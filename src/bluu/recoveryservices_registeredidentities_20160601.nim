@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, httpcore
 
 ## auto-generated via openapi macro
 ## title: RecoveryServicesClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_567657 = ref object of OpenApiRestCall
+  OpenApiRestCall_563555 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_567657](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563555](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_567657): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563555): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,8 +107,8 @@ const
   macServiceName = "recoveryservices-registeredidentities"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_VaultCertificatesCreate_567879 = ref object of OpenApiRestCall_567657
-proc url_VaultCertificatesCreate_567881(protocol: Scheme; host: string; base: string;
+  Call_VaultCertificatesCreate_563777 = ref object of OpenApiRestCall_563555
+proc url_VaultCertificatesCreate_563779(protocol: Scheme; host: string; base: string;
                                        route: string; path: JsonNode;
                                        query: JsonNode): Uri =
   result.scheme = $protocol
@@ -131,44 +135,43 @@ proc url_VaultCertificatesCreate_567881(protocol: Scheme; host: string; base: st
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_VaultCertificatesCreate_567880(path: JsonNode; query: JsonNode;
+proc validate_VaultCertificatesCreate_563778(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Uploads a certificate for a resource.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group where the recovery services vault is present.
-  ##   subscriptionId: JString (required)
-  ##                 : The subscription Id.
-  ##   certificateName: JString (required)
-  ##                  : Certificate friendly name.
   ##   vaultName: JString (required)
   ##            : The name of the recovery services vault.
+  ##   subscriptionId: JString (required)
+  ##                 : The subscription Id.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group where the recovery services vault is present.
+  ##   certificateName: JString (required)
+  ##                  : Certificate friendly name.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568054 = path.getOrDefault("resourceGroupName")
-  valid_568054 = validateParameter(valid_568054, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `vaultName` field"
+  var valid_563954 = path.getOrDefault("vaultName")
+  valid_563954 = validateParameter(valid_563954, JString, required = true,
                                  default = nil)
-  if valid_568054 != nil:
-    section.add "resourceGroupName", valid_568054
-  var valid_568055 = path.getOrDefault("subscriptionId")
-  valid_568055 = validateParameter(valid_568055, JString, required = true,
+  if valid_563954 != nil:
+    section.add "vaultName", valid_563954
+  var valid_563955 = path.getOrDefault("subscriptionId")
+  valid_563955 = validateParameter(valid_563955, JString, required = true,
                                  default = nil)
-  if valid_568055 != nil:
-    section.add "subscriptionId", valid_568055
-  var valid_568056 = path.getOrDefault("certificateName")
-  valid_568056 = validateParameter(valid_568056, JString, required = true,
+  if valid_563955 != nil:
+    section.add "subscriptionId", valid_563955
+  var valid_563956 = path.getOrDefault("resourceGroupName")
+  valid_563956 = validateParameter(valid_563956, JString, required = true,
                                  default = nil)
-  if valid_568056 != nil:
-    section.add "certificateName", valid_568056
-  var valid_568057 = path.getOrDefault("vaultName")
-  valid_568057 = validateParameter(valid_568057, JString, required = true,
+  if valid_563956 != nil:
+    section.add "resourceGroupName", valid_563956
+  var valid_563957 = path.getOrDefault("certificateName")
+  valid_563957 = validateParameter(valid_563957, JString, required = true,
                                  default = nil)
-  if valid_568057 != nil:
-    section.add "vaultName", valid_568057
+  if valid_563957 != nil:
+    section.add "certificateName", valid_563957
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -176,11 +179,11 @@ proc validate_VaultCertificatesCreate_567880(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568058 = query.getOrDefault("api-version")
-  valid_568058 = validateParameter(valid_568058, JString, required = true,
+  var valid_563958 = query.getOrDefault("api-version")
+  valid_563958 = validateParameter(valid_563958, JString, required = true,
                                  default = nil)
-  if valid_568058 != nil:
-    section.add "api-version", valid_568058
+  if valid_563958 != nil:
+    section.add "api-version", valid_563958
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -194,56 +197,56 @@ proc validate_VaultCertificatesCreate_567880(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568082: Call_VaultCertificatesCreate_567879; path: JsonNode;
+proc call*(call_563982: Call_VaultCertificatesCreate_563777; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Uploads a certificate for a resource.
   ## 
-  let valid = call_568082.validator(path, query, header, formData, body)
-  let scheme = call_568082.pickScheme
+  let valid = call_563982.validator(path, query, header, formData, body)
+  let scheme = call_563982.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568082.url(scheme.get, call_568082.host, call_568082.base,
-                         call_568082.route, valid.getOrDefault("path"),
+  let url = call_563982.url(scheme.get, call_563982.host, call_563982.base,
+                         call_563982.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568082, url, valid)
+  result = hook(call_563982, url, valid)
 
-proc call*(call_568153: Call_VaultCertificatesCreate_567879;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          certificateRequest: JsonNode; certificateName: string; vaultName: string): Recallable =
+proc call*(call_564053: Call_VaultCertificatesCreate_563777; vaultName: string;
+          apiVersion: string; certificateRequest: JsonNode; subscriptionId: string;
+          resourceGroupName: string; certificateName: string): Recallable =
   ## vaultCertificatesCreate
   ## Uploads a certificate for a resource.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group where the recovery services vault is present.
-  ##   apiVersion: string (required)
-  ##             : Client Api Version.
-  ##   subscriptionId: string (required)
-  ##                 : The subscription Id.
-  ##   certificateRequest: JObject (required)
-  ##                     : Input parameters for uploading the vault certificate.
-  ##   certificateName: string (required)
-  ##                  : Certificate friendly name.
   ##   vaultName: string (required)
   ##            : The name of the recovery services vault.
-  var path_568154 = newJObject()
-  var query_568156 = newJObject()
-  var body_568157 = newJObject()
-  add(path_568154, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568156, "api-version", newJString(apiVersion))
-  add(path_568154, "subscriptionId", newJString(subscriptionId))
+  ##   apiVersion: string (required)
+  ##             : Client Api Version.
+  ##   certificateRequest: JObject (required)
+  ##                     : Input parameters for uploading the vault certificate.
+  ##   subscriptionId: string (required)
+  ##                 : The subscription Id.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group where the recovery services vault is present.
+  ##   certificateName: string (required)
+  ##                  : Certificate friendly name.
+  var path_564054 = newJObject()
+  var query_564056 = newJObject()
+  var body_564057 = newJObject()
+  add(path_564054, "vaultName", newJString(vaultName))
+  add(query_564056, "api-version", newJString(apiVersion))
   if certificateRequest != nil:
-    body_568157 = certificateRequest
-  add(path_568154, "certificateName", newJString(certificateName))
-  add(path_568154, "vaultName", newJString(vaultName))
-  result = call_568153.call(path_568154, query_568156, nil, nil, body_568157)
+    body_564057 = certificateRequest
+  add(path_564054, "subscriptionId", newJString(subscriptionId))
+  add(path_564054, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564054, "certificateName", newJString(certificateName))
+  result = call_564053.call(path_564054, query_564056, nil, nil, body_564057)
 
-var vaultCertificatesCreate* = Call_VaultCertificatesCreate_567879(
+var vaultCertificatesCreate* = Call_VaultCertificatesCreate_563777(
     name: "vaultCertificatesCreate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/Subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.RecoveryServices/vaults/{vaultName}/certificates/{certificateName}",
-    validator: validate_VaultCertificatesCreate_567880, base: "",
-    url: url_VaultCertificatesCreate_567881, schemes: {Scheme.Https})
+    validator: validate_VaultCertificatesCreate_563778, base: "",
+    url: url_VaultCertificatesCreate_563779, schemes: {Scheme.Https})
 type
-  Call_RegisteredIdentitiesDelete_568196 = ref object of OpenApiRestCall_567657
-proc url_RegisteredIdentitiesDelete_568198(protocol: Scheme; host: string;
+  Call_RegisteredIdentitiesDelete_564096 = ref object of OpenApiRestCall_563555
+proc url_RegisteredIdentitiesDelete_564098(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -269,44 +272,43 @@ proc url_RegisteredIdentitiesDelete_568198(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_RegisteredIdentitiesDelete_568197(path: JsonNode; query: JsonNode;
+proc validate_RegisteredIdentitiesDelete_564097(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Unregisters the given container from your Recovery Services vault.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group where the recovery services vault is present.
+  ##   vaultName: JString (required)
+  ##            : The name of the recovery services vault.
   ##   identityName: JString (required)
   ##               : Name of the protection container to unregister.
   ##   subscriptionId: JString (required)
   ##                 : The subscription Id.
-  ##   vaultName: JString (required)
-  ##            : The name of the recovery services vault.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group where the recovery services vault is present.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568199 = path.getOrDefault("resourceGroupName")
-  valid_568199 = validateParameter(valid_568199, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `vaultName` field"
+  var valid_564099 = path.getOrDefault("vaultName")
+  valid_564099 = validateParameter(valid_564099, JString, required = true,
                                  default = nil)
-  if valid_568199 != nil:
-    section.add "resourceGroupName", valid_568199
-  var valid_568200 = path.getOrDefault("identityName")
-  valid_568200 = validateParameter(valid_568200, JString, required = true,
+  if valid_564099 != nil:
+    section.add "vaultName", valid_564099
+  var valid_564100 = path.getOrDefault("identityName")
+  valid_564100 = validateParameter(valid_564100, JString, required = true,
                                  default = nil)
-  if valid_568200 != nil:
-    section.add "identityName", valid_568200
-  var valid_568201 = path.getOrDefault("subscriptionId")
-  valid_568201 = validateParameter(valid_568201, JString, required = true,
+  if valid_564100 != nil:
+    section.add "identityName", valid_564100
+  var valid_564101 = path.getOrDefault("subscriptionId")
+  valid_564101 = validateParameter(valid_564101, JString, required = true,
                                  default = nil)
-  if valid_568201 != nil:
-    section.add "subscriptionId", valid_568201
-  var valid_568202 = path.getOrDefault("vaultName")
-  valid_568202 = validateParameter(valid_568202, JString, required = true,
+  if valid_564101 != nil:
+    section.add "subscriptionId", valid_564101
+  var valid_564102 = path.getOrDefault("resourceGroupName")
+  valid_564102 = validateParameter(valid_564102, JString, required = true,
                                  default = nil)
-  if valid_568202 != nil:
-    section.add "vaultName", valid_568202
+  if valid_564102 != nil:
+    section.add "resourceGroupName", valid_564102
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -314,11 +316,11 @@ proc validate_RegisteredIdentitiesDelete_568197(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568203 = query.getOrDefault("api-version")
-  valid_568203 = validateParameter(valid_568203, JString, required = true,
+  var valid_564103 = query.getOrDefault("api-version")
+  valid_564103 = validateParameter(valid_564103, JString, required = true,
                                  default = nil)
-  if valid_568203 != nil:
-    section.add "api-version", valid_568203
+  if valid_564103 != nil:
+    section.add "api-version", valid_564103
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -327,48 +329,48 @@ proc validate_RegisteredIdentitiesDelete_568197(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568204: Call_RegisteredIdentitiesDelete_568196; path: JsonNode;
+proc call*(call_564104: Call_RegisteredIdentitiesDelete_564096; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Unregisters the given container from your Recovery Services vault.
   ## 
-  let valid = call_568204.validator(path, query, header, formData, body)
-  let scheme = call_568204.pickScheme
+  let valid = call_564104.validator(path, query, header, formData, body)
+  let scheme = call_564104.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568204.url(scheme.get, call_568204.host, call_568204.base,
-                         call_568204.route, valid.getOrDefault("path"),
+  let url = call_564104.url(scheme.get, call_564104.host, call_564104.base,
+                         call_564104.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568204, url, valid)
+  result = hook(call_564104, url, valid)
 
-proc call*(call_568205: Call_RegisteredIdentitiesDelete_568196;
-          resourceGroupName: string; apiVersion: string; identityName: string;
-          subscriptionId: string; vaultName: string): Recallable =
+proc call*(call_564105: Call_RegisteredIdentitiesDelete_564096; vaultName: string;
+          apiVersion: string; identityName: string; subscriptionId: string;
+          resourceGroupName: string): Recallable =
   ## registeredIdentitiesDelete
   ## Unregisters the given container from your Recovery Services vault.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group where the recovery services vault is present.
+  ##   vaultName: string (required)
+  ##            : The name of the recovery services vault.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
   ##   identityName: string (required)
   ##               : Name of the protection container to unregister.
   ##   subscriptionId: string (required)
   ##                 : The subscription Id.
-  ##   vaultName: string (required)
-  ##            : The name of the recovery services vault.
-  var path_568206 = newJObject()
-  var query_568207 = newJObject()
-  add(path_568206, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568207, "api-version", newJString(apiVersion))
-  add(path_568206, "identityName", newJString(identityName))
-  add(path_568206, "subscriptionId", newJString(subscriptionId))
-  add(path_568206, "vaultName", newJString(vaultName))
-  result = call_568205.call(path_568206, query_568207, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group where the recovery services vault is present.
+  var path_564106 = newJObject()
+  var query_564107 = newJObject()
+  add(path_564106, "vaultName", newJString(vaultName))
+  add(query_564107, "api-version", newJString(apiVersion))
+  add(path_564106, "identityName", newJString(identityName))
+  add(path_564106, "subscriptionId", newJString(subscriptionId))
+  add(path_564106, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564105.call(path_564106, query_564107, nil, nil, nil)
 
-var registeredIdentitiesDelete* = Call_RegisteredIdentitiesDelete_568196(
+var registeredIdentitiesDelete* = Call_RegisteredIdentitiesDelete_564096(
     name: "registeredIdentitiesDelete", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/Subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.RecoveryServices/vaults/{vaultName}/registeredIdentities/{identityName}",
-    validator: validate_RegisteredIdentitiesDelete_568197, base: "",
-    url: url_RegisteredIdentitiesDelete_568198, schemes: {Scheme.Https})
+    validator: validate_RegisteredIdentitiesDelete_564097, base: "",
+    url: url_RegisteredIdentitiesDelete_564098, schemes: {Scheme.Https})
 export
   rest
 

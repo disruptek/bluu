@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_573657 = ref object of OpenApiRestCall
+  OpenApiRestCall_563555 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_573657](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563555](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_573657): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563555): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,15 +107,15 @@ const
   macServiceName = "apimanagement-apimopenidconnectproviders"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_OpenIdConnectProviderList_573879 = ref object of OpenApiRestCall_573657
-proc url_OpenIdConnectProviderList_573881(protocol: Scheme; host: string;
+  Call_OpenIdConnectProviderList_563777 = ref object of OpenApiRestCall_563555
+proc url_OpenIdConnectProviderList_563779(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_OpenIdConnectProviderList_573880(path: JsonNode; query: JsonNode;
+proc validate_OpenIdConnectProviderList_563778(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists all OpenID Connect Providers.
   ## 
@@ -120,10 +124,10 @@ proc validate_OpenIdConnectProviderList_573880(path: JsonNode; query: JsonNode;
   section = newJObject()
   result.add "path", section
   ## parameters in `query` object:
-  ##   api-version: JString (required)
-  ##              : Version of the API to be used with the client request.
   ##   $top: JInt
   ##       : Number of records to return.
+  ##   api-version: JString (required)
+  ##              : Version of the API to be used with the client request.
   ##   $skip: JInt
   ##        : Number of records to skip.
   ##   $filter: JString
@@ -133,26 +137,26 @@ proc validate_OpenIdConnectProviderList_573880(path: JsonNode; query: JsonNode;
   ## | id    | ge, le, eq, ne, gt, lt | substringof, contains, startswith, endswith |
   ## | name  | ge, le, eq, ne, gt, lt | substringof, contains, startswith, endswith |
   section = newJObject()
+  var valid_563928 = query.getOrDefault("$top")
+  valid_563928 = validateParameter(valid_563928, JInt, required = false, default = nil)
+  if valid_563928 != nil:
+    section.add "$top", valid_563928
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574028 = query.getOrDefault("api-version")
-  valid_574028 = validateParameter(valid_574028, JString, required = true,
+  var valid_563929 = query.getOrDefault("api-version")
+  valid_563929 = validateParameter(valid_563929, JString, required = true,
                                  default = nil)
-  if valid_574028 != nil:
-    section.add "api-version", valid_574028
-  var valid_574029 = query.getOrDefault("$top")
-  valid_574029 = validateParameter(valid_574029, JInt, required = false, default = nil)
-  if valid_574029 != nil:
-    section.add "$top", valid_574029
-  var valid_574030 = query.getOrDefault("$skip")
-  valid_574030 = validateParameter(valid_574030, JInt, required = false, default = nil)
-  if valid_574030 != nil:
-    section.add "$skip", valid_574030
-  var valid_574031 = query.getOrDefault("$filter")
-  valid_574031 = validateParameter(valid_574031, JString, required = false,
+  if valid_563929 != nil:
+    section.add "api-version", valid_563929
+  var valid_563930 = query.getOrDefault("$skip")
+  valid_563930 = validateParameter(valid_563930, JInt, required = false, default = nil)
+  if valid_563930 != nil:
+    section.add "$skip", valid_563930
+  var valid_563931 = query.getOrDefault("$filter")
+  valid_563931 = validateParameter(valid_563931, JString, required = false,
                                  default = nil)
-  if valid_574031 != nil:
-    section.add "$filter", valid_574031
+  if valid_563931 != nil:
+    section.add "$filter", valid_563931
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -161,27 +165,27 @@ proc validate_OpenIdConnectProviderList_573880(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574058: Call_OpenIdConnectProviderList_573879; path: JsonNode;
+proc call*(call_563958: Call_OpenIdConnectProviderList_563777; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists all OpenID Connect Providers.
   ## 
-  let valid = call_574058.validator(path, query, header, formData, body)
-  let scheme = call_574058.pickScheme
+  let valid = call_563958.validator(path, query, header, formData, body)
+  let scheme = call_563958.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574058.url(scheme.get, call_574058.host, call_574058.base,
-                         call_574058.route, valid.getOrDefault("path"),
+  let url = call_563958.url(scheme.get, call_563958.host, call_563958.base,
+                         call_563958.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574058, url, valid)
+  result = hook(call_563958, url, valid)
 
-proc call*(call_574129: Call_OpenIdConnectProviderList_573879; apiVersion: string;
+proc call*(call_564029: Call_OpenIdConnectProviderList_563777; apiVersion: string;
           Top: int = 0; Skip: int = 0; Filter: string = ""): Recallable =
   ## openIdConnectProviderList
   ## Lists all OpenID Connect Providers.
-  ##   apiVersion: string (required)
-  ##             : Version of the API to be used with the client request.
   ##   Top: int
   ##      : Number of records to return.
+  ##   apiVersion: string (required)
+  ##             : Version of the API to be used with the client request.
   ##   Skip: int
   ##       : Number of records to skip.
   ##   Filter: string
@@ -190,21 +194,21 @@ proc call*(call_574129: Call_OpenIdConnectProviderList_573879; apiVersion: strin
   ## |-------|------------------------|---------------------------------------------|
   ## | id    | ge, le, eq, ne, gt, lt | substringof, contains, startswith, endswith |
   ## | name  | ge, le, eq, ne, gt, lt | substringof, contains, startswith, endswith |
-  var query_574130 = newJObject()
-  add(query_574130, "api-version", newJString(apiVersion))
-  add(query_574130, "$top", newJInt(Top))
-  add(query_574130, "$skip", newJInt(Skip))
-  add(query_574130, "$filter", newJString(Filter))
-  result = call_574129.call(nil, query_574130, nil, nil, nil)
+  var query_564030 = newJObject()
+  add(query_564030, "$top", newJInt(Top))
+  add(query_564030, "api-version", newJString(apiVersion))
+  add(query_564030, "$skip", newJInt(Skip))
+  add(query_564030, "$filter", newJString(Filter))
+  result = call_564029.call(nil, query_564030, nil, nil, nil)
 
-var openIdConnectProviderList* = Call_OpenIdConnectProviderList_573879(
+var openIdConnectProviderList* = Call_OpenIdConnectProviderList_563777(
     name: "openIdConnectProviderList", meth: HttpMethod.HttpGet,
     host: "azure.local", route: "/openidConnectProviders",
-    validator: validate_OpenIdConnectProviderList_573880, base: "",
-    url: url_OpenIdConnectProviderList_573881, schemes: {Scheme.Https})
+    validator: validate_OpenIdConnectProviderList_563778, base: "",
+    url: url_OpenIdConnectProviderList_563779, schemes: {Scheme.Https})
 type
-  Call_OpenIdConnectProviderCreateOrUpdate_574202 = ref object of OpenApiRestCall_573657
-proc url_OpenIdConnectProviderCreateOrUpdate_574204(protocol: Scheme; host: string;
+  Call_OpenIdConnectProviderCreateOrUpdate_564102 = ref object of OpenApiRestCall_563555
+proc url_OpenIdConnectProviderCreateOrUpdate_564104(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -219,7 +223,7 @@ proc url_OpenIdConnectProviderCreateOrUpdate_574204(protocol: Scheme; host: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_OpenIdConnectProviderCreateOrUpdate_574203(path: JsonNode;
+proc validate_OpenIdConnectProviderCreateOrUpdate_564103(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Creates or updates the OpenID Connect Provider.
   ## 
@@ -230,11 +234,11 @@ proc validate_OpenIdConnectProviderCreateOrUpdate_574203(path: JsonNode;
   ##       : Identifier of the OpenID Connect Provider.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `opid` field"
-  var valid_574222 = path.getOrDefault("opid")
-  valid_574222 = validateParameter(valid_574222, JString, required = true,
+  var valid_564122 = path.getOrDefault("opid")
+  valid_564122 = validateParameter(valid_564122, JString, required = true,
                                  default = nil)
-  if valid_574222 != nil:
-    section.add "opid", valid_574222
+  if valid_564122 != nil:
+    section.add "opid", valid_564122
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -242,11 +246,11 @@ proc validate_OpenIdConnectProviderCreateOrUpdate_574203(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574223 = query.getOrDefault("api-version")
-  valid_574223 = validateParameter(valid_574223, JString, required = true,
+  var valid_564123 = query.getOrDefault("api-version")
+  valid_564123 = validateParameter(valid_564123, JString, required = true,
                                  default = nil)
-  if valid_574223 != nil:
-    section.add "api-version", valid_574223
+  if valid_564123 != nil:
+    section.add "api-version", valid_564123
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -260,21 +264,21 @@ proc validate_OpenIdConnectProviderCreateOrUpdate_574203(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574225: Call_OpenIdConnectProviderCreateOrUpdate_574202;
+proc call*(call_564125: Call_OpenIdConnectProviderCreateOrUpdate_564102;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Creates or updates the OpenID Connect Provider.
   ## 
-  let valid = call_574225.validator(path, query, header, formData, body)
-  let scheme = call_574225.pickScheme
+  let valid = call_564125.validator(path, query, header, formData, body)
+  let scheme = call_564125.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574225.url(scheme.get, call_574225.host, call_574225.base,
-                         call_574225.route, valid.getOrDefault("path"),
+  let url = call_564125.url(scheme.get, call_564125.host, call_564125.base,
+                         call_564125.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574225, url, valid)
+  result = hook(call_564125, url, valid)
 
-proc call*(call_574226: Call_OpenIdConnectProviderCreateOrUpdate_574202;
+proc call*(call_564126: Call_OpenIdConnectProviderCreateOrUpdate_564102;
           apiVersion: string; opid: string; parameters: JsonNode): Recallable =
   ## openIdConnectProviderCreateOrUpdate
   ## Creates or updates the OpenID Connect Provider.
@@ -284,23 +288,23 @@ proc call*(call_574226: Call_OpenIdConnectProviderCreateOrUpdate_574202;
   ##       : Identifier of the OpenID Connect Provider.
   ##   parameters: JObject (required)
   ##             : Create parameters.
-  var path_574227 = newJObject()
-  var query_574228 = newJObject()
-  var body_574229 = newJObject()
-  add(query_574228, "api-version", newJString(apiVersion))
-  add(path_574227, "opid", newJString(opid))
+  var path_564127 = newJObject()
+  var query_564128 = newJObject()
+  var body_564129 = newJObject()
+  add(query_564128, "api-version", newJString(apiVersion))
+  add(path_564127, "opid", newJString(opid))
   if parameters != nil:
-    body_574229 = parameters
-  result = call_574226.call(path_574227, query_574228, nil, nil, body_574229)
+    body_564129 = parameters
+  result = call_564126.call(path_564127, query_564128, nil, nil, body_564129)
 
-var openIdConnectProviderCreateOrUpdate* = Call_OpenIdConnectProviderCreateOrUpdate_574202(
+var openIdConnectProviderCreateOrUpdate* = Call_OpenIdConnectProviderCreateOrUpdate_564102(
     name: "openIdConnectProviderCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "azure.local", route: "/openidConnectProviders/{opid}",
-    validator: validate_OpenIdConnectProviderCreateOrUpdate_574203, base: "",
-    url: url_OpenIdConnectProviderCreateOrUpdate_574204, schemes: {Scheme.Https})
+    validator: validate_OpenIdConnectProviderCreateOrUpdate_564103, base: "",
+    url: url_OpenIdConnectProviderCreateOrUpdate_564104, schemes: {Scheme.Https})
 type
-  Call_OpenIdConnectProviderGet_574170 = ref object of OpenApiRestCall_573657
-proc url_OpenIdConnectProviderGet_574172(protocol: Scheme; host: string;
+  Call_OpenIdConnectProviderGet_564070 = ref object of OpenApiRestCall_563555
+proc url_OpenIdConnectProviderGet_564072(protocol: Scheme; host: string;
                                         base: string; route: string; path: JsonNode;
                                         query: JsonNode): Uri =
   result.scheme = $protocol
@@ -316,7 +320,7 @@ proc url_OpenIdConnectProviderGet_574172(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_OpenIdConnectProviderGet_574171(path: JsonNode; query: JsonNode;
+proc validate_OpenIdConnectProviderGet_564071(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets specific OpenID Connect Provider.
   ## 
@@ -327,11 +331,11 @@ proc validate_OpenIdConnectProviderGet_574171(path: JsonNode; query: JsonNode;
   ##       : Identifier of the OpenID Connect Provider.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `opid` field"
-  var valid_574196 = path.getOrDefault("opid")
-  valid_574196 = validateParameter(valid_574196, JString, required = true,
+  var valid_564096 = path.getOrDefault("opid")
+  valid_564096 = validateParameter(valid_564096, JString, required = true,
                                  default = nil)
-  if valid_574196 != nil:
-    section.add "opid", valid_574196
+  if valid_564096 != nil:
+    section.add "opid", valid_564096
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -339,11 +343,11 @@ proc validate_OpenIdConnectProviderGet_574171(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574197 = query.getOrDefault("api-version")
-  valid_574197 = validateParameter(valid_574197, JString, required = true,
+  var valid_564097 = query.getOrDefault("api-version")
+  valid_564097 = validateParameter(valid_564097, JString, required = true,
                                  default = nil)
-  if valid_574197 != nil:
-    section.add "api-version", valid_574197
+  if valid_564097 != nil:
+    section.add "api-version", valid_564097
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -352,20 +356,20 @@ proc validate_OpenIdConnectProviderGet_574171(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574198: Call_OpenIdConnectProviderGet_574170; path: JsonNode;
+proc call*(call_564098: Call_OpenIdConnectProviderGet_564070; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets specific OpenID Connect Provider.
   ## 
-  let valid = call_574198.validator(path, query, header, formData, body)
-  let scheme = call_574198.pickScheme
+  let valid = call_564098.validator(path, query, header, formData, body)
+  let scheme = call_564098.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574198.url(scheme.get, call_574198.host, call_574198.base,
-                         call_574198.route, valid.getOrDefault("path"),
+  let url = call_564098.url(scheme.get, call_564098.host, call_564098.base,
+                         call_564098.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574198, url, valid)
+  result = hook(call_564098, url, valid)
 
-proc call*(call_574199: Call_OpenIdConnectProviderGet_574170; apiVersion: string;
+proc call*(call_564099: Call_OpenIdConnectProviderGet_564070; apiVersion: string;
           opid: string): Recallable =
   ## openIdConnectProviderGet
   ## Gets specific OpenID Connect Provider.
@@ -373,20 +377,20 @@ proc call*(call_574199: Call_OpenIdConnectProviderGet_574170; apiVersion: string
   ##             : Version of the API to be used with the client request.
   ##   opid: string (required)
   ##       : Identifier of the OpenID Connect Provider.
-  var path_574200 = newJObject()
-  var query_574201 = newJObject()
-  add(query_574201, "api-version", newJString(apiVersion))
-  add(path_574200, "opid", newJString(opid))
-  result = call_574199.call(path_574200, query_574201, nil, nil, nil)
+  var path_564100 = newJObject()
+  var query_564101 = newJObject()
+  add(query_564101, "api-version", newJString(apiVersion))
+  add(path_564100, "opid", newJString(opid))
+  result = call_564099.call(path_564100, query_564101, nil, nil, nil)
 
-var openIdConnectProviderGet* = Call_OpenIdConnectProviderGet_574170(
+var openIdConnectProviderGet* = Call_OpenIdConnectProviderGet_564070(
     name: "openIdConnectProviderGet", meth: HttpMethod.HttpGet, host: "azure.local",
     route: "/openidConnectProviders/{opid}",
-    validator: validate_OpenIdConnectProviderGet_574171, base: "",
-    url: url_OpenIdConnectProviderGet_574172, schemes: {Scheme.Https})
+    validator: validate_OpenIdConnectProviderGet_564071, base: "",
+    url: url_OpenIdConnectProviderGet_564072, schemes: {Scheme.Https})
 type
-  Call_OpenIdConnectProviderUpdate_574240 = ref object of OpenApiRestCall_573657
-proc url_OpenIdConnectProviderUpdate_574242(protocol: Scheme; host: string;
+  Call_OpenIdConnectProviderUpdate_564140 = ref object of OpenApiRestCall_563555
+proc url_OpenIdConnectProviderUpdate_564142(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -401,7 +405,7 @@ proc url_OpenIdConnectProviderUpdate_574242(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_OpenIdConnectProviderUpdate_574241(path: JsonNode; query: JsonNode;
+proc validate_OpenIdConnectProviderUpdate_564141(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Updates the specific OpenID Connect Provider.
   ## 
@@ -412,11 +416,11 @@ proc validate_OpenIdConnectProviderUpdate_574241(path: JsonNode; query: JsonNode
   ##       : Identifier of the OpenID Connect Provider.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `opid` field"
-  var valid_574253 = path.getOrDefault("opid")
-  valid_574253 = validateParameter(valid_574253, JString, required = true,
+  var valid_564153 = path.getOrDefault("opid")
+  valid_564153 = validateParameter(valid_564153, JString, required = true,
                                  default = nil)
-  if valid_574253 != nil:
-    section.add "opid", valid_574253
+  if valid_564153 != nil:
+    section.add "opid", valid_564153
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -424,11 +428,11 @@ proc validate_OpenIdConnectProviderUpdate_574241(path: JsonNode; query: JsonNode
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574254 = query.getOrDefault("api-version")
-  valid_574254 = validateParameter(valid_574254, JString, required = true,
+  var valid_564154 = query.getOrDefault("api-version")
+  valid_564154 = validateParameter(valid_564154, JString, required = true,
                                  default = nil)
-  if valid_574254 != nil:
-    section.add "api-version", valid_574254
+  if valid_564154 != nil:
+    section.add "api-version", valid_564154
   result.add "query", section
   ## parameters in `header` object:
   ##   If-Match: JString (required)
@@ -436,11 +440,11 @@ proc validate_OpenIdConnectProviderUpdate_574241(path: JsonNode; query: JsonNode
   section = newJObject()
   assert header != nil,
         "header argument is necessary due to required `If-Match` field"
-  var valid_574255 = header.getOrDefault("If-Match")
-  valid_574255 = validateParameter(valid_574255, JString, required = true,
+  var valid_564155 = header.getOrDefault("If-Match")
+  valid_564155 = validateParameter(valid_564155, JString, required = true,
                                  default = nil)
-  if valid_574255 != nil:
-    section.add "If-Match", valid_574255
+  if valid_564155 != nil:
+    section.add "If-Match", valid_564155
   result.add "header", section
   section = newJObject()
   result.add "formData", section
@@ -452,20 +456,20 @@ proc validate_OpenIdConnectProviderUpdate_574241(path: JsonNode; query: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_574257: Call_OpenIdConnectProviderUpdate_574240; path: JsonNode;
+proc call*(call_564157: Call_OpenIdConnectProviderUpdate_564140; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Updates the specific OpenID Connect Provider.
   ## 
-  let valid = call_574257.validator(path, query, header, formData, body)
-  let scheme = call_574257.pickScheme
+  let valid = call_564157.validator(path, query, header, formData, body)
+  let scheme = call_564157.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574257.url(scheme.get, call_574257.host, call_574257.base,
-                         call_574257.route, valid.getOrDefault("path"),
+  let url = call_564157.url(scheme.get, call_564157.host, call_564157.base,
+                         call_564157.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574257, url, valid)
+  result = hook(call_564157, url, valid)
 
-proc call*(call_574258: Call_OpenIdConnectProviderUpdate_574240;
+proc call*(call_564158: Call_OpenIdConnectProviderUpdate_564140;
           apiVersion: string; opid: string; parameters: JsonNode): Recallable =
   ## openIdConnectProviderUpdate
   ## Updates the specific OpenID Connect Provider.
@@ -475,23 +479,23 @@ proc call*(call_574258: Call_OpenIdConnectProviderUpdate_574240;
   ##       : Identifier of the OpenID Connect Provider.
   ##   parameters: JObject (required)
   ##             : Update parameters.
-  var path_574259 = newJObject()
-  var query_574260 = newJObject()
-  var body_574261 = newJObject()
-  add(query_574260, "api-version", newJString(apiVersion))
-  add(path_574259, "opid", newJString(opid))
+  var path_564159 = newJObject()
+  var query_564160 = newJObject()
+  var body_564161 = newJObject()
+  add(query_564160, "api-version", newJString(apiVersion))
+  add(path_564159, "opid", newJString(opid))
   if parameters != nil:
-    body_574261 = parameters
-  result = call_574258.call(path_574259, query_574260, nil, nil, body_574261)
+    body_564161 = parameters
+  result = call_564158.call(path_564159, query_564160, nil, nil, body_564161)
 
-var openIdConnectProviderUpdate* = Call_OpenIdConnectProviderUpdate_574240(
+var openIdConnectProviderUpdate* = Call_OpenIdConnectProviderUpdate_564140(
     name: "openIdConnectProviderUpdate", meth: HttpMethod.HttpPatch,
     host: "azure.local", route: "/openidConnectProviders/{opid}",
-    validator: validate_OpenIdConnectProviderUpdate_574241, base: "",
-    url: url_OpenIdConnectProviderUpdate_574242, schemes: {Scheme.Https})
+    validator: validate_OpenIdConnectProviderUpdate_564141, base: "",
+    url: url_OpenIdConnectProviderUpdate_564142, schemes: {Scheme.Https})
 type
-  Call_OpenIdConnectProviderDelete_574230 = ref object of OpenApiRestCall_573657
-proc url_OpenIdConnectProviderDelete_574232(protocol: Scheme; host: string;
+  Call_OpenIdConnectProviderDelete_564130 = ref object of OpenApiRestCall_563555
+proc url_OpenIdConnectProviderDelete_564132(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -506,7 +510,7 @@ proc url_OpenIdConnectProviderDelete_574232(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_OpenIdConnectProviderDelete_574231(path: JsonNode; query: JsonNode;
+proc validate_OpenIdConnectProviderDelete_564131(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Deletes specific OpenID Connect Provider of the API Management service instance.
   ## 
@@ -517,11 +521,11 @@ proc validate_OpenIdConnectProviderDelete_574231(path: JsonNode; query: JsonNode
   ##       : Identifier of the OpenID Connect Provider.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `opid` field"
-  var valid_574233 = path.getOrDefault("opid")
-  valid_574233 = validateParameter(valid_574233, JString, required = true,
+  var valid_564133 = path.getOrDefault("opid")
+  valid_564133 = validateParameter(valid_564133, JString, required = true,
                                  default = nil)
-  if valid_574233 != nil:
-    section.add "opid", valid_574233
+  if valid_564133 != nil:
+    section.add "opid", valid_564133
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -529,11 +533,11 @@ proc validate_OpenIdConnectProviderDelete_574231(path: JsonNode; query: JsonNode
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574234 = query.getOrDefault("api-version")
-  valid_574234 = validateParameter(valid_574234, JString, required = true,
+  var valid_564134 = query.getOrDefault("api-version")
+  valid_564134 = validateParameter(valid_564134, JString, required = true,
                                  default = nil)
-  if valid_574234 != nil:
-    section.add "api-version", valid_574234
+  if valid_564134 != nil:
+    section.add "api-version", valid_564134
   result.add "query", section
   ## parameters in `header` object:
   ##   If-Match: JString (required)
@@ -541,31 +545,31 @@ proc validate_OpenIdConnectProviderDelete_574231(path: JsonNode; query: JsonNode
   section = newJObject()
   assert header != nil,
         "header argument is necessary due to required `If-Match` field"
-  var valid_574235 = header.getOrDefault("If-Match")
-  valid_574235 = validateParameter(valid_574235, JString, required = true,
+  var valid_564135 = header.getOrDefault("If-Match")
+  valid_564135 = validateParameter(valid_564135, JString, required = true,
                                  default = nil)
-  if valid_574235 != nil:
-    section.add "If-Match", valid_574235
+  if valid_564135 != nil:
+    section.add "If-Match", valid_564135
   result.add "header", section
   section = newJObject()
   result.add "formData", section
   if body != nil:
     result.add "body", body
 
-proc call*(call_574236: Call_OpenIdConnectProviderDelete_574230; path: JsonNode;
+proc call*(call_564136: Call_OpenIdConnectProviderDelete_564130; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes specific OpenID Connect Provider of the API Management service instance.
   ## 
-  let valid = call_574236.validator(path, query, header, formData, body)
-  let scheme = call_574236.pickScheme
+  let valid = call_564136.validator(path, query, header, formData, body)
+  let scheme = call_564136.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574236.url(scheme.get, call_574236.host, call_574236.base,
-                         call_574236.route, valid.getOrDefault("path"),
+  let url = call_564136.url(scheme.get, call_564136.host, call_564136.base,
+                         call_564136.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574236, url, valid)
+  result = hook(call_564136, url, valid)
 
-proc call*(call_574237: Call_OpenIdConnectProviderDelete_574230;
+proc call*(call_564137: Call_OpenIdConnectProviderDelete_564130;
           apiVersion: string; opid: string): Recallable =
   ## openIdConnectProviderDelete
   ## Deletes specific OpenID Connect Provider of the API Management service instance.
@@ -573,17 +577,17 @@ proc call*(call_574237: Call_OpenIdConnectProviderDelete_574230;
   ##             : Version of the API to be used with the client request.
   ##   opid: string (required)
   ##       : Identifier of the OpenID Connect Provider.
-  var path_574238 = newJObject()
-  var query_574239 = newJObject()
-  add(query_574239, "api-version", newJString(apiVersion))
-  add(path_574238, "opid", newJString(opid))
-  result = call_574237.call(path_574238, query_574239, nil, nil, nil)
+  var path_564138 = newJObject()
+  var query_564139 = newJObject()
+  add(query_564139, "api-version", newJString(apiVersion))
+  add(path_564138, "opid", newJString(opid))
+  result = call_564137.call(path_564138, query_564139, nil, nil, nil)
 
-var openIdConnectProviderDelete* = Call_OpenIdConnectProviderDelete_574230(
+var openIdConnectProviderDelete* = Call_OpenIdConnectProviderDelete_564130(
     name: "openIdConnectProviderDelete", meth: HttpMethod.HttpDelete,
     host: "azure.local", route: "/openidConnectProviders/{opid}",
-    validator: validate_OpenIdConnectProviderDelete_574231, base: "",
-    url: url_OpenIdConnectProviderDelete_574232, schemes: {Scheme.Https})
+    validator: validate_OpenIdConnectProviderDelete_564131, base: "",
+    url: url_OpenIdConnectProviderDelete_564132, schemes: {Scheme.Https})
 export
   rest
 

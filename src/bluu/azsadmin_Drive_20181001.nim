@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, httpcore
 
 ## auto-generated via openapi macro
 ## title: FabricAdminClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_574457 = ref object of OpenApiRestCall
+  OpenApiRestCall_563555 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_574457](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563555](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_574457): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563555): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,8 +107,8 @@ const
   macServiceName = "azsadmin-Drive"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_DrivesList_574679 = ref object of OpenApiRestCall_574457
-proc url_DrivesList_574681(protocol: Scheme; host: string; base: string; route: string;
+  Call_DrivesList_563777 = ref object of OpenApiRestCall_563555
+proc url_DrivesList_563779(protocol: Scheme; host: string; base: string; route: string;
                           path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -135,51 +139,50 @@ proc url_DrivesList_574681(protocol: Scheme; host: string; base: string; route: 
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DrivesList_574680(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_DrivesList_563778(path: JsonNode; query: JsonNode; header: JsonNode;
                                formData: JsonNode; body: JsonNode): JsonNode =
   ## Returns a list of all storage drives at a location.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : Name of the resource group.
   ##   scaleUnit: JString (required)
   ##            : Name of the scale units.
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials that uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   storageSubSystem: JString (required)
-  ##                   : Name of the storage system.
   ##   location: JString (required)
   ##           : Location of the resource.
+  ##   resourceGroupName: JString (required)
+  ##                    : Name of the resource group.
+  ##   storageSubSystem: JString (required)
+  ##                   : Name of the storage system.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_574855 = path.getOrDefault("resourceGroupName")
-  valid_574855 = validateParameter(valid_574855, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `scaleUnit` field"
+  var valid_563955 = path.getOrDefault("scaleUnit")
+  valid_563955 = validateParameter(valid_563955, JString, required = true,
                                  default = nil)
-  if valid_574855 != nil:
-    section.add "resourceGroupName", valid_574855
-  var valid_574856 = path.getOrDefault("scaleUnit")
-  valid_574856 = validateParameter(valid_574856, JString, required = true,
+  if valid_563955 != nil:
+    section.add "scaleUnit", valid_563955
+  var valid_563956 = path.getOrDefault("subscriptionId")
+  valid_563956 = validateParameter(valid_563956, JString, required = true,
                                  default = nil)
-  if valid_574856 != nil:
-    section.add "scaleUnit", valid_574856
-  var valid_574857 = path.getOrDefault("subscriptionId")
-  valid_574857 = validateParameter(valid_574857, JString, required = true,
+  if valid_563956 != nil:
+    section.add "subscriptionId", valid_563956
+  var valid_563957 = path.getOrDefault("location")
+  valid_563957 = validateParameter(valid_563957, JString, required = true,
                                  default = nil)
-  if valid_574857 != nil:
-    section.add "subscriptionId", valid_574857
-  var valid_574858 = path.getOrDefault("storageSubSystem")
-  valid_574858 = validateParameter(valid_574858, JString, required = true,
+  if valid_563957 != nil:
+    section.add "location", valid_563957
+  var valid_563958 = path.getOrDefault("resourceGroupName")
+  valid_563958 = validateParameter(valid_563958, JString, required = true,
                                  default = nil)
-  if valid_574858 != nil:
-    section.add "storageSubSystem", valid_574858
-  var valid_574859 = path.getOrDefault("location")
-  valid_574859 = validateParameter(valid_574859, JString, required = true,
+  if valid_563958 != nil:
+    section.add "resourceGroupName", valid_563958
+  var valid_563959 = path.getOrDefault("storageSubSystem")
+  valid_563959 = validateParameter(valid_563959, JString, required = true,
                                  default = nil)
-  if valid_574859 != nil:
-    section.add "location", valid_574859
+  if valid_563959 != nil:
+    section.add "storageSubSystem", valid_563959
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -189,16 +192,16 @@ proc validate_DrivesList_574680(path: JsonNode; query: JsonNode; header: JsonNod
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574873 = query.getOrDefault("api-version")
-  valid_574873 = validateParameter(valid_574873, JString, required = true,
+  var valid_563973 = query.getOrDefault("api-version")
+  valid_563973 = validateParameter(valid_563973, JString, required = true,
                                  default = newJString("2018-10-01"))
-  if valid_574873 != nil:
-    section.add "api-version", valid_574873
-  var valid_574874 = query.getOrDefault("$filter")
-  valid_574874 = validateParameter(valid_574874, JString, required = false,
+  if valid_563973 != nil:
+    section.add "api-version", valid_563973
+  var valid_563974 = query.getOrDefault("$filter")
+  valid_563974 = validateParameter(valid_563974, JString, required = false,
                                  default = nil)
-  if valid_574874 != nil:
-    section.add "$filter", valid_574874
+  if valid_563974 != nil:
+    section.add "$filter", valid_563974
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -207,57 +210,58 @@ proc validate_DrivesList_574680(path: JsonNode; query: JsonNode; header: JsonNod
   if body != nil:
     result.add "body", body
 
-proc call*(call_574897: Call_DrivesList_574679; path: JsonNode; query: JsonNode;
+proc call*(call_563997: Call_DrivesList_563777; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Returns a list of all storage drives at a location.
   ## 
-  let valid = call_574897.validator(path, query, header, formData, body)
-  let scheme = call_574897.pickScheme
+  let valid = call_563997.validator(path, query, header, formData, body)
+  let scheme = call_563997.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574897.url(scheme.get, call_574897.host, call_574897.base,
-                         call_574897.route, valid.getOrDefault("path"),
+  let url = call_563997.url(scheme.get, call_563997.host, call_563997.base,
+                         call_563997.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574897, url, valid)
+  result = hook(call_563997, url, valid)
 
-proc call*(call_574968: Call_DrivesList_574679; resourceGroupName: string;
-          scaleUnit: string; subscriptionId: string; storageSubSystem: string;
-          location: string; apiVersion: string = "2018-10-01"; Filter: string = ""): Recallable =
+proc call*(call_564068: Call_DrivesList_563777; scaleUnit: string;
+          subscriptionId: string; location: string; resourceGroupName: string;
+          storageSubSystem: string; apiVersion: string = "2018-10-01";
+          Filter: string = ""): Recallable =
   ## drivesList
   ## Returns a list of all storage drives at a location.
-  ##   resourceGroupName: string (required)
-  ##                    : Name of the resource group.
-  ##   scaleUnit: string (required)
-  ##            : Name of the scale units.
   ##   apiVersion: string (required)
   ##             : Client API Version.
+  ##   scaleUnit: string (required)
+  ##            : Name of the scale units.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials that uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   storageSubSystem: string (required)
-  ##                   : Name of the storage system.
   ##   location: string (required)
   ##           : Location of the resource.
+  ##   resourceGroupName: string (required)
+  ##                    : Name of the resource group.
   ##   Filter: string
   ##         : OData filter parameter.
-  var path_574969 = newJObject()
-  var query_574971 = newJObject()
-  add(path_574969, "resourceGroupName", newJString(resourceGroupName))
-  add(path_574969, "scaleUnit", newJString(scaleUnit))
-  add(query_574971, "api-version", newJString(apiVersion))
-  add(path_574969, "subscriptionId", newJString(subscriptionId))
-  add(path_574969, "storageSubSystem", newJString(storageSubSystem))
-  add(path_574969, "location", newJString(location))
-  add(query_574971, "$filter", newJString(Filter))
-  result = call_574968.call(path_574969, query_574971, nil, nil, nil)
+  ##   storageSubSystem: string (required)
+  ##                   : Name of the storage system.
+  var path_564069 = newJObject()
+  var query_564071 = newJObject()
+  add(query_564071, "api-version", newJString(apiVersion))
+  add(path_564069, "scaleUnit", newJString(scaleUnit))
+  add(path_564069, "subscriptionId", newJString(subscriptionId))
+  add(path_564069, "location", newJString(location))
+  add(path_564069, "resourceGroupName", newJString(resourceGroupName))
+  add(query_564071, "$filter", newJString(Filter))
+  add(path_564069, "storageSubSystem", newJString(storageSubSystem))
+  result = call_564068.call(path_564069, query_564071, nil, nil, nil)
 
-var drivesList* = Call_DrivesList_574679(name: "drivesList",
+var drivesList* = Call_DrivesList_563777(name: "drivesList",
                                       meth: HttpMethod.HttpGet, host: "adminmanagement.local.azurestack.external", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Fabric.Admin/fabricLocations/{location}/scaleUnits/{scaleUnit}/storageSubSystems/{storageSubSystem}/drives",
-                                      validator: validate_DrivesList_574680,
-                                      base: "", url: url_DrivesList_574681,
+                                      validator: validate_DrivesList_563778,
+                                      base: "", url: url_DrivesList_563779,
                                       schemes: {Scheme.Https})
 type
-  Call_DrivesGet_575010 = ref object of OpenApiRestCall_574457
-proc url_DrivesGet_575012(protocol: Scheme; host: string; base: string; route: string;
+  Call_DrivesGet_564110 = ref object of OpenApiRestCall_563555
+proc url_DrivesGet_564112(protocol: Scheme; host: string; base: string; route: string;
                          path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -290,58 +294,57 @@ proc url_DrivesGet_575012(protocol: Scheme; host: string; base: string; route: s
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DrivesGet_575011(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_DrivesGet_564111(path: JsonNode; query: JsonNode; header: JsonNode;
                               formData: JsonNode; body: JsonNode): JsonNode =
   ## Return the requested a storage drive.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : Name of the resource group.
   ##   scaleUnit: JString (required)
   ##            : Name of the scale units.
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials that uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   location: JString (required)
+  ##           : Location of the resource.
+  ##   resourceGroupName: JString (required)
+  ##                    : Name of the resource group.
   ##   storageSubSystem: JString (required)
   ##                   : Name of the storage system.
   ##   drive: JString (required)
   ##        : Name of the storage drive.
-  ##   location: JString (required)
-  ##           : Location of the resource.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_575013 = path.getOrDefault("resourceGroupName")
-  valid_575013 = validateParameter(valid_575013, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `scaleUnit` field"
+  var valid_564113 = path.getOrDefault("scaleUnit")
+  valid_564113 = validateParameter(valid_564113, JString, required = true,
                                  default = nil)
-  if valid_575013 != nil:
-    section.add "resourceGroupName", valid_575013
-  var valid_575014 = path.getOrDefault("scaleUnit")
-  valid_575014 = validateParameter(valid_575014, JString, required = true,
+  if valid_564113 != nil:
+    section.add "scaleUnit", valid_564113
+  var valid_564114 = path.getOrDefault("subscriptionId")
+  valid_564114 = validateParameter(valid_564114, JString, required = true,
                                  default = nil)
-  if valid_575014 != nil:
-    section.add "scaleUnit", valid_575014
-  var valid_575015 = path.getOrDefault("subscriptionId")
-  valid_575015 = validateParameter(valid_575015, JString, required = true,
+  if valid_564114 != nil:
+    section.add "subscriptionId", valid_564114
+  var valid_564115 = path.getOrDefault("location")
+  valid_564115 = validateParameter(valid_564115, JString, required = true,
                                  default = nil)
-  if valid_575015 != nil:
-    section.add "subscriptionId", valid_575015
-  var valid_575016 = path.getOrDefault("storageSubSystem")
-  valid_575016 = validateParameter(valid_575016, JString, required = true,
+  if valid_564115 != nil:
+    section.add "location", valid_564115
+  var valid_564116 = path.getOrDefault("resourceGroupName")
+  valid_564116 = validateParameter(valid_564116, JString, required = true,
                                  default = nil)
-  if valid_575016 != nil:
-    section.add "storageSubSystem", valid_575016
-  var valid_575017 = path.getOrDefault("drive")
-  valid_575017 = validateParameter(valid_575017, JString, required = true,
+  if valid_564116 != nil:
+    section.add "resourceGroupName", valid_564116
+  var valid_564117 = path.getOrDefault("storageSubSystem")
+  valid_564117 = validateParameter(valid_564117, JString, required = true,
                                  default = nil)
-  if valid_575017 != nil:
-    section.add "drive", valid_575017
-  var valid_575018 = path.getOrDefault("location")
-  valid_575018 = validateParameter(valid_575018, JString, required = true,
+  if valid_564117 != nil:
+    section.add "storageSubSystem", valid_564117
+  var valid_564118 = path.getOrDefault("drive")
+  valid_564118 = validateParameter(valid_564118, JString, required = true,
                                  default = nil)
-  if valid_575018 != nil:
-    section.add "location", valid_575018
+  if valid_564118 != nil:
+    section.add "drive", valid_564118
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -349,11 +352,11 @@ proc validate_DrivesGet_575011(path: JsonNode; query: JsonNode; header: JsonNode
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575019 = query.getOrDefault("api-version")
-  valid_575019 = validateParameter(valid_575019, JString, required = true,
+  var valid_564119 = query.getOrDefault("api-version")
+  valid_564119 = validateParameter(valid_564119, JString, required = true,
                                  default = newJString("2018-10-01"))
-  if valid_575019 != nil:
-    section.add "api-version", valid_575019
+  if valid_564119 != nil:
+    section.add "api-version", valid_564119
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -362,52 +365,52 @@ proc validate_DrivesGet_575011(path: JsonNode; query: JsonNode; header: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_575020: Call_DrivesGet_575010; path: JsonNode; query: JsonNode;
+proc call*(call_564120: Call_DrivesGet_564110; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Return the requested a storage drive.
   ## 
-  let valid = call_575020.validator(path, query, header, formData, body)
-  let scheme = call_575020.pickScheme
+  let valid = call_564120.validator(path, query, header, formData, body)
+  let scheme = call_564120.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575020.url(scheme.get, call_575020.host, call_575020.base,
-                         call_575020.route, valid.getOrDefault("path"),
+  let url = call_564120.url(scheme.get, call_564120.host, call_564120.base,
+                         call_564120.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575020, url, valid)
+  result = hook(call_564120, url, valid)
 
-proc call*(call_575021: Call_DrivesGet_575010; resourceGroupName: string;
-          scaleUnit: string; subscriptionId: string; storageSubSystem: string;
-          drive: string; location: string; apiVersion: string = "2018-10-01"): Recallable =
+proc call*(call_564121: Call_DrivesGet_564110; scaleUnit: string;
+          subscriptionId: string; location: string; resourceGroupName: string;
+          storageSubSystem: string; drive: string; apiVersion: string = "2018-10-01"): Recallable =
   ## drivesGet
   ## Return the requested a storage drive.
-  ##   resourceGroupName: string (required)
-  ##                    : Name of the resource group.
-  ##   scaleUnit: string (required)
-  ##            : Name of the scale units.
   ##   apiVersion: string (required)
   ##             : Client API Version.
+  ##   scaleUnit: string (required)
+  ##            : Name of the scale units.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials that uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   location: string (required)
+  ##           : Location of the resource.
+  ##   resourceGroupName: string (required)
+  ##                    : Name of the resource group.
   ##   storageSubSystem: string (required)
   ##                   : Name of the storage system.
   ##   drive: string (required)
   ##        : Name of the storage drive.
-  ##   location: string (required)
-  ##           : Location of the resource.
-  var path_575022 = newJObject()
-  var query_575023 = newJObject()
-  add(path_575022, "resourceGroupName", newJString(resourceGroupName))
-  add(path_575022, "scaleUnit", newJString(scaleUnit))
-  add(query_575023, "api-version", newJString(apiVersion))
-  add(path_575022, "subscriptionId", newJString(subscriptionId))
-  add(path_575022, "storageSubSystem", newJString(storageSubSystem))
-  add(path_575022, "drive", newJString(drive))
-  add(path_575022, "location", newJString(location))
-  result = call_575021.call(path_575022, query_575023, nil, nil, nil)
+  var path_564122 = newJObject()
+  var query_564123 = newJObject()
+  add(query_564123, "api-version", newJString(apiVersion))
+  add(path_564122, "scaleUnit", newJString(scaleUnit))
+  add(path_564122, "subscriptionId", newJString(subscriptionId))
+  add(path_564122, "location", newJString(location))
+  add(path_564122, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564122, "storageSubSystem", newJString(storageSubSystem))
+  add(path_564122, "drive", newJString(drive))
+  result = call_564121.call(path_564122, query_564123, nil, nil, nil)
 
-var drivesGet* = Call_DrivesGet_575010(name: "drivesGet", meth: HttpMethod.HttpGet, host: "adminmanagement.local.azurestack.external", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Fabric.Admin/fabricLocations/{location}/scaleUnits/{scaleUnit}/storageSubSystems/{storageSubSystem}/drives/{drive}",
-                                    validator: validate_DrivesGet_575011,
-                                    base: "", url: url_DrivesGet_575012,
+var drivesGet* = Call_DrivesGet_564110(name: "drivesGet", meth: HttpMethod.HttpGet, host: "adminmanagement.local.azurestack.external", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Fabric.Admin/fabricLocations/{location}/scaleUnits/{scaleUnit}/storageSubSystems/{storageSubSystem}/drives/{drive}",
+                                    validator: validate_DrivesGet_564111,
+                                    base: "", url: url_DrivesGet_564112,
                                     schemes: {Scheme.Https})
 export
   rest

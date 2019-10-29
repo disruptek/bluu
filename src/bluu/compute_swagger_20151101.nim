@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, httpcore
 
 ## auto-generated via openapi macro
 ## title: ComputeManagementConvenienceClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_567641 = ref object of OpenApiRestCall
+  OpenApiRestCall_563539 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_567641](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563539](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_567641): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563539): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,8 +107,8 @@ const
   macServiceName = "compute-swagger"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_VirtualMachinesQuickCreate_567863 = ref object of OpenApiRestCall_567641
-proc url_VirtualMachinesQuickCreate_567865(protocol: Scheme; host: string;
+  Call_VirtualMachinesQuickCreate_563761 = ref object of OpenApiRestCall_563539
+proc url_VirtualMachinesQuickCreate_563763(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -127,37 +131,37 @@ proc url_VirtualMachinesQuickCreate_567865(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_VirtualMachinesQuickCreate_567864(path: JsonNode; query: JsonNode;
+proc validate_VirtualMachinesQuickCreate_563762(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Create a named template deployment using a template.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group. The name is case insensitive.
   ##   deploymentName: JString (required)
   ##                 : The name of the deployment.
   ##   subscriptionId: JString (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group. The name is case insensitive.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568055 = path.getOrDefault("resourceGroupName")
-  valid_568055 = validateParameter(valid_568055, JString, required = true,
+        "path argument is necessary due to required `deploymentName` field"
+  var valid_563955 = path.getOrDefault("deploymentName")
+  valid_563955 = validateParameter(valid_563955, JString, required = true,
                                  default = nil)
-  if valid_568055 != nil:
-    section.add "resourceGroupName", valid_568055
-  var valid_568056 = path.getOrDefault("deploymentName")
-  valid_568056 = validateParameter(valid_568056, JString, required = true,
+  if valid_563955 != nil:
+    section.add "deploymentName", valid_563955
+  var valid_563956 = path.getOrDefault("subscriptionId")
+  valid_563956 = validateParameter(valid_563956, JString, required = true,
                                  default = nil)
-  if valid_568056 != nil:
-    section.add "deploymentName", valid_568056
-  var valid_568057 = path.getOrDefault("subscriptionId")
-  valid_568057 = validateParameter(valid_568057, JString, required = true,
+  if valid_563956 != nil:
+    section.add "subscriptionId", valid_563956
+  var valid_563957 = path.getOrDefault("resourceGroupName")
+  valid_563957 = validateParameter(valid_563957, JString, required = true,
                                  default = nil)
-  if valid_568057 != nil:
-    section.add "subscriptionId", valid_568057
+  if valid_563957 != nil:
+    section.add "resourceGroupName", valid_563957
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -165,11 +169,11 @@ proc validate_VirtualMachinesQuickCreate_567864(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568058 = query.getOrDefault("api-version")
-  valid_568058 = validateParameter(valid_568058, JString, required = true,
+  var valid_563958 = query.getOrDefault("api-version")
+  valid_563958 = validateParameter(valid_563958, JString, required = true,
                                  default = nil)
-  if valid_568058 != nil:
-    section.add "api-version", valid_568058
+  if valid_563958 != nil:
+    section.add "api-version", valid_563958
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -182,50 +186,50 @@ proc validate_VirtualMachinesQuickCreate_567864(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568082: Call_VirtualMachinesQuickCreate_567863; path: JsonNode;
+proc call*(call_563982: Call_VirtualMachinesQuickCreate_563761; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Create a named template deployment using a template.
   ## 
-  let valid = call_568082.validator(path, query, header, formData, body)
-  let scheme = call_568082.pickScheme
+  let valid = call_563982.validator(path, query, header, formData, body)
+  let scheme = call_563982.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568082.url(scheme.get, call_568082.host, call_568082.base,
-                         call_568082.route, valid.getOrDefault("path"),
+  let url = call_563982.url(scheme.get, call_563982.host, call_563982.base,
+                         call_563982.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568082, url, valid)
+  result = hook(call_563982, url, valid)
 
-proc call*(call_568153: Call_VirtualMachinesQuickCreate_567863;
-          resourceGroupName: string; apiVersion: string; deploymentName: string;
-          subscriptionId: string; parameters: JsonNode = nil): Recallable =
+proc call*(call_564053: Call_VirtualMachinesQuickCreate_563761; apiVersion: string;
+          deploymentName: string; subscriptionId: string; resourceGroupName: string;
+          parameters: JsonNode = nil): Recallable =
   ## virtualMachinesQuickCreate
   ## Create a named template deployment using a template.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group. The name is case insensitive.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
   ##   deploymentName: string (required)
   ##                 : The name of the deployment.
   ##   subscriptionId: string (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group. The name is case insensitive.
   ##   parameters: JObject
   ##             : Additional parameters supplied to the operation.
-  var path_568154 = newJObject()
-  var query_568156 = newJObject()
-  var body_568157 = newJObject()
-  add(path_568154, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568156, "api-version", newJString(apiVersion))
-  add(path_568154, "deploymentName", newJString(deploymentName))
-  add(path_568154, "subscriptionId", newJString(subscriptionId))
+  var path_564054 = newJObject()
+  var query_564056 = newJObject()
+  var body_564057 = newJObject()
+  add(query_564056, "api-version", newJString(apiVersion))
+  add(path_564054, "deploymentName", newJString(deploymentName))
+  add(path_564054, "subscriptionId", newJString(subscriptionId))
+  add(path_564054, "resourceGroupName", newJString(resourceGroupName))
   if parameters != nil:
-    body_568157 = parameters
-  result = call_568153.call(path_568154, query_568156, nil, nil, body_568157)
+    body_564057 = parameters
+  result = call_564053.call(path_564054, query_564056, nil, nil, body_564057)
 
-var virtualMachinesQuickCreate* = Call_VirtualMachinesQuickCreate_567863(
+var virtualMachinesQuickCreate* = Call_VirtualMachinesQuickCreate_563761(
     name: "virtualMachinesQuickCreate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.Resources/deployments/{deploymentName}",
-    validator: validate_VirtualMachinesQuickCreate_567864, base: "",
-    url: url_VirtualMachinesQuickCreate_567865, schemes: {Scheme.Https})
+    validator: validate_VirtualMachinesQuickCreate_563762, base: "",
+    url: url_VirtualMachinesQuickCreate_563763, schemes: {Scheme.Https})
 export
   rest
 

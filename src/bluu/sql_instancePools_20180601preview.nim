@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, httpcore
 
 ## auto-generated via openapi macro
 ## title: SqlManagementClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_567657 = ref object of OpenApiRestCall
+  OpenApiRestCall_563555 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_567657](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563555](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_567657): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563555): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,8 +107,8 @@ const
   macServiceName = "sql-instancePools"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_InstancePoolsList_567879 = ref object of OpenApiRestCall_567657
-proc url_InstancePoolsList_567881(protocol: Scheme; host: string; base: string;
+  Call_InstancePoolsList_563777 = ref object of OpenApiRestCall_563555
+proc url_InstancePoolsList_563779(protocol: Scheme; host: string; base: string;
                                  route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -120,7 +124,7 @@ proc url_InstancePoolsList_567881(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_InstancePoolsList_567880(path: JsonNode; query: JsonNode;
+proc validate_InstancePoolsList_563778(path: JsonNode; query: JsonNode;
                                       header: JsonNode; formData: JsonNode;
                                       body: JsonNode): JsonNode =
   ## Gets a list of all instance pools in the subscription.
@@ -133,11 +137,11 @@ proc validate_InstancePoolsList_567880(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_568054 = path.getOrDefault("subscriptionId")
-  valid_568054 = validateParameter(valid_568054, JString, required = true,
+  var valid_563954 = path.getOrDefault("subscriptionId")
+  valid_563954 = validateParameter(valid_563954, JString, required = true,
                                  default = nil)
-  if valid_568054 != nil:
-    section.add "subscriptionId", valid_568054
+  if valid_563954 != nil:
+    section.add "subscriptionId", valid_563954
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -145,11 +149,11 @@ proc validate_InstancePoolsList_567880(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568055 = query.getOrDefault("api-version")
-  valid_568055 = validateParameter(valid_568055, JString, required = true,
+  var valid_563955 = query.getOrDefault("api-version")
+  valid_563955 = validateParameter(valid_563955, JString, required = true,
                                  default = nil)
-  if valid_568055 != nil:
-    section.add "api-version", valid_568055
+  if valid_563955 != nil:
+    section.add "api-version", valid_563955
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -158,20 +162,20 @@ proc validate_InstancePoolsList_567880(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568078: Call_InstancePoolsList_567879; path: JsonNode;
+proc call*(call_563978: Call_InstancePoolsList_563777; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets a list of all instance pools in the subscription.
   ## 
-  let valid = call_568078.validator(path, query, header, formData, body)
-  let scheme = call_568078.pickScheme
+  let valid = call_563978.validator(path, query, header, formData, body)
+  let scheme = call_563978.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568078.url(scheme.get, call_568078.host, call_568078.base,
-                         call_568078.route, valid.getOrDefault("path"),
+  let url = call_563978.url(scheme.get, call_563978.host, call_563978.base,
+                         call_563978.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568078, url, valid)
+  result = hook(call_563978, url, valid)
 
-proc call*(call_568149: Call_InstancePoolsList_567879; apiVersion: string;
+proc call*(call_564049: Call_InstancePoolsList_563777; apiVersion: string;
           subscriptionId: string): Recallable =
   ## instancePoolsList
   ## Gets a list of all instance pools in the subscription.
@@ -179,19 +183,19 @@ proc call*(call_568149: Call_InstancePoolsList_567879; apiVersion: string;
   ##             : The API version to use for the request.
   ##   subscriptionId: string (required)
   ##                 : The subscription ID that identifies an Azure subscription.
-  var path_568150 = newJObject()
-  var query_568152 = newJObject()
-  add(query_568152, "api-version", newJString(apiVersion))
-  add(path_568150, "subscriptionId", newJString(subscriptionId))
-  result = call_568149.call(path_568150, query_568152, nil, nil, nil)
+  var path_564050 = newJObject()
+  var query_564052 = newJObject()
+  add(query_564052, "api-version", newJString(apiVersion))
+  add(path_564050, "subscriptionId", newJString(subscriptionId))
+  result = call_564049.call(path_564050, query_564052, nil, nil, nil)
 
-var instancePoolsList* = Call_InstancePoolsList_567879(name: "instancePoolsList",
+var instancePoolsList* = Call_InstancePoolsList_563777(name: "instancePoolsList",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Sql/instancePools",
-    validator: validate_InstancePoolsList_567880, base: "",
-    url: url_InstancePoolsList_567881, schemes: {Scheme.Https})
+    validator: validate_InstancePoolsList_563778, base: "",
+    url: url_InstancePoolsList_563779, schemes: {Scheme.Https})
 type
-  Call_InstancePoolsListByResourceGroup_568191 = ref object of OpenApiRestCall_567657
-proc url_InstancePoolsListByResourceGroup_568193(protocol: Scheme; host: string;
+  Call_InstancePoolsListByResourceGroup_564091 = ref object of OpenApiRestCall_563555
+proc url_InstancePoolsListByResourceGroup_564093(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -211,30 +215,30 @@ proc url_InstancePoolsListByResourceGroup_568193(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_InstancePoolsListByResourceGroup_568192(path: JsonNode;
+proc validate_InstancePoolsListByResourceGroup_564092(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets a list of instance pools in the resource group
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID that identifies an Azure subscription.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568194 = path.getOrDefault("resourceGroupName")
-  valid_568194 = validateParameter(valid_568194, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564094 = path.getOrDefault("subscriptionId")
+  valid_564094 = validateParameter(valid_564094, JString, required = true,
                                  default = nil)
-  if valid_568194 != nil:
-    section.add "resourceGroupName", valid_568194
-  var valid_568195 = path.getOrDefault("subscriptionId")
-  valid_568195 = validateParameter(valid_568195, JString, required = true,
+  if valid_564094 != nil:
+    section.add "subscriptionId", valid_564094
+  var valid_564095 = path.getOrDefault("resourceGroupName")
+  valid_564095 = validateParameter(valid_564095, JString, required = true,
                                  default = nil)
-  if valid_568195 != nil:
-    section.add "subscriptionId", valid_568195
+  if valid_564095 != nil:
+    section.add "resourceGroupName", valid_564095
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -242,11 +246,11 @@ proc validate_InstancePoolsListByResourceGroup_568192(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568196 = query.getOrDefault("api-version")
-  valid_568196 = validateParameter(valid_568196, JString, required = true,
+  var valid_564096 = query.getOrDefault("api-version")
+  valid_564096 = validateParameter(valid_564096, JString, required = true,
                                  default = nil)
-  if valid_568196 != nil:
-    section.add "api-version", valid_568196
+  if valid_564096 != nil:
+    section.add "api-version", valid_564096
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -255,45 +259,45 @@ proc validate_InstancePoolsListByResourceGroup_568192(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568197: Call_InstancePoolsListByResourceGroup_568191;
+proc call*(call_564097: Call_InstancePoolsListByResourceGroup_564091;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Gets a list of instance pools in the resource group
   ## 
-  let valid = call_568197.validator(path, query, header, formData, body)
-  let scheme = call_568197.pickScheme
+  let valid = call_564097.validator(path, query, header, formData, body)
+  let scheme = call_564097.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568197.url(scheme.get, call_568197.host, call_568197.base,
-                         call_568197.route, valid.getOrDefault("path"),
+  let url = call_564097.url(scheme.get, call_564097.host, call_564097.base,
+                         call_564097.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568197, url, valid)
+  result = hook(call_564097, url, valid)
 
-proc call*(call_568198: Call_InstancePoolsListByResourceGroup_568191;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string): Recallable =
+proc call*(call_564098: Call_InstancePoolsListByResourceGroup_564091;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string): Recallable =
   ## instancePoolsListByResourceGroup
   ## Gets a list of instance pools in the resource group
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   ##   apiVersion: string (required)
   ##             : The API version to use for the request.
   ##   subscriptionId: string (required)
   ##                 : The subscription ID that identifies an Azure subscription.
-  var path_568199 = newJObject()
-  var query_568200 = newJObject()
-  add(path_568199, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568200, "api-version", newJString(apiVersion))
-  add(path_568199, "subscriptionId", newJString(subscriptionId))
-  result = call_568198.call(path_568199, query_568200, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
+  var path_564099 = newJObject()
+  var query_564100 = newJObject()
+  add(query_564100, "api-version", newJString(apiVersion))
+  add(path_564099, "subscriptionId", newJString(subscriptionId))
+  add(path_564099, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564098.call(path_564099, query_564100, nil, nil, nil)
 
-var instancePoolsListByResourceGroup* = Call_InstancePoolsListByResourceGroup_568191(
+var instancePoolsListByResourceGroup* = Call_InstancePoolsListByResourceGroup_564091(
     name: "instancePoolsListByResourceGroup", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/instancePools",
-    validator: validate_InstancePoolsListByResourceGroup_568192, base: "",
-    url: url_InstancePoolsListByResourceGroup_568193, schemes: {Scheme.Https})
+    validator: validate_InstancePoolsListByResourceGroup_564092, base: "",
+    url: url_InstancePoolsListByResourceGroup_564093, schemes: {Scheme.Https})
 type
-  Call_InstancePoolsCreateOrUpdate_568212 = ref object of OpenApiRestCall_567657
-proc url_InstancePoolsCreateOrUpdate_568214(protocol: Scheme; host: string;
+  Call_InstancePoolsCreateOrUpdate_564112 = ref object of OpenApiRestCall_563555
+proc url_InstancePoolsCreateOrUpdate_564114(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -316,37 +320,37 @@ proc url_InstancePoolsCreateOrUpdate_568214(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_InstancePoolsCreateOrUpdate_568213(path: JsonNode; query: JsonNode;
+proc validate_InstancePoolsCreateOrUpdate_564113(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Creates or updates an instance pool.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID that identifies an Azure subscription.
   ##   instancePoolName: JString (required)
   ##                   : The name of the instance pool to be created or updated.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568215 = path.getOrDefault("resourceGroupName")
-  valid_568215 = validateParameter(valid_568215, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564115 = path.getOrDefault("subscriptionId")
+  valid_564115 = validateParameter(valid_564115, JString, required = true,
                                  default = nil)
-  if valid_568215 != nil:
-    section.add "resourceGroupName", valid_568215
-  var valid_568216 = path.getOrDefault("subscriptionId")
-  valid_568216 = validateParameter(valid_568216, JString, required = true,
+  if valid_564115 != nil:
+    section.add "subscriptionId", valid_564115
+  var valid_564116 = path.getOrDefault("instancePoolName")
+  valid_564116 = validateParameter(valid_564116, JString, required = true,
                                  default = nil)
-  if valid_568216 != nil:
-    section.add "subscriptionId", valid_568216
-  var valid_568217 = path.getOrDefault("instancePoolName")
-  valid_568217 = validateParameter(valid_568217, JString, required = true,
+  if valid_564116 != nil:
+    section.add "instancePoolName", valid_564116
+  var valid_564117 = path.getOrDefault("resourceGroupName")
+  valid_564117 = validateParameter(valid_564117, JString, required = true,
                                  default = nil)
-  if valid_568217 != nil:
-    section.add "instancePoolName", valid_568217
+  if valid_564117 != nil:
+    section.add "resourceGroupName", valid_564117
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -354,11 +358,11 @@ proc validate_InstancePoolsCreateOrUpdate_568213(path: JsonNode; query: JsonNode
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568218 = query.getOrDefault("api-version")
-  valid_568218 = validateParameter(valid_568218, JString, required = true,
+  var valid_564118 = query.getOrDefault("api-version")
+  valid_564118 = validateParameter(valid_564118, JString, required = true,
                                  default = nil)
-  if valid_568218 != nil:
-    section.add "api-version", valid_568218
+  if valid_564118 != nil:
+    section.add "api-version", valid_564118
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -372,53 +376,53 @@ proc validate_InstancePoolsCreateOrUpdate_568213(path: JsonNode; query: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_568220: Call_InstancePoolsCreateOrUpdate_568212; path: JsonNode;
+proc call*(call_564120: Call_InstancePoolsCreateOrUpdate_564112; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Creates or updates an instance pool.
   ## 
-  let valid = call_568220.validator(path, query, header, formData, body)
-  let scheme = call_568220.pickScheme
+  let valid = call_564120.validator(path, query, header, formData, body)
+  let scheme = call_564120.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568220.url(scheme.get, call_568220.host, call_568220.base,
-                         call_568220.route, valid.getOrDefault("path"),
+  let url = call_564120.url(scheme.get, call_564120.host, call_564120.base,
+                         call_564120.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568220, url, valid)
+  result = hook(call_564120, url, valid)
 
-proc call*(call_568221: Call_InstancePoolsCreateOrUpdate_568212;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          parameters: JsonNode; instancePoolName: string): Recallable =
+proc call*(call_564121: Call_InstancePoolsCreateOrUpdate_564112;
+          apiVersion: string; subscriptionId: string; instancePoolName: string;
+          resourceGroupName: string; parameters: JsonNode): Recallable =
   ## instancePoolsCreateOrUpdate
   ## Creates or updates an instance pool.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   ##   apiVersion: string (required)
   ##             : The API version to use for the request.
   ##   subscriptionId: string (required)
   ##                 : The subscription ID that identifies an Azure subscription.
-  ##   parameters: JObject (required)
-  ##             : The requested instance pool resource state.
   ##   instancePoolName: string (required)
   ##                   : The name of the instance pool to be created or updated.
-  var path_568222 = newJObject()
-  var query_568223 = newJObject()
-  var body_568224 = newJObject()
-  add(path_568222, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568223, "api-version", newJString(apiVersion))
-  add(path_568222, "subscriptionId", newJString(subscriptionId))
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
+  ##   parameters: JObject (required)
+  ##             : The requested instance pool resource state.
+  var path_564122 = newJObject()
+  var query_564123 = newJObject()
+  var body_564124 = newJObject()
+  add(query_564123, "api-version", newJString(apiVersion))
+  add(path_564122, "subscriptionId", newJString(subscriptionId))
+  add(path_564122, "instancePoolName", newJString(instancePoolName))
+  add(path_564122, "resourceGroupName", newJString(resourceGroupName))
   if parameters != nil:
-    body_568224 = parameters
-  add(path_568222, "instancePoolName", newJString(instancePoolName))
-  result = call_568221.call(path_568222, query_568223, nil, nil, body_568224)
+    body_564124 = parameters
+  result = call_564121.call(path_564122, query_564123, nil, nil, body_564124)
 
-var instancePoolsCreateOrUpdate* = Call_InstancePoolsCreateOrUpdate_568212(
+var instancePoolsCreateOrUpdate* = Call_InstancePoolsCreateOrUpdate_564112(
     name: "instancePoolsCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/instancePools/{instancePoolName}",
-    validator: validate_InstancePoolsCreateOrUpdate_568213, base: "",
-    url: url_InstancePoolsCreateOrUpdate_568214, schemes: {Scheme.Https})
+    validator: validate_InstancePoolsCreateOrUpdate_564113, base: "",
+    url: url_InstancePoolsCreateOrUpdate_564114, schemes: {Scheme.Https})
 type
-  Call_InstancePoolsGet_568201 = ref object of OpenApiRestCall_567657
-proc url_InstancePoolsGet_568203(protocol: Scheme; host: string; base: string;
+  Call_InstancePoolsGet_564101 = ref object of OpenApiRestCall_563555
+proc url_InstancePoolsGet_564103(protocol: Scheme; host: string; base: string;
                                 route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -441,7 +445,7 @@ proc url_InstancePoolsGet_568203(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_InstancePoolsGet_568202(path: JsonNode; query: JsonNode;
+proc validate_InstancePoolsGet_564102(path: JsonNode; query: JsonNode;
                                      header: JsonNode; formData: JsonNode;
                                      body: JsonNode): JsonNode =
   ## Gets an instance pool.
@@ -449,30 +453,30 @@ proc validate_InstancePoolsGet_568202(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID that identifies an Azure subscription.
   ##   instancePoolName: JString (required)
   ##                   : The name of the instance pool to be retrieved.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568204 = path.getOrDefault("resourceGroupName")
-  valid_568204 = validateParameter(valid_568204, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564104 = path.getOrDefault("subscriptionId")
+  valid_564104 = validateParameter(valid_564104, JString, required = true,
                                  default = nil)
-  if valid_568204 != nil:
-    section.add "resourceGroupName", valid_568204
-  var valid_568205 = path.getOrDefault("subscriptionId")
-  valid_568205 = validateParameter(valid_568205, JString, required = true,
+  if valid_564104 != nil:
+    section.add "subscriptionId", valid_564104
+  var valid_564105 = path.getOrDefault("instancePoolName")
+  valid_564105 = validateParameter(valid_564105, JString, required = true,
                                  default = nil)
-  if valid_568205 != nil:
-    section.add "subscriptionId", valid_568205
-  var valid_568206 = path.getOrDefault("instancePoolName")
-  valid_568206 = validateParameter(valid_568206, JString, required = true,
+  if valid_564105 != nil:
+    section.add "instancePoolName", valid_564105
+  var valid_564106 = path.getOrDefault("resourceGroupName")
+  valid_564106 = validateParameter(valid_564106, JString, required = true,
                                  default = nil)
-  if valid_568206 != nil:
-    section.add "instancePoolName", valid_568206
+  if valid_564106 != nil:
+    section.add "resourceGroupName", valid_564106
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -480,11 +484,11 @@ proc validate_InstancePoolsGet_568202(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568207 = query.getOrDefault("api-version")
-  valid_568207 = validateParameter(valid_568207, JString, required = true,
+  var valid_564107 = query.getOrDefault("api-version")
+  valid_564107 = validateParameter(valid_564107, JString, required = true,
                                  default = nil)
-  if valid_568207 != nil:
-    section.add "api-version", valid_568207
+  if valid_564107 != nil:
+    section.add "api-version", valid_564107
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -493,46 +497,47 @@ proc validate_InstancePoolsGet_568202(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568208: Call_InstancePoolsGet_568201; path: JsonNode;
+proc call*(call_564108: Call_InstancePoolsGet_564101; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets an instance pool.
   ## 
-  let valid = call_568208.validator(path, query, header, formData, body)
-  let scheme = call_568208.pickScheme
+  let valid = call_564108.validator(path, query, header, formData, body)
+  let scheme = call_564108.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568208.url(scheme.get, call_568208.host, call_568208.base,
-                         call_568208.route, valid.getOrDefault("path"),
+  let url = call_564108.url(scheme.get, call_564108.host, call_564108.base,
+                         call_564108.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568208, url, valid)
+  result = hook(call_564108, url, valid)
 
-proc call*(call_568209: Call_InstancePoolsGet_568201; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; instancePoolName: string): Recallable =
+proc call*(call_564109: Call_InstancePoolsGet_564101; apiVersion: string;
+          subscriptionId: string; instancePoolName: string;
+          resourceGroupName: string): Recallable =
   ## instancePoolsGet
   ## Gets an instance pool.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   ##   apiVersion: string (required)
   ##             : The API version to use for the request.
   ##   subscriptionId: string (required)
   ##                 : The subscription ID that identifies an Azure subscription.
   ##   instancePoolName: string (required)
   ##                   : The name of the instance pool to be retrieved.
-  var path_568210 = newJObject()
-  var query_568211 = newJObject()
-  add(path_568210, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568211, "api-version", newJString(apiVersion))
-  add(path_568210, "subscriptionId", newJString(subscriptionId))
-  add(path_568210, "instancePoolName", newJString(instancePoolName))
-  result = call_568209.call(path_568210, query_568211, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
+  var path_564110 = newJObject()
+  var query_564111 = newJObject()
+  add(query_564111, "api-version", newJString(apiVersion))
+  add(path_564110, "subscriptionId", newJString(subscriptionId))
+  add(path_564110, "instancePoolName", newJString(instancePoolName))
+  add(path_564110, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564109.call(path_564110, query_564111, nil, nil, nil)
 
-var instancePoolsGet* = Call_InstancePoolsGet_568201(name: "instancePoolsGet",
+var instancePoolsGet* = Call_InstancePoolsGet_564101(name: "instancePoolsGet",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/instancePools/{instancePoolName}",
-    validator: validate_InstancePoolsGet_568202, base: "",
-    url: url_InstancePoolsGet_568203, schemes: {Scheme.Https})
+    validator: validate_InstancePoolsGet_564102, base: "",
+    url: url_InstancePoolsGet_564103, schemes: {Scheme.Https})
 type
-  Call_InstancePoolsUpdate_568236 = ref object of OpenApiRestCall_567657
-proc url_InstancePoolsUpdate_568238(protocol: Scheme; host: string; base: string;
+  Call_InstancePoolsUpdate_564136 = ref object of OpenApiRestCall_563555
+proc url_InstancePoolsUpdate_564138(protocol: Scheme; host: string; base: string;
                                    route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -555,7 +560,7 @@ proc url_InstancePoolsUpdate_568238(protocol: Scheme; host: string; base: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_InstancePoolsUpdate_568237(path: JsonNode; query: JsonNode;
+proc validate_InstancePoolsUpdate_564137(path: JsonNode; query: JsonNode;
                                         header: JsonNode; formData: JsonNode;
                                         body: JsonNode): JsonNode =
   ## Updates an instance pool.
@@ -563,30 +568,30 @@ proc validate_InstancePoolsUpdate_568237(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID that identifies an Azure subscription.
   ##   instancePoolName: JString (required)
   ##                   : The name of the instance pool to be updated.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568239 = path.getOrDefault("resourceGroupName")
-  valid_568239 = validateParameter(valid_568239, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564139 = path.getOrDefault("subscriptionId")
+  valid_564139 = validateParameter(valid_564139, JString, required = true,
                                  default = nil)
-  if valid_568239 != nil:
-    section.add "resourceGroupName", valid_568239
-  var valid_568240 = path.getOrDefault("subscriptionId")
-  valid_568240 = validateParameter(valid_568240, JString, required = true,
+  if valid_564139 != nil:
+    section.add "subscriptionId", valid_564139
+  var valid_564140 = path.getOrDefault("instancePoolName")
+  valid_564140 = validateParameter(valid_564140, JString, required = true,
                                  default = nil)
-  if valid_568240 != nil:
-    section.add "subscriptionId", valid_568240
-  var valid_568241 = path.getOrDefault("instancePoolName")
-  valid_568241 = validateParameter(valid_568241, JString, required = true,
+  if valid_564140 != nil:
+    section.add "instancePoolName", valid_564140
+  var valid_564141 = path.getOrDefault("resourceGroupName")
+  valid_564141 = validateParameter(valid_564141, JString, required = true,
                                  default = nil)
-  if valid_568241 != nil:
-    section.add "instancePoolName", valid_568241
+  if valid_564141 != nil:
+    section.add "resourceGroupName", valid_564141
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -594,11 +599,11 @@ proc validate_InstancePoolsUpdate_568237(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568242 = query.getOrDefault("api-version")
-  valid_568242 = validateParameter(valid_568242, JString, required = true,
+  var valid_564142 = query.getOrDefault("api-version")
+  valid_564142 = validateParameter(valid_564142, JString, required = true,
                                  default = nil)
-  if valid_568242 != nil:
-    section.add "api-version", valid_568242
+  if valid_564142 != nil:
+    section.add "api-version", valid_564142
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -612,53 +617,53 @@ proc validate_InstancePoolsUpdate_568237(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568244: Call_InstancePoolsUpdate_568236; path: JsonNode;
+proc call*(call_564144: Call_InstancePoolsUpdate_564136; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Updates an instance pool.
   ## 
-  let valid = call_568244.validator(path, query, header, formData, body)
-  let scheme = call_568244.pickScheme
+  let valid = call_564144.validator(path, query, header, formData, body)
+  let scheme = call_564144.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568244.url(scheme.get, call_568244.host, call_568244.base,
-                         call_568244.route, valid.getOrDefault("path"),
+  let url = call_564144.url(scheme.get, call_564144.host, call_564144.base,
+                         call_564144.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568244, url, valid)
+  result = hook(call_564144, url, valid)
 
-proc call*(call_568245: Call_InstancePoolsUpdate_568236; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; parameters: JsonNode;
-          instancePoolName: string): Recallable =
+proc call*(call_564145: Call_InstancePoolsUpdate_564136; apiVersion: string;
+          subscriptionId: string; instancePoolName: string;
+          resourceGroupName: string; parameters: JsonNode): Recallable =
   ## instancePoolsUpdate
   ## Updates an instance pool.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   ##   apiVersion: string (required)
   ##             : The API version to use for the request.
   ##   subscriptionId: string (required)
   ##                 : The subscription ID that identifies an Azure subscription.
-  ##   parameters: JObject (required)
-  ##             : The requested instance pool resource state.
   ##   instancePoolName: string (required)
   ##                   : The name of the instance pool to be updated.
-  var path_568246 = newJObject()
-  var query_568247 = newJObject()
-  var body_568248 = newJObject()
-  add(path_568246, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568247, "api-version", newJString(apiVersion))
-  add(path_568246, "subscriptionId", newJString(subscriptionId))
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
+  ##   parameters: JObject (required)
+  ##             : The requested instance pool resource state.
+  var path_564146 = newJObject()
+  var query_564147 = newJObject()
+  var body_564148 = newJObject()
+  add(query_564147, "api-version", newJString(apiVersion))
+  add(path_564146, "subscriptionId", newJString(subscriptionId))
+  add(path_564146, "instancePoolName", newJString(instancePoolName))
+  add(path_564146, "resourceGroupName", newJString(resourceGroupName))
   if parameters != nil:
-    body_568248 = parameters
-  add(path_568246, "instancePoolName", newJString(instancePoolName))
-  result = call_568245.call(path_568246, query_568247, nil, nil, body_568248)
+    body_564148 = parameters
+  result = call_564145.call(path_564146, query_564147, nil, nil, body_564148)
 
-var instancePoolsUpdate* = Call_InstancePoolsUpdate_568236(
+var instancePoolsUpdate* = Call_InstancePoolsUpdate_564136(
     name: "instancePoolsUpdate", meth: HttpMethod.HttpPatch,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/instancePools/{instancePoolName}",
-    validator: validate_InstancePoolsUpdate_568237, base: "",
-    url: url_InstancePoolsUpdate_568238, schemes: {Scheme.Https})
+    validator: validate_InstancePoolsUpdate_564137, base: "",
+    url: url_InstancePoolsUpdate_564138, schemes: {Scheme.Https})
 type
-  Call_InstancePoolsDelete_568225 = ref object of OpenApiRestCall_567657
-proc url_InstancePoolsDelete_568227(protocol: Scheme; host: string; base: string;
+  Call_InstancePoolsDelete_564125 = ref object of OpenApiRestCall_563555
+proc url_InstancePoolsDelete_564127(protocol: Scheme; host: string; base: string;
                                    route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -681,7 +686,7 @@ proc url_InstancePoolsDelete_568227(protocol: Scheme; host: string; base: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_InstancePoolsDelete_568226(path: JsonNode; query: JsonNode;
+proc validate_InstancePoolsDelete_564126(path: JsonNode; query: JsonNode;
                                         header: JsonNode; formData: JsonNode;
                                         body: JsonNode): JsonNode =
   ## Deletes an instance pool
@@ -689,30 +694,30 @@ proc validate_InstancePoolsDelete_568226(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID that identifies an Azure subscription.
   ##   instancePoolName: JString (required)
   ##                   : The name of the instance pool to be deleted
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568228 = path.getOrDefault("resourceGroupName")
-  valid_568228 = validateParameter(valid_568228, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564128 = path.getOrDefault("subscriptionId")
+  valid_564128 = validateParameter(valid_564128, JString, required = true,
                                  default = nil)
-  if valid_568228 != nil:
-    section.add "resourceGroupName", valid_568228
-  var valid_568229 = path.getOrDefault("subscriptionId")
-  valid_568229 = validateParameter(valid_568229, JString, required = true,
+  if valid_564128 != nil:
+    section.add "subscriptionId", valid_564128
+  var valid_564129 = path.getOrDefault("instancePoolName")
+  valid_564129 = validateParameter(valid_564129, JString, required = true,
                                  default = nil)
-  if valid_568229 != nil:
-    section.add "subscriptionId", valid_568229
-  var valid_568230 = path.getOrDefault("instancePoolName")
-  valid_568230 = validateParameter(valid_568230, JString, required = true,
+  if valid_564129 != nil:
+    section.add "instancePoolName", valid_564129
+  var valid_564130 = path.getOrDefault("resourceGroupName")
+  valid_564130 = validateParameter(valid_564130, JString, required = true,
                                  default = nil)
-  if valid_568230 != nil:
-    section.add "instancePoolName", valid_568230
+  if valid_564130 != nil:
+    section.add "resourceGroupName", valid_564130
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -720,11 +725,11 @@ proc validate_InstancePoolsDelete_568226(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568231 = query.getOrDefault("api-version")
-  valid_568231 = validateParameter(valid_568231, JString, required = true,
+  var valid_564131 = query.getOrDefault("api-version")
+  valid_564131 = validateParameter(valid_564131, JString, required = true,
                                  default = nil)
-  if valid_568231 != nil:
-    section.add "api-version", valid_568231
+  if valid_564131 != nil:
+    section.add "api-version", valid_564131
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -733,44 +738,45 @@ proc validate_InstancePoolsDelete_568226(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568232: Call_InstancePoolsDelete_568225; path: JsonNode;
+proc call*(call_564132: Call_InstancePoolsDelete_564125; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes an instance pool
   ## 
-  let valid = call_568232.validator(path, query, header, formData, body)
-  let scheme = call_568232.pickScheme
+  let valid = call_564132.validator(path, query, header, formData, body)
+  let scheme = call_564132.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568232.url(scheme.get, call_568232.host, call_568232.base,
-                         call_568232.route, valid.getOrDefault("path"),
+  let url = call_564132.url(scheme.get, call_564132.host, call_564132.base,
+                         call_564132.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568232, url, valid)
+  result = hook(call_564132, url, valid)
 
-proc call*(call_568233: Call_InstancePoolsDelete_568225; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; instancePoolName: string): Recallable =
+proc call*(call_564133: Call_InstancePoolsDelete_564125; apiVersion: string;
+          subscriptionId: string; instancePoolName: string;
+          resourceGroupName: string): Recallable =
   ## instancePoolsDelete
   ## Deletes an instance pool
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   ##   apiVersion: string (required)
   ##             : The API version to use for the request.
   ##   subscriptionId: string (required)
   ##                 : The subscription ID that identifies an Azure subscription.
   ##   instancePoolName: string (required)
   ##                   : The name of the instance pool to be deleted
-  var path_568234 = newJObject()
-  var query_568235 = newJObject()
-  add(path_568234, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568235, "api-version", newJString(apiVersion))
-  add(path_568234, "subscriptionId", newJString(subscriptionId))
-  add(path_568234, "instancePoolName", newJString(instancePoolName))
-  result = call_568233.call(path_568234, query_568235, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
+  var path_564134 = newJObject()
+  var query_564135 = newJObject()
+  add(query_564135, "api-version", newJString(apiVersion))
+  add(path_564134, "subscriptionId", newJString(subscriptionId))
+  add(path_564134, "instancePoolName", newJString(instancePoolName))
+  add(path_564134, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564133.call(path_564134, query_564135, nil, nil, nil)
 
-var instancePoolsDelete* = Call_InstancePoolsDelete_568225(
+var instancePoolsDelete* = Call_InstancePoolsDelete_564125(
     name: "instancePoolsDelete", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/instancePools/{instancePoolName}",
-    validator: validate_InstancePoolsDelete_568226, base: "",
-    url: url_InstancePoolsDelete_568227, schemes: {Scheme.Https})
+    validator: validate_InstancePoolsDelete_564126, base: "",
+    url: url_InstancePoolsDelete_564127, schemes: {Scheme.Https})
 export
   rest
 

@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_573657 = ref object of OpenApiRestCall
+  OpenApiRestCall_563555 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_573657](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563555](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_573657): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563555): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,8 +107,8 @@ const
   macServiceName = "security-deviceSecurityGroups"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_DeviceSecurityGroupsList_573879 = ref object of OpenApiRestCall_573657
-proc url_DeviceSecurityGroupsList_573881(protocol: Scheme; host: string;
+  Call_DeviceSecurityGroupsList_563777 = ref object of OpenApiRestCall_563555
+proc url_DeviceSecurityGroupsList_563779(protocol: Scheme; host: string;
                                         base: string; route: string; path: JsonNode;
                                         query: JsonNode): Uri =
   result.scheme = $protocol
@@ -121,7 +125,7 @@ proc url_DeviceSecurityGroupsList_573881(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DeviceSecurityGroupsList_573880(path: JsonNode; query: JsonNode;
+proc validate_DeviceSecurityGroupsList_563778(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Use this method get the list of device security groups for the specified IoT Hub resource.
   ## 
@@ -133,11 +137,11 @@ proc validate_DeviceSecurityGroupsList_573880(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceId` field"
-  var valid_574041 = path.getOrDefault("resourceId")
-  valid_574041 = validateParameter(valid_574041, JString, required = true,
+  var valid_563941 = path.getOrDefault("resourceId")
+  valid_563941 = validateParameter(valid_563941, JString, required = true,
                                  default = nil)
-  if valid_574041 != nil:
-    section.add "resourceId", valid_574041
+  if valid_563941 != nil:
+    section.add "resourceId", valid_563941
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -145,11 +149,11 @@ proc validate_DeviceSecurityGroupsList_573880(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574042 = query.getOrDefault("api-version")
-  valid_574042 = validateParameter(valid_574042, JString, required = true,
+  var valid_563942 = query.getOrDefault("api-version")
+  valid_563942 = validateParameter(valid_563942, JString, required = true,
                                  default = nil)
-  if valid_574042 != nil:
-    section.add "api-version", valid_574042
+  if valid_563942 != nil:
+    section.add "api-version", valid_563942
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -158,20 +162,20 @@ proc validate_DeviceSecurityGroupsList_573880(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574069: Call_DeviceSecurityGroupsList_573879; path: JsonNode;
+proc call*(call_563969: Call_DeviceSecurityGroupsList_563777; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Use this method get the list of device security groups for the specified IoT Hub resource.
   ## 
-  let valid = call_574069.validator(path, query, header, formData, body)
-  let scheme = call_574069.pickScheme
+  let valid = call_563969.validator(path, query, header, formData, body)
+  let scheme = call_563969.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574069.url(scheme.get, call_574069.host, call_574069.base,
-                         call_574069.route, valid.getOrDefault("path"),
+  let url = call_563969.url(scheme.get, call_563969.host, call_563969.base,
+                         call_563969.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574069, url, valid)
+  result = hook(call_563969, url, valid)
 
-proc call*(call_574140: Call_DeviceSecurityGroupsList_573879; apiVersion: string;
+proc call*(call_564040: Call_DeviceSecurityGroupsList_563777; apiVersion: string;
           resourceId: string): Recallable =
   ## deviceSecurityGroupsList
   ## Use this method get the list of device security groups for the specified IoT Hub resource.
@@ -179,21 +183,21 @@ proc call*(call_574140: Call_DeviceSecurityGroupsList_573879; apiVersion: string
   ##             : API version for the operation
   ##   resourceId: string (required)
   ##             : The identifier of the resource.
-  var path_574141 = newJObject()
-  var query_574143 = newJObject()
-  add(query_574143, "api-version", newJString(apiVersion))
-  add(path_574141, "resourceId", newJString(resourceId))
-  result = call_574140.call(path_574141, query_574143, nil, nil, nil)
+  var path_564041 = newJObject()
+  var query_564043 = newJObject()
+  add(query_564043, "api-version", newJString(apiVersion))
+  add(path_564041, "resourceId", newJString(resourceId))
+  result = call_564040.call(path_564041, query_564043, nil, nil, nil)
 
-var deviceSecurityGroupsList* = Call_DeviceSecurityGroupsList_573879(
+var deviceSecurityGroupsList* = Call_DeviceSecurityGroupsList_563777(
     name: "deviceSecurityGroupsList", meth: HttpMethod.HttpGet,
     host: "management.azure.com",
     route: "/{resourceId}/providers/Microsoft.Security/deviceSecurityGroups",
-    validator: validate_DeviceSecurityGroupsList_573880, base: "",
-    url: url_DeviceSecurityGroupsList_573881, schemes: {Scheme.Https})
+    validator: validate_DeviceSecurityGroupsList_563778, base: "",
+    url: url_DeviceSecurityGroupsList_563779, schemes: {Scheme.Https})
 type
-  Call_DeviceSecurityGroupsCreateOrUpdate_574201 = ref object of OpenApiRestCall_573657
-proc url_DeviceSecurityGroupsCreateOrUpdate_574203(protocol: Scheme; host: string;
+  Call_DeviceSecurityGroupsCreateOrUpdate_564101 = ref object of OpenApiRestCall_563555
+proc url_DeviceSecurityGroupsCreateOrUpdate_564103(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -212,30 +216,29 @@ proc url_DeviceSecurityGroupsCreateOrUpdate_574203(protocol: Scheme; host: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DeviceSecurityGroupsCreateOrUpdate_574202(path: JsonNode;
+proc validate_DeviceSecurityGroupsCreateOrUpdate_564102(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Use this method to creates or updates the device security group on a specified IoT Hub resource.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceId: JString (required)
-  ##             : The identifier of the resource.
   ##   deviceSecurityGroupName: JString (required)
   ##                          : The name of the device security group. Note that the name of the device security group is case insensitive.
+  ##   resourceId: JString (required)
+  ##             : The identifier of the resource.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceId` field"
-  var valid_574204 = path.getOrDefault("resourceId")
-  valid_574204 = validateParameter(valid_574204, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `deviceSecurityGroupName` field"
+  var valid_564104 = path.getOrDefault("deviceSecurityGroupName")
+  valid_564104 = validateParameter(valid_564104, JString, required = true,
                                  default = nil)
-  if valid_574204 != nil:
-    section.add "resourceId", valid_574204
-  var valid_574205 = path.getOrDefault("deviceSecurityGroupName")
-  valid_574205 = validateParameter(valid_574205, JString, required = true,
+  if valid_564104 != nil:
+    section.add "deviceSecurityGroupName", valid_564104
+  var valid_564105 = path.getOrDefault("resourceId")
+  valid_564105 = validateParameter(valid_564105, JString, required = true,
                                  default = nil)
-  if valid_574205 != nil:
-    section.add "deviceSecurityGroupName", valid_574205
+  if valid_564105 != nil:
+    section.add "resourceId", valid_564105
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -243,11 +246,11 @@ proc validate_DeviceSecurityGroupsCreateOrUpdate_574202(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574206 = query.getOrDefault("api-version")
-  valid_574206 = validateParameter(valid_574206, JString, required = true,
+  var valid_564106 = query.getOrDefault("api-version")
+  valid_564106 = validateParameter(valid_564106, JString, required = true,
                                  default = nil)
-  if valid_574206 != nil:
-    section.add "api-version", valid_574206
+  if valid_564106 != nil:
+    section.add "api-version", valid_564106
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -261,51 +264,51 @@ proc validate_DeviceSecurityGroupsCreateOrUpdate_574202(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574208: Call_DeviceSecurityGroupsCreateOrUpdate_574201;
+proc call*(call_564108: Call_DeviceSecurityGroupsCreateOrUpdate_564101;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Use this method to creates or updates the device security group on a specified IoT Hub resource.
   ## 
-  let valid = call_574208.validator(path, query, header, formData, body)
-  let scheme = call_574208.pickScheme
+  let valid = call_564108.validator(path, query, header, formData, body)
+  let scheme = call_564108.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574208.url(scheme.get, call_574208.host, call_574208.base,
-                         call_574208.route, valid.getOrDefault("path"),
+  let url = call_564108.url(scheme.get, call_564108.host, call_564108.base,
+                         call_564108.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574208, url, valid)
+  result = hook(call_564108, url, valid)
 
-proc call*(call_574209: Call_DeviceSecurityGroupsCreateOrUpdate_574201;
-          apiVersion: string; deviceSecurityGroup: JsonNode; resourceId: string;
-          deviceSecurityGroupName: string): Recallable =
+proc call*(call_564109: Call_DeviceSecurityGroupsCreateOrUpdate_564101;
+          deviceSecurityGroupName: string; apiVersion: string;
+          deviceSecurityGroup: JsonNode; resourceId: string): Recallable =
   ## deviceSecurityGroupsCreateOrUpdate
   ## Use this method to creates or updates the device security group on a specified IoT Hub resource.
+  ##   deviceSecurityGroupName: string (required)
+  ##                          : The name of the device security group. Note that the name of the device security group is case insensitive.
   ##   apiVersion: string (required)
   ##             : API version for the operation
   ##   deviceSecurityGroup: JObject (required)
   ##                      : Security group object.
   ##   resourceId: string (required)
   ##             : The identifier of the resource.
-  ##   deviceSecurityGroupName: string (required)
-  ##                          : The name of the device security group. Note that the name of the device security group is case insensitive.
-  var path_574210 = newJObject()
-  var query_574211 = newJObject()
-  var body_574212 = newJObject()
-  add(query_574211, "api-version", newJString(apiVersion))
+  var path_564110 = newJObject()
+  var query_564111 = newJObject()
+  var body_564112 = newJObject()
+  add(path_564110, "deviceSecurityGroupName", newJString(deviceSecurityGroupName))
+  add(query_564111, "api-version", newJString(apiVersion))
   if deviceSecurityGroup != nil:
-    body_574212 = deviceSecurityGroup
-  add(path_574210, "resourceId", newJString(resourceId))
-  add(path_574210, "deviceSecurityGroupName", newJString(deviceSecurityGroupName))
-  result = call_574209.call(path_574210, query_574211, nil, nil, body_574212)
+    body_564112 = deviceSecurityGroup
+  add(path_564110, "resourceId", newJString(resourceId))
+  result = call_564109.call(path_564110, query_564111, nil, nil, body_564112)
 
-var deviceSecurityGroupsCreateOrUpdate* = Call_DeviceSecurityGroupsCreateOrUpdate_574201(
+var deviceSecurityGroupsCreateOrUpdate* = Call_DeviceSecurityGroupsCreateOrUpdate_564101(
     name: "deviceSecurityGroupsCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/{resourceId}/providers/Microsoft.Security/deviceSecurityGroups/{deviceSecurityGroupName}",
-    validator: validate_DeviceSecurityGroupsCreateOrUpdate_574202, base: "",
-    url: url_DeviceSecurityGroupsCreateOrUpdate_574203, schemes: {Scheme.Https})
+    validator: validate_DeviceSecurityGroupsCreateOrUpdate_564102, base: "",
+    url: url_DeviceSecurityGroupsCreateOrUpdate_564103, schemes: {Scheme.Https})
 type
-  Call_DeviceSecurityGroupsGet_574182 = ref object of OpenApiRestCall_573657
-proc url_DeviceSecurityGroupsGet_574184(protocol: Scheme; host: string; base: string;
+  Call_DeviceSecurityGroupsGet_564082 = ref object of OpenApiRestCall_563555
+proc url_DeviceSecurityGroupsGet_564084(protocol: Scheme; host: string; base: string;
                                        route: string; path: JsonNode;
                                        query: JsonNode): Uri =
   result.scheme = $protocol
@@ -325,30 +328,29 @@ proc url_DeviceSecurityGroupsGet_574184(protocol: Scheme; host: string; base: st
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DeviceSecurityGroupsGet_574183(path: JsonNode; query: JsonNode;
+proc validate_DeviceSecurityGroupsGet_564083(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Use this method to get the device security group for the specified IoT Hub resource.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceId: JString (required)
-  ##             : The identifier of the resource.
   ##   deviceSecurityGroupName: JString (required)
   ##                          : The name of the device security group. Note that the name of the device security group is case insensitive.
+  ##   resourceId: JString (required)
+  ##             : The identifier of the resource.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceId` field"
-  var valid_574194 = path.getOrDefault("resourceId")
-  valid_574194 = validateParameter(valid_574194, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `deviceSecurityGroupName` field"
+  var valid_564094 = path.getOrDefault("deviceSecurityGroupName")
+  valid_564094 = validateParameter(valid_564094, JString, required = true,
                                  default = nil)
-  if valid_574194 != nil:
-    section.add "resourceId", valid_574194
-  var valid_574195 = path.getOrDefault("deviceSecurityGroupName")
-  valid_574195 = validateParameter(valid_574195, JString, required = true,
+  if valid_564094 != nil:
+    section.add "deviceSecurityGroupName", valid_564094
+  var valid_564095 = path.getOrDefault("resourceId")
+  valid_564095 = validateParameter(valid_564095, JString, required = true,
                                  default = nil)
-  if valid_574195 != nil:
-    section.add "deviceSecurityGroupName", valid_574195
+  if valid_564095 != nil:
+    section.add "resourceId", valid_564095
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -356,11 +358,11 @@ proc validate_DeviceSecurityGroupsGet_574183(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574196 = query.getOrDefault("api-version")
-  valid_574196 = validateParameter(valid_574196, JString, required = true,
+  var valid_564096 = query.getOrDefault("api-version")
+  valid_564096 = validateParameter(valid_564096, JString, required = true,
                                  default = nil)
-  if valid_574196 != nil:
-    section.add "api-version", valid_574196
+  if valid_564096 != nil:
+    section.add "api-version", valid_564096
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -369,44 +371,44 @@ proc validate_DeviceSecurityGroupsGet_574183(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574197: Call_DeviceSecurityGroupsGet_574182; path: JsonNode;
+proc call*(call_564097: Call_DeviceSecurityGroupsGet_564082; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Use this method to get the device security group for the specified IoT Hub resource.
   ## 
-  let valid = call_574197.validator(path, query, header, formData, body)
-  let scheme = call_574197.pickScheme
+  let valid = call_564097.validator(path, query, header, formData, body)
+  let scheme = call_564097.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574197.url(scheme.get, call_574197.host, call_574197.base,
-                         call_574197.route, valid.getOrDefault("path"),
+  let url = call_564097.url(scheme.get, call_564097.host, call_564097.base,
+                         call_564097.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574197, url, valid)
+  result = hook(call_564097, url, valid)
 
-proc call*(call_574198: Call_DeviceSecurityGroupsGet_574182; apiVersion: string;
-          resourceId: string; deviceSecurityGroupName: string): Recallable =
+proc call*(call_564098: Call_DeviceSecurityGroupsGet_564082;
+          deviceSecurityGroupName: string; apiVersion: string; resourceId: string): Recallable =
   ## deviceSecurityGroupsGet
   ## Use this method to get the device security group for the specified IoT Hub resource.
+  ##   deviceSecurityGroupName: string (required)
+  ##                          : The name of the device security group. Note that the name of the device security group is case insensitive.
   ##   apiVersion: string (required)
   ##             : API version for the operation
   ##   resourceId: string (required)
   ##             : The identifier of the resource.
-  ##   deviceSecurityGroupName: string (required)
-  ##                          : The name of the device security group. Note that the name of the device security group is case insensitive.
-  var path_574199 = newJObject()
-  var query_574200 = newJObject()
-  add(query_574200, "api-version", newJString(apiVersion))
-  add(path_574199, "resourceId", newJString(resourceId))
-  add(path_574199, "deviceSecurityGroupName", newJString(deviceSecurityGroupName))
-  result = call_574198.call(path_574199, query_574200, nil, nil, nil)
+  var path_564099 = newJObject()
+  var query_564100 = newJObject()
+  add(path_564099, "deviceSecurityGroupName", newJString(deviceSecurityGroupName))
+  add(query_564100, "api-version", newJString(apiVersion))
+  add(path_564099, "resourceId", newJString(resourceId))
+  result = call_564098.call(path_564099, query_564100, nil, nil, nil)
 
-var deviceSecurityGroupsGet* = Call_DeviceSecurityGroupsGet_574182(
+var deviceSecurityGroupsGet* = Call_DeviceSecurityGroupsGet_564082(
     name: "deviceSecurityGroupsGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/{resourceId}/providers/Microsoft.Security/deviceSecurityGroups/{deviceSecurityGroupName}",
-    validator: validate_DeviceSecurityGroupsGet_574183, base: "",
-    url: url_DeviceSecurityGroupsGet_574184, schemes: {Scheme.Https})
+    validator: validate_DeviceSecurityGroupsGet_564083, base: "",
+    url: url_DeviceSecurityGroupsGet_564084, schemes: {Scheme.Https})
 type
-  Call_DeviceSecurityGroupsDelete_574213 = ref object of OpenApiRestCall_573657
-proc url_DeviceSecurityGroupsDelete_574215(protocol: Scheme; host: string;
+  Call_DeviceSecurityGroupsDelete_564113 = ref object of OpenApiRestCall_563555
+proc url_DeviceSecurityGroupsDelete_564115(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -425,30 +427,29 @@ proc url_DeviceSecurityGroupsDelete_574215(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DeviceSecurityGroupsDelete_574214(path: JsonNode; query: JsonNode;
+proc validate_DeviceSecurityGroupsDelete_564114(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## User this method to deletes the device security group.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceId: JString (required)
-  ##             : The identifier of the resource.
   ##   deviceSecurityGroupName: JString (required)
   ##                          : The name of the device security group. Note that the name of the device security group is case insensitive.
+  ##   resourceId: JString (required)
+  ##             : The identifier of the resource.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceId` field"
-  var valid_574216 = path.getOrDefault("resourceId")
-  valid_574216 = validateParameter(valid_574216, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `deviceSecurityGroupName` field"
+  var valid_564116 = path.getOrDefault("deviceSecurityGroupName")
+  valid_564116 = validateParameter(valid_564116, JString, required = true,
                                  default = nil)
-  if valid_574216 != nil:
-    section.add "resourceId", valid_574216
-  var valid_574217 = path.getOrDefault("deviceSecurityGroupName")
-  valid_574217 = validateParameter(valid_574217, JString, required = true,
+  if valid_564116 != nil:
+    section.add "deviceSecurityGroupName", valid_564116
+  var valid_564117 = path.getOrDefault("resourceId")
+  valid_564117 = validateParameter(valid_564117, JString, required = true,
                                  default = nil)
-  if valid_574217 != nil:
-    section.add "deviceSecurityGroupName", valid_574217
+  if valid_564117 != nil:
+    section.add "resourceId", valid_564117
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -456,11 +457,11 @@ proc validate_DeviceSecurityGroupsDelete_574214(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574218 = query.getOrDefault("api-version")
-  valid_574218 = validateParameter(valid_574218, JString, required = true,
+  var valid_564118 = query.getOrDefault("api-version")
+  valid_564118 = validateParameter(valid_564118, JString, required = true,
                                  default = nil)
-  if valid_574218 != nil:
-    section.add "api-version", valid_574218
+  if valid_564118 != nil:
+    section.add "api-version", valid_564118
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -469,41 +470,41 @@ proc validate_DeviceSecurityGroupsDelete_574214(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574219: Call_DeviceSecurityGroupsDelete_574213; path: JsonNode;
+proc call*(call_564119: Call_DeviceSecurityGroupsDelete_564113; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## User this method to deletes the device security group.
   ## 
-  let valid = call_574219.validator(path, query, header, formData, body)
-  let scheme = call_574219.pickScheme
+  let valid = call_564119.validator(path, query, header, formData, body)
+  let scheme = call_564119.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574219.url(scheme.get, call_574219.host, call_574219.base,
-                         call_574219.route, valid.getOrDefault("path"),
+  let url = call_564119.url(scheme.get, call_564119.host, call_564119.base,
+                         call_564119.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574219, url, valid)
+  result = hook(call_564119, url, valid)
 
-proc call*(call_574220: Call_DeviceSecurityGroupsDelete_574213; apiVersion: string;
-          resourceId: string; deviceSecurityGroupName: string): Recallable =
+proc call*(call_564120: Call_DeviceSecurityGroupsDelete_564113;
+          deviceSecurityGroupName: string; apiVersion: string; resourceId: string): Recallable =
   ## deviceSecurityGroupsDelete
   ## User this method to deletes the device security group.
+  ##   deviceSecurityGroupName: string (required)
+  ##                          : The name of the device security group. Note that the name of the device security group is case insensitive.
   ##   apiVersion: string (required)
   ##             : API version for the operation
   ##   resourceId: string (required)
   ##             : The identifier of the resource.
-  ##   deviceSecurityGroupName: string (required)
-  ##                          : The name of the device security group. Note that the name of the device security group is case insensitive.
-  var path_574221 = newJObject()
-  var query_574222 = newJObject()
-  add(query_574222, "api-version", newJString(apiVersion))
-  add(path_574221, "resourceId", newJString(resourceId))
-  add(path_574221, "deviceSecurityGroupName", newJString(deviceSecurityGroupName))
-  result = call_574220.call(path_574221, query_574222, nil, nil, nil)
+  var path_564121 = newJObject()
+  var query_564122 = newJObject()
+  add(path_564121, "deviceSecurityGroupName", newJString(deviceSecurityGroupName))
+  add(query_564122, "api-version", newJString(apiVersion))
+  add(path_564121, "resourceId", newJString(resourceId))
+  result = call_564120.call(path_564121, query_564122, nil, nil, nil)
 
-var deviceSecurityGroupsDelete* = Call_DeviceSecurityGroupsDelete_574213(
+var deviceSecurityGroupsDelete* = Call_DeviceSecurityGroupsDelete_564113(
     name: "deviceSecurityGroupsDelete", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/{resourceId}/providers/Microsoft.Security/deviceSecurityGroups/{deviceSecurityGroupName}",
-    validator: validate_DeviceSecurityGroupsDelete_574214, base: "",
-    url: url_DeviceSecurityGroupsDelete_574215, schemes: {Scheme.Https})
+    validator: validate_DeviceSecurityGroupsDelete_564114, base: "",
+    url: url_DeviceSecurityGroupsDelete_564115, schemes: {Scheme.Https})
 export
   rest
 

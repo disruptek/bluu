@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, httpcore
 
 ## auto-generated via openapi macro
 ## title: Azure ML Web Services Management Client
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_567658 = ref object of OpenApiRestCall
+  OpenApiRestCall_563556 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_567658](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563556](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_567658): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563556): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,15 +107,15 @@ const
   macServiceName = "machinelearning-webservices"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_OperationsList_567880 = ref object of OpenApiRestCall_567658
-proc url_OperationsList_567882(protocol: Scheme; host: string; base: string;
+  Call_OperationsList_563778 = ref object of OpenApiRestCall_563556
+proc url_OperationsList_563780(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_OperationsList_567881(path: JsonNode; query: JsonNode;
+proc validate_OperationsList_563779(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## Lists all the available REST API operations.
@@ -126,11 +130,11 @@ proc validate_OperationsList_567881(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568041 = query.getOrDefault("api-version")
-  valid_568041 = validateParameter(valid_568041, JString, required = true,
+  var valid_563941 = query.getOrDefault("api-version")
+  valid_563941 = validateParameter(valid_563941, JString, required = true,
                                  default = nil)
-  if valid_568041 != nil:
-    section.add "api-version", valid_568041
+  if valid_563941 != nil:
+    section.add "api-version", valid_563941
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -139,36 +143,36 @@ proc validate_OperationsList_567881(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568064: Call_OperationsList_567880; path: JsonNode; query: JsonNode;
+proc call*(call_563964: Call_OperationsList_563778; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists all the available REST API operations.
   ## 
-  let valid = call_568064.validator(path, query, header, formData, body)
-  let scheme = call_568064.pickScheme
+  let valid = call_563964.validator(path, query, header, formData, body)
+  let scheme = call_563964.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568064.url(scheme.get, call_568064.host, call_568064.base,
-                         call_568064.route, valid.getOrDefault("path"),
+  let url = call_563964.url(scheme.get, call_563964.host, call_563964.base,
+                         call_563964.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568064, url, valid)
+  result = hook(call_563964, url, valid)
 
-proc call*(call_568135: Call_OperationsList_567880; apiVersion: string): Recallable =
+proc call*(call_564035: Call_OperationsList_563778; apiVersion: string): Recallable =
   ## operationsList
   ## Lists all the available REST API operations.
   ##   apiVersion: string (required)
   ##             : The version of the Microsoft.MachineLearning resource provider API to use.
-  var query_568136 = newJObject()
-  add(query_568136, "api-version", newJString(apiVersion))
-  result = call_568135.call(nil, query_568136, nil, nil, nil)
+  var query_564036 = newJObject()
+  add(query_564036, "api-version", newJString(apiVersion))
+  result = call_564035.call(nil, query_564036, nil, nil, nil)
 
-var operationsList* = Call_OperationsList_567880(name: "operationsList",
+var operationsList* = Call_OperationsList_563778(name: "operationsList",
     meth: HttpMethod.HttpGet, host: "management.azure.com",
     route: "/providers/Microsoft.MachineLearning/operations",
-    validator: validate_OperationsList_567881, base: "", url: url_OperationsList_567882,
+    validator: validate_OperationsList_563779, base: "", url: url_OperationsList_563780,
     schemes: {Scheme.Https})
 type
-  Call_WebServicesListBySubscriptionId_568176 = ref object of OpenApiRestCall_567658
-proc url_WebServicesListBySubscriptionId_568178(protocol: Scheme; host: string;
+  Call_WebServicesListBySubscriptionId_564076 = ref object of OpenApiRestCall_563556
+proc url_WebServicesListBySubscriptionId_564078(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -185,7 +189,7 @@ proc url_WebServicesListBySubscriptionId_568178(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_WebServicesListBySubscriptionId_568177(path: JsonNode;
+proc validate_WebServicesListBySubscriptionId_564077(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the web services in the specified subscription.
   ## 
@@ -197,11 +201,11 @@ proc validate_WebServicesListBySubscriptionId_568177(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_568194 = path.getOrDefault("subscriptionId")
-  valid_568194 = validateParameter(valid_568194, JString, required = true,
+  var valid_564094 = path.getOrDefault("subscriptionId")
+  valid_564094 = validateParameter(valid_564094, JString, required = true,
                                  default = nil)
-  if valid_568194 != nil:
-    section.add "subscriptionId", valid_568194
+  if valid_564094 != nil:
+    section.add "subscriptionId", valid_564094
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -211,16 +215,16 @@ proc validate_WebServicesListBySubscriptionId_568177(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568195 = query.getOrDefault("api-version")
-  valid_568195 = validateParameter(valid_568195, JString, required = true,
+  var valid_564095 = query.getOrDefault("api-version")
+  valid_564095 = validateParameter(valid_564095, JString, required = true,
                                  default = nil)
-  if valid_568195 != nil:
-    section.add "api-version", valid_568195
-  var valid_568196 = query.getOrDefault("$skiptoken")
-  valid_568196 = validateParameter(valid_568196, JString, required = false,
+  if valid_564095 != nil:
+    section.add "api-version", valid_564095
+  var valid_564096 = query.getOrDefault("$skiptoken")
+  valid_564096 = validateParameter(valid_564096, JString, required = false,
                                  default = nil)
-  if valid_568196 != nil:
-    section.add "$skiptoken", valid_568196
+  if valid_564096 != nil:
+    section.add "$skiptoken", valid_564096
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -229,21 +233,21 @@ proc validate_WebServicesListBySubscriptionId_568177(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568197: Call_WebServicesListBySubscriptionId_568176;
+proc call*(call_564097: Call_WebServicesListBySubscriptionId_564076;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Gets the web services in the specified subscription.
   ## 
-  let valid = call_568197.validator(path, query, header, formData, body)
-  let scheme = call_568197.pickScheme
+  let valid = call_564097.validator(path, query, header, formData, body)
+  let scheme = call_564097.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568197.url(scheme.get, call_568197.host, call_568197.base,
-                         call_568197.route, valid.getOrDefault("path"),
+  let url = call_564097.url(scheme.get, call_564097.host, call_564097.base,
+                         call_564097.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568197, url, valid)
+  result = hook(call_564097, url, valid)
 
-proc call*(call_568198: Call_WebServicesListBySubscriptionId_568176;
+proc call*(call_564098: Call_WebServicesListBySubscriptionId_564076;
           apiVersion: string; subscriptionId: string; Skiptoken: string = ""): Recallable =
   ## webServicesListBySubscriptionId
   ## Gets the web services in the specified subscription.
@@ -253,21 +257,21 @@ proc call*(call_568198: Call_WebServicesListBySubscriptionId_568176;
   ##                 : The Azure subscription ID.
   ##   Skiptoken: string
   ##            : Continuation token for pagination.
-  var path_568199 = newJObject()
-  var query_568200 = newJObject()
-  add(query_568200, "api-version", newJString(apiVersion))
-  add(path_568199, "subscriptionId", newJString(subscriptionId))
-  add(query_568200, "$skiptoken", newJString(Skiptoken))
-  result = call_568198.call(path_568199, query_568200, nil, nil, nil)
+  var path_564099 = newJObject()
+  var query_564100 = newJObject()
+  add(query_564100, "api-version", newJString(apiVersion))
+  add(path_564099, "subscriptionId", newJString(subscriptionId))
+  add(query_564100, "$skiptoken", newJString(Skiptoken))
+  result = call_564098.call(path_564099, query_564100, nil, nil, nil)
 
-var webServicesListBySubscriptionId* = Call_WebServicesListBySubscriptionId_568176(
+var webServicesListBySubscriptionId* = Call_WebServicesListBySubscriptionId_564076(
     name: "webServicesListBySubscriptionId", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.MachineLearning/webServices",
-    validator: validate_WebServicesListBySubscriptionId_568177, base: "",
-    url: url_WebServicesListBySubscriptionId_568178, schemes: {Scheme.Https})
+    validator: validate_WebServicesListBySubscriptionId_564077, base: "",
+    url: url_WebServicesListBySubscriptionId_564078, schemes: {Scheme.Https})
 type
-  Call_WebServicesListByResourceGroup_568201 = ref object of OpenApiRestCall_567658
-proc url_WebServicesListByResourceGroup_568203(protocol: Scheme; host: string;
+  Call_WebServicesListByResourceGroup_564101 = ref object of OpenApiRestCall_563556
+proc url_WebServicesListByResourceGroup_564103(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -288,30 +292,30 @@ proc url_WebServicesListByResourceGroup_568203(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_WebServicesListByResourceGroup_568202(path: JsonNode;
+proc validate_WebServicesListByResourceGroup_564102(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the web services in the specified resource group.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : Name of the resource group in which the web service is located.
   ##   subscriptionId: JString (required)
   ##                 : The Azure subscription ID.
+  ##   resourceGroupName: JString (required)
+  ##                    : Name of the resource group in which the web service is located.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568204 = path.getOrDefault("resourceGroupName")
-  valid_568204 = validateParameter(valid_568204, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564104 = path.getOrDefault("subscriptionId")
+  valid_564104 = validateParameter(valid_564104, JString, required = true,
                                  default = nil)
-  if valid_568204 != nil:
-    section.add "resourceGroupName", valid_568204
-  var valid_568205 = path.getOrDefault("subscriptionId")
-  valid_568205 = validateParameter(valid_568205, JString, required = true,
+  if valid_564104 != nil:
+    section.add "subscriptionId", valid_564104
+  var valid_564105 = path.getOrDefault("resourceGroupName")
+  valid_564105 = validateParameter(valid_564105, JString, required = true,
                                  default = nil)
-  if valid_568205 != nil:
-    section.add "subscriptionId", valid_568205
+  if valid_564105 != nil:
+    section.add "resourceGroupName", valid_564105
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -321,16 +325,16 @@ proc validate_WebServicesListByResourceGroup_568202(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568206 = query.getOrDefault("api-version")
-  valid_568206 = validateParameter(valid_568206, JString, required = true,
+  var valid_564106 = query.getOrDefault("api-version")
+  valid_564106 = validateParameter(valid_564106, JString, required = true,
                                  default = nil)
-  if valid_568206 != nil:
-    section.add "api-version", valid_568206
-  var valid_568207 = query.getOrDefault("$skiptoken")
-  valid_568207 = validateParameter(valid_568207, JString, required = false,
+  if valid_564106 != nil:
+    section.add "api-version", valid_564106
+  var valid_564107 = query.getOrDefault("$skiptoken")
+  valid_564107 = validateParameter(valid_564107, JString, required = false,
                                  default = nil)
-  if valid_568207 != nil:
-    section.add "$skiptoken", valid_568207
+  if valid_564107 != nil:
+    section.add "$skiptoken", valid_564107
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -339,48 +343,48 @@ proc validate_WebServicesListByResourceGroup_568202(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568208: Call_WebServicesListByResourceGroup_568201; path: JsonNode;
+proc call*(call_564108: Call_WebServicesListByResourceGroup_564101; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the web services in the specified resource group.
   ## 
-  let valid = call_568208.validator(path, query, header, formData, body)
-  let scheme = call_568208.pickScheme
+  let valid = call_564108.validator(path, query, header, formData, body)
+  let scheme = call_564108.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568208.url(scheme.get, call_568208.host, call_568208.base,
-                         call_568208.route, valid.getOrDefault("path"),
+  let url = call_564108.url(scheme.get, call_564108.host, call_564108.base,
+                         call_564108.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568208, url, valid)
+  result = hook(call_564108, url, valid)
 
-proc call*(call_568209: Call_WebServicesListByResourceGroup_568201;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
+proc call*(call_564109: Call_WebServicesListByResourceGroup_564101;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string;
           Skiptoken: string = ""): Recallable =
   ## webServicesListByResourceGroup
   ## Gets the web services in the specified resource group.
-  ##   resourceGroupName: string (required)
-  ##                    : Name of the resource group in which the web service is located.
   ##   apiVersion: string (required)
   ##             : The version of the Microsoft.MachineLearning resource provider API to use.
   ##   subscriptionId: string (required)
   ##                 : The Azure subscription ID.
   ##   Skiptoken: string
   ##            : Continuation token for pagination.
-  var path_568210 = newJObject()
-  var query_568211 = newJObject()
-  add(path_568210, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568211, "api-version", newJString(apiVersion))
-  add(path_568210, "subscriptionId", newJString(subscriptionId))
-  add(query_568211, "$skiptoken", newJString(Skiptoken))
-  result = call_568209.call(path_568210, query_568211, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : Name of the resource group in which the web service is located.
+  var path_564110 = newJObject()
+  var query_564111 = newJObject()
+  add(query_564111, "api-version", newJString(apiVersion))
+  add(path_564110, "subscriptionId", newJString(subscriptionId))
+  add(query_564111, "$skiptoken", newJString(Skiptoken))
+  add(path_564110, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564109.call(path_564110, query_564111, nil, nil, nil)
 
-var webServicesListByResourceGroup* = Call_WebServicesListByResourceGroup_568201(
+var webServicesListByResourceGroup* = Call_WebServicesListByResourceGroup_564101(
     name: "webServicesListByResourceGroup", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.MachineLearning/webServices",
-    validator: validate_WebServicesListByResourceGroup_568202, base: "",
-    url: url_WebServicesListByResourceGroup_568203, schemes: {Scheme.Https})
+    validator: validate_WebServicesListByResourceGroup_564102, base: "",
+    url: url_WebServicesListByResourceGroup_564103, schemes: {Scheme.Https})
 type
-  Call_WebServicesCreateOrUpdate_568224 = ref object of OpenApiRestCall_567658
-proc url_WebServicesCreateOrUpdate_568226(protocol: Scheme; host: string;
+  Call_WebServicesCreateOrUpdate_564124 = ref object of OpenApiRestCall_563556
+proc url_WebServicesCreateOrUpdate_564126(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -403,37 +407,37 @@ proc url_WebServicesCreateOrUpdate_568226(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_WebServicesCreateOrUpdate_568225(path: JsonNode; query: JsonNode;
+proc validate_WebServicesCreateOrUpdate_564125(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Create or update a web service. This call will overwrite an existing web service. Note that there is no warning or confirmation. This is a nonrecoverable operation. If your intent is to create a new web service, call the Get operation first to verify that it does not exist.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : Name of the resource group in which the web service is located.
-  ##   subscriptionId: JString (required)
-  ##                 : The Azure subscription ID.
   ##   webServiceName: JString (required)
   ##                 : The name of the web service.
+  ##   subscriptionId: JString (required)
+  ##                 : The Azure subscription ID.
+  ##   resourceGroupName: JString (required)
+  ##                    : Name of the resource group in which the web service is located.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568227 = path.getOrDefault("resourceGroupName")
-  valid_568227 = validateParameter(valid_568227, JString, required = true,
+        "path argument is necessary due to required `webServiceName` field"
+  var valid_564127 = path.getOrDefault("webServiceName")
+  valid_564127 = validateParameter(valid_564127, JString, required = true,
                                  default = nil)
-  if valid_568227 != nil:
-    section.add "resourceGroupName", valid_568227
-  var valid_568228 = path.getOrDefault("subscriptionId")
-  valid_568228 = validateParameter(valid_568228, JString, required = true,
+  if valid_564127 != nil:
+    section.add "webServiceName", valid_564127
+  var valid_564128 = path.getOrDefault("subscriptionId")
+  valid_564128 = validateParameter(valid_564128, JString, required = true,
                                  default = nil)
-  if valid_568228 != nil:
-    section.add "subscriptionId", valid_568228
-  var valid_568229 = path.getOrDefault("webServiceName")
-  valid_568229 = validateParameter(valid_568229, JString, required = true,
+  if valid_564128 != nil:
+    section.add "subscriptionId", valid_564128
+  var valid_564129 = path.getOrDefault("resourceGroupName")
+  valid_564129 = validateParameter(valid_564129, JString, required = true,
                                  default = nil)
-  if valid_568229 != nil:
-    section.add "webServiceName", valid_568229
+  if valid_564129 != nil:
+    section.add "resourceGroupName", valid_564129
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -441,11 +445,11 @@ proc validate_WebServicesCreateOrUpdate_568225(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568230 = query.getOrDefault("api-version")
-  valid_568230 = validateParameter(valid_568230, JString, required = true,
+  var valid_564130 = query.getOrDefault("api-version")
+  valid_564130 = validateParameter(valid_564130, JString, required = true,
                                  default = nil)
-  if valid_568230 != nil:
-    section.add "api-version", valid_568230
+  if valid_564130 != nil:
+    section.add "api-version", valid_564130
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -459,53 +463,53 @@ proc validate_WebServicesCreateOrUpdate_568225(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568232: Call_WebServicesCreateOrUpdate_568224; path: JsonNode;
+proc call*(call_564132: Call_WebServicesCreateOrUpdate_564124; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Create or update a web service. This call will overwrite an existing web service. Note that there is no warning or confirmation. This is a nonrecoverable operation. If your intent is to create a new web service, call the Get operation first to verify that it does not exist.
   ## 
-  let valid = call_568232.validator(path, query, header, formData, body)
-  let scheme = call_568232.pickScheme
+  let valid = call_564132.validator(path, query, header, formData, body)
+  let scheme = call_564132.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568232.url(scheme.get, call_568232.host, call_568232.base,
-                         call_568232.route, valid.getOrDefault("path"),
+  let url = call_564132.url(scheme.get, call_564132.host, call_564132.base,
+                         call_564132.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568232, url, valid)
+  result = hook(call_564132, url, valid)
 
-proc call*(call_568233: Call_WebServicesCreateOrUpdate_568224;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          webServiceName: string; createOrUpdatePayload: JsonNode): Recallable =
+proc call*(call_564133: Call_WebServicesCreateOrUpdate_564124;
+          webServiceName: string; apiVersion: string; subscriptionId: string;
+          resourceGroupName: string; createOrUpdatePayload: JsonNode): Recallable =
   ## webServicesCreateOrUpdate
   ## Create or update a web service. This call will overwrite an existing web service. Note that there is no warning or confirmation. This is a nonrecoverable operation. If your intent is to create a new web service, call the Get operation first to verify that it does not exist.
-  ##   resourceGroupName: string (required)
-  ##                    : Name of the resource group in which the web service is located.
+  ##   webServiceName: string (required)
+  ##                 : The name of the web service.
   ##   apiVersion: string (required)
   ##             : The version of the Microsoft.MachineLearning resource provider API to use.
   ##   subscriptionId: string (required)
   ##                 : The Azure subscription ID.
-  ##   webServiceName: string (required)
-  ##                 : The name of the web service.
+  ##   resourceGroupName: string (required)
+  ##                    : Name of the resource group in which the web service is located.
   ##   createOrUpdatePayload: JObject (required)
   ##                        : The payload that is used to create or update the web service.
-  var path_568234 = newJObject()
-  var query_568235 = newJObject()
-  var body_568236 = newJObject()
-  add(path_568234, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568235, "api-version", newJString(apiVersion))
-  add(path_568234, "subscriptionId", newJString(subscriptionId))
-  add(path_568234, "webServiceName", newJString(webServiceName))
+  var path_564134 = newJObject()
+  var query_564135 = newJObject()
+  var body_564136 = newJObject()
+  add(path_564134, "webServiceName", newJString(webServiceName))
+  add(query_564135, "api-version", newJString(apiVersion))
+  add(path_564134, "subscriptionId", newJString(subscriptionId))
+  add(path_564134, "resourceGroupName", newJString(resourceGroupName))
   if createOrUpdatePayload != nil:
-    body_568236 = createOrUpdatePayload
-  result = call_568233.call(path_568234, query_568235, nil, nil, body_568236)
+    body_564136 = createOrUpdatePayload
+  result = call_564133.call(path_564134, query_564135, nil, nil, body_564136)
 
-var webServicesCreateOrUpdate* = Call_WebServicesCreateOrUpdate_568224(
+var webServicesCreateOrUpdate* = Call_WebServicesCreateOrUpdate_564124(
     name: "webServicesCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.MachineLearning/webServices/{webServiceName}",
-    validator: validate_WebServicesCreateOrUpdate_568225, base: "",
-    url: url_WebServicesCreateOrUpdate_568226, schemes: {Scheme.Https})
+    validator: validate_WebServicesCreateOrUpdate_564125, base: "",
+    url: url_WebServicesCreateOrUpdate_564126, schemes: {Scheme.Https})
 type
-  Call_WebServicesGet_568212 = ref object of OpenApiRestCall_567658
-proc url_WebServicesGet_568214(protocol: Scheme; host: string; base: string;
+  Call_WebServicesGet_564112 = ref object of OpenApiRestCall_563556
+proc url_WebServicesGet_564114(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -528,7 +532,7 @@ proc url_WebServicesGet_568214(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_WebServicesGet_568213(path: JsonNode; query: JsonNode;
+proc validate_WebServicesGet_564113(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## Gets the Web Service Definition as specified by a subscription, resource group, and name. Note that the storage credentials and web service keys are not returned by this call. To get the web service access keys, call List Keys.
@@ -536,49 +540,49 @@ proc validate_WebServicesGet_568213(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : Name of the resource group in which the web service is located.
-  ##   subscriptionId: JString (required)
-  ##                 : The Azure subscription ID.
   ##   webServiceName: JString (required)
   ##                 : The name of the web service.
+  ##   subscriptionId: JString (required)
+  ##                 : The Azure subscription ID.
+  ##   resourceGroupName: JString (required)
+  ##                    : Name of the resource group in which the web service is located.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568215 = path.getOrDefault("resourceGroupName")
-  valid_568215 = validateParameter(valid_568215, JString, required = true,
+        "path argument is necessary due to required `webServiceName` field"
+  var valid_564115 = path.getOrDefault("webServiceName")
+  valid_564115 = validateParameter(valid_564115, JString, required = true,
                                  default = nil)
-  if valid_568215 != nil:
-    section.add "resourceGroupName", valid_568215
-  var valid_568216 = path.getOrDefault("subscriptionId")
-  valid_568216 = validateParameter(valid_568216, JString, required = true,
+  if valid_564115 != nil:
+    section.add "webServiceName", valid_564115
+  var valid_564116 = path.getOrDefault("subscriptionId")
+  valid_564116 = validateParameter(valid_564116, JString, required = true,
                                  default = nil)
-  if valid_568216 != nil:
-    section.add "subscriptionId", valid_568216
-  var valid_568217 = path.getOrDefault("webServiceName")
-  valid_568217 = validateParameter(valid_568217, JString, required = true,
+  if valid_564116 != nil:
+    section.add "subscriptionId", valid_564116
+  var valid_564117 = path.getOrDefault("resourceGroupName")
+  valid_564117 = validateParameter(valid_564117, JString, required = true,
                                  default = nil)
-  if valid_568217 != nil:
-    section.add "webServiceName", valid_568217
+  if valid_564117 != nil:
+    section.add "resourceGroupName", valid_564117
   result.add "path", section
   ## parameters in `query` object:
-  ##   api-version: JString (required)
-  ##              : The version of the Microsoft.MachineLearning resource provider API to use.
   ##   region: JString
   ##         : The region for which encrypted credential parameters are valid.
+  ##   api-version: JString (required)
+  ##              : The version of the Microsoft.MachineLearning resource provider API to use.
   section = newJObject()
+  var valid_564118 = query.getOrDefault("region")
+  valid_564118 = validateParameter(valid_564118, JString, required = false,
+                                 default = nil)
+  if valid_564118 != nil:
+    section.add "region", valid_564118
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568218 = query.getOrDefault("api-version")
-  valid_568218 = validateParameter(valid_568218, JString, required = true,
+  var valid_564119 = query.getOrDefault("api-version")
+  valid_564119 = validateParameter(valid_564119, JString, required = true,
                                  default = nil)
-  if valid_568218 != nil:
-    section.add "api-version", valid_568218
-  var valid_568219 = query.getOrDefault("region")
-  valid_568219 = validateParameter(valid_568219, JString, required = false,
-                                 default = nil)
-  if valid_568219 != nil:
-    section.add "region", valid_568219
+  if valid_564119 != nil:
+    section.add "api-version", valid_564119
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -587,50 +591,50 @@ proc validate_WebServicesGet_568213(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568220: Call_WebServicesGet_568212; path: JsonNode; query: JsonNode;
+proc call*(call_564120: Call_WebServicesGet_564112; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the Web Service Definition as specified by a subscription, resource group, and name. Note that the storage credentials and web service keys are not returned by this call. To get the web service access keys, call List Keys.
   ## 
-  let valid = call_568220.validator(path, query, header, formData, body)
-  let scheme = call_568220.pickScheme
+  let valid = call_564120.validator(path, query, header, formData, body)
+  let scheme = call_564120.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568220.url(scheme.get, call_568220.host, call_568220.base,
-                         call_568220.route, valid.getOrDefault("path"),
+  let url = call_564120.url(scheme.get, call_564120.host, call_564120.base,
+                         call_564120.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568220, url, valid)
+  result = hook(call_564120, url, valid)
 
-proc call*(call_568221: Call_WebServicesGet_568212; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; webServiceName: string;
+proc call*(call_564121: Call_WebServicesGet_564112; webServiceName: string;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string;
           region: string = ""): Recallable =
   ## webServicesGet
   ## Gets the Web Service Definition as specified by a subscription, resource group, and name. Note that the storage credentials and web service keys are not returned by this call. To get the web service access keys, call List Keys.
-  ##   resourceGroupName: string (required)
-  ##                    : Name of the resource group in which the web service is located.
+  ##   region: string
+  ##         : The region for which encrypted credential parameters are valid.
+  ##   webServiceName: string (required)
+  ##                 : The name of the web service.
   ##   apiVersion: string (required)
   ##             : The version of the Microsoft.MachineLearning resource provider API to use.
   ##   subscriptionId: string (required)
   ##                 : The Azure subscription ID.
-  ##   webServiceName: string (required)
-  ##                 : The name of the web service.
-  ##   region: string
-  ##         : The region for which encrypted credential parameters are valid.
-  var path_568222 = newJObject()
-  var query_568223 = newJObject()
-  add(path_568222, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568223, "api-version", newJString(apiVersion))
-  add(path_568222, "subscriptionId", newJString(subscriptionId))
-  add(path_568222, "webServiceName", newJString(webServiceName))
-  add(query_568223, "region", newJString(region))
-  result = call_568221.call(path_568222, query_568223, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : Name of the resource group in which the web service is located.
+  var path_564122 = newJObject()
+  var query_564123 = newJObject()
+  add(query_564123, "region", newJString(region))
+  add(path_564122, "webServiceName", newJString(webServiceName))
+  add(query_564123, "api-version", newJString(apiVersion))
+  add(path_564122, "subscriptionId", newJString(subscriptionId))
+  add(path_564122, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564121.call(path_564122, query_564123, nil, nil, nil)
 
-var webServicesGet* = Call_WebServicesGet_568212(name: "webServicesGet",
+var webServicesGet* = Call_WebServicesGet_564112(name: "webServicesGet",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.MachineLearning/webServices/{webServiceName}",
-    validator: validate_WebServicesGet_568213, base: "", url: url_WebServicesGet_568214,
+    validator: validate_WebServicesGet_564113, base: "", url: url_WebServicesGet_564114,
     schemes: {Scheme.Https})
 type
-  Call_WebServicesPatch_568248 = ref object of OpenApiRestCall_567658
-proc url_WebServicesPatch_568250(protocol: Scheme; host: string; base: string;
+  Call_WebServicesPatch_564148 = ref object of OpenApiRestCall_563556
+proc url_WebServicesPatch_564150(protocol: Scheme; host: string; base: string;
                                 route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -653,7 +657,7 @@ proc url_WebServicesPatch_568250(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_WebServicesPatch_568249(path: JsonNode; query: JsonNode;
+proc validate_WebServicesPatch_564149(path: JsonNode; query: JsonNode;
                                      header: JsonNode; formData: JsonNode;
                                      body: JsonNode): JsonNode =
   ## Modifies an existing web service resource. The PATCH API call is an asynchronous operation. To determine whether it has completed successfully, you must perform a Get operation.
@@ -661,30 +665,30 @@ proc validate_WebServicesPatch_568249(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : Name of the resource group in which the web service is located.
-  ##   subscriptionId: JString (required)
-  ##                 : The Azure subscription ID.
   ##   webServiceName: JString (required)
   ##                 : The name of the web service.
+  ##   subscriptionId: JString (required)
+  ##                 : The Azure subscription ID.
+  ##   resourceGroupName: JString (required)
+  ##                    : Name of the resource group in which the web service is located.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568251 = path.getOrDefault("resourceGroupName")
-  valid_568251 = validateParameter(valid_568251, JString, required = true,
+        "path argument is necessary due to required `webServiceName` field"
+  var valid_564151 = path.getOrDefault("webServiceName")
+  valid_564151 = validateParameter(valid_564151, JString, required = true,
                                  default = nil)
-  if valid_568251 != nil:
-    section.add "resourceGroupName", valid_568251
-  var valid_568252 = path.getOrDefault("subscriptionId")
-  valid_568252 = validateParameter(valid_568252, JString, required = true,
+  if valid_564151 != nil:
+    section.add "webServiceName", valid_564151
+  var valid_564152 = path.getOrDefault("subscriptionId")
+  valid_564152 = validateParameter(valid_564152, JString, required = true,
                                  default = nil)
-  if valid_568252 != nil:
-    section.add "subscriptionId", valid_568252
-  var valid_568253 = path.getOrDefault("webServiceName")
-  valid_568253 = validateParameter(valid_568253, JString, required = true,
+  if valid_564152 != nil:
+    section.add "subscriptionId", valid_564152
+  var valid_564153 = path.getOrDefault("resourceGroupName")
+  valid_564153 = validateParameter(valid_564153, JString, required = true,
                                  default = nil)
-  if valid_568253 != nil:
-    section.add "webServiceName", valid_568253
+  if valid_564153 != nil:
+    section.add "resourceGroupName", valid_564153
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -692,11 +696,11 @@ proc validate_WebServicesPatch_568249(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568254 = query.getOrDefault("api-version")
-  valid_568254 = validateParameter(valid_568254, JString, required = true,
+  var valid_564154 = query.getOrDefault("api-version")
+  valid_564154 = validateParameter(valid_564154, JString, required = true,
                                  default = nil)
-  if valid_568254 != nil:
-    section.add "api-version", valid_568254
+  if valid_564154 != nil:
+    section.add "api-version", valid_564154
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -710,52 +714,52 @@ proc validate_WebServicesPatch_568249(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568256: Call_WebServicesPatch_568248; path: JsonNode;
+proc call*(call_564156: Call_WebServicesPatch_564148; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Modifies an existing web service resource. The PATCH API call is an asynchronous operation. To determine whether it has completed successfully, you must perform a Get operation.
   ## 
-  let valid = call_568256.validator(path, query, header, formData, body)
-  let scheme = call_568256.pickScheme
+  let valid = call_564156.validator(path, query, header, formData, body)
+  let scheme = call_564156.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568256.url(scheme.get, call_568256.host, call_568256.base,
-                         call_568256.route, valid.getOrDefault("path"),
+  let url = call_564156.url(scheme.get, call_564156.host, call_564156.base,
+                         call_564156.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568256, url, valid)
+  result = hook(call_564156, url, valid)
 
-proc call*(call_568257: Call_WebServicesPatch_568248; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; webServiceName: string;
+proc call*(call_564157: Call_WebServicesPatch_564148; webServiceName: string;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string;
           patchPayload: JsonNode): Recallable =
   ## webServicesPatch
   ## Modifies an existing web service resource. The PATCH API call is an asynchronous operation. To determine whether it has completed successfully, you must perform a Get operation.
-  ##   resourceGroupName: string (required)
-  ##                    : Name of the resource group in which the web service is located.
+  ##   webServiceName: string (required)
+  ##                 : The name of the web service.
   ##   apiVersion: string (required)
   ##             : The version of the Microsoft.MachineLearning resource provider API to use.
   ##   subscriptionId: string (required)
   ##                 : The Azure subscription ID.
-  ##   webServiceName: string (required)
-  ##                 : The name of the web service.
+  ##   resourceGroupName: string (required)
+  ##                    : Name of the resource group in which the web service is located.
   ##   patchPayload: JObject (required)
   ##               : The payload to use to patch the web service.
-  var path_568258 = newJObject()
-  var query_568259 = newJObject()
-  var body_568260 = newJObject()
-  add(path_568258, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568259, "api-version", newJString(apiVersion))
-  add(path_568258, "subscriptionId", newJString(subscriptionId))
-  add(path_568258, "webServiceName", newJString(webServiceName))
+  var path_564158 = newJObject()
+  var query_564159 = newJObject()
+  var body_564160 = newJObject()
+  add(path_564158, "webServiceName", newJString(webServiceName))
+  add(query_564159, "api-version", newJString(apiVersion))
+  add(path_564158, "subscriptionId", newJString(subscriptionId))
+  add(path_564158, "resourceGroupName", newJString(resourceGroupName))
   if patchPayload != nil:
-    body_568260 = patchPayload
-  result = call_568257.call(path_568258, query_568259, nil, nil, body_568260)
+    body_564160 = patchPayload
+  result = call_564157.call(path_564158, query_564159, nil, nil, body_564160)
 
-var webServicesPatch* = Call_WebServicesPatch_568248(name: "webServicesPatch",
+var webServicesPatch* = Call_WebServicesPatch_564148(name: "webServicesPatch",
     meth: HttpMethod.HttpPatch, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.MachineLearning/webServices/{webServiceName}",
-    validator: validate_WebServicesPatch_568249, base: "",
-    url: url_WebServicesPatch_568250, schemes: {Scheme.Https})
+    validator: validate_WebServicesPatch_564149, base: "",
+    url: url_WebServicesPatch_564150, schemes: {Scheme.Https})
 type
-  Call_WebServicesRemove_568237 = ref object of OpenApiRestCall_567658
-proc url_WebServicesRemove_568239(protocol: Scheme; host: string; base: string;
+  Call_WebServicesRemove_564137 = ref object of OpenApiRestCall_563556
+proc url_WebServicesRemove_564139(protocol: Scheme; host: string; base: string;
                                  route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -778,7 +782,7 @@ proc url_WebServicesRemove_568239(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_WebServicesRemove_568238(path: JsonNode; query: JsonNode;
+proc validate_WebServicesRemove_564138(path: JsonNode; query: JsonNode;
                                       header: JsonNode; formData: JsonNode;
                                       body: JsonNode): JsonNode =
   ## Deletes the specified web service.
@@ -786,30 +790,30 @@ proc validate_WebServicesRemove_568238(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : Name of the resource group in which the web service is located.
-  ##   subscriptionId: JString (required)
-  ##                 : The Azure subscription ID.
   ##   webServiceName: JString (required)
   ##                 : The name of the web service.
+  ##   subscriptionId: JString (required)
+  ##                 : The Azure subscription ID.
+  ##   resourceGroupName: JString (required)
+  ##                    : Name of the resource group in which the web service is located.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568240 = path.getOrDefault("resourceGroupName")
-  valid_568240 = validateParameter(valid_568240, JString, required = true,
+        "path argument is necessary due to required `webServiceName` field"
+  var valid_564140 = path.getOrDefault("webServiceName")
+  valid_564140 = validateParameter(valid_564140, JString, required = true,
                                  default = nil)
-  if valid_568240 != nil:
-    section.add "resourceGroupName", valid_568240
-  var valid_568241 = path.getOrDefault("subscriptionId")
-  valid_568241 = validateParameter(valid_568241, JString, required = true,
+  if valid_564140 != nil:
+    section.add "webServiceName", valid_564140
+  var valid_564141 = path.getOrDefault("subscriptionId")
+  valid_564141 = validateParameter(valid_564141, JString, required = true,
                                  default = nil)
-  if valid_568241 != nil:
-    section.add "subscriptionId", valid_568241
-  var valid_568242 = path.getOrDefault("webServiceName")
-  valid_568242 = validateParameter(valid_568242, JString, required = true,
+  if valid_564141 != nil:
+    section.add "subscriptionId", valid_564141
+  var valid_564142 = path.getOrDefault("resourceGroupName")
+  valid_564142 = validateParameter(valid_564142, JString, required = true,
                                  default = nil)
-  if valid_568242 != nil:
-    section.add "webServiceName", valid_568242
+  if valid_564142 != nil:
+    section.add "resourceGroupName", valid_564142
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -817,11 +821,11 @@ proc validate_WebServicesRemove_568238(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568243 = query.getOrDefault("api-version")
-  valid_568243 = validateParameter(valid_568243, JString, required = true,
+  var valid_564143 = query.getOrDefault("api-version")
+  valid_564143 = validateParameter(valid_564143, JString, required = true,
                                  default = nil)
-  if valid_568243 != nil:
-    section.add "api-version", valid_568243
+  if valid_564143 != nil:
+    section.add "api-version", valid_564143
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -830,46 +834,46 @@ proc validate_WebServicesRemove_568238(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568244: Call_WebServicesRemove_568237; path: JsonNode;
+proc call*(call_564144: Call_WebServicesRemove_564137; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes the specified web service.
   ## 
-  let valid = call_568244.validator(path, query, header, formData, body)
-  let scheme = call_568244.pickScheme
+  let valid = call_564144.validator(path, query, header, formData, body)
+  let scheme = call_564144.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568244.url(scheme.get, call_568244.host, call_568244.base,
-                         call_568244.route, valid.getOrDefault("path"),
+  let url = call_564144.url(scheme.get, call_564144.host, call_564144.base,
+                         call_564144.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568244, url, valid)
+  result = hook(call_564144, url, valid)
 
-proc call*(call_568245: Call_WebServicesRemove_568237; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; webServiceName: string): Recallable =
+proc call*(call_564145: Call_WebServicesRemove_564137; webServiceName: string;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string): Recallable =
   ## webServicesRemove
   ## Deletes the specified web service.
-  ##   resourceGroupName: string (required)
-  ##                    : Name of the resource group in which the web service is located.
+  ##   webServiceName: string (required)
+  ##                 : The name of the web service.
   ##   apiVersion: string (required)
   ##             : The version of the Microsoft.MachineLearning resource provider API to use.
   ##   subscriptionId: string (required)
   ##                 : The Azure subscription ID.
-  ##   webServiceName: string (required)
-  ##                 : The name of the web service.
-  var path_568246 = newJObject()
-  var query_568247 = newJObject()
-  add(path_568246, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568247, "api-version", newJString(apiVersion))
-  add(path_568246, "subscriptionId", newJString(subscriptionId))
-  add(path_568246, "webServiceName", newJString(webServiceName))
-  result = call_568245.call(path_568246, query_568247, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : Name of the resource group in which the web service is located.
+  var path_564146 = newJObject()
+  var query_564147 = newJObject()
+  add(path_564146, "webServiceName", newJString(webServiceName))
+  add(query_564147, "api-version", newJString(apiVersion))
+  add(path_564146, "subscriptionId", newJString(subscriptionId))
+  add(path_564146, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564145.call(path_564146, query_564147, nil, nil, nil)
 
-var webServicesRemove* = Call_WebServicesRemove_568237(name: "webServicesRemove",
+var webServicesRemove* = Call_WebServicesRemove_564137(name: "webServicesRemove",
     meth: HttpMethod.HttpDelete, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.MachineLearning/webServices/{webServiceName}",
-    validator: validate_WebServicesRemove_568238, base: "",
-    url: url_WebServicesRemove_568239, schemes: {Scheme.Https})
+    validator: validate_WebServicesRemove_564138, base: "",
+    url: url_WebServicesRemove_564139, schemes: {Scheme.Https})
 type
-  Call_WebServicesCreateRegionalProperties_568261 = ref object of OpenApiRestCall_567658
-proc url_WebServicesCreateRegionalProperties_568263(protocol: Scheme; host: string;
+  Call_WebServicesCreateRegionalProperties_564161 = ref object of OpenApiRestCall_563556
+proc url_WebServicesCreateRegionalProperties_564163(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -893,56 +897,55 @@ proc url_WebServicesCreateRegionalProperties_568263(protocol: Scheme; host: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_WebServicesCreateRegionalProperties_568262(path: JsonNode;
+proc validate_WebServicesCreateRegionalProperties_564162(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Creates an encrypted credentials parameter blob for the specified region. To get the web service from a region other than the region in which it has been created, you must first call Create Regional Web Services Properties to create a copy of the encrypted credential parameter blob in that region. You only need to do this before the first time that you get the web service in the new region.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : Name of the resource group in which the web service is located.
-  ##   subscriptionId: JString (required)
-  ##                 : The Azure subscription ID.
   ##   webServiceName: JString (required)
   ##                 : The name of the web service.
+  ##   subscriptionId: JString (required)
+  ##                 : The Azure subscription ID.
+  ##   resourceGroupName: JString (required)
+  ##                    : Name of the resource group in which the web service is located.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568264 = path.getOrDefault("resourceGroupName")
-  valid_568264 = validateParameter(valid_568264, JString, required = true,
+        "path argument is necessary due to required `webServiceName` field"
+  var valid_564164 = path.getOrDefault("webServiceName")
+  valid_564164 = validateParameter(valid_564164, JString, required = true,
                                  default = nil)
-  if valid_568264 != nil:
-    section.add "resourceGroupName", valid_568264
-  var valid_568265 = path.getOrDefault("subscriptionId")
-  valid_568265 = validateParameter(valid_568265, JString, required = true,
+  if valid_564164 != nil:
+    section.add "webServiceName", valid_564164
+  var valid_564165 = path.getOrDefault("subscriptionId")
+  valid_564165 = validateParameter(valid_564165, JString, required = true,
                                  default = nil)
-  if valid_568265 != nil:
-    section.add "subscriptionId", valid_568265
-  var valid_568266 = path.getOrDefault("webServiceName")
-  valid_568266 = validateParameter(valid_568266, JString, required = true,
+  if valid_564165 != nil:
+    section.add "subscriptionId", valid_564165
+  var valid_564166 = path.getOrDefault("resourceGroupName")
+  valid_564166 = validateParameter(valid_564166, JString, required = true,
                                  default = nil)
-  if valid_568266 != nil:
-    section.add "webServiceName", valid_568266
+  if valid_564166 != nil:
+    section.add "resourceGroupName", valid_564166
   result.add "path", section
   ## parameters in `query` object:
-  ##   api-version: JString (required)
-  ##              : The version of the Microsoft.MachineLearning resource provider API to use.
   ##   region: JString (required)
   ##         : The region for which encrypted credential parameters are created.
+  ##   api-version: JString (required)
+  ##              : The version of the Microsoft.MachineLearning resource provider API to use.
   section = newJObject()
-  assert query != nil,
-        "query argument is necessary due to required `api-version` field"
-  var valid_568267 = query.getOrDefault("api-version")
-  valid_568267 = validateParameter(valid_568267, JString, required = true,
+  assert query != nil, "query argument is necessary due to required `region` field"
+  var valid_564167 = query.getOrDefault("region")
+  valid_564167 = validateParameter(valid_564167, JString, required = true,
                                  default = nil)
-  if valid_568267 != nil:
-    section.add "api-version", valid_568267
-  var valid_568268 = query.getOrDefault("region")
-  valid_568268 = validateParameter(valid_568268, JString, required = true,
+  if valid_564167 != nil:
+    section.add "region", valid_564167
+  var valid_564168 = query.getOrDefault("api-version")
+  valid_564168 = validateParameter(valid_564168, JString, required = true,
                                  default = nil)
-  if valid_568268 != nil:
-    section.add "region", valid_568268
+  if valid_564168 != nil:
+    section.add "api-version", valid_564168
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -951,52 +954,52 @@ proc validate_WebServicesCreateRegionalProperties_568262(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568269: Call_WebServicesCreateRegionalProperties_568261;
+proc call*(call_564169: Call_WebServicesCreateRegionalProperties_564161;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Creates an encrypted credentials parameter blob for the specified region. To get the web service from a region other than the region in which it has been created, you must first call Create Regional Web Services Properties to create a copy of the encrypted credential parameter blob in that region. You only need to do this before the first time that you get the web service in the new region.
   ## 
-  let valid = call_568269.validator(path, query, header, formData, body)
-  let scheme = call_568269.pickScheme
+  let valid = call_564169.validator(path, query, header, formData, body)
+  let scheme = call_564169.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568269.url(scheme.get, call_568269.host, call_568269.base,
-                         call_568269.route, valid.getOrDefault("path"),
+  let url = call_564169.url(scheme.get, call_564169.host, call_564169.base,
+                         call_564169.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568269, url, valid)
+  result = hook(call_564169, url, valid)
 
-proc call*(call_568270: Call_WebServicesCreateRegionalProperties_568261;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          webServiceName: string; region: string): Recallable =
+proc call*(call_564170: Call_WebServicesCreateRegionalProperties_564161;
+          region: string; webServiceName: string; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string): Recallable =
   ## webServicesCreateRegionalProperties
   ## Creates an encrypted credentials parameter blob for the specified region. To get the web service from a region other than the region in which it has been created, you must first call Create Regional Web Services Properties to create a copy of the encrypted credential parameter blob in that region. You only need to do this before the first time that you get the web service in the new region.
-  ##   resourceGroupName: string (required)
-  ##                    : Name of the resource group in which the web service is located.
+  ##   region: string (required)
+  ##         : The region for which encrypted credential parameters are created.
+  ##   webServiceName: string (required)
+  ##                 : The name of the web service.
   ##   apiVersion: string (required)
   ##             : The version of the Microsoft.MachineLearning resource provider API to use.
   ##   subscriptionId: string (required)
   ##                 : The Azure subscription ID.
-  ##   webServiceName: string (required)
-  ##                 : The name of the web service.
-  ##   region: string (required)
-  ##         : The region for which encrypted credential parameters are created.
-  var path_568271 = newJObject()
-  var query_568272 = newJObject()
-  add(path_568271, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568272, "api-version", newJString(apiVersion))
-  add(path_568271, "subscriptionId", newJString(subscriptionId))
-  add(path_568271, "webServiceName", newJString(webServiceName))
-  add(query_568272, "region", newJString(region))
-  result = call_568270.call(path_568271, query_568272, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : Name of the resource group in which the web service is located.
+  var path_564171 = newJObject()
+  var query_564172 = newJObject()
+  add(query_564172, "region", newJString(region))
+  add(path_564171, "webServiceName", newJString(webServiceName))
+  add(query_564172, "api-version", newJString(apiVersion))
+  add(path_564171, "subscriptionId", newJString(subscriptionId))
+  add(path_564171, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564170.call(path_564171, query_564172, nil, nil, nil)
 
-var webServicesCreateRegionalProperties* = Call_WebServicesCreateRegionalProperties_568261(
+var webServicesCreateRegionalProperties* = Call_WebServicesCreateRegionalProperties_564161(
     name: "webServicesCreateRegionalProperties", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.MachineLearning/webServices/{webServiceName}/CreateRegionalBlob",
-    validator: validate_WebServicesCreateRegionalProperties_568262, base: "",
-    url: url_WebServicesCreateRegionalProperties_568263, schemes: {Scheme.Https})
+    validator: validate_WebServicesCreateRegionalProperties_564162, base: "",
+    url: url_WebServicesCreateRegionalProperties_564163, schemes: {Scheme.Https})
 type
-  Call_WebServicesListKeys_568273 = ref object of OpenApiRestCall_567658
-proc url_WebServicesListKeys_568275(protocol: Scheme; host: string; base: string;
+  Call_WebServicesListKeys_564173 = ref object of OpenApiRestCall_563556
+proc url_WebServicesListKeys_564175(protocol: Scheme; host: string; base: string;
                                    route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1020,7 +1023,7 @@ proc url_WebServicesListKeys_568275(protocol: Scheme; host: string; base: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_WebServicesListKeys_568274(path: JsonNode; query: JsonNode;
+proc validate_WebServicesListKeys_564174(path: JsonNode; query: JsonNode;
                                         header: JsonNode; formData: JsonNode;
                                         body: JsonNode): JsonNode =
   ## Gets the access keys for the specified web service.
@@ -1028,30 +1031,30 @@ proc validate_WebServicesListKeys_568274(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : Name of the resource group in which the web service is located.
-  ##   subscriptionId: JString (required)
-  ##                 : The Azure subscription ID.
   ##   webServiceName: JString (required)
   ##                 : The name of the web service.
+  ##   subscriptionId: JString (required)
+  ##                 : The Azure subscription ID.
+  ##   resourceGroupName: JString (required)
+  ##                    : Name of the resource group in which the web service is located.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568276 = path.getOrDefault("resourceGroupName")
-  valid_568276 = validateParameter(valid_568276, JString, required = true,
+        "path argument is necessary due to required `webServiceName` field"
+  var valid_564176 = path.getOrDefault("webServiceName")
+  valid_564176 = validateParameter(valid_564176, JString, required = true,
                                  default = nil)
-  if valid_568276 != nil:
-    section.add "resourceGroupName", valid_568276
-  var valid_568277 = path.getOrDefault("subscriptionId")
-  valid_568277 = validateParameter(valid_568277, JString, required = true,
+  if valid_564176 != nil:
+    section.add "webServiceName", valid_564176
+  var valid_564177 = path.getOrDefault("subscriptionId")
+  valid_564177 = validateParameter(valid_564177, JString, required = true,
                                  default = nil)
-  if valid_568277 != nil:
-    section.add "subscriptionId", valid_568277
-  var valid_568278 = path.getOrDefault("webServiceName")
-  valid_568278 = validateParameter(valid_568278, JString, required = true,
+  if valid_564177 != nil:
+    section.add "subscriptionId", valid_564177
+  var valid_564178 = path.getOrDefault("resourceGroupName")
+  valid_564178 = validateParameter(valid_564178, JString, required = true,
                                  default = nil)
-  if valid_568278 != nil:
-    section.add "webServiceName", valid_568278
+  if valid_564178 != nil:
+    section.add "resourceGroupName", valid_564178
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1059,11 +1062,11 @@ proc validate_WebServicesListKeys_568274(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568279 = query.getOrDefault("api-version")
-  valid_568279 = validateParameter(valid_568279, JString, required = true,
+  var valid_564179 = query.getOrDefault("api-version")
+  valid_564179 = validateParameter(valid_564179, JString, required = true,
                                  default = nil)
-  if valid_568279 != nil:
-    section.add "api-version", valid_568279
+  if valid_564179 != nil:
+    section.add "api-version", valid_564179
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1072,44 +1075,44 @@ proc validate_WebServicesListKeys_568274(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568280: Call_WebServicesListKeys_568273; path: JsonNode;
+proc call*(call_564180: Call_WebServicesListKeys_564173; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the access keys for the specified web service.
   ## 
-  let valid = call_568280.validator(path, query, header, formData, body)
-  let scheme = call_568280.pickScheme
+  let valid = call_564180.validator(path, query, header, formData, body)
+  let scheme = call_564180.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568280.url(scheme.get, call_568280.host, call_568280.base,
-                         call_568280.route, valid.getOrDefault("path"),
+  let url = call_564180.url(scheme.get, call_564180.host, call_564180.base,
+                         call_564180.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568280, url, valid)
+  result = hook(call_564180, url, valid)
 
-proc call*(call_568281: Call_WebServicesListKeys_568273; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; webServiceName: string): Recallable =
+proc call*(call_564181: Call_WebServicesListKeys_564173; webServiceName: string;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string): Recallable =
   ## webServicesListKeys
   ## Gets the access keys for the specified web service.
-  ##   resourceGroupName: string (required)
-  ##                    : Name of the resource group in which the web service is located.
+  ##   webServiceName: string (required)
+  ##                 : The name of the web service.
   ##   apiVersion: string (required)
   ##             : The version of the Microsoft.MachineLearning resource provider API to use.
   ##   subscriptionId: string (required)
   ##                 : The Azure subscription ID.
-  ##   webServiceName: string (required)
-  ##                 : The name of the web service.
-  var path_568282 = newJObject()
-  var query_568283 = newJObject()
-  add(path_568282, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568283, "api-version", newJString(apiVersion))
-  add(path_568282, "subscriptionId", newJString(subscriptionId))
-  add(path_568282, "webServiceName", newJString(webServiceName))
-  result = call_568281.call(path_568282, query_568283, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : Name of the resource group in which the web service is located.
+  var path_564182 = newJObject()
+  var query_564183 = newJObject()
+  add(path_564182, "webServiceName", newJString(webServiceName))
+  add(query_564183, "api-version", newJString(apiVersion))
+  add(path_564182, "subscriptionId", newJString(subscriptionId))
+  add(path_564182, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564181.call(path_564182, query_564183, nil, nil, nil)
 
-var webServicesListKeys* = Call_WebServicesListKeys_568273(
+var webServicesListKeys* = Call_WebServicesListKeys_564173(
     name: "webServicesListKeys", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.MachineLearning/webServices/{webServiceName}/listKeys",
-    validator: validate_WebServicesListKeys_568274, base: "",
-    url: url_WebServicesListKeys_568275, schemes: {Scheme.Https})
+    validator: validate_WebServicesListKeys_564174, base: "",
+    url: url_WebServicesListKeys_564175, schemes: {Scheme.Https})
 export
   rest
 

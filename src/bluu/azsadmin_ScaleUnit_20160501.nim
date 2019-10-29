@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, httpcore
 
 ## auto-generated via openapi macro
 ## title: FabricAdminClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_574458 = ref object of OpenApiRestCall
+  OpenApiRestCall_563556 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_574458](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563556](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_574458): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563556): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,8 +107,8 @@ const
   macServiceName = "azsadmin-ScaleUnit"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_ScaleUnitsList_574680 = ref object of OpenApiRestCall_574458
-proc url_ScaleUnitsList_574682(protocol: Scheme; host: string; base: string;
+  Call_ScaleUnitsList_563778 = ref object of OpenApiRestCall_563556
+proc url_ScaleUnitsList_563780(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -128,7 +132,7 @@ proc url_ScaleUnitsList_574682(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ScaleUnitsList_574681(path: JsonNode; query: JsonNode;
+proc validate_ScaleUnitsList_563779(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## Returns a list of all scale units at a location.
@@ -136,30 +140,30 @@ proc validate_ScaleUnitsList_574681(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : Name of the resource group.
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials that uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   location: JString (required)
   ##           : Location of the resource.
+  ##   resourceGroupName: JString (required)
+  ##                    : Name of the resource group.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_574843 = path.getOrDefault("resourceGroupName")
-  valid_574843 = validateParameter(valid_574843, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_563943 = path.getOrDefault("subscriptionId")
+  valid_563943 = validateParameter(valid_563943, JString, required = true,
                                  default = nil)
-  if valid_574843 != nil:
-    section.add "resourceGroupName", valid_574843
-  var valid_574844 = path.getOrDefault("subscriptionId")
-  valid_574844 = validateParameter(valid_574844, JString, required = true,
+  if valid_563943 != nil:
+    section.add "subscriptionId", valid_563943
+  var valid_563944 = path.getOrDefault("location")
+  valid_563944 = validateParameter(valid_563944, JString, required = true,
                                  default = nil)
-  if valid_574844 != nil:
-    section.add "subscriptionId", valid_574844
-  var valid_574845 = path.getOrDefault("location")
-  valid_574845 = validateParameter(valid_574845, JString, required = true,
+  if valid_563944 != nil:
+    section.add "location", valid_563944
+  var valid_563945 = path.getOrDefault("resourceGroupName")
+  valid_563945 = validateParameter(valid_563945, JString, required = true,
                                  default = nil)
-  if valid_574845 != nil:
-    section.add "location", valid_574845
+  if valid_563945 != nil:
+    section.add "resourceGroupName", valid_563945
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -169,16 +173,16 @@ proc validate_ScaleUnitsList_574681(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574859 = query.getOrDefault("api-version")
-  valid_574859 = validateParameter(valid_574859, JString, required = true,
+  var valid_563959 = query.getOrDefault("api-version")
+  valid_563959 = validateParameter(valid_563959, JString, required = true,
                                  default = newJString("2016-05-01"))
-  if valid_574859 != nil:
-    section.add "api-version", valid_574859
-  var valid_574860 = query.getOrDefault("$filter")
-  valid_574860 = validateParameter(valid_574860, JString, required = false,
+  if valid_563959 != nil:
+    section.add "api-version", valid_563959
+  var valid_563960 = query.getOrDefault("$filter")
+  valid_563960 = validateParameter(valid_563960, JString, required = false,
                                  default = nil)
-  if valid_574860 != nil:
-    section.add "$filter", valid_574860
+  if valid_563960 != nil:
+    section.add "$filter", valid_563960
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -187,50 +191,50 @@ proc validate_ScaleUnitsList_574681(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574887: Call_ScaleUnitsList_574680; path: JsonNode; query: JsonNode;
+proc call*(call_563987: Call_ScaleUnitsList_563778; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Returns a list of all scale units at a location.
   ## 
-  let valid = call_574887.validator(path, query, header, formData, body)
-  let scheme = call_574887.pickScheme
+  let valid = call_563987.validator(path, query, header, formData, body)
+  let scheme = call_563987.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574887.url(scheme.get, call_574887.host, call_574887.base,
-                         call_574887.route, valid.getOrDefault("path"),
+  let url = call_563987.url(scheme.get, call_563987.host, call_563987.base,
+                         call_563987.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574887, url, valid)
+  result = hook(call_563987, url, valid)
 
-proc call*(call_574958: Call_ScaleUnitsList_574680; resourceGroupName: string;
-          subscriptionId: string; location: string;
+proc call*(call_564058: Call_ScaleUnitsList_563778; subscriptionId: string;
+          location: string; resourceGroupName: string;
           apiVersion: string = "2016-05-01"; Filter: string = ""): Recallable =
   ## scaleUnitsList
   ## Returns a list of all scale units at a location.
-  ##   resourceGroupName: string (required)
-  ##                    : Name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client API Version.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials that uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   location: string (required)
   ##           : Location of the resource.
+  ##   resourceGroupName: string (required)
+  ##                    : Name of the resource group.
   ##   Filter: string
   ##         : OData filter parameter.
-  var path_574959 = newJObject()
-  var query_574961 = newJObject()
-  add(path_574959, "resourceGroupName", newJString(resourceGroupName))
-  add(query_574961, "api-version", newJString(apiVersion))
-  add(path_574959, "subscriptionId", newJString(subscriptionId))
-  add(path_574959, "location", newJString(location))
-  add(query_574961, "$filter", newJString(Filter))
-  result = call_574958.call(path_574959, query_574961, nil, nil, nil)
+  var path_564059 = newJObject()
+  var query_564061 = newJObject()
+  add(query_564061, "api-version", newJString(apiVersion))
+  add(path_564059, "subscriptionId", newJString(subscriptionId))
+  add(path_564059, "location", newJString(location))
+  add(path_564059, "resourceGroupName", newJString(resourceGroupName))
+  add(query_564061, "$filter", newJString(Filter))
+  result = call_564058.call(path_564059, query_564061, nil, nil, nil)
 
-var scaleUnitsList* = Call_ScaleUnitsList_574680(name: "scaleUnitsList",
+var scaleUnitsList* = Call_ScaleUnitsList_563778(name: "scaleUnitsList",
     meth: HttpMethod.HttpGet, host: "adminmanagement.local.azurestack.external", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Fabric.Admin/fabricLocations/{location}/scaleUnits",
-    validator: validate_ScaleUnitsList_574681, base: "", url: url_ScaleUnitsList_574682,
+    validator: validate_ScaleUnitsList_563779, base: "", url: url_ScaleUnitsList_563780,
     schemes: {Scheme.Https})
 type
-  Call_ScaleUnitsGet_575000 = ref object of OpenApiRestCall_574458
-proc url_ScaleUnitsGet_575002(protocol: Scheme; host: string; base: string;
+  Call_ScaleUnitsGet_564100 = ref object of OpenApiRestCall_563556
+proc url_ScaleUnitsGet_564102(protocol: Scheme; host: string; base: string;
                              route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -256,44 +260,43 @@ proc url_ScaleUnitsGet_575002(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ScaleUnitsGet_575001(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_ScaleUnitsGet_564101(path: JsonNode; query: JsonNode; header: JsonNode;
                                   formData: JsonNode; body: JsonNode): JsonNode =
   ## Returns the requested scale unit.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : Name of the resource group.
   ##   scaleUnit: JString (required)
   ##            : Name of the scale units.
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials that uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   location: JString (required)
   ##           : Location of the resource.
+  ##   resourceGroupName: JString (required)
+  ##                    : Name of the resource group.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_575012 = path.getOrDefault("resourceGroupName")
-  valid_575012 = validateParameter(valid_575012, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `scaleUnit` field"
+  var valid_564112 = path.getOrDefault("scaleUnit")
+  valid_564112 = validateParameter(valid_564112, JString, required = true,
                                  default = nil)
-  if valid_575012 != nil:
-    section.add "resourceGroupName", valid_575012
-  var valid_575013 = path.getOrDefault("scaleUnit")
-  valid_575013 = validateParameter(valid_575013, JString, required = true,
+  if valid_564112 != nil:
+    section.add "scaleUnit", valid_564112
+  var valid_564113 = path.getOrDefault("subscriptionId")
+  valid_564113 = validateParameter(valid_564113, JString, required = true,
                                  default = nil)
-  if valid_575013 != nil:
-    section.add "scaleUnit", valid_575013
-  var valid_575014 = path.getOrDefault("subscriptionId")
-  valid_575014 = validateParameter(valid_575014, JString, required = true,
+  if valid_564113 != nil:
+    section.add "subscriptionId", valid_564113
+  var valid_564114 = path.getOrDefault("location")
+  valid_564114 = validateParameter(valid_564114, JString, required = true,
                                  default = nil)
-  if valid_575014 != nil:
-    section.add "subscriptionId", valid_575014
-  var valid_575015 = path.getOrDefault("location")
-  valid_575015 = validateParameter(valid_575015, JString, required = true,
+  if valid_564114 != nil:
+    section.add "location", valid_564114
+  var valid_564115 = path.getOrDefault("resourceGroupName")
+  valid_564115 = validateParameter(valid_564115, JString, required = true,
                                  default = nil)
-  if valid_575015 != nil:
-    section.add "location", valid_575015
+  if valid_564115 != nil:
+    section.add "resourceGroupName", valid_564115
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -301,11 +304,11 @@ proc validate_ScaleUnitsGet_575001(path: JsonNode; query: JsonNode; header: Json
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575016 = query.getOrDefault("api-version")
-  valid_575016 = validateParameter(valid_575016, JString, required = true,
+  var valid_564116 = query.getOrDefault("api-version")
+  valid_564116 = validateParameter(valid_564116, JString, required = true,
                                  default = newJString("2016-05-01"))
-  if valid_575016 != nil:
-    section.add "api-version", valid_575016
+  if valid_564116 != nil:
+    section.add "api-version", valid_564116
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -314,50 +317,50 @@ proc validate_ScaleUnitsGet_575001(path: JsonNode; query: JsonNode; header: Json
   if body != nil:
     result.add "body", body
 
-proc call*(call_575017: Call_ScaleUnitsGet_575000; path: JsonNode; query: JsonNode;
+proc call*(call_564117: Call_ScaleUnitsGet_564100; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Returns the requested scale unit.
   ## 
-  let valid = call_575017.validator(path, query, header, formData, body)
-  let scheme = call_575017.pickScheme
+  let valid = call_564117.validator(path, query, header, formData, body)
+  let scheme = call_564117.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575017.url(scheme.get, call_575017.host, call_575017.base,
-                         call_575017.route, valid.getOrDefault("path"),
+  let url = call_564117.url(scheme.get, call_564117.host, call_564117.base,
+                         call_564117.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575017, url, valid)
+  result = hook(call_564117, url, valid)
 
-proc call*(call_575018: Call_ScaleUnitsGet_575000; resourceGroupName: string;
-          scaleUnit: string; subscriptionId: string; location: string;
+proc call*(call_564118: Call_ScaleUnitsGet_564100; scaleUnit: string;
+          subscriptionId: string; location: string; resourceGroupName: string;
           apiVersion: string = "2016-05-01"): Recallable =
   ## scaleUnitsGet
   ## Returns the requested scale unit.
-  ##   resourceGroupName: string (required)
-  ##                    : Name of the resource group.
-  ##   scaleUnit: string (required)
-  ##            : Name of the scale units.
   ##   apiVersion: string (required)
   ##             : Client API Version.
+  ##   scaleUnit: string (required)
+  ##            : Name of the scale units.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials that uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   location: string (required)
   ##           : Location of the resource.
-  var path_575019 = newJObject()
-  var query_575020 = newJObject()
-  add(path_575019, "resourceGroupName", newJString(resourceGroupName))
-  add(path_575019, "scaleUnit", newJString(scaleUnit))
-  add(query_575020, "api-version", newJString(apiVersion))
-  add(path_575019, "subscriptionId", newJString(subscriptionId))
-  add(path_575019, "location", newJString(location))
-  result = call_575018.call(path_575019, query_575020, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : Name of the resource group.
+  var path_564119 = newJObject()
+  var query_564120 = newJObject()
+  add(query_564120, "api-version", newJString(apiVersion))
+  add(path_564119, "scaleUnit", newJString(scaleUnit))
+  add(path_564119, "subscriptionId", newJString(subscriptionId))
+  add(path_564119, "location", newJString(location))
+  add(path_564119, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564118.call(path_564119, query_564120, nil, nil, nil)
 
-var scaleUnitsGet* = Call_ScaleUnitsGet_575000(name: "scaleUnitsGet",
+var scaleUnitsGet* = Call_ScaleUnitsGet_564100(name: "scaleUnitsGet",
     meth: HttpMethod.HttpGet, host: "adminmanagement.local.azurestack.external", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Fabric.Admin/fabricLocations/{location}/scaleUnits/{scaleUnit}",
-    validator: validate_ScaleUnitsGet_575001, base: "", url: url_ScaleUnitsGet_575002,
+    validator: validate_ScaleUnitsGet_564101, base: "", url: url_ScaleUnitsGet_564102,
     schemes: {Scheme.Https})
 type
-  Call_ScaleUnitsCreateFromJson_575021 = ref object of OpenApiRestCall_574458
-proc url_ScaleUnitsCreateFromJson_575023(protocol: Scheme; host: string;
+  Call_ScaleUnitsCreateFromJson_564121 = ref object of OpenApiRestCall_563556
+proc url_ScaleUnitsCreateFromJson_564123(protocol: Scheme; host: string;
                                         base: string; route: string; path: JsonNode;
                                         query: JsonNode): Uri =
   result.scheme = $protocol
@@ -385,44 +388,43 @@ proc url_ScaleUnitsCreateFromJson_575023(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ScaleUnitsCreateFromJson_575022(path: JsonNode; query: JsonNode;
+proc validate_ScaleUnitsCreateFromJson_564122(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Add a new scale unit.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : Name of the resource group.
   ##   scaleUnit: JString (required)
   ##            : Name of the scale units.
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials that uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   location: JString (required)
   ##           : Location of the resource.
+  ##   resourceGroupName: JString (required)
+  ##                    : Name of the resource group.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_575024 = path.getOrDefault("resourceGroupName")
-  valid_575024 = validateParameter(valid_575024, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `scaleUnit` field"
+  var valid_564124 = path.getOrDefault("scaleUnit")
+  valid_564124 = validateParameter(valid_564124, JString, required = true,
                                  default = nil)
-  if valid_575024 != nil:
-    section.add "resourceGroupName", valid_575024
-  var valid_575025 = path.getOrDefault("scaleUnit")
-  valid_575025 = validateParameter(valid_575025, JString, required = true,
+  if valid_564124 != nil:
+    section.add "scaleUnit", valid_564124
+  var valid_564125 = path.getOrDefault("subscriptionId")
+  valid_564125 = validateParameter(valid_564125, JString, required = true,
                                  default = nil)
-  if valid_575025 != nil:
-    section.add "scaleUnit", valid_575025
-  var valid_575026 = path.getOrDefault("subscriptionId")
-  valid_575026 = validateParameter(valid_575026, JString, required = true,
+  if valid_564125 != nil:
+    section.add "subscriptionId", valid_564125
+  var valid_564126 = path.getOrDefault("location")
+  valid_564126 = validateParameter(valid_564126, JString, required = true,
                                  default = nil)
-  if valid_575026 != nil:
-    section.add "subscriptionId", valid_575026
-  var valid_575027 = path.getOrDefault("location")
-  valid_575027 = validateParameter(valid_575027, JString, required = true,
+  if valid_564126 != nil:
+    section.add "location", valid_564126
+  var valid_564127 = path.getOrDefault("resourceGroupName")
+  valid_564127 = validateParameter(valid_564127, JString, required = true,
                                  default = nil)
-  if valid_575027 != nil:
-    section.add "location", valid_575027
+  if valid_564127 != nil:
+    section.add "resourceGroupName", valid_564127
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -430,11 +432,11 @@ proc validate_ScaleUnitsCreateFromJson_575022(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575028 = query.getOrDefault("api-version")
-  valid_575028 = validateParameter(valid_575028, JString, required = true,
+  var valid_564128 = query.getOrDefault("api-version")
+  valid_564128 = validateParameter(valid_564128, JString, required = true,
                                  default = newJString("2016-05-01"))
-  if valid_575028 != nil:
-    section.add "api-version", valid_575028
+  if valid_564128 != nil:
+    section.add "api-version", valid_564128
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -448,57 +450,56 @@ proc validate_ScaleUnitsCreateFromJson_575022(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_575030: Call_ScaleUnitsCreateFromJson_575021; path: JsonNode;
+proc call*(call_564130: Call_ScaleUnitsCreateFromJson_564121; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Add a new scale unit.
   ## 
-  let valid = call_575030.validator(path, query, header, formData, body)
-  let scheme = call_575030.pickScheme
+  let valid = call_564130.validator(path, query, header, formData, body)
+  let scheme = call_564130.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575030.url(scheme.get, call_575030.host, call_575030.base,
-                         call_575030.route, valid.getOrDefault("path"),
+  let url = call_564130.url(scheme.get, call_564130.host, call_564130.base,
+                         call_564130.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575030, url, valid)
+  result = hook(call_564130, url, valid)
 
-proc call*(call_575031: Call_ScaleUnitsCreateFromJson_575021;
-          resourceGroupName: string; scaleUnit: string; creationData: JsonNode;
-          subscriptionId: string; location: string;
-          apiVersion: string = "2016-05-01"): Recallable =
+proc call*(call_564131: Call_ScaleUnitsCreateFromJson_564121; scaleUnit: string;
+          creationData: JsonNode; subscriptionId: string; location: string;
+          resourceGroupName: string; apiVersion: string = "2016-05-01"): Recallable =
   ## scaleUnitsCreateFromJson
   ## Add a new scale unit.
-  ##   resourceGroupName: string (required)
-  ##                    : Name of the resource group.
-  ##   scaleUnit: string (required)
-  ##            : Name of the scale units.
   ##   apiVersion: string (required)
   ##             : Client API Version.
+  ##   scaleUnit: string (required)
+  ##            : Name of the scale units.
   ##   creationData: JObject (required)
   ##               : A list of input data that allows for creating the new scale unit.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials that uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   location: string (required)
   ##           : Location of the resource.
-  var path_575032 = newJObject()
-  var query_575033 = newJObject()
-  var body_575034 = newJObject()
-  add(path_575032, "resourceGroupName", newJString(resourceGroupName))
-  add(path_575032, "scaleUnit", newJString(scaleUnit))
-  add(query_575033, "api-version", newJString(apiVersion))
+  ##   resourceGroupName: string (required)
+  ##                    : Name of the resource group.
+  var path_564132 = newJObject()
+  var query_564133 = newJObject()
+  var body_564134 = newJObject()
+  add(query_564133, "api-version", newJString(apiVersion))
+  add(path_564132, "scaleUnit", newJString(scaleUnit))
   if creationData != nil:
-    body_575034 = creationData
-  add(path_575032, "subscriptionId", newJString(subscriptionId))
-  add(path_575032, "location", newJString(location))
-  result = call_575031.call(path_575032, query_575033, nil, nil, body_575034)
+    body_564134 = creationData
+  add(path_564132, "subscriptionId", newJString(subscriptionId))
+  add(path_564132, "location", newJString(location))
+  add(path_564132, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564131.call(path_564132, query_564133, nil, nil, body_564134)
 
-var scaleUnitsCreateFromJson* = Call_ScaleUnitsCreateFromJson_575021(
+var scaleUnitsCreateFromJson* = Call_ScaleUnitsCreateFromJson_564121(
     name: "scaleUnitsCreateFromJson", meth: HttpMethod.HttpPost,
     host: "adminmanagement.local.azurestack.external", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Fabric.Admin/fabricLocations/{location}/scaleUnits/{scaleUnit}/createFromJson",
-    validator: validate_ScaleUnitsCreateFromJson_575022, base: "",
-    url: url_ScaleUnitsCreateFromJson_575023, schemes: {Scheme.Https})
+    validator: validate_ScaleUnitsCreateFromJson_564122, base: "",
+    url: url_ScaleUnitsCreateFromJson_564123, schemes: {Scheme.Https})
 type
-  Call_ScaleUnitsScaleOut_575035 = ref object of OpenApiRestCall_574458
-proc url_ScaleUnitsScaleOut_575037(protocol: Scheme; host: string; base: string;
+  Call_ScaleUnitsScaleOut_564135 = ref object of OpenApiRestCall_563556
+proc url_ScaleUnitsScaleOut_564137(protocol: Scheme; host: string; base: string;
                                   route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -525,7 +526,7 @@ proc url_ScaleUnitsScaleOut_575037(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ScaleUnitsScaleOut_575036(path: JsonNode; query: JsonNode;
+proc validate_ScaleUnitsScaleOut_564136(path: JsonNode; query: JsonNode;
                                        header: JsonNode; formData: JsonNode;
                                        body: JsonNode): JsonNode =
   ## Scales out a scale unit.
@@ -533,37 +534,36 @@ proc validate_ScaleUnitsScaleOut_575036(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : Name of the resource group.
   ##   scaleUnit: JString (required)
   ##            : Name of the scale units.
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials that uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   location: JString (required)
   ##           : Location of the resource.
+  ##   resourceGroupName: JString (required)
+  ##                    : Name of the resource group.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_575038 = path.getOrDefault("resourceGroupName")
-  valid_575038 = validateParameter(valid_575038, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `scaleUnit` field"
+  var valid_564138 = path.getOrDefault("scaleUnit")
+  valid_564138 = validateParameter(valid_564138, JString, required = true,
                                  default = nil)
-  if valid_575038 != nil:
-    section.add "resourceGroupName", valid_575038
-  var valid_575039 = path.getOrDefault("scaleUnit")
-  valid_575039 = validateParameter(valid_575039, JString, required = true,
+  if valid_564138 != nil:
+    section.add "scaleUnit", valid_564138
+  var valid_564139 = path.getOrDefault("subscriptionId")
+  valid_564139 = validateParameter(valid_564139, JString, required = true,
                                  default = nil)
-  if valid_575039 != nil:
-    section.add "scaleUnit", valid_575039
-  var valid_575040 = path.getOrDefault("subscriptionId")
-  valid_575040 = validateParameter(valid_575040, JString, required = true,
+  if valid_564139 != nil:
+    section.add "subscriptionId", valid_564139
+  var valid_564140 = path.getOrDefault("location")
+  valid_564140 = validateParameter(valid_564140, JString, required = true,
                                  default = nil)
-  if valid_575040 != nil:
-    section.add "subscriptionId", valid_575040
-  var valid_575041 = path.getOrDefault("location")
-  valid_575041 = validateParameter(valid_575041, JString, required = true,
+  if valid_564140 != nil:
+    section.add "location", valid_564140
+  var valid_564141 = path.getOrDefault("resourceGroupName")
+  valid_564141 = validateParameter(valid_564141, JString, required = true,
                                  default = nil)
-  if valid_575041 != nil:
-    section.add "location", valid_575041
+  if valid_564141 != nil:
+    section.add "resourceGroupName", valid_564141
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -571,11 +571,11 @@ proc validate_ScaleUnitsScaleOut_575036(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575042 = query.getOrDefault("api-version")
-  valid_575042 = validateParameter(valid_575042, JString, required = true,
+  var valid_564142 = query.getOrDefault("api-version")
+  valid_564142 = validateParameter(valid_564142, JString, required = true,
                                  default = newJString("2016-05-01"))
-  if valid_575042 != nil:
-    section.add "api-version", valid_575042
+  if valid_564142 != nil:
+    section.add "api-version", valid_564142
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -589,53 +589,53 @@ proc validate_ScaleUnitsScaleOut_575036(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_575044: Call_ScaleUnitsScaleOut_575035; path: JsonNode;
+proc call*(call_564144: Call_ScaleUnitsScaleOut_564135; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Scales out a scale unit.
   ## 
-  let valid = call_575044.validator(path, query, header, formData, body)
-  let scheme = call_575044.pickScheme
+  let valid = call_564144.validator(path, query, header, formData, body)
+  let scheme = call_564144.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575044.url(scheme.get, call_575044.host, call_575044.base,
-                         call_575044.route, valid.getOrDefault("path"),
+  let url = call_564144.url(scheme.get, call_564144.host, call_564144.base,
+                         call_564144.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575044, url, valid)
+  result = hook(call_564144, url, valid)
 
-proc call*(call_575045: Call_ScaleUnitsScaleOut_575035; resourceGroupName: string;
-          scaleUnit: string; subscriptionId: string; nodeList: JsonNode;
-          location: string; apiVersion: string = "2016-05-01"): Recallable =
+proc call*(call_564145: Call_ScaleUnitsScaleOut_564135; scaleUnit: string;
+          nodeList: JsonNode; subscriptionId: string; location: string;
+          resourceGroupName: string; apiVersion: string = "2016-05-01"): Recallable =
   ## scaleUnitsScaleOut
   ## Scales out a scale unit.
-  ##   resourceGroupName: string (required)
-  ##                    : Name of the resource group.
-  ##   scaleUnit: string (required)
-  ##            : Name of the scale units.
   ##   apiVersion: string (required)
   ##             : Client API Version.
-  ##   subscriptionId: string (required)
-  ##                 : Subscription credentials that uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   scaleUnit: string (required)
+  ##            : Name of the scale units.
   ##   nodeList: JObject (required)
   ##           : A list of input data that allows for adding a set of scale unit nodes.
+  ##   subscriptionId: string (required)
+  ##                 : Subscription credentials that uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   location: string (required)
   ##           : Location of the resource.
-  var path_575046 = newJObject()
-  var query_575047 = newJObject()
-  var body_575048 = newJObject()
-  add(path_575046, "resourceGroupName", newJString(resourceGroupName))
-  add(path_575046, "scaleUnit", newJString(scaleUnit))
-  add(query_575047, "api-version", newJString(apiVersion))
-  add(path_575046, "subscriptionId", newJString(subscriptionId))
+  ##   resourceGroupName: string (required)
+  ##                    : Name of the resource group.
+  var path_564146 = newJObject()
+  var query_564147 = newJObject()
+  var body_564148 = newJObject()
+  add(query_564147, "api-version", newJString(apiVersion))
+  add(path_564146, "scaleUnit", newJString(scaleUnit))
   if nodeList != nil:
-    body_575048 = nodeList
-  add(path_575046, "location", newJString(location))
-  result = call_575045.call(path_575046, query_575047, nil, nil, body_575048)
+    body_564148 = nodeList
+  add(path_564146, "subscriptionId", newJString(subscriptionId))
+  add(path_564146, "location", newJString(location))
+  add(path_564146, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564145.call(path_564146, query_564147, nil, nil, body_564148)
 
-var scaleUnitsScaleOut* = Call_ScaleUnitsScaleOut_575035(
+var scaleUnitsScaleOut* = Call_ScaleUnitsScaleOut_564135(
     name: "scaleUnitsScaleOut", meth: HttpMethod.HttpPost,
     host: "adminmanagement.local.azurestack.external", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Fabric.Admin/fabricLocations/{location}/scaleUnits/{scaleUnit}/scaleOut",
-    validator: validate_ScaleUnitsScaleOut_575036, base: "",
-    url: url_ScaleUnitsScaleOut_575037, schemes: {Scheme.Https})
+    validator: validate_ScaleUnitsScaleOut_564136, base: "",
+    url: url_ScaleUnitsScaleOut_564137, schemes: {Scheme.Https})
 export
   rest
 

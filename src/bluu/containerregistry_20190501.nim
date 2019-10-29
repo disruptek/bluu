@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, httpcore
 
 ## auto-generated via openapi macro
 ## title: ContainerRegistryManagementClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_567666 = ref object of OpenApiRestCall
+  OpenApiRestCall_563564 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_567666](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563564](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_567666): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563564): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,15 +107,15 @@ const
   macServiceName = "containerregistry"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_OperationsList_567888 = ref object of OpenApiRestCall_567666
-proc url_OperationsList_567890(protocol: Scheme; host: string; base: string;
+  Call_OperationsList_563786 = ref object of OpenApiRestCall_563564
+proc url_OperationsList_563788(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_OperationsList_567889(path: JsonNode; query: JsonNode;
+proc validate_OperationsList_563787(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## Lists all of the available Azure Container Registry REST API operations.
@@ -126,11 +130,11 @@ proc validate_OperationsList_567889(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568049 = query.getOrDefault("api-version")
-  valid_568049 = validateParameter(valid_568049, JString, required = true,
+  var valid_563949 = query.getOrDefault("api-version")
+  valid_563949 = validateParameter(valid_563949, JString, required = true,
                                  default = nil)
-  if valid_568049 != nil:
-    section.add "api-version", valid_568049
+  if valid_563949 != nil:
+    section.add "api-version", valid_563949
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -139,36 +143,36 @@ proc validate_OperationsList_567889(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568072: Call_OperationsList_567888; path: JsonNode; query: JsonNode;
+proc call*(call_563972: Call_OperationsList_563786; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists all of the available Azure Container Registry REST API operations.
   ## 
-  let valid = call_568072.validator(path, query, header, formData, body)
-  let scheme = call_568072.pickScheme
+  let valid = call_563972.validator(path, query, header, formData, body)
+  let scheme = call_563972.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568072.url(scheme.get, call_568072.host, call_568072.base,
-                         call_568072.route, valid.getOrDefault("path"),
+  let url = call_563972.url(scheme.get, call_563972.host, call_563972.base,
+                         call_563972.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568072, url, valid)
+  result = hook(call_563972, url, valid)
 
-proc call*(call_568143: Call_OperationsList_567888; apiVersion: string): Recallable =
+proc call*(call_564043: Call_OperationsList_563786; apiVersion: string): Recallable =
   ## operationsList
   ## Lists all of the available Azure Container Registry REST API operations.
   ##   apiVersion: string (required)
   ##             : The client API version.
-  var query_568144 = newJObject()
-  add(query_568144, "api-version", newJString(apiVersion))
-  result = call_568143.call(nil, query_568144, nil, nil, nil)
+  var query_564044 = newJObject()
+  add(query_564044, "api-version", newJString(apiVersion))
+  result = call_564043.call(nil, query_564044, nil, nil, nil)
 
-var operationsList* = Call_OperationsList_567888(name: "operationsList",
+var operationsList* = Call_OperationsList_563786(name: "operationsList",
     meth: HttpMethod.HttpGet, host: "management.azure.com",
     route: "/providers/Microsoft.ContainerRegistry/operations",
-    validator: validate_OperationsList_567889, base: "", url: url_OperationsList_567890,
+    validator: validate_OperationsList_563787, base: "", url: url_OperationsList_563788,
     schemes: {Scheme.Https})
 type
-  Call_RegistriesCheckNameAvailability_568184 = ref object of OpenApiRestCall_567666
-proc url_RegistriesCheckNameAvailability_568186(protocol: Scheme; host: string;
+  Call_RegistriesCheckNameAvailability_564084 = ref object of OpenApiRestCall_563564
+proc url_RegistriesCheckNameAvailability_564086(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -185,7 +189,7 @@ proc url_RegistriesCheckNameAvailability_568186(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_RegistriesCheckNameAvailability_568185(path: JsonNode;
+proc validate_RegistriesCheckNameAvailability_564085(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Checks whether the container registry name is available for use. The name must contain only alphanumeric characters, be globally unique, and between 5 and 50 characters in length.
   ## 
@@ -197,11 +201,11 @@ proc validate_RegistriesCheckNameAvailability_568185(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_568201 = path.getOrDefault("subscriptionId")
-  valid_568201 = validateParameter(valid_568201, JString, required = true,
+  var valid_564101 = path.getOrDefault("subscriptionId")
+  valid_564101 = validateParameter(valid_564101, JString, required = true,
                                  default = nil)
-  if valid_568201 != nil:
-    section.add "subscriptionId", valid_568201
+  if valid_564101 != nil:
+    section.add "subscriptionId", valid_564101
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -209,11 +213,11 @@ proc validate_RegistriesCheckNameAvailability_568185(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568202 = query.getOrDefault("api-version")
-  valid_568202 = validateParameter(valid_568202, JString, required = true,
+  var valid_564102 = query.getOrDefault("api-version")
+  valid_564102 = validateParameter(valid_564102, JString, required = true,
                                  default = nil)
-  if valid_568202 != nil:
-    section.add "api-version", valid_568202
+  if valid_564102 != nil:
+    section.add "api-version", valid_564102
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -227,21 +231,21 @@ proc validate_RegistriesCheckNameAvailability_568185(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568204: Call_RegistriesCheckNameAvailability_568184;
+proc call*(call_564104: Call_RegistriesCheckNameAvailability_564084;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Checks whether the container registry name is available for use. The name must contain only alphanumeric characters, be globally unique, and between 5 and 50 characters in length.
   ## 
-  let valid = call_568204.validator(path, query, header, formData, body)
-  let scheme = call_568204.pickScheme
+  let valid = call_564104.validator(path, query, header, formData, body)
+  let scheme = call_564104.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568204.url(scheme.get, call_568204.host, call_568204.base,
-                         call_568204.route, valid.getOrDefault("path"),
+  let url = call_564104.url(scheme.get, call_564104.host, call_564104.base,
+                         call_564104.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568204, url, valid)
+  result = hook(call_564104, url, valid)
 
-proc call*(call_568205: Call_RegistriesCheckNameAvailability_568184;
+proc call*(call_564105: Call_RegistriesCheckNameAvailability_564084;
           apiVersion: string; subscriptionId: string;
           registryNameCheckRequest: JsonNode): Recallable =
   ## registriesCheckNameAvailability
@@ -252,23 +256,23 @@ proc call*(call_568205: Call_RegistriesCheckNameAvailability_568184;
   ##                 : The Microsoft Azure subscription ID.
   ##   registryNameCheckRequest: JObject (required)
   ##                           : The object containing information for the availability request.
-  var path_568206 = newJObject()
-  var query_568207 = newJObject()
-  var body_568208 = newJObject()
-  add(query_568207, "api-version", newJString(apiVersion))
-  add(path_568206, "subscriptionId", newJString(subscriptionId))
+  var path_564106 = newJObject()
+  var query_564107 = newJObject()
+  var body_564108 = newJObject()
+  add(query_564107, "api-version", newJString(apiVersion))
+  add(path_564106, "subscriptionId", newJString(subscriptionId))
   if registryNameCheckRequest != nil:
-    body_568208 = registryNameCheckRequest
-  result = call_568205.call(path_568206, query_568207, nil, nil, body_568208)
+    body_564108 = registryNameCheckRequest
+  result = call_564105.call(path_564106, query_564107, nil, nil, body_564108)
 
-var registriesCheckNameAvailability* = Call_RegistriesCheckNameAvailability_568184(
+var registriesCheckNameAvailability* = Call_RegistriesCheckNameAvailability_564084(
     name: "registriesCheckNameAvailability", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.ContainerRegistry/checkNameAvailability",
-    validator: validate_RegistriesCheckNameAvailability_568185, base: "",
-    url: url_RegistriesCheckNameAvailability_568186, schemes: {Scheme.Https})
+    validator: validate_RegistriesCheckNameAvailability_564085, base: "",
+    url: url_RegistriesCheckNameAvailability_564086, schemes: {Scheme.Https})
 type
-  Call_RegistriesList_568209 = ref object of OpenApiRestCall_567666
-proc url_RegistriesList_568211(protocol: Scheme; host: string; base: string;
+  Call_RegistriesList_564109 = ref object of OpenApiRestCall_563564
+proc url_RegistriesList_564111(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -285,7 +289,7 @@ proc url_RegistriesList_568211(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_RegistriesList_568210(path: JsonNode; query: JsonNode;
+proc validate_RegistriesList_564110(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## Lists all the container registries under the specified subscription.
@@ -298,11 +302,11 @@ proc validate_RegistriesList_568210(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_568212 = path.getOrDefault("subscriptionId")
-  valid_568212 = validateParameter(valid_568212, JString, required = true,
+  var valid_564112 = path.getOrDefault("subscriptionId")
+  valid_564112 = validateParameter(valid_564112, JString, required = true,
                                  default = nil)
-  if valid_568212 != nil:
-    section.add "subscriptionId", valid_568212
+  if valid_564112 != nil:
+    section.add "subscriptionId", valid_564112
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -310,11 +314,11 @@ proc validate_RegistriesList_568210(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568213 = query.getOrDefault("api-version")
-  valid_568213 = validateParameter(valid_568213, JString, required = true,
+  var valid_564113 = query.getOrDefault("api-version")
+  valid_564113 = validateParameter(valid_564113, JString, required = true,
                                  default = nil)
-  if valid_568213 != nil:
-    section.add "api-version", valid_568213
+  if valid_564113 != nil:
+    section.add "api-version", valid_564113
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -323,20 +327,20 @@ proc validate_RegistriesList_568210(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568214: Call_RegistriesList_568209; path: JsonNode; query: JsonNode;
+proc call*(call_564114: Call_RegistriesList_564109; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists all the container registries under the specified subscription.
   ## 
-  let valid = call_568214.validator(path, query, header, formData, body)
-  let scheme = call_568214.pickScheme
+  let valid = call_564114.validator(path, query, header, formData, body)
+  let scheme = call_564114.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568214.url(scheme.get, call_568214.host, call_568214.base,
-                         call_568214.route, valid.getOrDefault("path"),
+  let url = call_564114.url(scheme.get, call_564114.host, call_564114.base,
+                         call_564114.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568214, url, valid)
+  result = hook(call_564114, url, valid)
 
-proc call*(call_568215: Call_RegistriesList_568209; apiVersion: string;
+proc call*(call_564115: Call_RegistriesList_564109; apiVersion: string;
           subscriptionId: string): Recallable =
   ## registriesList
   ## Lists all the container registries under the specified subscription.
@@ -344,19 +348,19 @@ proc call*(call_568215: Call_RegistriesList_568209; apiVersion: string;
   ##             : The client API version.
   ##   subscriptionId: string (required)
   ##                 : The Microsoft Azure subscription ID.
-  var path_568216 = newJObject()
-  var query_568217 = newJObject()
-  add(query_568217, "api-version", newJString(apiVersion))
-  add(path_568216, "subscriptionId", newJString(subscriptionId))
-  result = call_568215.call(path_568216, query_568217, nil, nil, nil)
+  var path_564116 = newJObject()
+  var query_564117 = newJObject()
+  add(query_564117, "api-version", newJString(apiVersion))
+  add(path_564116, "subscriptionId", newJString(subscriptionId))
+  result = call_564115.call(path_564116, query_564117, nil, nil, nil)
 
-var registriesList* = Call_RegistriesList_568209(name: "registriesList",
+var registriesList* = Call_RegistriesList_564109(name: "registriesList",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.ContainerRegistry/registries",
-    validator: validate_RegistriesList_568210, base: "", url: url_RegistriesList_568211,
+    validator: validate_RegistriesList_564110, base: "", url: url_RegistriesList_564111,
     schemes: {Scheme.Https})
 type
-  Call_RegistriesListByResourceGroup_568218 = ref object of OpenApiRestCall_567666
-proc url_RegistriesListByResourceGroup_568220(protocol: Scheme; host: string;
+  Call_RegistriesListByResourceGroup_564118 = ref object of OpenApiRestCall_563564
+proc url_RegistriesListByResourceGroup_564120(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -377,30 +381,30 @@ proc url_RegistriesListByResourceGroup_568220(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_RegistriesListByResourceGroup_568219(path: JsonNode; query: JsonNode;
+proc validate_RegistriesListByResourceGroup_564119(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists all the container registries under the specified resource group.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group to which the container registry belongs.
   ##   subscriptionId: JString (required)
   ##                 : The Microsoft Azure subscription ID.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group to which the container registry belongs.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568221 = path.getOrDefault("resourceGroupName")
-  valid_568221 = validateParameter(valid_568221, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564121 = path.getOrDefault("subscriptionId")
+  valid_564121 = validateParameter(valid_564121, JString, required = true,
                                  default = nil)
-  if valid_568221 != nil:
-    section.add "resourceGroupName", valid_568221
-  var valid_568222 = path.getOrDefault("subscriptionId")
-  valid_568222 = validateParameter(valid_568222, JString, required = true,
+  if valid_564121 != nil:
+    section.add "subscriptionId", valid_564121
+  var valid_564122 = path.getOrDefault("resourceGroupName")
+  valid_564122 = validateParameter(valid_564122, JString, required = true,
                                  default = nil)
-  if valid_568222 != nil:
-    section.add "subscriptionId", valid_568222
+  if valid_564122 != nil:
+    section.add "resourceGroupName", valid_564122
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -408,11 +412,11 @@ proc validate_RegistriesListByResourceGroup_568219(path: JsonNode; query: JsonNo
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568223 = query.getOrDefault("api-version")
-  valid_568223 = validateParameter(valid_568223, JString, required = true,
+  var valid_564123 = query.getOrDefault("api-version")
+  valid_564123 = validateParameter(valid_564123, JString, required = true,
                                  default = nil)
-  if valid_568223 != nil:
-    section.add "api-version", valid_568223
+  if valid_564123 != nil:
+    section.add "api-version", valid_564123
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -421,44 +425,44 @@ proc validate_RegistriesListByResourceGroup_568219(path: JsonNode; query: JsonNo
   if body != nil:
     result.add "body", body
 
-proc call*(call_568224: Call_RegistriesListByResourceGroup_568218; path: JsonNode;
+proc call*(call_564124: Call_RegistriesListByResourceGroup_564118; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists all the container registries under the specified resource group.
   ## 
-  let valid = call_568224.validator(path, query, header, formData, body)
-  let scheme = call_568224.pickScheme
+  let valid = call_564124.validator(path, query, header, formData, body)
+  let scheme = call_564124.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568224.url(scheme.get, call_568224.host, call_568224.base,
-                         call_568224.route, valid.getOrDefault("path"),
+  let url = call_564124.url(scheme.get, call_564124.host, call_564124.base,
+                         call_564124.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568224, url, valid)
+  result = hook(call_564124, url, valid)
 
-proc call*(call_568225: Call_RegistriesListByResourceGroup_568218;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string): Recallable =
+proc call*(call_564125: Call_RegistriesListByResourceGroup_564118;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string): Recallable =
   ## registriesListByResourceGroup
   ## Lists all the container registries under the specified resource group.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group to which the container registry belongs.
   ##   apiVersion: string (required)
   ##             : The client API version.
   ##   subscriptionId: string (required)
   ##                 : The Microsoft Azure subscription ID.
-  var path_568226 = newJObject()
-  var query_568227 = newJObject()
-  add(path_568226, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568227, "api-version", newJString(apiVersion))
-  add(path_568226, "subscriptionId", newJString(subscriptionId))
-  result = call_568225.call(path_568226, query_568227, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group to which the container registry belongs.
+  var path_564126 = newJObject()
+  var query_564127 = newJObject()
+  add(query_564127, "api-version", newJString(apiVersion))
+  add(path_564126, "subscriptionId", newJString(subscriptionId))
+  add(path_564126, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564125.call(path_564126, query_564127, nil, nil, nil)
 
-var registriesListByResourceGroup* = Call_RegistriesListByResourceGroup_568218(
+var registriesListByResourceGroup* = Call_RegistriesListByResourceGroup_564118(
     name: "registriesListByResourceGroup", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ContainerRegistry/registries",
-    validator: validate_RegistriesListByResourceGroup_568219, base: "",
-    url: url_RegistriesListByResourceGroup_568220, schemes: {Scheme.Https})
+    validator: validate_RegistriesListByResourceGroup_564119, base: "",
+    url: url_RegistriesListByResourceGroup_564120, schemes: {Scheme.Https})
 type
-  Call_RegistriesCreate_568239 = ref object of OpenApiRestCall_567666
-proc url_RegistriesCreate_568241(protocol: Scheme; host: string; base: string;
+  Call_RegistriesCreate_564139 = ref object of OpenApiRestCall_563564
+proc url_RegistriesCreate_564141(protocol: Scheme; host: string; base: string;
                                 route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -481,7 +485,7 @@ proc url_RegistriesCreate_568241(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_RegistriesCreate_568240(path: JsonNode; query: JsonNode;
+proc validate_RegistriesCreate_564140(path: JsonNode; query: JsonNode;
                                      header: JsonNode; formData: JsonNode;
                                      body: JsonNode): JsonNode =
   ## Creates a container registry with the specified parameters.
@@ -489,30 +493,30 @@ proc validate_RegistriesCreate_568240(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group to which the container registry belongs.
   ##   subscriptionId: JString (required)
   ##                 : The Microsoft Azure subscription ID.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group to which the container registry belongs.
   ##   registryName: JString (required)
   ##               : The name of the container registry.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568242 = path.getOrDefault("resourceGroupName")
-  valid_568242 = validateParameter(valid_568242, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564142 = path.getOrDefault("subscriptionId")
+  valid_564142 = validateParameter(valid_564142, JString, required = true,
                                  default = nil)
-  if valid_568242 != nil:
-    section.add "resourceGroupName", valid_568242
-  var valid_568243 = path.getOrDefault("subscriptionId")
-  valid_568243 = validateParameter(valid_568243, JString, required = true,
+  if valid_564142 != nil:
+    section.add "subscriptionId", valid_564142
+  var valid_564143 = path.getOrDefault("resourceGroupName")
+  valid_564143 = validateParameter(valid_564143, JString, required = true,
                                  default = nil)
-  if valid_568243 != nil:
-    section.add "subscriptionId", valid_568243
-  var valid_568244 = path.getOrDefault("registryName")
-  valid_568244 = validateParameter(valid_568244, JString, required = true,
+  if valid_564143 != nil:
+    section.add "resourceGroupName", valid_564143
+  var valid_564144 = path.getOrDefault("registryName")
+  valid_564144 = validateParameter(valid_564144, JString, required = true,
                                  default = nil)
-  if valid_568244 != nil:
-    section.add "registryName", valid_568244
+  if valid_564144 != nil:
+    section.add "registryName", valid_564144
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -520,11 +524,11 @@ proc validate_RegistriesCreate_568240(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568245 = query.getOrDefault("api-version")
-  valid_568245 = validateParameter(valid_568245, JString, required = true,
+  var valid_564145 = query.getOrDefault("api-version")
+  valid_564145 = validateParameter(valid_564145, JString, required = true,
                                  default = nil)
-  if valid_568245 != nil:
-    section.add "api-version", valid_568245
+  if valid_564145 != nil:
+    section.add "api-version", valid_564145
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -538,52 +542,52 @@ proc validate_RegistriesCreate_568240(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568247: Call_RegistriesCreate_568239; path: JsonNode;
+proc call*(call_564147: Call_RegistriesCreate_564139; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Creates a container registry with the specified parameters.
   ## 
-  let valid = call_568247.validator(path, query, header, formData, body)
-  let scheme = call_568247.pickScheme
+  let valid = call_564147.validator(path, query, header, formData, body)
+  let scheme = call_564147.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568247.url(scheme.get, call_568247.host, call_568247.base,
-                         call_568247.route, valid.getOrDefault("path"),
+  let url = call_564147.url(scheme.get, call_564147.host, call_564147.base,
+                         call_564147.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568247, url, valid)
+  result = hook(call_564147, url, valid)
 
-proc call*(call_568248: Call_RegistriesCreate_568239; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; registry: JsonNode;
+proc call*(call_564148: Call_RegistriesCreate_564139; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string; registry: JsonNode;
           registryName: string): Recallable =
   ## registriesCreate
   ## Creates a container registry with the specified parameters.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group to which the container registry belongs.
   ##   apiVersion: string (required)
   ##             : The client API version.
   ##   subscriptionId: string (required)
   ##                 : The Microsoft Azure subscription ID.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group to which the container registry belongs.
   ##   registry: JObject (required)
   ##           : The parameters for creating a container registry.
   ##   registryName: string (required)
   ##               : The name of the container registry.
-  var path_568249 = newJObject()
-  var query_568250 = newJObject()
-  var body_568251 = newJObject()
-  add(path_568249, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568250, "api-version", newJString(apiVersion))
-  add(path_568249, "subscriptionId", newJString(subscriptionId))
+  var path_564149 = newJObject()
+  var query_564150 = newJObject()
+  var body_564151 = newJObject()
+  add(query_564150, "api-version", newJString(apiVersion))
+  add(path_564149, "subscriptionId", newJString(subscriptionId))
+  add(path_564149, "resourceGroupName", newJString(resourceGroupName))
   if registry != nil:
-    body_568251 = registry
-  add(path_568249, "registryName", newJString(registryName))
-  result = call_568248.call(path_568249, query_568250, nil, nil, body_568251)
+    body_564151 = registry
+  add(path_564149, "registryName", newJString(registryName))
+  result = call_564148.call(path_564149, query_564150, nil, nil, body_564151)
 
-var registriesCreate* = Call_RegistriesCreate_568239(name: "registriesCreate",
+var registriesCreate* = Call_RegistriesCreate_564139(name: "registriesCreate",
     meth: HttpMethod.HttpPut, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ContainerRegistry/registries/{registryName}",
-    validator: validate_RegistriesCreate_568240, base: "",
-    url: url_RegistriesCreate_568241, schemes: {Scheme.Https})
+    validator: validate_RegistriesCreate_564140, base: "",
+    url: url_RegistriesCreate_564141, schemes: {Scheme.Https})
 type
-  Call_RegistriesGet_568228 = ref object of OpenApiRestCall_567666
-proc url_RegistriesGet_568230(protocol: Scheme; host: string; base: string;
+  Call_RegistriesGet_564128 = ref object of OpenApiRestCall_563564
+proc url_RegistriesGet_564130(protocol: Scheme; host: string; base: string;
                              route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -606,37 +610,37 @@ proc url_RegistriesGet_568230(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_RegistriesGet_568229(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_RegistriesGet_564129(path: JsonNode; query: JsonNode; header: JsonNode;
                                   formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the properties of the specified container registry.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group to which the container registry belongs.
   ##   subscriptionId: JString (required)
   ##                 : The Microsoft Azure subscription ID.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group to which the container registry belongs.
   ##   registryName: JString (required)
   ##               : The name of the container registry.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568231 = path.getOrDefault("resourceGroupName")
-  valid_568231 = validateParameter(valid_568231, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564131 = path.getOrDefault("subscriptionId")
+  valid_564131 = validateParameter(valid_564131, JString, required = true,
                                  default = nil)
-  if valid_568231 != nil:
-    section.add "resourceGroupName", valid_568231
-  var valid_568232 = path.getOrDefault("subscriptionId")
-  valid_568232 = validateParameter(valid_568232, JString, required = true,
+  if valid_564131 != nil:
+    section.add "subscriptionId", valid_564131
+  var valid_564132 = path.getOrDefault("resourceGroupName")
+  valid_564132 = validateParameter(valid_564132, JString, required = true,
                                  default = nil)
-  if valid_568232 != nil:
-    section.add "subscriptionId", valid_568232
-  var valid_568233 = path.getOrDefault("registryName")
-  valid_568233 = validateParameter(valid_568233, JString, required = true,
+  if valid_564132 != nil:
+    section.add "resourceGroupName", valid_564132
+  var valid_564133 = path.getOrDefault("registryName")
+  valid_564133 = validateParameter(valid_564133, JString, required = true,
                                  default = nil)
-  if valid_568233 != nil:
-    section.add "registryName", valid_568233
+  if valid_564133 != nil:
+    section.add "registryName", valid_564133
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -644,11 +648,11 @@ proc validate_RegistriesGet_568229(path: JsonNode; query: JsonNode; header: Json
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568234 = query.getOrDefault("api-version")
-  valid_568234 = validateParameter(valid_568234, JString, required = true,
+  var valid_564134 = query.getOrDefault("api-version")
+  valid_564134 = validateParameter(valid_564134, JString, required = true,
                                  default = nil)
-  if valid_568234 != nil:
-    section.add "api-version", valid_568234
+  if valid_564134 != nil:
+    section.add "api-version", valid_564134
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -657,46 +661,46 @@ proc validate_RegistriesGet_568229(path: JsonNode; query: JsonNode; header: Json
   if body != nil:
     result.add "body", body
 
-proc call*(call_568235: Call_RegistriesGet_568228; path: JsonNode; query: JsonNode;
+proc call*(call_564135: Call_RegistriesGet_564128; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the properties of the specified container registry.
   ## 
-  let valid = call_568235.validator(path, query, header, formData, body)
-  let scheme = call_568235.pickScheme
+  let valid = call_564135.validator(path, query, header, formData, body)
+  let scheme = call_564135.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568235.url(scheme.get, call_568235.host, call_568235.base,
-                         call_568235.route, valid.getOrDefault("path"),
+  let url = call_564135.url(scheme.get, call_564135.host, call_564135.base,
+                         call_564135.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568235, url, valid)
+  result = hook(call_564135, url, valid)
 
-proc call*(call_568236: Call_RegistriesGet_568228; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; registryName: string): Recallable =
+proc call*(call_564136: Call_RegistriesGet_564128; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string; registryName: string): Recallable =
   ## registriesGet
   ## Gets the properties of the specified container registry.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group to which the container registry belongs.
   ##   apiVersion: string (required)
   ##             : The client API version.
   ##   subscriptionId: string (required)
   ##                 : The Microsoft Azure subscription ID.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group to which the container registry belongs.
   ##   registryName: string (required)
   ##               : The name of the container registry.
-  var path_568237 = newJObject()
-  var query_568238 = newJObject()
-  add(path_568237, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568238, "api-version", newJString(apiVersion))
-  add(path_568237, "subscriptionId", newJString(subscriptionId))
-  add(path_568237, "registryName", newJString(registryName))
-  result = call_568236.call(path_568237, query_568238, nil, nil, nil)
+  var path_564137 = newJObject()
+  var query_564138 = newJObject()
+  add(query_564138, "api-version", newJString(apiVersion))
+  add(path_564137, "subscriptionId", newJString(subscriptionId))
+  add(path_564137, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564137, "registryName", newJString(registryName))
+  result = call_564136.call(path_564137, query_564138, nil, nil, nil)
 
-var registriesGet* = Call_RegistriesGet_568228(name: "registriesGet",
+var registriesGet* = Call_RegistriesGet_564128(name: "registriesGet",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ContainerRegistry/registries/{registryName}",
-    validator: validate_RegistriesGet_568229, base: "", url: url_RegistriesGet_568230,
+    validator: validate_RegistriesGet_564129, base: "", url: url_RegistriesGet_564130,
     schemes: {Scheme.Https})
 type
-  Call_RegistriesUpdate_568263 = ref object of OpenApiRestCall_567666
-proc url_RegistriesUpdate_568265(protocol: Scheme; host: string; base: string;
+  Call_RegistriesUpdate_564163 = ref object of OpenApiRestCall_563564
+proc url_RegistriesUpdate_564165(protocol: Scheme; host: string; base: string;
                                 route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -719,7 +723,7 @@ proc url_RegistriesUpdate_568265(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_RegistriesUpdate_568264(path: JsonNode; query: JsonNode;
+proc validate_RegistriesUpdate_564164(path: JsonNode; query: JsonNode;
                                      header: JsonNode; formData: JsonNode;
                                      body: JsonNode): JsonNode =
   ## Updates a container registry with the specified parameters.
@@ -727,30 +731,30 @@ proc validate_RegistriesUpdate_568264(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group to which the container registry belongs.
   ##   subscriptionId: JString (required)
   ##                 : The Microsoft Azure subscription ID.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group to which the container registry belongs.
   ##   registryName: JString (required)
   ##               : The name of the container registry.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568266 = path.getOrDefault("resourceGroupName")
-  valid_568266 = validateParameter(valid_568266, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564166 = path.getOrDefault("subscriptionId")
+  valid_564166 = validateParameter(valid_564166, JString, required = true,
                                  default = nil)
-  if valid_568266 != nil:
-    section.add "resourceGroupName", valid_568266
-  var valid_568267 = path.getOrDefault("subscriptionId")
-  valid_568267 = validateParameter(valid_568267, JString, required = true,
+  if valid_564166 != nil:
+    section.add "subscriptionId", valid_564166
+  var valid_564167 = path.getOrDefault("resourceGroupName")
+  valid_564167 = validateParameter(valid_564167, JString, required = true,
                                  default = nil)
-  if valid_568267 != nil:
-    section.add "subscriptionId", valid_568267
-  var valid_568268 = path.getOrDefault("registryName")
-  valid_568268 = validateParameter(valid_568268, JString, required = true,
+  if valid_564167 != nil:
+    section.add "resourceGroupName", valid_564167
+  var valid_564168 = path.getOrDefault("registryName")
+  valid_564168 = validateParameter(valid_564168, JString, required = true,
                                  default = nil)
-  if valid_568268 != nil:
-    section.add "registryName", valid_568268
+  if valid_564168 != nil:
+    section.add "registryName", valid_564168
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -758,11 +762,11 @@ proc validate_RegistriesUpdate_568264(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568269 = query.getOrDefault("api-version")
-  valid_568269 = validateParameter(valid_568269, JString, required = true,
+  var valid_564169 = query.getOrDefault("api-version")
+  valid_564169 = validateParameter(valid_564169, JString, required = true,
                                  default = nil)
-  if valid_568269 != nil:
-    section.add "api-version", valid_568269
+  if valid_564169 != nil:
+    section.add "api-version", valid_564169
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -776,52 +780,52 @@ proc validate_RegistriesUpdate_568264(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568271: Call_RegistriesUpdate_568263; path: JsonNode;
+proc call*(call_564171: Call_RegistriesUpdate_564163; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Updates a container registry with the specified parameters.
   ## 
-  let valid = call_568271.validator(path, query, header, formData, body)
-  let scheme = call_568271.pickScheme
+  let valid = call_564171.validator(path, query, header, formData, body)
+  let scheme = call_564171.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568271.url(scheme.get, call_568271.host, call_568271.base,
-                         call_568271.route, valid.getOrDefault("path"),
+  let url = call_564171.url(scheme.get, call_564171.host, call_564171.base,
+                         call_564171.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568271, url, valid)
+  result = hook(call_564171, url, valid)
 
-proc call*(call_568272: Call_RegistriesUpdate_568263; resourceGroupName: string;
-          registryUpdateParameters: JsonNode; apiVersion: string;
-          subscriptionId: string; registryName: string): Recallable =
+proc call*(call_564172: Call_RegistriesUpdate_564163; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string; registryName: string;
+          registryUpdateParameters: JsonNode): Recallable =
   ## registriesUpdate
   ## Updates a container registry with the specified parameters.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group to which the container registry belongs.
-  ##   registryUpdateParameters: JObject (required)
-  ##                           : The parameters for updating a container registry.
   ##   apiVersion: string (required)
   ##             : The client API version.
   ##   subscriptionId: string (required)
   ##                 : The Microsoft Azure subscription ID.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group to which the container registry belongs.
   ##   registryName: string (required)
   ##               : The name of the container registry.
-  var path_568273 = newJObject()
-  var query_568274 = newJObject()
-  var body_568275 = newJObject()
-  add(path_568273, "resourceGroupName", newJString(resourceGroupName))
+  ##   registryUpdateParameters: JObject (required)
+  ##                           : The parameters for updating a container registry.
+  var path_564173 = newJObject()
+  var query_564174 = newJObject()
+  var body_564175 = newJObject()
+  add(query_564174, "api-version", newJString(apiVersion))
+  add(path_564173, "subscriptionId", newJString(subscriptionId))
+  add(path_564173, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564173, "registryName", newJString(registryName))
   if registryUpdateParameters != nil:
-    body_568275 = registryUpdateParameters
-  add(query_568274, "api-version", newJString(apiVersion))
-  add(path_568273, "subscriptionId", newJString(subscriptionId))
-  add(path_568273, "registryName", newJString(registryName))
-  result = call_568272.call(path_568273, query_568274, nil, nil, body_568275)
+    body_564175 = registryUpdateParameters
+  result = call_564172.call(path_564173, query_564174, nil, nil, body_564175)
 
-var registriesUpdate* = Call_RegistriesUpdate_568263(name: "registriesUpdate",
+var registriesUpdate* = Call_RegistriesUpdate_564163(name: "registriesUpdate",
     meth: HttpMethod.HttpPatch, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ContainerRegistry/registries/{registryName}",
-    validator: validate_RegistriesUpdate_568264, base: "",
-    url: url_RegistriesUpdate_568265, schemes: {Scheme.Https})
+    validator: validate_RegistriesUpdate_564164, base: "",
+    url: url_RegistriesUpdate_564165, schemes: {Scheme.Https})
 type
-  Call_RegistriesDelete_568252 = ref object of OpenApiRestCall_567666
-proc url_RegistriesDelete_568254(protocol: Scheme; host: string; base: string;
+  Call_RegistriesDelete_564152 = ref object of OpenApiRestCall_563564
+proc url_RegistriesDelete_564154(protocol: Scheme; host: string; base: string;
                                 route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -844,7 +848,7 @@ proc url_RegistriesDelete_568254(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_RegistriesDelete_568253(path: JsonNode; query: JsonNode;
+proc validate_RegistriesDelete_564153(path: JsonNode; query: JsonNode;
                                      header: JsonNode; formData: JsonNode;
                                      body: JsonNode): JsonNode =
   ## Deletes a container registry.
@@ -852,30 +856,30 @@ proc validate_RegistriesDelete_568253(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group to which the container registry belongs.
   ##   subscriptionId: JString (required)
   ##                 : The Microsoft Azure subscription ID.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group to which the container registry belongs.
   ##   registryName: JString (required)
   ##               : The name of the container registry.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568255 = path.getOrDefault("resourceGroupName")
-  valid_568255 = validateParameter(valid_568255, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564155 = path.getOrDefault("subscriptionId")
+  valid_564155 = validateParameter(valid_564155, JString, required = true,
                                  default = nil)
-  if valid_568255 != nil:
-    section.add "resourceGroupName", valid_568255
-  var valid_568256 = path.getOrDefault("subscriptionId")
-  valid_568256 = validateParameter(valid_568256, JString, required = true,
+  if valid_564155 != nil:
+    section.add "subscriptionId", valid_564155
+  var valid_564156 = path.getOrDefault("resourceGroupName")
+  valid_564156 = validateParameter(valid_564156, JString, required = true,
                                  default = nil)
-  if valid_568256 != nil:
-    section.add "subscriptionId", valid_568256
-  var valid_568257 = path.getOrDefault("registryName")
-  valid_568257 = validateParameter(valid_568257, JString, required = true,
+  if valid_564156 != nil:
+    section.add "resourceGroupName", valid_564156
+  var valid_564157 = path.getOrDefault("registryName")
+  valid_564157 = validateParameter(valid_564157, JString, required = true,
                                  default = nil)
-  if valid_568257 != nil:
-    section.add "registryName", valid_568257
+  if valid_564157 != nil:
+    section.add "registryName", valid_564157
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -883,11 +887,11 @@ proc validate_RegistriesDelete_568253(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568258 = query.getOrDefault("api-version")
-  valid_568258 = validateParameter(valid_568258, JString, required = true,
+  var valid_564158 = query.getOrDefault("api-version")
+  valid_564158 = validateParameter(valid_564158, JString, required = true,
                                  default = nil)
-  if valid_568258 != nil:
-    section.add "api-version", valid_568258
+  if valid_564158 != nil:
+    section.add "api-version", valid_564158
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -896,46 +900,46 @@ proc validate_RegistriesDelete_568253(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568259: Call_RegistriesDelete_568252; path: JsonNode;
+proc call*(call_564159: Call_RegistriesDelete_564152; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes a container registry.
   ## 
-  let valid = call_568259.validator(path, query, header, formData, body)
-  let scheme = call_568259.pickScheme
+  let valid = call_564159.validator(path, query, header, formData, body)
+  let scheme = call_564159.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568259.url(scheme.get, call_568259.host, call_568259.base,
-                         call_568259.route, valid.getOrDefault("path"),
+  let url = call_564159.url(scheme.get, call_564159.host, call_564159.base,
+                         call_564159.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568259, url, valid)
+  result = hook(call_564159, url, valid)
 
-proc call*(call_568260: Call_RegistriesDelete_568252; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; registryName: string): Recallable =
+proc call*(call_564160: Call_RegistriesDelete_564152; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string; registryName: string): Recallable =
   ## registriesDelete
   ## Deletes a container registry.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group to which the container registry belongs.
   ##   apiVersion: string (required)
   ##             : The client API version.
   ##   subscriptionId: string (required)
   ##                 : The Microsoft Azure subscription ID.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group to which the container registry belongs.
   ##   registryName: string (required)
   ##               : The name of the container registry.
-  var path_568261 = newJObject()
-  var query_568262 = newJObject()
-  add(path_568261, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568262, "api-version", newJString(apiVersion))
-  add(path_568261, "subscriptionId", newJString(subscriptionId))
-  add(path_568261, "registryName", newJString(registryName))
-  result = call_568260.call(path_568261, query_568262, nil, nil, nil)
+  var path_564161 = newJObject()
+  var query_564162 = newJObject()
+  add(query_564162, "api-version", newJString(apiVersion))
+  add(path_564161, "subscriptionId", newJString(subscriptionId))
+  add(path_564161, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564161, "registryName", newJString(registryName))
+  result = call_564160.call(path_564161, query_564162, nil, nil, nil)
 
-var registriesDelete* = Call_RegistriesDelete_568252(name: "registriesDelete",
+var registriesDelete* = Call_RegistriesDelete_564152(name: "registriesDelete",
     meth: HttpMethod.HttpDelete, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ContainerRegistry/registries/{registryName}",
-    validator: validate_RegistriesDelete_568253, base: "",
-    url: url_RegistriesDelete_568254, schemes: {Scheme.Https})
+    validator: validate_RegistriesDelete_564153, base: "",
+    url: url_RegistriesDelete_564154, schemes: {Scheme.Https})
 type
-  Call_RegistriesImportImage_568276 = ref object of OpenApiRestCall_567666
-proc url_RegistriesImportImage_568278(protocol: Scheme; host: string; base: string;
+  Call_RegistriesImportImage_564176 = ref object of OpenApiRestCall_563564
+proc url_RegistriesImportImage_564178(protocol: Scheme; host: string; base: string;
                                      route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -959,37 +963,37 @@ proc url_RegistriesImportImage_568278(protocol: Scheme; host: string; base: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_RegistriesImportImage_568277(path: JsonNode; query: JsonNode;
+proc validate_RegistriesImportImage_564177(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Copies an image to this container registry from the specified container registry.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group to which the container registry belongs.
   ##   subscriptionId: JString (required)
   ##                 : The Microsoft Azure subscription ID.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group to which the container registry belongs.
   ##   registryName: JString (required)
   ##               : The name of the container registry.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568279 = path.getOrDefault("resourceGroupName")
-  valid_568279 = validateParameter(valid_568279, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564179 = path.getOrDefault("subscriptionId")
+  valid_564179 = validateParameter(valid_564179, JString, required = true,
                                  default = nil)
-  if valid_568279 != nil:
-    section.add "resourceGroupName", valid_568279
-  var valid_568280 = path.getOrDefault("subscriptionId")
-  valid_568280 = validateParameter(valid_568280, JString, required = true,
+  if valid_564179 != nil:
+    section.add "subscriptionId", valid_564179
+  var valid_564180 = path.getOrDefault("resourceGroupName")
+  valid_564180 = validateParameter(valid_564180, JString, required = true,
                                  default = nil)
-  if valid_568280 != nil:
-    section.add "subscriptionId", valid_568280
-  var valid_568281 = path.getOrDefault("registryName")
-  valid_568281 = validateParameter(valid_568281, JString, required = true,
+  if valid_564180 != nil:
+    section.add "resourceGroupName", valid_564180
+  var valid_564181 = path.getOrDefault("registryName")
+  valid_564181 = validateParameter(valid_564181, JString, required = true,
                                  default = nil)
-  if valid_568281 != nil:
-    section.add "registryName", valid_568281
+  if valid_564181 != nil:
+    section.add "registryName", valid_564181
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -997,11 +1001,11 @@ proc validate_RegistriesImportImage_568277(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568282 = query.getOrDefault("api-version")
-  valid_568282 = validateParameter(valid_568282, JString, required = true,
+  var valid_564182 = query.getOrDefault("api-version")
+  valid_564182 = validateParameter(valid_564182, JString, required = true,
                                  default = nil)
-  if valid_568282 != nil:
-    section.add "api-version", valid_568282
+  if valid_564182 != nil:
+    section.add "api-version", valid_564182
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1015,53 +1019,53 @@ proc validate_RegistriesImportImage_568277(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568284: Call_RegistriesImportImage_568276; path: JsonNode;
+proc call*(call_564184: Call_RegistriesImportImage_564176; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Copies an image to this container registry from the specified container registry.
   ## 
-  let valid = call_568284.validator(path, query, header, formData, body)
-  let scheme = call_568284.pickScheme
+  let valid = call_564184.validator(path, query, header, formData, body)
+  let scheme = call_564184.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568284.url(scheme.get, call_568284.host, call_568284.base,
-                         call_568284.route, valid.getOrDefault("path"),
+  let url = call_564184.url(scheme.get, call_564184.host, call_564184.base,
+                         call_564184.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568284, url, valid)
+  result = hook(call_564184, url, valid)
 
-proc call*(call_568285: Call_RegistriesImportImage_568276;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          registryName: string; parameters: JsonNode): Recallable =
+proc call*(call_564185: Call_RegistriesImportImage_564176; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string; registryName: string;
+          parameters: JsonNode): Recallable =
   ## registriesImportImage
   ## Copies an image to this container registry from the specified container registry.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group to which the container registry belongs.
   ##   apiVersion: string (required)
   ##             : The client API version.
   ##   subscriptionId: string (required)
   ##                 : The Microsoft Azure subscription ID.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group to which the container registry belongs.
   ##   registryName: string (required)
   ##               : The name of the container registry.
   ##   parameters: JObject (required)
   ##             : The parameters specifying the image to copy and the source container registry.
-  var path_568286 = newJObject()
-  var query_568287 = newJObject()
-  var body_568288 = newJObject()
-  add(path_568286, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568287, "api-version", newJString(apiVersion))
-  add(path_568286, "subscriptionId", newJString(subscriptionId))
-  add(path_568286, "registryName", newJString(registryName))
+  var path_564186 = newJObject()
+  var query_564187 = newJObject()
+  var body_564188 = newJObject()
+  add(query_564187, "api-version", newJString(apiVersion))
+  add(path_564186, "subscriptionId", newJString(subscriptionId))
+  add(path_564186, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564186, "registryName", newJString(registryName))
   if parameters != nil:
-    body_568288 = parameters
-  result = call_568285.call(path_568286, query_568287, nil, nil, body_568288)
+    body_564188 = parameters
+  result = call_564185.call(path_564186, query_564187, nil, nil, body_564188)
 
-var registriesImportImage* = Call_RegistriesImportImage_568276(
+var registriesImportImage* = Call_RegistriesImportImage_564176(
     name: "registriesImportImage", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ContainerRegistry/registries/{registryName}/importImage",
-    validator: validate_RegistriesImportImage_568277, base: "",
-    url: url_RegistriesImportImage_568278, schemes: {Scheme.Https})
+    validator: validate_RegistriesImportImage_564177, base: "",
+    url: url_RegistriesImportImage_564178, schemes: {Scheme.Https})
 type
-  Call_RegistriesListCredentials_568289 = ref object of OpenApiRestCall_567666
-proc url_RegistriesListCredentials_568291(protocol: Scheme; host: string;
+  Call_RegistriesListCredentials_564189 = ref object of OpenApiRestCall_563564
+proc url_RegistriesListCredentials_564191(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1085,37 +1089,37 @@ proc url_RegistriesListCredentials_568291(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_RegistriesListCredentials_568290(path: JsonNode; query: JsonNode;
+proc validate_RegistriesListCredentials_564190(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists the login credentials for the specified container registry.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group to which the container registry belongs.
   ##   subscriptionId: JString (required)
   ##                 : The Microsoft Azure subscription ID.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group to which the container registry belongs.
   ##   registryName: JString (required)
   ##               : The name of the container registry.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568292 = path.getOrDefault("resourceGroupName")
-  valid_568292 = validateParameter(valid_568292, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564192 = path.getOrDefault("subscriptionId")
+  valid_564192 = validateParameter(valid_564192, JString, required = true,
                                  default = nil)
-  if valid_568292 != nil:
-    section.add "resourceGroupName", valid_568292
-  var valid_568293 = path.getOrDefault("subscriptionId")
-  valid_568293 = validateParameter(valid_568293, JString, required = true,
+  if valid_564192 != nil:
+    section.add "subscriptionId", valid_564192
+  var valid_564193 = path.getOrDefault("resourceGroupName")
+  valid_564193 = validateParameter(valid_564193, JString, required = true,
                                  default = nil)
-  if valid_568293 != nil:
-    section.add "subscriptionId", valid_568293
-  var valid_568294 = path.getOrDefault("registryName")
-  valid_568294 = validateParameter(valid_568294, JString, required = true,
+  if valid_564193 != nil:
+    section.add "resourceGroupName", valid_564193
+  var valid_564194 = path.getOrDefault("registryName")
+  valid_564194 = validateParameter(valid_564194, JString, required = true,
                                  default = nil)
-  if valid_568294 != nil:
-    section.add "registryName", valid_568294
+  if valid_564194 != nil:
+    section.add "registryName", valid_564194
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1123,11 +1127,11 @@ proc validate_RegistriesListCredentials_568290(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568295 = query.getOrDefault("api-version")
-  valid_568295 = validateParameter(valid_568295, JString, required = true,
+  var valid_564195 = query.getOrDefault("api-version")
+  valid_564195 = validateParameter(valid_564195, JString, required = true,
                                  default = nil)
-  if valid_568295 != nil:
-    section.add "api-version", valid_568295
+  if valid_564195 != nil:
+    section.add "api-version", valid_564195
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1136,48 +1140,47 @@ proc validate_RegistriesListCredentials_568290(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568296: Call_RegistriesListCredentials_568289; path: JsonNode;
+proc call*(call_564196: Call_RegistriesListCredentials_564189; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists the login credentials for the specified container registry.
   ## 
-  let valid = call_568296.validator(path, query, header, formData, body)
-  let scheme = call_568296.pickScheme
+  let valid = call_564196.validator(path, query, header, formData, body)
+  let scheme = call_564196.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568296.url(scheme.get, call_568296.host, call_568296.base,
-                         call_568296.route, valid.getOrDefault("path"),
+  let url = call_564196.url(scheme.get, call_564196.host, call_564196.base,
+                         call_564196.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568296, url, valid)
+  result = hook(call_564196, url, valid)
 
-proc call*(call_568297: Call_RegistriesListCredentials_568289;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          registryName: string): Recallable =
+proc call*(call_564197: Call_RegistriesListCredentials_564189; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string; registryName: string): Recallable =
   ## registriesListCredentials
   ## Lists the login credentials for the specified container registry.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group to which the container registry belongs.
   ##   apiVersion: string (required)
   ##             : The client API version.
   ##   subscriptionId: string (required)
   ##                 : The Microsoft Azure subscription ID.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group to which the container registry belongs.
   ##   registryName: string (required)
   ##               : The name of the container registry.
-  var path_568298 = newJObject()
-  var query_568299 = newJObject()
-  add(path_568298, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568299, "api-version", newJString(apiVersion))
-  add(path_568298, "subscriptionId", newJString(subscriptionId))
-  add(path_568298, "registryName", newJString(registryName))
-  result = call_568297.call(path_568298, query_568299, nil, nil, nil)
+  var path_564198 = newJObject()
+  var query_564199 = newJObject()
+  add(query_564199, "api-version", newJString(apiVersion))
+  add(path_564198, "subscriptionId", newJString(subscriptionId))
+  add(path_564198, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564198, "registryName", newJString(registryName))
+  result = call_564197.call(path_564198, query_564199, nil, nil, nil)
 
-var registriesListCredentials* = Call_RegistriesListCredentials_568289(
+var registriesListCredentials* = Call_RegistriesListCredentials_564189(
     name: "registriesListCredentials", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ContainerRegistry/registries/{registryName}/listCredentials",
-    validator: validate_RegistriesListCredentials_568290, base: "",
-    url: url_RegistriesListCredentials_568291, schemes: {Scheme.Https})
+    validator: validate_RegistriesListCredentials_564190, base: "",
+    url: url_RegistriesListCredentials_564191, schemes: {Scheme.Https})
 type
-  Call_RegistriesListUsages_568300 = ref object of OpenApiRestCall_567666
-proc url_RegistriesListUsages_568302(protocol: Scheme; host: string; base: string;
+  Call_RegistriesListUsages_564200 = ref object of OpenApiRestCall_563564
+proc url_RegistriesListUsages_564202(protocol: Scheme; host: string; base: string;
                                     route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1201,37 +1204,37 @@ proc url_RegistriesListUsages_568302(protocol: Scheme; host: string; base: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_RegistriesListUsages_568301(path: JsonNode; query: JsonNode;
+proc validate_RegistriesListUsages_564201(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the quota usages for the specified container registry.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group to which the container registry belongs.
   ##   subscriptionId: JString (required)
   ##                 : The Microsoft Azure subscription ID.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group to which the container registry belongs.
   ##   registryName: JString (required)
   ##               : The name of the container registry.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568303 = path.getOrDefault("resourceGroupName")
-  valid_568303 = validateParameter(valid_568303, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564203 = path.getOrDefault("subscriptionId")
+  valid_564203 = validateParameter(valid_564203, JString, required = true,
                                  default = nil)
-  if valid_568303 != nil:
-    section.add "resourceGroupName", valid_568303
-  var valid_568304 = path.getOrDefault("subscriptionId")
-  valid_568304 = validateParameter(valid_568304, JString, required = true,
+  if valid_564203 != nil:
+    section.add "subscriptionId", valid_564203
+  var valid_564204 = path.getOrDefault("resourceGroupName")
+  valid_564204 = validateParameter(valid_564204, JString, required = true,
                                  default = nil)
-  if valid_568304 != nil:
-    section.add "subscriptionId", valid_568304
-  var valid_568305 = path.getOrDefault("registryName")
-  valid_568305 = validateParameter(valid_568305, JString, required = true,
+  if valid_564204 != nil:
+    section.add "resourceGroupName", valid_564204
+  var valid_564205 = path.getOrDefault("registryName")
+  valid_564205 = validateParameter(valid_564205, JString, required = true,
                                  default = nil)
-  if valid_568305 != nil:
-    section.add "registryName", valid_568305
+  if valid_564205 != nil:
+    section.add "registryName", valid_564205
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1239,11 +1242,11 @@ proc validate_RegistriesListUsages_568301(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568306 = query.getOrDefault("api-version")
-  valid_568306 = validateParameter(valid_568306, JString, required = true,
+  var valid_564206 = query.getOrDefault("api-version")
+  valid_564206 = validateParameter(valid_564206, JString, required = true,
                                  default = nil)
-  if valid_568306 != nil:
-    section.add "api-version", valid_568306
+  if valid_564206 != nil:
+    section.add "api-version", valid_564206
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1252,48 +1255,47 @@ proc validate_RegistriesListUsages_568301(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568307: Call_RegistriesListUsages_568300; path: JsonNode;
+proc call*(call_564207: Call_RegistriesListUsages_564200; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the quota usages for the specified container registry.
   ## 
-  let valid = call_568307.validator(path, query, header, formData, body)
-  let scheme = call_568307.pickScheme
+  let valid = call_564207.validator(path, query, header, formData, body)
+  let scheme = call_564207.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568307.url(scheme.get, call_568307.host, call_568307.base,
-                         call_568307.route, valid.getOrDefault("path"),
+  let url = call_564207.url(scheme.get, call_564207.host, call_564207.base,
+                         call_564207.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568307, url, valid)
+  result = hook(call_564207, url, valid)
 
-proc call*(call_568308: Call_RegistriesListUsages_568300;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          registryName: string): Recallable =
+proc call*(call_564208: Call_RegistriesListUsages_564200; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string; registryName: string): Recallable =
   ## registriesListUsages
   ## Gets the quota usages for the specified container registry.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group to which the container registry belongs.
   ##   apiVersion: string (required)
   ##             : The client API version.
   ##   subscriptionId: string (required)
   ##                 : The Microsoft Azure subscription ID.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group to which the container registry belongs.
   ##   registryName: string (required)
   ##               : The name of the container registry.
-  var path_568309 = newJObject()
-  var query_568310 = newJObject()
-  add(path_568309, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568310, "api-version", newJString(apiVersion))
-  add(path_568309, "subscriptionId", newJString(subscriptionId))
-  add(path_568309, "registryName", newJString(registryName))
-  result = call_568308.call(path_568309, query_568310, nil, nil, nil)
+  var path_564209 = newJObject()
+  var query_564210 = newJObject()
+  add(query_564210, "api-version", newJString(apiVersion))
+  add(path_564209, "subscriptionId", newJString(subscriptionId))
+  add(path_564209, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564209, "registryName", newJString(registryName))
+  result = call_564208.call(path_564209, query_564210, nil, nil, nil)
 
-var registriesListUsages* = Call_RegistriesListUsages_568300(
+var registriesListUsages* = Call_RegistriesListUsages_564200(
     name: "registriesListUsages", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ContainerRegistry/registries/{registryName}/listUsages",
-    validator: validate_RegistriesListUsages_568301, base: "",
-    url: url_RegistriesListUsages_568302, schemes: {Scheme.Https})
+    validator: validate_RegistriesListUsages_564201, base: "",
+    url: url_RegistriesListUsages_564202, schemes: {Scheme.Https})
 type
-  Call_RegistriesRegenerateCredential_568311 = ref object of OpenApiRestCall_567666
-proc url_RegistriesRegenerateCredential_568313(protocol: Scheme; host: string;
+  Call_RegistriesRegenerateCredential_564211 = ref object of OpenApiRestCall_563564
+proc url_RegistriesRegenerateCredential_564213(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1317,37 +1319,37 @@ proc url_RegistriesRegenerateCredential_568313(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_RegistriesRegenerateCredential_568312(path: JsonNode;
+proc validate_RegistriesRegenerateCredential_564212(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Regenerates one of the login credentials for the specified container registry.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group to which the container registry belongs.
   ##   subscriptionId: JString (required)
   ##                 : The Microsoft Azure subscription ID.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group to which the container registry belongs.
   ##   registryName: JString (required)
   ##               : The name of the container registry.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568314 = path.getOrDefault("resourceGroupName")
-  valid_568314 = validateParameter(valid_568314, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564214 = path.getOrDefault("subscriptionId")
+  valid_564214 = validateParameter(valid_564214, JString, required = true,
                                  default = nil)
-  if valid_568314 != nil:
-    section.add "resourceGroupName", valid_568314
-  var valid_568315 = path.getOrDefault("subscriptionId")
-  valid_568315 = validateParameter(valid_568315, JString, required = true,
+  if valid_564214 != nil:
+    section.add "subscriptionId", valid_564214
+  var valid_564215 = path.getOrDefault("resourceGroupName")
+  valid_564215 = validateParameter(valid_564215, JString, required = true,
                                  default = nil)
-  if valid_568315 != nil:
-    section.add "subscriptionId", valid_568315
-  var valid_568316 = path.getOrDefault("registryName")
-  valid_568316 = validateParameter(valid_568316, JString, required = true,
+  if valid_564215 != nil:
+    section.add "resourceGroupName", valid_564215
+  var valid_564216 = path.getOrDefault("registryName")
+  valid_564216 = validateParameter(valid_564216, JString, required = true,
                                  default = nil)
-  if valid_568316 != nil:
-    section.add "registryName", valid_568316
+  if valid_564216 != nil:
+    section.add "registryName", valid_564216
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1355,11 +1357,11 @@ proc validate_RegistriesRegenerateCredential_568312(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568317 = query.getOrDefault("api-version")
-  valid_568317 = validateParameter(valid_568317, JString, required = true,
+  var valid_564217 = query.getOrDefault("api-version")
+  valid_564217 = validateParameter(valid_564217, JString, required = true,
                                  default = nil)
-  if valid_568317 != nil:
-    section.add "api-version", valid_568317
+  if valid_564217 != nil:
+    section.add "api-version", valid_564217
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1373,53 +1375,54 @@ proc validate_RegistriesRegenerateCredential_568312(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568319: Call_RegistriesRegenerateCredential_568311; path: JsonNode;
+proc call*(call_564219: Call_RegistriesRegenerateCredential_564211; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Regenerates one of the login credentials for the specified container registry.
   ## 
-  let valid = call_568319.validator(path, query, header, formData, body)
-  let scheme = call_568319.pickScheme
+  let valid = call_564219.validator(path, query, header, formData, body)
+  let scheme = call_564219.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568319.url(scheme.get, call_568319.host, call_568319.base,
-                         call_568319.route, valid.getOrDefault("path"),
+  let url = call_564219.url(scheme.get, call_564219.host, call_564219.base,
+                         call_564219.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568319, url, valid)
+  result = hook(call_564219, url, valid)
 
-proc call*(call_568320: Call_RegistriesRegenerateCredential_568311;
+proc call*(call_564220: Call_RegistriesRegenerateCredential_564211;
+          apiVersion: string; subscriptionId: string;
           regenerateCredentialParameters: JsonNode; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; registryName: string): Recallable =
+          registryName: string): Recallable =
   ## registriesRegenerateCredential
   ## Regenerates one of the login credentials for the specified container registry.
-  ##   regenerateCredentialParameters: JObject (required)
-  ##                                 : Specifies name of the password which should be regenerated -- password or password2.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group to which the container registry belongs.
   ##   apiVersion: string (required)
   ##             : The client API version.
   ##   subscriptionId: string (required)
   ##                 : The Microsoft Azure subscription ID.
+  ##   regenerateCredentialParameters: JObject (required)
+  ##                                 : Specifies name of the password which should be regenerated -- password or password2.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group to which the container registry belongs.
   ##   registryName: string (required)
   ##               : The name of the container registry.
-  var path_568321 = newJObject()
-  var query_568322 = newJObject()
-  var body_568323 = newJObject()
+  var path_564221 = newJObject()
+  var query_564222 = newJObject()
+  var body_564223 = newJObject()
+  add(query_564222, "api-version", newJString(apiVersion))
+  add(path_564221, "subscriptionId", newJString(subscriptionId))
   if regenerateCredentialParameters != nil:
-    body_568323 = regenerateCredentialParameters
-  add(path_568321, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568322, "api-version", newJString(apiVersion))
-  add(path_568321, "subscriptionId", newJString(subscriptionId))
-  add(path_568321, "registryName", newJString(registryName))
-  result = call_568320.call(path_568321, query_568322, nil, nil, body_568323)
+    body_564223 = regenerateCredentialParameters
+  add(path_564221, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564221, "registryName", newJString(registryName))
+  result = call_564220.call(path_564221, query_564222, nil, nil, body_564223)
 
-var registriesRegenerateCredential* = Call_RegistriesRegenerateCredential_568311(
+var registriesRegenerateCredential* = Call_RegistriesRegenerateCredential_564211(
     name: "registriesRegenerateCredential", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ContainerRegistry/registries/{registryName}/regenerateCredential",
-    validator: validate_RegistriesRegenerateCredential_568312, base: "",
-    url: url_RegistriesRegenerateCredential_568313, schemes: {Scheme.Https})
+    validator: validate_RegistriesRegenerateCredential_564212, base: "",
+    url: url_RegistriesRegenerateCredential_564213, schemes: {Scheme.Https})
 type
-  Call_ReplicationsList_568324 = ref object of OpenApiRestCall_567666
-proc url_ReplicationsList_568326(protocol: Scheme; host: string; base: string;
+  Call_ReplicationsList_564224 = ref object of OpenApiRestCall_563564
+proc url_ReplicationsList_564226(protocol: Scheme; host: string; base: string;
                                 route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1443,7 +1446,7 @@ proc url_ReplicationsList_568326(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ReplicationsList_568325(path: JsonNode; query: JsonNode;
+proc validate_ReplicationsList_564225(path: JsonNode; query: JsonNode;
                                      header: JsonNode; formData: JsonNode;
                                      body: JsonNode): JsonNode =
   ## Lists all the replications for the specified container registry.
@@ -1451,30 +1454,30 @@ proc validate_ReplicationsList_568325(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group to which the container registry belongs.
   ##   subscriptionId: JString (required)
   ##                 : The Microsoft Azure subscription ID.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group to which the container registry belongs.
   ##   registryName: JString (required)
   ##               : The name of the container registry.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568327 = path.getOrDefault("resourceGroupName")
-  valid_568327 = validateParameter(valid_568327, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564227 = path.getOrDefault("subscriptionId")
+  valid_564227 = validateParameter(valid_564227, JString, required = true,
                                  default = nil)
-  if valid_568327 != nil:
-    section.add "resourceGroupName", valid_568327
-  var valid_568328 = path.getOrDefault("subscriptionId")
-  valid_568328 = validateParameter(valid_568328, JString, required = true,
+  if valid_564227 != nil:
+    section.add "subscriptionId", valid_564227
+  var valid_564228 = path.getOrDefault("resourceGroupName")
+  valid_564228 = validateParameter(valid_564228, JString, required = true,
                                  default = nil)
-  if valid_568328 != nil:
-    section.add "subscriptionId", valid_568328
-  var valid_568329 = path.getOrDefault("registryName")
-  valid_568329 = validateParameter(valid_568329, JString, required = true,
+  if valid_564228 != nil:
+    section.add "resourceGroupName", valid_564228
+  var valid_564229 = path.getOrDefault("registryName")
+  valid_564229 = validateParameter(valid_564229, JString, required = true,
                                  default = nil)
-  if valid_568329 != nil:
-    section.add "registryName", valid_568329
+  if valid_564229 != nil:
+    section.add "registryName", valid_564229
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1482,11 +1485,11 @@ proc validate_ReplicationsList_568325(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568330 = query.getOrDefault("api-version")
-  valid_568330 = validateParameter(valid_568330, JString, required = true,
+  var valid_564230 = query.getOrDefault("api-version")
+  valid_564230 = validateParameter(valid_564230, JString, required = true,
                                  default = nil)
-  if valid_568330 != nil:
-    section.add "api-version", valid_568330
+  if valid_564230 != nil:
+    section.add "api-version", valid_564230
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1495,46 +1498,46 @@ proc validate_ReplicationsList_568325(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568331: Call_ReplicationsList_568324; path: JsonNode;
+proc call*(call_564231: Call_ReplicationsList_564224; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists all the replications for the specified container registry.
   ## 
-  let valid = call_568331.validator(path, query, header, formData, body)
-  let scheme = call_568331.pickScheme
+  let valid = call_564231.validator(path, query, header, formData, body)
+  let scheme = call_564231.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568331.url(scheme.get, call_568331.host, call_568331.base,
-                         call_568331.route, valid.getOrDefault("path"),
+  let url = call_564231.url(scheme.get, call_564231.host, call_564231.base,
+                         call_564231.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568331, url, valid)
+  result = hook(call_564231, url, valid)
 
-proc call*(call_568332: Call_ReplicationsList_568324; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; registryName: string): Recallable =
+proc call*(call_564232: Call_ReplicationsList_564224; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string; registryName: string): Recallable =
   ## replicationsList
   ## Lists all the replications for the specified container registry.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group to which the container registry belongs.
   ##   apiVersion: string (required)
   ##             : The client API version.
   ##   subscriptionId: string (required)
   ##                 : The Microsoft Azure subscription ID.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group to which the container registry belongs.
   ##   registryName: string (required)
   ##               : The name of the container registry.
-  var path_568333 = newJObject()
-  var query_568334 = newJObject()
-  add(path_568333, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568334, "api-version", newJString(apiVersion))
-  add(path_568333, "subscriptionId", newJString(subscriptionId))
-  add(path_568333, "registryName", newJString(registryName))
-  result = call_568332.call(path_568333, query_568334, nil, nil, nil)
+  var path_564233 = newJObject()
+  var query_564234 = newJObject()
+  add(query_564234, "api-version", newJString(apiVersion))
+  add(path_564233, "subscriptionId", newJString(subscriptionId))
+  add(path_564233, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564233, "registryName", newJString(registryName))
+  result = call_564232.call(path_564233, query_564234, nil, nil, nil)
 
-var replicationsList* = Call_ReplicationsList_568324(name: "replicationsList",
+var replicationsList* = Call_ReplicationsList_564224(name: "replicationsList",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ContainerRegistry/registries/{registryName}/replications",
-    validator: validate_ReplicationsList_568325, base: "",
-    url: url_ReplicationsList_568326, schemes: {Scheme.Https})
+    validator: validate_ReplicationsList_564225, base: "",
+    url: url_ReplicationsList_564226, schemes: {Scheme.Https})
 type
-  Call_ReplicationsCreate_568347 = ref object of OpenApiRestCall_567666
-proc url_ReplicationsCreate_568349(protocol: Scheme; host: string; base: string;
+  Call_ReplicationsCreate_564247 = ref object of OpenApiRestCall_563564
+proc url_ReplicationsCreate_564249(protocol: Scheme; host: string; base: string;
                                   route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1560,7 +1563,7 @@ proc url_ReplicationsCreate_568349(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ReplicationsCreate_568348(path: JsonNode; query: JsonNode;
+proc validate_ReplicationsCreate_564248(path: JsonNode; query: JsonNode;
                                        header: JsonNode; formData: JsonNode;
                                        body: JsonNode): JsonNode =
   ## Creates a replication for a container registry with the specified parameters.
@@ -1568,37 +1571,37 @@ proc validate_ReplicationsCreate_568348(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group to which the container registry belongs.
-  ##   subscriptionId: JString (required)
-  ##                 : The Microsoft Azure subscription ID.
   ##   replicationName: JString (required)
   ##                  : The name of the replication.
+  ##   subscriptionId: JString (required)
+  ##                 : The Microsoft Azure subscription ID.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group to which the container registry belongs.
   ##   registryName: JString (required)
   ##               : The name of the container registry.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568350 = path.getOrDefault("resourceGroupName")
-  valid_568350 = validateParameter(valid_568350, JString, required = true,
+        "path argument is necessary due to required `replicationName` field"
+  var valid_564250 = path.getOrDefault("replicationName")
+  valid_564250 = validateParameter(valid_564250, JString, required = true,
                                  default = nil)
-  if valid_568350 != nil:
-    section.add "resourceGroupName", valid_568350
-  var valid_568351 = path.getOrDefault("subscriptionId")
-  valid_568351 = validateParameter(valid_568351, JString, required = true,
+  if valid_564250 != nil:
+    section.add "replicationName", valid_564250
+  var valid_564251 = path.getOrDefault("subscriptionId")
+  valid_564251 = validateParameter(valid_564251, JString, required = true,
                                  default = nil)
-  if valid_568351 != nil:
-    section.add "subscriptionId", valid_568351
-  var valid_568352 = path.getOrDefault("replicationName")
-  valid_568352 = validateParameter(valid_568352, JString, required = true,
+  if valid_564251 != nil:
+    section.add "subscriptionId", valid_564251
+  var valid_564252 = path.getOrDefault("resourceGroupName")
+  valid_564252 = validateParameter(valid_564252, JString, required = true,
                                  default = nil)
-  if valid_568352 != nil:
-    section.add "replicationName", valid_568352
-  var valid_568353 = path.getOrDefault("registryName")
-  valid_568353 = validateParameter(valid_568353, JString, required = true,
+  if valid_564252 != nil:
+    section.add "resourceGroupName", valid_564252
+  var valid_564253 = path.getOrDefault("registryName")
+  valid_564253 = validateParameter(valid_564253, JString, required = true,
                                  default = nil)
-  if valid_568353 != nil:
-    section.add "registryName", valid_568353
+  if valid_564253 != nil:
+    section.add "registryName", valid_564253
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1606,11 +1609,11 @@ proc validate_ReplicationsCreate_568348(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568354 = query.getOrDefault("api-version")
-  valid_568354 = validateParameter(valid_568354, JString, required = true,
+  var valid_564254 = query.getOrDefault("api-version")
+  valid_564254 = validateParameter(valid_564254, JString, required = true,
                                  default = nil)
-  if valid_568354 != nil:
-    section.add "api-version", valid_568354
+  if valid_564254 != nil:
+    section.add "api-version", valid_564254
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1624,56 +1627,56 @@ proc validate_ReplicationsCreate_568348(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568356: Call_ReplicationsCreate_568347; path: JsonNode;
+proc call*(call_564256: Call_ReplicationsCreate_564247; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Creates a replication for a container registry with the specified parameters.
   ## 
-  let valid = call_568356.validator(path, query, header, formData, body)
-  let scheme = call_568356.pickScheme
+  let valid = call_564256.validator(path, query, header, formData, body)
+  let scheme = call_564256.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568356.url(scheme.get, call_568356.host, call_568356.base,
-                         call_568356.route, valid.getOrDefault("path"),
+  let url = call_564256.url(scheme.get, call_564256.host, call_564256.base,
+                         call_564256.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568356, url, valid)
+  result = hook(call_564256, url, valid)
 
-proc call*(call_568357: Call_ReplicationsCreate_568347; replication: JsonNode;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          replicationName: string; registryName: string): Recallable =
+proc call*(call_564257: Call_ReplicationsCreate_564247; replication: JsonNode;
+          apiVersion: string; replicationName: string; subscriptionId: string;
+          resourceGroupName: string; registryName: string): Recallable =
   ## replicationsCreate
   ## Creates a replication for a container registry with the specified parameters.
   ##   replication: JObject (required)
   ##              : The parameters for creating a replication.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group to which the container registry belongs.
   ##   apiVersion: string (required)
   ##             : The client API version.
-  ##   subscriptionId: string (required)
-  ##                 : The Microsoft Azure subscription ID.
   ##   replicationName: string (required)
   ##                  : The name of the replication.
+  ##   subscriptionId: string (required)
+  ##                 : The Microsoft Azure subscription ID.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group to which the container registry belongs.
   ##   registryName: string (required)
   ##               : The name of the container registry.
-  var path_568358 = newJObject()
-  var query_568359 = newJObject()
-  var body_568360 = newJObject()
+  var path_564258 = newJObject()
+  var query_564259 = newJObject()
+  var body_564260 = newJObject()
   if replication != nil:
-    body_568360 = replication
-  add(path_568358, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568359, "api-version", newJString(apiVersion))
-  add(path_568358, "subscriptionId", newJString(subscriptionId))
-  add(path_568358, "replicationName", newJString(replicationName))
-  add(path_568358, "registryName", newJString(registryName))
-  result = call_568357.call(path_568358, query_568359, nil, nil, body_568360)
+    body_564260 = replication
+  add(query_564259, "api-version", newJString(apiVersion))
+  add(path_564258, "replicationName", newJString(replicationName))
+  add(path_564258, "subscriptionId", newJString(subscriptionId))
+  add(path_564258, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564258, "registryName", newJString(registryName))
+  result = call_564257.call(path_564258, query_564259, nil, nil, body_564260)
 
-var replicationsCreate* = Call_ReplicationsCreate_568347(
+var replicationsCreate* = Call_ReplicationsCreate_564247(
     name: "replicationsCreate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ContainerRegistry/registries/{registryName}/replications/{replicationName}",
-    validator: validate_ReplicationsCreate_568348, base: "",
-    url: url_ReplicationsCreate_568349, schemes: {Scheme.Https})
+    validator: validate_ReplicationsCreate_564248, base: "",
+    url: url_ReplicationsCreate_564249, schemes: {Scheme.Https})
 type
-  Call_ReplicationsGet_568335 = ref object of OpenApiRestCall_567666
-proc url_ReplicationsGet_568337(protocol: Scheme; host: string; base: string;
+  Call_ReplicationsGet_564235 = ref object of OpenApiRestCall_563564
+proc url_ReplicationsGet_564237(protocol: Scheme; host: string; base: string;
                                route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1699,7 +1702,7 @@ proc url_ReplicationsGet_568337(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ReplicationsGet_568336(path: JsonNode; query: JsonNode;
+proc validate_ReplicationsGet_564236(path: JsonNode; query: JsonNode;
                                     header: JsonNode; formData: JsonNode;
                                     body: JsonNode): JsonNode =
   ## Gets the properties of the specified replication.
@@ -1707,37 +1710,37 @@ proc validate_ReplicationsGet_568336(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group to which the container registry belongs.
-  ##   subscriptionId: JString (required)
-  ##                 : The Microsoft Azure subscription ID.
   ##   replicationName: JString (required)
   ##                  : The name of the replication.
+  ##   subscriptionId: JString (required)
+  ##                 : The Microsoft Azure subscription ID.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group to which the container registry belongs.
   ##   registryName: JString (required)
   ##               : The name of the container registry.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568338 = path.getOrDefault("resourceGroupName")
-  valid_568338 = validateParameter(valid_568338, JString, required = true,
+        "path argument is necessary due to required `replicationName` field"
+  var valid_564238 = path.getOrDefault("replicationName")
+  valid_564238 = validateParameter(valid_564238, JString, required = true,
                                  default = nil)
-  if valid_568338 != nil:
-    section.add "resourceGroupName", valid_568338
-  var valid_568339 = path.getOrDefault("subscriptionId")
-  valid_568339 = validateParameter(valid_568339, JString, required = true,
+  if valid_564238 != nil:
+    section.add "replicationName", valid_564238
+  var valid_564239 = path.getOrDefault("subscriptionId")
+  valid_564239 = validateParameter(valid_564239, JString, required = true,
                                  default = nil)
-  if valid_568339 != nil:
-    section.add "subscriptionId", valid_568339
-  var valid_568340 = path.getOrDefault("replicationName")
-  valid_568340 = validateParameter(valid_568340, JString, required = true,
+  if valid_564239 != nil:
+    section.add "subscriptionId", valid_564239
+  var valid_564240 = path.getOrDefault("resourceGroupName")
+  valid_564240 = validateParameter(valid_564240, JString, required = true,
                                  default = nil)
-  if valid_568340 != nil:
-    section.add "replicationName", valid_568340
-  var valid_568341 = path.getOrDefault("registryName")
-  valid_568341 = validateParameter(valid_568341, JString, required = true,
+  if valid_564240 != nil:
+    section.add "resourceGroupName", valid_564240
+  var valid_564241 = path.getOrDefault("registryName")
+  valid_564241 = validateParameter(valid_564241, JString, required = true,
                                  default = nil)
-  if valid_568341 != nil:
-    section.add "registryName", valid_568341
+  if valid_564241 != nil:
+    section.add "registryName", valid_564241
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1745,11 +1748,11 @@ proc validate_ReplicationsGet_568336(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568342 = query.getOrDefault("api-version")
-  valid_568342 = validateParameter(valid_568342, JString, required = true,
+  var valid_564242 = query.getOrDefault("api-version")
+  valid_564242 = validateParameter(valid_564242, JString, required = true,
                                  default = nil)
-  if valid_568342 != nil:
-    section.add "api-version", valid_568342
+  if valid_564242 != nil:
+    section.add "api-version", valid_564242
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1758,50 +1761,50 @@ proc validate_ReplicationsGet_568336(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568343: Call_ReplicationsGet_568335; path: JsonNode; query: JsonNode;
+proc call*(call_564243: Call_ReplicationsGet_564235; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the properties of the specified replication.
   ## 
-  let valid = call_568343.validator(path, query, header, formData, body)
-  let scheme = call_568343.pickScheme
+  let valid = call_564243.validator(path, query, header, formData, body)
+  let scheme = call_564243.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568343.url(scheme.get, call_568343.host, call_568343.base,
-                         call_568343.route, valid.getOrDefault("path"),
+  let url = call_564243.url(scheme.get, call_564243.host, call_564243.base,
+                         call_564243.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568343, url, valid)
+  result = hook(call_564243, url, valid)
 
-proc call*(call_568344: Call_ReplicationsGet_568335; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; replicationName: string;
-          registryName: string): Recallable =
+proc call*(call_564244: Call_ReplicationsGet_564235; apiVersion: string;
+          replicationName: string; subscriptionId: string;
+          resourceGroupName: string; registryName: string): Recallable =
   ## replicationsGet
   ## Gets the properties of the specified replication.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group to which the container registry belongs.
   ##   apiVersion: string (required)
   ##             : The client API version.
-  ##   subscriptionId: string (required)
-  ##                 : The Microsoft Azure subscription ID.
   ##   replicationName: string (required)
   ##                  : The name of the replication.
+  ##   subscriptionId: string (required)
+  ##                 : The Microsoft Azure subscription ID.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group to which the container registry belongs.
   ##   registryName: string (required)
   ##               : The name of the container registry.
-  var path_568345 = newJObject()
-  var query_568346 = newJObject()
-  add(path_568345, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568346, "api-version", newJString(apiVersion))
-  add(path_568345, "subscriptionId", newJString(subscriptionId))
-  add(path_568345, "replicationName", newJString(replicationName))
-  add(path_568345, "registryName", newJString(registryName))
-  result = call_568344.call(path_568345, query_568346, nil, nil, nil)
+  var path_564245 = newJObject()
+  var query_564246 = newJObject()
+  add(query_564246, "api-version", newJString(apiVersion))
+  add(path_564245, "replicationName", newJString(replicationName))
+  add(path_564245, "subscriptionId", newJString(subscriptionId))
+  add(path_564245, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564245, "registryName", newJString(registryName))
+  result = call_564244.call(path_564245, query_564246, nil, nil, nil)
 
-var replicationsGet* = Call_ReplicationsGet_568335(name: "replicationsGet",
+var replicationsGet* = Call_ReplicationsGet_564235(name: "replicationsGet",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ContainerRegistry/registries/{registryName}/replications/{replicationName}",
-    validator: validate_ReplicationsGet_568336, base: "", url: url_ReplicationsGet_568337,
+    validator: validate_ReplicationsGet_564236, base: "", url: url_ReplicationsGet_564237,
     schemes: {Scheme.Https})
 type
-  Call_ReplicationsUpdate_568373 = ref object of OpenApiRestCall_567666
-proc url_ReplicationsUpdate_568375(protocol: Scheme; host: string; base: string;
+  Call_ReplicationsUpdate_564273 = ref object of OpenApiRestCall_563564
+proc url_ReplicationsUpdate_564275(protocol: Scheme; host: string; base: string;
                                   route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1827,7 +1830,7 @@ proc url_ReplicationsUpdate_568375(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ReplicationsUpdate_568374(path: JsonNode; query: JsonNode;
+proc validate_ReplicationsUpdate_564274(path: JsonNode; query: JsonNode;
                                        header: JsonNode; formData: JsonNode;
                                        body: JsonNode): JsonNode =
   ## Updates a replication for a container registry with the specified parameters.
@@ -1835,37 +1838,37 @@ proc validate_ReplicationsUpdate_568374(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group to which the container registry belongs.
-  ##   subscriptionId: JString (required)
-  ##                 : The Microsoft Azure subscription ID.
   ##   replicationName: JString (required)
   ##                  : The name of the replication.
+  ##   subscriptionId: JString (required)
+  ##                 : The Microsoft Azure subscription ID.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group to which the container registry belongs.
   ##   registryName: JString (required)
   ##               : The name of the container registry.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568376 = path.getOrDefault("resourceGroupName")
-  valid_568376 = validateParameter(valid_568376, JString, required = true,
+        "path argument is necessary due to required `replicationName` field"
+  var valid_564276 = path.getOrDefault("replicationName")
+  valid_564276 = validateParameter(valid_564276, JString, required = true,
                                  default = nil)
-  if valid_568376 != nil:
-    section.add "resourceGroupName", valid_568376
-  var valid_568377 = path.getOrDefault("subscriptionId")
-  valid_568377 = validateParameter(valid_568377, JString, required = true,
+  if valid_564276 != nil:
+    section.add "replicationName", valid_564276
+  var valid_564277 = path.getOrDefault("subscriptionId")
+  valid_564277 = validateParameter(valid_564277, JString, required = true,
                                  default = nil)
-  if valid_568377 != nil:
-    section.add "subscriptionId", valid_568377
-  var valid_568378 = path.getOrDefault("replicationName")
-  valid_568378 = validateParameter(valid_568378, JString, required = true,
+  if valid_564277 != nil:
+    section.add "subscriptionId", valid_564277
+  var valid_564278 = path.getOrDefault("resourceGroupName")
+  valid_564278 = validateParameter(valid_564278, JString, required = true,
                                  default = nil)
-  if valid_568378 != nil:
-    section.add "replicationName", valid_568378
-  var valid_568379 = path.getOrDefault("registryName")
-  valid_568379 = validateParameter(valid_568379, JString, required = true,
+  if valid_564278 != nil:
+    section.add "resourceGroupName", valid_564278
+  var valid_564279 = path.getOrDefault("registryName")
+  valid_564279 = validateParameter(valid_564279, JString, required = true,
                                  default = nil)
-  if valid_568379 != nil:
-    section.add "registryName", valid_568379
+  if valid_564279 != nil:
+    section.add "registryName", valid_564279
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1873,11 +1876,11 @@ proc validate_ReplicationsUpdate_568374(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568380 = query.getOrDefault("api-version")
-  valid_568380 = validateParameter(valid_568380, JString, required = true,
+  var valid_564280 = query.getOrDefault("api-version")
+  valid_564280 = validateParameter(valid_564280, JString, required = true,
                                  default = nil)
-  if valid_568380 != nil:
-    section.add "api-version", valid_568380
+  if valid_564280 != nil:
+    section.add "api-version", valid_564280
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1891,56 +1894,57 @@ proc validate_ReplicationsUpdate_568374(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568382: Call_ReplicationsUpdate_568373; path: JsonNode;
+proc call*(call_564282: Call_ReplicationsUpdate_564273; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Updates a replication for a container registry with the specified parameters.
   ## 
-  let valid = call_568382.validator(path, query, header, formData, body)
-  let scheme = call_568382.pickScheme
+  let valid = call_564282.validator(path, query, header, formData, body)
+  let scheme = call_564282.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568382.url(scheme.get, call_568382.host, call_568382.base,
-                         call_568382.route, valid.getOrDefault("path"),
+  let url = call_564282.url(scheme.get, call_564282.host, call_564282.base,
+                         call_564282.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568382, url, valid)
+  result = hook(call_564282, url, valid)
 
-proc call*(call_568383: Call_ReplicationsUpdate_568373; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; replicationName: string;
-          registryName: string; replicationUpdateParameters: JsonNode): Recallable =
+proc call*(call_564283: Call_ReplicationsUpdate_564273; apiVersion: string;
+          replicationName: string; subscriptionId: string;
+          resourceGroupName: string; replicationUpdateParameters: JsonNode;
+          registryName: string): Recallable =
   ## replicationsUpdate
   ## Updates a replication for a container registry with the specified parameters.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group to which the container registry belongs.
   ##   apiVersion: string (required)
   ##             : The client API version.
-  ##   subscriptionId: string (required)
-  ##                 : The Microsoft Azure subscription ID.
   ##   replicationName: string (required)
   ##                  : The name of the replication.
-  ##   registryName: string (required)
-  ##               : The name of the container registry.
+  ##   subscriptionId: string (required)
+  ##                 : The Microsoft Azure subscription ID.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group to which the container registry belongs.
   ##   replicationUpdateParameters: JObject (required)
   ##                              : The parameters for updating a replication.
-  var path_568384 = newJObject()
-  var query_568385 = newJObject()
-  var body_568386 = newJObject()
-  add(path_568384, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568385, "api-version", newJString(apiVersion))
-  add(path_568384, "subscriptionId", newJString(subscriptionId))
-  add(path_568384, "replicationName", newJString(replicationName))
-  add(path_568384, "registryName", newJString(registryName))
+  ##   registryName: string (required)
+  ##               : The name of the container registry.
+  var path_564284 = newJObject()
+  var query_564285 = newJObject()
+  var body_564286 = newJObject()
+  add(query_564285, "api-version", newJString(apiVersion))
+  add(path_564284, "replicationName", newJString(replicationName))
+  add(path_564284, "subscriptionId", newJString(subscriptionId))
+  add(path_564284, "resourceGroupName", newJString(resourceGroupName))
   if replicationUpdateParameters != nil:
-    body_568386 = replicationUpdateParameters
-  result = call_568383.call(path_568384, query_568385, nil, nil, body_568386)
+    body_564286 = replicationUpdateParameters
+  add(path_564284, "registryName", newJString(registryName))
+  result = call_564283.call(path_564284, query_564285, nil, nil, body_564286)
 
-var replicationsUpdate* = Call_ReplicationsUpdate_568373(
+var replicationsUpdate* = Call_ReplicationsUpdate_564273(
     name: "replicationsUpdate", meth: HttpMethod.HttpPatch,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ContainerRegistry/registries/{registryName}/replications/{replicationName}",
-    validator: validate_ReplicationsUpdate_568374, base: "",
-    url: url_ReplicationsUpdate_568375, schemes: {Scheme.Https})
+    validator: validate_ReplicationsUpdate_564274, base: "",
+    url: url_ReplicationsUpdate_564275, schemes: {Scheme.Https})
 type
-  Call_ReplicationsDelete_568361 = ref object of OpenApiRestCall_567666
-proc url_ReplicationsDelete_568363(protocol: Scheme; host: string; base: string;
+  Call_ReplicationsDelete_564261 = ref object of OpenApiRestCall_563564
+proc url_ReplicationsDelete_564263(protocol: Scheme; host: string; base: string;
                                   route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1966,7 +1970,7 @@ proc url_ReplicationsDelete_568363(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ReplicationsDelete_568362(path: JsonNode; query: JsonNode;
+proc validate_ReplicationsDelete_564262(path: JsonNode; query: JsonNode;
                                        header: JsonNode; formData: JsonNode;
                                        body: JsonNode): JsonNode =
   ## Deletes a replication from a container registry.
@@ -1974,37 +1978,37 @@ proc validate_ReplicationsDelete_568362(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group to which the container registry belongs.
-  ##   subscriptionId: JString (required)
-  ##                 : The Microsoft Azure subscription ID.
   ##   replicationName: JString (required)
   ##                  : The name of the replication.
+  ##   subscriptionId: JString (required)
+  ##                 : The Microsoft Azure subscription ID.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group to which the container registry belongs.
   ##   registryName: JString (required)
   ##               : The name of the container registry.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568364 = path.getOrDefault("resourceGroupName")
-  valid_568364 = validateParameter(valid_568364, JString, required = true,
+        "path argument is necessary due to required `replicationName` field"
+  var valid_564264 = path.getOrDefault("replicationName")
+  valid_564264 = validateParameter(valid_564264, JString, required = true,
                                  default = nil)
-  if valid_568364 != nil:
-    section.add "resourceGroupName", valid_568364
-  var valid_568365 = path.getOrDefault("subscriptionId")
-  valid_568365 = validateParameter(valid_568365, JString, required = true,
+  if valid_564264 != nil:
+    section.add "replicationName", valid_564264
+  var valid_564265 = path.getOrDefault("subscriptionId")
+  valid_564265 = validateParameter(valid_564265, JString, required = true,
                                  default = nil)
-  if valid_568365 != nil:
-    section.add "subscriptionId", valid_568365
-  var valid_568366 = path.getOrDefault("replicationName")
-  valid_568366 = validateParameter(valid_568366, JString, required = true,
+  if valid_564265 != nil:
+    section.add "subscriptionId", valid_564265
+  var valid_564266 = path.getOrDefault("resourceGroupName")
+  valid_564266 = validateParameter(valid_564266, JString, required = true,
                                  default = nil)
-  if valid_568366 != nil:
-    section.add "replicationName", valid_568366
-  var valid_568367 = path.getOrDefault("registryName")
-  valid_568367 = validateParameter(valid_568367, JString, required = true,
+  if valid_564266 != nil:
+    section.add "resourceGroupName", valid_564266
+  var valid_564267 = path.getOrDefault("registryName")
+  valid_564267 = validateParameter(valid_564267, JString, required = true,
                                  default = nil)
-  if valid_568367 != nil:
-    section.add "registryName", valid_568367
+  if valid_564267 != nil:
+    section.add "registryName", valid_564267
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2012,11 +2016,11 @@ proc validate_ReplicationsDelete_568362(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568368 = query.getOrDefault("api-version")
-  valid_568368 = validateParameter(valid_568368, JString, required = true,
+  var valid_564268 = query.getOrDefault("api-version")
+  valid_564268 = validateParameter(valid_564268, JString, required = true,
                                  default = nil)
-  if valid_568368 != nil:
-    section.add "api-version", valid_568368
+  if valid_564268 != nil:
+    section.add "api-version", valid_564268
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2025,51 +2029,51 @@ proc validate_ReplicationsDelete_568362(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568369: Call_ReplicationsDelete_568361; path: JsonNode;
+proc call*(call_564269: Call_ReplicationsDelete_564261; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes a replication from a container registry.
   ## 
-  let valid = call_568369.validator(path, query, header, formData, body)
-  let scheme = call_568369.pickScheme
+  let valid = call_564269.validator(path, query, header, formData, body)
+  let scheme = call_564269.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568369.url(scheme.get, call_568369.host, call_568369.base,
-                         call_568369.route, valid.getOrDefault("path"),
+  let url = call_564269.url(scheme.get, call_564269.host, call_564269.base,
+                         call_564269.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568369, url, valid)
+  result = hook(call_564269, url, valid)
 
-proc call*(call_568370: Call_ReplicationsDelete_568361; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; replicationName: string;
-          registryName: string): Recallable =
+proc call*(call_564270: Call_ReplicationsDelete_564261; apiVersion: string;
+          replicationName: string; subscriptionId: string;
+          resourceGroupName: string; registryName: string): Recallable =
   ## replicationsDelete
   ## Deletes a replication from a container registry.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group to which the container registry belongs.
   ##   apiVersion: string (required)
   ##             : The client API version.
-  ##   subscriptionId: string (required)
-  ##                 : The Microsoft Azure subscription ID.
   ##   replicationName: string (required)
   ##                  : The name of the replication.
+  ##   subscriptionId: string (required)
+  ##                 : The Microsoft Azure subscription ID.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group to which the container registry belongs.
   ##   registryName: string (required)
   ##               : The name of the container registry.
-  var path_568371 = newJObject()
-  var query_568372 = newJObject()
-  add(path_568371, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568372, "api-version", newJString(apiVersion))
-  add(path_568371, "subscriptionId", newJString(subscriptionId))
-  add(path_568371, "replicationName", newJString(replicationName))
-  add(path_568371, "registryName", newJString(registryName))
-  result = call_568370.call(path_568371, query_568372, nil, nil, nil)
+  var path_564271 = newJObject()
+  var query_564272 = newJObject()
+  add(query_564272, "api-version", newJString(apiVersion))
+  add(path_564271, "replicationName", newJString(replicationName))
+  add(path_564271, "subscriptionId", newJString(subscriptionId))
+  add(path_564271, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564271, "registryName", newJString(registryName))
+  result = call_564270.call(path_564271, query_564272, nil, nil, nil)
 
-var replicationsDelete* = Call_ReplicationsDelete_568361(
+var replicationsDelete* = Call_ReplicationsDelete_564261(
     name: "replicationsDelete", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ContainerRegistry/registries/{registryName}/replications/{replicationName}",
-    validator: validate_ReplicationsDelete_568362, base: "",
-    url: url_ReplicationsDelete_568363, schemes: {Scheme.Https})
+    validator: validate_ReplicationsDelete_564262, base: "",
+    url: url_ReplicationsDelete_564263, schemes: {Scheme.Https})
 type
-  Call_WebhooksList_568387 = ref object of OpenApiRestCall_567666
-proc url_WebhooksList_568389(protocol: Scheme; host: string; base: string;
+  Call_WebhooksList_564287 = ref object of OpenApiRestCall_563564
+proc url_WebhooksList_564289(protocol: Scheme; host: string; base: string;
                             route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2093,37 +2097,37 @@ proc url_WebhooksList_568389(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_WebhooksList_568388(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_WebhooksList_564288(path: JsonNode; query: JsonNode; header: JsonNode;
                                  formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists all the webhooks for the specified container registry.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group to which the container registry belongs.
   ##   subscriptionId: JString (required)
   ##                 : The Microsoft Azure subscription ID.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group to which the container registry belongs.
   ##   registryName: JString (required)
   ##               : The name of the container registry.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568390 = path.getOrDefault("resourceGroupName")
-  valid_568390 = validateParameter(valid_568390, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564290 = path.getOrDefault("subscriptionId")
+  valid_564290 = validateParameter(valid_564290, JString, required = true,
                                  default = nil)
-  if valid_568390 != nil:
-    section.add "resourceGroupName", valid_568390
-  var valid_568391 = path.getOrDefault("subscriptionId")
-  valid_568391 = validateParameter(valid_568391, JString, required = true,
+  if valid_564290 != nil:
+    section.add "subscriptionId", valid_564290
+  var valid_564291 = path.getOrDefault("resourceGroupName")
+  valid_564291 = validateParameter(valid_564291, JString, required = true,
                                  default = nil)
-  if valid_568391 != nil:
-    section.add "subscriptionId", valid_568391
-  var valid_568392 = path.getOrDefault("registryName")
-  valid_568392 = validateParameter(valid_568392, JString, required = true,
+  if valid_564291 != nil:
+    section.add "resourceGroupName", valid_564291
+  var valid_564292 = path.getOrDefault("registryName")
+  valid_564292 = validateParameter(valid_564292, JString, required = true,
                                  default = nil)
-  if valid_568392 != nil:
-    section.add "registryName", valid_568392
+  if valid_564292 != nil:
+    section.add "registryName", valid_564292
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2131,11 +2135,11 @@ proc validate_WebhooksList_568388(path: JsonNode; query: JsonNode; header: JsonN
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568393 = query.getOrDefault("api-version")
-  valid_568393 = validateParameter(valid_568393, JString, required = true,
+  var valid_564293 = query.getOrDefault("api-version")
+  valid_564293 = validateParameter(valid_564293, JString, required = true,
                                  default = nil)
-  if valid_568393 != nil:
-    section.add "api-version", valid_568393
+  if valid_564293 != nil:
+    section.add "api-version", valid_564293
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2144,46 +2148,46 @@ proc validate_WebhooksList_568388(path: JsonNode; query: JsonNode; header: JsonN
   if body != nil:
     result.add "body", body
 
-proc call*(call_568394: Call_WebhooksList_568387; path: JsonNode; query: JsonNode;
+proc call*(call_564294: Call_WebhooksList_564287; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists all the webhooks for the specified container registry.
   ## 
-  let valid = call_568394.validator(path, query, header, formData, body)
-  let scheme = call_568394.pickScheme
+  let valid = call_564294.validator(path, query, header, formData, body)
+  let scheme = call_564294.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568394.url(scheme.get, call_568394.host, call_568394.base,
-                         call_568394.route, valid.getOrDefault("path"),
+  let url = call_564294.url(scheme.get, call_564294.host, call_564294.base,
+                         call_564294.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568394, url, valid)
+  result = hook(call_564294, url, valid)
 
-proc call*(call_568395: Call_WebhooksList_568387; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; registryName: string): Recallable =
+proc call*(call_564295: Call_WebhooksList_564287; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string; registryName: string): Recallable =
   ## webhooksList
   ## Lists all the webhooks for the specified container registry.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group to which the container registry belongs.
   ##   apiVersion: string (required)
   ##             : The client API version.
   ##   subscriptionId: string (required)
   ##                 : The Microsoft Azure subscription ID.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group to which the container registry belongs.
   ##   registryName: string (required)
   ##               : The name of the container registry.
-  var path_568396 = newJObject()
-  var query_568397 = newJObject()
-  add(path_568396, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568397, "api-version", newJString(apiVersion))
-  add(path_568396, "subscriptionId", newJString(subscriptionId))
-  add(path_568396, "registryName", newJString(registryName))
-  result = call_568395.call(path_568396, query_568397, nil, nil, nil)
+  var path_564296 = newJObject()
+  var query_564297 = newJObject()
+  add(query_564297, "api-version", newJString(apiVersion))
+  add(path_564296, "subscriptionId", newJString(subscriptionId))
+  add(path_564296, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564296, "registryName", newJString(registryName))
+  result = call_564295.call(path_564296, query_564297, nil, nil, nil)
 
-var webhooksList* = Call_WebhooksList_568387(name: "webhooksList",
+var webhooksList* = Call_WebhooksList_564287(name: "webhooksList",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ContainerRegistry/registries/{registryName}/webhooks",
-    validator: validate_WebhooksList_568388, base: "", url: url_WebhooksList_568389,
+    validator: validate_WebhooksList_564288, base: "", url: url_WebhooksList_564289,
     schemes: {Scheme.Https})
 type
-  Call_WebhooksCreate_568410 = ref object of OpenApiRestCall_567666
-proc url_WebhooksCreate_568412(protocol: Scheme; host: string; base: string;
+  Call_WebhooksCreate_564310 = ref object of OpenApiRestCall_563564
+proc url_WebhooksCreate_564312(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2209,7 +2213,7 @@ proc url_WebhooksCreate_568412(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_WebhooksCreate_568411(path: JsonNode; query: JsonNode;
+proc validate_WebhooksCreate_564311(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## Creates a webhook for a container registry with the specified parameters.
@@ -2217,37 +2221,37 @@ proc validate_WebhooksCreate_568411(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group to which the container registry belongs.
-  ##   webhookName: JString (required)
-  ##              : The name of the webhook.
   ##   subscriptionId: JString (required)
   ##                 : The Microsoft Azure subscription ID.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group to which the container registry belongs.
   ##   registryName: JString (required)
   ##               : The name of the container registry.
+  ##   webhookName: JString (required)
+  ##              : The name of the webhook.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568413 = path.getOrDefault("resourceGroupName")
-  valid_568413 = validateParameter(valid_568413, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564313 = path.getOrDefault("subscriptionId")
+  valid_564313 = validateParameter(valid_564313, JString, required = true,
                                  default = nil)
-  if valid_568413 != nil:
-    section.add "resourceGroupName", valid_568413
-  var valid_568414 = path.getOrDefault("webhookName")
-  valid_568414 = validateParameter(valid_568414, JString, required = true,
+  if valid_564313 != nil:
+    section.add "subscriptionId", valid_564313
+  var valid_564314 = path.getOrDefault("resourceGroupName")
+  valid_564314 = validateParameter(valid_564314, JString, required = true,
                                  default = nil)
-  if valid_568414 != nil:
-    section.add "webhookName", valid_568414
-  var valid_568415 = path.getOrDefault("subscriptionId")
-  valid_568415 = validateParameter(valid_568415, JString, required = true,
+  if valid_564314 != nil:
+    section.add "resourceGroupName", valid_564314
+  var valid_564315 = path.getOrDefault("registryName")
+  valid_564315 = validateParameter(valid_564315, JString, required = true,
                                  default = nil)
-  if valid_568415 != nil:
-    section.add "subscriptionId", valid_568415
-  var valid_568416 = path.getOrDefault("registryName")
-  valid_568416 = validateParameter(valid_568416, JString, required = true,
+  if valid_564315 != nil:
+    section.add "registryName", valid_564315
+  var valid_564316 = path.getOrDefault("webhookName")
+  valid_564316 = validateParameter(valid_564316, JString, required = true,
                                  default = nil)
-  if valid_568416 != nil:
-    section.add "registryName", valid_568416
+  if valid_564316 != nil:
+    section.add "webhookName", valid_564316
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2255,11 +2259,11 @@ proc validate_WebhooksCreate_568411(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568417 = query.getOrDefault("api-version")
-  valid_568417 = validateParameter(valid_568417, JString, required = true,
+  var valid_564317 = query.getOrDefault("api-version")
+  valid_564317 = validateParameter(valid_564317, JString, required = true,
                                  default = nil)
-  if valid_568417 != nil:
-    section.add "api-version", valid_568417
+  if valid_564317 != nil:
+    section.add "api-version", valid_564317
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2273,55 +2277,55 @@ proc validate_WebhooksCreate_568411(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568419: Call_WebhooksCreate_568410; path: JsonNode; query: JsonNode;
+proc call*(call_564319: Call_WebhooksCreate_564310; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Creates a webhook for a container registry with the specified parameters.
   ## 
-  let valid = call_568419.validator(path, query, header, formData, body)
-  let scheme = call_568419.pickScheme
+  let valid = call_564319.validator(path, query, header, formData, body)
+  let scheme = call_564319.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568419.url(scheme.get, call_568419.host, call_568419.base,
-                         call_568419.route, valid.getOrDefault("path"),
+  let url = call_564319.url(scheme.get, call_564319.host, call_564319.base,
+                         call_564319.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568419, url, valid)
+  result = hook(call_564319, url, valid)
 
-proc call*(call_568420: Call_WebhooksCreate_568410; resourceGroupName: string;
-          apiVersion: string; webhookName: string; subscriptionId: string;
-          webhookCreateParameters: JsonNode; registryName: string): Recallable =
+proc call*(call_564320: Call_WebhooksCreate_564310; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string; registryName: string;
+          webhookCreateParameters: JsonNode; webhookName: string): Recallable =
   ## webhooksCreate
   ## Creates a webhook for a container registry with the specified parameters.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group to which the container registry belongs.
   ##   apiVersion: string (required)
   ##             : The client API version.
-  ##   webhookName: string (required)
-  ##              : The name of the webhook.
   ##   subscriptionId: string (required)
   ##                 : The Microsoft Azure subscription ID.
-  ##   webhookCreateParameters: JObject (required)
-  ##                          : The parameters for creating a webhook.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group to which the container registry belongs.
   ##   registryName: string (required)
   ##               : The name of the container registry.
-  var path_568421 = newJObject()
-  var query_568422 = newJObject()
-  var body_568423 = newJObject()
-  add(path_568421, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568422, "api-version", newJString(apiVersion))
-  add(path_568421, "webhookName", newJString(webhookName))
-  add(path_568421, "subscriptionId", newJString(subscriptionId))
+  ##   webhookCreateParameters: JObject (required)
+  ##                          : The parameters for creating a webhook.
+  ##   webhookName: string (required)
+  ##              : The name of the webhook.
+  var path_564321 = newJObject()
+  var query_564322 = newJObject()
+  var body_564323 = newJObject()
+  add(query_564322, "api-version", newJString(apiVersion))
+  add(path_564321, "subscriptionId", newJString(subscriptionId))
+  add(path_564321, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564321, "registryName", newJString(registryName))
   if webhookCreateParameters != nil:
-    body_568423 = webhookCreateParameters
-  add(path_568421, "registryName", newJString(registryName))
-  result = call_568420.call(path_568421, query_568422, nil, nil, body_568423)
+    body_564323 = webhookCreateParameters
+  add(path_564321, "webhookName", newJString(webhookName))
+  result = call_564320.call(path_564321, query_564322, nil, nil, body_564323)
 
-var webhooksCreate* = Call_WebhooksCreate_568410(name: "webhooksCreate",
+var webhooksCreate* = Call_WebhooksCreate_564310(name: "webhooksCreate",
     meth: HttpMethod.HttpPut, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ContainerRegistry/registries/{registryName}/webhooks/{webhookName}",
-    validator: validate_WebhooksCreate_568411, base: "", url: url_WebhooksCreate_568412,
+    validator: validate_WebhooksCreate_564311, base: "", url: url_WebhooksCreate_564312,
     schemes: {Scheme.Https})
 type
-  Call_WebhooksGet_568398 = ref object of OpenApiRestCall_567666
-proc url_WebhooksGet_568400(protocol: Scheme; host: string; base: string;
+  Call_WebhooksGet_564298 = ref object of OpenApiRestCall_563564
+proc url_WebhooksGet_564300(protocol: Scheme; host: string; base: string;
                            route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2347,44 +2351,44 @@ proc url_WebhooksGet_568400(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_WebhooksGet_568399(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_WebhooksGet_564299(path: JsonNode; query: JsonNode; header: JsonNode;
                                 formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the properties of the specified webhook.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group to which the container registry belongs.
-  ##   webhookName: JString (required)
-  ##              : The name of the webhook.
   ##   subscriptionId: JString (required)
   ##                 : The Microsoft Azure subscription ID.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group to which the container registry belongs.
   ##   registryName: JString (required)
   ##               : The name of the container registry.
+  ##   webhookName: JString (required)
+  ##              : The name of the webhook.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568401 = path.getOrDefault("resourceGroupName")
-  valid_568401 = validateParameter(valid_568401, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564301 = path.getOrDefault("subscriptionId")
+  valid_564301 = validateParameter(valid_564301, JString, required = true,
                                  default = nil)
-  if valid_568401 != nil:
-    section.add "resourceGroupName", valid_568401
-  var valid_568402 = path.getOrDefault("webhookName")
-  valid_568402 = validateParameter(valid_568402, JString, required = true,
+  if valid_564301 != nil:
+    section.add "subscriptionId", valid_564301
+  var valid_564302 = path.getOrDefault("resourceGroupName")
+  valid_564302 = validateParameter(valid_564302, JString, required = true,
                                  default = nil)
-  if valid_568402 != nil:
-    section.add "webhookName", valid_568402
-  var valid_568403 = path.getOrDefault("subscriptionId")
-  valid_568403 = validateParameter(valid_568403, JString, required = true,
+  if valid_564302 != nil:
+    section.add "resourceGroupName", valid_564302
+  var valid_564303 = path.getOrDefault("registryName")
+  valid_564303 = validateParameter(valid_564303, JString, required = true,
                                  default = nil)
-  if valid_568403 != nil:
-    section.add "subscriptionId", valid_568403
-  var valid_568404 = path.getOrDefault("registryName")
-  valid_568404 = validateParameter(valid_568404, JString, required = true,
+  if valid_564303 != nil:
+    section.add "registryName", valid_564303
+  var valid_564304 = path.getOrDefault("webhookName")
+  valid_564304 = validateParameter(valid_564304, JString, required = true,
                                  default = nil)
-  if valid_568404 != nil:
-    section.add "registryName", valid_568404
+  if valid_564304 != nil:
+    section.add "webhookName", valid_564304
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2392,11 +2396,11 @@ proc validate_WebhooksGet_568399(path: JsonNode; query: JsonNode; header: JsonNo
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568405 = query.getOrDefault("api-version")
-  valid_568405 = validateParameter(valid_568405, JString, required = true,
+  var valid_564305 = query.getOrDefault("api-version")
+  valid_564305 = validateParameter(valid_564305, JString, required = true,
                                  default = nil)
-  if valid_568405 != nil:
-    section.add "api-version", valid_568405
+  if valid_564305 != nil:
+    section.add "api-version", valid_564305
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2405,52 +2409,52 @@ proc validate_WebhooksGet_568399(path: JsonNode; query: JsonNode; header: JsonNo
   if body != nil:
     result.add "body", body
 
-proc call*(call_568406: Call_WebhooksGet_568398; path: JsonNode; query: JsonNode;
+proc call*(call_564306: Call_WebhooksGet_564298; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the properties of the specified webhook.
   ## 
-  let valid = call_568406.validator(path, query, header, formData, body)
-  let scheme = call_568406.pickScheme
+  let valid = call_564306.validator(path, query, header, formData, body)
+  let scheme = call_564306.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568406.url(scheme.get, call_568406.host, call_568406.base,
-                         call_568406.route, valid.getOrDefault("path"),
+  let url = call_564306.url(scheme.get, call_564306.host, call_564306.base,
+                         call_564306.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568406, url, valid)
+  result = hook(call_564306, url, valid)
 
-proc call*(call_568407: Call_WebhooksGet_568398; resourceGroupName: string;
-          apiVersion: string; webhookName: string; subscriptionId: string;
-          registryName: string): Recallable =
+proc call*(call_564307: Call_WebhooksGet_564298; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string; registryName: string;
+          webhookName: string): Recallable =
   ## webhooksGet
   ## Gets the properties of the specified webhook.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group to which the container registry belongs.
   ##   apiVersion: string (required)
   ##             : The client API version.
-  ##   webhookName: string (required)
-  ##              : The name of the webhook.
   ##   subscriptionId: string (required)
   ##                 : The Microsoft Azure subscription ID.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group to which the container registry belongs.
   ##   registryName: string (required)
   ##               : The name of the container registry.
-  var path_568408 = newJObject()
-  var query_568409 = newJObject()
-  add(path_568408, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568409, "api-version", newJString(apiVersion))
-  add(path_568408, "webhookName", newJString(webhookName))
-  add(path_568408, "subscriptionId", newJString(subscriptionId))
-  add(path_568408, "registryName", newJString(registryName))
-  result = call_568407.call(path_568408, query_568409, nil, nil, nil)
+  ##   webhookName: string (required)
+  ##              : The name of the webhook.
+  var path_564308 = newJObject()
+  var query_564309 = newJObject()
+  add(query_564309, "api-version", newJString(apiVersion))
+  add(path_564308, "subscriptionId", newJString(subscriptionId))
+  add(path_564308, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564308, "registryName", newJString(registryName))
+  add(path_564308, "webhookName", newJString(webhookName))
+  result = call_564307.call(path_564308, query_564309, nil, nil, nil)
 
-var webhooksGet* = Call_WebhooksGet_568398(name: "webhooksGet",
+var webhooksGet* = Call_WebhooksGet_564298(name: "webhooksGet",
                                         meth: HttpMethod.HttpGet,
                                         host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ContainerRegistry/registries/{registryName}/webhooks/{webhookName}",
-                                        validator: validate_WebhooksGet_568399,
-                                        base: "", url: url_WebhooksGet_568400,
+                                        validator: validate_WebhooksGet_564299,
+                                        base: "", url: url_WebhooksGet_564300,
                                         schemes: {Scheme.Https})
 type
-  Call_WebhooksUpdate_568436 = ref object of OpenApiRestCall_567666
-proc url_WebhooksUpdate_568438(protocol: Scheme; host: string; base: string;
+  Call_WebhooksUpdate_564336 = ref object of OpenApiRestCall_563564
+proc url_WebhooksUpdate_564338(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2476,7 +2480,7 @@ proc url_WebhooksUpdate_568438(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_WebhooksUpdate_568437(path: JsonNode; query: JsonNode;
+proc validate_WebhooksUpdate_564337(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## Updates a webhook with the specified parameters.
@@ -2484,37 +2488,37 @@ proc validate_WebhooksUpdate_568437(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group to which the container registry belongs.
-  ##   webhookName: JString (required)
-  ##              : The name of the webhook.
   ##   subscriptionId: JString (required)
   ##                 : The Microsoft Azure subscription ID.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group to which the container registry belongs.
   ##   registryName: JString (required)
   ##               : The name of the container registry.
+  ##   webhookName: JString (required)
+  ##              : The name of the webhook.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568439 = path.getOrDefault("resourceGroupName")
-  valid_568439 = validateParameter(valid_568439, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564339 = path.getOrDefault("subscriptionId")
+  valid_564339 = validateParameter(valid_564339, JString, required = true,
                                  default = nil)
-  if valid_568439 != nil:
-    section.add "resourceGroupName", valid_568439
-  var valid_568440 = path.getOrDefault("webhookName")
-  valid_568440 = validateParameter(valid_568440, JString, required = true,
+  if valid_564339 != nil:
+    section.add "subscriptionId", valid_564339
+  var valid_564340 = path.getOrDefault("resourceGroupName")
+  valid_564340 = validateParameter(valid_564340, JString, required = true,
                                  default = nil)
-  if valid_568440 != nil:
-    section.add "webhookName", valid_568440
-  var valid_568441 = path.getOrDefault("subscriptionId")
-  valid_568441 = validateParameter(valid_568441, JString, required = true,
+  if valid_564340 != nil:
+    section.add "resourceGroupName", valid_564340
+  var valid_564341 = path.getOrDefault("registryName")
+  valid_564341 = validateParameter(valid_564341, JString, required = true,
                                  default = nil)
-  if valid_568441 != nil:
-    section.add "subscriptionId", valid_568441
-  var valid_568442 = path.getOrDefault("registryName")
-  valid_568442 = validateParameter(valid_568442, JString, required = true,
+  if valid_564341 != nil:
+    section.add "registryName", valid_564341
+  var valid_564342 = path.getOrDefault("webhookName")
+  valid_564342 = validateParameter(valid_564342, JString, required = true,
                                  default = nil)
-  if valid_568442 != nil:
-    section.add "registryName", valid_568442
+  if valid_564342 != nil:
+    section.add "webhookName", valid_564342
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2522,11 +2526,11 @@ proc validate_WebhooksUpdate_568437(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568443 = query.getOrDefault("api-version")
-  valid_568443 = validateParameter(valid_568443, JString, required = true,
+  var valid_564343 = query.getOrDefault("api-version")
+  valid_564343 = validateParameter(valid_564343, JString, required = true,
                                  default = nil)
-  if valid_568443 != nil:
-    section.add "api-version", valid_568443
+  if valid_564343 != nil:
+    section.add "api-version", valid_564343
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2540,55 +2544,56 @@ proc validate_WebhooksUpdate_568437(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568445: Call_WebhooksUpdate_568436; path: JsonNode; query: JsonNode;
+proc call*(call_564345: Call_WebhooksUpdate_564336; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Updates a webhook with the specified parameters.
   ## 
-  let valid = call_568445.validator(path, query, header, formData, body)
-  let scheme = call_568445.pickScheme
+  let valid = call_564345.validator(path, query, header, formData, body)
+  let scheme = call_564345.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568445.url(scheme.get, call_568445.host, call_568445.base,
-                         call_568445.route, valid.getOrDefault("path"),
+  let url = call_564345.url(scheme.get, call_564345.host, call_564345.base,
+                         call_564345.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568445, url, valid)
+  result = hook(call_564345, url, valid)
 
-proc call*(call_568446: Call_WebhooksUpdate_568436; resourceGroupName: string;
+proc call*(call_564346: Call_WebhooksUpdate_564336;
           webhookUpdateParameters: JsonNode; apiVersion: string;
-          webhookName: string; subscriptionId: string; registryName: string): Recallable =
+          subscriptionId: string; resourceGroupName: string; registryName: string;
+          webhookName: string): Recallable =
   ## webhooksUpdate
   ## Updates a webhook with the specified parameters.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group to which the container registry belongs.
   ##   webhookUpdateParameters: JObject (required)
   ##                          : The parameters for updating a webhook.
   ##   apiVersion: string (required)
   ##             : The client API version.
-  ##   webhookName: string (required)
-  ##              : The name of the webhook.
   ##   subscriptionId: string (required)
   ##                 : The Microsoft Azure subscription ID.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group to which the container registry belongs.
   ##   registryName: string (required)
   ##               : The name of the container registry.
-  var path_568447 = newJObject()
-  var query_568448 = newJObject()
-  var body_568449 = newJObject()
-  add(path_568447, "resourceGroupName", newJString(resourceGroupName))
+  ##   webhookName: string (required)
+  ##              : The name of the webhook.
+  var path_564347 = newJObject()
+  var query_564348 = newJObject()
+  var body_564349 = newJObject()
   if webhookUpdateParameters != nil:
-    body_568449 = webhookUpdateParameters
-  add(query_568448, "api-version", newJString(apiVersion))
-  add(path_568447, "webhookName", newJString(webhookName))
-  add(path_568447, "subscriptionId", newJString(subscriptionId))
-  add(path_568447, "registryName", newJString(registryName))
-  result = call_568446.call(path_568447, query_568448, nil, nil, body_568449)
+    body_564349 = webhookUpdateParameters
+  add(query_564348, "api-version", newJString(apiVersion))
+  add(path_564347, "subscriptionId", newJString(subscriptionId))
+  add(path_564347, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564347, "registryName", newJString(registryName))
+  add(path_564347, "webhookName", newJString(webhookName))
+  result = call_564346.call(path_564347, query_564348, nil, nil, body_564349)
 
-var webhooksUpdate* = Call_WebhooksUpdate_568436(name: "webhooksUpdate",
+var webhooksUpdate* = Call_WebhooksUpdate_564336(name: "webhooksUpdate",
     meth: HttpMethod.HttpPatch, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ContainerRegistry/registries/{registryName}/webhooks/{webhookName}",
-    validator: validate_WebhooksUpdate_568437, base: "", url: url_WebhooksUpdate_568438,
+    validator: validate_WebhooksUpdate_564337, base: "", url: url_WebhooksUpdate_564338,
     schemes: {Scheme.Https})
 type
-  Call_WebhooksDelete_568424 = ref object of OpenApiRestCall_567666
-proc url_WebhooksDelete_568426(protocol: Scheme; host: string; base: string;
+  Call_WebhooksDelete_564324 = ref object of OpenApiRestCall_563564
+proc url_WebhooksDelete_564326(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2614,7 +2619,7 @@ proc url_WebhooksDelete_568426(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_WebhooksDelete_568425(path: JsonNode; query: JsonNode;
+proc validate_WebhooksDelete_564325(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## Deletes a webhook from a container registry.
@@ -2622,37 +2627,37 @@ proc validate_WebhooksDelete_568425(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group to which the container registry belongs.
-  ##   webhookName: JString (required)
-  ##              : The name of the webhook.
   ##   subscriptionId: JString (required)
   ##                 : The Microsoft Azure subscription ID.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group to which the container registry belongs.
   ##   registryName: JString (required)
   ##               : The name of the container registry.
+  ##   webhookName: JString (required)
+  ##              : The name of the webhook.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568427 = path.getOrDefault("resourceGroupName")
-  valid_568427 = validateParameter(valid_568427, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564327 = path.getOrDefault("subscriptionId")
+  valid_564327 = validateParameter(valid_564327, JString, required = true,
                                  default = nil)
-  if valid_568427 != nil:
-    section.add "resourceGroupName", valid_568427
-  var valid_568428 = path.getOrDefault("webhookName")
-  valid_568428 = validateParameter(valid_568428, JString, required = true,
+  if valid_564327 != nil:
+    section.add "subscriptionId", valid_564327
+  var valid_564328 = path.getOrDefault("resourceGroupName")
+  valid_564328 = validateParameter(valid_564328, JString, required = true,
                                  default = nil)
-  if valid_568428 != nil:
-    section.add "webhookName", valid_568428
-  var valid_568429 = path.getOrDefault("subscriptionId")
-  valid_568429 = validateParameter(valid_568429, JString, required = true,
+  if valid_564328 != nil:
+    section.add "resourceGroupName", valid_564328
+  var valid_564329 = path.getOrDefault("registryName")
+  valid_564329 = validateParameter(valid_564329, JString, required = true,
                                  default = nil)
-  if valid_568429 != nil:
-    section.add "subscriptionId", valid_568429
-  var valid_568430 = path.getOrDefault("registryName")
-  valid_568430 = validateParameter(valid_568430, JString, required = true,
+  if valid_564329 != nil:
+    section.add "registryName", valid_564329
+  var valid_564330 = path.getOrDefault("webhookName")
+  valid_564330 = validateParameter(valid_564330, JString, required = true,
                                  default = nil)
-  if valid_568430 != nil:
-    section.add "registryName", valid_568430
+  if valid_564330 != nil:
+    section.add "webhookName", valid_564330
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2660,11 +2665,11 @@ proc validate_WebhooksDelete_568425(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568431 = query.getOrDefault("api-version")
-  valid_568431 = validateParameter(valid_568431, JString, required = true,
+  var valid_564331 = query.getOrDefault("api-version")
+  valid_564331 = validateParameter(valid_564331, JString, required = true,
                                  default = nil)
-  if valid_568431 != nil:
-    section.add "api-version", valid_568431
+  if valid_564331 != nil:
+    section.add "api-version", valid_564331
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2673,50 +2678,50 @@ proc validate_WebhooksDelete_568425(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568432: Call_WebhooksDelete_568424; path: JsonNode; query: JsonNode;
+proc call*(call_564332: Call_WebhooksDelete_564324; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes a webhook from a container registry.
   ## 
-  let valid = call_568432.validator(path, query, header, formData, body)
-  let scheme = call_568432.pickScheme
+  let valid = call_564332.validator(path, query, header, formData, body)
+  let scheme = call_564332.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568432.url(scheme.get, call_568432.host, call_568432.base,
-                         call_568432.route, valid.getOrDefault("path"),
+  let url = call_564332.url(scheme.get, call_564332.host, call_564332.base,
+                         call_564332.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568432, url, valid)
+  result = hook(call_564332, url, valid)
 
-proc call*(call_568433: Call_WebhooksDelete_568424; resourceGroupName: string;
-          apiVersion: string; webhookName: string; subscriptionId: string;
-          registryName: string): Recallable =
+proc call*(call_564333: Call_WebhooksDelete_564324; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string; registryName: string;
+          webhookName: string): Recallable =
   ## webhooksDelete
   ## Deletes a webhook from a container registry.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group to which the container registry belongs.
   ##   apiVersion: string (required)
   ##             : The client API version.
-  ##   webhookName: string (required)
-  ##              : The name of the webhook.
   ##   subscriptionId: string (required)
   ##                 : The Microsoft Azure subscription ID.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group to which the container registry belongs.
   ##   registryName: string (required)
   ##               : The name of the container registry.
-  var path_568434 = newJObject()
-  var query_568435 = newJObject()
-  add(path_568434, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568435, "api-version", newJString(apiVersion))
-  add(path_568434, "webhookName", newJString(webhookName))
-  add(path_568434, "subscriptionId", newJString(subscriptionId))
-  add(path_568434, "registryName", newJString(registryName))
-  result = call_568433.call(path_568434, query_568435, nil, nil, nil)
+  ##   webhookName: string (required)
+  ##              : The name of the webhook.
+  var path_564334 = newJObject()
+  var query_564335 = newJObject()
+  add(query_564335, "api-version", newJString(apiVersion))
+  add(path_564334, "subscriptionId", newJString(subscriptionId))
+  add(path_564334, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564334, "registryName", newJString(registryName))
+  add(path_564334, "webhookName", newJString(webhookName))
+  result = call_564333.call(path_564334, query_564335, nil, nil, nil)
 
-var webhooksDelete* = Call_WebhooksDelete_568424(name: "webhooksDelete",
+var webhooksDelete* = Call_WebhooksDelete_564324(name: "webhooksDelete",
     meth: HttpMethod.HttpDelete, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ContainerRegistry/registries/{registryName}/webhooks/{webhookName}",
-    validator: validate_WebhooksDelete_568425, base: "", url: url_WebhooksDelete_568426,
+    validator: validate_WebhooksDelete_564325, base: "", url: url_WebhooksDelete_564326,
     schemes: {Scheme.Https})
 type
-  Call_WebhooksGetCallbackConfig_568450 = ref object of OpenApiRestCall_567666
-proc url_WebhooksGetCallbackConfig_568452(protocol: Scheme; host: string;
+  Call_WebhooksGetCallbackConfig_564350 = ref object of OpenApiRestCall_563564
+proc url_WebhooksGetCallbackConfig_564352(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2743,44 +2748,44 @@ proc url_WebhooksGetCallbackConfig_568452(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_WebhooksGetCallbackConfig_568451(path: JsonNode; query: JsonNode;
+proc validate_WebhooksGetCallbackConfig_564351(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the configuration of service URI and custom headers for the webhook.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group to which the container registry belongs.
-  ##   webhookName: JString (required)
-  ##              : The name of the webhook.
   ##   subscriptionId: JString (required)
   ##                 : The Microsoft Azure subscription ID.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group to which the container registry belongs.
   ##   registryName: JString (required)
   ##               : The name of the container registry.
+  ##   webhookName: JString (required)
+  ##              : The name of the webhook.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568453 = path.getOrDefault("resourceGroupName")
-  valid_568453 = validateParameter(valid_568453, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564353 = path.getOrDefault("subscriptionId")
+  valid_564353 = validateParameter(valid_564353, JString, required = true,
                                  default = nil)
-  if valid_568453 != nil:
-    section.add "resourceGroupName", valid_568453
-  var valid_568454 = path.getOrDefault("webhookName")
-  valid_568454 = validateParameter(valid_568454, JString, required = true,
+  if valid_564353 != nil:
+    section.add "subscriptionId", valid_564353
+  var valid_564354 = path.getOrDefault("resourceGroupName")
+  valid_564354 = validateParameter(valid_564354, JString, required = true,
                                  default = nil)
-  if valid_568454 != nil:
-    section.add "webhookName", valid_568454
-  var valid_568455 = path.getOrDefault("subscriptionId")
-  valid_568455 = validateParameter(valid_568455, JString, required = true,
+  if valid_564354 != nil:
+    section.add "resourceGroupName", valid_564354
+  var valid_564355 = path.getOrDefault("registryName")
+  valid_564355 = validateParameter(valid_564355, JString, required = true,
                                  default = nil)
-  if valid_568455 != nil:
-    section.add "subscriptionId", valid_568455
-  var valid_568456 = path.getOrDefault("registryName")
-  valid_568456 = validateParameter(valid_568456, JString, required = true,
+  if valid_564355 != nil:
+    section.add "registryName", valid_564355
+  var valid_564356 = path.getOrDefault("webhookName")
+  valid_564356 = validateParameter(valid_564356, JString, required = true,
                                  default = nil)
-  if valid_568456 != nil:
-    section.add "registryName", valid_568456
+  if valid_564356 != nil:
+    section.add "webhookName", valid_564356
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2788,11 +2793,11 @@ proc validate_WebhooksGetCallbackConfig_568451(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568457 = query.getOrDefault("api-version")
-  valid_568457 = validateParameter(valid_568457, JString, required = true,
+  var valid_564357 = query.getOrDefault("api-version")
+  valid_564357 = validateParameter(valid_564357, JString, required = true,
                                  default = nil)
-  if valid_568457 != nil:
-    section.add "api-version", valid_568457
+  if valid_564357 != nil:
+    section.add "api-version", valid_564357
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2801,51 +2806,51 @@ proc validate_WebhooksGetCallbackConfig_568451(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568458: Call_WebhooksGetCallbackConfig_568450; path: JsonNode;
+proc call*(call_564358: Call_WebhooksGetCallbackConfig_564350; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the configuration of service URI and custom headers for the webhook.
   ## 
-  let valid = call_568458.validator(path, query, header, formData, body)
-  let scheme = call_568458.pickScheme
+  let valid = call_564358.validator(path, query, header, formData, body)
+  let scheme = call_564358.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568458.url(scheme.get, call_568458.host, call_568458.base,
-                         call_568458.route, valid.getOrDefault("path"),
+  let url = call_564358.url(scheme.get, call_564358.host, call_564358.base,
+                         call_564358.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568458, url, valid)
+  result = hook(call_564358, url, valid)
 
-proc call*(call_568459: Call_WebhooksGetCallbackConfig_568450;
-          resourceGroupName: string; apiVersion: string; webhookName: string;
-          subscriptionId: string; registryName: string): Recallable =
+proc call*(call_564359: Call_WebhooksGetCallbackConfig_564350; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string; registryName: string;
+          webhookName: string): Recallable =
   ## webhooksGetCallbackConfig
   ## Gets the configuration of service URI and custom headers for the webhook.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group to which the container registry belongs.
   ##   apiVersion: string (required)
   ##             : The client API version.
-  ##   webhookName: string (required)
-  ##              : The name of the webhook.
   ##   subscriptionId: string (required)
   ##                 : The Microsoft Azure subscription ID.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group to which the container registry belongs.
   ##   registryName: string (required)
   ##               : The name of the container registry.
-  var path_568460 = newJObject()
-  var query_568461 = newJObject()
-  add(path_568460, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568461, "api-version", newJString(apiVersion))
-  add(path_568460, "webhookName", newJString(webhookName))
-  add(path_568460, "subscriptionId", newJString(subscriptionId))
-  add(path_568460, "registryName", newJString(registryName))
-  result = call_568459.call(path_568460, query_568461, nil, nil, nil)
+  ##   webhookName: string (required)
+  ##              : The name of the webhook.
+  var path_564360 = newJObject()
+  var query_564361 = newJObject()
+  add(query_564361, "api-version", newJString(apiVersion))
+  add(path_564360, "subscriptionId", newJString(subscriptionId))
+  add(path_564360, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564360, "registryName", newJString(registryName))
+  add(path_564360, "webhookName", newJString(webhookName))
+  result = call_564359.call(path_564360, query_564361, nil, nil, nil)
 
-var webhooksGetCallbackConfig* = Call_WebhooksGetCallbackConfig_568450(
+var webhooksGetCallbackConfig* = Call_WebhooksGetCallbackConfig_564350(
     name: "webhooksGetCallbackConfig", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ContainerRegistry/registries/{registryName}/webhooks/{webhookName}/getCallbackConfig",
-    validator: validate_WebhooksGetCallbackConfig_568451, base: "",
-    url: url_WebhooksGetCallbackConfig_568452, schemes: {Scheme.Https})
+    validator: validate_WebhooksGetCallbackConfig_564351, base: "",
+    url: url_WebhooksGetCallbackConfig_564352, schemes: {Scheme.Https})
 type
-  Call_WebhooksListEvents_568462 = ref object of OpenApiRestCall_567666
-proc url_WebhooksListEvents_568464(protocol: Scheme; host: string; base: string;
+  Call_WebhooksListEvents_564362 = ref object of OpenApiRestCall_563564
+proc url_WebhooksListEvents_564364(protocol: Scheme; host: string; base: string;
                                   route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2872,7 +2877,7 @@ proc url_WebhooksListEvents_568464(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_WebhooksListEvents_568463(path: JsonNode; query: JsonNode;
+proc validate_WebhooksListEvents_564363(path: JsonNode; query: JsonNode;
                                        header: JsonNode; formData: JsonNode;
                                        body: JsonNode): JsonNode =
   ## Lists recent events for the specified webhook.
@@ -2880,37 +2885,37 @@ proc validate_WebhooksListEvents_568463(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group to which the container registry belongs.
-  ##   webhookName: JString (required)
-  ##              : The name of the webhook.
   ##   subscriptionId: JString (required)
   ##                 : The Microsoft Azure subscription ID.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group to which the container registry belongs.
   ##   registryName: JString (required)
   ##               : The name of the container registry.
+  ##   webhookName: JString (required)
+  ##              : The name of the webhook.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568465 = path.getOrDefault("resourceGroupName")
-  valid_568465 = validateParameter(valid_568465, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564365 = path.getOrDefault("subscriptionId")
+  valid_564365 = validateParameter(valid_564365, JString, required = true,
                                  default = nil)
-  if valid_568465 != nil:
-    section.add "resourceGroupName", valid_568465
-  var valid_568466 = path.getOrDefault("webhookName")
-  valid_568466 = validateParameter(valid_568466, JString, required = true,
+  if valid_564365 != nil:
+    section.add "subscriptionId", valid_564365
+  var valid_564366 = path.getOrDefault("resourceGroupName")
+  valid_564366 = validateParameter(valid_564366, JString, required = true,
                                  default = nil)
-  if valid_568466 != nil:
-    section.add "webhookName", valid_568466
-  var valid_568467 = path.getOrDefault("subscriptionId")
-  valid_568467 = validateParameter(valid_568467, JString, required = true,
+  if valid_564366 != nil:
+    section.add "resourceGroupName", valid_564366
+  var valid_564367 = path.getOrDefault("registryName")
+  valid_564367 = validateParameter(valid_564367, JString, required = true,
                                  default = nil)
-  if valid_568467 != nil:
-    section.add "subscriptionId", valid_568467
-  var valid_568468 = path.getOrDefault("registryName")
-  valid_568468 = validateParameter(valid_568468, JString, required = true,
+  if valid_564367 != nil:
+    section.add "registryName", valid_564367
+  var valid_564368 = path.getOrDefault("webhookName")
+  valid_564368 = validateParameter(valid_564368, JString, required = true,
                                  default = nil)
-  if valid_568468 != nil:
-    section.add "registryName", valid_568468
+  if valid_564368 != nil:
+    section.add "webhookName", valid_564368
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2918,11 +2923,11 @@ proc validate_WebhooksListEvents_568463(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568469 = query.getOrDefault("api-version")
-  valid_568469 = validateParameter(valid_568469, JString, required = true,
+  var valid_564369 = query.getOrDefault("api-version")
+  valid_564369 = validateParameter(valid_564369, JString, required = true,
                                  default = nil)
-  if valid_568469 != nil:
-    section.add "api-version", valid_568469
+  if valid_564369 != nil:
+    section.add "api-version", valid_564369
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2931,51 +2936,51 @@ proc validate_WebhooksListEvents_568463(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568470: Call_WebhooksListEvents_568462; path: JsonNode;
+proc call*(call_564370: Call_WebhooksListEvents_564362; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists recent events for the specified webhook.
   ## 
-  let valid = call_568470.validator(path, query, header, formData, body)
-  let scheme = call_568470.pickScheme
+  let valid = call_564370.validator(path, query, header, formData, body)
+  let scheme = call_564370.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568470.url(scheme.get, call_568470.host, call_568470.base,
-                         call_568470.route, valid.getOrDefault("path"),
+  let url = call_564370.url(scheme.get, call_564370.host, call_564370.base,
+                         call_564370.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568470, url, valid)
+  result = hook(call_564370, url, valid)
 
-proc call*(call_568471: Call_WebhooksListEvents_568462; resourceGroupName: string;
-          apiVersion: string; webhookName: string; subscriptionId: string;
-          registryName: string): Recallable =
+proc call*(call_564371: Call_WebhooksListEvents_564362; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string; registryName: string;
+          webhookName: string): Recallable =
   ## webhooksListEvents
   ## Lists recent events for the specified webhook.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group to which the container registry belongs.
   ##   apiVersion: string (required)
   ##             : The client API version.
-  ##   webhookName: string (required)
-  ##              : The name of the webhook.
   ##   subscriptionId: string (required)
   ##                 : The Microsoft Azure subscription ID.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group to which the container registry belongs.
   ##   registryName: string (required)
   ##               : The name of the container registry.
-  var path_568472 = newJObject()
-  var query_568473 = newJObject()
-  add(path_568472, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568473, "api-version", newJString(apiVersion))
-  add(path_568472, "webhookName", newJString(webhookName))
-  add(path_568472, "subscriptionId", newJString(subscriptionId))
-  add(path_568472, "registryName", newJString(registryName))
-  result = call_568471.call(path_568472, query_568473, nil, nil, nil)
+  ##   webhookName: string (required)
+  ##              : The name of the webhook.
+  var path_564372 = newJObject()
+  var query_564373 = newJObject()
+  add(query_564373, "api-version", newJString(apiVersion))
+  add(path_564372, "subscriptionId", newJString(subscriptionId))
+  add(path_564372, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564372, "registryName", newJString(registryName))
+  add(path_564372, "webhookName", newJString(webhookName))
+  result = call_564371.call(path_564372, query_564373, nil, nil, nil)
 
-var webhooksListEvents* = Call_WebhooksListEvents_568462(
+var webhooksListEvents* = Call_WebhooksListEvents_564362(
     name: "webhooksListEvents", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ContainerRegistry/registries/{registryName}/webhooks/{webhookName}/listEvents",
-    validator: validate_WebhooksListEvents_568463, base: "",
-    url: url_WebhooksListEvents_568464, schemes: {Scheme.Https})
+    validator: validate_WebhooksListEvents_564363, base: "",
+    url: url_WebhooksListEvents_564364, schemes: {Scheme.Https})
 type
-  Call_WebhooksPing_568474 = ref object of OpenApiRestCall_567666
-proc url_WebhooksPing_568476(protocol: Scheme; host: string; base: string;
+  Call_WebhooksPing_564374 = ref object of OpenApiRestCall_563564
+proc url_WebhooksPing_564376(protocol: Scheme; host: string; base: string;
                             route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -3002,44 +3007,44 @@ proc url_WebhooksPing_568476(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_WebhooksPing_568475(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_WebhooksPing_564375(path: JsonNode; query: JsonNode; header: JsonNode;
                                  formData: JsonNode; body: JsonNode): JsonNode =
   ## Triggers a ping event to be sent to the webhook.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group to which the container registry belongs.
-  ##   webhookName: JString (required)
-  ##              : The name of the webhook.
   ##   subscriptionId: JString (required)
   ##                 : The Microsoft Azure subscription ID.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group to which the container registry belongs.
   ##   registryName: JString (required)
   ##               : The name of the container registry.
+  ##   webhookName: JString (required)
+  ##              : The name of the webhook.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568477 = path.getOrDefault("resourceGroupName")
-  valid_568477 = validateParameter(valid_568477, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564377 = path.getOrDefault("subscriptionId")
+  valid_564377 = validateParameter(valid_564377, JString, required = true,
                                  default = nil)
-  if valid_568477 != nil:
-    section.add "resourceGroupName", valid_568477
-  var valid_568478 = path.getOrDefault("webhookName")
-  valid_568478 = validateParameter(valid_568478, JString, required = true,
+  if valid_564377 != nil:
+    section.add "subscriptionId", valid_564377
+  var valid_564378 = path.getOrDefault("resourceGroupName")
+  valid_564378 = validateParameter(valid_564378, JString, required = true,
                                  default = nil)
-  if valid_568478 != nil:
-    section.add "webhookName", valid_568478
-  var valid_568479 = path.getOrDefault("subscriptionId")
-  valid_568479 = validateParameter(valid_568479, JString, required = true,
+  if valid_564378 != nil:
+    section.add "resourceGroupName", valid_564378
+  var valid_564379 = path.getOrDefault("registryName")
+  valid_564379 = validateParameter(valid_564379, JString, required = true,
                                  default = nil)
-  if valid_568479 != nil:
-    section.add "subscriptionId", valid_568479
-  var valid_568480 = path.getOrDefault("registryName")
-  valid_568480 = validateParameter(valid_568480, JString, required = true,
+  if valid_564379 != nil:
+    section.add "registryName", valid_564379
+  var valid_564380 = path.getOrDefault("webhookName")
+  valid_564380 = validateParameter(valid_564380, JString, required = true,
                                  default = nil)
-  if valid_568480 != nil:
-    section.add "registryName", valid_568480
+  if valid_564380 != nil:
+    section.add "webhookName", valid_564380
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -3047,11 +3052,11 @@ proc validate_WebhooksPing_568475(path: JsonNode; query: JsonNode; header: JsonN
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568481 = query.getOrDefault("api-version")
-  valid_568481 = validateParameter(valid_568481, JString, required = true,
+  var valid_564381 = query.getOrDefault("api-version")
+  valid_564381 = validateParameter(valid_564381, JString, required = true,
                                  default = nil)
-  if valid_568481 != nil:
-    section.add "api-version", valid_568481
+  if valid_564381 != nil:
+    section.add "api-version", valid_564381
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3060,46 +3065,46 @@ proc validate_WebhooksPing_568475(path: JsonNode; query: JsonNode; header: JsonN
   if body != nil:
     result.add "body", body
 
-proc call*(call_568482: Call_WebhooksPing_568474; path: JsonNode; query: JsonNode;
+proc call*(call_564382: Call_WebhooksPing_564374; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Triggers a ping event to be sent to the webhook.
   ## 
-  let valid = call_568482.validator(path, query, header, formData, body)
-  let scheme = call_568482.pickScheme
+  let valid = call_564382.validator(path, query, header, formData, body)
+  let scheme = call_564382.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568482.url(scheme.get, call_568482.host, call_568482.base,
-                         call_568482.route, valid.getOrDefault("path"),
+  let url = call_564382.url(scheme.get, call_564382.host, call_564382.base,
+                         call_564382.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568482, url, valid)
+  result = hook(call_564382, url, valid)
 
-proc call*(call_568483: Call_WebhooksPing_568474; resourceGroupName: string;
-          apiVersion: string; webhookName: string; subscriptionId: string;
-          registryName: string): Recallable =
+proc call*(call_564383: Call_WebhooksPing_564374; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string; registryName: string;
+          webhookName: string): Recallable =
   ## webhooksPing
   ## Triggers a ping event to be sent to the webhook.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group to which the container registry belongs.
   ##   apiVersion: string (required)
   ##             : The client API version.
-  ##   webhookName: string (required)
-  ##              : The name of the webhook.
   ##   subscriptionId: string (required)
   ##                 : The Microsoft Azure subscription ID.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group to which the container registry belongs.
   ##   registryName: string (required)
   ##               : The name of the container registry.
-  var path_568484 = newJObject()
-  var query_568485 = newJObject()
-  add(path_568484, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568485, "api-version", newJString(apiVersion))
-  add(path_568484, "webhookName", newJString(webhookName))
-  add(path_568484, "subscriptionId", newJString(subscriptionId))
-  add(path_568484, "registryName", newJString(registryName))
-  result = call_568483.call(path_568484, query_568485, nil, nil, nil)
+  ##   webhookName: string (required)
+  ##              : The name of the webhook.
+  var path_564384 = newJObject()
+  var query_564385 = newJObject()
+  add(query_564385, "api-version", newJString(apiVersion))
+  add(path_564384, "subscriptionId", newJString(subscriptionId))
+  add(path_564384, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564384, "registryName", newJString(registryName))
+  add(path_564384, "webhookName", newJString(webhookName))
+  result = call_564383.call(path_564384, query_564385, nil, nil, nil)
 
-var webhooksPing* = Call_WebhooksPing_568474(name: "webhooksPing",
+var webhooksPing* = Call_WebhooksPing_564374(name: "webhooksPing",
     meth: HttpMethod.HttpPost, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ContainerRegistry/registries/{registryName}/webhooks/{webhookName}/ping",
-    validator: validate_WebhooksPing_568475, base: "", url: url_WebhooksPing_568476,
+    validator: validate_WebhooksPing_564375, base: "", url: url_WebhooksPing_564376,
     schemes: {Scheme.Https})
 export
   rest

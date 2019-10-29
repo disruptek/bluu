@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, httpcore
 
 ## auto-generated via openapi macro
 ## title: SubscriptionsManagementClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_574442 = ref object of OpenApiRestCall
+  OpenApiRestCall_563540 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_574442](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563540](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_574442): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563540): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,8 +107,8 @@ const
   macServiceName = "azsadmin-Quota"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_QuotasList_574664 = ref object of OpenApiRestCall_574442
-proc url_QuotasList_574666(protocol: Scheme; host: string; base: string; route: string;
+  Call_QuotasList_563762 = ref object of OpenApiRestCall_563540
+proc url_QuotasList_563764(protocol: Scheme; host: string; base: string; route: string;
                           path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -124,7 +128,7 @@ proc url_QuotasList_574666(protocol: Scheme; host: string; base: string; route: 
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_QuotasList_574665(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_QuotasList_563763(path: JsonNode; query: JsonNode; header: JsonNode;
                                formData: JsonNode; body: JsonNode): JsonNode =
   ## Get the list of quotas at a location.
   ## 
@@ -138,16 +142,16 @@ proc validate_QuotasList_574665(path: JsonNode; query: JsonNode; header: JsonNod
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_574826 = path.getOrDefault("subscriptionId")
-  valid_574826 = validateParameter(valid_574826, JString, required = true,
+  var valid_563926 = path.getOrDefault("subscriptionId")
+  valid_563926 = validateParameter(valid_563926, JString, required = true,
                                  default = nil)
-  if valid_574826 != nil:
-    section.add "subscriptionId", valid_574826
-  var valid_574827 = path.getOrDefault("location")
-  valid_574827 = validateParameter(valid_574827, JString, required = true,
+  if valid_563926 != nil:
+    section.add "subscriptionId", valid_563926
+  var valid_563927 = path.getOrDefault("location")
+  valid_563927 = validateParameter(valid_563927, JString, required = true,
                                  default = nil)
-  if valid_574827 != nil:
-    section.add "location", valid_574827
+  if valid_563927 != nil:
+    section.add "location", valid_563927
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -155,11 +159,11 @@ proc validate_QuotasList_574665(path: JsonNode; query: JsonNode; header: JsonNod
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574841 = query.getOrDefault("api-version")
-  valid_574841 = validateParameter(valid_574841, JString, required = true,
+  var valid_563941 = query.getOrDefault("api-version")
+  valid_563941 = validateParameter(valid_563941, JString, required = true,
                                  default = newJString("2015-11-01"))
-  if valid_574841 != nil:
-    section.add "api-version", valid_574841
+  if valid_563941 != nil:
+    section.add "api-version", valid_563941
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -168,20 +172,20 @@ proc validate_QuotasList_574665(path: JsonNode; query: JsonNode; header: JsonNod
   if body != nil:
     result.add "body", body
 
-proc call*(call_574868: Call_QuotasList_574664; path: JsonNode; query: JsonNode;
+proc call*(call_563968: Call_QuotasList_563762; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get the list of quotas at a location.
   ## 
-  let valid = call_574868.validator(path, query, header, formData, body)
-  let scheme = call_574868.pickScheme
+  let valid = call_563968.validator(path, query, header, formData, body)
+  let scheme = call_563968.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574868.url(scheme.get, call_574868.host, call_574868.base,
-                         call_574868.route, valid.getOrDefault("path"),
+  let url = call_563968.url(scheme.get, call_563968.host, call_563968.base,
+                         call_563968.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574868, url, valid)
+  result = hook(call_563968, url, valid)
 
-proc call*(call_574939: Call_QuotasList_574664; subscriptionId: string;
+proc call*(call_564039: Call_QuotasList_563762; subscriptionId: string;
           location: string; apiVersion: string = "2015-11-01"): Recallable =
   ## quotasList
   ## Get the list of quotas at a location.
@@ -191,21 +195,21 @@ proc call*(call_574939: Call_QuotasList_574664; subscriptionId: string;
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription.The subscription ID forms part of the URI for every service call.
   ##   location: string (required)
   ##           : The AzureStack location.
-  var path_574940 = newJObject()
-  var query_574942 = newJObject()
-  add(query_574942, "api-version", newJString(apiVersion))
-  add(path_574940, "subscriptionId", newJString(subscriptionId))
-  add(path_574940, "location", newJString(location))
-  result = call_574939.call(path_574940, query_574942, nil, nil, nil)
+  var path_564040 = newJObject()
+  var query_564042 = newJObject()
+  add(query_564042, "api-version", newJString(apiVersion))
+  add(path_564040, "subscriptionId", newJString(subscriptionId))
+  add(path_564040, "location", newJString(location))
+  result = call_564039.call(path_564040, query_564042, nil, nil, nil)
 
-var quotasList* = Call_QuotasList_574664(name: "quotasList",
+var quotasList* = Call_QuotasList_563762(name: "quotasList",
                                       meth: HttpMethod.HttpGet, host: "adminmanagement.local.azurestack.external", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Subscriptions.Admin/locations/{location}/quotas",
-                                      validator: validate_QuotasList_574665,
-                                      base: "", url: url_QuotasList_574666,
+                                      validator: validate_QuotasList_563763,
+                                      base: "", url: url_QuotasList_563764,
                                       schemes: {Scheme.Https})
 type
-  Call_QuotasGet_574981 = ref object of OpenApiRestCall_574442
-proc url_QuotasGet_574983(protocol: Scheme; host: string; base: string; route: string;
+  Call_QuotasGet_564081 = ref object of OpenApiRestCall_563540
+proc url_QuotasGet_564083(protocol: Scheme; host: string; base: string; route: string;
                          path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -227,36 +231,37 @@ proc url_QuotasGet_574983(protocol: Scheme; host: string; base: string; route: s
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_QuotasGet_574982(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_QuotasGet_564082(path: JsonNode; query: JsonNode; header: JsonNode;
                               formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets a quota by name.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   quota: JString (required)
-  ##        : Name of the quota.
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription.The subscription ID forms part of the URI for every service call.
   ##   location: JString (required)
   ##           : The AzureStack location.
+  ##   quota: JString (required)
+  ##        : Name of the quota.
   section = newJObject()
-  assert path != nil, "path argument is necessary due to required `quota` field"
-  var valid_574993 = path.getOrDefault("quota")
-  valid_574993 = validateParameter(valid_574993, JString, required = true,
+  assert path != nil,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564093 = path.getOrDefault("subscriptionId")
+  valid_564093 = validateParameter(valid_564093, JString, required = true,
                                  default = nil)
-  if valid_574993 != nil:
-    section.add "quota", valid_574993
-  var valid_574994 = path.getOrDefault("subscriptionId")
-  valid_574994 = validateParameter(valid_574994, JString, required = true,
+  if valid_564093 != nil:
+    section.add "subscriptionId", valid_564093
+  var valid_564094 = path.getOrDefault("location")
+  valid_564094 = validateParameter(valid_564094, JString, required = true,
                                  default = nil)
-  if valid_574994 != nil:
-    section.add "subscriptionId", valid_574994
-  var valid_574995 = path.getOrDefault("location")
-  valid_574995 = validateParameter(valid_574995, JString, required = true,
+  if valid_564094 != nil:
+    section.add "location", valid_564094
+  var valid_564095 = path.getOrDefault("quota")
+  valid_564095 = validateParameter(valid_564095, JString, required = true,
                                  default = nil)
-  if valid_574995 != nil:
-    section.add "location", valid_574995
+  if valid_564095 != nil:
+    section.add "quota", valid_564095
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -264,11 +269,11 @@ proc validate_QuotasGet_574982(path: JsonNode; query: JsonNode; header: JsonNode
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574996 = query.getOrDefault("api-version")
-  valid_574996 = validateParameter(valid_574996, JString, required = true,
+  var valid_564096 = query.getOrDefault("api-version")
+  valid_564096 = validateParameter(valid_564096, JString, required = true,
                                  default = newJString("2015-11-01"))
-  if valid_574996 != nil:
-    section.add "api-version", valid_574996
+  if valid_564096 != nil:
+    section.add "api-version", valid_564096
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -277,42 +282,42 @@ proc validate_QuotasGet_574982(path: JsonNode; query: JsonNode; header: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_574997: Call_QuotasGet_574981; path: JsonNode; query: JsonNode;
+proc call*(call_564097: Call_QuotasGet_564081; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets a quota by name.
   ## 
-  let valid = call_574997.validator(path, query, header, formData, body)
-  let scheme = call_574997.pickScheme
+  let valid = call_564097.validator(path, query, header, formData, body)
+  let scheme = call_564097.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574997.url(scheme.get, call_574997.host, call_574997.base,
-                         call_574997.route, valid.getOrDefault("path"),
+  let url = call_564097.url(scheme.get, call_564097.host, call_564097.base,
+                         call_564097.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574997, url, valid)
+  result = hook(call_564097, url, valid)
 
-proc call*(call_574998: Call_QuotasGet_574981; quota: string; subscriptionId: string;
-          location: string; apiVersion: string = "2015-11-01"): Recallable =
+proc call*(call_564098: Call_QuotasGet_564081; subscriptionId: string;
+          location: string; quota: string; apiVersion: string = "2015-11-01"): Recallable =
   ## quotasGet
   ## Gets a quota by name.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
-  ##   quota: string (required)
-  ##        : Name of the quota.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription.The subscription ID forms part of the URI for every service call.
   ##   location: string (required)
   ##           : The AzureStack location.
-  var path_574999 = newJObject()
-  var query_575000 = newJObject()
-  add(query_575000, "api-version", newJString(apiVersion))
-  add(path_574999, "quota", newJString(quota))
-  add(path_574999, "subscriptionId", newJString(subscriptionId))
-  add(path_574999, "location", newJString(location))
-  result = call_574998.call(path_574999, query_575000, nil, nil, nil)
+  ##   quota: string (required)
+  ##        : Name of the quota.
+  var path_564099 = newJObject()
+  var query_564100 = newJObject()
+  add(query_564100, "api-version", newJString(apiVersion))
+  add(path_564099, "subscriptionId", newJString(subscriptionId))
+  add(path_564099, "location", newJString(location))
+  add(path_564099, "quota", newJString(quota))
+  result = call_564098.call(path_564099, query_564100, nil, nil, nil)
 
-var quotasGet* = Call_QuotasGet_574981(name: "quotasGet", meth: HttpMethod.HttpGet, host: "adminmanagement.local.azurestack.external", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Subscriptions.Admin/locations/{location}/quotas/{quota}",
-                                    validator: validate_QuotasGet_574982,
-                                    base: "", url: url_QuotasGet_574983,
+var quotasGet* = Call_QuotasGet_564081(name: "quotasGet", meth: HttpMethod.HttpGet, host: "adminmanagement.local.azurestack.external", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Subscriptions.Admin/locations/{location}/quotas/{quota}",
+                                    validator: validate_QuotasGet_564082,
+                                    base: "", url: url_QuotasGet_564083,
                                     schemes: {Scheme.Https})
 export
   rest

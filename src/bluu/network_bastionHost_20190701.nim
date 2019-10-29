@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_573641 = ref object of OpenApiRestCall
+  OpenApiRestCall_563539 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_573641](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563539](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_573641): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563539): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,8 +107,8 @@ const
   macServiceName = "network-bastionHost"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_BastionHostsList_573863 = ref object of OpenApiRestCall_573641
-proc url_BastionHostsList_573865(protocol: Scheme; host: string; base: string;
+  Call_BastionHostsList_563761 = ref object of OpenApiRestCall_563539
+proc url_BastionHostsList_563763(protocol: Scheme; host: string; base: string;
                                 route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -120,7 +124,7 @@ proc url_BastionHostsList_573865(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_BastionHostsList_573864(path: JsonNode; query: JsonNode;
+proc validate_BastionHostsList_563762(path: JsonNode; query: JsonNode;
                                      header: JsonNode; formData: JsonNode;
                                      body: JsonNode): JsonNode =
   ## Lists all Bastion Hosts in a subscription.
@@ -133,11 +137,11 @@ proc validate_BastionHostsList_573864(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_574025 = path.getOrDefault("subscriptionId")
-  valid_574025 = validateParameter(valid_574025, JString, required = true,
+  var valid_563925 = path.getOrDefault("subscriptionId")
+  valid_563925 = validateParameter(valid_563925, JString, required = true,
                                  default = nil)
-  if valid_574025 != nil:
-    section.add "subscriptionId", valid_574025
+  if valid_563925 != nil:
+    section.add "subscriptionId", valid_563925
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -145,11 +149,11 @@ proc validate_BastionHostsList_573864(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574026 = query.getOrDefault("api-version")
-  valid_574026 = validateParameter(valid_574026, JString, required = true,
+  var valid_563926 = query.getOrDefault("api-version")
+  valid_563926 = validateParameter(valid_563926, JString, required = true,
                                  default = nil)
-  if valid_574026 != nil:
-    section.add "api-version", valid_574026
+  if valid_563926 != nil:
+    section.add "api-version", valid_563926
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -158,20 +162,20 @@ proc validate_BastionHostsList_573864(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574053: Call_BastionHostsList_573863; path: JsonNode;
+proc call*(call_563953: Call_BastionHostsList_563761; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists all Bastion Hosts in a subscription.
   ## 
-  let valid = call_574053.validator(path, query, header, formData, body)
-  let scheme = call_574053.pickScheme
+  let valid = call_563953.validator(path, query, header, formData, body)
+  let scheme = call_563953.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574053.url(scheme.get, call_574053.host, call_574053.base,
-                         call_574053.route, valid.getOrDefault("path"),
+  let url = call_563953.url(scheme.get, call_563953.host, call_563953.base,
+                         call_563953.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574053, url, valid)
+  result = hook(call_563953, url, valid)
 
-proc call*(call_574124: Call_BastionHostsList_573863; apiVersion: string;
+proc call*(call_564024: Call_BastionHostsList_563761; apiVersion: string;
           subscriptionId: string): Recallable =
   ## bastionHostsList
   ## Lists all Bastion Hosts in a subscription.
@@ -179,19 +183,19 @@ proc call*(call_574124: Call_BastionHostsList_573863; apiVersion: string;
   ##             : Client API version.
   ##   subscriptionId: string (required)
   ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_574125 = newJObject()
-  var query_574127 = newJObject()
-  add(query_574127, "api-version", newJString(apiVersion))
-  add(path_574125, "subscriptionId", newJString(subscriptionId))
-  result = call_574124.call(path_574125, query_574127, nil, nil, nil)
+  var path_564025 = newJObject()
+  var query_564027 = newJObject()
+  add(query_564027, "api-version", newJString(apiVersion))
+  add(path_564025, "subscriptionId", newJString(subscriptionId))
+  result = call_564024.call(path_564025, query_564027, nil, nil, nil)
 
-var bastionHostsList* = Call_BastionHostsList_573863(name: "bastionHostsList",
+var bastionHostsList* = Call_BastionHostsList_563761(name: "bastionHostsList",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Network/bastionHosts",
-    validator: validate_BastionHostsList_573864, base: "",
-    url: url_BastionHostsList_573865, schemes: {Scheme.Https})
+    validator: validate_BastionHostsList_563762, base: "",
+    url: url_BastionHostsList_563763, schemes: {Scheme.Https})
 type
-  Call_BastionHostsListByResourceGroup_574166 = ref object of OpenApiRestCall_573641
-proc url_BastionHostsListByResourceGroup_574168(protocol: Scheme; host: string;
+  Call_BastionHostsListByResourceGroup_564066 = ref object of OpenApiRestCall_563539
+proc url_BastionHostsListByResourceGroup_564068(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -211,30 +215,30 @@ proc url_BastionHostsListByResourceGroup_574168(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_BastionHostsListByResourceGroup_574167(path: JsonNode;
+proc validate_BastionHostsListByResourceGroup_564067(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists all Bastion Hosts in a resource group.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   subscriptionId: JString (required)
   ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_574169 = path.getOrDefault("resourceGroupName")
-  valid_574169 = validateParameter(valid_574169, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564069 = path.getOrDefault("subscriptionId")
+  valid_564069 = validateParameter(valid_564069, JString, required = true,
                                  default = nil)
-  if valid_574169 != nil:
-    section.add "resourceGroupName", valid_574169
-  var valid_574170 = path.getOrDefault("subscriptionId")
-  valid_574170 = validateParameter(valid_574170, JString, required = true,
+  if valid_564069 != nil:
+    section.add "subscriptionId", valid_564069
+  var valid_564070 = path.getOrDefault("resourceGroupName")
+  valid_564070 = validateParameter(valid_564070, JString, required = true,
                                  default = nil)
-  if valid_574170 != nil:
-    section.add "subscriptionId", valid_574170
+  if valid_564070 != nil:
+    section.add "resourceGroupName", valid_564070
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -242,11 +246,11 @@ proc validate_BastionHostsListByResourceGroup_574167(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574171 = query.getOrDefault("api-version")
-  valid_574171 = validateParameter(valid_574171, JString, required = true,
+  var valid_564071 = query.getOrDefault("api-version")
+  valid_564071 = validateParameter(valid_564071, JString, required = true,
                                  default = nil)
-  if valid_574171 != nil:
-    section.add "api-version", valid_574171
+  if valid_564071 != nil:
+    section.add "api-version", valid_564071
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -255,45 +259,45 @@ proc validate_BastionHostsListByResourceGroup_574167(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574172: Call_BastionHostsListByResourceGroup_574166;
+proc call*(call_564072: Call_BastionHostsListByResourceGroup_564066;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Lists all Bastion Hosts in a resource group.
   ## 
-  let valid = call_574172.validator(path, query, header, formData, body)
-  let scheme = call_574172.pickScheme
+  let valid = call_564072.validator(path, query, header, formData, body)
+  let scheme = call_564072.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574172.url(scheme.get, call_574172.host, call_574172.base,
-                         call_574172.route, valid.getOrDefault("path"),
+  let url = call_564072.url(scheme.get, call_564072.host, call_564072.base,
+                         call_564072.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574172, url, valid)
+  result = hook(call_564072, url, valid)
 
-proc call*(call_574173: Call_BastionHostsListByResourceGroup_574166;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string): Recallable =
+proc call*(call_564073: Call_BastionHostsListByResourceGroup_564066;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string): Recallable =
   ## bastionHostsListByResourceGroup
   ## Lists all Bastion Hosts in a resource group.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client API version.
   ##   subscriptionId: string (required)
   ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_574174 = newJObject()
-  var query_574175 = newJObject()
-  add(path_574174, "resourceGroupName", newJString(resourceGroupName))
-  add(query_574175, "api-version", newJString(apiVersion))
-  add(path_574174, "subscriptionId", newJString(subscriptionId))
-  result = call_574173.call(path_574174, query_574175, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564074 = newJObject()
+  var query_564075 = newJObject()
+  add(query_564075, "api-version", newJString(apiVersion))
+  add(path_564074, "subscriptionId", newJString(subscriptionId))
+  add(path_564074, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564073.call(path_564074, query_564075, nil, nil, nil)
 
-var bastionHostsListByResourceGroup* = Call_BastionHostsListByResourceGroup_574166(
+var bastionHostsListByResourceGroup* = Call_BastionHostsListByResourceGroup_564066(
     name: "bastionHostsListByResourceGroup", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/bastionHosts",
-    validator: validate_BastionHostsListByResourceGroup_574167, base: "",
-    url: url_BastionHostsListByResourceGroup_574168, schemes: {Scheme.Https})
+    validator: validate_BastionHostsListByResourceGroup_564067, base: "",
+    url: url_BastionHostsListByResourceGroup_564068, schemes: {Scheme.Https})
 type
-  Call_BastionHostsCreateOrUpdate_574187 = ref object of OpenApiRestCall_573641
-proc url_BastionHostsCreateOrUpdate_574189(protocol: Scheme; host: string;
+  Call_BastionHostsCreateOrUpdate_564087 = ref object of OpenApiRestCall_563539
+proc url_BastionHostsCreateOrUpdate_564089(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -315,37 +319,37 @@ proc url_BastionHostsCreateOrUpdate_574189(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_BastionHostsCreateOrUpdate_574188(path: JsonNode; query: JsonNode;
+proc validate_BastionHostsCreateOrUpdate_564088(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Creates or updates the specified Bastion Host.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   subscriptionId: JString (required)
   ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   bastionHostName: JString (required)
   ##                  : The name of the Bastion Host.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_574216 = path.getOrDefault("resourceGroupName")
-  valid_574216 = validateParameter(valid_574216, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564116 = path.getOrDefault("subscriptionId")
+  valid_564116 = validateParameter(valid_564116, JString, required = true,
                                  default = nil)
-  if valid_574216 != nil:
-    section.add "resourceGroupName", valid_574216
-  var valid_574217 = path.getOrDefault("subscriptionId")
-  valid_574217 = validateParameter(valid_574217, JString, required = true,
+  if valid_564116 != nil:
+    section.add "subscriptionId", valid_564116
+  var valid_564117 = path.getOrDefault("bastionHostName")
+  valid_564117 = validateParameter(valid_564117, JString, required = true,
                                  default = nil)
-  if valid_574217 != nil:
-    section.add "subscriptionId", valid_574217
-  var valid_574218 = path.getOrDefault("bastionHostName")
-  valid_574218 = validateParameter(valid_574218, JString, required = true,
+  if valid_564117 != nil:
+    section.add "bastionHostName", valid_564117
+  var valid_564118 = path.getOrDefault("resourceGroupName")
+  valid_564118 = validateParameter(valid_564118, JString, required = true,
                                  default = nil)
-  if valid_574218 != nil:
-    section.add "bastionHostName", valid_574218
+  if valid_564118 != nil:
+    section.add "resourceGroupName", valid_564118
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -353,11 +357,11 @@ proc validate_BastionHostsCreateOrUpdate_574188(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574219 = query.getOrDefault("api-version")
-  valid_574219 = validateParameter(valid_574219, JString, required = true,
+  var valid_564119 = query.getOrDefault("api-version")
+  valid_564119 = validateParameter(valid_564119, JString, required = true,
                                  default = nil)
-  if valid_574219 != nil:
-    section.add "api-version", valid_574219
+  if valid_564119 != nil:
+    section.add "api-version", valid_564119
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -371,53 +375,53 @@ proc validate_BastionHostsCreateOrUpdate_574188(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574221: Call_BastionHostsCreateOrUpdate_574187; path: JsonNode;
+proc call*(call_564121: Call_BastionHostsCreateOrUpdate_564087; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Creates or updates the specified Bastion Host.
   ## 
-  let valid = call_574221.validator(path, query, header, formData, body)
-  let scheme = call_574221.pickScheme
+  let valid = call_564121.validator(path, query, header, formData, body)
+  let scheme = call_564121.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574221.url(scheme.get, call_574221.host, call_574221.base,
-                         call_574221.route, valid.getOrDefault("path"),
+  let url = call_564121.url(scheme.get, call_564121.host, call_564121.base,
+                         call_564121.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574221, url, valid)
+  result = hook(call_564121, url, valid)
 
-proc call*(call_574222: Call_BastionHostsCreateOrUpdate_574187;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          bastionHostName: string; parameters: JsonNode): Recallable =
+proc call*(call_564122: Call_BastionHostsCreateOrUpdate_564087; apiVersion: string;
+          subscriptionId: string; bastionHostName: string;
+          resourceGroupName: string; parameters: JsonNode): Recallable =
   ## bastionHostsCreateOrUpdate
   ## Creates or updates the specified Bastion Host.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client API version.
   ##   subscriptionId: string (required)
   ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   bastionHostName: string (required)
   ##                  : The name of the Bastion Host.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   parameters: JObject (required)
   ##             : Parameters supplied to the create or update Bastion Host operation.
-  var path_574223 = newJObject()
-  var query_574224 = newJObject()
-  var body_574225 = newJObject()
-  add(path_574223, "resourceGroupName", newJString(resourceGroupName))
-  add(query_574224, "api-version", newJString(apiVersion))
-  add(path_574223, "subscriptionId", newJString(subscriptionId))
-  add(path_574223, "bastionHostName", newJString(bastionHostName))
+  var path_564123 = newJObject()
+  var query_564124 = newJObject()
+  var body_564125 = newJObject()
+  add(query_564124, "api-version", newJString(apiVersion))
+  add(path_564123, "subscriptionId", newJString(subscriptionId))
+  add(path_564123, "bastionHostName", newJString(bastionHostName))
+  add(path_564123, "resourceGroupName", newJString(resourceGroupName))
   if parameters != nil:
-    body_574225 = parameters
-  result = call_574222.call(path_574223, query_574224, nil, nil, body_574225)
+    body_564125 = parameters
+  result = call_564122.call(path_564123, query_564124, nil, nil, body_564125)
 
-var bastionHostsCreateOrUpdate* = Call_BastionHostsCreateOrUpdate_574187(
+var bastionHostsCreateOrUpdate* = Call_BastionHostsCreateOrUpdate_564087(
     name: "bastionHostsCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/bastionHosts/{bastionHostName}",
-    validator: validate_BastionHostsCreateOrUpdate_574188, base: "",
-    url: url_BastionHostsCreateOrUpdate_574189, schemes: {Scheme.Https})
+    validator: validate_BastionHostsCreateOrUpdate_564088, base: "",
+    url: url_BastionHostsCreateOrUpdate_564089, schemes: {Scheme.Https})
 type
-  Call_BastionHostsGet_574176 = ref object of OpenApiRestCall_573641
-proc url_BastionHostsGet_574178(protocol: Scheme; host: string; base: string;
+  Call_BastionHostsGet_564076 = ref object of OpenApiRestCall_563539
+proc url_BastionHostsGet_564078(protocol: Scheme; host: string; base: string;
                                route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -439,7 +443,7 @@ proc url_BastionHostsGet_574178(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_BastionHostsGet_574177(path: JsonNode; query: JsonNode;
+proc validate_BastionHostsGet_564077(path: JsonNode; query: JsonNode;
                                     header: JsonNode; formData: JsonNode;
                                     body: JsonNode): JsonNode =
   ## Gets the specified Bastion Host.
@@ -447,30 +451,30 @@ proc validate_BastionHostsGet_574177(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   subscriptionId: JString (required)
   ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   bastionHostName: JString (required)
   ##                  : The name of the Bastion Host.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_574179 = path.getOrDefault("resourceGroupName")
-  valid_574179 = validateParameter(valid_574179, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564079 = path.getOrDefault("subscriptionId")
+  valid_564079 = validateParameter(valid_564079, JString, required = true,
                                  default = nil)
-  if valid_574179 != nil:
-    section.add "resourceGroupName", valid_574179
-  var valid_574180 = path.getOrDefault("subscriptionId")
-  valid_574180 = validateParameter(valid_574180, JString, required = true,
+  if valid_564079 != nil:
+    section.add "subscriptionId", valid_564079
+  var valid_564080 = path.getOrDefault("bastionHostName")
+  valid_564080 = validateParameter(valid_564080, JString, required = true,
                                  default = nil)
-  if valid_574180 != nil:
-    section.add "subscriptionId", valid_574180
-  var valid_574181 = path.getOrDefault("bastionHostName")
-  valid_574181 = validateParameter(valid_574181, JString, required = true,
+  if valid_564080 != nil:
+    section.add "bastionHostName", valid_564080
+  var valid_564081 = path.getOrDefault("resourceGroupName")
+  valid_564081 = validateParameter(valid_564081, JString, required = true,
                                  default = nil)
-  if valid_574181 != nil:
-    section.add "bastionHostName", valid_574181
+  if valid_564081 != nil:
+    section.add "resourceGroupName", valid_564081
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -478,11 +482,11 @@ proc validate_BastionHostsGet_574177(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574182 = query.getOrDefault("api-version")
-  valid_574182 = validateParameter(valid_574182, JString, required = true,
+  var valid_564082 = query.getOrDefault("api-version")
+  valid_564082 = validateParameter(valid_564082, JString, required = true,
                                  default = nil)
-  if valid_574182 != nil:
-    section.add "api-version", valid_574182
+  if valid_564082 != nil:
+    section.add "api-version", valid_564082
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -491,46 +495,46 @@ proc validate_BastionHostsGet_574177(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574183: Call_BastionHostsGet_574176; path: JsonNode; query: JsonNode;
+proc call*(call_564083: Call_BastionHostsGet_564076; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the specified Bastion Host.
   ## 
-  let valid = call_574183.validator(path, query, header, formData, body)
-  let scheme = call_574183.pickScheme
+  let valid = call_564083.validator(path, query, header, formData, body)
+  let scheme = call_564083.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574183.url(scheme.get, call_574183.host, call_574183.base,
-                         call_574183.route, valid.getOrDefault("path"),
+  let url = call_564083.url(scheme.get, call_564083.host, call_564083.base,
+                         call_564083.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574183, url, valid)
+  result = hook(call_564083, url, valid)
 
-proc call*(call_574184: Call_BastionHostsGet_574176; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; bastionHostName: string): Recallable =
+proc call*(call_564084: Call_BastionHostsGet_564076; apiVersion: string;
+          subscriptionId: string; bastionHostName: string; resourceGroupName: string): Recallable =
   ## bastionHostsGet
   ## Gets the specified Bastion Host.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client API version.
   ##   subscriptionId: string (required)
   ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   bastionHostName: string (required)
   ##                  : The name of the Bastion Host.
-  var path_574185 = newJObject()
-  var query_574186 = newJObject()
-  add(path_574185, "resourceGroupName", newJString(resourceGroupName))
-  add(query_574186, "api-version", newJString(apiVersion))
-  add(path_574185, "subscriptionId", newJString(subscriptionId))
-  add(path_574185, "bastionHostName", newJString(bastionHostName))
-  result = call_574184.call(path_574185, query_574186, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564085 = newJObject()
+  var query_564086 = newJObject()
+  add(query_564086, "api-version", newJString(apiVersion))
+  add(path_564085, "subscriptionId", newJString(subscriptionId))
+  add(path_564085, "bastionHostName", newJString(bastionHostName))
+  add(path_564085, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564084.call(path_564085, query_564086, nil, nil, nil)
 
-var bastionHostsGet* = Call_BastionHostsGet_574176(name: "bastionHostsGet",
+var bastionHostsGet* = Call_BastionHostsGet_564076(name: "bastionHostsGet",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/bastionHosts/{bastionHostName}",
-    validator: validate_BastionHostsGet_574177, base: "", url: url_BastionHostsGet_574178,
+    validator: validate_BastionHostsGet_564077, base: "", url: url_BastionHostsGet_564078,
     schemes: {Scheme.Https})
 type
-  Call_BastionHostsDelete_574226 = ref object of OpenApiRestCall_573641
-proc url_BastionHostsDelete_574228(protocol: Scheme; host: string; base: string;
+  Call_BastionHostsDelete_564126 = ref object of OpenApiRestCall_563539
+proc url_BastionHostsDelete_564128(protocol: Scheme; host: string; base: string;
                                   route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -552,7 +556,7 @@ proc url_BastionHostsDelete_574228(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_BastionHostsDelete_574227(path: JsonNode; query: JsonNode;
+proc validate_BastionHostsDelete_564127(path: JsonNode; query: JsonNode;
                                        header: JsonNode; formData: JsonNode;
                                        body: JsonNode): JsonNode =
   ## Deletes the specified Bastion Host.
@@ -560,30 +564,30 @@ proc validate_BastionHostsDelete_574227(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   subscriptionId: JString (required)
   ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   bastionHostName: JString (required)
   ##                  : The name of the Bastion Host.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_574229 = path.getOrDefault("resourceGroupName")
-  valid_574229 = validateParameter(valid_574229, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564129 = path.getOrDefault("subscriptionId")
+  valid_564129 = validateParameter(valid_564129, JString, required = true,
                                  default = nil)
-  if valid_574229 != nil:
-    section.add "resourceGroupName", valid_574229
-  var valid_574230 = path.getOrDefault("subscriptionId")
-  valid_574230 = validateParameter(valid_574230, JString, required = true,
+  if valid_564129 != nil:
+    section.add "subscriptionId", valid_564129
+  var valid_564130 = path.getOrDefault("bastionHostName")
+  valid_564130 = validateParameter(valid_564130, JString, required = true,
                                  default = nil)
-  if valid_574230 != nil:
-    section.add "subscriptionId", valid_574230
-  var valid_574231 = path.getOrDefault("bastionHostName")
-  valid_574231 = validateParameter(valid_574231, JString, required = true,
+  if valid_564130 != nil:
+    section.add "bastionHostName", valid_564130
+  var valid_564131 = path.getOrDefault("resourceGroupName")
+  valid_564131 = validateParameter(valid_564131, JString, required = true,
                                  default = nil)
-  if valid_574231 != nil:
-    section.add "bastionHostName", valid_574231
+  if valid_564131 != nil:
+    section.add "resourceGroupName", valid_564131
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -591,11 +595,11 @@ proc validate_BastionHostsDelete_574227(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574232 = query.getOrDefault("api-version")
-  valid_574232 = validateParameter(valid_574232, JString, required = true,
+  var valid_564132 = query.getOrDefault("api-version")
+  valid_564132 = validateParameter(valid_564132, JString, required = true,
                                  default = nil)
-  if valid_574232 != nil:
-    section.add "api-version", valid_574232
+  if valid_564132 != nil:
+    section.add "api-version", valid_564132
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -604,44 +608,44 @@ proc validate_BastionHostsDelete_574227(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574233: Call_BastionHostsDelete_574226; path: JsonNode;
+proc call*(call_564133: Call_BastionHostsDelete_564126; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes the specified Bastion Host.
   ## 
-  let valid = call_574233.validator(path, query, header, formData, body)
-  let scheme = call_574233.pickScheme
+  let valid = call_564133.validator(path, query, header, formData, body)
+  let scheme = call_564133.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574233.url(scheme.get, call_574233.host, call_574233.base,
-                         call_574233.route, valid.getOrDefault("path"),
+  let url = call_564133.url(scheme.get, call_564133.host, call_564133.base,
+                         call_564133.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574233, url, valid)
+  result = hook(call_564133, url, valid)
 
-proc call*(call_574234: Call_BastionHostsDelete_574226; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; bastionHostName: string): Recallable =
+proc call*(call_564134: Call_BastionHostsDelete_564126; apiVersion: string;
+          subscriptionId: string; bastionHostName: string; resourceGroupName: string): Recallable =
   ## bastionHostsDelete
   ## Deletes the specified Bastion Host.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client API version.
   ##   subscriptionId: string (required)
   ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   bastionHostName: string (required)
   ##                  : The name of the Bastion Host.
-  var path_574235 = newJObject()
-  var query_574236 = newJObject()
-  add(path_574235, "resourceGroupName", newJString(resourceGroupName))
-  add(query_574236, "api-version", newJString(apiVersion))
-  add(path_574235, "subscriptionId", newJString(subscriptionId))
-  add(path_574235, "bastionHostName", newJString(bastionHostName))
-  result = call_574234.call(path_574235, query_574236, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564135 = newJObject()
+  var query_564136 = newJObject()
+  add(query_564136, "api-version", newJString(apiVersion))
+  add(path_564135, "subscriptionId", newJString(subscriptionId))
+  add(path_564135, "bastionHostName", newJString(bastionHostName))
+  add(path_564135, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564134.call(path_564135, query_564136, nil, nil, nil)
 
-var bastionHostsDelete* = Call_BastionHostsDelete_574226(
+var bastionHostsDelete* = Call_BastionHostsDelete_564126(
     name: "bastionHostsDelete", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/bastionHosts/{bastionHostName}",
-    validator: validate_BastionHostsDelete_574227, base: "",
-    url: url_BastionHostsDelete_574228, schemes: {Scheme.Https})
+    validator: validate_BastionHostsDelete_564127, base: "",
+    url: url_BastionHostsDelete_564128, schemes: {Scheme.Https})
 export
   rest
 

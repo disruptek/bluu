@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, httpcore
 
 ## auto-generated via openapi macro
 ## title: Update Management
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_582458 = ref object of OpenApiRestCall
+  OpenApiRestCall_563556 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_582458](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563556](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_582458): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563556): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,8 +107,8 @@ const
   macServiceName = "automation-softwareUpdateConfigurationRun"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_SoftwareUpdateConfigurationRunsList_582680 = ref object of OpenApiRestCall_582458
-proc url_SoftwareUpdateConfigurationRunsList_582682(protocol: Scheme; host: string;
+  Call_SoftwareUpdateConfigurationRunsList_563778 = ref object of OpenApiRestCall_563556
+proc url_SoftwareUpdateConfigurationRunsList_563780(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -129,7 +133,7 @@ proc url_SoftwareUpdateConfigurationRunsList_582682(protocol: Scheme; host: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_SoftwareUpdateConfigurationRunsList_582681(path: JsonNode;
+proc validate_SoftwareUpdateConfigurationRunsList_563779(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Return list of software update configuration runs
   ## 
@@ -139,27 +143,27 @@ proc validate_SoftwareUpdateConfigurationRunsList_582681(path: JsonNode;
   ## parameters in `path` object:
   ##   automationAccountName: JString (required)
   ##                        : The name of the automation account.
-  ##   resourceGroupName: JString (required)
-  ##                    : Name of an Azure Resource group.
   ##   subscriptionId: JString (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : Name of an Azure Resource group.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `automationAccountName` field"
-  var valid_582843 = path.getOrDefault("automationAccountName")
-  valid_582843 = validateParameter(valid_582843, JString, required = true,
+  var valid_563943 = path.getOrDefault("automationAccountName")
+  valid_563943 = validateParameter(valid_563943, JString, required = true,
                                  default = nil)
-  if valid_582843 != nil:
-    section.add "automationAccountName", valid_582843
-  var valid_582844 = path.getOrDefault("resourceGroupName")
-  valid_582844 = validateParameter(valid_582844, JString, required = true,
+  if valid_563943 != nil:
+    section.add "automationAccountName", valid_563943
+  var valid_563944 = path.getOrDefault("subscriptionId")
+  valid_563944 = validateParameter(valid_563944, JString, required = true,
                                  default = nil)
-  if valid_582844 != nil:
-    section.add "resourceGroupName", valid_582844
-  var valid_582845 = path.getOrDefault("subscriptionId")
-  valid_582845 = validateParameter(valid_582845, JString, required = true,
+  if valid_563944 != nil:
+    section.add "subscriptionId", valid_563944
+  var valid_563945 = path.getOrDefault("resourceGroupName")
+  valid_563945 = validateParameter(valid_563945, JString, required = true,
                                  default = nil)
-  if valid_582845 != nil:
-    section.add "subscriptionId", valid_582845
+  if valid_563945 != nil:
+    section.add "resourceGroupName", valid_563945
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -173,97 +177,97 @@ proc validate_SoftwareUpdateConfigurationRunsList_582681(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_582846 = query.getOrDefault("api-version")
-  valid_582846 = validateParameter(valid_582846, JString, required = true,
+  var valid_563946 = query.getOrDefault("api-version")
+  valid_563946 = validateParameter(valid_563946, JString, required = true,
                                  default = nil)
-  if valid_582846 != nil:
-    section.add "api-version", valid_582846
-  var valid_582847 = query.getOrDefault("$top")
-  valid_582847 = validateParameter(valid_582847, JString, required = false,
+  if valid_563946 != nil:
+    section.add "api-version", valid_563946
+  var valid_563947 = query.getOrDefault("$top")
+  valid_563947 = validateParameter(valid_563947, JString, required = false,
                                  default = nil)
-  if valid_582847 != nil:
-    section.add "$top", valid_582847
-  var valid_582848 = query.getOrDefault("$skip")
-  valid_582848 = validateParameter(valid_582848, JString, required = false,
+  if valid_563947 != nil:
+    section.add "$top", valid_563947
+  var valid_563948 = query.getOrDefault("$skip")
+  valid_563948 = validateParameter(valid_563948, JString, required = false,
                                  default = nil)
-  if valid_582848 != nil:
-    section.add "$skip", valid_582848
-  var valid_582849 = query.getOrDefault("$filter")
-  valid_582849 = validateParameter(valid_582849, JString, required = false,
+  if valid_563948 != nil:
+    section.add "$skip", valid_563948
+  var valid_563949 = query.getOrDefault("$filter")
+  valid_563949 = validateParameter(valid_563949, JString, required = false,
                                  default = nil)
-  if valid_582849 != nil:
-    section.add "$filter", valid_582849
+  if valid_563949 != nil:
+    section.add "$filter", valid_563949
   result.add "query", section
   ## parameters in `header` object:
   ##   clientRequestId: JString
   ##                  : Identifies this specific client request.
   section = newJObject()
-  var valid_582850 = header.getOrDefault("clientRequestId")
-  valid_582850 = validateParameter(valid_582850, JString, required = false,
+  var valid_563950 = header.getOrDefault("clientRequestId")
+  valid_563950 = validateParameter(valid_563950, JString, required = false,
                                  default = nil)
-  if valid_582850 != nil:
-    section.add "clientRequestId", valid_582850
+  if valid_563950 != nil:
+    section.add "clientRequestId", valid_563950
   result.add "header", section
   section = newJObject()
   result.add "formData", section
   if body != nil:
     result.add "body", body
 
-proc call*(call_582877: Call_SoftwareUpdateConfigurationRunsList_582680;
+proc call*(call_563977: Call_SoftwareUpdateConfigurationRunsList_563778;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Return list of software update configuration runs
   ## 
   ## http://aka.ms/azureautomationsdk/softwareupdateconfigurationoperations
-  let valid = call_582877.validator(path, query, header, formData, body)
-  let scheme = call_582877.pickScheme
+  let valid = call_563977.validator(path, query, header, formData, body)
+  let scheme = call_563977.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_582877.url(scheme.get, call_582877.host, call_582877.base,
-                         call_582877.route, valid.getOrDefault("path"),
+  let url = call_563977.url(scheme.get, call_563977.host, call_563977.base,
+                         call_563977.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_582877, url, valid)
+  result = hook(call_563977, url, valid)
 
-proc call*(call_582948: Call_SoftwareUpdateConfigurationRunsList_582680;
-          automationAccountName: string; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; Top: string = "";
-          Skip: string = ""; Filter: string = ""): Recallable =
+proc call*(call_564048: Call_SoftwareUpdateConfigurationRunsList_563778;
+          apiVersion: string; automationAccountName: string; subscriptionId: string;
+          resourceGroupName: string; Top: string = ""; Skip: string = "";
+          Filter: string = ""): Recallable =
   ## softwareUpdateConfigurationRunsList
   ## Return list of software update configuration runs
   ## http://aka.ms/azureautomationsdk/softwareupdateconfigurationoperations
-  ##   automationAccountName: string (required)
-  ##                        : The name of the automation account.
-  ##   resourceGroupName: string (required)
-  ##                    : Name of an Azure Resource group.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
-  ##   subscriptionId: string (required)
-  ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   automationAccountName: string (required)
+  ##                        : The name of the automation account.
   ##   Top: string
   ##      : Maximum number of entries returned in the results collection
+  ##   subscriptionId: string (required)
+  ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   Skip: string
   ##       : Number of entries you skip before returning results
+  ##   resourceGroupName: string (required)
+  ##                    : Name of an Azure Resource group.
   ##   Filter: string
   ##         : The filter to apply on the operation. You can use the following filters: 'properties/osType', 'properties/status', 'properties/startTime', and 'properties/softwareUpdateConfiguration/name'
-  var path_582949 = newJObject()
-  var query_582951 = newJObject()
-  add(path_582949, "automationAccountName", newJString(automationAccountName))
-  add(path_582949, "resourceGroupName", newJString(resourceGroupName))
-  add(query_582951, "api-version", newJString(apiVersion))
-  add(path_582949, "subscriptionId", newJString(subscriptionId))
-  add(query_582951, "$top", newJString(Top))
-  add(query_582951, "$skip", newJString(Skip))
-  add(query_582951, "$filter", newJString(Filter))
-  result = call_582948.call(path_582949, query_582951, nil, nil, nil)
+  var path_564049 = newJObject()
+  var query_564051 = newJObject()
+  add(query_564051, "api-version", newJString(apiVersion))
+  add(path_564049, "automationAccountName", newJString(automationAccountName))
+  add(query_564051, "$top", newJString(Top))
+  add(path_564049, "subscriptionId", newJString(subscriptionId))
+  add(query_564051, "$skip", newJString(Skip))
+  add(path_564049, "resourceGroupName", newJString(resourceGroupName))
+  add(query_564051, "$filter", newJString(Filter))
+  result = call_564048.call(path_564049, query_564051, nil, nil, nil)
 
-var softwareUpdateConfigurationRunsList* = Call_SoftwareUpdateConfigurationRunsList_582680(
+var softwareUpdateConfigurationRunsList* = Call_SoftwareUpdateConfigurationRunsList_563778(
     name: "softwareUpdateConfigurationRunsList", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Automation/automationAccounts/{automationAccountName}/softwareUpdateConfigurationRuns",
-    validator: validate_SoftwareUpdateConfigurationRunsList_582681, base: "/",
-    url: url_SoftwareUpdateConfigurationRunsList_582682, schemes: {Scheme.Https})
+    validator: validate_SoftwareUpdateConfigurationRunsList_563779, base: "/",
+    url: url_SoftwareUpdateConfigurationRunsList_563780, schemes: {Scheme.Https})
 type
-  Call_SoftwareUpdateConfigurationRunsGetById_582990 = ref object of OpenApiRestCall_582458
-proc url_SoftwareUpdateConfigurationRunsGetById_582992(protocol: Scheme;
+  Call_SoftwareUpdateConfigurationRunsGetById_564090 = ref object of OpenApiRestCall_563556
+proc url_SoftwareUpdateConfigurationRunsGetById_564092(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -291,7 +295,7 @@ proc url_SoftwareUpdateConfigurationRunsGetById_582992(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_SoftwareUpdateConfigurationRunsGetById_582991(path: JsonNode;
+proc validate_SoftwareUpdateConfigurationRunsGetById_564091(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Get a single software update configuration Run by Id.
   ## 
@@ -301,34 +305,34 @@ proc validate_SoftwareUpdateConfigurationRunsGetById_582991(path: JsonNode;
   ## parameters in `path` object:
   ##   automationAccountName: JString (required)
   ##                        : The name of the automation account.
-  ##   resourceGroupName: JString (required)
-  ##                    : Name of an Azure Resource group.
   ##   subscriptionId: JString (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : Name of an Azure Resource group.
   ##   softwareUpdateConfigurationRunId: JString (required)
   ##                                   : The Id of the software update configuration run.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `automationAccountName` field"
-  var valid_582993 = path.getOrDefault("automationAccountName")
-  valid_582993 = validateParameter(valid_582993, JString, required = true,
+  var valid_564093 = path.getOrDefault("automationAccountName")
+  valid_564093 = validateParameter(valid_564093, JString, required = true,
                                  default = nil)
-  if valid_582993 != nil:
-    section.add "automationAccountName", valid_582993
-  var valid_582994 = path.getOrDefault("resourceGroupName")
-  valid_582994 = validateParameter(valid_582994, JString, required = true,
+  if valid_564093 != nil:
+    section.add "automationAccountName", valid_564093
+  var valid_564094 = path.getOrDefault("subscriptionId")
+  valid_564094 = validateParameter(valid_564094, JString, required = true,
                                  default = nil)
-  if valid_582994 != nil:
-    section.add "resourceGroupName", valid_582994
-  var valid_582995 = path.getOrDefault("subscriptionId")
-  valid_582995 = validateParameter(valid_582995, JString, required = true,
+  if valid_564094 != nil:
+    section.add "subscriptionId", valid_564094
+  var valid_564095 = path.getOrDefault("resourceGroupName")
+  valid_564095 = validateParameter(valid_564095, JString, required = true,
                                  default = nil)
-  if valid_582995 != nil:
-    section.add "subscriptionId", valid_582995
-  var valid_582996 = path.getOrDefault("softwareUpdateConfigurationRunId")
-  valid_582996 = validateParameter(valid_582996, JString, required = true,
+  if valid_564095 != nil:
+    section.add "resourceGroupName", valid_564095
+  var valid_564096 = path.getOrDefault("softwareUpdateConfigurationRunId")
+  valid_564096 = validateParameter(valid_564096, JString, required = true,
                                  default = nil)
-  if valid_582996 != nil:
-    section.add "softwareUpdateConfigurationRunId", valid_582996
+  if valid_564096 != nil:
+    section.add "softwareUpdateConfigurationRunId", valid_564096
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -336,74 +340,73 @@ proc validate_SoftwareUpdateConfigurationRunsGetById_582991(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_582997 = query.getOrDefault("api-version")
-  valid_582997 = validateParameter(valid_582997, JString, required = true,
+  var valid_564097 = query.getOrDefault("api-version")
+  valid_564097 = validateParameter(valid_564097, JString, required = true,
                                  default = nil)
-  if valid_582997 != nil:
-    section.add "api-version", valid_582997
+  if valid_564097 != nil:
+    section.add "api-version", valid_564097
   result.add "query", section
   ## parameters in `header` object:
   ##   clientRequestId: JString
   ##                  : Identifies this specific client request.
   section = newJObject()
-  var valid_582998 = header.getOrDefault("clientRequestId")
-  valid_582998 = validateParameter(valid_582998, JString, required = false,
+  var valid_564098 = header.getOrDefault("clientRequestId")
+  valid_564098 = validateParameter(valid_564098, JString, required = false,
                                  default = nil)
-  if valid_582998 != nil:
-    section.add "clientRequestId", valid_582998
+  if valid_564098 != nil:
+    section.add "clientRequestId", valid_564098
   result.add "header", section
   section = newJObject()
   result.add "formData", section
   if body != nil:
     result.add "body", body
 
-proc call*(call_582999: Call_SoftwareUpdateConfigurationRunsGetById_582990;
+proc call*(call_564099: Call_SoftwareUpdateConfigurationRunsGetById_564090;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Get a single software update configuration Run by Id.
   ## 
   ## http://aka.ms/azureautomationsdk/softwareupdateconfigurationrunoperations
-  let valid = call_582999.validator(path, query, header, formData, body)
-  let scheme = call_582999.pickScheme
+  let valid = call_564099.validator(path, query, header, formData, body)
+  let scheme = call_564099.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_582999.url(scheme.get, call_582999.host, call_582999.base,
-                         call_582999.route, valid.getOrDefault("path"),
+  let url = call_564099.url(scheme.get, call_564099.host, call_564099.base,
+                         call_564099.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_582999, url, valid)
+  result = hook(call_564099, url, valid)
 
-proc call*(call_583000: Call_SoftwareUpdateConfigurationRunsGetById_582990;
-          automationAccountName: string; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string;
-          softwareUpdateConfigurationRunId: string): Recallable =
+proc call*(call_564100: Call_SoftwareUpdateConfigurationRunsGetById_564090;
+          apiVersion: string; automationAccountName: string; subscriptionId: string;
+          resourceGroupName: string; softwareUpdateConfigurationRunId: string): Recallable =
   ## softwareUpdateConfigurationRunsGetById
   ## Get a single software update configuration Run by Id.
   ## http://aka.ms/azureautomationsdk/softwareupdateconfigurationrunoperations
-  ##   automationAccountName: string (required)
-  ##                        : The name of the automation account.
-  ##   resourceGroupName: string (required)
-  ##                    : Name of an Azure Resource group.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
+  ##   automationAccountName: string (required)
+  ##                        : The name of the automation account.
   ##   subscriptionId: string (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : Name of an Azure Resource group.
   ##   softwareUpdateConfigurationRunId: string (required)
   ##                                   : The Id of the software update configuration run.
-  var path_583001 = newJObject()
-  var query_583002 = newJObject()
-  add(path_583001, "automationAccountName", newJString(automationAccountName))
-  add(path_583001, "resourceGroupName", newJString(resourceGroupName))
-  add(query_583002, "api-version", newJString(apiVersion))
-  add(path_583001, "subscriptionId", newJString(subscriptionId))
-  add(path_583001, "softwareUpdateConfigurationRunId",
+  var path_564101 = newJObject()
+  var query_564102 = newJObject()
+  add(query_564102, "api-version", newJString(apiVersion))
+  add(path_564101, "automationAccountName", newJString(automationAccountName))
+  add(path_564101, "subscriptionId", newJString(subscriptionId))
+  add(path_564101, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564101, "softwareUpdateConfigurationRunId",
       newJString(softwareUpdateConfigurationRunId))
-  result = call_583000.call(path_583001, query_583002, nil, nil, nil)
+  result = call_564100.call(path_564101, query_564102, nil, nil, nil)
 
-var softwareUpdateConfigurationRunsGetById* = Call_SoftwareUpdateConfigurationRunsGetById_582990(
+var softwareUpdateConfigurationRunsGetById* = Call_SoftwareUpdateConfigurationRunsGetById_564090(
     name: "softwareUpdateConfigurationRunsGetById", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Automation/automationAccounts/{automationAccountName}/softwareUpdateConfigurationRuns/{softwareUpdateConfigurationRunId}",
-    validator: validate_SoftwareUpdateConfigurationRunsGetById_582991, base: "/",
-    url: url_SoftwareUpdateConfigurationRunsGetById_582992,
+    validator: validate_SoftwareUpdateConfigurationRunsGetById_564091, base: "/",
+    url: url_SoftwareUpdateConfigurationRunsGetById_564092,
     schemes: {Scheme.Https})
 export
   rest

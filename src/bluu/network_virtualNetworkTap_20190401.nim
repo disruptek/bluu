@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, httpcore
 
 ## auto-generated via openapi macro
 ## title: NetworkManagementClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_567657 = ref object of OpenApiRestCall
+  OpenApiRestCall_563555 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_567657](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563555](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_567657): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563555): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,8 +107,8 @@ const
   macServiceName = "network-virtualNetworkTap"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_VirtualNetworkTapsListAll_567879 = ref object of OpenApiRestCall_567657
-proc url_VirtualNetworkTapsListAll_567881(protocol: Scheme; host: string;
+  Call_VirtualNetworkTapsListAll_563777 = ref object of OpenApiRestCall_563555
+proc url_VirtualNetworkTapsListAll_563779(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -121,7 +125,7 @@ proc url_VirtualNetworkTapsListAll_567881(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_VirtualNetworkTapsListAll_567880(path: JsonNode; query: JsonNode;
+proc validate_VirtualNetworkTapsListAll_563778(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets all the VirtualNetworkTaps in a subscription.
   ## 
@@ -133,11 +137,11 @@ proc validate_VirtualNetworkTapsListAll_567880(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_568041 = path.getOrDefault("subscriptionId")
-  valid_568041 = validateParameter(valid_568041, JString, required = true,
+  var valid_563941 = path.getOrDefault("subscriptionId")
+  valid_563941 = validateParameter(valid_563941, JString, required = true,
                                  default = nil)
-  if valid_568041 != nil:
-    section.add "subscriptionId", valid_568041
+  if valid_563941 != nil:
+    section.add "subscriptionId", valid_563941
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -145,11 +149,11 @@ proc validate_VirtualNetworkTapsListAll_567880(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568042 = query.getOrDefault("api-version")
-  valid_568042 = validateParameter(valid_568042, JString, required = true,
+  var valid_563942 = query.getOrDefault("api-version")
+  valid_563942 = validateParameter(valid_563942, JString, required = true,
                                  default = nil)
-  if valid_568042 != nil:
-    section.add "api-version", valid_568042
+  if valid_563942 != nil:
+    section.add "api-version", valid_563942
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -158,20 +162,20 @@ proc validate_VirtualNetworkTapsListAll_567880(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568069: Call_VirtualNetworkTapsListAll_567879; path: JsonNode;
+proc call*(call_563969: Call_VirtualNetworkTapsListAll_563777; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets all the VirtualNetworkTaps in a subscription.
   ## 
-  let valid = call_568069.validator(path, query, header, formData, body)
-  let scheme = call_568069.pickScheme
+  let valid = call_563969.validator(path, query, header, formData, body)
+  let scheme = call_563969.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568069.url(scheme.get, call_568069.host, call_568069.base,
-                         call_568069.route, valid.getOrDefault("path"),
+  let url = call_563969.url(scheme.get, call_563969.host, call_563969.base,
+                         call_563969.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568069, url, valid)
+  result = hook(call_563969, url, valid)
 
-proc call*(call_568140: Call_VirtualNetworkTapsListAll_567879; apiVersion: string;
+proc call*(call_564040: Call_VirtualNetworkTapsListAll_563777; apiVersion: string;
           subscriptionId: string): Recallable =
   ## virtualNetworkTapsListAll
   ## Gets all the VirtualNetworkTaps in a subscription.
@@ -179,20 +183,20 @@ proc call*(call_568140: Call_VirtualNetworkTapsListAll_567879; apiVersion: strin
   ##             : Client API version.
   ##   subscriptionId: string (required)
   ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_568141 = newJObject()
-  var query_568143 = newJObject()
-  add(query_568143, "api-version", newJString(apiVersion))
-  add(path_568141, "subscriptionId", newJString(subscriptionId))
-  result = call_568140.call(path_568141, query_568143, nil, nil, nil)
+  var path_564041 = newJObject()
+  var query_564043 = newJObject()
+  add(query_564043, "api-version", newJString(apiVersion))
+  add(path_564041, "subscriptionId", newJString(subscriptionId))
+  result = call_564040.call(path_564041, query_564043, nil, nil, nil)
 
-var virtualNetworkTapsListAll* = Call_VirtualNetworkTapsListAll_567879(
+var virtualNetworkTapsListAll* = Call_VirtualNetworkTapsListAll_563777(
     name: "virtualNetworkTapsListAll", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Network/virtualNetworkTaps",
-    validator: validate_VirtualNetworkTapsListAll_567880, base: "",
-    url: url_VirtualNetworkTapsListAll_567881, schemes: {Scheme.Https})
+    validator: validate_VirtualNetworkTapsListAll_563778, base: "",
+    url: url_VirtualNetworkTapsListAll_563779, schemes: {Scheme.Https})
 type
-  Call_VirtualNetworkTapsListByResourceGroup_568182 = ref object of OpenApiRestCall_567657
-proc url_VirtualNetworkTapsListByResourceGroup_568184(protocol: Scheme;
+  Call_VirtualNetworkTapsListByResourceGroup_564082 = ref object of OpenApiRestCall_563555
+proc url_VirtualNetworkTapsListByResourceGroup_564084(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -213,30 +217,30 @@ proc url_VirtualNetworkTapsListByResourceGroup_568184(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_VirtualNetworkTapsListByResourceGroup_568183(path: JsonNode;
+proc validate_VirtualNetworkTapsListByResourceGroup_564083(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets all the VirtualNetworkTaps in a subscription.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   subscriptionId: JString (required)
   ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568185 = path.getOrDefault("resourceGroupName")
-  valid_568185 = validateParameter(valid_568185, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564085 = path.getOrDefault("subscriptionId")
+  valid_564085 = validateParameter(valid_564085, JString, required = true,
                                  default = nil)
-  if valid_568185 != nil:
-    section.add "resourceGroupName", valid_568185
-  var valid_568186 = path.getOrDefault("subscriptionId")
-  valid_568186 = validateParameter(valid_568186, JString, required = true,
+  if valid_564085 != nil:
+    section.add "subscriptionId", valid_564085
+  var valid_564086 = path.getOrDefault("resourceGroupName")
+  valid_564086 = validateParameter(valid_564086, JString, required = true,
                                  default = nil)
-  if valid_568186 != nil:
-    section.add "subscriptionId", valid_568186
+  if valid_564086 != nil:
+    section.add "resourceGroupName", valid_564086
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -244,11 +248,11 @@ proc validate_VirtualNetworkTapsListByResourceGroup_568183(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568187 = query.getOrDefault("api-version")
-  valid_568187 = validateParameter(valid_568187, JString, required = true,
+  var valid_564087 = query.getOrDefault("api-version")
+  valid_564087 = validateParameter(valid_564087, JString, required = true,
                                  default = nil)
-  if valid_568187 != nil:
-    section.add "api-version", valid_568187
+  if valid_564087 != nil:
+    section.add "api-version", valid_564087
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -257,45 +261,45 @@ proc validate_VirtualNetworkTapsListByResourceGroup_568183(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568188: Call_VirtualNetworkTapsListByResourceGroup_568182;
+proc call*(call_564088: Call_VirtualNetworkTapsListByResourceGroup_564082;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Gets all the VirtualNetworkTaps in a subscription.
   ## 
-  let valid = call_568188.validator(path, query, header, formData, body)
-  let scheme = call_568188.pickScheme
+  let valid = call_564088.validator(path, query, header, formData, body)
+  let scheme = call_564088.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568188.url(scheme.get, call_568188.host, call_568188.base,
-                         call_568188.route, valid.getOrDefault("path"),
+  let url = call_564088.url(scheme.get, call_564088.host, call_564088.base,
+                         call_564088.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568188, url, valid)
+  result = hook(call_564088, url, valid)
 
-proc call*(call_568189: Call_VirtualNetworkTapsListByResourceGroup_568182;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string): Recallable =
+proc call*(call_564089: Call_VirtualNetworkTapsListByResourceGroup_564082;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string): Recallable =
   ## virtualNetworkTapsListByResourceGroup
   ## Gets all the VirtualNetworkTaps in a subscription.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client API version.
   ##   subscriptionId: string (required)
   ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_568190 = newJObject()
-  var query_568191 = newJObject()
-  add(path_568190, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568191, "api-version", newJString(apiVersion))
-  add(path_568190, "subscriptionId", newJString(subscriptionId))
-  result = call_568189.call(path_568190, query_568191, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564090 = newJObject()
+  var query_564091 = newJObject()
+  add(query_564091, "api-version", newJString(apiVersion))
+  add(path_564090, "subscriptionId", newJString(subscriptionId))
+  add(path_564090, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564089.call(path_564090, query_564091, nil, nil, nil)
 
-var virtualNetworkTapsListByResourceGroup* = Call_VirtualNetworkTapsListByResourceGroup_568182(
+var virtualNetworkTapsListByResourceGroup* = Call_VirtualNetworkTapsListByResourceGroup_564082(
     name: "virtualNetworkTapsListByResourceGroup", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/virtualNetworkTaps",
-    validator: validate_VirtualNetworkTapsListByResourceGroup_568183, base: "",
-    url: url_VirtualNetworkTapsListByResourceGroup_568184, schemes: {Scheme.Https})
+    validator: validate_VirtualNetworkTapsListByResourceGroup_564083, base: "",
+    url: url_VirtualNetworkTapsListByResourceGroup_564084, schemes: {Scheme.Https})
 type
-  Call_VirtualNetworkTapsCreateOrUpdate_568203 = ref object of OpenApiRestCall_567657
-proc url_VirtualNetworkTapsCreateOrUpdate_568205(protocol: Scheme; host: string;
+  Call_VirtualNetworkTapsCreateOrUpdate_564103 = ref object of OpenApiRestCall_563555
+proc url_VirtualNetworkTapsCreateOrUpdate_564105(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -318,37 +322,37 @@ proc url_VirtualNetworkTapsCreateOrUpdate_568205(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_VirtualNetworkTapsCreateOrUpdate_568204(path: JsonNode;
+proc validate_VirtualNetworkTapsCreateOrUpdate_564104(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Creates or updates a Virtual Network Tap.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   subscriptionId: JString (required)
   ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   tapName: JString (required)
   ##          : The name of the virtual network tap.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568232 = path.getOrDefault("resourceGroupName")
-  valid_568232 = validateParameter(valid_568232, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564132 = path.getOrDefault("subscriptionId")
+  valid_564132 = validateParameter(valid_564132, JString, required = true,
                                  default = nil)
-  if valid_568232 != nil:
-    section.add "resourceGroupName", valid_568232
-  var valid_568233 = path.getOrDefault("subscriptionId")
-  valid_568233 = validateParameter(valid_568233, JString, required = true,
+  if valid_564132 != nil:
+    section.add "subscriptionId", valid_564132
+  var valid_564133 = path.getOrDefault("tapName")
+  valid_564133 = validateParameter(valid_564133, JString, required = true,
                                  default = nil)
-  if valid_568233 != nil:
-    section.add "subscriptionId", valid_568233
-  var valid_568234 = path.getOrDefault("tapName")
-  valid_568234 = validateParameter(valid_568234, JString, required = true,
+  if valid_564133 != nil:
+    section.add "tapName", valid_564133
+  var valid_564134 = path.getOrDefault("resourceGroupName")
+  valid_564134 = validateParameter(valid_564134, JString, required = true,
                                  default = nil)
-  if valid_568234 != nil:
-    section.add "tapName", valid_568234
+  if valid_564134 != nil:
+    section.add "resourceGroupName", valid_564134
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -356,11 +360,11 @@ proc validate_VirtualNetworkTapsCreateOrUpdate_568204(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568235 = query.getOrDefault("api-version")
-  valid_568235 = validateParameter(valid_568235, JString, required = true,
+  var valid_564135 = query.getOrDefault("api-version")
+  valid_564135 = validateParameter(valid_564135, JString, required = true,
                                  default = nil)
-  if valid_568235 != nil:
-    section.add "api-version", valid_568235
+  if valid_564135 != nil:
+    section.add "api-version", valid_564135
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -374,54 +378,54 @@ proc validate_VirtualNetworkTapsCreateOrUpdate_568204(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568237: Call_VirtualNetworkTapsCreateOrUpdate_568203;
+proc call*(call_564137: Call_VirtualNetworkTapsCreateOrUpdate_564103;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Creates or updates a Virtual Network Tap.
   ## 
-  let valid = call_568237.validator(path, query, header, formData, body)
-  let scheme = call_568237.pickScheme
+  let valid = call_564137.validator(path, query, header, formData, body)
+  let scheme = call_564137.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568237.url(scheme.get, call_568237.host, call_568237.base,
-                         call_568237.route, valid.getOrDefault("path"),
+  let url = call_564137.url(scheme.get, call_564137.host, call_564137.base,
+                         call_564137.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568237, url, valid)
+  result = hook(call_564137, url, valid)
 
-proc call*(call_568238: Call_VirtualNetworkTapsCreateOrUpdate_568203;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          tapName: string; parameters: JsonNode): Recallable =
+proc call*(call_564138: Call_VirtualNetworkTapsCreateOrUpdate_564103;
+          apiVersion: string; subscriptionId: string; tapName: string;
+          resourceGroupName: string; parameters: JsonNode): Recallable =
   ## virtualNetworkTapsCreateOrUpdate
   ## Creates or updates a Virtual Network Tap.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client API version.
   ##   subscriptionId: string (required)
   ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   tapName: string (required)
   ##          : The name of the virtual network tap.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   parameters: JObject (required)
   ##             : Parameters supplied to the create or update virtual network tap operation.
-  var path_568239 = newJObject()
-  var query_568240 = newJObject()
-  var body_568241 = newJObject()
-  add(path_568239, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568240, "api-version", newJString(apiVersion))
-  add(path_568239, "subscriptionId", newJString(subscriptionId))
-  add(path_568239, "tapName", newJString(tapName))
+  var path_564139 = newJObject()
+  var query_564140 = newJObject()
+  var body_564141 = newJObject()
+  add(query_564140, "api-version", newJString(apiVersion))
+  add(path_564139, "subscriptionId", newJString(subscriptionId))
+  add(path_564139, "tapName", newJString(tapName))
+  add(path_564139, "resourceGroupName", newJString(resourceGroupName))
   if parameters != nil:
-    body_568241 = parameters
-  result = call_568238.call(path_568239, query_568240, nil, nil, body_568241)
+    body_564141 = parameters
+  result = call_564138.call(path_564139, query_564140, nil, nil, body_564141)
 
-var virtualNetworkTapsCreateOrUpdate* = Call_VirtualNetworkTapsCreateOrUpdate_568203(
+var virtualNetworkTapsCreateOrUpdate* = Call_VirtualNetworkTapsCreateOrUpdate_564103(
     name: "virtualNetworkTapsCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/virtualNetworkTaps/{tapName}",
-    validator: validate_VirtualNetworkTapsCreateOrUpdate_568204, base: "",
-    url: url_VirtualNetworkTapsCreateOrUpdate_568205, schemes: {Scheme.Https})
+    validator: validate_VirtualNetworkTapsCreateOrUpdate_564104, base: "",
+    url: url_VirtualNetworkTapsCreateOrUpdate_564105, schemes: {Scheme.Https})
 type
-  Call_VirtualNetworkTapsGet_568192 = ref object of OpenApiRestCall_567657
-proc url_VirtualNetworkTapsGet_568194(protocol: Scheme; host: string; base: string;
+  Call_VirtualNetworkTapsGet_564092 = ref object of OpenApiRestCall_563555
+proc url_VirtualNetworkTapsGet_564094(protocol: Scheme; host: string; base: string;
                                      route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -444,37 +448,37 @@ proc url_VirtualNetworkTapsGet_568194(protocol: Scheme; host: string; base: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_VirtualNetworkTapsGet_568193(path: JsonNode; query: JsonNode;
+proc validate_VirtualNetworkTapsGet_564093(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets information about the specified virtual network tap.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   subscriptionId: JString (required)
   ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   tapName: JString (required)
   ##          : The name of virtual network tap.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568195 = path.getOrDefault("resourceGroupName")
-  valid_568195 = validateParameter(valid_568195, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564095 = path.getOrDefault("subscriptionId")
+  valid_564095 = validateParameter(valid_564095, JString, required = true,
                                  default = nil)
-  if valid_568195 != nil:
-    section.add "resourceGroupName", valid_568195
-  var valid_568196 = path.getOrDefault("subscriptionId")
-  valid_568196 = validateParameter(valid_568196, JString, required = true,
+  if valid_564095 != nil:
+    section.add "subscriptionId", valid_564095
+  var valid_564096 = path.getOrDefault("tapName")
+  valid_564096 = validateParameter(valid_564096, JString, required = true,
                                  default = nil)
-  if valid_568196 != nil:
-    section.add "subscriptionId", valid_568196
-  var valid_568197 = path.getOrDefault("tapName")
-  valid_568197 = validateParameter(valid_568197, JString, required = true,
+  if valid_564096 != nil:
+    section.add "tapName", valid_564096
+  var valid_564097 = path.getOrDefault("resourceGroupName")
+  valid_564097 = validateParameter(valid_564097, JString, required = true,
                                  default = nil)
-  if valid_568197 != nil:
-    section.add "tapName", valid_568197
+  if valid_564097 != nil:
+    section.add "resourceGroupName", valid_564097
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -482,11 +486,11 @@ proc validate_VirtualNetworkTapsGet_568193(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568198 = query.getOrDefault("api-version")
-  valid_568198 = validateParameter(valid_568198, JString, required = true,
+  var valid_564098 = query.getOrDefault("api-version")
+  valid_564098 = validateParameter(valid_564098, JString, required = true,
                                  default = nil)
-  if valid_568198 != nil:
-    section.add "api-version", valid_568198
+  if valid_564098 != nil:
+    section.add "api-version", valid_564098
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -495,48 +499,47 @@ proc validate_VirtualNetworkTapsGet_568193(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568199: Call_VirtualNetworkTapsGet_568192; path: JsonNode;
+proc call*(call_564099: Call_VirtualNetworkTapsGet_564092; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets information about the specified virtual network tap.
   ## 
-  let valid = call_568199.validator(path, query, header, formData, body)
-  let scheme = call_568199.pickScheme
+  let valid = call_564099.validator(path, query, header, formData, body)
+  let scheme = call_564099.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568199.url(scheme.get, call_568199.host, call_568199.base,
-                         call_568199.route, valid.getOrDefault("path"),
+  let url = call_564099.url(scheme.get, call_564099.host, call_564099.base,
+                         call_564099.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568199, url, valid)
+  result = hook(call_564099, url, valid)
 
-proc call*(call_568200: Call_VirtualNetworkTapsGet_568192;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          tapName: string): Recallable =
+proc call*(call_564100: Call_VirtualNetworkTapsGet_564092; apiVersion: string;
+          subscriptionId: string; tapName: string; resourceGroupName: string): Recallable =
   ## virtualNetworkTapsGet
   ## Gets information about the specified virtual network tap.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client API version.
   ##   subscriptionId: string (required)
   ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   tapName: string (required)
   ##          : The name of virtual network tap.
-  var path_568201 = newJObject()
-  var query_568202 = newJObject()
-  add(path_568201, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568202, "api-version", newJString(apiVersion))
-  add(path_568201, "subscriptionId", newJString(subscriptionId))
-  add(path_568201, "tapName", newJString(tapName))
-  result = call_568200.call(path_568201, query_568202, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564101 = newJObject()
+  var query_564102 = newJObject()
+  add(query_564102, "api-version", newJString(apiVersion))
+  add(path_564101, "subscriptionId", newJString(subscriptionId))
+  add(path_564101, "tapName", newJString(tapName))
+  add(path_564101, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564100.call(path_564101, query_564102, nil, nil, nil)
 
-var virtualNetworkTapsGet* = Call_VirtualNetworkTapsGet_568192(
+var virtualNetworkTapsGet* = Call_VirtualNetworkTapsGet_564092(
     name: "virtualNetworkTapsGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/virtualNetworkTaps/{tapName}",
-    validator: validate_VirtualNetworkTapsGet_568193, base: "",
-    url: url_VirtualNetworkTapsGet_568194, schemes: {Scheme.Https})
+    validator: validate_VirtualNetworkTapsGet_564093, base: "",
+    url: url_VirtualNetworkTapsGet_564094, schemes: {Scheme.Https})
 type
-  Call_VirtualNetworkTapsUpdateTags_568253 = ref object of OpenApiRestCall_567657
-proc url_VirtualNetworkTapsUpdateTags_568255(protocol: Scheme; host: string;
+  Call_VirtualNetworkTapsUpdateTags_564153 = ref object of OpenApiRestCall_563555
+proc url_VirtualNetworkTapsUpdateTags_564155(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -559,37 +562,37 @@ proc url_VirtualNetworkTapsUpdateTags_568255(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_VirtualNetworkTapsUpdateTags_568254(path: JsonNode; query: JsonNode;
+proc validate_VirtualNetworkTapsUpdateTags_564154(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Updates an VirtualNetworkTap tags.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   subscriptionId: JString (required)
   ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   tapName: JString (required)
   ##          : The name of the tap.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568256 = path.getOrDefault("resourceGroupName")
-  valid_568256 = validateParameter(valid_568256, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564156 = path.getOrDefault("subscriptionId")
+  valid_564156 = validateParameter(valid_564156, JString, required = true,
                                  default = nil)
-  if valid_568256 != nil:
-    section.add "resourceGroupName", valid_568256
-  var valid_568257 = path.getOrDefault("subscriptionId")
-  valid_568257 = validateParameter(valid_568257, JString, required = true,
+  if valid_564156 != nil:
+    section.add "subscriptionId", valid_564156
+  var valid_564157 = path.getOrDefault("tapName")
+  valid_564157 = validateParameter(valid_564157, JString, required = true,
                                  default = nil)
-  if valid_568257 != nil:
-    section.add "subscriptionId", valid_568257
-  var valid_568258 = path.getOrDefault("tapName")
-  valid_568258 = validateParameter(valid_568258, JString, required = true,
+  if valid_564157 != nil:
+    section.add "tapName", valid_564157
+  var valid_564158 = path.getOrDefault("resourceGroupName")
+  valid_564158 = validateParameter(valid_564158, JString, required = true,
                                  default = nil)
-  if valid_568258 != nil:
-    section.add "tapName", valid_568258
+  if valid_564158 != nil:
+    section.add "resourceGroupName", valid_564158
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -597,11 +600,11 @@ proc validate_VirtualNetworkTapsUpdateTags_568254(path: JsonNode; query: JsonNod
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568259 = query.getOrDefault("api-version")
-  valid_568259 = validateParameter(valid_568259, JString, required = true,
+  var valid_564159 = query.getOrDefault("api-version")
+  valid_564159 = validateParameter(valid_564159, JString, required = true,
                                  default = nil)
-  if valid_568259 != nil:
-    section.add "api-version", valid_568259
+  if valid_564159 != nil:
+    section.add "api-version", valid_564159
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -615,53 +618,53 @@ proc validate_VirtualNetworkTapsUpdateTags_568254(path: JsonNode; query: JsonNod
   if body != nil:
     result.add "body", body
 
-proc call*(call_568261: Call_VirtualNetworkTapsUpdateTags_568253; path: JsonNode;
+proc call*(call_564161: Call_VirtualNetworkTapsUpdateTags_564153; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Updates an VirtualNetworkTap tags.
   ## 
-  let valid = call_568261.validator(path, query, header, formData, body)
-  let scheme = call_568261.pickScheme
+  let valid = call_564161.validator(path, query, header, formData, body)
+  let scheme = call_564161.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568261.url(scheme.get, call_568261.host, call_568261.base,
-                         call_568261.route, valid.getOrDefault("path"),
+  let url = call_564161.url(scheme.get, call_564161.host, call_564161.base,
+                         call_564161.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568261, url, valid)
+  result = hook(call_564161, url, valid)
 
-proc call*(call_568262: Call_VirtualNetworkTapsUpdateTags_568253;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          tapName: string; tapParameters: JsonNode): Recallable =
+proc call*(call_564162: Call_VirtualNetworkTapsUpdateTags_564153;
+          apiVersion: string; subscriptionId: string; tapParameters: JsonNode;
+          tapName: string; resourceGroupName: string): Recallable =
   ## virtualNetworkTapsUpdateTags
   ## Updates an VirtualNetworkTap tags.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client API version.
   ##   subscriptionId: string (required)
   ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   tapName: string (required)
-  ##          : The name of the tap.
   ##   tapParameters: JObject (required)
   ##                : Parameters supplied to update VirtualNetworkTap tags.
-  var path_568263 = newJObject()
-  var query_568264 = newJObject()
-  var body_568265 = newJObject()
-  add(path_568263, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568264, "api-version", newJString(apiVersion))
-  add(path_568263, "subscriptionId", newJString(subscriptionId))
-  add(path_568263, "tapName", newJString(tapName))
+  ##   tapName: string (required)
+  ##          : The name of the tap.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564163 = newJObject()
+  var query_564164 = newJObject()
+  var body_564165 = newJObject()
+  add(query_564164, "api-version", newJString(apiVersion))
+  add(path_564163, "subscriptionId", newJString(subscriptionId))
   if tapParameters != nil:
-    body_568265 = tapParameters
-  result = call_568262.call(path_568263, query_568264, nil, nil, body_568265)
+    body_564165 = tapParameters
+  add(path_564163, "tapName", newJString(tapName))
+  add(path_564163, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564162.call(path_564163, query_564164, nil, nil, body_564165)
 
-var virtualNetworkTapsUpdateTags* = Call_VirtualNetworkTapsUpdateTags_568253(
+var virtualNetworkTapsUpdateTags* = Call_VirtualNetworkTapsUpdateTags_564153(
     name: "virtualNetworkTapsUpdateTags", meth: HttpMethod.HttpPatch,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/virtualNetworkTaps/{tapName}",
-    validator: validate_VirtualNetworkTapsUpdateTags_568254, base: "",
-    url: url_VirtualNetworkTapsUpdateTags_568255, schemes: {Scheme.Https})
+    validator: validate_VirtualNetworkTapsUpdateTags_564154, base: "",
+    url: url_VirtualNetworkTapsUpdateTags_564155, schemes: {Scheme.Https})
 type
-  Call_VirtualNetworkTapsDelete_568242 = ref object of OpenApiRestCall_567657
-proc url_VirtualNetworkTapsDelete_568244(protocol: Scheme; host: string;
+  Call_VirtualNetworkTapsDelete_564142 = ref object of OpenApiRestCall_563555
+proc url_VirtualNetworkTapsDelete_564144(protocol: Scheme; host: string;
                                         base: string; route: string; path: JsonNode;
                                         query: JsonNode): Uri =
   result.scheme = $protocol
@@ -685,37 +688,37 @@ proc url_VirtualNetworkTapsDelete_568244(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_VirtualNetworkTapsDelete_568243(path: JsonNode; query: JsonNode;
+proc validate_VirtualNetworkTapsDelete_564143(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Deletes the specified virtual network tap.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   subscriptionId: JString (required)
   ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   tapName: JString (required)
   ##          : The name of the virtual network tap.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568245 = path.getOrDefault("resourceGroupName")
-  valid_568245 = validateParameter(valid_568245, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564145 = path.getOrDefault("subscriptionId")
+  valid_564145 = validateParameter(valid_564145, JString, required = true,
                                  default = nil)
-  if valid_568245 != nil:
-    section.add "resourceGroupName", valid_568245
-  var valid_568246 = path.getOrDefault("subscriptionId")
-  valid_568246 = validateParameter(valid_568246, JString, required = true,
+  if valid_564145 != nil:
+    section.add "subscriptionId", valid_564145
+  var valid_564146 = path.getOrDefault("tapName")
+  valid_564146 = validateParameter(valid_564146, JString, required = true,
                                  default = nil)
-  if valid_568246 != nil:
-    section.add "subscriptionId", valid_568246
-  var valid_568247 = path.getOrDefault("tapName")
-  valid_568247 = validateParameter(valid_568247, JString, required = true,
+  if valid_564146 != nil:
+    section.add "tapName", valid_564146
+  var valid_564147 = path.getOrDefault("resourceGroupName")
+  valid_564147 = validateParameter(valid_564147, JString, required = true,
                                  default = nil)
-  if valid_568247 != nil:
-    section.add "tapName", valid_568247
+  if valid_564147 != nil:
+    section.add "resourceGroupName", valid_564147
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -723,11 +726,11 @@ proc validate_VirtualNetworkTapsDelete_568243(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568248 = query.getOrDefault("api-version")
-  valid_568248 = validateParameter(valid_568248, JString, required = true,
+  var valid_564148 = query.getOrDefault("api-version")
+  valid_564148 = validateParameter(valid_564148, JString, required = true,
                                  default = nil)
-  if valid_568248 != nil:
-    section.add "api-version", valid_568248
+  if valid_564148 != nil:
+    section.add "api-version", valid_564148
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -736,45 +739,44 @@ proc validate_VirtualNetworkTapsDelete_568243(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568249: Call_VirtualNetworkTapsDelete_568242; path: JsonNode;
+proc call*(call_564149: Call_VirtualNetworkTapsDelete_564142; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes the specified virtual network tap.
   ## 
-  let valid = call_568249.validator(path, query, header, formData, body)
-  let scheme = call_568249.pickScheme
+  let valid = call_564149.validator(path, query, header, formData, body)
+  let scheme = call_564149.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568249.url(scheme.get, call_568249.host, call_568249.base,
-                         call_568249.route, valid.getOrDefault("path"),
+  let url = call_564149.url(scheme.get, call_564149.host, call_564149.base,
+                         call_564149.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568249, url, valid)
+  result = hook(call_564149, url, valid)
 
-proc call*(call_568250: Call_VirtualNetworkTapsDelete_568242;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          tapName: string): Recallable =
+proc call*(call_564150: Call_VirtualNetworkTapsDelete_564142; apiVersion: string;
+          subscriptionId: string; tapName: string; resourceGroupName: string): Recallable =
   ## virtualNetworkTapsDelete
   ## Deletes the specified virtual network tap.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client API version.
   ##   subscriptionId: string (required)
   ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   tapName: string (required)
   ##          : The name of the virtual network tap.
-  var path_568251 = newJObject()
-  var query_568252 = newJObject()
-  add(path_568251, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568252, "api-version", newJString(apiVersion))
-  add(path_568251, "subscriptionId", newJString(subscriptionId))
-  add(path_568251, "tapName", newJString(tapName))
-  result = call_568250.call(path_568251, query_568252, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564151 = newJObject()
+  var query_564152 = newJObject()
+  add(query_564152, "api-version", newJString(apiVersion))
+  add(path_564151, "subscriptionId", newJString(subscriptionId))
+  add(path_564151, "tapName", newJString(tapName))
+  add(path_564151, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564150.call(path_564151, query_564152, nil, nil, nil)
 
-var virtualNetworkTapsDelete* = Call_VirtualNetworkTapsDelete_568242(
+var virtualNetworkTapsDelete* = Call_VirtualNetworkTapsDelete_564142(
     name: "virtualNetworkTapsDelete", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/virtualNetworkTaps/{tapName}",
-    validator: validate_VirtualNetworkTapsDelete_568243, base: "",
-    url: url_VirtualNetworkTapsDelete_568244, schemes: {Scheme.Https})
+    validator: validate_VirtualNetworkTapsDelete_564143, base: "",
+    url: url_VirtualNetworkTapsDelete_564144, schemes: {Scheme.Https})
 export
   rest
 

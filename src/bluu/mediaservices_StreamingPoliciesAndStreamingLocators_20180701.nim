@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_573641 = ref object of OpenApiRestCall
+  OpenApiRestCall_563539 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_573641](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563539](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_573641): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563539): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,8 +107,8 @@ const
   macServiceName = "mediaservices-StreamingPoliciesAndStreamingLocators"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_StreamingLocatorsList_573863 = ref object of OpenApiRestCall_573641
-proc url_StreamingLocatorsList_573865(protocol: Scheme; host: string; base: string;
+  Call_StreamingLocatorsList_563761 = ref object of OpenApiRestCall_563539
+proc url_StreamingLocatorsList_563763(protocol: Scheme; host: string; base: string;
                                      route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -127,69 +131,69 @@ proc url_StreamingLocatorsList_573865(protocol: Scheme; host: string; base: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_StreamingLocatorsList_573864(path: JsonNode; query: JsonNode;
+proc validate_StreamingLocatorsList_563762(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists the Streaming Locators in the account
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group within the Azure subscription.
   ##   subscriptionId: JString (required)
   ##                 : The unique identifier for a Microsoft Azure subscription.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group within the Azure subscription.
   ##   accountName: JString (required)
   ##              : The Media Services account name.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_574039 = path.getOrDefault("resourceGroupName")
-  valid_574039 = validateParameter(valid_574039, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_563939 = path.getOrDefault("subscriptionId")
+  valid_563939 = validateParameter(valid_563939, JString, required = true,
                                  default = nil)
-  if valid_574039 != nil:
-    section.add "resourceGroupName", valid_574039
-  var valid_574040 = path.getOrDefault("subscriptionId")
-  valid_574040 = validateParameter(valid_574040, JString, required = true,
+  if valid_563939 != nil:
+    section.add "subscriptionId", valid_563939
+  var valid_563940 = path.getOrDefault("resourceGroupName")
+  valid_563940 = validateParameter(valid_563940, JString, required = true,
                                  default = nil)
-  if valid_574040 != nil:
-    section.add "subscriptionId", valid_574040
-  var valid_574041 = path.getOrDefault("accountName")
-  valid_574041 = validateParameter(valid_574041, JString, required = true,
+  if valid_563940 != nil:
+    section.add "resourceGroupName", valid_563940
+  var valid_563941 = path.getOrDefault("accountName")
+  valid_563941 = validateParameter(valid_563941, JString, required = true,
                                  default = nil)
-  if valid_574041 != nil:
-    section.add "accountName", valid_574041
+  if valid_563941 != nil:
+    section.add "accountName", valid_563941
   result.add "path", section
   ## parameters in `query` object:
-  ##   $orderby: JString
-  ##           : Specifies the key by which the result collection should be ordered.
   ##   api-version: JString (required)
   ##              : The Version of the API to be used with the client request.
   ##   $top: JInt
   ##       : Specifies a non-negative integer n that limits the number of items returned from a collection. The service returns the number of available items up to but not greater than the specified value n.
+  ##   $orderby: JString
+  ##           : Specifies the key by which the result collection should be ordered.
   ##   $filter: JString
   ##          : Restricts the set of items returned.
   section = newJObject()
-  var valid_574042 = query.getOrDefault("$orderby")
-  valid_574042 = validateParameter(valid_574042, JString, required = false,
-                                 default = nil)
-  if valid_574042 != nil:
-    section.add "$orderby", valid_574042
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574043 = query.getOrDefault("api-version")
-  valid_574043 = validateParameter(valid_574043, JString, required = true,
+  var valid_563942 = query.getOrDefault("api-version")
+  valid_563942 = validateParameter(valid_563942, JString, required = true,
                                  default = nil)
-  if valid_574043 != nil:
-    section.add "api-version", valid_574043
-  var valid_574044 = query.getOrDefault("$top")
-  valid_574044 = validateParameter(valid_574044, JInt, required = false, default = nil)
-  if valid_574044 != nil:
-    section.add "$top", valid_574044
-  var valid_574045 = query.getOrDefault("$filter")
-  valid_574045 = validateParameter(valid_574045, JString, required = false,
+  if valid_563942 != nil:
+    section.add "api-version", valid_563942
+  var valid_563943 = query.getOrDefault("$top")
+  valid_563943 = validateParameter(valid_563943, JInt, required = false, default = nil)
+  if valid_563943 != nil:
+    section.add "$top", valid_563943
+  var valid_563944 = query.getOrDefault("$orderby")
+  valid_563944 = validateParameter(valid_563944, JString, required = false,
                                  default = nil)
-  if valid_574045 != nil:
-    section.add "$filter", valid_574045
+  if valid_563944 != nil:
+    section.add "$orderby", valid_563944
+  var valid_563945 = query.getOrDefault("$filter")
+  valid_563945 = validateParameter(valid_563945, JString, required = false,
+                                 default = nil)
+  if valid_563945 != nil:
+    section.add "$filter", valid_563945
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -198,57 +202,57 @@ proc validate_StreamingLocatorsList_573864(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574068: Call_StreamingLocatorsList_573863; path: JsonNode;
+proc call*(call_563968: Call_StreamingLocatorsList_563761; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists the Streaming Locators in the account
   ## 
-  let valid = call_574068.validator(path, query, header, formData, body)
-  let scheme = call_574068.pickScheme
+  let valid = call_563968.validator(path, query, header, formData, body)
+  let scheme = call_563968.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574068.url(scheme.get, call_574068.host, call_574068.base,
-                         call_574068.route, valid.getOrDefault("path"),
+  let url = call_563968.url(scheme.get, call_563968.host, call_563968.base,
+                         call_563968.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574068, url, valid)
+  result = hook(call_563968, url, valid)
 
-proc call*(call_574139: Call_StreamingLocatorsList_573863;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          accountName: string; Orderby: string = ""; Top: int = 0; Filter: string = ""): Recallable =
+proc call*(call_564039: Call_StreamingLocatorsList_563761; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string; accountName: string;
+          Top: int = 0; Orderby: string = ""; Filter: string = ""): Recallable =
   ## streamingLocatorsList
   ## Lists the Streaming Locators in the account
+  ##   apiVersion: string (required)
+  ##             : The Version of the API to be used with the client request.
+  ##   Top: int
+  ##      : Specifies a non-negative integer n that limits the number of items returned from a collection. The service returns the number of available items up to but not greater than the specified value n.
+  ##   subscriptionId: string (required)
+  ##                 : The unique identifier for a Microsoft Azure subscription.
   ##   Orderby: string
   ##          : Specifies the key by which the result collection should be ordered.
   ##   resourceGroupName: string (required)
   ##                    : The name of the resource group within the Azure subscription.
-  ##   apiVersion: string (required)
-  ##             : The Version of the API to be used with the client request.
-  ##   subscriptionId: string (required)
-  ##                 : The unique identifier for a Microsoft Azure subscription.
-  ##   Top: int
-  ##      : Specifies a non-negative integer n that limits the number of items returned from a collection. The service returns the number of available items up to but not greater than the specified value n.
-  ##   accountName: string (required)
-  ##              : The Media Services account name.
   ##   Filter: string
   ##         : Restricts the set of items returned.
-  var path_574140 = newJObject()
-  var query_574142 = newJObject()
-  add(query_574142, "$orderby", newJString(Orderby))
-  add(path_574140, "resourceGroupName", newJString(resourceGroupName))
-  add(query_574142, "api-version", newJString(apiVersion))
-  add(path_574140, "subscriptionId", newJString(subscriptionId))
-  add(query_574142, "$top", newJInt(Top))
-  add(path_574140, "accountName", newJString(accountName))
-  add(query_574142, "$filter", newJString(Filter))
-  result = call_574139.call(path_574140, query_574142, nil, nil, nil)
+  ##   accountName: string (required)
+  ##              : The Media Services account name.
+  var path_564040 = newJObject()
+  var query_564042 = newJObject()
+  add(query_564042, "api-version", newJString(apiVersion))
+  add(query_564042, "$top", newJInt(Top))
+  add(path_564040, "subscriptionId", newJString(subscriptionId))
+  add(query_564042, "$orderby", newJString(Orderby))
+  add(path_564040, "resourceGroupName", newJString(resourceGroupName))
+  add(query_564042, "$filter", newJString(Filter))
+  add(path_564040, "accountName", newJString(accountName))
+  result = call_564039.call(path_564040, query_564042, nil, nil, nil)
 
-var streamingLocatorsList* = Call_StreamingLocatorsList_573863(
+var streamingLocatorsList* = Call_StreamingLocatorsList_563761(
     name: "streamingLocatorsList", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Media/mediaServices/{accountName}/streamingLocators",
-    validator: validate_StreamingLocatorsList_573864, base: "",
-    url: url_StreamingLocatorsList_573865, schemes: {Scheme.Https})
+    validator: validate_StreamingLocatorsList_563762, base: "",
+    url: url_StreamingLocatorsList_563763, schemes: {Scheme.Https})
 type
-  Call_StreamingLocatorsCreate_574193 = ref object of OpenApiRestCall_573641
-proc url_StreamingLocatorsCreate_574195(protocol: Scheme; host: string; base: string;
+  Call_StreamingLocatorsCreate_564093 = ref object of OpenApiRestCall_563539
+proc url_StreamingLocatorsCreate_564095(protocol: Scheme; host: string; base: string;
                                        route: string; path: JsonNode;
                                        query: JsonNode): Uri =
   result.scheme = $protocol
@@ -275,44 +279,44 @@ proc url_StreamingLocatorsCreate_574195(protocol: Scheme; host: string; base: st
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_StreamingLocatorsCreate_574194(path: JsonNode; query: JsonNode;
+proc validate_StreamingLocatorsCreate_564094(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Create a Streaming Locator in the Media Services account
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group within the Azure subscription.
   ##   subscriptionId: JString (required)
   ##                 : The unique identifier for a Microsoft Azure subscription.
   ##   streamingLocatorName: JString (required)
   ##                       : The Streaming Locator name.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group within the Azure subscription.
   ##   accountName: JString (required)
   ##              : The Media Services account name.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_574196 = path.getOrDefault("resourceGroupName")
-  valid_574196 = validateParameter(valid_574196, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564096 = path.getOrDefault("subscriptionId")
+  valid_564096 = validateParameter(valid_564096, JString, required = true,
                                  default = nil)
-  if valid_574196 != nil:
-    section.add "resourceGroupName", valid_574196
-  var valid_574197 = path.getOrDefault("subscriptionId")
-  valid_574197 = validateParameter(valid_574197, JString, required = true,
+  if valid_564096 != nil:
+    section.add "subscriptionId", valid_564096
+  var valid_564097 = path.getOrDefault("streamingLocatorName")
+  valid_564097 = validateParameter(valid_564097, JString, required = true,
                                  default = nil)
-  if valid_574197 != nil:
-    section.add "subscriptionId", valid_574197
-  var valid_574198 = path.getOrDefault("streamingLocatorName")
-  valid_574198 = validateParameter(valid_574198, JString, required = true,
+  if valid_564097 != nil:
+    section.add "streamingLocatorName", valid_564097
+  var valid_564098 = path.getOrDefault("resourceGroupName")
+  valid_564098 = validateParameter(valid_564098, JString, required = true,
                                  default = nil)
-  if valid_574198 != nil:
-    section.add "streamingLocatorName", valid_574198
-  var valid_574199 = path.getOrDefault("accountName")
-  valid_574199 = validateParameter(valid_574199, JString, required = true,
+  if valid_564098 != nil:
+    section.add "resourceGroupName", valid_564098
+  var valid_564099 = path.getOrDefault("accountName")
+  valid_564099 = validateParameter(valid_564099, JString, required = true,
                                  default = nil)
-  if valid_574199 != nil:
-    section.add "accountName", valid_574199
+  if valid_564099 != nil:
+    section.add "accountName", valid_564099
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -320,11 +324,11 @@ proc validate_StreamingLocatorsCreate_574194(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574200 = query.getOrDefault("api-version")
-  valid_574200 = validateParameter(valid_574200, JString, required = true,
+  var valid_564100 = query.getOrDefault("api-version")
+  valid_564100 = validateParameter(valid_564100, JString, required = true,
                                  default = nil)
-  if valid_574200 != nil:
-    section.add "api-version", valid_574200
+  if valid_564100 != nil:
+    section.add "api-version", valid_564100
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -338,56 +342,56 @@ proc validate_StreamingLocatorsCreate_574194(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574202: Call_StreamingLocatorsCreate_574193; path: JsonNode;
+proc call*(call_564102: Call_StreamingLocatorsCreate_564093; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Create a Streaming Locator in the Media Services account
   ## 
-  let valid = call_574202.validator(path, query, header, formData, body)
-  let scheme = call_574202.pickScheme
+  let valid = call_564102.validator(path, query, header, formData, body)
+  let scheme = call_564102.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574202.url(scheme.get, call_574202.host, call_574202.base,
-                         call_574202.route, valid.getOrDefault("path"),
+  let url = call_564102.url(scheme.get, call_564102.host, call_564102.base,
+                         call_564102.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574202, url, valid)
+  result = hook(call_564102, url, valid)
 
-proc call*(call_574203: Call_StreamingLocatorsCreate_574193;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          streamingLocatorName: string; parameters: JsonNode; accountName: string): Recallable =
+proc call*(call_564103: Call_StreamingLocatorsCreate_564093; apiVersion: string;
+          subscriptionId: string; streamingLocatorName: string;
+          resourceGroupName: string; parameters: JsonNode; accountName: string): Recallable =
   ## streamingLocatorsCreate
   ## Create a Streaming Locator in the Media Services account
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group within the Azure subscription.
   ##   apiVersion: string (required)
   ##             : The Version of the API to be used with the client request.
   ##   subscriptionId: string (required)
   ##                 : The unique identifier for a Microsoft Azure subscription.
   ##   streamingLocatorName: string (required)
   ##                       : The Streaming Locator name.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group within the Azure subscription.
   ##   parameters: JObject (required)
   ##             : The request parameters
   ##   accountName: string (required)
   ##              : The Media Services account name.
-  var path_574204 = newJObject()
-  var query_574205 = newJObject()
-  var body_574206 = newJObject()
-  add(path_574204, "resourceGroupName", newJString(resourceGroupName))
-  add(query_574205, "api-version", newJString(apiVersion))
-  add(path_574204, "subscriptionId", newJString(subscriptionId))
-  add(path_574204, "streamingLocatorName", newJString(streamingLocatorName))
+  var path_564104 = newJObject()
+  var query_564105 = newJObject()
+  var body_564106 = newJObject()
+  add(query_564105, "api-version", newJString(apiVersion))
+  add(path_564104, "subscriptionId", newJString(subscriptionId))
+  add(path_564104, "streamingLocatorName", newJString(streamingLocatorName))
+  add(path_564104, "resourceGroupName", newJString(resourceGroupName))
   if parameters != nil:
-    body_574206 = parameters
-  add(path_574204, "accountName", newJString(accountName))
-  result = call_574203.call(path_574204, query_574205, nil, nil, body_574206)
+    body_564106 = parameters
+  add(path_564104, "accountName", newJString(accountName))
+  result = call_564103.call(path_564104, query_564105, nil, nil, body_564106)
 
-var streamingLocatorsCreate* = Call_StreamingLocatorsCreate_574193(
+var streamingLocatorsCreate* = Call_StreamingLocatorsCreate_564093(
     name: "streamingLocatorsCreate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Media/mediaServices/{accountName}/streamingLocators/{streamingLocatorName}",
-    validator: validate_StreamingLocatorsCreate_574194, base: "",
-    url: url_StreamingLocatorsCreate_574195, schemes: {Scheme.Https})
+    validator: validate_StreamingLocatorsCreate_564094, base: "",
+    url: url_StreamingLocatorsCreate_564095, schemes: {Scheme.Https})
 type
-  Call_StreamingLocatorsGet_574181 = ref object of OpenApiRestCall_573641
-proc url_StreamingLocatorsGet_574183(protocol: Scheme; host: string; base: string;
+  Call_StreamingLocatorsGet_564081 = ref object of OpenApiRestCall_563539
+proc url_StreamingLocatorsGet_564083(protocol: Scheme; host: string; base: string;
                                     route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -413,44 +417,44 @@ proc url_StreamingLocatorsGet_574183(protocol: Scheme; host: string; base: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_StreamingLocatorsGet_574182(path: JsonNode; query: JsonNode;
+proc validate_StreamingLocatorsGet_564082(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Get the details of a Streaming Locator in the Media Services account
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group within the Azure subscription.
   ##   subscriptionId: JString (required)
   ##                 : The unique identifier for a Microsoft Azure subscription.
   ##   streamingLocatorName: JString (required)
   ##                       : The Streaming Locator name.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group within the Azure subscription.
   ##   accountName: JString (required)
   ##              : The Media Services account name.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_574184 = path.getOrDefault("resourceGroupName")
-  valid_574184 = validateParameter(valid_574184, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564084 = path.getOrDefault("subscriptionId")
+  valid_564084 = validateParameter(valid_564084, JString, required = true,
                                  default = nil)
-  if valid_574184 != nil:
-    section.add "resourceGroupName", valid_574184
-  var valid_574185 = path.getOrDefault("subscriptionId")
-  valid_574185 = validateParameter(valid_574185, JString, required = true,
+  if valid_564084 != nil:
+    section.add "subscriptionId", valid_564084
+  var valid_564085 = path.getOrDefault("streamingLocatorName")
+  valid_564085 = validateParameter(valid_564085, JString, required = true,
                                  default = nil)
-  if valid_574185 != nil:
-    section.add "subscriptionId", valid_574185
-  var valid_574186 = path.getOrDefault("streamingLocatorName")
-  valid_574186 = validateParameter(valid_574186, JString, required = true,
+  if valid_564085 != nil:
+    section.add "streamingLocatorName", valid_564085
+  var valid_564086 = path.getOrDefault("resourceGroupName")
+  valid_564086 = validateParameter(valid_564086, JString, required = true,
                                  default = nil)
-  if valid_574186 != nil:
-    section.add "streamingLocatorName", valid_574186
-  var valid_574187 = path.getOrDefault("accountName")
-  valid_574187 = validateParameter(valid_574187, JString, required = true,
+  if valid_564086 != nil:
+    section.add "resourceGroupName", valid_564086
+  var valid_564087 = path.getOrDefault("accountName")
+  valid_564087 = validateParameter(valid_564087, JString, required = true,
                                  default = nil)
-  if valid_574187 != nil:
-    section.add "accountName", valid_574187
+  if valid_564087 != nil:
+    section.add "accountName", valid_564087
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -458,11 +462,11 @@ proc validate_StreamingLocatorsGet_574182(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574188 = query.getOrDefault("api-version")
-  valid_574188 = validateParameter(valid_574188, JString, required = true,
+  var valid_564088 = query.getOrDefault("api-version")
+  valid_564088 = validateParameter(valid_564088, JString, required = true,
                                  default = nil)
-  if valid_574188 != nil:
-    section.add "api-version", valid_574188
+  if valid_564088 != nil:
+    section.add "api-version", valid_564088
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -471,51 +475,51 @@ proc validate_StreamingLocatorsGet_574182(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574189: Call_StreamingLocatorsGet_574181; path: JsonNode;
+proc call*(call_564089: Call_StreamingLocatorsGet_564081; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get the details of a Streaming Locator in the Media Services account
   ## 
-  let valid = call_574189.validator(path, query, header, formData, body)
-  let scheme = call_574189.pickScheme
+  let valid = call_564089.validator(path, query, header, formData, body)
+  let scheme = call_564089.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574189.url(scheme.get, call_574189.host, call_574189.base,
-                         call_574189.route, valid.getOrDefault("path"),
+  let url = call_564089.url(scheme.get, call_564089.host, call_564089.base,
+                         call_564089.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574189, url, valid)
+  result = hook(call_564089, url, valid)
 
-proc call*(call_574190: Call_StreamingLocatorsGet_574181;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          streamingLocatorName: string; accountName: string): Recallable =
+proc call*(call_564090: Call_StreamingLocatorsGet_564081; apiVersion: string;
+          subscriptionId: string; streamingLocatorName: string;
+          resourceGroupName: string; accountName: string): Recallable =
   ## streamingLocatorsGet
   ## Get the details of a Streaming Locator in the Media Services account
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group within the Azure subscription.
   ##   apiVersion: string (required)
   ##             : The Version of the API to be used with the client request.
   ##   subscriptionId: string (required)
   ##                 : The unique identifier for a Microsoft Azure subscription.
   ##   streamingLocatorName: string (required)
   ##                       : The Streaming Locator name.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group within the Azure subscription.
   ##   accountName: string (required)
   ##              : The Media Services account name.
-  var path_574191 = newJObject()
-  var query_574192 = newJObject()
-  add(path_574191, "resourceGroupName", newJString(resourceGroupName))
-  add(query_574192, "api-version", newJString(apiVersion))
-  add(path_574191, "subscriptionId", newJString(subscriptionId))
-  add(path_574191, "streamingLocatorName", newJString(streamingLocatorName))
-  add(path_574191, "accountName", newJString(accountName))
-  result = call_574190.call(path_574191, query_574192, nil, nil, nil)
+  var path_564091 = newJObject()
+  var query_564092 = newJObject()
+  add(query_564092, "api-version", newJString(apiVersion))
+  add(path_564091, "subscriptionId", newJString(subscriptionId))
+  add(path_564091, "streamingLocatorName", newJString(streamingLocatorName))
+  add(path_564091, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564091, "accountName", newJString(accountName))
+  result = call_564090.call(path_564091, query_564092, nil, nil, nil)
 
-var streamingLocatorsGet* = Call_StreamingLocatorsGet_574181(
+var streamingLocatorsGet* = Call_StreamingLocatorsGet_564081(
     name: "streamingLocatorsGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Media/mediaServices/{accountName}/streamingLocators/{streamingLocatorName}",
-    validator: validate_StreamingLocatorsGet_574182, base: "",
-    url: url_StreamingLocatorsGet_574183, schemes: {Scheme.Https})
+    validator: validate_StreamingLocatorsGet_564082, base: "",
+    url: url_StreamingLocatorsGet_564083, schemes: {Scheme.Https})
 type
-  Call_StreamingLocatorsDelete_574207 = ref object of OpenApiRestCall_573641
-proc url_StreamingLocatorsDelete_574209(protocol: Scheme; host: string; base: string;
+  Call_StreamingLocatorsDelete_564107 = ref object of OpenApiRestCall_563539
+proc url_StreamingLocatorsDelete_564109(protocol: Scheme; host: string; base: string;
                                        route: string; path: JsonNode;
                                        query: JsonNode): Uri =
   result.scheme = $protocol
@@ -542,44 +546,44 @@ proc url_StreamingLocatorsDelete_574209(protocol: Scheme; host: string; base: st
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_StreamingLocatorsDelete_574208(path: JsonNode; query: JsonNode;
+proc validate_StreamingLocatorsDelete_564108(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Deletes a Streaming Locator in the Media Services account
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group within the Azure subscription.
   ##   subscriptionId: JString (required)
   ##                 : The unique identifier for a Microsoft Azure subscription.
   ##   streamingLocatorName: JString (required)
   ##                       : The Streaming Locator name.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group within the Azure subscription.
   ##   accountName: JString (required)
   ##              : The Media Services account name.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_574210 = path.getOrDefault("resourceGroupName")
-  valid_574210 = validateParameter(valid_574210, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564110 = path.getOrDefault("subscriptionId")
+  valid_564110 = validateParameter(valid_564110, JString, required = true,
                                  default = nil)
-  if valid_574210 != nil:
-    section.add "resourceGroupName", valid_574210
-  var valid_574211 = path.getOrDefault("subscriptionId")
-  valid_574211 = validateParameter(valid_574211, JString, required = true,
+  if valid_564110 != nil:
+    section.add "subscriptionId", valid_564110
+  var valid_564111 = path.getOrDefault("streamingLocatorName")
+  valid_564111 = validateParameter(valid_564111, JString, required = true,
                                  default = nil)
-  if valid_574211 != nil:
-    section.add "subscriptionId", valid_574211
-  var valid_574212 = path.getOrDefault("streamingLocatorName")
-  valid_574212 = validateParameter(valid_574212, JString, required = true,
+  if valid_564111 != nil:
+    section.add "streamingLocatorName", valid_564111
+  var valid_564112 = path.getOrDefault("resourceGroupName")
+  valid_564112 = validateParameter(valid_564112, JString, required = true,
                                  default = nil)
-  if valid_574212 != nil:
-    section.add "streamingLocatorName", valid_574212
-  var valid_574213 = path.getOrDefault("accountName")
-  valid_574213 = validateParameter(valid_574213, JString, required = true,
+  if valid_564112 != nil:
+    section.add "resourceGroupName", valid_564112
+  var valid_564113 = path.getOrDefault("accountName")
+  valid_564113 = validateParameter(valid_564113, JString, required = true,
                                  default = nil)
-  if valid_574213 != nil:
-    section.add "accountName", valid_574213
+  if valid_564113 != nil:
+    section.add "accountName", valid_564113
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -587,11 +591,11 @@ proc validate_StreamingLocatorsDelete_574208(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574214 = query.getOrDefault("api-version")
-  valid_574214 = validateParameter(valid_574214, JString, required = true,
+  var valid_564114 = query.getOrDefault("api-version")
+  valid_564114 = validateParameter(valid_564114, JString, required = true,
                                  default = nil)
-  if valid_574214 != nil:
-    section.add "api-version", valid_574214
+  if valid_564114 != nil:
+    section.add "api-version", valid_564114
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -600,51 +604,51 @@ proc validate_StreamingLocatorsDelete_574208(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574215: Call_StreamingLocatorsDelete_574207; path: JsonNode;
+proc call*(call_564115: Call_StreamingLocatorsDelete_564107; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes a Streaming Locator in the Media Services account
   ## 
-  let valid = call_574215.validator(path, query, header, formData, body)
-  let scheme = call_574215.pickScheme
+  let valid = call_564115.validator(path, query, header, formData, body)
+  let scheme = call_564115.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574215.url(scheme.get, call_574215.host, call_574215.base,
-                         call_574215.route, valid.getOrDefault("path"),
+  let url = call_564115.url(scheme.get, call_564115.host, call_564115.base,
+                         call_564115.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574215, url, valid)
+  result = hook(call_564115, url, valid)
 
-proc call*(call_574216: Call_StreamingLocatorsDelete_574207;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          streamingLocatorName: string; accountName: string): Recallable =
+proc call*(call_564116: Call_StreamingLocatorsDelete_564107; apiVersion: string;
+          subscriptionId: string; streamingLocatorName: string;
+          resourceGroupName: string; accountName: string): Recallable =
   ## streamingLocatorsDelete
   ## Deletes a Streaming Locator in the Media Services account
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group within the Azure subscription.
   ##   apiVersion: string (required)
   ##             : The Version of the API to be used with the client request.
   ##   subscriptionId: string (required)
   ##                 : The unique identifier for a Microsoft Azure subscription.
   ##   streamingLocatorName: string (required)
   ##                       : The Streaming Locator name.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group within the Azure subscription.
   ##   accountName: string (required)
   ##              : The Media Services account name.
-  var path_574217 = newJObject()
-  var query_574218 = newJObject()
-  add(path_574217, "resourceGroupName", newJString(resourceGroupName))
-  add(query_574218, "api-version", newJString(apiVersion))
-  add(path_574217, "subscriptionId", newJString(subscriptionId))
-  add(path_574217, "streamingLocatorName", newJString(streamingLocatorName))
-  add(path_574217, "accountName", newJString(accountName))
-  result = call_574216.call(path_574217, query_574218, nil, nil, nil)
+  var path_564117 = newJObject()
+  var query_564118 = newJObject()
+  add(query_564118, "api-version", newJString(apiVersion))
+  add(path_564117, "subscriptionId", newJString(subscriptionId))
+  add(path_564117, "streamingLocatorName", newJString(streamingLocatorName))
+  add(path_564117, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564117, "accountName", newJString(accountName))
+  result = call_564116.call(path_564117, query_564118, nil, nil, nil)
 
-var streamingLocatorsDelete* = Call_StreamingLocatorsDelete_574207(
+var streamingLocatorsDelete* = Call_StreamingLocatorsDelete_564107(
     name: "streamingLocatorsDelete", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Media/mediaServices/{accountName}/streamingLocators/{streamingLocatorName}",
-    validator: validate_StreamingLocatorsDelete_574208, base: "",
-    url: url_StreamingLocatorsDelete_574209, schemes: {Scheme.Https})
+    validator: validate_StreamingLocatorsDelete_564108, base: "",
+    url: url_StreamingLocatorsDelete_564109, schemes: {Scheme.Https})
 type
-  Call_StreamingLocatorsListContentKeys_574219 = ref object of OpenApiRestCall_573641
-proc url_StreamingLocatorsListContentKeys_574221(protocol: Scheme; host: string;
+  Call_StreamingLocatorsListContentKeys_564119 = ref object of OpenApiRestCall_563539
+proc url_StreamingLocatorsListContentKeys_564121(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -671,44 +675,44 @@ proc url_StreamingLocatorsListContentKeys_574221(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_StreamingLocatorsListContentKeys_574220(path: JsonNode;
+proc validate_StreamingLocatorsListContentKeys_564120(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## List Content Keys used by this Streaming Locator
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group within the Azure subscription.
   ##   subscriptionId: JString (required)
   ##                 : The unique identifier for a Microsoft Azure subscription.
   ##   streamingLocatorName: JString (required)
   ##                       : The Streaming Locator name.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group within the Azure subscription.
   ##   accountName: JString (required)
   ##              : The Media Services account name.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_574222 = path.getOrDefault("resourceGroupName")
-  valid_574222 = validateParameter(valid_574222, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564122 = path.getOrDefault("subscriptionId")
+  valid_564122 = validateParameter(valid_564122, JString, required = true,
                                  default = nil)
-  if valid_574222 != nil:
-    section.add "resourceGroupName", valid_574222
-  var valid_574223 = path.getOrDefault("subscriptionId")
-  valid_574223 = validateParameter(valid_574223, JString, required = true,
+  if valid_564122 != nil:
+    section.add "subscriptionId", valid_564122
+  var valid_564123 = path.getOrDefault("streamingLocatorName")
+  valid_564123 = validateParameter(valid_564123, JString, required = true,
                                  default = nil)
-  if valid_574223 != nil:
-    section.add "subscriptionId", valid_574223
-  var valid_574224 = path.getOrDefault("streamingLocatorName")
-  valid_574224 = validateParameter(valid_574224, JString, required = true,
+  if valid_564123 != nil:
+    section.add "streamingLocatorName", valid_564123
+  var valid_564124 = path.getOrDefault("resourceGroupName")
+  valid_564124 = validateParameter(valid_564124, JString, required = true,
                                  default = nil)
-  if valid_574224 != nil:
-    section.add "streamingLocatorName", valid_574224
-  var valid_574225 = path.getOrDefault("accountName")
-  valid_574225 = validateParameter(valid_574225, JString, required = true,
+  if valid_564124 != nil:
+    section.add "resourceGroupName", valid_564124
+  var valid_564125 = path.getOrDefault("accountName")
+  valid_564125 = validateParameter(valid_564125, JString, required = true,
                                  default = nil)
-  if valid_574225 != nil:
-    section.add "accountName", valid_574225
+  if valid_564125 != nil:
+    section.add "accountName", valid_564125
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -716,11 +720,11 @@ proc validate_StreamingLocatorsListContentKeys_574220(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574226 = query.getOrDefault("api-version")
-  valid_574226 = validateParameter(valid_574226, JString, required = true,
+  var valid_564126 = query.getOrDefault("api-version")
+  valid_564126 = validateParameter(valid_564126, JString, required = true,
                                  default = nil)
-  if valid_574226 != nil:
-    section.add "api-version", valid_574226
+  if valid_564126 != nil:
+    section.add "api-version", valid_564126
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -729,52 +733,52 @@ proc validate_StreamingLocatorsListContentKeys_574220(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574227: Call_StreamingLocatorsListContentKeys_574219;
+proc call*(call_564127: Call_StreamingLocatorsListContentKeys_564119;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## List Content Keys used by this Streaming Locator
   ## 
-  let valid = call_574227.validator(path, query, header, formData, body)
-  let scheme = call_574227.pickScheme
+  let valid = call_564127.validator(path, query, header, formData, body)
+  let scheme = call_564127.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574227.url(scheme.get, call_574227.host, call_574227.base,
-                         call_574227.route, valid.getOrDefault("path"),
+  let url = call_564127.url(scheme.get, call_564127.host, call_564127.base,
+                         call_564127.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574227, url, valid)
+  result = hook(call_564127, url, valid)
 
-proc call*(call_574228: Call_StreamingLocatorsListContentKeys_574219;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          streamingLocatorName: string; accountName: string): Recallable =
+proc call*(call_564128: Call_StreamingLocatorsListContentKeys_564119;
+          apiVersion: string; subscriptionId: string; streamingLocatorName: string;
+          resourceGroupName: string; accountName: string): Recallable =
   ## streamingLocatorsListContentKeys
   ## List Content Keys used by this Streaming Locator
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group within the Azure subscription.
   ##   apiVersion: string (required)
   ##             : The Version of the API to be used with the client request.
   ##   subscriptionId: string (required)
   ##                 : The unique identifier for a Microsoft Azure subscription.
   ##   streamingLocatorName: string (required)
   ##                       : The Streaming Locator name.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group within the Azure subscription.
   ##   accountName: string (required)
   ##              : The Media Services account name.
-  var path_574229 = newJObject()
-  var query_574230 = newJObject()
-  add(path_574229, "resourceGroupName", newJString(resourceGroupName))
-  add(query_574230, "api-version", newJString(apiVersion))
-  add(path_574229, "subscriptionId", newJString(subscriptionId))
-  add(path_574229, "streamingLocatorName", newJString(streamingLocatorName))
-  add(path_574229, "accountName", newJString(accountName))
-  result = call_574228.call(path_574229, query_574230, nil, nil, nil)
+  var path_564129 = newJObject()
+  var query_564130 = newJObject()
+  add(query_564130, "api-version", newJString(apiVersion))
+  add(path_564129, "subscriptionId", newJString(subscriptionId))
+  add(path_564129, "streamingLocatorName", newJString(streamingLocatorName))
+  add(path_564129, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564129, "accountName", newJString(accountName))
+  result = call_564128.call(path_564129, query_564130, nil, nil, nil)
 
-var streamingLocatorsListContentKeys* = Call_StreamingLocatorsListContentKeys_574219(
+var streamingLocatorsListContentKeys* = Call_StreamingLocatorsListContentKeys_564119(
     name: "streamingLocatorsListContentKeys", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Media/mediaServices/{accountName}/streamingLocators/{streamingLocatorName}/listContentKeys",
-    validator: validate_StreamingLocatorsListContentKeys_574220, base: "",
-    url: url_StreamingLocatorsListContentKeys_574221, schemes: {Scheme.Https})
+    validator: validate_StreamingLocatorsListContentKeys_564120, base: "",
+    url: url_StreamingLocatorsListContentKeys_564121, schemes: {Scheme.Https})
 type
-  Call_StreamingLocatorsListPaths_574231 = ref object of OpenApiRestCall_573641
-proc url_StreamingLocatorsListPaths_574233(protocol: Scheme; host: string;
+  Call_StreamingLocatorsListPaths_564131 = ref object of OpenApiRestCall_563539
+proc url_StreamingLocatorsListPaths_564133(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -801,44 +805,44 @@ proc url_StreamingLocatorsListPaths_574233(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_StreamingLocatorsListPaths_574232(path: JsonNode; query: JsonNode;
+proc validate_StreamingLocatorsListPaths_564132(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## List Paths supported by this Streaming Locator
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group within the Azure subscription.
   ##   subscriptionId: JString (required)
   ##                 : The unique identifier for a Microsoft Azure subscription.
   ##   streamingLocatorName: JString (required)
   ##                       : The Streaming Locator name.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group within the Azure subscription.
   ##   accountName: JString (required)
   ##              : The Media Services account name.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_574234 = path.getOrDefault("resourceGroupName")
-  valid_574234 = validateParameter(valid_574234, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564134 = path.getOrDefault("subscriptionId")
+  valid_564134 = validateParameter(valid_564134, JString, required = true,
                                  default = nil)
-  if valid_574234 != nil:
-    section.add "resourceGroupName", valid_574234
-  var valid_574235 = path.getOrDefault("subscriptionId")
-  valid_574235 = validateParameter(valid_574235, JString, required = true,
+  if valid_564134 != nil:
+    section.add "subscriptionId", valid_564134
+  var valid_564135 = path.getOrDefault("streamingLocatorName")
+  valid_564135 = validateParameter(valid_564135, JString, required = true,
                                  default = nil)
-  if valid_574235 != nil:
-    section.add "subscriptionId", valid_574235
-  var valid_574236 = path.getOrDefault("streamingLocatorName")
-  valid_574236 = validateParameter(valid_574236, JString, required = true,
+  if valid_564135 != nil:
+    section.add "streamingLocatorName", valid_564135
+  var valid_564136 = path.getOrDefault("resourceGroupName")
+  valid_564136 = validateParameter(valid_564136, JString, required = true,
                                  default = nil)
-  if valid_574236 != nil:
-    section.add "streamingLocatorName", valid_574236
-  var valid_574237 = path.getOrDefault("accountName")
-  valid_574237 = validateParameter(valid_574237, JString, required = true,
+  if valid_564136 != nil:
+    section.add "resourceGroupName", valid_564136
+  var valid_564137 = path.getOrDefault("accountName")
+  valid_564137 = validateParameter(valid_564137, JString, required = true,
                                  default = nil)
-  if valid_574237 != nil:
-    section.add "accountName", valid_574237
+  if valid_564137 != nil:
+    section.add "accountName", valid_564137
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -846,11 +850,11 @@ proc validate_StreamingLocatorsListPaths_574232(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574238 = query.getOrDefault("api-version")
-  valid_574238 = validateParameter(valid_574238, JString, required = true,
+  var valid_564138 = query.getOrDefault("api-version")
+  valid_564138 = validateParameter(valid_564138, JString, required = true,
                                  default = nil)
-  if valid_574238 != nil:
-    section.add "api-version", valid_574238
+  if valid_564138 != nil:
+    section.add "api-version", valid_564138
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -859,51 +863,51 @@ proc validate_StreamingLocatorsListPaths_574232(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574239: Call_StreamingLocatorsListPaths_574231; path: JsonNode;
+proc call*(call_564139: Call_StreamingLocatorsListPaths_564131; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## List Paths supported by this Streaming Locator
   ## 
-  let valid = call_574239.validator(path, query, header, formData, body)
-  let scheme = call_574239.pickScheme
+  let valid = call_564139.validator(path, query, header, formData, body)
+  let scheme = call_564139.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574239.url(scheme.get, call_574239.host, call_574239.base,
-                         call_574239.route, valid.getOrDefault("path"),
+  let url = call_564139.url(scheme.get, call_564139.host, call_564139.base,
+                         call_564139.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574239, url, valid)
+  result = hook(call_564139, url, valid)
 
-proc call*(call_574240: Call_StreamingLocatorsListPaths_574231;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          streamingLocatorName: string; accountName: string): Recallable =
+proc call*(call_564140: Call_StreamingLocatorsListPaths_564131; apiVersion: string;
+          subscriptionId: string; streamingLocatorName: string;
+          resourceGroupName: string; accountName: string): Recallable =
   ## streamingLocatorsListPaths
   ## List Paths supported by this Streaming Locator
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group within the Azure subscription.
   ##   apiVersion: string (required)
   ##             : The Version of the API to be used with the client request.
   ##   subscriptionId: string (required)
   ##                 : The unique identifier for a Microsoft Azure subscription.
   ##   streamingLocatorName: string (required)
   ##                       : The Streaming Locator name.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group within the Azure subscription.
   ##   accountName: string (required)
   ##              : The Media Services account name.
-  var path_574241 = newJObject()
-  var query_574242 = newJObject()
-  add(path_574241, "resourceGroupName", newJString(resourceGroupName))
-  add(query_574242, "api-version", newJString(apiVersion))
-  add(path_574241, "subscriptionId", newJString(subscriptionId))
-  add(path_574241, "streamingLocatorName", newJString(streamingLocatorName))
-  add(path_574241, "accountName", newJString(accountName))
-  result = call_574240.call(path_574241, query_574242, nil, nil, nil)
+  var path_564141 = newJObject()
+  var query_564142 = newJObject()
+  add(query_564142, "api-version", newJString(apiVersion))
+  add(path_564141, "subscriptionId", newJString(subscriptionId))
+  add(path_564141, "streamingLocatorName", newJString(streamingLocatorName))
+  add(path_564141, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564141, "accountName", newJString(accountName))
+  result = call_564140.call(path_564141, query_564142, nil, nil, nil)
 
-var streamingLocatorsListPaths* = Call_StreamingLocatorsListPaths_574231(
+var streamingLocatorsListPaths* = Call_StreamingLocatorsListPaths_564131(
     name: "streamingLocatorsListPaths", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Media/mediaServices/{accountName}/streamingLocators/{streamingLocatorName}/listPaths",
-    validator: validate_StreamingLocatorsListPaths_574232, base: "",
-    url: url_StreamingLocatorsListPaths_574233, schemes: {Scheme.Https})
+    validator: validate_StreamingLocatorsListPaths_564132, base: "",
+    url: url_StreamingLocatorsListPaths_564133, schemes: {Scheme.Https})
 type
-  Call_StreamingPoliciesList_574243 = ref object of OpenApiRestCall_573641
-proc url_StreamingPoliciesList_574245(protocol: Scheme; host: string; base: string;
+  Call_StreamingPoliciesList_564143 = ref object of OpenApiRestCall_563539
+proc url_StreamingPoliciesList_564145(protocol: Scheme; host: string; base: string;
                                      route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -926,69 +930,69 @@ proc url_StreamingPoliciesList_574245(protocol: Scheme; host: string; base: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_StreamingPoliciesList_574244(path: JsonNode; query: JsonNode;
+proc validate_StreamingPoliciesList_564144(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists the Streaming Policies in the account
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group within the Azure subscription.
   ##   subscriptionId: JString (required)
   ##                 : The unique identifier for a Microsoft Azure subscription.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group within the Azure subscription.
   ##   accountName: JString (required)
   ##              : The Media Services account name.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_574246 = path.getOrDefault("resourceGroupName")
-  valid_574246 = validateParameter(valid_574246, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564146 = path.getOrDefault("subscriptionId")
+  valid_564146 = validateParameter(valid_564146, JString, required = true,
                                  default = nil)
-  if valid_574246 != nil:
-    section.add "resourceGroupName", valid_574246
-  var valid_574247 = path.getOrDefault("subscriptionId")
-  valid_574247 = validateParameter(valid_574247, JString, required = true,
+  if valid_564146 != nil:
+    section.add "subscriptionId", valid_564146
+  var valid_564147 = path.getOrDefault("resourceGroupName")
+  valid_564147 = validateParameter(valid_564147, JString, required = true,
                                  default = nil)
-  if valid_574247 != nil:
-    section.add "subscriptionId", valid_574247
-  var valid_574248 = path.getOrDefault("accountName")
-  valid_574248 = validateParameter(valid_574248, JString, required = true,
+  if valid_564147 != nil:
+    section.add "resourceGroupName", valid_564147
+  var valid_564148 = path.getOrDefault("accountName")
+  valid_564148 = validateParameter(valid_564148, JString, required = true,
                                  default = nil)
-  if valid_574248 != nil:
-    section.add "accountName", valid_574248
+  if valid_564148 != nil:
+    section.add "accountName", valid_564148
   result.add "path", section
   ## parameters in `query` object:
-  ##   $orderby: JString
-  ##           : Specifies the key by which the result collection should be ordered.
   ##   api-version: JString (required)
   ##              : The Version of the API to be used with the client request.
   ##   $top: JInt
   ##       : Specifies a non-negative integer n that limits the number of items returned from a collection. The service returns the number of available items up to but not greater than the specified value n.
+  ##   $orderby: JString
+  ##           : Specifies the key by which the result collection should be ordered.
   ##   $filter: JString
   ##          : Restricts the set of items returned.
   section = newJObject()
-  var valid_574249 = query.getOrDefault("$orderby")
-  valid_574249 = validateParameter(valid_574249, JString, required = false,
-                                 default = nil)
-  if valid_574249 != nil:
-    section.add "$orderby", valid_574249
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574250 = query.getOrDefault("api-version")
-  valid_574250 = validateParameter(valid_574250, JString, required = true,
+  var valid_564149 = query.getOrDefault("api-version")
+  valid_564149 = validateParameter(valid_564149, JString, required = true,
                                  default = nil)
-  if valid_574250 != nil:
-    section.add "api-version", valid_574250
-  var valid_574251 = query.getOrDefault("$top")
-  valid_574251 = validateParameter(valid_574251, JInt, required = false, default = nil)
-  if valid_574251 != nil:
-    section.add "$top", valid_574251
-  var valid_574252 = query.getOrDefault("$filter")
-  valid_574252 = validateParameter(valid_574252, JString, required = false,
+  if valid_564149 != nil:
+    section.add "api-version", valid_564149
+  var valid_564150 = query.getOrDefault("$top")
+  valid_564150 = validateParameter(valid_564150, JInt, required = false, default = nil)
+  if valid_564150 != nil:
+    section.add "$top", valid_564150
+  var valid_564151 = query.getOrDefault("$orderby")
+  valid_564151 = validateParameter(valid_564151, JString, required = false,
                                  default = nil)
-  if valid_574252 != nil:
-    section.add "$filter", valid_574252
+  if valid_564151 != nil:
+    section.add "$orderby", valid_564151
+  var valid_564152 = query.getOrDefault("$filter")
+  valid_564152 = validateParameter(valid_564152, JString, required = false,
+                                 default = nil)
+  if valid_564152 != nil:
+    section.add "$filter", valid_564152
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -997,57 +1001,57 @@ proc validate_StreamingPoliciesList_574244(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574253: Call_StreamingPoliciesList_574243; path: JsonNode;
+proc call*(call_564153: Call_StreamingPoliciesList_564143; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists the Streaming Policies in the account
   ## 
-  let valid = call_574253.validator(path, query, header, formData, body)
-  let scheme = call_574253.pickScheme
+  let valid = call_564153.validator(path, query, header, formData, body)
+  let scheme = call_564153.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574253.url(scheme.get, call_574253.host, call_574253.base,
-                         call_574253.route, valid.getOrDefault("path"),
+  let url = call_564153.url(scheme.get, call_564153.host, call_564153.base,
+                         call_564153.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574253, url, valid)
+  result = hook(call_564153, url, valid)
 
-proc call*(call_574254: Call_StreamingPoliciesList_574243;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          accountName: string; Orderby: string = ""; Top: int = 0; Filter: string = ""): Recallable =
+proc call*(call_564154: Call_StreamingPoliciesList_564143; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string; accountName: string;
+          Top: int = 0; Orderby: string = ""; Filter: string = ""): Recallable =
   ## streamingPoliciesList
   ## Lists the Streaming Policies in the account
+  ##   apiVersion: string (required)
+  ##             : The Version of the API to be used with the client request.
+  ##   Top: int
+  ##      : Specifies a non-negative integer n that limits the number of items returned from a collection. The service returns the number of available items up to but not greater than the specified value n.
+  ##   subscriptionId: string (required)
+  ##                 : The unique identifier for a Microsoft Azure subscription.
   ##   Orderby: string
   ##          : Specifies the key by which the result collection should be ordered.
   ##   resourceGroupName: string (required)
   ##                    : The name of the resource group within the Azure subscription.
-  ##   apiVersion: string (required)
-  ##             : The Version of the API to be used with the client request.
-  ##   subscriptionId: string (required)
-  ##                 : The unique identifier for a Microsoft Azure subscription.
-  ##   Top: int
-  ##      : Specifies a non-negative integer n that limits the number of items returned from a collection. The service returns the number of available items up to but not greater than the specified value n.
-  ##   accountName: string (required)
-  ##              : The Media Services account name.
   ##   Filter: string
   ##         : Restricts the set of items returned.
-  var path_574255 = newJObject()
-  var query_574256 = newJObject()
-  add(query_574256, "$orderby", newJString(Orderby))
-  add(path_574255, "resourceGroupName", newJString(resourceGroupName))
-  add(query_574256, "api-version", newJString(apiVersion))
-  add(path_574255, "subscriptionId", newJString(subscriptionId))
-  add(query_574256, "$top", newJInt(Top))
-  add(path_574255, "accountName", newJString(accountName))
-  add(query_574256, "$filter", newJString(Filter))
-  result = call_574254.call(path_574255, query_574256, nil, nil, nil)
+  ##   accountName: string (required)
+  ##              : The Media Services account name.
+  var path_564155 = newJObject()
+  var query_564156 = newJObject()
+  add(query_564156, "api-version", newJString(apiVersion))
+  add(query_564156, "$top", newJInt(Top))
+  add(path_564155, "subscriptionId", newJString(subscriptionId))
+  add(query_564156, "$orderby", newJString(Orderby))
+  add(path_564155, "resourceGroupName", newJString(resourceGroupName))
+  add(query_564156, "$filter", newJString(Filter))
+  add(path_564155, "accountName", newJString(accountName))
+  result = call_564154.call(path_564155, query_564156, nil, nil, nil)
 
-var streamingPoliciesList* = Call_StreamingPoliciesList_574243(
+var streamingPoliciesList* = Call_StreamingPoliciesList_564143(
     name: "streamingPoliciesList", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Media/mediaServices/{accountName}/streamingPolicies",
-    validator: validate_StreamingPoliciesList_574244, base: "",
-    url: url_StreamingPoliciesList_574245, schemes: {Scheme.Https})
+    validator: validate_StreamingPoliciesList_564144, base: "",
+    url: url_StreamingPoliciesList_564145, schemes: {Scheme.Https})
 type
-  Call_StreamingPoliciesCreate_574269 = ref object of OpenApiRestCall_573641
-proc url_StreamingPoliciesCreate_574271(protocol: Scheme; host: string; base: string;
+  Call_StreamingPoliciesCreate_564169 = ref object of OpenApiRestCall_563539
+proc url_StreamingPoliciesCreate_564171(protocol: Scheme; host: string; base: string;
                                        route: string; path: JsonNode;
                                        query: JsonNode): Uri =
   result.scheme = $protocol
@@ -1074,44 +1078,44 @@ proc url_StreamingPoliciesCreate_574271(protocol: Scheme; host: string; base: st
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_StreamingPoliciesCreate_574270(path: JsonNode; query: JsonNode;
+proc validate_StreamingPoliciesCreate_564170(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Create a Streaming Policy in the Media Services account
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group within the Azure subscription.
   ##   subscriptionId: JString (required)
   ##                 : The unique identifier for a Microsoft Azure subscription.
   ##   streamingPolicyName: JString (required)
   ##                      : The Streaming Policy name.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group within the Azure subscription.
   ##   accountName: JString (required)
   ##              : The Media Services account name.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_574272 = path.getOrDefault("resourceGroupName")
-  valid_574272 = validateParameter(valid_574272, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564172 = path.getOrDefault("subscriptionId")
+  valid_564172 = validateParameter(valid_564172, JString, required = true,
                                  default = nil)
-  if valid_574272 != nil:
-    section.add "resourceGroupName", valid_574272
-  var valid_574273 = path.getOrDefault("subscriptionId")
-  valid_574273 = validateParameter(valid_574273, JString, required = true,
+  if valid_564172 != nil:
+    section.add "subscriptionId", valid_564172
+  var valid_564173 = path.getOrDefault("streamingPolicyName")
+  valid_564173 = validateParameter(valid_564173, JString, required = true,
                                  default = nil)
-  if valid_574273 != nil:
-    section.add "subscriptionId", valid_574273
-  var valid_574274 = path.getOrDefault("streamingPolicyName")
-  valid_574274 = validateParameter(valid_574274, JString, required = true,
+  if valid_564173 != nil:
+    section.add "streamingPolicyName", valid_564173
+  var valid_564174 = path.getOrDefault("resourceGroupName")
+  valid_564174 = validateParameter(valid_564174, JString, required = true,
                                  default = nil)
-  if valid_574274 != nil:
-    section.add "streamingPolicyName", valid_574274
-  var valid_574275 = path.getOrDefault("accountName")
-  valid_574275 = validateParameter(valid_574275, JString, required = true,
+  if valid_564174 != nil:
+    section.add "resourceGroupName", valid_564174
+  var valid_564175 = path.getOrDefault("accountName")
+  valid_564175 = validateParameter(valid_564175, JString, required = true,
                                  default = nil)
-  if valid_574275 != nil:
-    section.add "accountName", valid_574275
+  if valid_564175 != nil:
+    section.add "accountName", valid_564175
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1119,11 +1123,11 @@ proc validate_StreamingPoliciesCreate_574270(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574276 = query.getOrDefault("api-version")
-  valid_574276 = validateParameter(valid_574276, JString, required = true,
+  var valid_564176 = query.getOrDefault("api-version")
+  valid_564176 = validateParameter(valid_564176, JString, required = true,
                                  default = nil)
-  if valid_574276 != nil:
-    section.add "api-version", valid_574276
+  if valid_564176 != nil:
+    section.add "api-version", valid_564176
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1137,56 +1141,56 @@ proc validate_StreamingPoliciesCreate_574270(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574278: Call_StreamingPoliciesCreate_574269; path: JsonNode;
+proc call*(call_564178: Call_StreamingPoliciesCreate_564169; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Create a Streaming Policy in the Media Services account
   ## 
-  let valid = call_574278.validator(path, query, header, formData, body)
-  let scheme = call_574278.pickScheme
+  let valid = call_564178.validator(path, query, header, formData, body)
+  let scheme = call_564178.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574278.url(scheme.get, call_574278.host, call_574278.base,
-                         call_574278.route, valid.getOrDefault("path"),
+  let url = call_564178.url(scheme.get, call_564178.host, call_564178.base,
+                         call_564178.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574278, url, valid)
+  result = hook(call_564178, url, valid)
 
-proc call*(call_574279: Call_StreamingPoliciesCreate_574269;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          streamingPolicyName: string; parameters: JsonNode; accountName: string): Recallable =
+proc call*(call_564179: Call_StreamingPoliciesCreate_564169; apiVersion: string;
+          subscriptionId: string; streamingPolicyName: string;
+          resourceGroupName: string; parameters: JsonNode; accountName: string): Recallable =
   ## streamingPoliciesCreate
   ## Create a Streaming Policy in the Media Services account
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group within the Azure subscription.
   ##   apiVersion: string (required)
   ##             : The Version of the API to be used with the client request.
   ##   subscriptionId: string (required)
   ##                 : The unique identifier for a Microsoft Azure subscription.
   ##   streamingPolicyName: string (required)
   ##                      : The Streaming Policy name.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group within the Azure subscription.
   ##   parameters: JObject (required)
   ##             : The request parameters
   ##   accountName: string (required)
   ##              : The Media Services account name.
-  var path_574280 = newJObject()
-  var query_574281 = newJObject()
-  var body_574282 = newJObject()
-  add(path_574280, "resourceGroupName", newJString(resourceGroupName))
-  add(query_574281, "api-version", newJString(apiVersion))
-  add(path_574280, "subscriptionId", newJString(subscriptionId))
-  add(path_574280, "streamingPolicyName", newJString(streamingPolicyName))
+  var path_564180 = newJObject()
+  var query_564181 = newJObject()
+  var body_564182 = newJObject()
+  add(query_564181, "api-version", newJString(apiVersion))
+  add(path_564180, "subscriptionId", newJString(subscriptionId))
+  add(path_564180, "streamingPolicyName", newJString(streamingPolicyName))
+  add(path_564180, "resourceGroupName", newJString(resourceGroupName))
   if parameters != nil:
-    body_574282 = parameters
-  add(path_574280, "accountName", newJString(accountName))
-  result = call_574279.call(path_574280, query_574281, nil, nil, body_574282)
+    body_564182 = parameters
+  add(path_564180, "accountName", newJString(accountName))
+  result = call_564179.call(path_564180, query_564181, nil, nil, body_564182)
 
-var streamingPoliciesCreate* = Call_StreamingPoliciesCreate_574269(
+var streamingPoliciesCreate* = Call_StreamingPoliciesCreate_564169(
     name: "streamingPoliciesCreate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Media/mediaServices/{accountName}/streamingPolicies/{streamingPolicyName}",
-    validator: validate_StreamingPoliciesCreate_574270, base: "",
-    url: url_StreamingPoliciesCreate_574271, schemes: {Scheme.Https})
+    validator: validate_StreamingPoliciesCreate_564170, base: "",
+    url: url_StreamingPoliciesCreate_564171, schemes: {Scheme.Https})
 type
-  Call_StreamingPoliciesGet_574257 = ref object of OpenApiRestCall_573641
-proc url_StreamingPoliciesGet_574259(protocol: Scheme; host: string; base: string;
+  Call_StreamingPoliciesGet_564157 = ref object of OpenApiRestCall_563539
+proc url_StreamingPoliciesGet_564159(protocol: Scheme; host: string; base: string;
                                     route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1212,44 +1216,44 @@ proc url_StreamingPoliciesGet_574259(protocol: Scheme; host: string; base: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_StreamingPoliciesGet_574258(path: JsonNode; query: JsonNode;
+proc validate_StreamingPoliciesGet_564158(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Get the details of a Streaming Policy in the Media Services account
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group within the Azure subscription.
   ##   subscriptionId: JString (required)
   ##                 : The unique identifier for a Microsoft Azure subscription.
   ##   streamingPolicyName: JString (required)
   ##                      : The Streaming Policy name.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group within the Azure subscription.
   ##   accountName: JString (required)
   ##              : The Media Services account name.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_574260 = path.getOrDefault("resourceGroupName")
-  valid_574260 = validateParameter(valid_574260, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564160 = path.getOrDefault("subscriptionId")
+  valid_564160 = validateParameter(valid_564160, JString, required = true,
                                  default = nil)
-  if valid_574260 != nil:
-    section.add "resourceGroupName", valid_574260
-  var valid_574261 = path.getOrDefault("subscriptionId")
-  valid_574261 = validateParameter(valid_574261, JString, required = true,
+  if valid_564160 != nil:
+    section.add "subscriptionId", valid_564160
+  var valid_564161 = path.getOrDefault("streamingPolicyName")
+  valid_564161 = validateParameter(valid_564161, JString, required = true,
                                  default = nil)
-  if valid_574261 != nil:
-    section.add "subscriptionId", valid_574261
-  var valid_574262 = path.getOrDefault("streamingPolicyName")
-  valid_574262 = validateParameter(valid_574262, JString, required = true,
+  if valid_564161 != nil:
+    section.add "streamingPolicyName", valid_564161
+  var valid_564162 = path.getOrDefault("resourceGroupName")
+  valid_564162 = validateParameter(valid_564162, JString, required = true,
                                  default = nil)
-  if valid_574262 != nil:
-    section.add "streamingPolicyName", valid_574262
-  var valid_574263 = path.getOrDefault("accountName")
-  valid_574263 = validateParameter(valid_574263, JString, required = true,
+  if valid_564162 != nil:
+    section.add "resourceGroupName", valid_564162
+  var valid_564163 = path.getOrDefault("accountName")
+  valid_564163 = validateParameter(valid_564163, JString, required = true,
                                  default = nil)
-  if valid_574263 != nil:
-    section.add "accountName", valid_574263
+  if valid_564163 != nil:
+    section.add "accountName", valid_564163
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1257,11 +1261,11 @@ proc validate_StreamingPoliciesGet_574258(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574264 = query.getOrDefault("api-version")
-  valid_574264 = validateParameter(valid_574264, JString, required = true,
+  var valid_564164 = query.getOrDefault("api-version")
+  valid_564164 = validateParameter(valid_564164, JString, required = true,
                                  default = nil)
-  if valid_574264 != nil:
-    section.add "api-version", valid_574264
+  if valid_564164 != nil:
+    section.add "api-version", valid_564164
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1270,51 +1274,51 @@ proc validate_StreamingPoliciesGet_574258(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574265: Call_StreamingPoliciesGet_574257; path: JsonNode;
+proc call*(call_564165: Call_StreamingPoliciesGet_564157; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get the details of a Streaming Policy in the Media Services account
   ## 
-  let valid = call_574265.validator(path, query, header, formData, body)
-  let scheme = call_574265.pickScheme
+  let valid = call_564165.validator(path, query, header, formData, body)
+  let scheme = call_564165.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574265.url(scheme.get, call_574265.host, call_574265.base,
-                         call_574265.route, valid.getOrDefault("path"),
+  let url = call_564165.url(scheme.get, call_564165.host, call_564165.base,
+                         call_564165.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574265, url, valid)
+  result = hook(call_564165, url, valid)
 
-proc call*(call_574266: Call_StreamingPoliciesGet_574257;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          streamingPolicyName: string; accountName: string): Recallable =
+proc call*(call_564166: Call_StreamingPoliciesGet_564157; apiVersion: string;
+          subscriptionId: string; streamingPolicyName: string;
+          resourceGroupName: string; accountName: string): Recallable =
   ## streamingPoliciesGet
   ## Get the details of a Streaming Policy in the Media Services account
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group within the Azure subscription.
   ##   apiVersion: string (required)
   ##             : The Version of the API to be used with the client request.
   ##   subscriptionId: string (required)
   ##                 : The unique identifier for a Microsoft Azure subscription.
   ##   streamingPolicyName: string (required)
   ##                      : The Streaming Policy name.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group within the Azure subscription.
   ##   accountName: string (required)
   ##              : The Media Services account name.
-  var path_574267 = newJObject()
-  var query_574268 = newJObject()
-  add(path_574267, "resourceGroupName", newJString(resourceGroupName))
-  add(query_574268, "api-version", newJString(apiVersion))
-  add(path_574267, "subscriptionId", newJString(subscriptionId))
-  add(path_574267, "streamingPolicyName", newJString(streamingPolicyName))
-  add(path_574267, "accountName", newJString(accountName))
-  result = call_574266.call(path_574267, query_574268, nil, nil, nil)
+  var path_564167 = newJObject()
+  var query_564168 = newJObject()
+  add(query_564168, "api-version", newJString(apiVersion))
+  add(path_564167, "subscriptionId", newJString(subscriptionId))
+  add(path_564167, "streamingPolicyName", newJString(streamingPolicyName))
+  add(path_564167, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564167, "accountName", newJString(accountName))
+  result = call_564166.call(path_564167, query_564168, nil, nil, nil)
 
-var streamingPoliciesGet* = Call_StreamingPoliciesGet_574257(
+var streamingPoliciesGet* = Call_StreamingPoliciesGet_564157(
     name: "streamingPoliciesGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Media/mediaServices/{accountName}/streamingPolicies/{streamingPolicyName}",
-    validator: validate_StreamingPoliciesGet_574258, base: "",
-    url: url_StreamingPoliciesGet_574259, schemes: {Scheme.Https})
+    validator: validate_StreamingPoliciesGet_564158, base: "",
+    url: url_StreamingPoliciesGet_564159, schemes: {Scheme.Https})
 type
-  Call_StreamingPoliciesDelete_574283 = ref object of OpenApiRestCall_573641
-proc url_StreamingPoliciesDelete_574285(protocol: Scheme; host: string; base: string;
+  Call_StreamingPoliciesDelete_564183 = ref object of OpenApiRestCall_563539
+proc url_StreamingPoliciesDelete_564185(protocol: Scheme; host: string; base: string;
                                        route: string; path: JsonNode;
                                        query: JsonNode): Uri =
   result.scheme = $protocol
@@ -1341,44 +1345,44 @@ proc url_StreamingPoliciesDelete_574285(protocol: Scheme; host: string; base: st
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_StreamingPoliciesDelete_574284(path: JsonNode; query: JsonNode;
+proc validate_StreamingPoliciesDelete_564184(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Deletes a Streaming Policy in the Media Services account
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group within the Azure subscription.
   ##   subscriptionId: JString (required)
   ##                 : The unique identifier for a Microsoft Azure subscription.
   ##   streamingPolicyName: JString (required)
   ##                      : The Streaming Policy name.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group within the Azure subscription.
   ##   accountName: JString (required)
   ##              : The Media Services account name.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_574286 = path.getOrDefault("resourceGroupName")
-  valid_574286 = validateParameter(valid_574286, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564186 = path.getOrDefault("subscriptionId")
+  valid_564186 = validateParameter(valid_564186, JString, required = true,
                                  default = nil)
-  if valid_574286 != nil:
-    section.add "resourceGroupName", valid_574286
-  var valid_574287 = path.getOrDefault("subscriptionId")
-  valid_574287 = validateParameter(valid_574287, JString, required = true,
+  if valid_564186 != nil:
+    section.add "subscriptionId", valid_564186
+  var valid_564187 = path.getOrDefault("streamingPolicyName")
+  valid_564187 = validateParameter(valid_564187, JString, required = true,
                                  default = nil)
-  if valid_574287 != nil:
-    section.add "subscriptionId", valid_574287
-  var valid_574288 = path.getOrDefault("streamingPolicyName")
-  valid_574288 = validateParameter(valid_574288, JString, required = true,
+  if valid_564187 != nil:
+    section.add "streamingPolicyName", valid_564187
+  var valid_564188 = path.getOrDefault("resourceGroupName")
+  valid_564188 = validateParameter(valid_564188, JString, required = true,
                                  default = nil)
-  if valid_574288 != nil:
-    section.add "streamingPolicyName", valid_574288
-  var valid_574289 = path.getOrDefault("accountName")
-  valid_574289 = validateParameter(valid_574289, JString, required = true,
+  if valid_564188 != nil:
+    section.add "resourceGroupName", valid_564188
+  var valid_564189 = path.getOrDefault("accountName")
+  valid_564189 = validateParameter(valid_564189, JString, required = true,
                                  default = nil)
-  if valid_574289 != nil:
-    section.add "accountName", valid_574289
+  if valid_564189 != nil:
+    section.add "accountName", valid_564189
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1386,11 +1390,11 @@ proc validate_StreamingPoliciesDelete_574284(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574290 = query.getOrDefault("api-version")
-  valid_574290 = validateParameter(valid_574290, JString, required = true,
+  var valid_564190 = query.getOrDefault("api-version")
+  valid_564190 = validateParameter(valid_564190, JString, required = true,
                                  default = nil)
-  if valid_574290 != nil:
-    section.add "api-version", valid_574290
+  if valid_564190 != nil:
+    section.add "api-version", valid_564190
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1399,48 +1403,48 @@ proc validate_StreamingPoliciesDelete_574284(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574291: Call_StreamingPoliciesDelete_574283; path: JsonNode;
+proc call*(call_564191: Call_StreamingPoliciesDelete_564183; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes a Streaming Policy in the Media Services account
   ## 
-  let valid = call_574291.validator(path, query, header, formData, body)
-  let scheme = call_574291.pickScheme
+  let valid = call_564191.validator(path, query, header, formData, body)
+  let scheme = call_564191.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574291.url(scheme.get, call_574291.host, call_574291.base,
-                         call_574291.route, valid.getOrDefault("path"),
+  let url = call_564191.url(scheme.get, call_564191.host, call_564191.base,
+                         call_564191.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574291, url, valid)
+  result = hook(call_564191, url, valid)
 
-proc call*(call_574292: Call_StreamingPoliciesDelete_574283;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          streamingPolicyName: string; accountName: string): Recallable =
+proc call*(call_564192: Call_StreamingPoliciesDelete_564183; apiVersion: string;
+          subscriptionId: string; streamingPolicyName: string;
+          resourceGroupName: string; accountName: string): Recallable =
   ## streamingPoliciesDelete
   ## Deletes a Streaming Policy in the Media Services account
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group within the Azure subscription.
   ##   apiVersion: string (required)
   ##             : The Version of the API to be used with the client request.
   ##   subscriptionId: string (required)
   ##                 : The unique identifier for a Microsoft Azure subscription.
   ##   streamingPolicyName: string (required)
   ##                      : The Streaming Policy name.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group within the Azure subscription.
   ##   accountName: string (required)
   ##              : The Media Services account name.
-  var path_574293 = newJObject()
-  var query_574294 = newJObject()
-  add(path_574293, "resourceGroupName", newJString(resourceGroupName))
-  add(query_574294, "api-version", newJString(apiVersion))
-  add(path_574293, "subscriptionId", newJString(subscriptionId))
-  add(path_574293, "streamingPolicyName", newJString(streamingPolicyName))
-  add(path_574293, "accountName", newJString(accountName))
-  result = call_574292.call(path_574293, query_574294, nil, nil, nil)
+  var path_564193 = newJObject()
+  var query_564194 = newJObject()
+  add(query_564194, "api-version", newJString(apiVersion))
+  add(path_564193, "subscriptionId", newJString(subscriptionId))
+  add(path_564193, "streamingPolicyName", newJString(streamingPolicyName))
+  add(path_564193, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564193, "accountName", newJString(accountName))
+  result = call_564192.call(path_564193, query_564194, nil, nil, nil)
 
-var streamingPoliciesDelete* = Call_StreamingPoliciesDelete_574283(
+var streamingPoliciesDelete* = Call_StreamingPoliciesDelete_564183(
     name: "streamingPoliciesDelete", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Media/mediaServices/{accountName}/streamingPolicies/{streamingPolicyName}",
-    validator: validate_StreamingPoliciesDelete_574284, base: "",
-    url: url_StreamingPoliciesDelete_574285, schemes: {Scheme.Https})
+    validator: validate_StreamingPoliciesDelete_564184, base: "",
+    url: url_StreamingPoliciesDelete_564185, schemes: {Scheme.Https})
 export
   rest
 

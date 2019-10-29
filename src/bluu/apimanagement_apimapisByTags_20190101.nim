@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, httpcore
 
 ## auto-generated via openapi macro
 ## title: ApiManagementClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_593424 = ref object of OpenApiRestCall
+  OpenApiRestCall_563555 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_593424](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563555](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_593424): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563555): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,8 +107,8 @@ const
   macServiceName = "apimanagement-apimapisByTags"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_ApiListByTags_593646 = ref object of OpenApiRestCall_593424
-proc url_ApiListByTags_593648(protocol: Scheme; host: string; base: string;
+  Call_ApiListByTags_563777 = ref object of OpenApiRestCall_563555
+proc url_ApiListByTags_563779(protocol: Scheme; host: string; base: string;
                              route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -128,45 +132,45 @@ proc url_ApiListByTags_593648(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ApiListByTags_593647(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_ApiListByTags_563778(path: JsonNode; query: JsonNode; header: JsonNode;
                                   formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists a collection of apis associated with tags.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
-  ##   subscriptionId: JString (required)
-  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   serviceName: JString (required)
   ##              : The name of the API Management service.
+  ##   subscriptionId: JString (required)
+  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593809 = path.getOrDefault("resourceGroupName")
-  valid_593809 = validateParameter(valid_593809, JString, required = true,
+        "path argument is necessary due to required `serviceName` field"
+  var valid_563942 = path.getOrDefault("serviceName")
+  valid_563942 = validateParameter(valid_563942, JString, required = true,
                                  default = nil)
-  if valid_593809 != nil:
-    section.add "resourceGroupName", valid_593809
-  var valid_593810 = path.getOrDefault("subscriptionId")
-  valid_593810 = validateParameter(valid_593810, JString, required = true,
+  if valid_563942 != nil:
+    section.add "serviceName", valid_563942
+  var valid_563943 = path.getOrDefault("subscriptionId")
+  valid_563943 = validateParameter(valid_563943, JString, required = true,
                                  default = nil)
-  if valid_593810 != nil:
-    section.add "subscriptionId", valid_593810
-  var valid_593811 = path.getOrDefault("serviceName")
-  valid_593811 = validateParameter(valid_593811, JString, required = true,
+  if valid_563943 != nil:
+    section.add "subscriptionId", valid_563943
+  var valid_563944 = path.getOrDefault("resourceGroupName")
+  valid_563944 = validateParameter(valid_563944, JString, required = true,
                                  default = nil)
-  if valid_593811 != nil:
-    section.add "serviceName", valid_593811
+  if valid_563944 != nil:
+    section.add "resourceGroupName", valid_563944
   result.add "path", section
   ## parameters in `query` object:
+  ##   $top: JInt
+  ##       : Number of records to return.
   ##   api-version: JString (required)
   ##              : Version of the API to be used with the client request.
   ##   includeNotTaggedApis: JBool
   ##                       : Include not tagged APIs.
-  ##   $top: JInt
-  ##       : Number of records to return.
   ##   $skip: JInt
   ##        : Number of records to skip.
   ##   $filter: JString
@@ -182,30 +186,30 @@ proc validate_ApiListByTags_593647(path: JsonNode; query: JsonNode; header: Json
   ## |isCurrent | eq |    |
   ## 
   section = newJObject()
+  var valid_563945 = query.getOrDefault("$top")
+  valid_563945 = validateParameter(valid_563945, JInt, required = false, default = nil)
+  if valid_563945 != nil:
+    section.add "$top", valid_563945
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593812 = query.getOrDefault("api-version")
-  valid_593812 = validateParameter(valid_593812, JString, required = true,
+  var valid_563946 = query.getOrDefault("api-version")
+  valid_563946 = validateParameter(valid_563946, JString, required = true,
                                  default = nil)
-  if valid_593812 != nil:
-    section.add "api-version", valid_593812
-  var valid_593813 = query.getOrDefault("includeNotTaggedApis")
-  valid_593813 = validateParameter(valid_593813, JBool, required = false, default = nil)
-  if valid_593813 != nil:
-    section.add "includeNotTaggedApis", valid_593813
-  var valid_593814 = query.getOrDefault("$top")
-  valid_593814 = validateParameter(valid_593814, JInt, required = false, default = nil)
-  if valid_593814 != nil:
-    section.add "$top", valid_593814
-  var valid_593815 = query.getOrDefault("$skip")
-  valid_593815 = validateParameter(valid_593815, JInt, required = false, default = nil)
-  if valid_593815 != nil:
-    section.add "$skip", valid_593815
-  var valid_593816 = query.getOrDefault("$filter")
-  valid_593816 = validateParameter(valid_593816, JString, required = false,
+  if valid_563946 != nil:
+    section.add "api-version", valid_563946
+  var valid_563947 = query.getOrDefault("includeNotTaggedApis")
+  valid_563947 = validateParameter(valid_563947, JBool, required = false, default = nil)
+  if valid_563947 != nil:
+    section.add "includeNotTaggedApis", valid_563947
+  var valid_563948 = query.getOrDefault("$skip")
+  valid_563948 = validateParameter(valid_563948, JInt, required = false, default = nil)
+  if valid_563948 != nil:
+    section.add "$skip", valid_563948
+  var valid_563949 = query.getOrDefault("$filter")
+  valid_563949 = validateParameter(valid_563949, JString, required = false,
                                  default = nil)
-  if valid_593816 != nil:
-    section.add "$filter", valid_593816
+  if valid_563949 != nil:
+    section.add "$filter", valid_563949
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -214,39 +218,39 @@ proc validate_ApiListByTags_593647(path: JsonNode; query: JsonNode; header: Json
   if body != nil:
     result.add "body", body
 
-proc call*(call_593843: Call_ApiListByTags_593646; path: JsonNode; query: JsonNode;
+proc call*(call_563976: Call_ApiListByTags_563777; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists a collection of apis associated with tags.
   ## 
-  let valid = call_593843.validator(path, query, header, formData, body)
-  let scheme = call_593843.pickScheme
+  let valid = call_563976.validator(path, query, header, formData, body)
+  let scheme = call_563976.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593843.url(scheme.get, call_593843.host, call_593843.base,
-                         call_593843.route, valid.getOrDefault("path"),
+  let url = call_563976.url(scheme.get, call_563976.host, call_563976.base,
+                         call_563976.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593843, url, valid)
+  result = hook(call_563976, url, valid)
 
-proc call*(call_593914: Call_ApiListByTags_593646; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; serviceName: string;
-          includeNotTaggedApis: bool = false; Top: int = 0; Skip: int = 0;
+proc call*(call_564047: Call_ApiListByTags_563777; serviceName: string;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string;
+          Top: int = 0; includeNotTaggedApis: bool = false; Skip: int = 0;
           Filter: string = ""): Recallable =
   ## apiListByTags
   ## Lists a collection of apis associated with tags.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   serviceName: string (required)
+  ##              : The name of the API Management service.
+  ##   Top: int
+  ##      : Number of records to return.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
   ##   includeNotTaggedApis: bool
   ##                       : Include not tagged APIs.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   Top: int
-  ##      : Number of records to return.
   ##   Skip: int
   ##       : Number of records to skip.
-  ##   serviceName: string (required)
-  ##              : The name of the API Management service.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   Filter: string
   ##         : | Field       | Supported operators    | Supported functions               |
   ## |-------------|------------------------|-----------------------------------|
@@ -259,21 +263,21 @@ proc call*(call_593914: Call_ApiListByTags_593646; resourceGroupName: string;
   ## |serviceUrl | ge, le, eq, ne, gt, lt | substringof, contains, startswith, endswith|
   ## |isCurrent | eq |    |
   ## 
-  var path_593915 = newJObject()
-  var query_593917 = newJObject()
-  add(path_593915, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593917, "api-version", newJString(apiVersion))
-  add(query_593917, "includeNotTaggedApis", newJBool(includeNotTaggedApis))
-  add(path_593915, "subscriptionId", newJString(subscriptionId))
-  add(query_593917, "$top", newJInt(Top))
-  add(query_593917, "$skip", newJInt(Skip))
-  add(path_593915, "serviceName", newJString(serviceName))
-  add(query_593917, "$filter", newJString(Filter))
-  result = call_593914.call(path_593915, query_593917, nil, nil, nil)
+  var path_564048 = newJObject()
+  var query_564050 = newJObject()
+  add(path_564048, "serviceName", newJString(serviceName))
+  add(query_564050, "$top", newJInt(Top))
+  add(query_564050, "api-version", newJString(apiVersion))
+  add(query_564050, "includeNotTaggedApis", newJBool(includeNotTaggedApis))
+  add(path_564048, "subscriptionId", newJString(subscriptionId))
+  add(query_564050, "$skip", newJInt(Skip))
+  add(path_564048, "resourceGroupName", newJString(resourceGroupName))
+  add(query_564050, "$filter", newJString(Filter))
+  result = call_564047.call(path_564048, query_564050, nil, nil, nil)
 
-var apiListByTags* = Call_ApiListByTags_593646(name: "apiListByTags",
+var apiListByTags* = Call_ApiListByTags_563777(name: "apiListByTags",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ApiManagement/service/{serviceName}/apisByTags",
-    validator: validate_ApiListByTags_593647, base: "", url: url_ApiListByTags_593648,
+    validator: validate_ApiListByTags_563778, base: "", url: url_ApiListByTags_563779,
     schemes: {Scheme.Https})
 export
   rest

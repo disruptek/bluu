@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, httpcore
 
 ## auto-generated via openapi macro
 ## title: Azure Metrics
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_567657 = ref object of OpenApiRestCall
+  OpenApiRestCall_563555 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_567657](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563555](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_567657): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563555): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,8 +107,8 @@ const
   macServiceName = "monitor-metricsCreate_API"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_MetricsCreate_567879 = ref object of OpenApiRestCall_567657
-proc url_MetricsCreate_567881(protocol: Scheme; host: string; base: string;
+  Call_MetricsCreate_563777 = ref object of OpenApiRestCall_563555
+proc url_MetricsCreate_563779(protocol: Scheme; host: string; base: string;
                              route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -135,78 +139,78 @@ proc url_MetricsCreate_567881(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_MetricsCreate_567880(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_MetricsCreate_563778(path: JsonNode; query: JsonNode; header: JsonNode;
                                   formData: JsonNode; body: JsonNode): JsonNode =
   ## **Post the metric values for a resource**.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The ARM resource group name
-  ##   subscriptionId: JString (required)
-  ##                 : The azure subscription id
-  ##   resourceName: JString (required)
-  ##               : The ARM resource name
   ##   resourceTypeName: JString (required)
   ##                   : The ARM resource type name
+  ##   subscriptionId: JString (required)
+  ##                 : The azure subscription id
+  ##   resourceGroupName: JString (required)
+  ##                    : The ARM resource group name
   ##   resourceProvider: JString (required)
   ##                   : The ARM resource provider name
+  ##   resourceName: JString (required)
+  ##               : The ARM resource name
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568054 = path.getOrDefault("resourceGroupName")
-  valid_568054 = validateParameter(valid_568054, JString, required = true,
+        "path argument is necessary due to required `resourceTypeName` field"
+  var valid_563954 = path.getOrDefault("resourceTypeName")
+  valid_563954 = validateParameter(valid_563954, JString, required = true,
                                  default = nil)
-  if valid_568054 != nil:
-    section.add "resourceGroupName", valid_568054
-  var valid_568055 = path.getOrDefault("subscriptionId")
-  valid_568055 = validateParameter(valid_568055, JString, required = true,
+  if valid_563954 != nil:
+    section.add "resourceTypeName", valid_563954
+  var valid_563955 = path.getOrDefault("subscriptionId")
+  valid_563955 = validateParameter(valid_563955, JString, required = true,
                                  default = nil)
-  if valid_568055 != nil:
-    section.add "subscriptionId", valid_568055
-  var valid_568056 = path.getOrDefault("resourceName")
-  valid_568056 = validateParameter(valid_568056, JString, required = true,
+  if valid_563955 != nil:
+    section.add "subscriptionId", valid_563955
+  var valid_563956 = path.getOrDefault("resourceGroupName")
+  valid_563956 = validateParameter(valid_563956, JString, required = true,
                                  default = nil)
-  if valid_568056 != nil:
-    section.add "resourceName", valid_568056
-  var valid_568057 = path.getOrDefault("resourceTypeName")
-  valid_568057 = validateParameter(valid_568057, JString, required = true,
+  if valid_563956 != nil:
+    section.add "resourceGroupName", valid_563956
+  var valid_563957 = path.getOrDefault("resourceProvider")
+  valid_563957 = validateParameter(valid_563957, JString, required = true,
                                  default = nil)
-  if valid_568057 != nil:
-    section.add "resourceTypeName", valid_568057
-  var valid_568058 = path.getOrDefault("resourceProvider")
-  valid_568058 = validateParameter(valid_568058, JString, required = true,
+  if valid_563957 != nil:
+    section.add "resourceProvider", valid_563957
+  var valid_563958 = path.getOrDefault("resourceName")
+  valid_563958 = validateParameter(valid_563958, JString, required = true,
                                  default = nil)
-  if valid_568058 != nil:
-    section.add "resourceProvider", valid_568058
+  if valid_563958 != nil:
+    section.add "resourceName", valid_563958
   result.add "path", section
   section = newJObject()
   result.add "query", section
   ## parameters in `header` object:
+  ##   Content-Length: JInt (required)
+  ##                 : Content length of the payload
   ##   Authorization: JString (required)
   ##                : Authorization token issue for issued for audience "https:\\monitoring.azure.com\"
   ##   Content-Type: JString (required)
   ##               : Supports application/json and application/x-ndjson
-  ##   Content-Length: JInt (required)
-  ##                 : Content length of the payload
   section = newJObject()
   assert header != nil,
-        "header argument is necessary due to required `Authorization` field"
-  var valid_568059 = header.getOrDefault("Authorization")
-  valid_568059 = validateParameter(valid_568059, JString, required = true,
+        "header argument is necessary due to required `Content-Length` field"
+  var valid_563959 = header.getOrDefault("Content-Length")
+  valid_563959 = validateParameter(valid_563959, JInt, required = true, default = nil)
+  if valid_563959 != nil:
+    section.add "Content-Length", valid_563959
+  var valid_563960 = header.getOrDefault("Authorization")
+  valid_563960 = validateParameter(valid_563960, JString, required = true,
                                  default = nil)
-  if valid_568059 != nil:
-    section.add "Authorization", valid_568059
-  var valid_568060 = header.getOrDefault("Content-Type")
-  valid_568060 = validateParameter(valid_568060, JString, required = true,
+  if valid_563960 != nil:
+    section.add "Authorization", valid_563960
+  var valid_563961 = header.getOrDefault("Content-Type")
+  valid_563961 = validateParameter(valid_563961, JString, required = true,
                                  default = nil)
-  if valid_568060 != nil:
-    section.add "Content-Type", valid_568060
-  var valid_568061 = header.getOrDefault("Content-Length")
-  valid_568061 = validateParameter(valid_568061, JInt, required = true, default = nil)
-  if valid_568061 != nil:
-    section.add "Content-Length", valid_568061
+  if valid_563961 != nil:
+    section.add "Content-Type", valid_563961
   result.add "header", section
   section = newJObject()
   result.add "formData", section
@@ -218,50 +222,50 @@ proc validate_MetricsCreate_567880(path: JsonNode; query: JsonNode; header: Json
   if body != nil:
     result.add "body", body
 
-proc call*(call_568085: Call_MetricsCreate_567879; path: JsonNode; query: JsonNode;
+proc call*(call_563985: Call_MetricsCreate_563777; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## **Post the metric values for a resource**.
   ## 
-  let valid = call_568085.validator(path, query, header, formData, body)
-  let scheme = call_568085.pickScheme
+  let valid = call_563985.validator(path, query, header, formData, body)
+  let scheme = call_563985.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568085.url(scheme.get, call_568085.host, call_568085.base,
-                         call_568085.route, valid.getOrDefault("path"),
+  let url = call_563985.url(scheme.get, call_563985.host, call_563985.base,
+                         call_563985.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568085, url, valid)
+  result = hook(call_563985, url, valid)
 
-proc call*(call_568156: Call_MetricsCreate_567879; resourceGroupName: string;
-          subscriptionId: string; resourceName: string; resourceTypeName: string;
-          resourceProvider: string; body: JsonNode): Recallable =
+proc call*(call_564056: Call_MetricsCreate_563777; resourceTypeName: string;
+          subscriptionId: string; resourceGroupName: string;
+          resourceProvider: string; body: JsonNode; resourceName: string): Recallable =
   ## metricsCreate
   ## **Post the metric values for a resource**.
-  ##   resourceGroupName: string (required)
-  ##                    : The ARM resource group name
-  ##   subscriptionId: string (required)
-  ##                 : The azure subscription id
-  ##   resourceName: string (required)
-  ##               : The ARM resource name
   ##   resourceTypeName: string (required)
   ##                   : The ARM resource type name
+  ##   subscriptionId: string (required)
+  ##                 : The azure subscription id
+  ##   resourceGroupName: string (required)
+  ##                    : The ARM resource group name
   ##   resourceProvider: string (required)
   ##                   : The ARM resource provider name
   ##   body: JObject (required)
   ##       : The Azure metrics document json payload
-  var path_568157 = newJObject()
-  var body_568159 = newJObject()
-  add(path_568157, "resourceGroupName", newJString(resourceGroupName))
-  add(path_568157, "subscriptionId", newJString(subscriptionId))
-  add(path_568157, "resourceName", newJString(resourceName))
-  add(path_568157, "resourceTypeName", newJString(resourceTypeName))
-  add(path_568157, "resourceProvider", newJString(resourceProvider))
+  ##   resourceName: string (required)
+  ##               : The ARM resource name
+  var path_564057 = newJObject()
+  var body_564059 = newJObject()
+  add(path_564057, "resourceTypeName", newJString(resourceTypeName))
+  add(path_564057, "subscriptionId", newJString(subscriptionId))
+  add(path_564057, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564057, "resourceProvider", newJString(resourceProvider))
   if body != nil:
-    body_568159 = body
-  result = call_568156.call(path_568157, nil, nil, nil, body_568159)
+    body_564059 = body
+  add(path_564057, "resourceName", newJString(resourceName))
+  result = call_564056.call(path_564057, nil, nil, nil, body_564059)
 
-var metricsCreate* = Call_MetricsCreate_567879(name: "metricsCreate",
+var metricsCreate* = Call_MetricsCreate_563777(name: "metricsCreate",
     meth: HttpMethod.HttpPost, host: "monitoring.azure.com", route: "/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/{resourceProvider}/{resourceTypeName}/{resourceName}/metrics",
-    validator: validate_MetricsCreate_567880, base: "", url: url_MetricsCreate_567881,
+    validator: validate_MetricsCreate_563778, base: "", url: url_MetricsCreate_563779,
     schemes: {Scheme.Https})
 export
   rest

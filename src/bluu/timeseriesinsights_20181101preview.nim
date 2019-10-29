@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, httpcore
 
 ## auto-generated via openapi macro
 ## title: TimeSeriesInsightsClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_567668 = ref object of OpenApiRestCall
+  OpenApiRestCall_563566 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_567668](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563566](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_567668): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563566): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,15 +107,15 @@ const
   macServiceName = "timeseriesinsights"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_QueryGetAvailability_567890 = ref object of OpenApiRestCall_567668
-proc url_QueryGetAvailability_567892(protocol: Scheme; host: string; base: string;
+  Call_QueryGetAvailability_563788 = ref object of OpenApiRestCall_563566
+proc url_QueryGetAvailability_563790(protocol: Scheme; host: string; base: string;
                                     route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_QueryGetAvailability_567891(path: JsonNode; query: JsonNode;
+proc validate_QueryGetAvailability_563789(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Returns the time range and distribution of event count over the event timestamp ($ts). This API can be used to provide landing experience of navigating to the environment.
   ## 
@@ -125,71 +129,71 @@ proc validate_QueryGetAvailability_567891(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568064 = query.getOrDefault("api-version")
-  valid_568064 = validateParameter(valid_568064, JString, required = true,
+  var valid_563964 = query.getOrDefault("api-version")
+  valid_563964 = validateParameter(valid_563964, JString, required = true,
                                  default = newJString("2018-11-01-preview"))
-  if valid_568064 != nil:
-    section.add "api-version", valid_568064
+  if valid_563964 != nil:
+    section.add "api-version", valid_563964
   result.add "query", section
   ## parameters in `header` object:
-  ##   x-ms-client-session-id: JString
-  ##                         : Optional client session ID. Service records this value. Allows the service to trace a group of related operations across services, and allows the customer to contact support regarding a particular group of requests.
   ##   x-ms-client-request-id: JString
   ##                         : Optional client request ID. Service records this value. Allows the service to trace operation across services, and allows the customer to contact support regarding a particular request.
+  ##   x-ms-client-session-id: JString
+  ##                         : Optional client session ID. Service records this value. Allows the service to trace a group of related operations across services, and allows the customer to contact support regarding a particular group of requests.
   section = newJObject()
-  var valid_568065 = header.getOrDefault("x-ms-client-session-id")
-  valid_568065 = validateParameter(valid_568065, JString, required = false,
+  var valid_563965 = header.getOrDefault("x-ms-client-request-id")
+  valid_563965 = validateParameter(valid_563965, JString, required = false,
                                  default = nil)
-  if valid_568065 != nil:
-    section.add "x-ms-client-session-id", valid_568065
-  var valid_568066 = header.getOrDefault("x-ms-client-request-id")
-  valid_568066 = validateParameter(valid_568066, JString, required = false,
+  if valid_563965 != nil:
+    section.add "x-ms-client-request-id", valid_563965
+  var valid_563966 = header.getOrDefault("x-ms-client-session-id")
+  valid_563966 = validateParameter(valid_563966, JString, required = false,
                                  default = nil)
-  if valid_568066 != nil:
-    section.add "x-ms-client-request-id", valid_568066
+  if valid_563966 != nil:
+    section.add "x-ms-client-session-id", valid_563966
   result.add "header", section
   section = newJObject()
   result.add "formData", section
   if body != nil:
     result.add "body", body
 
-proc call*(call_568089: Call_QueryGetAvailability_567890; path: JsonNode;
+proc call*(call_563989: Call_QueryGetAvailability_563788; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Returns the time range and distribution of event count over the event timestamp ($ts). This API can be used to provide landing experience of navigating to the environment.
   ## 
-  let valid = call_568089.validator(path, query, header, formData, body)
-  let scheme = call_568089.pickScheme
+  let valid = call_563989.validator(path, query, header, formData, body)
+  let scheme = call_563989.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568089.url(scheme.get, call_568089.host, call_568089.base,
-                         call_568089.route, valid.getOrDefault("path"),
+  let url = call_563989.url(scheme.get, call_563989.host, call_563989.base,
+                         call_563989.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568089, url, valid)
+  result = hook(call_563989, url, valid)
 
-proc call*(call_568160: Call_QueryGetAvailability_567890;
+proc call*(call_564060: Call_QueryGetAvailability_563788;
           apiVersion: string = "2018-11-01-preview"): Recallable =
   ## queryGetAvailability
   ## Returns the time range and distribution of event count over the event timestamp ($ts). This API can be used to provide landing experience of navigating to the environment.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request. Currently supported version is "2018-11-01-preview".
-  var query_568161 = newJObject()
-  add(query_568161, "api-version", newJString(apiVersion))
-  result = call_568160.call(nil, query_568161, nil, nil, nil)
+  var query_564061 = newJObject()
+  add(query_564061, "api-version", newJString(apiVersion))
+  result = call_564060.call(nil, query_564061, nil, nil, nil)
 
-var queryGetAvailability* = Call_QueryGetAvailability_567890(
+var queryGetAvailability* = Call_QueryGetAvailability_563788(
     name: "queryGetAvailability", meth: HttpMethod.HttpGet, host: "azure.local",
-    route: "/availability", validator: validate_QueryGetAvailability_567891,
-    base: "", url: url_QueryGetAvailability_567892, schemes: {Scheme.Https})
+    route: "/availability", validator: validate_QueryGetAvailability_563789,
+    base: "", url: url_QueryGetAvailability_563790, schemes: {Scheme.Https})
 type
-  Call_QueryGetEventSchema_568201 = ref object of OpenApiRestCall_567668
-proc url_QueryGetEventSchema_568203(protocol: Scheme; host: string; base: string;
+  Call_QueryGetEventSchema_564101 = ref object of OpenApiRestCall_563566
+proc url_QueryGetEventSchema_564103(protocol: Scheme; host: string; base: string;
                                    route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_QueryGetEventSchema_568202(path: JsonNode; query: JsonNode;
+proc validate_QueryGetEventSchema_564102(path: JsonNode; query: JsonNode;
                                         header: JsonNode; formData: JsonNode;
                                         body: JsonNode): JsonNode =
   ## Returns environment event schema for a given search span. Event schema is a set of property definitions. Event schema may not be contain all persisted properties when there are too many properties.
@@ -204,28 +208,28 @@ proc validate_QueryGetEventSchema_568202(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568204 = query.getOrDefault("api-version")
-  valid_568204 = validateParameter(valid_568204, JString, required = true,
+  var valid_564104 = query.getOrDefault("api-version")
+  valid_564104 = validateParameter(valid_564104, JString, required = true,
                                  default = newJString("2018-11-01-preview"))
-  if valid_568204 != nil:
-    section.add "api-version", valid_568204
+  if valid_564104 != nil:
+    section.add "api-version", valid_564104
   result.add "query", section
   ## parameters in `header` object:
-  ##   x-ms-client-session-id: JString
-  ##                         : Optional client session ID. Service records this value. Allows the service to trace a group of related operations across services, and allows the customer to contact support regarding a particular group of requests.
   ##   x-ms-client-request-id: JString
   ##                         : Optional client request ID. Service records this value. Allows the service to trace operation across services, and allows the customer to contact support regarding a particular request.
+  ##   x-ms-client-session-id: JString
+  ##                         : Optional client session ID. Service records this value. Allows the service to trace a group of related operations across services, and allows the customer to contact support regarding a particular group of requests.
   section = newJObject()
-  var valid_568205 = header.getOrDefault("x-ms-client-session-id")
-  valid_568205 = validateParameter(valid_568205, JString, required = false,
+  var valid_564105 = header.getOrDefault("x-ms-client-request-id")
+  valid_564105 = validateParameter(valid_564105, JString, required = false,
                                  default = nil)
-  if valid_568205 != nil:
-    section.add "x-ms-client-session-id", valid_568205
-  var valid_568206 = header.getOrDefault("x-ms-client-request-id")
-  valid_568206 = validateParameter(valid_568206, JString, required = false,
+  if valid_564105 != nil:
+    section.add "x-ms-client-request-id", valid_564105
+  var valid_564106 = header.getOrDefault("x-ms-client-session-id")
+  valid_564106 = validateParameter(valid_564106, JString, required = false,
                                  default = nil)
-  if valid_568206 != nil:
-    section.add "x-ms-client-request-id", valid_568206
+  if valid_564106 != nil:
+    section.add "x-ms-client-session-id", valid_564106
   result.add "header", section
   section = newJObject()
   result.add "formData", section
@@ -237,20 +241,20 @@ proc validate_QueryGetEventSchema_568202(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568208: Call_QueryGetEventSchema_568201; path: JsonNode;
+proc call*(call_564108: Call_QueryGetEventSchema_564101; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Returns environment event schema for a given search span. Event schema is a set of property definitions. Event schema may not be contain all persisted properties when there are too many properties.
   ## 
-  let valid = call_568208.validator(path, query, header, formData, body)
-  let scheme = call_568208.pickScheme
+  let valid = call_564108.validator(path, query, header, formData, body)
+  let scheme = call_564108.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568208.url(scheme.get, call_568208.host, call_568208.base,
-                         call_568208.route, valid.getOrDefault("path"),
+  let url = call_564108.url(scheme.get, call_564108.host, call_564108.base,
+                         call_564108.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568208, url, valid)
+  result = hook(call_564108, url, valid)
 
-proc call*(call_568209: Call_QueryGetEventSchema_568201; parameters: JsonNode;
+proc call*(call_564109: Call_QueryGetEventSchema_564101; parameters: JsonNode;
           apiVersion: string = "2018-11-01-preview"): Recallable =
   ## queryGetEventSchema
   ## Returns environment event schema for a given search span. Event schema is a set of property definitions. Event schema may not be contain all persisted properties when there are too many properties.
@@ -258,20 +262,20 @@ proc call*(call_568209: Call_QueryGetEventSchema_568201; parameters: JsonNode;
   ##             : Version of the API to be used with the client request. Currently supported version is "2018-11-01-preview".
   ##   parameters: JObject (required)
   ##             : Parameters to get event schema.
-  var query_568210 = newJObject()
-  var body_568211 = newJObject()
-  add(query_568210, "api-version", newJString(apiVersion))
+  var query_564110 = newJObject()
+  var body_564111 = newJObject()
+  add(query_564110, "api-version", newJString(apiVersion))
   if parameters != nil:
-    body_568211 = parameters
-  result = call_568209.call(nil, query_568210, nil, nil, body_568211)
+    body_564111 = parameters
+  result = call_564109.call(nil, query_564110, nil, nil, body_564111)
 
-var queryGetEventSchema* = Call_QueryGetEventSchema_568201(
+var queryGetEventSchema* = Call_QueryGetEventSchema_564101(
     name: "queryGetEventSchema", meth: HttpMethod.HttpPost, host: "azure.local",
-    route: "/eventSchema", validator: validate_QueryGetEventSchema_568202, base: "",
-    url: url_QueryGetEventSchema_568203, schemes: {Scheme.Https})
+    route: "/eventSchema", validator: validate_QueryGetEventSchema_564102, base: "",
+    url: url_QueryGetEventSchema_564103, schemes: {Scheme.Https})
 type
-  Call_TimeSeriesHierarchiesGet_568212 = ref object of OpenApiRestCall_567668
-proc url_TimeSeriesHierarchiesGet_568214(protocol: Scheme; host: string;
+  Call_TimeSeriesHierarchiesGet_564112 = ref object of OpenApiRestCall_563566
+proc url_TimeSeriesHierarchiesGet_564114(protocol: Scheme; host: string;
                                         base: string; route: string; path: JsonNode;
                                         query: JsonNode): Uri =
   result.scheme = $protocol
@@ -279,7 +283,7 @@ proc url_TimeSeriesHierarchiesGet_568214(protocol: Scheme; host: string;
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_TimeSeriesHierarchiesGet_568213(path: JsonNode; query: JsonNode;
+proc validate_TimeSeriesHierarchiesGet_564113(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Returns time series hierarchies definitions in pages.
   ## 
@@ -293,79 +297,79 @@ proc validate_TimeSeriesHierarchiesGet_568213(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568215 = query.getOrDefault("api-version")
-  valid_568215 = validateParameter(valid_568215, JString, required = true,
+  var valid_564115 = query.getOrDefault("api-version")
+  valid_564115 = validateParameter(valid_564115, JString, required = true,
                                  default = newJString("2018-11-01-preview"))
-  if valid_568215 != nil:
-    section.add "api-version", valid_568215
+  if valid_564115 != nil:
+    section.add "api-version", valid_564115
   result.add "query", section
   ## parameters in `header` object:
-  ##   x-ms-client-session-id: JString
-  ##                         : Optional client session ID. Service records this value. Allows the service to trace a group of related operations across services, and allows the customer to contact support regarding a particular group of requests.
-  ##   x-ms-client-request-id: JString
-  ##                         : Optional client request ID. Service records this value. Allows the service to trace operation across services, and allows the customer to contact support regarding a particular request.
   ##   x-ms-continuation: JString
   ##                    : Continuation token from previous page of results to retrieve the next page of the results in calls that support pagination. To get the first page results, specify null continuation token as parameter value. Returned continuation token is null if all results have been returned, and there is no next page of results.
+  ##   x-ms-client-request-id: JString
+  ##                         : Optional client request ID. Service records this value. Allows the service to trace operation across services, and allows the customer to contact support regarding a particular request.
+  ##   x-ms-client-session-id: JString
+  ##                         : Optional client session ID. Service records this value. Allows the service to trace a group of related operations across services, and allows the customer to contact support regarding a particular group of requests.
   section = newJObject()
-  var valid_568216 = header.getOrDefault("x-ms-client-session-id")
-  valid_568216 = validateParameter(valid_568216, JString, required = false,
+  var valid_564116 = header.getOrDefault("x-ms-continuation")
+  valid_564116 = validateParameter(valid_564116, JString, required = false,
                                  default = nil)
-  if valid_568216 != nil:
-    section.add "x-ms-client-session-id", valid_568216
-  var valid_568217 = header.getOrDefault("x-ms-client-request-id")
-  valid_568217 = validateParameter(valid_568217, JString, required = false,
+  if valid_564116 != nil:
+    section.add "x-ms-continuation", valid_564116
+  var valid_564117 = header.getOrDefault("x-ms-client-request-id")
+  valid_564117 = validateParameter(valid_564117, JString, required = false,
                                  default = nil)
-  if valid_568217 != nil:
-    section.add "x-ms-client-request-id", valid_568217
-  var valid_568218 = header.getOrDefault("x-ms-continuation")
-  valid_568218 = validateParameter(valid_568218, JString, required = false,
+  if valid_564117 != nil:
+    section.add "x-ms-client-request-id", valid_564117
+  var valid_564118 = header.getOrDefault("x-ms-client-session-id")
+  valid_564118 = validateParameter(valid_564118, JString, required = false,
                                  default = nil)
-  if valid_568218 != nil:
-    section.add "x-ms-continuation", valid_568218
+  if valid_564118 != nil:
+    section.add "x-ms-client-session-id", valid_564118
   result.add "header", section
   section = newJObject()
   result.add "formData", section
   if body != nil:
     result.add "body", body
 
-proc call*(call_568219: Call_TimeSeriesHierarchiesGet_568212; path: JsonNode;
+proc call*(call_564119: Call_TimeSeriesHierarchiesGet_564112; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Returns time series hierarchies definitions in pages.
   ## 
-  let valid = call_568219.validator(path, query, header, formData, body)
-  let scheme = call_568219.pickScheme
+  let valid = call_564119.validator(path, query, header, formData, body)
+  let scheme = call_564119.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568219.url(scheme.get, call_568219.host, call_568219.base,
-                         call_568219.route, valid.getOrDefault("path"),
+  let url = call_564119.url(scheme.get, call_564119.host, call_564119.base,
+                         call_564119.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568219, url, valid)
+  result = hook(call_564119, url, valid)
 
-proc call*(call_568220: Call_TimeSeriesHierarchiesGet_568212;
+proc call*(call_564120: Call_TimeSeriesHierarchiesGet_564112;
           apiVersion: string = "2018-11-01-preview"): Recallable =
   ## timeSeriesHierarchiesGet
   ## Returns time series hierarchies definitions in pages.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request. Currently supported version is "2018-11-01-preview".
-  var query_568221 = newJObject()
-  add(query_568221, "api-version", newJString(apiVersion))
-  result = call_568220.call(nil, query_568221, nil, nil, nil)
+  var query_564121 = newJObject()
+  add(query_564121, "api-version", newJString(apiVersion))
+  result = call_564120.call(nil, query_564121, nil, nil, nil)
 
-var timeSeriesHierarchiesGet* = Call_TimeSeriesHierarchiesGet_568212(
+var timeSeriesHierarchiesGet* = Call_TimeSeriesHierarchiesGet_564112(
     name: "timeSeriesHierarchiesGet", meth: HttpMethod.HttpGet, host: "azure.local",
     route: "/timeseries/hierarchies",
-    validator: validate_TimeSeriesHierarchiesGet_568213, base: "",
-    url: url_TimeSeriesHierarchiesGet_568214, schemes: {Scheme.Https})
+    validator: validate_TimeSeriesHierarchiesGet_564113, base: "",
+    url: url_TimeSeriesHierarchiesGet_564114, schemes: {Scheme.Https})
 type
-  Call_TimeSeriesHierarchiesExecuteBatch_568222 = ref object of OpenApiRestCall_567668
-proc url_TimeSeriesHierarchiesExecuteBatch_568224(protocol: Scheme; host: string;
+  Call_TimeSeriesHierarchiesExecuteBatch_564122 = ref object of OpenApiRestCall_563566
+proc url_TimeSeriesHierarchiesExecuteBatch_564124(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_TimeSeriesHierarchiesExecuteBatch_568223(path: JsonNode;
+proc validate_TimeSeriesHierarchiesExecuteBatch_564123(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Executes a batch get, create, update, delete operation on multiple time series hierarchy definitions.
   ## 
@@ -379,28 +383,28 @@ proc validate_TimeSeriesHierarchiesExecuteBatch_568223(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568225 = query.getOrDefault("api-version")
-  valid_568225 = validateParameter(valid_568225, JString, required = true,
+  var valid_564125 = query.getOrDefault("api-version")
+  valid_564125 = validateParameter(valid_564125, JString, required = true,
                                  default = newJString("2018-11-01-preview"))
-  if valid_568225 != nil:
-    section.add "api-version", valid_568225
+  if valid_564125 != nil:
+    section.add "api-version", valid_564125
   result.add "query", section
   ## parameters in `header` object:
-  ##   x-ms-client-session-id: JString
-  ##                         : Optional client session ID. Service records this value. Allows the service to trace a group of related operations across services, and allows the customer to contact support regarding a particular group of requests.
   ##   x-ms-client-request-id: JString
   ##                         : Optional client request ID. Service records this value. Allows the service to trace operation across services, and allows the customer to contact support regarding a particular request.
+  ##   x-ms-client-session-id: JString
+  ##                         : Optional client session ID. Service records this value. Allows the service to trace a group of related operations across services, and allows the customer to contact support regarding a particular group of requests.
   section = newJObject()
-  var valid_568226 = header.getOrDefault("x-ms-client-session-id")
-  valid_568226 = validateParameter(valid_568226, JString, required = false,
+  var valid_564126 = header.getOrDefault("x-ms-client-request-id")
+  valid_564126 = validateParameter(valid_564126, JString, required = false,
                                  default = nil)
-  if valid_568226 != nil:
-    section.add "x-ms-client-session-id", valid_568226
-  var valid_568227 = header.getOrDefault("x-ms-client-request-id")
-  valid_568227 = validateParameter(valid_568227, JString, required = false,
+  if valid_564126 != nil:
+    section.add "x-ms-client-request-id", valid_564126
+  var valid_564127 = header.getOrDefault("x-ms-client-session-id")
+  valid_564127 = validateParameter(valid_564127, JString, required = false,
                                  default = nil)
-  if valid_568227 != nil:
-    section.add "x-ms-client-request-id", valid_568227
+  if valid_564127 != nil:
+    section.add "x-ms-client-session-id", valid_564127
   result.add "header", section
   section = newJObject()
   result.add "formData", section
@@ -412,21 +416,21 @@ proc validate_TimeSeriesHierarchiesExecuteBatch_568223(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568229: Call_TimeSeriesHierarchiesExecuteBatch_568222;
+proc call*(call_564129: Call_TimeSeriesHierarchiesExecuteBatch_564122;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Executes a batch get, create, update, delete operation on multiple time series hierarchy definitions.
   ## 
-  let valid = call_568229.validator(path, query, header, formData, body)
-  let scheme = call_568229.pickScheme
+  let valid = call_564129.validator(path, query, header, formData, body)
+  let scheme = call_564129.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568229.url(scheme.get, call_568229.host, call_568229.base,
-                         call_568229.route, valid.getOrDefault("path"),
+  let url = call_564129.url(scheme.get, call_564129.host, call_564129.base,
+                         call_564129.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568229, url, valid)
+  result = hook(call_564129, url, valid)
 
-proc call*(call_568230: Call_TimeSeriesHierarchiesExecuteBatch_568222;
+proc call*(call_564130: Call_TimeSeriesHierarchiesExecuteBatch_564122;
           parameters: JsonNode; apiVersion: string = "2018-11-01-preview"): Recallable =
   ## timeSeriesHierarchiesExecuteBatch
   ## Executes a batch get, create, update, delete operation on multiple time series hierarchy definitions.
@@ -434,28 +438,28 @@ proc call*(call_568230: Call_TimeSeriesHierarchiesExecuteBatch_568222;
   ##             : Version of the API to be used with the client request. Currently supported version is "2018-11-01-preview".
   ##   parameters: JObject (required)
   ##             : Time series hierarchies batch request body.
-  var query_568231 = newJObject()
-  var body_568232 = newJObject()
-  add(query_568231, "api-version", newJString(apiVersion))
+  var query_564131 = newJObject()
+  var body_564132 = newJObject()
+  add(query_564131, "api-version", newJString(apiVersion))
   if parameters != nil:
-    body_568232 = parameters
-  result = call_568230.call(nil, query_568231, nil, nil, body_568232)
+    body_564132 = parameters
+  result = call_564130.call(nil, query_564131, nil, nil, body_564132)
 
-var timeSeriesHierarchiesExecuteBatch* = Call_TimeSeriesHierarchiesExecuteBatch_568222(
+var timeSeriesHierarchiesExecuteBatch* = Call_TimeSeriesHierarchiesExecuteBatch_564122(
     name: "timeSeriesHierarchiesExecuteBatch", meth: HttpMethod.HttpPost,
     host: "azure.local", route: "/timeseries/hierarchies/$batch",
-    validator: validate_TimeSeriesHierarchiesExecuteBatch_568223, base: "",
-    url: url_TimeSeriesHierarchiesExecuteBatch_568224, schemes: {Scheme.Https})
+    validator: validate_TimeSeriesHierarchiesExecuteBatch_564123, base: "",
+    url: url_TimeSeriesHierarchiesExecuteBatch_564124, schemes: {Scheme.Https})
 type
-  Call_TimeSeriesInstancesGet_568233 = ref object of OpenApiRestCall_567668
-proc url_TimeSeriesInstancesGet_568235(protocol: Scheme; host: string; base: string;
+  Call_TimeSeriesInstancesGet_564133 = ref object of OpenApiRestCall_563566
+proc url_TimeSeriesInstancesGet_564135(protocol: Scheme; host: string; base: string;
                                       route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_TimeSeriesInstancesGet_568234(path: JsonNode; query: JsonNode;
+proc validate_TimeSeriesInstancesGet_564134(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets time series instances in pages.
   ## 
@@ -469,78 +473,78 @@ proc validate_TimeSeriesInstancesGet_568234(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568236 = query.getOrDefault("api-version")
-  valid_568236 = validateParameter(valid_568236, JString, required = true,
+  var valid_564136 = query.getOrDefault("api-version")
+  valid_564136 = validateParameter(valid_564136, JString, required = true,
                                  default = newJString("2018-11-01-preview"))
-  if valid_568236 != nil:
-    section.add "api-version", valid_568236
+  if valid_564136 != nil:
+    section.add "api-version", valid_564136
   result.add "query", section
   ## parameters in `header` object:
-  ##   x-ms-client-session-id: JString
-  ##                         : Optional client session ID. Service records this value. Allows the service to trace a group of related operations across services, and allows the customer to contact support regarding a particular group of requests.
-  ##   x-ms-client-request-id: JString
-  ##                         : Optional client request ID. Service records this value. Allows the service to trace operation across services, and allows the customer to contact support regarding a particular request.
   ##   x-ms-continuation: JString
   ##                    : Continuation token from previous page of results to retrieve the next page of the results in calls that support pagination. To get the first page results, specify null continuation token as parameter value. Returned continuation token is null if all results have been returned, and there is no next page of results.
+  ##   x-ms-client-request-id: JString
+  ##                         : Optional client request ID. Service records this value. Allows the service to trace operation across services, and allows the customer to contact support regarding a particular request.
+  ##   x-ms-client-session-id: JString
+  ##                         : Optional client session ID. Service records this value. Allows the service to trace a group of related operations across services, and allows the customer to contact support regarding a particular group of requests.
   section = newJObject()
-  var valid_568237 = header.getOrDefault("x-ms-client-session-id")
-  valid_568237 = validateParameter(valid_568237, JString, required = false,
+  var valid_564137 = header.getOrDefault("x-ms-continuation")
+  valid_564137 = validateParameter(valid_564137, JString, required = false,
                                  default = nil)
-  if valid_568237 != nil:
-    section.add "x-ms-client-session-id", valid_568237
-  var valid_568238 = header.getOrDefault("x-ms-client-request-id")
-  valid_568238 = validateParameter(valid_568238, JString, required = false,
+  if valid_564137 != nil:
+    section.add "x-ms-continuation", valid_564137
+  var valid_564138 = header.getOrDefault("x-ms-client-request-id")
+  valid_564138 = validateParameter(valid_564138, JString, required = false,
                                  default = nil)
-  if valid_568238 != nil:
-    section.add "x-ms-client-request-id", valid_568238
-  var valid_568239 = header.getOrDefault("x-ms-continuation")
-  valid_568239 = validateParameter(valid_568239, JString, required = false,
+  if valid_564138 != nil:
+    section.add "x-ms-client-request-id", valid_564138
+  var valid_564139 = header.getOrDefault("x-ms-client-session-id")
+  valid_564139 = validateParameter(valid_564139, JString, required = false,
                                  default = nil)
-  if valid_568239 != nil:
-    section.add "x-ms-continuation", valid_568239
+  if valid_564139 != nil:
+    section.add "x-ms-client-session-id", valid_564139
   result.add "header", section
   section = newJObject()
   result.add "formData", section
   if body != nil:
     result.add "body", body
 
-proc call*(call_568240: Call_TimeSeriesInstancesGet_568233; path: JsonNode;
+proc call*(call_564140: Call_TimeSeriesInstancesGet_564133; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets time series instances in pages.
   ## 
-  let valid = call_568240.validator(path, query, header, formData, body)
-  let scheme = call_568240.pickScheme
+  let valid = call_564140.validator(path, query, header, formData, body)
+  let scheme = call_564140.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568240.url(scheme.get, call_568240.host, call_568240.base,
-                         call_568240.route, valid.getOrDefault("path"),
+  let url = call_564140.url(scheme.get, call_564140.host, call_564140.base,
+                         call_564140.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568240, url, valid)
+  result = hook(call_564140, url, valid)
 
-proc call*(call_568241: Call_TimeSeriesInstancesGet_568233;
+proc call*(call_564141: Call_TimeSeriesInstancesGet_564133;
           apiVersion: string = "2018-11-01-preview"): Recallable =
   ## timeSeriesInstancesGet
   ## Gets time series instances in pages.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request. Currently supported version is "2018-11-01-preview".
-  var query_568242 = newJObject()
-  add(query_568242, "api-version", newJString(apiVersion))
-  result = call_568241.call(nil, query_568242, nil, nil, nil)
+  var query_564142 = newJObject()
+  add(query_564142, "api-version", newJString(apiVersion))
+  result = call_564141.call(nil, query_564142, nil, nil, nil)
 
-var timeSeriesInstancesGet* = Call_TimeSeriesInstancesGet_568233(
+var timeSeriesInstancesGet* = Call_TimeSeriesInstancesGet_564133(
     name: "timeSeriesInstancesGet", meth: HttpMethod.HttpGet, host: "azure.local",
-    route: "/timeseries/instances", validator: validate_TimeSeriesInstancesGet_568234,
-    base: "", url: url_TimeSeriesInstancesGet_568235, schemes: {Scheme.Https})
+    route: "/timeseries/instances", validator: validate_TimeSeriesInstancesGet_564134,
+    base: "", url: url_TimeSeriesInstancesGet_564135, schemes: {Scheme.Https})
 type
-  Call_TimeSeriesInstancesExecuteBatch_568243 = ref object of OpenApiRestCall_567668
-proc url_TimeSeriesInstancesExecuteBatch_568245(protocol: Scheme; host: string;
+  Call_TimeSeriesInstancesExecuteBatch_564143 = ref object of OpenApiRestCall_563566
+proc url_TimeSeriesInstancesExecuteBatch_564145(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_TimeSeriesInstancesExecuteBatch_568244(path: JsonNode;
+proc validate_TimeSeriesInstancesExecuteBatch_564144(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Executes a batch get, create, update, delete operation on multiple time series instances.
   ## 
@@ -554,28 +558,28 @@ proc validate_TimeSeriesInstancesExecuteBatch_568244(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568246 = query.getOrDefault("api-version")
-  valid_568246 = validateParameter(valid_568246, JString, required = true,
+  var valid_564146 = query.getOrDefault("api-version")
+  valid_564146 = validateParameter(valid_564146, JString, required = true,
                                  default = newJString("2018-11-01-preview"))
-  if valid_568246 != nil:
-    section.add "api-version", valid_568246
+  if valid_564146 != nil:
+    section.add "api-version", valid_564146
   result.add "query", section
   ## parameters in `header` object:
-  ##   x-ms-client-session-id: JString
-  ##                         : Optional client session ID. Service records this value. Allows the service to trace a group of related operations across services, and allows the customer to contact support regarding a particular group of requests.
   ##   x-ms-client-request-id: JString
   ##                         : Optional client request ID. Service records this value. Allows the service to trace operation across services, and allows the customer to contact support regarding a particular request.
+  ##   x-ms-client-session-id: JString
+  ##                         : Optional client session ID. Service records this value. Allows the service to trace a group of related operations across services, and allows the customer to contact support regarding a particular group of requests.
   section = newJObject()
-  var valid_568247 = header.getOrDefault("x-ms-client-session-id")
-  valid_568247 = validateParameter(valid_568247, JString, required = false,
+  var valid_564147 = header.getOrDefault("x-ms-client-request-id")
+  valid_564147 = validateParameter(valid_564147, JString, required = false,
                                  default = nil)
-  if valid_568247 != nil:
-    section.add "x-ms-client-session-id", valid_568247
-  var valid_568248 = header.getOrDefault("x-ms-client-request-id")
-  valid_568248 = validateParameter(valid_568248, JString, required = false,
+  if valid_564147 != nil:
+    section.add "x-ms-client-request-id", valid_564147
+  var valid_564148 = header.getOrDefault("x-ms-client-session-id")
+  valid_564148 = validateParameter(valid_564148, JString, required = false,
                                  default = nil)
-  if valid_568248 != nil:
-    section.add "x-ms-client-request-id", valid_568248
+  if valid_564148 != nil:
+    section.add "x-ms-client-session-id", valid_564148
   result.add "header", section
   section = newJObject()
   result.add "formData", section
@@ -587,21 +591,21 @@ proc validate_TimeSeriesInstancesExecuteBatch_568244(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568250: Call_TimeSeriesInstancesExecuteBatch_568243;
+proc call*(call_564150: Call_TimeSeriesInstancesExecuteBatch_564143;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Executes a batch get, create, update, delete operation on multiple time series instances.
   ## 
-  let valid = call_568250.validator(path, query, header, formData, body)
-  let scheme = call_568250.pickScheme
+  let valid = call_564150.validator(path, query, header, formData, body)
+  let scheme = call_564150.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568250.url(scheme.get, call_568250.host, call_568250.base,
-                         call_568250.route, valid.getOrDefault("path"),
+  let url = call_564150.url(scheme.get, call_564150.host, call_564150.base,
+                         call_564150.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568250, url, valid)
+  result = hook(call_564150, url, valid)
 
-proc call*(call_568251: Call_TimeSeriesInstancesExecuteBatch_568243;
+proc call*(call_564151: Call_TimeSeriesInstancesExecuteBatch_564143;
           parameters: JsonNode; apiVersion: string = "2018-11-01-preview"): Recallable =
   ## timeSeriesInstancesExecuteBatch
   ## Executes a batch get, create, update, delete operation on multiple time series instances.
@@ -609,28 +613,28 @@ proc call*(call_568251: Call_TimeSeriesInstancesExecuteBatch_568243;
   ##             : Version of the API to be used with the client request. Currently supported version is "2018-11-01-preview".
   ##   parameters: JObject (required)
   ##             : Time series instances suggest request body.
-  var query_568252 = newJObject()
-  var body_568253 = newJObject()
-  add(query_568252, "api-version", newJString(apiVersion))
+  var query_564152 = newJObject()
+  var body_564153 = newJObject()
+  add(query_564152, "api-version", newJString(apiVersion))
   if parameters != nil:
-    body_568253 = parameters
-  result = call_568251.call(nil, query_568252, nil, nil, body_568253)
+    body_564153 = parameters
+  result = call_564151.call(nil, query_564152, nil, nil, body_564153)
 
-var timeSeriesInstancesExecuteBatch* = Call_TimeSeriesInstancesExecuteBatch_568243(
+var timeSeriesInstancesExecuteBatch* = Call_TimeSeriesInstancesExecuteBatch_564143(
     name: "timeSeriesInstancesExecuteBatch", meth: HttpMethod.HttpPost,
     host: "azure.local", route: "/timeseries/instances/$batch",
-    validator: validate_TimeSeriesInstancesExecuteBatch_568244, base: "",
-    url: url_TimeSeriesInstancesExecuteBatch_568245, schemes: {Scheme.Https})
+    validator: validate_TimeSeriesInstancesExecuteBatch_564144, base: "",
+    url: url_TimeSeriesInstancesExecuteBatch_564145, schemes: {Scheme.Https})
 type
-  Call_TimeSeriesInstancesSearch_568254 = ref object of OpenApiRestCall_567668
-proc url_TimeSeriesInstancesSearch_568256(protocol: Scheme; host: string;
+  Call_TimeSeriesInstancesSearch_564154 = ref object of OpenApiRestCall_563566
+proc url_TimeSeriesInstancesSearch_564156(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_TimeSeriesInstancesSearch_568255(path: JsonNode; query: JsonNode;
+proc validate_TimeSeriesInstancesSearch_564155(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Partial list of hits on search for time series instances based on instance attributes.
   ## 
@@ -644,35 +648,35 @@ proc validate_TimeSeriesInstancesSearch_568255(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568257 = query.getOrDefault("api-version")
-  valid_568257 = validateParameter(valid_568257, JString, required = true,
+  var valid_564157 = query.getOrDefault("api-version")
+  valid_564157 = validateParameter(valid_564157, JString, required = true,
                                  default = newJString("2018-11-01-preview"))
-  if valid_568257 != nil:
-    section.add "api-version", valid_568257
+  if valid_564157 != nil:
+    section.add "api-version", valid_564157
   result.add "query", section
   ## parameters in `header` object:
-  ##   x-ms-client-session-id: JString
-  ##                         : Optional client session ID. Service records this value. Allows the service to trace a group of related operations across services, and allows the customer to contact support regarding a particular group of requests.
-  ##   x-ms-client-request-id: JString
-  ##                         : Optional client request ID. Service records this value. Allows the service to trace operation across services, and allows the customer to contact support regarding a particular request.
   ##   x-ms-continuation: JString
   ##                    : Continuation token from previous page of results to retrieve the next page of the results in calls that support pagination. To get the first page results, specify null continuation token as parameter value. Returned continuation token is null if all results have been returned, and there is no next page of results.
+  ##   x-ms-client-request-id: JString
+  ##                         : Optional client request ID. Service records this value. Allows the service to trace operation across services, and allows the customer to contact support regarding a particular request.
+  ##   x-ms-client-session-id: JString
+  ##                         : Optional client session ID. Service records this value. Allows the service to trace a group of related operations across services, and allows the customer to contact support regarding a particular group of requests.
   section = newJObject()
-  var valid_568258 = header.getOrDefault("x-ms-client-session-id")
-  valid_568258 = validateParameter(valid_568258, JString, required = false,
+  var valid_564158 = header.getOrDefault("x-ms-continuation")
+  valid_564158 = validateParameter(valid_564158, JString, required = false,
                                  default = nil)
-  if valid_568258 != nil:
-    section.add "x-ms-client-session-id", valid_568258
-  var valid_568259 = header.getOrDefault("x-ms-client-request-id")
-  valid_568259 = validateParameter(valid_568259, JString, required = false,
+  if valid_564158 != nil:
+    section.add "x-ms-continuation", valid_564158
+  var valid_564159 = header.getOrDefault("x-ms-client-request-id")
+  valid_564159 = validateParameter(valid_564159, JString, required = false,
                                  default = nil)
-  if valid_568259 != nil:
-    section.add "x-ms-client-request-id", valid_568259
-  var valid_568260 = header.getOrDefault("x-ms-continuation")
-  valid_568260 = validateParameter(valid_568260, JString, required = false,
+  if valid_564159 != nil:
+    section.add "x-ms-client-request-id", valid_564159
+  var valid_564160 = header.getOrDefault("x-ms-client-session-id")
+  valid_564160 = validateParameter(valid_564160, JString, required = false,
                                  default = nil)
-  if valid_568260 != nil:
-    section.add "x-ms-continuation", valid_568260
+  if valid_564160 != nil:
+    section.add "x-ms-client-session-id", valid_564160
   result.add "header", section
   section = newJObject()
   result.add "formData", section
@@ -684,20 +688,20 @@ proc validate_TimeSeriesInstancesSearch_568255(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568262: Call_TimeSeriesInstancesSearch_568254; path: JsonNode;
+proc call*(call_564162: Call_TimeSeriesInstancesSearch_564154; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Partial list of hits on search for time series instances based on instance attributes.
   ## 
-  let valid = call_568262.validator(path, query, header, formData, body)
-  let scheme = call_568262.pickScheme
+  let valid = call_564162.validator(path, query, header, formData, body)
+  let scheme = call_564162.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568262.url(scheme.get, call_568262.host, call_568262.base,
-                         call_568262.route, valid.getOrDefault("path"),
+  let url = call_564162.url(scheme.get, call_564162.host, call_564162.base,
+                         call_564162.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568262, url, valid)
+  result = hook(call_564162, url, valid)
 
-proc call*(call_568263: Call_TimeSeriesInstancesSearch_568254;
+proc call*(call_564163: Call_TimeSeriesInstancesSearch_564154;
           parameters: JsonNode; apiVersion: string = "2018-11-01-preview"): Recallable =
   ## timeSeriesInstancesSearch
   ## Partial list of hits on search for time series instances based on instance attributes.
@@ -705,28 +709,28 @@ proc call*(call_568263: Call_TimeSeriesInstancesSearch_568254;
   ##             : Version of the API to be used with the client request. Currently supported version is "2018-11-01-preview".
   ##   parameters: JObject (required)
   ##             : Time series instances search request body.
-  var query_568264 = newJObject()
-  var body_568265 = newJObject()
-  add(query_568264, "api-version", newJString(apiVersion))
+  var query_564164 = newJObject()
+  var body_564165 = newJObject()
+  add(query_564164, "api-version", newJString(apiVersion))
   if parameters != nil:
-    body_568265 = parameters
-  result = call_568263.call(nil, query_568264, nil, nil, body_568265)
+    body_564165 = parameters
+  result = call_564163.call(nil, query_564164, nil, nil, body_564165)
 
-var timeSeriesInstancesSearch* = Call_TimeSeriesInstancesSearch_568254(
+var timeSeriesInstancesSearch* = Call_TimeSeriesInstancesSearch_564154(
     name: "timeSeriesInstancesSearch", meth: HttpMethod.HttpPost,
     host: "azure.local", route: "/timeseries/instances/search",
-    validator: validate_TimeSeriesInstancesSearch_568255, base: "",
-    url: url_TimeSeriesInstancesSearch_568256, schemes: {Scheme.Https})
+    validator: validate_TimeSeriesInstancesSearch_564155, base: "",
+    url: url_TimeSeriesInstancesSearch_564156, schemes: {Scheme.Https})
 type
-  Call_TimeSeriesInstancesSuggest_568266 = ref object of OpenApiRestCall_567668
-proc url_TimeSeriesInstancesSuggest_568268(protocol: Scheme; host: string;
+  Call_TimeSeriesInstancesSuggest_564166 = ref object of OpenApiRestCall_563566
+proc url_TimeSeriesInstancesSuggest_564168(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_TimeSeriesInstancesSuggest_568267(path: JsonNode; query: JsonNode;
+proc validate_TimeSeriesInstancesSuggest_564167(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Suggests keywords based on time series instance attributes to be later used in Search Instances.
   ## 
@@ -740,28 +744,28 @@ proc validate_TimeSeriesInstancesSuggest_568267(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568269 = query.getOrDefault("api-version")
-  valid_568269 = validateParameter(valid_568269, JString, required = true,
+  var valid_564169 = query.getOrDefault("api-version")
+  valid_564169 = validateParameter(valid_564169, JString, required = true,
                                  default = newJString("2018-11-01-preview"))
-  if valid_568269 != nil:
-    section.add "api-version", valid_568269
+  if valid_564169 != nil:
+    section.add "api-version", valid_564169
   result.add "query", section
   ## parameters in `header` object:
-  ##   x-ms-client-session-id: JString
-  ##                         : Optional client session ID. Service records this value. Allows the service to trace a group of related operations across services, and allows the customer to contact support regarding a particular group of requests.
   ##   x-ms-client-request-id: JString
   ##                         : Optional client request ID. Service records this value. Allows the service to trace operation across services, and allows the customer to contact support regarding a particular request.
+  ##   x-ms-client-session-id: JString
+  ##                         : Optional client session ID. Service records this value. Allows the service to trace a group of related operations across services, and allows the customer to contact support regarding a particular group of requests.
   section = newJObject()
-  var valid_568270 = header.getOrDefault("x-ms-client-session-id")
-  valid_568270 = validateParameter(valid_568270, JString, required = false,
+  var valid_564170 = header.getOrDefault("x-ms-client-request-id")
+  valid_564170 = validateParameter(valid_564170, JString, required = false,
                                  default = nil)
-  if valid_568270 != nil:
-    section.add "x-ms-client-session-id", valid_568270
-  var valid_568271 = header.getOrDefault("x-ms-client-request-id")
-  valid_568271 = validateParameter(valid_568271, JString, required = false,
+  if valid_564170 != nil:
+    section.add "x-ms-client-request-id", valid_564170
+  var valid_564171 = header.getOrDefault("x-ms-client-session-id")
+  valid_564171 = validateParameter(valid_564171, JString, required = false,
                                  default = nil)
-  if valid_568271 != nil:
-    section.add "x-ms-client-request-id", valid_568271
+  if valid_564171 != nil:
+    section.add "x-ms-client-session-id", valid_564171
   result.add "header", section
   section = newJObject()
   result.add "formData", section
@@ -773,20 +777,20 @@ proc validate_TimeSeriesInstancesSuggest_568267(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568273: Call_TimeSeriesInstancesSuggest_568266; path: JsonNode;
+proc call*(call_564173: Call_TimeSeriesInstancesSuggest_564166; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Suggests keywords based on time series instance attributes to be later used in Search Instances.
   ## 
-  let valid = call_568273.validator(path, query, header, formData, body)
-  let scheme = call_568273.pickScheme
+  let valid = call_564173.validator(path, query, header, formData, body)
+  let scheme = call_564173.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568273.url(scheme.get, call_568273.host, call_568273.base,
-                         call_568273.route, valid.getOrDefault("path"),
+  let url = call_564173.url(scheme.get, call_564173.host, call_564173.base,
+                         call_564173.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568273, url, valid)
+  result = hook(call_564173, url, valid)
 
-proc call*(call_568274: Call_TimeSeriesInstancesSuggest_568266;
+proc call*(call_564174: Call_TimeSeriesInstancesSuggest_564166;
           parameters: JsonNode; apiVersion: string = "2018-11-01-preview"): Recallable =
   ## timeSeriesInstancesSuggest
   ## Suggests keywords based on time series instance attributes to be later used in Search Instances.
@@ -794,28 +798,28 @@ proc call*(call_568274: Call_TimeSeriesInstancesSuggest_568266;
   ##             : Version of the API to be used with the client request. Currently supported version is "2018-11-01-preview".
   ##   parameters: JObject (required)
   ##             : Time series instances suggest request body.
-  var query_568275 = newJObject()
-  var body_568276 = newJObject()
-  add(query_568275, "api-version", newJString(apiVersion))
+  var query_564175 = newJObject()
+  var body_564176 = newJObject()
+  add(query_564175, "api-version", newJString(apiVersion))
   if parameters != nil:
-    body_568276 = parameters
-  result = call_568274.call(nil, query_568275, nil, nil, body_568276)
+    body_564176 = parameters
+  result = call_564174.call(nil, query_564175, nil, nil, body_564176)
 
-var timeSeriesInstancesSuggest* = Call_TimeSeriesInstancesSuggest_568266(
+var timeSeriesInstancesSuggest* = Call_TimeSeriesInstancesSuggest_564166(
     name: "timeSeriesInstancesSuggest", meth: HttpMethod.HttpPost,
     host: "azure.local", route: "/timeseries/instances/suggest",
-    validator: validate_TimeSeriesInstancesSuggest_568267, base: "",
-    url: url_TimeSeriesInstancesSuggest_568268, schemes: {Scheme.Https})
+    validator: validate_TimeSeriesInstancesSuggest_564167, base: "",
+    url: url_TimeSeriesInstancesSuggest_564168, schemes: {Scheme.Https})
 type
-  Call_ModelSettingsGet_568277 = ref object of OpenApiRestCall_567668
-proc url_ModelSettingsGet_568279(protocol: Scheme; host: string; base: string;
+  Call_ModelSettingsGet_564177 = ref object of OpenApiRestCall_563566
+proc url_ModelSettingsGet_564179(protocol: Scheme; host: string; base: string;
                                 route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_ModelSettingsGet_568278(path: JsonNode; query: JsonNode;
+proc validate_ModelSettingsGet_564178(path: JsonNode; query: JsonNode;
                                      header: JsonNode; formData: JsonNode;
                                      body: JsonNode): JsonNode =
   ## Returns the model settings which includes model display name, Time Series ID properties and default type ID. Every pay-as-you-go environment has a model that is automatically created.
@@ -830,71 +834,71 @@ proc validate_ModelSettingsGet_568278(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568280 = query.getOrDefault("api-version")
-  valid_568280 = validateParameter(valid_568280, JString, required = true,
+  var valid_564180 = query.getOrDefault("api-version")
+  valid_564180 = validateParameter(valid_564180, JString, required = true,
                                  default = newJString("2018-11-01-preview"))
-  if valid_568280 != nil:
-    section.add "api-version", valid_568280
+  if valid_564180 != nil:
+    section.add "api-version", valid_564180
   result.add "query", section
   ## parameters in `header` object:
-  ##   x-ms-client-session-id: JString
-  ##                         : Optional client session ID. Service records this value. Allows the service to trace a group of related operations across services, and allows the customer to contact support regarding a particular group of requests.
   ##   x-ms-client-request-id: JString
   ##                         : Optional client request ID. Service records this value. Allows the service to trace operation across services, and allows the customer to contact support regarding a particular request.
+  ##   x-ms-client-session-id: JString
+  ##                         : Optional client session ID. Service records this value. Allows the service to trace a group of related operations across services, and allows the customer to contact support regarding a particular group of requests.
   section = newJObject()
-  var valid_568281 = header.getOrDefault("x-ms-client-session-id")
-  valid_568281 = validateParameter(valid_568281, JString, required = false,
+  var valid_564181 = header.getOrDefault("x-ms-client-request-id")
+  valid_564181 = validateParameter(valid_564181, JString, required = false,
                                  default = nil)
-  if valid_568281 != nil:
-    section.add "x-ms-client-session-id", valid_568281
-  var valid_568282 = header.getOrDefault("x-ms-client-request-id")
-  valid_568282 = validateParameter(valid_568282, JString, required = false,
+  if valid_564181 != nil:
+    section.add "x-ms-client-request-id", valid_564181
+  var valid_564182 = header.getOrDefault("x-ms-client-session-id")
+  valid_564182 = validateParameter(valid_564182, JString, required = false,
                                  default = nil)
-  if valid_568282 != nil:
-    section.add "x-ms-client-request-id", valid_568282
+  if valid_564182 != nil:
+    section.add "x-ms-client-session-id", valid_564182
   result.add "header", section
   section = newJObject()
   result.add "formData", section
   if body != nil:
     result.add "body", body
 
-proc call*(call_568283: Call_ModelSettingsGet_568277; path: JsonNode;
+proc call*(call_564183: Call_ModelSettingsGet_564177; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Returns the model settings which includes model display name, Time Series ID properties and default type ID. Every pay-as-you-go environment has a model that is automatically created.
   ## 
-  let valid = call_568283.validator(path, query, header, formData, body)
-  let scheme = call_568283.pickScheme
+  let valid = call_564183.validator(path, query, header, formData, body)
+  let scheme = call_564183.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568283.url(scheme.get, call_568283.host, call_568283.base,
-                         call_568283.route, valid.getOrDefault("path"),
+  let url = call_564183.url(scheme.get, call_564183.host, call_564183.base,
+                         call_564183.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568283, url, valid)
+  result = hook(call_564183, url, valid)
 
-proc call*(call_568284: Call_ModelSettingsGet_568277;
+proc call*(call_564184: Call_ModelSettingsGet_564177;
           apiVersion: string = "2018-11-01-preview"): Recallable =
   ## modelSettingsGet
   ## Returns the model settings which includes model display name, Time Series ID properties and default type ID. Every pay-as-you-go environment has a model that is automatically created.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request. Currently supported version is "2018-11-01-preview".
-  var query_568285 = newJObject()
-  add(query_568285, "api-version", newJString(apiVersion))
-  result = call_568284.call(nil, query_568285, nil, nil, nil)
+  var query_564185 = newJObject()
+  add(query_564185, "api-version", newJString(apiVersion))
+  result = call_564184.call(nil, query_564185, nil, nil, nil)
 
-var modelSettingsGet* = Call_ModelSettingsGet_568277(name: "modelSettingsGet",
+var modelSettingsGet* = Call_ModelSettingsGet_564177(name: "modelSettingsGet",
     meth: HttpMethod.HttpGet, host: "azure.local",
-    route: "/timeseries/modelSettings", validator: validate_ModelSettingsGet_568278,
-    base: "", url: url_ModelSettingsGet_568279, schemes: {Scheme.Https})
+    route: "/timeseries/modelSettings", validator: validate_ModelSettingsGet_564178,
+    base: "", url: url_ModelSettingsGet_564179, schemes: {Scheme.Https})
 type
-  Call_ModelSettingsUpdate_568286 = ref object of OpenApiRestCall_567668
-proc url_ModelSettingsUpdate_568288(protocol: Scheme; host: string; base: string;
+  Call_ModelSettingsUpdate_564186 = ref object of OpenApiRestCall_563566
+proc url_ModelSettingsUpdate_564188(protocol: Scheme; host: string; base: string;
                                    route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_ModelSettingsUpdate_568287(path: JsonNode; query: JsonNode;
+proc validate_ModelSettingsUpdate_564187(path: JsonNode; query: JsonNode;
                                         header: JsonNode; formData: JsonNode;
                                         body: JsonNode): JsonNode =
   ## Updates time series model settings - either the model name or default type ID.
@@ -909,28 +913,28 @@ proc validate_ModelSettingsUpdate_568287(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568289 = query.getOrDefault("api-version")
-  valid_568289 = validateParameter(valid_568289, JString, required = true,
+  var valid_564189 = query.getOrDefault("api-version")
+  valid_564189 = validateParameter(valid_564189, JString, required = true,
                                  default = newJString("2018-11-01-preview"))
-  if valid_568289 != nil:
-    section.add "api-version", valid_568289
+  if valid_564189 != nil:
+    section.add "api-version", valid_564189
   result.add "query", section
   ## parameters in `header` object:
-  ##   x-ms-client-session-id: JString
-  ##                         : Optional client session ID. Service records this value. Allows the service to trace a group of related operations across services, and allows the customer to contact support regarding a particular group of requests.
   ##   x-ms-client-request-id: JString
   ##                         : Optional client request ID. Service records this value. Allows the service to trace operation across services, and allows the customer to contact support regarding a particular request.
+  ##   x-ms-client-session-id: JString
+  ##                         : Optional client session ID. Service records this value. Allows the service to trace a group of related operations across services, and allows the customer to contact support regarding a particular group of requests.
   section = newJObject()
-  var valid_568290 = header.getOrDefault("x-ms-client-session-id")
-  valid_568290 = validateParameter(valid_568290, JString, required = false,
+  var valid_564190 = header.getOrDefault("x-ms-client-request-id")
+  valid_564190 = validateParameter(valid_564190, JString, required = false,
                                  default = nil)
-  if valid_568290 != nil:
-    section.add "x-ms-client-session-id", valid_568290
-  var valid_568291 = header.getOrDefault("x-ms-client-request-id")
-  valid_568291 = validateParameter(valid_568291, JString, required = false,
+  if valid_564190 != nil:
+    section.add "x-ms-client-request-id", valid_564190
+  var valid_564191 = header.getOrDefault("x-ms-client-session-id")
+  valid_564191 = validateParameter(valid_564191, JString, required = false,
                                  default = nil)
-  if valid_568291 != nil:
-    section.add "x-ms-client-request-id", valid_568291
+  if valid_564191 != nil:
+    section.add "x-ms-client-session-id", valid_564191
   result.add "header", section
   section = newJObject()
   result.add "formData", section
@@ -942,20 +946,20 @@ proc validate_ModelSettingsUpdate_568287(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568293: Call_ModelSettingsUpdate_568286; path: JsonNode;
+proc call*(call_564193: Call_ModelSettingsUpdate_564186; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Updates time series model settings - either the model name or default type ID.
   ## 
-  let valid = call_568293.validator(path, query, header, formData, body)
-  let scheme = call_568293.pickScheme
+  let valid = call_564193.validator(path, query, header, formData, body)
+  let scheme = call_564193.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568293.url(scheme.get, call_568293.host, call_568293.base,
-                         call_568293.route, valid.getOrDefault("path"),
+  let url = call_564193.url(scheme.get, call_564193.host, call_564193.base,
+                         call_564193.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568293, url, valid)
+  result = hook(call_564193, url, valid)
 
-proc call*(call_568294: Call_ModelSettingsUpdate_568286; parameters: JsonNode;
+proc call*(call_564194: Call_ModelSettingsUpdate_564186; parameters: JsonNode;
           apiVersion: string = "2018-11-01-preview"): Recallable =
   ## modelSettingsUpdate
   ## Updates time series model settings - either the model name or default type ID.
@@ -963,27 +967,27 @@ proc call*(call_568294: Call_ModelSettingsUpdate_568286; parameters: JsonNode;
   ##             : Version of the API to be used with the client request. Currently supported version is "2018-11-01-preview".
   ##   parameters: JObject (required)
   ##             : Model settings update request body.
-  var query_568295 = newJObject()
-  var body_568296 = newJObject()
-  add(query_568295, "api-version", newJString(apiVersion))
+  var query_564195 = newJObject()
+  var body_564196 = newJObject()
+  add(query_564195, "api-version", newJString(apiVersion))
   if parameters != nil:
-    body_568296 = parameters
-  result = call_568294.call(nil, query_568295, nil, nil, body_568296)
+    body_564196 = parameters
+  result = call_564194.call(nil, query_564195, nil, nil, body_564196)
 
-var modelSettingsUpdate* = Call_ModelSettingsUpdate_568286(
+var modelSettingsUpdate* = Call_ModelSettingsUpdate_564186(
     name: "modelSettingsUpdate", meth: HttpMethod.HttpPatch, host: "azure.local",
-    route: "/timeseries/modelSettings", validator: validate_ModelSettingsUpdate_568287,
-    base: "", url: url_ModelSettingsUpdate_568288, schemes: {Scheme.Https})
+    route: "/timeseries/modelSettings", validator: validate_ModelSettingsUpdate_564187,
+    base: "", url: url_ModelSettingsUpdate_564188, schemes: {Scheme.Https})
 type
-  Call_QueryExecute_568297 = ref object of OpenApiRestCall_567668
-proc url_QueryExecute_568299(protocol: Scheme; host: string; base: string;
+  Call_QueryExecute_564197 = ref object of OpenApiRestCall_563566
+proc url_QueryExecute_564199(protocol: Scheme; host: string; base: string;
                             route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_QueryExecute_568298(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_QueryExecute_564198(path: JsonNode; query: JsonNode; header: JsonNode;
                                  formData: JsonNode; body: JsonNode): JsonNode =
   ## Executes Time Series Query in pages of results - Get Events, Get Series or Aggregate Series.
   ## 
@@ -997,35 +1001,35 @@ proc validate_QueryExecute_568298(path: JsonNode; query: JsonNode; header: JsonN
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568300 = query.getOrDefault("api-version")
-  valid_568300 = validateParameter(valid_568300, JString, required = true,
+  var valid_564200 = query.getOrDefault("api-version")
+  valid_564200 = validateParameter(valid_564200, JString, required = true,
                                  default = newJString("2018-11-01-preview"))
-  if valid_568300 != nil:
-    section.add "api-version", valid_568300
+  if valid_564200 != nil:
+    section.add "api-version", valid_564200
   result.add "query", section
   ## parameters in `header` object:
-  ##   x-ms-client-session-id: JString
-  ##                         : Optional client session ID. Service records this value. Allows the service to trace a group of related operations across services, and allows the customer to contact support regarding a particular group of requests.
-  ##   x-ms-client-request-id: JString
-  ##                         : Optional client request ID. Service records this value. Allows the service to trace operation across services, and allows the customer to contact support regarding a particular request.
   ##   x-ms-continuation: JString
   ##                    : Continuation token from previous page of results to retrieve the next page of the results in calls that support pagination. To get the first page results, specify null continuation token as parameter value. Returned continuation token is null if all results have been returned, and there is no next page of results.
+  ##   x-ms-client-request-id: JString
+  ##                         : Optional client request ID. Service records this value. Allows the service to trace operation across services, and allows the customer to contact support regarding a particular request.
+  ##   x-ms-client-session-id: JString
+  ##                         : Optional client session ID. Service records this value. Allows the service to trace a group of related operations across services, and allows the customer to contact support regarding a particular group of requests.
   section = newJObject()
-  var valid_568301 = header.getOrDefault("x-ms-client-session-id")
-  valid_568301 = validateParameter(valid_568301, JString, required = false,
+  var valid_564201 = header.getOrDefault("x-ms-continuation")
+  valid_564201 = validateParameter(valid_564201, JString, required = false,
                                  default = nil)
-  if valid_568301 != nil:
-    section.add "x-ms-client-session-id", valid_568301
-  var valid_568302 = header.getOrDefault("x-ms-client-request-id")
-  valid_568302 = validateParameter(valid_568302, JString, required = false,
+  if valid_564201 != nil:
+    section.add "x-ms-continuation", valid_564201
+  var valid_564202 = header.getOrDefault("x-ms-client-request-id")
+  valid_564202 = validateParameter(valid_564202, JString, required = false,
                                  default = nil)
-  if valid_568302 != nil:
-    section.add "x-ms-client-request-id", valid_568302
-  var valid_568303 = header.getOrDefault("x-ms-continuation")
-  valid_568303 = validateParameter(valid_568303, JString, required = false,
+  if valid_564202 != nil:
+    section.add "x-ms-client-request-id", valid_564202
+  var valid_564203 = header.getOrDefault("x-ms-client-session-id")
+  valid_564203 = validateParameter(valid_564203, JString, required = false,
                                  default = nil)
-  if valid_568303 != nil:
-    section.add "x-ms-continuation", valid_568303
+  if valid_564203 != nil:
+    section.add "x-ms-client-session-id", valid_564203
   result.add "header", section
   section = newJObject()
   result.add "formData", section
@@ -1037,20 +1041,20 @@ proc validate_QueryExecute_568298(path: JsonNode; query: JsonNode; header: JsonN
   if body != nil:
     result.add "body", body
 
-proc call*(call_568305: Call_QueryExecute_568297; path: JsonNode; query: JsonNode;
+proc call*(call_564205: Call_QueryExecute_564197; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Executes Time Series Query in pages of results - Get Events, Get Series or Aggregate Series.
   ## 
-  let valid = call_568305.validator(path, query, header, formData, body)
-  let scheme = call_568305.pickScheme
+  let valid = call_564205.validator(path, query, header, formData, body)
+  let scheme = call_564205.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568305.url(scheme.get, call_568305.host, call_568305.base,
-                         call_568305.route, valid.getOrDefault("path"),
+  let url = call_564205.url(scheme.get, call_564205.host, call_564205.base,
+                         call_564205.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568305, url, valid)
+  result = hook(call_564205, url, valid)
 
-proc call*(call_568306: Call_QueryExecute_568297; parameters: JsonNode;
+proc call*(call_564206: Call_QueryExecute_564197; parameters: JsonNode;
           apiVersion: string = "2018-11-01-preview"): Recallable =
   ## queryExecute
   ## Executes Time Series Query in pages of results - Get Events, Get Series or Aggregate Series.
@@ -1058,27 +1062,27 @@ proc call*(call_568306: Call_QueryExecute_568297; parameters: JsonNode;
   ##             : Version of the API to be used with the client request. Currently supported version is "2018-11-01-preview".
   ##   parameters: JObject (required)
   ##             : Time series query request body.
-  var query_568307 = newJObject()
-  var body_568308 = newJObject()
-  add(query_568307, "api-version", newJString(apiVersion))
+  var query_564207 = newJObject()
+  var body_564208 = newJObject()
+  add(query_564207, "api-version", newJString(apiVersion))
   if parameters != nil:
-    body_568308 = parameters
-  result = call_568306.call(nil, query_568307, nil, nil, body_568308)
+    body_564208 = parameters
+  result = call_564206.call(nil, query_564207, nil, nil, body_564208)
 
-var queryExecute* = Call_QueryExecute_568297(name: "queryExecute",
+var queryExecute* = Call_QueryExecute_564197(name: "queryExecute",
     meth: HttpMethod.HttpPost, host: "azure.local", route: "/timeseries/query",
-    validator: validate_QueryExecute_568298, base: "", url: url_QueryExecute_568299,
+    validator: validate_QueryExecute_564198, base: "", url: url_QueryExecute_564199,
     schemes: {Scheme.Https})
 type
-  Call_TimeSeriesTypesGet_568309 = ref object of OpenApiRestCall_567668
-proc url_TimeSeriesTypesGet_568311(protocol: Scheme; host: string; base: string;
+  Call_TimeSeriesTypesGet_564209 = ref object of OpenApiRestCall_563566
+proc url_TimeSeriesTypesGet_564211(protocol: Scheme; host: string; base: string;
                                   route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_TimeSeriesTypesGet_568310(path: JsonNode; query: JsonNode;
+proc validate_TimeSeriesTypesGet_564210(path: JsonNode; query: JsonNode;
                                        header: JsonNode; formData: JsonNode;
                                        body: JsonNode): JsonNode =
   ## Gets time series types in pages.
@@ -1093,78 +1097,78 @@ proc validate_TimeSeriesTypesGet_568310(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568312 = query.getOrDefault("api-version")
-  valid_568312 = validateParameter(valid_568312, JString, required = true,
+  var valid_564212 = query.getOrDefault("api-version")
+  valid_564212 = validateParameter(valid_564212, JString, required = true,
                                  default = newJString("2018-11-01-preview"))
-  if valid_568312 != nil:
-    section.add "api-version", valid_568312
+  if valid_564212 != nil:
+    section.add "api-version", valid_564212
   result.add "query", section
   ## parameters in `header` object:
-  ##   x-ms-client-session-id: JString
-  ##                         : Optional client session ID. Service records this value. Allows the service to trace a group of related operations across services, and allows the customer to contact support regarding a particular group of requests.
-  ##   x-ms-client-request-id: JString
-  ##                         : Optional client request ID. Service records this value. Allows the service to trace operation across services, and allows the customer to contact support regarding a particular request.
   ##   x-ms-continuation: JString
   ##                    : Continuation token from previous page of results to retrieve the next page of the results in calls that support pagination. To get the first page results, specify null continuation token as parameter value. Returned continuation token is null if all results have been returned, and there is no next page of results.
+  ##   x-ms-client-request-id: JString
+  ##                         : Optional client request ID. Service records this value. Allows the service to trace operation across services, and allows the customer to contact support regarding a particular request.
+  ##   x-ms-client-session-id: JString
+  ##                         : Optional client session ID. Service records this value. Allows the service to trace a group of related operations across services, and allows the customer to contact support regarding a particular group of requests.
   section = newJObject()
-  var valid_568313 = header.getOrDefault("x-ms-client-session-id")
-  valid_568313 = validateParameter(valid_568313, JString, required = false,
+  var valid_564213 = header.getOrDefault("x-ms-continuation")
+  valid_564213 = validateParameter(valid_564213, JString, required = false,
                                  default = nil)
-  if valid_568313 != nil:
-    section.add "x-ms-client-session-id", valid_568313
-  var valid_568314 = header.getOrDefault("x-ms-client-request-id")
-  valid_568314 = validateParameter(valid_568314, JString, required = false,
+  if valid_564213 != nil:
+    section.add "x-ms-continuation", valid_564213
+  var valid_564214 = header.getOrDefault("x-ms-client-request-id")
+  valid_564214 = validateParameter(valid_564214, JString, required = false,
                                  default = nil)
-  if valid_568314 != nil:
-    section.add "x-ms-client-request-id", valid_568314
-  var valid_568315 = header.getOrDefault("x-ms-continuation")
-  valid_568315 = validateParameter(valid_568315, JString, required = false,
+  if valid_564214 != nil:
+    section.add "x-ms-client-request-id", valid_564214
+  var valid_564215 = header.getOrDefault("x-ms-client-session-id")
+  valid_564215 = validateParameter(valid_564215, JString, required = false,
                                  default = nil)
-  if valid_568315 != nil:
-    section.add "x-ms-continuation", valid_568315
+  if valid_564215 != nil:
+    section.add "x-ms-client-session-id", valid_564215
   result.add "header", section
   section = newJObject()
   result.add "formData", section
   if body != nil:
     result.add "body", body
 
-proc call*(call_568316: Call_TimeSeriesTypesGet_568309; path: JsonNode;
+proc call*(call_564216: Call_TimeSeriesTypesGet_564209; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets time series types in pages.
   ## 
-  let valid = call_568316.validator(path, query, header, formData, body)
-  let scheme = call_568316.pickScheme
+  let valid = call_564216.validator(path, query, header, formData, body)
+  let scheme = call_564216.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568316.url(scheme.get, call_568316.host, call_568316.base,
-                         call_568316.route, valid.getOrDefault("path"),
+  let url = call_564216.url(scheme.get, call_564216.host, call_564216.base,
+                         call_564216.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568316, url, valid)
+  result = hook(call_564216, url, valid)
 
-proc call*(call_568317: Call_TimeSeriesTypesGet_568309;
+proc call*(call_564217: Call_TimeSeriesTypesGet_564209;
           apiVersion: string = "2018-11-01-preview"): Recallable =
   ## timeSeriesTypesGet
   ## Gets time series types in pages.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request. Currently supported version is "2018-11-01-preview".
-  var query_568318 = newJObject()
-  add(query_568318, "api-version", newJString(apiVersion))
-  result = call_568317.call(nil, query_568318, nil, nil, nil)
+  var query_564218 = newJObject()
+  add(query_564218, "api-version", newJString(apiVersion))
+  result = call_564217.call(nil, query_564218, nil, nil, nil)
 
-var timeSeriesTypesGet* = Call_TimeSeriesTypesGet_568309(
+var timeSeriesTypesGet* = Call_TimeSeriesTypesGet_564209(
     name: "timeSeriesTypesGet", meth: HttpMethod.HttpGet, host: "azure.local",
-    route: "/timeseries/types", validator: validate_TimeSeriesTypesGet_568310,
-    base: "", url: url_TimeSeriesTypesGet_568311, schemes: {Scheme.Https})
+    route: "/timeseries/types", validator: validate_TimeSeriesTypesGet_564210,
+    base: "", url: url_TimeSeriesTypesGet_564211, schemes: {Scheme.Https})
 type
-  Call_TimeSeriesTypesExecuteBatch_568319 = ref object of OpenApiRestCall_567668
-proc url_TimeSeriesTypesExecuteBatch_568321(protocol: Scheme; host: string;
+  Call_TimeSeriesTypesExecuteBatch_564219 = ref object of OpenApiRestCall_563566
+proc url_TimeSeriesTypesExecuteBatch_564221(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_TimeSeriesTypesExecuteBatch_568320(path: JsonNode; query: JsonNode;
+proc validate_TimeSeriesTypesExecuteBatch_564220(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Executes a batch get, create, update, delete operation on multiple time series types.
   ## 
@@ -1178,28 +1182,28 @@ proc validate_TimeSeriesTypesExecuteBatch_568320(path: JsonNode; query: JsonNode
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568322 = query.getOrDefault("api-version")
-  valid_568322 = validateParameter(valid_568322, JString, required = true,
+  var valid_564222 = query.getOrDefault("api-version")
+  valid_564222 = validateParameter(valid_564222, JString, required = true,
                                  default = newJString("2018-11-01-preview"))
-  if valid_568322 != nil:
-    section.add "api-version", valid_568322
+  if valid_564222 != nil:
+    section.add "api-version", valid_564222
   result.add "query", section
   ## parameters in `header` object:
-  ##   x-ms-client-session-id: JString
-  ##                         : Optional client session ID. Service records this value. Allows the service to trace a group of related operations across services, and allows the customer to contact support regarding a particular group of requests.
   ##   x-ms-client-request-id: JString
   ##                         : Optional client request ID. Service records this value. Allows the service to trace operation across services, and allows the customer to contact support regarding a particular request.
+  ##   x-ms-client-session-id: JString
+  ##                         : Optional client session ID. Service records this value. Allows the service to trace a group of related operations across services, and allows the customer to contact support regarding a particular group of requests.
   section = newJObject()
-  var valid_568323 = header.getOrDefault("x-ms-client-session-id")
-  valid_568323 = validateParameter(valid_568323, JString, required = false,
+  var valid_564223 = header.getOrDefault("x-ms-client-request-id")
+  valid_564223 = validateParameter(valid_564223, JString, required = false,
                                  default = nil)
-  if valid_568323 != nil:
-    section.add "x-ms-client-session-id", valid_568323
-  var valid_568324 = header.getOrDefault("x-ms-client-request-id")
-  valid_568324 = validateParameter(valid_568324, JString, required = false,
+  if valid_564223 != nil:
+    section.add "x-ms-client-request-id", valid_564223
+  var valid_564224 = header.getOrDefault("x-ms-client-session-id")
+  valid_564224 = validateParameter(valid_564224, JString, required = false,
                                  default = nil)
-  if valid_568324 != nil:
-    section.add "x-ms-client-request-id", valid_568324
+  if valid_564224 != nil:
+    section.add "x-ms-client-session-id", valid_564224
   result.add "header", section
   section = newJObject()
   result.add "formData", section
@@ -1211,20 +1215,20 @@ proc validate_TimeSeriesTypesExecuteBatch_568320(path: JsonNode; query: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_568326: Call_TimeSeriesTypesExecuteBatch_568319; path: JsonNode;
+proc call*(call_564226: Call_TimeSeriesTypesExecuteBatch_564219; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Executes a batch get, create, update, delete operation on multiple time series types.
   ## 
-  let valid = call_568326.validator(path, query, header, formData, body)
-  let scheme = call_568326.pickScheme
+  let valid = call_564226.validator(path, query, header, formData, body)
+  let scheme = call_564226.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568326.url(scheme.get, call_568326.host, call_568326.base,
-                         call_568326.route, valid.getOrDefault("path"),
+  let url = call_564226.url(scheme.get, call_564226.host, call_564226.base,
+                         call_564226.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568326, url, valid)
+  result = hook(call_564226, url, valid)
 
-proc call*(call_568327: Call_TimeSeriesTypesExecuteBatch_568319;
+proc call*(call_564227: Call_TimeSeriesTypesExecuteBatch_564219;
           parameters: JsonNode; apiVersion: string = "2018-11-01-preview"): Recallable =
   ## timeSeriesTypesExecuteBatch
   ## Executes a batch get, create, update, delete operation on multiple time series types.
@@ -1232,18 +1236,18 @@ proc call*(call_568327: Call_TimeSeriesTypesExecuteBatch_568319;
   ##             : Version of the API to be used with the client request. Currently supported version is "2018-11-01-preview".
   ##   parameters: JObject (required)
   ##             : Time series types batch request body.
-  var query_568328 = newJObject()
-  var body_568329 = newJObject()
-  add(query_568328, "api-version", newJString(apiVersion))
+  var query_564228 = newJObject()
+  var body_564229 = newJObject()
+  add(query_564228, "api-version", newJString(apiVersion))
   if parameters != nil:
-    body_568329 = parameters
-  result = call_568327.call(nil, query_568328, nil, nil, body_568329)
+    body_564229 = parameters
+  result = call_564227.call(nil, query_564228, nil, nil, body_564229)
 
-var timeSeriesTypesExecuteBatch* = Call_TimeSeriesTypesExecuteBatch_568319(
+var timeSeriesTypesExecuteBatch* = Call_TimeSeriesTypesExecuteBatch_564219(
     name: "timeSeriesTypesExecuteBatch", meth: HttpMethod.HttpPost,
     host: "azure.local", route: "/timeseries/types/$batch",
-    validator: validate_TimeSeriesTypesExecuteBatch_568320, base: "",
-    url: url_TimeSeriesTypesExecuteBatch_568321, schemes: {Scheme.Https})
+    validator: validate_TimeSeriesTypesExecuteBatch_564220, base: "",
+    url: url_TimeSeriesTypesExecuteBatch_564221, schemes: {Scheme.Https})
 export
   rest
 

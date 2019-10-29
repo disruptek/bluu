@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_573657 = ref object of OpenApiRestCall
+  OpenApiRestCall_563555 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_573657](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563555](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_573657): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563555): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,8 +107,8 @@ const
   macServiceName = "security-subAssessments"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_SubAssessmentsList_573879 = ref object of OpenApiRestCall_573657
-proc url_SubAssessmentsList_573881(protocol: Scheme; host: string; base: string;
+  Call_SubAssessmentsList_563777 = ref object of OpenApiRestCall_563555
+proc url_SubAssessmentsList_563779(protocol: Scheme; host: string; base: string;
                                   route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -123,7 +127,7 @@ proc url_SubAssessmentsList_573881(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_SubAssessmentsList_573880(path: JsonNode; query: JsonNode;
+proc validate_SubAssessmentsList_563778(path: JsonNode; query: JsonNode;
                                        header: JsonNode; formData: JsonNode;
                                        body: JsonNode): JsonNode =
   ## Get security sub-assessments on all your scanned resources inside a scope
@@ -138,16 +142,16 @@ proc validate_SubAssessmentsList_573880(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `assessmentName` field"
-  var valid_574054 = path.getOrDefault("assessmentName")
-  valid_574054 = validateParameter(valid_574054, JString, required = true,
+  var valid_563954 = path.getOrDefault("assessmentName")
+  valid_563954 = validateParameter(valid_563954, JString, required = true,
                                  default = nil)
-  if valid_574054 != nil:
-    section.add "assessmentName", valid_574054
-  var valid_574055 = path.getOrDefault("scope")
-  valid_574055 = validateParameter(valid_574055, JString, required = true,
+  if valid_563954 != nil:
+    section.add "assessmentName", valid_563954
+  var valid_563955 = path.getOrDefault("scope")
+  valid_563955 = validateParameter(valid_563955, JString, required = true,
                                  default = nil)
-  if valid_574055 != nil:
-    section.add "scope", valid_574055
+  if valid_563955 != nil:
+    section.add "scope", valid_563955
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -155,11 +159,11 @@ proc validate_SubAssessmentsList_573880(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574056 = query.getOrDefault("api-version")
-  valid_574056 = validateParameter(valid_574056, JString, required = true,
+  var valid_563956 = query.getOrDefault("api-version")
+  valid_563956 = validateParameter(valid_563956, JString, required = true,
                                  default = nil)
-  if valid_574056 != nil:
-    section.add "api-version", valid_574056
+  if valid_563956 != nil:
+    section.add "api-version", valid_563956
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -168,44 +172,44 @@ proc validate_SubAssessmentsList_573880(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574079: Call_SubAssessmentsList_573879; path: JsonNode;
+proc call*(call_563979: Call_SubAssessmentsList_563777; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get security sub-assessments on all your scanned resources inside a scope
   ## 
-  let valid = call_574079.validator(path, query, header, formData, body)
-  let scheme = call_574079.pickScheme
+  let valid = call_563979.validator(path, query, header, formData, body)
+  let scheme = call_563979.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574079.url(scheme.get, call_574079.host, call_574079.base,
-                         call_574079.route, valid.getOrDefault("path"),
+  let url = call_563979.url(scheme.get, call_563979.host, call_563979.base,
+                         call_563979.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574079, url, valid)
+  result = hook(call_563979, url, valid)
 
-proc call*(call_574150: Call_SubAssessmentsList_573879; apiVersion: string;
-          assessmentName: string; scope: string): Recallable =
+proc call*(call_564050: Call_SubAssessmentsList_563777; assessmentName: string;
+          apiVersion: string; scope: string): Recallable =
   ## subAssessmentsList
   ## Get security sub-assessments on all your scanned resources inside a scope
-  ##   apiVersion: string (required)
-  ##             : API version for the operation
   ##   assessmentName: string (required)
   ##                 : The Assessment Key - Unique key for the assessment type
+  ##   apiVersion: string (required)
+  ##             : API version for the operation
   ##   scope: string (required)
   ##        : Scope of the query, can be subscription (/subscriptions/0b06d9ea-afe6-4779-bd59-30e5c2d9d13f) or management group (/providers/Microsoft.Management/managementGroups/mgName).
-  var path_574151 = newJObject()
-  var query_574153 = newJObject()
-  add(query_574153, "api-version", newJString(apiVersion))
-  add(path_574151, "assessmentName", newJString(assessmentName))
-  add(path_574151, "scope", newJString(scope))
-  result = call_574150.call(path_574151, query_574153, nil, nil, nil)
+  var path_564051 = newJObject()
+  var query_564053 = newJObject()
+  add(path_564051, "assessmentName", newJString(assessmentName))
+  add(query_564053, "api-version", newJString(apiVersion))
+  add(path_564051, "scope", newJString(scope))
+  result = call_564050.call(path_564051, query_564053, nil, nil, nil)
 
-var subAssessmentsList* = Call_SubAssessmentsList_573879(
+var subAssessmentsList* = Call_SubAssessmentsList_563777(
     name: "subAssessmentsList", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/{scope}/providers/Microsoft.Security/assessments/{assessmentName}/subAssessments",
-    validator: validate_SubAssessmentsList_573880, base: "",
-    url: url_SubAssessmentsList_573881, schemes: {Scheme.Https})
+    validator: validate_SubAssessmentsList_563778, base: "",
+    url: url_SubAssessmentsList_563779, schemes: {Scheme.Https})
 type
-  Call_SubAssessmentsGet_574192 = ref object of OpenApiRestCall_573657
-proc url_SubAssessmentsGet_574194(protocol: Scheme; host: string; base: string;
+  Call_SubAssessmentsGet_564092 = ref object of OpenApiRestCall_563555
+proc url_SubAssessmentsGet_564094(protocol: Scheme; host: string; base: string;
                                  route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -227,7 +231,7 @@ proc url_SubAssessmentsGet_574194(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_SubAssessmentsGet_574193(path: JsonNode; query: JsonNode;
+proc validate_SubAssessmentsGet_564093(path: JsonNode; query: JsonNode;
                                       header: JsonNode; formData: JsonNode;
                                       body: JsonNode): JsonNode =
   ## Get a security sub-assessment on your scanned resource
@@ -244,21 +248,21 @@ proc validate_SubAssessmentsGet_574193(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `assessmentName` field"
-  var valid_574195 = path.getOrDefault("assessmentName")
-  valid_574195 = validateParameter(valid_574195, JString, required = true,
+  var valid_564095 = path.getOrDefault("assessmentName")
+  valid_564095 = validateParameter(valid_564095, JString, required = true,
                                  default = nil)
-  if valid_574195 != nil:
-    section.add "assessmentName", valid_574195
-  var valid_574196 = path.getOrDefault("subAssessmentName")
-  valid_574196 = validateParameter(valid_574196, JString, required = true,
+  if valid_564095 != nil:
+    section.add "assessmentName", valid_564095
+  var valid_564096 = path.getOrDefault("subAssessmentName")
+  valid_564096 = validateParameter(valid_564096, JString, required = true,
                                  default = nil)
-  if valid_574196 != nil:
-    section.add "subAssessmentName", valid_574196
-  var valid_574197 = path.getOrDefault("scope")
-  valid_574197 = validateParameter(valid_574197, JString, required = true,
+  if valid_564096 != nil:
+    section.add "subAssessmentName", valid_564096
+  var valid_564097 = path.getOrDefault("scope")
+  valid_564097 = validateParameter(valid_564097, JString, required = true,
                                  default = nil)
-  if valid_574197 != nil:
-    section.add "scope", valid_574197
+  if valid_564097 != nil:
+    section.add "scope", valid_564097
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -266,11 +270,11 @@ proc validate_SubAssessmentsGet_574193(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574198 = query.getOrDefault("api-version")
-  valid_574198 = validateParameter(valid_574198, JString, required = true,
+  var valid_564098 = query.getOrDefault("api-version")
+  valid_564098 = validateParameter(valid_564098, JString, required = true,
                                  default = nil)
-  if valid_574198 != nil:
-    section.add "api-version", valid_574198
+  if valid_564098 != nil:
+    section.add "api-version", valid_564098
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -279,46 +283,46 @@ proc validate_SubAssessmentsGet_574193(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574199: Call_SubAssessmentsGet_574192; path: JsonNode;
+proc call*(call_564099: Call_SubAssessmentsGet_564092; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get a security sub-assessment on your scanned resource
   ## 
-  let valid = call_574199.validator(path, query, header, formData, body)
-  let scheme = call_574199.pickScheme
+  let valid = call_564099.validator(path, query, header, formData, body)
+  let scheme = call_564099.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574199.url(scheme.get, call_574199.host, call_574199.base,
-                         call_574199.route, valid.getOrDefault("path"),
+  let url = call_564099.url(scheme.get, call_564099.host, call_564099.base,
+                         call_564099.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574199, url, valid)
+  result = hook(call_564099, url, valid)
 
-proc call*(call_574200: Call_SubAssessmentsGet_574192; apiVersion: string;
-          assessmentName: string; subAssessmentName: string; scope: string): Recallable =
+proc call*(call_564100: Call_SubAssessmentsGet_564092; assessmentName: string;
+          apiVersion: string; subAssessmentName: string; scope: string): Recallable =
   ## subAssessmentsGet
   ## Get a security sub-assessment on your scanned resource
-  ##   apiVersion: string (required)
-  ##             : API version for the operation
   ##   assessmentName: string (required)
   ##                 : The Assessment Key - Unique key for the assessment type
+  ##   apiVersion: string (required)
+  ##             : API version for the operation
   ##   subAssessmentName: string (required)
   ##                    : The Sub-Assessment Key - Unique key for the sub-assessment type
   ##   scope: string (required)
   ##        : Scope of the query, can be subscription (/subscriptions/0b06d9ea-afe6-4779-bd59-30e5c2d9d13f) or management group (/providers/Microsoft.Management/managementGroups/mgName).
-  var path_574201 = newJObject()
-  var query_574202 = newJObject()
-  add(query_574202, "api-version", newJString(apiVersion))
-  add(path_574201, "assessmentName", newJString(assessmentName))
-  add(path_574201, "subAssessmentName", newJString(subAssessmentName))
-  add(path_574201, "scope", newJString(scope))
-  result = call_574200.call(path_574201, query_574202, nil, nil, nil)
+  var path_564101 = newJObject()
+  var query_564102 = newJObject()
+  add(path_564101, "assessmentName", newJString(assessmentName))
+  add(query_564102, "api-version", newJString(apiVersion))
+  add(path_564101, "subAssessmentName", newJString(subAssessmentName))
+  add(path_564101, "scope", newJString(scope))
+  result = call_564100.call(path_564101, query_564102, nil, nil, nil)
 
-var subAssessmentsGet* = Call_SubAssessmentsGet_574192(name: "subAssessmentsGet",
+var subAssessmentsGet* = Call_SubAssessmentsGet_564092(name: "subAssessmentsGet",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/{scope}/providers/Microsoft.Security/assessments/{assessmentName}/subAssessments/{subAssessmentName}",
-    validator: validate_SubAssessmentsGet_574193, base: "",
-    url: url_SubAssessmentsGet_574194, schemes: {Scheme.Https})
+    validator: validate_SubAssessmentsGet_564093, base: "",
+    url: url_SubAssessmentsGet_564094, schemes: {Scheme.Https})
 type
-  Call_SubAssessmentsListAll_574203 = ref object of OpenApiRestCall_573657
-proc url_SubAssessmentsListAll_574205(protocol: Scheme; host: string; base: string;
+  Call_SubAssessmentsListAll_564103 = ref object of OpenApiRestCall_563555
+proc url_SubAssessmentsListAll_564105(protocol: Scheme; host: string; base: string;
                                      route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -334,7 +338,7 @@ proc url_SubAssessmentsListAll_574205(protocol: Scheme; host: string; base: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_SubAssessmentsListAll_574204(path: JsonNode; query: JsonNode;
+proc validate_SubAssessmentsListAll_564104(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Get security sub-assessments on all your scanned resources inside a subscription scope
   ## 
@@ -345,11 +349,11 @@ proc validate_SubAssessmentsListAll_574204(path: JsonNode; query: JsonNode;
   ##        : Scope of the query, can be subscription (/subscriptions/0b06d9ea-afe6-4779-bd59-30e5c2d9d13f) or management group (/providers/Microsoft.Management/managementGroups/mgName).
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `scope` field"
-  var valid_574206 = path.getOrDefault("scope")
-  valid_574206 = validateParameter(valid_574206, JString, required = true,
+  var valid_564106 = path.getOrDefault("scope")
+  valid_564106 = validateParameter(valid_564106, JString, required = true,
                                  default = nil)
-  if valid_574206 != nil:
-    section.add "scope", valid_574206
+  if valid_564106 != nil:
+    section.add "scope", valid_564106
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -357,11 +361,11 @@ proc validate_SubAssessmentsListAll_574204(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574207 = query.getOrDefault("api-version")
-  valid_574207 = validateParameter(valid_574207, JString, required = true,
+  var valid_564107 = query.getOrDefault("api-version")
+  valid_564107 = validateParameter(valid_564107, JString, required = true,
                                  default = nil)
-  if valid_574207 != nil:
-    section.add "api-version", valid_574207
+  if valid_564107 != nil:
+    section.add "api-version", valid_564107
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -370,20 +374,20 @@ proc validate_SubAssessmentsListAll_574204(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574208: Call_SubAssessmentsListAll_574203; path: JsonNode;
+proc call*(call_564108: Call_SubAssessmentsListAll_564103; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get security sub-assessments on all your scanned resources inside a subscription scope
   ## 
-  let valid = call_574208.validator(path, query, header, formData, body)
-  let scheme = call_574208.pickScheme
+  let valid = call_564108.validator(path, query, header, formData, body)
+  let scheme = call_564108.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574208.url(scheme.get, call_574208.host, call_574208.base,
-                         call_574208.route, valid.getOrDefault("path"),
+  let url = call_564108.url(scheme.get, call_564108.host, call_564108.base,
+                         call_564108.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574208, url, valid)
+  result = hook(call_564108, url, valid)
 
-proc call*(call_574209: Call_SubAssessmentsListAll_574203; apiVersion: string;
+proc call*(call_564109: Call_SubAssessmentsListAll_564103; apiVersion: string;
           scope: string): Recallable =
   ## subAssessmentsListAll
   ## Get security sub-assessments on all your scanned resources inside a subscription scope
@@ -391,18 +395,18 @@ proc call*(call_574209: Call_SubAssessmentsListAll_574203; apiVersion: string;
   ##             : API version for the operation
   ##   scope: string (required)
   ##        : Scope of the query, can be subscription (/subscriptions/0b06d9ea-afe6-4779-bd59-30e5c2d9d13f) or management group (/providers/Microsoft.Management/managementGroups/mgName).
-  var path_574210 = newJObject()
-  var query_574211 = newJObject()
-  add(query_574211, "api-version", newJString(apiVersion))
-  add(path_574210, "scope", newJString(scope))
-  result = call_574209.call(path_574210, query_574211, nil, nil, nil)
+  var path_564110 = newJObject()
+  var query_564111 = newJObject()
+  add(query_564111, "api-version", newJString(apiVersion))
+  add(path_564110, "scope", newJString(scope))
+  result = call_564109.call(path_564110, query_564111, nil, nil, nil)
 
-var subAssessmentsListAll* = Call_SubAssessmentsListAll_574203(
+var subAssessmentsListAll* = Call_SubAssessmentsListAll_564103(
     name: "subAssessmentsListAll", meth: HttpMethod.HttpGet,
     host: "management.azure.com",
     route: "/{scope}/providers/Microsoft.Security/subAssessments",
-    validator: validate_SubAssessmentsListAll_574204, base: "",
-    url: url_SubAssessmentsListAll_574205, schemes: {Scheme.Https})
+    validator: validate_SubAssessmentsListAll_564104, base: "",
+    url: url_SubAssessmentsListAll_564105, schemes: {Scheme.Https})
 export
   rest
 

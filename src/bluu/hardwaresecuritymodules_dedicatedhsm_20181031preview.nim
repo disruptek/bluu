@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, httpcore
 
 ## auto-generated via openapi macro
 ## title: Azure Dedicated HSM Resource Provider
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_567641 = ref object of OpenApiRestCall
+  OpenApiRestCall_563539 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_567641](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563539](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_567641): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563539): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,8 +107,8 @@ const
   macServiceName = "hardwaresecuritymodules-dedicatedhsm"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_DedicatedHsmListBySubscription_567863 = ref object of OpenApiRestCall_567641
-proc url_DedicatedHsmListBySubscription_567865(protocol: Scheme; host: string;
+  Call_DedicatedHsmListBySubscription_563761 = ref object of OpenApiRestCall_563539
+proc url_DedicatedHsmListBySubscription_563763(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -121,7 +125,7 @@ proc url_DedicatedHsmListBySubscription_567865(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DedicatedHsmListBySubscription_567864(path: JsonNode;
+proc validate_DedicatedHsmListBySubscription_563762(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## The List operation gets information about the dedicated HSMs associated with the subscription.
   ## 
@@ -133,29 +137,29 @@ proc validate_DedicatedHsmListBySubscription_567864(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_568039 = path.getOrDefault("subscriptionId")
-  valid_568039 = validateParameter(valid_568039, JString, required = true,
+  var valid_563939 = path.getOrDefault("subscriptionId")
+  valid_563939 = validateParameter(valid_563939, JString, required = true,
                                  default = nil)
-  if valid_568039 != nil:
-    section.add "subscriptionId", valid_568039
+  if valid_563939 != nil:
+    section.add "subscriptionId", valid_563939
   result.add "path", section
   ## parameters in `query` object:
-  ##   api-version: JString (required)
-  ##              : Client Api Version.
   ##   $top: JInt
   ##       : Maximum number of results to return.
+  ##   api-version: JString (required)
+  ##              : Client Api Version.
   section = newJObject()
+  var valid_563940 = query.getOrDefault("$top")
+  valid_563940 = validateParameter(valid_563940, JInt, required = false, default = nil)
+  if valid_563940 != nil:
+    section.add "$top", valid_563940
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568040 = query.getOrDefault("api-version")
-  valid_568040 = validateParameter(valid_568040, JString, required = true,
+  var valid_563941 = query.getOrDefault("api-version")
+  valid_563941 = validateParameter(valid_563941, JString, required = true,
                                  default = nil)
-  if valid_568040 != nil:
-    section.add "api-version", valid_568040
-  var valid_568041 = query.getOrDefault("$top")
-  valid_568041 = validateParameter(valid_568041, JInt, required = false, default = nil)
-  if valid_568041 != nil:
-    section.add "$top", valid_568041
+  if valid_563941 != nil:
+    section.add "api-version", valid_563941
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -164,44 +168,44 @@ proc validate_DedicatedHsmListBySubscription_567864(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568064: Call_DedicatedHsmListBySubscription_567863; path: JsonNode;
+proc call*(call_563964: Call_DedicatedHsmListBySubscription_563761; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## The List operation gets information about the dedicated HSMs associated with the subscription.
   ## 
-  let valid = call_568064.validator(path, query, header, formData, body)
-  let scheme = call_568064.pickScheme
+  let valid = call_563964.validator(path, query, header, formData, body)
+  let scheme = call_563964.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568064.url(scheme.get, call_568064.host, call_568064.base,
-                         call_568064.route, valid.getOrDefault("path"),
+  let url = call_563964.url(scheme.get, call_563964.host, call_563964.base,
+                         call_563964.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568064, url, valid)
+  result = hook(call_563964, url, valid)
 
-proc call*(call_568135: Call_DedicatedHsmListBySubscription_567863;
+proc call*(call_564035: Call_DedicatedHsmListBySubscription_563761;
           apiVersion: string; subscriptionId: string; Top: int = 0): Recallable =
   ## dedicatedHsmListBySubscription
   ## The List operation gets information about the dedicated HSMs associated with the subscription.
+  ##   Top: int
+  ##      : Maximum number of results to return.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   Top: int
-  ##      : Maximum number of results to return.
-  var path_568136 = newJObject()
-  var query_568138 = newJObject()
-  add(query_568138, "api-version", newJString(apiVersion))
-  add(path_568136, "subscriptionId", newJString(subscriptionId))
-  add(query_568138, "$top", newJInt(Top))
-  result = call_568135.call(path_568136, query_568138, nil, nil, nil)
+  var path_564036 = newJObject()
+  var query_564038 = newJObject()
+  add(query_564038, "$top", newJInt(Top))
+  add(query_564038, "api-version", newJString(apiVersion))
+  add(path_564036, "subscriptionId", newJString(subscriptionId))
+  result = call_564035.call(path_564036, query_564038, nil, nil, nil)
 
-var dedicatedHsmListBySubscription* = Call_DedicatedHsmListBySubscription_567863(
+var dedicatedHsmListBySubscription* = Call_DedicatedHsmListBySubscription_563761(
     name: "dedicatedHsmListBySubscription", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.HardwareSecurityModules/dedicatedHSMs",
-    validator: validate_DedicatedHsmListBySubscription_567864, base: "",
-    url: url_DedicatedHsmListBySubscription_567865, schemes: {Scheme.Https})
+    validator: validate_DedicatedHsmListBySubscription_563762, base: "",
+    url: url_DedicatedHsmListBySubscription_563763, schemes: {Scheme.Https})
 type
-  Call_DedicatedHsmListByResourceGroup_568177 = ref object of OpenApiRestCall_567641
-proc url_DedicatedHsmListByResourceGroup_568179(protocol: Scheme; host: string;
+  Call_DedicatedHsmListByResourceGroup_564077 = ref object of OpenApiRestCall_563539
+proc url_DedicatedHsmListByResourceGroup_564079(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -222,48 +226,48 @@ proc url_DedicatedHsmListByResourceGroup_568179(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DedicatedHsmListByResourceGroup_568178(path: JsonNode;
+proc validate_DedicatedHsmListByResourceGroup_564078(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## The List operation gets information about the dedicated hsms associated with the subscription and within the specified resource group.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the Resource Group to which the dedicated HSM belongs.
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the Resource Group to which the dedicated HSM belongs.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568180 = path.getOrDefault("resourceGroupName")
-  valid_568180 = validateParameter(valid_568180, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564080 = path.getOrDefault("subscriptionId")
+  valid_564080 = validateParameter(valid_564080, JString, required = true,
                                  default = nil)
-  if valid_568180 != nil:
-    section.add "resourceGroupName", valid_568180
-  var valid_568181 = path.getOrDefault("subscriptionId")
-  valid_568181 = validateParameter(valid_568181, JString, required = true,
+  if valid_564080 != nil:
+    section.add "subscriptionId", valid_564080
+  var valid_564081 = path.getOrDefault("resourceGroupName")
+  valid_564081 = validateParameter(valid_564081, JString, required = true,
                                  default = nil)
-  if valid_568181 != nil:
-    section.add "subscriptionId", valid_568181
+  if valid_564081 != nil:
+    section.add "resourceGroupName", valid_564081
   result.add "path", section
   ## parameters in `query` object:
-  ##   api-version: JString (required)
-  ##              : Client Api Version.
   ##   $top: JInt
   ##       : Maximum number of results to return.
+  ##   api-version: JString (required)
+  ##              : Client Api Version.
   section = newJObject()
+  var valid_564082 = query.getOrDefault("$top")
+  valid_564082 = validateParameter(valid_564082, JInt, required = false, default = nil)
+  if valid_564082 != nil:
+    section.add "$top", valid_564082
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568182 = query.getOrDefault("api-version")
-  valid_568182 = validateParameter(valid_568182, JString, required = true,
+  var valid_564083 = query.getOrDefault("api-version")
+  valid_564083 = validateParameter(valid_564083, JString, required = true,
                                  default = nil)
-  if valid_568182 != nil:
-    section.add "api-version", valid_568182
-  var valid_568183 = query.getOrDefault("$top")
-  valid_568183 = validateParameter(valid_568183, JInt, required = false, default = nil)
-  if valid_568183 != nil:
-    section.add "$top", valid_568183
+  if valid_564083 != nil:
+    section.add "api-version", valid_564083
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -272,49 +276,49 @@ proc validate_DedicatedHsmListByResourceGroup_568178(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568184: Call_DedicatedHsmListByResourceGroup_568177;
+proc call*(call_564084: Call_DedicatedHsmListByResourceGroup_564077;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## The List operation gets information about the dedicated hsms associated with the subscription and within the specified resource group.
   ## 
-  let valid = call_568184.validator(path, query, header, formData, body)
-  let scheme = call_568184.pickScheme
+  let valid = call_564084.validator(path, query, header, formData, body)
+  let scheme = call_564084.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568184.url(scheme.get, call_568184.host, call_568184.base,
-                         call_568184.route, valid.getOrDefault("path"),
+  let url = call_564084.url(scheme.get, call_564084.host, call_564084.base,
+                         call_564084.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568184, url, valid)
+  result = hook(call_564084, url, valid)
 
-proc call*(call_568185: Call_DedicatedHsmListByResourceGroup_568177;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
+proc call*(call_564085: Call_DedicatedHsmListByResourceGroup_564077;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string;
           Top: int = 0): Recallable =
   ## dedicatedHsmListByResourceGroup
   ## The List operation gets information about the dedicated hsms associated with the subscription and within the specified resource group.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the Resource Group to which the dedicated HSM belongs.
+  ##   Top: int
+  ##      : Maximum number of results to return.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   Top: int
-  ##      : Maximum number of results to return.
-  var path_568186 = newJObject()
-  var query_568187 = newJObject()
-  add(path_568186, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568187, "api-version", newJString(apiVersion))
-  add(path_568186, "subscriptionId", newJString(subscriptionId))
-  add(query_568187, "$top", newJInt(Top))
-  result = call_568185.call(path_568186, query_568187, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the Resource Group to which the dedicated HSM belongs.
+  var path_564086 = newJObject()
+  var query_564087 = newJObject()
+  add(query_564087, "$top", newJInt(Top))
+  add(query_564087, "api-version", newJString(apiVersion))
+  add(path_564086, "subscriptionId", newJString(subscriptionId))
+  add(path_564086, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564085.call(path_564086, query_564087, nil, nil, nil)
 
-var dedicatedHsmListByResourceGroup* = Call_DedicatedHsmListByResourceGroup_568177(
+var dedicatedHsmListByResourceGroup* = Call_DedicatedHsmListByResourceGroup_564077(
     name: "dedicatedHsmListByResourceGroup", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.HardwareSecurityModules/dedicatedHSMs",
-    validator: validate_DedicatedHsmListByResourceGroup_568178, base: "",
-    url: url_DedicatedHsmListByResourceGroup_568179, schemes: {Scheme.Https})
+    validator: validate_DedicatedHsmListByResourceGroup_564078, base: "",
+    url: url_DedicatedHsmListByResourceGroup_564079, schemes: {Scheme.Https})
 type
-  Call_DedicatedHsmCreateOrUpdate_568199 = ref object of OpenApiRestCall_567641
-proc url_DedicatedHsmCreateOrUpdate_568201(protocol: Scheme; host: string;
+  Call_DedicatedHsmCreateOrUpdate_564099 = ref object of OpenApiRestCall_563539
+proc url_DedicatedHsmCreateOrUpdate_564101(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -337,37 +341,36 @@ proc url_DedicatedHsmCreateOrUpdate_568201(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DedicatedHsmCreateOrUpdate_568200(path: JsonNode; query: JsonNode;
+proc validate_DedicatedHsmCreateOrUpdate_564100(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Create or Update a dedicated HSM in the specified subscription.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the Resource Group to which the resource belongs.
   ##   name: JString (required)
   ##       : Name of the dedicated Hsm
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the Resource Group to which the resource belongs.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568219 = path.getOrDefault("resourceGroupName")
-  valid_568219 = validateParameter(valid_568219, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `name` field"
+  var valid_564119 = path.getOrDefault("name")
+  valid_564119 = validateParameter(valid_564119, JString, required = true,
                                  default = nil)
-  if valid_568219 != nil:
-    section.add "resourceGroupName", valid_568219
-  var valid_568220 = path.getOrDefault("name")
-  valid_568220 = validateParameter(valid_568220, JString, required = true,
+  if valid_564119 != nil:
+    section.add "name", valid_564119
+  var valid_564120 = path.getOrDefault("subscriptionId")
+  valid_564120 = validateParameter(valid_564120, JString, required = true,
                                  default = nil)
-  if valid_568220 != nil:
-    section.add "name", valid_568220
-  var valid_568221 = path.getOrDefault("subscriptionId")
-  valid_568221 = validateParameter(valid_568221, JString, required = true,
+  if valid_564120 != nil:
+    section.add "subscriptionId", valid_564120
+  var valid_564121 = path.getOrDefault("resourceGroupName")
+  valid_564121 = validateParameter(valid_564121, JString, required = true,
                                  default = nil)
-  if valid_568221 != nil:
-    section.add "subscriptionId", valid_568221
+  if valid_564121 != nil:
+    section.add "resourceGroupName", valid_564121
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -375,11 +378,11 @@ proc validate_DedicatedHsmCreateOrUpdate_568200(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568222 = query.getOrDefault("api-version")
-  valid_568222 = validateParameter(valid_568222, JString, required = true,
+  var valid_564122 = query.getOrDefault("api-version")
+  valid_564122 = validateParameter(valid_564122, JString, required = true,
                                  default = nil)
-  if valid_568222 != nil:
-    section.add "api-version", valid_568222
+  if valid_564122 != nil:
+    section.add "api-version", valid_564122
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -393,53 +396,53 @@ proc validate_DedicatedHsmCreateOrUpdate_568200(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568224: Call_DedicatedHsmCreateOrUpdate_568199; path: JsonNode;
+proc call*(call_564124: Call_DedicatedHsmCreateOrUpdate_564099; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Create or Update a dedicated HSM in the specified subscription.
   ## 
-  let valid = call_568224.validator(path, query, header, formData, body)
-  let scheme = call_568224.pickScheme
+  let valid = call_564124.validator(path, query, header, formData, body)
+  let scheme = call_564124.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568224.url(scheme.get, call_568224.host, call_568224.base,
-                         call_568224.route, valid.getOrDefault("path"),
+  let url = call_564124.url(scheme.get, call_564124.host, call_564124.base,
+                         call_564124.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568224, url, valid)
+  result = hook(call_564124, url, valid)
 
-proc call*(call_568225: Call_DedicatedHsmCreateOrUpdate_568199;
-          resourceGroupName: string; apiVersion: string; name: string;
-          subscriptionId: string; parameters: JsonNode): Recallable =
+proc call*(call_564125: Call_DedicatedHsmCreateOrUpdate_564099; apiVersion: string;
+          name: string; subscriptionId: string; resourceGroupName: string;
+          parameters: JsonNode): Recallable =
   ## dedicatedHsmCreateOrUpdate
   ## Create or Update a dedicated HSM in the specified subscription.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the Resource Group to which the resource belongs.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
   ##   name: string (required)
   ##       : Name of the dedicated Hsm
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the Resource Group to which the resource belongs.
   ##   parameters: JObject (required)
   ##             : Parameters to create or update the dedicated hsm
-  var path_568226 = newJObject()
-  var query_568227 = newJObject()
-  var body_568228 = newJObject()
-  add(path_568226, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568227, "api-version", newJString(apiVersion))
-  add(path_568226, "name", newJString(name))
-  add(path_568226, "subscriptionId", newJString(subscriptionId))
+  var path_564126 = newJObject()
+  var query_564127 = newJObject()
+  var body_564128 = newJObject()
+  add(query_564127, "api-version", newJString(apiVersion))
+  add(path_564126, "name", newJString(name))
+  add(path_564126, "subscriptionId", newJString(subscriptionId))
+  add(path_564126, "resourceGroupName", newJString(resourceGroupName))
   if parameters != nil:
-    body_568228 = parameters
-  result = call_568225.call(path_568226, query_568227, nil, nil, body_568228)
+    body_564128 = parameters
+  result = call_564125.call(path_564126, query_564127, nil, nil, body_564128)
 
-var dedicatedHsmCreateOrUpdate* = Call_DedicatedHsmCreateOrUpdate_568199(
+var dedicatedHsmCreateOrUpdate* = Call_DedicatedHsmCreateOrUpdate_564099(
     name: "dedicatedHsmCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.HardwareSecurityModules/dedicatedHSMs/{name}",
-    validator: validate_DedicatedHsmCreateOrUpdate_568200, base: "",
-    url: url_DedicatedHsmCreateOrUpdate_568201, schemes: {Scheme.Https})
+    validator: validate_DedicatedHsmCreateOrUpdate_564100, base: "",
+    url: url_DedicatedHsmCreateOrUpdate_564101, schemes: {Scheme.Https})
 type
-  Call_DedicatedHsmGet_568188 = ref object of OpenApiRestCall_567641
-proc url_DedicatedHsmGet_568190(protocol: Scheme; host: string; base: string;
+  Call_DedicatedHsmGet_564088 = ref object of OpenApiRestCall_563539
+proc url_DedicatedHsmGet_564090(protocol: Scheme; host: string; base: string;
                                route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -462,7 +465,7 @@ proc url_DedicatedHsmGet_568190(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DedicatedHsmGet_568189(path: JsonNode; query: JsonNode;
+proc validate_DedicatedHsmGet_564089(path: JsonNode; query: JsonNode;
                                     header: JsonNode; formData: JsonNode;
                                     body: JsonNode): JsonNode =
   ## Gets the specified Azure dedicated HSM.
@@ -470,30 +473,29 @@ proc validate_DedicatedHsmGet_568189(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the Resource Group to which the dedicated hsm belongs.
   ##   name: JString (required)
   ##       : The name of the dedicated HSM.
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the Resource Group to which the dedicated hsm belongs.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568191 = path.getOrDefault("resourceGroupName")
-  valid_568191 = validateParameter(valid_568191, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `name` field"
+  var valid_564091 = path.getOrDefault("name")
+  valid_564091 = validateParameter(valid_564091, JString, required = true,
                                  default = nil)
-  if valid_568191 != nil:
-    section.add "resourceGroupName", valid_568191
-  var valid_568192 = path.getOrDefault("name")
-  valid_568192 = validateParameter(valid_568192, JString, required = true,
+  if valid_564091 != nil:
+    section.add "name", valid_564091
+  var valid_564092 = path.getOrDefault("subscriptionId")
+  valid_564092 = validateParameter(valid_564092, JString, required = true,
                                  default = nil)
-  if valid_568192 != nil:
-    section.add "name", valid_568192
-  var valid_568193 = path.getOrDefault("subscriptionId")
-  valid_568193 = validateParameter(valid_568193, JString, required = true,
+  if valid_564092 != nil:
+    section.add "subscriptionId", valid_564092
+  var valid_564093 = path.getOrDefault("resourceGroupName")
+  valid_564093 = validateParameter(valid_564093, JString, required = true,
                                  default = nil)
-  if valid_568193 != nil:
-    section.add "subscriptionId", valid_568193
+  if valid_564093 != nil:
+    section.add "resourceGroupName", valid_564093
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -501,11 +503,11 @@ proc validate_DedicatedHsmGet_568189(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568194 = query.getOrDefault("api-version")
-  valid_568194 = validateParameter(valid_568194, JString, required = true,
+  var valid_564094 = query.getOrDefault("api-version")
+  valid_564094 = validateParameter(valid_564094, JString, required = true,
                                  default = nil)
-  if valid_568194 != nil:
-    section.add "api-version", valid_568194
+  if valid_564094 != nil:
+    section.add "api-version", valid_564094
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -514,46 +516,46 @@ proc validate_DedicatedHsmGet_568189(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568195: Call_DedicatedHsmGet_568188; path: JsonNode; query: JsonNode;
+proc call*(call_564095: Call_DedicatedHsmGet_564088; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the specified Azure dedicated HSM.
   ## 
-  let valid = call_568195.validator(path, query, header, formData, body)
-  let scheme = call_568195.pickScheme
+  let valid = call_564095.validator(path, query, header, formData, body)
+  let scheme = call_564095.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568195.url(scheme.get, call_568195.host, call_568195.base,
-                         call_568195.route, valid.getOrDefault("path"),
+  let url = call_564095.url(scheme.get, call_564095.host, call_564095.base,
+                         call_564095.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568195, url, valid)
+  result = hook(call_564095, url, valid)
 
-proc call*(call_568196: Call_DedicatedHsmGet_568188; resourceGroupName: string;
-          apiVersion: string; name: string; subscriptionId: string): Recallable =
+proc call*(call_564096: Call_DedicatedHsmGet_564088; apiVersion: string;
+          name: string; subscriptionId: string; resourceGroupName: string): Recallable =
   ## dedicatedHsmGet
   ## Gets the specified Azure dedicated HSM.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the Resource Group to which the dedicated hsm belongs.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
   ##   name: string (required)
   ##       : The name of the dedicated HSM.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_568197 = newJObject()
-  var query_568198 = newJObject()
-  add(path_568197, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568198, "api-version", newJString(apiVersion))
-  add(path_568197, "name", newJString(name))
-  add(path_568197, "subscriptionId", newJString(subscriptionId))
-  result = call_568196.call(path_568197, query_568198, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the Resource Group to which the dedicated hsm belongs.
+  var path_564097 = newJObject()
+  var query_564098 = newJObject()
+  add(query_564098, "api-version", newJString(apiVersion))
+  add(path_564097, "name", newJString(name))
+  add(path_564097, "subscriptionId", newJString(subscriptionId))
+  add(path_564097, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564096.call(path_564097, query_564098, nil, nil, nil)
 
-var dedicatedHsmGet* = Call_DedicatedHsmGet_568188(name: "dedicatedHsmGet",
+var dedicatedHsmGet* = Call_DedicatedHsmGet_564088(name: "dedicatedHsmGet",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.HardwareSecurityModules/dedicatedHSMs/{name}",
-    validator: validate_DedicatedHsmGet_568189, base: "", url: url_DedicatedHsmGet_568190,
+    validator: validate_DedicatedHsmGet_564089, base: "", url: url_DedicatedHsmGet_564090,
     schemes: {Scheme.Https})
 type
-  Call_DedicatedHsmUpdate_568240 = ref object of OpenApiRestCall_567641
-proc url_DedicatedHsmUpdate_568242(protocol: Scheme; host: string; base: string;
+  Call_DedicatedHsmUpdate_564140 = ref object of OpenApiRestCall_563539
+proc url_DedicatedHsmUpdate_564142(protocol: Scheme; host: string; base: string;
                                   route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -576,7 +578,7 @@ proc url_DedicatedHsmUpdate_568242(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DedicatedHsmUpdate_568241(path: JsonNode; query: JsonNode;
+proc validate_DedicatedHsmUpdate_564141(path: JsonNode; query: JsonNode;
                                        header: JsonNode; formData: JsonNode;
                                        body: JsonNode): JsonNode =
   ## Update a dedicated HSM in the specified subscription.
@@ -584,30 +586,29 @@ proc validate_DedicatedHsmUpdate_568241(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the Resource Group to which the server belongs.
   ##   name: JString (required)
   ##       : Name of the dedicated HSM
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the Resource Group to which the server belongs.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568243 = path.getOrDefault("resourceGroupName")
-  valid_568243 = validateParameter(valid_568243, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `name` field"
+  var valid_564143 = path.getOrDefault("name")
+  valid_564143 = validateParameter(valid_564143, JString, required = true,
                                  default = nil)
-  if valid_568243 != nil:
-    section.add "resourceGroupName", valid_568243
-  var valid_568244 = path.getOrDefault("name")
-  valid_568244 = validateParameter(valid_568244, JString, required = true,
+  if valid_564143 != nil:
+    section.add "name", valid_564143
+  var valid_564144 = path.getOrDefault("subscriptionId")
+  valid_564144 = validateParameter(valid_564144, JString, required = true,
                                  default = nil)
-  if valid_568244 != nil:
-    section.add "name", valid_568244
-  var valid_568245 = path.getOrDefault("subscriptionId")
-  valid_568245 = validateParameter(valid_568245, JString, required = true,
+  if valid_564144 != nil:
+    section.add "subscriptionId", valid_564144
+  var valid_564145 = path.getOrDefault("resourceGroupName")
+  valid_564145 = validateParameter(valid_564145, JString, required = true,
                                  default = nil)
-  if valid_568245 != nil:
-    section.add "subscriptionId", valid_568245
+  if valid_564145 != nil:
+    section.add "resourceGroupName", valid_564145
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -615,11 +616,11 @@ proc validate_DedicatedHsmUpdate_568241(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568246 = query.getOrDefault("api-version")
-  valid_568246 = validateParameter(valid_568246, JString, required = true,
+  var valid_564146 = query.getOrDefault("api-version")
+  valid_564146 = validateParameter(valid_564146, JString, required = true,
                                  default = nil)
-  if valid_568246 != nil:
-    section.add "api-version", valid_568246
+  if valid_564146 != nil:
+    section.add "api-version", valid_564146
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -633,53 +634,53 @@ proc validate_DedicatedHsmUpdate_568241(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568248: Call_DedicatedHsmUpdate_568240; path: JsonNode;
+proc call*(call_564148: Call_DedicatedHsmUpdate_564140; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Update a dedicated HSM in the specified subscription.
   ## 
-  let valid = call_568248.validator(path, query, header, formData, body)
-  let scheme = call_568248.pickScheme
+  let valid = call_564148.validator(path, query, header, formData, body)
+  let scheme = call_564148.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568248.url(scheme.get, call_568248.host, call_568248.base,
-                         call_568248.route, valid.getOrDefault("path"),
+  let url = call_564148.url(scheme.get, call_564148.host, call_564148.base,
+                         call_564148.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568248, url, valid)
+  result = hook(call_564148, url, valid)
 
-proc call*(call_568249: Call_DedicatedHsmUpdate_568240; resourceGroupName: string;
-          apiVersion: string; name: string; subscriptionId: string;
+proc call*(call_564149: Call_DedicatedHsmUpdate_564140; apiVersion: string;
+          name: string; subscriptionId: string; resourceGroupName: string;
           parameters: JsonNode): Recallable =
   ## dedicatedHsmUpdate
   ## Update a dedicated HSM in the specified subscription.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the Resource Group to which the server belongs.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
   ##   name: string (required)
   ##       : Name of the dedicated HSM
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the Resource Group to which the server belongs.
   ##   parameters: JObject (required)
   ##             : Parameters to patch the dedicated HSM
-  var path_568250 = newJObject()
-  var query_568251 = newJObject()
-  var body_568252 = newJObject()
-  add(path_568250, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568251, "api-version", newJString(apiVersion))
-  add(path_568250, "name", newJString(name))
-  add(path_568250, "subscriptionId", newJString(subscriptionId))
+  var path_564150 = newJObject()
+  var query_564151 = newJObject()
+  var body_564152 = newJObject()
+  add(query_564151, "api-version", newJString(apiVersion))
+  add(path_564150, "name", newJString(name))
+  add(path_564150, "subscriptionId", newJString(subscriptionId))
+  add(path_564150, "resourceGroupName", newJString(resourceGroupName))
   if parameters != nil:
-    body_568252 = parameters
-  result = call_568249.call(path_568250, query_568251, nil, nil, body_568252)
+    body_564152 = parameters
+  result = call_564149.call(path_564150, query_564151, nil, nil, body_564152)
 
-var dedicatedHsmUpdate* = Call_DedicatedHsmUpdate_568240(
+var dedicatedHsmUpdate* = Call_DedicatedHsmUpdate_564140(
     name: "dedicatedHsmUpdate", meth: HttpMethod.HttpPatch,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.HardwareSecurityModules/dedicatedHSMs/{name}",
-    validator: validate_DedicatedHsmUpdate_568241, base: "",
-    url: url_DedicatedHsmUpdate_568242, schemes: {Scheme.Https})
+    validator: validate_DedicatedHsmUpdate_564141, base: "",
+    url: url_DedicatedHsmUpdate_564142, schemes: {Scheme.Https})
 type
-  Call_DedicatedHsmDelete_568229 = ref object of OpenApiRestCall_567641
-proc url_DedicatedHsmDelete_568231(protocol: Scheme; host: string; base: string;
+  Call_DedicatedHsmDelete_564129 = ref object of OpenApiRestCall_563539
+proc url_DedicatedHsmDelete_564131(protocol: Scheme; host: string; base: string;
                                   route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -702,7 +703,7 @@ proc url_DedicatedHsmDelete_568231(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DedicatedHsmDelete_568230(path: JsonNode; query: JsonNode;
+proc validate_DedicatedHsmDelete_564130(path: JsonNode; query: JsonNode;
                                        header: JsonNode; formData: JsonNode;
                                        body: JsonNode): JsonNode =
   ## Deletes the specified Azure Dedicated HSM.
@@ -710,30 +711,29 @@ proc validate_DedicatedHsmDelete_568230(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the Resource Group to which the dedicated HSM belongs.
   ##   name: JString (required)
   ##       : The name of the dedicated HSM to delete
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the Resource Group to which the dedicated HSM belongs.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568232 = path.getOrDefault("resourceGroupName")
-  valid_568232 = validateParameter(valid_568232, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `name` field"
+  var valid_564132 = path.getOrDefault("name")
+  valid_564132 = validateParameter(valid_564132, JString, required = true,
                                  default = nil)
-  if valid_568232 != nil:
-    section.add "resourceGroupName", valid_568232
-  var valid_568233 = path.getOrDefault("name")
-  valid_568233 = validateParameter(valid_568233, JString, required = true,
+  if valid_564132 != nil:
+    section.add "name", valid_564132
+  var valid_564133 = path.getOrDefault("subscriptionId")
+  valid_564133 = validateParameter(valid_564133, JString, required = true,
                                  default = nil)
-  if valid_568233 != nil:
-    section.add "name", valid_568233
-  var valid_568234 = path.getOrDefault("subscriptionId")
-  valid_568234 = validateParameter(valid_568234, JString, required = true,
+  if valid_564133 != nil:
+    section.add "subscriptionId", valid_564133
+  var valid_564134 = path.getOrDefault("resourceGroupName")
+  valid_564134 = validateParameter(valid_564134, JString, required = true,
                                  default = nil)
-  if valid_568234 != nil:
-    section.add "subscriptionId", valid_568234
+  if valid_564134 != nil:
+    section.add "resourceGroupName", valid_564134
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -741,11 +741,11 @@ proc validate_DedicatedHsmDelete_568230(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568235 = query.getOrDefault("api-version")
-  valid_568235 = validateParameter(valid_568235, JString, required = true,
+  var valid_564135 = query.getOrDefault("api-version")
+  valid_564135 = validateParameter(valid_564135, JString, required = true,
                                  default = nil)
-  if valid_568235 != nil:
-    section.add "api-version", valid_568235
+  if valid_564135 != nil:
+    section.add "api-version", valid_564135
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -754,44 +754,44 @@ proc validate_DedicatedHsmDelete_568230(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568236: Call_DedicatedHsmDelete_568229; path: JsonNode;
+proc call*(call_564136: Call_DedicatedHsmDelete_564129; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes the specified Azure Dedicated HSM.
   ## 
-  let valid = call_568236.validator(path, query, header, formData, body)
-  let scheme = call_568236.pickScheme
+  let valid = call_564136.validator(path, query, header, formData, body)
+  let scheme = call_564136.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568236.url(scheme.get, call_568236.host, call_568236.base,
-                         call_568236.route, valid.getOrDefault("path"),
+  let url = call_564136.url(scheme.get, call_564136.host, call_564136.base,
+                         call_564136.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568236, url, valid)
+  result = hook(call_564136, url, valid)
 
-proc call*(call_568237: Call_DedicatedHsmDelete_568229; resourceGroupName: string;
-          apiVersion: string; name: string; subscriptionId: string): Recallable =
+proc call*(call_564137: Call_DedicatedHsmDelete_564129; apiVersion: string;
+          name: string; subscriptionId: string; resourceGroupName: string): Recallable =
   ## dedicatedHsmDelete
   ## Deletes the specified Azure Dedicated HSM.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the Resource Group to which the dedicated HSM belongs.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
   ##   name: string (required)
   ##       : The name of the dedicated HSM to delete
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_568238 = newJObject()
-  var query_568239 = newJObject()
-  add(path_568238, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568239, "api-version", newJString(apiVersion))
-  add(path_568238, "name", newJString(name))
-  add(path_568238, "subscriptionId", newJString(subscriptionId))
-  result = call_568237.call(path_568238, query_568239, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the Resource Group to which the dedicated HSM belongs.
+  var path_564138 = newJObject()
+  var query_564139 = newJObject()
+  add(query_564139, "api-version", newJString(apiVersion))
+  add(path_564138, "name", newJString(name))
+  add(path_564138, "subscriptionId", newJString(subscriptionId))
+  add(path_564138, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564137.call(path_564138, query_564139, nil, nil, nil)
 
-var dedicatedHsmDelete* = Call_DedicatedHsmDelete_568229(
+var dedicatedHsmDelete* = Call_DedicatedHsmDelete_564129(
     name: "dedicatedHsmDelete", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.HardwareSecurityModules/dedicatedHSMs/{name}",
-    validator: validate_DedicatedHsmDelete_568230, base: "",
-    url: url_DedicatedHsmDelete_568231, schemes: {Scheme.Https})
+    validator: validate_DedicatedHsmDelete_564130, base: "",
+    url: url_DedicatedHsmDelete_564131, schemes: {Scheme.Https})
 export
   rest
 

@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_573642 = ref object of OpenApiRestCall
+  OpenApiRestCall_563540 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_573642](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563540](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_573642): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563540): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,8 +107,8 @@ const
   macServiceName = "azsadmin-acquisitions"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_AcquisitionsList_573864 = ref object of OpenApiRestCall_573642
-proc url_AcquisitionsList_573866(protocol: Scheme; host: string; base: string;
+  Call_AcquisitionsList_563762 = ref object of OpenApiRestCall_563540
+proc url_AcquisitionsList_563764(protocol: Scheme; host: string; base: string;
                                 route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -127,7 +131,7 @@ proc url_AcquisitionsList_573866(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AcquisitionsList_573865(path: JsonNode; query: JsonNode;
+proc validate_AcquisitionsList_563763(path: JsonNode; query: JsonNode;
                                      header: JsonNode; formData: JsonNode;
                                      body: JsonNode): JsonNode =
   ## Returns a list of BLOB acquisitions.
@@ -135,30 +139,29 @@ proc validate_AcquisitionsList_573865(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : Resource group name.
   ##   farmId: JString (required)
   ##         : Farm Id.
   ##   subscriptionId: JString (required)
   ##                 : Subscription Id.
+  ##   resourceGroupName: JString (required)
+  ##                    : Resource group name.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_574027 = path.getOrDefault("resourceGroupName")
-  valid_574027 = validateParameter(valid_574027, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `farmId` field"
+  var valid_563927 = path.getOrDefault("farmId")
+  valid_563927 = validateParameter(valid_563927, JString, required = true,
                                  default = nil)
-  if valid_574027 != nil:
-    section.add "resourceGroupName", valid_574027
-  var valid_574028 = path.getOrDefault("farmId")
-  valid_574028 = validateParameter(valid_574028, JString, required = true,
+  if valid_563927 != nil:
+    section.add "farmId", valid_563927
+  var valid_563928 = path.getOrDefault("subscriptionId")
+  valid_563928 = validateParameter(valid_563928, JString, required = true,
                                  default = nil)
-  if valid_574028 != nil:
-    section.add "farmId", valid_574028
-  var valid_574029 = path.getOrDefault("subscriptionId")
-  valid_574029 = validateParameter(valid_574029, JString, required = true,
+  if valid_563928 != nil:
+    section.add "subscriptionId", valid_563928
+  var valid_563929 = path.getOrDefault("resourceGroupName")
+  valid_563929 = validateParameter(valid_563929, JString, required = true,
                                  default = nil)
-  if valid_574029 != nil:
-    section.add "subscriptionId", valid_574029
+  if valid_563929 != nil:
+    section.add "resourceGroupName", valid_563929
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -168,16 +171,16 @@ proc validate_AcquisitionsList_573865(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574030 = query.getOrDefault("api-version")
-  valid_574030 = validateParameter(valid_574030, JString, required = true,
+  var valid_563930 = query.getOrDefault("api-version")
+  valid_563930 = validateParameter(valid_563930, JString, required = true,
                                  default = nil)
-  if valid_574030 != nil:
-    section.add "api-version", valid_574030
-  var valid_574031 = query.getOrDefault("$filter")
-  valid_574031 = validateParameter(valid_574031, JString, required = false,
+  if valid_563930 != nil:
+    section.add "api-version", valid_563930
+  var valid_563931 = query.getOrDefault("$filter")
+  valid_563931 = validateParameter(valid_563931, JString, required = false,
                                  default = nil)
-  if valid_574031 != nil:
-    section.add "$filter", valid_574031
+  if valid_563931 != nil:
+    section.add "$filter", valid_563931
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -186,47 +189,47 @@ proc validate_AcquisitionsList_573865(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574058: Call_AcquisitionsList_573864; path: JsonNode;
+proc call*(call_563958: Call_AcquisitionsList_563762; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Returns a list of BLOB acquisitions.
   ## 
-  let valid = call_574058.validator(path, query, header, formData, body)
-  let scheme = call_574058.pickScheme
+  let valid = call_563958.validator(path, query, header, formData, body)
+  let scheme = call_563958.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574058.url(scheme.get, call_574058.host, call_574058.base,
-                         call_574058.route, valid.getOrDefault("path"),
+  let url = call_563958.url(scheme.get, call_563958.host, call_563958.base,
+                         call_563958.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574058, url, valid)
+  result = hook(call_563958, url, valid)
 
-proc call*(call_574129: Call_AcquisitionsList_573864; resourceGroupName: string;
-          apiVersion: string; farmId: string; subscriptionId: string;
+proc call*(call_564029: Call_AcquisitionsList_563762; apiVersion: string;
+          farmId: string; subscriptionId: string; resourceGroupName: string;
           Filter: string = ""): Recallable =
   ## acquisitionsList
   ## Returns a list of BLOB acquisitions.
-  ##   resourceGroupName: string (required)
-  ##                    : Resource group name.
   ##   apiVersion: string (required)
   ##             : REST Api Version.
   ##   farmId: string (required)
   ##         : Farm Id.
   ##   subscriptionId: string (required)
   ##                 : Subscription Id.
+  ##   resourceGroupName: string (required)
+  ##                    : Resource group name.
   ##   Filter: string
   ##         : Filter string
-  var path_574130 = newJObject()
-  var query_574132 = newJObject()
-  add(path_574130, "resourceGroupName", newJString(resourceGroupName))
-  add(query_574132, "api-version", newJString(apiVersion))
-  add(path_574130, "farmId", newJString(farmId))
-  add(path_574130, "subscriptionId", newJString(subscriptionId))
-  add(query_574132, "$filter", newJString(Filter))
-  result = call_574129.call(path_574130, query_574132, nil, nil, nil)
+  var path_564030 = newJObject()
+  var query_564032 = newJObject()
+  add(query_564032, "api-version", newJString(apiVersion))
+  add(path_564030, "farmId", newJString(farmId))
+  add(path_564030, "subscriptionId", newJString(subscriptionId))
+  add(path_564030, "resourceGroupName", newJString(resourceGroupName))
+  add(query_564032, "$filter", newJString(Filter))
+  result = call_564029.call(path_564030, query_564032, nil, nil, nil)
 
-var acquisitionsList* = Call_AcquisitionsList_573864(name: "acquisitionsList",
+var acquisitionsList* = Call_AcquisitionsList_563762(name: "acquisitionsList",
     meth: HttpMethod.HttpGet, host: "adminmanagement.local.azurestack.external", route: "/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.Storage.Admin/farms/{farmId}/acquisitions",
-    validator: validate_AcquisitionsList_573865, base: "",
-    url: url_AcquisitionsList_573866, schemes: {Scheme.Https})
+    validator: validate_AcquisitionsList_563763, base: "",
+    url: url_AcquisitionsList_563764, schemes: {Scheme.Https})
 export
   rest
 

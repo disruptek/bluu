@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, httpcore
 
 ## auto-generated via openapi macro
 ## title: SqlManagementClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_567641 = ref object of OpenApiRestCall
+  OpenApiRestCall_563539 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_567641](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563539](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_567641): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563539): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,8 +107,8 @@ const
   macServiceName = "sql-firewallRules"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_FirewallRulesReplace_568177 = ref object of OpenApiRestCall_567641
-proc url_FirewallRulesReplace_568179(protocol: Scheme; host: string; base: string;
+  Call_FirewallRulesReplace_564077 = ref object of OpenApiRestCall_563539
+proc url_FirewallRulesReplace_564079(protocol: Scheme; host: string; base: string;
                                     route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -127,37 +131,37 @@ proc url_FirewallRulesReplace_568179(protocol: Scheme; host: string; base: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_FirewallRulesReplace_568178(path: JsonNode; query: JsonNode;
+proc validate_FirewallRulesReplace_564078(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Replaces all firewall rules on the server.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   ##   serverName: JString (required)
   ##             : The name of the server.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID that identifies an Azure subscription.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568180 = path.getOrDefault("resourceGroupName")
-  valid_568180 = validateParameter(valid_568180, JString, required = true,
+        "path argument is necessary due to required `serverName` field"
+  var valid_564080 = path.getOrDefault("serverName")
+  valid_564080 = validateParameter(valid_564080, JString, required = true,
                                  default = nil)
-  if valid_568180 != nil:
-    section.add "resourceGroupName", valid_568180
-  var valid_568181 = path.getOrDefault("serverName")
-  valid_568181 = validateParameter(valid_568181, JString, required = true,
+  if valid_564080 != nil:
+    section.add "serverName", valid_564080
+  var valid_564081 = path.getOrDefault("subscriptionId")
+  valid_564081 = validateParameter(valid_564081, JString, required = true,
                                  default = nil)
-  if valid_568181 != nil:
-    section.add "serverName", valid_568181
-  var valid_568182 = path.getOrDefault("subscriptionId")
-  valid_568182 = validateParameter(valid_568182, JString, required = true,
+  if valid_564081 != nil:
+    section.add "subscriptionId", valid_564081
+  var valid_564082 = path.getOrDefault("resourceGroupName")
+  valid_564082 = validateParameter(valid_564082, JString, required = true,
                                  default = nil)
-  if valid_568182 != nil:
-    section.add "subscriptionId", valid_568182
+  if valid_564082 != nil:
+    section.add "resourceGroupName", valid_564082
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -165,11 +169,11 @@ proc validate_FirewallRulesReplace_568178(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568183 = query.getOrDefault("api-version")
-  valid_568183 = validateParameter(valid_568183, JString, required = true,
+  var valid_564083 = query.getOrDefault("api-version")
+  valid_564083 = validateParameter(valid_564083, JString, required = true,
                                  default = nil)
-  if valid_568183 != nil:
-    section.add "api-version", valid_568183
+  if valid_564083 != nil:
+    section.add "api-version", valid_564083
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -182,52 +186,52 @@ proc validate_FirewallRulesReplace_568178(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568185: Call_FirewallRulesReplace_568177; path: JsonNode;
+proc call*(call_564085: Call_FirewallRulesReplace_564077; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Replaces all firewall rules on the server.
   ## 
-  let valid = call_568185.validator(path, query, header, formData, body)
-  let scheme = call_568185.pickScheme
+  let valid = call_564085.validator(path, query, header, formData, body)
+  let scheme = call_564085.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568185.url(scheme.get, call_568185.host, call_568185.base,
-                         call_568185.route, valid.getOrDefault("path"),
+  let url = call_564085.url(scheme.get, call_564085.host, call_564085.base,
+                         call_564085.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568185, url, valid)
+  result = hook(call_564085, url, valid)
 
-proc call*(call_568186: Call_FirewallRulesReplace_568177;
-          resourceGroupName: string; apiVersion: string; serverName: string;
-          subscriptionId: string; parameters: JsonNode): Recallable =
+proc call*(call_564086: Call_FirewallRulesReplace_564077; apiVersion: string;
+          serverName: string; subscriptionId: string; resourceGroupName: string;
+          parameters: JsonNode): Recallable =
   ## firewallRulesReplace
   ## Replaces all firewall rules on the server.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   ##   apiVersion: string (required)
   ##             : The API version to use for the request.
   ##   serverName: string (required)
   ##             : The name of the server.
   ##   subscriptionId: string (required)
   ##                 : The subscription ID that identifies an Azure subscription.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   ##   parameters: JObject (required)
-  var path_568187 = newJObject()
-  var query_568188 = newJObject()
-  var body_568189 = newJObject()
-  add(path_568187, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568188, "api-version", newJString(apiVersion))
-  add(path_568187, "serverName", newJString(serverName))
-  add(path_568187, "subscriptionId", newJString(subscriptionId))
+  var path_564087 = newJObject()
+  var query_564088 = newJObject()
+  var body_564089 = newJObject()
+  add(query_564088, "api-version", newJString(apiVersion))
+  add(path_564087, "serverName", newJString(serverName))
+  add(path_564087, "subscriptionId", newJString(subscriptionId))
+  add(path_564087, "resourceGroupName", newJString(resourceGroupName))
   if parameters != nil:
-    body_568189 = parameters
-  result = call_568186.call(path_568187, query_568188, nil, nil, body_568189)
+    body_564089 = parameters
+  result = call_564086.call(path_564087, query_564088, nil, nil, body_564089)
 
-var firewallRulesReplace* = Call_FirewallRulesReplace_568177(
+var firewallRulesReplace* = Call_FirewallRulesReplace_564077(
     name: "firewallRulesReplace", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/servers/{serverName}/firewallRules",
-    validator: validate_FirewallRulesReplace_568178, base: "",
-    url: url_FirewallRulesReplace_568179, schemes: {Scheme.Https})
+    validator: validate_FirewallRulesReplace_564078, base: "",
+    url: url_FirewallRulesReplace_564079, schemes: {Scheme.Https})
 type
-  Call_FirewallRulesListByServer_567863 = ref object of OpenApiRestCall_567641
-proc url_FirewallRulesListByServer_567865(protocol: Scheme; host: string;
+  Call_FirewallRulesListByServer_563761 = ref object of OpenApiRestCall_563539
+proc url_FirewallRulesListByServer_563763(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -250,37 +254,37 @@ proc url_FirewallRulesListByServer_567865(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_FirewallRulesListByServer_567864(path: JsonNode; query: JsonNode;
+proc validate_FirewallRulesListByServer_563762(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets a list of firewall rules.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   ##   serverName: JString (required)
   ##             : The name of the server.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID that identifies an Azure subscription.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568038 = path.getOrDefault("resourceGroupName")
-  valid_568038 = validateParameter(valid_568038, JString, required = true,
+        "path argument is necessary due to required `serverName` field"
+  var valid_563938 = path.getOrDefault("serverName")
+  valid_563938 = validateParameter(valid_563938, JString, required = true,
                                  default = nil)
-  if valid_568038 != nil:
-    section.add "resourceGroupName", valid_568038
-  var valid_568039 = path.getOrDefault("serverName")
-  valid_568039 = validateParameter(valid_568039, JString, required = true,
+  if valid_563938 != nil:
+    section.add "serverName", valid_563938
+  var valid_563939 = path.getOrDefault("subscriptionId")
+  valid_563939 = validateParameter(valid_563939, JString, required = true,
                                  default = nil)
-  if valid_568039 != nil:
-    section.add "serverName", valid_568039
-  var valid_568040 = path.getOrDefault("subscriptionId")
-  valid_568040 = validateParameter(valid_568040, JString, required = true,
+  if valid_563939 != nil:
+    section.add "subscriptionId", valid_563939
+  var valid_563940 = path.getOrDefault("resourceGroupName")
+  valid_563940 = validateParameter(valid_563940, JString, required = true,
                                  default = nil)
-  if valid_568040 != nil:
-    section.add "subscriptionId", valid_568040
+  if valid_563940 != nil:
+    section.add "resourceGroupName", valid_563940
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -288,11 +292,11 @@ proc validate_FirewallRulesListByServer_567864(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568041 = query.getOrDefault("api-version")
-  valid_568041 = validateParameter(valid_568041, JString, required = true,
+  var valid_563941 = query.getOrDefault("api-version")
+  valid_563941 = validateParameter(valid_563941, JString, required = true,
                                  default = nil)
-  if valid_568041 != nil:
-    section.add "api-version", valid_568041
+  if valid_563941 != nil:
+    section.add "api-version", valid_563941
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -301,48 +305,47 @@ proc validate_FirewallRulesListByServer_567864(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568064: Call_FirewallRulesListByServer_567863; path: JsonNode;
+proc call*(call_563964: Call_FirewallRulesListByServer_563761; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets a list of firewall rules.
   ## 
-  let valid = call_568064.validator(path, query, header, formData, body)
-  let scheme = call_568064.pickScheme
+  let valid = call_563964.validator(path, query, header, formData, body)
+  let scheme = call_563964.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568064.url(scheme.get, call_568064.host, call_568064.base,
-                         call_568064.route, valid.getOrDefault("path"),
+  let url = call_563964.url(scheme.get, call_563964.host, call_563964.base,
+                         call_563964.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568064, url, valid)
+  result = hook(call_563964, url, valid)
 
-proc call*(call_568135: Call_FirewallRulesListByServer_567863;
-          resourceGroupName: string; apiVersion: string; serverName: string;
-          subscriptionId: string): Recallable =
+proc call*(call_564035: Call_FirewallRulesListByServer_563761; apiVersion: string;
+          serverName: string; subscriptionId: string; resourceGroupName: string): Recallable =
   ## firewallRulesListByServer
   ## Gets a list of firewall rules.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   ##   apiVersion: string (required)
   ##             : The API version to use for the request.
   ##   serverName: string (required)
   ##             : The name of the server.
   ##   subscriptionId: string (required)
   ##                 : The subscription ID that identifies an Azure subscription.
-  var path_568136 = newJObject()
-  var query_568138 = newJObject()
-  add(path_568136, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568138, "api-version", newJString(apiVersion))
-  add(path_568136, "serverName", newJString(serverName))
-  add(path_568136, "subscriptionId", newJString(subscriptionId))
-  result = call_568135.call(path_568136, query_568138, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
+  var path_564036 = newJObject()
+  var query_564038 = newJObject()
+  add(query_564038, "api-version", newJString(apiVersion))
+  add(path_564036, "serverName", newJString(serverName))
+  add(path_564036, "subscriptionId", newJString(subscriptionId))
+  add(path_564036, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564035.call(path_564036, query_564038, nil, nil, nil)
 
-var firewallRulesListByServer* = Call_FirewallRulesListByServer_567863(
+var firewallRulesListByServer* = Call_FirewallRulesListByServer_563761(
     name: "firewallRulesListByServer", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/servers/{serverName}/firewallRules",
-    validator: validate_FirewallRulesListByServer_567864, base: "",
-    url: url_FirewallRulesListByServer_567865, schemes: {Scheme.Https})
+    validator: validate_FirewallRulesListByServer_563762, base: "",
+    url: url_FirewallRulesListByServer_563763, schemes: {Scheme.Https})
 type
-  Call_FirewallRulesCreateOrUpdate_568202 = ref object of OpenApiRestCall_567641
-proc url_FirewallRulesCreateOrUpdate_568204(protocol: Scheme; host: string;
+  Call_FirewallRulesCreateOrUpdate_564102 = ref object of OpenApiRestCall_563539
+proc url_FirewallRulesCreateOrUpdate_564104(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -368,44 +371,44 @@ proc url_FirewallRulesCreateOrUpdate_568204(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_FirewallRulesCreateOrUpdate_568203(path: JsonNode; query: JsonNode;
+proc validate_FirewallRulesCreateOrUpdate_564103(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Creates or updates a firewall rule.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   ##   serverName: JString (required)
   ##             : The name of the server.
-  ##   subscriptionId: JString (required)
-  ##                 : The subscription ID that identifies an Azure subscription.
   ##   firewallRuleName: JString (required)
   ##                   : The name of the firewall rule.
+  ##   subscriptionId: JString (required)
+  ##                 : The subscription ID that identifies an Azure subscription.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568205 = path.getOrDefault("resourceGroupName")
-  valid_568205 = validateParameter(valid_568205, JString, required = true,
+        "path argument is necessary due to required `serverName` field"
+  var valid_564105 = path.getOrDefault("serverName")
+  valid_564105 = validateParameter(valid_564105, JString, required = true,
                                  default = nil)
-  if valid_568205 != nil:
-    section.add "resourceGroupName", valid_568205
-  var valid_568206 = path.getOrDefault("serverName")
-  valid_568206 = validateParameter(valid_568206, JString, required = true,
+  if valid_564105 != nil:
+    section.add "serverName", valid_564105
+  var valid_564106 = path.getOrDefault("firewallRuleName")
+  valid_564106 = validateParameter(valid_564106, JString, required = true,
                                  default = nil)
-  if valid_568206 != nil:
-    section.add "serverName", valid_568206
-  var valid_568207 = path.getOrDefault("subscriptionId")
-  valid_568207 = validateParameter(valid_568207, JString, required = true,
+  if valid_564106 != nil:
+    section.add "firewallRuleName", valid_564106
+  var valid_564107 = path.getOrDefault("subscriptionId")
+  valid_564107 = validateParameter(valid_564107, JString, required = true,
                                  default = nil)
-  if valid_568207 != nil:
-    section.add "subscriptionId", valid_568207
-  var valid_568208 = path.getOrDefault("firewallRuleName")
-  valid_568208 = validateParameter(valid_568208, JString, required = true,
+  if valid_564107 != nil:
+    section.add "subscriptionId", valid_564107
+  var valid_564108 = path.getOrDefault("resourceGroupName")
+  valid_564108 = validateParameter(valid_564108, JString, required = true,
                                  default = nil)
-  if valid_568208 != nil:
-    section.add "firewallRuleName", valid_568208
+  if valid_564108 != nil:
+    section.add "resourceGroupName", valid_564108
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -413,11 +416,11 @@ proc validate_FirewallRulesCreateOrUpdate_568203(path: JsonNode; query: JsonNode
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568209 = query.getOrDefault("api-version")
-  valid_568209 = validateParameter(valid_568209, JString, required = true,
+  var valid_564109 = query.getOrDefault("api-version")
+  valid_564109 = validateParameter(valid_564109, JString, required = true,
                                  default = nil)
-  if valid_568209 != nil:
-    section.add "api-version", valid_568209
+  if valid_564109 != nil:
+    section.add "api-version", valid_564109
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -431,56 +434,56 @@ proc validate_FirewallRulesCreateOrUpdate_568203(path: JsonNode; query: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_568211: Call_FirewallRulesCreateOrUpdate_568202; path: JsonNode;
+proc call*(call_564111: Call_FirewallRulesCreateOrUpdate_564102; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Creates or updates a firewall rule.
   ## 
-  let valid = call_568211.validator(path, query, header, formData, body)
-  let scheme = call_568211.pickScheme
+  let valid = call_564111.validator(path, query, header, formData, body)
+  let scheme = call_564111.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568211.url(scheme.get, call_568211.host, call_568211.base,
-                         call_568211.route, valid.getOrDefault("path"),
+  let url = call_564111.url(scheme.get, call_564111.host, call_564111.base,
+                         call_564111.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568211, url, valid)
+  result = hook(call_564111, url, valid)
 
-proc call*(call_568212: Call_FirewallRulesCreateOrUpdate_568202;
-          resourceGroupName: string; apiVersion: string; serverName: string;
-          subscriptionId: string; parameters: JsonNode; firewallRuleName: string): Recallable =
+proc call*(call_564112: Call_FirewallRulesCreateOrUpdate_564102;
+          apiVersion: string; serverName: string; firewallRuleName: string;
+          subscriptionId: string; resourceGroupName: string; parameters: JsonNode): Recallable =
   ## firewallRulesCreateOrUpdate
   ## Creates or updates a firewall rule.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   ##   apiVersion: string (required)
   ##             : The API version to use for the request.
   ##   serverName: string (required)
   ##             : The name of the server.
-  ##   subscriptionId: string (required)
-  ##                 : The subscription ID that identifies an Azure subscription.
-  ##   parameters: JObject (required)
-  ##             : The required parameters for creating or updating a firewall rule.
   ##   firewallRuleName: string (required)
   ##                   : The name of the firewall rule.
-  var path_568213 = newJObject()
-  var query_568214 = newJObject()
-  var body_568215 = newJObject()
-  add(path_568213, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568214, "api-version", newJString(apiVersion))
-  add(path_568213, "serverName", newJString(serverName))
-  add(path_568213, "subscriptionId", newJString(subscriptionId))
+  ##   subscriptionId: string (required)
+  ##                 : The subscription ID that identifies an Azure subscription.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
+  ##   parameters: JObject (required)
+  ##             : The required parameters for creating or updating a firewall rule.
+  var path_564113 = newJObject()
+  var query_564114 = newJObject()
+  var body_564115 = newJObject()
+  add(query_564114, "api-version", newJString(apiVersion))
+  add(path_564113, "serverName", newJString(serverName))
+  add(path_564113, "firewallRuleName", newJString(firewallRuleName))
+  add(path_564113, "subscriptionId", newJString(subscriptionId))
+  add(path_564113, "resourceGroupName", newJString(resourceGroupName))
   if parameters != nil:
-    body_568215 = parameters
-  add(path_568213, "firewallRuleName", newJString(firewallRuleName))
-  result = call_568212.call(path_568213, query_568214, nil, nil, body_568215)
+    body_564115 = parameters
+  result = call_564112.call(path_564113, query_564114, nil, nil, body_564115)
 
-var firewallRulesCreateOrUpdate* = Call_FirewallRulesCreateOrUpdate_568202(
+var firewallRulesCreateOrUpdate* = Call_FirewallRulesCreateOrUpdate_564102(
     name: "firewallRulesCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/servers/{serverName}/firewallRules/{firewallRuleName}",
-    validator: validate_FirewallRulesCreateOrUpdate_568203, base: "",
-    url: url_FirewallRulesCreateOrUpdate_568204, schemes: {Scheme.Https})
+    validator: validate_FirewallRulesCreateOrUpdate_564103, base: "",
+    url: url_FirewallRulesCreateOrUpdate_564104, schemes: {Scheme.Https})
 type
-  Call_FirewallRulesGet_568190 = ref object of OpenApiRestCall_567641
-proc url_FirewallRulesGet_568192(protocol: Scheme; host: string; base: string;
+  Call_FirewallRulesGet_564090 = ref object of OpenApiRestCall_563539
+proc url_FirewallRulesGet_564092(protocol: Scheme; host: string; base: string;
                                 route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -506,7 +509,7 @@ proc url_FirewallRulesGet_568192(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_FirewallRulesGet_568191(path: JsonNode; query: JsonNode;
+proc validate_FirewallRulesGet_564091(path: JsonNode; query: JsonNode;
                                      header: JsonNode; formData: JsonNode;
                                      body: JsonNode): JsonNode =
   ## Gets a firewall rule.
@@ -514,37 +517,37 @@ proc validate_FirewallRulesGet_568191(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   ##   serverName: JString (required)
   ##             : The name of the server.
-  ##   subscriptionId: JString (required)
-  ##                 : The subscription ID that identifies an Azure subscription.
   ##   firewallRuleName: JString (required)
   ##                   : The name of the firewall rule.
+  ##   subscriptionId: JString (required)
+  ##                 : The subscription ID that identifies an Azure subscription.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568193 = path.getOrDefault("resourceGroupName")
-  valid_568193 = validateParameter(valid_568193, JString, required = true,
+        "path argument is necessary due to required `serverName` field"
+  var valid_564093 = path.getOrDefault("serverName")
+  valid_564093 = validateParameter(valid_564093, JString, required = true,
                                  default = nil)
-  if valid_568193 != nil:
-    section.add "resourceGroupName", valid_568193
-  var valid_568194 = path.getOrDefault("serverName")
-  valid_568194 = validateParameter(valid_568194, JString, required = true,
+  if valid_564093 != nil:
+    section.add "serverName", valid_564093
+  var valid_564094 = path.getOrDefault("firewallRuleName")
+  valid_564094 = validateParameter(valid_564094, JString, required = true,
                                  default = nil)
-  if valid_568194 != nil:
-    section.add "serverName", valid_568194
-  var valid_568195 = path.getOrDefault("subscriptionId")
-  valid_568195 = validateParameter(valid_568195, JString, required = true,
+  if valid_564094 != nil:
+    section.add "firewallRuleName", valid_564094
+  var valid_564095 = path.getOrDefault("subscriptionId")
+  valid_564095 = validateParameter(valid_564095, JString, required = true,
                                  default = nil)
-  if valid_568195 != nil:
-    section.add "subscriptionId", valid_568195
-  var valid_568196 = path.getOrDefault("firewallRuleName")
-  valid_568196 = validateParameter(valid_568196, JString, required = true,
+  if valid_564095 != nil:
+    section.add "subscriptionId", valid_564095
+  var valid_564096 = path.getOrDefault("resourceGroupName")
+  valid_564096 = validateParameter(valid_564096, JString, required = true,
                                  default = nil)
-  if valid_568196 != nil:
-    section.add "firewallRuleName", valid_568196
+  if valid_564096 != nil:
+    section.add "resourceGroupName", valid_564096
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -552,11 +555,11 @@ proc validate_FirewallRulesGet_568191(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568197 = query.getOrDefault("api-version")
-  valid_568197 = validateParameter(valid_568197, JString, required = true,
+  var valid_564097 = query.getOrDefault("api-version")
+  valid_564097 = validateParameter(valid_564097, JString, required = true,
                                  default = nil)
-  if valid_568197 != nil:
-    section.add "api-version", valid_568197
+  if valid_564097 != nil:
+    section.add "api-version", valid_564097
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -565,50 +568,50 @@ proc validate_FirewallRulesGet_568191(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568198: Call_FirewallRulesGet_568190; path: JsonNode;
+proc call*(call_564098: Call_FirewallRulesGet_564090; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets a firewall rule.
   ## 
-  let valid = call_568198.validator(path, query, header, formData, body)
-  let scheme = call_568198.pickScheme
+  let valid = call_564098.validator(path, query, header, formData, body)
+  let scheme = call_564098.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568198.url(scheme.get, call_568198.host, call_568198.base,
-                         call_568198.route, valid.getOrDefault("path"),
+  let url = call_564098.url(scheme.get, call_564098.host, call_564098.base,
+                         call_564098.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568198, url, valid)
+  result = hook(call_564098, url, valid)
 
-proc call*(call_568199: Call_FirewallRulesGet_568190; resourceGroupName: string;
-          apiVersion: string; serverName: string; subscriptionId: string;
-          firewallRuleName: string): Recallable =
+proc call*(call_564099: Call_FirewallRulesGet_564090; apiVersion: string;
+          serverName: string; firewallRuleName: string; subscriptionId: string;
+          resourceGroupName: string): Recallable =
   ## firewallRulesGet
   ## Gets a firewall rule.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   ##   apiVersion: string (required)
   ##             : The API version to use for the request.
   ##   serverName: string (required)
   ##             : The name of the server.
-  ##   subscriptionId: string (required)
-  ##                 : The subscription ID that identifies an Azure subscription.
   ##   firewallRuleName: string (required)
   ##                   : The name of the firewall rule.
-  var path_568200 = newJObject()
-  var query_568201 = newJObject()
-  add(path_568200, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568201, "api-version", newJString(apiVersion))
-  add(path_568200, "serverName", newJString(serverName))
-  add(path_568200, "subscriptionId", newJString(subscriptionId))
-  add(path_568200, "firewallRuleName", newJString(firewallRuleName))
-  result = call_568199.call(path_568200, query_568201, nil, nil, nil)
+  ##   subscriptionId: string (required)
+  ##                 : The subscription ID that identifies an Azure subscription.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
+  var path_564100 = newJObject()
+  var query_564101 = newJObject()
+  add(query_564101, "api-version", newJString(apiVersion))
+  add(path_564100, "serverName", newJString(serverName))
+  add(path_564100, "firewallRuleName", newJString(firewallRuleName))
+  add(path_564100, "subscriptionId", newJString(subscriptionId))
+  add(path_564100, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564099.call(path_564100, query_564101, nil, nil, nil)
 
-var firewallRulesGet* = Call_FirewallRulesGet_568190(name: "firewallRulesGet",
+var firewallRulesGet* = Call_FirewallRulesGet_564090(name: "firewallRulesGet",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/servers/{serverName}/firewallRules/{firewallRuleName}",
-    validator: validate_FirewallRulesGet_568191, base: "",
-    url: url_FirewallRulesGet_568192, schemes: {Scheme.Https})
+    validator: validate_FirewallRulesGet_564091, base: "",
+    url: url_FirewallRulesGet_564092, schemes: {Scheme.Https})
 type
-  Call_FirewallRulesDelete_568216 = ref object of OpenApiRestCall_567641
-proc url_FirewallRulesDelete_568218(protocol: Scheme; host: string; base: string;
+  Call_FirewallRulesDelete_564116 = ref object of OpenApiRestCall_563539
+proc url_FirewallRulesDelete_564118(protocol: Scheme; host: string; base: string;
                                    route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -634,7 +637,7 @@ proc url_FirewallRulesDelete_568218(protocol: Scheme; host: string; base: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_FirewallRulesDelete_568217(path: JsonNode; query: JsonNode;
+proc validate_FirewallRulesDelete_564117(path: JsonNode; query: JsonNode;
                                         header: JsonNode; formData: JsonNode;
                                         body: JsonNode): JsonNode =
   ## Deletes a firewall rule.
@@ -642,37 +645,37 @@ proc validate_FirewallRulesDelete_568217(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   ##   serverName: JString (required)
   ##             : The name of the server.
-  ##   subscriptionId: JString (required)
-  ##                 : The subscription ID that identifies an Azure subscription.
   ##   firewallRuleName: JString (required)
   ##                   : The name of the firewall rule.
+  ##   subscriptionId: JString (required)
+  ##                 : The subscription ID that identifies an Azure subscription.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568219 = path.getOrDefault("resourceGroupName")
-  valid_568219 = validateParameter(valid_568219, JString, required = true,
+        "path argument is necessary due to required `serverName` field"
+  var valid_564119 = path.getOrDefault("serverName")
+  valid_564119 = validateParameter(valid_564119, JString, required = true,
                                  default = nil)
-  if valid_568219 != nil:
-    section.add "resourceGroupName", valid_568219
-  var valid_568220 = path.getOrDefault("serverName")
-  valid_568220 = validateParameter(valid_568220, JString, required = true,
+  if valid_564119 != nil:
+    section.add "serverName", valid_564119
+  var valid_564120 = path.getOrDefault("firewallRuleName")
+  valid_564120 = validateParameter(valid_564120, JString, required = true,
                                  default = nil)
-  if valid_568220 != nil:
-    section.add "serverName", valid_568220
-  var valid_568221 = path.getOrDefault("subscriptionId")
-  valid_568221 = validateParameter(valid_568221, JString, required = true,
+  if valid_564120 != nil:
+    section.add "firewallRuleName", valid_564120
+  var valid_564121 = path.getOrDefault("subscriptionId")
+  valid_564121 = validateParameter(valid_564121, JString, required = true,
                                  default = nil)
-  if valid_568221 != nil:
-    section.add "subscriptionId", valid_568221
-  var valid_568222 = path.getOrDefault("firewallRuleName")
-  valid_568222 = validateParameter(valid_568222, JString, required = true,
+  if valid_564121 != nil:
+    section.add "subscriptionId", valid_564121
+  var valid_564122 = path.getOrDefault("resourceGroupName")
+  valid_564122 = validateParameter(valid_564122, JString, required = true,
                                  default = nil)
-  if valid_568222 != nil:
-    section.add "firewallRuleName", valid_568222
+  if valid_564122 != nil:
+    section.add "resourceGroupName", valid_564122
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -680,11 +683,11 @@ proc validate_FirewallRulesDelete_568217(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568223 = query.getOrDefault("api-version")
-  valid_568223 = validateParameter(valid_568223, JString, required = true,
+  var valid_564123 = query.getOrDefault("api-version")
+  valid_564123 = validateParameter(valid_564123, JString, required = true,
                                  default = nil)
-  if valid_568223 != nil:
-    section.add "api-version", valid_568223
+  if valid_564123 != nil:
+    section.add "api-version", valid_564123
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -693,48 +696,48 @@ proc validate_FirewallRulesDelete_568217(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568224: Call_FirewallRulesDelete_568216; path: JsonNode;
+proc call*(call_564124: Call_FirewallRulesDelete_564116; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes a firewall rule.
   ## 
-  let valid = call_568224.validator(path, query, header, formData, body)
-  let scheme = call_568224.pickScheme
+  let valid = call_564124.validator(path, query, header, formData, body)
+  let scheme = call_564124.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568224.url(scheme.get, call_568224.host, call_568224.base,
-                         call_568224.route, valid.getOrDefault("path"),
+  let url = call_564124.url(scheme.get, call_564124.host, call_564124.base,
+                         call_564124.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568224, url, valid)
+  result = hook(call_564124, url, valid)
 
-proc call*(call_568225: Call_FirewallRulesDelete_568216; resourceGroupName: string;
-          apiVersion: string; serverName: string; subscriptionId: string;
-          firewallRuleName: string): Recallable =
+proc call*(call_564125: Call_FirewallRulesDelete_564116; apiVersion: string;
+          serverName: string; firewallRuleName: string; subscriptionId: string;
+          resourceGroupName: string): Recallable =
   ## firewallRulesDelete
   ## Deletes a firewall rule.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   ##   apiVersion: string (required)
   ##             : The API version to use for the request.
   ##   serverName: string (required)
   ##             : The name of the server.
-  ##   subscriptionId: string (required)
-  ##                 : The subscription ID that identifies an Azure subscription.
   ##   firewallRuleName: string (required)
   ##                   : The name of the firewall rule.
-  var path_568226 = newJObject()
-  var query_568227 = newJObject()
-  add(path_568226, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568227, "api-version", newJString(apiVersion))
-  add(path_568226, "serverName", newJString(serverName))
-  add(path_568226, "subscriptionId", newJString(subscriptionId))
-  add(path_568226, "firewallRuleName", newJString(firewallRuleName))
-  result = call_568225.call(path_568226, query_568227, nil, nil, nil)
+  ##   subscriptionId: string (required)
+  ##                 : The subscription ID that identifies an Azure subscription.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
+  var path_564126 = newJObject()
+  var query_564127 = newJObject()
+  add(query_564127, "api-version", newJString(apiVersion))
+  add(path_564126, "serverName", newJString(serverName))
+  add(path_564126, "firewallRuleName", newJString(firewallRuleName))
+  add(path_564126, "subscriptionId", newJString(subscriptionId))
+  add(path_564126, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564125.call(path_564126, query_564127, nil, nil, nil)
 
-var firewallRulesDelete* = Call_FirewallRulesDelete_568216(
+var firewallRulesDelete* = Call_FirewallRulesDelete_564116(
     name: "firewallRulesDelete", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/servers/{serverName}/firewallRules/{firewallRuleName}",
-    validator: validate_FirewallRulesDelete_568217, base: "",
-    url: url_FirewallRulesDelete_568218, schemes: {Scheme.Https})
+    validator: validate_FirewallRulesDelete_564117, base: "",
+    url: url_FirewallRulesDelete_564118, schemes: {Scheme.Https})
 export
   rest
 

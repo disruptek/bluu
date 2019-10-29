@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, httpcore
 
 ## auto-generated via openapi macro
 ## title: Provider API Client
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_567641 = ref object of OpenApiRestCall
+  OpenApiRestCall_563539 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_567641](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563539](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_567641): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563539): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,15 +107,15 @@ const
   macServiceName = "web-Provider"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_ProviderGetAvailableStacks_567863 = ref object of OpenApiRestCall_567641
-proc url_ProviderGetAvailableStacks_567865(protocol: Scheme; host: string;
+  Call_ProviderGetAvailableStacks_563761 = ref object of OpenApiRestCall_563539
+proc url_ProviderGetAvailableStacks_563763(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_ProviderGetAvailableStacks_567864(path: JsonNode; query: JsonNode;
+proc validate_ProviderGetAvailableStacks_563762(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Get available application frameworks and their versions
   ## 
@@ -126,16 +130,16 @@ proc validate_ProviderGetAvailableStacks_567864(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568024 = query.getOrDefault("api-version")
-  valid_568024 = validateParameter(valid_568024, JString, required = true,
+  var valid_563924 = query.getOrDefault("api-version")
+  valid_563924 = validateParameter(valid_563924, JString, required = true,
                                  default = nil)
-  if valid_568024 != nil:
-    section.add "api-version", valid_568024
-  var valid_568038 = query.getOrDefault("osTypeSelected")
-  valid_568038 = validateParameter(valid_568038, JString, required = false,
+  if valid_563924 != nil:
+    section.add "api-version", valid_563924
+  var valid_563938 = query.getOrDefault("osTypeSelected")
+  valid_563938 = validateParameter(valid_563938, JString, required = false,
                                  default = newJString("Windows"))
-  if valid_568038 != nil:
-    section.add "osTypeSelected", valid_568038
+  if valid_563938 != nil:
+    section.add "osTypeSelected", valid_563938
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -144,47 +148,47 @@ proc validate_ProviderGetAvailableStacks_567864(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568061: Call_ProviderGetAvailableStacks_567863; path: JsonNode;
+proc call*(call_563961: Call_ProviderGetAvailableStacks_563761; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get available application frameworks and their versions
   ## 
-  let valid = call_568061.validator(path, query, header, formData, body)
-  let scheme = call_568061.pickScheme
+  let valid = call_563961.validator(path, query, header, formData, body)
+  let scheme = call_563961.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568061.url(scheme.get, call_568061.host, call_568061.base,
-                         call_568061.route, valid.getOrDefault("path"),
+  let url = call_563961.url(scheme.get, call_563961.host, call_563961.base,
+                         call_563961.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568061, url, valid)
+  result = hook(call_563961, url, valid)
 
-proc call*(call_568132: Call_ProviderGetAvailableStacks_567863; apiVersion: string;
+proc call*(call_564032: Call_ProviderGetAvailableStacks_563761; apiVersion: string;
           osTypeSelected: string = "Windows"): Recallable =
   ## providerGetAvailableStacks
   ## Get available application frameworks and their versions
   ##   apiVersion: string (required)
   ##             : API Version
   ##   osTypeSelected: string
-  var query_568133 = newJObject()
-  add(query_568133, "api-version", newJString(apiVersion))
-  add(query_568133, "osTypeSelected", newJString(osTypeSelected))
-  result = call_568132.call(nil, query_568133, nil, nil, nil)
+  var query_564033 = newJObject()
+  add(query_564033, "api-version", newJString(apiVersion))
+  add(query_564033, "osTypeSelected", newJString(osTypeSelected))
+  result = call_564032.call(nil, query_564033, nil, nil, nil)
 
-var providerGetAvailableStacks* = Call_ProviderGetAvailableStacks_567863(
+var providerGetAvailableStacks* = Call_ProviderGetAvailableStacks_563761(
     name: "providerGetAvailableStacks", meth: HttpMethod.HttpGet,
     host: "management.azure.com",
     route: "/providers/Microsoft.Web/availableStacks",
-    validator: validate_ProviderGetAvailableStacks_567864, base: "",
-    url: url_ProviderGetAvailableStacks_567865, schemes: {Scheme.Https})
+    validator: validate_ProviderGetAvailableStacks_563762, base: "",
+    url: url_ProviderGetAvailableStacks_563763, schemes: {Scheme.Https})
 type
-  Call_ProviderListOperations_568173 = ref object of OpenApiRestCall_567641
-proc url_ProviderListOperations_568175(protocol: Scheme; host: string; base: string;
+  Call_ProviderListOperations_564073 = ref object of OpenApiRestCall_563539
+proc url_ProviderListOperations_564075(protocol: Scheme; host: string; base: string;
                                       route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_ProviderListOperations_568174(path: JsonNode; query: JsonNode;
+proc validate_ProviderListOperations_564074(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets all available operations for the Microsoft.Web resource provider. Also exposes resource metric definitions
   ## 
@@ -198,11 +202,11 @@ proc validate_ProviderListOperations_568174(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568176 = query.getOrDefault("api-version")
-  valid_568176 = validateParameter(valid_568176, JString, required = true,
+  var valid_564076 = query.getOrDefault("api-version")
+  valid_564076 = validateParameter(valid_564076, JString, required = true,
                                  default = nil)
-  if valid_568176 != nil:
-    section.add "api-version", valid_568176
+  if valid_564076 != nil:
+    section.add "api-version", valid_564076
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -211,36 +215,36 @@ proc validate_ProviderListOperations_568174(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568177: Call_ProviderListOperations_568173; path: JsonNode;
+proc call*(call_564077: Call_ProviderListOperations_564073; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets all available operations for the Microsoft.Web resource provider. Also exposes resource metric definitions
   ## 
-  let valid = call_568177.validator(path, query, header, formData, body)
-  let scheme = call_568177.pickScheme
+  let valid = call_564077.validator(path, query, header, formData, body)
+  let scheme = call_564077.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568177.url(scheme.get, call_568177.host, call_568177.base,
-                         call_568177.route, valid.getOrDefault("path"),
+  let url = call_564077.url(scheme.get, call_564077.host, call_564077.base,
+                         call_564077.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568177, url, valid)
+  result = hook(call_564077, url, valid)
 
-proc call*(call_568178: Call_ProviderListOperations_568173; apiVersion: string): Recallable =
+proc call*(call_564078: Call_ProviderListOperations_564073; apiVersion: string): Recallable =
   ## providerListOperations
   ## Gets all available operations for the Microsoft.Web resource provider. Also exposes resource metric definitions
   ##   apiVersion: string (required)
   ##             : API Version
-  var query_568179 = newJObject()
-  add(query_568179, "api-version", newJString(apiVersion))
-  result = call_568178.call(nil, query_568179, nil, nil, nil)
+  var query_564079 = newJObject()
+  add(query_564079, "api-version", newJString(apiVersion))
+  result = call_564078.call(nil, query_564079, nil, nil, nil)
 
-var providerListOperations* = Call_ProviderListOperations_568173(
+var providerListOperations* = Call_ProviderListOperations_564073(
     name: "providerListOperations", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/providers/Microsoft.Web/operations",
-    validator: validate_ProviderListOperations_568174, base: "",
-    url: url_ProviderListOperations_568175, schemes: {Scheme.Https})
+    validator: validate_ProviderListOperations_564074, base: "",
+    url: url_ProviderListOperations_564075, schemes: {Scheme.Https})
 type
-  Call_ProviderGetAvailableStacksOnPrem_568180 = ref object of OpenApiRestCall_567641
-proc url_ProviderGetAvailableStacksOnPrem_568182(protocol: Scheme; host: string;
+  Call_ProviderGetAvailableStacksOnPrem_564080 = ref object of OpenApiRestCall_563539
+proc url_ProviderGetAvailableStacksOnPrem_564082(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -256,7 +260,7 @@ proc url_ProviderGetAvailableStacksOnPrem_568182(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ProviderGetAvailableStacksOnPrem_568181(path: JsonNode;
+proc validate_ProviderGetAvailableStacksOnPrem_564081(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Get available application frameworks and their versions
   ## 
@@ -268,11 +272,11 @@ proc validate_ProviderGetAvailableStacksOnPrem_568181(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_568197 = path.getOrDefault("subscriptionId")
-  valid_568197 = validateParameter(valid_568197, JString, required = true,
+  var valid_564097 = path.getOrDefault("subscriptionId")
+  valid_564097 = validateParameter(valid_564097, JString, required = true,
                                  default = nil)
-  if valid_568197 != nil:
-    section.add "subscriptionId", valid_568197
+  if valid_564097 != nil:
+    section.add "subscriptionId", valid_564097
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -281,16 +285,16 @@ proc validate_ProviderGetAvailableStacksOnPrem_568181(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568198 = query.getOrDefault("api-version")
-  valid_568198 = validateParameter(valid_568198, JString, required = true,
+  var valid_564098 = query.getOrDefault("api-version")
+  valid_564098 = validateParameter(valid_564098, JString, required = true,
                                  default = nil)
-  if valid_568198 != nil:
-    section.add "api-version", valid_568198
-  var valid_568199 = query.getOrDefault("osTypeSelected")
-  valid_568199 = validateParameter(valid_568199, JString, required = false,
+  if valid_564098 != nil:
+    section.add "api-version", valid_564098
+  var valid_564099 = query.getOrDefault("osTypeSelected")
+  valid_564099 = validateParameter(valid_564099, JString, required = false,
                                  default = newJString("Windows"))
-  if valid_568199 != nil:
-    section.add "osTypeSelected", valid_568199
+  if valid_564099 != nil:
+    section.add "osTypeSelected", valid_564099
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -299,42 +303,42 @@ proc validate_ProviderGetAvailableStacksOnPrem_568181(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568200: Call_ProviderGetAvailableStacksOnPrem_568180;
+proc call*(call_564100: Call_ProviderGetAvailableStacksOnPrem_564080;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Get available application frameworks and their versions
   ## 
-  let valid = call_568200.validator(path, query, header, formData, body)
-  let scheme = call_568200.pickScheme
+  let valid = call_564100.validator(path, query, header, formData, body)
+  let scheme = call_564100.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568200.url(scheme.get, call_568200.host, call_568200.base,
-                         call_568200.route, valid.getOrDefault("path"),
+  let url = call_564100.url(scheme.get, call_564100.host, call_564100.base,
+                         call_564100.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568200, url, valid)
+  result = hook(call_564100, url, valid)
 
-proc call*(call_568201: Call_ProviderGetAvailableStacksOnPrem_568180;
+proc call*(call_564101: Call_ProviderGetAvailableStacksOnPrem_564080;
           apiVersion: string; subscriptionId: string;
           osTypeSelected: string = "Windows"): Recallable =
   ## providerGetAvailableStacksOnPrem
   ## Get available application frameworks and their versions
   ##   apiVersion: string (required)
   ##             : API Version
+  ##   osTypeSelected: string
   ##   subscriptionId: string (required)
   ##                 : Your Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
-  ##   osTypeSelected: string
-  var path_568202 = newJObject()
-  var query_568203 = newJObject()
-  add(query_568203, "api-version", newJString(apiVersion))
-  add(path_568202, "subscriptionId", newJString(subscriptionId))
-  add(query_568203, "osTypeSelected", newJString(osTypeSelected))
-  result = call_568201.call(path_568202, query_568203, nil, nil, nil)
+  var path_564102 = newJObject()
+  var query_564103 = newJObject()
+  add(query_564103, "api-version", newJString(apiVersion))
+  add(query_564103, "osTypeSelected", newJString(osTypeSelected))
+  add(path_564102, "subscriptionId", newJString(subscriptionId))
+  result = call_564101.call(path_564102, query_564103, nil, nil, nil)
 
-var providerGetAvailableStacksOnPrem* = Call_ProviderGetAvailableStacksOnPrem_568180(
+var providerGetAvailableStacksOnPrem* = Call_ProviderGetAvailableStacksOnPrem_564080(
     name: "providerGetAvailableStacksOnPrem", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Web/availableStacks",
-    validator: validate_ProviderGetAvailableStacksOnPrem_568181, base: "",
-    url: url_ProviderGetAvailableStacksOnPrem_568182, schemes: {Scheme.Https})
+    validator: validate_ProviderGetAvailableStacksOnPrem_564081, base: "",
+    url: url_ProviderGetAvailableStacksOnPrem_564082, schemes: {Scheme.Https})
 export
   rest
 

@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, httpcore
 
 ## auto-generated via openapi macro
 ## title: ContainerServiceClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_567657 = ref object of OpenApiRestCall
+  OpenApiRestCall_563555 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_567657](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563555](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_567657): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563555): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,8 +107,8 @@ const
   macServiceName = "containerservice-openShiftManagedClusters"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_OpenShiftManagedClustersList_567879 = ref object of OpenApiRestCall_567657
-proc url_OpenShiftManagedClustersList_567881(protocol: Scheme; host: string;
+  Call_OpenShiftManagedClustersList_563777 = ref object of OpenApiRestCall_563555
+proc url_OpenShiftManagedClustersList_563779(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -121,7 +125,7 @@ proc url_OpenShiftManagedClustersList_567881(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_OpenShiftManagedClustersList_567880(path: JsonNode; query: JsonNode;
+proc validate_OpenShiftManagedClustersList_563778(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets a list of OpenShift managed clusters in the specified subscription. The operation returns properties of each OpenShift managed cluster.
   ## 
@@ -133,11 +137,11 @@ proc validate_OpenShiftManagedClustersList_567880(path: JsonNode; query: JsonNod
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_568054 = path.getOrDefault("subscriptionId")
-  valid_568054 = validateParameter(valid_568054, JString, required = true,
+  var valid_563954 = path.getOrDefault("subscriptionId")
+  valid_563954 = validateParameter(valid_563954, JString, required = true,
                                  default = nil)
-  if valid_568054 != nil:
-    section.add "subscriptionId", valid_568054
+  if valid_563954 != nil:
+    section.add "subscriptionId", valid_563954
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -145,11 +149,11 @@ proc validate_OpenShiftManagedClustersList_567880(path: JsonNode; query: JsonNod
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568055 = query.getOrDefault("api-version")
-  valid_568055 = validateParameter(valid_568055, JString, required = true,
+  var valid_563955 = query.getOrDefault("api-version")
+  valid_563955 = validateParameter(valid_563955, JString, required = true,
                                  default = nil)
-  if valid_568055 != nil:
-    section.add "api-version", valid_568055
+  if valid_563955 != nil:
+    section.add "api-version", valid_563955
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -158,20 +162,20 @@ proc validate_OpenShiftManagedClustersList_567880(path: JsonNode; query: JsonNod
   if body != nil:
     result.add "body", body
 
-proc call*(call_568078: Call_OpenShiftManagedClustersList_567879; path: JsonNode;
+proc call*(call_563978: Call_OpenShiftManagedClustersList_563777; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets a list of OpenShift managed clusters in the specified subscription. The operation returns properties of each OpenShift managed cluster.
   ## 
-  let valid = call_568078.validator(path, query, header, formData, body)
-  let scheme = call_568078.pickScheme
+  let valid = call_563978.validator(path, query, header, formData, body)
+  let scheme = call_563978.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568078.url(scheme.get, call_568078.host, call_568078.base,
-                         call_568078.route, valid.getOrDefault("path"),
+  let url = call_563978.url(scheme.get, call_563978.host, call_563978.base,
+                         call_563978.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568078, url, valid)
+  result = hook(call_563978, url, valid)
 
-proc call*(call_568149: Call_OpenShiftManagedClustersList_567879;
+proc call*(call_564049: Call_OpenShiftManagedClustersList_563777;
           apiVersion: string; subscriptionId: string): Recallable =
   ## openShiftManagedClustersList
   ## Gets a list of OpenShift managed clusters in the specified subscription. The operation returns properties of each OpenShift managed cluster.
@@ -179,20 +183,20 @@ proc call*(call_568149: Call_OpenShiftManagedClustersList_567879;
   ##             : Client Api Version.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_568150 = newJObject()
-  var query_568152 = newJObject()
-  add(query_568152, "api-version", newJString(apiVersion))
-  add(path_568150, "subscriptionId", newJString(subscriptionId))
-  result = call_568149.call(path_568150, query_568152, nil, nil, nil)
+  var path_564050 = newJObject()
+  var query_564052 = newJObject()
+  add(query_564052, "api-version", newJString(apiVersion))
+  add(path_564050, "subscriptionId", newJString(subscriptionId))
+  result = call_564049.call(path_564050, query_564052, nil, nil, nil)
 
-var openShiftManagedClustersList* = Call_OpenShiftManagedClustersList_567879(
+var openShiftManagedClustersList* = Call_OpenShiftManagedClustersList_563777(
     name: "openShiftManagedClustersList", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.ContainerService/openShiftManagedClusters",
-    validator: validate_OpenShiftManagedClustersList_567880, base: "",
-    url: url_OpenShiftManagedClustersList_567881, schemes: {Scheme.Https})
+    validator: validate_OpenShiftManagedClustersList_563778, base: "",
+    url: url_OpenShiftManagedClustersList_563779, schemes: {Scheme.Https})
 type
-  Call_OpenShiftManagedClustersListByResourceGroup_568191 = ref object of OpenApiRestCall_567657
-proc url_OpenShiftManagedClustersListByResourceGroup_568193(protocol: Scheme;
+  Call_OpenShiftManagedClustersListByResourceGroup_564091 = ref object of OpenApiRestCall_563555
+proc url_OpenShiftManagedClustersListByResourceGroup_564093(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -213,30 +217,30 @@ proc url_OpenShiftManagedClustersListByResourceGroup_568193(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_OpenShiftManagedClustersListByResourceGroup_568192(path: JsonNode;
+proc validate_OpenShiftManagedClustersListByResourceGroup_564092(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists OpenShift managed clusters in the specified subscription and resource group. The operation returns properties of each OpenShift managed cluster.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568194 = path.getOrDefault("resourceGroupName")
-  valid_568194 = validateParameter(valid_568194, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564094 = path.getOrDefault("subscriptionId")
+  valid_564094 = validateParameter(valid_564094, JString, required = true,
                                  default = nil)
-  if valid_568194 != nil:
-    section.add "resourceGroupName", valid_568194
-  var valid_568195 = path.getOrDefault("subscriptionId")
-  valid_568195 = validateParameter(valid_568195, JString, required = true,
+  if valid_564094 != nil:
+    section.add "subscriptionId", valid_564094
+  var valid_564095 = path.getOrDefault("resourceGroupName")
+  valid_564095 = validateParameter(valid_564095, JString, required = true,
                                  default = nil)
-  if valid_568195 != nil:
-    section.add "subscriptionId", valid_568195
+  if valid_564095 != nil:
+    section.add "resourceGroupName", valid_564095
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -244,11 +248,11 @@ proc validate_OpenShiftManagedClustersListByResourceGroup_568192(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568196 = query.getOrDefault("api-version")
-  valid_568196 = validateParameter(valid_568196, JString, required = true,
+  var valid_564096 = query.getOrDefault("api-version")
+  valid_564096 = validateParameter(valid_564096, JString, required = true,
                                  default = nil)
-  if valid_568196 != nil:
-    section.add "api-version", valid_568196
+  if valid_564096 != nil:
+    section.add "api-version", valid_564096
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -257,46 +261,46 @@ proc validate_OpenShiftManagedClustersListByResourceGroup_568192(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568197: Call_OpenShiftManagedClustersListByResourceGroup_568191;
+proc call*(call_564097: Call_OpenShiftManagedClustersListByResourceGroup_564091;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Lists OpenShift managed clusters in the specified subscription and resource group. The operation returns properties of each OpenShift managed cluster.
   ## 
-  let valid = call_568197.validator(path, query, header, formData, body)
-  let scheme = call_568197.pickScheme
+  let valid = call_564097.validator(path, query, header, formData, body)
+  let scheme = call_564097.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568197.url(scheme.get, call_568197.host, call_568197.base,
-                         call_568197.route, valid.getOrDefault("path"),
+  let url = call_564097.url(scheme.get, call_564097.host, call_564097.base,
+                         call_564097.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568197, url, valid)
+  result = hook(call_564097, url, valid)
 
-proc call*(call_568198: Call_OpenShiftManagedClustersListByResourceGroup_568191;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string): Recallable =
+proc call*(call_564098: Call_OpenShiftManagedClustersListByResourceGroup_564091;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string): Recallable =
   ## openShiftManagedClustersListByResourceGroup
   ## Lists OpenShift managed clusters in the specified subscription and resource group. The operation returns properties of each OpenShift managed cluster.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_568199 = newJObject()
-  var query_568200 = newJObject()
-  add(path_568199, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568200, "api-version", newJString(apiVersion))
-  add(path_568199, "subscriptionId", newJString(subscriptionId))
-  result = call_568198.call(path_568199, query_568200, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564099 = newJObject()
+  var query_564100 = newJObject()
+  add(query_564100, "api-version", newJString(apiVersion))
+  add(path_564099, "subscriptionId", newJString(subscriptionId))
+  add(path_564099, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564098.call(path_564099, query_564100, nil, nil, nil)
 
-var openShiftManagedClustersListByResourceGroup* = Call_OpenShiftManagedClustersListByResourceGroup_568191(
+var openShiftManagedClustersListByResourceGroup* = Call_OpenShiftManagedClustersListByResourceGroup_564091(
     name: "openShiftManagedClustersListByResourceGroup", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ContainerService/openShiftManagedClusters",
-    validator: validate_OpenShiftManagedClustersListByResourceGroup_568192,
-    base: "", url: url_OpenShiftManagedClustersListByResourceGroup_568193,
+    validator: validate_OpenShiftManagedClustersListByResourceGroup_564092,
+    base: "", url: url_OpenShiftManagedClustersListByResourceGroup_564093,
     schemes: {Scheme.Https})
 type
-  Call_OpenShiftManagedClustersCreateOrUpdate_568212 = ref object of OpenApiRestCall_567657
-proc url_OpenShiftManagedClustersCreateOrUpdate_568214(protocol: Scheme;
+  Call_OpenShiftManagedClustersCreateOrUpdate_564112 = ref object of OpenApiRestCall_563555
+proc url_OpenShiftManagedClustersCreateOrUpdate_564114(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -318,37 +322,37 @@ proc url_OpenShiftManagedClustersCreateOrUpdate_568214(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_OpenShiftManagedClustersCreateOrUpdate_568213(path: JsonNode;
+proc validate_OpenShiftManagedClustersCreateOrUpdate_564113(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Creates or updates a OpenShift managed cluster with the specified configuration for agents and OpenShift version.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   ##   resourceName: JString (required)
   ##               : The name of the OpenShift managed cluster resource.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568215 = path.getOrDefault("resourceGroupName")
-  valid_568215 = validateParameter(valid_568215, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564115 = path.getOrDefault("subscriptionId")
+  valid_564115 = validateParameter(valid_564115, JString, required = true,
                                  default = nil)
-  if valid_568215 != nil:
-    section.add "resourceGroupName", valid_568215
-  var valid_568216 = path.getOrDefault("subscriptionId")
-  valid_568216 = validateParameter(valid_568216, JString, required = true,
+  if valid_564115 != nil:
+    section.add "subscriptionId", valid_564115
+  var valid_564116 = path.getOrDefault("resourceGroupName")
+  valid_564116 = validateParameter(valid_564116, JString, required = true,
                                  default = nil)
-  if valid_568216 != nil:
-    section.add "subscriptionId", valid_568216
-  var valid_568217 = path.getOrDefault("resourceName")
-  valid_568217 = validateParameter(valid_568217, JString, required = true,
+  if valid_564116 != nil:
+    section.add "resourceGroupName", valid_564116
+  var valid_564117 = path.getOrDefault("resourceName")
+  valid_564117 = validateParameter(valid_564117, JString, required = true,
                                  default = nil)
-  if valid_568217 != nil:
-    section.add "resourceName", valid_568217
+  if valid_564117 != nil:
+    section.add "resourceName", valid_564117
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -356,11 +360,11 @@ proc validate_OpenShiftManagedClustersCreateOrUpdate_568213(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568218 = query.getOrDefault("api-version")
-  valid_568218 = validateParameter(valid_568218, JString, required = true,
+  var valid_564118 = query.getOrDefault("api-version")
+  valid_564118 = validateParameter(valid_564118, JString, required = true,
                                  default = nil)
-  if valid_568218 != nil:
-    section.add "api-version", valid_568218
+  if valid_564118 != nil:
+    section.add "api-version", valid_564118
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -374,55 +378,55 @@ proc validate_OpenShiftManagedClustersCreateOrUpdate_568213(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568220: Call_OpenShiftManagedClustersCreateOrUpdate_568212;
+proc call*(call_564120: Call_OpenShiftManagedClustersCreateOrUpdate_564112;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Creates or updates a OpenShift managed cluster with the specified configuration for agents and OpenShift version.
   ## 
-  let valid = call_568220.validator(path, query, header, formData, body)
-  let scheme = call_568220.pickScheme
+  let valid = call_564120.validator(path, query, header, formData, body)
+  let scheme = call_564120.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568220.url(scheme.get, call_568220.host, call_568220.base,
-                         call_568220.route, valid.getOrDefault("path"),
+  let url = call_564120.url(scheme.get, call_564120.host, call_564120.base,
+                         call_564120.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568220, url, valid)
+  result = hook(call_564120, url, valid)
 
-proc call*(call_568221: Call_OpenShiftManagedClustersCreateOrUpdate_568212;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
+proc call*(call_564121: Call_OpenShiftManagedClustersCreateOrUpdate_564112;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string;
           resourceName: string; parameters: JsonNode): Recallable =
   ## openShiftManagedClustersCreateOrUpdate
   ## Creates or updates a OpenShift managed cluster with the specified configuration for agents and OpenShift version.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   resourceName: string (required)
   ##               : The name of the OpenShift managed cluster resource.
   ##   parameters: JObject (required)
   ##             : Parameters supplied to the Create or Update an OpenShift Managed Cluster operation.
-  var path_568222 = newJObject()
-  var query_568223 = newJObject()
-  var body_568224 = newJObject()
-  add(path_568222, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568223, "api-version", newJString(apiVersion))
-  add(path_568222, "subscriptionId", newJString(subscriptionId))
-  add(path_568222, "resourceName", newJString(resourceName))
+  var path_564122 = newJObject()
+  var query_564123 = newJObject()
+  var body_564124 = newJObject()
+  add(query_564123, "api-version", newJString(apiVersion))
+  add(path_564122, "subscriptionId", newJString(subscriptionId))
+  add(path_564122, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564122, "resourceName", newJString(resourceName))
   if parameters != nil:
-    body_568224 = parameters
-  result = call_568221.call(path_568222, query_568223, nil, nil, body_568224)
+    body_564124 = parameters
+  result = call_564121.call(path_564122, query_564123, nil, nil, body_564124)
 
-var openShiftManagedClustersCreateOrUpdate* = Call_OpenShiftManagedClustersCreateOrUpdate_568212(
+var openShiftManagedClustersCreateOrUpdate* = Call_OpenShiftManagedClustersCreateOrUpdate_564112(
     name: "openShiftManagedClustersCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ContainerService/openShiftManagedClusters/{resourceName}",
-    validator: validate_OpenShiftManagedClustersCreateOrUpdate_568213, base: "",
-    url: url_OpenShiftManagedClustersCreateOrUpdate_568214,
+    validator: validate_OpenShiftManagedClustersCreateOrUpdate_564113, base: "",
+    url: url_OpenShiftManagedClustersCreateOrUpdate_564114,
     schemes: {Scheme.Https})
 type
-  Call_OpenShiftManagedClustersGet_568201 = ref object of OpenApiRestCall_567657
-proc url_OpenShiftManagedClustersGet_568203(protocol: Scheme; host: string;
+  Call_OpenShiftManagedClustersGet_564101 = ref object of OpenApiRestCall_563555
+proc url_OpenShiftManagedClustersGet_564103(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -444,37 +448,37 @@ proc url_OpenShiftManagedClustersGet_568203(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_OpenShiftManagedClustersGet_568202(path: JsonNode; query: JsonNode;
+proc validate_OpenShiftManagedClustersGet_564102(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the details of the managed OpenShift cluster with a specified resource group and name.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   ##   resourceName: JString (required)
   ##               : The name of the OpenShift managed cluster resource.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568204 = path.getOrDefault("resourceGroupName")
-  valid_568204 = validateParameter(valid_568204, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564104 = path.getOrDefault("subscriptionId")
+  valid_564104 = validateParameter(valid_564104, JString, required = true,
                                  default = nil)
-  if valid_568204 != nil:
-    section.add "resourceGroupName", valid_568204
-  var valid_568205 = path.getOrDefault("subscriptionId")
-  valid_568205 = validateParameter(valid_568205, JString, required = true,
+  if valid_564104 != nil:
+    section.add "subscriptionId", valid_564104
+  var valid_564105 = path.getOrDefault("resourceGroupName")
+  valid_564105 = validateParameter(valid_564105, JString, required = true,
                                  default = nil)
-  if valid_568205 != nil:
-    section.add "subscriptionId", valid_568205
-  var valid_568206 = path.getOrDefault("resourceName")
-  valid_568206 = validateParameter(valid_568206, JString, required = true,
+  if valid_564105 != nil:
+    section.add "resourceGroupName", valid_564105
+  var valid_564106 = path.getOrDefault("resourceName")
+  valid_564106 = validateParameter(valid_564106, JString, required = true,
                                  default = nil)
-  if valid_568206 != nil:
-    section.add "resourceName", valid_568206
+  if valid_564106 != nil:
+    section.add "resourceName", valid_564106
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -482,11 +486,11 @@ proc validate_OpenShiftManagedClustersGet_568202(path: JsonNode; query: JsonNode
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568207 = query.getOrDefault("api-version")
-  valid_568207 = validateParameter(valid_568207, JString, required = true,
+  var valid_564107 = query.getOrDefault("api-version")
+  valid_564107 = validateParameter(valid_564107, JString, required = true,
                                  default = nil)
-  if valid_568207 != nil:
-    section.add "api-version", valid_568207
+  if valid_564107 != nil:
+    section.add "api-version", valid_564107
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -495,48 +499,48 @@ proc validate_OpenShiftManagedClustersGet_568202(path: JsonNode; query: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_568208: Call_OpenShiftManagedClustersGet_568201; path: JsonNode;
+proc call*(call_564108: Call_OpenShiftManagedClustersGet_564101; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the details of the managed OpenShift cluster with a specified resource group and name.
   ## 
-  let valid = call_568208.validator(path, query, header, formData, body)
-  let scheme = call_568208.pickScheme
+  let valid = call_564108.validator(path, query, header, formData, body)
+  let scheme = call_564108.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568208.url(scheme.get, call_568208.host, call_568208.base,
-                         call_568208.route, valid.getOrDefault("path"),
+  let url = call_564108.url(scheme.get, call_564108.host, call_564108.base,
+                         call_564108.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568208, url, valid)
+  result = hook(call_564108, url, valid)
 
-proc call*(call_568209: Call_OpenShiftManagedClustersGet_568201;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
+proc call*(call_564109: Call_OpenShiftManagedClustersGet_564101;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string;
           resourceName: string): Recallable =
   ## openShiftManagedClustersGet
   ## Gets the details of the managed OpenShift cluster with a specified resource group and name.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   resourceName: string (required)
   ##               : The name of the OpenShift managed cluster resource.
-  var path_568210 = newJObject()
-  var query_568211 = newJObject()
-  add(path_568210, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568211, "api-version", newJString(apiVersion))
-  add(path_568210, "subscriptionId", newJString(subscriptionId))
-  add(path_568210, "resourceName", newJString(resourceName))
-  result = call_568209.call(path_568210, query_568211, nil, nil, nil)
+  var path_564110 = newJObject()
+  var query_564111 = newJObject()
+  add(query_564111, "api-version", newJString(apiVersion))
+  add(path_564110, "subscriptionId", newJString(subscriptionId))
+  add(path_564110, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564110, "resourceName", newJString(resourceName))
+  result = call_564109.call(path_564110, query_564111, nil, nil, nil)
 
-var openShiftManagedClustersGet* = Call_OpenShiftManagedClustersGet_568201(
+var openShiftManagedClustersGet* = Call_OpenShiftManagedClustersGet_564101(
     name: "openShiftManagedClustersGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ContainerService/openShiftManagedClusters/{resourceName}",
-    validator: validate_OpenShiftManagedClustersGet_568202, base: "",
-    url: url_OpenShiftManagedClustersGet_568203, schemes: {Scheme.Https})
+    validator: validate_OpenShiftManagedClustersGet_564102, base: "",
+    url: url_OpenShiftManagedClustersGet_564103, schemes: {Scheme.Https})
 type
-  Call_OpenShiftManagedClustersUpdateTags_568236 = ref object of OpenApiRestCall_567657
-proc url_OpenShiftManagedClustersUpdateTags_568238(protocol: Scheme; host: string;
+  Call_OpenShiftManagedClustersUpdateTags_564136 = ref object of OpenApiRestCall_563555
+proc url_OpenShiftManagedClustersUpdateTags_564138(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -558,37 +562,37 @@ proc url_OpenShiftManagedClustersUpdateTags_568238(protocol: Scheme; host: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_OpenShiftManagedClustersUpdateTags_568237(path: JsonNode;
+proc validate_OpenShiftManagedClustersUpdateTags_564137(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Updates an OpenShift managed cluster with the specified tags.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   ##   resourceName: JString (required)
   ##               : The name of the OpenShift managed cluster resource.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568256 = path.getOrDefault("resourceGroupName")
-  valid_568256 = validateParameter(valid_568256, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564156 = path.getOrDefault("subscriptionId")
+  valid_564156 = validateParameter(valid_564156, JString, required = true,
                                  default = nil)
-  if valid_568256 != nil:
-    section.add "resourceGroupName", valid_568256
-  var valid_568257 = path.getOrDefault("subscriptionId")
-  valid_568257 = validateParameter(valid_568257, JString, required = true,
+  if valid_564156 != nil:
+    section.add "subscriptionId", valid_564156
+  var valid_564157 = path.getOrDefault("resourceGroupName")
+  valid_564157 = validateParameter(valid_564157, JString, required = true,
                                  default = nil)
-  if valid_568257 != nil:
-    section.add "subscriptionId", valid_568257
-  var valid_568258 = path.getOrDefault("resourceName")
-  valid_568258 = validateParameter(valid_568258, JString, required = true,
+  if valid_564157 != nil:
+    section.add "resourceGroupName", valid_564157
+  var valid_564158 = path.getOrDefault("resourceName")
+  valid_564158 = validateParameter(valid_564158, JString, required = true,
                                  default = nil)
-  if valid_568258 != nil:
-    section.add "resourceName", valid_568258
+  if valid_564158 != nil:
+    section.add "resourceName", valid_564158
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -596,11 +600,11 @@ proc validate_OpenShiftManagedClustersUpdateTags_568237(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568259 = query.getOrDefault("api-version")
-  valid_568259 = validateParameter(valid_568259, JString, required = true,
+  var valid_564159 = query.getOrDefault("api-version")
+  valid_564159 = validateParameter(valid_564159, JString, required = true,
                                  default = nil)
-  if valid_568259 != nil:
-    section.add "api-version", valid_568259
+  if valid_564159 != nil:
+    section.add "api-version", valid_564159
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -614,54 +618,54 @@ proc validate_OpenShiftManagedClustersUpdateTags_568237(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568261: Call_OpenShiftManagedClustersUpdateTags_568236;
+proc call*(call_564161: Call_OpenShiftManagedClustersUpdateTags_564136;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Updates an OpenShift managed cluster with the specified tags.
   ## 
-  let valid = call_568261.validator(path, query, header, formData, body)
-  let scheme = call_568261.pickScheme
+  let valid = call_564161.validator(path, query, header, formData, body)
+  let scheme = call_564161.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568261.url(scheme.get, call_568261.host, call_568261.base,
-                         call_568261.route, valid.getOrDefault("path"),
+  let url = call_564161.url(scheme.get, call_564161.host, call_564161.base,
+                         call_564161.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568261, url, valid)
+  result = hook(call_564161, url, valid)
 
-proc call*(call_568262: Call_OpenShiftManagedClustersUpdateTags_568236;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
+proc call*(call_564162: Call_OpenShiftManagedClustersUpdateTags_564136;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string;
           resourceName: string; parameters: JsonNode): Recallable =
   ## openShiftManagedClustersUpdateTags
   ## Updates an OpenShift managed cluster with the specified tags.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   resourceName: string (required)
   ##               : The name of the OpenShift managed cluster resource.
   ##   parameters: JObject (required)
   ##             : Parameters supplied to the Update OpenShift Managed Cluster Tags operation.
-  var path_568263 = newJObject()
-  var query_568264 = newJObject()
-  var body_568265 = newJObject()
-  add(path_568263, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568264, "api-version", newJString(apiVersion))
-  add(path_568263, "subscriptionId", newJString(subscriptionId))
-  add(path_568263, "resourceName", newJString(resourceName))
+  var path_564163 = newJObject()
+  var query_564164 = newJObject()
+  var body_564165 = newJObject()
+  add(query_564164, "api-version", newJString(apiVersion))
+  add(path_564163, "subscriptionId", newJString(subscriptionId))
+  add(path_564163, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564163, "resourceName", newJString(resourceName))
   if parameters != nil:
-    body_568265 = parameters
-  result = call_568262.call(path_568263, query_568264, nil, nil, body_568265)
+    body_564165 = parameters
+  result = call_564162.call(path_564163, query_564164, nil, nil, body_564165)
 
-var openShiftManagedClustersUpdateTags* = Call_OpenShiftManagedClustersUpdateTags_568236(
+var openShiftManagedClustersUpdateTags* = Call_OpenShiftManagedClustersUpdateTags_564136(
     name: "openShiftManagedClustersUpdateTags", meth: HttpMethod.HttpPatch,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ContainerService/openShiftManagedClusters/{resourceName}",
-    validator: validate_OpenShiftManagedClustersUpdateTags_568237, base: "",
-    url: url_OpenShiftManagedClustersUpdateTags_568238, schemes: {Scheme.Https})
+    validator: validate_OpenShiftManagedClustersUpdateTags_564137, base: "",
+    url: url_OpenShiftManagedClustersUpdateTags_564138, schemes: {Scheme.Https})
 type
-  Call_OpenShiftManagedClustersDelete_568225 = ref object of OpenApiRestCall_567657
-proc url_OpenShiftManagedClustersDelete_568227(protocol: Scheme; host: string;
+  Call_OpenShiftManagedClustersDelete_564125 = ref object of OpenApiRestCall_563555
+proc url_OpenShiftManagedClustersDelete_564127(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -683,37 +687,37 @@ proc url_OpenShiftManagedClustersDelete_568227(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_OpenShiftManagedClustersDelete_568226(path: JsonNode;
+proc validate_OpenShiftManagedClustersDelete_564126(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Deletes the OpenShift managed cluster with a specified resource group and name.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   ##   resourceName: JString (required)
   ##               : The name of the OpenShift managed cluster resource.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568228 = path.getOrDefault("resourceGroupName")
-  valid_568228 = validateParameter(valid_568228, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564128 = path.getOrDefault("subscriptionId")
+  valid_564128 = validateParameter(valid_564128, JString, required = true,
                                  default = nil)
-  if valid_568228 != nil:
-    section.add "resourceGroupName", valid_568228
-  var valid_568229 = path.getOrDefault("subscriptionId")
-  valid_568229 = validateParameter(valid_568229, JString, required = true,
+  if valid_564128 != nil:
+    section.add "subscriptionId", valid_564128
+  var valid_564129 = path.getOrDefault("resourceGroupName")
+  valid_564129 = validateParameter(valid_564129, JString, required = true,
                                  default = nil)
-  if valid_568229 != nil:
-    section.add "subscriptionId", valid_568229
-  var valid_568230 = path.getOrDefault("resourceName")
-  valid_568230 = validateParameter(valid_568230, JString, required = true,
+  if valid_564129 != nil:
+    section.add "resourceGroupName", valid_564129
+  var valid_564130 = path.getOrDefault("resourceName")
+  valid_564130 = validateParameter(valid_564130, JString, required = true,
                                  default = nil)
-  if valid_568230 != nil:
-    section.add "resourceName", valid_568230
+  if valid_564130 != nil:
+    section.add "resourceName", valid_564130
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -721,11 +725,11 @@ proc validate_OpenShiftManagedClustersDelete_568226(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568231 = query.getOrDefault("api-version")
-  valid_568231 = validateParameter(valid_568231, JString, required = true,
+  var valid_564131 = query.getOrDefault("api-version")
+  valid_564131 = validateParameter(valid_564131, JString, required = true,
                                  default = nil)
-  if valid_568231 != nil:
-    section.add "api-version", valid_568231
+  if valid_564131 != nil:
+    section.add "api-version", valid_564131
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -734,45 +738,45 @@ proc validate_OpenShiftManagedClustersDelete_568226(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568232: Call_OpenShiftManagedClustersDelete_568225; path: JsonNode;
+proc call*(call_564132: Call_OpenShiftManagedClustersDelete_564125; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes the OpenShift managed cluster with a specified resource group and name.
   ## 
-  let valid = call_568232.validator(path, query, header, formData, body)
-  let scheme = call_568232.pickScheme
+  let valid = call_564132.validator(path, query, header, formData, body)
+  let scheme = call_564132.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568232.url(scheme.get, call_568232.host, call_568232.base,
-                         call_568232.route, valid.getOrDefault("path"),
+  let url = call_564132.url(scheme.get, call_564132.host, call_564132.base,
+                         call_564132.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568232, url, valid)
+  result = hook(call_564132, url, valid)
 
-proc call*(call_568233: Call_OpenShiftManagedClustersDelete_568225;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
+proc call*(call_564133: Call_OpenShiftManagedClustersDelete_564125;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string;
           resourceName: string): Recallable =
   ## openShiftManagedClustersDelete
   ## Deletes the OpenShift managed cluster with a specified resource group and name.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   resourceName: string (required)
   ##               : The name of the OpenShift managed cluster resource.
-  var path_568234 = newJObject()
-  var query_568235 = newJObject()
-  add(path_568234, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568235, "api-version", newJString(apiVersion))
-  add(path_568234, "subscriptionId", newJString(subscriptionId))
-  add(path_568234, "resourceName", newJString(resourceName))
-  result = call_568233.call(path_568234, query_568235, nil, nil, nil)
+  var path_564134 = newJObject()
+  var query_564135 = newJObject()
+  add(query_564135, "api-version", newJString(apiVersion))
+  add(path_564134, "subscriptionId", newJString(subscriptionId))
+  add(path_564134, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564134, "resourceName", newJString(resourceName))
+  result = call_564133.call(path_564134, query_564135, nil, nil, nil)
 
-var openShiftManagedClustersDelete* = Call_OpenShiftManagedClustersDelete_568225(
+var openShiftManagedClustersDelete* = Call_OpenShiftManagedClustersDelete_564125(
     name: "openShiftManagedClustersDelete", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ContainerService/openShiftManagedClusters/{resourceName}",
-    validator: validate_OpenShiftManagedClustersDelete_568226, base: "",
-    url: url_OpenShiftManagedClustersDelete_568227, schemes: {Scheme.Https})
+    validator: validate_OpenShiftManagedClustersDelete_564126, base: "",
+    url: url_OpenShiftManagedClustersDelete_564127, schemes: {Scheme.Https})
 export
   rest
 

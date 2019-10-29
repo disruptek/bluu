@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, httpcore
 
 ## auto-generated via openapi macro
 ## title: ManagementLockClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_567657 = ref object of OpenApiRestCall
+  OpenApiRestCall_563555 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_567657](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563555](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_567657): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563555): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,15 +107,15 @@ const
   macServiceName = "resources-locks"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_AuthorizationOperationsList_567879 = ref object of OpenApiRestCall_567657
-proc url_AuthorizationOperationsList_567881(protocol: Scheme; host: string;
+  Call_AuthorizationOperationsList_563777 = ref object of OpenApiRestCall_563555
+proc url_AuthorizationOperationsList_563779(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_AuthorizationOperationsList_567880(path: JsonNode; query: JsonNode;
+proc validate_AuthorizationOperationsList_563778(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists all of the available Microsoft.Authorization REST API operations.
   ## 
@@ -125,11 +129,11 @@ proc validate_AuthorizationOperationsList_567880(path: JsonNode; query: JsonNode
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568040 = query.getOrDefault("api-version")
-  valid_568040 = validateParameter(valid_568040, JString, required = true,
+  var valid_563940 = query.getOrDefault("api-version")
+  valid_563940 = validateParameter(valid_563940, JString, required = true,
                                  default = nil)
-  if valid_568040 != nil:
-    section.add "api-version", valid_568040
+  if valid_563940 != nil:
+    section.add "api-version", valid_563940
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -138,37 +142,37 @@ proc validate_AuthorizationOperationsList_567880(path: JsonNode; query: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_568063: Call_AuthorizationOperationsList_567879; path: JsonNode;
+proc call*(call_563963: Call_AuthorizationOperationsList_563777; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists all of the available Microsoft.Authorization REST API operations.
   ## 
-  let valid = call_568063.validator(path, query, header, formData, body)
-  let scheme = call_568063.pickScheme
+  let valid = call_563963.validator(path, query, header, formData, body)
+  let scheme = call_563963.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568063.url(scheme.get, call_568063.host, call_568063.base,
-                         call_568063.route, valid.getOrDefault("path"),
+  let url = call_563963.url(scheme.get, call_563963.host, call_563963.base,
+                         call_563963.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568063, url, valid)
+  result = hook(call_563963, url, valid)
 
-proc call*(call_568134: Call_AuthorizationOperationsList_567879; apiVersion: string): Recallable =
+proc call*(call_564034: Call_AuthorizationOperationsList_563777; apiVersion: string): Recallable =
   ## authorizationOperationsList
   ## Lists all of the available Microsoft.Authorization REST API operations.
   ##   apiVersion: string (required)
   ##             : The API version to use for the operation.
-  var query_568135 = newJObject()
-  add(query_568135, "api-version", newJString(apiVersion))
-  result = call_568134.call(nil, query_568135, nil, nil, nil)
+  var query_564035 = newJObject()
+  add(query_564035, "api-version", newJString(apiVersion))
+  result = call_564034.call(nil, query_564035, nil, nil, nil)
 
-var authorizationOperationsList* = Call_AuthorizationOperationsList_567879(
+var authorizationOperationsList* = Call_AuthorizationOperationsList_563777(
     name: "authorizationOperationsList", meth: HttpMethod.HttpGet,
     host: "management.azure.com",
     route: "/providers/Microsoft.Authorization/operations",
-    validator: validate_AuthorizationOperationsList_567880, base: "",
-    url: url_AuthorizationOperationsList_567881, schemes: {Scheme.Https})
+    validator: validate_AuthorizationOperationsList_563778, base: "",
+    url: url_AuthorizationOperationsList_563779, schemes: {Scheme.Https})
 type
-  Call_ManagementLocksListAtSubscriptionLevel_568175 = ref object of OpenApiRestCall_567657
-proc url_ManagementLocksListAtSubscriptionLevel_568177(protocol: Scheme;
+  Call_ManagementLocksListAtSubscriptionLevel_564075 = ref object of OpenApiRestCall_563555
+proc url_ManagementLocksListAtSubscriptionLevel_564077(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -184,7 +188,7 @@ proc url_ManagementLocksListAtSubscriptionLevel_568177(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ManagementLocksListAtSubscriptionLevel_568176(path: JsonNode;
+proc validate_ManagementLocksListAtSubscriptionLevel_564076(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets all the management locks for a subscription.
   ## 
@@ -196,11 +200,11 @@ proc validate_ManagementLocksListAtSubscriptionLevel_568176(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_568193 = path.getOrDefault("subscriptionId")
-  valid_568193 = validateParameter(valid_568193, JString, required = true,
+  var valid_564093 = path.getOrDefault("subscriptionId")
+  valid_564093 = validateParameter(valid_564093, JString, required = true,
                                  default = nil)
-  if valid_568193 != nil:
-    section.add "subscriptionId", valid_568193
+  if valid_564093 != nil:
+    section.add "subscriptionId", valid_564093
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -210,16 +214,16 @@ proc validate_ManagementLocksListAtSubscriptionLevel_568176(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568194 = query.getOrDefault("api-version")
-  valid_568194 = validateParameter(valid_568194, JString, required = true,
+  var valid_564094 = query.getOrDefault("api-version")
+  valid_564094 = validateParameter(valid_564094, JString, required = true,
                                  default = nil)
-  if valid_568194 != nil:
-    section.add "api-version", valid_568194
-  var valid_568195 = query.getOrDefault("$filter")
-  valid_568195 = validateParameter(valid_568195, JString, required = false,
+  if valid_564094 != nil:
+    section.add "api-version", valid_564094
+  var valid_564095 = query.getOrDefault("$filter")
+  valid_564095 = validateParameter(valid_564095, JString, required = false,
                                  default = nil)
-  if valid_568195 != nil:
-    section.add "$filter", valid_568195
+  if valid_564095 != nil:
+    section.add "$filter", valid_564095
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -228,21 +232,21 @@ proc validate_ManagementLocksListAtSubscriptionLevel_568176(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568196: Call_ManagementLocksListAtSubscriptionLevel_568175;
+proc call*(call_564096: Call_ManagementLocksListAtSubscriptionLevel_564075;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Gets all the management locks for a subscription.
   ## 
-  let valid = call_568196.validator(path, query, header, formData, body)
-  let scheme = call_568196.pickScheme
+  let valid = call_564096.validator(path, query, header, formData, body)
+  let scheme = call_564096.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568196.url(scheme.get, call_568196.host, call_568196.base,
-                         call_568196.route, valid.getOrDefault("path"),
+  let url = call_564096.url(scheme.get, call_564096.host, call_564096.base,
+                         call_564096.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568196, url, valid)
+  result = hook(call_564096, url, valid)
 
-proc call*(call_568197: Call_ManagementLocksListAtSubscriptionLevel_568175;
+proc call*(call_564097: Call_ManagementLocksListAtSubscriptionLevel_564075;
           apiVersion: string; subscriptionId: string; Filter: string = ""): Recallable =
   ## managementLocksListAtSubscriptionLevel
   ## Gets all the management locks for a subscription.
@@ -252,22 +256,22 @@ proc call*(call_568197: Call_ManagementLocksListAtSubscriptionLevel_568175;
   ##                 : The ID of the target subscription.
   ##   Filter: string
   ##         : The filter to apply on the operation.
-  var path_568198 = newJObject()
-  var query_568199 = newJObject()
-  add(query_568199, "api-version", newJString(apiVersion))
-  add(path_568198, "subscriptionId", newJString(subscriptionId))
-  add(query_568199, "$filter", newJString(Filter))
-  result = call_568197.call(path_568198, query_568199, nil, nil, nil)
+  var path_564098 = newJObject()
+  var query_564099 = newJObject()
+  add(query_564099, "api-version", newJString(apiVersion))
+  add(path_564098, "subscriptionId", newJString(subscriptionId))
+  add(query_564099, "$filter", newJString(Filter))
+  result = call_564097.call(path_564098, query_564099, nil, nil, nil)
 
-var managementLocksListAtSubscriptionLevel* = Call_ManagementLocksListAtSubscriptionLevel_568175(
+var managementLocksListAtSubscriptionLevel* = Call_ManagementLocksListAtSubscriptionLevel_564075(
     name: "managementLocksListAtSubscriptionLevel", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Authorization/locks",
-    validator: validate_ManagementLocksListAtSubscriptionLevel_568176, base: "",
-    url: url_ManagementLocksListAtSubscriptionLevel_568177,
+    validator: validate_ManagementLocksListAtSubscriptionLevel_564076, base: "",
+    url: url_ManagementLocksListAtSubscriptionLevel_564077,
     schemes: {Scheme.Https})
 type
-  Call_ManagementLocksCreateOrUpdateAtSubscriptionLevel_568210 = ref object of OpenApiRestCall_567657
-proc url_ManagementLocksCreateOrUpdateAtSubscriptionLevel_568212(
+  Call_ManagementLocksCreateOrUpdateAtSubscriptionLevel_564110 = ref object of OpenApiRestCall_563555
+proc url_ManagementLocksCreateOrUpdateAtSubscriptionLevel_564112(
     protocol: Scheme; host: string; base: string; route: string; path: JsonNode;
     query: JsonNode): Uri =
   result.scheme = $protocol
@@ -286,7 +290,7 @@ proc url_ManagementLocksCreateOrUpdateAtSubscriptionLevel_568212(
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ManagementLocksCreateOrUpdateAtSubscriptionLevel_568211(
+proc validate_ManagementLocksCreateOrUpdateAtSubscriptionLevel_564111(
     path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
     body: JsonNode): JsonNode =
   ## When you apply a lock at a parent scope, all child resources inherit the same lock. To create management locks, you must have access to Microsoft.Authorization/* or Microsoft.Authorization/locks/* actions. Of the built-in roles, only Owner and User Access Administrator are granted those actions.
@@ -301,16 +305,16 @@ proc validate_ManagementLocksCreateOrUpdateAtSubscriptionLevel_568211(
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_568230 = path.getOrDefault("subscriptionId")
-  valid_568230 = validateParameter(valid_568230, JString, required = true,
+  var valid_564130 = path.getOrDefault("subscriptionId")
+  valid_564130 = validateParameter(valid_564130, JString, required = true,
                                  default = nil)
-  if valid_568230 != nil:
-    section.add "subscriptionId", valid_568230
-  var valid_568231 = path.getOrDefault("lockName")
-  valid_568231 = validateParameter(valid_568231, JString, required = true,
+  if valid_564130 != nil:
+    section.add "subscriptionId", valid_564130
+  var valid_564131 = path.getOrDefault("lockName")
+  valid_564131 = validateParameter(valid_564131, JString, required = true,
                                  default = nil)
-  if valid_568231 != nil:
-    section.add "lockName", valid_568231
+  if valid_564131 != nil:
+    section.add "lockName", valid_564131
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -318,11 +322,11 @@ proc validate_ManagementLocksCreateOrUpdateAtSubscriptionLevel_568211(
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568232 = query.getOrDefault("api-version")
-  valid_568232 = validateParameter(valid_568232, JString, required = true,
+  var valid_564132 = query.getOrDefault("api-version")
+  valid_564132 = validateParameter(valid_564132, JString, required = true,
                                  default = nil)
-  if valid_568232 != nil:
-    section.add "api-version", valid_568232
+  if valid_564132 != nil:
+    section.add "api-version", valid_564132
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -336,21 +340,21 @@ proc validate_ManagementLocksCreateOrUpdateAtSubscriptionLevel_568211(
   if body != nil:
     result.add "body", body
 
-proc call*(call_568234: Call_ManagementLocksCreateOrUpdateAtSubscriptionLevel_568210;
+proc call*(call_564134: Call_ManagementLocksCreateOrUpdateAtSubscriptionLevel_564110;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## When you apply a lock at a parent scope, all child resources inherit the same lock. To create management locks, you must have access to Microsoft.Authorization/* or Microsoft.Authorization/locks/* actions. Of the built-in roles, only Owner and User Access Administrator are granted those actions.
   ## 
-  let valid = call_568234.validator(path, query, header, formData, body)
-  let scheme = call_568234.pickScheme
+  let valid = call_564134.validator(path, query, header, formData, body)
+  let scheme = call_564134.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568234.url(scheme.get, call_568234.host, call_568234.base,
-                         call_568234.route, valid.getOrDefault("path"),
+  let url = call_564134.url(scheme.get, call_564134.host, call_564134.base,
+                         call_564134.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568234, url, valid)
+  result = hook(call_564134, url, valid)
 
-proc call*(call_568235: Call_ManagementLocksCreateOrUpdateAtSubscriptionLevel_568210;
+proc call*(call_564135: Call_ManagementLocksCreateOrUpdateAtSubscriptionLevel_564110;
           apiVersion: string; subscriptionId: string; lockName: string;
           parameters: JsonNode): Recallable =
   ## managementLocksCreateOrUpdateAtSubscriptionLevel
@@ -363,25 +367,25 @@ proc call*(call_568235: Call_ManagementLocksCreateOrUpdateAtSubscriptionLevel_56
   ##           : The name of lock. The lock name can be a maximum of 260 characters. It cannot contain <, > %, &, :, \, ?, /, or any control characters.
   ##   parameters: JObject (required)
   ##             : The management lock parameters.
-  var path_568236 = newJObject()
-  var query_568237 = newJObject()
-  var body_568238 = newJObject()
-  add(query_568237, "api-version", newJString(apiVersion))
-  add(path_568236, "subscriptionId", newJString(subscriptionId))
-  add(path_568236, "lockName", newJString(lockName))
+  var path_564136 = newJObject()
+  var query_564137 = newJObject()
+  var body_564138 = newJObject()
+  add(query_564137, "api-version", newJString(apiVersion))
+  add(path_564136, "subscriptionId", newJString(subscriptionId))
+  add(path_564136, "lockName", newJString(lockName))
   if parameters != nil:
-    body_568238 = parameters
-  result = call_568235.call(path_568236, query_568237, nil, nil, body_568238)
+    body_564138 = parameters
+  result = call_564135.call(path_564136, query_564137, nil, nil, body_564138)
 
-var managementLocksCreateOrUpdateAtSubscriptionLevel* = Call_ManagementLocksCreateOrUpdateAtSubscriptionLevel_568210(
+var managementLocksCreateOrUpdateAtSubscriptionLevel* = Call_ManagementLocksCreateOrUpdateAtSubscriptionLevel_564110(
     name: "managementLocksCreateOrUpdateAtSubscriptionLevel",
     meth: HttpMethod.HttpPut, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Authorization/locks/{lockName}",
-    validator: validate_ManagementLocksCreateOrUpdateAtSubscriptionLevel_568211,
-    base: "", url: url_ManagementLocksCreateOrUpdateAtSubscriptionLevel_568212,
+    validator: validate_ManagementLocksCreateOrUpdateAtSubscriptionLevel_564111,
+    base: "", url: url_ManagementLocksCreateOrUpdateAtSubscriptionLevel_564112,
     schemes: {Scheme.Https})
 type
-  Call_ManagementLocksGetAtSubscriptionLevel_568200 = ref object of OpenApiRestCall_567657
-proc url_ManagementLocksGetAtSubscriptionLevel_568202(protocol: Scheme;
+  Call_ManagementLocksGetAtSubscriptionLevel_564100 = ref object of OpenApiRestCall_563555
+proc url_ManagementLocksGetAtSubscriptionLevel_564102(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -399,7 +403,7 @@ proc url_ManagementLocksGetAtSubscriptionLevel_568202(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ManagementLocksGetAtSubscriptionLevel_568201(path: JsonNode;
+proc validate_ManagementLocksGetAtSubscriptionLevel_564101(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets a management lock at the subscription level.
   ## 
@@ -413,16 +417,16 @@ proc validate_ManagementLocksGetAtSubscriptionLevel_568201(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_568203 = path.getOrDefault("subscriptionId")
-  valid_568203 = validateParameter(valid_568203, JString, required = true,
+  var valid_564103 = path.getOrDefault("subscriptionId")
+  valid_564103 = validateParameter(valid_564103, JString, required = true,
                                  default = nil)
-  if valid_568203 != nil:
-    section.add "subscriptionId", valid_568203
-  var valid_568204 = path.getOrDefault("lockName")
-  valid_568204 = validateParameter(valid_568204, JString, required = true,
+  if valid_564103 != nil:
+    section.add "subscriptionId", valid_564103
+  var valid_564104 = path.getOrDefault("lockName")
+  valid_564104 = validateParameter(valid_564104, JString, required = true,
                                  default = nil)
-  if valid_568204 != nil:
-    section.add "lockName", valid_568204
+  if valid_564104 != nil:
+    section.add "lockName", valid_564104
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -430,11 +434,11 @@ proc validate_ManagementLocksGetAtSubscriptionLevel_568201(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568205 = query.getOrDefault("api-version")
-  valid_568205 = validateParameter(valid_568205, JString, required = true,
+  var valid_564105 = query.getOrDefault("api-version")
+  valid_564105 = validateParameter(valid_564105, JString, required = true,
                                  default = nil)
-  if valid_568205 != nil:
-    section.add "api-version", valid_568205
+  if valid_564105 != nil:
+    section.add "api-version", valid_564105
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -443,21 +447,21 @@ proc validate_ManagementLocksGetAtSubscriptionLevel_568201(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568206: Call_ManagementLocksGetAtSubscriptionLevel_568200;
+proc call*(call_564106: Call_ManagementLocksGetAtSubscriptionLevel_564100;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Gets a management lock at the subscription level.
   ## 
-  let valid = call_568206.validator(path, query, header, formData, body)
-  let scheme = call_568206.pickScheme
+  let valid = call_564106.validator(path, query, header, formData, body)
+  let scheme = call_564106.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568206.url(scheme.get, call_568206.host, call_568206.base,
-                         call_568206.route, valid.getOrDefault("path"),
+  let url = call_564106.url(scheme.get, call_564106.host, call_564106.base,
+                         call_564106.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568206, url, valid)
+  result = hook(call_564106, url, valid)
 
-proc call*(call_568207: Call_ManagementLocksGetAtSubscriptionLevel_568200;
+proc call*(call_564107: Call_ManagementLocksGetAtSubscriptionLevel_564100;
           apiVersion: string; subscriptionId: string; lockName: string): Recallable =
   ## managementLocksGetAtSubscriptionLevel
   ## Gets a management lock at the subscription level.
@@ -467,21 +471,21 @@ proc call*(call_568207: Call_ManagementLocksGetAtSubscriptionLevel_568200;
   ##                 : The ID of the target subscription.
   ##   lockName: string (required)
   ##           : The name of the lock to get.
-  var path_568208 = newJObject()
-  var query_568209 = newJObject()
-  add(query_568209, "api-version", newJString(apiVersion))
-  add(path_568208, "subscriptionId", newJString(subscriptionId))
-  add(path_568208, "lockName", newJString(lockName))
-  result = call_568207.call(path_568208, query_568209, nil, nil, nil)
+  var path_564108 = newJObject()
+  var query_564109 = newJObject()
+  add(query_564109, "api-version", newJString(apiVersion))
+  add(path_564108, "subscriptionId", newJString(subscriptionId))
+  add(path_564108, "lockName", newJString(lockName))
+  result = call_564107.call(path_564108, query_564109, nil, nil, nil)
 
-var managementLocksGetAtSubscriptionLevel* = Call_ManagementLocksGetAtSubscriptionLevel_568200(
+var managementLocksGetAtSubscriptionLevel* = Call_ManagementLocksGetAtSubscriptionLevel_564100(
     name: "managementLocksGetAtSubscriptionLevel", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Authorization/locks/{lockName}",
-    validator: validate_ManagementLocksGetAtSubscriptionLevel_568201, base: "",
-    url: url_ManagementLocksGetAtSubscriptionLevel_568202, schemes: {Scheme.Https})
+    validator: validate_ManagementLocksGetAtSubscriptionLevel_564101, base: "",
+    url: url_ManagementLocksGetAtSubscriptionLevel_564102, schemes: {Scheme.Https})
 type
-  Call_ManagementLocksDeleteAtSubscriptionLevel_568239 = ref object of OpenApiRestCall_567657
-proc url_ManagementLocksDeleteAtSubscriptionLevel_568241(protocol: Scheme;
+  Call_ManagementLocksDeleteAtSubscriptionLevel_564139 = ref object of OpenApiRestCall_563555
+proc url_ManagementLocksDeleteAtSubscriptionLevel_564141(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -499,7 +503,7 @@ proc url_ManagementLocksDeleteAtSubscriptionLevel_568241(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ManagementLocksDeleteAtSubscriptionLevel_568240(path: JsonNode;
+proc validate_ManagementLocksDeleteAtSubscriptionLevel_564140(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## To delete management locks, you must have access to Microsoft.Authorization/* or Microsoft.Authorization/locks/* actions. Of the built-in roles, only Owner and User Access Administrator are granted those actions.
   ## 
@@ -513,16 +517,16 @@ proc validate_ManagementLocksDeleteAtSubscriptionLevel_568240(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_568242 = path.getOrDefault("subscriptionId")
-  valid_568242 = validateParameter(valid_568242, JString, required = true,
+  var valid_564142 = path.getOrDefault("subscriptionId")
+  valid_564142 = validateParameter(valid_564142, JString, required = true,
                                  default = nil)
-  if valid_568242 != nil:
-    section.add "subscriptionId", valid_568242
-  var valid_568243 = path.getOrDefault("lockName")
-  valid_568243 = validateParameter(valid_568243, JString, required = true,
+  if valid_564142 != nil:
+    section.add "subscriptionId", valid_564142
+  var valid_564143 = path.getOrDefault("lockName")
+  valid_564143 = validateParameter(valid_564143, JString, required = true,
                                  default = nil)
-  if valid_568243 != nil:
-    section.add "lockName", valid_568243
+  if valid_564143 != nil:
+    section.add "lockName", valid_564143
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -530,11 +534,11 @@ proc validate_ManagementLocksDeleteAtSubscriptionLevel_568240(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568244 = query.getOrDefault("api-version")
-  valid_568244 = validateParameter(valid_568244, JString, required = true,
+  var valid_564144 = query.getOrDefault("api-version")
+  valid_564144 = validateParameter(valid_564144, JString, required = true,
                                  default = nil)
-  if valid_568244 != nil:
-    section.add "api-version", valid_568244
+  if valid_564144 != nil:
+    section.add "api-version", valid_564144
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -543,21 +547,21 @@ proc validate_ManagementLocksDeleteAtSubscriptionLevel_568240(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568245: Call_ManagementLocksDeleteAtSubscriptionLevel_568239;
+proc call*(call_564145: Call_ManagementLocksDeleteAtSubscriptionLevel_564139;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## To delete management locks, you must have access to Microsoft.Authorization/* or Microsoft.Authorization/locks/* actions. Of the built-in roles, only Owner and User Access Administrator are granted those actions.
   ## 
-  let valid = call_568245.validator(path, query, header, formData, body)
-  let scheme = call_568245.pickScheme
+  let valid = call_564145.validator(path, query, header, formData, body)
+  let scheme = call_564145.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568245.url(scheme.get, call_568245.host, call_568245.base,
-                         call_568245.route, valid.getOrDefault("path"),
+  let url = call_564145.url(scheme.get, call_564145.host, call_564145.base,
+                         call_564145.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568245, url, valid)
+  result = hook(call_564145, url, valid)
 
-proc call*(call_568246: Call_ManagementLocksDeleteAtSubscriptionLevel_568239;
+proc call*(call_564146: Call_ManagementLocksDeleteAtSubscriptionLevel_564139;
           apiVersion: string; subscriptionId: string; lockName: string): Recallable =
   ## managementLocksDeleteAtSubscriptionLevel
   ## To delete management locks, you must have access to Microsoft.Authorization/* or Microsoft.Authorization/locks/* actions. Of the built-in roles, only Owner and User Access Administrator are granted those actions.
@@ -567,22 +571,22 @@ proc call*(call_568246: Call_ManagementLocksDeleteAtSubscriptionLevel_568239;
   ##                 : The ID of the target subscription.
   ##   lockName: string (required)
   ##           : The name of lock to delete.
-  var path_568247 = newJObject()
-  var query_568248 = newJObject()
-  add(query_568248, "api-version", newJString(apiVersion))
-  add(path_568247, "subscriptionId", newJString(subscriptionId))
-  add(path_568247, "lockName", newJString(lockName))
-  result = call_568246.call(path_568247, query_568248, nil, nil, nil)
+  var path_564147 = newJObject()
+  var query_564148 = newJObject()
+  add(query_564148, "api-version", newJString(apiVersion))
+  add(path_564147, "subscriptionId", newJString(subscriptionId))
+  add(path_564147, "lockName", newJString(lockName))
+  result = call_564146.call(path_564147, query_564148, nil, nil, nil)
 
-var managementLocksDeleteAtSubscriptionLevel* = Call_ManagementLocksDeleteAtSubscriptionLevel_568239(
+var managementLocksDeleteAtSubscriptionLevel* = Call_ManagementLocksDeleteAtSubscriptionLevel_564139(
     name: "managementLocksDeleteAtSubscriptionLevel", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Authorization/locks/{lockName}",
-    validator: validate_ManagementLocksDeleteAtSubscriptionLevel_568240, base: "",
-    url: url_ManagementLocksDeleteAtSubscriptionLevel_568241,
+    validator: validate_ManagementLocksDeleteAtSubscriptionLevel_564140, base: "",
+    url: url_ManagementLocksDeleteAtSubscriptionLevel_564141,
     schemes: {Scheme.Https})
 type
-  Call_ManagementLocksListAtResourceGroupLevel_568249 = ref object of OpenApiRestCall_567657
-proc url_ManagementLocksListAtResourceGroupLevel_568251(protocol: Scheme;
+  Call_ManagementLocksListAtResourceGroupLevel_564149 = ref object of OpenApiRestCall_563555
+proc url_ManagementLocksListAtResourceGroupLevel_564151(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -602,30 +606,30 @@ proc url_ManagementLocksListAtResourceGroupLevel_568251(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ManagementLocksListAtResourceGroupLevel_568250(path: JsonNode;
+proc validate_ManagementLocksListAtResourceGroupLevel_564150(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets all the management locks for a resource group.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group containing the locks to get.
   ##   subscriptionId: JString (required)
   ##                 : The ID of the target subscription.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group containing the locks to get.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568252 = path.getOrDefault("resourceGroupName")
-  valid_568252 = validateParameter(valid_568252, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564152 = path.getOrDefault("subscriptionId")
+  valid_564152 = validateParameter(valid_564152, JString, required = true,
                                  default = nil)
-  if valid_568252 != nil:
-    section.add "resourceGroupName", valid_568252
-  var valid_568253 = path.getOrDefault("subscriptionId")
-  valid_568253 = validateParameter(valid_568253, JString, required = true,
+  if valid_564152 != nil:
+    section.add "subscriptionId", valid_564152
+  var valid_564153 = path.getOrDefault("resourceGroupName")
+  valid_564153 = validateParameter(valid_564153, JString, required = true,
                                  default = nil)
-  if valid_568253 != nil:
-    section.add "subscriptionId", valid_568253
+  if valid_564153 != nil:
+    section.add "resourceGroupName", valid_564153
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -635,16 +639,16 @@ proc validate_ManagementLocksListAtResourceGroupLevel_568250(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568254 = query.getOrDefault("api-version")
-  valid_568254 = validateParameter(valid_568254, JString, required = true,
+  var valid_564154 = query.getOrDefault("api-version")
+  valid_564154 = validateParameter(valid_564154, JString, required = true,
                                  default = nil)
-  if valid_568254 != nil:
-    section.add "api-version", valid_568254
-  var valid_568255 = query.getOrDefault("$filter")
-  valid_568255 = validateParameter(valid_568255, JString, required = false,
+  if valid_564154 != nil:
+    section.add "api-version", valid_564154
+  var valid_564155 = query.getOrDefault("$filter")
+  valid_564155 = validateParameter(valid_564155, JString, required = false,
                                  default = nil)
-  if valid_568255 != nil:
-    section.add "$filter", valid_568255
+  if valid_564155 != nil:
+    section.add "$filter", valid_564155
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -653,50 +657,50 @@ proc validate_ManagementLocksListAtResourceGroupLevel_568250(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568256: Call_ManagementLocksListAtResourceGroupLevel_568249;
+proc call*(call_564156: Call_ManagementLocksListAtResourceGroupLevel_564149;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Gets all the management locks for a resource group.
   ## 
-  let valid = call_568256.validator(path, query, header, formData, body)
-  let scheme = call_568256.pickScheme
+  let valid = call_564156.validator(path, query, header, formData, body)
+  let scheme = call_564156.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568256.url(scheme.get, call_568256.host, call_568256.base,
-                         call_568256.route, valid.getOrDefault("path"),
+  let url = call_564156.url(scheme.get, call_564156.host, call_564156.base,
+                         call_564156.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568256, url, valid)
+  result = hook(call_564156, url, valid)
 
-proc call*(call_568257: Call_ManagementLocksListAtResourceGroupLevel_568249;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
+proc call*(call_564157: Call_ManagementLocksListAtResourceGroupLevel_564149;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string;
           Filter: string = ""): Recallable =
   ## managementLocksListAtResourceGroupLevel
   ## Gets all the management locks for a resource group.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group containing the locks to get.
   ##   apiVersion: string (required)
   ##             : The API version to use for the operation.
   ##   subscriptionId: string (required)
   ##                 : The ID of the target subscription.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group containing the locks to get.
   ##   Filter: string
   ##         : The filter to apply on the operation.
-  var path_568258 = newJObject()
-  var query_568259 = newJObject()
-  add(path_568258, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568259, "api-version", newJString(apiVersion))
-  add(path_568258, "subscriptionId", newJString(subscriptionId))
-  add(query_568259, "$filter", newJString(Filter))
-  result = call_568257.call(path_568258, query_568259, nil, nil, nil)
+  var path_564158 = newJObject()
+  var query_564159 = newJObject()
+  add(query_564159, "api-version", newJString(apiVersion))
+  add(path_564158, "subscriptionId", newJString(subscriptionId))
+  add(path_564158, "resourceGroupName", newJString(resourceGroupName))
+  add(query_564159, "$filter", newJString(Filter))
+  result = call_564157.call(path_564158, query_564159, nil, nil, nil)
 
-var managementLocksListAtResourceGroupLevel* = Call_ManagementLocksListAtResourceGroupLevel_568249(
+var managementLocksListAtResourceGroupLevel* = Call_ManagementLocksListAtResourceGroupLevel_564149(
     name: "managementLocksListAtResourceGroupLevel", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Authorization/locks",
-    validator: validate_ManagementLocksListAtResourceGroupLevel_568250, base: "",
-    url: url_ManagementLocksListAtResourceGroupLevel_568251,
+    validator: validate_ManagementLocksListAtResourceGroupLevel_564150, base: "",
+    url: url_ManagementLocksListAtResourceGroupLevel_564151,
     schemes: {Scheme.Https})
 type
-  Call_ManagementLocksCreateOrUpdateAtResourceGroupLevel_568271 = ref object of OpenApiRestCall_567657
-proc url_ManagementLocksCreateOrUpdateAtResourceGroupLevel_568273(
+  Call_ManagementLocksCreateOrUpdateAtResourceGroupLevel_564171 = ref object of OpenApiRestCall_563555
+proc url_ManagementLocksCreateOrUpdateAtResourceGroupLevel_564173(
     protocol: Scheme; host: string; base: string; route: string; path: JsonNode;
     query: JsonNode): Uri =
   result.scheme = $protocol
@@ -719,7 +723,7 @@ proc url_ManagementLocksCreateOrUpdateAtResourceGroupLevel_568273(
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ManagementLocksCreateOrUpdateAtResourceGroupLevel_568272(
+proc validate_ManagementLocksCreateOrUpdateAtResourceGroupLevel_564172(
     path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
     body: JsonNode): JsonNode =
   ## When you apply a lock at a parent scope, all child resources inherit the same lock. To create management locks, you must have access to Microsoft.Authorization/* or Microsoft.Authorization/locks/* actions. Of the built-in roles, only Owner and User Access Administrator are granted those actions.
@@ -727,30 +731,30 @@ proc validate_ManagementLocksCreateOrUpdateAtResourceGroupLevel_568272(
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group to lock.
   ##   subscriptionId: JString (required)
   ##                 : The ID of the target subscription.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group to lock.
   ##   lockName: JString (required)
   ##           : The lock name. The lock name can be a maximum of 260 characters. It cannot contain <, > %, &, :, \, ?, /, or any control characters.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568274 = path.getOrDefault("resourceGroupName")
-  valid_568274 = validateParameter(valid_568274, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564174 = path.getOrDefault("subscriptionId")
+  valid_564174 = validateParameter(valid_564174, JString, required = true,
                                  default = nil)
-  if valid_568274 != nil:
-    section.add "resourceGroupName", valid_568274
-  var valid_568275 = path.getOrDefault("subscriptionId")
-  valid_568275 = validateParameter(valid_568275, JString, required = true,
+  if valid_564174 != nil:
+    section.add "subscriptionId", valid_564174
+  var valid_564175 = path.getOrDefault("resourceGroupName")
+  valid_564175 = validateParameter(valid_564175, JString, required = true,
                                  default = nil)
-  if valid_568275 != nil:
-    section.add "subscriptionId", valid_568275
-  var valid_568276 = path.getOrDefault("lockName")
-  valid_568276 = validateParameter(valid_568276, JString, required = true,
+  if valid_564175 != nil:
+    section.add "resourceGroupName", valid_564175
+  var valid_564176 = path.getOrDefault("lockName")
+  valid_564176 = validateParameter(valid_564176, JString, required = true,
                                  default = nil)
-  if valid_568276 != nil:
-    section.add "lockName", valid_568276
+  if valid_564176 != nil:
+    section.add "lockName", valid_564176
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -758,11 +762,11 @@ proc validate_ManagementLocksCreateOrUpdateAtResourceGroupLevel_568272(
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568277 = query.getOrDefault("api-version")
-  valid_568277 = validateParameter(valid_568277, JString, required = true,
+  var valid_564177 = query.getOrDefault("api-version")
+  valid_564177 = validateParameter(valid_564177, JString, required = true,
                                  default = nil)
-  if valid_568277 != nil:
-    section.add "api-version", valid_568277
+  if valid_564177 != nil:
+    section.add "api-version", valid_564177
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -776,55 +780,55 @@ proc validate_ManagementLocksCreateOrUpdateAtResourceGroupLevel_568272(
   if body != nil:
     result.add "body", body
 
-proc call*(call_568279: Call_ManagementLocksCreateOrUpdateAtResourceGroupLevel_568271;
+proc call*(call_564179: Call_ManagementLocksCreateOrUpdateAtResourceGroupLevel_564171;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## When you apply a lock at a parent scope, all child resources inherit the same lock. To create management locks, you must have access to Microsoft.Authorization/* or Microsoft.Authorization/locks/* actions. Of the built-in roles, only Owner and User Access Administrator are granted those actions.
   ## 
-  let valid = call_568279.validator(path, query, header, formData, body)
-  let scheme = call_568279.pickScheme
+  let valid = call_564179.validator(path, query, header, formData, body)
+  let scheme = call_564179.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568279.url(scheme.get, call_568279.host, call_568279.base,
-                         call_568279.route, valid.getOrDefault("path"),
+  let url = call_564179.url(scheme.get, call_564179.host, call_564179.base,
+                         call_564179.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568279, url, valid)
+  result = hook(call_564179, url, valid)
 
-proc call*(call_568280: Call_ManagementLocksCreateOrUpdateAtResourceGroupLevel_568271;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
+proc call*(call_564180: Call_ManagementLocksCreateOrUpdateAtResourceGroupLevel_564171;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string;
           lockName: string; parameters: JsonNode): Recallable =
   ## managementLocksCreateOrUpdateAtResourceGroupLevel
   ## When you apply a lock at a parent scope, all child resources inherit the same lock. To create management locks, you must have access to Microsoft.Authorization/* or Microsoft.Authorization/locks/* actions. Of the built-in roles, only Owner and User Access Administrator are granted those actions.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group to lock.
   ##   apiVersion: string (required)
   ##             : The API version to use for the operation.
   ##   subscriptionId: string (required)
   ##                 : The ID of the target subscription.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group to lock.
   ##   lockName: string (required)
   ##           : The lock name. The lock name can be a maximum of 260 characters. It cannot contain <, > %, &, :, \, ?, /, or any control characters.
   ##   parameters: JObject (required)
   ##             : The management lock parameters.
-  var path_568281 = newJObject()
-  var query_568282 = newJObject()
-  var body_568283 = newJObject()
-  add(path_568281, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568282, "api-version", newJString(apiVersion))
-  add(path_568281, "subscriptionId", newJString(subscriptionId))
-  add(path_568281, "lockName", newJString(lockName))
+  var path_564181 = newJObject()
+  var query_564182 = newJObject()
+  var body_564183 = newJObject()
+  add(query_564182, "api-version", newJString(apiVersion))
+  add(path_564181, "subscriptionId", newJString(subscriptionId))
+  add(path_564181, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564181, "lockName", newJString(lockName))
   if parameters != nil:
-    body_568283 = parameters
-  result = call_568280.call(path_568281, query_568282, nil, nil, body_568283)
+    body_564183 = parameters
+  result = call_564180.call(path_564181, query_564182, nil, nil, body_564183)
 
-var managementLocksCreateOrUpdateAtResourceGroupLevel* = Call_ManagementLocksCreateOrUpdateAtResourceGroupLevel_568271(
+var managementLocksCreateOrUpdateAtResourceGroupLevel* = Call_ManagementLocksCreateOrUpdateAtResourceGroupLevel_564171(
     name: "managementLocksCreateOrUpdateAtResourceGroupLevel",
     meth: HttpMethod.HttpPut, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Authorization/locks/{lockName}",
-    validator: validate_ManagementLocksCreateOrUpdateAtResourceGroupLevel_568272,
-    base: "", url: url_ManagementLocksCreateOrUpdateAtResourceGroupLevel_568273,
+    validator: validate_ManagementLocksCreateOrUpdateAtResourceGroupLevel_564172,
+    base: "", url: url_ManagementLocksCreateOrUpdateAtResourceGroupLevel_564173,
     schemes: {Scheme.Https})
 type
-  Call_ManagementLocksGetAtResourceGroupLevel_568260 = ref object of OpenApiRestCall_567657
-proc url_ManagementLocksGetAtResourceGroupLevel_568262(protocol: Scheme;
+  Call_ManagementLocksGetAtResourceGroupLevel_564160 = ref object of OpenApiRestCall_563555
+proc url_ManagementLocksGetAtResourceGroupLevel_564162(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -846,37 +850,37 @@ proc url_ManagementLocksGetAtResourceGroupLevel_568262(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ManagementLocksGetAtResourceGroupLevel_568261(path: JsonNode;
+proc validate_ManagementLocksGetAtResourceGroupLevel_564161(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets a management lock at the resource group level.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the locked resource group.
   ##   subscriptionId: JString (required)
   ##                 : The ID of the target subscription.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the locked resource group.
   ##   lockName: JString (required)
   ##           : The name of the lock to get.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568263 = path.getOrDefault("resourceGroupName")
-  valid_568263 = validateParameter(valid_568263, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564163 = path.getOrDefault("subscriptionId")
+  valid_564163 = validateParameter(valid_564163, JString, required = true,
                                  default = nil)
-  if valid_568263 != nil:
-    section.add "resourceGroupName", valid_568263
-  var valid_568264 = path.getOrDefault("subscriptionId")
-  valid_568264 = validateParameter(valid_568264, JString, required = true,
+  if valid_564163 != nil:
+    section.add "subscriptionId", valid_564163
+  var valid_564164 = path.getOrDefault("resourceGroupName")
+  valid_564164 = validateParameter(valid_564164, JString, required = true,
                                  default = nil)
-  if valid_568264 != nil:
-    section.add "subscriptionId", valid_568264
-  var valid_568265 = path.getOrDefault("lockName")
-  valid_568265 = validateParameter(valid_568265, JString, required = true,
+  if valid_564164 != nil:
+    section.add "resourceGroupName", valid_564164
+  var valid_564165 = path.getOrDefault("lockName")
+  valid_564165 = validateParameter(valid_564165, JString, required = true,
                                  default = nil)
-  if valid_568265 != nil:
-    section.add "lockName", valid_568265
+  if valid_564165 != nil:
+    section.add "lockName", valid_564165
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -884,11 +888,11 @@ proc validate_ManagementLocksGetAtResourceGroupLevel_568261(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568266 = query.getOrDefault("api-version")
-  valid_568266 = validateParameter(valid_568266, JString, required = true,
+  var valid_564166 = query.getOrDefault("api-version")
+  valid_564166 = validateParameter(valid_564166, JString, required = true,
                                  default = nil)
-  if valid_568266 != nil:
-    section.add "api-version", valid_568266
+  if valid_564166 != nil:
+    section.add "api-version", valid_564166
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -897,50 +901,50 @@ proc validate_ManagementLocksGetAtResourceGroupLevel_568261(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568267: Call_ManagementLocksGetAtResourceGroupLevel_568260;
+proc call*(call_564167: Call_ManagementLocksGetAtResourceGroupLevel_564160;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Gets a management lock at the resource group level.
   ## 
-  let valid = call_568267.validator(path, query, header, formData, body)
-  let scheme = call_568267.pickScheme
+  let valid = call_564167.validator(path, query, header, formData, body)
+  let scheme = call_564167.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568267.url(scheme.get, call_568267.host, call_568267.base,
-                         call_568267.route, valid.getOrDefault("path"),
+  let url = call_564167.url(scheme.get, call_564167.host, call_564167.base,
+                         call_564167.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568267, url, valid)
+  result = hook(call_564167, url, valid)
 
-proc call*(call_568268: Call_ManagementLocksGetAtResourceGroupLevel_568260;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
+proc call*(call_564168: Call_ManagementLocksGetAtResourceGroupLevel_564160;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string;
           lockName: string): Recallable =
   ## managementLocksGetAtResourceGroupLevel
   ## Gets a management lock at the resource group level.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the locked resource group.
   ##   apiVersion: string (required)
   ##             : The API version to use for the operation.
   ##   subscriptionId: string (required)
   ##                 : The ID of the target subscription.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the locked resource group.
   ##   lockName: string (required)
   ##           : The name of the lock to get.
-  var path_568269 = newJObject()
-  var query_568270 = newJObject()
-  add(path_568269, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568270, "api-version", newJString(apiVersion))
-  add(path_568269, "subscriptionId", newJString(subscriptionId))
-  add(path_568269, "lockName", newJString(lockName))
-  result = call_568268.call(path_568269, query_568270, nil, nil, nil)
+  var path_564169 = newJObject()
+  var query_564170 = newJObject()
+  add(query_564170, "api-version", newJString(apiVersion))
+  add(path_564169, "subscriptionId", newJString(subscriptionId))
+  add(path_564169, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564169, "lockName", newJString(lockName))
+  result = call_564168.call(path_564169, query_564170, nil, nil, nil)
 
-var managementLocksGetAtResourceGroupLevel* = Call_ManagementLocksGetAtResourceGroupLevel_568260(
+var managementLocksGetAtResourceGroupLevel* = Call_ManagementLocksGetAtResourceGroupLevel_564160(
     name: "managementLocksGetAtResourceGroupLevel", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Authorization/locks/{lockName}",
-    validator: validate_ManagementLocksGetAtResourceGroupLevel_568261, base: "",
-    url: url_ManagementLocksGetAtResourceGroupLevel_568262,
+    validator: validate_ManagementLocksGetAtResourceGroupLevel_564161, base: "",
+    url: url_ManagementLocksGetAtResourceGroupLevel_564162,
     schemes: {Scheme.Https})
 type
-  Call_ManagementLocksDeleteAtResourceGroupLevel_568284 = ref object of OpenApiRestCall_567657
-proc url_ManagementLocksDeleteAtResourceGroupLevel_568286(protocol: Scheme;
+  Call_ManagementLocksDeleteAtResourceGroupLevel_564184 = ref object of OpenApiRestCall_563555
+proc url_ManagementLocksDeleteAtResourceGroupLevel_564186(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -962,37 +966,37 @@ proc url_ManagementLocksDeleteAtResourceGroupLevel_568286(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ManagementLocksDeleteAtResourceGroupLevel_568285(path: JsonNode;
+proc validate_ManagementLocksDeleteAtResourceGroupLevel_564185(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## To delete management locks, you must have access to Microsoft.Authorization/* or Microsoft.Authorization/locks/* actions. Of the built-in roles, only Owner and User Access Administrator are granted those actions.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group containing the lock.
   ##   subscriptionId: JString (required)
   ##                 : The ID of the target subscription.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group containing the lock.
   ##   lockName: JString (required)
   ##           : The name of lock to delete.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568287 = path.getOrDefault("resourceGroupName")
-  valid_568287 = validateParameter(valid_568287, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564187 = path.getOrDefault("subscriptionId")
+  valid_564187 = validateParameter(valid_564187, JString, required = true,
                                  default = nil)
-  if valid_568287 != nil:
-    section.add "resourceGroupName", valid_568287
-  var valid_568288 = path.getOrDefault("subscriptionId")
-  valid_568288 = validateParameter(valid_568288, JString, required = true,
+  if valid_564187 != nil:
+    section.add "subscriptionId", valid_564187
+  var valid_564188 = path.getOrDefault("resourceGroupName")
+  valid_564188 = validateParameter(valid_564188, JString, required = true,
                                  default = nil)
-  if valid_568288 != nil:
-    section.add "subscriptionId", valid_568288
-  var valid_568289 = path.getOrDefault("lockName")
-  valid_568289 = validateParameter(valid_568289, JString, required = true,
+  if valid_564188 != nil:
+    section.add "resourceGroupName", valid_564188
+  var valid_564189 = path.getOrDefault("lockName")
+  valid_564189 = validateParameter(valid_564189, JString, required = true,
                                  default = nil)
-  if valid_568289 != nil:
-    section.add "lockName", valid_568289
+  if valid_564189 != nil:
+    section.add "lockName", valid_564189
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1000,11 +1004,11 @@ proc validate_ManagementLocksDeleteAtResourceGroupLevel_568285(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568290 = query.getOrDefault("api-version")
-  valid_568290 = validateParameter(valid_568290, JString, required = true,
+  var valid_564190 = query.getOrDefault("api-version")
+  valid_564190 = validateParameter(valid_564190, JString, required = true,
                                  default = nil)
-  if valid_568290 != nil:
-    section.add "api-version", valid_568290
+  if valid_564190 != nil:
+    section.add "api-version", valid_564190
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1013,50 +1017,50 @@ proc validate_ManagementLocksDeleteAtResourceGroupLevel_568285(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568291: Call_ManagementLocksDeleteAtResourceGroupLevel_568284;
+proc call*(call_564191: Call_ManagementLocksDeleteAtResourceGroupLevel_564184;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## To delete management locks, you must have access to Microsoft.Authorization/* or Microsoft.Authorization/locks/* actions. Of the built-in roles, only Owner and User Access Administrator are granted those actions.
   ## 
-  let valid = call_568291.validator(path, query, header, formData, body)
-  let scheme = call_568291.pickScheme
+  let valid = call_564191.validator(path, query, header, formData, body)
+  let scheme = call_564191.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568291.url(scheme.get, call_568291.host, call_568291.base,
-                         call_568291.route, valid.getOrDefault("path"),
+  let url = call_564191.url(scheme.get, call_564191.host, call_564191.base,
+                         call_564191.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568291, url, valid)
+  result = hook(call_564191, url, valid)
 
-proc call*(call_568292: Call_ManagementLocksDeleteAtResourceGroupLevel_568284;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
+proc call*(call_564192: Call_ManagementLocksDeleteAtResourceGroupLevel_564184;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string;
           lockName: string): Recallable =
   ## managementLocksDeleteAtResourceGroupLevel
   ## To delete management locks, you must have access to Microsoft.Authorization/* or Microsoft.Authorization/locks/* actions. Of the built-in roles, only Owner and User Access Administrator are granted those actions.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group containing the lock.
   ##   apiVersion: string (required)
   ##             : The API version to use for the operation.
   ##   subscriptionId: string (required)
   ##                 : The ID of the target subscription.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group containing the lock.
   ##   lockName: string (required)
   ##           : The name of lock to delete.
-  var path_568293 = newJObject()
-  var query_568294 = newJObject()
-  add(path_568293, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568294, "api-version", newJString(apiVersion))
-  add(path_568293, "subscriptionId", newJString(subscriptionId))
-  add(path_568293, "lockName", newJString(lockName))
-  result = call_568292.call(path_568293, query_568294, nil, nil, nil)
+  var path_564193 = newJObject()
+  var query_564194 = newJObject()
+  add(query_564194, "api-version", newJString(apiVersion))
+  add(path_564193, "subscriptionId", newJString(subscriptionId))
+  add(path_564193, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564193, "lockName", newJString(lockName))
+  result = call_564192.call(path_564193, query_564194, nil, nil, nil)
 
-var managementLocksDeleteAtResourceGroupLevel* = Call_ManagementLocksDeleteAtResourceGroupLevel_568284(
+var managementLocksDeleteAtResourceGroupLevel* = Call_ManagementLocksDeleteAtResourceGroupLevel_564184(
     name: "managementLocksDeleteAtResourceGroupLevel",
     meth: HttpMethod.HttpDelete, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Authorization/locks/{lockName}",
-    validator: validate_ManagementLocksDeleteAtResourceGroupLevel_568285,
-    base: "", url: url_ManagementLocksDeleteAtResourceGroupLevel_568286,
+    validator: validate_ManagementLocksDeleteAtResourceGroupLevel_564185,
+    base: "", url: url_ManagementLocksDeleteAtResourceGroupLevel_564186,
     schemes: {Scheme.Https})
 type
-  Call_ManagementLocksListAtResourceLevel_568295 = ref object of OpenApiRestCall_567657
-proc url_ManagementLocksListAtResourceLevel_568297(protocol: Scheme; host: string;
+  Call_ManagementLocksListAtResourceLevel_564195 = ref object of OpenApiRestCall_563555
+proc url_ManagementLocksListAtResourceLevel_564197(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1090,7 +1094,7 @@ proc url_ManagementLocksListAtResourceLevel_568297(protocol: Scheme; host: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ManagementLocksListAtResourceLevel_568296(path: JsonNode;
+proc validate_ManagementLocksListAtResourceLevel_564196(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets all the management locks for a resource or any level below resource.
   ## 
@@ -1099,49 +1103,49 @@ proc validate_ManagementLocksListAtResourceLevel_568296(path: JsonNode;
   ## parameters in `path` object:
   ##   resourceType: JString (required)
   ##               : The resource type of the locked resource.
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group containing the locked resource. The name is case insensitive.
-  ##   subscriptionId: JString (required)
-  ##                 : The ID of the target subscription.
-  ##   resourceName: JString (required)
-  ##               : The name of the locked resource.
   ##   resourceProviderNamespace: JString (required)
   ##                            : The namespace of the resource provider.
+  ##   subscriptionId: JString (required)
+  ##                 : The ID of the target subscription.
   ##   parentResourcePath: JString (required)
   ##                     : The parent resource identity.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group containing the locked resource. The name is case insensitive.
+  ##   resourceName: JString (required)
+  ##               : The name of the locked resource.
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceType` field"
-  var valid_568298 = path.getOrDefault("resourceType")
-  valid_568298 = validateParameter(valid_568298, JString, required = true,
+  var valid_564198 = path.getOrDefault("resourceType")
+  valid_564198 = validateParameter(valid_564198, JString, required = true,
                                  default = nil)
-  if valid_568298 != nil:
-    section.add "resourceType", valid_568298
-  var valid_568299 = path.getOrDefault("resourceGroupName")
-  valid_568299 = validateParameter(valid_568299, JString, required = true,
+  if valid_564198 != nil:
+    section.add "resourceType", valid_564198
+  var valid_564199 = path.getOrDefault("resourceProviderNamespace")
+  valid_564199 = validateParameter(valid_564199, JString, required = true,
                                  default = nil)
-  if valid_568299 != nil:
-    section.add "resourceGroupName", valid_568299
-  var valid_568300 = path.getOrDefault("subscriptionId")
-  valid_568300 = validateParameter(valid_568300, JString, required = true,
+  if valid_564199 != nil:
+    section.add "resourceProviderNamespace", valid_564199
+  var valid_564200 = path.getOrDefault("subscriptionId")
+  valid_564200 = validateParameter(valid_564200, JString, required = true,
                                  default = nil)
-  if valid_568300 != nil:
-    section.add "subscriptionId", valid_568300
-  var valid_568301 = path.getOrDefault("resourceName")
-  valid_568301 = validateParameter(valid_568301, JString, required = true,
+  if valid_564200 != nil:
+    section.add "subscriptionId", valid_564200
+  var valid_564201 = path.getOrDefault("parentResourcePath")
+  valid_564201 = validateParameter(valid_564201, JString, required = true,
                                  default = nil)
-  if valid_568301 != nil:
-    section.add "resourceName", valid_568301
-  var valid_568302 = path.getOrDefault("resourceProviderNamespace")
-  valid_568302 = validateParameter(valid_568302, JString, required = true,
+  if valid_564201 != nil:
+    section.add "parentResourcePath", valid_564201
+  var valid_564202 = path.getOrDefault("resourceGroupName")
+  valid_564202 = validateParameter(valid_564202, JString, required = true,
                                  default = nil)
-  if valid_568302 != nil:
-    section.add "resourceProviderNamespace", valid_568302
-  var valid_568303 = path.getOrDefault("parentResourcePath")
-  valid_568303 = validateParameter(valid_568303, JString, required = true,
+  if valid_564202 != nil:
+    section.add "resourceGroupName", valid_564202
+  var valid_564203 = path.getOrDefault("resourceName")
+  valid_564203 = validateParameter(valid_564203, JString, required = true,
                                  default = nil)
-  if valid_568303 != nil:
-    section.add "parentResourcePath", valid_568303
+  if valid_564203 != nil:
+    section.add "resourceName", valid_564203
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1151,16 +1155,16 @@ proc validate_ManagementLocksListAtResourceLevel_568296(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568304 = query.getOrDefault("api-version")
-  valid_568304 = validateParameter(valid_568304, JString, required = true,
+  var valid_564204 = query.getOrDefault("api-version")
+  valid_564204 = validateParameter(valid_564204, JString, required = true,
                                  default = nil)
-  if valid_568304 != nil:
-    section.add "api-version", valid_568304
-  var valid_568305 = query.getOrDefault("$filter")
-  valid_568305 = validateParameter(valid_568305, JString, required = false,
+  if valid_564204 != nil:
+    section.add "api-version", valid_564204
+  var valid_564205 = query.getOrDefault("$filter")
+  valid_564205 = validateParameter(valid_564205, JString, required = false,
                                  default = nil)
-  if valid_568305 != nil:
-    section.add "$filter", valid_568305
+  if valid_564205 != nil:
+    section.add "$filter", valid_564205
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1169,64 +1173,64 @@ proc validate_ManagementLocksListAtResourceLevel_568296(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568306: Call_ManagementLocksListAtResourceLevel_568295;
+proc call*(call_564206: Call_ManagementLocksListAtResourceLevel_564195;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Gets all the management locks for a resource or any level below resource.
   ## 
-  let valid = call_568306.validator(path, query, header, formData, body)
-  let scheme = call_568306.pickScheme
+  let valid = call_564206.validator(path, query, header, formData, body)
+  let scheme = call_564206.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568306.url(scheme.get, call_568306.host, call_568306.base,
-                         call_568306.route, valid.getOrDefault("path"),
+  let url = call_564206.url(scheme.get, call_564206.host, call_564206.base,
+                         call_564206.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568306, url, valid)
+  result = hook(call_564206, url, valid)
 
-proc call*(call_568307: Call_ManagementLocksListAtResourceLevel_568295;
-          resourceType: string; resourceGroupName: string; apiVersion: string;
-          subscriptionId: string; resourceName: string;
-          resourceProviderNamespace: string; parentResourcePath: string;
-          Filter: string = ""): Recallable =
+proc call*(call_564207: Call_ManagementLocksListAtResourceLevel_564195;
+          apiVersion: string; resourceType: string;
+          resourceProviderNamespace: string; subscriptionId: string;
+          parentResourcePath: string; resourceGroupName: string;
+          resourceName: string; Filter: string = ""): Recallable =
   ## managementLocksListAtResourceLevel
   ## Gets all the management locks for a resource or any level below resource.
-  ##   resourceType: string (required)
-  ##               : The resource type of the locked resource.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group containing the locked resource. The name is case insensitive.
   ##   apiVersion: string (required)
   ##             : The API version to use for the operation.
-  ##   subscriptionId: string (required)
-  ##                 : The ID of the target subscription.
-  ##   resourceName: string (required)
-  ##               : The name of the locked resource.
+  ##   resourceType: string (required)
+  ##               : The resource type of the locked resource.
   ##   resourceProviderNamespace: string (required)
   ##                            : The namespace of the resource provider.
+  ##   subscriptionId: string (required)
+  ##                 : The ID of the target subscription.
   ##   parentResourcePath: string (required)
   ##                     : The parent resource identity.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group containing the locked resource. The name is case insensitive.
   ##   Filter: string
   ##         : The filter to apply on the operation.
-  var path_568308 = newJObject()
-  var query_568309 = newJObject()
-  add(path_568308, "resourceType", newJString(resourceType))
-  add(path_568308, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568309, "api-version", newJString(apiVersion))
-  add(path_568308, "subscriptionId", newJString(subscriptionId))
-  add(path_568308, "resourceName", newJString(resourceName))
-  add(path_568308, "resourceProviderNamespace",
+  ##   resourceName: string (required)
+  ##               : The name of the locked resource.
+  var path_564208 = newJObject()
+  var query_564209 = newJObject()
+  add(query_564209, "api-version", newJString(apiVersion))
+  add(path_564208, "resourceType", newJString(resourceType))
+  add(path_564208, "resourceProviderNamespace",
       newJString(resourceProviderNamespace))
-  add(path_568308, "parentResourcePath", newJString(parentResourcePath))
-  add(query_568309, "$filter", newJString(Filter))
-  result = call_568307.call(path_568308, query_568309, nil, nil, nil)
+  add(path_564208, "subscriptionId", newJString(subscriptionId))
+  add(path_564208, "parentResourcePath", newJString(parentResourcePath))
+  add(path_564208, "resourceGroupName", newJString(resourceGroupName))
+  add(query_564209, "$filter", newJString(Filter))
+  add(path_564208, "resourceName", newJString(resourceName))
+  result = call_564207.call(path_564208, query_564209, nil, nil, nil)
 
-var managementLocksListAtResourceLevel* = Call_ManagementLocksListAtResourceLevel_568295(
+var managementLocksListAtResourceLevel* = Call_ManagementLocksListAtResourceLevel_564195(
     name: "managementLocksListAtResourceLevel", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/{resourceProviderNamespace}/{parentResourcePath}/{resourceType}/{resourceName}/providers/Microsoft.Authorization/locks",
-    validator: validate_ManagementLocksListAtResourceLevel_568296, base: "",
-    url: url_ManagementLocksListAtResourceLevel_568297, schemes: {Scheme.Https})
+    validator: validate_ManagementLocksListAtResourceLevel_564196, base: "",
+    url: url_ManagementLocksListAtResourceLevel_564197, schemes: {Scheme.Https})
 type
-  Call_ManagementLocksCreateOrUpdateAtResourceLevel_568325 = ref object of OpenApiRestCall_567657
-proc url_ManagementLocksCreateOrUpdateAtResourceLevel_568327(protocol: Scheme;
+  Call_ManagementLocksCreateOrUpdateAtResourceLevel_564225 = ref object of OpenApiRestCall_563555
+proc url_ManagementLocksCreateOrUpdateAtResourceLevel_564227(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1262,7 +1266,7 @@ proc url_ManagementLocksCreateOrUpdateAtResourceLevel_568327(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ManagementLocksCreateOrUpdateAtResourceLevel_568326(path: JsonNode;
+proc validate_ManagementLocksCreateOrUpdateAtResourceLevel_564226(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## When you apply a lock at a parent scope, all child resources inherit the same lock. To create management locks, you must have access to Microsoft.Authorization/* or Microsoft.Authorization/locks/* actions. Of the built-in roles, only Owner and User Access Administrator are granted those actions.
   ## 
@@ -1271,56 +1275,56 @@ proc validate_ManagementLocksCreateOrUpdateAtResourceLevel_568326(path: JsonNode
   ## parameters in `path` object:
   ##   resourceType: JString (required)
   ##               : The resource type of the resource to lock.
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group containing the resource to lock. 
+  ##   resourceProviderNamespace: JString (required)
+  ##                            : The resource provider namespace of the resource to lock.
   ##   subscriptionId: JString (required)
   ##                 : The ID of the target subscription.
+  ##   parentResourcePath: JString (required)
+  ##                     : The parent resource identity.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group containing the resource to lock. 
   ##   resourceName: JString (required)
   ##               : The name of the resource to lock.
   ##   lockName: JString (required)
   ##           : The name of lock. The lock name can be a maximum of 260 characters. It cannot contain <, > %, &, :, \, ?, /, or any control characters.
-  ##   resourceProviderNamespace: JString (required)
-  ##                            : The resource provider namespace of the resource to lock.
-  ##   parentResourcePath: JString (required)
-  ##                     : The parent resource identity.
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceType` field"
-  var valid_568328 = path.getOrDefault("resourceType")
-  valid_568328 = validateParameter(valid_568328, JString, required = true,
+  var valid_564228 = path.getOrDefault("resourceType")
+  valid_564228 = validateParameter(valid_564228, JString, required = true,
                                  default = nil)
-  if valid_568328 != nil:
-    section.add "resourceType", valid_568328
-  var valid_568329 = path.getOrDefault("resourceGroupName")
-  valid_568329 = validateParameter(valid_568329, JString, required = true,
+  if valid_564228 != nil:
+    section.add "resourceType", valid_564228
+  var valid_564229 = path.getOrDefault("resourceProviderNamespace")
+  valid_564229 = validateParameter(valid_564229, JString, required = true,
                                  default = nil)
-  if valid_568329 != nil:
-    section.add "resourceGroupName", valid_568329
-  var valid_568330 = path.getOrDefault("subscriptionId")
-  valid_568330 = validateParameter(valid_568330, JString, required = true,
+  if valid_564229 != nil:
+    section.add "resourceProviderNamespace", valid_564229
+  var valid_564230 = path.getOrDefault("subscriptionId")
+  valid_564230 = validateParameter(valid_564230, JString, required = true,
                                  default = nil)
-  if valid_568330 != nil:
-    section.add "subscriptionId", valid_568330
-  var valid_568331 = path.getOrDefault("resourceName")
-  valid_568331 = validateParameter(valid_568331, JString, required = true,
+  if valid_564230 != nil:
+    section.add "subscriptionId", valid_564230
+  var valid_564231 = path.getOrDefault("parentResourcePath")
+  valid_564231 = validateParameter(valid_564231, JString, required = true,
                                  default = nil)
-  if valid_568331 != nil:
-    section.add "resourceName", valid_568331
-  var valid_568332 = path.getOrDefault("lockName")
-  valid_568332 = validateParameter(valid_568332, JString, required = true,
+  if valid_564231 != nil:
+    section.add "parentResourcePath", valid_564231
+  var valid_564232 = path.getOrDefault("resourceGroupName")
+  valid_564232 = validateParameter(valid_564232, JString, required = true,
                                  default = nil)
-  if valid_568332 != nil:
-    section.add "lockName", valid_568332
-  var valid_568333 = path.getOrDefault("resourceProviderNamespace")
-  valid_568333 = validateParameter(valid_568333, JString, required = true,
+  if valid_564232 != nil:
+    section.add "resourceGroupName", valid_564232
+  var valid_564233 = path.getOrDefault("resourceName")
+  valid_564233 = validateParameter(valid_564233, JString, required = true,
                                  default = nil)
-  if valid_568333 != nil:
-    section.add "resourceProviderNamespace", valid_568333
-  var valid_568334 = path.getOrDefault("parentResourcePath")
-  valid_568334 = validateParameter(valid_568334, JString, required = true,
+  if valid_564233 != nil:
+    section.add "resourceName", valid_564233
+  var valid_564234 = path.getOrDefault("lockName")
+  valid_564234 = validateParameter(valid_564234, JString, required = true,
                                  default = nil)
-  if valid_568334 != nil:
-    section.add "parentResourcePath", valid_568334
+  if valid_564234 != nil:
+    section.add "lockName", valid_564234
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1328,11 +1332,11 @@ proc validate_ManagementLocksCreateOrUpdateAtResourceLevel_568326(path: JsonNode
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568335 = query.getOrDefault("api-version")
-  valid_568335 = validateParameter(valid_568335, JString, required = true,
+  var valid_564235 = query.getOrDefault("api-version")
+  valid_564235 = validateParameter(valid_564235, JString, required = true,
                                  default = nil)
-  if valid_568335 != nil:
-    section.add "api-version", valid_568335
+  if valid_564235 != nil:
+    section.add "api-version", valid_564235
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1346,70 +1350,70 @@ proc validate_ManagementLocksCreateOrUpdateAtResourceLevel_568326(path: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_568337: Call_ManagementLocksCreateOrUpdateAtResourceLevel_568325;
+proc call*(call_564237: Call_ManagementLocksCreateOrUpdateAtResourceLevel_564225;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## When you apply a lock at a parent scope, all child resources inherit the same lock. To create management locks, you must have access to Microsoft.Authorization/* or Microsoft.Authorization/locks/* actions. Of the built-in roles, only Owner and User Access Administrator are granted those actions.
   ## 
-  let valid = call_568337.validator(path, query, header, formData, body)
-  let scheme = call_568337.pickScheme
+  let valid = call_564237.validator(path, query, header, formData, body)
+  let scheme = call_564237.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568337.url(scheme.get, call_568337.host, call_568337.base,
-                         call_568337.route, valid.getOrDefault("path"),
+  let url = call_564237.url(scheme.get, call_564237.host, call_564237.base,
+                         call_564237.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568337, url, valid)
+  result = hook(call_564237, url, valid)
 
-proc call*(call_568338: Call_ManagementLocksCreateOrUpdateAtResourceLevel_568325;
-          resourceType: string; resourceGroupName: string; apiVersion: string;
-          subscriptionId: string; resourceName: string; lockName: string;
-          parameters: JsonNode; resourceProviderNamespace: string;
-          parentResourcePath: string): Recallable =
+proc call*(call_564238: Call_ManagementLocksCreateOrUpdateAtResourceLevel_564225;
+          apiVersion: string; resourceType: string;
+          resourceProviderNamespace: string; subscriptionId: string;
+          parentResourcePath: string; resourceGroupName: string;
+          resourceName: string; lockName: string; parameters: JsonNode): Recallable =
   ## managementLocksCreateOrUpdateAtResourceLevel
   ## When you apply a lock at a parent scope, all child resources inherit the same lock. To create management locks, you must have access to Microsoft.Authorization/* or Microsoft.Authorization/locks/* actions. Of the built-in roles, only Owner and User Access Administrator are granted those actions.
-  ##   resourceType: string (required)
-  ##               : The resource type of the resource to lock.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group containing the resource to lock. 
   ##   apiVersion: string (required)
   ##             : The API version to use for the operation.
+  ##   resourceType: string (required)
+  ##               : The resource type of the resource to lock.
+  ##   resourceProviderNamespace: string (required)
+  ##                            : The resource provider namespace of the resource to lock.
   ##   subscriptionId: string (required)
   ##                 : The ID of the target subscription.
+  ##   parentResourcePath: string (required)
+  ##                     : The parent resource identity.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group containing the resource to lock. 
   ##   resourceName: string (required)
   ##               : The name of the resource to lock.
   ##   lockName: string (required)
   ##           : The name of lock. The lock name can be a maximum of 260 characters. It cannot contain <, > %, &, :, \, ?, /, or any control characters.
   ##   parameters: JObject (required)
   ##             : Parameters for creating or updating a  management lock.
-  ##   resourceProviderNamespace: string (required)
-  ##                            : The resource provider namespace of the resource to lock.
-  ##   parentResourcePath: string (required)
-  ##                     : The parent resource identity.
-  var path_568339 = newJObject()
-  var query_568340 = newJObject()
-  var body_568341 = newJObject()
-  add(path_568339, "resourceType", newJString(resourceType))
-  add(path_568339, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568340, "api-version", newJString(apiVersion))
-  add(path_568339, "subscriptionId", newJString(subscriptionId))
-  add(path_568339, "resourceName", newJString(resourceName))
-  add(path_568339, "lockName", newJString(lockName))
-  if parameters != nil:
-    body_568341 = parameters
-  add(path_568339, "resourceProviderNamespace",
+  var path_564239 = newJObject()
+  var query_564240 = newJObject()
+  var body_564241 = newJObject()
+  add(query_564240, "api-version", newJString(apiVersion))
+  add(path_564239, "resourceType", newJString(resourceType))
+  add(path_564239, "resourceProviderNamespace",
       newJString(resourceProviderNamespace))
-  add(path_568339, "parentResourcePath", newJString(parentResourcePath))
-  result = call_568338.call(path_568339, query_568340, nil, nil, body_568341)
+  add(path_564239, "subscriptionId", newJString(subscriptionId))
+  add(path_564239, "parentResourcePath", newJString(parentResourcePath))
+  add(path_564239, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564239, "resourceName", newJString(resourceName))
+  add(path_564239, "lockName", newJString(lockName))
+  if parameters != nil:
+    body_564241 = parameters
+  result = call_564238.call(path_564239, query_564240, nil, nil, body_564241)
 
-var managementLocksCreateOrUpdateAtResourceLevel* = Call_ManagementLocksCreateOrUpdateAtResourceLevel_568325(
+var managementLocksCreateOrUpdateAtResourceLevel* = Call_ManagementLocksCreateOrUpdateAtResourceLevel_564225(
     name: "managementLocksCreateOrUpdateAtResourceLevel",
     meth: HttpMethod.HttpPut, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/{resourceProviderNamespace}/{parentResourcePath}/{resourceType}/{resourceName}/providers/Microsoft.Authorization/locks/{lockName}",
-    validator: validate_ManagementLocksCreateOrUpdateAtResourceLevel_568326,
-    base: "", url: url_ManagementLocksCreateOrUpdateAtResourceLevel_568327,
+    validator: validate_ManagementLocksCreateOrUpdateAtResourceLevel_564226,
+    base: "", url: url_ManagementLocksCreateOrUpdateAtResourceLevel_564227,
     schemes: {Scheme.Https})
 type
-  Call_ManagementLocksGetAtResourceLevel_568310 = ref object of OpenApiRestCall_567657
-proc url_ManagementLocksGetAtResourceLevel_568312(protocol: Scheme; host: string;
+  Call_ManagementLocksGetAtResourceLevel_564210 = ref object of OpenApiRestCall_563555
+proc url_ManagementLocksGetAtResourceLevel_564212(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1445,7 +1449,7 @@ proc url_ManagementLocksGetAtResourceLevel_568312(protocol: Scheme; host: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ManagementLocksGetAtResourceLevel_568311(path: JsonNode;
+proc validate_ManagementLocksGetAtResourceLevel_564211(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Get the management lock of a resource or any level below resource.
   ## 
@@ -1454,56 +1458,56 @@ proc validate_ManagementLocksGetAtResourceLevel_568311(path: JsonNode;
   ## parameters in `path` object:
   ##   resourceType: JString (required)
   ##               : The type of the resource.
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group. 
+  ##   resourceProviderNamespace: JString (required)
+  ##                            : The namespace of the resource provider.
   ##   subscriptionId: JString (required)
   ##                 : The ID of the target subscription.
+  ##   parentResourcePath: JString (required)
+  ##                     : An extra path parameter needed in some services, like SQL Databases.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group. 
   ##   resourceName: JString (required)
   ##               : The name of the resource.
   ##   lockName: JString (required)
   ##           : The name of lock.
-  ##   resourceProviderNamespace: JString (required)
-  ##                            : The namespace of the resource provider.
-  ##   parentResourcePath: JString (required)
-  ##                     : An extra path parameter needed in some services, like SQL Databases.
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceType` field"
-  var valid_568313 = path.getOrDefault("resourceType")
-  valid_568313 = validateParameter(valid_568313, JString, required = true,
+  var valid_564213 = path.getOrDefault("resourceType")
+  valid_564213 = validateParameter(valid_564213, JString, required = true,
                                  default = nil)
-  if valid_568313 != nil:
-    section.add "resourceType", valid_568313
-  var valid_568314 = path.getOrDefault("resourceGroupName")
-  valid_568314 = validateParameter(valid_568314, JString, required = true,
+  if valid_564213 != nil:
+    section.add "resourceType", valid_564213
+  var valid_564214 = path.getOrDefault("resourceProviderNamespace")
+  valid_564214 = validateParameter(valid_564214, JString, required = true,
                                  default = nil)
-  if valid_568314 != nil:
-    section.add "resourceGroupName", valid_568314
-  var valid_568315 = path.getOrDefault("subscriptionId")
-  valid_568315 = validateParameter(valid_568315, JString, required = true,
+  if valid_564214 != nil:
+    section.add "resourceProviderNamespace", valid_564214
+  var valid_564215 = path.getOrDefault("subscriptionId")
+  valid_564215 = validateParameter(valid_564215, JString, required = true,
                                  default = nil)
-  if valid_568315 != nil:
-    section.add "subscriptionId", valid_568315
-  var valid_568316 = path.getOrDefault("resourceName")
-  valid_568316 = validateParameter(valid_568316, JString, required = true,
+  if valid_564215 != nil:
+    section.add "subscriptionId", valid_564215
+  var valid_564216 = path.getOrDefault("parentResourcePath")
+  valid_564216 = validateParameter(valid_564216, JString, required = true,
                                  default = nil)
-  if valid_568316 != nil:
-    section.add "resourceName", valid_568316
-  var valid_568317 = path.getOrDefault("lockName")
-  valid_568317 = validateParameter(valid_568317, JString, required = true,
+  if valid_564216 != nil:
+    section.add "parentResourcePath", valid_564216
+  var valid_564217 = path.getOrDefault("resourceGroupName")
+  valid_564217 = validateParameter(valid_564217, JString, required = true,
                                  default = nil)
-  if valid_568317 != nil:
-    section.add "lockName", valid_568317
-  var valid_568318 = path.getOrDefault("resourceProviderNamespace")
-  valid_568318 = validateParameter(valid_568318, JString, required = true,
+  if valid_564217 != nil:
+    section.add "resourceGroupName", valid_564217
+  var valid_564218 = path.getOrDefault("resourceName")
+  valid_564218 = validateParameter(valid_564218, JString, required = true,
                                  default = nil)
-  if valid_568318 != nil:
-    section.add "resourceProviderNamespace", valid_568318
-  var valid_568319 = path.getOrDefault("parentResourcePath")
-  valid_568319 = validateParameter(valid_568319, JString, required = true,
+  if valid_564218 != nil:
+    section.add "resourceName", valid_564218
+  var valid_564219 = path.getOrDefault("lockName")
+  valid_564219 = validateParameter(valid_564219, JString, required = true,
                                  default = nil)
-  if valid_568319 != nil:
-    section.add "parentResourcePath", valid_568319
+  if valid_564219 != nil:
+    section.add "lockName", valid_564219
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1511,11 +1515,11 @@ proc validate_ManagementLocksGetAtResourceLevel_568311(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568320 = query.getOrDefault("api-version")
-  valid_568320 = validateParameter(valid_568320, JString, required = true,
+  var valid_564220 = query.getOrDefault("api-version")
+  valid_564220 = validateParameter(valid_564220, JString, required = true,
                                  default = nil)
-  if valid_568320 != nil:
-    section.add "api-version", valid_568320
+  if valid_564220 != nil:
+    section.add "api-version", valid_564220
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1524,63 +1528,64 @@ proc validate_ManagementLocksGetAtResourceLevel_568311(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568321: Call_ManagementLocksGetAtResourceLevel_568310;
+proc call*(call_564221: Call_ManagementLocksGetAtResourceLevel_564210;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Get the management lock of a resource or any level below resource.
   ## 
-  let valid = call_568321.validator(path, query, header, formData, body)
-  let scheme = call_568321.pickScheme
+  let valid = call_564221.validator(path, query, header, formData, body)
+  let scheme = call_564221.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568321.url(scheme.get, call_568321.host, call_568321.base,
-                         call_568321.route, valid.getOrDefault("path"),
+  let url = call_564221.url(scheme.get, call_564221.host, call_564221.base,
+                         call_564221.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568321, url, valid)
+  result = hook(call_564221, url, valid)
 
-proc call*(call_568322: Call_ManagementLocksGetAtResourceLevel_568310;
-          resourceType: string; resourceGroupName: string; apiVersion: string;
-          subscriptionId: string; resourceName: string; lockName: string;
-          resourceProviderNamespace: string; parentResourcePath: string): Recallable =
+proc call*(call_564222: Call_ManagementLocksGetAtResourceLevel_564210;
+          apiVersion: string; resourceType: string;
+          resourceProviderNamespace: string; subscriptionId: string;
+          parentResourcePath: string; resourceGroupName: string;
+          resourceName: string; lockName: string): Recallable =
   ## managementLocksGetAtResourceLevel
   ## Get the management lock of a resource or any level below resource.
-  ##   resourceType: string (required)
-  ##               : The type of the resource.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group. 
   ##   apiVersion: string (required)
   ##             : The API version to use for the operation.
+  ##   resourceType: string (required)
+  ##               : The type of the resource.
+  ##   resourceProviderNamespace: string (required)
+  ##                            : The namespace of the resource provider.
   ##   subscriptionId: string (required)
   ##                 : The ID of the target subscription.
+  ##   parentResourcePath: string (required)
+  ##                     : An extra path parameter needed in some services, like SQL Databases.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group. 
   ##   resourceName: string (required)
   ##               : The name of the resource.
   ##   lockName: string (required)
   ##           : The name of lock.
-  ##   resourceProviderNamespace: string (required)
-  ##                            : The namespace of the resource provider.
-  ##   parentResourcePath: string (required)
-  ##                     : An extra path parameter needed in some services, like SQL Databases.
-  var path_568323 = newJObject()
-  var query_568324 = newJObject()
-  add(path_568323, "resourceType", newJString(resourceType))
-  add(path_568323, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568324, "api-version", newJString(apiVersion))
-  add(path_568323, "subscriptionId", newJString(subscriptionId))
-  add(path_568323, "resourceName", newJString(resourceName))
-  add(path_568323, "lockName", newJString(lockName))
-  add(path_568323, "resourceProviderNamespace",
+  var path_564223 = newJObject()
+  var query_564224 = newJObject()
+  add(query_564224, "api-version", newJString(apiVersion))
+  add(path_564223, "resourceType", newJString(resourceType))
+  add(path_564223, "resourceProviderNamespace",
       newJString(resourceProviderNamespace))
-  add(path_568323, "parentResourcePath", newJString(parentResourcePath))
-  result = call_568322.call(path_568323, query_568324, nil, nil, nil)
+  add(path_564223, "subscriptionId", newJString(subscriptionId))
+  add(path_564223, "parentResourcePath", newJString(parentResourcePath))
+  add(path_564223, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564223, "resourceName", newJString(resourceName))
+  add(path_564223, "lockName", newJString(lockName))
+  result = call_564222.call(path_564223, query_564224, nil, nil, nil)
 
-var managementLocksGetAtResourceLevel* = Call_ManagementLocksGetAtResourceLevel_568310(
+var managementLocksGetAtResourceLevel* = Call_ManagementLocksGetAtResourceLevel_564210(
     name: "managementLocksGetAtResourceLevel", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/{resourceProviderNamespace}/{parentResourcePath}/{resourceType}/{resourceName}/providers/Microsoft.Authorization/locks/{lockName}",
-    validator: validate_ManagementLocksGetAtResourceLevel_568311, base: "",
-    url: url_ManagementLocksGetAtResourceLevel_568312, schemes: {Scheme.Https})
+    validator: validate_ManagementLocksGetAtResourceLevel_564211, base: "",
+    url: url_ManagementLocksGetAtResourceLevel_564212, schemes: {Scheme.Https})
 type
-  Call_ManagementLocksDeleteAtResourceLevel_568342 = ref object of OpenApiRestCall_567657
-proc url_ManagementLocksDeleteAtResourceLevel_568344(protocol: Scheme;
+  Call_ManagementLocksDeleteAtResourceLevel_564242 = ref object of OpenApiRestCall_563555
+proc url_ManagementLocksDeleteAtResourceLevel_564244(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1616,7 +1621,7 @@ proc url_ManagementLocksDeleteAtResourceLevel_568344(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ManagementLocksDeleteAtResourceLevel_568343(path: JsonNode;
+proc validate_ManagementLocksDeleteAtResourceLevel_564243(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## To delete management locks, you must have access to Microsoft.Authorization/* or Microsoft.Authorization/locks/* actions. Of the built-in roles, only Owner and User Access Administrator are granted those actions.
   ## 
@@ -1625,56 +1630,56 @@ proc validate_ManagementLocksDeleteAtResourceLevel_568343(path: JsonNode;
   ## parameters in `path` object:
   ##   resourceType: JString (required)
   ##               : The resource type of the resource with the lock to delete.
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group containing the resource with the lock to delete. 
+  ##   resourceProviderNamespace: JString (required)
+  ##                            : The resource provider namespace of the resource with the lock to delete.
   ##   subscriptionId: JString (required)
   ##                 : The ID of the target subscription.
+  ##   parentResourcePath: JString (required)
+  ##                     : The parent resource identity.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group containing the resource with the lock to delete. 
   ##   resourceName: JString (required)
   ##               : The name of the resource with the lock to delete.
   ##   lockName: JString (required)
   ##           : The name of the lock to delete.
-  ##   resourceProviderNamespace: JString (required)
-  ##                            : The resource provider namespace of the resource with the lock to delete.
-  ##   parentResourcePath: JString (required)
-  ##                     : The parent resource identity.
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceType` field"
-  var valid_568345 = path.getOrDefault("resourceType")
-  valid_568345 = validateParameter(valid_568345, JString, required = true,
+  var valid_564245 = path.getOrDefault("resourceType")
+  valid_564245 = validateParameter(valid_564245, JString, required = true,
                                  default = nil)
-  if valid_568345 != nil:
-    section.add "resourceType", valid_568345
-  var valid_568346 = path.getOrDefault("resourceGroupName")
-  valid_568346 = validateParameter(valid_568346, JString, required = true,
+  if valid_564245 != nil:
+    section.add "resourceType", valid_564245
+  var valid_564246 = path.getOrDefault("resourceProviderNamespace")
+  valid_564246 = validateParameter(valid_564246, JString, required = true,
                                  default = nil)
-  if valid_568346 != nil:
-    section.add "resourceGroupName", valid_568346
-  var valid_568347 = path.getOrDefault("subscriptionId")
-  valid_568347 = validateParameter(valid_568347, JString, required = true,
+  if valid_564246 != nil:
+    section.add "resourceProviderNamespace", valid_564246
+  var valid_564247 = path.getOrDefault("subscriptionId")
+  valid_564247 = validateParameter(valid_564247, JString, required = true,
                                  default = nil)
-  if valid_568347 != nil:
-    section.add "subscriptionId", valid_568347
-  var valid_568348 = path.getOrDefault("resourceName")
-  valid_568348 = validateParameter(valid_568348, JString, required = true,
+  if valid_564247 != nil:
+    section.add "subscriptionId", valid_564247
+  var valid_564248 = path.getOrDefault("parentResourcePath")
+  valid_564248 = validateParameter(valid_564248, JString, required = true,
                                  default = nil)
-  if valid_568348 != nil:
-    section.add "resourceName", valid_568348
-  var valid_568349 = path.getOrDefault("lockName")
-  valid_568349 = validateParameter(valid_568349, JString, required = true,
+  if valid_564248 != nil:
+    section.add "parentResourcePath", valid_564248
+  var valid_564249 = path.getOrDefault("resourceGroupName")
+  valid_564249 = validateParameter(valid_564249, JString, required = true,
                                  default = nil)
-  if valid_568349 != nil:
-    section.add "lockName", valid_568349
-  var valid_568350 = path.getOrDefault("resourceProviderNamespace")
-  valid_568350 = validateParameter(valid_568350, JString, required = true,
+  if valid_564249 != nil:
+    section.add "resourceGroupName", valid_564249
+  var valid_564250 = path.getOrDefault("resourceName")
+  valid_564250 = validateParameter(valid_564250, JString, required = true,
                                  default = nil)
-  if valid_568350 != nil:
-    section.add "resourceProviderNamespace", valid_568350
-  var valid_568351 = path.getOrDefault("parentResourcePath")
-  valid_568351 = validateParameter(valid_568351, JString, required = true,
+  if valid_564250 != nil:
+    section.add "resourceName", valid_564250
+  var valid_564251 = path.getOrDefault("lockName")
+  valid_564251 = validateParameter(valid_564251, JString, required = true,
                                  default = nil)
-  if valid_568351 != nil:
-    section.add "parentResourcePath", valid_568351
+  if valid_564251 != nil:
+    section.add "lockName", valid_564251
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1682,11 +1687,11 @@ proc validate_ManagementLocksDeleteAtResourceLevel_568343(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568352 = query.getOrDefault("api-version")
-  valid_568352 = validateParameter(valid_568352, JString, required = true,
+  var valid_564252 = query.getOrDefault("api-version")
+  valid_564252 = validateParameter(valid_564252, JString, required = true,
                                  default = nil)
-  if valid_568352 != nil:
-    section.add "api-version", valid_568352
+  if valid_564252 != nil:
+    section.add "api-version", valid_564252
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1695,63 +1700,64 @@ proc validate_ManagementLocksDeleteAtResourceLevel_568343(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568353: Call_ManagementLocksDeleteAtResourceLevel_568342;
+proc call*(call_564253: Call_ManagementLocksDeleteAtResourceLevel_564242;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## To delete management locks, you must have access to Microsoft.Authorization/* or Microsoft.Authorization/locks/* actions. Of the built-in roles, only Owner and User Access Administrator are granted those actions.
   ## 
-  let valid = call_568353.validator(path, query, header, formData, body)
-  let scheme = call_568353.pickScheme
+  let valid = call_564253.validator(path, query, header, formData, body)
+  let scheme = call_564253.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568353.url(scheme.get, call_568353.host, call_568353.base,
-                         call_568353.route, valid.getOrDefault("path"),
+  let url = call_564253.url(scheme.get, call_564253.host, call_564253.base,
+                         call_564253.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568353, url, valid)
+  result = hook(call_564253, url, valid)
 
-proc call*(call_568354: Call_ManagementLocksDeleteAtResourceLevel_568342;
-          resourceType: string; resourceGroupName: string; apiVersion: string;
-          subscriptionId: string; resourceName: string; lockName: string;
-          resourceProviderNamespace: string; parentResourcePath: string): Recallable =
+proc call*(call_564254: Call_ManagementLocksDeleteAtResourceLevel_564242;
+          apiVersion: string; resourceType: string;
+          resourceProviderNamespace: string; subscriptionId: string;
+          parentResourcePath: string; resourceGroupName: string;
+          resourceName: string; lockName: string): Recallable =
   ## managementLocksDeleteAtResourceLevel
   ## To delete management locks, you must have access to Microsoft.Authorization/* or Microsoft.Authorization/locks/* actions. Of the built-in roles, only Owner and User Access Administrator are granted those actions.
-  ##   resourceType: string (required)
-  ##               : The resource type of the resource with the lock to delete.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group containing the resource with the lock to delete. 
   ##   apiVersion: string (required)
   ##             : The API version to use for the operation.
+  ##   resourceType: string (required)
+  ##               : The resource type of the resource with the lock to delete.
+  ##   resourceProviderNamespace: string (required)
+  ##                            : The resource provider namespace of the resource with the lock to delete.
   ##   subscriptionId: string (required)
   ##                 : The ID of the target subscription.
+  ##   parentResourcePath: string (required)
+  ##                     : The parent resource identity.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group containing the resource with the lock to delete. 
   ##   resourceName: string (required)
   ##               : The name of the resource with the lock to delete.
   ##   lockName: string (required)
   ##           : The name of the lock to delete.
-  ##   resourceProviderNamespace: string (required)
-  ##                            : The resource provider namespace of the resource with the lock to delete.
-  ##   parentResourcePath: string (required)
-  ##                     : The parent resource identity.
-  var path_568355 = newJObject()
-  var query_568356 = newJObject()
-  add(path_568355, "resourceType", newJString(resourceType))
-  add(path_568355, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568356, "api-version", newJString(apiVersion))
-  add(path_568355, "subscriptionId", newJString(subscriptionId))
-  add(path_568355, "resourceName", newJString(resourceName))
-  add(path_568355, "lockName", newJString(lockName))
-  add(path_568355, "resourceProviderNamespace",
+  var path_564255 = newJObject()
+  var query_564256 = newJObject()
+  add(query_564256, "api-version", newJString(apiVersion))
+  add(path_564255, "resourceType", newJString(resourceType))
+  add(path_564255, "resourceProviderNamespace",
       newJString(resourceProviderNamespace))
-  add(path_568355, "parentResourcePath", newJString(parentResourcePath))
-  result = call_568354.call(path_568355, query_568356, nil, nil, nil)
+  add(path_564255, "subscriptionId", newJString(subscriptionId))
+  add(path_564255, "parentResourcePath", newJString(parentResourcePath))
+  add(path_564255, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564255, "resourceName", newJString(resourceName))
+  add(path_564255, "lockName", newJString(lockName))
+  result = call_564254.call(path_564255, query_564256, nil, nil, nil)
 
-var managementLocksDeleteAtResourceLevel* = Call_ManagementLocksDeleteAtResourceLevel_568342(
+var managementLocksDeleteAtResourceLevel* = Call_ManagementLocksDeleteAtResourceLevel_564242(
     name: "managementLocksDeleteAtResourceLevel", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/{resourceProviderNamespace}/{parentResourcePath}/{resourceType}/{resourceName}/providers/Microsoft.Authorization/locks/{lockName}",
-    validator: validate_ManagementLocksDeleteAtResourceLevel_568343, base: "",
-    url: url_ManagementLocksDeleteAtResourceLevel_568344, schemes: {Scheme.Https})
+    validator: validate_ManagementLocksDeleteAtResourceLevel_564243, base: "",
+    url: url_ManagementLocksDeleteAtResourceLevel_564244, schemes: {Scheme.Https})
 type
-  Call_ManagementLocksListByScope_568357 = ref object of OpenApiRestCall_567657
-proc url_ManagementLocksListByScope_568359(protocol: Scheme; host: string;
+  Call_ManagementLocksListByScope_564257 = ref object of OpenApiRestCall_563555
+proc url_ManagementLocksListByScope_564259(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1767,7 +1773,7 @@ proc url_ManagementLocksListByScope_568359(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ManagementLocksListByScope_568358(path: JsonNode; query: JsonNode;
+proc validate_ManagementLocksListByScope_564258(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets all the management locks for a scope.
   ## 
@@ -1779,11 +1785,11 @@ proc validate_ManagementLocksListByScope_568358(path: JsonNode; query: JsonNode;
   ## '/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/{resourceProviderNamespace}/{parentResourcePathIfPresent}/{resourceType}/{resourceName}' for resources.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `scope` field"
-  var valid_568360 = path.getOrDefault("scope")
-  valid_568360 = validateParameter(valid_568360, JString, required = true,
+  var valid_564260 = path.getOrDefault("scope")
+  valid_564260 = validateParameter(valid_564260, JString, required = true,
                                  default = nil)
-  if valid_568360 != nil:
-    section.add "scope", valid_568360
+  if valid_564260 != nil:
+    section.add "scope", valid_564260
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1793,16 +1799,16 @@ proc validate_ManagementLocksListByScope_568358(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568361 = query.getOrDefault("api-version")
-  valid_568361 = validateParameter(valid_568361, JString, required = true,
+  var valid_564261 = query.getOrDefault("api-version")
+  valid_564261 = validateParameter(valid_564261, JString, required = true,
                                  default = nil)
-  if valid_568361 != nil:
-    section.add "api-version", valid_568361
-  var valid_568362 = query.getOrDefault("$filter")
-  valid_568362 = validateParameter(valid_568362, JString, required = false,
+  if valid_564261 != nil:
+    section.add "api-version", valid_564261
+  var valid_564262 = query.getOrDefault("$filter")
+  valid_564262 = validateParameter(valid_564262, JString, required = false,
                                  default = nil)
-  if valid_568362 != nil:
-    section.add "$filter", valid_568362
+  if valid_564262 != nil:
+    section.add "$filter", valid_564262
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1811,46 +1817,46 @@ proc validate_ManagementLocksListByScope_568358(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568363: Call_ManagementLocksListByScope_568357; path: JsonNode;
+proc call*(call_564263: Call_ManagementLocksListByScope_564257; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets all the management locks for a scope.
   ## 
-  let valid = call_568363.validator(path, query, header, formData, body)
-  let scheme = call_568363.pickScheme
+  let valid = call_564263.validator(path, query, header, formData, body)
+  let scheme = call_564263.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568363.url(scheme.get, call_568363.host, call_568363.base,
-                         call_568363.route, valid.getOrDefault("path"),
+  let url = call_564263.url(scheme.get, call_564263.host, call_564263.base,
+                         call_564263.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568363, url, valid)
+  result = hook(call_564263, url, valid)
 
-proc call*(call_568364: Call_ManagementLocksListByScope_568357; apiVersion: string;
+proc call*(call_564264: Call_ManagementLocksListByScope_564257; apiVersion: string;
           scope: string; Filter: string = ""): Recallable =
   ## managementLocksListByScope
   ## Gets all the management locks for a scope.
   ##   apiVersion: string (required)
   ##             : The API version to use for the operation.
+  ##   Filter: string
+  ##         : The filter to apply on the operation.
   ##   scope: string (required)
   ##        : The scope for the lock. When providing a scope for the assignment, use '/subscriptions/{subscriptionId}' for subscriptions, '/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}' for resource groups, and 
   ## '/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/{resourceProviderNamespace}/{parentResourcePathIfPresent}/{resourceType}/{resourceName}' for resources.
-  ##   Filter: string
-  ##         : The filter to apply on the operation.
-  var path_568365 = newJObject()
-  var query_568366 = newJObject()
-  add(query_568366, "api-version", newJString(apiVersion))
-  add(path_568365, "scope", newJString(scope))
-  add(query_568366, "$filter", newJString(Filter))
-  result = call_568364.call(path_568365, query_568366, nil, nil, nil)
+  var path_564265 = newJObject()
+  var query_564266 = newJObject()
+  add(query_564266, "api-version", newJString(apiVersion))
+  add(query_564266, "$filter", newJString(Filter))
+  add(path_564265, "scope", newJString(scope))
+  result = call_564264.call(path_564265, query_564266, nil, nil, nil)
 
-var managementLocksListByScope* = Call_ManagementLocksListByScope_568357(
+var managementLocksListByScope* = Call_ManagementLocksListByScope_564257(
     name: "managementLocksListByScope", meth: HttpMethod.HttpGet,
     host: "management.azure.com",
     route: "/{scope}/providers/Microsoft.Authorization/locks",
-    validator: validate_ManagementLocksListByScope_568358, base: "",
-    url: url_ManagementLocksListByScope_568359, schemes: {Scheme.Https})
+    validator: validate_ManagementLocksListByScope_564258, base: "",
+    url: url_ManagementLocksListByScope_564259, schemes: {Scheme.Https})
 type
-  Call_ManagementLocksCreateOrUpdateByScope_568377 = ref object of OpenApiRestCall_567657
-proc url_ManagementLocksCreateOrUpdateByScope_568379(protocol: Scheme;
+  Call_ManagementLocksCreateOrUpdateByScope_564277 = ref object of OpenApiRestCall_563555
+proc url_ManagementLocksCreateOrUpdateByScope_564279(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1868,7 +1874,7 @@ proc url_ManagementLocksCreateOrUpdateByScope_568379(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ManagementLocksCreateOrUpdateByScope_568378(path: JsonNode;
+proc validate_ManagementLocksCreateOrUpdateByScope_564278(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Create or update a management lock by scope.
   ## 
@@ -1882,16 +1888,16 @@ proc validate_ManagementLocksCreateOrUpdateByScope_568378(path: JsonNode;
   ## '/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/{resourceProviderNamespace}/{parentResourcePathIfPresent}/{resourceType}/{resourceName}' for resources.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `lockName` field"
-  var valid_568380 = path.getOrDefault("lockName")
-  valid_568380 = validateParameter(valid_568380, JString, required = true,
+  var valid_564280 = path.getOrDefault("lockName")
+  valid_564280 = validateParameter(valid_564280, JString, required = true,
                                  default = nil)
-  if valid_568380 != nil:
-    section.add "lockName", valid_568380
-  var valid_568381 = path.getOrDefault("scope")
-  valid_568381 = validateParameter(valid_568381, JString, required = true,
+  if valid_564280 != nil:
+    section.add "lockName", valid_564280
+  var valid_564281 = path.getOrDefault("scope")
+  valid_564281 = validateParameter(valid_564281, JString, required = true,
                                  default = nil)
-  if valid_568381 != nil:
-    section.add "scope", valid_568381
+  if valid_564281 != nil:
+    section.add "scope", valid_564281
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1899,11 +1905,11 @@ proc validate_ManagementLocksCreateOrUpdateByScope_568378(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568382 = query.getOrDefault("api-version")
-  valid_568382 = validateParameter(valid_568382, JString, required = true,
+  var valid_564282 = query.getOrDefault("api-version")
+  valid_564282 = validateParameter(valid_564282, JString, required = true,
                                  default = nil)
-  if valid_568382 != nil:
-    section.add "api-version", valid_568382
+  if valid_564282 != nil:
+    section.add "api-version", valid_564282
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1917,21 +1923,21 @@ proc validate_ManagementLocksCreateOrUpdateByScope_568378(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568384: Call_ManagementLocksCreateOrUpdateByScope_568377;
+proc call*(call_564284: Call_ManagementLocksCreateOrUpdateByScope_564277;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Create or update a management lock by scope.
   ## 
-  let valid = call_568384.validator(path, query, header, formData, body)
-  let scheme = call_568384.pickScheme
+  let valid = call_564284.validator(path, query, header, formData, body)
+  let scheme = call_564284.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568384.url(scheme.get, call_568384.host, call_568384.base,
-                         call_568384.route, valid.getOrDefault("path"),
+  let url = call_564284.url(scheme.get, call_564284.host, call_564284.base,
+                         call_564284.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568384, url, valid)
+  result = hook(call_564284, url, valid)
 
-proc call*(call_568385: Call_ManagementLocksCreateOrUpdateByScope_568377;
+proc call*(call_564285: Call_ManagementLocksCreateOrUpdateByScope_564277;
           apiVersion: string; lockName: string; parameters: JsonNode; scope: string): Recallable =
   ## managementLocksCreateOrUpdateByScope
   ## Create or update a management lock by scope.
@@ -1944,25 +1950,25 @@ proc call*(call_568385: Call_ManagementLocksCreateOrUpdateByScope_568377;
   ##   scope: string (required)
   ##        : The scope for the lock. When providing a scope for the assignment, use '/subscriptions/{subscriptionId}' for subscriptions, '/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}' for resource groups, and 
   ## '/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/{resourceProviderNamespace}/{parentResourcePathIfPresent}/{resourceType}/{resourceName}' for resources.
-  var path_568386 = newJObject()
-  var query_568387 = newJObject()
-  var body_568388 = newJObject()
-  add(query_568387, "api-version", newJString(apiVersion))
-  add(path_568386, "lockName", newJString(lockName))
+  var path_564286 = newJObject()
+  var query_564287 = newJObject()
+  var body_564288 = newJObject()
+  add(query_564287, "api-version", newJString(apiVersion))
+  add(path_564286, "lockName", newJString(lockName))
   if parameters != nil:
-    body_568388 = parameters
-  add(path_568386, "scope", newJString(scope))
-  result = call_568385.call(path_568386, query_568387, nil, nil, body_568388)
+    body_564288 = parameters
+  add(path_564286, "scope", newJString(scope))
+  result = call_564285.call(path_564286, query_564287, nil, nil, body_564288)
 
-var managementLocksCreateOrUpdateByScope* = Call_ManagementLocksCreateOrUpdateByScope_568377(
+var managementLocksCreateOrUpdateByScope* = Call_ManagementLocksCreateOrUpdateByScope_564277(
     name: "managementLocksCreateOrUpdateByScope", meth: HttpMethod.HttpPut,
     host: "management.azure.com",
     route: "/{scope}/providers/Microsoft.Authorization/locks/{lockName}",
-    validator: validate_ManagementLocksCreateOrUpdateByScope_568378, base: "",
-    url: url_ManagementLocksCreateOrUpdateByScope_568379, schemes: {Scheme.Https})
+    validator: validate_ManagementLocksCreateOrUpdateByScope_564278, base: "",
+    url: url_ManagementLocksCreateOrUpdateByScope_564279, schemes: {Scheme.Https})
 type
-  Call_ManagementLocksGetByScope_568367 = ref object of OpenApiRestCall_567657
-proc url_ManagementLocksGetByScope_568369(protocol: Scheme; host: string;
+  Call_ManagementLocksGetByScope_564267 = ref object of OpenApiRestCall_563555
+proc url_ManagementLocksGetByScope_564269(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1980,7 +1986,7 @@ proc url_ManagementLocksGetByScope_568369(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ManagementLocksGetByScope_568368(path: JsonNode; query: JsonNode;
+proc validate_ManagementLocksGetByScope_564268(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Get a management lock by scope.
   ## 
@@ -1993,16 +1999,16 @@ proc validate_ManagementLocksGetByScope_568368(path: JsonNode; query: JsonNode;
   ##        : The scope for the lock. 
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `lockName` field"
-  var valid_568370 = path.getOrDefault("lockName")
-  valid_568370 = validateParameter(valid_568370, JString, required = true,
+  var valid_564270 = path.getOrDefault("lockName")
+  valid_564270 = validateParameter(valid_564270, JString, required = true,
                                  default = nil)
-  if valid_568370 != nil:
-    section.add "lockName", valid_568370
-  var valid_568371 = path.getOrDefault("scope")
-  valid_568371 = validateParameter(valid_568371, JString, required = true,
+  if valid_564270 != nil:
+    section.add "lockName", valid_564270
+  var valid_564271 = path.getOrDefault("scope")
+  valid_564271 = validateParameter(valid_564271, JString, required = true,
                                  default = nil)
-  if valid_568371 != nil:
-    section.add "scope", valid_568371
+  if valid_564271 != nil:
+    section.add "scope", valid_564271
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2010,11 +2016,11 @@ proc validate_ManagementLocksGetByScope_568368(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568372 = query.getOrDefault("api-version")
-  valid_568372 = validateParameter(valid_568372, JString, required = true,
+  var valid_564272 = query.getOrDefault("api-version")
+  valid_564272 = validateParameter(valid_564272, JString, required = true,
                                  default = nil)
-  if valid_568372 != nil:
-    section.add "api-version", valid_568372
+  if valid_564272 != nil:
+    section.add "api-version", valid_564272
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2023,20 +2029,20 @@ proc validate_ManagementLocksGetByScope_568368(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568373: Call_ManagementLocksGetByScope_568367; path: JsonNode;
+proc call*(call_564273: Call_ManagementLocksGetByScope_564267; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get a management lock by scope.
   ## 
-  let valid = call_568373.validator(path, query, header, formData, body)
-  let scheme = call_568373.pickScheme
+  let valid = call_564273.validator(path, query, header, formData, body)
+  let scheme = call_564273.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568373.url(scheme.get, call_568373.host, call_568373.base,
-                         call_568373.route, valid.getOrDefault("path"),
+  let url = call_564273.url(scheme.get, call_564273.host, call_564273.base,
+                         call_564273.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568373, url, valid)
+  result = hook(call_564273, url, valid)
 
-proc call*(call_568374: Call_ManagementLocksGetByScope_568367; apiVersion: string;
+proc call*(call_564274: Call_ManagementLocksGetByScope_564267; apiVersion: string;
           lockName: string; scope: string): Recallable =
   ## managementLocksGetByScope
   ## Get a management lock by scope.
@@ -2046,22 +2052,22 @@ proc call*(call_568374: Call_ManagementLocksGetByScope_568367; apiVersion: strin
   ##           : The name of lock.
   ##   scope: string (required)
   ##        : The scope for the lock. 
-  var path_568375 = newJObject()
-  var query_568376 = newJObject()
-  add(query_568376, "api-version", newJString(apiVersion))
-  add(path_568375, "lockName", newJString(lockName))
-  add(path_568375, "scope", newJString(scope))
-  result = call_568374.call(path_568375, query_568376, nil, nil, nil)
+  var path_564275 = newJObject()
+  var query_564276 = newJObject()
+  add(query_564276, "api-version", newJString(apiVersion))
+  add(path_564275, "lockName", newJString(lockName))
+  add(path_564275, "scope", newJString(scope))
+  result = call_564274.call(path_564275, query_564276, nil, nil, nil)
 
-var managementLocksGetByScope* = Call_ManagementLocksGetByScope_568367(
+var managementLocksGetByScope* = Call_ManagementLocksGetByScope_564267(
     name: "managementLocksGetByScope", meth: HttpMethod.HttpGet,
     host: "management.azure.com",
     route: "/{scope}/providers/Microsoft.Authorization/locks/{lockName}",
-    validator: validate_ManagementLocksGetByScope_568368, base: "",
-    url: url_ManagementLocksGetByScope_568369, schemes: {Scheme.Https})
+    validator: validate_ManagementLocksGetByScope_564268, base: "",
+    url: url_ManagementLocksGetByScope_564269, schemes: {Scheme.Https})
 type
-  Call_ManagementLocksDeleteByScope_568389 = ref object of OpenApiRestCall_567657
-proc url_ManagementLocksDeleteByScope_568391(protocol: Scheme; host: string;
+  Call_ManagementLocksDeleteByScope_564289 = ref object of OpenApiRestCall_563555
+proc url_ManagementLocksDeleteByScope_564291(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2079,7 +2085,7 @@ proc url_ManagementLocksDeleteByScope_568391(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ManagementLocksDeleteByScope_568390(path: JsonNode; query: JsonNode;
+proc validate_ManagementLocksDeleteByScope_564290(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Delete a management lock by scope.
   ## 
@@ -2092,16 +2098,16 @@ proc validate_ManagementLocksDeleteByScope_568390(path: JsonNode; query: JsonNod
   ##        : The scope for the lock. 
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `lockName` field"
-  var valid_568392 = path.getOrDefault("lockName")
-  valid_568392 = validateParameter(valid_568392, JString, required = true,
+  var valid_564292 = path.getOrDefault("lockName")
+  valid_564292 = validateParameter(valid_564292, JString, required = true,
                                  default = nil)
-  if valid_568392 != nil:
-    section.add "lockName", valid_568392
-  var valid_568393 = path.getOrDefault("scope")
-  valid_568393 = validateParameter(valid_568393, JString, required = true,
+  if valid_564292 != nil:
+    section.add "lockName", valid_564292
+  var valid_564293 = path.getOrDefault("scope")
+  valid_564293 = validateParameter(valid_564293, JString, required = true,
                                  default = nil)
-  if valid_568393 != nil:
-    section.add "scope", valid_568393
+  if valid_564293 != nil:
+    section.add "scope", valid_564293
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2109,11 +2115,11 @@ proc validate_ManagementLocksDeleteByScope_568390(path: JsonNode; query: JsonNod
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568394 = query.getOrDefault("api-version")
-  valid_568394 = validateParameter(valid_568394, JString, required = true,
+  var valid_564294 = query.getOrDefault("api-version")
+  valid_564294 = validateParameter(valid_564294, JString, required = true,
                                  default = nil)
-  if valid_568394 != nil:
-    section.add "api-version", valid_568394
+  if valid_564294 != nil:
+    section.add "api-version", valid_564294
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2122,20 +2128,20 @@ proc validate_ManagementLocksDeleteByScope_568390(path: JsonNode; query: JsonNod
   if body != nil:
     result.add "body", body
 
-proc call*(call_568395: Call_ManagementLocksDeleteByScope_568389; path: JsonNode;
+proc call*(call_564295: Call_ManagementLocksDeleteByScope_564289; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Delete a management lock by scope.
   ## 
-  let valid = call_568395.validator(path, query, header, formData, body)
-  let scheme = call_568395.pickScheme
+  let valid = call_564295.validator(path, query, header, formData, body)
+  let scheme = call_564295.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568395.url(scheme.get, call_568395.host, call_568395.base,
-                         call_568395.route, valid.getOrDefault("path"),
+  let url = call_564295.url(scheme.get, call_564295.host, call_564295.base,
+                         call_564295.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568395, url, valid)
+  result = hook(call_564295, url, valid)
 
-proc call*(call_568396: Call_ManagementLocksDeleteByScope_568389;
+proc call*(call_564296: Call_ManagementLocksDeleteByScope_564289;
           apiVersion: string; lockName: string; scope: string): Recallable =
   ## managementLocksDeleteByScope
   ## Delete a management lock by scope.
@@ -2145,19 +2151,19 @@ proc call*(call_568396: Call_ManagementLocksDeleteByScope_568389;
   ##           : The name of lock.
   ##   scope: string (required)
   ##        : The scope for the lock. 
-  var path_568397 = newJObject()
-  var query_568398 = newJObject()
-  add(query_568398, "api-version", newJString(apiVersion))
-  add(path_568397, "lockName", newJString(lockName))
-  add(path_568397, "scope", newJString(scope))
-  result = call_568396.call(path_568397, query_568398, nil, nil, nil)
+  var path_564297 = newJObject()
+  var query_564298 = newJObject()
+  add(query_564298, "api-version", newJString(apiVersion))
+  add(path_564297, "lockName", newJString(lockName))
+  add(path_564297, "scope", newJString(scope))
+  result = call_564296.call(path_564297, query_564298, nil, nil, nil)
 
-var managementLocksDeleteByScope* = Call_ManagementLocksDeleteByScope_568389(
+var managementLocksDeleteByScope* = Call_ManagementLocksDeleteByScope_564289(
     name: "managementLocksDeleteByScope", meth: HttpMethod.HttpDelete,
     host: "management.azure.com",
     route: "/{scope}/providers/Microsoft.Authorization/locks/{lockName}",
-    validator: validate_ManagementLocksDeleteByScope_568390, base: "",
-    url: url_ManagementLocksDeleteByScope_568391, schemes: {Scheme.Https})
+    validator: validate_ManagementLocksDeleteByScope_564290, base: "",
+    url: url_ManagementLocksDeleteByScope_564291, schemes: {Scheme.Https})
 export
   rest
 

@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, httpcore
 
 ## auto-generated via openapi macro
 ## title: DevSpacesManagement
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_567657 = ref object of OpenApiRestCall
+  OpenApiRestCall_563555 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_567657](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563555](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_567657): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563555): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,8 +107,8 @@ const
   macServiceName = "devspaces"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_ContainerHostMappingsGetContainerHostMapping_567879 = ref object of OpenApiRestCall_567657
-proc url_ContainerHostMappingsGetContainerHostMapping_567881(protocol: Scheme;
+  Call_ContainerHostMappingsGetContainerHostMapping_563777 = ref object of OpenApiRestCall_563555
+proc url_ContainerHostMappingsGetContainerHostMapping_563779(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -121,7 +125,7 @@ proc url_ContainerHostMappingsGetContainerHostMapping_567881(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ContainerHostMappingsGetContainerHostMapping_567880(path: JsonNode;
+proc validate_ContainerHostMappingsGetContainerHostMapping_563778(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   var section: JsonNode
   result = newJObject()
@@ -130,11 +134,11 @@ proc validate_ContainerHostMappingsGetContainerHostMapping_567880(path: JsonNode
   ##           : Location of the container host.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `location` field"
-  var valid_568071 = path.getOrDefault("location")
-  valid_568071 = validateParameter(valid_568071, JString, required = true,
+  var valid_563971 = path.getOrDefault("location")
+  valid_563971 = validateParameter(valid_563971, JString, required = true,
                                  default = nil)
-  if valid_568071 != nil:
-    section.add "location", valid_568071
+  if valid_563971 != nil:
+    section.add "location", valid_563971
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -142,11 +146,11 @@ proc validate_ContainerHostMappingsGetContainerHostMapping_567880(path: JsonNode
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568072 = query.getOrDefault("api-version")
-  valid_568072 = validateParameter(valid_568072, JString, required = true,
+  var valid_563972 = query.getOrDefault("api-version")
+  valid_563972 = validateParameter(valid_563972, JString, required = true,
                                  default = nil)
-  if valid_568072 != nil:
-    section.add "api-version", valid_568072
+  if valid_563972 != nil:
+    section.add "api-version", valid_563972
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -159,19 +163,19 @@ proc validate_ContainerHostMappingsGetContainerHostMapping_567880(path: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_568096: Call_ContainerHostMappingsGetContainerHostMapping_567879;
+proc call*(call_563996: Call_ContainerHostMappingsGetContainerHostMapping_563777;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
-  let valid = call_568096.validator(path, query, header, formData, body)
-  let scheme = call_568096.pickScheme
+  let valid = call_563996.validator(path, query, header, formData, body)
+  let scheme = call_563996.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568096.url(scheme.get, call_568096.host, call_568096.base,
-                         call_568096.route, valid.getOrDefault("path"),
+  let url = call_563996.url(scheme.get, call_563996.host, call_563996.base,
+                         call_563996.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568096, url, valid)
+  result = hook(call_563996, url, valid)
 
-proc call*(call_568167: Call_ContainerHostMappingsGetContainerHostMapping_567879;
+proc call*(call_564067: Call_ContainerHostMappingsGetContainerHostMapping_563777;
           apiVersion: string; containerHostMapping: JsonNode; location: string): Recallable =
   ## containerHostMappingsGetContainerHostMapping
   ##   apiVersion: string (required)
@@ -179,31 +183,31 @@ proc call*(call_568167: Call_ContainerHostMappingsGetContainerHostMapping_567879
   ##   containerHostMapping: JObject (required)
   ##   location: string (required)
   ##           : Location of the container host.
-  var path_568168 = newJObject()
-  var query_568170 = newJObject()
-  var body_568171 = newJObject()
-  add(query_568170, "api-version", newJString(apiVersion))
+  var path_564068 = newJObject()
+  var query_564070 = newJObject()
+  var body_564071 = newJObject()
+  add(query_564070, "api-version", newJString(apiVersion))
   if containerHostMapping != nil:
-    body_568171 = containerHostMapping
-  add(path_568168, "location", newJString(location))
-  result = call_568167.call(path_568168, query_568170, nil, nil, body_568171)
+    body_564071 = containerHostMapping
+  add(path_564068, "location", newJString(location))
+  result = call_564067.call(path_564068, query_564070, nil, nil, body_564071)
 
-var containerHostMappingsGetContainerHostMapping* = Call_ContainerHostMappingsGetContainerHostMapping_567879(
+var containerHostMappingsGetContainerHostMapping* = Call_ContainerHostMappingsGetContainerHostMapping_563777(
     name: "containerHostMappingsGetContainerHostMapping",
     meth: HttpMethod.HttpPost, host: "management.azure.com", route: "/providers/Microsoft.DevSpaces/locations/{location}/checkContainerHostMapping",
-    validator: validate_ContainerHostMappingsGetContainerHostMapping_567880,
-    base: "", url: url_ContainerHostMappingsGetContainerHostMapping_567881,
+    validator: validate_ContainerHostMappingsGetContainerHostMapping_563778,
+    base: "", url: url_ContainerHostMappingsGetContainerHostMapping_563779,
     schemes: {Scheme.Https})
 type
-  Call_OperationsList_568210 = ref object of OpenApiRestCall_567657
-proc url_OperationsList_568212(protocol: Scheme; host: string; base: string;
+  Call_OperationsList_564110 = ref object of OpenApiRestCall_563555
+proc url_OperationsList_564112(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_OperationsList_568211(path: JsonNode; query: JsonNode;
+proc validate_OperationsList_564111(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## Lists all the supported operations by the Microsoft.DevSpaces resource provider along with their description.
@@ -218,11 +222,11 @@ proc validate_OperationsList_568211(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568213 = query.getOrDefault("api-version")
-  valid_568213 = validateParameter(valid_568213, JString, required = true,
+  var valid_564113 = query.getOrDefault("api-version")
+  valid_564113 = validateParameter(valid_564113, JString, required = true,
                                  default = nil)
-  if valid_568213 != nil:
-    section.add "api-version", valid_568213
+  if valid_564113 != nil:
+    section.add "api-version", valid_564113
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -231,36 +235,36 @@ proc validate_OperationsList_568211(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568214: Call_OperationsList_568210; path: JsonNode; query: JsonNode;
+proc call*(call_564114: Call_OperationsList_564110; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists all the supported operations by the Microsoft.DevSpaces resource provider along with their description.
   ## 
-  let valid = call_568214.validator(path, query, header, formData, body)
-  let scheme = call_568214.pickScheme
+  let valid = call_564114.validator(path, query, header, formData, body)
+  let scheme = call_564114.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568214.url(scheme.get, call_568214.host, call_568214.base,
-                         call_568214.route, valid.getOrDefault("path"),
+  let url = call_564114.url(scheme.get, call_564114.host, call_564114.base,
+                         call_564114.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568214, url, valid)
+  result = hook(call_564114, url, valid)
 
-proc call*(call_568215: Call_OperationsList_568210; apiVersion: string): Recallable =
+proc call*(call_564115: Call_OperationsList_564110; apiVersion: string): Recallable =
   ## operationsList
   ## Lists all the supported operations by the Microsoft.DevSpaces resource provider along with their description.
   ##   apiVersion: string (required)
   ##             : Client API version.
-  var query_568216 = newJObject()
-  add(query_568216, "api-version", newJString(apiVersion))
-  result = call_568215.call(nil, query_568216, nil, nil, nil)
+  var query_564116 = newJObject()
+  add(query_564116, "api-version", newJString(apiVersion))
+  result = call_564115.call(nil, query_564116, nil, nil, nil)
 
-var operationsList* = Call_OperationsList_568210(name: "operationsList",
+var operationsList* = Call_OperationsList_564110(name: "operationsList",
     meth: HttpMethod.HttpGet, host: "management.azure.com",
     route: "/providers/Microsoft.DevSpaces/operations",
-    validator: validate_OperationsList_568211, base: "", url: url_OperationsList_568212,
+    validator: validate_OperationsList_564111, base: "", url: url_OperationsList_564112,
     schemes: {Scheme.Https})
 type
-  Call_ControllersList_568217 = ref object of OpenApiRestCall_567657
-proc url_ControllersList_568219(protocol: Scheme; host: string; base: string;
+  Call_ControllersList_564117 = ref object of OpenApiRestCall_563555
+proc url_ControllersList_564119(protocol: Scheme; host: string; base: string;
                                route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -276,7 +280,7 @@ proc url_ControllersList_568219(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ControllersList_568218(path: JsonNode; query: JsonNode;
+proc validate_ControllersList_564118(path: JsonNode; query: JsonNode;
                                     header: JsonNode; formData: JsonNode;
                                     body: JsonNode): JsonNode =
   ## Lists all the Azure Dev Spaces Controllers with their properties in the subscription.
@@ -289,11 +293,11 @@ proc validate_ControllersList_568218(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_568220 = path.getOrDefault("subscriptionId")
-  valid_568220 = validateParameter(valid_568220, JString, required = true,
+  var valid_564120 = path.getOrDefault("subscriptionId")
+  valid_564120 = validateParameter(valid_564120, JString, required = true,
                                  default = nil)
-  if valid_568220 != nil:
-    section.add "subscriptionId", valid_568220
+  if valid_564120 != nil:
+    section.add "subscriptionId", valid_564120
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -301,11 +305,11 @@ proc validate_ControllersList_568218(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568221 = query.getOrDefault("api-version")
-  valid_568221 = validateParameter(valid_568221, JString, required = true,
+  var valid_564121 = query.getOrDefault("api-version")
+  valid_564121 = validateParameter(valid_564121, JString, required = true,
                                  default = nil)
-  if valid_568221 != nil:
-    section.add "api-version", valid_568221
+  if valid_564121 != nil:
+    section.add "api-version", valid_564121
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -314,20 +318,20 @@ proc validate_ControllersList_568218(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568222: Call_ControllersList_568217; path: JsonNode; query: JsonNode;
+proc call*(call_564122: Call_ControllersList_564117; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists all the Azure Dev Spaces Controllers with their properties in the subscription.
   ## 
-  let valid = call_568222.validator(path, query, header, formData, body)
-  let scheme = call_568222.pickScheme
+  let valid = call_564122.validator(path, query, header, formData, body)
+  let scheme = call_564122.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568222.url(scheme.get, call_568222.host, call_568222.base,
-                         call_568222.route, valid.getOrDefault("path"),
+  let url = call_564122.url(scheme.get, call_564122.host, call_564122.base,
+                         call_564122.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568222, url, valid)
+  result = hook(call_564122, url, valid)
 
-proc call*(call_568223: Call_ControllersList_568217; apiVersion: string;
+proc call*(call_564123: Call_ControllersList_564117; apiVersion: string;
           subscriptionId: string): Recallable =
   ## controllersList
   ## Lists all the Azure Dev Spaces Controllers with their properties in the subscription.
@@ -335,19 +339,19 @@ proc call*(call_568223: Call_ControllersList_568217; apiVersion: string;
   ##             : Client API version.
   ##   subscriptionId: string (required)
   ##                 : Azure subscription ID.
-  var path_568224 = newJObject()
-  var query_568225 = newJObject()
-  add(query_568225, "api-version", newJString(apiVersion))
-  add(path_568224, "subscriptionId", newJString(subscriptionId))
-  result = call_568223.call(path_568224, query_568225, nil, nil, nil)
+  var path_564124 = newJObject()
+  var query_564125 = newJObject()
+  add(query_564125, "api-version", newJString(apiVersion))
+  add(path_564124, "subscriptionId", newJString(subscriptionId))
+  result = call_564123.call(path_564124, query_564125, nil, nil, nil)
 
-var controllersList* = Call_ControllersList_568217(name: "controllersList",
+var controllersList* = Call_ControllersList_564117(name: "controllersList",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.DevSpaces/controllers",
-    validator: validate_ControllersList_568218, base: "", url: url_ControllersList_568219,
+    validator: validate_ControllersList_564118, base: "", url: url_ControllersList_564119,
     schemes: {Scheme.Https})
 type
-  Call_ControllersListByResourceGroup_568226 = ref object of OpenApiRestCall_567657
-proc url_ControllersListByResourceGroup_568228(protocol: Scheme; host: string;
+  Call_ControllersListByResourceGroup_564126 = ref object of OpenApiRestCall_563555
+proc url_ControllersListByResourceGroup_564128(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -367,30 +371,30 @@ proc url_ControllersListByResourceGroup_568228(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ControllersListByResourceGroup_568227(path: JsonNode;
+proc validate_ControllersListByResourceGroup_564127(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists all the Azure Dev Spaces Controllers with their properties in the specified resource group and subscription.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : Resource group to which the resource belongs.
   ##   subscriptionId: JString (required)
   ##                 : Azure subscription ID.
+  ##   resourceGroupName: JString (required)
+  ##                    : Resource group to which the resource belongs.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568229 = path.getOrDefault("resourceGroupName")
-  valid_568229 = validateParameter(valid_568229, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564129 = path.getOrDefault("subscriptionId")
+  valid_564129 = validateParameter(valid_564129, JString, required = true,
                                  default = nil)
-  if valid_568229 != nil:
-    section.add "resourceGroupName", valid_568229
-  var valid_568230 = path.getOrDefault("subscriptionId")
-  valid_568230 = validateParameter(valid_568230, JString, required = true,
+  if valid_564129 != nil:
+    section.add "subscriptionId", valid_564129
+  var valid_564130 = path.getOrDefault("resourceGroupName")
+  valid_564130 = validateParameter(valid_564130, JString, required = true,
                                  default = nil)
-  if valid_568230 != nil:
-    section.add "subscriptionId", valid_568230
+  if valid_564130 != nil:
+    section.add "resourceGroupName", valid_564130
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -398,11 +402,11 @@ proc validate_ControllersListByResourceGroup_568227(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568231 = query.getOrDefault("api-version")
-  valid_568231 = validateParameter(valid_568231, JString, required = true,
+  var valid_564131 = query.getOrDefault("api-version")
+  valid_564131 = validateParameter(valid_564131, JString, required = true,
                                  default = nil)
-  if valid_568231 != nil:
-    section.add "api-version", valid_568231
+  if valid_564131 != nil:
+    section.add "api-version", valid_564131
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -411,44 +415,44 @@ proc validate_ControllersListByResourceGroup_568227(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568232: Call_ControllersListByResourceGroup_568226; path: JsonNode;
+proc call*(call_564132: Call_ControllersListByResourceGroup_564126; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists all the Azure Dev Spaces Controllers with their properties in the specified resource group and subscription.
   ## 
-  let valid = call_568232.validator(path, query, header, formData, body)
-  let scheme = call_568232.pickScheme
+  let valid = call_564132.validator(path, query, header, formData, body)
+  let scheme = call_564132.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568232.url(scheme.get, call_568232.host, call_568232.base,
-                         call_568232.route, valid.getOrDefault("path"),
+  let url = call_564132.url(scheme.get, call_564132.host, call_564132.base,
+                         call_564132.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568232, url, valid)
+  result = hook(call_564132, url, valid)
 
-proc call*(call_568233: Call_ControllersListByResourceGroup_568226;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string): Recallable =
+proc call*(call_564133: Call_ControllersListByResourceGroup_564126;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string): Recallable =
   ## controllersListByResourceGroup
   ## Lists all the Azure Dev Spaces Controllers with their properties in the specified resource group and subscription.
-  ##   resourceGroupName: string (required)
-  ##                    : Resource group to which the resource belongs.
   ##   apiVersion: string (required)
   ##             : Client API version.
   ##   subscriptionId: string (required)
   ##                 : Azure subscription ID.
-  var path_568234 = newJObject()
-  var query_568235 = newJObject()
-  add(path_568234, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568235, "api-version", newJString(apiVersion))
-  add(path_568234, "subscriptionId", newJString(subscriptionId))
-  result = call_568233.call(path_568234, query_568235, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : Resource group to which the resource belongs.
+  var path_564134 = newJObject()
+  var query_564135 = newJObject()
+  add(query_564135, "api-version", newJString(apiVersion))
+  add(path_564134, "subscriptionId", newJString(subscriptionId))
+  add(path_564134, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564133.call(path_564134, query_564135, nil, nil, nil)
 
-var controllersListByResourceGroup* = Call_ControllersListByResourceGroup_568226(
+var controllersListByResourceGroup* = Call_ControllersListByResourceGroup_564126(
     name: "controllersListByResourceGroup", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DevSpaces/controllers",
-    validator: validate_ControllersListByResourceGroup_568227, base: "",
-    url: url_ControllersListByResourceGroup_568228, schemes: {Scheme.Https})
+    validator: validate_ControllersListByResourceGroup_564127, base: "",
+    url: url_ControllersListByResourceGroup_564128, schemes: {Scheme.Https})
 type
-  Call_ControllersCreate_568247 = ref object of OpenApiRestCall_567657
-proc url_ControllersCreate_568249(protocol: Scheme; host: string; base: string;
+  Call_ControllersCreate_564147 = ref object of OpenApiRestCall_563555
+proc url_ControllersCreate_564149(protocol: Scheme; host: string; base: string;
                                  route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -471,7 +475,7 @@ proc url_ControllersCreate_568249(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ControllersCreate_568248(path: JsonNode; query: JsonNode;
+proc validate_ControllersCreate_564148(path: JsonNode; query: JsonNode;
                                       header: JsonNode; formData: JsonNode;
                                       body: JsonNode): JsonNode =
   ## Creates an Azure Dev Spaces Controller with the specified create parameters.
@@ -479,30 +483,29 @@ proc validate_ControllersCreate_568248(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : Resource group to which the resource belongs.
   ##   name: JString (required)
   ##       : Name of the resource.
   ##   subscriptionId: JString (required)
   ##                 : Azure subscription ID.
+  ##   resourceGroupName: JString (required)
+  ##                    : Resource group to which the resource belongs.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568250 = path.getOrDefault("resourceGroupName")
-  valid_568250 = validateParameter(valid_568250, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `name` field"
+  var valid_564150 = path.getOrDefault("name")
+  valid_564150 = validateParameter(valid_564150, JString, required = true,
                                  default = nil)
-  if valid_568250 != nil:
-    section.add "resourceGroupName", valid_568250
-  var valid_568251 = path.getOrDefault("name")
-  valid_568251 = validateParameter(valid_568251, JString, required = true,
+  if valid_564150 != nil:
+    section.add "name", valid_564150
+  var valid_564151 = path.getOrDefault("subscriptionId")
+  valid_564151 = validateParameter(valid_564151, JString, required = true,
                                  default = nil)
-  if valid_568251 != nil:
-    section.add "name", valid_568251
-  var valid_568252 = path.getOrDefault("subscriptionId")
-  valid_568252 = validateParameter(valid_568252, JString, required = true,
+  if valid_564151 != nil:
+    section.add "subscriptionId", valid_564151
+  var valid_564152 = path.getOrDefault("resourceGroupName")
+  valid_564152 = validateParameter(valid_564152, JString, required = true,
                                  default = nil)
-  if valid_568252 != nil:
-    section.add "subscriptionId", valid_568252
+  if valid_564152 != nil:
+    section.add "resourceGroupName", valid_564152
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -510,11 +513,11 @@ proc validate_ControllersCreate_568248(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568253 = query.getOrDefault("api-version")
-  valid_568253 = validateParameter(valid_568253, JString, required = true,
+  var valid_564153 = query.getOrDefault("api-version")
+  valid_564153 = validateParameter(valid_564153, JString, required = true,
                                  default = nil)
-  if valid_568253 != nil:
-    section.add "api-version", valid_568253
+  if valid_564153 != nil:
+    section.add "api-version", valid_564153
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -528,52 +531,52 @@ proc validate_ControllersCreate_568248(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568255: Call_ControllersCreate_568247; path: JsonNode;
+proc call*(call_564155: Call_ControllersCreate_564147; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Creates an Azure Dev Spaces Controller with the specified create parameters.
   ## 
-  let valid = call_568255.validator(path, query, header, formData, body)
-  let scheme = call_568255.pickScheme
+  let valid = call_564155.validator(path, query, header, formData, body)
+  let scheme = call_564155.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568255.url(scheme.get, call_568255.host, call_568255.base,
-                         call_568255.route, valid.getOrDefault("path"),
+  let url = call_564155.url(scheme.get, call_564155.host, call_564155.base,
+                         call_564155.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568255, url, valid)
+  result = hook(call_564155, url, valid)
 
-proc call*(call_568256: Call_ControllersCreate_568247; resourceGroupName: string;
-          apiVersion: string; name: string; controller: JsonNode;
-          subscriptionId: string): Recallable =
+proc call*(call_564156: Call_ControllersCreate_564147; apiVersion: string;
+          name: string; subscriptionId: string; resourceGroupName: string;
+          controller: JsonNode): Recallable =
   ## controllersCreate
   ## Creates an Azure Dev Spaces Controller with the specified create parameters.
-  ##   resourceGroupName: string (required)
-  ##                    : Resource group to which the resource belongs.
   ##   apiVersion: string (required)
   ##             : Client API version.
   ##   name: string (required)
   ##       : Name of the resource.
-  ##   controller: JObject (required)
-  ##             : Controller create parameters.
   ##   subscriptionId: string (required)
   ##                 : Azure subscription ID.
-  var path_568257 = newJObject()
-  var query_568258 = newJObject()
-  var body_568259 = newJObject()
-  add(path_568257, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568258, "api-version", newJString(apiVersion))
-  add(path_568257, "name", newJString(name))
+  ##   resourceGroupName: string (required)
+  ##                    : Resource group to which the resource belongs.
+  ##   controller: JObject (required)
+  ##             : Controller create parameters.
+  var path_564157 = newJObject()
+  var query_564158 = newJObject()
+  var body_564159 = newJObject()
+  add(query_564158, "api-version", newJString(apiVersion))
+  add(path_564157, "name", newJString(name))
+  add(path_564157, "subscriptionId", newJString(subscriptionId))
+  add(path_564157, "resourceGroupName", newJString(resourceGroupName))
   if controller != nil:
-    body_568259 = controller
-  add(path_568257, "subscriptionId", newJString(subscriptionId))
-  result = call_568256.call(path_568257, query_568258, nil, nil, body_568259)
+    body_564159 = controller
+  result = call_564156.call(path_564157, query_564158, nil, nil, body_564159)
 
-var controllersCreate* = Call_ControllersCreate_568247(name: "controllersCreate",
+var controllersCreate* = Call_ControllersCreate_564147(name: "controllersCreate",
     meth: HttpMethod.HttpPut, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DevSpaces/controllers/{name}",
-    validator: validate_ControllersCreate_568248, base: "",
-    url: url_ControllersCreate_568249, schemes: {Scheme.Https})
+    validator: validate_ControllersCreate_564148, base: "",
+    url: url_ControllersCreate_564149, schemes: {Scheme.Https})
 type
-  Call_ControllersGet_568236 = ref object of OpenApiRestCall_567657
-proc url_ControllersGet_568238(protocol: Scheme; host: string; base: string;
+  Call_ControllersGet_564136 = ref object of OpenApiRestCall_563555
+proc url_ControllersGet_564138(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -596,7 +599,7 @@ proc url_ControllersGet_568238(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ControllersGet_568237(path: JsonNode; query: JsonNode;
+proc validate_ControllersGet_564137(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## Gets the properties for an Azure Dev Spaces Controller.
@@ -604,30 +607,29 @@ proc validate_ControllersGet_568237(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : Resource group to which the resource belongs.
   ##   name: JString (required)
   ##       : Name of the resource.
   ##   subscriptionId: JString (required)
   ##                 : Azure subscription ID.
+  ##   resourceGroupName: JString (required)
+  ##                    : Resource group to which the resource belongs.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568239 = path.getOrDefault("resourceGroupName")
-  valid_568239 = validateParameter(valid_568239, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `name` field"
+  var valid_564139 = path.getOrDefault("name")
+  valid_564139 = validateParameter(valid_564139, JString, required = true,
                                  default = nil)
-  if valid_568239 != nil:
-    section.add "resourceGroupName", valid_568239
-  var valid_568240 = path.getOrDefault("name")
-  valid_568240 = validateParameter(valid_568240, JString, required = true,
+  if valid_564139 != nil:
+    section.add "name", valid_564139
+  var valid_564140 = path.getOrDefault("subscriptionId")
+  valid_564140 = validateParameter(valid_564140, JString, required = true,
                                  default = nil)
-  if valid_568240 != nil:
-    section.add "name", valid_568240
-  var valid_568241 = path.getOrDefault("subscriptionId")
-  valid_568241 = validateParameter(valid_568241, JString, required = true,
+  if valid_564140 != nil:
+    section.add "subscriptionId", valid_564140
+  var valid_564141 = path.getOrDefault("resourceGroupName")
+  valid_564141 = validateParameter(valid_564141, JString, required = true,
                                  default = nil)
-  if valid_568241 != nil:
-    section.add "subscriptionId", valid_568241
+  if valid_564141 != nil:
+    section.add "resourceGroupName", valid_564141
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -635,11 +637,11 @@ proc validate_ControllersGet_568237(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568242 = query.getOrDefault("api-version")
-  valid_568242 = validateParameter(valid_568242, JString, required = true,
+  var valid_564142 = query.getOrDefault("api-version")
+  valid_564142 = validateParameter(valid_564142, JString, required = true,
                                  default = nil)
-  if valid_568242 != nil:
-    section.add "api-version", valid_568242
+  if valid_564142 != nil:
+    section.add "api-version", valid_564142
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -648,46 +650,46 @@ proc validate_ControllersGet_568237(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568243: Call_ControllersGet_568236; path: JsonNode; query: JsonNode;
+proc call*(call_564143: Call_ControllersGet_564136; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the properties for an Azure Dev Spaces Controller.
   ## 
-  let valid = call_568243.validator(path, query, header, formData, body)
-  let scheme = call_568243.pickScheme
+  let valid = call_564143.validator(path, query, header, formData, body)
+  let scheme = call_564143.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568243.url(scheme.get, call_568243.host, call_568243.base,
-                         call_568243.route, valid.getOrDefault("path"),
+  let url = call_564143.url(scheme.get, call_564143.host, call_564143.base,
+                         call_564143.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568243, url, valid)
+  result = hook(call_564143, url, valid)
 
-proc call*(call_568244: Call_ControllersGet_568236; resourceGroupName: string;
-          apiVersion: string; name: string; subscriptionId: string): Recallable =
+proc call*(call_564144: Call_ControllersGet_564136; apiVersion: string; name: string;
+          subscriptionId: string; resourceGroupName: string): Recallable =
   ## controllersGet
   ## Gets the properties for an Azure Dev Spaces Controller.
-  ##   resourceGroupName: string (required)
-  ##                    : Resource group to which the resource belongs.
   ##   apiVersion: string (required)
   ##             : Client API version.
   ##   name: string (required)
   ##       : Name of the resource.
   ##   subscriptionId: string (required)
   ##                 : Azure subscription ID.
-  var path_568245 = newJObject()
-  var query_568246 = newJObject()
-  add(path_568245, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568246, "api-version", newJString(apiVersion))
-  add(path_568245, "name", newJString(name))
-  add(path_568245, "subscriptionId", newJString(subscriptionId))
-  result = call_568244.call(path_568245, query_568246, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : Resource group to which the resource belongs.
+  var path_564145 = newJObject()
+  var query_564146 = newJObject()
+  add(query_564146, "api-version", newJString(apiVersion))
+  add(path_564145, "name", newJString(name))
+  add(path_564145, "subscriptionId", newJString(subscriptionId))
+  add(path_564145, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564144.call(path_564145, query_564146, nil, nil, nil)
 
-var controllersGet* = Call_ControllersGet_568236(name: "controllersGet",
+var controllersGet* = Call_ControllersGet_564136(name: "controllersGet",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DevSpaces/controllers/{name}",
-    validator: validate_ControllersGet_568237, base: "", url: url_ControllersGet_568238,
+    validator: validate_ControllersGet_564137, base: "", url: url_ControllersGet_564138,
     schemes: {Scheme.Https})
 type
-  Call_ControllersUpdate_568271 = ref object of OpenApiRestCall_567657
-proc url_ControllersUpdate_568273(protocol: Scheme; host: string; base: string;
+  Call_ControllersUpdate_564171 = ref object of OpenApiRestCall_563555
+proc url_ControllersUpdate_564173(protocol: Scheme; host: string; base: string;
                                  route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -710,7 +712,7 @@ proc url_ControllersUpdate_568273(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ControllersUpdate_568272(path: JsonNode; query: JsonNode;
+proc validate_ControllersUpdate_564172(path: JsonNode; query: JsonNode;
                                       header: JsonNode; formData: JsonNode;
                                       body: JsonNode): JsonNode =
   ## Updates the properties of an existing Azure Dev Spaces Controller with the specified update parameters.
@@ -718,30 +720,29 @@ proc validate_ControllersUpdate_568272(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : Resource group to which the resource belongs.
   ##   name: JString (required)
   ##       : Name of the resource.
   ##   subscriptionId: JString (required)
   ##                 : Azure subscription ID.
+  ##   resourceGroupName: JString (required)
+  ##                    : Resource group to which the resource belongs.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568274 = path.getOrDefault("resourceGroupName")
-  valid_568274 = validateParameter(valid_568274, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `name` field"
+  var valid_564174 = path.getOrDefault("name")
+  valid_564174 = validateParameter(valid_564174, JString, required = true,
                                  default = nil)
-  if valid_568274 != nil:
-    section.add "resourceGroupName", valid_568274
-  var valid_568275 = path.getOrDefault("name")
-  valid_568275 = validateParameter(valid_568275, JString, required = true,
+  if valid_564174 != nil:
+    section.add "name", valid_564174
+  var valid_564175 = path.getOrDefault("subscriptionId")
+  valid_564175 = validateParameter(valid_564175, JString, required = true,
                                  default = nil)
-  if valid_568275 != nil:
-    section.add "name", valid_568275
-  var valid_568276 = path.getOrDefault("subscriptionId")
-  valid_568276 = validateParameter(valid_568276, JString, required = true,
+  if valid_564175 != nil:
+    section.add "subscriptionId", valid_564175
+  var valid_564176 = path.getOrDefault("resourceGroupName")
+  valid_564176 = validateParameter(valid_564176, JString, required = true,
                                  default = nil)
-  if valid_568276 != nil:
-    section.add "subscriptionId", valid_568276
+  if valid_564176 != nil:
+    section.add "resourceGroupName", valid_564176
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -749,11 +750,11 @@ proc validate_ControllersUpdate_568272(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568277 = query.getOrDefault("api-version")
-  valid_568277 = validateParameter(valid_568277, JString, required = true,
+  var valid_564177 = query.getOrDefault("api-version")
+  valid_564177 = validateParameter(valid_564177, JString, required = true,
                                  default = nil)
-  if valid_568277 != nil:
-    section.add "api-version", valid_568277
+  if valid_564177 != nil:
+    section.add "api-version", valid_564177
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -767,52 +768,52 @@ proc validate_ControllersUpdate_568272(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568279: Call_ControllersUpdate_568271; path: JsonNode;
+proc call*(call_564179: Call_ControllersUpdate_564171; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Updates the properties of an existing Azure Dev Spaces Controller with the specified update parameters.
   ## 
-  let valid = call_568279.validator(path, query, header, formData, body)
-  let scheme = call_568279.pickScheme
+  let valid = call_564179.validator(path, query, header, formData, body)
+  let scheme = call_564179.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568279.url(scheme.get, call_568279.host, call_568279.base,
-                         call_568279.route, valid.getOrDefault("path"),
+  let url = call_564179.url(scheme.get, call_564179.host, call_564179.base,
+                         call_564179.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568279, url, valid)
+  result = hook(call_564179, url, valid)
 
-proc call*(call_568280: Call_ControllersUpdate_568271; resourceGroupName: string;
-          apiVersion: string; name: string; subscriptionId: string;
+proc call*(call_564180: Call_ControllersUpdate_564171; apiVersion: string;
+          name: string; subscriptionId: string; resourceGroupName: string;
           controllerUpdateParameters: JsonNode): Recallable =
   ## controllersUpdate
   ## Updates the properties of an existing Azure Dev Spaces Controller with the specified update parameters.
-  ##   resourceGroupName: string (required)
-  ##                    : Resource group to which the resource belongs.
   ##   apiVersion: string (required)
   ##             : Client API version.
   ##   name: string (required)
   ##       : Name of the resource.
   ##   subscriptionId: string (required)
   ##                 : Azure subscription ID.
+  ##   resourceGroupName: string (required)
+  ##                    : Resource group to which the resource belongs.
   ##   controllerUpdateParameters: JObject (required)
   ##                             : Parameters for updating the Azure Dev Spaces Controller.
-  var path_568281 = newJObject()
-  var query_568282 = newJObject()
-  var body_568283 = newJObject()
-  add(path_568281, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568282, "api-version", newJString(apiVersion))
-  add(path_568281, "name", newJString(name))
-  add(path_568281, "subscriptionId", newJString(subscriptionId))
+  var path_564181 = newJObject()
+  var query_564182 = newJObject()
+  var body_564183 = newJObject()
+  add(query_564182, "api-version", newJString(apiVersion))
+  add(path_564181, "name", newJString(name))
+  add(path_564181, "subscriptionId", newJString(subscriptionId))
+  add(path_564181, "resourceGroupName", newJString(resourceGroupName))
   if controllerUpdateParameters != nil:
-    body_568283 = controllerUpdateParameters
-  result = call_568280.call(path_568281, query_568282, nil, nil, body_568283)
+    body_564183 = controllerUpdateParameters
+  result = call_564180.call(path_564181, query_564182, nil, nil, body_564183)
 
-var controllersUpdate* = Call_ControllersUpdate_568271(name: "controllersUpdate",
+var controllersUpdate* = Call_ControllersUpdate_564171(name: "controllersUpdate",
     meth: HttpMethod.HttpPatch, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DevSpaces/controllers/{name}",
-    validator: validate_ControllersUpdate_568272, base: "",
-    url: url_ControllersUpdate_568273, schemes: {Scheme.Https})
+    validator: validate_ControllersUpdate_564172, base: "",
+    url: url_ControllersUpdate_564173, schemes: {Scheme.Https})
 type
-  Call_ControllersDelete_568260 = ref object of OpenApiRestCall_567657
-proc url_ControllersDelete_568262(protocol: Scheme; host: string; base: string;
+  Call_ControllersDelete_564160 = ref object of OpenApiRestCall_563555
+proc url_ControllersDelete_564162(protocol: Scheme; host: string; base: string;
                                  route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -835,7 +836,7 @@ proc url_ControllersDelete_568262(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ControllersDelete_568261(path: JsonNode; query: JsonNode;
+proc validate_ControllersDelete_564161(path: JsonNode; query: JsonNode;
                                       header: JsonNode; formData: JsonNode;
                                       body: JsonNode): JsonNode =
   ## Deletes an existing Azure Dev Spaces Controller.
@@ -843,30 +844,29 @@ proc validate_ControllersDelete_568261(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : Resource group to which the resource belongs.
   ##   name: JString (required)
   ##       : Name of the resource.
   ##   subscriptionId: JString (required)
   ##                 : Azure subscription ID.
+  ##   resourceGroupName: JString (required)
+  ##                    : Resource group to which the resource belongs.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568263 = path.getOrDefault("resourceGroupName")
-  valid_568263 = validateParameter(valid_568263, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `name` field"
+  var valid_564163 = path.getOrDefault("name")
+  valid_564163 = validateParameter(valid_564163, JString, required = true,
                                  default = nil)
-  if valid_568263 != nil:
-    section.add "resourceGroupName", valid_568263
-  var valid_568264 = path.getOrDefault("name")
-  valid_568264 = validateParameter(valid_568264, JString, required = true,
+  if valid_564163 != nil:
+    section.add "name", valid_564163
+  var valid_564164 = path.getOrDefault("subscriptionId")
+  valid_564164 = validateParameter(valid_564164, JString, required = true,
                                  default = nil)
-  if valid_568264 != nil:
-    section.add "name", valid_568264
-  var valid_568265 = path.getOrDefault("subscriptionId")
-  valid_568265 = validateParameter(valid_568265, JString, required = true,
+  if valid_564164 != nil:
+    section.add "subscriptionId", valid_564164
+  var valid_564165 = path.getOrDefault("resourceGroupName")
+  valid_564165 = validateParameter(valid_564165, JString, required = true,
                                  default = nil)
-  if valid_568265 != nil:
-    section.add "subscriptionId", valid_568265
+  if valid_564165 != nil:
+    section.add "resourceGroupName", valid_564165
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -874,11 +874,11 @@ proc validate_ControllersDelete_568261(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568266 = query.getOrDefault("api-version")
-  valid_568266 = validateParameter(valid_568266, JString, required = true,
+  var valid_564166 = query.getOrDefault("api-version")
+  valid_564166 = validateParameter(valid_564166, JString, required = true,
                                  default = nil)
-  if valid_568266 != nil:
-    section.add "api-version", valid_568266
+  if valid_564166 != nil:
+    section.add "api-version", valid_564166
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -887,46 +887,46 @@ proc validate_ControllersDelete_568261(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568267: Call_ControllersDelete_568260; path: JsonNode;
+proc call*(call_564167: Call_ControllersDelete_564160; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes an existing Azure Dev Spaces Controller.
   ## 
-  let valid = call_568267.validator(path, query, header, formData, body)
-  let scheme = call_568267.pickScheme
+  let valid = call_564167.validator(path, query, header, formData, body)
+  let scheme = call_564167.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568267.url(scheme.get, call_568267.host, call_568267.base,
-                         call_568267.route, valid.getOrDefault("path"),
+  let url = call_564167.url(scheme.get, call_564167.host, call_564167.base,
+                         call_564167.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568267, url, valid)
+  result = hook(call_564167, url, valid)
 
-proc call*(call_568268: Call_ControllersDelete_568260; resourceGroupName: string;
-          apiVersion: string; name: string; subscriptionId: string): Recallable =
+proc call*(call_564168: Call_ControllersDelete_564160; apiVersion: string;
+          name: string; subscriptionId: string; resourceGroupName: string): Recallable =
   ## controllersDelete
   ## Deletes an existing Azure Dev Spaces Controller.
-  ##   resourceGroupName: string (required)
-  ##                    : Resource group to which the resource belongs.
   ##   apiVersion: string (required)
   ##             : Client API version.
   ##   name: string (required)
   ##       : Name of the resource.
   ##   subscriptionId: string (required)
   ##                 : Azure subscription ID.
-  var path_568269 = newJObject()
-  var query_568270 = newJObject()
-  add(path_568269, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568270, "api-version", newJString(apiVersion))
-  add(path_568269, "name", newJString(name))
-  add(path_568269, "subscriptionId", newJString(subscriptionId))
-  result = call_568268.call(path_568269, query_568270, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : Resource group to which the resource belongs.
+  var path_564169 = newJObject()
+  var query_564170 = newJObject()
+  add(query_564170, "api-version", newJString(apiVersion))
+  add(path_564169, "name", newJString(name))
+  add(path_564169, "subscriptionId", newJString(subscriptionId))
+  add(path_564169, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564168.call(path_564169, query_564170, nil, nil, nil)
 
-var controllersDelete* = Call_ControllersDelete_568260(name: "controllersDelete",
+var controllersDelete* = Call_ControllersDelete_564160(name: "controllersDelete",
     meth: HttpMethod.HttpDelete, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DevSpaces/controllers/{name}",
-    validator: validate_ControllersDelete_568261, base: "",
-    url: url_ControllersDelete_568262, schemes: {Scheme.Https})
+    validator: validate_ControllersDelete_564161, base: "",
+    url: url_ControllersDelete_564162, schemes: {Scheme.Https})
 type
-  Call_ControllersListConnectionDetails_568284 = ref object of OpenApiRestCall_567657
-proc url_ControllersListConnectionDetails_568286(protocol: Scheme; host: string;
+  Call_ControllersListConnectionDetails_564184 = ref object of OpenApiRestCall_563555
+proc url_ControllersListConnectionDetails_564186(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -950,37 +950,36 @@ proc url_ControllersListConnectionDetails_568286(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ControllersListConnectionDetails_568285(path: JsonNode;
+proc validate_ControllersListConnectionDetails_564185(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists connection details for the underlying container resources of an Azure Dev Spaces Controller.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : Resource group to which the resource belongs.
   ##   name: JString (required)
   ##       : Name of the resource.
   ##   subscriptionId: JString (required)
   ##                 : Azure subscription ID.
+  ##   resourceGroupName: JString (required)
+  ##                    : Resource group to which the resource belongs.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568287 = path.getOrDefault("resourceGroupName")
-  valid_568287 = validateParameter(valid_568287, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `name` field"
+  var valid_564187 = path.getOrDefault("name")
+  valid_564187 = validateParameter(valid_564187, JString, required = true,
                                  default = nil)
-  if valid_568287 != nil:
-    section.add "resourceGroupName", valid_568287
-  var valid_568288 = path.getOrDefault("name")
-  valid_568288 = validateParameter(valid_568288, JString, required = true,
+  if valid_564187 != nil:
+    section.add "name", valid_564187
+  var valid_564188 = path.getOrDefault("subscriptionId")
+  valid_564188 = validateParameter(valid_564188, JString, required = true,
                                  default = nil)
-  if valid_568288 != nil:
-    section.add "name", valid_568288
-  var valid_568289 = path.getOrDefault("subscriptionId")
-  valid_568289 = validateParameter(valid_568289, JString, required = true,
+  if valid_564188 != nil:
+    section.add "subscriptionId", valid_564188
+  var valid_564189 = path.getOrDefault("resourceGroupName")
+  valid_564189 = validateParameter(valid_564189, JString, required = true,
                                  default = nil)
-  if valid_568289 != nil:
-    section.add "subscriptionId", valid_568289
+  if valid_564189 != nil:
+    section.add "resourceGroupName", valid_564189
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -988,11 +987,11 @@ proc validate_ControllersListConnectionDetails_568285(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568290 = query.getOrDefault("api-version")
-  valid_568290 = validateParameter(valid_568290, JString, required = true,
+  var valid_564190 = query.getOrDefault("api-version")
+  valid_564190 = validateParameter(valid_564190, JString, required = true,
                                  default = nil)
-  if valid_568290 != nil:
-    section.add "api-version", valid_568290
+  if valid_564190 != nil:
+    section.add "api-version", valid_564190
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1001,46 +1000,46 @@ proc validate_ControllersListConnectionDetails_568285(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568291: Call_ControllersListConnectionDetails_568284;
+proc call*(call_564191: Call_ControllersListConnectionDetails_564184;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Lists connection details for the underlying container resources of an Azure Dev Spaces Controller.
   ## 
-  let valid = call_568291.validator(path, query, header, formData, body)
-  let scheme = call_568291.pickScheme
+  let valid = call_564191.validator(path, query, header, formData, body)
+  let scheme = call_564191.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568291.url(scheme.get, call_568291.host, call_568291.base,
-                         call_568291.route, valid.getOrDefault("path"),
+  let url = call_564191.url(scheme.get, call_564191.host, call_564191.base,
+                         call_564191.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568291, url, valid)
+  result = hook(call_564191, url, valid)
 
-proc call*(call_568292: Call_ControllersListConnectionDetails_568284;
-          resourceGroupName: string; apiVersion: string; name: string;
-          subscriptionId: string): Recallable =
+proc call*(call_564192: Call_ControllersListConnectionDetails_564184;
+          apiVersion: string; name: string; subscriptionId: string;
+          resourceGroupName: string): Recallable =
   ## controllersListConnectionDetails
   ## Lists connection details for the underlying container resources of an Azure Dev Spaces Controller.
-  ##   resourceGroupName: string (required)
-  ##                    : Resource group to which the resource belongs.
   ##   apiVersion: string (required)
   ##             : Client API version.
   ##   name: string (required)
   ##       : Name of the resource.
   ##   subscriptionId: string (required)
   ##                 : Azure subscription ID.
-  var path_568293 = newJObject()
-  var query_568294 = newJObject()
-  add(path_568293, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568294, "api-version", newJString(apiVersion))
-  add(path_568293, "name", newJString(name))
-  add(path_568293, "subscriptionId", newJString(subscriptionId))
-  result = call_568292.call(path_568293, query_568294, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : Resource group to which the resource belongs.
+  var path_564193 = newJObject()
+  var query_564194 = newJObject()
+  add(query_564194, "api-version", newJString(apiVersion))
+  add(path_564193, "name", newJString(name))
+  add(path_564193, "subscriptionId", newJString(subscriptionId))
+  add(path_564193, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564192.call(path_564193, query_564194, nil, nil, nil)
 
-var controllersListConnectionDetails* = Call_ControllersListConnectionDetails_568284(
+var controllersListConnectionDetails* = Call_ControllersListConnectionDetails_564184(
     name: "controllersListConnectionDetails", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DevSpaces/controllers/{name}/listConnectionDetails",
-    validator: validate_ControllersListConnectionDetails_568285, base: "",
-    url: url_ControllersListConnectionDetails_568286, schemes: {Scheme.Https})
+    validator: validate_ControllersListConnectionDetails_564185, base: "",
+    url: url_ControllersListConnectionDetails_564186, schemes: {Scheme.Https})
 export
   rest
 

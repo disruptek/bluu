@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, httpcore
 
 ## auto-generated via openapi macro
 ## title: Azure SQL Database
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_567642 = ref object of OpenApiRestCall
+  OpenApiRestCall_563540 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_567642](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563540](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_567642): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563540): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,8 +107,8 @@ const
   macServiceName = "sql-servers"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_ServersList_567864 = ref object of OpenApiRestCall_567642
-proc url_ServersList_567866(protocol: Scheme; host: string; base: string;
+  Call_ServersList_563762 = ref object of OpenApiRestCall_563540
+proc url_ServersList_563764(protocol: Scheme; host: string; base: string;
                            route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -120,7 +124,7 @@ proc url_ServersList_567866(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ServersList_567865(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_ServersList_563763(path: JsonNode; query: JsonNode; header: JsonNode;
                                 formData: JsonNode; body: JsonNode): JsonNode =
   ## Returns a list of servers.
   ## 
@@ -132,11 +136,11 @@ proc validate_ServersList_567865(path: JsonNode; query: JsonNode; header: JsonNo
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_568026 = path.getOrDefault("subscriptionId")
-  valid_568026 = validateParameter(valid_568026, JString, required = true,
+  var valid_563926 = path.getOrDefault("subscriptionId")
+  valid_563926 = validateParameter(valid_563926, JString, required = true,
                                  default = nil)
-  if valid_568026 != nil:
-    section.add "subscriptionId", valid_568026
+  if valid_563926 != nil:
+    section.add "subscriptionId", valid_563926
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -144,11 +148,11 @@ proc validate_ServersList_567865(path: JsonNode; query: JsonNode; header: JsonNo
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568027 = query.getOrDefault("api-version")
-  valid_568027 = validateParameter(valid_568027, JString, required = true,
+  var valid_563927 = query.getOrDefault("api-version")
+  valid_563927 = validateParameter(valid_563927, JString, required = true,
                                  default = nil)
-  if valid_568027 != nil:
-    section.add "api-version", valid_568027
+  if valid_563927 != nil:
+    section.add "api-version", valid_563927
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -157,20 +161,20 @@ proc validate_ServersList_567865(path: JsonNode; query: JsonNode; header: JsonNo
   if body != nil:
     result.add "body", body
 
-proc call*(call_568054: Call_ServersList_567864; path: JsonNode; query: JsonNode;
+proc call*(call_563954: Call_ServersList_563762; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Returns a list of servers.
   ## 
-  let valid = call_568054.validator(path, query, header, formData, body)
-  let scheme = call_568054.pickScheme
+  let valid = call_563954.validator(path, query, header, formData, body)
+  let scheme = call_563954.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568054.url(scheme.get, call_568054.host, call_568054.base,
-                         call_568054.route, valid.getOrDefault("path"),
+  let url = call_563954.url(scheme.get, call_563954.host, call_563954.base,
+                         call_563954.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568054, url, valid)
+  result = hook(call_563954, url, valid)
 
-proc call*(call_568125: Call_ServersList_567864; apiVersion: string;
+proc call*(call_564025: Call_ServersList_563762; apiVersion: string;
           subscriptionId: string): Recallable =
   ## serversList
   ## Returns a list of servers.
@@ -178,21 +182,21 @@ proc call*(call_568125: Call_ServersList_567864; apiVersion: string;
   ##             : The API version to use for the request.
   ##   subscriptionId: string (required)
   ##                 : The subscription ID that identifies an Azure subscription.
-  var path_568126 = newJObject()
-  var query_568128 = newJObject()
-  add(query_568128, "api-version", newJString(apiVersion))
-  add(path_568126, "subscriptionId", newJString(subscriptionId))
-  result = call_568125.call(path_568126, query_568128, nil, nil, nil)
+  var path_564026 = newJObject()
+  var query_564028 = newJObject()
+  add(query_564028, "api-version", newJString(apiVersion))
+  add(path_564026, "subscriptionId", newJString(subscriptionId))
+  result = call_564025.call(path_564026, query_564028, nil, nil, nil)
 
-var serversList* = Call_ServersList_567864(name: "serversList",
+var serversList* = Call_ServersList_563762(name: "serversList",
                                         meth: HttpMethod.HttpGet,
                                         host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Sql/servers",
-                                        validator: validate_ServersList_567865,
-                                        base: "", url: url_ServersList_567866,
+                                        validator: validate_ServersList_563763,
+                                        base: "", url: url_ServersList_563764,
                                         schemes: {Scheme.Https})
 type
-  Call_ServersListByResourceGroup_568167 = ref object of OpenApiRestCall_567642
-proc url_ServersListByResourceGroup_568169(protocol: Scheme; host: string;
+  Call_ServersListByResourceGroup_564067 = ref object of OpenApiRestCall_563540
+proc url_ServersListByResourceGroup_564069(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -212,30 +216,30 @@ proc url_ServersListByResourceGroup_568169(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ServersListByResourceGroup_568168(path: JsonNode; query: JsonNode;
+proc validate_ServersListByResourceGroup_564068(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Returns a list of servers in a resource group.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID that identifies an Azure subscription.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568170 = path.getOrDefault("resourceGroupName")
-  valid_568170 = validateParameter(valid_568170, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564070 = path.getOrDefault("subscriptionId")
+  valid_564070 = validateParameter(valid_564070, JString, required = true,
                                  default = nil)
-  if valid_568170 != nil:
-    section.add "resourceGroupName", valid_568170
-  var valid_568171 = path.getOrDefault("subscriptionId")
-  valid_568171 = validateParameter(valid_568171, JString, required = true,
+  if valid_564070 != nil:
+    section.add "subscriptionId", valid_564070
+  var valid_564071 = path.getOrDefault("resourceGroupName")
+  valid_564071 = validateParameter(valid_564071, JString, required = true,
                                  default = nil)
-  if valid_568171 != nil:
-    section.add "subscriptionId", valid_568171
+  if valid_564071 != nil:
+    section.add "resourceGroupName", valid_564071
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -243,11 +247,11 @@ proc validate_ServersListByResourceGroup_568168(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568172 = query.getOrDefault("api-version")
-  valid_568172 = validateParameter(valid_568172, JString, required = true,
+  var valid_564072 = query.getOrDefault("api-version")
+  valid_564072 = validateParameter(valid_564072, JString, required = true,
                                  default = nil)
-  if valid_568172 != nil:
-    section.add "api-version", valid_568172
+  if valid_564072 != nil:
+    section.add "api-version", valid_564072
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -256,44 +260,44 @@ proc validate_ServersListByResourceGroup_568168(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568173: Call_ServersListByResourceGroup_568167; path: JsonNode;
+proc call*(call_564073: Call_ServersListByResourceGroup_564067; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Returns a list of servers in a resource group.
   ## 
-  let valid = call_568173.validator(path, query, header, formData, body)
-  let scheme = call_568173.pickScheme
+  let valid = call_564073.validator(path, query, header, formData, body)
+  let scheme = call_564073.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568173.url(scheme.get, call_568173.host, call_568173.base,
-                         call_568173.route, valid.getOrDefault("path"),
+  let url = call_564073.url(scheme.get, call_564073.host, call_564073.base,
+                         call_564073.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568173, url, valid)
+  result = hook(call_564073, url, valid)
 
-proc call*(call_568174: Call_ServersListByResourceGroup_568167;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string): Recallable =
+proc call*(call_564074: Call_ServersListByResourceGroup_564067; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string): Recallable =
   ## serversListByResourceGroup
   ## Returns a list of servers in a resource group.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   ##   apiVersion: string (required)
   ##             : The API version to use for the request.
   ##   subscriptionId: string (required)
   ##                 : The subscription ID that identifies an Azure subscription.
-  var path_568175 = newJObject()
-  var query_568176 = newJObject()
-  add(path_568175, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568176, "api-version", newJString(apiVersion))
-  add(path_568175, "subscriptionId", newJString(subscriptionId))
-  result = call_568174.call(path_568175, query_568176, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
+  var path_564075 = newJObject()
+  var query_564076 = newJObject()
+  add(query_564076, "api-version", newJString(apiVersion))
+  add(path_564075, "subscriptionId", newJString(subscriptionId))
+  add(path_564075, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564074.call(path_564075, query_564076, nil, nil, nil)
 
-var serversListByResourceGroup* = Call_ServersListByResourceGroup_568167(
+var serversListByResourceGroup* = Call_ServersListByResourceGroup_564067(
     name: "serversListByResourceGroup", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/servers",
-    validator: validate_ServersListByResourceGroup_568168, base: "",
-    url: url_ServersListByResourceGroup_568169, schemes: {Scheme.Https})
+    validator: validate_ServersListByResourceGroup_564068, base: "",
+    url: url_ServersListByResourceGroup_564069, schemes: {Scheme.Https})
 type
-  Call_ServersCreateOrUpdate_568197 = ref object of OpenApiRestCall_567642
-proc url_ServersCreateOrUpdate_568199(protocol: Scheme; host: string; base: string;
+  Call_ServersCreateOrUpdate_564097 = ref object of OpenApiRestCall_563540
+proc url_ServersCreateOrUpdate_564099(protocol: Scheme; host: string; base: string;
                                      route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -315,37 +319,37 @@ proc url_ServersCreateOrUpdate_568199(protocol: Scheme; host: string; base: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ServersCreateOrUpdate_568198(path: JsonNode; query: JsonNode;
+proc validate_ServersCreateOrUpdate_564098(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Creates or updates a new server.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   ##   serverName: JString (required)
   ##             : The name of the server.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID that identifies an Azure subscription.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568217 = path.getOrDefault("resourceGroupName")
-  valid_568217 = validateParameter(valid_568217, JString, required = true,
+        "path argument is necessary due to required `serverName` field"
+  var valid_564117 = path.getOrDefault("serverName")
+  valid_564117 = validateParameter(valid_564117, JString, required = true,
                                  default = nil)
-  if valid_568217 != nil:
-    section.add "resourceGroupName", valid_568217
-  var valid_568218 = path.getOrDefault("serverName")
-  valid_568218 = validateParameter(valid_568218, JString, required = true,
+  if valid_564117 != nil:
+    section.add "serverName", valid_564117
+  var valid_564118 = path.getOrDefault("subscriptionId")
+  valid_564118 = validateParameter(valid_564118, JString, required = true,
                                  default = nil)
-  if valid_568218 != nil:
-    section.add "serverName", valid_568218
-  var valid_568219 = path.getOrDefault("subscriptionId")
-  valid_568219 = validateParameter(valid_568219, JString, required = true,
+  if valid_564118 != nil:
+    section.add "subscriptionId", valid_564118
+  var valid_564119 = path.getOrDefault("resourceGroupName")
+  valid_564119 = validateParameter(valid_564119, JString, required = true,
                                  default = nil)
-  if valid_568219 != nil:
-    section.add "subscriptionId", valid_568219
+  if valid_564119 != nil:
+    section.add "resourceGroupName", valid_564119
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -353,11 +357,11 @@ proc validate_ServersCreateOrUpdate_568198(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568220 = query.getOrDefault("api-version")
-  valid_568220 = validateParameter(valid_568220, JString, required = true,
+  var valid_564120 = query.getOrDefault("api-version")
+  valid_564120 = validateParameter(valid_564120, JString, required = true,
                                  default = nil)
-  if valid_568220 != nil:
-    section.add "api-version", valid_568220
+  if valid_564120 != nil:
+    section.add "api-version", valid_564120
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -371,53 +375,53 @@ proc validate_ServersCreateOrUpdate_568198(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568222: Call_ServersCreateOrUpdate_568197; path: JsonNode;
+proc call*(call_564122: Call_ServersCreateOrUpdate_564097; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Creates or updates a new server.
   ## 
-  let valid = call_568222.validator(path, query, header, formData, body)
-  let scheme = call_568222.pickScheme
+  let valid = call_564122.validator(path, query, header, formData, body)
+  let scheme = call_564122.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568222.url(scheme.get, call_568222.host, call_568222.base,
-                         call_568222.route, valid.getOrDefault("path"),
+  let url = call_564122.url(scheme.get, call_564122.host, call_564122.base,
+                         call_564122.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568222, url, valid)
+  result = hook(call_564122, url, valid)
 
-proc call*(call_568223: Call_ServersCreateOrUpdate_568197;
-          resourceGroupName: string; apiVersion: string; serverName: string;
-          subscriptionId: string; parameters: JsonNode): Recallable =
+proc call*(call_564123: Call_ServersCreateOrUpdate_564097; apiVersion: string;
+          serverName: string; subscriptionId: string; resourceGroupName: string;
+          parameters: JsonNode): Recallable =
   ## serversCreateOrUpdate
   ## Creates or updates a new server.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   ##   apiVersion: string (required)
   ##             : The API version to use for the request.
   ##   serverName: string (required)
   ##             : The name of the server.
   ##   subscriptionId: string (required)
   ##                 : The subscription ID that identifies an Azure subscription.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   ##   parameters: JObject (required)
   ##             : The required parameters for creating or updating a server.
-  var path_568224 = newJObject()
-  var query_568225 = newJObject()
-  var body_568226 = newJObject()
-  add(path_568224, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568225, "api-version", newJString(apiVersion))
-  add(path_568224, "serverName", newJString(serverName))
-  add(path_568224, "subscriptionId", newJString(subscriptionId))
+  var path_564124 = newJObject()
+  var query_564125 = newJObject()
+  var body_564126 = newJObject()
+  add(query_564125, "api-version", newJString(apiVersion))
+  add(path_564124, "serverName", newJString(serverName))
+  add(path_564124, "subscriptionId", newJString(subscriptionId))
+  add(path_564124, "resourceGroupName", newJString(resourceGroupName))
   if parameters != nil:
-    body_568226 = parameters
-  result = call_568223.call(path_568224, query_568225, nil, nil, body_568226)
+    body_564126 = parameters
+  result = call_564123.call(path_564124, query_564125, nil, nil, body_564126)
 
-var serversCreateOrUpdate* = Call_ServersCreateOrUpdate_568197(
+var serversCreateOrUpdate* = Call_ServersCreateOrUpdate_564097(
     name: "serversCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/servers/{serverName}",
-    validator: validate_ServersCreateOrUpdate_568198, base: "",
-    url: url_ServersCreateOrUpdate_568199, schemes: {Scheme.Https})
+    validator: validate_ServersCreateOrUpdate_564098, base: "",
+    url: url_ServersCreateOrUpdate_564099, schemes: {Scheme.Https})
 type
-  Call_ServersGet_568177 = ref object of OpenApiRestCall_567642
-proc url_ServersGet_568179(protocol: Scheme; host: string; base: string; route: string;
+  Call_ServersGet_564077 = ref object of OpenApiRestCall_563540
+proc url_ServersGet_564079(protocol: Scheme; host: string; base: string; route: string;
                           path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -439,37 +443,37 @@ proc url_ServersGet_568179(protocol: Scheme; host: string; base: string; route: 
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ServersGet_568178(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_ServersGet_564078(path: JsonNode; query: JsonNode; header: JsonNode;
                                formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets a server.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   ##   serverName: JString (required)
   ##             : The name of the server.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID that identifies an Azure subscription.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568189 = path.getOrDefault("resourceGroupName")
-  valid_568189 = validateParameter(valid_568189, JString, required = true,
+        "path argument is necessary due to required `serverName` field"
+  var valid_564089 = path.getOrDefault("serverName")
+  valid_564089 = validateParameter(valid_564089, JString, required = true,
                                  default = nil)
-  if valid_568189 != nil:
-    section.add "resourceGroupName", valid_568189
-  var valid_568190 = path.getOrDefault("serverName")
-  valid_568190 = validateParameter(valid_568190, JString, required = true,
+  if valid_564089 != nil:
+    section.add "serverName", valid_564089
+  var valid_564090 = path.getOrDefault("subscriptionId")
+  valid_564090 = validateParameter(valid_564090, JString, required = true,
                                  default = nil)
-  if valid_568190 != nil:
-    section.add "serverName", valid_568190
-  var valid_568191 = path.getOrDefault("subscriptionId")
-  valid_568191 = validateParameter(valid_568191, JString, required = true,
+  if valid_564090 != nil:
+    section.add "subscriptionId", valid_564090
+  var valid_564091 = path.getOrDefault("resourceGroupName")
+  valid_564091 = validateParameter(valid_564091, JString, required = true,
                                  default = nil)
-  if valid_568191 != nil:
-    section.add "subscriptionId", valid_568191
+  if valid_564091 != nil:
+    section.add "resourceGroupName", valid_564091
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -477,11 +481,11 @@ proc validate_ServersGet_568178(path: JsonNode; query: JsonNode; header: JsonNod
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568192 = query.getOrDefault("api-version")
-  valid_568192 = validateParameter(valid_568192, JString, required = true,
+  var valid_564092 = query.getOrDefault("api-version")
+  valid_564092 = validateParameter(valid_564092, JString, required = true,
                                  default = nil)
-  if valid_568192 != nil:
-    section.add "api-version", valid_568192
+  if valid_564092 != nil:
+    section.add "api-version", valid_564092
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -490,48 +494,48 @@ proc validate_ServersGet_568178(path: JsonNode; query: JsonNode; header: JsonNod
   if body != nil:
     result.add "body", body
 
-proc call*(call_568193: Call_ServersGet_568177; path: JsonNode; query: JsonNode;
+proc call*(call_564093: Call_ServersGet_564077; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets a server.
   ## 
-  let valid = call_568193.validator(path, query, header, formData, body)
-  let scheme = call_568193.pickScheme
+  let valid = call_564093.validator(path, query, header, formData, body)
+  let scheme = call_564093.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568193.url(scheme.get, call_568193.host, call_568193.base,
-                         call_568193.route, valid.getOrDefault("path"),
+  let url = call_564093.url(scheme.get, call_564093.host, call_564093.base,
+                         call_564093.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568193, url, valid)
+  result = hook(call_564093, url, valid)
 
-proc call*(call_568194: Call_ServersGet_568177; resourceGroupName: string;
-          apiVersion: string; serverName: string; subscriptionId: string): Recallable =
+proc call*(call_564094: Call_ServersGet_564077; apiVersion: string;
+          serverName: string; subscriptionId: string; resourceGroupName: string): Recallable =
   ## serversGet
   ## Gets a server.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   ##   apiVersion: string (required)
   ##             : The API version to use for the request.
   ##   serverName: string (required)
   ##             : The name of the server.
   ##   subscriptionId: string (required)
   ##                 : The subscription ID that identifies an Azure subscription.
-  var path_568195 = newJObject()
-  var query_568196 = newJObject()
-  add(path_568195, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568196, "api-version", newJString(apiVersion))
-  add(path_568195, "serverName", newJString(serverName))
-  add(path_568195, "subscriptionId", newJString(subscriptionId))
-  result = call_568194.call(path_568195, query_568196, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
+  var path_564095 = newJObject()
+  var query_564096 = newJObject()
+  add(query_564096, "api-version", newJString(apiVersion))
+  add(path_564095, "serverName", newJString(serverName))
+  add(path_564095, "subscriptionId", newJString(subscriptionId))
+  add(path_564095, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564094.call(path_564095, query_564096, nil, nil, nil)
 
-var serversGet* = Call_ServersGet_568177(name: "serversGet",
+var serversGet* = Call_ServersGet_564077(name: "serversGet",
                                       meth: HttpMethod.HttpGet,
                                       host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/servers/{serverName}",
-                                      validator: validate_ServersGet_568178,
-                                      base: "", url: url_ServersGet_568179,
+                                      validator: validate_ServersGet_564078,
+                                      base: "", url: url_ServersGet_564079,
                                       schemes: {Scheme.Https})
 type
-  Call_ServersUpdate_568238 = ref object of OpenApiRestCall_567642
-proc url_ServersUpdate_568240(protocol: Scheme; host: string; base: string;
+  Call_ServersUpdate_564138 = ref object of OpenApiRestCall_563540
+proc url_ServersUpdate_564140(protocol: Scheme; host: string; base: string;
                              route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -553,37 +557,37 @@ proc url_ServersUpdate_568240(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ServersUpdate_568239(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_ServersUpdate_564139(path: JsonNode; query: JsonNode; header: JsonNode;
                                   formData: JsonNode; body: JsonNode): JsonNode =
   ## Updates an existing server.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   ##   serverName: JString (required)
   ##             : The name of the server.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID that identifies an Azure subscription.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568241 = path.getOrDefault("resourceGroupName")
-  valid_568241 = validateParameter(valid_568241, JString, required = true,
+        "path argument is necessary due to required `serverName` field"
+  var valid_564141 = path.getOrDefault("serverName")
+  valid_564141 = validateParameter(valid_564141, JString, required = true,
                                  default = nil)
-  if valid_568241 != nil:
-    section.add "resourceGroupName", valid_568241
-  var valid_568242 = path.getOrDefault("serverName")
-  valid_568242 = validateParameter(valid_568242, JString, required = true,
+  if valid_564141 != nil:
+    section.add "serverName", valid_564141
+  var valid_564142 = path.getOrDefault("subscriptionId")
+  valid_564142 = validateParameter(valid_564142, JString, required = true,
                                  default = nil)
-  if valid_568242 != nil:
-    section.add "serverName", valid_568242
-  var valid_568243 = path.getOrDefault("subscriptionId")
-  valid_568243 = validateParameter(valid_568243, JString, required = true,
+  if valid_564142 != nil:
+    section.add "subscriptionId", valid_564142
+  var valid_564143 = path.getOrDefault("resourceGroupName")
+  valid_564143 = validateParameter(valid_564143, JString, required = true,
                                  default = nil)
-  if valid_568243 != nil:
-    section.add "subscriptionId", valid_568243
+  if valid_564143 != nil:
+    section.add "resourceGroupName", valid_564143
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -591,11 +595,11 @@ proc validate_ServersUpdate_568239(path: JsonNode; query: JsonNode; header: Json
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568244 = query.getOrDefault("api-version")
-  valid_568244 = validateParameter(valid_568244, JString, required = true,
+  var valid_564144 = query.getOrDefault("api-version")
+  valid_564144 = validateParameter(valid_564144, JString, required = true,
                                  default = nil)
-  if valid_568244 != nil:
-    section.add "api-version", valid_568244
+  if valid_564144 != nil:
+    section.add "api-version", valid_564144
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -609,52 +613,52 @@ proc validate_ServersUpdate_568239(path: JsonNode; query: JsonNode; header: Json
   if body != nil:
     result.add "body", body
 
-proc call*(call_568246: Call_ServersUpdate_568238; path: JsonNode; query: JsonNode;
+proc call*(call_564146: Call_ServersUpdate_564138; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Updates an existing server.
   ## 
-  let valid = call_568246.validator(path, query, header, formData, body)
-  let scheme = call_568246.pickScheme
+  let valid = call_564146.validator(path, query, header, formData, body)
+  let scheme = call_564146.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568246.url(scheme.get, call_568246.host, call_568246.base,
-                         call_568246.route, valid.getOrDefault("path"),
+  let url = call_564146.url(scheme.get, call_564146.host, call_564146.base,
+                         call_564146.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568246, url, valid)
+  result = hook(call_564146, url, valid)
 
-proc call*(call_568247: Call_ServersUpdate_568238; resourceGroupName: string;
-          apiVersion: string; serverName: string; subscriptionId: string;
+proc call*(call_564147: Call_ServersUpdate_564138; apiVersion: string;
+          serverName: string; subscriptionId: string; resourceGroupName: string;
           parameters: JsonNode): Recallable =
   ## serversUpdate
   ## Updates an existing server.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   ##   apiVersion: string (required)
   ##             : The API version to use for the request.
   ##   serverName: string (required)
   ##             : The name of the server.
   ##   subscriptionId: string (required)
   ##                 : The subscription ID that identifies an Azure subscription.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   ##   parameters: JObject (required)
   ##             : The required parameters for updating a server.
-  var path_568248 = newJObject()
-  var query_568249 = newJObject()
-  var body_568250 = newJObject()
-  add(path_568248, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568249, "api-version", newJString(apiVersion))
-  add(path_568248, "serverName", newJString(serverName))
-  add(path_568248, "subscriptionId", newJString(subscriptionId))
+  var path_564148 = newJObject()
+  var query_564149 = newJObject()
+  var body_564150 = newJObject()
+  add(query_564149, "api-version", newJString(apiVersion))
+  add(path_564148, "serverName", newJString(serverName))
+  add(path_564148, "subscriptionId", newJString(subscriptionId))
+  add(path_564148, "resourceGroupName", newJString(resourceGroupName))
   if parameters != nil:
-    body_568250 = parameters
-  result = call_568247.call(path_568248, query_568249, nil, nil, body_568250)
+    body_564150 = parameters
+  result = call_564147.call(path_564148, query_564149, nil, nil, body_564150)
 
-var serversUpdate* = Call_ServersUpdate_568238(name: "serversUpdate",
+var serversUpdate* = Call_ServersUpdate_564138(name: "serversUpdate",
     meth: HttpMethod.HttpPatch, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/servers/{serverName}",
-    validator: validate_ServersUpdate_568239, base: "", url: url_ServersUpdate_568240,
+    validator: validate_ServersUpdate_564139, base: "", url: url_ServersUpdate_564140,
     schemes: {Scheme.Https})
 type
-  Call_ServersDelete_568227 = ref object of OpenApiRestCall_567642
-proc url_ServersDelete_568229(protocol: Scheme; host: string; base: string;
+  Call_ServersDelete_564127 = ref object of OpenApiRestCall_563540
+proc url_ServersDelete_564129(protocol: Scheme; host: string; base: string;
                              route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -676,37 +680,37 @@ proc url_ServersDelete_568229(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ServersDelete_568228(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_ServersDelete_564128(path: JsonNode; query: JsonNode; header: JsonNode;
                                   formData: JsonNode; body: JsonNode): JsonNode =
   ## Deletes a SQL server.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   ##   serverName: JString (required)
   ##             : The name of the server.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID that identifies an Azure subscription.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568230 = path.getOrDefault("resourceGroupName")
-  valid_568230 = validateParameter(valid_568230, JString, required = true,
+        "path argument is necessary due to required `serverName` field"
+  var valid_564130 = path.getOrDefault("serverName")
+  valid_564130 = validateParameter(valid_564130, JString, required = true,
                                  default = nil)
-  if valid_568230 != nil:
-    section.add "resourceGroupName", valid_568230
-  var valid_568231 = path.getOrDefault("serverName")
-  valid_568231 = validateParameter(valid_568231, JString, required = true,
+  if valid_564130 != nil:
+    section.add "serverName", valid_564130
+  var valid_564131 = path.getOrDefault("subscriptionId")
+  valid_564131 = validateParameter(valid_564131, JString, required = true,
                                  default = nil)
-  if valid_568231 != nil:
-    section.add "serverName", valid_568231
-  var valid_568232 = path.getOrDefault("subscriptionId")
-  valid_568232 = validateParameter(valid_568232, JString, required = true,
+  if valid_564131 != nil:
+    section.add "subscriptionId", valid_564131
+  var valid_564132 = path.getOrDefault("resourceGroupName")
+  valid_564132 = validateParameter(valid_564132, JString, required = true,
                                  default = nil)
-  if valid_568232 != nil:
-    section.add "subscriptionId", valid_568232
+  if valid_564132 != nil:
+    section.add "resourceGroupName", valid_564132
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -714,11 +718,11 @@ proc validate_ServersDelete_568228(path: JsonNode; query: JsonNode; header: Json
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568233 = query.getOrDefault("api-version")
-  valid_568233 = validateParameter(valid_568233, JString, required = true,
+  var valid_564133 = query.getOrDefault("api-version")
+  valid_564133 = validateParameter(valid_564133, JString, required = true,
                                  default = nil)
-  if valid_568233 != nil:
-    section.add "api-version", valid_568233
+  if valid_564133 != nil:
+    section.add "api-version", valid_564133
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -727,42 +731,42 @@ proc validate_ServersDelete_568228(path: JsonNode; query: JsonNode; header: Json
   if body != nil:
     result.add "body", body
 
-proc call*(call_568234: Call_ServersDelete_568227; path: JsonNode; query: JsonNode;
+proc call*(call_564134: Call_ServersDelete_564127; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes a SQL server.
   ## 
-  let valid = call_568234.validator(path, query, header, formData, body)
-  let scheme = call_568234.pickScheme
+  let valid = call_564134.validator(path, query, header, formData, body)
+  let scheme = call_564134.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568234.url(scheme.get, call_568234.host, call_568234.base,
-                         call_568234.route, valid.getOrDefault("path"),
+  let url = call_564134.url(scheme.get, call_564134.host, call_564134.base,
+                         call_564134.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568234, url, valid)
+  result = hook(call_564134, url, valid)
 
-proc call*(call_568235: Call_ServersDelete_568227; resourceGroupName: string;
-          apiVersion: string; serverName: string; subscriptionId: string): Recallable =
+proc call*(call_564135: Call_ServersDelete_564127; apiVersion: string;
+          serverName: string; subscriptionId: string; resourceGroupName: string): Recallable =
   ## serversDelete
   ## Deletes a SQL server.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   ##   apiVersion: string (required)
   ##             : The API version to use for the request.
   ##   serverName: string (required)
   ##             : The name of the server.
   ##   subscriptionId: string (required)
   ##                 : The subscription ID that identifies an Azure subscription.
-  var path_568236 = newJObject()
-  var query_568237 = newJObject()
-  add(path_568236, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568237, "api-version", newJString(apiVersion))
-  add(path_568236, "serverName", newJString(serverName))
-  add(path_568236, "subscriptionId", newJString(subscriptionId))
-  result = call_568235.call(path_568236, query_568237, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
+  var path_564136 = newJObject()
+  var query_564137 = newJObject()
+  add(query_564137, "api-version", newJString(apiVersion))
+  add(path_564136, "serverName", newJString(serverName))
+  add(path_564136, "subscriptionId", newJString(subscriptionId))
+  add(path_564136, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564135.call(path_564136, query_564137, nil, nil, nil)
 
-var serversDelete* = Call_ServersDelete_568227(name: "serversDelete",
+var serversDelete* = Call_ServersDelete_564127(name: "serversDelete",
     meth: HttpMethod.HttpDelete, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/servers/{serverName}",
-    validator: validate_ServersDelete_568228, base: "", url: url_ServersDelete_568229,
+    validator: validate_ServersDelete_564128, base: "", url: url_ServersDelete_564129,
     schemes: {Scheme.Https})
 export
   rest

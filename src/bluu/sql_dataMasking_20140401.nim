@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, httpcore
 
 ## auto-generated via openapi macro
 ## title: Azure SQL Database Datamasking Policies and Rules
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_567642 = ref object of OpenApiRestCall
+  OpenApiRestCall_563540 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_567642](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563540](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_567642): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563540): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,8 +107,8 @@ const
   macServiceName = "sql-dataMasking"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_DataMaskingPoliciesCreateOrUpdate_568193 = ref object of OpenApiRestCall_567642
-proc url_DataMaskingPoliciesCreateOrUpdate_568195(protocol: Scheme; host: string;
+  Call_DataMaskingPoliciesCreateOrUpdate_564093 = ref object of OpenApiRestCall_563540
+proc url_DataMaskingPoliciesCreateOrUpdate_564095(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -133,15 +137,13 @@ proc url_DataMaskingPoliciesCreateOrUpdate_568195(protocol: Scheme; host: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DataMaskingPoliciesCreateOrUpdate_568194(path: JsonNode;
+proc validate_DataMaskingPoliciesCreateOrUpdate_564094(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Creates or updates a database data masking policy
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   ##   serverName: JString (required)
   ##             : The name of the server.
   ##   dataMaskingPolicyName: JString (required)
@@ -150,34 +152,36 @@ proc validate_DataMaskingPoliciesCreateOrUpdate_568194(path: JsonNode;
   ##                 : The subscription ID that identifies an Azure subscription.
   ##   databaseName: JString (required)
   ##               : The name of the database.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568213 = path.getOrDefault("resourceGroupName")
-  valid_568213 = validateParameter(valid_568213, JString, required = true,
+        "path argument is necessary due to required `serverName` field"
+  var valid_564113 = path.getOrDefault("serverName")
+  valid_564113 = validateParameter(valid_564113, JString, required = true,
                                  default = nil)
-  if valid_568213 != nil:
-    section.add "resourceGroupName", valid_568213
-  var valid_568214 = path.getOrDefault("serverName")
-  valid_568214 = validateParameter(valid_568214, JString, required = true,
-                                 default = nil)
-  if valid_568214 != nil:
-    section.add "serverName", valid_568214
-  var valid_568215 = path.getOrDefault("dataMaskingPolicyName")
-  valid_568215 = validateParameter(valid_568215, JString, required = true,
+  if valid_564113 != nil:
+    section.add "serverName", valid_564113
+  var valid_564114 = path.getOrDefault("dataMaskingPolicyName")
+  valid_564114 = validateParameter(valid_564114, JString, required = true,
                                  default = newJString("Default"))
-  if valid_568215 != nil:
-    section.add "dataMaskingPolicyName", valid_568215
-  var valid_568216 = path.getOrDefault("subscriptionId")
-  valid_568216 = validateParameter(valid_568216, JString, required = true,
+  if valid_564114 != nil:
+    section.add "dataMaskingPolicyName", valid_564114
+  var valid_564115 = path.getOrDefault("subscriptionId")
+  valid_564115 = validateParameter(valid_564115, JString, required = true,
                                  default = nil)
-  if valid_568216 != nil:
-    section.add "subscriptionId", valid_568216
-  var valid_568217 = path.getOrDefault("databaseName")
-  valid_568217 = validateParameter(valid_568217, JString, required = true,
+  if valid_564115 != nil:
+    section.add "subscriptionId", valid_564115
+  var valid_564116 = path.getOrDefault("databaseName")
+  valid_564116 = validateParameter(valid_564116, JString, required = true,
                                  default = nil)
-  if valid_568217 != nil:
-    section.add "databaseName", valid_568217
+  if valid_564116 != nil:
+    section.add "databaseName", valid_564116
+  var valid_564117 = path.getOrDefault("resourceGroupName")
+  valid_564117 = validateParameter(valid_564117, JString, required = true,
+                                 default = nil)
+  if valid_564117 != nil:
+    section.add "resourceGroupName", valid_564117
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -185,11 +189,11 @@ proc validate_DataMaskingPoliciesCreateOrUpdate_568194(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568218 = query.getOrDefault("api-version")
-  valid_568218 = validateParameter(valid_568218, JString, required = true,
+  var valid_564118 = query.getOrDefault("api-version")
+  valid_564118 = validateParameter(valid_564118, JString, required = true,
                                  default = nil)
-  if valid_568218 != nil:
-    section.add "api-version", valid_568218
+  if valid_564118 != nil:
+    section.add "api-version", valid_564118
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -203,28 +207,26 @@ proc validate_DataMaskingPoliciesCreateOrUpdate_568194(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568220: Call_DataMaskingPoliciesCreateOrUpdate_568193;
+proc call*(call_564120: Call_DataMaskingPoliciesCreateOrUpdate_564093;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Creates or updates a database data masking policy
   ## 
-  let valid = call_568220.validator(path, query, header, formData, body)
-  let scheme = call_568220.pickScheme
+  let valid = call_564120.validator(path, query, header, formData, body)
+  let scheme = call_564120.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568220.url(scheme.get, call_568220.host, call_568220.base,
-                         call_568220.route, valid.getOrDefault("path"),
+  let url = call_564120.url(scheme.get, call_564120.host, call_564120.base,
+                         call_564120.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568220, url, valid)
+  result = hook(call_564120, url, valid)
 
-proc call*(call_568221: Call_DataMaskingPoliciesCreateOrUpdate_568193;
-          resourceGroupName: string; apiVersion: string; serverName: string;
-          subscriptionId: string; databaseName: string; parameters: JsonNode;
+proc call*(call_564121: Call_DataMaskingPoliciesCreateOrUpdate_564093;
+          apiVersion: string; serverName: string; subscriptionId: string;
+          databaseName: string; resourceGroupName: string; parameters: JsonNode;
           dataMaskingPolicyName: string = "Default"): Recallable =
   ## dataMaskingPoliciesCreateOrUpdate
   ## Creates or updates a database data masking policy
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   ##   apiVersion: string (required)
   ##             : The API version to use for the request.
   ##   serverName: string (required)
@@ -235,29 +237,31 @@ proc call*(call_568221: Call_DataMaskingPoliciesCreateOrUpdate_568193;
   ##                 : The subscription ID that identifies an Azure subscription.
   ##   databaseName: string (required)
   ##               : The name of the database.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   ##   parameters: JObject (required)
   ##             : Parameters for creating or updating a data masking policy.
-  var path_568222 = newJObject()
-  var query_568223 = newJObject()
-  var body_568224 = newJObject()
-  add(path_568222, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568223, "api-version", newJString(apiVersion))
-  add(path_568222, "serverName", newJString(serverName))
-  add(path_568222, "dataMaskingPolicyName", newJString(dataMaskingPolicyName))
-  add(path_568222, "subscriptionId", newJString(subscriptionId))
-  add(path_568222, "databaseName", newJString(databaseName))
+  var path_564122 = newJObject()
+  var query_564123 = newJObject()
+  var body_564124 = newJObject()
+  add(query_564123, "api-version", newJString(apiVersion))
+  add(path_564122, "serverName", newJString(serverName))
+  add(path_564122, "dataMaskingPolicyName", newJString(dataMaskingPolicyName))
+  add(path_564122, "subscriptionId", newJString(subscriptionId))
+  add(path_564122, "databaseName", newJString(databaseName))
+  add(path_564122, "resourceGroupName", newJString(resourceGroupName))
   if parameters != nil:
-    body_568224 = parameters
-  result = call_568221.call(path_568222, query_568223, nil, nil, body_568224)
+    body_564124 = parameters
+  result = call_564121.call(path_564122, query_564123, nil, nil, body_564124)
 
-var dataMaskingPoliciesCreateOrUpdate* = Call_DataMaskingPoliciesCreateOrUpdate_568193(
+var dataMaskingPoliciesCreateOrUpdate* = Call_DataMaskingPoliciesCreateOrUpdate_564093(
     name: "dataMaskingPoliciesCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/servers/{serverName}/databases/{databaseName}/dataMaskingPolicies/{dataMaskingPolicyName}",
-    validator: validate_DataMaskingPoliciesCreateOrUpdate_568194, base: "",
-    url: url_DataMaskingPoliciesCreateOrUpdate_568195, schemes: {Scheme.Https})
+    validator: validate_DataMaskingPoliciesCreateOrUpdate_564094, base: "",
+    url: url_DataMaskingPoliciesCreateOrUpdate_564095, schemes: {Scheme.Https})
 type
-  Call_DataMaskingPoliciesGet_567864 = ref object of OpenApiRestCall_567642
-proc url_DataMaskingPoliciesGet_567866(protocol: Scheme; host: string; base: string;
+  Call_DataMaskingPoliciesGet_563762 = ref object of OpenApiRestCall_563540
+proc url_DataMaskingPoliciesGet_563764(protocol: Scheme; host: string; base: string;
                                       route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -286,15 +290,13 @@ proc url_DataMaskingPoliciesGet_567866(protocol: Scheme; host: string; base: str
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DataMaskingPoliciesGet_567865(path: JsonNode; query: JsonNode;
+proc validate_DataMaskingPoliciesGet_563763(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets a database data masking policy.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   ##   serverName: JString (required)
   ##             : The name of the server.
   ##   dataMaskingPolicyName: JString (required)
@@ -303,34 +305,36 @@ proc validate_DataMaskingPoliciesGet_567865(path: JsonNode; query: JsonNode;
   ##                 : The subscription ID that identifies an Azure subscription.
   ##   databaseName: JString (required)
   ##               : The name of the database.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568039 = path.getOrDefault("resourceGroupName")
-  valid_568039 = validateParameter(valid_568039, JString, required = true,
+        "path argument is necessary due to required `serverName` field"
+  var valid_563939 = path.getOrDefault("serverName")
+  valid_563939 = validateParameter(valid_563939, JString, required = true,
                                  default = nil)
-  if valid_568039 != nil:
-    section.add "resourceGroupName", valid_568039
-  var valid_568040 = path.getOrDefault("serverName")
-  valid_568040 = validateParameter(valid_568040, JString, required = true,
-                                 default = nil)
-  if valid_568040 != nil:
-    section.add "serverName", valid_568040
-  var valid_568054 = path.getOrDefault("dataMaskingPolicyName")
-  valid_568054 = validateParameter(valid_568054, JString, required = true,
+  if valid_563939 != nil:
+    section.add "serverName", valid_563939
+  var valid_563953 = path.getOrDefault("dataMaskingPolicyName")
+  valid_563953 = validateParameter(valid_563953, JString, required = true,
                                  default = newJString("Default"))
-  if valid_568054 != nil:
-    section.add "dataMaskingPolicyName", valid_568054
-  var valid_568055 = path.getOrDefault("subscriptionId")
-  valid_568055 = validateParameter(valid_568055, JString, required = true,
+  if valid_563953 != nil:
+    section.add "dataMaskingPolicyName", valid_563953
+  var valid_563954 = path.getOrDefault("subscriptionId")
+  valid_563954 = validateParameter(valid_563954, JString, required = true,
                                  default = nil)
-  if valid_568055 != nil:
-    section.add "subscriptionId", valid_568055
-  var valid_568056 = path.getOrDefault("databaseName")
-  valid_568056 = validateParameter(valid_568056, JString, required = true,
+  if valid_563954 != nil:
+    section.add "subscriptionId", valid_563954
+  var valid_563955 = path.getOrDefault("databaseName")
+  valid_563955 = validateParameter(valid_563955, JString, required = true,
                                  default = nil)
-  if valid_568056 != nil:
-    section.add "databaseName", valid_568056
+  if valid_563955 != nil:
+    section.add "databaseName", valid_563955
+  var valid_563956 = path.getOrDefault("resourceGroupName")
+  valid_563956 = validateParameter(valid_563956, JString, required = true,
+                                 default = nil)
+  if valid_563956 != nil:
+    section.add "resourceGroupName", valid_563956
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -338,11 +342,11 @@ proc validate_DataMaskingPoliciesGet_567865(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568057 = query.getOrDefault("api-version")
-  valid_568057 = validateParameter(valid_568057, JString, required = true,
+  var valid_563957 = query.getOrDefault("api-version")
+  valid_563957 = validateParameter(valid_563957, JString, required = true,
                                  default = nil)
-  if valid_568057 != nil:
-    section.add "api-version", valid_568057
+  if valid_563957 != nil:
+    section.add "api-version", valid_563957
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -351,27 +355,24 @@ proc validate_DataMaskingPoliciesGet_567865(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568080: Call_DataMaskingPoliciesGet_567864; path: JsonNode;
+proc call*(call_563980: Call_DataMaskingPoliciesGet_563762; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets a database data masking policy.
   ## 
-  let valid = call_568080.validator(path, query, header, formData, body)
-  let scheme = call_568080.pickScheme
+  let valid = call_563980.validator(path, query, header, formData, body)
+  let scheme = call_563980.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568080.url(scheme.get, call_568080.host, call_568080.base,
-                         call_568080.route, valid.getOrDefault("path"),
+  let url = call_563980.url(scheme.get, call_563980.host, call_563980.base,
+                         call_563980.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568080, url, valid)
+  result = hook(call_563980, url, valid)
 
-proc call*(call_568151: Call_DataMaskingPoliciesGet_567864;
-          resourceGroupName: string; apiVersion: string; serverName: string;
-          subscriptionId: string; databaseName: string;
-          dataMaskingPolicyName: string = "Default"): Recallable =
+proc call*(call_564051: Call_DataMaskingPoliciesGet_563762; apiVersion: string;
+          serverName: string; subscriptionId: string; databaseName: string;
+          resourceGroupName: string; dataMaskingPolicyName: string = "Default"): Recallable =
   ## dataMaskingPoliciesGet
   ## Gets a database data masking policy.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   ##   apiVersion: string (required)
   ##             : The API version to use for the request.
   ##   serverName: string (required)
@@ -382,24 +383,26 @@ proc call*(call_568151: Call_DataMaskingPoliciesGet_567864;
   ##                 : The subscription ID that identifies an Azure subscription.
   ##   databaseName: string (required)
   ##               : The name of the database.
-  var path_568152 = newJObject()
-  var query_568154 = newJObject()
-  add(path_568152, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568154, "api-version", newJString(apiVersion))
-  add(path_568152, "serverName", newJString(serverName))
-  add(path_568152, "dataMaskingPolicyName", newJString(dataMaskingPolicyName))
-  add(path_568152, "subscriptionId", newJString(subscriptionId))
-  add(path_568152, "databaseName", newJString(databaseName))
-  result = call_568151.call(path_568152, query_568154, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
+  var path_564052 = newJObject()
+  var query_564054 = newJObject()
+  add(query_564054, "api-version", newJString(apiVersion))
+  add(path_564052, "serverName", newJString(serverName))
+  add(path_564052, "dataMaskingPolicyName", newJString(dataMaskingPolicyName))
+  add(path_564052, "subscriptionId", newJString(subscriptionId))
+  add(path_564052, "databaseName", newJString(databaseName))
+  add(path_564052, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564051.call(path_564052, query_564054, nil, nil, nil)
 
-var dataMaskingPoliciesGet* = Call_DataMaskingPoliciesGet_567864(
+var dataMaskingPoliciesGet* = Call_DataMaskingPoliciesGet_563762(
     name: "dataMaskingPoliciesGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/servers/{serverName}/databases/{databaseName}/dataMaskingPolicies/{dataMaskingPolicyName}",
-    validator: validate_DataMaskingPoliciesGet_567865, base: "",
-    url: url_DataMaskingPoliciesGet_567866, schemes: {Scheme.Https})
+    validator: validate_DataMaskingPoliciesGet_563763, base: "",
+    url: url_DataMaskingPoliciesGet_563764, schemes: {Scheme.Https})
 type
-  Call_DataMaskingRulesListByDatabase_568225 = ref object of OpenApiRestCall_567642
-proc url_DataMaskingRulesListByDatabase_568227(protocol: Scheme; host: string;
+  Call_DataMaskingRulesListByDatabase_564125 = ref object of OpenApiRestCall_563540
+proc url_DataMaskingRulesListByDatabase_564127(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -429,15 +432,13 @@ proc url_DataMaskingRulesListByDatabase_568227(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DataMaskingRulesListByDatabase_568226(path: JsonNode;
+proc validate_DataMaskingRulesListByDatabase_564126(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets a list of database data masking rules.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   ##   serverName: JString (required)
   ##             : The name of the server.
   ##   dataMaskingPolicyName: JString (required)
@@ -446,34 +447,36 @@ proc validate_DataMaskingRulesListByDatabase_568226(path: JsonNode;
   ##                 : The subscription ID that identifies an Azure subscription.
   ##   databaseName: JString (required)
   ##               : The name of the database.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568228 = path.getOrDefault("resourceGroupName")
-  valid_568228 = validateParameter(valid_568228, JString, required = true,
+        "path argument is necessary due to required `serverName` field"
+  var valid_564128 = path.getOrDefault("serverName")
+  valid_564128 = validateParameter(valid_564128, JString, required = true,
                                  default = nil)
-  if valid_568228 != nil:
-    section.add "resourceGroupName", valid_568228
-  var valid_568229 = path.getOrDefault("serverName")
-  valid_568229 = validateParameter(valid_568229, JString, required = true,
-                                 default = nil)
-  if valid_568229 != nil:
-    section.add "serverName", valid_568229
-  var valid_568230 = path.getOrDefault("dataMaskingPolicyName")
-  valid_568230 = validateParameter(valid_568230, JString, required = true,
+  if valid_564128 != nil:
+    section.add "serverName", valid_564128
+  var valid_564129 = path.getOrDefault("dataMaskingPolicyName")
+  valid_564129 = validateParameter(valid_564129, JString, required = true,
                                  default = newJString("Default"))
-  if valid_568230 != nil:
-    section.add "dataMaskingPolicyName", valid_568230
-  var valid_568231 = path.getOrDefault("subscriptionId")
-  valid_568231 = validateParameter(valid_568231, JString, required = true,
+  if valid_564129 != nil:
+    section.add "dataMaskingPolicyName", valid_564129
+  var valid_564130 = path.getOrDefault("subscriptionId")
+  valid_564130 = validateParameter(valid_564130, JString, required = true,
                                  default = nil)
-  if valid_568231 != nil:
-    section.add "subscriptionId", valid_568231
-  var valid_568232 = path.getOrDefault("databaseName")
-  valid_568232 = validateParameter(valid_568232, JString, required = true,
+  if valid_564130 != nil:
+    section.add "subscriptionId", valid_564130
+  var valid_564131 = path.getOrDefault("databaseName")
+  valid_564131 = validateParameter(valid_564131, JString, required = true,
                                  default = nil)
-  if valid_568232 != nil:
-    section.add "databaseName", valid_568232
+  if valid_564131 != nil:
+    section.add "databaseName", valid_564131
+  var valid_564132 = path.getOrDefault("resourceGroupName")
+  valid_564132 = validateParameter(valid_564132, JString, required = true,
+                                 default = nil)
+  if valid_564132 != nil:
+    section.add "resourceGroupName", valid_564132
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -481,11 +484,11 @@ proc validate_DataMaskingRulesListByDatabase_568226(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568233 = query.getOrDefault("api-version")
-  valid_568233 = validateParameter(valid_568233, JString, required = true,
+  var valid_564133 = query.getOrDefault("api-version")
+  valid_564133 = validateParameter(valid_564133, JString, required = true,
                                  default = nil)
-  if valid_568233 != nil:
-    section.add "api-version", valid_568233
+  if valid_564133 != nil:
+    section.add "api-version", valid_564133
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -494,27 +497,25 @@ proc validate_DataMaskingRulesListByDatabase_568226(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568234: Call_DataMaskingRulesListByDatabase_568225; path: JsonNode;
+proc call*(call_564134: Call_DataMaskingRulesListByDatabase_564125; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets a list of database data masking rules.
   ## 
-  let valid = call_568234.validator(path, query, header, formData, body)
-  let scheme = call_568234.pickScheme
+  let valid = call_564134.validator(path, query, header, formData, body)
+  let scheme = call_564134.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568234.url(scheme.get, call_568234.host, call_568234.base,
-                         call_568234.route, valid.getOrDefault("path"),
+  let url = call_564134.url(scheme.get, call_564134.host, call_564134.base,
+                         call_564134.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568234, url, valid)
+  result = hook(call_564134, url, valid)
 
-proc call*(call_568235: Call_DataMaskingRulesListByDatabase_568225;
-          resourceGroupName: string; apiVersion: string; serverName: string;
-          subscriptionId: string; databaseName: string;
+proc call*(call_564135: Call_DataMaskingRulesListByDatabase_564125;
+          apiVersion: string; serverName: string; subscriptionId: string;
+          databaseName: string; resourceGroupName: string;
           dataMaskingPolicyName: string = "Default"): Recallable =
   ## dataMaskingRulesListByDatabase
   ## Gets a list of database data masking rules.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   ##   apiVersion: string (required)
   ##             : The API version to use for the request.
   ##   serverName: string (required)
@@ -525,24 +526,26 @@ proc call*(call_568235: Call_DataMaskingRulesListByDatabase_568225;
   ##                 : The subscription ID that identifies an Azure subscription.
   ##   databaseName: string (required)
   ##               : The name of the database.
-  var path_568236 = newJObject()
-  var query_568237 = newJObject()
-  add(path_568236, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568237, "api-version", newJString(apiVersion))
-  add(path_568236, "serverName", newJString(serverName))
-  add(path_568236, "dataMaskingPolicyName", newJString(dataMaskingPolicyName))
-  add(path_568236, "subscriptionId", newJString(subscriptionId))
-  add(path_568236, "databaseName", newJString(databaseName))
-  result = call_568235.call(path_568236, query_568237, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
+  var path_564136 = newJObject()
+  var query_564137 = newJObject()
+  add(query_564137, "api-version", newJString(apiVersion))
+  add(path_564136, "serverName", newJString(serverName))
+  add(path_564136, "dataMaskingPolicyName", newJString(dataMaskingPolicyName))
+  add(path_564136, "subscriptionId", newJString(subscriptionId))
+  add(path_564136, "databaseName", newJString(databaseName))
+  add(path_564136, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564135.call(path_564136, query_564137, nil, nil, nil)
 
-var dataMaskingRulesListByDatabase* = Call_DataMaskingRulesListByDatabase_568225(
+var dataMaskingRulesListByDatabase* = Call_DataMaskingRulesListByDatabase_564125(
     name: "dataMaskingRulesListByDatabase", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/servers/{serverName}/databases/{databaseName}/dataMaskingPolicies/{dataMaskingPolicyName}/rules",
-    validator: validate_DataMaskingRulesListByDatabase_568226, base: "",
-    url: url_DataMaskingRulesListByDatabase_568227, schemes: {Scheme.Https})
+    validator: validate_DataMaskingRulesListByDatabase_564126, base: "",
+    url: url_DataMaskingRulesListByDatabase_564127, schemes: {Scheme.Https})
 type
-  Call_DataMaskingRulesCreateOrUpdate_568238 = ref object of OpenApiRestCall_567642
-proc url_DataMaskingRulesCreateOrUpdate_568240(protocol: Scheme; host: string;
+  Call_DataMaskingRulesCreateOrUpdate_564138 = ref object of OpenApiRestCall_563540
+proc url_DataMaskingRulesCreateOrUpdate_564140(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -575,17 +578,13 @@ proc url_DataMaskingRulesCreateOrUpdate_568240(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DataMaskingRulesCreateOrUpdate_568239(path: JsonNode;
+proc validate_DataMaskingRulesCreateOrUpdate_564139(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Creates or updates a database data masking rule.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   dataMaskingRuleName: JString (required)
-  ##                      : The name of the data masking rule.
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   ##   serverName: JString (required)
   ##             : The name of the server.
   ##   dataMaskingPolicyName: JString (required)
@@ -594,38 +593,43 @@ proc validate_DataMaskingRulesCreateOrUpdate_568239(path: JsonNode;
   ##                 : The subscription ID that identifies an Azure subscription.
   ##   databaseName: JString (required)
   ##               : The name of the database.
+  ##   dataMaskingRuleName: JString (required)
+  ##                      : The name of the data masking rule.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   section = newJObject()
-  assert path != nil, "path argument is necessary due to required `dataMaskingRuleName` field"
-  var valid_568241 = path.getOrDefault("dataMaskingRuleName")
-  valid_568241 = validateParameter(valid_568241, JString, required = true,
+  assert path != nil,
+        "path argument is necessary due to required `serverName` field"
+  var valid_564141 = path.getOrDefault("serverName")
+  valid_564141 = validateParameter(valid_564141, JString, required = true,
                                  default = nil)
-  if valid_568241 != nil:
-    section.add "dataMaskingRuleName", valid_568241
-  var valid_568242 = path.getOrDefault("resourceGroupName")
-  valid_568242 = validateParameter(valid_568242, JString, required = true,
-                                 default = nil)
-  if valid_568242 != nil:
-    section.add "resourceGroupName", valid_568242
-  var valid_568243 = path.getOrDefault("serverName")
-  valid_568243 = validateParameter(valid_568243, JString, required = true,
-                                 default = nil)
-  if valid_568243 != nil:
-    section.add "serverName", valid_568243
-  var valid_568244 = path.getOrDefault("dataMaskingPolicyName")
-  valid_568244 = validateParameter(valid_568244, JString, required = true,
+  if valid_564141 != nil:
+    section.add "serverName", valid_564141
+  var valid_564142 = path.getOrDefault("dataMaskingPolicyName")
+  valid_564142 = validateParameter(valid_564142, JString, required = true,
                                  default = newJString("Default"))
-  if valid_568244 != nil:
-    section.add "dataMaskingPolicyName", valid_568244
-  var valid_568245 = path.getOrDefault("subscriptionId")
-  valid_568245 = validateParameter(valid_568245, JString, required = true,
+  if valid_564142 != nil:
+    section.add "dataMaskingPolicyName", valid_564142
+  var valid_564143 = path.getOrDefault("subscriptionId")
+  valid_564143 = validateParameter(valid_564143, JString, required = true,
                                  default = nil)
-  if valid_568245 != nil:
-    section.add "subscriptionId", valid_568245
-  var valid_568246 = path.getOrDefault("databaseName")
-  valid_568246 = validateParameter(valid_568246, JString, required = true,
+  if valid_564143 != nil:
+    section.add "subscriptionId", valid_564143
+  var valid_564144 = path.getOrDefault("databaseName")
+  valid_564144 = validateParameter(valid_564144, JString, required = true,
                                  default = nil)
-  if valid_568246 != nil:
-    section.add "databaseName", valid_568246
+  if valid_564144 != nil:
+    section.add "databaseName", valid_564144
+  var valid_564145 = path.getOrDefault("dataMaskingRuleName")
+  valid_564145 = validateParameter(valid_564145, JString, required = true,
+                                 default = nil)
+  if valid_564145 != nil:
+    section.add "dataMaskingRuleName", valid_564145
+  var valid_564146 = path.getOrDefault("resourceGroupName")
+  valid_564146 = validateParameter(valid_564146, JString, required = true,
+                                 default = nil)
+  if valid_564146 != nil:
+    section.add "resourceGroupName", valid_564146
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -633,11 +637,11 @@ proc validate_DataMaskingRulesCreateOrUpdate_568239(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568247 = query.getOrDefault("api-version")
-  valid_568247 = validateParameter(valid_568247, JString, required = true,
+  var valid_564147 = query.getOrDefault("api-version")
+  valid_564147 = validateParameter(valid_564147, JString, required = true,
                                  default = nil)
-  if valid_568247 != nil:
-    section.add "api-version", valid_568247
+  if valid_564147 != nil:
+    section.add "api-version", valid_564147
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -651,30 +655,26 @@ proc validate_DataMaskingRulesCreateOrUpdate_568239(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568249: Call_DataMaskingRulesCreateOrUpdate_568238; path: JsonNode;
+proc call*(call_564149: Call_DataMaskingRulesCreateOrUpdate_564138; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Creates or updates a database data masking rule.
   ## 
-  let valid = call_568249.validator(path, query, header, formData, body)
-  let scheme = call_568249.pickScheme
+  let valid = call_564149.validator(path, query, header, formData, body)
+  let scheme = call_564149.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568249.url(scheme.get, call_568249.host, call_568249.base,
-                         call_568249.route, valid.getOrDefault("path"),
+  let url = call_564149.url(scheme.get, call_564149.host, call_564149.base,
+                         call_564149.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568249, url, valid)
+  result = hook(call_564149, url, valid)
 
-proc call*(call_568250: Call_DataMaskingRulesCreateOrUpdate_568238;
-          dataMaskingRuleName: string; resourceGroupName: string;
+proc call*(call_564150: Call_DataMaskingRulesCreateOrUpdate_564138;
           apiVersion: string; serverName: string; subscriptionId: string;
-          databaseName: string; parameters: JsonNode;
+          databaseName: string; dataMaskingRuleName: string;
+          resourceGroupName: string; parameters: JsonNode;
           dataMaskingPolicyName: string = "Default"): Recallable =
   ## dataMaskingRulesCreateOrUpdate
   ## Creates or updates a database data masking rule.
-  ##   dataMaskingRuleName: string (required)
-  ##                      : The name of the data masking rule.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   ##   apiVersion: string (required)
   ##             : The API version to use for the request.
   ##   serverName: string (required)
@@ -685,27 +685,31 @@ proc call*(call_568250: Call_DataMaskingRulesCreateOrUpdate_568238;
   ##                 : The subscription ID that identifies an Azure subscription.
   ##   databaseName: string (required)
   ##               : The name of the database.
+  ##   dataMaskingRuleName: string (required)
+  ##                      : The name of the data masking rule.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   ##   parameters: JObject (required)
   ##             : The required parameters for creating or updating a data masking rule.
-  var path_568251 = newJObject()
-  var query_568252 = newJObject()
-  var body_568253 = newJObject()
-  add(path_568251, "dataMaskingRuleName", newJString(dataMaskingRuleName))
-  add(path_568251, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568252, "api-version", newJString(apiVersion))
-  add(path_568251, "serverName", newJString(serverName))
-  add(path_568251, "dataMaskingPolicyName", newJString(dataMaskingPolicyName))
-  add(path_568251, "subscriptionId", newJString(subscriptionId))
-  add(path_568251, "databaseName", newJString(databaseName))
+  var path_564151 = newJObject()
+  var query_564152 = newJObject()
+  var body_564153 = newJObject()
+  add(query_564152, "api-version", newJString(apiVersion))
+  add(path_564151, "serverName", newJString(serverName))
+  add(path_564151, "dataMaskingPolicyName", newJString(dataMaskingPolicyName))
+  add(path_564151, "subscriptionId", newJString(subscriptionId))
+  add(path_564151, "databaseName", newJString(databaseName))
+  add(path_564151, "dataMaskingRuleName", newJString(dataMaskingRuleName))
+  add(path_564151, "resourceGroupName", newJString(resourceGroupName))
   if parameters != nil:
-    body_568253 = parameters
-  result = call_568250.call(path_568251, query_568252, nil, nil, body_568253)
+    body_564153 = parameters
+  result = call_564150.call(path_564151, query_564152, nil, nil, body_564153)
 
-var dataMaskingRulesCreateOrUpdate* = Call_DataMaskingRulesCreateOrUpdate_568238(
+var dataMaskingRulesCreateOrUpdate* = Call_DataMaskingRulesCreateOrUpdate_564138(
     name: "dataMaskingRulesCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/servers/{serverName}/databases/{databaseName}/dataMaskingPolicies/{dataMaskingPolicyName}/rules/{dataMaskingRuleName}",
-    validator: validate_DataMaskingRulesCreateOrUpdate_568239, base: "",
-    url: url_DataMaskingRulesCreateOrUpdate_568240, schemes: {Scheme.Https})
+    validator: validate_DataMaskingRulesCreateOrUpdate_564139, base: "",
+    url: url_DataMaskingRulesCreateOrUpdate_564140, schemes: {Scheme.Https})
 export
   rest
 

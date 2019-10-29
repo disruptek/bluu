@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, httpcore
 
 ## auto-generated via openapi macro
 ## title: CommerceManagementClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_582441 = ref object of OpenApiRestCall
+  OpenApiRestCall_563539 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_582441](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563539](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_582441): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563539): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,8 +107,8 @@ const
   macServiceName = "azsadmin-CommerceAdmin"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_SubscriberUsageAggregatesList_582663 = ref object of OpenApiRestCall_582441
-proc url_SubscriberUsageAggregatesList_582665(protocol: Scheme; host: string;
+  Call_SubscriberUsageAggregatesList_563761 = ref object of OpenApiRestCall_563539
+proc url_SubscriberUsageAggregatesList_563763(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -121,7 +125,7 @@ proc url_SubscriberUsageAggregatesList_582665(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_SubscriberUsageAggregatesList_582664(path: JsonNode; query: JsonNode;
+proc validate_SubscriberUsageAggregatesList_563762(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets a collection of SubscriberUsageAggregates, which are UsageAggregates from direct tenants.
   ## 
@@ -133,58 +137,58 @@ proc validate_SubscriberUsageAggregatesList_582664(path: JsonNode; query: JsonNo
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_582838 = path.getOrDefault("subscriptionId")
-  valid_582838 = validateParameter(valid_582838, JString, required = true,
+  var valid_563938 = path.getOrDefault("subscriptionId")
+  valid_563938 = validateParameter(valid_563938, JString, required = true,
                                  default = nil)
-  if valid_582838 != nil:
-    section.add "subscriptionId", valid_582838
+  if valid_563938 != nil:
+    section.add "subscriptionId", valid_563938
   result.add "path", section
   ## parameters in `query` object:
-  ##   subscriberId: JString
-  ##               : The tenant subscription identifier.
-  ##   api-version: JString (required)
-  ##              : Client Api Version.
   ##   reportedStartTime: JString (required)
   ##                    : The reported start time (inclusive).
-  ##   reportedEndTime: JString (required)
-  ##                  : The reported end time (exclusive).
-  ##   continuationToken: JString
-  ##                    : The continuation token.
+  ##   api-version: JString (required)
+  ##              : Client Api Version.
   ##   aggregationGranularity: JString
   ##                         : The aggregation granularity.
+  ##   continuationToken: JString
+  ##                    : The continuation token.
+  ##   reportedEndTime: JString (required)
+  ##                  : The reported end time (exclusive).
+  ##   subscriberId: JString
+  ##               : The tenant subscription identifier.
   section = newJObject()
-  var valid_582839 = query.getOrDefault("subscriberId")
-  valid_582839 = validateParameter(valid_582839, JString, required = false,
-                                 default = nil)
-  if valid_582839 != nil:
-    section.add "subscriberId", valid_582839
   assert query != nil,
-        "query argument is necessary due to required `api-version` field"
-  var valid_582853 = query.getOrDefault("api-version")
-  valid_582853 = validateParameter(valid_582853, JString, required = true,
+        "query argument is necessary due to required `reportedStartTime` field"
+  var valid_563939 = query.getOrDefault("reportedStartTime")
+  valid_563939 = validateParameter(valid_563939, JString, required = true,
+                                 default = nil)
+  if valid_563939 != nil:
+    section.add "reportedStartTime", valid_563939
+  var valid_563953 = query.getOrDefault("api-version")
+  valid_563953 = validateParameter(valid_563953, JString, required = true,
                                  default = newJString("2015-06-01-preview"))
-  if valid_582853 != nil:
-    section.add "api-version", valid_582853
-  var valid_582854 = query.getOrDefault("reportedStartTime")
-  valid_582854 = validateParameter(valid_582854, JString, required = true,
+  if valid_563953 != nil:
+    section.add "api-version", valid_563953
+  var valid_563954 = query.getOrDefault("aggregationGranularity")
+  valid_563954 = validateParameter(valid_563954, JString, required = false,
                                  default = nil)
-  if valid_582854 != nil:
-    section.add "reportedStartTime", valid_582854
-  var valid_582855 = query.getOrDefault("reportedEndTime")
-  valid_582855 = validateParameter(valid_582855, JString, required = true,
+  if valid_563954 != nil:
+    section.add "aggregationGranularity", valid_563954
+  var valid_563955 = query.getOrDefault("continuationToken")
+  valid_563955 = validateParameter(valid_563955, JString, required = false,
                                  default = nil)
-  if valid_582855 != nil:
-    section.add "reportedEndTime", valid_582855
-  var valid_582856 = query.getOrDefault("continuationToken")
-  valid_582856 = validateParameter(valid_582856, JString, required = false,
+  if valid_563955 != nil:
+    section.add "continuationToken", valid_563955
+  var valid_563956 = query.getOrDefault("reportedEndTime")
+  valid_563956 = validateParameter(valid_563956, JString, required = true,
                                  default = nil)
-  if valid_582856 != nil:
-    section.add "continuationToken", valid_582856
-  var valid_582857 = query.getOrDefault("aggregationGranularity")
-  valid_582857 = validateParameter(valid_582857, JString, required = false,
+  if valid_563956 != nil:
+    section.add "reportedEndTime", valid_563956
+  var valid_563957 = query.getOrDefault("subscriberId")
+  valid_563957 = validateParameter(valid_563957, JString, required = false,
                                  default = nil)
-  if valid_582857 != nil:
-    section.add "aggregationGranularity", valid_582857
+  if valid_563957 != nil:
+    section.add "subscriberId", valid_563957
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -193,56 +197,56 @@ proc validate_SubscriberUsageAggregatesList_582664(path: JsonNode; query: JsonNo
   if body != nil:
     result.add "body", body
 
-proc call*(call_582880: Call_SubscriberUsageAggregatesList_582663; path: JsonNode;
+proc call*(call_563980: Call_SubscriberUsageAggregatesList_563761; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets a collection of SubscriberUsageAggregates, which are UsageAggregates from direct tenants.
   ## 
-  let valid = call_582880.validator(path, query, header, formData, body)
-  let scheme = call_582880.pickScheme
+  let valid = call_563980.validator(path, query, header, formData, body)
+  let scheme = call_563980.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_582880.url(scheme.get, call_582880.host, call_582880.base,
-                         call_582880.route, valid.getOrDefault("path"),
+  let url = call_563980.url(scheme.get, call_563980.host, call_563980.base,
+                         call_563980.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_582880, url, valid)
+  result = hook(call_563980, url, valid)
 
-proc call*(call_582951: Call_SubscriberUsageAggregatesList_582663;
-          subscriptionId: string; reportedStartTime: string;
-          reportedEndTime: string; subscriberId: string = "";
-          apiVersion: string = "2015-06-01-preview"; continuationToken: string = "";
-          aggregationGranularity: string = ""): Recallable =
+proc call*(call_564051: Call_SubscriberUsageAggregatesList_563761;
+          reportedStartTime: string; subscriptionId: string;
+          reportedEndTime: string; apiVersion: string = "2015-06-01-preview";
+          aggregationGranularity: string = ""; continuationToken: string = "";
+          subscriberId: string = ""): Recallable =
   ## subscriberUsageAggregatesList
   ## Gets a collection of SubscriberUsageAggregates, which are UsageAggregates from direct tenants.
-  ##   subscriberId: string
-  ##               : The tenant subscription identifier.
+  ##   reportedStartTime: string (required)
+  ##                    : The reported start time (inclusive).
   ##   apiVersion: string (required)
   ##             : Client Api Version.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription.The subscription ID forms part of the URI for every service call.
-  ##   reportedStartTime: string (required)
-  ##                    : The reported start time (inclusive).
-  ##   reportedEndTime: string (required)
-  ##                  : The reported end time (exclusive).
-  ##   continuationToken: string
-  ##                    : The continuation token.
   ##   aggregationGranularity: string
   ##                         : The aggregation granularity.
-  var path_582952 = newJObject()
-  var query_582954 = newJObject()
-  add(query_582954, "subscriberId", newJString(subscriberId))
-  add(query_582954, "api-version", newJString(apiVersion))
-  add(path_582952, "subscriptionId", newJString(subscriptionId))
-  add(query_582954, "reportedStartTime", newJString(reportedStartTime))
-  add(query_582954, "reportedEndTime", newJString(reportedEndTime))
-  add(query_582954, "continuationToken", newJString(continuationToken))
-  add(query_582954, "aggregationGranularity", newJString(aggregationGranularity))
-  result = call_582951.call(path_582952, query_582954, nil, nil, nil)
+  ##   continuationToken: string
+  ##                    : The continuation token.
+  ##   reportedEndTime: string (required)
+  ##                  : The reported end time (exclusive).
+  ##   subscriberId: string
+  ##               : The tenant subscription identifier.
+  var path_564052 = newJObject()
+  var query_564054 = newJObject()
+  add(query_564054, "reportedStartTime", newJString(reportedStartTime))
+  add(query_564054, "api-version", newJString(apiVersion))
+  add(path_564052, "subscriptionId", newJString(subscriptionId))
+  add(query_564054, "aggregationGranularity", newJString(aggregationGranularity))
+  add(query_564054, "continuationToken", newJString(continuationToken))
+  add(query_564054, "reportedEndTime", newJString(reportedEndTime))
+  add(query_564054, "subscriberId", newJString(subscriberId))
+  result = call_564051.call(path_564052, query_564054, nil, nil, nil)
 
-var subscriberUsageAggregatesList* = Call_SubscriberUsageAggregatesList_582663(
+var subscriberUsageAggregatesList* = Call_SubscriberUsageAggregatesList_563761(
     name: "subscriberUsageAggregatesList", meth: HttpMethod.HttpGet,
     host: "management.local.azurestack.external", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Commerce/subscriberUsageAggregates",
-    validator: validate_SubscriberUsageAggregatesList_582664, base: "",
-    url: url_SubscriberUsageAggregatesList_582665, schemes: {Scheme.Https})
+    validator: validate_SubscriberUsageAggregatesList_563762, base: "",
+    url: url_SubscriberUsageAggregatesList_563763, schemes: {Scheme.Https})
 export
   rest
 

@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, httpcore
 
 ## auto-generated via openapi macro
 ## title: Guest Diagnostic Settings Association
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_567642 = ref object of OpenApiRestCall
+  OpenApiRestCall_563540 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_567642](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563540](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_567642): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563540): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,8 +107,8 @@ const
   macServiceName = "monitor-guestDiagnosticSettingsAssociation_API"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_GuestDiagnosticsSettingsAssociationList_567864 = ref object of OpenApiRestCall_567642
-proc url_GuestDiagnosticsSettingsAssociationList_567866(protocol: Scheme;
+  Call_GuestDiagnosticsSettingsAssociationList_563762 = ref object of OpenApiRestCall_563540
+proc url_GuestDiagnosticsSettingsAssociationList_563764(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -120,7 +124,7 @@ proc url_GuestDiagnosticsSettingsAssociationList_567866(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_GuestDiagnosticsSettingsAssociationList_567865(path: JsonNode;
+proc validate_GuestDiagnosticsSettingsAssociationList_563763(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Get a list of all guest diagnostic settings association in a subscription.
   ## 
@@ -132,11 +136,11 @@ proc validate_GuestDiagnosticsSettingsAssociationList_567865(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_568039 = path.getOrDefault("subscriptionId")
-  valid_568039 = validateParameter(valid_568039, JString, required = true,
+  var valid_563939 = path.getOrDefault("subscriptionId")
+  valid_563939 = validateParameter(valid_563939, JString, required = true,
                                  default = nil)
-  if valid_568039 != nil:
-    section.add "subscriptionId", valid_568039
+  if valid_563939 != nil:
+    section.add "subscriptionId", valid_563939
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -144,11 +148,11 @@ proc validate_GuestDiagnosticsSettingsAssociationList_567865(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568040 = query.getOrDefault("api-version")
-  valid_568040 = validateParameter(valid_568040, JString, required = true,
+  var valid_563940 = query.getOrDefault("api-version")
+  valid_563940 = validateParameter(valid_563940, JString, required = true,
                                  default = nil)
-  if valid_568040 != nil:
-    section.add "api-version", valid_568040
+  if valid_563940 != nil:
+    section.add "api-version", valid_563940
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -157,21 +161,21 @@ proc validate_GuestDiagnosticsSettingsAssociationList_567865(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568063: Call_GuestDiagnosticsSettingsAssociationList_567864;
+proc call*(call_563963: Call_GuestDiagnosticsSettingsAssociationList_563762;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Get a list of all guest diagnostic settings association in a subscription.
   ## 
-  let valid = call_568063.validator(path, query, header, formData, body)
-  let scheme = call_568063.pickScheme
+  let valid = call_563963.validator(path, query, header, formData, body)
+  let scheme = call_563963.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568063.url(scheme.get, call_568063.host, call_568063.base,
-                         call_568063.route, valid.getOrDefault("path"),
+  let url = call_563963.url(scheme.get, call_563963.host, call_563963.base,
+                         call_563963.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568063, url, valid)
+  result = hook(call_563963, url, valid)
 
-proc call*(call_568134: Call_GuestDiagnosticsSettingsAssociationList_567864;
+proc call*(call_564034: Call_GuestDiagnosticsSettingsAssociationList_563762;
           apiVersion: string; subscriptionId: string): Recallable =
   ## guestDiagnosticsSettingsAssociationList
   ## Get a list of all guest diagnostic settings association in a subscription.
@@ -179,21 +183,21 @@ proc call*(call_568134: Call_GuestDiagnosticsSettingsAssociationList_567864;
   ##             : Client Api Version.
   ##   subscriptionId: string (required)
   ##                 : The Azure subscription Id.
-  var path_568135 = newJObject()
-  var query_568137 = newJObject()
-  add(query_568137, "api-version", newJString(apiVersion))
-  add(path_568135, "subscriptionId", newJString(subscriptionId))
-  result = call_568134.call(path_568135, query_568137, nil, nil, nil)
+  var path_564035 = newJObject()
+  var query_564037 = newJObject()
+  add(query_564037, "api-version", newJString(apiVersion))
+  add(path_564035, "subscriptionId", newJString(subscriptionId))
+  result = call_564034.call(path_564035, query_564037, nil, nil, nil)
 
-var guestDiagnosticsSettingsAssociationList* = Call_GuestDiagnosticsSettingsAssociationList_567864(
+var guestDiagnosticsSettingsAssociationList* = Call_GuestDiagnosticsSettingsAssociationList_563762(
     name: "guestDiagnosticsSettingsAssociationList", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/microsoft.insights/guestDiagnosticSettingsAssociations",
-    validator: validate_GuestDiagnosticsSettingsAssociationList_567865, base: "",
-    url: url_GuestDiagnosticsSettingsAssociationList_567866,
+    validator: validate_GuestDiagnosticsSettingsAssociationList_563763, base: "",
+    url: url_GuestDiagnosticsSettingsAssociationList_563764,
     schemes: {Scheme.Https})
 type
-  Call_GuestDiagnosticsSettingsAssociationListByResourceGroup_568176 = ref object of OpenApiRestCall_567642
-proc url_GuestDiagnosticsSettingsAssociationListByResourceGroup_568178(
+  Call_GuestDiagnosticsSettingsAssociationListByResourceGroup_564076 = ref object of OpenApiRestCall_563540
+proc url_GuestDiagnosticsSettingsAssociationListByResourceGroup_564078(
     protocol: Scheme; host: string; base: string; route: string; path: JsonNode;
     query: JsonNode): Uri =
   result.scheme = $protocol
@@ -214,7 +218,7 @@ proc url_GuestDiagnosticsSettingsAssociationListByResourceGroup_568178(
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_GuestDiagnosticsSettingsAssociationListByResourceGroup_568177(
+proc validate_GuestDiagnosticsSettingsAssociationListByResourceGroup_564077(
     path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
     body: JsonNode): JsonNode =
   ## Get a list of all guest diagnostic settings association in a resource group.
@@ -222,23 +226,23 @@ proc validate_GuestDiagnosticsSettingsAssociationListByResourceGroup_568177(
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   subscriptionId: JString (required)
   ##                 : The Azure subscription Id.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568179 = path.getOrDefault("resourceGroupName")
-  valid_568179 = validateParameter(valid_568179, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564079 = path.getOrDefault("subscriptionId")
+  valid_564079 = validateParameter(valid_564079, JString, required = true,
                                  default = nil)
-  if valid_568179 != nil:
-    section.add "resourceGroupName", valid_568179
-  var valid_568180 = path.getOrDefault("subscriptionId")
-  valid_568180 = validateParameter(valid_568180, JString, required = true,
+  if valid_564079 != nil:
+    section.add "subscriptionId", valid_564079
+  var valid_564080 = path.getOrDefault("resourceGroupName")
+  valid_564080 = validateParameter(valid_564080, JString, required = true,
                                  default = nil)
-  if valid_568180 != nil:
-    section.add "subscriptionId", valid_568180
+  if valid_564080 != nil:
+    section.add "resourceGroupName", valid_564080
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -246,11 +250,11 @@ proc validate_GuestDiagnosticsSettingsAssociationListByResourceGroup_568177(
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568181 = query.getOrDefault("api-version")
-  valid_568181 = validateParameter(valid_568181, JString, required = true,
+  var valid_564081 = query.getOrDefault("api-version")
+  valid_564081 = validateParameter(valid_564081, JString, required = true,
                                  default = nil)
-  if valid_568181 != nil:
-    section.add "api-version", valid_568181
+  if valid_564081 != nil:
+    section.add "api-version", valid_564081
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -259,46 +263,46 @@ proc validate_GuestDiagnosticsSettingsAssociationListByResourceGroup_568177(
   if body != nil:
     result.add "body", body
 
-proc call*(call_568182: Call_GuestDiagnosticsSettingsAssociationListByResourceGroup_568176;
+proc call*(call_564082: Call_GuestDiagnosticsSettingsAssociationListByResourceGroup_564076;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Get a list of all guest diagnostic settings association in a resource group.
   ## 
-  let valid = call_568182.validator(path, query, header, formData, body)
-  let scheme = call_568182.pickScheme
+  let valid = call_564082.validator(path, query, header, formData, body)
+  let scheme = call_564082.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568182.url(scheme.get, call_568182.host, call_568182.base,
-                         call_568182.route, valid.getOrDefault("path"),
+  let url = call_564082.url(scheme.get, call_564082.host, call_564082.base,
+                         call_564082.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568182, url, valid)
+  result = hook(call_564082, url, valid)
 
-proc call*(call_568183: Call_GuestDiagnosticsSettingsAssociationListByResourceGroup_568176;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string): Recallable =
+proc call*(call_564083: Call_GuestDiagnosticsSettingsAssociationListByResourceGroup_564076;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string): Recallable =
   ## guestDiagnosticsSettingsAssociationListByResourceGroup
   ## Get a list of all guest diagnostic settings association in a resource group.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
   ##   subscriptionId: string (required)
   ##                 : The Azure subscription Id.
-  var path_568184 = newJObject()
-  var query_568185 = newJObject()
-  add(path_568184, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568185, "api-version", newJString(apiVersion))
-  add(path_568184, "subscriptionId", newJString(subscriptionId))
-  result = call_568183.call(path_568184, query_568185, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564084 = newJObject()
+  var query_564085 = newJObject()
+  add(query_564085, "api-version", newJString(apiVersion))
+  add(path_564084, "subscriptionId", newJString(subscriptionId))
+  add(path_564084, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564083.call(path_564084, query_564085, nil, nil, nil)
 
-var guestDiagnosticsSettingsAssociationListByResourceGroup* = Call_GuestDiagnosticsSettingsAssociationListByResourceGroup_568176(
+var guestDiagnosticsSettingsAssociationListByResourceGroup* = Call_GuestDiagnosticsSettingsAssociationListByResourceGroup_564076(
     name: "guestDiagnosticsSettingsAssociationListByResourceGroup",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/microsoft.insights/guestDiagnosticSettingsAssociations",
-    validator: validate_GuestDiagnosticsSettingsAssociationListByResourceGroup_568177,
-    base: "", url: url_GuestDiagnosticsSettingsAssociationListByResourceGroup_568178,
+    validator: validate_GuestDiagnosticsSettingsAssociationListByResourceGroup_564077,
+    base: "", url: url_GuestDiagnosticsSettingsAssociationListByResourceGroup_564078,
     schemes: {Scheme.Https})
 type
-  Call_GuestDiagnosticsSettingsAssociationCreateOrUpdate_568196 = ref object of OpenApiRestCall_567642
-proc url_GuestDiagnosticsSettingsAssociationCreateOrUpdate_568198(
+  Call_GuestDiagnosticsSettingsAssociationCreateOrUpdate_564096 = ref object of OpenApiRestCall_563540
+proc url_GuestDiagnosticsSettingsAssociationCreateOrUpdate_564098(
     protocol: Scheme; host: string; base: string; route: string; path: JsonNode;
     query: JsonNode): Uri =
   result.scheme = $protocol
@@ -317,7 +321,7 @@ proc url_GuestDiagnosticsSettingsAssociationCreateOrUpdate_568198(
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_GuestDiagnosticsSettingsAssociationCreateOrUpdate_568197(
+proc validate_GuestDiagnosticsSettingsAssociationCreateOrUpdate_564097(
     path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
     body: JsonNode): JsonNode =
   ## Creates or updates guest diagnostics settings association.
@@ -325,23 +329,23 @@ proc validate_GuestDiagnosticsSettingsAssociationCreateOrUpdate_568197(
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceUri: JString (required)
-  ##              : The fully qualified ID of the resource, including the resource name and resource type.
   ##   associationName: JString (required)
   ##                  : The name of the diagnostic settings association.
+  ##   resourceUri: JString (required)
+  ##              : The fully qualified ID of the resource, including the resource name and resource type.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceUri` field"
-  var valid_568199 = path.getOrDefault("resourceUri")
-  valid_568199 = validateParameter(valid_568199, JString, required = true,
+        "path argument is necessary due to required `associationName` field"
+  var valid_564099 = path.getOrDefault("associationName")
+  valid_564099 = validateParameter(valid_564099, JString, required = true,
                                  default = nil)
-  if valid_568199 != nil:
-    section.add "resourceUri", valid_568199
-  var valid_568200 = path.getOrDefault("associationName")
-  valid_568200 = validateParameter(valid_568200, JString, required = true,
+  if valid_564099 != nil:
+    section.add "associationName", valid_564099
+  var valid_564100 = path.getOrDefault("resourceUri")
+  valid_564100 = validateParameter(valid_564100, JString, required = true,
                                  default = nil)
-  if valid_568200 != nil:
-    section.add "associationName", valid_568200
+  if valid_564100 != nil:
+    section.add "resourceUri", valid_564100
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -349,11 +353,11 @@ proc validate_GuestDiagnosticsSettingsAssociationCreateOrUpdate_568197(
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568201 = query.getOrDefault("api-version")
-  valid_568201 = validateParameter(valid_568201, JString, required = true,
+  var valid_564101 = query.getOrDefault("api-version")
+  valid_564101 = validateParameter(valid_564101, JString, required = true,
                                  default = nil)
-  if valid_568201 != nil:
-    section.add "api-version", valid_568201
+  if valid_564101 != nil:
+    section.add "api-version", valid_564101
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -367,52 +371,52 @@ proc validate_GuestDiagnosticsSettingsAssociationCreateOrUpdate_568197(
   if body != nil:
     result.add "body", body
 
-proc call*(call_568203: Call_GuestDiagnosticsSettingsAssociationCreateOrUpdate_568196;
+proc call*(call_564103: Call_GuestDiagnosticsSettingsAssociationCreateOrUpdate_564096;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Creates or updates guest diagnostics settings association.
   ## 
-  let valid = call_568203.validator(path, query, header, formData, body)
-  let scheme = call_568203.pickScheme
+  let valid = call_564103.validator(path, query, header, formData, body)
+  let scheme = call_564103.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568203.url(scheme.get, call_568203.host, call_568203.base,
-                         call_568203.route, valid.getOrDefault("path"),
+  let url = call_564103.url(scheme.get, call_564103.host, call_564103.base,
+                         call_564103.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568203, url, valid)
+  result = hook(call_564103, url, valid)
 
-proc call*(call_568204: Call_GuestDiagnosticsSettingsAssociationCreateOrUpdate_568196;
-          apiVersion: string; resourceUri: string; associationName: string;
-          diagnosticSettingsAssociation: JsonNode): Recallable =
+proc call*(call_564104: Call_GuestDiagnosticsSettingsAssociationCreateOrUpdate_564096;
+          diagnosticSettingsAssociation: JsonNode; apiVersion: string;
+          associationName: string; resourceUri: string): Recallable =
   ## guestDiagnosticsSettingsAssociationCreateOrUpdate
   ## Creates or updates guest diagnostics settings association.
-  ##   apiVersion: string (required)
-  ##             : Client Api Version.
-  ##   resourceUri: string (required)
-  ##              : The fully qualified ID of the resource, including the resource name and resource type.
-  ##   associationName: string (required)
-  ##                  : The name of the diagnostic settings association.
   ##   diagnosticSettingsAssociation: JObject (required)
   ##                                : The diagnostic settings association to create or update.
-  var path_568205 = newJObject()
-  var query_568206 = newJObject()
-  var body_568207 = newJObject()
-  add(query_568206, "api-version", newJString(apiVersion))
-  add(path_568205, "resourceUri", newJString(resourceUri))
-  add(path_568205, "associationName", newJString(associationName))
+  ##   apiVersion: string (required)
+  ##             : Client Api Version.
+  ##   associationName: string (required)
+  ##                  : The name of the diagnostic settings association.
+  ##   resourceUri: string (required)
+  ##              : The fully qualified ID of the resource, including the resource name and resource type.
+  var path_564105 = newJObject()
+  var query_564106 = newJObject()
+  var body_564107 = newJObject()
   if diagnosticSettingsAssociation != nil:
-    body_568207 = diagnosticSettingsAssociation
-  result = call_568204.call(path_568205, query_568206, nil, nil, body_568207)
+    body_564107 = diagnosticSettingsAssociation
+  add(query_564106, "api-version", newJString(apiVersion))
+  add(path_564105, "associationName", newJString(associationName))
+  add(path_564105, "resourceUri", newJString(resourceUri))
+  result = call_564104.call(path_564105, query_564106, nil, nil, body_564107)
 
-var guestDiagnosticsSettingsAssociationCreateOrUpdate* = Call_GuestDiagnosticsSettingsAssociationCreateOrUpdate_568196(
+var guestDiagnosticsSettingsAssociationCreateOrUpdate* = Call_GuestDiagnosticsSettingsAssociationCreateOrUpdate_564096(
     name: "guestDiagnosticsSettingsAssociationCreateOrUpdate",
     meth: HttpMethod.HttpPut, host: "management.azure.com", route: "/{resourceUri}/providers/microsoft.insights/guestDiagnosticSettingsAssociation/{associationName}",
-    validator: validate_GuestDiagnosticsSettingsAssociationCreateOrUpdate_568197,
-    base: "", url: url_GuestDiagnosticsSettingsAssociationCreateOrUpdate_568198,
+    validator: validate_GuestDiagnosticsSettingsAssociationCreateOrUpdate_564097,
+    base: "", url: url_GuestDiagnosticsSettingsAssociationCreateOrUpdate_564098,
     schemes: {Scheme.Https})
 type
-  Call_GuestDiagnosticsSettingsAssociationGet_568186 = ref object of OpenApiRestCall_567642
-proc url_GuestDiagnosticsSettingsAssociationGet_568188(protocol: Scheme;
+  Call_GuestDiagnosticsSettingsAssociationGet_564086 = ref object of OpenApiRestCall_563540
+proc url_GuestDiagnosticsSettingsAssociationGet_564088(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -430,30 +434,30 @@ proc url_GuestDiagnosticsSettingsAssociationGet_568188(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_GuestDiagnosticsSettingsAssociationGet_568187(path: JsonNode;
+proc validate_GuestDiagnosticsSettingsAssociationGet_564087(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets guest diagnostics association settings.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceUri: JString (required)
-  ##              : The fully qualified ID of the resource, including the resource name and resource type.
   ##   associationName: JString (required)
   ##                  : The name of the diagnostic settings association.
+  ##   resourceUri: JString (required)
+  ##              : The fully qualified ID of the resource, including the resource name and resource type.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceUri` field"
-  var valid_568189 = path.getOrDefault("resourceUri")
-  valid_568189 = validateParameter(valid_568189, JString, required = true,
+        "path argument is necessary due to required `associationName` field"
+  var valid_564089 = path.getOrDefault("associationName")
+  valid_564089 = validateParameter(valid_564089, JString, required = true,
                                  default = nil)
-  if valid_568189 != nil:
-    section.add "resourceUri", valid_568189
-  var valid_568190 = path.getOrDefault("associationName")
-  valid_568190 = validateParameter(valid_568190, JString, required = true,
+  if valid_564089 != nil:
+    section.add "associationName", valid_564089
+  var valid_564090 = path.getOrDefault("resourceUri")
+  valid_564090 = validateParameter(valid_564090, JString, required = true,
                                  default = nil)
-  if valid_568190 != nil:
-    section.add "associationName", valid_568190
+  if valid_564090 != nil:
+    section.add "resourceUri", valid_564090
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -461,11 +465,11 @@ proc validate_GuestDiagnosticsSettingsAssociationGet_568187(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568191 = query.getOrDefault("api-version")
-  valid_568191 = validateParameter(valid_568191, JString, required = true,
+  var valid_564091 = query.getOrDefault("api-version")
+  valid_564091 = validateParameter(valid_564091, JString, required = true,
                                  default = nil)
-  if valid_568191 != nil:
-    section.add "api-version", valid_568191
+  if valid_564091 != nil:
+    section.add "api-version", valid_564091
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -474,46 +478,46 @@ proc validate_GuestDiagnosticsSettingsAssociationGet_568187(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568192: Call_GuestDiagnosticsSettingsAssociationGet_568186;
+proc call*(call_564092: Call_GuestDiagnosticsSettingsAssociationGet_564086;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Gets guest diagnostics association settings.
   ## 
-  let valid = call_568192.validator(path, query, header, formData, body)
-  let scheme = call_568192.pickScheme
+  let valid = call_564092.validator(path, query, header, formData, body)
+  let scheme = call_564092.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568192.url(scheme.get, call_568192.host, call_568192.base,
-                         call_568192.route, valid.getOrDefault("path"),
+  let url = call_564092.url(scheme.get, call_564092.host, call_564092.base,
+                         call_564092.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568192, url, valid)
+  result = hook(call_564092, url, valid)
 
-proc call*(call_568193: Call_GuestDiagnosticsSettingsAssociationGet_568186;
-          apiVersion: string; resourceUri: string; associationName: string): Recallable =
+proc call*(call_564093: Call_GuestDiagnosticsSettingsAssociationGet_564086;
+          apiVersion: string; associationName: string; resourceUri: string): Recallable =
   ## guestDiagnosticsSettingsAssociationGet
   ## Gets guest diagnostics association settings.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
-  ##   resourceUri: string (required)
-  ##              : The fully qualified ID of the resource, including the resource name and resource type.
   ##   associationName: string (required)
   ##                  : The name of the diagnostic settings association.
-  var path_568194 = newJObject()
-  var query_568195 = newJObject()
-  add(query_568195, "api-version", newJString(apiVersion))
-  add(path_568194, "resourceUri", newJString(resourceUri))
-  add(path_568194, "associationName", newJString(associationName))
-  result = call_568193.call(path_568194, query_568195, nil, nil, nil)
+  ##   resourceUri: string (required)
+  ##              : The fully qualified ID of the resource, including the resource name and resource type.
+  var path_564094 = newJObject()
+  var query_564095 = newJObject()
+  add(query_564095, "api-version", newJString(apiVersion))
+  add(path_564094, "associationName", newJString(associationName))
+  add(path_564094, "resourceUri", newJString(resourceUri))
+  result = call_564093.call(path_564094, query_564095, nil, nil, nil)
 
-var guestDiagnosticsSettingsAssociationGet* = Call_GuestDiagnosticsSettingsAssociationGet_568186(
+var guestDiagnosticsSettingsAssociationGet* = Call_GuestDiagnosticsSettingsAssociationGet_564086(
     name: "guestDiagnosticsSettingsAssociationGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/{resourceUri}/providers/microsoft.insights/guestDiagnosticSettingsAssociation/{associationName}",
-    validator: validate_GuestDiagnosticsSettingsAssociationGet_568187, base: "",
-    url: url_GuestDiagnosticsSettingsAssociationGet_568188,
+    validator: validate_GuestDiagnosticsSettingsAssociationGet_564087, base: "",
+    url: url_GuestDiagnosticsSettingsAssociationGet_564088,
     schemes: {Scheme.Https})
 type
-  Call_GuestDiagnosticsSettingsAssociationUpdate_568218 = ref object of OpenApiRestCall_567642
-proc url_GuestDiagnosticsSettingsAssociationUpdate_568220(protocol: Scheme;
+  Call_GuestDiagnosticsSettingsAssociationUpdate_564118 = ref object of OpenApiRestCall_563540
+proc url_GuestDiagnosticsSettingsAssociationUpdate_564120(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -531,30 +535,30 @@ proc url_GuestDiagnosticsSettingsAssociationUpdate_568220(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_GuestDiagnosticsSettingsAssociationUpdate_568219(path: JsonNode;
+proc validate_GuestDiagnosticsSettingsAssociationUpdate_564119(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Updates an existing guestDiagnosticsSettingsAssociation Resource. To update other fields use the CreateOrUpdate method
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceUri: JString (required)
-  ##              : The fully qualified ID of the resource, including the resource name and resource type.
   ##   associationName: JString (required)
   ##                  : The name of the diagnostic settings association.
+  ##   resourceUri: JString (required)
+  ##              : The fully qualified ID of the resource, including the resource name and resource type.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceUri` field"
-  var valid_568238 = path.getOrDefault("resourceUri")
-  valid_568238 = validateParameter(valid_568238, JString, required = true,
+        "path argument is necessary due to required `associationName` field"
+  var valid_564138 = path.getOrDefault("associationName")
+  valid_564138 = validateParameter(valid_564138, JString, required = true,
                                  default = nil)
-  if valid_568238 != nil:
-    section.add "resourceUri", valid_568238
-  var valid_568239 = path.getOrDefault("associationName")
-  valid_568239 = validateParameter(valid_568239, JString, required = true,
+  if valid_564138 != nil:
+    section.add "associationName", valid_564138
+  var valid_564139 = path.getOrDefault("resourceUri")
+  valid_564139 = validateParameter(valid_564139, JString, required = true,
                                  default = nil)
-  if valid_568239 != nil:
-    section.add "associationName", valid_568239
+  if valid_564139 != nil:
+    section.add "resourceUri", valid_564139
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -562,11 +566,11 @@ proc validate_GuestDiagnosticsSettingsAssociationUpdate_568219(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568240 = query.getOrDefault("api-version")
-  valid_568240 = validateParameter(valid_568240, JString, required = true,
+  var valid_564140 = query.getOrDefault("api-version")
+  valid_564140 = validateParameter(valid_564140, JString, required = true,
                                  default = nil)
-  if valid_568240 != nil:
-    section.add "api-version", valid_568240
+  if valid_564140 != nil:
+    section.add "api-version", valid_564140
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -580,52 +584,52 @@ proc validate_GuestDiagnosticsSettingsAssociationUpdate_568219(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568242: Call_GuestDiagnosticsSettingsAssociationUpdate_568218;
+proc call*(call_564142: Call_GuestDiagnosticsSettingsAssociationUpdate_564118;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Updates an existing guestDiagnosticsSettingsAssociation Resource. To update other fields use the CreateOrUpdate method
   ## 
-  let valid = call_568242.validator(path, query, header, formData, body)
-  let scheme = call_568242.pickScheme
+  let valid = call_564142.validator(path, query, header, formData, body)
+  let scheme = call_564142.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568242.url(scheme.get, call_568242.host, call_568242.base,
-                         call_568242.route, valid.getOrDefault("path"),
+  let url = call_564142.url(scheme.get, call_564142.host, call_564142.base,
+                         call_564142.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568242, url, valid)
+  result = hook(call_564142, url, valid)
 
-proc call*(call_568243: Call_GuestDiagnosticsSettingsAssociationUpdate_568218;
-          apiVersion: string; resourceUri: string; parameters: JsonNode;
-          associationName: string): Recallable =
+proc call*(call_564143: Call_GuestDiagnosticsSettingsAssociationUpdate_564118;
+          apiVersion: string; associationName: string; resourceUri: string;
+          parameters: JsonNode): Recallable =
   ## guestDiagnosticsSettingsAssociationUpdate
   ## Updates an existing guestDiagnosticsSettingsAssociation Resource. To update other fields use the CreateOrUpdate method
   ##   apiVersion: string (required)
   ##             : Client Api Version.
+  ##   associationName: string (required)
+  ##                  : The name of the diagnostic settings association.
   ##   resourceUri: string (required)
   ##              : The fully qualified ID of the resource, including the resource name and resource type.
   ##   parameters: JObject (required)
   ##             : Parameters supplied to the operation.
-  ##   associationName: string (required)
-  ##                  : The name of the diagnostic settings association.
-  var path_568244 = newJObject()
-  var query_568245 = newJObject()
-  var body_568246 = newJObject()
-  add(query_568245, "api-version", newJString(apiVersion))
-  add(path_568244, "resourceUri", newJString(resourceUri))
+  var path_564144 = newJObject()
+  var query_564145 = newJObject()
+  var body_564146 = newJObject()
+  add(query_564145, "api-version", newJString(apiVersion))
+  add(path_564144, "associationName", newJString(associationName))
+  add(path_564144, "resourceUri", newJString(resourceUri))
   if parameters != nil:
-    body_568246 = parameters
-  add(path_568244, "associationName", newJString(associationName))
-  result = call_568243.call(path_568244, query_568245, nil, nil, body_568246)
+    body_564146 = parameters
+  result = call_564143.call(path_564144, query_564145, nil, nil, body_564146)
 
-var guestDiagnosticsSettingsAssociationUpdate* = Call_GuestDiagnosticsSettingsAssociationUpdate_568218(
+var guestDiagnosticsSettingsAssociationUpdate* = Call_GuestDiagnosticsSettingsAssociationUpdate_564118(
     name: "guestDiagnosticsSettingsAssociationUpdate", meth: HttpMethod.HttpPatch,
     host: "management.azure.com", route: "/{resourceUri}/providers/microsoft.insights/guestDiagnosticSettingsAssociation/{associationName}",
-    validator: validate_GuestDiagnosticsSettingsAssociationUpdate_568219,
-    base: "", url: url_GuestDiagnosticsSettingsAssociationUpdate_568220,
+    validator: validate_GuestDiagnosticsSettingsAssociationUpdate_564119,
+    base: "", url: url_GuestDiagnosticsSettingsAssociationUpdate_564120,
     schemes: {Scheme.Https})
 type
-  Call_GuestDiagnosticsSettingsAssociationDelete_568208 = ref object of OpenApiRestCall_567642
-proc url_GuestDiagnosticsSettingsAssociationDelete_568210(protocol: Scheme;
+  Call_GuestDiagnosticsSettingsAssociationDelete_564108 = ref object of OpenApiRestCall_563540
+proc url_GuestDiagnosticsSettingsAssociationDelete_564110(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -643,30 +647,30 @@ proc url_GuestDiagnosticsSettingsAssociationDelete_568210(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_GuestDiagnosticsSettingsAssociationDelete_568209(path: JsonNode;
+proc validate_GuestDiagnosticsSettingsAssociationDelete_564109(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Delete guest diagnostics association settings.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceUri: JString (required)
-  ##              : The fully qualified ID of the resource, including the resource name and resource type.
   ##   associationName: JString (required)
   ##                  : The name of the diagnostic settings association.
+  ##   resourceUri: JString (required)
+  ##              : The fully qualified ID of the resource, including the resource name and resource type.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceUri` field"
-  var valid_568211 = path.getOrDefault("resourceUri")
-  valid_568211 = validateParameter(valid_568211, JString, required = true,
+        "path argument is necessary due to required `associationName` field"
+  var valid_564111 = path.getOrDefault("associationName")
+  valid_564111 = validateParameter(valid_564111, JString, required = true,
                                  default = nil)
-  if valid_568211 != nil:
-    section.add "resourceUri", valid_568211
-  var valid_568212 = path.getOrDefault("associationName")
-  valid_568212 = validateParameter(valid_568212, JString, required = true,
+  if valid_564111 != nil:
+    section.add "associationName", valid_564111
+  var valid_564112 = path.getOrDefault("resourceUri")
+  valid_564112 = validateParameter(valid_564112, JString, required = true,
                                  default = nil)
-  if valid_568212 != nil:
-    section.add "associationName", valid_568212
+  if valid_564112 != nil:
+    section.add "resourceUri", valid_564112
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -674,11 +678,11 @@ proc validate_GuestDiagnosticsSettingsAssociationDelete_568209(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568213 = query.getOrDefault("api-version")
-  valid_568213 = validateParameter(valid_568213, JString, required = true,
+  var valid_564113 = query.getOrDefault("api-version")
+  valid_564113 = validateParameter(valid_564113, JString, required = true,
                                  default = nil)
-  if valid_568213 != nil:
-    section.add "api-version", valid_568213
+  if valid_564113 != nil:
+    section.add "api-version", valid_564113
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -687,42 +691,42 @@ proc validate_GuestDiagnosticsSettingsAssociationDelete_568209(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568214: Call_GuestDiagnosticsSettingsAssociationDelete_568208;
+proc call*(call_564114: Call_GuestDiagnosticsSettingsAssociationDelete_564108;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Delete guest diagnostics association settings.
   ## 
-  let valid = call_568214.validator(path, query, header, formData, body)
-  let scheme = call_568214.pickScheme
+  let valid = call_564114.validator(path, query, header, formData, body)
+  let scheme = call_564114.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568214.url(scheme.get, call_568214.host, call_568214.base,
-                         call_568214.route, valid.getOrDefault("path"),
+  let url = call_564114.url(scheme.get, call_564114.host, call_564114.base,
+                         call_564114.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568214, url, valid)
+  result = hook(call_564114, url, valid)
 
-proc call*(call_568215: Call_GuestDiagnosticsSettingsAssociationDelete_568208;
-          apiVersion: string; resourceUri: string; associationName: string): Recallable =
+proc call*(call_564115: Call_GuestDiagnosticsSettingsAssociationDelete_564108;
+          apiVersion: string; associationName: string; resourceUri: string): Recallable =
   ## guestDiagnosticsSettingsAssociationDelete
   ## Delete guest diagnostics association settings.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
-  ##   resourceUri: string (required)
-  ##              : The fully qualified ID of the resource, including the resource name and resource type.
   ##   associationName: string (required)
   ##                  : The name of the diagnostic settings association.
-  var path_568216 = newJObject()
-  var query_568217 = newJObject()
-  add(query_568217, "api-version", newJString(apiVersion))
-  add(path_568216, "resourceUri", newJString(resourceUri))
-  add(path_568216, "associationName", newJString(associationName))
-  result = call_568215.call(path_568216, query_568217, nil, nil, nil)
+  ##   resourceUri: string (required)
+  ##              : The fully qualified ID of the resource, including the resource name and resource type.
+  var path_564116 = newJObject()
+  var query_564117 = newJObject()
+  add(query_564117, "api-version", newJString(apiVersion))
+  add(path_564116, "associationName", newJString(associationName))
+  add(path_564116, "resourceUri", newJString(resourceUri))
+  result = call_564115.call(path_564116, query_564117, nil, nil, nil)
 
-var guestDiagnosticsSettingsAssociationDelete* = Call_GuestDiagnosticsSettingsAssociationDelete_568208(
+var guestDiagnosticsSettingsAssociationDelete* = Call_GuestDiagnosticsSettingsAssociationDelete_564108(
     name: "guestDiagnosticsSettingsAssociationDelete",
     meth: HttpMethod.HttpDelete, host: "management.azure.com", route: "/{resourceUri}/providers/microsoft.insights/guestDiagnosticSettingsAssociation/{associationName}",
-    validator: validate_GuestDiagnosticsSettingsAssociationDelete_568209,
-    base: "", url: url_GuestDiagnosticsSettingsAssociationDelete_568210,
+    validator: validate_GuestDiagnosticsSettingsAssociationDelete_564109,
+    base: "", url: url_GuestDiagnosticsSettingsAssociationDelete_564110,
     schemes: {Scheme.Https})
 export
   rest

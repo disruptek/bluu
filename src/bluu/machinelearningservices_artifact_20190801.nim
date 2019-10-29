@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_573641 = ref object of OpenApiRestCall
+  OpenApiRestCall_563539 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_573641](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563539](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_573641): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563539): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,8 +107,8 @@ const
   macServiceName = "machinelearningservices-artifact"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_ArtifactsBatchGetById_573863 = ref object of OpenApiRestCall_573641
-proc url_ArtifactsBatchGetById_573865(protocol: Scheme; host: string; base: string;
+  Call_ArtifactsBatchGetById_563761 = ref object of OpenApiRestCall_563539
+proc url_ArtifactsBatchGetById_563763(protocol: Scheme; host: string; base: string;
                                      route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -128,37 +132,37 @@ proc url_ArtifactsBatchGetById_573865(protocol: Scheme; host: string; base: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ArtifactsBatchGetById_573864(path: JsonNode; query: JsonNode;
+proc validate_ArtifactsBatchGetById_563762(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Get Batch Artifacts by the specific Ids.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The Name of the resource group in which the workspace is located.
   ##   subscriptionId: JString (required)
   ##                 : The Azure Subscription ID.
+  ##   resourceGroupName: JString (required)
+  ##                    : The Name of the resource group in which the workspace is located.
   ##   workspaceName: JString (required)
   ##                : The name of the workspace.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_574038 = path.getOrDefault("resourceGroupName")
-  valid_574038 = validateParameter(valid_574038, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_563938 = path.getOrDefault("subscriptionId")
+  valid_563938 = validateParameter(valid_563938, JString, required = true,
                                  default = nil)
-  if valid_574038 != nil:
-    section.add "resourceGroupName", valid_574038
-  var valid_574039 = path.getOrDefault("subscriptionId")
-  valid_574039 = validateParameter(valid_574039, JString, required = true,
+  if valid_563938 != nil:
+    section.add "subscriptionId", valid_563938
+  var valid_563939 = path.getOrDefault("resourceGroupName")
+  valid_563939 = validateParameter(valid_563939, JString, required = true,
                                  default = nil)
-  if valid_574039 != nil:
-    section.add "subscriptionId", valid_574039
-  var valid_574040 = path.getOrDefault("workspaceName")
-  valid_574040 = validateParameter(valid_574040, JString, required = true,
+  if valid_563939 != nil:
+    section.add "resourceGroupName", valid_563939
+  var valid_563940 = path.getOrDefault("workspaceName")
+  valid_563940 = validateParameter(valid_563940, JString, required = true,
                                  default = nil)
-  if valid_574040 != nil:
-    section.add "workspaceName", valid_574040
+  if valid_563940 != nil:
+    section.add "workspaceName", valid_563940
   result.add "path", section
   section = newJObject()
   result.add "query", section
@@ -174,48 +178,47 @@ proc validate_ArtifactsBatchGetById_573864(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574064: Call_ArtifactsBatchGetById_573863; path: JsonNode;
+proc call*(call_563964: Call_ArtifactsBatchGetById_563761; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get Batch Artifacts by the specific Ids.
   ## 
-  let valid = call_574064.validator(path, query, header, formData, body)
-  let scheme = call_574064.pickScheme
+  let valid = call_563964.validator(path, query, header, formData, body)
+  let scheme = call_563964.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574064.url(scheme.get, call_574064.host, call_574064.base,
-                         call_574064.route, valid.getOrDefault("path"),
+  let url = call_563964.url(scheme.get, call_563964.host, call_563964.base,
+                         call_563964.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574064, url, valid)
+  result = hook(call_563964, url, valid)
 
-proc call*(call_574135: Call_ArtifactsBatchGetById_573863;
-          resourceGroupName: string; artifactIds: JsonNode; subscriptionId: string;
-          workspaceName: string): Recallable =
+proc call*(call_564035: Call_ArtifactsBatchGetById_563761; subscriptionId: string;
+          artifactIds: JsonNode; resourceGroupName: string; workspaceName: string): Recallable =
   ## artifactsBatchGetById
   ## Get Batch Artifacts by the specific Ids.
-  ##   resourceGroupName: string (required)
-  ##                    : The Name of the resource group in which the workspace is located.
-  ##   artifactIds: JObject (required)
-  ##              : The command for Batch Artifact get request.
   ##   subscriptionId: string (required)
   ##                 : The Azure Subscription ID.
+  ##   artifactIds: JObject (required)
+  ##              : The command for Batch Artifact get request.
+  ##   resourceGroupName: string (required)
+  ##                    : The Name of the resource group in which the workspace is located.
   ##   workspaceName: string (required)
   ##                : The name of the workspace.
-  var path_574136 = newJObject()
-  var body_574138 = newJObject()
-  add(path_574136, "resourceGroupName", newJString(resourceGroupName))
+  var path_564036 = newJObject()
+  var body_564038 = newJObject()
+  add(path_564036, "subscriptionId", newJString(subscriptionId))
   if artifactIds != nil:
-    body_574138 = artifactIds
-  add(path_574136, "subscriptionId", newJString(subscriptionId))
-  add(path_574136, "workspaceName", newJString(workspaceName))
-  result = call_574135.call(path_574136, nil, nil, nil, body_574138)
+    body_564038 = artifactIds
+  add(path_564036, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564036, "workspaceName", newJString(workspaceName))
+  result = call_564035.call(path_564036, nil, nil, nil, body_564038)
 
-var artifactsBatchGetById* = Call_ArtifactsBatchGetById_573863(
+var artifactsBatchGetById* = Call_ArtifactsBatchGetById_563761(
     name: "artifactsBatchGetById", meth: HttpMethod.HttpPost, host: "azure.local", route: "/artifact/v2.0/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.MachineLearningServices/workspaces/{workspaceName}/artifacts/batch/metadata",
-    validator: validate_ArtifactsBatchGetById_573864, base: "",
-    url: url_ArtifactsBatchGetById_573865, schemes: {Scheme.Https})
+    validator: validate_ArtifactsBatchGetById_563762, base: "",
+    url: url_ArtifactsBatchGetById_563763, schemes: {Scheme.Https})
 type
-  Call_ArtifactsCreate_574177 = ref object of OpenApiRestCall_573641
-proc url_ArtifactsCreate_574179(protocol: Scheme; host: string; base: string;
+  Call_ArtifactsCreate_564077 = ref object of OpenApiRestCall_563539
+proc url_ArtifactsCreate_564079(protocol: Scheme; host: string; base: string;
                                route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -239,7 +242,7 @@ proc url_ArtifactsCreate_574179(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ArtifactsCreate_574178(path: JsonNode; query: JsonNode;
+proc validate_ArtifactsCreate_564078(path: JsonNode; query: JsonNode;
                                     header: JsonNode; formData: JsonNode;
                                     body: JsonNode): JsonNode =
   ## Create an Artifact.
@@ -247,30 +250,30 @@ proc validate_ArtifactsCreate_574178(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The Name of the resource group in which the workspace is located.
   ##   subscriptionId: JString (required)
   ##                 : The Azure Subscription ID.
+  ##   resourceGroupName: JString (required)
+  ##                    : The Name of the resource group in which the workspace is located.
   ##   workspaceName: JString (required)
   ##                : The name of the workspace.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_574180 = path.getOrDefault("resourceGroupName")
-  valid_574180 = validateParameter(valid_574180, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564080 = path.getOrDefault("subscriptionId")
+  valid_564080 = validateParameter(valid_564080, JString, required = true,
                                  default = nil)
-  if valid_574180 != nil:
-    section.add "resourceGroupName", valid_574180
-  var valid_574181 = path.getOrDefault("subscriptionId")
-  valid_574181 = validateParameter(valid_574181, JString, required = true,
+  if valid_564080 != nil:
+    section.add "subscriptionId", valid_564080
+  var valid_564081 = path.getOrDefault("resourceGroupName")
+  valid_564081 = validateParameter(valid_564081, JString, required = true,
                                  default = nil)
-  if valid_574181 != nil:
-    section.add "subscriptionId", valid_574181
-  var valid_574182 = path.getOrDefault("workspaceName")
-  valid_574182 = validateParameter(valid_574182, JString, required = true,
+  if valid_564081 != nil:
+    section.add "resourceGroupName", valid_564081
+  var valid_564082 = path.getOrDefault("workspaceName")
+  valid_564082 = validateParameter(valid_564082, JString, required = true,
                                  default = nil)
-  if valid_574182 != nil:
-    section.add "workspaceName", valid_574182
+  if valid_564082 != nil:
+    section.add "workspaceName", valid_564082
   result.add "path", section
   section = newJObject()
   result.add "query", section
@@ -286,47 +289,47 @@ proc validate_ArtifactsCreate_574178(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574184: Call_ArtifactsCreate_574177; path: JsonNode; query: JsonNode;
+proc call*(call_564084: Call_ArtifactsCreate_564077; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Create an Artifact.
   ## 
-  let valid = call_574184.validator(path, query, header, formData, body)
-  let scheme = call_574184.pickScheme
+  let valid = call_564084.validator(path, query, header, formData, body)
+  let scheme = call_564084.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574184.url(scheme.get, call_574184.host, call_574184.base,
-                         call_574184.route, valid.getOrDefault("path"),
+  let url = call_564084.url(scheme.get, call_564084.host, call_564084.base,
+                         call_564084.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574184, url, valid)
+  result = hook(call_564084, url, valid)
 
-proc call*(call_574185: Call_ArtifactsCreate_574177; artifact: JsonNode;
-          resourceGroupName: string; subscriptionId: string; workspaceName: string): Recallable =
+proc call*(call_564085: Call_ArtifactsCreate_564077; artifact: JsonNode;
+          subscriptionId: string; resourceGroupName: string; workspaceName: string): Recallable =
   ## artifactsCreate
   ## Create an Artifact.
   ##   artifact: JObject (required)
   ##           : The Artifact details.
-  ##   resourceGroupName: string (required)
-  ##                    : The Name of the resource group in which the workspace is located.
   ##   subscriptionId: string (required)
   ##                 : The Azure Subscription ID.
+  ##   resourceGroupName: string (required)
+  ##                    : The Name of the resource group in which the workspace is located.
   ##   workspaceName: string (required)
   ##                : The name of the workspace.
-  var path_574186 = newJObject()
-  var body_574187 = newJObject()
+  var path_564086 = newJObject()
+  var body_564087 = newJObject()
   if artifact != nil:
-    body_574187 = artifact
-  add(path_574186, "resourceGroupName", newJString(resourceGroupName))
-  add(path_574186, "subscriptionId", newJString(subscriptionId))
-  add(path_574186, "workspaceName", newJString(workspaceName))
-  result = call_574185.call(path_574186, nil, nil, nil, body_574187)
+    body_564087 = artifact
+  add(path_564086, "subscriptionId", newJString(subscriptionId))
+  add(path_564086, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564086, "workspaceName", newJString(workspaceName))
+  result = call_564085.call(path_564086, nil, nil, nil, body_564087)
 
-var artifactsCreate* = Call_ArtifactsCreate_574177(name: "artifactsCreate",
+var artifactsCreate* = Call_ArtifactsCreate_564077(name: "artifactsCreate",
     meth: HttpMethod.HttpPost, host: "azure.local", route: "/artifact/v2.0/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.MachineLearningServices/workspaces/{workspaceName}/artifacts/metadata",
-    validator: validate_ArtifactsCreate_574178, base: "", url: url_ArtifactsCreate_574179,
+    validator: validate_ArtifactsCreate_564078, base: "", url: url_ArtifactsCreate_564079,
     schemes: {Scheme.Https})
 type
-  Call_ArtifactsRegister_574188 = ref object of OpenApiRestCall_573641
-proc url_ArtifactsRegister_574190(protocol: Scheme; host: string; base: string;
+  Call_ArtifactsRegister_564088 = ref object of OpenApiRestCall_563539
+proc url_ArtifactsRegister_564090(protocol: Scheme; host: string; base: string;
                                  route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -350,7 +353,7 @@ proc url_ArtifactsRegister_574190(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ArtifactsRegister_574189(path: JsonNode; query: JsonNode;
+proc validate_ArtifactsRegister_564089(path: JsonNode; query: JsonNode;
                                       header: JsonNode; formData: JsonNode;
                                       body: JsonNode): JsonNode =
   ## Create an Artifact for an existing dataPath.
@@ -358,30 +361,30 @@ proc validate_ArtifactsRegister_574189(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The Name of the resource group in which the workspace is located.
   ##   subscriptionId: JString (required)
   ##                 : The Azure Subscription ID.
+  ##   resourceGroupName: JString (required)
+  ##                    : The Name of the resource group in which the workspace is located.
   ##   workspaceName: JString (required)
   ##                : The name of the workspace.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_574191 = path.getOrDefault("resourceGroupName")
-  valid_574191 = validateParameter(valid_574191, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564091 = path.getOrDefault("subscriptionId")
+  valid_564091 = validateParameter(valid_564091, JString, required = true,
                                  default = nil)
-  if valid_574191 != nil:
-    section.add "resourceGroupName", valid_574191
-  var valid_574192 = path.getOrDefault("subscriptionId")
-  valid_574192 = validateParameter(valid_574192, JString, required = true,
+  if valid_564091 != nil:
+    section.add "subscriptionId", valid_564091
+  var valid_564092 = path.getOrDefault("resourceGroupName")
+  valid_564092 = validateParameter(valid_564092, JString, required = true,
                                  default = nil)
-  if valid_574192 != nil:
-    section.add "subscriptionId", valid_574192
-  var valid_574193 = path.getOrDefault("workspaceName")
-  valid_574193 = validateParameter(valid_574193, JString, required = true,
+  if valid_564092 != nil:
+    section.add "resourceGroupName", valid_564092
+  var valid_564093 = path.getOrDefault("workspaceName")
+  valid_564093 = validateParameter(valid_564093, JString, required = true,
                                  default = nil)
-  if valid_574193 != nil:
-    section.add "workspaceName", valid_574193
+  if valid_564093 != nil:
+    section.add "workspaceName", valid_564093
   result.add "path", section
   section = newJObject()
   result.add "query", section
@@ -397,47 +400,47 @@ proc validate_ArtifactsRegister_574189(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574195: Call_ArtifactsRegister_574188; path: JsonNode;
+proc call*(call_564095: Call_ArtifactsRegister_564088; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Create an Artifact for an existing dataPath.
   ## 
-  let valid = call_574195.validator(path, query, header, formData, body)
-  let scheme = call_574195.pickScheme
+  let valid = call_564095.validator(path, query, header, formData, body)
+  let scheme = call_564095.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574195.url(scheme.get, call_574195.host, call_574195.base,
-                         call_574195.route, valid.getOrDefault("path"),
+  let url = call_564095.url(scheme.get, call_564095.host, call_564095.base,
+                         call_564095.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574195, url, valid)
+  result = hook(call_564095, url, valid)
 
-proc call*(call_574196: Call_ArtifactsRegister_574188; artifact: JsonNode;
-          resourceGroupName: string; subscriptionId: string; workspaceName: string): Recallable =
+proc call*(call_564096: Call_ArtifactsRegister_564088; artifact: JsonNode;
+          subscriptionId: string; resourceGroupName: string; workspaceName: string): Recallable =
   ## artifactsRegister
   ## Create an Artifact for an existing dataPath.
   ##   artifact: JObject (required)
   ##           : The Artifact creation details.
-  ##   resourceGroupName: string (required)
-  ##                    : The Name of the resource group in which the workspace is located.
   ##   subscriptionId: string (required)
   ##                 : The Azure Subscription ID.
+  ##   resourceGroupName: string (required)
+  ##                    : The Name of the resource group in which the workspace is located.
   ##   workspaceName: string (required)
   ##                : The name of the workspace.
-  var path_574197 = newJObject()
-  var body_574198 = newJObject()
+  var path_564097 = newJObject()
+  var body_564098 = newJObject()
   if artifact != nil:
-    body_574198 = artifact
-  add(path_574197, "resourceGroupName", newJString(resourceGroupName))
-  add(path_574197, "subscriptionId", newJString(subscriptionId))
-  add(path_574197, "workspaceName", newJString(workspaceName))
-  result = call_574196.call(path_574197, nil, nil, nil, body_574198)
+    body_564098 = artifact
+  add(path_564097, "subscriptionId", newJString(subscriptionId))
+  add(path_564097, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564097, "workspaceName", newJString(workspaceName))
+  result = call_564096.call(path_564097, nil, nil, nil, body_564098)
 
-var artifactsRegister* = Call_ArtifactsRegister_574188(name: "artifactsRegister",
+var artifactsRegister* = Call_ArtifactsRegister_564088(name: "artifactsRegister",
     meth: HttpMethod.HttpPost, host: "azure.local", route: "/artifact/v2.0/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.MachineLearningServices/workspaces/{workspaceName}/artifacts/register",
-    validator: validate_ArtifactsRegister_574189, base: "",
-    url: url_ArtifactsRegister_574190, schemes: {Scheme.Https})
+    validator: validate_ArtifactsRegister_564089, base: "",
+    url: url_ArtifactsRegister_564090, schemes: {Scheme.Https})
 type
-  Call_ArtifactsBatchGetStorageById_574199 = ref object of OpenApiRestCall_573641
-proc url_ArtifactsBatchGetStorageById_574201(protocol: Scheme; host: string;
+  Call_ArtifactsBatchGetStorageById_564099 = ref object of OpenApiRestCall_563539
+proc url_ArtifactsBatchGetStorageById_564101(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -461,37 +464,37 @@ proc url_ArtifactsBatchGetStorageById_574201(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ArtifactsBatchGetStorageById_574200(path: JsonNode; query: JsonNode;
+proc validate_ArtifactsBatchGetStorageById_564100(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Get Batch Artifacts storage by specific Ids.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The Name of the resource group in which the workspace is located.
   ##   subscriptionId: JString (required)
   ##                 : The Azure Subscription ID.
+  ##   resourceGroupName: JString (required)
+  ##                    : The Name of the resource group in which the workspace is located.
   ##   workspaceName: JString (required)
   ##                : The name of the workspace.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_574202 = path.getOrDefault("resourceGroupName")
-  valid_574202 = validateParameter(valid_574202, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564102 = path.getOrDefault("subscriptionId")
+  valid_564102 = validateParameter(valid_564102, JString, required = true,
                                  default = nil)
-  if valid_574202 != nil:
-    section.add "resourceGroupName", valid_574202
-  var valid_574203 = path.getOrDefault("subscriptionId")
-  valid_574203 = validateParameter(valid_574203, JString, required = true,
+  if valid_564102 != nil:
+    section.add "subscriptionId", valid_564102
+  var valid_564103 = path.getOrDefault("resourceGroupName")
+  valid_564103 = validateParameter(valid_564103, JString, required = true,
                                  default = nil)
-  if valid_574203 != nil:
-    section.add "subscriptionId", valid_574203
-  var valid_574204 = path.getOrDefault("workspaceName")
-  valid_574204 = validateParameter(valid_574204, JString, required = true,
+  if valid_564103 != nil:
+    section.add "resourceGroupName", valid_564103
+  var valid_564104 = path.getOrDefault("workspaceName")
+  valid_564104 = validateParameter(valid_564104, JString, required = true,
                                  default = nil)
-  if valid_574204 != nil:
-    section.add "workspaceName", valid_574204
+  if valid_564104 != nil:
+    section.add "workspaceName", valid_564104
   result.add "path", section
   section = newJObject()
   result.add "query", section
@@ -507,49 +510,49 @@ proc validate_ArtifactsBatchGetStorageById_574200(path: JsonNode; query: JsonNod
   if body != nil:
     result.add "body", body
 
-proc call*(call_574206: Call_ArtifactsBatchGetStorageById_574199; path: JsonNode;
+proc call*(call_564106: Call_ArtifactsBatchGetStorageById_564099; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get Batch Artifacts storage by specific Ids.
   ## 
-  let valid = call_574206.validator(path, query, header, formData, body)
-  let scheme = call_574206.pickScheme
+  let valid = call_564106.validator(path, query, header, formData, body)
+  let scheme = call_564106.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574206.url(scheme.get, call_574206.host, call_574206.base,
-                         call_574206.route, valid.getOrDefault("path"),
+  let url = call_564106.url(scheme.get, call_564106.host, call_564106.base,
+                         call_564106.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574206, url, valid)
+  result = hook(call_564106, url, valid)
 
-proc call*(call_574207: Call_ArtifactsBatchGetStorageById_574199;
-          resourceGroupName: string; artifactIds: JsonNode; subscriptionId: string;
+proc call*(call_564107: Call_ArtifactsBatchGetStorageById_564099;
+          subscriptionId: string; artifactIds: JsonNode; resourceGroupName: string;
           workspaceName: string): Recallable =
   ## artifactsBatchGetStorageById
   ## Get Batch Artifacts storage by specific Ids.
-  ##   resourceGroupName: string (required)
-  ##                    : The Name of the resource group in which the workspace is located.
-  ##   artifactIds: JObject (required)
-  ##              : The list of artifactIds to get.
   ##   subscriptionId: string (required)
   ##                 : The Azure Subscription ID.
+  ##   artifactIds: JObject (required)
+  ##              : The list of artifactIds to get.
+  ##   resourceGroupName: string (required)
+  ##                    : The Name of the resource group in which the workspace is located.
   ##   workspaceName: string (required)
   ##                : The name of the workspace.
-  var path_574208 = newJObject()
-  var body_574209 = newJObject()
-  add(path_574208, "resourceGroupName", newJString(resourceGroupName))
+  var path_564108 = newJObject()
+  var body_564109 = newJObject()
+  add(path_564108, "subscriptionId", newJString(subscriptionId))
   if artifactIds != nil:
-    body_574209 = artifactIds
-  add(path_574208, "subscriptionId", newJString(subscriptionId))
-  add(path_574208, "workspaceName", newJString(workspaceName))
-  result = call_574207.call(path_574208, nil, nil, nil, body_574209)
+    body_564109 = artifactIds
+  add(path_564108, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564108, "workspaceName", newJString(workspaceName))
+  result = call_564107.call(path_564108, nil, nil, nil, body_564109)
 
-var artifactsBatchGetStorageById* = Call_ArtifactsBatchGetStorageById_574199(
+var artifactsBatchGetStorageById* = Call_ArtifactsBatchGetStorageById_564099(
     name: "artifactsBatchGetStorageById", meth: HttpMethod.HttpPost,
     host: "azure.local", route: "/artifact/v2.0/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.MachineLearningServices/workspaces/{workspaceName}/artifacts/storageuri/batch/metadata",
-    validator: validate_ArtifactsBatchGetStorageById_574200, base: "",
-    url: url_ArtifactsBatchGetStorageById_574201, schemes: {Scheme.Https})
+    validator: validate_ArtifactsBatchGetStorageById_564100, base: "",
+    url: url_ArtifactsBatchGetStorageById_564101, schemes: {Scheme.Https})
 type
-  Call_ArtifactsListInContainer_574210 = ref object of OpenApiRestCall_573641
-proc url_ArtifactsListInContainer_574212(protocol: Scheme; host: string;
+  Call_ArtifactsListInContainer_564110 = ref object of OpenApiRestCall_563539
+proc url_ArtifactsListInContainer_564112(protocol: Scheme; host: string;
                                         base: string; route: string; path: JsonNode;
                                         query: JsonNode): Uri =
   result.scheme = $protocol
@@ -579,51 +582,50 @@ proc url_ArtifactsListInContainer_574212(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ArtifactsListInContainer_574211(path: JsonNode; query: JsonNode;
+proc validate_ArtifactsListInContainer_564111(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Get Artifacts metadata in a specific container or path.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The Name of the resource group in which the workspace is located.
   ##   origin: JString (required)
   ##         : The origin of the Artifact.
   ##   subscriptionId: JString (required)
   ##                 : The Azure Subscription ID.
   ##   container: JString (required)
   ##            : The container name.
+  ##   resourceGroupName: JString (required)
+  ##                    : The Name of the resource group in which the workspace is located.
   ##   workspaceName: JString (required)
   ##                : The name of the workspace.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_574213 = path.getOrDefault("resourceGroupName")
-  valid_574213 = validateParameter(valid_574213, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `origin` field"
+  var valid_564113 = path.getOrDefault("origin")
+  valid_564113 = validateParameter(valid_564113, JString, required = true,
                                  default = nil)
-  if valid_574213 != nil:
-    section.add "resourceGroupName", valid_574213
-  var valid_574214 = path.getOrDefault("origin")
-  valid_574214 = validateParameter(valid_574214, JString, required = true,
+  if valid_564113 != nil:
+    section.add "origin", valid_564113
+  var valid_564114 = path.getOrDefault("subscriptionId")
+  valid_564114 = validateParameter(valid_564114, JString, required = true,
                                  default = nil)
-  if valid_574214 != nil:
-    section.add "origin", valid_574214
-  var valid_574215 = path.getOrDefault("subscriptionId")
-  valid_574215 = validateParameter(valid_574215, JString, required = true,
+  if valid_564114 != nil:
+    section.add "subscriptionId", valid_564114
+  var valid_564115 = path.getOrDefault("container")
+  valid_564115 = validateParameter(valid_564115, JString, required = true,
                                  default = nil)
-  if valid_574215 != nil:
-    section.add "subscriptionId", valid_574215
-  var valid_574216 = path.getOrDefault("container")
-  valid_574216 = validateParameter(valid_574216, JString, required = true,
+  if valid_564115 != nil:
+    section.add "container", valid_564115
+  var valid_564116 = path.getOrDefault("resourceGroupName")
+  valid_564116 = validateParameter(valid_564116, JString, required = true,
                                  default = nil)
-  if valid_574216 != nil:
-    section.add "container", valid_574216
-  var valid_574217 = path.getOrDefault("workspaceName")
-  valid_574217 = validateParameter(valid_574217, JString, required = true,
+  if valid_564116 != nil:
+    section.add "resourceGroupName", valid_564116
+  var valid_564117 = path.getOrDefault("workspaceName")
+  valid_564117 = validateParameter(valid_564117, JString, required = true,
                                  default = nil)
-  if valid_574217 != nil:
-    section.add "workspaceName", valid_574217
+  if valid_564117 != nil:
+    section.add "workspaceName", valid_564117
   result.add "path", section
   ## parameters in `query` object:
   ##   path: JString
@@ -631,16 +633,16 @@ proc validate_ArtifactsListInContainer_574211(path: JsonNode; query: JsonNode;
   ##   continuationToken: JString
   ##                    : The continuation token.
   section = newJObject()
-  var valid_574218 = query.getOrDefault("path")
-  valid_574218 = validateParameter(valid_574218, JString, required = false,
+  var valid_564118 = query.getOrDefault("path")
+  valid_564118 = validateParameter(valid_564118, JString, required = false,
                                  default = nil)
-  if valid_574218 != nil:
-    section.add "path", valid_574218
-  var valid_574219 = query.getOrDefault("continuationToken")
-  valid_574219 = validateParameter(valid_574219, JString, required = false,
+  if valid_564118 != nil:
+    section.add "path", valid_564118
+  var valid_564119 = query.getOrDefault("continuationToken")
+  valid_564119 = validateParameter(valid_564119, JString, required = false,
                                  default = nil)
-  if valid_574219 != nil:
-    section.add "continuationToken", valid_574219
+  if valid_564119 != nil:
+    section.add "continuationToken", valid_564119
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -649,57 +651,56 @@ proc validate_ArtifactsListInContainer_574211(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574220: Call_ArtifactsListInContainer_574210; path: JsonNode;
+proc call*(call_564120: Call_ArtifactsListInContainer_564110; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get Artifacts metadata in a specific container or path.
   ## 
-  let valid = call_574220.validator(path, query, header, formData, body)
-  let scheme = call_574220.pickScheme
+  let valid = call_564120.validator(path, query, header, formData, body)
+  let scheme = call_564120.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574220.url(scheme.get, call_574220.host, call_574220.base,
-                         call_574220.route, valid.getOrDefault("path"),
+  let url = call_564120.url(scheme.get, call_564120.host, call_564120.base,
+                         call_564120.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574220, url, valid)
+  result = hook(call_564120, url, valid)
 
-proc call*(call_574221: Call_ArtifactsListInContainer_574210;
-          resourceGroupName: string; origin: string; subscriptionId: string;
-          container: string; workspaceName: string; path: string = "";
-          continuationToken: string = ""): Recallable =
+proc call*(call_564121: Call_ArtifactsListInContainer_564110; origin: string;
+          subscriptionId: string; container: string; resourceGroupName: string;
+          workspaceName: string; path: string = ""; continuationToken: string = ""): Recallable =
   ## artifactsListInContainer
   ## Get Artifacts metadata in a specific container or path.
-  ##   resourceGroupName: string (required)
-  ##                    : The Name of the resource group in which the workspace is located.
   ##   origin: string (required)
   ##         : The origin of the Artifact.
-  ##   subscriptionId: string (required)
-  ##                 : The Azure Subscription ID.
-  ##   container: string (required)
-  ##            : The container name.
   ##   path: string
   ##       : The Artifact Path.
+  ##   subscriptionId: string (required)
+  ##                 : The Azure Subscription ID.
   ##   continuationToken: string
   ##                    : The continuation token.
+  ##   container: string (required)
+  ##            : The container name.
+  ##   resourceGroupName: string (required)
+  ##                    : The Name of the resource group in which the workspace is located.
   ##   workspaceName: string (required)
   ##                : The name of the workspace.
-  var path_574222 = newJObject()
-  var query_574223 = newJObject()
-  add(path_574222, "resourceGroupName", newJString(resourceGroupName))
-  add(path_574222, "origin", newJString(origin))
-  add(path_574222, "subscriptionId", newJString(subscriptionId))
-  add(path_574222, "container", newJString(container))
-  add(query_574223, "path", newJString(path))
-  add(query_574223, "continuationToken", newJString(continuationToken))
-  add(path_574222, "workspaceName", newJString(workspaceName))
-  result = call_574221.call(path_574222, query_574223, nil, nil, nil)
+  var path_564122 = newJObject()
+  var query_564123 = newJObject()
+  add(path_564122, "origin", newJString(origin))
+  add(query_564123, "path", newJString(path))
+  add(path_564122, "subscriptionId", newJString(subscriptionId))
+  add(query_564123, "continuationToken", newJString(continuationToken))
+  add(path_564122, "container", newJString(container))
+  add(path_564122, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564122, "workspaceName", newJString(workspaceName))
+  result = call_564121.call(path_564122, query_564123, nil, nil, nil)
 
-var artifactsListInContainer* = Call_ArtifactsListInContainer_574210(
+var artifactsListInContainer* = Call_ArtifactsListInContainer_564110(
     name: "artifactsListInContainer", meth: HttpMethod.HttpGet, host: "azure.local", route: "/artifact/v2.0/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.MachineLearningServices/workspaces/{workspaceName}/artifacts/{origin}/{container}",
-    validator: validate_ArtifactsListInContainer_574211, base: "",
-    url: url_ArtifactsListInContainer_574212, schemes: {Scheme.Https})
+    validator: validate_ArtifactsListInContainer_564111, base: "",
+    url: url_ArtifactsListInContainer_564112, schemes: {Scheme.Https})
 type
-  Call_ArtifactsDeleteMetaDataInContainer_574224 = ref object of OpenApiRestCall_573641
-proc url_ArtifactsDeleteMetaDataInContainer_574226(protocol: Scheme; host: string;
+  Call_ArtifactsDeleteMetaDataInContainer_564124 = ref object of OpenApiRestCall_563539
+proc url_ArtifactsDeleteMetaDataInContainer_564126(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -729,61 +730,60 @@ proc url_ArtifactsDeleteMetaDataInContainer_574226(protocol: Scheme; host: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ArtifactsDeleteMetaDataInContainer_574225(path: JsonNode;
+proc validate_ArtifactsDeleteMetaDataInContainer_564125(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Delete Artifact Metadata in a specific container.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The Name of the resource group in which the workspace is located.
   ##   origin: JString (required)
   ##         : The origin of the Artifact.
   ##   subscriptionId: JString (required)
   ##                 : The Azure Subscription ID.
   ##   container: JString (required)
   ##            : The container name.
+  ##   resourceGroupName: JString (required)
+  ##                    : The Name of the resource group in which the workspace is located.
   ##   workspaceName: JString (required)
   ##                : The name of the workspace.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_574227 = path.getOrDefault("resourceGroupName")
-  valid_574227 = validateParameter(valid_574227, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `origin` field"
+  var valid_564127 = path.getOrDefault("origin")
+  valid_564127 = validateParameter(valid_564127, JString, required = true,
                                  default = nil)
-  if valid_574227 != nil:
-    section.add "resourceGroupName", valid_574227
-  var valid_574228 = path.getOrDefault("origin")
-  valid_574228 = validateParameter(valid_574228, JString, required = true,
+  if valid_564127 != nil:
+    section.add "origin", valid_564127
+  var valid_564128 = path.getOrDefault("subscriptionId")
+  valid_564128 = validateParameter(valid_564128, JString, required = true,
                                  default = nil)
-  if valid_574228 != nil:
-    section.add "origin", valid_574228
-  var valid_574229 = path.getOrDefault("subscriptionId")
-  valid_574229 = validateParameter(valid_574229, JString, required = true,
+  if valid_564128 != nil:
+    section.add "subscriptionId", valid_564128
+  var valid_564129 = path.getOrDefault("container")
+  valid_564129 = validateParameter(valid_564129, JString, required = true,
                                  default = nil)
-  if valid_574229 != nil:
-    section.add "subscriptionId", valid_574229
-  var valid_574230 = path.getOrDefault("container")
-  valid_574230 = validateParameter(valid_574230, JString, required = true,
+  if valid_564129 != nil:
+    section.add "container", valid_564129
+  var valid_564130 = path.getOrDefault("resourceGroupName")
+  valid_564130 = validateParameter(valid_564130, JString, required = true,
                                  default = nil)
-  if valid_574230 != nil:
-    section.add "container", valid_574230
-  var valid_574231 = path.getOrDefault("workspaceName")
-  valid_574231 = validateParameter(valid_574231, JString, required = true,
+  if valid_564130 != nil:
+    section.add "resourceGroupName", valid_564130
+  var valid_564131 = path.getOrDefault("workspaceName")
+  valid_564131 = validateParameter(valid_564131, JString, required = true,
                                  default = nil)
-  if valid_574231 != nil:
-    section.add "workspaceName", valid_574231
+  if valid_564131 != nil:
+    section.add "workspaceName", valid_564131
   result.add "path", section
   ## parameters in `query` object:
   ##   hardDelete: JBool
   ##             : If set to true. The delete cannot be revert at later time.
   section = newJObject()
-  var valid_574245 = query.getOrDefault("hardDelete")
-  valid_574245 = validateParameter(valid_574245, JBool, required = false,
+  var valid_564145 = query.getOrDefault("hardDelete")
+  valid_564145 = validateParameter(valid_564145, JBool, required = false,
                                  default = newJBool(false))
-  if valid_574245 != nil:
-    section.add "hardDelete", valid_574245
+  if valid_564145 != nil:
+    section.add "hardDelete", valid_564145
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -792,55 +792,55 @@ proc validate_ArtifactsDeleteMetaDataInContainer_574225(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574246: Call_ArtifactsDeleteMetaDataInContainer_574224;
+proc call*(call_564146: Call_ArtifactsDeleteMetaDataInContainer_564124;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Delete Artifact Metadata in a specific container.
   ## 
-  let valid = call_574246.validator(path, query, header, formData, body)
-  let scheme = call_574246.pickScheme
+  let valid = call_564146.validator(path, query, header, formData, body)
+  let scheme = call_564146.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574246.url(scheme.get, call_574246.host, call_574246.base,
-                         call_574246.route, valid.getOrDefault("path"),
+  let url = call_564146.url(scheme.get, call_564146.host, call_564146.base,
+                         call_564146.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574246, url, valid)
+  result = hook(call_564146, url, valid)
 
-proc call*(call_574247: Call_ArtifactsDeleteMetaDataInContainer_574224;
-          resourceGroupName: string; origin: string; subscriptionId: string;
-          container: string; workspaceName: string; hardDelete: bool = false): Recallable =
+proc call*(call_564147: Call_ArtifactsDeleteMetaDataInContainer_564124;
+          origin: string; subscriptionId: string; container: string;
+          resourceGroupName: string; workspaceName: string; hardDelete: bool = false): Recallable =
   ## artifactsDeleteMetaDataInContainer
   ## Delete Artifact Metadata in a specific container.
-  ##   resourceGroupName: string (required)
-  ##                    : The Name of the resource group in which the workspace is located.
+  ##   hardDelete: bool
+  ##             : If set to true. The delete cannot be revert at later time.
   ##   origin: string (required)
   ##         : The origin of the Artifact.
   ##   subscriptionId: string (required)
   ##                 : The Azure Subscription ID.
-  ##   hardDelete: bool
-  ##             : If set to true. The delete cannot be revert at later time.
   ##   container: string (required)
   ##            : The container name.
+  ##   resourceGroupName: string (required)
+  ##                    : The Name of the resource group in which the workspace is located.
   ##   workspaceName: string (required)
   ##                : The name of the workspace.
-  var path_574248 = newJObject()
-  var query_574249 = newJObject()
-  add(path_574248, "resourceGroupName", newJString(resourceGroupName))
-  add(path_574248, "origin", newJString(origin))
-  add(path_574248, "subscriptionId", newJString(subscriptionId))
-  add(query_574249, "hardDelete", newJBool(hardDelete))
-  add(path_574248, "container", newJString(container))
-  add(path_574248, "workspaceName", newJString(workspaceName))
-  result = call_574247.call(path_574248, query_574249, nil, nil, nil)
+  var path_564148 = newJObject()
+  var query_564149 = newJObject()
+  add(query_564149, "hardDelete", newJBool(hardDelete))
+  add(path_564148, "origin", newJString(origin))
+  add(path_564148, "subscriptionId", newJString(subscriptionId))
+  add(path_564148, "container", newJString(container))
+  add(path_564148, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564148, "workspaceName", newJString(workspaceName))
+  result = call_564147.call(path_564148, query_564149, nil, nil, nil)
 
-var artifactsDeleteMetaDataInContainer* = Call_ArtifactsDeleteMetaDataInContainer_574224(
+var artifactsDeleteMetaDataInContainer* = Call_ArtifactsDeleteMetaDataInContainer_564124(
     name: "artifactsDeleteMetaDataInContainer", meth: HttpMethod.HttpDelete,
     host: "azure.local", route: "/artifact/v2.0/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.MachineLearningServices/workspaces/{workspaceName}/artifacts/{origin}/{container}/batch",
-    validator: validate_ArtifactsDeleteMetaDataInContainer_574225, base: "",
-    url: url_ArtifactsDeleteMetaDataInContainer_574226, schemes: {Scheme.Https})
+    validator: validate_ArtifactsDeleteMetaDataInContainer_564125, base: "",
+    url: url_ArtifactsDeleteMetaDataInContainer_564126, schemes: {Scheme.Https})
 type
-  Call_ArtifactsBatchIngestFromSas_574250 = ref object of OpenApiRestCall_573641
-proc url_ArtifactsBatchIngestFromSas_574252(protocol: Scheme; host: string;
+  Call_ArtifactsBatchIngestFromSas_564150 = ref object of OpenApiRestCall_563539
+proc url_ArtifactsBatchIngestFromSas_564152(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -870,51 +870,50 @@ proc url_ArtifactsBatchIngestFromSas_574252(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ArtifactsBatchIngestFromSas_574251(path: JsonNode; query: JsonNode;
+proc validate_ArtifactsBatchIngestFromSas_564151(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Ingest Batch Artifacts using shared access signature.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The Name of the resource group in which the workspace is located.
   ##   origin: JString (required)
   ##         : The origin of the Artifact.
   ##   subscriptionId: JString (required)
   ##                 : The Azure Subscription ID.
   ##   container: JString (required)
   ##            : The container name.
+  ##   resourceGroupName: JString (required)
+  ##                    : The Name of the resource group in which the workspace is located.
   ##   workspaceName: JString (required)
   ##                : The name of the workspace.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_574253 = path.getOrDefault("resourceGroupName")
-  valid_574253 = validateParameter(valid_574253, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `origin` field"
+  var valid_564153 = path.getOrDefault("origin")
+  valid_564153 = validateParameter(valid_564153, JString, required = true,
                                  default = nil)
-  if valid_574253 != nil:
-    section.add "resourceGroupName", valid_574253
-  var valid_574254 = path.getOrDefault("origin")
-  valid_574254 = validateParameter(valid_574254, JString, required = true,
+  if valid_564153 != nil:
+    section.add "origin", valid_564153
+  var valid_564154 = path.getOrDefault("subscriptionId")
+  valid_564154 = validateParameter(valid_564154, JString, required = true,
                                  default = nil)
-  if valid_574254 != nil:
-    section.add "origin", valid_574254
-  var valid_574255 = path.getOrDefault("subscriptionId")
-  valid_574255 = validateParameter(valid_574255, JString, required = true,
+  if valid_564154 != nil:
+    section.add "subscriptionId", valid_564154
+  var valid_564155 = path.getOrDefault("container")
+  valid_564155 = validateParameter(valid_564155, JString, required = true,
                                  default = nil)
-  if valid_574255 != nil:
-    section.add "subscriptionId", valid_574255
-  var valid_574256 = path.getOrDefault("container")
-  valid_574256 = validateParameter(valid_574256, JString, required = true,
+  if valid_564155 != nil:
+    section.add "container", valid_564155
+  var valid_564156 = path.getOrDefault("resourceGroupName")
+  valid_564156 = validateParameter(valid_564156, JString, required = true,
                                  default = nil)
-  if valid_574256 != nil:
-    section.add "container", valid_574256
-  var valid_574257 = path.getOrDefault("workspaceName")
-  valid_574257 = validateParameter(valid_574257, JString, required = true,
+  if valid_564156 != nil:
+    section.add "resourceGroupName", valid_564156
+  var valid_564157 = path.getOrDefault("workspaceName")
+  valid_564157 = validateParameter(valid_564157, JString, required = true,
                                  default = nil)
-  if valid_574257 != nil:
-    section.add "workspaceName", valid_574257
+  if valid_564157 != nil:
+    section.add "workspaceName", valid_564157
   result.add "path", section
   section = newJObject()
   result.add "query", section
@@ -930,55 +929,55 @@ proc validate_ArtifactsBatchIngestFromSas_574251(path: JsonNode; query: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_574259: Call_ArtifactsBatchIngestFromSas_574250; path: JsonNode;
+proc call*(call_564159: Call_ArtifactsBatchIngestFromSas_564150; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Ingest Batch Artifacts using shared access signature.
   ## 
-  let valid = call_574259.validator(path, query, header, formData, body)
-  let scheme = call_574259.pickScheme
+  let valid = call_564159.validator(path, query, header, formData, body)
+  let scheme = call_564159.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574259.url(scheme.get, call_574259.host, call_574259.base,
-                         call_574259.route, valid.getOrDefault("path"),
+  let url = call_564159.url(scheme.get, call_564159.host, call_564159.base,
+                         call_564159.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574259, url, valid)
+  result = hook(call_564159, url, valid)
 
-proc call*(call_574260: Call_ArtifactsBatchIngestFromSas_574250;
-          resourceGroupName: string; origin: string; subscriptionId: string;
-          container: string; workspaceName: string; artifactContainerSas: JsonNode): Recallable =
+proc call*(call_564160: Call_ArtifactsBatchIngestFromSas_564150; origin: string;
+          artifactContainerSas: JsonNode; subscriptionId: string; container: string;
+          resourceGroupName: string; workspaceName: string): Recallable =
   ## artifactsBatchIngestFromSas
   ## Ingest Batch Artifacts using shared access signature.
-  ##   resourceGroupName: string (required)
-  ##                    : The Name of the resource group in which the workspace is located.
   ##   origin: string (required)
   ##         : The origin of the Artifact.
+  ##   artifactContainerSas: JObject (required)
+  ##                       : The artifact container shared access signature to use for batch ingest.
   ##   subscriptionId: string (required)
   ##                 : The Azure Subscription ID.
   ##   container: string (required)
   ##            : The container name.
+  ##   resourceGroupName: string (required)
+  ##                    : The Name of the resource group in which the workspace is located.
   ##   workspaceName: string (required)
   ##                : The name of the workspace.
-  ##   artifactContainerSas: JObject (required)
-  ##                       : The artifact container shared access signature to use for batch ingest.
-  var path_574261 = newJObject()
-  var body_574262 = newJObject()
-  add(path_574261, "resourceGroupName", newJString(resourceGroupName))
-  add(path_574261, "origin", newJString(origin))
-  add(path_574261, "subscriptionId", newJString(subscriptionId))
-  add(path_574261, "container", newJString(container))
-  add(path_574261, "workspaceName", newJString(workspaceName))
+  var path_564161 = newJObject()
+  var body_564162 = newJObject()
+  add(path_564161, "origin", newJString(origin))
   if artifactContainerSas != nil:
-    body_574262 = artifactContainerSas
-  result = call_574260.call(path_574261, nil, nil, nil, body_574262)
+    body_564162 = artifactContainerSas
+  add(path_564161, "subscriptionId", newJString(subscriptionId))
+  add(path_564161, "container", newJString(container))
+  add(path_564161, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564161, "workspaceName", newJString(workspaceName))
+  result = call_564160.call(path_564161, nil, nil, nil, body_564162)
 
-var artifactsBatchIngestFromSas* = Call_ArtifactsBatchIngestFromSas_574250(
+var artifactsBatchIngestFromSas* = Call_ArtifactsBatchIngestFromSas_564150(
     name: "artifactsBatchIngestFromSas", meth: HttpMethod.HttpPost,
     host: "azure.local", route: "/artifact/v2.0/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.MachineLearningServices/workspaces/{workspaceName}/artifacts/{origin}/{container}/batch/ingest/containersas",
-    validator: validate_ArtifactsBatchIngestFromSas_574251, base: "",
-    url: url_ArtifactsBatchIngestFromSas_574252, schemes: {Scheme.Https})
+    validator: validate_ArtifactsBatchIngestFromSas_564151, base: "",
+    url: url_ArtifactsBatchIngestFromSas_564152, schemes: {Scheme.Https})
 type
-  Call_ArtifactsBatchCreateEmptyArtifacts_574263 = ref object of OpenApiRestCall_573641
-proc url_ArtifactsBatchCreateEmptyArtifacts_574265(protocol: Scheme; host: string;
+  Call_ArtifactsBatchCreateEmptyArtifacts_564163 = ref object of OpenApiRestCall_563539
+proc url_ArtifactsBatchCreateEmptyArtifacts_564165(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1008,51 +1007,50 @@ proc url_ArtifactsBatchCreateEmptyArtifacts_574265(protocol: Scheme; host: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ArtifactsBatchCreateEmptyArtifacts_574264(path: JsonNode;
+proc validate_ArtifactsBatchCreateEmptyArtifacts_564164(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Create a Batch of empty Artifacts from the supplied paths.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The Name of the resource group in which the workspace is located.
   ##   origin: JString (required)
   ##         : The origin of the Artifact.
   ##   subscriptionId: JString (required)
   ##                 : The Azure Subscription ID.
   ##   container: JString (required)
   ##            : The container name.
+  ##   resourceGroupName: JString (required)
+  ##                    : The Name of the resource group in which the workspace is located.
   ##   workspaceName: JString (required)
   ##                : The name of the workspace.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_574266 = path.getOrDefault("resourceGroupName")
-  valid_574266 = validateParameter(valid_574266, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `origin` field"
+  var valid_564166 = path.getOrDefault("origin")
+  valid_564166 = validateParameter(valid_564166, JString, required = true,
                                  default = nil)
-  if valid_574266 != nil:
-    section.add "resourceGroupName", valid_574266
-  var valid_574267 = path.getOrDefault("origin")
-  valid_574267 = validateParameter(valid_574267, JString, required = true,
+  if valid_564166 != nil:
+    section.add "origin", valid_564166
+  var valid_564167 = path.getOrDefault("subscriptionId")
+  valid_564167 = validateParameter(valid_564167, JString, required = true,
                                  default = nil)
-  if valid_574267 != nil:
-    section.add "origin", valid_574267
-  var valid_574268 = path.getOrDefault("subscriptionId")
-  valid_574268 = validateParameter(valid_574268, JString, required = true,
+  if valid_564167 != nil:
+    section.add "subscriptionId", valid_564167
+  var valid_564168 = path.getOrDefault("container")
+  valid_564168 = validateParameter(valid_564168, JString, required = true,
                                  default = nil)
-  if valid_574268 != nil:
-    section.add "subscriptionId", valid_574268
-  var valid_574269 = path.getOrDefault("container")
-  valid_574269 = validateParameter(valid_574269, JString, required = true,
+  if valid_564168 != nil:
+    section.add "container", valid_564168
+  var valid_564169 = path.getOrDefault("resourceGroupName")
+  valid_564169 = validateParameter(valid_564169, JString, required = true,
                                  default = nil)
-  if valid_574269 != nil:
-    section.add "container", valid_574269
-  var valid_574270 = path.getOrDefault("workspaceName")
-  valid_574270 = validateParameter(valid_574270, JString, required = true,
+  if valid_564169 != nil:
+    section.add "resourceGroupName", valid_564169
+  var valid_564170 = path.getOrDefault("workspaceName")
+  valid_564170 = validateParameter(valid_564170, JString, required = true,
                                  default = nil)
-  if valid_574270 != nil:
-    section.add "workspaceName", valid_574270
+  if valid_564170 != nil:
+    section.add "workspaceName", valid_564170
   result.add "path", section
   section = newJObject()
   result.add "query", section
@@ -1068,56 +1066,56 @@ proc validate_ArtifactsBatchCreateEmptyArtifacts_574264(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574272: Call_ArtifactsBatchCreateEmptyArtifacts_574263;
+proc call*(call_564172: Call_ArtifactsBatchCreateEmptyArtifacts_564163;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Create a Batch of empty Artifacts from the supplied paths.
   ## 
-  let valid = call_574272.validator(path, query, header, formData, body)
-  let scheme = call_574272.pickScheme
+  let valid = call_564172.validator(path, query, header, formData, body)
+  let scheme = call_564172.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574272.url(scheme.get, call_574272.host, call_574272.base,
-                         call_574272.route, valid.getOrDefault("path"),
+  let url = call_564172.url(scheme.get, call_564172.host, call_564172.base,
+                         call_564172.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574272, url, valid)
+  result = hook(call_564172, url, valid)
 
-proc call*(call_574273: Call_ArtifactsBatchCreateEmptyArtifacts_574263;
-          resourceGroupName: string; origin: string; subscriptionId: string;
-          container: string; artifactPaths: JsonNode; workspaceName: string): Recallable =
+proc call*(call_564173: Call_ArtifactsBatchCreateEmptyArtifacts_564163;
+          origin: string; subscriptionId: string; container: string;
+          resourceGroupName: string; artifactPaths: JsonNode; workspaceName: string): Recallable =
   ## artifactsBatchCreateEmptyArtifacts
   ## Create a Batch of empty Artifacts from the supplied paths.
-  ##   resourceGroupName: string (required)
-  ##                    : The Name of the resource group in which the workspace is located.
   ##   origin: string (required)
   ##         : The origin of the Artifact.
   ##   subscriptionId: string (required)
   ##                 : The Azure Subscription ID.
   ##   container: string (required)
   ##            : The container name.
+  ##   resourceGroupName: string (required)
+  ##                    : The Name of the resource group in which the workspace is located.
   ##   artifactPaths: JObject (required)
   ##                : The list of Artifact paths to create.
   ##   workspaceName: string (required)
   ##                : The name of the workspace.
-  var path_574274 = newJObject()
-  var body_574275 = newJObject()
-  add(path_574274, "resourceGroupName", newJString(resourceGroupName))
-  add(path_574274, "origin", newJString(origin))
-  add(path_574274, "subscriptionId", newJString(subscriptionId))
-  add(path_574274, "container", newJString(container))
+  var path_564174 = newJObject()
+  var body_564175 = newJObject()
+  add(path_564174, "origin", newJString(origin))
+  add(path_564174, "subscriptionId", newJString(subscriptionId))
+  add(path_564174, "container", newJString(container))
+  add(path_564174, "resourceGroupName", newJString(resourceGroupName))
   if artifactPaths != nil:
-    body_574275 = artifactPaths
-  add(path_574274, "workspaceName", newJString(workspaceName))
-  result = call_574273.call(path_574274, nil, nil, nil, body_574275)
+    body_564175 = artifactPaths
+  add(path_564174, "workspaceName", newJString(workspaceName))
+  result = call_564173.call(path_564174, nil, nil, nil, body_564175)
 
-var artifactsBatchCreateEmptyArtifacts* = Call_ArtifactsBatchCreateEmptyArtifacts_574263(
+var artifactsBatchCreateEmptyArtifacts* = Call_ArtifactsBatchCreateEmptyArtifacts_564163(
     name: "artifactsBatchCreateEmptyArtifacts", meth: HttpMethod.HttpPost,
     host: "azure.local", route: "/artifact/v2.0/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.MachineLearningServices/workspaces/{workspaceName}/artifacts/{origin}/{container}/batch/metadata",
-    validator: validate_ArtifactsBatchCreateEmptyArtifacts_574264, base: "",
-    url: url_ArtifactsBatchCreateEmptyArtifacts_574265, schemes: {Scheme.Https})
+    validator: validate_ArtifactsBatchCreateEmptyArtifacts_564164, base: "",
+    url: url_ArtifactsBatchCreateEmptyArtifacts_564165, schemes: {Scheme.Https})
 type
-  Call_ArtifactsDeleteBatchMetaData_574276 = ref object of OpenApiRestCall_573641
-proc url_ArtifactsDeleteBatchMetaData_574278(protocol: Scheme; host: string;
+  Call_ArtifactsDeleteBatchMetaData_564176 = ref object of OpenApiRestCall_563539
+proc url_ArtifactsDeleteBatchMetaData_564178(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1147,61 +1145,60 @@ proc url_ArtifactsDeleteBatchMetaData_574278(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ArtifactsDeleteBatchMetaData_574277(path: JsonNode; query: JsonNode;
+proc validate_ArtifactsDeleteBatchMetaData_564177(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Delete a Batch of Artifact Metadata.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The Name of the resource group in which the workspace is located.
   ##   origin: JString (required)
   ##         : The origin of the Artifact.
   ##   subscriptionId: JString (required)
   ##                 : The Azure Subscription ID.
   ##   container: JString (required)
   ##            : The container name.
+  ##   resourceGroupName: JString (required)
+  ##                    : The Name of the resource group in which the workspace is located.
   ##   workspaceName: JString (required)
   ##                : The name of the workspace.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_574279 = path.getOrDefault("resourceGroupName")
-  valid_574279 = validateParameter(valid_574279, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `origin` field"
+  var valid_564179 = path.getOrDefault("origin")
+  valid_564179 = validateParameter(valid_564179, JString, required = true,
                                  default = nil)
-  if valid_574279 != nil:
-    section.add "resourceGroupName", valid_574279
-  var valid_574280 = path.getOrDefault("origin")
-  valid_574280 = validateParameter(valid_574280, JString, required = true,
+  if valid_564179 != nil:
+    section.add "origin", valid_564179
+  var valid_564180 = path.getOrDefault("subscriptionId")
+  valid_564180 = validateParameter(valid_564180, JString, required = true,
                                  default = nil)
-  if valid_574280 != nil:
-    section.add "origin", valid_574280
-  var valid_574281 = path.getOrDefault("subscriptionId")
-  valid_574281 = validateParameter(valid_574281, JString, required = true,
+  if valid_564180 != nil:
+    section.add "subscriptionId", valid_564180
+  var valid_564181 = path.getOrDefault("container")
+  valid_564181 = validateParameter(valid_564181, JString, required = true,
                                  default = nil)
-  if valid_574281 != nil:
-    section.add "subscriptionId", valid_574281
-  var valid_574282 = path.getOrDefault("container")
-  valid_574282 = validateParameter(valid_574282, JString, required = true,
+  if valid_564181 != nil:
+    section.add "container", valid_564181
+  var valid_564182 = path.getOrDefault("resourceGroupName")
+  valid_564182 = validateParameter(valid_564182, JString, required = true,
                                  default = nil)
-  if valid_574282 != nil:
-    section.add "container", valid_574282
-  var valid_574283 = path.getOrDefault("workspaceName")
-  valid_574283 = validateParameter(valid_574283, JString, required = true,
+  if valid_564182 != nil:
+    section.add "resourceGroupName", valid_564182
+  var valid_564183 = path.getOrDefault("workspaceName")
+  valid_564183 = validateParameter(valid_564183, JString, required = true,
                                  default = nil)
-  if valid_574283 != nil:
-    section.add "workspaceName", valid_574283
+  if valid_564183 != nil:
+    section.add "workspaceName", valid_564183
   result.add "path", section
   ## parameters in `query` object:
   ##   hardDelete: JBool
   ##             : If set to true, the delete cannot be reverted at a later time.
   section = newJObject()
-  var valid_574284 = query.getOrDefault("hardDelete")
-  valid_574284 = validateParameter(valid_574284, JBool, required = false,
+  var valid_564184 = query.getOrDefault("hardDelete")
+  valid_564184 = validateParameter(valid_564184, JBool, required = false,
                                  default = newJBool(false))
-  if valid_574284 != nil:
-    section.add "hardDelete", valid_574284
+  if valid_564184 != nil:
+    section.add "hardDelete", valid_564184
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1215,60 +1212,59 @@ proc validate_ArtifactsDeleteBatchMetaData_574277(path: JsonNode; query: JsonNod
   if body != nil:
     result.add "body", body
 
-proc call*(call_574286: Call_ArtifactsDeleteBatchMetaData_574276; path: JsonNode;
+proc call*(call_564186: Call_ArtifactsDeleteBatchMetaData_564176; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Delete a Batch of Artifact Metadata.
   ## 
-  let valid = call_574286.validator(path, query, header, formData, body)
-  let scheme = call_574286.pickScheme
+  let valid = call_564186.validator(path, query, header, formData, body)
+  let scheme = call_564186.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574286.url(scheme.get, call_574286.host, call_574286.base,
-                         call_574286.route, valid.getOrDefault("path"),
+  let url = call_564186.url(scheme.get, call_564186.host, call_564186.base,
+                         call_564186.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574286, url, valid)
+  result = hook(call_564186, url, valid)
 
-proc call*(call_574287: Call_ArtifactsDeleteBatchMetaData_574276;
-          resourceGroupName: string; origin: string; subscriptionId: string;
-          container: string; artifactPaths: JsonNode; workspaceName: string;
-          hardDelete: bool = false): Recallable =
+proc call*(call_564187: Call_ArtifactsDeleteBatchMetaData_564176; origin: string;
+          subscriptionId: string; container: string; resourceGroupName: string;
+          artifactPaths: JsonNode; workspaceName: string; hardDelete: bool = false): Recallable =
   ## artifactsDeleteBatchMetaData
   ## Delete a Batch of Artifact Metadata.
-  ##   resourceGroupName: string (required)
-  ##                    : The Name of the resource group in which the workspace is located.
+  ##   hardDelete: bool
+  ##             : If set to true, the delete cannot be reverted at a later time.
   ##   origin: string (required)
   ##         : The origin of the Artifact.
   ##   subscriptionId: string (required)
   ##                 : The Azure Subscription ID.
-  ##   hardDelete: bool
-  ##             : If set to true, the delete cannot be reverted at a later time.
   ##   container: string (required)
   ##            : The container name.
+  ##   resourceGroupName: string (required)
+  ##                    : The Name of the resource group in which the workspace is located.
   ##   artifactPaths: JObject (required)
   ##                : The list of Artifact paths to delete.
   ##   workspaceName: string (required)
   ##                : The name of the workspace.
-  var path_574288 = newJObject()
-  var query_574289 = newJObject()
-  var body_574290 = newJObject()
-  add(path_574288, "resourceGroupName", newJString(resourceGroupName))
-  add(path_574288, "origin", newJString(origin))
-  add(path_574288, "subscriptionId", newJString(subscriptionId))
-  add(query_574289, "hardDelete", newJBool(hardDelete))
-  add(path_574288, "container", newJString(container))
+  var path_564188 = newJObject()
+  var query_564189 = newJObject()
+  var body_564190 = newJObject()
+  add(query_564189, "hardDelete", newJBool(hardDelete))
+  add(path_564188, "origin", newJString(origin))
+  add(path_564188, "subscriptionId", newJString(subscriptionId))
+  add(path_564188, "container", newJString(container))
+  add(path_564188, "resourceGroupName", newJString(resourceGroupName))
   if artifactPaths != nil:
-    body_574290 = artifactPaths
-  add(path_574288, "workspaceName", newJString(workspaceName))
-  result = call_574287.call(path_574288, query_574289, nil, nil, body_574290)
+    body_564190 = artifactPaths
+  add(path_564188, "workspaceName", newJString(workspaceName))
+  result = call_564187.call(path_564188, query_564189, nil, nil, body_564190)
 
-var artifactsDeleteBatchMetaData* = Call_ArtifactsDeleteBatchMetaData_574276(
+var artifactsDeleteBatchMetaData* = Call_ArtifactsDeleteBatchMetaData_564176(
     name: "artifactsDeleteBatchMetaData", meth: HttpMethod.HttpPost,
     host: "azure.local", route: "/artifact/v2.0/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.MachineLearningServices/workspaces/{workspaceName}/artifacts/{origin}/{container}/batch/metadata:delete",
-    validator: validate_ArtifactsDeleteBatchMetaData_574277, base: "",
-    url: url_ArtifactsDeleteBatchMetaData_574278, schemes: {Scheme.Https})
+    validator: validate_ArtifactsDeleteBatchMetaData_564177, base: "",
+    url: url_ArtifactsDeleteBatchMetaData_564178, schemes: {Scheme.Https})
 type
-  Call_ArtifactsUpload_574304 = ref object of OpenApiRestCall_573641
-proc url_ArtifactsUpload_574306(protocol: Scheme; host: string; base: string;
+  Call_ArtifactsUpload_564204 = ref object of OpenApiRestCall_563539
+proc url_ArtifactsUpload_564206(protocol: Scheme; host: string; base: string;
                                route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1298,7 +1294,7 @@ proc url_ArtifactsUpload_574306(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ArtifactsUpload_574305(path: JsonNode; query: JsonNode;
+proc validate_ArtifactsUpload_564205(path: JsonNode; query: JsonNode;
                                     header: JsonNode; formData: JsonNode;
                                     body: JsonNode): JsonNode =
   ## Upload content to an Artifact.
@@ -1306,74 +1302,73 @@ proc validate_ArtifactsUpload_574305(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The Name of the resource group in which the workspace is located.
   ##   origin: JString (required)
   ##         : The origin of the Artifact.
   ##   subscriptionId: JString (required)
   ##                 : The Azure Subscription ID.
   ##   container: JString (required)
   ##            : The container name.
+  ##   resourceGroupName: JString (required)
+  ##                    : The Name of the resource group in which the workspace is located.
   ##   workspaceName: JString (required)
   ##                : The name of the workspace.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_574307 = path.getOrDefault("resourceGroupName")
-  valid_574307 = validateParameter(valid_574307, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `origin` field"
+  var valid_564207 = path.getOrDefault("origin")
+  valid_564207 = validateParameter(valid_564207, JString, required = true,
                                  default = nil)
-  if valid_574307 != nil:
-    section.add "resourceGroupName", valid_574307
-  var valid_574308 = path.getOrDefault("origin")
-  valid_574308 = validateParameter(valid_574308, JString, required = true,
+  if valid_564207 != nil:
+    section.add "origin", valid_564207
+  var valid_564208 = path.getOrDefault("subscriptionId")
+  valid_564208 = validateParameter(valid_564208, JString, required = true,
                                  default = nil)
-  if valid_574308 != nil:
-    section.add "origin", valid_574308
-  var valid_574309 = path.getOrDefault("subscriptionId")
-  valid_574309 = validateParameter(valid_574309, JString, required = true,
+  if valid_564208 != nil:
+    section.add "subscriptionId", valid_564208
+  var valid_564209 = path.getOrDefault("container")
+  valid_564209 = validateParameter(valid_564209, JString, required = true,
                                  default = nil)
-  if valid_574309 != nil:
-    section.add "subscriptionId", valid_574309
-  var valid_574310 = path.getOrDefault("container")
-  valid_574310 = validateParameter(valid_574310, JString, required = true,
+  if valid_564209 != nil:
+    section.add "container", valid_564209
+  var valid_564210 = path.getOrDefault("resourceGroupName")
+  valid_564210 = validateParameter(valid_564210, JString, required = true,
                                  default = nil)
-  if valid_574310 != nil:
-    section.add "container", valid_574310
-  var valid_574311 = path.getOrDefault("workspaceName")
-  valid_574311 = validateParameter(valid_574311, JString, required = true,
+  if valid_564210 != nil:
+    section.add "resourceGroupName", valid_564210
+  var valid_564211 = path.getOrDefault("workspaceName")
+  valid_564211 = validateParameter(valid_564211, JString, required = true,
                                  default = nil)
-  if valid_574311 != nil:
-    section.add "workspaceName", valid_574311
+  if valid_564211 != nil:
+    section.add "workspaceName", valid_564211
   result.add "path", section
   ## parameters in `query` object:
-  ##   index: JInt
-  ##        : The index.
-  ##   append: JBool
-  ##         : Whether or not to append the content or replace it.
-  ##   path: JString
-  ##       : The Artifact Path.
   ##   allowOverwrite: JBool
   ##                 : whether to allow overwrite if Artifact Content exist already. when set to true, Overwrite happens if Artifact Content already exists
+  ##   append: JBool
+  ##         : Whether or not to append the content or replace it.
+  ##   index: JInt
+  ##        : The index.
+  ##   path: JString
+  ##       : The Artifact Path.
   section = newJObject()
-  var valid_574312 = query.getOrDefault("index")
-  valid_574312 = validateParameter(valid_574312, JInt, required = false, default = nil)
-  if valid_574312 != nil:
-    section.add "index", valid_574312
-  var valid_574313 = query.getOrDefault("append")
-  valid_574313 = validateParameter(valid_574313, JBool, required = false,
+  var valid_564212 = query.getOrDefault("allowOverwrite")
+  valid_564212 = validateParameter(valid_564212, JBool, required = false,
                                  default = newJBool(false))
-  if valid_574313 != nil:
-    section.add "append", valid_574313
-  var valid_574314 = query.getOrDefault("path")
-  valid_574314 = validateParameter(valid_574314, JString, required = false,
+  if valid_564212 != nil:
+    section.add "allowOverwrite", valid_564212
+  var valid_564213 = query.getOrDefault("append")
+  valid_564213 = validateParameter(valid_564213, JBool, required = false,
+                                 default = newJBool(false))
+  if valid_564213 != nil:
+    section.add "append", valid_564213
+  var valid_564214 = query.getOrDefault("index")
+  valid_564214 = validateParameter(valid_564214, JInt, required = false, default = nil)
+  if valid_564214 != nil:
+    section.add "index", valid_564214
+  var valid_564215 = query.getOrDefault("path")
+  valid_564215 = validateParameter(valid_564215, JString, required = false,
                                  default = nil)
-  if valid_574314 != nil:
-    section.add "path", valid_574314
-  var valid_574315 = query.getOrDefault("allowOverwrite")
-  valid_574315 = validateParameter(valid_574315, JBool, required = false,
-                                 default = newJBool(false))
-  if valid_574315 != nil:
-    section.add "allowOverwrite", valid_574315
+  if valid_564215 != nil:
+    section.add "path", valid_564215
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1387,68 +1382,69 @@ proc validate_ArtifactsUpload_574305(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574317: Call_ArtifactsUpload_574304; path: JsonNode; query: JsonNode;
+proc call*(call_564217: Call_ArtifactsUpload_564204; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Upload content to an Artifact.
   ## 
-  let valid = call_574317.validator(path, query, header, formData, body)
-  let scheme = call_574317.pickScheme
+  let valid = call_564217.validator(path, query, header, formData, body)
+  let scheme = call_564217.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574317.url(scheme.get, call_574317.host, call_574317.base,
-                         call_574317.route, valid.getOrDefault("path"),
+  let url = call_564217.url(scheme.get, call_564217.host, call_564217.base,
+                         call_564217.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574317, url, valid)
+  result = hook(call_564217, url, valid)
 
-proc call*(call_574318: Call_ArtifactsUpload_574304; resourceGroupName: string;
-          origin: string; subscriptionId: string; container: string;
-          content: JsonNode; workspaceName: string; index: int = 0;
-          append: bool = false; path: string = ""; allowOverwrite: bool = false): Recallable =
+proc call*(call_564218: Call_ArtifactsUpload_564204; origin: string;
+          content: JsonNode; subscriptionId: string; container: string;
+          resourceGroupName: string; workspaceName: string;
+          allowOverwrite: bool = false; append: bool = false; index: int = 0;
+          path: string = ""): Recallable =
   ## artifactsUpload
   ## Upload content to an Artifact.
-  ##   resourceGroupName: string (required)
-  ##                    : The Name of the resource group in which the workspace is located.
   ##   origin: string (required)
   ##         : The origin of the Artifact.
-  ##   index: int
-  ##        : The index.
+  ##   allowOverwrite: bool
+  ##                 : whether to allow overwrite if Artifact Content exist already. when set to true, Overwrite happens if Artifact Content already exists
   ##   append: bool
   ##         : Whether or not to append the content or replace it.
+  ##   index: int
+  ##        : The index.
+  ##   path: string
+  ##       : The Artifact Path.
+  ##   content: JString (required)
+  ##          : The file upload.
   ##   subscriptionId: string (required)
   ##                 : The Azure Subscription ID.
   ##   container: string (required)
   ##            : The container name.
-  ##   content: JString (required)
-  ##          : The file upload.
-  ##   path: string
-  ##       : The Artifact Path.
-  ##   allowOverwrite: bool
-  ##                 : whether to allow overwrite if Artifact Content exist already. when set to true, Overwrite happens if Artifact Content already exists
+  ##   resourceGroupName: string (required)
+  ##                    : The Name of the resource group in which the workspace is located.
   ##   workspaceName: string (required)
   ##                : The name of the workspace.
-  var path_574319 = newJObject()
-  var query_574320 = newJObject()
-  var body_574321 = newJObject()
-  add(path_574319, "resourceGroupName", newJString(resourceGroupName))
-  add(path_574319, "origin", newJString(origin))
-  add(query_574320, "index", newJInt(index))
-  add(query_574320, "append", newJBool(append))
-  add(path_574319, "subscriptionId", newJString(subscriptionId))
-  add(path_574319, "container", newJString(container))
+  var path_564219 = newJObject()
+  var query_564220 = newJObject()
+  var body_564221 = newJObject()
+  add(path_564219, "origin", newJString(origin))
+  add(query_564220, "allowOverwrite", newJBool(allowOverwrite))
+  add(query_564220, "append", newJBool(append))
+  add(query_564220, "index", newJInt(index))
+  add(query_564220, "path", newJString(path))
   if content != nil:
-    body_574321 = content
-  add(query_574320, "path", newJString(path))
-  add(query_574320, "allowOverwrite", newJBool(allowOverwrite))
-  add(path_574319, "workspaceName", newJString(workspaceName))
-  result = call_574318.call(path_574319, query_574320, nil, nil, body_574321)
+    body_564221 = content
+  add(path_564219, "subscriptionId", newJString(subscriptionId))
+  add(path_564219, "container", newJString(container))
+  add(path_564219, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564219, "workspaceName", newJString(workspaceName))
+  result = call_564218.call(path_564219, query_564220, nil, nil, body_564221)
 
-var artifactsUpload* = Call_ArtifactsUpload_574304(name: "artifactsUpload",
+var artifactsUpload* = Call_ArtifactsUpload_564204(name: "artifactsUpload",
     meth: HttpMethod.HttpPost, host: "azure.local", route: "/artifact/v2.0/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.MachineLearningServices/workspaces/{workspaceName}/artifacts/{origin}/{container}/content",
-    validator: validate_ArtifactsUpload_574305, base: "", url: url_ArtifactsUpload_574306,
+    validator: validate_ArtifactsUpload_564205, base: "", url: url_ArtifactsUpload_564206,
     schemes: {Scheme.Https})
 type
-  Call_ArtifactsDownload_574291 = ref object of OpenApiRestCall_573641
-proc url_ArtifactsDownload_574293(protocol: Scheme; host: string; base: string;
+  Call_ArtifactsDownload_564191 = ref object of OpenApiRestCall_563539
+proc url_ArtifactsDownload_564193(protocol: Scheme; host: string; base: string;
                                  route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1478,7 +1474,7 @@ proc url_ArtifactsDownload_574293(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ArtifactsDownload_574292(path: JsonNode; query: JsonNode;
+proc validate_ArtifactsDownload_564192(path: JsonNode; query: JsonNode;
                                       header: JsonNode; formData: JsonNode;
                                       body: JsonNode): JsonNode =
   ## Get Artifact content of a specific Id.
@@ -1486,54 +1482,53 @@ proc validate_ArtifactsDownload_574292(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The Name of the resource group in which the workspace is located.
   ##   origin: JString (required)
   ##         : The origin of the Artifact.
   ##   subscriptionId: JString (required)
   ##                 : The Azure Subscription ID.
   ##   container: JString (required)
   ##            : The container name.
+  ##   resourceGroupName: JString (required)
+  ##                    : The Name of the resource group in which the workspace is located.
   ##   workspaceName: JString (required)
   ##                : The name of the workspace.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_574294 = path.getOrDefault("resourceGroupName")
-  valid_574294 = validateParameter(valid_574294, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `origin` field"
+  var valid_564194 = path.getOrDefault("origin")
+  valid_564194 = validateParameter(valid_564194, JString, required = true,
                                  default = nil)
-  if valid_574294 != nil:
-    section.add "resourceGroupName", valid_574294
-  var valid_574295 = path.getOrDefault("origin")
-  valid_574295 = validateParameter(valid_574295, JString, required = true,
+  if valid_564194 != nil:
+    section.add "origin", valid_564194
+  var valid_564195 = path.getOrDefault("subscriptionId")
+  valid_564195 = validateParameter(valid_564195, JString, required = true,
                                  default = nil)
-  if valid_574295 != nil:
-    section.add "origin", valid_574295
-  var valid_574296 = path.getOrDefault("subscriptionId")
-  valid_574296 = validateParameter(valid_574296, JString, required = true,
+  if valid_564195 != nil:
+    section.add "subscriptionId", valid_564195
+  var valid_564196 = path.getOrDefault("container")
+  valid_564196 = validateParameter(valid_564196, JString, required = true,
                                  default = nil)
-  if valid_574296 != nil:
-    section.add "subscriptionId", valid_574296
-  var valid_574297 = path.getOrDefault("container")
-  valid_574297 = validateParameter(valid_574297, JString, required = true,
+  if valid_564196 != nil:
+    section.add "container", valid_564196
+  var valid_564197 = path.getOrDefault("resourceGroupName")
+  valid_564197 = validateParameter(valid_564197, JString, required = true,
                                  default = nil)
-  if valid_574297 != nil:
-    section.add "container", valid_574297
-  var valid_574298 = path.getOrDefault("workspaceName")
-  valid_574298 = validateParameter(valid_574298, JString, required = true,
+  if valid_564197 != nil:
+    section.add "resourceGroupName", valid_564197
+  var valid_564198 = path.getOrDefault("workspaceName")
+  valid_564198 = validateParameter(valid_564198, JString, required = true,
                                  default = nil)
-  if valid_574298 != nil:
-    section.add "workspaceName", valid_574298
+  if valid_564198 != nil:
+    section.add "workspaceName", valid_564198
   result.add "path", section
   ## parameters in `query` object:
   ##   path: JString
   ##       : The Artifact Path.
   section = newJObject()
-  var valid_574299 = query.getOrDefault("path")
-  valid_574299 = validateParameter(valid_574299, JString, required = false,
+  var valid_564199 = query.getOrDefault("path")
+  valid_564199 = validateParameter(valid_564199, JString, required = false,
                                  default = nil)
-  if valid_574299 != nil:
-    section.add "path", valid_574299
+  if valid_564199 != nil:
+    section.add "path", valid_564199
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1542,53 +1537,53 @@ proc validate_ArtifactsDownload_574292(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574300: Call_ArtifactsDownload_574291; path: JsonNode;
+proc call*(call_564200: Call_ArtifactsDownload_564191; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get Artifact content of a specific Id.
   ## 
-  let valid = call_574300.validator(path, query, header, formData, body)
-  let scheme = call_574300.pickScheme
+  let valid = call_564200.validator(path, query, header, formData, body)
+  let scheme = call_564200.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574300.url(scheme.get, call_574300.host, call_574300.base,
-                         call_574300.route, valid.getOrDefault("path"),
+  let url = call_564200.url(scheme.get, call_564200.host, call_564200.base,
+                         call_564200.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574300, url, valid)
+  result = hook(call_564200, url, valid)
 
-proc call*(call_574301: Call_ArtifactsDownload_574291; resourceGroupName: string;
-          origin: string; subscriptionId: string; container: string;
+proc call*(call_564201: Call_ArtifactsDownload_564191; origin: string;
+          subscriptionId: string; container: string; resourceGroupName: string;
           workspaceName: string; path: string = ""): Recallable =
   ## artifactsDownload
   ## Get Artifact content of a specific Id.
-  ##   resourceGroupName: string (required)
-  ##                    : The Name of the resource group in which the workspace is located.
   ##   origin: string (required)
   ##         : The origin of the Artifact.
+  ##   path: string
+  ##       : The Artifact Path.
   ##   subscriptionId: string (required)
   ##                 : The Azure Subscription ID.
   ##   container: string (required)
   ##            : The container name.
-  ##   path: string
-  ##       : The Artifact Path.
+  ##   resourceGroupName: string (required)
+  ##                    : The Name of the resource group in which the workspace is located.
   ##   workspaceName: string (required)
   ##                : The name of the workspace.
-  var path_574302 = newJObject()
-  var query_574303 = newJObject()
-  add(path_574302, "resourceGroupName", newJString(resourceGroupName))
-  add(path_574302, "origin", newJString(origin))
-  add(path_574302, "subscriptionId", newJString(subscriptionId))
-  add(path_574302, "container", newJString(container))
-  add(query_574303, "path", newJString(path))
-  add(path_574302, "workspaceName", newJString(workspaceName))
-  result = call_574301.call(path_574302, query_574303, nil, nil, nil)
+  var path_564202 = newJObject()
+  var query_564203 = newJObject()
+  add(path_564202, "origin", newJString(origin))
+  add(query_564203, "path", newJString(path))
+  add(path_564202, "subscriptionId", newJString(subscriptionId))
+  add(path_564202, "container", newJString(container))
+  add(path_564202, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564202, "workspaceName", newJString(workspaceName))
+  result = call_564201.call(path_564202, query_564203, nil, nil, nil)
 
-var artifactsDownload* = Call_ArtifactsDownload_574291(name: "artifactsDownload",
+var artifactsDownload* = Call_ArtifactsDownload_564191(name: "artifactsDownload",
     meth: HttpMethod.HttpGet, host: "azure.local", route: "/artifact/v2.0/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.MachineLearningServices/workspaces/{workspaceName}/artifacts/{origin}/{container}/content",
-    validator: validate_ArtifactsDownload_574292, base: "",
-    url: url_ArtifactsDownload_574293, schemes: {Scheme.Https})
+    validator: validate_ArtifactsDownload_564192, base: "",
+    url: url_ArtifactsDownload_564193, schemes: {Scheme.Https})
 type
-  Call_ArtifactsGetContentInformation_574322 = ref object of OpenApiRestCall_573641
-proc url_ArtifactsGetContentInformation_574324(protocol: Scheme; host: string;
+  Call_ArtifactsGetContentInformation_564222 = ref object of OpenApiRestCall_563539
+proc url_ArtifactsGetContentInformation_564224(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1618,61 +1613,60 @@ proc url_ArtifactsGetContentInformation_574324(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ArtifactsGetContentInformation_574323(path: JsonNode;
+proc validate_ArtifactsGetContentInformation_564223(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Get content information of an Artifact.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The Name of the resource group in which the workspace is located.
   ##   origin: JString (required)
   ##         : The origin of the Artifact.
   ##   subscriptionId: JString (required)
   ##                 : The Azure Subscription ID.
   ##   container: JString (required)
   ##            : The container name.
+  ##   resourceGroupName: JString (required)
+  ##                    : The Name of the resource group in which the workspace is located.
   ##   workspaceName: JString (required)
   ##                : The name of the workspace.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_574325 = path.getOrDefault("resourceGroupName")
-  valid_574325 = validateParameter(valid_574325, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `origin` field"
+  var valid_564225 = path.getOrDefault("origin")
+  valid_564225 = validateParameter(valid_564225, JString, required = true,
                                  default = nil)
-  if valid_574325 != nil:
-    section.add "resourceGroupName", valid_574325
-  var valid_574326 = path.getOrDefault("origin")
-  valid_574326 = validateParameter(valid_574326, JString, required = true,
+  if valid_564225 != nil:
+    section.add "origin", valid_564225
+  var valid_564226 = path.getOrDefault("subscriptionId")
+  valid_564226 = validateParameter(valid_564226, JString, required = true,
                                  default = nil)
-  if valid_574326 != nil:
-    section.add "origin", valid_574326
-  var valid_574327 = path.getOrDefault("subscriptionId")
-  valid_574327 = validateParameter(valid_574327, JString, required = true,
+  if valid_564226 != nil:
+    section.add "subscriptionId", valid_564226
+  var valid_564227 = path.getOrDefault("container")
+  valid_564227 = validateParameter(valid_564227, JString, required = true,
                                  default = nil)
-  if valid_574327 != nil:
-    section.add "subscriptionId", valid_574327
-  var valid_574328 = path.getOrDefault("container")
-  valid_574328 = validateParameter(valid_574328, JString, required = true,
+  if valid_564227 != nil:
+    section.add "container", valid_564227
+  var valid_564228 = path.getOrDefault("resourceGroupName")
+  valid_564228 = validateParameter(valid_564228, JString, required = true,
                                  default = nil)
-  if valid_574328 != nil:
-    section.add "container", valid_574328
-  var valid_574329 = path.getOrDefault("workspaceName")
-  valid_574329 = validateParameter(valid_574329, JString, required = true,
+  if valid_564228 != nil:
+    section.add "resourceGroupName", valid_564228
+  var valid_564229 = path.getOrDefault("workspaceName")
+  valid_564229 = validateParameter(valid_564229, JString, required = true,
                                  default = nil)
-  if valid_574329 != nil:
-    section.add "workspaceName", valid_574329
+  if valid_564229 != nil:
+    section.add "workspaceName", valid_564229
   result.add "path", section
   ## parameters in `query` object:
   ##   path: JString
   ##       : The Artifact Path.
   section = newJObject()
-  var valid_574330 = query.getOrDefault("path")
-  valid_574330 = validateParameter(valid_574330, JString, required = false,
+  var valid_564230 = query.getOrDefault("path")
+  valid_564230 = validateParameter(valid_564230, JString, required = false,
                                  default = nil)
-  if valid_574330 != nil:
-    section.add "path", valid_574330
+  if valid_564230 != nil:
+    section.add "path", valid_564230
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1681,54 +1675,54 @@ proc validate_ArtifactsGetContentInformation_574323(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574331: Call_ArtifactsGetContentInformation_574322; path: JsonNode;
+proc call*(call_564231: Call_ArtifactsGetContentInformation_564222; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get content information of an Artifact.
   ## 
-  let valid = call_574331.validator(path, query, header, formData, body)
-  let scheme = call_574331.pickScheme
+  let valid = call_564231.validator(path, query, header, formData, body)
+  let scheme = call_564231.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574331.url(scheme.get, call_574331.host, call_574331.base,
-                         call_574331.route, valid.getOrDefault("path"),
+  let url = call_564231.url(scheme.get, call_564231.host, call_564231.base,
+                         call_564231.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574331, url, valid)
+  result = hook(call_564231, url, valid)
 
-proc call*(call_574332: Call_ArtifactsGetContentInformation_574322;
-          resourceGroupName: string; origin: string; subscriptionId: string;
-          container: string; workspaceName: string; path: string = ""): Recallable =
+proc call*(call_564232: Call_ArtifactsGetContentInformation_564222; origin: string;
+          subscriptionId: string; container: string; resourceGroupName: string;
+          workspaceName: string; path: string = ""): Recallable =
   ## artifactsGetContentInformation
   ## Get content information of an Artifact.
-  ##   resourceGroupName: string (required)
-  ##                    : The Name of the resource group in which the workspace is located.
   ##   origin: string (required)
   ##         : The origin of the Artifact.
+  ##   path: string
+  ##       : The Artifact Path.
   ##   subscriptionId: string (required)
   ##                 : The Azure Subscription ID.
   ##   container: string (required)
   ##            : The container name.
-  ##   path: string
-  ##       : The Artifact Path.
+  ##   resourceGroupName: string (required)
+  ##                    : The Name of the resource group in which the workspace is located.
   ##   workspaceName: string (required)
   ##                : The name of the workspace.
-  var path_574333 = newJObject()
-  var query_574334 = newJObject()
-  add(path_574333, "resourceGroupName", newJString(resourceGroupName))
-  add(path_574333, "origin", newJString(origin))
-  add(path_574333, "subscriptionId", newJString(subscriptionId))
-  add(path_574333, "container", newJString(container))
-  add(query_574334, "path", newJString(path))
-  add(path_574333, "workspaceName", newJString(workspaceName))
-  result = call_574332.call(path_574333, query_574334, nil, nil, nil)
+  var path_564233 = newJObject()
+  var query_564234 = newJObject()
+  add(path_564233, "origin", newJString(origin))
+  add(query_564234, "path", newJString(path))
+  add(path_564233, "subscriptionId", newJString(subscriptionId))
+  add(path_564233, "container", newJString(container))
+  add(path_564233, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564233, "workspaceName", newJString(workspaceName))
+  result = call_564232.call(path_564233, query_564234, nil, nil, nil)
 
-var artifactsGetContentInformation* = Call_ArtifactsGetContentInformation_574322(
+var artifactsGetContentInformation* = Call_ArtifactsGetContentInformation_564222(
     name: "artifactsGetContentInformation", meth: HttpMethod.HttpGet,
     host: "azure.local", route: "/artifact/v2.0/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.MachineLearningServices/workspaces/{workspaceName}/artifacts/{origin}/{container}/contentinfo",
-    validator: validate_ArtifactsGetContentInformation_574323, base: "",
-    url: url_ArtifactsGetContentInformation_574324, schemes: {Scheme.Https})
+    validator: validate_ArtifactsGetContentInformation_564223, base: "",
+    url: url_ArtifactsGetContentInformation_564224, schemes: {Scheme.Https})
 type
-  Call_ArtifactsGetStorageContentInformation_574335 = ref object of OpenApiRestCall_573641
-proc url_ArtifactsGetStorageContentInformation_574337(protocol: Scheme;
+  Call_ArtifactsGetStorageContentInformation_564235 = ref object of OpenApiRestCall_563539
+proc url_ArtifactsGetStorageContentInformation_564237(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1758,61 +1752,60 @@ proc url_ArtifactsGetStorageContentInformation_574337(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ArtifactsGetStorageContentInformation_574336(path: JsonNode;
+proc validate_ArtifactsGetStorageContentInformation_564236(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Get storage content information of an Artifact.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The Name of the resource group in which the workspace is located.
   ##   origin: JString (required)
   ##         : The origin of the Artifact.
   ##   subscriptionId: JString (required)
   ##                 : The Azure Subscription ID.
   ##   container: JString (required)
   ##            : The container name.
+  ##   resourceGroupName: JString (required)
+  ##                    : The Name of the resource group in which the workspace is located.
   ##   workspaceName: JString (required)
   ##                : The name of the workspace.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_574338 = path.getOrDefault("resourceGroupName")
-  valid_574338 = validateParameter(valid_574338, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `origin` field"
+  var valid_564238 = path.getOrDefault("origin")
+  valid_564238 = validateParameter(valid_564238, JString, required = true,
                                  default = nil)
-  if valid_574338 != nil:
-    section.add "resourceGroupName", valid_574338
-  var valid_574339 = path.getOrDefault("origin")
-  valid_574339 = validateParameter(valid_574339, JString, required = true,
+  if valid_564238 != nil:
+    section.add "origin", valid_564238
+  var valid_564239 = path.getOrDefault("subscriptionId")
+  valid_564239 = validateParameter(valid_564239, JString, required = true,
                                  default = nil)
-  if valid_574339 != nil:
-    section.add "origin", valid_574339
-  var valid_574340 = path.getOrDefault("subscriptionId")
-  valid_574340 = validateParameter(valid_574340, JString, required = true,
+  if valid_564239 != nil:
+    section.add "subscriptionId", valid_564239
+  var valid_564240 = path.getOrDefault("container")
+  valid_564240 = validateParameter(valid_564240, JString, required = true,
                                  default = nil)
-  if valid_574340 != nil:
-    section.add "subscriptionId", valid_574340
-  var valid_574341 = path.getOrDefault("container")
-  valid_574341 = validateParameter(valid_574341, JString, required = true,
+  if valid_564240 != nil:
+    section.add "container", valid_564240
+  var valid_564241 = path.getOrDefault("resourceGroupName")
+  valid_564241 = validateParameter(valid_564241, JString, required = true,
                                  default = nil)
-  if valid_574341 != nil:
-    section.add "container", valid_574341
-  var valid_574342 = path.getOrDefault("workspaceName")
-  valid_574342 = validateParameter(valid_574342, JString, required = true,
+  if valid_564241 != nil:
+    section.add "resourceGroupName", valid_564241
+  var valid_564242 = path.getOrDefault("workspaceName")
+  valid_564242 = validateParameter(valid_564242, JString, required = true,
                                  default = nil)
-  if valid_574342 != nil:
-    section.add "workspaceName", valid_574342
+  if valid_564242 != nil:
+    section.add "workspaceName", valid_564242
   result.add "path", section
   ## parameters in `query` object:
   ##   path: JString
   ##       : The Artifact Path.
   section = newJObject()
-  var valid_574343 = query.getOrDefault("path")
-  valid_574343 = validateParameter(valid_574343, JString, required = false,
+  var valid_564243 = query.getOrDefault("path")
+  valid_564243 = validateParameter(valid_564243, JString, required = false,
                                  default = nil)
-  if valid_574343 != nil:
-    section.add "path", valid_574343
+  if valid_564243 != nil:
+    section.add "path", valid_564243
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1821,55 +1814,55 @@ proc validate_ArtifactsGetStorageContentInformation_574336(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574344: Call_ArtifactsGetStorageContentInformation_574335;
+proc call*(call_564244: Call_ArtifactsGetStorageContentInformation_564235;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Get storage content information of an Artifact.
   ## 
-  let valid = call_574344.validator(path, query, header, formData, body)
-  let scheme = call_574344.pickScheme
+  let valid = call_564244.validator(path, query, header, formData, body)
+  let scheme = call_564244.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574344.url(scheme.get, call_574344.host, call_574344.base,
-                         call_574344.route, valid.getOrDefault("path"),
+  let url = call_564244.url(scheme.get, call_564244.host, call_564244.base,
+                         call_564244.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574344, url, valid)
+  result = hook(call_564244, url, valid)
 
-proc call*(call_574345: Call_ArtifactsGetStorageContentInformation_574335;
-          resourceGroupName: string; origin: string; subscriptionId: string;
-          container: string; workspaceName: string; path: string = ""): Recallable =
+proc call*(call_564245: Call_ArtifactsGetStorageContentInformation_564235;
+          origin: string; subscriptionId: string; container: string;
+          resourceGroupName: string; workspaceName: string; path: string = ""): Recallable =
   ## artifactsGetStorageContentInformation
   ## Get storage content information of an Artifact.
-  ##   resourceGroupName: string (required)
-  ##                    : The Name of the resource group in which the workspace is located.
   ##   origin: string (required)
   ##         : The origin of the Artifact.
+  ##   path: string
+  ##       : The Artifact Path.
   ##   subscriptionId: string (required)
   ##                 : The Azure Subscription ID.
   ##   container: string (required)
   ##            : The container name.
-  ##   path: string
-  ##       : The Artifact Path.
+  ##   resourceGroupName: string (required)
+  ##                    : The Name of the resource group in which the workspace is located.
   ##   workspaceName: string (required)
   ##                : The name of the workspace.
-  var path_574346 = newJObject()
-  var query_574347 = newJObject()
-  add(path_574346, "resourceGroupName", newJString(resourceGroupName))
-  add(path_574346, "origin", newJString(origin))
-  add(path_574346, "subscriptionId", newJString(subscriptionId))
-  add(path_574346, "container", newJString(container))
-  add(query_574347, "path", newJString(path))
-  add(path_574346, "workspaceName", newJString(workspaceName))
-  result = call_574345.call(path_574346, query_574347, nil, nil, nil)
+  var path_564246 = newJObject()
+  var query_564247 = newJObject()
+  add(path_564246, "origin", newJString(origin))
+  add(query_564247, "path", newJString(path))
+  add(path_564246, "subscriptionId", newJString(subscriptionId))
+  add(path_564246, "container", newJString(container))
+  add(path_564246, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564246, "workspaceName", newJString(workspaceName))
+  result = call_564245.call(path_564246, query_564247, nil, nil, nil)
 
-var artifactsGetStorageContentInformation* = Call_ArtifactsGetStorageContentInformation_574335(
+var artifactsGetStorageContentInformation* = Call_ArtifactsGetStorageContentInformation_564235(
     name: "artifactsGetStorageContentInformation", meth: HttpMethod.HttpGet,
     host: "azure.local", route: "/artifact/v2.0/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.MachineLearningServices/workspaces/{workspaceName}/artifacts/{origin}/{container}/contentinfo/storageuri",
-    validator: validate_ArtifactsGetStorageContentInformation_574336, base: "",
-    url: url_ArtifactsGetStorageContentInformation_574337, schemes: {Scheme.Https})
+    validator: validate_ArtifactsGetStorageContentInformation_564236, base: "",
+    url: url_ArtifactsGetStorageContentInformation_564237, schemes: {Scheme.Https})
 type
-  Call_ArtifactsGet_574348 = ref object of OpenApiRestCall_573641
-proc url_ArtifactsGet_574350(protocol: Scheme; host: string; base: string;
+  Call_ArtifactsGet_564248 = ref object of OpenApiRestCall_563539
+proc url_ArtifactsGet_564250(protocol: Scheme; host: string; base: string;
                             route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1899,62 +1892,61 @@ proc url_ArtifactsGet_574350(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ArtifactsGet_574349(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_ArtifactsGet_564249(path: JsonNode; query: JsonNode; header: JsonNode;
                                  formData: JsonNode; body: JsonNode): JsonNode =
   ## Get Artifact metadata for a specific Id.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The Name of the resource group in which the workspace is located.
   ##   origin: JString (required)
   ##         : The origin of the Artifact.
   ##   subscriptionId: JString (required)
   ##                 : The Azure Subscription ID.
   ##   container: JString (required)
   ##            : The container name.
+  ##   resourceGroupName: JString (required)
+  ##                    : The Name of the resource group in which the workspace is located.
   ##   workspaceName: JString (required)
   ##                : The name of the workspace.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_574351 = path.getOrDefault("resourceGroupName")
-  valid_574351 = validateParameter(valid_574351, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `origin` field"
+  var valid_564251 = path.getOrDefault("origin")
+  valid_564251 = validateParameter(valid_564251, JString, required = true,
                                  default = nil)
-  if valid_574351 != nil:
-    section.add "resourceGroupName", valid_574351
-  var valid_574352 = path.getOrDefault("origin")
-  valid_574352 = validateParameter(valid_574352, JString, required = true,
+  if valid_564251 != nil:
+    section.add "origin", valid_564251
+  var valid_564252 = path.getOrDefault("subscriptionId")
+  valid_564252 = validateParameter(valid_564252, JString, required = true,
                                  default = nil)
-  if valid_574352 != nil:
-    section.add "origin", valid_574352
-  var valid_574353 = path.getOrDefault("subscriptionId")
-  valid_574353 = validateParameter(valid_574353, JString, required = true,
+  if valid_564252 != nil:
+    section.add "subscriptionId", valid_564252
+  var valid_564253 = path.getOrDefault("container")
+  valid_564253 = validateParameter(valid_564253, JString, required = true,
                                  default = nil)
-  if valid_574353 != nil:
-    section.add "subscriptionId", valid_574353
-  var valid_574354 = path.getOrDefault("container")
-  valid_574354 = validateParameter(valid_574354, JString, required = true,
+  if valid_564253 != nil:
+    section.add "container", valid_564253
+  var valid_564254 = path.getOrDefault("resourceGroupName")
+  valid_564254 = validateParameter(valid_564254, JString, required = true,
                                  default = nil)
-  if valid_574354 != nil:
-    section.add "container", valid_574354
-  var valid_574355 = path.getOrDefault("workspaceName")
-  valid_574355 = validateParameter(valid_574355, JString, required = true,
+  if valid_564254 != nil:
+    section.add "resourceGroupName", valid_564254
+  var valid_564255 = path.getOrDefault("workspaceName")
+  valid_564255 = validateParameter(valid_564255, JString, required = true,
                                  default = nil)
-  if valid_574355 != nil:
-    section.add "workspaceName", valid_574355
+  if valid_564255 != nil:
+    section.add "workspaceName", valid_564255
   result.add "path", section
   ## parameters in `query` object:
   ##   path: JString (required)
   ##       : The Artifact Path.
   section = newJObject()
   assert query != nil, "query argument is necessary due to required `path` field"
-  var valid_574356 = query.getOrDefault("path")
-  valid_574356 = validateParameter(valid_574356, JString, required = true,
+  var valid_564256 = query.getOrDefault("path")
+  valid_564256 = validateParameter(valid_564256, JString, required = true,
                                  default = nil)
-  if valid_574356 != nil:
-    section.add "path", valid_574356
+  if valid_564256 != nil:
+    section.add "path", valid_564256
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1963,53 +1955,53 @@ proc validate_ArtifactsGet_574349(path: JsonNode; query: JsonNode; header: JsonN
   if body != nil:
     result.add "body", body
 
-proc call*(call_574357: Call_ArtifactsGet_574348; path: JsonNode; query: JsonNode;
+proc call*(call_564257: Call_ArtifactsGet_564248; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get Artifact metadata for a specific Id.
   ## 
-  let valid = call_574357.validator(path, query, header, formData, body)
-  let scheme = call_574357.pickScheme
+  let valid = call_564257.validator(path, query, header, formData, body)
+  let scheme = call_564257.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574357.url(scheme.get, call_574357.host, call_574357.base,
-                         call_574357.route, valid.getOrDefault("path"),
+  let url = call_564257.url(scheme.get, call_564257.host, call_564257.base,
+                         call_564257.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574357, url, valid)
+  result = hook(call_564257, url, valid)
 
-proc call*(call_574358: Call_ArtifactsGet_574348; resourceGroupName: string;
-          origin: string; subscriptionId: string; container: string; path: string;
+proc call*(call_564258: Call_ArtifactsGet_564248; origin: string; path: string;
+          subscriptionId: string; container: string; resourceGroupName: string;
           workspaceName: string): Recallable =
   ## artifactsGet
   ## Get Artifact metadata for a specific Id.
-  ##   resourceGroupName: string (required)
-  ##                    : The Name of the resource group in which the workspace is located.
   ##   origin: string (required)
   ##         : The origin of the Artifact.
+  ##   path: string (required)
+  ##       : The Artifact Path.
   ##   subscriptionId: string (required)
   ##                 : The Azure Subscription ID.
   ##   container: string (required)
   ##            : The container name.
-  ##   path: string (required)
-  ##       : The Artifact Path.
+  ##   resourceGroupName: string (required)
+  ##                    : The Name of the resource group in which the workspace is located.
   ##   workspaceName: string (required)
   ##                : The name of the workspace.
-  var path_574359 = newJObject()
-  var query_574360 = newJObject()
-  add(path_574359, "resourceGroupName", newJString(resourceGroupName))
-  add(path_574359, "origin", newJString(origin))
-  add(path_574359, "subscriptionId", newJString(subscriptionId))
-  add(path_574359, "container", newJString(container))
-  add(query_574360, "path", newJString(path))
-  add(path_574359, "workspaceName", newJString(workspaceName))
-  result = call_574358.call(path_574359, query_574360, nil, nil, nil)
+  var path_564259 = newJObject()
+  var query_564260 = newJObject()
+  add(path_564259, "origin", newJString(origin))
+  add(query_564260, "path", newJString(path))
+  add(path_564259, "subscriptionId", newJString(subscriptionId))
+  add(path_564259, "container", newJString(container))
+  add(path_564259, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564259, "workspaceName", newJString(workspaceName))
+  result = call_564258.call(path_564259, query_564260, nil, nil, nil)
 
-var artifactsGet* = Call_ArtifactsGet_574348(name: "artifactsGet",
+var artifactsGet* = Call_ArtifactsGet_564248(name: "artifactsGet",
     meth: HttpMethod.HttpGet, host: "azure.local", route: "/artifact/v2.0/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.MachineLearningServices/workspaces/{workspaceName}/artifacts/{origin}/{container}/metadata",
-    validator: validate_ArtifactsGet_574349, base: "", url: url_ArtifactsGet_574350,
+    validator: validate_ArtifactsGet_564249, base: "", url: url_ArtifactsGet_564250,
     schemes: {Scheme.Https})
 type
-  Call_ArtifactsDeleteMetaData_574361 = ref object of OpenApiRestCall_573641
-proc url_ArtifactsDeleteMetaData_574363(protocol: Scheme; host: string; base: string;
+  Call_ArtifactsDeleteMetaData_564261 = ref object of OpenApiRestCall_563539
+proc url_ArtifactsDeleteMetaData_564263(protocol: Scheme; host: string; base: string;
                                        route: string; path: JsonNode;
                                        query: JsonNode): Uri =
   result.scheme = $protocol
@@ -2040,51 +2032,50 @@ proc url_ArtifactsDeleteMetaData_574363(protocol: Scheme; host: string; base: st
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ArtifactsDeleteMetaData_574362(path: JsonNode; query: JsonNode;
+proc validate_ArtifactsDeleteMetaData_564262(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Delete an Artifact Metadata.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The Name of the resource group in which the workspace is located.
   ##   origin: JString (required)
   ##         : The origin of the Artifact.
   ##   subscriptionId: JString (required)
   ##                 : The Azure Subscription ID.
   ##   container: JString (required)
   ##            : The container name.
+  ##   resourceGroupName: JString (required)
+  ##                    : The Name of the resource group in which the workspace is located.
   ##   workspaceName: JString (required)
   ##                : The name of the workspace.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_574364 = path.getOrDefault("resourceGroupName")
-  valid_574364 = validateParameter(valid_574364, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `origin` field"
+  var valid_564264 = path.getOrDefault("origin")
+  valid_564264 = validateParameter(valid_564264, JString, required = true,
                                  default = nil)
-  if valid_574364 != nil:
-    section.add "resourceGroupName", valid_574364
-  var valid_574365 = path.getOrDefault("origin")
-  valid_574365 = validateParameter(valid_574365, JString, required = true,
+  if valid_564264 != nil:
+    section.add "origin", valid_564264
+  var valid_564265 = path.getOrDefault("subscriptionId")
+  valid_564265 = validateParameter(valid_564265, JString, required = true,
                                  default = nil)
-  if valid_574365 != nil:
-    section.add "origin", valid_574365
-  var valid_574366 = path.getOrDefault("subscriptionId")
-  valid_574366 = validateParameter(valid_574366, JString, required = true,
+  if valid_564265 != nil:
+    section.add "subscriptionId", valid_564265
+  var valid_564266 = path.getOrDefault("container")
+  valid_564266 = validateParameter(valid_564266, JString, required = true,
                                  default = nil)
-  if valid_574366 != nil:
-    section.add "subscriptionId", valid_574366
-  var valid_574367 = path.getOrDefault("container")
-  valid_574367 = validateParameter(valid_574367, JString, required = true,
+  if valid_564266 != nil:
+    section.add "container", valid_564266
+  var valid_564267 = path.getOrDefault("resourceGroupName")
+  valid_564267 = validateParameter(valid_564267, JString, required = true,
                                  default = nil)
-  if valid_574367 != nil:
-    section.add "container", valid_574367
-  var valid_574368 = path.getOrDefault("workspaceName")
-  valid_574368 = validateParameter(valid_574368, JString, required = true,
+  if valid_564267 != nil:
+    section.add "resourceGroupName", valid_564267
+  var valid_564268 = path.getOrDefault("workspaceName")
+  valid_564268 = validateParameter(valid_564268, JString, required = true,
                                  default = nil)
-  if valid_574368 != nil:
-    section.add "workspaceName", valid_574368
+  if valid_564268 != nil:
+    section.add "workspaceName", valid_564268
   result.add "path", section
   ## parameters in `query` object:
   ##   hardDelete: JBool
@@ -2092,16 +2083,16 @@ proc validate_ArtifactsDeleteMetaData_574362(path: JsonNode; query: JsonNode;
   ##   path: JString
   ##       : The Artifact Path.
   section = newJObject()
-  var valid_574369 = query.getOrDefault("hardDelete")
-  valid_574369 = validateParameter(valid_574369, JBool, required = false,
+  var valid_564269 = query.getOrDefault("hardDelete")
+  valid_564269 = validateParameter(valid_564269, JBool, required = false,
                                  default = newJBool(false))
-  if valid_574369 != nil:
-    section.add "hardDelete", valid_574369
-  var valid_574370 = query.getOrDefault("path")
-  valid_574370 = validateParameter(valid_574370, JString, required = false,
+  if valid_564269 != nil:
+    section.add "hardDelete", valid_564269
+  var valid_564270 = query.getOrDefault("path")
+  valid_564270 = validateParameter(valid_564270, JString, required = false,
                                  default = nil)
-  if valid_574370 != nil:
-    section.add "path", valid_574370
+  if valid_564270 != nil:
+    section.add "path", valid_564270
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2110,58 +2101,57 @@ proc validate_ArtifactsDeleteMetaData_574362(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574371: Call_ArtifactsDeleteMetaData_574361; path: JsonNode;
+proc call*(call_564271: Call_ArtifactsDeleteMetaData_564261; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Delete an Artifact Metadata.
   ## 
-  let valid = call_574371.validator(path, query, header, formData, body)
-  let scheme = call_574371.pickScheme
+  let valid = call_564271.validator(path, query, header, formData, body)
+  let scheme = call_564271.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574371.url(scheme.get, call_574371.host, call_574371.base,
-                         call_574371.route, valid.getOrDefault("path"),
+  let url = call_564271.url(scheme.get, call_564271.host, call_564271.base,
+                         call_564271.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574371, url, valid)
+  result = hook(call_564271, url, valid)
 
-proc call*(call_574372: Call_ArtifactsDeleteMetaData_574361;
-          resourceGroupName: string; origin: string; subscriptionId: string;
-          container: string; workspaceName: string; hardDelete: bool = false;
-          path: string = ""): Recallable =
+proc call*(call_564272: Call_ArtifactsDeleteMetaData_564261; origin: string;
+          subscriptionId: string; container: string; resourceGroupName: string;
+          workspaceName: string; hardDelete: bool = false; path: string = ""): Recallable =
   ## artifactsDeleteMetaData
   ## Delete an Artifact Metadata.
-  ##   resourceGroupName: string (required)
-  ##                    : The Name of the resource group in which the workspace is located.
-  ##   origin: string (required)
-  ##         : The origin of the Artifact.
-  ##   subscriptionId: string (required)
-  ##                 : The Azure Subscription ID.
   ##   hardDelete: bool
   ##             : If set to true. The delete cannot be revert at later time.
-  ##   container: string (required)
-  ##            : The container name.
+  ##   origin: string (required)
+  ##         : The origin of the Artifact.
   ##   path: string
   ##       : The Artifact Path.
+  ##   subscriptionId: string (required)
+  ##                 : The Azure Subscription ID.
+  ##   container: string (required)
+  ##            : The container name.
+  ##   resourceGroupName: string (required)
+  ##                    : The Name of the resource group in which the workspace is located.
   ##   workspaceName: string (required)
   ##                : The name of the workspace.
-  var path_574373 = newJObject()
-  var query_574374 = newJObject()
-  add(path_574373, "resourceGroupName", newJString(resourceGroupName))
-  add(path_574373, "origin", newJString(origin))
-  add(path_574373, "subscriptionId", newJString(subscriptionId))
-  add(query_574374, "hardDelete", newJBool(hardDelete))
-  add(path_574373, "container", newJString(container))
-  add(query_574374, "path", newJString(path))
-  add(path_574373, "workspaceName", newJString(workspaceName))
-  result = call_574372.call(path_574373, query_574374, nil, nil, nil)
+  var path_564273 = newJObject()
+  var query_564274 = newJObject()
+  add(query_564274, "hardDelete", newJBool(hardDelete))
+  add(path_564273, "origin", newJString(origin))
+  add(query_564274, "path", newJString(path))
+  add(path_564273, "subscriptionId", newJString(subscriptionId))
+  add(path_564273, "container", newJString(container))
+  add(path_564273, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564273, "workspaceName", newJString(workspaceName))
+  result = call_564272.call(path_564273, query_564274, nil, nil, nil)
 
-var artifactsDeleteMetaData* = Call_ArtifactsDeleteMetaData_574361(
+var artifactsDeleteMetaData* = Call_ArtifactsDeleteMetaData_564261(
     name: "artifactsDeleteMetaData", meth: HttpMethod.HttpDelete,
     host: "azure.local", route: "/artifact/v2.0/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.MachineLearningServices/workspaces/{workspaceName}/artifacts/{origin}/{container}/metadata",
-    validator: validate_ArtifactsDeleteMetaData_574362, base: "",
-    url: url_ArtifactsDeleteMetaData_574363, schemes: {Scheme.Https})
+    validator: validate_ArtifactsDeleteMetaData_564262, base: "",
+    url: url_ArtifactsDeleteMetaData_564263, schemes: {Scheme.Https})
 type
-  Call_ArtifactsListSasByPrefix_574375 = ref object of OpenApiRestCall_573641
-proc url_ArtifactsListSasByPrefix_574377(protocol: Scheme; host: string;
+  Call_ArtifactsListSasByPrefix_564275 = ref object of OpenApiRestCall_563539
+proc url_ArtifactsListSasByPrefix_564277(protocol: Scheme; host: string;
                                         base: string; route: string; path: JsonNode;
                                         query: JsonNode): Uri =
   result.scheme = $protocol
@@ -2192,51 +2182,50 @@ proc url_ArtifactsListSasByPrefix_574377(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ArtifactsListSasByPrefix_574376(path: JsonNode; query: JsonNode;
+proc validate_ArtifactsListSasByPrefix_564276(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Get shared access signature for an Artifact in specific path.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The Name of the resource group in which the workspace is located.
   ##   origin: JString (required)
   ##         : The origin of the Artifact.
   ##   subscriptionId: JString (required)
   ##                 : The Azure Subscription ID.
   ##   container: JString (required)
   ##            : The container name.
+  ##   resourceGroupName: JString (required)
+  ##                    : The Name of the resource group in which the workspace is located.
   ##   workspaceName: JString (required)
   ##                : The name of the workspace.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_574378 = path.getOrDefault("resourceGroupName")
-  valid_574378 = validateParameter(valid_574378, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `origin` field"
+  var valid_564278 = path.getOrDefault("origin")
+  valid_564278 = validateParameter(valid_564278, JString, required = true,
                                  default = nil)
-  if valid_574378 != nil:
-    section.add "resourceGroupName", valid_574378
-  var valid_574379 = path.getOrDefault("origin")
-  valid_574379 = validateParameter(valid_574379, JString, required = true,
+  if valid_564278 != nil:
+    section.add "origin", valid_564278
+  var valid_564279 = path.getOrDefault("subscriptionId")
+  valid_564279 = validateParameter(valid_564279, JString, required = true,
                                  default = nil)
-  if valid_574379 != nil:
-    section.add "origin", valid_574379
-  var valid_574380 = path.getOrDefault("subscriptionId")
-  valid_574380 = validateParameter(valid_574380, JString, required = true,
+  if valid_564279 != nil:
+    section.add "subscriptionId", valid_564279
+  var valid_564280 = path.getOrDefault("container")
+  valid_564280 = validateParameter(valid_564280, JString, required = true,
                                  default = nil)
-  if valid_574380 != nil:
-    section.add "subscriptionId", valid_574380
-  var valid_574381 = path.getOrDefault("container")
-  valid_574381 = validateParameter(valid_574381, JString, required = true,
+  if valid_564280 != nil:
+    section.add "container", valid_564280
+  var valid_564281 = path.getOrDefault("resourceGroupName")
+  valid_564281 = validateParameter(valid_564281, JString, required = true,
                                  default = nil)
-  if valid_574381 != nil:
-    section.add "container", valid_574381
-  var valid_574382 = path.getOrDefault("workspaceName")
-  valid_574382 = validateParameter(valid_574382, JString, required = true,
+  if valid_564281 != nil:
+    section.add "resourceGroupName", valid_564281
+  var valid_564282 = path.getOrDefault("workspaceName")
+  valid_564282 = validateParameter(valid_564282, JString, required = true,
                                  default = nil)
-  if valid_574382 != nil:
-    section.add "workspaceName", valid_574382
+  if valid_564282 != nil:
+    section.add "workspaceName", valid_564282
   result.add "path", section
   ## parameters in `query` object:
   ##   path: JString
@@ -2244,16 +2233,16 @@ proc validate_ArtifactsListSasByPrefix_574376(path: JsonNode; query: JsonNode;
   ##   continuationToken: JString
   ##                    : The continuation token.
   section = newJObject()
-  var valid_574383 = query.getOrDefault("path")
-  valid_574383 = validateParameter(valid_574383, JString, required = false,
+  var valid_564283 = query.getOrDefault("path")
+  valid_564283 = validateParameter(valid_564283, JString, required = false,
                                  default = nil)
-  if valid_574383 != nil:
-    section.add "path", valid_574383
-  var valid_574384 = query.getOrDefault("continuationToken")
-  valid_574384 = validateParameter(valid_574384, JString, required = false,
+  if valid_564283 != nil:
+    section.add "path", valid_564283
+  var valid_564284 = query.getOrDefault("continuationToken")
+  valid_564284 = validateParameter(valid_564284, JString, required = false,
                                  default = nil)
-  if valid_574384 != nil:
-    section.add "continuationToken", valid_574384
+  if valid_564284 != nil:
+    section.add "continuationToken", valid_564284
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2262,57 +2251,56 @@ proc validate_ArtifactsListSasByPrefix_574376(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574385: Call_ArtifactsListSasByPrefix_574375; path: JsonNode;
+proc call*(call_564285: Call_ArtifactsListSasByPrefix_564275; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get shared access signature for an Artifact in specific path.
   ## 
-  let valid = call_574385.validator(path, query, header, formData, body)
-  let scheme = call_574385.pickScheme
+  let valid = call_564285.validator(path, query, header, formData, body)
+  let scheme = call_564285.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574385.url(scheme.get, call_574385.host, call_574385.base,
-                         call_574385.route, valid.getOrDefault("path"),
+  let url = call_564285.url(scheme.get, call_564285.host, call_564285.base,
+                         call_564285.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574385, url, valid)
+  result = hook(call_564285, url, valid)
 
-proc call*(call_574386: Call_ArtifactsListSasByPrefix_574375;
-          resourceGroupName: string; origin: string; subscriptionId: string;
-          container: string; workspaceName: string; path: string = "";
-          continuationToken: string = ""): Recallable =
+proc call*(call_564286: Call_ArtifactsListSasByPrefix_564275; origin: string;
+          subscriptionId: string; container: string; resourceGroupName: string;
+          workspaceName: string; path: string = ""; continuationToken: string = ""): Recallable =
   ## artifactsListSasByPrefix
   ## Get shared access signature for an Artifact in specific path.
-  ##   resourceGroupName: string (required)
-  ##                    : The Name of the resource group in which the workspace is located.
   ##   origin: string (required)
   ##         : The origin of the Artifact.
-  ##   subscriptionId: string (required)
-  ##                 : The Azure Subscription ID.
-  ##   container: string (required)
-  ##            : The container name.
   ##   path: string
   ##       : The Artifact Path.
+  ##   subscriptionId: string (required)
+  ##                 : The Azure Subscription ID.
   ##   continuationToken: string
   ##                    : The continuation token.
+  ##   container: string (required)
+  ##            : The container name.
+  ##   resourceGroupName: string (required)
+  ##                    : The Name of the resource group in which the workspace is located.
   ##   workspaceName: string (required)
   ##                : The name of the workspace.
-  var path_574387 = newJObject()
-  var query_574388 = newJObject()
-  add(path_574387, "resourceGroupName", newJString(resourceGroupName))
-  add(path_574387, "origin", newJString(origin))
-  add(path_574387, "subscriptionId", newJString(subscriptionId))
-  add(path_574387, "container", newJString(container))
-  add(query_574388, "path", newJString(path))
-  add(query_574388, "continuationToken", newJString(continuationToken))
-  add(path_574387, "workspaceName", newJString(workspaceName))
-  result = call_574386.call(path_574387, query_574388, nil, nil, nil)
+  var path_564287 = newJObject()
+  var query_564288 = newJObject()
+  add(path_564287, "origin", newJString(origin))
+  add(query_564288, "path", newJString(path))
+  add(path_564287, "subscriptionId", newJString(subscriptionId))
+  add(query_564288, "continuationToken", newJString(continuationToken))
+  add(path_564287, "container", newJString(container))
+  add(path_564287, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564287, "workspaceName", newJString(workspaceName))
+  result = call_564286.call(path_564287, query_564288, nil, nil, nil)
 
-var artifactsListSasByPrefix* = Call_ArtifactsListSasByPrefix_574375(
+var artifactsListSasByPrefix* = Call_ArtifactsListSasByPrefix_564275(
     name: "artifactsListSasByPrefix", meth: HttpMethod.HttpGet, host: "azure.local", route: "/artifact/v2.0/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.MachineLearningServices/workspaces/{workspaceName}/artifacts/{origin}/{container}/prefix/contentinfo",
-    validator: validate_ArtifactsListSasByPrefix_574376, base: "",
-    url: url_ArtifactsListSasByPrefix_574377, schemes: {Scheme.Https})
+    validator: validate_ArtifactsListSasByPrefix_564276, base: "",
+    url: url_ArtifactsListSasByPrefix_564277, schemes: {Scheme.Https})
 type
-  Call_ArtifactsListStorageUriByPrefix_574389 = ref object of OpenApiRestCall_573641
-proc url_ArtifactsListStorageUriByPrefix_574391(protocol: Scheme; host: string;
+  Call_ArtifactsListStorageUriByPrefix_564289 = ref object of OpenApiRestCall_563539
+proc url_ArtifactsListStorageUriByPrefix_564291(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2342,51 +2330,50 @@ proc url_ArtifactsListStorageUriByPrefix_574391(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ArtifactsListStorageUriByPrefix_574390(path: JsonNode;
+proc validate_ArtifactsListStorageUriByPrefix_564290(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Get storage Uri for Artifacts in a specific path.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The Name of the resource group in which the workspace is located.
   ##   origin: JString (required)
   ##         : The origin of the Artifact.
   ##   subscriptionId: JString (required)
   ##                 : The Azure Subscription ID.
   ##   container: JString (required)
   ##            : The container name.
+  ##   resourceGroupName: JString (required)
+  ##                    : The Name of the resource group in which the workspace is located.
   ##   workspaceName: JString (required)
   ##                : The name of the workspace.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_574392 = path.getOrDefault("resourceGroupName")
-  valid_574392 = validateParameter(valid_574392, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `origin` field"
+  var valid_564292 = path.getOrDefault("origin")
+  valid_564292 = validateParameter(valid_564292, JString, required = true,
                                  default = nil)
-  if valid_574392 != nil:
-    section.add "resourceGroupName", valid_574392
-  var valid_574393 = path.getOrDefault("origin")
-  valid_574393 = validateParameter(valid_574393, JString, required = true,
+  if valid_564292 != nil:
+    section.add "origin", valid_564292
+  var valid_564293 = path.getOrDefault("subscriptionId")
+  valid_564293 = validateParameter(valid_564293, JString, required = true,
                                  default = nil)
-  if valid_574393 != nil:
-    section.add "origin", valid_574393
-  var valid_574394 = path.getOrDefault("subscriptionId")
-  valid_574394 = validateParameter(valid_574394, JString, required = true,
+  if valid_564293 != nil:
+    section.add "subscriptionId", valid_564293
+  var valid_564294 = path.getOrDefault("container")
+  valid_564294 = validateParameter(valid_564294, JString, required = true,
                                  default = nil)
-  if valid_574394 != nil:
-    section.add "subscriptionId", valid_574394
-  var valid_574395 = path.getOrDefault("container")
-  valid_574395 = validateParameter(valid_574395, JString, required = true,
+  if valid_564294 != nil:
+    section.add "container", valid_564294
+  var valid_564295 = path.getOrDefault("resourceGroupName")
+  valid_564295 = validateParameter(valid_564295, JString, required = true,
                                  default = nil)
-  if valid_574395 != nil:
-    section.add "container", valid_574395
-  var valid_574396 = path.getOrDefault("workspaceName")
-  valid_574396 = validateParameter(valid_574396, JString, required = true,
+  if valid_564295 != nil:
+    section.add "resourceGroupName", valid_564295
+  var valid_564296 = path.getOrDefault("workspaceName")
+  valid_564296 = validateParameter(valid_564296, JString, required = true,
                                  default = nil)
-  if valid_574396 != nil:
-    section.add "workspaceName", valid_574396
+  if valid_564296 != nil:
+    section.add "workspaceName", valid_564296
   result.add "path", section
   ## parameters in `query` object:
   ##   path: JString
@@ -2394,16 +2381,16 @@ proc validate_ArtifactsListStorageUriByPrefix_574390(path: JsonNode;
   ##   continuationToken: JString
   ##                    : The continuation token.
   section = newJObject()
-  var valid_574397 = query.getOrDefault("path")
-  valid_574397 = validateParameter(valid_574397, JString, required = false,
+  var valid_564297 = query.getOrDefault("path")
+  valid_564297 = validateParameter(valid_564297, JString, required = false,
                                  default = nil)
-  if valid_574397 != nil:
-    section.add "path", valid_574397
-  var valid_574398 = query.getOrDefault("continuationToken")
-  valid_574398 = validateParameter(valid_574398, JString, required = false,
+  if valid_564297 != nil:
+    section.add "path", valid_564297
+  var valid_564298 = query.getOrDefault("continuationToken")
+  valid_564298 = validateParameter(valid_564298, JString, required = false,
                                  default = nil)
-  if valid_574398 != nil:
-    section.add "continuationToken", valid_574398
+  if valid_564298 != nil:
+    section.add "continuationToken", valid_564298
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2412,59 +2399,59 @@ proc validate_ArtifactsListStorageUriByPrefix_574390(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574399: Call_ArtifactsListStorageUriByPrefix_574389;
+proc call*(call_564299: Call_ArtifactsListStorageUriByPrefix_564289;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Get storage Uri for Artifacts in a specific path.
   ## 
-  let valid = call_574399.validator(path, query, header, formData, body)
-  let scheme = call_574399.pickScheme
+  let valid = call_564299.validator(path, query, header, formData, body)
+  let scheme = call_564299.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574399.url(scheme.get, call_574399.host, call_574399.base,
-                         call_574399.route, valid.getOrDefault("path"),
+  let url = call_564299.url(scheme.get, call_564299.host, call_564299.base,
+                         call_564299.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574399, url, valid)
+  result = hook(call_564299, url, valid)
 
-proc call*(call_574400: Call_ArtifactsListStorageUriByPrefix_574389;
-          resourceGroupName: string; origin: string; subscriptionId: string;
-          container: string; workspaceName: string; path: string = "";
+proc call*(call_564300: Call_ArtifactsListStorageUriByPrefix_564289;
+          origin: string; subscriptionId: string; container: string;
+          resourceGroupName: string; workspaceName: string; path: string = "";
           continuationToken: string = ""): Recallable =
   ## artifactsListStorageUriByPrefix
   ## Get storage Uri for Artifacts in a specific path.
-  ##   resourceGroupName: string (required)
-  ##                    : The Name of the resource group in which the workspace is located.
   ##   origin: string (required)
   ##         : The origin of the Artifact.
-  ##   subscriptionId: string (required)
-  ##                 : The Azure Subscription ID.
-  ##   container: string (required)
-  ##            : The container name.
   ##   path: string
   ##       : The Artifact Path.
+  ##   subscriptionId: string (required)
+  ##                 : The Azure Subscription ID.
   ##   continuationToken: string
   ##                    : The continuation token.
+  ##   container: string (required)
+  ##            : The container name.
+  ##   resourceGroupName: string (required)
+  ##                    : The Name of the resource group in which the workspace is located.
   ##   workspaceName: string (required)
   ##                : The name of the workspace.
-  var path_574401 = newJObject()
-  var query_574402 = newJObject()
-  add(path_574401, "resourceGroupName", newJString(resourceGroupName))
-  add(path_574401, "origin", newJString(origin))
-  add(path_574401, "subscriptionId", newJString(subscriptionId))
-  add(path_574401, "container", newJString(container))
-  add(query_574402, "path", newJString(path))
-  add(query_574402, "continuationToken", newJString(continuationToken))
-  add(path_574401, "workspaceName", newJString(workspaceName))
-  result = call_574400.call(path_574401, query_574402, nil, nil, nil)
+  var path_564301 = newJObject()
+  var query_564302 = newJObject()
+  add(path_564301, "origin", newJString(origin))
+  add(query_564302, "path", newJString(path))
+  add(path_564301, "subscriptionId", newJString(subscriptionId))
+  add(query_564302, "continuationToken", newJString(continuationToken))
+  add(path_564301, "container", newJString(container))
+  add(path_564301, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564301, "workspaceName", newJString(workspaceName))
+  result = call_564300.call(path_564301, query_564302, nil, nil, nil)
 
-var artifactsListStorageUriByPrefix* = Call_ArtifactsListStorageUriByPrefix_574389(
+var artifactsListStorageUriByPrefix* = Call_ArtifactsListStorageUriByPrefix_564289(
     name: "artifactsListStorageUriByPrefix", meth: HttpMethod.HttpGet,
     host: "azure.local", route: "/artifact/v2.0/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.MachineLearningServices/workspaces/{workspaceName}/artifacts/{origin}/{container}/prefix/contentinfo/storageuri",
-    validator: validate_ArtifactsListStorageUriByPrefix_574390, base: "",
-    url: url_ArtifactsListStorageUriByPrefix_574391, schemes: {Scheme.Https})
+    validator: validate_ArtifactsListStorageUriByPrefix_564290, base: "",
+    url: url_ArtifactsListStorageUriByPrefix_564291, schemes: {Scheme.Https})
 type
-  Call_ArtifactsGetSas_574403 = ref object of OpenApiRestCall_573641
-proc url_ArtifactsGetSas_574405(protocol: Scheme; host: string; base: string;
+  Call_ArtifactsGetSas_564303 = ref object of OpenApiRestCall_563539
+proc url_ArtifactsGetSas_564305(protocol: Scheme; host: string; base: string;
                                route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2494,7 +2481,7 @@ proc url_ArtifactsGetSas_574405(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ArtifactsGetSas_574404(path: JsonNode; query: JsonNode;
+proc validate_ArtifactsGetSas_564304(path: JsonNode; query: JsonNode;
                                     header: JsonNode; formData: JsonNode;
                                     body: JsonNode): JsonNode =
   ## Get writable shared access signature for a specific Artifact.
@@ -2502,54 +2489,53 @@ proc validate_ArtifactsGetSas_574404(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The Name of the resource group in which the workspace is located.
   ##   origin: JString (required)
   ##         : The origin of the Artifact.
   ##   subscriptionId: JString (required)
   ##                 : The Azure Subscription ID.
   ##   container: JString (required)
   ##            : The container name.
+  ##   resourceGroupName: JString (required)
+  ##                    : The Name of the resource group in which the workspace is located.
   ##   workspaceName: JString (required)
   ##                : The name of the workspace.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_574406 = path.getOrDefault("resourceGroupName")
-  valid_574406 = validateParameter(valid_574406, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `origin` field"
+  var valid_564306 = path.getOrDefault("origin")
+  valid_564306 = validateParameter(valid_564306, JString, required = true,
                                  default = nil)
-  if valid_574406 != nil:
-    section.add "resourceGroupName", valid_574406
-  var valid_574407 = path.getOrDefault("origin")
-  valid_574407 = validateParameter(valid_574407, JString, required = true,
+  if valid_564306 != nil:
+    section.add "origin", valid_564306
+  var valid_564307 = path.getOrDefault("subscriptionId")
+  valid_564307 = validateParameter(valid_564307, JString, required = true,
                                  default = nil)
-  if valid_574407 != nil:
-    section.add "origin", valid_574407
-  var valid_574408 = path.getOrDefault("subscriptionId")
-  valid_574408 = validateParameter(valid_574408, JString, required = true,
+  if valid_564307 != nil:
+    section.add "subscriptionId", valid_564307
+  var valid_564308 = path.getOrDefault("container")
+  valid_564308 = validateParameter(valid_564308, JString, required = true,
                                  default = nil)
-  if valid_574408 != nil:
-    section.add "subscriptionId", valid_574408
-  var valid_574409 = path.getOrDefault("container")
-  valid_574409 = validateParameter(valid_574409, JString, required = true,
+  if valid_564308 != nil:
+    section.add "container", valid_564308
+  var valid_564309 = path.getOrDefault("resourceGroupName")
+  valid_564309 = validateParameter(valid_564309, JString, required = true,
                                  default = nil)
-  if valid_574409 != nil:
-    section.add "container", valid_574409
-  var valid_574410 = path.getOrDefault("workspaceName")
-  valid_574410 = validateParameter(valid_574410, JString, required = true,
+  if valid_564309 != nil:
+    section.add "resourceGroupName", valid_564309
+  var valid_564310 = path.getOrDefault("workspaceName")
+  valid_564310 = validateParameter(valid_564310, JString, required = true,
                                  default = nil)
-  if valid_574410 != nil:
-    section.add "workspaceName", valid_574410
+  if valid_564310 != nil:
+    section.add "workspaceName", valid_564310
   result.add "path", section
   ## parameters in `query` object:
   ##   path: JString
   ##       : The Artifact Path.
   section = newJObject()
-  var valid_574411 = query.getOrDefault("path")
-  valid_574411 = validateParameter(valid_574411, JString, required = false,
+  var valid_564311 = query.getOrDefault("path")
+  valid_564311 = validateParameter(valid_564311, JString, required = false,
                                  default = nil)
-  if valid_574411 != nil:
-    section.add "path", valid_574411
+  if valid_564311 != nil:
+    section.add "path", valid_564311
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2558,49 +2544,49 @@ proc validate_ArtifactsGetSas_574404(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574412: Call_ArtifactsGetSas_574403; path: JsonNode; query: JsonNode;
+proc call*(call_564312: Call_ArtifactsGetSas_564303; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get writable shared access signature for a specific Artifact.
   ## 
-  let valid = call_574412.validator(path, query, header, formData, body)
-  let scheme = call_574412.pickScheme
+  let valid = call_564312.validator(path, query, header, formData, body)
+  let scheme = call_564312.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574412.url(scheme.get, call_574412.host, call_574412.base,
-                         call_574412.route, valid.getOrDefault("path"),
+  let url = call_564312.url(scheme.get, call_564312.host, call_564312.base,
+                         call_564312.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574412, url, valid)
+  result = hook(call_564312, url, valid)
 
-proc call*(call_574413: Call_ArtifactsGetSas_574403; resourceGroupName: string;
-          origin: string; subscriptionId: string; container: string;
+proc call*(call_564313: Call_ArtifactsGetSas_564303; origin: string;
+          subscriptionId: string; container: string; resourceGroupName: string;
           workspaceName: string; path: string = ""): Recallable =
   ## artifactsGetSas
   ## Get writable shared access signature for a specific Artifact.
-  ##   resourceGroupName: string (required)
-  ##                    : The Name of the resource group in which the workspace is located.
   ##   origin: string (required)
   ##         : The origin of the Artifact.
+  ##   path: string
+  ##       : The Artifact Path.
   ##   subscriptionId: string (required)
   ##                 : The Azure Subscription ID.
   ##   container: string (required)
   ##            : The container name.
-  ##   path: string
-  ##       : The Artifact Path.
+  ##   resourceGroupName: string (required)
+  ##                    : The Name of the resource group in which the workspace is located.
   ##   workspaceName: string (required)
   ##                : The name of the workspace.
-  var path_574414 = newJObject()
-  var query_574415 = newJObject()
-  add(path_574414, "resourceGroupName", newJString(resourceGroupName))
-  add(path_574414, "origin", newJString(origin))
-  add(path_574414, "subscriptionId", newJString(subscriptionId))
-  add(path_574414, "container", newJString(container))
-  add(query_574415, "path", newJString(path))
-  add(path_574414, "workspaceName", newJString(workspaceName))
-  result = call_574413.call(path_574414, query_574415, nil, nil, nil)
+  var path_564314 = newJObject()
+  var query_564315 = newJObject()
+  add(path_564314, "origin", newJString(origin))
+  add(query_564315, "path", newJString(path))
+  add(path_564314, "subscriptionId", newJString(subscriptionId))
+  add(path_564314, "container", newJString(container))
+  add(path_564314, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564314, "workspaceName", newJString(workspaceName))
+  result = call_564313.call(path_564314, query_564315, nil, nil, nil)
 
-var artifactsGetSas* = Call_ArtifactsGetSas_574403(name: "artifactsGetSas",
+var artifactsGetSas* = Call_ArtifactsGetSas_564303(name: "artifactsGetSas",
     meth: HttpMethod.HttpGet, host: "azure.local", route: "/artifact/v2.0/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.MachineLearningServices/workspaces/{workspaceName}/artifacts/{origin}/{container}/write",
-    validator: validate_ArtifactsGetSas_574404, base: "", url: url_ArtifactsGetSas_574405,
+    validator: validate_ArtifactsGetSas_564304, base: "", url: url_ArtifactsGetSas_564305,
     schemes: {Scheme.Https})
 export
   rest

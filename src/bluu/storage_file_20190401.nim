@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_573657 = ref object of OpenApiRestCall
+  OpenApiRestCall_563555 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_573657](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563555](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_573657): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563555): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,8 +107,8 @@ const
   macServiceName = "storage-file"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_FileServicesList_573879 = ref object of OpenApiRestCall_573657
-proc url_FileServicesList_573881(protocol: Scheme; host: string; base: string;
+  Call_FileServicesList_563777 = ref object of OpenApiRestCall_563555
+proc url_FileServicesList_563779(protocol: Scheme; host: string; base: string;
                                 route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -128,7 +132,7 @@ proc url_FileServicesList_573881(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_FileServicesList_573880(path: JsonNode; query: JsonNode;
+proc validate_FileServicesList_563778(path: JsonNode; query: JsonNode;
                                      header: JsonNode; formData: JsonNode;
                                      body: JsonNode): JsonNode =
   ## List all file services in storage accounts
@@ -136,30 +140,30 @@ proc validate_FileServicesList_573880(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
   ##   subscriptionId: JString (required)
   ##                 : The ID of the target subscription.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
   ##   accountName: JString (required)
   ##              : The name of the storage account within the specified resource group. Storage account names must be between 3 and 24 characters in length and use numbers and lower-case letters only.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_574041 = path.getOrDefault("resourceGroupName")
-  valid_574041 = validateParameter(valid_574041, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_563941 = path.getOrDefault("subscriptionId")
+  valid_563941 = validateParameter(valid_563941, JString, required = true,
                                  default = nil)
-  if valid_574041 != nil:
-    section.add "resourceGroupName", valid_574041
-  var valid_574042 = path.getOrDefault("subscriptionId")
-  valid_574042 = validateParameter(valid_574042, JString, required = true,
+  if valid_563941 != nil:
+    section.add "subscriptionId", valid_563941
+  var valid_563942 = path.getOrDefault("resourceGroupName")
+  valid_563942 = validateParameter(valid_563942, JString, required = true,
                                  default = nil)
-  if valid_574042 != nil:
-    section.add "subscriptionId", valid_574042
-  var valid_574043 = path.getOrDefault("accountName")
-  valid_574043 = validateParameter(valid_574043, JString, required = true,
+  if valid_563942 != nil:
+    section.add "resourceGroupName", valid_563942
+  var valid_563943 = path.getOrDefault("accountName")
+  valid_563943 = validateParameter(valid_563943, JString, required = true,
                                  default = nil)
-  if valid_574043 != nil:
-    section.add "accountName", valid_574043
+  if valid_563943 != nil:
+    section.add "accountName", valid_563943
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -167,11 +171,11 @@ proc validate_FileServicesList_573880(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574044 = query.getOrDefault("api-version")
-  valid_574044 = validateParameter(valid_574044, JString, required = true,
+  var valid_563944 = query.getOrDefault("api-version")
+  valid_563944 = validateParameter(valid_563944, JString, required = true,
                                  default = nil)
-  if valid_574044 != nil:
-    section.add "api-version", valid_574044
+  if valid_563944 != nil:
+    section.add "api-version", valid_563944
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -180,46 +184,46 @@ proc validate_FileServicesList_573880(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574071: Call_FileServicesList_573879; path: JsonNode;
+proc call*(call_563971: Call_FileServicesList_563777; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## List all file services in storage accounts
   ## 
-  let valid = call_574071.validator(path, query, header, formData, body)
-  let scheme = call_574071.pickScheme
+  let valid = call_563971.validator(path, query, header, formData, body)
+  let scheme = call_563971.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574071.url(scheme.get, call_574071.host, call_574071.base,
-                         call_574071.route, valid.getOrDefault("path"),
+  let url = call_563971.url(scheme.get, call_563971.host, call_563971.base,
+                         call_563971.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574071, url, valid)
+  result = hook(call_563971, url, valid)
 
-proc call*(call_574142: Call_FileServicesList_573879; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; accountName: string): Recallable =
+proc call*(call_564042: Call_FileServicesList_563777; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string; accountName: string): Recallable =
   ## fileServicesList
   ## List all file services in storage accounts
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
   ##   apiVersion: string (required)
   ##             : The API version to use for this operation.
   ##   subscriptionId: string (required)
   ##                 : The ID of the target subscription.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
   ##   accountName: string (required)
   ##              : The name of the storage account within the specified resource group. Storage account names must be between 3 and 24 characters in length and use numbers and lower-case letters only.
-  var path_574143 = newJObject()
-  var query_574145 = newJObject()
-  add(path_574143, "resourceGroupName", newJString(resourceGroupName))
-  add(query_574145, "api-version", newJString(apiVersion))
-  add(path_574143, "subscriptionId", newJString(subscriptionId))
-  add(path_574143, "accountName", newJString(accountName))
-  result = call_574142.call(path_574143, query_574145, nil, nil, nil)
+  var path_564043 = newJObject()
+  var query_564045 = newJObject()
+  add(query_564045, "api-version", newJString(apiVersion))
+  add(path_564043, "subscriptionId", newJString(subscriptionId))
+  add(path_564043, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564043, "accountName", newJString(accountName))
+  result = call_564042.call(path_564043, query_564045, nil, nil, nil)
 
-var fileServicesList* = Call_FileServicesList_573879(name: "fileServicesList",
+var fileServicesList* = Call_FileServicesList_563777(name: "fileServicesList",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Storage/storageAccounts/{accountName}/fileServices",
-    validator: validate_FileServicesList_573880, base: "",
-    url: url_FileServicesList_573881, schemes: {Scheme.Https})
+    validator: validate_FileServicesList_563778, base: "",
+    url: url_FileServicesList_563779, schemes: {Scheme.Https})
 type
-  Call_FileSharesList_574184 = ref object of OpenApiRestCall_573657
-proc url_FileSharesList_574186(protocol: Scheme; host: string; base: string;
+  Call_FileSharesList_564084 = ref object of OpenApiRestCall_563555
+proc url_FileSharesList_564086(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -243,7 +247,7 @@ proc url_FileSharesList_574186(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_FileSharesList_574185(path: JsonNode; query: JsonNode;
+proc validate_FileSharesList_564085(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## Lists all shares.
@@ -251,63 +255,63 @@ proc validate_FileSharesList_574185(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
   ##   subscriptionId: JString (required)
   ##                 : The ID of the target subscription.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
   ##   accountName: JString (required)
   ##              : The name of the storage account within the specified resource group. Storage account names must be between 3 and 24 characters in length and use numbers and lower-case letters only.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_574188 = path.getOrDefault("resourceGroupName")
-  valid_574188 = validateParameter(valid_574188, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564088 = path.getOrDefault("subscriptionId")
+  valid_564088 = validateParameter(valid_564088, JString, required = true,
                                  default = nil)
-  if valid_574188 != nil:
-    section.add "resourceGroupName", valid_574188
-  var valid_574189 = path.getOrDefault("subscriptionId")
-  valid_574189 = validateParameter(valid_574189, JString, required = true,
+  if valid_564088 != nil:
+    section.add "subscriptionId", valid_564088
+  var valid_564089 = path.getOrDefault("resourceGroupName")
+  valid_564089 = validateParameter(valid_564089, JString, required = true,
                                  default = nil)
-  if valid_574189 != nil:
-    section.add "subscriptionId", valid_574189
-  var valid_574190 = path.getOrDefault("accountName")
-  valid_574190 = validateParameter(valid_574190, JString, required = true,
+  if valid_564089 != nil:
+    section.add "resourceGroupName", valid_564089
+  var valid_564090 = path.getOrDefault("accountName")
+  valid_564090 = validateParameter(valid_564090, JString, required = true,
                                  default = nil)
-  if valid_574190 != nil:
-    section.add "accountName", valid_574190
+  if valid_564090 != nil:
+    section.add "accountName", valid_564090
   result.add "path", section
   ## parameters in `query` object:
-  ##   $maxpagesize: JString
-  ##               : Optional. Specified maximum number of shares that can be included in the list.
-  ##   api-version: JString (required)
-  ##              : The API version to use for this operation.
   ##   $skipToken: JString
   ##             : Optional. Continuation token for the list operation.
+  ##   api-version: JString (required)
+  ##              : The API version to use for this operation.
+  ##   $maxpagesize: JString
+  ##               : Optional. Specified maximum number of shares that can be included in the list.
   ##   $filter: JString
   ##          : Optional. When specified, only share names starting with the filter will be listed.
   section = newJObject()
-  var valid_574191 = query.getOrDefault("$maxpagesize")
-  valid_574191 = validateParameter(valid_574191, JString, required = false,
+  var valid_564091 = query.getOrDefault("$skipToken")
+  valid_564091 = validateParameter(valid_564091, JString, required = false,
                                  default = nil)
-  if valid_574191 != nil:
-    section.add "$maxpagesize", valid_574191
+  if valid_564091 != nil:
+    section.add "$skipToken", valid_564091
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574192 = query.getOrDefault("api-version")
-  valid_574192 = validateParameter(valid_574192, JString, required = true,
+  var valid_564092 = query.getOrDefault("api-version")
+  valid_564092 = validateParameter(valid_564092, JString, required = true,
                                  default = nil)
-  if valid_574192 != nil:
-    section.add "api-version", valid_574192
-  var valid_574193 = query.getOrDefault("$skipToken")
-  valid_574193 = validateParameter(valid_574193, JString, required = false,
+  if valid_564092 != nil:
+    section.add "api-version", valid_564092
+  var valid_564093 = query.getOrDefault("$maxpagesize")
+  valid_564093 = validateParameter(valid_564093, JString, required = false,
                                  default = nil)
-  if valid_574193 != nil:
-    section.add "$skipToken", valid_574193
-  var valid_574194 = query.getOrDefault("$filter")
-  valid_574194 = validateParameter(valid_574194, JString, required = false,
+  if valid_564093 != nil:
+    section.add "$maxpagesize", valid_564093
+  var valid_564094 = query.getOrDefault("$filter")
+  valid_564094 = validateParameter(valid_564094, JString, required = false,
                                  default = nil)
-  if valid_574194 != nil:
-    section.add "$filter", valid_574194
+  if valid_564094 != nil:
+    section.add "$filter", valid_564094
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -316,56 +320,56 @@ proc validate_FileSharesList_574185(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574195: Call_FileSharesList_574184; path: JsonNode; query: JsonNode;
+proc call*(call_564095: Call_FileSharesList_564084; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists all shares.
   ## 
-  let valid = call_574195.validator(path, query, header, formData, body)
-  let scheme = call_574195.pickScheme
+  let valid = call_564095.validator(path, query, header, formData, body)
+  let scheme = call_564095.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574195.url(scheme.get, call_574195.host, call_574195.base,
-                         call_574195.route, valid.getOrDefault("path"),
+  let url = call_564095.url(scheme.get, call_564095.host, call_564095.base,
+                         call_564095.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574195, url, valid)
+  result = hook(call_564095, url, valid)
 
-proc call*(call_574196: Call_FileSharesList_574184; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; accountName: string;
-          Maxpagesize: string = ""; SkipToken: string = ""; Filter: string = ""): Recallable =
+proc call*(call_564096: Call_FileSharesList_564084; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string; accountName: string;
+          SkipToken: string = ""; Maxpagesize: string = ""; Filter: string = ""): Recallable =
   ## fileSharesList
   ## Lists all shares.
-  ##   Maxpagesize: string
-  ##              : Optional. Specified maximum number of shares that can be included in the list.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
+  ##   SkipToken: string
+  ##            : Optional. Continuation token for the list operation.
   ##   apiVersion: string (required)
   ##             : The API version to use for this operation.
   ##   subscriptionId: string (required)
   ##                 : The ID of the target subscription.
-  ##   SkipToken: string
-  ##            : Optional. Continuation token for the list operation.
-  ##   accountName: string (required)
-  ##              : The name of the storage account within the specified resource group. Storage account names must be between 3 and 24 characters in length and use numbers and lower-case letters only.
+  ##   Maxpagesize: string
+  ##              : Optional. Specified maximum number of shares that can be included in the list.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
   ##   Filter: string
   ##         : Optional. When specified, only share names starting with the filter will be listed.
-  var path_574197 = newJObject()
-  var query_574198 = newJObject()
-  add(query_574198, "$maxpagesize", newJString(Maxpagesize))
-  add(path_574197, "resourceGroupName", newJString(resourceGroupName))
-  add(query_574198, "api-version", newJString(apiVersion))
-  add(path_574197, "subscriptionId", newJString(subscriptionId))
-  add(query_574198, "$skipToken", newJString(SkipToken))
-  add(path_574197, "accountName", newJString(accountName))
-  add(query_574198, "$filter", newJString(Filter))
-  result = call_574196.call(path_574197, query_574198, nil, nil, nil)
+  ##   accountName: string (required)
+  ##              : The name of the storage account within the specified resource group. Storage account names must be between 3 and 24 characters in length and use numbers and lower-case letters only.
+  var path_564097 = newJObject()
+  var query_564098 = newJObject()
+  add(query_564098, "$skipToken", newJString(SkipToken))
+  add(query_564098, "api-version", newJString(apiVersion))
+  add(path_564097, "subscriptionId", newJString(subscriptionId))
+  add(query_564098, "$maxpagesize", newJString(Maxpagesize))
+  add(path_564097, "resourceGroupName", newJString(resourceGroupName))
+  add(query_564098, "$filter", newJString(Filter))
+  add(path_564097, "accountName", newJString(accountName))
+  result = call_564096.call(path_564097, query_564098, nil, nil, nil)
 
-var fileSharesList* = Call_FileSharesList_574184(name: "fileSharesList",
+var fileSharesList* = Call_FileSharesList_564084(name: "fileSharesList",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Storage/storageAccounts/{accountName}/fileServices/default/shares",
-    validator: validate_FileSharesList_574185, base: "", url: url_FileSharesList_574186,
+    validator: validate_FileSharesList_564085, base: "", url: url_FileSharesList_564086,
     schemes: {Scheme.Https})
 type
-  Call_FileSharesCreate_574220 = ref object of OpenApiRestCall_573657
-proc url_FileSharesCreate_574222(protocol: Scheme; host: string; base: string;
+  Call_FileSharesCreate_564120 = ref object of OpenApiRestCall_563555
+proc url_FileSharesCreate_564122(protocol: Scheme; host: string; base: string;
                                 route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -391,7 +395,7 @@ proc url_FileSharesCreate_574222(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_FileSharesCreate_574221(path: JsonNode; query: JsonNode;
+proc validate_FileSharesCreate_564121(path: JsonNode; query: JsonNode;
                                      header: JsonNode; formData: JsonNode;
                                      body: JsonNode): JsonNode =
   ## Creates a new share under the specified account as described by request body. The share resource includes metadata and properties for that share. It does not include a list of the files contained by the share. 
@@ -399,37 +403,37 @@ proc validate_FileSharesCreate_574221(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
   ##   subscriptionId: JString (required)
   ##                 : The ID of the target subscription.
   ##   shareName: JString (required)
   ##            : The name of the file share within the specified storage account. File share names must be between 3 and 63 characters in length and use numbers, lower-case letters and dash (-) only. Every dash (-) character must be immediately preceded and followed by a letter or number.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
   ##   accountName: JString (required)
   ##              : The name of the storage account within the specified resource group. Storage account names must be between 3 and 24 characters in length and use numbers and lower-case letters only.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_574240 = path.getOrDefault("resourceGroupName")
-  valid_574240 = validateParameter(valid_574240, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564140 = path.getOrDefault("subscriptionId")
+  valid_564140 = validateParameter(valid_564140, JString, required = true,
                                  default = nil)
-  if valid_574240 != nil:
-    section.add "resourceGroupName", valid_574240
-  var valid_574241 = path.getOrDefault("subscriptionId")
-  valid_574241 = validateParameter(valid_574241, JString, required = true,
+  if valid_564140 != nil:
+    section.add "subscriptionId", valid_564140
+  var valid_564141 = path.getOrDefault("shareName")
+  valid_564141 = validateParameter(valid_564141, JString, required = true,
                                  default = nil)
-  if valid_574241 != nil:
-    section.add "subscriptionId", valid_574241
-  var valid_574242 = path.getOrDefault("shareName")
-  valid_574242 = validateParameter(valid_574242, JString, required = true,
+  if valid_564141 != nil:
+    section.add "shareName", valid_564141
+  var valid_564142 = path.getOrDefault("resourceGroupName")
+  valid_564142 = validateParameter(valid_564142, JString, required = true,
                                  default = nil)
-  if valid_574242 != nil:
-    section.add "shareName", valid_574242
-  var valid_574243 = path.getOrDefault("accountName")
-  valid_574243 = validateParameter(valid_574243, JString, required = true,
+  if valid_564142 != nil:
+    section.add "resourceGroupName", valid_564142
+  var valid_564143 = path.getOrDefault("accountName")
+  valid_564143 = validateParameter(valid_564143, JString, required = true,
                                  default = nil)
-  if valid_574243 != nil:
-    section.add "accountName", valid_574243
+  if valid_564143 != nil:
+    section.add "accountName", valid_564143
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -437,11 +441,11 @@ proc validate_FileSharesCreate_574221(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574244 = query.getOrDefault("api-version")
-  valid_574244 = validateParameter(valid_574244, JString, required = true,
+  var valid_564144 = query.getOrDefault("api-version")
+  valid_564144 = validateParameter(valid_564144, JString, required = true,
                                  default = nil)
-  if valid_574244 != nil:
-    section.add "api-version", valid_574244
+  if valid_564144 != nil:
+    section.add "api-version", valid_564144
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -455,55 +459,55 @@ proc validate_FileSharesCreate_574221(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574246: Call_FileSharesCreate_574220; path: JsonNode;
+proc call*(call_564146: Call_FileSharesCreate_564120; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Creates a new share under the specified account as described by request body. The share resource includes metadata and properties for that share. It does not include a list of the files contained by the share. 
   ## 
-  let valid = call_574246.validator(path, query, header, formData, body)
-  let scheme = call_574246.pickScheme
+  let valid = call_564146.validator(path, query, header, formData, body)
+  let scheme = call_564146.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574246.url(scheme.get, call_574246.host, call_574246.base,
-                         call_574246.route, valid.getOrDefault("path"),
+  let url = call_564146.url(scheme.get, call_564146.host, call_564146.base,
+                         call_564146.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574246, url, valid)
+  result = hook(call_564146, url, valid)
 
-proc call*(call_574247: Call_FileSharesCreate_574220; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; shareName: string;
-          fileShare: JsonNode; accountName: string): Recallable =
+proc call*(call_564147: Call_FileSharesCreate_564120; apiVersion: string;
+          fileShare: JsonNode; subscriptionId: string; shareName: string;
+          resourceGroupName: string; accountName: string): Recallable =
   ## fileSharesCreate
   ## Creates a new share under the specified account as described by request body. The share resource includes metadata and properties for that share. It does not include a list of the files contained by the share. 
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
   ##   apiVersion: string (required)
   ##             : The API version to use for this operation.
+  ##   fileShare: JObject (required)
+  ##            : Properties of the file share to create.
   ##   subscriptionId: string (required)
   ##                 : The ID of the target subscription.
   ##   shareName: string (required)
   ##            : The name of the file share within the specified storage account. File share names must be between 3 and 63 characters in length and use numbers, lower-case letters and dash (-) only. Every dash (-) character must be immediately preceded and followed by a letter or number.
-  ##   fileShare: JObject (required)
-  ##            : Properties of the file share to create.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
   ##   accountName: string (required)
   ##              : The name of the storage account within the specified resource group. Storage account names must be between 3 and 24 characters in length and use numbers and lower-case letters only.
-  var path_574248 = newJObject()
-  var query_574249 = newJObject()
-  var body_574250 = newJObject()
-  add(path_574248, "resourceGroupName", newJString(resourceGroupName))
-  add(query_574249, "api-version", newJString(apiVersion))
-  add(path_574248, "subscriptionId", newJString(subscriptionId))
-  add(path_574248, "shareName", newJString(shareName))
+  var path_564148 = newJObject()
+  var query_564149 = newJObject()
+  var body_564150 = newJObject()
+  add(query_564149, "api-version", newJString(apiVersion))
   if fileShare != nil:
-    body_574250 = fileShare
-  add(path_574248, "accountName", newJString(accountName))
-  result = call_574247.call(path_574248, query_574249, nil, nil, body_574250)
+    body_564150 = fileShare
+  add(path_564148, "subscriptionId", newJString(subscriptionId))
+  add(path_564148, "shareName", newJString(shareName))
+  add(path_564148, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564148, "accountName", newJString(accountName))
+  result = call_564147.call(path_564148, query_564149, nil, nil, body_564150)
 
-var fileSharesCreate* = Call_FileSharesCreate_574220(name: "fileSharesCreate",
+var fileSharesCreate* = Call_FileSharesCreate_564120(name: "fileSharesCreate",
     meth: HttpMethod.HttpPut, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Storage/storageAccounts/{accountName}/fileServices/default/shares/{shareName}",
-    validator: validate_FileSharesCreate_574221, base: "",
-    url: url_FileSharesCreate_574222, schemes: {Scheme.Https})
+    validator: validate_FileSharesCreate_564121, base: "",
+    url: url_FileSharesCreate_564122, schemes: {Scheme.Https})
 type
-  Call_FileSharesGet_574199 = ref object of OpenApiRestCall_573657
-proc url_FileSharesGet_574201(protocol: Scheme; host: string; base: string;
+  Call_FileSharesGet_564099 = ref object of OpenApiRestCall_563555
+proc url_FileSharesGet_564101(protocol: Scheme; host: string; base: string;
                              route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -529,44 +533,44 @@ proc url_FileSharesGet_574201(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_FileSharesGet_574200(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_FileSharesGet_564100(path: JsonNode; query: JsonNode; header: JsonNode;
                                   formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets properties of a specified share.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
   ##   subscriptionId: JString (required)
   ##                 : The ID of the target subscription.
   ##   shareName: JString (required)
   ##            : The name of the file share within the specified storage account. File share names must be between 3 and 63 characters in length and use numbers, lower-case letters and dash (-) only. Every dash (-) character must be immediately preceded and followed by a letter or number.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
   ##   accountName: JString (required)
   ##              : The name of the storage account within the specified resource group. Storage account names must be between 3 and 24 characters in length and use numbers and lower-case letters only.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_574211 = path.getOrDefault("resourceGroupName")
-  valid_574211 = validateParameter(valid_574211, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564111 = path.getOrDefault("subscriptionId")
+  valid_564111 = validateParameter(valid_564111, JString, required = true,
                                  default = nil)
-  if valid_574211 != nil:
-    section.add "resourceGroupName", valid_574211
-  var valid_574212 = path.getOrDefault("subscriptionId")
-  valid_574212 = validateParameter(valid_574212, JString, required = true,
+  if valid_564111 != nil:
+    section.add "subscriptionId", valid_564111
+  var valid_564112 = path.getOrDefault("shareName")
+  valid_564112 = validateParameter(valid_564112, JString, required = true,
                                  default = nil)
-  if valid_574212 != nil:
-    section.add "subscriptionId", valid_574212
-  var valid_574213 = path.getOrDefault("shareName")
-  valid_574213 = validateParameter(valid_574213, JString, required = true,
+  if valid_564112 != nil:
+    section.add "shareName", valid_564112
+  var valid_564113 = path.getOrDefault("resourceGroupName")
+  valid_564113 = validateParameter(valid_564113, JString, required = true,
                                  default = nil)
-  if valid_574213 != nil:
-    section.add "shareName", valid_574213
-  var valid_574214 = path.getOrDefault("accountName")
-  valid_574214 = validateParameter(valid_574214, JString, required = true,
+  if valid_564113 != nil:
+    section.add "resourceGroupName", valid_564113
+  var valid_564114 = path.getOrDefault("accountName")
+  valid_564114 = validateParameter(valid_564114, JString, required = true,
                                  default = nil)
-  if valid_574214 != nil:
-    section.add "accountName", valid_574214
+  if valid_564114 != nil:
+    section.add "accountName", valid_564114
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -574,11 +578,11 @@ proc validate_FileSharesGet_574200(path: JsonNode; query: JsonNode; header: Json
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574215 = query.getOrDefault("api-version")
-  valid_574215 = validateParameter(valid_574215, JString, required = true,
+  var valid_564115 = query.getOrDefault("api-version")
+  valid_564115 = validateParameter(valid_564115, JString, required = true,
                                  default = nil)
-  if valid_574215 != nil:
-    section.add "api-version", valid_574215
+  if valid_564115 != nil:
+    section.add "api-version", valid_564115
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -587,50 +591,50 @@ proc validate_FileSharesGet_574200(path: JsonNode; query: JsonNode; header: Json
   if body != nil:
     result.add "body", body
 
-proc call*(call_574216: Call_FileSharesGet_574199; path: JsonNode; query: JsonNode;
+proc call*(call_564116: Call_FileSharesGet_564099; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets properties of a specified share.
   ## 
-  let valid = call_574216.validator(path, query, header, formData, body)
-  let scheme = call_574216.pickScheme
+  let valid = call_564116.validator(path, query, header, formData, body)
+  let scheme = call_564116.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574216.url(scheme.get, call_574216.host, call_574216.base,
-                         call_574216.route, valid.getOrDefault("path"),
+  let url = call_564116.url(scheme.get, call_564116.host, call_564116.base,
+                         call_564116.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574216, url, valid)
+  result = hook(call_564116, url, valid)
 
-proc call*(call_574217: Call_FileSharesGet_574199; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; shareName: string;
+proc call*(call_564117: Call_FileSharesGet_564099; apiVersion: string;
+          subscriptionId: string; shareName: string; resourceGroupName: string;
           accountName: string): Recallable =
   ## fileSharesGet
   ## Gets properties of a specified share.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
   ##   apiVersion: string (required)
   ##             : The API version to use for this operation.
   ##   subscriptionId: string (required)
   ##                 : The ID of the target subscription.
   ##   shareName: string (required)
   ##            : The name of the file share within the specified storage account. File share names must be between 3 and 63 characters in length and use numbers, lower-case letters and dash (-) only. Every dash (-) character must be immediately preceded and followed by a letter or number.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
   ##   accountName: string (required)
   ##              : The name of the storage account within the specified resource group. Storage account names must be between 3 and 24 characters in length and use numbers and lower-case letters only.
-  var path_574218 = newJObject()
-  var query_574219 = newJObject()
-  add(path_574218, "resourceGroupName", newJString(resourceGroupName))
-  add(query_574219, "api-version", newJString(apiVersion))
-  add(path_574218, "subscriptionId", newJString(subscriptionId))
-  add(path_574218, "shareName", newJString(shareName))
-  add(path_574218, "accountName", newJString(accountName))
-  result = call_574217.call(path_574218, query_574219, nil, nil, nil)
+  var path_564118 = newJObject()
+  var query_564119 = newJObject()
+  add(query_564119, "api-version", newJString(apiVersion))
+  add(path_564118, "subscriptionId", newJString(subscriptionId))
+  add(path_564118, "shareName", newJString(shareName))
+  add(path_564118, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564118, "accountName", newJString(accountName))
+  result = call_564117.call(path_564118, query_564119, nil, nil, nil)
 
-var fileSharesGet* = Call_FileSharesGet_574199(name: "fileSharesGet",
+var fileSharesGet* = Call_FileSharesGet_564099(name: "fileSharesGet",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Storage/storageAccounts/{accountName}/fileServices/default/shares/{shareName}",
-    validator: validate_FileSharesGet_574200, base: "", url: url_FileSharesGet_574201,
+    validator: validate_FileSharesGet_564100, base: "", url: url_FileSharesGet_564101,
     schemes: {Scheme.Https})
 type
-  Call_FileSharesUpdate_574263 = ref object of OpenApiRestCall_573657
-proc url_FileSharesUpdate_574265(protocol: Scheme; host: string; base: string;
+  Call_FileSharesUpdate_564163 = ref object of OpenApiRestCall_563555
+proc url_FileSharesUpdate_564165(protocol: Scheme; host: string; base: string;
                                 route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -656,7 +660,7 @@ proc url_FileSharesUpdate_574265(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_FileSharesUpdate_574264(path: JsonNode; query: JsonNode;
+proc validate_FileSharesUpdate_564164(path: JsonNode; query: JsonNode;
                                      header: JsonNode; formData: JsonNode;
                                      body: JsonNode): JsonNode =
   ## Updates share properties as specified in request body. Properties not mentioned in the request will not be changed. Update fails if the specified share does not already exist. 
@@ -664,37 +668,37 @@ proc validate_FileSharesUpdate_574264(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
   ##   subscriptionId: JString (required)
   ##                 : The ID of the target subscription.
   ##   shareName: JString (required)
   ##            : The name of the file share within the specified storage account. File share names must be between 3 and 63 characters in length and use numbers, lower-case letters and dash (-) only. Every dash (-) character must be immediately preceded and followed by a letter or number.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
   ##   accountName: JString (required)
   ##              : The name of the storage account within the specified resource group. Storage account names must be between 3 and 24 characters in length and use numbers and lower-case letters only.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_574266 = path.getOrDefault("resourceGroupName")
-  valid_574266 = validateParameter(valid_574266, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564166 = path.getOrDefault("subscriptionId")
+  valid_564166 = validateParameter(valid_564166, JString, required = true,
                                  default = nil)
-  if valid_574266 != nil:
-    section.add "resourceGroupName", valid_574266
-  var valid_574267 = path.getOrDefault("subscriptionId")
-  valid_574267 = validateParameter(valid_574267, JString, required = true,
+  if valid_564166 != nil:
+    section.add "subscriptionId", valid_564166
+  var valid_564167 = path.getOrDefault("shareName")
+  valid_564167 = validateParameter(valid_564167, JString, required = true,
                                  default = nil)
-  if valid_574267 != nil:
-    section.add "subscriptionId", valid_574267
-  var valid_574268 = path.getOrDefault("shareName")
-  valid_574268 = validateParameter(valid_574268, JString, required = true,
+  if valid_564167 != nil:
+    section.add "shareName", valid_564167
+  var valid_564168 = path.getOrDefault("resourceGroupName")
+  valid_564168 = validateParameter(valid_564168, JString, required = true,
                                  default = nil)
-  if valid_574268 != nil:
-    section.add "shareName", valid_574268
-  var valid_574269 = path.getOrDefault("accountName")
-  valid_574269 = validateParameter(valid_574269, JString, required = true,
+  if valid_564168 != nil:
+    section.add "resourceGroupName", valid_564168
+  var valid_564169 = path.getOrDefault("accountName")
+  valid_564169 = validateParameter(valid_564169, JString, required = true,
                                  default = nil)
-  if valid_574269 != nil:
-    section.add "accountName", valid_574269
+  if valid_564169 != nil:
+    section.add "accountName", valid_564169
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -702,11 +706,11 @@ proc validate_FileSharesUpdate_574264(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574270 = query.getOrDefault("api-version")
-  valid_574270 = validateParameter(valid_574270, JString, required = true,
+  var valid_564170 = query.getOrDefault("api-version")
+  valid_564170 = validateParameter(valid_564170, JString, required = true,
                                  default = nil)
-  if valid_574270 != nil:
-    section.add "api-version", valid_574270
+  if valid_564170 != nil:
+    section.add "api-version", valid_564170
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -720,55 +724,55 @@ proc validate_FileSharesUpdate_574264(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574272: Call_FileSharesUpdate_574263; path: JsonNode;
+proc call*(call_564172: Call_FileSharesUpdate_564163; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Updates share properties as specified in request body. Properties not mentioned in the request will not be changed. Update fails if the specified share does not already exist. 
   ## 
-  let valid = call_574272.validator(path, query, header, formData, body)
-  let scheme = call_574272.pickScheme
+  let valid = call_564172.validator(path, query, header, formData, body)
+  let scheme = call_564172.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574272.url(scheme.get, call_574272.host, call_574272.base,
-                         call_574272.route, valid.getOrDefault("path"),
+  let url = call_564172.url(scheme.get, call_564172.host, call_564172.base,
+                         call_564172.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574272, url, valid)
+  result = hook(call_564172, url, valid)
 
-proc call*(call_574273: Call_FileSharesUpdate_574263; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; shareName: string;
-          fileShare: JsonNode; accountName: string): Recallable =
+proc call*(call_564173: Call_FileSharesUpdate_564163; apiVersion: string;
+          fileShare: JsonNode; subscriptionId: string; shareName: string;
+          resourceGroupName: string; accountName: string): Recallable =
   ## fileSharesUpdate
   ## Updates share properties as specified in request body. Properties not mentioned in the request will not be changed. Update fails if the specified share does not already exist. 
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
   ##   apiVersion: string (required)
   ##             : The API version to use for this operation.
+  ##   fileShare: JObject (required)
+  ##            : Properties to update for the file share.
   ##   subscriptionId: string (required)
   ##                 : The ID of the target subscription.
   ##   shareName: string (required)
   ##            : The name of the file share within the specified storage account. File share names must be between 3 and 63 characters in length and use numbers, lower-case letters and dash (-) only. Every dash (-) character must be immediately preceded and followed by a letter or number.
-  ##   fileShare: JObject (required)
-  ##            : Properties to update for the file share.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
   ##   accountName: string (required)
   ##              : The name of the storage account within the specified resource group. Storage account names must be between 3 and 24 characters in length and use numbers and lower-case letters only.
-  var path_574274 = newJObject()
-  var query_574275 = newJObject()
-  var body_574276 = newJObject()
-  add(path_574274, "resourceGroupName", newJString(resourceGroupName))
-  add(query_574275, "api-version", newJString(apiVersion))
-  add(path_574274, "subscriptionId", newJString(subscriptionId))
-  add(path_574274, "shareName", newJString(shareName))
+  var path_564174 = newJObject()
+  var query_564175 = newJObject()
+  var body_564176 = newJObject()
+  add(query_564175, "api-version", newJString(apiVersion))
   if fileShare != nil:
-    body_574276 = fileShare
-  add(path_574274, "accountName", newJString(accountName))
-  result = call_574273.call(path_574274, query_574275, nil, nil, body_574276)
+    body_564176 = fileShare
+  add(path_564174, "subscriptionId", newJString(subscriptionId))
+  add(path_564174, "shareName", newJString(shareName))
+  add(path_564174, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564174, "accountName", newJString(accountName))
+  result = call_564173.call(path_564174, query_564175, nil, nil, body_564176)
 
-var fileSharesUpdate* = Call_FileSharesUpdate_574263(name: "fileSharesUpdate",
+var fileSharesUpdate* = Call_FileSharesUpdate_564163(name: "fileSharesUpdate",
     meth: HttpMethod.HttpPatch, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Storage/storageAccounts/{accountName}/fileServices/default/shares/{shareName}",
-    validator: validate_FileSharesUpdate_574264, base: "",
-    url: url_FileSharesUpdate_574265, schemes: {Scheme.Https})
+    validator: validate_FileSharesUpdate_564164, base: "",
+    url: url_FileSharesUpdate_564165, schemes: {Scheme.Https})
 type
-  Call_FileSharesDelete_574251 = ref object of OpenApiRestCall_573657
-proc url_FileSharesDelete_574253(protocol: Scheme; host: string; base: string;
+  Call_FileSharesDelete_564151 = ref object of OpenApiRestCall_563555
+proc url_FileSharesDelete_564153(protocol: Scheme; host: string; base: string;
                                 route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -794,7 +798,7 @@ proc url_FileSharesDelete_574253(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_FileSharesDelete_574252(path: JsonNode; query: JsonNode;
+proc validate_FileSharesDelete_564152(path: JsonNode; query: JsonNode;
                                      header: JsonNode; formData: JsonNode;
                                      body: JsonNode): JsonNode =
   ## Deletes specified share under its account.
@@ -802,37 +806,37 @@ proc validate_FileSharesDelete_574252(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
   ##   subscriptionId: JString (required)
   ##                 : The ID of the target subscription.
   ##   shareName: JString (required)
   ##            : The name of the file share within the specified storage account. File share names must be between 3 and 63 characters in length and use numbers, lower-case letters and dash (-) only. Every dash (-) character must be immediately preceded and followed by a letter or number.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
   ##   accountName: JString (required)
   ##              : The name of the storage account within the specified resource group. Storage account names must be between 3 and 24 characters in length and use numbers and lower-case letters only.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_574254 = path.getOrDefault("resourceGroupName")
-  valid_574254 = validateParameter(valid_574254, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564154 = path.getOrDefault("subscriptionId")
+  valid_564154 = validateParameter(valid_564154, JString, required = true,
                                  default = nil)
-  if valid_574254 != nil:
-    section.add "resourceGroupName", valid_574254
-  var valid_574255 = path.getOrDefault("subscriptionId")
-  valid_574255 = validateParameter(valid_574255, JString, required = true,
+  if valid_564154 != nil:
+    section.add "subscriptionId", valid_564154
+  var valid_564155 = path.getOrDefault("shareName")
+  valid_564155 = validateParameter(valid_564155, JString, required = true,
                                  default = nil)
-  if valid_574255 != nil:
-    section.add "subscriptionId", valid_574255
-  var valid_574256 = path.getOrDefault("shareName")
-  valid_574256 = validateParameter(valid_574256, JString, required = true,
+  if valid_564155 != nil:
+    section.add "shareName", valid_564155
+  var valid_564156 = path.getOrDefault("resourceGroupName")
+  valid_564156 = validateParameter(valid_564156, JString, required = true,
                                  default = nil)
-  if valid_574256 != nil:
-    section.add "shareName", valid_574256
-  var valid_574257 = path.getOrDefault("accountName")
-  valid_574257 = validateParameter(valid_574257, JString, required = true,
+  if valid_564156 != nil:
+    section.add "resourceGroupName", valid_564156
+  var valid_564157 = path.getOrDefault("accountName")
+  valid_564157 = validateParameter(valid_564157, JString, required = true,
                                  default = nil)
-  if valid_574257 != nil:
-    section.add "accountName", valid_574257
+  if valid_564157 != nil:
+    section.add "accountName", valid_564157
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -840,11 +844,11 @@ proc validate_FileSharesDelete_574252(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574258 = query.getOrDefault("api-version")
-  valid_574258 = validateParameter(valid_574258, JString, required = true,
+  var valid_564158 = query.getOrDefault("api-version")
+  valid_564158 = validateParameter(valid_564158, JString, required = true,
                                  default = nil)
-  if valid_574258 != nil:
-    section.add "api-version", valid_574258
+  if valid_564158 != nil:
+    section.add "api-version", valid_564158
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -853,50 +857,50 @@ proc validate_FileSharesDelete_574252(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574259: Call_FileSharesDelete_574251; path: JsonNode;
+proc call*(call_564159: Call_FileSharesDelete_564151; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes specified share under its account.
   ## 
-  let valid = call_574259.validator(path, query, header, formData, body)
-  let scheme = call_574259.pickScheme
+  let valid = call_564159.validator(path, query, header, formData, body)
+  let scheme = call_564159.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574259.url(scheme.get, call_574259.host, call_574259.base,
-                         call_574259.route, valid.getOrDefault("path"),
+  let url = call_564159.url(scheme.get, call_564159.host, call_564159.base,
+                         call_564159.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574259, url, valid)
+  result = hook(call_564159, url, valid)
 
-proc call*(call_574260: Call_FileSharesDelete_574251; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; shareName: string;
+proc call*(call_564160: Call_FileSharesDelete_564151; apiVersion: string;
+          subscriptionId: string; shareName: string; resourceGroupName: string;
           accountName: string): Recallable =
   ## fileSharesDelete
   ## Deletes specified share under its account.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
   ##   apiVersion: string (required)
   ##             : The API version to use for this operation.
   ##   subscriptionId: string (required)
   ##                 : The ID of the target subscription.
   ##   shareName: string (required)
   ##            : The name of the file share within the specified storage account. File share names must be between 3 and 63 characters in length and use numbers, lower-case letters and dash (-) only. Every dash (-) character must be immediately preceded and followed by a letter or number.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
   ##   accountName: string (required)
   ##              : The name of the storage account within the specified resource group. Storage account names must be between 3 and 24 characters in length and use numbers and lower-case letters only.
-  var path_574261 = newJObject()
-  var query_574262 = newJObject()
-  add(path_574261, "resourceGroupName", newJString(resourceGroupName))
-  add(query_574262, "api-version", newJString(apiVersion))
-  add(path_574261, "subscriptionId", newJString(subscriptionId))
-  add(path_574261, "shareName", newJString(shareName))
-  add(path_574261, "accountName", newJString(accountName))
-  result = call_574260.call(path_574261, query_574262, nil, nil, nil)
+  var path_564161 = newJObject()
+  var query_564162 = newJObject()
+  add(query_564162, "api-version", newJString(apiVersion))
+  add(path_564161, "subscriptionId", newJString(subscriptionId))
+  add(path_564161, "shareName", newJString(shareName))
+  add(path_564161, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564161, "accountName", newJString(accountName))
+  result = call_564160.call(path_564161, query_564162, nil, nil, nil)
 
-var fileSharesDelete* = Call_FileSharesDelete_574251(name: "fileSharesDelete",
+var fileSharesDelete* = Call_FileSharesDelete_564151(name: "fileSharesDelete",
     meth: HttpMethod.HttpDelete, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Storage/storageAccounts/{accountName}/fileServices/default/shares/{shareName}",
-    validator: validate_FileSharesDelete_574252, base: "",
-    url: url_FileSharesDelete_574253, schemes: {Scheme.Https})
+    validator: validate_FileSharesDelete_564152, base: "",
+    url: url_FileSharesDelete_564153, schemes: {Scheme.Https})
 type
-  Call_FileServicesSetServiceProperties_574302 = ref object of OpenApiRestCall_573657
-proc url_FileServicesSetServiceProperties_574304(protocol: Scheme; host: string;
+  Call_FileServicesSetServiceProperties_564202 = ref object of OpenApiRestCall_563555
+proc url_FileServicesSetServiceProperties_564204(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -923,44 +927,44 @@ proc url_FileServicesSetServiceProperties_574304(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_FileServicesSetServiceProperties_574303(path: JsonNode;
+proc validate_FileServicesSetServiceProperties_564203(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Sets the properties of file services in storage accounts, including CORS (Cross-Origin Resource Sharing) rules. 
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
   ##   subscriptionId: JString (required)
   ##                 : The ID of the target subscription.
   ##   FileServicesName: JString (required)
   ##                   : The name of the file Service within the specified storage account. File Service Name must be "default"
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
   ##   accountName: JString (required)
   ##              : The name of the storage account within the specified resource group. Storage account names must be between 3 and 24 characters in length and use numbers and lower-case letters only.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_574305 = path.getOrDefault("resourceGroupName")
-  valid_574305 = validateParameter(valid_574305, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564205 = path.getOrDefault("subscriptionId")
+  valid_564205 = validateParameter(valid_564205, JString, required = true,
                                  default = nil)
-  if valid_574305 != nil:
-    section.add "resourceGroupName", valid_574305
-  var valid_574306 = path.getOrDefault("subscriptionId")
-  valid_574306 = validateParameter(valid_574306, JString, required = true,
-                                 default = nil)
-  if valid_574306 != nil:
-    section.add "subscriptionId", valid_574306
-  var valid_574307 = path.getOrDefault("FileServicesName")
-  valid_574307 = validateParameter(valid_574307, JString, required = true,
+  if valid_564205 != nil:
+    section.add "subscriptionId", valid_564205
+  var valid_564206 = path.getOrDefault("FileServicesName")
+  valid_564206 = validateParameter(valid_564206, JString, required = true,
                                  default = newJString("default"))
-  if valid_574307 != nil:
-    section.add "FileServicesName", valid_574307
-  var valid_574308 = path.getOrDefault("accountName")
-  valid_574308 = validateParameter(valid_574308, JString, required = true,
+  if valid_564206 != nil:
+    section.add "FileServicesName", valid_564206
+  var valid_564207 = path.getOrDefault("resourceGroupName")
+  valid_564207 = validateParameter(valid_564207, JString, required = true,
                                  default = nil)
-  if valid_574308 != nil:
-    section.add "accountName", valid_574308
+  if valid_564207 != nil:
+    section.add "resourceGroupName", valid_564207
+  var valid_564208 = path.getOrDefault("accountName")
+  valid_564208 = validateParameter(valid_564208, JString, required = true,
+                                 default = nil)
+  if valid_564208 != nil:
+    section.add "accountName", valid_564208
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -968,11 +972,11 @@ proc validate_FileServicesSetServiceProperties_574303(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574309 = query.getOrDefault("api-version")
-  valid_574309 = validateParameter(valid_574309, JString, required = true,
+  var valid_564209 = query.getOrDefault("api-version")
+  valid_564209 = validateParameter(valid_564209, JString, required = true,
                                  default = nil)
-  if valid_574309 != nil:
-    section.add "api-version", valid_574309
+  if valid_564209 != nil:
+    section.add "api-version", valid_564209
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -986,58 +990,58 @@ proc validate_FileServicesSetServiceProperties_574303(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574311: Call_FileServicesSetServiceProperties_574302;
+proc call*(call_564211: Call_FileServicesSetServiceProperties_564202;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Sets the properties of file services in storage accounts, including CORS (Cross-Origin Resource Sharing) rules. 
   ## 
-  let valid = call_574311.validator(path, query, header, formData, body)
-  let scheme = call_574311.pickScheme
+  let valid = call_564211.validator(path, query, header, formData, body)
+  let scheme = call_564211.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574311.url(scheme.get, call_574311.host, call_574311.base,
-                         call_574311.route, valid.getOrDefault("path"),
+  let url = call_564211.url(scheme.get, call_564211.host, call_564211.base,
+                         call_564211.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574311, url, valid)
+  result = hook(call_564211, url, valid)
 
-proc call*(call_574312: Call_FileServicesSetServiceProperties_574302;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
+proc call*(call_564212: Call_FileServicesSetServiceProperties_564202;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string;
           parameters: JsonNode; accountName: string;
           FileServicesName: string = "default"): Recallable =
   ## fileServicesSetServiceProperties
   ## Sets the properties of file services in storage accounts, including CORS (Cross-Origin Resource Sharing) rules. 
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
   ##   apiVersion: string (required)
   ##             : The API version to use for this operation.
   ##   subscriptionId: string (required)
   ##                 : The ID of the target subscription.
   ##   FileServicesName: string (required)
   ##                   : The name of the file Service within the specified storage account. File Service Name must be "default"
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
   ##   parameters: JObject (required)
   ##             : The properties of file services in storage accounts, including CORS (Cross-Origin Resource Sharing) rules.
   ##   accountName: string (required)
   ##              : The name of the storage account within the specified resource group. Storage account names must be between 3 and 24 characters in length and use numbers and lower-case letters only.
-  var path_574313 = newJObject()
-  var query_574314 = newJObject()
-  var body_574315 = newJObject()
-  add(path_574313, "resourceGroupName", newJString(resourceGroupName))
-  add(query_574314, "api-version", newJString(apiVersion))
-  add(path_574313, "subscriptionId", newJString(subscriptionId))
-  add(path_574313, "FileServicesName", newJString(FileServicesName))
+  var path_564213 = newJObject()
+  var query_564214 = newJObject()
+  var body_564215 = newJObject()
+  add(query_564214, "api-version", newJString(apiVersion))
+  add(path_564213, "subscriptionId", newJString(subscriptionId))
+  add(path_564213, "FileServicesName", newJString(FileServicesName))
+  add(path_564213, "resourceGroupName", newJString(resourceGroupName))
   if parameters != nil:
-    body_574315 = parameters
-  add(path_574313, "accountName", newJString(accountName))
-  result = call_574312.call(path_574313, query_574314, nil, nil, body_574315)
+    body_564215 = parameters
+  add(path_564213, "accountName", newJString(accountName))
+  result = call_564212.call(path_564213, query_564214, nil, nil, body_564215)
 
-var fileServicesSetServiceProperties* = Call_FileServicesSetServiceProperties_574302(
+var fileServicesSetServiceProperties* = Call_FileServicesSetServiceProperties_564202(
     name: "fileServicesSetServiceProperties", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Storage/storageAccounts/{accountName}/fileServices/{FileServicesName}",
-    validator: validate_FileServicesSetServiceProperties_574303, base: "",
-    url: url_FileServicesSetServiceProperties_574304, schemes: {Scheme.Https})
+    validator: validate_FileServicesSetServiceProperties_564203, base: "",
+    url: url_FileServicesSetServiceProperties_564204, schemes: {Scheme.Https})
 type
-  Call_FileServicesGetServiceProperties_574277 = ref object of OpenApiRestCall_573657
-proc url_FileServicesGetServiceProperties_574279(protocol: Scheme; host: string;
+  Call_FileServicesGetServiceProperties_564177 = ref object of OpenApiRestCall_563555
+proc url_FileServicesGetServiceProperties_564179(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1064,44 +1068,44 @@ proc url_FileServicesGetServiceProperties_574279(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_FileServicesGetServiceProperties_574278(path: JsonNode;
+proc validate_FileServicesGetServiceProperties_564178(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the properties of file services in storage accounts, including CORS (Cross-Origin Resource Sharing) rules.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
   ##   subscriptionId: JString (required)
   ##                 : The ID of the target subscription.
   ##   FileServicesName: JString (required)
   ##                   : The name of the file Service within the specified storage account. File Service Name must be "default"
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
   ##   accountName: JString (required)
   ##              : The name of the storage account within the specified resource group. Storage account names must be between 3 and 24 characters in length and use numbers and lower-case letters only.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_574280 = path.getOrDefault("resourceGroupName")
-  valid_574280 = validateParameter(valid_574280, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564180 = path.getOrDefault("subscriptionId")
+  valid_564180 = validateParameter(valid_564180, JString, required = true,
                                  default = nil)
-  if valid_574280 != nil:
-    section.add "resourceGroupName", valid_574280
-  var valid_574281 = path.getOrDefault("subscriptionId")
-  valid_574281 = validateParameter(valid_574281, JString, required = true,
-                                 default = nil)
-  if valid_574281 != nil:
-    section.add "subscriptionId", valid_574281
-  var valid_574295 = path.getOrDefault("FileServicesName")
-  valid_574295 = validateParameter(valid_574295, JString, required = true,
+  if valid_564180 != nil:
+    section.add "subscriptionId", valid_564180
+  var valid_564194 = path.getOrDefault("FileServicesName")
+  valid_564194 = validateParameter(valid_564194, JString, required = true,
                                  default = newJString("default"))
-  if valid_574295 != nil:
-    section.add "FileServicesName", valid_574295
-  var valid_574296 = path.getOrDefault("accountName")
-  valid_574296 = validateParameter(valid_574296, JString, required = true,
+  if valid_564194 != nil:
+    section.add "FileServicesName", valid_564194
+  var valid_564195 = path.getOrDefault("resourceGroupName")
+  valid_564195 = validateParameter(valid_564195, JString, required = true,
                                  default = nil)
-  if valid_574296 != nil:
-    section.add "accountName", valid_574296
+  if valid_564195 != nil:
+    section.add "resourceGroupName", valid_564195
+  var valid_564196 = path.getOrDefault("accountName")
+  valid_564196 = validateParameter(valid_564196, JString, required = true,
+                                 default = nil)
+  if valid_564196 != nil:
+    section.add "accountName", valid_564196
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1109,11 +1113,11 @@ proc validate_FileServicesGetServiceProperties_574278(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574297 = query.getOrDefault("api-version")
-  valid_574297 = validateParameter(valid_574297, JString, required = true,
+  var valid_564197 = query.getOrDefault("api-version")
+  valid_564197 = validateParameter(valid_564197, JString, required = true,
                                  default = nil)
-  if valid_574297 != nil:
-    section.add "api-version", valid_574297
+  if valid_564197 != nil:
+    section.add "api-version", valid_564197
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1122,49 +1126,49 @@ proc validate_FileServicesGetServiceProperties_574278(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574298: Call_FileServicesGetServiceProperties_574277;
+proc call*(call_564198: Call_FileServicesGetServiceProperties_564177;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Gets the properties of file services in storage accounts, including CORS (Cross-Origin Resource Sharing) rules.
   ## 
-  let valid = call_574298.validator(path, query, header, formData, body)
-  let scheme = call_574298.pickScheme
+  let valid = call_564198.validator(path, query, header, formData, body)
+  let scheme = call_564198.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574298.url(scheme.get, call_574298.host, call_574298.base,
-                         call_574298.route, valid.getOrDefault("path"),
+  let url = call_564198.url(scheme.get, call_564198.host, call_564198.base,
+                         call_564198.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574298, url, valid)
+  result = hook(call_564198, url, valid)
 
-proc call*(call_574299: Call_FileServicesGetServiceProperties_574277;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
+proc call*(call_564199: Call_FileServicesGetServiceProperties_564177;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string;
           accountName: string; FileServicesName: string = "default"): Recallable =
   ## fileServicesGetServiceProperties
   ## Gets the properties of file services in storage accounts, including CORS (Cross-Origin Resource Sharing) rules.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
   ##   apiVersion: string (required)
   ##             : The API version to use for this operation.
   ##   subscriptionId: string (required)
   ##                 : The ID of the target subscription.
   ##   FileServicesName: string (required)
   ##                   : The name of the file Service within the specified storage account. File Service Name must be "default"
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
   ##   accountName: string (required)
   ##              : The name of the storage account within the specified resource group. Storage account names must be between 3 and 24 characters in length and use numbers and lower-case letters only.
-  var path_574300 = newJObject()
-  var query_574301 = newJObject()
-  add(path_574300, "resourceGroupName", newJString(resourceGroupName))
-  add(query_574301, "api-version", newJString(apiVersion))
-  add(path_574300, "subscriptionId", newJString(subscriptionId))
-  add(path_574300, "FileServicesName", newJString(FileServicesName))
-  add(path_574300, "accountName", newJString(accountName))
-  result = call_574299.call(path_574300, query_574301, nil, nil, nil)
+  var path_564200 = newJObject()
+  var query_564201 = newJObject()
+  add(query_564201, "api-version", newJString(apiVersion))
+  add(path_564200, "subscriptionId", newJString(subscriptionId))
+  add(path_564200, "FileServicesName", newJString(FileServicesName))
+  add(path_564200, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564200, "accountName", newJString(accountName))
+  result = call_564199.call(path_564200, query_564201, nil, nil, nil)
 
-var fileServicesGetServiceProperties* = Call_FileServicesGetServiceProperties_574277(
+var fileServicesGetServiceProperties* = Call_FileServicesGetServiceProperties_564177(
     name: "fileServicesGetServiceProperties", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Storage/storageAccounts/{accountName}/fileServices/{FileServicesName}",
-    validator: validate_FileServicesGetServiceProperties_574278, base: "",
-    url: url_FileServicesGetServiceProperties_574279, schemes: {Scheme.Https})
+    validator: validate_FileServicesGetServiceProperties_564178, base: "",
+    url: url_FileServicesGetServiceProperties_564179, schemes: {Scheme.Https})
 export
   rest
 

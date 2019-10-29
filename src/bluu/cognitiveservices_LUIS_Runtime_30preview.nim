@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, httpcore
 
 ## auto-generated via openapi macro
 ## title: LUIS Runtime Client
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_567658 = ref object of OpenApiRestCall
+  OpenApiRestCall_563556 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_567658](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563556](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_567658): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563556): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,8 +107,8 @@ const
   macServiceName = "cognitiveservices-LUIS-Runtime"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_PredictionGetSlotPrediction_568187 = ref object of OpenApiRestCall_567658
-proc url_PredictionGetSlotPrediction_568189(protocol: Scheme; host: string;
+  Call_PredictionGetSlotPrediction_564087 = ref object of OpenApiRestCall_563556
+proc url_PredictionGetSlotPrediction_564089(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -123,7 +127,7 @@ proc url_PredictionGetSlotPrediction_568189(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_PredictionGetSlotPrediction_568188(path: JsonNode; query: JsonNode;
+proc validate_PredictionGetSlotPrediction_564088(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the predictions for an application slot.
   ## 
@@ -136,37 +140,37 @@ proc validate_PredictionGetSlotPrediction_568188(path: JsonNode; query: JsonNode
   ##           : The application slot name.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `appId` field"
-  var valid_568199 = path.getOrDefault("appId")
-  valid_568199 = validateParameter(valid_568199, JString, required = true,
+  var valid_564099 = path.getOrDefault("appId")
+  valid_564099 = validateParameter(valid_564099, JString, required = true,
                                  default = nil)
-  if valid_568199 != nil:
-    section.add "appId", valid_568199
-  var valid_568200 = path.getOrDefault("slotName")
-  valid_568200 = validateParameter(valid_568200, JString, required = true,
+  if valid_564099 != nil:
+    section.add "appId", valid_564099
+  var valid_564100 = path.getOrDefault("slotName")
+  valid_564100 = validateParameter(valid_564100, JString, required = true,
                                  default = nil)
-  if valid_568200 != nil:
-    section.add "slotName", valid_568200
+  if valid_564100 != nil:
+    section.add "slotName", valid_564100
   result.add "path", section
   ## parameters in `query` object:
   ##   verbose: JBool
   ##          : Indicates whether to get extra metadata for the entities predictions or not.
-  ##   show-all-intents: JBool
-  ##                   : Indicates whether to return all the intents in the response or just the top intent.
   ##   log: JBool
   ##      : Indicates whether to log the endpoint query or not.
+  ##   show-all-intents: JBool
+  ##                   : Indicates whether to return all the intents in the response or just the top intent.
   section = newJObject()
-  var valid_568201 = query.getOrDefault("verbose")
-  valid_568201 = validateParameter(valid_568201, JBool, required = false, default = nil)
-  if valid_568201 != nil:
-    section.add "verbose", valid_568201
-  var valid_568202 = query.getOrDefault("show-all-intents")
-  valid_568202 = validateParameter(valid_568202, JBool, required = false, default = nil)
-  if valid_568202 != nil:
-    section.add "show-all-intents", valid_568202
-  var valid_568203 = query.getOrDefault("log")
-  valid_568203 = validateParameter(valid_568203, JBool, required = false, default = nil)
-  if valid_568203 != nil:
-    section.add "log", valid_568203
+  var valid_564101 = query.getOrDefault("verbose")
+  valid_564101 = validateParameter(valid_564101, JBool, required = false, default = nil)
+  if valid_564101 != nil:
+    section.add "verbose", valid_564101
+  var valid_564102 = query.getOrDefault("log")
+  valid_564102 = validateParameter(valid_564102, JBool, required = false, default = nil)
+  if valid_564102 != nil:
+    section.add "log", valid_564102
+  var valid_564103 = query.getOrDefault("show-all-intents")
+  valid_564103 = validateParameter(valid_564103, JBool, required = false, default = nil)
+  if valid_564103 != nil:
+    section.add "show-all-intents", valid_564103
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -180,56 +184,56 @@ proc validate_PredictionGetSlotPrediction_568188(path: JsonNode; query: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_568205: Call_PredictionGetSlotPrediction_568187; path: JsonNode;
+proc call*(call_564105: Call_PredictionGetSlotPrediction_564087; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the predictions for an application slot.
   ## 
-  let valid = call_568205.validator(path, query, header, formData, body)
-  let scheme = call_568205.pickScheme
+  let valid = call_564105.validator(path, query, header, formData, body)
+  let scheme = call_564105.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568205.url(scheme.get, call_568205.host, call_568205.base,
-                         call_568205.route, valid.getOrDefault("path"),
+  let url = call_564105.url(scheme.get, call_564105.host, call_564105.base,
+                         call_564105.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568205, url, valid)
+  result = hook(call_564105, url, valid)
 
-proc call*(call_568206: Call_PredictionGetSlotPrediction_568187; appId: string;
-          slotName: string; predictionRequest: JsonNode; verbose: bool = false;
-          showAllIntents: bool = false; log: bool = false): Recallable =
+proc call*(call_564106: Call_PredictionGetSlotPrediction_564087;
+          predictionRequest: JsonNode; appId: string; slotName: string;
+          verbose: bool = false; log: bool = false; showAllIntents: bool = false): Recallable =
   ## predictionGetSlotPrediction
   ## Gets the predictions for an application slot.
   ##   verbose: bool
   ##          : Indicates whether to get extra metadata for the entities predictions or not.
-  ##   showAllIntents: bool
-  ##                 : Indicates whether to return all the intents in the response or just the top intent.
-  ##   appId: string (required)
-  ##        : The application ID.
   ##   log: bool
   ##      : Indicates whether to log the endpoint query or not.
-  ##   slotName: string (required)
-  ##           : The application slot name.
   ##   predictionRequest: JObject (required)
   ##                    : The prediction request parameters.
-  var path_568207 = newJObject()
-  var query_568208 = newJObject()
-  var body_568209 = newJObject()
-  add(query_568208, "verbose", newJBool(verbose))
-  add(query_568208, "show-all-intents", newJBool(showAllIntents))
-  add(path_568207, "appId", newJString(appId))
-  add(query_568208, "log", newJBool(log))
-  add(path_568207, "slotName", newJString(slotName))
+  ##   appId: string (required)
+  ##        : The application ID.
+  ##   slotName: string (required)
+  ##           : The application slot name.
+  ##   showAllIntents: bool
+  ##                 : Indicates whether to return all the intents in the response or just the top intent.
+  var path_564107 = newJObject()
+  var query_564108 = newJObject()
+  var body_564109 = newJObject()
+  add(query_564108, "verbose", newJBool(verbose))
+  add(query_564108, "log", newJBool(log))
   if predictionRequest != nil:
-    body_568209 = predictionRequest
-  result = call_568206.call(path_568207, query_568208, nil, nil, body_568209)
+    body_564109 = predictionRequest
+  add(path_564107, "appId", newJString(appId))
+  add(path_564107, "slotName", newJString(slotName))
+  add(query_564108, "show-all-intents", newJBool(showAllIntents))
+  result = call_564106.call(path_564107, query_564108, nil, nil, body_564109)
 
-var predictionGetSlotPrediction* = Call_PredictionGetSlotPrediction_568187(
+var predictionGetSlotPrediction* = Call_PredictionGetSlotPrediction_564087(
     name: "predictionGetSlotPrediction", meth: HttpMethod.HttpPost,
     host: "azure.local", route: "/apps/{appId}/slots/{slotName}/predict",
-    validator: validate_PredictionGetSlotPrediction_568188, base: "",
-    url: url_PredictionGetSlotPrediction_568189, schemes: {Scheme.Https})
+    validator: validate_PredictionGetSlotPrediction_564088, base: "",
+    url: url_PredictionGetSlotPrediction_564089, schemes: {Scheme.Https})
 type
-  Call_PredictionGetSlotPredictionGET_567880 = ref object of OpenApiRestCall_567658
-proc url_PredictionGetSlotPredictionGET_567882(protocol: Scheme; host: string;
+  Call_PredictionGetSlotPredictionGET_563778 = ref object of OpenApiRestCall_563556
+proc url_PredictionGetSlotPredictionGET_563780(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -248,7 +252,7 @@ proc url_PredictionGetSlotPredictionGET_567882(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_PredictionGetSlotPredictionGET_567881(path: JsonNode;
+proc validate_PredictionGetSlotPredictionGET_563779(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the predictions for an application slot.
   ## 
@@ -261,45 +265,45 @@ proc validate_PredictionGetSlotPredictionGET_567881(path: JsonNode;
   ##           : The application slot name.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `appId` field"
-  var valid_568042 = path.getOrDefault("appId")
-  valid_568042 = validateParameter(valid_568042, JString, required = true,
+  var valid_563942 = path.getOrDefault("appId")
+  valid_563942 = validateParameter(valid_563942, JString, required = true,
                                  default = nil)
-  if valid_568042 != nil:
-    section.add "appId", valid_568042
-  var valid_568043 = path.getOrDefault("slotName")
-  valid_568043 = validateParameter(valid_568043, JString, required = true,
+  if valid_563942 != nil:
+    section.add "appId", valid_563942
+  var valid_563943 = path.getOrDefault("slotName")
+  valid_563943 = validateParameter(valid_563943, JString, required = true,
                                  default = nil)
-  if valid_568043 != nil:
-    section.add "slotName", valid_568043
+  if valid_563943 != nil:
+    section.add "slotName", valid_563943
   result.add "path", section
   ## parameters in `query` object:
   ##   verbose: JBool
   ##          : Indicates whether to get extra metadata for the entities predictions or not.
-  ##   show-all-intents: JBool
-  ##                   : Indicates whether to return all the intents in the response or just the top intent.
-  ##   query: JString (required)
-  ##        : The query to predict.
   ##   log: JBool
   ##      : Indicates whether to log the endpoint query or not.
+  ##   query: JString (required)
+  ##        : The query to predict.
+  ##   show-all-intents: JBool
+  ##                   : Indicates whether to return all the intents in the response or just the top intent.
   section = newJObject()
-  var valid_568044 = query.getOrDefault("verbose")
-  valid_568044 = validateParameter(valid_568044, JBool, required = false, default = nil)
-  if valid_568044 != nil:
-    section.add "verbose", valid_568044
-  var valid_568045 = query.getOrDefault("show-all-intents")
-  valid_568045 = validateParameter(valid_568045, JBool, required = false, default = nil)
-  if valid_568045 != nil:
-    section.add "show-all-intents", valid_568045
+  var valid_563944 = query.getOrDefault("verbose")
+  valid_563944 = validateParameter(valid_563944, JBool, required = false, default = nil)
+  if valid_563944 != nil:
+    section.add "verbose", valid_563944
+  var valid_563945 = query.getOrDefault("log")
+  valid_563945 = validateParameter(valid_563945, JBool, required = false, default = nil)
+  if valid_563945 != nil:
+    section.add "log", valid_563945
   assert query != nil, "query argument is necessary due to required `query` field"
-  var valid_568046 = query.getOrDefault("query")
-  valid_568046 = validateParameter(valid_568046, JString, required = true,
+  var valid_563946 = query.getOrDefault("query")
+  valid_563946 = validateParameter(valid_563946, JString, required = true,
                                  default = nil)
-  if valid_568046 != nil:
-    section.add "query", valid_568046
-  var valid_568047 = query.getOrDefault("log")
-  valid_568047 = validateParameter(valid_568047, JBool, required = false, default = nil)
-  if valid_568047 != nil:
-    section.add "log", valid_568047
+  if valid_563946 != nil:
+    section.add "query", valid_563946
+  var valid_563947 = query.getOrDefault("show-all-intents")
+  valid_563947 = validateParameter(valid_563947, JBool, required = false, default = nil)
+  if valid_563947 != nil:
+    section.add "show-all-intents", valid_563947
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -308,54 +312,54 @@ proc validate_PredictionGetSlotPredictionGET_567881(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568074: Call_PredictionGetSlotPredictionGET_567880; path: JsonNode;
+proc call*(call_563974: Call_PredictionGetSlotPredictionGET_563778; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the predictions for an application slot.
   ## 
-  let valid = call_568074.validator(path, query, header, formData, body)
-  let scheme = call_568074.pickScheme
+  let valid = call_563974.validator(path, query, header, formData, body)
+  let scheme = call_563974.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568074.url(scheme.get, call_568074.host, call_568074.base,
-                         call_568074.route, valid.getOrDefault("path"),
+  let url = call_563974.url(scheme.get, call_563974.host, call_563974.base,
+                         call_563974.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568074, url, valid)
+  result = hook(call_563974, url, valid)
 
-proc call*(call_568145: Call_PredictionGetSlotPredictionGET_567880; query: string;
-          appId: string; slotName: string; verbose: bool = false;
-          showAllIntents: bool = false; log: bool = false): Recallable =
+proc call*(call_564045: Call_PredictionGetSlotPredictionGET_563778; appId: string;
+          query: string; slotName: string; verbose: bool = false; log: bool = false;
+          showAllIntents: bool = false): Recallable =
   ## predictionGetSlotPredictionGET
   ## Gets the predictions for an application slot.
   ##   verbose: bool
   ##          : Indicates whether to get extra metadata for the entities predictions or not.
-  ##   showAllIntents: bool
-  ##                 : Indicates whether to return all the intents in the response or just the top intent.
-  ##   query: string (required)
-  ##        : The query to predict.
-  ##   appId: string (required)
-  ##        : The application ID.
   ##   log: bool
   ##      : Indicates whether to log the endpoint query or not.
+  ##   appId: string (required)
+  ##        : The application ID.
+  ##   query: string (required)
+  ##        : The query to predict.
   ##   slotName: string (required)
   ##           : The application slot name.
-  var path_568146 = newJObject()
-  var query_568148 = newJObject()
-  add(query_568148, "verbose", newJBool(verbose))
-  add(query_568148, "show-all-intents", newJBool(showAllIntents))
-  add(query_568148, "query", newJString(query))
-  add(path_568146, "appId", newJString(appId))
-  add(query_568148, "log", newJBool(log))
-  add(path_568146, "slotName", newJString(slotName))
-  result = call_568145.call(path_568146, query_568148, nil, nil, nil)
+  ##   showAllIntents: bool
+  ##                 : Indicates whether to return all the intents in the response or just the top intent.
+  var path_564046 = newJObject()
+  var query_564048 = newJObject()
+  add(query_564048, "verbose", newJBool(verbose))
+  add(query_564048, "log", newJBool(log))
+  add(path_564046, "appId", newJString(appId))
+  add(query_564048, "query", newJString(query))
+  add(path_564046, "slotName", newJString(slotName))
+  add(query_564048, "show-all-intents", newJBool(showAllIntents))
+  result = call_564045.call(path_564046, query_564048, nil, nil, nil)
 
-var predictionGetSlotPredictionGET* = Call_PredictionGetSlotPredictionGET_567880(
+var predictionGetSlotPredictionGET* = Call_PredictionGetSlotPredictionGET_563778(
     name: "predictionGetSlotPredictionGET", meth: HttpMethod.HttpGet,
     host: "azure.local", route: "/apps/{appId}/slots/{slotName}/predict",
-    validator: validate_PredictionGetSlotPredictionGET_567881, base: "",
-    url: url_PredictionGetSlotPredictionGET_567882, schemes: {Scheme.Https})
+    validator: validate_PredictionGetSlotPredictionGET_563779, base: "",
+    url: url_PredictionGetSlotPredictionGET_563780, schemes: {Scheme.Https})
 type
-  Call_PredictionGetVersionPrediction_568223 = ref object of OpenApiRestCall_567658
-proc url_PredictionGetVersionPrediction_568225(protocol: Scheme; host: string;
+  Call_PredictionGetVersionPrediction_564123 = ref object of OpenApiRestCall_563556
+proc url_PredictionGetVersionPrediction_564125(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -374,50 +378,50 @@ proc url_PredictionGetVersionPrediction_568225(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_PredictionGetVersionPrediction_568224(path: JsonNode;
+proc validate_PredictionGetVersionPrediction_564124(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the predictions for an application version.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   versionId: JString (required)
-  ##            : The application version ID.
   ##   appId: JString (required)
   ##        : The application ID.
+  ##   versionId: JString (required)
+  ##            : The application version ID.
   section = newJObject()
-  assert path != nil, "path argument is necessary due to required `versionId` field"
-  var valid_568226 = path.getOrDefault("versionId")
-  valid_568226 = validateParameter(valid_568226, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `appId` field"
+  var valid_564126 = path.getOrDefault("appId")
+  valid_564126 = validateParameter(valid_564126, JString, required = true,
                                  default = nil)
-  if valid_568226 != nil:
-    section.add "versionId", valid_568226
-  var valid_568227 = path.getOrDefault("appId")
-  valid_568227 = validateParameter(valid_568227, JString, required = true,
+  if valid_564126 != nil:
+    section.add "appId", valid_564126
+  var valid_564127 = path.getOrDefault("versionId")
+  valid_564127 = validateParameter(valid_564127, JString, required = true,
                                  default = nil)
-  if valid_568227 != nil:
-    section.add "appId", valid_568227
+  if valid_564127 != nil:
+    section.add "versionId", valid_564127
   result.add "path", section
   ## parameters in `query` object:
   ##   verbose: JBool
   ##          : Indicates whether to get extra metadata for the entities predictions or not.
-  ##   show-all-intents: JBool
-  ##                   : Indicates whether to return all the intents in the response or just the top intent.
   ##   log: JBool
   ##      : Indicates whether to log the endpoint query or not.
+  ##   show-all-intents: JBool
+  ##                   : Indicates whether to return all the intents in the response or just the top intent.
   section = newJObject()
-  var valid_568228 = query.getOrDefault("verbose")
-  valid_568228 = validateParameter(valid_568228, JBool, required = false, default = nil)
-  if valid_568228 != nil:
-    section.add "verbose", valid_568228
-  var valid_568229 = query.getOrDefault("show-all-intents")
-  valid_568229 = validateParameter(valid_568229, JBool, required = false, default = nil)
-  if valid_568229 != nil:
-    section.add "show-all-intents", valid_568229
-  var valid_568230 = query.getOrDefault("log")
-  valid_568230 = validateParameter(valid_568230, JBool, required = false, default = nil)
-  if valid_568230 != nil:
-    section.add "log", valid_568230
+  var valid_564128 = query.getOrDefault("verbose")
+  valid_564128 = validateParameter(valid_564128, JBool, required = false, default = nil)
+  if valid_564128 != nil:
+    section.add "verbose", valid_564128
+  var valid_564129 = query.getOrDefault("log")
+  valid_564129 = validateParameter(valid_564129, JBool, required = false, default = nil)
+  if valid_564129 != nil:
+    section.add "log", valid_564129
+  var valid_564130 = query.getOrDefault("show-all-intents")
+  valid_564130 = validateParameter(valid_564130, JBool, required = false, default = nil)
+  if valid_564130 != nil:
+    section.add "show-all-intents", valid_564130
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -431,56 +435,56 @@ proc validate_PredictionGetVersionPrediction_568224(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568232: Call_PredictionGetVersionPrediction_568223; path: JsonNode;
+proc call*(call_564132: Call_PredictionGetVersionPrediction_564123; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the predictions for an application version.
   ## 
-  let valid = call_568232.validator(path, query, header, formData, body)
-  let scheme = call_568232.pickScheme
+  let valid = call_564132.validator(path, query, header, formData, body)
+  let scheme = call_564132.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568232.url(scheme.get, call_568232.host, call_568232.base,
-                         call_568232.route, valid.getOrDefault("path"),
+  let url = call_564132.url(scheme.get, call_564132.host, call_564132.base,
+                         call_564132.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568232, url, valid)
+  result = hook(call_564132, url, valid)
 
-proc call*(call_568233: Call_PredictionGetVersionPrediction_568223;
-          versionId: string; appId: string; predictionRequest: JsonNode;
-          verbose: bool = false; showAllIntents: bool = false; log: bool = false): Recallable =
+proc call*(call_564133: Call_PredictionGetVersionPrediction_564123;
+          predictionRequest: JsonNode; appId: string; versionId: string;
+          verbose: bool = false; log: bool = false; showAllIntents: bool = false): Recallable =
   ## predictionGetVersionPrediction
   ## Gets the predictions for an application version.
   ##   verbose: bool
   ##          : Indicates whether to get extra metadata for the entities predictions or not.
-  ##   versionId: string (required)
-  ##            : The application version ID.
-  ##   showAllIntents: bool
-  ##                 : Indicates whether to return all the intents in the response or just the top intent.
-  ##   appId: string (required)
-  ##        : The application ID.
   ##   log: bool
   ##      : Indicates whether to log the endpoint query or not.
   ##   predictionRequest: JObject (required)
   ##                    : The prediction request parameters.
-  var path_568234 = newJObject()
-  var query_568235 = newJObject()
-  var body_568236 = newJObject()
-  add(query_568235, "verbose", newJBool(verbose))
-  add(path_568234, "versionId", newJString(versionId))
-  add(query_568235, "show-all-intents", newJBool(showAllIntents))
-  add(path_568234, "appId", newJString(appId))
-  add(query_568235, "log", newJBool(log))
+  ##   appId: string (required)
+  ##        : The application ID.
+  ##   versionId: string (required)
+  ##            : The application version ID.
+  ##   showAllIntents: bool
+  ##                 : Indicates whether to return all the intents in the response or just the top intent.
+  var path_564134 = newJObject()
+  var query_564135 = newJObject()
+  var body_564136 = newJObject()
+  add(query_564135, "verbose", newJBool(verbose))
+  add(query_564135, "log", newJBool(log))
   if predictionRequest != nil:
-    body_568236 = predictionRequest
-  result = call_568233.call(path_568234, query_568235, nil, nil, body_568236)
+    body_564136 = predictionRequest
+  add(path_564134, "appId", newJString(appId))
+  add(path_564134, "versionId", newJString(versionId))
+  add(query_564135, "show-all-intents", newJBool(showAllIntents))
+  result = call_564133.call(path_564134, query_564135, nil, nil, body_564136)
 
-var predictionGetVersionPrediction* = Call_PredictionGetVersionPrediction_568223(
+var predictionGetVersionPrediction* = Call_PredictionGetVersionPrediction_564123(
     name: "predictionGetVersionPrediction", meth: HttpMethod.HttpPost,
     host: "azure.local", route: "/apps/{appId}/versions/{versionId}/predict",
-    validator: validate_PredictionGetVersionPrediction_568224, base: "",
-    url: url_PredictionGetVersionPrediction_568225, schemes: {Scheme.Https})
+    validator: validate_PredictionGetVersionPrediction_564124, base: "",
+    url: url_PredictionGetVersionPrediction_564125, schemes: {Scheme.Https})
 type
-  Call_PredictionGetVersionPredictionGET_568210 = ref object of OpenApiRestCall_567658
-proc url_PredictionGetVersionPredictionGET_568212(protocol: Scheme; host: string;
+  Call_PredictionGetVersionPredictionGET_564110 = ref object of OpenApiRestCall_563556
+proc url_PredictionGetVersionPredictionGET_564112(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -499,58 +503,58 @@ proc url_PredictionGetVersionPredictionGET_568212(protocol: Scheme; host: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_PredictionGetVersionPredictionGET_568211(path: JsonNode;
+proc validate_PredictionGetVersionPredictionGET_564111(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the predictions for an application version.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   versionId: JString (required)
-  ##            : The application version ID.
   ##   appId: JString (required)
   ##        : The application ID.
+  ##   versionId: JString (required)
+  ##            : The application version ID.
   section = newJObject()
-  assert path != nil, "path argument is necessary due to required `versionId` field"
-  var valid_568213 = path.getOrDefault("versionId")
-  valid_568213 = validateParameter(valid_568213, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `appId` field"
+  var valid_564113 = path.getOrDefault("appId")
+  valid_564113 = validateParameter(valid_564113, JString, required = true,
                                  default = nil)
-  if valid_568213 != nil:
-    section.add "versionId", valid_568213
-  var valid_568214 = path.getOrDefault("appId")
-  valid_568214 = validateParameter(valid_568214, JString, required = true,
+  if valid_564113 != nil:
+    section.add "appId", valid_564113
+  var valid_564114 = path.getOrDefault("versionId")
+  valid_564114 = validateParameter(valid_564114, JString, required = true,
                                  default = nil)
-  if valid_568214 != nil:
-    section.add "appId", valid_568214
+  if valid_564114 != nil:
+    section.add "versionId", valid_564114
   result.add "path", section
   ## parameters in `query` object:
   ##   verbose: JBool
   ##          : Indicates whether to get extra metadata for the entities predictions or not.
-  ##   show-all-intents: JBool
-  ##                   : Indicates whether to return all the intents in the response or just the top intent.
-  ##   query: JString (required)
-  ##        : The query to predict.
   ##   log: JBool
   ##      : Indicates whether to log the endpoint query or not.
+  ##   query: JString (required)
+  ##        : The query to predict.
+  ##   show-all-intents: JBool
+  ##                   : Indicates whether to return all the intents in the response or just the top intent.
   section = newJObject()
-  var valid_568215 = query.getOrDefault("verbose")
-  valid_568215 = validateParameter(valid_568215, JBool, required = false, default = nil)
-  if valid_568215 != nil:
-    section.add "verbose", valid_568215
-  var valid_568216 = query.getOrDefault("show-all-intents")
-  valid_568216 = validateParameter(valid_568216, JBool, required = false, default = nil)
-  if valid_568216 != nil:
-    section.add "show-all-intents", valid_568216
+  var valid_564115 = query.getOrDefault("verbose")
+  valid_564115 = validateParameter(valid_564115, JBool, required = false, default = nil)
+  if valid_564115 != nil:
+    section.add "verbose", valid_564115
+  var valid_564116 = query.getOrDefault("log")
+  valid_564116 = validateParameter(valid_564116, JBool, required = false, default = nil)
+  if valid_564116 != nil:
+    section.add "log", valid_564116
   assert query != nil, "query argument is necessary due to required `query` field"
-  var valid_568217 = query.getOrDefault("query")
-  valid_568217 = validateParameter(valid_568217, JString, required = true,
+  var valid_564117 = query.getOrDefault("query")
+  valid_564117 = validateParameter(valid_564117, JString, required = true,
                                  default = nil)
-  if valid_568217 != nil:
-    section.add "query", valid_568217
-  var valid_568218 = query.getOrDefault("log")
-  valid_568218 = validateParameter(valid_568218, JBool, required = false, default = nil)
-  if valid_568218 != nil:
-    section.add "log", valid_568218
+  if valid_564117 != nil:
+    section.add "query", valid_564117
+  var valid_564118 = query.getOrDefault("show-all-intents")
+  valid_564118 = validateParameter(valid_564118, JBool, required = false, default = nil)
+  if valid_564118 != nil:
+    section.add "show-all-intents", valid_564118
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -559,52 +563,52 @@ proc validate_PredictionGetVersionPredictionGET_568211(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568219: Call_PredictionGetVersionPredictionGET_568210;
+proc call*(call_564119: Call_PredictionGetVersionPredictionGET_564110;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Gets the predictions for an application version.
   ## 
-  let valid = call_568219.validator(path, query, header, formData, body)
-  let scheme = call_568219.pickScheme
+  let valid = call_564119.validator(path, query, header, formData, body)
+  let scheme = call_564119.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568219.url(scheme.get, call_568219.host, call_568219.base,
-                         call_568219.route, valid.getOrDefault("path"),
+  let url = call_564119.url(scheme.get, call_564119.host, call_564119.base,
+                         call_564119.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568219, url, valid)
+  result = hook(call_564119, url, valid)
 
-proc call*(call_568220: Call_PredictionGetVersionPredictionGET_568210;
-          versionId: string; query: string; appId: string; verbose: bool = false;
-          showAllIntents: bool = false; log: bool = false): Recallable =
+proc call*(call_564120: Call_PredictionGetVersionPredictionGET_564110;
+          appId: string; query: string; versionId: string; verbose: bool = false;
+          log: bool = false; showAllIntents: bool = false): Recallable =
   ## predictionGetVersionPredictionGET
   ## Gets the predictions for an application version.
   ##   verbose: bool
   ##          : Indicates whether to get extra metadata for the entities predictions or not.
+  ##   log: bool
+  ##      : Indicates whether to log the endpoint query or not.
+  ##   appId: string (required)
+  ##        : The application ID.
+  ##   query: string (required)
+  ##        : The query to predict.
   ##   versionId: string (required)
   ##            : The application version ID.
   ##   showAllIntents: bool
   ##                 : Indicates whether to return all the intents in the response or just the top intent.
-  ##   query: string (required)
-  ##        : The query to predict.
-  ##   appId: string (required)
-  ##        : The application ID.
-  ##   log: bool
-  ##      : Indicates whether to log the endpoint query or not.
-  var path_568221 = newJObject()
-  var query_568222 = newJObject()
-  add(query_568222, "verbose", newJBool(verbose))
-  add(path_568221, "versionId", newJString(versionId))
-  add(query_568222, "show-all-intents", newJBool(showAllIntents))
-  add(query_568222, "query", newJString(query))
-  add(path_568221, "appId", newJString(appId))
-  add(query_568222, "log", newJBool(log))
-  result = call_568220.call(path_568221, query_568222, nil, nil, nil)
+  var path_564121 = newJObject()
+  var query_564122 = newJObject()
+  add(query_564122, "verbose", newJBool(verbose))
+  add(query_564122, "log", newJBool(log))
+  add(path_564121, "appId", newJString(appId))
+  add(query_564122, "query", newJString(query))
+  add(path_564121, "versionId", newJString(versionId))
+  add(query_564122, "show-all-intents", newJBool(showAllIntents))
+  result = call_564120.call(path_564121, query_564122, nil, nil, nil)
 
-var predictionGetVersionPredictionGET* = Call_PredictionGetVersionPredictionGET_568210(
+var predictionGetVersionPredictionGET* = Call_PredictionGetVersionPredictionGET_564110(
     name: "predictionGetVersionPredictionGET", meth: HttpMethod.HttpGet,
     host: "azure.local", route: "/apps/{appId}/versions/{versionId}/predict",
-    validator: validate_PredictionGetVersionPredictionGET_568211, base: "",
-    url: url_PredictionGetVersionPredictionGET_568212, schemes: {Scheme.Https})
+    validator: validate_PredictionGetVersionPredictionGET_564111, base: "",
+    url: url_PredictionGetVersionPredictionGET_564112, schemes: {Scheme.Https})
 export
   rest
 

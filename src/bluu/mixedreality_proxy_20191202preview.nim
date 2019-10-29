@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, httpcore
 
 ## auto-generated via openapi macro
 ## title: Mixed Reality
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_567658 = ref object of OpenApiRestCall
+  OpenApiRestCall_563556 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_567658](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563556](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_567658): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563556): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,15 +107,15 @@ const
   macServiceName = "mixedreality-proxy"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_OperationsList_567880 = ref object of OpenApiRestCall_567658
-proc url_OperationsList_567882(protocol: Scheme; host: string; base: string;
+  Call_OperationsList_563778 = ref object of OpenApiRestCall_563556
+proc url_OperationsList_563780(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_OperationsList_567881(path: JsonNode; query: JsonNode;
+proc validate_OperationsList_563779(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## Exposing Available Operations
@@ -126,11 +130,11 @@ proc validate_OperationsList_567881(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568028 = query.getOrDefault("api-version")
-  valid_568028 = validateParameter(valid_568028, JString, required = true,
+  var valid_563928 = query.getOrDefault("api-version")
+  valid_563928 = validateParameter(valid_563928, JString, required = true,
                                  default = nil)
-  if valid_568028 != nil:
-    section.add "api-version", valid_568028
+  if valid_563928 != nil:
+    section.add "api-version", valid_563928
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -139,36 +143,36 @@ proc validate_OperationsList_567881(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568055: Call_OperationsList_567880; path: JsonNode; query: JsonNode;
+proc call*(call_563955: Call_OperationsList_563778; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Exposing Available Operations
   ## 
-  let valid = call_568055.validator(path, query, header, formData, body)
-  let scheme = call_568055.pickScheme
+  let valid = call_563955.validator(path, query, header, formData, body)
+  let scheme = call_563955.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568055.url(scheme.get, call_568055.host, call_568055.base,
-                         call_568055.route, valid.getOrDefault("path"),
+  let url = call_563955.url(scheme.get, call_563955.host, call_563955.base,
+                         call_563955.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568055, url, valid)
+  result = hook(call_563955, url, valid)
 
-proc call*(call_568126: Call_OperationsList_567880; apiVersion: string): Recallable =
+proc call*(call_564026: Call_OperationsList_563778; apiVersion: string): Recallable =
   ## operationsList
   ## Exposing Available Operations
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
-  var query_568127 = newJObject()
-  add(query_568127, "api-version", newJString(apiVersion))
-  result = call_568126.call(nil, query_568127, nil, nil, nil)
+  var query_564027 = newJObject()
+  add(query_564027, "api-version", newJString(apiVersion))
+  result = call_564026.call(nil, query_564027, nil, nil, nil)
 
-var operationsList* = Call_OperationsList_567880(name: "operationsList",
+var operationsList* = Call_OperationsList_563778(name: "operationsList",
     meth: HttpMethod.HttpGet, host: "management.azure.com",
     route: "/providers/Microsoft.MixedReality/operations",
-    validator: validate_OperationsList_567881, base: "", url: url_OperationsList_567882,
+    validator: validate_OperationsList_563779, base: "", url: url_OperationsList_563780,
     schemes: {Scheme.Https})
 type
-  Call_CheckNameAvailabilityLocal_568167 = ref object of OpenApiRestCall_567658
-proc url_CheckNameAvailabilityLocal_568169(protocol: Scheme; host: string;
+  Call_CheckNameAvailabilityLocal_564067 = ref object of OpenApiRestCall_563556
+proc url_CheckNameAvailabilityLocal_564069(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -188,7 +192,7 @@ proc url_CheckNameAvailabilityLocal_568169(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_CheckNameAvailabilityLocal_568168(path: JsonNode; query: JsonNode;
+proc validate_CheckNameAvailabilityLocal_564068(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Check Name Availability for local uniqueness
   ## 
@@ -202,16 +206,16 @@ proc validate_CheckNameAvailabilityLocal_568168(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_568193 = path.getOrDefault("subscriptionId")
-  valid_568193 = validateParameter(valid_568193, JString, required = true,
+  var valid_564093 = path.getOrDefault("subscriptionId")
+  valid_564093 = validateParameter(valid_564093, JString, required = true,
                                  default = nil)
-  if valid_568193 != nil:
-    section.add "subscriptionId", valid_568193
-  var valid_568194 = path.getOrDefault("location")
-  valid_568194 = validateParameter(valid_568194, JString, required = true,
+  if valid_564093 != nil:
+    section.add "subscriptionId", valid_564093
+  var valid_564094 = path.getOrDefault("location")
+  valid_564094 = validateParameter(valid_564094, JString, required = true,
                                  default = nil)
-  if valid_568194 != nil:
-    section.add "location", valid_568194
+  if valid_564094 != nil:
+    section.add "location", valid_564094
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -219,11 +223,11 @@ proc validate_CheckNameAvailabilityLocal_568168(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568195 = query.getOrDefault("api-version")
-  valid_568195 = validateParameter(valid_568195, JString, required = true,
+  var valid_564095 = query.getOrDefault("api-version")
+  valid_564095 = validateParameter(valid_564095, JString, required = true,
                                  default = nil)
-  if valid_568195 != nil:
-    section.add "api-version", valid_568195
+  if valid_564095 != nil:
+    section.add "api-version", valid_564095
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -237,20 +241,20 @@ proc validate_CheckNameAvailabilityLocal_568168(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568197: Call_CheckNameAvailabilityLocal_568167; path: JsonNode;
+proc call*(call_564097: Call_CheckNameAvailabilityLocal_564067; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Check Name Availability for local uniqueness
   ## 
-  let valid = call_568197.validator(path, query, header, formData, body)
-  let scheme = call_568197.pickScheme
+  let valid = call_564097.validator(path, query, header, formData, body)
+  let scheme = call_564097.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568197.url(scheme.get, call_568197.host, call_568197.base,
-                         call_568197.route, valid.getOrDefault("path"),
+  let url = call_564097.url(scheme.get, call_564097.host, call_564097.base,
+                         call_564097.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568197, url, valid)
+  result = hook(call_564097, url, valid)
 
-proc call*(call_568198: Call_CheckNameAvailabilityLocal_568167; apiVersion: string;
+proc call*(call_564098: Call_CheckNameAvailabilityLocal_564067; apiVersion: string;
           subscriptionId: string; location: string; checkNameAvailability: JsonNode): Recallable =
   ## checkNameAvailabilityLocal
   ## Check Name Availability for local uniqueness
@@ -262,21 +266,21 @@ proc call*(call_568198: Call_CheckNameAvailabilityLocal_568167; apiVersion: stri
   ##           : The location in which uniqueness will be verified.
   ##   checkNameAvailability: JObject (required)
   ##                        : Check Name Availability Request.
-  var path_568199 = newJObject()
-  var query_568200 = newJObject()
-  var body_568201 = newJObject()
-  add(query_568200, "api-version", newJString(apiVersion))
-  add(path_568199, "subscriptionId", newJString(subscriptionId))
-  add(path_568199, "location", newJString(location))
+  var path_564099 = newJObject()
+  var query_564100 = newJObject()
+  var body_564101 = newJObject()
+  add(query_564100, "api-version", newJString(apiVersion))
+  add(path_564099, "subscriptionId", newJString(subscriptionId))
+  add(path_564099, "location", newJString(location))
   if checkNameAvailability != nil:
-    body_568201 = checkNameAvailability
-  result = call_568198.call(path_568199, query_568200, nil, nil, body_568201)
+    body_564101 = checkNameAvailability
+  result = call_564098.call(path_564099, query_564100, nil, nil, body_564101)
 
-var checkNameAvailabilityLocal* = Call_CheckNameAvailabilityLocal_568167(
+var checkNameAvailabilityLocal* = Call_CheckNameAvailabilityLocal_564067(
     name: "checkNameAvailabilityLocal", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.MixedReality/locations/{location}/checkNameAvailability",
-    validator: validate_CheckNameAvailabilityLocal_568168, base: "",
-    url: url_CheckNameAvailabilityLocal_568169, schemes: {Scheme.Https})
+    validator: validate_CheckNameAvailabilityLocal_564068, base: "",
+    url: url_CheckNameAvailabilityLocal_564069, schemes: {Scheme.Https})
 export
   rest
 

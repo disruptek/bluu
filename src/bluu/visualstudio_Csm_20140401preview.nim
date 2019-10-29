@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, httpcore
 
 ## auto-generated via openapi macro
 ## title: Visual Studio Resource Provider Client
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_567641 = ref object of OpenApiRestCall
+  OpenApiRestCall_563539 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_567641](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563539](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_567641): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563539): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,15 +107,15 @@ const
   macServiceName = "visualstudio-Csm"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_OperationsList_567863 = ref object of OpenApiRestCall_567641
-proc url_OperationsList_567865(protocol: Scheme; host: string; base: string;
+  Call_OperationsList_563761 = ref object of OpenApiRestCall_563539
+proc url_OperationsList_563763(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_OperationsList_567864(path: JsonNode; query: JsonNode;
+proc validate_OperationsList_563762(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## Gets the details of all operations possible on the Microsoft.VisualStudio resource provider.
@@ -129,32 +133,32 @@ proc validate_OperationsList_567864(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_567970: Call_OperationsList_567863; path: JsonNode; query: JsonNode;
+proc call*(call_563868: Call_OperationsList_563761; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the details of all operations possible on the Microsoft.VisualStudio resource provider.
   ## 
-  let valid = call_567970.validator(path, query, header, formData, body)
-  let scheme = call_567970.pickScheme
+  let valid = call_563868.validator(path, query, header, formData, body)
+  let scheme = call_563868.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_567970.url(scheme.get, call_567970.host, call_567970.base,
-                         call_567970.route, valid.getOrDefault("path"),
+  let url = call_563868.url(scheme.get, call_563868.host, call_563868.base,
+                         call_563868.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_567970, url, valid)
+  result = hook(call_563868, url, valid)
 
-proc call*(call_568054: Call_OperationsList_567863): Recallable =
+proc call*(call_563952: Call_OperationsList_563761): Recallable =
   ## operationsList
   ## Gets the details of all operations possible on the Microsoft.VisualStudio resource provider.
-  result = call_568054.call(nil, nil, nil, nil, nil)
+  result = call_563952.call(nil, nil, nil, nil, nil)
 
-var operationsList* = Call_OperationsList_567863(name: "operationsList",
+var operationsList* = Call_OperationsList_563761(name: "operationsList",
     meth: HttpMethod.HttpGet, host: "management.azure.com",
     route: "/providers/microsoft.visualstudio/operations",
-    validator: validate_OperationsList_567864, base: "", url: url_OperationsList_567865,
+    validator: validate_OperationsList_563762, base: "", url: url_OperationsList_563763,
     schemes: {Scheme.Https})
 type
-  Call_AccountsCheckNameAvailability_568092 = ref object of OpenApiRestCall_567641
-proc url_AccountsCheckNameAvailability_568094(protocol: Scheme; host: string;
+  Call_AccountsCheckNameAvailability_563990 = ref object of OpenApiRestCall_563539
+proc url_AccountsCheckNameAvailability_563992(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -171,7 +175,7 @@ proc url_AccountsCheckNameAvailability_568094(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AccountsCheckNameAvailability_568093(path: JsonNode; query: JsonNode;
+proc validate_AccountsCheckNameAvailability_563991(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Checks if the specified Visual Studio Team Services account name is available. Resource name can be either an account name or an account name and PUID.
   ## 
@@ -183,11 +187,11 @@ proc validate_AccountsCheckNameAvailability_568093(path: JsonNode; query: JsonNo
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_568172 = path.getOrDefault("subscriptionId")
-  valid_568172 = validateParameter(valid_568172, JString, required = true,
+  var valid_564072 = path.getOrDefault("subscriptionId")
+  valid_564072 = validateParameter(valid_564072, JString, required = true,
                                  default = nil)
-  if valid_568172 != nil:
-    section.add "subscriptionId", valid_568172
+  if valid_564072 != nil:
+    section.add "subscriptionId", valid_564072
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -195,11 +199,11 @@ proc validate_AccountsCheckNameAvailability_568093(path: JsonNode; query: JsonNo
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568173 = query.getOrDefault("api-version")
-  valid_568173 = validateParameter(valid_568173, JString, required = true,
+  var valid_564073 = query.getOrDefault("api-version")
+  valid_564073 = validateParameter(valid_564073, JString, required = true,
                                  default = nil)
-  if valid_568173 != nil:
-    section.add "api-version", valid_568173
+  if valid_564073 != nil:
+    section.add "api-version", valid_564073
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -213,20 +217,20 @@ proc validate_AccountsCheckNameAvailability_568093(path: JsonNode; query: JsonNo
   if body != nil:
     result.add "body", body
 
-proc call*(call_568175: Call_AccountsCheckNameAvailability_568092; path: JsonNode;
+proc call*(call_564075: Call_AccountsCheckNameAvailability_563990; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Checks if the specified Visual Studio Team Services account name is available. Resource name can be either an account name or an account name and PUID.
   ## 
-  let valid = call_568175.validator(path, query, header, formData, body)
-  let scheme = call_568175.pickScheme
+  let valid = call_564075.validator(path, query, header, formData, body)
+  let scheme = call_564075.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568175.url(scheme.get, call_568175.host, call_568175.base,
-                         call_568175.route, valid.getOrDefault("path"),
+  let url = call_564075.url(scheme.get, call_564075.host, call_564075.base,
+                         call_564075.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568175, url, valid)
+  result = hook(call_564075, url, valid)
 
-proc call*(call_568176: Call_AccountsCheckNameAvailability_568092;
+proc call*(call_564076: Call_AccountsCheckNameAvailability_563990;
           apiVersion: string; subscriptionId: string; body: JsonNode): Recallable =
   ## accountsCheckNameAvailability
   ## Checks if the specified Visual Studio Team Services account name is available. Resource name can be either an account name or an account name and PUID.
@@ -236,23 +240,23 @@ proc call*(call_568176: Call_AccountsCheckNameAvailability_568092;
   ##                 : The Azure subscription identifier.
   ##   body: JObject (required)
   ##       : Parameters describing the name to check availability for.
-  var path_568177 = newJObject()
-  var query_568179 = newJObject()
-  var body_568180 = newJObject()
-  add(query_568179, "api-version", newJString(apiVersion))
-  add(path_568177, "subscriptionId", newJString(subscriptionId))
+  var path_564077 = newJObject()
+  var query_564079 = newJObject()
+  var body_564080 = newJObject()
+  add(query_564079, "api-version", newJString(apiVersion))
+  add(path_564077, "subscriptionId", newJString(subscriptionId))
   if body != nil:
-    body_568180 = body
-  result = call_568176.call(path_568177, query_568179, nil, nil, body_568180)
+    body_564080 = body
+  result = call_564076.call(path_564077, query_564079, nil, nil, body_564080)
 
-var accountsCheckNameAvailability* = Call_AccountsCheckNameAvailability_568092(
+var accountsCheckNameAvailability* = Call_AccountsCheckNameAvailability_563990(
     name: "accountsCheckNameAvailability", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/microsoft.visualstudio/checkNameAvailability",
-    validator: validate_AccountsCheckNameAvailability_568093, base: "",
-    url: url_AccountsCheckNameAvailability_568094, schemes: {Scheme.Https})
+    validator: validate_AccountsCheckNameAvailability_563991, base: "",
+    url: url_AccountsCheckNameAvailability_563992, schemes: {Scheme.Https})
 type
-  Call_ProjectsListByResourceGroup_568182 = ref object of OpenApiRestCall_567641
-proc url_ProjectsListByResourceGroup_568184(protocol: Scheme; host: string;
+  Call_ProjectsListByResourceGroup_564082 = ref object of OpenApiRestCall_563539
+proc url_ProjectsListByResourceGroup_564084(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -276,37 +280,37 @@ proc url_ProjectsListByResourceGroup_568184(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ProjectsListByResourceGroup_568183(path: JsonNode; query: JsonNode;
+proc validate_ProjectsListByResourceGroup_564083(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets all Visual Studio Team Services project resources created in the specified Team Services account.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : Name of the resource group within the Azure subscription.
-  ##   subscriptionId: JString (required)
-  ##                 : The Azure subscription identifier.
   ##   rootResourceName: JString (required)
   ##                   : Name of the Team Services account.
+  ##   subscriptionId: JString (required)
+  ##                 : The Azure subscription identifier.
+  ##   resourceGroupName: JString (required)
+  ##                    : Name of the resource group within the Azure subscription.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568185 = path.getOrDefault("resourceGroupName")
-  valid_568185 = validateParameter(valid_568185, JString, required = true,
+        "path argument is necessary due to required `rootResourceName` field"
+  var valid_564085 = path.getOrDefault("rootResourceName")
+  valid_564085 = validateParameter(valid_564085, JString, required = true,
                                  default = nil)
-  if valid_568185 != nil:
-    section.add "resourceGroupName", valid_568185
-  var valid_568186 = path.getOrDefault("subscriptionId")
-  valid_568186 = validateParameter(valid_568186, JString, required = true,
+  if valid_564085 != nil:
+    section.add "rootResourceName", valid_564085
+  var valid_564086 = path.getOrDefault("subscriptionId")
+  valid_564086 = validateParameter(valid_564086, JString, required = true,
                                  default = nil)
-  if valid_568186 != nil:
-    section.add "subscriptionId", valid_568186
-  var valid_568187 = path.getOrDefault("rootResourceName")
-  valid_568187 = validateParameter(valid_568187, JString, required = true,
+  if valid_564086 != nil:
+    section.add "subscriptionId", valid_564086
+  var valid_564087 = path.getOrDefault("resourceGroupName")
+  valid_564087 = validateParameter(valid_564087, JString, required = true,
                                  default = nil)
-  if valid_568187 != nil:
-    section.add "rootResourceName", valid_568187
+  if valid_564087 != nil:
+    section.add "resourceGroupName", valid_564087
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -314,11 +318,11 @@ proc validate_ProjectsListByResourceGroup_568183(path: JsonNode; query: JsonNode
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568188 = query.getOrDefault("api-version")
-  valid_568188 = validateParameter(valid_568188, JString, required = true,
+  var valid_564088 = query.getOrDefault("api-version")
+  valid_564088 = validateParameter(valid_564088, JString, required = true,
                                  default = nil)
-  if valid_568188 != nil:
-    section.add "api-version", valid_568188
+  if valid_564088 != nil:
+    section.add "api-version", valid_564088
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -327,48 +331,48 @@ proc validate_ProjectsListByResourceGroup_568183(path: JsonNode; query: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_568189: Call_ProjectsListByResourceGroup_568182; path: JsonNode;
+proc call*(call_564089: Call_ProjectsListByResourceGroup_564082; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets all Visual Studio Team Services project resources created in the specified Team Services account.
   ## 
-  let valid = call_568189.validator(path, query, header, formData, body)
-  let scheme = call_568189.pickScheme
+  let valid = call_564089.validator(path, query, header, formData, body)
+  let scheme = call_564089.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568189.url(scheme.get, call_568189.host, call_568189.base,
-                         call_568189.route, valid.getOrDefault("path"),
+  let url = call_564089.url(scheme.get, call_564089.host, call_564089.base,
+                         call_564089.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568189, url, valid)
+  result = hook(call_564089, url, valid)
 
-proc call*(call_568190: Call_ProjectsListByResourceGroup_568182;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          rootResourceName: string): Recallable =
+proc call*(call_564090: Call_ProjectsListByResourceGroup_564082;
+          rootResourceName: string; apiVersion: string; subscriptionId: string;
+          resourceGroupName: string): Recallable =
   ## projectsListByResourceGroup
   ## Gets all Visual Studio Team Services project resources created in the specified Team Services account.
-  ##   resourceGroupName: string (required)
-  ##                    : Name of the resource group within the Azure subscription.
+  ##   rootResourceName: string (required)
+  ##                   : Name of the Team Services account.
   ##   apiVersion: string (required)
   ##             : API Version
   ##   subscriptionId: string (required)
   ##                 : The Azure subscription identifier.
-  ##   rootResourceName: string (required)
-  ##                   : Name of the Team Services account.
-  var path_568191 = newJObject()
-  var query_568192 = newJObject()
-  add(path_568191, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568192, "api-version", newJString(apiVersion))
-  add(path_568191, "subscriptionId", newJString(subscriptionId))
-  add(path_568191, "rootResourceName", newJString(rootResourceName))
-  result = call_568190.call(path_568191, query_568192, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : Name of the resource group within the Azure subscription.
+  var path_564091 = newJObject()
+  var query_564092 = newJObject()
+  add(path_564091, "rootResourceName", newJString(rootResourceName))
+  add(query_564092, "api-version", newJString(apiVersion))
+  add(path_564091, "subscriptionId", newJString(subscriptionId))
+  add(path_564091, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564090.call(path_564091, query_564092, nil, nil, nil)
 
-var projectsListByResourceGroup* = Call_ProjectsListByResourceGroup_568182(
+var projectsListByResourceGroup* = Call_ProjectsListByResourceGroup_564082(
     name: "projectsListByResourceGroup", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/microsoft.visualstudio/account/{rootResourceName}/project",
-    validator: validate_ProjectsListByResourceGroup_568183, base: "",
-    url: url_ProjectsListByResourceGroup_568184, schemes: {Scheme.Https})
+    validator: validate_ProjectsListByResourceGroup_564083, base: "",
+    url: url_ProjectsListByResourceGroup_564084, schemes: {Scheme.Https})
 type
-  Call_ProjectsCreate_568205 = ref object of OpenApiRestCall_567641
-proc url_ProjectsCreate_568207(protocol: Scheme; host: string; base: string;
+  Call_ProjectsCreate_564105 = ref object of OpenApiRestCall_563539
+proc url_ProjectsCreate_564107(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -394,7 +398,7 @@ proc url_ProjectsCreate_568207(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ProjectsCreate_568206(path: JsonNode; query: JsonNode;
+proc validate_ProjectsCreate_564106(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## Creates a Team Services project in the collection with the specified name. 'VersionControlOption' and 'ProcessTemplateId' must be specified in the resource properties. Valid values for VersionControlOption: Git, Tfvc. Valid values for ProcessTemplateId: 6B724908-EF14-45CF-84F8-768B5384DA45, ADCC42AB-9882-485E-A3ED-7678F01F66BC, 27450541-8E31-4150-9947-DC59F998FC01 (these IDs correspond to Scrum, Agile, and CMMI process templates).
@@ -402,56 +406,56 @@ proc validate_ProjectsCreate_568206(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : Name of the resource group within the Azure subscription.
-  ##   subscriptionId: JString (required)
-  ##                 : The Azure subscription identifier.
-  ##   resourceName: JString (required)
-  ##               : Name of the Team Services project.
   ##   rootResourceName: JString (required)
   ##                   : Name of the Team Services account.
+  ##   subscriptionId: JString (required)
+  ##                 : The Azure subscription identifier.
+  ##   resourceGroupName: JString (required)
+  ##                    : Name of the resource group within the Azure subscription.
+  ##   resourceName: JString (required)
+  ##               : Name of the Team Services project.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568208 = path.getOrDefault("resourceGroupName")
-  valid_568208 = validateParameter(valid_568208, JString, required = true,
+        "path argument is necessary due to required `rootResourceName` field"
+  var valid_564108 = path.getOrDefault("rootResourceName")
+  valid_564108 = validateParameter(valid_564108, JString, required = true,
                                  default = nil)
-  if valid_568208 != nil:
-    section.add "resourceGroupName", valid_568208
-  var valid_568209 = path.getOrDefault("subscriptionId")
-  valid_568209 = validateParameter(valid_568209, JString, required = true,
+  if valid_564108 != nil:
+    section.add "rootResourceName", valid_564108
+  var valid_564109 = path.getOrDefault("subscriptionId")
+  valid_564109 = validateParameter(valid_564109, JString, required = true,
                                  default = nil)
-  if valid_568209 != nil:
-    section.add "subscriptionId", valid_568209
-  var valid_568210 = path.getOrDefault("resourceName")
-  valid_568210 = validateParameter(valid_568210, JString, required = true,
+  if valid_564109 != nil:
+    section.add "subscriptionId", valid_564109
+  var valid_564110 = path.getOrDefault("resourceGroupName")
+  valid_564110 = validateParameter(valid_564110, JString, required = true,
                                  default = nil)
-  if valid_568210 != nil:
-    section.add "resourceName", valid_568210
-  var valid_568211 = path.getOrDefault("rootResourceName")
-  valid_568211 = validateParameter(valid_568211, JString, required = true,
+  if valid_564110 != nil:
+    section.add "resourceGroupName", valid_564110
+  var valid_564111 = path.getOrDefault("resourceName")
+  valid_564111 = validateParameter(valid_564111, JString, required = true,
                                  default = nil)
-  if valid_568211 != nil:
-    section.add "rootResourceName", valid_568211
+  if valid_564111 != nil:
+    section.add "resourceName", valid_564111
   result.add "path", section
   ## parameters in `query` object:
-  ##   api-version: JString (required)
-  ##              : API Version
   ##   validating: JString
   ##             : This parameter is ignored and should be set to an empty string.
+  ##   api-version: JString (required)
+  ##              : API Version
   section = newJObject()
+  var valid_564112 = query.getOrDefault("validating")
+  valid_564112 = validateParameter(valid_564112, JString, required = false,
+                                 default = nil)
+  if valid_564112 != nil:
+    section.add "validating", valid_564112
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568212 = query.getOrDefault("api-version")
-  valid_568212 = validateParameter(valid_568212, JString, required = true,
+  var valid_564113 = query.getOrDefault("api-version")
+  valid_564113 = validateParameter(valid_564113, JString, required = true,
                                  default = nil)
-  if valid_568212 != nil:
-    section.add "api-version", valid_568212
-  var valid_568213 = query.getOrDefault("validating")
-  valid_568213 = validateParameter(valid_568213, JString, required = false,
-                                 default = nil)
-  if valid_568213 != nil:
-    section.add "validating", valid_568213
+  if valid_564113 != nil:
+    section.add "api-version", valid_564113
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -465,58 +469,58 @@ proc validate_ProjectsCreate_568206(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568215: Call_ProjectsCreate_568205; path: JsonNode; query: JsonNode;
+proc call*(call_564115: Call_ProjectsCreate_564105; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Creates a Team Services project in the collection with the specified name. 'VersionControlOption' and 'ProcessTemplateId' must be specified in the resource properties. Valid values for VersionControlOption: Git, Tfvc. Valid values for ProcessTemplateId: 6B724908-EF14-45CF-84F8-768B5384DA45, ADCC42AB-9882-485E-A3ED-7678F01F66BC, 27450541-8E31-4150-9947-DC59F998FC01 (these IDs correspond to Scrum, Agile, and CMMI process templates).
   ## 
-  let valid = call_568215.validator(path, query, header, formData, body)
-  let scheme = call_568215.pickScheme
+  let valid = call_564115.validator(path, query, header, formData, body)
+  let scheme = call_564115.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568215.url(scheme.get, call_568215.host, call_568215.base,
-                         call_568215.route, valid.getOrDefault("path"),
+  let url = call_564115.url(scheme.get, call_564115.host, call_564115.base,
+                         call_564115.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568215, url, valid)
+  result = hook(call_564115, url, valid)
 
-proc call*(call_568216: Call_ProjectsCreate_568205; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; resourceName: string;
-          body: JsonNode; rootResourceName: string; validating: string = ""): Recallable =
+proc call*(call_564116: Call_ProjectsCreate_564105; rootResourceName: string;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string;
+          body: JsonNode; resourceName: string; validating: string = ""): Recallable =
   ## projectsCreate
   ## Creates a Team Services project in the collection with the specified name. 'VersionControlOption' and 'ProcessTemplateId' must be specified in the resource properties. Valid values for VersionControlOption: Git, Tfvc. Valid values for ProcessTemplateId: 6B724908-EF14-45CF-84F8-768B5384DA45, ADCC42AB-9882-485E-A3ED-7678F01F66BC, 27450541-8E31-4150-9947-DC59F998FC01 (these IDs correspond to Scrum, Agile, and CMMI process templates).
-  ##   resourceGroupName: string (required)
-  ##                    : Name of the resource group within the Azure subscription.
+  ##   validating: string
+  ##             : This parameter is ignored and should be set to an empty string.
+  ##   rootResourceName: string (required)
+  ##                   : Name of the Team Services account.
   ##   apiVersion: string (required)
   ##             : API Version
   ##   subscriptionId: string (required)
   ##                 : The Azure subscription identifier.
-  ##   resourceName: string (required)
-  ##               : Name of the Team Services project.
-  ##   validating: string
-  ##             : This parameter is ignored and should be set to an empty string.
+  ##   resourceGroupName: string (required)
+  ##                    : Name of the resource group within the Azure subscription.
   ##   body: JObject (required)
   ##       : The request data.
-  ##   rootResourceName: string (required)
-  ##                   : Name of the Team Services account.
-  var path_568217 = newJObject()
-  var query_568218 = newJObject()
-  var body_568219 = newJObject()
-  add(path_568217, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568218, "api-version", newJString(apiVersion))
-  add(path_568217, "subscriptionId", newJString(subscriptionId))
-  add(path_568217, "resourceName", newJString(resourceName))
-  add(query_568218, "validating", newJString(validating))
+  ##   resourceName: string (required)
+  ##               : Name of the Team Services project.
+  var path_564117 = newJObject()
+  var query_564118 = newJObject()
+  var body_564119 = newJObject()
+  add(query_564118, "validating", newJString(validating))
+  add(path_564117, "rootResourceName", newJString(rootResourceName))
+  add(query_564118, "api-version", newJString(apiVersion))
+  add(path_564117, "subscriptionId", newJString(subscriptionId))
+  add(path_564117, "resourceGroupName", newJString(resourceGroupName))
   if body != nil:
-    body_568219 = body
-  add(path_568217, "rootResourceName", newJString(rootResourceName))
-  result = call_568216.call(path_568217, query_568218, nil, nil, body_568219)
+    body_564119 = body
+  add(path_564117, "resourceName", newJString(resourceName))
+  result = call_564116.call(path_564117, query_564118, nil, nil, body_564119)
 
-var projectsCreate* = Call_ProjectsCreate_568205(name: "projectsCreate",
+var projectsCreate* = Call_ProjectsCreate_564105(name: "projectsCreate",
     meth: HttpMethod.HttpPut, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/microsoft.visualstudio/account/{rootResourceName}/project/{resourceName}",
-    validator: validate_ProjectsCreate_568206, base: "", url: url_ProjectsCreate_568207,
+    validator: validate_ProjectsCreate_564106, base: "", url: url_ProjectsCreate_564107,
     schemes: {Scheme.Https})
 type
-  Call_ProjectsGet_568193 = ref object of OpenApiRestCall_567641
-proc url_ProjectsGet_568195(protocol: Scheme; host: string; base: string;
+  Call_ProjectsGet_564093 = ref object of OpenApiRestCall_563539
+proc url_ProjectsGet_564095(protocol: Scheme; host: string; base: string;
                            route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -542,44 +546,44 @@ proc url_ProjectsGet_568195(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ProjectsGet_568194(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_ProjectsGet_564094(path: JsonNode; query: JsonNode; header: JsonNode;
                                 formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the details of a Team Services project resource.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : Name of the resource group within the Azure subscription.
-  ##   subscriptionId: JString (required)
-  ##                 : The Azure subscription identifier.
-  ##   resourceName: JString (required)
-  ##               : Name of the Team Services project.
   ##   rootResourceName: JString (required)
   ##                   : Name of the Team Services account.
+  ##   subscriptionId: JString (required)
+  ##                 : The Azure subscription identifier.
+  ##   resourceGroupName: JString (required)
+  ##                    : Name of the resource group within the Azure subscription.
+  ##   resourceName: JString (required)
+  ##               : Name of the Team Services project.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568196 = path.getOrDefault("resourceGroupName")
-  valid_568196 = validateParameter(valid_568196, JString, required = true,
+        "path argument is necessary due to required `rootResourceName` field"
+  var valid_564096 = path.getOrDefault("rootResourceName")
+  valid_564096 = validateParameter(valid_564096, JString, required = true,
                                  default = nil)
-  if valid_568196 != nil:
-    section.add "resourceGroupName", valid_568196
-  var valid_568197 = path.getOrDefault("subscriptionId")
-  valid_568197 = validateParameter(valid_568197, JString, required = true,
+  if valid_564096 != nil:
+    section.add "rootResourceName", valid_564096
+  var valid_564097 = path.getOrDefault("subscriptionId")
+  valid_564097 = validateParameter(valid_564097, JString, required = true,
                                  default = nil)
-  if valid_568197 != nil:
-    section.add "subscriptionId", valid_568197
-  var valid_568198 = path.getOrDefault("resourceName")
-  valid_568198 = validateParameter(valid_568198, JString, required = true,
+  if valid_564097 != nil:
+    section.add "subscriptionId", valid_564097
+  var valid_564098 = path.getOrDefault("resourceGroupName")
+  valid_564098 = validateParameter(valid_564098, JString, required = true,
                                  default = nil)
-  if valid_568198 != nil:
-    section.add "resourceName", valid_568198
-  var valid_568199 = path.getOrDefault("rootResourceName")
-  valid_568199 = validateParameter(valid_568199, JString, required = true,
+  if valid_564098 != nil:
+    section.add "resourceGroupName", valid_564098
+  var valid_564099 = path.getOrDefault("resourceName")
+  valid_564099 = validateParameter(valid_564099, JString, required = true,
                                  default = nil)
-  if valid_568199 != nil:
-    section.add "rootResourceName", valid_568199
+  if valid_564099 != nil:
+    section.add "resourceName", valid_564099
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -587,11 +591,11 @@ proc validate_ProjectsGet_568194(path: JsonNode; query: JsonNode; header: JsonNo
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568200 = query.getOrDefault("api-version")
-  valid_568200 = validateParameter(valid_568200, JString, required = true,
+  var valid_564100 = query.getOrDefault("api-version")
+  valid_564100 = validateParameter(valid_564100, JString, required = true,
                                  default = nil)
-  if valid_568200 != nil:
-    section.add "api-version", valid_568200
+  if valid_564100 != nil:
+    section.add "api-version", valid_564100
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -600,52 +604,52 @@ proc validate_ProjectsGet_568194(path: JsonNode; query: JsonNode; header: JsonNo
   if body != nil:
     result.add "body", body
 
-proc call*(call_568201: Call_ProjectsGet_568193; path: JsonNode; query: JsonNode;
+proc call*(call_564101: Call_ProjectsGet_564093; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the details of a Team Services project resource.
   ## 
-  let valid = call_568201.validator(path, query, header, formData, body)
-  let scheme = call_568201.pickScheme
+  let valid = call_564101.validator(path, query, header, formData, body)
+  let scheme = call_564101.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568201.url(scheme.get, call_568201.host, call_568201.base,
-                         call_568201.route, valid.getOrDefault("path"),
+  let url = call_564101.url(scheme.get, call_564101.host, call_564101.base,
+                         call_564101.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568201, url, valid)
+  result = hook(call_564101, url, valid)
 
-proc call*(call_568202: Call_ProjectsGet_568193; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; resourceName: string;
-          rootResourceName: string): Recallable =
+proc call*(call_564102: Call_ProjectsGet_564093; rootResourceName: string;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string;
+          resourceName: string): Recallable =
   ## projectsGet
   ## Gets the details of a Team Services project resource.
-  ##   resourceGroupName: string (required)
-  ##                    : Name of the resource group within the Azure subscription.
+  ##   rootResourceName: string (required)
+  ##                   : Name of the Team Services account.
   ##   apiVersion: string (required)
   ##             : API Version
   ##   subscriptionId: string (required)
   ##                 : The Azure subscription identifier.
+  ##   resourceGroupName: string (required)
+  ##                    : Name of the resource group within the Azure subscription.
   ##   resourceName: string (required)
   ##               : Name of the Team Services project.
-  ##   rootResourceName: string (required)
-  ##                   : Name of the Team Services account.
-  var path_568203 = newJObject()
-  var query_568204 = newJObject()
-  add(path_568203, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568204, "api-version", newJString(apiVersion))
-  add(path_568203, "subscriptionId", newJString(subscriptionId))
-  add(path_568203, "resourceName", newJString(resourceName))
-  add(path_568203, "rootResourceName", newJString(rootResourceName))
-  result = call_568202.call(path_568203, query_568204, nil, nil, nil)
+  var path_564103 = newJObject()
+  var query_564104 = newJObject()
+  add(path_564103, "rootResourceName", newJString(rootResourceName))
+  add(query_564104, "api-version", newJString(apiVersion))
+  add(path_564103, "subscriptionId", newJString(subscriptionId))
+  add(path_564103, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564103, "resourceName", newJString(resourceName))
+  result = call_564102.call(path_564103, query_564104, nil, nil, nil)
 
-var projectsGet* = Call_ProjectsGet_568193(name: "projectsGet",
+var projectsGet* = Call_ProjectsGet_564093(name: "projectsGet",
                                         meth: HttpMethod.HttpGet,
                                         host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/microsoft.visualstudio/account/{rootResourceName}/project/{resourceName}",
-                                        validator: validate_ProjectsGet_568194,
-                                        base: "", url: url_ProjectsGet_568195,
+                                        validator: validate_ProjectsGet_564094,
+                                        base: "", url: url_ProjectsGet_564095,
                                         schemes: {Scheme.Https})
 type
-  Call_ProjectsUpdate_568220 = ref object of OpenApiRestCall_567641
-proc url_ProjectsUpdate_568222(protocol: Scheme; host: string; base: string;
+  Call_ProjectsUpdate_564120 = ref object of OpenApiRestCall_563539
+proc url_ProjectsUpdate_564122(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -671,7 +675,7 @@ proc url_ProjectsUpdate_568222(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ProjectsUpdate_568221(path: JsonNode; query: JsonNode;
+proc validate_ProjectsUpdate_564121(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## Updates the tags of the specified Team Services project.
@@ -679,37 +683,37 @@ proc validate_ProjectsUpdate_568221(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : Name of the resource group within the Azure subscription.
-  ##   subscriptionId: JString (required)
-  ##                 : The Azure subscription identifier.
-  ##   resourceName: JString (required)
-  ##               : Name of the Team Services project.
   ##   rootResourceName: JString (required)
   ##                   : Name of the Team Services account.
+  ##   subscriptionId: JString (required)
+  ##                 : The Azure subscription identifier.
+  ##   resourceGroupName: JString (required)
+  ##                    : Name of the resource group within the Azure subscription.
+  ##   resourceName: JString (required)
+  ##               : Name of the Team Services project.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568223 = path.getOrDefault("resourceGroupName")
-  valid_568223 = validateParameter(valid_568223, JString, required = true,
+        "path argument is necessary due to required `rootResourceName` field"
+  var valid_564123 = path.getOrDefault("rootResourceName")
+  valid_564123 = validateParameter(valid_564123, JString, required = true,
                                  default = nil)
-  if valid_568223 != nil:
-    section.add "resourceGroupName", valid_568223
-  var valid_568224 = path.getOrDefault("subscriptionId")
-  valid_568224 = validateParameter(valid_568224, JString, required = true,
+  if valid_564123 != nil:
+    section.add "rootResourceName", valid_564123
+  var valid_564124 = path.getOrDefault("subscriptionId")
+  valid_564124 = validateParameter(valid_564124, JString, required = true,
                                  default = nil)
-  if valid_568224 != nil:
-    section.add "subscriptionId", valid_568224
-  var valid_568225 = path.getOrDefault("resourceName")
-  valid_568225 = validateParameter(valid_568225, JString, required = true,
+  if valid_564124 != nil:
+    section.add "subscriptionId", valid_564124
+  var valid_564125 = path.getOrDefault("resourceGroupName")
+  valid_564125 = validateParameter(valid_564125, JString, required = true,
                                  default = nil)
-  if valid_568225 != nil:
-    section.add "resourceName", valid_568225
-  var valid_568226 = path.getOrDefault("rootResourceName")
-  valid_568226 = validateParameter(valid_568226, JString, required = true,
+  if valid_564125 != nil:
+    section.add "resourceGroupName", valid_564125
+  var valid_564126 = path.getOrDefault("resourceName")
+  valid_564126 = validateParameter(valid_564126, JString, required = true,
                                  default = nil)
-  if valid_568226 != nil:
-    section.add "rootResourceName", valid_568226
+  if valid_564126 != nil:
+    section.add "resourceName", valid_564126
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -717,11 +721,11 @@ proc validate_ProjectsUpdate_568221(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568227 = query.getOrDefault("api-version")
-  valid_568227 = validateParameter(valid_568227, JString, required = true,
+  var valid_564127 = query.getOrDefault("api-version")
+  valid_564127 = validateParameter(valid_564127, JString, required = true,
                                  default = nil)
-  if valid_568227 != nil:
-    section.add "api-version", valid_568227
+  if valid_564127 != nil:
+    section.add "api-version", valid_564127
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -735,55 +739,55 @@ proc validate_ProjectsUpdate_568221(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568229: Call_ProjectsUpdate_568220; path: JsonNode; query: JsonNode;
+proc call*(call_564129: Call_ProjectsUpdate_564120; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Updates the tags of the specified Team Services project.
   ## 
-  let valid = call_568229.validator(path, query, header, formData, body)
-  let scheme = call_568229.pickScheme
+  let valid = call_564129.validator(path, query, header, formData, body)
+  let scheme = call_564129.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568229.url(scheme.get, call_568229.host, call_568229.base,
-                         call_568229.route, valid.getOrDefault("path"),
+  let url = call_564129.url(scheme.get, call_564129.host, call_564129.base,
+                         call_564129.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568229, url, valid)
+  result = hook(call_564129, url, valid)
 
-proc call*(call_568230: Call_ProjectsUpdate_568220; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; resourceName: string;
-          body: JsonNode; rootResourceName: string): Recallable =
+proc call*(call_564130: Call_ProjectsUpdate_564120; rootResourceName: string;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string;
+          body: JsonNode; resourceName: string): Recallable =
   ## projectsUpdate
   ## Updates the tags of the specified Team Services project.
-  ##   resourceGroupName: string (required)
-  ##                    : Name of the resource group within the Azure subscription.
+  ##   rootResourceName: string (required)
+  ##                   : Name of the Team Services account.
   ##   apiVersion: string (required)
   ##             : API Version
   ##   subscriptionId: string (required)
   ##                 : The Azure subscription identifier.
-  ##   resourceName: string (required)
-  ##               : Name of the Team Services project.
+  ##   resourceGroupName: string (required)
+  ##                    : Name of the resource group within the Azure subscription.
   ##   body: JObject (required)
   ##       : The request data.
-  ##   rootResourceName: string (required)
-  ##                   : Name of the Team Services account.
-  var path_568231 = newJObject()
-  var query_568232 = newJObject()
-  var body_568233 = newJObject()
-  add(path_568231, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568232, "api-version", newJString(apiVersion))
-  add(path_568231, "subscriptionId", newJString(subscriptionId))
-  add(path_568231, "resourceName", newJString(resourceName))
+  ##   resourceName: string (required)
+  ##               : Name of the Team Services project.
+  var path_564131 = newJObject()
+  var query_564132 = newJObject()
+  var body_564133 = newJObject()
+  add(path_564131, "rootResourceName", newJString(rootResourceName))
+  add(query_564132, "api-version", newJString(apiVersion))
+  add(path_564131, "subscriptionId", newJString(subscriptionId))
+  add(path_564131, "resourceGroupName", newJString(resourceGroupName))
   if body != nil:
-    body_568233 = body
-  add(path_568231, "rootResourceName", newJString(rootResourceName))
-  result = call_568230.call(path_568231, query_568232, nil, nil, body_568233)
+    body_564133 = body
+  add(path_564131, "resourceName", newJString(resourceName))
+  result = call_564130.call(path_564131, query_564132, nil, nil, body_564133)
 
-var projectsUpdate* = Call_ProjectsUpdate_568220(name: "projectsUpdate",
+var projectsUpdate* = Call_ProjectsUpdate_564120(name: "projectsUpdate",
     meth: HttpMethod.HttpPatch, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/microsoft.visualstudio/account/{rootResourceName}/project/{resourceName}",
-    validator: validate_ProjectsUpdate_568221, base: "", url: url_ProjectsUpdate_568222,
+    validator: validate_ProjectsUpdate_564121, base: "", url: url_ProjectsUpdate_564122,
     schemes: {Scheme.Https})
 type
-  Call_ProjectsGetJobStatus_568234 = ref object of OpenApiRestCall_567641
-proc url_ProjectsGetJobStatus_568236(protocol: Scheme; host: string; base: string;
+  Call_ProjectsGetJobStatus_564134 = ref object of OpenApiRestCall_563539
+proc url_ProjectsGetJobStatus_564136(protocol: Scheme; host: string; base: string;
                                     route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -814,77 +818,77 @@ proc url_ProjectsGetJobStatus_568236(protocol: Scheme; host: string; base: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ProjectsGetJobStatus_568235(path: JsonNode; query: JsonNode;
+proc validate_ProjectsGetJobStatus_564135(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the status of the project resource creation job.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : Name of the resource group within the Azure subscription.
-  ##   subscriptionId: JString (required)
-  ##                 : The Azure subscription identifier.
-  ##   resourceName: JString (required)
-  ##               : Name of the Team Services project.
-  ##   subContainerName: JString (required)
-  ##                   : This parameter should be set to the resourceName.
   ##   rootResourceName: JString (required)
   ##                   : Name of the Team Services account.
+  ##   subContainerName: JString (required)
+  ##                   : This parameter should be set to the resourceName.
+  ##   subscriptionId: JString (required)
+  ##                 : The Azure subscription identifier.
+  ##   resourceGroupName: JString (required)
+  ##                    : Name of the resource group within the Azure subscription.
+  ##   resourceName: JString (required)
+  ##               : Name of the Team Services project.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568237 = path.getOrDefault("resourceGroupName")
-  valid_568237 = validateParameter(valid_568237, JString, required = true,
+        "path argument is necessary due to required `rootResourceName` field"
+  var valid_564137 = path.getOrDefault("rootResourceName")
+  valid_564137 = validateParameter(valid_564137, JString, required = true,
                                  default = nil)
-  if valid_568237 != nil:
-    section.add "resourceGroupName", valid_568237
-  var valid_568238 = path.getOrDefault("subscriptionId")
-  valid_568238 = validateParameter(valid_568238, JString, required = true,
+  if valid_564137 != nil:
+    section.add "rootResourceName", valid_564137
+  var valid_564138 = path.getOrDefault("subContainerName")
+  valid_564138 = validateParameter(valid_564138, JString, required = true,
                                  default = nil)
-  if valid_568238 != nil:
-    section.add "subscriptionId", valid_568238
-  var valid_568239 = path.getOrDefault("resourceName")
-  valid_568239 = validateParameter(valid_568239, JString, required = true,
+  if valid_564138 != nil:
+    section.add "subContainerName", valid_564138
+  var valid_564139 = path.getOrDefault("subscriptionId")
+  valid_564139 = validateParameter(valid_564139, JString, required = true,
                                  default = nil)
-  if valid_568239 != nil:
-    section.add "resourceName", valid_568239
-  var valid_568240 = path.getOrDefault("subContainerName")
-  valid_568240 = validateParameter(valid_568240, JString, required = true,
+  if valid_564139 != nil:
+    section.add "subscriptionId", valid_564139
+  var valid_564140 = path.getOrDefault("resourceGroupName")
+  valid_564140 = validateParameter(valid_564140, JString, required = true,
                                  default = nil)
-  if valid_568240 != nil:
-    section.add "subContainerName", valid_568240
-  var valid_568241 = path.getOrDefault("rootResourceName")
-  valid_568241 = validateParameter(valid_568241, JString, required = true,
+  if valid_564140 != nil:
+    section.add "resourceGroupName", valid_564140
+  var valid_564141 = path.getOrDefault("resourceName")
+  valid_564141 = validateParameter(valid_564141, JString, required = true,
                                  default = nil)
-  if valid_568241 != nil:
-    section.add "rootResourceName", valid_568241
+  if valid_564141 != nil:
+    section.add "resourceName", valid_564141
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
   ##              : API Version
-  ##   jobId: JString
-  ##        : The job identifier.
   ##   operation: JString (required)
   ##            : The operation type. The only supported value is 'put'.
+  ##   jobId: JString
+  ##        : The job identifier.
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568242 = query.getOrDefault("api-version")
-  valid_568242 = validateParameter(valid_568242, JString, required = true,
+  var valid_564142 = query.getOrDefault("api-version")
+  valid_564142 = validateParameter(valid_564142, JString, required = true,
                                  default = nil)
-  if valid_568242 != nil:
-    section.add "api-version", valid_568242
-  var valid_568243 = query.getOrDefault("jobId")
-  valid_568243 = validateParameter(valid_568243, JString, required = false,
+  if valid_564142 != nil:
+    section.add "api-version", valid_564142
+  var valid_564143 = query.getOrDefault("operation")
+  valid_564143 = validateParameter(valid_564143, JString, required = true,
                                  default = nil)
-  if valid_568243 != nil:
-    section.add "jobId", valid_568243
-  var valid_568244 = query.getOrDefault("operation")
-  valid_568244 = validateParameter(valid_568244, JString, required = true,
+  if valid_564143 != nil:
+    section.add "operation", valid_564143
+  var valid_564144 = query.getOrDefault("jobId")
+  valid_564144 = validateParameter(valid_564144, JString, required = false,
                                  default = nil)
-  if valid_568244 != nil:
-    section.add "operation", valid_568244
+  if valid_564144 != nil:
+    section.add "jobId", valid_564144
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -893,61 +897,61 @@ proc validate_ProjectsGetJobStatus_568235(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568245: Call_ProjectsGetJobStatus_568234; path: JsonNode;
+proc call*(call_564145: Call_ProjectsGetJobStatus_564134; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the status of the project resource creation job.
   ## 
-  let valid = call_568245.validator(path, query, header, formData, body)
-  let scheme = call_568245.pickScheme
+  let valid = call_564145.validator(path, query, header, formData, body)
+  let scheme = call_564145.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568245.url(scheme.get, call_568245.host, call_568245.base,
-                         call_568245.route, valid.getOrDefault("path"),
+  let url = call_564145.url(scheme.get, call_564145.host, call_564145.base,
+                         call_564145.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568245, url, valid)
+  result = hook(call_564145, url, valid)
 
-proc call*(call_568246: Call_ProjectsGetJobStatus_568234;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          resourceName: string; subContainerName: string; operation: string;
-          rootResourceName: string; jobId: string = ""): Recallable =
+proc call*(call_564146: Call_ProjectsGetJobStatus_564134; rootResourceName: string;
+          apiVersion: string; operation: string; subContainerName: string;
+          subscriptionId: string; resourceGroupName: string; resourceName: string;
+          jobId: string = ""): Recallable =
   ## projectsGetJobStatus
   ## Gets the status of the project resource creation job.
-  ##   resourceGroupName: string (required)
-  ##                    : Name of the resource group within the Azure subscription.
-  ##   apiVersion: string (required)
-  ##             : API Version
-  ##   jobId: string
-  ##        : The job identifier.
-  ##   subscriptionId: string (required)
-  ##                 : The Azure subscription identifier.
-  ##   resourceName: string (required)
-  ##               : Name of the Team Services project.
-  ##   subContainerName: string (required)
-  ##                   : This parameter should be set to the resourceName.
-  ##   operation: string (required)
-  ##            : The operation type. The only supported value is 'put'.
   ##   rootResourceName: string (required)
   ##                   : Name of the Team Services account.
-  var path_568247 = newJObject()
-  var query_568248 = newJObject()
-  add(path_568247, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568248, "api-version", newJString(apiVersion))
-  add(query_568248, "jobId", newJString(jobId))
-  add(path_568247, "subscriptionId", newJString(subscriptionId))
-  add(path_568247, "resourceName", newJString(resourceName))
-  add(path_568247, "subContainerName", newJString(subContainerName))
-  add(query_568248, "operation", newJString(operation))
-  add(path_568247, "rootResourceName", newJString(rootResourceName))
-  result = call_568246.call(path_568247, query_568248, nil, nil, nil)
+  ##   apiVersion: string (required)
+  ##             : API Version
+  ##   operation: string (required)
+  ##            : The operation type. The only supported value is 'put'.
+  ##   jobId: string
+  ##        : The job identifier.
+  ##   subContainerName: string (required)
+  ##                   : This parameter should be set to the resourceName.
+  ##   subscriptionId: string (required)
+  ##                 : The Azure subscription identifier.
+  ##   resourceGroupName: string (required)
+  ##                    : Name of the resource group within the Azure subscription.
+  ##   resourceName: string (required)
+  ##               : Name of the Team Services project.
+  var path_564147 = newJObject()
+  var query_564148 = newJObject()
+  add(path_564147, "rootResourceName", newJString(rootResourceName))
+  add(query_564148, "api-version", newJString(apiVersion))
+  add(query_564148, "operation", newJString(operation))
+  add(query_564148, "jobId", newJString(jobId))
+  add(path_564147, "subContainerName", newJString(subContainerName))
+  add(path_564147, "subscriptionId", newJString(subscriptionId))
+  add(path_564147, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564147, "resourceName", newJString(resourceName))
+  result = call_564146.call(path_564147, query_564148, nil, nil, nil)
 
-var projectsGetJobStatus* = Call_ProjectsGetJobStatus_568234(
+var projectsGetJobStatus* = Call_ProjectsGetJobStatus_564134(
     name: "projectsGetJobStatus", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/microsoft.visualstudio/account/{rootResourceName}/project/{resourceName}/subContainers/{subContainerName}/status",
-    validator: validate_ProjectsGetJobStatus_568235, base: "",
-    url: url_ProjectsGetJobStatus_568236, schemes: {Scheme.Https})
+    validator: validate_ProjectsGetJobStatus_564135, base: "",
+    url: url_ProjectsGetJobStatus_564136, schemes: {Scheme.Https})
 type
-  Call_AccountsListByResourceGroup_568249 = ref object of OpenApiRestCall_567641
-proc url_AccountsListByResourceGroup_568251(protocol: Scheme; host: string;
+  Call_AccountsListByResourceGroup_564149 = ref object of OpenApiRestCall_563539
+proc url_AccountsListByResourceGroup_564151(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -967,30 +971,30 @@ proc url_AccountsListByResourceGroup_568251(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AccountsListByResourceGroup_568250(path: JsonNode; query: JsonNode;
+proc validate_AccountsListByResourceGroup_564150(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets all Visual Studio Team Services account resources under the resource group linked to the specified Azure subscription.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : Name of the resource group within the Azure subscription.
   ##   subscriptionId: JString (required)
   ##                 : The Azure subscription identifier.
+  ##   resourceGroupName: JString (required)
+  ##                    : Name of the resource group within the Azure subscription.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568252 = path.getOrDefault("resourceGroupName")
-  valid_568252 = validateParameter(valid_568252, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564152 = path.getOrDefault("subscriptionId")
+  valid_564152 = validateParameter(valid_564152, JString, required = true,
                                  default = nil)
-  if valid_568252 != nil:
-    section.add "resourceGroupName", valid_568252
-  var valid_568253 = path.getOrDefault("subscriptionId")
-  valid_568253 = validateParameter(valid_568253, JString, required = true,
+  if valid_564152 != nil:
+    section.add "subscriptionId", valid_564152
+  var valid_564153 = path.getOrDefault("resourceGroupName")
+  valid_564153 = validateParameter(valid_564153, JString, required = true,
                                  default = nil)
-  if valid_568253 != nil:
-    section.add "subscriptionId", valid_568253
+  if valid_564153 != nil:
+    section.add "resourceGroupName", valid_564153
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -998,11 +1002,11 @@ proc validate_AccountsListByResourceGroup_568250(path: JsonNode; query: JsonNode
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568254 = query.getOrDefault("api-version")
-  valid_568254 = validateParameter(valid_568254, JString, required = true,
+  var valid_564154 = query.getOrDefault("api-version")
+  valid_564154 = validateParameter(valid_564154, JString, required = true,
                                  default = nil)
-  if valid_568254 != nil:
-    section.add "api-version", valid_568254
+  if valid_564154 != nil:
+    section.add "api-version", valid_564154
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1011,44 +1015,44 @@ proc validate_AccountsListByResourceGroup_568250(path: JsonNode; query: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_568255: Call_AccountsListByResourceGroup_568249; path: JsonNode;
+proc call*(call_564155: Call_AccountsListByResourceGroup_564149; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets all Visual Studio Team Services account resources under the resource group linked to the specified Azure subscription.
   ## 
-  let valid = call_568255.validator(path, query, header, formData, body)
-  let scheme = call_568255.pickScheme
+  let valid = call_564155.validator(path, query, header, formData, body)
+  let scheme = call_564155.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568255.url(scheme.get, call_568255.host, call_568255.base,
-                         call_568255.route, valid.getOrDefault("path"),
+  let url = call_564155.url(scheme.get, call_564155.host, call_564155.base,
+                         call_564155.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568255, url, valid)
+  result = hook(call_564155, url, valid)
 
-proc call*(call_568256: Call_AccountsListByResourceGroup_568249;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string): Recallable =
+proc call*(call_564156: Call_AccountsListByResourceGroup_564149;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string): Recallable =
   ## accountsListByResourceGroup
   ## Gets all Visual Studio Team Services account resources under the resource group linked to the specified Azure subscription.
-  ##   resourceGroupName: string (required)
-  ##                    : Name of the resource group within the Azure subscription.
   ##   apiVersion: string (required)
   ##             : API Version
   ##   subscriptionId: string (required)
   ##                 : The Azure subscription identifier.
-  var path_568257 = newJObject()
-  var query_568258 = newJObject()
-  add(path_568257, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568258, "api-version", newJString(apiVersion))
-  add(path_568257, "subscriptionId", newJString(subscriptionId))
-  result = call_568256.call(path_568257, query_568258, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : Name of the resource group within the Azure subscription.
+  var path_564157 = newJObject()
+  var query_564158 = newJObject()
+  add(query_564158, "api-version", newJString(apiVersion))
+  add(path_564157, "subscriptionId", newJString(subscriptionId))
+  add(path_564157, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564156.call(path_564157, query_564158, nil, nil, nil)
 
-var accountsListByResourceGroup* = Call_AccountsListByResourceGroup_568249(
+var accountsListByResourceGroup* = Call_AccountsListByResourceGroup_564149(
     name: "accountsListByResourceGroup", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/microsoft.visualstudio/account",
-    validator: validate_AccountsListByResourceGroup_568250, base: "",
-    url: url_AccountsListByResourceGroup_568251, schemes: {Scheme.Https})
+    validator: validate_AccountsListByResourceGroup_564150, base: "",
+    url: url_AccountsListByResourceGroup_564151, schemes: {Scheme.Https})
 type
-  Call_ExtensionsListByAccount_568259 = ref object of OpenApiRestCall_567641
-proc url_ExtensionsListByAccount_568261(protocol: Scheme; host: string; base: string;
+  Call_ExtensionsListByAccount_564159 = ref object of OpenApiRestCall_563539
+proc url_ExtensionsListByAccount_564161(protocol: Scheme; host: string; base: string;
                                        route: string; path: JsonNode;
                                        query: JsonNode): Uri =
   result.scheme = $protocol
@@ -1073,37 +1077,37 @@ proc url_ExtensionsListByAccount_568261(protocol: Scheme; host: string; base: st
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ExtensionsListByAccount_568260(path: JsonNode; query: JsonNode;
+proc validate_ExtensionsListByAccount_564160(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the details of the extension resources created within the resource group.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : Name of the resource group within the Azure subscription.
   ##   subscriptionId: JString (required)
   ##                 : The Azure subscription identifier.
   ##   accountResourceName: JString (required)
   ##                      : The name of the Visual Studio Team Services account resource.
+  ##   resourceGroupName: JString (required)
+  ##                    : Name of the resource group within the Azure subscription.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568262 = path.getOrDefault("resourceGroupName")
-  valid_568262 = validateParameter(valid_568262, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564162 = path.getOrDefault("subscriptionId")
+  valid_564162 = validateParameter(valid_564162, JString, required = true,
                                  default = nil)
-  if valid_568262 != nil:
-    section.add "resourceGroupName", valid_568262
-  var valid_568263 = path.getOrDefault("subscriptionId")
-  valid_568263 = validateParameter(valid_568263, JString, required = true,
+  if valid_564162 != nil:
+    section.add "subscriptionId", valid_564162
+  var valid_564163 = path.getOrDefault("accountResourceName")
+  valid_564163 = validateParameter(valid_564163, JString, required = true,
                                  default = nil)
-  if valid_568263 != nil:
-    section.add "subscriptionId", valid_568263
-  var valid_568264 = path.getOrDefault("accountResourceName")
-  valid_568264 = validateParameter(valid_568264, JString, required = true,
+  if valid_564163 != nil:
+    section.add "accountResourceName", valid_564163
+  var valid_564164 = path.getOrDefault("resourceGroupName")
+  valid_564164 = validateParameter(valid_564164, JString, required = true,
                                  default = nil)
-  if valid_568264 != nil:
-    section.add "accountResourceName", valid_568264
+  if valid_564164 != nil:
+    section.add "resourceGroupName", valid_564164
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1111,11 +1115,11 @@ proc validate_ExtensionsListByAccount_568260(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568265 = query.getOrDefault("api-version")
-  valid_568265 = validateParameter(valid_568265, JString, required = true,
+  var valid_564165 = query.getOrDefault("api-version")
+  valid_564165 = validateParameter(valid_564165, JString, required = true,
                                  default = nil)
-  if valid_568265 != nil:
-    section.add "api-version", valid_568265
+  if valid_564165 != nil:
+    section.add "api-version", valid_564165
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1124,48 +1128,48 @@ proc validate_ExtensionsListByAccount_568260(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568266: Call_ExtensionsListByAccount_568259; path: JsonNode;
+proc call*(call_564166: Call_ExtensionsListByAccount_564159; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the details of the extension resources created within the resource group.
   ## 
-  let valid = call_568266.validator(path, query, header, formData, body)
-  let scheme = call_568266.pickScheme
+  let valid = call_564166.validator(path, query, header, formData, body)
+  let scheme = call_564166.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568266.url(scheme.get, call_568266.host, call_568266.base,
-                         call_568266.route, valid.getOrDefault("path"),
+  let url = call_564166.url(scheme.get, call_564166.host, call_564166.base,
+                         call_564166.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568266, url, valid)
+  result = hook(call_564166, url, valid)
 
-proc call*(call_568267: Call_ExtensionsListByAccount_568259;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          accountResourceName: string): Recallable =
+proc call*(call_564167: Call_ExtensionsListByAccount_564159; apiVersion: string;
+          subscriptionId: string; accountResourceName: string;
+          resourceGroupName: string): Recallable =
   ## extensionsListByAccount
   ## Gets the details of the extension resources created within the resource group.
-  ##   resourceGroupName: string (required)
-  ##                    : Name of the resource group within the Azure subscription.
   ##   apiVersion: string (required)
   ##             : API Version
   ##   subscriptionId: string (required)
   ##                 : The Azure subscription identifier.
   ##   accountResourceName: string (required)
   ##                      : The name of the Visual Studio Team Services account resource.
-  var path_568268 = newJObject()
-  var query_568269 = newJObject()
-  add(path_568268, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568269, "api-version", newJString(apiVersion))
-  add(path_568268, "subscriptionId", newJString(subscriptionId))
-  add(path_568268, "accountResourceName", newJString(accountResourceName))
-  result = call_568267.call(path_568268, query_568269, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : Name of the resource group within the Azure subscription.
+  var path_564168 = newJObject()
+  var query_564169 = newJObject()
+  add(query_564169, "api-version", newJString(apiVersion))
+  add(path_564168, "subscriptionId", newJString(subscriptionId))
+  add(path_564168, "accountResourceName", newJString(accountResourceName))
+  add(path_564168, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564167.call(path_564168, query_564169, nil, nil, nil)
 
-var extensionsListByAccount* = Call_ExtensionsListByAccount_568259(
+var extensionsListByAccount* = Call_ExtensionsListByAccount_564159(
     name: "extensionsListByAccount", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/microsoft.visualstudio/account/{accountResourceName}/extension",
-    validator: validate_ExtensionsListByAccount_568260, base: "",
-    url: url_ExtensionsListByAccount_568261, schemes: {Scheme.Https})
+    validator: validate_ExtensionsListByAccount_564160, base: "",
+    url: url_ExtensionsListByAccount_564161, schemes: {Scheme.Https})
 type
-  Call_ExtensionsCreate_568282 = ref object of OpenApiRestCall_567641
-proc url_ExtensionsCreate_568284(protocol: Scheme; host: string; base: string;
+  Call_ExtensionsCreate_564182 = ref object of OpenApiRestCall_563539
+proc url_ExtensionsCreate_564184(protocol: Scheme; host: string; base: string;
                                 route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1192,7 +1196,7 @@ proc url_ExtensionsCreate_568284(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ExtensionsCreate_568283(path: JsonNode; query: JsonNode;
+proc validate_ExtensionsCreate_564183(path: JsonNode; query: JsonNode;
                                      header: JsonNode; formData: JsonNode;
                                      body: JsonNode): JsonNode =
   ## Registers the extension with a Visual Studio Team Services account.
@@ -1200,37 +1204,37 @@ proc validate_ExtensionsCreate_568283(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : Name of the resource group within the Azure subscription.
   ##   subscriptionId: JString (required)
   ##                 : The Azure subscription identifier.
-  ##   extensionResourceName: JString (required)
-  ##                        : The name of the extension.
   ##   accountResourceName: JString (required)
   ##                      : The name of the Visual Studio Team Services account resource.
+  ##   resourceGroupName: JString (required)
+  ##                    : Name of the resource group within the Azure subscription.
+  ##   extensionResourceName: JString (required)
+  ##                        : The name of the extension.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568285 = path.getOrDefault("resourceGroupName")
-  valid_568285 = validateParameter(valid_568285, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564185 = path.getOrDefault("subscriptionId")
+  valid_564185 = validateParameter(valid_564185, JString, required = true,
                                  default = nil)
-  if valid_568285 != nil:
-    section.add "resourceGroupName", valid_568285
-  var valid_568286 = path.getOrDefault("subscriptionId")
-  valid_568286 = validateParameter(valid_568286, JString, required = true,
+  if valid_564185 != nil:
+    section.add "subscriptionId", valid_564185
+  var valid_564186 = path.getOrDefault("accountResourceName")
+  valid_564186 = validateParameter(valid_564186, JString, required = true,
                                  default = nil)
-  if valid_568286 != nil:
-    section.add "subscriptionId", valid_568286
-  var valid_568287 = path.getOrDefault("extensionResourceName")
-  valid_568287 = validateParameter(valid_568287, JString, required = true,
+  if valid_564186 != nil:
+    section.add "accountResourceName", valid_564186
+  var valid_564187 = path.getOrDefault("resourceGroupName")
+  valid_564187 = validateParameter(valid_564187, JString, required = true,
                                  default = nil)
-  if valid_568287 != nil:
-    section.add "extensionResourceName", valid_568287
-  var valid_568288 = path.getOrDefault("accountResourceName")
-  valid_568288 = validateParameter(valid_568288, JString, required = true,
+  if valid_564187 != nil:
+    section.add "resourceGroupName", valid_564187
+  var valid_564188 = path.getOrDefault("extensionResourceName")
+  valid_564188 = validateParameter(valid_564188, JString, required = true,
                                  default = nil)
-  if valid_568288 != nil:
-    section.add "accountResourceName", valid_568288
+  if valid_564188 != nil:
+    section.add "extensionResourceName", valid_564188
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1238,11 +1242,11 @@ proc validate_ExtensionsCreate_568283(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568289 = query.getOrDefault("api-version")
-  valid_568289 = validateParameter(valid_568289, JString, required = true,
+  var valid_564189 = query.getOrDefault("api-version")
+  valid_564189 = validateParameter(valid_564189, JString, required = true,
                                  default = nil)
-  if valid_568289 != nil:
-    section.add "api-version", valid_568289
+  if valid_564189 != nil:
+    section.add "api-version", valid_564189
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1256,55 +1260,55 @@ proc validate_ExtensionsCreate_568283(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568291: Call_ExtensionsCreate_568282; path: JsonNode;
+proc call*(call_564191: Call_ExtensionsCreate_564182; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Registers the extension with a Visual Studio Team Services account.
   ## 
-  let valid = call_568291.validator(path, query, header, formData, body)
-  let scheme = call_568291.pickScheme
+  let valid = call_564191.validator(path, query, header, formData, body)
+  let scheme = call_564191.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568291.url(scheme.get, call_568291.host, call_568291.base,
-                         call_568291.route, valid.getOrDefault("path"),
+  let url = call_564191.url(scheme.get, call_564191.host, call_564191.base,
+                         call_564191.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568291, url, valid)
+  result = hook(call_564191, url, valid)
 
-proc call*(call_568292: Call_ExtensionsCreate_568282; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; extensionResourceName: string;
-          accountResourceName: string; body: JsonNode): Recallable =
+proc call*(call_564192: Call_ExtensionsCreate_564182; apiVersion: string;
+          subscriptionId: string; accountResourceName: string;
+          resourceGroupName: string; body: JsonNode; extensionResourceName: string): Recallable =
   ## extensionsCreate
   ## Registers the extension with a Visual Studio Team Services account.
-  ##   resourceGroupName: string (required)
-  ##                    : Name of the resource group within the Azure subscription.
   ##   apiVersion: string (required)
   ##             : API Version
   ##   subscriptionId: string (required)
   ##                 : The Azure subscription identifier.
-  ##   extensionResourceName: string (required)
-  ##                        : The name of the extension.
   ##   accountResourceName: string (required)
   ##                      : The name of the Visual Studio Team Services account resource.
+  ##   resourceGroupName: string (required)
+  ##                    : Name of the resource group within the Azure subscription.
   ##   body: JObject (required)
   ##       : An object containing additional information related to the extension request.
-  var path_568293 = newJObject()
-  var query_568294 = newJObject()
-  var body_568295 = newJObject()
-  add(path_568293, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568294, "api-version", newJString(apiVersion))
-  add(path_568293, "subscriptionId", newJString(subscriptionId))
-  add(path_568293, "extensionResourceName", newJString(extensionResourceName))
-  add(path_568293, "accountResourceName", newJString(accountResourceName))
+  ##   extensionResourceName: string (required)
+  ##                        : The name of the extension.
+  var path_564193 = newJObject()
+  var query_564194 = newJObject()
+  var body_564195 = newJObject()
+  add(query_564194, "api-version", newJString(apiVersion))
+  add(path_564193, "subscriptionId", newJString(subscriptionId))
+  add(path_564193, "accountResourceName", newJString(accountResourceName))
+  add(path_564193, "resourceGroupName", newJString(resourceGroupName))
   if body != nil:
-    body_568295 = body
-  result = call_568292.call(path_568293, query_568294, nil, nil, body_568295)
+    body_564195 = body
+  add(path_564193, "extensionResourceName", newJString(extensionResourceName))
+  result = call_564192.call(path_564193, query_564194, nil, nil, body_564195)
 
-var extensionsCreate* = Call_ExtensionsCreate_568282(name: "extensionsCreate",
+var extensionsCreate* = Call_ExtensionsCreate_564182(name: "extensionsCreate",
     meth: HttpMethod.HttpPut, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/microsoft.visualstudio/account/{accountResourceName}/extension/{extensionResourceName}",
-    validator: validate_ExtensionsCreate_568283, base: "",
-    url: url_ExtensionsCreate_568284, schemes: {Scheme.Https})
+    validator: validate_ExtensionsCreate_564183, base: "",
+    url: url_ExtensionsCreate_564184, schemes: {Scheme.Https})
 type
-  Call_ExtensionsGet_568270 = ref object of OpenApiRestCall_567641
-proc url_ExtensionsGet_568272(protocol: Scheme; host: string; base: string;
+  Call_ExtensionsGet_564170 = ref object of OpenApiRestCall_563539
+proc url_ExtensionsGet_564172(protocol: Scheme; host: string; base: string;
                              route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1331,44 +1335,44 @@ proc url_ExtensionsGet_568272(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ExtensionsGet_568271(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_ExtensionsGet_564171(path: JsonNode; query: JsonNode; header: JsonNode;
                                   formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the details of an extension associated with a Visual Studio Team Services account resource.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : Name of the resource group within the Azure subscription.
   ##   subscriptionId: JString (required)
   ##                 : The Azure subscription identifier.
-  ##   extensionResourceName: JString (required)
-  ##                        : The name of the extension.
   ##   accountResourceName: JString (required)
   ##                      : The name of the Visual Studio Team Services account resource.
+  ##   resourceGroupName: JString (required)
+  ##                    : Name of the resource group within the Azure subscription.
+  ##   extensionResourceName: JString (required)
+  ##                        : The name of the extension.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568273 = path.getOrDefault("resourceGroupName")
-  valid_568273 = validateParameter(valid_568273, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564173 = path.getOrDefault("subscriptionId")
+  valid_564173 = validateParameter(valid_564173, JString, required = true,
                                  default = nil)
-  if valid_568273 != nil:
-    section.add "resourceGroupName", valid_568273
-  var valid_568274 = path.getOrDefault("subscriptionId")
-  valid_568274 = validateParameter(valid_568274, JString, required = true,
+  if valid_564173 != nil:
+    section.add "subscriptionId", valid_564173
+  var valid_564174 = path.getOrDefault("accountResourceName")
+  valid_564174 = validateParameter(valid_564174, JString, required = true,
                                  default = nil)
-  if valid_568274 != nil:
-    section.add "subscriptionId", valid_568274
-  var valid_568275 = path.getOrDefault("extensionResourceName")
-  valid_568275 = validateParameter(valid_568275, JString, required = true,
+  if valid_564174 != nil:
+    section.add "accountResourceName", valid_564174
+  var valid_564175 = path.getOrDefault("resourceGroupName")
+  valid_564175 = validateParameter(valid_564175, JString, required = true,
                                  default = nil)
-  if valid_568275 != nil:
-    section.add "extensionResourceName", valid_568275
-  var valid_568276 = path.getOrDefault("accountResourceName")
-  valid_568276 = validateParameter(valid_568276, JString, required = true,
+  if valid_564175 != nil:
+    section.add "resourceGroupName", valid_564175
+  var valid_564176 = path.getOrDefault("extensionResourceName")
+  valid_564176 = validateParameter(valid_564176, JString, required = true,
                                  default = nil)
-  if valid_568276 != nil:
-    section.add "accountResourceName", valid_568276
+  if valid_564176 != nil:
+    section.add "extensionResourceName", valid_564176
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1376,11 +1380,11 @@ proc validate_ExtensionsGet_568271(path: JsonNode; query: JsonNode; header: Json
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568277 = query.getOrDefault("api-version")
-  valid_568277 = validateParameter(valid_568277, JString, required = true,
+  var valid_564177 = query.getOrDefault("api-version")
+  valid_564177 = validateParameter(valid_564177, JString, required = true,
                                  default = nil)
-  if valid_568277 != nil:
-    section.add "api-version", valid_568277
+  if valid_564177 != nil:
+    section.add "api-version", valid_564177
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1389,50 +1393,50 @@ proc validate_ExtensionsGet_568271(path: JsonNode; query: JsonNode; header: Json
   if body != nil:
     result.add "body", body
 
-proc call*(call_568278: Call_ExtensionsGet_568270; path: JsonNode; query: JsonNode;
+proc call*(call_564178: Call_ExtensionsGet_564170; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the details of an extension associated with a Visual Studio Team Services account resource.
   ## 
-  let valid = call_568278.validator(path, query, header, formData, body)
-  let scheme = call_568278.pickScheme
+  let valid = call_564178.validator(path, query, header, formData, body)
+  let scheme = call_564178.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568278.url(scheme.get, call_568278.host, call_568278.base,
-                         call_568278.route, valid.getOrDefault("path"),
+  let url = call_564178.url(scheme.get, call_564178.host, call_564178.base,
+                         call_564178.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568278, url, valid)
+  result = hook(call_564178, url, valid)
 
-proc call*(call_568279: Call_ExtensionsGet_568270; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; extensionResourceName: string;
-          accountResourceName: string): Recallable =
+proc call*(call_564179: Call_ExtensionsGet_564170; apiVersion: string;
+          subscriptionId: string; accountResourceName: string;
+          resourceGroupName: string; extensionResourceName: string): Recallable =
   ## extensionsGet
   ## Gets the details of an extension associated with a Visual Studio Team Services account resource.
-  ##   resourceGroupName: string (required)
-  ##                    : Name of the resource group within the Azure subscription.
   ##   apiVersion: string (required)
   ##             : API Version
   ##   subscriptionId: string (required)
   ##                 : The Azure subscription identifier.
-  ##   extensionResourceName: string (required)
-  ##                        : The name of the extension.
   ##   accountResourceName: string (required)
   ##                      : The name of the Visual Studio Team Services account resource.
-  var path_568280 = newJObject()
-  var query_568281 = newJObject()
-  add(path_568280, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568281, "api-version", newJString(apiVersion))
-  add(path_568280, "subscriptionId", newJString(subscriptionId))
-  add(path_568280, "extensionResourceName", newJString(extensionResourceName))
-  add(path_568280, "accountResourceName", newJString(accountResourceName))
-  result = call_568279.call(path_568280, query_568281, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : Name of the resource group within the Azure subscription.
+  ##   extensionResourceName: string (required)
+  ##                        : The name of the extension.
+  var path_564180 = newJObject()
+  var query_564181 = newJObject()
+  add(query_564181, "api-version", newJString(apiVersion))
+  add(path_564180, "subscriptionId", newJString(subscriptionId))
+  add(path_564180, "accountResourceName", newJString(accountResourceName))
+  add(path_564180, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564180, "extensionResourceName", newJString(extensionResourceName))
+  result = call_564179.call(path_564180, query_564181, nil, nil, nil)
 
-var extensionsGet* = Call_ExtensionsGet_568270(name: "extensionsGet",
+var extensionsGet* = Call_ExtensionsGet_564170(name: "extensionsGet",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/microsoft.visualstudio/account/{accountResourceName}/extension/{extensionResourceName}",
-    validator: validate_ExtensionsGet_568271, base: "", url: url_ExtensionsGet_568272,
+    validator: validate_ExtensionsGet_564171, base: "", url: url_ExtensionsGet_564172,
     schemes: {Scheme.Https})
 type
-  Call_ExtensionsUpdate_568308 = ref object of OpenApiRestCall_567641
-proc url_ExtensionsUpdate_568310(protocol: Scheme; host: string; base: string;
+  Call_ExtensionsUpdate_564208 = ref object of OpenApiRestCall_563539
+proc url_ExtensionsUpdate_564210(protocol: Scheme; host: string; base: string;
                                 route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1459,7 +1463,7 @@ proc url_ExtensionsUpdate_568310(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ExtensionsUpdate_568309(path: JsonNode; query: JsonNode;
+proc validate_ExtensionsUpdate_564209(path: JsonNode; query: JsonNode;
                                      header: JsonNode; formData: JsonNode;
                                      body: JsonNode): JsonNode =
   ## Updates an existing extension registration for the Visual Studio Team Services account.
@@ -1467,37 +1471,37 @@ proc validate_ExtensionsUpdate_568309(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : Name of the resource group within the Azure subscription.
   ##   subscriptionId: JString (required)
   ##                 : The Azure subscription identifier.
-  ##   extensionResourceName: JString (required)
-  ##                        : The name of the extension.
   ##   accountResourceName: JString (required)
   ##                      : The name of the Visual Studio Team Services account resource.
+  ##   resourceGroupName: JString (required)
+  ##                    : Name of the resource group within the Azure subscription.
+  ##   extensionResourceName: JString (required)
+  ##                        : The name of the extension.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568311 = path.getOrDefault("resourceGroupName")
-  valid_568311 = validateParameter(valid_568311, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564211 = path.getOrDefault("subscriptionId")
+  valid_564211 = validateParameter(valid_564211, JString, required = true,
                                  default = nil)
-  if valid_568311 != nil:
-    section.add "resourceGroupName", valid_568311
-  var valid_568312 = path.getOrDefault("subscriptionId")
-  valid_568312 = validateParameter(valid_568312, JString, required = true,
+  if valid_564211 != nil:
+    section.add "subscriptionId", valid_564211
+  var valid_564212 = path.getOrDefault("accountResourceName")
+  valid_564212 = validateParameter(valid_564212, JString, required = true,
                                  default = nil)
-  if valid_568312 != nil:
-    section.add "subscriptionId", valid_568312
-  var valid_568313 = path.getOrDefault("extensionResourceName")
-  valid_568313 = validateParameter(valid_568313, JString, required = true,
+  if valid_564212 != nil:
+    section.add "accountResourceName", valid_564212
+  var valid_564213 = path.getOrDefault("resourceGroupName")
+  valid_564213 = validateParameter(valid_564213, JString, required = true,
                                  default = nil)
-  if valid_568313 != nil:
-    section.add "extensionResourceName", valid_568313
-  var valid_568314 = path.getOrDefault("accountResourceName")
-  valid_568314 = validateParameter(valid_568314, JString, required = true,
+  if valid_564213 != nil:
+    section.add "resourceGroupName", valid_564213
+  var valid_564214 = path.getOrDefault("extensionResourceName")
+  valid_564214 = validateParameter(valid_564214, JString, required = true,
                                  default = nil)
-  if valid_568314 != nil:
-    section.add "accountResourceName", valid_568314
+  if valid_564214 != nil:
+    section.add "extensionResourceName", valid_564214
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1505,11 +1509,11 @@ proc validate_ExtensionsUpdate_568309(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568315 = query.getOrDefault("api-version")
-  valid_568315 = validateParameter(valid_568315, JString, required = true,
+  var valid_564215 = query.getOrDefault("api-version")
+  valid_564215 = validateParameter(valid_564215, JString, required = true,
                                  default = nil)
-  if valid_568315 != nil:
-    section.add "api-version", valid_568315
+  if valid_564215 != nil:
+    section.add "api-version", valid_564215
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1523,55 +1527,55 @@ proc validate_ExtensionsUpdate_568309(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568317: Call_ExtensionsUpdate_568308; path: JsonNode;
+proc call*(call_564217: Call_ExtensionsUpdate_564208; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Updates an existing extension registration for the Visual Studio Team Services account.
   ## 
-  let valid = call_568317.validator(path, query, header, formData, body)
-  let scheme = call_568317.pickScheme
+  let valid = call_564217.validator(path, query, header, formData, body)
+  let scheme = call_564217.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568317.url(scheme.get, call_568317.host, call_568317.base,
-                         call_568317.route, valid.getOrDefault("path"),
+  let url = call_564217.url(scheme.get, call_564217.host, call_564217.base,
+                         call_564217.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568317, url, valid)
+  result = hook(call_564217, url, valid)
 
-proc call*(call_568318: Call_ExtensionsUpdate_568308; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; extensionResourceName: string;
-          accountResourceName: string; body: JsonNode): Recallable =
+proc call*(call_564218: Call_ExtensionsUpdate_564208; apiVersion: string;
+          subscriptionId: string; accountResourceName: string;
+          resourceGroupName: string; body: JsonNode; extensionResourceName: string): Recallable =
   ## extensionsUpdate
   ## Updates an existing extension registration for the Visual Studio Team Services account.
-  ##   resourceGroupName: string (required)
-  ##                    : Name of the resource group within the Azure subscription.
   ##   apiVersion: string (required)
   ##             : API Version
   ##   subscriptionId: string (required)
   ##                 : The Azure subscription identifier.
-  ##   extensionResourceName: string (required)
-  ##                        : The name of the extension.
   ##   accountResourceName: string (required)
   ##                      : The name of the Visual Studio Team Services account resource.
+  ##   resourceGroupName: string (required)
+  ##                    : Name of the resource group within the Azure subscription.
   ##   body: JObject (required)
   ##       : An object containing additional information related to the extension request.
-  var path_568319 = newJObject()
-  var query_568320 = newJObject()
-  var body_568321 = newJObject()
-  add(path_568319, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568320, "api-version", newJString(apiVersion))
-  add(path_568319, "subscriptionId", newJString(subscriptionId))
-  add(path_568319, "extensionResourceName", newJString(extensionResourceName))
-  add(path_568319, "accountResourceName", newJString(accountResourceName))
+  ##   extensionResourceName: string (required)
+  ##                        : The name of the extension.
+  var path_564219 = newJObject()
+  var query_564220 = newJObject()
+  var body_564221 = newJObject()
+  add(query_564220, "api-version", newJString(apiVersion))
+  add(path_564219, "subscriptionId", newJString(subscriptionId))
+  add(path_564219, "accountResourceName", newJString(accountResourceName))
+  add(path_564219, "resourceGroupName", newJString(resourceGroupName))
   if body != nil:
-    body_568321 = body
-  result = call_568318.call(path_568319, query_568320, nil, nil, body_568321)
+    body_564221 = body
+  add(path_564219, "extensionResourceName", newJString(extensionResourceName))
+  result = call_564218.call(path_564219, query_564220, nil, nil, body_564221)
 
-var extensionsUpdate* = Call_ExtensionsUpdate_568308(name: "extensionsUpdate",
+var extensionsUpdate* = Call_ExtensionsUpdate_564208(name: "extensionsUpdate",
     meth: HttpMethod.HttpPatch, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/microsoft.visualstudio/account/{accountResourceName}/extension/{extensionResourceName}",
-    validator: validate_ExtensionsUpdate_568309, base: "",
-    url: url_ExtensionsUpdate_568310, schemes: {Scheme.Https})
+    validator: validate_ExtensionsUpdate_564209, base: "",
+    url: url_ExtensionsUpdate_564210, schemes: {Scheme.Https})
 type
-  Call_ExtensionsDelete_568296 = ref object of OpenApiRestCall_567641
-proc url_ExtensionsDelete_568298(protocol: Scheme; host: string; base: string;
+  Call_ExtensionsDelete_564196 = ref object of OpenApiRestCall_563539
+proc url_ExtensionsDelete_564198(protocol: Scheme; host: string; base: string;
                                 route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1598,7 +1602,7 @@ proc url_ExtensionsDelete_568298(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ExtensionsDelete_568297(path: JsonNode; query: JsonNode;
+proc validate_ExtensionsDelete_564197(path: JsonNode; query: JsonNode;
                                      header: JsonNode; formData: JsonNode;
                                      body: JsonNode): JsonNode =
   ## Removes an extension resource registration for a Visual Studio Team Services account.
@@ -1606,37 +1610,37 @@ proc validate_ExtensionsDelete_568297(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : Name of the resource group within the Azure subscription.
   ##   subscriptionId: JString (required)
   ##                 : The Azure subscription identifier.
-  ##   extensionResourceName: JString (required)
-  ##                        : The name of the extension.
   ##   accountResourceName: JString (required)
   ##                      : The name of the Visual Studio Team Services account resource.
+  ##   resourceGroupName: JString (required)
+  ##                    : Name of the resource group within the Azure subscription.
+  ##   extensionResourceName: JString (required)
+  ##                        : The name of the extension.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568299 = path.getOrDefault("resourceGroupName")
-  valid_568299 = validateParameter(valid_568299, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564199 = path.getOrDefault("subscriptionId")
+  valid_564199 = validateParameter(valid_564199, JString, required = true,
                                  default = nil)
-  if valid_568299 != nil:
-    section.add "resourceGroupName", valid_568299
-  var valid_568300 = path.getOrDefault("subscriptionId")
-  valid_568300 = validateParameter(valid_568300, JString, required = true,
+  if valid_564199 != nil:
+    section.add "subscriptionId", valid_564199
+  var valid_564200 = path.getOrDefault("accountResourceName")
+  valid_564200 = validateParameter(valid_564200, JString, required = true,
                                  default = nil)
-  if valid_568300 != nil:
-    section.add "subscriptionId", valid_568300
-  var valid_568301 = path.getOrDefault("extensionResourceName")
-  valid_568301 = validateParameter(valid_568301, JString, required = true,
+  if valid_564200 != nil:
+    section.add "accountResourceName", valid_564200
+  var valid_564201 = path.getOrDefault("resourceGroupName")
+  valid_564201 = validateParameter(valid_564201, JString, required = true,
                                  default = nil)
-  if valid_568301 != nil:
-    section.add "extensionResourceName", valid_568301
-  var valid_568302 = path.getOrDefault("accountResourceName")
-  valid_568302 = validateParameter(valid_568302, JString, required = true,
+  if valid_564201 != nil:
+    section.add "resourceGroupName", valid_564201
+  var valid_564202 = path.getOrDefault("extensionResourceName")
+  valid_564202 = validateParameter(valid_564202, JString, required = true,
                                  default = nil)
-  if valid_568302 != nil:
-    section.add "accountResourceName", valid_568302
+  if valid_564202 != nil:
+    section.add "extensionResourceName", valid_564202
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1644,11 +1648,11 @@ proc validate_ExtensionsDelete_568297(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568303 = query.getOrDefault("api-version")
-  valid_568303 = validateParameter(valid_568303, JString, required = true,
+  var valid_564203 = query.getOrDefault("api-version")
+  valid_564203 = validateParameter(valid_564203, JString, required = true,
                                  default = nil)
-  if valid_568303 != nil:
-    section.add "api-version", valid_568303
+  if valid_564203 != nil:
+    section.add "api-version", valid_564203
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1657,50 +1661,50 @@ proc validate_ExtensionsDelete_568297(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568304: Call_ExtensionsDelete_568296; path: JsonNode;
+proc call*(call_564204: Call_ExtensionsDelete_564196; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Removes an extension resource registration for a Visual Studio Team Services account.
   ## 
-  let valid = call_568304.validator(path, query, header, formData, body)
-  let scheme = call_568304.pickScheme
+  let valid = call_564204.validator(path, query, header, formData, body)
+  let scheme = call_564204.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568304.url(scheme.get, call_568304.host, call_568304.base,
-                         call_568304.route, valid.getOrDefault("path"),
+  let url = call_564204.url(scheme.get, call_564204.host, call_564204.base,
+                         call_564204.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568304, url, valid)
+  result = hook(call_564204, url, valid)
 
-proc call*(call_568305: Call_ExtensionsDelete_568296; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; extensionResourceName: string;
-          accountResourceName: string): Recallable =
+proc call*(call_564205: Call_ExtensionsDelete_564196; apiVersion: string;
+          subscriptionId: string; accountResourceName: string;
+          resourceGroupName: string; extensionResourceName: string): Recallable =
   ## extensionsDelete
   ## Removes an extension resource registration for a Visual Studio Team Services account.
-  ##   resourceGroupName: string (required)
-  ##                    : Name of the resource group within the Azure subscription.
   ##   apiVersion: string (required)
   ##             : API Version
   ##   subscriptionId: string (required)
   ##                 : The Azure subscription identifier.
-  ##   extensionResourceName: string (required)
-  ##                        : The name of the extension.
   ##   accountResourceName: string (required)
   ##                      : The name of the Visual Studio Team Services account resource.
-  var path_568306 = newJObject()
-  var query_568307 = newJObject()
-  add(path_568306, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568307, "api-version", newJString(apiVersion))
-  add(path_568306, "subscriptionId", newJString(subscriptionId))
-  add(path_568306, "extensionResourceName", newJString(extensionResourceName))
-  add(path_568306, "accountResourceName", newJString(accountResourceName))
-  result = call_568305.call(path_568306, query_568307, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : Name of the resource group within the Azure subscription.
+  ##   extensionResourceName: string (required)
+  ##                        : The name of the extension.
+  var path_564206 = newJObject()
+  var query_564207 = newJObject()
+  add(query_564207, "api-version", newJString(apiVersion))
+  add(path_564206, "subscriptionId", newJString(subscriptionId))
+  add(path_564206, "accountResourceName", newJString(accountResourceName))
+  add(path_564206, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564206, "extensionResourceName", newJString(extensionResourceName))
+  result = call_564205.call(path_564206, query_564207, nil, nil, nil)
 
-var extensionsDelete* = Call_ExtensionsDelete_568296(name: "extensionsDelete",
+var extensionsDelete* = Call_ExtensionsDelete_564196(name: "extensionsDelete",
     meth: HttpMethod.HttpDelete, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/microsoft.visualstudio/account/{accountResourceName}/extension/{extensionResourceName}",
-    validator: validate_ExtensionsDelete_568297, base: "",
-    url: url_ExtensionsDelete_568298, schemes: {Scheme.Https})
+    validator: validate_ExtensionsDelete_564197, base: "",
+    url: url_ExtensionsDelete_564198, schemes: {Scheme.Https})
 type
-  Call_AccountsCreateOrUpdate_568333 = ref object of OpenApiRestCall_567641
-proc url_AccountsCreateOrUpdate_568335(protocol: Scheme; host: string; base: string;
+  Call_AccountsCreateOrUpdate_564233 = ref object of OpenApiRestCall_563539
+proc url_AccountsCreateOrUpdate_564235(protocol: Scheme; host: string; base: string;
                                       route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1722,37 +1726,37 @@ proc url_AccountsCreateOrUpdate_568335(protocol: Scheme; host: string; base: str
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AccountsCreateOrUpdate_568334(path: JsonNode; query: JsonNode;
+proc validate_AccountsCreateOrUpdate_564234(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Creates or updates a Visual Studio Team Services account resource.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : Name of the resource group within the Azure subscription.
   ##   subscriptionId: JString (required)
   ##                 : The Azure subscription identifier.
+  ##   resourceGroupName: JString (required)
+  ##                    : Name of the resource group within the Azure subscription.
   ##   resourceName: JString (required)
   ##               : Name of the resource.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568336 = path.getOrDefault("resourceGroupName")
-  valid_568336 = validateParameter(valid_568336, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564236 = path.getOrDefault("subscriptionId")
+  valid_564236 = validateParameter(valid_564236, JString, required = true,
                                  default = nil)
-  if valid_568336 != nil:
-    section.add "resourceGroupName", valid_568336
-  var valid_568337 = path.getOrDefault("subscriptionId")
-  valid_568337 = validateParameter(valid_568337, JString, required = true,
+  if valid_564236 != nil:
+    section.add "subscriptionId", valid_564236
+  var valid_564237 = path.getOrDefault("resourceGroupName")
+  valid_564237 = validateParameter(valid_564237, JString, required = true,
                                  default = nil)
-  if valid_568337 != nil:
-    section.add "subscriptionId", valid_568337
-  var valid_568338 = path.getOrDefault("resourceName")
-  valid_568338 = validateParameter(valid_568338, JString, required = true,
+  if valid_564237 != nil:
+    section.add "resourceGroupName", valid_564237
+  var valid_564238 = path.getOrDefault("resourceName")
+  valid_564238 = validateParameter(valid_564238, JString, required = true,
                                  default = nil)
-  if valid_568338 != nil:
-    section.add "resourceName", valid_568338
+  if valid_564238 != nil:
+    section.add "resourceName", valid_564238
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1760,11 +1764,11 @@ proc validate_AccountsCreateOrUpdate_568334(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568339 = query.getOrDefault("api-version")
-  valid_568339 = validateParameter(valid_568339, JString, required = true,
+  var valid_564239 = query.getOrDefault("api-version")
+  valid_564239 = validateParameter(valid_564239, JString, required = true,
                                  default = nil)
-  if valid_568339 != nil:
-    section.add "api-version", valid_568339
+  if valid_564239 != nil:
+    section.add "api-version", valid_564239
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1778,53 +1782,53 @@ proc validate_AccountsCreateOrUpdate_568334(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568341: Call_AccountsCreateOrUpdate_568333; path: JsonNode;
+proc call*(call_564241: Call_AccountsCreateOrUpdate_564233; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Creates or updates a Visual Studio Team Services account resource.
   ## 
-  let valid = call_568341.validator(path, query, header, formData, body)
-  let scheme = call_568341.pickScheme
+  let valid = call_564241.validator(path, query, header, formData, body)
+  let scheme = call_564241.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568341.url(scheme.get, call_568341.host, call_568341.base,
-                         call_568341.route, valid.getOrDefault("path"),
+  let url = call_564241.url(scheme.get, call_564241.host, call_564241.base,
+                         call_564241.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568341, url, valid)
+  result = hook(call_564241, url, valid)
 
-proc call*(call_568342: Call_AccountsCreateOrUpdate_568333;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          resourceName: string; body: JsonNode): Recallable =
+proc call*(call_564242: Call_AccountsCreateOrUpdate_564233; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string; body: JsonNode;
+          resourceName: string): Recallable =
   ## accountsCreateOrUpdate
   ## Creates or updates a Visual Studio Team Services account resource.
-  ##   resourceGroupName: string (required)
-  ##                    : Name of the resource group within the Azure subscription.
   ##   apiVersion: string (required)
   ##             : API Version
   ##   subscriptionId: string (required)
   ##                 : The Azure subscription identifier.
-  ##   resourceName: string (required)
-  ##               : Name of the resource.
+  ##   resourceGroupName: string (required)
+  ##                    : Name of the resource group within the Azure subscription.
   ##   body: JObject (required)
   ##       : The request data.
-  var path_568343 = newJObject()
-  var query_568344 = newJObject()
-  var body_568345 = newJObject()
-  add(path_568343, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568344, "api-version", newJString(apiVersion))
-  add(path_568343, "subscriptionId", newJString(subscriptionId))
-  add(path_568343, "resourceName", newJString(resourceName))
+  ##   resourceName: string (required)
+  ##               : Name of the resource.
+  var path_564243 = newJObject()
+  var query_564244 = newJObject()
+  var body_564245 = newJObject()
+  add(query_564244, "api-version", newJString(apiVersion))
+  add(path_564243, "subscriptionId", newJString(subscriptionId))
+  add(path_564243, "resourceGroupName", newJString(resourceGroupName))
   if body != nil:
-    body_568345 = body
-  result = call_568342.call(path_568343, query_568344, nil, nil, body_568345)
+    body_564245 = body
+  add(path_564243, "resourceName", newJString(resourceName))
+  result = call_564242.call(path_564243, query_564244, nil, nil, body_564245)
 
-var accountsCreateOrUpdate* = Call_AccountsCreateOrUpdate_568333(
+var accountsCreateOrUpdate* = Call_AccountsCreateOrUpdate_564233(
     name: "accountsCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/microsoft.visualstudio/account/{resourceName}",
-    validator: validate_AccountsCreateOrUpdate_568334, base: "",
-    url: url_AccountsCreateOrUpdate_568335, schemes: {Scheme.Https})
+    validator: validate_AccountsCreateOrUpdate_564234, base: "",
+    url: url_AccountsCreateOrUpdate_564235, schemes: {Scheme.Https})
 type
-  Call_AccountsGet_568322 = ref object of OpenApiRestCall_567641
-proc url_AccountsGet_568324(protocol: Scheme; host: string; base: string;
+  Call_AccountsGet_564222 = ref object of OpenApiRestCall_563539
+proc url_AccountsGet_564224(protocol: Scheme; host: string; base: string;
                            route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1846,37 +1850,37 @@ proc url_AccountsGet_568324(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AccountsGet_568323(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_AccountsGet_564223(path: JsonNode; query: JsonNode; header: JsonNode;
                                 formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the Visual Studio Team Services account resource details.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : Name of the resource group within the Azure subscription.
   ##   subscriptionId: JString (required)
   ##                 : The Azure subscription identifier.
+  ##   resourceGroupName: JString (required)
+  ##                    : Name of the resource group within the Azure subscription.
   ##   resourceName: JString (required)
   ##               : Name of the resource.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568325 = path.getOrDefault("resourceGroupName")
-  valid_568325 = validateParameter(valid_568325, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564225 = path.getOrDefault("subscriptionId")
+  valid_564225 = validateParameter(valid_564225, JString, required = true,
                                  default = nil)
-  if valid_568325 != nil:
-    section.add "resourceGroupName", valid_568325
-  var valid_568326 = path.getOrDefault("subscriptionId")
-  valid_568326 = validateParameter(valid_568326, JString, required = true,
+  if valid_564225 != nil:
+    section.add "subscriptionId", valid_564225
+  var valid_564226 = path.getOrDefault("resourceGroupName")
+  valid_564226 = validateParameter(valid_564226, JString, required = true,
                                  default = nil)
-  if valid_568326 != nil:
-    section.add "subscriptionId", valid_568326
-  var valid_568327 = path.getOrDefault("resourceName")
-  valid_568327 = validateParameter(valid_568327, JString, required = true,
+  if valid_564226 != nil:
+    section.add "resourceGroupName", valid_564226
+  var valid_564227 = path.getOrDefault("resourceName")
+  valid_564227 = validateParameter(valid_564227, JString, required = true,
                                  default = nil)
-  if valid_568327 != nil:
-    section.add "resourceName", valid_568327
+  if valid_564227 != nil:
+    section.add "resourceName", valid_564227
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1884,11 +1888,11 @@ proc validate_AccountsGet_568323(path: JsonNode; query: JsonNode; header: JsonNo
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568328 = query.getOrDefault("api-version")
-  valid_568328 = validateParameter(valid_568328, JString, required = true,
+  var valid_564228 = query.getOrDefault("api-version")
+  valid_564228 = validateParameter(valid_564228, JString, required = true,
                                  default = nil)
-  if valid_568328 != nil:
-    section.add "api-version", valid_568328
+  if valid_564228 != nil:
+    section.add "api-version", valid_564228
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1897,48 +1901,48 @@ proc validate_AccountsGet_568323(path: JsonNode; query: JsonNode; header: JsonNo
   if body != nil:
     result.add "body", body
 
-proc call*(call_568329: Call_AccountsGet_568322; path: JsonNode; query: JsonNode;
+proc call*(call_564229: Call_AccountsGet_564222; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the Visual Studio Team Services account resource details.
   ## 
-  let valid = call_568329.validator(path, query, header, formData, body)
-  let scheme = call_568329.pickScheme
+  let valid = call_564229.validator(path, query, header, formData, body)
+  let scheme = call_564229.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568329.url(scheme.get, call_568329.host, call_568329.base,
-                         call_568329.route, valid.getOrDefault("path"),
+  let url = call_564229.url(scheme.get, call_564229.host, call_564229.base,
+                         call_564229.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568329, url, valid)
+  result = hook(call_564229, url, valid)
 
-proc call*(call_568330: Call_AccountsGet_568322; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; resourceName: string): Recallable =
+proc call*(call_564230: Call_AccountsGet_564222; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string; resourceName: string): Recallable =
   ## accountsGet
   ## Gets the Visual Studio Team Services account resource details.
-  ##   resourceGroupName: string (required)
-  ##                    : Name of the resource group within the Azure subscription.
   ##   apiVersion: string (required)
   ##             : API Version
   ##   subscriptionId: string (required)
   ##                 : The Azure subscription identifier.
+  ##   resourceGroupName: string (required)
+  ##                    : Name of the resource group within the Azure subscription.
   ##   resourceName: string (required)
   ##               : Name of the resource.
-  var path_568331 = newJObject()
-  var query_568332 = newJObject()
-  add(path_568331, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568332, "api-version", newJString(apiVersion))
-  add(path_568331, "subscriptionId", newJString(subscriptionId))
-  add(path_568331, "resourceName", newJString(resourceName))
-  result = call_568330.call(path_568331, query_568332, nil, nil, nil)
+  var path_564231 = newJObject()
+  var query_564232 = newJObject()
+  add(query_564232, "api-version", newJString(apiVersion))
+  add(path_564231, "subscriptionId", newJString(subscriptionId))
+  add(path_564231, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564231, "resourceName", newJString(resourceName))
+  result = call_564230.call(path_564231, query_564232, nil, nil, nil)
 
-var accountsGet* = Call_AccountsGet_568322(name: "accountsGet",
+var accountsGet* = Call_AccountsGet_564222(name: "accountsGet",
                                         meth: HttpMethod.HttpGet,
                                         host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/microsoft.visualstudio/account/{resourceName}",
-                                        validator: validate_AccountsGet_568323,
-                                        base: "", url: url_AccountsGet_568324,
+                                        validator: validate_AccountsGet_564223,
+                                        base: "", url: url_AccountsGet_564224,
                                         schemes: {Scheme.Https})
 type
-  Call_AccountsUpdate_568357 = ref object of OpenApiRestCall_567641
-proc url_AccountsUpdate_568359(protocol: Scheme; host: string; base: string;
+  Call_AccountsUpdate_564257 = ref object of OpenApiRestCall_563539
+proc url_AccountsUpdate_564259(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1960,7 +1964,7 @@ proc url_AccountsUpdate_568359(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AccountsUpdate_568358(path: JsonNode; query: JsonNode;
+proc validate_AccountsUpdate_564258(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## Updates tags for Visual Studio Team Services account resource.
@@ -1968,30 +1972,30 @@ proc validate_AccountsUpdate_568358(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : Name of the resource group within the Azure subscription.
   ##   subscriptionId: JString (required)
   ##                 : The Azure subscription identifier.
+  ##   resourceGroupName: JString (required)
+  ##                    : Name of the resource group within the Azure subscription.
   ##   resourceName: JString (required)
   ##               : Name of the resource.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568360 = path.getOrDefault("resourceGroupName")
-  valid_568360 = validateParameter(valid_568360, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564260 = path.getOrDefault("subscriptionId")
+  valid_564260 = validateParameter(valid_564260, JString, required = true,
                                  default = nil)
-  if valid_568360 != nil:
-    section.add "resourceGroupName", valid_568360
-  var valid_568361 = path.getOrDefault("subscriptionId")
-  valid_568361 = validateParameter(valid_568361, JString, required = true,
+  if valid_564260 != nil:
+    section.add "subscriptionId", valid_564260
+  var valid_564261 = path.getOrDefault("resourceGroupName")
+  valid_564261 = validateParameter(valid_564261, JString, required = true,
                                  default = nil)
-  if valid_568361 != nil:
-    section.add "subscriptionId", valid_568361
-  var valid_568362 = path.getOrDefault("resourceName")
-  valid_568362 = validateParameter(valid_568362, JString, required = true,
+  if valid_564261 != nil:
+    section.add "resourceGroupName", valid_564261
+  var valid_564262 = path.getOrDefault("resourceName")
+  valid_564262 = validateParameter(valid_564262, JString, required = true,
                                  default = nil)
-  if valid_568362 != nil:
-    section.add "resourceName", valid_568362
+  if valid_564262 != nil:
+    section.add "resourceName", valid_564262
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1999,11 +2003,11 @@ proc validate_AccountsUpdate_568358(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568363 = query.getOrDefault("api-version")
-  valid_568363 = validateParameter(valid_568363, JString, required = true,
+  var valid_564263 = query.getOrDefault("api-version")
+  valid_564263 = validateParameter(valid_564263, JString, required = true,
                                  default = nil)
-  if valid_568363 != nil:
-    section.add "api-version", valid_568363
+  if valid_564263 != nil:
+    section.add "api-version", valid_564263
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2017,52 +2021,52 @@ proc validate_AccountsUpdate_568358(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568365: Call_AccountsUpdate_568357; path: JsonNode; query: JsonNode;
+proc call*(call_564265: Call_AccountsUpdate_564257; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Updates tags for Visual Studio Team Services account resource.
   ## 
-  let valid = call_568365.validator(path, query, header, formData, body)
-  let scheme = call_568365.pickScheme
+  let valid = call_564265.validator(path, query, header, formData, body)
+  let scheme = call_564265.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568365.url(scheme.get, call_568365.host, call_568365.base,
-                         call_568365.route, valid.getOrDefault("path"),
+  let url = call_564265.url(scheme.get, call_564265.host, call_564265.base,
+                         call_564265.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568365, url, valid)
+  result = hook(call_564265, url, valid)
 
-proc call*(call_568366: Call_AccountsUpdate_568357; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; resourceName: string;
-          body: JsonNode): Recallable =
+proc call*(call_564266: Call_AccountsUpdate_564257; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string; body: JsonNode;
+          resourceName: string): Recallable =
   ## accountsUpdate
   ## Updates tags for Visual Studio Team Services account resource.
-  ##   resourceGroupName: string (required)
-  ##                    : Name of the resource group within the Azure subscription.
   ##   apiVersion: string (required)
   ##             : API Version
   ##   subscriptionId: string (required)
   ##                 : The Azure subscription identifier.
-  ##   resourceName: string (required)
-  ##               : Name of the resource.
+  ##   resourceGroupName: string (required)
+  ##                    : Name of the resource group within the Azure subscription.
   ##   body: JObject (required)
   ##       : The request data.
-  var path_568367 = newJObject()
-  var query_568368 = newJObject()
-  var body_568369 = newJObject()
-  add(path_568367, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568368, "api-version", newJString(apiVersion))
-  add(path_568367, "subscriptionId", newJString(subscriptionId))
-  add(path_568367, "resourceName", newJString(resourceName))
+  ##   resourceName: string (required)
+  ##               : Name of the resource.
+  var path_564267 = newJObject()
+  var query_564268 = newJObject()
+  var body_564269 = newJObject()
+  add(query_564268, "api-version", newJString(apiVersion))
+  add(path_564267, "subscriptionId", newJString(subscriptionId))
+  add(path_564267, "resourceGroupName", newJString(resourceGroupName))
   if body != nil:
-    body_568369 = body
-  result = call_568366.call(path_568367, query_568368, nil, nil, body_568369)
+    body_564269 = body
+  add(path_564267, "resourceName", newJString(resourceName))
+  result = call_564266.call(path_564267, query_564268, nil, nil, body_564269)
 
-var accountsUpdate* = Call_AccountsUpdate_568357(name: "accountsUpdate",
+var accountsUpdate* = Call_AccountsUpdate_564257(name: "accountsUpdate",
     meth: HttpMethod.HttpPatch, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/microsoft.visualstudio/account/{resourceName}",
-    validator: validate_AccountsUpdate_568358, base: "", url: url_AccountsUpdate_568359,
+    validator: validate_AccountsUpdate_564258, base: "", url: url_AccountsUpdate_564259,
     schemes: {Scheme.Https})
 type
-  Call_AccountsDelete_568346 = ref object of OpenApiRestCall_567641
-proc url_AccountsDelete_568348(protocol: Scheme; host: string; base: string;
+  Call_AccountsDelete_564246 = ref object of OpenApiRestCall_563539
+proc url_AccountsDelete_564248(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2084,7 +2088,7 @@ proc url_AccountsDelete_568348(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AccountsDelete_568347(path: JsonNode; query: JsonNode;
+proc validate_AccountsDelete_564247(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## Deletes a Visual Studio Team Services account resource.
@@ -2092,30 +2096,30 @@ proc validate_AccountsDelete_568347(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : Name of the resource group within the Azure subscription.
   ##   subscriptionId: JString (required)
   ##                 : The Azure subscription identifier.
+  ##   resourceGroupName: JString (required)
+  ##                    : Name of the resource group within the Azure subscription.
   ##   resourceName: JString (required)
   ##               : Name of the resource.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568349 = path.getOrDefault("resourceGroupName")
-  valid_568349 = validateParameter(valid_568349, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564249 = path.getOrDefault("subscriptionId")
+  valid_564249 = validateParameter(valid_564249, JString, required = true,
                                  default = nil)
-  if valid_568349 != nil:
-    section.add "resourceGroupName", valid_568349
-  var valid_568350 = path.getOrDefault("subscriptionId")
-  valid_568350 = validateParameter(valid_568350, JString, required = true,
+  if valid_564249 != nil:
+    section.add "subscriptionId", valid_564249
+  var valid_564250 = path.getOrDefault("resourceGroupName")
+  valid_564250 = validateParameter(valid_564250, JString, required = true,
                                  default = nil)
-  if valid_568350 != nil:
-    section.add "subscriptionId", valid_568350
-  var valid_568351 = path.getOrDefault("resourceName")
-  valid_568351 = validateParameter(valid_568351, JString, required = true,
+  if valid_564250 != nil:
+    section.add "resourceGroupName", valid_564250
+  var valid_564251 = path.getOrDefault("resourceName")
+  valid_564251 = validateParameter(valid_564251, JString, required = true,
                                  default = nil)
-  if valid_568351 != nil:
-    section.add "resourceName", valid_568351
+  if valid_564251 != nil:
+    section.add "resourceName", valid_564251
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2123,11 +2127,11 @@ proc validate_AccountsDelete_568347(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568352 = query.getOrDefault("api-version")
-  valid_568352 = validateParameter(valid_568352, JString, required = true,
+  var valid_564252 = query.getOrDefault("api-version")
+  valid_564252 = validateParameter(valid_564252, JString, required = true,
                                  default = nil)
-  if valid_568352 != nil:
-    section.add "api-version", valid_568352
+  if valid_564252 != nil:
+    section.add "api-version", valid_564252
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2136,42 +2140,42 @@ proc validate_AccountsDelete_568347(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568353: Call_AccountsDelete_568346; path: JsonNode; query: JsonNode;
+proc call*(call_564253: Call_AccountsDelete_564246; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes a Visual Studio Team Services account resource.
   ## 
-  let valid = call_568353.validator(path, query, header, formData, body)
-  let scheme = call_568353.pickScheme
+  let valid = call_564253.validator(path, query, header, formData, body)
+  let scheme = call_564253.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568353.url(scheme.get, call_568353.host, call_568353.base,
-                         call_568353.route, valid.getOrDefault("path"),
+  let url = call_564253.url(scheme.get, call_564253.host, call_564253.base,
+                         call_564253.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568353, url, valid)
+  result = hook(call_564253, url, valid)
 
-proc call*(call_568354: Call_AccountsDelete_568346; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; resourceName: string): Recallable =
+proc call*(call_564254: Call_AccountsDelete_564246; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string; resourceName: string): Recallable =
   ## accountsDelete
   ## Deletes a Visual Studio Team Services account resource.
-  ##   resourceGroupName: string (required)
-  ##                    : Name of the resource group within the Azure subscription.
   ##   apiVersion: string (required)
   ##             : API Version
   ##   subscriptionId: string (required)
   ##                 : The Azure subscription identifier.
+  ##   resourceGroupName: string (required)
+  ##                    : Name of the resource group within the Azure subscription.
   ##   resourceName: string (required)
   ##               : Name of the resource.
-  var path_568355 = newJObject()
-  var query_568356 = newJObject()
-  add(path_568355, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568356, "api-version", newJString(apiVersion))
-  add(path_568355, "subscriptionId", newJString(subscriptionId))
-  add(path_568355, "resourceName", newJString(resourceName))
-  result = call_568354.call(path_568355, query_568356, nil, nil, nil)
+  var path_564255 = newJObject()
+  var query_564256 = newJObject()
+  add(query_564256, "api-version", newJString(apiVersion))
+  add(path_564255, "subscriptionId", newJString(subscriptionId))
+  add(path_564255, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564255, "resourceName", newJString(resourceName))
+  result = call_564254.call(path_564255, query_564256, nil, nil, nil)
 
-var accountsDelete* = Call_AccountsDelete_568346(name: "accountsDelete",
+var accountsDelete* = Call_AccountsDelete_564246(name: "accountsDelete",
     meth: HttpMethod.HttpDelete, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/microsoft.visualstudio/account/{resourceName}",
-    validator: validate_AccountsDelete_568347, base: "", url: url_AccountsDelete_568348,
+    validator: validate_AccountsDelete_564247, base: "", url: url_AccountsDelete_564248,
     schemes: {Scheme.Https})
 export
   rest

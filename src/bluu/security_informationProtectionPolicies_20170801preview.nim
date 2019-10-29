@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, httpcore
 
 ## auto-generated via openapi macro
 ## title: Security Center
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_567657 = ref object of OpenApiRestCall
+  OpenApiRestCall_563555 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_567657](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563555](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_567657): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563555): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,8 +107,8 @@ const
   macServiceName = "security-informationProtectionPolicies"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_InformationProtectionPoliciesList_567879 = ref object of OpenApiRestCall_567657
-proc url_InformationProtectionPoliciesList_567881(protocol: Scheme; host: string;
+  Call_InformationProtectionPoliciesList_563777 = ref object of OpenApiRestCall_563555
+proc url_InformationProtectionPoliciesList_563779(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -120,7 +124,7 @@ proc url_InformationProtectionPoliciesList_567881(protocol: Scheme; host: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_InformationProtectionPoliciesList_567880(path: JsonNode;
+proc validate_InformationProtectionPoliciesList_563778(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Information protection policies of a specific management group.
   ## 
@@ -131,11 +135,11 @@ proc validate_InformationProtectionPoliciesList_567880(path: JsonNode;
   ##        : Scope of the query, can be subscription (/subscriptions/0b06d9ea-afe6-4779-bd59-30e5c2d9d13f) or management group (/providers/Microsoft.Management/managementGroups/mgName).
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `scope` field"
-  var valid_568041 = path.getOrDefault("scope")
-  valid_568041 = validateParameter(valid_568041, JString, required = true,
+  var valid_563941 = path.getOrDefault("scope")
+  valid_563941 = validateParameter(valid_563941, JString, required = true,
                                  default = nil)
-  if valid_568041 != nil:
-    section.add "scope", valid_568041
+  if valid_563941 != nil:
+    section.add "scope", valid_563941
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -143,11 +147,11 @@ proc validate_InformationProtectionPoliciesList_567880(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568042 = query.getOrDefault("api-version")
-  valid_568042 = validateParameter(valid_568042, JString, required = true,
+  var valid_563942 = query.getOrDefault("api-version")
+  valid_563942 = validateParameter(valid_563942, JString, required = true,
                                  default = nil)
-  if valid_568042 != nil:
-    section.add "api-version", valid_568042
+  if valid_563942 != nil:
+    section.add "api-version", valid_563942
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -156,21 +160,21 @@ proc validate_InformationProtectionPoliciesList_567880(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568069: Call_InformationProtectionPoliciesList_567879;
+proc call*(call_563969: Call_InformationProtectionPoliciesList_563777;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Information protection policies of a specific management group.
   ## 
-  let valid = call_568069.validator(path, query, header, formData, body)
-  let scheme = call_568069.pickScheme
+  let valid = call_563969.validator(path, query, header, formData, body)
+  let scheme = call_563969.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568069.url(scheme.get, call_568069.host, call_568069.base,
-                         call_568069.route, valid.getOrDefault("path"),
+  let url = call_563969.url(scheme.get, call_563969.host, call_563969.base,
+                         call_563969.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568069, url, valid)
+  result = hook(call_563969, url, valid)
 
-proc call*(call_568140: Call_InformationProtectionPoliciesList_567879;
+proc call*(call_564040: Call_InformationProtectionPoliciesList_563777;
           apiVersion: string; scope: string): Recallable =
   ## informationProtectionPoliciesList
   ## Information protection policies of a specific management group.
@@ -178,20 +182,20 @@ proc call*(call_568140: Call_InformationProtectionPoliciesList_567879;
   ##             : API version for the operation
   ##   scope: string (required)
   ##        : Scope of the query, can be subscription (/subscriptions/0b06d9ea-afe6-4779-bd59-30e5c2d9d13f) or management group (/providers/Microsoft.Management/managementGroups/mgName).
-  var path_568141 = newJObject()
-  var query_568143 = newJObject()
-  add(query_568143, "api-version", newJString(apiVersion))
-  add(path_568141, "scope", newJString(scope))
-  result = call_568140.call(path_568141, query_568143, nil, nil, nil)
+  var path_564041 = newJObject()
+  var query_564043 = newJObject()
+  add(query_564043, "api-version", newJString(apiVersion))
+  add(path_564041, "scope", newJString(scope))
+  result = call_564040.call(path_564041, query_564043, nil, nil, nil)
 
-var informationProtectionPoliciesList* = Call_InformationProtectionPoliciesList_567879(
+var informationProtectionPoliciesList* = Call_InformationProtectionPoliciesList_563777(
     name: "informationProtectionPoliciesList", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/{scope}/providers/Microsoft.Security/informationProtectionPolicies",
-    validator: validate_InformationProtectionPoliciesList_567880, base: "",
-    url: url_InformationProtectionPoliciesList_567881, schemes: {Scheme.Https})
+    validator: validate_InformationProtectionPoliciesList_563778, base: "",
+    url: url_InformationProtectionPoliciesList_563779, schemes: {Scheme.Https})
 type
-  Call_InformationProtectionPoliciesCreateOrUpdate_568214 = ref object of OpenApiRestCall_567657
-proc url_InformationProtectionPoliciesCreateOrUpdate_568216(protocol: Scheme;
+  Call_InformationProtectionPoliciesCreateOrUpdate_564114 = ref object of OpenApiRestCall_563555
+proc url_InformationProtectionPoliciesCreateOrUpdate_564116(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -210,7 +214,7 @@ proc url_InformationProtectionPoliciesCreateOrUpdate_568216(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_InformationProtectionPoliciesCreateOrUpdate_568215(path: JsonNode;
+proc validate_InformationProtectionPoliciesCreateOrUpdate_564115(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Details of the information protection policy.
   ## 
@@ -223,16 +227,16 @@ proc validate_InformationProtectionPoliciesCreateOrUpdate_568215(path: JsonNode;
   ##        : Scope of the query, can be subscription (/subscriptions/0b06d9ea-afe6-4779-bd59-30e5c2d9d13f) or management group (/providers/Microsoft.Management/managementGroups/mgName).
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `informationProtectionPolicyName` field"
-  var valid_568217 = path.getOrDefault("informationProtectionPolicyName")
-  valid_568217 = validateParameter(valid_568217, JString, required = true,
+  var valid_564117 = path.getOrDefault("informationProtectionPolicyName")
+  valid_564117 = validateParameter(valid_564117, JString, required = true,
                                  default = newJString("effective"))
-  if valid_568217 != nil:
-    section.add "informationProtectionPolicyName", valid_568217
-  var valid_568218 = path.getOrDefault("scope")
-  valid_568218 = validateParameter(valid_568218, JString, required = true,
+  if valid_564117 != nil:
+    section.add "informationProtectionPolicyName", valid_564117
+  var valid_564118 = path.getOrDefault("scope")
+  valid_564118 = validateParameter(valid_564118, JString, required = true,
                                  default = nil)
-  if valid_568218 != nil:
-    section.add "scope", valid_568218
+  if valid_564118 != nil:
+    section.add "scope", valid_564118
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -240,11 +244,11 @@ proc validate_InformationProtectionPoliciesCreateOrUpdate_568215(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568219 = query.getOrDefault("api-version")
-  valid_568219 = validateParameter(valid_568219, JString, required = true,
+  var valid_564119 = query.getOrDefault("api-version")
+  valid_564119 = validateParameter(valid_564119, JString, required = true,
                                  default = nil)
-  if valid_568219 != nil:
-    section.add "api-version", valid_568219
+  if valid_564119 != nil:
+    section.add "api-version", valid_564119
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -253,48 +257,48 @@ proc validate_InformationProtectionPoliciesCreateOrUpdate_568215(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568220: Call_InformationProtectionPoliciesCreateOrUpdate_568214;
+proc call*(call_564120: Call_InformationProtectionPoliciesCreateOrUpdate_564114;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Details of the information protection policy.
   ## 
-  let valid = call_568220.validator(path, query, header, formData, body)
-  let scheme = call_568220.pickScheme
+  let valid = call_564120.validator(path, query, header, formData, body)
+  let scheme = call_564120.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568220.url(scheme.get, call_568220.host, call_568220.base,
-                         call_568220.route, valid.getOrDefault("path"),
+  let url = call_564120.url(scheme.get, call_564120.host, call_564120.base,
+                         call_564120.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568220, url, valid)
+  result = hook(call_564120, url, valid)
 
-proc call*(call_568221: Call_InformationProtectionPoliciesCreateOrUpdate_568214;
+proc call*(call_564121: Call_InformationProtectionPoliciesCreateOrUpdate_564114;
           apiVersion: string; scope: string;
           informationProtectionPolicyName: string = "effective"): Recallable =
   ## informationProtectionPoliciesCreateOrUpdate
   ## Details of the information protection policy.
-  ##   informationProtectionPolicyName: string (required)
-  ##                                  : Name of the information protection policy.
   ##   apiVersion: string (required)
   ##             : API version for the operation
+  ##   informationProtectionPolicyName: string (required)
+  ##                                  : Name of the information protection policy.
   ##   scope: string (required)
   ##        : Scope of the query, can be subscription (/subscriptions/0b06d9ea-afe6-4779-bd59-30e5c2d9d13f) or management group (/providers/Microsoft.Management/managementGroups/mgName).
-  var path_568222 = newJObject()
-  var query_568223 = newJObject()
-  add(path_568222, "informationProtectionPolicyName",
+  var path_564122 = newJObject()
+  var query_564123 = newJObject()
+  add(query_564123, "api-version", newJString(apiVersion))
+  add(path_564122, "informationProtectionPolicyName",
       newJString(informationProtectionPolicyName))
-  add(query_568223, "api-version", newJString(apiVersion))
-  add(path_568222, "scope", newJString(scope))
-  result = call_568221.call(path_568222, query_568223, nil, nil, nil)
+  add(path_564122, "scope", newJString(scope))
+  result = call_564121.call(path_564122, query_564123, nil, nil, nil)
 
-var informationProtectionPoliciesCreateOrUpdate* = Call_InformationProtectionPoliciesCreateOrUpdate_568214(
+var informationProtectionPoliciesCreateOrUpdate* = Call_InformationProtectionPoliciesCreateOrUpdate_564114(
     name: "informationProtectionPoliciesCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/{scope}/providers/Microsoft.Security/informationProtectionPolicies/{informationProtectionPolicyName}",
-    validator: validate_InformationProtectionPoliciesCreateOrUpdate_568215,
-    base: "", url: url_InformationProtectionPoliciesCreateOrUpdate_568216,
+    validator: validate_InformationProtectionPoliciesCreateOrUpdate_564115,
+    base: "", url: url_InformationProtectionPoliciesCreateOrUpdate_564116,
     schemes: {Scheme.Https})
 type
-  Call_InformationProtectionPoliciesGet_568182 = ref object of OpenApiRestCall_567657
-proc url_InformationProtectionPoliciesGet_568184(protocol: Scheme; host: string;
+  Call_InformationProtectionPoliciesGet_564082 = ref object of OpenApiRestCall_563555
+proc url_InformationProtectionPoliciesGet_564084(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -313,7 +317,7 @@ proc url_InformationProtectionPoliciesGet_568184(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_InformationProtectionPoliciesGet_568183(path: JsonNode;
+proc validate_InformationProtectionPoliciesGet_564083(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Details of the information protection policy.
   ## 
@@ -326,16 +330,16 @@ proc validate_InformationProtectionPoliciesGet_568183(path: JsonNode;
   ##        : Scope of the query, can be subscription (/subscriptions/0b06d9ea-afe6-4779-bd59-30e5c2d9d13f) or management group (/providers/Microsoft.Management/managementGroups/mgName).
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `informationProtectionPolicyName` field"
-  var valid_568207 = path.getOrDefault("informationProtectionPolicyName")
-  valid_568207 = validateParameter(valid_568207, JString, required = true,
+  var valid_564107 = path.getOrDefault("informationProtectionPolicyName")
+  valid_564107 = validateParameter(valid_564107, JString, required = true,
                                  default = newJString("effective"))
-  if valid_568207 != nil:
-    section.add "informationProtectionPolicyName", valid_568207
-  var valid_568208 = path.getOrDefault("scope")
-  valid_568208 = validateParameter(valid_568208, JString, required = true,
+  if valid_564107 != nil:
+    section.add "informationProtectionPolicyName", valid_564107
+  var valid_564108 = path.getOrDefault("scope")
+  valid_564108 = validateParameter(valid_564108, JString, required = true,
                                  default = nil)
-  if valid_568208 != nil:
-    section.add "scope", valid_568208
+  if valid_564108 != nil:
+    section.add "scope", valid_564108
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -343,11 +347,11 @@ proc validate_InformationProtectionPoliciesGet_568183(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568209 = query.getOrDefault("api-version")
-  valid_568209 = validateParameter(valid_568209, JString, required = true,
+  var valid_564109 = query.getOrDefault("api-version")
+  valid_564109 = validateParameter(valid_564109, JString, required = true,
                                  default = nil)
-  if valid_568209 != nil:
-    section.add "api-version", valid_568209
+  if valid_564109 != nil:
+    section.add "api-version", valid_564109
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -356,44 +360,44 @@ proc validate_InformationProtectionPoliciesGet_568183(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568210: Call_InformationProtectionPoliciesGet_568182;
+proc call*(call_564110: Call_InformationProtectionPoliciesGet_564082;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Details of the information protection policy.
   ## 
-  let valid = call_568210.validator(path, query, header, formData, body)
-  let scheme = call_568210.pickScheme
+  let valid = call_564110.validator(path, query, header, formData, body)
+  let scheme = call_564110.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568210.url(scheme.get, call_568210.host, call_568210.base,
-                         call_568210.route, valid.getOrDefault("path"),
+  let url = call_564110.url(scheme.get, call_564110.host, call_564110.base,
+                         call_564110.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568210, url, valid)
+  result = hook(call_564110, url, valid)
 
-proc call*(call_568211: Call_InformationProtectionPoliciesGet_568182;
+proc call*(call_564111: Call_InformationProtectionPoliciesGet_564082;
           apiVersion: string; scope: string;
           informationProtectionPolicyName: string = "effective"): Recallable =
   ## informationProtectionPoliciesGet
   ## Details of the information protection policy.
-  ##   informationProtectionPolicyName: string (required)
-  ##                                  : Name of the information protection policy.
   ##   apiVersion: string (required)
   ##             : API version for the operation
+  ##   informationProtectionPolicyName: string (required)
+  ##                                  : Name of the information protection policy.
   ##   scope: string (required)
   ##        : Scope of the query, can be subscription (/subscriptions/0b06d9ea-afe6-4779-bd59-30e5c2d9d13f) or management group (/providers/Microsoft.Management/managementGroups/mgName).
-  var path_568212 = newJObject()
-  var query_568213 = newJObject()
-  add(path_568212, "informationProtectionPolicyName",
+  var path_564112 = newJObject()
+  var query_564113 = newJObject()
+  add(query_564113, "api-version", newJString(apiVersion))
+  add(path_564112, "informationProtectionPolicyName",
       newJString(informationProtectionPolicyName))
-  add(query_568213, "api-version", newJString(apiVersion))
-  add(path_568212, "scope", newJString(scope))
-  result = call_568211.call(path_568212, query_568213, nil, nil, nil)
+  add(path_564112, "scope", newJString(scope))
+  result = call_564111.call(path_564112, query_564113, nil, nil, nil)
 
-var informationProtectionPoliciesGet* = Call_InformationProtectionPoliciesGet_568182(
+var informationProtectionPoliciesGet* = Call_InformationProtectionPoliciesGet_564082(
     name: "informationProtectionPoliciesGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/{scope}/providers/Microsoft.Security/informationProtectionPolicies/{informationProtectionPolicyName}",
-    validator: validate_InformationProtectionPoliciesGet_568183, base: "",
-    url: url_InformationProtectionPoliciesGet_568184, schemes: {Scheme.Https})
+    validator: validate_InformationProtectionPoliciesGet_564083, base: "",
+    url: url_InformationProtectionPoliciesGet_564084, schemes: {Scheme.Https})
 export
   rest
 

@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, httpcore
 
 ## auto-generated via openapi macro
 ## title: ApiManagementClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_593424 = ref object of OpenApiRestCall
+  OpenApiRestCall_563555 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_593424](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563555](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_593424): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563555): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,8 +107,8 @@ const
   macServiceName = "apimanagement-apimemailtemplates"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_EmailTemplateListByService_593646 = ref object of OpenApiRestCall_593424
-proc url_EmailTemplateListByService_593648(protocol: Scheme; host: string;
+  Call_EmailTemplateListByService_563777 = ref object of OpenApiRestCall_563555
+proc url_EmailTemplateListByService_563779(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -128,68 +132,68 @@ proc url_EmailTemplateListByService_593648(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_EmailTemplateListByService_593647(path: JsonNode; query: JsonNode;
+proc validate_EmailTemplateListByService_563778(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists a collection of properties defined within a service instance.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
-  ##   subscriptionId: JString (required)
-  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   serviceName: JString (required)
   ##              : The name of the API Management service.
+  ##   subscriptionId: JString (required)
+  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593809 = path.getOrDefault("resourceGroupName")
-  valid_593809 = validateParameter(valid_593809, JString, required = true,
+        "path argument is necessary due to required `serviceName` field"
+  var valid_563942 = path.getOrDefault("serviceName")
+  valid_563942 = validateParameter(valid_563942, JString, required = true,
                                  default = nil)
-  if valid_593809 != nil:
-    section.add "resourceGroupName", valid_593809
-  var valid_593810 = path.getOrDefault("subscriptionId")
-  valid_593810 = validateParameter(valid_593810, JString, required = true,
+  if valid_563942 != nil:
+    section.add "serviceName", valid_563942
+  var valid_563943 = path.getOrDefault("subscriptionId")
+  valid_563943 = validateParameter(valid_563943, JString, required = true,
                                  default = nil)
-  if valid_593810 != nil:
-    section.add "subscriptionId", valid_593810
-  var valid_593811 = path.getOrDefault("serviceName")
-  valid_593811 = validateParameter(valid_593811, JString, required = true,
+  if valid_563943 != nil:
+    section.add "subscriptionId", valid_563943
+  var valid_563944 = path.getOrDefault("resourceGroupName")
+  valid_563944 = validateParameter(valid_563944, JString, required = true,
                                  default = nil)
-  if valid_593811 != nil:
-    section.add "serviceName", valid_593811
+  if valid_563944 != nil:
+    section.add "resourceGroupName", valid_563944
   result.add "path", section
   ## parameters in `query` object:
-  ##   api-version: JString (required)
-  ##              : Version of the API to be used with the client request.
   ##   $top: JInt
   ##       : Number of records to return.
+  ##   api-version: JString (required)
+  ##              : Version of the API to be used with the client request.
   ##   $skip: JInt
   ##        : Number of records to skip.
   ##   $filter: JString
   ##          : |   Field     |     Usage     |     Supported operators     |     Supported functions     |</br>|-------------|-------------|-------------|-------------|</br>| name | filter | ge, le, eq, ne, gt, lt | substringof, contains, startswith, endswith | </br>
   section = newJObject()
+  var valid_563945 = query.getOrDefault("$top")
+  valid_563945 = validateParameter(valid_563945, JInt, required = false, default = nil)
+  if valid_563945 != nil:
+    section.add "$top", valid_563945
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593812 = query.getOrDefault("api-version")
-  valid_593812 = validateParameter(valid_593812, JString, required = true,
+  var valid_563946 = query.getOrDefault("api-version")
+  valid_563946 = validateParameter(valid_563946, JString, required = true,
                                  default = nil)
-  if valid_593812 != nil:
-    section.add "api-version", valid_593812
-  var valid_593813 = query.getOrDefault("$top")
-  valid_593813 = validateParameter(valid_593813, JInt, required = false, default = nil)
-  if valid_593813 != nil:
-    section.add "$top", valid_593813
-  var valid_593814 = query.getOrDefault("$skip")
-  valid_593814 = validateParameter(valid_593814, JInt, required = false, default = nil)
-  if valid_593814 != nil:
-    section.add "$skip", valid_593814
-  var valid_593815 = query.getOrDefault("$filter")
-  valid_593815 = validateParameter(valid_593815, JString, required = false,
+  if valid_563946 != nil:
+    section.add "api-version", valid_563946
+  var valid_563947 = query.getOrDefault("$skip")
+  valid_563947 = validateParameter(valid_563947, JInt, required = false, default = nil)
+  if valid_563947 != nil:
+    section.add "$skip", valid_563947
+  var valid_563948 = query.getOrDefault("$filter")
+  valid_563948 = validateParameter(valid_563948, JString, required = false,
                                  default = nil)
-  if valid_593815 != nil:
-    section.add "$filter", valid_593815
+  if valid_563948 != nil:
+    section.add "$filter", valid_563948
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -198,57 +202,57 @@ proc validate_EmailTemplateListByService_593647(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593842: Call_EmailTemplateListByService_593646; path: JsonNode;
+proc call*(call_563975: Call_EmailTemplateListByService_563777; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists a collection of properties defined within a service instance.
   ## 
-  let valid = call_593842.validator(path, query, header, formData, body)
-  let scheme = call_593842.pickScheme
+  let valid = call_563975.validator(path, query, header, formData, body)
+  let scheme = call_563975.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593842.url(scheme.get, call_593842.host, call_593842.base,
-                         call_593842.route, valid.getOrDefault("path"),
+  let url = call_563975.url(scheme.get, call_563975.host, call_563975.base,
+                         call_563975.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593842, url, valid)
+  result = hook(call_563975, url, valid)
 
-proc call*(call_593913: Call_EmailTemplateListByService_593646;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          serviceName: string; Top: int = 0; Skip: int = 0; Filter: string = ""): Recallable =
+proc call*(call_564046: Call_EmailTemplateListByService_563777;
+          serviceName: string; apiVersion: string; subscriptionId: string;
+          resourceGroupName: string; Top: int = 0; Skip: int = 0; Filter: string = ""): Recallable =
   ## emailTemplateListByService
   ## Lists a collection of properties defined within a service instance.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   serviceName: string (required)
+  ##              : The name of the API Management service.
+  ##   Top: int
+  ##      : Number of records to return.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   Top: int
-  ##      : Number of records to return.
   ##   Skip: int
   ##       : Number of records to skip.
-  ##   serviceName: string (required)
-  ##              : The name of the API Management service.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   Filter: string
   ##         : |   Field     |     Usage     |     Supported operators     |     Supported functions     |</br>|-------------|-------------|-------------|-------------|</br>| name | filter | ge, le, eq, ne, gt, lt | substringof, contains, startswith, endswith | </br>
-  var path_593914 = newJObject()
-  var query_593916 = newJObject()
-  add(path_593914, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593916, "api-version", newJString(apiVersion))
-  add(path_593914, "subscriptionId", newJString(subscriptionId))
-  add(query_593916, "$top", newJInt(Top))
-  add(query_593916, "$skip", newJInt(Skip))
-  add(path_593914, "serviceName", newJString(serviceName))
-  add(query_593916, "$filter", newJString(Filter))
-  result = call_593913.call(path_593914, query_593916, nil, nil, nil)
+  var path_564047 = newJObject()
+  var query_564049 = newJObject()
+  add(path_564047, "serviceName", newJString(serviceName))
+  add(query_564049, "$top", newJInt(Top))
+  add(query_564049, "api-version", newJString(apiVersion))
+  add(path_564047, "subscriptionId", newJString(subscriptionId))
+  add(query_564049, "$skip", newJInt(Skip))
+  add(path_564047, "resourceGroupName", newJString(resourceGroupName))
+  add(query_564049, "$filter", newJString(Filter))
+  result = call_564046.call(path_564047, query_564049, nil, nil, nil)
 
-var emailTemplateListByService* = Call_EmailTemplateListByService_593646(
+var emailTemplateListByService* = Call_EmailTemplateListByService_563777(
     name: "emailTemplateListByService", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ApiManagement/service/{serviceName}/templates",
-    validator: validate_EmailTemplateListByService_593647, base: "",
-    url: url_EmailTemplateListByService_593648, schemes: {Scheme.Https})
+    validator: validate_EmailTemplateListByService_563778, base: "",
+    url: url_EmailTemplateListByService_563779, schemes: {Scheme.Https})
 type
-  Call_EmailTemplateCreateOrUpdate_593980 = ref object of OpenApiRestCall_593424
-proc url_EmailTemplateCreateOrUpdate_593982(protocol: Scheme; host: string;
+  Call_EmailTemplateCreateOrUpdate_564113 = ref object of OpenApiRestCall_563555
+proc url_EmailTemplateCreateOrUpdate_564115(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -274,44 +278,44 @@ proc url_EmailTemplateCreateOrUpdate_593982(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_EmailTemplateCreateOrUpdate_593981(path: JsonNode; query: JsonNode;
+proc validate_EmailTemplateCreateOrUpdate_564114(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Updates an Email Template.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
-  ##   subscriptionId: JString (required)
-  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   templateName: JString (required)
-  ##               : Email Template Name Identifier.
   ##   serviceName: JString (required)
   ##              : The name of the API Management service.
+  ##   subscriptionId: JString (required)
+  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
+  ##   templateName: JString (required)
+  ##               : Email Template Name Identifier.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594010 = path.getOrDefault("resourceGroupName")
-  valid_594010 = validateParameter(valid_594010, JString, required = true,
+        "path argument is necessary due to required `serviceName` field"
+  var valid_564143 = path.getOrDefault("serviceName")
+  valid_564143 = validateParameter(valid_564143, JString, required = true,
                                  default = nil)
-  if valid_594010 != nil:
-    section.add "resourceGroupName", valid_594010
-  var valid_594011 = path.getOrDefault("subscriptionId")
-  valid_594011 = validateParameter(valid_594011, JString, required = true,
+  if valid_564143 != nil:
+    section.add "serviceName", valid_564143
+  var valid_564144 = path.getOrDefault("subscriptionId")
+  valid_564144 = validateParameter(valid_564144, JString, required = true,
                                  default = nil)
-  if valid_594011 != nil:
-    section.add "subscriptionId", valid_594011
-  var valid_594012 = path.getOrDefault("templateName")
-  valid_594012 = validateParameter(valid_594012, JString, required = true, default = newJString(
+  if valid_564144 != nil:
+    section.add "subscriptionId", valid_564144
+  var valid_564145 = path.getOrDefault("resourceGroupName")
+  valid_564145 = validateParameter(valid_564145, JString, required = true,
+                                 default = nil)
+  if valid_564145 != nil:
+    section.add "resourceGroupName", valid_564145
+  var valid_564146 = path.getOrDefault("templateName")
+  valid_564146 = validateParameter(valid_564146, JString, required = true, default = newJString(
       "applicationApprovedNotificationMessage"))
-  if valid_594012 != nil:
-    section.add "templateName", valid_594012
-  var valid_594013 = path.getOrDefault("serviceName")
-  valid_594013 = validateParameter(valid_594013, JString, required = true,
-                                 default = nil)
-  if valid_594013 != nil:
-    section.add "serviceName", valid_594013
+  if valid_564146 != nil:
+    section.add "templateName", valid_564146
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -319,21 +323,21 @@ proc validate_EmailTemplateCreateOrUpdate_593981(path: JsonNode; query: JsonNode
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594014 = query.getOrDefault("api-version")
-  valid_594014 = validateParameter(valid_594014, JString, required = true,
+  var valid_564147 = query.getOrDefault("api-version")
+  valid_564147 = validateParameter(valid_564147, JString, required = true,
                                  default = nil)
-  if valid_594014 != nil:
-    section.add "api-version", valid_594014
+  if valid_564147 != nil:
+    section.add "api-version", valid_564147
   result.add "query", section
   ## parameters in `header` object:
   ##   If-Match: JString
   ##           : ETag of the Entity. Not required when creating an entity, but required when updating an entity.
   section = newJObject()
-  var valid_594015 = header.getOrDefault("If-Match")
-  valid_594015 = validateParameter(valid_594015, JString, required = false,
+  var valid_564148 = header.getOrDefault("If-Match")
+  valid_564148 = validateParameter(valid_564148, JString, required = false,
                                  default = nil)
-  if valid_594015 != nil:
-    section.add "If-Match", valid_594015
+  if valid_564148 != nil:
+    section.add "If-Match", valid_564148
   result.add "header", section
   section = newJObject()
   result.add "formData", section
@@ -345,57 +349,57 @@ proc validate_EmailTemplateCreateOrUpdate_593981(path: JsonNode; query: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_594017: Call_EmailTemplateCreateOrUpdate_593980; path: JsonNode;
+proc call*(call_564150: Call_EmailTemplateCreateOrUpdate_564113; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Updates an Email Template.
   ## 
-  let valid = call_594017.validator(path, query, header, formData, body)
-  let scheme = call_594017.pickScheme
+  let valid = call_564150.validator(path, query, header, formData, body)
+  let scheme = call_564150.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594017.url(scheme.get, call_594017.host, call_594017.base,
-                         call_594017.route, valid.getOrDefault("path"),
+  let url = call_564150.url(scheme.get, call_564150.host, call_564150.base,
+                         call_564150.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594017, url, valid)
+  result = hook(call_564150, url, valid)
 
-proc call*(call_594018: Call_EmailTemplateCreateOrUpdate_593980;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          parameters: JsonNode; serviceName: string;
+proc call*(call_564151: Call_EmailTemplateCreateOrUpdate_564113;
+          serviceName: string; apiVersion: string; subscriptionId: string;
+          resourceGroupName: string; parameters: JsonNode;
           templateName: string = "applicationApprovedNotificationMessage"): Recallable =
   ## emailTemplateCreateOrUpdate
   ## Updates an Email Template.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   serviceName: string (required)
+  ##              : The name of the API Management service.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   templateName: string (required)
   ##               : Email Template Name Identifier.
   ##   parameters: JObject (required)
   ##             : Email Template update parameters.
-  ##   serviceName: string (required)
-  ##              : The name of the API Management service.
-  var path_594019 = newJObject()
-  var query_594020 = newJObject()
-  var body_594021 = newJObject()
-  add(path_594019, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594020, "api-version", newJString(apiVersion))
-  add(path_594019, "subscriptionId", newJString(subscriptionId))
-  add(path_594019, "templateName", newJString(templateName))
+  var path_564152 = newJObject()
+  var query_564153 = newJObject()
+  var body_564154 = newJObject()
+  add(path_564152, "serviceName", newJString(serviceName))
+  add(query_564153, "api-version", newJString(apiVersion))
+  add(path_564152, "subscriptionId", newJString(subscriptionId))
+  add(path_564152, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564152, "templateName", newJString(templateName))
   if parameters != nil:
-    body_594021 = parameters
-  add(path_594019, "serviceName", newJString(serviceName))
-  result = call_594018.call(path_594019, query_594020, nil, nil, body_594021)
+    body_564154 = parameters
+  result = call_564151.call(path_564152, query_564153, nil, nil, body_564154)
 
-var emailTemplateCreateOrUpdate* = Call_EmailTemplateCreateOrUpdate_593980(
+var emailTemplateCreateOrUpdate* = Call_EmailTemplateCreateOrUpdate_564113(
     name: "emailTemplateCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ApiManagement/service/{serviceName}/templates/{templateName}",
-    validator: validate_EmailTemplateCreateOrUpdate_593981, base: "",
-    url: url_EmailTemplateCreateOrUpdate_593982, schemes: {Scheme.Https})
+    validator: validate_EmailTemplateCreateOrUpdate_564114, base: "",
+    url: url_EmailTemplateCreateOrUpdate_564115, schemes: {Scheme.Https})
 type
-  Call_EmailTemplateGetEntityTag_594035 = ref object of OpenApiRestCall_593424
-proc url_EmailTemplateGetEntityTag_594037(protocol: Scheme; host: string;
+  Call_EmailTemplateGetEntityTag_564168 = ref object of OpenApiRestCall_563555
+proc url_EmailTemplateGetEntityTag_564170(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -421,44 +425,44 @@ proc url_EmailTemplateGetEntityTag_594037(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_EmailTemplateGetEntityTag_594036(path: JsonNode; query: JsonNode;
+proc validate_EmailTemplateGetEntityTag_564169(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the entity state (Etag) version of the email template specified by its identifier.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
-  ##   subscriptionId: JString (required)
-  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   templateName: JString (required)
-  ##               : Email Template Name Identifier.
   ##   serviceName: JString (required)
   ##              : The name of the API Management service.
+  ##   subscriptionId: JString (required)
+  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
+  ##   templateName: JString (required)
+  ##               : Email Template Name Identifier.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594038 = path.getOrDefault("resourceGroupName")
-  valid_594038 = validateParameter(valid_594038, JString, required = true,
+        "path argument is necessary due to required `serviceName` field"
+  var valid_564171 = path.getOrDefault("serviceName")
+  valid_564171 = validateParameter(valid_564171, JString, required = true,
                                  default = nil)
-  if valid_594038 != nil:
-    section.add "resourceGroupName", valid_594038
-  var valid_594039 = path.getOrDefault("subscriptionId")
-  valid_594039 = validateParameter(valid_594039, JString, required = true,
+  if valid_564171 != nil:
+    section.add "serviceName", valid_564171
+  var valid_564172 = path.getOrDefault("subscriptionId")
+  valid_564172 = validateParameter(valid_564172, JString, required = true,
                                  default = nil)
-  if valid_594039 != nil:
-    section.add "subscriptionId", valid_594039
-  var valid_594040 = path.getOrDefault("templateName")
-  valid_594040 = validateParameter(valid_594040, JString, required = true, default = newJString(
+  if valid_564172 != nil:
+    section.add "subscriptionId", valid_564172
+  var valid_564173 = path.getOrDefault("resourceGroupName")
+  valid_564173 = validateParameter(valid_564173, JString, required = true,
+                                 default = nil)
+  if valid_564173 != nil:
+    section.add "resourceGroupName", valid_564173
+  var valid_564174 = path.getOrDefault("templateName")
+  valid_564174 = validateParameter(valid_564174, JString, required = true, default = newJString(
       "applicationApprovedNotificationMessage"))
-  if valid_594040 != nil:
-    section.add "templateName", valid_594040
-  var valid_594041 = path.getOrDefault("serviceName")
-  valid_594041 = validateParameter(valid_594041, JString, required = true,
-                                 default = nil)
-  if valid_594041 != nil:
-    section.add "serviceName", valid_594041
+  if valid_564174 != nil:
+    section.add "templateName", valid_564174
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -466,11 +470,11 @@ proc validate_EmailTemplateGetEntityTag_594036(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594042 = query.getOrDefault("api-version")
-  valid_594042 = validateParameter(valid_594042, JString, required = true,
+  var valid_564175 = query.getOrDefault("api-version")
+  valid_564175 = validateParameter(valid_564175, JString, required = true,
                                  default = nil)
-  if valid_594042 != nil:
-    section.add "api-version", valid_594042
+  if valid_564175 != nil:
+    section.add "api-version", valid_564175
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -479,52 +483,51 @@ proc validate_EmailTemplateGetEntityTag_594036(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594043: Call_EmailTemplateGetEntityTag_594035; path: JsonNode;
+proc call*(call_564176: Call_EmailTemplateGetEntityTag_564168; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the entity state (Etag) version of the email template specified by its identifier.
   ## 
-  let valid = call_594043.validator(path, query, header, formData, body)
-  let scheme = call_594043.pickScheme
+  let valid = call_564176.validator(path, query, header, formData, body)
+  let scheme = call_564176.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594043.url(scheme.get, call_594043.host, call_594043.base,
-                         call_594043.route, valid.getOrDefault("path"),
+  let url = call_564176.url(scheme.get, call_564176.host, call_564176.base,
+                         call_564176.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594043, url, valid)
+  result = hook(call_564176, url, valid)
 
-proc call*(call_594044: Call_EmailTemplateGetEntityTag_594035;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          serviceName: string;
+proc call*(call_564177: Call_EmailTemplateGetEntityTag_564168; serviceName: string;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string;
           templateName: string = "applicationApprovedNotificationMessage"): Recallable =
   ## emailTemplateGetEntityTag
   ## Gets the entity state (Etag) version of the email template specified by its identifier.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   serviceName: string (required)
+  ##              : The name of the API Management service.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   templateName: string (required)
   ##               : Email Template Name Identifier.
-  ##   serviceName: string (required)
-  ##              : The name of the API Management service.
-  var path_594045 = newJObject()
-  var query_594046 = newJObject()
-  add(path_594045, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594046, "api-version", newJString(apiVersion))
-  add(path_594045, "subscriptionId", newJString(subscriptionId))
-  add(path_594045, "templateName", newJString(templateName))
-  add(path_594045, "serviceName", newJString(serviceName))
-  result = call_594044.call(path_594045, query_594046, nil, nil, nil)
+  var path_564178 = newJObject()
+  var query_564179 = newJObject()
+  add(path_564178, "serviceName", newJString(serviceName))
+  add(query_564179, "api-version", newJString(apiVersion))
+  add(path_564178, "subscriptionId", newJString(subscriptionId))
+  add(path_564178, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564178, "templateName", newJString(templateName))
+  result = call_564177.call(path_564178, query_564179, nil, nil, nil)
 
-var emailTemplateGetEntityTag* = Call_EmailTemplateGetEntityTag_594035(
+var emailTemplateGetEntityTag* = Call_EmailTemplateGetEntityTag_564168(
     name: "emailTemplateGetEntityTag", meth: HttpMethod.HttpHead,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ApiManagement/service/{serviceName}/templates/{templateName}",
-    validator: validate_EmailTemplateGetEntityTag_594036, base: "",
-    url: url_EmailTemplateGetEntityTag_594037, schemes: {Scheme.Https})
+    validator: validate_EmailTemplateGetEntityTag_564169, base: "",
+    url: url_EmailTemplateGetEntityTag_564170, schemes: {Scheme.Https})
 type
-  Call_EmailTemplateGet_593955 = ref object of OpenApiRestCall_593424
-proc url_EmailTemplateGet_593957(protocol: Scheme; host: string; base: string;
+  Call_EmailTemplateGet_564088 = ref object of OpenApiRestCall_563555
+proc url_EmailTemplateGet_564090(protocol: Scheme; host: string; base: string;
                                 route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -550,7 +553,7 @@ proc url_EmailTemplateGet_593957(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_EmailTemplateGet_593956(path: JsonNode; query: JsonNode;
+proc validate_EmailTemplateGet_564089(path: JsonNode; query: JsonNode;
                                      header: JsonNode; formData: JsonNode;
                                      body: JsonNode): JsonNode =
   ## Gets the details of the email template specified by its identifier.
@@ -558,37 +561,37 @@ proc validate_EmailTemplateGet_593956(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
-  ##   subscriptionId: JString (required)
-  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   templateName: JString (required)
-  ##               : Email Template Name Identifier.
   ##   serviceName: JString (required)
   ##              : The name of the API Management service.
+  ##   subscriptionId: JString (required)
+  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
+  ##   templateName: JString (required)
+  ##               : Email Template Name Identifier.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593958 = path.getOrDefault("resourceGroupName")
-  valid_593958 = validateParameter(valid_593958, JString, required = true,
+        "path argument is necessary due to required `serviceName` field"
+  var valid_564091 = path.getOrDefault("serviceName")
+  valid_564091 = validateParameter(valid_564091, JString, required = true,
                                  default = nil)
-  if valid_593958 != nil:
-    section.add "resourceGroupName", valid_593958
-  var valid_593959 = path.getOrDefault("subscriptionId")
-  valid_593959 = validateParameter(valid_593959, JString, required = true,
+  if valid_564091 != nil:
+    section.add "serviceName", valid_564091
+  var valid_564092 = path.getOrDefault("subscriptionId")
+  valid_564092 = validateParameter(valid_564092, JString, required = true,
                                  default = nil)
-  if valid_593959 != nil:
-    section.add "subscriptionId", valid_593959
-  var valid_593973 = path.getOrDefault("templateName")
-  valid_593973 = validateParameter(valid_593973, JString, required = true, default = newJString(
+  if valid_564092 != nil:
+    section.add "subscriptionId", valid_564092
+  var valid_564093 = path.getOrDefault("resourceGroupName")
+  valid_564093 = validateParameter(valid_564093, JString, required = true,
+                                 default = nil)
+  if valid_564093 != nil:
+    section.add "resourceGroupName", valid_564093
+  var valid_564107 = path.getOrDefault("templateName")
+  valid_564107 = validateParameter(valid_564107, JString, required = true, default = newJString(
       "applicationApprovedNotificationMessage"))
-  if valid_593973 != nil:
-    section.add "templateName", valid_593973
-  var valid_593974 = path.getOrDefault("serviceName")
-  valid_593974 = validateParameter(valid_593974, JString, required = true,
-                                 default = nil)
-  if valid_593974 != nil:
-    section.add "serviceName", valid_593974
+  if valid_564107 != nil:
+    section.add "templateName", valid_564107
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -596,11 +599,11 @@ proc validate_EmailTemplateGet_593956(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593975 = query.getOrDefault("api-version")
-  valid_593975 = validateParameter(valid_593975, JString, required = true,
+  var valid_564108 = query.getOrDefault("api-version")
+  valid_564108 = validateParameter(valid_564108, JString, required = true,
                                  default = nil)
-  if valid_593975 != nil:
-    section.add "api-version", valid_593975
+  if valid_564108 != nil:
+    section.add "api-version", valid_564108
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -609,50 +612,50 @@ proc validate_EmailTemplateGet_593956(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593976: Call_EmailTemplateGet_593955; path: JsonNode;
+proc call*(call_564109: Call_EmailTemplateGet_564088; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the details of the email template specified by its identifier.
   ## 
-  let valid = call_593976.validator(path, query, header, formData, body)
-  let scheme = call_593976.pickScheme
+  let valid = call_564109.validator(path, query, header, formData, body)
+  let scheme = call_564109.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593976.url(scheme.get, call_593976.host, call_593976.base,
-                         call_593976.route, valid.getOrDefault("path"),
+  let url = call_564109.url(scheme.get, call_564109.host, call_564109.base,
+                         call_564109.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593976, url, valid)
+  result = hook(call_564109, url, valid)
 
-proc call*(call_593977: Call_EmailTemplateGet_593955; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; serviceName: string;
+proc call*(call_564110: Call_EmailTemplateGet_564088; serviceName: string;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string;
           templateName: string = "applicationApprovedNotificationMessage"): Recallable =
   ## emailTemplateGet
   ## Gets the details of the email template specified by its identifier.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   serviceName: string (required)
+  ##              : The name of the API Management service.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   templateName: string (required)
   ##               : Email Template Name Identifier.
-  ##   serviceName: string (required)
-  ##              : The name of the API Management service.
-  var path_593978 = newJObject()
-  var query_593979 = newJObject()
-  add(path_593978, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593979, "api-version", newJString(apiVersion))
-  add(path_593978, "subscriptionId", newJString(subscriptionId))
-  add(path_593978, "templateName", newJString(templateName))
-  add(path_593978, "serviceName", newJString(serviceName))
-  result = call_593977.call(path_593978, query_593979, nil, nil, nil)
+  var path_564111 = newJObject()
+  var query_564112 = newJObject()
+  add(path_564111, "serviceName", newJString(serviceName))
+  add(query_564112, "api-version", newJString(apiVersion))
+  add(path_564111, "subscriptionId", newJString(subscriptionId))
+  add(path_564111, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564111, "templateName", newJString(templateName))
+  result = call_564110.call(path_564111, query_564112, nil, nil, nil)
 
-var emailTemplateGet* = Call_EmailTemplateGet_593955(name: "emailTemplateGet",
+var emailTemplateGet* = Call_EmailTemplateGet_564088(name: "emailTemplateGet",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ApiManagement/service/{serviceName}/templates/{templateName}",
-    validator: validate_EmailTemplateGet_593956, base: "",
-    url: url_EmailTemplateGet_593957, schemes: {Scheme.Https})
+    validator: validate_EmailTemplateGet_564089, base: "",
+    url: url_EmailTemplateGet_564090, schemes: {Scheme.Https})
 type
-  Call_EmailTemplateUpdate_594047 = ref object of OpenApiRestCall_593424
-proc url_EmailTemplateUpdate_594049(protocol: Scheme; host: string; base: string;
+  Call_EmailTemplateUpdate_564180 = ref object of OpenApiRestCall_563555
+proc url_EmailTemplateUpdate_564182(protocol: Scheme; host: string; base: string;
                                    route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -678,7 +681,7 @@ proc url_EmailTemplateUpdate_594049(protocol: Scheme; host: string; base: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_EmailTemplateUpdate_594048(path: JsonNode; query: JsonNode;
+proc validate_EmailTemplateUpdate_564181(path: JsonNode; query: JsonNode;
                                         header: JsonNode; formData: JsonNode;
                                         body: JsonNode): JsonNode =
   ## Updates the specific Email Template.
@@ -686,37 +689,37 @@ proc validate_EmailTemplateUpdate_594048(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
-  ##   subscriptionId: JString (required)
-  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   templateName: JString (required)
-  ##               : Email Template Name Identifier.
   ##   serviceName: JString (required)
   ##              : The name of the API Management service.
+  ##   subscriptionId: JString (required)
+  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
+  ##   templateName: JString (required)
+  ##               : Email Template Name Identifier.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594050 = path.getOrDefault("resourceGroupName")
-  valid_594050 = validateParameter(valid_594050, JString, required = true,
+        "path argument is necessary due to required `serviceName` field"
+  var valid_564183 = path.getOrDefault("serviceName")
+  valid_564183 = validateParameter(valid_564183, JString, required = true,
                                  default = nil)
-  if valid_594050 != nil:
-    section.add "resourceGroupName", valid_594050
-  var valid_594051 = path.getOrDefault("subscriptionId")
-  valid_594051 = validateParameter(valid_594051, JString, required = true,
+  if valid_564183 != nil:
+    section.add "serviceName", valid_564183
+  var valid_564184 = path.getOrDefault("subscriptionId")
+  valid_564184 = validateParameter(valid_564184, JString, required = true,
                                  default = nil)
-  if valid_594051 != nil:
-    section.add "subscriptionId", valid_594051
-  var valid_594052 = path.getOrDefault("templateName")
-  valid_594052 = validateParameter(valid_594052, JString, required = true, default = newJString(
+  if valid_564184 != nil:
+    section.add "subscriptionId", valid_564184
+  var valid_564185 = path.getOrDefault("resourceGroupName")
+  valid_564185 = validateParameter(valid_564185, JString, required = true,
+                                 default = nil)
+  if valid_564185 != nil:
+    section.add "resourceGroupName", valid_564185
+  var valid_564186 = path.getOrDefault("templateName")
+  valid_564186 = validateParameter(valid_564186, JString, required = true, default = newJString(
       "applicationApprovedNotificationMessage"))
-  if valid_594052 != nil:
-    section.add "templateName", valid_594052
-  var valid_594053 = path.getOrDefault("serviceName")
-  valid_594053 = validateParameter(valid_594053, JString, required = true,
-                                 default = nil)
-  if valid_594053 != nil:
-    section.add "serviceName", valid_594053
+  if valid_564186 != nil:
+    section.add "templateName", valid_564186
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -724,11 +727,11 @@ proc validate_EmailTemplateUpdate_594048(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594054 = query.getOrDefault("api-version")
-  valid_594054 = validateParameter(valid_594054, JString, required = true,
+  var valid_564187 = query.getOrDefault("api-version")
+  valid_564187 = validateParameter(valid_564187, JString, required = true,
                                  default = nil)
-  if valid_594054 != nil:
-    section.add "api-version", valid_594054
+  if valid_564187 != nil:
+    section.add "api-version", valid_564187
   result.add "query", section
   ## parameters in `header` object:
   ##   If-Match: JString (required)
@@ -736,11 +739,11 @@ proc validate_EmailTemplateUpdate_594048(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert header != nil,
         "header argument is necessary due to required `If-Match` field"
-  var valid_594055 = header.getOrDefault("If-Match")
-  valid_594055 = validateParameter(valid_594055, JString, required = true,
+  var valid_564188 = header.getOrDefault("If-Match")
+  valid_564188 = validateParameter(valid_564188, JString, required = true,
                                  default = nil)
-  if valid_594055 != nil:
-    section.add "If-Match", valid_594055
+  if valid_564188 != nil:
+    section.add "If-Match", valid_564188
   result.add "header", section
   section = newJObject()
   result.add "formData", section
@@ -752,57 +755,57 @@ proc validate_EmailTemplateUpdate_594048(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594057: Call_EmailTemplateUpdate_594047; path: JsonNode;
+proc call*(call_564190: Call_EmailTemplateUpdate_564180; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Updates the specific Email Template.
   ## 
-  let valid = call_594057.validator(path, query, header, formData, body)
-  let scheme = call_594057.pickScheme
+  let valid = call_564190.validator(path, query, header, formData, body)
+  let scheme = call_564190.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594057.url(scheme.get, call_594057.host, call_594057.base,
-                         call_594057.route, valid.getOrDefault("path"),
+  let url = call_564190.url(scheme.get, call_564190.host, call_564190.base,
+                         call_564190.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594057, url, valid)
+  result = hook(call_564190, url, valid)
 
-proc call*(call_594058: Call_EmailTemplateUpdate_594047; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; parameters: JsonNode;
-          serviceName: string;
+proc call*(call_564191: Call_EmailTemplateUpdate_564180; serviceName: string;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string;
+          parameters: JsonNode;
           templateName: string = "applicationApprovedNotificationMessage"): Recallable =
   ## emailTemplateUpdate
   ## Updates the specific Email Template.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   serviceName: string (required)
+  ##              : The name of the API Management service.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   templateName: string (required)
   ##               : Email Template Name Identifier.
   ##   parameters: JObject (required)
   ##             : Update parameters.
-  ##   serviceName: string (required)
-  ##              : The name of the API Management service.
-  var path_594059 = newJObject()
-  var query_594060 = newJObject()
-  var body_594061 = newJObject()
-  add(path_594059, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594060, "api-version", newJString(apiVersion))
-  add(path_594059, "subscriptionId", newJString(subscriptionId))
-  add(path_594059, "templateName", newJString(templateName))
+  var path_564192 = newJObject()
+  var query_564193 = newJObject()
+  var body_564194 = newJObject()
+  add(path_564192, "serviceName", newJString(serviceName))
+  add(query_564193, "api-version", newJString(apiVersion))
+  add(path_564192, "subscriptionId", newJString(subscriptionId))
+  add(path_564192, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564192, "templateName", newJString(templateName))
   if parameters != nil:
-    body_594061 = parameters
-  add(path_594059, "serviceName", newJString(serviceName))
-  result = call_594058.call(path_594059, query_594060, nil, nil, body_594061)
+    body_564194 = parameters
+  result = call_564191.call(path_564192, query_564193, nil, nil, body_564194)
 
-var emailTemplateUpdate* = Call_EmailTemplateUpdate_594047(
+var emailTemplateUpdate* = Call_EmailTemplateUpdate_564180(
     name: "emailTemplateUpdate", meth: HttpMethod.HttpPatch,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ApiManagement/service/{serviceName}/templates/{templateName}",
-    validator: validate_EmailTemplateUpdate_594048, base: "",
-    url: url_EmailTemplateUpdate_594049, schemes: {Scheme.Https})
+    validator: validate_EmailTemplateUpdate_564181, base: "",
+    url: url_EmailTemplateUpdate_564182, schemes: {Scheme.Https})
 type
-  Call_EmailTemplateDelete_594022 = ref object of OpenApiRestCall_593424
-proc url_EmailTemplateDelete_594024(protocol: Scheme; host: string; base: string;
+  Call_EmailTemplateDelete_564155 = ref object of OpenApiRestCall_563555
+proc url_EmailTemplateDelete_564157(protocol: Scheme; host: string; base: string;
                                    route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -828,7 +831,7 @@ proc url_EmailTemplateDelete_594024(protocol: Scheme; host: string; base: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_EmailTemplateDelete_594023(path: JsonNode; query: JsonNode;
+proc validate_EmailTemplateDelete_564156(path: JsonNode; query: JsonNode;
                                         header: JsonNode; formData: JsonNode;
                                         body: JsonNode): JsonNode =
   ## Reset the Email Template to default template provided by the API Management service instance.
@@ -836,37 +839,37 @@ proc validate_EmailTemplateDelete_594023(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
-  ##   subscriptionId: JString (required)
-  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   templateName: JString (required)
-  ##               : Email Template Name Identifier.
   ##   serviceName: JString (required)
   ##              : The name of the API Management service.
+  ##   subscriptionId: JString (required)
+  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
+  ##   templateName: JString (required)
+  ##               : Email Template Name Identifier.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594025 = path.getOrDefault("resourceGroupName")
-  valid_594025 = validateParameter(valid_594025, JString, required = true,
+        "path argument is necessary due to required `serviceName` field"
+  var valid_564158 = path.getOrDefault("serviceName")
+  valid_564158 = validateParameter(valid_564158, JString, required = true,
                                  default = nil)
-  if valid_594025 != nil:
-    section.add "resourceGroupName", valid_594025
-  var valid_594026 = path.getOrDefault("subscriptionId")
-  valid_594026 = validateParameter(valid_594026, JString, required = true,
+  if valid_564158 != nil:
+    section.add "serviceName", valid_564158
+  var valid_564159 = path.getOrDefault("subscriptionId")
+  valid_564159 = validateParameter(valid_564159, JString, required = true,
                                  default = nil)
-  if valid_594026 != nil:
-    section.add "subscriptionId", valid_594026
-  var valid_594027 = path.getOrDefault("templateName")
-  valid_594027 = validateParameter(valid_594027, JString, required = true, default = newJString(
+  if valid_564159 != nil:
+    section.add "subscriptionId", valid_564159
+  var valid_564160 = path.getOrDefault("resourceGroupName")
+  valid_564160 = validateParameter(valid_564160, JString, required = true,
+                                 default = nil)
+  if valid_564160 != nil:
+    section.add "resourceGroupName", valid_564160
+  var valid_564161 = path.getOrDefault("templateName")
+  valid_564161 = validateParameter(valid_564161, JString, required = true, default = newJString(
       "applicationApprovedNotificationMessage"))
-  if valid_594027 != nil:
-    section.add "templateName", valid_594027
-  var valid_594028 = path.getOrDefault("serviceName")
-  valid_594028 = validateParameter(valid_594028, JString, required = true,
-                                 default = nil)
-  if valid_594028 != nil:
-    section.add "serviceName", valid_594028
+  if valid_564161 != nil:
+    section.add "templateName", valid_564161
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -874,11 +877,11 @@ proc validate_EmailTemplateDelete_594023(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594029 = query.getOrDefault("api-version")
-  valid_594029 = validateParameter(valid_594029, JString, required = true,
+  var valid_564162 = query.getOrDefault("api-version")
+  valid_564162 = validateParameter(valid_564162, JString, required = true,
                                  default = nil)
-  if valid_594029 != nil:
-    section.add "api-version", valid_594029
+  if valid_564162 != nil:
+    section.add "api-version", valid_564162
   result.add "query", section
   ## parameters in `header` object:
   ##   If-Match: JString (required)
@@ -886,59 +889,59 @@ proc validate_EmailTemplateDelete_594023(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert header != nil,
         "header argument is necessary due to required `If-Match` field"
-  var valid_594030 = header.getOrDefault("If-Match")
-  valid_594030 = validateParameter(valid_594030, JString, required = true,
+  var valid_564163 = header.getOrDefault("If-Match")
+  valid_564163 = validateParameter(valid_564163, JString, required = true,
                                  default = nil)
-  if valid_594030 != nil:
-    section.add "If-Match", valid_594030
+  if valid_564163 != nil:
+    section.add "If-Match", valid_564163
   result.add "header", section
   section = newJObject()
   result.add "formData", section
   if body != nil:
     result.add "body", body
 
-proc call*(call_594031: Call_EmailTemplateDelete_594022; path: JsonNode;
+proc call*(call_564164: Call_EmailTemplateDelete_564155; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Reset the Email Template to default template provided by the API Management service instance.
   ## 
-  let valid = call_594031.validator(path, query, header, formData, body)
-  let scheme = call_594031.pickScheme
+  let valid = call_564164.validator(path, query, header, formData, body)
+  let scheme = call_564164.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594031.url(scheme.get, call_594031.host, call_594031.base,
-                         call_594031.route, valid.getOrDefault("path"),
+  let url = call_564164.url(scheme.get, call_564164.host, call_564164.base,
+                         call_564164.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594031, url, valid)
+  result = hook(call_564164, url, valid)
 
-proc call*(call_594032: Call_EmailTemplateDelete_594022; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; serviceName: string;
+proc call*(call_564165: Call_EmailTemplateDelete_564155; serviceName: string;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string;
           templateName: string = "applicationApprovedNotificationMessage"): Recallable =
   ## emailTemplateDelete
   ## Reset the Email Template to default template provided by the API Management service instance.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   serviceName: string (required)
+  ##              : The name of the API Management service.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   templateName: string (required)
   ##               : Email Template Name Identifier.
-  ##   serviceName: string (required)
-  ##              : The name of the API Management service.
-  var path_594033 = newJObject()
-  var query_594034 = newJObject()
-  add(path_594033, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594034, "api-version", newJString(apiVersion))
-  add(path_594033, "subscriptionId", newJString(subscriptionId))
-  add(path_594033, "templateName", newJString(templateName))
-  add(path_594033, "serviceName", newJString(serviceName))
-  result = call_594032.call(path_594033, query_594034, nil, nil, nil)
+  var path_564166 = newJObject()
+  var query_564167 = newJObject()
+  add(path_564166, "serviceName", newJString(serviceName))
+  add(query_564167, "api-version", newJString(apiVersion))
+  add(path_564166, "subscriptionId", newJString(subscriptionId))
+  add(path_564166, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564166, "templateName", newJString(templateName))
+  result = call_564165.call(path_564166, query_564167, nil, nil, nil)
 
-var emailTemplateDelete* = Call_EmailTemplateDelete_594022(
+var emailTemplateDelete* = Call_EmailTemplateDelete_564155(
     name: "emailTemplateDelete", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ApiManagement/service/{serviceName}/templates/{templateName}",
-    validator: validate_EmailTemplateDelete_594023, base: "",
-    url: url_EmailTemplateDelete_594024, schemes: {Scheme.Https})
+    validator: validate_EmailTemplateDelete_564156, base: "",
+    url: url_EmailTemplateDelete_564157, schemes: {Scheme.Https})
 export
   rest
 

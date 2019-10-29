@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_573657 = ref object of OpenApiRestCall
+  OpenApiRestCall_563555 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_573657](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563555](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_573657): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563555): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,15 +107,15 @@ const
   macServiceName = "apimanagement-apimemailtemplate"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_EmailTemplateList_573879 = ref object of OpenApiRestCall_573657
-proc url_EmailTemplateList_573881(protocol: Scheme; host: string; base: string;
+  Call_EmailTemplateList_563777 = ref object of OpenApiRestCall_563555
+proc url_EmailTemplateList_563779(protocol: Scheme; host: string; base: string;
                                  route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_EmailTemplateList_573880(path: JsonNode; query: JsonNode;
+proc validate_EmailTemplateList_563778(path: JsonNode; query: JsonNode;
                                       header: JsonNode; formData: JsonNode;
                                       body: JsonNode): JsonNode =
   ## Lists a collection of properties defined within a service instance.
@@ -121,10 +125,10 @@ proc validate_EmailTemplateList_573880(path: JsonNode; query: JsonNode;
   section = newJObject()
   result.add "path", section
   ## parameters in `query` object:
-  ##   api-version: JString (required)
-  ##              : Version of the API to be used with the client request.
   ##   $top: JInt
   ##       : Number of records to return.
+  ##   api-version: JString (required)
+  ##              : Version of the API to be used with the client request.
   ##   $skip: JInt
   ##        : Number of records to skip.
   ##   $filter: JString
@@ -133,26 +137,26 @@ proc validate_EmailTemplateList_573880(path: JsonNode; query: JsonNode;
   ## |----------------|------------------------|---------------------------------------------|
   ## | id             | ge, le, eq, ne, gt, lt | substringof, contains, startswith, endswith |
   section = newJObject()
+  var valid_563928 = query.getOrDefault("$top")
+  valid_563928 = validateParameter(valid_563928, JInt, required = false, default = nil)
+  if valid_563928 != nil:
+    section.add "$top", valid_563928
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574028 = query.getOrDefault("api-version")
-  valid_574028 = validateParameter(valid_574028, JString, required = true,
+  var valid_563929 = query.getOrDefault("api-version")
+  valid_563929 = validateParameter(valid_563929, JString, required = true,
                                  default = nil)
-  if valid_574028 != nil:
-    section.add "api-version", valid_574028
-  var valid_574029 = query.getOrDefault("$top")
-  valid_574029 = validateParameter(valid_574029, JInt, required = false, default = nil)
-  if valid_574029 != nil:
-    section.add "$top", valid_574029
-  var valid_574030 = query.getOrDefault("$skip")
-  valid_574030 = validateParameter(valid_574030, JInt, required = false, default = nil)
-  if valid_574030 != nil:
-    section.add "$skip", valid_574030
-  var valid_574031 = query.getOrDefault("$filter")
-  valid_574031 = validateParameter(valid_574031, JString, required = false,
+  if valid_563929 != nil:
+    section.add "api-version", valid_563929
+  var valid_563930 = query.getOrDefault("$skip")
+  valid_563930 = validateParameter(valid_563930, JInt, required = false, default = nil)
+  if valid_563930 != nil:
+    section.add "$skip", valid_563930
+  var valid_563931 = query.getOrDefault("$filter")
+  valid_563931 = validateParameter(valid_563931, JString, required = false,
                                  default = nil)
-  if valid_574031 != nil:
-    section.add "$filter", valid_574031
+  if valid_563931 != nil:
+    section.add "$filter", valid_563931
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -161,27 +165,27 @@ proc validate_EmailTemplateList_573880(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574058: Call_EmailTemplateList_573879; path: JsonNode;
+proc call*(call_563958: Call_EmailTemplateList_563777; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists a collection of properties defined within a service instance.
   ## 
-  let valid = call_574058.validator(path, query, header, formData, body)
-  let scheme = call_574058.pickScheme
+  let valid = call_563958.validator(path, query, header, formData, body)
+  let scheme = call_563958.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574058.url(scheme.get, call_574058.host, call_574058.base,
-                         call_574058.route, valid.getOrDefault("path"),
+  let url = call_563958.url(scheme.get, call_563958.host, call_563958.base,
+                         call_563958.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574058, url, valid)
+  result = hook(call_563958, url, valid)
 
-proc call*(call_574129: Call_EmailTemplateList_573879; apiVersion: string;
+proc call*(call_564029: Call_EmailTemplateList_563777; apiVersion: string;
           Top: int = 0; Skip: int = 0; Filter: string = ""): Recallable =
   ## emailTemplateList
   ## Lists a collection of properties defined within a service instance.
-  ##   apiVersion: string (required)
-  ##             : Version of the API to be used with the client request.
   ##   Top: int
   ##      : Number of records to return.
+  ##   apiVersion: string (required)
+  ##             : Version of the API to be used with the client request.
   ##   Skip: int
   ##       : Number of records to skip.
   ##   Filter: string
@@ -189,20 +193,20 @@ proc call*(call_574129: Call_EmailTemplateList_573879; apiVersion: string;
   ## 
   ## |----------------|------------------------|---------------------------------------------|
   ## | id             | ge, le, eq, ne, gt, lt | substringof, contains, startswith, endswith |
-  var query_574130 = newJObject()
-  add(query_574130, "api-version", newJString(apiVersion))
-  add(query_574130, "$top", newJInt(Top))
-  add(query_574130, "$skip", newJInt(Skip))
-  add(query_574130, "$filter", newJString(Filter))
-  result = call_574129.call(nil, query_574130, nil, nil, nil)
+  var query_564030 = newJObject()
+  add(query_564030, "$top", newJInt(Top))
+  add(query_564030, "api-version", newJString(apiVersion))
+  add(query_564030, "$skip", newJInt(Skip))
+  add(query_564030, "$filter", newJString(Filter))
+  result = call_564029.call(nil, query_564030, nil, nil, nil)
 
-var emailTemplateList* = Call_EmailTemplateList_573879(name: "emailTemplateList",
+var emailTemplateList* = Call_EmailTemplateList_563777(name: "emailTemplateList",
     meth: HttpMethod.HttpGet, host: "azure.local", route: "/templates",
-    validator: validate_EmailTemplateList_573880, base: "",
-    url: url_EmailTemplateList_573881, schemes: {Scheme.Https})
+    validator: validate_EmailTemplateList_563778, base: "",
+    url: url_EmailTemplateList_563779, schemes: {Scheme.Https})
 type
-  Call_EmailTemplateCreateOrUpdate_574215 = ref object of OpenApiRestCall_573657
-proc url_EmailTemplateCreateOrUpdate_574217(protocol: Scheme; host: string;
+  Call_EmailTemplateCreateOrUpdate_564115 = ref object of OpenApiRestCall_563555
+proc url_EmailTemplateCreateOrUpdate_564117(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -217,7 +221,7 @@ proc url_EmailTemplateCreateOrUpdate_574217(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_EmailTemplateCreateOrUpdate_574216(path: JsonNode; query: JsonNode;
+proc validate_EmailTemplateCreateOrUpdate_564116(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Updates an Email Template.
   ## 
@@ -229,11 +233,11 @@ proc validate_EmailTemplateCreateOrUpdate_574216(path: JsonNode; query: JsonNode
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `templateName` field"
-  var valid_574245 = path.getOrDefault("templateName")
-  valid_574245 = validateParameter(valid_574245, JString, required = true, default = newJString(
+  var valid_564145 = path.getOrDefault("templateName")
+  valid_564145 = validateParameter(valid_564145, JString, required = true, default = newJString(
       "applicationApprovedNotificationMessage"))
-  if valid_574245 != nil:
-    section.add "templateName", valid_574245
+  if valid_564145 != nil:
+    section.add "templateName", valid_564145
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -241,11 +245,11 @@ proc validate_EmailTemplateCreateOrUpdate_574216(path: JsonNode; query: JsonNode
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574246 = query.getOrDefault("api-version")
-  valid_574246 = validateParameter(valid_574246, JString, required = true,
+  var valid_564146 = query.getOrDefault("api-version")
+  valid_564146 = validateParameter(valid_564146, JString, required = true,
                                  default = nil)
-  if valid_574246 != nil:
-    section.add "api-version", valid_574246
+  if valid_564146 != nil:
+    section.add "api-version", valid_564146
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -259,20 +263,20 @@ proc validate_EmailTemplateCreateOrUpdate_574216(path: JsonNode; query: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_574248: Call_EmailTemplateCreateOrUpdate_574215; path: JsonNode;
+proc call*(call_564148: Call_EmailTemplateCreateOrUpdate_564115; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Updates an Email Template.
   ## 
-  let valid = call_574248.validator(path, query, header, formData, body)
-  let scheme = call_574248.pickScheme
+  let valid = call_564148.validator(path, query, header, formData, body)
+  let scheme = call_564148.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574248.url(scheme.get, call_574248.host, call_574248.base,
-                         call_574248.route, valid.getOrDefault("path"),
+  let url = call_564148.url(scheme.get, call_564148.host, call_564148.base,
+                         call_564148.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574248, url, valid)
+  result = hook(call_564148, url, valid)
 
-proc call*(call_574249: Call_EmailTemplateCreateOrUpdate_574215;
+proc call*(call_564149: Call_EmailTemplateCreateOrUpdate_564115;
           apiVersion: string; parameters: JsonNode;
           templateName: string = "applicationApprovedNotificationMessage"): Recallable =
   ## emailTemplateCreateOrUpdate
@@ -283,23 +287,23 @@ proc call*(call_574249: Call_EmailTemplateCreateOrUpdate_574215;
   ##               : Email Template Name Identifier.
   ##   parameters: JObject (required)
   ##             : Email Template update parameters.
-  var path_574250 = newJObject()
-  var query_574251 = newJObject()
-  var body_574252 = newJObject()
-  add(query_574251, "api-version", newJString(apiVersion))
-  add(path_574250, "templateName", newJString(templateName))
+  var path_564150 = newJObject()
+  var query_564151 = newJObject()
+  var body_564152 = newJObject()
+  add(query_564151, "api-version", newJString(apiVersion))
+  add(path_564150, "templateName", newJString(templateName))
   if parameters != nil:
-    body_574252 = parameters
-  result = call_574249.call(path_574250, query_574251, nil, nil, body_574252)
+    body_564152 = parameters
+  result = call_564149.call(path_564150, query_564151, nil, nil, body_564152)
 
-var emailTemplateCreateOrUpdate* = Call_EmailTemplateCreateOrUpdate_574215(
+var emailTemplateCreateOrUpdate* = Call_EmailTemplateCreateOrUpdate_564115(
     name: "emailTemplateCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "azure.local", route: "/templates/{templateName}",
-    validator: validate_EmailTemplateCreateOrUpdate_574216, base: "",
-    url: url_EmailTemplateCreateOrUpdate_574217, schemes: {Scheme.Https})
+    validator: validate_EmailTemplateCreateOrUpdate_564116, base: "",
+    url: url_EmailTemplateCreateOrUpdate_564117, schemes: {Scheme.Https})
 type
-  Call_EmailTemplateGet_574170 = ref object of OpenApiRestCall_573657
-proc url_EmailTemplateGet_574172(protocol: Scheme; host: string; base: string;
+  Call_EmailTemplateGet_564070 = ref object of OpenApiRestCall_563555
+proc url_EmailTemplateGet_564072(protocol: Scheme; host: string; base: string;
                                 route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -314,7 +318,7 @@ proc url_EmailTemplateGet_574172(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_EmailTemplateGet_574171(path: JsonNode; query: JsonNode;
+proc validate_EmailTemplateGet_564071(path: JsonNode; query: JsonNode;
                                      header: JsonNode; formData: JsonNode;
                                      body: JsonNode): JsonNode =
   ## Gets the details of the email template specified by its identifier.
@@ -327,11 +331,11 @@ proc validate_EmailTemplateGet_574171(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `templateName` field"
-  var valid_574209 = path.getOrDefault("templateName")
-  valid_574209 = validateParameter(valid_574209, JString, required = true, default = newJString(
+  var valid_564109 = path.getOrDefault("templateName")
+  valid_564109 = validateParameter(valid_564109, JString, required = true, default = newJString(
       "applicationApprovedNotificationMessage"))
-  if valid_574209 != nil:
-    section.add "templateName", valid_574209
+  if valid_564109 != nil:
+    section.add "templateName", valid_564109
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -339,11 +343,11 @@ proc validate_EmailTemplateGet_574171(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574210 = query.getOrDefault("api-version")
-  valid_574210 = validateParameter(valid_574210, JString, required = true,
+  var valid_564110 = query.getOrDefault("api-version")
+  valid_564110 = validateParameter(valid_564110, JString, required = true,
                                  default = nil)
-  if valid_574210 != nil:
-    section.add "api-version", valid_574210
+  if valid_564110 != nil:
+    section.add "api-version", valid_564110
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -352,20 +356,20 @@ proc validate_EmailTemplateGet_574171(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574211: Call_EmailTemplateGet_574170; path: JsonNode;
+proc call*(call_564111: Call_EmailTemplateGet_564070; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the details of the email template specified by its identifier.
   ## 
-  let valid = call_574211.validator(path, query, header, formData, body)
-  let scheme = call_574211.pickScheme
+  let valid = call_564111.validator(path, query, header, formData, body)
+  let scheme = call_564111.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574211.url(scheme.get, call_574211.host, call_574211.base,
-                         call_574211.route, valid.getOrDefault("path"),
+  let url = call_564111.url(scheme.get, call_564111.host, call_564111.base,
+                         call_564111.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574211, url, valid)
+  result = hook(call_564111, url, valid)
 
-proc call*(call_574212: Call_EmailTemplateGet_574170; apiVersion: string;
+proc call*(call_564112: Call_EmailTemplateGet_564070; apiVersion: string;
           templateName: string = "applicationApprovedNotificationMessage"): Recallable =
   ## emailTemplateGet
   ## Gets the details of the email template specified by its identifier.
@@ -373,19 +377,19 @@ proc call*(call_574212: Call_EmailTemplateGet_574170; apiVersion: string;
   ##             : Version of the API to be used with the client request.
   ##   templateName: string (required)
   ##               : Email Template Name Identifier.
-  var path_574213 = newJObject()
-  var query_574214 = newJObject()
-  add(query_574214, "api-version", newJString(apiVersion))
-  add(path_574213, "templateName", newJString(templateName))
-  result = call_574212.call(path_574213, query_574214, nil, nil, nil)
+  var path_564113 = newJObject()
+  var query_564114 = newJObject()
+  add(query_564114, "api-version", newJString(apiVersion))
+  add(path_564113, "templateName", newJString(templateName))
+  result = call_564112.call(path_564113, query_564114, nil, nil, nil)
 
-var emailTemplateGet* = Call_EmailTemplateGet_574170(name: "emailTemplateGet",
+var emailTemplateGet* = Call_EmailTemplateGet_564070(name: "emailTemplateGet",
     meth: HttpMethod.HttpGet, host: "azure.local",
-    route: "/templates/{templateName}", validator: validate_EmailTemplateGet_574171,
-    base: "", url: url_EmailTemplateGet_574172, schemes: {Scheme.Https})
+    route: "/templates/{templateName}", validator: validate_EmailTemplateGet_564071,
+    base: "", url: url_EmailTemplateGet_564072, schemes: {Scheme.Https})
 type
-  Call_EmailTemplateUpdate_574263 = ref object of OpenApiRestCall_573657
-proc url_EmailTemplateUpdate_574265(protocol: Scheme; host: string; base: string;
+  Call_EmailTemplateUpdate_564163 = ref object of OpenApiRestCall_563555
+proc url_EmailTemplateUpdate_564165(protocol: Scheme; host: string; base: string;
                                    route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -400,7 +404,7 @@ proc url_EmailTemplateUpdate_574265(protocol: Scheme; host: string; base: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_EmailTemplateUpdate_574264(path: JsonNode; query: JsonNode;
+proc validate_EmailTemplateUpdate_564164(path: JsonNode; query: JsonNode;
                                         header: JsonNode; formData: JsonNode;
                                         body: JsonNode): JsonNode =
   ## Updates the specific Email Template.
@@ -413,11 +417,11 @@ proc validate_EmailTemplateUpdate_574264(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `templateName` field"
-  var valid_574266 = path.getOrDefault("templateName")
-  valid_574266 = validateParameter(valid_574266, JString, required = true, default = newJString(
+  var valid_564166 = path.getOrDefault("templateName")
+  valid_564166 = validateParameter(valid_564166, JString, required = true, default = newJString(
       "applicationApprovedNotificationMessage"))
-  if valid_574266 != nil:
-    section.add "templateName", valid_574266
+  if valid_564166 != nil:
+    section.add "templateName", valid_564166
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -425,11 +429,11 @@ proc validate_EmailTemplateUpdate_574264(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574267 = query.getOrDefault("api-version")
-  valid_574267 = validateParameter(valid_574267, JString, required = true,
+  var valid_564167 = query.getOrDefault("api-version")
+  valid_564167 = validateParameter(valid_564167, JString, required = true,
                                  default = nil)
-  if valid_574267 != nil:
-    section.add "api-version", valid_574267
+  if valid_564167 != nil:
+    section.add "api-version", valid_564167
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -443,20 +447,20 @@ proc validate_EmailTemplateUpdate_574264(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574269: Call_EmailTemplateUpdate_574263; path: JsonNode;
+proc call*(call_564169: Call_EmailTemplateUpdate_564163; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Updates the specific Email Template.
   ## 
-  let valid = call_574269.validator(path, query, header, formData, body)
-  let scheme = call_574269.pickScheme
+  let valid = call_564169.validator(path, query, header, formData, body)
+  let scheme = call_564169.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574269.url(scheme.get, call_574269.host, call_574269.base,
-                         call_574269.route, valid.getOrDefault("path"),
+  let url = call_564169.url(scheme.get, call_564169.host, call_564169.base,
+                         call_564169.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574269, url, valid)
+  result = hook(call_564169, url, valid)
 
-proc call*(call_574270: Call_EmailTemplateUpdate_574263; apiVersion: string;
+proc call*(call_564170: Call_EmailTemplateUpdate_564163; apiVersion: string;
           parameters: JsonNode;
           templateName: string = "applicationApprovedNotificationMessage"): Recallable =
   ## emailTemplateUpdate
@@ -467,22 +471,22 @@ proc call*(call_574270: Call_EmailTemplateUpdate_574263; apiVersion: string;
   ##               : Email Template Name Identifier.
   ##   parameters: JObject (required)
   ##             : Update parameters.
-  var path_574271 = newJObject()
-  var query_574272 = newJObject()
-  var body_574273 = newJObject()
-  add(query_574272, "api-version", newJString(apiVersion))
-  add(path_574271, "templateName", newJString(templateName))
+  var path_564171 = newJObject()
+  var query_564172 = newJObject()
+  var body_564173 = newJObject()
+  add(query_564172, "api-version", newJString(apiVersion))
+  add(path_564171, "templateName", newJString(templateName))
   if parameters != nil:
-    body_574273 = parameters
-  result = call_574270.call(path_574271, query_574272, nil, nil, body_574273)
+    body_564173 = parameters
+  result = call_564170.call(path_564171, query_564172, nil, nil, body_564173)
 
-var emailTemplateUpdate* = Call_EmailTemplateUpdate_574263(
+var emailTemplateUpdate* = Call_EmailTemplateUpdate_564163(
     name: "emailTemplateUpdate", meth: HttpMethod.HttpPatch, host: "azure.local",
-    route: "/templates/{templateName}", validator: validate_EmailTemplateUpdate_574264,
-    base: "", url: url_EmailTemplateUpdate_574265, schemes: {Scheme.Https})
+    route: "/templates/{templateName}", validator: validate_EmailTemplateUpdate_564164,
+    base: "", url: url_EmailTemplateUpdate_564165, schemes: {Scheme.Https})
 type
-  Call_EmailTemplateDelete_574253 = ref object of OpenApiRestCall_573657
-proc url_EmailTemplateDelete_574255(protocol: Scheme; host: string; base: string;
+  Call_EmailTemplateDelete_564153 = ref object of OpenApiRestCall_563555
+proc url_EmailTemplateDelete_564155(protocol: Scheme; host: string; base: string;
                                    route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -497,7 +501,7 @@ proc url_EmailTemplateDelete_574255(protocol: Scheme; host: string; base: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_EmailTemplateDelete_574254(path: JsonNode; query: JsonNode;
+proc validate_EmailTemplateDelete_564154(path: JsonNode; query: JsonNode;
                                         header: JsonNode; formData: JsonNode;
                                         body: JsonNode): JsonNode =
   ## Reset the Email Template to default template provided by the API Management service instance.
@@ -510,11 +514,11 @@ proc validate_EmailTemplateDelete_574254(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `templateName` field"
-  var valid_574256 = path.getOrDefault("templateName")
-  valid_574256 = validateParameter(valid_574256, JString, required = true, default = newJString(
+  var valid_564156 = path.getOrDefault("templateName")
+  valid_564156 = validateParameter(valid_564156, JString, required = true, default = newJString(
       "applicationApprovedNotificationMessage"))
-  if valid_574256 != nil:
-    section.add "templateName", valid_574256
+  if valid_564156 != nil:
+    section.add "templateName", valid_564156
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -522,11 +526,11 @@ proc validate_EmailTemplateDelete_574254(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574257 = query.getOrDefault("api-version")
-  valid_574257 = validateParameter(valid_574257, JString, required = true,
+  var valid_564157 = query.getOrDefault("api-version")
+  valid_564157 = validateParameter(valid_564157, JString, required = true,
                                  default = nil)
-  if valid_574257 != nil:
-    section.add "api-version", valid_574257
+  if valid_564157 != nil:
+    section.add "api-version", valid_564157
   result.add "query", section
   ## parameters in `header` object:
   ##   If-Match: JString (required)
@@ -534,31 +538,31 @@ proc validate_EmailTemplateDelete_574254(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert header != nil,
         "header argument is necessary due to required `If-Match` field"
-  var valid_574258 = header.getOrDefault("If-Match")
-  valid_574258 = validateParameter(valid_574258, JString, required = true,
+  var valid_564158 = header.getOrDefault("If-Match")
+  valid_564158 = validateParameter(valid_564158, JString, required = true,
                                  default = nil)
-  if valid_574258 != nil:
-    section.add "If-Match", valid_574258
+  if valid_564158 != nil:
+    section.add "If-Match", valid_564158
   result.add "header", section
   section = newJObject()
   result.add "formData", section
   if body != nil:
     result.add "body", body
 
-proc call*(call_574259: Call_EmailTemplateDelete_574253; path: JsonNode;
+proc call*(call_564159: Call_EmailTemplateDelete_564153; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Reset the Email Template to default template provided by the API Management service instance.
   ## 
-  let valid = call_574259.validator(path, query, header, formData, body)
-  let scheme = call_574259.pickScheme
+  let valid = call_564159.validator(path, query, header, formData, body)
+  let scheme = call_564159.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574259.url(scheme.get, call_574259.host, call_574259.base,
-                         call_574259.route, valid.getOrDefault("path"),
+  let url = call_564159.url(scheme.get, call_564159.host, call_564159.base,
+                         call_564159.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574259, url, valid)
+  result = hook(call_564159, url, valid)
 
-proc call*(call_574260: Call_EmailTemplateDelete_574253; apiVersion: string;
+proc call*(call_564160: Call_EmailTemplateDelete_564153; apiVersion: string;
           templateName: string = "applicationApprovedNotificationMessage"): Recallable =
   ## emailTemplateDelete
   ## Reset the Email Template to default template provided by the API Management service instance.
@@ -566,16 +570,16 @@ proc call*(call_574260: Call_EmailTemplateDelete_574253; apiVersion: string;
   ##             : Version of the API to be used with the client request.
   ##   templateName: string (required)
   ##               : Email Template Name Identifier.
-  var path_574261 = newJObject()
-  var query_574262 = newJObject()
-  add(query_574262, "api-version", newJString(apiVersion))
-  add(path_574261, "templateName", newJString(templateName))
-  result = call_574260.call(path_574261, query_574262, nil, nil, nil)
+  var path_564161 = newJObject()
+  var query_564162 = newJObject()
+  add(query_564162, "api-version", newJString(apiVersion))
+  add(path_564161, "templateName", newJString(templateName))
+  result = call_564160.call(path_564161, query_564162, nil, nil, nil)
 
-var emailTemplateDelete* = Call_EmailTemplateDelete_574253(
+var emailTemplateDelete* = Call_EmailTemplateDelete_564153(
     name: "emailTemplateDelete", meth: HttpMethod.HttpDelete, host: "azure.local",
-    route: "/templates/{templateName}", validator: validate_EmailTemplateDelete_574254,
-    base: "", url: url_EmailTemplateDelete_574255, schemes: {Scheme.Https})
+    route: "/templates/{templateName}", validator: validate_EmailTemplateDelete_564154,
+    base: "", url: url_EmailTemplateDelete_564155, schemes: {Scheme.Https})
 export
   rest
 

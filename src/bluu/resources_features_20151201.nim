@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, httpcore
 
 ## auto-generated via openapi macro
 ## title: FeatureClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_567641 = ref object of OpenApiRestCall
+  OpenApiRestCall_563539 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_567641](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563539](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_567641): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563539): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,15 +107,15 @@ const
   macServiceName = "resources-features"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_ListOperations_567863 = ref object of OpenApiRestCall_567641
-proc url_ListOperations_567865(protocol: Scheme; host: string; base: string;
+  Call_ListOperations_563761 = ref object of OpenApiRestCall_563539
+proc url_ListOperations_563763(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_ListOperations_567864(path: JsonNode; query: JsonNode;
+proc validate_ListOperations_563762(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## Lists all of the available Microsoft.Features REST API operations.
@@ -126,11 +130,11 @@ proc validate_ListOperations_567864(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568024 = query.getOrDefault("api-version")
-  valid_568024 = validateParameter(valid_568024, JString, required = true,
+  var valid_563924 = query.getOrDefault("api-version")
+  valid_563924 = validateParameter(valid_563924, JString, required = true,
                                  default = nil)
-  if valid_568024 != nil:
-    section.add "api-version", valid_568024
+  if valid_563924 != nil:
+    section.add "api-version", valid_563924
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -139,36 +143,36 @@ proc validate_ListOperations_567864(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568047: Call_ListOperations_567863; path: JsonNode; query: JsonNode;
+proc call*(call_563947: Call_ListOperations_563761; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists all of the available Microsoft.Features REST API operations.
   ## 
-  let valid = call_568047.validator(path, query, header, formData, body)
-  let scheme = call_568047.pickScheme
+  let valid = call_563947.validator(path, query, header, formData, body)
+  let scheme = call_563947.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568047.url(scheme.get, call_568047.host, call_568047.base,
-                         call_568047.route, valid.getOrDefault("path"),
+  let url = call_563947.url(scheme.get, call_563947.host, call_563947.base,
+                         call_563947.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568047, url, valid)
+  result = hook(call_563947, url, valid)
 
-proc call*(call_568118: Call_ListOperations_567863; apiVersion: string): Recallable =
+proc call*(call_564018: Call_ListOperations_563761; apiVersion: string): Recallable =
   ## listOperations
   ## Lists all of the available Microsoft.Features REST API operations.
   ##   apiVersion: string (required)
   ##             : The API version to use for this operation.
-  var query_568119 = newJObject()
-  add(query_568119, "api-version", newJString(apiVersion))
-  result = call_568118.call(nil, query_568119, nil, nil, nil)
+  var query_564019 = newJObject()
+  add(query_564019, "api-version", newJString(apiVersion))
+  result = call_564018.call(nil, query_564019, nil, nil, nil)
 
-var listOperations* = Call_ListOperations_567863(name: "listOperations",
+var listOperations* = Call_ListOperations_563761(name: "listOperations",
     meth: HttpMethod.HttpGet, host: "management.azure.com",
     route: "/providers/Microsoft.Features/operations",
-    validator: validate_ListOperations_567864, base: "", url: url_ListOperations_567865,
+    validator: validate_ListOperations_563762, base: "", url: url_ListOperations_563763,
     schemes: {Scheme.Https})
 type
-  Call_FeaturesListAll_568159 = ref object of OpenApiRestCall_567641
-proc url_FeaturesListAll_568161(protocol: Scheme; host: string; base: string;
+  Call_FeaturesListAll_564059 = ref object of OpenApiRestCall_563539
+proc url_FeaturesListAll_564061(protocol: Scheme; host: string; base: string;
                                route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -184,7 +188,7 @@ proc url_FeaturesListAll_568161(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_FeaturesListAll_568160(path: JsonNode; query: JsonNode;
+proc validate_FeaturesListAll_564060(path: JsonNode; query: JsonNode;
                                     header: JsonNode; formData: JsonNode;
                                     body: JsonNode): JsonNode =
   ## Gets all the preview features that are available through AFEC for the subscription.
@@ -197,11 +201,11 @@ proc validate_FeaturesListAll_568160(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_568176 = path.getOrDefault("subscriptionId")
-  valid_568176 = validateParameter(valid_568176, JString, required = true,
+  var valid_564076 = path.getOrDefault("subscriptionId")
+  valid_564076 = validateParameter(valid_564076, JString, required = true,
                                  default = nil)
-  if valid_568176 != nil:
-    section.add "subscriptionId", valid_568176
+  if valid_564076 != nil:
+    section.add "subscriptionId", valid_564076
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -209,11 +213,11 @@ proc validate_FeaturesListAll_568160(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568177 = query.getOrDefault("api-version")
-  valid_568177 = validateParameter(valid_568177, JString, required = true,
+  var valid_564077 = query.getOrDefault("api-version")
+  valid_564077 = validateParameter(valid_564077, JString, required = true,
                                  default = nil)
-  if valid_568177 != nil:
-    section.add "api-version", valid_568177
+  if valid_564077 != nil:
+    section.add "api-version", valid_564077
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -222,20 +226,20 @@ proc validate_FeaturesListAll_568160(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568178: Call_FeaturesListAll_568159; path: JsonNode; query: JsonNode;
+proc call*(call_564078: Call_FeaturesListAll_564059; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets all the preview features that are available through AFEC for the subscription.
   ## 
-  let valid = call_568178.validator(path, query, header, formData, body)
-  let scheme = call_568178.pickScheme
+  let valid = call_564078.validator(path, query, header, formData, body)
+  let scheme = call_564078.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568178.url(scheme.get, call_568178.host, call_568178.base,
-                         call_568178.route, valid.getOrDefault("path"),
+  let url = call_564078.url(scheme.get, call_564078.host, call_564078.base,
+                         call_564078.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568178, url, valid)
+  result = hook(call_564078, url, valid)
 
-proc call*(call_568179: Call_FeaturesListAll_568159; apiVersion: string;
+proc call*(call_564079: Call_FeaturesListAll_564059; apiVersion: string;
           subscriptionId: string): Recallable =
   ## featuresListAll
   ## Gets all the preview features that are available through AFEC for the subscription.
@@ -243,19 +247,19 @@ proc call*(call_568179: Call_FeaturesListAll_568159; apiVersion: string;
   ##             : The API version to use for this operation.
   ##   subscriptionId: string (required)
   ##                 : The ID of the target subscription.
-  var path_568180 = newJObject()
-  var query_568181 = newJObject()
-  add(query_568181, "api-version", newJString(apiVersion))
-  add(path_568180, "subscriptionId", newJString(subscriptionId))
-  result = call_568179.call(path_568180, query_568181, nil, nil, nil)
+  var path_564080 = newJObject()
+  var query_564081 = newJObject()
+  add(query_564081, "api-version", newJString(apiVersion))
+  add(path_564080, "subscriptionId", newJString(subscriptionId))
+  result = call_564079.call(path_564080, query_564081, nil, nil, nil)
 
-var featuresListAll* = Call_FeaturesListAll_568159(name: "featuresListAll",
+var featuresListAll* = Call_FeaturesListAll_564059(name: "featuresListAll",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Features/features",
-    validator: validate_FeaturesListAll_568160, base: "", url: url_FeaturesListAll_568161,
+    validator: validate_FeaturesListAll_564060, base: "", url: url_FeaturesListAll_564061,
     schemes: {Scheme.Https})
 type
-  Call_FeaturesList_568182 = ref object of OpenApiRestCall_567641
-proc url_FeaturesList_568184(protocol: Scheme; host: string; base: string;
+  Call_FeaturesList_564082 = ref object of OpenApiRestCall_563539
+proc url_FeaturesList_564084(protocol: Scheme; host: string; base: string;
                             route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -275,30 +279,29 @@ proc url_FeaturesList_568184(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_FeaturesList_568183(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_FeaturesList_564083(path: JsonNode; query: JsonNode; header: JsonNode;
                                  formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets all the preview features in a provider namespace that are available through AFEC for the subscription.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   subscriptionId: JString (required)
-  ##                 : The ID of the target subscription.
   ##   resourceProviderNamespace: JString (required)
   ##                            : The namespace of the resource provider for getting features.
+  ##   subscriptionId: JString (required)
+  ##                 : The ID of the target subscription.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `subscriptionId` field"
-  var valid_568185 = path.getOrDefault("subscriptionId")
-  valid_568185 = validateParameter(valid_568185, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `resourceProviderNamespace` field"
+  var valid_564085 = path.getOrDefault("resourceProviderNamespace")
+  valid_564085 = validateParameter(valid_564085, JString, required = true,
                                  default = nil)
-  if valid_568185 != nil:
-    section.add "subscriptionId", valid_568185
-  var valid_568186 = path.getOrDefault("resourceProviderNamespace")
-  valid_568186 = validateParameter(valid_568186, JString, required = true,
+  if valid_564085 != nil:
+    section.add "resourceProviderNamespace", valid_564085
+  var valid_564086 = path.getOrDefault("subscriptionId")
+  valid_564086 = validateParameter(valid_564086, JString, required = true,
                                  default = nil)
-  if valid_568186 != nil:
-    section.add "resourceProviderNamespace", valid_568186
+  if valid_564086 != nil:
+    section.add "subscriptionId", valid_564086
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -306,11 +309,11 @@ proc validate_FeaturesList_568183(path: JsonNode; query: JsonNode; header: JsonN
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568187 = query.getOrDefault("api-version")
-  valid_568187 = validateParameter(valid_568187, JString, required = true,
+  var valid_564087 = query.getOrDefault("api-version")
+  valid_564087 = validateParameter(valid_564087, JString, required = true,
                                  default = nil)
-  if valid_568187 != nil:
-    section.add "api-version", valid_568187
+  if valid_564087 != nil:
+    section.add "api-version", valid_564087
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -319,44 +322,44 @@ proc validate_FeaturesList_568183(path: JsonNode; query: JsonNode; header: JsonN
   if body != nil:
     result.add "body", body
 
-proc call*(call_568188: Call_FeaturesList_568182; path: JsonNode; query: JsonNode;
+proc call*(call_564088: Call_FeaturesList_564082; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets all the preview features in a provider namespace that are available through AFEC for the subscription.
   ## 
-  let valid = call_568188.validator(path, query, header, formData, body)
-  let scheme = call_568188.pickScheme
+  let valid = call_564088.validator(path, query, header, formData, body)
+  let scheme = call_564088.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568188.url(scheme.get, call_568188.host, call_568188.base,
-                         call_568188.route, valid.getOrDefault("path"),
+  let url = call_564088.url(scheme.get, call_564088.host, call_564088.base,
+                         call_564088.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568188, url, valid)
+  result = hook(call_564088, url, valid)
 
-proc call*(call_568189: Call_FeaturesList_568182; apiVersion: string;
-          subscriptionId: string; resourceProviderNamespace: string): Recallable =
+proc call*(call_564089: Call_FeaturesList_564082; apiVersion: string;
+          resourceProviderNamespace: string; subscriptionId: string): Recallable =
   ## featuresList
   ## Gets all the preview features in a provider namespace that are available through AFEC for the subscription.
   ##   apiVersion: string (required)
   ##             : The API version to use for this operation.
-  ##   subscriptionId: string (required)
-  ##                 : The ID of the target subscription.
   ##   resourceProviderNamespace: string (required)
   ##                            : The namespace of the resource provider for getting features.
-  var path_568190 = newJObject()
-  var query_568191 = newJObject()
-  add(query_568191, "api-version", newJString(apiVersion))
-  add(path_568190, "subscriptionId", newJString(subscriptionId))
-  add(path_568190, "resourceProviderNamespace",
+  ##   subscriptionId: string (required)
+  ##                 : The ID of the target subscription.
+  var path_564090 = newJObject()
+  var query_564091 = newJObject()
+  add(query_564091, "api-version", newJString(apiVersion))
+  add(path_564090, "resourceProviderNamespace",
       newJString(resourceProviderNamespace))
-  result = call_568189.call(path_568190, query_568191, nil, nil, nil)
+  add(path_564090, "subscriptionId", newJString(subscriptionId))
+  result = call_564089.call(path_564090, query_564091, nil, nil, nil)
 
-var featuresList* = Call_FeaturesList_568182(name: "featuresList",
+var featuresList* = Call_FeaturesList_564082(name: "featuresList",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Features/providers/{resourceProviderNamespace}/features",
-    validator: validate_FeaturesList_568183, base: "", url: url_FeaturesList_568184,
+    validator: validate_FeaturesList_564083, base: "", url: url_FeaturesList_564084,
     schemes: {Scheme.Https})
 type
-  Call_FeaturesGet_568192 = ref object of OpenApiRestCall_567641
-proc url_FeaturesGet_568194(protocol: Scheme; host: string; base: string;
+  Call_FeaturesGet_564092 = ref object of OpenApiRestCall_563539
+proc url_FeaturesGet_564094(protocol: Scheme; host: string; base: string;
                            route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -378,37 +381,36 @@ proc url_FeaturesGet_568194(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_FeaturesGet_568193(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_FeaturesGet_564093(path: JsonNode; query: JsonNode; header: JsonNode;
                                 formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the preview feature with the specified name.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
+  ##   resourceProviderNamespace: JString (required)
+  ##                            : The resource provider namespace for the feature.
   ##   subscriptionId: JString (required)
   ##                 : The ID of the target subscription.
   ##   featureName: JString (required)
   ##              : The name of the feature to get.
-  ##   resourceProviderNamespace: JString (required)
-  ##                            : The resource provider namespace for the feature.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `subscriptionId` field"
-  var valid_568195 = path.getOrDefault("subscriptionId")
-  valid_568195 = validateParameter(valid_568195, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `resourceProviderNamespace` field"
+  var valid_564095 = path.getOrDefault("resourceProviderNamespace")
+  valid_564095 = validateParameter(valid_564095, JString, required = true,
                                  default = nil)
-  if valid_568195 != nil:
-    section.add "subscriptionId", valid_568195
-  var valid_568196 = path.getOrDefault("featureName")
-  valid_568196 = validateParameter(valid_568196, JString, required = true,
+  if valid_564095 != nil:
+    section.add "resourceProviderNamespace", valid_564095
+  var valid_564096 = path.getOrDefault("subscriptionId")
+  valid_564096 = validateParameter(valid_564096, JString, required = true,
                                  default = nil)
-  if valid_568196 != nil:
-    section.add "featureName", valid_568196
-  var valid_568197 = path.getOrDefault("resourceProviderNamespace")
-  valid_568197 = validateParameter(valid_568197, JString, required = true,
+  if valid_564096 != nil:
+    section.add "subscriptionId", valid_564096
+  var valid_564097 = path.getOrDefault("featureName")
+  valid_564097 = validateParameter(valid_564097, JString, required = true,
                                  default = nil)
-  if valid_568197 != nil:
-    section.add "resourceProviderNamespace", valid_568197
+  if valid_564097 != nil:
+    section.add "featureName", valid_564097
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -416,11 +418,11 @@ proc validate_FeaturesGet_568193(path: JsonNode; query: JsonNode; header: JsonNo
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568198 = query.getOrDefault("api-version")
-  valid_568198 = validateParameter(valid_568198, JString, required = true,
+  var valid_564098 = query.getOrDefault("api-version")
+  valid_564098 = validateParameter(valid_564098, JString, required = true,
                                  default = nil)
-  if valid_568198 != nil:
-    section.add "api-version", valid_568198
+  if valid_564098 != nil:
+    section.add "api-version", valid_564098
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -429,50 +431,50 @@ proc validate_FeaturesGet_568193(path: JsonNode; query: JsonNode; header: JsonNo
   if body != nil:
     result.add "body", body
 
-proc call*(call_568199: Call_FeaturesGet_568192; path: JsonNode; query: JsonNode;
+proc call*(call_564099: Call_FeaturesGet_564092; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the preview feature with the specified name.
   ## 
-  let valid = call_568199.validator(path, query, header, formData, body)
-  let scheme = call_568199.pickScheme
+  let valid = call_564099.validator(path, query, header, formData, body)
+  let scheme = call_564099.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568199.url(scheme.get, call_568199.host, call_568199.base,
-                         call_568199.route, valid.getOrDefault("path"),
+  let url = call_564099.url(scheme.get, call_564099.host, call_564099.base,
+                         call_564099.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568199, url, valid)
+  result = hook(call_564099, url, valid)
 
-proc call*(call_568200: Call_FeaturesGet_568192; apiVersion: string;
-          subscriptionId: string; featureName: string;
-          resourceProviderNamespace: string): Recallable =
+proc call*(call_564100: Call_FeaturesGet_564092; apiVersion: string;
+          resourceProviderNamespace: string; subscriptionId: string;
+          featureName: string): Recallable =
   ## featuresGet
   ## Gets the preview feature with the specified name.
   ##   apiVersion: string (required)
   ##             : The API version to use for this operation.
+  ##   resourceProviderNamespace: string (required)
+  ##                            : The resource provider namespace for the feature.
   ##   subscriptionId: string (required)
   ##                 : The ID of the target subscription.
   ##   featureName: string (required)
   ##              : The name of the feature to get.
-  ##   resourceProviderNamespace: string (required)
-  ##                            : The resource provider namespace for the feature.
-  var path_568201 = newJObject()
-  var query_568202 = newJObject()
-  add(query_568202, "api-version", newJString(apiVersion))
-  add(path_568201, "subscriptionId", newJString(subscriptionId))
-  add(path_568201, "featureName", newJString(featureName))
-  add(path_568201, "resourceProviderNamespace",
+  var path_564101 = newJObject()
+  var query_564102 = newJObject()
+  add(query_564102, "api-version", newJString(apiVersion))
+  add(path_564101, "resourceProviderNamespace",
       newJString(resourceProviderNamespace))
-  result = call_568200.call(path_568201, query_568202, nil, nil, nil)
+  add(path_564101, "subscriptionId", newJString(subscriptionId))
+  add(path_564101, "featureName", newJString(featureName))
+  result = call_564100.call(path_564101, query_564102, nil, nil, nil)
 
-var featuresGet* = Call_FeaturesGet_568192(name: "featuresGet",
+var featuresGet* = Call_FeaturesGet_564092(name: "featuresGet",
                                         meth: HttpMethod.HttpGet,
                                         host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Features/providers/{resourceProviderNamespace}/features/{featureName}",
-                                        validator: validate_FeaturesGet_568193,
-                                        base: "", url: url_FeaturesGet_568194,
+                                        validator: validate_FeaturesGet_564093,
+                                        base: "", url: url_FeaturesGet_564094,
                                         schemes: {Scheme.Https})
 type
-  Call_FeaturesRegister_568203 = ref object of OpenApiRestCall_567641
-proc url_FeaturesRegister_568205(protocol: Scheme; host: string; base: string;
+  Call_FeaturesRegister_564103 = ref object of OpenApiRestCall_563539
+proc url_FeaturesRegister_564105(protocol: Scheme; host: string; base: string;
                                 route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -495,7 +497,7 @@ proc url_FeaturesRegister_568205(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_FeaturesRegister_568204(path: JsonNode; query: JsonNode;
+proc validate_FeaturesRegister_564104(path: JsonNode; query: JsonNode;
                                      header: JsonNode; formData: JsonNode;
                                      body: JsonNode): JsonNode =
   ## Registers the preview feature for the subscription.
@@ -503,30 +505,29 @@ proc validate_FeaturesRegister_568204(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
+  ##   resourceProviderNamespace: JString (required)
+  ##                            : The namespace of the resource provider.
   ##   subscriptionId: JString (required)
   ##                 : The ID of the target subscription.
   ##   featureName: JString (required)
   ##              : The name of the feature to register.
-  ##   resourceProviderNamespace: JString (required)
-  ##                            : The namespace of the resource provider.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `subscriptionId` field"
-  var valid_568206 = path.getOrDefault("subscriptionId")
-  valid_568206 = validateParameter(valid_568206, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `resourceProviderNamespace` field"
+  var valid_564106 = path.getOrDefault("resourceProviderNamespace")
+  valid_564106 = validateParameter(valid_564106, JString, required = true,
                                  default = nil)
-  if valid_568206 != nil:
-    section.add "subscriptionId", valid_568206
-  var valid_568207 = path.getOrDefault("featureName")
-  valid_568207 = validateParameter(valid_568207, JString, required = true,
+  if valid_564106 != nil:
+    section.add "resourceProviderNamespace", valid_564106
+  var valid_564107 = path.getOrDefault("subscriptionId")
+  valid_564107 = validateParameter(valid_564107, JString, required = true,
                                  default = nil)
-  if valid_568207 != nil:
-    section.add "featureName", valid_568207
-  var valid_568208 = path.getOrDefault("resourceProviderNamespace")
-  valid_568208 = validateParameter(valid_568208, JString, required = true,
+  if valid_564107 != nil:
+    section.add "subscriptionId", valid_564107
+  var valid_564108 = path.getOrDefault("featureName")
+  valid_564108 = validateParameter(valid_564108, JString, required = true,
                                  default = nil)
-  if valid_568208 != nil:
-    section.add "resourceProviderNamespace", valid_568208
+  if valid_564108 != nil:
+    section.add "featureName", valid_564108
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -534,11 +535,11 @@ proc validate_FeaturesRegister_568204(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568209 = query.getOrDefault("api-version")
-  valid_568209 = validateParameter(valid_568209, JString, required = true,
+  var valid_564109 = query.getOrDefault("api-version")
+  valid_564109 = validateParameter(valid_564109, JString, required = true,
                                  default = nil)
-  if valid_568209 != nil:
-    section.add "api-version", valid_568209
+  if valid_564109 != nil:
+    section.add "api-version", valid_564109
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -547,45 +548,45 @@ proc validate_FeaturesRegister_568204(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568210: Call_FeaturesRegister_568203; path: JsonNode;
+proc call*(call_564110: Call_FeaturesRegister_564103; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Registers the preview feature for the subscription.
   ## 
-  let valid = call_568210.validator(path, query, header, formData, body)
-  let scheme = call_568210.pickScheme
+  let valid = call_564110.validator(path, query, header, formData, body)
+  let scheme = call_564110.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568210.url(scheme.get, call_568210.host, call_568210.base,
-                         call_568210.route, valid.getOrDefault("path"),
+  let url = call_564110.url(scheme.get, call_564110.host, call_564110.base,
+                         call_564110.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568210, url, valid)
+  result = hook(call_564110, url, valid)
 
-proc call*(call_568211: Call_FeaturesRegister_568203; apiVersion: string;
-          subscriptionId: string; featureName: string;
-          resourceProviderNamespace: string): Recallable =
+proc call*(call_564111: Call_FeaturesRegister_564103; apiVersion: string;
+          resourceProviderNamespace: string; subscriptionId: string;
+          featureName: string): Recallable =
   ## featuresRegister
   ## Registers the preview feature for the subscription.
   ##   apiVersion: string (required)
   ##             : The API version to use for this operation.
+  ##   resourceProviderNamespace: string (required)
+  ##                            : The namespace of the resource provider.
   ##   subscriptionId: string (required)
   ##                 : The ID of the target subscription.
   ##   featureName: string (required)
   ##              : The name of the feature to register.
-  ##   resourceProviderNamespace: string (required)
-  ##                            : The namespace of the resource provider.
-  var path_568212 = newJObject()
-  var query_568213 = newJObject()
-  add(query_568213, "api-version", newJString(apiVersion))
-  add(path_568212, "subscriptionId", newJString(subscriptionId))
-  add(path_568212, "featureName", newJString(featureName))
-  add(path_568212, "resourceProviderNamespace",
+  var path_564112 = newJObject()
+  var query_564113 = newJObject()
+  add(query_564113, "api-version", newJString(apiVersion))
+  add(path_564112, "resourceProviderNamespace",
       newJString(resourceProviderNamespace))
-  result = call_568211.call(path_568212, query_568213, nil, nil, nil)
+  add(path_564112, "subscriptionId", newJString(subscriptionId))
+  add(path_564112, "featureName", newJString(featureName))
+  result = call_564111.call(path_564112, query_564113, nil, nil, nil)
 
-var featuresRegister* = Call_FeaturesRegister_568203(name: "featuresRegister",
+var featuresRegister* = Call_FeaturesRegister_564103(name: "featuresRegister",
     meth: HttpMethod.HttpPost, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Features/providers/{resourceProviderNamespace}/features/{featureName}/register",
-    validator: validate_FeaturesRegister_568204, base: "",
-    url: url_FeaturesRegister_568205, schemes: {Scheme.Https})
+    validator: validate_FeaturesRegister_564104, base: "",
+    url: url_FeaturesRegister_564105, schemes: {Scheme.Https})
 export
   rest
 

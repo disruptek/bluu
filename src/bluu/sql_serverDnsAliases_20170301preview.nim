@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, httpcore
 
 ## auto-generated via openapi macro
 ## title: SqlManagementClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_567641 = ref object of OpenApiRestCall
+  OpenApiRestCall_563539 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_567641](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563539](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_567641): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563539): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,8 +107,8 @@ const
   macServiceName = "sql-serverDnsAliases"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_ServerDnsAliasesListByServer_567863 = ref object of OpenApiRestCall_567641
-proc url_ServerDnsAliasesListByServer_567865(protocol: Scheme; host: string;
+  Call_ServerDnsAliasesListByServer_563761 = ref object of OpenApiRestCall_563539
+proc url_ServerDnsAliasesListByServer_563763(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -127,37 +131,37 @@ proc url_ServerDnsAliasesListByServer_567865(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ServerDnsAliasesListByServer_567864(path: JsonNode; query: JsonNode;
+proc validate_ServerDnsAliasesListByServer_563762(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets a list of server DNS aliases for a server.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   ##   serverName: JString (required)
   ##             : The name of the server that the alias is pointing to.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID that identifies an Azure subscription.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568038 = path.getOrDefault("resourceGroupName")
-  valid_568038 = validateParameter(valid_568038, JString, required = true,
+        "path argument is necessary due to required `serverName` field"
+  var valid_563938 = path.getOrDefault("serverName")
+  valid_563938 = validateParameter(valid_563938, JString, required = true,
                                  default = nil)
-  if valid_568038 != nil:
-    section.add "resourceGroupName", valid_568038
-  var valid_568039 = path.getOrDefault("serverName")
-  valid_568039 = validateParameter(valid_568039, JString, required = true,
+  if valid_563938 != nil:
+    section.add "serverName", valid_563938
+  var valid_563939 = path.getOrDefault("subscriptionId")
+  valid_563939 = validateParameter(valid_563939, JString, required = true,
                                  default = nil)
-  if valid_568039 != nil:
-    section.add "serverName", valid_568039
-  var valid_568040 = path.getOrDefault("subscriptionId")
-  valid_568040 = validateParameter(valid_568040, JString, required = true,
+  if valid_563939 != nil:
+    section.add "subscriptionId", valid_563939
+  var valid_563940 = path.getOrDefault("resourceGroupName")
+  valid_563940 = validateParameter(valid_563940, JString, required = true,
                                  default = nil)
-  if valid_568040 != nil:
-    section.add "subscriptionId", valid_568040
+  if valid_563940 != nil:
+    section.add "resourceGroupName", valid_563940
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -165,11 +169,11 @@ proc validate_ServerDnsAliasesListByServer_567864(path: JsonNode; query: JsonNod
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568041 = query.getOrDefault("api-version")
-  valid_568041 = validateParameter(valid_568041, JString, required = true,
+  var valid_563941 = query.getOrDefault("api-version")
+  valid_563941 = validateParameter(valid_563941, JString, required = true,
                                  default = nil)
-  if valid_568041 != nil:
-    section.add "api-version", valid_568041
+  if valid_563941 != nil:
+    section.add "api-version", valid_563941
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -178,48 +182,48 @@ proc validate_ServerDnsAliasesListByServer_567864(path: JsonNode; query: JsonNod
   if body != nil:
     result.add "body", body
 
-proc call*(call_568064: Call_ServerDnsAliasesListByServer_567863; path: JsonNode;
+proc call*(call_563964: Call_ServerDnsAliasesListByServer_563761; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets a list of server DNS aliases for a server.
   ## 
-  let valid = call_568064.validator(path, query, header, formData, body)
-  let scheme = call_568064.pickScheme
+  let valid = call_563964.validator(path, query, header, formData, body)
+  let scheme = call_563964.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568064.url(scheme.get, call_568064.host, call_568064.base,
-                         call_568064.route, valid.getOrDefault("path"),
+  let url = call_563964.url(scheme.get, call_563964.host, call_563964.base,
+                         call_563964.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568064, url, valid)
+  result = hook(call_563964, url, valid)
 
-proc call*(call_568135: Call_ServerDnsAliasesListByServer_567863;
-          resourceGroupName: string; apiVersion: string; serverName: string;
-          subscriptionId: string): Recallable =
+proc call*(call_564035: Call_ServerDnsAliasesListByServer_563761;
+          apiVersion: string; serverName: string; subscriptionId: string;
+          resourceGroupName: string): Recallable =
   ## serverDnsAliasesListByServer
   ## Gets a list of server DNS aliases for a server.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   ##   apiVersion: string (required)
   ##             : The API version to use for the request.
   ##   serverName: string (required)
   ##             : The name of the server that the alias is pointing to.
   ##   subscriptionId: string (required)
   ##                 : The subscription ID that identifies an Azure subscription.
-  var path_568136 = newJObject()
-  var query_568138 = newJObject()
-  add(path_568136, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568138, "api-version", newJString(apiVersion))
-  add(path_568136, "serverName", newJString(serverName))
-  add(path_568136, "subscriptionId", newJString(subscriptionId))
-  result = call_568135.call(path_568136, query_568138, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
+  var path_564036 = newJObject()
+  var query_564038 = newJObject()
+  add(query_564038, "api-version", newJString(apiVersion))
+  add(path_564036, "serverName", newJString(serverName))
+  add(path_564036, "subscriptionId", newJString(subscriptionId))
+  add(path_564036, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564035.call(path_564036, query_564038, nil, nil, nil)
 
-var serverDnsAliasesListByServer* = Call_ServerDnsAliasesListByServer_567863(
+var serverDnsAliasesListByServer* = Call_ServerDnsAliasesListByServer_563761(
     name: "serverDnsAliasesListByServer", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/servers/{serverName}/dnsAliases",
-    validator: validate_ServerDnsAliasesListByServer_567864, base: "",
-    url: url_ServerDnsAliasesListByServer_567865, schemes: {Scheme.Https})
+    validator: validate_ServerDnsAliasesListByServer_563762, base: "",
+    url: url_ServerDnsAliasesListByServer_563763, schemes: {Scheme.Https})
 type
-  Call_ServerDnsAliasesCreateOrUpdate_568189 = ref object of OpenApiRestCall_567641
-proc url_ServerDnsAliasesCreateOrUpdate_568191(protocol: Scheme; host: string;
+  Call_ServerDnsAliasesCreateOrUpdate_564089 = ref object of OpenApiRestCall_563539
+proc url_ServerDnsAliasesCreateOrUpdate_564091(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -244,44 +248,44 @@ proc url_ServerDnsAliasesCreateOrUpdate_568191(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ServerDnsAliasesCreateOrUpdate_568190(path: JsonNode;
+proc validate_ServerDnsAliasesCreateOrUpdate_564090(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Creates a server dns alias.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   ##   serverName: JString (required)
   ##             : The name of the server that the alias is pointing to.
-  ##   subscriptionId: JString (required)
-  ##                 : The subscription ID that identifies an Azure subscription.
   ##   dnsAliasName: JString (required)
   ##               : The name of the server DNS alias.
+  ##   subscriptionId: JString (required)
+  ##                 : The subscription ID that identifies an Azure subscription.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568192 = path.getOrDefault("resourceGroupName")
-  valid_568192 = validateParameter(valid_568192, JString, required = true,
+        "path argument is necessary due to required `serverName` field"
+  var valid_564092 = path.getOrDefault("serverName")
+  valid_564092 = validateParameter(valid_564092, JString, required = true,
                                  default = nil)
-  if valid_568192 != nil:
-    section.add "resourceGroupName", valid_568192
-  var valid_568193 = path.getOrDefault("serverName")
-  valid_568193 = validateParameter(valid_568193, JString, required = true,
+  if valid_564092 != nil:
+    section.add "serverName", valid_564092
+  var valid_564093 = path.getOrDefault("dnsAliasName")
+  valid_564093 = validateParameter(valid_564093, JString, required = true,
                                  default = nil)
-  if valid_568193 != nil:
-    section.add "serverName", valid_568193
-  var valid_568194 = path.getOrDefault("subscriptionId")
-  valid_568194 = validateParameter(valid_568194, JString, required = true,
+  if valid_564093 != nil:
+    section.add "dnsAliasName", valid_564093
+  var valid_564094 = path.getOrDefault("subscriptionId")
+  valid_564094 = validateParameter(valid_564094, JString, required = true,
                                  default = nil)
-  if valid_568194 != nil:
-    section.add "subscriptionId", valid_568194
-  var valid_568195 = path.getOrDefault("dnsAliasName")
-  valid_568195 = validateParameter(valid_568195, JString, required = true,
+  if valid_564094 != nil:
+    section.add "subscriptionId", valid_564094
+  var valid_564095 = path.getOrDefault("resourceGroupName")
+  valid_564095 = validateParameter(valid_564095, JString, required = true,
                                  default = nil)
-  if valid_568195 != nil:
-    section.add "dnsAliasName", valid_568195
+  if valid_564095 != nil:
+    section.add "resourceGroupName", valid_564095
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -289,11 +293,11 @@ proc validate_ServerDnsAliasesCreateOrUpdate_568190(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568196 = query.getOrDefault("api-version")
-  valid_568196 = validateParameter(valid_568196, JString, required = true,
+  var valid_564096 = query.getOrDefault("api-version")
+  valid_564096 = validateParameter(valid_564096, JString, required = true,
                                  default = nil)
-  if valid_568196 != nil:
-    section.add "api-version", valid_568196
+  if valid_564096 != nil:
+    section.add "api-version", valid_564096
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -302,51 +306,51 @@ proc validate_ServerDnsAliasesCreateOrUpdate_568190(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568197: Call_ServerDnsAliasesCreateOrUpdate_568189; path: JsonNode;
+proc call*(call_564097: Call_ServerDnsAliasesCreateOrUpdate_564089; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Creates a server dns alias.
   ## 
-  let valid = call_568197.validator(path, query, header, formData, body)
-  let scheme = call_568197.pickScheme
+  let valid = call_564097.validator(path, query, header, formData, body)
+  let scheme = call_564097.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568197.url(scheme.get, call_568197.host, call_568197.base,
-                         call_568197.route, valid.getOrDefault("path"),
+  let url = call_564097.url(scheme.get, call_564097.host, call_564097.base,
+                         call_564097.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568197, url, valid)
+  result = hook(call_564097, url, valid)
 
-proc call*(call_568198: Call_ServerDnsAliasesCreateOrUpdate_568189;
-          resourceGroupName: string; apiVersion: string; serverName: string;
-          subscriptionId: string; dnsAliasName: string): Recallable =
+proc call*(call_564098: Call_ServerDnsAliasesCreateOrUpdate_564089;
+          apiVersion: string; serverName: string; dnsAliasName: string;
+          subscriptionId: string; resourceGroupName: string): Recallable =
   ## serverDnsAliasesCreateOrUpdate
   ## Creates a server dns alias.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   ##   apiVersion: string (required)
   ##             : The API version to use for the request.
   ##   serverName: string (required)
   ##             : The name of the server that the alias is pointing to.
-  ##   subscriptionId: string (required)
-  ##                 : The subscription ID that identifies an Azure subscription.
   ##   dnsAliasName: string (required)
   ##               : The name of the server DNS alias.
-  var path_568199 = newJObject()
-  var query_568200 = newJObject()
-  add(path_568199, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568200, "api-version", newJString(apiVersion))
-  add(path_568199, "serverName", newJString(serverName))
-  add(path_568199, "subscriptionId", newJString(subscriptionId))
-  add(path_568199, "dnsAliasName", newJString(dnsAliasName))
-  result = call_568198.call(path_568199, query_568200, nil, nil, nil)
+  ##   subscriptionId: string (required)
+  ##                 : The subscription ID that identifies an Azure subscription.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
+  var path_564099 = newJObject()
+  var query_564100 = newJObject()
+  add(query_564100, "api-version", newJString(apiVersion))
+  add(path_564099, "serverName", newJString(serverName))
+  add(path_564099, "dnsAliasName", newJString(dnsAliasName))
+  add(path_564099, "subscriptionId", newJString(subscriptionId))
+  add(path_564099, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564098.call(path_564099, query_564100, nil, nil, nil)
 
-var serverDnsAliasesCreateOrUpdate* = Call_ServerDnsAliasesCreateOrUpdate_568189(
+var serverDnsAliasesCreateOrUpdate* = Call_ServerDnsAliasesCreateOrUpdate_564089(
     name: "serverDnsAliasesCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/servers/{serverName}/dnsAliases/{dnsAliasName}",
-    validator: validate_ServerDnsAliasesCreateOrUpdate_568190, base: "",
-    url: url_ServerDnsAliasesCreateOrUpdate_568191, schemes: {Scheme.Https})
+    validator: validate_ServerDnsAliasesCreateOrUpdate_564090, base: "",
+    url: url_ServerDnsAliasesCreateOrUpdate_564091, schemes: {Scheme.Https})
 type
-  Call_ServerDnsAliasesGet_568177 = ref object of OpenApiRestCall_567641
-proc url_ServerDnsAliasesGet_568179(protocol: Scheme; host: string; base: string;
+  Call_ServerDnsAliasesGet_564077 = ref object of OpenApiRestCall_563539
+proc url_ServerDnsAliasesGet_564079(protocol: Scheme; host: string; base: string;
                                    route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -371,7 +375,7 @@ proc url_ServerDnsAliasesGet_568179(protocol: Scheme; host: string; base: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ServerDnsAliasesGet_568178(path: JsonNode; query: JsonNode;
+proc validate_ServerDnsAliasesGet_564078(path: JsonNode; query: JsonNode;
                                         header: JsonNode; formData: JsonNode;
                                         body: JsonNode): JsonNode =
   ## Gets a server DNS alias.
@@ -379,37 +383,37 @@ proc validate_ServerDnsAliasesGet_568178(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   ##   serverName: JString (required)
   ##             : The name of the server that the alias is pointing to.
-  ##   subscriptionId: JString (required)
-  ##                 : The subscription ID that identifies an Azure subscription.
   ##   dnsAliasName: JString (required)
   ##               : The name of the server DNS alias.
+  ##   subscriptionId: JString (required)
+  ##                 : The subscription ID that identifies an Azure subscription.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568180 = path.getOrDefault("resourceGroupName")
-  valid_568180 = validateParameter(valid_568180, JString, required = true,
+        "path argument is necessary due to required `serverName` field"
+  var valid_564080 = path.getOrDefault("serverName")
+  valid_564080 = validateParameter(valid_564080, JString, required = true,
                                  default = nil)
-  if valid_568180 != nil:
-    section.add "resourceGroupName", valid_568180
-  var valid_568181 = path.getOrDefault("serverName")
-  valid_568181 = validateParameter(valid_568181, JString, required = true,
+  if valid_564080 != nil:
+    section.add "serverName", valid_564080
+  var valid_564081 = path.getOrDefault("dnsAliasName")
+  valid_564081 = validateParameter(valid_564081, JString, required = true,
                                  default = nil)
-  if valid_568181 != nil:
-    section.add "serverName", valid_568181
-  var valid_568182 = path.getOrDefault("subscriptionId")
-  valid_568182 = validateParameter(valid_568182, JString, required = true,
+  if valid_564081 != nil:
+    section.add "dnsAliasName", valid_564081
+  var valid_564082 = path.getOrDefault("subscriptionId")
+  valid_564082 = validateParameter(valid_564082, JString, required = true,
                                  default = nil)
-  if valid_568182 != nil:
-    section.add "subscriptionId", valid_568182
-  var valid_568183 = path.getOrDefault("dnsAliasName")
-  valid_568183 = validateParameter(valid_568183, JString, required = true,
+  if valid_564082 != nil:
+    section.add "subscriptionId", valid_564082
+  var valid_564083 = path.getOrDefault("resourceGroupName")
+  valid_564083 = validateParameter(valid_564083, JString, required = true,
                                  default = nil)
-  if valid_568183 != nil:
-    section.add "dnsAliasName", valid_568183
+  if valid_564083 != nil:
+    section.add "resourceGroupName", valid_564083
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -417,11 +421,11 @@ proc validate_ServerDnsAliasesGet_568178(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568184 = query.getOrDefault("api-version")
-  valid_568184 = validateParameter(valid_568184, JString, required = true,
+  var valid_564084 = query.getOrDefault("api-version")
+  valid_564084 = validateParameter(valid_564084, JString, required = true,
                                  default = nil)
-  if valid_568184 != nil:
-    section.add "api-version", valid_568184
+  if valid_564084 != nil:
+    section.add "api-version", valid_564084
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -430,51 +434,51 @@ proc validate_ServerDnsAliasesGet_568178(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568185: Call_ServerDnsAliasesGet_568177; path: JsonNode;
+proc call*(call_564085: Call_ServerDnsAliasesGet_564077; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets a server DNS alias.
   ## 
-  let valid = call_568185.validator(path, query, header, formData, body)
-  let scheme = call_568185.pickScheme
+  let valid = call_564085.validator(path, query, header, formData, body)
+  let scheme = call_564085.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568185.url(scheme.get, call_568185.host, call_568185.base,
-                         call_568185.route, valid.getOrDefault("path"),
+  let url = call_564085.url(scheme.get, call_564085.host, call_564085.base,
+                         call_564085.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568185, url, valid)
+  result = hook(call_564085, url, valid)
 
-proc call*(call_568186: Call_ServerDnsAliasesGet_568177; resourceGroupName: string;
-          apiVersion: string; serverName: string; subscriptionId: string;
-          dnsAliasName: string): Recallable =
+proc call*(call_564086: Call_ServerDnsAliasesGet_564077; apiVersion: string;
+          serverName: string; dnsAliasName: string; subscriptionId: string;
+          resourceGroupName: string): Recallable =
   ## serverDnsAliasesGet
   ## Gets a server DNS alias.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   ##   apiVersion: string (required)
   ##             : The API version to use for the request.
   ##   serverName: string (required)
   ##             : The name of the server that the alias is pointing to.
-  ##   subscriptionId: string (required)
-  ##                 : The subscription ID that identifies an Azure subscription.
   ##   dnsAliasName: string (required)
   ##               : The name of the server DNS alias.
-  var path_568187 = newJObject()
-  var query_568188 = newJObject()
-  add(path_568187, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568188, "api-version", newJString(apiVersion))
-  add(path_568187, "serverName", newJString(serverName))
-  add(path_568187, "subscriptionId", newJString(subscriptionId))
-  add(path_568187, "dnsAliasName", newJString(dnsAliasName))
-  result = call_568186.call(path_568187, query_568188, nil, nil, nil)
+  ##   subscriptionId: string (required)
+  ##                 : The subscription ID that identifies an Azure subscription.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
+  var path_564087 = newJObject()
+  var query_564088 = newJObject()
+  add(query_564088, "api-version", newJString(apiVersion))
+  add(path_564087, "serverName", newJString(serverName))
+  add(path_564087, "dnsAliasName", newJString(dnsAliasName))
+  add(path_564087, "subscriptionId", newJString(subscriptionId))
+  add(path_564087, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564086.call(path_564087, query_564088, nil, nil, nil)
 
-var serverDnsAliasesGet* = Call_ServerDnsAliasesGet_568177(
+var serverDnsAliasesGet* = Call_ServerDnsAliasesGet_564077(
     name: "serverDnsAliasesGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/servers/{serverName}/dnsAliases/{dnsAliasName}",
-    validator: validate_ServerDnsAliasesGet_568178, base: "",
-    url: url_ServerDnsAliasesGet_568179, schemes: {Scheme.Https})
+    validator: validate_ServerDnsAliasesGet_564078, base: "",
+    url: url_ServerDnsAliasesGet_564079, schemes: {Scheme.Https})
 type
-  Call_ServerDnsAliasesDelete_568201 = ref object of OpenApiRestCall_567641
-proc url_ServerDnsAliasesDelete_568203(protocol: Scheme; host: string; base: string;
+  Call_ServerDnsAliasesDelete_564101 = ref object of OpenApiRestCall_563539
+proc url_ServerDnsAliasesDelete_564103(protocol: Scheme; host: string; base: string;
                                       route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -499,44 +503,44 @@ proc url_ServerDnsAliasesDelete_568203(protocol: Scheme; host: string; base: str
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ServerDnsAliasesDelete_568202(path: JsonNode; query: JsonNode;
+proc validate_ServerDnsAliasesDelete_564102(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Deletes the server DNS alias with the given name.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   ##   serverName: JString (required)
   ##             : The name of the server that the alias is pointing to.
-  ##   subscriptionId: JString (required)
-  ##                 : The subscription ID that identifies an Azure subscription.
   ##   dnsAliasName: JString (required)
   ##               : The name of the server DNS alias.
+  ##   subscriptionId: JString (required)
+  ##                 : The subscription ID that identifies an Azure subscription.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568204 = path.getOrDefault("resourceGroupName")
-  valid_568204 = validateParameter(valid_568204, JString, required = true,
+        "path argument is necessary due to required `serverName` field"
+  var valid_564104 = path.getOrDefault("serverName")
+  valid_564104 = validateParameter(valid_564104, JString, required = true,
                                  default = nil)
-  if valid_568204 != nil:
-    section.add "resourceGroupName", valid_568204
-  var valid_568205 = path.getOrDefault("serverName")
-  valid_568205 = validateParameter(valid_568205, JString, required = true,
+  if valid_564104 != nil:
+    section.add "serverName", valid_564104
+  var valid_564105 = path.getOrDefault("dnsAliasName")
+  valid_564105 = validateParameter(valid_564105, JString, required = true,
                                  default = nil)
-  if valid_568205 != nil:
-    section.add "serverName", valid_568205
-  var valid_568206 = path.getOrDefault("subscriptionId")
-  valid_568206 = validateParameter(valid_568206, JString, required = true,
+  if valid_564105 != nil:
+    section.add "dnsAliasName", valid_564105
+  var valid_564106 = path.getOrDefault("subscriptionId")
+  valid_564106 = validateParameter(valid_564106, JString, required = true,
                                  default = nil)
-  if valid_568206 != nil:
-    section.add "subscriptionId", valid_568206
-  var valid_568207 = path.getOrDefault("dnsAliasName")
-  valid_568207 = validateParameter(valid_568207, JString, required = true,
+  if valid_564106 != nil:
+    section.add "subscriptionId", valid_564106
+  var valid_564107 = path.getOrDefault("resourceGroupName")
+  valid_564107 = validateParameter(valid_564107, JString, required = true,
                                  default = nil)
-  if valid_568207 != nil:
-    section.add "dnsAliasName", valid_568207
+  if valid_564107 != nil:
+    section.add "resourceGroupName", valid_564107
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -544,11 +548,11 @@ proc validate_ServerDnsAliasesDelete_568202(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568208 = query.getOrDefault("api-version")
-  valid_568208 = validateParameter(valid_568208, JString, required = true,
+  var valid_564108 = query.getOrDefault("api-version")
+  valid_564108 = validateParameter(valid_564108, JString, required = true,
                                  default = nil)
-  if valid_568208 != nil:
-    section.add "api-version", valid_568208
+  if valid_564108 != nil:
+    section.add "api-version", valid_564108
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -557,51 +561,51 @@ proc validate_ServerDnsAliasesDelete_568202(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568209: Call_ServerDnsAliasesDelete_568201; path: JsonNode;
+proc call*(call_564109: Call_ServerDnsAliasesDelete_564101; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes the server DNS alias with the given name.
   ## 
-  let valid = call_568209.validator(path, query, header, formData, body)
-  let scheme = call_568209.pickScheme
+  let valid = call_564109.validator(path, query, header, formData, body)
+  let scheme = call_564109.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568209.url(scheme.get, call_568209.host, call_568209.base,
-                         call_568209.route, valid.getOrDefault("path"),
+  let url = call_564109.url(scheme.get, call_564109.host, call_564109.base,
+                         call_564109.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568209, url, valid)
+  result = hook(call_564109, url, valid)
 
-proc call*(call_568210: Call_ServerDnsAliasesDelete_568201;
-          resourceGroupName: string; apiVersion: string; serverName: string;
-          subscriptionId: string; dnsAliasName: string): Recallable =
+proc call*(call_564110: Call_ServerDnsAliasesDelete_564101; apiVersion: string;
+          serverName: string; dnsAliasName: string; subscriptionId: string;
+          resourceGroupName: string): Recallable =
   ## serverDnsAliasesDelete
   ## Deletes the server DNS alias with the given name.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   ##   apiVersion: string (required)
   ##             : The API version to use for the request.
   ##   serverName: string (required)
   ##             : The name of the server that the alias is pointing to.
-  ##   subscriptionId: string (required)
-  ##                 : The subscription ID that identifies an Azure subscription.
   ##   dnsAliasName: string (required)
   ##               : The name of the server DNS alias.
-  var path_568211 = newJObject()
-  var query_568212 = newJObject()
-  add(path_568211, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568212, "api-version", newJString(apiVersion))
-  add(path_568211, "serverName", newJString(serverName))
-  add(path_568211, "subscriptionId", newJString(subscriptionId))
-  add(path_568211, "dnsAliasName", newJString(dnsAliasName))
-  result = call_568210.call(path_568211, query_568212, nil, nil, nil)
+  ##   subscriptionId: string (required)
+  ##                 : The subscription ID that identifies an Azure subscription.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
+  var path_564111 = newJObject()
+  var query_564112 = newJObject()
+  add(query_564112, "api-version", newJString(apiVersion))
+  add(path_564111, "serverName", newJString(serverName))
+  add(path_564111, "dnsAliasName", newJString(dnsAliasName))
+  add(path_564111, "subscriptionId", newJString(subscriptionId))
+  add(path_564111, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564110.call(path_564111, query_564112, nil, nil, nil)
 
-var serverDnsAliasesDelete* = Call_ServerDnsAliasesDelete_568201(
+var serverDnsAliasesDelete* = Call_ServerDnsAliasesDelete_564101(
     name: "serverDnsAliasesDelete", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/servers/{serverName}/dnsAliases/{dnsAliasName}",
-    validator: validate_ServerDnsAliasesDelete_568202, base: "",
-    url: url_ServerDnsAliasesDelete_568203, schemes: {Scheme.Https})
+    validator: validate_ServerDnsAliasesDelete_564102, base: "",
+    url: url_ServerDnsAliasesDelete_564103, schemes: {Scheme.Https})
 type
-  Call_ServerDnsAliasesAcquire_568213 = ref object of OpenApiRestCall_567641
-proc url_ServerDnsAliasesAcquire_568215(protocol: Scheme; host: string; base: string;
+  Call_ServerDnsAliasesAcquire_564113 = ref object of OpenApiRestCall_563539
+proc url_ServerDnsAliasesAcquire_564115(protocol: Scheme; host: string; base: string;
                                        route: string; path: JsonNode;
                                        query: JsonNode): Uri =
   result.scheme = $protocol
@@ -628,44 +632,44 @@ proc url_ServerDnsAliasesAcquire_568215(protocol: Scheme; host: string; base: st
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ServerDnsAliasesAcquire_568214(path: JsonNode; query: JsonNode;
+proc validate_ServerDnsAliasesAcquire_564114(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Acquires server DNS alias from another server.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   ##   serverName: JString (required)
   ##             : The name of the server that the alias is pointing to.
-  ##   subscriptionId: JString (required)
-  ##                 : The subscription ID that identifies an Azure subscription.
   ##   dnsAliasName: JString (required)
   ##               : The name of the server dns alias.
+  ##   subscriptionId: JString (required)
+  ##                 : The subscription ID that identifies an Azure subscription.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568216 = path.getOrDefault("resourceGroupName")
-  valid_568216 = validateParameter(valid_568216, JString, required = true,
+        "path argument is necessary due to required `serverName` field"
+  var valid_564116 = path.getOrDefault("serverName")
+  valid_564116 = validateParameter(valid_564116, JString, required = true,
                                  default = nil)
-  if valid_568216 != nil:
-    section.add "resourceGroupName", valid_568216
-  var valid_568217 = path.getOrDefault("serverName")
-  valid_568217 = validateParameter(valid_568217, JString, required = true,
+  if valid_564116 != nil:
+    section.add "serverName", valid_564116
+  var valid_564117 = path.getOrDefault("dnsAliasName")
+  valid_564117 = validateParameter(valid_564117, JString, required = true,
                                  default = nil)
-  if valid_568217 != nil:
-    section.add "serverName", valid_568217
-  var valid_568218 = path.getOrDefault("subscriptionId")
-  valid_568218 = validateParameter(valid_568218, JString, required = true,
+  if valid_564117 != nil:
+    section.add "dnsAliasName", valid_564117
+  var valid_564118 = path.getOrDefault("subscriptionId")
+  valid_564118 = validateParameter(valid_564118, JString, required = true,
                                  default = nil)
-  if valid_568218 != nil:
-    section.add "subscriptionId", valid_568218
-  var valid_568219 = path.getOrDefault("dnsAliasName")
-  valid_568219 = validateParameter(valid_568219, JString, required = true,
+  if valid_564118 != nil:
+    section.add "subscriptionId", valid_564118
+  var valid_564119 = path.getOrDefault("resourceGroupName")
+  valid_564119 = validateParameter(valid_564119, JString, required = true,
                                  default = nil)
-  if valid_568219 != nil:
-    section.add "dnsAliasName", valid_568219
+  if valid_564119 != nil:
+    section.add "resourceGroupName", valid_564119
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -673,11 +677,11 @@ proc validate_ServerDnsAliasesAcquire_568214(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568220 = query.getOrDefault("api-version")
-  valid_568220 = validateParameter(valid_568220, JString, required = true,
+  var valid_564120 = query.getOrDefault("api-version")
+  valid_564120 = validateParameter(valid_564120, JString, required = true,
                                  default = nil)
-  if valid_568220 != nil:
-    section.add "api-version", valid_568220
+  if valid_564120 != nil:
+    section.add "api-version", valid_564120
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -690,52 +694,52 @@ proc validate_ServerDnsAliasesAcquire_568214(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568222: Call_ServerDnsAliasesAcquire_568213; path: JsonNode;
+proc call*(call_564122: Call_ServerDnsAliasesAcquire_564113; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Acquires server DNS alias from another server.
   ## 
-  let valid = call_568222.validator(path, query, header, formData, body)
-  let scheme = call_568222.pickScheme
+  let valid = call_564122.validator(path, query, header, formData, body)
+  let scheme = call_564122.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568222.url(scheme.get, call_568222.host, call_568222.base,
-                         call_568222.route, valid.getOrDefault("path"),
+  let url = call_564122.url(scheme.get, call_564122.host, call_564122.base,
+                         call_564122.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568222, url, valid)
+  result = hook(call_564122, url, valid)
 
-proc call*(call_568223: Call_ServerDnsAliasesAcquire_568213;
-          resourceGroupName: string; apiVersion: string; serverName: string;
-          subscriptionId: string; dnsAliasName: string; parameters: JsonNode): Recallable =
+proc call*(call_564123: Call_ServerDnsAliasesAcquire_564113; apiVersion: string;
+          serverName: string; dnsAliasName: string; subscriptionId: string;
+          resourceGroupName: string; parameters: JsonNode): Recallable =
   ## serverDnsAliasesAcquire
   ## Acquires server DNS alias from another server.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   ##   apiVersion: string (required)
   ##             : The API version to use for the request.
   ##   serverName: string (required)
   ##             : The name of the server that the alias is pointing to.
-  ##   subscriptionId: string (required)
-  ##                 : The subscription ID that identifies an Azure subscription.
   ##   dnsAliasName: string (required)
   ##               : The name of the server dns alias.
+  ##   subscriptionId: string (required)
+  ##                 : The subscription ID that identifies an Azure subscription.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   ##   parameters: JObject (required)
-  var path_568224 = newJObject()
-  var query_568225 = newJObject()
-  var body_568226 = newJObject()
-  add(path_568224, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568225, "api-version", newJString(apiVersion))
-  add(path_568224, "serverName", newJString(serverName))
-  add(path_568224, "subscriptionId", newJString(subscriptionId))
-  add(path_568224, "dnsAliasName", newJString(dnsAliasName))
+  var path_564124 = newJObject()
+  var query_564125 = newJObject()
+  var body_564126 = newJObject()
+  add(query_564125, "api-version", newJString(apiVersion))
+  add(path_564124, "serverName", newJString(serverName))
+  add(path_564124, "dnsAliasName", newJString(dnsAliasName))
+  add(path_564124, "subscriptionId", newJString(subscriptionId))
+  add(path_564124, "resourceGroupName", newJString(resourceGroupName))
   if parameters != nil:
-    body_568226 = parameters
-  result = call_568223.call(path_568224, query_568225, nil, nil, body_568226)
+    body_564126 = parameters
+  result = call_564123.call(path_564124, query_564125, nil, nil, body_564126)
 
-var serverDnsAliasesAcquire* = Call_ServerDnsAliasesAcquire_568213(
+var serverDnsAliasesAcquire* = Call_ServerDnsAliasesAcquire_564113(
     name: "serverDnsAliasesAcquire", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/servers/{serverName}/dnsAliases/{dnsAliasName}/acquire",
-    validator: validate_ServerDnsAliasesAcquire_568214, base: "",
-    url: url_ServerDnsAliasesAcquire_568215, schemes: {Scheme.Https})
+    validator: validate_ServerDnsAliasesAcquire_564114, base: "",
+    url: url_ServerDnsAliasesAcquire_564115, schemes: {Scheme.Https})
 export
   rest
 

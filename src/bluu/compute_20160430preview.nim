@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, httpcore
 
 ## auto-generated via openapi macro
 ## title: ComputeManagementClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_567667 = ref object of OpenApiRestCall
+  OpenApiRestCall_563565 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_567667](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563565](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_567667): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563565): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,8 +107,8 @@ const
   macServiceName = "compute"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_AvailabilitySetsListBySubscription_567889 = ref object of OpenApiRestCall_567667
-proc url_AvailabilitySetsListBySubscription_567891(protocol: Scheme; host: string;
+  Call_AvailabilitySetsListBySubscription_563787 = ref object of OpenApiRestCall_563565
+proc url_AvailabilitySetsListBySubscription_563789(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -121,7 +125,7 @@ proc url_AvailabilitySetsListBySubscription_567891(protocol: Scheme; host: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AvailabilitySetsListBySubscription_567890(path: JsonNode;
+proc validate_AvailabilitySetsListBySubscription_563788(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists all availability sets in a subscription.
   ## 
@@ -133,11 +137,11 @@ proc validate_AvailabilitySetsListBySubscription_567890(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_568064 = path.getOrDefault("subscriptionId")
-  valid_568064 = validateParameter(valid_568064, JString, required = true,
+  var valid_563964 = path.getOrDefault("subscriptionId")
+  valid_563964 = validateParameter(valid_563964, JString, required = true,
                                  default = nil)
-  if valid_568064 != nil:
-    section.add "subscriptionId", valid_568064
+  if valid_563964 != nil:
+    section.add "subscriptionId", valid_563964
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -145,11 +149,11 @@ proc validate_AvailabilitySetsListBySubscription_567890(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568065 = query.getOrDefault("api-version")
-  valid_568065 = validateParameter(valid_568065, JString, required = true,
+  var valid_563965 = query.getOrDefault("api-version")
+  valid_563965 = validateParameter(valid_563965, JString, required = true,
                                  default = nil)
-  if valid_568065 != nil:
-    section.add "api-version", valid_568065
+  if valid_563965 != nil:
+    section.add "api-version", valid_563965
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -158,21 +162,21 @@ proc validate_AvailabilitySetsListBySubscription_567890(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568088: Call_AvailabilitySetsListBySubscription_567889;
+proc call*(call_563988: Call_AvailabilitySetsListBySubscription_563787;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Lists all availability sets in a subscription.
   ## 
-  let valid = call_568088.validator(path, query, header, formData, body)
-  let scheme = call_568088.pickScheme
+  let valid = call_563988.validator(path, query, header, formData, body)
+  let scheme = call_563988.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568088.url(scheme.get, call_568088.host, call_568088.base,
-                         call_568088.route, valid.getOrDefault("path"),
+  let url = call_563988.url(scheme.get, call_563988.host, call_563988.base,
+                         call_563988.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568088, url, valid)
+  result = hook(call_563988, url, valid)
 
-proc call*(call_568159: Call_AvailabilitySetsListBySubscription_567889;
+proc call*(call_564059: Call_AvailabilitySetsListBySubscription_563787;
           apiVersion: string; subscriptionId: string): Recallable =
   ## availabilitySetsListBySubscription
   ## Lists all availability sets in a subscription.
@@ -180,20 +184,20 @@ proc call*(call_568159: Call_AvailabilitySetsListBySubscription_567889;
   ##             : Client Api Version.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_568160 = newJObject()
-  var query_568162 = newJObject()
-  add(query_568162, "api-version", newJString(apiVersion))
-  add(path_568160, "subscriptionId", newJString(subscriptionId))
-  result = call_568159.call(path_568160, query_568162, nil, nil, nil)
+  var path_564060 = newJObject()
+  var query_564062 = newJObject()
+  add(query_564062, "api-version", newJString(apiVersion))
+  add(path_564060, "subscriptionId", newJString(subscriptionId))
+  result = call_564059.call(path_564060, query_564062, nil, nil, nil)
 
-var availabilitySetsListBySubscription* = Call_AvailabilitySetsListBySubscription_567889(
+var availabilitySetsListBySubscription* = Call_AvailabilitySetsListBySubscription_563787(
     name: "availabilitySetsListBySubscription", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Compute/availabilitySets",
-    validator: validate_AvailabilitySetsListBySubscription_567890, base: "",
-    url: url_AvailabilitySetsListBySubscription_567891, schemes: {Scheme.Https})
+    validator: validate_AvailabilitySetsListBySubscription_563788, base: "",
+    url: url_AvailabilitySetsListBySubscription_563789, schemes: {Scheme.Https})
 type
-  Call_ImagesList_568201 = ref object of OpenApiRestCall_567667
-proc url_ImagesList_568203(protocol: Scheme; host: string; base: string; route: string;
+  Call_ImagesList_564101 = ref object of OpenApiRestCall_563565
+proc url_ImagesList_564103(protocol: Scheme; host: string; base: string; route: string;
                           path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -209,7 +213,7 @@ proc url_ImagesList_568203(protocol: Scheme; host: string; base: string; route: 
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ImagesList_568202(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_ImagesList_564102(path: JsonNode; query: JsonNode; header: JsonNode;
                                formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the list of Images in the subscription. Use nextLink property in the response to get the next page of Images. Do this till nextLink is null to fetch all the Images.
   ## 
@@ -221,11 +225,11 @@ proc validate_ImagesList_568202(path: JsonNode; query: JsonNode; header: JsonNod
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_568204 = path.getOrDefault("subscriptionId")
-  valid_568204 = validateParameter(valid_568204, JString, required = true,
+  var valid_564104 = path.getOrDefault("subscriptionId")
+  valid_564104 = validateParameter(valid_564104, JString, required = true,
                                  default = nil)
-  if valid_568204 != nil:
-    section.add "subscriptionId", valid_568204
+  if valid_564104 != nil:
+    section.add "subscriptionId", valid_564104
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -233,11 +237,11 @@ proc validate_ImagesList_568202(path: JsonNode; query: JsonNode; header: JsonNod
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568205 = query.getOrDefault("api-version")
-  valid_568205 = validateParameter(valid_568205, JString, required = true,
+  var valid_564105 = query.getOrDefault("api-version")
+  valid_564105 = validateParameter(valid_564105, JString, required = true,
                                  default = nil)
-  if valid_568205 != nil:
-    section.add "api-version", valid_568205
+  if valid_564105 != nil:
+    section.add "api-version", valid_564105
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -246,20 +250,20 @@ proc validate_ImagesList_568202(path: JsonNode; query: JsonNode; header: JsonNod
   if body != nil:
     result.add "body", body
 
-proc call*(call_568206: Call_ImagesList_568201; path: JsonNode; query: JsonNode;
+proc call*(call_564106: Call_ImagesList_564101; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the list of Images in the subscription. Use nextLink property in the response to get the next page of Images. Do this till nextLink is null to fetch all the Images.
   ## 
-  let valid = call_568206.validator(path, query, header, formData, body)
-  let scheme = call_568206.pickScheme
+  let valid = call_564106.validator(path, query, header, formData, body)
+  let scheme = call_564106.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568206.url(scheme.get, call_568206.host, call_568206.base,
-                         call_568206.route, valid.getOrDefault("path"),
+  let url = call_564106.url(scheme.get, call_564106.host, call_564106.base,
+                         call_564106.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568206, url, valid)
+  result = hook(call_564106, url, valid)
 
-proc call*(call_568207: Call_ImagesList_568201; apiVersion: string;
+proc call*(call_564107: Call_ImagesList_564101; apiVersion: string;
           subscriptionId: string): Recallable =
   ## imagesList
   ## Gets the list of Images in the subscription. Use nextLink property in the response to get the next page of Images. Do this till nextLink is null to fetch all the Images.
@@ -267,21 +271,21 @@ proc call*(call_568207: Call_ImagesList_568201; apiVersion: string;
   ##             : Client Api Version.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_568208 = newJObject()
-  var query_568209 = newJObject()
-  add(query_568209, "api-version", newJString(apiVersion))
-  add(path_568208, "subscriptionId", newJString(subscriptionId))
-  result = call_568207.call(path_568208, query_568209, nil, nil, nil)
+  var path_564108 = newJObject()
+  var query_564109 = newJObject()
+  add(query_564109, "api-version", newJString(apiVersion))
+  add(path_564108, "subscriptionId", newJString(subscriptionId))
+  result = call_564107.call(path_564108, query_564109, nil, nil, nil)
 
-var imagesList* = Call_ImagesList_568201(name: "imagesList",
+var imagesList* = Call_ImagesList_564101(name: "imagesList",
                                       meth: HttpMethod.HttpGet,
                                       host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Compute/images",
-                                      validator: validate_ImagesList_568202,
-                                      base: "", url: url_ImagesList_568203,
+                                      validator: validate_ImagesList_564102,
+                                      base: "", url: url_ImagesList_564103,
                                       schemes: {Scheme.Https})
 type
-  Call_VirtualMachineImagesListPublishers_568210 = ref object of OpenApiRestCall_567667
-proc url_VirtualMachineImagesListPublishers_568212(protocol: Scheme; host: string;
+  Call_VirtualMachineImagesListPublishers_564110 = ref object of OpenApiRestCall_563565
+proc url_VirtualMachineImagesListPublishers_564112(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -300,7 +304,7 @@ proc url_VirtualMachineImagesListPublishers_568212(protocol: Scheme; host: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_VirtualMachineImagesListPublishers_568211(path: JsonNode;
+proc validate_VirtualMachineImagesListPublishers_564111(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets a list of virtual machine image publishers for the specified Azure location.
   ## 
@@ -314,16 +318,16 @@ proc validate_VirtualMachineImagesListPublishers_568211(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_568213 = path.getOrDefault("subscriptionId")
-  valid_568213 = validateParameter(valid_568213, JString, required = true,
+  var valid_564113 = path.getOrDefault("subscriptionId")
+  valid_564113 = validateParameter(valid_564113, JString, required = true,
                                  default = nil)
-  if valid_568213 != nil:
-    section.add "subscriptionId", valid_568213
-  var valid_568214 = path.getOrDefault("location")
-  valid_568214 = validateParameter(valid_568214, JString, required = true,
+  if valid_564113 != nil:
+    section.add "subscriptionId", valid_564113
+  var valid_564114 = path.getOrDefault("location")
+  valid_564114 = validateParameter(valid_564114, JString, required = true,
                                  default = nil)
-  if valid_568214 != nil:
-    section.add "location", valid_568214
+  if valid_564114 != nil:
+    section.add "location", valid_564114
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -331,11 +335,11 @@ proc validate_VirtualMachineImagesListPublishers_568211(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568215 = query.getOrDefault("api-version")
-  valid_568215 = validateParameter(valid_568215, JString, required = true,
+  var valid_564115 = query.getOrDefault("api-version")
+  valid_564115 = validateParameter(valid_564115, JString, required = true,
                                  default = nil)
-  if valid_568215 != nil:
-    section.add "api-version", valid_568215
+  if valid_564115 != nil:
+    section.add "api-version", valid_564115
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -344,21 +348,21 @@ proc validate_VirtualMachineImagesListPublishers_568211(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568216: Call_VirtualMachineImagesListPublishers_568210;
+proc call*(call_564116: Call_VirtualMachineImagesListPublishers_564110;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Gets a list of virtual machine image publishers for the specified Azure location.
   ## 
-  let valid = call_568216.validator(path, query, header, formData, body)
-  let scheme = call_568216.pickScheme
+  let valid = call_564116.validator(path, query, header, formData, body)
+  let scheme = call_564116.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568216.url(scheme.get, call_568216.host, call_568216.base,
-                         call_568216.route, valid.getOrDefault("path"),
+  let url = call_564116.url(scheme.get, call_564116.host, call_564116.base,
+                         call_564116.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568216, url, valid)
+  result = hook(call_564116, url, valid)
 
-proc call*(call_568217: Call_VirtualMachineImagesListPublishers_568210;
+proc call*(call_564117: Call_VirtualMachineImagesListPublishers_564110;
           apiVersion: string; subscriptionId: string; location: string): Recallable =
   ## virtualMachineImagesListPublishers
   ## Gets a list of virtual machine image publishers for the specified Azure location.
@@ -368,21 +372,21 @@ proc call*(call_568217: Call_VirtualMachineImagesListPublishers_568210;
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   location: string (required)
   ##           : The name of a supported Azure region.
-  var path_568218 = newJObject()
-  var query_568219 = newJObject()
-  add(query_568219, "api-version", newJString(apiVersion))
-  add(path_568218, "subscriptionId", newJString(subscriptionId))
-  add(path_568218, "location", newJString(location))
-  result = call_568217.call(path_568218, query_568219, nil, nil, nil)
+  var path_564118 = newJObject()
+  var query_564119 = newJObject()
+  add(query_564119, "api-version", newJString(apiVersion))
+  add(path_564118, "subscriptionId", newJString(subscriptionId))
+  add(path_564118, "location", newJString(location))
+  result = call_564117.call(path_564118, query_564119, nil, nil, nil)
 
-var virtualMachineImagesListPublishers* = Call_VirtualMachineImagesListPublishers_568210(
+var virtualMachineImagesListPublishers* = Call_VirtualMachineImagesListPublishers_564110(
     name: "virtualMachineImagesListPublishers", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Compute/locations/{location}/publishers",
-    validator: validate_VirtualMachineImagesListPublishers_568211, base: "",
-    url: url_VirtualMachineImagesListPublishers_568212, schemes: {Scheme.Https})
+    validator: validate_VirtualMachineImagesListPublishers_564111, base: "",
+    url: url_VirtualMachineImagesListPublishers_564112, schemes: {Scheme.Https})
 type
-  Call_VirtualMachineExtensionImagesListTypes_568220 = ref object of OpenApiRestCall_567667
-proc url_VirtualMachineExtensionImagesListTypes_568222(protocol: Scheme;
+  Call_VirtualMachineExtensionImagesListTypes_564120 = ref object of OpenApiRestCall_563565
+proc url_VirtualMachineExtensionImagesListTypes_564122(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -404,36 +408,36 @@ proc url_VirtualMachineExtensionImagesListTypes_568222(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_VirtualMachineExtensionImagesListTypes_568221(path: JsonNode;
+proc validate_VirtualMachineExtensionImagesListTypes_564121(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets a list of virtual machine extension image types.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
+  ##   publisherName: JString (required)
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   publisherName: JString (required)
   ##   location: JString (required)
   ##           : The name of a supported Azure region.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `subscriptionId` field"
-  var valid_568223 = path.getOrDefault("subscriptionId")
-  valid_568223 = validateParameter(valid_568223, JString, required = true,
+        "path argument is necessary due to required `publisherName` field"
+  var valid_564123 = path.getOrDefault("publisherName")
+  valid_564123 = validateParameter(valid_564123, JString, required = true,
                                  default = nil)
-  if valid_568223 != nil:
-    section.add "subscriptionId", valid_568223
-  var valid_568224 = path.getOrDefault("publisherName")
-  valid_568224 = validateParameter(valid_568224, JString, required = true,
+  if valid_564123 != nil:
+    section.add "publisherName", valid_564123
+  var valid_564124 = path.getOrDefault("subscriptionId")
+  valid_564124 = validateParameter(valid_564124, JString, required = true,
                                  default = nil)
-  if valid_568224 != nil:
-    section.add "publisherName", valid_568224
-  var valid_568225 = path.getOrDefault("location")
-  valid_568225 = validateParameter(valid_568225, JString, required = true,
+  if valid_564124 != nil:
+    section.add "subscriptionId", valid_564124
+  var valid_564125 = path.getOrDefault("location")
+  valid_564125 = validateParameter(valid_564125, JString, required = true,
                                  default = nil)
-  if valid_568225 != nil:
-    section.add "location", valid_568225
+  if valid_564125 != nil:
+    section.add "location", valid_564125
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -441,11 +445,11 @@ proc validate_VirtualMachineExtensionImagesListTypes_568221(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568226 = query.getOrDefault("api-version")
-  valid_568226 = validateParameter(valid_568226, JString, required = true,
+  var valid_564126 = query.getOrDefault("api-version")
+  valid_564126 = validateParameter(valid_564126, JString, required = true,
                                  default = nil)
-  if valid_568226 != nil:
-    section.add "api-version", valid_568226
+  if valid_564126 != nil:
+    section.add "api-version", valid_564126
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -454,49 +458,49 @@ proc validate_VirtualMachineExtensionImagesListTypes_568221(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568227: Call_VirtualMachineExtensionImagesListTypes_568220;
+proc call*(call_564127: Call_VirtualMachineExtensionImagesListTypes_564120;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Gets a list of virtual machine extension image types.
   ## 
-  let valid = call_568227.validator(path, query, header, formData, body)
-  let scheme = call_568227.pickScheme
+  let valid = call_564127.validator(path, query, header, formData, body)
+  let scheme = call_564127.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568227.url(scheme.get, call_568227.host, call_568227.base,
-                         call_568227.route, valid.getOrDefault("path"),
+  let url = call_564127.url(scheme.get, call_564127.host, call_564127.base,
+                         call_564127.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568227, url, valid)
+  result = hook(call_564127, url, valid)
 
-proc call*(call_568228: Call_VirtualMachineExtensionImagesListTypes_568220;
-          apiVersion: string; subscriptionId: string; publisherName: string;
+proc call*(call_564128: Call_VirtualMachineExtensionImagesListTypes_564120;
+          publisherName: string; apiVersion: string; subscriptionId: string;
           location: string): Recallable =
   ## virtualMachineExtensionImagesListTypes
   ## Gets a list of virtual machine extension image types.
+  ##   publisherName: string (required)
   ##   apiVersion: string (required)
   ##             : Client Api Version.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   publisherName: string (required)
   ##   location: string (required)
   ##           : The name of a supported Azure region.
-  var path_568229 = newJObject()
-  var query_568230 = newJObject()
-  add(query_568230, "api-version", newJString(apiVersion))
-  add(path_568229, "subscriptionId", newJString(subscriptionId))
-  add(path_568229, "publisherName", newJString(publisherName))
-  add(path_568229, "location", newJString(location))
-  result = call_568228.call(path_568229, query_568230, nil, nil, nil)
+  var path_564129 = newJObject()
+  var query_564130 = newJObject()
+  add(path_564129, "publisherName", newJString(publisherName))
+  add(query_564130, "api-version", newJString(apiVersion))
+  add(path_564129, "subscriptionId", newJString(subscriptionId))
+  add(path_564129, "location", newJString(location))
+  result = call_564128.call(path_564129, query_564130, nil, nil, nil)
 
-var virtualMachineExtensionImagesListTypes* = Call_VirtualMachineExtensionImagesListTypes_568220(
+var virtualMachineExtensionImagesListTypes* = Call_VirtualMachineExtensionImagesListTypes_564120(
     name: "virtualMachineExtensionImagesListTypes", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Compute/locations/{location}/publishers/{publisherName}/artifacttypes/vmextension/types",
-    validator: validate_VirtualMachineExtensionImagesListTypes_568221, base: "",
-    url: url_VirtualMachineExtensionImagesListTypes_568222,
+    validator: validate_VirtualMachineExtensionImagesListTypes_564121, base: "",
+    url: url_VirtualMachineExtensionImagesListTypes_564122,
     schemes: {Scheme.Https})
 type
-  Call_VirtualMachineExtensionImagesListVersions_568231 = ref object of OpenApiRestCall_567667
-proc url_VirtualMachineExtensionImagesListVersions_568233(protocol: Scheme;
+  Call_VirtualMachineExtensionImagesListVersions_564131 = ref object of OpenApiRestCall_563565
+proc url_VirtualMachineExtensionImagesListVersions_564133(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -521,71 +525,72 @@ proc url_VirtualMachineExtensionImagesListVersions_568233(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_VirtualMachineExtensionImagesListVersions_568232(path: JsonNode;
+proc validate_VirtualMachineExtensionImagesListVersions_564132(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets a list of virtual machine extension image versions.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
+  ##   publisherName: JString (required)
   ##   type: JString (required)
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   publisherName: JString (required)
   ##   location: JString (required)
   ##           : The name of a supported Azure region.
   section = newJObject()
-  assert path != nil, "path argument is necessary due to required `type` field"
-  var valid_568235 = path.getOrDefault("type")
-  valid_568235 = validateParameter(valid_568235, JString, required = true,
+  assert path != nil,
+        "path argument is necessary due to required `publisherName` field"
+  var valid_564135 = path.getOrDefault("publisherName")
+  valid_564135 = validateParameter(valid_564135, JString, required = true,
                                  default = nil)
-  if valid_568235 != nil:
-    section.add "type", valid_568235
-  var valid_568236 = path.getOrDefault("subscriptionId")
-  valid_568236 = validateParameter(valid_568236, JString, required = true,
+  if valid_564135 != nil:
+    section.add "publisherName", valid_564135
+  var valid_564136 = path.getOrDefault("type")
+  valid_564136 = validateParameter(valid_564136, JString, required = true,
                                  default = nil)
-  if valid_568236 != nil:
-    section.add "subscriptionId", valid_568236
-  var valid_568237 = path.getOrDefault("publisherName")
-  valid_568237 = validateParameter(valid_568237, JString, required = true,
+  if valid_564136 != nil:
+    section.add "type", valid_564136
+  var valid_564137 = path.getOrDefault("subscriptionId")
+  valid_564137 = validateParameter(valid_564137, JString, required = true,
                                  default = nil)
-  if valid_568237 != nil:
-    section.add "publisherName", valid_568237
-  var valid_568238 = path.getOrDefault("location")
-  valid_568238 = validateParameter(valid_568238, JString, required = true,
+  if valid_564137 != nil:
+    section.add "subscriptionId", valid_564137
+  var valid_564138 = path.getOrDefault("location")
+  valid_564138 = validateParameter(valid_564138, JString, required = true,
                                  default = nil)
-  if valid_568238 != nil:
-    section.add "location", valid_568238
+  if valid_564138 != nil:
+    section.add "location", valid_564138
   result.add "path", section
   ## parameters in `query` object:
-  ##   $orderby: JString
+  ##   $top: JInt
   ##   api-version: JString (required)
   ##              : Client Api Version.
-  ##   $top: JInt
+  ##   $orderby: JString
   ##   $filter: JString
   ##          : The filter to apply on the operation.
   section = newJObject()
-  var valid_568239 = query.getOrDefault("$orderby")
-  valid_568239 = validateParameter(valid_568239, JString, required = false,
-                                 default = nil)
-  if valid_568239 != nil:
-    section.add "$orderby", valid_568239
+  var valid_564139 = query.getOrDefault("$top")
+  valid_564139 = validateParameter(valid_564139, JInt, required = false, default = nil)
+  if valid_564139 != nil:
+    section.add "$top", valid_564139
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568240 = query.getOrDefault("api-version")
-  valid_568240 = validateParameter(valid_568240, JString, required = true,
+  var valid_564140 = query.getOrDefault("api-version")
+  valid_564140 = validateParameter(valid_564140, JString, required = true,
                                  default = nil)
-  if valid_568240 != nil:
-    section.add "api-version", valid_568240
-  var valid_568241 = query.getOrDefault("$top")
-  valid_568241 = validateParameter(valid_568241, JInt, required = false, default = nil)
-  if valid_568241 != nil:
-    section.add "$top", valid_568241
-  var valid_568242 = query.getOrDefault("$filter")
-  valid_568242 = validateParameter(valid_568242, JString, required = false,
+  if valid_564140 != nil:
+    section.add "api-version", valid_564140
+  var valid_564141 = query.getOrDefault("$orderby")
+  valid_564141 = validateParameter(valid_564141, JString, required = false,
                                  default = nil)
-  if valid_568242 != nil:
-    section.add "$filter", valid_568242
+  if valid_564141 != nil:
+    section.add "$orderby", valid_564141
+  var valid_564142 = query.getOrDefault("$filter")
+  valid_564142 = validateParameter(valid_564142, JString, required = false,
+                                 default = nil)
+  if valid_564142 != nil:
+    section.add "$filter", valid_564142
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -594,59 +599,59 @@ proc validate_VirtualMachineExtensionImagesListVersions_568232(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568243: Call_VirtualMachineExtensionImagesListVersions_568231;
+proc call*(call_564143: Call_VirtualMachineExtensionImagesListVersions_564131;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Gets a list of virtual machine extension image versions.
   ## 
-  let valid = call_568243.validator(path, query, header, formData, body)
-  let scheme = call_568243.pickScheme
+  let valid = call_564143.validator(path, query, header, formData, body)
+  let scheme = call_564143.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568243.url(scheme.get, call_568243.host, call_568243.base,
-                         call_568243.route, valid.getOrDefault("path"),
+  let url = call_564143.url(scheme.get, call_564143.host, call_564143.base,
+                         call_564143.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568243, url, valid)
+  result = hook(call_564143, url, valid)
 
-proc call*(call_568244: Call_VirtualMachineExtensionImagesListVersions_568231;
-          `type`: string; apiVersion: string; subscriptionId: string;
-          publisherName: string; location: string; Orderby: string = ""; Top: int = 0;
+proc call*(call_564144: Call_VirtualMachineExtensionImagesListVersions_564131;
+          publisherName: string; `type`: string; apiVersion: string;
+          subscriptionId: string; location: string; Top: int = 0; Orderby: string = "";
           Filter: string = ""): Recallable =
   ## virtualMachineExtensionImagesListVersions
   ## Gets a list of virtual machine extension image versions.
+  ##   publisherName: string (required)
+  ##   Top: int
   ##   type: string (required)
-  ##   Orderby: string
   ##   apiVersion: string (required)
   ##             : Client Api Version.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   Top: int
-  ##   publisherName: string (required)
+  ##   Orderby: string
   ##   location: string (required)
   ##           : The name of a supported Azure region.
   ##   Filter: string
   ##         : The filter to apply on the operation.
-  var path_568245 = newJObject()
-  var query_568246 = newJObject()
-  add(path_568245, "type", newJString(`type`))
-  add(query_568246, "$orderby", newJString(Orderby))
-  add(query_568246, "api-version", newJString(apiVersion))
-  add(path_568245, "subscriptionId", newJString(subscriptionId))
-  add(query_568246, "$top", newJInt(Top))
-  add(path_568245, "publisherName", newJString(publisherName))
-  add(path_568245, "location", newJString(location))
-  add(query_568246, "$filter", newJString(Filter))
-  result = call_568244.call(path_568245, query_568246, nil, nil, nil)
+  var path_564145 = newJObject()
+  var query_564146 = newJObject()
+  add(path_564145, "publisherName", newJString(publisherName))
+  add(query_564146, "$top", newJInt(Top))
+  add(path_564145, "type", newJString(`type`))
+  add(query_564146, "api-version", newJString(apiVersion))
+  add(path_564145, "subscriptionId", newJString(subscriptionId))
+  add(query_564146, "$orderby", newJString(Orderby))
+  add(path_564145, "location", newJString(location))
+  add(query_564146, "$filter", newJString(Filter))
+  result = call_564144.call(path_564145, query_564146, nil, nil, nil)
 
-var virtualMachineExtensionImagesListVersions* = Call_VirtualMachineExtensionImagesListVersions_568231(
+var virtualMachineExtensionImagesListVersions* = Call_VirtualMachineExtensionImagesListVersions_564131(
     name: "virtualMachineExtensionImagesListVersions", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Compute/locations/{location}/publishers/{publisherName}/artifacttypes/vmextension/types/{type}/versions",
-    validator: validate_VirtualMachineExtensionImagesListVersions_568232,
-    base: "", url: url_VirtualMachineExtensionImagesListVersions_568233,
+    validator: validate_VirtualMachineExtensionImagesListVersions_564132,
+    base: "", url: url_VirtualMachineExtensionImagesListVersions_564133,
     schemes: {Scheme.Https})
 type
-  Call_VirtualMachineExtensionImagesGet_568247 = ref object of OpenApiRestCall_567667
-proc url_VirtualMachineExtensionImagesGet_568249(protocol: Scheme; host: string;
+  Call_VirtualMachineExtensionImagesGet_564147 = ref object of OpenApiRestCall_563565
+proc url_VirtualMachineExtensionImagesGet_564149(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -673,47 +678,48 @@ proc url_VirtualMachineExtensionImagesGet_568249(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_VirtualMachineExtensionImagesGet_568248(path: JsonNode;
+proc validate_VirtualMachineExtensionImagesGet_564148(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets a virtual machine extension image.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   type: JString (required)
+  ##   publisherName: JString (required)
   ##   version: JString (required)
+  ##   type: JString (required)
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   publisherName: JString (required)
   ##   location: JString (required)
   ##           : The name of a supported Azure region.
   section = newJObject()
-  assert path != nil, "path argument is necessary due to required `type` field"
-  var valid_568250 = path.getOrDefault("type")
-  valid_568250 = validateParameter(valid_568250, JString, required = true,
+  assert path != nil,
+        "path argument is necessary due to required `publisherName` field"
+  var valid_564150 = path.getOrDefault("publisherName")
+  valid_564150 = validateParameter(valid_564150, JString, required = true,
                                  default = nil)
-  if valid_568250 != nil:
-    section.add "type", valid_568250
-  var valid_568251 = path.getOrDefault("version")
-  valid_568251 = validateParameter(valid_568251, JString, required = true,
+  if valid_564150 != nil:
+    section.add "publisherName", valid_564150
+  var valid_564151 = path.getOrDefault("version")
+  valid_564151 = validateParameter(valid_564151, JString, required = true,
                                  default = nil)
-  if valid_568251 != nil:
-    section.add "version", valid_568251
-  var valid_568252 = path.getOrDefault("subscriptionId")
-  valid_568252 = validateParameter(valid_568252, JString, required = true,
+  if valid_564151 != nil:
+    section.add "version", valid_564151
+  var valid_564152 = path.getOrDefault("type")
+  valid_564152 = validateParameter(valid_564152, JString, required = true,
                                  default = nil)
-  if valid_568252 != nil:
-    section.add "subscriptionId", valid_568252
-  var valid_568253 = path.getOrDefault("publisherName")
-  valid_568253 = validateParameter(valid_568253, JString, required = true,
+  if valid_564152 != nil:
+    section.add "type", valid_564152
+  var valid_564153 = path.getOrDefault("subscriptionId")
+  valid_564153 = validateParameter(valid_564153, JString, required = true,
                                  default = nil)
-  if valid_568253 != nil:
-    section.add "publisherName", valid_568253
-  var valid_568254 = path.getOrDefault("location")
-  valid_568254 = validateParameter(valid_568254, JString, required = true,
+  if valid_564153 != nil:
+    section.add "subscriptionId", valid_564153
+  var valid_564154 = path.getOrDefault("location")
+  valid_564154 = validateParameter(valid_564154, JString, required = true,
                                  default = nil)
-  if valid_568254 != nil:
-    section.add "location", valid_568254
+  if valid_564154 != nil:
+    section.add "location", valid_564154
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -721,11 +727,11 @@ proc validate_VirtualMachineExtensionImagesGet_568248(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568255 = query.getOrDefault("api-version")
-  valid_568255 = validateParameter(valid_568255, JString, required = true,
+  var valid_564155 = query.getOrDefault("api-version")
+  valid_564155 = validateParameter(valid_564155, JString, required = true,
                                  default = nil)
-  if valid_568255 != nil:
-    section.add "api-version", valid_568255
+  if valid_564155 != nil:
+    section.add "api-version", valid_564155
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -734,52 +740,52 @@ proc validate_VirtualMachineExtensionImagesGet_568248(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568256: Call_VirtualMachineExtensionImagesGet_568247;
+proc call*(call_564156: Call_VirtualMachineExtensionImagesGet_564147;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Gets a virtual machine extension image.
   ## 
-  let valid = call_568256.validator(path, query, header, formData, body)
-  let scheme = call_568256.pickScheme
+  let valid = call_564156.validator(path, query, header, formData, body)
+  let scheme = call_564156.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568256.url(scheme.get, call_568256.host, call_568256.base,
-                         call_568256.route, valid.getOrDefault("path"),
+  let url = call_564156.url(scheme.get, call_564156.host, call_564156.base,
+                         call_564156.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568256, url, valid)
+  result = hook(call_564156, url, valid)
 
-proc call*(call_568257: Call_VirtualMachineExtensionImagesGet_568247;
-          `type`: string; apiVersion: string; version: string; subscriptionId: string;
-          publisherName: string; location: string): Recallable =
+proc call*(call_564157: Call_VirtualMachineExtensionImagesGet_564147;
+          publisherName: string; version: string; apiVersion: string; `type`: string;
+          subscriptionId: string; location: string): Recallable =
   ## virtualMachineExtensionImagesGet
   ## Gets a virtual machine extension image.
-  ##   type: string (required)
+  ##   publisherName: string (required)
+  ##   version: string (required)
   ##   apiVersion: string (required)
   ##             : Client Api Version.
-  ##   version: string (required)
+  ##   type: string (required)
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   publisherName: string (required)
   ##   location: string (required)
   ##           : The name of a supported Azure region.
-  var path_568258 = newJObject()
-  var query_568259 = newJObject()
-  add(path_568258, "type", newJString(`type`))
-  add(query_568259, "api-version", newJString(apiVersion))
-  add(path_568258, "version", newJString(version))
-  add(path_568258, "subscriptionId", newJString(subscriptionId))
-  add(path_568258, "publisherName", newJString(publisherName))
-  add(path_568258, "location", newJString(location))
-  result = call_568257.call(path_568258, query_568259, nil, nil, nil)
+  var path_564158 = newJObject()
+  var query_564159 = newJObject()
+  add(path_564158, "publisherName", newJString(publisherName))
+  add(path_564158, "version", newJString(version))
+  add(query_564159, "api-version", newJString(apiVersion))
+  add(path_564158, "type", newJString(`type`))
+  add(path_564158, "subscriptionId", newJString(subscriptionId))
+  add(path_564158, "location", newJString(location))
+  result = call_564157.call(path_564158, query_564159, nil, nil, nil)
 
-var virtualMachineExtensionImagesGet* = Call_VirtualMachineExtensionImagesGet_568247(
+var virtualMachineExtensionImagesGet* = Call_VirtualMachineExtensionImagesGet_564147(
     name: "virtualMachineExtensionImagesGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Compute/locations/{location}/publishers/{publisherName}/artifacttypes/vmextension/types/{type}/versions/{version}",
-    validator: validate_VirtualMachineExtensionImagesGet_568248, base: "",
-    url: url_VirtualMachineExtensionImagesGet_568249, schemes: {Scheme.Https})
+    validator: validate_VirtualMachineExtensionImagesGet_564148, base: "",
+    url: url_VirtualMachineExtensionImagesGet_564149, schemes: {Scheme.Https})
 type
-  Call_VirtualMachineImagesListOffers_568260 = ref object of OpenApiRestCall_567667
-proc url_VirtualMachineImagesListOffers_568262(protocol: Scheme; host: string;
+  Call_VirtualMachineImagesListOffers_564160 = ref object of OpenApiRestCall_563565
+proc url_VirtualMachineImagesListOffers_564162(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -801,37 +807,37 @@ proc url_VirtualMachineImagesListOffers_568262(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_VirtualMachineImagesListOffers_568261(path: JsonNode;
+proc validate_VirtualMachineImagesListOffers_564161(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets a list of virtual machine image offers for the specified location and publisher.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   subscriptionId: JString (required)
-  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   publisherName: JString (required)
   ##                : A valid image publisher.
+  ##   subscriptionId: JString (required)
+  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   location: JString (required)
   ##           : The name of a supported Azure region.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `subscriptionId` field"
-  var valid_568263 = path.getOrDefault("subscriptionId")
-  valid_568263 = validateParameter(valid_568263, JString, required = true,
+        "path argument is necessary due to required `publisherName` field"
+  var valid_564163 = path.getOrDefault("publisherName")
+  valid_564163 = validateParameter(valid_564163, JString, required = true,
                                  default = nil)
-  if valid_568263 != nil:
-    section.add "subscriptionId", valid_568263
-  var valid_568264 = path.getOrDefault("publisherName")
-  valid_568264 = validateParameter(valid_568264, JString, required = true,
+  if valid_564163 != nil:
+    section.add "publisherName", valid_564163
+  var valid_564164 = path.getOrDefault("subscriptionId")
+  valid_564164 = validateParameter(valid_564164, JString, required = true,
                                  default = nil)
-  if valid_568264 != nil:
-    section.add "publisherName", valid_568264
-  var valid_568265 = path.getOrDefault("location")
-  valid_568265 = validateParameter(valid_568265, JString, required = true,
+  if valid_564164 != nil:
+    section.add "subscriptionId", valid_564164
+  var valid_564165 = path.getOrDefault("location")
+  valid_564165 = validateParameter(valid_564165, JString, required = true,
                                  default = nil)
-  if valid_568265 != nil:
-    section.add "location", valid_568265
+  if valid_564165 != nil:
+    section.add "location", valid_564165
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -839,11 +845,11 @@ proc validate_VirtualMachineImagesListOffers_568261(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568266 = query.getOrDefault("api-version")
-  valid_568266 = validateParameter(valid_568266, JString, required = true,
+  var valid_564166 = query.getOrDefault("api-version")
+  valid_564166 = validateParameter(valid_564166, JString, required = true,
                                  default = nil)
-  if valid_568266 != nil:
-    section.add "api-version", valid_568266
+  if valid_564166 != nil:
+    section.add "api-version", valid_564166
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -852,48 +858,48 @@ proc validate_VirtualMachineImagesListOffers_568261(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568267: Call_VirtualMachineImagesListOffers_568260; path: JsonNode;
+proc call*(call_564167: Call_VirtualMachineImagesListOffers_564160; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets a list of virtual machine image offers for the specified location and publisher.
   ## 
-  let valid = call_568267.validator(path, query, header, formData, body)
-  let scheme = call_568267.pickScheme
+  let valid = call_564167.validator(path, query, header, formData, body)
+  let scheme = call_564167.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568267.url(scheme.get, call_568267.host, call_568267.base,
-                         call_568267.route, valid.getOrDefault("path"),
+  let url = call_564167.url(scheme.get, call_564167.host, call_564167.base,
+                         call_564167.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568267, url, valid)
+  result = hook(call_564167, url, valid)
 
-proc call*(call_568268: Call_VirtualMachineImagesListOffers_568260;
-          apiVersion: string; subscriptionId: string; publisherName: string;
+proc call*(call_564168: Call_VirtualMachineImagesListOffers_564160;
+          publisherName: string; apiVersion: string; subscriptionId: string;
           location: string): Recallable =
   ## virtualMachineImagesListOffers
   ## Gets a list of virtual machine image offers for the specified location and publisher.
+  ##   publisherName: string (required)
+  ##                : A valid image publisher.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   publisherName: string (required)
-  ##                : A valid image publisher.
   ##   location: string (required)
   ##           : The name of a supported Azure region.
-  var path_568269 = newJObject()
-  var query_568270 = newJObject()
-  add(query_568270, "api-version", newJString(apiVersion))
-  add(path_568269, "subscriptionId", newJString(subscriptionId))
-  add(path_568269, "publisherName", newJString(publisherName))
-  add(path_568269, "location", newJString(location))
-  result = call_568268.call(path_568269, query_568270, nil, nil, nil)
+  var path_564169 = newJObject()
+  var query_564170 = newJObject()
+  add(path_564169, "publisherName", newJString(publisherName))
+  add(query_564170, "api-version", newJString(apiVersion))
+  add(path_564169, "subscriptionId", newJString(subscriptionId))
+  add(path_564169, "location", newJString(location))
+  result = call_564168.call(path_564169, query_564170, nil, nil, nil)
 
-var virtualMachineImagesListOffers* = Call_VirtualMachineImagesListOffers_568260(
+var virtualMachineImagesListOffers* = Call_VirtualMachineImagesListOffers_564160(
     name: "virtualMachineImagesListOffers", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Compute/locations/{location}/publishers/{publisherName}/artifacttypes/vmimage/offers",
-    validator: validate_VirtualMachineImagesListOffers_568261, base: "",
-    url: url_VirtualMachineImagesListOffers_568262, schemes: {Scheme.Https})
+    validator: validate_VirtualMachineImagesListOffers_564161, base: "",
+    url: url_VirtualMachineImagesListOffers_564162, schemes: {Scheme.Https})
 type
-  Call_VirtualMachineImagesListSkus_568271 = ref object of OpenApiRestCall_567667
-proc url_VirtualMachineImagesListSkus_568273(protocol: Scheme; host: string;
+  Call_VirtualMachineImagesListSkus_564171 = ref object of OpenApiRestCall_563565
+proc url_VirtualMachineImagesListSkus_564173(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -918,44 +924,44 @@ proc url_VirtualMachineImagesListSkus_568273(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_VirtualMachineImagesListSkus_568272(path: JsonNode; query: JsonNode;
+proc validate_VirtualMachineImagesListSkus_564172(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets a list of virtual machine image SKUs for the specified location, publisher, and offer.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   subscriptionId: JString (required)
-  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   publisherName: JString (required)
   ##                : A valid image publisher.
   ##   offer: JString (required)
   ##        : A valid image publisher offer.
+  ##   subscriptionId: JString (required)
+  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   location: JString (required)
   ##           : The name of a supported Azure region.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `subscriptionId` field"
-  var valid_568274 = path.getOrDefault("subscriptionId")
-  valid_568274 = validateParameter(valid_568274, JString, required = true,
+        "path argument is necessary due to required `publisherName` field"
+  var valid_564174 = path.getOrDefault("publisherName")
+  valid_564174 = validateParameter(valid_564174, JString, required = true,
                                  default = nil)
-  if valid_568274 != nil:
-    section.add "subscriptionId", valid_568274
-  var valid_568275 = path.getOrDefault("publisherName")
-  valid_568275 = validateParameter(valid_568275, JString, required = true,
+  if valid_564174 != nil:
+    section.add "publisherName", valid_564174
+  var valid_564175 = path.getOrDefault("offer")
+  valid_564175 = validateParameter(valid_564175, JString, required = true,
                                  default = nil)
-  if valid_568275 != nil:
-    section.add "publisherName", valid_568275
-  var valid_568276 = path.getOrDefault("offer")
-  valid_568276 = validateParameter(valid_568276, JString, required = true,
+  if valid_564175 != nil:
+    section.add "offer", valid_564175
+  var valid_564176 = path.getOrDefault("subscriptionId")
+  valid_564176 = validateParameter(valid_564176, JString, required = true,
                                  default = nil)
-  if valid_568276 != nil:
-    section.add "offer", valid_568276
-  var valid_568277 = path.getOrDefault("location")
-  valid_568277 = validateParameter(valid_568277, JString, required = true,
+  if valid_564176 != nil:
+    section.add "subscriptionId", valid_564176
+  var valid_564177 = path.getOrDefault("location")
+  valid_564177 = validateParameter(valid_564177, JString, required = true,
                                  default = nil)
-  if valid_568277 != nil:
-    section.add "location", valid_568277
+  if valid_564177 != nil:
+    section.add "location", valid_564177
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -963,11 +969,11 @@ proc validate_VirtualMachineImagesListSkus_568272(path: JsonNode; query: JsonNod
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568278 = query.getOrDefault("api-version")
-  valid_568278 = validateParameter(valid_568278, JString, required = true,
+  var valid_564178 = query.getOrDefault("api-version")
+  valid_564178 = validateParameter(valid_564178, JString, required = true,
                                  default = nil)
-  if valid_568278 != nil:
-    section.add "api-version", valid_568278
+  if valid_564178 != nil:
+    section.add "api-version", valid_564178
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -976,51 +982,51 @@ proc validate_VirtualMachineImagesListSkus_568272(path: JsonNode; query: JsonNod
   if body != nil:
     result.add "body", body
 
-proc call*(call_568279: Call_VirtualMachineImagesListSkus_568271; path: JsonNode;
+proc call*(call_564179: Call_VirtualMachineImagesListSkus_564171; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets a list of virtual machine image SKUs for the specified location, publisher, and offer.
   ## 
-  let valid = call_568279.validator(path, query, header, formData, body)
-  let scheme = call_568279.pickScheme
+  let valid = call_564179.validator(path, query, header, formData, body)
+  let scheme = call_564179.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568279.url(scheme.get, call_568279.host, call_568279.base,
-                         call_568279.route, valid.getOrDefault("path"),
+  let url = call_564179.url(scheme.get, call_564179.host, call_564179.base,
+                         call_564179.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568279, url, valid)
+  result = hook(call_564179, url, valid)
 
-proc call*(call_568280: Call_VirtualMachineImagesListSkus_568271;
-          apiVersion: string; subscriptionId: string; publisherName: string;
-          offer: string; location: string): Recallable =
+proc call*(call_564180: Call_VirtualMachineImagesListSkus_564171;
+          publisherName: string; offer: string; apiVersion: string;
+          subscriptionId: string; location: string): Recallable =
   ## virtualMachineImagesListSkus
   ## Gets a list of virtual machine image SKUs for the specified location, publisher, and offer.
-  ##   apiVersion: string (required)
-  ##             : Client Api Version.
-  ##   subscriptionId: string (required)
-  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   publisherName: string (required)
   ##                : A valid image publisher.
   ##   offer: string (required)
   ##        : A valid image publisher offer.
+  ##   apiVersion: string (required)
+  ##             : Client Api Version.
+  ##   subscriptionId: string (required)
+  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   location: string (required)
   ##           : The name of a supported Azure region.
-  var path_568281 = newJObject()
-  var query_568282 = newJObject()
-  add(query_568282, "api-version", newJString(apiVersion))
-  add(path_568281, "subscriptionId", newJString(subscriptionId))
-  add(path_568281, "publisherName", newJString(publisherName))
-  add(path_568281, "offer", newJString(offer))
-  add(path_568281, "location", newJString(location))
-  result = call_568280.call(path_568281, query_568282, nil, nil, nil)
+  var path_564181 = newJObject()
+  var query_564182 = newJObject()
+  add(path_564181, "publisherName", newJString(publisherName))
+  add(path_564181, "offer", newJString(offer))
+  add(query_564182, "api-version", newJString(apiVersion))
+  add(path_564181, "subscriptionId", newJString(subscriptionId))
+  add(path_564181, "location", newJString(location))
+  result = call_564180.call(path_564181, query_564182, nil, nil, nil)
 
-var virtualMachineImagesListSkus* = Call_VirtualMachineImagesListSkus_568271(
+var virtualMachineImagesListSkus* = Call_VirtualMachineImagesListSkus_564171(
     name: "virtualMachineImagesListSkus", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Compute/locations/{location}/publishers/{publisherName}/artifacttypes/vmimage/offers/{offer}/skus",
-    validator: validate_VirtualMachineImagesListSkus_568272, base: "",
-    url: url_VirtualMachineImagesListSkus_568273, schemes: {Scheme.Https})
+    validator: validate_VirtualMachineImagesListSkus_564172, base: "",
+    url: url_VirtualMachineImagesListSkus_564173, schemes: {Scheme.Https})
 type
-  Call_VirtualMachineImagesList_568283 = ref object of OpenApiRestCall_567667
-proc url_VirtualMachineImagesList_568285(protocol: Scheme; host: string;
+  Call_VirtualMachineImagesList_564183 = ref object of OpenApiRestCall_563565
+proc url_VirtualMachineImagesList_564185(protocol: Scheme; host: string;
                                         base: string; route: string; path: JsonNode;
                                         query: JsonNode): Uri =
   result.scheme = $protocol
@@ -1049,80 +1055,81 @@ proc url_VirtualMachineImagesList_568285(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_VirtualMachineImagesList_568284(path: JsonNode; query: JsonNode;
+proc validate_VirtualMachineImagesList_564184(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets a list of all virtual machine image versions for the specified location, publisher, offer, and SKU.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   skus: JString (required)
-  ##       : A valid image SKU.
-  ##   subscriptionId: JString (required)
-  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   publisherName: JString (required)
   ##                : A valid image publisher.
   ##   offer: JString (required)
   ##        : A valid image publisher offer.
+  ##   subscriptionId: JString (required)
+  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   location: JString (required)
   ##           : The name of a supported Azure region.
+  ##   skus: JString (required)
+  ##       : A valid image SKU.
   section = newJObject()
-  assert path != nil, "path argument is necessary due to required `skus` field"
-  var valid_568286 = path.getOrDefault("skus")
-  valid_568286 = validateParameter(valid_568286, JString, required = true,
+  assert path != nil,
+        "path argument is necessary due to required `publisherName` field"
+  var valid_564186 = path.getOrDefault("publisherName")
+  valid_564186 = validateParameter(valid_564186, JString, required = true,
                                  default = nil)
-  if valid_568286 != nil:
-    section.add "skus", valid_568286
-  var valid_568287 = path.getOrDefault("subscriptionId")
-  valid_568287 = validateParameter(valid_568287, JString, required = true,
+  if valid_564186 != nil:
+    section.add "publisherName", valid_564186
+  var valid_564187 = path.getOrDefault("offer")
+  valid_564187 = validateParameter(valid_564187, JString, required = true,
                                  default = nil)
-  if valid_568287 != nil:
-    section.add "subscriptionId", valid_568287
-  var valid_568288 = path.getOrDefault("publisherName")
-  valid_568288 = validateParameter(valid_568288, JString, required = true,
+  if valid_564187 != nil:
+    section.add "offer", valid_564187
+  var valid_564188 = path.getOrDefault("subscriptionId")
+  valid_564188 = validateParameter(valid_564188, JString, required = true,
                                  default = nil)
-  if valid_568288 != nil:
-    section.add "publisherName", valid_568288
-  var valid_568289 = path.getOrDefault("offer")
-  valid_568289 = validateParameter(valid_568289, JString, required = true,
+  if valid_564188 != nil:
+    section.add "subscriptionId", valid_564188
+  var valid_564189 = path.getOrDefault("location")
+  valid_564189 = validateParameter(valid_564189, JString, required = true,
                                  default = nil)
-  if valid_568289 != nil:
-    section.add "offer", valid_568289
-  var valid_568290 = path.getOrDefault("location")
-  valid_568290 = validateParameter(valid_568290, JString, required = true,
+  if valid_564189 != nil:
+    section.add "location", valid_564189
+  var valid_564190 = path.getOrDefault("skus")
+  valid_564190 = validateParameter(valid_564190, JString, required = true,
                                  default = nil)
-  if valid_568290 != nil:
-    section.add "location", valid_568290
+  if valid_564190 != nil:
+    section.add "skus", valid_564190
   result.add "path", section
   ## parameters in `query` object:
-  ##   $orderby: JString
+  ##   $top: JInt
   ##   api-version: JString (required)
   ##              : Client Api Version.
-  ##   $top: JInt
+  ##   $orderby: JString
   ##   $filter: JString
   ##          : The filter to apply on the operation.
   section = newJObject()
-  var valid_568291 = query.getOrDefault("$orderby")
-  valid_568291 = validateParameter(valid_568291, JString, required = false,
-                                 default = nil)
-  if valid_568291 != nil:
-    section.add "$orderby", valid_568291
+  var valid_564191 = query.getOrDefault("$top")
+  valid_564191 = validateParameter(valid_564191, JInt, required = false, default = nil)
+  if valid_564191 != nil:
+    section.add "$top", valid_564191
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568292 = query.getOrDefault("api-version")
-  valid_568292 = validateParameter(valid_568292, JString, required = true,
+  var valid_564192 = query.getOrDefault("api-version")
+  valid_564192 = validateParameter(valid_564192, JString, required = true,
                                  default = nil)
-  if valid_568292 != nil:
-    section.add "api-version", valid_568292
-  var valid_568293 = query.getOrDefault("$top")
-  valid_568293 = validateParameter(valid_568293, JInt, required = false, default = nil)
-  if valid_568293 != nil:
-    section.add "$top", valid_568293
-  var valid_568294 = query.getOrDefault("$filter")
-  valid_568294 = validateParameter(valid_568294, JString, required = false,
+  if valid_564192 != nil:
+    section.add "api-version", valid_564192
+  var valid_564193 = query.getOrDefault("$orderby")
+  valid_564193 = validateParameter(valid_564193, JString, required = false,
                                  default = nil)
-  if valid_568294 != nil:
-    section.add "$filter", valid_568294
+  if valid_564193 != nil:
+    section.add "$orderby", valid_564193
+  var valid_564194 = query.getOrDefault("$filter")
+  valid_564194 = validateParameter(valid_564194, JString, required = false,
+                                 default = nil)
+  if valid_564194 != nil:
+    section.add "$filter", valid_564194
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1131,61 +1138,62 @@ proc validate_VirtualMachineImagesList_568284(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568295: Call_VirtualMachineImagesList_568283; path: JsonNode;
+proc call*(call_564195: Call_VirtualMachineImagesList_564183; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets a list of all virtual machine image versions for the specified location, publisher, offer, and SKU.
   ## 
-  let valid = call_568295.validator(path, query, header, formData, body)
-  let scheme = call_568295.pickScheme
+  let valid = call_564195.validator(path, query, header, formData, body)
+  let scheme = call_564195.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568295.url(scheme.get, call_568295.host, call_568295.base,
-                         call_568295.route, valid.getOrDefault("path"),
+  let url = call_564195.url(scheme.get, call_564195.host, call_564195.base,
+                         call_564195.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568295, url, valid)
+  result = hook(call_564195, url, valid)
 
-proc call*(call_568296: Call_VirtualMachineImagesList_568283; apiVersion: string;
-          skus: string; subscriptionId: string; publisherName: string; offer: string;
-          location: string; Orderby: string = ""; Top: int = 0; Filter: string = ""): Recallable =
+proc call*(call_564196: Call_VirtualMachineImagesList_564183;
+          publisherName: string; offer: string; apiVersion: string;
+          subscriptionId: string; location: string; skus: string; Top: int = 0;
+          Orderby: string = ""; Filter: string = ""): Recallable =
   ## virtualMachineImagesList
   ## Gets a list of all virtual machine image versions for the specified location, publisher, offer, and SKU.
-  ##   Orderby: string
-  ##   apiVersion: string (required)
-  ##             : Client Api Version.
-  ##   skus: string (required)
-  ##       : A valid image SKU.
-  ##   subscriptionId: string (required)
-  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   Top: int
   ##   publisherName: string (required)
   ##                : A valid image publisher.
   ##   offer: string (required)
   ##        : A valid image publisher offer.
+  ##   Top: int
+  ##   apiVersion: string (required)
+  ##             : Client Api Version.
+  ##   subscriptionId: string (required)
+  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   Orderby: string
   ##   location: string (required)
   ##           : The name of a supported Azure region.
   ##   Filter: string
   ##         : The filter to apply on the operation.
-  var path_568297 = newJObject()
-  var query_568298 = newJObject()
-  add(query_568298, "$orderby", newJString(Orderby))
-  add(query_568298, "api-version", newJString(apiVersion))
-  add(path_568297, "skus", newJString(skus))
-  add(path_568297, "subscriptionId", newJString(subscriptionId))
-  add(query_568298, "$top", newJInt(Top))
-  add(path_568297, "publisherName", newJString(publisherName))
-  add(path_568297, "offer", newJString(offer))
-  add(path_568297, "location", newJString(location))
-  add(query_568298, "$filter", newJString(Filter))
-  result = call_568296.call(path_568297, query_568298, nil, nil, nil)
+  ##   skus: string (required)
+  ##       : A valid image SKU.
+  var path_564197 = newJObject()
+  var query_564198 = newJObject()
+  add(path_564197, "publisherName", newJString(publisherName))
+  add(path_564197, "offer", newJString(offer))
+  add(query_564198, "$top", newJInt(Top))
+  add(query_564198, "api-version", newJString(apiVersion))
+  add(path_564197, "subscriptionId", newJString(subscriptionId))
+  add(query_564198, "$orderby", newJString(Orderby))
+  add(path_564197, "location", newJString(location))
+  add(query_564198, "$filter", newJString(Filter))
+  add(path_564197, "skus", newJString(skus))
+  result = call_564196.call(path_564197, query_564198, nil, nil, nil)
 
-var virtualMachineImagesList* = Call_VirtualMachineImagesList_568283(
+var virtualMachineImagesList* = Call_VirtualMachineImagesList_564183(
     name: "virtualMachineImagesList", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Compute/locations/{location}/publishers/{publisherName}/artifacttypes/vmimage/offers/{offer}/skus/{skus}/versions",
-    validator: validate_VirtualMachineImagesList_568284, base: "",
-    url: url_VirtualMachineImagesList_568285, schemes: {Scheme.Https})
+    validator: validate_VirtualMachineImagesList_564184, base: "",
+    url: url_VirtualMachineImagesList_564185, schemes: {Scheme.Https})
 type
-  Call_VirtualMachineImagesGet_568299 = ref object of OpenApiRestCall_567667
-proc url_VirtualMachineImagesGet_568301(protocol: Scheme; host: string; base: string;
+  Call_VirtualMachineImagesGet_564199 = ref object of OpenApiRestCall_563565
+proc url_VirtualMachineImagesGet_564201(protocol: Scheme; host: string; base: string;
                                        route: string; path: JsonNode;
                                        query: JsonNode): Uri =
   result.scheme = $protocol
@@ -1216,57 +1224,58 @@ proc url_VirtualMachineImagesGet_568301(protocol: Scheme; host: string; base: st
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_VirtualMachineImagesGet_568300(path: JsonNode; query: JsonNode;
+proc validate_VirtualMachineImagesGet_564200(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets a virtual machine image.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   skus: JString (required)
-  ##       : A valid image SKU.
-  ##   version: JString (required)
-  ##          : A valid image SKU version.
-  ##   subscriptionId: JString (required)
-  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   publisherName: JString (required)
   ##                : A valid image publisher.
   ##   offer: JString (required)
   ##        : A valid image publisher offer.
+  ##   version: JString (required)
+  ##          : A valid image SKU version.
+  ##   subscriptionId: JString (required)
+  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   location: JString (required)
   ##           : The name of a supported Azure region.
+  ##   skus: JString (required)
+  ##       : A valid image SKU.
   section = newJObject()
-  assert path != nil, "path argument is necessary due to required `skus` field"
-  var valid_568302 = path.getOrDefault("skus")
-  valid_568302 = validateParameter(valid_568302, JString, required = true,
+  assert path != nil,
+        "path argument is necessary due to required `publisherName` field"
+  var valid_564202 = path.getOrDefault("publisherName")
+  valid_564202 = validateParameter(valid_564202, JString, required = true,
                                  default = nil)
-  if valid_568302 != nil:
-    section.add "skus", valid_568302
-  var valid_568303 = path.getOrDefault("version")
-  valid_568303 = validateParameter(valid_568303, JString, required = true,
+  if valid_564202 != nil:
+    section.add "publisherName", valid_564202
+  var valid_564203 = path.getOrDefault("offer")
+  valid_564203 = validateParameter(valid_564203, JString, required = true,
                                  default = nil)
-  if valid_568303 != nil:
-    section.add "version", valid_568303
-  var valid_568304 = path.getOrDefault("subscriptionId")
-  valid_568304 = validateParameter(valid_568304, JString, required = true,
+  if valid_564203 != nil:
+    section.add "offer", valid_564203
+  var valid_564204 = path.getOrDefault("version")
+  valid_564204 = validateParameter(valid_564204, JString, required = true,
                                  default = nil)
-  if valid_568304 != nil:
-    section.add "subscriptionId", valid_568304
-  var valid_568305 = path.getOrDefault("publisherName")
-  valid_568305 = validateParameter(valid_568305, JString, required = true,
+  if valid_564204 != nil:
+    section.add "version", valid_564204
+  var valid_564205 = path.getOrDefault("subscriptionId")
+  valid_564205 = validateParameter(valid_564205, JString, required = true,
                                  default = nil)
-  if valid_568305 != nil:
-    section.add "publisherName", valid_568305
-  var valid_568306 = path.getOrDefault("offer")
-  valid_568306 = validateParameter(valid_568306, JString, required = true,
+  if valid_564205 != nil:
+    section.add "subscriptionId", valid_564205
+  var valid_564206 = path.getOrDefault("location")
+  valid_564206 = validateParameter(valid_564206, JString, required = true,
                                  default = nil)
-  if valid_568306 != nil:
-    section.add "offer", valid_568306
-  var valid_568307 = path.getOrDefault("location")
-  valid_568307 = validateParameter(valid_568307, JString, required = true,
+  if valid_564206 != nil:
+    section.add "location", valid_564206
+  var valid_564207 = path.getOrDefault("skus")
+  valid_564207 = validateParameter(valid_564207, JString, required = true,
                                  default = nil)
-  if valid_568307 != nil:
-    section.add "location", valid_568307
+  if valid_564207 != nil:
+    section.add "skus", valid_564207
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1274,11 +1283,11 @@ proc validate_VirtualMachineImagesGet_568300(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568308 = query.getOrDefault("api-version")
-  valid_568308 = validateParameter(valid_568308, JString, required = true,
+  var valid_564208 = query.getOrDefault("api-version")
+  valid_564208 = validateParameter(valid_564208, JString, required = true,
                                  default = nil)
-  if valid_568308 != nil:
-    section.add "api-version", valid_568308
+  if valid_564208 != nil:
+    section.add "api-version", valid_564208
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1287,57 +1296,57 @@ proc validate_VirtualMachineImagesGet_568300(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568309: Call_VirtualMachineImagesGet_568299; path: JsonNode;
+proc call*(call_564209: Call_VirtualMachineImagesGet_564199; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets a virtual machine image.
   ## 
-  let valid = call_568309.validator(path, query, header, formData, body)
-  let scheme = call_568309.pickScheme
+  let valid = call_564209.validator(path, query, header, formData, body)
+  let scheme = call_564209.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568309.url(scheme.get, call_568309.host, call_568309.base,
-                         call_568309.route, valid.getOrDefault("path"),
+  let url = call_564209.url(scheme.get, call_564209.host, call_564209.base,
+                         call_564209.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568309, url, valid)
+  result = hook(call_564209, url, valid)
 
-proc call*(call_568310: Call_VirtualMachineImagesGet_568299; apiVersion: string;
-          skus: string; version: string; subscriptionId: string;
-          publisherName: string; offer: string; location: string): Recallable =
+proc call*(call_564210: Call_VirtualMachineImagesGet_564199; publisherName: string;
+          offer: string; version: string; apiVersion: string; subscriptionId: string;
+          location: string; skus: string): Recallable =
   ## virtualMachineImagesGet
   ## Gets a virtual machine image.
-  ##   apiVersion: string (required)
-  ##             : Client Api Version.
-  ##   skus: string (required)
-  ##       : A valid image SKU.
-  ##   version: string (required)
-  ##          : A valid image SKU version.
-  ##   subscriptionId: string (required)
-  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   publisherName: string (required)
   ##                : A valid image publisher.
   ##   offer: string (required)
   ##        : A valid image publisher offer.
+  ##   version: string (required)
+  ##          : A valid image SKU version.
+  ##   apiVersion: string (required)
+  ##             : Client Api Version.
+  ##   subscriptionId: string (required)
+  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   location: string (required)
   ##           : The name of a supported Azure region.
-  var path_568311 = newJObject()
-  var query_568312 = newJObject()
-  add(query_568312, "api-version", newJString(apiVersion))
-  add(path_568311, "skus", newJString(skus))
-  add(path_568311, "version", newJString(version))
-  add(path_568311, "subscriptionId", newJString(subscriptionId))
-  add(path_568311, "publisherName", newJString(publisherName))
-  add(path_568311, "offer", newJString(offer))
-  add(path_568311, "location", newJString(location))
-  result = call_568310.call(path_568311, query_568312, nil, nil, nil)
+  ##   skus: string (required)
+  ##       : A valid image SKU.
+  var path_564211 = newJObject()
+  var query_564212 = newJObject()
+  add(path_564211, "publisherName", newJString(publisherName))
+  add(path_564211, "offer", newJString(offer))
+  add(path_564211, "version", newJString(version))
+  add(query_564212, "api-version", newJString(apiVersion))
+  add(path_564211, "subscriptionId", newJString(subscriptionId))
+  add(path_564211, "location", newJString(location))
+  add(path_564211, "skus", newJString(skus))
+  result = call_564210.call(path_564211, query_564212, nil, nil, nil)
 
-var virtualMachineImagesGet* = Call_VirtualMachineImagesGet_568299(
+var virtualMachineImagesGet* = Call_VirtualMachineImagesGet_564199(
     name: "virtualMachineImagesGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Compute/locations/{location}/publishers/{publisherName}/artifacttypes/vmimage/offers/{offer}/skus/{skus}/versions/{version}",
-    validator: validate_VirtualMachineImagesGet_568300, base: "",
-    url: url_VirtualMachineImagesGet_568301, schemes: {Scheme.Https})
+    validator: validate_VirtualMachineImagesGet_564200, base: "",
+    url: url_VirtualMachineImagesGet_564201, schemes: {Scheme.Https})
 type
-  Call_UsageList_568313 = ref object of OpenApiRestCall_567667
-proc url_UsageList_568315(protocol: Scheme; host: string; base: string; route: string;
+  Call_UsageList_564213 = ref object of OpenApiRestCall_563565
+proc url_UsageList_564215(protocol: Scheme; host: string; base: string; route: string;
                          path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1356,7 +1365,7 @@ proc url_UsageList_568315(protocol: Scheme; host: string; base: string; route: s
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_UsageList_568314(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_UsageList_564214(path: JsonNode; query: JsonNode; header: JsonNode;
                               formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets, for the specified location, the current compute resource usage information as well as the limits for compute resources under the subscription.
   ## 
@@ -1370,16 +1379,16 @@ proc validate_UsageList_568314(path: JsonNode; query: JsonNode; header: JsonNode
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_568316 = path.getOrDefault("subscriptionId")
-  valid_568316 = validateParameter(valid_568316, JString, required = true,
+  var valid_564216 = path.getOrDefault("subscriptionId")
+  valid_564216 = validateParameter(valid_564216, JString, required = true,
                                  default = nil)
-  if valid_568316 != nil:
-    section.add "subscriptionId", valid_568316
-  var valid_568317 = path.getOrDefault("location")
-  valid_568317 = validateParameter(valid_568317, JString, required = true,
+  if valid_564216 != nil:
+    section.add "subscriptionId", valid_564216
+  var valid_564217 = path.getOrDefault("location")
+  valid_564217 = validateParameter(valid_564217, JString, required = true,
                                  default = nil)
-  if valid_568317 != nil:
-    section.add "location", valid_568317
+  if valid_564217 != nil:
+    section.add "location", valid_564217
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1387,11 +1396,11 @@ proc validate_UsageList_568314(path: JsonNode; query: JsonNode; header: JsonNode
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568318 = query.getOrDefault("api-version")
-  valid_568318 = validateParameter(valid_568318, JString, required = true,
+  var valid_564218 = query.getOrDefault("api-version")
+  valid_564218 = validateParameter(valid_564218, JString, required = true,
                                  default = nil)
-  if valid_568318 != nil:
-    section.add "api-version", valid_568318
+  if valid_564218 != nil:
+    section.add "api-version", valid_564218
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1400,20 +1409,20 @@ proc validate_UsageList_568314(path: JsonNode; query: JsonNode; header: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_568319: Call_UsageList_568313; path: JsonNode; query: JsonNode;
+proc call*(call_564219: Call_UsageList_564213; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets, for the specified location, the current compute resource usage information as well as the limits for compute resources under the subscription.
   ## 
-  let valid = call_568319.validator(path, query, header, formData, body)
-  let scheme = call_568319.pickScheme
+  let valid = call_564219.validator(path, query, header, formData, body)
+  let scheme = call_564219.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568319.url(scheme.get, call_568319.host, call_568319.base,
-                         call_568319.route, valid.getOrDefault("path"),
+  let url = call_564219.url(scheme.get, call_564219.host, call_564219.base,
+                         call_564219.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568319, url, valid)
+  result = hook(call_564219, url, valid)
 
-proc call*(call_568320: Call_UsageList_568313; apiVersion: string;
+proc call*(call_564220: Call_UsageList_564213; apiVersion: string;
           subscriptionId: string; location: string): Recallable =
   ## usageList
   ## Gets, for the specified location, the current compute resource usage information as well as the limits for compute resources under the subscription.
@@ -1423,21 +1432,21 @@ proc call*(call_568320: Call_UsageList_568313; apiVersion: string;
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   location: string (required)
   ##           : The location for which resource usage is queried.
-  var path_568321 = newJObject()
-  var query_568322 = newJObject()
-  add(query_568322, "api-version", newJString(apiVersion))
-  add(path_568321, "subscriptionId", newJString(subscriptionId))
-  add(path_568321, "location", newJString(location))
-  result = call_568320.call(path_568321, query_568322, nil, nil, nil)
+  var path_564221 = newJObject()
+  var query_564222 = newJObject()
+  add(query_564222, "api-version", newJString(apiVersion))
+  add(path_564221, "subscriptionId", newJString(subscriptionId))
+  add(path_564221, "location", newJString(location))
+  result = call_564220.call(path_564221, query_564222, nil, nil, nil)
 
-var usageList* = Call_UsageList_568313(name: "usageList", meth: HttpMethod.HttpGet,
+var usageList* = Call_UsageList_564213(name: "usageList", meth: HttpMethod.HttpGet,
                                     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Compute/locations/{location}/usages",
-                                    validator: validate_UsageList_568314,
-                                    base: "", url: url_UsageList_568315,
+                                    validator: validate_UsageList_564214,
+                                    base: "", url: url_UsageList_564215,
                                     schemes: {Scheme.Https})
 type
-  Call_VirtualMachineSizesList_568323 = ref object of OpenApiRestCall_567667
-proc url_VirtualMachineSizesList_568325(protocol: Scheme; host: string; base: string;
+  Call_VirtualMachineSizesList_564223 = ref object of OpenApiRestCall_563565
+proc url_VirtualMachineSizesList_564225(protocol: Scheme; host: string; base: string;
                                        route: string; path: JsonNode;
                                        query: JsonNode): Uri =
   result.scheme = $protocol
@@ -1457,7 +1466,7 @@ proc url_VirtualMachineSizesList_568325(protocol: Scheme; host: string; base: st
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_VirtualMachineSizesList_568324(path: JsonNode; query: JsonNode;
+proc validate_VirtualMachineSizesList_564224(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists all available virtual machine sizes for a subscription in a location.
   ## 
@@ -1471,16 +1480,16 @@ proc validate_VirtualMachineSizesList_568324(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_568326 = path.getOrDefault("subscriptionId")
-  valid_568326 = validateParameter(valid_568326, JString, required = true,
+  var valid_564226 = path.getOrDefault("subscriptionId")
+  valid_564226 = validateParameter(valid_564226, JString, required = true,
                                  default = nil)
-  if valid_568326 != nil:
-    section.add "subscriptionId", valid_568326
-  var valid_568327 = path.getOrDefault("location")
-  valid_568327 = validateParameter(valid_568327, JString, required = true,
+  if valid_564226 != nil:
+    section.add "subscriptionId", valid_564226
+  var valid_564227 = path.getOrDefault("location")
+  valid_564227 = validateParameter(valid_564227, JString, required = true,
                                  default = nil)
-  if valid_568327 != nil:
-    section.add "location", valid_568327
+  if valid_564227 != nil:
+    section.add "location", valid_564227
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1488,11 +1497,11 @@ proc validate_VirtualMachineSizesList_568324(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568328 = query.getOrDefault("api-version")
-  valid_568328 = validateParameter(valid_568328, JString, required = true,
+  var valid_564228 = query.getOrDefault("api-version")
+  valid_564228 = validateParameter(valid_564228, JString, required = true,
                                  default = nil)
-  if valid_568328 != nil:
-    section.add "api-version", valid_568328
+  if valid_564228 != nil:
+    section.add "api-version", valid_564228
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1501,20 +1510,20 @@ proc validate_VirtualMachineSizesList_568324(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568329: Call_VirtualMachineSizesList_568323; path: JsonNode;
+proc call*(call_564229: Call_VirtualMachineSizesList_564223; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists all available virtual machine sizes for a subscription in a location.
   ## 
-  let valid = call_568329.validator(path, query, header, formData, body)
-  let scheme = call_568329.pickScheme
+  let valid = call_564229.validator(path, query, header, formData, body)
+  let scheme = call_564229.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568329.url(scheme.get, call_568329.host, call_568329.base,
-                         call_568329.route, valid.getOrDefault("path"),
+  let url = call_564229.url(scheme.get, call_564229.host, call_564229.base,
+                         call_564229.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568329, url, valid)
+  result = hook(call_564229, url, valid)
 
-proc call*(call_568330: Call_VirtualMachineSizesList_568323; apiVersion: string;
+proc call*(call_564230: Call_VirtualMachineSizesList_564223; apiVersion: string;
           subscriptionId: string; location: string): Recallable =
   ## virtualMachineSizesList
   ## Lists all available virtual machine sizes for a subscription in a location.
@@ -1524,21 +1533,21 @@ proc call*(call_568330: Call_VirtualMachineSizesList_568323; apiVersion: string;
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   location: string (required)
   ##           : The location upon which virtual-machine-sizes is queried.
-  var path_568331 = newJObject()
-  var query_568332 = newJObject()
-  add(query_568332, "api-version", newJString(apiVersion))
-  add(path_568331, "subscriptionId", newJString(subscriptionId))
-  add(path_568331, "location", newJString(location))
-  result = call_568330.call(path_568331, query_568332, nil, nil, nil)
+  var path_564231 = newJObject()
+  var query_564232 = newJObject()
+  add(query_564232, "api-version", newJString(apiVersion))
+  add(path_564231, "subscriptionId", newJString(subscriptionId))
+  add(path_564231, "location", newJString(location))
+  result = call_564230.call(path_564231, query_564232, nil, nil, nil)
 
-var virtualMachineSizesList* = Call_VirtualMachineSizesList_568323(
+var virtualMachineSizesList* = Call_VirtualMachineSizesList_564223(
     name: "virtualMachineSizesList", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Compute/locations/{location}/vmSizes",
-    validator: validate_VirtualMachineSizesList_568324, base: "",
-    url: url_VirtualMachineSizesList_568325, schemes: {Scheme.Https})
+    validator: validate_VirtualMachineSizesList_564224, base: "",
+    url: url_VirtualMachineSizesList_564225, schemes: {Scheme.Https})
 type
-  Call_VirtualMachineScaleSetsListAll_568333 = ref object of OpenApiRestCall_567667
-proc url_VirtualMachineScaleSetsListAll_568335(protocol: Scheme; host: string;
+  Call_VirtualMachineScaleSetsListAll_564233 = ref object of OpenApiRestCall_563565
+proc url_VirtualMachineScaleSetsListAll_564235(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1555,7 +1564,7 @@ proc url_VirtualMachineScaleSetsListAll_568335(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_VirtualMachineScaleSetsListAll_568334(path: JsonNode;
+proc validate_VirtualMachineScaleSetsListAll_564234(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets a list of all VM Scale Sets in the subscription, regardless of the associated resource group. Use nextLink property in the response to get the next page of VM Scale Sets. Do this till nextLink is null to fetch all the VM Scale Sets.
   ## 
@@ -1567,11 +1576,11 @@ proc validate_VirtualMachineScaleSetsListAll_568334(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_568336 = path.getOrDefault("subscriptionId")
-  valid_568336 = validateParameter(valid_568336, JString, required = true,
+  var valid_564236 = path.getOrDefault("subscriptionId")
+  valid_564236 = validateParameter(valid_564236, JString, required = true,
                                  default = nil)
-  if valid_568336 != nil:
-    section.add "subscriptionId", valid_568336
+  if valid_564236 != nil:
+    section.add "subscriptionId", valid_564236
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1579,11 +1588,11 @@ proc validate_VirtualMachineScaleSetsListAll_568334(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568337 = query.getOrDefault("api-version")
-  valid_568337 = validateParameter(valid_568337, JString, required = true,
+  var valid_564237 = query.getOrDefault("api-version")
+  valid_564237 = validateParameter(valid_564237, JString, required = true,
                                  default = nil)
-  if valid_568337 != nil:
-    section.add "api-version", valid_568337
+  if valid_564237 != nil:
+    section.add "api-version", valid_564237
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1592,20 +1601,20 @@ proc validate_VirtualMachineScaleSetsListAll_568334(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568338: Call_VirtualMachineScaleSetsListAll_568333; path: JsonNode;
+proc call*(call_564238: Call_VirtualMachineScaleSetsListAll_564233; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets a list of all VM Scale Sets in the subscription, regardless of the associated resource group. Use nextLink property in the response to get the next page of VM Scale Sets. Do this till nextLink is null to fetch all the VM Scale Sets.
   ## 
-  let valid = call_568338.validator(path, query, header, formData, body)
-  let scheme = call_568338.pickScheme
+  let valid = call_564238.validator(path, query, header, formData, body)
+  let scheme = call_564238.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568338.url(scheme.get, call_568338.host, call_568338.base,
-                         call_568338.route, valid.getOrDefault("path"),
+  let url = call_564238.url(scheme.get, call_564238.host, call_564238.base,
+                         call_564238.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568338, url, valid)
+  result = hook(call_564238, url, valid)
 
-proc call*(call_568339: Call_VirtualMachineScaleSetsListAll_568333;
+proc call*(call_564239: Call_VirtualMachineScaleSetsListAll_564233;
           apiVersion: string; subscriptionId: string): Recallable =
   ## virtualMachineScaleSetsListAll
   ## Gets a list of all VM Scale Sets in the subscription, regardless of the associated resource group. Use nextLink property in the response to get the next page of VM Scale Sets. Do this till nextLink is null to fetch all the VM Scale Sets.
@@ -1613,20 +1622,20 @@ proc call*(call_568339: Call_VirtualMachineScaleSetsListAll_568333;
   ##             : Client Api Version.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_568340 = newJObject()
-  var query_568341 = newJObject()
-  add(query_568341, "api-version", newJString(apiVersion))
-  add(path_568340, "subscriptionId", newJString(subscriptionId))
-  result = call_568339.call(path_568340, query_568341, nil, nil, nil)
+  var path_564240 = newJObject()
+  var query_564241 = newJObject()
+  add(query_564241, "api-version", newJString(apiVersion))
+  add(path_564240, "subscriptionId", newJString(subscriptionId))
+  result = call_564239.call(path_564240, query_564241, nil, nil, nil)
 
-var virtualMachineScaleSetsListAll* = Call_VirtualMachineScaleSetsListAll_568333(
+var virtualMachineScaleSetsListAll* = Call_VirtualMachineScaleSetsListAll_564233(
     name: "virtualMachineScaleSetsListAll", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Compute/virtualMachineScaleSets",
-    validator: validate_VirtualMachineScaleSetsListAll_568334, base: "",
-    url: url_VirtualMachineScaleSetsListAll_568335, schemes: {Scheme.Https})
+    validator: validate_VirtualMachineScaleSetsListAll_564234, base: "",
+    url: url_VirtualMachineScaleSetsListAll_564235, schemes: {Scheme.Https})
 type
-  Call_VirtualMachinesListAll_568342 = ref object of OpenApiRestCall_567667
-proc url_VirtualMachinesListAll_568344(protocol: Scheme; host: string; base: string;
+  Call_VirtualMachinesListAll_564242 = ref object of OpenApiRestCall_563565
+proc url_VirtualMachinesListAll_564244(protocol: Scheme; host: string; base: string;
                                       route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1643,7 +1652,7 @@ proc url_VirtualMachinesListAll_568344(protocol: Scheme; host: string; base: str
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_VirtualMachinesListAll_568343(path: JsonNode; query: JsonNode;
+proc validate_VirtualMachinesListAll_564243(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists all of the virtual machines in the specified subscription. Use the nextLink property in the response to get the next page of virtual machines.
   ## 
@@ -1655,11 +1664,11 @@ proc validate_VirtualMachinesListAll_568343(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_568345 = path.getOrDefault("subscriptionId")
-  valid_568345 = validateParameter(valid_568345, JString, required = true,
+  var valid_564245 = path.getOrDefault("subscriptionId")
+  valid_564245 = validateParameter(valid_564245, JString, required = true,
                                  default = nil)
-  if valid_568345 != nil:
-    section.add "subscriptionId", valid_568345
+  if valid_564245 != nil:
+    section.add "subscriptionId", valid_564245
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1667,11 +1676,11 @@ proc validate_VirtualMachinesListAll_568343(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568346 = query.getOrDefault("api-version")
-  valid_568346 = validateParameter(valid_568346, JString, required = true,
+  var valid_564246 = query.getOrDefault("api-version")
+  valid_564246 = validateParameter(valid_564246, JString, required = true,
                                  default = nil)
-  if valid_568346 != nil:
-    section.add "api-version", valid_568346
+  if valid_564246 != nil:
+    section.add "api-version", valid_564246
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1680,20 +1689,20 @@ proc validate_VirtualMachinesListAll_568343(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568347: Call_VirtualMachinesListAll_568342; path: JsonNode;
+proc call*(call_564247: Call_VirtualMachinesListAll_564242; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists all of the virtual machines in the specified subscription. Use the nextLink property in the response to get the next page of virtual machines.
   ## 
-  let valid = call_568347.validator(path, query, header, formData, body)
-  let scheme = call_568347.pickScheme
+  let valid = call_564247.validator(path, query, header, formData, body)
+  let scheme = call_564247.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568347.url(scheme.get, call_568347.host, call_568347.base,
-                         call_568347.route, valid.getOrDefault("path"),
+  let url = call_564247.url(scheme.get, call_564247.host, call_564247.base,
+                         call_564247.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568347, url, valid)
+  result = hook(call_564247, url, valid)
 
-proc call*(call_568348: Call_VirtualMachinesListAll_568342; apiVersion: string;
+proc call*(call_564248: Call_VirtualMachinesListAll_564242; apiVersion: string;
           subscriptionId: string): Recallable =
   ## virtualMachinesListAll
   ## Lists all of the virtual machines in the specified subscription. Use the nextLink property in the response to get the next page of virtual machines.
@@ -1701,20 +1710,20 @@ proc call*(call_568348: Call_VirtualMachinesListAll_568342; apiVersion: string;
   ##             : Client Api Version.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_568349 = newJObject()
-  var query_568350 = newJObject()
-  add(query_568350, "api-version", newJString(apiVersion))
-  add(path_568349, "subscriptionId", newJString(subscriptionId))
-  result = call_568348.call(path_568349, query_568350, nil, nil, nil)
+  var path_564249 = newJObject()
+  var query_564250 = newJObject()
+  add(query_564250, "api-version", newJString(apiVersion))
+  add(path_564249, "subscriptionId", newJString(subscriptionId))
+  result = call_564248.call(path_564249, query_564250, nil, nil, nil)
 
-var virtualMachinesListAll* = Call_VirtualMachinesListAll_568342(
+var virtualMachinesListAll* = Call_VirtualMachinesListAll_564242(
     name: "virtualMachinesListAll", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Compute/virtualMachines",
-    validator: validate_VirtualMachinesListAll_568343, base: "",
-    url: url_VirtualMachinesListAll_568344, schemes: {Scheme.Https})
+    validator: validate_VirtualMachinesListAll_564243, base: "",
+    url: url_VirtualMachinesListAll_564244, schemes: {Scheme.Https})
 type
-  Call_AvailabilitySetsList_568351 = ref object of OpenApiRestCall_567667
-proc url_AvailabilitySetsList_568353(protocol: Scheme; host: string; base: string;
+  Call_AvailabilitySetsList_564251 = ref object of OpenApiRestCall_563565
+proc url_AvailabilitySetsList_564253(protocol: Scheme; host: string; base: string;
                                     route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1735,30 +1744,30 @@ proc url_AvailabilitySetsList_568353(protocol: Scheme; host: string; base: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AvailabilitySetsList_568352(path: JsonNode; query: JsonNode;
+proc validate_AvailabilitySetsList_564252(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists all availability sets in a resource group.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568354 = path.getOrDefault("resourceGroupName")
-  valid_568354 = validateParameter(valid_568354, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564254 = path.getOrDefault("subscriptionId")
+  valid_564254 = validateParameter(valid_564254, JString, required = true,
                                  default = nil)
-  if valid_568354 != nil:
-    section.add "resourceGroupName", valid_568354
-  var valid_568355 = path.getOrDefault("subscriptionId")
-  valid_568355 = validateParameter(valid_568355, JString, required = true,
+  if valid_564254 != nil:
+    section.add "subscriptionId", valid_564254
+  var valid_564255 = path.getOrDefault("resourceGroupName")
+  valid_564255 = validateParameter(valid_564255, JString, required = true,
                                  default = nil)
-  if valid_568355 != nil:
-    section.add "subscriptionId", valid_568355
+  if valid_564255 != nil:
+    section.add "resourceGroupName", valid_564255
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1766,11 +1775,11 @@ proc validate_AvailabilitySetsList_568352(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568356 = query.getOrDefault("api-version")
-  valid_568356 = validateParameter(valid_568356, JString, required = true,
+  var valid_564256 = query.getOrDefault("api-version")
+  valid_564256 = validateParameter(valid_564256, JString, required = true,
                                  default = nil)
-  if valid_568356 != nil:
-    section.add "api-version", valid_568356
+  if valid_564256 != nil:
+    section.add "api-version", valid_564256
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1779,44 +1788,44 @@ proc validate_AvailabilitySetsList_568352(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568357: Call_AvailabilitySetsList_568351; path: JsonNode;
+proc call*(call_564257: Call_AvailabilitySetsList_564251; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists all availability sets in a resource group.
   ## 
-  let valid = call_568357.validator(path, query, header, formData, body)
-  let scheme = call_568357.pickScheme
+  let valid = call_564257.validator(path, query, header, formData, body)
+  let scheme = call_564257.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568357.url(scheme.get, call_568357.host, call_568357.base,
-                         call_568357.route, valid.getOrDefault("path"),
+  let url = call_564257.url(scheme.get, call_564257.host, call_564257.base,
+                         call_564257.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568357, url, valid)
+  result = hook(call_564257, url, valid)
 
-proc call*(call_568358: Call_AvailabilitySetsList_568351;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string): Recallable =
+proc call*(call_564258: Call_AvailabilitySetsList_564251; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string): Recallable =
   ## availabilitySetsList
   ## Lists all availability sets in a resource group.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_568359 = newJObject()
-  var query_568360 = newJObject()
-  add(path_568359, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568360, "api-version", newJString(apiVersion))
-  add(path_568359, "subscriptionId", newJString(subscriptionId))
-  result = call_568358.call(path_568359, query_568360, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564259 = newJObject()
+  var query_564260 = newJObject()
+  add(query_564260, "api-version", newJString(apiVersion))
+  add(path_564259, "subscriptionId", newJString(subscriptionId))
+  add(path_564259, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564258.call(path_564259, query_564260, nil, nil, nil)
 
-var availabilitySetsList* = Call_AvailabilitySetsList_568351(
+var availabilitySetsList* = Call_AvailabilitySetsList_564251(
     name: "availabilitySetsList", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/availabilitySets",
-    validator: validate_AvailabilitySetsList_568352, base: "",
-    url: url_AvailabilitySetsList_568353, schemes: {Scheme.Https})
+    validator: validate_AvailabilitySetsList_564252, base: "",
+    url: url_AvailabilitySetsList_564253, schemes: {Scheme.Https})
 type
-  Call_AvailabilitySetsCreateOrUpdate_568372 = ref object of OpenApiRestCall_567667
-proc url_AvailabilitySetsCreateOrUpdate_568374(protocol: Scheme; host: string;
+  Call_AvailabilitySetsCreateOrUpdate_564272 = ref object of OpenApiRestCall_563565
+proc url_AvailabilitySetsCreateOrUpdate_564274(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1840,37 +1849,36 @@ proc url_AvailabilitySetsCreateOrUpdate_568374(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AvailabilitySetsCreateOrUpdate_568373(path: JsonNode;
+proc validate_AvailabilitySetsCreateOrUpdate_564273(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Create or update an availability set.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
-  ##   subscriptionId: JString (required)
-  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   availabilitySetName: JString (required)
   ##                      : The name of the availability set.
+  ##   subscriptionId: JString (required)
+  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568392 = path.getOrDefault("resourceGroupName")
-  valid_568392 = validateParameter(valid_568392, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `availabilitySetName` field"
+  var valid_564292 = path.getOrDefault("availabilitySetName")
+  valid_564292 = validateParameter(valid_564292, JString, required = true,
                                  default = nil)
-  if valid_568392 != nil:
-    section.add "resourceGroupName", valid_568392
-  var valid_568393 = path.getOrDefault("subscriptionId")
-  valid_568393 = validateParameter(valid_568393, JString, required = true,
+  if valid_564292 != nil:
+    section.add "availabilitySetName", valid_564292
+  var valid_564293 = path.getOrDefault("subscriptionId")
+  valid_564293 = validateParameter(valid_564293, JString, required = true,
                                  default = nil)
-  if valid_568393 != nil:
-    section.add "subscriptionId", valid_568393
-  var valid_568394 = path.getOrDefault("availabilitySetName")
-  valid_568394 = validateParameter(valid_568394, JString, required = true,
+  if valid_564293 != nil:
+    section.add "subscriptionId", valid_564293
+  var valid_564294 = path.getOrDefault("resourceGroupName")
+  valid_564294 = validateParameter(valid_564294, JString, required = true,
                                  default = nil)
-  if valid_568394 != nil:
-    section.add "availabilitySetName", valid_568394
+  if valid_564294 != nil:
+    section.add "resourceGroupName", valid_564294
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1878,11 +1886,11 @@ proc validate_AvailabilitySetsCreateOrUpdate_568373(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568395 = query.getOrDefault("api-version")
-  valid_568395 = validateParameter(valid_568395, JString, required = true,
+  var valid_564295 = query.getOrDefault("api-version")
+  valid_564295 = validateParameter(valid_564295, JString, required = true,
                                  default = nil)
-  if valid_568395 != nil:
-    section.add "api-version", valid_568395
+  if valid_564295 != nil:
+    section.add "api-version", valid_564295
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1896,53 +1904,53 @@ proc validate_AvailabilitySetsCreateOrUpdate_568373(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568397: Call_AvailabilitySetsCreateOrUpdate_568372; path: JsonNode;
+proc call*(call_564297: Call_AvailabilitySetsCreateOrUpdate_564272; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Create or update an availability set.
   ## 
-  let valid = call_568397.validator(path, query, header, formData, body)
-  let scheme = call_568397.pickScheme
+  let valid = call_564297.validator(path, query, header, formData, body)
+  let scheme = call_564297.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568397.url(scheme.get, call_568397.host, call_568397.base,
-                         call_568397.route, valid.getOrDefault("path"),
+  let url = call_564297.url(scheme.get, call_564297.host, call_564297.base,
+                         call_564297.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568397, url, valid)
+  result = hook(call_564297, url, valid)
 
-proc call*(call_568398: Call_AvailabilitySetsCreateOrUpdate_568372;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          availabilitySetName: string; parameters: JsonNode): Recallable =
+proc call*(call_564298: Call_AvailabilitySetsCreateOrUpdate_564272;
+          availabilitySetName: string; apiVersion: string; subscriptionId: string;
+          resourceGroupName: string; parameters: JsonNode): Recallable =
   ## availabilitySetsCreateOrUpdate
   ## Create or update an availability set.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   availabilitySetName: string (required)
+  ##                      : The name of the availability set.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   availabilitySetName: string (required)
-  ##                      : The name of the availability set.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   parameters: JObject (required)
   ##             : Parameters supplied to the Create Availability Set operation.
-  var path_568399 = newJObject()
-  var query_568400 = newJObject()
-  var body_568401 = newJObject()
-  add(path_568399, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568400, "api-version", newJString(apiVersion))
-  add(path_568399, "subscriptionId", newJString(subscriptionId))
-  add(path_568399, "availabilitySetName", newJString(availabilitySetName))
+  var path_564299 = newJObject()
+  var query_564300 = newJObject()
+  var body_564301 = newJObject()
+  add(path_564299, "availabilitySetName", newJString(availabilitySetName))
+  add(query_564300, "api-version", newJString(apiVersion))
+  add(path_564299, "subscriptionId", newJString(subscriptionId))
+  add(path_564299, "resourceGroupName", newJString(resourceGroupName))
   if parameters != nil:
-    body_568401 = parameters
-  result = call_568398.call(path_568399, query_568400, nil, nil, body_568401)
+    body_564301 = parameters
+  result = call_564298.call(path_564299, query_564300, nil, nil, body_564301)
 
-var availabilitySetsCreateOrUpdate* = Call_AvailabilitySetsCreateOrUpdate_568372(
+var availabilitySetsCreateOrUpdate* = Call_AvailabilitySetsCreateOrUpdate_564272(
     name: "availabilitySetsCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/availabilitySets/{availabilitySetName}",
-    validator: validate_AvailabilitySetsCreateOrUpdate_568373, base: "",
-    url: url_AvailabilitySetsCreateOrUpdate_568374, schemes: {Scheme.Https})
+    validator: validate_AvailabilitySetsCreateOrUpdate_564273, base: "",
+    url: url_AvailabilitySetsCreateOrUpdate_564274, schemes: {Scheme.Https})
 type
-  Call_AvailabilitySetsGet_568361 = ref object of OpenApiRestCall_567667
-proc url_AvailabilitySetsGet_568363(protocol: Scheme; host: string; base: string;
+  Call_AvailabilitySetsGet_564261 = ref object of OpenApiRestCall_563565
+proc url_AvailabilitySetsGet_564263(protocol: Scheme; host: string; base: string;
                                    route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1966,7 +1974,7 @@ proc url_AvailabilitySetsGet_568363(protocol: Scheme; host: string; base: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AvailabilitySetsGet_568362(path: JsonNode; query: JsonNode;
+proc validate_AvailabilitySetsGet_564262(path: JsonNode; query: JsonNode;
                                         header: JsonNode; formData: JsonNode;
                                         body: JsonNode): JsonNode =
   ## Retrieves information about an availability set.
@@ -1974,30 +1982,29 @@ proc validate_AvailabilitySetsGet_568362(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
-  ##   subscriptionId: JString (required)
-  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   availabilitySetName: JString (required)
   ##                      : The name of the availability set.
+  ##   subscriptionId: JString (required)
+  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568364 = path.getOrDefault("resourceGroupName")
-  valid_568364 = validateParameter(valid_568364, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `availabilitySetName` field"
+  var valid_564264 = path.getOrDefault("availabilitySetName")
+  valid_564264 = validateParameter(valid_564264, JString, required = true,
                                  default = nil)
-  if valid_568364 != nil:
-    section.add "resourceGroupName", valid_568364
-  var valid_568365 = path.getOrDefault("subscriptionId")
-  valid_568365 = validateParameter(valid_568365, JString, required = true,
+  if valid_564264 != nil:
+    section.add "availabilitySetName", valid_564264
+  var valid_564265 = path.getOrDefault("subscriptionId")
+  valid_564265 = validateParameter(valid_564265, JString, required = true,
                                  default = nil)
-  if valid_568365 != nil:
-    section.add "subscriptionId", valid_568365
-  var valid_568366 = path.getOrDefault("availabilitySetName")
-  valid_568366 = validateParameter(valid_568366, JString, required = true,
+  if valid_564265 != nil:
+    section.add "subscriptionId", valid_564265
+  var valid_564266 = path.getOrDefault("resourceGroupName")
+  valid_564266 = validateParameter(valid_564266, JString, required = true,
                                  default = nil)
-  if valid_568366 != nil:
-    section.add "availabilitySetName", valid_568366
+  if valid_564266 != nil:
+    section.add "resourceGroupName", valid_564266
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2005,11 +2012,11 @@ proc validate_AvailabilitySetsGet_568362(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568367 = query.getOrDefault("api-version")
-  valid_568367 = validateParameter(valid_568367, JString, required = true,
+  var valid_564267 = query.getOrDefault("api-version")
+  valid_564267 = validateParameter(valid_564267, JString, required = true,
                                  default = nil)
-  if valid_568367 != nil:
-    section.add "api-version", valid_568367
+  if valid_564267 != nil:
+    section.add "api-version", valid_564267
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2018,47 +2025,48 @@ proc validate_AvailabilitySetsGet_568362(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568368: Call_AvailabilitySetsGet_568361; path: JsonNode;
+proc call*(call_564268: Call_AvailabilitySetsGet_564261; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Retrieves information about an availability set.
   ## 
-  let valid = call_568368.validator(path, query, header, formData, body)
-  let scheme = call_568368.pickScheme
+  let valid = call_564268.validator(path, query, header, formData, body)
+  let scheme = call_564268.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568368.url(scheme.get, call_568368.host, call_568368.base,
-                         call_568368.route, valid.getOrDefault("path"),
+  let url = call_564268.url(scheme.get, call_564268.host, call_564268.base,
+                         call_564268.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568368, url, valid)
+  result = hook(call_564268, url, valid)
 
-proc call*(call_568369: Call_AvailabilitySetsGet_568361; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; availabilitySetName: string): Recallable =
+proc call*(call_564269: Call_AvailabilitySetsGet_564261;
+          availabilitySetName: string; apiVersion: string; subscriptionId: string;
+          resourceGroupName: string): Recallable =
   ## availabilitySetsGet
   ## Retrieves information about an availability set.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   availabilitySetName: string (required)
+  ##                      : The name of the availability set.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   availabilitySetName: string (required)
-  ##                      : The name of the availability set.
-  var path_568370 = newJObject()
-  var query_568371 = newJObject()
-  add(path_568370, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568371, "api-version", newJString(apiVersion))
-  add(path_568370, "subscriptionId", newJString(subscriptionId))
-  add(path_568370, "availabilitySetName", newJString(availabilitySetName))
-  result = call_568369.call(path_568370, query_568371, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564270 = newJObject()
+  var query_564271 = newJObject()
+  add(path_564270, "availabilitySetName", newJString(availabilitySetName))
+  add(query_564271, "api-version", newJString(apiVersion))
+  add(path_564270, "subscriptionId", newJString(subscriptionId))
+  add(path_564270, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564269.call(path_564270, query_564271, nil, nil, nil)
 
-var availabilitySetsGet* = Call_AvailabilitySetsGet_568361(
+var availabilitySetsGet* = Call_AvailabilitySetsGet_564261(
     name: "availabilitySetsGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/availabilitySets/{availabilitySetName}",
-    validator: validate_AvailabilitySetsGet_568362, base: "",
-    url: url_AvailabilitySetsGet_568363, schemes: {Scheme.Https})
+    validator: validate_AvailabilitySetsGet_564262, base: "",
+    url: url_AvailabilitySetsGet_564263, schemes: {Scheme.Https})
 type
-  Call_AvailabilitySetsDelete_568402 = ref object of OpenApiRestCall_567667
-proc url_AvailabilitySetsDelete_568404(protocol: Scheme; host: string; base: string;
+  Call_AvailabilitySetsDelete_564302 = ref object of OpenApiRestCall_563565
+proc url_AvailabilitySetsDelete_564304(protocol: Scheme; host: string; base: string;
                                       route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2082,37 +2090,36 @@ proc url_AvailabilitySetsDelete_568404(protocol: Scheme; host: string; base: str
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AvailabilitySetsDelete_568403(path: JsonNode; query: JsonNode;
+proc validate_AvailabilitySetsDelete_564303(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Delete an availability set.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
-  ##   subscriptionId: JString (required)
-  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   availabilitySetName: JString (required)
   ##                      : The name of the availability set.
+  ##   subscriptionId: JString (required)
+  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568405 = path.getOrDefault("resourceGroupName")
-  valid_568405 = validateParameter(valid_568405, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `availabilitySetName` field"
+  var valid_564305 = path.getOrDefault("availabilitySetName")
+  valid_564305 = validateParameter(valid_564305, JString, required = true,
                                  default = nil)
-  if valid_568405 != nil:
-    section.add "resourceGroupName", valid_568405
-  var valid_568406 = path.getOrDefault("subscriptionId")
-  valid_568406 = validateParameter(valid_568406, JString, required = true,
+  if valid_564305 != nil:
+    section.add "availabilitySetName", valid_564305
+  var valid_564306 = path.getOrDefault("subscriptionId")
+  valid_564306 = validateParameter(valid_564306, JString, required = true,
                                  default = nil)
-  if valid_568406 != nil:
-    section.add "subscriptionId", valid_568406
-  var valid_568407 = path.getOrDefault("availabilitySetName")
-  valid_568407 = validateParameter(valid_568407, JString, required = true,
+  if valid_564306 != nil:
+    section.add "subscriptionId", valid_564306
+  var valid_564307 = path.getOrDefault("resourceGroupName")
+  valid_564307 = validateParameter(valid_564307, JString, required = true,
                                  default = nil)
-  if valid_568407 != nil:
-    section.add "availabilitySetName", valid_568407
+  if valid_564307 != nil:
+    section.add "resourceGroupName", valid_564307
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2120,11 +2127,11 @@ proc validate_AvailabilitySetsDelete_568403(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568408 = query.getOrDefault("api-version")
-  valid_568408 = validateParameter(valid_568408, JString, required = true,
+  var valid_564308 = query.getOrDefault("api-version")
+  valid_564308 = validateParameter(valid_564308, JString, required = true,
                                  default = nil)
-  if valid_568408 != nil:
-    section.add "api-version", valid_568408
+  if valid_564308 != nil:
+    section.add "api-version", valid_564308
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2133,48 +2140,48 @@ proc validate_AvailabilitySetsDelete_568403(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568409: Call_AvailabilitySetsDelete_568402; path: JsonNode;
+proc call*(call_564309: Call_AvailabilitySetsDelete_564302; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Delete an availability set.
   ## 
-  let valid = call_568409.validator(path, query, header, formData, body)
-  let scheme = call_568409.pickScheme
+  let valid = call_564309.validator(path, query, header, formData, body)
+  let scheme = call_564309.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568409.url(scheme.get, call_568409.host, call_568409.base,
-                         call_568409.route, valid.getOrDefault("path"),
+  let url = call_564309.url(scheme.get, call_564309.host, call_564309.base,
+                         call_564309.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568409, url, valid)
+  result = hook(call_564309, url, valid)
 
-proc call*(call_568410: Call_AvailabilitySetsDelete_568402;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          availabilitySetName: string): Recallable =
+proc call*(call_564310: Call_AvailabilitySetsDelete_564302;
+          availabilitySetName: string; apiVersion: string; subscriptionId: string;
+          resourceGroupName: string): Recallable =
   ## availabilitySetsDelete
   ## Delete an availability set.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   availabilitySetName: string (required)
+  ##                      : The name of the availability set.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   availabilitySetName: string (required)
-  ##                      : The name of the availability set.
-  var path_568411 = newJObject()
-  var query_568412 = newJObject()
-  add(path_568411, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568412, "api-version", newJString(apiVersion))
-  add(path_568411, "subscriptionId", newJString(subscriptionId))
-  add(path_568411, "availabilitySetName", newJString(availabilitySetName))
-  result = call_568410.call(path_568411, query_568412, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564311 = newJObject()
+  var query_564312 = newJObject()
+  add(path_564311, "availabilitySetName", newJString(availabilitySetName))
+  add(query_564312, "api-version", newJString(apiVersion))
+  add(path_564311, "subscriptionId", newJString(subscriptionId))
+  add(path_564311, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564310.call(path_564311, query_564312, nil, nil, nil)
 
-var availabilitySetsDelete* = Call_AvailabilitySetsDelete_568402(
+var availabilitySetsDelete* = Call_AvailabilitySetsDelete_564302(
     name: "availabilitySetsDelete", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/availabilitySets/{availabilitySetName}",
-    validator: validate_AvailabilitySetsDelete_568403, base: "",
-    url: url_AvailabilitySetsDelete_568404, schemes: {Scheme.Https})
+    validator: validate_AvailabilitySetsDelete_564303, base: "",
+    url: url_AvailabilitySetsDelete_564304, schemes: {Scheme.Https})
 type
-  Call_AvailabilitySetsListAvailableSizes_568413 = ref object of OpenApiRestCall_567667
-proc url_AvailabilitySetsListAvailableSizes_568415(protocol: Scheme; host: string;
+  Call_AvailabilitySetsListAvailableSizes_564313 = ref object of OpenApiRestCall_563565
+proc url_AvailabilitySetsListAvailableSizes_564315(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2199,37 +2206,36 @@ proc url_AvailabilitySetsListAvailableSizes_568415(protocol: Scheme; host: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AvailabilitySetsListAvailableSizes_568414(path: JsonNode;
+proc validate_AvailabilitySetsListAvailableSizes_564314(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists all available virtual machine sizes that can be used to create a new virtual machine in an existing availability set.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
-  ##   subscriptionId: JString (required)
-  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   availabilitySetName: JString (required)
   ##                      : The name of the availability set.
+  ##   subscriptionId: JString (required)
+  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568416 = path.getOrDefault("resourceGroupName")
-  valid_568416 = validateParameter(valid_568416, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `availabilitySetName` field"
+  var valid_564316 = path.getOrDefault("availabilitySetName")
+  valid_564316 = validateParameter(valid_564316, JString, required = true,
                                  default = nil)
-  if valid_568416 != nil:
-    section.add "resourceGroupName", valid_568416
-  var valid_568417 = path.getOrDefault("subscriptionId")
-  valid_568417 = validateParameter(valid_568417, JString, required = true,
+  if valid_564316 != nil:
+    section.add "availabilitySetName", valid_564316
+  var valid_564317 = path.getOrDefault("subscriptionId")
+  valid_564317 = validateParameter(valid_564317, JString, required = true,
                                  default = nil)
-  if valid_568417 != nil:
-    section.add "subscriptionId", valid_568417
-  var valid_568418 = path.getOrDefault("availabilitySetName")
-  valid_568418 = validateParameter(valid_568418, JString, required = true,
+  if valid_564317 != nil:
+    section.add "subscriptionId", valid_564317
+  var valid_564318 = path.getOrDefault("resourceGroupName")
+  valid_564318 = validateParameter(valid_564318, JString, required = true,
                                  default = nil)
-  if valid_568418 != nil:
-    section.add "availabilitySetName", valid_568418
+  if valid_564318 != nil:
+    section.add "resourceGroupName", valid_564318
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2237,11 +2243,11 @@ proc validate_AvailabilitySetsListAvailableSizes_568414(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568419 = query.getOrDefault("api-version")
-  valid_568419 = validateParameter(valid_568419, JString, required = true,
+  var valid_564319 = query.getOrDefault("api-version")
+  valid_564319 = validateParameter(valid_564319, JString, required = true,
                                  default = nil)
-  if valid_568419 != nil:
-    section.add "api-version", valid_568419
+  if valid_564319 != nil:
+    section.add "api-version", valid_564319
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2250,49 +2256,49 @@ proc validate_AvailabilitySetsListAvailableSizes_568414(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568420: Call_AvailabilitySetsListAvailableSizes_568413;
+proc call*(call_564320: Call_AvailabilitySetsListAvailableSizes_564313;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Lists all available virtual machine sizes that can be used to create a new virtual machine in an existing availability set.
   ## 
-  let valid = call_568420.validator(path, query, header, formData, body)
-  let scheme = call_568420.pickScheme
+  let valid = call_564320.validator(path, query, header, formData, body)
+  let scheme = call_564320.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568420.url(scheme.get, call_568420.host, call_568420.base,
-                         call_568420.route, valid.getOrDefault("path"),
+  let url = call_564320.url(scheme.get, call_564320.host, call_564320.base,
+                         call_564320.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568420, url, valid)
+  result = hook(call_564320, url, valid)
 
-proc call*(call_568421: Call_AvailabilitySetsListAvailableSizes_568413;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          availabilitySetName: string): Recallable =
+proc call*(call_564321: Call_AvailabilitySetsListAvailableSizes_564313;
+          availabilitySetName: string; apiVersion: string; subscriptionId: string;
+          resourceGroupName: string): Recallable =
   ## availabilitySetsListAvailableSizes
   ## Lists all available virtual machine sizes that can be used to create a new virtual machine in an existing availability set.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   availabilitySetName: string (required)
+  ##                      : The name of the availability set.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   availabilitySetName: string (required)
-  ##                      : The name of the availability set.
-  var path_568422 = newJObject()
-  var query_568423 = newJObject()
-  add(path_568422, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568423, "api-version", newJString(apiVersion))
-  add(path_568422, "subscriptionId", newJString(subscriptionId))
-  add(path_568422, "availabilitySetName", newJString(availabilitySetName))
-  result = call_568421.call(path_568422, query_568423, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564322 = newJObject()
+  var query_564323 = newJObject()
+  add(path_564322, "availabilitySetName", newJString(availabilitySetName))
+  add(query_564323, "api-version", newJString(apiVersion))
+  add(path_564322, "subscriptionId", newJString(subscriptionId))
+  add(path_564322, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564321.call(path_564322, query_564323, nil, nil, nil)
 
-var availabilitySetsListAvailableSizes* = Call_AvailabilitySetsListAvailableSizes_568413(
+var availabilitySetsListAvailableSizes* = Call_AvailabilitySetsListAvailableSizes_564313(
     name: "availabilitySetsListAvailableSizes", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/availabilitySets/{availabilitySetName}/vmSizes",
-    validator: validate_AvailabilitySetsListAvailableSizes_568414, base: "",
-    url: url_AvailabilitySetsListAvailableSizes_568415, schemes: {Scheme.Https})
+    validator: validate_AvailabilitySetsListAvailableSizes_564314, base: "",
+    url: url_AvailabilitySetsListAvailableSizes_564315, schemes: {Scheme.Https})
 type
-  Call_ImagesListByResourceGroup_568424 = ref object of OpenApiRestCall_567667
-proc url_ImagesListByResourceGroup_568426(protocol: Scheme; host: string;
+  Call_ImagesListByResourceGroup_564324 = ref object of OpenApiRestCall_563565
+proc url_ImagesListByResourceGroup_564326(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2312,30 +2318,30 @@ proc url_ImagesListByResourceGroup_568426(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ImagesListByResourceGroup_568425(path: JsonNode; query: JsonNode;
+proc validate_ImagesListByResourceGroup_564325(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the list of images under a resource group.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568427 = path.getOrDefault("resourceGroupName")
-  valid_568427 = validateParameter(valid_568427, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564327 = path.getOrDefault("subscriptionId")
+  valid_564327 = validateParameter(valid_564327, JString, required = true,
                                  default = nil)
-  if valid_568427 != nil:
-    section.add "resourceGroupName", valid_568427
-  var valid_568428 = path.getOrDefault("subscriptionId")
-  valid_568428 = validateParameter(valid_568428, JString, required = true,
+  if valid_564327 != nil:
+    section.add "subscriptionId", valid_564327
+  var valid_564328 = path.getOrDefault("resourceGroupName")
+  valid_564328 = validateParameter(valid_564328, JString, required = true,
                                  default = nil)
-  if valid_568428 != nil:
-    section.add "subscriptionId", valid_568428
+  if valid_564328 != nil:
+    section.add "resourceGroupName", valid_564328
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2343,11 +2349,11 @@ proc validate_ImagesListByResourceGroup_568425(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568429 = query.getOrDefault("api-version")
-  valid_568429 = validateParameter(valid_568429, JString, required = true,
+  var valid_564329 = query.getOrDefault("api-version")
+  valid_564329 = validateParameter(valid_564329, JString, required = true,
                                  default = nil)
-  if valid_568429 != nil:
-    section.add "api-version", valid_568429
+  if valid_564329 != nil:
+    section.add "api-version", valid_564329
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2356,44 +2362,44 @@ proc validate_ImagesListByResourceGroup_568425(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568430: Call_ImagesListByResourceGroup_568424; path: JsonNode;
+proc call*(call_564330: Call_ImagesListByResourceGroup_564324; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the list of images under a resource group.
   ## 
-  let valid = call_568430.validator(path, query, header, formData, body)
-  let scheme = call_568430.pickScheme
+  let valid = call_564330.validator(path, query, header, formData, body)
+  let scheme = call_564330.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568430.url(scheme.get, call_568430.host, call_568430.base,
-                         call_568430.route, valid.getOrDefault("path"),
+  let url = call_564330.url(scheme.get, call_564330.host, call_564330.base,
+                         call_564330.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568430, url, valid)
+  result = hook(call_564330, url, valid)
 
-proc call*(call_568431: Call_ImagesListByResourceGroup_568424;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string): Recallable =
+proc call*(call_564331: Call_ImagesListByResourceGroup_564324; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string): Recallable =
   ## imagesListByResourceGroup
   ## Gets the list of images under a resource group.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_568432 = newJObject()
-  var query_568433 = newJObject()
-  add(path_568432, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568433, "api-version", newJString(apiVersion))
-  add(path_568432, "subscriptionId", newJString(subscriptionId))
-  result = call_568431.call(path_568432, query_568433, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564332 = newJObject()
+  var query_564333 = newJObject()
+  add(query_564333, "api-version", newJString(apiVersion))
+  add(path_564332, "subscriptionId", newJString(subscriptionId))
+  add(path_564332, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564331.call(path_564332, query_564333, nil, nil, nil)
 
-var imagesListByResourceGroup* = Call_ImagesListByResourceGroup_568424(
+var imagesListByResourceGroup* = Call_ImagesListByResourceGroup_564324(
     name: "imagesListByResourceGroup", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/images",
-    validator: validate_ImagesListByResourceGroup_568425, base: "",
-    url: url_ImagesListByResourceGroup_568426, schemes: {Scheme.Https})
+    validator: validate_ImagesListByResourceGroup_564325, base: "",
+    url: url_ImagesListByResourceGroup_564326, schemes: {Scheme.Https})
 type
-  Call_ImagesCreateOrUpdate_568446 = ref object of OpenApiRestCall_567667
-proc url_ImagesCreateOrUpdate_568448(protocol: Scheme; host: string; base: string;
+  Call_ImagesCreateOrUpdate_564346 = ref object of OpenApiRestCall_563565
+proc url_ImagesCreateOrUpdate_564348(protocol: Scheme; host: string; base: string;
                                     route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2415,37 +2421,36 @@ proc url_ImagesCreateOrUpdate_568448(protocol: Scheme; host: string; base: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ImagesCreateOrUpdate_568447(path: JsonNode; query: JsonNode;
+proc validate_ImagesCreateOrUpdate_564347(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Create or update an image.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
-  ##   subscriptionId: JString (required)
-  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   imageName: JString (required)
   ##            : The name of the image.
+  ##   subscriptionId: JString (required)
+  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568449 = path.getOrDefault("resourceGroupName")
-  valid_568449 = validateParameter(valid_568449, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `imageName` field"
+  var valid_564349 = path.getOrDefault("imageName")
+  valid_564349 = validateParameter(valid_564349, JString, required = true,
                                  default = nil)
-  if valid_568449 != nil:
-    section.add "resourceGroupName", valid_568449
-  var valid_568450 = path.getOrDefault("subscriptionId")
-  valid_568450 = validateParameter(valid_568450, JString, required = true,
+  if valid_564349 != nil:
+    section.add "imageName", valid_564349
+  var valid_564350 = path.getOrDefault("subscriptionId")
+  valid_564350 = validateParameter(valid_564350, JString, required = true,
                                  default = nil)
-  if valid_568450 != nil:
-    section.add "subscriptionId", valid_568450
-  var valid_568451 = path.getOrDefault("imageName")
-  valid_568451 = validateParameter(valid_568451, JString, required = true,
+  if valid_564350 != nil:
+    section.add "subscriptionId", valid_564350
+  var valid_564351 = path.getOrDefault("resourceGroupName")
+  valid_564351 = validateParameter(valid_564351, JString, required = true,
                                  default = nil)
-  if valid_568451 != nil:
-    section.add "imageName", valid_568451
+  if valid_564351 != nil:
+    section.add "resourceGroupName", valid_564351
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2453,11 +2458,11 @@ proc validate_ImagesCreateOrUpdate_568447(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568452 = query.getOrDefault("api-version")
-  valid_568452 = validateParameter(valid_568452, JString, required = true,
+  var valid_564352 = query.getOrDefault("api-version")
+  valid_564352 = validateParameter(valid_564352, JString, required = true,
                                  default = nil)
-  if valid_568452 != nil:
-    section.add "api-version", valid_568452
+  if valid_564352 != nil:
+    section.add "api-version", valid_564352
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2471,53 +2476,53 @@ proc validate_ImagesCreateOrUpdate_568447(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568454: Call_ImagesCreateOrUpdate_568446; path: JsonNode;
+proc call*(call_564354: Call_ImagesCreateOrUpdate_564346; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Create or update an image.
   ## 
-  let valid = call_568454.validator(path, query, header, formData, body)
-  let scheme = call_568454.pickScheme
+  let valid = call_564354.validator(path, query, header, formData, body)
+  let scheme = call_564354.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568454.url(scheme.get, call_568454.host, call_568454.base,
-                         call_568454.route, valid.getOrDefault("path"),
+  let url = call_564354.url(scheme.get, call_564354.host, call_564354.base,
+                         call_564354.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568454, url, valid)
+  result = hook(call_564354, url, valid)
 
-proc call*(call_568455: Call_ImagesCreateOrUpdate_568446;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          imageName: string; parameters: JsonNode): Recallable =
+proc call*(call_564355: Call_ImagesCreateOrUpdate_564346; imageName: string;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string;
+          parameters: JsonNode): Recallable =
   ## imagesCreateOrUpdate
   ## Create or update an image.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   imageName: string (required)
+  ##            : The name of the image.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   imageName: string (required)
-  ##            : The name of the image.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   parameters: JObject (required)
   ##             : Parameters supplied to the Create Image operation.
-  var path_568456 = newJObject()
-  var query_568457 = newJObject()
-  var body_568458 = newJObject()
-  add(path_568456, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568457, "api-version", newJString(apiVersion))
-  add(path_568456, "subscriptionId", newJString(subscriptionId))
-  add(path_568456, "imageName", newJString(imageName))
+  var path_564356 = newJObject()
+  var query_564357 = newJObject()
+  var body_564358 = newJObject()
+  add(path_564356, "imageName", newJString(imageName))
+  add(query_564357, "api-version", newJString(apiVersion))
+  add(path_564356, "subscriptionId", newJString(subscriptionId))
+  add(path_564356, "resourceGroupName", newJString(resourceGroupName))
   if parameters != nil:
-    body_568458 = parameters
-  result = call_568455.call(path_568456, query_568457, nil, nil, body_568458)
+    body_564358 = parameters
+  result = call_564355.call(path_564356, query_564357, nil, nil, body_564358)
 
-var imagesCreateOrUpdate* = Call_ImagesCreateOrUpdate_568446(
+var imagesCreateOrUpdate* = Call_ImagesCreateOrUpdate_564346(
     name: "imagesCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/images/{imageName}",
-    validator: validate_ImagesCreateOrUpdate_568447, base: "",
-    url: url_ImagesCreateOrUpdate_568448, schemes: {Scheme.Https})
+    validator: validate_ImagesCreateOrUpdate_564347, base: "",
+    url: url_ImagesCreateOrUpdate_564348, schemes: {Scheme.Https})
 type
-  Call_ImagesGet_568434 = ref object of OpenApiRestCall_567667
-proc url_ImagesGet_568436(protocol: Scheme; host: string; base: string; route: string;
+  Call_ImagesGet_564334 = ref object of OpenApiRestCall_563565
+proc url_ImagesGet_564336(protocol: Scheme; host: string; base: string; route: string;
                          path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2539,56 +2544,55 @@ proc url_ImagesGet_568436(protocol: Scheme; host: string; base: string; route: s
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ImagesGet_568435(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_ImagesGet_564335(path: JsonNode; query: JsonNode; header: JsonNode;
                               formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets an image.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
-  ##   subscriptionId: JString (required)
-  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   imageName: JString (required)
   ##            : The name of the image.
+  ##   subscriptionId: JString (required)
+  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568437 = path.getOrDefault("resourceGroupName")
-  valid_568437 = validateParameter(valid_568437, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `imageName` field"
+  var valid_564337 = path.getOrDefault("imageName")
+  valid_564337 = validateParameter(valid_564337, JString, required = true,
                                  default = nil)
-  if valid_568437 != nil:
-    section.add "resourceGroupName", valid_568437
-  var valid_568438 = path.getOrDefault("subscriptionId")
-  valid_568438 = validateParameter(valid_568438, JString, required = true,
+  if valid_564337 != nil:
+    section.add "imageName", valid_564337
+  var valid_564338 = path.getOrDefault("subscriptionId")
+  valid_564338 = validateParameter(valid_564338, JString, required = true,
                                  default = nil)
-  if valid_568438 != nil:
-    section.add "subscriptionId", valid_568438
-  var valid_568439 = path.getOrDefault("imageName")
-  valid_568439 = validateParameter(valid_568439, JString, required = true,
+  if valid_564338 != nil:
+    section.add "subscriptionId", valid_564338
+  var valid_564339 = path.getOrDefault("resourceGroupName")
+  valid_564339 = validateParameter(valid_564339, JString, required = true,
                                  default = nil)
-  if valid_568439 != nil:
-    section.add "imageName", valid_568439
+  if valid_564339 != nil:
+    section.add "resourceGroupName", valid_564339
   result.add "path", section
   ## parameters in `query` object:
-  ##   $expand: JString
-  ##          : The expand expression to apply on the operation.
   ##   api-version: JString (required)
   ##              : Client Api Version.
+  ##   $expand: JString
+  ##          : The expand expression to apply on the operation.
   section = newJObject()
-  var valid_568440 = query.getOrDefault("$expand")
-  valid_568440 = validateParameter(valid_568440, JString, required = false,
-                                 default = nil)
-  if valid_568440 != nil:
-    section.add "$expand", valid_568440
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568441 = query.getOrDefault("api-version")
-  valid_568441 = validateParameter(valid_568441, JString, required = true,
+  var valid_564340 = query.getOrDefault("api-version")
+  valid_564340 = validateParameter(valid_564340, JString, required = true,
                                  default = nil)
-  if valid_568441 != nil:
-    section.add "api-version", valid_568441
+  if valid_564340 != nil:
+    section.add "api-version", valid_564340
+  var valid_564341 = query.getOrDefault("$expand")
+  valid_564341 = validateParameter(valid_564341, JString, required = false,
+                                 default = nil)
+  if valid_564341 != nil:
+    section.add "$expand", valid_564341
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2597,51 +2601,50 @@ proc validate_ImagesGet_568435(path: JsonNode; query: JsonNode; header: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_568442: Call_ImagesGet_568434; path: JsonNode; query: JsonNode;
+proc call*(call_564342: Call_ImagesGet_564334; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets an image.
   ## 
-  let valid = call_568442.validator(path, query, header, formData, body)
-  let scheme = call_568442.pickScheme
+  let valid = call_564342.validator(path, query, header, formData, body)
+  let scheme = call_564342.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568442.url(scheme.get, call_568442.host, call_568442.base,
-                         call_568442.route, valid.getOrDefault("path"),
+  let url = call_564342.url(scheme.get, call_564342.host, call_564342.base,
+                         call_564342.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568442, url, valid)
+  result = hook(call_564342, url, valid)
 
-proc call*(call_568443: Call_ImagesGet_568434; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; imageName: string;
-          Expand: string = ""): Recallable =
+proc call*(call_564343: Call_ImagesGet_564334; imageName: string; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string; Expand: string = ""): Recallable =
   ## imagesGet
   ## Gets an image.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
-  ##   Expand: string
-  ##         : The expand expression to apply on the operation.
-  ##   apiVersion: string (required)
-  ##             : Client Api Version.
-  ##   subscriptionId: string (required)
-  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   imageName: string (required)
   ##            : The name of the image.
-  var path_568444 = newJObject()
-  var query_568445 = newJObject()
-  add(path_568444, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568445, "$expand", newJString(Expand))
-  add(query_568445, "api-version", newJString(apiVersion))
-  add(path_568444, "subscriptionId", newJString(subscriptionId))
-  add(path_568444, "imageName", newJString(imageName))
-  result = call_568443.call(path_568444, query_568445, nil, nil, nil)
+  ##   apiVersion: string (required)
+  ##             : Client Api Version.
+  ##   Expand: string
+  ##         : The expand expression to apply on the operation.
+  ##   subscriptionId: string (required)
+  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564344 = newJObject()
+  var query_564345 = newJObject()
+  add(path_564344, "imageName", newJString(imageName))
+  add(query_564345, "api-version", newJString(apiVersion))
+  add(query_564345, "$expand", newJString(Expand))
+  add(path_564344, "subscriptionId", newJString(subscriptionId))
+  add(path_564344, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564343.call(path_564344, query_564345, nil, nil, nil)
 
-var imagesGet* = Call_ImagesGet_568434(name: "imagesGet", meth: HttpMethod.HttpGet,
+var imagesGet* = Call_ImagesGet_564334(name: "imagesGet", meth: HttpMethod.HttpGet,
                                     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/images/{imageName}",
-                                    validator: validate_ImagesGet_568435,
-                                    base: "", url: url_ImagesGet_568436,
+                                    validator: validate_ImagesGet_564335,
+                                    base: "", url: url_ImagesGet_564336,
                                     schemes: {Scheme.Https})
 type
-  Call_ImagesDelete_568459 = ref object of OpenApiRestCall_567667
-proc url_ImagesDelete_568461(protocol: Scheme; host: string; base: string;
+  Call_ImagesDelete_564359 = ref object of OpenApiRestCall_563565
+proc url_ImagesDelete_564361(protocol: Scheme; host: string; base: string;
                             route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2663,37 +2666,36 @@ proc url_ImagesDelete_568461(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ImagesDelete_568460(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_ImagesDelete_564360(path: JsonNode; query: JsonNode; header: JsonNode;
                                  formData: JsonNode; body: JsonNode): JsonNode =
   ## Deletes an Image.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
-  ##   subscriptionId: JString (required)
-  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   imageName: JString (required)
   ##            : The name of the image.
+  ##   subscriptionId: JString (required)
+  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568462 = path.getOrDefault("resourceGroupName")
-  valid_568462 = validateParameter(valid_568462, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `imageName` field"
+  var valid_564362 = path.getOrDefault("imageName")
+  valid_564362 = validateParameter(valid_564362, JString, required = true,
                                  default = nil)
-  if valid_568462 != nil:
-    section.add "resourceGroupName", valid_568462
-  var valid_568463 = path.getOrDefault("subscriptionId")
-  valid_568463 = validateParameter(valid_568463, JString, required = true,
+  if valid_564362 != nil:
+    section.add "imageName", valid_564362
+  var valid_564363 = path.getOrDefault("subscriptionId")
+  valid_564363 = validateParameter(valid_564363, JString, required = true,
                                  default = nil)
-  if valid_568463 != nil:
-    section.add "subscriptionId", valid_568463
-  var valid_568464 = path.getOrDefault("imageName")
-  valid_568464 = validateParameter(valid_568464, JString, required = true,
+  if valid_564363 != nil:
+    section.add "subscriptionId", valid_564363
+  var valid_564364 = path.getOrDefault("resourceGroupName")
+  valid_564364 = validateParameter(valid_564364, JString, required = true,
                                  default = nil)
-  if valid_568464 != nil:
-    section.add "imageName", valid_568464
+  if valid_564364 != nil:
+    section.add "resourceGroupName", valid_564364
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2701,11 +2703,11 @@ proc validate_ImagesDelete_568460(path: JsonNode; query: JsonNode; header: JsonN
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568465 = query.getOrDefault("api-version")
-  valid_568465 = validateParameter(valid_568465, JString, required = true,
+  var valid_564365 = query.getOrDefault("api-version")
+  valid_564365 = validateParameter(valid_564365, JString, required = true,
                                  default = nil)
-  if valid_568465 != nil:
-    section.add "api-version", valid_568465
+  if valid_564365 != nil:
+    section.add "api-version", valid_564365
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2714,46 +2716,46 @@ proc validate_ImagesDelete_568460(path: JsonNode; query: JsonNode; header: JsonN
   if body != nil:
     result.add "body", body
 
-proc call*(call_568466: Call_ImagesDelete_568459; path: JsonNode; query: JsonNode;
+proc call*(call_564366: Call_ImagesDelete_564359; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes an Image.
   ## 
-  let valid = call_568466.validator(path, query, header, formData, body)
-  let scheme = call_568466.pickScheme
+  let valid = call_564366.validator(path, query, header, formData, body)
+  let scheme = call_564366.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568466.url(scheme.get, call_568466.host, call_568466.base,
-                         call_568466.route, valid.getOrDefault("path"),
+  let url = call_564366.url(scheme.get, call_564366.host, call_564366.base,
+                         call_564366.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568466, url, valid)
+  result = hook(call_564366, url, valid)
 
-proc call*(call_568467: Call_ImagesDelete_568459; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; imageName: string): Recallable =
+proc call*(call_564367: Call_ImagesDelete_564359; imageName: string;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string): Recallable =
   ## imagesDelete
   ## Deletes an Image.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   imageName: string (required)
+  ##            : The name of the image.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   imageName: string (required)
-  ##            : The name of the image.
-  var path_568468 = newJObject()
-  var query_568469 = newJObject()
-  add(path_568468, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568469, "api-version", newJString(apiVersion))
-  add(path_568468, "subscriptionId", newJString(subscriptionId))
-  add(path_568468, "imageName", newJString(imageName))
-  result = call_568467.call(path_568468, query_568469, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564368 = newJObject()
+  var query_564369 = newJObject()
+  add(path_564368, "imageName", newJString(imageName))
+  add(query_564369, "api-version", newJString(apiVersion))
+  add(path_564368, "subscriptionId", newJString(subscriptionId))
+  add(path_564368, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564367.call(path_564368, query_564369, nil, nil, nil)
 
-var imagesDelete* = Call_ImagesDelete_568459(name: "imagesDelete",
+var imagesDelete* = Call_ImagesDelete_564359(name: "imagesDelete",
     meth: HttpMethod.HttpDelete, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/images/{imageName}",
-    validator: validate_ImagesDelete_568460, base: "", url: url_ImagesDelete_568461,
+    validator: validate_ImagesDelete_564360, base: "", url: url_ImagesDelete_564361,
     schemes: {Scheme.Https})
 type
-  Call_VirtualMachineScaleSetsList_568470 = ref object of OpenApiRestCall_567667
-proc url_VirtualMachineScaleSetsList_568472(protocol: Scheme; host: string;
+  Call_VirtualMachineScaleSetsList_564370 = ref object of OpenApiRestCall_563565
+proc url_VirtualMachineScaleSetsList_564372(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2774,30 +2776,30 @@ proc url_VirtualMachineScaleSetsList_568472(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_VirtualMachineScaleSetsList_568471(path: JsonNode; query: JsonNode;
+proc validate_VirtualMachineScaleSetsList_564371(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets a list of all VM scale sets under a resource group.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568473 = path.getOrDefault("resourceGroupName")
-  valid_568473 = validateParameter(valid_568473, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564373 = path.getOrDefault("subscriptionId")
+  valid_564373 = validateParameter(valid_564373, JString, required = true,
                                  default = nil)
-  if valid_568473 != nil:
-    section.add "resourceGroupName", valid_568473
-  var valid_568474 = path.getOrDefault("subscriptionId")
-  valid_568474 = validateParameter(valid_568474, JString, required = true,
+  if valid_564373 != nil:
+    section.add "subscriptionId", valid_564373
+  var valid_564374 = path.getOrDefault("resourceGroupName")
+  valid_564374 = validateParameter(valid_564374, JString, required = true,
                                  default = nil)
-  if valid_568474 != nil:
-    section.add "subscriptionId", valid_568474
+  if valid_564374 != nil:
+    section.add "resourceGroupName", valid_564374
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2805,11 +2807,11 @@ proc validate_VirtualMachineScaleSetsList_568471(path: JsonNode; query: JsonNode
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568475 = query.getOrDefault("api-version")
-  valid_568475 = validateParameter(valid_568475, JString, required = true,
+  var valid_564375 = query.getOrDefault("api-version")
+  valid_564375 = validateParameter(valid_564375, JString, required = true,
                                  default = nil)
-  if valid_568475 != nil:
-    section.add "api-version", valid_568475
+  if valid_564375 != nil:
+    section.add "api-version", valid_564375
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2818,44 +2820,44 @@ proc validate_VirtualMachineScaleSetsList_568471(path: JsonNode; query: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_568476: Call_VirtualMachineScaleSetsList_568470; path: JsonNode;
+proc call*(call_564376: Call_VirtualMachineScaleSetsList_564370; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets a list of all VM scale sets under a resource group.
   ## 
-  let valid = call_568476.validator(path, query, header, formData, body)
-  let scheme = call_568476.pickScheme
+  let valid = call_564376.validator(path, query, header, formData, body)
+  let scheme = call_564376.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568476.url(scheme.get, call_568476.host, call_568476.base,
-                         call_568476.route, valid.getOrDefault("path"),
+  let url = call_564376.url(scheme.get, call_564376.host, call_564376.base,
+                         call_564376.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568476, url, valid)
+  result = hook(call_564376, url, valid)
 
-proc call*(call_568477: Call_VirtualMachineScaleSetsList_568470;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string): Recallable =
+proc call*(call_564377: Call_VirtualMachineScaleSetsList_564370;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string): Recallable =
   ## virtualMachineScaleSetsList
   ## Gets a list of all VM scale sets under a resource group.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_568478 = newJObject()
-  var query_568479 = newJObject()
-  add(path_568478, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568479, "api-version", newJString(apiVersion))
-  add(path_568478, "subscriptionId", newJString(subscriptionId))
-  result = call_568477.call(path_568478, query_568479, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564378 = newJObject()
+  var query_564379 = newJObject()
+  add(query_564379, "api-version", newJString(apiVersion))
+  add(path_564378, "subscriptionId", newJString(subscriptionId))
+  add(path_564378, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564377.call(path_564378, query_564379, nil, nil, nil)
 
-var virtualMachineScaleSetsList* = Call_VirtualMachineScaleSetsList_568470(
+var virtualMachineScaleSetsList* = Call_VirtualMachineScaleSetsList_564370(
     name: "virtualMachineScaleSetsList", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/virtualMachineScaleSets",
-    validator: validate_VirtualMachineScaleSetsList_568471, base: "",
-    url: url_VirtualMachineScaleSetsList_568472, schemes: {Scheme.Https})
+    validator: validate_VirtualMachineScaleSetsList_564371, base: "",
+    url: url_VirtualMachineScaleSetsList_564372, schemes: {Scheme.Https})
 type
-  Call_VirtualMachineScaleSetVMsList_568480 = ref object of OpenApiRestCall_567667
-proc url_VirtualMachineScaleSetVMsList_568482(protocol: Scheme; host: string;
+  Call_VirtualMachineScaleSetVMsList_564380 = ref object of OpenApiRestCall_563565
+proc url_VirtualMachineScaleSetVMsList_564382(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2880,70 +2882,70 @@ proc url_VirtualMachineScaleSetVMsList_568482(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_VirtualMachineScaleSetVMsList_568481(path: JsonNode; query: JsonNode;
+proc validate_VirtualMachineScaleSetVMsList_564381(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets a list of all virtual machines in a VM scale sets.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   virtualMachineScaleSetName: JString (required)
   ##                             : The name of the VM scale set.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568483 = path.getOrDefault("resourceGroupName")
-  valid_568483 = validateParameter(valid_568483, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564383 = path.getOrDefault("subscriptionId")
+  valid_564383 = validateParameter(valid_564383, JString, required = true,
                                  default = nil)
-  if valid_568483 != nil:
-    section.add "resourceGroupName", valid_568483
-  var valid_568484 = path.getOrDefault("subscriptionId")
-  valid_568484 = validateParameter(valid_568484, JString, required = true,
+  if valid_564383 != nil:
+    section.add "subscriptionId", valid_564383
+  var valid_564384 = path.getOrDefault("virtualMachineScaleSetName")
+  valid_564384 = validateParameter(valid_564384, JString, required = true,
                                  default = nil)
-  if valid_568484 != nil:
-    section.add "subscriptionId", valid_568484
-  var valid_568485 = path.getOrDefault("virtualMachineScaleSetName")
-  valid_568485 = validateParameter(valid_568485, JString, required = true,
+  if valid_564384 != nil:
+    section.add "virtualMachineScaleSetName", valid_564384
+  var valid_564385 = path.getOrDefault("resourceGroupName")
+  valid_564385 = validateParameter(valid_564385, JString, required = true,
                                  default = nil)
-  if valid_568485 != nil:
-    section.add "virtualMachineScaleSetName", valid_568485
+  if valid_564385 != nil:
+    section.add "resourceGroupName", valid_564385
   result.add "path", section
   ## parameters in `query` object:
-  ##   $expand: JString
-  ##          : The expand expression to apply to the operation.
   ##   api-version: JString (required)
   ##              : Client Api Version.
   ##   $select: JString
   ##          : The list parameters.
+  ##   $expand: JString
+  ##          : The expand expression to apply to the operation.
   ##   $filter: JString
   ##          : The filter to apply to the operation.
   section = newJObject()
-  var valid_568486 = query.getOrDefault("$expand")
-  valid_568486 = validateParameter(valid_568486, JString, required = false,
-                                 default = nil)
-  if valid_568486 != nil:
-    section.add "$expand", valid_568486
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568487 = query.getOrDefault("api-version")
-  valid_568487 = validateParameter(valid_568487, JString, required = true,
+  var valid_564386 = query.getOrDefault("api-version")
+  valid_564386 = validateParameter(valid_564386, JString, required = true,
                                  default = nil)
-  if valid_568487 != nil:
-    section.add "api-version", valid_568487
-  var valid_568488 = query.getOrDefault("$select")
-  valid_568488 = validateParameter(valid_568488, JString, required = false,
+  if valid_564386 != nil:
+    section.add "api-version", valid_564386
+  var valid_564387 = query.getOrDefault("$select")
+  valid_564387 = validateParameter(valid_564387, JString, required = false,
                                  default = nil)
-  if valid_568488 != nil:
-    section.add "$select", valid_568488
-  var valid_568489 = query.getOrDefault("$filter")
-  valid_568489 = validateParameter(valid_568489, JString, required = false,
+  if valid_564387 != nil:
+    section.add "$select", valid_564387
+  var valid_564388 = query.getOrDefault("$expand")
+  valid_564388 = validateParameter(valid_564388, JString, required = false,
                                  default = nil)
-  if valid_568489 != nil:
-    section.add "$filter", valid_568489
+  if valid_564388 != nil:
+    section.add "$expand", valid_564388
+  var valid_564389 = query.getOrDefault("$filter")
+  valid_564389 = validateParameter(valid_564389, JString, required = false,
+                                 default = nil)
+  if valid_564389 != nil:
+    section.add "$filter", valid_564389
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2952,59 +2954,59 @@ proc validate_VirtualMachineScaleSetVMsList_568481(path: JsonNode; query: JsonNo
   if body != nil:
     result.add "body", body
 
-proc call*(call_568490: Call_VirtualMachineScaleSetVMsList_568480; path: JsonNode;
+proc call*(call_564390: Call_VirtualMachineScaleSetVMsList_564380; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets a list of all virtual machines in a VM scale sets.
   ## 
-  let valid = call_568490.validator(path, query, header, formData, body)
-  let scheme = call_568490.pickScheme
+  let valid = call_564390.validator(path, query, header, formData, body)
+  let scheme = call_564390.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568490.url(scheme.get, call_568490.host, call_568490.base,
-                         call_568490.route, valid.getOrDefault("path"),
+  let url = call_564390.url(scheme.get, call_564390.host, call_564390.base,
+                         call_564390.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568490, url, valid)
+  result = hook(call_564390, url, valid)
 
-proc call*(call_568491: Call_VirtualMachineScaleSetVMsList_568480;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          virtualMachineScaleSetName: string; Expand: string = "";
-          Select: string = ""; Filter: string = ""): Recallable =
+proc call*(call_564391: Call_VirtualMachineScaleSetVMsList_564380;
+          apiVersion: string; subscriptionId: string;
+          virtualMachineScaleSetName: string; resourceGroupName: string;
+          Select: string = ""; Expand: string = ""; Filter: string = ""): Recallable =
   ## virtualMachineScaleSetVMsList
   ## Gets a list of all virtual machines in a VM scale sets.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
-  ##   Expand: string
-  ##         : The expand expression to apply to the operation.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
-  ##   subscriptionId: string (required)
-  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   Select: string
   ##         : The list parameters.
+  ##   Expand: string
+  ##         : The expand expression to apply to the operation.
+  ##   subscriptionId: string (required)
+  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   virtualMachineScaleSetName: string (required)
   ##                             : The name of the VM scale set.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   Filter: string
   ##         : The filter to apply to the operation.
-  var path_568492 = newJObject()
-  var query_568493 = newJObject()
-  add(path_568492, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568493, "$expand", newJString(Expand))
-  add(query_568493, "api-version", newJString(apiVersion))
-  add(path_568492, "subscriptionId", newJString(subscriptionId))
-  add(query_568493, "$select", newJString(Select))
-  add(path_568492, "virtualMachineScaleSetName",
+  var path_564392 = newJObject()
+  var query_564393 = newJObject()
+  add(query_564393, "api-version", newJString(apiVersion))
+  add(query_564393, "$select", newJString(Select))
+  add(query_564393, "$expand", newJString(Expand))
+  add(path_564392, "subscriptionId", newJString(subscriptionId))
+  add(path_564392, "virtualMachineScaleSetName",
       newJString(virtualMachineScaleSetName))
-  add(query_568493, "$filter", newJString(Filter))
-  result = call_568491.call(path_568492, query_568493, nil, nil, nil)
+  add(path_564392, "resourceGroupName", newJString(resourceGroupName))
+  add(query_564393, "$filter", newJString(Filter))
+  result = call_564391.call(path_564392, query_564393, nil, nil, nil)
 
-var virtualMachineScaleSetVMsList* = Call_VirtualMachineScaleSetVMsList_568480(
+var virtualMachineScaleSetVMsList* = Call_VirtualMachineScaleSetVMsList_564380(
     name: "virtualMachineScaleSetVMsList", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/virtualMachineScaleSets/{virtualMachineScaleSetName}/virtualMachines",
-    validator: validate_VirtualMachineScaleSetVMsList_568481, base: "",
-    url: url_VirtualMachineScaleSetVMsList_568482, schemes: {Scheme.Https})
+    validator: validate_VirtualMachineScaleSetVMsList_564381, base: "",
+    url: url_VirtualMachineScaleSetVMsList_564382, schemes: {Scheme.Https})
 type
-  Call_VirtualMachineScaleSetsCreateOrUpdate_568505 = ref object of OpenApiRestCall_567667
-proc url_VirtualMachineScaleSetsCreateOrUpdate_568507(protocol: Scheme;
+  Call_VirtualMachineScaleSetsCreateOrUpdate_564405 = ref object of OpenApiRestCall_563565
+proc url_VirtualMachineScaleSetsCreateOrUpdate_564407(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -3027,7 +3029,7 @@ proc url_VirtualMachineScaleSetsCreateOrUpdate_568507(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_VirtualMachineScaleSetsCreateOrUpdate_568506(path: JsonNode;
+proc validate_VirtualMachineScaleSetsCreateOrUpdate_564406(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Create or update a VM scale set.
   ## 
@@ -3036,28 +3038,28 @@ proc validate_VirtualMachineScaleSetsCreateOrUpdate_568506(path: JsonNode;
   ## parameters in `path` object:
   ##   vmScaleSetName: JString (required)
   ##                 : The name of the VM scale set to create or update.
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `vmScaleSetName` field"
-  var valid_568508 = path.getOrDefault("vmScaleSetName")
-  valid_568508 = validateParameter(valid_568508, JString, required = true,
+  var valid_564408 = path.getOrDefault("vmScaleSetName")
+  valid_564408 = validateParameter(valid_564408, JString, required = true,
                                  default = nil)
-  if valid_568508 != nil:
-    section.add "vmScaleSetName", valid_568508
-  var valid_568509 = path.getOrDefault("resourceGroupName")
-  valid_568509 = validateParameter(valid_568509, JString, required = true,
+  if valid_564408 != nil:
+    section.add "vmScaleSetName", valid_564408
+  var valid_564409 = path.getOrDefault("subscriptionId")
+  valid_564409 = validateParameter(valid_564409, JString, required = true,
                                  default = nil)
-  if valid_568509 != nil:
-    section.add "resourceGroupName", valid_568509
-  var valid_568510 = path.getOrDefault("subscriptionId")
-  valid_568510 = validateParameter(valid_568510, JString, required = true,
+  if valid_564409 != nil:
+    section.add "subscriptionId", valid_564409
+  var valid_564410 = path.getOrDefault("resourceGroupName")
+  valid_564410 = validateParameter(valid_564410, JString, required = true,
                                  default = nil)
-  if valid_568510 != nil:
-    section.add "subscriptionId", valid_568510
+  if valid_564410 != nil:
+    section.add "resourceGroupName", valid_564410
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -3065,11 +3067,11 @@ proc validate_VirtualMachineScaleSetsCreateOrUpdate_568506(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568511 = query.getOrDefault("api-version")
-  valid_568511 = validateParameter(valid_568511, JString, required = true,
+  var valid_564411 = query.getOrDefault("api-version")
+  valid_564411 = validateParameter(valid_564411, JString, required = true,
                                  default = nil)
-  if valid_568511 != nil:
-    section.add "api-version", valid_568511
+  if valid_564411 != nil:
+    section.add "api-version", valid_564411
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3083,54 +3085,54 @@ proc validate_VirtualMachineScaleSetsCreateOrUpdate_568506(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568513: Call_VirtualMachineScaleSetsCreateOrUpdate_568505;
+proc call*(call_564413: Call_VirtualMachineScaleSetsCreateOrUpdate_564405;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Create or update a VM scale set.
   ## 
-  let valid = call_568513.validator(path, query, header, formData, body)
-  let scheme = call_568513.pickScheme
+  let valid = call_564413.validator(path, query, header, formData, body)
+  let scheme = call_564413.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568513.url(scheme.get, call_568513.host, call_568513.base,
-                         call_568513.route, valid.getOrDefault("path"),
+  let url = call_564413.url(scheme.get, call_564413.host, call_564413.base,
+                         call_564413.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568513, url, valid)
+  result = hook(call_564413, url, valid)
 
-proc call*(call_568514: Call_VirtualMachineScaleSetsCreateOrUpdate_568505;
-          vmScaleSetName: string; resourceGroupName: string; apiVersion: string;
-          subscriptionId: string; parameters: JsonNode): Recallable =
+proc call*(call_564414: Call_VirtualMachineScaleSetsCreateOrUpdate_564405;
+          apiVersion: string; vmScaleSetName: string; subscriptionId: string;
+          resourceGroupName: string; parameters: JsonNode): Recallable =
   ## virtualMachineScaleSetsCreateOrUpdate
   ## Create or update a VM scale set.
+  ##   apiVersion: string (required)
+  ##             : Client Api Version.
   ##   vmScaleSetName: string (required)
   ##                 : The name of the VM scale set to create or update.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
-  ##   apiVersion: string (required)
-  ##             : Client Api Version.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   parameters: JObject (required)
   ##             : The scale set object.
-  var path_568515 = newJObject()
-  var query_568516 = newJObject()
-  var body_568517 = newJObject()
-  add(path_568515, "vmScaleSetName", newJString(vmScaleSetName))
-  add(path_568515, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568516, "api-version", newJString(apiVersion))
-  add(path_568515, "subscriptionId", newJString(subscriptionId))
+  var path_564415 = newJObject()
+  var query_564416 = newJObject()
+  var body_564417 = newJObject()
+  add(query_564416, "api-version", newJString(apiVersion))
+  add(path_564415, "vmScaleSetName", newJString(vmScaleSetName))
+  add(path_564415, "subscriptionId", newJString(subscriptionId))
+  add(path_564415, "resourceGroupName", newJString(resourceGroupName))
   if parameters != nil:
-    body_568517 = parameters
-  result = call_568514.call(path_568515, query_568516, nil, nil, body_568517)
+    body_564417 = parameters
+  result = call_564414.call(path_564415, query_564416, nil, nil, body_564417)
 
-var virtualMachineScaleSetsCreateOrUpdate* = Call_VirtualMachineScaleSetsCreateOrUpdate_568505(
+var virtualMachineScaleSetsCreateOrUpdate* = Call_VirtualMachineScaleSetsCreateOrUpdate_564405(
     name: "virtualMachineScaleSetsCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/virtualMachineScaleSets/{vmScaleSetName}",
-    validator: validate_VirtualMachineScaleSetsCreateOrUpdate_568506, base: "",
-    url: url_VirtualMachineScaleSetsCreateOrUpdate_568507, schemes: {Scheme.Https})
+    validator: validate_VirtualMachineScaleSetsCreateOrUpdate_564406, base: "",
+    url: url_VirtualMachineScaleSetsCreateOrUpdate_564407, schemes: {Scheme.Https})
 type
-  Call_VirtualMachineScaleSetsGet_568494 = ref object of OpenApiRestCall_567667
-proc url_VirtualMachineScaleSetsGet_568496(protocol: Scheme; host: string;
+  Call_VirtualMachineScaleSetsGet_564394 = ref object of OpenApiRestCall_563565
+proc url_VirtualMachineScaleSetsGet_564396(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -3153,7 +3155,7 @@ proc url_VirtualMachineScaleSetsGet_568496(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_VirtualMachineScaleSetsGet_568495(path: JsonNode; query: JsonNode;
+proc validate_VirtualMachineScaleSetsGet_564395(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Display information about a virtual machine scale set.
   ## 
@@ -3162,28 +3164,28 @@ proc validate_VirtualMachineScaleSetsGet_568495(path: JsonNode; query: JsonNode;
   ## parameters in `path` object:
   ##   vmScaleSetName: JString (required)
   ##                 : The name of the VM scale set.
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `vmScaleSetName` field"
-  var valid_568497 = path.getOrDefault("vmScaleSetName")
-  valid_568497 = validateParameter(valid_568497, JString, required = true,
+  var valid_564397 = path.getOrDefault("vmScaleSetName")
+  valid_564397 = validateParameter(valid_564397, JString, required = true,
                                  default = nil)
-  if valid_568497 != nil:
-    section.add "vmScaleSetName", valid_568497
-  var valid_568498 = path.getOrDefault("resourceGroupName")
-  valid_568498 = validateParameter(valid_568498, JString, required = true,
+  if valid_564397 != nil:
+    section.add "vmScaleSetName", valid_564397
+  var valid_564398 = path.getOrDefault("subscriptionId")
+  valid_564398 = validateParameter(valid_564398, JString, required = true,
                                  default = nil)
-  if valid_568498 != nil:
-    section.add "resourceGroupName", valid_568498
-  var valid_568499 = path.getOrDefault("subscriptionId")
-  valid_568499 = validateParameter(valid_568499, JString, required = true,
+  if valid_564398 != nil:
+    section.add "subscriptionId", valid_564398
+  var valid_564399 = path.getOrDefault("resourceGroupName")
+  valid_564399 = validateParameter(valid_564399, JString, required = true,
                                  default = nil)
-  if valid_568499 != nil:
-    section.add "subscriptionId", valid_568499
+  if valid_564399 != nil:
+    section.add "resourceGroupName", valid_564399
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -3191,11 +3193,11 @@ proc validate_VirtualMachineScaleSetsGet_568495(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568500 = query.getOrDefault("api-version")
-  valid_568500 = validateParameter(valid_568500, JString, required = true,
+  var valid_564400 = query.getOrDefault("api-version")
+  valid_564400 = validateParameter(valid_564400, JString, required = true,
                                  default = nil)
-  if valid_568500 != nil:
-    section.add "api-version", valid_568500
+  if valid_564400 != nil:
+    section.add "api-version", valid_564400
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3204,48 +3206,47 @@ proc validate_VirtualMachineScaleSetsGet_568495(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568501: Call_VirtualMachineScaleSetsGet_568494; path: JsonNode;
+proc call*(call_564401: Call_VirtualMachineScaleSetsGet_564394; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Display information about a virtual machine scale set.
   ## 
-  let valid = call_568501.validator(path, query, header, formData, body)
-  let scheme = call_568501.pickScheme
+  let valid = call_564401.validator(path, query, header, formData, body)
+  let scheme = call_564401.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568501.url(scheme.get, call_568501.host, call_568501.base,
-                         call_568501.route, valid.getOrDefault("path"),
+  let url = call_564401.url(scheme.get, call_564401.host, call_564401.base,
+                         call_564401.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568501, url, valid)
+  result = hook(call_564401, url, valid)
 
-proc call*(call_568502: Call_VirtualMachineScaleSetsGet_568494;
-          vmScaleSetName: string; resourceGroupName: string; apiVersion: string;
-          subscriptionId: string): Recallable =
+proc call*(call_564402: Call_VirtualMachineScaleSetsGet_564394; apiVersion: string;
+          vmScaleSetName: string; subscriptionId: string; resourceGroupName: string): Recallable =
   ## virtualMachineScaleSetsGet
   ## Display information about a virtual machine scale set.
-  ##   vmScaleSetName: string (required)
-  ##                 : The name of the VM scale set.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
+  ##   vmScaleSetName: string (required)
+  ##                 : The name of the VM scale set.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_568503 = newJObject()
-  var query_568504 = newJObject()
-  add(path_568503, "vmScaleSetName", newJString(vmScaleSetName))
-  add(path_568503, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568504, "api-version", newJString(apiVersion))
-  add(path_568503, "subscriptionId", newJString(subscriptionId))
-  result = call_568502.call(path_568503, query_568504, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564403 = newJObject()
+  var query_564404 = newJObject()
+  add(query_564404, "api-version", newJString(apiVersion))
+  add(path_564403, "vmScaleSetName", newJString(vmScaleSetName))
+  add(path_564403, "subscriptionId", newJString(subscriptionId))
+  add(path_564403, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564402.call(path_564403, query_564404, nil, nil, nil)
 
-var virtualMachineScaleSetsGet* = Call_VirtualMachineScaleSetsGet_568494(
+var virtualMachineScaleSetsGet* = Call_VirtualMachineScaleSetsGet_564394(
     name: "virtualMachineScaleSetsGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/virtualMachineScaleSets/{vmScaleSetName}",
-    validator: validate_VirtualMachineScaleSetsGet_568495, base: "",
-    url: url_VirtualMachineScaleSetsGet_568496, schemes: {Scheme.Https})
+    validator: validate_VirtualMachineScaleSetsGet_564395, base: "",
+    url: url_VirtualMachineScaleSetsGet_564396, schemes: {Scheme.Https})
 type
-  Call_VirtualMachineScaleSetsDelete_568518 = ref object of OpenApiRestCall_567667
-proc url_VirtualMachineScaleSetsDelete_568520(protocol: Scheme; host: string;
+  Call_VirtualMachineScaleSetsDelete_564418 = ref object of OpenApiRestCall_563565
+proc url_VirtualMachineScaleSetsDelete_564420(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -3268,7 +3269,7 @@ proc url_VirtualMachineScaleSetsDelete_568520(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_VirtualMachineScaleSetsDelete_568519(path: JsonNode; query: JsonNode;
+proc validate_VirtualMachineScaleSetsDelete_564419(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Deletes a VM scale set.
   ## 
@@ -3277,28 +3278,28 @@ proc validate_VirtualMachineScaleSetsDelete_568519(path: JsonNode; query: JsonNo
   ## parameters in `path` object:
   ##   vmScaleSetName: JString (required)
   ##                 : The name of the VM scale set.
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `vmScaleSetName` field"
-  var valid_568521 = path.getOrDefault("vmScaleSetName")
-  valid_568521 = validateParameter(valid_568521, JString, required = true,
+  var valid_564421 = path.getOrDefault("vmScaleSetName")
+  valid_564421 = validateParameter(valid_564421, JString, required = true,
                                  default = nil)
-  if valid_568521 != nil:
-    section.add "vmScaleSetName", valid_568521
-  var valid_568522 = path.getOrDefault("resourceGroupName")
-  valid_568522 = validateParameter(valid_568522, JString, required = true,
+  if valid_564421 != nil:
+    section.add "vmScaleSetName", valid_564421
+  var valid_564422 = path.getOrDefault("subscriptionId")
+  valid_564422 = validateParameter(valid_564422, JString, required = true,
                                  default = nil)
-  if valid_568522 != nil:
-    section.add "resourceGroupName", valid_568522
-  var valid_568523 = path.getOrDefault("subscriptionId")
-  valid_568523 = validateParameter(valid_568523, JString, required = true,
+  if valid_564422 != nil:
+    section.add "subscriptionId", valid_564422
+  var valid_564423 = path.getOrDefault("resourceGroupName")
+  valid_564423 = validateParameter(valid_564423, JString, required = true,
                                  default = nil)
-  if valid_568523 != nil:
-    section.add "subscriptionId", valid_568523
+  if valid_564423 != nil:
+    section.add "resourceGroupName", valid_564423
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -3306,11 +3307,11 @@ proc validate_VirtualMachineScaleSetsDelete_568519(path: JsonNode; query: JsonNo
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568524 = query.getOrDefault("api-version")
-  valid_568524 = validateParameter(valid_568524, JString, required = true,
+  var valid_564424 = query.getOrDefault("api-version")
+  valid_564424 = validateParameter(valid_564424, JString, required = true,
                                  default = nil)
-  if valid_568524 != nil:
-    section.add "api-version", valid_568524
+  if valid_564424 != nil:
+    section.add "api-version", valid_564424
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3319,48 +3320,48 @@ proc validate_VirtualMachineScaleSetsDelete_568519(path: JsonNode; query: JsonNo
   if body != nil:
     result.add "body", body
 
-proc call*(call_568525: Call_VirtualMachineScaleSetsDelete_568518; path: JsonNode;
+proc call*(call_564425: Call_VirtualMachineScaleSetsDelete_564418; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes a VM scale set.
   ## 
-  let valid = call_568525.validator(path, query, header, formData, body)
-  let scheme = call_568525.pickScheme
+  let valid = call_564425.validator(path, query, header, formData, body)
+  let scheme = call_564425.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568525.url(scheme.get, call_568525.host, call_568525.base,
-                         call_568525.route, valid.getOrDefault("path"),
+  let url = call_564425.url(scheme.get, call_564425.host, call_564425.base,
+                         call_564425.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568525, url, valid)
+  result = hook(call_564425, url, valid)
 
-proc call*(call_568526: Call_VirtualMachineScaleSetsDelete_568518;
-          vmScaleSetName: string; resourceGroupName: string; apiVersion: string;
-          subscriptionId: string): Recallable =
+proc call*(call_564426: Call_VirtualMachineScaleSetsDelete_564418;
+          apiVersion: string; vmScaleSetName: string; subscriptionId: string;
+          resourceGroupName: string): Recallable =
   ## virtualMachineScaleSetsDelete
   ## Deletes a VM scale set.
-  ##   vmScaleSetName: string (required)
-  ##                 : The name of the VM scale set.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
+  ##   vmScaleSetName: string (required)
+  ##                 : The name of the VM scale set.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_568527 = newJObject()
-  var query_568528 = newJObject()
-  add(path_568527, "vmScaleSetName", newJString(vmScaleSetName))
-  add(path_568527, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568528, "api-version", newJString(apiVersion))
-  add(path_568527, "subscriptionId", newJString(subscriptionId))
-  result = call_568526.call(path_568527, query_568528, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564427 = newJObject()
+  var query_564428 = newJObject()
+  add(query_564428, "api-version", newJString(apiVersion))
+  add(path_564427, "vmScaleSetName", newJString(vmScaleSetName))
+  add(path_564427, "subscriptionId", newJString(subscriptionId))
+  add(path_564427, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564426.call(path_564427, query_564428, nil, nil, nil)
 
-var virtualMachineScaleSetsDelete* = Call_VirtualMachineScaleSetsDelete_568518(
+var virtualMachineScaleSetsDelete* = Call_VirtualMachineScaleSetsDelete_564418(
     name: "virtualMachineScaleSetsDelete", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/virtualMachineScaleSets/{vmScaleSetName}",
-    validator: validate_VirtualMachineScaleSetsDelete_568519, base: "",
-    url: url_VirtualMachineScaleSetsDelete_568520, schemes: {Scheme.Https})
+    validator: validate_VirtualMachineScaleSetsDelete_564419, base: "",
+    url: url_VirtualMachineScaleSetsDelete_564420, schemes: {Scheme.Https})
 type
-  Call_VirtualMachineScaleSetsDeallocate_568529 = ref object of OpenApiRestCall_567667
-proc url_VirtualMachineScaleSetsDeallocate_568531(protocol: Scheme; host: string;
+  Call_VirtualMachineScaleSetsDeallocate_564429 = ref object of OpenApiRestCall_563565
+proc url_VirtualMachineScaleSetsDeallocate_564431(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -3384,7 +3385,7 @@ proc url_VirtualMachineScaleSetsDeallocate_568531(protocol: Scheme; host: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_VirtualMachineScaleSetsDeallocate_568530(path: JsonNode;
+proc validate_VirtualMachineScaleSetsDeallocate_564430(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Deallocates specific virtual machines in a VM scale set. Shuts down the virtual machines and releases the compute resources. You are not billed for the compute resources that this virtual machine scale set deallocates.
   ## 
@@ -3393,28 +3394,28 @@ proc validate_VirtualMachineScaleSetsDeallocate_568530(path: JsonNode;
   ## parameters in `path` object:
   ##   vmScaleSetName: JString (required)
   ##                 : The name of the VM scale set.
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `vmScaleSetName` field"
-  var valid_568532 = path.getOrDefault("vmScaleSetName")
-  valid_568532 = validateParameter(valid_568532, JString, required = true,
+  var valid_564432 = path.getOrDefault("vmScaleSetName")
+  valid_564432 = validateParameter(valid_564432, JString, required = true,
                                  default = nil)
-  if valid_568532 != nil:
-    section.add "vmScaleSetName", valid_568532
-  var valid_568533 = path.getOrDefault("resourceGroupName")
-  valid_568533 = validateParameter(valid_568533, JString, required = true,
+  if valid_564432 != nil:
+    section.add "vmScaleSetName", valid_564432
+  var valid_564433 = path.getOrDefault("subscriptionId")
+  valid_564433 = validateParameter(valid_564433, JString, required = true,
                                  default = nil)
-  if valid_568533 != nil:
-    section.add "resourceGroupName", valid_568533
-  var valid_568534 = path.getOrDefault("subscriptionId")
-  valid_568534 = validateParameter(valid_568534, JString, required = true,
+  if valid_564433 != nil:
+    section.add "subscriptionId", valid_564433
+  var valid_564434 = path.getOrDefault("resourceGroupName")
+  valid_564434 = validateParameter(valid_564434, JString, required = true,
                                  default = nil)
-  if valid_568534 != nil:
-    section.add "subscriptionId", valid_568534
+  if valid_564434 != nil:
+    section.add "resourceGroupName", valid_564434
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -3422,11 +3423,11 @@ proc validate_VirtualMachineScaleSetsDeallocate_568530(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568535 = query.getOrDefault("api-version")
-  valid_568535 = validateParameter(valid_568535, JString, required = true,
+  var valid_564435 = query.getOrDefault("api-version")
+  valid_564435 = validateParameter(valid_564435, JString, required = true,
                                  default = nil)
-  if valid_568535 != nil:
-    section.add "api-version", valid_568535
+  if valid_564435 != nil:
+    section.add "api-version", valid_564435
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3439,54 +3440,54 @@ proc validate_VirtualMachineScaleSetsDeallocate_568530(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568537: Call_VirtualMachineScaleSetsDeallocate_568529;
+proc call*(call_564437: Call_VirtualMachineScaleSetsDeallocate_564429;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Deallocates specific virtual machines in a VM scale set. Shuts down the virtual machines and releases the compute resources. You are not billed for the compute resources that this virtual machine scale set deallocates.
   ## 
-  let valid = call_568537.validator(path, query, header, formData, body)
-  let scheme = call_568537.pickScheme
+  let valid = call_564437.validator(path, query, header, formData, body)
+  let scheme = call_564437.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568537.url(scheme.get, call_568537.host, call_568537.base,
-                         call_568537.route, valid.getOrDefault("path"),
+  let url = call_564437.url(scheme.get, call_564437.host, call_564437.base,
+                         call_564437.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568537, url, valid)
+  result = hook(call_564437, url, valid)
 
-proc call*(call_568538: Call_VirtualMachineScaleSetsDeallocate_568529;
-          vmScaleSetName: string; resourceGroupName: string; apiVersion: string;
-          subscriptionId: string; vmInstanceIDs: JsonNode = nil): Recallable =
+proc call*(call_564438: Call_VirtualMachineScaleSetsDeallocate_564429;
+          apiVersion: string; vmScaleSetName: string; subscriptionId: string;
+          resourceGroupName: string; vmInstanceIDs: JsonNode = nil): Recallable =
   ## virtualMachineScaleSetsDeallocate
   ## Deallocates specific virtual machines in a VM scale set. Shuts down the virtual machines and releases the compute resources. You are not billed for the compute resources that this virtual machine scale set deallocates.
-  ##   vmScaleSetName: string (required)
-  ##                 : The name of the VM scale set.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
+  ##   vmScaleSetName: string (required)
+  ##                 : The name of the VM scale set.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   vmInstanceIDs: JObject
   ##                : A list of virtual machine instance IDs from the VM scale set.
-  var path_568539 = newJObject()
-  var query_568540 = newJObject()
-  var body_568541 = newJObject()
-  add(path_568539, "vmScaleSetName", newJString(vmScaleSetName))
-  add(path_568539, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568540, "api-version", newJString(apiVersion))
-  add(path_568539, "subscriptionId", newJString(subscriptionId))
+  var path_564439 = newJObject()
+  var query_564440 = newJObject()
+  var body_564441 = newJObject()
+  add(query_564440, "api-version", newJString(apiVersion))
+  add(path_564439, "vmScaleSetName", newJString(vmScaleSetName))
+  add(path_564439, "subscriptionId", newJString(subscriptionId))
+  add(path_564439, "resourceGroupName", newJString(resourceGroupName))
   if vmInstanceIDs != nil:
-    body_568541 = vmInstanceIDs
-  result = call_568538.call(path_568539, query_568540, nil, nil, body_568541)
+    body_564441 = vmInstanceIDs
+  result = call_564438.call(path_564439, query_564440, nil, nil, body_564441)
 
-var virtualMachineScaleSetsDeallocate* = Call_VirtualMachineScaleSetsDeallocate_568529(
+var virtualMachineScaleSetsDeallocate* = Call_VirtualMachineScaleSetsDeallocate_564429(
     name: "virtualMachineScaleSetsDeallocate", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/virtualMachineScaleSets/{vmScaleSetName}/deallocate",
-    validator: validate_VirtualMachineScaleSetsDeallocate_568530, base: "",
-    url: url_VirtualMachineScaleSetsDeallocate_568531, schemes: {Scheme.Https})
+    validator: validate_VirtualMachineScaleSetsDeallocate_564430, base: "",
+    url: url_VirtualMachineScaleSetsDeallocate_564431, schemes: {Scheme.Https})
 type
-  Call_VirtualMachineScaleSetsDeleteInstances_568542 = ref object of OpenApiRestCall_567667
-proc url_VirtualMachineScaleSetsDeleteInstances_568544(protocol: Scheme;
+  Call_VirtualMachineScaleSetsDeleteInstances_564442 = ref object of OpenApiRestCall_563565
+proc url_VirtualMachineScaleSetsDeleteInstances_564444(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -3510,7 +3511,7 @@ proc url_VirtualMachineScaleSetsDeleteInstances_568544(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_VirtualMachineScaleSetsDeleteInstances_568543(path: JsonNode;
+proc validate_VirtualMachineScaleSetsDeleteInstances_564443(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Deletes virtual machines in a VM scale set.
   ## 
@@ -3519,28 +3520,28 @@ proc validate_VirtualMachineScaleSetsDeleteInstances_568543(path: JsonNode;
   ## parameters in `path` object:
   ##   vmScaleSetName: JString (required)
   ##                 : The name of the VM scale set.
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `vmScaleSetName` field"
-  var valid_568545 = path.getOrDefault("vmScaleSetName")
-  valid_568545 = validateParameter(valid_568545, JString, required = true,
+  var valid_564445 = path.getOrDefault("vmScaleSetName")
+  valid_564445 = validateParameter(valid_564445, JString, required = true,
                                  default = nil)
-  if valid_568545 != nil:
-    section.add "vmScaleSetName", valid_568545
-  var valid_568546 = path.getOrDefault("resourceGroupName")
-  valid_568546 = validateParameter(valid_568546, JString, required = true,
+  if valid_564445 != nil:
+    section.add "vmScaleSetName", valid_564445
+  var valid_564446 = path.getOrDefault("subscriptionId")
+  valid_564446 = validateParameter(valid_564446, JString, required = true,
                                  default = nil)
-  if valid_568546 != nil:
-    section.add "resourceGroupName", valid_568546
-  var valid_568547 = path.getOrDefault("subscriptionId")
-  valid_568547 = validateParameter(valid_568547, JString, required = true,
+  if valid_564446 != nil:
+    section.add "subscriptionId", valid_564446
+  var valid_564447 = path.getOrDefault("resourceGroupName")
+  valid_564447 = validateParameter(valid_564447, JString, required = true,
                                  default = nil)
-  if valid_568547 != nil:
-    section.add "subscriptionId", valid_568547
+  if valid_564447 != nil:
+    section.add "resourceGroupName", valid_564447
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -3548,11 +3549,11 @@ proc validate_VirtualMachineScaleSetsDeleteInstances_568543(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568548 = query.getOrDefault("api-version")
-  valid_568548 = validateParameter(valid_568548, JString, required = true,
+  var valid_564448 = query.getOrDefault("api-version")
+  valid_564448 = validateParameter(valid_564448, JString, required = true,
                                  default = nil)
-  if valid_568548 != nil:
-    section.add "api-version", valid_568548
+  if valid_564448 != nil:
+    section.add "api-version", valid_564448
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3566,55 +3567,55 @@ proc validate_VirtualMachineScaleSetsDeleteInstances_568543(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568550: Call_VirtualMachineScaleSetsDeleteInstances_568542;
+proc call*(call_564450: Call_VirtualMachineScaleSetsDeleteInstances_564442;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Deletes virtual machines in a VM scale set.
   ## 
-  let valid = call_568550.validator(path, query, header, formData, body)
-  let scheme = call_568550.pickScheme
+  let valid = call_564450.validator(path, query, header, formData, body)
+  let scheme = call_564450.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568550.url(scheme.get, call_568550.host, call_568550.base,
-                         call_568550.route, valid.getOrDefault("path"),
+  let url = call_564450.url(scheme.get, call_564450.host, call_564450.base,
+                         call_564450.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568550, url, valid)
+  result = hook(call_564450, url, valid)
 
-proc call*(call_568551: Call_VirtualMachineScaleSetsDeleteInstances_568542;
-          vmScaleSetName: string; resourceGroupName: string; apiVersion: string;
-          subscriptionId: string; vmInstanceIDs: JsonNode): Recallable =
+proc call*(call_564451: Call_VirtualMachineScaleSetsDeleteInstances_564442;
+          apiVersion: string; vmScaleSetName: string; subscriptionId: string;
+          resourceGroupName: string; vmInstanceIDs: JsonNode): Recallable =
   ## virtualMachineScaleSetsDeleteInstances
   ## Deletes virtual machines in a VM scale set.
-  ##   vmScaleSetName: string (required)
-  ##                 : The name of the VM scale set.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
+  ##   vmScaleSetName: string (required)
+  ##                 : The name of the VM scale set.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   vmInstanceIDs: JObject (required)
   ##                : A list of virtual machine instance IDs from the VM scale set.
-  var path_568552 = newJObject()
-  var query_568553 = newJObject()
-  var body_568554 = newJObject()
-  add(path_568552, "vmScaleSetName", newJString(vmScaleSetName))
-  add(path_568552, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568553, "api-version", newJString(apiVersion))
-  add(path_568552, "subscriptionId", newJString(subscriptionId))
+  var path_564452 = newJObject()
+  var query_564453 = newJObject()
+  var body_564454 = newJObject()
+  add(query_564453, "api-version", newJString(apiVersion))
+  add(path_564452, "vmScaleSetName", newJString(vmScaleSetName))
+  add(path_564452, "subscriptionId", newJString(subscriptionId))
+  add(path_564452, "resourceGroupName", newJString(resourceGroupName))
   if vmInstanceIDs != nil:
-    body_568554 = vmInstanceIDs
-  result = call_568551.call(path_568552, query_568553, nil, nil, body_568554)
+    body_564454 = vmInstanceIDs
+  result = call_564451.call(path_564452, query_564453, nil, nil, body_564454)
 
-var virtualMachineScaleSetsDeleteInstances* = Call_VirtualMachineScaleSetsDeleteInstances_568542(
+var virtualMachineScaleSetsDeleteInstances* = Call_VirtualMachineScaleSetsDeleteInstances_564442(
     name: "virtualMachineScaleSetsDeleteInstances", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/virtualMachineScaleSets/{vmScaleSetName}/delete",
-    validator: validate_VirtualMachineScaleSetsDeleteInstances_568543, base: "",
-    url: url_VirtualMachineScaleSetsDeleteInstances_568544,
+    validator: validate_VirtualMachineScaleSetsDeleteInstances_564443, base: "",
+    url: url_VirtualMachineScaleSetsDeleteInstances_564444,
     schemes: {Scheme.Https})
 type
-  Call_VirtualMachineScaleSetsGetInstanceView_568555 = ref object of OpenApiRestCall_567667
-proc url_VirtualMachineScaleSetsGetInstanceView_568557(protocol: Scheme;
+  Call_VirtualMachineScaleSetsGetInstanceView_564455 = ref object of OpenApiRestCall_563565
+proc url_VirtualMachineScaleSetsGetInstanceView_564457(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -3638,7 +3639,7 @@ proc url_VirtualMachineScaleSetsGetInstanceView_568557(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_VirtualMachineScaleSetsGetInstanceView_568556(path: JsonNode;
+proc validate_VirtualMachineScaleSetsGetInstanceView_564456(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the status of a VM scale set instance.
   ## 
@@ -3647,28 +3648,28 @@ proc validate_VirtualMachineScaleSetsGetInstanceView_568556(path: JsonNode;
   ## parameters in `path` object:
   ##   vmScaleSetName: JString (required)
   ##                 : The name of the VM scale set.
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `vmScaleSetName` field"
-  var valid_568558 = path.getOrDefault("vmScaleSetName")
-  valid_568558 = validateParameter(valid_568558, JString, required = true,
+  var valid_564458 = path.getOrDefault("vmScaleSetName")
+  valid_564458 = validateParameter(valid_564458, JString, required = true,
                                  default = nil)
-  if valid_568558 != nil:
-    section.add "vmScaleSetName", valid_568558
-  var valid_568559 = path.getOrDefault("resourceGroupName")
-  valid_568559 = validateParameter(valid_568559, JString, required = true,
+  if valid_564458 != nil:
+    section.add "vmScaleSetName", valid_564458
+  var valid_564459 = path.getOrDefault("subscriptionId")
+  valid_564459 = validateParameter(valid_564459, JString, required = true,
                                  default = nil)
-  if valid_568559 != nil:
-    section.add "resourceGroupName", valid_568559
-  var valid_568560 = path.getOrDefault("subscriptionId")
-  valid_568560 = validateParameter(valid_568560, JString, required = true,
+  if valid_564459 != nil:
+    section.add "subscriptionId", valid_564459
+  var valid_564460 = path.getOrDefault("resourceGroupName")
+  valid_564460 = validateParameter(valid_564460, JString, required = true,
                                  default = nil)
-  if valid_568560 != nil:
-    section.add "subscriptionId", valid_568560
+  if valid_564460 != nil:
+    section.add "resourceGroupName", valid_564460
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -3676,11 +3677,11 @@ proc validate_VirtualMachineScaleSetsGetInstanceView_568556(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568561 = query.getOrDefault("api-version")
-  valid_568561 = validateParameter(valid_568561, JString, required = true,
+  var valid_564461 = query.getOrDefault("api-version")
+  valid_564461 = validateParameter(valid_564461, JString, required = true,
                                  default = nil)
-  if valid_568561 != nil:
-    section.add "api-version", valid_568561
+  if valid_564461 != nil:
+    section.add "api-version", valid_564461
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3689,50 +3690,50 @@ proc validate_VirtualMachineScaleSetsGetInstanceView_568556(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568562: Call_VirtualMachineScaleSetsGetInstanceView_568555;
+proc call*(call_564462: Call_VirtualMachineScaleSetsGetInstanceView_564455;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Gets the status of a VM scale set instance.
   ## 
-  let valid = call_568562.validator(path, query, header, formData, body)
-  let scheme = call_568562.pickScheme
+  let valid = call_564462.validator(path, query, header, formData, body)
+  let scheme = call_564462.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568562.url(scheme.get, call_568562.host, call_568562.base,
-                         call_568562.route, valid.getOrDefault("path"),
+  let url = call_564462.url(scheme.get, call_564462.host, call_564462.base,
+                         call_564462.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568562, url, valid)
+  result = hook(call_564462, url, valid)
 
-proc call*(call_568563: Call_VirtualMachineScaleSetsGetInstanceView_568555;
-          vmScaleSetName: string; resourceGroupName: string; apiVersion: string;
-          subscriptionId: string): Recallable =
+proc call*(call_564463: Call_VirtualMachineScaleSetsGetInstanceView_564455;
+          apiVersion: string; vmScaleSetName: string; subscriptionId: string;
+          resourceGroupName: string): Recallable =
   ## virtualMachineScaleSetsGetInstanceView
   ## Gets the status of a VM scale set instance.
-  ##   vmScaleSetName: string (required)
-  ##                 : The name of the VM scale set.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
+  ##   vmScaleSetName: string (required)
+  ##                 : The name of the VM scale set.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_568564 = newJObject()
-  var query_568565 = newJObject()
-  add(path_568564, "vmScaleSetName", newJString(vmScaleSetName))
-  add(path_568564, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568565, "api-version", newJString(apiVersion))
-  add(path_568564, "subscriptionId", newJString(subscriptionId))
-  result = call_568563.call(path_568564, query_568565, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564464 = newJObject()
+  var query_564465 = newJObject()
+  add(query_564465, "api-version", newJString(apiVersion))
+  add(path_564464, "vmScaleSetName", newJString(vmScaleSetName))
+  add(path_564464, "subscriptionId", newJString(subscriptionId))
+  add(path_564464, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564463.call(path_564464, query_564465, nil, nil, nil)
 
-var virtualMachineScaleSetsGetInstanceView* = Call_VirtualMachineScaleSetsGetInstanceView_568555(
+var virtualMachineScaleSetsGetInstanceView* = Call_VirtualMachineScaleSetsGetInstanceView_564455(
     name: "virtualMachineScaleSetsGetInstanceView", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/virtualMachineScaleSets/{vmScaleSetName}/instanceView",
-    validator: validate_VirtualMachineScaleSetsGetInstanceView_568556, base: "",
-    url: url_VirtualMachineScaleSetsGetInstanceView_568557,
+    validator: validate_VirtualMachineScaleSetsGetInstanceView_564456, base: "",
+    url: url_VirtualMachineScaleSetsGetInstanceView_564457,
     schemes: {Scheme.Https})
 type
-  Call_VirtualMachineScaleSetsUpdateInstances_568566 = ref object of OpenApiRestCall_567667
-proc url_VirtualMachineScaleSetsUpdateInstances_568568(protocol: Scheme;
+  Call_VirtualMachineScaleSetsUpdateInstances_564466 = ref object of OpenApiRestCall_563565
+proc url_VirtualMachineScaleSetsUpdateInstances_564468(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -3756,7 +3757,7 @@ proc url_VirtualMachineScaleSetsUpdateInstances_568568(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_VirtualMachineScaleSetsUpdateInstances_568567(path: JsonNode;
+proc validate_VirtualMachineScaleSetsUpdateInstances_564467(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Upgrades one or more virtual machines to the latest SKU set in the VM scale set model.
   ## 
@@ -3765,28 +3766,28 @@ proc validate_VirtualMachineScaleSetsUpdateInstances_568567(path: JsonNode;
   ## parameters in `path` object:
   ##   vmScaleSetName: JString (required)
   ##                 : The name of the VM scale set.
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `vmScaleSetName` field"
-  var valid_568569 = path.getOrDefault("vmScaleSetName")
-  valid_568569 = validateParameter(valid_568569, JString, required = true,
+  var valid_564469 = path.getOrDefault("vmScaleSetName")
+  valid_564469 = validateParameter(valid_564469, JString, required = true,
                                  default = nil)
-  if valid_568569 != nil:
-    section.add "vmScaleSetName", valid_568569
-  var valid_568570 = path.getOrDefault("resourceGroupName")
-  valid_568570 = validateParameter(valid_568570, JString, required = true,
+  if valid_564469 != nil:
+    section.add "vmScaleSetName", valid_564469
+  var valid_564470 = path.getOrDefault("subscriptionId")
+  valid_564470 = validateParameter(valid_564470, JString, required = true,
                                  default = nil)
-  if valid_568570 != nil:
-    section.add "resourceGroupName", valid_568570
-  var valid_568571 = path.getOrDefault("subscriptionId")
-  valid_568571 = validateParameter(valid_568571, JString, required = true,
+  if valid_564470 != nil:
+    section.add "subscriptionId", valid_564470
+  var valid_564471 = path.getOrDefault("resourceGroupName")
+  valid_564471 = validateParameter(valid_564471, JString, required = true,
                                  default = nil)
-  if valid_568571 != nil:
-    section.add "subscriptionId", valid_568571
+  if valid_564471 != nil:
+    section.add "resourceGroupName", valid_564471
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -3794,11 +3795,11 @@ proc validate_VirtualMachineScaleSetsUpdateInstances_568567(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568572 = query.getOrDefault("api-version")
-  valid_568572 = validateParameter(valid_568572, JString, required = true,
+  var valid_564472 = query.getOrDefault("api-version")
+  valid_564472 = validateParameter(valid_564472, JString, required = true,
                                  default = nil)
-  if valid_568572 != nil:
-    section.add "api-version", valid_568572
+  if valid_564472 != nil:
+    section.add "api-version", valid_564472
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3812,55 +3813,55 @@ proc validate_VirtualMachineScaleSetsUpdateInstances_568567(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568574: Call_VirtualMachineScaleSetsUpdateInstances_568566;
+proc call*(call_564474: Call_VirtualMachineScaleSetsUpdateInstances_564466;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Upgrades one or more virtual machines to the latest SKU set in the VM scale set model.
   ## 
-  let valid = call_568574.validator(path, query, header, formData, body)
-  let scheme = call_568574.pickScheme
+  let valid = call_564474.validator(path, query, header, formData, body)
+  let scheme = call_564474.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568574.url(scheme.get, call_568574.host, call_568574.base,
-                         call_568574.route, valid.getOrDefault("path"),
+  let url = call_564474.url(scheme.get, call_564474.host, call_564474.base,
+                         call_564474.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568574, url, valid)
+  result = hook(call_564474, url, valid)
 
-proc call*(call_568575: Call_VirtualMachineScaleSetsUpdateInstances_568566;
-          vmScaleSetName: string; resourceGroupName: string; apiVersion: string;
-          subscriptionId: string; vmInstanceIDs: JsonNode): Recallable =
+proc call*(call_564475: Call_VirtualMachineScaleSetsUpdateInstances_564466;
+          apiVersion: string; vmScaleSetName: string; subscriptionId: string;
+          resourceGroupName: string; vmInstanceIDs: JsonNode): Recallable =
   ## virtualMachineScaleSetsUpdateInstances
   ## Upgrades one or more virtual machines to the latest SKU set in the VM scale set model.
-  ##   vmScaleSetName: string (required)
-  ##                 : The name of the VM scale set.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
+  ##   vmScaleSetName: string (required)
+  ##                 : The name of the VM scale set.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   vmInstanceIDs: JObject (required)
   ##                : A list of virtual machine instance IDs from the VM scale set.
-  var path_568576 = newJObject()
-  var query_568577 = newJObject()
-  var body_568578 = newJObject()
-  add(path_568576, "vmScaleSetName", newJString(vmScaleSetName))
-  add(path_568576, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568577, "api-version", newJString(apiVersion))
-  add(path_568576, "subscriptionId", newJString(subscriptionId))
+  var path_564476 = newJObject()
+  var query_564477 = newJObject()
+  var body_564478 = newJObject()
+  add(query_564477, "api-version", newJString(apiVersion))
+  add(path_564476, "vmScaleSetName", newJString(vmScaleSetName))
+  add(path_564476, "subscriptionId", newJString(subscriptionId))
+  add(path_564476, "resourceGroupName", newJString(resourceGroupName))
   if vmInstanceIDs != nil:
-    body_568578 = vmInstanceIDs
-  result = call_568575.call(path_568576, query_568577, nil, nil, body_568578)
+    body_564478 = vmInstanceIDs
+  result = call_564475.call(path_564476, query_564477, nil, nil, body_564478)
 
-var virtualMachineScaleSetsUpdateInstances* = Call_VirtualMachineScaleSetsUpdateInstances_568566(
+var virtualMachineScaleSetsUpdateInstances* = Call_VirtualMachineScaleSetsUpdateInstances_564466(
     name: "virtualMachineScaleSetsUpdateInstances", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/virtualMachineScaleSets/{vmScaleSetName}/manualupgrade",
-    validator: validate_VirtualMachineScaleSetsUpdateInstances_568567, base: "",
-    url: url_VirtualMachineScaleSetsUpdateInstances_568568,
+    validator: validate_VirtualMachineScaleSetsUpdateInstances_564467, base: "",
+    url: url_VirtualMachineScaleSetsUpdateInstances_564468,
     schemes: {Scheme.Https})
 type
-  Call_VirtualMachineScaleSetsPowerOff_568579 = ref object of OpenApiRestCall_567667
-proc url_VirtualMachineScaleSetsPowerOff_568581(protocol: Scheme; host: string;
+  Call_VirtualMachineScaleSetsPowerOff_564479 = ref object of OpenApiRestCall_563565
+proc url_VirtualMachineScaleSetsPowerOff_564481(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -3884,7 +3885,7 @@ proc url_VirtualMachineScaleSetsPowerOff_568581(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_VirtualMachineScaleSetsPowerOff_568580(path: JsonNode;
+proc validate_VirtualMachineScaleSetsPowerOff_564480(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Power off (stop) one or more virtual machines in a VM scale set. Note that resources are still attached and you are getting charged for the resources. Instead, use deallocate to release resources and avoid charges.
   ## 
@@ -3893,28 +3894,28 @@ proc validate_VirtualMachineScaleSetsPowerOff_568580(path: JsonNode;
   ## parameters in `path` object:
   ##   vmScaleSetName: JString (required)
   ##                 : The name of the VM scale set.
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `vmScaleSetName` field"
-  var valid_568582 = path.getOrDefault("vmScaleSetName")
-  valid_568582 = validateParameter(valid_568582, JString, required = true,
+  var valid_564482 = path.getOrDefault("vmScaleSetName")
+  valid_564482 = validateParameter(valid_564482, JString, required = true,
                                  default = nil)
-  if valid_568582 != nil:
-    section.add "vmScaleSetName", valid_568582
-  var valid_568583 = path.getOrDefault("resourceGroupName")
-  valid_568583 = validateParameter(valid_568583, JString, required = true,
+  if valid_564482 != nil:
+    section.add "vmScaleSetName", valid_564482
+  var valid_564483 = path.getOrDefault("subscriptionId")
+  valid_564483 = validateParameter(valid_564483, JString, required = true,
                                  default = nil)
-  if valid_568583 != nil:
-    section.add "resourceGroupName", valid_568583
-  var valid_568584 = path.getOrDefault("subscriptionId")
-  valid_568584 = validateParameter(valid_568584, JString, required = true,
+  if valid_564483 != nil:
+    section.add "subscriptionId", valid_564483
+  var valid_564484 = path.getOrDefault("resourceGroupName")
+  valid_564484 = validateParameter(valid_564484, JString, required = true,
                                  default = nil)
-  if valid_568584 != nil:
-    section.add "subscriptionId", valid_568584
+  if valid_564484 != nil:
+    section.add "resourceGroupName", valid_564484
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -3922,11 +3923,11 @@ proc validate_VirtualMachineScaleSetsPowerOff_568580(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568585 = query.getOrDefault("api-version")
-  valid_568585 = validateParameter(valid_568585, JString, required = true,
+  var valid_564485 = query.getOrDefault("api-version")
+  valid_564485 = validateParameter(valid_564485, JString, required = true,
                                  default = nil)
-  if valid_568585 != nil:
-    section.add "api-version", valid_568585
+  if valid_564485 != nil:
+    section.add "api-version", valid_564485
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3939,54 +3940,54 @@ proc validate_VirtualMachineScaleSetsPowerOff_568580(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568587: Call_VirtualMachineScaleSetsPowerOff_568579;
+proc call*(call_564487: Call_VirtualMachineScaleSetsPowerOff_564479;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Power off (stop) one or more virtual machines in a VM scale set. Note that resources are still attached and you are getting charged for the resources. Instead, use deallocate to release resources and avoid charges.
   ## 
-  let valid = call_568587.validator(path, query, header, formData, body)
-  let scheme = call_568587.pickScheme
+  let valid = call_564487.validator(path, query, header, formData, body)
+  let scheme = call_564487.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568587.url(scheme.get, call_568587.host, call_568587.base,
-                         call_568587.route, valid.getOrDefault("path"),
+  let url = call_564487.url(scheme.get, call_564487.host, call_564487.base,
+                         call_564487.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568587, url, valid)
+  result = hook(call_564487, url, valid)
 
-proc call*(call_568588: Call_VirtualMachineScaleSetsPowerOff_568579;
-          vmScaleSetName: string; resourceGroupName: string; apiVersion: string;
-          subscriptionId: string; vmInstanceIDs: JsonNode = nil): Recallable =
+proc call*(call_564488: Call_VirtualMachineScaleSetsPowerOff_564479;
+          apiVersion: string; vmScaleSetName: string; subscriptionId: string;
+          resourceGroupName: string; vmInstanceIDs: JsonNode = nil): Recallable =
   ## virtualMachineScaleSetsPowerOff
   ## Power off (stop) one or more virtual machines in a VM scale set. Note that resources are still attached and you are getting charged for the resources. Instead, use deallocate to release resources and avoid charges.
-  ##   vmScaleSetName: string (required)
-  ##                 : The name of the VM scale set.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
+  ##   vmScaleSetName: string (required)
+  ##                 : The name of the VM scale set.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   vmInstanceIDs: JObject
   ##                : A list of virtual machine instance IDs from the VM scale set.
-  var path_568589 = newJObject()
-  var query_568590 = newJObject()
-  var body_568591 = newJObject()
-  add(path_568589, "vmScaleSetName", newJString(vmScaleSetName))
-  add(path_568589, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568590, "api-version", newJString(apiVersion))
-  add(path_568589, "subscriptionId", newJString(subscriptionId))
+  var path_564489 = newJObject()
+  var query_564490 = newJObject()
+  var body_564491 = newJObject()
+  add(query_564490, "api-version", newJString(apiVersion))
+  add(path_564489, "vmScaleSetName", newJString(vmScaleSetName))
+  add(path_564489, "subscriptionId", newJString(subscriptionId))
+  add(path_564489, "resourceGroupName", newJString(resourceGroupName))
   if vmInstanceIDs != nil:
-    body_568591 = vmInstanceIDs
-  result = call_568588.call(path_568589, query_568590, nil, nil, body_568591)
+    body_564491 = vmInstanceIDs
+  result = call_564488.call(path_564489, query_564490, nil, nil, body_564491)
 
-var virtualMachineScaleSetsPowerOff* = Call_VirtualMachineScaleSetsPowerOff_568579(
+var virtualMachineScaleSetsPowerOff* = Call_VirtualMachineScaleSetsPowerOff_564479(
     name: "virtualMachineScaleSetsPowerOff", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/virtualMachineScaleSets/{vmScaleSetName}/poweroff",
-    validator: validate_VirtualMachineScaleSetsPowerOff_568580, base: "",
-    url: url_VirtualMachineScaleSetsPowerOff_568581, schemes: {Scheme.Https})
+    validator: validate_VirtualMachineScaleSetsPowerOff_564480, base: "",
+    url: url_VirtualMachineScaleSetsPowerOff_564481, schemes: {Scheme.Https})
 type
-  Call_VirtualMachineScaleSetsReimage_568592 = ref object of OpenApiRestCall_567667
-proc url_VirtualMachineScaleSetsReimage_568594(protocol: Scheme; host: string;
+  Call_VirtualMachineScaleSetsReimage_564492 = ref object of OpenApiRestCall_563565
+proc url_VirtualMachineScaleSetsReimage_564494(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -4010,7 +4011,7 @@ proc url_VirtualMachineScaleSetsReimage_568594(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_VirtualMachineScaleSetsReimage_568593(path: JsonNode;
+proc validate_VirtualMachineScaleSetsReimage_564493(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Reimages (upgrade the operating system) one or more virtual machines in a VM scale set.
   ## 
@@ -4019,28 +4020,28 @@ proc validate_VirtualMachineScaleSetsReimage_568593(path: JsonNode;
   ## parameters in `path` object:
   ##   vmScaleSetName: JString (required)
   ##                 : The name of the VM scale set.
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `vmScaleSetName` field"
-  var valid_568595 = path.getOrDefault("vmScaleSetName")
-  valid_568595 = validateParameter(valid_568595, JString, required = true,
+  var valid_564495 = path.getOrDefault("vmScaleSetName")
+  valid_564495 = validateParameter(valid_564495, JString, required = true,
                                  default = nil)
-  if valid_568595 != nil:
-    section.add "vmScaleSetName", valid_568595
-  var valid_568596 = path.getOrDefault("resourceGroupName")
-  valid_568596 = validateParameter(valid_568596, JString, required = true,
+  if valid_564495 != nil:
+    section.add "vmScaleSetName", valid_564495
+  var valid_564496 = path.getOrDefault("subscriptionId")
+  valid_564496 = validateParameter(valid_564496, JString, required = true,
                                  default = nil)
-  if valid_568596 != nil:
-    section.add "resourceGroupName", valid_568596
-  var valid_568597 = path.getOrDefault("subscriptionId")
-  valid_568597 = validateParameter(valid_568597, JString, required = true,
+  if valid_564496 != nil:
+    section.add "subscriptionId", valid_564496
+  var valid_564497 = path.getOrDefault("resourceGroupName")
+  valid_564497 = validateParameter(valid_564497, JString, required = true,
                                  default = nil)
-  if valid_568597 != nil:
-    section.add "subscriptionId", valid_568597
+  if valid_564497 != nil:
+    section.add "resourceGroupName", valid_564497
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -4048,11 +4049,11 @@ proc validate_VirtualMachineScaleSetsReimage_568593(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568598 = query.getOrDefault("api-version")
-  valid_568598 = validateParameter(valid_568598, JString, required = true,
+  var valid_564498 = query.getOrDefault("api-version")
+  valid_564498 = validateParameter(valid_564498, JString, required = true,
                                  default = nil)
-  if valid_568598 != nil:
-    section.add "api-version", valid_568598
+  if valid_564498 != nil:
+    section.add "api-version", valid_564498
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -4061,48 +4062,48 @@ proc validate_VirtualMachineScaleSetsReimage_568593(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568599: Call_VirtualMachineScaleSetsReimage_568592; path: JsonNode;
+proc call*(call_564499: Call_VirtualMachineScaleSetsReimage_564492; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Reimages (upgrade the operating system) one or more virtual machines in a VM scale set.
   ## 
-  let valid = call_568599.validator(path, query, header, formData, body)
-  let scheme = call_568599.pickScheme
+  let valid = call_564499.validator(path, query, header, formData, body)
+  let scheme = call_564499.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568599.url(scheme.get, call_568599.host, call_568599.base,
-                         call_568599.route, valid.getOrDefault("path"),
+  let url = call_564499.url(scheme.get, call_564499.host, call_564499.base,
+                         call_564499.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568599, url, valid)
+  result = hook(call_564499, url, valid)
 
-proc call*(call_568600: Call_VirtualMachineScaleSetsReimage_568592;
-          vmScaleSetName: string; resourceGroupName: string; apiVersion: string;
-          subscriptionId: string): Recallable =
+proc call*(call_564500: Call_VirtualMachineScaleSetsReimage_564492;
+          apiVersion: string; vmScaleSetName: string; subscriptionId: string;
+          resourceGroupName: string): Recallable =
   ## virtualMachineScaleSetsReimage
   ## Reimages (upgrade the operating system) one or more virtual machines in a VM scale set.
-  ##   vmScaleSetName: string (required)
-  ##                 : The name of the VM scale set.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
+  ##   vmScaleSetName: string (required)
+  ##                 : The name of the VM scale set.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_568601 = newJObject()
-  var query_568602 = newJObject()
-  add(path_568601, "vmScaleSetName", newJString(vmScaleSetName))
-  add(path_568601, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568602, "api-version", newJString(apiVersion))
-  add(path_568601, "subscriptionId", newJString(subscriptionId))
-  result = call_568600.call(path_568601, query_568602, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564501 = newJObject()
+  var query_564502 = newJObject()
+  add(query_564502, "api-version", newJString(apiVersion))
+  add(path_564501, "vmScaleSetName", newJString(vmScaleSetName))
+  add(path_564501, "subscriptionId", newJString(subscriptionId))
+  add(path_564501, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564500.call(path_564501, query_564502, nil, nil, nil)
 
-var virtualMachineScaleSetsReimage* = Call_VirtualMachineScaleSetsReimage_568592(
+var virtualMachineScaleSetsReimage* = Call_VirtualMachineScaleSetsReimage_564492(
     name: "virtualMachineScaleSetsReimage", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/virtualMachineScaleSets/{vmScaleSetName}/reimage",
-    validator: validate_VirtualMachineScaleSetsReimage_568593, base: "",
-    url: url_VirtualMachineScaleSetsReimage_568594, schemes: {Scheme.Https})
+    validator: validate_VirtualMachineScaleSetsReimage_564493, base: "",
+    url: url_VirtualMachineScaleSetsReimage_564494, schemes: {Scheme.Https})
 type
-  Call_VirtualMachineScaleSetsReimageAll_568603 = ref object of OpenApiRestCall_567667
-proc url_VirtualMachineScaleSetsReimageAll_568605(protocol: Scheme; host: string;
+  Call_VirtualMachineScaleSetsReimageAll_564503 = ref object of OpenApiRestCall_563565
+proc url_VirtualMachineScaleSetsReimageAll_564505(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -4126,7 +4127,7 @@ proc url_VirtualMachineScaleSetsReimageAll_568605(protocol: Scheme; host: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_VirtualMachineScaleSetsReimageAll_568604(path: JsonNode;
+proc validate_VirtualMachineScaleSetsReimageAll_564504(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Reimages all the disks ( including data disks ) in the virtual machines in a VM scale set. This operation is only supported for managed disks.
   ## 
@@ -4135,28 +4136,28 @@ proc validate_VirtualMachineScaleSetsReimageAll_568604(path: JsonNode;
   ## parameters in `path` object:
   ##   vmScaleSetName: JString (required)
   ##                 : The name of the VM scale set.
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `vmScaleSetName` field"
-  var valid_568606 = path.getOrDefault("vmScaleSetName")
-  valid_568606 = validateParameter(valid_568606, JString, required = true,
+  var valid_564506 = path.getOrDefault("vmScaleSetName")
+  valid_564506 = validateParameter(valid_564506, JString, required = true,
                                  default = nil)
-  if valid_568606 != nil:
-    section.add "vmScaleSetName", valid_568606
-  var valid_568607 = path.getOrDefault("resourceGroupName")
-  valid_568607 = validateParameter(valid_568607, JString, required = true,
+  if valid_564506 != nil:
+    section.add "vmScaleSetName", valid_564506
+  var valid_564507 = path.getOrDefault("subscriptionId")
+  valid_564507 = validateParameter(valid_564507, JString, required = true,
                                  default = nil)
-  if valid_568607 != nil:
-    section.add "resourceGroupName", valid_568607
-  var valid_568608 = path.getOrDefault("subscriptionId")
-  valid_568608 = validateParameter(valid_568608, JString, required = true,
+  if valid_564507 != nil:
+    section.add "subscriptionId", valid_564507
+  var valid_564508 = path.getOrDefault("resourceGroupName")
+  valid_564508 = validateParameter(valid_564508, JString, required = true,
                                  default = nil)
-  if valid_568608 != nil:
-    section.add "subscriptionId", valid_568608
+  if valid_564508 != nil:
+    section.add "resourceGroupName", valid_564508
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -4164,11 +4165,11 @@ proc validate_VirtualMachineScaleSetsReimageAll_568604(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568609 = query.getOrDefault("api-version")
-  valid_568609 = validateParameter(valid_568609, JString, required = true,
+  var valid_564509 = query.getOrDefault("api-version")
+  valid_564509 = validateParameter(valid_564509, JString, required = true,
                                  default = nil)
-  if valid_568609 != nil:
-    section.add "api-version", valid_568609
+  if valid_564509 != nil:
+    section.add "api-version", valid_564509
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -4177,49 +4178,49 @@ proc validate_VirtualMachineScaleSetsReimageAll_568604(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568610: Call_VirtualMachineScaleSetsReimageAll_568603;
+proc call*(call_564510: Call_VirtualMachineScaleSetsReimageAll_564503;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Reimages all the disks ( including data disks ) in the virtual machines in a VM scale set. This operation is only supported for managed disks.
   ## 
-  let valid = call_568610.validator(path, query, header, formData, body)
-  let scheme = call_568610.pickScheme
+  let valid = call_564510.validator(path, query, header, formData, body)
+  let scheme = call_564510.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568610.url(scheme.get, call_568610.host, call_568610.base,
-                         call_568610.route, valid.getOrDefault("path"),
+  let url = call_564510.url(scheme.get, call_564510.host, call_564510.base,
+                         call_564510.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568610, url, valid)
+  result = hook(call_564510, url, valid)
 
-proc call*(call_568611: Call_VirtualMachineScaleSetsReimageAll_568603;
-          vmScaleSetName: string; resourceGroupName: string; apiVersion: string;
-          subscriptionId: string): Recallable =
+proc call*(call_564511: Call_VirtualMachineScaleSetsReimageAll_564503;
+          apiVersion: string; vmScaleSetName: string; subscriptionId: string;
+          resourceGroupName: string): Recallable =
   ## virtualMachineScaleSetsReimageAll
   ## Reimages all the disks ( including data disks ) in the virtual machines in a VM scale set. This operation is only supported for managed disks.
-  ##   vmScaleSetName: string (required)
-  ##                 : The name of the VM scale set.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
+  ##   vmScaleSetName: string (required)
+  ##                 : The name of the VM scale set.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_568612 = newJObject()
-  var query_568613 = newJObject()
-  add(path_568612, "vmScaleSetName", newJString(vmScaleSetName))
-  add(path_568612, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568613, "api-version", newJString(apiVersion))
-  add(path_568612, "subscriptionId", newJString(subscriptionId))
-  result = call_568611.call(path_568612, query_568613, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564512 = newJObject()
+  var query_564513 = newJObject()
+  add(query_564513, "api-version", newJString(apiVersion))
+  add(path_564512, "vmScaleSetName", newJString(vmScaleSetName))
+  add(path_564512, "subscriptionId", newJString(subscriptionId))
+  add(path_564512, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564511.call(path_564512, query_564513, nil, nil, nil)
 
-var virtualMachineScaleSetsReimageAll* = Call_VirtualMachineScaleSetsReimageAll_568603(
+var virtualMachineScaleSetsReimageAll* = Call_VirtualMachineScaleSetsReimageAll_564503(
     name: "virtualMachineScaleSetsReimageAll", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/virtualMachineScaleSets/{vmScaleSetName}/reimageall",
-    validator: validate_VirtualMachineScaleSetsReimageAll_568604, base: "",
-    url: url_VirtualMachineScaleSetsReimageAll_568605, schemes: {Scheme.Https})
+    validator: validate_VirtualMachineScaleSetsReimageAll_564504, base: "",
+    url: url_VirtualMachineScaleSetsReimageAll_564505, schemes: {Scheme.Https})
 type
-  Call_VirtualMachineScaleSetsRestart_568614 = ref object of OpenApiRestCall_567667
-proc url_VirtualMachineScaleSetsRestart_568616(protocol: Scheme; host: string;
+  Call_VirtualMachineScaleSetsRestart_564514 = ref object of OpenApiRestCall_563565
+proc url_VirtualMachineScaleSetsRestart_564516(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -4243,7 +4244,7 @@ proc url_VirtualMachineScaleSetsRestart_568616(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_VirtualMachineScaleSetsRestart_568615(path: JsonNode;
+proc validate_VirtualMachineScaleSetsRestart_564515(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Restarts one or more virtual machines in a VM scale set.
   ## 
@@ -4252,28 +4253,28 @@ proc validate_VirtualMachineScaleSetsRestart_568615(path: JsonNode;
   ## parameters in `path` object:
   ##   vmScaleSetName: JString (required)
   ##                 : The name of the VM scale set.
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `vmScaleSetName` field"
-  var valid_568617 = path.getOrDefault("vmScaleSetName")
-  valid_568617 = validateParameter(valid_568617, JString, required = true,
+  var valid_564517 = path.getOrDefault("vmScaleSetName")
+  valid_564517 = validateParameter(valid_564517, JString, required = true,
                                  default = nil)
-  if valid_568617 != nil:
-    section.add "vmScaleSetName", valid_568617
-  var valid_568618 = path.getOrDefault("resourceGroupName")
-  valid_568618 = validateParameter(valid_568618, JString, required = true,
+  if valid_564517 != nil:
+    section.add "vmScaleSetName", valid_564517
+  var valid_564518 = path.getOrDefault("subscriptionId")
+  valid_564518 = validateParameter(valid_564518, JString, required = true,
                                  default = nil)
-  if valid_568618 != nil:
-    section.add "resourceGroupName", valid_568618
-  var valid_568619 = path.getOrDefault("subscriptionId")
-  valid_568619 = validateParameter(valid_568619, JString, required = true,
+  if valid_564518 != nil:
+    section.add "subscriptionId", valid_564518
+  var valid_564519 = path.getOrDefault("resourceGroupName")
+  valid_564519 = validateParameter(valid_564519, JString, required = true,
                                  default = nil)
-  if valid_568619 != nil:
-    section.add "subscriptionId", valid_568619
+  if valid_564519 != nil:
+    section.add "resourceGroupName", valid_564519
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -4281,11 +4282,11 @@ proc validate_VirtualMachineScaleSetsRestart_568615(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568620 = query.getOrDefault("api-version")
-  valid_568620 = validateParameter(valid_568620, JString, required = true,
+  var valid_564520 = query.getOrDefault("api-version")
+  valid_564520 = validateParameter(valid_564520, JString, required = true,
                                  default = nil)
-  if valid_568620 != nil:
-    section.add "api-version", valid_568620
+  if valid_564520 != nil:
+    section.add "api-version", valid_564520
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -4298,53 +4299,53 @@ proc validate_VirtualMachineScaleSetsRestart_568615(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568622: Call_VirtualMachineScaleSetsRestart_568614; path: JsonNode;
+proc call*(call_564522: Call_VirtualMachineScaleSetsRestart_564514; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Restarts one or more virtual machines in a VM scale set.
   ## 
-  let valid = call_568622.validator(path, query, header, formData, body)
-  let scheme = call_568622.pickScheme
+  let valid = call_564522.validator(path, query, header, formData, body)
+  let scheme = call_564522.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568622.url(scheme.get, call_568622.host, call_568622.base,
-                         call_568622.route, valid.getOrDefault("path"),
+  let url = call_564522.url(scheme.get, call_564522.host, call_564522.base,
+                         call_564522.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568622, url, valid)
+  result = hook(call_564522, url, valid)
 
-proc call*(call_568623: Call_VirtualMachineScaleSetsRestart_568614;
-          vmScaleSetName: string; resourceGroupName: string; apiVersion: string;
-          subscriptionId: string; vmInstanceIDs: JsonNode = nil): Recallable =
+proc call*(call_564523: Call_VirtualMachineScaleSetsRestart_564514;
+          apiVersion: string; vmScaleSetName: string; subscriptionId: string;
+          resourceGroupName: string; vmInstanceIDs: JsonNode = nil): Recallable =
   ## virtualMachineScaleSetsRestart
   ## Restarts one or more virtual machines in a VM scale set.
-  ##   vmScaleSetName: string (required)
-  ##                 : The name of the VM scale set.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
+  ##   vmScaleSetName: string (required)
+  ##                 : The name of the VM scale set.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   vmInstanceIDs: JObject
   ##                : A list of virtual machine instance IDs from the VM scale set.
-  var path_568624 = newJObject()
-  var query_568625 = newJObject()
-  var body_568626 = newJObject()
-  add(path_568624, "vmScaleSetName", newJString(vmScaleSetName))
-  add(path_568624, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568625, "api-version", newJString(apiVersion))
-  add(path_568624, "subscriptionId", newJString(subscriptionId))
+  var path_564524 = newJObject()
+  var query_564525 = newJObject()
+  var body_564526 = newJObject()
+  add(query_564525, "api-version", newJString(apiVersion))
+  add(path_564524, "vmScaleSetName", newJString(vmScaleSetName))
+  add(path_564524, "subscriptionId", newJString(subscriptionId))
+  add(path_564524, "resourceGroupName", newJString(resourceGroupName))
   if vmInstanceIDs != nil:
-    body_568626 = vmInstanceIDs
-  result = call_568623.call(path_568624, query_568625, nil, nil, body_568626)
+    body_564526 = vmInstanceIDs
+  result = call_564523.call(path_564524, query_564525, nil, nil, body_564526)
 
-var virtualMachineScaleSetsRestart* = Call_VirtualMachineScaleSetsRestart_568614(
+var virtualMachineScaleSetsRestart* = Call_VirtualMachineScaleSetsRestart_564514(
     name: "virtualMachineScaleSetsRestart", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/virtualMachineScaleSets/{vmScaleSetName}/restart",
-    validator: validate_VirtualMachineScaleSetsRestart_568615, base: "",
-    url: url_VirtualMachineScaleSetsRestart_568616, schemes: {Scheme.Https})
+    validator: validate_VirtualMachineScaleSetsRestart_564515, base: "",
+    url: url_VirtualMachineScaleSetsRestart_564516, schemes: {Scheme.Https})
 type
-  Call_VirtualMachineScaleSetsListSkus_568627 = ref object of OpenApiRestCall_567667
-proc url_VirtualMachineScaleSetsListSkus_568629(protocol: Scheme; host: string;
+  Call_VirtualMachineScaleSetsListSkus_564527 = ref object of OpenApiRestCall_563565
+proc url_VirtualMachineScaleSetsListSkus_564529(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -4368,7 +4369,7 @@ proc url_VirtualMachineScaleSetsListSkus_568629(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_VirtualMachineScaleSetsListSkus_568628(path: JsonNode;
+proc validate_VirtualMachineScaleSetsListSkus_564528(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets a list of SKUs available for your VM scale set, including the minimum and maximum VM instances allowed for each SKU.
   ## 
@@ -4377,28 +4378,28 @@ proc validate_VirtualMachineScaleSetsListSkus_568628(path: JsonNode;
   ## parameters in `path` object:
   ##   vmScaleSetName: JString (required)
   ##                 : The name of the VM scale set.
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `vmScaleSetName` field"
-  var valid_568630 = path.getOrDefault("vmScaleSetName")
-  valid_568630 = validateParameter(valid_568630, JString, required = true,
+  var valid_564530 = path.getOrDefault("vmScaleSetName")
+  valid_564530 = validateParameter(valid_564530, JString, required = true,
                                  default = nil)
-  if valid_568630 != nil:
-    section.add "vmScaleSetName", valid_568630
-  var valid_568631 = path.getOrDefault("resourceGroupName")
-  valid_568631 = validateParameter(valid_568631, JString, required = true,
+  if valid_564530 != nil:
+    section.add "vmScaleSetName", valid_564530
+  var valid_564531 = path.getOrDefault("subscriptionId")
+  valid_564531 = validateParameter(valid_564531, JString, required = true,
                                  default = nil)
-  if valid_568631 != nil:
-    section.add "resourceGroupName", valid_568631
-  var valid_568632 = path.getOrDefault("subscriptionId")
-  valid_568632 = validateParameter(valid_568632, JString, required = true,
+  if valid_564531 != nil:
+    section.add "subscriptionId", valid_564531
+  var valid_564532 = path.getOrDefault("resourceGroupName")
+  valid_564532 = validateParameter(valid_564532, JString, required = true,
                                  default = nil)
-  if valid_568632 != nil:
-    section.add "subscriptionId", valid_568632
+  if valid_564532 != nil:
+    section.add "resourceGroupName", valid_564532
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -4406,11 +4407,11 @@ proc validate_VirtualMachineScaleSetsListSkus_568628(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568633 = query.getOrDefault("api-version")
-  valid_568633 = validateParameter(valid_568633, JString, required = true,
+  var valid_564533 = query.getOrDefault("api-version")
+  valid_564533 = validateParameter(valid_564533, JString, required = true,
                                  default = nil)
-  if valid_568633 != nil:
-    section.add "api-version", valid_568633
+  if valid_564533 != nil:
+    section.add "api-version", valid_564533
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -4419,49 +4420,49 @@ proc validate_VirtualMachineScaleSetsListSkus_568628(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568634: Call_VirtualMachineScaleSetsListSkus_568627;
+proc call*(call_564534: Call_VirtualMachineScaleSetsListSkus_564527;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Gets a list of SKUs available for your VM scale set, including the minimum and maximum VM instances allowed for each SKU.
   ## 
-  let valid = call_568634.validator(path, query, header, formData, body)
-  let scheme = call_568634.pickScheme
+  let valid = call_564534.validator(path, query, header, formData, body)
+  let scheme = call_564534.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568634.url(scheme.get, call_568634.host, call_568634.base,
-                         call_568634.route, valid.getOrDefault("path"),
+  let url = call_564534.url(scheme.get, call_564534.host, call_564534.base,
+                         call_564534.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568634, url, valid)
+  result = hook(call_564534, url, valid)
 
-proc call*(call_568635: Call_VirtualMachineScaleSetsListSkus_568627;
-          vmScaleSetName: string; resourceGroupName: string; apiVersion: string;
-          subscriptionId: string): Recallable =
+proc call*(call_564535: Call_VirtualMachineScaleSetsListSkus_564527;
+          apiVersion: string; vmScaleSetName: string; subscriptionId: string;
+          resourceGroupName: string): Recallable =
   ## virtualMachineScaleSetsListSkus
   ## Gets a list of SKUs available for your VM scale set, including the minimum and maximum VM instances allowed for each SKU.
-  ##   vmScaleSetName: string (required)
-  ##                 : The name of the VM scale set.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
+  ##   vmScaleSetName: string (required)
+  ##                 : The name of the VM scale set.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_568636 = newJObject()
-  var query_568637 = newJObject()
-  add(path_568636, "vmScaleSetName", newJString(vmScaleSetName))
-  add(path_568636, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568637, "api-version", newJString(apiVersion))
-  add(path_568636, "subscriptionId", newJString(subscriptionId))
-  result = call_568635.call(path_568636, query_568637, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564536 = newJObject()
+  var query_564537 = newJObject()
+  add(query_564537, "api-version", newJString(apiVersion))
+  add(path_564536, "vmScaleSetName", newJString(vmScaleSetName))
+  add(path_564536, "subscriptionId", newJString(subscriptionId))
+  add(path_564536, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564535.call(path_564536, query_564537, nil, nil, nil)
 
-var virtualMachineScaleSetsListSkus* = Call_VirtualMachineScaleSetsListSkus_568627(
+var virtualMachineScaleSetsListSkus* = Call_VirtualMachineScaleSetsListSkus_564527(
     name: "virtualMachineScaleSetsListSkus", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/virtualMachineScaleSets/{vmScaleSetName}/skus",
-    validator: validate_VirtualMachineScaleSetsListSkus_568628, base: "",
-    url: url_VirtualMachineScaleSetsListSkus_568629, schemes: {Scheme.Https})
+    validator: validate_VirtualMachineScaleSetsListSkus_564528, base: "",
+    url: url_VirtualMachineScaleSetsListSkus_564529, schemes: {Scheme.Https})
 type
-  Call_VirtualMachineScaleSetsStart_568638 = ref object of OpenApiRestCall_567667
-proc url_VirtualMachineScaleSetsStart_568640(protocol: Scheme; host: string;
+  Call_VirtualMachineScaleSetsStart_564538 = ref object of OpenApiRestCall_563565
+proc url_VirtualMachineScaleSetsStart_564540(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -4485,7 +4486,7 @@ proc url_VirtualMachineScaleSetsStart_568640(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_VirtualMachineScaleSetsStart_568639(path: JsonNode; query: JsonNode;
+proc validate_VirtualMachineScaleSetsStart_564539(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Starts one or more virtual machines in a VM scale set.
   ## 
@@ -4494,28 +4495,28 @@ proc validate_VirtualMachineScaleSetsStart_568639(path: JsonNode; query: JsonNod
   ## parameters in `path` object:
   ##   vmScaleSetName: JString (required)
   ##                 : The name of the VM scale set.
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `vmScaleSetName` field"
-  var valid_568641 = path.getOrDefault("vmScaleSetName")
-  valid_568641 = validateParameter(valid_568641, JString, required = true,
+  var valid_564541 = path.getOrDefault("vmScaleSetName")
+  valid_564541 = validateParameter(valid_564541, JString, required = true,
                                  default = nil)
-  if valid_568641 != nil:
-    section.add "vmScaleSetName", valid_568641
-  var valid_568642 = path.getOrDefault("resourceGroupName")
-  valid_568642 = validateParameter(valid_568642, JString, required = true,
+  if valid_564541 != nil:
+    section.add "vmScaleSetName", valid_564541
+  var valid_564542 = path.getOrDefault("subscriptionId")
+  valid_564542 = validateParameter(valid_564542, JString, required = true,
                                  default = nil)
-  if valid_568642 != nil:
-    section.add "resourceGroupName", valid_568642
-  var valid_568643 = path.getOrDefault("subscriptionId")
-  valid_568643 = validateParameter(valid_568643, JString, required = true,
+  if valid_564542 != nil:
+    section.add "subscriptionId", valid_564542
+  var valid_564543 = path.getOrDefault("resourceGroupName")
+  valid_564543 = validateParameter(valid_564543, JString, required = true,
                                  default = nil)
-  if valid_568643 != nil:
-    section.add "subscriptionId", valid_568643
+  if valid_564543 != nil:
+    section.add "resourceGroupName", valid_564543
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -4523,11 +4524,11 @@ proc validate_VirtualMachineScaleSetsStart_568639(path: JsonNode; query: JsonNod
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568644 = query.getOrDefault("api-version")
-  valid_568644 = validateParameter(valid_568644, JString, required = true,
+  var valid_564544 = query.getOrDefault("api-version")
+  valid_564544 = validateParameter(valid_564544, JString, required = true,
                                  default = nil)
-  if valid_568644 != nil:
-    section.add "api-version", valid_568644
+  if valid_564544 != nil:
+    section.add "api-version", valid_564544
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -4540,53 +4541,53 @@ proc validate_VirtualMachineScaleSetsStart_568639(path: JsonNode; query: JsonNod
   if body != nil:
     result.add "body", body
 
-proc call*(call_568646: Call_VirtualMachineScaleSetsStart_568638; path: JsonNode;
+proc call*(call_564546: Call_VirtualMachineScaleSetsStart_564538; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Starts one or more virtual machines in a VM scale set.
   ## 
-  let valid = call_568646.validator(path, query, header, formData, body)
-  let scheme = call_568646.pickScheme
+  let valid = call_564546.validator(path, query, header, formData, body)
+  let scheme = call_564546.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568646.url(scheme.get, call_568646.host, call_568646.base,
-                         call_568646.route, valid.getOrDefault("path"),
+  let url = call_564546.url(scheme.get, call_564546.host, call_564546.base,
+                         call_564546.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568646, url, valid)
+  result = hook(call_564546, url, valid)
 
-proc call*(call_568647: Call_VirtualMachineScaleSetsStart_568638;
-          vmScaleSetName: string; resourceGroupName: string; apiVersion: string;
-          subscriptionId: string; vmInstanceIDs: JsonNode = nil): Recallable =
+proc call*(call_564547: Call_VirtualMachineScaleSetsStart_564538;
+          apiVersion: string; vmScaleSetName: string; subscriptionId: string;
+          resourceGroupName: string; vmInstanceIDs: JsonNode = nil): Recallable =
   ## virtualMachineScaleSetsStart
   ## Starts one or more virtual machines in a VM scale set.
-  ##   vmScaleSetName: string (required)
-  ##                 : The name of the VM scale set.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
+  ##   vmScaleSetName: string (required)
+  ##                 : The name of the VM scale set.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   vmInstanceIDs: JObject
   ##                : A list of virtual machine instance IDs from the VM scale set.
-  var path_568648 = newJObject()
-  var query_568649 = newJObject()
-  var body_568650 = newJObject()
-  add(path_568648, "vmScaleSetName", newJString(vmScaleSetName))
-  add(path_568648, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568649, "api-version", newJString(apiVersion))
-  add(path_568648, "subscriptionId", newJString(subscriptionId))
+  var path_564548 = newJObject()
+  var query_564549 = newJObject()
+  var body_564550 = newJObject()
+  add(query_564549, "api-version", newJString(apiVersion))
+  add(path_564548, "vmScaleSetName", newJString(vmScaleSetName))
+  add(path_564548, "subscriptionId", newJString(subscriptionId))
+  add(path_564548, "resourceGroupName", newJString(resourceGroupName))
   if vmInstanceIDs != nil:
-    body_568650 = vmInstanceIDs
-  result = call_568647.call(path_568648, query_568649, nil, nil, body_568650)
+    body_564550 = vmInstanceIDs
+  result = call_564547.call(path_564548, query_564549, nil, nil, body_564550)
 
-var virtualMachineScaleSetsStart* = Call_VirtualMachineScaleSetsStart_568638(
+var virtualMachineScaleSetsStart* = Call_VirtualMachineScaleSetsStart_564538(
     name: "virtualMachineScaleSetsStart", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/virtualMachineScaleSets/{vmScaleSetName}/start",
-    validator: validate_VirtualMachineScaleSetsStart_568639, base: "",
-    url: url_VirtualMachineScaleSetsStart_568640, schemes: {Scheme.Https})
+    validator: validate_VirtualMachineScaleSetsStart_564539, base: "",
+    url: url_VirtualMachineScaleSetsStart_564540, schemes: {Scheme.Https})
 type
-  Call_VirtualMachineScaleSetVMsGet_568651 = ref object of OpenApiRestCall_567667
-proc url_VirtualMachineScaleSetVMsGet_568653(protocol: Scheme; host: string;
+  Call_VirtualMachineScaleSetVMsGet_564551 = ref object of OpenApiRestCall_563565
+proc url_VirtualMachineScaleSetVMsGet_564553(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -4612,7 +4613,7 @@ proc url_VirtualMachineScaleSetVMsGet_568653(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_VirtualMachineScaleSetVMsGet_568652(path: JsonNode; query: JsonNode;
+proc validate_VirtualMachineScaleSetVMsGet_564552(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets a virtual machine from a VM scale set.
   ## 
@@ -4621,35 +4622,35 @@ proc validate_VirtualMachineScaleSetVMsGet_568652(path: JsonNode; query: JsonNod
   ## parameters in `path` object:
   ##   vmScaleSetName: JString (required)
   ##                 : The name of the VM scale set.
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   ##   instanceId: JString (required)
   ##             : The instance ID of the virtual machine.
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `vmScaleSetName` field"
-  var valid_568654 = path.getOrDefault("vmScaleSetName")
-  valid_568654 = validateParameter(valid_568654, JString, required = true,
+  var valid_564554 = path.getOrDefault("vmScaleSetName")
+  valid_564554 = validateParameter(valid_564554, JString, required = true,
                                  default = nil)
-  if valid_568654 != nil:
-    section.add "vmScaleSetName", valid_568654
-  var valid_568655 = path.getOrDefault("resourceGroupName")
-  valid_568655 = validateParameter(valid_568655, JString, required = true,
+  if valid_564554 != nil:
+    section.add "vmScaleSetName", valid_564554
+  var valid_564555 = path.getOrDefault("subscriptionId")
+  valid_564555 = validateParameter(valid_564555, JString, required = true,
                                  default = nil)
-  if valid_568655 != nil:
-    section.add "resourceGroupName", valid_568655
-  var valid_568656 = path.getOrDefault("subscriptionId")
-  valid_568656 = validateParameter(valid_568656, JString, required = true,
+  if valid_564555 != nil:
+    section.add "subscriptionId", valid_564555
+  var valid_564556 = path.getOrDefault("resourceGroupName")
+  valid_564556 = validateParameter(valid_564556, JString, required = true,
                                  default = nil)
-  if valid_568656 != nil:
-    section.add "subscriptionId", valid_568656
-  var valid_568657 = path.getOrDefault("instanceId")
-  valid_568657 = validateParameter(valid_568657, JString, required = true,
+  if valid_564556 != nil:
+    section.add "resourceGroupName", valid_564556
+  var valid_564557 = path.getOrDefault("instanceId")
+  valid_564557 = validateParameter(valid_564557, JString, required = true,
                                  default = nil)
-  if valid_568657 != nil:
-    section.add "instanceId", valid_568657
+  if valid_564557 != nil:
+    section.add "instanceId", valid_564557
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -4657,11 +4658,11 @@ proc validate_VirtualMachineScaleSetVMsGet_568652(path: JsonNode; query: JsonNod
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568658 = query.getOrDefault("api-version")
-  valid_568658 = validateParameter(valid_568658, JString, required = true,
+  var valid_564558 = query.getOrDefault("api-version")
+  valid_564558 = validateParameter(valid_564558, JString, required = true,
                                  default = nil)
-  if valid_568658 != nil:
-    section.add "api-version", valid_568658
+  if valid_564558 != nil:
+    section.add "api-version", valid_564558
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -4670,51 +4671,51 @@ proc validate_VirtualMachineScaleSetVMsGet_568652(path: JsonNode; query: JsonNod
   if body != nil:
     result.add "body", body
 
-proc call*(call_568659: Call_VirtualMachineScaleSetVMsGet_568651; path: JsonNode;
+proc call*(call_564559: Call_VirtualMachineScaleSetVMsGet_564551; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets a virtual machine from a VM scale set.
   ## 
-  let valid = call_568659.validator(path, query, header, formData, body)
-  let scheme = call_568659.pickScheme
+  let valid = call_564559.validator(path, query, header, formData, body)
+  let scheme = call_564559.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568659.url(scheme.get, call_568659.host, call_568659.base,
-                         call_568659.route, valid.getOrDefault("path"),
+  let url = call_564559.url(scheme.get, call_564559.host, call_564559.base,
+                         call_564559.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568659, url, valid)
+  result = hook(call_564559, url, valid)
 
-proc call*(call_568660: Call_VirtualMachineScaleSetVMsGet_568651;
-          vmScaleSetName: string; resourceGroupName: string; apiVersion: string;
-          subscriptionId: string; instanceId: string): Recallable =
+proc call*(call_564560: Call_VirtualMachineScaleSetVMsGet_564551;
+          apiVersion: string; vmScaleSetName: string; subscriptionId: string;
+          resourceGroupName: string; instanceId: string): Recallable =
   ## virtualMachineScaleSetVMsGet
   ## Gets a virtual machine from a VM scale set.
-  ##   vmScaleSetName: string (required)
-  ##                 : The name of the VM scale set.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
+  ##   vmScaleSetName: string (required)
+  ##                 : The name of the VM scale set.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   instanceId: string (required)
   ##             : The instance ID of the virtual machine.
-  var path_568661 = newJObject()
-  var query_568662 = newJObject()
-  add(path_568661, "vmScaleSetName", newJString(vmScaleSetName))
-  add(path_568661, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568662, "api-version", newJString(apiVersion))
-  add(path_568661, "subscriptionId", newJString(subscriptionId))
-  add(path_568661, "instanceId", newJString(instanceId))
-  result = call_568660.call(path_568661, query_568662, nil, nil, nil)
+  var path_564561 = newJObject()
+  var query_564562 = newJObject()
+  add(query_564562, "api-version", newJString(apiVersion))
+  add(path_564561, "vmScaleSetName", newJString(vmScaleSetName))
+  add(path_564561, "subscriptionId", newJString(subscriptionId))
+  add(path_564561, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564561, "instanceId", newJString(instanceId))
+  result = call_564560.call(path_564561, query_564562, nil, nil, nil)
 
-var virtualMachineScaleSetVMsGet* = Call_VirtualMachineScaleSetVMsGet_568651(
+var virtualMachineScaleSetVMsGet* = Call_VirtualMachineScaleSetVMsGet_564551(
     name: "virtualMachineScaleSetVMsGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/virtualMachineScaleSets/{vmScaleSetName}/virtualmachines/{instanceId}",
-    validator: validate_VirtualMachineScaleSetVMsGet_568652, base: "",
-    url: url_VirtualMachineScaleSetVMsGet_568653, schemes: {Scheme.Https})
+    validator: validate_VirtualMachineScaleSetVMsGet_564552, base: "",
+    url: url_VirtualMachineScaleSetVMsGet_564553, schemes: {Scheme.Https})
 type
-  Call_VirtualMachineScaleSetVMsDelete_568663 = ref object of OpenApiRestCall_567667
-proc url_VirtualMachineScaleSetVMsDelete_568665(protocol: Scheme; host: string;
+  Call_VirtualMachineScaleSetVMsDelete_564563 = ref object of OpenApiRestCall_563565
+proc url_VirtualMachineScaleSetVMsDelete_564565(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -4740,7 +4741,7 @@ proc url_VirtualMachineScaleSetVMsDelete_568665(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_VirtualMachineScaleSetVMsDelete_568664(path: JsonNode;
+proc validate_VirtualMachineScaleSetVMsDelete_564564(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Deletes a virtual machine from a VM scale set.
   ## 
@@ -4749,35 +4750,35 @@ proc validate_VirtualMachineScaleSetVMsDelete_568664(path: JsonNode;
   ## parameters in `path` object:
   ##   vmScaleSetName: JString (required)
   ##                 : The name of the VM scale set.
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   ##   instanceId: JString (required)
   ##             : The instance ID of the virtual machine.
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `vmScaleSetName` field"
-  var valid_568666 = path.getOrDefault("vmScaleSetName")
-  valid_568666 = validateParameter(valid_568666, JString, required = true,
+  var valid_564566 = path.getOrDefault("vmScaleSetName")
+  valid_564566 = validateParameter(valid_564566, JString, required = true,
                                  default = nil)
-  if valid_568666 != nil:
-    section.add "vmScaleSetName", valid_568666
-  var valid_568667 = path.getOrDefault("resourceGroupName")
-  valid_568667 = validateParameter(valid_568667, JString, required = true,
+  if valid_564566 != nil:
+    section.add "vmScaleSetName", valid_564566
+  var valid_564567 = path.getOrDefault("subscriptionId")
+  valid_564567 = validateParameter(valid_564567, JString, required = true,
                                  default = nil)
-  if valid_568667 != nil:
-    section.add "resourceGroupName", valid_568667
-  var valid_568668 = path.getOrDefault("subscriptionId")
-  valid_568668 = validateParameter(valid_568668, JString, required = true,
+  if valid_564567 != nil:
+    section.add "subscriptionId", valid_564567
+  var valid_564568 = path.getOrDefault("resourceGroupName")
+  valid_564568 = validateParameter(valid_564568, JString, required = true,
                                  default = nil)
-  if valid_568668 != nil:
-    section.add "subscriptionId", valid_568668
-  var valid_568669 = path.getOrDefault("instanceId")
-  valid_568669 = validateParameter(valid_568669, JString, required = true,
+  if valid_564568 != nil:
+    section.add "resourceGroupName", valid_564568
+  var valid_564569 = path.getOrDefault("instanceId")
+  valid_564569 = validateParameter(valid_564569, JString, required = true,
                                  default = nil)
-  if valid_568669 != nil:
-    section.add "instanceId", valid_568669
+  if valid_564569 != nil:
+    section.add "instanceId", valid_564569
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -4785,11 +4786,11 @@ proc validate_VirtualMachineScaleSetVMsDelete_568664(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568670 = query.getOrDefault("api-version")
-  valid_568670 = validateParameter(valid_568670, JString, required = true,
+  var valid_564570 = query.getOrDefault("api-version")
+  valid_564570 = validateParameter(valid_564570, JString, required = true,
                                  default = nil)
-  if valid_568670 != nil:
-    section.add "api-version", valid_568670
+  if valid_564570 != nil:
+    section.add "api-version", valid_564570
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -4798,52 +4799,52 @@ proc validate_VirtualMachineScaleSetVMsDelete_568664(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568671: Call_VirtualMachineScaleSetVMsDelete_568663;
+proc call*(call_564571: Call_VirtualMachineScaleSetVMsDelete_564563;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Deletes a virtual machine from a VM scale set.
   ## 
-  let valid = call_568671.validator(path, query, header, formData, body)
-  let scheme = call_568671.pickScheme
+  let valid = call_564571.validator(path, query, header, formData, body)
+  let scheme = call_564571.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568671.url(scheme.get, call_568671.host, call_568671.base,
-                         call_568671.route, valid.getOrDefault("path"),
+  let url = call_564571.url(scheme.get, call_564571.host, call_564571.base,
+                         call_564571.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568671, url, valid)
+  result = hook(call_564571, url, valid)
 
-proc call*(call_568672: Call_VirtualMachineScaleSetVMsDelete_568663;
-          vmScaleSetName: string; resourceGroupName: string; apiVersion: string;
-          subscriptionId: string; instanceId: string): Recallable =
+proc call*(call_564572: Call_VirtualMachineScaleSetVMsDelete_564563;
+          apiVersion: string; vmScaleSetName: string; subscriptionId: string;
+          resourceGroupName: string; instanceId: string): Recallable =
   ## virtualMachineScaleSetVMsDelete
   ## Deletes a virtual machine from a VM scale set.
-  ##   vmScaleSetName: string (required)
-  ##                 : The name of the VM scale set.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
+  ##   vmScaleSetName: string (required)
+  ##                 : The name of the VM scale set.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   instanceId: string (required)
   ##             : The instance ID of the virtual machine.
-  var path_568673 = newJObject()
-  var query_568674 = newJObject()
-  add(path_568673, "vmScaleSetName", newJString(vmScaleSetName))
-  add(path_568673, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568674, "api-version", newJString(apiVersion))
-  add(path_568673, "subscriptionId", newJString(subscriptionId))
-  add(path_568673, "instanceId", newJString(instanceId))
-  result = call_568672.call(path_568673, query_568674, nil, nil, nil)
+  var path_564573 = newJObject()
+  var query_564574 = newJObject()
+  add(query_564574, "api-version", newJString(apiVersion))
+  add(path_564573, "vmScaleSetName", newJString(vmScaleSetName))
+  add(path_564573, "subscriptionId", newJString(subscriptionId))
+  add(path_564573, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564573, "instanceId", newJString(instanceId))
+  result = call_564572.call(path_564573, query_564574, nil, nil, nil)
 
-var virtualMachineScaleSetVMsDelete* = Call_VirtualMachineScaleSetVMsDelete_568663(
+var virtualMachineScaleSetVMsDelete* = Call_VirtualMachineScaleSetVMsDelete_564563(
     name: "virtualMachineScaleSetVMsDelete", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/virtualMachineScaleSets/{vmScaleSetName}/virtualmachines/{instanceId}",
-    validator: validate_VirtualMachineScaleSetVMsDelete_568664, base: "",
-    url: url_VirtualMachineScaleSetVMsDelete_568665, schemes: {Scheme.Https})
+    validator: validate_VirtualMachineScaleSetVMsDelete_564564, base: "",
+    url: url_VirtualMachineScaleSetVMsDelete_564565, schemes: {Scheme.Https})
 type
-  Call_VirtualMachineScaleSetVMsDeallocate_568675 = ref object of OpenApiRestCall_567667
-proc url_VirtualMachineScaleSetVMsDeallocate_568677(protocol: Scheme; host: string;
+  Call_VirtualMachineScaleSetVMsDeallocate_564575 = ref object of OpenApiRestCall_563565
+proc url_VirtualMachineScaleSetVMsDeallocate_564577(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -4870,7 +4871,7 @@ proc url_VirtualMachineScaleSetVMsDeallocate_568677(protocol: Scheme; host: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_VirtualMachineScaleSetVMsDeallocate_568676(path: JsonNode;
+proc validate_VirtualMachineScaleSetVMsDeallocate_564576(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Deallocates a specific virtual machine in a VM scale set. Shuts down the virtual machine and releases the compute resources it uses. You are not billed for the compute resources of this virtual machine once it is deallocated.
   ## 
@@ -4879,35 +4880,35 @@ proc validate_VirtualMachineScaleSetVMsDeallocate_568676(path: JsonNode;
   ## parameters in `path` object:
   ##   vmScaleSetName: JString (required)
   ##                 : The name of the VM scale set.
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   ##   instanceId: JString (required)
   ##             : The instance ID of the virtual machine.
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `vmScaleSetName` field"
-  var valid_568678 = path.getOrDefault("vmScaleSetName")
-  valid_568678 = validateParameter(valid_568678, JString, required = true,
+  var valid_564578 = path.getOrDefault("vmScaleSetName")
+  valid_564578 = validateParameter(valid_564578, JString, required = true,
                                  default = nil)
-  if valid_568678 != nil:
-    section.add "vmScaleSetName", valid_568678
-  var valid_568679 = path.getOrDefault("resourceGroupName")
-  valid_568679 = validateParameter(valid_568679, JString, required = true,
+  if valid_564578 != nil:
+    section.add "vmScaleSetName", valid_564578
+  var valid_564579 = path.getOrDefault("subscriptionId")
+  valid_564579 = validateParameter(valid_564579, JString, required = true,
                                  default = nil)
-  if valid_568679 != nil:
-    section.add "resourceGroupName", valid_568679
-  var valid_568680 = path.getOrDefault("subscriptionId")
-  valid_568680 = validateParameter(valid_568680, JString, required = true,
+  if valid_564579 != nil:
+    section.add "subscriptionId", valid_564579
+  var valid_564580 = path.getOrDefault("resourceGroupName")
+  valid_564580 = validateParameter(valid_564580, JString, required = true,
                                  default = nil)
-  if valid_568680 != nil:
-    section.add "subscriptionId", valid_568680
-  var valid_568681 = path.getOrDefault("instanceId")
-  valid_568681 = validateParameter(valid_568681, JString, required = true,
+  if valid_564580 != nil:
+    section.add "resourceGroupName", valid_564580
+  var valid_564581 = path.getOrDefault("instanceId")
+  valid_564581 = validateParameter(valid_564581, JString, required = true,
                                  default = nil)
-  if valid_568681 != nil:
-    section.add "instanceId", valid_568681
+  if valid_564581 != nil:
+    section.add "instanceId", valid_564581
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -4915,11 +4916,11 @@ proc validate_VirtualMachineScaleSetVMsDeallocate_568676(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568682 = query.getOrDefault("api-version")
-  valid_568682 = validateParameter(valid_568682, JString, required = true,
+  var valid_564582 = query.getOrDefault("api-version")
+  valid_564582 = validateParameter(valid_564582, JString, required = true,
                                  default = nil)
-  if valid_568682 != nil:
-    section.add "api-version", valid_568682
+  if valid_564582 != nil:
+    section.add "api-version", valid_564582
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -4928,52 +4929,52 @@ proc validate_VirtualMachineScaleSetVMsDeallocate_568676(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568683: Call_VirtualMachineScaleSetVMsDeallocate_568675;
+proc call*(call_564583: Call_VirtualMachineScaleSetVMsDeallocate_564575;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Deallocates a specific virtual machine in a VM scale set. Shuts down the virtual machine and releases the compute resources it uses. You are not billed for the compute resources of this virtual machine once it is deallocated.
   ## 
-  let valid = call_568683.validator(path, query, header, formData, body)
-  let scheme = call_568683.pickScheme
+  let valid = call_564583.validator(path, query, header, formData, body)
+  let scheme = call_564583.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568683.url(scheme.get, call_568683.host, call_568683.base,
-                         call_568683.route, valid.getOrDefault("path"),
+  let url = call_564583.url(scheme.get, call_564583.host, call_564583.base,
+                         call_564583.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568683, url, valid)
+  result = hook(call_564583, url, valid)
 
-proc call*(call_568684: Call_VirtualMachineScaleSetVMsDeallocate_568675;
-          vmScaleSetName: string; resourceGroupName: string; apiVersion: string;
-          subscriptionId: string; instanceId: string): Recallable =
+proc call*(call_564584: Call_VirtualMachineScaleSetVMsDeallocate_564575;
+          apiVersion: string; vmScaleSetName: string; subscriptionId: string;
+          resourceGroupName: string; instanceId: string): Recallable =
   ## virtualMachineScaleSetVMsDeallocate
   ## Deallocates a specific virtual machine in a VM scale set. Shuts down the virtual machine and releases the compute resources it uses. You are not billed for the compute resources of this virtual machine once it is deallocated.
-  ##   vmScaleSetName: string (required)
-  ##                 : The name of the VM scale set.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
+  ##   vmScaleSetName: string (required)
+  ##                 : The name of the VM scale set.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   instanceId: string (required)
   ##             : The instance ID of the virtual machine.
-  var path_568685 = newJObject()
-  var query_568686 = newJObject()
-  add(path_568685, "vmScaleSetName", newJString(vmScaleSetName))
-  add(path_568685, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568686, "api-version", newJString(apiVersion))
-  add(path_568685, "subscriptionId", newJString(subscriptionId))
-  add(path_568685, "instanceId", newJString(instanceId))
-  result = call_568684.call(path_568685, query_568686, nil, nil, nil)
+  var path_564585 = newJObject()
+  var query_564586 = newJObject()
+  add(query_564586, "api-version", newJString(apiVersion))
+  add(path_564585, "vmScaleSetName", newJString(vmScaleSetName))
+  add(path_564585, "subscriptionId", newJString(subscriptionId))
+  add(path_564585, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564585, "instanceId", newJString(instanceId))
+  result = call_564584.call(path_564585, query_564586, nil, nil, nil)
 
-var virtualMachineScaleSetVMsDeallocate* = Call_VirtualMachineScaleSetVMsDeallocate_568675(
+var virtualMachineScaleSetVMsDeallocate* = Call_VirtualMachineScaleSetVMsDeallocate_564575(
     name: "virtualMachineScaleSetVMsDeallocate", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/virtualMachineScaleSets/{vmScaleSetName}/virtualmachines/{instanceId}/deallocate",
-    validator: validate_VirtualMachineScaleSetVMsDeallocate_568676, base: "",
-    url: url_VirtualMachineScaleSetVMsDeallocate_568677, schemes: {Scheme.Https})
+    validator: validate_VirtualMachineScaleSetVMsDeallocate_564576, base: "",
+    url: url_VirtualMachineScaleSetVMsDeallocate_564577, schemes: {Scheme.Https})
 type
-  Call_VirtualMachineScaleSetVMsGetInstanceView_568687 = ref object of OpenApiRestCall_567667
-proc url_VirtualMachineScaleSetVMsGetInstanceView_568689(protocol: Scheme;
+  Call_VirtualMachineScaleSetVMsGetInstanceView_564587 = ref object of OpenApiRestCall_563565
+proc url_VirtualMachineScaleSetVMsGetInstanceView_564589(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -5000,7 +5001,7 @@ proc url_VirtualMachineScaleSetVMsGetInstanceView_568689(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_VirtualMachineScaleSetVMsGetInstanceView_568688(path: JsonNode;
+proc validate_VirtualMachineScaleSetVMsGetInstanceView_564588(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the status of a virtual machine from a VM scale set.
   ## 
@@ -5009,35 +5010,35 @@ proc validate_VirtualMachineScaleSetVMsGetInstanceView_568688(path: JsonNode;
   ## parameters in `path` object:
   ##   vmScaleSetName: JString (required)
   ##                 : The name of the VM scale set.
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   ##   instanceId: JString (required)
   ##             : The instance ID of the virtual machine.
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `vmScaleSetName` field"
-  var valid_568690 = path.getOrDefault("vmScaleSetName")
-  valid_568690 = validateParameter(valid_568690, JString, required = true,
+  var valid_564590 = path.getOrDefault("vmScaleSetName")
+  valid_564590 = validateParameter(valid_564590, JString, required = true,
                                  default = nil)
-  if valid_568690 != nil:
-    section.add "vmScaleSetName", valid_568690
-  var valid_568691 = path.getOrDefault("resourceGroupName")
-  valid_568691 = validateParameter(valid_568691, JString, required = true,
+  if valid_564590 != nil:
+    section.add "vmScaleSetName", valid_564590
+  var valid_564591 = path.getOrDefault("subscriptionId")
+  valid_564591 = validateParameter(valid_564591, JString, required = true,
                                  default = nil)
-  if valid_568691 != nil:
-    section.add "resourceGroupName", valid_568691
-  var valid_568692 = path.getOrDefault("subscriptionId")
-  valid_568692 = validateParameter(valid_568692, JString, required = true,
+  if valid_564591 != nil:
+    section.add "subscriptionId", valid_564591
+  var valid_564592 = path.getOrDefault("resourceGroupName")
+  valid_564592 = validateParameter(valid_564592, JString, required = true,
                                  default = nil)
-  if valid_568692 != nil:
-    section.add "subscriptionId", valid_568692
-  var valid_568693 = path.getOrDefault("instanceId")
-  valid_568693 = validateParameter(valid_568693, JString, required = true,
+  if valid_564592 != nil:
+    section.add "resourceGroupName", valid_564592
+  var valid_564593 = path.getOrDefault("instanceId")
+  valid_564593 = validateParameter(valid_564593, JString, required = true,
                                  default = nil)
-  if valid_568693 != nil:
-    section.add "instanceId", valid_568693
+  if valid_564593 != nil:
+    section.add "instanceId", valid_564593
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -5045,11 +5046,11 @@ proc validate_VirtualMachineScaleSetVMsGetInstanceView_568688(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568694 = query.getOrDefault("api-version")
-  valid_568694 = validateParameter(valid_568694, JString, required = true,
+  var valid_564594 = query.getOrDefault("api-version")
+  valid_564594 = validateParameter(valid_564594, JString, required = true,
                                  default = nil)
-  if valid_568694 != nil:
-    section.add "api-version", valid_568694
+  if valid_564594 != nil:
+    section.add "api-version", valid_564594
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -5058,53 +5059,53 @@ proc validate_VirtualMachineScaleSetVMsGetInstanceView_568688(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568695: Call_VirtualMachineScaleSetVMsGetInstanceView_568687;
+proc call*(call_564595: Call_VirtualMachineScaleSetVMsGetInstanceView_564587;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Gets the status of a virtual machine from a VM scale set.
   ## 
-  let valid = call_568695.validator(path, query, header, formData, body)
-  let scheme = call_568695.pickScheme
+  let valid = call_564595.validator(path, query, header, formData, body)
+  let scheme = call_564595.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568695.url(scheme.get, call_568695.host, call_568695.base,
-                         call_568695.route, valid.getOrDefault("path"),
+  let url = call_564595.url(scheme.get, call_564595.host, call_564595.base,
+                         call_564595.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568695, url, valid)
+  result = hook(call_564595, url, valid)
 
-proc call*(call_568696: Call_VirtualMachineScaleSetVMsGetInstanceView_568687;
-          vmScaleSetName: string; resourceGroupName: string; apiVersion: string;
-          subscriptionId: string; instanceId: string): Recallable =
+proc call*(call_564596: Call_VirtualMachineScaleSetVMsGetInstanceView_564587;
+          apiVersion: string; vmScaleSetName: string; subscriptionId: string;
+          resourceGroupName: string; instanceId: string): Recallable =
   ## virtualMachineScaleSetVMsGetInstanceView
   ## Gets the status of a virtual machine from a VM scale set.
-  ##   vmScaleSetName: string (required)
-  ##                 : The name of the VM scale set.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
+  ##   vmScaleSetName: string (required)
+  ##                 : The name of the VM scale set.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   instanceId: string (required)
   ##             : The instance ID of the virtual machine.
-  var path_568697 = newJObject()
-  var query_568698 = newJObject()
-  add(path_568697, "vmScaleSetName", newJString(vmScaleSetName))
-  add(path_568697, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568698, "api-version", newJString(apiVersion))
-  add(path_568697, "subscriptionId", newJString(subscriptionId))
-  add(path_568697, "instanceId", newJString(instanceId))
-  result = call_568696.call(path_568697, query_568698, nil, nil, nil)
+  var path_564597 = newJObject()
+  var query_564598 = newJObject()
+  add(query_564598, "api-version", newJString(apiVersion))
+  add(path_564597, "vmScaleSetName", newJString(vmScaleSetName))
+  add(path_564597, "subscriptionId", newJString(subscriptionId))
+  add(path_564597, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564597, "instanceId", newJString(instanceId))
+  result = call_564596.call(path_564597, query_564598, nil, nil, nil)
 
-var virtualMachineScaleSetVMsGetInstanceView* = Call_VirtualMachineScaleSetVMsGetInstanceView_568687(
+var virtualMachineScaleSetVMsGetInstanceView* = Call_VirtualMachineScaleSetVMsGetInstanceView_564587(
     name: "virtualMachineScaleSetVMsGetInstanceView", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/virtualMachineScaleSets/{vmScaleSetName}/virtualmachines/{instanceId}/instanceView",
-    validator: validate_VirtualMachineScaleSetVMsGetInstanceView_568688, base: "",
-    url: url_VirtualMachineScaleSetVMsGetInstanceView_568689,
+    validator: validate_VirtualMachineScaleSetVMsGetInstanceView_564588, base: "",
+    url: url_VirtualMachineScaleSetVMsGetInstanceView_564589,
     schemes: {Scheme.Https})
 type
-  Call_VirtualMachineScaleSetVMsPowerOff_568699 = ref object of OpenApiRestCall_567667
-proc url_VirtualMachineScaleSetVMsPowerOff_568701(protocol: Scheme; host: string;
+  Call_VirtualMachineScaleSetVMsPowerOff_564599 = ref object of OpenApiRestCall_563565
+proc url_VirtualMachineScaleSetVMsPowerOff_564601(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -5131,7 +5132,7 @@ proc url_VirtualMachineScaleSetVMsPowerOff_568701(protocol: Scheme; host: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_VirtualMachineScaleSetVMsPowerOff_568700(path: JsonNode;
+proc validate_VirtualMachineScaleSetVMsPowerOff_564600(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Power off (stop) a virtual machine in a VM scale set. Note that resources are still attached and you are getting charged for the resources. Instead, use deallocate to release resources and avoid charges.
   ## 
@@ -5140,35 +5141,35 @@ proc validate_VirtualMachineScaleSetVMsPowerOff_568700(path: JsonNode;
   ## parameters in `path` object:
   ##   vmScaleSetName: JString (required)
   ##                 : The name of the VM scale set.
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   ##   instanceId: JString (required)
   ##             : The instance ID of the virtual machine.
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `vmScaleSetName` field"
-  var valid_568702 = path.getOrDefault("vmScaleSetName")
-  valid_568702 = validateParameter(valid_568702, JString, required = true,
+  var valid_564602 = path.getOrDefault("vmScaleSetName")
+  valid_564602 = validateParameter(valid_564602, JString, required = true,
                                  default = nil)
-  if valid_568702 != nil:
-    section.add "vmScaleSetName", valid_568702
-  var valid_568703 = path.getOrDefault("resourceGroupName")
-  valid_568703 = validateParameter(valid_568703, JString, required = true,
+  if valid_564602 != nil:
+    section.add "vmScaleSetName", valid_564602
+  var valid_564603 = path.getOrDefault("subscriptionId")
+  valid_564603 = validateParameter(valid_564603, JString, required = true,
                                  default = nil)
-  if valid_568703 != nil:
-    section.add "resourceGroupName", valid_568703
-  var valid_568704 = path.getOrDefault("subscriptionId")
-  valid_568704 = validateParameter(valid_568704, JString, required = true,
+  if valid_564603 != nil:
+    section.add "subscriptionId", valid_564603
+  var valid_564604 = path.getOrDefault("resourceGroupName")
+  valid_564604 = validateParameter(valid_564604, JString, required = true,
                                  default = nil)
-  if valid_568704 != nil:
-    section.add "subscriptionId", valid_568704
-  var valid_568705 = path.getOrDefault("instanceId")
-  valid_568705 = validateParameter(valid_568705, JString, required = true,
+  if valid_564604 != nil:
+    section.add "resourceGroupName", valid_564604
+  var valid_564605 = path.getOrDefault("instanceId")
+  valid_564605 = validateParameter(valid_564605, JString, required = true,
                                  default = nil)
-  if valid_568705 != nil:
-    section.add "instanceId", valid_568705
+  if valid_564605 != nil:
+    section.add "instanceId", valid_564605
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -5176,11 +5177,11 @@ proc validate_VirtualMachineScaleSetVMsPowerOff_568700(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568706 = query.getOrDefault("api-version")
-  valid_568706 = validateParameter(valid_568706, JString, required = true,
+  var valid_564606 = query.getOrDefault("api-version")
+  valid_564606 = validateParameter(valid_564606, JString, required = true,
                                  default = nil)
-  if valid_568706 != nil:
-    section.add "api-version", valid_568706
+  if valid_564606 != nil:
+    section.add "api-version", valid_564606
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -5189,52 +5190,52 @@ proc validate_VirtualMachineScaleSetVMsPowerOff_568700(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568707: Call_VirtualMachineScaleSetVMsPowerOff_568699;
+proc call*(call_564607: Call_VirtualMachineScaleSetVMsPowerOff_564599;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Power off (stop) a virtual machine in a VM scale set. Note that resources are still attached and you are getting charged for the resources. Instead, use deallocate to release resources and avoid charges.
   ## 
-  let valid = call_568707.validator(path, query, header, formData, body)
-  let scheme = call_568707.pickScheme
+  let valid = call_564607.validator(path, query, header, formData, body)
+  let scheme = call_564607.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568707.url(scheme.get, call_568707.host, call_568707.base,
-                         call_568707.route, valid.getOrDefault("path"),
+  let url = call_564607.url(scheme.get, call_564607.host, call_564607.base,
+                         call_564607.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568707, url, valid)
+  result = hook(call_564607, url, valid)
 
-proc call*(call_568708: Call_VirtualMachineScaleSetVMsPowerOff_568699;
-          vmScaleSetName: string; resourceGroupName: string; apiVersion: string;
-          subscriptionId: string; instanceId: string): Recallable =
+proc call*(call_564608: Call_VirtualMachineScaleSetVMsPowerOff_564599;
+          apiVersion: string; vmScaleSetName: string; subscriptionId: string;
+          resourceGroupName: string; instanceId: string): Recallable =
   ## virtualMachineScaleSetVMsPowerOff
   ## Power off (stop) a virtual machine in a VM scale set. Note that resources are still attached and you are getting charged for the resources. Instead, use deallocate to release resources and avoid charges.
-  ##   vmScaleSetName: string (required)
-  ##                 : The name of the VM scale set.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
+  ##   vmScaleSetName: string (required)
+  ##                 : The name of the VM scale set.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   instanceId: string (required)
   ##             : The instance ID of the virtual machine.
-  var path_568709 = newJObject()
-  var query_568710 = newJObject()
-  add(path_568709, "vmScaleSetName", newJString(vmScaleSetName))
-  add(path_568709, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568710, "api-version", newJString(apiVersion))
-  add(path_568709, "subscriptionId", newJString(subscriptionId))
-  add(path_568709, "instanceId", newJString(instanceId))
-  result = call_568708.call(path_568709, query_568710, nil, nil, nil)
+  var path_564609 = newJObject()
+  var query_564610 = newJObject()
+  add(query_564610, "api-version", newJString(apiVersion))
+  add(path_564609, "vmScaleSetName", newJString(vmScaleSetName))
+  add(path_564609, "subscriptionId", newJString(subscriptionId))
+  add(path_564609, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564609, "instanceId", newJString(instanceId))
+  result = call_564608.call(path_564609, query_564610, nil, nil, nil)
 
-var virtualMachineScaleSetVMsPowerOff* = Call_VirtualMachineScaleSetVMsPowerOff_568699(
+var virtualMachineScaleSetVMsPowerOff* = Call_VirtualMachineScaleSetVMsPowerOff_564599(
     name: "virtualMachineScaleSetVMsPowerOff", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/virtualMachineScaleSets/{vmScaleSetName}/virtualmachines/{instanceId}/poweroff",
-    validator: validate_VirtualMachineScaleSetVMsPowerOff_568700, base: "",
-    url: url_VirtualMachineScaleSetVMsPowerOff_568701, schemes: {Scheme.Https})
+    validator: validate_VirtualMachineScaleSetVMsPowerOff_564600, base: "",
+    url: url_VirtualMachineScaleSetVMsPowerOff_564601, schemes: {Scheme.Https})
 type
-  Call_VirtualMachineScaleSetVMsReimage_568711 = ref object of OpenApiRestCall_567667
-proc url_VirtualMachineScaleSetVMsReimage_568713(protocol: Scheme; host: string;
+  Call_VirtualMachineScaleSetVMsReimage_564611 = ref object of OpenApiRestCall_563565
+proc url_VirtualMachineScaleSetVMsReimage_564613(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -5261,7 +5262,7 @@ proc url_VirtualMachineScaleSetVMsReimage_568713(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_VirtualMachineScaleSetVMsReimage_568712(path: JsonNode;
+proc validate_VirtualMachineScaleSetVMsReimage_564612(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Reimages (upgrade the operating system) a specific virtual machine in a VM scale set.
   ## 
@@ -5270,35 +5271,35 @@ proc validate_VirtualMachineScaleSetVMsReimage_568712(path: JsonNode;
   ## parameters in `path` object:
   ##   vmScaleSetName: JString (required)
   ##                 : The name of the VM scale set.
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   ##   instanceId: JString (required)
   ##             : The instance ID of the virtual machine.
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `vmScaleSetName` field"
-  var valid_568714 = path.getOrDefault("vmScaleSetName")
-  valid_568714 = validateParameter(valid_568714, JString, required = true,
+  var valid_564614 = path.getOrDefault("vmScaleSetName")
+  valid_564614 = validateParameter(valid_564614, JString, required = true,
                                  default = nil)
-  if valid_568714 != nil:
-    section.add "vmScaleSetName", valid_568714
-  var valid_568715 = path.getOrDefault("resourceGroupName")
-  valid_568715 = validateParameter(valid_568715, JString, required = true,
+  if valid_564614 != nil:
+    section.add "vmScaleSetName", valid_564614
+  var valid_564615 = path.getOrDefault("subscriptionId")
+  valid_564615 = validateParameter(valid_564615, JString, required = true,
                                  default = nil)
-  if valid_568715 != nil:
-    section.add "resourceGroupName", valid_568715
-  var valid_568716 = path.getOrDefault("subscriptionId")
-  valid_568716 = validateParameter(valid_568716, JString, required = true,
+  if valid_564615 != nil:
+    section.add "subscriptionId", valid_564615
+  var valid_564616 = path.getOrDefault("resourceGroupName")
+  valid_564616 = validateParameter(valid_564616, JString, required = true,
                                  default = nil)
-  if valid_568716 != nil:
-    section.add "subscriptionId", valid_568716
-  var valid_568717 = path.getOrDefault("instanceId")
-  valid_568717 = validateParameter(valid_568717, JString, required = true,
+  if valid_564616 != nil:
+    section.add "resourceGroupName", valid_564616
+  var valid_564617 = path.getOrDefault("instanceId")
+  valid_564617 = validateParameter(valid_564617, JString, required = true,
                                  default = nil)
-  if valid_568717 != nil:
-    section.add "instanceId", valid_568717
+  if valid_564617 != nil:
+    section.add "instanceId", valid_564617
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -5306,11 +5307,11 @@ proc validate_VirtualMachineScaleSetVMsReimage_568712(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568718 = query.getOrDefault("api-version")
-  valid_568718 = validateParameter(valid_568718, JString, required = true,
+  var valid_564618 = query.getOrDefault("api-version")
+  valid_564618 = validateParameter(valid_564618, JString, required = true,
                                  default = nil)
-  if valid_568718 != nil:
-    section.add "api-version", valid_568718
+  if valid_564618 != nil:
+    section.add "api-version", valid_564618
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -5319,52 +5320,52 @@ proc validate_VirtualMachineScaleSetVMsReimage_568712(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568719: Call_VirtualMachineScaleSetVMsReimage_568711;
+proc call*(call_564619: Call_VirtualMachineScaleSetVMsReimage_564611;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Reimages (upgrade the operating system) a specific virtual machine in a VM scale set.
   ## 
-  let valid = call_568719.validator(path, query, header, formData, body)
-  let scheme = call_568719.pickScheme
+  let valid = call_564619.validator(path, query, header, formData, body)
+  let scheme = call_564619.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568719.url(scheme.get, call_568719.host, call_568719.base,
-                         call_568719.route, valid.getOrDefault("path"),
+  let url = call_564619.url(scheme.get, call_564619.host, call_564619.base,
+                         call_564619.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568719, url, valid)
+  result = hook(call_564619, url, valid)
 
-proc call*(call_568720: Call_VirtualMachineScaleSetVMsReimage_568711;
-          vmScaleSetName: string; resourceGroupName: string; apiVersion: string;
-          subscriptionId: string; instanceId: string): Recallable =
+proc call*(call_564620: Call_VirtualMachineScaleSetVMsReimage_564611;
+          apiVersion: string; vmScaleSetName: string; subscriptionId: string;
+          resourceGroupName: string; instanceId: string): Recallable =
   ## virtualMachineScaleSetVMsReimage
   ## Reimages (upgrade the operating system) a specific virtual machine in a VM scale set.
-  ##   vmScaleSetName: string (required)
-  ##                 : The name of the VM scale set.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
+  ##   vmScaleSetName: string (required)
+  ##                 : The name of the VM scale set.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   instanceId: string (required)
   ##             : The instance ID of the virtual machine.
-  var path_568721 = newJObject()
-  var query_568722 = newJObject()
-  add(path_568721, "vmScaleSetName", newJString(vmScaleSetName))
-  add(path_568721, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568722, "api-version", newJString(apiVersion))
-  add(path_568721, "subscriptionId", newJString(subscriptionId))
-  add(path_568721, "instanceId", newJString(instanceId))
-  result = call_568720.call(path_568721, query_568722, nil, nil, nil)
+  var path_564621 = newJObject()
+  var query_564622 = newJObject()
+  add(query_564622, "api-version", newJString(apiVersion))
+  add(path_564621, "vmScaleSetName", newJString(vmScaleSetName))
+  add(path_564621, "subscriptionId", newJString(subscriptionId))
+  add(path_564621, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564621, "instanceId", newJString(instanceId))
+  result = call_564620.call(path_564621, query_564622, nil, nil, nil)
 
-var virtualMachineScaleSetVMsReimage* = Call_VirtualMachineScaleSetVMsReimage_568711(
+var virtualMachineScaleSetVMsReimage* = Call_VirtualMachineScaleSetVMsReimage_564611(
     name: "virtualMachineScaleSetVMsReimage", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/virtualMachineScaleSets/{vmScaleSetName}/virtualmachines/{instanceId}/reimage",
-    validator: validate_VirtualMachineScaleSetVMsReimage_568712, base: "",
-    url: url_VirtualMachineScaleSetVMsReimage_568713, schemes: {Scheme.Https})
+    validator: validate_VirtualMachineScaleSetVMsReimage_564612, base: "",
+    url: url_VirtualMachineScaleSetVMsReimage_564613, schemes: {Scheme.Https})
 type
-  Call_VirtualMachineScaleSetVMsReimageAll_568723 = ref object of OpenApiRestCall_567667
-proc url_VirtualMachineScaleSetVMsReimageAll_568725(protocol: Scheme; host: string;
+  Call_VirtualMachineScaleSetVMsReimageAll_564623 = ref object of OpenApiRestCall_563565
+proc url_VirtualMachineScaleSetVMsReimageAll_564625(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -5391,7 +5392,7 @@ proc url_VirtualMachineScaleSetVMsReimageAll_568725(protocol: Scheme; host: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_VirtualMachineScaleSetVMsReimageAll_568724(path: JsonNode;
+proc validate_VirtualMachineScaleSetVMsReimageAll_564624(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Allows you to re-image all the disks ( including data disks ) in the a VM scale set instance. This operation is only supported for managed disks.
   ## 
@@ -5400,35 +5401,35 @@ proc validate_VirtualMachineScaleSetVMsReimageAll_568724(path: JsonNode;
   ## parameters in `path` object:
   ##   vmScaleSetName: JString (required)
   ##                 : The name of the VM scale set.
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   ##   instanceId: JString (required)
   ##             : The instance ID of the virtual machine.
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `vmScaleSetName` field"
-  var valid_568726 = path.getOrDefault("vmScaleSetName")
-  valid_568726 = validateParameter(valid_568726, JString, required = true,
+  var valid_564626 = path.getOrDefault("vmScaleSetName")
+  valid_564626 = validateParameter(valid_564626, JString, required = true,
                                  default = nil)
-  if valid_568726 != nil:
-    section.add "vmScaleSetName", valid_568726
-  var valid_568727 = path.getOrDefault("resourceGroupName")
-  valid_568727 = validateParameter(valid_568727, JString, required = true,
+  if valid_564626 != nil:
+    section.add "vmScaleSetName", valid_564626
+  var valid_564627 = path.getOrDefault("subscriptionId")
+  valid_564627 = validateParameter(valid_564627, JString, required = true,
                                  default = nil)
-  if valid_568727 != nil:
-    section.add "resourceGroupName", valid_568727
-  var valid_568728 = path.getOrDefault("subscriptionId")
-  valid_568728 = validateParameter(valid_568728, JString, required = true,
+  if valid_564627 != nil:
+    section.add "subscriptionId", valid_564627
+  var valid_564628 = path.getOrDefault("resourceGroupName")
+  valid_564628 = validateParameter(valid_564628, JString, required = true,
                                  default = nil)
-  if valid_568728 != nil:
-    section.add "subscriptionId", valid_568728
-  var valid_568729 = path.getOrDefault("instanceId")
-  valid_568729 = validateParameter(valid_568729, JString, required = true,
+  if valid_564628 != nil:
+    section.add "resourceGroupName", valid_564628
+  var valid_564629 = path.getOrDefault("instanceId")
+  valid_564629 = validateParameter(valid_564629, JString, required = true,
                                  default = nil)
-  if valid_568729 != nil:
-    section.add "instanceId", valid_568729
+  if valid_564629 != nil:
+    section.add "instanceId", valid_564629
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -5436,11 +5437,11 @@ proc validate_VirtualMachineScaleSetVMsReimageAll_568724(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568730 = query.getOrDefault("api-version")
-  valid_568730 = validateParameter(valid_568730, JString, required = true,
+  var valid_564630 = query.getOrDefault("api-version")
+  valid_564630 = validateParameter(valid_564630, JString, required = true,
                                  default = nil)
-  if valid_568730 != nil:
-    section.add "api-version", valid_568730
+  if valid_564630 != nil:
+    section.add "api-version", valid_564630
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -5449,52 +5450,52 @@ proc validate_VirtualMachineScaleSetVMsReimageAll_568724(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568731: Call_VirtualMachineScaleSetVMsReimageAll_568723;
+proc call*(call_564631: Call_VirtualMachineScaleSetVMsReimageAll_564623;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Allows you to re-image all the disks ( including data disks ) in the a VM scale set instance. This operation is only supported for managed disks.
   ## 
-  let valid = call_568731.validator(path, query, header, formData, body)
-  let scheme = call_568731.pickScheme
+  let valid = call_564631.validator(path, query, header, formData, body)
+  let scheme = call_564631.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568731.url(scheme.get, call_568731.host, call_568731.base,
-                         call_568731.route, valid.getOrDefault("path"),
+  let url = call_564631.url(scheme.get, call_564631.host, call_564631.base,
+                         call_564631.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568731, url, valid)
+  result = hook(call_564631, url, valid)
 
-proc call*(call_568732: Call_VirtualMachineScaleSetVMsReimageAll_568723;
-          vmScaleSetName: string; resourceGroupName: string; apiVersion: string;
-          subscriptionId: string; instanceId: string): Recallable =
+proc call*(call_564632: Call_VirtualMachineScaleSetVMsReimageAll_564623;
+          apiVersion: string; vmScaleSetName: string; subscriptionId: string;
+          resourceGroupName: string; instanceId: string): Recallable =
   ## virtualMachineScaleSetVMsReimageAll
   ## Allows you to re-image all the disks ( including data disks ) in the a VM scale set instance. This operation is only supported for managed disks.
-  ##   vmScaleSetName: string (required)
-  ##                 : The name of the VM scale set.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
+  ##   vmScaleSetName: string (required)
+  ##                 : The name of the VM scale set.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   instanceId: string (required)
   ##             : The instance ID of the virtual machine.
-  var path_568733 = newJObject()
-  var query_568734 = newJObject()
-  add(path_568733, "vmScaleSetName", newJString(vmScaleSetName))
-  add(path_568733, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568734, "api-version", newJString(apiVersion))
-  add(path_568733, "subscriptionId", newJString(subscriptionId))
-  add(path_568733, "instanceId", newJString(instanceId))
-  result = call_568732.call(path_568733, query_568734, nil, nil, nil)
+  var path_564633 = newJObject()
+  var query_564634 = newJObject()
+  add(query_564634, "api-version", newJString(apiVersion))
+  add(path_564633, "vmScaleSetName", newJString(vmScaleSetName))
+  add(path_564633, "subscriptionId", newJString(subscriptionId))
+  add(path_564633, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564633, "instanceId", newJString(instanceId))
+  result = call_564632.call(path_564633, query_564634, nil, nil, nil)
 
-var virtualMachineScaleSetVMsReimageAll* = Call_VirtualMachineScaleSetVMsReimageAll_568723(
+var virtualMachineScaleSetVMsReimageAll* = Call_VirtualMachineScaleSetVMsReimageAll_564623(
     name: "virtualMachineScaleSetVMsReimageAll", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/virtualMachineScaleSets/{vmScaleSetName}/virtualmachines/{instanceId}/reimageall",
-    validator: validate_VirtualMachineScaleSetVMsReimageAll_568724, base: "",
-    url: url_VirtualMachineScaleSetVMsReimageAll_568725, schemes: {Scheme.Https})
+    validator: validate_VirtualMachineScaleSetVMsReimageAll_564624, base: "",
+    url: url_VirtualMachineScaleSetVMsReimageAll_564625, schemes: {Scheme.Https})
 type
-  Call_VirtualMachineScaleSetVMsRestart_568735 = ref object of OpenApiRestCall_567667
-proc url_VirtualMachineScaleSetVMsRestart_568737(protocol: Scheme; host: string;
+  Call_VirtualMachineScaleSetVMsRestart_564635 = ref object of OpenApiRestCall_563565
+proc url_VirtualMachineScaleSetVMsRestart_564637(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -5521,7 +5522,7 @@ proc url_VirtualMachineScaleSetVMsRestart_568737(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_VirtualMachineScaleSetVMsRestart_568736(path: JsonNode;
+proc validate_VirtualMachineScaleSetVMsRestart_564636(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Restarts a virtual machine in a VM scale set.
   ## 
@@ -5530,35 +5531,35 @@ proc validate_VirtualMachineScaleSetVMsRestart_568736(path: JsonNode;
   ## parameters in `path` object:
   ##   vmScaleSetName: JString (required)
   ##                 : The name of the VM scale set.
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   ##   instanceId: JString (required)
   ##             : The instance ID of the virtual machine.
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `vmScaleSetName` field"
-  var valid_568738 = path.getOrDefault("vmScaleSetName")
-  valid_568738 = validateParameter(valid_568738, JString, required = true,
+  var valid_564638 = path.getOrDefault("vmScaleSetName")
+  valid_564638 = validateParameter(valid_564638, JString, required = true,
                                  default = nil)
-  if valid_568738 != nil:
-    section.add "vmScaleSetName", valid_568738
-  var valid_568739 = path.getOrDefault("resourceGroupName")
-  valid_568739 = validateParameter(valid_568739, JString, required = true,
+  if valid_564638 != nil:
+    section.add "vmScaleSetName", valid_564638
+  var valid_564639 = path.getOrDefault("subscriptionId")
+  valid_564639 = validateParameter(valid_564639, JString, required = true,
                                  default = nil)
-  if valid_568739 != nil:
-    section.add "resourceGroupName", valid_568739
-  var valid_568740 = path.getOrDefault("subscriptionId")
-  valid_568740 = validateParameter(valid_568740, JString, required = true,
+  if valid_564639 != nil:
+    section.add "subscriptionId", valid_564639
+  var valid_564640 = path.getOrDefault("resourceGroupName")
+  valid_564640 = validateParameter(valid_564640, JString, required = true,
                                  default = nil)
-  if valid_568740 != nil:
-    section.add "subscriptionId", valid_568740
-  var valid_568741 = path.getOrDefault("instanceId")
-  valid_568741 = validateParameter(valid_568741, JString, required = true,
+  if valid_564640 != nil:
+    section.add "resourceGroupName", valid_564640
+  var valid_564641 = path.getOrDefault("instanceId")
+  valid_564641 = validateParameter(valid_564641, JString, required = true,
                                  default = nil)
-  if valid_568741 != nil:
-    section.add "instanceId", valid_568741
+  if valid_564641 != nil:
+    section.add "instanceId", valid_564641
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -5566,11 +5567,11 @@ proc validate_VirtualMachineScaleSetVMsRestart_568736(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568742 = query.getOrDefault("api-version")
-  valid_568742 = validateParameter(valid_568742, JString, required = true,
+  var valid_564642 = query.getOrDefault("api-version")
+  valid_564642 = validateParameter(valid_564642, JString, required = true,
                                  default = nil)
-  if valid_568742 != nil:
-    section.add "api-version", valid_568742
+  if valid_564642 != nil:
+    section.add "api-version", valid_564642
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -5579,52 +5580,52 @@ proc validate_VirtualMachineScaleSetVMsRestart_568736(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568743: Call_VirtualMachineScaleSetVMsRestart_568735;
+proc call*(call_564643: Call_VirtualMachineScaleSetVMsRestart_564635;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Restarts a virtual machine in a VM scale set.
   ## 
-  let valid = call_568743.validator(path, query, header, formData, body)
-  let scheme = call_568743.pickScheme
+  let valid = call_564643.validator(path, query, header, formData, body)
+  let scheme = call_564643.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568743.url(scheme.get, call_568743.host, call_568743.base,
-                         call_568743.route, valid.getOrDefault("path"),
+  let url = call_564643.url(scheme.get, call_564643.host, call_564643.base,
+                         call_564643.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568743, url, valid)
+  result = hook(call_564643, url, valid)
 
-proc call*(call_568744: Call_VirtualMachineScaleSetVMsRestart_568735;
-          vmScaleSetName: string; resourceGroupName: string; apiVersion: string;
-          subscriptionId: string; instanceId: string): Recallable =
+proc call*(call_564644: Call_VirtualMachineScaleSetVMsRestart_564635;
+          apiVersion: string; vmScaleSetName: string; subscriptionId: string;
+          resourceGroupName: string; instanceId: string): Recallable =
   ## virtualMachineScaleSetVMsRestart
   ## Restarts a virtual machine in a VM scale set.
-  ##   vmScaleSetName: string (required)
-  ##                 : The name of the VM scale set.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
+  ##   vmScaleSetName: string (required)
+  ##                 : The name of the VM scale set.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   instanceId: string (required)
   ##             : The instance ID of the virtual machine.
-  var path_568745 = newJObject()
-  var query_568746 = newJObject()
-  add(path_568745, "vmScaleSetName", newJString(vmScaleSetName))
-  add(path_568745, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568746, "api-version", newJString(apiVersion))
-  add(path_568745, "subscriptionId", newJString(subscriptionId))
-  add(path_568745, "instanceId", newJString(instanceId))
-  result = call_568744.call(path_568745, query_568746, nil, nil, nil)
+  var path_564645 = newJObject()
+  var query_564646 = newJObject()
+  add(query_564646, "api-version", newJString(apiVersion))
+  add(path_564645, "vmScaleSetName", newJString(vmScaleSetName))
+  add(path_564645, "subscriptionId", newJString(subscriptionId))
+  add(path_564645, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564645, "instanceId", newJString(instanceId))
+  result = call_564644.call(path_564645, query_564646, nil, nil, nil)
 
-var virtualMachineScaleSetVMsRestart* = Call_VirtualMachineScaleSetVMsRestart_568735(
+var virtualMachineScaleSetVMsRestart* = Call_VirtualMachineScaleSetVMsRestart_564635(
     name: "virtualMachineScaleSetVMsRestart", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/virtualMachineScaleSets/{vmScaleSetName}/virtualmachines/{instanceId}/restart",
-    validator: validate_VirtualMachineScaleSetVMsRestart_568736, base: "",
-    url: url_VirtualMachineScaleSetVMsRestart_568737, schemes: {Scheme.Https})
+    validator: validate_VirtualMachineScaleSetVMsRestart_564636, base: "",
+    url: url_VirtualMachineScaleSetVMsRestart_564637, schemes: {Scheme.Https})
 type
-  Call_VirtualMachineScaleSetVMsStart_568747 = ref object of OpenApiRestCall_567667
-proc url_VirtualMachineScaleSetVMsStart_568749(protocol: Scheme; host: string;
+  Call_VirtualMachineScaleSetVMsStart_564647 = ref object of OpenApiRestCall_563565
+proc url_VirtualMachineScaleSetVMsStart_564649(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -5651,7 +5652,7 @@ proc url_VirtualMachineScaleSetVMsStart_568749(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_VirtualMachineScaleSetVMsStart_568748(path: JsonNode;
+proc validate_VirtualMachineScaleSetVMsStart_564648(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Starts a virtual machine in a VM scale set.
   ## 
@@ -5660,35 +5661,35 @@ proc validate_VirtualMachineScaleSetVMsStart_568748(path: JsonNode;
   ## parameters in `path` object:
   ##   vmScaleSetName: JString (required)
   ##                 : The name of the VM scale set.
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   ##   instanceId: JString (required)
   ##             : The instance ID of the virtual machine.
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `vmScaleSetName` field"
-  var valid_568750 = path.getOrDefault("vmScaleSetName")
-  valid_568750 = validateParameter(valid_568750, JString, required = true,
+  var valid_564650 = path.getOrDefault("vmScaleSetName")
+  valid_564650 = validateParameter(valid_564650, JString, required = true,
                                  default = nil)
-  if valid_568750 != nil:
-    section.add "vmScaleSetName", valid_568750
-  var valid_568751 = path.getOrDefault("resourceGroupName")
-  valid_568751 = validateParameter(valid_568751, JString, required = true,
+  if valid_564650 != nil:
+    section.add "vmScaleSetName", valid_564650
+  var valid_564651 = path.getOrDefault("subscriptionId")
+  valid_564651 = validateParameter(valid_564651, JString, required = true,
                                  default = nil)
-  if valid_568751 != nil:
-    section.add "resourceGroupName", valid_568751
-  var valid_568752 = path.getOrDefault("subscriptionId")
-  valid_568752 = validateParameter(valid_568752, JString, required = true,
+  if valid_564651 != nil:
+    section.add "subscriptionId", valid_564651
+  var valid_564652 = path.getOrDefault("resourceGroupName")
+  valid_564652 = validateParameter(valid_564652, JString, required = true,
                                  default = nil)
-  if valid_568752 != nil:
-    section.add "subscriptionId", valid_568752
-  var valid_568753 = path.getOrDefault("instanceId")
-  valid_568753 = validateParameter(valid_568753, JString, required = true,
+  if valid_564652 != nil:
+    section.add "resourceGroupName", valid_564652
+  var valid_564653 = path.getOrDefault("instanceId")
+  valid_564653 = validateParameter(valid_564653, JString, required = true,
                                  default = nil)
-  if valid_568753 != nil:
-    section.add "instanceId", valid_568753
+  if valid_564653 != nil:
+    section.add "instanceId", valid_564653
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -5696,11 +5697,11 @@ proc validate_VirtualMachineScaleSetVMsStart_568748(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568754 = query.getOrDefault("api-version")
-  valid_568754 = validateParameter(valid_568754, JString, required = true,
+  var valid_564654 = query.getOrDefault("api-version")
+  valid_564654 = validateParameter(valid_564654, JString, required = true,
                                  default = nil)
-  if valid_568754 != nil:
-    section.add "api-version", valid_568754
+  if valid_564654 != nil:
+    section.add "api-version", valid_564654
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -5709,51 +5710,51 @@ proc validate_VirtualMachineScaleSetVMsStart_568748(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568755: Call_VirtualMachineScaleSetVMsStart_568747; path: JsonNode;
+proc call*(call_564655: Call_VirtualMachineScaleSetVMsStart_564647; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Starts a virtual machine in a VM scale set.
   ## 
-  let valid = call_568755.validator(path, query, header, formData, body)
-  let scheme = call_568755.pickScheme
+  let valid = call_564655.validator(path, query, header, formData, body)
+  let scheme = call_564655.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568755.url(scheme.get, call_568755.host, call_568755.base,
-                         call_568755.route, valid.getOrDefault("path"),
+  let url = call_564655.url(scheme.get, call_564655.host, call_564655.base,
+                         call_564655.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568755, url, valid)
+  result = hook(call_564655, url, valid)
 
-proc call*(call_568756: Call_VirtualMachineScaleSetVMsStart_568747;
-          vmScaleSetName: string; resourceGroupName: string; apiVersion: string;
-          subscriptionId: string; instanceId: string): Recallable =
+proc call*(call_564656: Call_VirtualMachineScaleSetVMsStart_564647;
+          apiVersion: string; vmScaleSetName: string; subscriptionId: string;
+          resourceGroupName: string; instanceId: string): Recallable =
   ## virtualMachineScaleSetVMsStart
   ## Starts a virtual machine in a VM scale set.
-  ##   vmScaleSetName: string (required)
-  ##                 : The name of the VM scale set.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
+  ##   vmScaleSetName: string (required)
+  ##                 : The name of the VM scale set.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   instanceId: string (required)
   ##             : The instance ID of the virtual machine.
-  var path_568757 = newJObject()
-  var query_568758 = newJObject()
-  add(path_568757, "vmScaleSetName", newJString(vmScaleSetName))
-  add(path_568757, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568758, "api-version", newJString(apiVersion))
-  add(path_568757, "subscriptionId", newJString(subscriptionId))
-  add(path_568757, "instanceId", newJString(instanceId))
-  result = call_568756.call(path_568757, query_568758, nil, nil, nil)
+  var path_564657 = newJObject()
+  var query_564658 = newJObject()
+  add(query_564658, "api-version", newJString(apiVersion))
+  add(path_564657, "vmScaleSetName", newJString(vmScaleSetName))
+  add(path_564657, "subscriptionId", newJString(subscriptionId))
+  add(path_564657, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564657, "instanceId", newJString(instanceId))
+  result = call_564656.call(path_564657, query_564658, nil, nil, nil)
 
-var virtualMachineScaleSetVMsStart* = Call_VirtualMachineScaleSetVMsStart_568747(
+var virtualMachineScaleSetVMsStart* = Call_VirtualMachineScaleSetVMsStart_564647(
     name: "virtualMachineScaleSetVMsStart", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/virtualMachineScaleSets/{vmScaleSetName}/virtualmachines/{instanceId}/start",
-    validator: validate_VirtualMachineScaleSetVMsStart_568748, base: "",
-    url: url_VirtualMachineScaleSetVMsStart_568749, schemes: {Scheme.Https})
+    validator: validate_VirtualMachineScaleSetVMsStart_564648, base: "",
+    url: url_VirtualMachineScaleSetVMsStart_564649, schemes: {Scheme.Https})
 type
-  Call_VirtualMachinesList_568759 = ref object of OpenApiRestCall_567667
-proc url_VirtualMachinesList_568761(protocol: Scheme; host: string; base: string;
+  Call_VirtualMachinesList_564659 = ref object of OpenApiRestCall_563565
+proc url_VirtualMachinesList_564661(protocol: Scheme; host: string; base: string;
                                    route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -5774,7 +5775,7 @@ proc url_VirtualMachinesList_568761(protocol: Scheme; host: string; base: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_VirtualMachinesList_568760(path: JsonNode; query: JsonNode;
+proc validate_VirtualMachinesList_564660(path: JsonNode; query: JsonNode;
                                         header: JsonNode; formData: JsonNode;
                                         body: JsonNode): JsonNode =
   ## Lists all of the virtual machines in the specified resource group. Use the nextLink property in the response to get the next page of virtual machines.
@@ -5782,23 +5783,23 @@ proc validate_VirtualMachinesList_568760(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568762 = path.getOrDefault("resourceGroupName")
-  valid_568762 = validateParameter(valid_568762, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564662 = path.getOrDefault("subscriptionId")
+  valid_564662 = validateParameter(valid_564662, JString, required = true,
                                  default = nil)
-  if valid_568762 != nil:
-    section.add "resourceGroupName", valid_568762
-  var valid_568763 = path.getOrDefault("subscriptionId")
-  valid_568763 = validateParameter(valid_568763, JString, required = true,
+  if valid_564662 != nil:
+    section.add "subscriptionId", valid_564662
+  var valid_564663 = path.getOrDefault("resourceGroupName")
+  valid_564663 = validateParameter(valid_564663, JString, required = true,
                                  default = nil)
-  if valid_568763 != nil:
-    section.add "subscriptionId", valid_568763
+  if valid_564663 != nil:
+    section.add "resourceGroupName", valid_564663
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -5806,11 +5807,11 @@ proc validate_VirtualMachinesList_568760(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568764 = query.getOrDefault("api-version")
-  valid_568764 = validateParameter(valid_568764, JString, required = true,
+  var valid_564664 = query.getOrDefault("api-version")
+  valid_564664 = validateParameter(valid_564664, JString, required = true,
                                  default = nil)
-  if valid_568764 != nil:
-    section.add "api-version", valid_568764
+  if valid_564664 != nil:
+    section.add "api-version", valid_564664
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -5819,44 +5820,44 @@ proc validate_VirtualMachinesList_568760(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568765: Call_VirtualMachinesList_568759; path: JsonNode;
+proc call*(call_564665: Call_VirtualMachinesList_564659; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists all of the virtual machines in the specified resource group. Use the nextLink property in the response to get the next page of virtual machines.
   ## 
-  let valid = call_568765.validator(path, query, header, formData, body)
-  let scheme = call_568765.pickScheme
+  let valid = call_564665.validator(path, query, header, formData, body)
+  let scheme = call_564665.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568765.url(scheme.get, call_568765.host, call_568765.base,
-                         call_568765.route, valid.getOrDefault("path"),
+  let url = call_564665.url(scheme.get, call_564665.host, call_564665.base,
+                         call_564665.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568765, url, valid)
+  result = hook(call_564665, url, valid)
 
-proc call*(call_568766: Call_VirtualMachinesList_568759; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string): Recallable =
+proc call*(call_564666: Call_VirtualMachinesList_564659; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string): Recallable =
   ## virtualMachinesList
   ## Lists all of the virtual machines in the specified resource group. Use the nextLink property in the response to get the next page of virtual machines.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_568767 = newJObject()
-  var query_568768 = newJObject()
-  add(path_568767, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568768, "api-version", newJString(apiVersion))
-  add(path_568767, "subscriptionId", newJString(subscriptionId))
-  result = call_568766.call(path_568767, query_568768, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564667 = newJObject()
+  var query_564668 = newJObject()
+  add(query_564668, "api-version", newJString(apiVersion))
+  add(path_564667, "subscriptionId", newJString(subscriptionId))
+  add(path_564667, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564666.call(path_564667, query_564668, nil, nil, nil)
 
-var virtualMachinesList* = Call_VirtualMachinesList_568759(
+var virtualMachinesList* = Call_VirtualMachinesList_564659(
     name: "virtualMachinesList", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/virtualMachines",
-    validator: validate_VirtualMachinesList_568760, base: "",
-    url: url_VirtualMachinesList_568761, schemes: {Scheme.Https})
+    validator: validate_VirtualMachinesList_564660, base: "",
+    url: url_VirtualMachinesList_564661, schemes: {Scheme.Https})
 type
-  Call_VirtualMachinesCreateOrUpdate_568794 = ref object of OpenApiRestCall_567667
-proc url_VirtualMachinesCreateOrUpdate_568796(protocol: Scheme; host: string;
+  Call_VirtualMachinesCreateOrUpdate_564694 = ref object of OpenApiRestCall_563565
+proc url_VirtualMachinesCreateOrUpdate_564696(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -5879,37 +5880,37 @@ proc url_VirtualMachinesCreateOrUpdate_568796(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_VirtualMachinesCreateOrUpdate_568795(path: JsonNode; query: JsonNode;
+proc validate_VirtualMachinesCreateOrUpdate_564695(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## The operation to create or update a virtual machine.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   ##   vmName: JString (required)
   ##         : The name of the virtual machine.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568797 = path.getOrDefault("resourceGroupName")
-  valid_568797 = validateParameter(valid_568797, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564697 = path.getOrDefault("subscriptionId")
+  valid_564697 = validateParameter(valid_564697, JString, required = true,
                                  default = nil)
-  if valid_568797 != nil:
-    section.add "resourceGroupName", valid_568797
-  var valid_568798 = path.getOrDefault("subscriptionId")
-  valid_568798 = validateParameter(valid_568798, JString, required = true,
+  if valid_564697 != nil:
+    section.add "subscriptionId", valid_564697
+  var valid_564698 = path.getOrDefault("resourceGroupName")
+  valid_564698 = validateParameter(valid_564698, JString, required = true,
                                  default = nil)
-  if valid_568798 != nil:
-    section.add "subscriptionId", valid_568798
-  var valid_568799 = path.getOrDefault("vmName")
-  valid_568799 = validateParameter(valid_568799, JString, required = true,
+  if valid_564698 != nil:
+    section.add "resourceGroupName", valid_564698
+  var valid_564699 = path.getOrDefault("vmName")
+  valid_564699 = validateParameter(valid_564699, JString, required = true,
                                  default = nil)
-  if valid_568799 != nil:
-    section.add "vmName", valid_568799
+  if valid_564699 != nil:
+    section.add "vmName", valid_564699
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -5917,11 +5918,11 @@ proc validate_VirtualMachinesCreateOrUpdate_568795(path: JsonNode; query: JsonNo
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568800 = query.getOrDefault("api-version")
-  valid_568800 = validateParameter(valid_568800, JString, required = true,
+  var valid_564700 = query.getOrDefault("api-version")
+  valid_564700 = validateParameter(valid_564700, JString, required = true,
                                  default = nil)
-  if valid_568800 != nil:
-    section.add "api-version", valid_568800
+  if valid_564700 != nil:
+    section.add "api-version", valid_564700
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -5935,53 +5936,53 @@ proc validate_VirtualMachinesCreateOrUpdate_568795(path: JsonNode; query: JsonNo
   if body != nil:
     result.add "body", body
 
-proc call*(call_568802: Call_VirtualMachinesCreateOrUpdate_568794; path: JsonNode;
+proc call*(call_564702: Call_VirtualMachinesCreateOrUpdate_564694; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## The operation to create or update a virtual machine.
   ## 
-  let valid = call_568802.validator(path, query, header, formData, body)
-  let scheme = call_568802.pickScheme
+  let valid = call_564702.validator(path, query, header, formData, body)
+  let scheme = call_564702.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568802.url(scheme.get, call_568802.host, call_568802.base,
-                         call_568802.route, valid.getOrDefault("path"),
+  let url = call_564702.url(scheme.get, call_564702.host, call_564702.base,
+                         call_564702.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568802, url, valid)
+  result = hook(call_564702, url, valid)
 
-proc call*(call_568803: Call_VirtualMachinesCreateOrUpdate_568794;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          vmName: string; parameters: JsonNode): Recallable =
+proc call*(call_564703: Call_VirtualMachinesCreateOrUpdate_564694;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string;
+          parameters: JsonNode; vmName: string): Recallable =
   ## virtualMachinesCreateOrUpdate
   ## The operation to create or update a virtual machine.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   vmName: string (required)
-  ##         : The name of the virtual machine.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   parameters: JObject (required)
   ##             : Parameters supplied to the Create Virtual Machine operation.
-  var path_568804 = newJObject()
-  var query_568805 = newJObject()
-  var body_568806 = newJObject()
-  add(path_568804, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568805, "api-version", newJString(apiVersion))
-  add(path_568804, "subscriptionId", newJString(subscriptionId))
-  add(path_568804, "vmName", newJString(vmName))
+  ##   vmName: string (required)
+  ##         : The name of the virtual machine.
+  var path_564704 = newJObject()
+  var query_564705 = newJObject()
+  var body_564706 = newJObject()
+  add(query_564705, "api-version", newJString(apiVersion))
+  add(path_564704, "subscriptionId", newJString(subscriptionId))
+  add(path_564704, "resourceGroupName", newJString(resourceGroupName))
   if parameters != nil:
-    body_568806 = parameters
-  result = call_568803.call(path_568804, query_568805, nil, nil, body_568806)
+    body_564706 = parameters
+  add(path_564704, "vmName", newJString(vmName))
+  result = call_564703.call(path_564704, query_564705, nil, nil, body_564706)
 
-var virtualMachinesCreateOrUpdate* = Call_VirtualMachinesCreateOrUpdate_568794(
+var virtualMachinesCreateOrUpdate* = Call_VirtualMachinesCreateOrUpdate_564694(
     name: "virtualMachinesCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/virtualMachines/{vmName}",
-    validator: validate_VirtualMachinesCreateOrUpdate_568795, base: "",
-    url: url_VirtualMachinesCreateOrUpdate_568796, schemes: {Scheme.Https})
+    validator: validate_VirtualMachinesCreateOrUpdate_564695, base: "",
+    url: url_VirtualMachinesCreateOrUpdate_564696, schemes: {Scheme.Https})
 type
-  Call_VirtualMachinesGet_568769 = ref object of OpenApiRestCall_567667
-proc url_VirtualMachinesGet_568771(protocol: Scheme; host: string; base: string;
+  Call_VirtualMachinesGet_564669 = ref object of OpenApiRestCall_563565
+proc url_VirtualMachinesGet_564671(protocol: Scheme; host: string; base: string;
                                   route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -6004,7 +6005,7 @@ proc url_VirtualMachinesGet_568771(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_VirtualMachinesGet_568770(path: JsonNode; query: JsonNode;
+proc validate_VirtualMachinesGet_564670(path: JsonNode; query: JsonNode;
                                        header: JsonNode; formData: JsonNode;
                                        body: JsonNode): JsonNode =
   ## Retrieves information about the model view or the instance view of a virtual machine.
@@ -6012,49 +6013,49 @@ proc validate_VirtualMachinesGet_568770(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   ##   vmName: JString (required)
   ##         : The name of the virtual machine.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568772 = path.getOrDefault("resourceGroupName")
-  valid_568772 = validateParameter(valid_568772, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564672 = path.getOrDefault("subscriptionId")
+  valid_564672 = validateParameter(valid_564672, JString, required = true,
                                  default = nil)
-  if valid_568772 != nil:
-    section.add "resourceGroupName", valid_568772
-  var valid_568773 = path.getOrDefault("subscriptionId")
-  valid_568773 = validateParameter(valid_568773, JString, required = true,
+  if valid_564672 != nil:
+    section.add "subscriptionId", valid_564672
+  var valid_564673 = path.getOrDefault("resourceGroupName")
+  valid_564673 = validateParameter(valid_564673, JString, required = true,
                                  default = nil)
-  if valid_568773 != nil:
-    section.add "subscriptionId", valid_568773
-  var valid_568774 = path.getOrDefault("vmName")
-  valid_568774 = validateParameter(valid_568774, JString, required = true,
+  if valid_564673 != nil:
+    section.add "resourceGroupName", valid_564673
+  var valid_564674 = path.getOrDefault("vmName")
+  valid_564674 = validateParameter(valid_564674, JString, required = true,
                                  default = nil)
-  if valid_568774 != nil:
-    section.add "vmName", valid_568774
+  if valid_564674 != nil:
+    section.add "vmName", valid_564674
   result.add "path", section
   ## parameters in `query` object:
-  ##   $expand: JString
-  ##          : The expand expression to apply on the operation.
   ##   api-version: JString (required)
   ##              : Client Api Version.
+  ##   $expand: JString
+  ##          : The expand expression to apply on the operation.
   section = newJObject()
-  var valid_568788 = query.getOrDefault("$expand")
-  valid_568788 = validateParameter(valid_568788, JString, required = false,
-                                 default = newJString("instanceView"))
-  if valid_568788 != nil:
-    section.add "$expand", valid_568788
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568789 = query.getOrDefault("api-version")
-  valid_568789 = validateParameter(valid_568789, JString, required = true,
+  var valid_564675 = query.getOrDefault("api-version")
+  valid_564675 = validateParameter(valid_564675, JString, required = true,
                                  default = nil)
-  if valid_568789 != nil:
-    section.add "api-version", valid_568789
+  if valid_564675 != nil:
+    section.add "api-version", valid_564675
+  var valid_564689 = query.getOrDefault("$expand")
+  valid_564689 = validateParameter(valid_564689, JString, required = false,
+                                 default = newJString("instanceView"))
+  if valid_564689 != nil:
+    section.add "$expand", valid_564689
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -6063,51 +6064,51 @@ proc validate_VirtualMachinesGet_568770(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568790: Call_VirtualMachinesGet_568769; path: JsonNode;
+proc call*(call_564690: Call_VirtualMachinesGet_564669; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Retrieves information about the model view or the instance view of a virtual machine.
   ## 
-  let valid = call_568790.validator(path, query, header, formData, body)
-  let scheme = call_568790.pickScheme
+  let valid = call_564690.validator(path, query, header, formData, body)
+  let scheme = call_564690.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568790.url(scheme.get, call_568790.host, call_568790.base,
-                         call_568790.route, valid.getOrDefault("path"),
+  let url = call_564690.url(scheme.get, call_564690.host, call_564690.base,
+                         call_564690.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568790, url, valid)
+  result = hook(call_564690, url, valid)
 
-proc call*(call_568791: Call_VirtualMachinesGet_568769; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; vmName: string;
+proc call*(call_564691: Call_VirtualMachinesGet_564669; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string; vmName: string;
           Expand: string = "instanceView"): Recallable =
   ## virtualMachinesGet
   ## Retrieves information about the model view or the instance view of a virtual machine.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
-  ##   Expand: string
-  ##         : The expand expression to apply on the operation.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
+  ##   Expand: string
+  ##         : The expand expression to apply on the operation.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   vmName: string (required)
   ##         : The name of the virtual machine.
-  var path_568792 = newJObject()
-  var query_568793 = newJObject()
-  add(path_568792, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568793, "$expand", newJString(Expand))
-  add(query_568793, "api-version", newJString(apiVersion))
-  add(path_568792, "subscriptionId", newJString(subscriptionId))
-  add(path_568792, "vmName", newJString(vmName))
-  result = call_568791.call(path_568792, query_568793, nil, nil, nil)
+  var path_564692 = newJObject()
+  var query_564693 = newJObject()
+  add(query_564693, "api-version", newJString(apiVersion))
+  add(query_564693, "$expand", newJString(Expand))
+  add(path_564692, "subscriptionId", newJString(subscriptionId))
+  add(path_564692, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564692, "vmName", newJString(vmName))
+  result = call_564691.call(path_564692, query_564693, nil, nil, nil)
 
-var virtualMachinesGet* = Call_VirtualMachinesGet_568769(
+var virtualMachinesGet* = Call_VirtualMachinesGet_564669(
     name: "virtualMachinesGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/virtualMachines/{vmName}",
-    validator: validate_VirtualMachinesGet_568770, base: "",
-    url: url_VirtualMachinesGet_568771, schemes: {Scheme.Https})
+    validator: validate_VirtualMachinesGet_564670, base: "",
+    url: url_VirtualMachinesGet_564671, schemes: {Scheme.Https})
 type
-  Call_VirtualMachinesDelete_568807 = ref object of OpenApiRestCall_567667
-proc url_VirtualMachinesDelete_568809(protocol: Scheme; host: string; base: string;
+  Call_VirtualMachinesDelete_564707 = ref object of OpenApiRestCall_563565
+proc url_VirtualMachinesDelete_564709(protocol: Scheme; host: string; base: string;
                                      route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -6130,37 +6131,37 @@ proc url_VirtualMachinesDelete_568809(protocol: Scheme; host: string; base: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_VirtualMachinesDelete_568808(path: JsonNode; query: JsonNode;
+proc validate_VirtualMachinesDelete_564708(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## The operation to delete a virtual machine.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   ##   vmName: JString (required)
   ##         : The name of the virtual machine.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568810 = path.getOrDefault("resourceGroupName")
-  valid_568810 = validateParameter(valid_568810, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564710 = path.getOrDefault("subscriptionId")
+  valid_564710 = validateParameter(valid_564710, JString, required = true,
                                  default = nil)
-  if valid_568810 != nil:
-    section.add "resourceGroupName", valid_568810
-  var valid_568811 = path.getOrDefault("subscriptionId")
-  valid_568811 = validateParameter(valid_568811, JString, required = true,
+  if valid_564710 != nil:
+    section.add "subscriptionId", valid_564710
+  var valid_564711 = path.getOrDefault("resourceGroupName")
+  valid_564711 = validateParameter(valid_564711, JString, required = true,
                                  default = nil)
-  if valid_568811 != nil:
-    section.add "subscriptionId", valid_568811
-  var valid_568812 = path.getOrDefault("vmName")
-  valid_568812 = validateParameter(valid_568812, JString, required = true,
+  if valid_564711 != nil:
+    section.add "resourceGroupName", valid_564711
+  var valid_564712 = path.getOrDefault("vmName")
+  valid_564712 = validateParameter(valid_564712, JString, required = true,
                                  default = nil)
-  if valid_568812 != nil:
-    section.add "vmName", valid_568812
+  if valid_564712 != nil:
+    section.add "vmName", valid_564712
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -6168,11 +6169,11 @@ proc validate_VirtualMachinesDelete_568808(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568813 = query.getOrDefault("api-version")
-  valid_568813 = validateParameter(valid_568813, JString, required = true,
+  var valid_564713 = query.getOrDefault("api-version")
+  valid_564713 = validateParameter(valid_564713, JString, required = true,
                                  default = nil)
-  if valid_568813 != nil:
-    section.add "api-version", valid_568813
+  if valid_564713 != nil:
+    section.add "api-version", valid_564713
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -6181,48 +6182,47 @@ proc validate_VirtualMachinesDelete_568808(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568814: Call_VirtualMachinesDelete_568807; path: JsonNode;
+proc call*(call_564714: Call_VirtualMachinesDelete_564707; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## The operation to delete a virtual machine.
   ## 
-  let valid = call_568814.validator(path, query, header, formData, body)
-  let scheme = call_568814.pickScheme
+  let valid = call_564714.validator(path, query, header, formData, body)
+  let scheme = call_564714.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568814.url(scheme.get, call_568814.host, call_568814.base,
-                         call_568814.route, valid.getOrDefault("path"),
+  let url = call_564714.url(scheme.get, call_564714.host, call_564714.base,
+                         call_564714.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568814, url, valid)
+  result = hook(call_564714, url, valid)
 
-proc call*(call_568815: Call_VirtualMachinesDelete_568807;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          vmName: string): Recallable =
+proc call*(call_564715: Call_VirtualMachinesDelete_564707; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string; vmName: string): Recallable =
   ## virtualMachinesDelete
   ## The operation to delete a virtual machine.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   vmName: string (required)
   ##         : The name of the virtual machine.
-  var path_568816 = newJObject()
-  var query_568817 = newJObject()
-  add(path_568816, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568817, "api-version", newJString(apiVersion))
-  add(path_568816, "subscriptionId", newJString(subscriptionId))
-  add(path_568816, "vmName", newJString(vmName))
-  result = call_568815.call(path_568816, query_568817, nil, nil, nil)
+  var path_564716 = newJObject()
+  var query_564717 = newJObject()
+  add(query_564717, "api-version", newJString(apiVersion))
+  add(path_564716, "subscriptionId", newJString(subscriptionId))
+  add(path_564716, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564716, "vmName", newJString(vmName))
+  result = call_564715.call(path_564716, query_564717, nil, nil, nil)
 
-var virtualMachinesDelete* = Call_VirtualMachinesDelete_568807(
+var virtualMachinesDelete* = Call_VirtualMachinesDelete_564707(
     name: "virtualMachinesDelete", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/virtualMachines/{vmName}",
-    validator: validate_VirtualMachinesDelete_568808, base: "",
-    url: url_VirtualMachinesDelete_568809, schemes: {Scheme.Https})
+    validator: validate_VirtualMachinesDelete_564708, base: "",
+    url: url_VirtualMachinesDelete_564709, schemes: {Scheme.Https})
 type
-  Call_VirtualMachinesCapture_568818 = ref object of OpenApiRestCall_567667
-proc url_VirtualMachinesCapture_568820(protocol: Scheme; host: string; base: string;
+  Call_VirtualMachinesCapture_564718 = ref object of OpenApiRestCall_563565
+proc url_VirtualMachinesCapture_564720(protocol: Scheme; host: string; base: string;
                                       route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -6246,37 +6246,37 @@ proc url_VirtualMachinesCapture_568820(protocol: Scheme; host: string; base: str
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_VirtualMachinesCapture_568819(path: JsonNode; query: JsonNode;
+proc validate_VirtualMachinesCapture_564719(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Captures the VM by copying virtual hard disks of the VM and outputs a template that can be used to create similar VMs.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   ##   vmName: JString (required)
   ##         : The name of the virtual machine.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568821 = path.getOrDefault("resourceGroupName")
-  valid_568821 = validateParameter(valid_568821, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564721 = path.getOrDefault("subscriptionId")
+  valid_564721 = validateParameter(valid_564721, JString, required = true,
                                  default = nil)
-  if valid_568821 != nil:
-    section.add "resourceGroupName", valid_568821
-  var valid_568822 = path.getOrDefault("subscriptionId")
-  valid_568822 = validateParameter(valid_568822, JString, required = true,
+  if valid_564721 != nil:
+    section.add "subscriptionId", valid_564721
+  var valid_564722 = path.getOrDefault("resourceGroupName")
+  valid_564722 = validateParameter(valid_564722, JString, required = true,
                                  default = nil)
-  if valid_568822 != nil:
-    section.add "subscriptionId", valid_568822
-  var valid_568823 = path.getOrDefault("vmName")
-  valid_568823 = validateParameter(valid_568823, JString, required = true,
+  if valid_564722 != nil:
+    section.add "resourceGroupName", valid_564722
+  var valid_564723 = path.getOrDefault("vmName")
+  valid_564723 = validateParameter(valid_564723, JString, required = true,
                                  default = nil)
-  if valid_568823 != nil:
-    section.add "vmName", valid_568823
+  if valid_564723 != nil:
+    section.add "vmName", valid_564723
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -6284,11 +6284,11 @@ proc validate_VirtualMachinesCapture_568819(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568824 = query.getOrDefault("api-version")
-  valid_568824 = validateParameter(valid_568824, JString, required = true,
+  var valid_564724 = query.getOrDefault("api-version")
+  valid_564724 = validateParameter(valid_564724, JString, required = true,
                                  default = nil)
-  if valid_568824 != nil:
-    section.add "api-version", valid_568824
+  if valid_564724 != nil:
+    section.add "api-version", valid_564724
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -6302,53 +6302,53 @@ proc validate_VirtualMachinesCapture_568819(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568826: Call_VirtualMachinesCapture_568818; path: JsonNode;
+proc call*(call_564726: Call_VirtualMachinesCapture_564718; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Captures the VM by copying virtual hard disks of the VM and outputs a template that can be used to create similar VMs.
   ## 
-  let valid = call_568826.validator(path, query, header, formData, body)
-  let scheme = call_568826.pickScheme
+  let valid = call_564726.validator(path, query, header, formData, body)
+  let scheme = call_564726.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568826.url(scheme.get, call_568826.host, call_568826.base,
-                         call_568826.route, valid.getOrDefault("path"),
+  let url = call_564726.url(scheme.get, call_564726.host, call_564726.base,
+                         call_564726.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568826, url, valid)
+  result = hook(call_564726, url, valid)
 
-proc call*(call_568827: Call_VirtualMachinesCapture_568818;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          vmName: string; parameters: JsonNode): Recallable =
+proc call*(call_564727: Call_VirtualMachinesCapture_564718; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string; parameters: JsonNode;
+          vmName: string): Recallable =
   ## virtualMachinesCapture
   ## Captures the VM by copying virtual hard disks of the VM and outputs a template that can be used to create similar VMs.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   vmName: string (required)
-  ##         : The name of the virtual machine.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   parameters: JObject (required)
   ##             : Parameters supplied to the Capture Virtual Machine operation.
-  var path_568828 = newJObject()
-  var query_568829 = newJObject()
-  var body_568830 = newJObject()
-  add(path_568828, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568829, "api-version", newJString(apiVersion))
-  add(path_568828, "subscriptionId", newJString(subscriptionId))
-  add(path_568828, "vmName", newJString(vmName))
+  ##   vmName: string (required)
+  ##         : The name of the virtual machine.
+  var path_564728 = newJObject()
+  var query_564729 = newJObject()
+  var body_564730 = newJObject()
+  add(query_564729, "api-version", newJString(apiVersion))
+  add(path_564728, "subscriptionId", newJString(subscriptionId))
+  add(path_564728, "resourceGroupName", newJString(resourceGroupName))
   if parameters != nil:
-    body_568830 = parameters
-  result = call_568827.call(path_568828, query_568829, nil, nil, body_568830)
+    body_564730 = parameters
+  add(path_564728, "vmName", newJString(vmName))
+  result = call_564727.call(path_564728, query_564729, nil, nil, body_564730)
 
-var virtualMachinesCapture* = Call_VirtualMachinesCapture_568818(
+var virtualMachinesCapture* = Call_VirtualMachinesCapture_564718(
     name: "virtualMachinesCapture", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/virtualMachines/{vmName}/capture",
-    validator: validate_VirtualMachinesCapture_568819, base: "",
-    url: url_VirtualMachinesCapture_568820, schemes: {Scheme.Https})
+    validator: validate_VirtualMachinesCapture_564719, base: "",
+    url: url_VirtualMachinesCapture_564720, schemes: {Scheme.Https})
 type
-  Call_VirtualMachinesConvertToManagedDisks_568831 = ref object of OpenApiRestCall_567667
-proc url_VirtualMachinesConvertToManagedDisks_568833(protocol: Scheme;
+  Call_VirtualMachinesConvertToManagedDisks_564731 = ref object of OpenApiRestCall_563565
+proc url_VirtualMachinesConvertToManagedDisks_564733(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -6372,37 +6372,37 @@ proc url_VirtualMachinesConvertToManagedDisks_568833(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_VirtualMachinesConvertToManagedDisks_568832(path: JsonNode;
+proc validate_VirtualMachinesConvertToManagedDisks_564732(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Converts virtual machine disks from blob-based to managed disks. Virtual machine must be stop-deallocated before invoking this operation.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   ##   vmName: JString (required)
   ##         : The name of the virtual machine.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568834 = path.getOrDefault("resourceGroupName")
-  valid_568834 = validateParameter(valid_568834, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564734 = path.getOrDefault("subscriptionId")
+  valid_564734 = validateParameter(valid_564734, JString, required = true,
                                  default = nil)
-  if valid_568834 != nil:
-    section.add "resourceGroupName", valid_568834
-  var valid_568835 = path.getOrDefault("subscriptionId")
-  valid_568835 = validateParameter(valid_568835, JString, required = true,
+  if valid_564734 != nil:
+    section.add "subscriptionId", valid_564734
+  var valid_564735 = path.getOrDefault("resourceGroupName")
+  valid_564735 = validateParameter(valid_564735, JString, required = true,
                                  default = nil)
-  if valid_568835 != nil:
-    section.add "subscriptionId", valid_568835
-  var valid_568836 = path.getOrDefault("vmName")
-  valid_568836 = validateParameter(valid_568836, JString, required = true,
+  if valid_564735 != nil:
+    section.add "resourceGroupName", valid_564735
+  var valid_564736 = path.getOrDefault("vmName")
+  valid_564736 = validateParameter(valid_564736, JString, required = true,
                                  default = nil)
-  if valid_568836 != nil:
-    section.add "vmName", valid_568836
+  if valid_564736 != nil:
+    section.add "vmName", valid_564736
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -6410,11 +6410,11 @@ proc validate_VirtualMachinesConvertToManagedDisks_568832(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568837 = query.getOrDefault("api-version")
-  valid_568837 = validateParameter(valid_568837, JString, required = true,
+  var valid_564737 = query.getOrDefault("api-version")
+  valid_564737 = validateParameter(valid_564737, JString, required = true,
                                  default = nil)
-  if valid_568837 != nil:
-    section.add "api-version", valid_568837
+  if valid_564737 != nil:
+    section.add "api-version", valid_564737
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -6423,49 +6423,49 @@ proc validate_VirtualMachinesConvertToManagedDisks_568832(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568838: Call_VirtualMachinesConvertToManagedDisks_568831;
+proc call*(call_564738: Call_VirtualMachinesConvertToManagedDisks_564731;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Converts virtual machine disks from blob-based to managed disks. Virtual machine must be stop-deallocated before invoking this operation.
   ## 
-  let valid = call_568838.validator(path, query, header, formData, body)
-  let scheme = call_568838.pickScheme
+  let valid = call_564738.validator(path, query, header, formData, body)
+  let scheme = call_564738.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568838.url(scheme.get, call_568838.host, call_568838.base,
-                         call_568838.route, valid.getOrDefault("path"),
+  let url = call_564738.url(scheme.get, call_564738.host, call_564738.base,
+                         call_564738.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568838, url, valid)
+  result = hook(call_564738, url, valid)
 
-proc call*(call_568839: Call_VirtualMachinesConvertToManagedDisks_568831;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
+proc call*(call_564739: Call_VirtualMachinesConvertToManagedDisks_564731;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string;
           vmName: string): Recallable =
   ## virtualMachinesConvertToManagedDisks
   ## Converts virtual machine disks from blob-based to managed disks. Virtual machine must be stop-deallocated before invoking this operation.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   vmName: string (required)
   ##         : The name of the virtual machine.
-  var path_568840 = newJObject()
-  var query_568841 = newJObject()
-  add(path_568840, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568841, "api-version", newJString(apiVersion))
-  add(path_568840, "subscriptionId", newJString(subscriptionId))
-  add(path_568840, "vmName", newJString(vmName))
-  result = call_568839.call(path_568840, query_568841, nil, nil, nil)
+  var path_564740 = newJObject()
+  var query_564741 = newJObject()
+  add(query_564741, "api-version", newJString(apiVersion))
+  add(path_564740, "subscriptionId", newJString(subscriptionId))
+  add(path_564740, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564740, "vmName", newJString(vmName))
+  result = call_564739.call(path_564740, query_564741, nil, nil, nil)
 
-var virtualMachinesConvertToManagedDisks* = Call_VirtualMachinesConvertToManagedDisks_568831(
+var virtualMachinesConvertToManagedDisks* = Call_VirtualMachinesConvertToManagedDisks_564731(
     name: "virtualMachinesConvertToManagedDisks", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/virtualMachines/{vmName}/convertToManagedDisks",
-    validator: validate_VirtualMachinesConvertToManagedDisks_568832, base: "",
-    url: url_VirtualMachinesConvertToManagedDisks_568833, schemes: {Scheme.Https})
+    validator: validate_VirtualMachinesConvertToManagedDisks_564732, base: "",
+    url: url_VirtualMachinesConvertToManagedDisks_564733, schemes: {Scheme.Https})
 type
-  Call_VirtualMachinesDeallocate_568842 = ref object of OpenApiRestCall_567667
-proc url_VirtualMachinesDeallocate_568844(protocol: Scheme; host: string;
+  Call_VirtualMachinesDeallocate_564742 = ref object of OpenApiRestCall_563565
+proc url_VirtualMachinesDeallocate_564744(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -6489,37 +6489,37 @@ proc url_VirtualMachinesDeallocate_568844(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_VirtualMachinesDeallocate_568843(path: JsonNode; query: JsonNode;
+proc validate_VirtualMachinesDeallocate_564743(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Shuts down the virtual machine and releases the compute resources. You are not billed for the compute resources that this virtual machine uses.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   ##   vmName: JString (required)
   ##         : The name of the virtual machine.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568845 = path.getOrDefault("resourceGroupName")
-  valid_568845 = validateParameter(valid_568845, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564745 = path.getOrDefault("subscriptionId")
+  valid_564745 = validateParameter(valid_564745, JString, required = true,
                                  default = nil)
-  if valid_568845 != nil:
-    section.add "resourceGroupName", valid_568845
-  var valid_568846 = path.getOrDefault("subscriptionId")
-  valid_568846 = validateParameter(valid_568846, JString, required = true,
+  if valid_564745 != nil:
+    section.add "subscriptionId", valid_564745
+  var valid_564746 = path.getOrDefault("resourceGroupName")
+  valid_564746 = validateParameter(valid_564746, JString, required = true,
                                  default = nil)
-  if valid_568846 != nil:
-    section.add "subscriptionId", valid_568846
-  var valid_568847 = path.getOrDefault("vmName")
-  valid_568847 = validateParameter(valid_568847, JString, required = true,
+  if valid_564746 != nil:
+    section.add "resourceGroupName", valid_564746
+  var valid_564747 = path.getOrDefault("vmName")
+  valid_564747 = validateParameter(valid_564747, JString, required = true,
                                  default = nil)
-  if valid_568847 != nil:
-    section.add "vmName", valid_568847
+  if valid_564747 != nil:
+    section.add "vmName", valid_564747
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -6527,11 +6527,11 @@ proc validate_VirtualMachinesDeallocate_568843(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568848 = query.getOrDefault("api-version")
-  valid_568848 = validateParameter(valid_568848, JString, required = true,
+  var valid_564748 = query.getOrDefault("api-version")
+  valid_564748 = validateParameter(valid_564748, JString, required = true,
                                  default = nil)
-  if valid_568848 != nil:
-    section.add "api-version", valid_568848
+  if valid_564748 != nil:
+    section.add "api-version", valid_564748
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -6540,48 +6540,47 @@ proc validate_VirtualMachinesDeallocate_568843(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568849: Call_VirtualMachinesDeallocate_568842; path: JsonNode;
+proc call*(call_564749: Call_VirtualMachinesDeallocate_564742; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Shuts down the virtual machine and releases the compute resources. You are not billed for the compute resources that this virtual machine uses.
   ## 
-  let valid = call_568849.validator(path, query, header, formData, body)
-  let scheme = call_568849.pickScheme
+  let valid = call_564749.validator(path, query, header, formData, body)
+  let scheme = call_564749.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568849.url(scheme.get, call_568849.host, call_568849.base,
-                         call_568849.route, valid.getOrDefault("path"),
+  let url = call_564749.url(scheme.get, call_564749.host, call_564749.base,
+                         call_564749.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568849, url, valid)
+  result = hook(call_564749, url, valid)
 
-proc call*(call_568850: Call_VirtualMachinesDeallocate_568842;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          vmName: string): Recallable =
+proc call*(call_564750: Call_VirtualMachinesDeallocate_564742; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string; vmName: string): Recallable =
   ## virtualMachinesDeallocate
   ## Shuts down the virtual machine and releases the compute resources. You are not billed for the compute resources that this virtual machine uses.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   vmName: string (required)
   ##         : The name of the virtual machine.
-  var path_568851 = newJObject()
-  var query_568852 = newJObject()
-  add(path_568851, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568852, "api-version", newJString(apiVersion))
-  add(path_568851, "subscriptionId", newJString(subscriptionId))
-  add(path_568851, "vmName", newJString(vmName))
-  result = call_568850.call(path_568851, query_568852, nil, nil, nil)
+  var path_564751 = newJObject()
+  var query_564752 = newJObject()
+  add(query_564752, "api-version", newJString(apiVersion))
+  add(path_564751, "subscriptionId", newJString(subscriptionId))
+  add(path_564751, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564751, "vmName", newJString(vmName))
+  result = call_564750.call(path_564751, query_564752, nil, nil, nil)
 
-var virtualMachinesDeallocate* = Call_VirtualMachinesDeallocate_568842(
+var virtualMachinesDeallocate* = Call_VirtualMachinesDeallocate_564742(
     name: "virtualMachinesDeallocate", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/virtualMachines/{vmName}/deallocate",
-    validator: validate_VirtualMachinesDeallocate_568843, base: "",
-    url: url_VirtualMachinesDeallocate_568844, schemes: {Scheme.Https})
+    validator: validate_VirtualMachinesDeallocate_564743, base: "",
+    url: url_VirtualMachinesDeallocate_564744, schemes: {Scheme.Https})
 type
-  Call_VirtualMachinesGetExtensions_568853 = ref object of OpenApiRestCall_567667
-proc url_VirtualMachinesGetExtensions_568855(protocol: Scheme; host: string;
+  Call_VirtualMachinesGetExtensions_564753 = ref object of OpenApiRestCall_563565
+proc url_VirtualMachinesGetExtensions_564755(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -6605,56 +6604,56 @@ proc url_VirtualMachinesGetExtensions_568855(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_VirtualMachinesGetExtensions_568854(path: JsonNode; query: JsonNode;
+proc validate_VirtualMachinesGetExtensions_564754(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## The operation to get all extensions of a Virtual Machine.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   ##   vmName: JString (required)
   ##         : The name of the virtual machine containing the extension.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568856 = path.getOrDefault("resourceGroupName")
-  valid_568856 = validateParameter(valid_568856, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564756 = path.getOrDefault("subscriptionId")
+  valid_564756 = validateParameter(valid_564756, JString, required = true,
                                  default = nil)
-  if valid_568856 != nil:
-    section.add "resourceGroupName", valid_568856
-  var valid_568857 = path.getOrDefault("subscriptionId")
-  valid_568857 = validateParameter(valid_568857, JString, required = true,
+  if valid_564756 != nil:
+    section.add "subscriptionId", valid_564756
+  var valid_564757 = path.getOrDefault("resourceGroupName")
+  valid_564757 = validateParameter(valid_564757, JString, required = true,
                                  default = nil)
-  if valid_568857 != nil:
-    section.add "subscriptionId", valid_568857
-  var valid_568858 = path.getOrDefault("vmName")
-  valid_568858 = validateParameter(valid_568858, JString, required = true,
+  if valid_564757 != nil:
+    section.add "resourceGroupName", valid_564757
+  var valid_564758 = path.getOrDefault("vmName")
+  valid_564758 = validateParameter(valid_564758, JString, required = true,
                                  default = nil)
-  if valid_568858 != nil:
-    section.add "vmName", valid_568858
+  if valid_564758 != nil:
+    section.add "vmName", valid_564758
   result.add "path", section
   ## parameters in `query` object:
-  ##   $expand: JString
-  ##          : The expand expression to apply on the operation.
   ##   api-version: JString (required)
   ##              : Client Api Version.
+  ##   $expand: JString
+  ##          : The expand expression to apply on the operation.
   section = newJObject()
-  var valid_568859 = query.getOrDefault("$expand")
-  valid_568859 = validateParameter(valid_568859, JString, required = false,
-                                 default = nil)
-  if valid_568859 != nil:
-    section.add "$expand", valid_568859
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568860 = query.getOrDefault("api-version")
-  valid_568860 = validateParameter(valid_568860, JString, required = true,
+  var valid_564759 = query.getOrDefault("api-version")
+  valid_564759 = validateParameter(valid_564759, JString, required = true,
                                  default = nil)
-  if valid_568860 != nil:
-    section.add "api-version", valid_568860
+  if valid_564759 != nil:
+    section.add "api-version", valid_564759
+  var valid_564760 = query.getOrDefault("$expand")
+  valid_564760 = validateParameter(valid_564760, JString, required = false,
+                                 default = nil)
+  if valid_564760 != nil:
+    section.add "$expand", valid_564760
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -6663,51 +6662,51 @@ proc validate_VirtualMachinesGetExtensions_568854(path: JsonNode; query: JsonNod
   if body != nil:
     result.add "body", body
 
-proc call*(call_568861: Call_VirtualMachinesGetExtensions_568853; path: JsonNode;
+proc call*(call_564761: Call_VirtualMachinesGetExtensions_564753; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## The operation to get all extensions of a Virtual Machine.
   ## 
-  let valid = call_568861.validator(path, query, header, formData, body)
-  let scheme = call_568861.pickScheme
+  let valid = call_564761.validator(path, query, header, formData, body)
+  let scheme = call_564761.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568861.url(scheme.get, call_568861.host, call_568861.base,
-                         call_568861.route, valid.getOrDefault("path"),
+  let url = call_564761.url(scheme.get, call_564761.host, call_564761.base,
+                         call_564761.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568861, url, valid)
+  result = hook(call_564761, url, valid)
 
-proc call*(call_568862: Call_VirtualMachinesGetExtensions_568853;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
+proc call*(call_564762: Call_VirtualMachinesGetExtensions_564753;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string;
           vmName: string; Expand: string = ""): Recallable =
   ## virtualMachinesGetExtensions
   ## The operation to get all extensions of a Virtual Machine.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
-  ##   Expand: string
-  ##         : The expand expression to apply on the operation.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
+  ##   Expand: string
+  ##         : The expand expression to apply on the operation.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   vmName: string (required)
   ##         : The name of the virtual machine containing the extension.
-  var path_568863 = newJObject()
-  var query_568864 = newJObject()
-  add(path_568863, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568864, "$expand", newJString(Expand))
-  add(query_568864, "api-version", newJString(apiVersion))
-  add(path_568863, "subscriptionId", newJString(subscriptionId))
-  add(path_568863, "vmName", newJString(vmName))
-  result = call_568862.call(path_568863, query_568864, nil, nil, nil)
+  var path_564763 = newJObject()
+  var query_564764 = newJObject()
+  add(query_564764, "api-version", newJString(apiVersion))
+  add(query_564764, "$expand", newJString(Expand))
+  add(path_564763, "subscriptionId", newJString(subscriptionId))
+  add(path_564763, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564763, "vmName", newJString(vmName))
+  result = call_564762.call(path_564763, query_564764, nil, nil, nil)
 
-var virtualMachinesGetExtensions* = Call_VirtualMachinesGetExtensions_568853(
+var virtualMachinesGetExtensions* = Call_VirtualMachinesGetExtensions_564753(
     name: "virtualMachinesGetExtensions", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/virtualMachines/{vmName}/extensions",
-    validator: validate_VirtualMachinesGetExtensions_568854, base: "",
-    url: url_VirtualMachinesGetExtensions_568855, schemes: {Scheme.Https})
+    validator: validate_VirtualMachinesGetExtensions_564754, base: "",
+    url: url_VirtualMachinesGetExtensions_564755, schemes: {Scheme.Https})
 type
-  Call_VirtualMachineExtensionsCreateOrUpdate_568878 = ref object of OpenApiRestCall_567667
-proc url_VirtualMachineExtensionsCreateOrUpdate_568880(protocol: Scheme;
+  Call_VirtualMachineExtensionsCreateOrUpdate_564778 = ref object of OpenApiRestCall_563565
+proc url_VirtualMachineExtensionsCreateOrUpdate_564780(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -6733,44 +6732,44 @@ proc url_VirtualMachineExtensionsCreateOrUpdate_568880(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_VirtualMachineExtensionsCreateOrUpdate_568879(path: JsonNode;
+proc validate_VirtualMachineExtensionsCreateOrUpdate_564779(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## The operation to create or update the extension.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
+  ##   subscriptionId: JString (required)
+  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   resourceGroupName: JString (required)
   ##                    : The name of the resource group.
   ##   vmExtensionName: JString (required)
   ##                  : The name of the virtual machine extension.
-  ##   subscriptionId: JString (required)
-  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   vmName: JString (required)
   ##         : The name of the virtual machine where the extension should be created or updated.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568881 = path.getOrDefault("resourceGroupName")
-  valid_568881 = validateParameter(valid_568881, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564781 = path.getOrDefault("subscriptionId")
+  valid_564781 = validateParameter(valid_564781, JString, required = true,
                                  default = nil)
-  if valid_568881 != nil:
-    section.add "resourceGroupName", valid_568881
-  var valid_568882 = path.getOrDefault("vmExtensionName")
-  valid_568882 = validateParameter(valid_568882, JString, required = true,
+  if valid_564781 != nil:
+    section.add "subscriptionId", valid_564781
+  var valid_564782 = path.getOrDefault("resourceGroupName")
+  valid_564782 = validateParameter(valid_564782, JString, required = true,
                                  default = nil)
-  if valid_568882 != nil:
-    section.add "vmExtensionName", valid_568882
-  var valid_568883 = path.getOrDefault("subscriptionId")
-  valid_568883 = validateParameter(valid_568883, JString, required = true,
+  if valid_564782 != nil:
+    section.add "resourceGroupName", valid_564782
+  var valid_564783 = path.getOrDefault("vmExtensionName")
+  valid_564783 = validateParameter(valid_564783, JString, required = true,
                                  default = nil)
-  if valid_568883 != nil:
-    section.add "subscriptionId", valid_568883
-  var valid_568884 = path.getOrDefault("vmName")
-  valid_568884 = validateParameter(valid_568884, JString, required = true,
+  if valid_564783 != nil:
+    section.add "vmExtensionName", valid_564783
+  var valid_564784 = path.getOrDefault("vmName")
+  valid_564784 = validateParameter(valid_564784, JString, required = true,
                                  default = nil)
-  if valid_568884 != nil:
-    section.add "vmName", valid_568884
+  if valid_564784 != nil:
+    section.add "vmName", valid_564784
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -6778,11 +6777,11 @@ proc validate_VirtualMachineExtensionsCreateOrUpdate_568879(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568885 = query.getOrDefault("api-version")
-  valid_568885 = validateParameter(valid_568885, JString, required = true,
+  var valid_564785 = query.getOrDefault("api-version")
+  valid_564785 = validateParameter(valid_564785, JString, required = true,
                                  default = nil)
-  if valid_568885 != nil:
-    section.add "api-version", valid_568885
+  if valid_564785 != nil:
+    section.add "api-version", valid_564785
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -6796,59 +6795,58 @@ proc validate_VirtualMachineExtensionsCreateOrUpdate_568879(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568887: Call_VirtualMachineExtensionsCreateOrUpdate_568878;
+proc call*(call_564787: Call_VirtualMachineExtensionsCreateOrUpdate_564778;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## The operation to create or update the extension.
   ## 
-  let valid = call_568887.validator(path, query, header, formData, body)
-  let scheme = call_568887.pickScheme
+  let valid = call_564787.validator(path, query, header, formData, body)
+  let scheme = call_564787.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568887.url(scheme.get, call_568887.host, call_568887.base,
-                         call_568887.route, valid.getOrDefault("path"),
+  let url = call_564787.url(scheme.get, call_564787.host, call_564787.base,
+                         call_564787.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568887, url, valid)
+  result = hook(call_564787, url, valid)
 
-proc call*(call_568888: Call_VirtualMachineExtensionsCreateOrUpdate_568878;
-          extensionParameters: JsonNode; resourceGroupName: string;
-          apiVersion: string; vmExtensionName: string; subscriptionId: string;
-          vmName: string): Recallable =
+proc call*(call_564788: Call_VirtualMachineExtensionsCreateOrUpdate_564778;
+          apiVersion: string; extensionParameters: JsonNode; subscriptionId: string;
+          resourceGroupName: string; vmExtensionName: string; vmName: string): Recallable =
   ## virtualMachineExtensionsCreateOrUpdate
   ## The operation to create or update the extension.
-  ##   extensionParameters: JObject (required)
-  ##                      : Parameters supplied to the Create Virtual Machine Extension operation.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
-  ##   vmExtensionName: string (required)
-  ##                  : The name of the virtual machine extension.
+  ##   extensionParameters: JObject (required)
+  ##                      : Parameters supplied to the Create Virtual Machine Extension operation.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  ##   vmExtensionName: string (required)
+  ##                  : The name of the virtual machine extension.
   ##   vmName: string (required)
   ##         : The name of the virtual machine where the extension should be created or updated.
-  var path_568889 = newJObject()
-  var query_568890 = newJObject()
-  var body_568891 = newJObject()
+  var path_564789 = newJObject()
+  var query_564790 = newJObject()
+  var body_564791 = newJObject()
+  add(query_564790, "api-version", newJString(apiVersion))
   if extensionParameters != nil:
-    body_568891 = extensionParameters
-  add(path_568889, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568890, "api-version", newJString(apiVersion))
-  add(path_568889, "vmExtensionName", newJString(vmExtensionName))
-  add(path_568889, "subscriptionId", newJString(subscriptionId))
-  add(path_568889, "vmName", newJString(vmName))
-  result = call_568888.call(path_568889, query_568890, nil, nil, body_568891)
+    body_564791 = extensionParameters
+  add(path_564789, "subscriptionId", newJString(subscriptionId))
+  add(path_564789, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564789, "vmExtensionName", newJString(vmExtensionName))
+  add(path_564789, "vmName", newJString(vmName))
+  result = call_564788.call(path_564789, query_564790, nil, nil, body_564791)
 
-var virtualMachineExtensionsCreateOrUpdate* = Call_VirtualMachineExtensionsCreateOrUpdate_568878(
+var virtualMachineExtensionsCreateOrUpdate* = Call_VirtualMachineExtensionsCreateOrUpdate_564778(
     name: "virtualMachineExtensionsCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/virtualMachines/{vmName}/extensions/{vmExtensionName}",
-    validator: validate_VirtualMachineExtensionsCreateOrUpdate_568879, base: "",
-    url: url_VirtualMachineExtensionsCreateOrUpdate_568880,
+    validator: validate_VirtualMachineExtensionsCreateOrUpdate_564779, base: "",
+    url: url_VirtualMachineExtensionsCreateOrUpdate_564780,
     schemes: {Scheme.Https})
 type
-  Call_VirtualMachineExtensionsGet_568865 = ref object of OpenApiRestCall_567667
-proc url_VirtualMachineExtensionsGet_568867(protocol: Scheme; host: string;
+  Call_VirtualMachineExtensionsGet_564765 = ref object of OpenApiRestCall_563565
+proc url_VirtualMachineExtensionsGet_564767(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -6874,63 +6872,63 @@ proc url_VirtualMachineExtensionsGet_568867(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_VirtualMachineExtensionsGet_568866(path: JsonNode; query: JsonNode;
+proc validate_VirtualMachineExtensionsGet_564766(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## The operation to get the extension.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
+  ##   subscriptionId: JString (required)
+  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   resourceGroupName: JString (required)
   ##                    : The name of the resource group.
   ##   vmExtensionName: JString (required)
   ##                  : The name of the virtual machine extension.
-  ##   subscriptionId: JString (required)
-  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   vmName: JString (required)
   ##         : The name of the virtual machine containing the extension.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568868 = path.getOrDefault("resourceGroupName")
-  valid_568868 = validateParameter(valid_568868, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564768 = path.getOrDefault("subscriptionId")
+  valid_564768 = validateParameter(valid_564768, JString, required = true,
                                  default = nil)
-  if valid_568868 != nil:
-    section.add "resourceGroupName", valid_568868
-  var valid_568869 = path.getOrDefault("vmExtensionName")
-  valid_568869 = validateParameter(valid_568869, JString, required = true,
+  if valid_564768 != nil:
+    section.add "subscriptionId", valid_564768
+  var valid_564769 = path.getOrDefault("resourceGroupName")
+  valid_564769 = validateParameter(valid_564769, JString, required = true,
                                  default = nil)
-  if valid_568869 != nil:
-    section.add "vmExtensionName", valid_568869
-  var valid_568870 = path.getOrDefault("subscriptionId")
-  valid_568870 = validateParameter(valid_568870, JString, required = true,
+  if valid_564769 != nil:
+    section.add "resourceGroupName", valid_564769
+  var valid_564770 = path.getOrDefault("vmExtensionName")
+  valid_564770 = validateParameter(valid_564770, JString, required = true,
                                  default = nil)
-  if valid_568870 != nil:
-    section.add "subscriptionId", valid_568870
-  var valid_568871 = path.getOrDefault("vmName")
-  valid_568871 = validateParameter(valid_568871, JString, required = true,
+  if valid_564770 != nil:
+    section.add "vmExtensionName", valid_564770
+  var valid_564771 = path.getOrDefault("vmName")
+  valid_564771 = validateParameter(valid_564771, JString, required = true,
                                  default = nil)
-  if valid_568871 != nil:
-    section.add "vmName", valid_568871
+  if valid_564771 != nil:
+    section.add "vmName", valid_564771
   result.add "path", section
   ## parameters in `query` object:
-  ##   $expand: JString
-  ##          : The expand expression to apply on the operation.
   ##   api-version: JString (required)
   ##              : Client Api Version.
+  ##   $expand: JString
+  ##          : The expand expression to apply on the operation.
   section = newJObject()
-  var valid_568872 = query.getOrDefault("$expand")
-  valid_568872 = validateParameter(valid_568872, JString, required = false,
-                                 default = nil)
-  if valid_568872 != nil:
-    section.add "$expand", valid_568872
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568873 = query.getOrDefault("api-version")
-  valid_568873 = validateParameter(valid_568873, JString, required = true,
+  var valid_564772 = query.getOrDefault("api-version")
+  valid_564772 = validateParameter(valid_564772, JString, required = true,
                                  default = nil)
-  if valid_568873 != nil:
-    section.add "api-version", valid_568873
+  if valid_564772 != nil:
+    section.add "api-version", valid_564772
+  var valid_564773 = query.getOrDefault("$expand")
+  valid_564773 = validateParameter(valid_564773, JString, required = false,
+                                 default = nil)
+  if valid_564773 != nil:
+    section.add "$expand", valid_564773
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -6939,54 +6937,54 @@ proc validate_VirtualMachineExtensionsGet_568866(path: JsonNode; query: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_568874: Call_VirtualMachineExtensionsGet_568865; path: JsonNode;
+proc call*(call_564774: Call_VirtualMachineExtensionsGet_564765; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## The operation to get the extension.
   ## 
-  let valid = call_568874.validator(path, query, header, formData, body)
-  let scheme = call_568874.pickScheme
+  let valid = call_564774.validator(path, query, header, formData, body)
+  let scheme = call_564774.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568874.url(scheme.get, call_568874.host, call_568874.base,
-                         call_568874.route, valid.getOrDefault("path"),
+  let url = call_564774.url(scheme.get, call_564774.host, call_564774.base,
+                         call_564774.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568874, url, valid)
+  result = hook(call_564774, url, valid)
 
-proc call*(call_568875: Call_VirtualMachineExtensionsGet_568865;
-          resourceGroupName: string; apiVersion: string; vmExtensionName: string;
-          subscriptionId: string; vmName: string; Expand: string = ""): Recallable =
+proc call*(call_564775: Call_VirtualMachineExtensionsGet_564765;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string;
+          vmExtensionName: string; vmName: string; Expand: string = ""): Recallable =
   ## virtualMachineExtensionsGet
   ## The operation to get the extension.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
-  ##   Expand: string
-  ##         : The expand expression to apply on the operation.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
-  ##   vmExtensionName: string (required)
-  ##                  : The name of the virtual machine extension.
+  ##   Expand: string
+  ##         : The expand expression to apply on the operation.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  ##   vmExtensionName: string (required)
+  ##                  : The name of the virtual machine extension.
   ##   vmName: string (required)
   ##         : The name of the virtual machine containing the extension.
-  var path_568876 = newJObject()
-  var query_568877 = newJObject()
-  add(path_568876, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568877, "$expand", newJString(Expand))
-  add(query_568877, "api-version", newJString(apiVersion))
-  add(path_568876, "vmExtensionName", newJString(vmExtensionName))
-  add(path_568876, "subscriptionId", newJString(subscriptionId))
-  add(path_568876, "vmName", newJString(vmName))
-  result = call_568875.call(path_568876, query_568877, nil, nil, nil)
+  var path_564776 = newJObject()
+  var query_564777 = newJObject()
+  add(query_564777, "api-version", newJString(apiVersion))
+  add(query_564777, "$expand", newJString(Expand))
+  add(path_564776, "subscriptionId", newJString(subscriptionId))
+  add(path_564776, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564776, "vmExtensionName", newJString(vmExtensionName))
+  add(path_564776, "vmName", newJString(vmName))
+  result = call_564775.call(path_564776, query_564777, nil, nil, nil)
 
-var virtualMachineExtensionsGet* = Call_VirtualMachineExtensionsGet_568865(
+var virtualMachineExtensionsGet* = Call_VirtualMachineExtensionsGet_564765(
     name: "virtualMachineExtensionsGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/virtualMachines/{vmName}/extensions/{vmExtensionName}",
-    validator: validate_VirtualMachineExtensionsGet_568866, base: "",
-    url: url_VirtualMachineExtensionsGet_568867, schemes: {Scheme.Https})
+    validator: validate_VirtualMachineExtensionsGet_564766, base: "",
+    url: url_VirtualMachineExtensionsGet_564767, schemes: {Scheme.Https})
 type
-  Call_VirtualMachineExtensionsUpdate_568904 = ref object of OpenApiRestCall_567667
-proc url_VirtualMachineExtensionsUpdate_568906(protocol: Scheme; host: string;
+  Call_VirtualMachineExtensionsUpdate_564804 = ref object of OpenApiRestCall_563565
+proc url_VirtualMachineExtensionsUpdate_564806(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -7012,44 +7010,44 @@ proc url_VirtualMachineExtensionsUpdate_568906(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_VirtualMachineExtensionsUpdate_568905(path: JsonNode;
+proc validate_VirtualMachineExtensionsUpdate_564805(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## The operation to update the extension.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
+  ##   subscriptionId: JString (required)
+  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   resourceGroupName: JString (required)
   ##                    : The name of the resource group.
   ##   vmExtensionName: JString (required)
   ##                  : The name of the virtual machine extension.
-  ##   subscriptionId: JString (required)
-  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   vmName: JString (required)
   ##         : The name of the virtual machine where the extension should be updated.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568907 = path.getOrDefault("resourceGroupName")
-  valid_568907 = validateParameter(valid_568907, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564807 = path.getOrDefault("subscriptionId")
+  valid_564807 = validateParameter(valid_564807, JString, required = true,
                                  default = nil)
-  if valid_568907 != nil:
-    section.add "resourceGroupName", valid_568907
-  var valid_568908 = path.getOrDefault("vmExtensionName")
-  valid_568908 = validateParameter(valid_568908, JString, required = true,
+  if valid_564807 != nil:
+    section.add "subscriptionId", valid_564807
+  var valid_564808 = path.getOrDefault("resourceGroupName")
+  valid_564808 = validateParameter(valid_564808, JString, required = true,
                                  default = nil)
-  if valid_568908 != nil:
-    section.add "vmExtensionName", valid_568908
-  var valid_568909 = path.getOrDefault("subscriptionId")
-  valid_568909 = validateParameter(valid_568909, JString, required = true,
+  if valid_564808 != nil:
+    section.add "resourceGroupName", valid_564808
+  var valid_564809 = path.getOrDefault("vmExtensionName")
+  valid_564809 = validateParameter(valid_564809, JString, required = true,
                                  default = nil)
-  if valid_568909 != nil:
-    section.add "subscriptionId", valid_568909
-  var valid_568910 = path.getOrDefault("vmName")
-  valid_568910 = validateParameter(valid_568910, JString, required = true,
+  if valid_564809 != nil:
+    section.add "vmExtensionName", valid_564809
+  var valid_564810 = path.getOrDefault("vmName")
+  valid_564810 = validateParameter(valid_564810, JString, required = true,
                                  default = nil)
-  if valid_568910 != nil:
-    section.add "vmName", valid_568910
+  if valid_564810 != nil:
+    section.add "vmName", valid_564810
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -7057,11 +7055,11 @@ proc validate_VirtualMachineExtensionsUpdate_568905(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568911 = query.getOrDefault("api-version")
-  valid_568911 = validateParameter(valid_568911, JString, required = true,
+  var valid_564811 = query.getOrDefault("api-version")
+  valid_564811 = validateParameter(valid_564811, JString, required = true,
                                  default = nil)
-  if valid_568911 != nil:
-    section.add "api-version", valid_568911
+  if valid_564811 != nil:
+    section.add "api-version", valid_564811
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -7075,57 +7073,56 @@ proc validate_VirtualMachineExtensionsUpdate_568905(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568913: Call_VirtualMachineExtensionsUpdate_568904; path: JsonNode;
+proc call*(call_564813: Call_VirtualMachineExtensionsUpdate_564804; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## The operation to update the extension.
   ## 
-  let valid = call_568913.validator(path, query, header, formData, body)
-  let scheme = call_568913.pickScheme
+  let valid = call_564813.validator(path, query, header, formData, body)
+  let scheme = call_564813.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568913.url(scheme.get, call_568913.host, call_568913.base,
-                         call_568913.route, valid.getOrDefault("path"),
+  let url = call_564813.url(scheme.get, call_564813.host, call_564813.base,
+                         call_564813.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568913, url, valid)
+  result = hook(call_564813, url, valid)
 
-proc call*(call_568914: Call_VirtualMachineExtensionsUpdate_568904;
-          extensionParameters: JsonNode; resourceGroupName: string;
-          apiVersion: string; vmExtensionName: string; subscriptionId: string;
-          vmName: string): Recallable =
+proc call*(call_564814: Call_VirtualMachineExtensionsUpdate_564804;
+          apiVersion: string; extensionParameters: JsonNode; subscriptionId: string;
+          resourceGroupName: string; vmExtensionName: string; vmName: string): Recallable =
   ## virtualMachineExtensionsUpdate
   ## The operation to update the extension.
-  ##   extensionParameters: JObject (required)
-  ##                      : Parameters supplied to the Update Virtual Machine Extension operation.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
-  ##   vmExtensionName: string (required)
-  ##                  : The name of the virtual machine extension.
+  ##   extensionParameters: JObject (required)
+  ##                      : Parameters supplied to the Update Virtual Machine Extension operation.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  ##   vmExtensionName: string (required)
+  ##                  : The name of the virtual machine extension.
   ##   vmName: string (required)
   ##         : The name of the virtual machine where the extension should be updated.
-  var path_568915 = newJObject()
-  var query_568916 = newJObject()
-  var body_568917 = newJObject()
+  var path_564815 = newJObject()
+  var query_564816 = newJObject()
+  var body_564817 = newJObject()
+  add(query_564816, "api-version", newJString(apiVersion))
   if extensionParameters != nil:
-    body_568917 = extensionParameters
-  add(path_568915, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568916, "api-version", newJString(apiVersion))
-  add(path_568915, "vmExtensionName", newJString(vmExtensionName))
-  add(path_568915, "subscriptionId", newJString(subscriptionId))
-  add(path_568915, "vmName", newJString(vmName))
-  result = call_568914.call(path_568915, query_568916, nil, nil, body_568917)
+    body_564817 = extensionParameters
+  add(path_564815, "subscriptionId", newJString(subscriptionId))
+  add(path_564815, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564815, "vmExtensionName", newJString(vmExtensionName))
+  add(path_564815, "vmName", newJString(vmName))
+  result = call_564814.call(path_564815, query_564816, nil, nil, body_564817)
 
-var virtualMachineExtensionsUpdate* = Call_VirtualMachineExtensionsUpdate_568904(
+var virtualMachineExtensionsUpdate* = Call_VirtualMachineExtensionsUpdate_564804(
     name: "virtualMachineExtensionsUpdate", meth: HttpMethod.HttpPatch,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/virtualMachines/{vmName}/extensions/{vmExtensionName}",
-    validator: validate_VirtualMachineExtensionsUpdate_568905, base: "",
-    url: url_VirtualMachineExtensionsUpdate_568906, schemes: {Scheme.Https})
+    validator: validate_VirtualMachineExtensionsUpdate_564805, base: "",
+    url: url_VirtualMachineExtensionsUpdate_564806, schemes: {Scheme.Https})
 type
-  Call_VirtualMachineExtensionsDelete_568892 = ref object of OpenApiRestCall_567667
-proc url_VirtualMachineExtensionsDelete_568894(protocol: Scheme; host: string;
+  Call_VirtualMachineExtensionsDelete_564792 = ref object of OpenApiRestCall_563565
+proc url_VirtualMachineExtensionsDelete_564794(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -7151,44 +7148,44 @@ proc url_VirtualMachineExtensionsDelete_568894(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_VirtualMachineExtensionsDelete_568893(path: JsonNode;
+proc validate_VirtualMachineExtensionsDelete_564793(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## The operation to delete the extension.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
+  ##   subscriptionId: JString (required)
+  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   resourceGroupName: JString (required)
   ##                    : The name of the resource group.
   ##   vmExtensionName: JString (required)
   ##                  : The name of the virtual machine extension.
-  ##   subscriptionId: JString (required)
-  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   vmName: JString (required)
   ##         : The name of the virtual machine where the extension should be deleted.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568895 = path.getOrDefault("resourceGroupName")
-  valid_568895 = validateParameter(valid_568895, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564795 = path.getOrDefault("subscriptionId")
+  valid_564795 = validateParameter(valid_564795, JString, required = true,
                                  default = nil)
-  if valid_568895 != nil:
-    section.add "resourceGroupName", valid_568895
-  var valid_568896 = path.getOrDefault("vmExtensionName")
-  valid_568896 = validateParameter(valid_568896, JString, required = true,
+  if valid_564795 != nil:
+    section.add "subscriptionId", valid_564795
+  var valid_564796 = path.getOrDefault("resourceGroupName")
+  valid_564796 = validateParameter(valid_564796, JString, required = true,
                                  default = nil)
-  if valid_568896 != nil:
-    section.add "vmExtensionName", valid_568896
-  var valid_568897 = path.getOrDefault("subscriptionId")
-  valid_568897 = validateParameter(valid_568897, JString, required = true,
+  if valid_564796 != nil:
+    section.add "resourceGroupName", valid_564796
+  var valid_564797 = path.getOrDefault("vmExtensionName")
+  valid_564797 = validateParameter(valid_564797, JString, required = true,
                                  default = nil)
-  if valid_568897 != nil:
-    section.add "subscriptionId", valid_568897
-  var valid_568898 = path.getOrDefault("vmName")
-  valid_568898 = validateParameter(valid_568898, JString, required = true,
+  if valid_564797 != nil:
+    section.add "vmExtensionName", valid_564797
+  var valid_564798 = path.getOrDefault("vmName")
+  valid_564798 = validateParameter(valid_564798, JString, required = true,
                                  default = nil)
-  if valid_568898 != nil:
-    section.add "vmName", valid_568898
+  if valid_564798 != nil:
+    section.add "vmName", valid_564798
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -7196,11 +7193,11 @@ proc validate_VirtualMachineExtensionsDelete_568893(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568899 = query.getOrDefault("api-version")
-  valid_568899 = validateParameter(valid_568899, JString, required = true,
+  var valid_564799 = query.getOrDefault("api-version")
+  valid_564799 = validateParameter(valid_564799, JString, required = true,
                                  default = nil)
-  if valid_568899 != nil:
-    section.add "api-version", valid_568899
+  if valid_564799 != nil:
+    section.add "api-version", valid_564799
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -7209,51 +7206,51 @@ proc validate_VirtualMachineExtensionsDelete_568893(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568900: Call_VirtualMachineExtensionsDelete_568892; path: JsonNode;
+proc call*(call_564800: Call_VirtualMachineExtensionsDelete_564792; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## The operation to delete the extension.
   ## 
-  let valid = call_568900.validator(path, query, header, formData, body)
-  let scheme = call_568900.pickScheme
+  let valid = call_564800.validator(path, query, header, formData, body)
+  let scheme = call_564800.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568900.url(scheme.get, call_568900.host, call_568900.base,
-                         call_568900.route, valid.getOrDefault("path"),
+  let url = call_564800.url(scheme.get, call_564800.host, call_564800.base,
+                         call_564800.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568900, url, valid)
+  result = hook(call_564800, url, valid)
 
-proc call*(call_568901: Call_VirtualMachineExtensionsDelete_568892;
-          resourceGroupName: string; apiVersion: string; vmExtensionName: string;
-          subscriptionId: string; vmName: string): Recallable =
+proc call*(call_564801: Call_VirtualMachineExtensionsDelete_564792;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string;
+          vmExtensionName: string; vmName: string): Recallable =
   ## virtualMachineExtensionsDelete
   ## The operation to delete the extension.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
-  ##   vmExtensionName: string (required)
-  ##                  : The name of the virtual machine extension.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  ##   vmExtensionName: string (required)
+  ##                  : The name of the virtual machine extension.
   ##   vmName: string (required)
   ##         : The name of the virtual machine where the extension should be deleted.
-  var path_568902 = newJObject()
-  var query_568903 = newJObject()
-  add(path_568902, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568903, "api-version", newJString(apiVersion))
-  add(path_568902, "vmExtensionName", newJString(vmExtensionName))
-  add(path_568902, "subscriptionId", newJString(subscriptionId))
-  add(path_568902, "vmName", newJString(vmName))
-  result = call_568901.call(path_568902, query_568903, nil, nil, nil)
+  var path_564802 = newJObject()
+  var query_564803 = newJObject()
+  add(query_564803, "api-version", newJString(apiVersion))
+  add(path_564802, "subscriptionId", newJString(subscriptionId))
+  add(path_564802, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564802, "vmExtensionName", newJString(vmExtensionName))
+  add(path_564802, "vmName", newJString(vmName))
+  result = call_564801.call(path_564802, query_564803, nil, nil, nil)
 
-var virtualMachineExtensionsDelete* = Call_VirtualMachineExtensionsDelete_568892(
+var virtualMachineExtensionsDelete* = Call_VirtualMachineExtensionsDelete_564792(
     name: "virtualMachineExtensionsDelete", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/virtualMachines/{vmName}/extensions/{vmExtensionName}",
-    validator: validate_VirtualMachineExtensionsDelete_568893, base: "",
-    url: url_VirtualMachineExtensionsDelete_568894, schemes: {Scheme.Https})
+    validator: validate_VirtualMachineExtensionsDelete_564793, base: "",
+    url: url_VirtualMachineExtensionsDelete_564794, schemes: {Scheme.Https})
 type
-  Call_VirtualMachinesGeneralize_568918 = ref object of OpenApiRestCall_567667
-proc url_VirtualMachinesGeneralize_568920(protocol: Scheme; host: string;
+  Call_VirtualMachinesGeneralize_564818 = ref object of OpenApiRestCall_563565
+proc url_VirtualMachinesGeneralize_564820(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -7277,37 +7274,37 @@ proc url_VirtualMachinesGeneralize_568920(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_VirtualMachinesGeneralize_568919(path: JsonNode; query: JsonNode;
+proc validate_VirtualMachinesGeneralize_564819(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Sets the state of the virtual machine to generalized.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   ##   vmName: JString (required)
   ##         : The name of the virtual machine.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568921 = path.getOrDefault("resourceGroupName")
-  valid_568921 = validateParameter(valid_568921, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564821 = path.getOrDefault("subscriptionId")
+  valid_564821 = validateParameter(valid_564821, JString, required = true,
                                  default = nil)
-  if valid_568921 != nil:
-    section.add "resourceGroupName", valid_568921
-  var valid_568922 = path.getOrDefault("subscriptionId")
-  valid_568922 = validateParameter(valid_568922, JString, required = true,
+  if valid_564821 != nil:
+    section.add "subscriptionId", valid_564821
+  var valid_564822 = path.getOrDefault("resourceGroupName")
+  valid_564822 = validateParameter(valid_564822, JString, required = true,
                                  default = nil)
-  if valid_568922 != nil:
-    section.add "subscriptionId", valid_568922
-  var valid_568923 = path.getOrDefault("vmName")
-  valid_568923 = validateParameter(valid_568923, JString, required = true,
+  if valid_564822 != nil:
+    section.add "resourceGroupName", valid_564822
+  var valid_564823 = path.getOrDefault("vmName")
+  valid_564823 = validateParameter(valid_564823, JString, required = true,
                                  default = nil)
-  if valid_568923 != nil:
-    section.add "vmName", valid_568923
+  if valid_564823 != nil:
+    section.add "vmName", valid_564823
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -7315,11 +7312,11 @@ proc validate_VirtualMachinesGeneralize_568919(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568924 = query.getOrDefault("api-version")
-  valid_568924 = validateParameter(valid_568924, JString, required = true,
+  var valid_564824 = query.getOrDefault("api-version")
+  valid_564824 = validateParameter(valid_564824, JString, required = true,
                                  default = nil)
-  if valid_568924 != nil:
-    section.add "api-version", valid_568924
+  if valid_564824 != nil:
+    section.add "api-version", valid_564824
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -7328,48 +7325,47 @@ proc validate_VirtualMachinesGeneralize_568919(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568925: Call_VirtualMachinesGeneralize_568918; path: JsonNode;
+proc call*(call_564825: Call_VirtualMachinesGeneralize_564818; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Sets the state of the virtual machine to generalized.
   ## 
-  let valid = call_568925.validator(path, query, header, formData, body)
-  let scheme = call_568925.pickScheme
+  let valid = call_564825.validator(path, query, header, formData, body)
+  let scheme = call_564825.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568925.url(scheme.get, call_568925.host, call_568925.base,
-                         call_568925.route, valid.getOrDefault("path"),
+  let url = call_564825.url(scheme.get, call_564825.host, call_564825.base,
+                         call_564825.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568925, url, valid)
+  result = hook(call_564825, url, valid)
 
-proc call*(call_568926: Call_VirtualMachinesGeneralize_568918;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          vmName: string): Recallable =
+proc call*(call_564826: Call_VirtualMachinesGeneralize_564818; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string; vmName: string): Recallable =
   ## virtualMachinesGeneralize
   ## Sets the state of the virtual machine to generalized.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   vmName: string (required)
   ##         : The name of the virtual machine.
-  var path_568927 = newJObject()
-  var query_568928 = newJObject()
-  add(path_568927, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568928, "api-version", newJString(apiVersion))
-  add(path_568927, "subscriptionId", newJString(subscriptionId))
-  add(path_568927, "vmName", newJString(vmName))
-  result = call_568926.call(path_568927, query_568928, nil, nil, nil)
+  var path_564827 = newJObject()
+  var query_564828 = newJObject()
+  add(query_564828, "api-version", newJString(apiVersion))
+  add(path_564827, "subscriptionId", newJString(subscriptionId))
+  add(path_564827, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564827, "vmName", newJString(vmName))
+  result = call_564826.call(path_564827, query_564828, nil, nil, nil)
 
-var virtualMachinesGeneralize* = Call_VirtualMachinesGeneralize_568918(
+var virtualMachinesGeneralize* = Call_VirtualMachinesGeneralize_564818(
     name: "virtualMachinesGeneralize", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/virtualMachines/{vmName}/generalize",
-    validator: validate_VirtualMachinesGeneralize_568919, base: "",
-    url: url_VirtualMachinesGeneralize_568920, schemes: {Scheme.Https})
+    validator: validate_VirtualMachinesGeneralize_564819, base: "",
+    url: url_VirtualMachinesGeneralize_564820, schemes: {Scheme.Https})
 type
-  Call_VirtualMachinesPowerOff_568929 = ref object of OpenApiRestCall_567667
-proc url_VirtualMachinesPowerOff_568931(protocol: Scheme; host: string; base: string;
+  Call_VirtualMachinesPowerOff_564829 = ref object of OpenApiRestCall_563565
+proc url_VirtualMachinesPowerOff_564831(protocol: Scheme; host: string; base: string;
                                        route: string; path: JsonNode;
                                        query: JsonNode): Uri =
   result.scheme = $protocol
@@ -7394,37 +7390,37 @@ proc url_VirtualMachinesPowerOff_568931(protocol: Scheme; host: string; base: st
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_VirtualMachinesPowerOff_568930(path: JsonNode; query: JsonNode;
+proc validate_VirtualMachinesPowerOff_564830(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## The operation to power off (stop) a virtual machine. The virtual machine can be restarted with the same provisioned resources. You are still charged for this virtual machine.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   ##   vmName: JString (required)
   ##         : The name of the virtual machine.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568932 = path.getOrDefault("resourceGroupName")
-  valid_568932 = validateParameter(valid_568932, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564832 = path.getOrDefault("subscriptionId")
+  valid_564832 = validateParameter(valid_564832, JString, required = true,
                                  default = nil)
-  if valid_568932 != nil:
-    section.add "resourceGroupName", valid_568932
-  var valid_568933 = path.getOrDefault("subscriptionId")
-  valid_568933 = validateParameter(valid_568933, JString, required = true,
+  if valid_564832 != nil:
+    section.add "subscriptionId", valid_564832
+  var valid_564833 = path.getOrDefault("resourceGroupName")
+  valid_564833 = validateParameter(valid_564833, JString, required = true,
                                  default = nil)
-  if valid_568933 != nil:
-    section.add "subscriptionId", valid_568933
-  var valid_568934 = path.getOrDefault("vmName")
-  valid_568934 = validateParameter(valid_568934, JString, required = true,
+  if valid_564833 != nil:
+    section.add "resourceGroupName", valid_564833
+  var valid_564834 = path.getOrDefault("vmName")
+  valid_564834 = validateParameter(valid_564834, JString, required = true,
                                  default = nil)
-  if valid_568934 != nil:
-    section.add "vmName", valid_568934
+  if valid_564834 != nil:
+    section.add "vmName", valid_564834
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -7432,11 +7428,11 @@ proc validate_VirtualMachinesPowerOff_568930(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568935 = query.getOrDefault("api-version")
-  valid_568935 = validateParameter(valid_568935, JString, required = true,
+  var valid_564835 = query.getOrDefault("api-version")
+  valid_564835 = validateParameter(valid_564835, JString, required = true,
                                  default = nil)
-  if valid_568935 != nil:
-    section.add "api-version", valid_568935
+  if valid_564835 != nil:
+    section.add "api-version", valid_564835
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -7445,48 +7441,47 @@ proc validate_VirtualMachinesPowerOff_568930(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568936: Call_VirtualMachinesPowerOff_568929; path: JsonNode;
+proc call*(call_564836: Call_VirtualMachinesPowerOff_564829; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## The operation to power off (stop) a virtual machine. The virtual machine can be restarted with the same provisioned resources. You are still charged for this virtual machine.
   ## 
-  let valid = call_568936.validator(path, query, header, formData, body)
-  let scheme = call_568936.pickScheme
+  let valid = call_564836.validator(path, query, header, formData, body)
+  let scheme = call_564836.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568936.url(scheme.get, call_568936.host, call_568936.base,
-                         call_568936.route, valid.getOrDefault("path"),
+  let url = call_564836.url(scheme.get, call_564836.host, call_564836.base,
+                         call_564836.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568936, url, valid)
+  result = hook(call_564836, url, valid)
 
-proc call*(call_568937: Call_VirtualMachinesPowerOff_568929;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          vmName: string): Recallable =
+proc call*(call_564837: Call_VirtualMachinesPowerOff_564829; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string; vmName: string): Recallable =
   ## virtualMachinesPowerOff
   ## The operation to power off (stop) a virtual machine. The virtual machine can be restarted with the same provisioned resources. You are still charged for this virtual machine.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   vmName: string (required)
   ##         : The name of the virtual machine.
-  var path_568938 = newJObject()
-  var query_568939 = newJObject()
-  add(path_568938, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568939, "api-version", newJString(apiVersion))
-  add(path_568938, "subscriptionId", newJString(subscriptionId))
-  add(path_568938, "vmName", newJString(vmName))
-  result = call_568937.call(path_568938, query_568939, nil, nil, nil)
+  var path_564838 = newJObject()
+  var query_564839 = newJObject()
+  add(query_564839, "api-version", newJString(apiVersion))
+  add(path_564838, "subscriptionId", newJString(subscriptionId))
+  add(path_564838, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564838, "vmName", newJString(vmName))
+  result = call_564837.call(path_564838, query_564839, nil, nil, nil)
 
-var virtualMachinesPowerOff* = Call_VirtualMachinesPowerOff_568929(
+var virtualMachinesPowerOff* = Call_VirtualMachinesPowerOff_564829(
     name: "virtualMachinesPowerOff", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/virtualMachines/{vmName}/powerOff",
-    validator: validate_VirtualMachinesPowerOff_568930, base: "",
-    url: url_VirtualMachinesPowerOff_568931, schemes: {Scheme.Https})
+    validator: validate_VirtualMachinesPowerOff_564830, base: "",
+    url: url_VirtualMachinesPowerOff_564831, schemes: {Scheme.Https})
 type
-  Call_VirtualMachinesRedeploy_568940 = ref object of OpenApiRestCall_567667
-proc url_VirtualMachinesRedeploy_568942(protocol: Scheme; host: string; base: string;
+  Call_VirtualMachinesRedeploy_564840 = ref object of OpenApiRestCall_563565
+proc url_VirtualMachinesRedeploy_564842(protocol: Scheme; host: string; base: string;
                                        route: string; path: JsonNode;
                                        query: JsonNode): Uri =
   result.scheme = $protocol
@@ -7511,37 +7506,37 @@ proc url_VirtualMachinesRedeploy_568942(protocol: Scheme; host: string; base: st
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_VirtualMachinesRedeploy_568941(path: JsonNode; query: JsonNode;
+proc validate_VirtualMachinesRedeploy_564841(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Shuts down the virtual machine, moves it to a new node, and powers it back on.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   ##   vmName: JString (required)
   ##         : The name of the virtual machine.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568943 = path.getOrDefault("resourceGroupName")
-  valid_568943 = validateParameter(valid_568943, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564843 = path.getOrDefault("subscriptionId")
+  valid_564843 = validateParameter(valid_564843, JString, required = true,
                                  default = nil)
-  if valid_568943 != nil:
-    section.add "resourceGroupName", valid_568943
-  var valid_568944 = path.getOrDefault("subscriptionId")
-  valid_568944 = validateParameter(valid_568944, JString, required = true,
+  if valid_564843 != nil:
+    section.add "subscriptionId", valid_564843
+  var valid_564844 = path.getOrDefault("resourceGroupName")
+  valid_564844 = validateParameter(valid_564844, JString, required = true,
                                  default = nil)
-  if valid_568944 != nil:
-    section.add "subscriptionId", valid_568944
-  var valid_568945 = path.getOrDefault("vmName")
-  valid_568945 = validateParameter(valid_568945, JString, required = true,
+  if valid_564844 != nil:
+    section.add "resourceGroupName", valid_564844
+  var valid_564845 = path.getOrDefault("vmName")
+  valid_564845 = validateParameter(valid_564845, JString, required = true,
                                  default = nil)
-  if valid_568945 != nil:
-    section.add "vmName", valid_568945
+  if valid_564845 != nil:
+    section.add "vmName", valid_564845
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -7549,11 +7544,11 @@ proc validate_VirtualMachinesRedeploy_568941(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568946 = query.getOrDefault("api-version")
-  valid_568946 = validateParameter(valid_568946, JString, required = true,
+  var valid_564846 = query.getOrDefault("api-version")
+  valid_564846 = validateParameter(valid_564846, JString, required = true,
                                  default = nil)
-  if valid_568946 != nil:
-    section.add "api-version", valid_568946
+  if valid_564846 != nil:
+    section.add "api-version", valid_564846
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -7562,48 +7557,47 @@ proc validate_VirtualMachinesRedeploy_568941(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568947: Call_VirtualMachinesRedeploy_568940; path: JsonNode;
+proc call*(call_564847: Call_VirtualMachinesRedeploy_564840; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Shuts down the virtual machine, moves it to a new node, and powers it back on.
   ## 
-  let valid = call_568947.validator(path, query, header, formData, body)
-  let scheme = call_568947.pickScheme
+  let valid = call_564847.validator(path, query, header, formData, body)
+  let scheme = call_564847.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568947.url(scheme.get, call_568947.host, call_568947.base,
-                         call_568947.route, valid.getOrDefault("path"),
+  let url = call_564847.url(scheme.get, call_564847.host, call_564847.base,
+                         call_564847.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568947, url, valid)
+  result = hook(call_564847, url, valid)
 
-proc call*(call_568948: Call_VirtualMachinesRedeploy_568940;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          vmName: string): Recallable =
+proc call*(call_564848: Call_VirtualMachinesRedeploy_564840; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string; vmName: string): Recallable =
   ## virtualMachinesRedeploy
   ## Shuts down the virtual machine, moves it to a new node, and powers it back on.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   vmName: string (required)
   ##         : The name of the virtual machine.
-  var path_568949 = newJObject()
-  var query_568950 = newJObject()
-  add(path_568949, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568950, "api-version", newJString(apiVersion))
-  add(path_568949, "subscriptionId", newJString(subscriptionId))
-  add(path_568949, "vmName", newJString(vmName))
-  result = call_568948.call(path_568949, query_568950, nil, nil, nil)
+  var path_564849 = newJObject()
+  var query_564850 = newJObject()
+  add(query_564850, "api-version", newJString(apiVersion))
+  add(path_564849, "subscriptionId", newJString(subscriptionId))
+  add(path_564849, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564849, "vmName", newJString(vmName))
+  result = call_564848.call(path_564849, query_564850, nil, nil, nil)
 
-var virtualMachinesRedeploy* = Call_VirtualMachinesRedeploy_568940(
+var virtualMachinesRedeploy* = Call_VirtualMachinesRedeploy_564840(
     name: "virtualMachinesRedeploy", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/virtualMachines/{vmName}/redeploy",
-    validator: validate_VirtualMachinesRedeploy_568941, base: "",
-    url: url_VirtualMachinesRedeploy_568942, schemes: {Scheme.Https})
+    validator: validate_VirtualMachinesRedeploy_564841, base: "",
+    url: url_VirtualMachinesRedeploy_564842, schemes: {Scheme.Https})
 type
-  Call_VirtualMachinesRestart_568951 = ref object of OpenApiRestCall_567667
-proc url_VirtualMachinesRestart_568953(protocol: Scheme; host: string; base: string;
+  Call_VirtualMachinesRestart_564851 = ref object of OpenApiRestCall_563565
+proc url_VirtualMachinesRestart_564853(protocol: Scheme; host: string; base: string;
                                       route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -7627,37 +7621,37 @@ proc url_VirtualMachinesRestart_568953(protocol: Scheme; host: string; base: str
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_VirtualMachinesRestart_568952(path: JsonNode; query: JsonNode;
+proc validate_VirtualMachinesRestart_564852(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## The operation to restart a virtual machine.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   ##   vmName: JString (required)
   ##         : The name of the virtual machine.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568954 = path.getOrDefault("resourceGroupName")
-  valid_568954 = validateParameter(valid_568954, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564854 = path.getOrDefault("subscriptionId")
+  valid_564854 = validateParameter(valid_564854, JString, required = true,
                                  default = nil)
-  if valid_568954 != nil:
-    section.add "resourceGroupName", valid_568954
-  var valid_568955 = path.getOrDefault("subscriptionId")
-  valid_568955 = validateParameter(valid_568955, JString, required = true,
+  if valid_564854 != nil:
+    section.add "subscriptionId", valid_564854
+  var valid_564855 = path.getOrDefault("resourceGroupName")
+  valid_564855 = validateParameter(valid_564855, JString, required = true,
                                  default = nil)
-  if valid_568955 != nil:
-    section.add "subscriptionId", valid_568955
-  var valid_568956 = path.getOrDefault("vmName")
-  valid_568956 = validateParameter(valid_568956, JString, required = true,
+  if valid_564855 != nil:
+    section.add "resourceGroupName", valid_564855
+  var valid_564856 = path.getOrDefault("vmName")
+  valid_564856 = validateParameter(valid_564856, JString, required = true,
                                  default = nil)
-  if valid_568956 != nil:
-    section.add "vmName", valid_568956
+  if valid_564856 != nil:
+    section.add "vmName", valid_564856
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -7665,11 +7659,11 @@ proc validate_VirtualMachinesRestart_568952(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568957 = query.getOrDefault("api-version")
-  valid_568957 = validateParameter(valid_568957, JString, required = true,
+  var valid_564857 = query.getOrDefault("api-version")
+  valid_564857 = validateParameter(valid_564857, JString, required = true,
                                  default = nil)
-  if valid_568957 != nil:
-    section.add "api-version", valid_568957
+  if valid_564857 != nil:
+    section.add "api-version", valid_564857
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -7678,48 +7672,47 @@ proc validate_VirtualMachinesRestart_568952(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568958: Call_VirtualMachinesRestart_568951; path: JsonNode;
+proc call*(call_564858: Call_VirtualMachinesRestart_564851; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## The operation to restart a virtual machine.
   ## 
-  let valid = call_568958.validator(path, query, header, formData, body)
-  let scheme = call_568958.pickScheme
+  let valid = call_564858.validator(path, query, header, formData, body)
+  let scheme = call_564858.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568958.url(scheme.get, call_568958.host, call_568958.base,
-                         call_568958.route, valid.getOrDefault("path"),
+  let url = call_564858.url(scheme.get, call_564858.host, call_564858.base,
+                         call_564858.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568958, url, valid)
+  result = hook(call_564858, url, valid)
 
-proc call*(call_568959: Call_VirtualMachinesRestart_568951;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          vmName: string): Recallable =
+proc call*(call_564859: Call_VirtualMachinesRestart_564851; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string; vmName: string): Recallable =
   ## virtualMachinesRestart
   ## The operation to restart a virtual machine.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   vmName: string (required)
   ##         : The name of the virtual machine.
-  var path_568960 = newJObject()
-  var query_568961 = newJObject()
-  add(path_568960, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568961, "api-version", newJString(apiVersion))
-  add(path_568960, "subscriptionId", newJString(subscriptionId))
-  add(path_568960, "vmName", newJString(vmName))
-  result = call_568959.call(path_568960, query_568961, nil, nil, nil)
+  var path_564860 = newJObject()
+  var query_564861 = newJObject()
+  add(query_564861, "api-version", newJString(apiVersion))
+  add(path_564860, "subscriptionId", newJString(subscriptionId))
+  add(path_564860, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564860, "vmName", newJString(vmName))
+  result = call_564859.call(path_564860, query_564861, nil, nil, nil)
 
-var virtualMachinesRestart* = Call_VirtualMachinesRestart_568951(
+var virtualMachinesRestart* = Call_VirtualMachinesRestart_564851(
     name: "virtualMachinesRestart", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/virtualMachines/{vmName}/restart",
-    validator: validate_VirtualMachinesRestart_568952, base: "",
-    url: url_VirtualMachinesRestart_568953, schemes: {Scheme.Https})
+    validator: validate_VirtualMachinesRestart_564852, base: "",
+    url: url_VirtualMachinesRestart_564853, schemes: {Scheme.Https})
 type
-  Call_VirtualMachinesStart_568962 = ref object of OpenApiRestCall_567667
-proc url_VirtualMachinesStart_568964(protocol: Scheme; host: string; base: string;
+  Call_VirtualMachinesStart_564862 = ref object of OpenApiRestCall_563565
+proc url_VirtualMachinesStart_564864(protocol: Scheme; host: string; base: string;
                                     route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -7743,37 +7736,37 @@ proc url_VirtualMachinesStart_568964(protocol: Scheme; host: string; base: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_VirtualMachinesStart_568963(path: JsonNode; query: JsonNode;
+proc validate_VirtualMachinesStart_564863(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## The operation to start a virtual machine.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   ##   vmName: JString (required)
   ##         : The name of the virtual machine.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568965 = path.getOrDefault("resourceGroupName")
-  valid_568965 = validateParameter(valid_568965, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564865 = path.getOrDefault("subscriptionId")
+  valid_564865 = validateParameter(valid_564865, JString, required = true,
                                  default = nil)
-  if valid_568965 != nil:
-    section.add "resourceGroupName", valid_568965
-  var valid_568966 = path.getOrDefault("subscriptionId")
-  valid_568966 = validateParameter(valid_568966, JString, required = true,
+  if valid_564865 != nil:
+    section.add "subscriptionId", valid_564865
+  var valid_564866 = path.getOrDefault("resourceGroupName")
+  valid_564866 = validateParameter(valid_564866, JString, required = true,
                                  default = nil)
-  if valid_568966 != nil:
-    section.add "subscriptionId", valid_568966
-  var valid_568967 = path.getOrDefault("vmName")
-  valid_568967 = validateParameter(valid_568967, JString, required = true,
+  if valid_564866 != nil:
+    section.add "resourceGroupName", valid_564866
+  var valid_564867 = path.getOrDefault("vmName")
+  valid_564867 = validateParameter(valid_564867, JString, required = true,
                                  default = nil)
-  if valid_568967 != nil:
-    section.add "vmName", valid_568967
+  if valid_564867 != nil:
+    section.add "vmName", valid_564867
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -7781,11 +7774,11 @@ proc validate_VirtualMachinesStart_568963(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568968 = query.getOrDefault("api-version")
-  valid_568968 = validateParameter(valid_568968, JString, required = true,
+  var valid_564868 = query.getOrDefault("api-version")
+  valid_564868 = validateParameter(valid_564868, JString, required = true,
                                  default = nil)
-  if valid_568968 != nil:
-    section.add "api-version", valid_568968
+  if valid_564868 != nil:
+    section.add "api-version", valid_564868
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -7794,48 +7787,47 @@ proc validate_VirtualMachinesStart_568963(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568969: Call_VirtualMachinesStart_568962; path: JsonNode;
+proc call*(call_564869: Call_VirtualMachinesStart_564862; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## The operation to start a virtual machine.
   ## 
-  let valid = call_568969.validator(path, query, header, formData, body)
-  let scheme = call_568969.pickScheme
+  let valid = call_564869.validator(path, query, header, formData, body)
+  let scheme = call_564869.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568969.url(scheme.get, call_568969.host, call_568969.base,
-                         call_568969.route, valid.getOrDefault("path"),
+  let url = call_564869.url(scheme.get, call_564869.host, call_564869.base,
+                         call_564869.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568969, url, valid)
+  result = hook(call_564869, url, valid)
 
-proc call*(call_568970: Call_VirtualMachinesStart_568962;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          vmName: string): Recallable =
+proc call*(call_564870: Call_VirtualMachinesStart_564862; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string; vmName: string): Recallable =
   ## virtualMachinesStart
   ## The operation to start a virtual machine.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   vmName: string (required)
   ##         : The name of the virtual machine.
-  var path_568971 = newJObject()
-  var query_568972 = newJObject()
-  add(path_568971, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568972, "api-version", newJString(apiVersion))
-  add(path_568971, "subscriptionId", newJString(subscriptionId))
-  add(path_568971, "vmName", newJString(vmName))
-  result = call_568970.call(path_568971, query_568972, nil, nil, nil)
+  var path_564871 = newJObject()
+  var query_564872 = newJObject()
+  add(query_564872, "api-version", newJString(apiVersion))
+  add(path_564871, "subscriptionId", newJString(subscriptionId))
+  add(path_564871, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564871, "vmName", newJString(vmName))
+  result = call_564870.call(path_564871, query_564872, nil, nil, nil)
 
-var virtualMachinesStart* = Call_VirtualMachinesStart_568962(
+var virtualMachinesStart* = Call_VirtualMachinesStart_564862(
     name: "virtualMachinesStart", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/virtualMachines/{vmName}/start",
-    validator: validate_VirtualMachinesStart_568963, base: "",
-    url: url_VirtualMachinesStart_568964, schemes: {Scheme.Https})
+    validator: validate_VirtualMachinesStart_564863, base: "",
+    url: url_VirtualMachinesStart_564864, schemes: {Scheme.Https})
 type
-  Call_VirtualMachinesListAvailableSizes_568973 = ref object of OpenApiRestCall_567667
-proc url_VirtualMachinesListAvailableSizes_568975(protocol: Scheme; host: string;
+  Call_VirtualMachinesListAvailableSizes_564873 = ref object of OpenApiRestCall_563565
+proc url_VirtualMachinesListAvailableSizes_564875(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -7859,37 +7851,37 @@ proc url_VirtualMachinesListAvailableSizes_568975(protocol: Scheme; host: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_VirtualMachinesListAvailableSizes_568974(path: JsonNode;
+proc validate_VirtualMachinesListAvailableSizes_564874(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists all available virtual machine sizes to which the specified virtual machine can be resized.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   ##   vmName: JString (required)
   ##         : The name of the virtual machine.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568976 = path.getOrDefault("resourceGroupName")
-  valid_568976 = validateParameter(valid_568976, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564876 = path.getOrDefault("subscriptionId")
+  valid_564876 = validateParameter(valid_564876, JString, required = true,
                                  default = nil)
-  if valid_568976 != nil:
-    section.add "resourceGroupName", valid_568976
-  var valid_568977 = path.getOrDefault("subscriptionId")
-  valid_568977 = validateParameter(valid_568977, JString, required = true,
+  if valid_564876 != nil:
+    section.add "subscriptionId", valid_564876
+  var valid_564877 = path.getOrDefault("resourceGroupName")
+  valid_564877 = validateParameter(valid_564877, JString, required = true,
                                  default = nil)
-  if valid_568977 != nil:
-    section.add "subscriptionId", valid_568977
-  var valid_568978 = path.getOrDefault("vmName")
-  valid_568978 = validateParameter(valid_568978, JString, required = true,
+  if valid_564877 != nil:
+    section.add "resourceGroupName", valid_564877
+  var valid_564878 = path.getOrDefault("vmName")
+  valid_564878 = validateParameter(valid_564878, JString, required = true,
                                  default = nil)
-  if valid_568978 != nil:
-    section.add "vmName", valid_568978
+  if valid_564878 != nil:
+    section.add "vmName", valid_564878
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -7897,11 +7889,11 @@ proc validate_VirtualMachinesListAvailableSizes_568974(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568979 = query.getOrDefault("api-version")
-  valid_568979 = validateParameter(valid_568979, JString, required = true,
+  var valid_564879 = query.getOrDefault("api-version")
+  valid_564879 = validateParameter(valid_564879, JString, required = true,
                                  default = nil)
-  if valid_568979 != nil:
-    section.add "api-version", valid_568979
+  if valid_564879 != nil:
+    section.add "api-version", valid_564879
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -7910,46 +7902,46 @@ proc validate_VirtualMachinesListAvailableSizes_568974(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568980: Call_VirtualMachinesListAvailableSizes_568973;
+proc call*(call_564880: Call_VirtualMachinesListAvailableSizes_564873;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Lists all available virtual machine sizes to which the specified virtual machine can be resized.
   ## 
-  let valid = call_568980.validator(path, query, header, formData, body)
-  let scheme = call_568980.pickScheme
+  let valid = call_564880.validator(path, query, header, formData, body)
+  let scheme = call_564880.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568980.url(scheme.get, call_568980.host, call_568980.base,
-                         call_568980.route, valid.getOrDefault("path"),
+  let url = call_564880.url(scheme.get, call_564880.host, call_564880.base,
+                         call_564880.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568980, url, valid)
+  result = hook(call_564880, url, valid)
 
-proc call*(call_568981: Call_VirtualMachinesListAvailableSizes_568973;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
+proc call*(call_564881: Call_VirtualMachinesListAvailableSizes_564873;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string;
           vmName: string): Recallable =
   ## virtualMachinesListAvailableSizes
   ## Lists all available virtual machine sizes to which the specified virtual machine can be resized.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   vmName: string (required)
   ##         : The name of the virtual machine.
-  var path_568982 = newJObject()
-  var query_568983 = newJObject()
-  add(path_568982, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568983, "api-version", newJString(apiVersion))
-  add(path_568982, "subscriptionId", newJString(subscriptionId))
-  add(path_568982, "vmName", newJString(vmName))
-  result = call_568981.call(path_568982, query_568983, nil, nil, nil)
+  var path_564882 = newJObject()
+  var query_564883 = newJObject()
+  add(query_564883, "api-version", newJString(apiVersion))
+  add(path_564882, "subscriptionId", newJString(subscriptionId))
+  add(path_564882, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564882, "vmName", newJString(vmName))
+  result = call_564881.call(path_564882, query_564883, nil, nil, nil)
 
-var virtualMachinesListAvailableSizes* = Call_VirtualMachinesListAvailableSizes_568973(
+var virtualMachinesListAvailableSizes* = Call_VirtualMachinesListAvailableSizes_564873(
     name: "virtualMachinesListAvailableSizes", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/virtualMachines/{vmName}/vmSizes",
-    validator: validate_VirtualMachinesListAvailableSizes_568974, base: "",
-    url: url_VirtualMachinesListAvailableSizes_568975, schemes: {Scheme.Https})
+    validator: validate_VirtualMachinesListAvailableSizes_564874, base: "",
+    url: url_VirtualMachinesListAvailableSizes_564875, schemes: {Scheme.Https})
 export
   rest
 

@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, httpcore
 
 ## auto-generated via openapi macro
 ## title: UsageManagementClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_567658 = ref object of OpenApiRestCall
+  OpenApiRestCall_563556 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_567658](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563556](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_567658): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563556): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,8 +107,8 @@ const
   macServiceName = "commerce"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_RateCardGet_567880 = ref object of OpenApiRestCall_567658
-proc url_RateCardGet_567882(protocol: Scheme; host: string; base: string;
+  Call_RateCardGet_563778 = ref object of OpenApiRestCall_563556
+proc url_RateCardGet_563780(protocol: Scheme; host: string; base: string;
                            route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -120,7 +124,7 @@ proc url_RateCardGet_567882(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_RateCardGet_567881(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_RateCardGet_563779(path: JsonNode; query: JsonNode; header: JsonNode;
                                 formData: JsonNode; body: JsonNode): JsonNode =
   ## Enables you to query for the resource/meter metadata and related prices used in a given subscription by Offer ID, Currency, Locale and Region. The metadata associated with the billing meters, including but not limited to service names, types, resources, units of measure, and regions, is subject to change at any time and without notice. If you intend to use this billing data in an automated fashion, please use the billing meter GUID to uniquely identify each billable item. If the billing meter GUID is scheduled to change due to a new billing model, you will be notified in advance of the change. 
   ## 
@@ -133,11 +137,11 @@ proc validate_RateCardGet_567881(path: JsonNode; query: JsonNode; header: JsonNo
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_568056 = path.getOrDefault("subscriptionId")
-  valid_568056 = validateParameter(valid_568056, JString, required = true,
+  var valid_563956 = path.getOrDefault("subscriptionId")
+  valid_563956 = validateParameter(valid_563956, JString, required = true,
                                  default = nil)
-  if valid_568056 != nil:
-    section.add "subscriptionId", valid_568056
+  if valid_563956 != nil:
+    section.add "subscriptionId", valid_563956
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -147,16 +151,16 @@ proc validate_RateCardGet_567881(path: JsonNode; query: JsonNode; header: JsonNo
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568057 = query.getOrDefault("api-version")
-  valid_568057 = validateParameter(valid_568057, JString, required = true,
+  var valid_563957 = query.getOrDefault("api-version")
+  valid_563957 = validateParameter(valid_563957, JString, required = true,
                                  default = nil)
-  if valid_568057 != nil:
-    section.add "api-version", valid_568057
-  var valid_568058 = query.getOrDefault("$filter")
-  valid_568058 = validateParameter(valid_568058, JString, required = true,
+  if valid_563957 != nil:
+    section.add "api-version", valid_563957
+  var valid_563958 = query.getOrDefault("$filter")
+  valid_563958 = validateParameter(valid_563958, JString, required = true,
                                  default = nil)
-  if valid_568058 != nil:
-    section.add "$filter", valid_568058
+  if valid_563958 != nil:
+    section.add "$filter", valid_563958
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -165,21 +169,21 @@ proc validate_RateCardGet_567881(path: JsonNode; query: JsonNode; header: JsonNo
   if body != nil:
     result.add "body", body
 
-proc call*(call_568081: Call_RateCardGet_567880; path: JsonNode; query: JsonNode;
+proc call*(call_563981: Call_RateCardGet_563778; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Enables you to query for the resource/meter metadata and related prices used in a given subscription by Offer ID, Currency, Locale and Region. The metadata associated with the billing meters, including but not limited to service names, types, resources, units of measure, and regions, is subject to change at any time and without notice. If you intend to use this billing data in an automated fashion, please use the billing meter GUID to uniquely identify each billable item. If the billing meter GUID is scheduled to change due to a new billing model, you will be notified in advance of the change. 
   ## 
   ## https://docs.microsoft.com/rest/api/commerce/ratecard
-  let valid = call_568081.validator(path, query, header, formData, body)
-  let scheme = call_568081.pickScheme
+  let valid = call_563981.validator(path, query, header, formData, body)
+  let scheme = call_563981.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568081.url(scheme.get, call_568081.host, call_568081.base,
-                         call_568081.route, valid.getOrDefault("path"),
+  let url = call_563981.url(scheme.get, call_563981.host, call_563981.base,
+                         call_563981.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568081, url, valid)
+  result = hook(call_563981, url, valid)
 
-proc call*(call_568152: Call_RateCardGet_567880; apiVersion: string;
+proc call*(call_564052: Call_RateCardGet_563778; apiVersion: string;
           subscriptionId: string; Filter: string): Recallable =
   ## rateCardGet
   ## Enables you to query for the resource/meter metadata and related prices used in a given subscription by Offer ID, Currency, Locale and Region. The metadata associated with the billing meters, including but not limited to service names, types, resources, units of measure, and regions, is subject to change at any time and without notice. If you intend to use this billing data in an automated fashion, please use the billing meter GUID to uniquely identify each billable item. If the billing meter GUID is scheduled to change due to a new billing model, you will be notified in advance of the change. 
@@ -190,22 +194,22 @@ proc call*(call_568152: Call_RateCardGet_567880; apiVersion: string;
   ##                 : It uniquely identifies Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   Filter: string (required)
   ##         : The filter to apply on the operation. It ONLY supports the 'eq' and 'and' logical operators at this time. All the 4 query parameters 'OfferDurableId',  'Currency', 'Locale', 'Region' are required to be a part of the $filter.
-  var path_568153 = newJObject()
-  var query_568155 = newJObject()
-  add(query_568155, "api-version", newJString(apiVersion))
-  add(path_568153, "subscriptionId", newJString(subscriptionId))
-  add(query_568155, "$filter", newJString(Filter))
-  result = call_568152.call(path_568153, query_568155, nil, nil, nil)
+  var path_564053 = newJObject()
+  var query_564055 = newJObject()
+  add(query_564055, "api-version", newJString(apiVersion))
+  add(path_564053, "subscriptionId", newJString(subscriptionId))
+  add(query_564055, "$filter", newJString(Filter))
+  result = call_564052.call(path_564053, query_564055, nil, nil, nil)
 
-var rateCardGet* = Call_RateCardGet_567880(name: "rateCardGet",
+var rateCardGet* = Call_RateCardGet_563778(name: "rateCardGet",
                                         meth: HttpMethod.HttpGet,
                                         host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Commerce/RateCard",
-                                        validator: validate_RateCardGet_567881,
-                                        base: "", url: url_RateCardGet_567882,
+                                        validator: validate_RateCardGet_563779,
+                                        base: "", url: url_RateCardGet_563780,
                                         schemes: {Scheme.Https})
 type
-  Call_UsageAggregatesList_568194 = ref object of OpenApiRestCall_567658
-proc url_UsageAggregatesList_568196(protocol: Scheme; host: string; base: string;
+  Call_UsageAggregatesList_564094 = ref object of OpenApiRestCall_563556
+proc url_UsageAggregatesList_564096(protocol: Scheme; host: string; base: string;
                                    route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -222,7 +226,7 @@ proc url_UsageAggregatesList_568196(protocol: Scheme; host: string; base: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_UsageAggregatesList_568195(path: JsonNode; query: JsonNode;
+proc validate_UsageAggregatesList_564095(path: JsonNode; query: JsonNode;
                                         header: JsonNode; formData: JsonNode;
                                         body: JsonNode): JsonNode =
   ## Query aggregated Azure subscription consumption data for a date range.
@@ -236,57 +240,57 @@ proc validate_UsageAggregatesList_568195(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_568197 = path.getOrDefault("subscriptionId")
-  valid_568197 = validateParameter(valid_568197, JString, required = true,
+  var valid_564097 = path.getOrDefault("subscriptionId")
+  valid_564097 = validateParameter(valid_564097, JString, required = true,
                                  default = nil)
-  if valid_568197 != nil:
-    section.add "subscriptionId", valid_568197
+  if valid_564097 != nil:
+    section.add "subscriptionId", valid_564097
   result.add "path", section
   ## parameters in `query` object:
-  ##   api-version: JString (required)
-  ##              : Client Api Version.
-  ##   showDetails: JBool
-  ##              : `True` returns usage data in instance-level detail, `false` causes server-side aggregation with fewer details. For example, if you have 3 website instances, by default you will get 3 line items for website consumption. If you specify showDetails = false, the data will be aggregated as a single line item for website consumption within the time period (for the given subscriptionId, meterId, usageStartTime and usageEndTime).
   ##   reportedStartTime: JString (required)
   ##                    : The start of the time range to retrieve data for.
-  ##   reportedEndTime: JString (required)
-  ##                  : The end of the time range to retrieve data for.
-  ##   continuationToken: JString
-  ##                    : Used when a continuation token string is provided in the response body of the previous call, enabling paging through a large result set. If not present, the data is retrieved from the beginning of the day/hour (based on the granularity) passed in. 
+  ##   api-version: JString (required)
+  ##              : Client Api Version.
   ##   aggregationGranularity: JString
   ##                         : `Daily` (default) returns the data in daily granularity, `Hourly` returns the data in hourly granularity.
+  ##   showDetails: JBool
+  ##              : `True` returns usage data in instance-level detail, `false` causes server-side aggregation with fewer details. For example, if you have 3 website instances, by default you will get 3 line items for website consumption. If you specify showDetails = false, the data will be aggregated as a single line item for website consumption within the time period (for the given subscriptionId, meterId, usageStartTime and usageEndTime).
+  ##   continuationToken: JString
+  ##                    : Used when a continuation token string is provided in the response body of the previous call, enabling paging through a large result set. If not present, the data is retrieved from the beginning of the day/hour (based on the granularity) passed in. 
+  ##   reportedEndTime: JString (required)
+  ##                  : The end of the time range to retrieve data for.
   section = newJObject()
   assert query != nil,
-        "query argument is necessary due to required `api-version` field"
-  var valid_568198 = query.getOrDefault("api-version")
-  valid_568198 = validateParameter(valid_568198, JString, required = true,
+        "query argument is necessary due to required `reportedStartTime` field"
+  var valid_564098 = query.getOrDefault("reportedStartTime")
+  valid_564098 = validateParameter(valid_564098, JString, required = true,
                                  default = nil)
-  if valid_568198 != nil:
-    section.add "api-version", valid_568198
-  var valid_568199 = query.getOrDefault("showDetails")
-  valid_568199 = validateParameter(valid_568199, JBool, required = false, default = nil)
-  if valid_568199 != nil:
-    section.add "showDetails", valid_568199
-  var valid_568200 = query.getOrDefault("reportedStartTime")
-  valid_568200 = validateParameter(valid_568200, JString, required = true,
+  if valid_564098 != nil:
+    section.add "reportedStartTime", valid_564098
+  var valid_564099 = query.getOrDefault("api-version")
+  valid_564099 = validateParameter(valid_564099, JString, required = true,
                                  default = nil)
-  if valid_568200 != nil:
-    section.add "reportedStartTime", valid_568200
-  var valid_568201 = query.getOrDefault("reportedEndTime")
-  valid_568201 = validateParameter(valid_568201, JString, required = true,
-                                 default = nil)
-  if valid_568201 != nil:
-    section.add "reportedEndTime", valid_568201
-  var valid_568202 = query.getOrDefault("continuationToken")
-  valid_568202 = validateParameter(valid_568202, JString, required = false,
-                                 default = nil)
-  if valid_568202 != nil:
-    section.add "continuationToken", valid_568202
-  var valid_568216 = query.getOrDefault("aggregationGranularity")
-  valid_568216 = validateParameter(valid_568216, JString, required = false,
+  if valid_564099 != nil:
+    section.add "api-version", valid_564099
+  var valid_564113 = query.getOrDefault("aggregationGranularity")
+  valid_564113 = validateParameter(valid_564113, JString, required = false,
                                  default = newJString("Daily"))
-  if valid_568216 != nil:
-    section.add "aggregationGranularity", valid_568216
+  if valid_564113 != nil:
+    section.add "aggregationGranularity", valid_564113
+  var valid_564114 = query.getOrDefault("showDetails")
+  valid_564114 = validateParameter(valid_564114, JBool, required = false, default = nil)
+  if valid_564114 != nil:
+    section.add "showDetails", valid_564114
+  var valid_564115 = query.getOrDefault("continuationToken")
+  valid_564115 = validateParameter(valid_564115, JString, required = false,
+                                 default = nil)
+  if valid_564115 != nil:
+    section.add "continuationToken", valid_564115
+  var valid_564116 = query.getOrDefault("reportedEndTime")
+  valid_564116 = validateParameter(valid_564116, JString, required = true,
+                                 default = nil)
+  if valid_564116 != nil:
+    section.add "reportedEndTime", valid_564116
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -295,57 +299,57 @@ proc validate_UsageAggregatesList_568195(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568217: Call_UsageAggregatesList_568194; path: JsonNode;
+proc call*(call_564117: Call_UsageAggregatesList_564094; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Query aggregated Azure subscription consumption data for a date range.
   ## 
   ## https://docs.microsoft.com/rest/api/commerce/usageaggregates
-  let valid = call_568217.validator(path, query, header, formData, body)
-  let scheme = call_568217.pickScheme
+  let valid = call_564117.validator(path, query, header, formData, body)
+  let scheme = call_564117.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568217.url(scheme.get, call_568217.host, call_568217.base,
-                         call_568217.route, valid.getOrDefault("path"),
+  let url = call_564117.url(scheme.get, call_564117.host, call_564117.base,
+                         call_564117.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568217, url, valid)
+  result = hook(call_564117, url, valid)
 
-proc call*(call_568218: Call_UsageAggregatesList_568194; apiVersion: string;
-          subscriptionId: string; reportedStartTime: string;
-          reportedEndTime: string; showDetails: bool = false;
-          continuationToken: string = ""; aggregationGranularity: string = "Daily"): Recallable =
+proc call*(call_564118: Call_UsageAggregatesList_564094; reportedStartTime: string;
+          apiVersion: string; subscriptionId: string; reportedEndTime: string;
+          aggregationGranularity: string = "Daily"; showDetails: bool = false;
+          continuationToken: string = ""): Recallable =
   ## usageAggregatesList
   ## Query aggregated Azure subscription consumption data for a date range.
   ## https://docs.microsoft.com/rest/api/commerce/usageaggregates
-  ##   apiVersion: string (required)
-  ##             : Client Api Version.
-  ##   showDetails: bool
-  ##              : `True` returns usage data in instance-level detail, `false` causes server-side aggregation with fewer details. For example, if you have 3 website instances, by default you will get 3 line items for website consumption. If you specify showDetails = false, the data will be aggregated as a single line item for website consumption within the time period (for the given subscriptionId, meterId, usageStartTime and usageEndTime).
-  ##   subscriptionId: string (required)
-  ##                 : It uniquely identifies Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   reportedStartTime: string (required)
   ##                    : The start of the time range to retrieve data for.
-  ##   reportedEndTime: string (required)
-  ##                  : The end of the time range to retrieve data for.
-  ##   continuationToken: string
-  ##                    : Used when a continuation token string is provided in the response body of the previous call, enabling paging through a large result set. If not present, the data is retrieved from the beginning of the day/hour (based on the granularity) passed in. 
+  ##   apiVersion: string (required)
+  ##             : Client Api Version.
+  ##   subscriptionId: string (required)
+  ##                 : It uniquely identifies Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   aggregationGranularity: string
   ##                         : `Daily` (default) returns the data in daily granularity, `Hourly` returns the data in hourly granularity.
-  var path_568219 = newJObject()
-  var query_568220 = newJObject()
-  add(query_568220, "api-version", newJString(apiVersion))
-  add(query_568220, "showDetails", newJBool(showDetails))
-  add(path_568219, "subscriptionId", newJString(subscriptionId))
-  add(query_568220, "reportedStartTime", newJString(reportedStartTime))
-  add(query_568220, "reportedEndTime", newJString(reportedEndTime))
-  add(query_568220, "continuationToken", newJString(continuationToken))
-  add(query_568220, "aggregationGranularity", newJString(aggregationGranularity))
-  result = call_568218.call(path_568219, query_568220, nil, nil, nil)
+  ##   showDetails: bool
+  ##              : `True` returns usage data in instance-level detail, `false` causes server-side aggregation with fewer details. For example, if you have 3 website instances, by default you will get 3 line items for website consumption. If you specify showDetails = false, the data will be aggregated as a single line item for website consumption within the time period (for the given subscriptionId, meterId, usageStartTime and usageEndTime).
+  ##   continuationToken: string
+  ##                    : Used when a continuation token string is provided in the response body of the previous call, enabling paging through a large result set. If not present, the data is retrieved from the beginning of the day/hour (based on the granularity) passed in. 
+  ##   reportedEndTime: string (required)
+  ##                  : The end of the time range to retrieve data for.
+  var path_564119 = newJObject()
+  var query_564120 = newJObject()
+  add(query_564120, "reportedStartTime", newJString(reportedStartTime))
+  add(query_564120, "api-version", newJString(apiVersion))
+  add(path_564119, "subscriptionId", newJString(subscriptionId))
+  add(query_564120, "aggregationGranularity", newJString(aggregationGranularity))
+  add(query_564120, "showDetails", newJBool(showDetails))
+  add(query_564120, "continuationToken", newJString(continuationToken))
+  add(query_564120, "reportedEndTime", newJString(reportedEndTime))
+  result = call_564118.call(path_564119, query_564120, nil, nil, nil)
 
-var usageAggregatesList* = Call_UsageAggregatesList_568194(
+var usageAggregatesList* = Call_UsageAggregatesList_564094(
     name: "usageAggregatesList", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Commerce/UsageAggregates",
-    validator: validate_UsageAggregatesList_568195, base: "",
-    url: url_UsageAggregatesList_568196, schemes: {Scheme.Https})
+    validator: validate_UsageAggregatesList_564095, base: "",
+    url: url_UsageAggregatesList_564096, schemes: {Scheme.Https})
 export
   rest
 

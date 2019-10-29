@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, httpcore
 
 ## auto-generated via openapi macro
 ## title: DataLakeAnalyticsJobManagementClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_567641 = ref object of OpenApiRestCall
+  OpenApiRestCall_563539 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_567641](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563539](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_567641): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563539): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,15 +107,15 @@ const
   macServiceName = "datalake-analytics-job"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_JobBuild_567863 = ref object of OpenApiRestCall_567641
-proc url_JobBuild_567865(protocol: Scheme; host: string; base: string; route: string;
+  Call_JobBuild_563761 = ref object of OpenApiRestCall_563539
+proc url_JobBuild_563763(protocol: Scheme; host: string; base: string; route: string;
                         path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_JobBuild_567864(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_JobBuild_563762(path: JsonNode; query: JsonNode; header: JsonNode;
                              formData: JsonNode; body: JsonNode): JsonNode =
   ## Builds (compiles) the specified job in the specified Data Lake Analytics account for job correctness and validation.
   ## 
@@ -125,11 +129,11 @@ proc validate_JobBuild_567864(path: JsonNode; query: JsonNode; header: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568041 = query.getOrDefault("api-version")
-  valid_568041 = validateParameter(valid_568041, JString, required = true,
+  var valid_563941 = query.getOrDefault("api-version")
+  valid_563941 = validateParameter(valid_563941, JString, required = true,
                                  default = nil)
-  if valid_568041 != nil:
-    section.add "api-version", valid_568041
+  if valid_563941 != nil:
+    section.add "api-version", valid_563941
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -143,20 +147,20 @@ proc validate_JobBuild_567864(path: JsonNode; query: JsonNode; header: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568065: Call_JobBuild_567863; path: JsonNode; query: JsonNode;
+proc call*(call_563965: Call_JobBuild_563761; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Builds (compiles) the specified job in the specified Data Lake Analytics account for job correctness and validation.
   ## 
-  let valid = call_568065.validator(path, query, header, formData, body)
-  let scheme = call_568065.pickScheme
+  let valid = call_563965.validator(path, query, header, formData, body)
+  let scheme = call_563965.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568065.url(scheme.get, call_568065.host, call_568065.base,
-                         call_568065.route, valid.getOrDefault("path"),
+  let url = call_563965.url(scheme.get, call_563965.host, call_563965.base,
+                         call_563965.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568065, url, valid)
+  result = hook(call_563965, url, valid)
 
-proc call*(call_568136: Call_JobBuild_567863; apiVersion: string;
+proc call*(call_564036: Call_JobBuild_563761; apiVersion: string;
           parameters: JsonNode): Recallable =
   ## jobBuild
   ## Builds (compiles) the specified job in the specified Data Lake Analytics account for job correctness and validation.
@@ -164,28 +168,28 @@ proc call*(call_568136: Call_JobBuild_567863; apiVersion: string;
   ##             : Client Api Version.
   ##   parameters: JObject (required)
   ##             : The parameters to build a job.
-  var query_568137 = newJObject()
-  var body_568139 = newJObject()
-  add(query_568137, "api-version", newJString(apiVersion))
+  var query_564037 = newJObject()
+  var body_564039 = newJObject()
+  add(query_564037, "api-version", newJString(apiVersion))
   if parameters != nil:
-    body_568139 = parameters
-  result = call_568136.call(nil, query_568137, nil, nil, body_568139)
+    body_564039 = parameters
+  result = call_564036.call(nil, query_564037, nil, nil, body_564039)
 
-var jobBuild* = Call_JobBuild_567863(name: "jobBuild", meth: HttpMethod.HttpPost,
+var jobBuild* = Call_JobBuild_563761(name: "jobBuild", meth: HttpMethod.HttpPost,
                                   host: "azure.local", route: "/BuildJob",
-                                  validator: validate_JobBuild_567864, base: "",
-                                  url: url_JobBuild_567865,
+                                  validator: validate_JobBuild_563762, base: "",
+                                  url: url_JobBuild_563763,
                                   schemes: {Scheme.Https})
 type
-  Call_JobList_568178 = ref object of OpenApiRestCall_567641
-proc url_JobList_568180(protocol: Scheme; host: string; base: string; route: string;
+  Call_JobList_564078 = ref object of OpenApiRestCall_563539
+proc url_JobList_564080(protocol: Scheme; host: string; base: string; route: string;
                        path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_JobList_568179(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_JobList_564079(path: JsonNode; query: JsonNode; header: JsonNode;
                             formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists the jobs, if any, associated with the specified Data Lake Analytics account. The response includes a link to the next page of results, if any.
   ## 
@@ -194,76 +198,76 @@ proc validate_JobList_568179(path: JsonNode; query: JsonNode; header: JsonNode;
   section = newJObject()
   result.add "path", section
   ## parameters in `query` object:
-  ##   $orderby: JString
-  ##           : OrderBy clause. One or more comma-separated expressions with an optional "asc" (the default) or "desc" depending on the order you'd like the values sorted, e.g. Categories?$orderby=CategoryName desc. Optional.
-  ##   $expand: JString
-  ##          : OData expansion. Expand related resources in line with the retrieved resources, e.g. Categories/$expand=Products would expand Product data in line with each Category entry. Optional.
-  ##   api-version: JString (required)
-  ##              : Client Api Version.
   ##   $top: JInt
   ##       : The number of items to return. Optional.
+  ##   api-version: JString (required)
+  ##              : Client Api Version.
   ##   $select: JString
   ##          : OData Select statement. Limits the properties on each entry to just those requested, e.g. Categories?$select=CategoryName,Description. Optional.
-  ##   $skip: JInt
-  ##        : The number of items to skip over before returning elements. Optional.
+  ##   $expand: JString
+  ##          : OData expansion. Expand related resources in line with the retrieved resources, e.g. Categories/$expand=Products would expand Product data in line with each Category entry. Optional.
   ##   $count: JBool
   ##         : The Boolean value of true or false to request a count of the matching resources included with the resources in the response, e.g. Categories?$count=true. Optional.
-  ##   $search: JString
-  ##          : A free form search. A free-text search expression to match for whether a particular entry should be included in the feed, e.g. Categories?$search=blue OR green. Optional.
   ##   $format: JString
   ##          : The return format. Return the response in particular format without access to request headers for standard content-type negotiation (e.g Orders?$format=json). Optional.
+  ##   $orderby: JString
+  ##           : OrderBy clause. One or more comma-separated expressions with an optional "asc" (the default) or "desc" depending on the order you'd like the values sorted, e.g. Categories?$orderby=CategoryName desc. Optional.
+  ##   $skip: JInt
+  ##        : The number of items to skip over before returning elements. Optional.
   ##   $filter: JString
   ##          : OData filter. Optional.
+  ##   $search: JString
+  ##          : A free form search. A free-text search expression to match for whether a particular entry should be included in the feed, e.g. Categories?$search=blue OR green. Optional.
   section = newJObject()
-  var valid_568182 = query.getOrDefault("$orderby")
-  valid_568182 = validateParameter(valid_568182, JString, required = false,
-                                 default = nil)
-  if valid_568182 != nil:
-    section.add "$orderby", valid_568182
-  var valid_568183 = query.getOrDefault("$expand")
-  valid_568183 = validateParameter(valid_568183, JString, required = false,
-                                 default = nil)
-  if valid_568183 != nil:
-    section.add "$expand", valid_568183
+  var valid_564082 = query.getOrDefault("$top")
+  valid_564082 = validateParameter(valid_564082, JInt, required = false, default = nil)
+  if valid_564082 != nil:
+    section.add "$top", valid_564082
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568184 = query.getOrDefault("api-version")
-  valid_568184 = validateParameter(valid_568184, JString, required = true,
+  var valid_564083 = query.getOrDefault("api-version")
+  valid_564083 = validateParameter(valid_564083, JString, required = true,
                                  default = nil)
-  if valid_568184 != nil:
-    section.add "api-version", valid_568184
-  var valid_568185 = query.getOrDefault("$top")
-  valid_568185 = validateParameter(valid_568185, JInt, required = false, default = nil)
-  if valid_568185 != nil:
-    section.add "$top", valid_568185
-  var valid_568186 = query.getOrDefault("$select")
-  valid_568186 = validateParameter(valid_568186, JString, required = false,
+  if valid_564083 != nil:
+    section.add "api-version", valid_564083
+  var valid_564084 = query.getOrDefault("$select")
+  valid_564084 = validateParameter(valid_564084, JString, required = false,
                                  default = nil)
-  if valid_568186 != nil:
-    section.add "$select", valid_568186
-  var valid_568187 = query.getOrDefault("$skip")
-  valid_568187 = validateParameter(valid_568187, JInt, required = false, default = nil)
-  if valid_568187 != nil:
-    section.add "$skip", valid_568187
-  var valid_568188 = query.getOrDefault("$count")
-  valid_568188 = validateParameter(valid_568188, JBool, required = false, default = nil)
-  if valid_568188 != nil:
-    section.add "$count", valid_568188
-  var valid_568189 = query.getOrDefault("$search")
-  valid_568189 = validateParameter(valid_568189, JString, required = false,
+  if valid_564084 != nil:
+    section.add "$select", valid_564084
+  var valid_564085 = query.getOrDefault("$expand")
+  valid_564085 = validateParameter(valid_564085, JString, required = false,
                                  default = nil)
-  if valid_568189 != nil:
-    section.add "$search", valid_568189
-  var valid_568190 = query.getOrDefault("$format")
-  valid_568190 = validateParameter(valid_568190, JString, required = false,
+  if valid_564085 != nil:
+    section.add "$expand", valid_564085
+  var valid_564086 = query.getOrDefault("$count")
+  valid_564086 = validateParameter(valid_564086, JBool, required = false, default = nil)
+  if valid_564086 != nil:
+    section.add "$count", valid_564086
+  var valid_564087 = query.getOrDefault("$format")
+  valid_564087 = validateParameter(valid_564087, JString, required = false,
                                  default = nil)
-  if valid_568190 != nil:
-    section.add "$format", valid_568190
-  var valid_568191 = query.getOrDefault("$filter")
-  valid_568191 = validateParameter(valid_568191, JString, required = false,
+  if valid_564087 != nil:
+    section.add "$format", valid_564087
+  var valid_564088 = query.getOrDefault("$orderby")
+  valid_564088 = validateParameter(valid_564088, JString, required = false,
                                  default = nil)
-  if valid_568191 != nil:
-    section.add "$filter", valid_568191
+  if valid_564088 != nil:
+    section.add "$orderby", valid_564088
+  var valid_564089 = query.getOrDefault("$skip")
+  valid_564089 = validateParameter(valid_564089, JInt, required = false, default = nil)
+  if valid_564089 != nil:
+    section.add "$skip", valid_564089
+  var valid_564090 = query.getOrDefault("$filter")
+  valid_564090 = validateParameter(valid_564090, JString, required = false,
+                                 default = nil)
+  if valid_564090 != nil:
+    section.add "$filter", valid_564090
+  var valid_564091 = query.getOrDefault("$search")
+  valid_564091 = validateParameter(valid_564091, JString, required = false,
+                                 default = nil)
+  if valid_564091 != nil:
+    section.add "$search", valid_564091
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -272,65 +276,65 @@ proc validate_JobList_568179(path: JsonNode; query: JsonNode; header: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568192: Call_JobList_568178; path: JsonNode; query: JsonNode;
+proc call*(call_564092: Call_JobList_564078; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists the jobs, if any, associated with the specified Data Lake Analytics account. The response includes a link to the next page of results, if any.
   ## 
-  let valid = call_568192.validator(path, query, header, formData, body)
-  let scheme = call_568192.pickScheme
+  let valid = call_564092.validator(path, query, header, formData, body)
+  let scheme = call_564092.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568192.url(scheme.get, call_568192.host, call_568192.base,
-                         call_568192.route, valid.getOrDefault("path"),
+  let url = call_564092.url(scheme.get, call_564092.host, call_564092.base,
+                         call_564092.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568192, url, valid)
+  result = hook(call_564092, url, valid)
 
-proc call*(call_568193: Call_JobList_568178; apiVersion: string;
-          Orderby: string = ""; Expand: string = ""; Top: int = 0; Select: string = "";
-          Skip: int = 0; Count: bool = false; Search: string = ""; Format: string = "";
-          Filter: string = ""): Recallable =
+proc call*(call_564093: Call_JobList_564078; apiVersion: string; Top: int = 0;
+          Select: string = ""; Expand: string = ""; Count: bool = false;
+          Format: string = ""; Orderby: string = ""; Skip: int = 0; Filter: string = "";
+          Search: string = ""): Recallable =
   ## jobList
   ## Lists the jobs, if any, associated with the specified Data Lake Analytics account. The response includes a link to the next page of results, if any.
-  ##   Orderby: string
-  ##          : OrderBy clause. One or more comma-separated expressions with an optional "asc" (the default) or "desc" depending on the order you'd like the values sorted, e.g. Categories?$orderby=CategoryName desc. Optional.
-  ##   Expand: string
-  ##         : OData expansion. Expand related resources in line with the retrieved resources, e.g. Categories/$expand=Products would expand Product data in line with each Category entry. Optional.
-  ##   apiVersion: string (required)
-  ##             : Client Api Version.
   ##   Top: int
   ##      : The number of items to return. Optional.
+  ##   apiVersion: string (required)
+  ##             : Client Api Version.
   ##   Select: string
   ##         : OData Select statement. Limits the properties on each entry to just those requested, e.g. Categories?$select=CategoryName,Description. Optional.
-  ##   Skip: int
-  ##       : The number of items to skip over before returning elements. Optional.
+  ##   Expand: string
+  ##         : OData expansion. Expand related resources in line with the retrieved resources, e.g. Categories/$expand=Products would expand Product data in line with each Category entry. Optional.
   ##   Count: bool
   ##        : The Boolean value of true or false to request a count of the matching resources included with the resources in the response, e.g. Categories?$count=true. Optional.
-  ##   Search: string
-  ##         : A free form search. A free-text search expression to match for whether a particular entry should be included in the feed, e.g. Categories?$search=blue OR green. Optional.
   ##   Format: string
   ##         : The return format. Return the response in particular format without access to request headers for standard content-type negotiation (e.g Orders?$format=json). Optional.
+  ##   Orderby: string
+  ##          : OrderBy clause. One or more comma-separated expressions with an optional "asc" (the default) or "desc" depending on the order you'd like the values sorted, e.g. Categories?$orderby=CategoryName desc. Optional.
+  ##   Skip: int
+  ##       : The number of items to skip over before returning elements. Optional.
   ##   Filter: string
   ##         : OData filter. Optional.
-  var query_568194 = newJObject()
-  add(query_568194, "$orderby", newJString(Orderby))
-  add(query_568194, "$expand", newJString(Expand))
-  add(query_568194, "api-version", newJString(apiVersion))
-  add(query_568194, "$top", newJInt(Top))
-  add(query_568194, "$select", newJString(Select))
-  add(query_568194, "$skip", newJInt(Skip))
-  add(query_568194, "$count", newJBool(Count))
-  add(query_568194, "$search", newJString(Search))
-  add(query_568194, "$format", newJString(Format))
-  add(query_568194, "$filter", newJString(Filter))
-  result = call_568193.call(nil, query_568194, nil, nil, nil)
+  ##   Search: string
+  ##         : A free form search. A free-text search expression to match for whether a particular entry should be included in the feed, e.g. Categories?$search=blue OR green. Optional.
+  var query_564094 = newJObject()
+  add(query_564094, "$top", newJInt(Top))
+  add(query_564094, "api-version", newJString(apiVersion))
+  add(query_564094, "$select", newJString(Select))
+  add(query_564094, "$expand", newJString(Expand))
+  add(query_564094, "$count", newJBool(Count))
+  add(query_564094, "$format", newJString(Format))
+  add(query_564094, "$orderby", newJString(Orderby))
+  add(query_564094, "$skip", newJInt(Skip))
+  add(query_564094, "$filter", newJString(Filter))
+  add(query_564094, "$search", newJString(Search))
+  result = call_564093.call(nil, query_564094, nil, nil, nil)
 
-var jobList* = Call_JobList_568178(name: "jobList", meth: HttpMethod.HttpGet,
+var jobList* = Call_JobList_564078(name: "jobList", meth: HttpMethod.HttpGet,
                                 host: "azure.local", route: "/Jobs",
-                                validator: validate_JobList_568179, base: "",
-                                url: url_JobList_568180, schemes: {Scheme.Https})
+                                validator: validate_JobList_564079, base: "",
+                                url: url_JobList_564080, schemes: {Scheme.Https})
 type
-  Call_JobCreate_568218 = ref object of OpenApiRestCall_567641
-proc url_JobCreate_568220(protocol: Scheme; host: string; base: string; route: string;
+  Call_JobCreate_564118 = ref object of OpenApiRestCall_563539
+proc url_JobCreate_564120(protocol: Scheme; host: string; base: string; route: string;
                          path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -345,7 +349,7 @@ proc url_JobCreate_568220(protocol: Scheme; host: string; base: string; route: s
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_JobCreate_568219(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_JobCreate_564119(path: JsonNode; query: JsonNode; header: JsonNode;
                               formData: JsonNode; body: JsonNode): JsonNode =
   ## Submits a job to the specified Data Lake Analytics account.
   ## 
@@ -357,11 +361,11 @@ proc validate_JobCreate_568219(path: JsonNode; query: JsonNode; header: JsonNode
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `jobIdentity` field"
-  var valid_568221 = path.getOrDefault("jobIdentity")
-  valid_568221 = validateParameter(valid_568221, JString, required = true,
+  var valid_564121 = path.getOrDefault("jobIdentity")
+  valid_564121 = validateParameter(valid_564121, JString, required = true,
                                  default = nil)
-  if valid_568221 != nil:
-    section.add "jobIdentity", valid_568221
+  if valid_564121 != nil:
+    section.add "jobIdentity", valid_564121
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -369,11 +373,11 @@ proc validate_JobCreate_568219(path: JsonNode; query: JsonNode; header: JsonNode
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568222 = query.getOrDefault("api-version")
-  valid_568222 = validateParameter(valid_568222, JString, required = true,
+  var valid_564122 = query.getOrDefault("api-version")
+  valid_564122 = validateParameter(valid_564122, JString, required = true,
                                  default = nil)
-  if valid_568222 != nil:
-    section.add "api-version", valid_568222
+  if valid_564122 != nil:
+    section.add "api-version", valid_564122
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -387,20 +391,20 @@ proc validate_JobCreate_568219(path: JsonNode; query: JsonNode; header: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_568224: Call_JobCreate_568218; path: JsonNode; query: JsonNode;
+proc call*(call_564124: Call_JobCreate_564118; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Submits a job to the specified Data Lake Analytics account.
   ## 
-  let valid = call_568224.validator(path, query, header, formData, body)
-  let scheme = call_568224.pickScheme
+  let valid = call_564124.validator(path, query, header, formData, body)
+  let scheme = call_564124.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568224.url(scheme.get, call_568224.host, call_568224.base,
-                         call_568224.route, valid.getOrDefault("path"),
+  let url = call_564124.url(scheme.get, call_564124.host, call_564124.base,
+                         call_564124.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568224, url, valid)
+  result = hook(call_564124, url, valid)
 
-proc call*(call_568225: Call_JobCreate_568218; apiVersion: string;
+proc call*(call_564125: Call_JobCreate_564118; apiVersion: string;
           jobIdentity: string; parameters: JsonNode): Recallable =
   ## jobCreate
   ## Submits a job to the specified Data Lake Analytics account.
@@ -410,24 +414,24 @@ proc call*(call_568225: Call_JobCreate_568218; apiVersion: string;
   ##              : The job ID (a GUID) for the job being submitted.
   ##   parameters: JObject (required)
   ##             : The parameters to submit a job.
-  var path_568226 = newJObject()
-  var query_568227 = newJObject()
-  var body_568228 = newJObject()
-  add(query_568227, "api-version", newJString(apiVersion))
-  add(path_568226, "jobIdentity", newJString(jobIdentity))
+  var path_564126 = newJObject()
+  var query_564127 = newJObject()
+  var body_564128 = newJObject()
+  add(query_564127, "api-version", newJString(apiVersion))
+  add(path_564126, "jobIdentity", newJString(jobIdentity))
   if parameters != nil:
-    body_568228 = parameters
-  result = call_568225.call(path_568226, query_568227, nil, nil, body_568228)
+    body_564128 = parameters
+  result = call_564125.call(path_564126, query_564127, nil, nil, body_564128)
 
-var jobCreate* = Call_JobCreate_568218(name: "jobCreate", meth: HttpMethod.HttpPut,
+var jobCreate* = Call_JobCreate_564118(name: "jobCreate", meth: HttpMethod.HttpPut,
                                     host: "azure.local",
                                     route: "/Jobs/{jobIdentity}",
-                                    validator: validate_JobCreate_568219,
-                                    base: "", url: url_JobCreate_568220,
+                                    validator: validate_JobCreate_564119,
+                                    base: "", url: url_JobCreate_564120,
                                     schemes: {Scheme.Https})
 type
-  Call_JobGet_568195 = ref object of OpenApiRestCall_567641
-proc url_JobGet_568197(protocol: Scheme; host: string; base: string; route: string;
+  Call_JobGet_564095 = ref object of OpenApiRestCall_563539
+proc url_JobGet_564097(protocol: Scheme; host: string; base: string; route: string;
                       path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -442,7 +446,7 @@ proc url_JobGet_568197(protocol: Scheme; host: string; base: string; route: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_JobGet_568196(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_JobGet_564096(path: JsonNode; query: JsonNode; header: JsonNode;
                            formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the job information for the specified job ID.
   ## 
@@ -454,11 +458,11 @@ proc validate_JobGet_568196(path: JsonNode; query: JsonNode; header: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `jobIdentity` field"
-  var valid_568212 = path.getOrDefault("jobIdentity")
-  valid_568212 = validateParameter(valid_568212, JString, required = true,
+  var valid_564112 = path.getOrDefault("jobIdentity")
+  valid_564112 = validateParameter(valid_564112, JString, required = true,
                                  default = nil)
-  if valid_568212 != nil:
-    section.add "jobIdentity", valid_568212
+  if valid_564112 != nil:
+    section.add "jobIdentity", valid_564112
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -466,11 +470,11 @@ proc validate_JobGet_568196(path: JsonNode; query: JsonNode; header: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568213 = query.getOrDefault("api-version")
-  valid_568213 = validateParameter(valid_568213, JString, required = true,
+  var valid_564113 = query.getOrDefault("api-version")
+  valid_564113 = validateParameter(valid_564113, JString, required = true,
                                  default = nil)
-  if valid_568213 != nil:
-    section.add "api-version", valid_568213
+  if valid_564113 != nil:
+    section.add "api-version", valid_564113
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -479,39 +483,39 @@ proc validate_JobGet_568196(path: JsonNode; query: JsonNode; header: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568214: Call_JobGet_568195; path: JsonNode; query: JsonNode;
+proc call*(call_564114: Call_JobGet_564095; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the job information for the specified job ID.
   ## 
-  let valid = call_568214.validator(path, query, header, formData, body)
-  let scheme = call_568214.pickScheme
+  let valid = call_564114.validator(path, query, header, formData, body)
+  let scheme = call_564114.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568214.url(scheme.get, call_568214.host, call_568214.base,
-                         call_568214.route, valid.getOrDefault("path"),
+  let url = call_564114.url(scheme.get, call_564114.host, call_564114.base,
+                         call_564114.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568214, url, valid)
+  result = hook(call_564114, url, valid)
 
-proc call*(call_568215: Call_JobGet_568195; apiVersion: string; jobIdentity: string): Recallable =
+proc call*(call_564115: Call_JobGet_564095; apiVersion: string; jobIdentity: string): Recallable =
   ## jobGet
   ## Gets the job information for the specified job ID.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
   ##   jobIdentity: string (required)
   ##              : JobInfo ID.
-  var path_568216 = newJObject()
-  var query_568217 = newJObject()
-  add(query_568217, "api-version", newJString(apiVersion))
-  add(path_568216, "jobIdentity", newJString(jobIdentity))
-  result = call_568215.call(path_568216, query_568217, nil, nil, nil)
+  var path_564116 = newJObject()
+  var query_564117 = newJObject()
+  add(query_564117, "api-version", newJString(apiVersion))
+  add(path_564116, "jobIdentity", newJString(jobIdentity))
+  result = call_564115.call(path_564116, query_564117, nil, nil, nil)
 
-var jobGet* = Call_JobGet_568195(name: "jobGet", meth: HttpMethod.HttpGet,
+var jobGet* = Call_JobGet_564095(name: "jobGet", meth: HttpMethod.HttpGet,
                               host: "azure.local", route: "/Jobs/{jobIdentity}",
-                              validator: validate_JobGet_568196, base: "",
-                              url: url_JobGet_568197, schemes: {Scheme.Https})
+                              validator: validate_JobGet_564096, base: "",
+                              url: url_JobGet_564097, schemes: {Scheme.Https})
 type
-  Call_JobCancel_568229 = ref object of OpenApiRestCall_567641
-proc url_JobCancel_568231(protocol: Scheme; host: string; base: string; route: string;
+  Call_JobCancel_564129 = ref object of OpenApiRestCall_563539
+proc url_JobCancel_564131(protocol: Scheme; host: string; base: string; route: string;
                          path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -527,7 +531,7 @@ proc url_JobCancel_568231(protocol: Scheme; host: string; base: string; route: s
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_JobCancel_568230(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_JobCancel_564130(path: JsonNode; query: JsonNode; header: JsonNode;
                               formData: JsonNode; body: JsonNode): JsonNode =
   ## Cancels the running job specified by the job ID.
   ## 
@@ -539,11 +543,11 @@ proc validate_JobCancel_568230(path: JsonNode; query: JsonNode; header: JsonNode
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `jobIdentity` field"
-  var valid_568232 = path.getOrDefault("jobIdentity")
-  valid_568232 = validateParameter(valid_568232, JString, required = true,
+  var valid_564132 = path.getOrDefault("jobIdentity")
+  valid_564132 = validateParameter(valid_564132, JString, required = true,
                                  default = nil)
-  if valid_568232 != nil:
-    section.add "jobIdentity", valid_568232
+  if valid_564132 != nil:
+    section.add "jobIdentity", valid_564132
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -551,11 +555,11 @@ proc validate_JobCancel_568230(path: JsonNode; query: JsonNode; header: JsonNode
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568233 = query.getOrDefault("api-version")
-  valid_568233 = validateParameter(valid_568233, JString, required = true,
+  var valid_564133 = query.getOrDefault("api-version")
+  valid_564133 = validateParameter(valid_564133, JString, required = true,
                                  default = nil)
-  if valid_568233 != nil:
-    section.add "api-version", valid_568233
+  if valid_564133 != nil:
+    section.add "api-version", valid_564133
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -564,20 +568,20 @@ proc validate_JobCancel_568230(path: JsonNode; query: JsonNode; header: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_568234: Call_JobCancel_568229; path: JsonNode; query: JsonNode;
+proc call*(call_564134: Call_JobCancel_564129; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Cancels the running job specified by the job ID.
   ## 
-  let valid = call_568234.validator(path, query, header, formData, body)
-  let scheme = call_568234.pickScheme
+  let valid = call_564134.validator(path, query, header, formData, body)
+  let scheme = call_564134.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568234.url(scheme.get, call_568234.host, call_568234.base,
-                         call_568234.route, valid.getOrDefault("path"),
+  let url = call_564134.url(scheme.get, call_564134.host, call_564134.base,
+                         call_564134.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568234, url, valid)
+  result = hook(call_564134, url, valid)
 
-proc call*(call_568235: Call_JobCancel_568229; apiVersion: string;
+proc call*(call_564135: Call_JobCancel_564129; apiVersion: string;
           jobIdentity: string): Recallable =
   ## jobCancel
   ## Cancels the running job specified by the job ID.
@@ -585,21 +589,21 @@ proc call*(call_568235: Call_JobCancel_568229; apiVersion: string;
   ##             : Client Api Version.
   ##   jobIdentity: string (required)
   ##              : JobInfo ID to cancel.
-  var path_568236 = newJObject()
-  var query_568237 = newJObject()
-  add(query_568237, "api-version", newJString(apiVersion))
-  add(path_568236, "jobIdentity", newJString(jobIdentity))
-  result = call_568235.call(path_568236, query_568237, nil, nil, nil)
+  var path_564136 = newJObject()
+  var query_564137 = newJObject()
+  add(query_564137, "api-version", newJString(apiVersion))
+  add(path_564136, "jobIdentity", newJString(jobIdentity))
+  result = call_564135.call(path_564136, query_564137, nil, nil, nil)
 
-var jobCancel* = Call_JobCancel_568229(name: "jobCancel", meth: HttpMethod.HttpPost,
+var jobCancel* = Call_JobCancel_564129(name: "jobCancel", meth: HttpMethod.HttpPost,
                                     host: "azure.local",
                                     route: "/Jobs/{jobIdentity}/CancelJob",
-                                    validator: validate_JobCancel_568230,
-                                    base: "", url: url_JobCancel_568231,
+                                    validator: validate_JobCancel_564130,
+                                    base: "", url: url_JobCancel_564131,
                                     schemes: {Scheme.Https})
 type
-  Call_JobGetDebugDataPath_568238 = ref object of OpenApiRestCall_567641
-proc url_JobGetDebugDataPath_568240(protocol: Scheme; host: string; base: string;
+  Call_JobGetDebugDataPath_564138 = ref object of OpenApiRestCall_563539
+proc url_JobGetDebugDataPath_564140(protocol: Scheme; host: string; base: string;
                                    route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -615,7 +619,7 @@ proc url_JobGetDebugDataPath_568240(protocol: Scheme; host: string; base: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_JobGetDebugDataPath_568239(path: JsonNode; query: JsonNode;
+proc validate_JobGetDebugDataPath_564139(path: JsonNode; query: JsonNode;
                                         header: JsonNode; formData: JsonNode;
                                         body: JsonNode): JsonNode =
   ## Gets the U-SQL job debug data information specified by the job ID.
@@ -628,11 +632,11 @@ proc validate_JobGetDebugDataPath_568239(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `jobIdentity` field"
-  var valid_568241 = path.getOrDefault("jobIdentity")
-  valid_568241 = validateParameter(valid_568241, JString, required = true,
+  var valid_564141 = path.getOrDefault("jobIdentity")
+  valid_564141 = validateParameter(valid_564141, JString, required = true,
                                  default = nil)
-  if valid_568241 != nil:
-    section.add "jobIdentity", valid_568241
+  if valid_564141 != nil:
+    section.add "jobIdentity", valid_564141
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -640,11 +644,11 @@ proc validate_JobGetDebugDataPath_568239(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568242 = query.getOrDefault("api-version")
-  valid_568242 = validateParameter(valid_568242, JString, required = true,
+  var valid_564142 = query.getOrDefault("api-version")
+  valid_564142 = validateParameter(valid_564142, JString, required = true,
                                  default = nil)
-  if valid_568242 != nil:
-    section.add "api-version", valid_568242
+  if valid_564142 != nil:
+    section.add "api-version", valid_564142
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -653,20 +657,20 @@ proc validate_JobGetDebugDataPath_568239(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568243: Call_JobGetDebugDataPath_568238; path: JsonNode;
+proc call*(call_564143: Call_JobGetDebugDataPath_564138; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the U-SQL job debug data information specified by the job ID.
   ## 
-  let valid = call_568243.validator(path, query, header, formData, body)
-  let scheme = call_568243.pickScheme
+  let valid = call_564143.validator(path, query, header, formData, body)
+  let scheme = call_564143.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568243.url(scheme.get, call_568243.host, call_568243.base,
-                         call_568243.route, valid.getOrDefault("path"),
+  let url = call_564143.url(scheme.get, call_564143.host, call_564143.base,
+                         call_564143.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568243, url, valid)
+  result = hook(call_564143, url, valid)
 
-proc call*(call_568244: Call_JobGetDebugDataPath_568238; apiVersion: string;
+proc call*(call_564144: Call_JobGetDebugDataPath_564138; apiVersion: string;
           jobIdentity: string): Recallable =
   ## jobGetDebugDataPath
   ## Gets the U-SQL job debug data information specified by the job ID.
@@ -674,20 +678,20 @@ proc call*(call_568244: Call_JobGetDebugDataPath_568238; apiVersion: string;
   ##             : Client Api Version.
   ##   jobIdentity: string (required)
   ##              : JobInfo ID.
-  var path_568245 = newJObject()
-  var query_568246 = newJObject()
-  add(query_568246, "api-version", newJString(apiVersion))
-  add(path_568245, "jobIdentity", newJString(jobIdentity))
-  result = call_568244.call(path_568245, query_568246, nil, nil, nil)
+  var path_564145 = newJObject()
+  var query_564146 = newJObject()
+  add(query_564146, "api-version", newJString(apiVersion))
+  add(path_564145, "jobIdentity", newJString(jobIdentity))
+  result = call_564144.call(path_564145, query_564146, nil, nil, nil)
 
-var jobGetDebugDataPath* = Call_JobGetDebugDataPath_568238(
+var jobGetDebugDataPath* = Call_JobGetDebugDataPath_564138(
     name: "jobGetDebugDataPath", meth: HttpMethod.HttpPost, host: "azure.local",
     route: "/Jobs/{jobIdentity}/GetDebugDataPath",
-    validator: validate_JobGetDebugDataPath_568239, base: "",
-    url: url_JobGetDebugDataPath_568240, schemes: {Scheme.Https})
+    validator: validate_JobGetDebugDataPath_564139, base: "",
+    url: url_JobGetDebugDataPath_564140, schemes: {Scheme.Https})
 type
-  Call_JobGetStatistics_568247 = ref object of OpenApiRestCall_567641
-proc url_JobGetStatistics_568249(protocol: Scheme; host: string; base: string;
+  Call_JobGetStatistics_564147 = ref object of OpenApiRestCall_563539
+proc url_JobGetStatistics_564149(protocol: Scheme; host: string; base: string;
                                 route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -703,7 +707,7 @@ proc url_JobGetStatistics_568249(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_JobGetStatistics_568248(path: JsonNode; query: JsonNode;
+proc validate_JobGetStatistics_564148(path: JsonNode; query: JsonNode;
                                      header: JsonNode; formData: JsonNode;
                                      body: JsonNode): JsonNode =
   ## Gets statistics of the specified job.
@@ -716,11 +720,11 @@ proc validate_JobGetStatistics_568248(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `jobIdentity` field"
-  var valid_568250 = path.getOrDefault("jobIdentity")
-  valid_568250 = validateParameter(valid_568250, JString, required = true,
+  var valid_564150 = path.getOrDefault("jobIdentity")
+  valid_564150 = validateParameter(valid_564150, JString, required = true,
                                  default = nil)
-  if valid_568250 != nil:
-    section.add "jobIdentity", valid_568250
+  if valid_564150 != nil:
+    section.add "jobIdentity", valid_564150
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -728,11 +732,11 @@ proc validate_JobGetStatistics_568248(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568251 = query.getOrDefault("api-version")
-  valid_568251 = validateParameter(valid_568251, JString, required = true,
+  var valid_564151 = query.getOrDefault("api-version")
+  valid_564151 = validateParameter(valid_564151, JString, required = true,
                                  default = nil)
-  if valid_568251 != nil:
-    section.add "api-version", valid_568251
+  if valid_564151 != nil:
+    section.add "api-version", valid_564151
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -741,20 +745,20 @@ proc validate_JobGetStatistics_568248(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568252: Call_JobGetStatistics_568247; path: JsonNode;
+proc call*(call_564152: Call_JobGetStatistics_564147; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets statistics of the specified job.
   ## 
-  let valid = call_568252.validator(path, query, header, formData, body)
-  let scheme = call_568252.pickScheme
+  let valid = call_564152.validator(path, query, header, formData, body)
+  let scheme = call_564152.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568252.url(scheme.get, call_568252.host, call_568252.base,
-                         call_568252.route, valid.getOrDefault("path"),
+  let url = call_564152.url(scheme.get, call_564152.host, call_564152.base,
+                         call_564152.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568252, url, valid)
+  result = hook(call_564152, url, valid)
 
-proc call*(call_568253: Call_JobGetStatistics_568247; apiVersion: string;
+proc call*(call_564153: Call_JobGetStatistics_564147; apiVersion: string;
           jobIdentity: string): Recallable =
   ## jobGetStatistics
   ## Gets statistics of the specified job.
@@ -762,17 +766,17 @@ proc call*(call_568253: Call_JobGetStatistics_568247; apiVersion: string;
   ##             : Client Api Version.
   ##   jobIdentity: string (required)
   ##              : JobInfo ID.
-  var path_568254 = newJObject()
-  var query_568255 = newJObject()
-  add(query_568255, "api-version", newJString(apiVersion))
-  add(path_568254, "jobIdentity", newJString(jobIdentity))
-  result = call_568253.call(path_568254, query_568255, nil, nil, nil)
+  var path_564154 = newJObject()
+  var query_564155 = newJObject()
+  add(query_564155, "api-version", newJString(apiVersion))
+  add(path_564154, "jobIdentity", newJString(jobIdentity))
+  result = call_564153.call(path_564154, query_564155, nil, nil, nil)
 
-var jobGetStatistics* = Call_JobGetStatistics_568247(name: "jobGetStatistics",
+var jobGetStatistics* = Call_JobGetStatistics_564147(name: "jobGetStatistics",
     meth: HttpMethod.HttpPost, host: "azure.local",
     route: "/Jobs/{jobIdentity}/GetStatistics",
-    validator: validate_JobGetStatistics_568248, base: "",
-    url: url_JobGetStatistics_568249, schemes: {Scheme.Https})
+    validator: validate_JobGetStatistics_564148, base: "",
+    url: url_JobGetStatistics_564149, schemes: {Scheme.Https})
 export
   rest
 

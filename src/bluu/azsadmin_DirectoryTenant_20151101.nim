@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, httpcore
 
 ## auto-generated via openapi macro
 ## title: SubscriptionsManagementClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_574441 = ref object of OpenApiRestCall
+  OpenApiRestCall_563539 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_574441](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563539](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_574441): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563539): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,8 +107,8 @@ const
   macServiceName = "azsadmin-DirectoryTenant"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_DirectoryTenantsList_574663 = ref object of OpenApiRestCall_574441
-proc url_DirectoryTenantsList_574665(protocol: Scheme; host: string; base: string;
+  Call_DirectoryTenantsList_563761 = ref object of OpenApiRestCall_563539
+proc url_DirectoryTenantsList_563763(protocol: Scheme; host: string; base: string;
                                     route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -125,30 +129,30 @@ proc url_DirectoryTenantsList_574665(protocol: Scheme; host: string; base: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DirectoryTenantsList_574664(path: JsonNode; query: JsonNode;
+proc validate_DirectoryTenantsList_563762(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists all the directory tenants under the current subscription and given resource group name.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The resource group the resource is located under.
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription.The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The resource group the resource is located under.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_574825 = path.getOrDefault("resourceGroupName")
-  valid_574825 = validateParameter(valid_574825, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_563925 = path.getOrDefault("subscriptionId")
+  valid_563925 = validateParameter(valid_563925, JString, required = true,
                                  default = nil)
-  if valid_574825 != nil:
-    section.add "resourceGroupName", valid_574825
-  var valid_574826 = path.getOrDefault("subscriptionId")
-  valid_574826 = validateParameter(valid_574826, JString, required = true,
+  if valid_563925 != nil:
+    section.add "subscriptionId", valid_563925
+  var valid_563926 = path.getOrDefault("resourceGroupName")
+  valid_563926 = validateParameter(valid_563926, JString, required = true,
                                  default = nil)
-  if valid_574826 != nil:
-    section.add "subscriptionId", valid_574826
+  if valid_563926 != nil:
+    section.add "resourceGroupName", valid_563926
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -156,11 +160,11 @@ proc validate_DirectoryTenantsList_574664(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574840 = query.getOrDefault("api-version")
-  valid_574840 = validateParameter(valid_574840, JString, required = true,
+  var valid_563940 = query.getOrDefault("api-version")
+  valid_563940 = validateParameter(valid_563940, JString, required = true,
                                  default = newJString("2015-11-01"))
-  if valid_574840 != nil:
-    section.add "api-version", valid_574840
+  if valid_563940 != nil:
+    section.add "api-version", valid_563940
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -169,45 +173,44 @@ proc validate_DirectoryTenantsList_574664(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574867: Call_DirectoryTenantsList_574663; path: JsonNode;
+proc call*(call_563967: Call_DirectoryTenantsList_563761; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists all the directory tenants under the current subscription and given resource group name.
   ## 
-  let valid = call_574867.validator(path, query, header, formData, body)
-  let scheme = call_574867.pickScheme
+  let valid = call_563967.validator(path, query, header, formData, body)
+  let scheme = call_563967.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574867.url(scheme.get, call_574867.host, call_574867.base,
-                         call_574867.route, valid.getOrDefault("path"),
+  let url = call_563967.url(scheme.get, call_563967.host, call_563967.base,
+                         call_563967.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574867, url, valid)
+  result = hook(call_563967, url, valid)
 
-proc call*(call_574938: Call_DirectoryTenantsList_574663;
-          resourceGroupName: string; subscriptionId: string;
-          apiVersion: string = "2015-11-01"): Recallable =
+proc call*(call_564038: Call_DirectoryTenantsList_563761; subscriptionId: string;
+          resourceGroupName: string; apiVersion: string = "2015-11-01"): Recallable =
   ## directoryTenantsList
   ## Lists all the directory tenants under the current subscription and given resource group name.
-  ##   resourceGroupName: string (required)
-  ##                    : The resource group the resource is located under.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription.The subscription ID forms part of the URI for every service call.
-  var path_574939 = newJObject()
-  var query_574941 = newJObject()
-  add(path_574939, "resourceGroupName", newJString(resourceGroupName))
-  add(query_574941, "api-version", newJString(apiVersion))
-  add(path_574939, "subscriptionId", newJString(subscriptionId))
-  result = call_574938.call(path_574939, query_574941, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The resource group the resource is located under.
+  var path_564039 = newJObject()
+  var query_564041 = newJObject()
+  add(query_564041, "api-version", newJString(apiVersion))
+  add(path_564039, "subscriptionId", newJString(subscriptionId))
+  add(path_564039, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564038.call(path_564039, query_564041, nil, nil, nil)
 
-var directoryTenantsList* = Call_DirectoryTenantsList_574663(
+var directoryTenantsList* = Call_DirectoryTenantsList_563761(
     name: "directoryTenantsList", meth: HttpMethod.HttpGet,
     host: "adminmanagement.local.azurestack.external", route: "/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.Subscriptions.Admin/directoryTenants",
-    validator: validate_DirectoryTenantsList_574664, base: "",
-    url: url_DirectoryTenantsList_574665, schemes: {Scheme.Https})
+    validator: validate_DirectoryTenantsList_563762, base: "",
+    url: url_DirectoryTenantsList_563763, schemes: {Scheme.Https})
 type
-  Call_DirectoryTenantsCreateOrUpdate_575000 = ref object of OpenApiRestCall_574441
-proc url_DirectoryTenantsCreateOrUpdate_575002(protocol: Scheme; host: string;
+  Call_DirectoryTenantsCreateOrUpdate_564100 = ref object of OpenApiRestCall_563539
+proc url_DirectoryTenantsCreateOrUpdate_564102(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -230,37 +233,37 @@ proc url_DirectoryTenantsCreateOrUpdate_575002(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DirectoryTenantsCreateOrUpdate_575001(path: JsonNode;
+proc validate_DirectoryTenantsCreateOrUpdate_564101(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Create or updates a directory tenant.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The resource group the resource is located under.
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription.The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The resource group the resource is located under.
   ##   tenant: JString (required)
   ##         : Directory tenant name.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_575003 = path.getOrDefault("resourceGroupName")
-  valid_575003 = validateParameter(valid_575003, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564103 = path.getOrDefault("subscriptionId")
+  valid_564103 = validateParameter(valid_564103, JString, required = true,
                                  default = nil)
-  if valid_575003 != nil:
-    section.add "resourceGroupName", valid_575003
-  var valid_575004 = path.getOrDefault("subscriptionId")
-  valid_575004 = validateParameter(valid_575004, JString, required = true,
+  if valid_564103 != nil:
+    section.add "subscriptionId", valid_564103
+  var valid_564104 = path.getOrDefault("resourceGroupName")
+  valid_564104 = validateParameter(valid_564104, JString, required = true,
                                  default = nil)
-  if valid_575004 != nil:
-    section.add "subscriptionId", valid_575004
-  var valid_575005 = path.getOrDefault("tenant")
-  valid_575005 = validateParameter(valid_575005, JString, required = true,
+  if valid_564104 != nil:
+    section.add "resourceGroupName", valid_564104
+  var valid_564105 = path.getOrDefault("tenant")
+  valid_564105 = validateParameter(valid_564105, JString, required = true,
                                  default = nil)
-  if valid_575005 != nil:
-    section.add "tenant", valid_575005
+  if valid_564105 != nil:
+    section.add "tenant", valid_564105
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -268,11 +271,11 @@ proc validate_DirectoryTenantsCreateOrUpdate_575001(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575006 = query.getOrDefault("api-version")
-  valid_575006 = validateParameter(valid_575006, JString, required = true,
+  var valid_564106 = query.getOrDefault("api-version")
+  valid_564106 = validateParameter(valid_564106, JString, required = true,
                                  default = newJString("2015-11-01"))
-  if valid_575006 != nil:
-    section.add "api-version", valid_575006
+  if valid_564106 != nil:
+    section.add "api-version", valid_564106
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -286,53 +289,53 @@ proc validate_DirectoryTenantsCreateOrUpdate_575001(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_575008: Call_DirectoryTenantsCreateOrUpdate_575000; path: JsonNode;
+proc call*(call_564108: Call_DirectoryTenantsCreateOrUpdate_564100; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Create or updates a directory tenant.
   ## 
-  let valid = call_575008.validator(path, query, header, formData, body)
-  let scheme = call_575008.pickScheme
+  let valid = call_564108.validator(path, query, header, formData, body)
+  let scheme = call_564108.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575008.url(scheme.get, call_575008.host, call_575008.base,
-                         call_575008.route, valid.getOrDefault("path"),
+  let url = call_564108.url(scheme.get, call_564108.host, call_564108.base,
+                         call_564108.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575008, url, valid)
+  result = hook(call_564108, url, valid)
 
-proc call*(call_575009: Call_DirectoryTenantsCreateOrUpdate_575000;
-          resourceGroupName: string; subscriptionId: string; tenant: string;
+proc call*(call_564109: Call_DirectoryTenantsCreateOrUpdate_564100;
+          subscriptionId: string; resourceGroupName: string; tenant: string;
           newTenant: JsonNode; apiVersion: string = "2015-11-01"): Recallable =
   ## directoryTenantsCreateOrUpdate
   ## Create or updates a directory tenant.
-  ##   resourceGroupName: string (required)
-  ##                    : The resource group the resource is located under.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription.The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The resource group the resource is located under.
   ##   tenant: string (required)
   ##         : Directory tenant name.
   ##   newTenant: JObject (required)
   ##            : New directory tenant properties.
-  var path_575010 = newJObject()
-  var query_575011 = newJObject()
-  var body_575012 = newJObject()
-  add(path_575010, "resourceGroupName", newJString(resourceGroupName))
-  add(query_575011, "api-version", newJString(apiVersion))
-  add(path_575010, "subscriptionId", newJString(subscriptionId))
-  add(path_575010, "tenant", newJString(tenant))
+  var path_564110 = newJObject()
+  var query_564111 = newJObject()
+  var body_564112 = newJObject()
+  add(query_564111, "api-version", newJString(apiVersion))
+  add(path_564110, "subscriptionId", newJString(subscriptionId))
+  add(path_564110, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564110, "tenant", newJString(tenant))
   if newTenant != nil:
-    body_575012 = newTenant
-  result = call_575009.call(path_575010, query_575011, nil, nil, body_575012)
+    body_564112 = newTenant
+  result = call_564109.call(path_564110, query_564111, nil, nil, body_564112)
 
-var directoryTenantsCreateOrUpdate* = Call_DirectoryTenantsCreateOrUpdate_575000(
+var directoryTenantsCreateOrUpdate* = Call_DirectoryTenantsCreateOrUpdate_564100(
     name: "directoryTenantsCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "adminmanagement.local.azurestack.external", route: "/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.Subscriptions.Admin/directoryTenants/{tenant}",
-    validator: validate_DirectoryTenantsCreateOrUpdate_575001, base: "",
-    url: url_DirectoryTenantsCreateOrUpdate_575002, schemes: {Scheme.Https})
+    validator: validate_DirectoryTenantsCreateOrUpdate_564101, base: "",
+    url: url_DirectoryTenantsCreateOrUpdate_564102, schemes: {Scheme.Https})
 type
-  Call_DirectoryTenantsGet_574980 = ref object of OpenApiRestCall_574441
-proc url_DirectoryTenantsGet_574982(protocol: Scheme; host: string; base: string;
+  Call_DirectoryTenantsGet_564080 = ref object of OpenApiRestCall_563539
+proc url_DirectoryTenantsGet_564082(protocol: Scheme; host: string; base: string;
                                    route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -355,7 +358,7 @@ proc url_DirectoryTenantsGet_574982(protocol: Scheme; host: string; base: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DirectoryTenantsGet_574981(path: JsonNode; query: JsonNode;
+proc validate_DirectoryTenantsGet_564081(path: JsonNode; query: JsonNode;
                                         header: JsonNode; formData: JsonNode;
                                         body: JsonNode): JsonNode =
   ## Get a directory tenant by name.
@@ -363,30 +366,30 @@ proc validate_DirectoryTenantsGet_574981(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The resource group the resource is located under.
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription.The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The resource group the resource is located under.
   ##   tenant: JString (required)
   ##         : Directory tenant name.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_574992 = path.getOrDefault("resourceGroupName")
-  valid_574992 = validateParameter(valid_574992, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564092 = path.getOrDefault("subscriptionId")
+  valid_564092 = validateParameter(valid_564092, JString, required = true,
                                  default = nil)
-  if valid_574992 != nil:
-    section.add "resourceGroupName", valid_574992
-  var valid_574993 = path.getOrDefault("subscriptionId")
-  valid_574993 = validateParameter(valid_574993, JString, required = true,
+  if valid_564092 != nil:
+    section.add "subscriptionId", valid_564092
+  var valid_564093 = path.getOrDefault("resourceGroupName")
+  valid_564093 = validateParameter(valid_564093, JString, required = true,
                                  default = nil)
-  if valid_574993 != nil:
-    section.add "subscriptionId", valid_574993
-  var valid_574994 = path.getOrDefault("tenant")
-  valid_574994 = validateParameter(valid_574994, JString, required = true,
+  if valid_564093 != nil:
+    section.add "resourceGroupName", valid_564093
+  var valid_564094 = path.getOrDefault("tenant")
+  valid_564094 = validateParameter(valid_564094, JString, required = true,
                                  default = nil)
-  if valid_574994 != nil:
-    section.add "tenant", valid_574994
+  if valid_564094 != nil:
+    section.add "tenant", valid_564094
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -394,11 +397,11 @@ proc validate_DirectoryTenantsGet_574981(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574995 = query.getOrDefault("api-version")
-  valid_574995 = validateParameter(valid_574995, JString, required = true,
+  var valid_564095 = query.getOrDefault("api-version")
+  valid_564095 = validateParameter(valid_564095, JString, required = true,
                                  default = newJString("2015-11-01"))
-  if valid_574995 != nil:
-    section.add "api-version", valid_574995
+  if valid_564095 != nil:
+    section.add "api-version", valid_564095
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -407,47 +410,48 @@ proc validate_DirectoryTenantsGet_574981(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574996: Call_DirectoryTenantsGet_574980; path: JsonNode;
+proc call*(call_564096: Call_DirectoryTenantsGet_564080; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get a directory tenant by name.
   ## 
-  let valid = call_574996.validator(path, query, header, formData, body)
-  let scheme = call_574996.pickScheme
+  let valid = call_564096.validator(path, query, header, formData, body)
+  let scheme = call_564096.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574996.url(scheme.get, call_574996.host, call_574996.base,
-                         call_574996.route, valid.getOrDefault("path"),
+  let url = call_564096.url(scheme.get, call_564096.host, call_564096.base,
+                         call_564096.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574996, url, valid)
+  result = hook(call_564096, url, valid)
 
-proc call*(call_574997: Call_DirectoryTenantsGet_574980; resourceGroupName: string;
-          subscriptionId: string; tenant: string; apiVersion: string = "2015-11-01"): Recallable =
+proc call*(call_564097: Call_DirectoryTenantsGet_564080; subscriptionId: string;
+          resourceGroupName: string; tenant: string;
+          apiVersion: string = "2015-11-01"): Recallable =
   ## directoryTenantsGet
   ## Get a directory tenant by name.
-  ##   resourceGroupName: string (required)
-  ##                    : The resource group the resource is located under.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription.The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The resource group the resource is located under.
   ##   tenant: string (required)
   ##         : Directory tenant name.
-  var path_574998 = newJObject()
-  var query_574999 = newJObject()
-  add(path_574998, "resourceGroupName", newJString(resourceGroupName))
-  add(query_574999, "api-version", newJString(apiVersion))
-  add(path_574998, "subscriptionId", newJString(subscriptionId))
-  add(path_574998, "tenant", newJString(tenant))
-  result = call_574997.call(path_574998, query_574999, nil, nil, nil)
+  var path_564098 = newJObject()
+  var query_564099 = newJObject()
+  add(query_564099, "api-version", newJString(apiVersion))
+  add(path_564098, "subscriptionId", newJString(subscriptionId))
+  add(path_564098, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564098, "tenant", newJString(tenant))
+  result = call_564097.call(path_564098, query_564099, nil, nil, nil)
 
-var directoryTenantsGet* = Call_DirectoryTenantsGet_574980(
+var directoryTenantsGet* = Call_DirectoryTenantsGet_564080(
     name: "directoryTenantsGet", meth: HttpMethod.HttpGet,
     host: "adminmanagement.local.azurestack.external", route: "/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.Subscriptions.Admin/directoryTenants/{tenant}",
-    validator: validate_DirectoryTenantsGet_574981, base: "",
-    url: url_DirectoryTenantsGet_574982, schemes: {Scheme.Https})
+    validator: validate_DirectoryTenantsGet_564081, base: "",
+    url: url_DirectoryTenantsGet_564082, schemes: {Scheme.Https})
 type
-  Call_DirectoryTenantsDelete_575013 = ref object of OpenApiRestCall_574441
-proc url_DirectoryTenantsDelete_575015(protocol: Scheme; host: string; base: string;
+  Call_DirectoryTenantsDelete_564113 = ref object of OpenApiRestCall_563539
+proc url_DirectoryTenantsDelete_564115(protocol: Scheme; host: string; base: string;
                                       route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -470,37 +474,37 @@ proc url_DirectoryTenantsDelete_575015(protocol: Scheme; host: string; base: str
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DirectoryTenantsDelete_575014(path: JsonNode; query: JsonNode;
+proc validate_DirectoryTenantsDelete_564114(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Delete a directory tenant under a resource group.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The resource group the resource is located under.
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription.The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The resource group the resource is located under.
   ##   tenant: JString (required)
   ##         : Directory tenant name.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_575016 = path.getOrDefault("resourceGroupName")
-  valid_575016 = validateParameter(valid_575016, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564116 = path.getOrDefault("subscriptionId")
+  valid_564116 = validateParameter(valid_564116, JString, required = true,
                                  default = nil)
-  if valid_575016 != nil:
-    section.add "resourceGroupName", valid_575016
-  var valid_575017 = path.getOrDefault("subscriptionId")
-  valid_575017 = validateParameter(valid_575017, JString, required = true,
+  if valid_564116 != nil:
+    section.add "subscriptionId", valid_564116
+  var valid_564117 = path.getOrDefault("resourceGroupName")
+  valid_564117 = validateParameter(valid_564117, JString, required = true,
                                  default = nil)
-  if valid_575017 != nil:
-    section.add "subscriptionId", valid_575017
-  var valid_575018 = path.getOrDefault("tenant")
-  valid_575018 = validateParameter(valid_575018, JString, required = true,
+  if valid_564117 != nil:
+    section.add "resourceGroupName", valid_564117
+  var valid_564118 = path.getOrDefault("tenant")
+  valid_564118 = validateParameter(valid_564118, JString, required = true,
                                  default = nil)
-  if valid_575018 != nil:
-    section.add "tenant", valid_575018
+  if valid_564118 != nil:
+    section.add "tenant", valid_564118
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -508,11 +512,11 @@ proc validate_DirectoryTenantsDelete_575014(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575019 = query.getOrDefault("api-version")
-  valid_575019 = validateParameter(valid_575019, JString, required = true,
+  var valid_564119 = query.getOrDefault("api-version")
+  valid_564119 = validateParameter(valid_564119, JString, required = true,
                                  default = newJString("2015-11-01"))
-  if valid_575019 != nil:
-    section.add "api-version", valid_575019
+  if valid_564119 != nil:
+    section.add "api-version", valid_564119
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -521,45 +525,45 @@ proc validate_DirectoryTenantsDelete_575014(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_575020: Call_DirectoryTenantsDelete_575013; path: JsonNode;
+proc call*(call_564120: Call_DirectoryTenantsDelete_564113; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Delete a directory tenant under a resource group.
   ## 
-  let valid = call_575020.validator(path, query, header, formData, body)
-  let scheme = call_575020.pickScheme
+  let valid = call_564120.validator(path, query, header, formData, body)
+  let scheme = call_564120.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575020.url(scheme.get, call_575020.host, call_575020.base,
-                         call_575020.route, valid.getOrDefault("path"),
+  let url = call_564120.url(scheme.get, call_564120.host, call_564120.base,
+                         call_564120.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575020, url, valid)
+  result = hook(call_564120, url, valid)
 
-proc call*(call_575021: Call_DirectoryTenantsDelete_575013;
-          resourceGroupName: string; subscriptionId: string; tenant: string;
+proc call*(call_564121: Call_DirectoryTenantsDelete_564113; subscriptionId: string;
+          resourceGroupName: string; tenant: string;
           apiVersion: string = "2015-11-01"): Recallable =
   ## directoryTenantsDelete
   ## Delete a directory tenant under a resource group.
-  ##   resourceGroupName: string (required)
-  ##                    : The resource group the resource is located under.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription.The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The resource group the resource is located under.
   ##   tenant: string (required)
   ##         : Directory tenant name.
-  var path_575022 = newJObject()
-  var query_575023 = newJObject()
-  add(path_575022, "resourceGroupName", newJString(resourceGroupName))
-  add(query_575023, "api-version", newJString(apiVersion))
-  add(path_575022, "subscriptionId", newJString(subscriptionId))
-  add(path_575022, "tenant", newJString(tenant))
-  result = call_575021.call(path_575022, query_575023, nil, nil, nil)
+  var path_564122 = newJObject()
+  var query_564123 = newJObject()
+  add(query_564123, "api-version", newJString(apiVersion))
+  add(path_564122, "subscriptionId", newJString(subscriptionId))
+  add(path_564122, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564122, "tenant", newJString(tenant))
+  result = call_564121.call(path_564122, query_564123, nil, nil, nil)
 
-var directoryTenantsDelete* = Call_DirectoryTenantsDelete_575013(
+var directoryTenantsDelete* = Call_DirectoryTenantsDelete_564113(
     name: "directoryTenantsDelete", meth: HttpMethod.HttpDelete,
     host: "adminmanagement.local.azurestack.external", route: "/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.Subscriptions.Admin/directoryTenants/{tenant}",
-    validator: validate_DirectoryTenantsDelete_575014, base: "",
-    url: url_DirectoryTenantsDelete_575015, schemes: {Scheme.Https})
+    validator: validate_DirectoryTenantsDelete_564114, base: "",
+    url: url_DirectoryTenantsDelete_564115, schemes: {Scheme.Https})
 export
   rest
 

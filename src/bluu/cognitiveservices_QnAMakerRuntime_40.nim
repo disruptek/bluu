@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, httpcore
 
 ## auto-generated via openapi macro
 ## title: QnAMaker Runtime Client
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_567658 = ref object of OpenApiRestCall
+  OpenApiRestCall_563556 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_567658](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563556](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_567658): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563556): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,8 +107,8 @@ const
   macServiceName = "cognitiveservices-QnAMakerRuntime"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_RuntimeGenerateAnswer_567880 = ref object of OpenApiRestCall_567658
-proc url_RuntimeGenerateAnswer_567882(protocol: Scheme; host: string; base: string;
+  Call_RuntimeGenerateAnswer_563778 = ref object of OpenApiRestCall_563556
+proc url_RuntimeGenerateAnswer_563780(protocol: Scheme; host: string; base: string;
                                      route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -120,7 +124,7 @@ proc url_RuntimeGenerateAnswer_567882(protocol: Scheme; host: string; base: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_RuntimeGenerateAnswer_567881(path: JsonNode; query: JsonNode;
+proc validate_RuntimeGenerateAnswer_563779(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   var section: JsonNode
   result = newJObject()
@@ -129,11 +133,11 @@ proc validate_RuntimeGenerateAnswer_567881(path: JsonNode; query: JsonNode;
   ##       : Knowledgebase id.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `kbId` field"
-  var valid_568055 = path.getOrDefault("kbId")
-  valid_568055 = validateParameter(valid_568055, JString, required = true,
+  var valid_563955 = path.getOrDefault("kbId")
+  valid_563955 = validateParameter(valid_563955, JString, required = true,
                                  default = nil)
-  if valid_568055 != nil:
-    section.add "kbId", valid_568055
+  if valid_563955 != nil:
+    section.add "kbId", valid_563955
   result.add "path", section
   section = newJObject()
   result.add "query", section
@@ -149,39 +153,39 @@ proc validate_RuntimeGenerateAnswer_567881(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568079: Call_RuntimeGenerateAnswer_567880; path: JsonNode;
+proc call*(call_563979: Call_RuntimeGenerateAnswer_563778; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
-  let valid = call_568079.validator(path, query, header, formData, body)
-  let scheme = call_568079.pickScheme
+  let valid = call_563979.validator(path, query, header, formData, body)
+  let scheme = call_563979.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568079.url(scheme.get, call_568079.host, call_568079.base,
-                         call_568079.route, valid.getOrDefault("path"),
+  let url = call_563979.url(scheme.get, call_563979.host, call_563979.base,
+                         call_563979.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568079, url, valid)
+  result = hook(call_563979, url, valid)
 
-proc call*(call_568150: Call_RuntimeGenerateAnswer_567880; kbId: string;
+proc call*(call_564050: Call_RuntimeGenerateAnswer_563778; kbId: string;
           generateAnswerPayload: JsonNode): Recallable =
   ## runtimeGenerateAnswer
   ##   kbId: string (required)
   ##       : Knowledgebase id.
   ##   generateAnswerPayload: JObject (required)
   ##                        : Post body of the request.
-  var path_568151 = newJObject()
-  var body_568153 = newJObject()
-  add(path_568151, "kbId", newJString(kbId))
+  var path_564051 = newJObject()
+  var body_564053 = newJObject()
+  add(path_564051, "kbId", newJString(kbId))
   if generateAnswerPayload != nil:
-    body_568153 = generateAnswerPayload
-  result = call_568150.call(path_568151, nil, nil, nil, body_568153)
+    body_564053 = generateAnswerPayload
+  result = call_564050.call(path_564051, nil, nil, nil, body_564053)
 
-var runtimeGenerateAnswer* = Call_RuntimeGenerateAnswer_567880(
+var runtimeGenerateAnswer* = Call_RuntimeGenerateAnswer_563778(
     name: "runtimeGenerateAnswer", meth: HttpMethod.HttpPost, host: "azure.local",
     route: "/knowledgebases/{kbId}/generateAnswer",
-    validator: validate_RuntimeGenerateAnswer_567881, base: "",
-    url: url_RuntimeGenerateAnswer_567882, schemes: {Scheme.Https})
+    validator: validate_RuntimeGenerateAnswer_563779, base: "",
+    url: url_RuntimeGenerateAnswer_563780, schemes: {Scheme.Https})
 type
-  Call_RuntimeTrain_568192 = ref object of OpenApiRestCall_567658
-proc url_RuntimeTrain_568194(protocol: Scheme; host: string; base: string;
+  Call_RuntimeTrain_564092 = ref object of OpenApiRestCall_563556
+proc url_RuntimeTrain_564094(protocol: Scheme; host: string; base: string;
                             route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -197,7 +201,7 @@ proc url_RuntimeTrain_568194(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_RuntimeTrain_568193(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_RuntimeTrain_564093(path: JsonNode; query: JsonNode; header: JsonNode;
                                  formData: JsonNode; body: JsonNode): JsonNode =
   var section: JsonNode
   result = newJObject()
@@ -206,11 +210,11 @@ proc validate_RuntimeTrain_568193(path: JsonNode; query: JsonNode; header: JsonN
   ##       : Knowledgebase id.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `kbId` field"
-  var valid_568195 = path.getOrDefault("kbId")
-  valid_568195 = validateParameter(valid_568195, JString, required = true,
+  var valid_564095 = path.getOrDefault("kbId")
+  valid_564095 = validateParameter(valid_564095, JString, required = true,
                                  default = nil)
-  if valid_568195 != nil:
-    section.add "kbId", valid_568195
+  if valid_564095 != nil:
+    section.add "kbId", valid_564095
   result.add "path", section
   section = newJObject()
   result.add "query", section
@@ -226,35 +230,35 @@ proc validate_RuntimeTrain_568193(path: JsonNode; query: JsonNode; header: JsonN
   if body != nil:
     result.add "body", body
 
-proc call*(call_568197: Call_RuntimeTrain_568192; path: JsonNode; query: JsonNode;
+proc call*(call_564097: Call_RuntimeTrain_564092; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
-  let valid = call_568197.validator(path, query, header, formData, body)
-  let scheme = call_568197.pickScheme
+  let valid = call_564097.validator(path, query, header, formData, body)
+  let scheme = call_564097.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568197.url(scheme.get, call_568197.host, call_568197.base,
-                         call_568197.route, valid.getOrDefault("path"),
+  let url = call_564097.url(scheme.get, call_564097.host, call_564097.base,
+                         call_564097.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568197, url, valid)
+  result = hook(call_564097, url, valid)
 
-proc call*(call_568198: Call_RuntimeTrain_568192; kbId: string;
+proc call*(call_564098: Call_RuntimeTrain_564092; kbId: string;
           trainPayload: JsonNode): Recallable =
   ## runtimeTrain
   ##   kbId: string (required)
   ##       : Knowledgebase id.
   ##   trainPayload: JObject (required)
   ##               : Post body of the request.
-  var path_568199 = newJObject()
-  var body_568200 = newJObject()
-  add(path_568199, "kbId", newJString(kbId))
+  var path_564099 = newJObject()
+  var body_564100 = newJObject()
+  add(path_564099, "kbId", newJString(kbId))
   if trainPayload != nil:
-    body_568200 = trainPayload
-  result = call_568198.call(path_568199, nil, nil, nil, body_568200)
+    body_564100 = trainPayload
+  result = call_564098.call(path_564099, nil, nil, nil, body_564100)
 
-var runtimeTrain* = Call_RuntimeTrain_568192(name: "runtimeTrain",
+var runtimeTrain* = Call_RuntimeTrain_564092(name: "runtimeTrain",
     meth: HttpMethod.HttpPost, host: "azure.local",
-    route: "/knowledgebases/{kbId}/train", validator: validate_RuntimeTrain_568193,
-    base: "", url: url_RuntimeTrain_568194, schemes: {Scheme.Https})
+    route: "/knowledgebases/{kbId}/train", validator: validate_RuntimeTrain_564093,
+    base: "", url: url_RuntimeTrain_564094, schemes: {Scheme.Https})
 export
   rest
 

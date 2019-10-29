@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, httpcore
 
 ## auto-generated via openapi macro
 ## title: Security Center
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_567659 = ref object of OpenApiRestCall
+  OpenApiRestCall_563557 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_567659](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563557](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_567659): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563557): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,8 +107,8 @@ const
   macServiceName = "security-alerts"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_AlertsList_567881 = ref object of OpenApiRestCall_567659
-proc url_AlertsList_567883(protocol: Scheme; host: string; base: string; route: string;
+  Call_AlertsList_563779 = ref object of OpenApiRestCall_563557
+proc url_AlertsList_563781(protocol: Scheme; host: string; base: string; route: string;
                           path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -120,7 +124,7 @@ proc url_AlertsList_567883(protocol: Scheme; host: string; base: string; route: 
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AlertsList_567882(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_AlertsList_563780(path: JsonNode; query: JsonNode; header: JsonNode;
                                formData: JsonNode; body: JsonNode): JsonNode =
   ## List all the alerts that are associated with the subscription
   ## 
@@ -132,44 +136,44 @@ proc validate_AlertsList_567882(path: JsonNode; query: JsonNode; header: JsonNod
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_568044 = path.getOrDefault("subscriptionId")
-  valid_568044 = validateParameter(valid_568044, JString, required = true,
+  var valid_563944 = path.getOrDefault("subscriptionId")
+  valid_563944 = validateParameter(valid_563944, JString, required = true,
                                  default = nil)
-  if valid_568044 != nil:
-    section.add "subscriptionId", valid_568044
+  if valid_563944 != nil:
+    section.add "subscriptionId", valid_563944
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
   ##              : API version for the operation
-  ##   $expand: JString
-  ##          : OData expand. Optional.
   ##   $select: JString
   ##          : OData select. Optional.
+  ##   $expand: JString
+  ##          : OData expand. Optional.
   ##   $filter: JString
   ##          : OData filter. Optional.
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568045 = query.getOrDefault("api-version")
-  valid_568045 = validateParameter(valid_568045, JString, required = true,
+  var valid_563945 = query.getOrDefault("api-version")
+  valid_563945 = validateParameter(valid_563945, JString, required = true,
                                  default = nil)
-  if valid_568045 != nil:
-    section.add "api-version", valid_568045
-  var valid_568046 = query.getOrDefault("$expand")
-  valid_568046 = validateParameter(valid_568046, JString, required = false,
+  if valid_563945 != nil:
+    section.add "api-version", valid_563945
+  var valid_563946 = query.getOrDefault("$select")
+  valid_563946 = validateParameter(valid_563946, JString, required = false,
                                  default = nil)
-  if valid_568046 != nil:
-    section.add "$expand", valid_568046
-  var valid_568047 = query.getOrDefault("$select")
-  valid_568047 = validateParameter(valid_568047, JString, required = false,
+  if valid_563946 != nil:
+    section.add "$select", valid_563946
+  var valid_563947 = query.getOrDefault("$expand")
+  valid_563947 = validateParameter(valid_563947, JString, required = false,
                                  default = nil)
-  if valid_568047 != nil:
-    section.add "$select", valid_568047
-  var valid_568048 = query.getOrDefault("$filter")
-  valid_568048 = validateParameter(valid_568048, JString, required = false,
+  if valid_563947 != nil:
+    section.add "$expand", valid_563947
+  var valid_563948 = query.getOrDefault("$filter")
+  valid_563948 = validateParameter(valid_563948, JString, required = false,
                                  default = nil)
-  if valid_568048 != nil:
-    section.add "$filter", valid_568048
+  if valid_563948 != nil:
+    section.add "$filter", valid_563948
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -178,52 +182,52 @@ proc validate_AlertsList_567882(path: JsonNode; query: JsonNode; header: JsonNod
   if body != nil:
     result.add "body", body
 
-proc call*(call_568075: Call_AlertsList_567881; path: JsonNode; query: JsonNode;
+proc call*(call_563975: Call_AlertsList_563779; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## List all the alerts that are associated with the subscription
   ## 
-  let valid = call_568075.validator(path, query, header, formData, body)
-  let scheme = call_568075.pickScheme
+  let valid = call_563975.validator(path, query, header, formData, body)
+  let scheme = call_563975.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568075.url(scheme.get, call_568075.host, call_568075.base,
-                         call_568075.route, valid.getOrDefault("path"),
+  let url = call_563975.url(scheme.get, call_563975.host, call_563975.base,
+                         call_563975.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568075, url, valid)
+  result = hook(call_563975, url, valid)
 
-proc call*(call_568146: Call_AlertsList_567881; apiVersion: string;
-          subscriptionId: string; Expand: string = ""; Select: string = "";
+proc call*(call_564046: Call_AlertsList_563779; apiVersion: string;
+          subscriptionId: string; Select: string = ""; Expand: string = "";
           Filter: string = ""): Recallable =
   ## alertsList
   ## List all the alerts that are associated with the subscription
   ##   apiVersion: string (required)
   ##             : API version for the operation
+  ##   Select: string
+  ##         : OData select. Optional.
   ##   Expand: string
   ##         : OData expand. Optional.
   ##   subscriptionId: string (required)
   ##                 : Azure subscription ID
-  ##   Select: string
-  ##         : OData select. Optional.
   ##   Filter: string
   ##         : OData filter. Optional.
-  var path_568147 = newJObject()
-  var query_568149 = newJObject()
-  add(query_568149, "api-version", newJString(apiVersion))
-  add(query_568149, "$expand", newJString(Expand))
-  add(path_568147, "subscriptionId", newJString(subscriptionId))
-  add(query_568149, "$select", newJString(Select))
-  add(query_568149, "$filter", newJString(Filter))
-  result = call_568146.call(path_568147, query_568149, nil, nil, nil)
+  var path_564047 = newJObject()
+  var query_564049 = newJObject()
+  add(query_564049, "api-version", newJString(apiVersion))
+  add(query_564049, "$select", newJString(Select))
+  add(query_564049, "$expand", newJString(Expand))
+  add(path_564047, "subscriptionId", newJString(subscriptionId))
+  add(query_564049, "$filter", newJString(Filter))
+  result = call_564046.call(path_564047, query_564049, nil, nil, nil)
 
-var alertsList* = Call_AlertsList_567881(name: "alertsList",
+var alertsList* = Call_AlertsList_563779(name: "alertsList",
                                       meth: HttpMethod.HttpGet,
                                       host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Security/alerts",
-                                      validator: validate_AlertsList_567882,
-                                      base: "", url: url_AlertsList_567883,
+                                      validator: validate_AlertsList_563780,
+                                      base: "", url: url_AlertsList_563781,
                                       schemes: {Scheme.Https})
 type
-  Call_AlertsListSubscriptionLevelAlertsByRegion_568188 = ref object of OpenApiRestCall_567659
-proc url_AlertsListSubscriptionLevelAlertsByRegion_568190(protocol: Scheme;
+  Call_AlertsListSubscriptionLevelAlertsByRegion_564088 = ref object of OpenApiRestCall_563557
+proc url_AlertsListSubscriptionLevelAlertsByRegion_564090(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -242,63 +246,63 @@ proc url_AlertsListSubscriptionLevelAlertsByRegion_568190(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AlertsListSubscriptionLevelAlertsByRegion_568189(path: JsonNode;
+proc validate_AlertsListSubscriptionLevelAlertsByRegion_564089(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## List all the alerts that are associated with the subscription that are stored in a specific location
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   ascLocation: JString (required)
-  ##              : The location where ASC stores the data of the subscription. can be retrieved from Get locations
   ##   subscriptionId: JString (required)
   ##                 : Azure subscription ID
+  ##   ascLocation: JString (required)
+  ##              : The location where ASC stores the data of the subscription. can be retrieved from Get locations
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `ascLocation` field"
-  var valid_568191 = path.getOrDefault("ascLocation")
-  valid_568191 = validateParameter(valid_568191, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564091 = path.getOrDefault("subscriptionId")
+  valid_564091 = validateParameter(valid_564091, JString, required = true,
                                  default = nil)
-  if valid_568191 != nil:
-    section.add "ascLocation", valid_568191
-  var valid_568192 = path.getOrDefault("subscriptionId")
-  valid_568192 = validateParameter(valid_568192, JString, required = true,
+  if valid_564091 != nil:
+    section.add "subscriptionId", valid_564091
+  var valid_564092 = path.getOrDefault("ascLocation")
+  valid_564092 = validateParameter(valid_564092, JString, required = true,
                                  default = nil)
-  if valid_568192 != nil:
-    section.add "subscriptionId", valid_568192
+  if valid_564092 != nil:
+    section.add "ascLocation", valid_564092
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
   ##              : API version for the operation
-  ##   $expand: JString
-  ##          : OData expand. Optional.
   ##   $select: JString
   ##          : OData select. Optional.
+  ##   $expand: JString
+  ##          : OData expand. Optional.
   ##   $filter: JString
   ##          : OData filter. Optional.
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568193 = query.getOrDefault("api-version")
-  valid_568193 = validateParameter(valid_568193, JString, required = true,
+  var valid_564093 = query.getOrDefault("api-version")
+  valid_564093 = validateParameter(valid_564093, JString, required = true,
                                  default = nil)
-  if valid_568193 != nil:
-    section.add "api-version", valid_568193
-  var valid_568194 = query.getOrDefault("$expand")
-  valid_568194 = validateParameter(valid_568194, JString, required = false,
+  if valid_564093 != nil:
+    section.add "api-version", valid_564093
+  var valid_564094 = query.getOrDefault("$select")
+  valid_564094 = validateParameter(valid_564094, JString, required = false,
                                  default = nil)
-  if valid_568194 != nil:
-    section.add "$expand", valid_568194
-  var valid_568195 = query.getOrDefault("$select")
-  valid_568195 = validateParameter(valid_568195, JString, required = false,
+  if valid_564094 != nil:
+    section.add "$select", valid_564094
+  var valid_564095 = query.getOrDefault("$expand")
+  valid_564095 = validateParameter(valid_564095, JString, required = false,
                                  default = nil)
-  if valid_568195 != nil:
-    section.add "$select", valid_568195
-  var valid_568196 = query.getOrDefault("$filter")
-  valid_568196 = validateParameter(valid_568196, JString, required = false,
+  if valid_564095 != nil:
+    section.add "$expand", valid_564095
+  var valid_564096 = query.getOrDefault("$filter")
+  valid_564096 = validateParameter(valid_564096, JString, required = false,
                                  default = nil)
-  if valid_568196 != nil:
-    section.add "$filter", valid_568196
+  if valid_564096 != nil:
+    section.add "$filter", valid_564096
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -307,56 +311,56 @@ proc validate_AlertsListSubscriptionLevelAlertsByRegion_568189(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568197: Call_AlertsListSubscriptionLevelAlertsByRegion_568188;
+proc call*(call_564097: Call_AlertsListSubscriptionLevelAlertsByRegion_564088;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## List all the alerts that are associated with the subscription that are stored in a specific location
   ## 
-  let valid = call_568197.validator(path, query, header, formData, body)
-  let scheme = call_568197.pickScheme
+  let valid = call_564097.validator(path, query, header, formData, body)
+  let scheme = call_564097.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568197.url(scheme.get, call_568197.host, call_568197.base,
-                         call_568197.route, valid.getOrDefault("path"),
+  let url = call_564097.url(scheme.get, call_564097.host, call_564097.base,
+                         call_564097.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568197, url, valid)
+  result = hook(call_564097, url, valid)
 
-proc call*(call_568198: Call_AlertsListSubscriptionLevelAlertsByRegion_568188;
-          apiVersion: string; ascLocation: string; subscriptionId: string;
-          Expand: string = ""; Select: string = ""; Filter: string = ""): Recallable =
+proc call*(call_564098: Call_AlertsListSubscriptionLevelAlertsByRegion_564088;
+          apiVersion: string; subscriptionId: string; ascLocation: string;
+          Select: string = ""; Expand: string = ""; Filter: string = ""): Recallable =
   ## alertsListSubscriptionLevelAlertsByRegion
   ## List all the alerts that are associated with the subscription that are stored in a specific location
   ##   apiVersion: string (required)
   ##             : API version for the operation
-  ##   Expand: string
-  ##         : OData expand. Optional.
-  ##   ascLocation: string (required)
-  ##              : The location where ASC stores the data of the subscription. can be retrieved from Get locations
-  ##   subscriptionId: string (required)
-  ##                 : Azure subscription ID
   ##   Select: string
   ##         : OData select. Optional.
+  ##   Expand: string
+  ##         : OData expand. Optional.
+  ##   subscriptionId: string (required)
+  ##                 : Azure subscription ID
+  ##   ascLocation: string (required)
+  ##              : The location where ASC stores the data of the subscription. can be retrieved from Get locations
   ##   Filter: string
   ##         : OData filter. Optional.
-  var path_568199 = newJObject()
-  var query_568200 = newJObject()
-  add(query_568200, "api-version", newJString(apiVersion))
-  add(query_568200, "$expand", newJString(Expand))
-  add(path_568199, "ascLocation", newJString(ascLocation))
-  add(path_568199, "subscriptionId", newJString(subscriptionId))
-  add(query_568200, "$select", newJString(Select))
-  add(query_568200, "$filter", newJString(Filter))
-  result = call_568198.call(path_568199, query_568200, nil, nil, nil)
+  var path_564099 = newJObject()
+  var query_564100 = newJObject()
+  add(query_564100, "api-version", newJString(apiVersion))
+  add(query_564100, "$select", newJString(Select))
+  add(query_564100, "$expand", newJString(Expand))
+  add(path_564099, "subscriptionId", newJString(subscriptionId))
+  add(path_564099, "ascLocation", newJString(ascLocation))
+  add(query_564100, "$filter", newJString(Filter))
+  result = call_564098.call(path_564099, query_564100, nil, nil, nil)
 
-var alertsListSubscriptionLevelAlertsByRegion* = Call_AlertsListSubscriptionLevelAlertsByRegion_568188(
+var alertsListSubscriptionLevelAlertsByRegion* = Call_AlertsListSubscriptionLevelAlertsByRegion_564088(
     name: "alertsListSubscriptionLevelAlertsByRegion", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Security/locations/{ascLocation}/alerts",
-    validator: validate_AlertsListSubscriptionLevelAlertsByRegion_568189,
-    base: "", url: url_AlertsListSubscriptionLevelAlertsByRegion_568190,
+    validator: validate_AlertsListSubscriptionLevelAlertsByRegion_564089,
+    base: "", url: url_AlertsListSubscriptionLevelAlertsByRegion_564090,
     schemes: {Scheme.Https})
 type
-  Call_AlertsGetSubscriptionLevelAlert_568201 = ref object of OpenApiRestCall_567659
-proc url_AlertsGetSubscriptionLevelAlert_568203(protocol: Scheme; host: string;
+  Call_AlertsGetSubscriptionLevelAlert_564101 = ref object of OpenApiRestCall_563557
+proc url_AlertsGetSubscriptionLevelAlert_564103(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -377,37 +381,36 @@ proc url_AlertsGetSubscriptionLevelAlert_568203(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AlertsGetSubscriptionLevelAlert_568202(path: JsonNode;
+proc validate_AlertsGetSubscriptionLevelAlert_564102(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Get an alert that is associated with a subscription
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   ascLocation: JString (required)
-  ##              : The location where ASC stores the data of the subscription. can be retrieved from Get locations
-  ##   subscriptionId: JString (required)
-  ##                 : Azure subscription ID
   ##   alertName: JString (required)
   ##            : Name of the alert object
+  ##   subscriptionId: JString (required)
+  ##                 : Azure subscription ID
+  ##   ascLocation: JString (required)
+  ##              : The location where ASC stores the data of the subscription. can be retrieved from Get locations
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `ascLocation` field"
-  var valid_568213 = path.getOrDefault("ascLocation")
-  valid_568213 = validateParameter(valid_568213, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `alertName` field"
+  var valid_564113 = path.getOrDefault("alertName")
+  valid_564113 = validateParameter(valid_564113, JString, required = true,
                                  default = nil)
-  if valid_568213 != nil:
-    section.add "ascLocation", valid_568213
-  var valid_568214 = path.getOrDefault("subscriptionId")
-  valid_568214 = validateParameter(valid_568214, JString, required = true,
+  if valid_564113 != nil:
+    section.add "alertName", valid_564113
+  var valid_564114 = path.getOrDefault("subscriptionId")
+  valid_564114 = validateParameter(valid_564114, JString, required = true,
                                  default = nil)
-  if valid_568214 != nil:
-    section.add "subscriptionId", valid_568214
-  var valid_568215 = path.getOrDefault("alertName")
-  valid_568215 = validateParameter(valid_568215, JString, required = true,
+  if valid_564114 != nil:
+    section.add "subscriptionId", valid_564114
+  var valid_564115 = path.getOrDefault("ascLocation")
+  valid_564115 = validateParameter(valid_564115, JString, required = true,
                                  default = nil)
-  if valid_568215 != nil:
-    section.add "alertName", valid_568215
+  if valid_564115 != nil:
+    section.add "ascLocation", valid_564115
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -415,11 +418,11 @@ proc validate_AlertsGetSubscriptionLevelAlert_568202(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568216 = query.getOrDefault("api-version")
-  valid_568216 = validateParameter(valid_568216, JString, required = true,
+  var valid_564116 = query.getOrDefault("api-version")
+  valid_564116 = validateParameter(valid_564116, JString, required = true,
                                  default = nil)
-  if valid_568216 != nil:
-    section.add "api-version", valid_568216
+  if valid_564116 != nil:
+    section.add "api-version", valid_564116
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -428,49 +431,49 @@ proc validate_AlertsGetSubscriptionLevelAlert_568202(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568217: Call_AlertsGetSubscriptionLevelAlert_568201;
+proc call*(call_564117: Call_AlertsGetSubscriptionLevelAlert_564101;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Get an alert that is associated with a subscription
   ## 
-  let valid = call_568217.validator(path, query, header, formData, body)
-  let scheme = call_568217.pickScheme
+  let valid = call_564117.validator(path, query, header, formData, body)
+  let scheme = call_564117.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568217.url(scheme.get, call_568217.host, call_568217.base,
-                         call_568217.route, valid.getOrDefault("path"),
+  let url = call_564117.url(scheme.get, call_564117.host, call_564117.base,
+                         call_564117.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568217, url, valid)
+  result = hook(call_564117, url, valid)
 
-proc call*(call_568218: Call_AlertsGetSubscriptionLevelAlert_568201;
-          apiVersion: string; ascLocation: string; subscriptionId: string;
-          alertName: string): Recallable =
+proc call*(call_564118: Call_AlertsGetSubscriptionLevelAlert_564101;
+          alertName: string; apiVersion: string; subscriptionId: string;
+          ascLocation: string): Recallable =
   ## alertsGetSubscriptionLevelAlert
   ## Get an alert that is associated with a subscription
-  ##   apiVersion: string (required)
-  ##             : API version for the operation
-  ##   ascLocation: string (required)
-  ##              : The location where ASC stores the data of the subscription. can be retrieved from Get locations
-  ##   subscriptionId: string (required)
-  ##                 : Azure subscription ID
   ##   alertName: string (required)
   ##            : Name of the alert object
-  var path_568219 = newJObject()
-  var query_568220 = newJObject()
-  add(query_568220, "api-version", newJString(apiVersion))
-  add(path_568219, "ascLocation", newJString(ascLocation))
-  add(path_568219, "subscriptionId", newJString(subscriptionId))
-  add(path_568219, "alertName", newJString(alertName))
-  result = call_568218.call(path_568219, query_568220, nil, nil, nil)
+  ##   apiVersion: string (required)
+  ##             : API version for the operation
+  ##   subscriptionId: string (required)
+  ##                 : Azure subscription ID
+  ##   ascLocation: string (required)
+  ##              : The location where ASC stores the data of the subscription. can be retrieved from Get locations
+  var path_564119 = newJObject()
+  var query_564120 = newJObject()
+  add(path_564119, "alertName", newJString(alertName))
+  add(query_564120, "api-version", newJString(apiVersion))
+  add(path_564119, "subscriptionId", newJString(subscriptionId))
+  add(path_564119, "ascLocation", newJString(ascLocation))
+  result = call_564118.call(path_564119, query_564120, nil, nil, nil)
 
-var alertsGetSubscriptionLevelAlert* = Call_AlertsGetSubscriptionLevelAlert_568201(
+var alertsGetSubscriptionLevelAlert* = Call_AlertsGetSubscriptionLevelAlert_564101(
     name: "alertsGetSubscriptionLevelAlert", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Security/locations/{ascLocation}/alerts/{alertName}",
-    validator: validate_AlertsGetSubscriptionLevelAlert_568202, base: "",
-    url: url_AlertsGetSubscriptionLevelAlert_568203, schemes: {Scheme.Https})
+    validator: validate_AlertsGetSubscriptionLevelAlert_564102, base: "",
+    url: url_AlertsGetSubscriptionLevelAlert_564103, schemes: {Scheme.Https})
 type
-  Call_AlertsUpdateSubscriptionLevelAlertState_568221 = ref object of OpenApiRestCall_567659
-proc url_AlertsUpdateSubscriptionLevelAlertState_568223(protocol: Scheme;
+  Call_AlertsUpdateSubscriptionLevelAlertState_564121 = ref object of OpenApiRestCall_563557
+proc url_AlertsUpdateSubscriptionLevelAlertState_564123(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -495,44 +498,43 @@ proc url_AlertsUpdateSubscriptionLevelAlertState_568223(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AlertsUpdateSubscriptionLevelAlertState_568222(path: JsonNode;
+proc validate_AlertsUpdateSubscriptionLevelAlertState_564122(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Update the alert's state
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   ascLocation: JString (required)
-  ##              : The location where ASC stores the data of the subscription. can be retrieved from Get locations
-  ##   subscriptionId: JString (required)
-  ##                 : Azure subscription ID
-  ##   alertUpdateActionType: JString (required)
-  ##                        : Type of the action to do on the alert
   ##   alertName: JString (required)
   ##            : Name of the alert object
+  ##   subscriptionId: JString (required)
+  ##                 : Azure subscription ID
+  ##   ascLocation: JString (required)
+  ##              : The location where ASC stores the data of the subscription. can be retrieved from Get locations
+  ##   alertUpdateActionType: JString (required)
+  ##                        : Type of the action to do on the alert
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `ascLocation` field"
-  var valid_568224 = path.getOrDefault("ascLocation")
-  valid_568224 = validateParameter(valid_568224, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `alertName` field"
+  var valid_564124 = path.getOrDefault("alertName")
+  valid_564124 = validateParameter(valid_564124, JString, required = true,
                                  default = nil)
-  if valid_568224 != nil:
-    section.add "ascLocation", valid_568224
-  var valid_568225 = path.getOrDefault("subscriptionId")
-  valid_568225 = validateParameter(valid_568225, JString, required = true,
+  if valid_564124 != nil:
+    section.add "alertName", valid_564124
+  var valid_564125 = path.getOrDefault("subscriptionId")
+  valid_564125 = validateParameter(valid_564125, JString, required = true,
                                  default = nil)
-  if valid_568225 != nil:
-    section.add "subscriptionId", valid_568225
-  var valid_568239 = path.getOrDefault("alertUpdateActionType")
-  valid_568239 = validateParameter(valid_568239, JString, required = true,
+  if valid_564125 != nil:
+    section.add "subscriptionId", valid_564125
+  var valid_564126 = path.getOrDefault("ascLocation")
+  valid_564126 = validateParameter(valid_564126, JString, required = true,
+                                 default = nil)
+  if valid_564126 != nil:
+    section.add "ascLocation", valid_564126
+  var valid_564140 = path.getOrDefault("alertUpdateActionType")
+  valid_564140 = validateParameter(valid_564140, JString, required = true,
                                  default = newJString("Dismiss"))
-  if valid_568239 != nil:
-    section.add "alertUpdateActionType", valid_568239
-  var valid_568240 = path.getOrDefault("alertName")
-  valid_568240 = validateParameter(valid_568240, JString, required = true,
-                                 default = nil)
-  if valid_568240 != nil:
-    section.add "alertName", valid_568240
+  if valid_564140 != nil:
+    section.add "alertUpdateActionType", valid_564140
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -540,11 +542,11 @@ proc validate_AlertsUpdateSubscriptionLevelAlertState_568222(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568241 = query.getOrDefault("api-version")
-  valid_568241 = validateParameter(valid_568241, JString, required = true,
+  var valid_564141 = query.getOrDefault("api-version")
+  valid_564141 = validateParameter(valid_564141, JString, required = true,
                                  default = nil)
-  if valid_568241 != nil:
-    section.add "api-version", valid_568241
+  if valid_564141 != nil:
+    section.add "api-version", valid_564141
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -553,53 +555,53 @@ proc validate_AlertsUpdateSubscriptionLevelAlertState_568222(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568242: Call_AlertsUpdateSubscriptionLevelAlertState_568221;
+proc call*(call_564142: Call_AlertsUpdateSubscriptionLevelAlertState_564121;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Update the alert's state
   ## 
-  let valid = call_568242.validator(path, query, header, formData, body)
-  let scheme = call_568242.pickScheme
+  let valid = call_564142.validator(path, query, header, formData, body)
+  let scheme = call_564142.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568242.url(scheme.get, call_568242.host, call_568242.base,
-                         call_568242.route, valid.getOrDefault("path"),
+  let url = call_564142.url(scheme.get, call_564142.host, call_564142.base,
+                         call_564142.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568242, url, valid)
+  result = hook(call_564142, url, valid)
 
-proc call*(call_568243: Call_AlertsUpdateSubscriptionLevelAlertState_568221;
-          apiVersion: string; ascLocation: string; subscriptionId: string;
-          alertName: string; alertUpdateActionType: string = "Dismiss"): Recallable =
+proc call*(call_564143: Call_AlertsUpdateSubscriptionLevelAlertState_564121;
+          alertName: string; apiVersion: string; subscriptionId: string;
+          ascLocation: string; alertUpdateActionType: string = "Dismiss"): Recallable =
   ## alertsUpdateSubscriptionLevelAlertState
   ## Update the alert's state
-  ##   apiVersion: string (required)
-  ##             : API version for the operation
-  ##   ascLocation: string (required)
-  ##              : The location where ASC stores the data of the subscription. can be retrieved from Get locations
-  ##   subscriptionId: string (required)
-  ##                 : Azure subscription ID
-  ##   alertUpdateActionType: string (required)
-  ##                        : Type of the action to do on the alert
   ##   alertName: string (required)
   ##            : Name of the alert object
-  var path_568244 = newJObject()
-  var query_568245 = newJObject()
-  add(query_568245, "api-version", newJString(apiVersion))
-  add(path_568244, "ascLocation", newJString(ascLocation))
-  add(path_568244, "subscriptionId", newJString(subscriptionId))
-  add(path_568244, "alertUpdateActionType", newJString(alertUpdateActionType))
-  add(path_568244, "alertName", newJString(alertName))
-  result = call_568243.call(path_568244, query_568245, nil, nil, nil)
+  ##   apiVersion: string (required)
+  ##             : API version for the operation
+  ##   subscriptionId: string (required)
+  ##                 : Azure subscription ID
+  ##   ascLocation: string (required)
+  ##              : The location where ASC stores the data of the subscription. can be retrieved from Get locations
+  ##   alertUpdateActionType: string (required)
+  ##                        : Type of the action to do on the alert
+  var path_564144 = newJObject()
+  var query_564145 = newJObject()
+  add(path_564144, "alertName", newJString(alertName))
+  add(query_564145, "api-version", newJString(apiVersion))
+  add(path_564144, "subscriptionId", newJString(subscriptionId))
+  add(path_564144, "ascLocation", newJString(ascLocation))
+  add(path_564144, "alertUpdateActionType", newJString(alertUpdateActionType))
+  result = call_564143.call(path_564144, query_564145, nil, nil, nil)
 
-var alertsUpdateSubscriptionLevelAlertState* = Call_AlertsUpdateSubscriptionLevelAlertState_568221(
+var alertsUpdateSubscriptionLevelAlertState* = Call_AlertsUpdateSubscriptionLevelAlertState_564121(
     name: "alertsUpdateSubscriptionLevelAlertState", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Security/locations/{ascLocation}/alerts/{alertName}/{alertUpdateActionType}",
-    validator: validate_AlertsUpdateSubscriptionLevelAlertState_568222, base: "",
-    url: url_AlertsUpdateSubscriptionLevelAlertState_568223,
+    validator: validate_AlertsUpdateSubscriptionLevelAlertState_564122, base: "",
+    url: url_AlertsUpdateSubscriptionLevelAlertState_564123,
     schemes: {Scheme.Https})
 type
-  Call_AlertsListByResourceGroup_568246 = ref object of OpenApiRestCall_567659
-proc url_AlertsListByResourceGroup_568248(protocol: Scheme; host: string;
+  Call_AlertsListByResourceGroup_564146 = ref object of OpenApiRestCall_563557
+proc url_AlertsListByResourceGroup_564148(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -619,63 +621,63 @@ proc url_AlertsListByResourceGroup_568248(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AlertsListByResourceGroup_568247(path: JsonNode; query: JsonNode;
+proc validate_AlertsListByResourceGroup_564147(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## List all the alerts that are associated with the resource group
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
   ##   subscriptionId: JString (required)
   ##                 : Azure subscription ID
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568249 = path.getOrDefault("resourceGroupName")
-  valid_568249 = validateParameter(valid_568249, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564149 = path.getOrDefault("subscriptionId")
+  valid_564149 = validateParameter(valid_564149, JString, required = true,
                                  default = nil)
-  if valid_568249 != nil:
-    section.add "resourceGroupName", valid_568249
-  var valid_568250 = path.getOrDefault("subscriptionId")
-  valid_568250 = validateParameter(valid_568250, JString, required = true,
+  if valid_564149 != nil:
+    section.add "subscriptionId", valid_564149
+  var valid_564150 = path.getOrDefault("resourceGroupName")
+  valid_564150 = validateParameter(valid_564150, JString, required = true,
                                  default = nil)
-  if valid_568250 != nil:
-    section.add "subscriptionId", valid_568250
+  if valid_564150 != nil:
+    section.add "resourceGroupName", valid_564150
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
   ##              : API version for the operation
-  ##   $expand: JString
-  ##          : OData expand. Optional.
   ##   $select: JString
   ##          : OData select. Optional.
+  ##   $expand: JString
+  ##          : OData expand. Optional.
   ##   $filter: JString
   ##          : OData filter. Optional.
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568251 = query.getOrDefault("api-version")
-  valid_568251 = validateParameter(valid_568251, JString, required = true,
+  var valid_564151 = query.getOrDefault("api-version")
+  valid_564151 = validateParameter(valid_564151, JString, required = true,
                                  default = nil)
-  if valid_568251 != nil:
-    section.add "api-version", valid_568251
-  var valid_568252 = query.getOrDefault("$expand")
-  valid_568252 = validateParameter(valid_568252, JString, required = false,
+  if valid_564151 != nil:
+    section.add "api-version", valid_564151
+  var valid_564152 = query.getOrDefault("$select")
+  valid_564152 = validateParameter(valid_564152, JString, required = false,
                                  default = nil)
-  if valid_568252 != nil:
-    section.add "$expand", valid_568252
-  var valid_568253 = query.getOrDefault("$select")
-  valid_568253 = validateParameter(valid_568253, JString, required = false,
+  if valid_564152 != nil:
+    section.add "$select", valid_564152
+  var valid_564153 = query.getOrDefault("$expand")
+  valid_564153 = validateParameter(valid_564153, JString, required = false,
                                  default = nil)
-  if valid_568253 != nil:
-    section.add "$select", valid_568253
-  var valid_568254 = query.getOrDefault("$filter")
-  valid_568254 = validateParameter(valid_568254, JString, required = false,
+  if valid_564153 != nil:
+    section.add "$expand", valid_564153
+  var valid_564154 = query.getOrDefault("$filter")
+  valid_564154 = validateParameter(valid_564154, JString, required = false,
                                  default = nil)
-  if valid_568254 != nil:
-    section.add "$filter", valid_568254
+  if valid_564154 != nil:
+    section.add "$filter", valid_564154
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -684,54 +686,54 @@ proc validate_AlertsListByResourceGroup_568247(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568255: Call_AlertsListByResourceGroup_568246; path: JsonNode;
+proc call*(call_564155: Call_AlertsListByResourceGroup_564146; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## List all the alerts that are associated with the resource group
   ## 
-  let valid = call_568255.validator(path, query, header, formData, body)
-  let scheme = call_568255.pickScheme
+  let valid = call_564155.validator(path, query, header, formData, body)
+  let scheme = call_564155.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568255.url(scheme.get, call_568255.host, call_568255.base,
-                         call_568255.route, valid.getOrDefault("path"),
+  let url = call_564155.url(scheme.get, call_564155.host, call_564155.base,
+                         call_564155.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568255, url, valid)
+  result = hook(call_564155, url, valid)
 
-proc call*(call_568256: Call_AlertsListByResourceGroup_568246;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          Expand: string = ""; Select: string = ""; Filter: string = ""): Recallable =
+proc call*(call_564156: Call_AlertsListByResourceGroup_564146; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string; Select: string = "";
+          Expand: string = ""; Filter: string = ""): Recallable =
   ## alertsListByResourceGroup
   ## List all the alerts that are associated with the resource group
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
   ##   apiVersion: string (required)
   ##             : API version for the operation
+  ##   Select: string
+  ##         : OData select. Optional.
   ##   Expand: string
   ##         : OData expand. Optional.
   ##   subscriptionId: string (required)
   ##                 : Azure subscription ID
-  ##   Select: string
-  ##         : OData select. Optional.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
   ##   Filter: string
   ##         : OData filter. Optional.
-  var path_568257 = newJObject()
-  var query_568258 = newJObject()
-  add(path_568257, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568258, "api-version", newJString(apiVersion))
-  add(query_568258, "$expand", newJString(Expand))
-  add(path_568257, "subscriptionId", newJString(subscriptionId))
-  add(query_568258, "$select", newJString(Select))
-  add(query_568258, "$filter", newJString(Filter))
-  result = call_568256.call(path_568257, query_568258, nil, nil, nil)
+  var path_564157 = newJObject()
+  var query_564158 = newJObject()
+  add(query_564158, "api-version", newJString(apiVersion))
+  add(query_564158, "$select", newJString(Select))
+  add(query_564158, "$expand", newJString(Expand))
+  add(path_564157, "subscriptionId", newJString(subscriptionId))
+  add(path_564157, "resourceGroupName", newJString(resourceGroupName))
+  add(query_564158, "$filter", newJString(Filter))
+  result = call_564156.call(path_564157, query_564158, nil, nil, nil)
 
-var alertsListByResourceGroup* = Call_AlertsListByResourceGroup_568246(
+var alertsListByResourceGroup* = Call_AlertsListByResourceGroup_564146(
     name: "alertsListByResourceGroup", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Security/alerts",
-    validator: validate_AlertsListByResourceGroup_568247, base: "",
-    url: url_AlertsListByResourceGroup_568248, schemes: {Scheme.Https})
+    validator: validate_AlertsListByResourceGroup_564147, base: "",
+    url: url_AlertsListByResourceGroup_564148, schemes: {Scheme.Https})
 type
-  Call_AlertsListResourceGroupLevelAlertsByRegion_568259 = ref object of OpenApiRestCall_567659
-proc url_AlertsListResourceGroupLevelAlertsByRegion_568261(protocol: Scheme;
+  Call_AlertsListResourceGroupLevelAlertsByRegion_564159 = ref object of OpenApiRestCall_563557
+proc url_AlertsListResourceGroupLevelAlertsByRegion_564161(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -754,70 +756,70 @@ proc url_AlertsListResourceGroupLevelAlertsByRegion_568261(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AlertsListResourceGroupLevelAlertsByRegion_568260(path: JsonNode;
+proc validate_AlertsListResourceGroupLevelAlertsByRegion_564160(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## List all the alerts that are associated with the resource group that are stored in a specific location
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
-  ##   ascLocation: JString (required)
-  ##              : The location where ASC stores the data of the subscription. can be retrieved from Get locations
   ##   subscriptionId: JString (required)
   ##                 : Azure subscription ID
+  ##   ascLocation: JString (required)
+  ##              : The location where ASC stores the data of the subscription. can be retrieved from Get locations
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568262 = path.getOrDefault("resourceGroupName")
-  valid_568262 = validateParameter(valid_568262, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564162 = path.getOrDefault("subscriptionId")
+  valid_564162 = validateParameter(valid_564162, JString, required = true,
                                  default = nil)
-  if valid_568262 != nil:
-    section.add "resourceGroupName", valid_568262
-  var valid_568263 = path.getOrDefault("ascLocation")
-  valid_568263 = validateParameter(valid_568263, JString, required = true,
+  if valid_564162 != nil:
+    section.add "subscriptionId", valid_564162
+  var valid_564163 = path.getOrDefault("ascLocation")
+  valid_564163 = validateParameter(valid_564163, JString, required = true,
                                  default = nil)
-  if valid_568263 != nil:
-    section.add "ascLocation", valid_568263
-  var valid_568264 = path.getOrDefault("subscriptionId")
-  valid_568264 = validateParameter(valid_568264, JString, required = true,
+  if valid_564163 != nil:
+    section.add "ascLocation", valid_564163
+  var valid_564164 = path.getOrDefault("resourceGroupName")
+  valid_564164 = validateParameter(valid_564164, JString, required = true,
                                  default = nil)
-  if valid_568264 != nil:
-    section.add "subscriptionId", valid_568264
+  if valid_564164 != nil:
+    section.add "resourceGroupName", valid_564164
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
   ##              : API version for the operation
-  ##   $expand: JString
-  ##          : OData expand. Optional.
   ##   $select: JString
   ##          : OData select. Optional.
+  ##   $expand: JString
+  ##          : OData expand. Optional.
   ##   $filter: JString
   ##          : OData filter. Optional.
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568265 = query.getOrDefault("api-version")
-  valid_568265 = validateParameter(valid_568265, JString, required = true,
+  var valid_564165 = query.getOrDefault("api-version")
+  valid_564165 = validateParameter(valid_564165, JString, required = true,
                                  default = nil)
-  if valid_568265 != nil:
-    section.add "api-version", valid_568265
-  var valid_568266 = query.getOrDefault("$expand")
-  valid_568266 = validateParameter(valid_568266, JString, required = false,
+  if valid_564165 != nil:
+    section.add "api-version", valid_564165
+  var valid_564166 = query.getOrDefault("$select")
+  valid_564166 = validateParameter(valid_564166, JString, required = false,
                                  default = nil)
-  if valid_568266 != nil:
-    section.add "$expand", valid_568266
-  var valid_568267 = query.getOrDefault("$select")
-  valid_568267 = validateParameter(valid_568267, JString, required = false,
+  if valid_564166 != nil:
+    section.add "$select", valid_564166
+  var valid_564167 = query.getOrDefault("$expand")
+  valid_564167 = validateParameter(valid_564167, JString, required = false,
                                  default = nil)
-  if valid_568267 != nil:
-    section.add "$select", valid_568267
-  var valid_568268 = query.getOrDefault("$filter")
-  valid_568268 = validateParameter(valid_568268, JString, required = false,
+  if valid_564167 != nil:
+    section.add "$expand", valid_564167
+  var valid_564168 = query.getOrDefault("$filter")
+  valid_564168 = validateParameter(valid_564168, JString, required = false,
                                  default = nil)
-  if valid_568268 != nil:
-    section.add "$filter", valid_568268
+  if valid_564168 != nil:
+    section.add "$filter", valid_564168
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -826,60 +828,60 @@ proc validate_AlertsListResourceGroupLevelAlertsByRegion_568260(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568269: Call_AlertsListResourceGroupLevelAlertsByRegion_568259;
+proc call*(call_564169: Call_AlertsListResourceGroupLevelAlertsByRegion_564159;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## List all the alerts that are associated with the resource group that are stored in a specific location
   ## 
-  let valid = call_568269.validator(path, query, header, formData, body)
-  let scheme = call_568269.pickScheme
+  let valid = call_564169.validator(path, query, header, formData, body)
+  let scheme = call_564169.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568269.url(scheme.get, call_568269.host, call_568269.base,
-                         call_568269.route, valid.getOrDefault("path"),
+  let url = call_564169.url(scheme.get, call_564169.host, call_564169.base,
+                         call_564169.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568269, url, valid)
+  result = hook(call_564169, url, valid)
 
-proc call*(call_568270: Call_AlertsListResourceGroupLevelAlertsByRegion_568259;
-          resourceGroupName: string; apiVersion: string; ascLocation: string;
-          subscriptionId: string; Expand: string = ""; Select: string = "";
+proc call*(call_564170: Call_AlertsListResourceGroupLevelAlertsByRegion_564159;
+          apiVersion: string; subscriptionId: string; ascLocation: string;
+          resourceGroupName: string; Select: string = ""; Expand: string = "";
           Filter: string = ""): Recallable =
   ## alertsListResourceGroupLevelAlertsByRegion
   ## List all the alerts that are associated with the resource group that are stored in a specific location
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
   ##   apiVersion: string (required)
   ##             : API version for the operation
-  ##   Expand: string
-  ##         : OData expand. Optional.
-  ##   ascLocation: string (required)
-  ##              : The location where ASC stores the data of the subscription. can be retrieved from Get locations
-  ##   subscriptionId: string (required)
-  ##                 : Azure subscription ID
   ##   Select: string
   ##         : OData select. Optional.
+  ##   Expand: string
+  ##         : OData expand. Optional.
+  ##   subscriptionId: string (required)
+  ##                 : Azure subscription ID
+  ##   ascLocation: string (required)
+  ##              : The location where ASC stores the data of the subscription. can be retrieved from Get locations
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
   ##   Filter: string
   ##         : OData filter. Optional.
-  var path_568271 = newJObject()
-  var query_568272 = newJObject()
-  add(path_568271, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568272, "api-version", newJString(apiVersion))
-  add(query_568272, "$expand", newJString(Expand))
-  add(path_568271, "ascLocation", newJString(ascLocation))
-  add(path_568271, "subscriptionId", newJString(subscriptionId))
-  add(query_568272, "$select", newJString(Select))
-  add(query_568272, "$filter", newJString(Filter))
-  result = call_568270.call(path_568271, query_568272, nil, nil, nil)
+  var path_564171 = newJObject()
+  var query_564172 = newJObject()
+  add(query_564172, "api-version", newJString(apiVersion))
+  add(query_564172, "$select", newJString(Select))
+  add(query_564172, "$expand", newJString(Expand))
+  add(path_564171, "subscriptionId", newJString(subscriptionId))
+  add(path_564171, "ascLocation", newJString(ascLocation))
+  add(path_564171, "resourceGroupName", newJString(resourceGroupName))
+  add(query_564172, "$filter", newJString(Filter))
+  result = call_564170.call(path_564171, query_564172, nil, nil, nil)
 
-var alertsListResourceGroupLevelAlertsByRegion* = Call_AlertsListResourceGroupLevelAlertsByRegion_568259(
+var alertsListResourceGroupLevelAlertsByRegion* = Call_AlertsListResourceGroupLevelAlertsByRegion_564159(
     name: "alertsListResourceGroupLevelAlertsByRegion", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Security/locations/{ascLocation}/alerts",
-    validator: validate_AlertsListResourceGroupLevelAlertsByRegion_568260,
-    base: "", url: url_AlertsListResourceGroupLevelAlertsByRegion_568261,
+    validator: validate_AlertsListResourceGroupLevelAlertsByRegion_564160,
+    base: "", url: url_AlertsListResourceGroupLevelAlertsByRegion_564161,
     schemes: {Scheme.Https})
 type
-  Call_AlertsGetResourceGroupLevelAlerts_568273 = ref object of OpenApiRestCall_567659
-proc url_AlertsGetResourceGroupLevelAlerts_568275(protocol: Scheme; host: string;
+  Call_AlertsGetResourceGroupLevelAlerts_564173 = ref object of OpenApiRestCall_563557
+proc url_AlertsGetResourceGroupLevelAlerts_564175(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -904,44 +906,43 @@ proc url_AlertsGetResourceGroupLevelAlerts_568275(protocol: Scheme; host: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AlertsGetResourceGroupLevelAlerts_568274(path: JsonNode;
+proc validate_AlertsGetResourceGroupLevelAlerts_564174(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Get an alert that is associated a resource group or a resource in a resource group
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
-  ##   ascLocation: JString (required)
-  ##              : The location where ASC stores the data of the subscription. can be retrieved from Get locations
-  ##   subscriptionId: JString (required)
-  ##                 : Azure subscription ID
   ##   alertName: JString (required)
   ##            : Name of the alert object
+  ##   subscriptionId: JString (required)
+  ##                 : Azure subscription ID
+  ##   ascLocation: JString (required)
+  ##              : The location where ASC stores the data of the subscription. can be retrieved from Get locations
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568276 = path.getOrDefault("resourceGroupName")
-  valid_568276 = validateParameter(valid_568276, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `alertName` field"
+  var valid_564176 = path.getOrDefault("alertName")
+  valid_564176 = validateParameter(valid_564176, JString, required = true,
                                  default = nil)
-  if valid_568276 != nil:
-    section.add "resourceGroupName", valid_568276
-  var valid_568277 = path.getOrDefault("ascLocation")
-  valid_568277 = validateParameter(valid_568277, JString, required = true,
+  if valid_564176 != nil:
+    section.add "alertName", valid_564176
+  var valid_564177 = path.getOrDefault("subscriptionId")
+  valid_564177 = validateParameter(valid_564177, JString, required = true,
                                  default = nil)
-  if valid_568277 != nil:
-    section.add "ascLocation", valid_568277
-  var valid_568278 = path.getOrDefault("subscriptionId")
-  valid_568278 = validateParameter(valid_568278, JString, required = true,
+  if valid_564177 != nil:
+    section.add "subscriptionId", valid_564177
+  var valid_564178 = path.getOrDefault("ascLocation")
+  valid_564178 = validateParameter(valid_564178, JString, required = true,
                                  default = nil)
-  if valid_568278 != nil:
-    section.add "subscriptionId", valid_568278
-  var valid_568279 = path.getOrDefault("alertName")
-  valid_568279 = validateParameter(valid_568279, JString, required = true,
+  if valid_564178 != nil:
+    section.add "ascLocation", valid_564178
+  var valid_564179 = path.getOrDefault("resourceGroupName")
+  valid_564179 = validateParameter(valid_564179, JString, required = true,
                                  default = nil)
-  if valid_568279 != nil:
-    section.add "alertName", valid_568279
+  if valid_564179 != nil:
+    section.add "resourceGroupName", valid_564179
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -949,11 +950,11 @@ proc validate_AlertsGetResourceGroupLevelAlerts_568274(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568280 = query.getOrDefault("api-version")
-  valid_568280 = validateParameter(valid_568280, JString, required = true,
+  var valid_564180 = query.getOrDefault("api-version")
+  valid_564180 = validateParameter(valid_564180, JString, required = true,
                                  default = nil)
-  if valid_568280 != nil:
-    section.add "api-version", valid_568280
+  if valid_564180 != nil:
+    section.add "api-version", valid_564180
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -962,52 +963,52 @@ proc validate_AlertsGetResourceGroupLevelAlerts_568274(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568281: Call_AlertsGetResourceGroupLevelAlerts_568273;
+proc call*(call_564181: Call_AlertsGetResourceGroupLevelAlerts_564173;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Get an alert that is associated a resource group or a resource in a resource group
   ## 
-  let valid = call_568281.validator(path, query, header, formData, body)
-  let scheme = call_568281.pickScheme
+  let valid = call_564181.validator(path, query, header, formData, body)
+  let scheme = call_564181.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568281.url(scheme.get, call_568281.host, call_568281.base,
-                         call_568281.route, valid.getOrDefault("path"),
+  let url = call_564181.url(scheme.get, call_564181.host, call_564181.base,
+                         call_564181.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568281, url, valid)
+  result = hook(call_564181, url, valid)
 
-proc call*(call_568282: Call_AlertsGetResourceGroupLevelAlerts_568273;
-          resourceGroupName: string; apiVersion: string; ascLocation: string;
-          subscriptionId: string; alertName: string): Recallable =
+proc call*(call_564182: Call_AlertsGetResourceGroupLevelAlerts_564173;
+          alertName: string; apiVersion: string; subscriptionId: string;
+          ascLocation: string; resourceGroupName: string): Recallable =
   ## alertsGetResourceGroupLevelAlerts
   ## Get an alert that is associated a resource group or a resource in a resource group
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
-  ##   apiVersion: string (required)
-  ##             : API version for the operation
-  ##   ascLocation: string (required)
-  ##              : The location where ASC stores the data of the subscription. can be retrieved from Get locations
-  ##   subscriptionId: string (required)
-  ##                 : Azure subscription ID
   ##   alertName: string (required)
   ##            : Name of the alert object
-  var path_568283 = newJObject()
-  var query_568284 = newJObject()
-  add(path_568283, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568284, "api-version", newJString(apiVersion))
-  add(path_568283, "ascLocation", newJString(ascLocation))
-  add(path_568283, "subscriptionId", newJString(subscriptionId))
-  add(path_568283, "alertName", newJString(alertName))
-  result = call_568282.call(path_568283, query_568284, nil, nil, nil)
+  ##   apiVersion: string (required)
+  ##             : API version for the operation
+  ##   subscriptionId: string (required)
+  ##                 : Azure subscription ID
+  ##   ascLocation: string (required)
+  ##              : The location where ASC stores the data of the subscription. can be retrieved from Get locations
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
+  var path_564183 = newJObject()
+  var query_564184 = newJObject()
+  add(path_564183, "alertName", newJString(alertName))
+  add(query_564184, "api-version", newJString(apiVersion))
+  add(path_564183, "subscriptionId", newJString(subscriptionId))
+  add(path_564183, "ascLocation", newJString(ascLocation))
+  add(path_564183, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564182.call(path_564183, query_564184, nil, nil, nil)
 
-var alertsGetResourceGroupLevelAlerts* = Call_AlertsGetResourceGroupLevelAlerts_568273(
+var alertsGetResourceGroupLevelAlerts* = Call_AlertsGetResourceGroupLevelAlerts_564173(
     name: "alertsGetResourceGroupLevelAlerts", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Security/locations/{ascLocation}/alerts/{alertName}",
-    validator: validate_AlertsGetResourceGroupLevelAlerts_568274, base: "",
-    url: url_AlertsGetResourceGroupLevelAlerts_568275, schemes: {Scheme.Https})
+    validator: validate_AlertsGetResourceGroupLevelAlerts_564174, base: "",
+    url: url_AlertsGetResourceGroupLevelAlerts_564175, schemes: {Scheme.Https})
 type
-  Call_AlertsUpdateResourceGroupLevelAlertState_568285 = ref object of OpenApiRestCall_567659
-proc url_AlertsUpdateResourceGroupLevelAlertState_568287(protocol: Scheme;
+  Call_AlertsUpdateResourceGroupLevelAlertState_564185 = ref object of OpenApiRestCall_563557
+proc url_AlertsUpdateResourceGroupLevelAlertState_564187(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1036,51 +1037,50 @@ proc url_AlertsUpdateResourceGroupLevelAlertState_568287(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AlertsUpdateResourceGroupLevelAlertState_568286(path: JsonNode;
+proc validate_AlertsUpdateResourceGroupLevelAlertState_564186(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Update the alert's state
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
-  ##   ascLocation: JString (required)
-  ##              : The location where ASC stores the data of the subscription. can be retrieved from Get locations
-  ##   subscriptionId: JString (required)
-  ##                 : Azure subscription ID
-  ##   alertUpdateActionType: JString (required)
-  ##                        : Type of the action to do on the alert
   ##   alertName: JString (required)
   ##            : Name of the alert object
+  ##   subscriptionId: JString (required)
+  ##                 : Azure subscription ID
+  ##   ascLocation: JString (required)
+  ##              : The location where ASC stores the data of the subscription. can be retrieved from Get locations
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
+  ##   alertUpdateActionType: JString (required)
+  ##                        : Type of the action to do on the alert
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568288 = path.getOrDefault("resourceGroupName")
-  valid_568288 = validateParameter(valid_568288, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `alertName` field"
+  var valid_564188 = path.getOrDefault("alertName")
+  valid_564188 = validateParameter(valid_564188, JString, required = true,
                                  default = nil)
-  if valid_568288 != nil:
-    section.add "resourceGroupName", valid_568288
-  var valid_568289 = path.getOrDefault("ascLocation")
-  valid_568289 = validateParameter(valid_568289, JString, required = true,
+  if valid_564188 != nil:
+    section.add "alertName", valid_564188
+  var valid_564189 = path.getOrDefault("subscriptionId")
+  valid_564189 = validateParameter(valid_564189, JString, required = true,
                                  default = nil)
-  if valid_568289 != nil:
-    section.add "ascLocation", valid_568289
-  var valid_568290 = path.getOrDefault("subscriptionId")
-  valid_568290 = validateParameter(valid_568290, JString, required = true,
+  if valid_564189 != nil:
+    section.add "subscriptionId", valid_564189
+  var valid_564190 = path.getOrDefault("ascLocation")
+  valid_564190 = validateParameter(valid_564190, JString, required = true,
                                  default = nil)
-  if valid_568290 != nil:
-    section.add "subscriptionId", valid_568290
-  var valid_568291 = path.getOrDefault("alertUpdateActionType")
-  valid_568291 = validateParameter(valid_568291, JString, required = true,
+  if valid_564190 != nil:
+    section.add "ascLocation", valid_564190
+  var valid_564191 = path.getOrDefault("resourceGroupName")
+  valid_564191 = validateParameter(valid_564191, JString, required = true,
+                                 default = nil)
+  if valid_564191 != nil:
+    section.add "resourceGroupName", valid_564191
+  var valid_564192 = path.getOrDefault("alertUpdateActionType")
+  valid_564192 = validateParameter(valid_564192, JString, required = true,
                                  default = newJString("Dismiss"))
-  if valid_568291 != nil:
-    section.add "alertUpdateActionType", valid_568291
-  var valid_568292 = path.getOrDefault("alertName")
-  valid_568292 = validateParameter(valid_568292, JString, required = true,
-                                 default = nil)
-  if valid_568292 != nil:
-    section.add "alertName", valid_568292
+  if valid_564192 != nil:
+    section.add "alertUpdateActionType", valid_564192
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1088,11 +1088,11 @@ proc validate_AlertsUpdateResourceGroupLevelAlertState_568286(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568293 = query.getOrDefault("api-version")
-  valid_568293 = validateParameter(valid_568293, JString, required = true,
+  var valid_564193 = query.getOrDefault("api-version")
+  valid_564193 = validateParameter(valid_564193, JString, required = true,
                                  default = nil)
-  if valid_568293 != nil:
-    section.add "api-version", valid_568293
+  if valid_564193 != nil:
+    section.add "api-version", valid_564193
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1101,53 +1101,53 @@ proc validate_AlertsUpdateResourceGroupLevelAlertState_568286(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568294: Call_AlertsUpdateResourceGroupLevelAlertState_568285;
+proc call*(call_564194: Call_AlertsUpdateResourceGroupLevelAlertState_564185;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Update the alert's state
   ## 
-  let valid = call_568294.validator(path, query, header, formData, body)
-  let scheme = call_568294.pickScheme
+  let valid = call_564194.validator(path, query, header, formData, body)
+  let scheme = call_564194.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568294.url(scheme.get, call_568294.host, call_568294.base,
-                         call_568294.route, valid.getOrDefault("path"),
+  let url = call_564194.url(scheme.get, call_564194.host, call_564194.base,
+                         call_564194.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568294, url, valid)
+  result = hook(call_564194, url, valid)
 
-proc call*(call_568295: Call_AlertsUpdateResourceGroupLevelAlertState_568285;
-          resourceGroupName: string; apiVersion: string; ascLocation: string;
-          subscriptionId: string; alertName: string;
+proc call*(call_564195: Call_AlertsUpdateResourceGroupLevelAlertState_564185;
+          alertName: string; apiVersion: string; subscriptionId: string;
+          ascLocation: string; resourceGroupName: string;
           alertUpdateActionType: string = "Dismiss"): Recallable =
   ## alertsUpdateResourceGroupLevelAlertState
   ## Update the alert's state
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
-  ##   apiVersion: string (required)
-  ##             : API version for the operation
-  ##   ascLocation: string (required)
-  ##              : The location where ASC stores the data of the subscription. can be retrieved from Get locations
-  ##   subscriptionId: string (required)
-  ##                 : Azure subscription ID
-  ##   alertUpdateActionType: string (required)
-  ##                        : Type of the action to do on the alert
   ##   alertName: string (required)
   ##            : Name of the alert object
-  var path_568296 = newJObject()
-  var query_568297 = newJObject()
-  add(path_568296, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568297, "api-version", newJString(apiVersion))
-  add(path_568296, "ascLocation", newJString(ascLocation))
-  add(path_568296, "subscriptionId", newJString(subscriptionId))
-  add(path_568296, "alertUpdateActionType", newJString(alertUpdateActionType))
-  add(path_568296, "alertName", newJString(alertName))
-  result = call_568295.call(path_568296, query_568297, nil, nil, nil)
+  ##   apiVersion: string (required)
+  ##             : API version for the operation
+  ##   subscriptionId: string (required)
+  ##                 : Azure subscription ID
+  ##   ascLocation: string (required)
+  ##              : The location where ASC stores the data of the subscription. can be retrieved from Get locations
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
+  ##   alertUpdateActionType: string (required)
+  ##                        : Type of the action to do on the alert
+  var path_564196 = newJObject()
+  var query_564197 = newJObject()
+  add(path_564196, "alertName", newJString(alertName))
+  add(query_564197, "api-version", newJString(apiVersion))
+  add(path_564196, "subscriptionId", newJString(subscriptionId))
+  add(path_564196, "ascLocation", newJString(ascLocation))
+  add(path_564196, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564196, "alertUpdateActionType", newJString(alertUpdateActionType))
+  result = call_564195.call(path_564196, query_564197, nil, nil, nil)
 
-var alertsUpdateResourceGroupLevelAlertState* = Call_AlertsUpdateResourceGroupLevelAlertState_568285(
+var alertsUpdateResourceGroupLevelAlertState* = Call_AlertsUpdateResourceGroupLevelAlertState_564185(
     name: "alertsUpdateResourceGroupLevelAlertState", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Security/locations/{ascLocation}/alerts/{alertName}/{alertUpdateActionType}",
-    validator: validate_AlertsUpdateResourceGroupLevelAlertState_568286, base: "",
-    url: url_AlertsUpdateResourceGroupLevelAlertState_568287,
+    validator: validate_AlertsUpdateResourceGroupLevelAlertState_564186, base: "",
+    url: url_AlertsUpdateResourceGroupLevelAlertState_564187,
     schemes: {Scheme.Https})
 export
   rest

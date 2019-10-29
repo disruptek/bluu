@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, httpcore
 
 ## auto-generated via openapi macro
 ## title: BlueprintClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_574442 = ref object of OpenApiRestCall
+  OpenApiRestCall_563540 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_574442](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563540](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_574442): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563540): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,8 +107,8 @@ const
   macServiceName = "blueprint-assignmentOperation"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_AssignmentOperationsList_574664 = ref object of OpenApiRestCall_574442
-proc url_AssignmentOperationsList_574666(protocol: Scheme; host: string;
+  Call_AssignmentOperationsList_563762 = ref object of OpenApiRestCall_563540
+proc url_AssignmentOperationsList_563764(protocol: Scheme; host: string;
                                         base: string; route: string; path: JsonNode;
                                         query: JsonNode): Uri =
   result.scheme = $protocol
@@ -124,29 +128,30 @@ proc url_AssignmentOperationsList_574666(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AssignmentOperationsList_574665(path: JsonNode; query: JsonNode;
+proc validate_AssignmentOperationsList_563763(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## List operations for given blueprint assignment within a subscription.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   scope: JString (required)
-  ##        : The scope of the resource. Valid scopes are: management group (format: '/providers/Microsoft.Management/managementGroups/{managementGroup}'), subscription (format: '/subscriptions/{subscriptionId}'). For blueprint assignments management group scope is reserved for future use.
   ##   assignmentName: JString (required)
   ##                 : Name of the blueprint assignment.
+  ##   scope: JString (required)
+  ##        : The scope of the resource. Valid scopes are: management group (format: '/providers/Microsoft.Management/managementGroups/{managementGroup}'), subscription (format: '/subscriptions/{subscriptionId}'). For blueprint assignments management group scope is reserved for future use.
   section = newJObject()
-  assert path != nil, "path argument is necessary due to required `scope` field"
-  var valid_574839 = path.getOrDefault("scope")
-  valid_574839 = validateParameter(valid_574839, JString, required = true,
+  assert path != nil,
+        "path argument is necessary due to required `assignmentName` field"
+  var valid_563939 = path.getOrDefault("assignmentName")
+  valid_563939 = validateParameter(valid_563939, JString, required = true,
                                  default = nil)
-  if valid_574839 != nil:
-    section.add "scope", valid_574839
-  var valid_574840 = path.getOrDefault("assignmentName")
-  valid_574840 = validateParameter(valid_574840, JString, required = true,
+  if valid_563939 != nil:
+    section.add "assignmentName", valid_563939
+  var valid_563940 = path.getOrDefault("scope")
+  valid_563940 = validateParameter(valid_563940, JString, required = true,
                                  default = nil)
-  if valid_574840 != nil:
-    section.add "assignmentName", valid_574840
+  if valid_563940 != nil:
+    section.add "scope", valid_563940
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -154,11 +159,11 @@ proc validate_AssignmentOperationsList_574665(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574841 = query.getOrDefault("api-version")
-  valid_574841 = validateParameter(valid_574841, JString, required = true,
+  var valid_563941 = query.getOrDefault("api-version")
+  valid_563941 = validateParameter(valid_563941, JString, required = true,
                                  default = nil)
-  if valid_574841 != nil:
-    section.add "api-version", valid_574841
+  if valid_563941 != nil:
+    section.add "api-version", valid_563941
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -167,44 +172,44 @@ proc validate_AssignmentOperationsList_574665(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574864: Call_AssignmentOperationsList_574664; path: JsonNode;
+proc call*(call_563964: Call_AssignmentOperationsList_563762; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## List operations for given blueprint assignment within a subscription.
   ## 
-  let valid = call_574864.validator(path, query, header, formData, body)
-  let scheme = call_574864.pickScheme
+  let valid = call_563964.validator(path, query, header, formData, body)
+  let scheme = call_563964.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574864.url(scheme.get, call_574864.host, call_574864.base,
-                         call_574864.route, valid.getOrDefault("path"),
+  let url = call_563964.url(scheme.get, call_563964.host, call_563964.base,
+                         call_563964.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574864, url, valid)
+  result = hook(call_563964, url, valid)
 
-proc call*(call_574935: Call_AssignmentOperationsList_574664; apiVersion: string;
-          scope: string; assignmentName: string): Recallable =
+proc call*(call_564035: Call_AssignmentOperationsList_563762; apiVersion: string;
+          assignmentName: string; scope: string): Recallable =
   ## assignmentOperationsList
   ## List operations for given blueprint assignment within a subscription.
   ##   apiVersion: string (required)
   ##             : Client API Version.
-  ##   scope: string (required)
-  ##        : The scope of the resource. Valid scopes are: management group (format: '/providers/Microsoft.Management/managementGroups/{managementGroup}'), subscription (format: '/subscriptions/{subscriptionId}'). For blueprint assignments management group scope is reserved for future use.
   ##   assignmentName: string (required)
   ##                 : Name of the blueprint assignment.
-  var path_574936 = newJObject()
-  var query_574938 = newJObject()
-  add(query_574938, "api-version", newJString(apiVersion))
-  add(path_574936, "scope", newJString(scope))
-  add(path_574936, "assignmentName", newJString(assignmentName))
-  result = call_574935.call(path_574936, query_574938, nil, nil, nil)
+  ##   scope: string (required)
+  ##        : The scope of the resource. Valid scopes are: management group (format: '/providers/Microsoft.Management/managementGroups/{managementGroup}'), subscription (format: '/subscriptions/{subscriptionId}'). For blueprint assignments management group scope is reserved for future use.
+  var path_564036 = newJObject()
+  var query_564038 = newJObject()
+  add(query_564038, "api-version", newJString(apiVersion))
+  add(path_564036, "assignmentName", newJString(assignmentName))
+  add(path_564036, "scope", newJString(scope))
+  result = call_564035.call(path_564036, query_564038, nil, nil, nil)
 
-var assignmentOperationsList* = Call_AssignmentOperationsList_574664(
+var assignmentOperationsList* = Call_AssignmentOperationsList_563762(
     name: "assignmentOperationsList", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/{scope}/providers/Microsoft.Blueprint/blueprintAssignments/{assignmentName}/assignmentOperations",
-    validator: validate_AssignmentOperationsList_574665, base: "",
-    url: url_AssignmentOperationsList_574666, schemes: {Scheme.Https})
+    validator: validate_AssignmentOperationsList_563763, base: "",
+    url: url_AssignmentOperationsList_563764, schemes: {Scheme.Https})
 type
-  Call_AssignmentOperationsGet_574977 = ref object of OpenApiRestCall_574442
-proc url_AssignmentOperationsGet_574979(protocol: Scheme; host: string; base: string;
+  Call_AssignmentOperationsGet_564077 = ref object of OpenApiRestCall_563540
+proc url_AssignmentOperationsGet_564079(protocol: Scheme; host: string; base: string;
                                        route: string; path: JsonNode;
                                        query: JsonNode): Uri =
   result.scheme = $protocol
@@ -227,36 +232,37 @@ proc url_AssignmentOperationsGet_574979(protocol: Scheme; host: string; base: st
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AssignmentOperationsGet_574978(path: JsonNode; query: JsonNode;
+proc validate_AssignmentOperationsGet_564078(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Get a blueprint assignment operation.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   assignmentOperationName: JString (required)
-  ##                          : Name of the blueprint assignment operation.
-  ##   scope: JString (required)
-  ##        : The scope of the resource. Valid scopes are: management group (format: '/providers/Microsoft.Management/managementGroups/{managementGroup}'), subscription (format: '/subscriptions/{subscriptionId}'). For blueprint assignments management group scope is reserved for future use.
   ##   assignmentName: JString (required)
   ##                 : Name of the blueprint assignment.
+  ##   scope: JString (required)
+  ##        : The scope of the resource. Valid scopes are: management group (format: '/providers/Microsoft.Management/managementGroups/{managementGroup}'), subscription (format: '/subscriptions/{subscriptionId}'). For blueprint assignments management group scope is reserved for future use.
+  ##   assignmentOperationName: JString (required)
+  ##                          : Name of the blueprint assignment operation.
   section = newJObject()
-  assert path != nil, "path argument is necessary due to required `assignmentOperationName` field"
-  var valid_574980 = path.getOrDefault("assignmentOperationName")
-  valid_574980 = validateParameter(valid_574980, JString, required = true,
+  assert path != nil,
+        "path argument is necessary due to required `assignmentName` field"
+  var valid_564080 = path.getOrDefault("assignmentName")
+  valid_564080 = validateParameter(valid_564080, JString, required = true,
                                  default = nil)
-  if valid_574980 != nil:
-    section.add "assignmentOperationName", valid_574980
-  var valid_574981 = path.getOrDefault("scope")
-  valid_574981 = validateParameter(valid_574981, JString, required = true,
+  if valid_564080 != nil:
+    section.add "assignmentName", valid_564080
+  var valid_564081 = path.getOrDefault("scope")
+  valid_564081 = validateParameter(valid_564081, JString, required = true,
                                  default = nil)
-  if valid_574981 != nil:
-    section.add "scope", valid_574981
-  var valid_574982 = path.getOrDefault("assignmentName")
-  valid_574982 = validateParameter(valid_574982, JString, required = true,
+  if valid_564081 != nil:
+    section.add "scope", valid_564081
+  var valid_564082 = path.getOrDefault("assignmentOperationName")
+  valid_564082 = validateParameter(valid_564082, JString, required = true,
                                  default = nil)
-  if valid_574982 != nil:
-    section.add "assignmentName", valid_574982
+  if valid_564082 != nil:
+    section.add "assignmentOperationName", valid_564082
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -264,11 +270,11 @@ proc validate_AssignmentOperationsGet_574978(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574983 = query.getOrDefault("api-version")
-  valid_574983 = validateParameter(valid_574983, JString, required = true,
+  var valid_564083 = query.getOrDefault("api-version")
+  valid_564083 = validateParameter(valid_564083, JString, required = true,
                                  default = nil)
-  if valid_574983 != nil:
-    section.add "api-version", valid_574983
+  if valid_564083 != nil:
+    section.add "api-version", valid_564083
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -277,44 +283,44 @@ proc validate_AssignmentOperationsGet_574978(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574984: Call_AssignmentOperationsGet_574977; path: JsonNode;
+proc call*(call_564084: Call_AssignmentOperationsGet_564077; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get a blueprint assignment operation.
   ## 
-  let valid = call_574984.validator(path, query, header, formData, body)
-  let scheme = call_574984.pickScheme
+  let valid = call_564084.validator(path, query, header, formData, body)
+  let scheme = call_564084.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574984.url(scheme.get, call_574984.host, call_574984.base,
-                         call_574984.route, valid.getOrDefault("path"),
+  let url = call_564084.url(scheme.get, call_564084.host, call_564084.base,
+                         call_564084.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574984, url, valid)
+  result = hook(call_564084, url, valid)
 
-proc call*(call_574985: Call_AssignmentOperationsGet_574977; apiVersion: string;
-          assignmentOperationName: string; scope: string; assignmentName: string): Recallable =
+proc call*(call_564085: Call_AssignmentOperationsGet_564077; apiVersion: string;
+          assignmentName: string; scope: string; assignmentOperationName: string): Recallable =
   ## assignmentOperationsGet
   ## Get a blueprint assignment operation.
   ##   apiVersion: string (required)
   ##             : Client API Version.
-  ##   assignmentOperationName: string (required)
-  ##                          : Name of the blueprint assignment operation.
-  ##   scope: string (required)
-  ##        : The scope of the resource. Valid scopes are: management group (format: '/providers/Microsoft.Management/managementGroups/{managementGroup}'), subscription (format: '/subscriptions/{subscriptionId}'). For blueprint assignments management group scope is reserved for future use.
   ##   assignmentName: string (required)
   ##                 : Name of the blueprint assignment.
-  var path_574986 = newJObject()
-  var query_574987 = newJObject()
-  add(query_574987, "api-version", newJString(apiVersion))
-  add(path_574986, "assignmentOperationName", newJString(assignmentOperationName))
-  add(path_574986, "scope", newJString(scope))
-  add(path_574986, "assignmentName", newJString(assignmentName))
-  result = call_574985.call(path_574986, query_574987, nil, nil, nil)
+  ##   scope: string (required)
+  ##        : The scope of the resource. Valid scopes are: management group (format: '/providers/Microsoft.Management/managementGroups/{managementGroup}'), subscription (format: '/subscriptions/{subscriptionId}'). For blueprint assignments management group scope is reserved for future use.
+  ##   assignmentOperationName: string (required)
+  ##                          : Name of the blueprint assignment operation.
+  var path_564086 = newJObject()
+  var query_564087 = newJObject()
+  add(query_564087, "api-version", newJString(apiVersion))
+  add(path_564086, "assignmentName", newJString(assignmentName))
+  add(path_564086, "scope", newJString(scope))
+  add(path_564086, "assignmentOperationName", newJString(assignmentOperationName))
+  result = call_564085.call(path_564086, query_564087, nil, nil, nil)
 
-var assignmentOperationsGet* = Call_AssignmentOperationsGet_574977(
+var assignmentOperationsGet* = Call_AssignmentOperationsGet_564077(
     name: "assignmentOperationsGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/{scope}/providers/Microsoft.Blueprint/blueprintAssignments/{assignmentName}/assignmentOperations/{assignmentOperationName}",
-    validator: validate_AssignmentOperationsGet_574978, base: "",
-    url: url_AssignmentOperationsGet_574979, schemes: {Scheme.Https})
+    validator: validate_AssignmentOperationsGet_564078, base: "",
+    url: url_AssignmentOperationsGet_564079, schemes: {Scheme.Https})
 export
   rest
 

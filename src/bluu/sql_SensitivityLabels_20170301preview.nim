@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, httpcore
 
 ## auto-generated via openapi macro
 ## title: SqlManagementClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_567641 = ref object of OpenApiRestCall
+  OpenApiRestCall_563539 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_567641](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563539](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_567641): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563539): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,8 +107,8 @@ const
   macServiceName = "sql-SensitivityLabels"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_SensitivityLabelsListCurrentByDatabase_567863 = ref object of OpenApiRestCall_567641
-proc url_SensitivityLabelsListCurrentByDatabase_567865(protocol: Scheme;
+  Call_SensitivityLabelsListCurrentByDatabase_563761 = ref object of OpenApiRestCall_563539
+proc url_SensitivityLabelsListCurrentByDatabase_563763(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -130,44 +134,44 @@ proc url_SensitivityLabelsListCurrentByDatabase_567865(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_SensitivityLabelsListCurrentByDatabase_567864(path: JsonNode;
+proc validate_SensitivityLabelsListCurrentByDatabase_563762(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the sensitivity labels of a given database
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   ##   serverName: JString (required)
   ##             : The name of the server.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID that identifies an Azure subscription.
   ##   databaseName: JString (required)
   ##               : The name of the database.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568039 = path.getOrDefault("resourceGroupName")
-  valid_568039 = validateParameter(valid_568039, JString, required = true,
+        "path argument is necessary due to required `serverName` field"
+  var valid_563939 = path.getOrDefault("serverName")
+  valid_563939 = validateParameter(valid_563939, JString, required = true,
                                  default = nil)
-  if valid_568039 != nil:
-    section.add "resourceGroupName", valid_568039
-  var valid_568040 = path.getOrDefault("serverName")
-  valid_568040 = validateParameter(valid_568040, JString, required = true,
+  if valid_563939 != nil:
+    section.add "serverName", valid_563939
+  var valid_563940 = path.getOrDefault("subscriptionId")
+  valid_563940 = validateParameter(valid_563940, JString, required = true,
                                  default = nil)
-  if valid_568040 != nil:
-    section.add "serverName", valid_568040
-  var valid_568041 = path.getOrDefault("subscriptionId")
-  valid_568041 = validateParameter(valid_568041, JString, required = true,
+  if valid_563940 != nil:
+    section.add "subscriptionId", valid_563940
+  var valid_563941 = path.getOrDefault("databaseName")
+  valid_563941 = validateParameter(valid_563941, JString, required = true,
                                  default = nil)
-  if valid_568041 != nil:
-    section.add "subscriptionId", valid_568041
-  var valid_568042 = path.getOrDefault("databaseName")
-  valid_568042 = validateParameter(valid_568042, JString, required = true,
+  if valid_563941 != nil:
+    section.add "databaseName", valid_563941
+  var valid_563942 = path.getOrDefault("resourceGroupName")
+  valid_563942 = validateParameter(valid_563942, JString, required = true,
                                  default = nil)
-  if valid_568042 != nil:
-    section.add "databaseName", valid_568042
+  if valid_563942 != nil:
+    section.add "resourceGroupName", valid_563942
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -177,16 +181,16 @@ proc validate_SensitivityLabelsListCurrentByDatabase_567864(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568043 = query.getOrDefault("api-version")
-  valid_568043 = validateParameter(valid_568043, JString, required = true,
+  var valid_563943 = query.getOrDefault("api-version")
+  valid_563943 = validateParameter(valid_563943, JString, required = true,
                                  default = nil)
-  if valid_568043 != nil:
-    section.add "api-version", valid_568043
-  var valid_568044 = query.getOrDefault("$filter")
-  valid_568044 = validateParameter(valid_568044, JString, required = false,
+  if valid_563943 != nil:
+    section.add "api-version", valid_563943
+  var valid_563944 = query.getOrDefault("$filter")
+  valid_563944 = validateParameter(valid_563944, JString, required = false,
                                  default = nil)
-  if valid_568044 != nil:
-    section.add "$filter", valid_568044
+  if valid_563944 != nil:
+    section.add "$filter", valid_563944
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -195,27 +199,25 @@ proc validate_SensitivityLabelsListCurrentByDatabase_567864(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568067: Call_SensitivityLabelsListCurrentByDatabase_567863;
+proc call*(call_563967: Call_SensitivityLabelsListCurrentByDatabase_563761;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Gets the sensitivity labels of a given database
   ## 
-  let valid = call_568067.validator(path, query, header, formData, body)
-  let scheme = call_568067.pickScheme
+  let valid = call_563967.validator(path, query, header, formData, body)
+  let scheme = call_563967.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568067.url(scheme.get, call_568067.host, call_568067.base,
-                         call_568067.route, valid.getOrDefault("path"),
+  let url = call_563967.url(scheme.get, call_563967.host, call_563967.base,
+                         call_563967.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568067, url, valid)
+  result = hook(call_563967, url, valid)
 
-proc call*(call_568138: Call_SensitivityLabelsListCurrentByDatabase_567863;
-          resourceGroupName: string; apiVersion: string; serverName: string;
-          subscriptionId: string; databaseName: string; Filter: string = ""): Recallable =
+proc call*(call_564038: Call_SensitivityLabelsListCurrentByDatabase_563761;
+          apiVersion: string; serverName: string; subscriptionId: string;
+          databaseName: string; resourceGroupName: string; Filter: string = ""): Recallable =
   ## sensitivityLabelsListCurrentByDatabase
   ## Gets the sensitivity labels of a given database
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   ##   apiVersion: string (required)
   ##             : The API version to use for the request.
   ##   serverName: string (required)
@@ -224,27 +226,29 @@ proc call*(call_568138: Call_SensitivityLabelsListCurrentByDatabase_567863;
   ##                 : The subscription ID that identifies an Azure subscription.
   ##   databaseName: string (required)
   ##               : The name of the database.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   ##   Filter: string
   ##         : An OData filter expression that filters elements in the collection.
-  var path_568139 = newJObject()
-  var query_568141 = newJObject()
-  add(path_568139, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568141, "api-version", newJString(apiVersion))
-  add(path_568139, "serverName", newJString(serverName))
-  add(path_568139, "subscriptionId", newJString(subscriptionId))
-  add(path_568139, "databaseName", newJString(databaseName))
-  add(query_568141, "$filter", newJString(Filter))
-  result = call_568138.call(path_568139, query_568141, nil, nil, nil)
+  var path_564039 = newJObject()
+  var query_564041 = newJObject()
+  add(query_564041, "api-version", newJString(apiVersion))
+  add(path_564039, "serverName", newJString(serverName))
+  add(path_564039, "subscriptionId", newJString(subscriptionId))
+  add(path_564039, "databaseName", newJString(databaseName))
+  add(path_564039, "resourceGroupName", newJString(resourceGroupName))
+  add(query_564041, "$filter", newJString(Filter))
+  result = call_564038.call(path_564039, query_564041, nil, nil, nil)
 
-var sensitivityLabelsListCurrentByDatabase* = Call_SensitivityLabelsListCurrentByDatabase_567863(
+var sensitivityLabelsListCurrentByDatabase* = Call_SensitivityLabelsListCurrentByDatabase_563761(
     name: "sensitivityLabelsListCurrentByDatabase", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/servers/{serverName}/databases/{databaseName}/currentSensitivityLabels",
-    validator: validate_SensitivityLabelsListCurrentByDatabase_567864, base: "",
-    url: url_SensitivityLabelsListCurrentByDatabase_567865,
+    validator: validate_SensitivityLabelsListCurrentByDatabase_563762, base: "",
+    url: url_SensitivityLabelsListCurrentByDatabase_563763,
     schemes: {Scheme.Https})
 type
-  Call_SensitivityLabelsListRecommendedByDatabase_568180 = ref object of OpenApiRestCall_567641
-proc url_SensitivityLabelsListRecommendedByDatabase_568182(protocol: Scheme;
+  Call_SensitivityLabelsListRecommendedByDatabase_564080 = ref object of OpenApiRestCall_563539
+proc url_SensitivityLabelsListRecommendedByDatabase_564082(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -270,75 +274,75 @@ proc url_SensitivityLabelsListRecommendedByDatabase_568182(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_SensitivityLabelsListRecommendedByDatabase_568181(path: JsonNode;
+proc validate_SensitivityLabelsListRecommendedByDatabase_564081(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the sensitivity labels of a given database
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   ##   serverName: JString (required)
   ##             : The name of the server.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID that identifies an Azure subscription.
   ##   databaseName: JString (required)
   ##               : The name of the database.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568183 = path.getOrDefault("resourceGroupName")
-  valid_568183 = validateParameter(valid_568183, JString, required = true,
+        "path argument is necessary due to required `serverName` field"
+  var valid_564083 = path.getOrDefault("serverName")
+  valid_564083 = validateParameter(valid_564083, JString, required = true,
                                  default = nil)
-  if valid_568183 != nil:
-    section.add "resourceGroupName", valid_568183
-  var valid_568184 = path.getOrDefault("serverName")
-  valid_568184 = validateParameter(valid_568184, JString, required = true,
+  if valid_564083 != nil:
+    section.add "serverName", valid_564083
+  var valid_564084 = path.getOrDefault("subscriptionId")
+  valid_564084 = validateParameter(valid_564084, JString, required = true,
                                  default = nil)
-  if valid_568184 != nil:
-    section.add "serverName", valid_568184
-  var valid_568185 = path.getOrDefault("subscriptionId")
-  valid_568185 = validateParameter(valid_568185, JString, required = true,
+  if valid_564084 != nil:
+    section.add "subscriptionId", valid_564084
+  var valid_564085 = path.getOrDefault("databaseName")
+  valid_564085 = validateParameter(valid_564085, JString, required = true,
                                  default = nil)
-  if valid_568185 != nil:
-    section.add "subscriptionId", valid_568185
-  var valid_568186 = path.getOrDefault("databaseName")
-  valid_568186 = validateParameter(valid_568186, JString, required = true,
+  if valid_564085 != nil:
+    section.add "databaseName", valid_564085
+  var valid_564086 = path.getOrDefault("resourceGroupName")
+  valid_564086 = validateParameter(valid_564086, JString, required = true,
                                  default = nil)
-  if valid_568186 != nil:
-    section.add "databaseName", valid_568186
+  if valid_564086 != nil:
+    section.add "resourceGroupName", valid_564086
   result.add "path", section
   ## parameters in `query` object:
-  ##   api-version: JString (required)
-  ##              : The API version to use for the request.
   ##   includeDisabledRecommendations: JBool
   ##                                 : Specifies whether to include disabled recommendations or not.
   ##   $skipToken: JString
+  ##   api-version: JString (required)
+  ##              : The API version to use for the request.
   ##   $filter: JString
   ##          : An OData filter expression that filters elements in the collection.
   section = newJObject()
+  var valid_564087 = query.getOrDefault("includeDisabledRecommendations")
+  valid_564087 = validateParameter(valid_564087, JBool, required = false, default = nil)
+  if valid_564087 != nil:
+    section.add "includeDisabledRecommendations", valid_564087
+  var valid_564088 = query.getOrDefault("$skipToken")
+  valid_564088 = validateParameter(valid_564088, JString, required = false,
+                                 default = nil)
+  if valid_564088 != nil:
+    section.add "$skipToken", valid_564088
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568187 = query.getOrDefault("api-version")
-  valid_568187 = validateParameter(valid_568187, JString, required = true,
+  var valid_564089 = query.getOrDefault("api-version")
+  valid_564089 = validateParameter(valid_564089, JString, required = true,
                                  default = nil)
-  if valid_568187 != nil:
-    section.add "api-version", valid_568187
-  var valid_568188 = query.getOrDefault("includeDisabledRecommendations")
-  valid_568188 = validateParameter(valid_568188, JBool, required = false, default = nil)
-  if valid_568188 != nil:
-    section.add "includeDisabledRecommendations", valid_568188
-  var valid_568189 = query.getOrDefault("$skipToken")
-  valid_568189 = validateParameter(valid_568189, JString, required = false,
+  if valid_564089 != nil:
+    section.add "api-version", valid_564089
+  var valid_564090 = query.getOrDefault("$filter")
+  valid_564090 = validateParameter(valid_564090, JString, required = false,
                                  default = nil)
-  if valid_568189 != nil:
-    section.add "$skipToken", valid_568189
-  var valid_568190 = query.getOrDefault("$filter")
-  valid_568190 = validateParameter(valid_568190, JString, required = false,
-                                 default = nil)
-  if valid_568190 != nil:
-    section.add "$filter", valid_568190
+  if valid_564090 != nil:
+    section.add "$filter", valid_564090
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -347,29 +351,30 @@ proc validate_SensitivityLabelsListRecommendedByDatabase_568181(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568191: Call_SensitivityLabelsListRecommendedByDatabase_568180;
+proc call*(call_564091: Call_SensitivityLabelsListRecommendedByDatabase_564080;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Gets the sensitivity labels of a given database
   ## 
-  let valid = call_568191.validator(path, query, header, formData, body)
-  let scheme = call_568191.pickScheme
+  let valid = call_564091.validator(path, query, header, formData, body)
+  let scheme = call_564091.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568191.url(scheme.get, call_568191.host, call_568191.base,
-                         call_568191.route, valid.getOrDefault("path"),
+  let url = call_564091.url(scheme.get, call_564091.host, call_564091.base,
+                         call_564091.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568191, url, valid)
+  result = hook(call_564091, url, valid)
 
-proc call*(call_568192: Call_SensitivityLabelsListRecommendedByDatabase_568180;
-          resourceGroupName: string; apiVersion: string; serverName: string;
-          subscriptionId: string; databaseName: string;
+proc call*(call_564092: Call_SensitivityLabelsListRecommendedByDatabase_564080;
+          apiVersion: string; serverName: string; subscriptionId: string;
+          databaseName: string; resourceGroupName: string;
           includeDisabledRecommendations: bool = false; SkipToken: string = "";
           Filter: string = ""): Recallable =
   ## sensitivityLabelsListRecommendedByDatabase
   ## Gets the sensitivity labels of a given database
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
+  ##   includeDisabledRecommendations: bool
+  ##                                 : Specifies whether to include disabled recommendations or not.
+  ##   SkipToken: string
   ##   apiVersion: string (required)
   ##             : The API version to use for the request.
   ##   serverName: string (required)
@@ -378,33 +383,32 @@ proc call*(call_568192: Call_SensitivityLabelsListRecommendedByDatabase_568180;
   ##                 : The subscription ID that identifies an Azure subscription.
   ##   databaseName: string (required)
   ##               : The name of the database.
-  ##   includeDisabledRecommendations: bool
-  ##                                 : Specifies whether to include disabled recommendations or not.
-  ##   SkipToken: string
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   ##   Filter: string
   ##         : An OData filter expression that filters elements in the collection.
-  var path_568193 = newJObject()
-  var query_568194 = newJObject()
-  add(path_568193, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568194, "api-version", newJString(apiVersion))
-  add(path_568193, "serverName", newJString(serverName))
-  add(path_568193, "subscriptionId", newJString(subscriptionId))
-  add(path_568193, "databaseName", newJString(databaseName))
-  add(query_568194, "includeDisabledRecommendations",
+  var path_564093 = newJObject()
+  var query_564094 = newJObject()
+  add(query_564094, "includeDisabledRecommendations",
       newJBool(includeDisabledRecommendations))
-  add(query_568194, "$skipToken", newJString(SkipToken))
-  add(query_568194, "$filter", newJString(Filter))
-  result = call_568192.call(path_568193, query_568194, nil, nil, nil)
+  add(query_564094, "$skipToken", newJString(SkipToken))
+  add(query_564094, "api-version", newJString(apiVersion))
+  add(path_564093, "serverName", newJString(serverName))
+  add(path_564093, "subscriptionId", newJString(subscriptionId))
+  add(path_564093, "databaseName", newJString(databaseName))
+  add(path_564093, "resourceGroupName", newJString(resourceGroupName))
+  add(query_564094, "$filter", newJString(Filter))
+  result = call_564092.call(path_564093, query_564094, nil, nil, nil)
 
-var sensitivityLabelsListRecommendedByDatabase* = Call_SensitivityLabelsListRecommendedByDatabase_568180(
+var sensitivityLabelsListRecommendedByDatabase* = Call_SensitivityLabelsListRecommendedByDatabase_564080(
     name: "sensitivityLabelsListRecommendedByDatabase", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/servers/{serverName}/databases/{databaseName}/recommendedSensitivityLabels",
-    validator: validate_SensitivityLabelsListRecommendedByDatabase_568181,
-    base: "", url: url_SensitivityLabelsListRecommendedByDatabase_568182,
+    validator: validate_SensitivityLabelsListRecommendedByDatabase_564081,
+    base: "", url: url_SensitivityLabelsListRecommendedByDatabase_564082,
     schemes: {Scheme.Https})
 type
-  Call_SensitivityLabelsCreateOrUpdate_568224 = ref object of OpenApiRestCall_567641
-proc url_SensitivityLabelsCreateOrUpdate_568226(protocol: Scheme; host: string;
+  Call_SensitivityLabelsCreateOrUpdate_564124 = ref object of OpenApiRestCall_563539
+proc url_SensitivityLabelsCreateOrUpdate_564126(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -442,72 +446,71 @@ proc url_SensitivityLabelsCreateOrUpdate_568226(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_SensitivityLabelsCreateOrUpdate_568225(path: JsonNode;
+proc validate_SensitivityLabelsCreateOrUpdate_564125(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Creates or updates the sensitivity label of a given column
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
+  ##   sensitivityLabelSource: JString (required)
+  ##                         : The source of the sensitivity label.
   ##   serverName: JString (required)
   ##             : The name of the server.
-  ##   subscriptionId: JString (required)
-  ##                 : The subscription ID that identifies an Azure subscription.
   ##   columnName: JString (required)
   ##             : The name of the column.
+  ##   subscriptionId: JString (required)
+  ##                 : The subscription ID that identifies an Azure subscription.
+  ##   databaseName: JString (required)
+  ##               : The name of the database.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   ##   schemaName: JString (required)
   ##             : The name of the schema.
   ##   tableName: JString (required)
   ##            : The name of the table.
-  ##   databaseName: JString (required)
-  ##               : The name of the database.
-  ##   sensitivityLabelSource: JString (required)
-  ##                         : The source of the sensitivity label.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568227 = path.getOrDefault("resourceGroupName")
-  valid_568227 = validateParameter(valid_568227, JString, required = true,
-                                 default = nil)
-  if valid_568227 != nil:
-    section.add "resourceGroupName", valid_568227
-  var valid_568228 = path.getOrDefault("serverName")
-  valid_568228 = validateParameter(valid_568228, JString, required = true,
-                                 default = nil)
-  if valid_568228 != nil:
-    section.add "serverName", valid_568228
-  var valid_568229 = path.getOrDefault("subscriptionId")
-  valid_568229 = validateParameter(valid_568229, JString, required = true,
-                                 default = nil)
-  if valid_568229 != nil:
-    section.add "subscriptionId", valid_568229
-  var valid_568230 = path.getOrDefault("columnName")
-  valid_568230 = validateParameter(valid_568230, JString, required = true,
-                                 default = nil)
-  if valid_568230 != nil:
-    section.add "columnName", valid_568230
-  var valid_568231 = path.getOrDefault("schemaName")
-  valid_568231 = validateParameter(valid_568231, JString, required = true,
-                                 default = nil)
-  if valid_568231 != nil:
-    section.add "schemaName", valid_568231
-  var valid_568232 = path.getOrDefault("tableName")
-  valid_568232 = validateParameter(valid_568232, JString, required = true,
-                                 default = nil)
-  if valid_568232 != nil:
-    section.add "tableName", valid_568232
-  var valid_568233 = path.getOrDefault("databaseName")
-  valid_568233 = validateParameter(valid_568233, JString, required = true,
-                                 default = nil)
-  if valid_568233 != nil:
-    section.add "databaseName", valid_568233
-  var valid_568234 = path.getOrDefault("sensitivityLabelSource")
-  valid_568234 = validateParameter(valid_568234, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `sensitivityLabelSource` field"
+  var valid_564127 = path.getOrDefault("sensitivityLabelSource")
+  valid_564127 = validateParameter(valid_564127, JString, required = true,
                                  default = newJString("current"))
-  if valid_568234 != nil:
-    section.add "sensitivityLabelSource", valid_568234
+  if valid_564127 != nil:
+    section.add "sensitivityLabelSource", valid_564127
+  var valid_564128 = path.getOrDefault("serverName")
+  valid_564128 = validateParameter(valid_564128, JString, required = true,
+                                 default = nil)
+  if valid_564128 != nil:
+    section.add "serverName", valid_564128
+  var valid_564129 = path.getOrDefault("columnName")
+  valid_564129 = validateParameter(valid_564129, JString, required = true,
+                                 default = nil)
+  if valid_564129 != nil:
+    section.add "columnName", valid_564129
+  var valid_564130 = path.getOrDefault("subscriptionId")
+  valid_564130 = validateParameter(valid_564130, JString, required = true,
+                                 default = nil)
+  if valid_564130 != nil:
+    section.add "subscriptionId", valid_564130
+  var valid_564131 = path.getOrDefault("databaseName")
+  valid_564131 = validateParameter(valid_564131, JString, required = true,
+                                 default = nil)
+  if valid_564131 != nil:
+    section.add "databaseName", valid_564131
+  var valid_564132 = path.getOrDefault("resourceGroupName")
+  valid_564132 = validateParameter(valid_564132, JString, required = true,
+                                 default = nil)
+  if valid_564132 != nil:
+    section.add "resourceGroupName", valid_564132
+  var valid_564133 = path.getOrDefault("schemaName")
+  valid_564133 = validateParameter(valid_564133, JString, required = true,
+                                 default = nil)
+  if valid_564133 != nil:
+    section.add "schemaName", valid_564133
+  var valid_564134 = path.getOrDefault("tableName")
+  valid_564134 = validateParameter(valid_564134, JString, required = true,
+                                 default = nil)
+  if valid_564134 != nil:
+    section.add "tableName", valid_564134
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -515,11 +518,11 @@ proc validate_SensitivityLabelsCreateOrUpdate_568225(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568235 = query.getOrDefault("api-version")
-  valid_568235 = validateParameter(valid_568235, JString, required = true,
+  var valid_564135 = query.getOrDefault("api-version")
+  valid_564135 = validateParameter(valid_564135, JString, required = true,
                                  default = nil)
-  if valid_568235 != nil:
-    section.add "api-version", valid_568235
+  if valid_564135 != nil:
+    section.add "api-version", valid_564135
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -533,71 +536,71 @@ proc validate_SensitivityLabelsCreateOrUpdate_568225(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568237: Call_SensitivityLabelsCreateOrUpdate_568224;
+proc call*(call_564137: Call_SensitivityLabelsCreateOrUpdate_564124;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Creates or updates the sensitivity label of a given column
   ## 
-  let valid = call_568237.validator(path, query, header, formData, body)
-  let scheme = call_568237.pickScheme
+  let valid = call_564137.validator(path, query, header, formData, body)
+  let scheme = call_564137.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568237.url(scheme.get, call_568237.host, call_568237.base,
-                         call_568237.route, valid.getOrDefault("path"),
+  let url = call_564137.url(scheme.get, call_564137.host, call_564137.base,
+                         call_564137.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568237, url, valid)
+  result = hook(call_564137, url, valid)
 
-proc call*(call_568238: Call_SensitivityLabelsCreateOrUpdate_568224;
-          resourceGroupName: string; apiVersion: string; serverName: string;
-          subscriptionId: string; columnName: string; schemaName: string;
-          tableName: string; databaseName: string; parameters: JsonNode;
+proc call*(call_564138: Call_SensitivityLabelsCreateOrUpdate_564124;
+          apiVersion: string; serverName: string; columnName: string;
+          subscriptionId: string; databaseName: string; resourceGroupName: string;
+          schemaName: string; tableName: string; parameters: JsonNode;
           sensitivityLabelSource: string = "current"): Recallable =
   ## sensitivityLabelsCreateOrUpdate
   ## Creates or updates the sensitivity label of a given column
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
+  ##   sensitivityLabelSource: string (required)
+  ##                         : The source of the sensitivity label.
   ##   apiVersion: string (required)
   ##             : The API version to use for the request.
   ##   serverName: string (required)
   ##             : The name of the server.
-  ##   subscriptionId: string (required)
-  ##                 : The subscription ID that identifies an Azure subscription.
   ##   columnName: string (required)
   ##             : The name of the column.
+  ##   subscriptionId: string (required)
+  ##                 : The subscription ID that identifies an Azure subscription.
+  ##   databaseName: string (required)
+  ##               : The name of the database.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   ##   schemaName: string (required)
   ##             : The name of the schema.
   ##   tableName: string (required)
   ##            : The name of the table.
-  ##   databaseName: string (required)
-  ##               : The name of the database.
-  ##   sensitivityLabelSource: string (required)
-  ##                         : The source of the sensitivity label.
   ##   parameters: JObject (required)
   ##             : The column sensitivity label resource.
-  var path_568239 = newJObject()
-  var query_568240 = newJObject()
-  var body_568241 = newJObject()
-  add(path_568239, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568240, "api-version", newJString(apiVersion))
-  add(path_568239, "serverName", newJString(serverName))
-  add(path_568239, "subscriptionId", newJString(subscriptionId))
-  add(path_568239, "columnName", newJString(columnName))
-  add(path_568239, "schemaName", newJString(schemaName))
-  add(path_568239, "tableName", newJString(tableName))
-  add(path_568239, "databaseName", newJString(databaseName))
-  add(path_568239, "sensitivityLabelSource", newJString(sensitivityLabelSource))
+  var path_564139 = newJObject()
+  var query_564140 = newJObject()
+  var body_564141 = newJObject()
+  add(path_564139, "sensitivityLabelSource", newJString(sensitivityLabelSource))
+  add(query_564140, "api-version", newJString(apiVersion))
+  add(path_564139, "serverName", newJString(serverName))
+  add(path_564139, "columnName", newJString(columnName))
+  add(path_564139, "subscriptionId", newJString(subscriptionId))
+  add(path_564139, "databaseName", newJString(databaseName))
+  add(path_564139, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564139, "schemaName", newJString(schemaName))
+  add(path_564139, "tableName", newJString(tableName))
   if parameters != nil:
-    body_568241 = parameters
-  result = call_568238.call(path_568239, query_568240, nil, nil, body_568241)
+    body_564141 = parameters
+  result = call_564138.call(path_564139, query_564140, nil, nil, body_564141)
 
-var sensitivityLabelsCreateOrUpdate* = Call_SensitivityLabelsCreateOrUpdate_568224(
+var sensitivityLabelsCreateOrUpdate* = Call_SensitivityLabelsCreateOrUpdate_564124(
     name: "sensitivityLabelsCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/servers/{serverName}/databases/{databaseName}/schemas/{schemaName}/tables/{tableName}/columns/{columnName}/sensitivityLabels/{sensitivityLabelSource}",
-    validator: validate_SensitivityLabelsCreateOrUpdate_568225, base: "",
-    url: url_SensitivityLabelsCreateOrUpdate_568226, schemes: {Scheme.Https})
+    validator: validate_SensitivityLabelsCreateOrUpdate_564125, base: "",
+    url: url_SensitivityLabelsCreateOrUpdate_564126, schemes: {Scheme.Https})
 type
-  Call_SensitivityLabelsGet_568195 = ref object of OpenApiRestCall_567641
-proc url_SensitivityLabelsGet_568197(protocol: Scheme; host: string; base: string;
+  Call_SensitivityLabelsGet_564095 = ref object of OpenApiRestCall_563539
+proc url_SensitivityLabelsGet_564097(protocol: Scheme; host: string; base: string;
                                     route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -635,72 +638,71 @@ proc url_SensitivityLabelsGet_568197(protocol: Scheme; host: string; base: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_SensitivityLabelsGet_568196(path: JsonNode; query: JsonNode;
+proc validate_SensitivityLabelsGet_564096(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the sensitivity label of a given column
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
+  ##   sensitivityLabelSource: JString (required)
+  ##                         : The source of the sensitivity label.
   ##   serverName: JString (required)
   ##             : The name of the server.
-  ##   subscriptionId: JString (required)
-  ##                 : The subscription ID that identifies an Azure subscription.
   ##   columnName: JString (required)
   ##             : The name of the column.
+  ##   subscriptionId: JString (required)
+  ##                 : The subscription ID that identifies an Azure subscription.
+  ##   databaseName: JString (required)
+  ##               : The name of the database.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   ##   schemaName: JString (required)
   ##             : The name of the schema.
   ##   tableName: JString (required)
   ##            : The name of the table.
-  ##   databaseName: JString (required)
-  ##               : The name of the database.
-  ##   sensitivityLabelSource: JString (required)
-  ##                         : The source of the sensitivity label.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568198 = path.getOrDefault("resourceGroupName")
-  valid_568198 = validateParameter(valid_568198, JString, required = true,
-                                 default = nil)
-  if valid_568198 != nil:
-    section.add "resourceGroupName", valid_568198
-  var valid_568199 = path.getOrDefault("serverName")
-  valid_568199 = validateParameter(valid_568199, JString, required = true,
-                                 default = nil)
-  if valid_568199 != nil:
-    section.add "serverName", valid_568199
-  var valid_568200 = path.getOrDefault("subscriptionId")
-  valid_568200 = validateParameter(valid_568200, JString, required = true,
-                                 default = nil)
-  if valid_568200 != nil:
-    section.add "subscriptionId", valid_568200
-  var valid_568201 = path.getOrDefault("columnName")
-  valid_568201 = validateParameter(valid_568201, JString, required = true,
-                                 default = nil)
-  if valid_568201 != nil:
-    section.add "columnName", valid_568201
-  var valid_568202 = path.getOrDefault("schemaName")
-  valid_568202 = validateParameter(valid_568202, JString, required = true,
-                                 default = nil)
-  if valid_568202 != nil:
-    section.add "schemaName", valid_568202
-  var valid_568203 = path.getOrDefault("tableName")
-  valid_568203 = validateParameter(valid_568203, JString, required = true,
-                                 default = nil)
-  if valid_568203 != nil:
-    section.add "tableName", valid_568203
-  var valid_568204 = path.getOrDefault("databaseName")
-  valid_568204 = validateParameter(valid_568204, JString, required = true,
-                                 default = nil)
-  if valid_568204 != nil:
-    section.add "databaseName", valid_568204
-  var valid_568218 = path.getOrDefault("sensitivityLabelSource")
-  valid_568218 = validateParameter(valid_568218, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `sensitivityLabelSource` field"
+  var valid_564111 = path.getOrDefault("sensitivityLabelSource")
+  valid_564111 = validateParameter(valid_564111, JString, required = true,
                                  default = newJString("current"))
-  if valid_568218 != nil:
-    section.add "sensitivityLabelSource", valid_568218
+  if valid_564111 != nil:
+    section.add "sensitivityLabelSource", valid_564111
+  var valid_564112 = path.getOrDefault("serverName")
+  valid_564112 = validateParameter(valid_564112, JString, required = true,
+                                 default = nil)
+  if valid_564112 != nil:
+    section.add "serverName", valid_564112
+  var valid_564113 = path.getOrDefault("columnName")
+  valid_564113 = validateParameter(valid_564113, JString, required = true,
+                                 default = nil)
+  if valid_564113 != nil:
+    section.add "columnName", valid_564113
+  var valid_564114 = path.getOrDefault("subscriptionId")
+  valid_564114 = validateParameter(valid_564114, JString, required = true,
+                                 default = nil)
+  if valid_564114 != nil:
+    section.add "subscriptionId", valid_564114
+  var valid_564115 = path.getOrDefault("databaseName")
+  valid_564115 = validateParameter(valid_564115, JString, required = true,
+                                 default = nil)
+  if valid_564115 != nil:
+    section.add "databaseName", valid_564115
+  var valid_564116 = path.getOrDefault("resourceGroupName")
+  valid_564116 = validateParameter(valid_564116, JString, required = true,
+                                 default = nil)
+  if valid_564116 != nil:
+    section.add "resourceGroupName", valid_564116
+  var valid_564117 = path.getOrDefault("schemaName")
+  valid_564117 = validateParameter(valid_564117, JString, required = true,
+                                 default = nil)
+  if valid_564117 != nil:
+    section.add "schemaName", valid_564117
+  var valid_564118 = path.getOrDefault("tableName")
+  valid_564118 = validateParameter(valid_564118, JString, required = true,
+                                 default = nil)
+  if valid_564118 != nil:
+    section.add "tableName", valid_564118
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -708,11 +710,11 @@ proc validate_SensitivityLabelsGet_568196(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568219 = query.getOrDefault("api-version")
-  valid_568219 = validateParameter(valid_568219, JString, required = true,
+  var valid_564119 = query.getOrDefault("api-version")
+  valid_564119 = validateParameter(valid_564119, JString, required = true,
                                  default = nil)
-  if valid_568219 != nil:
-    section.add "api-version", valid_568219
+  if valid_564119 != nil:
+    section.add "api-version", valid_564119
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -721,65 +723,64 @@ proc validate_SensitivityLabelsGet_568196(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568220: Call_SensitivityLabelsGet_568195; path: JsonNode;
+proc call*(call_564120: Call_SensitivityLabelsGet_564095; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the sensitivity label of a given column
   ## 
-  let valid = call_568220.validator(path, query, header, formData, body)
-  let scheme = call_568220.pickScheme
+  let valid = call_564120.validator(path, query, header, formData, body)
+  let scheme = call_564120.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568220.url(scheme.get, call_568220.host, call_568220.base,
-                         call_568220.route, valid.getOrDefault("path"),
+  let url = call_564120.url(scheme.get, call_564120.host, call_564120.base,
+                         call_564120.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568220, url, valid)
+  result = hook(call_564120, url, valid)
 
-proc call*(call_568221: Call_SensitivityLabelsGet_568195;
-          resourceGroupName: string; apiVersion: string; serverName: string;
-          subscriptionId: string; columnName: string; schemaName: string;
-          tableName: string; databaseName: string;
-          sensitivityLabelSource: string = "current"): Recallable =
+proc call*(call_564121: Call_SensitivityLabelsGet_564095; apiVersion: string;
+          serverName: string; columnName: string; subscriptionId: string;
+          databaseName: string; resourceGroupName: string; schemaName: string;
+          tableName: string; sensitivityLabelSource: string = "current"): Recallable =
   ## sensitivityLabelsGet
   ## Gets the sensitivity label of a given column
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
+  ##   sensitivityLabelSource: string (required)
+  ##                         : The source of the sensitivity label.
   ##   apiVersion: string (required)
   ##             : The API version to use for the request.
   ##   serverName: string (required)
   ##             : The name of the server.
-  ##   subscriptionId: string (required)
-  ##                 : The subscription ID that identifies an Azure subscription.
   ##   columnName: string (required)
   ##             : The name of the column.
+  ##   subscriptionId: string (required)
+  ##                 : The subscription ID that identifies an Azure subscription.
+  ##   databaseName: string (required)
+  ##               : The name of the database.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   ##   schemaName: string (required)
   ##             : The name of the schema.
   ##   tableName: string (required)
   ##            : The name of the table.
-  ##   databaseName: string (required)
-  ##               : The name of the database.
-  ##   sensitivityLabelSource: string (required)
-  ##                         : The source of the sensitivity label.
-  var path_568222 = newJObject()
-  var query_568223 = newJObject()
-  add(path_568222, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568223, "api-version", newJString(apiVersion))
-  add(path_568222, "serverName", newJString(serverName))
-  add(path_568222, "subscriptionId", newJString(subscriptionId))
-  add(path_568222, "columnName", newJString(columnName))
-  add(path_568222, "schemaName", newJString(schemaName))
-  add(path_568222, "tableName", newJString(tableName))
-  add(path_568222, "databaseName", newJString(databaseName))
-  add(path_568222, "sensitivityLabelSource", newJString(sensitivityLabelSource))
-  result = call_568221.call(path_568222, query_568223, nil, nil, nil)
+  var path_564122 = newJObject()
+  var query_564123 = newJObject()
+  add(path_564122, "sensitivityLabelSource", newJString(sensitivityLabelSource))
+  add(query_564123, "api-version", newJString(apiVersion))
+  add(path_564122, "serverName", newJString(serverName))
+  add(path_564122, "columnName", newJString(columnName))
+  add(path_564122, "subscriptionId", newJString(subscriptionId))
+  add(path_564122, "databaseName", newJString(databaseName))
+  add(path_564122, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564122, "schemaName", newJString(schemaName))
+  add(path_564122, "tableName", newJString(tableName))
+  result = call_564121.call(path_564122, query_564123, nil, nil, nil)
 
-var sensitivityLabelsGet* = Call_SensitivityLabelsGet_568195(
+var sensitivityLabelsGet* = Call_SensitivityLabelsGet_564095(
     name: "sensitivityLabelsGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/servers/{serverName}/databases/{databaseName}/schemas/{schemaName}/tables/{tableName}/columns/{columnName}/sensitivityLabels/{sensitivityLabelSource}",
-    validator: validate_SensitivityLabelsGet_568196, base: "",
-    url: url_SensitivityLabelsGet_568197, schemes: {Scheme.Https})
+    validator: validate_SensitivityLabelsGet_564096, base: "",
+    url: url_SensitivityLabelsGet_564097, schemes: {Scheme.Https})
 type
-  Call_SensitivityLabelsDelete_568242 = ref object of OpenApiRestCall_567641
-proc url_SensitivityLabelsDelete_568244(protocol: Scheme; host: string; base: string;
+  Call_SensitivityLabelsDelete_564142 = ref object of OpenApiRestCall_563539
+proc url_SensitivityLabelsDelete_564144(protocol: Scheme; host: string; base: string;
                                        route: string; path: JsonNode;
                                        query: JsonNode): Uri =
   result.scheme = $protocol
@@ -818,72 +819,71 @@ proc url_SensitivityLabelsDelete_568244(protocol: Scheme; host: string; base: st
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_SensitivityLabelsDelete_568243(path: JsonNode; query: JsonNode;
+proc validate_SensitivityLabelsDelete_564143(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Deletes the sensitivity label of a given column
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
+  ##   sensitivityLabelSource: JString (required)
+  ##                         : The source of the sensitivity label.
   ##   serverName: JString (required)
   ##             : The name of the server.
-  ##   subscriptionId: JString (required)
-  ##                 : The subscription ID that identifies an Azure subscription.
   ##   columnName: JString (required)
   ##             : The name of the column.
+  ##   subscriptionId: JString (required)
+  ##                 : The subscription ID that identifies an Azure subscription.
+  ##   databaseName: JString (required)
+  ##               : The name of the database.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   ##   schemaName: JString (required)
   ##             : The name of the schema.
   ##   tableName: JString (required)
   ##            : The name of the table.
-  ##   databaseName: JString (required)
-  ##               : The name of the database.
-  ##   sensitivityLabelSource: JString (required)
-  ##                         : The source of the sensitivity label.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568245 = path.getOrDefault("resourceGroupName")
-  valid_568245 = validateParameter(valid_568245, JString, required = true,
-                                 default = nil)
-  if valid_568245 != nil:
-    section.add "resourceGroupName", valid_568245
-  var valid_568246 = path.getOrDefault("serverName")
-  valid_568246 = validateParameter(valid_568246, JString, required = true,
-                                 default = nil)
-  if valid_568246 != nil:
-    section.add "serverName", valid_568246
-  var valid_568247 = path.getOrDefault("subscriptionId")
-  valid_568247 = validateParameter(valid_568247, JString, required = true,
-                                 default = nil)
-  if valid_568247 != nil:
-    section.add "subscriptionId", valid_568247
-  var valid_568248 = path.getOrDefault("columnName")
-  valid_568248 = validateParameter(valid_568248, JString, required = true,
-                                 default = nil)
-  if valid_568248 != nil:
-    section.add "columnName", valid_568248
-  var valid_568249 = path.getOrDefault("schemaName")
-  valid_568249 = validateParameter(valid_568249, JString, required = true,
-                                 default = nil)
-  if valid_568249 != nil:
-    section.add "schemaName", valid_568249
-  var valid_568250 = path.getOrDefault("tableName")
-  valid_568250 = validateParameter(valid_568250, JString, required = true,
-                                 default = nil)
-  if valid_568250 != nil:
-    section.add "tableName", valid_568250
-  var valid_568251 = path.getOrDefault("databaseName")
-  valid_568251 = validateParameter(valid_568251, JString, required = true,
-                                 default = nil)
-  if valid_568251 != nil:
-    section.add "databaseName", valid_568251
-  var valid_568252 = path.getOrDefault("sensitivityLabelSource")
-  valid_568252 = validateParameter(valid_568252, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `sensitivityLabelSource` field"
+  var valid_564145 = path.getOrDefault("sensitivityLabelSource")
+  valid_564145 = validateParameter(valid_564145, JString, required = true,
                                  default = newJString("current"))
-  if valid_568252 != nil:
-    section.add "sensitivityLabelSource", valid_568252
+  if valid_564145 != nil:
+    section.add "sensitivityLabelSource", valid_564145
+  var valid_564146 = path.getOrDefault("serverName")
+  valid_564146 = validateParameter(valid_564146, JString, required = true,
+                                 default = nil)
+  if valid_564146 != nil:
+    section.add "serverName", valid_564146
+  var valid_564147 = path.getOrDefault("columnName")
+  valid_564147 = validateParameter(valid_564147, JString, required = true,
+                                 default = nil)
+  if valid_564147 != nil:
+    section.add "columnName", valid_564147
+  var valid_564148 = path.getOrDefault("subscriptionId")
+  valid_564148 = validateParameter(valid_564148, JString, required = true,
+                                 default = nil)
+  if valid_564148 != nil:
+    section.add "subscriptionId", valid_564148
+  var valid_564149 = path.getOrDefault("databaseName")
+  valid_564149 = validateParameter(valid_564149, JString, required = true,
+                                 default = nil)
+  if valid_564149 != nil:
+    section.add "databaseName", valid_564149
+  var valid_564150 = path.getOrDefault("resourceGroupName")
+  valid_564150 = validateParameter(valid_564150, JString, required = true,
+                                 default = nil)
+  if valid_564150 != nil:
+    section.add "resourceGroupName", valid_564150
+  var valid_564151 = path.getOrDefault("schemaName")
+  valid_564151 = validateParameter(valid_564151, JString, required = true,
+                                 default = nil)
+  if valid_564151 != nil:
+    section.add "schemaName", valid_564151
+  var valid_564152 = path.getOrDefault("tableName")
+  valid_564152 = validateParameter(valid_564152, JString, required = true,
+                                 default = nil)
+  if valid_564152 != nil:
+    section.add "tableName", valid_564152
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -891,11 +891,11 @@ proc validate_SensitivityLabelsDelete_568243(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568253 = query.getOrDefault("api-version")
-  valid_568253 = validateParameter(valid_568253, JString, required = true,
+  var valid_564153 = query.getOrDefault("api-version")
+  valid_564153 = validateParameter(valid_564153, JString, required = true,
                                  default = nil)
-  if valid_568253 != nil:
-    section.add "api-version", valid_568253
+  if valid_564153 != nil:
+    section.add "api-version", valid_564153
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -904,65 +904,64 @@ proc validate_SensitivityLabelsDelete_568243(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568254: Call_SensitivityLabelsDelete_568242; path: JsonNode;
+proc call*(call_564154: Call_SensitivityLabelsDelete_564142; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes the sensitivity label of a given column
   ## 
-  let valid = call_568254.validator(path, query, header, formData, body)
-  let scheme = call_568254.pickScheme
+  let valid = call_564154.validator(path, query, header, formData, body)
+  let scheme = call_564154.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568254.url(scheme.get, call_568254.host, call_568254.base,
-                         call_568254.route, valid.getOrDefault("path"),
+  let url = call_564154.url(scheme.get, call_564154.host, call_564154.base,
+                         call_564154.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568254, url, valid)
+  result = hook(call_564154, url, valid)
 
-proc call*(call_568255: Call_SensitivityLabelsDelete_568242;
-          resourceGroupName: string; apiVersion: string; serverName: string;
-          subscriptionId: string; columnName: string; schemaName: string;
-          tableName: string; databaseName: string;
-          sensitivityLabelSource: string = "current"): Recallable =
+proc call*(call_564155: Call_SensitivityLabelsDelete_564142; apiVersion: string;
+          serverName: string; columnName: string; subscriptionId: string;
+          databaseName: string; resourceGroupName: string; schemaName: string;
+          tableName: string; sensitivityLabelSource: string = "current"): Recallable =
   ## sensitivityLabelsDelete
   ## Deletes the sensitivity label of a given column
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
+  ##   sensitivityLabelSource: string (required)
+  ##                         : The source of the sensitivity label.
   ##   apiVersion: string (required)
   ##             : The API version to use for the request.
   ##   serverName: string (required)
   ##             : The name of the server.
-  ##   subscriptionId: string (required)
-  ##                 : The subscription ID that identifies an Azure subscription.
   ##   columnName: string (required)
   ##             : The name of the column.
+  ##   subscriptionId: string (required)
+  ##                 : The subscription ID that identifies an Azure subscription.
+  ##   databaseName: string (required)
+  ##               : The name of the database.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   ##   schemaName: string (required)
   ##             : The name of the schema.
   ##   tableName: string (required)
   ##            : The name of the table.
-  ##   databaseName: string (required)
-  ##               : The name of the database.
-  ##   sensitivityLabelSource: string (required)
-  ##                         : The source of the sensitivity label.
-  var path_568256 = newJObject()
-  var query_568257 = newJObject()
-  add(path_568256, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568257, "api-version", newJString(apiVersion))
-  add(path_568256, "serverName", newJString(serverName))
-  add(path_568256, "subscriptionId", newJString(subscriptionId))
-  add(path_568256, "columnName", newJString(columnName))
-  add(path_568256, "schemaName", newJString(schemaName))
-  add(path_568256, "tableName", newJString(tableName))
-  add(path_568256, "databaseName", newJString(databaseName))
-  add(path_568256, "sensitivityLabelSource", newJString(sensitivityLabelSource))
-  result = call_568255.call(path_568256, query_568257, nil, nil, nil)
+  var path_564156 = newJObject()
+  var query_564157 = newJObject()
+  add(path_564156, "sensitivityLabelSource", newJString(sensitivityLabelSource))
+  add(query_564157, "api-version", newJString(apiVersion))
+  add(path_564156, "serverName", newJString(serverName))
+  add(path_564156, "columnName", newJString(columnName))
+  add(path_564156, "subscriptionId", newJString(subscriptionId))
+  add(path_564156, "databaseName", newJString(databaseName))
+  add(path_564156, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564156, "schemaName", newJString(schemaName))
+  add(path_564156, "tableName", newJString(tableName))
+  result = call_564155.call(path_564156, query_564157, nil, nil, nil)
 
-var sensitivityLabelsDelete* = Call_SensitivityLabelsDelete_568242(
+var sensitivityLabelsDelete* = Call_SensitivityLabelsDelete_564142(
     name: "sensitivityLabelsDelete", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/servers/{serverName}/databases/{databaseName}/schemas/{schemaName}/tables/{tableName}/columns/{columnName}/sensitivityLabels/{sensitivityLabelSource}",
-    validator: validate_SensitivityLabelsDelete_568243, base: "",
-    url: url_SensitivityLabelsDelete_568244, schemes: {Scheme.Https})
+    validator: validate_SensitivityLabelsDelete_564143, base: "",
+    url: url_SensitivityLabelsDelete_564144, schemes: {Scheme.Https})
 type
-  Call_SensitivityLabelsDisableRecommendation_568258 = ref object of OpenApiRestCall_567641
-proc url_SensitivityLabelsDisableRecommendation_568260(protocol: Scheme;
+  Call_SensitivityLabelsDisableRecommendation_564158 = ref object of OpenApiRestCall_563539
+proc url_SensitivityLabelsDisableRecommendation_564160(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1001,71 +1000,70 @@ proc url_SensitivityLabelsDisableRecommendation_568260(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_SensitivityLabelsDisableRecommendation_568259(path: JsonNode;
+proc validate_SensitivityLabelsDisableRecommendation_564159(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Disables sensitivity recommendations on a given column
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
+  ##   sensitivityLabelSource: JString (required)
   ##   serverName: JString (required)
   ##             : The name of the server.
-  ##   subscriptionId: JString (required)
-  ##                 : The subscription ID that identifies an Azure subscription.
   ##   columnName: JString (required)
   ##             : The name of the column.
+  ##   subscriptionId: JString (required)
+  ##                 : The subscription ID that identifies an Azure subscription.
+  ##   databaseName: JString (required)
+  ##               : The name of the database.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   ##   schemaName: JString (required)
   ##             : The name of the schema.
   ##   tableName: JString (required)
   ##            : The name of the table.
-  ##   databaseName: JString (required)
-  ##               : The name of the database.
-  ##   sensitivityLabelSource: JString (required)
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568261 = path.getOrDefault("resourceGroupName")
-  valid_568261 = validateParameter(valid_568261, JString, required = true,
-                                 default = nil)
-  if valid_568261 != nil:
-    section.add "resourceGroupName", valid_568261
-  var valid_568262 = path.getOrDefault("serverName")
-  valid_568262 = validateParameter(valid_568262, JString, required = true,
-                                 default = nil)
-  if valid_568262 != nil:
-    section.add "serverName", valid_568262
-  var valid_568263 = path.getOrDefault("subscriptionId")
-  valid_568263 = validateParameter(valid_568263, JString, required = true,
-                                 default = nil)
-  if valid_568263 != nil:
-    section.add "subscriptionId", valid_568263
-  var valid_568264 = path.getOrDefault("columnName")
-  valid_568264 = validateParameter(valid_568264, JString, required = true,
-                                 default = nil)
-  if valid_568264 != nil:
-    section.add "columnName", valid_568264
-  var valid_568265 = path.getOrDefault("schemaName")
-  valid_568265 = validateParameter(valid_568265, JString, required = true,
-                                 default = nil)
-  if valid_568265 != nil:
-    section.add "schemaName", valid_568265
-  var valid_568266 = path.getOrDefault("tableName")
-  valid_568266 = validateParameter(valid_568266, JString, required = true,
-                                 default = nil)
-  if valid_568266 != nil:
-    section.add "tableName", valid_568266
-  var valid_568267 = path.getOrDefault("databaseName")
-  valid_568267 = validateParameter(valid_568267, JString, required = true,
-                                 default = nil)
-  if valid_568267 != nil:
-    section.add "databaseName", valid_568267
-  var valid_568268 = path.getOrDefault("sensitivityLabelSource")
-  valid_568268 = validateParameter(valid_568268, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `sensitivityLabelSource` field"
+  var valid_564161 = path.getOrDefault("sensitivityLabelSource")
+  valid_564161 = validateParameter(valid_564161, JString, required = true,
                                  default = newJString("recommended"))
-  if valid_568268 != nil:
-    section.add "sensitivityLabelSource", valid_568268
+  if valid_564161 != nil:
+    section.add "sensitivityLabelSource", valid_564161
+  var valid_564162 = path.getOrDefault("serverName")
+  valid_564162 = validateParameter(valid_564162, JString, required = true,
+                                 default = nil)
+  if valid_564162 != nil:
+    section.add "serverName", valid_564162
+  var valid_564163 = path.getOrDefault("columnName")
+  valid_564163 = validateParameter(valid_564163, JString, required = true,
+                                 default = nil)
+  if valid_564163 != nil:
+    section.add "columnName", valid_564163
+  var valid_564164 = path.getOrDefault("subscriptionId")
+  valid_564164 = validateParameter(valid_564164, JString, required = true,
+                                 default = nil)
+  if valid_564164 != nil:
+    section.add "subscriptionId", valid_564164
+  var valid_564165 = path.getOrDefault("databaseName")
+  valid_564165 = validateParameter(valid_564165, JString, required = true,
+                                 default = nil)
+  if valid_564165 != nil:
+    section.add "databaseName", valid_564165
+  var valid_564166 = path.getOrDefault("resourceGroupName")
+  valid_564166 = validateParameter(valid_564166, JString, required = true,
+                                 default = nil)
+  if valid_564166 != nil:
+    section.add "resourceGroupName", valid_564166
+  var valid_564167 = path.getOrDefault("schemaName")
+  valid_564167 = validateParameter(valid_564167, JString, required = true,
+                                 default = nil)
+  if valid_564167 != nil:
+    section.add "schemaName", valid_564167
+  var valid_564168 = path.getOrDefault("tableName")
+  valid_564168 = validateParameter(valid_564168, JString, required = true,
+                                 default = nil)
+  if valid_564168 != nil:
+    section.add "tableName", valid_564168
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1073,11 +1071,11 @@ proc validate_SensitivityLabelsDisableRecommendation_568259(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568269 = query.getOrDefault("api-version")
-  valid_568269 = validateParameter(valid_568269, JString, required = true,
+  var valid_564169 = query.getOrDefault("api-version")
+  valid_564169 = validateParameter(valid_564169, JString, required = true,
                                  default = nil)
-  if valid_568269 != nil:
-    section.add "api-version", valid_568269
+  if valid_564169 != nil:
+    section.add "api-version", valid_564169
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1086,66 +1084,66 @@ proc validate_SensitivityLabelsDisableRecommendation_568259(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568270: Call_SensitivityLabelsDisableRecommendation_568258;
+proc call*(call_564170: Call_SensitivityLabelsDisableRecommendation_564158;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Disables sensitivity recommendations on a given column
   ## 
-  let valid = call_568270.validator(path, query, header, formData, body)
-  let scheme = call_568270.pickScheme
+  let valid = call_564170.validator(path, query, header, formData, body)
+  let scheme = call_564170.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568270.url(scheme.get, call_568270.host, call_568270.base,
-                         call_568270.route, valid.getOrDefault("path"),
+  let url = call_564170.url(scheme.get, call_564170.host, call_564170.base,
+                         call_564170.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568270, url, valid)
+  result = hook(call_564170, url, valid)
 
-proc call*(call_568271: Call_SensitivityLabelsDisableRecommendation_568258;
-          resourceGroupName: string; apiVersion: string; serverName: string;
-          subscriptionId: string; columnName: string; schemaName: string;
-          tableName: string; databaseName: string;
+proc call*(call_564171: Call_SensitivityLabelsDisableRecommendation_564158;
+          apiVersion: string; serverName: string; columnName: string;
+          subscriptionId: string; databaseName: string; resourceGroupName: string;
+          schemaName: string; tableName: string;
           sensitivityLabelSource: string = "recommended"): Recallable =
   ## sensitivityLabelsDisableRecommendation
   ## Disables sensitivity recommendations on a given column
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
+  ##   sensitivityLabelSource: string (required)
   ##   apiVersion: string (required)
   ##             : The API version to use for the request.
   ##   serverName: string (required)
   ##             : The name of the server.
-  ##   subscriptionId: string (required)
-  ##                 : The subscription ID that identifies an Azure subscription.
   ##   columnName: string (required)
   ##             : The name of the column.
+  ##   subscriptionId: string (required)
+  ##                 : The subscription ID that identifies an Azure subscription.
+  ##   databaseName: string (required)
+  ##               : The name of the database.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   ##   schemaName: string (required)
   ##             : The name of the schema.
   ##   tableName: string (required)
   ##            : The name of the table.
-  ##   databaseName: string (required)
-  ##               : The name of the database.
-  ##   sensitivityLabelSource: string (required)
-  var path_568272 = newJObject()
-  var query_568273 = newJObject()
-  add(path_568272, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568273, "api-version", newJString(apiVersion))
-  add(path_568272, "serverName", newJString(serverName))
-  add(path_568272, "subscriptionId", newJString(subscriptionId))
-  add(path_568272, "columnName", newJString(columnName))
-  add(path_568272, "schemaName", newJString(schemaName))
-  add(path_568272, "tableName", newJString(tableName))
-  add(path_568272, "databaseName", newJString(databaseName))
-  add(path_568272, "sensitivityLabelSource", newJString(sensitivityLabelSource))
-  result = call_568271.call(path_568272, query_568273, nil, nil, nil)
+  var path_564172 = newJObject()
+  var query_564173 = newJObject()
+  add(path_564172, "sensitivityLabelSource", newJString(sensitivityLabelSource))
+  add(query_564173, "api-version", newJString(apiVersion))
+  add(path_564172, "serverName", newJString(serverName))
+  add(path_564172, "columnName", newJString(columnName))
+  add(path_564172, "subscriptionId", newJString(subscriptionId))
+  add(path_564172, "databaseName", newJString(databaseName))
+  add(path_564172, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564172, "schemaName", newJString(schemaName))
+  add(path_564172, "tableName", newJString(tableName))
+  result = call_564171.call(path_564172, query_564173, nil, nil, nil)
 
-var sensitivityLabelsDisableRecommendation* = Call_SensitivityLabelsDisableRecommendation_568258(
+var sensitivityLabelsDisableRecommendation* = Call_SensitivityLabelsDisableRecommendation_564158(
     name: "sensitivityLabelsDisableRecommendation", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/servers/{serverName}/databases/{databaseName}/schemas/{schemaName}/tables/{tableName}/columns/{columnName}/sensitivityLabels/{sensitivityLabelSource}/disable",
-    validator: validate_SensitivityLabelsDisableRecommendation_568259, base: "",
-    url: url_SensitivityLabelsDisableRecommendation_568260,
+    validator: validate_SensitivityLabelsDisableRecommendation_564159, base: "",
+    url: url_SensitivityLabelsDisableRecommendation_564160,
     schemes: {Scheme.Https})
 type
-  Call_SensitivityLabelsEnableRecommendation_568274 = ref object of OpenApiRestCall_567641
-proc url_SensitivityLabelsEnableRecommendation_568276(protocol: Scheme;
+  Call_SensitivityLabelsEnableRecommendation_564174 = ref object of OpenApiRestCall_563539
+proc url_SensitivityLabelsEnableRecommendation_564176(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1184,71 +1182,70 @@ proc url_SensitivityLabelsEnableRecommendation_568276(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_SensitivityLabelsEnableRecommendation_568275(path: JsonNode;
+proc validate_SensitivityLabelsEnableRecommendation_564175(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Enables sensitivity recommendations on a given column (recommendations are enabled by default on all columns)
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
+  ##   sensitivityLabelSource: JString (required)
   ##   serverName: JString (required)
   ##             : The name of the server.
-  ##   subscriptionId: JString (required)
-  ##                 : The subscription ID that identifies an Azure subscription.
   ##   columnName: JString (required)
   ##             : The name of the column.
+  ##   subscriptionId: JString (required)
+  ##                 : The subscription ID that identifies an Azure subscription.
+  ##   databaseName: JString (required)
+  ##               : The name of the database.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   ##   schemaName: JString (required)
   ##             : The name of the schema.
   ##   tableName: JString (required)
   ##            : The name of the table.
-  ##   databaseName: JString (required)
-  ##               : The name of the database.
-  ##   sensitivityLabelSource: JString (required)
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568277 = path.getOrDefault("resourceGroupName")
-  valid_568277 = validateParameter(valid_568277, JString, required = true,
-                                 default = nil)
-  if valid_568277 != nil:
-    section.add "resourceGroupName", valid_568277
-  var valid_568278 = path.getOrDefault("serverName")
-  valid_568278 = validateParameter(valid_568278, JString, required = true,
-                                 default = nil)
-  if valid_568278 != nil:
-    section.add "serverName", valid_568278
-  var valid_568279 = path.getOrDefault("subscriptionId")
-  valid_568279 = validateParameter(valid_568279, JString, required = true,
-                                 default = nil)
-  if valid_568279 != nil:
-    section.add "subscriptionId", valid_568279
-  var valid_568280 = path.getOrDefault("columnName")
-  valid_568280 = validateParameter(valid_568280, JString, required = true,
-                                 default = nil)
-  if valid_568280 != nil:
-    section.add "columnName", valid_568280
-  var valid_568281 = path.getOrDefault("schemaName")
-  valid_568281 = validateParameter(valid_568281, JString, required = true,
-                                 default = nil)
-  if valid_568281 != nil:
-    section.add "schemaName", valid_568281
-  var valid_568282 = path.getOrDefault("tableName")
-  valid_568282 = validateParameter(valid_568282, JString, required = true,
-                                 default = nil)
-  if valid_568282 != nil:
-    section.add "tableName", valid_568282
-  var valid_568283 = path.getOrDefault("databaseName")
-  valid_568283 = validateParameter(valid_568283, JString, required = true,
-                                 default = nil)
-  if valid_568283 != nil:
-    section.add "databaseName", valid_568283
-  var valid_568284 = path.getOrDefault("sensitivityLabelSource")
-  valid_568284 = validateParameter(valid_568284, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `sensitivityLabelSource` field"
+  var valid_564177 = path.getOrDefault("sensitivityLabelSource")
+  valid_564177 = validateParameter(valid_564177, JString, required = true,
                                  default = newJString("recommended"))
-  if valid_568284 != nil:
-    section.add "sensitivityLabelSource", valid_568284
+  if valid_564177 != nil:
+    section.add "sensitivityLabelSource", valid_564177
+  var valid_564178 = path.getOrDefault("serverName")
+  valid_564178 = validateParameter(valid_564178, JString, required = true,
+                                 default = nil)
+  if valid_564178 != nil:
+    section.add "serverName", valid_564178
+  var valid_564179 = path.getOrDefault("columnName")
+  valid_564179 = validateParameter(valid_564179, JString, required = true,
+                                 default = nil)
+  if valid_564179 != nil:
+    section.add "columnName", valid_564179
+  var valid_564180 = path.getOrDefault("subscriptionId")
+  valid_564180 = validateParameter(valid_564180, JString, required = true,
+                                 default = nil)
+  if valid_564180 != nil:
+    section.add "subscriptionId", valid_564180
+  var valid_564181 = path.getOrDefault("databaseName")
+  valid_564181 = validateParameter(valid_564181, JString, required = true,
+                                 default = nil)
+  if valid_564181 != nil:
+    section.add "databaseName", valid_564181
+  var valid_564182 = path.getOrDefault("resourceGroupName")
+  valid_564182 = validateParameter(valid_564182, JString, required = true,
+                                 default = nil)
+  if valid_564182 != nil:
+    section.add "resourceGroupName", valid_564182
+  var valid_564183 = path.getOrDefault("schemaName")
+  valid_564183 = validateParameter(valid_564183, JString, required = true,
+                                 default = nil)
+  if valid_564183 != nil:
+    section.add "schemaName", valid_564183
+  var valid_564184 = path.getOrDefault("tableName")
+  valid_564184 = validateParameter(valid_564184, JString, required = true,
+                                 default = nil)
+  if valid_564184 != nil:
+    section.add "tableName", valid_564184
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1256,11 +1253,11 @@ proc validate_SensitivityLabelsEnableRecommendation_568275(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568285 = query.getOrDefault("api-version")
-  valid_568285 = validateParameter(valid_568285, JString, required = true,
+  var valid_564185 = query.getOrDefault("api-version")
+  valid_564185 = validateParameter(valid_564185, JString, required = true,
                                  default = nil)
-  if valid_568285 != nil:
-    section.add "api-version", valid_568285
+  if valid_564185 != nil:
+    section.add "api-version", valid_564185
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1269,62 +1266,62 @@ proc validate_SensitivityLabelsEnableRecommendation_568275(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568286: Call_SensitivityLabelsEnableRecommendation_568274;
+proc call*(call_564186: Call_SensitivityLabelsEnableRecommendation_564174;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Enables sensitivity recommendations on a given column (recommendations are enabled by default on all columns)
   ## 
-  let valid = call_568286.validator(path, query, header, formData, body)
-  let scheme = call_568286.pickScheme
+  let valid = call_564186.validator(path, query, header, formData, body)
+  let scheme = call_564186.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568286.url(scheme.get, call_568286.host, call_568286.base,
-                         call_568286.route, valid.getOrDefault("path"),
+  let url = call_564186.url(scheme.get, call_564186.host, call_564186.base,
+                         call_564186.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568286, url, valid)
+  result = hook(call_564186, url, valid)
 
-proc call*(call_568287: Call_SensitivityLabelsEnableRecommendation_568274;
-          resourceGroupName: string; apiVersion: string; serverName: string;
-          subscriptionId: string; columnName: string; schemaName: string;
-          tableName: string; databaseName: string;
+proc call*(call_564187: Call_SensitivityLabelsEnableRecommendation_564174;
+          apiVersion: string; serverName: string; columnName: string;
+          subscriptionId: string; databaseName: string; resourceGroupName: string;
+          schemaName: string; tableName: string;
           sensitivityLabelSource: string = "recommended"): Recallable =
   ## sensitivityLabelsEnableRecommendation
   ## Enables sensitivity recommendations on a given column (recommendations are enabled by default on all columns)
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
+  ##   sensitivityLabelSource: string (required)
   ##   apiVersion: string (required)
   ##             : The API version to use for the request.
   ##   serverName: string (required)
   ##             : The name of the server.
-  ##   subscriptionId: string (required)
-  ##                 : The subscription ID that identifies an Azure subscription.
   ##   columnName: string (required)
   ##             : The name of the column.
+  ##   subscriptionId: string (required)
+  ##                 : The subscription ID that identifies an Azure subscription.
+  ##   databaseName: string (required)
+  ##               : The name of the database.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   ##   schemaName: string (required)
   ##             : The name of the schema.
   ##   tableName: string (required)
   ##            : The name of the table.
-  ##   databaseName: string (required)
-  ##               : The name of the database.
-  ##   sensitivityLabelSource: string (required)
-  var path_568288 = newJObject()
-  var query_568289 = newJObject()
-  add(path_568288, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568289, "api-version", newJString(apiVersion))
-  add(path_568288, "serverName", newJString(serverName))
-  add(path_568288, "subscriptionId", newJString(subscriptionId))
-  add(path_568288, "columnName", newJString(columnName))
-  add(path_568288, "schemaName", newJString(schemaName))
-  add(path_568288, "tableName", newJString(tableName))
-  add(path_568288, "databaseName", newJString(databaseName))
-  add(path_568288, "sensitivityLabelSource", newJString(sensitivityLabelSource))
-  result = call_568287.call(path_568288, query_568289, nil, nil, nil)
+  var path_564188 = newJObject()
+  var query_564189 = newJObject()
+  add(path_564188, "sensitivityLabelSource", newJString(sensitivityLabelSource))
+  add(query_564189, "api-version", newJString(apiVersion))
+  add(path_564188, "serverName", newJString(serverName))
+  add(path_564188, "columnName", newJString(columnName))
+  add(path_564188, "subscriptionId", newJString(subscriptionId))
+  add(path_564188, "databaseName", newJString(databaseName))
+  add(path_564188, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564188, "schemaName", newJString(schemaName))
+  add(path_564188, "tableName", newJString(tableName))
+  result = call_564187.call(path_564188, query_564189, nil, nil, nil)
 
-var sensitivityLabelsEnableRecommendation* = Call_SensitivityLabelsEnableRecommendation_568274(
+var sensitivityLabelsEnableRecommendation* = Call_SensitivityLabelsEnableRecommendation_564174(
     name: "sensitivityLabelsEnableRecommendation", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/servers/{serverName}/databases/{databaseName}/schemas/{schemaName}/tables/{tableName}/columns/{columnName}/sensitivityLabels/{sensitivityLabelSource}/enable",
-    validator: validate_SensitivityLabelsEnableRecommendation_568275, base: "",
-    url: url_SensitivityLabelsEnableRecommendation_568276, schemes: {Scheme.Https})
+    validator: validate_SensitivityLabelsEnableRecommendation_564175, base: "",
+    url: url_SensitivityLabelsEnableRecommendation_564176, schemes: {Scheme.Https})
 export
   rest
 

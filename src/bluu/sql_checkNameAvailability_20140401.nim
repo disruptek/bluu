@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, httpcore
 
 ## auto-generated via openapi macro
 ## title: Azure SQL Database
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_567642 = ref object of OpenApiRestCall
+  OpenApiRestCall_563540 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_567642](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563540](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_567642): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563540): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,8 +107,8 @@ const
   macServiceName = "sql-checkNameAvailability"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_ServersCheckNameAvailability_567864 = ref object of OpenApiRestCall_567642
-proc url_ServersCheckNameAvailability_567866(protocol: Scheme; host: string;
+  Call_ServersCheckNameAvailability_563762 = ref object of OpenApiRestCall_563540
+proc url_ServersCheckNameAvailability_563764(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -121,7 +125,7 @@ proc url_ServersCheckNameAvailability_567866(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ServersCheckNameAvailability_567865(path: JsonNode; query: JsonNode;
+proc validate_ServersCheckNameAvailability_563763(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Determines whether a resource can be created with the specified name.
   ## 
@@ -133,11 +137,11 @@ proc validate_ServersCheckNameAvailability_567865(path: JsonNode; query: JsonNod
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_568056 = path.getOrDefault("subscriptionId")
-  valid_568056 = validateParameter(valid_568056, JString, required = true,
+  var valid_563956 = path.getOrDefault("subscriptionId")
+  valid_563956 = validateParameter(valid_563956, JString, required = true,
                                  default = nil)
-  if valid_568056 != nil:
-    section.add "subscriptionId", valid_568056
+  if valid_563956 != nil:
+    section.add "subscriptionId", valid_563956
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -145,11 +149,11 @@ proc validate_ServersCheckNameAvailability_567865(path: JsonNode; query: JsonNod
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568057 = query.getOrDefault("api-version")
-  valid_568057 = validateParameter(valid_568057, JString, required = true,
+  var valid_563957 = query.getOrDefault("api-version")
+  valid_563957 = validateParameter(valid_563957, JString, required = true,
                                  default = nil)
-  if valid_568057 != nil:
-    section.add "api-version", valid_568057
+  if valid_563957 != nil:
+    section.add "api-version", valid_563957
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -163,20 +167,20 @@ proc validate_ServersCheckNameAvailability_567865(path: JsonNode; query: JsonNod
   if body != nil:
     result.add "body", body
 
-proc call*(call_568081: Call_ServersCheckNameAvailability_567864; path: JsonNode;
+proc call*(call_563981: Call_ServersCheckNameAvailability_563762; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Determines whether a resource can be created with the specified name.
   ## 
-  let valid = call_568081.validator(path, query, header, formData, body)
-  let scheme = call_568081.pickScheme
+  let valid = call_563981.validator(path, query, header, formData, body)
+  let scheme = call_563981.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568081.url(scheme.get, call_568081.host, call_568081.base,
-                         call_568081.route, valid.getOrDefault("path"),
+  let url = call_563981.url(scheme.get, call_563981.host, call_563981.base,
+                         call_563981.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568081, url, valid)
+  result = hook(call_563981, url, valid)
 
-proc call*(call_568152: Call_ServersCheckNameAvailability_567864;
+proc call*(call_564052: Call_ServersCheckNameAvailability_563762;
           apiVersion: string; subscriptionId: string; parameters: JsonNode): Recallable =
   ## serversCheckNameAvailability
   ## Determines whether a resource can be created with the specified name.
@@ -186,20 +190,20 @@ proc call*(call_568152: Call_ServersCheckNameAvailability_567864;
   ##                 : The subscription ID that identifies an Azure subscription.
   ##   parameters: JObject (required)
   ##             : The parameters to request for name availability.
-  var path_568153 = newJObject()
-  var query_568155 = newJObject()
-  var body_568156 = newJObject()
-  add(query_568155, "api-version", newJString(apiVersion))
-  add(path_568153, "subscriptionId", newJString(subscriptionId))
+  var path_564053 = newJObject()
+  var query_564055 = newJObject()
+  var body_564056 = newJObject()
+  add(query_564055, "api-version", newJString(apiVersion))
+  add(path_564053, "subscriptionId", newJString(subscriptionId))
   if parameters != nil:
-    body_568156 = parameters
-  result = call_568152.call(path_568153, query_568155, nil, nil, body_568156)
+    body_564056 = parameters
+  result = call_564052.call(path_564053, query_564055, nil, nil, body_564056)
 
-var serversCheckNameAvailability* = Call_ServersCheckNameAvailability_567864(
+var serversCheckNameAvailability* = Call_ServersCheckNameAvailability_563762(
     name: "serversCheckNameAvailability", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Sql/checkNameAvailability",
-    validator: validate_ServersCheckNameAvailability_567865, base: "",
-    url: url_ServersCheckNameAvailability_567866, schemes: {Scheme.Https})
+    validator: validate_ServersCheckNameAvailability_563763, base: "",
+    url: url_ServersCheckNameAvailability_563764, schemes: {Scheme.Https})
 export
   rest
 

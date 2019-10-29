@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, httpcore
 
 ## auto-generated via openapi macro
 ## title: RecoveryServicesClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_567658 = ref object of OpenApiRestCall
+  OpenApiRestCall_563556 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_567658](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563556](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_567658): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563556): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,8 +107,8 @@ const
   macServiceName = "recoveryservices-replicationusages"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_ReplicationUsagesList_567880 = ref object of OpenApiRestCall_567658
-proc url_ReplicationUsagesList_567882(protocol: Scheme; host: string; base: string;
+  Call_ReplicationUsagesList_563778 = ref object of OpenApiRestCall_563556
+proc url_ReplicationUsagesList_563780(protocol: Scheme; host: string; base: string;
                                      route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -128,37 +132,36 @@ proc url_ReplicationUsagesList_567882(protocol: Scheme; host: string; base: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ReplicationUsagesList_567881(path: JsonNode; query: JsonNode;
+proc validate_ReplicationUsagesList_563779(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Fetches the replication usages of the vault.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group where the recovery services vault is present.
-  ##   subscriptionId: JString (required)
-  ##                 : The subscription Id.
   ##   vaultName: JString (required)
   ##            : The name of the recovery services vault.
+  ##   subscriptionId: JString (required)
+  ##                 : The subscription Id.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group where the recovery services vault is present.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568055 = path.getOrDefault("resourceGroupName")
-  valid_568055 = validateParameter(valid_568055, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `vaultName` field"
+  var valid_563955 = path.getOrDefault("vaultName")
+  valid_563955 = validateParameter(valid_563955, JString, required = true,
                                  default = nil)
-  if valid_568055 != nil:
-    section.add "resourceGroupName", valid_568055
-  var valid_568056 = path.getOrDefault("subscriptionId")
-  valid_568056 = validateParameter(valid_568056, JString, required = true,
+  if valid_563955 != nil:
+    section.add "vaultName", valid_563955
+  var valid_563956 = path.getOrDefault("subscriptionId")
+  valid_563956 = validateParameter(valid_563956, JString, required = true,
                                  default = nil)
-  if valid_568056 != nil:
-    section.add "subscriptionId", valid_568056
-  var valid_568057 = path.getOrDefault("vaultName")
-  valid_568057 = validateParameter(valid_568057, JString, required = true,
+  if valid_563956 != nil:
+    section.add "subscriptionId", valid_563956
+  var valid_563957 = path.getOrDefault("resourceGroupName")
+  valid_563957 = validateParameter(valid_563957, JString, required = true,
                                  default = nil)
-  if valid_568057 != nil:
-    section.add "vaultName", valid_568057
+  if valid_563957 != nil:
+    section.add "resourceGroupName", valid_563957
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -166,11 +169,11 @@ proc validate_ReplicationUsagesList_567881(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568058 = query.getOrDefault("api-version")
-  valid_568058 = validateParameter(valid_568058, JString, required = true,
+  var valid_563958 = query.getOrDefault("api-version")
+  valid_563958 = validateParameter(valid_563958, JString, required = true,
                                  default = nil)
-  if valid_568058 != nil:
-    section.add "api-version", valid_568058
+  if valid_563958 != nil:
+    section.add "api-version", valid_563958
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -179,45 +182,44 @@ proc validate_ReplicationUsagesList_567881(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568081: Call_ReplicationUsagesList_567880; path: JsonNode;
+proc call*(call_563981: Call_ReplicationUsagesList_563778; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Fetches the replication usages of the vault.
   ## 
-  let valid = call_568081.validator(path, query, header, formData, body)
-  let scheme = call_568081.pickScheme
+  let valid = call_563981.validator(path, query, header, formData, body)
+  let scheme = call_563981.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568081.url(scheme.get, call_568081.host, call_568081.base,
-                         call_568081.route, valid.getOrDefault("path"),
+  let url = call_563981.url(scheme.get, call_563981.host, call_563981.base,
+                         call_563981.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568081, url, valid)
+  result = hook(call_563981, url, valid)
 
-proc call*(call_568152: Call_ReplicationUsagesList_567880;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          vaultName: string): Recallable =
+proc call*(call_564052: Call_ReplicationUsagesList_563778; vaultName: string;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string): Recallable =
   ## replicationUsagesList
   ## Fetches the replication usages of the vault.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group where the recovery services vault is present.
+  ##   vaultName: string (required)
+  ##            : The name of the recovery services vault.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
   ##   subscriptionId: string (required)
   ##                 : The subscription Id.
-  ##   vaultName: string (required)
-  ##            : The name of the recovery services vault.
-  var path_568153 = newJObject()
-  var query_568155 = newJObject()
-  add(path_568153, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568155, "api-version", newJString(apiVersion))
-  add(path_568153, "subscriptionId", newJString(subscriptionId))
-  add(path_568153, "vaultName", newJString(vaultName))
-  result = call_568152.call(path_568153, query_568155, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group where the recovery services vault is present.
+  var path_564053 = newJObject()
+  var query_564055 = newJObject()
+  add(path_564053, "vaultName", newJString(vaultName))
+  add(query_564055, "api-version", newJString(apiVersion))
+  add(path_564053, "subscriptionId", newJString(subscriptionId))
+  add(path_564053, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564052.call(path_564053, query_564055, nil, nil, nil)
 
-var replicationUsagesList* = Call_ReplicationUsagesList_567880(
+var replicationUsagesList* = Call_ReplicationUsagesList_563778(
     name: "replicationUsagesList", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/Subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.RecoveryServices/vaults/{vaultName}/replicationUsages",
-    validator: validate_ReplicationUsagesList_567881, base: "",
-    url: url_ReplicationUsagesList_567882, schemes: {Scheme.Https})
+    validator: validate_ReplicationUsagesList_563779, base: "",
+    url: url_ReplicationUsagesList_563780, schemes: {Scheme.Https})
 export
   rest
 

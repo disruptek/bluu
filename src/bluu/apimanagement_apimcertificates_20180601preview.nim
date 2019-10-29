@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, httpcore
 
 ## auto-generated via openapi macro
 ## title: ApiManagementClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_593424 = ref object of OpenApiRestCall
+  OpenApiRestCall_563555 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_593424](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563555](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_593424): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563555): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,8 +107,8 @@ const
   macServiceName = "apimanagement-apimcertificates"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_CertificateListByService_593646 = ref object of OpenApiRestCall_593424
-proc url_CertificateListByService_593648(protocol: Scheme; host: string;
+  Call_CertificateListByService_563777 = ref object of OpenApiRestCall_563555
+proc url_CertificateListByService_563779(protocol: Scheme; host: string;
                                         base: string; route: string; path: JsonNode;
                                         query: JsonNode): Uri =
   result.scheme = $protocol
@@ -129,43 +133,43 @@ proc url_CertificateListByService_593648(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_CertificateListByService_593647(path: JsonNode; query: JsonNode;
+proc validate_CertificateListByService_563778(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists a collection of all certificates in the specified service instance.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
-  ##   subscriptionId: JString (required)
-  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   serviceName: JString (required)
   ##              : The name of the API Management service.
+  ##   subscriptionId: JString (required)
+  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593809 = path.getOrDefault("resourceGroupName")
-  valid_593809 = validateParameter(valid_593809, JString, required = true,
+        "path argument is necessary due to required `serviceName` field"
+  var valid_563942 = path.getOrDefault("serviceName")
+  valid_563942 = validateParameter(valid_563942, JString, required = true,
                                  default = nil)
-  if valid_593809 != nil:
-    section.add "resourceGroupName", valid_593809
-  var valid_593810 = path.getOrDefault("subscriptionId")
-  valid_593810 = validateParameter(valid_593810, JString, required = true,
+  if valid_563942 != nil:
+    section.add "serviceName", valid_563942
+  var valid_563943 = path.getOrDefault("subscriptionId")
+  valid_563943 = validateParameter(valid_563943, JString, required = true,
                                  default = nil)
-  if valid_593810 != nil:
-    section.add "subscriptionId", valid_593810
-  var valid_593811 = path.getOrDefault("serviceName")
-  valid_593811 = validateParameter(valid_593811, JString, required = true,
+  if valid_563943 != nil:
+    section.add "subscriptionId", valid_563943
+  var valid_563944 = path.getOrDefault("resourceGroupName")
+  valid_563944 = validateParameter(valid_563944, JString, required = true,
                                  default = nil)
-  if valid_593811 != nil:
-    section.add "serviceName", valid_593811
+  if valid_563944 != nil:
+    section.add "resourceGroupName", valid_563944
   result.add "path", section
   ## parameters in `query` object:
-  ##   api-version: JString (required)
-  ##              : Version of the API to be used with the client request.
   ##   $top: JInt
   ##       : Number of records to return.
+  ##   api-version: JString (required)
+  ##              : Version of the API to be used with the client request.
   ##   $skip: JInt
   ##        : Number of records to skip.
   ##   $filter: JString
@@ -178,26 +182,26 @@ proc validate_CertificateListByService_593647(path: JsonNode; query: JsonNode;
   ## |expirationDate | ge, le, eq, ne, gt, lt |    |
   ## 
   section = newJObject()
+  var valid_563945 = query.getOrDefault("$top")
+  valid_563945 = validateParameter(valid_563945, JInt, required = false, default = nil)
+  if valid_563945 != nil:
+    section.add "$top", valid_563945
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593812 = query.getOrDefault("api-version")
-  valid_593812 = validateParameter(valid_593812, JString, required = true,
+  var valid_563946 = query.getOrDefault("api-version")
+  valid_563946 = validateParameter(valid_563946, JString, required = true,
                                  default = nil)
-  if valid_593812 != nil:
-    section.add "api-version", valid_593812
-  var valid_593813 = query.getOrDefault("$top")
-  valid_593813 = validateParameter(valid_593813, JInt, required = false, default = nil)
-  if valid_593813 != nil:
-    section.add "$top", valid_593813
-  var valid_593814 = query.getOrDefault("$skip")
-  valid_593814 = validateParameter(valid_593814, JInt, required = false, default = nil)
-  if valid_593814 != nil:
-    section.add "$skip", valid_593814
-  var valid_593815 = query.getOrDefault("$filter")
-  valid_593815 = validateParameter(valid_593815, JString, required = false,
+  if valid_563946 != nil:
+    section.add "api-version", valid_563946
+  var valid_563947 = query.getOrDefault("$skip")
+  valid_563947 = validateParameter(valid_563947, JInt, required = false, default = nil)
+  if valid_563947 != nil:
+    section.add "$skip", valid_563947
+  var valid_563948 = query.getOrDefault("$filter")
+  valid_563948 = validateParameter(valid_563948, JString, required = false,
                                  default = nil)
-  if valid_593815 != nil:
-    section.add "$filter", valid_593815
+  if valid_563948 != nil:
+    section.add "$filter", valid_563948
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -206,36 +210,36 @@ proc validate_CertificateListByService_593647(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593842: Call_CertificateListByService_593646; path: JsonNode;
+proc call*(call_563975: Call_CertificateListByService_563777; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists a collection of all certificates in the specified service instance.
   ## 
-  let valid = call_593842.validator(path, query, header, formData, body)
-  let scheme = call_593842.pickScheme
+  let valid = call_563975.validator(path, query, header, formData, body)
+  let scheme = call_563975.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593842.url(scheme.get, call_593842.host, call_593842.base,
-                         call_593842.route, valid.getOrDefault("path"),
+  let url = call_563975.url(scheme.get, call_563975.host, call_563975.base,
+                         call_563975.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593842, url, valid)
+  result = hook(call_563975, url, valid)
 
-proc call*(call_593913: Call_CertificateListByService_593646;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          serviceName: string; Top: int = 0; Skip: int = 0; Filter: string = ""): Recallable =
+proc call*(call_564046: Call_CertificateListByService_563777; serviceName: string;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string;
+          Top: int = 0; Skip: int = 0; Filter: string = ""): Recallable =
   ## certificateListByService
   ## Lists a collection of all certificates in the specified service instance.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   serviceName: string (required)
+  ##              : The name of the API Management service.
+  ##   Top: int
+  ##      : Number of records to return.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   Top: int
-  ##      : Number of records to return.
   ##   Skip: int
   ##       : Number of records to skip.
-  ##   serviceName: string (required)
-  ##              : The name of the API Management service.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   Filter: string
   ##         : | Field       | Supported operators    | Supported functions               |
   ## |-------------|------------------------|-----------------------------------|
@@ -245,25 +249,25 @@ proc call*(call_593913: Call_CertificateListByService_593646;
   ## |thumbprint | ge, le, eq, ne, gt, lt | substringof, contains, startswith, endswith|
   ## |expirationDate | ge, le, eq, ne, gt, lt |    |
   ## 
-  var path_593914 = newJObject()
-  var query_593916 = newJObject()
-  add(path_593914, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593916, "api-version", newJString(apiVersion))
-  add(path_593914, "subscriptionId", newJString(subscriptionId))
-  add(query_593916, "$top", newJInt(Top))
-  add(query_593916, "$skip", newJInt(Skip))
-  add(path_593914, "serviceName", newJString(serviceName))
-  add(query_593916, "$filter", newJString(Filter))
-  result = call_593913.call(path_593914, query_593916, nil, nil, nil)
+  var path_564047 = newJObject()
+  var query_564049 = newJObject()
+  add(path_564047, "serviceName", newJString(serviceName))
+  add(query_564049, "$top", newJInt(Top))
+  add(query_564049, "api-version", newJString(apiVersion))
+  add(path_564047, "subscriptionId", newJString(subscriptionId))
+  add(query_564049, "$skip", newJInt(Skip))
+  add(path_564047, "resourceGroupName", newJString(resourceGroupName))
+  add(query_564049, "$filter", newJString(Filter))
+  result = call_564046.call(path_564047, query_564049, nil, nil, nil)
 
-var certificateListByService* = Call_CertificateListByService_593646(
+var certificateListByService* = Call_CertificateListByService_563777(
     name: "certificateListByService", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ApiManagement/service/{serviceName}/certificates",
-    validator: validate_CertificateListByService_593647, base: "",
-    url: url_CertificateListByService_593648, schemes: {Scheme.Https})
+    validator: validate_CertificateListByService_563778, base: "",
+    url: url_CertificateListByService_563779, schemes: {Scheme.Https})
 type
-  Call_CertificateCreateOrUpdate_593967 = ref object of OpenApiRestCall_593424
-proc url_CertificateCreateOrUpdate_593969(protocol: Scheme; host: string;
+  Call_CertificateCreateOrUpdate_564100 = ref object of OpenApiRestCall_563555
+proc url_CertificateCreateOrUpdate_564102(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -289,7 +293,7 @@ proc url_CertificateCreateOrUpdate_593969(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_CertificateCreateOrUpdate_593968(path: JsonNode; query: JsonNode;
+proc validate_CertificateCreateOrUpdate_564101(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Creates or updates the certificate being used for authentication with the backend.
   ## 
@@ -298,37 +302,37 @@ proc validate_CertificateCreateOrUpdate_593968(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
+  ##   serviceName: JString (required)
+  ##              : The name of the API Management service.
+  ##   subscriptionId: JString (required)
+  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   resourceGroupName: JString (required)
   ##                    : The name of the resource group.
   ##   certificateId: JString (required)
   ##                : Identifier of the certificate entity. Must be unique in the current API Management service instance.
-  ##   subscriptionId: JString (required)
-  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   serviceName: JString (required)
-  ##              : The name of the API Management service.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593987 = path.getOrDefault("resourceGroupName")
-  valid_593987 = validateParameter(valid_593987, JString, required = true,
+        "path argument is necessary due to required `serviceName` field"
+  var valid_564120 = path.getOrDefault("serviceName")
+  valid_564120 = validateParameter(valid_564120, JString, required = true,
                                  default = nil)
-  if valid_593987 != nil:
-    section.add "resourceGroupName", valid_593987
-  var valid_593988 = path.getOrDefault("certificateId")
-  valid_593988 = validateParameter(valid_593988, JString, required = true,
+  if valid_564120 != nil:
+    section.add "serviceName", valid_564120
+  var valid_564121 = path.getOrDefault("subscriptionId")
+  valid_564121 = validateParameter(valid_564121, JString, required = true,
                                  default = nil)
-  if valid_593988 != nil:
-    section.add "certificateId", valid_593988
-  var valid_593989 = path.getOrDefault("subscriptionId")
-  valid_593989 = validateParameter(valid_593989, JString, required = true,
+  if valid_564121 != nil:
+    section.add "subscriptionId", valid_564121
+  var valid_564122 = path.getOrDefault("resourceGroupName")
+  valid_564122 = validateParameter(valid_564122, JString, required = true,
                                  default = nil)
-  if valid_593989 != nil:
-    section.add "subscriptionId", valid_593989
-  var valid_593990 = path.getOrDefault("serviceName")
-  valid_593990 = validateParameter(valid_593990, JString, required = true,
+  if valid_564122 != nil:
+    section.add "resourceGroupName", valid_564122
+  var valid_564123 = path.getOrDefault("certificateId")
+  valid_564123 = validateParameter(valid_564123, JString, required = true,
                                  default = nil)
-  if valid_593990 != nil:
-    section.add "serviceName", valid_593990
+  if valid_564123 != nil:
+    section.add "certificateId", valid_564123
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -336,21 +340,21 @@ proc validate_CertificateCreateOrUpdate_593968(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593991 = query.getOrDefault("api-version")
-  valid_593991 = validateParameter(valid_593991, JString, required = true,
+  var valid_564124 = query.getOrDefault("api-version")
+  valid_564124 = validateParameter(valid_564124, JString, required = true,
                                  default = nil)
-  if valid_593991 != nil:
-    section.add "api-version", valid_593991
+  if valid_564124 != nil:
+    section.add "api-version", valid_564124
   result.add "query", section
   ## parameters in `header` object:
   ##   If-Match: JString
   ##           : ETag of the Entity. Not required when creating an entity, but required when updating an entity.
   section = newJObject()
-  var valid_593992 = header.getOrDefault("If-Match")
-  valid_593992 = validateParameter(valid_593992, JString, required = false,
+  var valid_564125 = header.getOrDefault("If-Match")
+  valid_564125 = validateParameter(valid_564125, JString, required = false,
                                  default = nil)
-  if valid_593992 != nil:
-    section.add "If-Match", valid_593992
+  if valid_564125 != nil:
+    section.add "If-Match", valid_564125
   result.add "header", section
   section = newJObject()
   result.add "formData", section
@@ -362,60 +366,60 @@ proc validate_CertificateCreateOrUpdate_593968(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593994: Call_CertificateCreateOrUpdate_593967; path: JsonNode;
+proc call*(call_564127: Call_CertificateCreateOrUpdate_564100; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Creates or updates the certificate being used for authentication with the backend.
   ## 
   ## How to secure back-end services using client certificate authentication in Azure API Management
   ## https://azure.microsoft.com/en-us/documentation/articles/api-management-howto-mutual-certificates/
-  let valid = call_593994.validator(path, query, header, formData, body)
-  let scheme = call_593994.pickScheme
+  let valid = call_564127.validator(path, query, header, formData, body)
+  let scheme = call_564127.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593994.url(scheme.get, call_593994.host, call_593994.base,
-                         call_593994.route, valid.getOrDefault("path"),
+  let url = call_564127.url(scheme.get, call_564127.host, call_564127.base,
+                         call_564127.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593994, url, valid)
+  result = hook(call_564127, url, valid)
 
-proc call*(call_593995: Call_CertificateCreateOrUpdate_593967;
-          resourceGroupName: string; apiVersion: string; certificateId: string;
-          subscriptionId: string; parameters: JsonNode; serviceName: string): Recallable =
+proc call*(call_564128: Call_CertificateCreateOrUpdate_564100; serviceName: string;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string;
+          parameters: JsonNode; certificateId: string): Recallable =
   ## certificateCreateOrUpdate
   ## Creates or updates the certificate being used for authentication with the backend.
   ## How to secure back-end services using client certificate authentication in Azure API Management
   ## https://azure.microsoft.com/en-us/documentation/articles/api-management-howto-mutual-certificates/
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
-  ##   apiVersion: string (required)
-  ##             : Version of the API to be used with the client request.
-  ##   certificateId: string (required)
-  ##                : Identifier of the certificate entity. Must be unique in the current API Management service instance.
-  ##   subscriptionId: string (required)
-  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   parameters: JObject (required)
-  ##             : Create or Update parameters.
   ##   serviceName: string (required)
   ##              : The name of the API Management service.
-  var path_593996 = newJObject()
-  var query_593997 = newJObject()
-  var body_593998 = newJObject()
-  add(path_593996, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593997, "api-version", newJString(apiVersion))
-  add(path_593996, "certificateId", newJString(certificateId))
-  add(path_593996, "subscriptionId", newJString(subscriptionId))
+  ##   apiVersion: string (required)
+  ##             : Version of the API to be used with the client request.
+  ##   subscriptionId: string (required)
+  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  ##   parameters: JObject (required)
+  ##             : Create or Update parameters.
+  ##   certificateId: string (required)
+  ##                : Identifier of the certificate entity. Must be unique in the current API Management service instance.
+  var path_564129 = newJObject()
+  var query_564130 = newJObject()
+  var body_564131 = newJObject()
+  add(path_564129, "serviceName", newJString(serviceName))
+  add(query_564130, "api-version", newJString(apiVersion))
+  add(path_564129, "subscriptionId", newJString(subscriptionId))
+  add(path_564129, "resourceGroupName", newJString(resourceGroupName))
   if parameters != nil:
-    body_593998 = parameters
-  add(path_593996, "serviceName", newJString(serviceName))
-  result = call_593995.call(path_593996, query_593997, nil, nil, body_593998)
+    body_564131 = parameters
+  add(path_564129, "certificateId", newJString(certificateId))
+  result = call_564128.call(path_564129, query_564130, nil, nil, body_564131)
 
-var certificateCreateOrUpdate* = Call_CertificateCreateOrUpdate_593967(
+var certificateCreateOrUpdate* = Call_CertificateCreateOrUpdate_564100(
     name: "certificateCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ApiManagement/service/{serviceName}/certificates/{certificateId}",
-    validator: validate_CertificateCreateOrUpdate_593968, base: "",
-    url: url_CertificateCreateOrUpdate_593969, schemes: {Scheme.Https})
+    validator: validate_CertificateCreateOrUpdate_564101, base: "",
+    url: url_CertificateCreateOrUpdate_564102, schemes: {Scheme.Https})
 type
-  Call_CertificateGetEntityTag_594012 = ref object of OpenApiRestCall_593424
-proc url_CertificateGetEntityTag_594014(protocol: Scheme; host: string; base: string;
+  Call_CertificateGetEntityTag_564145 = ref object of OpenApiRestCall_563555
+proc url_CertificateGetEntityTag_564147(protocol: Scheme; host: string; base: string;
                                        route: string; path: JsonNode;
                                        query: JsonNode): Uri =
   result.scheme = $protocol
@@ -442,44 +446,44 @@ proc url_CertificateGetEntityTag_594014(protocol: Scheme; host: string; base: st
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_CertificateGetEntityTag_594013(path: JsonNode; query: JsonNode;
+proc validate_CertificateGetEntityTag_564146(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the entity state (Etag) version of the certificate specified by its identifier.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
+  ##   serviceName: JString (required)
+  ##              : The name of the API Management service.
+  ##   subscriptionId: JString (required)
+  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   resourceGroupName: JString (required)
   ##                    : The name of the resource group.
   ##   certificateId: JString (required)
   ##                : Identifier of the certificate entity. Must be unique in the current API Management service instance.
-  ##   subscriptionId: JString (required)
-  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   serviceName: JString (required)
-  ##              : The name of the API Management service.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594015 = path.getOrDefault("resourceGroupName")
-  valid_594015 = validateParameter(valid_594015, JString, required = true,
+        "path argument is necessary due to required `serviceName` field"
+  var valid_564148 = path.getOrDefault("serviceName")
+  valid_564148 = validateParameter(valid_564148, JString, required = true,
                                  default = nil)
-  if valid_594015 != nil:
-    section.add "resourceGroupName", valid_594015
-  var valid_594016 = path.getOrDefault("certificateId")
-  valid_594016 = validateParameter(valid_594016, JString, required = true,
+  if valid_564148 != nil:
+    section.add "serviceName", valid_564148
+  var valid_564149 = path.getOrDefault("subscriptionId")
+  valid_564149 = validateParameter(valid_564149, JString, required = true,
                                  default = nil)
-  if valid_594016 != nil:
-    section.add "certificateId", valid_594016
-  var valid_594017 = path.getOrDefault("subscriptionId")
-  valid_594017 = validateParameter(valid_594017, JString, required = true,
+  if valid_564149 != nil:
+    section.add "subscriptionId", valid_564149
+  var valid_564150 = path.getOrDefault("resourceGroupName")
+  valid_564150 = validateParameter(valid_564150, JString, required = true,
                                  default = nil)
-  if valid_594017 != nil:
-    section.add "subscriptionId", valid_594017
-  var valid_594018 = path.getOrDefault("serviceName")
-  valid_594018 = validateParameter(valid_594018, JString, required = true,
+  if valid_564150 != nil:
+    section.add "resourceGroupName", valid_564150
+  var valid_564151 = path.getOrDefault("certificateId")
+  valid_564151 = validateParameter(valid_564151, JString, required = true,
                                  default = nil)
-  if valid_594018 != nil:
-    section.add "serviceName", valid_594018
+  if valid_564151 != nil:
+    section.add "certificateId", valid_564151
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -487,11 +491,11 @@ proc validate_CertificateGetEntityTag_594013(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594019 = query.getOrDefault("api-version")
-  valid_594019 = validateParameter(valid_594019, JString, required = true,
+  var valid_564152 = query.getOrDefault("api-version")
+  valid_564152 = validateParameter(valid_564152, JString, required = true,
                                  default = nil)
-  if valid_594019 != nil:
-    section.add "api-version", valid_594019
+  if valid_564152 != nil:
+    section.add "api-version", valid_564152
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -500,51 +504,51 @@ proc validate_CertificateGetEntityTag_594013(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594020: Call_CertificateGetEntityTag_594012; path: JsonNode;
+proc call*(call_564153: Call_CertificateGetEntityTag_564145; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the entity state (Etag) version of the certificate specified by its identifier.
   ## 
-  let valid = call_594020.validator(path, query, header, formData, body)
-  let scheme = call_594020.pickScheme
+  let valid = call_564153.validator(path, query, header, formData, body)
+  let scheme = call_564153.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594020.url(scheme.get, call_594020.host, call_594020.base,
-                         call_594020.route, valid.getOrDefault("path"),
+  let url = call_564153.url(scheme.get, call_564153.host, call_564153.base,
+                         call_564153.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594020, url, valid)
+  result = hook(call_564153, url, valid)
 
-proc call*(call_594021: Call_CertificateGetEntityTag_594012;
-          resourceGroupName: string; apiVersion: string; certificateId: string;
-          subscriptionId: string; serviceName: string): Recallable =
+proc call*(call_564154: Call_CertificateGetEntityTag_564145; serviceName: string;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string;
+          certificateId: string): Recallable =
   ## certificateGetEntityTag
   ## Gets the entity state (Etag) version of the certificate specified by its identifier.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
-  ##   apiVersion: string (required)
-  ##             : Version of the API to be used with the client request.
-  ##   certificateId: string (required)
-  ##                : Identifier of the certificate entity. Must be unique in the current API Management service instance.
-  ##   subscriptionId: string (required)
-  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   serviceName: string (required)
   ##              : The name of the API Management service.
-  var path_594022 = newJObject()
-  var query_594023 = newJObject()
-  add(path_594022, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594023, "api-version", newJString(apiVersion))
-  add(path_594022, "certificateId", newJString(certificateId))
-  add(path_594022, "subscriptionId", newJString(subscriptionId))
-  add(path_594022, "serviceName", newJString(serviceName))
-  result = call_594021.call(path_594022, query_594023, nil, nil, nil)
+  ##   apiVersion: string (required)
+  ##             : Version of the API to be used with the client request.
+  ##   subscriptionId: string (required)
+  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  ##   certificateId: string (required)
+  ##                : Identifier of the certificate entity. Must be unique in the current API Management service instance.
+  var path_564155 = newJObject()
+  var query_564156 = newJObject()
+  add(path_564155, "serviceName", newJString(serviceName))
+  add(query_564156, "api-version", newJString(apiVersion))
+  add(path_564155, "subscriptionId", newJString(subscriptionId))
+  add(path_564155, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564155, "certificateId", newJString(certificateId))
+  result = call_564154.call(path_564155, query_564156, nil, nil, nil)
 
-var certificateGetEntityTag* = Call_CertificateGetEntityTag_594012(
+var certificateGetEntityTag* = Call_CertificateGetEntityTag_564145(
     name: "certificateGetEntityTag", meth: HttpMethod.HttpHead,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ApiManagement/service/{serviceName}/certificates/{certificateId}",
-    validator: validate_CertificateGetEntityTag_594013, base: "",
-    url: url_CertificateGetEntityTag_594014, schemes: {Scheme.Https})
+    validator: validate_CertificateGetEntityTag_564146, base: "",
+    url: url_CertificateGetEntityTag_564147, schemes: {Scheme.Https})
 type
-  Call_CertificateGet_593955 = ref object of OpenApiRestCall_593424
-proc url_CertificateGet_593957(protocol: Scheme; host: string; base: string;
+  Call_CertificateGet_564088 = ref object of OpenApiRestCall_563555
+proc url_CertificateGet_564090(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -570,7 +574,7 @@ proc url_CertificateGet_593957(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_CertificateGet_593956(path: JsonNode; query: JsonNode;
+proc validate_CertificateGet_564089(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## Gets the details of the certificate specified by its identifier.
@@ -578,37 +582,37 @@ proc validate_CertificateGet_593956(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
+  ##   serviceName: JString (required)
+  ##              : The name of the API Management service.
+  ##   subscriptionId: JString (required)
+  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   resourceGroupName: JString (required)
   ##                    : The name of the resource group.
   ##   certificateId: JString (required)
   ##                : Identifier of the certificate entity. Must be unique in the current API Management service instance.
-  ##   subscriptionId: JString (required)
-  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   serviceName: JString (required)
-  ##              : The name of the API Management service.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593958 = path.getOrDefault("resourceGroupName")
-  valid_593958 = validateParameter(valid_593958, JString, required = true,
+        "path argument is necessary due to required `serviceName` field"
+  var valid_564091 = path.getOrDefault("serviceName")
+  valid_564091 = validateParameter(valid_564091, JString, required = true,
                                  default = nil)
-  if valid_593958 != nil:
-    section.add "resourceGroupName", valid_593958
-  var valid_593959 = path.getOrDefault("certificateId")
-  valid_593959 = validateParameter(valid_593959, JString, required = true,
+  if valid_564091 != nil:
+    section.add "serviceName", valid_564091
+  var valid_564092 = path.getOrDefault("subscriptionId")
+  valid_564092 = validateParameter(valid_564092, JString, required = true,
                                  default = nil)
-  if valid_593959 != nil:
-    section.add "certificateId", valid_593959
-  var valid_593960 = path.getOrDefault("subscriptionId")
-  valid_593960 = validateParameter(valid_593960, JString, required = true,
+  if valid_564092 != nil:
+    section.add "subscriptionId", valid_564092
+  var valid_564093 = path.getOrDefault("resourceGroupName")
+  valid_564093 = validateParameter(valid_564093, JString, required = true,
                                  default = nil)
-  if valid_593960 != nil:
-    section.add "subscriptionId", valid_593960
-  var valid_593961 = path.getOrDefault("serviceName")
-  valid_593961 = validateParameter(valid_593961, JString, required = true,
+  if valid_564093 != nil:
+    section.add "resourceGroupName", valid_564093
+  var valid_564094 = path.getOrDefault("certificateId")
+  valid_564094 = validateParameter(valid_564094, JString, required = true,
                                  default = nil)
-  if valid_593961 != nil:
-    section.add "serviceName", valid_593961
+  if valid_564094 != nil:
+    section.add "certificateId", valid_564094
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -616,11 +620,11 @@ proc validate_CertificateGet_593956(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593962 = query.getOrDefault("api-version")
-  valid_593962 = validateParameter(valid_593962, JString, required = true,
+  var valid_564095 = query.getOrDefault("api-version")
+  valid_564095 = validateParameter(valid_564095, JString, required = true,
                                  default = nil)
-  if valid_593962 != nil:
-    section.add "api-version", valid_593962
+  if valid_564095 != nil:
+    section.add "api-version", valid_564095
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -629,50 +633,50 @@ proc validate_CertificateGet_593956(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593963: Call_CertificateGet_593955; path: JsonNode; query: JsonNode;
+proc call*(call_564096: Call_CertificateGet_564088; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the details of the certificate specified by its identifier.
   ## 
-  let valid = call_593963.validator(path, query, header, formData, body)
-  let scheme = call_593963.pickScheme
+  let valid = call_564096.validator(path, query, header, formData, body)
+  let scheme = call_564096.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593963.url(scheme.get, call_593963.host, call_593963.base,
-                         call_593963.route, valid.getOrDefault("path"),
+  let url = call_564096.url(scheme.get, call_564096.host, call_564096.base,
+                         call_564096.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593963, url, valid)
+  result = hook(call_564096, url, valid)
 
-proc call*(call_593964: Call_CertificateGet_593955; resourceGroupName: string;
-          apiVersion: string; certificateId: string; subscriptionId: string;
-          serviceName: string): Recallable =
+proc call*(call_564097: Call_CertificateGet_564088; serviceName: string;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string;
+          certificateId: string): Recallable =
   ## certificateGet
   ## Gets the details of the certificate specified by its identifier.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
-  ##   apiVersion: string (required)
-  ##             : Version of the API to be used with the client request.
-  ##   certificateId: string (required)
-  ##                : Identifier of the certificate entity. Must be unique in the current API Management service instance.
-  ##   subscriptionId: string (required)
-  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   serviceName: string (required)
   ##              : The name of the API Management service.
-  var path_593965 = newJObject()
-  var query_593966 = newJObject()
-  add(path_593965, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593966, "api-version", newJString(apiVersion))
-  add(path_593965, "certificateId", newJString(certificateId))
-  add(path_593965, "subscriptionId", newJString(subscriptionId))
-  add(path_593965, "serviceName", newJString(serviceName))
-  result = call_593964.call(path_593965, query_593966, nil, nil, nil)
+  ##   apiVersion: string (required)
+  ##             : Version of the API to be used with the client request.
+  ##   subscriptionId: string (required)
+  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  ##   certificateId: string (required)
+  ##                : Identifier of the certificate entity. Must be unique in the current API Management service instance.
+  var path_564098 = newJObject()
+  var query_564099 = newJObject()
+  add(path_564098, "serviceName", newJString(serviceName))
+  add(query_564099, "api-version", newJString(apiVersion))
+  add(path_564098, "subscriptionId", newJString(subscriptionId))
+  add(path_564098, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564098, "certificateId", newJString(certificateId))
+  result = call_564097.call(path_564098, query_564099, nil, nil, nil)
 
-var certificateGet* = Call_CertificateGet_593955(name: "certificateGet",
+var certificateGet* = Call_CertificateGet_564088(name: "certificateGet",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ApiManagement/service/{serviceName}/certificates/{certificateId}",
-    validator: validate_CertificateGet_593956, base: "", url: url_CertificateGet_593957,
+    validator: validate_CertificateGet_564089, base: "", url: url_CertificateGet_564090,
     schemes: {Scheme.Https})
 type
-  Call_CertificateDelete_593999 = ref object of OpenApiRestCall_593424
-proc url_CertificateDelete_594001(protocol: Scheme; host: string; base: string;
+  Call_CertificateDelete_564132 = ref object of OpenApiRestCall_563555
+proc url_CertificateDelete_564134(protocol: Scheme; host: string; base: string;
                                  route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -698,7 +702,7 @@ proc url_CertificateDelete_594001(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_CertificateDelete_594000(path: JsonNode; query: JsonNode;
+proc validate_CertificateDelete_564133(path: JsonNode; query: JsonNode;
                                       header: JsonNode; formData: JsonNode;
                                       body: JsonNode): JsonNode =
   ## Deletes specific certificate.
@@ -706,37 +710,37 @@ proc validate_CertificateDelete_594000(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
+  ##   serviceName: JString (required)
+  ##              : The name of the API Management service.
+  ##   subscriptionId: JString (required)
+  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   resourceGroupName: JString (required)
   ##                    : The name of the resource group.
   ##   certificateId: JString (required)
   ##                : Identifier of the certificate entity. Must be unique in the current API Management service instance.
-  ##   subscriptionId: JString (required)
-  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   serviceName: JString (required)
-  ##              : The name of the API Management service.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594002 = path.getOrDefault("resourceGroupName")
-  valid_594002 = validateParameter(valid_594002, JString, required = true,
+        "path argument is necessary due to required `serviceName` field"
+  var valid_564135 = path.getOrDefault("serviceName")
+  valid_564135 = validateParameter(valid_564135, JString, required = true,
                                  default = nil)
-  if valid_594002 != nil:
-    section.add "resourceGroupName", valid_594002
-  var valid_594003 = path.getOrDefault("certificateId")
-  valid_594003 = validateParameter(valid_594003, JString, required = true,
+  if valid_564135 != nil:
+    section.add "serviceName", valid_564135
+  var valid_564136 = path.getOrDefault("subscriptionId")
+  valid_564136 = validateParameter(valid_564136, JString, required = true,
                                  default = nil)
-  if valid_594003 != nil:
-    section.add "certificateId", valid_594003
-  var valid_594004 = path.getOrDefault("subscriptionId")
-  valid_594004 = validateParameter(valid_594004, JString, required = true,
+  if valid_564136 != nil:
+    section.add "subscriptionId", valid_564136
+  var valid_564137 = path.getOrDefault("resourceGroupName")
+  valid_564137 = validateParameter(valid_564137, JString, required = true,
                                  default = nil)
-  if valid_594004 != nil:
-    section.add "subscriptionId", valid_594004
-  var valid_594005 = path.getOrDefault("serviceName")
-  valid_594005 = validateParameter(valid_594005, JString, required = true,
+  if valid_564137 != nil:
+    section.add "resourceGroupName", valid_564137
+  var valid_564138 = path.getOrDefault("certificateId")
+  valid_564138 = validateParameter(valid_564138, JString, required = true,
                                  default = nil)
-  if valid_594005 != nil:
-    section.add "serviceName", valid_594005
+  if valid_564138 != nil:
+    section.add "certificateId", valid_564138
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -744,11 +748,11 @@ proc validate_CertificateDelete_594000(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594006 = query.getOrDefault("api-version")
-  valid_594006 = validateParameter(valid_594006, JString, required = true,
+  var valid_564139 = query.getOrDefault("api-version")
+  valid_564139 = validateParameter(valid_564139, JString, required = true,
                                  default = nil)
-  if valid_594006 != nil:
-    section.add "api-version", valid_594006
+  if valid_564139 != nil:
+    section.add "api-version", valid_564139
   result.add "query", section
   ## parameters in `header` object:
   ##   If-Match: JString (required)
@@ -756,58 +760,58 @@ proc validate_CertificateDelete_594000(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert header != nil,
         "header argument is necessary due to required `If-Match` field"
-  var valid_594007 = header.getOrDefault("If-Match")
-  valid_594007 = validateParameter(valid_594007, JString, required = true,
+  var valid_564140 = header.getOrDefault("If-Match")
+  valid_564140 = validateParameter(valid_564140, JString, required = true,
                                  default = nil)
-  if valid_594007 != nil:
-    section.add "If-Match", valid_594007
+  if valid_564140 != nil:
+    section.add "If-Match", valid_564140
   result.add "header", section
   section = newJObject()
   result.add "formData", section
   if body != nil:
     result.add "body", body
 
-proc call*(call_594008: Call_CertificateDelete_593999; path: JsonNode;
+proc call*(call_564141: Call_CertificateDelete_564132; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes specific certificate.
   ## 
-  let valid = call_594008.validator(path, query, header, formData, body)
-  let scheme = call_594008.pickScheme
+  let valid = call_564141.validator(path, query, header, formData, body)
+  let scheme = call_564141.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594008.url(scheme.get, call_594008.host, call_594008.base,
-                         call_594008.route, valid.getOrDefault("path"),
+  let url = call_564141.url(scheme.get, call_564141.host, call_564141.base,
+                         call_564141.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594008, url, valid)
+  result = hook(call_564141, url, valid)
 
-proc call*(call_594009: Call_CertificateDelete_593999; resourceGroupName: string;
-          apiVersion: string; certificateId: string; subscriptionId: string;
-          serviceName: string): Recallable =
+proc call*(call_564142: Call_CertificateDelete_564132; serviceName: string;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string;
+          certificateId: string): Recallable =
   ## certificateDelete
   ## Deletes specific certificate.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
-  ##   apiVersion: string (required)
-  ##             : Version of the API to be used with the client request.
-  ##   certificateId: string (required)
-  ##                : Identifier of the certificate entity. Must be unique in the current API Management service instance.
-  ##   subscriptionId: string (required)
-  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   serviceName: string (required)
   ##              : The name of the API Management service.
-  var path_594010 = newJObject()
-  var query_594011 = newJObject()
-  add(path_594010, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594011, "api-version", newJString(apiVersion))
-  add(path_594010, "certificateId", newJString(certificateId))
-  add(path_594010, "subscriptionId", newJString(subscriptionId))
-  add(path_594010, "serviceName", newJString(serviceName))
-  result = call_594009.call(path_594010, query_594011, nil, nil, nil)
+  ##   apiVersion: string (required)
+  ##             : Version of the API to be used with the client request.
+  ##   subscriptionId: string (required)
+  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  ##   certificateId: string (required)
+  ##                : Identifier of the certificate entity. Must be unique in the current API Management service instance.
+  var path_564143 = newJObject()
+  var query_564144 = newJObject()
+  add(path_564143, "serviceName", newJString(serviceName))
+  add(query_564144, "api-version", newJString(apiVersion))
+  add(path_564143, "subscriptionId", newJString(subscriptionId))
+  add(path_564143, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564143, "certificateId", newJString(certificateId))
+  result = call_564142.call(path_564143, query_564144, nil, nil, nil)
 
-var certificateDelete* = Call_CertificateDelete_593999(name: "certificateDelete",
+var certificateDelete* = Call_CertificateDelete_564132(name: "certificateDelete",
     meth: HttpMethod.HttpDelete, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ApiManagement/service/{serviceName}/certificates/{certificateId}",
-    validator: validate_CertificateDelete_594000, base: "",
-    url: url_CertificateDelete_594001, schemes: {Scheme.Https})
+    validator: validate_CertificateDelete_564133, base: "",
+    url: url_CertificateDelete_564134, schemes: {Scheme.Https})
 export
   rest
 

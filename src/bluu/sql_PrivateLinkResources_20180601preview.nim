@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_573641 = ref object of OpenApiRestCall
+  OpenApiRestCall_563539 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_573641](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563539](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_573641): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563539): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,8 +107,8 @@ const
   macServiceName = "sql-PrivateLinkResources"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_PrivateLinkResourcesListByServer_573863 = ref object of OpenApiRestCall_573641
-proc url_PrivateLinkResourcesListByServer_573865(protocol: Scheme; host: string;
+  Call_PrivateLinkResourcesListByServer_563761 = ref object of OpenApiRestCall_563539
+proc url_PrivateLinkResourcesListByServer_563763(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -127,37 +131,37 @@ proc url_PrivateLinkResourcesListByServer_573865(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_PrivateLinkResourcesListByServer_573864(path: JsonNode;
+proc validate_PrivateLinkResourcesListByServer_563762(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the private link resources for SQL server.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   ##   serverName: JString (required)
   ##             : The name of the server.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID that identifies an Azure subscription.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_574038 = path.getOrDefault("resourceGroupName")
-  valid_574038 = validateParameter(valid_574038, JString, required = true,
+        "path argument is necessary due to required `serverName` field"
+  var valid_563938 = path.getOrDefault("serverName")
+  valid_563938 = validateParameter(valid_563938, JString, required = true,
                                  default = nil)
-  if valid_574038 != nil:
-    section.add "resourceGroupName", valid_574038
-  var valid_574039 = path.getOrDefault("serverName")
-  valid_574039 = validateParameter(valid_574039, JString, required = true,
+  if valid_563938 != nil:
+    section.add "serverName", valid_563938
+  var valid_563939 = path.getOrDefault("subscriptionId")
+  valid_563939 = validateParameter(valid_563939, JString, required = true,
                                  default = nil)
-  if valid_574039 != nil:
-    section.add "serverName", valid_574039
-  var valid_574040 = path.getOrDefault("subscriptionId")
-  valid_574040 = validateParameter(valid_574040, JString, required = true,
+  if valid_563939 != nil:
+    section.add "subscriptionId", valid_563939
+  var valid_563940 = path.getOrDefault("resourceGroupName")
+  valid_563940 = validateParameter(valid_563940, JString, required = true,
                                  default = nil)
-  if valid_574040 != nil:
-    section.add "subscriptionId", valid_574040
+  if valid_563940 != nil:
+    section.add "resourceGroupName", valid_563940
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -165,11 +169,11 @@ proc validate_PrivateLinkResourcesListByServer_573864(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574041 = query.getOrDefault("api-version")
-  valid_574041 = validateParameter(valid_574041, JString, required = true,
+  var valid_563941 = query.getOrDefault("api-version")
+  valid_563941 = validateParameter(valid_563941, JString, required = true,
                                  default = nil)
-  if valid_574041 != nil:
-    section.add "api-version", valid_574041
+  if valid_563941 != nil:
+    section.add "api-version", valid_563941
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -178,49 +182,49 @@ proc validate_PrivateLinkResourcesListByServer_573864(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574064: Call_PrivateLinkResourcesListByServer_573863;
+proc call*(call_563964: Call_PrivateLinkResourcesListByServer_563761;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Gets the private link resources for SQL server.
   ## 
-  let valid = call_574064.validator(path, query, header, formData, body)
-  let scheme = call_574064.pickScheme
+  let valid = call_563964.validator(path, query, header, formData, body)
+  let scheme = call_563964.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574064.url(scheme.get, call_574064.host, call_574064.base,
-                         call_574064.route, valid.getOrDefault("path"),
+  let url = call_563964.url(scheme.get, call_563964.host, call_563964.base,
+                         call_563964.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574064, url, valid)
+  result = hook(call_563964, url, valid)
 
-proc call*(call_574135: Call_PrivateLinkResourcesListByServer_573863;
-          resourceGroupName: string; apiVersion: string; serverName: string;
-          subscriptionId: string): Recallable =
+proc call*(call_564035: Call_PrivateLinkResourcesListByServer_563761;
+          apiVersion: string; serverName: string; subscriptionId: string;
+          resourceGroupName: string): Recallable =
   ## privateLinkResourcesListByServer
   ## Gets the private link resources for SQL server.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   ##   apiVersion: string (required)
   ##             : The API version to use for the request.
   ##   serverName: string (required)
   ##             : The name of the server.
   ##   subscriptionId: string (required)
   ##                 : The subscription ID that identifies an Azure subscription.
-  var path_574136 = newJObject()
-  var query_574138 = newJObject()
-  add(path_574136, "resourceGroupName", newJString(resourceGroupName))
-  add(query_574138, "api-version", newJString(apiVersion))
-  add(path_574136, "serverName", newJString(serverName))
-  add(path_574136, "subscriptionId", newJString(subscriptionId))
-  result = call_574135.call(path_574136, query_574138, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
+  var path_564036 = newJObject()
+  var query_564038 = newJObject()
+  add(query_564038, "api-version", newJString(apiVersion))
+  add(path_564036, "serverName", newJString(serverName))
+  add(path_564036, "subscriptionId", newJString(subscriptionId))
+  add(path_564036, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564035.call(path_564036, query_564038, nil, nil, nil)
 
-var privateLinkResourcesListByServer* = Call_PrivateLinkResourcesListByServer_573863(
+var privateLinkResourcesListByServer* = Call_PrivateLinkResourcesListByServer_563761(
     name: "privateLinkResourcesListByServer", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/servers/{serverName}/privateLinkResources",
-    validator: validate_PrivateLinkResourcesListByServer_573864, base: "",
-    url: url_PrivateLinkResourcesListByServer_573865, schemes: {Scheme.Https})
+    validator: validate_PrivateLinkResourcesListByServer_563762, base: "",
+    url: url_PrivateLinkResourcesListByServer_563763, schemes: {Scheme.Https})
 type
-  Call_PrivateLinkResourcesGet_574177 = ref object of OpenApiRestCall_573641
-proc url_PrivateLinkResourcesGet_574179(protocol: Scheme; host: string; base: string;
+  Call_PrivateLinkResourcesGet_564077 = ref object of OpenApiRestCall_563539
+proc url_PrivateLinkResourcesGet_564079(protocol: Scheme; host: string; base: string;
                                        route: string; path: JsonNode;
                                        query: JsonNode): Uri =
   result.scheme = $protocol
@@ -246,44 +250,44 @@ proc url_PrivateLinkResourcesGet_574179(protocol: Scheme; host: string; base: st
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_PrivateLinkResourcesGet_574178(path: JsonNode; query: JsonNode;
+proc validate_PrivateLinkResourcesGet_564078(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets a private link resource for SQL server.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   ##   serverName: JString (required)
   ##             : The name of the server.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID that identifies an Azure subscription.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   ##   groupName: JString (required)
   ##            : The name of the private link resource.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_574180 = path.getOrDefault("resourceGroupName")
-  valid_574180 = validateParameter(valid_574180, JString, required = true,
+        "path argument is necessary due to required `serverName` field"
+  var valid_564080 = path.getOrDefault("serverName")
+  valid_564080 = validateParameter(valid_564080, JString, required = true,
                                  default = nil)
-  if valid_574180 != nil:
-    section.add "resourceGroupName", valid_574180
-  var valid_574181 = path.getOrDefault("serverName")
-  valid_574181 = validateParameter(valid_574181, JString, required = true,
+  if valid_564080 != nil:
+    section.add "serverName", valid_564080
+  var valid_564081 = path.getOrDefault("subscriptionId")
+  valid_564081 = validateParameter(valid_564081, JString, required = true,
                                  default = nil)
-  if valid_574181 != nil:
-    section.add "serverName", valid_574181
-  var valid_574182 = path.getOrDefault("subscriptionId")
-  valid_574182 = validateParameter(valid_574182, JString, required = true,
+  if valid_564081 != nil:
+    section.add "subscriptionId", valid_564081
+  var valid_564082 = path.getOrDefault("resourceGroupName")
+  valid_564082 = validateParameter(valid_564082, JString, required = true,
                                  default = nil)
-  if valid_574182 != nil:
-    section.add "subscriptionId", valid_574182
-  var valid_574183 = path.getOrDefault("groupName")
-  valid_574183 = validateParameter(valid_574183, JString, required = true,
+  if valid_564082 != nil:
+    section.add "resourceGroupName", valid_564082
+  var valid_564083 = path.getOrDefault("groupName")
+  valid_564083 = validateParameter(valid_564083, JString, required = true,
                                  default = nil)
-  if valid_574183 != nil:
-    section.add "groupName", valid_574183
+  if valid_564083 != nil:
+    section.add "groupName", valid_564083
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -291,11 +295,11 @@ proc validate_PrivateLinkResourcesGet_574178(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574184 = query.getOrDefault("api-version")
-  valid_574184 = validateParameter(valid_574184, JString, required = true,
+  var valid_564084 = query.getOrDefault("api-version")
+  valid_564084 = validateParameter(valid_564084, JString, required = true,
                                  default = nil)
-  if valid_574184 != nil:
-    section.add "api-version", valid_574184
+  if valid_564084 != nil:
+    section.add "api-version", valid_564084
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -304,48 +308,48 @@ proc validate_PrivateLinkResourcesGet_574178(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574185: Call_PrivateLinkResourcesGet_574177; path: JsonNode;
+proc call*(call_564085: Call_PrivateLinkResourcesGet_564077; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets a private link resource for SQL server.
   ## 
-  let valid = call_574185.validator(path, query, header, formData, body)
-  let scheme = call_574185.pickScheme
+  let valid = call_564085.validator(path, query, header, formData, body)
+  let scheme = call_564085.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574185.url(scheme.get, call_574185.host, call_574185.base,
-                         call_574185.route, valid.getOrDefault("path"),
+  let url = call_564085.url(scheme.get, call_564085.host, call_564085.base,
+                         call_564085.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574185, url, valid)
+  result = hook(call_564085, url, valid)
 
-proc call*(call_574186: Call_PrivateLinkResourcesGet_574177;
-          resourceGroupName: string; apiVersion: string; serverName: string;
-          subscriptionId: string; groupName: string): Recallable =
+proc call*(call_564086: Call_PrivateLinkResourcesGet_564077; apiVersion: string;
+          serverName: string; subscriptionId: string; resourceGroupName: string;
+          groupName: string): Recallable =
   ## privateLinkResourcesGet
   ## Gets a private link resource for SQL server.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   ##   apiVersion: string (required)
   ##             : The API version to use for the request.
   ##   serverName: string (required)
   ##             : The name of the server.
   ##   subscriptionId: string (required)
   ##                 : The subscription ID that identifies an Azure subscription.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   ##   groupName: string (required)
   ##            : The name of the private link resource.
-  var path_574187 = newJObject()
-  var query_574188 = newJObject()
-  add(path_574187, "resourceGroupName", newJString(resourceGroupName))
-  add(query_574188, "api-version", newJString(apiVersion))
-  add(path_574187, "serverName", newJString(serverName))
-  add(path_574187, "subscriptionId", newJString(subscriptionId))
-  add(path_574187, "groupName", newJString(groupName))
-  result = call_574186.call(path_574187, query_574188, nil, nil, nil)
+  var path_564087 = newJObject()
+  var query_564088 = newJObject()
+  add(query_564088, "api-version", newJString(apiVersion))
+  add(path_564087, "serverName", newJString(serverName))
+  add(path_564087, "subscriptionId", newJString(subscriptionId))
+  add(path_564087, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564087, "groupName", newJString(groupName))
+  result = call_564086.call(path_564087, query_564088, nil, nil, nil)
 
-var privateLinkResourcesGet* = Call_PrivateLinkResourcesGet_574177(
+var privateLinkResourcesGet* = Call_PrivateLinkResourcesGet_564077(
     name: "privateLinkResourcesGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/servers/{serverName}/privateLinkResources/{groupName}",
-    validator: validate_PrivateLinkResourcesGet_574178, base: "",
-    url: url_PrivateLinkResourcesGet_574179, schemes: {Scheme.Https})
+    validator: validate_PrivateLinkResourcesGet_564078, base: "",
+    url: url_PrivateLinkResourcesGet_564079, schemes: {Scheme.Https})
 export
   rest
 

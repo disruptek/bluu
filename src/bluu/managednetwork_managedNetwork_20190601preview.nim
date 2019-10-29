@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_573657 = ref object of OpenApiRestCall
+  OpenApiRestCall_563555 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_573657](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563555](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_573657): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563555): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,15 +107,15 @@ const
   macServiceName = "managednetwork-managedNetwork"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_OperationsList_573879 = ref object of OpenApiRestCall_573657
-proc url_OperationsList_573881(protocol: Scheme; host: string; base: string;
+  Call_OperationsList_563777 = ref object of OpenApiRestCall_563555
+proc url_OperationsList_563779(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_OperationsList_573880(path: JsonNode; query: JsonNode;
+proc validate_OperationsList_563778(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## Lists all of the available MNC operations.
@@ -126,11 +130,11 @@ proc validate_OperationsList_573880(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574040 = query.getOrDefault("api-version")
-  valid_574040 = validateParameter(valid_574040, JString, required = true,
+  var valid_563940 = query.getOrDefault("api-version")
+  valid_563940 = validateParameter(valid_563940, JString, required = true,
                                  default = nil)
-  if valid_574040 != nil:
-    section.add "api-version", valid_574040
+  if valid_563940 != nil:
+    section.add "api-version", valid_563940
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -139,36 +143,36 @@ proc validate_OperationsList_573880(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574063: Call_OperationsList_573879; path: JsonNode; query: JsonNode;
+proc call*(call_563963: Call_OperationsList_563777; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists all of the available MNC operations.
   ## 
-  let valid = call_574063.validator(path, query, header, formData, body)
-  let scheme = call_574063.pickScheme
+  let valid = call_563963.validator(path, query, header, formData, body)
+  let scheme = call_563963.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574063.url(scheme.get, call_574063.host, call_574063.base,
-                         call_574063.route, valid.getOrDefault("path"),
+  let url = call_563963.url(scheme.get, call_563963.host, call_563963.base,
+                         call_563963.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574063, url, valid)
+  result = hook(call_563963, url, valid)
 
-proc call*(call_574134: Call_OperationsList_573879; apiVersion: string): Recallable =
+proc call*(call_564034: Call_OperationsList_563777; apiVersion: string): Recallable =
   ## operationsList
   ## Lists all of the available MNC operations.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
-  var query_574135 = newJObject()
-  add(query_574135, "api-version", newJString(apiVersion))
-  result = call_574134.call(nil, query_574135, nil, nil, nil)
+  var query_564035 = newJObject()
+  add(query_564035, "api-version", newJString(apiVersion))
+  result = call_564034.call(nil, query_564035, nil, nil, nil)
 
-var operationsList* = Call_OperationsList_573879(name: "operationsList",
+var operationsList* = Call_OperationsList_563777(name: "operationsList",
     meth: HttpMethod.HttpGet, host: "management.azure.com",
     route: "/providers/Microsoft.ManagedNetwork/operations",
-    validator: validate_OperationsList_573880, base: "", url: url_OperationsList_573881,
+    validator: validate_OperationsList_563778, base: "", url: url_OperationsList_563779,
     schemes: {Scheme.Https})
 type
-  Call_ManagedNetworksListBySubscription_574175 = ref object of OpenApiRestCall_573657
-proc url_ManagedNetworksListBySubscription_574177(protocol: Scheme; host: string;
+  Call_ManagedNetworksListBySubscription_564075 = ref object of OpenApiRestCall_563555
+proc url_ManagedNetworksListBySubscription_564077(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -185,7 +189,7 @@ proc url_ManagedNetworksListBySubscription_574177(protocol: Scheme; host: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ManagedNetworksListBySubscription_574176(path: JsonNode;
+proc validate_ManagedNetworksListBySubscription_564076(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## The ListBySubscription  ManagedNetwork operation retrieves all the Managed Network Resources in the current subscription in a paginated format.
   ## 
@@ -197,11 +201,11 @@ proc validate_ManagedNetworksListBySubscription_574176(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_574193 = path.getOrDefault("subscriptionId")
-  valid_574193 = validateParameter(valid_574193, JString, required = true,
+  var valid_564093 = path.getOrDefault("subscriptionId")
+  valid_564093 = validateParameter(valid_564093, JString, required = true,
                                  default = nil)
-  if valid_574193 != nil:
-    section.add "subscriptionId", valid_574193
+  if valid_564093 != nil:
+    section.add "subscriptionId", valid_564093
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -213,20 +217,20 @@ proc validate_ManagedNetworksListBySubscription_574176(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574194 = query.getOrDefault("api-version")
-  valid_574194 = validateParameter(valid_574194, JString, required = true,
+  var valid_564094 = query.getOrDefault("api-version")
+  valid_564094 = validateParameter(valid_564094, JString, required = true,
                                  default = nil)
-  if valid_574194 != nil:
-    section.add "api-version", valid_574194
-  var valid_574195 = query.getOrDefault("$top")
-  valid_574195 = validateParameter(valid_574195, JInt, required = false, default = nil)
-  if valid_574195 != nil:
-    section.add "$top", valid_574195
-  var valid_574196 = query.getOrDefault("$skiptoken")
-  valid_574196 = validateParameter(valid_574196, JString, required = false,
+  if valid_564094 != nil:
+    section.add "api-version", valid_564094
+  var valid_564095 = query.getOrDefault("$top")
+  valid_564095 = validateParameter(valid_564095, JInt, required = false, default = nil)
+  if valid_564095 != nil:
+    section.add "$top", valid_564095
+  var valid_564096 = query.getOrDefault("$skiptoken")
+  valid_564096 = validateParameter(valid_564096, JString, required = false,
                                  default = nil)
-  if valid_574196 != nil:
-    section.add "$skiptoken", valid_574196
+  if valid_564096 != nil:
+    section.add "$skiptoken", valid_564096
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -235,49 +239,49 @@ proc validate_ManagedNetworksListBySubscription_574176(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574197: Call_ManagedNetworksListBySubscription_574175;
+proc call*(call_564097: Call_ManagedNetworksListBySubscription_564075;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## The ListBySubscription  ManagedNetwork operation retrieves all the Managed Network Resources in the current subscription in a paginated format.
   ## 
-  let valid = call_574197.validator(path, query, header, formData, body)
-  let scheme = call_574197.pickScheme
+  let valid = call_564097.validator(path, query, header, formData, body)
+  let scheme = call_564097.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574197.url(scheme.get, call_574197.host, call_574197.base,
-                         call_574197.route, valid.getOrDefault("path"),
+  let url = call_564097.url(scheme.get, call_564097.host, call_564097.base,
+                         call_564097.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574197, url, valid)
+  result = hook(call_564097, url, valid)
 
-proc call*(call_574198: Call_ManagedNetworksListBySubscription_574175;
+proc call*(call_564098: Call_ManagedNetworksListBySubscription_564075;
           apiVersion: string; subscriptionId: string; Top: int = 0;
           Skiptoken: string = ""): Recallable =
   ## managedNetworksListBySubscription
   ## The ListBySubscription  ManagedNetwork operation retrieves all the Managed Network Resources in the current subscription in a paginated format.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
-  ##   subscriptionId: string (required)
-  ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   Top: int
   ##      : May be used to limit the number of results in a page for list queries.
+  ##   subscriptionId: string (required)
+  ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   Skiptoken: string
   ##            : Skiptoken is only used if a previous operation returned a partial result. If a previous response contains a nextLink element, the value of the nextLink element will include a skiptoken parameter that specifies a starting point to use for subsequent calls.
-  var path_574199 = newJObject()
-  var query_574200 = newJObject()
-  add(query_574200, "api-version", newJString(apiVersion))
-  add(path_574199, "subscriptionId", newJString(subscriptionId))
-  add(query_574200, "$top", newJInt(Top))
-  add(query_574200, "$skiptoken", newJString(Skiptoken))
-  result = call_574198.call(path_574199, query_574200, nil, nil, nil)
+  var path_564099 = newJObject()
+  var query_564100 = newJObject()
+  add(query_564100, "api-version", newJString(apiVersion))
+  add(query_564100, "$top", newJInt(Top))
+  add(path_564099, "subscriptionId", newJString(subscriptionId))
+  add(query_564100, "$skiptoken", newJString(Skiptoken))
+  result = call_564098.call(path_564099, query_564100, nil, nil, nil)
 
-var managedNetworksListBySubscription* = Call_ManagedNetworksListBySubscription_574175(
+var managedNetworksListBySubscription* = Call_ManagedNetworksListBySubscription_564075(
     name: "managedNetworksListBySubscription", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.ManagedNetwork/managedNetworks",
-    validator: validate_ManagedNetworksListBySubscription_574176, base: "",
-    url: url_ManagedNetworksListBySubscription_574177, schemes: {Scheme.Https})
+    validator: validate_ManagedNetworksListBySubscription_564076, base: "",
+    url: url_ManagedNetworksListBySubscription_564077, schemes: {Scheme.Https})
 type
-  Call_ManagedNetworksListByResourceGroup_574201 = ref object of OpenApiRestCall_573657
-proc url_ManagedNetworksListByResourceGroup_574203(protocol: Scheme; host: string;
+  Call_ManagedNetworksListByResourceGroup_564101 = ref object of OpenApiRestCall_563555
+proc url_ManagedNetworksListByResourceGroup_564103(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -298,30 +302,30 @@ proc url_ManagedNetworksListByResourceGroup_574203(protocol: Scheme; host: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ManagedNetworksListByResourceGroup_574202(path: JsonNode;
+proc validate_ManagedNetworksListByResourceGroup_564102(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## The ListByResourceGroup ManagedNetwork operation retrieves all the Managed Network resources in a resource group in a paginated format.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   subscriptionId: JString (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_574204 = path.getOrDefault("resourceGroupName")
-  valid_574204 = validateParameter(valid_574204, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564104 = path.getOrDefault("subscriptionId")
+  valid_564104 = validateParameter(valid_564104, JString, required = true,
                                  default = nil)
-  if valid_574204 != nil:
-    section.add "resourceGroupName", valid_574204
-  var valid_574205 = path.getOrDefault("subscriptionId")
-  valid_574205 = validateParameter(valid_574205, JString, required = true,
+  if valid_564104 != nil:
+    section.add "subscriptionId", valid_564104
+  var valid_564105 = path.getOrDefault("resourceGroupName")
+  valid_564105 = validateParameter(valid_564105, JString, required = true,
                                  default = nil)
-  if valid_574205 != nil:
-    section.add "subscriptionId", valid_574205
+  if valid_564105 != nil:
+    section.add "resourceGroupName", valid_564105
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -333,20 +337,20 @@ proc validate_ManagedNetworksListByResourceGroup_574202(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574206 = query.getOrDefault("api-version")
-  valid_574206 = validateParameter(valid_574206, JString, required = true,
+  var valid_564106 = query.getOrDefault("api-version")
+  valid_564106 = validateParameter(valid_564106, JString, required = true,
                                  default = nil)
-  if valid_574206 != nil:
-    section.add "api-version", valid_574206
-  var valid_574207 = query.getOrDefault("$top")
-  valid_574207 = validateParameter(valid_574207, JInt, required = false, default = nil)
-  if valid_574207 != nil:
-    section.add "$top", valid_574207
-  var valid_574208 = query.getOrDefault("$skiptoken")
-  valid_574208 = validateParameter(valid_574208, JString, required = false,
+  if valid_564106 != nil:
+    section.add "api-version", valid_564106
+  var valid_564107 = query.getOrDefault("$top")
+  valid_564107 = validateParameter(valid_564107, JInt, required = false, default = nil)
+  if valid_564107 != nil:
+    section.add "$top", valid_564107
+  var valid_564108 = query.getOrDefault("$skiptoken")
+  valid_564108 = validateParameter(valid_564108, JString, required = false,
                                  default = nil)
-  if valid_574208 != nil:
-    section.add "$skiptoken", valid_574208
+  if valid_564108 != nil:
+    section.add "$skiptoken", valid_564108
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -355,52 +359,52 @@ proc validate_ManagedNetworksListByResourceGroup_574202(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574209: Call_ManagedNetworksListByResourceGroup_574201;
+proc call*(call_564109: Call_ManagedNetworksListByResourceGroup_564101;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## The ListByResourceGroup ManagedNetwork operation retrieves all the Managed Network resources in a resource group in a paginated format.
   ## 
-  let valid = call_574209.validator(path, query, header, formData, body)
-  let scheme = call_574209.pickScheme
+  let valid = call_564109.validator(path, query, header, formData, body)
+  let scheme = call_564109.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574209.url(scheme.get, call_574209.host, call_574209.base,
-                         call_574209.route, valid.getOrDefault("path"),
+  let url = call_564109.url(scheme.get, call_564109.host, call_564109.base,
+                         call_564109.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574209, url, valid)
+  result = hook(call_564109, url, valid)
 
-proc call*(call_574210: Call_ManagedNetworksListByResourceGroup_574201;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
+proc call*(call_564110: Call_ManagedNetworksListByResourceGroup_564101;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string;
           Top: int = 0; Skiptoken: string = ""): Recallable =
   ## managedNetworksListByResourceGroup
   ## The ListByResourceGroup ManagedNetwork operation retrieves all the Managed Network resources in a resource group in a paginated format.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
-  ##   subscriptionId: string (required)
-  ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   Top: int
   ##      : May be used to limit the number of results in a page for list queries.
+  ##   subscriptionId: string (required)
+  ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   Skiptoken: string
   ##            : Skiptoken is only used if a previous operation returned a partial result. If a previous response contains a nextLink element, the value of the nextLink element will include a skiptoken parameter that specifies a starting point to use for subsequent calls.
-  var path_574211 = newJObject()
-  var query_574212 = newJObject()
-  add(path_574211, "resourceGroupName", newJString(resourceGroupName))
-  add(query_574212, "api-version", newJString(apiVersion))
-  add(path_574211, "subscriptionId", newJString(subscriptionId))
-  add(query_574212, "$top", newJInt(Top))
-  add(query_574212, "$skiptoken", newJString(Skiptoken))
-  result = call_574210.call(path_574211, query_574212, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564111 = newJObject()
+  var query_564112 = newJObject()
+  add(query_564112, "api-version", newJString(apiVersion))
+  add(query_564112, "$top", newJInt(Top))
+  add(path_564111, "subscriptionId", newJString(subscriptionId))
+  add(query_564112, "$skiptoken", newJString(Skiptoken))
+  add(path_564111, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564110.call(path_564111, query_564112, nil, nil, nil)
 
-var managedNetworksListByResourceGroup* = Call_ManagedNetworksListByResourceGroup_574201(
+var managedNetworksListByResourceGroup* = Call_ManagedNetworksListByResourceGroup_564101(
     name: "managedNetworksListByResourceGroup", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ManagedNetwork/managedNetworks",
-    validator: validate_ManagedNetworksListByResourceGroup_574202, base: "",
-    url: url_ManagedNetworksListByResourceGroup_574203, schemes: {Scheme.Https})
+    validator: validate_ManagedNetworksListByResourceGroup_564102, base: "",
+    url: url_ManagedNetworksListByResourceGroup_564103, schemes: {Scheme.Https})
 type
-  Call_ManagedNetworksCreateOrUpdate_574224 = ref object of OpenApiRestCall_573657
-proc url_ManagedNetworksCreateOrUpdate_574226(protocol: Scheme; host: string;
+  Call_ManagedNetworksCreateOrUpdate_564124 = ref object of OpenApiRestCall_563555
+proc url_ManagedNetworksCreateOrUpdate_564126(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -424,37 +428,37 @@ proc url_ManagedNetworksCreateOrUpdate_574226(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ManagedNetworksCreateOrUpdate_574225(path: JsonNode; query: JsonNode;
+proc validate_ManagedNetworksCreateOrUpdate_564125(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## The Put ManagedNetworks operation creates/updates a Managed Network Resource, specified by resource group and Managed Network name
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
+  ##   subscriptionId: JString (required)
+  ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   resourceGroupName: JString (required)
   ##                    : The name of the resource group.
   ##   managedNetworkName: JString (required)
   ##                     : The name of the Managed Network.
-  ##   subscriptionId: JString (required)
-  ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_574244 = path.getOrDefault("resourceGroupName")
-  valid_574244 = validateParameter(valid_574244, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564144 = path.getOrDefault("subscriptionId")
+  valid_564144 = validateParameter(valid_564144, JString, required = true,
                                  default = nil)
-  if valid_574244 != nil:
-    section.add "resourceGroupName", valid_574244
-  var valid_574245 = path.getOrDefault("managedNetworkName")
-  valid_574245 = validateParameter(valid_574245, JString, required = true,
+  if valid_564144 != nil:
+    section.add "subscriptionId", valid_564144
+  var valid_564145 = path.getOrDefault("resourceGroupName")
+  valid_564145 = validateParameter(valid_564145, JString, required = true,
                                  default = nil)
-  if valid_574245 != nil:
-    section.add "managedNetworkName", valid_574245
-  var valid_574246 = path.getOrDefault("subscriptionId")
-  valid_574246 = validateParameter(valid_574246, JString, required = true,
+  if valid_564145 != nil:
+    section.add "resourceGroupName", valid_564145
+  var valid_564146 = path.getOrDefault("managedNetworkName")
+  valid_564146 = validateParameter(valid_564146, JString, required = true,
                                  default = nil)
-  if valid_574246 != nil:
-    section.add "subscriptionId", valid_574246
+  if valid_564146 != nil:
+    section.add "managedNetworkName", valid_564146
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -462,11 +466,11 @@ proc validate_ManagedNetworksCreateOrUpdate_574225(path: JsonNode; query: JsonNo
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574247 = query.getOrDefault("api-version")
-  valid_574247 = validateParameter(valid_574247, JString, required = true,
+  var valid_564147 = query.getOrDefault("api-version")
+  valid_564147 = validateParameter(valid_564147, JString, required = true,
                                  default = nil)
-  if valid_574247 != nil:
-    section.add "api-version", valid_574247
+  if valid_564147 != nil:
+    section.add "api-version", valid_564147
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -480,53 +484,53 @@ proc validate_ManagedNetworksCreateOrUpdate_574225(path: JsonNode; query: JsonNo
   if body != nil:
     result.add "body", body
 
-proc call*(call_574249: Call_ManagedNetworksCreateOrUpdate_574224; path: JsonNode;
+proc call*(call_564149: Call_ManagedNetworksCreateOrUpdate_564124; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## The Put ManagedNetworks operation creates/updates a Managed Network Resource, specified by resource group and Managed Network name
   ## 
-  let valid = call_574249.validator(path, query, header, formData, body)
-  let scheme = call_574249.pickScheme
+  let valid = call_564149.validator(path, query, header, formData, body)
+  let scheme = call_564149.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574249.url(scheme.get, call_574249.host, call_574249.base,
-                         call_574249.route, valid.getOrDefault("path"),
+  let url = call_564149.url(scheme.get, call_564149.host, call_564149.base,
+                         call_564149.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574249, url, valid)
+  result = hook(call_564149, url, valid)
 
-proc call*(call_574250: Call_ManagedNetworksCreateOrUpdate_574224;
-          resourceGroupName: string; apiVersion: string; managedNetworkName: string;
-          subscriptionId: string; managedNetwork: JsonNode): Recallable =
+proc call*(call_564150: Call_ManagedNetworksCreateOrUpdate_564124;
+          apiVersion: string; managedNetwork: JsonNode; subscriptionId: string;
+          resourceGroupName: string; managedNetworkName: string): Recallable =
   ## managedNetworksCreateOrUpdate
   ## The Put ManagedNetworks operation creates/updates a Managed Network Resource, specified by resource group and Managed Network name
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
-  ##   managedNetworkName: string (required)
-  ##                     : The name of the Managed Network.
-  ##   subscriptionId: string (required)
-  ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   managedNetwork: JObject (required)
   ##                 : Parameters supplied to the create/update a Managed Network Resource
-  var path_574251 = newJObject()
-  var query_574252 = newJObject()
-  var body_574253 = newJObject()
-  add(path_574251, "resourceGroupName", newJString(resourceGroupName))
-  add(query_574252, "api-version", newJString(apiVersion))
-  add(path_574251, "managedNetworkName", newJString(managedNetworkName))
-  add(path_574251, "subscriptionId", newJString(subscriptionId))
+  ##   subscriptionId: string (required)
+  ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  ##   managedNetworkName: string (required)
+  ##                     : The name of the Managed Network.
+  var path_564151 = newJObject()
+  var query_564152 = newJObject()
+  var body_564153 = newJObject()
+  add(query_564152, "api-version", newJString(apiVersion))
   if managedNetwork != nil:
-    body_574253 = managedNetwork
-  result = call_574250.call(path_574251, query_574252, nil, nil, body_574253)
+    body_564153 = managedNetwork
+  add(path_564151, "subscriptionId", newJString(subscriptionId))
+  add(path_564151, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564151, "managedNetworkName", newJString(managedNetworkName))
+  result = call_564150.call(path_564151, query_564152, nil, nil, body_564153)
 
-var managedNetworksCreateOrUpdate* = Call_ManagedNetworksCreateOrUpdate_574224(
+var managedNetworksCreateOrUpdate* = Call_ManagedNetworksCreateOrUpdate_564124(
     name: "managedNetworksCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ManagedNetwork/managedNetworks/{managedNetworkName}",
-    validator: validate_ManagedNetworksCreateOrUpdate_574225, base: "",
-    url: url_ManagedNetworksCreateOrUpdate_574226, schemes: {Scheme.Https})
+    validator: validate_ManagedNetworksCreateOrUpdate_564125, base: "",
+    url: url_ManagedNetworksCreateOrUpdate_564126, schemes: {Scheme.Https})
 type
-  Call_ManagedNetworksGet_574213 = ref object of OpenApiRestCall_573657
-proc url_ManagedNetworksGet_574215(protocol: Scheme; host: string; base: string;
+  Call_ManagedNetworksGet_564113 = ref object of OpenApiRestCall_563555
+proc url_ManagedNetworksGet_564115(protocol: Scheme; host: string; base: string;
                                   route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -550,7 +554,7 @@ proc url_ManagedNetworksGet_574215(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ManagedNetworksGet_574214(path: JsonNode; query: JsonNode;
+proc validate_ManagedNetworksGet_564114(path: JsonNode; query: JsonNode;
                                        header: JsonNode; formData: JsonNode;
                                        body: JsonNode): JsonNode =
   ## The Get ManagedNetworks operation gets a Managed Network Resource, specified by the resource group and Managed Network name
@@ -558,30 +562,30 @@ proc validate_ManagedNetworksGet_574214(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
+  ##   subscriptionId: JString (required)
+  ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   resourceGroupName: JString (required)
   ##                    : The name of the resource group.
   ##   managedNetworkName: JString (required)
   ##                     : The name of the Managed Network.
-  ##   subscriptionId: JString (required)
-  ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_574216 = path.getOrDefault("resourceGroupName")
-  valid_574216 = validateParameter(valid_574216, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564116 = path.getOrDefault("subscriptionId")
+  valid_564116 = validateParameter(valid_564116, JString, required = true,
                                  default = nil)
-  if valid_574216 != nil:
-    section.add "resourceGroupName", valid_574216
-  var valid_574217 = path.getOrDefault("managedNetworkName")
-  valid_574217 = validateParameter(valid_574217, JString, required = true,
+  if valid_564116 != nil:
+    section.add "subscriptionId", valid_564116
+  var valid_564117 = path.getOrDefault("resourceGroupName")
+  valid_564117 = validateParameter(valid_564117, JString, required = true,
                                  default = nil)
-  if valid_574217 != nil:
-    section.add "managedNetworkName", valid_574217
-  var valid_574218 = path.getOrDefault("subscriptionId")
-  valid_574218 = validateParameter(valid_574218, JString, required = true,
+  if valid_564117 != nil:
+    section.add "resourceGroupName", valid_564117
+  var valid_564118 = path.getOrDefault("managedNetworkName")
+  valid_564118 = validateParameter(valid_564118, JString, required = true,
                                  default = nil)
-  if valid_574218 != nil:
-    section.add "subscriptionId", valid_574218
+  if valid_564118 != nil:
+    section.add "managedNetworkName", valid_564118
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -589,11 +593,11 @@ proc validate_ManagedNetworksGet_574214(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574219 = query.getOrDefault("api-version")
-  valid_574219 = validateParameter(valid_574219, JString, required = true,
+  var valid_564119 = query.getOrDefault("api-version")
+  valid_564119 = validateParameter(valid_564119, JString, required = true,
                                  default = nil)
-  if valid_574219 != nil:
-    section.add "api-version", valid_574219
+  if valid_564119 != nil:
+    section.add "api-version", valid_564119
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -602,47 +606,48 @@ proc validate_ManagedNetworksGet_574214(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574220: Call_ManagedNetworksGet_574213; path: JsonNode;
+proc call*(call_564120: Call_ManagedNetworksGet_564113; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## The Get ManagedNetworks operation gets a Managed Network Resource, specified by the resource group and Managed Network name
   ## 
-  let valid = call_574220.validator(path, query, header, formData, body)
-  let scheme = call_574220.pickScheme
+  let valid = call_564120.validator(path, query, header, formData, body)
+  let scheme = call_564120.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574220.url(scheme.get, call_574220.host, call_574220.base,
-                         call_574220.route, valid.getOrDefault("path"),
+  let url = call_564120.url(scheme.get, call_564120.host, call_564120.base,
+                         call_564120.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574220, url, valid)
+  result = hook(call_564120, url, valid)
 
-proc call*(call_574221: Call_ManagedNetworksGet_574213; resourceGroupName: string;
-          apiVersion: string; managedNetworkName: string; subscriptionId: string): Recallable =
+proc call*(call_564121: Call_ManagedNetworksGet_564113; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string;
+          managedNetworkName: string): Recallable =
   ## managedNetworksGet
   ## The Get ManagedNetworks operation gets a Managed Network Resource, specified by the resource group and Managed Network name
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
-  ##   managedNetworkName: string (required)
-  ##                     : The name of the Managed Network.
   ##   subscriptionId: string (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_574222 = newJObject()
-  var query_574223 = newJObject()
-  add(path_574222, "resourceGroupName", newJString(resourceGroupName))
-  add(query_574223, "api-version", newJString(apiVersion))
-  add(path_574222, "managedNetworkName", newJString(managedNetworkName))
-  add(path_574222, "subscriptionId", newJString(subscriptionId))
-  result = call_574221.call(path_574222, query_574223, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  ##   managedNetworkName: string (required)
+  ##                     : The name of the Managed Network.
+  var path_564122 = newJObject()
+  var query_564123 = newJObject()
+  add(query_564123, "api-version", newJString(apiVersion))
+  add(path_564122, "subscriptionId", newJString(subscriptionId))
+  add(path_564122, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564122, "managedNetworkName", newJString(managedNetworkName))
+  result = call_564121.call(path_564122, query_564123, nil, nil, nil)
 
-var managedNetworksGet* = Call_ManagedNetworksGet_574213(
+var managedNetworksGet* = Call_ManagedNetworksGet_564113(
     name: "managedNetworksGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ManagedNetwork/managedNetworks/{managedNetworkName}",
-    validator: validate_ManagedNetworksGet_574214, base: "",
-    url: url_ManagedNetworksGet_574215, schemes: {Scheme.Https})
+    validator: validate_ManagedNetworksGet_564114, base: "",
+    url: url_ManagedNetworksGet_564115, schemes: {Scheme.Https})
 type
-  Call_ManagedNetworksUpdate_574265 = ref object of OpenApiRestCall_573657
-proc url_ManagedNetworksUpdate_574267(protocol: Scheme; host: string; base: string;
+  Call_ManagedNetworksUpdate_564165 = ref object of OpenApiRestCall_563555
+proc url_ManagedNetworksUpdate_564167(protocol: Scheme; host: string; base: string;
                                      route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -666,37 +671,37 @@ proc url_ManagedNetworksUpdate_574267(protocol: Scheme; host: string; base: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ManagedNetworksUpdate_574266(path: JsonNode; query: JsonNode;
+proc validate_ManagedNetworksUpdate_564166(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Updates the specified Managed Network resource tags.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
+  ##   subscriptionId: JString (required)
+  ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   resourceGroupName: JString (required)
   ##                    : The name of the resource group.
   ##   managedNetworkName: JString (required)
   ##                     : The name of the Managed Network.
-  ##   subscriptionId: JString (required)
-  ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_574268 = path.getOrDefault("resourceGroupName")
-  valid_574268 = validateParameter(valid_574268, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564168 = path.getOrDefault("subscriptionId")
+  valid_564168 = validateParameter(valid_564168, JString, required = true,
                                  default = nil)
-  if valid_574268 != nil:
-    section.add "resourceGroupName", valid_574268
-  var valid_574269 = path.getOrDefault("managedNetworkName")
-  valid_574269 = validateParameter(valid_574269, JString, required = true,
+  if valid_564168 != nil:
+    section.add "subscriptionId", valid_564168
+  var valid_564169 = path.getOrDefault("resourceGroupName")
+  valid_564169 = validateParameter(valid_564169, JString, required = true,
                                  default = nil)
-  if valid_574269 != nil:
-    section.add "managedNetworkName", valid_574269
-  var valid_574270 = path.getOrDefault("subscriptionId")
-  valid_574270 = validateParameter(valid_574270, JString, required = true,
+  if valid_564169 != nil:
+    section.add "resourceGroupName", valid_564169
+  var valid_564170 = path.getOrDefault("managedNetworkName")
+  valid_564170 = validateParameter(valid_564170, JString, required = true,
                                  default = nil)
-  if valid_574270 != nil:
-    section.add "subscriptionId", valid_574270
+  if valid_564170 != nil:
+    section.add "managedNetworkName", valid_564170
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -704,11 +709,11 @@ proc validate_ManagedNetworksUpdate_574266(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574271 = query.getOrDefault("api-version")
-  valid_574271 = validateParameter(valid_574271, JString, required = true,
+  var valid_564171 = query.getOrDefault("api-version")
+  valid_564171 = validateParameter(valid_564171, JString, required = true,
                                  default = nil)
-  if valid_574271 != nil:
-    section.add "api-version", valid_574271
+  if valid_564171 != nil:
+    section.add "api-version", valid_564171
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -722,53 +727,53 @@ proc validate_ManagedNetworksUpdate_574266(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574273: Call_ManagedNetworksUpdate_574265; path: JsonNode;
+proc call*(call_564173: Call_ManagedNetworksUpdate_564165; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Updates the specified Managed Network resource tags.
   ## 
-  let valid = call_574273.validator(path, query, header, formData, body)
-  let scheme = call_574273.pickScheme
+  let valid = call_564173.validator(path, query, header, formData, body)
+  let scheme = call_564173.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574273.url(scheme.get, call_574273.host, call_574273.base,
-                         call_574273.route, valid.getOrDefault("path"),
+  let url = call_564173.url(scheme.get, call_564173.host, call_564173.base,
+                         call_564173.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574273, url, valid)
+  result = hook(call_564173, url, valid)
 
-proc call*(call_574274: Call_ManagedNetworksUpdate_574265;
-          resourceGroupName: string; apiVersion: string; managedNetworkName: string;
-          subscriptionId: string; parameters: JsonNode): Recallable =
+proc call*(call_564174: Call_ManagedNetworksUpdate_564165; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string;
+          managedNetworkName: string; parameters: JsonNode): Recallable =
   ## managedNetworksUpdate
   ## Updates the specified Managed Network resource tags.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
-  ##   managedNetworkName: string (required)
-  ##                     : The name of the Managed Network.
   ##   subscriptionId: string (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  ##   managedNetworkName: string (required)
+  ##                     : The name of the Managed Network.
   ##   parameters: JObject (required)
   ##             : Parameters supplied to update application gateway tags and/or scope.
-  var path_574275 = newJObject()
-  var query_574276 = newJObject()
-  var body_574277 = newJObject()
-  add(path_574275, "resourceGroupName", newJString(resourceGroupName))
-  add(query_574276, "api-version", newJString(apiVersion))
-  add(path_574275, "managedNetworkName", newJString(managedNetworkName))
-  add(path_574275, "subscriptionId", newJString(subscriptionId))
+  var path_564175 = newJObject()
+  var query_564176 = newJObject()
+  var body_564177 = newJObject()
+  add(query_564176, "api-version", newJString(apiVersion))
+  add(path_564175, "subscriptionId", newJString(subscriptionId))
+  add(path_564175, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564175, "managedNetworkName", newJString(managedNetworkName))
   if parameters != nil:
-    body_574277 = parameters
-  result = call_574274.call(path_574275, query_574276, nil, nil, body_574277)
+    body_564177 = parameters
+  result = call_564174.call(path_564175, query_564176, nil, nil, body_564177)
 
-var managedNetworksUpdate* = Call_ManagedNetworksUpdate_574265(
+var managedNetworksUpdate* = Call_ManagedNetworksUpdate_564165(
     name: "managedNetworksUpdate", meth: HttpMethod.HttpPatch,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ManagedNetwork/managedNetworks/{managedNetworkName}",
-    validator: validate_ManagedNetworksUpdate_574266, base: "",
-    url: url_ManagedNetworksUpdate_574267, schemes: {Scheme.Https})
+    validator: validate_ManagedNetworksUpdate_564166, base: "",
+    url: url_ManagedNetworksUpdate_564167, schemes: {Scheme.Https})
 type
-  Call_ManagedNetworksDelete_574254 = ref object of OpenApiRestCall_573657
-proc url_ManagedNetworksDelete_574256(protocol: Scheme; host: string; base: string;
+  Call_ManagedNetworksDelete_564154 = ref object of OpenApiRestCall_563555
+proc url_ManagedNetworksDelete_564156(protocol: Scheme; host: string; base: string;
                                      route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -792,37 +797,37 @@ proc url_ManagedNetworksDelete_574256(protocol: Scheme; host: string; base: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ManagedNetworksDelete_574255(path: JsonNode; query: JsonNode;
+proc validate_ManagedNetworksDelete_564155(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## The Delete ManagedNetworks operation deletes a Managed Network Resource, specified by the  resource group and Managed Network name
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
+  ##   subscriptionId: JString (required)
+  ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   resourceGroupName: JString (required)
   ##                    : The name of the resource group.
   ##   managedNetworkName: JString (required)
   ##                     : The name of the Managed Network.
-  ##   subscriptionId: JString (required)
-  ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_574257 = path.getOrDefault("resourceGroupName")
-  valid_574257 = validateParameter(valid_574257, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564157 = path.getOrDefault("subscriptionId")
+  valid_564157 = validateParameter(valid_564157, JString, required = true,
                                  default = nil)
-  if valid_574257 != nil:
-    section.add "resourceGroupName", valid_574257
-  var valid_574258 = path.getOrDefault("managedNetworkName")
-  valid_574258 = validateParameter(valid_574258, JString, required = true,
+  if valid_564157 != nil:
+    section.add "subscriptionId", valid_564157
+  var valid_564158 = path.getOrDefault("resourceGroupName")
+  valid_564158 = validateParameter(valid_564158, JString, required = true,
                                  default = nil)
-  if valid_574258 != nil:
-    section.add "managedNetworkName", valid_574258
-  var valid_574259 = path.getOrDefault("subscriptionId")
-  valid_574259 = validateParameter(valid_574259, JString, required = true,
+  if valid_564158 != nil:
+    section.add "resourceGroupName", valid_564158
+  var valid_564159 = path.getOrDefault("managedNetworkName")
+  valid_564159 = validateParameter(valid_564159, JString, required = true,
                                  default = nil)
-  if valid_574259 != nil:
-    section.add "subscriptionId", valid_574259
+  if valid_564159 != nil:
+    section.add "managedNetworkName", valid_564159
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -830,11 +835,11 @@ proc validate_ManagedNetworksDelete_574255(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574260 = query.getOrDefault("api-version")
-  valid_574260 = validateParameter(valid_574260, JString, required = true,
+  var valid_564160 = query.getOrDefault("api-version")
+  valid_564160 = validateParameter(valid_564160, JString, required = true,
                                  default = nil)
-  if valid_574260 != nil:
-    section.add "api-version", valid_574260
+  if valid_564160 != nil:
+    section.add "api-version", valid_564160
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -843,48 +848,48 @@ proc validate_ManagedNetworksDelete_574255(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574261: Call_ManagedNetworksDelete_574254; path: JsonNode;
+proc call*(call_564161: Call_ManagedNetworksDelete_564154; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## The Delete ManagedNetworks operation deletes a Managed Network Resource, specified by the  resource group and Managed Network name
   ## 
-  let valid = call_574261.validator(path, query, header, formData, body)
-  let scheme = call_574261.pickScheme
+  let valid = call_564161.validator(path, query, header, formData, body)
+  let scheme = call_564161.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574261.url(scheme.get, call_574261.host, call_574261.base,
-                         call_574261.route, valid.getOrDefault("path"),
+  let url = call_564161.url(scheme.get, call_564161.host, call_564161.base,
+                         call_564161.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574261, url, valid)
+  result = hook(call_564161, url, valid)
 
-proc call*(call_574262: Call_ManagedNetworksDelete_574254;
-          resourceGroupName: string; apiVersion: string; managedNetworkName: string;
-          subscriptionId: string): Recallable =
+proc call*(call_564162: Call_ManagedNetworksDelete_564154; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string;
+          managedNetworkName: string): Recallable =
   ## managedNetworksDelete
   ## The Delete ManagedNetworks operation deletes a Managed Network Resource, specified by the  resource group and Managed Network name
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
-  ##   managedNetworkName: string (required)
-  ##                     : The name of the Managed Network.
   ##   subscriptionId: string (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_574263 = newJObject()
-  var query_574264 = newJObject()
-  add(path_574263, "resourceGroupName", newJString(resourceGroupName))
-  add(query_574264, "api-version", newJString(apiVersion))
-  add(path_574263, "managedNetworkName", newJString(managedNetworkName))
-  add(path_574263, "subscriptionId", newJString(subscriptionId))
-  result = call_574262.call(path_574263, query_574264, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  ##   managedNetworkName: string (required)
+  ##                     : The name of the Managed Network.
+  var path_564163 = newJObject()
+  var query_564164 = newJObject()
+  add(query_564164, "api-version", newJString(apiVersion))
+  add(path_564163, "subscriptionId", newJString(subscriptionId))
+  add(path_564163, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564163, "managedNetworkName", newJString(managedNetworkName))
+  result = call_564162.call(path_564163, query_564164, nil, nil, nil)
 
-var managedNetworksDelete* = Call_ManagedNetworksDelete_574254(
+var managedNetworksDelete* = Call_ManagedNetworksDelete_564154(
     name: "managedNetworksDelete", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ManagedNetwork/managedNetworks/{managedNetworkName}",
-    validator: validate_ManagedNetworksDelete_574255, base: "",
-    url: url_ManagedNetworksDelete_574256, schemes: {Scheme.Https})
+    validator: validate_ManagedNetworksDelete_564155, base: "",
+    url: url_ManagedNetworksDelete_564156, schemes: {Scheme.Https})
 type
-  Call_ManagedNetworkGroupsListByManagedNetwork_574278 = ref object of OpenApiRestCall_573657
-proc url_ManagedNetworkGroupsListByManagedNetwork_574280(protocol: Scheme;
+  Call_ManagedNetworkGroupsListByManagedNetwork_564178 = ref object of OpenApiRestCall_563555
+proc url_ManagedNetworkGroupsListByManagedNetwork_564180(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -909,37 +914,37 @@ proc url_ManagedNetworkGroupsListByManagedNetwork_574280(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ManagedNetworkGroupsListByManagedNetwork_574279(path: JsonNode;
+proc validate_ManagedNetworkGroupsListByManagedNetwork_564179(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## The ListByManagedNetwork ManagedNetworkGroup operation retrieves all the Managed Network Groups in a specified Managed Networks in a paginated format.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
+  ##   subscriptionId: JString (required)
+  ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   resourceGroupName: JString (required)
   ##                    : The name of the resource group.
   ##   managedNetworkName: JString (required)
   ##                     : The name of the Managed Network.
-  ##   subscriptionId: JString (required)
-  ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_574281 = path.getOrDefault("resourceGroupName")
-  valid_574281 = validateParameter(valid_574281, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564181 = path.getOrDefault("subscriptionId")
+  valid_564181 = validateParameter(valid_564181, JString, required = true,
                                  default = nil)
-  if valid_574281 != nil:
-    section.add "resourceGroupName", valid_574281
-  var valid_574282 = path.getOrDefault("managedNetworkName")
-  valid_574282 = validateParameter(valid_574282, JString, required = true,
+  if valid_564181 != nil:
+    section.add "subscriptionId", valid_564181
+  var valid_564182 = path.getOrDefault("resourceGroupName")
+  valid_564182 = validateParameter(valid_564182, JString, required = true,
                                  default = nil)
-  if valid_574282 != nil:
-    section.add "managedNetworkName", valid_574282
-  var valid_574283 = path.getOrDefault("subscriptionId")
-  valid_574283 = validateParameter(valid_574283, JString, required = true,
+  if valid_564182 != nil:
+    section.add "resourceGroupName", valid_564182
+  var valid_564183 = path.getOrDefault("managedNetworkName")
+  valid_564183 = validateParameter(valid_564183, JString, required = true,
                                  default = nil)
-  if valid_574283 != nil:
-    section.add "subscriptionId", valid_574283
+  if valid_564183 != nil:
+    section.add "managedNetworkName", valid_564183
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -951,20 +956,20 @@ proc validate_ManagedNetworkGroupsListByManagedNetwork_574279(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574284 = query.getOrDefault("api-version")
-  valid_574284 = validateParameter(valid_574284, JString, required = true,
+  var valid_564184 = query.getOrDefault("api-version")
+  valid_564184 = validateParameter(valid_564184, JString, required = true,
                                  default = nil)
-  if valid_574284 != nil:
-    section.add "api-version", valid_574284
-  var valid_574285 = query.getOrDefault("$top")
-  valid_574285 = validateParameter(valid_574285, JInt, required = false, default = nil)
-  if valid_574285 != nil:
-    section.add "$top", valid_574285
-  var valid_574286 = query.getOrDefault("$skiptoken")
-  valid_574286 = validateParameter(valid_574286, JString, required = false,
+  if valid_564184 != nil:
+    section.add "api-version", valid_564184
+  var valid_564185 = query.getOrDefault("$top")
+  valid_564185 = validateParameter(valid_564185, JInt, required = false, default = nil)
+  if valid_564185 != nil:
+    section.add "$top", valid_564185
+  var valid_564186 = query.getOrDefault("$skiptoken")
+  valid_564186 = validateParameter(valid_564186, JString, required = false,
                                  default = nil)
-  if valid_574286 != nil:
-    section.add "$skiptoken", valid_574286
+  if valid_564186 != nil:
+    section.add "$skiptoken", valid_564186
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -973,56 +978,56 @@ proc validate_ManagedNetworkGroupsListByManagedNetwork_574279(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574287: Call_ManagedNetworkGroupsListByManagedNetwork_574278;
+proc call*(call_564187: Call_ManagedNetworkGroupsListByManagedNetwork_564178;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## The ListByManagedNetwork ManagedNetworkGroup operation retrieves all the Managed Network Groups in a specified Managed Networks in a paginated format.
   ## 
-  let valid = call_574287.validator(path, query, header, formData, body)
-  let scheme = call_574287.pickScheme
+  let valid = call_564187.validator(path, query, header, formData, body)
+  let scheme = call_564187.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574287.url(scheme.get, call_574287.host, call_574287.base,
-                         call_574287.route, valid.getOrDefault("path"),
+  let url = call_564187.url(scheme.get, call_564187.host, call_564187.base,
+                         call_564187.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574287, url, valid)
+  result = hook(call_564187, url, valid)
 
-proc call*(call_574288: Call_ManagedNetworkGroupsListByManagedNetwork_574278;
-          resourceGroupName: string; apiVersion: string; managedNetworkName: string;
-          subscriptionId: string; Top: int = 0; Skiptoken: string = ""): Recallable =
+proc call*(call_564188: Call_ManagedNetworkGroupsListByManagedNetwork_564178;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string;
+          managedNetworkName: string; Top: int = 0; Skiptoken: string = ""): Recallable =
   ## managedNetworkGroupsListByManagedNetwork
   ## The ListByManagedNetwork ManagedNetworkGroup operation retrieves all the Managed Network Groups in a specified Managed Networks in a paginated format.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
-  ##   managedNetworkName: string (required)
-  ##                     : The name of the Managed Network.
-  ##   subscriptionId: string (required)
-  ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   Top: int
   ##      : May be used to limit the number of results in a page for list queries.
+  ##   subscriptionId: string (required)
+  ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   Skiptoken: string
   ##            : Skiptoken is only used if a previous operation returned a partial result. If a previous response contains a nextLink element, the value of the nextLink element will include a skiptoken parameter that specifies a starting point to use for subsequent calls.
-  var path_574289 = newJObject()
-  var query_574290 = newJObject()
-  add(path_574289, "resourceGroupName", newJString(resourceGroupName))
-  add(query_574290, "api-version", newJString(apiVersion))
-  add(path_574289, "managedNetworkName", newJString(managedNetworkName))
-  add(path_574289, "subscriptionId", newJString(subscriptionId))
-  add(query_574290, "$top", newJInt(Top))
-  add(query_574290, "$skiptoken", newJString(Skiptoken))
-  result = call_574288.call(path_574289, query_574290, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  ##   managedNetworkName: string (required)
+  ##                     : The name of the Managed Network.
+  var path_564189 = newJObject()
+  var query_564190 = newJObject()
+  add(query_564190, "api-version", newJString(apiVersion))
+  add(query_564190, "$top", newJInt(Top))
+  add(path_564189, "subscriptionId", newJString(subscriptionId))
+  add(query_564190, "$skiptoken", newJString(Skiptoken))
+  add(path_564189, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564189, "managedNetworkName", newJString(managedNetworkName))
+  result = call_564188.call(path_564189, query_564190, nil, nil, nil)
 
-var managedNetworkGroupsListByManagedNetwork* = Call_ManagedNetworkGroupsListByManagedNetwork_574278(
+var managedNetworkGroupsListByManagedNetwork* = Call_ManagedNetworkGroupsListByManagedNetwork_564178(
     name: "managedNetworkGroupsListByManagedNetwork", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ManagedNetwork/managedNetworks/{managedNetworkName}/managedNetworkGroups",
-    validator: validate_ManagedNetworkGroupsListByManagedNetwork_574279, base: "",
-    url: url_ManagedNetworkGroupsListByManagedNetwork_574280,
+    validator: validate_ManagedNetworkGroupsListByManagedNetwork_564179, base: "",
+    url: url_ManagedNetworkGroupsListByManagedNetwork_564180,
     schemes: {Scheme.Https})
 type
-  Call_ManagedNetworkGroupsCreateOrUpdate_574303 = ref object of OpenApiRestCall_573657
-proc url_ManagedNetworkGroupsCreateOrUpdate_574305(protocol: Scheme; host: string;
+  Call_ManagedNetworkGroupsCreateOrUpdate_564203 = ref object of OpenApiRestCall_563555
+proc url_ManagedNetworkGroupsCreateOrUpdate_564205(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1050,44 +1055,43 @@ proc url_ManagedNetworkGroupsCreateOrUpdate_574305(protocol: Scheme; host: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ManagedNetworkGroupsCreateOrUpdate_574304(path: JsonNode;
+proc validate_ManagedNetworkGroupsCreateOrUpdate_564204(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## The Put ManagedNetworkGroups operation creates or updates a Managed Network Group resource
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
-  ##   managedNetworkName: JString (required)
-  ##                     : The name of the Managed Network.
   ##   managedNetworkGroupName: JString (required)
   ##                          : The name of the Managed Network Group.
   ##   subscriptionId: JString (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
+  ##   managedNetworkName: JString (required)
+  ##                     : The name of the Managed Network.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_574306 = path.getOrDefault("resourceGroupName")
-  valid_574306 = validateParameter(valid_574306, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `managedNetworkGroupName` field"
+  var valid_564206 = path.getOrDefault("managedNetworkGroupName")
+  valid_564206 = validateParameter(valid_564206, JString, required = true,
                                  default = nil)
-  if valid_574306 != nil:
-    section.add "resourceGroupName", valid_574306
-  var valid_574307 = path.getOrDefault("managedNetworkName")
-  valid_574307 = validateParameter(valid_574307, JString, required = true,
+  if valid_564206 != nil:
+    section.add "managedNetworkGroupName", valid_564206
+  var valid_564207 = path.getOrDefault("subscriptionId")
+  valid_564207 = validateParameter(valid_564207, JString, required = true,
                                  default = nil)
-  if valid_574307 != nil:
-    section.add "managedNetworkName", valid_574307
-  var valid_574308 = path.getOrDefault("managedNetworkGroupName")
-  valid_574308 = validateParameter(valid_574308, JString, required = true,
+  if valid_564207 != nil:
+    section.add "subscriptionId", valid_564207
+  var valid_564208 = path.getOrDefault("resourceGroupName")
+  valid_564208 = validateParameter(valid_564208, JString, required = true,
                                  default = nil)
-  if valid_574308 != nil:
-    section.add "managedNetworkGroupName", valid_574308
-  var valid_574309 = path.getOrDefault("subscriptionId")
-  valid_574309 = validateParameter(valid_574309, JString, required = true,
+  if valid_564208 != nil:
+    section.add "resourceGroupName", valid_564208
+  var valid_564209 = path.getOrDefault("managedNetworkName")
+  valid_564209 = validateParameter(valid_564209, JString, required = true,
                                  default = nil)
-  if valid_574309 != nil:
-    section.add "subscriptionId", valid_574309
+  if valid_564209 != nil:
+    section.add "managedNetworkName", valid_564209
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1095,11 +1099,11 @@ proc validate_ManagedNetworkGroupsCreateOrUpdate_574304(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574310 = query.getOrDefault("api-version")
-  valid_574310 = validateParameter(valid_574310, JString, required = true,
+  var valid_564210 = query.getOrDefault("api-version")
+  valid_564210 = validateParameter(valid_564210, JString, required = true,
                                  default = nil)
-  if valid_574310 != nil:
-    section.add "api-version", valid_574310
+  if valid_564210 != nil:
+    section.add "api-version", valid_564210
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1113,58 +1117,58 @@ proc validate_ManagedNetworkGroupsCreateOrUpdate_574304(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574312: Call_ManagedNetworkGroupsCreateOrUpdate_574303;
+proc call*(call_564212: Call_ManagedNetworkGroupsCreateOrUpdate_564203;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## The Put ManagedNetworkGroups operation creates or updates a Managed Network Group resource
   ## 
-  let valid = call_574312.validator(path, query, header, formData, body)
-  let scheme = call_574312.pickScheme
+  let valid = call_564212.validator(path, query, header, formData, body)
+  let scheme = call_564212.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574312.url(scheme.get, call_574312.host, call_574312.base,
-                         call_574312.route, valid.getOrDefault("path"),
+  let url = call_564212.url(scheme.get, call_564212.host, call_564212.base,
+                         call_564212.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574312, url, valid)
+  result = hook(call_564212, url, valid)
 
-proc call*(call_574313: Call_ManagedNetworkGroupsCreateOrUpdate_574303;
-          resourceGroupName: string; apiVersion: string; managedNetworkName: string;
-          managedNetworkGroupName: string; subscriptionId: string;
-          managedNetworkGroup: JsonNode): Recallable =
+proc call*(call_564213: Call_ManagedNetworkGroupsCreateOrUpdate_564203;
+          managedNetworkGroupName: string; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string;
+          managedNetworkGroup: JsonNode; managedNetworkName: string): Recallable =
   ## managedNetworkGroupsCreateOrUpdate
   ## The Put ManagedNetworkGroups operation creates or updates a Managed Network Group resource
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
-  ##   apiVersion: string (required)
-  ##             : Client Api Version.
-  ##   managedNetworkName: string (required)
-  ##                     : The name of the Managed Network.
   ##   managedNetworkGroupName: string (required)
   ##                          : The name of the Managed Network Group.
+  ##   apiVersion: string (required)
+  ##             : Client Api Version.
   ##   subscriptionId: string (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   managedNetworkGroup: JObject (required)
   ##                      : Parameters supplied to the create/update a Managed Network Group resource
-  var path_574314 = newJObject()
-  var query_574315 = newJObject()
-  var body_574316 = newJObject()
-  add(path_574314, "resourceGroupName", newJString(resourceGroupName))
-  add(query_574315, "api-version", newJString(apiVersion))
-  add(path_574314, "managedNetworkName", newJString(managedNetworkName))
-  add(path_574314, "managedNetworkGroupName", newJString(managedNetworkGroupName))
-  add(path_574314, "subscriptionId", newJString(subscriptionId))
+  ##   managedNetworkName: string (required)
+  ##                     : The name of the Managed Network.
+  var path_564214 = newJObject()
+  var query_564215 = newJObject()
+  var body_564216 = newJObject()
+  add(path_564214, "managedNetworkGroupName", newJString(managedNetworkGroupName))
+  add(query_564215, "api-version", newJString(apiVersion))
+  add(path_564214, "subscriptionId", newJString(subscriptionId))
+  add(path_564214, "resourceGroupName", newJString(resourceGroupName))
   if managedNetworkGroup != nil:
-    body_574316 = managedNetworkGroup
-  result = call_574313.call(path_574314, query_574315, nil, nil, body_574316)
+    body_564216 = managedNetworkGroup
+  add(path_564214, "managedNetworkName", newJString(managedNetworkName))
+  result = call_564213.call(path_564214, query_564215, nil, nil, body_564216)
 
-var managedNetworkGroupsCreateOrUpdate* = Call_ManagedNetworkGroupsCreateOrUpdate_574303(
+var managedNetworkGroupsCreateOrUpdate* = Call_ManagedNetworkGroupsCreateOrUpdate_564203(
     name: "managedNetworkGroupsCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ManagedNetwork/managedNetworks/{managedNetworkName}/managedNetworkGroups/{managedNetworkGroupName}",
-    validator: validate_ManagedNetworkGroupsCreateOrUpdate_574304, base: "",
-    url: url_ManagedNetworkGroupsCreateOrUpdate_574305, schemes: {Scheme.Https})
+    validator: validate_ManagedNetworkGroupsCreateOrUpdate_564204, base: "",
+    url: url_ManagedNetworkGroupsCreateOrUpdate_564205, schemes: {Scheme.Https})
 type
-  Call_ManagedNetworkGroupsGet_574291 = ref object of OpenApiRestCall_573657
-proc url_ManagedNetworkGroupsGet_574293(protocol: Scheme; host: string; base: string;
+  Call_ManagedNetworkGroupsGet_564191 = ref object of OpenApiRestCall_563555
+proc url_ManagedNetworkGroupsGet_564193(protocol: Scheme; host: string; base: string;
                                        route: string; path: JsonNode;
                                        query: JsonNode): Uri =
   result.scheme = $protocol
@@ -1193,44 +1197,43 @@ proc url_ManagedNetworkGroupsGet_574293(protocol: Scheme; host: string; base: st
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ManagedNetworkGroupsGet_574292(path: JsonNode; query: JsonNode;
+proc validate_ManagedNetworkGroupsGet_564192(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## The Get ManagedNetworkGroups operation gets a Managed Network Group specified by the resource group, Managed Network name, and group name
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
-  ##   managedNetworkName: JString (required)
-  ##                     : The name of the Managed Network.
   ##   managedNetworkGroupName: JString (required)
   ##                          : The name of the Managed Network Group.
   ##   subscriptionId: JString (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
+  ##   managedNetworkName: JString (required)
+  ##                     : The name of the Managed Network.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_574294 = path.getOrDefault("resourceGroupName")
-  valid_574294 = validateParameter(valid_574294, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `managedNetworkGroupName` field"
+  var valid_564194 = path.getOrDefault("managedNetworkGroupName")
+  valid_564194 = validateParameter(valid_564194, JString, required = true,
                                  default = nil)
-  if valid_574294 != nil:
-    section.add "resourceGroupName", valid_574294
-  var valid_574295 = path.getOrDefault("managedNetworkName")
-  valid_574295 = validateParameter(valid_574295, JString, required = true,
+  if valid_564194 != nil:
+    section.add "managedNetworkGroupName", valid_564194
+  var valid_564195 = path.getOrDefault("subscriptionId")
+  valid_564195 = validateParameter(valid_564195, JString, required = true,
                                  default = nil)
-  if valid_574295 != nil:
-    section.add "managedNetworkName", valid_574295
-  var valid_574296 = path.getOrDefault("managedNetworkGroupName")
-  valid_574296 = validateParameter(valid_574296, JString, required = true,
+  if valid_564195 != nil:
+    section.add "subscriptionId", valid_564195
+  var valid_564196 = path.getOrDefault("resourceGroupName")
+  valid_564196 = validateParameter(valid_564196, JString, required = true,
                                  default = nil)
-  if valid_574296 != nil:
-    section.add "managedNetworkGroupName", valid_574296
-  var valid_574297 = path.getOrDefault("subscriptionId")
-  valid_574297 = validateParameter(valid_574297, JString, required = true,
+  if valid_564196 != nil:
+    section.add "resourceGroupName", valid_564196
+  var valid_564197 = path.getOrDefault("managedNetworkName")
+  valid_564197 = validateParameter(valid_564197, JString, required = true,
                                  default = nil)
-  if valid_574297 != nil:
-    section.add "subscriptionId", valid_574297
+  if valid_564197 != nil:
+    section.add "managedNetworkName", valid_564197
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1238,11 +1241,11 @@ proc validate_ManagedNetworkGroupsGet_574292(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574298 = query.getOrDefault("api-version")
-  valid_574298 = validateParameter(valid_574298, JString, required = true,
+  var valid_564198 = query.getOrDefault("api-version")
+  valid_564198 = validateParameter(valid_564198, JString, required = true,
                                  default = nil)
-  if valid_574298 != nil:
-    section.add "api-version", valid_574298
+  if valid_564198 != nil:
+    section.add "api-version", valid_564198
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1251,51 +1254,52 @@ proc validate_ManagedNetworkGroupsGet_574292(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574299: Call_ManagedNetworkGroupsGet_574291; path: JsonNode;
+proc call*(call_564199: Call_ManagedNetworkGroupsGet_564191; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## The Get ManagedNetworkGroups operation gets a Managed Network Group specified by the resource group, Managed Network name, and group name
   ## 
-  let valid = call_574299.validator(path, query, header, formData, body)
-  let scheme = call_574299.pickScheme
+  let valid = call_564199.validator(path, query, header, formData, body)
+  let scheme = call_564199.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574299.url(scheme.get, call_574299.host, call_574299.base,
-                         call_574299.route, valid.getOrDefault("path"),
+  let url = call_564199.url(scheme.get, call_564199.host, call_564199.base,
+                         call_564199.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574299, url, valid)
+  result = hook(call_564199, url, valid)
 
-proc call*(call_574300: Call_ManagedNetworkGroupsGet_574291;
-          resourceGroupName: string; apiVersion: string; managedNetworkName: string;
-          managedNetworkGroupName: string; subscriptionId: string): Recallable =
+proc call*(call_564200: Call_ManagedNetworkGroupsGet_564191;
+          managedNetworkGroupName: string; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string;
+          managedNetworkName: string): Recallable =
   ## managedNetworkGroupsGet
   ## The Get ManagedNetworkGroups operation gets a Managed Network Group specified by the resource group, Managed Network name, and group name
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
-  ##   apiVersion: string (required)
-  ##             : Client Api Version.
-  ##   managedNetworkName: string (required)
-  ##                     : The name of the Managed Network.
   ##   managedNetworkGroupName: string (required)
   ##                          : The name of the Managed Network Group.
+  ##   apiVersion: string (required)
+  ##             : Client Api Version.
   ##   subscriptionId: string (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_574301 = newJObject()
-  var query_574302 = newJObject()
-  add(path_574301, "resourceGroupName", newJString(resourceGroupName))
-  add(query_574302, "api-version", newJString(apiVersion))
-  add(path_574301, "managedNetworkName", newJString(managedNetworkName))
-  add(path_574301, "managedNetworkGroupName", newJString(managedNetworkGroupName))
-  add(path_574301, "subscriptionId", newJString(subscriptionId))
-  result = call_574300.call(path_574301, query_574302, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  ##   managedNetworkName: string (required)
+  ##                     : The name of the Managed Network.
+  var path_564201 = newJObject()
+  var query_564202 = newJObject()
+  add(path_564201, "managedNetworkGroupName", newJString(managedNetworkGroupName))
+  add(query_564202, "api-version", newJString(apiVersion))
+  add(path_564201, "subscriptionId", newJString(subscriptionId))
+  add(path_564201, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564201, "managedNetworkName", newJString(managedNetworkName))
+  result = call_564200.call(path_564201, query_564202, nil, nil, nil)
 
-var managedNetworkGroupsGet* = Call_ManagedNetworkGroupsGet_574291(
+var managedNetworkGroupsGet* = Call_ManagedNetworkGroupsGet_564191(
     name: "managedNetworkGroupsGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ManagedNetwork/managedNetworks/{managedNetworkName}/managedNetworkGroups/{managedNetworkGroupName}",
-    validator: validate_ManagedNetworkGroupsGet_574292, base: "",
-    url: url_ManagedNetworkGroupsGet_574293, schemes: {Scheme.Https})
+    validator: validate_ManagedNetworkGroupsGet_564192, base: "",
+    url: url_ManagedNetworkGroupsGet_564193, schemes: {Scheme.Https})
 type
-  Call_ManagedNetworkGroupsDelete_574317 = ref object of OpenApiRestCall_573657
-proc url_ManagedNetworkGroupsDelete_574319(protocol: Scheme; host: string;
+  Call_ManagedNetworkGroupsDelete_564217 = ref object of OpenApiRestCall_563555
+proc url_ManagedNetworkGroupsDelete_564219(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1323,44 +1327,43 @@ proc url_ManagedNetworkGroupsDelete_574319(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ManagedNetworkGroupsDelete_574318(path: JsonNode; query: JsonNode;
+proc validate_ManagedNetworkGroupsDelete_564218(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## The Delete ManagedNetworkGroups operation deletes a Managed Network Group specified by the resource group, Managed Network name, and group name
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
-  ##   managedNetworkName: JString (required)
-  ##                     : The name of the Managed Network.
   ##   managedNetworkGroupName: JString (required)
   ##                          : The name of the Managed Network Group.
   ##   subscriptionId: JString (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
+  ##   managedNetworkName: JString (required)
+  ##                     : The name of the Managed Network.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_574320 = path.getOrDefault("resourceGroupName")
-  valid_574320 = validateParameter(valid_574320, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `managedNetworkGroupName` field"
+  var valid_564220 = path.getOrDefault("managedNetworkGroupName")
+  valid_564220 = validateParameter(valid_564220, JString, required = true,
                                  default = nil)
-  if valid_574320 != nil:
-    section.add "resourceGroupName", valid_574320
-  var valid_574321 = path.getOrDefault("managedNetworkName")
-  valid_574321 = validateParameter(valid_574321, JString, required = true,
+  if valid_564220 != nil:
+    section.add "managedNetworkGroupName", valid_564220
+  var valid_564221 = path.getOrDefault("subscriptionId")
+  valid_564221 = validateParameter(valid_564221, JString, required = true,
                                  default = nil)
-  if valid_574321 != nil:
-    section.add "managedNetworkName", valid_574321
-  var valid_574322 = path.getOrDefault("managedNetworkGroupName")
-  valid_574322 = validateParameter(valid_574322, JString, required = true,
+  if valid_564221 != nil:
+    section.add "subscriptionId", valid_564221
+  var valid_564222 = path.getOrDefault("resourceGroupName")
+  valid_564222 = validateParameter(valid_564222, JString, required = true,
                                  default = nil)
-  if valid_574322 != nil:
-    section.add "managedNetworkGroupName", valid_574322
-  var valid_574323 = path.getOrDefault("subscriptionId")
-  valid_574323 = validateParameter(valid_574323, JString, required = true,
+  if valid_564222 != nil:
+    section.add "resourceGroupName", valid_564222
+  var valid_564223 = path.getOrDefault("managedNetworkName")
+  valid_564223 = validateParameter(valid_564223, JString, required = true,
                                  default = nil)
-  if valid_574323 != nil:
-    section.add "subscriptionId", valid_574323
+  if valid_564223 != nil:
+    section.add "managedNetworkName", valid_564223
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1368,11 +1371,11 @@ proc validate_ManagedNetworkGroupsDelete_574318(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574324 = query.getOrDefault("api-version")
-  valid_574324 = validateParameter(valid_574324, JString, required = true,
+  var valid_564224 = query.getOrDefault("api-version")
+  valid_564224 = validateParameter(valid_564224, JString, required = true,
                                  default = nil)
-  if valid_574324 != nil:
-    section.add "api-version", valid_574324
+  if valid_564224 != nil:
+    section.add "api-version", valid_564224
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1381,51 +1384,52 @@ proc validate_ManagedNetworkGroupsDelete_574318(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574325: Call_ManagedNetworkGroupsDelete_574317; path: JsonNode;
+proc call*(call_564225: Call_ManagedNetworkGroupsDelete_564217; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## The Delete ManagedNetworkGroups operation deletes a Managed Network Group specified by the resource group, Managed Network name, and group name
   ## 
-  let valid = call_574325.validator(path, query, header, formData, body)
-  let scheme = call_574325.pickScheme
+  let valid = call_564225.validator(path, query, header, formData, body)
+  let scheme = call_564225.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574325.url(scheme.get, call_574325.host, call_574325.base,
-                         call_574325.route, valid.getOrDefault("path"),
+  let url = call_564225.url(scheme.get, call_564225.host, call_564225.base,
+                         call_564225.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574325, url, valid)
+  result = hook(call_564225, url, valid)
 
-proc call*(call_574326: Call_ManagedNetworkGroupsDelete_574317;
-          resourceGroupName: string; apiVersion: string; managedNetworkName: string;
-          managedNetworkGroupName: string; subscriptionId: string): Recallable =
+proc call*(call_564226: Call_ManagedNetworkGroupsDelete_564217;
+          managedNetworkGroupName: string; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string;
+          managedNetworkName: string): Recallable =
   ## managedNetworkGroupsDelete
   ## The Delete ManagedNetworkGroups operation deletes a Managed Network Group specified by the resource group, Managed Network name, and group name
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
-  ##   apiVersion: string (required)
-  ##             : Client Api Version.
-  ##   managedNetworkName: string (required)
-  ##                     : The name of the Managed Network.
   ##   managedNetworkGroupName: string (required)
   ##                          : The name of the Managed Network Group.
+  ##   apiVersion: string (required)
+  ##             : Client Api Version.
   ##   subscriptionId: string (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_574327 = newJObject()
-  var query_574328 = newJObject()
-  add(path_574327, "resourceGroupName", newJString(resourceGroupName))
-  add(query_574328, "api-version", newJString(apiVersion))
-  add(path_574327, "managedNetworkName", newJString(managedNetworkName))
-  add(path_574327, "managedNetworkGroupName", newJString(managedNetworkGroupName))
-  add(path_574327, "subscriptionId", newJString(subscriptionId))
-  result = call_574326.call(path_574327, query_574328, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  ##   managedNetworkName: string (required)
+  ##                     : The name of the Managed Network.
+  var path_564227 = newJObject()
+  var query_564228 = newJObject()
+  add(path_564227, "managedNetworkGroupName", newJString(managedNetworkGroupName))
+  add(query_564228, "api-version", newJString(apiVersion))
+  add(path_564227, "subscriptionId", newJString(subscriptionId))
+  add(path_564227, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564227, "managedNetworkName", newJString(managedNetworkName))
+  result = call_564226.call(path_564227, query_564228, nil, nil, nil)
 
-var managedNetworkGroupsDelete* = Call_ManagedNetworkGroupsDelete_574317(
+var managedNetworkGroupsDelete* = Call_ManagedNetworkGroupsDelete_564217(
     name: "managedNetworkGroupsDelete", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ManagedNetwork/managedNetworks/{managedNetworkName}/managedNetworkGroups/{managedNetworkGroupName}",
-    validator: validate_ManagedNetworkGroupsDelete_574318, base: "",
-    url: url_ManagedNetworkGroupsDelete_574319, schemes: {Scheme.Https})
+    validator: validate_ManagedNetworkGroupsDelete_564218, base: "",
+    url: url_ManagedNetworkGroupsDelete_564219, schemes: {Scheme.Https})
 type
-  Call_ManagedNetworkPeeringPoliciesListByManagedNetwork_574329 = ref object of OpenApiRestCall_573657
-proc url_ManagedNetworkPeeringPoliciesListByManagedNetwork_574331(
+  Call_ManagedNetworkPeeringPoliciesListByManagedNetwork_564229 = ref object of OpenApiRestCall_563555
+proc url_ManagedNetworkPeeringPoliciesListByManagedNetwork_564231(
     protocol: Scheme; host: string; base: string; route: string; path: JsonNode;
     query: JsonNode): Uri =
   result.scheme = $protocol
@@ -1451,7 +1455,7 @@ proc url_ManagedNetworkPeeringPoliciesListByManagedNetwork_574331(
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ManagedNetworkPeeringPoliciesListByManagedNetwork_574330(
+proc validate_ManagedNetworkPeeringPoliciesListByManagedNetwork_564230(
     path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
     body: JsonNode): JsonNode =
   ## The ListByManagedNetwork PeeringPolicies operation retrieves all the Managed Network Peering Policies in a specified Managed Network, in a paginated format.
@@ -1459,30 +1463,30 @@ proc validate_ManagedNetworkPeeringPoliciesListByManagedNetwork_574330(
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
+  ##   subscriptionId: JString (required)
+  ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   resourceGroupName: JString (required)
   ##                    : The name of the resource group.
   ##   managedNetworkName: JString (required)
   ##                     : The name of the Managed Network.
-  ##   subscriptionId: JString (required)
-  ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_574332 = path.getOrDefault("resourceGroupName")
-  valid_574332 = validateParameter(valid_574332, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564232 = path.getOrDefault("subscriptionId")
+  valid_564232 = validateParameter(valid_564232, JString, required = true,
                                  default = nil)
-  if valid_574332 != nil:
-    section.add "resourceGroupName", valid_574332
-  var valid_574333 = path.getOrDefault("managedNetworkName")
-  valid_574333 = validateParameter(valid_574333, JString, required = true,
+  if valid_564232 != nil:
+    section.add "subscriptionId", valid_564232
+  var valid_564233 = path.getOrDefault("resourceGroupName")
+  valid_564233 = validateParameter(valid_564233, JString, required = true,
                                  default = nil)
-  if valid_574333 != nil:
-    section.add "managedNetworkName", valid_574333
-  var valid_574334 = path.getOrDefault("subscriptionId")
-  valid_574334 = validateParameter(valid_574334, JString, required = true,
+  if valid_564233 != nil:
+    section.add "resourceGroupName", valid_564233
+  var valid_564234 = path.getOrDefault("managedNetworkName")
+  valid_564234 = validateParameter(valid_564234, JString, required = true,
                                  default = nil)
-  if valid_574334 != nil:
-    section.add "subscriptionId", valid_574334
+  if valid_564234 != nil:
+    section.add "managedNetworkName", valid_564234
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1494,20 +1498,20 @@ proc validate_ManagedNetworkPeeringPoliciesListByManagedNetwork_574330(
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574335 = query.getOrDefault("api-version")
-  valid_574335 = validateParameter(valid_574335, JString, required = true,
+  var valid_564235 = query.getOrDefault("api-version")
+  valid_564235 = validateParameter(valid_564235, JString, required = true,
                                  default = nil)
-  if valid_574335 != nil:
-    section.add "api-version", valid_574335
-  var valid_574336 = query.getOrDefault("$top")
-  valid_574336 = validateParameter(valid_574336, JInt, required = false, default = nil)
-  if valid_574336 != nil:
-    section.add "$top", valid_574336
-  var valid_574337 = query.getOrDefault("$skiptoken")
-  valid_574337 = validateParameter(valid_574337, JString, required = false,
+  if valid_564235 != nil:
+    section.add "api-version", valid_564235
+  var valid_564236 = query.getOrDefault("$top")
+  valid_564236 = validateParameter(valid_564236, JInt, required = false, default = nil)
+  if valid_564236 != nil:
+    section.add "$top", valid_564236
+  var valid_564237 = query.getOrDefault("$skiptoken")
+  valid_564237 = validateParameter(valid_564237, JString, required = false,
                                  default = nil)
-  if valid_574337 != nil:
-    section.add "$skiptoken", valid_574337
+  if valid_564237 != nil:
+    section.add "$skiptoken", valid_564237
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1516,56 +1520,56 @@ proc validate_ManagedNetworkPeeringPoliciesListByManagedNetwork_574330(
   if body != nil:
     result.add "body", body
 
-proc call*(call_574338: Call_ManagedNetworkPeeringPoliciesListByManagedNetwork_574329;
+proc call*(call_564238: Call_ManagedNetworkPeeringPoliciesListByManagedNetwork_564229;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## The ListByManagedNetwork PeeringPolicies operation retrieves all the Managed Network Peering Policies in a specified Managed Network, in a paginated format.
   ## 
-  let valid = call_574338.validator(path, query, header, formData, body)
-  let scheme = call_574338.pickScheme
+  let valid = call_564238.validator(path, query, header, formData, body)
+  let scheme = call_564238.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574338.url(scheme.get, call_574338.host, call_574338.base,
-                         call_574338.route, valid.getOrDefault("path"),
+  let url = call_564238.url(scheme.get, call_564238.host, call_564238.base,
+                         call_564238.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574338, url, valid)
+  result = hook(call_564238, url, valid)
 
-proc call*(call_574339: Call_ManagedNetworkPeeringPoliciesListByManagedNetwork_574329;
-          resourceGroupName: string; apiVersion: string; managedNetworkName: string;
-          subscriptionId: string; Top: int = 0; Skiptoken: string = ""): Recallable =
+proc call*(call_564239: Call_ManagedNetworkPeeringPoliciesListByManagedNetwork_564229;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string;
+          managedNetworkName: string; Top: int = 0; Skiptoken: string = ""): Recallable =
   ## managedNetworkPeeringPoliciesListByManagedNetwork
   ## The ListByManagedNetwork PeeringPolicies operation retrieves all the Managed Network Peering Policies in a specified Managed Network, in a paginated format.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
-  ##   managedNetworkName: string (required)
-  ##                     : The name of the Managed Network.
-  ##   subscriptionId: string (required)
-  ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   Top: int
   ##      : May be used to limit the number of results in a page for list queries.
+  ##   subscriptionId: string (required)
+  ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   Skiptoken: string
   ##            : Skiptoken is only used if a previous operation returned a partial result. If a previous response contains a nextLink element, the value of the nextLink element will include a skiptoken parameter that specifies a starting point to use for subsequent calls.
-  var path_574340 = newJObject()
-  var query_574341 = newJObject()
-  add(path_574340, "resourceGroupName", newJString(resourceGroupName))
-  add(query_574341, "api-version", newJString(apiVersion))
-  add(path_574340, "managedNetworkName", newJString(managedNetworkName))
-  add(path_574340, "subscriptionId", newJString(subscriptionId))
-  add(query_574341, "$top", newJInt(Top))
-  add(query_574341, "$skiptoken", newJString(Skiptoken))
-  result = call_574339.call(path_574340, query_574341, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  ##   managedNetworkName: string (required)
+  ##                     : The name of the Managed Network.
+  var path_564240 = newJObject()
+  var query_564241 = newJObject()
+  add(query_564241, "api-version", newJString(apiVersion))
+  add(query_564241, "$top", newJInt(Top))
+  add(path_564240, "subscriptionId", newJString(subscriptionId))
+  add(query_564241, "$skiptoken", newJString(Skiptoken))
+  add(path_564240, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564240, "managedNetworkName", newJString(managedNetworkName))
+  result = call_564239.call(path_564240, query_564241, nil, nil, nil)
 
-var managedNetworkPeeringPoliciesListByManagedNetwork* = Call_ManagedNetworkPeeringPoliciesListByManagedNetwork_574329(
+var managedNetworkPeeringPoliciesListByManagedNetwork* = Call_ManagedNetworkPeeringPoliciesListByManagedNetwork_564229(
     name: "managedNetworkPeeringPoliciesListByManagedNetwork",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ManagedNetwork/managedNetworks/{managedNetworkName}/managedNetworkPeeringPolicies",
-    validator: validate_ManagedNetworkPeeringPoliciesListByManagedNetwork_574330,
-    base: "", url: url_ManagedNetworkPeeringPoliciesListByManagedNetwork_574331,
+    validator: validate_ManagedNetworkPeeringPoliciesListByManagedNetwork_564230,
+    base: "", url: url_ManagedNetworkPeeringPoliciesListByManagedNetwork_564231,
     schemes: {Scheme.Https})
 type
-  Call_ManagedNetworkPeeringPoliciesCreateOrUpdate_574354 = ref object of OpenApiRestCall_573657
-proc url_ManagedNetworkPeeringPoliciesCreateOrUpdate_574356(protocol: Scheme;
+  Call_ManagedNetworkPeeringPoliciesCreateOrUpdate_564254 = ref object of OpenApiRestCall_563555
+proc url_ManagedNetworkPeeringPoliciesCreateOrUpdate_564256(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1593,44 +1597,44 @@ proc url_ManagedNetworkPeeringPoliciesCreateOrUpdate_574356(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ManagedNetworkPeeringPoliciesCreateOrUpdate_574355(path: JsonNode;
+proc validate_ManagedNetworkPeeringPoliciesCreateOrUpdate_564255(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## The Put ManagedNetworkPeeringPolicies operation creates/updates a new Managed Network Peering Policy
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
-  ##   managedNetworkName: JString (required)
-  ##                     : The name of the Managed Network.
   ##   subscriptionId: JString (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   managedNetworkPeeringPolicyName: JString (required)
   ##                                  : The name of the Managed Network Peering Policy.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
+  ##   managedNetworkName: JString (required)
+  ##                     : The name of the Managed Network.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_574357 = path.getOrDefault("resourceGroupName")
-  valid_574357 = validateParameter(valid_574357, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564257 = path.getOrDefault("subscriptionId")
+  valid_564257 = validateParameter(valid_564257, JString, required = true,
                                  default = nil)
-  if valid_574357 != nil:
-    section.add "resourceGroupName", valid_574357
-  var valid_574358 = path.getOrDefault("managedNetworkName")
-  valid_574358 = validateParameter(valid_574358, JString, required = true,
+  if valid_564257 != nil:
+    section.add "subscriptionId", valid_564257
+  var valid_564258 = path.getOrDefault("managedNetworkPeeringPolicyName")
+  valid_564258 = validateParameter(valid_564258, JString, required = true,
                                  default = nil)
-  if valid_574358 != nil:
-    section.add "managedNetworkName", valid_574358
-  var valid_574359 = path.getOrDefault("subscriptionId")
-  valid_574359 = validateParameter(valid_574359, JString, required = true,
+  if valid_564258 != nil:
+    section.add "managedNetworkPeeringPolicyName", valid_564258
+  var valid_564259 = path.getOrDefault("resourceGroupName")
+  valid_564259 = validateParameter(valid_564259, JString, required = true,
                                  default = nil)
-  if valid_574359 != nil:
-    section.add "subscriptionId", valid_574359
-  var valid_574360 = path.getOrDefault("managedNetworkPeeringPolicyName")
-  valid_574360 = validateParameter(valid_574360, JString, required = true,
+  if valid_564259 != nil:
+    section.add "resourceGroupName", valid_564259
+  var valid_564260 = path.getOrDefault("managedNetworkName")
+  valid_564260 = validateParameter(valid_564260, JString, required = true,
                                  default = nil)
-  if valid_574360 != nil:
-    section.add "managedNetworkPeeringPolicyName", valid_574360
+  if valid_564260 != nil:
+    section.add "managedNetworkName", valid_564260
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1638,11 +1642,11 @@ proc validate_ManagedNetworkPeeringPoliciesCreateOrUpdate_574355(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574361 = query.getOrDefault("api-version")
-  valid_574361 = validateParameter(valid_574361, JString, required = true,
+  var valid_564261 = query.getOrDefault("api-version")
+  valid_564261 = validateParameter(valid_564261, JString, required = true,
                                  default = nil)
-  if valid_574361 != nil:
-    section.add "api-version", valid_574361
+  if valid_564261 != nil:
+    section.add "api-version", valid_564261
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1656,60 +1660,60 @@ proc validate_ManagedNetworkPeeringPoliciesCreateOrUpdate_574355(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574363: Call_ManagedNetworkPeeringPoliciesCreateOrUpdate_574354;
+proc call*(call_564263: Call_ManagedNetworkPeeringPoliciesCreateOrUpdate_564254;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## The Put ManagedNetworkPeeringPolicies operation creates/updates a new Managed Network Peering Policy
   ## 
-  let valid = call_574363.validator(path, query, header, formData, body)
-  let scheme = call_574363.pickScheme
+  let valid = call_564263.validator(path, query, header, formData, body)
+  let scheme = call_564263.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574363.url(scheme.get, call_574363.host, call_574363.base,
-                         call_574363.route, valid.getOrDefault("path"),
+  let url = call_564263.url(scheme.get, call_564263.host, call_564263.base,
+                         call_564263.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574363, url, valid)
+  result = hook(call_564263, url, valid)
 
-proc call*(call_574364: Call_ManagedNetworkPeeringPoliciesCreateOrUpdate_574354;
-          managedNetworkPolicy: JsonNode; resourceGroupName: string;
-          apiVersion: string; managedNetworkName: string; subscriptionId: string;
-          managedNetworkPeeringPolicyName: string): Recallable =
+proc call*(call_564264: Call_ManagedNetworkPeeringPoliciesCreateOrUpdate_564254;
+          apiVersion: string; subscriptionId: string;
+          managedNetworkPeeringPolicyName: string; resourceGroupName: string;
+          managedNetworkPolicy: JsonNode; managedNetworkName: string): Recallable =
   ## managedNetworkPeeringPoliciesCreateOrUpdate
   ## The Put ManagedNetworkPeeringPolicies operation creates/updates a new Managed Network Peering Policy
+  ##   apiVersion: string (required)
+  ##             : Client Api Version.
+  ##   subscriptionId: string (required)
+  ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   managedNetworkPeeringPolicyName: string (required)
+  ##                                  : The name of the Managed Network Peering Policy.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   managedNetworkPolicy: JObject (required)
   ##                       : Parameters supplied to create/update a Managed Network Peering Policy
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
-  ##   apiVersion: string (required)
-  ##             : Client Api Version.
   ##   managedNetworkName: string (required)
   ##                     : The name of the Managed Network.
-  ##   subscriptionId: string (required)
-  ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   managedNetworkPeeringPolicyName: string (required)
-  ##                                  : The name of the Managed Network Peering Policy.
-  var path_574365 = newJObject()
-  var query_574366 = newJObject()
-  var body_574367 = newJObject()
-  if managedNetworkPolicy != nil:
-    body_574367 = managedNetworkPolicy
-  add(path_574365, "resourceGroupName", newJString(resourceGroupName))
-  add(query_574366, "api-version", newJString(apiVersion))
-  add(path_574365, "managedNetworkName", newJString(managedNetworkName))
-  add(path_574365, "subscriptionId", newJString(subscriptionId))
-  add(path_574365, "managedNetworkPeeringPolicyName",
+  var path_564265 = newJObject()
+  var query_564266 = newJObject()
+  var body_564267 = newJObject()
+  add(query_564266, "api-version", newJString(apiVersion))
+  add(path_564265, "subscriptionId", newJString(subscriptionId))
+  add(path_564265, "managedNetworkPeeringPolicyName",
       newJString(managedNetworkPeeringPolicyName))
-  result = call_574364.call(path_574365, query_574366, nil, nil, body_574367)
+  add(path_564265, "resourceGroupName", newJString(resourceGroupName))
+  if managedNetworkPolicy != nil:
+    body_564267 = managedNetworkPolicy
+  add(path_564265, "managedNetworkName", newJString(managedNetworkName))
+  result = call_564264.call(path_564265, query_564266, nil, nil, body_564267)
 
-var managedNetworkPeeringPoliciesCreateOrUpdate* = Call_ManagedNetworkPeeringPoliciesCreateOrUpdate_574354(
+var managedNetworkPeeringPoliciesCreateOrUpdate* = Call_ManagedNetworkPeeringPoliciesCreateOrUpdate_564254(
     name: "managedNetworkPeeringPoliciesCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ManagedNetwork/managedNetworks/{managedNetworkName}/managedNetworkPeeringPolicies/{managedNetworkPeeringPolicyName}",
-    validator: validate_ManagedNetworkPeeringPoliciesCreateOrUpdate_574355,
-    base: "", url: url_ManagedNetworkPeeringPoliciesCreateOrUpdate_574356,
+    validator: validate_ManagedNetworkPeeringPoliciesCreateOrUpdate_564255,
+    base: "", url: url_ManagedNetworkPeeringPoliciesCreateOrUpdate_564256,
     schemes: {Scheme.Https})
 type
-  Call_ManagedNetworkPeeringPoliciesGet_574342 = ref object of OpenApiRestCall_573657
-proc url_ManagedNetworkPeeringPoliciesGet_574344(protocol: Scheme; host: string;
+  Call_ManagedNetworkPeeringPoliciesGet_564242 = ref object of OpenApiRestCall_563555
+proc url_ManagedNetworkPeeringPoliciesGet_564244(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1737,44 +1741,44 @@ proc url_ManagedNetworkPeeringPoliciesGet_574344(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ManagedNetworkPeeringPoliciesGet_574343(path: JsonNode;
+proc validate_ManagedNetworkPeeringPoliciesGet_564243(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## The Get ManagedNetworkPeeringPolicies operation gets a Managed Network Peering Policy resource, specified by the  resource group, Managed Network name, and peering policy name
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
-  ##   managedNetworkName: JString (required)
-  ##                     : The name of the Managed Network.
   ##   subscriptionId: JString (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   managedNetworkPeeringPolicyName: JString (required)
   ##                                  : The name of the Managed Network Peering Policy.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
+  ##   managedNetworkName: JString (required)
+  ##                     : The name of the Managed Network.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_574345 = path.getOrDefault("resourceGroupName")
-  valid_574345 = validateParameter(valid_574345, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564245 = path.getOrDefault("subscriptionId")
+  valid_564245 = validateParameter(valid_564245, JString, required = true,
                                  default = nil)
-  if valid_574345 != nil:
-    section.add "resourceGroupName", valid_574345
-  var valid_574346 = path.getOrDefault("managedNetworkName")
-  valid_574346 = validateParameter(valid_574346, JString, required = true,
+  if valid_564245 != nil:
+    section.add "subscriptionId", valid_564245
+  var valid_564246 = path.getOrDefault("managedNetworkPeeringPolicyName")
+  valid_564246 = validateParameter(valid_564246, JString, required = true,
                                  default = nil)
-  if valid_574346 != nil:
-    section.add "managedNetworkName", valid_574346
-  var valid_574347 = path.getOrDefault("subscriptionId")
-  valid_574347 = validateParameter(valid_574347, JString, required = true,
+  if valid_564246 != nil:
+    section.add "managedNetworkPeeringPolicyName", valid_564246
+  var valid_564247 = path.getOrDefault("resourceGroupName")
+  valid_564247 = validateParameter(valid_564247, JString, required = true,
                                  default = nil)
-  if valid_574347 != nil:
-    section.add "subscriptionId", valid_574347
-  var valid_574348 = path.getOrDefault("managedNetworkPeeringPolicyName")
-  valid_574348 = validateParameter(valid_574348, JString, required = true,
+  if valid_564247 != nil:
+    section.add "resourceGroupName", valid_564247
+  var valid_564248 = path.getOrDefault("managedNetworkName")
+  valid_564248 = validateParameter(valid_564248, JString, required = true,
                                  default = nil)
-  if valid_574348 != nil:
-    section.add "managedNetworkPeeringPolicyName", valid_574348
+  if valid_564248 != nil:
+    section.add "managedNetworkName", valid_564248
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1782,11 +1786,11 @@ proc validate_ManagedNetworkPeeringPoliciesGet_574343(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574349 = query.getOrDefault("api-version")
-  valid_574349 = validateParameter(valid_574349, JString, required = true,
+  var valid_564249 = query.getOrDefault("api-version")
+  valid_564249 = validateParameter(valid_564249, JString, required = true,
                                  default = nil)
-  if valid_574349 != nil:
-    section.add "api-version", valid_574349
+  if valid_564249 != nil:
+    section.add "api-version", valid_564249
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1795,53 +1799,54 @@ proc validate_ManagedNetworkPeeringPoliciesGet_574343(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574350: Call_ManagedNetworkPeeringPoliciesGet_574342;
+proc call*(call_564250: Call_ManagedNetworkPeeringPoliciesGet_564242;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## The Get ManagedNetworkPeeringPolicies operation gets a Managed Network Peering Policy resource, specified by the  resource group, Managed Network name, and peering policy name
   ## 
-  let valid = call_574350.validator(path, query, header, formData, body)
-  let scheme = call_574350.pickScheme
+  let valid = call_564250.validator(path, query, header, formData, body)
+  let scheme = call_564250.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574350.url(scheme.get, call_574350.host, call_574350.base,
-                         call_574350.route, valid.getOrDefault("path"),
+  let url = call_564250.url(scheme.get, call_564250.host, call_564250.base,
+                         call_564250.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574350, url, valid)
+  result = hook(call_564250, url, valid)
 
-proc call*(call_574351: Call_ManagedNetworkPeeringPoliciesGet_574342;
-          resourceGroupName: string; apiVersion: string; managedNetworkName: string;
-          subscriptionId: string; managedNetworkPeeringPolicyName: string): Recallable =
+proc call*(call_564251: Call_ManagedNetworkPeeringPoliciesGet_564242;
+          apiVersion: string; subscriptionId: string;
+          managedNetworkPeeringPolicyName: string; resourceGroupName: string;
+          managedNetworkName: string): Recallable =
   ## managedNetworkPeeringPoliciesGet
   ## The Get ManagedNetworkPeeringPolicies operation gets a Managed Network Peering Policy resource, specified by the  resource group, Managed Network name, and peering policy name
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
-  ##   managedNetworkName: string (required)
-  ##                     : The name of the Managed Network.
   ##   subscriptionId: string (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   managedNetworkPeeringPolicyName: string (required)
   ##                                  : The name of the Managed Network Peering Policy.
-  var path_574352 = newJObject()
-  var query_574353 = newJObject()
-  add(path_574352, "resourceGroupName", newJString(resourceGroupName))
-  add(query_574353, "api-version", newJString(apiVersion))
-  add(path_574352, "managedNetworkName", newJString(managedNetworkName))
-  add(path_574352, "subscriptionId", newJString(subscriptionId))
-  add(path_574352, "managedNetworkPeeringPolicyName",
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  ##   managedNetworkName: string (required)
+  ##                     : The name of the Managed Network.
+  var path_564252 = newJObject()
+  var query_564253 = newJObject()
+  add(query_564253, "api-version", newJString(apiVersion))
+  add(path_564252, "subscriptionId", newJString(subscriptionId))
+  add(path_564252, "managedNetworkPeeringPolicyName",
       newJString(managedNetworkPeeringPolicyName))
-  result = call_574351.call(path_574352, query_574353, nil, nil, nil)
+  add(path_564252, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564252, "managedNetworkName", newJString(managedNetworkName))
+  result = call_564251.call(path_564252, query_564253, nil, nil, nil)
 
-var managedNetworkPeeringPoliciesGet* = Call_ManagedNetworkPeeringPoliciesGet_574342(
+var managedNetworkPeeringPoliciesGet* = Call_ManagedNetworkPeeringPoliciesGet_564242(
     name: "managedNetworkPeeringPoliciesGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ManagedNetwork/managedNetworks/{managedNetworkName}/managedNetworkPeeringPolicies/{managedNetworkPeeringPolicyName}",
-    validator: validate_ManagedNetworkPeeringPoliciesGet_574343, base: "",
-    url: url_ManagedNetworkPeeringPoliciesGet_574344, schemes: {Scheme.Https})
+    validator: validate_ManagedNetworkPeeringPoliciesGet_564243, base: "",
+    url: url_ManagedNetworkPeeringPoliciesGet_564244, schemes: {Scheme.Https})
 type
-  Call_ManagedNetworkPeeringPoliciesDelete_574368 = ref object of OpenApiRestCall_573657
-proc url_ManagedNetworkPeeringPoliciesDelete_574370(protocol: Scheme; host: string;
+  Call_ManagedNetworkPeeringPoliciesDelete_564268 = ref object of OpenApiRestCall_563555
+proc url_ManagedNetworkPeeringPoliciesDelete_564270(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1869,44 +1874,44 @@ proc url_ManagedNetworkPeeringPoliciesDelete_574370(protocol: Scheme; host: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ManagedNetworkPeeringPoliciesDelete_574369(path: JsonNode;
+proc validate_ManagedNetworkPeeringPoliciesDelete_564269(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## The Delete ManagedNetworkPeeringPolicies operation deletes a Managed Network Peering Policy, specified by the  resource group, Managed Network name, and peering policy name
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
-  ##   managedNetworkName: JString (required)
-  ##                     : The name of the Managed Network.
   ##   subscriptionId: JString (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   managedNetworkPeeringPolicyName: JString (required)
   ##                                  : The name of the Managed Network Peering Policy.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
+  ##   managedNetworkName: JString (required)
+  ##                     : The name of the Managed Network.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_574371 = path.getOrDefault("resourceGroupName")
-  valid_574371 = validateParameter(valid_574371, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564271 = path.getOrDefault("subscriptionId")
+  valid_564271 = validateParameter(valid_564271, JString, required = true,
                                  default = nil)
-  if valid_574371 != nil:
-    section.add "resourceGroupName", valid_574371
-  var valid_574372 = path.getOrDefault("managedNetworkName")
-  valid_574372 = validateParameter(valid_574372, JString, required = true,
+  if valid_564271 != nil:
+    section.add "subscriptionId", valid_564271
+  var valid_564272 = path.getOrDefault("managedNetworkPeeringPolicyName")
+  valid_564272 = validateParameter(valid_564272, JString, required = true,
                                  default = nil)
-  if valid_574372 != nil:
-    section.add "managedNetworkName", valid_574372
-  var valid_574373 = path.getOrDefault("subscriptionId")
-  valid_574373 = validateParameter(valid_574373, JString, required = true,
+  if valid_564272 != nil:
+    section.add "managedNetworkPeeringPolicyName", valid_564272
+  var valid_564273 = path.getOrDefault("resourceGroupName")
+  valid_564273 = validateParameter(valid_564273, JString, required = true,
                                  default = nil)
-  if valid_574373 != nil:
-    section.add "subscriptionId", valid_574373
-  var valid_574374 = path.getOrDefault("managedNetworkPeeringPolicyName")
-  valid_574374 = validateParameter(valid_574374, JString, required = true,
+  if valid_564273 != nil:
+    section.add "resourceGroupName", valid_564273
+  var valid_564274 = path.getOrDefault("managedNetworkName")
+  valid_564274 = validateParameter(valid_564274, JString, required = true,
                                  default = nil)
-  if valid_574374 != nil:
-    section.add "managedNetworkPeeringPolicyName", valid_574374
+  if valid_564274 != nil:
+    section.add "managedNetworkName", valid_564274
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1914,11 +1919,11 @@ proc validate_ManagedNetworkPeeringPoliciesDelete_574369(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574375 = query.getOrDefault("api-version")
-  valid_574375 = validateParameter(valid_574375, JString, required = true,
+  var valid_564275 = query.getOrDefault("api-version")
+  valid_564275 = validateParameter(valid_564275, JString, required = true,
                                  default = nil)
-  if valid_574375 != nil:
-    section.add "api-version", valid_574375
+  if valid_564275 != nil:
+    section.add "api-version", valid_564275
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1927,53 +1932,54 @@ proc validate_ManagedNetworkPeeringPoliciesDelete_574369(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574376: Call_ManagedNetworkPeeringPoliciesDelete_574368;
+proc call*(call_564276: Call_ManagedNetworkPeeringPoliciesDelete_564268;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## The Delete ManagedNetworkPeeringPolicies operation deletes a Managed Network Peering Policy, specified by the  resource group, Managed Network name, and peering policy name
   ## 
-  let valid = call_574376.validator(path, query, header, formData, body)
-  let scheme = call_574376.pickScheme
+  let valid = call_564276.validator(path, query, header, formData, body)
+  let scheme = call_564276.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574376.url(scheme.get, call_574376.host, call_574376.base,
-                         call_574376.route, valid.getOrDefault("path"),
+  let url = call_564276.url(scheme.get, call_564276.host, call_564276.base,
+                         call_564276.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574376, url, valid)
+  result = hook(call_564276, url, valid)
 
-proc call*(call_574377: Call_ManagedNetworkPeeringPoliciesDelete_574368;
-          resourceGroupName: string; apiVersion: string; managedNetworkName: string;
-          subscriptionId: string; managedNetworkPeeringPolicyName: string): Recallable =
+proc call*(call_564277: Call_ManagedNetworkPeeringPoliciesDelete_564268;
+          apiVersion: string; subscriptionId: string;
+          managedNetworkPeeringPolicyName: string; resourceGroupName: string;
+          managedNetworkName: string): Recallable =
   ## managedNetworkPeeringPoliciesDelete
   ## The Delete ManagedNetworkPeeringPolicies operation deletes a Managed Network Peering Policy, specified by the  resource group, Managed Network name, and peering policy name
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
-  ##   managedNetworkName: string (required)
-  ##                     : The name of the Managed Network.
   ##   subscriptionId: string (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   managedNetworkPeeringPolicyName: string (required)
   ##                                  : The name of the Managed Network Peering Policy.
-  var path_574378 = newJObject()
-  var query_574379 = newJObject()
-  add(path_574378, "resourceGroupName", newJString(resourceGroupName))
-  add(query_574379, "api-version", newJString(apiVersion))
-  add(path_574378, "managedNetworkName", newJString(managedNetworkName))
-  add(path_574378, "subscriptionId", newJString(subscriptionId))
-  add(path_574378, "managedNetworkPeeringPolicyName",
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  ##   managedNetworkName: string (required)
+  ##                     : The name of the Managed Network.
+  var path_564278 = newJObject()
+  var query_564279 = newJObject()
+  add(query_564279, "api-version", newJString(apiVersion))
+  add(path_564278, "subscriptionId", newJString(subscriptionId))
+  add(path_564278, "managedNetworkPeeringPolicyName",
       newJString(managedNetworkPeeringPolicyName))
-  result = call_574377.call(path_574378, query_574379, nil, nil, nil)
+  add(path_564278, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564278, "managedNetworkName", newJString(managedNetworkName))
+  result = call_564277.call(path_564278, query_564279, nil, nil, nil)
 
-var managedNetworkPeeringPoliciesDelete* = Call_ManagedNetworkPeeringPoliciesDelete_574368(
+var managedNetworkPeeringPoliciesDelete* = Call_ManagedNetworkPeeringPoliciesDelete_564268(
     name: "managedNetworkPeeringPoliciesDelete", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ManagedNetwork/managedNetworks/{managedNetworkName}/managedNetworkPeeringPolicies/{managedNetworkPeeringPolicyName}",
-    validator: validate_ManagedNetworkPeeringPoliciesDelete_574369, base: "",
-    url: url_ManagedNetworkPeeringPoliciesDelete_574370, schemes: {Scheme.Https})
+    validator: validate_ManagedNetworkPeeringPoliciesDelete_564269, base: "",
+    url: url_ManagedNetworkPeeringPoliciesDelete_564270, schemes: {Scheme.Https})
 type
-  Call_ScopeAssignmentsList_574380 = ref object of OpenApiRestCall_573657
-proc url_ScopeAssignmentsList_574382(protocol: Scheme; host: string; base: string;
+  Call_ScopeAssignmentsList_564280 = ref object of OpenApiRestCall_563555
+proc url_ScopeAssignmentsList_564282(protocol: Scheme; host: string; base: string;
                                     route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1989,7 +1995,7 @@ proc url_ScopeAssignmentsList_574382(protocol: Scheme; host: string; base: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ScopeAssignmentsList_574381(path: JsonNode; query: JsonNode;
+proc validate_ScopeAssignmentsList_564281(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Get the specified scope assignment.
   ## 
@@ -2000,11 +2006,11 @@ proc validate_ScopeAssignmentsList_574381(path: JsonNode; query: JsonNode;
   ##        : The base resource of the scope assignment.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `scope` field"
-  var valid_574383 = path.getOrDefault("scope")
-  valid_574383 = validateParameter(valid_574383, JString, required = true,
+  var valid_564283 = path.getOrDefault("scope")
+  valid_564283 = validateParameter(valid_564283, JString, required = true,
                                  default = nil)
-  if valid_574383 != nil:
-    section.add "scope", valid_574383
+  if valid_564283 != nil:
+    section.add "scope", valid_564283
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2012,11 +2018,11 @@ proc validate_ScopeAssignmentsList_574381(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574384 = query.getOrDefault("api-version")
-  valid_574384 = validateParameter(valid_574384, JString, required = true,
+  var valid_564284 = query.getOrDefault("api-version")
+  valid_564284 = validateParameter(valid_564284, JString, required = true,
                                  default = nil)
-  if valid_574384 != nil:
-    section.add "api-version", valid_574384
+  if valid_564284 != nil:
+    section.add "api-version", valid_564284
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2025,20 +2031,20 @@ proc validate_ScopeAssignmentsList_574381(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574385: Call_ScopeAssignmentsList_574380; path: JsonNode;
+proc call*(call_564285: Call_ScopeAssignmentsList_564280; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get the specified scope assignment.
   ## 
-  let valid = call_574385.validator(path, query, header, formData, body)
-  let scheme = call_574385.pickScheme
+  let valid = call_564285.validator(path, query, header, formData, body)
+  let scheme = call_564285.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574385.url(scheme.get, call_574385.host, call_574385.base,
-                         call_574385.route, valid.getOrDefault("path"),
+  let url = call_564285.url(scheme.get, call_564285.host, call_564285.base,
+                         call_564285.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574385, url, valid)
+  result = hook(call_564285, url, valid)
 
-proc call*(call_574386: Call_ScopeAssignmentsList_574380; apiVersion: string;
+proc call*(call_564286: Call_ScopeAssignmentsList_564280; apiVersion: string;
           scope: string): Recallable =
   ## scopeAssignmentsList
   ## Get the specified scope assignment.
@@ -2046,21 +2052,21 @@ proc call*(call_574386: Call_ScopeAssignmentsList_574380; apiVersion: string;
   ##             : Client Api Version.
   ##   scope: string (required)
   ##        : The base resource of the scope assignment.
-  var path_574387 = newJObject()
-  var query_574388 = newJObject()
-  add(query_574388, "api-version", newJString(apiVersion))
-  add(path_574387, "scope", newJString(scope))
-  result = call_574386.call(path_574387, query_574388, nil, nil, nil)
+  var path_564287 = newJObject()
+  var query_564288 = newJObject()
+  add(query_564288, "api-version", newJString(apiVersion))
+  add(path_564287, "scope", newJString(scope))
+  result = call_564286.call(path_564287, query_564288, nil, nil, nil)
 
-var scopeAssignmentsList* = Call_ScopeAssignmentsList_574380(
+var scopeAssignmentsList* = Call_ScopeAssignmentsList_564280(
     name: "scopeAssignmentsList", meth: HttpMethod.HttpGet,
     host: "management.azure.com",
     route: "/{scope}/providers/Microsoft.ManagedNetwork/scopeAssignments",
-    validator: validate_ScopeAssignmentsList_574381, base: "",
-    url: url_ScopeAssignmentsList_574382, schemes: {Scheme.Https})
+    validator: validate_ScopeAssignmentsList_564281, base: "",
+    url: url_ScopeAssignmentsList_564282, schemes: {Scheme.Https})
 type
-  Call_ScopeAssignmentsCreateOrUpdate_574399 = ref object of OpenApiRestCall_573657
-proc url_ScopeAssignmentsCreateOrUpdate_574401(protocol: Scheme; host: string;
+  Call_ScopeAssignmentsCreateOrUpdate_564299 = ref object of OpenApiRestCall_563555
+proc url_ScopeAssignmentsCreateOrUpdate_564301(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2079,7 +2085,7 @@ proc url_ScopeAssignmentsCreateOrUpdate_574401(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ScopeAssignmentsCreateOrUpdate_574400(path: JsonNode;
+proc validate_ScopeAssignmentsCreateOrUpdate_564300(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Creates a scope assignment.
   ## 
@@ -2093,16 +2099,16 @@ proc validate_ScopeAssignmentsCreateOrUpdate_574400(path: JsonNode;
   ## '/subscriptions/{subscription-id}/resourceGroups/{resource-group-name}/providers/{resource-provider}/{resource-type}/{resource-name}' for a resource.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `scopeAssignmentName` field"
-  var valid_574402 = path.getOrDefault("scopeAssignmentName")
-  valid_574402 = validateParameter(valid_574402, JString, required = true,
+  var valid_564302 = path.getOrDefault("scopeAssignmentName")
+  valid_564302 = validateParameter(valid_564302, JString, required = true,
                                  default = nil)
-  if valid_574402 != nil:
-    section.add "scopeAssignmentName", valid_574402
-  var valid_574403 = path.getOrDefault("scope")
-  valid_574403 = validateParameter(valid_574403, JString, required = true,
+  if valid_564302 != nil:
+    section.add "scopeAssignmentName", valid_564302
+  var valid_564303 = path.getOrDefault("scope")
+  valid_564303 = validateParameter(valid_564303, JString, required = true,
                                  default = nil)
-  if valid_574403 != nil:
-    section.add "scope", valid_574403
+  if valid_564303 != nil:
+    section.add "scope", valid_564303
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2110,11 +2116,11 @@ proc validate_ScopeAssignmentsCreateOrUpdate_574400(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574404 = query.getOrDefault("api-version")
-  valid_574404 = validateParameter(valid_574404, JString, required = true,
+  var valid_564304 = query.getOrDefault("api-version")
+  valid_564304 = validateParameter(valid_564304, JString, required = true,
                                  default = nil)
-  if valid_574404 != nil:
-    section.add "api-version", valid_574404
+  if valid_564304 != nil:
+    section.add "api-version", valid_564304
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2128,51 +2134,51 @@ proc validate_ScopeAssignmentsCreateOrUpdate_574400(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574406: Call_ScopeAssignmentsCreateOrUpdate_574399; path: JsonNode;
+proc call*(call_564306: Call_ScopeAssignmentsCreateOrUpdate_564299; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Creates a scope assignment.
   ## 
-  let valid = call_574406.validator(path, query, header, formData, body)
-  let scheme = call_574406.pickScheme
+  let valid = call_564306.validator(path, query, header, formData, body)
+  let scheme = call_564306.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574406.url(scheme.get, call_574406.host, call_574406.base,
-                         call_574406.route, valid.getOrDefault("path"),
+  let url = call_564306.url(scheme.get, call_564306.host, call_564306.base,
+                         call_564306.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574406, url, valid)
+  result = hook(call_564306, url, valid)
 
-proc call*(call_574407: Call_ScopeAssignmentsCreateOrUpdate_574399;
-          apiVersion: string; scopeAssignmentName: string; parameters: JsonNode;
+proc call*(call_564307: Call_ScopeAssignmentsCreateOrUpdate_564299;
+          scopeAssignmentName: string; apiVersion: string; parameters: JsonNode;
           scope: string): Recallable =
   ## scopeAssignmentsCreateOrUpdate
   ## Creates a scope assignment.
-  ##   apiVersion: string (required)
-  ##             : Client Api Version.
   ##   scopeAssignmentName: string (required)
   ##                      : The name of the scope assignment to create.
+  ##   apiVersion: string (required)
+  ##             : Client Api Version.
   ##   parameters: JObject (required)
   ##             : Parameters supplied to the specify which Managed Network this scope is being assigned
   ##   scope: string (required)
   ##        : The base resource of the scope assignment to create. The scope can be any REST resource instance. For example, use '/subscriptions/{subscription-id}/' for a subscription, '/subscriptions/{subscription-id}/resourceGroups/{resource-group-name}' for a resource group, and 
   ## '/subscriptions/{subscription-id}/resourceGroups/{resource-group-name}/providers/{resource-provider}/{resource-type}/{resource-name}' for a resource.
-  var path_574408 = newJObject()
-  var query_574409 = newJObject()
-  var body_574410 = newJObject()
-  add(query_574409, "api-version", newJString(apiVersion))
-  add(path_574408, "scopeAssignmentName", newJString(scopeAssignmentName))
+  var path_564308 = newJObject()
+  var query_564309 = newJObject()
+  var body_564310 = newJObject()
+  add(path_564308, "scopeAssignmentName", newJString(scopeAssignmentName))
+  add(query_564309, "api-version", newJString(apiVersion))
   if parameters != nil:
-    body_574410 = parameters
-  add(path_574408, "scope", newJString(scope))
-  result = call_574407.call(path_574408, query_574409, nil, nil, body_574410)
+    body_564310 = parameters
+  add(path_564308, "scope", newJString(scope))
+  result = call_564307.call(path_564308, query_564309, nil, nil, body_564310)
 
-var scopeAssignmentsCreateOrUpdate* = Call_ScopeAssignmentsCreateOrUpdate_574399(
+var scopeAssignmentsCreateOrUpdate* = Call_ScopeAssignmentsCreateOrUpdate_564299(
     name: "scopeAssignmentsCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/{scope}/providers/Microsoft.ManagedNetwork/scopeAssignments/{scopeAssignmentName}",
-    validator: validate_ScopeAssignmentsCreateOrUpdate_574400, base: "",
-    url: url_ScopeAssignmentsCreateOrUpdate_574401, schemes: {Scheme.Https})
+    validator: validate_ScopeAssignmentsCreateOrUpdate_564300, base: "",
+    url: url_ScopeAssignmentsCreateOrUpdate_564301, schemes: {Scheme.Https})
 type
-  Call_ScopeAssignmentsGet_574389 = ref object of OpenApiRestCall_573657
-proc url_ScopeAssignmentsGet_574391(protocol: Scheme; host: string; base: string;
+  Call_ScopeAssignmentsGet_564289 = ref object of OpenApiRestCall_563555
+proc url_ScopeAssignmentsGet_564291(protocol: Scheme; host: string; base: string;
                                    route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2191,7 +2197,7 @@ proc url_ScopeAssignmentsGet_574391(protocol: Scheme; host: string; base: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ScopeAssignmentsGet_574390(path: JsonNode; query: JsonNode;
+proc validate_ScopeAssignmentsGet_564290(path: JsonNode; query: JsonNode;
                                         header: JsonNode; formData: JsonNode;
                                         body: JsonNode): JsonNode =
   ## Get the specified scope assignment.
@@ -2205,16 +2211,16 @@ proc validate_ScopeAssignmentsGet_574390(path: JsonNode; query: JsonNode;
   ##        : The base resource of the scope assignment.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `scopeAssignmentName` field"
-  var valid_574392 = path.getOrDefault("scopeAssignmentName")
-  valid_574392 = validateParameter(valid_574392, JString, required = true,
+  var valid_564292 = path.getOrDefault("scopeAssignmentName")
+  valid_564292 = validateParameter(valid_564292, JString, required = true,
                                  default = nil)
-  if valid_574392 != nil:
-    section.add "scopeAssignmentName", valid_574392
-  var valid_574393 = path.getOrDefault("scope")
-  valid_574393 = validateParameter(valid_574393, JString, required = true,
+  if valid_564292 != nil:
+    section.add "scopeAssignmentName", valid_564292
+  var valid_564293 = path.getOrDefault("scope")
+  valid_564293 = validateParameter(valid_564293, JString, required = true,
                                  default = nil)
-  if valid_574393 != nil:
-    section.add "scope", valid_574393
+  if valid_564293 != nil:
+    section.add "scope", valid_564293
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2222,11 +2228,11 @@ proc validate_ScopeAssignmentsGet_574390(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574394 = query.getOrDefault("api-version")
-  valid_574394 = validateParameter(valid_574394, JString, required = true,
+  var valid_564294 = query.getOrDefault("api-version")
+  valid_564294 = validateParameter(valid_564294, JString, required = true,
                                  default = nil)
-  if valid_574394 != nil:
-    section.add "api-version", valid_574394
+  if valid_564294 != nil:
+    section.add "api-version", valid_564294
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2235,44 +2241,44 @@ proc validate_ScopeAssignmentsGet_574390(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574395: Call_ScopeAssignmentsGet_574389; path: JsonNode;
+proc call*(call_564295: Call_ScopeAssignmentsGet_564289; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get the specified scope assignment.
   ## 
-  let valid = call_574395.validator(path, query, header, formData, body)
-  let scheme = call_574395.pickScheme
+  let valid = call_564295.validator(path, query, header, formData, body)
+  let scheme = call_564295.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574395.url(scheme.get, call_574395.host, call_574395.base,
-                         call_574395.route, valid.getOrDefault("path"),
+  let url = call_564295.url(scheme.get, call_564295.host, call_564295.base,
+                         call_564295.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574395, url, valid)
+  result = hook(call_564295, url, valid)
 
-proc call*(call_574396: Call_ScopeAssignmentsGet_574389; apiVersion: string;
-          scopeAssignmentName: string; scope: string): Recallable =
+proc call*(call_564296: Call_ScopeAssignmentsGet_564289;
+          scopeAssignmentName: string; apiVersion: string; scope: string): Recallable =
   ## scopeAssignmentsGet
   ## Get the specified scope assignment.
-  ##   apiVersion: string (required)
-  ##             : Client Api Version.
   ##   scopeAssignmentName: string (required)
   ##                      : The name of the scope assignment to get.
+  ##   apiVersion: string (required)
+  ##             : Client Api Version.
   ##   scope: string (required)
   ##        : The base resource of the scope assignment.
-  var path_574397 = newJObject()
-  var query_574398 = newJObject()
-  add(query_574398, "api-version", newJString(apiVersion))
-  add(path_574397, "scopeAssignmentName", newJString(scopeAssignmentName))
-  add(path_574397, "scope", newJString(scope))
-  result = call_574396.call(path_574397, query_574398, nil, nil, nil)
+  var path_564297 = newJObject()
+  var query_564298 = newJObject()
+  add(path_564297, "scopeAssignmentName", newJString(scopeAssignmentName))
+  add(query_564298, "api-version", newJString(apiVersion))
+  add(path_564297, "scope", newJString(scope))
+  result = call_564296.call(path_564297, query_564298, nil, nil, nil)
 
-var scopeAssignmentsGet* = Call_ScopeAssignmentsGet_574389(
+var scopeAssignmentsGet* = Call_ScopeAssignmentsGet_564289(
     name: "scopeAssignmentsGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/{scope}/providers/Microsoft.ManagedNetwork/scopeAssignments/{scopeAssignmentName}",
-    validator: validate_ScopeAssignmentsGet_574390, base: "",
-    url: url_ScopeAssignmentsGet_574391, schemes: {Scheme.Https})
+    validator: validate_ScopeAssignmentsGet_564290, base: "",
+    url: url_ScopeAssignmentsGet_564291, schemes: {Scheme.Https})
 type
-  Call_ScopeAssignmentsDelete_574411 = ref object of OpenApiRestCall_573657
-proc url_ScopeAssignmentsDelete_574413(protocol: Scheme; host: string; base: string;
+  Call_ScopeAssignmentsDelete_564311 = ref object of OpenApiRestCall_563555
+proc url_ScopeAssignmentsDelete_564313(protocol: Scheme; host: string; base: string;
                                       route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2291,7 +2297,7 @@ proc url_ScopeAssignmentsDelete_574413(protocol: Scheme; host: string; base: str
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ScopeAssignmentsDelete_574412(path: JsonNode; query: JsonNode;
+proc validate_ScopeAssignmentsDelete_564312(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Deletes a scope assignment.
   ## 
@@ -2304,16 +2310,16 @@ proc validate_ScopeAssignmentsDelete_574412(path: JsonNode; query: JsonNode;
   ##        : The scope of the scope assignment to delete.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `scopeAssignmentName` field"
-  var valid_574414 = path.getOrDefault("scopeAssignmentName")
-  valid_574414 = validateParameter(valid_574414, JString, required = true,
+  var valid_564314 = path.getOrDefault("scopeAssignmentName")
+  valid_564314 = validateParameter(valid_564314, JString, required = true,
                                  default = nil)
-  if valid_574414 != nil:
-    section.add "scopeAssignmentName", valid_574414
-  var valid_574415 = path.getOrDefault("scope")
-  valid_574415 = validateParameter(valid_574415, JString, required = true,
+  if valid_564314 != nil:
+    section.add "scopeAssignmentName", valid_564314
+  var valid_564315 = path.getOrDefault("scope")
+  valid_564315 = validateParameter(valid_564315, JString, required = true,
                                  default = nil)
-  if valid_574415 != nil:
-    section.add "scope", valid_574415
+  if valid_564315 != nil:
+    section.add "scope", valid_564315
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2321,11 +2327,11 @@ proc validate_ScopeAssignmentsDelete_574412(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574416 = query.getOrDefault("api-version")
-  valid_574416 = validateParameter(valid_574416, JString, required = true,
+  var valid_564316 = query.getOrDefault("api-version")
+  valid_564316 = validateParameter(valid_564316, JString, required = true,
                                  default = nil)
-  if valid_574416 != nil:
-    section.add "api-version", valid_574416
+  if valid_564316 != nil:
+    section.add "api-version", valid_564316
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2334,41 +2340,41 @@ proc validate_ScopeAssignmentsDelete_574412(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574417: Call_ScopeAssignmentsDelete_574411; path: JsonNode;
+proc call*(call_564317: Call_ScopeAssignmentsDelete_564311; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes a scope assignment.
   ## 
-  let valid = call_574417.validator(path, query, header, formData, body)
-  let scheme = call_574417.pickScheme
+  let valid = call_564317.validator(path, query, header, formData, body)
+  let scheme = call_564317.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574417.url(scheme.get, call_574417.host, call_574417.base,
-                         call_574417.route, valid.getOrDefault("path"),
+  let url = call_564317.url(scheme.get, call_564317.host, call_564317.base,
+                         call_564317.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574417, url, valid)
+  result = hook(call_564317, url, valid)
 
-proc call*(call_574418: Call_ScopeAssignmentsDelete_574411; apiVersion: string;
-          scopeAssignmentName: string; scope: string): Recallable =
+proc call*(call_564318: Call_ScopeAssignmentsDelete_564311;
+          scopeAssignmentName: string; apiVersion: string; scope: string): Recallable =
   ## scopeAssignmentsDelete
   ## Deletes a scope assignment.
-  ##   apiVersion: string (required)
-  ##             : Client Api Version.
   ##   scopeAssignmentName: string (required)
   ##                      : The name of the scope assignment to delete.
+  ##   apiVersion: string (required)
+  ##             : Client Api Version.
   ##   scope: string (required)
   ##        : The scope of the scope assignment to delete.
-  var path_574419 = newJObject()
-  var query_574420 = newJObject()
-  add(query_574420, "api-version", newJString(apiVersion))
-  add(path_574419, "scopeAssignmentName", newJString(scopeAssignmentName))
-  add(path_574419, "scope", newJString(scope))
-  result = call_574418.call(path_574419, query_574420, nil, nil, nil)
+  var path_564319 = newJObject()
+  var query_564320 = newJObject()
+  add(path_564319, "scopeAssignmentName", newJString(scopeAssignmentName))
+  add(query_564320, "api-version", newJString(apiVersion))
+  add(path_564319, "scope", newJString(scope))
+  result = call_564318.call(path_564319, query_564320, nil, nil, nil)
 
-var scopeAssignmentsDelete* = Call_ScopeAssignmentsDelete_574411(
+var scopeAssignmentsDelete* = Call_ScopeAssignmentsDelete_564311(
     name: "scopeAssignmentsDelete", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/{scope}/providers/Microsoft.ManagedNetwork/scopeAssignments/{scopeAssignmentName}",
-    validator: validate_ScopeAssignmentsDelete_574412, base: "",
-    url: url_ScopeAssignmentsDelete_574413, schemes: {Scheme.Https})
+    validator: validate_ScopeAssignmentsDelete_564312, base: "",
+    url: url_ScopeAssignmentsDelete_564313, schemes: {Scheme.Https})
 export
   rest
 

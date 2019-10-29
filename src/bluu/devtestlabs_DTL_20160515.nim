@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, httpcore
 
 ## auto-generated via openapi macro
 ## title: DevTestLabsClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_567650 = ref object of OpenApiRestCall
+  OpenApiRestCall_563548 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_567650](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563548](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_567650): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563548): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,15 +107,15 @@ const
   macServiceName = "devtestlabs-DTL"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_ProviderOperationsList_567872 = ref object of OpenApiRestCall_567650
-proc url_ProviderOperationsList_567874(protocol: Scheme; host: string; base: string;
+  Call_ProviderOperationsList_563770 = ref object of OpenApiRestCall_563548
+proc url_ProviderOperationsList_563772(protocol: Scheme; host: string; base: string;
                                       route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_ProviderOperationsList_567873(path: JsonNode; query: JsonNode;
+proc validate_ProviderOperationsList_563771(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Result of the request to list REST API operations
   ## 
@@ -125,11 +129,11 @@ proc validate_ProviderOperationsList_567873(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568046 = query.getOrDefault("api-version")
-  valid_568046 = validateParameter(valid_568046, JString, required = true,
+  var valid_563946 = query.getOrDefault("api-version")
+  valid_563946 = validateParameter(valid_563946, JString, required = true,
                                  default = newJString("2016-05-15"))
-  if valid_568046 != nil:
-    section.add "api-version", valid_568046
+  if valid_563946 != nil:
+    section.add "api-version", valid_563946
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -138,38 +142,38 @@ proc validate_ProviderOperationsList_567873(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568069: Call_ProviderOperationsList_567872; path: JsonNode;
+proc call*(call_563969: Call_ProviderOperationsList_563770; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Result of the request to list REST API operations
   ## 
-  let valid = call_568069.validator(path, query, header, formData, body)
-  let scheme = call_568069.pickScheme
+  let valid = call_563969.validator(path, query, header, formData, body)
+  let scheme = call_563969.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568069.url(scheme.get, call_568069.host, call_568069.base,
-                         call_568069.route, valid.getOrDefault("path"),
+  let url = call_563969.url(scheme.get, call_563969.host, call_563969.base,
+                         call_563969.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568069, url, valid)
+  result = hook(call_563969, url, valid)
 
-proc call*(call_568140: Call_ProviderOperationsList_567872;
+proc call*(call_564040: Call_ProviderOperationsList_563770;
           apiVersion: string = "2016-05-15"): Recallable =
   ## providerOperationsList
   ## Result of the request to list REST API operations
   ##   apiVersion: string (required)
   ##             : Client API version.
-  var query_568141 = newJObject()
-  add(query_568141, "api-version", newJString(apiVersion))
-  result = call_568140.call(nil, query_568141, nil, nil, nil)
+  var query_564041 = newJObject()
+  add(query_564041, "api-version", newJString(apiVersion))
+  result = call_564040.call(nil, query_564041, nil, nil, nil)
 
-var providerOperationsList* = Call_ProviderOperationsList_567872(
+var providerOperationsList* = Call_ProviderOperationsList_563770(
     name: "providerOperationsList", meth: HttpMethod.HttpGet,
     host: "management.azure.com",
     route: "/providers/Microsoft.DevTestLab/operations",
-    validator: validate_ProviderOperationsList_567873, base: "",
-    url: url_ProviderOperationsList_567874, schemes: {Scheme.Https})
+    validator: validate_ProviderOperationsList_563771, base: "",
+    url: url_ProviderOperationsList_563772, schemes: {Scheme.Https})
 type
-  Call_LabsListBySubscription_568181 = ref object of OpenApiRestCall_567650
-proc url_LabsListBySubscription_568183(protocol: Scheme; host: string; base: string;
+  Call_LabsListBySubscription_564081 = ref object of OpenApiRestCall_563548
+proc url_LabsListBySubscription_564083(protocol: Scheme; host: string; base: string;
                                       route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -185,7 +189,7 @@ proc url_LabsListBySubscription_568183(protocol: Scheme; host: string; base: str
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_LabsListBySubscription_568182(path: JsonNode; query: JsonNode;
+proc validate_LabsListBySubscription_564082(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## List labs in a subscription.
   ## 
@@ -197,50 +201,50 @@ proc validate_LabsListBySubscription_568182(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_568199 = path.getOrDefault("subscriptionId")
-  valid_568199 = validateParameter(valid_568199, JString, required = true,
+  var valid_564099 = path.getOrDefault("subscriptionId")
+  valid_564099 = validateParameter(valid_564099, JString, required = true,
                                  default = nil)
-  if valid_568199 != nil:
-    section.add "subscriptionId", valid_568199
+  if valid_564099 != nil:
+    section.add "subscriptionId", valid_564099
   result.add "path", section
   ## parameters in `query` object:
-  ##   $orderby: JString
-  ##           : The ordering expression for the results, using OData notation.
-  ##   $expand: JString
-  ##          : Specify the $expand query. Example: 'properties($select=defaultStorageAccount)'
-  ##   api-version: JString (required)
-  ##              : Client API version.
   ##   $top: JInt
   ##       : The maximum number of resources to return from the operation.
+  ##   api-version: JString (required)
+  ##              : Client API version.
+  ##   $expand: JString
+  ##          : Specify the $expand query. Example: 'properties($select=defaultStorageAccount)'
+  ##   $orderby: JString
+  ##           : The ordering expression for the results, using OData notation.
   ##   $filter: JString
   ##          : The filter to apply to the operation.
   section = newJObject()
-  var valid_568200 = query.getOrDefault("$orderby")
-  valid_568200 = validateParameter(valid_568200, JString, required = false,
-                                 default = nil)
-  if valid_568200 != nil:
-    section.add "$orderby", valid_568200
-  var valid_568201 = query.getOrDefault("$expand")
-  valid_568201 = validateParameter(valid_568201, JString, required = false,
-                                 default = nil)
-  if valid_568201 != nil:
-    section.add "$expand", valid_568201
+  var valid_564100 = query.getOrDefault("$top")
+  valid_564100 = validateParameter(valid_564100, JInt, required = false, default = nil)
+  if valid_564100 != nil:
+    section.add "$top", valid_564100
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568202 = query.getOrDefault("api-version")
-  valid_568202 = validateParameter(valid_568202, JString, required = true,
+  var valid_564101 = query.getOrDefault("api-version")
+  valid_564101 = validateParameter(valid_564101, JString, required = true,
                                  default = newJString("2016-05-15"))
-  if valid_568202 != nil:
-    section.add "api-version", valid_568202
-  var valid_568203 = query.getOrDefault("$top")
-  valid_568203 = validateParameter(valid_568203, JInt, required = false, default = nil)
-  if valid_568203 != nil:
-    section.add "$top", valid_568203
-  var valid_568204 = query.getOrDefault("$filter")
-  valid_568204 = validateParameter(valid_568204, JString, required = false,
+  if valid_564101 != nil:
+    section.add "api-version", valid_564101
+  var valid_564102 = query.getOrDefault("$expand")
+  valid_564102 = validateParameter(valid_564102, JString, required = false,
                                  default = nil)
-  if valid_568204 != nil:
-    section.add "$filter", valid_568204
+  if valid_564102 != nil:
+    section.add "$expand", valid_564102
+  var valid_564103 = query.getOrDefault("$orderby")
+  valid_564103 = validateParameter(valid_564103, JString, required = false,
+                                 default = nil)
+  if valid_564103 != nil:
+    section.add "$orderby", valid_564103
+  var valid_564104 = query.getOrDefault("$filter")
+  valid_564104 = validateParameter(valid_564104, JString, required = false,
+                                 default = nil)
+  if valid_564104 != nil:
+    section.add "$filter", valid_564104
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -249,54 +253,54 @@ proc validate_LabsListBySubscription_568182(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568205: Call_LabsListBySubscription_568181; path: JsonNode;
+proc call*(call_564105: Call_LabsListBySubscription_564081; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## List labs in a subscription.
   ## 
-  let valid = call_568205.validator(path, query, header, formData, body)
-  let scheme = call_568205.pickScheme
+  let valid = call_564105.validator(path, query, header, formData, body)
+  let scheme = call_564105.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568205.url(scheme.get, call_568205.host, call_568205.base,
-                         call_568205.route, valid.getOrDefault("path"),
+  let url = call_564105.url(scheme.get, call_564105.host, call_564105.base,
+                         call_564105.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568205, url, valid)
+  result = hook(call_564105, url, valid)
 
-proc call*(call_568206: Call_LabsListBySubscription_568181; subscriptionId: string;
-          Orderby: string = ""; Expand: string = ""; apiVersion: string = "2016-05-15";
-          Top: int = 0; Filter: string = ""): Recallable =
+proc call*(call_564106: Call_LabsListBySubscription_564081; subscriptionId: string;
+          Top: int = 0; apiVersion: string = "2016-05-15"; Expand: string = "";
+          Orderby: string = ""; Filter: string = ""): Recallable =
   ## labsListBySubscription
   ## List labs in a subscription.
-  ##   Orderby: string
-  ##          : The ordering expression for the results, using OData notation.
-  ##   Expand: string
-  ##         : Specify the $expand query. Example: 'properties($select=defaultStorageAccount)'
-  ##   apiVersion: string (required)
-  ##             : Client API version.
-  ##   subscriptionId: string (required)
-  ##                 : The subscription ID.
   ##   Top: int
   ##      : The maximum number of resources to return from the operation.
+  ##   apiVersion: string (required)
+  ##             : Client API version.
+  ##   Expand: string
+  ##         : Specify the $expand query. Example: 'properties($select=defaultStorageAccount)'
+  ##   subscriptionId: string (required)
+  ##                 : The subscription ID.
+  ##   Orderby: string
+  ##          : The ordering expression for the results, using OData notation.
   ##   Filter: string
   ##         : The filter to apply to the operation.
-  var path_568207 = newJObject()
-  var query_568208 = newJObject()
-  add(query_568208, "$orderby", newJString(Orderby))
-  add(query_568208, "$expand", newJString(Expand))
-  add(query_568208, "api-version", newJString(apiVersion))
-  add(path_568207, "subscriptionId", newJString(subscriptionId))
-  add(query_568208, "$top", newJInt(Top))
-  add(query_568208, "$filter", newJString(Filter))
-  result = call_568206.call(path_568207, query_568208, nil, nil, nil)
+  var path_564107 = newJObject()
+  var query_564108 = newJObject()
+  add(query_564108, "$top", newJInt(Top))
+  add(query_564108, "api-version", newJString(apiVersion))
+  add(query_564108, "$expand", newJString(Expand))
+  add(path_564107, "subscriptionId", newJString(subscriptionId))
+  add(query_564108, "$orderby", newJString(Orderby))
+  add(query_564108, "$filter", newJString(Filter))
+  result = call_564106.call(path_564107, query_564108, nil, nil, nil)
 
-var labsListBySubscription* = Call_LabsListBySubscription_568181(
+var labsListBySubscription* = Call_LabsListBySubscription_564081(
     name: "labsListBySubscription", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.DevTestLab/labs",
-    validator: validate_LabsListBySubscription_568182, base: "",
-    url: url_LabsListBySubscription_568183, schemes: {Scheme.Https})
+    validator: validate_LabsListBySubscription_564082, base: "",
+    url: url_LabsListBySubscription_564083, schemes: {Scheme.Https})
 type
-  Call_OperationsGet_568209 = ref object of OpenApiRestCall_567650
-proc url_OperationsGet_568211(protocol: Scheme; host: string; base: string;
+  Call_OperationsGet_564109 = ref object of OpenApiRestCall_563548
+proc url_OperationsGet_564111(protocol: Scheme; host: string; base: string;
                              route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -317,36 +321,37 @@ proc url_OperationsGet_568211(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_OperationsGet_568210(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_OperationsGet_564110(path: JsonNode; query: JsonNode; header: JsonNode;
                                   formData: JsonNode; body: JsonNode): JsonNode =
   ## Get operation.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
+  ##   locationName: JString (required)
+  ##               : The name of the location.
   ##   name: JString (required)
   ##       : The name of the operation.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID.
-  ##   locationName: JString (required)
-  ##               : The name of the location.
   section = newJObject()
-  assert path != nil, "path argument is necessary due to required `name` field"
-  var valid_568212 = path.getOrDefault("name")
-  valid_568212 = validateParameter(valid_568212, JString, required = true,
+  assert path != nil,
+        "path argument is necessary due to required `locationName` field"
+  var valid_564112 = path.getOrDefault("locationName")
+  valid_564112 = validateParameter(valid_564112, JString, required = true,
                                  default = nil)
-  if valid_568212 != nil:
-    section.add "name", valid_568212
-  var valid_568213 = path.getOrDefault("subscriptionId")
-  valid_568213 = validateParameter(valid_568213, JString, required = true,
+  if valid_564112 != nil:
+    section.add "locationName", valid_564112
+  var valid_564113 = path.getOrDefault("name")
+  valid_564113 = validateParameter(valid_564113, JString, required = true,
                                  default = nil)
-  if valid_568213 != nil:
-    section.add "subscriptionId", valid_568213
-  var valid_568214 = path.getOrDefault("locationName")
-  valid_568214 = validateParameter(valid_568214, JString, required = true,
+  if valid_564113 != nil:
+    section.add "name", valid_564113
+  var valid_564114 = path.getOrDefault("subscriptionId")
+  valid_564114 = validateParameter(valid_564114, JString, required = true,
                                  default = nil)
-  if valid_568214 != nil:
-    section.add "locationName", valid_568214
+  if valid_564114 != nil:
+    section.add "subscriptionId", valid_564114
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -354,11 +359,11 @@ proc validate_OperationsGet_568210(path: JsonNode; query: JsonNode; header: Json
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568215 = query.getOrDefault("api-version")
-  valid_568215 = validateParameter(valid_568215, JString, required = true,
+  var valid_564115 = query.getOrDefault("api-version")
+  valid_564115 = validateParameter(valid_564115, JString, required = true,
                                  default = newJString("2016-05-15"))
-  if valid_568215 != nil:
-    section.add "api-version", valid_568215
+  if valid_564115 != nil:
+    section.add "api-version", valid_564115
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -367,47 +372,46 @@ proc validate_OperationsGet_568210(path: JsonNode; query: JsonNode; header: Json
   if body != nil:
     result.add "body", body
 
-proc call*(call_568216: Call_OperationsGet_568209; path: JsonNode; query: JsonNode;
+proc call*(call_564116: Call_OperationsGet_564109; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get operation.
   ## 
-  let valid = call_568216.validator(path, query, header, formData, body)
-  let scheme = call_568216.pickScheme
+  let valid = call_564116.validator(path, query, header, formData, body)
+  let scheme = call_564116.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568216.url(scheme.get, call_568216.host, call_568216.base,
-                         call_568216.route, valid.getOrDefault("path"),
+  let url = call_564116.url(scheme.get, call_564116.host, call_564116.base,
+                         call_564116.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568216, url, valid)
+  result = hook(call_564116, url, valid)
 
-proc call*(call_568217: Call_OperationsGet_568209; name: string;
-          subscriptionId: string; locationName: string;
-          apiVersion: string = "2016-05-15"): Recallable =
+proc call*(call_564117: Call_OperationsGet_564109; locationName: string;
+          name: string; subscriptionId: string; apiVersion: string = "2016-05-15"): Recallable =
   ## operationsGet
   ## Get operation.
   ##   apiVersion: string (required)
   ##             : Client API version.
+  ##   locationName: string (required)
+  ##               : The name of the location.
   ##   name: string (required)
   ##       : The name of the operation.
   ##   subscriptionId: string (required)
   ##                 : The subscription ID.
-  ##   locationName: string (required)
-  ##               : The name of the location.
-  var path_568218 = newJObject()
-  var query_568219 = newJObject()
-  add(query_568219, "api-version", newJString(apiVersion))
-  add(path_568218, "name", newJString(name))
-  add(path_568218, "subscriptionId", newJString(subscriptionId))
-  add(path_568218, "locationName", newJString(locationName))
-  result = call_568217.call(path_568218, query_568219, nil, nil, nil)
+  var path_564118 = newJObject()
+  var query_564119 = newJObject()
+  add(query_564119, "api-version", newJString(apiVersion))
+  add(path_564118, "locationName", newJString(locationName))
+  add(path_564118, "name", newJString(name))
+  add(path_564118, "subscriptionId", newJString(subscriptionId))
+  result = call_564117.call(path_564118, query_564119, nil, nil, nil)
 
-var operationsGet* = Call_OperationsGet_568209(name: "operationsGet",
+var operationsGet* = Call_OperationsGet_564109(name: "operationsGet",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.DevTestLab/locations/{locationName}/operations/{name}",
-    validator: validate_OperationsGet_568210, base: "", url: url_OperationsGet_568211,
+    validator: validate_OperationsGet_564110, base: "", url: url_OperationsGet_564111,
     schemes: {Scheme.Https})
 type
-  Call_GlobalSchedulesListBySubscription_568220 = ref object of OpenApiRestCall_567650
-proc url_GlobalSchedulesListBySubscription_568222(protocol: Scheme; host: string;
+  Call_GlobalSchedulesListBySubscription_564120 = ref object of OpenApiRestCall_563548
+proc url_GlobalSchedulesListBySubscription_564122(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -423,7 +427,7 @@ proc url_GlobalSchedulesListBySubscription_568222(protocol: Scheme; host: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_GlobalSchedulesListBySubscription_568221(path: JsonNode;
+proc validate_GlobalSchedulesListBySubscription_564121(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## List schedules in a subscription.
   ## 
@@ -435,50 +439,50 @@ proc validate_GlobalSchedulesListBySubscription_568221(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_568223 = path.getOrDefault("subscriptionId")
-  valid_568223 = validateParameter(valid_568223, JString, required = true,
+  var valid_564123 = path.getOrDefault("subscriptionId")
+  valid_564123 = validateParameter(valid_564123, JString, required = true,
                                  default = nil)
-  if valid_568223 != nil:
-    section.add "subscriptionId", valid_568223
+  if valid_564123 != nil:
+    section.add "subscriptionId", valid_564123
   result.add "path", section
   ## parameters in `query` object:
-  ##   $orderby: JString
-  ##           : The ordering expression for the results, using OData notation.
-  ##   $expand: JString
-  ##          : Specify the $expand query. Example: 'properties($select=status)'
-  ##   api-version: JString (required)
-  ##              : Client API version.
   ##   $top: JInt
   ##       : The maximum number of resources to return from the operation.
+  ##   api-version: JString (required)
+  ##              : Client API version.
+  ##   $expand: JString
+  ##          : Specify the $expand query. Example: 'properties($select=status)'
+  ##   $orderby: JString
+  ##           : The ordering expression for the results, using OData notation.
   ##   $filter: JString
   ##          : The filter to apply to the operation.
   section = newJObject()
-  var valid_568224 = query.getOrDefault("$orderby")
-  valid_568224 = validateParameter(valid_568224, JString, required = false,
-                                 default = nil)
-  if valid_568224 != nil:
-    section.add "$orderby", valid_568224
-  var valid_568225 = query.getOrDefault("$expand")
-  valid_568225 = validateParameter(valid_568225, JString, required = false,
-                                 default = nil)
-  if valid_568225 != nil:
-    section.add "$expand", valid_568225
+  var valid_564124 = query.getOrDefault("$top")
+  valid_564124 = validateParameter(valid_564124, JInt, required = false, default = nil)
+  if valid_564124 != nil:
+    section.add "$top", valid_564124
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568226 = query.getOrDefault("api-version")
-  valid_568226 = validateParameter(valid_568226, JString, required = true,
+  var valid_564125 = query.getOrDefault("api-version")
+  valid_564125 = validateParameter(valid_564125, JString, required = true,
                                  default = newJString("2016-05-15"))
-  if valid_568226 != nil:
-    section.add "api-version", valid_568226
-  var valid_568227 = query.getOrDefault("$top")
-  valid_568227 = validateParameter(valid_568227, JInt, required = false, default = nil)
-  if valid_568227 != nil:
-    section.add "$top", valid_568227
-  var valid_568228 = query.getOrDefault("$filter")
-  valid_568228 = validateParameter(valid_568228, JString, required = false,
+  if valid_564125 != nil:
+    section.add "api-version", valid_564125
+  var valid_564126 = query.getOrDefault("$expand")
+  valid_564126 = validateParameter(valid_564126, JString, required = false,
                                  default = nil)
-  if valid_568228 != nil:
-    section.add "$filter", valid_568228
+  if valid_564126 != nil:
+    section.add "$expand", valid_564126
+  var valid_564127 = query.getOrDefault("$orderby")
+  valid_564127 = validateParameter(valid_564127, JString, required = false,
+                                 default = nil)
+  if valid_564127 != nil:
+    section.add "$orderby", valid_564127
+  var valid_564128 = query.getOrDefault("$filter")
+  valid_564128 = validateParameter(valid_564128, JString, required = false,
+                                 default = nil)
+  if valid_564128 != nil:
+    section.add "$filter", valid_564128
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -487,55 +491,55 @@ proc validate_GlobalSchedulesListBySubscription_568221(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568229: Call_GlobalSchedulesListBySubscription_568220;
+proc call*(call_564129: Call_GlobalSchedulesListBySubscription_564120;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## List schedules in a subscription.
   ## 
-  let valid = call_568229.validator(path, query, header, formData, body)
-  let scheme = call_568229.pickScheme
+  let valid = call_564129.validator(path, query, header, formData, body)
+  let scheme = call_564129.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568229.url(scheme.get, call_568229.host, call_568229.base,
-                         call_568229.route, valid.getOrDefault("path"),
+  let url = call_564129.url(scheme.get, call_564129.host, call_564129.base,
+                         call_564129.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568229, url, valid)
+  result = hook(call_564129, url, valid)
 
-proc call*(call_568230: Call_GlobalSchedulesListBySubscription_568220;
-          subscriptionId: string; Orderby: string = ""; Expand: string = "";
-          apiVersion: string = "2016-05-15"; Top: int = 0; Filter: string = ""): Recallable =
+proc call*(call_564130: Call_GlobalSchedulesListBySubscription_564120;
+          subscriptionId: string; Top: int = 0; apiVersion: string = "2016-05-15";
+          Expand: string = ""; Orderby: string = ""; Filter: string = ""): Recallable =
   ## globalSchedulesListBySubscription
   ## List schedules in a subscription.
-  ##   Orderby: string
-  ##          : The ordering expression for the results, using OData notation.
-  ##   Expand: string
-  ##         : Specify the $expand query. Example: 'properties($select=status)'
-  ##   apiVersion: string (required)
-  ##             : Client API version.
-  ##   subscriptionId: string (required)
-  ##                 : The subscription ID.
   ##   Top: int
   ##      : The maximum number of resources to return from the operation.
+  ##   apiVersion: string (required)
+  ##             : Client API version.
+  ##   Expand: string
+  ##         : Specify the $expand query. Example: 'properties($select=status)'
+  ##   subscriptionId: string (required)
+  ##                 : The subscription ID.
+  ##   Orderby: string
+  ##          : The ordering expression for the results, using OData notation.
   ##   Filter: string
   ##         : The filter to apply to the operation.
-  var path_568231 = newJObject()
-  var query_568232 = newJObject()
-  add(query_568232, "$orderby", newJString(Orderby))
-  add(query_568232, "$expand", newJString(Expand))
-  add(query_568232, "api-version", newJString(apiVersion))
-  add(path_568231, "subscriptionId", newJString(subscriptionId))
-  add(query_568232, "$top", newJInt(Top))
-  add(query_568232, "$filter", newJString(Filter))
-  result = call_568230.call(path_568231, query_568232, nil, nil, nil)
+  var path_564131 = newJObject()
+  var query_564132 = newJObject()
+  add(query_564132, "$top", newJInt(Top))
+  add(query_564132, "api-version", newJString(apiVersion))
+  add(query_564132, "$expand", newJString(Expand))
+  add(path_564131, "subscriptionId", newJString(subscriptionId))
+  add(query_564132, "$orderby", newJString(Orderby))
+  add(query_564132, "$filter", newJString(Filter))
+  result = call_564130.call(path_564131, query_564132, nil, nil, nil)
 
-var globalSchedulesListBySubscription* = Call_GlobalSchedulesListBySubscription_568220(
+var globalSchedulesListBySubscription* = Call_GlobalSchedulesListBySubscription_564120(
     name: "globalSchedulesListBySubscription", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.DevTestLab/schedules",
-    validator: validate_GlobalSchedulesListBySubscription_568221, base: "",
-    url: url_GlobalSchedulesListBySubscription_568222, schemes: {Scheme.Https})
+    validator: validate_GlobalSchedulesListBySubscription_564121, base: "",
+    url: url_GlobalSchedulesListBySubscription_564122, schemes: {Scheme.Https})
 type
-  Call_LabsListByResourceGroup_568233 = ref object of OpenApiRestCall_567650
-proc url_LabsListByResourceGroup_568235(protocol: Scheme; host: string; base: string;
+  Call_LabsListByResourceGroup_564133 = ref object of OpenApiRestCall_563548
+proc url_LabsListByResourceGroup_564135(protocol: Scheme; host: string; base: string;
                                        route: string; path: JsonNode;
                                        query: JsonNode): Uri =
   result.scheme = $protocol
@@ -556,69 +560,69 @@ proc url_LabsListByResourceGroup_568235(protocol: Scheme; host: string; base: st
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_LabsListByResourceGroup_568234(path: JsonNode; query: JsonNode;
+proc validate_LabsListByResourceGroup_564134(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## List labs in a resource group.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568236 = path.getOrDefault("resourceGroupName")
-  valid_568236 = validateParameter(valid_568236, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564136 = path.getOrDefault("subscriptionId")
+  valid_564136 = validateParameter(valid_564136, JString, required = true,
                                  default = nil)
-  if valid_568236 != nil:
-    section.add "resourceGroupName", valid_568236
-  var valid_568237 = path.getOrDefault("subscriptionId")
-  valid_568237 = validateParameter(valid_568237, JString, required = true,
+  if valid_564136 != nil:
+    section.add "subscriptionId", valid_564136
+  var valid_564137 = path.getOrDefault("resourceGroupName")
+  valid_564137 = validateParameter(valid_564137, JString, required = true,
                                  default = nil)
-  if valid_568237 != nil:
-    section.add "subscriptionId", valid_568237
+  if valid_564137 != nil:
+    section.add "resourceGroupName", valid_564137
   result.add "path", section
   ## parameters in `query` object:
-  ##   $orderby: JString
-  ##           : The ordering expression for the results, using OData notation.
-  ##   $expand: JString
-  ##          : Specify the $expand query. Example: 'properties($select=defaultStorageAccount)'
-  ##   api-version: JString (required)
-  ##              : Client API version.
   ##   $top: JInt
   ##       : The maximum number of resources to return from the operation.
+  ##   api-version: JString (required)
+  ##              : Client API version.
+  ##   $expand: JString
+  ##          : Specify the $expand query. Example: 'properties($select=defaultStorageAccount)'
+  ##   $orderby: JString
+  ##           : The ordering expression for the results, using OData notation.
   ##   $filter: JString
   ##          : The filter to apply to the operation.
   section = newJObject()
-  var valid_568238 = query.getOrDefault("$orderby")
-  valid_568238 = validateParameter(valid_568238, JString, required = false,
-                                 default = nil)
-  if valid_568238 != nil:
-    section.add "$orderby", valid_568238
-  var valid_568239 = query.getOrDefault("$expand")
-  valid_568239 = validateParameter(valid_568239, JString, required = false,
-                                 default = nil)
-  if valid_568239 != nil:
-    section.add "$expand", valid_568239
+  var valid_564138 = query.getOrDefault("$top")
+  valid_564138 = validateParameter(valid_564138, JInt, required = false, default = nil)
+  if valid_564138 != nil:
+    section.add "$top", valid_564138
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568240 = query.getOrDefault("api-version")
-  valid_568240 = validateParameter(valid_568240, JString, required = true,
+  var valid_564139 = query.getOrDefault("api-version")
+  valid_564139 = validateParameter(valid_564139, JString, required = true,
                                  default = newJString("2016-05-15"))
-  if valid_568240 != nil:
-    section.add "api-version", valid_568240
-  var valid_568241 = query.getOrDefault("$top")
-  valid_568241 = validateParameter(valid_568241, JInt, required = false, default = nil)
-  if valid_568241 != nil:
-    section.add "$top", valid_568241
-  var valid_568242 = query.getOrDefault("$filter")
-  valid_568242 = validateParameter(valid_568242, JString, required = false,
+  if valid_564139 != nil:
+    section.add "api-version", valid_564139
+  var valid_564140 = query.getOrDefault("$expand")
+  valid_564140 = validateParameter(valid_564140, JString, required = false,
                                  default = nil)
-  if valid_568242 != nil:
-    section.add "$filter", valid_568242
+  if valid_564140 != nil:
+    section.add "$expand", valid_564140
+  var valid_564141 = query.getOrDefault("$orderby")
+  valid_564141 = validateParameter(valid_564141, JString, required = false,
+                                 default = nil)
+  if valid_564141 != nil:
+    section.add "$orderby", valid_564141
+  var valid_564142 = query.getOrDefault("$filter")
+  valid_564142 = validateParameter(valid_564142, JString, required = false,
+                                 default = nil)
+  if valid_564142 != nil:
+    section.add "$filter", valid_564142
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -627,58 +631,58 @@ proc validate_LabsListByResourceGroup_568234(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568243: Call_LabsListByResourceGroup_568233; path: JsonNode;
+proc call*(call_564143: Call_LabsListByResourceGroup_564133; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## List labs in a resource group.
   ## 
-  let valid = call_568243.validator(path, query, header, formData, body)
-  let scheme = call_568243.pickScheme
+  let valid = call_564143.validator(path, query, header, formData, body)
+  let scheme = call_564143.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568243.url(scheme.get, call_568243.host, call_568243.base,
-                         call_568243.route, valid.getOrDefault("path"),
+  let url = call_564143.url(scheme.get, call_564143.host, call_564143.base,
+                         call_564143.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568243, url, valid)
+  result = hook(call_564143, url, valid)
 
-proc call*(call_568244: Call_LabsListByResourceGroup_568233;
-          resourceGroupName: string; subscriptionId: string; Orderby: string = "";
-          Expand: string = ""; apiVersion: string = "2016-05-15"; Top: int = 0;
+proc call*(call_564144: Call_LabsListByResourceGroup_564133;
+          subscriptionId: string; resourceGroupName: string; Top: int = 0;
+          apiVersion: string = "2016-05-15"; Expand: string = ""; Orderby: string = "";
           Filter: string = ""): Recallable =
   ## labsListByResourceGroup
   ## List labs in a resource group.
+  ##   Top: int
+  ##      : The maximum number of resources to return from the operation.
+  ##   apiVersion: string (required)
+  ##             : Client API version.
+  ##   Expand: string
+  ##         : Specify the $expand query. Example: 'properties($select=defaultStorageAccount)'
+  ##   subscriptionId: string (required)
+  ##                 : The subscription ID.
   ##   Orderby: string
   ##          : The ordering expression for the results, using OData notation.
   ##   resourceGroupName: string (required)
   ##                    : The name of the resource group.
-  ##   Expand: string
-  ##         : Specify the $expand query. Example: 'properties($select=defaultStorageAccount)'
-  ##   apiVersion: string (required)
-  ##             : Client API version.
-  ##   subscriptionId: string (required)
-  ##                 : The subscription ID.
-  ##   Top: int
-  ##      : The maximum number of resources to return from the operation.
   ##   Filter: string
   ##         : The filter to apply to the operation.
-  var path_568245 = newJObject()
-  var query_568246 = newJObject()
-  add(query_568246, "$orderby", newJString(Orderby))
-  add(path_568245, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568246, "$expand", newJString(Expand))
-  add(query_568246, "api-version", newJString(apiVersion))
-  add(path_568245, "subscriptionId", newJString(subscriptionId))
-  add(query_568246, "$top", newJInt(Top))
-  add(query_568246, "$filter", newJString(Filter))
-  result = call_568244.call(path_568245, query_568246, nil, nil, nil)
+  var path_564145 = newJObject()
+  var query_564146 = newJObject()
+  add(query_564146, "$top", newJInt(Top))
+  add(query_564146, "api-version", newJString(apiVersion))
+  add(query_564146, "$expand", newJString(Expand))
+  add(path_564145, "subscriptionId", newJString(subscriptionId))
+  add(query_564146, "$orderby", newJString(Orderby))
+  add(path_564145, "resourceGroupName", newJString(resourceGroupName))
+  add(query_564146, "$filter", newJString(Filter))
+  result = call_564144.call(path_564145, query_564146, nil, nil, nil)
 
-var labsListByResourceGroup* = Call_LabsListByResourceGroup_568233(
+var labsListByResourceGroup* = Call_LabsListByResourceGroup_564133(
     name: "labsListByResourceGroup", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DevTestLab/labs",
-    validator: validate_LabsListByResourceGroup_568234, base: "",
-    url: url_LabsListByResourceGroup_568235, schemes: {Scheme.Https})
+    validator: validate_LabsListByResourceGroup_564134, base: "",
+    url: url_LabsListByResourceGroup_564135, schemes: {Scheme.Https})
 type
-  Call_ArtifactSourcesList_568247 = ref object of OpenApiRestCall_567650
-proc url_ArtifactSourcesList_568249(protocol: Scheme; host: string; base: string;
+  Call_ArtifactSourcesList_564147 = ref object of OpenApiRestCall_563548
+proc url_ArtifactSourcesList_564149(protocol: Scheme; host: string; base: string;
                                    route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -701,7 +705,7 @@ proc url_ArtifactSourcesList_568249(protocol: Scheme; host: string; base: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ArtifactSourcesList_568248(path: JsonNode; query: JsonNode;
+proc validate_ArtifactSourcesList_564148(path: JsonNode; query: JsonNode;
                                         header: JsonNode; formData: JsonNode;
                                         body: JsonNode): JsonNode =
   ## List artifact sources in a given lab.
@@ -709,69 +713,68 @@ proc validate_ArtifactSourcesList_568248(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
-  ##   subscriptionId: JString (required)
-  ##                 : The subscription ID.
   ##   labName: JString (required)
   ##          : The name of the lab.
+  ##   subscriptionId: JString (required)
+  ##                 : The subscription ID.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568250 = path.getOrDefault("resourceGroupName")
-  valid_568250 = validateParameter(valid_568250, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `labName` field"
+  var valid_564150 = path.getOrDefault("labName")
+  valid_564150 = validateParameter(valid_564150, JString, required = true,
                                  default = nil)
-  if valid_568250 != nil:
-    section.add "resourceGroupName", valid_568250
-  var valid_568251 = path.getOrDefault("subscriptionId")
-  valid_568251 = validateParameter(valid_568251, JString, required = true,
+  if valid_564150 != nil:
+    section.add "labName", valid_564150
+  var valid_564151 = path.getOrDefault("subscriptionId")
+  valid_564151 = validateParameter(valid_564151, JString, required = true,
                                  default = nil)
-  if valid_568251 != nil:
-    section.add "subscriptionId", valid_568251
-  var valid_568252 = path.getOrDefault("labName")
-  valid_568252 = validateParameter(valid_568252, JString, required = true,
+  if valid_564151 != nil:
+    section.add "subscriptionId", valid_564151
+  var valid_564152 = path.getOrDefault("resourceGroupName")
+  valid_564152 = validateParameter(valid_564152, JString, required = true,
                                  default = nil)
-  if valid_568252 != nil:
-    section.add "labName", valid_568252
+  if valid_564152 != nil:
+    section.add "resourceGroupName", valid_564152
   result.add "path", section
   ## parameters in `query` object:
-  ##   $orderby: JString
-  ##           : The ordering expression for the results, using OData notation.
-  ##   $expand: JString
-  ##          : Specify the $expand query. Example: 'properties($select=displayName)'
-  ##   api-version: JString (required)
-  ##              : Client API version.
   ##   $top: JInt
   ##       : The maximum number of resources to return from the operation.
+  ##   api-version: JString (required)
+  ##              : Client API version.
+  ##   $expand: JString
+  ##          : Specify the $expand query. Example: 'properties($select=displayName)'
+  ##   $orderby: JString
+  ##           : The ordering expression for the results, using OData notation.
   ##   $filter: JString
   ##          : The filter to apply to the operation.
   section = newJObject()
-  var valid_568253 = query.getOrDefault("$orderby")
-  valid_568253 = validateParameter(valid_568253, JString, required = false,
-                                 default = nil)
-  if valid_568253 != nil:
-    section.add "$orderby", valid_568253
-  var valid_568254 = query.getOrDefault("$expand")
-  valid_568254 = validateParameter(valid_568254, JString, required = false,
-                                 default = nil)
-  if valid_568254 != nil:
-    section.add "$expand", valid_568254
+  var valid_564153 = query.getOrDefault("$top")
+  valid_564153 = validateParameter(valid_564153, JInt, required = false, default = nil)
+  if valid_564153 != nil:
+    section.add "$top", valid_564153
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568255 = query.getOrDefault("api-version")
-  valid_568255 = validateParameter(valid_568255, JString, required = true,
+  var valid_564154 = query.getOrDefault("api-version")
+  valid_564154 = validateParameter(valid_564154, JString, required = true,
                                  default = newJString("2016-05-15"))
-  if valid_568255 != nil:
-    section.add "api-version", valid_568255
-  var valid_568256 = query.getOrDefault("$top")
-  valid_568256 = validateParameter(valid_568256, JInt, required = false, default = nil)
-  if valid_568256 != nil:
-    section.add "$top", valid_568256
-  var valid_568257 = query.getOrDefault("$filter")
-  valid_568257 = validateParameter(valid_568257, JString, required = false,
+  if valid_564154 != nil:
+    section.add "api-version", valid_564154
+  var valid_564155 = query.getOrDefault("$expand")
+  valid_564155 = validateParameter(valid_564155, JString, required = false,
                                  default = nil)
-  if valid_568257 != nil:
-    section.add "$filter", valid_568257
+  if valid_564155 != nil:
+    section.add "$expand", valid_564155
+  var valid_564156 = query.getOrDefault("$orderby")
+  valid_564156 = validateParameter(valid_564156, JString, required = false,
+                                 default = nil)
+  if valid_564156 != nil:
+    section.add "$orderby", valid_564156
+  var valid_564157 = query.getOrDefault("$filter")
+  valid_564157 = validateParameter(valid_564157, JString, required = false,
+                                 default = nil)
+  if valid_564157 != nil:
+    section.add "$filter", valid_564157
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -780,61 +783,61 @@ proc validate_ArtifactSourcesList_568248(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568258: Call_ArtifactSourcesList_568247; path: JsonNode;
+proc call*(call_564158: Call_ArtifactSourcesList_564147; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## List artifact sources in a given lab.
   ## 
-  let valid = call_568258.validator(path, query, header, formData, body)
-  let scheme = call_568258.pickScheme
+  let valid = call_564158.validator(path, query, header, formData, body)
+  let scheme = call_564158.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568258.url(scheme.get, call_568258.host, call_568258.base,
-                         call_568258.route, valid.getOrDefault("path"),
+  let url = call_564158.url(scheme.get, call_564158.host, call_564158.base,
+                         call_564158.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568258, url, valid)
+  result = hook(call_564158, url, valid)
 
-proc call*(call_568259: Call_ArtifactSourcesList_568247; resourceGroupName: string;
-          subscriptionId: string; labName: string; Orderby: string = "";
-          Expand: string = ""; apiVersion: string = "2016-05-15"; Top: int = 0;
+proc call*(call_564159: Call_ArtifactSourcesList_564147; labName: string;
+          subscriptionId: string; resourceGroupName: string; Top: int = 0;
+          apiVersion: string = "2016-05-15"; Expand: string = ""; Orderby: string = "";
           Filter: string = ""): Recallable =
   ## artifactSourcesList
   ## List artifact sources in a given lab.
+  ##   labName: string (required)
+  ##          : The name of the lab.
+  ##   Top: int
+  ##      : The maximum number of resources to return from the operation.
+  ##   apiVersion: string (required)
+  ##             : Client API version.
+  ##   Expand: string
+  ##         : Specify the $expand query. Example: 'properties($select=displayName)'
+  ##   subscriptionId: string (required)
+  ##                 : The subscription ID.
   ##   Orderby: string
   ##          : The ordering expression for the results, using OData notation.
   ##   resourceGroupName: string (required)
   ##                    : The name of the resource group.
-  ##   Expand: string
-  ##         : Specify the $expand query. Example: 'properties($select=displayName)'
-  ##   apiVersion: string (required)
-  ##             : Client API version.
-  ##   subscriptionId: string (required)
-  ##                 : The subscription ID.
-  ##   Top: int
-  ##      : The maximum number of resources to return from the operation.
-  ##   labName: string (required)
-  ##          : The name of the lab.
   ##   Filter: string
   ##         : The filter to apply to the operation.
-  var path_568260 = newJObject()
-  var query_568261 = newJObject()
-  add(query_568261, "$orderby", newJString(Orderby))
-  add(path_568260, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568261, "$expand", newJString(Expand))
-  add(query_568261, "api-version", newJString(apiVersion))
-  add(path_568260, "subscriptionId", newJString(subscriptionId))
-  add(query_568261, "$top", newJInt(Top))
-  add(path_568260, "labName", newJString(labName))
-  add(query_568261, "$filter", newJString(Filter))
-  result = call_568259.call(path_568260, query_568261, nil, nil, nil)
+  var path_564160 = newJObject()
+  var query_564161 = newJObject()
+  add(path_564160, "labName", newJString(labName))
+  add(query_564161, "$top", newJInt(Top))
+  add(query_564161, "api-version", newJString(apiVersion))
+  add(query_564161, "$expand", newJString(Expand))
+  add(path_564160, "subscriptionId", newJString(subscriptionId))
+  add(query_564161, "$orderby", newJString(Orderby))
+  add(path_564160, "resourceGroupName", newJString(resourceGroupName))
+  add(query_564161, "$filter", newJString(Filter))
+  result = call_564159.call(path_564160, query_564161, nil, nil, nil)
 
-var artifactSourcesList* = Call_ArtifactSourcesList_568247(
+var artifactSourcesList* = Call_ArtifactSourcesList_564147(
     name: "artifactSourcesList", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DevTestLab/labs/{labName}/artifactsources",
-    validator: validate_ArtifactSourcesList_568248, base: "",
-    url: url_ArtifactSourcesList_568249, schemes: {Scheme.Https})
+    validator: validate_ArtifactSourcesList_564148, base: "",
+    url: url_ArtifactSourcesList_564149, schemes: {Scheme.Https})
 type
-  Call_ArmTemplatesList_568262 = ref object of OpenApiRestCall_567650
-proc url_ArmTemplatesList_568264(protocol: Scheme; host: string; base: string;
+  Call_ArmTemplatesList_564162 = ref object of OpenApiRestCall_563548
+proc url_ArmTemplatesList_564164(protocol: Scheme; host: string; base: string;
                                 route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -861,7 +864,7 @@ proc url_ArmTemplatesList_568264(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ArmTemplatesList_568263(path: JsonNode; query: JsonNode;
+proc validate_ArmTemplatesList_564163(path: JsonNode; query: JsonNode;
                                      header: JsonNode; formData: JsonNode;
                                      body: JsonNode): JsonNode =
   ## List azure resource manager templates in a given artifact source.
@@ -869,76 +872,75 @@ proc validate_ArmTemplatesList_568263(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
-  ##   subscriptionId: JString (required)
-  ##                 : The subscription ID.
-  ##   artifactSourceName: JString (required)
-  ##                     : The name of the artifact source.
   ##   labName: JString (required)
   ##          : The name of the lab.
+  ##   subscriptionId: JString (required)
+  ##                 : The subscription ID.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
+  ##   artifactSourceName: JString (required)
+  ##                     : The name of the artifact source.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568265 = path.getOrDefault("resourceGroupName")
-  valid_568265 = validateParameter(valid_568265, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `labName` field"
+  var valid_564165 = path.getOrDefault("labName")
+  valid_564165 = validateParameter(valid_564165, JString, required = true,
                                  default = nil)
-  if valid_568265 != nil:
-    section.add "resourceGroupName", valid_568265
-  var valid_568266 = path.getOrDefault("subscriptionId")
-  valid_568266 = validateParameter(valid_568266, JString, required = true,
+  if valid_564165 != nil:
+    section.add "labName", valid_564165
+  var valid_564166 = path.getOrDefault("subscriptionId")
+  valid_564166 = validateParameter(valid_564166, JString, required = true,
                                  default = nil)
-  if valid_568266 != nil:
-    section.add "subscriptionId", valid_568266
-  var valid_568267 = path.getOrDefault("artifactSourceName")
-  valid_568267 = validateParameter(valid_568267, JString, required = true,
+  if valid_564166 != nil:
+    section.add "subscriptionId", valid_564166
+  var valid_564167 = path.getOrDefault("resourceGroupName")
+  valid_564167 = validateParameter(valid_564167, JString, required = true,
                                  default = nil)
-  if valid_568267 != nil:
-    section.add "artifactSourceName", valid_568267
-  var valid_568268 = path.getOrDefault("labName")
-  valid_568268 = validateParameter(valid_568268, JString, required = true,
+  if valid_564167 != nil:
+    section.add "resourceGroupName", valid_564167
+  var valid_564168 = path.getOrDefault("artifactSourceName")
+  valid_564168 = validateParameter(valid_564168, JString, required = true,
                                  default = nil)
-  if valid_568268 != nil:
-    section.add "labName", valid_568268
+  if valid_564168 != nil:
+    section.add "artifactSourceName", valid_564168
   result.add "path", section
   ## parameters in `query` object:
-  ##   $orderby: JString
-  ##           : The ordering expression for the results, using OData notation.
-  ##   $expand: JString
-  ##          : Specify the $expand query. Example: 'properties($select=displayName)'
-  ##   api-version: JString (required)
-  ##              : Client API version.
   ##   $top: JInt
   ##       : The maximum number of resources to return from the operation.
+  ##   api-version: JString (required)
+  ##              : Client API version.
+  ##   $expand: JString
+  ##          : Specify the $expand query. Example: 'properties($select=displayName)'
+  ##   $orderby: JString
+  ##           : The ordering expression for the results, using OData notation.
   ##   $filter: JString
   ##          : The filter to apply to the operation.
   section = newJObject()
-  var valid_568269 = query.getOrDefault("$orderby")
-  valid_568269 = validateParameter(valid_568269, JString, required = false,
-                                 default = nil)
-  if valid_568269 != nil:
-    section.add "$orderby", valid_568269
-  var valid_568270 = query.getOrDefault("$expand")
-  valid_568270 = validateParameter(valid_568270, JString, required = false,
-                                 default = nil)
-  if valid_568270 != nil:
-    section.add "$expand", valid_568270
+  var valid_564169 = query.getOrDefault("$top")
+  valid_564169 = validateParameter(valid_564169, JInt, required = false, default = nil)
+  if valid_564169 != nil:
+    section.add "$top", valid_564169
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568271 = query.getOrDefault("api-version")
-  valid_568271 = validateParameter(valid_568271, JString, required = true,
+  var valid_564170 = query.getOrDefault("api-version")
+  valid_564170 = validateParameter(valid_564170, JString, required = true,
                                  default = newJString("2016-05-15"))
-  if valid_568271 != nil:
-    section.add "api-version", valid_568271
-  var valid_568272 = query.getOrDefault("$top")
-  valid_568272 = validateParameter(valid_568272, JInt, required = false, default = nil)
-  if valid_568272 != nil:
-    section.add "$top", valid_568272
-  var valid_568273 = query.getOrDefault("$filter")
-  valid_568273 = validateParameter(valid_568273, JString, required = false,
+  if valid_564170 != nil:
+    section.add "api-version", valid_564170
+  var valid_564171 = query.getOrDefault("$expand")
+  valid_564171 = validateParameter(valid_564171, JString, required = false,
                                  default = nil)
-  if valid_568273 != nil:
-    section.add "$filter", valid_568273
+  if valid_564171 != nil:
+    section.add "$expand", valid_564171
+  var valid_564172 = query.getOrDefault("$orderby")
+  valid_564172 = validateParameter(valid_564172, JString, required = false,
+                                 default = nil)
+  if valid_564172 != nil:
+    section.add "$orderby", valid_564172
+  var valid_564173 = query.getOrDefault("$filter")
+  valid_564173 = validateParameter(valid_564173, JString, required = false,
+                                 default = nil)
+  if valid_564173 != nil:
+    section.add "$filter", valid_564173
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -947,63 +949,63 @@ proc validate_ArmTemplatesList_568263(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568274: Call_ArmTemplatesList_568262; path: JsonNode;
+proc call*(call_564174: Call_ArmTemplatesList_564162; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## List azure resource manager templates in a given artifact source.
   ## 
-  let valid = call_568274.validator(path, query, header, formData, body)
-  let scheme = call_568274.pickScheme
+  let valid = call_564174.validator(path, query, header, formData, body)
+  let scheme = call_564174.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568274.url(scheme.get, call_568274.host, call_568274.base,
-                         call_568274.route, valid.getOrDefault("path"),
+  let url = call_564174.url(scheme.get, call_564174.host, call_564174.base,
+                         call_564174.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568274, url, valid)
+  result = hook(call_564174, url, valid)
 
-proc call*(call_568275: Call_ArmTemplatesList_568262; resourceGroupName: string;
-          subscriptionId: string; artifactSourceName: string; labName: string;
-          Orderby: string = ""; Expand: string = ""; apiVersion: string = "2016-05-15";
-          Top: int = 0; Filter: string = ""): Recallable =
+proc call*(call_564175: Call_ArmTemplatesList_564162; labName: string;
+          subscriptionId: string; resourceGroupName: string;
+          artifactSourceName: string; Top: int = 0; apiVersion: string = "2016-05-15";
+          Expand: string = ""; Orderby: string = ""; Filter: string = ""): Recallable =
   ## armTemplatesList
   ## List azure resource manager templates in a given artifact source.
+  ##   labName: string (required)
+  ##          : The name of the lab.
+  ##   Top: int
+  ##      : The maximum number of resources to return from the operation.
+  ##   apiVersion: string (required)
+  ##             : Client API version.
+  ##   Expand: string
+  ##         : Specify the $expand query. Example: 'properties($select=displayName)'
+  ##   subscriptionId: string (required)
+  ##                 : The subscription ID.
   ##   Orderby: string
   ##          : The ordering expression for the results, using OData notation.
   ##   resourceGroupName: string (required)
   ##                    : The name of the resource group.
-  ##   Expand: string
-  ##         : Specify the $expand query. Example: 'properties($select=displayName)'
-  ##   apiVersion: string (required)
-  ##             : Client API version.
-  ##   subscriptionId: string (required)
-  ##                 : The subscription ID.
-  ##   Top: int
-  ##      : The maximum number of resources to return from the operation.
-  ##   artifactSourceName: string (required)
-  ##                     : The name of the artifact source.
-  ##   labName: string (required)
-  ##          : The name of the lab.
   ##   Filter: string
   ##         : The filter to apply to the operation.
-  var path_568276 = newJObject()
-  var query_568277 = newJObject()
-  add(query_568277, "$orderby", newJString(Orderby))
-  add(path_568276, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568277, "$expand", newJString(Expand))
-  add(query_568277, "api-version", newJString(apiVersion))
-  add(path_568276, "subscriptionId", newJString(subscriptionId))
-  add(query_568277, "$top", newJInt(Top))
-  add(path_568276, "artifactSourceName", newJString(artifactSourceName))
-  add(path_568276, "labName", newJString(labName))
-  add(query_568277, "$filter", newJString(Filter))
-  result = call_568275.call(path_568276, query_568277, nil, nil, nil)
+  ##   artifactSourceName: string (required)
+  ##                     : The name of the artifact source.
+  var path_564176 = newJObject()
+  var query_564177 = newJObject()
+  add(path_564176, "labName", newJString(labName))
+  add(query_564177, "$top", newJInt(Top))
+  add(query_564177, "api-version", newJString(apiVersion))
+  add(query_564177, "$expand", newJString(Expand))
+  add(path_564176, "subscriptionId", newJString(subscriptionId))
+  add(query_564177, "$orderby", newJString(Orderby))
+  add(path_564176, "resourceGroupName", newJString(resourceGroupName))
+  add(query_564177, "$filter", newJString(Filter))
+  add(path_564176, "artifactSourceName", newJString(artifactSourceName))
+  result = call_564175.call(path_564176, query_564177, nil, nil, nil)
 
-var armTemplatesList* = Call_ArmTemplatesList_568262(name: "armTemplatesList",
+var armTemplatesList* = Call_ArmTemplatesList_564162(name: "armTemplatesList",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DevTestLab/labs/{labName}/artifactsources/{artifactSourceName}/armtemplates",
-    validator: validate_ArmTemplatesList_568263, base: "",
-    url: url_ArmTemplatesList_568264, schemes: {Scheme.Https})
+    validator: validate_ArmTemplatesList_564163, base: "",
+    url: url_ArmTemplatesList_564164, schemes: {Scheme.Https})
 type
-  Call_ArmTemplatesGet_568278 = ref object of OpenApiRestCall_567650
-proc url_ArmTemplatesGet_568280(protocol: Scheme; host: string; base: string;
+  Call_ArmTemplatesGet_564178 = ref object of OpenApiRestCall_563548
+proc url_ArmTemplatesGet_564180(protocol: Scheme; host: string; base: string;
                                route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1032,7 +1034,7 @@ proc url_ArmTemplatesGet_568280(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ArmTemplatesGet_568279(path: JsonNode; query: JsonNode;
+proc validate_ArmTemplatesGet_564179(path: JsonNode; query: JsonNode;
                                     header: JsonNode; formData: JsonNode;
                                     body: JsonNode): JsonNode =
   ## Get azure resource manager template.
@@ -1040,63 +1042,62 @@ proc validate_ArmTemplatesGet_568279(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
+  ##   labName: JString (required)
+  ##          : The name of the lab.
   ##   name: JString (required)
   ##       : The name of the azure Resource Manager template.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   ##   artifactSourceName: JString (required)
   ##                     : The name of the artifact source.
-  ##   labName: JString (required)
-  ##          : The name of the lab.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568281 = path.getOrDefault("resourceGroupName")
-  valid_568281 = validateParameter(valid_568281, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `labName` field"
+  var valid_564181 = path.getOrDefault("labName")
+  valid_564181 = validateParameter(valid_564181, JString, required = true,
                                  default = nil)
-  if valid_568281 != nil:
-    section.add "resourceGroupName", valid_568281
-  var valid_568282 = path.getOrDefault("name")
-  valid_568282 = validateParameter(valid_568282, JString, required = true,
+  if valid_564181 != nil:
+    section.add "labName", valid_564181
+  var valid_564182 = path.getOrDefault("name")
+  valid_564182 = validateParameter(valid_564182, JString, required = true,
                                  default = nil)
-  if valid_568282 != nil:
-    section.add "name", valid_568282
-  var valid_568283 = path.getOrDefault("subscriptionId")
-  valid_568283 = validateParameter(valid_568283, JString, required = true,
+  if valid_564182 != nil:
+    section.add "name", valid_564182
+  var valid_564183 = path.getOrDefault("subscriptionId")
+  valid_564183 = validateParameter(valid_564183, JString, required = true,
                                  default = nil)
-  if valid_568283 != nil:
-    section.add "subscriptionId", valid_568283
-  var valid_568284 = path.getOrDefault("artifactSourceName")
-  valid_568284 = validateParameter(valid_568284, JString, required = true,
+  if valid_564183 != nil:
+    section.add "subscriptionId", valid_564183
+  var valid_564184 = path.getOrDefault("resourceGroupName")
+  valid_564184 = validateParameter(valid_564184, JString, required = true,
                                  default = nil)
-  if valid_568284 != nil:
-    section.add "artifactSourceName", valid_568284
-  var valid_568285 = path.getOrDefault("labName")
-  valid_568285 = validateParameter(valid_568285, JString, required = true,
+  if valid_564184 != nil:
+    section.add "resourceGroupName", valid_564184
+  var valid_564185 = path.getOrDefault("artifactSourceName")
+  valid_564185 = validateParameter(valid_564185, JString, required = true,
                                  default = nil)
-  if valid_568285 != nil:
-    section.add "labName", valid_568285
+  if valid_564185 != nil:
+    section.add "artifactSourceName", valid_564185
   result.add "path", section
   ## parameters in `query` object:
-  ##   $expand: JString
-  ##          : Specify the $expand query. Example: 'properties($select=displayName)'
   ##   api-version: JString (required)
   ##              : Client API version.
+  ##   $expand: JString
+  ##          : Specify the $expand query. Example: 'properties($select=displayName)'
   section = newJObject()
-  var valid_568286 = query.getOrDefault("$expand")
-  valid_568286 = validateParameter(valid_568286, JString, required = false,
-                                 default = nil)
-  if valid_568286 != nil:
-    section.add "$expand", valid_568286
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568287 = query.getOrDefault("api-version")
-  valid_568287 = validateParameter(valid_568287, JString, required = true,
+  var valid_564186 = query.getOrDefault("api-version")
+  valid_564186 = validateParameter(valid_564186, JString, required = true,
                                  default = newJString("2016-05-15"))
-  if valid_568287 != nil:
-    section.add "api-version", valid_568287
+  if valid_564186 != nil:
+    section.add "api-version", valid_564186
+  var valid_564187 = query.getOrDefault("$expand")
+  valid_564187 = validateParameter(valid_564187, JString, required = false,
+                                 default = nil)
+  if valid_564187 != nil:
+    section.add "$expand", valid_564187
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1105,56 +1106,57 @@ proc validate_ArmTemplatesGet_568279(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568288: Call_ArmTemplatesGet_568278; path: JsonNode; query: JsonNode;
+proc call*(call_564188: Call_ArmTemplatesGet_564178; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get azure resource manager template.
   ## 
-  let valid = call_568288.validator(path, query, header, formData, body)
-  let scheme = call_568288.pickScheme
+  let valid = call_564188.validator(path, query, header, formData, body)
+  let scheme = call_564188.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568288.url(scheme.get, call_568288.host, call_568288.base,
-                         call_568288.route, valid.getOrDefault("path"),
+  let url = call_564188.url(scheme.get, call_564188.host, call_564188.base,
+                         call_564188.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568288, url, valid)
+  result = hook(call_564188, url, valid)
 
-proc call*(call_568289: Call_ArmTemplatesGet_568278; resourceGroupName: string;
-          name: string; subscriptionId: string; artifactSourceName: string;
-          labName: string; Expand: string = ""; apiVersion: string = "2016-05-15"): Recallable =
+proc call*(call_564189: Call_ArmTemplatesGet_564178; labName: string; name: string;
+          subscriptionId: string; resourceGroupName: string;
+          artifactSourceName: string; apiVersion: string = "2016-05-15";
+          Expand: string = ""): Recallable =
   ## armTemplatesGet
   ## Get azure resource manager template.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   labName: string (required)
+  ##          : The name of the lab.
+  ##   apiVersion: string (required)
+  ##             : Client API version.
   ##   Expand: string
   ##         : Specify the $expand query. Example: 'properties($select=displayName)'
   ##   name: string (required)
   ##       : The name of the azure Resource Manager template.
-  ##   apiVersion: string (required)
-  ##             : Client API version.
   ##   subscriptionId: string (required)
   ##                 : The subscription ID.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   artifactSourceName: string (required)
   ##                     : The name of the artifact source.
-  ##   labName: string (required)
-  ##          : The name of the lab.
-  var path_568290 = newJObject()
-  var query_568291 = newJObject()
-  add(path_568290, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568291, "$expand", newJString(Expand))
-  add(path_568290, "name", newJString(name))
-  add(query_568291, "api-version", newJString(apiVersion))
-  add(path_568290, "subscriptionId", newJString(subscriptionId))
-  add(path_568290, "artifactSourceName", newJString(artifactSourceName))
-  add(path_568290, "labName", newJString(labName))
-  result = call_568289.call(path_568290, query_568291, nil, nil, nil)
+  var path_564190 = newJObject()
+  var query_564191 = newJObject()
+  add(path_564190, "labName", newJString(labName))
+  add(query_564191, "api-version", newJString(apiVersion))
+  add(query_564191, "$expand", newJString(Expand))
+  add(path_564190, "name", newJString(name))
+  add(path_564190, "subscriptionId", newJString(subscriptionId))
+  add(path_564190, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564190, "artifactSourceName", newJString(artifactSourceName))
+  result = call_564189.call(path_564190, query_564191, nil, nil, nil)
 
-var armTemplatesGet* = Call_ArmTemplatesGet_568278(name: "armTemplatesGet",
+var armTemplatesGet* = Call_ArmTemplatesGet_564178(name: "armTemplatesGet",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DevTestLab/labs/{labName}/artifactsources/{artifactSourceName}/armtemplates/{name}",
-    validator: validate_ArmTemplatesGet_568279, base: "", url: url_ArmTemplatesGet_568280,
+    validator: validate_ArmTemplatesGet_564179, base: "", url: url_ArmTemplatesGet_564180,
     schemes: {Scheme.Https})
 type
-  Call_ArtifactsList_568292 = ref object of OpenApiRestCall_567650
-proc url_ArtifactsList_568294(protocol: Scheme; host: string; base: string;
+  Call_ArtifactsList_564192 = ref object of OpenApiRestCall_563548
+proc url_ArtifactsList_564194(protocol: Scheme; host: string; base: string;
                              route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1181,83 +1183,82 @@ proc url_ArtifactsList_568294(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ArtifactsList_568293(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_ArtifactsList_564193(path: JsonNode; query: JsonNode; header: JsonNode;
                                   formData: JsonNode; body: JsonNode): JsonNode =
   ## List artifacts in a given artifact source.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
-  ##   subscriptionId: JString (required)
-  ##                 : The subscription ID.
-  ##   artifactSourceName: JString (required)
-  ##                     : The name of the artifact source.
   ##   labName: JString (required)
   ##          : The name of the lab.
+  ##   subscriptionId: JString (required)
+  ##                 : The subscription ID.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
+  ##   artifactSourceName: JString (required)
+  ##                     : The name of the artifact source.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568295 = path.getOrDefault("resourceGroupName")
-  valid_568295 = validateParameter(valid_568295, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `labName` field"
+  var valid_564195 = path.getOrDefault("labName")
+  valid_564195 = validateParameter(valid_564195, JString, required = true,
                                  default = nil)
-  if valid_568295 != nil:
-    section.add "resourceGroupName", valid_568295
-  var valid_568296 = path.getOrDefault("subscriptionId")
-  valid_568296 = validateParameter(valid_568296, JString, required = true,
+  if valid_564195 != nil:
+    section.add "labName", valid_564195
+  var valid_564196 = path.getOrDefault("subscriptionId")
+  valid_564196 = validateParameter(valid_564196, JString, required = true,
                                  default = nil)
-  if valid_568296 != nil:
-    section.add "subscriptionId", valid_568296
-  var valid_568297 = path.getOrDefault("artifactSourceName")
-  valid_568297 = validateParameter(valid_568297, JString, required = true,
+  if valid_564196 != nil:
+    section.add "subscriptionId", valid_564196
+  var valid_564197 = path.getOrDefault("resourceGroupName")
+  valid_564197 = validateParameter(valid_564197, JString, required = true,
                                  default = nil)
-  if valid_568297 != nil:
-    section.add "artifactSourceName", valid_568297
-  var valid_568298 = path.getOrDefault("labName")
-  valid_568298 = validateParameter(valid_568298, JString, required = true,
+  if valid_564197 != nil:
+    section.add "resourceGroupName", valid_564197
+  var valid_564198 = path.getOrDefault("artifactSourceName")
+  valid_564198 = validateParameter(valid_564198, JString, required = true,
                                  default = nil)
-  if valid_568298 != nil:
-    section.add "labName", valid_568298
+  if valid_564198 != nil:
+    section.add "artifactSourceName", valid_564198
   result.add "path", section
   ## parameters in `query` object:
-  ##   $orderby: JString
-  ##           : The ordering expression for the results, using OData notation.
-  ##   $expand: JString
-  ##          : Specify the $expand query. Example: 'properties($select=title)'
-  ##   api-version: JString (required)
-  ##              : Client API version.
   ##   $top: JInt
   ##       : The maximum number of resources to return from the operation.
+  ##   api-version: JString (required)
+  ##              : Client API version.
+  ##   $expand: JString
+  ##          : Specify the $expand query. Example: 'properties($select=title)'
+  ##   $orderby: JString
+  ##           : The ordering expression for the results, using OData notation.
   ##   $filter: JString
   ##          : The filter to apply to the operation.
   section = newJObject()
-  var valid_568299 = query.getOrDefault("$orderby")
-  valid_568299 = validateParameter(valid_568299, JString, required = false,
-                                 default = nil)
-  if valid_568299 != nil:
-    section.add "$orderby", valid_568299
-  var valid_568300 = query.getOrDefault("$expand")
-  valid_568300 = validateParameter(valid_568300, JString, required = false,
-                                 default = nil)
-  if valid_568300 != nil:
-    section.add "$expand", valid_568300
+  var valid_564199 = query.getOrDefault("$top")
+  valid_564199 = validateParameter(valid_564199, JInt, required = false, default = nil)
+  if valid_564199 != nil:
+    section.add "$top", valid_564199
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568301 = query.getOrDefault("api-version")
-  valid_568301 = validateParameter(valid_568301, JString, required = true,
+  var valid_564200 = query.getOrDefault("api-version")
+  valid_564200 = validateParameter(valid_564200, JString, required = true,
                                  default = newJString("2016-05-15"))
-  if valid_568301 != nil:
-    section.add "api-version", valid_568301
-  var valid_568302 = query.getOrDefault("$top")
-  valid_568302 = validateParameter(valid_568302, JInt, required = false, default = nil)
-  if valid_568302 != nil:
-    section.add "$top", valid_568302
-  var valid_568303 = query.getOrDefault("$filter")
-  valid_568303 = validateParameter(valid_568303, JString, required = false,
+  if valid_564200 != nil:
+    section.add "api-version", valid_564200
+  var valid_564201 = query.getOrDefault("$expand")
+  valid_564201 = validateParameter(valid_564201, JString, required = false,
                                  default = nil)
-  if valid_568303 != nil:
-    section.add "$filter", valid_568303
+  if valid_564201 != nil:
+    section.add "$expand", valid_564201
+  var valid_564202 = query.getOrDefault("$orderby")
+  valid_564202 = validateParameter(valid_564202, JString, required = false,
+                                 default = nil)
+  if valid_564202 != nil:
+    section.add "$orderby", valid_564202
+  var valid_564203 = query.getOrDefault("$filter")
+  valid_564203 = validateParameter(valid_564203, JString, required = false,
+                                 default = nil)
+  if valid_564203 != nil:
+    section.add "$filter", valid_564203
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1266,63 +1267,63 @@ proc validate_ArtifactsList_568293(path: JsonNode; query: JsonNode; header: Json
   if body != nil:
     result.add "body", body
 
-proc call*(call_568304: Call_ArtifactsList_568292; path: JsonNode; query: JsonNode;
+proc call*(call_564204: Call_ArtifactsList_564192; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## List artifacts in a given artifact source.
   ## 
-  let valid = call_568304.validator(path, query, header, formData, body)
-  let scheme = call_568304.pickScheme
+  let valid = call_564204.validator(path, query, header, formData, body)
+  let scheme = call_564204.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568304.url(scheme.get, call_568304.host, call_568304.base,
-                         call_568304.route, valid.getOrDefault("path"),
+  let url = call_564204.url(scheme.get, call_564204.host, call_564204.base,
+                         call_564204.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568304, url, valid)
+  result = hook(call_564204, url, valid)
 
-proc call*(call_568305: Call_ArtifactsList_568292; resourceGroupName: string;
-          subscriptionId: string; artifactSourceName: string; labName: string;
-          Orderby: string = ""; Expand: string = ""; apiVersion: string = "2016-05-15";
-          Top: int = 0; Filter: string = ""): Recallable =
+proc call*(call_564205: Call_ArtifactsList_564192; labName: string;
+          subscriptionId: string; resourceGroupName: string;
+          artifactSourceName: string; Top: int = 0; apiVersion: string = "2016-05-15";
+          Expand: string = ""; Orderby: string = ""; Filter: string = ""): Recallable =
   ## artifactsList
   ## List artifacts in a given artifact source.
+  ##   labName: string (required)
+  ##          : The name of the lab.
+  ##   Top: int
+  ##      : The maximum number of resources to return from the operation.
+  ##   apiVersion: string (required)
+  ##             : Client API version.
+  ##   Expand: string
+  ##         : Specify the $expand query. Example: 'properties($select=title)'
+  ##   subscriptionId: string (required)
+  ##                 : The subscription ID.
   ##   Orderby: string
   ##          : The ordering expression for the results, using OData notation.
   ##   resourceGroupName: string (required)
   ##                    : The name of the resource group.
-  ##   Expand: string
-  ##         : Specify the $expand query. Example: 'properties($select=title)'
-  ##   apiVersion: string (required)
-  ##             : Client API version.
-  ##   subscriptionId: string (required)
-  ##                 : The subscription ID.
-  ##   Top: int
-  ##      : The maximum number of resources to return from the operation.
-  ##   artifactSourceName: string (required)
-  ##                     : The name of the artifact source.
-  ##   labName: string (required)
-  ##          : The name of the lab.
   ##   Filter: string
   ##         : The filter to apply to the operation.
-  var path_568306 = newJObject()
-  var query_568307 = newJObject()
-  add(query_568307, "$orderby", newJString(Orderby))
-  add(path_568306, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568307, "$expand", newJString(Expand))
-  add(query_568307, "api-version", newJString(apiVersion))
-  add(path_568306, "subscriptionId", newJString(subscriptionId))
-  add(query_568307, "$top", newJInt(Top))
-  add(path_568306, "artifactSourceName", newJString(artifactSourceName))
-  add(path_568306, "labName", newJString(labName))
-  add(query_568307, "$filter", newJString(Filter))
-  result = call_568305.call(path_568306, query_568307, nil, nil, nil)
+  ##   artifactSourceName: string (required)
+  ##                     : The name of the artifact source.
+  var path_564206 = newJObject()
+  var query_564207 = newJObject()
+  add(path_564206, "labName", newJString(labName))
+  add(query_564207, "$top", newJInt(Top))
+  add(query_564207, "api-version", newJString(apiVersion))
+  add(query_564207, "$expand", newJString(Expand))
+  add(path_564206, "subscriptionId", newJString(subscriptionId))
+  add(query_564207, "$orderby", newJString(Orderby))
+  add(path_564206, "resourceGroupName", newJString(resourceGroupName))
+  add(query_564207, "$filter", newJString(Filter))
+  add(path_564206, "artifactSourceName", newJString(artifactSourceName))
+  result = call_564205.call(path_564206, query_564207, nil, nil, nil)
 
-var artifactsList* = Call_ArtifactsList_568292(name: "artifactsList",
+var artifactsList* = Call_ArtifactsList_564192(name: "artifactsList",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DevTestLab/labs/{labName}/artifactsources/{artifactSourceName}/artifacts",
-    validator: validate_ArtifactsList_568293, base: "", url: url_ArtifactsList_568294,
+    validator: validate_ArtifactsList_564193, base: "", url: url_ArtifactsList_564194,
     schemes: {Scheme.Https})
 type
-  Call_ArtifactsGet_568308 = ref object of OpenApiRestCall_567650
-proc url_ArtifactsGet_568310(protocol: Scheme; host: string; base: string;
+  Call_ArtifactsGet_564208 = ref object of OpenApiRestCall_563548
+proc url_ArtifactsGet_564210(protocol: Scheme; host: string; base: string;
                             route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1351,70 +1352,69 @@ proc url_ArtifactsGet_568310(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ArtifactsGet_568309(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_ArtifactsGet_564209(path: JsonNode; query: JsonNode; header: JsonNode;
                                  formData: JsonNode; body: JsonNode): JsonNode =
   ## Get artifact.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
+  ##   labName: JString (required)
+  ##          : The name of the lab.
   ##   name: JString (required)
   ##       : The name of the artifact.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   ##   artifactSourceName: JString (required)
   ##                     : The name of the artifact source.
-  ##   labName: JString (required)
-  ##          : The name of the lab.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568311 = path.getOrDefault("resourceGroupName")
-  valid_568311 = validateParameter(valid_568311, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `labName` field"
+  var valid_564211 = path.getOrDefault("labName")
+  valid_564211 = validateParameter(valid_564211, JString, required = true,
                                  default = nil)
-  if valid_568311 != nil:
-    section.add "resourceGroupName", valid_568311
-  var valid_568312 = path.getOrDefault("name")
-  valid_568312 = validateParameter(valid_568312, JString, required = true,
+  if valid_564211 != nil:
+    section.add "labName", valid_564211
+  var valid_564212 = path.getOrDefault("name")
+  valid_564212 = validateParameter(valid_564212, JString, required = true,
                                  default = nil)
-  if valid_568312 != nil:
-    section.add "name", valid_568312
-  var valid_568313 = path.getOrDefault("subscriptionId")
-  valid_568313 = validateParameter(valid_568313, JString, required = true,
+  if valid_564212 != nil:
+    section.add "name", valid_564212
+  var valid_564213 = path.getOrDefault("subscriptionId")
+  valid_564213 = validateParameter(valid_564213, JString, required = true,
                                  default = nil)
-  if valid_568313 != nil:
-    section.add "subscriptionId", valid_568313
-  var valid_568314 = path.getOrDefault("artifactSourceName")
-  valid_568314 = validateParameter(valid_568314, JString, required = true,
+  if valid_564213 != nil:
+    section.add "subscriptionId", valid_564213
+  var valid_564214 = path.getOrDefault("resourceGroupName")
+  valid_564214 = validateParameter(valid_564214, JString, required = true,
                                  default = nil)
-  if valid_568314 != nil:
-    section.add "artifactSourceName", valid_568314
-  var valid_568315 = path.getOrDefault("labName")
-  valid_568315 = validateParameter(valid_568315, JString, required = true,
+  if valid_564214 != nil:
+    section.add "resourceGroupName", valid_564214
+  var valid_564215 = path.getOrDefault("artifactSourceName")
+  valid_564215 = validateParameter(valid_564215, JString, required = true,
                                  default = nil)
-  if valid_568315 != nil:
-    section.add "labName", valid_568315
+  if valid_564215 != nil:
+    section.add "artifactSourceName", valid_564215
   result.add "path", section
   ## parameters in `query` object:
-  ##   $expand: JString
-  ##          : Specify the $expand query. Example: 'properties($select=title)'
   ##   api-version: JString (required)
   ##              : Client API version.
+  ##   $expand: JString
+  ##          : Specify the $expand query. Example: 'properties($select=title)'
   section = newJObject()
-  var valid_568316 = query.getOrDefault("$expand")
-  valid_568316 = validateParameter(valid_568316, JString, required = false,
-                                 default = nil)
-  if valid_568316 != nil:
-    section.add "$expand", valid_568316
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568317 = query.getOrDefault("api-version")
-  valid_568317 = validateParameter(valid_568317, JString, required = true,
+  var valid_564216 = query.getOrDefault("api-version")
+  valid_564216 = validateParameter(valid_564216, JString, required = true,
                                  default = newJString("2016-05-15"))
-  if valid_568317 != nil:
-    section.add "api-version", valid_568317
+  if valid_564216 != nil:
+    section.add "api-version", valid_564216
+  var valid_564217 = query.getOrDefault("$expand")
+  valid_564217 = validateParameter(valid_564217, JString, required = false,
+                                 default = nil)
+  if valid_564217 != nil:
+    section.add "$expand", valid_564217
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1423,56 +1423,57 @@ proc validate_ArtifactsGet_568309(path: JsonNode; query: JsonNode; header: JsonN
   if body != nil:
     result.add "body", body
 
-proc call*(call_568318: Call_ArtifactsGet_568308; path: JsonNode; query: JsonNode;
+proc call*(call_564218: Call_ArtifactsGet_564208; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get artifact.
   ## 
-  let valid = call_568318.validator(path, query, header, formData, body)
-  let scheme = call_568318.pickScheme
+  let valid = call_564218.validator(path, query, header, formData, body)
+  let scheme = call_564218.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568318.url(scheme.get, call_568318.host, call_568318.base,
-                         call_568318.route, valid.getOrDefault("path"),
+  let url = call_564218.url(scheme.get, call_564218.host, call_564218.base,
+                         call_564218.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568318, url, valid)
+  result = hook(call_564218, url, valid)
 
-proc call*(call_568319: Call_ArtifactsGet_568308; resourceGroupName: string;
-          name: string; subscriptionId: string; artifactSourceName: string;
-          labName: string; Expand: string = ""; apiVersion: string = "2016-05-15"): Recallable =
+proc call*(call_564219: Call_ArtifactsGet_564208; labName: string; name: string;
+          subscriptionId: string; resourceGroupName: string;
+          artifactSourceName: string; apiVersion: string = "2016-05-15";
+          Expand: string = ""): Recallable =
   ## artifactsGet
   ## Get artifact.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   labName: string (required)
+  ##          : The name of the lab.
+  ##   apiVersion: string (required)
+  ##             : Client API version.
   ##   Expand: string
   ##         : Specify the $expand query. Example: 'properties($select=title)'
   ##   name: string (required)
   ##       : The name of the artifact.
-  ##   apiVersion: string (required)
-  ##             : Client API version.
   ##   subscriptionId: string (required)
   ##                 : The subscription ID.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   artifactSourceName: string (required)
   ##                     : The name of the artifact source.
-  ##   labName: string (required)
-  ##          : The name of the lab.
-  var path_568320 = newJObject()
-  var query_568321 = newJObject()
-  add(path_568320, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568321, "$expand", newJString(Expand))
-  add(path_568320, "name", newJString(name))
-  add(query_568321, "api-version", newJString(apiVersion))
-  add(path_568320, "subscriptionId", newJString(subscriptionId))
-  add(path_568320, "artifactSourceName", newJString(artifactSourceName))
-  add(path_568320, "labName", newJString(labName))
-  result = call_568319.call(path_568320, query_568321, nil, nil, nil)
+  var path_564220 = newJObject()
+  var query_564221 = newJObject()
+  add(path_564220, "labName", newJString(labName))
+  add(query_564221, "api-version", newJString(apiVersion))
+  add(query_564221, "$expand", newJString(Expand))
+  add(path_564220, "name", newJString(name))
+  add(path_564220, "subscriptionId", newJString(subscriptionId))
+  add(path_564220, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564220, "artifactSourceName", newJString(artifactSourceName))
+  result = call_564219.call(path_564220, query_564221, nil, nil, nil)
 
-var artifactsGet* = Call_ArtifactsGet_568308(name: "artifactsGet",
+var artifactsGet* = Call_ArtifactsGet_564208(name: "artifactsGet",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DevTestLab/labs/{labName}/artifactsources/{artifactSourceName}/artifacts/{name}",
-    validator: validate_ArtifactsGet_568309, base: "", url: url_ArtifactsGet_568310,
+    validator: validate_ArtifactsGet_564209, base: "", url: url_ArtifactsGet_564210,
     schemes: {Scheme.Https})
 type
-  Call_ArtifactsGenerateArmTemplate_568322 = ref object of OpenApiRestCall_567650
-proc url_ArtifactsGenerateArmTemplate_568324(protocol: Scheme; host: string;
+  Call_ArtifactsGenerateArmTemplate_564222 = ref object of OpenApiRestCall_563548
+proc url_ArtifactsGenerateArmTemplate_564224(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1502,51 +1503,50 @@ proc url_ArtifactsGenerateArmTemplate_568324(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ArtifactsGenerateArmTemplate_568323(path: JsonNode; query: JsonNode;
+proc validate_ArtifactsGenerateArmTemplate_564223(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Generates an ARM template for the given artifact, uploads the required files to a storage account, and validates the generated artifact.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
+  ##   labName: JString (required)
+  ##          : The name of the lab.
   ##   name: JString (required)
   ##       : The name of the artifact.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   ##   artifactSourceName: JString (required)
   ##                     : The name of the artifact source.
-  ##   labName: JString (required)
-  ##          : The name of the lab.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568325 = path.getOrDefault("resourceGroupName")
-  valid_568325 = validateParameter(valid_568325, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `labName` field"
+  var valid_564225 = path.getOrDefault("labName")
+  valid_564225 = validateParameter(valid_564225, JString, required = true,
                                  default = nil)
-  if valid_568325 != nil:
-    section.add "resourceGroupName", valid_568325
-  var valid_568326 = path.getOrDefault("name")
-  valid_568326 = validateParameter(valid_568326, JString, required = true,
+  if valid_564225 != nil:
+    section.add "labName", valid_564225
+  var valid_564226 = path.getOrDefault("name")
+  valid_564226 = validateParameter(valid_564226, JString, required = true,
                                  default = nil)
-  if valid_568326 != nil:
-    section.add "name", valid_568326
-  var valid_568327 = path.getOrDefault("subscriptionId")
-  valid_568327 = validateParameter(valid_568327, JString, required = true,
+  if valid_564226 != nil:
+    section.add "name", valid_564226
+  var valid_564227 = path.getOrDefault("subscriptionId")
+  valid_564227 = validateParameter(valid_564227, JString, required = true,
                                  default = nil)
-  if valid_568327 != nil:
-    section.add "subscriptionId", valid_568327
-  var valid_568328 = path.getOrDefault("artifactSourceName")
-  valid_568328 = validateParameter(valid_568328, JString, required = true,
+  if valid_564227 != nil:
+    section.add "subscriptionId", valid_564227
+  var valid_564228 = path.getOrDefault("resourceGroupName")
+  valid_564228 = validateParameter(valid_564228, JString, required = true,
                                  default = nil)
-  if valid_568328 != nil:
-    section.add "artifactSourceName", valid_568328
-  var valid_568329 = path.getOrDefault("labName")
-  valid_568329 = validateParameter(valid_568329, JString, required = true,
+  if valid_564228 != nil:
+    section.add "resourceGroupName", valid_564228
+  var valid_564229 = path.getOrDefault("artifactSourceName")
+  valid_564229 = validateParameter(valid_564229, JString, required = true,
                                  default = nil)
-  if valid_568329 != nil:
-    section.add "labName", valid_568329
+  if valid_564229 != nil:
+    section.add "artifactSourceName", valid_564229
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1554,11 +1554,11 @@ proc validate_ArtifactsGenerateArmTemplate_568323(path: JsonNode; query: JsonNod
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568330 = query.getOrDefault("api-version")
-  valid_568330 = validateParameter(valid_568330, JString, required = true,
+  var valid_564230 = query.getOrDefault("api-version")
+  valid_564230 = validateParameter(valid_564230, JString, required = true,
                                  default = newJString("2016-05-15"))
-  if valid_568330 != nil:
-    section.add "api-version", valid_568330
+  if valid_564230 != nil:
+    section.add "api-version", valid_564230
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1572,60 +1572,60 @@ proc validate_ArtifactsGenerateArmTemplate_568323(path: JsonNode; query: JsonNod
   if body != nil:
     result.add "body", body
 
-proc call*(call_568332: Call_ArtifactsGenerateArmTemplate_568322; path: JsonNode;
+proc call*(call_564232: Call_ArtifactsGenerateArmTemplate_564222; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Generates an ARM template for the given artifact, uploads the required files to a storage account, and validates the generated artifact.
   ## 
-  let valid = call_568332.validator(path, query, header, formData, body)
-  let scheme = call_568332.pickScheme
+  let valid = call_564232.validator(path, query, header, formData, body)
+  let scheme = call_564232.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568332.url(scheme.get, call_568332.host, call_568332.base,
-                         call_568332.route, valid.getOrDefault("path"),
+  let url = call_564232.url(scheme.get, call_564232.host, call_564232.base,
+                         call_564232.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568332, url, valid)
+  result = hook(call_564232, url, valid)
 
-proc call*(call_568333: Call_ArtifactsGenerateArmTemplate_568322;
-          resourceGroupName: string; name: string; subscriptionId: string;
-          artifactSourceName: string; labName: string;
-          generateArmTemplateRequest: JsonNode; apiVersion: string = "2016-05-15"): Recallable =
+proc call*(call_564233: Call_ArtifactsGenerateArmTemplate_564222; labName: string;
+          generateArmTemplateRequest: JsonNode; name: string;
+          subscriptionId: string; resourceGroupName: string;
+          artifactSourceName: string; apiVersion: string = "2016-05-15"): Recallable =
   ## artifactsGenerateArmTemplate
   ## Generates an ARM template for the given artifact, uploads the required files to a storage account, and validates the generated artifact.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   labName: string (required)
+  ##          : The name of the lab.
   ##   apiVersion: string (required)
   ##             : Client API version.
+  ##   generateArmTemplateRequest: JObject (required)
+  ##                             : Parameters for generating an ARM template for deploying artifacts.
   ##   name: string (required)
   ##       : The name of the artifact.
   ##   subscriptionId: string (required)
   ##                 : The subscription ID.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   artifactSourceName: string (required)
   ##                     : The name of the artifact source.
-  ##   labName: string (required)
-  ##          : The name of the lab.
-  ##   generateArmTemplateRequest: JObject (required)
-  ##                             : Parameters for generating an ARM template for deploying artifacts.
-  var path_568334 = newJObject()
-  var query_568335 = newJObject()
-  var body_568336 = newJObject()
-  add(path_568334, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568335, "api-version", newJString(apiVersion))
-  add(path_568334, "name", newJString(name))
-  add(path_568334, "subscriptionId", newJString(subscriptionId))
-  add(path_568334, "artifactSourceName", newJString(artifactSourceName))
-  add(path_568334, "labName", newJString(labName))
+  var path_564234 = newJObject()
+  var query_564235 = newJObject()
+  var body_564236 = newJObject()
+  add(path_564234, "labName", newJString(labName))
+  add(query_564235, "api-version", newJString(apiVersion))
   if generateArmTemplateRequest != nil:
-    body_568336 = generateArmTemplateRequest
-  result = call_568333.call(path_568334, query_568335, nil, nil, body_568336)
+    body_564236 = generateArmTemplateRequest
+  add(path_564234, "name", newJString(name))
+  add(path_564234, "subscriptionId", newJString(subscriptionId))
+  add(path_564234, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564234, "artifactSourceName", newJString(artifactSourceName))
+  result = call_564233.call(path_564234, query_564235, nil, nil, body_564236)
 
-var artifactsGenerateArmTemplate* = Call_ArtifactsGenerateArmTemplate_568322(
+var artifactsGenerateArmTemplate* = Call_ArtifactsGenerateArmTemplate_564222(
     name: "artifactsGenerateArmTemplate", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DevTestLab/labs/{labName}/artifactsources/{artifactSourceName}/artifacts/{name}/generateArmTemplate",
-    validator: validate_ArtifactsGenerateArmTemplate_568323, base: "",
-    url: url_ArtifactsGenerateArmTemplate_568324, schemes: {Scheme.Https})
+    validator: validate_ArtifactsGenerateArmTemplate_564223, base: "",
+    url: url_ArtifactsGenerateArmTemplate_564224, schemes: {Scheme.Https})
 type
-  Call_ArtifactSourcesCreateOrUpdate_568350 = ref object of OpenApiRestCall_567650
-proc url_ArtifactSourcesCreateOrUpdate_568352(protocol: Scheme; host: string;
+  Call_ArtifactSourcesCreateOrUpdate_564250 = ref object of OpenApiRestCall_563548
+proc url_ArtifactSourcesCreateOrUpdate_564252(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1650,44 +1650,43 @@ proc url_ArtifactSourcesCreateOrUpdate_568352(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ArtifactSourcesCreateOrUpdate_568351(path: JsonNode; query: JsonNode;
+proc validate_ArtifactSourcesCreateOrUpdate_564251(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Create or replace an existing artifact source.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
+  ##   labName: JString (required)
+  ##          : The name of the lab.
   ##   name: JString (required)
   ##       : The name of the artifact source.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID.
-  ##   labName: JString (required)
-  ##          : The name of the lab.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568353 = path.getOrDefault("resourceGroupName")
-  valid_568353 = validateParameter(valid_568353, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `labName` field"
+  var valid_564253 = path.getOrDefault("labName")
+  valid_564253 = validateParameter(valid_564253, JString, required = true,
                                  default = nil)
-  if valid_568353 != nil:
-    section.add "resourceGroupName", valid_568353
-  var valid_568354 = path.getOrDefault("name")
-  valid_568354 = validateParameter(valid_568354, JString, required = true,
+  if valid_564253 != nil:
+    section.add "labName", valid_564253
+  var valid_564254 = path.getOrDefault("name")
+  valid_564254 = validateParameter(valid_564254, JString, required = true,
                                  default = nil)
-  if valid_568354 != nil:
-    section.add "name", valid_568354
-  var valid_568355 = path.getOrDefault("subscriptionId")
-  valid_568355 = validateParameter(valid_568355, JString, required = true,
+  if valid_564254 != nil:
+    section.add "name", valid_564254
+  var valid_564255 = path.getOrDefault("subscriptionId")
+  valid_564255 = validateParameter(valid_564255, JString, required = true,
                                  default = nil)
-  if valid_568355 != nil:
-    section.add "subscriptionId", valid_568355
-  var valid_568356 = path.getOrDefault("labName")
-  valid_568356 = validateParameter(valid_568356, JString, required = true,
+  if valid_564255 != nil:
+    section.add "subscriptionId", valid_564255
+  var valid_564256 = path.getOrDefault("resourceGroupName")
+  valid_564256 = validateParameter(valid_564256, JString, required = true,
                                  default = nil)
-  if valid_568356 != nil:
-    section.add "labName", valid_568356
+  if valid_564256 != nil:
+    section.add "resourceGroupName", valid_564256
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1695,11 +1694,11 @@ proc validate_ArtifactSourcesCreateOrUpdate_568351(path: JsonNode; query: JsonNo
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568357 = query.getOrDefault("api-version")
-  valid_568357 = validateParameter(valid_568357, JString, required = true,
+  var valid_564257 = query.getOrDefault("api-version")
+  valid_564257 = validateParameter(valid_564257, JString, required = true,
                                  default = newJString("2016-05-15"))
-  if valid_568357 != nil:
-    section.add "api-version", valid_568357
+  if valid_564257 != nil:
+    section.add "api-version", valid_564257
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1713,56 +1712,56 @@ proc validate_ArtifactSourcesCreateOrUpdate_568351(path: JsonNode; query: JsonNo
   if body != nil:
     result.add "body", body
 
-proc call*(call_568359: Call_ArtifactSourcesCreateOrUpdate_568350; path: JsonNode;
+proc call*(call_564259: Call_ArtifactSourcesCreateOrUpdate_564250; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Create or replace an existing artifact source.
   ## 
-  let valid = call_568359.validator(path, query, header, formData, body)
-  let scheme = call_568359.pickScheme
+  let valid = call_564259.validator(path, query, header, formData, body)
+  let scheme = call_564259.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568359.url(scheme.get, call_568359.host, call_568359.base,
-                         call_568359.route, valid.getOrDefault("path"),
+  let url = call_564259.url(scheme.get, call_564259.host, call_564259.base,
+                         call_564259.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568359, url, valid)
+  result = hook(call_564259, url, valid)
 
-proc call*(call_568360: Call_ArtifactSourcesCreateOrUpdate_568350;
-          resourceGroupName: string; name: string; artifactSource: JsonNode;
-          subscriptionId: string; labName: string; apiVersion: string = "2016-05-15"): Recallable =
+proc call*(call_564260: Call_ArtifactSourcesCreateOrUpdate_564250; labName: string;
+          name: string; subscriptionId: string; artifactSource: JsonNode;
+          resourceGroupName: string; apiVersion: string = "2016-05-15"): Recallable =
   ## artifactSourcesCreateOrUpdate
   ## Create or replace an existing artifact source.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   labName: string (required)
+  ##          : The name of the lab.
   ##   apiVersion: string (required)
   ##             : Client API version.
   ##   name: string (required)
   ##       : The name of the artifact source.
-  ##   artifactSource: JObject (required)
-  ##                 : Properties of an artifact source.
   ##   subscriptionId: string (required)
   ##                 : The subscription ID.
-  ##   labName: string (required)
-  ##          : The name of the lab.
-  var path_568361 = newJObject()
-  var query_568362 = newJObject()
-  var body_568363 = newJObject()
-  add(path_568361, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568362, "api-version", newJString(apiVersion))
-  add(path_568361, "name", newJString(name))
+  ##   artifactSource: JObject (required)
+  ##                 : Properties of an artifact source.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564261 = newJObject()
+  var query_564262 = newJObject()
+  var body_564263 = newJObject()
+  add(path_564261, "labName", newJString(labName))
+  add(query_564262, "api-version", newJString(apiVersion))
+  add(path_564261, "name", newJString(name))
+  add(path_564261, "subscriptionId", newJString(subscriptionId))
   if artifactSource != nil:
-    body_568363 = artifactSource
-  add(path_568361, "subscriptionId", newJString(subscriptionId))
-  add(path_568361, "labName", newJString(labName))
-  result = call_568360.call(path_568361, query_568362, nil, nil, body_568363)
+    body_564263 = artifactSource
+  add(path_564261, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564260.call(path_564261, query_564262, nil, nil, body_564263)
 
-var artifactSourcesCreateOrUpdate* = Call_ArtifactSourcesCreateOrUpdate_568350(
+var artifactSourcesCreateOrUpdate* = Call_ArtifactSourcesCreateOrUpdate_564250(
     name: "artifactSourcesCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DevTestLab/labs/{labName}/artifactsources/{name}",
-    validator: validate_ArtifactSourcesCreateOrUpdate_568351, base: "",
-    url: url_ArtifactSourcesCreateOrUpdate_568352, schemes: {Scheme.Https})
+    validator: validate_ArtifactSourcesCreateOrUpdate_564251, base: "",
+    url: url_ArtifactSourcesCreateOrUpdate_564252, schemes: {Scheme.Https})
 type
-  Call_ArtifactSourcesGet_568337 = ref object of OpenApiRestCall_567650
-proc url_ArtifactSourcesGet_568339(protocol: Scheme; host: string; base: string;
+  Call_ArtifactSourcesGet_564237 = ref object of OpenApiRestCall_563548
+proc url_ArtifactSourcesGet_564239(protocol: Scheme; host: string; base: string;
                                   route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1787,7 +1786,7 @@ proc url_ArtifactSourcesGet_568339(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ArtifactSourcesGet_568338(path: JsonNode; query: JsonNode;
+proc validate_ArtifactSourcesGet_564238(path: JsonNode; query: JsonNode;
                                        header: JsonNode; formData: JsonNode;
                                        body: JsonNode): JsonNode =
   ## Get artifact source.
@@ -1795,56 +1794,55 @@ proc validate_ArtifactSourcesGet_568338(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
+  ##   labName: JString (required)
+  ##          : The name of the lab.
   ##   name: JString (required)
   ##       : The name of the artifact source.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID.
-  ##   labName: JString (required)
-  ##          : The name of the lab.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568340 = path.getOrDefault("resourceGroupName")
-  valid_568340 = validateParameter(valid_568340, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `labName` field"
+  var valid_564240 = path.getOrDefault("labName")
+  valid_564240 = validateParameter(valid_564240, JString, required = true,
                                  default = nil)
-  if valid_568340 != nil:
-    section.add "resourceGroupName", valid_568340
-  var valid_568341 = path.getOrDefault("name")
-  valid_568341 = validateParameter(valid_568341, JString, required = true,
+  if valid_564240 != nil:
+    section.add "labName", valid_564240
+  var valid_564241 = path.getOrDefault("name")
+  valid_564241 = validateParameter(valid_564241, JString, required = true,
                                  default = nil)
-  if valid_568341 != nil:
-    section.add "name", valid_568341
-  var valid_568342 = path.getOrDefault("subscriptionId")
-  valid_568342 = validateParameter(valid_568342, JString, required = true,
+  if valid_564241 != nil:
+    section.add "name", valid_564241
+  var valid_564242 = path.getOrDefault("subscriptionId")
+  valid_564242 = validateParameter(valid_564242, JString, required = true,
                                  default = nil)
-  if valid_568342 != nil:
-    section.add "subscriptionId", valid_568342
-  var valid_568343 = path.getOrDefault("labName")
-  valid_568343 = validateParameter(valid_568343, JString, required = true,
+  if valid_564242 != nil:
+    section.add "subscriptionId", valid_564242
+  var valid_564243 = path.getOrDefault("resourceGroupName")
+  valid_564243 = validateParameter(valid_564243, JString, required = true,
                                  default = nil)
-  if valid_568343 != nil:
-    section.add "labName", valid_568343
+  if valid_564243 != nil:
+    section.add "resourceGroupName", valid_564243
   result.add "path", section
   ## parameters in `query` object:
-  ##   $expand: JString
-  ##          : Specify the $expand query. Example: 'properties($select=displayName)'
   ##   api-version: JString (required)
   ##              : Client API version.
+  ##   $expand: JString
+  ##          : Specify the $expand query. Example: 'properties($select=displayName)'
   section = newJObject()
-  var valid_568344 = query.getOrDefault("$expand")
-  valid_568344 = validateParameter(valid_568344, JString, required = false,
-                                 default = nil)
-  if valid_568344 != nil:
-    section.add "$expand", valid_568344
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568345 = query.getOrDefault("api-version")
-  valid_568345 = validateParameter(valid_568345, JString, required = true,
+  var valid_564244 = query.getOrDefault("api-version")
+  valid_564244 = validateParameter(valid_564244, JString, required = true,
                                  default = newJString("2016-05-15"))
-  if valid_568345 != nil:
-    section.add "api-version", valid_568345
+  if valid_564244 != nil:
+    section.add "api-version", valid_564244
+  var valid_564245 = query.getOrDefault("$expand")
+  valid_564245 = validateParameter(valid_564245, JString, required = false,
+                                 default = nil)
+  if valid_564245 != nil:
+    section.add "$expand", valid_564245
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1853,54 +1851,54 @@ proc validate_ArtifactSourcesGet_568338(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568346: Call_ArtifactSourcesGet_568337; path: JsonNode;
+proc call*(call_564246: Call_ArtifactSourcesGet_564237; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get artifact source.
   ## 
-  let valid = call_568346.validator(path, query, header, formData, body)
-  let scheme = call_568346.pickScheme
+  let valid = call_564246.validator(path, query, header, formData, body)
+  let scheme = call_564246.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568346.url(scheme.get, call_568346.host, call_568346.base,
-                         call_568346.route, valid.getOrDefault("path"),
+  let url = call_564246.url(scheme.get, call_564246.host, call_564246.base,
+                         call_564246.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568346, url, valid)
+  result = hook(call_564246, url, valid)
 
-proc call*(call_568347: Call_ArtifactSourcesGet_568337; resourceGroupName: string;
-          name: string; subscriptionId: string; labName: string; Expand: string = "";
-          apiVersion: string = "2016-05-15"): Recallable =
+proc call*(call_564247: Call_ArtifactSourcesGet_564237; labName: string;
+          name: string; subscriptionId: string; resourceGroupName: string;
+          apiVersion: string = "2016-05-15"; Expand: string = ""): Recallable =
   ## artifactSourcesGet
   ## Get artifact source.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   labName: string (required)
+  ##          : The name of the lab.
+  ##   apiVersion: string (required)
+  ##             : Client API version.
   ##   Expand: string
   ##         : Specify the $expand query. Example: 'properties($select=displayName)'
   ##   name: string (required)
   ##       : The name of the artifact source.
-  ##   apiVersion: string (required)
-  ##             : Client API version.
   ##   subscriptionId: string (required)
   ##                 : The subscription ID.
-  ##   labName: string (required)
-  ##          : The name of the lab.
-  var path_568348 = newJObject()
-  var query_568349 = newJObject()
-  add(path_568348, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568349, "$expand", newJString(Expand))
-  add(path_568348, "name", newJString(name))
-  add(query_568349, "api-version", newJString(apiVersion))
-  add(path_568348, "subscriptionId", newJString(subscriptionId))
-  add(path_568348, "labName", newJString(labName))
-  result = call_568347.call(path_568348, query_568349, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564248 = newJObject()
+  var query_564249 = newJObject()
+  add(path_564248, "labName", newJString(labName))
+  add(query_564249, "api-version", newJString(apiVersion))
+  add(query_564249, "$expand", newJString(Expand))
+  add(path_564248, "name", newJString(name))
+  add(path_564248, "subscriptionId", newJString(subscriptionId))
+  add(path_564248, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564247.call(path_564248, query_564249, nil, nil, nil)
 
-var artifactSourcesGet* = Call_ArtifactSourcesGet_568337(
+var artifactSourcesGet* = Call_ArtifactSourcesGet_564237(
     name: "artifactSourcesGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DevTestLab/labs/{labName}/artifactsources/{name}",
-    validator: validate_ArtifactSourcesGet_568338, base: "",
-    url: url_ArtifactSourcesGet_568339, schemes: {Scheme.Https})
+    validator: validate_ArtifactSourcesGet_564238, base: "",
+    url: url_ArtifactSourcesGet_564239, schemes: {Scheme.Https})
 type
-  Call_ArtifactSourcesUpdate_568376 = ref object of OpenApiRestCall_567650
-proc url_ArtifactSourcesUpdate_568378(protocol: Scheme; host: string; base: string;
+  Call_ArtifactSourcesUpdate_564276 = ref object of OpenApiRestCall_563548
+proc url_ArtifactSourcesUpdate_564278(protocol: Scheme; host: string; base: string;
                                      route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1925,44 +1923,43 @@ proc url_ArtifactSourcesUpdate_568378(protocol: Scheme; host: string; base: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ArtifactSourcesUpdate_568377(path: JsonNode; query: JsonNode;
+proc validate_ArtifactSourcesUpdate_564277(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Modify properties of artifact sources.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
+  ##   labName: JString (required)
+  ##          : The name of the lab.
   ##   name: JString (required)
   ##       : The name of the artifact source.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID.
-  ##   labName: JString (required)
-  ##          : The name of the lab.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568379 = path.getOrDefault("resourceGroupName")
-  valid_568379 = validateParameter(valid_568379, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `labName` field"
+  var valid_564279 = path.getOrDefault("labName")
+  valid_564279 = validateParameter(valid_564279, JString, required = true,
                                  default = nil)
-  if valid_568379 != nil:
-    section.add "resourceGroupName", valid_568379
-  var valid_568380 = path.getOrDefault("name")
-  valid_568380 = validateParameter(valid_568380, JString, required = true,
+  if valid_564279 != nil:
+    section.add "labName", valid_564279
+  var valid_564280 = path.getOrDefault("name")
+  valid_564280 = validateParameter(valid_564280, JString, required = true,
                                  default = nil)
-  if valid_568380 != nil:
-    section.add "name", valid_568380
-  var valid_568381 = path.getOrDefault("subscriptionId")
-  valid_568381 = validateParameter(valid_568381, JString, required = true,
+  if valid_564280 != nil:
+    section.add "name", valid_564280
+  var valid_564281 = path.getOrDefault("subscriptionId")
+  valid_564281 = validateParameter(valid_564281, JString, required = true,
                                  default = nil)
-  if valid_568381 != nil:
-    section.add "subscriptionId", valid_568381
-  var valid_568382 = path.getOrDefault("labName")
-  valid_568382 = validateParameter(valid_568382, JString, required = true,
+  if valid_564281 != nil:
+    section.add "subscriptionId", valid_564281
+  var valid_564282 = path.getOrDefault("resourceGroupName")
+  valid_564282 = validateParameter(valid_564282, JString, required = true,
                                  default = nil)
-  if valid_568382 != nil:
-    section.add "labName", valid_568382
+  if valid_564282 != nil:
+    section.add "resourceGroupName", valid_564282
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1970,11 +1967,11 @@ proc validate_ArtifactSourcesUpdate_568377(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568383 = query.getOrDefault("api-version")
-  valid_568383 = validateParameter(valid_568383, JString, required = true,
+  var valid_564283 = query.getOrDefault("api-version")
+  valid_564283 = validateParameter(valid_564283, JString, required = true,
                                  default = newJString("2016-05-15"))
-  if valid_568383 != nil:
-    section.add "api-version", valid_568383
+  if valid_564283 != nil:
+    section.add "api-version", valid_564283
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1988,56 +1985,56 @@ proc validate_ArtifactSourcesUpdate_568377(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568385: Call_ArtifactSourcesUpdate_568376; path: JsonNode;
+proc call*(call_564285: Call_ArtifactSourcesUpdate_564276; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Modify properties of artifact sources.
   ## 
-  let valid = call_568385.validator(path, query, header, formData, body)
-  let scheme = call_568385.pickScheme
+  let valid = call_564285.validator(path, query, header, formData, body)
+  let scheme = call_564285.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568385.url(scheme.get, call_568385.host, call_568385.base,
-                         call_568385.route, valid.getOrDefault("path"),
+  let url = call_564285.url(scheme.get, call_564285.host, call_564285.base,
+                         call_564285.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568385, url, valid)
+  result = hook(call_564285, url, valid)
 
-proc call*(call_568386: Call_ArtifactSourcesUpdate_568376;
-          resourceGroupName: string; name: string; artifactSource: JsonNode;
-          subscriptionId: string; labName: string; apiVersion: string = "2016-05-15"): Recallable =
+proc call*(call_564286: Call_ArtifactSourcesUpdate_564276; labName: string;
+          name: string; subscriptionId: string; artifactSource: JsonNode;
+          resourceGroupName: string; apiVersion: string = "2016-05-15"): Recallable =
   ## artifactSourcesUpdate
   ## Modify properties of artifact sources.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   labName: string (required)
+  ##          : The name of the lab.
   ##   apiVersion: string (required)
   ##             : Client API version.
   ##   name: string (required)
   ##       : The name of the artifact source.
-  ##   artifactSource: JObject (required)
-  ##                 : Properties of an artifact source.
   ##   subscriptionId: string (required)
   ##                 : The subscription ID.
-  ##   labName: string (required)
-  ##          : The name of the lab.
-  var path_568387 = newJObject()
-  var query_568388 = newJObject()
-  var body_568389 = newJObject()
-  add(path_568387, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568388, "api-version", newJString(apiVersion))
-  add(path_568387, "name", newJString(name))
+  ##   artifactSource: JObject (required)
+  ##                 : Properties of an artifact source.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564287 = newJObject()
+  var query_564288 = newJObject()
+  var body_564289 = newJObject()
+  add(path_564287, "labName", newJString(labName))
+  add(query_564288, "api-version", newJString(apiVersion))
+  add(path_564287, "name", newJString(name))
+  add(path_564287, "subscriptionId", newJString(subscriptionId))
   if artifactSource != nil:
-    body_568389 = artifactSource
-  add(path_568387, "subscriptionId", newJString(subscriptionId))
-  add(path_568387, "labName", newJString(labName))
-  result = call_568386.call(path_568387, query_568388, nil, nil, body_568389)
+    body_564289 = artifactSource
+  add(path_564287, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564286.call(path_564287, query_564288, nil, nil, body_564289)
 
-var artifactSourcesUpdate* = Call_ArtifactSourcesUpdate_568376(
+var artifactSourcesUpdate* = Call_ArtifactSourcesUpdate_564276(
     name: "artifactSourcesUpdate", meth: HttpMethod.HttpPatch,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DevTestLab/labs/{labName}/artifactsources/{name}",
-    validator: validate_ArtifactSourcesUpdate_568377, base: "",
-    url: url_ArtifactSourcesUpdate_568378, schemes: {Scheme.Https})
+    validator: validate_ArtifactSourcesUpdate_564277, base: "",
+    url: url_ArtifactSourcesUpdate_564278, schemes: {Scheme.Https})
 type
-  Call_ArtifactSourcesDelete_568364 = ref object of OpenApiRestCall_567650
-proc url_ArtifactSourcesDelete_568366(protocol: Scheme; host: string; base: string;
+  Call_ArtifactSourcesDelete_564264 = ref object of OpenApiRestCall_563548
+proc url_ArtifactSourcesDelete_564266(protocol: Scheme; host: string; base: string;
                                      route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2062,44 +2059,43 @@ proc url_ArtifactSourcesDelete_568366(protocol: Scheme; host: string; base: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ArtifactSourcesDelete_568365(path: JsonNode; query: JsonNode;
+proc validate_ArtifactSourcesDelete_564265(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Delete artifact source.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
+  ##   labName: JString (required)
+  ##          : The name of the lab.
   ##   name: JString (required)
   ##       : The name of the artifact source.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID.
-  ##   labName: JString (required)
-  ##          : The name of the lab.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568367 = path.getOrDefault("resourceGroupName")
-  valid_568367 = validateParameter(valid_568367, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `labName` field"
+  var valid_564267 = path.getOrDefault("labName")
+  valid_564267 = validateParameter(valid_564267, JString, required = true,
                                  default = nil)
-  if valid_568367 != nil:
-    section.add "resourceGroupName", valid_568367
-  var valid_568368 = path.getOrDefault("name")
-  valid_568368 = validateParameter(valid_568368, JString, required = true,
+  if valid_564267 != nil:
+    section.add "labName", valid_564267
+  var valid_564268 = path.getOrDefault("name")
+  valid_564268 = validateParameter(valid_564268, JString, required = true,
                                  default = nil)
-  if valid_568368 != nil:
-    section.add "name", valid_568368
-  var valid_568369 = path.getOrDefault("subscriptionId")
-  valid_568369 = validateParameter(valid_568369, JString, required = true,
+  if valid_564268 != nil:
+    section.add "name", valid_564268
+  var valid_564269 = path.getOrDefault("subscriptionId")
+  valid_564269 = validateParameter(valid_564269, JString, required = true,
                                  default = nil)
-  if valid_568369 != nil:
-    section.add "subscriptionId", valid_568369
-  var valid_568370 = path.getOrDefault("labName")
-  valid_568370 = validateParameter(valid_568370, JString, required = true,
+  if valid_564269 != nil:
+    section.add "subscriptionId", valid_564269
+  var valid_564270 = path.getOrDefault("resourceGroupName")
+  valid_564270 = validateParameter(valid_564270, JString, required = true,
                                  default = nil)
-  if valid_568370 != nil:
-    section.add "labName", valid_568370
+  if valid_564270 != nil:
+    section.add "resourceGroupName", valid_564270
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2107,11 +2103,11 @@ proc validate_ArtifactSourcesDelete_568365(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568371 = query.getOrDefault("api-version")
-  valid_568371 = validateParameter(valid_568371, JString, required = true,
+  var valid_564271 = query.getOrDefault("api-version")
+  valid_564271 = validateParameter(valid_564271, JString, required = true,
                                  default = newJString("2016-05-15"))
-  if valid_568371 != nil:
-    section.add "api-version", valid_568371
+  if valid_564271 != nil:
+    section.add "api-version", valid_564271
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2120,51 +2116,51 @@ proc validate_ArtifactSourcesDelete_568365(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568372: Call_ArtifactSourcesDelete_568364; path: JsonNode;
+proc call*(call_564272: Call_ArtifactSourcesDelete_564264; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Delete artifact source.
   ## 
-  let valid = call_568372.validator(path, query, header, formData, body)
-  let scheme = call_568372.pickScheme
+  let valid = call_564272.validator(path, query, header, formData, body)
+  let scheme = call_564272.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568372.url(scheme.get, call_568372.host, call_568372.base,
-                         call_568372.route, valid.getOrDefault("path"),
+  let url = call_564272.url(scheme.get, call_564272.host, call_564272.base,
+                         call_564272.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568372, url, valid)
+  result = hook(call_564272, url, valid)
 
-proc call*(call_568373: Call_ArtifactSourcesDelete_568364;
-          resourceGroupName: string; name: string; subscriptionId: string;
-          labName: string; apiVersion: string = "2016-05-15"): Recallable =
+proc call*(call_564273: Call_ArtifactSourcesDelete_564264; labName: string;
+          name: string; subscriptionId: string; resourceGroupName: string;
+          apiVersion: string = "2016-05-15"): Recallable =
   ## artifactSourcesDelete
   ## Delete artifact source.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   labName: string (required)
+  ##          : The name of the lab.
   ##   apiVersion: string (required)
   ##             : Client API version.
   ##   name: string (required)
   ##       : The name of the artifact source.
   ##   subscriptionId: string (required)
   ##                 : The subscription ID.
-  ##   labName: string (required)
-  ##          : The name of the lab.
-  var path_568374 = newJObject()
-  var query_568375 = newJObject()
-  add(path_568374, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568375, "api-version", newJString(apiVersion))
-  add(path_568374, "name", newJString(name))
-  add(path_568374, "subscriptionId", newJString(subscriptionId))
-  add(path_568374, "labName", newJString(labName))
-  result = call_568373.call(path_568374, query_568375, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564274 = newJObject()
+  var query_564275 = newJObject()
+  add(path_564274, "labName", newJString(labName))
+  add(query_564275, "api-version", newJString(apiVersion))
+  add(path_564274, "name", newJString(name))
+  add(path_564274, "subscriptionId", newJString(subscriptionId))
+  add(path_564274, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564273.call(path_564274, query_564275, nil, nil, nil)
 
-var artifactSourcesDelete* = Call_ArtifactSourcesDelete_568364(
+var artifactSourcesDelete* = Call_ArtifactSourcesDelete_564264(
     name: "artifactSourcesDelete", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DevTestLab/labs/{labName}/artifactsources/{name}",
-    validator: validate_ArtifactSourcesDelete_568365, base: "",
-    url: url_ArtifactSourcesDelete_568366, schemes: {Scheme.Https})
+    validator: validate_ArtifactSourcesDelete_564265, base: "",
+    url: url_ArtifactSourcesDelete_564266, schemes: {Scheme.Https})
 type
-  Call_CostsCreateOrUpdate_568403 = ref object of OpenApiRestCall_567650
-proc url_CostsCreateOrUpdate_568405(protocol: Scheme; host: string; base: string;
+  Call_CostsCreateOrUpdate_564303 = ref object of OpenApiRestCall_563548
+proc url_CostsCreateOrUpdate_564305(protocol: Scheme; host: string; base: string;
                                    route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2189,7 +2185,7 @@ proc url_CostsCreateOrUpdate_568405(protocol: Scheme; host: string; base: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_CostsCreateOrUpdate_568404(path: JsonNode; query: JsonNode;
+proc validate_CostsCreateOrUpdate_564304(path: JsonNode; query: JsonNode;
                                         header: JsonNode; formData: JsonNode;
                                         body: JsonNode): JsonNode =
   ## Create or replace an existing cost.
@@ -2197,37 +2193,36 @@ proc validate_CostsCreateOrUpdate_568404(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
+  ##   labName: JString (required)
+  ##          : The name of the lab.
   ##   name: JString (required)
   ##       : The name of the cost.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID.
-  ##   labName: JString (required)
-  ##          : The name of the lab.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568406 = path.getOrDefault("resourceGroupName")
-  valid_568406 = validateParameter(valid_568406, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `labName` field"
+  var valid_564306 = path.getOrDefault("labName")
+  valid_564306 = validateParameter(valid_564306, JString, required = true,
                                  default = nil)
-  if valid_568406 != nil:
-    section.add "resourceGroupName", valid_568406
-  var valid_568407 = path.getOrDefault("name")
-  valid_568407 = validateParameter(valid_568407, JString, required = true,
+  if valid_564306 != nil:
+    section.add "labName", valid_564306
+  var valid_564307 = path.getOrDefault("name")
+  valid_564307 = validateParameter(valid_564307, JString, required = true,
                                  default = nil)
-  if valid_568407 != nil:
-    section.add "name", valid_568407
-  var valid_568408 = path.getOrDefault("subscriptionId")
-  valid_568408 = validateParameter(valid_568408, JString, required = true,
+  if valid_564307 != nil:
+    section.add "name", valid_564307
+  var valid_564308 = path.getOrDefault("subscriptionId")
+  valid_564308 = validateParameter(valid_564308, JString, required = true,
                                  default = nil)
-  if valid_568408 != nil:
-    section.add "subscriptionId", valid_568408
-  var valid_568409 = path.getOrDefault("labName")
-  valid_568409 = validateParameter(valid_568409, JString, required = true,
+  if valid_564308 != nil:
+    section.add "subscriptionId", valid_564308
+  var valid_564309 = path.getOrDefault("resourceGroupName")
+  valid_564309 = validateParameter(valid_564309, JString, required = true,
                                  default = nil)
-  if valid_568409 != nil:
-    section.add "labName", valid_568409
+  if valid_564309 != nil:
+    section.add "resourceGroupName", valid_564309
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2235,11 +2230,11 @@ proc validate_CostsCreateOrUpdate_568404(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568410 = query.getOrDefault("api-version")
-  valid_568410 = validateParameter(valid_568410, JString, required = true,
+  var valid_564310 = query.getOrDefault("api-version")
+  valid_564310 = validateParameter(valid_564310, JString, required = true,
                                  default = newJString("2016-05-15"))
-  if valid_568410 != nil:
-    section.add "api-version", valid_568410
+  if valid_564310 != nil:
+    section.add "api-version", valid_564310
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2253,56 +2248,56 @@ proc validate_CostsCreateOrUpdate_568404(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568412: Call_CostsCreateOrUpdate_568403; path: JsonNode;
+proc call*(call_564312: Call_CostsCreateOrUpdate_564303; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Create or replace an existing cost.
   ## 
-  let valid = call_568412.validator(path, query, header, formData, body)
-  let scheme = call_568412.pickScheme
+  let valid = call_564312.validator(path, query, header, formData, body)
+  let scheme = call_564312.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568412.url(scheme.get, call_568412.host, call_568412.base,
-                         call_568412.route, valid.getOrDefault("path"),
+  let url = call_564312.url(scheme.get, call_564312.host, call_564312.base,
+                         call_564312.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568412, url, valid)
+  result = hook(call_564312, url, valid)
 
-proc call*(call_568413: Call_CostsCreateOrUpdate_568403; resourceGroupName: string;
-          name: string; subscriptionId: string; labName: string; labCost: JsonNode;
-          apiVersion: string = "2016-05-15"): Recallable =
+proc call*(call_564313: Call_CostsCreateOrUpdate_564303; labName: string;
+          name: string; subscriptionId: string; resourceGroupName: string;
+          labCost: JsonNode; apiVersion: string = "2016-05-15"): Recallable =
   ## costsCreateOrUpdate
   ## Create or replace an existing cost.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   labName: string (required)
+  ##          : The name of the lab.
   ##   apiVersion: string (required)
   ##             : Client API version.
   ##   name: string (required)
   ##       : The name of the cost.
   ##   subscriptionId: string (required)
   ##                 : The subscription ID.
-  ##   labName: string (required)
-  ##          : The name of the lab.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   labCost: JObject (required)
   ##          : A cost item.
-  var path_568414 = newJObject()
-  var query_568415 = newJObject()
-  var body_568416 = newJObject()
-  add(path_568414, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568415, "api-version", newJString(apiVersion))
-  add(path_568414, "name", newJString(name))
-  add(path_568414, "subscriptionId", newJString(subscriptionId))
-  add(path_568414, "labName", newJString(labName))
+  var path_564314 = newJObject()
+  var query_564315 = newJObject()
+  var body_564316 = newJObject()
+  add(path_564314, "labName", newJString(labName))
+  add(query_564315, "api-version", newJString(apiVersion))
+  add(path_564314, "name", newJString(name))
+  add(path_564314, "subscriptionId", newJString(subscriptionId))
+  add(path_564314, "resourceGroupName", newJString(resourceGroupName))
   if labCost != nil:
-    body_568416 = labCost
-  result = call_568413.call(path_568414, query_568415, nil, nil, body_568416)
+    body_564316 = labCost
+  result = call_564313.call(path_564314, query_564315, nil, nil, body_564316)
 
-var costsCreateOrUpdate* = Call_CostsCreateOrUpdate_568403(
+var costsCreateOrUpdate* = Call_CostsCreateOrUpdate_564303(
     name: "costsCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DevTestLab/labs/{labName}/costs/{name}",
-    validator: validate_CostsCreateOrUpdate_568404, base: "",
-    url: url_CostsCreateOrUpdate_568405, schemes: {Scheme.Https})
+    validator: validate_CostsCreateOrUpdate_564304, base: "",
+    url: url_CostsCreateOrUpdate_564305, schemes: {Scheme.Https})
 type
-  Call_CostsGet_568390 = ref object of OpenApiRestCall_567650
-proc url_CostsGet_568392(protocol: Scheme; host: string; base: string; route: string;
+  Call_CostsGet_564290 = ref object of OpenApiRestCall_563548
+proc url_CostsGet_564292(protocol: Scheme; host: string; base: string; route: string;
                         path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2327,63 +2322,62 @@ proc url_CostsGet_568392(protocol: Scheme; host: string; base: string; route: st
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_CostsGet_568391(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_CostsGet_564291(path: JsonNode; query: JsonNode; header: JsonNode;
                              formData: JsonNode; body: JsonNode): JsonNode =
   ## Get cost.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
+  ##   labName: JString (required)
+  ##          : The name of the lab.
   ##   name: JString (required)
   ##       : The name of the cost.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID.
-  ##   labName: JString (required)
-  ##          : The name of the lab.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568393 = path.getOrDefault("resourceGroupName")
-  valid_568393 = validateParameter(valid_568393, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `labName` field"
+  var valid_564293 = path.getOrDefault("labName")
+  valid_564293 = validateParameter(valid_564293, JString, required = true,
                                  default = nil)
-  if valid_568393 != nil:
-    section.add "resourceGroupName", valid_568393
-  var valid_568394 = path.getOrDefault("name")
-  valid_568394 = validateParameter(valid_568394, JString, required = true,
+  if valid_564293 != nil:
+    section.add "labName", valid_564293
+  var valid_564294 = path.getOrDefault("name")
+  valid_564294 = validateParameter(valid_564294, JString, required = true,
                                  default = nil)
-  if valid_568394 != nil:
-    section.add "name", valid_568394
-  var valid_568395 = path.getOrDefault("subscriptionId")
-  valid_568395 = validateParameter(valid_568395, JString, required = true,
+  if valid_564294 != nil:
+    section.add "name", valid_564294
+  var valid_564295 = path.getOrDefault("subscriptionId")
+  valid_564295 = validateParameter(valid_564295, JString, required = true,
                                  default = nil)
-  if valid_568395 != nil:
-    section.add "subscriptionId", valid_568395
-  var valid_568396 = path.getOrDefault("labName")
-  valid_568396 = validateParameter(valid_568396, JString, required = true,
+  if valid_564295 != nil:
+    section.add "subscriptionId", valid_564295
+  var valid_564296 = path.getOrDefault("resourceGroupName")
+  valid_564296 = validateParameter(valid_564296, JString, required = true,
                                  default = nil)
-  if valid_568396 != nil:
-    section.add "labName", valid_568396
+  if valid_564296 != nil:
+    section.add "resourceGroupName", valid_564296
   result.add "path", section
   ## parameters in `query` object:
-  ##   $expand: JString
-  ##          : Specify the $expand query. Example: 'properties($expand=labCostDetails)'
   ##   api-version: JString (required)
   ##              : Client API version.
+  ##   $expand: JString
+  ##          : Specify the $expand query. Example: 'properties($expand=labCostDetails)'
   section = newJObject()
-  var valid_568397 = query.getOrDefault("$expand")
-  valid_568397 = validateParameter(valid_568397, JString, required = false,
-                                 default = nil)
-  if valid_568397 != nil:
-    section.add "$expand", valid_568397
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568398 = query.getOrDefault("api-version")
-  valid_568398 = validateParameter(valid_568398, JString, required = true,
+  var valid_564297 = query.getOrDefault("api-version")
+  valid_564297 = validateParameter(valid_564297, JString, required = true,
                                  default = newJString("2016-05-15"))
-  if valid_568398 != nil:
-    section.add "api-version", valid_568398
+  if valid_564297 != nil:
+    section.add "api-version", valid_564297
+  var valid_564298 = query.getOrDefault("$expand")
+  valid_564298 = validateParameter(valid_564298, JString, required = false,
+                                 default = nil)
+  if valid_564298 != nil:
+    section.add "$expand", valid_564298
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2392,54 +2386,54 @@ proc validate_CostsGet_568391(path: JsonNode; query: JsonNode; header: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568399: Call_CostsGet_568390; path: JsonNode; query: JsonNode;
+proc call*(call_564299: Call_CostsGet_564290; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get cost.
   ## 
-  let valid = call_568399.validator(path, query, header, formData, body)
-  let scheme = call_568399.pickScheme
+  let valid = call_564299.validator(path, query, header, formData, body)
+  let scheme = call_564299.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568399.url(scheme.get, call_568399.host, call_568399.base,
-                         call_568399.route, valid.getOrDefault("path"),
+  let url = call_564299.url(scheme.get, call_564299.host, call_564299.base,
+                         call_564299.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568399, url, valid)
+  result = hook(call_564299, url, valid)
 
-proc call*(call_568400: Call_CostsGet_568390; resourceGroupName: string;
-          name: string; subscriptionId: string; labName: string; Expand: string = "";
-          apiVersion: string = "2016-05-15"): Recallable =
+proc call*(call_564300: Call_CostsGet_564290; labName: string; name: string;
+          subscriptionId: string; resourceGroupName: string;
+          apiVersion: string = "2016-05-15"; Expand: string = ""): Recallable =
   ## costsGet
   ## Get cost.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   labName: string (required)
+  ##          : The name of the lab.
+  ##   apiVersion: string (required)
+  ##             : Client API version.
   ##   Expand: string
   ##         : Specify the $expand query. Example: 'properties($expand=labCostDetails)'
   ##   name: string (required)
   ##       : The name of the cost.
-  ##   apiVersion: string (required)
-  ##             : Client API version.
   ##   subscriptionId: string (required)
   ##                 : The subscription ID.
-  ##   labName: string (required)
-  ##          : The name of the lab.
-  var path_568401 = newJObject()
-  var query_568402 = newJObject()
-  add(path_568401, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568402, "$expand", newJString(Expand))
-  add(path_568401, "name", newJString(name))
-  add(query_568402, "api-version", newJString(apiVersion))
-  add(path_568401, "subscriptionId", newJString(subscriptionId))
-  add(path_568401, "labName", newJString(labName))
-  result = call_568400.call(path_568401, query_568402, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564301 = newJObject()
+  var query_564302 = newJObject()
+  add(path_564301, "labName", newJString(labName))
+  add(query_564302, "api-version", newJString(apiVersion))
+  add(query_564302, "$expand", newJString(Expand))
+  add(path_564301, "name", newJString(name))
+  add(path_564301, "subscriptionId", newJString(subscriptionId))
+  add(path_564301, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564300.call(path_564301, query_564302, nil, nil, nil)
 
-var costsGet* = Call_CostsGet_568390(name: "costsGet", meth: HttpMethod.HttpGet,
+var costsGet* = Call_CostsGet_564290(name: "costsGet", meth: HttpMethod.HttpGet,
                                   host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DevTestLab/labs/{labName}/costs/{name}",
-                                  validator: validate_CostsGet_568391, base: "",
-                                  url: url_CostsGet_568392,
+                                  validator: validate_CostsGet_564291, base: "",
+                                  url: url_CostsGet_564292,
                                   schemes: {Scheme.Https})
 type
-  Call_CustomImagesList_568417 = ref object of OpenApiRestCall_567650
-proc url_CustomImagesList_568419(protocol: Scheme; host: string; base: string;
+  Call_CustomImagesList_564317 = ref object of OpenApiRestCall_563548
+proc url_CustomImagesList_564319(protocol: Scheme; host: string; base: string;
                                 route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2462,7 +2456,7 @@ proc url_CustomImagesList_568419(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_CustomImagesList_568418(path: JsonNode; query: JsonNode;
+proc validate_CustomImagesList_564318(path: JsonNode; query: JsonNode;
                                      header: JsonNode; formData: JsonNode;
                                      body: JsonNode): JsonNode =
   ## List custom images in a given lab.
@@ -2470,69 +2464,68 @@ proc validate_CustomImagesList_568418(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
-  ##   subscriptionId: JString (required)
-  ##                 : The subscription ID.
   ##   labName: JString (required)
   ##          : The name of the lab.
+  ##   subscriptionId: JString (required)
+  ##                 : The subscription ID.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568420 = path.getOrDefault("resourceGroupName")
-  valid_568420 = validateParameter(valid_568420, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `labName` field"
+  var valid_564320 = path.getOrDefault("labName")
+  valid_564320 = validateParameter(valid_564320, JString, required = true,
                                  default = nil)
-  if valid_568420 != nil:
-    section.add "resourceGroupName", valid_568420
-  var valid_568421 = path.getOrDefault("subscriptionId")
-  valid_568421 = validateParameter(valid_568421, JString, required = true,
+  if valid_564320 != nil:
+    section.add "labName", valid_564320
+  var valid_564321 = path.getOrDefault("subscriptionId")
+  valid_564321 = validateParameter(valid_564321, JString, required = true,
                                  default = nil)
-  if valid_568421 != nil:
-    section.add "subscriptionId", valid_568421
-  var valid_568422 = path.getOrDefault("labName")
-  valid_568422 = validateParameter(valid_568422, JString, required = true,
+  if valid_564321 != nil:
+    section.add "subscriptionId", valid_564321
+  var valid_564322 = path.getOrDefault("resourceGroupName")
+  valid_564322 = validateParameter(valid_564322, JString, required = true,
                                  default = nil)
-  if valid_568422 != nil:
-    section.add "labName", valid_568422
+  if valid_564322 != nil:
+    section.add "resourceGroupName", valid_564322
   result.add "path", section
   ## parameters in `query` object:
-  ##   $orderby: JString
-  ##           : The ordering expression for the results, using OData notation.
-  ##   $expand: JString
-  ##          : Specify the $expand query. Example: 'properties($select=vm)'
-  ##   api-version: JString (required)
-  ##              : Client API version.
   ##   $top: JInt
   ##       : The maximum number of resources to return from the operation.
+  ##   api-version: JString (required)
+  ##              : Client API version.
+  ##   $expand: JString
+  ##          : Specify the $expand query. Example: 'properties($select=vm)'
+  ##   $orderby: JString
+  ##           : The ordering expression for the results, using OData notation.
   ##   $filter: JString
   ##          : The filter to apply to the operation.
   section = newJObject()
-  var valid_568423 = query.getOrDefault("$orderby")
-  valid_568423 = validateParameter(valid_568423, JString, required = false,
-                                 default = nil)
-  if valid_568423 != nil:
-    section.add "$orderby", valid_568423
-  var valid_568424 = query.getOrDefault("$expand")
-  valid_568424 = validateParameter(valid_568424, JString, required = false,
-                                 default = nil)
-  if valid_568424 != nil:
-    section.add "$expand", valid_568424
+  var valid_564323 = query.getOrDefault("$top")
+  valid_564323 = validateParameter(valid_564323, JInt, required = false, default = nil)
+  if valid_564323 != nil:
+    section.add "$top", valid_564323
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568425 = query.getOrDefault("api-version")
-  valid_568425 = validateParameter(valid_568425, JString, required = true,
+  var valid_564324 = query.getOrDefault("api-version")
+  valid_564324 = validateParameter(valid_564324, JString, required = true,
                                  default = newJString("2016-05-15"))
-  if valid_568425 != nil:
-    section.add "api-version", valid_568425
-  var valid_568426 = query.getOrDefault("$top")
-  valid_568426 = validateParameter(valid_568426, JInt, required = false, default = nil)
-  if valid_568426 != nil:
-    section.add "$top", valid_568426
-  var valid_568427 = query.getOrDefault("$filter")
-  valid_568427 = validateParameter(valid_568427, JString, required = false,
+  if valid_564324 != nil:
+    section.add "api-version", valid_564324
+  var valid_564325 = query.getOrDefault("$expand")
+  valid_564325 = validateParameter(valid_564325, JString, required = false,
                                  default = nil)
-  if valid_568427 != nil:
-    section.add "$filter", valid_568427
+  if valid_564325 != nil:
+    section.add "$expand", valid_564325
+  var valid_564326 = query.getOrDefault("$orderby")
+  valid_564326 = validateParameter(valid_564326, JString, required = false,
+                                 default = nil)
+  if valid_564326 != nil:
+    section.add "$orderby", valid_564326
+  var valid_564327 = query.getOrDefault("$filter")
+  valid_564327 = validateParameter(valid_564327, JString, required = false,
+                                 default = nil)
+  if valid_564327 != nil:
+    section.add "$filter", valid_564327
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2541,60 +2534,60 @@ proc validate_CustomImagesList_568418(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568428: Call_CustomImagesList_568417; path: JsonNode;
+proc call*(call_564328: Call_CustomImagesList_564317; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## List custom images in a given lab.
   ## 
-  let valid = call_568428.validator(path, query, header, formData, body)
-  let scheme = call_568428.pickScheme
+  let valid = call_564328.validator(path, query, header, formData, body)
+  let scheme = call_564328.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568428.url(scheme.get, call_568428.host, call_568428.base,
-                         call_568428.route, valid.getOrDefault("path"),
+  let url = call_564328.url(scheme.get, call_564328.host, call_564328.base,
+                         call_564328.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568428, url, valid)
+  result = hook(call_564328, url, valid)
 
-proc call*(call_568429: Call_CustomImagesList_568417; resourceGroupName: string;
-          subscriptionId: string; labName: string; Orderby: string = "";
-          Expand: string = ""; apiVersion: string = "2016-05-15"; Top: int = 0;
+proc call*(call_564329: Call_CustomImagesList_564317; labName: string;
+          subscriptionId: string; resourceGroupName: string; Top: int = 0;
+          apiVersion: string = "2016-05-15"; Expand: string = ""; Orderby: string = "";
           Filter: string = ""): Recallable =
   ## customImagesList
   ## List custom images in a given lab.
+  ##   labName: string (required)
+  ##          : The name of the lab.
+  ##   Top: int
+  ##      : The maximum number of resources to return from the operation.
+  ##   apiVersion: string (required)
+  ##             : Client API version.
+  ##   Expand: string
+  ##         : Specify the $expand query. Example: 'properties($select=vm)'
+  ##   subscriptionId: string (required)
+  ##                 : The subscription ID.
   ##   Orderby: string
   ##          : The ordering expression for the results, using OData notation.
   ##   resourceGroupName: string (required)
   ##                    : The name of the resource group.
-  ##   Expand: string
-  ##         : Specify the $expand query. Example: 'properties($select=vm)'
-  ##   apiVersion: string (required)
-  ##             : Client API version.
-  ##   subscriptionId: string (required)
-  ##                 : The subscription ID.
-  ##   Top: int
-  ##      : The maximum number of resources to return from the operation.
-  ##   labName: string (required)
-  ##          : The name of the lab.
   ##   Filter: string
   ##         : The filter to apply to the operation.
-  var path_568430 = newJObject()
-  var query_568431 = newJObject()
-  add(query_568431, "$orderby", newJString(Orderby))
-  add(path_568430, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568431, "$expand", newJString(Expand))
-  add(query_568431, "api-version", newJString(apiVersion))
-  add(path_568430, "subscriptionId", newJString(subscriptionId))
-  add(query_568431, "$top", newJInt(Top))
-  add(path_568430, "labName", newJString(labName))
-  add(query_568431, "$filter", newJString(Filter))
-  result = call_568429.call(path_568430, query_568431, nil, nil, nil)
+  var path_564330 = newJObject()
+  var query_564331 = newJObject()
+  add(path_564330, "labName", newJString(labName))
+  add(query_564331, "$top", newJInt(Top))
+  add(query_564331, "api-version", newJString(apiVersion))
+  add(query_564331, "$expand", newJString(Expand))
+  add(path_564330, "subscriptionId", newJString(subscriptionId))
+  add(query_564331, "$orderby", newJString(Orderby))
+  add(path_564330, "resourceGroupName", newJString(resourceGroupName))
+  add(query_564331, "$filter", newJString(Filter))
+  result = call_564329.call(path_564330, query_564331, nil, nil, nil)
 
-var customImagesList* = Call_CustomImagesList_568417(name: "customImagesList",
+var customImagesList* = Call_CustomImagesList_564317(name: "customImagesList",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DevTestLab/labs/{labName}/customimages",
-    validator: validate_CustomImagesList_568418, base: "",
-    url: url_CustomImagesList_568419, schemes: {Scheme.Https})
+    validator: validate_CustomImagesList_564318, base: "",
+    url: url_CustomImagesList_564319, schemes: {Scheme.Https})
 type
-  Call_CustomImagesCreateOrUpdate_568445 = ref object of OpenApiRestCall_567650
-proc url_CustomImagesCreateOrUpdate_568447(protocol: Scheme; host: string;
+  Call_CustomImagesCreateOrUpdate_564345 = ref object of OpenApiRestCall_563548
+proc url_CustomImagesCreateOrUpdate_564347(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2619,44 +2612,43 @@ proc url_CustomImagesCreateOrUpdate_568447(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_CustomImagesCreateOrUpdate_568446(path: JsonNode; query: JsonNode;
+proc validate_CustomImagesCreateOrUpdate_564346(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Create or replace an existing custom image. This operation can take a while to complete.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
+  ##   labName: JString (required)
+  ##          : The name of the lab.
   ##   name: JString (required)
   ##       : The name of the custom image.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID.
-  ##   labName: JString (required)
-  ##          : The name of the lab.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568448 = path.getOrDefault("resourceGroupName")
-  valid_568448 = validateParameter(valid_568448, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `labName` field"
+  var valid_564348 = path.getOrDefault("labName")
+  valid_564348 = validateParameter(valid_564348, JString, required = true,
                                  default = nil)
-  if valid_568448 != nil:
-    section.add "resourceGroupName", valid_568448
-  var valid_568449 = path.getOrDefault("name")
-  valid_568449 = validateParameter(valid_568449, JString, required = true,
+  if valid_564348 != nil:
+    section.add "labName", valid_564348
+  var valid_564349 = path.getOrDefault("name")
+  valid_564349 = validateParameter(valid_564349, JString, required = true,
                                  default = nil)
-  if valid_568449 != nil:
-    section.add "name", valid_568449
-  var valid_568450 = path.getOrDefault("subscriptionId")
-  valid_568450 = validateParameter(valid_568450, JString, required = true,
+  if valid_564349 != nil:
+    section.add "name", valid_564349
+  var valid_564350 = path.getOrDefault("subscriptionId")
+  valid_564350 = validateParameter(valid_564350, JString, required = true,
                                  default = nil)
-  if valid_568450 != nil:
-    section.add "subscriptionId", valid_568450
-  var valid_568451 = path.getOrDefault("labName")
-  valid_568451 = validateParameter(valid_568451, JString, required = true,
+  if valid_564350 != nil:
+    section.add "subscriptionId", valid_564350
+  var valid_564351 = path.getOrDefault("resourceGroupName")
+  valid_564351 = validateParameter(valid_564351, JString, required = true,
                                  default = nil)
-  if valid_568451 != nil:
-    section.add "labName", valid_568451
+  if valid_564351 != nil:
+    section.add "resourceGroupName", valid_564351
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2664,11 +2656,11 @@ proc validate_CustomImagesCreateOrUpdate_568446(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568452 = query.getOrDefault("api-version")
-  valid_568452 = validateParameter(valid_568452, JString, required = true,
+  var valid_564352 = query.getOrDefault("api-version")
+  valid_564352 = validateParameter(valid_564352, JString, required = true,
                                  default = newJString("2016-05-15"))
-  if valid_568452 != nil:
-    section.add "api-version", valid_568452
+  if valid_564352 != nil:
+    section.add "api-version", valid_564352
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2682,56 +2674,56 @@ proc validate_CustomImagesCreateOrUpdate_568446(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568454: Call_CustomImagesCreateOrUpdate_568445; path: JsonNode;
+proc call*(call_564354: Call_CustomImagesCreateOrUpdate_564345; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Create or replace an existing custom image. This operation can take a while to complete.
   ## 
-  let valid = call_568454.validator(path, query, header, formData, body)
-  let scheme = call_568454.pickScheme
+  let valid = call_564354.validator(path, query, header, formData, body)
+  let scheme = call_564354.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568454.url(scheme.get, call_568454.host, call_568454.base,
-                         call_568454.route, valid.getOrDefault("path"),
+  let url = call_564354.url(scheme.get, call_564354.host, call_564354.base,
+                         call_564354.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568454, url, valid)
+  result = hook(call_564354, url, valid)
 
-proc call*(call_568455: Call_CustomImagesCreateOrUpdate_568445;
-          resourceGroupName: string; name: string; subscriptionId: string;
-          customImage: JsonNode; labName: string; apiVersion: string = "2016-05-15"): Recallable =
+proc call*(call_564355: Call_CustomImagesCreateOrUpdate_564345; labName: string;
+          customImage: JsonNode; name: string; subscriptionId: string;
+          resourceGroupName: string; apiVersion: string = "2016-05-15"): Recallable =
   ## customImagesCreateOrUpdate
   ## Create or replace an existing custom image. This operation can take a while to complete.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   labName: string (required)
+  ##          : The name of the lab.
+  ##   customImage: JObject (required)
+  ##              : A custom image.
   ##   apiVersion: string (required)
   ##             : Client API version.
   ##   name: string (required)
   ##       : The name of the custom image.
   ##   subscriptionId: string (required)
   ##                 : The subscription ID.
-  ##   customImage: JObject (required)
-  ##              : A custom image.
-  ##   labName: string (required)
-  ##          : The name of the lab.
-  var path_568456 = newJObject()
-  var query_568457 = newJObject()
-  var body_568458 = newJObject()
-  add(path_568456, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568457, "api-version", newJString(apiVersion))
-  add(path_568456, "name", newJString(name))
-  add(path_568456, "subscriptionId", newJString(subscriptionId))
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564356 = newJObject()
+  var query_564357 = newJObject()
+  var body_564358 = newJObject()
+  add(path_564356, "labName", newJString(labName))
   if customImage != nil:
-    body_568458 = customImage
-  add(path_568456, "labName", newJString(labName))
-  result = call_568455.call(path_568456, query_568457, nil, nil, body_568458)
+    body_564358 = customImage
+  add(query_564357, "api-version", newJString(apiVersion))
+  add(path_564356, "name", newJString(name))
+  add(path_564356, "subscriptionId", newJString(subscriptionId))
+  add(path_564356, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564355.call(path_564356, query_564357, nil, nil, body_564358)
 
-var customImagesCreateOrUpdate* = Call_CustomImagesCreateOrUpdate_568445(
+var customImagesCreateOrUpdate* = Call_CustomImagesCreateOrUpdate_564345(
     name: "customImagesCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DevTestLab/labs/{labName}/customimages/{name}",
-    validator: validate_CustomImagesCreateOrUpdate_568446, base: "",
-    url: url_CustomImagesCreateOrUpdate_568447, schemes: {Scheme.Https})
+    validator: validate_CustomImagesCreateOrUpdate_564346, base: "",
+    url: url_CustomImagesCreateOrUpdate_564347, schemes: {Scheme.Https})
 type
-  Call_CustomImagesGet_568432 = ref object of OpenApiRestCall_567650
-proc url_CustomImagesGet_568434(protocol: Scheme; host: string; base: string;
+  Call_CustomImagesGet_564332 = ref object of OpenApiRestCall_563548
+proc url_CustomImagesGet_564334(protocol: Scheme; host: string; base: string;
                                route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2756,7 +2748,7 @@ proc url_CustomImagesGet_568434(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_CustomImagesGet_568433(path: JsonNode; query: JsonNode;
+proc validate_CustomImagesGet_564333(path: JsonNode; query: JsonNode;
                                     header: JsonNode; formData: JsonNode;
                                     body: JsonNode): JsonNode =
   ## Get custom image.
@@ -2764,56 +2756,55 @@ proc validate_CustomImagesGet_568433(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
+  ##   labName: JString (required)
+  ##          : The name of the lab.
   ##   name: JString (required)
   ##       : The name of the custom image.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID.
-  ##   labName: JString (required)
-  ##          : The name of the lab.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568435 = path.getOrDefault("resourceGroupName")
-  valid_568435 = validateParameter(valid_568435, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `labName` field"
+  var valid_564335 = path.getOrDefault("labName")
+  valid_564335 = validateParameter(valid_564335, JString, required = true,
                                  default = nil)
-  if valid_568435 != nil:
-    section.add "resourceGroupName", valid_568435
-  var valid_568436 = path.getOrDefault("name")
-  valid_568436 = validateParameter(valid_568436, JString, required = true,
+  if valid_564335 != nil:
+    section.add "labName", valid_564335
+  var valid_564336 = path.getOrDefault("name")
+  valid_564336 = validateParameter(valid_564336, JString, required = true,
                                  default = nil)
-  if valid_568436 != nil:
-    section.add "name", valid_568436
-  var valid_568437 = path.getOrDefault("subscriptionId")
-  valid_568437 = validateParameter(valid_568437, JString, required = true,
+  if valid_564336 != nil:
+    section.add "name", valid_564336
+  var valid_564337 = path.getOrDefault("subscriptionId")
+  valid_564337 = validateParameter(valid_564337, JString, required = true,
                                  default = nil)
-  if valid_568437 != nil:
-    section.add "subscriptionId", valid_568437
-  var valid_568438 = path.getOrDefault("labName")
-  valid_568438 = validateParameter(valid_568438, JString, required = true,
+  if valid_564337 != nil:
+    section.add "subscriptionId", valid_564337
+  var valid_564338 = path.getOrDefault("resourceGroupName")
+  valid_564338 = validateParameter(valid_564338, JString, required = true,
                                  default = nil)
-  if valid_568438 != nil:
-    section.add "labName", valid_568438
+  if valid_564338 != nil:
+    section.add "resourceGroupName", valid_564338
   result.add "path", section
   ## parameters in `query` object:
-  ##   $expand: JString
-  ##          : Specify the $expand query. Example: 'properties($select=vm)'
   ##   api-version: JString (required)
   ##              : Client API version.
+  ##   $expand: JString
+  ##          : Specify the $expand query. Example: 'properties($select=vm)'
   section = newJObject()
-  var valid_568439 = query.getOrDefault("$expand")
-  valid_568439 = validateParameter(valid_568439, JString, required = false,
-                                 default = nil)
-  if valid_568439 != nil:
-    section.add "$expand", valid_568439
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568440 = query.getOrDefault("api-version")
-  valid_568440 = validateParameter(valid_568440, JString, required = true,
+  var valid_564339 = query.getOrDefault("api-version")
+  valid_564339 = validateParameter(valid_564339, JString, required = true,
                                  default = newJString("2016-05-15"))
-  if valid_568440 != nil:
-    section.add "api-version", valid_568440
+  if valid_564339 != nil:
+    section.add "api-version", valid_564339
+  var valid_564340 = query.getOrDefault("$expand")
+  valid_564340 = validateParameter(valid_564340, JString, required = false,
+                                 default = nil)
+  if valid_564340 != nil:
+    section.add "$expand", valid_564340
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2822,53 +2813,53 @@ proc validate_CustomImagesGet_568433(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568441: Call_CustomImagesGet_568432; path: JsonNode; query: JsonNode;
+proc call*(call_564341: Call_CustomImagesGet_564332; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get custom image.
   ## 
-  let valid = call_568441.validator(path, query, header, formData, body)
-  let scheme = call_568441.pickScheme
+  let valid = call_564341.validator(path, query, header, formData, body)
+  let scheme = call_564341.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568441.url(scheme.get, call_568441.host, call_568441.base,
-                         call_568441.route, valid.getOrDefault("path"),
+  let url = call_564341.url(scheme.get, call_564341.host, call_564341.base,
+                         call_564341.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568441, url, valid)
+  result = hook(call_564341, url, valid)
 
-proc call*(call_568442: Call_CustomImagesGet_568432; resourceGroupName: string;
-          name: string; subscriptionId: string; labName: string; Expand: string = "";
-          apiVersion: string = "2016-05-15"): Recallable =
+proc call*(call_564342: Call_CustomImagesGet_564332; labName: string; name: string;
+          subscriptionId: string; resourceGroupName: string;
+          apiVersion: string = "2016-05-15"; Expand: string = ""): Recallable =
   ## customImagesGet
   ## Get custom image.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   labName: string (required)
+  ##          : The name of the lab.
+  ##   apiVersion: string (required)
+  ##             : Client API version.
   ##   Expand: string
   ##         : Specify the $expand query. Example: 'properties($select=vm)'
   ##   name: string (required)
   ##       : The name of the custom image.
-  ##   apiVersion: string (required)
-  ##             : Client API version.
   ##   subscriptionId: string (required)
   ##                 : The subscription ID.
-  ##   labName: string (required)
-  ##          : The name of the lab.
-  var path_568443 = newJObject()
-  var query_568444 = newJObject()
-  add(path_568443, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568444, "$expand", newJString(Expand))
-  add(path_568443, "name", newJString(name))
-  add(query_568444, "api-version", newJString(apiVersion))
-  add(path_568443, "subscriptionId", newJString(subscriptionId))
-  add(path_568443, "labName", newJString(labName))
-  result = call_568442.call(path_568443, query_568444, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564343 = newJObject()
+  var query_564344 = newJObject()
+  add(path_564343, "labName", newJString(labName))
+  add(query_564344, "api-version", newJString(apiVersion))
+  add(query_564344, "$expand", newJString(Expand))
+  add(path_564343, "name", newJString(name))
+  add(path_564343, "subscriptionId", newJString(subscriptionId))
+  add(path_564343, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564342.call(path_564343, query_564344, nil, nil, nil)
 
-var customImagesGet* = Call_CustomImagesGet_568432(name: "customImagesGet",
+var customImagesGet* = Call_CustomImagesGet_564332(name: "customImagesGet",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DevTestLab/labs/{labName}/customimages/{name}",
-    validator: validate_CustomImagesGet_568433, base: "", url: url_CustomImagesGet_568434,
+    validator: validate_CustomImagesGet_564333, base: "", url: url_CustomImagesGet_564334,
     schemes: {Scheme.Https})
 type
-  Call_CustomImagesDelete_568459 = ref object of OpenApiRestCall_567650
-proc url_CustomImagesDelete_568461(protocol: Scheme; host: string; base: string;
+  Call_CustomImagesDelete_564359 = ref object of OpenApiRestCall_563548
+proc url_CustomImagesDelete_564361(protocol: Scheme; host: string; base: string;
                                   route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2893,7 +2884,7 @@ proc url_CustomImagesDelete_568461(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_CustomImagesDelete_568460(path: JsonNode; query: JsonNode;
+proc validate_CustomImagesDelete_564360(path: JsonNode; query: JsonNode;
                                        header: JsonNode; formData: JsonNode;
                                        body: JsonNode): JsonNode =
   ## Delete custom image. This operation can take a while to complete.
@@ -2901,37 +2892,36 @@ proc validate_CustomImagesDelete_568460(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
+  ##   labName: JString (required)
+  ##          : The name of the lab.
   ##   name: JString (required)
   ##       : The name of the custom image.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID.
-  ##   labName: JString (required)
-  ##          : The name of the lab.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568462 = path.getOrDefault("resourceGroupName")
-  valid_568462 = validateParameter(valid_568462, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `labName` field"
+  var valid_564362 = path.getOrDefault("labName")
+  valid_564362 = validateParameter(valid_564362, JString, required = true,
                                  default = nil)
-  if valid_568462 != nil:
-    section.add "resourceGroupName", valid_568462
-  var valid_568463 = path.getOrDefault("name")
-  valid_568463 = validateParameter(valid_568463, JString, required = true,
+  if valid_564362 != nil:
+    section.add "labName", valid_564362
+  var valid_564363 = path.getOrDefault("name")
+  valid_564363 = validateParameter(valid_564363, JString, required = true,
                                  default = nil)
-  if valid_568463 != nil:
-    section.add "name", valid_568463
-  var valid_568464 = path.getOrDefault("subscriptionId")
-  valid_568464 = validateParameter(valid_568464, JString, required = true,
+  if valid_564363 != nil:
+    section.add "name", valid_564363
+  var valid_564364 = path.getOrDefault("subscriptionId")
+  valid_564364 = validateParameter(valid_564364, JString, required = true,
                                  default = nil)
-  if valid_568464 != nil:
-    section.add "subscriptionId", valid_568464
-  var valid_568465 = path.getOrDefault("labName")
-  valid_568465 = validateParameter(valid_568465, JString, required = true,
+  if valid_564364 != nil:
+    section.add "subscriptionId", valid_564364
+  var valid_564365 = path.getOrDefault("resourceGroupName")
+  valid_564365 = validateParameter(valid_564365, JString, required = true,
                                  default = nil)
-  if valid_568465 != nil:
-    section.add "labName", valid_568465
+  if valid_564365 != nil:
+    section.add "resourceGroupName", valid_564365
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2939,11 +2929,11 @@ proc validate_CustomImagesDelete_568460(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568466 = query.getOrDefault("api-version")
-  valid_568466 = validateParameter(valid_568466, JString, required = true,
+  var valid_564366 = query.getOrDefault("api-version")
+  valid_564366 = validateParameter(valid_564366, JString, required = true,
                                  default = newJString("2016-05-15"))
-  if valid_568466 != nil:
-    section.add "api-version", valid_568466
+  if valid_564366 != nil:
+    section.add "api-version", valid_564366
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2952,51 +2942,51 @@ proc validate_CustomImagesDelete_568460(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568467: Call_CustomImagesDelete_568459; path: JsonNode;
+proc call*(call_564367: Call_CustomImagesDelete_564359; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Delete custom image. This operation can take a while to complete.
   ## 
-  let valid = call_568467.validator(path, query, header, formData, body)
-  let scheme = call_568467.pickScheme
+  let valid = call_564367.validator(path, query, header, formData, body)
+  let scheme = call_564367.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568467.url(scheme.get, call_568467.host, call_568467.base,
-                         call_568467.route, valid.getOrDefault("path"),
+  let url = call_564367.url(scheme.get, call_564367.host, call_564367.base,
+                         call_564367.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568467, url, valid)
+  result = hook(call_564367, url, valid)
 
-proc call*(call_568468: Call_CustomImagesDelete_568459; resourceGroupName: string;
-          name: string; subscriptionId: string; labName: string;
+proc call*(call_564368: Call_CustomImagesDelete_564359; labName: string;
+          name: string; subscriptionId: string; resourceGroupName: string;
           apiVersion: string = "2016-05-15"): Recallable =
   ## customImagesDelete
   ## Delete custom image. This operation can take a while to complete.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   labName: string (required)
+  ##          : The name of the lab.
   ##   apiVersion: string (required)
   ##             : Client API version.
   ##   name: string (required)
   ##       : The name of the custom image.
   ##   subscriptionId: string (required)
   ##                 : The subscription ID.
-  ##   labName: string (required)
-  ##          : The name of the lab.
-  var path_568469 = newJObject()
-  var query_568470 = newJObject()
-  add(path_568469, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568470, "api-version", newJString(apiVersion))
-  add(path_568469, "name", newJString(name))
-  add(path_568469, "subscriptionId", newJString(subscriptionId))
-  add(path_568469, "labName", newJString(labName))
-  result = call_568468.call(path_568469, query_568470, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564369 = newJObject()
+  var query_564370 = newJObject()
+  add(path_564369, "labName", newJString(labName))
+  add(query_564370, "api-version", newJString(apiVersion))
+  add(path_564369, "name", newJString(name))
+  add(path_564369, "subscriptionId", newJString(subscriptionId))
+  add(path_564369, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564368.call(path_564369, query_564370, nil, nil, nil)
 
-var customImagesDelete* = Call_CustomImagesDelete_568459(
+var customImagesDelete* = Call_CustomImagesDelete_564359(
     name: "customImagesDelete", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DevTestLab/labs/{labName}/customimages/{name}",
-    validator: validate_CustomImagesDelete_568460, base: "",
-    url: url_CustomImagesDelete_568461, schemes: {Scheme.Https})
+    validator: validate_CustomImagesDelete_564360, base: "",
+    url: url_CustomImagesDelete_564361, schemes: {Scheme.Https})
 type
-  Call_FormulasList_568471 = ref object of OpenApiRestCall_567650
-proc url_FormulasList_568473(protocol: Scheme; host: string; base: string;
+  Call_FormulasList_564371 = ref object of OpenApiRestCall_563548
+proc url_FormulasList_564373(protocol: Scheme; host: string; base: string;
                             route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -3019,76 +3009,75 @@ proc url_FormulasList_568473(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_FormulasList_568472(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_FormulasList_564372(path: JsonNode; query: JsonNode; header: JsonNode;
                                  formData: JsonNode; body: JsonNode): JsonNode =
   ## List formulas in a given lab.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
-  ##   subscriptionId: JString (required)
-  ##                 : The subscription ID.
   ##   labName: JString (required)
   ##          : The name of the lab.
+  ##   subscriptionId: JString (required)
+  ##                 : The subscription ID.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568474 = path.getOrDefault("resourceGroupName")
-  valid_568474 = validateParameter(valid_568474, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `labName` field"
+  var valid_564374 = path.getOrDefault("labName")
+  valid_564374 = validateParameter(valid_564374, JString, required = true,
                                  default = nil)
-  if valid_568474 != nil:
-    section.add "resourceGroupName", valid_568474
-  var valid_568475 = path.getOrDefault("subscriptionId")
-  valid_568475 = validateParameter(valid_568475, JString, required = true,
+  if valid_564374 != nil:
+    section.add "labName", valid_564374
+  var valid_564375 = path.getOrDefault("subscriptionId")
+  valid_564375 = validateParameter(valid_564375, JString, required = true,
                                  default = nil)
-  if valid_568475 != nil:
-    section.add "subscriptionId", valid_568475
-  var valid_568476 = path.getOrDefault("labName")
-  valid_568476 = validateParameter(valid_568476, JString, required = true,
+  if valid_564375 != nil:
+    section.add "subscriptionId", valid_564375
+  var valid_564376 = path.getOrDefault("resourceGroupName")
+  valid_564376 = validateParameter(valid_564376, JString, required = true,
                                  default = nil)
-  if valid_568476 != nil:
-    section.add "labName", valid_568476
+  if valid_564376 != nil:
+    section.add "resourceGroupName", valid_564376
   result.add "path", section
   ## parameters in `query` object:
-  ##   $orderby: JString
-  ##           : The ordering expression for the results, using OData notation.
-  ##   $expand: JString
-  ##          : Specify the $expand query. Example: 'properties($select=description)'
-  ##   api-version: JString (required)
-  ##              : Client API version.
   ##   $top: JInt
   ##       : The maximum number of resources to return from the operation.
+  ##   api-version: JString (required)
+  ##              : Client API version.
+  ##   $expand: JString
+  ##          : Specify the $expand query. Example: 'properties($select=description)'
+  ##   $orderby: JString
+  ##           : The ordering expression for the results, using OData notation.
   ##   $filter: JString
   ##          : The filter to apply to the operation.
   section = newJObject()
-  var valid_568477 = query.getOrDefault("$orderby")
-  valid_568477 = validateParameter(valid_568477, JString, required = false,
-                                 default = nil)
-  if valid_568477 != nil:
-    section.add "$orderby", valid_568477
-  var valid_568478 = query.getOrDefault("$expand")
-  valid_568478 = validateParameter(valid_568478, JString, required = false,
-                                 default = nil)
-  if valid_568478 != nil:
-    section.add "$expand", valid_568478
+  var valid_564377 = query.getOrDefault("$top")
+  valid_564377 = validateParameter(valid_564377, JInt, required = false, default = nil)
+  if valid_564377 != nil:
+    section.add "$top", valid_564377
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568479 = query.getOrDefault("api-version")
-  valid_568479 = validateParameter(valid_568479, JString, required = true,
+  var valid_564378 = query.getOrDefault("api-version")
+  valid_564378 = validateParameter(valid_564378, JString, required = true,
                                  default = newJString("2016-05-15"))
-  if valid_568479 != nil:
-    section.add "api-version", valid_568479
-  var valid_568480 = query.getOrDefault("$top")
-  valid_568480 = validateParameter(valid_568480, JInt, required = false, default = nil)
-  if valid_568480 != nil:
-    section.add "$top", valid_568480
-  var valid_568481 = query.getOrDefault("$filter")
-  valid_568481 = validateParameter(valid_568481, JString, required = false,
+  if valid_564378 != nil:
+    section.add "api-version", valid_564378
+  var valid_564379 = query.getOrDefault("$expand")
+  valid_564379 = validateParameter(valid_564379, JString, required = false,
                                  default = nil)
-  if valid_568481 != nil:
-    section.add "$filter", valid_568481
+  if valid_564379 != nil:
+    section.add "$expand", valid_564379
+  var valid_564380 = query.getOrDefault("$orderby")
+  valid_564380 = validateParameter(valid_564380, JString, required = false,
+                                 default = nil)
+  if valid_564380 != nil:
+    section.add "$orderby", valid_564380
+  var valid_564381 = query.getOrDefault("$filter")
+  valid_564381 = validateParameter(valid_564381, JString, required = false,
+                                 default = nil)
+  if valid_564381 != nil:
+    section.add "$filter", valid_564381
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3097,60 +3086,60 @@ proc validate_FormulasList_568472(path: JsonNode; query: JsonNode; header: JsonN
   if body != nil:
     result.add "body", body
 
-proc call*(call_568482: Call_FormulasList_568471; path: JsonNode; query: JsonNode;
+proc call*(call_564382: Call_FormulasList_564371; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## List formulas in a given lab.
   ## 
-  let valid = call_568482.validator(path, query, header, formData, body)
-  let scheme = call_568482.pickScheme
+  let valid = call_564382.validator(path, query, header, formData, body)
+  let scheme = call_564382.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568482.url(scheme.get, call_568482.host, call_568482.base,
-                         call_568482.route, valid.getOrDefault("path"),
+  let url = call_564382.url(scheme.get, call_564382.host, call_564382.base,
+                         call_564382.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568482, url, valid)
+  result = hook(call_564382, url, valid)
 
-proc call*(call_568483: Call_FormulasList_568471; resourceGroupName: string;
-          subscriptionId: string; labName: string; Orderby: string = "";
-          Expand: string = ""; apiVersion: string = "2016-05-15"; Top: int = 0;
+proc call*(call_564383: Call_FormulasList_564371; labName: string;
+          subscriptionId: string; resourceGroupName: string; Top: int = 0;
+          apiVersion: string = "2016-05-15"; Expand: string = ""; Orderby: string = "";
           Filter: string = ""): Recallable =
   ## formulasList
   ## List formulas in a given lab.
+  ##   labName: string (required)
+  ##          : The name of the lab.
+  ##   Top: int
+  ##      : The maximum number of resources to return from the operation.
+  ##   apiVersion: string (required)
+  ##             : Client API version.
+  ##   Expand: string
+  ##         : Specify the $expand query. Example: 'properties($select=description)'
+  ##   subscriptionId: string (required)
+  ##                 : The subscription ID.
   ##   Orderby: string
   ##          : The ordering expression for the results, using OData notation.
   ##   resourceGroupName: string (required)
   ##                    : The name of the resource group.
-  ##   Expand: string
-  ##         : Specify the $expand query. Example: 'properties($select=description)'
-  ##   apiVersion: string (required)
-  ##             : Client API version.
-  ##   subscriptionId: string (required)
-  ##                 : The subscription ID.
-  ##   Top: int
-  ##      : The maximum number of resources to return from the operation.
-  ##   labName: string (required)
-  ##          : The name of the lab.
   ##   Filter: string
   ##         : The filter to apply to the operation.
-  var path_568484 = newJObject()
-  var query_568485 = newJObject()
-  add(query_568485, "$orderby", newJString(Orderby))
-  add(path_568484, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568485, "$expand", newJString(Expand))
-  add(query_568485, "api-version", newJString(apiVersion))
-  add(path_568484, "subscriptionId", newJString(subscriptionId))
-  add(query_568485, "$top", newJInt(Top))
-  add(path_568484, "labName", newJString(labName))
-  add(query_568485, "$filter", newJString(Filter))
-  result = call_568483.call(path_568484, query_568485, nil, nil, nil)
+  var path_564384 = newJObject()
+  var query_564385 = newJObject()
+  add(path_564384, "labName", newJString(labName))
+  add(query_564385, "$top", newJInt(Top))
+  add(query_564385, "api-version", newJString(apiVersion))
+  add(query_564385, "$expand", newJString(Expand))
+  add(path_564384, "subscriptionId", newJString(subscriptionId))
+  add(query_564385, "$orderby", newJString(Orderby))
+  add(path_564384, "resourceGroupName", newJString(resourceGroupName))
+  add(query_564385, "$filter", newJString(Filter))
+  result = call_564383.call(path_564384, query_564385, nil, nil, nil)
 
-var formulasList* = Call_FormulasList_568471(name: "formulasList",
+var formulasList* = Call_FormulasList_564371(name: "formulasList",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DevTestLab/labs/{labName}/formulas",
-    validator: validate_FormulasList_568472, base: "", url: url_FormulasList_568473,
+    validator: validate_FormulasList_564372, base: "", url: url_FormulasList_564373,
     schemes: {Scheme.Https})
 type
-  Call_FormulasCreateOrUpdate_568499 = ref object of OpenApiRestCall_567650
-proc url_FormulasCreateOrUpdate_568501(protocol: Scheme; host: string; base: string;
+  Call_FormulasCreateOrUpdate_564399 = ref object of OpenApiRestCall_563548
+proc url_FormulasCreateOrUpdate_564401(protocol: Scheme; host: string; base: string;
                                       route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -3175,44 +3164,43 @@ proc url_FormulasCreateOrUpdate_568501(protocol: Scheme; host: string; base: str
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_FormulasCreateOrUpdate_568500(path: JsonNode; query: JsonNode;
+proc validate_FormulasCreateOrUpdate_564400(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Create or replace an existing Formula. This operation can take a while to complete.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
+  ##   labName: JString (required)
+  ##          : The name of the lab.
   ##   name: JString (required)
   ##       : The name of the formula.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID.
-  ##   labName: JString (required)
-  ##          : The name of the lab.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568502 = path.getOrDefault("resourceGroupName")
-  valid_568502 = validateParameter(valid_568502, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `labName` field"
+  var valid_564402 = path.getOrDefault("labName")
+  valid_564402 = validateParameter(valid_564402, JString, required = true,
                                  default = nil)
-  if valid_568502 != nil:
-    section.add "resourceGroupName", valid_568502
-  var valid_568503 = path.getOrDefault("name")
-  valid_568503 = validateParameter(valid_568503, JString, required = true,
+  if valid_564402 != nil:
+    section.add "labName", valid_564402
+  var valid_564403 = path.getOrDefault("name")
+  valid_564403 = validateParameter(valid_564403, JString, required = true,
                                  default = nil)
-  if valid_568503 != nil:
-    section.add "name", valid_568503
-  var valid_568504 = path.getOrDefault("subscriptionId")
-  valid_568504 = validateParameter(valid_568504, JString, required = true,
+  if valid_564403 != nil:
+    section.add "name", valid_564403
+  var valid_564404 = path.getOrDefault("subscriptionId")
+  valid_564404 = validateParameter(valid_564404, JString, required = true,
                                  default = nil)
-  if valid_568504 != nil:
-    section.add "subscriptionId", valid_568504
-  var valid_568505 = path.getOrDefault("labName")
-  valid_568505 = validateParameter(valid_568505, JString, required = true,
+  if valid_564404 != nil:
+    section.add "subscriptionId", valid_564404
+  var valid_564405 = path.getOrDefault("resourceGroupName")
+  valid_564405 = validateParameter(valid_564405, JString, required = true,
                                  default = nil)
-  if valid_568505 != nil:
-    section.add "labName", valid_568505
+  if valid_564405 != nil:
+    section.add "resourceGroupName", valid_564405
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -3220,11 +3208,11 @@ proc validate_FormulasCreateOrUpdate_568500(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568506 = query.getOrDefault("api-version")
-  valid_568506 = validateParameter(valid_568506, JString, required = true,
+  var valid_564406 = query.getOrDefault("api-version")
+  valid_564406 = validateParameter(valid_564406, JString, required = true,
                                  default = newJString("2016-05-15"))
-  if valid_568506 != nil:
-    section.add "api-version", valid_568506
+  if valid_564406 != nil:
+    section.add "api-version", valid_564406
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3238,56 +3226,56 @@ proc validate_FormulasCreateOrUpdate_568500(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568508: Call_FormulasCreateOrUpdate_568499; path: JsonNode;
+proc call*(call_564408: Call_FormulasCreateOrUpdate_564399; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Create or replace an existing Formula. This operation can take a while to complete.
   ## 
-  let valid = call_568508.validator(path, query, header, formData, body)
-  let scheme = call_568508.pickScheme
+  let valid = call_564408.validator(path, query, header, formData, body)
+  let scheme = call_564408.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568508.url(scheme.get, call_568508.host, call_568508.base,
-                         call_568508.route, valid.getOrDefault("path"),
+  let url = call_564408.url(scheme.get, call_564408.host, call_564408.base,
+                         call_564408.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568508, url, valid)
+  result = hook(call_564408, url, valid)
 
-proc call*(call_568509: Call_FormulasCreateOrUpdate_568499;
-          resourceGroupName: string; formula: JsonNode; name: string;
-          subscriptionId: string; labName: string; apiVersion: string = "2016-05-15"): Recallable =
+proc call*(call_564409: Call_FormulasCreateOrUpdate_564399; labName: string;
+          name: string; subscriptionId: string; resourceGroupName: string;
+          formula: JsonNode; apiVersion: string = "2016-05-15"): Recallable =
   ## formulasCreateOrUpdate
   ## Create or replace an existing Formula. This operation can take a while to complete.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
-  ##   formula: JObject (required)
-  ##          : A formula for creating a VM, specifying an image base and other parameters
+  ##   labName: string (required)
+  ##          : The name of the lab.
   ##   apiVersion: string (required)
   ##             : Client API version.
   ##   name: string (required)
   ##       : The name of the formula.
   ##   subscriptionId: string (required)
   ##                 : The subscription ID.
-  ##   labName: string (required)
-  ##          : The name of the lab.
-  var path_568510 = newJObject()
-  var query_568511 = newJObject()
-  var body_568512 = newJObject()
-  add(path_568510, "resourceGroupName", newJString(resourceGroupName))
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  ##   formula: JObject (required)
+  ##          : A formula for creating a VM, specifying an image base and other parameters
+  var path_564410 = newJObject()
+  var query_564411 = newJObject()
+  var body_564412 = newJObject()
+  add(path_564410, "labName", newJString(labName))
+  add(query_564411, "api-version", newJString(apiVersion))
+  add(path_564410, "name", newJString(name))
+  add(path_564410, "subscriptionId", newJString(subscriptionId))
+  add(path_564410, "resourceGroupName", newJString(resourceGroupName))
   if formula != nil:
-    body_568512 = formula
-  add(query_568511, "api-version", newJString(apiVersion))
-  add(path_568510, "name", newJString(name))
-  add(path_568510, "subscriptionId", newJString(subscriptionId))
-  add(path_568510, "labName", newJString(labName))
-  result = call_568509.call(path_568510, query_568511, nil, nil, body_568512)
+    body_564412 = formula
+  result = call_564409.call(path_564410, query_564411, nil, nil, body_564412)
 
-var formulasCreateOrUpdate* = Call_FormulasCreateOrUpdate_568499(
+var formulasCreateOrUpdate* = Call_FormulasCreateOrUpdate_564399(
     name: "formulasCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DevTestLab/labs/{labName}/formulas/{name}",
-    validator: validate_FormulasCreateOrUpdate_568500, base: "",
-    url: url_FormulasCreateOrUpdate_568501, schemes: {Scheme.Https})
+    validator: validate_FormulasCreateOrUpdate_564400, base: "",
+    url: url_FormulasCreateOrUpdate_564401, schemes: {Scheme.Https})
 type
-  Call_FormulasGet_568486 = ref object of OpenApiRestCall_567650
-proc url_FormulasGet_568488(protocol: Scheme; host: string; base: string;
+  Call_FormulasGet_564386 = ref object of OpenApiRestCall_563548
+proc url_FormulasGet_564388(protocol: Scheme; host: string; base: string;
                            route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -3312,63 +3300,62 @@ proc url_FormulasGet_568488(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_FormulasGet_568487(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_FormulasGet_564387(path: JsonNode; query: JsonNode; header: JsonNode;
                                 formData: JsonNode; body: JsonNode): JsonNode =
   ## Get formula.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
+  ##   labName: JString (required)
+  ##          : The name of the lab.
   ##   name: JString (required)
   ##       : The name of the formula.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID.
-  ##   labName: JString (required)
-  ##          : The name of the lab.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568489 = path.getOrDefault("resourceGroupName")
-  valid_568489 = validateParameter(valid_568489, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `labName` field"
+  var valid_564389 = path.getOrDefault("labName")
+  valid_564389 = validateParameter(valid_564389, JString, required = true,
                                  default = nil)
-  if valid_568489 != nil:
-    section.add "resourceGroupName", valid_568489
-  var valid_568490 = path.getOrDefault("name")
-  valid_568490 = validateParameter(valid_568490, JString, required = true,
+  if valid_564389 != nil:
+    section.add "labName", valid_564389
+  var valid_564390 = path.getOrDefault("name")
+  valid_564390 = validateParameter(valid_564390, JString, required = true,
                                  default = nil)
-  if valid_568490 != nil:
-    section.add "name", valid_568490
-  var valid_568491 = path.getOrDefault("subscriptionId")
-  valid_568491 = validateParameter(valid_568491, JString, required = true,
+  if valid_564390 != nil:
+    section.add "name", valid_564390
+  var valid_564391 = path.getOrDefault("subscriptionId")
+  valid_564391 = validateParameter(valid_564391, JString, required = true,
                                  default = nil)
-  if valid_568491 != nil:
-    section.add "subscriptionId", valid_568491
-  var valid_568492 = path.getOrDefault("labName")
-  valid_568492 = validateParameter(valid_568492, JString, required = true,
+  if valid_564391 != nil:
+    section.add "subscriptionId", valid_564391
+  var valid_564392 = path.getOrDefault("resourceGroupName")
+  valid_564392 = validateParameter(valid_564392, JString, required = true,
                                  default = nil)
-  if valid_568492 != nil:
-    section.add "labName", valid_568492
+  if valid_564392 != nil:
+    section.add "resourceGroupName", valid_564392
   result.add "path", section
   ## parameters in `query` object:
-  ##   $expand: JString
-  ##          : Specify the $expand query. Example: 'properties($select=description)'
   ##   api-version: JString (required)
   ##              : Client API version.
+  ##   $expand: JString
+  ##          : Specify the $expand query. Example: 'properties($select=description)'
   section = newJObject()
-  var valid_568493 = query.getOrDefault("$expand")
-  valid_568493 = validateParameter(valid_568493, JString, required = false,
-                                 default = nil)
-  if valid_568493 != nil:
-    section.add "$expand", valid_568493
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568494 = query.getOrDefault("api-version")
-  valid_568494 = validateParameter(valid_568494, JString, required = true,
+  var valid_564393 = query.getOrDefault("api-version")
+  valid_564393 = validateParameter(valid_564393, JString, required = true,
                                  default = newJString("2016-05-15"))
-  if valid_568494 != nil:
-    section.add "api-version", valid_568494
+  if valid_564393 != nil:
+    section.add "api-version", valid_564393
+  var valid_564394 = query.getOrDefault("$expand")
+  valid_564394 = validateParameter(valid_564394, JString, required = false,
+                                 default = nil)
+  if valid_564394 != nil:
+    section.add "$expand", valid_564394
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3377,55 +3364,55 @@ proc validate_FormulasGet_568487(path: JsonNode; query: JsonNode; header: JsonNo
   if body != nil:
     result.add "body", body
 
-proc call*(call_568495: Call_FormulasGet_568486; path: JsonNode; query: JsonNode;
+proc call*(call_564395: Call_FormulasGet_564386; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get formula.
   ## 
-  let valid = call_568495.validator(path, query, header, formData, body)
-  let scheme = call_568495.pickScheme
+  let valid = call_564395.validator(path, query, header, formData, body)
+  let scheme = call_564395.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568495.url(scheme.get, call_568495.host, call_568495.base,
-                         call_568495.route, valid.getOrDefault("path"),
+  let url = call_564395.url(scheme.get, call_564395.host, call_564395.base,
+                         call_564395.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568495, url, valid)
+  result = hook(call_564395, url, valid)
 
-proc call*(call_568496: Call_FormulasGet_568486; resourceGroupName: string;
-          name: string; subscriptionId: string; labName: string; Expand: string = "";
-          apiVersion: string = "2016-05-15"): Recallable =
+proc call*(call_564396: Call_FormulasGet_564386; labName: string; name: string;
+          subscriptionId: string; resourceGroupName: string;
+          apiVersion: string = "2016-05-15"; Expand: string = ""): Recallable =
   ## formulasGet
   ## Get formula.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   labName: string (required)
+  ##          : The name of the lab.
+  ##   apiVersion: string (required)
+  ##             : Client API version.
   ##   Expand: string
   ##         : Specify the $expand query. Example: 'properties($select=description)'
   ##   name: string (required)
   ##       : The name of the formula.
-  ##   apiVersion: string (required)
-  ##             : Client API version.
   ##   subscriptionId: string (required)
   ##                 : The subscription ID.
-  ##   labName: string (required)
-  ##          : The name of the lab.
-  var path_568497 = newJObject()
-  var query_568498 = newJObject()
-  add(path_568497, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568498, "$expand", newJString(Expand))
-  add(path_568497, "name", newJString(name))
-  add(query_568498, "api-version", newJString(apiVersion))
-  add(path_568497, "subscriptionId", newJString(subscriptionId))
-  add(path_568497, "labName", newJString(labName))
-  result = call_568496.call(path_568497, query_568498, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564397 = newJObject()
+  var query_564398 = newJObject()
+  add(path_564397, "labName", newJString(labName))
+  add(query_564398, "api-version", newJString(apiVersion))
+  add(query_564398, "$expand", newJString(Expand))
+  add(path_564397, "name", newJString(name))
+  add(path_564397, "subscriptionId", newJString(subscriptionId))
+  add(path_564397, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564396.call(path_564397, query_564398, nil, nil, nil)
 
-var formulasGet* = Call_FormulasGet_568486(name: "formulasGet",
+var formulasGet* = Call_FormulasGet_564386(name: "formulasGet",
                                         meth: HttpMethod.HttpGet,
                                         host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DevTestLab/labs/{labName}/formulas/{name}",
-                                        validator: validate_FormulasGet_568487,
-                                        base: "", url: url_FormulasGet_568488,
+                                        validator: validate_FormulasGet_564387,
+                                        base: "", url: url_FormulasGet_564388,
                                         schemes: {Scheme.Https})
 type
-  Call_FormulasDelete_568513 = ref object of OpenApiRestCall_567650
-proc url_FormulasDelete_568515(protocol: Scheme; host: string; base: string;
+  Call_FormulasDelete_564413 = ref object of OpenApiRestCall_563548
+proc url_FormulasDelete_564415(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -3450,7 +3437,7 @@ proc url_FormulasDelete_568515(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_FormulasDelete_568514(path: JsonNode; query: JsonNode;
+proc validate_FormulasDelete_564414(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## Delete formula.
@@ -3458,37 +3445,36 @@ proc validate_FormulasDelete_568514(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
+  ##   labName: JString (required)
+  ##          : The name of the lab.
   ##   name: JString (required)
   ##       : The name of the formula.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID.
-  ##   labName: JString (required)
-  ##          : The name of the lab.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568516 = path.getOrDefault("resourceGroupName")
-  valid_568516 = validateParameter(valid_568516, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `labName` field"
+  var valid_564416 = path.getOrDefault("labName")
+  valid_564416 = validateParameter(valid_564416, JString, required = true,
                                  default = nil)
-  if valid_568516 != nil:
-    section.add "resourceGroupName", valid_568516
-  var valid_568517 = path.getOrDefault("name")
-  valid_568517 = validateParameter(valid_568517, JString, required = true,
+  if valid_564416 != nil:
+    section.add "labName", valid_564416
+  var valid_564417 = path.getOrDefault("name")
+  valid_564417 = validateParameter(valid_564417, JString, required = true,
                                  default = nil)
-  if valid_568517 != nil:
-    section.add "name", valid_568517
-  var valid_568518 = path.getOrDefault("subscriptionId")
-  valid_568518 = validateParameter(valid_568518, JString, required = true,
+  if valid_564417 != nil:
+    section.add "name", valid_564417
+  var valid_564418 = path.getOrDefault("subscriptionId")
+  valid_564418 = validateParameter(valid_564418, JString, required = true,
                                  default = nil)
-  if valid_568518 != nil:
-    section.add "subscriptionId", valid_568518
-  var valid_568519 = path.getOrDefault("labName")
-  valid_568519 = validateParameter(valid_568519, JString, required = true,
+  if valid_564418 != nil:
+    section.add "subscriptionId", valid_564418
+  var valid_564419 = path.getOrDefault("resourceGroupName")
+  valid_564419 = validateParameter(valid_564419, JString, required = true,
                                  default = nil)
-  if valid_568519 != nil:
-    section.add "labName", valid_568519
+  if valid_564419 != nil:
+    section.add "resourceGroupName", valid_564419
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -3496,11 +3482,11 @@ proc validate_FormulasDelete_568514(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568520 = query.getOrDefault("api-version")
-  valid_568520 = validateParameter(valid_568520, JString, required = true,
+  var valid_564420 = query.getOrDefault("api-version")
+  valid_564420 = validateParameter(valid_564420, JString, required = true,
                                  default = newJString("2016-05-15"))
-  if valid_568520 != nil:
-    section.add "api-version", valid_568520
+  if valid_564420 != nil:
+    section.add "api-version", valid_564420
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3509,50 +3495,50 @@ proc validate_FormulasDelete_568514(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568521: Call_FormulasDelete_568513; path: JsonNode; query: JsonNode;
+proc call*(call_564421: Call_FormulasDelete_564413; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Delete formula.
   ## 
-  let valid = call_568521.validator(path, query, header, formData, body)
-  let scheme = call_568521.pickScheme
+  let valid = call_564421.validator(path, query, header, formData, body)
+  let scheme = call_564421.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568521.url(scheme.get, call_568521.host, call_568521.base,
-                         call_568521.route, valid.getOrDefault("path"),
+  let url = call_564421.url(scheme.get, call_564421.host, call_564421.base,
+                         call_564421.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568521, url, valid)
+  result = hook(call_564421, url, valid)
 
-proc call*(call_568522: Call_FormulasDelete_568513; resourceGroupName: string;
-          name: string; subscriptionId: string; labName: string;
+proc call*(call_564422: Call_FormulasDelete_564413; labName: string; name: string;
+          subscriptionId: string; resourceGroupName: string;
           apiVersion: string = "2016-05-15"): Recallable =
   ## formulasDelete
   ## Delete formula.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   labName: string (required)
+  ##          : The name of the lab.
   ##   apiVersion: string (required)
   ##             : Client API version.
   ##   name: string (required)
   ##       : The name of the formula.
   ##   subscriptionId: string (required)
   ##                 : The subscription ID.
-  ##   labName: string (required)
-  ##          : The name of the lab.
-  var path_568523 = newJObject()
-  var query_568524 = newJObject()
-  add(path_568523, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568524, "api-version", newJString(apiVersion))
-  add(path_568523, "name", newJString(name))
-  add(path_568523, "subscriptionId", newJString(subscriptionId))
-  add(path_568523, "labName", newJString(labName))
-  result = call_568522.call(path_568523, query_568524, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564423 = newJObject()
+  var query_564424 = newJObject()
+  add(path_564423, "labName", newJString(labName))
+  add(query_564424, "api-version", newJString(apiVersion))
+  add(path_564423, "name", newJString(name))
+  add(path_564423, "subscriptionId", newJString(subscriptionId))
+  add(path_564423, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564422.call(path_564423, query_564424, nil, nil, nil)
 
-var formulasDelete* = Call_FormulasDelete_568513(name: "formulasDelete",
+var formulasDelete* = Call_FormulasDelete_564413(name: "formulasDelete",
     meth: HttpMethod.HttpDelete, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DevTestLab/labs/{labName}/formulas/{name}",
-    validator: validate_FormulasDelete_568514, base: "", url: url_FormulasDelete_568515,
+    validator: validate_FormulasDelete_564414, base: "", url: url_FormulasDelete_564415,
     schemes: {Scheme.Https})
 type
-  Call_GalleryImagesList_568525 = ref object of OpenApiRestCall_567650
-proc url_GalleryImagesList_568527(protocol: Scheme; host: string; base: string;
+  Call_GalleryImagesList_564425 = ref object of OpenApiRestCall_563548
+proc url_GalleryImagesList_564427(protocol: Scheme; host: string; base: string;
                                  route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -3575,7 +3561,7 @@ proc url_GalleryImagesList_568527(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_GalleryImagesList_568526(path: JsonNode; query: JsonNode;
+proc validate_GalleryImagesList_564426(path: JsonNode; query: JsonNode;
                                       header: JsonNode; formData: JsonNode;
                                       body: JsonNode): JsonNode =
   ## List gallery images in a given lab.
@@ -3583,69 +3569,68 @@ proc validate_GalleryImagesList_568526(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
-  ##   subscriptionId: JString (required)
-  ##                 : The subscription ID.
   ##   labName: JString (required)
   ##          : The name of the lab.
+  ##   subscriptionId: JString (required)
+  ##                 : The subscription ID.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568528 = path.getOrDefault("resourceGroupName")
-  valid_568528 = validateParameter(valid_568528, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `labName` field"
+  var valid_564428 = path.getOrDefault("labName")
+  valid_564428 = validateParameter(valid_564428, JString, required = true,
                                  default = nil)
-  if valid_568528 != nil:
-    section.add "resourceGroupName", valid_568528
-  var valid_568529 = path.getOrDefault("subscriptionId")
-  valid_568529 = validateParameter(valid_568529, JString, required = true,
+  if valid_564428 != nil:
+    section.add "labName", valid_564428
+  var valid_564429 = path.getOrDefault("subscriptionId")
+  valid_564429 = validateParameter(valid_564429, JString, required = true,
                                  default = nil)
-  if valid_568529 != nil:
-    section.add "subscriptionId", valid_568529
-  var valid_568530 = path.getOrDefault("labName")
-  valid_568530 = validateParameter(valid_568530, JString, required = true,
+  if valid_564429 != nil:
+    section.add "subscriptionId", valid_564429
+  var valid_564430 = path.getOrDefault("resourceGroupName")
+  valid_564430 = validateParameter(valid_564430, JString, required = true,
                                  default = nil)
-  if valid_568530 != nil:
-    section.add "labName", valid_568530
+  if valid_564430 != nil:
+    section.add "resourceGroupName", valid_564430
   result.add "path", section
   ## parameters in `query` object:
-  ##   $orderby: JString
-  ##           : The ordering expression for the results, using OData notation.
-  ##   $expand: JString
-  ##          : Specify the $expand query. Example: 'properties($select=author)'
-  ##   api-version: JString (required)
-  ##              : Client API version.
   ##   $top: JInt
   ##       : The maximum number of resources to return from the operation.
+  ##   api-version: JString (required)
+  ##              : Client API version.
+  ##   $expand: JString
+  ##          : Specify the $expand query. Example: 'properties($select=author)'
+  ##   $orderby: JString
+  ##           : The ordering expression for the results, using OData notation.
   ##   $filter: JString
   ##          : The filter to apply to the operation.
   section = newJObject()
-  var valid_568531 = query.getOrDefault("$orderby")
-  valid_568531 = validateParameter(valid_568531, JString, required = false,
-                                 default = nil)
-  if valid_568531 != nil:
-    section.add "$orderby", valid_568531
-  var valid_568532 = query.getOrDefault("$expand")
-  valid_568532 = validateParameter(valid_568532, JString, required = false,
-                                 default = nil)
-  if valid_568532 != nil:
-    section.add "$expand", valid_568532
+  var valid_564431 = query.getOrDefault("$top")
+  valid_564431 = validateParameter(valid_564431, JInt, required = false, default = nil)
+  if valid_564431 != nil:
+    section.add "$top", valid_564431
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568533 = query.getOrDefault("api-version")
-  valid_568533 = validateParameter(valid_568533, JString, required = true,
+  var valid_564432 = query.getOrDefault("api-version")
+  valid_564432 = validateParameter(valid_564432, JString, required = true,
                                  default = newJString("2016-05-15"))
-  if valid_568533 != nil:
-    section.add "api-version", valid_568533
-  var valid_568534 = query.getOrDefault("$top")
-  valid_568534 = validateParameter(valid_568534, JInt, required = false, default = nil)
-  if valid_568534 != nil:
-    section.add "$top", valid_568534
-  var valid_568535 = query.getOrDefault("$filter")
-  valid_568535 = validateParameter(valid_568535, JString, required = false,
+  if valid_564432 != nil:
+    section.add "api-version", valid_564432
+  var valid_564433 = query.getOrDefault("$expand")
+  valid_564433 = validateParameter(valid_564433, JString, required = false,
                                  default = nil)
-  if valid_568535 != nil:
-    section.add "$filter", valid_568535
+  if valid_564433 != nil:
+    section.add "$expand", valid_564433
+  var valid_564434 = query.getOrDefault("$orderby")
+  valid_564434 = validateParameter(valid_564434, JString, required = false,
+                                 default = nil)
+  if valid_564434 != nil:
+    section.add "$orderby", valid_564434
+  var valid_564435 = query.getOrDefault("$filter")
+  valid_564435 = validateParameter(valid_564435, JString, required = false,
+                                 default = nil)
+  if valid_564435 != nil:
+    section.add "$filter", valid_564435
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3654,60 +3639,60 @@ proc validate_GalleryImagesList_568526(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568536: Call_GalleryImagesList_568525; path: JsonNode;
+proc call*(call_564436: Call_GalleryImagesList_564425; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## List gallery images in a given lab.
   ## 
-  let valid = call_568536.validator(path, query, header, formData, body)
-  let scheme = call_568536.pickScheme
+  let valid = call_564436.validator(path, query, header, formData, body)
+  let scheme = call_564436.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568536.url(scheme.get, call_568536.host, call_568536.base,
-                         call_568536.route, valid.getOrDefault("path"),
+  let url = call_564436.url(scheme.get, call_564436.host, call_564436.base,
+                         call_564436.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568536, url, valid)
+  result = hook(call_564436, url, valid)
 
-proc call*(call_568537: Call_GalleryImagesList_568525; resourceGroupName: string;
-          subscriptionId: string; labName: string; Orderby: string = "";
-          Expand: string = ""; apiVersion: string = "2016-05-15"; Top: int = 0;
+proc call*(call_564437: Call_GalleryImagesList_564425; labName: string;
+          subscriptionId: string; resourceGroupName: string; Top: int = 0;
+          apiVersion: string = "2016-05-15"; Expand: string = ""; Orderby: string = "";
           Filter: string = ""): Recallable =
   ## galleryImagesList
   ## List gallery images in a given lab.
+  ##   labName: string (required)
+  ##          : The name of the lab.
+  ##   Top: int
+  ##      : The maximum number of resources to return from the operation.
+  ##   apiVersion: string (required)
+  ##             : Client API version.
+  ##   Expand: string
+  ##         : Specify the $expand query. Example: 'properties($select=author)'
+  ##   subscriptionId: string (required)
+  ##                 : The subscription ID.
   ##   Orderby: string
   ##          : The ordering expression for the results, using OData notation.
   ##   resourceGroupName: string (required)
   ##                    : The name of the resource group.
-  ##   Expand: string
-  ##         : Specify the $expand query. Example: 'properties($select=author)'
-  ##   apiVersion: string (required)
-  ##             : Client API version.
-  ##   subscriptionId: string (required)
-  ##                 : The subscription ID.
-  ##   Top: int
-  ##      : The maximum number of resources to return from the operation.
-  ##   labName: string (required)
-  ##          : The name of the lab.
   ##   Filter: string
   ##         : The filter to apply to the operation.
-  var path_568538 = newJObject()
-  var query_568539 = newJObject()
-  add(query_568539, "$orderby", newJString(Orderby))
-  add(path_568538, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568539, "$expand", newJString(Expand))
-  add(query_568539, "api-version", newJString(apiVersion))
-  add(path_568538, "subscriptionId", newJString(subscriptionId))
-  add(query_568539, "$top", newJInt(Top))
-  add(path_568538, "labName", newJString(labName))
-  add(query_568539, "$filter", newJString(Filter))
-  result = call_568537.call(path_568538, query_568539, nil, nil, nil)
+  var path_564438 = newJObject()
+  var query_564439 = newJObject()
+  add(path_564438, "labName", newJString(labName))
+  add(query_564439, "$top", newJInt(Top))
+  add(query_564439, "api-version", newJString(apiVersion))
+  add(query_564439, "$expand", newJString(Expand))
+  add(path_564438, "subscriptionId", newJString(subscriptionId))
+  add(query_564439, "$orderby", newJString(Orderby))
+  add(path_564438, "resourceGroupName", newJString(resourceGroupName))
+  add(query_564439, "$filter", newJString(Filter))
+  result = call_564437.call(path_564438, query_564439, nil, nil, nil)
 
-var galleryImagesList* = Call_GalleryImagesList_568525(name: "galleryImagesList",
+var galleryImagesList* = Call_GalleryImagesList_564425(name: "galleryImagesList",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DevTestLab/labs/{labName}/galleryimages",
-    validator: validate_GalleryImagesList_568526, base: "",
-    url: url_GalleryImagesList_568527, schemes: {Scheme.Https})
+    validator: validate_GalleryImagesList_564426, base: "",
+    url: url_GalleryImagesList_564427, schemes: {Scheme.Https})
 type
-  Call_NotificationChannelsList_568540 = ref object of OpenApiRestCall_567650
-proc url_NotificationChannelsList_568542(protocol: Scheme; host: string;
+  Call_NotificationChannelsList_564440 = ref object of OpenApiRestCall_563548
+proc url_NotificationChannelsList_564442(protocol: Scheme; host: string;
                                         base: string; route: string; path: JsonNode;
                                         query: JsonNode): Uri =
   result.scheme = $protocol
@@ -3731,76 +3716,75 @@ proc url_NotificationChannelsList_568542(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_NotificationChannelsList_568541(path: JsonNode; query: JsonNode;
+proc validate_NotificationChannelsList_564441(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## List notification channels in a given lab.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
-  ##   subscriptionId: JString (required)
-  ##                 : The subscription ID.
   ##   labName: JString (required)
   ##          : The name of the lab.
+  ##   subscriptionId: JString (required)
+  ##                 : The subscription ID.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568543 = path.getOrDefault("resourceGroupName")
-  valid_568543 = validateParameter(valid_568543, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `labName` field"
+  var valid_564443 = path.getOrDefault("labName")
+  valid_564443 = validateParameter(valid_564443, JString, required = true,
                                  default = nil)
-  if valid_568543 != nil:
-    section.add "resourceGroupName", valid_568543
-  var valid_568544 = path.getOrDefault("subscriptionId")
-  valid_568544 = validateParameter(valid_568544, JString, required = true,
+  if valid_564443 != nil:
+    section.add "labName", valid_564443
+  var valid_564444 = path.getOrDefault("subscriptionId")
+  valid_564444 = validateParameter(valid_564444, JString, required = true,
                                  default = nil)
-  if valid_568544 != nil:
-    section.add "subscriptionId", valid_568544
-  var valid_568545 = path.getOrDefault("labName")
-  valid_568545 = validateParameter(valid_568545, JString, required = true,
+  if valid_564444 != nil:
+    section.add "subscriptionId", valid_564444
+  var valid_564445 = path.getOrDefault("resourceGroupName")
+  valid_564445 = validateParameter(valid_564445, JString, required = true,
                                  default = nil)
-  if valid_568545 != nil:
-    section.add "labName", valid_568545
+  if valid_564445 != nil:
+    section.add "resourceGroupName", valid_564445
   result.add "path", section
   ## parameters in `query` object:
-  ##   $orderby: JString
-  ##           : The ordering expression for the results, using OData notation.
-  ##   $expand: JString
-  ##          : Specify the $expand query. Example: 'properties($select=webHookUrl)'
-  ##   api-version: JString (required)
-  ##              : Client API version.
   ##   $top: JInt
   ##       : The maximum number of resources to return from the operation.
+  ##   api-version: JString (required)
+  ##              : Client API version.
+  ##   $expand: JString
+  ##          : Specify the $expand query. Example: 'properties($select=webHookUrl)'
+  ##   $orderby: JString
+  ##           : The ordering expression for the results, using OData notation.
   ##   $filter: JString
   ##          : The filter to apply to the operation.
   section = newJObject()
-  var valid_568546 = query.getOrDefault("$orderby")
-  valid_568546 = validateParameter(valid_568546, JString, required = false,
-                                 default = nil)
-  if valid_568546 != nil:
-    section.add "$orderby", valid_568546
-  var valid_568547 = query.getOrDefault("$expand")
-  valid_568547 = validateParameter(valid_568547, JString, required = false,
-                                 default = nil)
-  if valid_568547 != nil:
-    section.add "$expand", valid_568547
+  var valid_564446 = query.getOrDefault("$top")
+  valid_564446 = validateParameter(valid_564446, JInt, required = false, default = nil)
+  if valid_564446 != nil:
+    section.add "$top", valid_564446
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568548 = query.getOrDefault("api-version")
-  valid_568548 = validateParameter(valid_568548, JString, required = true,
+  var valid_564447 = query.getOrDefault("api-version")
+  valid_564447 = validateParameter(valid_564447, JString, required = true,
                                  default = newJString("2016-05-15"))
-  if valid_568548 != nil:
-    section.add "api-version", valid_568548
-  var valid_568549 = query.getOrDefault("$top")
-  valid_568549 = validateParameter(valid_568549, JInt, required = false, default = nil)
-  if valid_568549 != nil:
-    section.add "$top", valid_568549
-  var valid_568550 = query.getOrDefault("$filter")
-  valid_568550 = validateParameter(valid_568550, JString, required = false,
+  if valid_564447 != nil:
+    section.add "api-version", valid_564447
+  var valid_564448 = query.getOrDefault("$expand")
+  valid_564448 = validateParameter(valid_564448, JString, required = false,
                                  default = nil)
-  if valid_568550 != nil:
-    section.add "$filter", valid_568550
+  if valid_564448 != nil:
+    section.add "$expand", valid_564448
+  var valid_564449 = query.getOrDefault("$orderby")
+  valid_564449 = validateParameter(valid_564449, JString, required = false,
+                                 default = nil)
+  if valid_564449 != nil:
+    section.add "$orderby", valid_564449
+  var valid_564450 = query.getOrDefault("$filter")
+  valid_564450 = validateParameter(valid_564450, JString, required = false,
+                                 default = nil)
+  if valid_564450 != nil:
+    section.add "$filter", valid_564450
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3809,61 +3793,61 @@ proc validate_NotificationChannelsList_568541(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568551: Call_NotificationChannelsList_568540; path: JsonNode;
+proc call*(call_564451: Call_NotificationChannelsList_564440; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## List notification channels in a given lab.
   ## 
-  let valid = call_568551.validator(path, query, header, formData, body)
-  let scheme = call_568551.pickScheme
+  let valid = call_564451.validator(path, query, header, formData, body)
+  let scheme = call_564451.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568551.url(scheme.get, call_568551.host, call_568551.base,
-                         call_568551.route, valid.getOrDefault("path"),
+  let url = call_564451.url(scheme.get, call_564451.host, call_564451.base,
+                         call_564451.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568551, url, valid)
+  result = hook(call_564451, url, valid)
 
-proc call*(call_568552: Call_NotificationChannelsList_568540;
-          resourceGroupName: string; subscriptionId: string; labName: string;
-          Orderby: string = ""; Expand: string = ""; apiVersion: string = "2016-05-15";
-          Top: int = 0; Filter: string = ""): Recallable =
+proc call*(call_564452: Call_NotificationChannelsList_564440; labName: string;
+          subscriptionId: string; resourceGroupName: string; Top: int = 0;
+          apiVersion: string = "2016-05-15"; Expand: string = ""; Orderby: string = "";
+          Filter: string = ""): Recallable =
   ## notificationChannelsList
   ## List notification channels in a given lab.
+  ##   labName: string (required)
+  ##          : The name of the lab.
+  ##   Top: int
+  ##      : The maximum number of resources to return from the operation.
+  ##   apiVersion: string (required)
+  ##             : Client API version.
+  ##   Expand: string
+  ##         : Specify the $expand query. Example: 'properties($select=webHookUrl)'
+  ##   subscriptionId: string (required)
+  ##                 : The subscription ID.
   ##   Orderby: string
   ##          : The ordering expression for the results, using OData notation.
   ##   resourceGroupName: string (required)
   ##                    : The name of the resource group.
-  ##   Expand: string
-  ##         : Specify the $expand query. Example: 'properties($select=webHookUrl)'
-  ##   apiVersion: string (required)
-  ##             : Client API version.
-  ##   subscriptionId: string (required)
-  ##                 : The subscription ID.
-  ##   Top: int
-  ##      : The maximum number of resources to return from the operation.
-  ##   labName: string (required)
-  ##          : The name of the lab.
   ##   Filter: string
   ##         : The filter to apply to the operation.
-  var path_568553 = newJObject()
-  var query_568554 = newJObject()
-  add(query_568554, "$orderby", newJString(Orderby))
-  add(path_568553, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568554, "$expand", newJString(Expand))
-  add(query_568554, "api-version", newJString(apiVersion))
-  add(path_568553, "subscriptionId", newJString(subscriptionId))
-  add(query_568554, "$top", newJInt(Top))
-  add(path_568553, "labName", newJString(labName))
-  add(query_568554, "$filter", newJString(Filter))
-  result = call_568552.call(path_568553, query_568554, nil, nil, nil)
+  var path_564453 = newJObject()
+  var query_564454 = newJObject()
+  add(path_564453, "labName", newJString(labName))
+  add(query_564454, "$top", newJInt(Top))
+  add(query_564454, "api-version", newJString(apiVersion))
+  add(query_564454, "$expand", newJString(Expand))
+  add(path_564453, "subscriptionId", newJString(subscriptionId))
+  add(query_564454, "$orderby", newJString(Orderby))
+  add(path_564453, "resourceGroupName", newJString(resourceGroupName))
+  add(query_564454, "$filter", newJString(Filter))
+  result = call_564452.call(path_564453, query_564454, nil, nil, nil)
 
-var notificationChannelsList* = Call_NotificationChannelsList_568540(
+var notificationChannelsList* = Call_NotificationChannelsList_564440(
     name: "notificationChannelsList", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DevTestLab/labs/{labName}/notificationchannels",
-    validator: validate_NotificationChannelsList_568541, base: "",
-    url: url_NotificationChannelsList_568542, schemes: {Scheme.Https})
+    validator: validate_NotificationChannelsList_564441, base: "",
+    url: url_NotificationChannelsList_564442, schemes: {Scheme.Https})
 type
-  Call_NotificationChannelsCreateOrUpdate_568568 = ref object of OpenApiRestCall_567650
-proc url_NotificationChannelsCreateOrUpdate_568570(protocol: Scheme; host: string;
+  Call_NotificationChannelsCreateOrUpdate_564468 = ref object of OpenApiRestCall_563548
+proc url_NotificationChannelsCreateOrUpdate_564470(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -3888,44 +3872,43 @@ proc url_NotificationChannelsCreateOrUpdate_568570(protocol: Scheme; host: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_NotificationChannelsCreateOrUpdate_568569(path: JsonNode;
+proc validate_NotificationChannelsCreateOrUpdate_564469(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Create or replace an existing notificationChannel.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
+  ##   labName: JString (required)
+  ##          : The name of the lab.
   ##   name: JString (required)
   ##       : The name of the notificationChannel.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID.
-  ##   labName: JString (required)
-  ##          : The name of the lab.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568571 = path.getOrDefault("resourceGroupName")
-  valid_568571 = validateParameter(valid_568571, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `labName` field"
+  var valid_564471 = path.getOrDefault("labName")
+  valid_564471 = validateParameter(valid_564471, JString, required = true,
                                  default = nil)
-  if valid_568571 != nil:
-    section.add "resourceGroupName", valid_568571
-  var valid_568572 = path.getOrDefault("name")
-  valid_568572 = validateParameter(valid_568572, JString, required = true,
+  if valid_564471 != nil:
+    section.add "labName", valid_564471
+  var valid_564472 = path.getOrDefault("name")
+  valid_564472 = validateParameter(valid_564472, JString, required = true,
                                  default = nil)
-  if valid_568572 != nil:
-    section.add "name", valid_568572
-  var valid_568573 = path.getOrDefault("subscriptionId")
-  valid_568573 = validateParameter(valid_568573, JString, required = true,
+  if valid_564472 != nil:
+    section.add "name", valid_564472
+  var valid_564473 = path.getOrDefault("subscriptionId")
+  valid_564473 = validateParameter(valid_564473, JString, required = true,
                                  default = nil)
-  if valid_568573 != nil:
-    section.add "subscriptionId", valid_568573
-  var valid_568574 = path.getOrDefault("labName")
-  valid_568574 = validateParameter(valid_568574, JString, required = true,
+  if valid_564473 != nil:
+    section.add "subscriptionId", valid_564473
+  var valid_564474 = path.getOrDefault("resourceGroupName")
+  valid_564474 = validateParameter(valid_564474, JString, required = true,
                                  default = nil)
-  if valid_568574 != nil:
-    section.add "labName", valid_568574
+  if valid_564474 != nil:
+    section.add "resourceGroupName", valid_564474
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -3933,11 +3916,11 @@ proc validate_NotificationChannelsCreateOrUpdate_568569(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568575 = query.getOrDefault("api-version")
-  valid_568575 = validateParameter(valid_568575, JString, required = true,
+  var valid_564475 = query.getOrDefault("api-version")
+  valid_564475 = validateParameter(valid_564475, JString, required = true,
                                  default = newJString("2016-05-15"))
-  if valid_568575 != nil:
-    section.add "api-version", valid_568575
+  if valid_564475 != nil:
+    section.add "api-version", valid_564475
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3951,57 +3934,58 @@ proc validate_NotificationChannelsCreateOrUpdate_568569(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568577: Call_NotificationChannelsCreateOrUpdate_568568;
+proc call*(call_564477: Call_NotificationChannelsCreateOrUpdate_564468;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Create or replace an existing notificationChannel.
   ## 
-  let valid = call_568577.validator(path, query, header, formData, body)
-  let scheme = call_568577.pickScheme
+  let valid = call_564477.validator(path, query, header, formData, body)
+  let scheme = call_564477.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568577.url(scheme.get, call_568577.host, call_568577.base,
-                         call_568577.route, valid.getOrDefault("path"),
+  let url = call_564477.url(scheme.get, call_564477.host, call_564477.base,
+                         call_564477.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568577, url, valid)
+  result = hook(call_564477, url, valid)
 
-proc call*(call_568578: Call_NotificationChannelsCreateOrUpdate_568568;
-          notificationChannel: JsonNode; resourceGroupName: string; name: string;
-          subscriptionId: string; labName: string; apiVersion: string = "2016-05-15"): Recallable =
+proc call*(call_564478: Call_NotificationChannelsCreateOrUpdate_564468;
+          labName: string; notificationChannel: JsonNode; name: string;
+          subscriptionId: string; resourceGroupName: string;
+          apiVersion: string = "2016-05-15"): Recallable =
   ## notificationChannelsCreateOrUpdate
   ## Create or replace an existing notificationChannel.
-  ##   notificationChannel: JObject (required)
-  ##                      : A notification.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   labName: string (required)
+  ##          : The name of the lab.
   ##   apiVersion: string (required)
   ##             : Client API version.
+  ##   notificationChannel: JObject (required)
+  ##                      : A notification.
   ##   name: string (required)
   ##       : The name of the notificationChannel.
   ##   subscriptionId: string (required)
   ##                 : The subscription ID.
-  ##   labName: string (required)
-  ##          : The name of the lab.
-  var path_568579 = newJObject()
-  var query_568580 = newJObject()
-  var body_568581 = newJObject()
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564479 = newJObject()
+  var query_564480 = newJObject()
+  var body_564481 = newJObject()
+  add(path_564479, "labName", newJString(labName))
+  add(query_564480, "api-version", newJString(apiVersion))
   if notificationChannel != nil:
-    body_568581 = notificationChannel
-  add(path_568579, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568580, "api-version", newJString(apiVersion))
-  add(path_568579, "name", newJString(name))
-  add(path_568579, "subscriptionId", newJString(subscriptionId))
-  add(path_568579, "labName", newJString(labName))
-  result = call_568578.call(path_568579, query_568580, nil, nil, body_568581)
+    body_564481 = notificationChannel
+  add(path_564479, "name", newJString(name))
+  add(path_564479, "subscriptionId", newJString(subscriptionId))
+  add(path_564479, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564478.call(path_564479, query_564480, nil, nil, body_564481)
 
-var notificationChannelsCreateOrUpdate* = Call_NotificationChannelsCreateOrUpdate_568568(
+var notificationChannelsCreateOrUpdate* = Call_NotificationChannelsCreateOrUpdate_564468(
     name: "notificationChannelsCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DevTestLab/labs/{labName}/notificationchannels/{name}",
-    validator: validate_NotificationChannelsCreateOrUpdate_568569, base: "",
-    url: url_NotificationChannelsCreateOrUpdate_568570, schemes: {Scheme.Https})
+    validator: validate_NotificationChannelsCreateOrUpdate_564469, base: "",
+    url: url_NotificationChannelsCreateOrUpdate_564470, schemes: {Scheme.Https})
 type
-  Call_NotificationChannelsGet_568555 = ref object of OpenApiRestCall_567650
-proc url_NotificationChannelsGet_568557(protocol: Scheme; host: string; base: string;
+  Call_NotificationChannelsGet_564455 = ref object of OpenApiRestCall_563548
+proc url_NotificationChannelsGet_564457(protocol: Scheme; host: string; base: string;
                                        route: string; path: JsonNode;
                                        query: JsonNode): Uri =
   result.scheme = $protocol
@@ -4027,63 +4011,62 @@ proc url_NotificationChannelsGet_568557(protocol: Scheme; host: string; base: st
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_NotificationChannelsGet_568556(path: JsonNode; query: JsonNode;
+proc validate_NotificationChannelsGet_564456(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Get notification channels.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
+  ##   labName: JString (required)
+  ##          : The name of the lab.
   ##   name: JString (required)
   ##       : The name of the notificationChannel.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID.
-  ##   labName: JString (required)
-  ##          : The name of the lab.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568558 = path.getOrDefault("resourceGroupName")
-  valid_568558 = validateParameter(valid_568558, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `labName` field"
+  var valid_564458 = path.getOrDefault("labName")
+  valid_564458 = validateParameter(valid_564458, JString, required = true,
                                  default = nil)
-  if valid_568558 != nil:
-    section.add "resourceGroupName", valid_568558
-  var valid_568559 = path.getOrDefault("name")
-  valid_568559 = validateParameter(valid_568559, JString, required = true,
+  if valid_564458 != nil:
+    section.add "labName", valid_564458
+  var valid_564459 = path.getOrDefault("name")
+  valid_564459 = validateParameter(valid_564459, JString, required = true,
                                  default = nil)
-  if valid_568559 != nil:
-    section.add "name", valid_568559
-  var valid_568560 = path.getOrDefault("subscriptionId")
-  valid_568560 = validateParameter(valid_568560, JString, required = true,
+  if valid_564459 != nil:
+    section.add "name", valid_564459
+  var valid_564460 = path.getOrDefault("subscriptionId")
+  valid_564460 = validateParameter(valid_564460, JString, required = true,
                                  default = nil)
-  if valid_568560 != nil:
-    section.add "subscriptionId", valid_568560
-  var valid_568561 = path.getOrDefault("labName")
-  valid_568561 = validateParameter(valid_568561, JString, required = true,
+  if valid_564460 != nil:
+    section.add "subscriptionId", valid_564460
+  var valid_564461 = path.getOrDefault("resourceGroupName")
+  valid_564461 = validateParameter(valid_564461, JString, required = true,
                                  default = nil)
-  if valid_568561 != nil:
-    section.add "labName", valid_568561
+  if valid_564461 != nil:
+    section.add "resourceGroupName", valid_564461
   result.add "path", section
   ## parameters in `query` object:
-  ##   $expand: JString
-  ##          : Specify the $expand query. Example: 'properties($select=webHookUrl)'
   ##   api-version: JString (required)
   ##              : Client API version.
+  ##   $expand: JString
+  ##          : Specify the $expand query. Example: 'properties($select=webHookUrl)'
   section = newJObject()
-  var valid_568562 = query.getOrDefault("$expand")
-  valid_568562 = validateParameter(valid_568562, JString, required = false,
-                                 default = nil)
-  if valid_568562 != nil:
-    section.add "$expand", valid_568562
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568563 = query.getOrDefault("api-version")
-  valid_568563 = validateParameter(valid_568563, JString, required = true,
+  var valid_564462 = query.getOrDefault("api-version")
+  valid_564462 = validateParameter(valid_564462, JString, required = true,
                                  default = newJString("2016-05-15"))
-  if valid_568563 != nil:
-    section.add "api-version", valid_568563
+  if valid_564462 != nil:
+    section.add "api-version", valid_564462
+  var valid_564463 = query.getOrDefault("$expand")
+  valid_564463 = validateParameter(valid_564463, JString, required = false,
+                                 default = nil)
+  if valid_564463 != nil:
+    section.add "$expand", valid_564463
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -4092,54 +4075,54 @@ proc validate_NotificationChannelsGet_568556(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568564: Call_NotificationChannelsGet_568555; path: JsonNode;
+proc call*(call_564464: Call_NotificationChannelsGet_564455; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get notification channels.
   ## 
-  let valid = call_568564.validator(path, query, header, formData, body)
-  let scheme = call_568564.pickScheme
+  let valid = call_564464.validator(path, query, header, formData, body)
+  let scheme = call_564464.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568564.url(scheme.get, call_568564.host, call_568564.base,
-                         call_568564.route, valid.getOrDefault("path"),
+  let url = call_564464.url(scheme.get, call_564464.host, call_564464.base,
+                         call_564464.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568564, url, valid)
+  result = hook(call_564464, url, valid)
 
-proc call*(call_568565: Call_NotificationChannelsGet_568555;
-          resourceGroupName: string; name: string; subscriptionId: string;
-          labName: string; Expand: string = ""; apiVersion: string = "2016-05-15"): Recallable =
+proc call*(call_564465: Call_NotificationChannelsGet_564455; labName: string;
+          name: string; subscriptionId: string; resourceGroupName: string;
+          apiVersion: string = "2016-05-15"; Expand: string = ""): Recallable =
   ## notificationChannelsGet
   ## Get notification channels.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   labName: string (required)
+  ##          : The name of the lab.
+  ##   apiVersion: string (required)
+  ##             : Client API version.
   ##   Expand: string
   ##         : Specify the $expand query. Example: 'properties($select=webHookUrl)'
   ##   name: string (required)
   ##       : The name of the notificationChannel.
-  ##   apiVersion: string (required)
-  ##             : Client API version.
   ##   subscriptionId: string (required)
   ##                 : The subscription ID.
-  ##   labName: string (required)
-  ##          : The name of the lab.
-  var path_568566 = newJObject()
-  var query_568567 = newJObject()
-  add(path_568566, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568567, "$expand", newJString(Expand))
-  add(path_568566, "name", newJString(name))
-  add(query_568567, "api-version", newJString(apiVersion))
-  add(path_568566, "subscriptionId", newJString(subscriptionId))
-  add(path_568566, "labName", newJString(labName))
-  result = call_568565.call(path_568566, query_568567, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564466 = newJObject()
+  var query_564467 = newJObject()
+  add(path_564466, "labName", newJString(labName))
+  add(query_564467, "api-version", newJString(apiVersion))
+  add(query_564467, "$expand", newJString(Expand))
+  add(path_564466, "name", newJString(name))
+  add(path_564466, "subscriptionId", newJString(subscriptionId))
+  add(path_564466, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564465.call(path_564466, query_564467, nil, nil, nil)
 
-var notificationChannelsGet* = Call_NotificationChannelsGet_568555(
+var notificationChannelsGet* = Call_NotificationChannelsGet_564455(
     name: "notificationChannelsGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DevTestLab/labs/{labName}/notificationchannels/{name}",
-    validator: validate_NotificationChannelsGet_568556, base: "",
-    url: url_NotificationChannelsGet_568557, schemes: {Scheme.Https})
+    validator: validate_NotificationChannelsGet_564456, base: "",
+    url: url_NotificationChannelsGet_564457, schemes: {Scheme.Https})
 type
-  Call_NotificationChannelsUpdate_568594 = ref object of OpenApiRestCall_567650
-proc url_NotificationChannelsUpdate_568596(protocol: Scheme; host: string;
+  Call_NotificationChannelsUpdate_564494 = ref object of OpenApiRestCall_563548
+proc url_NotificationChannelsUpdate_564496(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -4164,44 +4147,43 @@ proc url_NotificationChannelsUpdate_568596(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_NotificationChannelsUpdate_568595(path: JsonNode; query: JsonNode;
+proc validate_NotificationChannelsUpdate_564495(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Modify properties of notification channels.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
+  ##   labName: JString (required)
+  ##          : The name of the lab.
   ##   name: JString (required)
   ##       : The name of the notificationChannel.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID.
-  ##   labName: JString (required)
-  ##          : The name of the lab.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568597 = path.getOrDefault("resourceGroupName")
-  valid_568597 = validateParameter(valid_568597, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `labName` field"
+  var valid_564497 = path.getOrDefault("labName")
+  valid_564497 = validateParameter(valid_564497, JString, required = true,
                                  default = nil)
-  if valid_568597 != nil:
-    section.add "resourceGroupName", valid_568597
-  var valid_568598 = path.getOrDefault("name")
-  valid_568598 = validateParameter(valid_568598, JString, required = true,
+  if valid_564497 != nil:
+    section.add "labName", valid_564497
+  var valid_564498 = path.getOrDefault("name")
+  valid_564498 = validateParameter(valid_564498, JString, required = true,
                                  default = nil)
-  if valid_568598 != nil:
-    section.add "name", valid_568598
-  var valid_568599 = path.getOrDefault("subscriptionId")
-  valid_568599 = validateParameter(valid_568599, JString, required = true,
+  if valid_564498 != nil:
+    section.add "name", valid_564498
+  var valid_564499 = path.getOrDefault("subscriptionId")
+  valid_564499 = validateParameter(valid_564499, JString, required = true,
                                  default = nil)
-  if valid_568599 != nil:
-    section.add "subscriptionId", valid_568599
-  var valid_568600 = path.getOrDefault("labName")
-  valid_568600 = validateParameter(valid_568600, JString, required = true,
+  if valid_564499 != nil:
+    section.add "subscriptionId", valid_564499
+  var valid_564500 = path.getOrDefault("resourceGroupName")
+  valid_564500 = validateParameter(valid_564500, JString, required = true,
                                  default = nil)
-  if valid_568600 != nil:
-    section.add "labName", valid_568600
+  if valid_564500 != nil:
+    section.add "resourceGroupName", valid_564500
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -4209,11 +4191,11 @@ proc validate_NotificationChannelsUpdate_568595(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568601 = query.getOrDefault("api-version")
-  valid_568601 = validateParameter(valid_568601, JString, required = true,
+  var valid_564501 = query.getOrDefault("api-version")
+  valid_564501 = validateParameter(valid_564501, JString, required = true,
                                  default = newJString("2016-05-15"))
-  if valid_568601 != nil:
-    section.add "api-version", valid_568601
+  if valid_564501 != nil:
+    section.add "api-version", valid_564501
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -4227,56 +4209,56 @@ proc validate_NotificationChannelsUpdate_568595(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568603: Call_NotificationChannelsUpdate_568594; path: JsonNode;
+proc call*(call_564503: Call_NotificationChannelsUpdate_564494; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Modify properties of notification channels.
   ## 
-  let valid = call_568603.validator(path, query, header, formData, body)
-  let scheme = call_568603.pickScheme
+  let valid = call_564503.validator(path, query, header, formData, body)
+  let scheme = call_564503.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568603.url(scheme.get, call_568603.host, call_568603.base,
-                         call_568603.route, valid.getOrDefault("path"),
+  let url = call_564503.url(scheme.get, call_564503.host, call_564503.base,
+                         call_564503.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568603, url, valid)
+  result = hook(call_564503, url, valid)
 
-proc call*(call_568604: Call_NotificationChannelsUpdate_568594;
-          notificationChannel: JsonNode; resourceGroupName: string; name: string;
-          subscriptionId: string; labName: string; apiVersion: string = "2016-05-15"): Recallable =
+proc call*(call_564504: Call_NotificationChannelsUpdate_564494; labName: string;
+          notificationChannel: JsonNode; name: string; subscriptionId: string;
+          resourceGroupName: string; apiVersion: string = "2016-05-15"): Recallable =
   ## notificationChannelsUpdate
   ## Modify properties of notification channels.
-  ##   notificationChannel: JObject (required)
-  ##                      : A notification.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   labName: string (required)
+  ##          : The name of the lab.
   ##   apiVersion: string (required)
   ##             : Client API version.
+  ##   notificationChannel: JObject (required)
+  ##                      : A notification.
   ##   name: string (required)
   ##       : The name of the notificationChannel.
   ##   subscriptionId: string (required)
   ##                 : The subscription ID.
-  ##   labName: string (required)
-  ##          : The name of the lab.
-  var path_568605 = newJObject()
-  var query_568606 = newJObject()
-  var body_568607 = newJObject()
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564505 = newJObject()
+  var query_564506 = newJObject()
+  var body_564507 = newJObject()
+  add(path_564505, "labName", newJString(labName))
+  add(query_564506, "api-version", newJString(apiVersion))
   if notificationChannel != nil:
-    body_568607 = notificationChannel
-  add(path_568605, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568606, "api-version", newJString(apiVersion))
-  add(path_568605, "name", newJString(name))
-  add(path_568605, "subscriptionId", newJString(subscriptionId))
-  add(path_568605, "labName", newJString(labName))
-  result = call_568604.call(path_568605, query_568606, nil, nil, body_568607)
+    body_564507 = notificationChannel
+  add(path_564505, "name", newJString(name))
+  add(path_564505, "subscriptionId", newJString(subscriptionId))
+  add(path_564505, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564504.call(path_564505, query_564506, nil, nil, body_564507)
 
-var notificationChannelsUpdate* = Call_NotificationChannelsUpdate_568594(
+var notificationChannelsUpdate* = Call_NotificationChannelsUpdate_564494(
     name: "notificationChannelsUpdate", meth: HttpMethod.HttpPatch,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DevTestLab/labs/{labName}/notificationchannels/{name}",
-    validator: validate_NotificationChannelsUpdate_568595, base: "",
-    url: url_NotificationChannelsUpdate_568596, schemes: {Scheme.Https})
+    validator: validate_NotificationChannelsUpdate_564495, base: "",
+    url: url_NotificationChannelsUpdate_564496, schemes: {Scheme.Https})
 type
-  Call_NotificationChannelsDelete_568582 = ref object of OpenApiRestCall_567650
-proc url_NotificationChannelsDelete_568584(protocol: Scheme; host: string;
+  Call_NotificationChannelsDelete_564482 = ref object of OpenApiRestCall_563548
+proc url_NotificationChannelsDelete_564484(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -4301,44 +4283,43 @@ proc url_NotificationChannelsDelete_568584(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_NotificationChannelsDelete_568583(path: JsonNode; query: JsonNode;
+proc validate_NotificationChannelsDelete_564483(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Delete notification channel.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
+  ##   labName: JString (required)
+  ##          : The name of the lab.
   ##   name: JString (required)
   ##       : The name of the notificationChannel.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID.
-  ##   labName: JString (required)
-  ##          : The name of the lab.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568585 = path.getOrDefault("resourceGroupName")
-  valid_568585 = validateParameter(valid_568585, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `labName` field"
+  var valid_564485 = path.getOrDefault("labName")
+  valid_564485 = validateParameter(valid_564485, JString, required = true,
                                  default = nil)
-  if valid_568585 != nil:
-    section.add "resourceGroupName", valid_568585
-  var valid_568586 = path.getOrDefault("name")
-  valid_568586 = validateParameter(valid_568586, JString, required = true,
+  if valid_564485 != nil:
+    section.add "labName", valid_564485
+  var valid_564486 = path.getOrDefault("name")
+  valid_564486 = validateParameter(valid_564486, JString, required = true,
                                  default = nil)
-  if valid_568586 != nil:
-    section.add "name", valid_568586
-  var valid_568587 = path.getOrDefault("subscriptionId")
-  valid_568587 = validateParameter(valid_568587, JString, required = true,
+  if valid_564486 != nil:
+    section.add "name", valid_564486
+  var valid_564487 = path.getOrDefault("subscriptionId")
+  valid_564487 = validateParameter(valid_564487, JString, required = true,
                                  default = nil)
-  if valid_568587 != nil:
-    section.add "subscriptionId", valid_568587
-  var valid_568588 = path.getOrDefault("labName")
-  valid_568588 = validateParameter(valid_568588, JString, required = true,
+  if valid_564487 != nil:
+    section.add "subscriptionId", valid_564487
+  var valid_564488 = path.getOrDefault("resourceGroupName")
+  valid_564488 = validateParameter(valid_564488, JString, required = true,
                                  default = nil)
-  if valid_568588 != nil:
-    section.add "labName", valid_568588
+  if valid_564488 != nil:
+    section.add "resourceGroupName", valid_564488
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -4346,11 +4327,11 @@ proc validate_NotificationChannelsDelete_568583(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568589 = query.getOrDefault("api-version")
-  valid_568589 = validateParameter(valid_568589, JString, required = true,
+  var valid_564489 = query.getOrDefault("api-version")
+  valid_564489 = validateParameter(valid_564489, JString, required = true,
                                  default = newJString("2016-05-15"))
-  if valid_568589 != nil:
-    section.add "api-version", valid_568589
+  if valid_564489 != nil:
+    section.add "api-version", valid_564489
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -4359,51 +4340,51 @@ proc validate_NotificationChannelsDelete_568583(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568590: Call_NotificationChannelsDelete_568582; path: JsonNode;
+proc call*(call_564490: Call_NotificationChannelsDelete_564482; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Delete notification channel.
   ## 
-  let valid = call_568590.validator(path, query, header, formData, body)
-  let scheme = call_568590.pickScheme
+  let valid = call_564490.validator(path, query, header, formData, body)
+  let scheme = call_564490.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568590.url(scheme.get, call_568590.host, call_568590.base,
-                         call_568590.route, valid.getOrDefault("path"),
+  let url = call_564490.url(scheme.get, call_564490.host, call_564490.base,
+                         call_564490.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568590, url, valid)
+  result = hook(call_564490, url, valid)
 
-proc call*(call_568591: Call_NotificationChannelsDelete_568582;
-          resourceGroupName: string; name: string; subscriptionId: string;
-          labName: string; apiVersion: string = "2016-05-15"): Recallable =
+proc call*(call_564491: Call_NotificationChannelsDelete_564482; labName: string;
+          name: string; subscriptionId: string; resourceGroupName: string;
+          apiVersion: string = "2016-05-15"): Recallable =
   ## notificationChannelsDelete
   ## Delete notification channel.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   labName: string (required)
+  ##          : The name of the lab.
   ##   apiVersion: string (required)
   ##             : Client API version.
   ##   name: string (required)
   ##       : The name of the notificationChannel.
   ##   subscriptionId: string (required)
   ##                 : The subscription ID.
-  ##   labName: string (required)
-  ##          : The name of the lab.
-  var path_568592 = newJObject()
-  var query_568593 = newJObject()
-  add(path_568592, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568593, "api-version", newJString(apiVersion))
-  add(path_568592, "name", newJString(name))
-  add(path_568592, "subscriptionId", newJString(subscriptionId))
-  add(path_568592, "labName", newJString(labName))
-  result = call_568591.call(path_568592, query_568593, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564492 = newJObject()
+  var query_564493 = newJObject()
+  add(path_564492, "labName", newJString(labName))
+  add(query_564493, "api-version", newJString(apiVersion))
+  add(path_564492, "name", newJString(name))
+  add(path_564492, "subscriptionId", newJString(subscriptionId))
+  add(path_564492, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564491.call(path_564492, query_564493, nil, nil, nil)
 
-var notificationChannelsDelete* = Call_NotificationChannelsDelete_568582(
+var notificationChannelsDelete* = Call_NotificationChannelsDelete_564482(
     name: "notificationChannelsDelete", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DevTestLab/labs/{labName}/notificationchannels/{name}",
-    validator: validate_NotificationChannelsDelete_568583, base: "",
-    url: url_NotificationChannelsDelete_568584, schemes: {Scheme.Https})
+    validator: validate_NotificationChannelsDelete_564483, base: "",
+    url: url_NotificationChannelsDelete_564484, schemes: {Scheme.Https})
 type
-  Call_NotificationChannelsNotify_568608 = ref object of OpenApiRestCall_567650
-proc url_NotificationChannelsNotify_568610(protocol: Scheme; host: string;
+  Call_NotificationChannelsNotify_564508 = ref object of OpenApiRestCall_563548
+proc url_NotificationChannelsNotify_564510(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -4429,44 +4410,43 @@ proc url_NotificationChannelsNotify_568610(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_NotificationChannelsNotify_568609(path: JsonNode; query: JsonNode;
+proc validate_NotificationChannelsNotify_564509(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Send notification to provided channel.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
+  ##   labName: JString (required)
+  ##          : The name of the lab.
   ##   name: JString (required)
   ##       : The name of the notificationChannel.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID.
-  ##   labName: JString (required)
-  ##          : The name of the lab.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568611 = path.getOrDefault("resourceGroupName")
-  valid_568611 = validateParameter(valid_568611, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `labName` field"
+  var valid_564511 = path.getOrDefault("labName")
+  valid_564511 = validateParameter(valid_564511, JString, required = true,
                                  default = nil)
-  if valid_568611 != nil:
-    section.add "resourceGroupName", valid_568611
-  var valid_568612 = path.getOrDefault("name")
-  valid_568612 = validateParameter(valid_568612, JString, required = true,
+  if valid_564511 != nil:
+    section.add "labName", valid_564511
+  var valid_564512 = path.getOrDefault("name")
+  valid_564512 = validateParameter(valid_564512, JString, required = true,
                                  default = nil)
-  if valid_568612 != nil:
-    section.add "name", valid_568612
-  var valid_568613 = path.getOrDefault("subscriptionId")
-  valid_568613 = validateParameter(valid_568613, JString, required = true,
+  if valid_564512 != nil:
+    section.add "name", valid_564512
+  var valid_564513 = path.getOrDefault("subscriptionId")
+  valid_564513 = validateParameter(valid_564513, JString, required = true,
                                  default = nil)
-  if valid_568613 != nil:
-    section.add "subscriptionId", valid_568613
-  var valid_568614 = path.getOrDefault("labName")
-  valid_568614 = validateParameter(valid_568614, JString, required = true,
+  if valid_564513 != nil:
+    section.add "subscriptionId", valid_564513
+  var valid_564514 = path.getOrDefault("resourceGroupName")
+  valid_564514 = validateParameter(valid_564514, JString, required = true,
                                  default = nil)
-  if valid_568614 != nil:
-    section.add "labName", valid_568614
+  if valid_564514 != nil:
+    section.add "resourceGroupName", valid_564514
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -4474,11 +4454,11 @@ proc validate_NotificationChannelsNotify_568609(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568615 = query.getOrDefault("api-version")
-  valid_568615 = validateParameter(valid_568615, JString, required = true,
+  var valid_564515 = query.getOrDefault("api-version")
+  valid_564515 = validateParameter(valid_564515, JString, required = true,
                                  default = newJString("2016-05-15"))
-  if valid_568615 != nil:
-    section.add "api-version", valid_568615
+  if valid_564515 != nil:
+    section.add "api-version", valid_564515
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -4492,57 +4472,56 @@ proc validate_NotificationChannelsNotify_568609(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568617: Call_NotificationChannelsNotify_568608; path: JsonNode;
+proc call*(call_564517: Call_NotificationChannelsNotify_564508; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Send notification to provided channel.
   ## 
-  let valid = call_568617.validator(path, query, header, formData, body)
-  let scheme = call_568617.pickScheme
+  let valid = call_564517.validator(path, query, header, formData, body)
+  let scheme = call_564517.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568617.url(scheme.get, call_568617.host, call_568617.base,
-                         call_568617.route, valid.getOrDefault("path"),
+  let url = call_564517.url(scheme.get, call_564517.host, call_564517.base,
+                         call_564517.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568617, url, valid)
+  result = hook(call_564517, url, valid)
 
-proc call*(call_568618: Call_NotificationChannelsNotify_568608;
-          resourceGroupName: string; name: string; subscriptionId: string;
-          labName: string; notifyParameters: JsonNode;
-          apiVersion: string = "2016-05-15"): Recallable =
+proc call*(call_564518: Call_NotificationChannelsNotify_564508; labName: string;
+          name: string; subscriptionId: string; resourceGroupName: string;
+          notifyParameters: JsonNode; apiVersion: string = "2016-05-15"): Recallable =
   ## notificationChannelsNotify
   ## Send notification to provided channel.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   labName: string (required)
+  ##          : The name of the lab.
   ##   apiVersion: string (required)
   ##             : Client API version.
   ##   name: string (required)
   ##       : The name of the notificationChannel.
   ##   subscriptionId: string (required)
   ##                 : The subscription ID.
-  ##   labName: string (required)
-  ##          : The name of the lab.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   notifyParameters: JObject (required)
   ##                   : Properties for generating a Notification.
-  var path_568619 = newJObject()
-  var query_568620 = newJObject()
-  var body_568621 = newJObject()
-  add(path_568619, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568620, "api-version", newJString(apiVersion))
-  add(path_568619, "name", newJString(name))
-  add(path_568619, "subscriptionId", newJString(subscriptionId))
-  add(path_568619, "labName", newJString(labName))
+  var path_564519 = newJObject()
+  var query_564520 = newJObject()
+  var body_564521 = newJObject()
+  add(path_564519, "labName", newJString(labName))
+  add(query_564520, "api-version", newJString(apiVersion))
+  add(path_564519, "name", newJString(name))
+  add(path_564519, "subscriptionId", newJString(subscriptionId))
+  add(path_564519, "resourceGroupName", newJString(resourceGroupName))
   if notifyParameters != nil:
-    body_568621 = notifyParameters
-  result = call_568618.call(path_568619, query_568620, nil, nil, body_568621)
+    body_564521 = notifyParameters
+  result = call_564518.call(path_564519, query_564520, nil, nil, body_564521)
 
-var notificationChannelsNotify* = Call_NotificationChannelsNotify_568608(
+var notificationChannelsNotify* = Call_NotificationChannelsNotify_564508(
     name: "notificationChannelsNotify", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DevTestLab/labs/{labName}/notificationchannels/{name}/notify",
-    validator: validate_NotificationChannelsNotify_568609, base: "",
-    url: url_NotificationChannelsNotify_568610, schemes: {Scheme.Https})
+    validator: validate_NotificationChannelsNotify_564509, base: "",
+    url: url_NotificationChannelsNotify_564510, schemes: {Scheme.Https})
 type
-  Call_PolicySetsEvaluatePolicies_568622 = ref object of OpenApiRestCall_567650
-proc url_PolicySetsEvaluatePolicies_568624(protocol: Scheme; host: string;
+  Call_PolicySetsEvaluatePolicies_564522 = ref object of OpenApiRestCall_563548
+proc url_PolicySetsEvaluatePolicies_564524(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -4568,44 +4547,43 @@ proc url_PolicySetsEvaluatePolicies_568624(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_PolicySetsEvaluatePolicies_568623(path: JsonNode; query: JsonNode;
+proc validate_PolicySetsEvaluatePolicies_564523(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Evaluates lab policy.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
+  ##   labName: JString (required)
+  ##          : The name of the lab.
   ##   name: JString (required)
   ##       : The name of the policy set.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID.
-  ##   labName: JString (required)
-  ##          : The name of the lab.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568625 = path.getOrDefault("resourceGroupName")
-  valid_568625 = validateParameter(valid_568625, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `labName` field"
+  var valid_564525 = path.getOrDefault("labName")
+  valid_564525 = validateParameter(valid_564525, JString, required = true,
                                  default = nil)
-  if valid_568625 != nil:
-    section.add "resourceGroupName", valid_568625
-  var valid_568626 = path.getOrDefault("name")
-  valid_568626 = validateParameter(valid_568626, JString, required = true,
+  if valid_564525 != nil:
+    section.add "labName", valid_564525
+  var valid_564526 = path.getOrDefault("name")
+  valid_564526 = validateParameter(valid_564526, JString, required = true,
                                  default = nil)
-  if valid_568626 != nil:
-    section.add "name", valid_568626
-  var valid_568627 = path.getOrDefault("subscriptionId")
-  valid_568627 = validateParameter(valid_568627, JString, required = true,
+  if valid_564526 != nil:
+    section.add "name", valid_564526
+  var valid_564527 = path.getOrDefault("subscriptionId")
+  valid_564527 = validateParameter(valid_564527, JString, required = true,
                                  default = nil)
-  if valid_568627 != nil:
-    section.add "subscriptionId", valid_568627
-  var valid_568628 = path.getOrDefault("labName")
-  valid_568628 = validateParameter(valid_568628, JString, required = true,
+  if valid_564527 != nil:
+    section.add "subscriptionId", valid_564527
+  var valid_564528 = path.getOrDefault("resourceGroupName")
+  valid_564528 = validateParameter(valid_564528, JString, required = true,
                                  default = nil)
-  if valid_568628 != nil:
-    section.add "labName", valid_568628
+  if valid_564528 != nil:
+    section.add "resourceGroupName", valid_564528
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -4613,11 +4591,11 @@ proc validate_PolicySetsEvaluatePolicies_568623(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568629 = query.getOrDefault("api-version")
-  valid_568629 = validateParameter(valid_568629, JString, required = true,
+  var valid_564529 = query.getOrDefault("api-version")
+  valid_564529 = validateParameter(valid_564529, JString, required = true,
                                  default = newJString("2016-05-15"))
-  if valid_568629 != nil:
-    section.add "api-version", valid_568629
+  if valid_564529 != nil:
+    section.add "api-version", valid_564529
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -4631,57 +4609,56 @@ proc validate_PolicySetsEvaluatePolicies_568623(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568631: Call_PolicySetsEvaluatePolicies_568622; path: JsonNode;
+proc call*(call_564531: Call_PolicySetsEvaluatePolicies_564522; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Evaluates lab policy.
   ## 
-  let valid = call_568631.validator(path, query, header, formData, body)
-  let scheme = call_568631.pickScheme
+  let valid = call_564531.validator(path, query, header, formData, body)
+  let scheme = call_564531.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568631.url(scheme.get, call_568631.host, call_568631.base,
-                         call_568631.route, valid.getOrDefault("path"),
+  let url = call_564531.url(scheme.get, call_564531.host, call_564531.base,
+                         call_564531.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568631, url, valid)
+  result = hook(call_564531, url, valid)
 
-proc call*(call_568632: Call_PolicySetsEvaluatePolicies_568622;
-          resourceGroupName: string; name: string; subscriptionId: string;
-          evaluatePoliciesRequest: JsonNode; labName: string;
-          apiVersion: string = "2016-05-15"): Recallable =
+proc call*(call_564532: Call_PolicySetsEvaluatePolicies_564522; labName: string;
+          name: string; subscriptionId: string; resourceGroupName: string;
+          evaluatePoliciesRequest: JsonNode; apiVersion: string = "2016-05-15"): Recallable =
   ## policySetsEvaluatePolicies
   ## Evaluates lab policy.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   labName: string (required)
+  ##          : The name of the lab.
   ##   apiVersion: string (required)
   ##             : Client API version.
   ##   name: string (required)
   ##       : The name of the policy set.
   ##   subscriptionId: string (required)
   ##                 : The subscription ID.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   evaluatePoliciesRequest: JObject (required)
   ##                          : Request body for evaluating a policy set.
-  ##   labName: string (required)
-  ##          : The name of the lab.
-  var path_568633 = newJObject()
-  var query_568634 = newJObject()
-  var body_568635 = newJObject()
-  add(path_568633, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568634, "api-version", newJString(apiVersion))
-  add(path_568633, "name", newJString(name))
-  add(path_568633, "subscriptionId", newJString(subscriptionId))
+  var path_564533 = newJObject()
+  var query_564534 = newJObject()
+  var body_564535 = newJObject()
+  add(path_564533, "labName", newJString(labName))
+  add(query_564534, "api-version", newJString(apiVersion))
+  add(path_564533, "name", newJString(name))
+  add(path_564533, "subscriptionId", newJString(subscriptionId))
+  add(path_564533, "resourceGroupName", newJString(resourceGroupName))
   if evaluatePoliciesRequest != nil:
-    body_568635 = evaluatePoliciesRequest
-  add(path_568633, "labName", newJString(labName))
-  result = call_568632.call(path_568633, query_568634, nil, nil, body_568635)
+    body_564535 = evaluatePoliciesRequest
+  result = call_564532.call(path_564533, query_564534, nil, nil, body_564535)
 
-var policySetsEvaluatePolicies* = Call_PolicySetsEvaluatePolicies_568622(
+var policySetsEvaluatePolicies* = Call_PolicySetsEvaluatePolicies_564522(
     name: "policySetsEvaluatePolicies", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DevTestLab/labs/{labName}/policysets/{name}/evaluatePolicies",
-    validator: validate_PolicySetsEvaluatePolicies_568623, base: "",
-    url: url_PolicySetsEvaluatePolicies_568624, schemes: {Scheme.Https})
+    validator: validate_PolicySetsEvaluatePolicies_564523, base: "",
+    url: url_PolicySetsEvaluatePolicies_564524, schemes: {Scheme.Https})
 type
-  Call_PoliciesList_568636 = ref object of OpenApiRestCall_567650
-proc url_PoliciesList_568638(protocol: Scheme; host: string; base: string;
+  Call_PoliciesList_564536 = ref object of OpenApiRestCall_563548
+proc url_PoliciesList_564538(protocol: Scheme; host: string; base: string;
                             route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -4707,83 +4684,82 @@ proc url_PoliciesList_568638(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_PoliciesList_568637(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_PoliciesList_564537(path: JsonNode; query: JsonNode; header: JsonNode;
                                  formData: JsonNode; body: JsonNode): JsonNode =
   ## List policies in a given policy set.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
-  ##   subscriptionId: JString (required)
-  ##                 : The subscription ID.
-  ##   policySetName: JString (required)
-  ##                : The name of the policy set.
   ##   labName: JString (required)
   ##          : The name of the lab.
+  ##   policySetName: JString (required)
+  ##                : The name of the policy set.
+  ##   subscriptionId: JString (required)
+  ##                 : The subscription ID.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568639 = path.getOrDefault("resourceGroupName")
-  valid_568639 = validateParameter(valid_568639, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `labName` field"
+  var valid_564539 = path.getOrDefault("labName")
+  valid_564539 = validateParameter(valid_564539, JString, required = true,
                                  default = nil)
-  if valid_568639 != nil:
-    section.add "resourceGroupName", valid_568639
-  var valid_568640 = path.getOrDefault("subscriptionId")
-  valid_568640 = validateParameter(valid_568640, JString, required = true,
+  if valid_564539 != nil:
+    section.add "labName", valid_564539
+  var valid_564540 = path.getOrDefault("policySetName")
+  valid_564540 = validateParameter(valid_564540, JString, required = true,
                                  default = nil)
-  if valid_568640 != nil:
-    section.add "subscriptionId", valid_568640
-  var valid_568641 = path.getOrDefault("policySetName")
-  valid_568641 = validateParameter(valid_568641, JString, required = true,
+  if valid_564540 != nil:
+    section.add "policySetName", valid_564540
+  var valid_564541 = path.getOrDefault("subscriptionId")
+  valid_564541 = validateParameter(valid_564541, JString, required = true,
                                  default = nil)
-  if valid_568641 != nil:
-    section.add "policySetName", valid_568641
-  var valid_568642 = path.getOrDefault("labName")
-  valid_568642 = validateParameter(valid_568642, JString, required = true,
+  if valid_564541 != nil:
+    section.add "subscriptionId", valid_564541
+  var valid_564542 = path.getOrDefault("resourceGroupName")
+  valid_564542 = validateParameter(valid_564542, JString, required = true,
                                  default = nil)
-  if valid_568642 != nil:
-    section.add "labName", valid_568642
+  if valid_564542 != nil:
+    section.add "resourceGroupName", valid_564542
   result.add "path", section
   ## parameters in `query` object:
-  ##   $orderby: JString
-  ##           : The ordering expression for the results, using OData notation.
-  ##   $expand: JString
-  ##          : Specify the $expand query. Example: 'properties($select=description)'
-  ##   api-version: JString (required)
-  ##              : Client API version.
   ##   $top: JInt
   ##       : The maximum number of resources to return from the operation.
+  ##   api-version: JString (required)
+  ##              : Client API version.
+  ##   $expand: JString
+  ##          : Specify the $expand query. Example: 'properties($select=description)'
+  ##   $orderby: JString
+  ##           : The ordering expression for the results, using OData notation.
   ##   $filter: JString
   ##          : The filter to apply to the operation.
   section = newJObject()
-  var valid_568643 = query.getOrDefault("$orderby")
-  valid_568643 = validateParameter(valid_568643, JString, required = false,
-                                 default = nil)
-  if valid_568643 != nil:
-    section.add "$orderby", valid_568643
-  var valid_568644 = query.getOrDefault("$expand")
-  valid_568644 = validateParameter(valid_568644, JString, required = false,
-                                 default = nil)
-  if valid_568644 != nil:
-    section.add "$expand", valid_568644
+  var valid_564543 = query.getOrDefault("$top")
+  valid_564543 = validateParameter(valid_564543, JInt, required = false, default = nil)
+  if valid_564543 != nil:
+    section.add "$top", valid_564543
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568645 = query.getOrDefault("api-version")
-  valid_568645 = validateParameter(valid_568645, JString, required = true,
+  var valid_564544 = query.getOrDefault("api-version")
+  valid_564544 = validateParameter(valid_564544, JString, required = true,
                                  default = newJString("2016-05-15"))
-  if valid_568645 != nil:
-    section.add "api-version", valid_568645
-  var valid_568646 = query.getOrDefault("$top")
-  valid_568646 = validateParameter(valid_568646, JInt, required = false, default = nil)
-  if valid_568646 != nil:
-    section.add "$top", valid_568646
-  var valid_568647 = query.getOrDefault("$filter")
-  valid_568647 = validateParameter(valid_568647, JString, required = false,
+  if valid_564544 != nil:
+    section.add "api-version", valid_564544
+  var valid_564545 = query.getOrDefault("$expand")
+  valid_564545 = validateParameter(valid_564545, JString, required = false,
                                  default = nil)
-  if valid_568647 != nil:
-    section.add "$filter", valid_568647
+  if valid_564545 != nil:
+    section.add "$expand", valid_564545
+  var valid_564546 = query.getOrDefault("$orderby")
+  valid_564546 = validateParameter(valid_564546, JString, required = false,
+                                 default = nil)
+  if valid_564546 != nil:
+    section.add "$orderby", valid_564546
+  var valid_564547 = query.getOrDefault("$filter")
+  valid_564547 = validateParameter(valid_564547, JString, required = false,
+                                 default = nil)
+  if valid_564547 != nil:
+    section.add "$filter", valid_564547
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -4792,63 +4768,63 @@ proc validate_PoliciesList_568637(path: JsonNode; query: JsonNode; header: JsonN
   if body != nil:
     result.add "body", body
 
-proc call*(call_568648: Call_PoliciesList_568636; path: JsonNode; query: JsonNode;
+proc call*(call_564548: Call_PoliciesList_564536; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## List policies in a given policy set.
   ## 
-  let valid = call_568648.validator(path, query, header, formData, body)
-  let scheme = call_568648.pickScheme
+  let valid = call_564548.validator(path, query, header, formData, body)
+  let scheme = call_564548.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568648.url(scheme.get, call_568648.host, call_568648.base,
-                         call_568648.route, valid.getOrDefault("path"),
+  let url = call_564548.url(scheme.get, call_564548.host, call_564548.base,
+                         call_564548.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568648, url, valid)
+  result = hook(call_564548, url, valid)
 
-proc call*(call_568649: Call_PoliciesList_568636; resourceGroupName: string;
-          subscriptionId: string; policySetName: string; labName: string;
-          Orderby: string = ""; Expand: string = ""; apiVersion: string = "2016-05-15";
-          Top: int = 0; Filter: string = ""): Recallable =
+proc call*(call_564549: Call_PoliciesList_564536; labName: string;
+          policySetName: string; subscriptionId: string; resourceGroupName: string;
+          Top: int = 0; apiVersion: string = "2016-05-15"; Expand: string = "";
+          Orderby: string = ""; Filter: string = ""): Recallable =
   ## policiesList
   ## List policies in a given policy set.
+  ##   labName: string (required)
+  ##          : The name of the lab.
+  ##   Top: int
+  ##      : The maximum number of resources to return from the operation.
+  ##   apiVersion: string (required)
+  ##             : Client API version.
+  ##   Expand: string
+  ##         : Specify the $expand query. Example: 'properties($select=description)'
+  ##   policySetName: string (required)
+  ##                : The name of the policy set.
+  ##   subscriptionId: string (required)
+  ##                 : The subscription ID.
   ##   Orderby: string
   ##          : The ordering expression for the results, using OData notation.
   ##   resourceGroupName: string (required)
   ##                    : The name of the resource group.
-  ##   Expand: string
-  ##         : Specify the $expand query. Example: 'properties($select=description)'
-  ##   apiVersion: string (required)
-  ##             : Client API version.
-  ##   subscriptionId: string (required)
-  ##                 : The subscription ID.
-  ##   Top: int
-  ##      : The maximum number of resources to return from the operation.
-  ##   policySetName: string (required)
-  ##                : The name of the policy set.
-  ##   labName: string (required)
-  ##          : The name of the lab.
   ##   Filter: string
   ##         : The filter to apply to the operation.
-  var path_568650 = newJObject()
-  var query_568651 = newJObject()
-  add(query_568651, "$orderby", newJString(Orderby))
-  add(path_568650, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568651, "$expand", newJString(Expand))
-  add(query_568651, "api-version", newJString(apiVersion))
-  add(path_568650, "subscriptionId", newJString(subscriptionId))
-  add(query_568651, "$top", newJInt(Top))
-  add(path_568650, "policySetName", newJString(policySetName))
-  add(path_568650, "labName", newJString(labName))
-  add(query_568651, "$filter", newJString(Filter))
-  result = call_568649.call(path_568650, query_568651, nil, nil, nil)
+  var path_564550 = newJObject()
+  var query_564551 = newJObject()
+  add(path_564550, "labName", newJString(labName))
+  add(query_564551, "$top", newJInt(Top))
+  add(query_564551, "api-version", newJString(apiVersion))
+  add(query_564551, "$expand", newJString(Expand))
+  add(path_564550, "policySetName", newJString(policySetName))
+  add(path_564550, "subscriptionId", newJString(subscriptionId))
+  add(query_564551, "$orderby", newJString(Orderby))
+  add(path_564550, "resourceGroupName", newJString(resourceGroupName))
+  add(query_564551, "$filter", newJString(Filter))
+  result = call_564549.call(path_564550, query_564551, nil, nil, nil)
 
-var policiesList* = Call_PoliciesList_568636(name: "policiesList",
+var policiesList* = Call_PoliciesList_564536(name: "policiesList",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DevTestLab/labs/{labName}/policysets/{policySetName}/policies",
-    validator: validate_PoliciesList_568637, base: "", url: url_PoliciesList_568638,
+    validator: validate_PoliciesList_564537, base: "", url: url_PoliciesList_564538,
     schemes: {Scheme.Https})
 type
-  Call_PoliciesCreateOrUpdate_568666 = ref object of OpenApiRestCall_567650
-proc url_PoliciesCreateOrUpdate_568668(protocol: Scheme; host: string; base: string;
+  Call_PoliciesCreateOrUpdate_564566 = ref object of OpenApiRestCall_563548
+proc url_PoliciesCreateOrUpdate_564568(protocol: Scheme; host: string; base: string;
                                       route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -4876,51 +4852,50 @@ proc url_PoliciesCreateOrUpdate_568668(protocol: Scheme; host: string; base: str
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_PoliciesCreateOrUpdate_568667(path: JsonNode; query: JsonNode;
+proc validate_PoliciesCreateOrUpdate_564567(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Create or replace an existing policy.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
-  ##   name: JString (required)
-  ##       : The name of the policy.
-  ##   subscriptionId: JString (required)
-  ##                 : The subscription ID.
-  ##   policySetName: JString (required)
-  ##                : The name of the policy set.
   ##   labName: JString (required)
   ##          : The name of the lab.
+  ##   name: JString (required)
+  ##       : The name of the policy.
+  ##   policySetName: JString (required)
+  ##                : The name of the policy set.
+  ##   subscriptionId: JString (required)
+  ##                 : The subscription ID.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568669 = path.getOrDefault("resourceGroupName")
-  valid_568669 = validateParameter(valid_568669, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `labName` field"
+  var valid_564569 = path.getOrDefault("labName")
+  valid_564569 = validateParameter(valid_564569, JString, required = true,
                                  default = nil)
-  if valid_568669 != nil:
-    section.add "resourceGroupName", valid_568669
-  var valid_568670 = path.getOrDefault("name")
-  valid_568670 = validateParameter(valid_568670, JString, required = true,
+  if valid_564569 != nil:
+    section.add "labName", valid_564569
+  var valid_564570 = path.getOrDefault("name")
+  valid_564570 = validateParameter(valid_564570, JString, required = true,
                                  default = nil)
-  if valid_568670 != nil:
-    section.add "name", valid_568670
-  var valid_568671 = path.getOrDefault("subscriptionId")
-  valid_568671 = validateParameter(valid_568671, JString, required = true,
+  if valid_564570 != nil:
+    section.add "name", valid_564570
+  var valid_564571 = path.getOrDefault("policySetName")
+  valid_564571 = validateParameter(valid_564571, JString, required = true,
                                  default = nil)
-  if valid_568671 != nil:
-    section.add "subscriptionId", valid_568671
-  var valid_568672 = path.getOrDefault("policySetName")
-  valid_568672 = validateParameter(valid_568672, JString, required = true,
+  if valid_564571 != nil:
+    section.add "policySetName", valid_564571
+  var valid_564572 = path.getOrDefault("subscriptionId")
+  valid_564572 = validateParameter(valid_564572, JString, required = true,
                                  default = nil)
-  if valid_568672 != nil:
-    section.add "policySetName", valid_568672
-  var valid_568673 = path.getOrDefault("labName")
-  valid_568673 = validateParameter(valid_568673, JString, required = true,
+  if valid_564572 != nil:
+    section.add "subscriptionId", valid_564572
+  var valid_564573 = path.getOrDefault("resourceGroupName")
+  valid_564573 = validateParameter(valid_564573, JString, required = true,
                                  default = nil)
-  if valid_568673 != nil:
-    section.add "labName", valid_568673
+  if valid_564573 != nil:
+    section.add "resourceGroupName", valid_564573
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -4928,11 +4903,11 @@ proc validate_PoliciesCreateOrUpdate_568667(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568674 = query.getOrDefault("api-version")
-  valid_568674 = validateParameter(valid_568674, JString, required = true,
+  var valid_564574 = query.getOrDefault("api-version")
+  valid_564574 = validateParameter(valid_564574, JString, required = true,
                                  default = newJString("2016-05-15"))
-  if valid_568674 != nil:
-    section.add "api-version", valid_568674
+  if valid_564574 != nil:
+    section.add "api-version", valid_564574
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -4946,60 +4921,60 @@ proc validate_PoliciesCreateOrUpdate_568667(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568676: Call_PoliciesCreateOrUpdate_568666; path: JsonNode;
+proc call*(call_564576: Call_PoliciesCreateOrUpdate_564566; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Create or replace an existing policy.
   ## 
-  let valid = call_568676.validator(path, query, header, formData, body)
-  let scheme = call_568676.pickScheme
+  let valid = call_564576.validator(path, query, header, formData, body)
+  let scheme = call_564576.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568676.url(scheme.get, call_568676.host, call_568676.base,
-                         call_568676.route, valid.getOrDefault("path"),
+  let url = call_564576.url(scheme.get, call_564576.host, call_564576.base,
+                         call_564576.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568676, url, valid)
+  result = hook(call_564576, url, valid)
 
-proc call*(call_568677: Call_PoliciesCreateOrUpdate_568666;
-          resourceGroupName: string; name: string; subscriptionId: string;
-          policySetName: string; labName: string; policy: JsonNode;
+proc call*(call_564577: Call_PoliciesCreateOrUpdate_564566; labName: string;
+          policy: JsonNode; name: string; policySetName: string;
+          subscriptionId: string; resourceGroupName: string;
           apiVersion: string = "2016-05-15"): Recallable =
   ## policiesCreateOrUpdate
   ## Create or replace an existing policy.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
-  ##   apiVersion: string (required)
-  ##             : Client API version.
-  ##   name: string (required)
-  ##       : The name of the policy.
-  ##   subscriptionId: string (required)
-  ##                 : The subscription ID.
-  ##   policySetName: string (required)
-  ##                : The name of the policy set.
   ##   labName: string (required)
   ##          : The name of the lab.
+  ##   apiVersion: string (required)
+  ##             : Client API version.
   ##   policy: JObject (required)
   ##         : A Policy.
-  var path_568678 = newJObject()
-  var query_568679 = newJObject()
-  var body_568680 = newJObject()
-  add(path_568678, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568679, "api-version", newJString(apiVersion))
-  add(path_568678, "name", newJString(name))
-  add(path_568678, "subscriptionId", newJString(subscriptionId))
-  add(path_568678, "policySetName", newJString(policySetName))
-  add(path_568678, "labName", newJString(labName))
+  ##   name: string (required)
+  ##       : The name of the policy.
+  ##   policySetName: string (required)
+  ##                : The name of the policy set.
+  ##   subscriptionId: string (required)
+  ##                 : The subscription ID.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564578 = newJObject()
+  var query_564579 = newJObject()
+  var body_564580 = newJObject()
+  add(path_564578, "labName", newJString(labName))
+  add(query_564579, "api-version", newJString(apiVersion))
   if policy != nil:
-    body_568680 = policy
-  result = call_568677.call(path_568678, query_568679, nil, nil, body_568680)
+    body_564580 = policy
+  add(path_564578, "name", newJString(name))
+  add(path_564578, "policySetName", newJString(policySetName))
+  add(path_564578, "subscriptionId", newJString(subscriptionId))
+  add(path_564578, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564577.call(path_564578, query_564579, nil, nil, body_564580)
 
-var policiesCreateOrUpdate* = Call_PoliciesCreateOrUpdate_568666(
+var policiesCreateOrUpdate* = Call_PoliciesCreateOrUpdate_564566(
     name: "policiesCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DevTestLab/labs/{labName}/policysets/{policySetName}/policies/{name}",
-    validator: validate_PoliciesCreateOrUpdate_568667, base: "",
-    url: url_PoliciesCreateOrUpdate_568668, schemes: {Scheme.Https})
+    validator: validate_PoliciesCreateOrUpdate_564567, base: "",
+    url: url_PoliciesCreateOrUpdate_564568, schemes: {Scheme.Https})
 type
-  Call_PoliciesGet_568652 = ref object of OpenApiRestCall_567650
-proc url_PoliciesGet_568654(protocol: Scheme; host: string; base: string;
+  Call_PoliciesGet_564552 = ref object of OpenApiRestCall_563548
+proc url_PoliciesGet_564554(protocol: Scheme; host: string; base: string;
                            route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -5027,70 +5002,69 @@ proc url_PoliciesGet_568654(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_PoliciesGet_568653(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_PoliciesGet_564553(path: JsonNode; query: JsonNode; header: JsonNode;
                                 formData: JsonNode; body: JsonNode): JsonNode =
   ## Get policy.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
-  ##   name: JString (required)
-  ##       : The name of the policy.
-  ##   subscriptionId: JString (required)
-  ##                 : The subscription ID.
-  ##   policySetName: JString (required)
-  ##                : The name of the policy set.
   ##   labName: JString (required)
   ##          : The name of the lab.
+  ##   name: JString (required)
+  ##       : The name of the policy.
+  ##   policySetName: JString (required)
+  ##                : The name of the policy set.
+  ##   subscriptionId: JString (required)
+  ##                 : The subscription ID.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568655 = path.getOrDefault("resourceGroupName")
-  valid_568655 = validateParameter(valid_568655, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `labName` field"
+  var valid_564555 = path.getOrDefault("labName")
+  valid_564555 = validateParameter(valid_564555, JString, required = true,
                                  default = nil)
-  if valid_568655 != nil:
-    section.add "resourceGroupName", valid_568655
-  var valid_568656 = path.getOrDefault("name")
-  valid_568656 = validateParameter(valid_568656, JString, required = true,
+  if valid_564555 != nil:
+    section.add "labName", valid_564555
+  var valid_564556 = path.getOrDefault("name")
+  valid_564556 = validateParameter(valid_564556, JString, required = true,
                                  default = nil)
-  if valid_568656 != nil:
-    section.add "name", valid_568656
-  var valid_568657 = path.getOrDefault("subscriptionId")
-  valid_568657 = validateParameter(valid_568657, JString, required = true,
+  if valid_564556 != nil:
+    section.add "name", valid_564556
+  var valid_564557 = path.getOrDefault("policySetName")
+  valid_564557 = validateParameter(valid_564557, JString, required = true,
                                  default = nil)
-  if valid_568657 != nil:
-    section.add "subscriptionId", valid_568657
-  var valid_568658 = path.getOrDefault("policySetName")
-  valid_568658 = validateParameter(valid_568658, JString, required = true,
+  if valid_564557 != nil:
+    section.add "policySetName", valid_564557
+  var valid_564558 = path.getOrDefault("subscriptionId")
+  valid_564558 = validateParameter(valid_564558, JString, required = true,
                                  default = nil)
-  if valid_568658 != nil:
-    section.add "policySetName", valid_568658
-  var valid_568659 = path.getOrDefault("labName")
-  valid_568659 = validateParameter(valid_568659, JString, required = true,
+  if valid_564558 != nil:
+    section.add "subscriptionId", valid_564558
+  var valid_564559 = path.getOrDefault("resourceGroupName")
+  valid_564559 = validateParameter(valid_564559, JString, required = true,
                                  default = nil)
-  if valid_568659 != nil:
-    section.add "labName", valid_568659
+  if valid_564559 != nil:
+    section.add "resourceGroupName", valid_564559
   result.add "path", section
   ## parameters in `query` object:
-  ##   $expand: JString
-  ##          : Specify the $expand query. Example: 'properties($select=description)'
   ##   api-version: JString (required)
   ##              : Client API version.
+  ##   $expand: JString
+  ##          : Specify the $expand query. Example: 'properties($select=description)'
   section = newJObject()
-  var valid_568660 = query.getOrDefault("$expand")
-  valid_568660 = validateParameter(valid_568660, JString, required = false,
-                                 default = nil)
-  if valid_568660 != nil:
-    section.add "$expand", valid_568660
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568661 = query.getOrDefault("api-version")
-  valid_568661 = validateParameter(valid_568661, JString, required = true,
+  var valid_564560 = query.getOrDefault("api-version")
+  valid_564560 = validateParameter(valid_564560, JString, required = true,
                                  default = newJString("2016-05-15"))
-  if valid_568661 != nil:
-    section.add "api-version", valid_568661
+  if valid_564560 != nil:
+    section.add "api-version", valid_564560
+  var valid_564561 = query.getOrDefault("$expand")
+  valid_564561 = validateParameter(valid_564561, JString, required = false,
+                                 default = nil)
+  if valid_564561 != nil:
+    section.add "$expand", valid_564561
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -5099,58 +5073,58 @@ proc validate_PoliciesGet_568653(path: JsonNode; query: JsonNode; header: JsonNo
   if body != nil:
     result.add "body", body
 
-proc call*(call_568662: Call_PoliciesGet_568652; path: JsonNode; query: JsonNode;
+proc call*(call_564562: Call_PoliciesGet_564552; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get policy.
   ## 
-  let valid = call_568662.validator(path, query, header, formData, body)
-  let scheme = call_568662.pickScheme
+  let valid = call_564562.validator(path, query, header, formData, body)
+  let scheme = call_564562.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568662.url(scheme.get, call_568662.host, call_568662.base,
-                         call_568662.route, valid.getOrDefault("path"),
+  let url = call_564562.url(scheme.get, call_564562.host, call_564562.base,
+                         call_564562.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568662, url, valid)
+  result = hook(call_564562, url, valid)
 
-proc call*(call_568663: Call_PoliciesGet_568652; resourceGroupName: string;
-          name: string; subscriptionId: string; policySetName: string;
-          labName: string; Expand: string = ""; apiVersion: string = "2016-05-15"): Recallable =
+proc call*(call_564563: Call_PoliciesGet_564552; labName: string; name: string;
+          policySetName: string; subscriptionId: string; resourceGroupName: string;
+          apiVersion: string = "2016-05-15"; Expand: string = ""): Recallable =
   ## policiesGet
   ## Get policy.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   labName: string (required)
+  ##          : The name of the lab.
+  ##   apiVersion: string (required)
+  ##             : Client API version.
   ##   Expand: string
   ##         : Specify the $expand query. Example: 'properties($select=description)'
   ##   name: string (required)
   ##       : The name of the policy.
-  ##   apiVersion: string (required)
-  ##             : Client API version.
-  ##   subscriptionId: string (required)
-  ##                 : The subscription ID.
   ##   policySetName: string (required)
   ##                : The name of the policy set.
-  ##   labName: string (required)
-  ##          : The name of the lab.
-  var path_568664 = newJObject()
-  var query_568665 = newJObject()
-  add(path_568664, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568665, "$expand", newJString(Expand))
-  add(path_568664, "name", newJString(name))
-  add(query_568665, "api-version", newJString(apiVersion))
-  add(path_568664, "subscriptionId", newJString(subscriptionId))
-  add(path_568664, "policySetName", newJString(policySetName))
-  add(path_568664, "labName", newJString(labName))
-  result = call_568663.call(path_568664, query_568665, nil, nil, nil)
+  ##   subscriptionId: string (required)
+  ##                 : The subscription ID.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564564 = newJObject()
+  var query_564565 = newJObject()
+  add(path_564564, "labName", newJString(labName))
+  add(query_564565, "api-version", newJString(apiVersion))
+  add(query_564565, "$expand", newJString(Expand))
+  add(path_564564, "name", newJString(name))
+  add(path_564564, "policySetName", newJString(policySetName))
+  add(path_564564, "subscriptionId", newJString(subscriptionId))
+  add(path_564564, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564563.call(path_564564, query_564565, nil, nil, nil)
 
-var policiesGet* = Call_PoliciesGet_568652(name: "policiesGet",
+var policiesGet* = Call_PoliciesGet_564552(name: "policiesGet",
                                         meth: HttpMethod.HttpGet,
                                         host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DevTestLab/labs/{labName}/policysets/{policySetName}/policies/{name}",
-                                        validator: validate_PoliciesGet_568653,
-                                        base: "", url: url_PoliciesGet_568654,
+                                        validator: validate_PoliciesGet_564553,
+                                        base: "", url: url_PoliciesGet_564554,
                                         schemes: {Scheme.Https})
 type
-  Call_PoliciesUpdate_568694 = ref object of OpenApiRestCall_567650
-proc url_PoliciesUpdate_568696(protocol: Scheme; host: string; base: string;
+  Call_PoliciesUpdate_564594 = ref object of OpenApiRestCall_563548
+proc url_PoliciesUpdate_564596(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -5178,7 +5152,7 @@ proc url_PoliciesUpdate_568696(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_PoliciesUpdate_568695(path: JsonNode; query: JsonNode;
+proc validate_PoliciesUpdate_564595(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## Modify properties of policies.
@@ -5186,44 +5160,43 @@ proc validate_PoliciesUpdate_568695(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
-  ##   name: JString (required)
-  ##       : The name of the policy.
-  ##   subscriptionId: JString (required)
-  ##                 : The subscription ID.
-  ##   policySetName: JString (required)
-  ##                : The name of the policy set.
   ##   labName: JString (required)
   ##          : The name of the lab.
+  ##   name: JString (required)
+  ##       : The name of the policy.
+  ##   policySetName: JString (required)
+  ##                : The name of the policy set.
+  ##   subscriptionId: JString (required)
+  ##                 : The subscription ID.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568697 = path.getOrDefault("resourceGroupName")
-  valid_568697 = validateParameter(valid_568697, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `labName` field"
+  var valid_564597 = path.getOrDefault("labName")
+  valid_564597 = validateParameter(valid_564597, JString, required = true,
                                  default = nil)
-  if valid_568697 != nil:
-    section.add "resourceGroupName", valid_568697
-  var valid_568698 = path.getOrDefault("name")
-  valid_568698 = validateParameter(valid_568698, JString, required = true,
+  if valid_564597 != nil:
+    section.add "labName", valid_564597
+  var valid_564598 = path.getOrDefault("name")
+  valid_564598 = validateParameter(valid_564598, JString, required = true,
                                  default = nil)
-  if valid_568698 != nil:
-    section.add "name", valid_568698
-  var valid_568699 = path.getOrDefault("subscriptionId")
-  valid_568699 = validateParameter(valid_568699, JString, required = true,
+  if valid_564598 != nil:
+    section.add "name", valid_564598
+  var valid_564599 = path.getOrDefault("policySetName")
+  valid_564599 = validateParameter(valid_564599, JString, required = true,
                                  default = nil)
-  if valid_568699 != nil:
-    section.add "subscriptionId", valid_568699
-  var valid_568700 = path.getOrDefault("policySetName")
-  valid_568700 = validateParameter(valid_568700, JString, required = true,
+  if valid_564599 != nil:
+    section.add "policySetName", valid_564599
+  var valid_564600 = path.getOrDefault("subscriptionId")
+  valid_564600 = validateParameter(valid_564600, JString, required = true,
                                  default = nil)
-  if valid_568700 != nil:
-    section.add "policySetName", valid_568700
-  var valid_568701 = path.getOrDefault("labName")
-  valid_568701 = validateParameter(valid_568701, JString, required = true,
+  if valid_564600 != nil:
+    section.add "subscriptionId", valid_564600
+  var valid_564601 = path.getOrDefault("resourceGroupName")
+  valid_564601 = validateParameter(valid_564601, JString, required = true,
                                  default = nil)
-  if valid_568701 != nil:
-    section.add "labName", valid_568701
+  if valid_564601 != nil:
+    section.add "resourceGroupName", valid_564601
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -5231,11 +5204,11 @@ proc validate_PoliciesUpdate_568695(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568702 = query.getOrDefault("api-version")
-  valid_568702 = validateParameter(valid_568702, JString, required = true,
+  var valid_564602 = query.getOrDefault("api-version")
+  valid_564602 = validateParameter(valid_564602, JString, required = true,
                                  default = newJString("2016-05-15"))
-  if valid_568702 != nil:
-    section.add "api-version", valid_568702
+  if valid_564602 != nil:
+    section.add "api-version", valid_564602
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -5249,58 +5222,59 @@ proc validate_PoliciesUpdate_568695(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568704: Call_PoliciesUpdate_568694; path: JsonNode; query: JsonNode;
+proc call*(call_564604: Call_PoliciesUpdate_564594; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Modify properties of policies.
   ## 
-  let valid = call_568704.validator(path, query, header, formData, body)
-  let scheme = call_568704.pickScheme
+  let valid = call_564604.validator(path, query, header, formData, body)
+  let scheme = call_564604.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568704.url(scheme.get, call_568704.host, call_568704.base,
-                         call_568704.route, valid.getOrDefault("path"),
+  let url = call_564604.url(scheme.get, call_564604.host, call_564604.base,
+                         call_564604.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568704, url, valid)
+  result = hook(call_564604, url, valid)
 
-proc call*(call_568705: Call_PoliciesUpdate_568694; resourceGroupName: string;
-          name: string; subscriptionId: string; policySetName: string;
-          labName: string; policy: JsonNode; apiVersion: string = "2016-05-15"): Recallable =
+proc call*(call_564605: Call_PoliciesUpdate_564594; labName: string;
+          policy: JsonNode; name: string; policySetName: string;
+          subscriptionId: string; resourceGroupName: string;
+          apiVersion: string = "2016-05-15"): Recallable =
   ## policiesUpdate
   ## Modify properties of policies.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
-  ##   apiVersion: string (required)
-  ##             : Client API version.
-  ##   name: string (required)
-  ##       : The name of the policy.
-  ##   subscriptionId: string (required)
-  ##                 : The subscription ID.
-  ##   policySetName: string (required)
-  ##                : The name of the policy set.
   ##   labName: string (required)
   ##          : The name of the lab.
+  ##   apiVersion: string (required)
+  ##             : Client API version.
   ##   policy: JObject (required)
   ##         : A Policy.
-  var path_568706 = newJObject()
-  var query_568707 = newJObject()
-  var body_568708 = newJObject()
-  add(path_568706, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568707, "api-version", newJString(apiVersion))
-  add(path_568706, "name", newJString(name))
-  add(path_568706, "subscriptionId", newJString(subscriptionId))
-  add(path_568706, "policySetName", newJString(policySetName))
-  add(path_568706, "labName", newJString(labName))
+  ##   name: string (required)
+  ##       : The name of the policy.
+  ##   policySetName: string (required)
+  ##                : The name of the policy set.
+  ##   subscriptionId: string (required)
+  ##                 : The subscription ID.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564606 = newJObject()
+  var query_564607 = newJObject()
+  var body_564608 = newJObject()
+  add(path_564606, "labName", newJString(labName))
+  add(query_564607, "api-version", newJString(apiVersion))
   if policy != nil:
-    body_568708 = policy
-  result = call_568705.call(path_568706, query_568707, nil, nil, body_568708)
+    body_564608 = policy
+  add(path_564606, "name", newJString(name))
+  add(path_564606, "policySetName", newJString(policySetName))
+  add(path_564606, "subscriptionId", newJString(subscriptionId))
+  add(path_564606, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564605.call(path_564606, query_564607, nil, nil, body_564608)
 
-var policiesUpdate* = Call_PoliciesUpdate_568694(name: "policiesUpdate",
+var policiesUpdate* = Call_PoliciesUpdate_564594(name: "policiesUpdate",
     meth: HttpMethod.HttpPatch, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DevTestLab/labs/{labName}/policysets/{policySetName}/policies/{name}",
-    validator: validate_PoliciesUpdate_568695, base: "", url: url_PoliciesUpdate_568696,
+    validator: validate_PoliciesUpdate_564595, base: "", url: url_PoliciesUpdate_564596,
     schemes: {Scheme.Https})
 type
-  Call_PoliciesDelete_568681 = ref object of OpenApiRestCall_567650
-proc url_PoliciesDelete_568683(protocol: Scheme; host: string; base: string;
+  Call_PoliciesDelete_564581 = ref object of OpenApiRestCall_563548
+proc url_PoliciesDelete_564583(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -5328,7 +5302,7 @@ proc url_PoliciesDelete_568683(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_PoliciesDelete_568682(path: JsonNode; query: JsonNode;
+proc validate_PoliciesDelete_564582(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## Delete policy.
@@ -5336,44 +5310,43 @@ proc validate_PoliciesDelete_568682(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
-  ##   name: JString (required)
-  ##       : The name of the policy.
-  ##   subscriptionId: JString (required)
-  ##                 : The subscription ID.
-  ##   policySetName: JString (required)
-  ##                : The name of the policy set.
   ##   labName: JString (required)
   ##          : The name of the lab.
+  ##   name: JString (required)
+  ##       : The name of the policy.
+  ##   policySetName: JString (required)
+  ##                : The name of the policy set.
+  ##   subscriptionId: JString (required)
+  ##                 : The subscription ID.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568684 = path.getOrDefault("resourceGroupName")
-  valid_568684 = validateParameter(valid_568684, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `labName` field"
+  var valid_564584 = path.getOrDefault("labName")
+  valid_564584 = validateParameter(valid_564584, JString, required = true,
                                  default = nil)
-  if valid_568684 != nil:
-    section.add "resourceGroupName", valid_568684
-  var valid_568685 = path.getOrDefault("name")
-  valid_568685 = validateParameter(valid_568685, JString, required = true,
+  if valid_564584 != nil:
+    section.add "labName", valid_564584
+  var valid_564585 = path.getOrDefault("name")
+  valid_564585 = validateParameter(valid_564585, JString, required = true,
                                  default = nil)
-  if valid_568685 != nil:
-    section.add "name", valid_568685
-  var valid_568686 = path.getOrDefault("subscriptionId")
-  valid_568686 = validateParameter(valid_568686, JString, required = true,
+  if valid_564585 != nil:
+    section.add "name", valid_564585
+  var valid_564586 = path.getOrDefault("policySetName")
+  valid_564586 = validateParameter(valid_564586, JString, required = true,
                                  default = nil)
-  if valid_568686 != nil:
-    section.add "subscriptionId", valid_568686
-  var valid_568687 = path.getOrDefault("policySetName")
-  valid_568687 = validateParameter(valid_568687, JString, required = true,
+  if valid_564586 != nil:
+    section.add "policySetName", valid_564586
+  var valid_564587 = path.getOrDefault("subscriptionId")
+  valid_564587 = validateParameter(valid_564587, JString, required = true,
                                  default = nil)
-  if valid_568687 != nil:
-    section.add "policySetName", valid_568687
-  var valid_568688 = path.getOrDefault("labName")
-  valid_568688 = validateParameter(valid_568688, JString, required = true,
+  if valid_564587 != nil:
+    section.add "subscriptionId", valid_564587
+  var valid_564588 = path.getOrDefault("resourceGroupName")
+  valid_564588 = validateParameter(valid_564588, JString, required = true,
                                  default = nil)
-  if valid_568688 != nil:
-    section.add "labName", valid_568688
+  if valid_564588 != nil:
+    section.add "resourceGroupName", valid_564588
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -5381,11 +5354,11 @@ proc validate_PoliciesDelete_568682(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568689 = query.getOrDefault("api-version")
-  valid_568689 = validateParameter(valid_568689, JString, required = true,
+  var valid_564589 = query.getOrDefault("api-version")
+  valid_564589 = validateParameter(valid_564589, JString, required = true,
                                  default = newJString("2016-05-15"))
-  if valid_568689 != nil:
-    section.add "api-version", valid_568689
+  if valid_564589 != nil:
+    section.add "api-version", valid_564589
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -5394,53 +5367,53 @@ proc validate_PoliciesDelete_568682(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568690: Call_PoliciesDelete_568681; path: JsonNode; query: JsonNode;
+proc call*(call_564590: Call_PoliciesDelete_564581; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Delete policy.
   ## 
-  let valid = call_568690.validator(path, query, header, formData, body)
-  let scheme = call_568690.pickScheme
+  let valid = call_564590.validator(path, query, header, formData, body)
+  let scheme = call_564590.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568690.url(scheme.get, call_568690.host, call_568690.base,
-                         call_568690.route, valid.getOrDefault("path"),
+  let url = call_564590.url(scheme.get, call_564590.host, call_564590.base,
+                         call_564590.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568690, url, valid)
+  result = hook(call_564590, url, valid)
 
-proc call*(call_568691: Call_PoliciesDelete_568681; resourceGroupName: string;
-          name: string; subscriptionId: string; policySetName: string;
-          labName: string; apiVersion: string = "2016-05-15"): Recallable =
+proc call*(call_564591: Call_PoliciesDelete_564581; labName: string; name: string;
+          policySetName: string; subscriptionId: string; resourceGroupName: string;
+          apiVersion: string = "2016-05-15"): Recallable =
   ## policiesDelete
   ## Delete policy.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   labName: string (required)
+  ##          : The name of the lab.
   ##   apiVersion: string (required)
   ##             : Client API version.
   ##   name: string (required)
   ##       : The name of the policy.
-  ##   subscriptionId: string (required)
-  ##                 : The subscription ID.
   ##   policySetName: string (required)
   ##                : The name of the policy set.
-  ##   labName: string (required)
-  ##          : The name of the lab.
-  var path_568692 = newJObject()
-  var query_568693 = newJObject()
-  add(path_568692, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568693, "api-version", newJString(apiVersion))
-  add(path_568692, "name", newJString(name))
-  add(path_568692, "subscriptionId", newJString(subscriptionId))
-  add(path_568692, "policySetName", newJString(policySetName))
-  add(path_568692, "labName", newJString(labName))
-  result = call_568691.call(path_568692, query_568693, nil, nil, nil)
+  ##   subscriptionId: string (required)
+  ##                 : The subscription ID.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564592 = newJObject()
+  var query_564593 = newJObject()
+  add(path_564592, "labName", newJString(labName))
+  add(query_564593, "api-version", newJString(apiVersion))
+  add(path_564592, "name", newJString(name))
+  add(path_564592, "policySetName", newJString(policySetName))
+  add(path_564592, "subscriptionId", newJString(subscriptionId))
+  add(path_564592, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564591.call(path_564592, query_564593, nil, nil, nil)
 
-var policiesDelete* = Call_PoliciesDelete_568681(name: "policiesDelete",
+var policiesDelete* = Call_PoliciesDelete_564581(name: "policiesDelete",
     meth: HttpMethod.HttpDelete, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DevTestLab/labs/{labName}/policysets/{policySetName}/policies/{name}",
-    validator: validate_PoliciesDelete_568682, base: "", url: url_PoliciesDelete_568683,
+    validator: validate_PoliciesDelete_564582, base: "", url: url_PoliciesDelete_564583,
     schemes: {Scheme.Https})
 type
-  Call_SchedulesList_568709 = ref object of OpenApiRestCall_567650
-proc url_SchedulesList_568711(protocol: Scheme; host: string; base: string;
+  Call_SchedulesList_564609 = ref object of OpenApiRestCall_563548
+proc url_SchedulesList_564611(protocol: Scheme; host: string; base: string;
                              route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -5463,76 +5436,75 @@ proc url_SchedulesList_568711(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_SchedulesList_568710(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_SchedulesList_564610(path: JsonNode; query: JsonNode; header: JsonNode;
                                   formData: JsonNode; body: JsonNode): JsonNode =
   ## List schedules in a given lab.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
-  ##   subscriptionId: JString (required)
-  ##                 : The subscription ID.
   ##   labName: JString (required)
   ##          : The name of the lab.
+  ##   subscriptionId: JString (required)
+  ##                 : The subscription ID.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568712 = path.getOrDefault("resourceGroupName")
-  valid_568712 = validateParameter(valid_568712, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `labName` field"
+  var valid_564612 = path.getOrDefault("labName")
+  valid_564612 = validateParameter(valid_564612, JString, required = true,
                                  default = nil)
-  if valid_568712 != nil:
-    section.add "resourceGroupName", valid_568712
-  var valid_568713 = path.getOrDefault("subscriptionId")
-  valid_568713 = validateParameter(valid_568713, JString, required = true,
+  if valid_564612 != nil:
+    section.add "labName", valid_564612
+  var valid_564613 = path.getOrDefault("subscriptionId")
+  valid_564613 = validateParameter(valid_564613, JString, required = true,
                                  default = nil)
-  if valid_568713 != nil:
-    section.add "subscriptionId", valid_568713
-  var valid_568714 = path.getOrDefault("labName")
-  valid_568714 = validateParameter(valid_568714, JString, required = true,
+  if valid_564613 != nil:
+    section.add "subscriptionId", valid_564613
+  var valid_564614 = path.getOrDefault("resourceGroupName")
+  valid_564614 = validateParameter(valid_564614, JString, required = true,
                                  default = nil)
-  if valid_568714 != nil:
-    section.add "labName", valid_568714
+  if valid_564614 != nil:
+    section.add "resourceGroupName", valid_564614
   result.add "path", section
   ## parameters in `query` object:
-  ##   $orderby: JString
-  ##           : The ordering expression for the results, using OData notation.
-  ##   $expand: JString
-  ##          : Specify the $expand query. Example: 'properties($select=status)'
-  ##   api-version: JString (required)
-  ##              : Client API version.
   ##   $top: JInt
   ##       : The maximum number of resources to return from the operation.
+  ##   api-version: JString (required)
+  ##              : Client API version.
+  ##   $expand: JString
+  ##          : Specify the $expand query. Example: 'properties($select=status)'
+  ##   $orderby: JString
+  ##           : The ordering expression for the results, using OData notation.
   ##   $filter: JString
   ##          : The filter to apply to the operation.
   section = newJObject()
-  var valid_568715 = query.getOrDefault("$orderby")
-  valid_568715 = validateParameter(valid_568715, JString, required = false,
-                                 default = nil)
-  if valid_568715 != nil:
-    section.add "$orderby", valid_568715
-  var valid_568716 = query.getOrDefault("$expand")
-  valid_568716 = validateParameter(valid_568716, JString, required = false,
-                                 default = nil)
-  if valid_568716 != nil:
-    section.add "$expand", valid_568716
+  var valid_564615 = query.getOrDefault("$top")
+  valid_564615 = validateParameter(valid_564615, JInt, required = false, default = nil)
+  if valid_564615 != nil:
+    section.add "$top", valid_564615
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568717 = query.getOrDefault("api-version")
-  valid_568717 = validateParameter(valid_568717, JString, required = true,
+  var valid_564616 = query.getOrDefault("api-version")
+  valid_564616 = validateParameter(valid_564616, JString, required = true,
                                  default = newJString("2016-05-15"))
-  if valid_568717 != nil:
-    section.add "api-version", valid_568717
-  var valid_568718 = query.getOrDefault("$top")
-  valid_568718 = validateParameter(valid_568718, JInt, required = false, default = nil)
-  if valid_568718 != nil:
-    section.add "$top", valid_568718
-  var valid_568719 = query.getOrDefault("$filter")
-  valid_568719 = validateParameter(valid_568719, JString, required = false,
+  if valid_564616 != nil:
+    section.add "api-version", valid_564616
+  var valid_564617 = query.getOrDefault("$expand")
+  valid_564617 = validateParameter(valid_564617, JString, required = false,
                                  default = nil)
-  if valid_568719 != nil:
-    section.add "$filter", valid_568719
+  if valid_564617 != nil:
+    section.add "$expand", valid_564617
+  var valid_564618 = query.getOrDefault("$orderby")
+  valid_564618 = validateParameter(valid_564618, JString, required = false,
+                                 default = nil)
+  if valid_564618 != nil:
+    section.add "$orderby", valid_564618
+  var valid_564619 = query.getOrDefault("$filter")
+  valid_564619 = validateParameter(valid_564619, JString, required = false,
+                                 default = nil)
+  if valid_564619 != nil:
+    section.add "$filter", valid_564619
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -5541,60 +5513,60 @@ proc validate_SchedulesList_568710(path: JsonNode; query: JsonNode; header: Json
   if body != nil:
     result.add "body", body
 
-proc call*(call_568720: Call_SchedulesList_568709; path: JsonNode; query: JsonNode;
+proc call*(call_564620: Call_SchedulesList_564609; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## List schedules in a given lab.
   ## 
-  let valid = call_568720.validator(path, query, header, formData, body)
-  let scheme = call_568720.pickScheme
+  let valid = call_564620.validator(path, query, header, formData, body)
+  let scheme = call_564620.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568720.url(scheme.get, call_568720.host, call_568720.base,
-                         call_568720.route, valid.getOrDefault("path"),
+  let url = call_564620.url(scheme.get, call_564620.host, call_564620.base,
+                         call_564620.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568720, url, valid)
+  result = hook(call_564620, url, valid)
 
-proc call*(call_568721: Call_SchedulesList_568709; resourceGroupName: string;
-          subscriptionId: string; labName: string; Orderby: string = "";
-          Expand: string = ""; apiVersion: string = "2016-05-15"; Top: int = 0;
+proc call*(call_564621: Call_SchedulesList_564609; labName: string;
+          subscriptionId: string; resourceGroupName: string; Top: int = 0;
+          apiVersion: string = "2016-05-15"; Expand: string = ""; Orderby: string = "";
           Filter: string = ""): Recallable =
   ## schedulesList
   ## List schedules in a given lab.
+  ##   labName: string (required)
+  ##          : The name of the lab.
+  ##   Top: int
+  ##      : The maximum number of resources to return from the operation.
+  ##   apiVersion: string (required)
+  ##             : Client API version.
+  ##   Expand: string
+  ##         : Specify the $expand query. Example: 'properties($select=status)'
+  ##   subscriptionId: string (required)
+  ##                 : The subscription ID.
   ##   Orderby: string
   ##          : The ordering expression for the results, using OData notation.
   ##   resourceGroupName: string (required)
   ##                    : The name of the resource group.
-  ##   Expand: string
-  ##         : Specify the $expand query. Example: 'properties($select=status)'
-  ##   apiVersion: string (required)
-  ##             : Client API version.
-  ##   subscriptionId: string (required)
-  ##                 : The subscription ID.
-  ##   Top: int
-  ##      : The maximum number of resources to return from the operation.
-  ##   labName: string (required)
-  ##          : The name of the lab.
   ##   Filter: string
   ##         : The filter to apply to the operation.
-  var path_568722 = newJObject()
-  var query_568723 = newJObject()
-  add(query_568723, "$orderby", newJString(Orderby))
-  add(path_568722, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568723, "$expand", newJString(Expand))
-  add(query_568723, "api-version", newJString(apiVersion))
-  add(path_568722, "subscriptionId", newJString(subscriptionId))
-  add(query_568723, "$top", newJInt(Top))
-  add(path_568722, "labName", newJString(labName))
-  add(query_568723, "$filter", newJString(Filter))
-  result = call_568721.call(path_568722, query_568723, nil, nil, nil)
+  var path_564622 = newJObject()
+  var query_564623 = newJObject()
+  add(path_564622, "labName", newJString(labName))
+  add(query_564623, "$top", newJInt(Top))
+  add(query_564623, "api-version", newJString(apiVersion))
+  add(query_564623, "$expand", newJString(Expand))
+  add(path_564622, "subscriptionId", newJString(subscriptionId))
+  add(query_564623, "$orderby", newJString(Orderby))
+  add(path_564622, "resourceGroupName", newJString(resourceGroupName))
+  add(query_564623, "$filter", newJString(Filter))
+  result = call_564621.call(path_564622, query_564623, nil, nil, nil)
 
-var schedulesList* = Call_SchedulesList_568709(name: "schedulesList",
+var schedulesList* = Call_SchedulesList_564609(name: "schedulesList",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DevTestLab/labs/{labName}/schedules",
-    validator: validate_SchedulesList_568710, base: "", url: url_SchedulesList_568711,
+    validator: validate_SchedulesList_564610, base: "", url: url_SchedulesList_564611,
     schemes: {Scheme.Https})
 type
-  Call_SchedulesCreateOrUpdate_568737 = ref object of OpenApiRestCall_567650
-proc url_SchedulesCreateOrUpdate_568739(protocol: Scheme; host: string; base: string;
+  Call_SchedulesCreateOrUpdate_564637 = ref object of OpenApiRestCall_563548
+proc url_SchedulesCreateOrUpdate_564639(protocol: Scheme; host: string; base: string;
                                        route: string; path: JsonNode;
                                        query: JsonNode): Uri =
   result.scheme = $protocol
@@ -5620,44 +5592,43 @@ proc url_SchedulesCreateOrUpdate_568739(protocol: Scheme; host: string; base: st
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_SchedulesCreateOrUpdate_568738(path: JsonNode; query: JsonNode;
+proc validate_SchedulesCreateOrUpdate_564638(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Create or replace an existing schedule.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
+  ##   labName: JString (required)
+  ##          : The name of the lab.
   ##   name: JString (required)
   ##       : The name of the schedule.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID.
-  ##   labName: JString (required)
-  ##          : The name of the lab.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568740 = path.getOrDefault("resourceGroupName")
-  valid_568740 = validateParameter(valid_568740, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `labName` field"
+  var valid_564640 = path.getOrDefault("labName")
+  valid_564640 = validateParameter(valid_564640, JString, required = true,
                                  default = nil)
-  if valid_568740 != nil:
-    section.add "resourceGroupName", valid_568740
-  var valid_568741 = path.getOrDefault("name")
-  valid_568741 = validateParameter(valid_568741, JString, required = true,
+  if valid_564640 != nil:
+    section.add "labName", valid_564640
+  var valid_564641 = path.getOrDefault("name")
+  valid_564641 = validateParameter(valid_564641, JString, required = true,
                                  default = nil)
-  if valid_568741 != nil:
-    section.add "name", valid_568741
-  var valid_568742 = path.getOrDefault("subscriptionId")
-  valid_568742 = validateParameter(valid_568742, JString, required = true,
+  if valid_564641 != nil:
+    section.add "name", valid_564641
+  var valid_564642 = path.getOrDefault("subscriptionId")
+  valid_564642 = validateParameter(valid_564642, JString, required = true,
                                  default = nil)
-  if valid_568742 != nil:
-    section.add "subscriptionId", valid_568742
-  var valid_568743 = path.getOrDefault("labName")
-  valid_568743 = validateParameter(valid_568743, JString, required = true,
+  if valid_564642 != nil:
+    section.add "subscriptionId", valid_564642
+  var valid_564643 = path.getOrDefault("resourceGroupName")
+  valid_564643 = validateParameter(valid_564643, JString, required = true,
                                  default = nil)
-  if valid_568743 != nil:
-    section.add "labName", valid_568743
+  if valid_564643 != nil:
+    section.add "resourceGroupName", valid_564643
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -5665,11 +5636,11 @@ proc validate_SchedulesCreateOrUpdate_568738(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568744 = query.getOrDefault("api-version")
-  valid_568744 = validateParameter(valid_568744, JString, required = true,
+  var valid_564644 = query.getOrDefault("api-version")
+  valid_564644 = validateParameter(valid_564644, JString, required = true,
                                  default = newJString("2016-05-15"))
-  if valid_568744 != nil:
-    section.add "api-version", valid_568744
+  if valid_564644 != nil:
+    section.add "api-version", valid_564644
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -5683,56 +5654,56 @@ proc validate_SchedulesCreateOrUpdate_568738(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568746: Call_SchedulesCreateOrUpdate_568737; path: JsonNode;
+proc call*(call_564646: Call_SchedulesCreateOrUpdate_564637; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Create or replace an existing schedule.
   ## 
-  let valid = call_568746.validator(path, query, header, formData, body)
-  let scheme = call_568746.pickScheme
+  let valid = call_564646.validator(path, query, header, formData, body)
+  let scheme = call_564646.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568746.url(scheme.get, call_568746.host, call_568746.base,
-                         call_568746.route, valid.getOrDefault("path"),
+  let url = call_564646.url(scheme.get, call_564646.host, call_564646.base,
+                         call_564646.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568746, url, valid)
+  result = hook(call_564646, url, valid)
 
-proc call*(call_568747: Call_SchedulesCreateOrUpdate_568737;
-          resourceGroupName: string; name: string; subscriptionId: string;
-          labName: string; schedule: JsonNode; apiVersion: string = "2016-05-15"): Recallable =
+proc call*(call_564647: Call_SchedulesCreateOrUpdate_564637; labName: string;
+          name: string; subscriptionId: string; resourceGroupName: string;
+          schedule: JsonNode; apiVersion: string = "2016-05-15"): Recallable =
   ## schedulesCreateOrUpdate
   ## Create or replace an existing schedule.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   labName: string (required)
+  ##          : The name of the lab.
   ##   apiVersion: string (required)
   ##             : Client API version.
   ##   name: string (required)
   ##       : The name of the schedule.
   ##   subscriptionId: string (required)
   ##                 : The subscription ID.
-  ##   labName: string (required)
-  ##          : The name of the lab.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   schedule: JObject (required)
   ##           : A schedule.
-  var path_568748 = newJObject()
-  var query_568749 = newJObject()
-  var body_568750 = newJObject()
-  add(path_568748, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568749, "api-version", newJString(apiVersion))
-  add(path_568748, "name", newJString(name))
-  add(path_568748, "subscriptionId", newJString(subscriptionId))
-  add(path_568748, "labName", newJString(labName))
+  var path_564648 = newJObject()
+  var query_564649 = newJObject()
+  var body_564650 = newJObject()
+  add(path_564648, "labName", newJString(labName))
+  add(query_564649, "api-version", newJString(apiVersion))
+  add(path_564648, "name", newJString(name))
+  add(path_564648, "subscriptionId", newJString(subscriptionId))
+  add(path_564648, "resourceGroupName", newJString(resourceGroupName))
   if schedule != nil:
-    body_568750 = schedule
-  result = call_568747.call(path_568748, query_568749, nil, nil, body_568750)
+    body_564650 = schedule
+  result = call_564647.call(path_564648, query_564649, nil, nil, body_564650)
 
-var schedulesCreateOrUpdate* = Call_SchedulesCreateOrUpdate_568737(
+var schedulesCreateOrUpdate* = Call_SchedulesCreateOrUpdate_564637(
     name: "schedulesCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DevTestLab/labs/{labName}/schedules/{name}",
-    validator: validate_SchedulesCreateOrUpdate_568738, base: "",
-    url: url_SchedulesCreateOrUpdate_568739, schemes: {Scheme.Https})
+    validator: validate_SchedulesCreateOrUpdate_564638, base: "",
+    url: url_SchedulesCreateOrUpdate_564639, schemes: {Scheme.Https})
 type
-  Call_SchedulesGet_568724 = ref object of OpenApiRestCall_567650
-proc url_SchedulesGet_568726(protocol: Scheme; host: string; base: string;
+  Call_SchedulesGet_564624 = ref object of OpenApiRestCall_563548
+proc url_SchedulesGet_564626(protocol: Scheme; host: string; base: string;
                             route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -5757,63 +5728,62 @@ proc url_SchedulesGet_568726(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_SchedulesGet_568725(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_SchedulesGet_564625(path: JsonNode; query: JsonNode; header: JsonNode;
                                  formData: JsonNode; body: JsonNode): JsonNode =
   ## Get schedule.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
+  ##   labName: JString (required)
+  ##          : The name of the lab.
   ##   name: JString (required)
   ##       : The name of the schedule.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID.
-  ##   labName: JString (required)
-  ##          : The name of the lab.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568727 = path.getOrDefault("resourceGroupName")
-  valid_568727 = validateParameter(valid_568727, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `labName` field"
+  var valid_564627 = path.getOrDefault("labName")
+  valid_564627 = validateParameter(valid_564627, JString, required = true,
                                  default = nil)
-  if valid_568727 != nil:
-    section.add "resourceGroupName", valid_568727
-  var valid_568728 = path.getOrDefault("name")
-  valid_568728 = validateParameter(valid_568728, JString, required = true,
+  if valid_564627 != nil:
+    section.add "labName", valid_564627
+  var valid_564628 = path.getOrDefault("name")
+  valid_564628 = validateParameter(valid_564628, JString, required = true,
                                  default = nil)
-  if valid_568728 != nil:
-    section.add "name", valid_568728
-  var valid_568729 = path.getOrDefault("subscriptionId")
-  valid_568729 = validateParameter(valid_568729, JString, required = true,
+  if valid_564628 != nil:
+    section.add "name", valid_564628
+  var valid_564629 = path.getOrDefault("subscriptionId")
+  valid_564629 = validateParameter(valid_564629, JString, required = true,
                                  default = nil)
-  if valid_568729 != nil:
-    section.add "subscriptionId", valid_568729
-  var valid_568730 = path.getOrDefault("labName")
-  valid_568730 = validateParameter(valid_568730, JString, required = true,
+  if valid_564629 != nil:
+    section.add "subscriptionId", valid_564629
+  var valid_564630 = path.getOrDefault("resourceGroupName")
+  valid_564630 = validateParameter(valid_564630, JString, required = true,
                                  default = nil)
-  if valid_568730 != nil:
-    section.add "labName", valid_568730
+  if valid_564630 != nil:
+    section.add "resourceGroupName", valid_564630
   result.add "path", section
   ## parameters in `query` object:
-  ##   $expand: JString
-  ##          : Specify the $expand query. Example: 'properties($select=status)'
   ##   api-version: JString (required)
   ##              : Client API version.
+  ##   $expand: JString
+  ##          : Specify the $expand query. Example: 'properties($select=status)'
   section = newJObject()
-  var valid_568731 = query.getOrDefault("$expand")
-  valid_568731 = validateParameter(valid_568731, JString, required = false,
-                                 default = nil)
-  if valid_568731 != nil:
-    section.add "$expand", valid_568731
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568732 = query.getOrDefault("api-version")
-  valid_568732 = validateParameter(valid_568732, JString, required = true,
+  var valid_564631 = query.getOrDefault("api-version")
+  valid_564631 = validateParameter(valid_564631, JString, required = true,
                                  default = newJString("2016-05-15"))
-  if valid_568732 != nil:
-    section.add "api-version", valid_568732
+  if valid_564631 != nil:
+    section.add "api-version", valid_564631
+  var valid_564632 = query.getOrDefault("$expand")
+  valid_564632 = validateParameter(valid_564632, JString, required = false,
+                                 default = nil)
+  if valid_564632 != nil:
+    section.add "$expand", valid_564632
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -5822,53 +5792,53 @@ proc validate_SchedulesGet_568725(path: JsonNode; query: JsonNode; header: JsonN
   if body != nil:
     result.add "body", body
 
-proc call*(call_568733: Call_SchedulesGet_568724; path: JsonNode; query: JsonNode;
+proc call*(call_564633: Call_SchedulesGet_564624; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get schedule.
   ## 
-  let valid = call_568733.validator(path, query, header, formData, body)
-  let scheme = call_568733.pickScheme
+  let valid = call_564633.validator(path, query, header, formData, body)
+  let scheme = call_564633.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568733.url(scheme.get, call_568733.host, call_568733.base,
-                         call_568733.route, valid.getOrDefault("path"),
+  let url = call_564633.url(scheme.get, call_564633.host, call_564633.base,
+                         call_564633.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568733, url, valid)
+  result = hook(call_564633, url, valid)
 
-proc call*(call_568734: Call_SchedulesGet_568724; resourceGroupName: string;
-          name: string; subscriptionId: string; labName: string; Expand: string = "";
-          apiVersion: string = "2016-05-15"): Recallable =
+proc call*(call_564634: Call_SchedulesGet_564624; labName: string; name: string;
+          subscriptionId: string; resourceGroupName: string;
+          apiVersion: string = "2016-05-15"; Expand: string = ""): Recallable =
   ## schedulesGet
   ## Get schedule.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   labName: string (required)
+  ##          : The name of the lab.
+  ##   apiVersion: string (required)
+  ##             : Client API version.
   ##   Expand: string
   ##         : Specify the $expand query. Example: 'properties($select=status)'
   ##   name: string (required)
   ##       : The name of the schedule.
-  ##   apiVersion: string (required)
-  ##             : Client API version.
   ##   subscriptionId: string (required)
   ##                 : The subscription ID.
-  ##   labName: string (required)
-  ##          : The name of the lab.
-  var path_568735 = newJObject()
-  var query_568736 = newJObject()
-  add(path_568735, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568736, "$expand", newJString(Expand))
-  add(path_568735, "name", newJString(name))
-  add(query_568736, "api-version", newJString(apiVersion))
-  add(path_568735, "subscriptionId", newJString(subscriptionId))
-  add(path_568735, "labName", newJString(labName))
-  result = call_568734.call(path_568735, query_568736, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564635 = newJObject()
+  var query_564636 = newJObject()
+  add(path_564635, "labName", newJString(labName))
+  add(query_564636, "api-version", newJString(apiVersion))
+  add(query_564636, "$expand", newJString(Expand))
+  add(path_564635, "name", newJString(name))
+  add(path_564635, "subscriptionId", newJString(subscriptionId))
+  add(path_564635, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564634.call(path_564635, query_564636, nil, nil, nil)
 
-var schedulesGet* = Call_SchedulesGet_568724(name: "schedulesGet",
+var schedulesGet* = Call_SchedulesGet_564624(name: "schedulesGet",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DevTestLab/labs/{labName}/schedules/{name}",
-    validator: validate_SchedulesGet_568725, base: "", url: url_SchedulesGet_568726,
+    validator: validate_SchedulesGet_564625, base: "", url: url_SchedulesGet_564626,
     schemes: {Scheme.Https})
 type
-  Call_SchedulesUpdate_568763 = ref object of OpenApiRestCall_567650
-proc url_SchedulesUpdate_568765(protocol: Scheme; host: string; base: string;
+  Call_SchedulesUpdate_564663 = ref object of OpenApiRestCall_563548
+proc url_SchedulesUpdate_564665(protocol: Scheme; host: string; base: string;
                                route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -5893,7 +5863,7 @@ proc url_SchedulesUpdate_568765(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_SchedulesUpdate_568764(path: JsonNode; query: JsonNode;
+proc validate_SchedulesUpdate_564664(path: JsonNode; query: JsonNode;
                                     header: JsonNode; formData: JsonNode;
                                     body: JsonNode): JsonNode =
   ## Modify properties of schedules.
@@ -5901,37 +5871,36 @@ proc validate_SchedulesUpdate_568764(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
+  ##   labName: JString (required)
+  ##          : The name of the lab.
   ##   name: JString (required)
   ##       : The name of the schedule.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID.
-  ##   labName: JString (required)
-  ##          : The name of the lab.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568766 = path.getOrDefault("resourceGroupName")
-  valid_568766 = validateParameter(valid_568766, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `labName` field"
+  var valid_564666 = path.getOrDefault("labName")
+  valid_564666 = validateParameter(valid_564666, JString, required = true,
                                  default = nil)
-  if valid_568766 != nil:
-    section.add "resourceGroupName", valid_568766
-  var valid_568767 = path.getOrDefault("name")
-  valid_568767 = validateParameter(valid_568767, JString, required = true,
+  if valid_564666 != nil:
+    section.add "labName", valid_564666
+  var valid_564667 = path.getOrDefault("name")
+  valid_564667 = validateParameter(valid_564667, JString, required = true,
                                  default = nil)
-  if valid_568767 != nil:
-    section.add "name", valid_568767
-  var valid_568768 = path.getOrDefault("subscriptionId")
-  valid_568768 = validateParameter(valid_568768, JString, required = true,
+  if valid_564667 != nil:
+    section.add "name", valid_564667
+  var valid_564668 = path.getOrDefault("subscriptionId")
+  valid_564668 = validateParameter(valid_564668, JString, required = true,
                                  default = nil)
-  if valid_568768 != nil:
-    section.add "subscriptionId", valid_568768
-  var valid_568769 = path.getOrDefault("labName")
-  valid_568769 = validateParameter(valid_568769, JString, required = true,
+  if valid_564668 != nil:
+    section.add "subscriptionId", valid_564668
+  var valid_564669 = path.getOrDefault("resourceGroupName")
+  valid_564669 = validateParameter(valid_564669, JString, required = true,
                                  default = nil)
-  if valid_568769 != nil:
-    section.add "labName", valid_568769
+  if valid_564669 != nil:
+    section.add "resourceGroupName", valid_564669
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -5939,11 +5908,11 @@ proc validate_SchedulesUpdate_568764(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568770 = query.getOrDefault("api-version")
-  valid_568770 = validateParameter(valid_568770, JString, required = true,
+  var valid_564670 = query.getOrDefault("api-version")
+  valid_564670 = validateParameter(valid_564670, JString, required = true,
                                  default = newJString("2016-05-15"))
-  if valid_568770 != nil:
-    section.add "api-version", valid_568770
+  if valid_564670 != nil:
+    section.add "api-version", valid_564670
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -5957,55 +5926,55 @@ proc validate_SchedulesUpdate_568764(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568772: Call_SchedulesUpdate_568763; path: JsonNode; query: JsonNode;
+proc call*(call_564672: Call_SchedulesUpdate_564663; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Modify properties of schedules.
   ## 
-  let valid = call_568772.validator(path, query, header, formData, body)
-  let scheme = call_568772.pickScheme
+  let valid = call_564672.validator(path, query, header, formData, body)
+  let scheme = call_564672.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568772.url(scheme.get, call_568772.host, call_568772.base,
-                         call_568772.route, valid.getOrDefault("path"),
+  let url = call_564672.url(scheme.get, call_564672.host, call_564672.base,
+                         call_564672.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568772, url, valid)
+  result = hook(call_564672, url, valid)
 
-proc call*(call_568773: Call_SchedulesUpdate_568763; resourceGroupName: string;
-          name: string; subscriptionId: string; labName: string; schedule: JsonNode;
+proc call*(call_564673: Call_SchedulesUpdate_564663; labName: string; name: string;
+          subscriptionId: string; resourceGroupName: string; schedule: JsonNode;
           apiVersion: string = "2016-05-15"): Recallable =
   ## schedulesUpdate
   ## Modify properties of schedules.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   labName: string (required)
+  ##          : The name of the lab.
   ##   apiVersion: string (required)
   ##             : Client API version.
   ##   name: string (required)
   ##       : The name of the schedule.
   ##   subscriptionId: string (required)
   ##                 : The subscription ID.
-  ##   labName: string (required)
-  ##          : The name of the lab.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   schedule: JObject (required)
   ##           : A schedule.
-  var path_568774 = newJObject()
-  var query_568775 = newJObject()
-  var body_568776 = newJObject()
-  add(path_568774, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568775, "api-version", newJString(apiVersion))
-  add(path_568774, "name", newJString(name))
-  add(path_568774, "subscriptionId", newJString(subscriptionId))
-  add(path_568774, "labName", newJString(labName))
+  var path_564674 = newJObject()
+  var query_564675 = newJObject()
+  var body_564676 = newJObject()
+  add(path_564674, "labName", newJString(labName))
+  add(query_564675, "api-version", newJString(apiVersion))
+  add(path_564674, "name", newJString(name))
+  add(path_564674, "subscriptionId", newJString(subscriptionId))
+  add(path_564674, "resourceGroupName", newJString(resourceGroupName))
   if schedule != nil:
-    body_568776 = schedule
-  result = call_568773.call(path_568774, query_568775, nil, nil, body_568776)
+    body_564676 = schedule
+  result = call_564673.call(path_564674, query_564675, nil, nil, body_564676)
 
-var schedulesUpdate* = Call_SchedulesUpdate_568763(name: "schedulesUpdate",
+var schedulesUpdate* = Call_SchedulesUpdate_564663(name: "schedulesUpdate",
     meth: HttpMethod.HttpPatch, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DevTestLab/labs/{labName}/schedules/{name}",
-    validator: validate_SchedulesUpdate_568764, base: "", url: url_SchedulesUpdate_568765,
+    validator: validate_SchedulesUpdate_564664, base: "", url: url_SchedulesUpdate_564665,
     schemes: {Scheme.Https})
 type
-  Call_SchedulesDelete_568751 = ref object of OpenApiRestCall_567650
-proc url_SchedulesDelete_568753(protocol: Scheme; host: string; base: string;
+  Call_SchedulesDelete_564651 = ref object of OpenApiRestCall_563548
+proc url_SchedulesDelete_564653(protocol: Scheme; host: string; base: string;
                                route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -6030,7 +5999,7 @@ proc url_SchedulesDelete_568753(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_SchedulesDelete_568752(path: JsonNode; query: JsonNode;
+proc validate_SchedulesDelete_564652(path: JsonNode; query: JsonNode;
                                     header: JsonNode; formData: JsonNode;
                                     body: JsonNode): JsonNode =
   ## Delete schedule.
@@ -6038,37 +6007,36 @@ proc validate_SchedulesDelete_568752(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
+  ##   labName: JString (required)
+  ##          : The name of the lab.
   ##   name: JString (required)
   ##       : The name of the schedule.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID.
-  ##   labName: JString (required)
-  ##          : The name of the lab.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568754 = path.getOrDefault("resourceGroupName")
-  valid_568754 = validateParameter(valid_568754, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `labName` field"
+  var valid_564654 = path.getOrDefault("labName")
+  valid_564654 = validateParameter(valid_564654, JString, required = true,
                                  default = nil)
-  if valid_568754 != nil:
-    section.add "resourceGroupName", valid_568754
-  var valid_568755 = path.getOrDefault("name")
-  valid_568755 = validateParameter(valid_568755, JString, required = true,
+  if valid_564654 != nil:
+    section.add "labName", valid_564654
+  var valid_564655 = path.getOrDefault("name")
+  valid_564655 = validateParameter(valid_564655, JString, required = true,
                                  default = nil)
-  if valid_568755 != nil:
-    section.add "name", valid_568755
-  var valid_568756 = path.getOrDefault("subscriptionId")
-  valid_568756 = validateParameter(valid_568756, JString, required = true,
+  if valid_564655 != nil:
+    section.add "name", valid_564655
+  var valid_564656 = path.getOrDefault("subscriptionId")
+  valid_564656 = validateParameter(valid_564656, JString, required = true,
                                  default = nil)
-  if valid_568756 != nil:
-    section.add "subscriptionId", valid_568756
-  var valid_568757 = path.getOrDefault("labName")
-  valid_568757 = validateParameter(valid_568757, JString, required = true,
+  if valid_564656 != nil:
+    section.add "subscriptionId", valid_564656
+  var valid_564657 = path.getOrDefault("resourceGroupName")
+  valid_564657 = validateParameter(valid_564657, JString, required = true,
                                  default = nil)
-  if valid_568757 != nil:
-    section.add "labName", valid_568757
+  if valid_564657 != nil:
+    section.add "resourceGroupName", valid_564657
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -6076,11 +6044,11 @@ proc validate_SchedulesDelete_568752(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568758 = query.getOrDefault("api-version")
-  valid_568758 = validateParameter(valid_568758, JString, required = true,
+  var valid_564658 = query.getOrDefault("api-version")
+  valid_564658 = validateParameter(valid_564658, JString, required = true,
                                  default = newJString("2016-05-15"))
-  if valid_568758 != nil:
-    section.add "api-version", valid_568758
+  if valid_564658 != nil:
+    section.add "api-version", valid_564658
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -6089,50 +6057,50 @@ proc validate_SchedulesDelete_568752(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568759: Call_SchedulesDelete_568751; path: JsonNode; query: JsonNode;
+proc call*(call_564659: Call_SchedulesDelete_564651; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Delete schedule.
   ## 
-  let valid = call_568759.validator(path, query, header, formData, body)
-  let scheme = call_568759.pickScheme
+  let valid = call_564659.validator(path, query, header, formData, body)
+  let scheme = call_564659.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568759.url(scheme.get, call_568759.host, call_568759.base,
-                         call_568759.route, valid.getOrDefault("path"),
+  let url = call_564659.url(scheme.get, call_564659.host, call_564659.base,
+                         call_564659.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568759, url, valid)
+  result = hook(call_564659, url, valid)
 
-proc call*(call_568760: Call_SchedulesDelete_568751; resourceGroupName: string;
-          name: string; subscriptionId: string; labName: string;
+proc call*(call_564660: Call_SchedulesDelete_564651; labName: string; name: string;
+          subscriptionId: string; resourceGroupName: string;
           apiVersion: string = "2016-05-15"): Recallable =
   ## schedulesDelete
   ## Delete schedule.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   labName: string (required)
+  ##          : The name of the lab.
   ##   apiVersion: string (required)
   ##             : Client API version.
   ##   name: string (required)
   ##       : The name of the schedule.
   ##   subscriptionId: string (required)
   ##                 : The subscription ID.
-  ##   labName: string (required)
-  ##          : The name of the lab.
-  var path_568761 = newJObject()
-  var query_568762 = newJObject()
-  add(path_568761, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568762, "api-version", newJString(apiVersion))
-  add(path_568761, "name", newJString(name))
-  add(path_568761, "subscriptionId", newJString(subscriptionId))
-  add(path_568761, "labName", newJString(labName))
-  result = call_568760.call(path_568761, query_568762, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564661 = newJObject()
+  var query_564662 = newJObject()
+  add(path_564661, "labName", newJString(labName))
+  add(query_564662, "api-version", newJString(apiVersion))
+  add(path_564661, "name", newJString(name))
+  add(path_564661, "subscriptionId", newJString(subscriptionId))
+  add(path_564661, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564660.call(path_564661, query_564662, nil, nil, nil)
 
-var schedulesDelete* = Call_SchedulesDelete_568751(name: "schedulesDelete",
+var schedulesDelete* = Call_SchedulesDelete_564651(name: "schedulesDelete",
     meth: HttpMethod.HttpDelete, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DevTestLab/labs/{labName}/schedules/{name}",
-    validator: validate_SchedulesDelete_568752, base: "", url: url_SchedulesDelete_568753,
+    validator: validate_SchedulesDelete_564652, base: "", url: url_SchedulesDelete_564653,
     schemes: {Scheme.Https})
 type
-  Call_SchedulesExecute_568777 = ref object of OpenApiRestCall_567650
-proc url_SchedulesExecute_568779(protocol: Scheme; host: string; base: string;
+  Call_SchedulesExecute_564677 = ref object of OpenApiRestCall_563548
+proc url_SchedulesExecute_564679(protocol: Scheme; host: string; base: string;
                                 route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -6158,7 +6126,7 @@ proc url_SchedulesExecute_568779(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_SchedulesExecute_568778(path: JsonNode; query: JsonNode;
+proc validate_SchedulesExecute_564678(path: JsonNode; query: JsonNode;
                                      header: JsonNode; formData: JsonNode;
                                      body: JsonNode): JsonNode =
   ## Execute a schedule. This operation can take a while to complete.
@@ -6166,37 +6134,36 @@ proc validate_SchedulesExecute_568778(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
+  ##   labName: JString (required)
+  ##          : The name of the lab.
   ##   name: JString (required)
   ##       : The name of the schedule.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID.
-  ##   labName: JString (required)
-  ##          : The name of the lab.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568780 = path.getOrDefault("resourceGroupName")
-  valid_568780 = validateParameter(valid_568780, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `labName` field"
+  var valid_564680 = path.getOrDefault("labName")
+  valid_564680 = validateParameter(valid_564680, JString, required = true,
                                  default = nil)
-  if valid_568780 != nil:
-    section.add "resourceGroupName", valid_568780
-  var valid_568781 = path.getOrDefault("name")
-  valid_568781 = validateParameter(valid_568781, JString, required = true,
+  if valid_564680 != nil:
+    section.add "labName", valid_564680
+  var valid_564681 = path.getOrDefault("name")
+  valid_564681 = validateParameter(valid_564681, JString, required = true,
                                  default = nil)
-  if valid_568781 != nil:
-    section.add "name", valid_568781
-  var valid_568782 = path.getOrDefault("subscriptionId")
-  valid_568782 = validateParameter(valid_568782, JString, required = true,
+  if valid_564681 != nil:
+    section.add "name", valid_564681
+  var valid_564682 = path.getOrDefault("subscriptionId")
+  valid_564682 = validateParameter(valid_564682, JString, required = true,
                                  default = nil)
-  if valid_568782 != nil:
-    section.add "subscriptionId", valid_568782
-  var valid_568783 = path.getOrDefault("labName")
-  valid_568783 = validateParameter(valid_568783, JString, required = true,
+  if valid_564682 != nil:
+    section.add "subscriptionId", valid_564682
+  var valid_564683 = path.getOrDefault("resourceGroupName")
+  valid_564683 = validateParameter(valid_564683, JString, required = true,
                                  default = nil)
-  if valid_568783 != nil:
-    section.add "labName", valid_568783
+  if valid_564683 != nil:
+    section.add "resourceGroupName", valid_564683
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -6204,11 +6171,11 @@ proc validate_SchedulesExecute_568778(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568784 = query.getOrDefault("api-version")
-  valid_568784 = validateParameter(valid_568784, JString, required = true,
+  var valid_564684 = query.getOrDefault("api-version")
+  valid_564684 = validateParameter(valid_564684, JString, required = true,
                                  default = newJString("2016-05-15"))
-  if valid_568784 != nil:
-    section.add "api-version", valid_568784
+  if valid_564684 != nil:
+    section.add "api-version", valid_564684
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -6217,50 +6184,50 @@ proc validate_SchedulesExecute_568778(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568785: Call_SchedulesExecute_568777; path: JsonNode;
+proc call*(call_564685: Call_SchedulesExecute_564677; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Execute a schedule. This operation can take a while to complete.
   ## 
-  let valid = call_568785.validator(path, query, header, formData, body)
-  let scheme = call_568785.pickScheme
+  let valid = call_564685.validator(path, query, header, formData, body)
+  let scheme = call_564685.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568785.url(scheme.get, call_568785.host, call_568785.base,
-                         call_568785.route, valid.getOrDefault("path"),
+  let url = call_564685.url(scheme.get, call_564685.host, call_564685.base,
+                         call_564685.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568785, url, valid)
+  result = hook(call_564685, url, valid)
 
-proc call*(call_568786: Call_SchedulesExecute_568777; resourceGroupName: string;
-          name: string; subscriptionId: string; labName: string;
+proc call*(call_564686: Call_SchedulesExecute_564677; labName: string; name: string;
+          subscriptionId: string; resourceGroupName: string;
           apiVersion: string = "2016-05-15"): Recallable =
   ## schedulesExecute
   ## Execute a schedule. This operation can take a while to complete.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   labName: string (required)
+  ##          : The name of the lab.
   ##   apiVersion: string (required)
   ##             : Client API version.
   ##   name: string (required)
   ##       : The name of the schedule.
   ##   subscriptionId: string (required)
   ##                 : The subscription ID.
-  ##   labName: string (required)
-  ##          : The name of the lab.
-  var path_568787 = newJObject()
-  var query_568788 = newJObject()
-  add(path_568787, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568788, "api-version", newJString(apiVersion))
-  add(path_568787, "name", newJString(name))
-  add(path_568787, "subscriptionId", newJString(subscriptionId))
-  add(path_568787, "labName", newJString(labName))
-  result = call_568786.call(path_568787, query_568788, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564687 = newJObject()
+  var query_564688 = newJObject()
+  add(path_564687, "labName", newJString(labName))
+  add(query_564688, "api-version", newJString(apiVersion))
+  add(path_564687, "name", newJString(name))
+  add(path_564687, "subscriptionId", newJString(subscriptionId))
+  add(path_564687, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564686.call(path_564687, query_564688, nil, nil, nil)
 
-var schedulesExecute* = Call_SchedulesExecute_568777(name: "schedulesExecute",
+var schedulesExecute* = Call_SchedulesExecute_564677(name: "schedulesExecute",
     meth: HttpMethod.HttpPost, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DevTestLab/labs/{labName}/schedules/{name}/execute",
-    validator: validate_SchedulesExecute_568778, base: "",
-    url: url_SchedulesExecute_568779, schemes: {Scheme.Https})
+    validator: validate_SchedulesExecute_564678, base: "",
+    url: url_SchedulesExecute_564679, schemes: {Scheme.Https})
 type
-  Call_SchedulesListApplicable_568789 = ref object of OpenApiRestCall_567650
-proc url_SchedulesListApplicable_568791(protocol: Scheme; host: string; base: string;
+  Call_SchedulesListApplicable_564689 = ref object of OpenApiRestCall_563548
+proc url_SchedulesListApplicable_564691(protocol: Scheme; host: string; base: string;
                                        route: string; path: JsonNode;
                                        query: JsonNode): Uri =
   result.scheme = $protocol
@@ -6287,44 +6254,43 @@ proc url_SchedulesListApplicable_568791(protocol: Scheme; host: string; base: st
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_SchedulesListApplicable_568790(path: JsonNode; query: JsonNode;
+proc validate_SchedulesListApplicable_564690(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists all applicable schedules
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
+  ##   labName: JString (required)
+  ##          : The name of the lab.
   ##   name: JString (required)
   ##       : The name of the schedule.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID.
-  ##   labName: JString (required)
-  ##          : The name of the lab.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568792 = path.getOrDefault("resourceGroupName")
-  valid_568792 = validateParameter(valid_568792, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `labName` field"
+  var valid_564692 = path.getOrDefault("labName")
+  valid_564692 = validateParameter(valid_564692, JString, required = true,
                                  default = nil)
-  if valid_568792 != nil:
-    section.add "resourceGroupName", valid_568792
-  var valid_568793 = path.getOrDefault("name")
-  valid_568793 = validateParameter(valid_568793, JString, required = true,
+  if valid_564692 != nil:
+    section.add "labName", valid_564692
+  var valid_564693 = path.getOrDefault("name")
+  valid_564693 = validateParameter(valid_564693, JString, required = true,
                                  default = nil)
-  if valid_568793 != nil:
-    section.add "name", valid_568793
-  var valid_568794 = path.getOrDefault("subscriptionId")
-  valid_568794 = validateParameter(valid_568794, JString, required = true,
+  if valid_564693 != nil:
+    section.add "name", valid_564693
+  var valid_564694 = path.getOrDefault("subscriptionId")
+  valid_564694 = validateParameter(valid_564694, JString, required = true,
                                  default = nil)
-  if valid_568794 != nil:
-    section.add "subscriptionId", valid_568794
-  var valid_568795 = path.getOrDefault("labName")
-  valid_568795 = validateParameter(valid_568795, JString, required = true,
+  if valid_564694 != nil:
+    section.add "subscriptionId", valid_564694
+  var valid_564695 = path.getOrDefault("resourceGroupName")
+  valid_564695 = validateParameter(valid_564695, JString, required = true,
                                  default = nil)
-  if valid_568795 != nil:
-    section.add "labName", valid_568795
+  if valid_564695 != nil:
+    section.add "resourceGroupName", valid_564695
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -6332,11 +6298,11 @@ proc validate_SchedulesListApplicable_568790(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568796 = query.getOrDefault("api-version")
-  valid_568796 = validateParameter(valid_568796, JString, required = true,
+  var valid_564696 = query.getOrDefault("api-version")
+  valid_564696 = validateParameter(valid_564696, JString, required = true,
                                  default = newJString("2016-05-15"))
-  if valid_568796 != nil:
-    section.add "api-version", valid_568796
+  if valid_564696 != nil:
+    section.add "api-version", valid_564696
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -6345,51 +6311,51 @@ proc validate_SchedulesListApplicable_568790(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568797: Call_SchedulesListApplicable_568789; path: JsonNode;
+proc call*(call_564697: Call_SchedulesListApplicable_564689; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists all applicable schedules
   ## 
-  let valid = call_568797.validator(path, query, header, formData, body)
-  let scheme = call_568797.pickScheme
+  let valid = call_564697.validator(path, query, header, formData, body)
+  let scheme = call_564697.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568797.url(scheme.get, call_568797.host, call_568797.base,
-                         call_568797.route, valid.getOrDefault("path"),
+  let url = call_564697.url(scheme.get, call_564697.host, call_564697.base,
+                         call_564697.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568797, url, valid)
+  result = hook(call_564697, url, valid)
 
-proc call*(call_568798: Call_SchedulesListApplicable_568789;
-          resourceGroupName: string; name: string; subscriptionId: string;
-          labName: string; apiVersion: string = "2016-05-15"): Recallable =
+proc call*(call_564698: Call_SchedulesListApplicable_564689; labName: string;
+          name: string; subscriptionId: string; resourceGroupName: string;
+          apiVersion: string = "2016-05-15"): Recallable =
   ## schedulesListApplicable
   ## Lists all applicable schedules
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   labName: string (required)
+  ##          : The name of the lab.
   ##   apiVersion: string (required)
   ##             : Client API version.
   ##   name: string (required)
   ##       : The name of the schedule.
   ##   subscriptionId: string (required)
   ##                 : The subscription ID.
-  ##   labName: string (required)
-  ##          : The name of the lab.
-  var path_568799 = newJObject()
-  var query_568800 = newJObject()
-  add(path_568799, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568800, "api-version", newJString(apiVersion))
-  add(path_568799, "name", newJString(name))
-  add(path_568799, "subscriptionId", newJString(subscriptionId))
-  add(path_568799, "labName", newJString(labName))
-  result = call_568798.call(path_568799, query_568800, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564699 = newJObject()
+  var query_564700 = newJObject()
+  add(path_564699, "labName", newJString(labName))
+  add(query_564700, "api-version", newJString(apiVersion))
+  add(path_564699, "name", newJString(name))
+  add(path_564699, "subscriptionId", newJString(subscriptionId))
+  add(path_564699, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564698.call(path_564699, query_564700, nil, nil, nil)
 
-var schedulesListApplicable* = Call_SchedulesListApplicable_568789(
+var schedulesListApplicable* = Call_SchedulesListApplicable_564689(
     name: "schedulesListApplicable", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DevTestLab/labs/{labName}/schedules/{name}/listApplicable",
-    validator: validate_SchedulesListApplicable_568790, base: "",
-    url: url_SchedulesListApplicable_568791, schemes: {Scheme.Https})
+    validator: validate_SchedulesListApplicable_564690, base: "",
+    url: url_SchedulesListApplicable_564691, schemes: {Scheme.Https})
 type
-  Call_ServiceRunnersList_568801 = ref object of OpenApiRestCall_567650
-proc url_ServiceRunnersList_568803(protocol: Scheme; host: string; base: string;
+  Call_ServiceRunnersList_564701 = ref object of OpenApiRestCall_563548
+proc url_ServiceRunnersList_564703(protocol: Scheme; host: string; base: string;
                                   route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -6412,7 +6378,7 @@ proc url_ServiceRunnersList_568803(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ServiceRunnersList_568802(path: JsonNode; query: JsonNode;
+proc validate_ServiceRunnersList_564702(path: JsonNode; query: JsonNode;
                                        header: JsonNode; formData: JsonNode;
                                        body: JsonNode): JsonNode =
   ## List service runners in a given lab.
@@ -6420,62 +6386,61 @@ proc validate_ServiceRunnersList_568802(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
-  ##   subscriptionId: JString (required)
-  ##                 : The subscription ID.
   ##   labName: JString (required)
   ##          : The name of the lab.
+  ##   subscriptionId: JString (required)
+  ##                 : The subscription ID.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568804 = path.getOrDefault("resourceGroupName")
-  valid_568804 = validateParameter(valid_568804, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `labName` field"
+  var valid_564704 = path.getOrDefault("labName")
+  valid_564704 = validateParameter(valid_564704, JString, required = true,
                                  default = nil)
-  if valid_568804 != nil:
-    section.add "resourceGroupName", valid_568804
-  var valid_568805 = path.getOrDefault("subscriptionId")
-  valid_568805 = validateParameter(valid_568805, JString, required = true,
+  if valid_564704 != nil:
+    section.add "labName", valid_564704
+  var valid_564705 = path.getOrDefault("subscriptionId")
+  valid_564705 = validateParameter(valid_564705, JString, required = true,
                                  default = nil)
-  if valid_568805 != nil:
-    section.add "subscriptionId", valid_568805
-  var valid_568806 = path.getOrDefault("labName")
-  valid_568806 = validateParameter(valid_568806, JString, required = true,
+  if valid_564705 != nil:
+    section.add "subscriptionId", valid_564705
+  var valid_564706 = path.getOrDefault("resourceGroupName")
+  valid_564706 = validateParameter(valid_564706, JString, required = true,
                                  default = nil)
-  if valid_568806 != nil:
-    section.add "labName", valid_568806
+  if valid_564706 != nil:
+    section.add "resourceGroupName", valid_564706
   result.add "path", section
   ## parameters in `query` object:
-  ##   $orderby: JString
-  ##           : The ordering expression for the results, using OData notation.
-  ##   api-version: JString (required)
-  ##              : Client API version.
   ##   $top: JInt
   ##       : The maximum number of resources to return from the operation.
+  ##   api-version: JString (required)
+  ##              : Client API version.
+  ##   $orderby: JString
+  ##           : The ordering expression for the results, using OData notation.
   ##   $filter: JString
   ##          : The filter to apply to the operation.
   section = newJObject()
-  var valid_568807 = query.getOrDefault("$orderby")
-  valid_568807 = validateParameter(valid_568807, JString, required = false,
-                                 default = nil)
-  if valid_568807 != nil:
-    section.add "$orderby", valid_568807
+  var valid_564707 = query.getOrDefault("$top")
+  valid_564707 = validateParameter(valid_564707, JInt, required = false, default = nil)
+  if valid_564707 != nil:
+    section.add "$top", valid_564707
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568808 = query.getOrDefault("api-version")
-  valid_568808 = validateParameter(valid_568808, JString, required = true,
+  var valid_564708 = query.getOrDefault("api-version")
+  valid_564708 = validateParameter(valid_564708, JString, required = true,
                                  default = newJString("2016-05-15"))
-  if valid_568808 != nil:
-    section.add "api-version", valid_568808
-  var valid_568809 = query.getOrDefault("$top")
-  valid_568809 = validateParameter(valid_568809, JInt, required = false, default = nil)
-  if valid_568809 != nil:
-    section.add "$top", valid_568809
-  var valid_568810 = query.getOrDefault("$filter")
-  valid_568810 = validateParameter(valid_568810, JString, required = false,
+  if valid_564708 != nil:
+    section.add "api-version", valid_564708
+  var valid_564709 = query.getOrDefault("$orderby")
+  valid_564709 = validateParameter(valid_564709, JString, required = false,
                                  default = nil)
-  if valid_568810 != nil:
-    section.add "$filter", valid_568810
+  if valid_564709 != nil:
+    section.add "$orderby", valid_564709
+  var valid_564710 = query.getOrDefault("$filter")
+  valid_564710 = validateParameter(valid_564710, JString, required = false,
+                                 default = nil)
+  if valid_564710 != nil:
+    section.add "$filter", valid_564710
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -6484,57 +6449,57 @@ proc validate_ServiceRunnersList_568802(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568811: Call_ServiceRunnersList_568801; path: JsonNode;
+proc call*(call_564711: Call_ServiceRunnersList_564701; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## List service runners in a given lab.
   ## 
-  let valid = call_568811.validator(path, query, header, formData, body)
-  let scheme = call_568811.pickScheme
+  let valid = call_564711.validator(path, query, header, formData, body)
+  let scheme = call_564711.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568811.url(scheme.get, call_568811.host, call_568811.base,
-                         call_568811.route, valid.getOrDefault("path"),
+  let url = call_564711.url(scheme.get, call_564711.host, call_564711.base,
+                         call_564711.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568811, url, valid)
+  result = hook(call_564711, url, valid)
 
-proc call*(call_568812: Call_ServiceRunnersList_568801; resourceGroupName: string;
-          subscriptionId: string; labName: string; Orderby: string = "";
-          apiVersion: string = "2016-05-15"; Top: int = 0; Filter: string = ""): Recallable =
+proc call*(call_564712: Call_ServiceRunnersList_564701; labName: string;
+          subscriptionId: string; resourceGroupName: string; Top: int = 0;
+          apiVersion: string = "2016-05-15"; Orderby: string = ""; Filter: string = ""): Recallable =
   ## serviceRunnersList
   ## List service runners in a given lab.
-  ##   Orderby: string
-  ##          : The ordering expression for the results, using OData notation.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   labName: string (required)
+  ##          : The name of the lab.
+  ##   Top: int
+  ##      : The maximum number of resources to return from the operation.
   ##   apiVersion: string (required)
   ##             : Client API version.
   ##   subscriptionId: string (required)
   ##                 : The subscription ID.
-  ##   Top: int
-  ##      : The maximum number of resources to return from the operation.
-  ##   labName: string (required)
-  ##          : The name of the lab.
+  ##   Orderby: string
+  ##          : The ordering expression for the results, using OData notation.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   Filter: string
   ##         : The filter to apply to the operation.
-  var path_568813 = newJObject()
-  var query_568814 = newJObject()
-  add(query_568814, "$orderby", newJString(Orderby))
-  add(path_568813, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568814, "api-version", newJString(apiVersion))
-  add(path_568813, "subscriptionId", newJString(subscriptionId))
-  add(query_568814, "$top", newJInt(Top))
-  add(path_568813, "labName", newJString(labName))
-  add(query_568814, "$filter", newJString(Filter))
-  result = call_568812.call(path_568813, query_568814, nil, nil, nil)
+  var path_564713 = newJObject()
+  var query_564714 = newJObject()
+  add(path_564713, "labName", newJString(labName))
+  add(query_564714, "$top", newJInt(Top))
+  add(query_564714, "api-version", newJString(apiVersion))
+  add(path_564713, "subscriptionId", newJString(subscriptionId))
+  add(query_564714, "$orderby", newJString(Orderby))
+  add(path_564713, "resourceGroupName", newJString(resourceGroupName))
+  add(query_564714, "$filter", newJString(Filter))
+  result = call_564712.call(path_564713, query_564714, nil, nil, nil)
 
-var serviceRunnersList* = Call_ServiceRunnersList_568801(
+var serviceRunnersList* = Call_ServiceRunnersList_564701(
     name: "serviceRunnersList", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DevTestLab/labs/{labName}/servicerunners",
-    validator: validate_ServiceRunnersList_568802, base: "",
-    url: url_ServiceRunnersList_568803, schemes: {Scheme.Https})
+    validator: validate_ServiceRunnersList_564702, base: "",
+    url: url_ServiceRunnersList_564703, schemes: {Scheme.Https})
 type
-  Call_ServiceRunnersCreateOrUpdate_568827 = ref object of OpenApiRestCall_567650
-proc url_ServiceRunnersCreateOrUpdate_568829(protocol: Scheme; host: string;
+  Call_ServiceRunnersCreateOrUpdate_564727 = ref object of OpenApiRestCall_563548
+proc url_ServiceRunnersCreateOrUpdate_564729(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -6559,44 +6524,43 @@ proc url_ServiceRunnersCreateOrUpdate_568829(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ServiceRunnersCreateOrUpdate_568828(path: JsonNode; query: JsonNode;
+proc validate_ServiceRunnersCreateOrUpdate_564728(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Create or replace an existing Service runner.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
+  ##   labName: JString (required)
+  ##          : The name of the lab.
   ##   name: JString (required)
   ##       : The name of the service runner.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID.
-  ##   labName: JString (required)
-  ##          : The name of the lab.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568830 = path.getOrDefault("resourceGroupName")
-  valid_568830 = validateParameter(valid_568830, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `labName` field"
+  var valid_564730 = path.getOrDefault("labName")
+  valid_564730 = validateParameter(valid_564730, JString, required = true,
                                  default = nil)
-  if valid_568830 != nil:
-    section.add "resourceGroupName", valid_568830
-  var valid_568831 = path.getOrDefault("name")
-  valid_568831 = validateParameter(valid_568831, JString, required = true,
+  if valid_564730 != nil:
+    section.add "labName", valid_564730
+  var valid_564731 = path.getOrDefault("name")
+  valid_564731 = validateParameter(valid_564731, JString, required = true,
                                  default = nil)
-  if valid_568831 != nil:
-    section.add "name", valid_568831
-  var valid_568832 = path.getOrDefault("subscriptionId")
-  valid_568832 = validateParameter(valid_568832, JString, required = true,
+  if valid_564731 != nil:
+    section.add "name", valid_564731
+  var valid_564732 = path.getOrDefault("subscriptionId")
+  valid_564732 = validateParameter(valid_564732, JString, required = true,
                                  default = nil)
-  if valid_568832 != nil:
-    section.add "subscriptionId", valid_568832
-  var valid_568833 = path.getOrDefault("labName")
-  valid_568833 = validateParameter(valid_568833, JString, required = true,
+  if valid_564732 != nil:
+    section.add "subscriptionId", valid_564732
+  var valid_564733 = path.getOrDefault("resourceGroupName")
+  valid_564733 = validateParameter(valid_564733, JString, required = true,
                                  default = nil)
-  if valid_568833 != nil:
-    section.add "labName", valid_568833
+  if valid_564733 != nil:
+    section.add "resourceGroupName", valid_564733
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -6604,11 +6568,11 @@ proc validate_ServiceRunnersCreateOrUpdate_568828(path: JsonNode; query: JsonNod
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568834 = query.getOrDefault("api-version")
-  valid_568834 = validateParameter(valid_568834, JString, required = true,
+  var valid_564734 = query.getOrDefault("api-version")
+  valid_564734 = validateParameter(valid_564734, JString, required = true,
                                  default = newJString("2016-05-15"))
-  if valid_568834 != nil:
-    section.add "api-version", valid_568834
+  if valid_564734 != nil:
+    section.add "api-version", valid_564734
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -6622,57 +6586,57 @@ proc validate_ServiceRunnersCreateOrUpdate_568828(path: JsonNode; query: JsonNod
   if body != nil:
     result.add "body", body
 
-proc call*(call_568836: Call_ServiceRunnersCreateOrUpdate_568827; path: JsonNode;
+proc call*(call_564736: Call_ServiceRunnersCreateOrUpdate_564727; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Create or replace an existing Service runner.
   ## 
-  let valid = call_568836.validator(path, query, header, formData, body)
-  let scheme = call_568836.pickScheme
+  let valid = call_564736.validator(path, query, header, formData, body)
+  let scheme = call_564736.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568836.url(scheme.get, call_568836.host, call_568836.base,
-                         call_568836.route, valid.getOrDefault("path"),
+  let url = call_564736.url(scheme.get, call_564736.host, call_564736.base,
+                         call_564736.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568836, url, valid)
+  result = hook(call_564736, url, valid)
 
-proc call*(call_568837: Call_ServiceRunnersCreateOrUpdate_568827;
-          resourceGroupName: string; name: string; subscriptionId: string;
-          serviceRunner: JsonNode; labName: string;
+proc call*(call_564737: Call_ServiceRunnersCreateOrUpdate_564727;
+          serviceRunner: JsonNode; labName: string; name: string;
+          subscriptionId: string; resourceGroupName: string;
           apiVersion: string = "2016-05-15"): Recallable =
   ## serviceRunnersCreateOrUpdate
   ## Create or replace an existing Service runner.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   serviceRunner: JObject (required)
+  ##                : A container for a managed identity to execute DevTest lab services.
+  ##   labName: string (required)
+  ##          : The name of the lab.
   ##   apiVersion: string (required)
   ##             : Client API version.
   ##   name: string (required)
   ##       : The name of the service runner.
   ##   subscriptionId: string (required)
   ##                 : The subscription ID.
-  ##   serviceRunner: JObject (required)
-  ##                : A container for a managed identity to execute DevTest lab services.
-  ##   labName: string (required)
-  ##          : The name of the lab.
-  var path_568838 = newJObject()
-  var query_568839 = newJObject()
-  var body_568840 = newJObject()
-  add(path_568838, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568839, "api-version", newJString(apiVersion))
-  add(path_568838, "name", newJString(name))
-  add(path_568838, "subscriptionId", newJString(subscriptionId))
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564738 = newJObject()
+  var query_564739 = newJObject()
+  var body_564740 = newJObject()
   if serviceRunner != nil:
-    body_568840 = serviceRunner
-  add(path_568838, "labName", newJString(labName))
-  result = call_568837.call(path_568838, query_568839, nil, nil, body_568840)
+    body_564740 = serviceRunner
+  add(path_564738, "labName", newJString(labName))
+  add(query_564739, "api-version", newJString(apiVersion))
+  add(path_564738, "name", newJString(name))
+  add(path_564738, "subscriptionId", newJString(subscriptionId))
+  add(path_564738, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564737.call(path_564738, query_564739, nil, nil, body_564740)
 
-var serviceRunnersCreateOrUpdate* = Call_ServiceRunnersCreateOrUpdate_568827(
+var serviceRunnersCreateOrUpdate* = Call_ServiceRunnersCreateOrUpdate_564727(
     name: "serviceRunnersCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DevTestLab/labs/{labName}/servicerunners/{name}",
-    validator: validate_ServiceRunnersCreateOrUpdate_568828, base: "",
-    url: url_ServiceRunnersCreateOrUpdate_568829, schemes: {Scheme.Https})
+    validator: validate_ServiceRunnersCreateOrUpdate_564728, base: "",
+    url: url_ServiceRunnersCreateOrUpdate_564729, schemes: {Scheme.Https})
 type
-  Call_ServiceRunnersGet_568815 = ref object of OpenApiRestCall_567650
-proc url_ServiceRunnersGet_568817(protocol: Scheme; host: string; base: string;
+  Call_ServiceRunnersGet_564715 = ref object of OpenApiRestCall_563548
+proc url_ServiceRunnersGet_564717(protocol: Scheme; host: string; base: string;
                                  route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -6697,7 +6661,7 @@ proc url_ServiceRunnersGet_568817(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ServiceRunnersGet_568816(path: JsonNode; query: JsonNode;
+proc validate_ServiceRunnersGet_564716(path: JsonNode; query: JsonNode;
                                       header: JsonNode; formData: JsonNode;
                                       body: JsonNode): JsonNode =
   ## Get service runner.
@@ -6705,37 +6669,36 @@ proc validate_ServiceRunnersGet_568816(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
+  ##   labName: JString (required)
+  ##          : The name of the lab.
   ##   name: JString (required)
   ##       : The name of the service runner.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID.
-  ##   labName: JString (required)
-  ##          : The name of the lab.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568818 = path.getOrDefault("resourceGroupName")
-  valid_568818 = validateParameter(valid_568818, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `labName` field"
+  var valid_564718 = path.getOrDefault("labName")
+  valid_564718 = validateParameter(valid_564718, JString, required = true,
                                  default = nil)
-  if valid_568818 != nil:
-    section.add "resourceGroupName", valid_568818
-  var valid_568819 = path.getOrDefault("name")
-  valid_568819 = validateParameter(valid_568819, JString, required = true,
+  if valid_564718 != nil:
+    section.add "labName", valid_564718
+  var valid_564719 = path.getOrDefault("name")
+  valid_564719 = validateParameter(valid_564719, JString, required = true,
                                  default = nil)
-  if valid_568819 != nil:
-    section.add "name", valid_568819
-  var valid_568820 = path.getOrDefault("subscriptionId")
-  valid_568820 = validateParameter(valid_568820, JString, required = true,
+  if valid_564719 != nil:
+    section.add "name", valid_564719
+  var valid_564720 = path.getOrDefault("subscriptionId")
+  valid_564720 = validateParameter(valid_564720, JString, required = true,
                                  default = nil)
-  if valid_568820 != nil:
-    section.add "subscriptionId", valid_568820
-  var valid_568821 = path.getOrDefault("labName")
-  valid_568821 = validateParameter(valid_568821, JString, required = true,
+  if valid_564720 != nil:
+    section.add "subscriptionId", valid_564720
+  var valid_564721 = path.getOrDefault("resourceGroupName")
+  valid_564721 = validateParameter(valid_564721, JString, required = true,
                                  default = nil)
-  if valid_568821 != nil:
-    section.add "labName", valid_568821
+  if valid_564721 != nil:
+    section.add "resourceGroupName", valid_564721
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -6743,11 +6706,11 @@ proc validate_ServiceRunnersGet_568816(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568822 = query.getOrDefault("api-version")
-  valid_568822 = validateParameter(valid_568822, JString, required = true,
+  var valid_564722 = query.getOrDefault("api-version")
+  valid_564722 = validateParameter(valid_564722, JString, required = true,
                                  default = newJString("2016-05-15"))
-  if valid_568822 != nil:
-    section.add "api-version", valid_568822
+  if valid_564722 != nil:
+    section.add "api-version", valid_564722
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -6756,50 +6719,50 @@ proc validate_ServiceRunnersGet_568816(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568823: Call_ServiceRunnersGet_568815; path: JsonNode;
+proc call*(call_564723: Call_ServiceRunnersGet_564715; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get service runner.
   ## 
-  let valid = call_568823.validator(path, query, header, formData, body)
-  let scheme = call_568823.pickScheme
+  let valid = call_564723.validator(path, query, header, formData, body)
+  let scheme = call_564723.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568823.url(scheme.get, call_568823.host, call_568823.base,
-                         call_568823.route, valid.getOrDefault("path"),
+  let url = call_564723.url(scheme.get, call_564723.host, call_564723.base,
+                         call_564723.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568823, url, valid)
+  result = hook(call_564723, url, valid)
 
-proc call*(call_568824: Call_ServiceRunnersGet_568815; resourceGroupName: string;
-          name: string; subscriptionId: string; labName: string;
+proc call*(call_564724: Call_ServiceRunnersGet_564715; labName: string; name: string;
+          subscriptionId: string; resourceGroupName: string;
           apiVersion: string = "2016-05-15"): Recallable =
   ## serviceRunnersGet
   ## Get service runner.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   labName: string (required)
+  ##          : The name of the lab.
   ##   apiVersion: string (required)
   ##             : Client API version.
   ##   name: string (required)
   ##       : The name of the service runner.
   ##   subscriptionId: string (required)
   ##                 : The subscription ID.
-  ##   labName: string (required)
-  ##          : The name of the lab.
-  var path_568825 = newJObject()
-  var query_568826 = newJObject()
-  add(path_568825, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568826, "api-version", newJString(apiVersion))
-  add(path_568825, "name", newJString(name))
-  add(path_568825, "subscriptionId", newJString(subscriptionId))
-  add(path_568825, "labName", newJString(labName))
-  result = call_568824.call(path_568825, query_568826, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564725 = newJObject()
+  var query_564726 = newJObject()
+  add(path_564725, "labName", newJString(labName))
+  add(query_564726, "api-version", newJString(apiVersion))
+  add(path_564725, "name", newJString(name))
+  add(path_564725, "subscriptionId", newJString(subscriptionId))
+  add(path_564725, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564724.call(path_564725, query_564726, nil, nil, nil)
 
-var serviceRunnersGet* = Call_ServiceRunnersGet_568815(name: "serviceRunnersGet",
+var serviceRunnersGet* = Call_ServiceRunnersGet_564715(name: "serviceRunnersGet",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DevTestLab/labs/{labName}/servicerunners/{name}",
-    validator: validate_ServiceRunnersGet_568816, base: "",
-    url: url_ServiceRunnersGet_568817, schemes: {Scheme.Https})
+    validator: validate_ServiceRunnersGet_564716, base: "",
+    url: url_ServiceRunnersGet_564717, schemes: {Scheme.Https})
 type
-  Call_ServiceRunnersDelete_568841 = ref object of OpenApiRestCall_567650
-proc url_ServiceRunnersDelete_568843(protocol: Scheme; host: string; base: string;
+  Call_ServiceRunnersDelete_564741 = ref object of OpenApiRestCall_563548
+proc url_ServiceRunnersDelete_564743(protocol: Scheme; host: string; base: string;
                                     route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -6824,44 +6787,43 @@ proc url_ServiceRunnersDelete_568843(protocol: Scheme; host: string; base: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ServiceRunnersDelete_568842(path: JsonNode; query: JsonNode;
+proc validate_ServiceRunnersDelete_564742(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Delete service runner.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
+  ##   labName: JString (required)
+  ##          : The name of the lab.
   ##   name: JString (required)
   ##       : The name of the service runner.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID.
-  ##   labName: JString (required)
-  ##          : The name of the lab.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568844 = path.getOrDefault("resourceGroupName")
-  valid_568844 = validateParameter(valid_568844, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `labName` field"
+  var valid_564744 = path.getOrDefault("labName")
+  valid_564744 = validateParameter(valid_564744, JString, required = true,
                                  default = nil)
-  if valid_568844 != nil:
-    section.add "resourceGroupName", valid_568844
-  var valid_568845 = path.getOrDefault("name")
-  valid_568845 = validateParameter(valid_568845, JString, required = true,
+  if valid_564744 != nil:
+    section.add "labName", valid_564744
+  var valid_564745 = path.getOrDefault("name")
+  valid_564745 = validateParameter(valid_564745, JString, required = true,
                                  default = nil)
-  if valid_568845 != nil:
-    section.add "name", valid_568845
-  var valid_568846 = path.getOrDefault("subscriptionId")
-  valid_568846 = validateParameter(valid_568846, JString, required = true,
+  if valid_564745 != nil:
+    section.add "name", valid_564745
+  var valid_564746 = path.getOrDefault("subscriptionId")
+  valid_564746 = validateParameter(valid_564746, JString, required = true,
                                  default = nil)
-  if valid_568846 != nil:
-    section.add "subscriptionId", valid_568846
-  var valid_568847 = path.getOrDefault("labName")
-  valid_568847 = validateParameter(valid_568847, JString, required = true,
+  if valid_564746 != nil:
+    section.add "subscriptionId", valid_564746
+  var valid_564747 = path.getOrDefault("resourceGroupName")
+  valid_564747 = validateParameter(valid_564747, JString, required = true,
                                  default = nil)
-  if valid_568847 != nil:
-    section.add "labName", valid_568847
+  if valid_564747 != nil:
+    section.add "resourceGroupName", valid_564747
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -6869,11 +6831,11 @@ proc validate_ServiceRunnersDelete_568842(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568848 = query.getOrDefault("api-version")
-  valid_568848 = validateParameter(valid_568848, JString, required = true,
+  var valid_564748 = query.getOrDefault("api-version")
+  valid_564748 = validateParameter(valid_564748, JString, required = true,
                                  default = newJString("2016-05-15"))
-  if valid_568848 != nil:
-    section.add "api-version", valid_568848
+  if valid_564748 != nil:
+    section.add "api-version", valid_564748
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -6882,51 +6844,51 @@ proc validate_ServiceRunnersDelete_568842(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568849: Call_ServiceRunnersDelete_568841; path: JsonNode;
+proc call*(call_564749: Call_ServiceRunnersDelete_564741; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Delete service runner.
   ## 
-  let valid = call_568849.validator(path, query, header, formData, body)
-  let scheme = call_568849.pickScheme
+  let valid = call_564749.validator(path, query, header, formData, body)
+  let scheme = call_564749.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568849.url(scheme.get, call_568849.host, call_568849.base,
-                         call_568849.route, valid.getOrDefault("path"),
+  let url = call_564749.url(scheme.get, call_564749.host, call_564749.base,
+                         call_564749.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568849, url, valid)
+  result = hook(call_564749, url, valid)
 
-proc call*(call_568850: Call_ServiceRunnersDelete_568841;
-          resourceGroupName: string; name: string; subscriptionId: string;
-          labName: string; apiVersion: string = "2016-05-15"): Recallable =
+proc call*(call_564750: Call_ServiceRunnersDelete_564741; labName: string;
+          name: string; subscriptionId: string; resourceGroupName: string;
+          apiVersion: string = "2016-05-15"): Recallable =
   ## serviceRunnersDelete
   ## Delete service runner.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   labName: string (required)
+  ##          : The name of the lab.
   ##   apiVersion: string (required)
   ##             : Client API version.
   ##   name: string (required)
   ##       : The name of the service runner.
   ##   subscriptionId: string (required)
   ##                 : The subscription ID.
-  ##   labName: string (required)
-  ##          : The name of the lab.
-  var path_568851 = newJObject()
-  var query_568852 = newJObject()
-  add(path_568851, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568852, "api-version", newJString(apiVersion))
-  add(path_568851, "name", newJString(name))
-  add(path_568851, "subscriptionId", newJString(subscriptionId))
-  add(path_568851, "labName", newJString(labName))
-  result = call_568850.call(path_568851, query_568852, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564751 = newJObject()
+  var query_564752 = newJObject()
+  add(path_564751, "labName", newJString(labName))
+  add(query_564752, "api-version", newJString(apiVersion))
+  add(path_564751, "name", newJString(name))
+  add(path_564751, "subscriptionId", newJString(subscriptionId))
+  add(path_564751, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564750.call(path_564751, query_564752, nil, nil, nil)
 
-var serviceRunnersDelete* = Call_ServiceRunnersDelete_568841(
+var serviceRunnersDelete* = Call_ServiceRunnersDelete_564741(
     name: "serviceRunnersDelete", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DevTestLab/labs/{labName}/servicerunners/{name}",
-    validator: validate_ServiceRunnersDelete_568842, base: "",
-    url: url_ServiceRunnersDelete_568843, schemes: {Scheme.Https})
+    validator: validate_ServiceRunnersDelete_564742, base: "",
+    url: url_ServiceRunnersDelete_564743, schemes: {Scheme.Https})
 type
-  Call_UsersList_568853 = ref object of OpenApiRestCall_567650
-proc url_UsersList_568855(protocol: Scheme; host: string; base: string; route: string;
+  Call_UsersList_564753 = ref object of OpenApiRestCall_563548
+proc url_UsersList_564755(protocol: Scheme; host: string; base: string; route: string;
                          path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -6949,76 +6911,75 @@ proc url_UsersList_568855(protocol: Scheme; host: string; base: string; route: s
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_UsersList_568854(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_UsersList_564754(path: JsonNode; query: JsonNode; header: JsonNode;
                               formData: JsonNode; body: JsonNode): JsonNode =
   ## List user profiles in a given lab.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
-  ##   subscriptionId: JString (required)
-  ##                 : The subscription ID.
   ##   labName: JString (required)
   ##          : The name of the lab.
+  ##   subscriptionId: JString (required)
+  ##                 : The subscription ID.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568856 = path.getOrDefault("resourceGroupName")
-  valid_568856 = validateParameter(valid_568856, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `labName` field"
+  var valid_564756 = path.getOrDefault("labName")
+  valid_564756 = validateParameter(valid_564756, JString, required = true,
                                  default = nil)
-  if valid_568856 != nil:
-    section.add "resourceGroupName", valid_568856
-  var valid_568857 = path.getOrDefault("subscriptionId")
-  valid_568857 = validateParameter(valid_568857, JString, required = true,
+  if valid_564756 != nil:
+    section.add "labName", valid_564756
+  var valid_564757 = path.getOrDefault("subscriptionId")
+  valid_564757 = validateParameter(valid_564757, JString, required = true,
                                  default = nil)
-  if valid_568857 != nil:
-    section.add "subscriptionId", valid_568857
-  var valid_568858 = path.getOrDefault("labName")
-  valid_568858 = validateParameter(valid_568858, JString, required = true,
+  if valid_564757 != nil:
+    section.add "subscriptionId", valid_564757
+  var valid_564758 = path.getOrDefault("resourceGroupName")
+  valid_564758 = validateParameter(valid_564758, JString, required = true,
                                  default = nil)
-  if valid_568858 != nil:
-    section.add "labName", valid_568858
+  if valid_564758 != nil:
+    section.add "resourceGroupName", valid_564758
   result.add "path", section
   ## parameters in `query` object:
-  ##   $orderby: JString
-  ##           : The ordering expression for the results, using OData notation.
-  ##   $expand: JString
-  ##          : Specify the $expand query. Example: 'properties($select=identity)'
-  ##   api-version: JString (required)
-  ##              : Client API version.
   ##   $top: JInt
   ##       : The maximum number of resources to return from the operation.
+  ##   api-version: JString (required)
+  ##              : Client API version.
+  ##   $expand: JString
+  ##          : Specify the $expand query. Example: 'properties($select=identity)'
+  ##   $orderby: JString
+  ##           : The ordering expression for the results, using OData notation.
   ##   $filter: JString
   ##          : The filter to apply to the operation.
   section = newJObject()
-  var valid_568859 = query.getOrDefault("$orderby")
-  valid_568859 = validateParameter(valid_568859, JString, required = false,
-                                 default = nil)
-  if valid_568859 != nil:
-    section.add "$orderby", valid_568859
-  var valid_568860 = query.getOrDefault("$expand")
-  valid_568860 = validateParameter(valid_568860, JString, required = false,
-                                 default = nil)
-  if valid_568860 != nil:
-    section.add "$expand", valid_568860
+  var valid_564759 = query.getOrDefault("$top")
+  valid_564759 = validateParameter(valid_564759, JInt, required = false, default = nil)
+  if valid_564759 != nil:
+    section.add "$top", valid_564759
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568861 = query.getOrDefault("api-version")
-  valid_568861 = validateParameter(valid_568861, JString, required = true,
+  var valid_564760 = query.getOrDefault("api-version")
+  valid_564760 = validateParameter(valid_564760, JString, required = true,
                                  default = newJString("2016-05-15"))
-  if valid_568861 != nil:
-    section.add "api-version", valid_568861
-  var valid_568862 = query.getOrDefault("$top")
-  valid_568862 = validateParameter(valid_568862, JInt, required = false, default = nil)
-  if valid_568862 != nil:
-    section.add "$top", valid_568862
-  var valid_568863 = query.getOrDefault("$filter")
-  valid_568863 = validateParameter(valid_568863, JString, required = false,
+  if valid_564760 != nil:
+    section.add "api-version", valid_564760
+  var valid_564761 = query.getOrDefault("$expand")
+  valid_564761 = validateParameter(valid_564761, JString, required = false,
                                  default = nil)
-  if valid_568863 != nil:
-    section.add "$filter", valid_568863
+  if valid_564761 != nil:
+    section.add "$expand", valid_564761
+  var valid_564762 = query.getOrDefault("$orderby")
+  valid_564762 = validateParameter(valid_564762, JString, required = false,
+                                 default = nil)
+  if valid_564762 != nil:
+    section.add "$orderby", valid_564762
+  var valid_564763 = query.getOrDefault("$filter")
+  valid_564763 = validateParameter(valid_564763, JString, required = false,
+                                 default = nil)
+  if valid_564763 != nil:
+    section.add "$filter", valid_564763
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -7027,61 +6988,61 @@ proc validate_UsersList_568854(path: JsonNode; query: JsonNode; header: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_568864: Call_UsersList_568853; path: JsonNode; query: JsonNode;
+proc call*(call_564764: Call_UsersList_564753; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## List user profiles in a given lab.
   ## 
-  let valid = call_568864.validator(path, query, header, formData, body)
-  let scheme = call_568864.pickScheme
+  let valid = call_564764.validator(path, query, header, formData, body)
+  let scheme = call_564764.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568864.url(scheme.get, call_568864.host, call_568864.base,
-                         call_568864.route, valid.getOrDefault("path"),
+  let url = call_564764.url(scheme.get, call_564764.host, call_564764.base,
+                         call_564764.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568864, url, valid)
+  result = hook(call_564764, url, valid)
 
-proc call*(call_568865: Call_UsersList_568853; resourceGroupName: string;
-          subscriptionId: string; labName: string; Orderby: string = "";
-          Expand: string = ""; apiVersion: string = "2016-05-15"; Top: int = 0;
+proc call*(call_564765: Call_UsersList_564753; labName: string;
+          subscriptionId: string; resourceGroupName: string; Top: int = 0;
+          apiVersion: string = "2016-05-15"; Expand: string = ""; Orderby: string = "";
           Filter: string = ""): Recallable =
   ## usersList
   ## List user profiles in a given lab.
+  ##   labName: string (required)
+  ##          : The name of the lab.
+  ##   Top: int
+  ##      : The maximum number of resources to return from the operation.
+  ##   apiVersion: string (required)
+  ##             : Client API version.
+  ##   Expand: string
+  ##         : Specify the $expand query. Example: 'properties($select=identity)'
+  ##   subscriptionId: string (required)
+  ##                 : The subscription ID.
   ##   Orderby: string
   ##          : The ordering expression for the results, using OData notation.
   ##   resourceGroupName: string (required)
   ##                    : The name of the resource group.
-  ##   Expand: string
-  ##         : Specify the $expand query. Example: 'properties($select=identity)'
-  ##   apiVersion: string (required)
-  ##             : Client API version.
-  ##   subscriptionId: string (required)
-  ##                 : The subscription ID.
-  ##   Top: int
-  ##      : The maximum number of resources to return from the operation.
-  ##   labName: string (required)
-  ##          : The name of the lab.
   ##   Filter: string
   ##         : The filter to apply to the operation.
-  var path_568866 = newJObject()
-  var query_568867 = newJObject()
-  add(query_568867, "$orderby", newJString(Orderby))
-  add(path_568866, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568867, "$expand", newJString(Expand))
-  add(query_568867, "api-version", newJString(apiVersion))
-  add(path_568866, "subscriptionId", newJString(subscriptionId))
-  add(query_568867, "$top", newJInt(Top))
-  add(path_568866, "labName", newJString(labName))
-  add(query_568867, "$filter", newJString(Filter))
-  result = call_568865.call(path_568866, query_568867, nil, nil, nil)
+  var path_564766 = newJObject()
+  var query_564767 = newJObject()
+  add(path_564766, "labName", newJString(labName))
+  add(query_564767, "$top", newJInt(Top))
+  add(query_564767, "api-version", newJString(apiVersion))
+  add(query_564767, "$expand", newJString(Expand))
+  add(path_564766, "subscriptionId", newJString(subscriptionId))
+  add(query_564767, "$orderby", newJString(Orderby))
+  add(path_564766, "resourceGroupName", newJString(resourceGroupName))
+  add(query_564767, "$filter", newJString(Filter))
+  result = call_564765.call(path_564766, query_564767, nil, nil, nil)
 
-var usersList* = Call_UsersList_568853(name: "usersList", meth: HttpMethod.HttpGet,
+var usersList* = Call_UsersList_564753(name: "usersList", meth: HttpMethod.HttpGet,
                                     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DevTestLab/labs/{labName}/users",
-                                    validator: validate_UsersList_568854,
-                                    base: "", url: url_UsersList_568855,
+                                    validator: validate_UsersList_564754,
+                                    base: "", url: url_UsersList_564755,
                                     schemes: {Scheme.Https})
 type
-  Call_UsersCreateOrUpdate_568881 = ref object of OpenApiRestCall_567650
-proc url_UsersCreateOrUpdate_568883(protocol: Scheme; host: string; base: string;
+  Call_UsersCreateOrUpdate_564781 = ref object of OpenApiRestCall_563548
+proc url_UsersCreateOrUpdate_564783(protocol: Scheme; host: string; base: string;
                                    route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -7106,7 +7067,7 @@ proc url_UsersCreateOrUpdate_568883(protocol: Scheme; host: string; base: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_UsersCreateOrUpdate_568882(path: JsonNode; query: JsonNode;
+proc validate_UsersCreateOrUpdate_564782(path: JsonNode; query: JsonNode;
                                         header: JsonNode; formData: JsonNode;
                                         body: JsonNode): JsonNode =
   ## Create or replace an existing user profile.
@@ -7114,37 +7075,36 @@ proc validate_UsersCreateOrUpdate_568882(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
+  ##   labName: JString (required)
+  ##          : The name of the lab.
   ##   name: JString (required)
   ##       : The name of the user profile.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID.
-  ##   labName: JString (required)
-  ##          : The name of the lab.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568884 = path.getOrDefault("resourceGroupName")
-  valid_568884 = validateParameter(valid_568884, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `labName` field"
+  var valid_564784 = path.getOrDefault("labName")
+  valid_564784 = validateParameter(valid_564784, JString, required = true,
                                  default = nil)
-  if valid_568884 != nil:
-    section.add "resourceGroupName", valid_568884
-  var valid_568885 = path.getOrDefault("name")
-  valid_568885 = validateParameter(valid_568885, JString, required = true,
+  if valid_564784 != nil:
+    section.add "labName", valid_564784
+  var valid_564785 = path.getOrDefault("name")
+  valid_564785 = validateParameter(valid_564785, JString, required = true,
                                  default = nil)
-  if valid_568885 != nil:
-    section.add "name", valid_568885
-  var valid_568886 = path.getOrDefault("subscriptionId")
-  valid_568886 = validateParameter(valid_568886, JString, required = true,
+  if valid_564785 != nil:
+    section.add "name", valid_564785
+  var valid_564786 = path.getOrDefault("subscriptionId")
+  valid_564786 = validateParameter(valid_564786, JString, required = true,
                                  default = nil)
-  if valid_568886 != nil:
-    section.add "subscriptionId", valid_568886
-  var valid_568887 = path.getOrDefault("labName")
-  valid_568887 = validateParameter(valid_568887, JString, required = true,
+  if valid_564786 != nil:
+    section.add "subscriptionId", valid_564786
+  var valid_564787 = path.getOrDefault("resourceGroupName")
+  valid_564787 = validateParameter(valid_564787, JString, required = true,
                                  default = nil)
-  if valid_568887 != nil:
-    section.add "labName", valid_568887
+  if valid_564787 != nil:
+    section.add "resourceGroupName", valid_564787
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -7152,11 +7112,11 @@ proc validate_UsersCreateOrUpdate_568882(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568888 = query.getOrDefault("api-version")
-  valid_568888 = validateParameter(valid_568888, JString, required = true,
+  var valid_564788 = query.getOrDefault("api-version")
+  valid_564788 = validateParameter(valid_564788, JString, required = true,
                                  default = newJString("2016-05-15"))
-  if valid_568888 != nil:
-    section.add "api-version", valid_568888
+  if valid_564788 != nil:
+    section.add "api-version", valid_564788
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -7170,56 +7130,56 @@ proc validate_UsersCreateOrUpdate_568882(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568890: Call_UsersCreateOrUpdate_568881; path: JsonNode;
+proc call*(call_564790: Call_UsersCreateOrUpdate_564781; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Create or replace an existing user profile.
   ## 
-  let valid = call_568890.validator(path, query, header, formData, body)
-  let scheme = call_568890.pickScheme
+  let valid = call_564790.validator(path, query, header, formData, body)
+  let scheme = call_564790.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568890.url(scheme.get, call_568890.host, call_568890.base,
-                         call_568890.route, valid.getOrDefault("path"),
+  let url = call_564790.url(scheme.get, call_564790.host, call_564790.base,
+                         call_564790.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568890, url, valid)
+  result = hook(call_564790, url, valid)
 
-proc call*(call_568891: Call_UsersCreateOrUpdate_568881; resourceGroupName: string;
-          name: string; user: JsonNode; subscriptionId: string; labName: string;
-          apiVersion: string = "2016-05-15"): Recallable =
+proc call*(call_564791: Call_UsersCreateOrUpdate_564781; labName: string;
+          name: string; subscriptionId: string; user: JsonNode;
+          resourceGroupName: string; apiVersion: string = "2016-05-15"): Recallable =
   ## usersCreateOrUpdate
   ## Create or replace an existing user profile.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   labName: string (required)
+  ##          : The name of the lab.
   ##   apiVersion: string (required)
   ##             : Client API version.
   ##   name: string (required)
   ##       : The name of the user profile.
-  ##   user: JObject (required)
-  ##       : Profile of a lab user.
   ##   subscriptionId: string (required)
   ##                 : The subscription ID.
-  ##   labName: string (required)
-  ##          : The name of the lab.
-  var path_568892 = newJObject()
-  var query_568893 = newJObject()
-  var body_568894 = newJObject()
-  add(path_568892, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568893, "api-version", newJString(apiVersion))
-  add(path_568892, "name", newJString(name))
+  ##   user: JObject (required)
+  ##       : Profile of a lab user.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564792 = newJObject()
+  var query_564793 = newJObject()
+  var body_564794 = newJObject()
+  add(path_564792, "labName", newJString(labName))
+  add(query_564793, "api-version", newJString(apiVersion))
+  add(path_564792, "name", newJString(name))
+  add(path_564792, "subscriptionId", newJString(subscriptionId))
   if user != nil:
-    body_568894 = user
-  add(path_568892, "subscriptionId", newJString(subscriptionId))
-  add(path_568892, "labName", newJString(labName))
-  result = call_568891.call(path_568892, query_568893, nil, nil, body_568894)
+    body_564794 = user
+  add(path_564792, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564791.call(path_564792, query_564793, nil, nil, body_564794)
 
-var usersCreateOrUpdate* = Call_UsersCreateOrUpdate_568881(
+var usersCreateOrUpdate* = Call_UsersCreateOrUpdate_564781(
     name: "usersCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DevTestLab/labs/{labName}/users/{name}",
-    validator: validate_UsersCreateOrUpdate_568882, base: "",
-    url: url_UsersCreateOrUpdate_568883, schemes: {Scheme.Https})
+    validator: validate_UsersCreateOrUpdate_564782, base: "",
+    url: url_UsersCreateOrUpdate_564783, schemes: {Scheme.Https})
 type
-  Call_UsersGet_568868 = ref object of OpenApiRestCall_567650
-proc url_UsersGet_568870(protocol: Scheme; host: string; base: string; route: string;
+  Call_UsersGet_564768 = ref object of OpenApiRestCall_563548
+proc url_UsersGet_564770(protocol: Scheme; host: string; base: string; route: string;
                         path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -7244,63 +7204,62 @@ proc url_UsersGet_568870(protocol: Scheme; host: string; base: string; route: st
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_UsersGet_568869(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_UsersGet_564769(path: JsonNode; query: JsonNode; header: JsonNode;
                              formData: JsonNode; body: JsonNode): JsonNode =
   ## Get user profile.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
+  ##   labName: JString (required)
+  ##          : The name of the lab.
   ##   name: JString (required)
   ##       : The name of the user profile.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID.
-  ##   labName: JString (required)
-  ##          : The name of the lab.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568871 = path.getOrDefault("resourceGroupName")
-  valid_568871 = validateParameter(valid_568871, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `labName` field"
+  var valid_564771 = path.getOrDefault("labName")
+  valid_564771 = validateParameter(valid_564771, JString, required = true,
                                  default = nil)
-  if valid_568871 != nil:
-    section.add "resourceGroupName", valid_568871
-  var valid_568872 = path.getOrDefault("name")
-  valid_568872 = validateParameter(valid_568872, JString, required = true,
+  if valid_564771 != nil:
+    section.add "labName", valid_564771
+  var valid_564772 = path.getOrDefault("name")
+  valid_564772 = validateParameter(valid_564772, JString, required = true,
                                  default = nil)
-  if valid_568872 != nil:
-    section.add "name", valid_568872
-  var valid_568873 = path.getOrDefault("subscriptionId")
-  valid_568873 = validateParameter(valid_568873, JString, required = true,
+  if valid_564772 != nil:
+    section.add "name", valid_564772
+  var valid_564773 = path.getOrDefault("subscriptionId")
+  valid_564773 = validateParameter(valid_564773, JString, required = true,
                                  default = nil)
-  if valid_568873 != nil:
-    section.add "subscriptionId", valid_568873
-  var valid_568874 = path.getOrDefault("labName")
-  valid_568874 = validateParameter(valid_568874, JString, required = true,
+  if valid_564773 != nil:
+    section.add "subscriptionId", valid_564773
+  var valid_564774 = path.getOrDefault("resourceGroupName")
+  valid_564774 = validateParameter(valid_564774, JString, required = true,
                                  default = nil)
-  if valid_568874 != nil:
-    section.add "labName", valid_568874
+  if valid_564774 != nil:
+    section.add "resourceGroupName", valid_564774
   result.add "path", section
   ## parameters in `query` object:
-  ##   $expand: JString
-  ##          : Specify the $expand query. Example: 'properties($select=identity)'
   ##   api-version: JString (required)
   ##              : Client API version.
+  ##   $expand: JString
+  ##          : Specify the $expand query. Example: 'properties($select=identity)'
   section = newJObject()
-  var valid_568875 = query.getOrDefault("$expand")
-  valid_568875 = validateParameter(valid_568875, JString, required = false,
-                                 default = nil)
-  if valid_568875 != nil:
-    section.add "$expand", valid_568875
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568876 = query.getOrDefault("api-version")
-  valid_568876 = validateParameter(valid_568876, JString, required = true,
+  var valid_564775 = query.getOrDefault("api-version")
+  valid_564775 = validateParameter(valid_564775, JString, required = true,
                                  default = newJString("2016-05-15"))
-  if valid_568876 != nil:
-    section.add "api-version", valid_568876
+  if valid_564775 != nil:
+    section.add "api-version", valid_564775
+  var valid_564776 = query.getOrDefault("$expand")
+  valid_564776 = validateParameter(valid_564776, JString, required = false,
+                                 default = nil)
+  if valid_564776 != nil:
+    section.add "$expand", valid_564776
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -7309,54 +7268,54 @@ proc validate_UsersGet_568869(path: JsonNode; query: JsonNode; header: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568877: Call_UsersGet_568868; path: JsonNode; query: JsonNode;
+proc call*(call_564777: Call_UsersGet_564768; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get user profile.
   ## 
-  let valid = call_568877.validator(path, query, header, formData, body)
-  let scheme = call_568877.pickScheme
+  let valid = call_564777.validator(path, query, header, formData, body)
+  let scheme = call_564777.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568877.url(scheme.get, call_568877.host, call_568877.base,
-                         call_568877.route, valid.getOrDefault("path"),
+  let url = call_564777.url(scheme.get, call_564777.host, call_564777.base,
+                         call_564777.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568877, url, valid)
+  result = hook(call_564777, url, valid)
 
-proc call*(call_568878: Call_UsersGet_568868; resourceGroupName: string;
-          name: string; subscriptionId: string; labName: string; Expand: string = "";
-          apiVersion: string = "2016-05-15"): Recallable =
+proc call*(call_564778: Call_UsersGet_564768; labName: string; name: string;
+          subscriptionId: string; resourceGroupName: string;
+          apiVersion: string = "2016-05-15"; Expand: string = ""): Recallable =
   ## usersGet
   ## Get user profile.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   labName: string (required)
+  ##          : The name of the lab.
+  ##   apiVersion: string (required)
+  ##             : Client API version.
   ##   Expand: string
   ##         : Specify the $expand query. Example: 'properties($select=identity)'
   ##   name: string (required)
   ##       : The name of the user profile.
-  ##   apiVersion: string (required)
-  ##             : Client API version.
   ##   subscriptionId: string (required)
   ##                 : The subscription ID.
-  ##   labName: string (required)
-  ##          : The name of the lab.
-  var path_568879 = newJObject()
-  var query_568880 = newJObject()
-  add(path_568879, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568880, "$expand", newJString(Expand))
-  add(path_568879, "name", newJString(name))
-  add(query_568880, "api-version", newJString(apiVersion))
-  add(path_568879, "subscriptionId", newJString(subscriptionId))
-  add(path_568879, "labName", newJString(labName))
-  result = call_568878.call(path_568879, query_568880, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564779 = newJObject()
+  var query_564780 = newJObject()
+  add(path_564779, "labName", newJString(labName))
+  add(query_564780, "api-version", newJString(apiVersion))
+  add(query_564780, "$expand", newJString(Expand))
+  add(path_564779, "name", newJString(name))
+  add(path_564779, "subscriptionId", newJString(subscriptionId))
+  add(path_564779, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564778.call(path_564779, query_564780, nil, nil, nil)
 
-var usersGet* = Call_UsersGet_568868(name: "usersGet", meth: HttpMethod.HttpGet,
+var usersGet* = Call_UsersGet_564768(name: "usersGet", meth: HttpMethod.HttpGet,
                                   host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DevTestLab/labs/{labName}/users/{name}",
-                                  validator: validate_UsersGet_568869, base: "",
-                                  url: url_UsersGet_568870,
+                                  validator: validate_UsersGet_564769, base: "",
+                                  url: url_UsersGet_564770,
                                   schemes: {Scheme.Https})
 type
-  Call_UsersUpdate_568907 = ref object of OpenApiRestCall_567650
-proc url_UsersUpdate_568909(protocol: Scheme; host: string; base: string;
+  Call_UsersUpdate_564807 = ref object of OpenApiRestCall_563548
+proc url_UsersUpdate_564809(protocol: Scheme; host: string; base: string;
                            route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -7381,44 +7340,43 @@ proc url_UsersUpdate_568909(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_UsersUpdate_568908(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_UsersUpdate_564808(path: JsonNode; query: JsonNode; header: JsonNode;
                                 formData: JsonNode; body: JsonNode): JsonNode =
   ## Modify properties of user profiles.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
+  ##   labName: JString (required)
+  ##          : The name of the lab.
   ##   name: JString (required)
   ##       : The name of the user profile.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID.
-  ##   labName: JString (required)
-  ##          : The name of the lab.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568910 = path.getOrDefault("resourceGroupName")
-  valid_568910 = validateParameter(valid_568910, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `labName` field"
+  var valid_564810 = path.getOrDefault("labName")
+  valid_564810 = validateParameter(valid_564810, JString, required = true,
                                  default = nil)
-  if valid_568910 != nil:
-    section.add "resourceGroupName", valid_568910
-  var valid_568911 = path.getOrDefault("name")
-  valid_568911 = validateParameter(valid_568911, JString, required = true,
+  if valid_564810 != nil:
+    section.add "labName", valid_564810
+  var valid_564811 = path.getOrDefault("name")
+  valid_564811 = validateParameter(valid_564811, JString, required = true,
                                  default = nil)
-  if valid_568911 != nil:
-    section.add "name", valid_568911
-  var valid_568912 = path.getOrDefault("subscriptionId")
-  valid_568912 = validateParameter(valid_568912, JString, required = true,
+  if valid_564811 != nil:
+    section.add "name", valid_564811
+  var valid_564812 = path.getOrDefault("subscriptionId")
+  valid_564812 = validateParameter(valid_564812, JString, required = true,
                                  default = nil)
-  if valid_568912 != nil:
-    section.add "subscriptionId", valid_568912
-  var valid_568913 = path.getOrDefault("labName")
-  valid_568913 = validateParameter(valid_568913, JString, required = true,
+  if valid_564812 != nil:
+    section.add "subscriptionId", valid_564812
+  var valid_564813 = path.getOrDefault("resourceGroupName")
+  valid_564813 = validateParameter(valid_564813, JString, required = true,
                                  default = nil)
-  if valid_568913 != nil:
-    section.add "labName", valid_568913
+  if valid_564813 != nil:
+    section.add "resourceGroupName", valid_564813
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -7426,11 +7384,11 @@ proc validate_UsersUpdate_568908(path: JsonNode; query: JsonNode; header: JsonNo
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568914 = query.getOrDefault("api-version")
-  valid_568914 = validateParameter(valid_568914, JString, required = true,
+  var valid_564814 = query.getOrDefault("api-version")
+  valid_564814 = validateParameter(valid_564814, JString, required = true,
                                  default = newJString("2016-05-15"))
-  if valid_568914 != nil:
-    section.add "api-version", valid_568914
+  if valid_564814 != nil:
+    section.add "api-version", valid_564814
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -7444,57 +7402,57 @@ proc validate_UsersUpdate_568908(path: JsonNode; query: JsonNode; header: JsonNo
   if body != nil:
     result.add "body", body
 
-proc call*(call_568916: Call_UsersUpdate_568907; path: JsonNode; query: JsonNode;
+proc call*(call_564816: Call_UsersUpdate_564807; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Modify properties of user profiles.
   ## 
-  let valid = call_568916.validator(path, query, header, formData, body)
-  let scheme = call_568916.pickScheme
+  let valid = call_564816.validator(path, query, header, formData, body)
+  let scheme = call_564816.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568916.url(scheme.get, call_568916.host, call_568916.base,
-                         call_568916.route, valid.getOrDefault("path"),
+  let url = call_564816.url(scheme.get, call_564816.host, call_564816.base,
+                         call_564816.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568916, url, valid)
+  result = hook(call_564816, url, valid)
 
-proc call*(call_568917: Call_UsersUpdate_568907; resourceGroupName: string;
-          name: string; user: JsonNode; subscriptionId: string; labName: string;
+proc call*(call_564817: Call_UsersUpdate_564807; labName: string; name: string;
+          subscriptionId: string; user: JsonNode; resourceGroupName: string;
           apiVersion: string = "2016-05-15"): Recallable =
   ## usersUpdate
   ## Modify properties of user profiles.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   labName: string (required)
+  ##          : The name of the lab.
   ##   apiVersion: string (required)
   ##             : Client API version.
   ##   name: string (required)
   ##       : The name of the user profile.
-  ##   user: JObject (required)
-  ##       : Profile of a lab user.
   ##   subscriptionId: string (required)
   ##                 : The subscription ID.
-  ##   labName: string (required)
-  ##          : The name of the lab.
-  var path_568918 = newJObject()
-  var query_568919 = newJObject()
-  var body_568920 = newJObject()
-  add(path_568918, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568919, "api-version", newJString(apiVersion))
-  add(path_568918, "name", newJString(name))
+  ##   user: JObject (required)
+  ##       : Profile of a lab user.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564818 = newJObject()
+  var query_564819 = newJObject()
+  var body_564820 = newJObject()
+  add(path_564818, "labName", newJString(labName))
+  add(query_564819, "api-version", newJString(apiVersion))
+  add(path_564818, "name", newJString(name))
+  add(path_564818, "subscriptionId", newJString(subscriptionId))
   if user != nil:
-    body_568920 = user
-  add(path_568918, "subscriptionId", newJString(subscriptionId))
-  add(path_568918, "labName", newJString(labName))
-  result = call_568917.call(path_568918, query_568919, nil, nil, body_568920)
+    body_564820 = user
+  add(path_564818, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564817.call(path_564818, query_564819, nil, nil, body_564820)
 
-var usersUpdate* = Call_UsersUpdate_568907(name: "usersUpdate",
+var usersUpdate* = Call_UsersUpdate_564807(name: "usersUpdate",
                                         meth: HttpMethod.HttpPatch,
                                         host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DevTestLab/labs/{labName}/users/{name}",
-                                        validator: validate_UsersUpdate_568908,
-                                        base: "", url: url_UsersUpdate_568909,
+                                        validator: validate_UsersUpdate_564808,
+                                        base: "", url: url_UsersUpdate_564809,
                                         schemes: {Scheme.Https})
 type
-  Call_UsersDelete_568895 = ref object of OpenApiRestCall_567650
-proc url_UsersDelete_568897(protocol: Scheme; host: string; base: string;
+  Call_UsersDelete_564795 = ref object of OpenApiRestCall_563548
+proc url_UsersDelete_564797(protocol: Scheme; host: string; base: string;
                            route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -7519,44 +7477,43 @@ proc url_UsersDelete_568897(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_UsersDelete_568896(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_UsersDelete_564796(path: JsonNode; query: JsonNode; header: JsonNode;
                                 formData: JsonNode; body: JsonNode): JsonNode =
   ## Delete user profile. This operation can take a while to complete.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
+  ##   labName: JString (required)
+  ##          : The name of the lab.
   ##   name: JString (required)
   ##       : The name of the user profile.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID.
-  ##   labName: JString (required)
-  ##          : The name of the lab.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568898 = path.getOrDefault("resourceGroupName")
-  valid_568898 = validateParameter(valid_568898, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `labName` field"
+  var valid_564798 = path.getOrDefault("labName")
+  valid_564798 = validateParameter(valid_564798, JString, required = true,
                                  default = nil)
-  if valid_568898 != nil:
-    section.add "resourceGroupName", valid_568898
-  var valid_568899 = path.getOrDefault("name")
-  valid_568899 = validateParameter(valid_568899, JString, required = true,
+  if valid_564798 != nil:
+    section.add "labName", valid_564798
+  var valid_564799 = path.getOrDefault("name")
+  valid_564799 = validateParameter(valid_564799, JString, required = true,
                                  default = nil)
-  if valid_568899 != nil:
-    section.add "name", valid_568899
-  var valid_568900 = path.getOrDefault("subscriptionId")
-  valid_568900 = validateParameter(valid_568900, JString, required = true,
+  if valid_564799 != nil:
+    section.add "name", valid_564799
+  var valid_564800 = path.getOrDefault("subscriptionId")
+  valid_564800 = validateParameter(valid_564800, JString, required = true,
                                  default = nil)
-  if valid_568900 != nil:
-    section.add "subscriptionId", valid_568900
-  var valid_568901 = path.getOrDefault("labName")
-  valid_568901 = validateParameter(valid_568901, JString, required = true,
+  if valid_564800 != nil:
+    section.add "subscriptionId", valid_564800
+  var valid_564801 = path.getOrDefault("resourceGroupName")
+  valid_564801 = validateParameter(valid_564801, JString, required = true,
                                  default = nil)
-  if valid_568901 != nil:
-    section.add "labName", valid_568901
+  if valid_564801 != nil:
+    section.add "resourceGroupName", valid_564801
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -7564,11 +7521,11 @@ proc validate_UsersDelete_568896(path: JsonNode; query: JsonNode; header: JsonNo
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568902 = query.getOrDefault("api-version")
-  valid_568902 = validateParameter(valid_568902, JString, required = true,
+  var valid_564802 = query.getOrDefault("api-version")
+  valid_564802 = validateParameter(valid_564802, JString, required = true,
                                  default = newJString("2016-05-15"))
-  if valid_568902 != nil:
-    section.add "api-version", valid_568902
+  if valid_564802 != nil:
+    section.add "api-version", valid_564802
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -7577,52 +7534,52 @@ proc validate_UsersDelete_568896(path: JsonNode; query: JsonNode; header: JsonNo
   if body != nil:
     result.add "body", body
 
-proc call*(call_568903: Call_UsersDelete_568895; path: JsonNode; query: JsonNode;
+proc call*(call_564803: Call_UsersDelete_564795; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Delete user profile. This operation can take a while to complete.
   ## 
-  let valid = call_568903.validator(path, query, header, formData, body)
-  let scheme = call_568903.pickScheme
+  let valid = call_564803.validator(path, query, header, formData, body)
+  let scheme = call_564803.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568903.url(scheme.get, call_568903.host, call_568903.base,
-                         call_568903.route, valid.getOrDefault("path"),
+  let url = call_564803.url(scheme.get, call_564803.host, call_564803.base,
+                         call_564803.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568903, url, valid)
+  result = hook(call_564803, url, valid)
 
-proc call*(call_568904: Call_UsersDelete_568895; resourceGroupName: string;
-          name: string; subscriptionId: string; labName: string;
+proc call*(call_564804: Call_UsersDelete_564795; labName: string; name: string;
+          subscriptionId: string; resourceGroupName: string;
           apiVersion: string = "2016-05-15"): Recallable =
   ## usersDelete
   ## Delete user profile. This operation can take a while to complete.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   labName: string (required)
+  ##          : The name of the lab.
   ##   apiVersion: string (required)
   ##             : Client API version.
   ##   name: string (required)
   ##       : The name of the user profile.
   ##   subscriptionId: string (required)
   ##                 : The subscription ID.
-  ##   labName: string (required)
-  ##          : The name of the lab.
-  var path_568905 = newJObject()
-  var query_568906 = newJObject()
-  add(path_568905, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568906, "api-version", newJString(apiVersion))
-  add(path_568905, "name", newJString(name))
-  add(path_568905, "subscriptionId", newJString(subscriptionId))
-  add(path_568905, "labName", newJString(labName))
-  result = call_568904.call(path_568905, query_568906, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564805 = newJObject()
+  var query_564806 = newJObject()
+  add(path_564805, "labName", newJString(labName))
+  add(query_564806, "api-version", newJString(apiVersion))
+  add(path_564805, "name", newJString(name))
+  add(path_564805, "subscriptionId", newJString(subscriptionId))
+  add(path_564805, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564804.call(path_564805, query_564806, nil, nil, nil)
 
-var usersDelete* = Call_UsersDelete_568895(name: "usersDelete",
+var usersDelete* = Call_UsersDelete_564795(name: "usersDelete",
                                         meth: HttpMethod.HttpDelete,
                                         host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DevTestLab/labs/{labName}/users/{name}",
-                                        validator: validate_UsersDelete_568896,
-                                        base: "", url: url_UsersDelete_568897,
+                                        validator: validate_UsersDelete_564796,
+                                        base: "", url: url_UsersDelete_564797,
                                         schemes: {Scheme.Https})
 type
-  Call_DisksList_568921 = ref object of OpenApiRestCall_567650
-proc url_DisksList_568923(protocol: Scheme; host: string; base: string; route: string;
+  Call_DisksList_564821 = ref object of OpenApiRestCall_563548
+proc url_DisksList_564823(protocol: Scheme; host: string; base: string; route: string;
                          path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -7648,83 +7605,82 @@ proc url_DisksList_568923(protocol: Scheme; host: string; base: string; route: s
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DisksList_568922(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_DisksList_564822(path: JsonNode; query: JsonNode; header: JsonNode;
                               formData: JsonNode; body: JsonNode): JsonNode =
   ## List disks in a given user profile.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
-  ##   subscriptionId: JString (required)
-  ##                 : The subscription ID.
-  ##   userName: JString (required)
-  ##           : The name of the user profile.
   ##   labName: JString (required)
   ##          : The name of the lab.
+  ##   subscriptionId: JString (required)
+  ##                 : The subscription ID.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
+  ##   userName: JString (required)
+  ##           : The name of the user profile.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568924 = path.getOrDefault("resourceGroupName")
-  valid_568924 = validateParameter(valid_568924, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `labName` field"
+  var valid_564824 = path.getOrDefault("labName")
+  valid_564824 = validateParameter(valid_564824, JString, required = true,
                                  default = nil)
-  if valid_568924 != nil:
-    section.add "resourceGroupName", valid_568924
-  var valid_568925 = path.getOrDefault("subscriptionId")
-  valid_568925 = validateParameter(valid_568925, JString, required = true,
+  if valid_564824 != nil:
+    section.add "labName", valid_564824
+  var valid_564825 = path.getOrDefault("subscriptionId")
+  valid_564825 = validateParameter(valid_564825, JString, required = true,
                                  default = nil)
-  if valid_568925 != nil:
-    section.add "subscriptionId", valid_568925
-  var valid_568926 = path.getOrDefault("userName")
-  valid_568926 = validateParameter(valid_568926, JString, required = true,
+  if valid_564825 != nil:
+    section.add "subscriptionId", valid_564825
+  var valid_564826 = path.getOrDefault("resourceGroupName")
+  valid_564826 = validateParameter(valid_564826, JString, required = true,
                                  default = nil)
-  if valid_568926 != nil:
-    section.add "userName", valid_568926
-  var valid_568927 = path.getOrDefault("labName")
-  valid_568927 = validateParameter(valid_568927, JString, required = true,
+  if valid_564826 != nil:
+    section.add "resourceGroupName", valid_564826
+  var valid_564827 = path.getOrDefault("userName")
+  valid_564827 = validateParameter(valid_564827, JString, required = true,
                                  default = nil)
-  if valid_568927 != nil:
-    section.add "labName", valid_568927
+  if valid_564827 != nil:
+    section.add "userName", valid_564827
   result.add "path", section
   ## parameters in `query` object:
-  ##   $orderby: JString
-  ##           : The ordering expression for the results, using OData notation.
-  ##   $expand: JString
-  ##          : Specify the $expand query. Example: 'properties($select=diskType)'
-  ##   api-version: JString (required)
-  ##              : Client API version.
   ##   $top: JInt
   ##       : The maximum number of resources to return from the operation.
+  ##   api-version: JString (required)
+  ##              : Client API version.
+  ##   $expand: JString
+  ##          : Specify the $expand query. Example: 'properties($select=diskType)'
+  ##   $orderby: JString
+  ##           : The ordering expression for the results, using OData notation.
   ##   $filter: JString
   ##          : The filter to apply to the operation.
   section = newJObject()
-  var valid_568928 = query.getOrDefault("$orderby")
-  valid_568928 = validateParameter(valid_568928, JString, required = false,
-                                 default = nil)
-  if valid_568928 != nil:
-    section.add "$orderby", valid_568928
-  var valid_568929 = query.getOrDefault("$expand")
-  valid_568929 = validateParameter(valid_568929, JString, required = false,
-                                 default = nil)
-  if valid_568929 != nil:
-    section.add "$expand", valid_568929
+  var valid_564828 = query.getOrDefault("$top")
+  valid_564828 = validateParameter(valid_564828, JInt, required = false, default = nil)
+  if valid_564828 != nil:
+    section.add "$top", valid_564828
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568930 = query.getOrDefault("api-version")
-  valid_568930 = validateParameter(valid_568930, JString, required = true,
+  var valid_564829 = query.getOrDefault("api-version")
+  valid_564829 = validateParameter(valid_564829, JString, required = true,
                                  default = newJString("2016-05-15"))
-  if valid_568930 != nil:
-    section.add "api-version", valid_568930
-  var valid_568931 = query.getOrDefault("$top")
-  valid_568931 = validateParameter(valid_568931, JInt, required = false, default = nil)
-  if valid_568931 != nil:
-    section.add "$top", valid_568931
-  var valid_568932 = query.getOrDefault("$filter")
-  valid_568932 = validateParameter(valid_568932, JString, required = false,
+  if valid_564829 != nil:
+    section.add "api-version", valid_564829
+  var valid_564830 = query.getOrDefault("$expand")
+  valid_564830 = validateParameter(valid_564830, JString, required = false,
                                  default = nil)
-  if valid_568932 != nil:
-    section.add "$filter", valid_568932
+  if valid_564830 != nil:
+    section.add "$expand", valid_564830
+  var valid_564831 = query.getOrDefault("$orderby")
+  valid_564831 = validateParameter(valid_564831, JString, required = false,
+                                 default = nil)
+  if valid_564831 != nil:
+    section.add "$orderby", valid_564831
+  var valid_564832 = query.getOrDefault("$filter")
+  valid_564832 = validateParameter(valid_564832, JString, required = false,
+                                 default = nil)
+  if valid_564832 != nil:
+    section.add "$filter", valid_564832
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -7733,64 +7689,64 @@ proc validate_DisksList_568922(path: JsonNode; query: JsonNode; header: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_568933: Call_DisksList_568921; path: JsonNode; query: JsonNode;
+proc call*(call_564833: Call_DisksList_564821; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## List disks in a given user profile.
   ## 
-  let valid = call_568933.validator(path, query, header, formData, body)
-  let scheme = call_568933.pickScheme
+  let valid = call_564833.validator(path, query, header, formData, body)
+  let scheme = call_564833.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568933.url(scheme.get, call_568933.host, call_568933.base,
-                         call_568933.route, valid.getOrDefault("path"),
+  let url = call_564833.url(scheme.get, call_564833.host, call_564833.base,
+                         call_564833.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568933, url, valid)
+  result = hook(call_564833, url, valid)
 
-proc call*(call_568934: Call_DisksList_568921; resourceGroupName: string;
-          subscriptionId: string; userName: string; labName: string;
-          Orderby: string = ""; Expand: string = ""; apiVersion: string = "2016-05-15";
-          Top: int = 0; Filter: string = ""): Recallable =
+proc call*(call_564834: Call_DisksList_564821; labName: string;
+          subscriptionId: string; resourceGroupName: string; userName: string;
+          Top: int = 0; apiVersion: string = "2016-05-15"; Expand: string = "";
+          Orderby: string = ""; Filter: string = ""): Recallable =
   ## disksList
   ## List disks in a given user profile.
+  ##   labName: string (required)
+  ##          : The name of the lab.
+  ##   Top: int
+  ##      : The maximum number of resources to return from the operation.
+  ##   apiVersion: string (required)
+  ##             : Client API version.
+  ##   Expand: string
+  ##         : Specify the $expand query. Example: 'properties($select=diskType)'
+  ##   subscriptionId: string (required)
+  ##                 : The subscription ID.
   ##   Orderby: string
   ##          : The ordering expression for the results, using OData notation.
   ##   resourceGroupName: string (required)
   ##                    : The name of the resource group.
-  ##   Expand: string
-  ##         : Specify the $expand query. Example: 'properties($select=diskType)'
-  ##   apiVersion: string (required)
-  ##             : Client API version.
-  ##   subscriptionId: string (required)
-  ##                 : The subscription ID.
-  ##   Top: int
-  ##      : The maximum number of resources to return from the operation.
-  ##   userName: string (required)
-  ##           : The name of the user profile.
-  ##   labName: string (required)
-  ##          : The name of the lab.
   ##   Filter: string
   ##         : The filter to apply to the operation.
-  var path_568935 = newJObject()
-  var query_568936 = newJObject()
-  add(query_568936, "$orderby", newJString(Orderby))
-  add(path_568935, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568936, "$expand", newJString(Expand))
-  add(query_568936, "api-version", newJString(apiVersion))
-  add(path_568935, "subscriptionId", newJString(subscriptionId))
-  add(query_568936, "$top", newJInt(Top))
-  add(path_568935, "userName", newJString(userName))
-  add(path_568935, "labName", newJString(labName))
-  add(query_568936, "$filter", newJString(Filter))
-  result = call_568934.call(path_568935, query_568936, nil, nil, nil)
+  ##   userName: string (required)
+  ##           : The name of the user profile.
+  var path_564835 = newJObject()
+  var query_564836 = newJObject()
+  add(path_564835, "labName", newJString(labName))
+  add(query_564836, "$top", newJInt(Top))
+  add(query_564836, "api-version", newJString(apiVersion))
+  add(query_564836, "$expand", newJString(Expand))
+  add(path_564835, "subscriptionId", newJString(subscriptionId))
+  add(query_564836, "$orderby", newJString(Orderby))
+  add(path_564835, "resourceGroupName", newJString(resourceGroupName))
+  add(query_564836, "$filter", newJString(Filter))
+  add(path_564835, "userName", newJString(userName))
+  result = call_564834.call(path_564835, query_564836, nil, nil, nil)
 
-var disksList* = Call_DisksList_568921(name: "disksList", meth: HttpMethod.HttpGet,
+var disksList* = Call_DisksList_564821(name: "disksList", meth: HttpMethod.HttpGet,
                                     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DevTestLab/labs/{labName}/users/{userName}/disks",
-                                    validator: validate_DisksList_568922,
-                                    base: "", url: url_DisksList_568923,
+                                    validator: validate_DisksList_564822,
+                                    base: "", url: url_DisksList_564823,
                                     schemes: {Scheme.Https})
 type
-  Call_DisksCreateOrUpdate_568951 = ref object of OpenApiRestCall_567650
-proc url_DisksCreateOrUpdate_568953(protocol: Scheme; host: string; base: string;
+  Call_DisksCreateOrUpdate_564851 = ref object of OpenApiRestCall_563548
+proc url_DisksCreateOrUpdate_564853(protocol: Scheme; host: string; base: string;
                                    route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -7818,7 +7774,7 @@ proc url_DisksCreateOrUpdate_568953(protocol: Scheme; host: string; base: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DisksCreateOrUpdate_568952(path: JsonNode; query: JsonNode;
+proc validate_DisksCreateOrUpdate_564852(path: JsonNode; query: JsonNode;
                                         header: JsonNode; formData: JsonNode;
                                         body: JsonNode): JsonNode =
   ## Create or replace an existing disk. This operation can take a while to complete.
@@ -7826,44 +7782,43 @@ proc validate_DisksCreateOrUpdate_568952(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
+  ##   labName: JString (required)
+  ##          : The name of the lab.
   ##   name: JString (required)
   ##       : The name of the disk.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   ##   userName: JString (required)
   ##           : The name of the user profile.
-  ##   labName: JString (required)
-  ##          : The name of the lab.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568954 = path.getOrDefault("resourceGroupName")
-  valid_568954 = validateParameter(valid_568954, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `labName` field"
+  var valid_564854 = path.getOrDefault("labName")
+  valid_564854 = validateParameter(valid_564854, JString, required = true,
                                  default = nil)
-  if valid_568954 != nil:
-    section.add "resourceGroupName", valid_568954
-  var valid_568955 = path.getOrDefault("name")
-  valid_568955 = validateParameter(valid_568955, JString, required = true,
+  if valid_564854 != nil:
+    section.add "labName", valid_564854
+  var valid_564855 = path.getOrDefault("name")
+  valid_564855 = validateParameter(valid_564855, JString, required = true,
                                  default = nil)
-  if valid_568955 != nil:
-    section.add "name", valid_568955
-  var valid_568956 = path.getOrDefault("subscriptionId")
-  valid_568956 = validateParameter(valid_568956, JString, required = true,
+  if valid_564855 != nil:
+    section.add "name", valid_564855
+  var valid_564856 = path.getOrDefault("subscriptionId")
+  valid_564856 = validateParameter(valid_564856, JString, required = true,
                                  default = nil)
-  if valid_568956 != nil:
-    section.add "subscriptionId", valid_568956
-  var valid_568957 = path.getOrDefault("userName")
-  valid_568957 = validateParameter(valid_568957, JString, required = true,
+  if valid_564856 != nil:
+    section.add "subscriptionId", valid_564856
+  var valid_564857 = path.getOrDefault("resourceGroupName")
+  valid_564857 = validateParameter(valid_564857, JString, required = true,
                                  default = nil)
-  if valid_568957 != nil:
-    section.add "userName", valid_568957
-  var valid_568958 = path.getOrDefault("labName")
-  valid_568958 = validateParameter(valid_568958, JString, required = true,
+  if valid_564857 != nil:
+    section.add "resourceGroupName", valid_564857
+  var valid_564858 = path.getOrDefault("userName")
+  valid_564858 = validateParameter(valid_564858, JString, required = true,
                                  default = nil)
-  if valid_568958 != nil:
-    section.add "labName", valid_568958
+  if valid_564858 != nil:
+    section.add "userName", valid_564858
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -7871,11 +7826,11 @@ proc validate_DisksCreateOrUpdate_568952(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568959 = query.getOrDefault("api-version")
-  valid_568959 = validateParameter(valid_568959, JString, required = true,
+  var valid_564859 = query.getOrDefault("api-version")
+  valid_564859 = validateParameter(valid_564859, JString, required = true,
                                  default = newJString("2016-05-15"))
-  if valid_568959 != nil:
-    section.add "api-version", valid_568959
+  if valid_564859 != nil:
+    section.add "api-version", valid_564859
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -7889,59 +7844,60 @@ proc validate_DisksCreateOrUpdate_568952(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568961: Call_DisksCreateOrUpdate_568951; path: JsonNode;
+proc call*(call_564861: Call_DisksCreateOrUpdate_564851; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Create or replace an existing disk. This operation can take a while to complete.
   ## 
-  let valid = call_568961.validator(path, query, header, formData, body)
-  let scheme = call_568961.pickScheme
+  let valid = call_564861.validator(path, query, header, formData, body)
+  let scheme = call_564861.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568961.url(scheme.get, call_568961.host, call_568961.base,
-                         call_568961.route, valid.getOrDefault("path"),
+  let url = call_564861.url(scheme.get, call_564861.host, call_564861.base,
+                         call_564861.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568961, url, valid)
+  result = hook(call_564861, url, valid)
 
-proc call*(call_568962: Call_DisksCreateOrUpdate_568951; resourceGroupName: string;
-          name: string; subscriptionId: string; userName: string; disk: JsonNode;
-          labName: string; apiVersion: string = "2016-05-15"): Recallable =
+proc call*(call_564862: Call_DisksCreateOrUpdate_564851; labName: string;
+          name: string; disk: JsonNode; subscriptionId: string;
+          resourceGroupName: string; userName: string;
+          apiVersion: string = "2016-05-15"): Recallable =
   ## disksCreateOrUpdate
   ## Create or replace an existing disk. This operation can take a while to complete.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   labName: string (required)
+  ##          : The name of the lab.
   ##   apiVersion: string (required)
   ##             : Client API version.
   ##   name: string (required)
   ##       : The name of the disk.
-  ##   subscriptionId: string (required)
-  ##                 : The subscription ID.
-  ##   userName: string (required)
-  ##           : The name of the user profile.
   ##   disk: JObject (required)
   ##       : A Disk.
-  ##   labName: string (required)
-  ##          : The name of the lab.
-  var path_568963 = newJObject()
-  var query_568964 = newJObject()
-  var body_568965 = newJObject()
-  add(path_568963, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568964, "api-version", newJString(apiVersion))
-  add(path_568963, "name", newJString(name))
-  add(path_568963, "subscriptionId", newJString(subscriptionId))
-  add(path_568963, "userName", newJString(userName))
+  ##   subscriptionId: string (required)
+  ##                 : The subscription ID.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  ##   userName: string (required)
+  ##           : The name of the user profile.
+  var path_564863 = newJObject()
+  var query_564864 = newJObject()
+  var body_564865 = newJObject()
+  add(path_564863, "labName", newJString(labName))
+  add(query_564864, "api-version", newJString(apiVersion))
+  add(path_564863, "name", newJString(name))
   if disk != nil:
-    body_568965 = disk
-  add(path_568963, "labName", newJString(labName))
-  result = call_568962.call(path_568963, query_568964, nil, nil, body_568965)
+    body_564865 = disk
+  add(path_564863, "subscriptionId", newJString(subscriptionId))
+  add(path_564863, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564863, "userName", newJString(userName))
+  result = call_564862.call(path_564863, query_564864, nil, nil, body_564865)
 
-var disksCreateOrUpdate* = Call_DisksCreateOrUpdate_568951(
+var disksCreateOrUpdate* = Call_DisksCreateOrUpdate_564851(
     name: "disksCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DevTestLab/labs/{labName}/users/{userName}/disks/{name}",
-    validator: validate_DisksCreateOrUpdate_568952, base: "",
-    url: url_DisksCreateOrUpdate_568953, schemes: {Scheme.Https})
+    validator: validate_DisksCreateOrUpdate_564852, base: "",
+    url: url_DisksCreateOrUpdate_564853, schemes: {Scheme.Https})
 type
-  Call_DisksGet_568937 = ref object of OpenApiRestCall_567650
-proc url_DisksGet_568939(protocol: Scheme; host: string; base: string; route: string;
+  Call_DisksGet_564837 = ref object of OpenApiRestCall_563548
+proc url_DisksGet_564839(protocol: Scheme; host: string; base: string; route: string;
                         path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -7969,70 +7925,69 @@ proc url_DisksGet_568939(protocol: Scheme; host: string; base: string; route: st
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DisksGet_568938(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_DisksGet_564838(path: JsonNode; query: JsonNode; header: JsonNode;
                              formData: JsonNode; body: JsonNode): JsonNode =
   ## Get disk.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
+  ##   labName: JString (required)
+  ##          : The name of the lab.
   ##   name: JString (required)
   ##       : The name of the disk.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   ##   userName: JString (required)
   ##           : The name of the user profile.
-  ##   labName: JString (required)
-  ##          : The name of the lab.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568940 = path.getOrDefault("resourceGroupName")
-  valid_568940 = validateParameter(valid_568940, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `labName` field"
+  var valid_564840 = path.getOrDefault("labName")
+  valid_564840 = validateParameter(valid_564840, JString, required = true,
                                  default = nil)
-  if valid_568940 != nil:
-    section.add "resourceGroupName", valid_568940
-  var valid_568941 = path.getOrDefault("name")
-  valid_568941 = validateParameter(valid_568941, JString, required = true,
+  if valid_564840 != nil:
+    section.add "labName", valid_564840
+  var valid_564841 = path.getOrDefault("name")
+  valid_564841 = validateParameter(valid_564841, JString, required = true,
                                  default = nil)
-  if valid_568941 != nil:
-    section.add "name", valid_568941
-  var valid_568942 = path.getOrDefault("subscriptionId")
-  valid_568942 = validateParameter(valid_568942, JString, required = true,
+  if valid_564841 != nil:
+    section.add "name", valid_564841
+  var valid_564842 = path.getOrDefault("subscriptionId")
+  valid_564842 = validateParameter(valid_564842, JString, required = true,
                                  default = nil)
-  if valid_568942 != nil:
-    section.add "subscriptionId", valid_568942
-  var valid_568943 = path.getOrDefault("userName")
-  valid_568943 = validateParameter(valid_568943, JString, required = true,
+  if valid_564842 != nil:
+    section.add "subscriptionId", valid_564842
+  var valid_564843 = path.getOrDefault("resourceGroupName")
+  valid_564843 = validateParameter(valid_564843, JString, required = true,
                                  default = nil)
-  if valid_568943 != nil:
-    section.add "userName", valid_568943
-  var valid_568944 = path.getOrDefault("labName")
-  valid_568944 = validateParameter(valid_568944, JString, required = true,
+  if valid_564843 != nil:
+    section.add "resourceGroupName", valid_564843
+  var valid_564844 = path.getOrDefault("userName")
+  valid_564844 = validateParameter(valid_564844, JString, required = true,
                                  default = nil)
-  if valid_568944 != nil:
-    section.add "labName", valid_568944
+  if valid_564844 != nil:
+    section.add "userName", valid_564844
   result.add "path", section
   ## parameters in `query` object:
-  ##   $expand: JString
-  ##          : Specify the $expand query. Example: 'properties($select=diskType)'
   ##   api-version: JString (required)
   ##              : Client API version.
+  ##   $expand: JString
+  ##          : Specify the $expand query. Example: 'properties($select=diskType)'
   section = newJObject()
-  var valid_568945 = query.getOrDefault("$expand")
-  valid_568945 = validateParameter(valid_568945, JString, required = false,
-                                 default = nil)
-  if valid_568945 != nil:
-    section.add "$expand", valid_568945
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568946 = query.getOrDefault("api-version")
-  valid_568946 = validateParameter(valid_568946, JString, required = true,
+  var valid_564845 = query.getOrDefault("api-version")
+  valid_564845 = validateParameter(valid_564845, JString, required = true,
                                  default = newJString("2016-05-15"))
-  if valid_568946 != nil:
-    section.add "api-version", valid_568946
+  if valid_564845 != nil:
+    section.add "api-version", valid_564845
+  var valid_564846 = query.getOrDefault("$expand")
+  valid_564846 = validateParameter(valid_564846, JString, required = false,
+                                 default = nil)
+  if valid_564846 != nil:
+    section.add "$expand", valid_564846
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -8041,57 +7996,57 @@ proc validate_DisksGet_568938(path: JsonNode; query: JsonNode; header: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568947: Call_DisksGet_568937; path: JsonNode; query: JsonNode;
+proc call*(call_564847: Call_DisksGet_564837; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get disk.
   ## 
-  let valid = call_568947.validator(path, query, header, formData, body)
-  let scheme = call_568947.pickScheme
+  let valid = call_564847.validator(path, query, header, formData, body)
+  let scheme = call_564847.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568947.url(scheme.get, call_568947.host, call_568947.base,
-                         call_568947.route, valid.getOrDefault("path"),
+  let url = call_564847.url(scheme.get, call_564847.host, call_564847.base,
+                         call_564847.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568947, url, valid)
+  result = hook(call_564847, url, valid)
 
-proc call*(call_568948: Call_DisksGet_568937; resourceGroupName: string;
-          name: string; subscriptionId: string; userName: string; labName: string;
-          Expand: string = ""; apiVersion: string = "2016-05-15"): Recallable =
+proc call*(call_564848: Call_DisksGet_564837; labName: string; name: string;
+          subscriptionId: string; resourceGroupName: string; userName: string;
+          apiVersion: string = "2016-05-15"; Expand: string = ""): Recallable =
   ## disksGet
   ## Get disk.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   labName: string (required)
+  ##          : The name of the lab.
+  ##   apiVersion: string (required)
+  ##             : Client API version.
   ##   Expand: string
   ##         : Specify the $expand query. Example: 'properties($select=diskType)'
   ##   name: string (required)
   ##       : The name of the disk.
-  ##   apiVersion: string (required)
-  ##             : Client API version.
   ##   subscriptionId: string (required)
   ##                 : The subscription ID.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   userName: string (required)
   ##           : The name of the user profile.
-  ##   labName: string (required)
-  ##          : The name of the lab.
-  var path_568949 = newJObject()
-  var query_568950 = newJObject()
-  add(path_568949, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568950, "$expand", newJString(Expand))
-  add(path_568949, "name", newJString(name))
-  add(query_568950, "api-version", newJString(apiVersion))
-  add(path_568949, "subscriptionId", newJString(subscriptionId))
-  add(path_568949, "userName", newJString(userName))
-  add(path_568949, "labName", newJString(labName))
-  result = call_568948.call(path_568949, query_568950, nil, nil, nil)
+  var path_564849 = newJObject()
+  var query_564850 = newJObject()
+  add(path_564849, "labName", newJString(labName))
+  add(query_564850, "api-version", newJString(apiVersion))
+  add(query_564850, "$expand", newJString(Expand))
+  add(path_564849, "name", newJString(name))
+  add(path_564849, "subscriptionId", newJString(subscriptionId))
+  add(path_564849, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564849, "userName", newJString(userName))
+  result = call_564848.call(path_564849, query_564850, nil, nil, nil)
 
-var disksGet* = Call_DisksGet_568937(name: "disksGet", meth: HttpMethod.HttpGet,
+var disksGet* = Call_DisksGet_564837(name: "disksGet", meth: HttpMethod.HttpGet,
                                   host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DevTestLab/labs/{labName}/users/{userName}/disks/{name}",
-                                  validator: validate_DisksGet_568938, base: "",
-                                  url: url_DisksGet_568939,
+                                  validator: validate_DisksGet_564838, base: "",
+                                  url: url_DisksGet_564839,
                                   schemes: {Scheme.Https})
 type
-  Call_DisksDelete_568966 = ref object of OpenApiRestCall_567650
-proc url_DisksDelete_568968(protocol: Scheme; host: string; base: string;
+  Call_DisksDelete_564866 = ref object of OpenApiRestCall_563548
+proc url_DisksDelete_564868(protocol: Scheme; host: string; base: string;
                            route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -8119,51 +8074,50 @@ proc url_DisksDelete_568968(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DisksDelete_568967(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_DisksDelete_564867(path: JsonNode; query: JsonNode; header: JsonNode;
                                 formData: JsonNode; body: JsonNode): JsonNode =
   ## Delete disk. This operation can take a while to complete.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
+  ##   labName: JString (required)
+  ##          : The name of the lab.
   ##   name: JString (required)
   ##       : The name of the disk.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   ##   userName: JString (required)
   ##           : The name of the user profile.
-  ##   labName: JString (required)
-  ##          : The name of the lab.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568969 = path.getOrDefault("resourceGroupName")
-  valid_568969 = validateParameter(valid_568969, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `labName` field"
+  var valid_564869 = path.getOrDefault("labName")
+  valid_564869 = validateParameter(valid_564869, JString, required = true,
                                  default = nil)
-  if valid_568969 != nil:
-    section.add "resourceGroupName", valid_568969
-  var valid_568970 = path.getOrDefault("name")
-  valid_568970 = validateParameter(valid_568970, JString, required = true,
+  if valid_564869 != nil:
+    section.add "labName", valid_564869
+  var valid_564870 = path.getOrDefault("name")
+  valid_564870 = validateParameter(valid_564870, JString, required = true,
                                  default = nil)
-  if valid_568970 != nil:
-    section.add "name", valid_568970
-  var valid_568971 = path.getOrDefault("subscriptionId")
-  valid_568971 = validateParameter(valid_568971, JString, required = true,
+  if valid_564870 != nil:
+    section.add "name", valid_564870
+  var valid_564871 = path.getOrDefault("subscriptionId")
+  valid_564871 = validateParameter(valid_564871, JString, required = true,
                                  default = nil)
-  if valid_568971 != nil:
-    section.add "subscriptionId", valid_568971
-  var valid_568972 = path.getOrDefault("userName")
-  valid_568972 = validateParameter(valid_568972, JString, required = true,
+  if valid_564871 != nil:
+    section.add "subscriptionId", valid_564871
+  var valid_564872 = path.getOrDefault("resourceGroupName")
+  valid_564872 = validateParameter(valid_564872, JString, required = true,
                                  default = nil)
-  if valid_568972 != nil:
-    section.add "userName", valid_568972
-  var valid_568973 = path.getOrDefault("labName")
-  valid_568973 = validateParameter(valid_568973, JString, required = true,
+  if valid_564872 != nil:
+    section.add "resourceGroupName", valid_564872
+  var valid_564873 = path.getOrDefault("userName")
+  valid_564873 = validateParameter(valid_564873, JString, required = true,
                                  default = nil)
-  if valid_568973 != nil:
-    section.add "labName", valid_568973
+  if valid_564873 != nil:
+    section.add "userName", valid_564873
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -8171,11 +8125,11 @@ proc validate_DisksDelete_568967(path: JsonNode; query: JsonNode; header: JsonNo
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568974 = query.getOrDefault("api-version")
-  valid_568974 = validateParameter(valid_568974, JString, required = true,
+  var valid_564874 = query.getOrDefault("api-version")
+  valid_564874 = validateParameter(valid_564874, JString, required = true,
                                  default = newJString("2016-05-15"))
-  if valid_568974 != nil:
-    section.add "api-version", valid_568974
+  if valid_564874 != nil:
+    section.add "api-version", valid_564874
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -8184,55 +8138,55 @@ proc validate_DisksDelete_568967(path: JsonNode; query: JsonNode; header: JsonNo
   if body != nil:
     result.add "body", body
 
-proc call*(call_568975: Call_DisksDelete_568966; path: JsonNode; query: JsonNode;
+proc call*(call_564875: Call_DisksDelete_564866; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Delete disk. This operation can take a while to complete.
   ## 
-  let valid = call_568975.validator(path, query, header, formData, body)
-  let scheme = call_568975.pickScheme
+  let valid = call_564875.validator(path, query, header, formData, body)
+  let scheme = call_564875.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568975.url(scheme.get, call_568975.host, call_568975.base,
-                         call_568975.route, valid.getOrDefault("path"),
+  let url = call_564875.url(scheme.get, call_564875.host, call_564875.base,
+                         call_564875.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568975, url, valid)
+  result = hook(call_564875, url, valid)
 
-proc call*(call_568976: Call_DisksDelete_568966; resourceGroupName: string;
-          name: string; subscriptionId: string; userName: string; labName: string;
+proc call*(call_564876: Call_DisksDelete_564866; labName: string; name: string;
+          subscriptionId: string; resourceGroupName: string; userName: string;
           apiVersion: string = "2016-05-15"): Recallable =
   ## disksDelete
   ## Delete disk. This operation can take a while to complete.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   labName: string (required)
+  ##          : The name of the lab.
   ##   apiVersion: string (required)
   ##             : Client API version.
   ##   name: string (required)
   ##       : The name of the disk.
   ##   subscriptionId: string (required)
   ##                 : The subscription ID.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   userName: string (required)
   ##           : The name of the user profile.
-  ##   labName: string (required)
-  ##          : The name of the lab.
-  var path_568977 = newJObject()
-  var query_568978 = newJObject()
-  add(path_568977, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568978, "api-version", newJString(apiVersion))
-  add(path_568977, "name", newJString(name))
-  add(path_568977, "subscriptionId", newJString(subscriptionId))
-  add(path_568977, "userName", newJString(userName))
-  add(path_568977, "labName", newJString(labName))
-  result = call_568976.call(path_568977, query_568978, nil, nil, nil)
+  var path_564877 = newJObject()
+  var query_564878 = newJObject()
+  add(path_564877, "labName", newJString(labName))
+  add(query_564878, "api-version", newJString(apiVersion))
+  add(path_564877, "name", newJString(name))
+  add(path_564877, "subscriptionId", newJString(subscriptionId))
+  add(path_564877, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564877, "userName", newJString(userName))
+  result = call_564876.call(path_564877, query_564878, nil, nil, nil)
 
-var disksDelete* = Call_DisksDelete_568966(name: "disksDelete",
+var disksDelete* = Call_DisksDelete_564866(name: "disksDelete",
                                         meth: HttpMethod.HttpDelete,
                                         host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DevTestLab/labs/{labName}/users/{userName}/disks/{name}",
-                                        validator: validate_DisksDelete_568967,
-                                        base: "", url: url_DisksDelete_568968,
+                                        validator: validate_DisksDelete_564867,
+                                        base: "", url: url_DisksDelete_564868,
                                         schemes: {Scheme.Https})
 type
-  Call_DisksAttach_568979 = ref object of OpenApiRestCall_567650
-proc url_DisksAttach_568981(protocol: Scheme; host: string; base: string;
+  Call_DisksAttach_564879 = ref object of OpenApiRestCall_563548
+proc url_DisksAttach_564881(protocol: Scheme; host: string; base: string;
                            route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -8261,51 +8215,50 @@ proc url_DisksAttach_568981(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DisksAttach_568980(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_DisksAttach_564880(path: JsonNode; query: JsonNode; header: JsonNode;
                                 formData: JsonNode; body: JsonNode): JsonNode =
   ## Attach and create the lease of the disk to the virtual machine. This operation can take a while to complete.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
+  ##   labName: JString (required)
+  ##          : The name of the lab.
   ##   name: JString (required)
   ##       : The name of the disk.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   ##   userName: JString (required)
   ##           : The name of the user profile.
-  ##   labName: JString (required)
-  ##          : The name of the lab.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568982 = path.getOrDefault("resourceGroupName")
-  valid_568982 = validateParameter(valid_568982, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `labName` field"
+  var valid_564882 = path.getOrDefault("labName")
+  valid_564882 = validateParameter(valid_564882, JString, required = true,
                                  default = nil)
-  if valid_568982 != nil:
-    section.add "resourceGroupName", valid_568982
-  var valid_568983 = path.getOrDefault("name")
-  valid_568983 = validateParameter(valid_568983, JString, required = true,
+  if valid_564882 != nil:
+    section.add "labName", valid_564882
+  var valid_564883 = path.getOrDefault("name")
+  valid_564883 = validateParameter(valid_564883, JString, required = true,
                                  default = nil)
-  if valid_568983 != nil:
-    section.add "name", valid_568983
-  var valid_568984 = path.getOrDefault("subscriptionId")
-  valid_568984 = validateParameter(valid_568984, JString, required = true,
+  if valid_564883 != nil:
+    section.add "name", valid_564883
+  var valid_564884 = path.getOrDefault("subscriptionId")
+  valid_564884 = validateParameter(valid_564884, JString, required = true,
                                  default = nil)
-  if valid_568984 != nil:
-    section.add "subscriptionId", valid_568984
-  var valid_568985 = path.getOrDefault("userName")
-  valid_568985 = validateParameter(valid_568985, JString, required = true,
+  if valid_564884 != nil:
+    section.add "subscriptionId", valid_564884
+  var valid_564885 = path.getOrDefault("resourceGroupName")
+  valid_564885 = validateParameter(valid_564885, JString, required = true,
                                  default = nil)
-  if valid_568985 != nil:
-    section.add "userName", valid_568985
-  var valid_568986 = path.getOrDefault("labName")
-  valid_568986 = validateParameter(valid_568986, JString, required = true,
+  if valid_564885 != nil:
+    section.add "resourceGroupName", valid_564885
+  var valid_564886 = path.getOrDefault("userName")
+  valid_564886 = validateParameter(valid_564886, JString, required = true,
                                  default = nil)
-  if valid_568986 != nil:
-    section.add "labName", valid_568986
+  if valid_564886 != nil:
+    section.add "userName", valid_564886
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -8313,11 +8266,11 @@ proc validate_DisksAttach_568980(path: JsonNode; query: JsonNode; header: JsonNo
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568987 = query.getOrDefault("api-version")
-  valid_568987 = validateParameter(valid_568987, JString, required = true,
+  var valid_564887 = query.getOrDefault("api-version")
+  valid_564887 = validateParameter(valid_564887, JString, required = true,
                                  default = newJString("2016-05-15"))
-  if valid_568987 != nil:
-    section.add "api-version", valid_568987
+  if valid_564887 != nil:
+    section.add "api-version", valid_564887
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -8331,60 +8284,61 @@ proc validate_DisksAttach_568980(path: JsonNode; query: JsonNode; header: JsonNo
   if body != nil:
     result.add "body", body
 
-proc call*(call_568989: Call_DisksAttach_568979; path: JsonNode; query: JsonNode;
+proc call*(call_564889: Call_DisksAttach_564879; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Attach and create the lease of the disk to the virtual machine. This operation can take a while to complete.
   ## 
-  let valid = call_568989.validator(path, query, header, formData, body)
-  let scheme = call_568989.pickScheme
+  let valid = call_564889.validator(path, query, header, formData, body)
+  let scheme = call_564889.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568989.url(scheme.get, call_568989.host, call_568989.base,
-                         call_568989.route, valid.getOrDefault("path"),
+  let url = call_564889.url(scheme.get, call_564889.host, call_564889.base,
+                         call_564889.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568989, url, valid)
+  result = hook(call_564889, url, valid)
 
-proc call*(call_568990: Call_DisksAttach_568979; resourceGroupName: string;
-          name: string; subscriptionId: string; attachDiskProperties: JsonNode;
-          userName: string; labName: string; apiVersion: string = "2016-05-15"): Recallable =
+proc call*(call_564890: Call_DisksAttach_564879; labName: string;
+          attachDiskProperties: JsonNode; name: string; subscriptionId: string;
+          resourceGroupName: string; userName: string;
+          apiVersion: string = "2016-05-15"): Recallable =
   ## disksAttach
   ## Attach and create the lease of the disk to the virtual machine. This operation can take a while to complete.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   labName: string (required)
+  ##          : The name of the lab.
+  ##   attachDiskProperties: JObject (required)
+  ##                       : Properties of the disk to attach.
   ##   apiVersion: string (required)
   ##             : Client API version.
   ##   name: string (required)
   ##       : The name of the disk.
   ##   subscriptionId: string (required)
   ##                 : The subscription ID.
-  ##   attachDiskProperties: JObject (required)
-  ##                       : Properties of the disk to attach.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   userName: string (required)
   ##           : The name of the user profile.
-  ##   labName: string (required)
-  ##          : The name of the lab.
-  var path_568991 = newJObject()
-  var query_568992 = newJObject()
-  var body_568993 = newJObject()
-  add(path_568991, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568992, "api-version", newJString(apiVersion))
-  add(path_568991, "name", newJString(name))
-  add(path_568991, "subscriptionId", newJString(subscriptionId))
+  var path_564891 = newJObject()
+  var query_564892 = newJObject()
+  var body_564893 = newJObject()
+  add(path_564891, "labName", newJString(labName))
   if attachDiskProperties != nil:
-    body_568993 = attachDiskProperties
-  add(path_568991, "userName", newJString(userName))
-  add(path_568991, "labName", newJString(labName))
-  result = call_568990.call(path_568991, query_568992, nil, nil, body_568993)
+    body_564893 = attachDiskProperties
+  add(query_564892, "api-version", newJString(apiVersion))
+  add(path_564891, "name", newJString(name))
+  add(path_564891, "subscriptionId", newJString(subscriptionId))
+  add(path_564891, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564891, "userName", newJString(userName))
+  result = call_564890.call(path_564891, query_564892, nil, nil, body_564893)
 
-var disksAttach* = Call_DisksAttach_568979(name: "disksAttach",
+var disksAttach* = Call_DisksAttach_564879(name: "disksAttach",
                                         meth: HttpMethod.HttpPost,
                                         host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DevTestLab/labs/{labName}/users/{userName}/disks/{name}/attach",
-                                        validator: validate_DisksAttach_568980,
-                                        base: "", url: url_DisksAttach_568981,
+                                        validator: validate_DisksAttach_564880,
+                                        base: "", url: url_DisksAttach_564881,
                                         schemes: {Scheme.Https})
 type
-  Call_DisksDetach_568994 = ref object of OpenApiRestCall_567650
-proc url_DisksDetach_568996(protocol: Scheme; host: string; base: string;
+  Call_DisksDetach_564894 = ref object of OpenApiRestCall_563548
+proc url_DisksDetach_564896(protocol: Scheme; host: string; base: string;
                            route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -8413,51 +8367,50 @@ proc url_DisksDetach_568996(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DisksDetach_568995(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_DisksDetach_564895(path: JsonNode; query: JsonNode; header: JsonNode;
                                 formData: JsonNode; body: JsonNode): JsonNode =
   ## Detach and break the lease of the disk attached to the virtual machine. This operation can take a while to complete.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
+  ##   labName: JString (required)
+  ##          : The name of the lab.
   ##   name: JString (required)
   ##       : The name of the disk.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   ##   userName: JString (required)
   ##           : The name of the user profile.
-  ##   labName: JString (required)
-  ##          : The name of the lab.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568997 = path.getOrDefault("resourceGroupName")
-  valid_568997 = validateParameter(valid_568997, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `labName` field"
+  var valid_564897 = path.getOrDefault("labName")
+  valid_564897 = validateParameter(valid_564897, JString, required = true,
                                  default = nil)
-  if valid_568997 != nil:
-    section.add "resourceGroupName", valid_568997
-  var valid_568998 = path.getOrDefault("name")
-  valid_568998 = validateParameter(valid_568998, JString, required = true,
+  if valid_564897 != nil:
+    section.add "labName", valid_564897
+  var valid_564898 = path.getOrDefault("name")
+  valid_564898 = validateParameter(valid_564898, JString, required = true,
                                  default = nil)
-  if valid_568998 != nil:
-    section.add "name", valid_568998
-  var valid_568999 = path.getOrDefault("subscriptionId")
-  valid_568999 = validateParameter(valid_568999, JString, required = true,
+  if valid_564898 != nil:
+    section.add "name", valid_564898
+  var valid_564899 = path.getOrDefault("subscriptionId")
+  valid_564899 = validateParameter(valid_564899, JString, required = true,
                                  default = nil)
-  if valid_568999 != nil:
-    section.add "subscriptionId", valid_568999
-  var valid_569000 = path.getOrDefault("userName")
-  valid_569000 = validateParameter(valid_569000, JString, required = true,
+  if valid_564899 != nil:
+    section.add "subscriptionId", valid_564899
+  var valid_564900 = path.getOrDefault("resourceGroupName")
+  valid_564900 = validateParameter(valid_564900, JString, required = true,
                                  default = nil)
-  if valid_569000 != nil:
-    section.add "userName", valid_569000
-  var valid_569001 = path.getOrDefault("labName")
-  valid_569001 = validateParameter(valid_569001, JString, required = true,
+  if valid_564900 != nil:
+    section.add "resourceGroupName", valid_564900
+  var valid_564901 = path.getOrDefault("userName")
+  valid_564901 = validateParameter(valid_564901, JString, required = true,
                                  default = nil)
-  if valid_569001 != nil:
-    section.add "labName", valid_569001
+  if valid_564901 != nil:
+    section.add "userName", valid_564901
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -8465,11 +8418,11 @@ proc validate_DisksDetach_568995(path: JsonNode; query: JsonNode; header: JsonNo
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_569002 = query.getOrDefault("api-version")
-  valid_569002 = validateParameter(valid_569002, JString, required = true,
+  var valid_564902 = query.getOrDefault("api-version")
+  valid_564902 = validateParameter(valid_564902, JString, required = true,
                                  default = newJString("2016-05-15"))
-  if valid_569002 != nil:
-    section.add "api-version", valid_569002
+  if valid_564902 != nil:
+    section.add "api-version", valid_564902
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -8483,60 +8436,60 @@ proc validate_DisksDetach_568995(path: JsonNode; query: JsonNode; header: JsonNo
   if body != nil:
     result.add "body", body
 
-proc call*(call_569004: Call_DisksDetach_568994; path: JsonNode; query: JsonNode;
+proc call*(call_564904: Call_DisksDetach_564894; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Detach and break the lease of the disk attached to the virtual machine. This operation can take a while to complete.
   ## 
-  let valid = call_569004.validator(path, query, header, formData, body)
-  let scheme = call_569004.pickScheme
+  let valid = call_564904.validator(path, query, header, formData, body)
+  let scheme = call_564904.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_569004.url(scheme.get, call_569004.host, call_569004.base,
-                         call_569004.route, valid.getOrDefault("path"),
+  let url = call_564904.url(scheme.get, call_564904.host, call_564904.base,
+                         call_564904.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_569004, url, valid)
+  result = hook(call_564904, url, valid)
 
-proc call*(call_569005: Call_DisksDetach_568994; resourceGroupName: string;
-          name: string; subscriptionId: string; detachDiskProperties: JsonNode;
-          userName: string; labName: string; apiVersion: string = "2016-05-15"): Recallable =
+proc call*(call_564905: Call_DisksDetach_564894; labName: string; name: string;
+          subscriptionId: string; resourceGroupName: string; userName: string;
+          detachDiskProperties: JsonNode; apiVersion: string = "2016-05-15"): Recallable =
   ## disksDetach
   ## Detach and break the lease of the disk attached to the virtual machine. This operation can take a while to complete.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   labName: string (required)
+  ##          : The name of the lab.
   ##   apiVersion: string (required)
   ##             : Client API version.
   ##   name: string (required)
   ##       : The name of the disk.
   ##   subscriptionId: string (required)
   ##                 : The subscription ID.
-  ##   detachDiskProperties: JObject (required)
-  ##                       : Properties of the disk to detach.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   userName: string (required)
   ##           : The name of the user profile.
-  ##   labName: string (required)
-  ##          : The name of the lab.
-  var path_569006 = newJObject()
-  var query_569007 = newJObject()
-  var body_569008 = newJObject()
-  add(path_569006, "resourceGroupName", newJString(resourceGroupName))
-  add(query_569007, "api-version", newJString(apiVersion))
-  add(path_569006, "name", newJString(name))
-  add(path_569006, "subscriptionId", newJString(subscriptionId))
+  ##   detachDiskProperties: JObject (required)
+  ##                       : Properties of the disk to detach.
+  var path_564906 = newJObject()
+  var query_564907 = newJObject()
+  var body_564908 = newJObject()
+  add(path_564906, "labName", newJString(labName))
+  add(query_564907, "api-version", newJString(apiVersion))
+  add(path_564906, "name", newJString(name))
+  add(path_564906, "subscriptionId", newJString(subscriptionId))
+  add(path_564906, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564906, "userName", newJString(userName))
   if detachDiskProperties != nil:
-    body_569008 = detachDiskProperties
-  add(path_569006, "userName", newJString(userName))
-  add(path_569006, "labName", newJString(labName))
-  result = call_569005.call(path_569006, query_569007, nil, nil, body_569008)
+    body_564908 = detachDiskProperties
+  result = call_564905.call(path_564906, query_564907, nil, nil, body_564908)
 
-var disksDetach* = Call_DisksDetach_568994(name: "disksDetach",
+var disksDetach* = Call_DisksDetach_564894(name: "disksDetach",
                                         meth: HttpMethod.HttpPost,
                                         host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DevTestLab/labs/{labName}/users/{userName}/disks/{name}/detach",
-                                        validator: validate_DisksDetach_568995,
-                                        base: "", url: url_DisksDetach_568996,
+                                        validator: validate_DisksDetach_564895,
+                                        base: "", url: url_DisksDetach_564896,
                                         schemes: {Scheme.Https})
 type
-  Call_EnvironmentsList_569009 = ref object of OpenApiRestCall_567650
-proc url_EnvironmentsList_569011(protocol: Scheme; host: string; base: string;
+  Call_EnvironmentsList_564909 = ref object of OpenApiRestCall_563548
+proc url_EnvironmentsList_564911(protocol: Scheme; host: string; base: string;
                                 route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -8562,7 +8515,7 @@ proc url_EnvironmentsList_569011(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_EnvironmentsList_569010(path: JsonNode; query: JsonNode;
+proc validate_EnvironmentsList_564910(path: JsonNode; query: JsonNode;
                                      header: JsonNode; formData: JsonNode;
                                      body: JsonNode): JsonNode =
   ## List environments in a given user profile.
@@ -8570,76 +8523,75 @@ proc validate_EnvironmentsList_569010(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
-  ##   subscriptionId: JString (required)
-  ##                 : The subscription ID.
-  ##   userName: JString (required)
-  ##           : The name of the user profile.
   ##   labName: JString (required)
   ##          : The name of the lab.
+  ##   subscriptionId: JString (required)
+  ##                 : The subscription ID.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
+  ##   userName: JString (required)
+  ##           : The name of the user profile.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_569012 = path.getOrDefault("resourceGroupName")
-  valid_569012 = validateParameter(valid_569012, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `labName` field"
+  var valid_564912 = path.getOrDefault("labName")
+  valid_564912 = validateParameter(valid_564912, JString, required = true,
                                  default = nil)
-  if valid_569012 != nil:
-    section.add "resourceGroupName", valid_569012
-  var valid_569013 = path.getOrDefault("subscriptionId")
-  valid_569013 = validateParameter(valid_569013, JString, required = true,
+  if valid_564912 != nil:
+    section.add "labName", valid_564912
+  var valid_564913 = path.getOrDefault("subscriptionId")
+  valid_564913 = validateParameter(valid_564913, JString, required = true,
                                  default = nil)
-  if valid_569013 != nil:
-    section.add "subscriptionId", valid_569013
-  var valid_569014 = path.getOrDefault("userName")
-  valid_569014 = validateParameter(valid_569014, JString, required = true,
+  if valid_564913 != nil:
+    section.add "subscriptionId", valid_564913
+  var valid_564914 = path.getOrDefault("resourceGroupName")
+  valid_564914 = validateParameter(valid_564914, JString, required = true,
                                  default = nil)
-  if valid_569014 != nil:
-    section.add "userName", valid_569014
-  var valid_569015 = path.getOrDefault("labName")
-  valid_569015 = validateParameter(valid_569015, JString, required = true,
+  if valid_564914 != nil:
+    section.add "resourceGroupName", valid_564914
+  var valid_564915 = path.getOrDefault("userName")
+  valid_564915 = validateParameter(valid_564915, JString, required = true,
                                  default = nil)
-  if valid_569015 != nil:
-    section.add "labName", valid_569015
+  if valid_564915 != nil:
+    section.add "userName", valid_564915
   result.add "path", section
   ## parameters in `query` object:
-  ##   $orderby: JString
-  ##           : The ordering expression for the results, using OData notation.
-  ##   $expand: JString
-  ##          : Specify the $expand query. Example: 'properties($select=deploymentProperties)'
-  ##   api-version: JString (required)
-  ##              : Client API version.
   ##   $top: JInt
   ##       : The maximum number of resources to return from the operation.
+  ##   api-version: JString (required)
+  ##              : Client API version.
+  ##   $expand: JString
+  ##          : Specify the $expand query. Example: 'properties($select=deploymentProperties)'
+  ##   $orderby: JString
+  ##           : The ordering expression for the results, using OData notation.
   ##   $filter: JString
   ##          : The filter to apply to the operation.
   section = newJObject()
-  var valid_569016 = query.getOrDefault("$orderby")
-  valid_569016 = validateParameter(valid_569016, JString, required = false,
-                                 default = nil)
-  if valid_569016 != nil:
-    section.add "$orderby", valid_569016
-  var valid_569017 = query.getOrDefault("$expand")
-  valid_569017 = validateParameter(valid_569017, JString, required = false,
-                                 default = nil)
-  if valid_569017 != nil:
-    section.add "$expand", valid_569017
+  var valid_564916 = query.getOrDefault("$top")
+  valid_564916 = validateParameter(valid_564916, JInt, required = false, default = nil)
+  if valid_564916 != nil:
+    section.add "$top", valid_564916
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_569018 = query.getOrDefault("api-version")
-  valid_569018 = validateParameter(valid_569018, JString, required = true,
+  var valid_564917 = query.getOrDefault("api-version")
+  valid_564917 = validateParameter(valid_564917, JString, required = true,
                                  default = newJString("2016-05-15"))
-  if valid_569018 != nil:
-    section.add "api-version", valid_569018
-  var valid_569019 = query.getOrDefault("$top")
-  valid_569019 = validateParameter(valid_569019, JInt, required = false, default = nil)
-  if valid_569019 != nil:
-    section.add "$top", valid_569019
-  var valid_569020 = query.getOrDefault("$filter")
-  valid_569020 = validateParameter(valid_569020, JString, required = false,
+  if valid_564917 != nil:
+    section.add "api-version", valid_564917
+  var valid_564918 = query.getOrDefault("$expand")
+  valid_564918 = validateParameter(valid_564918, JString, required = false,
                                  default = nil)
-  if valid_569020 != nil:
-    section.add "$filter", valid_569020
+  if valid_564918 != nil:
+    section.add "$expand", valid_564918
+  var valid_564919 = query.getOrDefault("$orderby")
+  valid_564919 = validateParameter(valid_564919, JString, required = false,
+                                 default = nil)
+  if valid_564919 != nil:
+    section.add "$orderby", valid_564919
+  var valid_564920 = query.getOrDefault("$filter")
+  valid_564920 = validateParameter(valid_564920, JString, required = false,
+                                 default = nil)
+  if valid_564920 != nil:
+    section.add "$filter", valid_564920
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -8648,63 +8600,63 @@ proc validate_EnvironmentsList_569010(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_569021: Call_EnvironmentsList_569009; path: JsonNode;
+proc call*(call_564921: Call_EnvironmentsList_564909; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## List environments in a given user profile.
   ## 
-  let valid = call_569021.validator(path, query, header, formData, body)
-  let scheme = call_569021.pickScheme
+  let valid = call_564921.validator(path, query, header, formData, body)
+  let scheme = call_564921.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_569021.url(scheme.get, call_569021.host, call_569021.base,
-                         call_569021.route, valid.getOrDefault("path"),
+  let url = call_564921.url(scheme.get, call_564921.host, call_564921.base,
+                         call_564921.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_569021, url, valid)
+  result = hook(call_564921, url, valid)
 
-proc call*(call_569022: Call_EnvironmentsList_569009; resourceGroupName: string;
-          subscriptionId: string; userName: string; labName: string;
-          Orderby: string = ""; Expand: string = ""; apiVersion: string = "2016-05-15";
-          Top: int = 0; Filter: string = ""): Recallable =
+proc call*(call_564922: Call_EnvironmentsList_564909; labName: string;
+          subscriptionId: string; resourceGroupName: string; userName: string;
+          Top: int = 0; apiVersion: string = "2016-05-15"; Expand: string = "";
+          Orderby: string = ""; Filter: string = ""): Recallable =
   ## environmentsList
   ## List environments in a given user profile.
+  ##   labName: string (required)
+  ##          : The name of the lab.
+  ##   Top: int
+  ##      : The maximum number of resources to return from the operation.
+  ##   apiVersion: string (required)
+  ##             : Client API version.
+  ##   Expand: string
+  ##         : Specify the $expand query. Example: 'properties($select=deploymentProperties)'
+  ##   subscriptionId: string (required)
+  ##                 : The subscription ID.
   ##   Orderby: string
   ##          : The ordering expression for the results, using OData notation.
   ##   resourceGroupName: string (required)
   ##                    : The name of the resource group.
-  ##   Expand: string
-  ##         : Specify the $expand query. Example: 'properties($select=deploymentProperties)'
-  ##   apiVersion: string (required)
-  ##             : Client API version.
-  ##   subscriptionId: string (required)
-  ##                 : The subscription ID.
-  ##   Top: int
-  ##      : The maximum number of resources to return from the operation.
-  ##   userName: string (required)
-  ##           : The name of the user profile.
-  ##   labName: string (required)
-  ##          : The name of the lab.
   ##   Filter: string
   ##         : The filter to apply to the operation.
-  var path_569023 = newJObject()
-  var query_569024 = newJObject()
-  add(query_569024, "$orderby", newJString(Orderby))
-  add(path_569023, "resourceGroupName", newJString(resourceGroupName))
-  add(query_569024, "$expand", newJString(Expand))
-  add(query_569024, "api-version", newJString(apiVersion))
-  add(path_569023, "subscriptionId", newJString(subscriptionId))
-  add(query_569024, "$top", newJInt(Top))
-  add(path_569023, "userName", newJString(userName))
-  add(path_569023, "labName", newJString(labName))
-  add(query_569024, "$filter", newJString(Filter))
-  result = call_569022.call(path_569023, query_569024, nil, nil, nil)
+  ##   userName: string (required)
+  ##           : The name of the user profile.
+  var path_564923 = newJObject()
+  var query_564924 = newJObject()
+  add(path_564923, "labName", newJString(labName))
+  add(query_564924, "$top", newJInt(Top))
+  add(query_564924, "api-version", newJString(apiVersion))
+  add(query_564924, "$expand", newJString(Expand))
+  add(path_564923, "subscriptionId", newJString(subscriptionId))
+  add(query_564924, "$orderby", newJString(Orderby))
+  add(path_564923, "resourceGroupName", newJString(resourceGroupName))
+  add(query_564924, "$filter", newJString(Filter))
+  add(path_564923, "userName", newJString(userName))
+  result = call_564922.call(path_564923, query_564924, nil, nil, nil)
 
-var environmentsList* = Call_EnvironmentsList_569009(name: "environmentsList",
+var environmentsList* = Call_EnvironmentsList_564909(name: "environmentsList",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DevTestLab/labs/{labName}/users/{userName}/environments",
-    validator: validate_EnvironmentsList_569010, base: "",
-    url: url_EnvironmentsList_569011, schemes: {Scheme.Https})
+    validator: validate_EnvironmentsList_564910, base: "",
+    url: url_EnvironmentsList_564911, schemes: {Scheme.Https})
 type
-  Call_EnvironmentsCreateOrUpdate_569039 = ref object of OpenApiRestCall_567650
-proc url_EnvironmentsCreateOrUpdate_569041(protocol: Scheme; host: string;
+  Call_EnvironmentsCreateOrUpdate_564939 = ref object of OpenApiRestCall_563548
+proc url_EnvironmentsCreateOrUpdate_564941(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -8732,51 +8684,50 @@ proc url_EnvironmentsCreateOrUpdate_569041(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_EnvironmentsCreateOrUpdate_569040(path: JsonNode; query: JsonNode;
+proc validate_EnvironmentsCreateOrUpdate_564940(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Create or replace an existing environment. This operation can take a while to complete.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
+  ##   labName: JString (required)
+  ##          : The name of the lab.
   ##   name: JString (required)
   ##       : The name of the environment.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   ##   userName: JString (required)
   ##           : The name of the user profile.
-  ##   labName: JString (required)
-  ##          : The name of the lab.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_569042 = path.getOrDefault("resourceGroupName")
-  valid_569042 = validateParameter(valid_569042, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `labName` field"
+  var valid_564942 = path.getOrDefault("labName")
+  valid_564942 = validateParameter(valid_564942, JString, required = true,
                                  default = nil)
-  if valid_569042 != nil:
-    section.add "resourceGroupName", valid_569042
-  var valid_569043 = path.getOrDefault("name")
-  valid_569043 = validateParameter(valid_569043, JString, required = true,
+  if valid_564942 != nil:
+    section.add "labName", valid_564942
+  var valid_564943 = path.getOrDefault("name")
+  valid_564943 = validateParameter(valid_564943, JString, required = true,
                                  default = nil)
-  if valid_569043 != nil:
-    section.add "name", valid_569043
-  var valid_569044 = path.getOrDefault("subscriptionId")
-  valid_569044 = validateParameter(valid_569044, JString, required = true,
+  if valid_564943 != nil:
+    section.add "name", valid_564943
+  var valid_564944 = path.getOrDefault("subscriptionId")
+  valid_564944 = validateParameter(valid_564944, JString, required = true,
                                  default = nil)
-  if valid_569044 != nil:
-    section.add "subscriptionId", valid_569044
-  var valid_569045 = path.getOrDefault("userName")
-  valid_569045 = validateParameter(valid_569045, JString, required = true,
+  if valid_564944 != nil:
+    section.add "subscriptionId", valid_564944
+  var valid_564945 = path.getOrDefault("resourceGroupName")
+  valid_564945 = validateParameter(valid_564945, JString, required = true,
                                  default = nil)
-  if valid_569045 != nil:
-    section.add "userName", valid_569045
-  var valid_569046 = path.getOrDefault("labName")
-  valid_569046 = validateParameter(valid_569046, JString, required = true,
+  if valid_564945 != nil:
+    section.add "resourceGroupName", valid_564945
+  var valid_564946 = path.getOrDefault("userName")
+  valid_564946 = validateParameter(valid_564946, JString, required = true,
                                  default = nil)
-  if valid_569046 != nil:
-    section.add "labName", valid_569046
+  if valid_564946 != nil:
+    section.add "userName", valid_564946
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -8784,11 +8735,11 @@ proc validate_EnvironmentsCreateOrUpdate_569040(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_569047 = query.getOrDefault("api-version")
-  valid_569047 = validateParameter(valid_569047, JString, required = true,
+  var valid_564947 = query.getOrDefault("api-version")
+  valid_564947 = validateParameter(valid_564947, JString, required = true,
                                  default = newJString("2016-05-15"))
-  if valid_569047 != nil:
-    section.add "api-version", valid_569047
+  if valid_564947 != nil:
+    section.add "api-version", valid_564947
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -8802,60 +8753,60 @@ proc validate_EnvironmentsCreateOrUpdate_569040(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_569049: Call_EnvironmentsCreateOrUpdate_569039; path: JsonNode;
+proc call*(call_564949: Call_EnvironmentsCreateOrUpdate_564939; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Create or replace an existing environment. This operation can take a while to complete.
   ## 
-  let valid = call_569049.validator(path, query, header, formData, body)
-  let scheme = call_569049.pickScheme
+  let valid = call_564949.validator(path, query, header, formData, body)
+  let scheme = call_564949.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_569049.url(scheme.get, call_569049.host, call_569049.base,
-                         call_569049.route, valid.getOrDefault("path"),
+  let url = call_564949.url(scheme.get, call_564949.host, call_564949.base,
+                         call_564949.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_569049, url, valid)
+  result = hook(call_564949, url, valid)
 
-proc call*(call_569050: Call_EnvironmentsCreateOrUpdate_569039;
-          resourceGroupName: string; name: string; subscriptionId: string;
-          userName: string; dtlEnvironment: JsonNode; labName: string;
+proc call*(call_564950: Call_EnvironmentsCreateOrUpdate_564939; labName: string;
+          name: string; subscriptionId: string; dtlEnvironment: JsonNode;
+          resourceGroupName: string; userName: string;
           apiVersion: string = "2016-05-15"): Recallable =
   ## environmentsCreateOrUpdate
   ## Create or replace an existing environment. This operation can take a while to complete.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   labName: string (required)
+  ##          : The name of the lab.
   ##   apiVersion: string (required)
   ##             : Client API version.
   ##   name: string (required)
   ##       : The name of the environment.
   ##   subscriptionId: string (required)
   ##                 : The subscription ID.
-  ##   userName: string (required)
-  ##           : The name of the user profile.
   ##   dtlEnvironment: JObject (required)
   ##                 : An environment, which is essentially an ARM template deployment.
-  ##   labName: string (required)
-  ##          : The name of the lab.
-  var path_569051 = newJObject()
-  var query_569052 = newJObject()
-  var body_569053 = newJObject()
-  add(path_569051, "resourceGroupName", newJString(resourceGroupName))
-  add(query_569052, "api-version", newJString(apiVersion))
-  add(path_569051, "name", newJString(name))
-  add(path_569051, "subscriptionId", newJString(subscriptionId))
-  add(path_569051, "userName", newJString(userName))
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  ##   userName: string (required)
+  ##           : The name of the user profile.
+  var path_564951 = newJObject()
+  var query_564952 = newJObject()
+  var body_564953 = newJObject()
+  add(path_564951, "labName", newJString(labName))
+  add(query_564952, "api-version", newJString(apiVersion))
+  add(path_564951, "name", newJString(name))
+  add(path_564951, "subscriptionId", newJString(subscriptionId))
   if dtlEnvironment != nil:
-    body_569053 = dtlEnvironment
-  add(path_569051, "labName", newJString(labName))
-  result = call_569050.call(path_569051, query_569052, nil, nil, body_569053)
+    body_564953 = dtlEnvironment
+  add(path_564951, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564951, "userName", newJString(userName))
+  result = call_564950.call(path_564951, query_564952, nil, nil, body_564953)
 
-var environmentsCreateOrUpdate* = Call_EnvironmentsCreateOrUpdate_569039(
+var environmentsCreateOrUpdate* = Call_EnvironmentsCreateOrUpdate_564939(
     name: "environmentsCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DevTestLab/labs/{labName}/users/{userName}/environments/{name}",
-    validator: validate_EnvironmentsCreateOrUpdate_569040, base: "",
-    url: url_EnvironmentsCreateOrUpdate_569041, schemes: {Scheme.Https})
+    validator: validate_EnvironmentsCreateOrUpdate_564940, base: "",
+    url: url_EnvironmentsCreateOrUpdate_564941, schemes: {Scheme.Https})
 type
-  Call_EnvironmentsGet_569025 = ref object of OpenApiRestCall_567650
-proc url_EnvironmentsGet_569027(protocol: Scheme; host: string; base: string;
+  Call_EnvironmentsGet_564925 = ref object of OpenApiRestCall_563548
+proc url_EnvironmentsGet_564927(protocol: Scheme; host: string; base: string;
                                route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -8883,7 +8834,7 @@ proc url_EnvironmentsGet_569027(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_EnvironmentsGet_569026(path: JsonNode; query: JsonNode;
+proc validate_EnvironmentsGet_564926(path: JsonNode; query: JsonNode;
                                     header: JsonNode; formData: JsonNode;
                                     body: JsonNode): JsonNode =
   ## Get environment.
@@ -8891,63 +8842,62 @@ proc validate_EnvironmentsGet_569026(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
+  ##   labName: JString (required)
+  ##          : The name of the lab.
   ##   name: JString (required)
   ##       : The name of the environment.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   ##   userName: JString (required)
   ##           : The name of the user profile.
-  ##   labName: JString (required)
-  ##          : The name of the lab.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_569028 = path.getOrDefault("resourceGroupName")
-  valid_569028 = validateParameter(valid_569028, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `labName` field"
+  var valid_564928 = path.getOrDefault("labName")
+  valid_564928 = validateParameter(valid_564928, JString, required = true,
                                  default = nil)
-  if valid_569028 != nil:
-    section.add "resourceGroupName", valid_569028
-  var valid_569029 = path.getOrDefault("name")
-  valid_569029 = validateParameter(valid_569029, JString, required = true,
+  if valid_564928 != nil:
+    section.add "labName", valid_564928
+  var valid_564929 = path.getOrDefault("name")
+  valid_564929 = validateParameter(valid_564929, JString, required = true,
                                  default = nil)
-  if valid_569029 != nil:
-    section.add "name", valid_569029
-  var valid_569030 = path.getOrDefault("subscriptionId")
-  valid_569030 = validateParameter(valid_569030, JString, required = true,
+  if valid_564929 != nil:
+    section.add "name", valid_564929
+  var valid_564930 = path.getOrDefault("subscriptionId")
+  valid_564930 = validateParameter(valid_564930, JString, required = true,
                                  default = nil)
-  if valid_569030 != nil:
-    section.add "subscriptionId", valid_569030
-  var valid_569031 = path.getOrDefault("userName")
-  valid_569031 = validateParameter(valid_569031, JString, required = true,
+  if valid_564930 != nil:
+    section.add "subscriptionId", valid_564930
+  var valid_564931 = path.getOrDefault("resourceGroupName")
+  valid_564931 = validateParameter(valid_564931, JString, required = true,
                                  default = nil)
-  if valid_569031 != nil:
-    section.add "userName", valid_569031
-  var valid_569032 = path.getOrDefault("labName")
-  valid_569032 = validateParameter(valid_569032, JString, required = true,
+  if valid_564931 != nil:
+    section.add "resourceGroupName", valid_564931
+  var valid_564932 = path.getOrDefault("userName")
+  valid_564932 = validateParameter(valid_564932, JString, required = true,
                                  default = nil)
-  if valid_569032 != nil:
-    section.add "labName", valid_569032
+  if valid_564932 != nil:
+    section.add "userName", valid_564932
   result.add "path", section
   ## parameters in `query` object:
-  ##   $expand: JString
-  ##          : Specify the $expand query. Example: 'properties($select=deploymentProperties)'
   ##   api-version: JString (required)
   ##              : Client API version.
+  ##   $expand: JString
+  ##          : Specify the $expand query. Example: 'properties($select=deploymentProperties)'
   section = newJObject()
-  var valid_569033 = query.getOrDefault("$expand")
-  valid_569033 = validateParameter(valid_569033, JString, required = false,
-                                 default = nil)
-  if valid_569033 != nil:
-    section.add "$expand", valid_569033
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_569034 = query.getOrDefault("api-version")
-  valid_569034 = validateParameter(valid_569034, JString, required = true,
+  var valid_564933 = query.getOrDefault("api-version")
+  valid_564933 = validateParameter(valid_564933, JString, required = true,
                                  default = newJString("2016-05-15"))
-  if valid_569034 != nil:
-    section.add "api-version", valid_569034
+  if valid_564933 != nil:
+    section.add "api-version", valid_564933
+  var valid_564934 = query.getOrDefault("$expand")
+  valid_564934 = validateParameter(valid_564934, JString, required = false,
+                                 default = nil)
+  if valid_564934 != nil:
+    section.add "$expand", valid_564934
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -8956,56 +8906,56 @@ proc validate_EnvironmentsGet_569026(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_569035: Call_EnvironmentsGet_569025; path: JsonNode; query: JsonNode;
+proc call*(call_564935: Call_EnvironmentsGet_564925; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get environment.
   ## 
-  let valid = call_569035.validator(path, query, header, formData, body)
-  let scheme = call_569035.pickScheme
+  let valid = call_564935.validator(path, query, header, formData, body)
+  let scheme = call_564935.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_569035.url(scheme.get, call_569035.host, call_569035.base,
-                         call_569035.route, valid.getOrDefault("path"),
+  let url = call_564935.url(scheme.get, call_564935.host, call_564935.base,
+                         call_564935.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_569035, url, valid)
+  result = hook(call_564935, url, valid)
 
-proc call*(call_569036: Call_EnvironmentsGet_569025; resourceGroupName: string;
-          name: string; subscriptionId: string; userName: string; labName: string;
-          Expand: string = ""; apiVersion: string = "2016-05-15"): Recallable =
+proc call*(call_564936: Call_EnvironmentsGet_564925; labName: string; name: string;
+          subscriptionId: string; resourceGroupName: string; userName: string;
+          apiVersion: string = "2016-05-15"; Expand: string = ""): Recallable =
   ## environmentsGet
   ## Get environment.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   labName: string (required)
+  ##          : The name of the lab.
+  ##   apiVersion: string (required)
+  ##             : Client API version.
   ##   Expand: string
   ##         : Specify the $expand query. Example: 'properties($select=deploymentProperties)'
   ##   name: string (required)
   ##       : The name of the environment.
-  ##   apiVersion: string (required)
-  ##             : Client API version.
   ##   subscriptionId: string (required)
   ##                 : The subscription ID.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   userName: string (required)
   ##           : The name of the user profile.
-  ##   labName: string (required)
-  ##          : The name of the lab.
-  var path_569037 = newJObject()
-  var query_569038 = newJObject()
-  add(path_569037, "resourceGroupName", newJString(resourceGroupName))
-  add(query_569038, "$expand", newJString(Expand))
-  add(path_569037, "name", newJString(name))
-  add(query_569038, "api-version", newJString(apiVersion))
-  add(path_569037, "subscriptionId", newJString(subscriptionId))
-  add(path_569037, "userName", newJString(userName))
-  add(path_569037, "labName", newJString(labName))
-  result = call_569036.call(path_569037, query_569038, nil, nil, nil)
+  var path_564937 = newJObject()
+  var query_564938 = newJObject()
+  add(path_564937, "labName", newJString(labName))
+  add(query_564938, "api-version", newJString(apiVersion))
+  add(query_564938, "$expand", newJString(Expand))
+  add(path_564937, "name", newJString(name))
+  add(path_564937, "subscriptionId", newJString(subscriptionId))
+  add(path_564937, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564937, "userName", newJString(userName))
+  result = call_564936.call(path_564937, query_564938, nil, nil, nil)
 
-var environmentsGet* = Call_EnvironmentsGet_569025(name: "environmentsGet",
+var environmentsGet* = Call_EnvironmentsGet_564925(name: "environmentsGet",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DevTestLab/labs/{labName}/users/{userName}/environments/{name}",
-    validator: validate_EnvironmentsGet_569026, base: "", url: url_EnvironmentsGet_569027,
+    validator: validate_EnvironmentsGet_564926, base: "", url: url_EnvironmentsGet_564927,
     schemes: {Scheme.Https})
 type
-  Call_EnvironmentsDelete_569054 = ref object of OpenApiRestCall_567650
-proc url_EnvironmentsDelete_569056(protocol: Scheme; host: string; base: string;
+  Call_EnvironmentsDelete_564954 = ref object of OpenApiRestCall_563548
+proc url_EnvironmentsDelete_564956(protocol: Scheme; host: string; base: string;
                                   route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -9033,7 +8983,7 @@ proc url_EnvironmentsDelete_569056(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_EnvironmentsDelete_569055(path: JsonNode; query: JsonNode;
+proc validate_EnvironmentsDelete_564955(path: JsonNode; query: JsonNode;
                                        header: JsonNode; formData: JsonNode;
                                        body: JsonNode): JsonNode =
   ## Delete environment. This operation can take a while to complete.
@@ -9041,44 +8991,43 @@ proc validate_EnvironmentsDelete_569055(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
+  ##   labName: JString (required)
+  ##          : The name of the lab.
   ##   name: JString (required)
   ##       : The name of the environment.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   ##   userName: JString (required)
   ##           : The name of the user profile.
-  ##   labName: JString (required)
-  ##          : The name of the lab.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_569057 = path.getOrDefault("resourceGroupName")
-  valid_569057 = validateParameter(valid_569057, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `labName` field"
+  var valid_564957 = path.getOrDefault("labName")
+  valid_564957 = validateParameter(valid_564957, JString, required = true,
                                  default = nil)
-  if valid_569057 != nil:
-    section.add "resourceGroupName", valid_569057
-  var valid_569058 = path.getOrDefault("name")
-  valid_569058 = validateParameter(valid_569058, JString, required = true,
+  if valid_564957 != nil:
+    section.add "labName", valid_564957
+  var valid_564958 = path.getOrDefault("name")
+  valid_564958 = validateParameter(valid_564958, JString, required = true,
                                  default = nil)
-  if valid_569058 != nil:
-    section.add "name", valid_569058
-  var valid_569059 = path.getOrDefault("subscriptionId")
-  valid_569059 = validateParameter(valid_569059, JString, required = true,
+  if valid_564958 != nil:
+    section.add "name", valid_564958
+  var valid_564959 = path.getOrDefault("subscriptionId")
+  valid_564959 = validateParameter(valid_564959, JString, required = true,
                                  default = nil)
-  if valid_569059 != nil:
-    section.add "subscriptionId", valid_569059
-  var valid_569060 = path.getOrDefault("userName")
-  valid_569060 = validateParameter(valid_569060, JString, required = true,
+  if valid_564959 != nil:
+    section.add "subscriptionId", valid_564959
+  var valid_564960 = path.getOrDefault("resourceGroupName")
+  valid_564960 = validateParameter(valid_564960, JString, required = true,
                                  default = nil)
-  if valid_569060 != nil:
-    section.add "userName", valid_569060
-  var valid_569061 = path.getOrDefault("labName")
-  valid_569061 = validateParameter(valid_569061, JString, required = true,
+  if valid_564960 != nil:
+    section.add "resourceGroupName", valid_564960
+  var valid_564961 = path.getOrDefault("userName")
+  valid_564961 = validateParameter(valid_564961, JString, required = true,
                                  default = nil)
-  if valid_569061 != nil:
-    section.add "labName", valid_569061
+  if valid_564961 != nil:
+    section.add "userName", valid_564961
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -9086,11 +9035,11 @@ proc validate_EnvironmentsDelete_569055(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_569062 = query.getOrDefault("api-version")
-  valid_569062 = validateParameter(valid_569062, JString, required = true,
+  var valid_564962 = query.getOrDefault("api-version")
+  valid_564962 = validateParameter(valid_564962, JString, required = true,
                                  default = newJString("2016-05-15"))
-  if valid_569062 != nil:
-    section.add "api-version", valid_569062
+  if valid_564962 != nil:
+    section.add "api-version", valid_564962
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -9099,54 +9048,54 @@ proc validate_EnvironmentsDelete_569055(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_569063: Call_EnvironmentsDelete_569054; path: JsonNode;
+proc call*(call_564963: Call_EnvironmentsDelete_564954; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Delete environment. This operation can take a while to complete.
   ## 
-  let valid = call_569063.validator(path, query, header, formData, body)
-  let scheme = call_569063.pickScheme
+  let valid = call_564963.validator(path, query, header, formData, body)
+  let scheme = call_564963.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_569063.url(scheme.get, call_569063.host, call_569063.base,
-                         call_569063.route, valid.getOrDefault("path"),
+  let url = call_564963.url(scheme.get, call_564963.host, call_564963.base,
+                         call_564963.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_569063, url, valid)
+  result = hook(call_564963, url, valid)
 
-proc call*(call_569064: Call_EnvironmentsDelete_569054; resourceGroupName: string;
-          name: string; subscriptionId: string; userName: string; labName: string;
-          apiVersion: string = "2016-05-15"): Recallable =
+proc call*(call_564964: Call_EnvironmentsDelete_564954; labName: string;
+          name: string; subscriptionId: string; resourceGroupName: string;
+          userName: string; apiVersion: string = "2016-05-15"): Recallable =
   ## environmentsDelete
   ## Delete environment. This operation can take a while to complete.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   labName: string (required)
+  ##          : The name of the lab.
   ##   apiVersion: string (required)
   ##             : Client API version.
   ##   name: string (required)
   ##       : The name of the environment.
   ##   subscriptionId: string (required)
   ##                 : The subscription ID.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   userName: string (required)
   ##           : The name of the user profile.
-  ##   labName: string (required)
-  ##          : The name of the lab.
-  var path_569065 = newJObject()
-  var query_569066 = newJObject()
-  add(path_569065, "resourceGroupName", newJString(resourceGroupName))
-  add(query_569066, "api-version", newJString(apiVersion))
-  add(path_569065, "name", newJString(name))
-  add(path_569065, "subscriptionId", newJString(subscriptionId))
-  add(path_569065, "userName", newJString(userName))
-  add(path_569065, "labName", newJString(labName))
-  result = call_569064.call(path_569065, query_569066, nil, nil, nil)
+  var path_564965 = newJObject()
+  var query_564966 = newJObject()
+  add(path_564965, "labName", newJString(labName))
+  add(query_564966, "api-version", newJString(apiVersion))
+  add(path_564965, "name", newJString(name))
+  add(path_564965, "subscriptionId", newJString(subscriptionId))
+  add(path_564965, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564965, "userName", newJString(userName))
+  result = call_564964.call(path_564965, query_564966, nil, nil, nil)
 
-var environmentsDelete* = Call_EnvironmentsDelete_569054(
+var environmentsDelete* = Call_EnvironmentsDelete_564954(
     name: "environmentsDelete", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DevTestLab/labs/{labName}/users/{userName}/environments/{name}",
-    validator: validate_EnvironmentsDelete_569055, base: "",
-    url: url_EnvironmentsDelete_569056, schemes: {Scheme.Https})
+    validator: validate_EnvironmentsDelete_564955, base: "",
+    url: url_EnvironmentsDelete_564956, schemes: {Scheme.Https})
 type
-  Call_SecretsList_569067 = ref object of OpenApiRestCall_567650
-proc url_SecretsList_569069(protocol: Scheme; host: string; base: string;
+  Call_SecretsList_564967 = ref object of OpenApiRestCall_563548
+proc url_SecretsList_564969(protocol: Scheme; host: string; base: string;
                            route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -9172,83 +9121,82 @@ proc url_SecretsList_569069(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_SecretsList_569068(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_SecretsList_564968(path: JsonNode; query: JsonNode; header: JsonNode;
                                 formData: JsonNode; body: JsonNode): JsonNode =
   ## List secrets in a given user profile.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
-  ##   subscriptionId: JString (required)
-  ##                 : The subscription ID.
-  ##   userName: JString (required)
-  ##           : The name of the user profile.
   ##   labName: JString (required)
   ##          : The name of the lab.
+  ##   subscriptionId: JString (required)
+  ##                 : The subscription ID.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
+  ##   userName: JString (required)
+  ##           : The name of the user profile.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_569070 = path.getOrDefault("resourceGroupName")
-  valid_569070 = validateParameter(valid_569070, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `labName` field"
+  var valid_564970 = path.getOrDefault("labName")
+  valid_564970 = validateParameter(valid_564970, JString, required = true,
                                  default = nil)
-  if valid_569070 != nil:
-    section.add "resourceGroupName", valid_569070
-  var valid_569071 = path.getOrDefault("subscriptionId")
-  valid_569071 = validateParameter(valid_569071, JString, required = true,
+  if valid_564970 != nil:
+    section.add "labName", valid_564970
+  var valid_564971 = path.getOrDefault("subscriptionId")
+  valid_564971 = validateParameter(valid_564971, JString, required = true,
                                  default = nil)
-  if valid_569071 != nil:
-    section.add "subscriptionId", valid_569071
-  var valid_569072 = path.getOrDefault("userName")
-  valid_569072 = validateParameter(valid_569072, JString, required = true,
+  if valid_564971 != nil:
+    section.add "subscriptionId", valid_564971
+  var valid_564972 = path.getOrDefault("resourceGroupName")
+  valid_564972 = validateParameter(valid_564972, JString, required = true,
                                  default = nil)
-  if valid_569072 != nil:
-    section.add "userName", valid_569072
-  var valid_569073 = path.getOrDefault("labName")
-  valid_569073 = validateParameter(valid_569073, JString, required = true,
+  if valid_564972 != nil:
+    section.add "resourceGroupName", valid_564972
+  var valid_564973 = path.getOrDefault("userName")
+  valid_564973 = validateParameter(valid_564973, JString, required = true,
                                  default = nil)
-  if valid_569073 != nil:
-    section.add "labName", valid_569073
+  if valid_564973 != nil:
+    section.add "userName", valid_564973
   result.add "path", section
   ## parameters in `query` object:
-  ##   $orderby: JString
-  ##           : The ordering expression for the results, using OData notation.
-  ##   $expand: JString
-  ##          : Specify the $expand query. Example: 'properties($select=value)'
-  ##   api-version: JString (required)
-  ##              : Client API version.
   ##   $top: JInt
   ##       : The maximum number of resources to return from the operation.
+  ##   api-version: JString (required)
+  ##              : Client API version.
+  ##   $expand: JString
+  ##          : Specify the $expand query. Example: 'properties($select=value)'
+  ##   $orderby: JString
+  ##           : The ordering expression for the results, using OData notation.
   ##   $filter: JString
   ##          : The filter to apply to the operation.
   section = newJObject()
-  var valid_569074 = query.getOrDefault("$orderby")
-  valid_569074 = validateParameter(valid_569074, JString, required = false,
-                                 default = nil)
-  if valid_569074 != nil:
-    section.add "$orderby", valid_569074
-  var valid_569075 = query.getOrDefault("$expand")
-  valid_569075 = validateParameter(valid_569075, JString, required = false,
-                                 default = nil)
-  if valid_569075 != nil:
-    section.add "$expand", valid_569075
+  var valid_564974 = query.getOrDefault("$top")
+  valid_564974 = validateParameter(valid_564974, JInt, required = false, default = nil)
+  if valid_564974 != nil:
+    section.add "$top", valid_564974
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_569076 = query.getOrDefault("api-version")
-  valid_569076 = validateParameter(valid_569076, JString, required = true,
+  var valid_564975 = query.getOrDefault("api-version")
+  valid_564975 = validateParameter(valid_564975, JString, required = true,
                                  default = newJString("2016-05-15"))
-  if valid_569076 != nil:
-    section.add "api-version", valid_569076
-  var valid_569077 = query.getOrDefault("$top")
-  valid_569077 = validateParameter(valid_569077, JInt, required = false, default = nil)
-  if valid_569077 != nil:
-    section.add "$top", valid_569077
-  var valid_569078 = query.getOrDefault("$filter")
-  valid_569078 = validateParameter(valid_569078, JString, required = false,
+  if valid_564975 != nil:
+    section.add "api-version", valid_564975
+  var valid_564976 = query.getOrDefault("$expand")
+  valid_564976 = validateParameter(valid_564976, JString, required = false,
                                  default = nil)
-  if valid_569078 != nil:
-    section.add "$filter", valid_569078
+  if valid_564976 != nil:
+    section.add "$expand", valid_564976
+  var valid_564977 = query.getOrDefault("$orderby")
+  valid_564977 = validateParameter(valid_564977, JString, required = false,
+                                 default = nil)
+  if valid_564977 != nil:
+    section.add "$orderby", valid_564977
+  var valid_564978 = query.getOrDefault("$filter")
+  valid_564978 = validateParameter(valid_564978, JString, required = false,
+                                 default = nil)
+  if valid_564978 != nil:
+    section.add "$filter", valid_564978
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -9257,65 +9205,65 @@ proc validate_SecretsList_569068(path: JsonNode; query: JsonNode; header: JsonNo
   if body != nil:
     result.add "body", body
 
-proc call*(call_569079: Call_SecretsList_569067; path: JsonNode; query: JsonNode;
+proc call*(call_564979: Call_SecretsList_564967; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## List secrets in a given user profile.
   ## 
-  let valid = call_569079.validator(path, query, header, formData, body)
-  let scheme = call_569079.pickScheme
+  let valid = call_564979.validator(path, query, header, formData, body)
+  let scheme = call_564979.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_569079.url(scheme.get, call_569079.host, call_569079.base,
-                         call_569079.route, valid.getOrDefault("path"),
+  let url = call_564979.url(scheme.get, call_564979.host, call_564979.base,
+                         call_564979.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_569079, url, valid)
+  result = hook(call_564979, url, valid)
 
-proc call*(call_569080: Call_SecretsList_569067; resourceGroupName: string;
-          subscriptionId: string; userName: string; labName: string;
-          Orderby: string = ""; Expand: string = ""; apiVersion: string = "2016-05-15";
-          Top: int = 0; Filter: string = ""): Recallable =
+proc call*(call_564980: Call_SecretsList_564967; labName: string;
+          subscriptionId: string; resourceGroupName: string; userName: string;
+          Top: int = 0; apiVersion: string = "2016-05-15"; Expand: string = "";
+          Orderby: string = ""; Filter: string = ""): Recallable =
   ## secretsList
   ## List secrets in a given user profile.
+  ##   labName: string (required)
+  ##          : The name of the lab.
+  ##   Top: int
+  ##      : The maximum number of resources to return from the operation.
+  ##   apiVersion: string (required)
+  ##             : Client API version.
+  ##   Expand: string
+  ##         : Specify the $expand query. Example: 'properties($select=value)'
+  ##   subscriptionId: string (required)
+  ##                 : The subscription ID.
   ##   Orderby: string
   ##          : The ordering expression for the results, using OData notation.
   ##   resourceGroupName: string (required)
   ##                    : The name of the resource group.
-  ##   Expand: string
-  ##         : Specify the $expand query. Example: 'properties($select=value)'
-  ##   apiVersion: string (required)
-  ##             : Client API version.
-  ##   subscriptionId: string (required)
-  ##                 : The subscription ID.
-  ##   Top: int
-  ##      : The maximum number of resources to return from the operation.
-  ##   userName: string (required)
-  ##           : The name of the user profile.
-  ##   labName: string (required)
-  ##          : The name of the lab.
   ##   Filter: string
   ##         : The filter to apply to the operation.
-  var path_569081 = newJObject()
-  var query_569082 = newJObject()
-  add(query_569082, "$orderby", newJString(Orderby))
-  add(path_569081, "resourceGroupName", newJString(resourceGroupName))
-  add(query_569082, "$expand", newJString(Expand))
-  add(query_569082, "api-version", newJString(apiVersion))
-  add(path_569081, "subscriptionId", newJString(subscriptionId))
-  add(query_569082, "$top", newJInt(Top))
-  add(path_569081, "userName", newJString(userName))
-  add(path_569081, "labName", newJString(labName))
-  add(query_569082, "$filter", newJString(Filter))
-  result = call_569080.call(path_569081, query_569082, nil, nil, nil)
+  ##   userName: string (required)
+  ##           : The name of the user profile.
+  var path_564981 = newJObject()
+  var query_564982 = newJObject()
+  add(path_564981, "labName", newJString(labName))
+  add(query_564982, "$top", newJInt(Top))
+  add(query_564982, "api-version", newJString(apiVersion))
+  add(query_564982, "$expand", newJString(Expand))
+  add(path_564981, "subscriptionId", newJString(subscriptionId))
+  add(query_564982, "$orderby", newJString(Orderby))
+  add(path_564981, "resourceGroupName", newJString(resourceGroupName))
+  add(query_564982, "$filter", newJString(Filter))
+  add(path_564981, "userName", newJString(userName))
+  result = call_564980.call(path_564981, query_564982, nil, nil, nil)
 
-var secretsList* = Call_SecretsList_569067(name: "secretsList",
+var secretsList* = Call_SecretsList_564967(name: "secretsList",
                                         meth: HttpMethod.HttpGet,
                                         host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DevTestLab/labs/{labName}/users/{userName}/secrets",
-                                        validator: validate_SecretsList_569068,
-                                        base: "", url: url_SecretsList_569069,
+                                        validator: validate_SecretsList_564968,
+                                        base: "", url: url_SecretsList_564969,
                                         schemes: {Scheme.Https})
 type
-  Call_SecretsCreateOrUpdate_569097 = ref object of OpenApiRestCall_567650
-proc url_SecretsCreateOrUpdate_569099(protocol: Scheme; host: string; base: string;
+  Call_SecretsCreateOrUpdate_564997 = ref object of OpenApiRestCall_563548
+proc url_SecretsCreateOrUpdate_564999(protocol: Scheme; host: string; base: string;
                                      route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -9343,51 +9291,50 @@ proc url_SecretsCreateOrUpdate_569099(protocol: Scheme; host: string; base: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_SecretsCreateOrUpdate_569098(path: JsonNode; query: JsonNode;
+proc validate_SecretsCreateOrUpdate_564998(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Create or replace an existing secret.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
+  ##   labName: JString (required)
+  ##          : The name of the lab.
   ##   name: JString (required)
   ##       : The name of the secret.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   ##   userName: JString (required)
   ##           : The name of the user profile.
-  ##   labName: JString (required)
-  ##          : The name of the lab.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_569100 = path.getOrDefault("resourceGroupName")
-  valid_569100 = validateParameter(valid_569100, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `labName` field"
+  var valid_565000 = path.getOrDefault("labName")
+  valid_565000 = validateParameter(valid_565000, JString, required = true,
                                  default = nil)
-  if valid_569100 != nil:
-    section.add "resourceGroupName", valid_569100
-  var valid_569101 = path.getOrDefault("name")
-  valid_569101 = validateParameter(valid_569101, JString, required = true,
+  if valid_565000 != nil:
+    section.add "labName", valid_565000
+  var valid_565001 = path.getOrDefault("name")
+  valid_565001 = validateParameter(valid_565001, JString, required = true,
                                  default = nil)
-  if valid_569101 != nil:
-    section.add "name", valid_569101
-  var valid_569102 = path.getOrDefault("subscriptionId")
-  valid_569102 = validateParameter(valid_569102, JString, required = true,
+  if valid_565001 != nil:
+    section.add "name", valid_565001
+  var valid_565002 = path.getOrDefault("subscriptionId")
+  valid_565002 = validateParameter(valid_565002, JString, required = true,
                                  default = nil)
-  if valid_569102 != nil:
-    section.add "subscriptionId", valid_569102
-  var valid_569103 = path.getOrDefault("userName")
-  valid_569103 = validateParameter(valid_569103, JString, required = true,
+  if valid_565002 != nil:
+    section.add "subscriptionId", valid_565002
+  var valid_565003 = path.getOrDefault("resourceGroupName")
+  valid_565003 = validateParameter(valid_565003, JString, required = true,
                                  default = nil)
-  if valid_569103 != nil:
-    section.add "userName", valid_569103
-  var valid_569104 = path.getOrDefault("labName")
-  valid_569104 = validateParameter(valid_569104, JString, required = true,
+  if valid_565003 != nil:
+    section.add "resourceGroupName", valid_565003
+  var valid_565004 = path.getOrDefault("userName")
+  valid_565004 = validateParameter(valid_565004, JString, required = true,
                                  default = nil)
-  if valid_569104 != nil:
-    section.add "labName", valid_569104
+  if valid_565004 != nil:
+    section.add "userName", valid_565004
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -9395,11 +9342,11 @@ proc validate_SecretsCreateOrUpdate_569098(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_569105 = query.getOrDefault("api-version")
-  valid_569105 = validateParameter(valid_569105, JString, required = true,
+  var valid_565005 = query.getOrDefault("api-version")
+  valid_565005 = validateParameter(valid_565005, JString, required = true,
                                  default = newJString("2016-05-15"))
-  if valid_569105 != nil:
-    section.add "api-version", valid_569105
+  if valid_565005 != nil:
+    section.add "api-version", valid_565005
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -9413,60 +9360,59 @@ proc validate_SecretsCreateOrUpdate_569098(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_569107: Call_SecretsCreateOrUpdate_569097; path: JsonNode;
+proc call*(call_565007: Call_SecretsCreateOrUpdate_564997; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Create or replace an existing secret.
   ## 
-  let valid = call_569107.validator(path, query, header, formData, body)
-  let scheme = call_569107.pickScheme
+  let valid = call_565007.validator(path, query, header, formData, body)
+  let scheme = call_565007.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_569107.url(scheme.get, call_569107.host, call_569107.base,
-                         call_569107.route, valid.getOrDefault("path"),
+  let url = call_565007.url(scheme.get, call_565007.host, call_565007.base,
+                         call_565007.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_569107, url, valid)
+  result = hook(call_565007, url, valid)
 
-proc call*(call_569108: Call_SecretsCreateOrUpdate_569097;
-          resourceGroupName: string; name: string; subscriptionId: string;
-          userName: string; labName: string; secret: JsonNode;
-          apiVersion: string = "2016-05-15"): Recallable =
+proc call*(call_565008: Call_SecretsCreateOrUpdate_564997; labName: string;
+          name: string; subscriptionId: string; resourceGroupName: string;
+          userName: string; secret: JsonNode; apiVersion: string = "2016-05-15"): Recallable =
   ## secretsCreateOrUpdate
   ## Create or replace an existing secret.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   labName: string (required)
+  ##          : The name of the lab.
   ##   apiVersion: string (required)
   ##             : Client API version.
   ##   name: string (required)
   ##       : The name of the secret.
   ##   subscriptionId: string (required)
   ##                 : The subscription ID.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   userName: string (required)
   ##           : The name of the user profile.
-  ##   labName: string (required)
-  ##          : The name of the lab.
   ##   secret: JObject (required)
   ##         : A secret.
-  var path_569109 = newJObject()
-  var query_569110 = newJObject()
-  var body_569111 = newJObject()
-  add(path_569109, "resourceGroupName", newJString(resourceGroupName))
-  add(query_569110, "api-version", newJString(apiVersion))
-  add(path_569109, "name", newJString(name))
-  add(path_569109, "subscriptionId", newJString(subscriptionId))
-  add(path_569109, "userName", newJString(userName))
-  add(path_569109, "labName", newJString(labName))
+  var path_565009 = newJObject()
+  var query_565010 = newJObject()
+  var body_565011 = newJObject()
+  add(path_565009, "labName", newJString(labName))
+  add(query_565010, "api-version", newJString(apiVersion))
+  add(path_565009, "name", newJString(name))
+  add(path_565009, "subscriptionId", newJString(subscriptionId))
+  add(path_565009, "resourceGroupName", newJString(resourceGroupName))
+  add(path_565009, "userName", newJString(userName))
   if secret != nil:
-    body_569111 = secret
-  result = call_569108.call(path_569109, query_569110, nil, nil, body_569111)
+    body_565011 = secret
+  result = call_565008.call(path_565009, query_565010, nil, nil, body_565011)
 
-var secretsCreateOrUpdate* = Call_SecretsCreateOrUpdate_569097(
+var secretsCreateOrUpdate* = Call_SecretsCreateOrUpdate_564997(
     name: "secretsCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DevTestLab/labs/{labName}/users/{userName}/secrets/{name}",
-    validator: validate_SecretsCreateOrUpdate_569098, base: "",
-    url: url_SecretsCreateOrUpdate_569099, schemes: {Scheme.Https})
+    validator: validate_SecretsCreateOrUpdate_564998, base: "",
+    url: url_SecretsCreateOrUpdate_564999, schemes: {Scheme.Https})
 type
-  Call_SecretsGet_569083 = ref object of OpenApiRestCall_567650
-proc url_SecretsGet_569085(protocol: Scheme; host: string; base: string; route: string;
+  Call_SecretsGet_564983 = ref object of OpenApiRestCall_563548
+proc url_SecretsGet_564985(protocol: Scheme; host: string; base: string; route: string;
                           path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -9494,70 +9440,69 @@ proc url_SecretsGet_569085(protocol: Scheme; host: string; base: string; route: 
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_SecretsGet_569084(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_SecretsGet_564984(path: JsonNode; query: JsonNode; header: JsonNode;
                                formData: JsonNode; body: JsonNode): JsonNode =
   ## Get secret.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
+  ##   labName: JString (required)
+  ##          : The name of the lab.
   ##   name: JString (required)
   ##       : The name of the secret.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   ##   userName: JString (required)
   ##           : The name of the user profile.
-  ##   labName: JString (required)
-  ##          : The name of the lab.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_569086 = path.getOrDefault("resourceGroupName")
-  valid_569086 = validateParameter(valid_569086, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `labName` field"
+  var valid_564986 = path.getOrDefault("labName")
+  valid_564986 = validateParameter(valid_564986, JString, required = true,
                                  default = nil)
-  if valid_569086 != nil:
-    section.add "resourceGroupName", valid_569086
-  var valid_569087 = path.getOrDefault("name")
-  valid_569087 = validateParameter(valid_569087, JString, required = true,
+  if valid_564986 != nil:
+    section.add "labName", valid_564986
+  var valid_564987 = path.getOrDefault("name")
+  valid_564987 = validateParameter(valid_564987, JString, required = true,
                                  default = nil)
-  if valid_569087 != nil:
-    section.add "name", valid_569087
-  var valid_569088 = path.getOrDefault("subscriptionId")
-  valid_569088 = validateParameter(valid_569088, JString, required = true,
+  if valid_564987 != nil:
+    section.add "name", valid_564987
+  var valid_564988 = path.getOrDefault("subscriptionId")
+  valid_564988 = validateParameter(valid_564988, JString, required = true,
                                  default = nil)
-  if valid_569088 != nil:
-    section.add "subscriptionId", valid_569088
-  var valid_569089 = path.getOrDefault("userName")
-  valid_569089 = validateParameter(valid_569089, JString, required = true,
+  if valid_564988 != nil:
+    section.add "subscriptionId", valid_564988
+  var valid_564989 = path.getOrDefault("resourceGroupName")
+  valid_564989 = validateParameter(valid_564989, JString, required = true,
                                  default = nil)
-  if valid_569089 != nil:
-    section.add "userName", valid_569089
-  var valid_569090 = path.getOrDefault("labName")
-  valid_569090 = validateParameter(valid_569090, JString, required = true,
+  if valid_564989 != nil:
+    section.add "resourceGroupName", valid_564989
+  var valid_564990 = path.getOrDefault("userName")
+  valid_564990 = validateParameter(valid_564990, JString, required = true,
                                  default = nil)
-  if valid_569090 != nil:
-    section.add "labName", valid_569090
+  if valid_564990 != nil:
+    section.add "userName", valid_564990
   result.add "path", section
   ## parameters in `query` object:
-  ##   $expand: JString
-  ##          : Specify the $expand query. Example: 'properties($select=value)'
   ##   api-version: JString (required)
   ##              : Client API version.
+  ##   $expand: JString
+  ##          : Specify the $expand query. Example: 'properties($select=value)'
   section = newJObject()
-  var valid_569091 = query.getOrDefault("$expand")
-  valid_569091 = validateParameter(valid_569091, JString, required = false,
-                                 default = nil)
-  if valid_569091 != nil:
-    section.add "$expand", valid_569091
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_569092 = query.getOrDefault("api-version")
-  valid_569092 = validateParameter(valid_569092, JString, required = true,
+  var valid_564991 = query.getOrDefault("api-version")
+  valid_564991 = validateParameter(valid_564991, JString, required = true,
                                  default = newJString("2016-05-15"))
-  if valid_569092 != nil:
-    section.add "api-version", valid_569092
+  if valid_564991 != nil:
+    section.add "api-version", valid_564991
+  var valid_564992 = query.getOrDefault("$expand")
+  valid_564992 = validateParameter(valid_564992, JString, required = false,
+                                 default = nil)
+  if valid_564992 != nil:
+    section.add "$expand", valid_564992
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -9566,58 +9511,58 @@ proc validate_SecretsGet_569084(path: JsonNode; query: JsonNode; header: JsonNod
   if body != nil:
     result.add "body", body
 
-proc call*(call_569093: Call_SecretsGet_569083; path: JsonNode; query: JsonNode;
+proc call*(call_564993: Call_SecretsGet_564983; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get secret.
   ## 
-  let valid = call_569093.validator(path, query, header, formData, body)
-  let scheme = call_569093.pickScheme
+  let valid = call_564993.validator(path, query, header, formData, body)
+  let scheme = call_564993.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_569093.url(scheme.get, call_569093.host, call_569093.base,
-                         call_569093.route, valid.getOrDefault("path"),
+  let url = call_564993.url(scheme.get, call_564993.host, call_564993.base,
+                         call_564993.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_569093, url, valid)
+  result = hook(call_564993, url, valid)
 
-proc call*(call_569094: Call_SecretsGet_569083; resourceGroupName: string;
-          name: string; subscriptionId: string; userName: string; labName: string;
-          Expand: string = ""; apiVersion: string = "2016-05-15"): Recallable =
+proc call*(call_564994: Call_SecretsGet_564983; labName: string; name: string;
+          subscriptionId: string; resourceGroupName: string; userName: string;
+          apiVersion: string = "2016-05-15"; Expand: string = ""): Recallable =
   ## secretsGet
   ## Get secret.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   labName: string (required)
+  ##          : The name of the lab.
+  ##   apiVersion: string (required)
+  ##             : Client API version.
   ##   Expand: string
   ##         : Specify the $expand query. Example: 'properties($select=value)'
   ##   name: string (required)
   ##       : The name of the secret.
-  ##   apiVersion: string (required)
-  ##             : Client API version.
   ##   subscriptionId: string (required)
   ##                 : The subscription ID.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   userName: string (required)
   ##           : The name of the user profile.
-  ##   labName: string (required)
-  ##          : The name of the lab.
-  var path_569095 = newJObject()
-  var query_569096 = newJObject()
-  add(path_569095, "resourceGroupName", newJString(resourceGroupName))
-  add(query_569096, "$expand", newJString(Expand))
-  add(path_569095, "name", newJString(name))
-  add(query_569096, "api-version", newJString(apiVersion))
-  add(path_569095, "subscriptionId", newJString(subscriptionId))
-  add(path_569095, "userName", newJString(userName))
-  add(path_569095, "labName", newJString(labName))
-  result = call_569094.call(path_569095, query_569096, nil, nil, nil)
+  var path_564995 = newJObject()
+  var query_564996 = newJObject()
+  add(path_564995, "labName", newJString(labName))
+  add(query_564996, "api-version", newJString(apiVersion))
+  add(query_564996, "$expand", newJString(Expand))
+  add(path_564995, "name", newJString(name))
+  add(path_564995, "subscriptionId", newJString(subscriptionId))
+  add(path_564995, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564995, "userName", newJString(userName))
+  result = call_564994.call(path_564995, query_564996, nil, nil, nil)
 
-var secretsGet* = Call_SecretsGet_569083(name: "secretsGet",
+var secretsGet* = Call_SecretsGet_564983(name: "secretsGet",
                                       meth: HttpMethod.HttpGet,
                                       host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DevTestLab/labs/{labName}/users/{userName}/secrets/{name}",
-                                      validator: validate_SecretsGet_569084,
-                                      base: "", url: url_SecretsGet_569085,
+                                      validator: validate_SecretsGet_564984,
+                                      base: "", url: url_SecretsGet_564985,
                                       schemes: {Scheme.Https})
 type
-  Call_SecretsDelete_569112 = ref object of OpenApiRestCall_567650
-proc url_SecretsDelete_569114(protocol: Scheme; host: string; base: string;
+  Call_SecretsDelete_565012 = ref object of OpenApiRestCall_563548
+proc url_SecretsDelete_565014(protocol: Scheme; host: string; base: string;
                              route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -9645,51 +9590,50 @@ proc url_SecretsDelete_569114(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_SecretsDelete_569113(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_SecretsDelete_565013(path: JsonNode; query: JsonNode; header: JsonNode;
                                   formData: JsonNode; body: JsonNode): JsonNode =
   ## Delete secret.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
+  ##   labName: JString (required)
+  ##          : The name of the lab.
   ##   name: JString (required)
   ##       : The name of the secret.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   ##   userName: JString (required)
   ##           : The name of the user profile.
-  ##   labName: JString (required)
-  ##          : The name of the lab.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_569115 = path.getOrDefault("resourceGroupName")
-  valid_569115 = validateParameter(valid_569115, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `labName` field"
+  var valid_565015 = path.getOrDefault("labName")
+  valid_565015 = validateParameter(valid_565015, JString, required = true,
                                  default = nil)
-  if valid_569115 != nil:
-    section.add "resourceGroupName", valid_569115
-  var valid_569116 = path.getOrDefault("name")
-  valid_569116 = validateParameter(valid_569116, JString, required = true,
+  if valid_565015 != nil:
+    section.add "labName", valid_565015
+  var valid_565016 = path.getOrDefault("name")
+  valid_565016 = validateParameter(valid_565016, JString, required = true,
                                  default = nil)
-  if valid_569116 != nil:
-    section.add "name", valid_569116
-  var valid_569117 = path.getOrDefault("subscriptionId")
-  valid_569117 = validateParameter(valid_569117, JString, required = true,
+  if valid_565016 != nil:
+    section.add "name", valid_565016
+  var valid_565017 = path.getOrDefault("subscriptionId")
+  valid_565017 = validateParameter(valid_565017, JString, required = true,
                                  default = nil)
-  if valid_569117 != nil:
-    section.add "subscriptionId", valid_569117
-  var valid_569118 = path.getOrDefault("userName")
-  valid_569118 = validateParameter(valid_569118, JString, required = true,
+  if valid_565017 != nil:
+    section.add "subscriptionId", valid_565017
+  var valid_565018 = path.getOrDefault("resourceGroupName")
+  valid_565018 = validateParameter(valid_565018, JString, required = true,
                                  default = nil)
-  if valid_569118 != nil:
-    section.add "userName", valid_569118
-  var valid_569119 = path.getOrDefault("labName")
-  valid_569119 = validateParameter(valid_569119, JString, required = true,
+  if valid_565018 != nil:
+    section.add "resourceGroupName", valid_565018
+  var valid_565019 = path.getOrDefault("userName")
+  valid_565019 = validateParameter(valid_565019, JString, required = true,
                                  default = nil)
-  if valid_569119 != nil:
-    section.add "labName", valid_569119
+  if valid_565019 != nil:
+    section.add "userName", valid_565019
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -9697,11 +9641,11 @@ proc validate_SecretsDelete_569113(path: JsonNode; query: JsonNode; header: Json
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_569120 = query.getOrDefault("api-version")
-  valid_569120 = validateParameter(valid_569120, JString, required = true,
+  var valid_565020 = query.getOrDefault("api-version")
+  valid_565020 = validateParameter(valid_565020, JString, required = true,
                                  default = newJString("2016-05-15"))
-  if valid_569120 != nil:
-    section.add "api-version", valid_569120
+  if valid_565020 != nil:
+    section.add "api-version", valid_565020
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -9710,53 +9654,53 @@ proc validate_SecretsDelete_569113(path: JsonNode; query: JsonNode; header: Json
   if body != nil:
     result.add "body", body
 
-proc call*(call_569121: Call_SecretsDelete_569112; path: JsonNode; query: JsonNode;
+proc call*(call_565021: Call_SecretsDelete_565012; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Delete secret.
   ## 
-  let valid = call_569121.validator(path, query, header, formData, body)
-  let scheme = call_569121.pickScheme
+  let valid = call_565021.validator(path, query, header, formData, body)
+  let scheme = call_565021.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_569121.url(scheme.get, call_569121.host, call_569121.base,
-                         call_569121.route, valid.getOrDefault("path"),
+  let url = call_565021.url(scheme.get, call_565021.host, call_565021.base,
+                         call_565021.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_569121, url, valid)
+  result = hook(call_565021, url, valid)
 
-proc call*(call_569122: Call_SecretsDelete_569112; resourceGroupName: string;
-          name: string; subscriptionId: string; userName: string; labName: string;
+proc call*(call_565022: Call_SecretsDelete_565012; labName: string; name: string;
+          subscriptionId: string; resourceGroupName: string; userName: string;
           apiVersion: string = "2016-05-15"): Recallable =
   ## secretsDelete
   ## Delete secret.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   labName: string (required)
+  ##          : The name of the lab.
   ##   apiVersion: string (required)
   ##             : Client API version.
   ##   name: string (required)
   ##       : The name of the secret.
   ##   subscriptionId: string (required)
   ##                 : The subscription ID.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   userName: string (required)
   ##           : The name of the user profile.
-  ##   labName: string (required)
-  ##          : The name of the lab.
-  var path_569123 = newJObject()
-  var query_569124 = newJObject()
-  add(path_569123, "resourceGroupName", newJString(resourceGroupName))
-  add(query_569124, "api-version", newJString(apiVersion))
-  add(path_569123, "name", newJString(name))
-  add(path_569123, "subscriptionId", newJString(subscriptionId))
-  add(path_569123, "userName", newJString(userName))
-  add(path_569123, "labName", newJString(labName))
-  result = call_569122.call(path_569123, query_569124, nil, nil, nil)
+  var path_565023 = newJObject()
+  var query_565024 = newJObject()
+  add(path_565023, "labName", newJString(labName))
+  add(query_565024, "api-version", newJString(apiVersion))
+  add(path_565023, "name", newJString(name))
+  add(path_565023, "subscriptionId", newJString(subscriptionId))
+  add(path_565023, "resourceGroupName", newJString(resourceGroupName))
+  add(path_565023, "userName", newJString(userName))
+  result = call_565022.call(path_565023, query_565024, nil, nil, nil)
 
-var secretsDelete* = Call_SecretsDelete_569112(name: "secretsDelete",
+var secretsDelete* = Call_SecretsDelete_565012(name: "secretsDelete",
     meth: HttpMethod.HttpDelete, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DevTestLab/labs/{labName}/users/{userName}/secrets/{name}",
-    validator: validate_SecretsDelete_569113, base: "", url: url_SecretsDelete_569114,
+    validator: validate_SecretsDelete_565013, base: "", url: url_SecretsDelete_565014,
     schemes: {Scheme.Https})
 type
-  Call_VirtualMachinesList_569125 = ref object of OpenApiRestCall_567650
-proc url_VirtualMachinesList_569127(protocol: Scheme; host: string; base: string;
+  Call_VirtualMachinesList_565025 = ref object of OpenApiRestCall_563548
+proc url_VirtualMachinesList_565027(protocol: Scheme; host: string; base: string;
                                    route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -9779,7 +9723,7 @@ proc url_VirtualMachinesList_569127(protocol: Scheme; host: string; base: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_VirtualMachinesList_569126(path: JsonNode; query: JsonNode;
+proc validate_VirtualMachinesList_565026(path: JsonNode; query: JsonNode;
                                         header: JsonNode; formData: JsonNode;
                                         body: JsonNode): JsonNode =
   ## List virtual machines in a given lab.
@@ -9787,69 +9731,68 @@ proc validate_VirtualMachinesList_569126(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
-  ##   subscriptionId: JString (required)
-  ##                 : The subscription ID.
   ##   labName: JString (required)
   ##          : The name of the lab.
+  ##   subscriptionId: JString (required)
+  ##                 : The subscription ID.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_569128 = path.getOrDefault("resourceGroupName")
-  valid_569128 = validateParameter(valid_569128, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `labName` field"
+  var valid_565028 = path.getOrDefault("labName")
+  valid_565028 = validateParameter(valid_565028, JString, required = true,
                                  default = nil)
-  if valid_569128 != nil:
-    section.add "resourceGroupName", valid_569128
-  var valid_569129 = path.getOrDefault("subscriptionId")
-  valid_569129 = validateParameter(valid_569129, JString, required = true,
+  if valid_565028 != nil:
+    section.add "labName", valid_565028
+  var valid_565029 = path.getOrDefault("subscriptionId")
+  valid_565029 = validateParameter(valid_565029, JString, required = true,
                                  default = nil)
-  if valid_569129 != nil:
-    section.add "subscriptionId", valid_569129
-  var valid_569130 = path.getOrDefault("labName")
-  valid_569130 = validateParameter(valid_569130, JString, required = true,
+  if valid_565029 != nil:
+    section.add "subscriptionId", valid_565029
+  var valid_565030 = path.getOrDefault("resourceGroupName")
+  valid_565030 = validateParameter(valid_565030, JString, required = true,
                                  default = nil)
-  if valid_569130 != nil:
-    section.add "labName", valid_569130
+  if valid_565030 != nil:
+    section.add "resourceGroupName", valid_565030
   result.add "path", section
   ## parameters in `query` object:
-  ##   $orderby: JString
-  ##           : The ordering expression for the results, using OData notation.
-  ##   $expand: JString
-  ##          : Specify the $expand query. Example: 'properties($expand=artifacts,computeVm,networkInterface,applicableSchedule)'
-  ##   api-version: JString (required)
-  ##              : Client API version.
   ##   $top: JInt
   ##       : The maximum number of resources to return from the operation.
+  ##   api-version: JString (required)
+  ##              : Client API version.
+  ##   $expand: JString
+  ##          : Specify the $expand query. Example: 'properties($expand=artifacts,computeVm,networkInterface,applicableSchedule)'
+  ##   $orderby: JString
+  ##           : The ordering expression for the results, using OData notation.
   ##   $filter: JString
   ##          : The filter to apply to the operation.
   section = newJObject()
-  var valid_569131 = query.getOrDefault("$orderby")
-  valid_569131 = validateParameter(valid_569131, JString, required = false,
-                                 default = nil)
-  if valid_569131 != nil:
-    section.add "$orderby", valid_569131
-  var valid_569132 = query.getOrDefault("$expand")
-  valid_569132 = validateParameter(valid_569132, JString, required = false,
-                                 default = nil)
-  if valid_569132 != nil:
-    section.add "$expand", valid_569132
+  var valid_565031 = query.getOrDefault("$top")
+  valid_565031 = validateParameter(valid_565031, JInt, required = false, default = nil)
+  if valid_565031 != nil:
+    section.add "$top", valid_565031
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_569133 = query.getOrDefault("api-version")
-  valid_569133 = validateParameter(valid_569133, JString, required = true,
+  var valid_565032 = query.getOrDefault("api-version")
+  valid_565032 = validateParameter(valid_565032, JString, required = true,
                                  default = newJString("2016-05-15"))
-  if valid_569133 != nil:
-    section.add "api-version", valid_569133
-  var valid_569134 = query.getOrDefault("$top")
-  valid_569134 = validateParameter(valid_569134, JInt, required = false, default = nil)
-  if valid_569134 != nil:
-    section.add "$top", valid_569134
-  var valid_569135 = query.getOrDefault("$filter")
-  valid_569135 = validateParameter(valid_569135, JString, required = false,
+  if valid_565032 != nil:
+    section.add "api-version", valid_565032
+  var valid_565033 = query.getOrDefault("$expand")
+  valid_565033 = validateParameter(valid_565033, JString, required = false,
                                  default = nil)
-  if valid_569135 != nil:
-    section.add "$filter", valid_569135
+  if valid_565033 != nil:
+    section.add "$expand", valid_565033
+  var valid_565034 = query.getOrDefault("$orderby")
+  valid_565034 = validateParameter(valid_565034, JString, required = false,
+                                 default = nil)
+  if valid_565034 != nil:
+    section.add "$orderby", valid_565034
+  var valid_565035 = query.getOrDefault("$filter")
+  valid_565035 = validateParameter(valid_565035, JString, required = false,
+                                 default = nil)
+  if valid_565035 != nil:
+    section.add "$filter", valid_565035
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -9858,61 +9801,61 @@ proc validate_VirtualMachinesList_569126(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_569136: Call_VirtualMachinesList_569125; path: JsonNode;
+proc call*(call_565036: Call_VirtualMachinesList_565025; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## List virtual machines in a given lab.
   ## 
-  let valid = call_569136.validator(path, query, header, formData, body)
-  let scheme = call_569136.pickScheme
+  let valid = call_565036.validator(path, query, header, formData, body)
+  let scheme = call_565036.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_569136.url(scheme.get, call_569136.host, call_569136.base,
-                         call_569136.route, valid.getOrDefault("path"),
+  let url = call_565036.url(scheme.get, call_565036.host, call_565036.base,
+                         call_565036.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_569136, url, valid)
+  result = hook(call_565036, url, valid)
 
-proc call*(call_569137: Call_VirtualMachinesList_569125; resourceGroupName: string;
-          subscriptionId: string; labName: string; Orderby: string = "";
-          Expand: string = ""; apiVersion: string = "2016-05-15"; Top: int = 0;
+proc call*(call_565037: Call_VirtualMachinesList_565025; labName: string;
+          subscriptionId: string; resourceGroupName: string; Top: int = 0;
+          apiVersion: string = "2016-05-15"; Expand: string = ""; Orderby: string = "";
           Filter: string = ""): Recallable =
   ## virtualMachinesList
   ## List virtual machines in a given lab.
+  ##   labName: string (required)
+  ##          : The name of the lab.
+  ##   Top: int
+  ##      : The maximum number of resources to return from the operation.
+  ##   apiVersion: string (required)
+  ##             : Client API version.
+  ##   Expand: string
+  ##         : Specify the $expand query. Example: 'properties($expand=artifacts,computeVm,networkInterface,applicableSchedule)'
+  ##   subscriptionId: string (required)
+  ##                 : The subscription ID.
   ##   Orderby: string
   ##          : The ordering expression for the results, using OData notation.
   ##   resourceGroupName: string (required)
   ##                    : The name of the resource group.
-  ##   Expand: string
-  ##         : Specify the $expand query. Example: 'properties($expand=artifacts,computeVm,networkInterface,applicableSchedule)'
-  ##   apiVersion: string (required)
-  ##             : Client API version.
-  ##   subscriptionId: string (required)
-  ##                 : The subscription ID.
-  ##   Top: int
-  ##      : The maximum number of resources to return from the operation.
-  ##   labName: string (required)
-  ##          : The name of the lab.
   ##   Filter: string
   ##         : The filter to apply to the operation.
-  var path_569138 = newJObject()
-  var query_569139 = newJObject()
-  add(query_569139, "$orderby", newJString(Orderby))
-  add(path_569138, "resourceGroupName", newJString(resourceGroupName))
-  add(query_569139, "$expand", newJString(Expand))
-  add(query_569139, "api-version", newJString(apiVersion))
-  add(path_569138, "subscriptionId", newJString(subscriptionId))
-  add(query_569139, "$top", newJInt(Top))
-  add(path_569138, "labName", newJString(labName))
-  add(query_569139, "$filter", newJString(Filter))
-  result = call_569137.call(path_569138, query_569139, nil, nil, nil)
+  var path_565038 = newJObject()
+  var query_565039 = newJObject()
+  add(path_565038, "labName", newJString(labName))
+  add(query_565039, "$top", newJInt(Top))
+  add(query_565039, "api-version", newJString(apiVersion))
+  add(query_565039, "$expand", newJString(Expand))
+  add(path_565038, "subscriptionId", newJString(subscriptionId))
+  add(query_565039, "$orderby", newJString(Orderby))
+  add(path_565038, "resourceGroupName", newJString(resourceGroupName))
+  add(query_565039, "$filter", newJString(Filter))
+  result = call_565037.call(path_565038, query_565039, nil, nil, nil)
 
-var virtualMachinesList* = Call_VirtualMachinesList_569125(
+var virtualMachinesList* = Call_VirtualMachinesList_565025(
     name: "virtualMachinesList", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DevTestLab/labs/{labName}/virtualmachines",
-    validator: validate_VirtualMachinesList_569126, base: "",
-    url: url_VirtualMachinesList_569127, schemes: {Scheme.Https})
+    validator: validate_VirtualMachinesList_565026, base: "",
+    url: url_VirtualMachinesList_565027, schemes: {Scheme.Https})
 type
-  Call_VirtualMachinesCreateOrUpdate_569153 = ref object of OpenApiRestCall_567650
-proc url_VirtualMachinesCreateOrUpdate_569155(protocol: Scheme; host: string;
+  Call_VirtualMachinesCreateOrUpdate_565053 = ref object of OpenApiRestCall_563548
+proc url_VirtualMachinesCreateOrUpdate_565055(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -9937,44 +9880,43 @@ proc url_VirtualMachinesCreateOrUpdate_569155(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_VirtualMachinesCreateOrUpdate_569154(path: JsonNode; query: JsonNode;
+proc validate_VirtualMachinesCreateOrUpdate_565054(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Create or replace an existing Virtual machine. This operation can take a while to complete.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
+  ##   labName: JString (required)
+  ##          : The name of the lab.
   ##   name: JString (required)
   ##       : The name of the virtual machine.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID.
-  ##   labName: JString (required)
-  ##          : The name of the lab.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_569156 = path.getOrDefault("resourceGroupName")
-  valid_569156 = validateParameter(valid_569156, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `labName` field"
+  var valid_565056 = path.getOrDefault("labName")
+  valid_565056 = validateParameter(valid_565056, JString, required = true,
                                  default = nil)
-  if valid_569156 != nil:
-    section.add "resourceGroupName", valid_569156
-  var valid_569157 = path.getOrDefault("name")
-  valid_569157 = validateParameter(valid_569157, JString, required = true,
+  if valid_565056 != nil:
+    section.add "labName", valid_565056
+  var valid_565057 = path.getOrDefault("name")
+  valid_565057 = validateParameter(valid_565057, JString, required = true,
                                  default = nil)
-  if valid_569157 != nil:
-    section.add "name", valid_569157
-  var valid_569158 = path.getOrDefault("subscriptionId")
-  valid_569158 = validateParameter(valid_569158, JString, required = true,
+  if valid_565057 != nil:
+    section.add "name", valid_565057
+  var valid_565058 = path.getOrDefault("subscriptionId")
+  valid_565058 = validateParameter(valid_565058, JString, required = true,
                                  default = nil)
-  if valid_569158 != nil:
-    section.add "subscriptionId", valid_569158
-  var valid_569159 = path.getOrDefault("labName")
-  valid_569159 = validateParameter(valid_569159, JString, required = true,
+  if valid_565058 != nil:
+    section.add "subscriptionId", valid_565058
+  var valid_565059 = path.getOrDefault("resourceGroupName")
+  valid_565059 = validateParameter(valid_565059, JString, required = true,
                                  default = nil)
-  if valid_569159 != nil:
-    section.add "labName", valid_569159
+  if valid_565059 != nil:
+    section.add "resourceGroupName", valid_565059
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -9982,11 +9924,11 @@ proc validate_VirtualMachinesCreateOrUpdate_569154(path: JsonNode; query: JsonNo
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_569160 = query.getOrDefault("api-version")
-  valid_569160 = validateParameter(valid_569160, JString, required = true,
+  var valid_565060 = query.getOrDefault("api-version")
+  valid_565060 = validateParameter(valid_565060, JString, required = true,
                                  default = newJString("2016-05-15"))
-  if valid_569160 != nil:
-    section.add "api-version", valid_569160
+  if valid_565060 != nil:
+    section.add "api-version", valid_565060
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -10000,57 +9942,56 @@ proc validate_VirtualMachinesCreateOrUpdate_569154(path: JsonNode; query: JsonNo
   if body != nil:
     result.add "body", body
 
-proc call*(call_569162: Call_VirtualMachinesCreateOrUpdate_569153; path: JsonNode;
+proc call*(call_565062: Call_VirtualMachinesCreateOrUpdate_565053; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Create or replace an existing Virtual machine. This operation can take a while to complete.
   ## 
-  let valid = call_569162.validator(path, query, header, formData, body)
-  let scheme = call_569162.pickScheme
+  let valid = call_565062.validator(path, query, header, formData, body)
+  let scheme = call_565062.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_569162.url(scheme.get, call_569162.host, call_569162.base,
-                         call_569162.route, valid.getOrDefault("path"),
+  let url = call_565062.url(scheme.get, call_565062.host, call_565062.base,
+                         call_565062.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_569162, url, valid)
+  result = hook(call_565062, url, valid)
 
-proc call*(call_569163: Call_VirtualMachinesCreateOrUpdate_569153;
-          resourceGroupName: string; name: string; subscriptionId: string;
-          labName: string; labVirtualMachine: JsonNode;
-          apiVersion: string = "2016-05-15"): Recallable =
+proc call*(call_565063: Call_VirtualMachinesCreateOrUpdate_565053; labName: string;
+          name: string; subscriptionId: string; resourceGroupName: string;
+          labVirtualMachine: JsonNode; apiVersion: string = "2016-05-15"): Recallable =
   ## virtualMachinesCreateOrUpdate
   ## Create or replace an existing Virtual machine. This operation can take a while to complete.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   labName: string (required)
+  ##          : The name of the lab.
   ##   apiVersion: string (required)
   ##             : Client API version.
   ##   name: string (required)
   ##       : The name of the virtual machine.
   ##   subscriptionId: string (required)
   ##                 : The subscription ID.
-  ##   labName: string (required)
-  ##          : The name of the lab.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   labVirtualMachine: JObject (required)
   ##                    : A virtual machine.
-  var path_569164 = newJObject()
-  var query_569165 = newJObject()
-  var body_569166 = newJObject()
-  add(path_569164, "resourceGroupName", newJString(resourceGroupName))
-  add(query_569165, "api-version", newJString(apiVersion))
-  add(path_569164, "name", newJString(name))
-  add(path_569164, "subscriptionId", newJString(subscriptionId))
-  add(path_569164, "labName", newJString(labName))
+  var path_565064 = newJObject()
+  var query_565065 = newJObject()
+  var body_565066 = newJObject()
+  add(path_565064, "labName", newJString(labName))
+  add(query_565065, "api-version", newJString(apiVersion))
+  add(path_565064, "name", newJString(name))
+  add(path_565064, "subscriptionId", newJString(subscriptionId))
+  add(path_565064, "resourceGroupName", newJString(resourceGroupName))
   if labVirtualMachine != nil:
-    body_569166 = labVirtualMachine
-  result = call_569163.call(path_569164, query_569165, nil, nil, body_569166)
+    body_565066 = labVirtualMachine
+  result = call_565063.call(path_565064, query_565065, nil, nil, body_565066)
 
-var virtualMachinesCreateOrUpdate* = Call_VirtualMachinesCreateOrUpdate_569153(
+var virtualMachinesCreateOrUpdate* = Call_VirtualMachinesCreateOrUpdate_565053(
     name: "virtualMachinesCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DevTestLab/labs/{labName}/virtualmachines/{name}",
-    validator: validate_VirtualMachinesCreateOrUpdate_569154, base: "",
-    url: url_VirtualMachinesCreateOrUpdate_569155, schemes: {Scheme.Https})
+    validator: validate_VirtualMachinesCreateOrUpdate_565054, base: "",
+    url: url_VirtualMachinesCreateOrUpdate_565055, schemes: {Scheme.Https})
 type
-  Call_VirtualMachinesGet_569140 = ref object of OpenApiRestCall_567650
-proc url_VirtualMachinesGet_569142(protocol: Scheme; host: string; base: string;
+  Call_VirtualMachinesGet_565040 = ref object of OpenApiRestCall_563548
+proc url_VirtualMachinesGet_565042(protocol: Scheme; host: string; base: string;
                                   route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -10075,7 +10016,7 @@ proc url_VirtualMachinesGet_569142(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_VirtualMachinesGet_569141(path: JsonNode; query: JsonNode;
+proc validate_VirtualMachinesGet_565041(path: JsonNode; query: JsonNode;
                                        header: JsonNode; formData: JsonNode;
                                        body: JsonNode): JsonNode =
   ## Get virtual machine.
@@ -10083,56 +10024,55 @@ proc validate_VirtualMachinesGet_569141(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
+  ##   labName: JString (required)
+  ##          : The name of the lab.
   ##   name: JString (required)
   ##       : The name of the virtual machine.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID.
-  ##   labName: JString (required)
-  ##          : The name of the lab.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_569143 = path.getOrDefault("resourceGroupName")
-  valid_569143 = validateParameter(valid_569143, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `labName` field"
+  var valid_565043 = path.getOrDefault("labName")
+  valid_565043 = validateParameter(valid_565043, JString, required = true,
                                  default = nil)
-  if valid_569143 != nil:
-    section.add "resourceGroupName", valid_569143
-  var valid_569144 = path.getOrDefault("name")
-  valid_569144 = validateParameter(valid_569144, JString, required = true,
+  if valid_565043 != nil:
+    section.add "labName", valid_565043
+  var valid_565044 = path.getOrDefault("name")
+  valid_565044 = validateParameter(valid_565044, JString, required = true,
                                  default = nil)
-  if valid_569144 != nil:
-    section.add "name", valid_569144
-  var valid_569145 = path.getOrDefault("subscriptionId")
-  valid_569145 = validateParameter(valid_569145, JString, required = true,
+  if valid_565044 != nil:
+    section.add "name", valid_565044
+  var valid_565045 = path.getOrDefault("subscriptionId")
+  valid_565045 = validateParameter(valid_565045, JString, required = true,
                                  default = nil)
-  if valid_569145 != nil:
-    section.add "subscriptionId", valid_569145
-  var valid_569146 = path.getOrDefault("labName")
-  valid_569146 = validateParameter(valid_569146, JString, required = true,
+  if valid_565045 != nil:
+    section.add "subscriptionId", valid_565045
+  var valid_565046 = path.getOrDefault("resourceGroupName")
+  valid_565046 = validateParameter(valid_565046, JString, required = true,
                                  default = nil)
-  if valid_569146 != nil:
-    section.add "labName", valid_569146
+  if valid_565046 != nil:
+    section.add "resourceGroupName", valid_565046
   result.add "path", section
   ## parameters in `query` object:
-  ##   $expand: JString
-  ##          : Specify the $expand query. Example: 'properties($expand=artifacts,computeVm,networkInterface,applicableSchedule)'
   ##   api-version: JString (required)
   ##              : Client API version.
+  ##   $expand: JString
+  ##          : Specify the $expand query. Example: 'properties($expand=artifacts,computeVm,networkInterface,applicableSchedule)'
   section = newJObject()
-  var valid_569147 = query.getOrDefault("$expand")
-  valid_569147 = validateParameter(valid_569147, JString, required = false,
-                                 default = nil)
-  if valid_569147 != nil:
-    section.add "$expand", valid_569147
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_569148 = query.getOrDefault("api-version")
-  valid_569148 = validateParameter(valid_569148, JString, required = true,
+  var valid_565047 = query.getOrDefault("api-version")
+  valid_565047 = validateParameter(valid_565047, JString, required = true,
                                  default = newJString("2016-05-15"))
-  if valid_569148 != nil:
-    section.add "api-version", valid_569148
+  if valid_565047 != nil:
+    section.add "api-version", valid_565047
+  var valid_565048 = query.getOrDefault("$expand")
+  valid_565048 = validateParameter(valid_565048, JString, required = false,
+                                 default = nil)
+  if valid_565048 != nil:
+    section.add "$expand", valid_565048
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -10141,54 +10081,54 @@ proc validate_VirtualMachinesGet_569141(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_569149: Call_VirtualMachinesGet_569140; path: JsonNode;
+proc call*(call_565049: Call_VirtualMachinesGet_565040; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get virtual machine.
   ## 
-  let valid = call_569149.validator(path, query, header, formData, body)
-  let scheme = call_569149.pickScheme
+  let valid = call_565049.validator(path, query, header, formData, body)
+  let scheme = call_565049.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_569149.url(scheme.get, call_569149.host, call_569149.base,
-                         call_569149.route, valid.getOrDefault("path"),
+  let url = call_565049.url(scheme.get, call_565049.host, call_565049.base,
+                         call_565049.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_569149, url, valid)
+  result = hook(call_565049, url, valid)
 
-proc call*(call_569150: Call_VirtualMachinesGet_569140; resourceGroupName: string;
-          name: string; subscriptionId: string; labName: string; Expand: string = "";
-          apiVersion: string = "2016-05-15"): Recallable =
+proc call*(call_565050: Call_VirtualMachinesGet_565040; labName: string;
+          name: string; subscriptionId: string; resourceGroupName: string;
+          apiVersion: string = "2016-05-15"; Expand: string = ""): Recallable =
   ## virtualMachinesGet
   ## Get virtual machine.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   labName: string (required)
+  ##          : The name of the lab.
+  ##   apiVersion: string (required)
+  ##             : Client API version.
   ##   Expand: string
   ##         : Specify the $expand query. Example: 'properties($expand=artifacts,computeVm,networkInterface,applicableSchedule)'
   ##   name: string (required)
   ##       : The name of the virtual machine.
-  ##   apiVersion: string (required)
-  ##             : Client API version.
   ##   subscriptionId: string (required)
   ##                 : The subscription ID.
-  ##   labName: string (required)
-  ##          : The name of the lab.
-  var path_569151 = newJObject()
-  var query_569152 = newJObject()
-  add(path_569151, "resourceGroupName", newJString(resourceGroupName))
-  add(query_569152, "$expand", newJString(Expand))
-  add(path_569151, "name", newJString(name))
-  add(query_569152, "api-version", newJString(apiVersion))
-  add(path_569151, "subscriptionId", newJString(subscriptionId))
-  add(path_569151, "labName", newJString(labName))
-  result = call_569150.call(path_569151, query_569152, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_565051 = newJObject()
+  var query_565052 = newJObject()
+  add(path_565051, "labName", newJString(labName))
+  add(query_565052, "api-version", newJString(apiVersion))
+  add(query_565052, "$expand", newJString(Expand))
+  add(path_565051, "name", newJString(name))
+  add(path_565051, "subscriptionId", newJString(subscriptionId))
+  add(path_565051, "resourceGroupName", newJString(resourceGroupName))
+  result = call_565050.call(path_565051, query_565052, nil, nil, nil)
 
-var virtualMachinesGet* = Call_VirtualMachinesGet_569140(
+var virtualMachinesGet* = Call_VirtualMachinesGet_565040(
     name: "virtualMachinesGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DevTestLab/labs/{labName}/virtualmachines/{name}",
-    validator: validate_VirtualMachinesGet_569141, base: "",
-    url: url_VirtualMachinesGet_569142, schemes: {Scheme.Https})
+    validator: validate_VirtualMachinesGet_565041, base: "",
+    url: url_VirtualMachinesGet_565042, schemes: {Scheme.Https})
 type
-  Call_VirtualMachinesUpdate_569179 = ref object of OpenApiRestCall_567650
-proc url_VirtualMachinesUpdate_569181(protocol: Scheme; host: string; base: string;
+  Call_VirtualMachinesUpdate_565079 = ref object of OpenApiRestCall_563548
+proc url_VirtualMachinesUpdate_565081(protocol: Scheme; host: string; base: string;
                                      route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -10213,44 +10153,43 @@ proc url_VirtualMachinesUpdate_569181(protocol: Scheme; host: string; base: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_VirtualMachinesUpdate_569180(path: JsonNode; query: JsonNode;
+proc validate_VirtualMachinesUpdate_565080(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Modify properties of virtual machines.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
+  ##   labName: JString (required)
+  ##          : The name of the lab.
   ##   name: JString (required)
   ##       : The name of the virtual machine.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID.
-  ##   labName: JString (required)
-  ##          : The name of the lab.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_569182 = path.getOrDefault("resourceGroupName")
-  valid_569182 = validateParameter(valid_569182, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `labName` field"
+  var valid_565082 = path.getOrDefault("labName")
+  valid_565082 = validateParameter(valid_565082, JString, required = true,
                                  default = nil)
-  if valid_569182 != nil:
-    section.add "resourceGroupName", valid_569182
-  var valid_569183 = path.getOrDefault("name")
-  valid_569183 = validateParameter(valid_569183, JString, required = true,
+  if valid_565082 != nil:
+    section.add "labName", valid_565082
+  var valid_565083 = path.getOrDefault("name")
+  valid_565083 = validateParameter(valid_565083, JString, required = true,
                                  default = nil)
-  if valid_569183 != nil:
-    section.add "name", valid_569183
-  var valid_569184 = path.getOrDefault("subscriptionId")
-  valid_569184 = validateParameter(valid_569184, JString, required = true,
+  if valid_565083 != nil:
+    section.add "name", valid_565083
+  var valid_565084 = path.getOrDefault("subscriptionId")
+  valid_565084 = validateParameter(valid_565084, JString, required = true,
                                  default = nil)
-  if valid_569184 != nil:
-    section.add "subscriptionId", valid_569184
-  var valid_569185 = path.getOrDefault("labName")
-  valid_569185 = validateParameter(valid_569185, JString, required = true,
+  if valid_565084 != nil:
+    section.add "subscriptionId", valid_565084
+  var valid_565085 = path.getOrDefault("resourceGroupName")
+  valid_565085 = validateParameter(valid_565085, JString, required = true,
                                  default = nil)
-  if valid_569185 != nil:
-    section.add "labName", valid_569185
+  if valid_565085 != nil:
+    section.add "resourceGroupName", valid_565085
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -10258,11 +10197,11 @@ proc validate_VirtualMachinesUpdate_569180(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_569186 = query.getOrDefault("api-version")
-  valid_569186 = validateParameter(valid_569186, JString, required = true,
+  var valid_565086 = query.getOrDefault("api-version")
+  valid_565086 = validateParameter(valid_565086, JString, required = true,
                                  default = newJString("2016-05-15"))
-  if valid_569186 != nil:
-    section.add "api-version", valid_569186
+  if valid_565086 != nil:
+    section.add "api-version", valid_565086
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -10276,57 +10215,56 @@ proc validate_VirtualMachinesUpdate_569180(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_569188: Call_VirtualMachinesUpdate_569179; path: JsonNode;
+proc call*(call_565088: Call_VirtualMachinesUpdate_565079; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Modify properties of virtual machines.
   ## 
-  let valid = call_569188.validator(path, query, header, formData, body)
-  let scheme = call_569188.pickScheme
+  let valid = call_565088.validator(path, query, header, formData, body)
+  let scheme = call_565088.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_569188.url(scheme.get, call_569188.host, call_569188.base,
-                         call_569188.route, valid.getOrDefault("path"),
+  let url = call_565088.url(scheme.get, call_565088.host, call_565088.base,
+                         call_565088.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_569188, url, valid)
+  result = hook(call_565088, url, valid)
 
-proc call*(call_569189: Call_VirtualMachinesUpdate_569179;
-          resourceGroupName: string; name: string; subscriptionId: string;
-          labName: string; labVirtualMachine: JsonNode;
-          apiVersion: string = "2016-05-15"): Recallable =
+proc call*(call_565089: Call_VirtualMachinesUpdate_565079; labName: string;
+          name: string; subscriptionId: string; resourceGroupName: string;
+          labVirtualMachine: JsonNode; apiVersion: string = "2016-05-15"): Recallable =
   ## virtualMachinesUpdate
   ## Modify properties of virtual machines.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   labName: string (required)
+  ##          : The name of the lab.
   ##   apiVersion: string (required)
   ##             : Client API version.
   ##   name: string (required)
   ##       : The name of the virtual machine.
   ##   subscriptionId: string (required)
   ##                 : The subscription ID.
-  ##   labName: string (required)
-  ##          : The name of the lab.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   labVirtualMachine: JObject (required)
   ##                    : A virtual machine.
-  var path_569190 = newJObject()
-  var query_569191 = newJObject()
-  var body_569192 = newJObject()
-  add(path_569190, "resourceGroupName", newJString(resourceGroupName))
-  add(query_569191, "api-version", newJString(apiVersion))
-  add(path_569190, "name", newJString(name))
-  add(path_569190, "subscriptionId", newJString(subscriptionId))
-  add(path_569190, "labName", newJString(labName))
+  var path_565090 = newJObject()
+  var query_565091 = newJObject()
+  var body_565092 = newJObject()
+  add(path_565090, "labName", newJString(labName))
+  add(query_565091, "api-version", newJString(apiVersion))
+  add(path_565090, "name", newJString(name))
+  add(path_565090, "subscriptionId", newJString(subscriptionId))
+  add(path_565090, "resourceGroupName", newJString(resourceGroupName))
   if labVirtualMachine != nil:
-    body_569192 = labVirtualMachine
-  result = call_569189.call(path_569190, query_569191, nil, nil, body_569192)
+    body_565092 = labVirtualMachine
+  result = call_565089.call(path_565090, query_565091, nil, nil, body_565092)
 
-var virtualMachinesUpdate* = Call_VirtualMachinesUpdate_569179(
+var virtualMachinesUpdate* = Call_VirtualMachinesUpdate_565079(
     name: "virtualMachinesUpdate", meth: HttpMethod.HttpPatch,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DevTestLab/labs/{labName}/virtualmachines/{name}",
-    validator: validate_VirtualMachinesUpdate_569180, base: "",
-    url: url_VirtualMachinesUpdate_569181, schemes: {Scheme.Https})
+    validator: validate_VirtualMachinesUpdate_565080, base: "",
+    url: url_VirtualMachinesUpdate_565081, schemes: {Scheme.Https})
 type
-  Call_VirtualMachinesDelete_569167 = ref object of OpenApiRestCall_567650
-proc url_VirtualMachinesDelete_569169(protocol: Scheme; host: string; base: string;
+  Call_VirtualMachinesDelete_565067 = ref object of OpenApiRestCall_563548
+proc url_VirtualMachinesDelete_565069(protocol: Scheme; host: string; base: string;
                                      route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -10351,44 +10289,43 @@ proc url_VirtualMachinesDelete_569169(protocol: Scheme; host: string; base: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_VirtualMachinesDelete_569168(path: JsonNode; query: JsonNode;
+proc validate_VirtualMachinesDelete_565068(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Delete virtual machine. This operation can take a while to complete.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
+  ##   labName: JString (required)
+  ##          : The name of the lab.
   ##   name: JString (required)
   ##       : The name of the virtual machine.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID.
-  ##   labName: JString (required)
-  ##          : The name of the lab.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_569170 = path.getOrDefault("resourceGroupName")
-  valid_569170 = validateParameter(valid_569170, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `labName` field"
+  var valid_565070 = path.getOrDefault("labName")
+  valid_565070 = validateParameter(valid_565070, JString, required = true,
                                  default = nil)
-  if valid_569170 != nil:
-    section.add "resourceGroupName", valid_569170
-  var valid_569171 = path.getOrDefault("name")
-  valid_569171 = validateParameter(valid_569171, JString, required = true,
+  if valid_565070 != nil:
+    section.add "labName", valid_565070
+  var valid_565071 = path.getOrDefault("name")
+  valid_565071 = validateParameter(valid_565071, JString, required = true,
                                  default = nil)
-  if valid_569171 != nil:
-    section.add "name", valid_569171
-  var valid_569172 = path.getOrDefault("subscriptionId")
-  valid_569172 = validateParameter(valid_569172, JString, required = true,
+  if valid_565071 != nil:
+    section.add "name", valid_565071
+  var valid_565072 = path.getOrDefault("subscriptionId")
+  valid_565072 = validateParameter(valid_565072, JString, required = true,
                                  default = nil)
-  if valid_569172 != nil:
-    section.add "subscriptionId", valid_569172
-  var valid_569173 = path.getOrDefault("labName")
-  valid_569173 = validateParameter(valid_569173, JString, required = true,
+  if valid_565072 != nil:
+    section.add "subscriptionId", valid_565072
+  var valid_565073 = path.getOrDefault("resourceGroupName")
+  valid_565073 = validateParameter(valid_565073, JString, required = true,
                                  default = nil)
-  if valid_569173 != nil:
-    section.add "labName", valid_569173
+  if valid_565073 != nil:
+    section.add "resourceGroupName", valid_565073
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -10396,11 +10333,11 @@ proc validate_VirtualMachinesDelete_569168(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_569174 = query.getOrDefault("api-version")
-  valid_569174 = validateParameter(valid_569174, JString, required = true,
+  var valid_565074 = query.getOrDefault("api-version")
+  valid_565074 = validateParameter(valid_565074, JString, required = true,
                                  default = newJString("2016-05-15"))
-  if valid_569174 != nil:
-    section.add "api-version", valid_569174
+  if valid_565074 != nil:
+    section.add "api-version", valid_565074
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -10409,51 +10346,51 @@ proc validate_VirtualMachinesDelete_569168(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_569175: Call_VirtualMachinesDelete_569167; path: JsonNode;
+proc call*(call_565075: Call_VirtualMachinesDelete_565067; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Delete virtual machine. This operation can take a while to complete.
   ## 
-  let valid = call_569175.validator(path, query, header, formData, body)
-  let scheme = call_569175.pickScheme
+  let valid = call_565075.validator(path, query, header, formData, body)
+  let scheme = call_565075.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_569175.url(scheme.get, call_569175.host, call_569175.base,
-                         call_569175.route, valid.getOrDefault("path"),
+  let url = call_565075.url(scheme.get, call_565075.host, call_565075.base,
+                         call_565075.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_569175, url, valid)
+  result = hook(call_565075, url, valid)
 
-proc call*(call_569176: Call_VirtualMachinesDelete_569167;
-          resourceGroupName: string; name: string; subscriptionId: string;
-          labName: string; apiVersion: string = "2016-05-15"): Recallable =
+proc call*(call_565076: Call_VirtualMachinesDelete_565067; labName: string;
+          name: string; subscriptionId: string; resourceGroupName: string;
+          apiVersion: string = "2016-05-15"): Recallable =
   ## virtualMachinesDelete
   ## Delete virtual machine. This operation can take a while to complete.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   labName: string (required)
+  ##          : The name of the lab.
   ##   apiVersion: string (required)
   ##             : Client API version.
   ##   name: string (required)
   ##       : The name of the virtual machine.
   ##   subscriptionId: string (required)
   ##                 : The subscription ID.
-  ##   labName: string (required)
-  ##          : The name of the lab.
-  var path_569177 = newJObject()
-  var query_569178 = newJObject()
-  add(path_569177, "resourceGroupName", newJString(resourceGroupName))
-  add(query_569178, "api-version", newJString(apiVersion))
-  add(path_569177, "name", newJString(name))
-  add(path_569177, "subscriptionId", newJString(subscriptionId))
-  add(path_569177, "labName", newJString(labName))
-  result = call_569176.call(path_569177, query_569178, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_565077 = newJObject()
+  var query_565078 = newJObject()
+  add(path_565077, "labName", newJString(labName))
+  add(query_565078, "api-version", newJString(apiVersion))
+  add(path_565077, "name", newJString(name))
+  add(path_565077, "subscriptionId", newJString(subscriptionId))
+  add(path_565077, "resourceGroupName", newJString(resourceGroupName))
+  result = call_565076.call(path_565077, query_565078, nil, nil, nil)
 
-var virtualMachinesDelete* = Call_VirtualMachinesDelete_569167(
+var virtualMachinesDelete* = Call_VirtualMachinesDelete_565067(
     name: "virtualMachinesDelete", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DevTestLab/labs/{labName}/virtualmachines/{name}",
-    validator: validate_VirtualMachinesDelete_569168, base: "",
-    url: url_VirtualMachinesDelete_569169, schemes: {Scheme.Https})
+    validator: validate_VirtualMachinesDelete_565068, base: "",
+    url: url_VirtualMachinesDelete_565069, schemes: {Scheme.Https})
 type
-  Call_VirtualMachinesAddDataDisk_569193 = ref object of OpenApiRestCall_567650
-proc url_VirtualMachinesAddDataDisk_569195(protocol: Scheme; host: string;
+  Call_VirtualMachinesAddDataDisk_565093 = ref object of OpenApiRestCall_563548
+proc url_VirtualMachinesAddDataDisk_565095(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -10479,44 +10416,43 @@ proc url_VirtualMachinesAddDataDisk_569195(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_VirtualMachinesAddDataDisk_569194(path: JsonNode; query: JsonNode;
+proc validate_VirtualMachinesAddDataDisk_565094(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Attach a new or existing data disk to virtual machine. This operation can take a while to complete.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
+  ##   labName: JString (required)
+  ##          : The name of the lab.
   ##   name: JString (required)
   ##       : The name of the virtual machine.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID.
-  ##   labName: JString (required)
-  ##          : The name of the lab.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_569196 = path.getOrDefault("resourceGroupName")
-  valid_569196 = validateParameter(valid_569196, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `labName` field"
+  var valid_565096 = path.getOrDefault("labName")
+  valid_565096 = validateParameter(valid_565096, JString, required = true,
                                  default = nil)
-  if valid_569196 != nil:
-    section.add "resourceGroupName", valid_569196
-  var valid_569197 = path.getOrDefault("name")
-  valid_569197 = validateParameter(valid_569197, JString, required = true,
+  if valid_565096 != nil:
+    section.add "labName", valid_565096
+  var valid_565097 = path.getOrDefault("name")
+  valid_565097 = validateParameter(valid_565097, JString, required = true,
                                  default = nil)
-  if valid_569197 != nil:
-    section.add "name", valid_569197
-  var valid_569198 = path.getOrDefault("subscriptionId")
-  valid_569198 = validateParameter(valid_569198, JString, required = true,
+  if valid_565097 != nil:
+    section.add "name", valid_565097
+  var valid_565098 = path.getOrDefault("subscriptionId")
+  valid_565098 = validateParameter(valid_565098, JString, required = true,
                                  default = nil)
-  if valid_569198 != nil:
-    section.add "subscriptionId", valid_569198
-  var valid_569199 = path.getOrDefault("labName")
-  valid_569199 = validateParameter(valid_569199, JString, required = true,
+  if valid_565098 != nil:
+    section.add "subscriptionId", valid_565098
+  var valid_565099 = path.getOrDefault("resourceGroupName")
+  valid_565099 = validateParameter(valid_565099, JString, required = true,
                                  default = nil)
-  if valid_569199 != nil:
-    section.add "labName", valid_569199
+  if valid_565099 != nil:
+    section.add "resourceGroupName", valid_565099
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -10524,11 +10460,11 @@ proc validate_VirtualMachinesAddDataDisk_569194(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_569200 = query.getOrDefault("api-version")
-  valid_569200 = validateParameter(valid_569200, JString, required = true,
+  var valid_565100 = query.getOrDefault("api-version")
+  valid_565100 = validateParameter(valid_565100, JString, required = true,
                                  default = newJString("2016-05-15"))
-  if valid_569200 != nil:
-    section.add "api-version", valid_569200
+  if valid_565100 != nil:
+    section.add "api-version", valid_565100
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -10542,57 +10478,56 @@ proc validate_VirtualMachinesAddDataDisk_569194(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_569202: Call_VirtualMachinesAddDataDisk_569193; path: JsonNode;
+proc call*(call_565102: Call_VirtualMachinesAddDataDisk_565093; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Attach a new or existing data disk to virtual machine. This operation can take a while to complete.
   ## 
-  let valid = call_569202.validator(path, query, header, formData, body)
-  let scheme = call_569202.pickScheme
+  let valid = call_565102.validator(path, query, header, formData, body)
+  let scheme = call_565102.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_569202.url(scheme.get, call_569202.host, call_569202.base,
-                         call_569202.route, valid.getOrDefault("path"),
+  let url = call_565102.url(scheme.get, call_565102.host, call_565102.base,
+                         call_565102.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_569202, url, valid)
+  result = hook(call_565102, url, valid)
 
-proc call*(call_569203: Call_VirtualMachinesAddDataDisk_569193;
-          resourceGroupName: string; name: string; subscriptionId: string;
-          labName: string; dataDiskProperties: JsonNode;
-          apiVersion: string = "2016-05-15"): Recallable =
+proc call*(call_565103: Call_VirtualMachinesAddDataDisk_565093; labName: string;
+          dataDiskProperties: JsonNode; name: string; subscriptionId: string;
+          resourceGroupName: string; apiVersion: string = "2016-05-15"): Recallable =
   ## virtualMachinesAddDataDisk
   ## Attach a new or existing data disk to virtual machine. This operation can take a while to complete.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   labName: string (required)
+  ##          : The name of the lab.
+  ##   dataDiskProperties: JObject (required)
+  ##                     : Request body for adding a new or existing data disk to a virtual machine.
   ##   apiVersion: string (required)
   ##             : Client API version.
   ##   name: string (required)
   ##       : The name of the virtual machine.
   ##   subscriptionId: string (required)
   ##                 : The subscription ID.
-  ##   labName: string (required)
-  ##          : The name of the lab.
-  ##   dataDiskProperties: JObject (required)
-  ##                     : Request body for adding a new or existing data disk to a virtual machine.
-  var path_569204 = newJObject()
-  var query_569205 = newJObject()
-  var body_569206 = newJObject()
-  add(path_569204, "resourceGroupName", newJString(resourceGroupName))
-  add(query_569205, "api-version", newJString(apiVersion))
-  add(path_569204, "name", newJString(name))
-  add(path_569204, "subscriptionId", newJString(subscriptionId))
-  add(path_569204, "labName", newJString(labName))
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_565104 = newJObject()
+  var query_565105 = newJObject()
+  var body_565106 = newJObject()
+  add(path_565104, "labName", newJString(labName))
   if dataDiskProperties != nil:
-    body_569206 = dataDiskProperties
-  result = call_569203.call(path_569204, query_569205, nil, nil, body_569206)
+    body_565106 = dataDiskProperties
+  add(query_565105, "api-version", newJString(apiVersion))
+  add(path_565104, "name", newJString(name))
+  add(path_565104, "subscriptionId", newJString(subscriptionId))
+  add(path_565104, "resourceGroupName", newJString(resourceGroupName))
+  result = call_565103.call(path_565104, query_565105, nil, nil, body_565106)
 
-var virtualMachinesAddDataDisk* = Call_VirtualMachinesAddDataDisk_569193(
+var virtualMachinesAddDataDisk* = Call_VirtualMachinesAddDataDisk_565093(
     name: "virtualMachinesAddDataDisk", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DevTestLab/labs/{labName}/virtualmachines/{name}/addDataDisk",
-    validator: validate_VirtualMachinesAddDataDisk_569194, base: "",
-    url: url_VirtualMachinesAddDataDisk_569195, schemes: {Scheme.Https})
+    validator: validate_VirtualMachinesAddDataDisk_565094, base: "",
+    url: url_VirtualMachinesAddDataDisk_565095, schemes: {Scheme.Https})
 type
-  Call_VirtualMachinesApplyArtifacts_569207 = ref object of OpenApiRestCall_567650
-proc url_VirtualMachinesApplyArtifacts_569209(protocol: Scheme; host: string;
+  Call_VirtualMachinesApplyArtifacts_565107 = ref object of OpenApiRestCall_563548
+proc url_VirtualMachinesApplyArtifacts_565109(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -10618,44 +10553,43 @@ proc url_VirtualMachinesApplyArtifacts_569209(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_VirtualMachinesApplyArtifacts_569208(path: JsonNode; query: JsonNode;
+proc validate_VirtualMachinesApplyArtifacts_565108(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Apply artifacts to virtual machine. This operation can take a while to complete.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
+  ##   labName: JString (required)
+  ##          : The name of the lab.
   ##   name: JString (required)
   ##       : The name of the virtual machine.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID.
-  ##   labName: JString (required)
-  ##          : The name of the lab.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_569210 = path.getOrDefault("resourceGroupName")
-  valid_569210 = validateParameter(valid_569210, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `labName` field"
+  var valid_565110 = path.getOrDefault("labName")
+  valid_565110 = validateParameter(valid_565110, JString, required = true,
                                  default = nil)
-  if valid_569210 != nil:
-    section.add "resourceGroupName", valid_569210
-  var valid_569211 = path.getOrDefault("name")
-  valid_569211 = validateParameter(valid_569211, JString, required = true,
+  if valid_565110 != nil:
+    section.add "labName", valid_565110
+  var valid_565111 = path.getOrDefault("name")
+  valid_565111 = validateParameter(valid_565111, JString, required = true,
                                  default = nil)
-  if valid_569211 != nil:
-    section.add "name", valid_569211
-  var valid_569212 = path.getOrDefault("subscriptionId")
-  valid_569212 = validateParameter(valid_569212, JString, required = true,
+  if valid_565111 != nil:
+    section.add "name", valid_565111
+  var valid_565112 = path.getOrDefault("subscriptionId")
+  valid_565112 = validateParameter(valid_565112, JString, required = true,
                                  default = nil)
-  if valid_569212 != nil:
-    section.add "subscriptionId", valid_569212
-  var valid_569213 = path.getOrDefault("labName")
-  valid_569213 = validateParameter(valid_569213, JString, required = true,
+  if valid_565112 != nil:
+    section.add "subscriptionId", valid_565112
+  var valid_565113 = path.getOrDefault("resourceGroupName")
+  valid_565113 = validateParameter(valid_565113, JString, required = true,
                                  default = nil)
-  if valid_569213 != nil:
-    section.add "labName", valid_569213
+  if valid_565113 != nil:
+    section.add "resourceGroupName", valid_565113
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -10663,11 +10597,11 @@ proc validate_VirtualMachinesApplyArtifacts_569208(path: JsonNode; query: JsonNo
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_569214 = query.getOrDefault("api-version")
-  valid_569214 = validateParameter(valid_569214, JString, required = true,
+  var valid_565114 = query.getOrDefault("api-version")
+  valid_565114 = validateParameter(valid_565114, JString, required = true,
                                  default = newJString("2016-05-15"))
-  if valid_569214 != nil:
-    section.add "api-version", valid_569214
+  if valid_565114 != nil:
+    section.add "api-version", valid_565114
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -10681,57 +10615,56 @@ proc validate_VirtualMachinesApplyArtifacts_569208(path: JsonNode; query: JsonNo
   if body != nil:
     result.add "body", body
 
-proc call*(call_569216: Call_VirtualMachinesApplyArtifacts_569207; path: JsonNode;
+proc call*(call_565116: Call_VirtualMachinesApplyArtifacts_565107; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Apply artifacts to virtual machine. This operation can take a while to complete.
   ## 
-  let valid = call_569216.validator(path, query, header, formData, body)
-  let scheme = call_569216.pickScheme
+  let valid = call_565116.validator(path, query, header, formData, body)
+  let scheme = call_565116.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_569216.url(scheme.get, call_569216.host, call_569216.base,
-                         call_569216.route, valid.getOrDefault("path"),
+  let url = call_565116.url(scheme.get, call_565116.host, call_565116.base,
+                         call_565116.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_569216, url, valid)
+  result = hook(call_565116, url, valid)
 
-proc call*(call_569217: Call_VirtualMachinesApplyArtifacts_569207;
-          resourceGroupName: string; name: string; subscriptionId: string;
-          applyArtifactsRequest: JsonNode; labName: string;
-          apiVersion: string = "2016-05-15"): Recallable =
+proc call*(call_565117: Call_VirtualMachinesApplyArtifacts_565107; labName: string;
+          applyArtifactsRequest: JsonNode; name: string; subscriptionId: string;
+          resourceGroupName: string; apiVersion: string = "2016-05-15"): Recallable =
   ## virtualMachinesApplyArtifacts
   ## Apply artifacts to virtual machine. This operation can take a while to complete.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   labName: string (required)
+  ##          : The name of the lab.
+  ##   applyArtifactsRequest: JObject (required)
+  ##                        : Request body for applying artifacts to a virtual machine.
   ##   apiVersion: string (required)
   ##             : Client API version.
   ##   name: string (required)
   ##       : The name of the virtual machine.
   ##   subscriptionId: string (required)
   ##                 : The subscription ID.
-  ##   applyArtifactsRequest: JObject (required)
-  ##                        : Request body for applying artifacts to a virtual machine.
-  ##   labName: string (required)
-  ##          : The name of the lab.
-  var path_569218 = newJObject()
-  var query_569219 = newJObject()
-  var body_569220 = newJObject()
-  add(path_569218, "resourceGroupName", newJString(resourceGroupName))
-  add(query_569219, "api-version", newJString(apiVersion))
-  add(path_569218, "name", newJString(name))
-  add(path_569218, "subscriptionId", newJString(subscriptionId))
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_565118 = newJObject()
+  var query_565119 = newJObject()
+  var body_565120 = newJObject()
+  add(path_565118, "labName", newJString(labName))
   if applyArtifactsRequest != nil:
-    body_569220 = applyArtifactsRequest
-  add(path_569218, "labName", newJString(labName))
-  result = call_569217.call(path_569218, query_569219, nil, nil, body_569220)
+    body_565120 = applyArtifactsRequest
+  add(query_565119, "api-version", newJString(apiVersion))
+  add(path_565118, "name", newJString(name))
+  add(path_565118, "subscriptionId", newJString(subscriptionId))
+  add(path_565118, "resourceGroupName", newJString(resourceGroupName))
+  result = call_565117.call(path_565118, query_565119, nil, nil, body_565120)
 
-var virtualMachinesApplyArtifacts* = Call_VirtualMachinesApplyArtifacts_569207(
+var virtualMachinesApplyArtifacts* = Call_VirtualMachinesApplyArtifacts_565107(
     name: "virtualMachinesApplyArtifacts", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DevTestLab/labs/{labName}/virtualmachines/{name}/applyArtifacts",
-    validator: validate_VirtualMachinesApplyArtifacts_569208, base: "",
-    url: url_VirtualMachinesApplyArtifacts_569209, schemes: {Scheme.Https})
+    validator: validate_VirtualMachinesApplyArtifacts_565108, base: "",
+    url: url_VirtualMachinesApplyArtifacts_565109, schemes: {Scheme.Https})
 type
-  Call_VirtualMachinesClaim_569221 = ref object of OpenApiRestCall_567650
-proc url_VirtualMachinesClaim_569223(protocol: Scheme; host: string; base: string;
+  Call_VirtualMachinesClaim_565121 = ref object of OpenApiRestCall_563548
+proc url_VirtualMachinesClaim_565123(protocol: Scheme; host: string; base: string;
                                     route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -10757,44 +10690,43 @@ proc url_VirtualMachinesClaim_569223(protocol: Scheme; host: string; base: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_VirtualMachinesClaim_569222(path: JsonNode; query: JsonNode;
+proc validate_VirtualMachinesClaim_565122(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Take ownership of an existing virtual machine This operation can take a while to complete.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
+  ##   labName: JString (required)
+  ##          : The name of the lab.
   ##   name: JString (required)
   ##       : The name of the virtual machine.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID.
-  ##   labName: JString (required)
-  ##          : The name of the lab.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_569224 = path.getOrDefault("resourceGroupName")
-  valid_569224 = validateParameter(valid_569224, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `labName` field"
+  var valid_565124 = path.getOrDefault("labName")
+  valid_565124 = validateParameter(valid_565124, JString, required = true,
                                  default = nil)
-  if valid_569224 != nil:
-    section.add "resourceGroupName", valid_569224
-  var valid_569225 = path.getOrDefault("name")
-  valid_569225 = validateParameter(valid_569225, JString, required = true,
+  if valid_565124 != nil:
+    section.add "labName", valid_565124
+  var valid_565125 = path.getOrDefault("name")
+  valid_565125 = validateParameter(valid_565125, JString, required = true,
                                  default = nil)
-  if valid_569225 != nil:
-    section.add "name", valid_569225
-  var valid_569226 = path.getOrDefault("subscriptionId")
-  valid_569226 = validateParameter(valid_569226, JString, required = true,
+  if valid_565125 != nil:
+    section.add "name", valid_565125
+  var valid_565126 = path.getOrDefault("subscriptionId")
+  valid_565126 = validateParameter(valid_565126, JString, required = true,
                                  default = nil)
-  if valid_569226 != nil:
-    section.add "subscriptionId", valid_569226
-  var valid_569227 = path.getOrDefault("labName")
-  valid_569227 = validateParameter(valid_569227, JString, required = true,
+  if valid_565126 != nil:
+    section.add "subscriptionId", valid_565126
+  var valid_565127 = path.getOrDefault("resourceGroupName")
+  valid_565127 = validateParameter(valid_565127, JString, required = true,
                                  default = nil)
-  if valid_569227 != nil:
-    section.add "labName", valid_569227
+  if valid_565127 != nil:
+    section.add "resourceGroupName", valid_565127
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -10802,11 +10734,11 @@ proc validate_VirtualMachinesClaim_569222(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_569228 = query.getOrDefault("api-version")
-  valid_569228 = validateParameter(valid_569228, JString, required = true,
+  var valid_565128 = query.getOrDefault("api-version")
+  valid_565128 = validateParameter(valid_565128, JString, required = true,
                                  default = newJString("2016-05-15"))
-  if valid_569228 != nil:
-    section.add "api-version", valid_569228
+  if valid_565128 != nil:
+    section.add "api-version", valid_565128
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -10815,51 +10747,51 @@ proc validate_VirtualMachinesClaim_569222(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_569229: Call_VirtualMachinesClaim_569221; path: JsonNode;
+proc call*(call_565129: Call_VirtualMachinesClaim_565121; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Take ownership of an existing virtual machine This operation can take a while to complete.
   ## 
-  let valid = call_569229.validator(path, query, header, formData, body)
-  let scheme = call_569229.pickScheme
+  let valid = call_565129.validator(path, query, header, formData, body)
+  let scheme = call_565129.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_569229.url(scheme.get, call_569229.host, call_569229.base,
-                         call_569229.route, valid.getOrDefault("path"),
+  let url = call_565129.url(scheme.get, call_565129.host, call_565129.base,
+                         call_565129.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_569229, url, valid)
+  result = hook(call_565129, url, valid)
 
-proc call*(call_569230: Call_VirtualMachinesClaim_569221;
-          resourceGroupName: string; name: string; subscriptionId: string;
-          labName: string; apiVersion: string = "2016-05-15"): Recallable =
+proc call*(call_565130: Call_VirtualMachinesClaim_565121; labName: string;
+          name: string; subscriptionId: string; resourceGroupName: string;
+          apiVersion: string = "2016-05-15"): Recallable =
   ## virtualMachinesClaim
   ## Take ownership of an existing virtual machine This operation can take a while to complete.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   labName: string (required)
+  ##          : The name of the lab.
   ##   apiVersion: string (required)
   ##             : Client API version.
   ##   name: string (required)
   ##       : The name of the virtual machine.
   ##   subscriptionId: string (required)
   ##                 : The subscription ID.
-  ##   labName: string (required)
-  ##          : The name of the lab.
-  var path_569231 = newJObject()
-  var query_569232 = newJObject()
-  add(path_569231, "resourceGroupName", newJString(resourceGroupName))
-  add(query_569232, "api-version", newJString(apiVersion))
-  add(path_569231, "name", newJString(name))
-  add(path_569231, "subscriptionId", newJString(subscriptionId))
-  add(path_569231, "labName", newJString(labName))
-  result = call_569230.call(path_569231, query_569232, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_565131 = newJObject()
+  var query_565132 = newJObject()
+  add(path_565131, "labName", newJString(labName))
+  add(query_565132, "api-version", newJString(apiVersion))
+  add(path_565131, "name", newJString(name))
+  add(path_565131, "subscriptionId", newJString(subscriptionId))
+  add(path_565131, "resourceGroupName", newJString(resourceGroupName))
+  result = call_565130.call(path_565131, query_565132, nil, nil, nil)
 
-var virtualMachinesClaim* = Call_VirtualMachinesClaim_569221(
+var virtualMachinesClaim* = Call_VirtualMachinesClaim_565121(
     name: "virtualMachinesClaim", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DevTestLab/labs/{labName}/virtualmachines/{name}/claim",
-    validator: validate_VirtualMachinesClaim_569222, base: "",
-    url: url_VirtualMachinesClaim_569223, schemes: {Scheme.Https})
+    validator: validate_VirtualMachinesClaim_565122, base: "",
+    url: url_VirtualMachinesClaim_565123, schemes: {Scheme.Https})
 type
-  Call_VirtualMachinesDetachDataDisk_569233 = ref object of OpenApiRestCall_567650
-proc url_VirtualMachinesDetachDataDisk_569235(protocol: Scheme; host: string;
+  Call_VirtualMachinesDetachDataDisk_565133 = ref object of OpenApiRestCall_563548
+proc url_VirtualMachinesDetachDataDisk_565135(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -10885,44 +10817,43 @@ proc url_VirtualMachinesDetachDataDisk_569235(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_VirtualMachinesDetachDataDisk_569234(path: JsonNode; query: JsonNode;
+proc validate_VirtualMachinesDetachDataDisk_565134(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Detach the specified disk from the virtual machine. This operation can take a while to complete.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
+  ##   labName: JString (required)
+  ##          : The name of the lab.
   ##   name: JString (required)
   ##       : The name of the virtual machine.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID.
-  ##   labName: JString (required)
-  ##          : The name of the lab.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_569236 = path.getOrDefault("resourceGroupName")
-  valid_569236 = validateParameter(valid_569236, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `labName` field"
+  var valid_565136 = path.getOrDefault("labName")
+  valid_565136 = validateParameter(valid_565136, JString, required = true,
                                  default = nil)
-  if valid_569236 != nil:
-    section.add "resourceGroupName", valid_569236
-  var valid_569237 = path.getOrDefault("name")
-  valid_569237 = validateParameter(valid_569237, JString, required = true,
+  if valid_565136 != nil:
+    section.add "labName", valid_565136
+  var valid_565137 = path.getOrDefault("name")
+  valid_565137 = validateParameter(valid_565137, JString, required = true,
                                  default = nil)
-  if valid_569237 != nil:
-    section.add "name", valid_569237
-  var valid_569238 = path.getOrDefault("subscriptionId")
-  valid_569238 = validateParameter(valid_569238, JString, required = true,
+  if valid_565137 != nil:
+    section.add "name", valid_565137
+  var valid_565138 = path.getOrDefault("subscriptionId")
+  valid_565138 = validateParameter(valid_565138, JString, required = true,
                                  default = nil)
-  if valid_569238 != nil:
-    section.add "subscriptionId", valid_569238
-  var valid_569239 = path.getOrDefault("labName")
-  valid_569239 = validateParameter(valid_569239, JString, required = true,
+  if valid_565138 != nil:
+    section.add "subscriptionId", valid_565138
+  var valid_565139 = path.getOrDefault("resourceGroupName")
+  valid_565139 = validateParameter(valid_565139, JString, required = true,
                                  default = nil)
-  if valid_569239 != nil:
-    section.add "labName", valid_569239
+  if valid_565139 != nil:
+    section.add "resourceGroupName", valid_565139
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -10930,11 +10861,11 @@ proc validate_VirtualMachinesDetachDataDisk_569234(path: JsonNode; query: JsonNo
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_569240 = query.getOrDefault("api-version")
-  valid_569240 = validateParameter(valid_569240, JString, required = true,
+  var valid_565140 = query.getOrDefault("api-version")
+  valid_565140 = validateParameter(valid_565140, JString, required = true,
                                  default = newJString("2016-05-15"))
-  if valid_569240 != nil:
-    section.add "api-version", valid_569240
+  if valid_565140 != nil:
+    section.add "api-version", valid_565140
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -10948,57 +10879,56 @@ proc validate_VirtualMachinesDetachDataDisk_569234(path: JsonNode; query: JsonNo
   if body != nil:
     result.add "body", body
 
-proc call*(call_569242: Call_VirtualMachinesDetachDataDisk_569233; path: JsonNode;
+proc call*(call_565142: Call_VirtualMachinesDetachDataDisk_565133; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Detach the specified disk from the virtual machine. This operation can take a while to complete.
   ## 
-  let valid = call_569242.validator(path, query, header, formData, body)
-  let scheme = call_569242.pickScheme
+  let valid = call_565142.validator(path, query, header, formData, body)
+  let scheme = call_565142.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_569242.url(scheme.get, call_569242.host, call_569242.base,
-                         call_569242.route, valid.getOrDefault("path"),
+  let url = call_565142.url(scheme.get, call_565142.host, call_565142.base,
+                         call_565142.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_569242, url, valid)
+  result = hook(call_565142, url, valid)
 
-proc call*(call_569243: Call_VirtualMachinesDetachDataDisk_569233;
-          resourceGroupName: string; name: string; subscriptionId: string;
-          detachDataDiskProperties: JsonNode; labName: string;
-          apiVersion: string = "2016-05-15"): Recallable =
+proc call*(call_565143: Call_VirtualMachinesDetachDataDisk_565133; labName: string;
+          name: string; subscriptionId: string; resourceGroupName: string;
+          detachDataDiskProperties: JsonNode; apiVersion: string = "2016-05-15"): Recallable =
   ## virtualMachinesDetachDataDisk
   ## Detach the specified disk from the virtual machine. This operation can take a while to complete.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   labName: string (required)
+  ##          : The name of the lab.
   ##   apiVersion: string (required)
   ##             : Client API version.
   ##   name: string (required)
   ##       : The name of the virtual machine.
   ##   subscriptionId: string (required)
   ##                 : The subscription ID.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   detachDataDiskProperties: JObject (required)
   ##                           : Request body for detaching data disk from a virtual machine.
-  ##   labName: string (required)
-  ##          : The name of the lab.
-  var path_569244 = newJObject()
-  var query_569245 = newJObject()
-  var body_569246 = newJObject()
-  add(path_569244, "resourceGroupName", newJString(resourceGroupName))
-  add(query_569245, "api-version", newJString(apiVersion))
-  add(path_569244, "name", newJString(name))
-  add(path_569244, "subscriptionId", newJString(subscriptionId))
+  var path_565144 = newJObject()
+  var query_565145 = newJObject()
+  var body_565146 = newJObject()
+  add(path_565144, "labName", newJString(labName))
+  add(query_565145, "api-version", newJString(apiVersion))
+  add(path_565144, "name", newJString(name))
+  add(path_565144, "subscriptionId", newJString(subscriptionId))
+  add(path_565144, "resourceGroupName", newJString(resourceGroupName))
   if detachDataDiskProperties != nil:
-    body_569246 = detachDataDiskProperties
-  add(path_569244, "labName", newJString(labName))
-  result = call_569243.call(path_569244, query_569245, nil, nil, body_569246)
+    body_565146 = detachDataDiskProperties
+  result = call_565143.call(path_565144, query_565145, nil, nil, body_565146)
 
-var virtualMachinesDetachDataDisk* = Call_VirtualMachinesDetachDataDisk_569233(
+var virtualMachinesDetachDataDisk* = Call_VirtualMachinesDetachDataDisk_565133(
     name: "virtualMachinesDetachDataDisk", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DevTestLab/labs/{labName}/virtualmachines/{name}/detachDataDisk",
-    validator: validate_VirtualMachinesDetachDataDisk_569234, base: "",
-    url: url_VirtualMachinesDetachDataDisk_569235, schemes: {Scheme.Https})
+    validator: validate_VirtualMachinesDetachDataDisk_565134, base: "",
+    url: url_VirtualMachinesDetachDataDisk_565135, schemes: {Scheme.Https})
 type
-  Call_VirtualMachinesListApplicableSchedules_569247 = ref object of OpenApiRestCall_567650
-proc url_VirtualMachinesListApplicableSchedules_569249(protocol: Scheme;
+  Call_VirtualMachinesListApplicableSchedules_565147 = ref object of OpenApiRestCall_563548
+proc url_VirtualMachinesListApplicableSchedules_565149(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -11024,44 +10954,43 @@ proc url_VirtualMachinesListApplicableSchedules_569249(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_VirtualMachinesListApplicableSchedules_569248(path: JsonNode;
+proc validate_VirtualMachinesListApplicableSchedules_565148(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists all applicable schedules
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
+  ##   labName: JString (required)
+  ##          : The name of the lab.
   ##   name: JString (required)
   ##       : The name of the virtual machine.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID.
-  ##   labName: JString (required)
-  ##          : The name of the lab.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_569250 = path.getOrDefault("resourceGroupName")
-  valid_569250 = validateParameter(valid_569250, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `labName` field"
+  var valid_565150 = path.getOrDefault("labName")
+  valid_565150 = validateParameter(valid_565150, JString, required = true,
                                  default = nil)
-  if valid_569250 != nil:
-    section.add "resourceGroupName", valid_569250
-  var valid_569251 = path.getOrDefault("name")
-  valid_569251 = validateParameter(valid_569251, JString, required = true,
+  if valid_565150 != nil:
+    section.add "labName", valid_565150
+  var valid_565151 = path.getOrDefault("name")
+  valid_565151 = validateParameter(valid_565151, JString, required = true,
                                  default = nil)
-  if valid_569251 != nil:
-    section.add "name", valid_569251
-  var valid_569252 = path.getOrDefault("subscriptionId")
-  valid_569252 = validateParameter(valid_569252, JString, required = true,
+  if valid_565151 != nil:
+    section.add "name", valid_565151
+  var valid_565152 = path.getOrDefault("subscriptionId")
+  valid_565152 = validateParameter(valid_565152, JString, required = true,
                                  default = nil)
-  if valid_569252 != nil:
-    section.add "subscriptionId", valid_569252
-  var valid_569253 = path.getOrDefault("labName")
-  valid_569253 = validateParameter(valid_569253, JString, required = true,
+  if valid_565152 != nil:
+    section.add "subscriptionId", valid_565152
+  var valid_565153 = path.getOrDefault("resourceGroupName")
+  valid_565153 = validateParameter(valid_565153, JString, required = true,
                                  default = nil)
-  if valid_569253 != nil:
-    section.add "labName", valid_569253
+  if valid_565153 != nil:
+    section.add "resourceGroupName", valid_565153
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -11069,11 +10998,11 @@ proc validate_VirtualMachinesListApplicableSchedules_569248(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_569254 = query.getOrDefault("api-version")
-  valid_569254 = validateParameter(valid_569254, JString, required = true,
+  var valid_565154 = query.getOrDefault("api-version")
+  valid_565154 = validateParameter(valid_565154, JString, required = true,
                                  default = newJString("2016-05-15"))
-  if valid_569254 != nil:
-    section.add "api-version", valid_569254
+  if valid_565154 != nil:
+    section.add "api-version", valid_565154
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -11082,53 +11011,53 @@ proc validate_VirtualMachinesListApplicableSchedules_569248(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_569255: Call_VirtualMachinesListApplicableSchedules_569247;
+proc call*(call_565155: Call_VirtualMachinesListApplicableSchedules_565147;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Lists all applicable schedules
   ## 
-  let valid = call_569255.validator(path, query, header, formData, body)
-  let scheme = call_569255.pickScheme
+  let valid = call_565155.validator(path, query, header, formData, body)
+  let scheme = call_565155.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_569255.url(scheme.get, call_569255.host, call_569255.base,
-                         call_569255.route, valid.getOrDefault("path"),
+  let url = call_565155.url(scheme.get, call_565155.host, call_565155.base,
+                         call_565155.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_569255, url, valid)
+  result = hook(call_565155, url, valid)
 
-proc call*(call_569256: Call_VirtualMachinesListApplicableSchedules_569247;
-          resourceGroupName: string; name: string; subscriptionId: string;
-          labName: string; apiVersion: string = "2016-05-15"): Recallable =
+proc call*(call_565156: Call_VirtualMachinesListApplicableSchedules_565147;
+          labName: string; name: string; subscriptionId: string;
+          resourceGroupName: string; apiVersion: string = "2016-05-15"): Recallable =
   ## virtualMachinesListApplicableSchedules
   ## Lists all applicable schedules
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   labName: string (required)
+  ##          : The name of the lab.
   ##   apiVersion: string (required)
   ##             : Client API version.
   ##   name: string (required)
   ##       : The name of the virtual machine.
   ##   subscriptionId: string (required)
   ##                 : The subscription ID.
-  ##   labName: string (required)
-  ##          : The name of the lab.
-  var path_569257 = newJObject()
-  var query_569258 = newJObject()
-  add(path_569257, "resourceGroupName", newJString(resourceGroupName))
-  add(query_569258, "api-version", newJString(apiVersion))
-  add(path_569257, "name", newJString(name))
-  add(path_569257, "subscriptionId", newJString(subscriptionId))
-  add(path_569257, "labName", newJString(labName))
-  result = call_569256.call(path_569257, query_569258, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_565157 = newJObject()
+  var query_565158 = newJObject()
+  add(path_565157, "labName", newJString(labName))
+  add(query_565158, "api-version", newJString(apiVersion))
+  add(path_565157, "name", newJString(name))
+  add(path_565157, "subscriptionId", newJString(subscriptionId))
+  add(path_565157, "resourceGroupName", newJString(resourceGroupName))
+  result = call_565156.call(path_565157, query_565158, nil, nil, nil)
 
-var virtualMachinesListApplicableSchedules* = Call_VirtualMachinesListApplicableSchedules_569247(
+var virtualMachinesListApplicableSchedules* = Call_VirtualMachinesListApplicableSchedules_565147(
     name: "virtualMachinesListApplicableSchedules", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DevTestLab/labs/{labName}/virtualmachines/{name}/listApplicableSchedules",
-    validator: validate_VirtualMachinesListApplicableSchedules_569248, base: "",
-    url: url_VirtualMachinesListApplicableSchedules_569249,
+    validator: validate_VirtualMachinesListApplicableSchedules_565148, base: "",
+    url: url_VirtualMachinesListApplicableSchedules_565149,
     schemes: {Scheme.Https})
 type
-  Call_VirtualMachinesStart_569259 = ref object of OpenApiRestCall_567650
-proc url_VirtualMachinesStart_569261(protocol: Scheme; host: string; base: string;
+  Call_VirtualMachinesStart_565159 = ref object of OpenApiRestCall_563548
+proc url_VirtualMachinesStart_565161(protocol: Scheme; host: string; base: string;
                                     route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -11154,44 +11083,43 @@ proc url_VirtualMachinesStart_569261(protocol: Scheme; host: string; base: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_VirtualMachinesStart_569260(path: JsonNode; query: JsonNode;
+proc validate_VirtualMachinesStart_565160(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Start a virtual machine. This operation can take a while to complete.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
+  ##   labName: JString (required)
+  ##          : The name of the lab.
   ##   name: JString (required)
   ##       : The name of the virtual machine.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID.
-  ##   labName: JString (required)
-  ##          : The name of the lab.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_569262 = path.getOrDefault("resourceGroupName")
-  valid_569262 = validateParameter(valid_569262, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `labName` field"
+  var valid_565162 = path.getOrDefault("labName")
+  valid_565162 = validateParameter(valid_565162, JString, required = true,
                                  default = nil)
-  if valid_569262 != nil:
-    section.add "resourceGroupName", valid_569262
-  var valid_569263 = path.getOrDefault("name")
-  valid_569263 = validateParameter(valid_569263, JString, required = true,
+  if valid_565162 != nil:
+    section.add "labName", valid_565162
+  var valid_565163 = path.getOrDefault("name")
+  valid_565163 = validateParameter(valid_565163, JString, required = true,
                                  default = nil)
-  if valid_569263 != nil:
-    section.add "name", valid_569263
-  var valid_569264 = path.getOrDefault("subscriptionId")
-  valid_569264 = validateParameter(valid_569264, JString, required = true,
+  if valid_565163 != nil:
+    section.add "name", valid_565163
+  var valid_565164 = path.getOrDefault("subscriptionId")
+  valid_565164 = validateParameter(valid_565164, JString, required = true,
                                  default = nil)
-  if valid_569264 != nil:
-    section.add "subscriptionId", valid_569264
-  var valid_569265 = path.getOrDefault("labName")
-  valid_569265 = validateParameter(valid_569265, JString, required = true,
+  if valid_565164 != nil:
+    section.add "subscriptionId", valid_565164
+  var valid_565165 = path.getOrDefault("resourceGroupName")
+  valid_565165 = validateParameter(valid_565165, JString, required = true,
                                  default = nil)
-  if valid_569265 != nil:
-    section.add "labName", valid_569265
+  if valid_565165 != nil:
+    section.add "resourceGroupName", valid_565165
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -11199,11 +11127,11 @@ proc validate_VirtualMachinesStart_569260(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_569266 = query.getOrDefault("api-version")
-  valid_569266 = validateParameter(valid_569266, JString, required = true,
+  var valid_565166 = query.getOrDefault("api-version")
+  valid_565166 = validateParameter(valid_565166, JString, required = true,
                                  default = newJString("2016-05-15"))
-  if valid_569266 != nil:
-    section.add "api-version", valid_569266
+  if valid_565166 != nil:
+    section.add "api-version", valid_565166
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -11212,51 +11140,51 @@ proc validate_VirtualMachinesStart_569260(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_569267: Call_VirtualMachinesStart_569259; path: JsonNode;
+proc call*(call_565167: Call_VirtualMachinesStart_565159; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Start a virtual machine. This operation can take a while to complete.
   ## 
-  let valid = call_569267.validator(path, query, header, formData, body)
-  let scheme = call_569267.pickScheme
+  let valid = call_565167.validator(path, query, header, formData, body)
+  let scheme = call_565167.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_569267.url(scheme.get, call_569267.host, call_569267.base,
-                         call_569267.route, valid.getOrDefault("path"),
+  let url = call_565167.url(scheme.get, call_565167.host, call_565167.base,
+                         call_565167.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_569267, url, valid)
+  result = hook(call_565167, url, valid)
 
-proc call*(call_569268: Call_VirtualMachinesStart_569259;
-          resourceGroupName: string; name: string; subscriptionId: string;
-          labName: string; apiVersion: string = "2016-05-15"): Recallable =
+proc call*(call_565168: Call_VirtualMachinesStart_565159; labName: string;
+          name: string; subscriptionId: string; resourceGroupName: string;
+          apiVersion: string = "2016-05-15"): Recallable =
   ## virtualMachinesStart
   ## Start a virtual machine. This operation can take a while to complete.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   labName: string (required)
+  ##          : The name of the lab.
   ##   apiVersion: string (required)
   ##             : Client API version.
   ##   name: string (required)
   ##       : The name of the virtual machine.
   ##   subscriptionId: string (required)
   ##                 : The subscription ID.
-  ##   labName: string (required)
-  ##          : The name of the lab.
-  var path_569269 = newJObject()
-  var query_569270 = newJObject()
-  add(path_569269, "resourceGroupName", newJString(resourceGroupName))
-  add(query_569270, "api-version", newJString(apiVersion))
-  add(path_569269, "name", newJString(name))
-  add(path_569269, "subscriptionId", newJString(subscriptionId))
-  add(path_569269, "labName", newJString(labName))
-  result = call_569268.call(path_569269, query_569270, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_565169 = newJObject()
+  var query_565170 = newJObject()
+  add(path_565169, "labName", newJString(labName))
+  add(query_565170, "api-version", newJString(apiVersion))
+  add(path_565169, "name", newJString(name))
+  add(path_565169, "subscriptionId", newJString(subscriptionId))
+  add(path_565169, "resourceGroupName", newJString(resourceGroupName))
+  result = call_565168.call(path_565169, query_565170, nil, nil, nil)
 
-var virtualMachinesStart* = Call_VirtualMachinesStart_569259(
+var virtualMachinesStart* = Call_VirtualMachinesStart_565159(
     name: "virtualMachinesStart", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DevTestLab/labs/{labName}/virtualmachines/{name}/start",
-    validator: validate_VirtualMachinesStart_569260, base: "",
-    url: url_VirtualMachinesStart_569261, schemes: {Scheme.Https})
+    validator: validate_VirtualMachinesStart_565160, base: "",
+    url: url_VirtualMachinesStart_565161, schemes: {Scheme.Https})
 type
-  Call_VirtualMachinesStop_569271 = ref object of OpenApiRestCall_567650
-proc url_VirtualMachinesStop_569273(protocol: Scheme; host: string; base: string;
+  Call_VirtualMachinesStop_565171 = ref object of OpenApiRestCall_563548
+proc url_VirtualMachinesStop_565173(protocol: Scheme; host: string; base: string;
                                    route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -11282,7 +11210,7 @@ proc url_VirtualMachinesStop_569273(protocol: Scheme; host: string; base: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_VirtualMachinesStop_569272(path: JsonNode; query: JsonNode;
+proc validate_VirtualMachinesStop_565172(path: JsonNode; query: JsonNode;
                                         header: JsonNode; formData: JsonNode;
                                         body: JsonNode): JsonNode =
   ## Stop a virtual machine This operation can take a while to complete.
@@ -11290,37 +11218,36 @@ proc validate_VirtualMachinesStop_569272(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
+  ##   labName: JString (required)
+  ##          : The name of the lab.
   ##   name: JString (required)
   ##       : The name of the virtual machine.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID.
-  ##   labName: JString (required)
-  ##          : The name of the lab.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_569274 = path.getOrDefault("resourceGroupName")
-  valid_569274 = validateParameter(valid_569274, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `labName` field"
+  var valid_565174 = path.getOrDefault("labName")
+  valid_565174 = validateParameter(valid_565174, JString, required = true,
                                  default = nil)
-  if valid_569274 != nil:
-    section.add "resourceGroupName", valid_569274
-  var valid_569275 = path.getOrDefault("name")
-  valid_569275 = validateParameter(valid_569275, JString, required = true,
+  if valid_565174 != nil:
+    section.add "labName", valid_565174
+  var valid_565175 = path.getOrDefault("name")
+  valid_565175 = validateParameter(valid_565175, JString, required = true,
                                  default = nil)
-  if valid_569275 != nil:
-    section.add "name", valid_569275
-  var valid_569276 = path.getOrDefault("subscriptionId")
-  valid_569276 = validateParameter(valid_569276, JString, required = true,
+  if valid_565175 != nil:
+    section.add "name", valid_565175
+  var valid_565176 = path.getOrDefault("subscriptionId")
+  valid_565176 = validateParameter(valid_565176, JString, required = true,
                                  default = nil)
-  if valid_569276 != nil:
-    section.add "subscriptionId", valid_569276
-  var valid_569277 = path.getOrDefault("labName")
-  valid_569277 = validateParameter(valid_569277, JString, required = true,
+  if valid_565176 != nil:
+    section.add "subscriptionId", valid_565176
+  var valid_565177 = path.getOrDefault("resourceGroupName")
+  valid_565177 = validateParameter(valid_565177, JString, required = true,
                                  default = nil)
-  if valid_569277 != nil:
-    section.add "labName", valid_569277
+  if valid_565177 != nil:
+    section.add "resourceGroupName", valid_565177
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -11328,11 +11255,11 @@ proc validate_VirtualMachinesStop_569272(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_569278 = query.getOrDefault("api-version")
-  valid_569278 = validateParameter(valid_569278, JString, required = true,
+  var valid_565178 = query.getOrDefault("api-version")
+  valid_565178 = validateParameter(valid_565178, JString, required = true,
                                  default = newJString("2016-05-15"))
-  if valid_569278 != nil:
-    section.add "api-version", valid_569278
+  if valid_565178 != nil:
+    section.add "api-version", valid_565178
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -11341,51 +11268,51 @@ proc validate_VirtualMachinesStop_569272(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_569279: Call_VirtualMachinesStop_569271; path: JsonNode;
+proc call*(call_565179: Call_VirtualMachinesStop_565171; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Stop a virtual machine This operation can take a while to complete.
   ## 
-  let valid = call_569279.validator(path, query, header, formData, body)
-  let scheme = call_569279.pickScheme
+  let valid = call_565179.validator(path, query, header, formData, body)
+  let scheme = call_565179.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_569279.url(scheme.get, call_569279.host, call_569279.base,
-                         call_569279.route, valid.getOrDefault("path"),
+  let url = call_565179.url(scheme.get, call_565179.host, call_565179.base,
+                         call_565179.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_569279, url, valid)
+  result = hook(call_565179, url, valid)
 
-proc call*(call_569280: Call_VirtualMachinesStop_569271; resourceGroupName: string;
-          name: string; subscriptionId: string; labName: string;
+proc call*(call_565180: Call_VirtualMachinesStop_565171; labName: string;
+          name: string; subscriptionId: string; resourceGroupName: string;
           apiVersion: string = "2016-05-15"): Recallable =
   ## virtualMachinesStop
   ## Stop a virtual machine This operation can take a while to complete.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   labName: string (required)
+  ##          : The name of the lab.
   ##   apiVersion: string (required)
   ##             : Client API version.
   ##   name: string (required)
   ##       : The name of the virtual machine.
   ##   subscriptionId: string (required)
   ##                 : The subscription ID.
-  ##   labName: string (required)
-  ##          : The name of the lab.
-  var path_569281 = newJObject()
-  var query_569282 = newJObject()
-  add(path_569281, "resourceGroupName", newJString(resourceGroupName))
-  add(query_569282, "api-version", newJString(apiVersion))
-  add(path_569281, "name", newJString(name))
-  add(path_569281, "subscriptionId", newJString(subscriptionId))
-  add(path_569281, "labName", newJString(labName))
-  result = call_569280.call(path_569281, query_569282, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_565181 = newJObject()
+  var query_565182 = newJObject()
+  add(path_565181, "labName", newJString(labName))
+  add(query_565182, "api-version", newJString(apiVersion))
+  add(path_565181, "name", newJString(name))
+  add(path_565181, "subscriptionId", newJString(subscriptionId))
+  add(path_565181, "resourceGroupName", newJString(resourceGroupName))
+  result = call_565180.call(path_565181, query_565182, nil, nil, nil)
 
-var virtualMachinesStop* = Call_VirtualMachinesStop_569271(
+var virtualMachinesStop* = Call_VirtualMachinesStop_565171(
     name: "virtualMachinesStop", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DevTestLab/labs/{labName}/virtualmachines/{name}/stop",
-    validator: validate_VirtualMachinesStop_569272, base: "",
-    url: url_VirtualMachinesStop_569273, schemes: {Scheme.Https})
+    validator: validate_VirtualMachinesStop_565172, base: "",
+    url: url_VirtualMachinesStop_565173, schemes: {Scheme.Https})
 type
-  Call_VirtualMachineSchedulesList_569283 = ref object of OpenApiRestCall_567650
-proc url_VirtualMachineSchedulesList_569285(protocol: Scheme; host: string;
+  Call_VirtualMachineSchedulesList_565183 = ref object of OpenApiRestCall_563548
+proc url_VirtualMachineSchedulesList_565185(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -11412,83 +11339,82 @@ proc url_VirtualMachineSchedulesList_569285(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_VirtualMachineSchedulesList_569284(path: JsonNode; query: JsonNode;
+proc validate_VirtualMachineSchedulesList_565184(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## List schedules in a given virtual machine.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
+  ##   labName: JString (required)
+  ##          : The name of the lab.
   ##   virtualMachineName: JString (required)
   ##                     : The name of the virtual machine.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID.
-  ##   labName: JString (required)
-  ##          : The name of the lab.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_569286 = path.getOrDefault("resourceGroupName")
-  valid_569286 = validateParameter(valid_569286, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `labName` field"
+  var valid_565186 = path.getOrDefault("labName")
+  valid_565186 = validateParameter(valid_565186, JString, required = true,
                                  default = nil)
-  if valid_569286 != nil:
-    section.add "resourceGroupName", valid_569286
-  var valid_569287 = path.getOrDefault("virtualMachineName")
-  valid_569287 = validateParameter(valid_569287, JString, required = true,
+  if valid_565186 != nil:
+    section.add "labName", valid_565186
+  var valid_565187 = path.getOrDefault("virtualMachineName")
+  valid_565187 = validateParameter(valid_565187, JString, required = true,
                                  default = nil)
-  if valid_569287 != nil:
-    section.add "virtualMachineName", valid_569287
-  var valid_569288 = path.getOrDefault("subscriptionId")
-  valid_569288 = validateParameter(valid_569288, JString, required = true,
+  if valid_565187 != nil:
+    section.add "virtualMachineName", valid_565187
+  var valid_565188 = path.getOrDefault("subscriptionId")
+  valid_565188 = validateParameter(valid_565188, JString, required = true,
                                  default = nil)
-  if valid_569288 != nil:
-    section.add "subscriptionId", valid_569288
-  var valid_569289 = path.getOrDefault("labName")
-  valid_569289 = validateParameter(valid_569289, JString, required = true,
+  if valid_565188 != nil:
+    section.add "subscriptionId", valid_565188
+  var valid_565189 = path.getOrDefault("resourceGroupName")
+  valid_565189 = validateParameter(valid_565189, JString, required = true,
                                  default = nil)
-  if valid_569289 != nil:
-    section.add "labName", valid_569289
+  if valid_565189 != nil:
+    section.add "resourceGroupName", valid_565189
   result.add "path", section
   ## parameters in `query` object:
-  ##   $orderby: JString
-  ##           : The ordering expression for the results, using OData notation.
-  ##   $expand: JString
-  ##          : Specify the $expand query. Example: 'properties($select=status)'
-  ##   api-version: JString (required)
-  ##              : Client API version.
   ##   $top: JInt
   ##       : The maximum number of resources to return from the operation.
+  ##   api-version: JString (required)
+  ##              : Client API version.
+  ##   $expand: JString
+  ##          : Specify the $expand query. Example: 'properties($select=status)'
+  ##   $orderby: JString
+  ##           : The ordering expression for the results, using OData notation.
   ##   $filter: JString
   ##          : The filter to apply to the operation.
   section = newJObject()
-  var valid_569290 = query.getOrDefault("$orderby")
-  valid_569290 = validateParameter(valid_569290, JString, required = false,
-                                 default = nil)
-  if valid_569290 != nil:
-    section.add "$orderby", valid_569290
-  var valid_569291 = query.getOrDefault("$expand")
-  valid_569291 = validateParameter(valid_569291, JString, required = false,
-                                 default = nil)
-  if valid_569291 != nil:
-    section.add "$expand", valid_569291
+  var valid_565190 = query.getOrDefault("$top")
+  valid_565190 = validateParameter(valid_565190, JInt, required = false, default = nil)
+  if valid_565190 != nil:
+    section.add "$top", valid_565190
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_569292 = query.getOrDefault("api-version")
-  valid_569292 = validateParameter(valid_569292, JString, required = true,
+  var valid_565191 = query.getOrDefault("api-version")
+  valid_565191 = validateParameter(valid_565191, JString, required = true,
                                  default = newJString("2016-05-15"))
-  if valid_569292 != nil:
-    section.add "api-version", valid_569292
-  var valid_569293 = query.getOrDefault("$top")
-  valid_569293 = validateParameter(valid_569293, JInt, required = false, default = nil)
-  if valid_569293 != nil:
-    section.add "$top", valid_569293
-  var valid_569294 = query.getOrDefault("$filter")
-  valid_569294 = validateParameter(valid_569294, JString, required = false,
+  if valid_565191 != nil:
+    section.add "api-version", valid_565191
+  var valid_565192 = query.getOrDefault("$expand")
+  valid_565192 = validateParameter(valid_565192, JString, required = false,
                                  default = nil)
-  if valid_569294 != nil:
-    section.add "$filter", valid_569294
+  if valid_565192 != nil:
+    section.add "$expand", valid_565192
+  var valid_565193 = query.getOrDefault("$orderby")
+  valid_565193 = validateParameter(valid_565193, JString, required = false,
+                                 default = nil)
+  if valid_565193 != nil:
+    section.add "$orderby", valid_565193
+  var valid_565194 = query.getOrDefault("$filter")
+  valid_565194 = validateParameter(valid_565194, JString, required = false,
+                                 default = nil)
+  if valid_565194 != nil:
+    section.add "$filter", valid_565194
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -11497,65 +11423,64 @@ proc validate_VirtualMachineSchedulesList_569284(path: JsonNode; query: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_569295: Call_VirtualMachineSchedulesList_569283; path: JsonNode;
+proc call*(call_565195: Call_VirtualMachineSchedulesList_565183; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## List schedules in a given virtual machine.
   ## 
-  let valid = call_569295.validator(path, query, header, formData, body)
-  let scheme = call_569295.pickScheme
+  let valid = call_565195.validator(path, query, header, formData, body)
+  let scheme = call_565195.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_569295.url(scheme.get, call_569295.host, call_569295.base,
-                         call_569295.route, valid.getOrDefault("path"),
+  let url = call_565195.url(scheme.get, call_565195.host, call_565195.base,
+                         call_565195.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_569295, url, valid)
+  result = hook(call_565195, url, valid)
 
-proc call*(call_569296: Call_VirtualMachineSchedulesList_569283;
-          resourceGroupName: string; virtualMachineName: string;
-          subscriptionId: string; labName: string; Orderby: string = "";
-          Expand: string = ""; apiVersion: string = "2016-05-15"; Top: int = 0;
-          Filter: string = ""): Recallable =
+proc call*(call_565196: Call_VirtualMachineSchedulesList_565183; labName: string;
+          virtualMachineName: string; subscriptionId: string;
+          resourceGroupName: string; Top: int = 0; apiVersion: string = "2016-05-15";
+          Expand: string = ""; Orderby: string = ""; Filter: string = ""): Recallable =
   ## virtualMachineSchedulesList
   ## List schedules in a given virtual machine.
-  ##   Orderby: string
-  ##          : The ordering expression for the results, using OData notation.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   labName: string (required)
+  ##          : The name of the lab.
+  ##   Top: int
+  ##      : The maximum number of resources to return from the operation.
+  ##   apiVersion: string (required)
+  ##             : Client API version.
   ##   Expand: string
   ##         : Specify the $expand query. Example: 'properties($select=status)'
   ##   virtualMachineName: string (required)
   ##                     : The name of the virtual machine.
-  ##   apiVersion: string (required)
-  ##             : Client API version.
   ##   subscriptionId: string (required)
   ##                 : The subscription ID.
-  ##   Top: int
-  ##      : The maximum number of resources to return from the operation.
-  ##   labName: string (required)
-  ##          : The name of the lab.
+  ##   Orderby: string
+  ##          : The ordering expression for the results, using OData notation.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   Filter: string
   ##         : The filter to apply to the operation.
-  var path_569297 = newJObject()
-  var query_569298 = newJObject()
-  add(query_569298, "$orderby", newJString(Orderby))
-  add(path_569297, "resourceGroupName", newJString(resourceGroupName))
-  add(query_569298, "$expand", newJString(Expand))
-  add(path_569297, "virtualMachineName", newJString(virtualMachineName))
-  add(query_569298, "api-version", newJString(apiVersion))
-  add(path_569297, "subscriptionId", newJString(subscriptionId))
-  add(query_569298, "$top", newJInt(Top))
-  add(path_569297, "labName", newJString(labName))
-  add(query_569298, "$filter", newJString(Filter))
-  result = call_569296.call(path_569297, query_569298, nil, nil, nil)
+  var path_565197 = newJObject()
+  var query_565198 = newJObject()
+  add(path_565197, "labName", newJString(labName))
+  add(query_565198, "$top", newJInt(Top))
+  add(query_565198, "api-version", newJString(apiVersion))
+  add(query_565198, "$expand", newJString(Expand))
+  add(path_565197, "virtualMachineName", newJString(virtualMachineName))
+  add(path_565197, "subscriptionId", newJString(subscriptionId))
+  add(query_565198, "$orderby", newJString(Orderby))
+  add(path_565197, "resourceGroupName", newJString(resourceGroupName))
+  add(query_565198, "$filter", newJString(Filter))
+  result = call_565196.call(path_565197, query_565198, nil, nil, nil)
 
-var virtualMachineSchedulesList* = Call_VirtualMachineSchedulesList_569283(
+var virtualMachineSchedulesList* = Call_VirtualMachineSchedulesList_565183(
     name: "virtualMachineSchedulesList", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DevTestLab/labs/{labName}/virtualmachines/{virtualMachineName}/schedules",
-    validator: validate_VirtualMachineSchedulesList_569284, base: "",
-    url: url_VirtualMachineSchedulesList_569285, schemes: {Scheme.Https})
+    validator: validate_VirtualMachineSchedulesList_565184, base: "",
+    url: url_VirtualMachineSchedulesList_565185, schemes: {Scheme.Https})
 type
-  Call_VirtualMachineSchedulesCreateOrUpdate_569313 = ref object of OpenApiRestCall_567650
-proc url_VirtualMachineSchedulesCreateOrUpdate_569315(protocol: Scheme;
+  Call_VirtualMachineSchedulesCreateOrUpdate_565213 = ref object of OpenApiRestCall_563548
+proc url_VirtualMachineSchedulesCreateOrUpdate_565215(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -11584,51 +11509,50 @@ proc url_VirtualMachineSchedulesCreateOrUpdate_569315(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_VirtualMachineSchedulesCreateOrUpdate_569314(path: JsonNode;
+proc validate_VirtualMachineSchedulesCreateOrUpdate_565214(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Create or replace an existing schedule.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
+  ##   labName: JString (required)
+  ##          : The name of the lab.
   ##   virtualMachineName: JString (required)
   ##                     : The name of the virtual machine.
   ##   name: JString (required)
   ##       : The name of the schedule.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID.
-  ##   labName: JString (required)
-  ##          : The name of the lab.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_569316 = path.getOrDefault("resourceGroupName")
-  valid_569316 = validateParameter(valid_569316, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `labName` field"
+  var valid_565216 = path.getOrDefault("labName")
+  valid_565216 = validateParameter(valid_565216, JString, required = true,
                                  default = nil)
-  if valid_569316 != nil:
-    section.add "resourceGroupName", valid_569316
-  var valid_569317 = path.getOrDefault("virtualMachineName")
-  valid_569317 = validateParameter(valid_569317, JString, required = true,
+  if valid_565216 != nil:
+    section.add "labName", valid_565216
+  var valid_565217 = path.getOrDefault("virtualMachineName")
+  valid_565217 = validateParameter(valid_565217, JString, required = true,
                                  default = nil)
-  if valid_569317 != nil:
-    section.add "virtualMachineName", valid_569317
-  var valid_569318 = path.getOrDefault("name")
-  valid_569318 = validateParameter(valid_569318, JString, required = true,
+  if valid_565217 != nil:
+    section.add "virtualMachineName", valid_565217
+  var valid_565218 = path.getOrDefault("name")
+  valid_565218 = validateParameter(valid_565218, JString, required = true,
                                  default = nil)
-  if valid_569318 != nil:
-    section.add "name", valid_569318
-  var valid_569319 = path.getOrDefault("subscriptionId")
-  valid_569319 = validateParameter(valid_569319, JString, required = true,
+  if valid_565218 != nil:
+    section.add "name", valid_565218
+  var valid_565219 = path.getOrDefault("subscriptionId")
+  valid_565219 = validateParameter(valid_565219, JString, required = true,
                                  default = nil)
-  if valid_569319 != nil:
-    section.add "subscriptionId", valid_569319
-  var valid_569320 = path.getOrDefault("labName")
-  valid_569320 = validateParameter(valid_569320, JString, required = true,
+  if valid_565219 != nil:
+    section.add "subscriptionId", valid_565219
+  var valid_565220 = path.getOrDefault("resourceGroupName")
+  valid_565220 = validateParameter(valid_565220, JString, required = true,
                                  default = nil)
-  if valid_569320 != nil:
-    section.add "labName", valid_569320
+  if valid_565220 != nil:
+    section.add "resourceGroupName", valid_565220
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -11636,11 +11560,11 @@ proc validate_VirtualMachineSchedulesCreateOrUpdate_569314(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_569321 = query.getOrDefault("api-version")
-  valid_569321 = validateParameter(valid_569321, JString, required = true,
+  var valid_565221 = query.getOrDefault("api-version")
+  valid_565221 = validateParameter(valid_565221, JString, required = true,
                                  default = newJString("2016-05-15"))
-  if valid_569321 != nil:
-    section.add "api-version", valid_569321
+  if valid_565221 != nil:
+    section.add "api-version", valid_565221
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -11654,28 +11578,28 @@ proc validate_VirtualMachineSchedulesCreateOrUpdate_569314(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_569323: Call_VirtualMachineSchedulesCreateOrUpdate_569313;
+proc call*(call_565223: Call_VirtualMachineSchedulesCreateOrUpdate_565213;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Create or replace an existing schedule.
   ## 
-  let valid = call_569323.validator(path, query, header, formData, body)
-  let scheme = call_569323.pickScheme
+  let valid = call_565223.validator(path, query, header, formData, body)
+  let scheme = call_565223.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_569323.url(scheme.get, call_569323.host, call_569323.base,
-                         call_569323.route, valid.getOrDefault("path"),
+  let url = call_565223.url(scheme.get, call_565223.host, call_565223.base,
+                         call_565223.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_569323, url, valid)
+  result = hook(call_565223, url, valid)
 
-proc call*(call_569324: Call_VirtualMachineSchedulesCreateOrUpdate_569313;
-          resourceGroupName: string; virtualMachineName: string; name: string;
-          subscriptionId: string; labName: string; schedule: JsonNode;
+proc call*(call_565224: Call_VirtualMachineSchedulesCreateOrUpdate_565213;
+          labName: string; virtualMachineName: string; name: string;
+          subscriptionId: string; resourceGroupName: string; schedule: JsonNode;
           apiVersion: string = "2016-05-15"): Recallable =
   ## virtualMachineSchedulesCreateOrUpdate
   ## Create or replace an existing schedule.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   labName: string (required)
+  ##          : The name of the lab.
   ##   apiVersion: string (required)
   ##             : Client API version.
   ##   virtualMachineName: string (required)
@@ -11684,31 +11608,31 @@ proc call*(call_569324: Call_VirtualMachineSchedulesCreateOrUpdate_569313;
   ##       : The name of the schedule.
   ##   subscriptionId: string (required)
   ##                 : The subscription ID.
-  ##   labName: string (required)
-  ##          : The name of the lab.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   schedule: JObject (required)
   ##           : A schedule.
-  var path_569325 = newJObject()
-  var query_569326 = newJObject()
-  var body_569327 = newJObject()
-  add(path_569325, "resourceGroupName", newJString(resourceGroupName))
-  add(query_569326, "api-version", newJString(apiVersion))
-  add(path_569325, "virtualMachineName", newJString(virtualMachineName))
-  add(path_569325, "name", newJString(name))
-  add(path_569325, "subscriptionId", newJString(subscriptionId))
-  add(path_569325, "labName", newJString(labName))
+  var path_565225 = newJObject()
+  var query_565226 = newJObject()
+  var body_565227 = newJObject()
+  add(path_565225, "labName", newJString(labName))
+  add(query_565226, "api-version", newJString(apiVersion))
+  add(path_565225, "virtualMachineName", newJString(virtualMachineName))
+  add(path_565225, "name", newJString(name))
+  add(path_565225, "subscriptionId", newJString(subscriptionId))
+  add(path_565225, "resourceGroupName", newJString(resourceGroupName))
   if schedule != nil:
-    body_569327 = schedule
-  result = call_569324.call(path_569325, query_569326, nil, nil, body_569327)
+    body_565227 = schedule
+  result = call_565224.call(path_565225, query_565226, nil, nil, body_565227)
 
-var virtualMachineSchedulesCreateOrUpdate* = Call_VirtualMachineSchedulesCreateOrUpdate_569313(
+var virtualMachineSchedulesCreateOrUpdate* = Call_VirtualMachineSchedulesCreateOrUpdate_565213(
     name: "virtualMachineSchedulesCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DevTestLab/labs/{labName}/virtualmachines/{virtualMachineName}/schedules/{name}",
-    validator: validate_VirtualMachineSchedulesCreateOrUpdate_569314, base: "",
-    url: url_VirtualMachineSchedulesCreateOrUpdate_569315, schemes: {Scheme.Https})
+    validator: validate_VirtualMachineSchedulesCreateOrUpdate_565214, base: "",
+    url: url_VirtualMachineSchedulesCreateOrUpdate_565215, schemes: {Scheme.Https})
 type
-  Call_VirtualMachineSchedulesGet_569299 = ref object of OpenApiRestCall_567650
-proc url_VirtualMachineSchedulesGet_569301(protocol: Scheme; host: string;
+  Call_VirtualMachineSchedulesGet_565199 = ref object of OpenApiRestCall_563548
+proc url_VirtualMachineSchedulesGet_565201(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -11737,70 +11661,69 @@ proc url_VirtualMachineSchedulesGet_569301(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_VirtualMachineSchedulesGet_569300(path: JsonNode; query: JsonNode;
+proc validate_VirtualMachineSchedulesGet_565200(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Get schedule.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
+  ##   labName: JString (required)
+  ##          : The name of the lab.
   ##   virtualMachineName: JString (required)
   ##                     : The name of the virtual machine.
   ##   name: JString (required)
   ##       : The name of the schedule.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID.
-  ##   labName: JString (required)
-  ##          : The name of the lab.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_569302 = path.getOrDefault("resourceGroupName")
-  valid_569302 = validateParameter(valid_569302, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `labName` field"
+  var valid_565202 = path.getOrDefault("labName")
+  valid_565202 = validateParameter(valid_565202, JString, required = true,
                                  default = nil)
-  if valid_569302 != nil:
-    section.add "resourceGroupName", valid_569302
-  var valid_569303 = path.getOrDefault("virtualMachineName")
-  valid_569303 = validateParameter(valid_569303, JString, required = true,
+  if valid_565202 != nil:
+    section.add "labName", valid_565202
+  var valid_565203 = path.getOrDefault("virtualMachineName")
+  valid_565203 = validateParameter(valid_565203, JString, required = true,
                                  default = nil)
-  if valid_569303 != nil:
-    section.add "virtualMachineName", valid_569303
-  var valid_569304 = path.getOrDefault("name")
-  valid_569304 = validateParameter(valid_569304, JString, required = true,
+  if valid_565203 != nil:
+    section.add "virtualMachineName", valid_565203
+  var valid_565204 = path.getOrDefault("name")
+  valid_565204 = validateParameter(valid_565204, JString, required = true,
                                  default = nil)
-  if valid_569304 != nil:
-    section.add "name", valid_569304
-  var valid_569305 = path.getOrDefault("subscriptionId")
-  valid_569305 = validateParameter(valid_569305, JString, required = true,
+  if valid_565204 != nil:
+    section.add "name", valid_565204
+  var valid_565205 = path.getOrDefault("subscriptionId")
+  valid_565205 = validateParameter(valid_565205, JString, required = true,
                                  default = nil)
-  if valid_569305 != nil:
-    section.add "subscriptionId", valid_569305
-  var valid_569306 = path.getOrDefault("labName")
-  valid_569306 = validateParameter(valid_569306, JString, required = true,
+  if valid_565205 != nil:
+    section.add "subscriptionId", valid_565205
+  var valid_565206 = path.getOrDefault("resourceGroupName")
+  valid_565206 = validateParameter(valid_565206, JString, required = true,
                                  default = nil)
-  if valid_569306 != nil:
-    section.add "labName", valid_569306
+  if valid_565206 != nil:
+    section.add "resourceGroupName", valid_565206
   result.add "path", section
   ## parameters in `query` object:
-  ##   $expand: JString
-  ##          : Specify the $expand query. Example: 'properties($select=status)'
   ##   api-version: JString (required)
   ##              : Client API version.
+  ##   $expand: JString
+  ##          : Specify the $expand query. Example: 'properties($select=status)'
   section = newJObject()
-  var valid_569307 = query.getOrDefault("$expand")
-  valid_569307 = validateParameter(valid_569307, JString, required = false,
-                                 default = nil)
-  if valid_569307 != nil:
-    section.add "$expand", valid_569307
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_569308 = query.getOrDefault("api-version")
-  valid_569308 = validateParameter(valid_569308, JString, required = true,
+  var valid_565207 = query.getOrDefault("api-version")
+  valid_565207 = validateParameter(valid_565207, JString, required = true,
                                  default = newJString("2016-05-15"))
-  if valid_569308 != nil:
-    section.add "api-version", valid_569308
+  if valid_565207 != nil:
+    section.add "api-version", valid_565207
+  var valid_565208 = query.getOrDefault("$expand")
+  valid_565208 = validateParameter(valid_565208, JString, required = false,
+                                 default = nil)
+  if valid_565208 != nil:
+    section.add "$expand", valid_565208
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -11809,58 +11732,58 @@ proc validate_VirtualMachineSchedulesGet_569300(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_569309: Call_VirtualMachineSchedulesGet_569299; path: JsonNode;
+proc call*(call_565209: Call_VirtualMachineSchedulesGet_565199; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get schedule.
   ## 
-  let valid = call_569309.validator(path, query, header, formData, body)
-  let scheme = call_569309.pickScheme
+  let valid = call_565209.validator(path, query, header, formData, body)
+  let scheme = call_565209.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_569309.url(scheme.get, call_569309.host, call_569309.base,
-                         call_569309.route, valid.getOrDefault("path"),
+  let url = call_565209.url(scheme.get, call_565209.host, call_565209.base,
+                         call_565209.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_569309, url, valid)
+  result = hook(call_565209, url, valid)
 
-proc call*(call_569310: Call_VirtualMachineSchedulesGet_569299;
-          resourceGroupName: string; virtualMachineName: string; name: string;
-          subscriptionId: string; labName: string; Expand: string = "";
-          apiVersion: string = "2016-05-15"): Recallable =
+proc call*(call_565210: Call_VirtualMachineSchedulesGet_565199; labName: string;
+          virtualMachineName: string; name: string; subscriptionId: string;
+          resourceGroupName: string; apiVersion: string = "2016-05-15";
+          Expand: string = ""): Recallable =
   ## virtualMachineSchedulesGet
   ## Get schedule.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   labName: string (required)
+  ##          : The name of the lab.
+  ##   apiVersion: string (required)
+  ##             : Client API version.
   ##   Expand: string
   ##         : Specify the $expand query. Example: 'properties($select=status)'
   ##   virtualMachineName: string (required)
   ##                     : The name of the virtual machine.
   ##   name: string (required)
   ##       : The name of the schedule.
-  ##   apiVersion: string (required)
-  ##             : Client API version.
   ##   subscriptionId: string (required)
   ##                 : The subscription ID.
-  ##   labName: string (required)
-  ##          : The name of the lab.
-  var path_569311 = newJObject()
-  var query_569312 = newJObject()
-  add(path_569311, "resourceGroupName", newJString(resourceGroupName))
-  add(query_569312, "$expand", newJString(Expand))
-  add(path_569311, "virtualMachineName", newJString(virtualMachineName))
-  add(path_569311, "name", newJString(name))
-  add(query_569312, "api-version", newJString(apiVersion))
-  add(path_569311, "subscriptionId", newJString(subscriptionId))
-  add(path_569311, "labName", newJString(labName))
-  result = call_569310.call(path_569311, query_569312, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_565211 = newJObject()
+  var query_565212 = newJObject()
+  add(path_565211, "labName", newJString(labName))
+  add(query_565212, "api-version", newJString(apiVersion))
+  add(query_565212, "$expand", newJString(Expand))
+  add(path_565211, "virtualMachineName", newJString(virtualMachineName))
+  add(path_565211, "name", newJString(name))
+  add(path_565211, "subscriptionId", newJString(subscriptionId))
+  add(path_565211, "resourceGroupName", newJString(resourceGroupName))
+  result = call_565210.call(path_565211, query_565212, nil, nil, nil)
 
-var virtualMachineSchedulesGet* = Call_VirtualMachineSchedulesGet_569299(
+var virtualMachineSchedulesGet* = Call_VirtualMachineSchedulesGet_565199(
     name: "virtualMachineSchedulesGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DevTestLab/labs/{labName}/virtualmachines/{virtualMachineName}/schedules/{name}",
-    validator: validate_VirtualMachineSchedulesGet_569300, base: "",
-    url: url_VirtualMachineSchedulesGet_569301, schemes: {Scheme.Https})
+    validator: validate_VirtualMachineSchedulesGet_565200, base: "",
+    url: url_VirtualMachineSchedulesGet_565201, schemes: {Scheme.Https})
 type
-  Call_VirtualMachineSchedulesUpdate_569341 = ref object of OpenApiRestCall_567650
-proc url_VirtualMachineSchedulesUpdate_569343(protocol: Scheme; host: string;
+  Call_VirtualMachineSchedulesUpdate_565241 = ref object of OpenApiRestCall_563548
+proc url_VirtualMachineSchedulesUpdate_565243(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -11889,51 +11812,50 @@ proc url_VirtualMachineSchedulesUpdate_569343(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_VirtualMachineSchedulesUpdate_569342(path: JsonNode; query: JsonNode;
+proc validate_VirtualMachineSchedulesUpdate_565242(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Modify properties of schedules.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
+  ##   labName: JString (required)
+  ##          : The name of the lab.
   ##   virtualMachineName: JString (required)
   ##                     : The name of the virtual machine.
   ##   name: JString (required)
   ##       : The name of the schedule.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID.
-  ##   labName: JString (required)
-  ##          : The name of the lab.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_569344 = path.getOrDefault("resourceGroupName")
-  valid_569344 = validateParameter(valid_569344, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `labName` field"
+  var valid_565244 = path.getOrDefault("labName")
+  valid_565244 = validateParameter(valid_565244, JString, required = true,
                                  default = nil)
-  if valid_569344 != nil:
-    section.add "resourceGroupName", valid_569344
-  var valid_569345 = path.getOrDefault("virtualMachineName")
-  valid_569345 = validateParameter(valid_569345, JString, required = true,
+  if valid_565244 != nil:
+    section.add "labName", valid_565244
+  var valid_565245 = path.getOrDefault("virtualMachineName")
+  valid_565245 = validateParameter(valid_565245, JString, required = true,
                                  default = nil)
-  if valid_569345 != nil:
-    section.add "virtualMachineName", valid_569345
-  var valid_569346 = path.getOrDefault("name")
-  valid_569346 = validateParameter(valid_569346, JString, required = true,
+  if valid_565245 != nil:
+    section.add "virtualMachineName", valid_565245
+  var valid_565246 = path.getOrDefault("name")
+  valid_565246 = validateParameter(valid_565246, JString, required = true,
                                  default = nil)
-  if valid_569346 != nil:
-    section.add "name", valid_569346
-  var valid_569347 = path.getOrDefault("subscriptionId")
-  valid_569347 = validateParameter(valid_569347, JString, required = true,
+  if valid_565246 != nil:
+    section.add "name", valid_565246
+  var valid_565247 = path.getOrDefault("subscriptionId")
+  valid_565247 = validateParameter(valid_565247, JString, required = true,
                                  default = nil)
-  if valid_569347 != nil:
-    section.add "subscriptionId", valid_569347
-  var valid_569348 = path.getOrDefault("labName")
-  valid_569348 = validateParameter(valid_569348, JString, required = true,
+  if valid_565247 != nil:
+    section.add "subscriptionId", valid_565247
+  var valid_565248 = path.getOrDefault("resourceGroupName")
+  valid_565248 = validateParameter(valid_565248, JString, required = true,
                                  default = nil)
-  if valid_569348 != nil:
-    section.add "labName", valid_569348
+  if valid_565248 != nil:
+    section.add "resourceGroupName", valid_565248
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -11941,11 +11863,11 @@ proc validate_VirtualMachineSchedulesUpdate_569342(path: JsonNode; query: JsonNo
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_569349 = query.getOrDefault("api-version")
-  valid_569349 = validateParameter(valid_569349, JString, required = true,
+  var valid_565249 = query.getOrDefault("api-version")
+  valid_565249 = validateParameter(valid_565249, JString, required = true,
                                  default = newJString("2016-05-15"))
-  if valid_569349 != nil:
-    section.add "api-version", valid_569349
+  if valid_565249 != nil:
+    section.add "api-version", valid_565249
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -11959,27 +11881,27 @@ proc validate_VirtualMachineSchedulesUpdate_569342(path: JsonNode; query: JsonNo
   if body != nil:
     result.add "body", body
 
-proc call*(call_569351: Call_VirtualMachineSchedulesUpdate_569341; path: JsonNode;
+proc call*(call_565251: Call_VirtualMachineSchedulesUpdate_565241; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Modify properties of schedules.
   ## 
-  let valid = call_569351.validator(path, query, header, formData, body)
-  let scheme = call_569351.pickScheme
+  let valid = call_565251.validator(path, query, header, formData, body)
+  let scheme = call_565251.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_569351.url(scheme.get, call_569351.host, call_569351.base,
-                         call_569351.route, valid.getOrDefault("path"),
+  let url = call_565251.url(scheme.get, call_565251.host, call_565251.base,
+                         call_565251.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_569351, url, valid)
+  result = hook(call_565251, url, valid)
 
-proc call*(call_569352: Call_VirtualMachineSchedulesUpdate_569341;
-          resourceGroupName: string; virtualMachineName: string; name: string;
-          subscriptionId: string; labName: string; schedule: JsonNode;
+proc call*(call_565252: Call_VirtualMachineSchedulesUpdate_565241; labName: string;
+          virtualMachineName: string; name: string; subscriptionId: string;
+          resourceGroupName: string; schedule: JsonNode;
           apiVersion: string = "2016-05-15"): Recallable =
   ## virtualMachineSchedulesUpdate
   ## Modify properties of schedules.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   labName: string (required)
+  ##          : The name of the lab.
   ##   apiVersion: string (required)
   ##             : Client API version.
   ##   virtualMachineName: string (required)
@@ -11988,31 +11910,31 @@ proc call*(call_569352: Call_VirtualMachineSchedulesUpdate_569341;
   ##       : The name of the schedule.
   ##   subscriptionId: string (required)
   ##                 : The subscription ID.
-  ##   labName: string (required)
-  ##          : The name of the lab.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   schedule: JObject (required)
   ##           : A schedule.
-  var path_569353 = newJObject()
-  var query_569354 = newJObject()
-  var body_569355 = newJObject()
-  add(path_569353, "resourceGroupName", newJString(resourceGroupName))
-  add(query_569354, "api-version", newJString(apiVersion))
-  add(path_569353, "virtualMachineName", newJString(virtualMachineName))
-  add(path_569353, "name", newJString(name))
-  add(path_569353, "subscriptionId", newJString(subscriptionId))
-  add(path_569353, "labName", newJString(labName))
+  var path_565253 = newJObject()
+  var query_565254 = newJObject()
+  var body_565255 = newJObject()
+  add(path_565253, "labName", newJString(labName))
+  add(query_565254, "api-version", newJString(apiVersion))
+  add(path_565253, "virtualMachineName", newJString(virtualMachineName))
+  add(path_565253, "name", newJString(name))
+  add(path_565253, "subscriptionId", newJString(subscriptionId))
+  add(path_565253, "resourceGroupName", newJString(resourceGroupName))
   if schedule != nil:
-    body_569355 = schedule
-  result = call_569352.call(path_569353, query_569354, nil, nil, body_569355)
+    body_565255 = schedule
+  result = call_565252.call(path_565253, query_565254, nil, nil, body_565255)
 
-var virtualMachineSchedulesUpdate* = Call_VirtualMachineSchedulesUpdate_569341(
+var virtualMachineSchedulesUpdate* = Call_VirtualMachineSchedulesUpdate_565241(
     name: "virtualMachineSchedulesUpdate", meth: HttpMethod.HttpPatch,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DevTestLab/labs/{labName}/virtualmachines/{virtualMachineName}/schedules/{name}",
-    validator: validate_VirtualMachineSchedulesUpdate_569342, base: "",
-    url: url_VirtualMachineSchedulesUpdate_569343, schemes: {Scheme.Https})
+    validator: validate_VirtualMachineSchedulesUpdate_565242, base: "",
+    url: url_VirtualMachineSchedulesUpdate_565243, schemes: {Scheme.Https})
 type
-  Call_VirtualMachineSchedulesDelete_569328 = ref object of OpenApiRestCall_567650
-proc url_VirtualMachineSchedulesDelete_569330(protocol: Scheme; host: string;
+  Call_VirtualMachineSchedulesDelete_565228 = ref object of OpenApiRestCall_563548
+proc url_VirtualMachineSchedulesDelete_565230(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -12041,51 +11963,50 @@ proc url_VirtualMachineSchedulesDelete_569330(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_VirtualMachineSchedulesDelete_569329(path: JsonNode; query: JsonNode;
+proc validate_VirtualMachineSchedulesDelete_565229(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Delete schedule.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
+  ##   labName: JString (required)
+  ##          : The name of the lab.
   ##   virtualMachineName: JString (required)
   ##                     : The name of the virtual machine.
   ##   name: JString (required)
   ##       : The name of the schedule.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID.
-  ##   labName: JString (required)
-  ##          : The name of the lab.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_569331 = path.getOrDefault("resourceGroupName")
-  valid_569331 = validateParameter(valid_569331, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `labName` field"
+  var valid_565231 = path.getOrDefault("labName")
+  valid_565231 = validateParameter(valid_565231, JString, required = true,
                                  default = nil)
-  if valid_569331 != nil:
-    section.add "resourceGroupName", valid_569331
-  var valid_569332 = path.getOrDefault("virtualMachineName")
-  valid_569332 = validateParameter(valid_569332, JString, required = true,
+  if valid_565231 != nil:
+    section.add "labName", valid_565231
+  var valid_565232 = path.getOrDefault("virtualMachineName")
+  valid_565232 = validateParameter(valid_565232, JString, required = true,
                                  default = nil)
-  if valid_569332 != nil:
-    section.add "virtualMachineName", valid_569332
-  var valid_569333 = path.getOrDefault("name")
-  valid_569333 = validateParameter(valid_569333, JString, required = true,
+  if valid_565232 != nil:
+    section.add "virtualMachineName", valid_565232
+  var valid_565233 = path.getOrDefault("name")
+  valid_565233 = validateParameter(valid_565233, JString, required = true,
                                  default = nil)
-  if valid_569333 != nil:
-    section.add "name", valid_569333
-  var valid_569334 = path.getOrDefault("subscriptionId")
-  valid_569334 = validateParameter(valid_569334, JString, required = true,
+  if valid_565233 != nil:
+    section.add "name", valid_565233
+  var valid_565234 = path.getOrDefault("subscriptionId")
+  valid_565234 = validateParameter(valid_565234, JString, required = true,
                                  default = nil)
-  if valid_569334 != nil:
-    section.add "subscriptionId", valid_569334
-  var valid_569335 = path.getOrDefault("labName")
-  valid_569335 = validateParameter(valid_569335, JString, required = true,
+  if valid_565234 != nil:
+    section.add "subscriptionId", valid_565234
+  var valid_565235 = path.getOrDefault("resourceGroupName")
+  valid_565235 = validateParameter(valid_565235, JString, required = true,
                                  default = nil)
-  if valid_569335 != nil:
-    section.add "labName", valid_569335
+  if valid_565235 != nil:
+    section.add "resourceGroupName", valid_565235
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -12093,11 +12014,11 @@ proc validate_VirtualMachineSchedulesDelete_569329(path: JsonNode; query: JsonNo
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_569336 = query.getOrDefault("api-version")
-  valid_569336 = validateParameter(valid_569336, JString, required = true,
+  var valid_565236 = query.getOrDefault("api-version")
+  valid_565236 = validateParameter(valid_565236, JString, required = true,
                                  default = newJString("2016-05-15"))
-  if valid_569336 != nil:
-    section.add "api-version", valid_569336
+  if valid_565236 != nil:
+    section.add "api-version", valid_565236
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -12106,26 +12027,26 @@ proc validate_VirtualMachineSchedulesDelete_569329(path: JsonNode; query: JsonNo
   if body != nil:
     result.add "body", body
 
-proc call*(call_569337: Call_VirtualMachineSchedulesDelete_569328; path: JsonNode;
+proc call*(call_565237: Call_VirtualMachineSchedulesDelete_565228; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Delete schedule.
   ## 
-  let valid = call_569337.validator(path, query, header, formData, body)
-  let scheme = call_569337.pickScheme
+  let valid = call_565237.validator(path, query, header, formData, body)
+  let scheme = call_565237.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_569337.url(scheme.get, call_569337.host, call_569337.base,
-                         call_569337.route, valid.getOrDefault("path"),
+  let url = call_565237.url(scheme.get, call_565237.host, call_565237.base,
+                         call_565237.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_569337, url, valid)
+  result = hook(call_565237, url, valid)
 
-proc call*(call_569338: Call_VirtualMachineSchedulesDelete_569328;
-          resourceGroupName: string; virtualMachineName: string; name: string;
-          subscriptionId: string; labName: string; apiVersion: string = "2016-05-15"): Recallable =
+proc call*(call_565238: Call_VirtualMachineSchedulesDelete_565228; labName: string;
+          virtualMachineName: string; name: string; subscriptionId: string;
+          resourceGroupName: string; apiVersion: string = "2016-05-15"): Recallable =
   ## virtualMachineSchedulesDelete
   ## Delete schedule.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   labName: string (required)
+  ##          : The name of the lab.
   ##   apiVersion: string (required)
   ##             : Client API version.
   ##   virtualMachineName: string (required)
@@ -12134,26 +12055,26 @@ proc call*(call_569338: Call_VirtualMachineSchedulesDelete_569328;
   ##       : The name of the schedule.
   ##   subscriptionId: string (required)
   ##                 : The subscription ID.
-  ##   labName: string (required)
-  ##          : The name of the lab.
-  var path_569339 = newJObject()
-  var query_569340 = newJObject()
-  add(path_569339, "resourceGroupName", newJString(resourceGroupName))
-  add(query_569340, "api-version", newJString(apiVersion))
-  add(path_569339, "virtualMachineName", newJString(virtualMachineName))
-  add(path_569339, "name", newJString(name))
-  add(path_569339, "subscriptionId", newJString(subscriptionId))
-  add(path_569339, "labName", newJString(labName))
-  result = call_569338.call(path_569339, query_569340, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_565239 = newJObject()
+  var query_565240 = newJObject()
+  add(path_565239, "labName", newJString(labName))
+  add(query_565240, "api-version", newJString(apiVersion))
+  add(path_565239, "virtualMachineName", newJString(virtualMachineName))
+  add(path_565239, "name", newJString(name))
+  add(path_565239, "subscriptionId", newJString(subscriptionId))
+  add(path_565239, "resourceGroupName", newJString(resourceGroupName))
+  result = call_565238.call(path_565239, query_565240, nil, nil, nil)
 
-var virtualMachineSchedulesDelete* = Call_VirtualMachineSchedulesDelete_569328(
+var virtualMachineSchedulesDelete* = Call_VirtualMachineSchedulesDelete_565228(
     name: "virtualMachineSchedulesDelete", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DevTestLab/labs/{labName}/virtualmachines/{virtualMachineName}/schedules/{name}",
-    validator: validate_VirtualMachineSchedulesDelete_569329, base: "",
-    url: url_VirtualMachineSchedulesDelete_569330, schemes: {Scheme.Https})
+    validator: validate_VirtualMachineSchedulesDelete_565229, base: "",
+    url: url_VirtualMachineSchedulesDelete_565230, schemes: {Scheme.Https})
 type
-  Call_VirtualMachineSchedulesExecute_569356 = ref object of OpenApiRestCall_567650
-proc url_VirtualMachineSchedulesExecute_569358(protocol: Scheme; host: string;
+  Call_VirtualMachineSchedulesExecute_565256 = ref object of OpenApiRestCall_563548
+proc url_VirtualMachineSchedulesExecute_565258(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -12183,51 +12104,50 @@ proc url_VirtualMachineSchedulesExecute_569358(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_VirtualMachineSchedulesExecute_569357(path: JsonNode;
+proc validate_VirtualMachineSchedulesExecute_565257(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Execute a schedule. This operation can take a while to complete.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
+  ##   labName: JString (required)
+  ##          : The name of the lab.
   ##   virtualMachineName: JString (required)
   ##                     : The name of the virtual machine.
   ##   name: JString (required)
   ##       : The name of the schedule.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID.
-  ##   labName: JString (required)
-  ##          : The name of the lab.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_569359 = path.getOrDefault("resourceGroupName")
-  valid_569359 = validateParameter(valid_569359, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `labName` field"
+  var valid_565259 = path.getOrDefault("labName")
+  valid_565259 = validateParameter(valid_565259, JString, required = true,
                                  default = nil)
-  if valid_569359 != nil:
-    section.add "resourceGroupName", valid_569359
-  var valid_569360 = path.getOrDefault("virtualMachineName")
-  valid_569360 = validateParameter(valid_569360, JString, required = true,
+  if valid_565259 != nil:
+    section.add "labName", valid_565259
+  var valid_565260 = path.getOrDefault("virtualMachineName")
+  valid_565260 = validateParameter(valid_565260, JString, required = true,
                                  default = nil)
-  if valid_569360 != nil:
-    section.add "virtualMachineName", valid_569360
-  var valid_569361 = path.getOrDefault("name")
-  valid_569361 = validateParameter(valid_569361, JString, required = true,
+  if valid_565260 != nil:
+    section.add "virtualMachineName", valid_565260
+  var valid_565261 = path.getOrDefault("name")
+  valid_565261 = validateParameter(valid_565261, JString, required = true,
                                  default = nil)
-  if valid_569361 != nil:
-    section.add "name", valid_569361
-  var valid_569362 = path.getOrDefault("subscriptionId")
-  valid_569362 = validateParameter(valid_569362, JString, required = true,
+  if valid_565261 != nil:
+    section.add "name", valid_565261
+  var valid_565262 = path.getOrDefault("subscriptionId")
+  valid_565262 = validateParameter(valid_565262, JString, required = true,
                                  default = nil)
-  if valid_569362 != nil:
-    section.add "subscriptionId", valid_569362
-  var valid_569363 = path.getOrDefault("labName")
-  valid_569363 = validateParameter(valid_569363, JString, required = true,
+  if valid_565262 != nil:
+    section.add "subscriptionId", valid_565262
+  var valid_565263 = path.getOrDefault("resourceGroupName")
+  valid_565263 = validateParameter(valid_565263, JString, required = true,
                                  default = nil)
-  if valid_569363 != nil:
-    section.add "labName", valid_569363
+  if valid_565263 != nil:
+    section.add "resourceGroupName", valid_565263
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -12235,11 +12155,11 @@ proc validate_VirtualMachineSchedulesExecute_569357(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_569364 = query.getOrDefault("api-version")
-  valid_569364 = validateParameter(valid_569364, JString, required = true,
+  var valid_565264 = query.getOrDefault("api-version")
+  valid_565264 = validateParameter(valid_565264, JString, required = true,
                                  default = newJString("2016-05-15"))
-  if valid_569364 != nil:
-    section.add "api-version", valid_569364
+  if valid_565264 != nil:
+    section.add "api-version", valid_565264
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -12248,26 +12168,27 @@ proc validate_VirtualMachineSchedulesExecute_569357(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_569365: Call_VirtualMachineSchedulesExecute_569356; path: JsonNode;
+proc call*(call_565265: Call_VirtualMachineSchedulesExecute_565256; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Execute a schedule. This operation can take a while to complete.
   ## 
-  let valid = call_569365.validator(path, query, header, formData, body)
-  let scheme = call_569365.pickScheme
+  let valid = call_565265.validator(path, query, header, formData, body)
+  let scheme = call_565265.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_569365.url(scheme.get, call_569365.host, call_569365.base,
-                         call_569365.route, valid.getOrDefault("path"),
+  let url = call_565265.url(scheme.get, call_565265.host, call_565265.base,
+                         call_565265.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_569365, url, valid)
+  result = hook(call_565265, url, valid)
 
-proc call*(call_569366: Call_VirtualMachineSchedulesExecute_569356;
-          resourceGroupName: string; virtualMachineName: string; name: string;
-          subscriptionId: string; labName: string; apiVersion: string = "2016-05-15"): Recallable =
+proc call*(call_565266: Call_VirtualMachineSchedulesExecute_565256;
+          labName: string; virtualMachineName: string; name: string;
+          subscriptionId: string; resourceGroupName: string;
+          apiVersion: string = "2016-05-15"): Recallable =
   ## virtualMachineSchedulesExecute
   ## Execute a schedule. This operation can take a while to complete.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   labName: string (required)
+  ##          : The name of the lab.
   ##   apiVersion: string (required)
   ##             : Client API version.
   ##   virtualMachineName: string (required)
@@ -12276,26 +12197,26 @@ proc call*(call_569366: Call_VirtualMachineSchedulesExecute_569356;
   ##       : The name of the schedule.
   ##   subscriptionId: string (required)
   ##                 : The subscription ID.
-  ##   labName: string (required)
-  ##          : The name of the lab.
-  var path_569367 = newJObject()
-  var query_569368 = newJObject()
-  add(path_569367, "resourceGroupName", newJString(resourceGroupName))
-  add(query_569368, "api-version", newJString(apiVersion))
-  add(path_569367, "virtualMachineName", newJString(virtualMachineName))
-  add(path_569367, "name", newJString(name))
-  add(path_569367, "subscriptionId", newJString(subscriptionId))
-  add(path_569367, "labName", newJString(labName))
-  result = call_569366.call(path_569367, query_569368, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_565267 = newJObject()
+  var query_565268 = newJObject()
+  add(path_565267, "labName", newJString(labName))
+  add(query_565268, "api-version", newJString(apiVersion))
+  add(path_565267, "virtualMachineName", newJString(virtualMachineName))
+  add(path_565267, "name", newJString(name))
+  add(path_565267, "subscriptionId", newJString(subscriptionId))
+  add(path_565267, "resourceGroupName", newJString(resourceGroupName))
+  result = call_565266.call(path_565267, query_565268, nil, nil, nil)
 
-var virtualMachineSchedulesExecute* = Call_VirtualMachineSchedulesExecute_569356(
+var virtualMachineSchedulesExecute* = Call_VirtualMachineSchedulesExecute_565256(
     name: "virtualMachineSchedulesExecute", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DevTestLab/labs/{labName}/virtualmachines/{virtualMachineName}/schedules/{name}/execute",
-    validator: validate_VirtualMachineSchedulesExecute_569357, base: "",
-    url: url_VirtualMachineSchedulesExecute_569358, schemes: {Scheme.Https})
+    validator: validate_VirtualMachineSchedulesExecute_565257, base: "",
+    url: url_VirtualMachineSchedulesExecute_565258, schemes: {Scheme.Https})
 type
-  Call_VirtualNetworksList_569369 = ref object of OpenApiRestCall_567650
-proc url_VirtualNetworksList_569371(protocol: Scheme; host: string; base: string;
+  Call_VirtualNetworksList_565269 = ref object of OpenApiRestCall_563548
+proc url_VirtualNetworksList_565271(protocol: Scheme; host: string; base: string;
                                    route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -12318,7 +12239,7 @@ proc url_VirtualNetworksList_569371(protocol: Scheme; host: string; base: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_VirtualNetworksList_569370(path: JsonNode; query: JsonNode;
+proc validate_VirtualNetworksList_565270(path: JsonNode; query: JsonNode;
                                         header: JsonNode; formData: JsonNode;
                                         body: JsonNode): JsonNode =
   ## List virtual networks in a given lab.
@@ -12326,69 +12247,68 @@ proc validate_VirtualNetworksList_569370(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
-  ##   subscriptionId: JString (required)
-  ##                 : The subscription ID.
   ##   labName: JString (required)
   ##          : The name of the lab.
+  ##   subscriptionId: JString (required)
+  ##                 : The subscription ID.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_569372 = path.getOrDefault("resourceGroupName")
-  valid_569372 = validateParameter(valid_569372, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `labName` field"
+  var valid_565272 = path.getOrDefault("labName")
+  valid_565272 = validateParameter(valid_565272, JString, required = true,
                                  default = nil)
-  if valid_569372 != nil:
-    section.add "resourceGroupName", valid_569372
-  var valid_569373 = path.getOrDefault("subscriptionId")
-  valid_569373 = validateParameter(valid_569373, JString, required = true,
+  if valid_565272 != nil:
+    section.add "labName", valid_565272
+  var valid_565273 = path.getOrDefault("subscriptionId")
+  valid_565273 = validateParameter(valid_565273, JString, required = true,
                                  default = nil)
-  if valid_569373 != nil:
-    section.add "subscriptionId", valid_569373
-  var valid_569374 = path.getOrDefault("labName")
-  valid_569374 = validateParameter(valid_569374, JString, required = true,
+  if valid_565273 != nil:
+    section.add "subscriptionId", valid_565273
+  var valid_565274 = path.getOrDefault("resourceGroupName")
+  valid_565274 = validateParameter(valid_565274, JString, required = true,
                                  default = nil)
-  if valid_569374 != nil:
-    section.add "labName", valid_569374
+  if valid_565274 != nil:
+    section.add "resourceGroupName", valid_565274
   result.add "path", section
   ## parameters in `query` object:
-  ##   $orderby: JString
-  ##           : The ordering expression for the results, using OData notation.
-  ##   $expand: JString
-  ##          : Specify the $expand query. Example: 'properties($expand=externalSubnets)'
-  ##   api-version: JString (required)
-  ##              : Client API version.
   ##   $top: JInt
   ##       : The maximum number of resources to return from the operation.
+  ##   api-version: JString (required)
+  ##              : Client API version.
+  ##   $expand: JString
+  ##          : Specify the $expand query. Example: 'properties($expand=externalSubnets)'
+  ##   $orderby: JString
+  ##           : The ordering expression for the results, using OData notation.
   ##   $filter: JString
   ##          : The filter to apply to the operation.
   section = newJObject()
-  var valid_569375 = query.getOrDefault("$orderby")
-  valid_569375 = validateParameter(valid_569375, JString, required = false,
-                                 default = nil)
-  if valid_569375 != nil:
-    section.add "$orderby", valid_569375
-  var valid_569376 = query.getOrDefault("$expand")
-  valid_569376 = validateParameter(valid_569376, JString, required = false,
-                                 default = nil)
-  if valid_569376 != nil:
-    section.add "$expand", valid_569376
+  var valid_565275 = query.getOrDefault("$top")
+  valid_565275 = validateParameter(valid_565275, JInt, required = false, default = nil)
+  if valid_565275 != nil:
+    section.add "$top", valid_565275
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_569377 = query.getOrDefault("api-version")
-  valid_569377 = validateParameter(valid_569377, JString, required = true,
+  var valid_565276 = query.getOrDefault("api-version")
+  valid_565276 = validateParameter(valid_565276, JString, required = true,
                                  default = newJString("2016-05-15"))
-  if valid_569377 != nil:
-    section.add "api-version", valid_569377
-  var valid_569378 = query.getOrDefault("$top")
-  valid_569378 = validateParameter(valid_569378, JInt, required = false, default = nil)
-  if valid_569378 != nil:
-    section.add "$top", valid_569378
-  var valid_569379 = query.getOrDefault("$filter")
-  valid_569379 = validateParameter(valid_569379, JString, required = false,
+  if valid_565276 != nil:
+    section.add "api-version", valid_565276
+  var valid_565277 = query.getOrDefault("$expand")
+  valid_565277 = validateParameter(valid_565277, JString, required = false,
                                  default = nil)
-  if valid_569379 != nil:
-    section.add "$filter", valid_569379
+  if valid_565277 != nil:
+    section.add "$expand", valid_565277
+  var valid_565278 = query.getOrDefault("$orderby")
+  valid_565278 = validateParameter(valid_565278, JString, required = false,
+                                 default = nil)
+  if valid_565278 != nil:
+    section.add "$orderby", valid_565278
+  var valid_565279 = query.getOrDefault("$filter")
+  valid_565279 = validateParameter(valid_565279, JString, required = false,
+                                 default = nil)
+  if valid_565279 != nil:
+    section.add "$filter", valid_565279
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -12397,61 +12317,61 @@ proc validate_VirtualNetworksList_569370(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_569380: Call_VirtualNetworksList_569369; path: JsonNode;
+proc call*(call_565280: Call_VirtualNetworksList_565269; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## List virtual networks in a given lab.
   ## 
-  let valid = call_569380.validator(path, query, header, formData, body)
-  let scheme = call_569380.pickScheme
+  let valid = call_565280.validator(path, query, header, formData, body)
+  let scheme = call_565280.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_569380.url(scheme.get, call_569380.host, call_569380.base,
-                         call_569380.route, valid.getOrDefault("path"),
+  let url = call_565280.url(scheme.get, call_565280.host, call_565280.base,
+                         call_565280.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_569380, url, valid)
+  result = hook(call_565280, url, valid)
 
-proc call*(call_569381: Call_VirtualNetworksList_569369; resourceGroupName: string;
-          subscriptionId: string; labName: string; Orderby: string = "";
-          Expand: string = ""; apiVersion: string = "2016-05-15"; Top: int = 0;
+proc call*(call_565281: Call_VirtualNetworksList_565269; labName: string;
+          subscriptionId: string; resourceGroupName: string; Top: int = 0;
+          apiVersion: string = "2016-05-15"; Expand: string = ""; Orderby: string = "";
           Filter: string = ""): Recallable =
   ## virtualNetworksList
   ## List virtual networks in a given lab.
+  ##   labName: string (required)
+  ##          : The name of the lab.
+  ##   Top: int
+  ##      : The maximum number of resources to return from the operation.
+  ##   apiVersion: string (required)
+  ##             : Client API version.
+  ##   Expand: string
+  ##         : Specify the $expand query. Example: 'properties($expand=externalSubnets)'
+  ##   subscriptionId: string (required)
+  ##                 : The subscription ID.
   ##   Orderby: string
   ##          : The ordering expression for the results, using OData notation.
   ##   resourceGroupName: string (required)
   ##                    : The name of the resource group.
-  ##   Expand: string
-  ##         : Specify the $expand query. Example: 'properties($expand=externalSubnets)'
-  ##   apiVersion: string (required)
-  ##             : Client API version.
-  ##   subscriptionId: string (required)
-  ##                 : The subscription ID.
-  ##   Top: int
-  ##      : The maximum number of resources to return from the operation.
-  ##   labName: string (required)
-  ##          : The name of the lab.
   ##   Filter: string
   ##         : The filter to apply to the operation.
-  var path_569382 = newJObject()
-  var query_569383 = newJObject()
-  add(query_569383, "$orderby", newJString(Orderby))
-  add(path_569382, "resourceGroupName", newJString(resourceGroupName))
-  add(query_569383, "$expand", newJString(Expand))
-  add(query_569383, "api-version", newJString(apiVersion))
-  add(path_569382, "subscriptionId", newJString(subscriptionId))
-  add(query_569383, "$top", newJInt(Top))
-  add(path_569382, "labName", newJString(labName))
-  add(query_569383, "$filter", newJString(Filter))
-  result = call_569381.call(path_569382, query_569383, nil, nil, nil)
+  var path_565282 = newJObject()
+  var query_565283 = newJObject()
+  add(path_565282, "labName", newJString(labName))
+  add(query_565283, "$top", newJInt(Top))
+  add(query_565283, "api-version", newJString(apiVersion))
+  add(query_565283, "$expand", newJString(Expand))
+  add(path_565282, "subscriptionId", newJString(subscriptionId))
+  add(query_565283, "$orderby", newJString(Orderby))
+  add(path_565282, "resourceGroupName", newJString(resourceGroupName))
+  add(query_565283, "$filter", newJString(Filter))
+  result = call_565281.call(path_565282, query_565283, nil, nil, nil)
 
-var virtualNetworksList* = Call_VirtualNetworksList_569369(
+var virtualNetworksList* = Call_VirtualNetworksList_565269(
     name: "virtualNetworksList", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DevTestLab/labs/{labName}/virtualnetworks",
-    validator: validate_VirtualNetworksList_569370, base: "",
-    url: url_VirtualNetworksList_569371, schemes: {Scheme.Https})
+    validator: validate_VirtualNetworksList_565270, base: "",
+    url: url_VirtualNetworksList_565271, schemes: {Scheme.Https})
 type
-  Call_VirtualNetworksCreateOrUpdate_569397 = ref object of OpenApiRestCall_567650
-proc url_VirtualNetworksCreateOrUpdate_569399(protocol: Scheme; host: string;
+  Call_VirtualNetworksCreateOrUpdate_565297 = ref object of OpenApiRestCall_563548
+proc url_VirtualNetworksCreateOrUpdate_565299(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -12476,44 +12396,43 @@ proc url_VirtualNetworksCreateOrUpdate_569399(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_VirtualNetworksCreateOrUpdate_569398(path: JsonNode; query: JsonNode;
+proc validate_VirtualNetworksCreateOrUpdate_565298(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Create or replace an existing virtual network. This operation can take a while to complete.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
+  ##   labName: JString (required)
+  ##          : The name of the lab.
   ##   name: JString (required)
   ##       : The name of the virtual network.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID.
-  ##   labName: JString (required)
-  ##          : The name of the lab.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_569400 = path.getOrDefault("resourceGroupName")
-  valid_569400 = validateParameter(valid_569400, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `labName` field"
+  var valid_565300 = path.getOrDefault("labName")
+  valid_565300 = validateParameter(valid_565300, JString, required = true,
                                  default = nil)
-  if valid_569400 != nil:
-    section.add "resourceGroupName", valid_569400
-  var valid_569401 = path.getOrDefault("name")
-  valid_569401 = validateParameter(valid_569401, JString, required = true,
+  if valid_565300 != nil:
+    section.add "labName", valid_565300
+  var valid_565301 = path.getOrDefault("name")
+  valid_565301 = validateParameter(valid_565301, JString, required = true,
                                  default = nil)
-  if valid_569401 != nil:
-    section.add "name", valid_569401
-  var valid_569402 = path.getOrDefault("subscriptionId")
-  valid_569402 = validateParameter(valid_569402, JString, required = true,
+  if valid_565301 != nil:
+    section.add "name", valid_565301
+  var valid_565302 = path.getOrDefault("subscriptionId")
+  valid_565302 = validateParameter(valid_565302, JString, required = true,
                                  default = nil)
-  if valid_569402 != nil:
-    section.add "subscriptionId", valid_569402
-  var valid_569403 = path.getOrDefault("labName")
-  valid_569403 = validateParameter(valid_569403, JString, required = true,
+  if valid_565302 != nil:
+    section.add "subscriptionId", valid_565302
+  var valid_565303 = path.getOrDefault("resourceGroupName")
+  valid_565303 = validateParameter(valid_565303, JString, required = true,
                                  default = nil)
-  if valid_569403 != nil:
-    section.add "labName", valid_569403
+  if valid_565303 != nil:
+    section.add "resourceGroupName", valid_565303
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -12521,11 +12440,11 @@ proc validate_VirtualNetworksCreateOrUpdate_569398(path: JsonNode; query: JsonNo
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_569404 = query.getOrDefault("api-version")
-  valid_569404 = validateParameter(valid_569404, JString, required = true,
+  var valid_565304 = query.getOrDefault("api-version")
+  valid_565304 = validateParameter(valid_565304, JString, required = true,
                                  default = newJString("2016-05-15"))
-  if valid_569404 != nil:
-    section.add "api-version", valid_569404
+  if valid_565304 != nil:
+    section.add "api-version", valid_565304
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -12539,57 +12458,56 @@ proc validate_VirtualNetworksCreateOrUpdate_569398(path: JsonNode; query: JsonNo
   if body != nil:
     result.add "body", body
 
-proc call*(call_569406: Call_VirtualNetworksCreateOrUpdate_569397; path: JsonNode;
+proc call*(call_565306: Call_VirtualNetworksCreateOrUpdate_565297; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Create or replace an existing virtual network. This operation can take a while to complete.
   ## 
-  let valid = call_569406.validator(path, query, header, formData, body)
-  let scheme = call_569406.pickScheme
+  let valid = call_565306.validator(path, query, header, formData, body)
+  let scheme = call_565306.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_569406.url(scheme.get, call_569406.host, call_569406.base,
-                         call_569406.route, valid.getOrDefault("path"),
+  let url = call_565306.url(scheme.get, call_565306.host, call_565306.base,
+                         call_565306.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_569406, url, valid)
+  result = hook(call_565306, url, valid)
 
-proc call*(call_569407: Call_VirtualNetworksCreateOrUpdate_569397;
-          resourceGroupName: string; name: string; subscriptionId: string;
-          labName: string; virtualNetwork: JsonNode;
-          apiVersion: string = "2016-05-15"): Recallable =
+proc call*(call_565307: Call_VirtualNetworksCreateOrUpdate_565297; labName: string;
+          name: string; subscriptionId: string; resourceGroupName: string;
+          virtualNetwork: JsonNode; apiVersion: string = "2016-05-15"): Recallable =
   ## virtualNetworksCreateOrUpdate
   ## Create or replace an existing virtual network. This operation can take a while to complete.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   labName: string (required)
+  ##          : The name of the lab.
   ##   apiVersion: string (required)
   ##             : Client API version.
   ##   name: string (required)
   ##       : The name of the virtual network.
   ##   subscriptionId: string (required)
   ##                 : The subscription ID.
-  ##   labName: string (required)
-  ##          : The name of the lab.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   virtualNetwork: JObject (required)
   ##                 : A virtual network.
-  var path_569408 = newJObject()
-  var query_569409 = newJObject()
-  var body_569410 = newJObject()
-  add(path_569408, "resourceGroupName", newJString(resourceGroupName))
-  add(query_569409, "api-version", newJString(apiVersion))
-  add(path_569408, "name", newJString(name))
-  add(path_569408, "subscriptionId", newJString(subscriptionId))
-  add(path_569408, "labName", newJString(labName))
+  var path_565308 = newJObject()
+  var query_565309 = newJObject()
+  var body_565310 = newJObject()
+  add(path_565308, "labName", newJString(labName))
+  add(query_565309, "api-version", newJString(apiVersion))
+  add(path_565308, "name", newJString(name))
+  add(path_565308, "subscriptionId", newJString(subscriptionId))
+  add(path_565308, "resourceGroupName", newJString(resourceGroupName))
   if virtualNetwork != nil:
-    body_569410 = virtualNetwork
-  result = call_569407.call(path_569408, query_569409, nil, nil, body_569410)
+    body_565310 = virtualNetwork
+  result = call_565307.call(path_565308, query_565309, nil, nil, body_565310)
 
-var virtualNetworksCreateOrUpdate* = Call_VirtualNetworksCreateOrUpdate_569397(
+var virtualNetworksCreateOrUpdate* = Call_VirtualNetworksCreateOrUpdate_565297(
     name: "virtualNetworksCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DevTestLab/labs/{labName}/virtualnetworks/{name}",
-    validator: validate_VirtualNetworksCreateOrUpdate_569398, base: "",
-    url: url_VirtualNetworksCreateOrUpdate_569399, schemes: {Scheme.Https})
+    validator: validate_VirtualNetworksCreateOrUpdate_565298, base: "",
+    url: url_VirtualNetworksCreateOrUpdate_565299, schemes: {Scheme.Https})
 type
-  Call_VirtualNetworksGet_569384 = ref object of OpenApiRestCall_567650
-proc url_VirtualNetworksGet_569386(protocol: Scheme; host: string; base: string;
+  Call_VirtualNetworksGet_565284 = ref object of OpenApiRestCall_563548
+proc url_VirtualNetworksGet_565286(protocol: Scheme; host: string; base: string;
                                   route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -12614,7 +12532,7 @@ proc url_VirtualNetworksGet_569386(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_VirtualNetworksGet_569385(path: JsonNode; query: JsonNode;
+proc validate_VirtualNetworksGet_565285(path: JsonNode; query: JsonNode;
                                        header: JsonNode; formData: JsonNode;
                                        body: JsonNode): JsonNode =
   ## Get virtual network.
@@ -12622,56 +12540,55 @@ proc validate_VirtualNetworksGet_569385(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
+  ##   labName: JString (required)
+  ##          : The name of the lab.
   ##   name: JString (required)
   ##       : The name of the virtual network.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID.
-  ##   labName: JString (required)
-  ##          : The name of the lab.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_569387 = path.getOrDefault("resourceGroupName")
-  valid_569387 = validateParameter(valid_569387, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `labName` field"
+  var valid_565287 = path.getOrDefault("labName")
+  valid_565287 = validateParameter(valid_565287, JString, required = true,
                                  default = nil)
-  if valid_569387 != nil:
-    section.add "resourceGroupName", valid_569387
-  var valid_569388 = path.getOrDefault("name")
-  valid_569388 = validateParameter(valid_569388, JString, required = true,
+  if valid_565287 != nil:
+    section.add "labName", valid_565287
+  var valid_565288 = path.getOrDefault("name")
+  valid_565288 = validateParameter(valid_565288, JString, required = true,
                                  default = nil)
-  if valid_569388 != nil:
-    section.add "name", valid_569388
-  var valid_569389 = path.getOrDefault("subscriptionId")
-  valid_569389 = validateParameter(valid_569389, JString, required = true,
+  if valid_565288 != nil:
+    section.add "name", valid_565288
+  var valid_565289 = path.getOrDefault("subscriptionId")
+  valid_565289 = validateParameter(valid_565289, JString, required = true,
                                  default = nil)
-  if valid_569389 != nil:
-    section.add "subscriptionId", valid_569389
-  var valid_569390 = path.getOrDefault("labName")
-  valid_569390 = validateParameter(valid_569390, JString, required = true,
+  if valid_565289 != nil:
+    section.add "subscriptionId", valid_565289
+  var valid_565290 = path.getOrDefault("resourceGroupName")
+  valid_565290 = validateParameter(valid_565290, JString, required = true,
                                  default = nil)
-  if valid_569390 != nil:
-    section.add "labName", valid_569390
+  if valid_565290 != nil:
+    section.add "resourceGroupName", valid_565290
   result.add "path", section
   ## parameters in `query` object:
-  ##   $expand: JString
-  ##          : Specify the $expand query. Example: 'properties($expand=externalSubnets)'
   ##   api-version: JString (required)
   ##              : Client API version.
+  ##   $expand: JString
+  ##          : Specify the $expand query. Example: 'properties($expand=externalSubnets)'
   section = newJObject()
-  var valid_569391 = query.getOrDefault("$expand")
-  valid_569391 = validateParameter(valid_569391, JString, required = false,
-                                 default = nil)
-  if valid_569391 != nil:
-    section.add "$expand", valid_569391
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_569392 = query.getOrDefault("api-version")
-  valid_569392 = validateParameter(valid_569392, JString, required = true,
+  var valid_565291 = query.getOrDefault("api-version")
+  valid_565291 = validateParameter(valid_565291, JString, required = true,
                                  default = newJString("2016-05-15"))
-  if valid_569392 != nil:
-    section.add "api-version", valid_569392
+  if valid_565291 != nil:
+    section.add "api-version", valid_565291
+  var valid_565292 = query.getOrDefault("$expand")
+  valid_565292 = validateParameter(valid_565292, JString, required = false,
+                                 default = nil)
+  if valid_565292 != nil:
+    section.add "$expand", valid_565292
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -12680,54 +12597,54 @@ proc validate_VirtualNetworksGet_569385(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_569393: Call_VirtualNetworksGet_569384; path: JsonNode;
+proc call*(call_565293: Call_VirtualNetworksGet_565284; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get virtual network.
   ## 
-  let valid = call_569393.validator(path, query, header, formData, body)
-  let scheme = call_569393.pickScheme
+  let valid = call_565293.validator(path, query, header, formData, body)
+  let scheme = call_565293.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_569393.url(scheme.get, call_569393.host, call_569393.base,
-                         call_569393.route, valid.getOrDefault("path"),
+  let url = call_565293.url(scheme.get, call_565293.host, call_565293.base,
+                         call_565293.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_569393, url, valid)
+  result = hook(call_565293, url, valid)
 
-proc call*(call_569394: Call_VirtualNetworksGet_569384; resourceGroupName: string;
-          name: string; subscriptionId: string; labName: string; Expand: string = "";
-          apiVersion: string = "2016-05-15"): Recallable =
+proc call*(call_565294: Call_VirtualNetworksGet_565284; labName: string;
+          name: string; subscriptionId: string; resourceGroupName: string;
+          apiVersion: string = "2016-05-15"; Expand: string = ""): Recallable =
   ## virtualNetworksGet
   ## Get virtual network.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   labName: string (required)
+  ##          : The name of the lab.
+  ##   apiVersion: string (required)
+  ##             : Client API version.
   ##   Expand: string
   ##         : Specify the $expand query. Example: 'properties($expand=externalSubnets)'
   ##   name: string (required)
   ##       : The name of the virtual network.
-  ##   apiVersion: string (required)
-  ##             : Client API version.
   ##   subscriptionId: string (required)
   ##                 : The subscription ID.
-  ##   labName: string (required)
-  ##          : The name of the lab.
-  var path_569395 = newJObject()
-  var query_569396 = newJObject()
-  add(path_569395, "resourceGroupName", newJString(resourceGroupName))
-  add(query_569396, "$expand", newJString(Expand))
-  add(path_569395, "name", newJString(name))
-  add(query_569396, "api-version", newJString(apiVersion))
-  add(path_569395, "subscriptionId", newJString(subscriptionId))
-  add(path_569395, "labName", newJString(labName))
-  result = call_569394.call(path_569395, query_569396, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_565295 = newJObject()
+  var query_565296 = newJObject()
+  add(path_565295, "labName", newJString(labName))
+  add(query_565296, "api-version", newJString(apiVersion))
+  add(query_565296, "$expand", newJString(Expand))
+  add(path_565295, "name", newJString(name))
+  add(path_565295, "subscriptionId", newJString(subscriptionId))
+  add(path_565295, "resourceGroupName", newJString(resourceGroupName))
+  result = call_565294.call(path_565295, query_565296, nil, nil, nil)
 
-var virtualNetworksGet* = Call_VirtualNetworksGet_569384(
+var virtualNetworksGet* = Call_VirtualNetworksGet_565284(
     name: "virtualNetworksGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DevTestLab/labs/{labName}/virtualnetworks/{name}",
-    validator: validate_VirtualNetworksGet_569385, base: "",
-    url: url_VirtualNetworksGet_569386, schemes: {Scheme.Https})
+    validator: validate_VirtualNetworksGet_565285, base: "",
+    url: url_VirtualNetworksGet_565286, schemes: {Scheme.Https})
 type
-  Call_VirtualNetworksUpdate_569423 = ref object of OpenApiRestCall_567650
-proc url_VirtualNetworksUpdate_569425(protocol: Scheme; host: string; base: string;
+  Call_VirtualNetworksUpdate_565323 = ref object of OpenApiRestCall_563548
+proc url_VirtualNetworksUpdate_565325(protocol: Scheme; host: string; base: string;
                                      route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -12752,44 +12669,43 @@ proc url_VirtualNetworksUpdate_569425(protocol: Scheme; host: string; base: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_VirtualNetworksUpdate_569424(path: JsonNode; query: JsonNode;
+proc validate_VirtualNetworksUpdate_565324(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Modify properties of virtual networks.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
+  ##   labName: JString (required)
+  ##          : The name of the lab.
   ##   name: JString (required)
   ##       : The name of the virtual network.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID.
-  ##   labName: JString (required)
-  ##          : The name of the lab.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_569426 = path.getOrDefault("resourceGroupName")
-  valid_569426 = validateParameter(valid_569426, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `labName` field"
+  var valid_565326 = path.getOrDefault("labName")
+  valid_565326 = validateParameter(valid_565326, JString, required = true,
                                  default = nil)
-  if valid_569426 != nil:
-    section.add "resourceGroupName", valid_569426
-  var valid_569427 = path.getOrDefault("name")
-  valid_569427 = validateParameter(valid_569427, JString, required = true,
+  if valid_565326 != nil:
+    section.add "labName", valid_565326
+  var valid_565327 = path.getOrDefault("name")
+  valid_565327 = validateParameter(valid_565327, JString, required = true,
                                  default = nil)
-  if valid_569427 != nil:
-    section.add "name", valid_569427
-  var valid_569428 = path.getOrDefault("subscriptionId")
-  valid_569428 = validateParameter(valid_569428, JString, required = true,
+  if valid_565327 != nil:
+    section.add "name", valid_565327
+  var valid_565328 = path.getOrDefault("subscriptionId")
+  valid_565328 = validateParameter(valid_565328, JString, required = true,
                                  default = nil)
-  if valid_569428 != nil:
-    section.add "subscriptionId", valid_569428
-  var valid_569429 = path.getOrDefault("labName")
-  valid_569429 = validateParameter(valid_569429, JString, required = true,
+  if valid_565328 != nil:
+    section.add "subscriptionId", valid_565328
+  var valid_565329 = path.getOrDefault("resourceGroupName")
+  valid_565329 = validateParameter(valid_565329, JString, required = true,
                                  default = nil)
-  if valid_569429 != nil:
-    section.add "labName", valid_569429
+  if valid_565329 != nil:
+    section.add "resourceGroupName", valid_565329
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -12797,11 +12713,11 @@ proc validate_VirtualNetworksUpdate_569424(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_569430 = query.getOrDefault("api-version")
-  valid_569430 = validateParameter(valid_569430, JString, required = true,
+  var valid_565330 = query.getOrDefault("api-version")
+  valid_565330 = validateParameter(valid_565330, JString, required = true,
                                  default = newJString("2016-05-15"))
-  if valid_569430 != nil:
-    section.add "api-version", valid_569430
+  if valid_565330 != nil:
+    section.add "api-version", valid_565330
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -12815,57 +12731,56 @@ proc validate_VirtualNetworksUpdate_569424(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_569432: Call_VirtualNetworksUpdate_569423; path: JsonNode;
+proc call*(call_565332: Call_VirtualNetworksUpdate_565323; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Modify properties of virtual networks.
   ## 
-  let valid = call_569432.validator(path, query, header, formData, body)
-  let scheme = call_569432.pickScheme
+  let valid = call_565332.validator(path, query, header, formData, body)
+  let scheme = call_565332.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_569432.url(scheme.get, call_569432.host, call_569432.base,
-                         call_569432.route, valid.getOrDefault("path"),
+  let url = call_565332.url(scheme.get, call_565332.host, call_565332.base,
+                         call_565332.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_569432, url, valid)
+  result = hook(call_565332, url, valid)
 
-proc call*(call_569433: Call_VirtualNetworksUpdate_569423;
-          resourceGroupName: string; name: string; subscriptionId: string;
-          labName: string; virtualNetwork: JsonNode;
-          apiVersion: string = "2016-05-15"): Recallable =
+proc call*(call_565333: Call_VirtualNetworksUpdate_565323; labName: string;
+          name: string; subscriptionId: string; resourceGroupName: string;
+          virtualNetwork: JsonNode; apiVersion: string = "2016-05-15"): Recallable =
   ## virtualNetworksUpdate
   ## Modify properties of virtual networks.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   labName: string (required)
+  ##          : The name of the lab.
   ##   apiVersion: string (required)
   ##             : Client API version.
   ##   name: string (required)
   ##       : The name of the virtual network.
   ##   subscriptionId: string (required)
   ##                 : The subscription ID.
-  ##   labName: string (required)
-  ##          : The name of the lab.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   virtualNetwork: JObject (required)
   ##                 : A virtual network.
-  var path_569434 = newJObject()
-  var query_569435 = newJObject()
-  var body_569436 = newJObject()
-  add(path_569434, "resourceGroupName", newJString(resourceGroupName))
-  add(query_569435, "api-version", newJString(apiVersion))
-  add(path_569434, "name", newJString(name))
-  add(path_569434, "subscriptionId", newJString(subscriptionId))
-  add(path_569434, "labName", newJString(labName))
+  var path_565334 = newJObject()
+  var query_565335 = newJObject()
+  var body_565336 = newJObject()
+  add(path_565334, "labName", newJString(labName))
+  add(query_565335, "api-version", newJString(apiVersion))
+  add(path_565334, "name", newJString(name))
+  add(path_565334, "subscriptionId", newJString(subscriptionId))
+  add(path_565334, "resourceGroupName", newJString(resourceGroupName))
   if virtualNetwork != nil:
-    body_569436 = virtualNetwork
-  result = call_569433.call(path_569434, query_569435, nil, nil, body_569436)
+    body_565336 = virtualNetwork
+  result = call_565333.call(path_565334, query_565335, nil, nil, body_565336)
 
-var virtualNetworksUpdate* = Call_VirtualNetworksUpdate_569423(
+var virtualNetworksUpdate* = Call_VirtualNetworksUpdate_565323(
     name: "virtualNetworksUpdate", meth: HttpMethod.HttpPatch,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DevTestLab/labs/{labName}/virtualnetworks/{name}",
-    validator: validate_VirtualNetworksUpdate_569424, base: "",
-    url: url_VirtualNetworksUpdate_569425, schemes: {Scheme.Https})
+    validator: validate_VirtualNetworksUpdate_565324, base: "",
+    url: url_VirtualNetworksUpdate_565325, schemes: {Scheme.Https})
 type
-  Call_VirtualNetworksDelete_569411 = ref object of OpenApiRestCall_567650
-proc url_VirtualNetworksDelete_569413(protocol: Scheme; host: string; base: string;
+  Call_VirtualNetworksDelete_565311 = ref object of OpenApiRestCall_563548
+proc url_VirtualNetworksDelete_565313(protocol: Scheme; host: string; base: string;
                                      route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -12890,44 +12805,43 @@ proc url_VirtualNetworksDelete_569413(protocol: Scheme; host: string; base: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_VirtualNetworksDelete_569412(path: JsonNode; query: JsonNode;
+proc validate_VirtualNetworksDelete_565312(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Delete virtual network. This operation can take a while to complete.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
+  ##   labName: JString (required)
+  ##          : The name of the lab.
   ##   name: JString (required)
   ##       : The name of the virtual network.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID.
-  ##   labName: JString (required)
-  ##          : The name of the lab.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_569414 = path.getOrDefault("resourceGroupName")
-  valid_569414 = validateParameter(valid_569414, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `labName` field"
+  var valid_565314 = path.getOrDefault("labName")
+  valid_565314 = validateParameter(valid_565314, JString, required = true,
                                  default = nil)
-  if valid_569414 != nil:
-    section.add "resourceGroupName", valid_569414
-  var valid_569415 = path.getOrDefault("name")
-  valid_569415 = validateParameter(valid_569415, JString, required = true,
+  if valid_565314 != nil:
+    section.add "labName", valid_565314
+  var valid_565315 = path.getOrDefault("name")
+  valid_565315 = validateParameter(valid_565315, JString, required = true,
                                  default = nil)
-  if valid_569415 != nil:
-    section.add "name", valid_569415
-  var valid_569416 = path.getOrDefault("subscriptionId")
-  valid_569416 = validateParameter(valid_569416, JString, required = true,
+  if valid_565315 != nil:
+    section.add "name", valid_565315
+  var valid_565316 = path.getOrDefault("subscriptionId")
+  valid_565316 = validateParameter(valid_565316, JString, required = true,
                                  default = nil)
-  if valid_569416 != nil:
-    section.add "subscriptionId", valid_569416
-  var valid_569417 = path.getOrDefault("labName")
-  valid_569417 = validateParameter(valid_569417, JString, required = true,
+  if valid_565316 != nil:
+    section.add "subscriptionId", valid_565316
+  var valid_565317 = path.getOrDefault("resourceGroupName")
+  valid_565317 = validateParameter(valid_565317, JString, required = true,
                                  default = nil)
-  if valid_569417 != nil:
-    section.add "labName", valid_569417
+  if valid_565317 != nil:
+    section.add "resourceGroupName", valid_565317
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -12935,11 +12849,11 @@ proc validate_VirtualNetworksDelete_569412(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_569418 = query.getOrDefault("api-version")
-  valid_569418 = validateParameter(valid_569418, JString, required = true,
+  var valid_565318 = query.getOrDefault("api-version")
+  valid_565318 = validateParameter(valid_565318, JString, required = true,
                                  default = newJString("2016-05-15"))
-  if valid_569418 != nil:
-    section.add "api-version", valid_569418
+  if valid_565318 != nil:
+    section.add "api-version", valid_565318
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -12948,51 +12862,51 @@ proc validate_VirtualNetworksDelete_569412(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_569419: Call_VirtualNetworksDelete_569411; path: JsonNode;
+proc call*(call_565319: Call_VirtualNetworksDelete_565311; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Delete virtual network. This operation can take a while to complete.
   ## 
-  let valid = call_569419.validator(path, query, header, formData, body)
-  let scheme = call_569419.pickScheme
+  let valid = call_565319.validator(path, query, header, formData, body)
+  let scheme = call_565319.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_569419.url(scheme.get, call_569419.host, call_569419.base,
-                         call_569419.route, valid.getOrDefault("path"),
+  let url = call_565319.url(scheme.get, call_565319.host, call_565319.base,
+                         call_565319.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_569419, url, valid)
+  result = hook(call_565319, url, valid)
 
-proc call*(call_569420: Call_VirtualNetworksDelete_569411;
-          resourceGroupName: string; name: string; subscriptionId: string;
-          labName: string; apiVersion: string = "2016-05-15"): Recallable =
+proc call*(call_565320: Call_VirtualNetworksDelete_565311; labName: string;
+          name: string; subscriptionId: string; resourceGroupName: string;
+          apiVersion: string = "2016-05-15"): Recallable =
   ## virtualNetworksDelete
   ## Delete virtual network. This operation can take a while to complete.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   labName: string (required)
+  ##          : The name of the lab.
   ##   apiVersion: string (required)
   ##             : Client API version.
   ##   name: string (required)
   ##       : The name of the virtual network.
   ##   subscriptionId: string (required)
   ##                 : The subscription ID.
-  ##   labName: string (required)
-  ##          : The name of the lab.
-  var path_569421 = newJObject()
-  var query_569422 = newJObject()
-  add(path_569421, "resourceGroupName", newJString(resourceGroupName))
-  add(query_569422, "api-version", newJString(apiVersion))
-  add(path_569421, "name", newJString(name))
-  add(path_569421, "subscriptionId", newJString(subscriptionId))
-  add(path_569421, "labName", newJString(labName))
-  result = call_569420.call(path_569421, query_569422, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_565321 = newJObject()
+  var query_565322 = newJObject()
+  add(path_565321, "labName", newJString(labName))
+  add(query_565322, "api-version", newJString(apiVersion))
+  add(path_565321, "name", newJString(name))
+  add(path_565321, "subscriptionId", newJString(subscriptionId))
+  add(path_565321, "resourceGroupName", newJString(resourceGroupName))
+  result = call_565320.call(path_565321, query_565322, nil, nil, nil)
 
-var virtualNetworksDelete* = Call_VirtualNetworksDelete_569411(
+var virtualNetworksDelete* = Call_VirtualNetworksDelete_565311(
     name: "virtualNetworksDelete", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DevTestLab/labs/{labName}/virtualnetworks/{name}",
-    validator: validate_VirtualNetworksDelete_569412, base: "",
-    url: url_VirtualNetworksDelete_569413, schemes: {Scheme.Https})
+    validator: validate_VirtualNetworksDelete_565312, base: "",
+    url: url_VirtualNetworksDelete_565313, schemes: {Scheme.Https})
 type
-  Call_LabsCreateOrUpdate_569449 = ref object of OpenApiRestCall_567650
-proc url_LabsCreateOrUpdate_569451(protocol: Scheme; host: string; base: string;
+  Call_LabsCreateOrUpdate_565349 = ref object of OpenApiRestCall_563548
+proc url_LabsCreateOrUpdate_565351(protocol: Scheme; host: string; base: string;
                                   route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -13014,7 +12928,7 @@ proc url_LabsCreateOrUpdate_569451(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_LabsCreateOrUpdate_569450(path: JsonNode; query: JsonNode;
+proc validate_LabsCreateOrUpdate_565350(path: JsonNode; query: JsonNode;
                                        header: JsonNode; formData: JsonNode;
                                        body: JsonNode): JsonNode =
   ## Create or replace an existing lab. This operation can take a while to complete.
@@ -13022,30 +12936,29 @@ proc validate_LabsCreateOrUpdate_569450(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   name: JString (required)
   ##       : The name of the lab.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_569452 = path.getOrDefault("resourceGroupName")
-  valid_569452 = validateParameter(valid_569452, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `name` field"
+  var valid_565352 = path.getOrDefault("name")
+  valid_565352 = validateParameter(valid_565352, JString, required = true,
                                  default = nil)
-  if valid_569452 != nil:
-    section.add "resourceGroupName", valid_569452
-  var valid_569453 = path.getOrDefault("name")
-  valid_569453 = validateParameter(valid_569453, JString, required = true,
+  if valid_565352 != nil:
+    section.add "name", valid_565352
+  var valid_565353 = path.getOrDefault("subscriptionId")
+  valid_565353 = validateParameter(valid_565353, JString, required = true,
                                  default = nil)
-  if valid_569453 != nil:
-    section.add "name", valid_569453
-  var valid_569454 = path.getOrDefault("subscriptionId")
-  valid_569454 = validateParameter(valid_569454, JString, required = true,
+  if valid_565353 != nil:
+    section.add "subscriptionId", valid_565353
+  var valid_565354 = path.getOrDefault("resourceGroupName")
+  valid_565354 = validateParameter(valid_565354, JString, required = true,
                                  default = nil)
-  if valid_569454 != nil:
-    section.add "subscriptionId", valid_569454
+  if valid_565354 != nil:
+    section.add "resourceGroupName", valid_565354
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -13053,11 +12966,11 @@ proc validate_LabsCreateOrUpdate_569450(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_569455 = query.getOrDefault("api-version")
-  valid_569455 = validateParameter(valid_569455, JString, required = true,
+  var valid_565355 = query.getOrDefault("api-version")
+  valid_565355 = validateParameter(valid_565355, JString, required = true,
                                  default = newJString("2016-05-15"))
-  if valid_569455 != nil:
-    section.add "api-version", valid_569455
+  if valid_565355 != nil:
+    section.add "api-version", valid_565355
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -13071,53 +12984,53 @@ proc validate_LabsCreateOrUpdate_569450(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_569457: Call_LabsCreateOrUpdate_569449; path: JsonNode;
+proc call*(call_565357: Call_LabsCreateOrUpdate_565349; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Create or replace an existing lab. This operation can take a while to complete.
   ## 
-  let valid = call_569457.validator(path, query, header, formData, body)
-  let scheme = call_569457.pickScheme
+  let valid = call_565357.validator(path, query, header, formData, body)
+  let scheme = call_565357.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_569457.url(scheme.get, call_569457.host, call_569457.base,
-                         call_569457.route, valid.getOrDefault("path"),
+  let url = call_565357.url(scheme.get, call_565357.host, call_565357.base,
+                         call_565357.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_569457, url, valid)
+  result = hook(call_565357, url, valid)
 
-proc call*(call_569458: Call_LabsCreateOrUpdate_569449; resourceGroupName: string;
-          name: string; subscriptionId: string; lab: JsonNode;
+proc call*(call_565358: Call_LabsCreateOrUpdate_565349; lab: JsonNode; name: string;
+          subscriptionId: string; resourceGroupName: string;
           apiVersion: string = "2016-05-15"): Recallable =
   ## labsCreateOrUpdate
   ## Create or replace an existing lab. This operation can take a while to complete.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   lab: JObject (required)
+  ##      : A lab.
   ##   apiVersion: string (required)
   ##             : Client API version.
   ##   name: string (required)
   ##       : The name of the lab.
   ##   subscriptionId: string (required)
   ##                 : The subscription ID.
-  ##   lab: JObject (required)
-  ##      : A lab.
-  var path_569459 = newJObject()
-  var query_569460 = newJObject()
-  var body_569461 = newJObject()
-  add(path_569459, "resourceGroupName", newJString(resourceGroupName))
-  add(query_569460, "api-version", newJString(apiVersion))
-  add(path_569459, "name", newJString(name))
-  add(path_569459, "subscriptionId", newJString(subscriptionId))
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_565359 = newJObject()
+  var query_565360 = newJObject()
+  var body_565361 = newJObject()
   if lab != nil:
-    body_569461 = lab
-  result = call_569458.call(path_569459, query_569460, nil, nil, body_569461)
+    body_565361 = lab
+  add(query_565360, "api-version", newJString(apiVersion))
+  add(path_565359, "name", newJString(name))
+  add(path_565359, "subscriptionId", newJString(subscriptionId))
+  add(path_565359, "resourceGroupName", newJString(resourceGroupName))
+  result = call_565358.call(path_565359, query_565360, nil, nil, body_565361)
 
-var labsCreateOrUpdate* = Call_LabsCreateOrUpdate_569449(
+var labsCreateOrUpdate* = Call_LabsCreateOrUpdate_565349(
     name: "labsCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DevTestLab/labs/{name}",
-    validator: validate_LabsCreateOrUpdate_569450, base: "",
-    url: url_LabsCreateOrUpdate_569451, schemes: {Scheme.Https})
+    validator: validate_LabsCreateOrUpdate_565350, base: "",
+    url: url_LabsCreateOrUpdate_565351, schemes: {Scheme.Https})
 type
-  Call_LabsGet_569437 = ref object of OpenApiRestCall_567650
-proc url_LabsGet_569439(protocol: Scheme; host: string; base: string; route: string;
+  Call_LabsGet_565337 = ref object of OpenApiRestCall_563548
+proc url_LabsGet_565339(protocol: Scheme; host: string; base: string; route: string;
                        path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -13139,56 +13052,55 @@ proc url_LabsGet_569439(protocol: Scheme; host: string; base: string; route: str
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_LabsGet_569438(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_LabsGet_565338(path: JsonNode; query: JsonNode; header: JsonNode;
                             formData: JsonNode; body: JsonNode): JsonNode =
   ## Get lab.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   name: JString (required)
   ##       : The name of the lab.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_569440 = path.getOrDefault("resourceGroupName")
-  valid_569440 = validateParameter(valid_569440, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `name` field"
+  var valid_565340 = path.getOrDefault("name")
+  valid_565340 = validateParameter(valid_565340, JString, required = true,
                                  default = nil)
-  if valid_569440 != nil:
-    section.add "resourceGroupName", valid_569440
-  var valid_569441 = path.getOrDefault("name")
-  valid_569441 = validateParameter(valid_569441, JString, required = true,
+  if valid_565340 != nil:
+    section.add "name", valid_565340
+  var valid_565341 = path.getOrDefault("subscriptionId")
+  valid_565341 = validateParameter(valid_565341, JString, required = true,
                                  default = nil)
-  if valid_569441 != nil:
-    section.add "name", valid_569441
-  var valid_569442 = path.getOrDefault("subscriptionId")
-  valid_569442 = validateParameter(valid_569442, JString, required = true,
+  if valid_565341 != nil:
+    section.add "subscriptionId", valid_565341
+  var valid_565342 = path.getOrDefault("resourceGroupName")
+  valid_565342 = validateParameter(valid_565342, JString, required = true,
                                  default = nil)
-  if valid_569442 != nil:
-    section.add "subscriptionId", valid_569442
+  if valid_565342 != nil:
+    section.add "resourceGroupName", valid_565342
   result.add "path", section
   ## parameters in `query` object:
-  ##   $expand: JString
-  ##          : Specify the $expand query. Example: 'properties($select=defaultStorageAccount)'
   ##   api-version: JString (required)
   ##              : Client API version.
+  ##   $expand: JString
+  ##          : Specify the $expand query. Example: 'properties($select=defaultStorageAccount)'
   section = newJObject()
-  var valid_569443 = query.getOrDefault("$expand")
-  valid_569443 = validateParameter(valid_569443, JString, required = false,
-                                 default = nil)
-  if valid_569443 != nil:
-    section.add "$expand", valid_569443
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_569444 = query.getOrDefault("api-version")
-  valid_569444 = validateParameter(valid_569444, JString, required = true,
+  var valid_565343 = query.getOrDefault("api-version")
+  valid_565343 = validateParameter(valid_565343, JString, required = true,
                                  default = newJString("2016-05-15"))
-  if valid_569444 != nil:
-    section.add "api-version", valid_569444
+  if valid_565343 != nil:
+    section.add "api-version", valid_565343
+  var valid_565344 = query.getOrDefault("$expand")
+  valid_565344 = validateParameter(valid_565344, JString, required = false,
+                                 default = nil)
+  if valid_565344 != nil:
+    section.add "$expand", valid_565344
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -13197,50 +13109,50 @@ proc validate_LabsGet_569438(path: JsonNode; query: JsonNode; header: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_569445: Call_LabsGet_569437; path: JsonNode; query: JsonNode;
+proc call*(call_565345: Call_LabsGet_565337; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get lab.
   ## 
-  let valid = call_569445.validator(path, query, header, formData, body)
-  let scheme = call_569445.pickScheme
+  let valid = call_565345.validator(path, query, header, formData, body)
+  let scheme = call_565345.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_569445.url(scheme.get, call_569445.host, call_569445.base,
-                         call_569445.route, valid.getOrDefault("path"),
+  let url = call_565345.url(scheme.get, call_565345.host, call_565345.base,
+                         call_565345.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_569445, url, valid)
+  result = hook(call_565345, url, valid)
 
-proc call*(call_569446: Call_LabsGet_569437; resourceGroupName: string; name: string;
-          subscriptionId: string; Expand: string = "";
-          apiVersion: string = "2016-05-15"): Recallable =
+proc call*(call_565346: Call_LabsGet_565337; name: string; subscriptionId: string;
+          resourceGroupName: string; apiVersion: string = "2016-05-15";
+          Expand: string = ""): Recallable =
   ## labsGet
   ## Get lab.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   apiVersion: string (required)
+  ##             : Client API version.
   ##   Expand: string
   ##         : Specify the $expand query. Example: 'properties($select=defaultStorageAccount)'
   ##   name: string (required)
   ##       : The name of the lab.
-  ##   apiVersion: string (required)
-  ##             : Client API version.
   ##   subscriptionId: string (required)
   ##                 : The subscription ID.
-  var path_569447 = newJObject()
-  var query_569448 = newJObject()
-  add(path_569447, "resourceGroupName", newJString(resourceGroupName))
-  add(query_569448, "$expand", newJString(Expand))
-  add(path_569447, "name", newJString(name))
-  add(query_569448, "api-version", newJString(apiVersion))
-  add(path_569447, "subscriptionId", newJString(subscriptionId))
-  result = call_569446.call(path_569447, query_569448, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_565347 = newJObject()
+  var query_565348 = newJObject()
+  add(query_565348, "api-version", newJString(apiVersion))
+  add(query_565348, "$expand", newJString(Expand))
+  add(path_565347, "name", newJString(name))
+  add(path_565347, "subscriptionId", newJString(subscriptionId))
+  add(path_565347, "resourceGroupName", newJString(resourceGroupName))
+  result = call_565346.call(path_565347, query_565348, nil, nil, nil)
 
-var labsGet* = Call_LabsGet_569437(name: "labsGet", meth: HttpMethod.HttpGet,
+var labsGet* = Call_LabsGet_565337(name: "labsGet", meth: HttpMethod.HttpGet,
                                 host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DevTestLab/labs/{name}",
-                                validator: validate_LabsGet_569438, base: "",
-                                url: url_LabsGet_569439, schemes: {Scheme.Https})
+                                validator: validate_LabsGet_565338, base: "",
+                                url: url_LabsGet_565339, schemes: {Scheme.Https})
 type
-  Call_LabsUpdate_569473 = ref object of OpenApiRestCall_567650
-proc url_LabsUpdate_569475(protocol: Scheme; host: string; base: string; route: string;
+  Call_LabsUpdate_565373 = ref object of OpenApiRestCall_563548
+proc url_LabsUpdate_565375(protocol: Scheme; host: string; base: string; route: string;
                           path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -13262,37 +13174,36 @@ proc url_LabsUpdate_569475(protocol: Scheme; host: string; base: string; route: 
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_LabsUpdate_569474(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_LabsUpdate_565374(path: JsonNode; query: JsonNode; header: JsonNode;
                                formData: JsonNode; body: JsonNode): JsonNode =
   ## Modify properties of labs.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   name: JString (required)
   ##       : The name of the lab.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_569476 = path.getOrDefault("resourceGroupName")
-  valid_569476 = validateParameter(valid_569476, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `name` field"
+  var valid_565376 = path.getOrDefault("name")
+  valid_565376 = validateParameter(valid_565376, JString, required = true,
                                  default = nil)
-  if valid_569476 != nil:
-    section.add "resourceGroupName", valid_569476
-  var valid_569477 = path.getOrDefault("name")
-  valid_569477 = validateParameter(valid_569477, JString, required = true,
+  if valid_565376 != nil:
+    section.add "name", valid_565376
+  var valid_565377 = path.getOrDefault("subscriptionId")
+  valid_565377 = validateParameter(valid_565377, JString, required = true,
                                  default = nil)
-  if valid_569477 != nil:
-    section.add "name", valid_569477
-  var valid_569478 = path.getOrDefault("subscriptionId")
-  valid_569478 = validateParameter(valid_569478, JString, required = true,
+  if valid_565377 != nil:
+    section.add "subscriptionId", valid_565377
+  var valid_565378 = path.getOrDefault("resourceGroupName")
+  valid_565378 = validateParameter(valid_565378, JString, required = true,
                                  default = nil)
-  if valid_569478 != nil:
-    section.add "subscriptionId", valid_569478
+  if valid_565378 != nil:
+    section.add "resourceGroupName", valid_565378
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -13300,11 +13211,11 @@ proc validate_LabsUpdate_569474(path: JsonNode; query: JsonNode; header: JsonNod
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_569479 = query.getOrDefault("api-version")
-  valid_569479 = validateParameter(valid_569479, JString, required = true,
+  var valid_565379 = query.getOrDefault("api-version")
+  valid_565379 = validateParameter(valid_565379, JString, required = true,
                                  default = newJString("2016-05-15"))
-  if valid_569479 != nil:
-    section.add "api-version", valid_569479
+  if valid_565379 != nil:
+    section.add "api-version", valid_565379
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -13318,54 +13229,54 @@ proc validate_LabsUpdate_569474(path: JsonNode; query: JsonNode; header: JsonNod
   if body != nil:
     result.add "body", body
 
-proc call*(call_569481: Call_LabsUpdate_569473; path: JsonNode; query: JsonNode;
+proc call*(call_565381: Call_LabsUpdate_565373; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Modify properties of labs.
   ## 
-  let valid = call_569481.validator(path, query, header, formData, body)
-  let scheme = call_569481.pickScheme
+  let valid = call_565381.validator(path, query, header, formData, body)
+  let scheme = call_565381.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_569481.url(scheme.get, call_569481.host, call_569481.base,
-                         call_569481.route, valid.getOrDefault("path"),
+  let url = call_565381.url(scheme.get, call_565381.host, call_565381.base,
+                         call_565381.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_569481, url, valid)
+  result = hook(call_565381, url, valid)
 
-proc call*(call_569482: Call_LabsUpdate_569473; resourceGroupName: string;
-          name: string; subscriptionId: string; lab: JsonNode;
+proc call*(call_565382: Call_LabsUpdate_565373; lab: JsonNode; name: string;
+          subscriptionId: string; resourceGroupName: string;
           apiVersion: string = "2016-05-15"): Recallable =
   ## labsUpdate
   ## Modify properties of labs.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   lab: JObject (required)
+  ##      : A lab.
   ##   apiVersion: string (required)
   ##             : Client API version.
   ##   name: string (required)
   ##       : The name of the lab.
   ##   subscriptionId: string (required)
   ##                 : The subscription ID.
-  ##   lab: JObject (required)
-  ##      : A lab.
-  var path_569483 = newJObject()
-  var query_569484 = newJObject()
-  var body_569485 = newJObject()
-  add(path_569483, "resourceGroupName", newJString(resourceGroupName))
-  add(query_569484, "api-version", newJString(apiVersion))
-  add(path_569483, "name", newJString(name))
-  add(path_569483, "subscriptionId", newJString(subscriptionId))
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_565383 = newJObject()
+  var query_565384 = newJObject()
+  var body_565385 = newJObject()
   if lab != nil:
-    body_569485 = lab
-  result = call_569482.call(path_569483, query_569484, nil, nil, body_569485)
+    body_565385 = lab
+  add(query_565384, "api-version", newJString(apiVersion))
+  add(path_565383, "name", newJString(name))
+  add(path_565383, "subscriptionId", newJString(subscriptionId))
+  add(path_565383, "resourceGroupName", newJString(resourceGroupName))
+  result = call_565382.call(path_565383, query_565384, nil, nil, body_565385)
 
-var labsUpdate* = Call_LabsUpdate_569473(name: "labsUpdate",
+var labsUpdate* = Call_LabsUpdate_565373(name: "labsUpdate",
                                       meth: HttpMethod.HttpPatch,
                                       host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DevTestLab/labs/{name}",
-                                      validator: validate_LabsUpdate_569474,
-                                      base: "", url: url_LabsUpdate_569475,
+                                      validator: validate_LabsUpdate_565374,
+                                      base: "", url: url_LabsUpdate_565375,
                                       schemes: {Scheme.Https})
 type
-  Call_LabsDelete_569462 = ref object of OpenApiRestCall_567650
-proc url_LabsDelete_569464(protocol: Scheme; host: string; base: string; route: string;
+  Call_LabsDelete_565362 = ref object of OpenApiRestCall_563548
+proc url_LabsDelete_565364(protocol: Scheme; host: string; base: string; route: string;
                           path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -13387,37 +13298,36 @@ proc url_LabsDelete_569464(protocol: Scheme; host: string; base: string; route: 
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_LabsDelete_569463(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_LabsDelete_565363(path: JsonNode; query: JsonNode; header: JsonNode;
                                formData: JsonNode; body: JsonNode): JsonNode =
   ## Delete lab. This operation can take a while to complete.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   name: JString (required)
   ##       : The name of the lab.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_569465 = path.getOrDefault("resourceGroupName")
-  valid_569465 = validateParameter(valid_569465, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `name` field"
+  var valid_565365 = path.getOrDefault("name")
+  valid_565365 = validateParameter(valid_565365, JString, required = true,
                                  default = nil)
-  if valid_569465 != nil:
-    section.add "resourceGroupName", valid_569465
-  var valid_569466 = path.getOrDefault("name")
-  valid_569466 = validateParameter(valid_569466, JString, required = true,
+  if valid_565365 != nil:
+    section.add "name", valid_565365
+  var valid_565366 = path.getOrDefault("subscriptionId")
+  valid_565366 = validateParameter(valid_565366, JString, required = true,
                                  default = nil)
-  if valid_569466 != nil:
-    section.add "name", valid_569466
-  var valid_569467 = path.getOrDefault("subscriptionId")
-  valid_569467 = validateParameter(valid_569467, JString, required = true,
+  if valid_565366 != nil:
+    section.add "subscriptionId", valid_565366
+  var valid_565367 = path.getOrDefault("resourceGroupName")
+  valid_565367 = validateParameter(valid_565367, JString, required = true,
                                  default = nil)
-  if valid_569467 != nil:
-    section.add "subscriptionId", valid_569467
+  if valid_565367 != nil:
+    section.add "resourceGroupName", valid_565367
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -13425,11 +13335,11 @@ proc validate_LabsDelete_569463(path: JsonNode; query: JsonNode; header: JsonNod
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_569468 = query.getOrDefault("api-version")
-  valid_569468 = validateParameter(valid_569468, JString, required = true,
+  var valid_565368 = query.getOrDefault("api-version")
+  valid_565368 = validateParameter(valid_565368, JString, required = true,
                                  default = newJString("2016-05-15"))
-  if valid_569468 != nil:
-    section.add "api-version", valid_569468
+  if valid_565368 != nil:
+    section.add "api-version", valid_565368
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -13438,48 +13348,48 @@ proc validate_LabsDelete_569463(path: JsonNode; query: JsonNode; header: JsonNod
   if body != nil:
     result.add "body", body
 
-proc call*(call_569469: Call_LabsDelete_569462; path: JsonNode; query: JsonNode;
+proc call*(call_565369: Call_LabsDelete_565362; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Delete lab. This operation can take a while to complete.
   ## 
-  let valid = call_569469.validator(path, query, header, formData, body)
-  let scheme = call_569469.pickScheme
+  let valid = call_565369.validator(path, query, header, formData, body)
+  let scheme = call_565369.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_569469.url(scheme.get, call_569469.host, call_569469.base,
-                         call_569469.route, valid.getOrDefault("path"),
+  let url = call_565369.url(scheme.get, call_565369.host, call_565369.base,
+                         call_565369.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_569469, url, valid)
+  result = hook(call_565369, url, valid)
 
-proc call*(call_569470: Call_LabsDelete_569462; resourceGroupName: string;
-          name: string; subscriptionId: string; apiVersion: string = "2016-05-15"): Recallable =
+proc call*(call_565370: Call_LabsDelete_565362; name: string; subscriptionId: string;
+          resourceGroupName: string; apiVersion: string = "2016-05-15"): Recallable =
   ## labsDelete
   ## Delete lab. This operation can take a while to complete.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client API version.
   ##   name: string (required)
   ##       : The name of the lab.
   ##   subscriptionId: string (required)
   ##                 : The subscription ID.
-  var path_569471 = newJObject()
-  var query_569472 = newJObject()
-  add(path_569471, "resourceGroupName", newJString(resourceGroupName))
-  add(query_569472, "api-version", newJString(apiVersion))
-  add(path_569471, "name", newJString(name))
-  add(path_569471, "subscriptionId", newJString(subscriptionId))
-  result = call_569470.call(path_569471, query_569472, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_565371 = newJObject()
+  var query_565372 = newJObject()
+  add(query_565372, "api-version", newJString(apiVersion))
+  add(path_565371, "name", newJString(name))
+  add(path_565371, "subscriptionId", newJString(subscriptionId))
+  add(path_565371, "resourceGroupName", newJString(resourceGroupName))
+  result = call_565370.call(path_565371, query_565372, nil, nil, nil)
 
-var labsDelete* = Call_LabsDelete_569462(name: "labsDelete",
+var labsDelete* = Call_LabsDelete_565362(name: "labsDelete",
                                       meth: HttpMethod.HttpDelete,
                                       host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DevTestLab/labs/{name}",
-                                      validator: validate_LabsDelete_569463,
-                                      base: "", url: url_LabsDelete_569464,
+                                      validator: validate_LabsDelete_565363,
+                                      base: "", url: url_LabsDelete_565364,
                                       schemes: {Scheme.Https})
 type
-  Call_LabsClaimAnyVm_569486 = ref object of OpenApiRestCall_567650
-proc url_LabsClaimAnyVm_569488(protocol: Scheme; host: string; base: string;
+  Call_LabsClaimAnyVm_565386 = ref object of OpenApiRestCall_563548
+proc url_LabsClaimAnyVm_565388(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -13502,7 +13412,7 @@ proc url_LabsClaimAnyVm_569488(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_LabsClaimAnyVm_569487(path: JsonNode; query: JsonNode;
+proc validate_LabsClaimAnyVm_565387(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## Claim a random claimable virtual machine in the lab. This operation can take a while to complete.
@@ -13510,30 +13420,29 @@ proc validate_LabsClaimAnyVm_569487(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   name: JString (required)
   ##       : The name of the lab.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_569489 = path.getOrDefault("resourceGroupName")
-  valid_569489 = validateParameter(valid_569489, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `name` field"
+  var valid_565389 = path.getOrDefault("name")
+  valid_565389 = validateParameter(valid_565389, JString, required = true,
                                  default = nil)
-  if valid_569489 != nil:
-    section.add "resourceGroupName", valid_569489
-  var valid_569490 = path.getOrDefault("name")
-  valid_569490 = validateParameter(valid_569490, JString, required = true,
+  if valid_565389 != nil:
+    section.add "name", valid_565389
+  var valid_565390 = path.getOrDefault("subscriptionId")
+  valid_565390 = validateParameter(valid_565390, JString, required = true,
                                  default = nil)
-  if valid_569490 != nil:
-    section.add "name", valid_569490
-  var valid_569491 = path.getOrDefault("subscriptionId")
-  valid_569491 = validateParameter(valid_569491, JString, required = true,
+  if valid_565390 != nil:
+    section.add "subscriptionId", valid_565390
+  var valid_565391 = path.getOrDefault("resourceGroupName")
+  valid_565391 = validateParameter(valid_565391, JString, required = true,
                                  default = nil)
-  if valid_569491 != nil:
-    section.add "subscriptionId", valid_569491
+  if valid_565391 != nil:
+    section.add "resourceGroupName", valid_565391
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -13541,11 +13450,11 @@ proc validate_LabsClaimAnyVm_569487(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_569492 = query.getOrDefault("api-version")
-  valid_569492 = validateParameter(valid_569492, JString, required = true,
+  var valid_565392 = query.getOrDefault("api-version")
+  valid_565392 = validateParameter(valid_565392, JString, required = true,
                                  default = newJString("2016-05-15"))
-  if valid_569492 != nil:
-    section.add "api-version", valid_569492
+  if valid_565392 != nil:
+    section.add "api-version", valid_565392
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -13554,46 +13463,47 @@ proc validate_LabsClaimAnyVm_569487(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_569493: Call_LabsClaimAnyVm_569486; path: JsonNode; query: JsonNode;
+proc call*(call_565393: Call_LabsClaimAnyVm_565386; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Claim a random claimable virtual machine in the lab. This operation can take a while to complete.
   ## 
-  let valid = call_569493.validator(path, query, header, formData, body)
-  let scheme = call_569493.pickScheme
+  let valid = call_565393.validator(path, query, header, formData, body)
+  let scheme = call_565393.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_569493.url(scheme.get, call_569493.host, call_569493.base,
-                         call_569493.route, valid.getOrDefault("path"),
+  let url = call_565393.url(scheme.get, call_565393.host, call_565393.base,
+                         call_565393.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_569493, url, valid)
+  result = hook(call_565393, url, valid)
 
-proc call*(call_569494: Call_LabsClaimAnyVm_569486; resourceGroupName: string;
-          name: string; subscriptionId: string; apiVersion: string = "2016-05-15"): Recallable =
+proc call*(call_565394: Call_LabsClaimAnyVm_565386; name: string;
+          subscriptionId: string; resourceGroupName: string;
+          apiVersion: string = "2016-05-15"): Recallable =
   ## labsClaimAnyVm
   ## Claim a random claimable virtual machine in the lab. This operation can take a while to complete.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client API version.
   ##   name: string (required)
   ##       : The name of the lab.
   ##   subscriptionId: string (required)
   ##                 : The subscription ID.
-  var path_569495 = newJObject()
-  var query_569496 = newJObject()
-  add(path_569495, "resourceGroupName", newJString(resourceGroupName))
-  add(query_569496, "api-version", newJString(apiVersion))
-  add(path_569495, "name", newJString(name))
-  add(path_569495, "subscriptionId", newJString(subscriptionId))
-  result = call_569494.call(path_569495, query_569496, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_565395 = newJObject()
+  var query_565396 = newJObject()
+  add(query_565396, "api-version", newJString(apiVersion))
+  add(path_565395, "name", newJString(name))
+  add(path_565395, "subscriptionId", newJString(subscriptionId))
+  add(path_565395, "resourceGroupName", newJString(resourceGroupName))
+  result = call_565394.call(path_565395, query_565396, nil, nil, nil)
 
-var labsClaimAnyVm* = Call_LabsClaimAnyVm_569486(name: "labsClaimAnyVm",
+var labsClaimAnyVm* = Call_LabsClaimAnyVm_565386(name: "labsClaimAnyVm",
     meth: HttpMethod.HttpPost, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DevTestLab/labs/{name}/claimAnyVm",
-    validator: validate_LabsClaimAnyVm_569487, base: "", url: url_LabsClaimAnyVm_569488,
+    validator: validate_LabsClaimAnyVm_565387, base: "", url: url_LabsClaimAnyVm_565388,
     schemes: {Scheme.Https})
 type
-  Call_LabsCreateEnvironment_569497 = ref object of OpenApiRestCall_567650
-proc url_LabsCreateEnvironment_569499(protocol: Scheme; host: string; base: string;
+  Call_LabsCreateEnvironment_565397 = ref object of OpenApiRestCall_563548
+proc url_LabsCreateEnvironment_565399(protocol: Scheme; host: string; base: string;
                                      route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -13616,37 +13526,36 @@ proc url_LabsCreateEnvironment_569499(protocol: Scheme; host: string; base: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_LabsCreateEnvironment_569498(path: JsonNode; query: JsonNode;
+proc validate_LabsCreateEnvironment_565398(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Create virtual machines in a lab. This operation can take a while to complete.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   name: JString (required)
   ##       : The name of the lab.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_569500 = path.getOrDefault("resourceGroupName")
-  valid_569500 = validateParameter(valid_569500, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `name` field"
+  var valid_565400 = path.getOrDefault("name")
+  valid_565400 = validateParameter(valid_565400, JString, required = true,
                                  default = nil)
-  if valid_569500 != nil:
-    section.add "resourceGroupName", valid_569500
-  var valid_569501 = path.getOrDefault("name")
-  valid_569501 = validateParameter(valid_569501, JString, required = true,
+  if valid_565400 != nil:
+    section.add "name", valid_565400
+  var valid_565401 = path.getOrDefault("subscriptionId")
+  valid_565401 = validateParameter(valid_565401, JString, required = true,
                                  default = nil)
-  if valid_569501 != nil:
-    section.add "name", valid_569501
-  var valid_569502 = path.getOrDefault("subscriptionId")
-  valid_569502 = validateParameter(valid_569502, JString, required = true,
+  if valid_565401 != nil:
+    section.add "subscriptionId", valid_565401
+  var valid_565402 = path.getOrDefault("resourceGroupName")
+  valid_565402 = validateParameter(valid_565402, JString, required = true,
                                  default = nil)
-  if valid_569502 != nil:
-    section.add "subscriptionId", valid_569502
+  if valid_565402 != nil:
+    section.add "resourceGroupName", valid_565402
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -13654,11 +13563,11 @@ proc validate_LabsCreateEnvironment_569498(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_569503 = query.getOrDefault("api-version")
-  valid_569503 = validateParameter(valid_569503, JString, required = true,
+  var valid_565403 = query.getOrDefault("api-version")
+  valid_565403 = validateParameter(valid_565403, JString, required = true,
                                  default = newJString("2016-05-15"))
-  if valid_569503 != nil:
-    section.add "api-version", valid_569503
+  if valid_565403 != nil:
+    section.add "api-version", valid_565403
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -13672,54 +13581,53 @@ proc validate_LabsCreateEnvironment_569498(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_569505: Call_LabsCreateEnvironment_569497; path: JsonNode;
+proc call*(call_565405: Call_LabsCreateEnvironment_565397; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Create virtual machines in a lab. This operation can take a while to complete.
   ## 
-  let valid = call_569505.validator(path, query, header, formData, body)
-  let scheme = call_569505.pickScheme
+  let valid = call_565405.validator(path, query, header, formData, body)
+  let scheme = call_565405.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_569505.url(scheme.get, call_569505.host, call_569505.base,
-                         call_569505.route, valid.getOrDefault("path"),
+  let url = call_565405.url(scheme.get, call_565405.host, call_565405.base,
+                         call_565405.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_569505, url, valid)
+  result = hook(call_565405, url, valid)
 
-proc call*(call_569506: Call_LabsCreateEnvironment_569497;
-          resourceGroupName: string; name: string;
-          labVirtualMachineCreationParameter: JsonNode; subscriptionId: string;
-          apiVersion: string = "2016-05-15"): Recallable =
+proc call*(call_565406: Call_LabsCreateEnvironment_565397; name: string;
+          subscriptionId: string; labVirtualMachineCreationParameter: JsonNode;
+          resourceGroupName: string; apiVersion: string = "2016-05-15"): Recallable =
   ## labsCreateEnvironment
   ## Create virtual machines in a lab. This operation can take a while to complete.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client API version.
   ##   name: string (required)
   ##       : The name of the lab.
-  ##   labVirtualMachineCreationParameter: JObject (required)
-  ##                                     : Properties for creating a virtual machine.
   ##   subscriptionId: string (required)
   ##                 : The subscription ID.
-  var path_569507 = newJObject()
-  var query_569508 = newJObject()
-  var body_569509 = newJObject()
-  add(path_569507, "resourceGroupName", newJString(resourceGroupName))
-  add(query_569508, "api-version", newJString(apiVersion))
-  add(path_569507, "name", newJString(name))
+  ##   labVirtualMachineCreationParameter: JObject (required)
+  ##                                     : Properties for creating a virtual machine.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_565407 = newJObject()
+  var query_565408 = newJObject()
+  var body_565409 = newJObject()
+  add(query_565408, "api-version", newJString(apiVersion))
+  add(path_565407, "name", newJString(name))
+  add(path_565407, "subscriptionId", newJString(subscriptionId))
   if labVirtualMachineCreationParameter != nil:
-    body_569509 = labVirtualMachineCreationParameter
-  add(path_569507, "subscriptionId", newJString(subscriptionId))
-  result = call_569506.call(path_569507, query_569508, nil, nil, body_569509)
+    body_565409 = labVirtualMachineCreationParameter
+  add(path_565407, "resourceGroupName", newJString(resourceGroupName))
+  result = call_565406.call(path_565407, query_565408, nil, nil, body_565409)
 
-var labsCreateEnvironment* = Call_LabsCreateEnvironment_569497(
+var labsCreateEnvironment* = Call_LabsCreateEnvironment_565397(
     name: "labsCreateEnvironment", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DevTestLab/labs/{name}/createEnvironment",
-    validator: validate_LabsCreateEnvironment_569498, base: "",
-    url: url_LabsCreateEnvironment_569499, schemes: {Scheme.Https})
+    validator: validate_LabsCreateEnvironment_565398, base: "",
+    url: url_LabsCreateEnvironment_565399, schemes: {Scheme.Https})
 type
-  Call_LabsExportResourceUsage_569510 = ref object of OpenApiRestCall_567650
-proc url_LabsExportResourceUsage_569512(protocol: Scheme; host: string; base: string;
+  Call_LabsExportResourceUsage_565410 = ref object of OpenApiRestCall_563548
+proc url_LabsExportResourceUsage_565412(protocol: Scheme; host: string; base: string;
                                        route: string; path: JsonNode;
                                        query: JsonNode): Uri =
   result.scheme = $protocol
@@ -13743,37 +13651,36 @@ proc url_LabsExportResourceUsage_569512(protocol: Scheme; host: string; base: st
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_LabsExportResourceUsage_569511(path: JsonNode; query: JsonNode;
+proc validate_LabsExportResourceUsage_565411(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Exports the lab resource usage into a storage account This operation can take a while to complete.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   name: JString (required)
   ##       : The name of the lab.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_569513 = path.getOrDefault("resourceGroupName")
-  valid_569513 = validateParameter(valid_569513, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `name` field"
+  var valid_565413 = path.getOrDefault("name")
+  valid_565413 = validateParameter(valid_565413, JString, required = true,
                                  default = nil)
-  if valid_569513 != nil:
-    section.add "resourceGroupName", valid_569513
-  var valid_569514 = path.getOrDefault("name")
-  valid_569514 = validateParameter(valid_569514, JString, required = true,
+  if valid_565413 != nil:
+    section.add "name", valid_565413
+  var valid_565414 = path.getOrDefault("subscriptionId")
+  valid_565414 = validateParameter(valid_565414, JString, required = true,
                                  default = nil)
-  if valid_569514 != nil:
-    section.add "name", valid_569514
-  var valid_569515 = path.getOrDefault("subscriptionId")
-  valid_569515 = validateParameter(valid_569515, JString, required = true,
+  if valid_565414 != nil:
+    section.add "subscriptionId", valid_565414
+  var valid_565415 = path.getOrDefault("resourceGroupName")
+  valid_565415 = validateParameter(valid_565415, JString, required = true,
                                  default = nil)
-  if valid_569515 != nil:
-    section.add "subscriptionId", valid_569515
+  if valid_565415 != nil:
+    section.add "resourceGroupName", valid_565415
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -13781,11 +13688,11 @@ proc validate_LabsExportResourceUsage_569511(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_569516 = query.getOrDefault("api-version")
-  valid_569516 = validateParameter(valid_569516, JString, required = true,
+  var valid_565416 = query.getOrDefault("api-version")
+  valid_565416 = validateParameter(valid_565416, JString, required = true,
                                  default = newJString("2016-05-15"))
-  if valid_569516 != nil:
-    section.add "api-version", valid_569516
+  if valid_565416 != nil:
+    section.add "api-version", valid_565416
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -13799,27 +13706,24 @@ proc validate_LabsExportResourceUsage_569511(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_569518: Call_LabsExportResourceUsage_569510; path: JsonNode;
+proc call*(call_565418: Call_LabsExportResourceUsage_565410; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Exports the lab resource usage into a storage account This operation can take a while to complete.
   ## 
-  let valid = call_569518.validator(path, query, header, formData, body)
-  let scheme = call_569518.pickScheme
+  let valid = call_565418.validator(path, query, header, formData, body)
+  let scheme = call_565418.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_569518.url(scheme.get, call_569518.host, call_569518.base,
-                         call_569518.route, valid.getOrDefault("path"),
+  let url = call_565418.url(scheme.get, call_565418.host, call_565418.base,
+                         call_565418.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_569518, url, valid)
+  result = hook(call_565418, url, valid)
 
-proc call*(call_569519: Call_LabsExportResourceUsage_569510;
-          resourceGroupName: string; name: string; subscriptionId: string;
-          exportResourceUsageParameters: JsonNode;
-          apiVersion: string = "2016-05-15"): Recallable =
+proc call*(call_565419: Call_LabsExportResourceUsage_565410; name: string;
+          subscriptionId: string; exportResourceUsageParameters: JsonNode;
+          resourceGroupName: string; apiVersion: string = "2016-05-15"): Recallable =
   ## labsExportResourceUsage
   ## Exports the lab resource usage into a storage account This operation can take a while to complete.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client API version.
   ##   name: string (required)
@@ -13828,25 +13732,27 @@ proc call*(call_569519: Call_LabsExportResourceUsage_569510;
   ##                 : The subscription ID.
   ##   exportResourceUsageParameters: JObject (required)
   ##                                : The parameters of the export operation.
-  var path_569520 = newJObject()
-  var query_569521 = newJObject()
-  var body_569522 = newJObject()
-  add(path_569520, "resourceGroupName", newJString(resourceGroupName))
-  add(query_569521, "api-version", newJString(apiVersion))
-  add(path_569520, "name", newJString(name))
-  add(path_569520, "subscriptionId", newJString(subscriptionId))
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_565420 = newJObject()
+  var query_565421 = newJObject()
+  var body_565422 = newJObject()
+  add(query_565421, "api-version", newJString(apiVersion))
+  add(path_565420, "name", newJString(name))
+  add(path_565420, "subscriptionId", newJString(subscriptionId))
   if exportResourceUsageParameters != nil:
-    body_569522 = exportResourceUsageParameters
-  result = call_569519.call(path_569520, query_569521, nil, nil, body_569522)
+    body_565422 = exportResourceUsageParameters
+  add(path_565420, "resourceGroupName", newJString(resourceGroupName))
+  result = call_565419.call(path_565420, query_565421, nil, nil, body_565422)
 
-var labsExportResourceUsage* = Call_LabsExportResourceUsage_569510(
+var labsExportResourceUsage* = Call_LabsExportResourceUsage_565410(
     name: "labsExportResourceUsage", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DevTestLab/labs/{name}/exportResourceUsage",
-    validator: validate_LabsExportResourceUsage_569511, base: "",
-    url: url_LabsExportResourceUsage_569512, schemes: {Scheme.Https})
+    validator: validate_LabsExportResourceUsage_565411, base: "",
+    url: url_LabsExportResourceUsage_565412, schemes: {Scheme.Https})
 type
-  Call_LabsGenerateUploadUri_569523 = ref object of OpenApiRestCall_567650
-proc url_LabsGenerateUploadUri_569525(protocol: Scheme; host: string; base: string;
+  Call_LabsGenerateUploadUri_565423 = ref object of OpenApiRestCall_563548
+proc url_LabsGenerateUploadUri_565425(protocol: Scheme; host: string; base: string;
                                      route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -13869,37 +13775,36 @@ proc url_LabsGenerateUploadUri_569525(protocol: Scheme; host: string; base: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_LabsGenerateUploadUri_569524(path: JsonNode; query: JsonNode;
+proc validate_LabsGenerateUploadUri_565424(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Generate a URI for uploading custom disk images to a Lab.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   name: JString (required)
   ##       : The name of the lab.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_569526 = path.getOrDefault("resourceGroupName")
-  valid_569526 = validateParameter(valid_569526, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `name` field"
+  var valid_565426 = path.getOrDefault("name")
+  valid_565426 = validateParameter(valid_565426, JString, required = true,
                                  default = nil)
-  if valid_569526 != nil:
-    section.add "resourceGroupName", valid_569526
-  var valid_569527 = path.getOrDefault("name")
-  valid_569527 = validateParameter(valid_569527, JString, required = true,
+  if valid_565426 != nil:
+    section.add "name", valid_565426
+  var valid_565427 = path.getOrDefault("subscriptionId")
+  valid_565427 = validateParameter(valid_565427, JString, required = true,
                                  default = nil)
-  if valid_569527 != nil:
-    section.add "name", valid_569527
-  var valid_569528 = path.getOrDefault("subscriptionId")
-  valid_569528 = validateParameter(valid_569528, JString, required = true,
+  if valid_565427 != nil:
+    section.add "subscriptionId", valid_565427
+  var valid_565428 = path.getOrDefault("resourceGroupName")
+  valid_565428 = validateParameter(valid_565428, JString, required = true,
                                  default = nil)
-  if valid_569528 != nil:
-    section.add "subscriptionId", valid_569528
+  if valid_565428 != nil:
+    section.add "resourceGroupName", valid_565428
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -13907,11 +13812,11 @@ proc validate_LabsGenerateUploadUri_569524(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_569529 = query.getOrDefault("api-version")
-  valid_569529 = validateParameter(valid_569529, JString, required = true,
+  var valid_565429 = query.getOrDefault("api-version")
+  valid_565429 = validateParameter(valid_565429, JString, required = true,
                                  default = newJString("2016-05-15"))
-  if valid_569529 != nil:
-    section.add "api-version", valid_569529
+  if valid_565429 != nil:
+    section.add "api-version", valid_565429
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -13925,53 +13830,53 @@ proc validate_LabsGenerateUploadUri_569524(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_569531: Call_LabsGenerateUploadUri_569523; path: JsonNode;
+proc call*(call_565431: Call_LabsGenerateUploadUri_565423; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Generate a URI for uploading custom disk images to a Lab.
   ## 
-  let valid = call_569531.validator(path, query, header, formData, body)
-  let scheme = call_569531.pickScheme
+  let valid = call_565431.validator(path, query, header, formData, body)
+  let scheme = call_565431.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_569531.url(scheme.get, call_569531.host, call_569531.base,
-                         call_569531.route, valid.getOrDefault("path"),
+  let url = call_565431.url(scheme.get, call_565431.host, call_565431.base,
+                         call_565431.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_569531, url, valid)
+  result = hook(call_565431, url, valid)
 
-proc call*(call_569532: Call_LabsGenerateUploadUri_569523;
-          resourceGroupName: string; name: string; subscriptionId: string;
+proc call*(call_565432: Call_LabsGenerateUploadUri_565423; name: string;
+          subscriptionId: string; resourceGroupName: string;
           generateUploadUriParameter: JsonNode; apiVersion: string = "2016-05-15"): Recallable =
   ## labsGenerateUploadUri
   ## Generate a URI for uploading custom disk images to a Lab.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client API version.
   ##   name: string (required)
   ##       : The name of the lab.
   ##   subscriptionId: string (required)
   ##                 : The subscription ID.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   generateUploadUriParameter: JObject (required)
   ##                             : Properties for generating an upload URI.
-  var path_569533 = newJObject()
-  var query_569534 = newJObject()
-  var body_569535 = newJObject()
-  add(path_569533, "resourceGroupName", newJString(resourceGroupName))
-  add(query_569534, "api-version", newJString(apiVersion))
-  add(path_569533, "name", newJString(name))
-  add(path_569533, "subscriptionId", newJString(subscriptionId))
+  var path_565433 = newJObject()
+  var query_565434 = newJObject()
+  var body_565435 = newJObject()
+  add(query_565434, "api-version", newJString(apiVersion))
+  add(path_565433, "name", newJString(name))
+  add(path_565433, "subscriptionId", newJString(subscriptionId))
+  add(path_565433, "resourceGroupName", newJString(resourceGroupName))
   if generateUploadUriParameter != nil:
-    body_569535 = generateUploadUriParameter
-  result = call_569532.call(path_569533, query_569534, nil, nil, body_569535)
+    body_565435 = generateUploadUriParameter
+  result = call_565432.call(path_565433, query_565434, nil, nil, body_565435)
 
-var labsGenerateUploadUri* = Call_LabsGenerateUploadUri_569523(
+var labsGenerateUploadUri* = Call_LabsGenerateUploadUri_565423(
     name: "labsGenerateUploadUri", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DevTestLab/labs/{name}/generateUploadUri",
-    validator: validate_LabsGenerateUploadUri_569524, base: "",
-    url: url_LabsGenerateUploadUri_569525, schemes: {Scheme.Https})
+    validator: validate_LabsGenerateUploadUri_565424, base: "",
+    url: url_LabsGenerateUploadUri_565425, schemes: {Scheme.Https})
 type
-  Call_LabsListVhds_569536 = ref object of OpenApiRestCall_567650
-proc url_LabsListVhds_569538(protocol: Scheme; host: string; base: string;
+  Call_LabsListVhds_565436 = ref object of OpenApiRestCall_563548
+proc url_LabsListVhds_565438(protocol: Scheme; host: string; base: string;
                             route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -13994,37 +13899,36 @@ proc url_LabsListVhds_569538(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_LabsListVhds_569537(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_LabsListVhds_565437(path: JsonNode; query: JsonNode; header: JsonNode;
                                  formData: JsonNode; body: JsonNode): JsonNode =
   ## List disk images available for custom image creation.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   name: JString (required)
   ##       : The name of the lab.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_569539 = path.getOrDefault("resourceGroupName")
-  valid_569539 = validateParameter(valid_569539, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `name` field"
+  var valid_565439 = path.getOrDefault("name")
+  valid_565439 = validateParameter(valid_565439, JString, required = true,
                                  default = nil)
-  if valid_569539 != nil:
-    section.add "resourceGroupName", valid_569539
-  var valid_569540 = path.getOrDefault("name")
-  valid_569540 = validateParameter(valid_569540, JString, required = true,
+  if valid_565439 != nil:
+    section.add "name", valid_565439
+  var valid_565440 = path.getOrDefault("subscriptionId")
+  valid_565440 = validateParameter(valid_565440, JString, required = true,
                                  default = nil)
-  if valid_569540 != nil:
-    section.add "name", valid_569540
-  var valid_569541 = path.getOrDefault("subscriptionId")
-  valid_569541 = validateParameter(valid_569541, JString, required = true,
+  if valid_565440 != nil:
+    section.add "subscriptionId", valid_565440
+  var valid_565441 = path.getOrDefault("resourceGroupName")
+  valid_565441 = validateParameter(valid_565441, JString, required = true,
                                  default = nil)
-  if valid_569541 != nil:
-    section.add "subscriptionId", valid_569541
+  if valid_565441 != nil:
+    section.add "resourceGroupName", valid_565441
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -14032,11 +13936,11 @@ proc validate_LabsListVhds_569537(path: JsonNode; query: JsonNode; header: JsonN
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_569542 = query.getOrDefault("api-version")
-  valid_569542 = validateParameter(valid_569542, JString, required = true,
+  var valid_565442 = query.getOrDefault("api-version")
+  valid_565442 = validateParameter(valid_565442, JString, required = true,
                                  default = newJString("2016-05-15"))
-  if valid_569542 != nil:
-    section.add "api-version", valid_569542
+  if valid_565442 != nil:
+    section.add "api-version", valid_565442
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -14045,46 +13949,47 @@ proc validate_LabsListVhds_569537(path: JsonNode; query: JsonNode; header: JsonN
   if body != nil:
     result.add "body", body
 
-proc call*(call_569543: Call_LabsListVhds_569536; path: JsonNode; query: JsonNode;
+proc call*(call_565443: Call_LabsListVhds_565436; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## List disk images available for custom image creation.
   ## 
-  let valid = call_569543.validator(path, query, header, formData, body)
-  let scheme = call_569543.pickScheme
+  let valid = call_565443.validator(path, query, header, formData, body)
+  let scheme = call_565443.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_569543.url(scheme.get, call_569543.host, call_569543.base,
-                         call_569543.route, valid.getOrDefault("path"),
+  let url = call_565443.url(scheme.get, call_565443.host, call_565443.base,
+                         call_565443.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_569543, url, valid)
+  result = hook(call_565443, url, valid)
 
-proc call*(call_569544: Call_LabsListVhds_569536; resourceGroupName: string;
-          name: string; subscriptionId: string; apiVersion: string = "2016-05-15"): Recallable =
+proc call*(call_565444: Call_LabsListVhds_565436; name: string;
+          subscriptionId: string; resourceGroupName: string;
+          apiVersion: string = "2016-05-15"): Recallable =
   ## labsListVhds
   ## List disk images available for custom image creation.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client API version.
   ##   name: string (required)
   ##       : The name of the lab.
   ##   subscriptionId: string (required)
   ##                 : The subscription ID.
-  var path_569545 = newJObject()
-  var query_569546 = newJObject()
-  add(path_569545, "resourceGroupName", newJString(resourceGroupName))
-  add(query_569546, "api-version", newJString(apiVersion))
-  add(path_569545, "name", newJString(name))
-  add(path_569545, "subscriptionId", newJString(subscriptionId))
-  result = call_569544.call(path_569545, query_569546, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_565445 = newJObject()
+  var query_565446 = newJObject()
+  add(query_565446, "api-version", newJString(apiVersion))
+  add(path_565445, "name", newJString(name))
+  add(path_565445, "subscriptionId", newJString(subscriptionId))
+  add(path_565445, "resourceGroupName", newJString(resourceGroupName))
+  result = call_565444.call(path_565445, query_565446, nil, nil, nil)
 
-var labsListVhds* = Call_LabsListVhds_569536(name: "labsListVhds",
+var labsListVhds* = Call_LabsListVhds_565436(name: "labsListVhds",
     meth: HttpMethod.HttpPost, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DevTestLab/labs/{name}/listVhds",
-    validator: validate_LabsListVhds_569537, base: "", url: url_LabsListVhds_569538,
+    validator: validate_LabsListVhds_565437, base: "", url: url_LabsListVhds_565438,
     schemes: {Scheme.Https})
 type
-  Call_GlobalSchedulesListByResourceGroup_569547 = ref object of OpenApiRestCall_567650
-proc url_GlobalSchedulesListByResourceGroup_569549(protocol: Scheme; host: string;
+  Call_GlobalSchedulesListByResourceGroup_565447 = ref object of OpenApiRestCall_563548
+proc url_GlobalSchedulesListByResourceGroup_565449(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -14104,69 +14009,69 @@ proc url_GlobalSchedulesListByResourceGroup_569549(protocol: Scheme; host: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_GlobalSchedulesListByResourceGroup_569548(path: JsonNode;
+proc validate_GlobalSchedulesListByResourceGroup_565448(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## List schedules in a resource group.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_569550 = path.getOrDefault("resourceGroupName")
-  valid_569550 = validateParameter(valid_569550, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_565450 = path.getOrDefault("subscriptionId")
+  valid_565450 = validateParameter(valid_565450, JString, required = true,
                                  default = nil)
-  if valid_569550 != nil:
-    section.add "resourceGroupName", valid_569550
-  var valid_569551 = path.getOrDefault("subscriptionId")
-  valid_569551 = validateParameter(valid_569551, JString, required = true,
+  if valid_565450 != nil:
+    section.add "subscriptionId", valid_565450
+  var valid_565451 = path.getOrDefault("resourceGroupName")
+  valid_565451 = validateParameter(valid_565451, JString, required = true,
                                  default = nil)
-  if valid_569551 != nil:
-    section.add "subscriptionId", valid_569551
+  if valid_565451 != nil:
+    section.add "resourceGroupName", valid_565451
   result.add "path", section
   ## parameters in `query` object:
-  ##   $orderby: JString
-  ##           : The ordering expression for the results, using OData notation.
-  ##   $expand: JString
-  ##          : Specify the $expand query. Example: 'properties($select=status)'
-  ##   api-version: JString (required)
-  ##              : Client API version.
   ##   $top: JInt
   ##       : The maximum number of resources to return from the operation.
+  ##   api-version: JString (required)
+  ##              : Client API version.
+  ##   $expand: JString
+  ##          : Specify the $expand query. Example: 'properties($select=status)'
+  ##   $orderby: JString
+  ##           : The ordering expression for the results, using OData notation.
   ##   $filter: JString
   ##          : The filter to apply to the operation.
   section = newJObject()
-  var valid_569552 = query.getOrDefault("$orderby")
-  valid_569552 = validateParameter(valid_569552, JString, required = false,
-                                 default = nil)
-  if valid_569552 != nil:
-    section.add "$orderby", valid_569552
-  var valid_569553 = query.getOrDefault("$expand")
-  valid_569553 = validateParameter(valid_569553, JString, required = false,
-                                 default = nil)
-  if valid_569553 != nil:
-    section.add "$expand", valid_569553
+  var valid_565452 = query.getOrDefault("$top")
+  valid_565452 = validateParameter(valid_565452, JInt, required = false, default = nil)
+  if valid_565452 != nil:
+    section.add "$top", valid_565452
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_569554 = query.getOrDefault("api-version")
-  valid_569554 = validateParameter(valid_569554, JString, required = true,
+  var valid_565453 = query.getOrDefault("api-version")
+  valid_565453 = validateParameter(valid_565453, JString, required = true,
                                  default = newJString("2016-05-15"))
-  if valid_569554 != nil:
-    section.add "api-version", valid_569554
-  var valid_569555 = query.getOrDefault("$top")
-  valid_569555 = validateParameter(valid_569555, JInt, required = false, default = nil)
-  if valid_569555 != nil:
-    section.add "$top", valid_569555
-  var valid_569556 = query.getOrDefault("$filter")
-  valid_569556 = validateParameter(valid_569556, JString, required = false,
+  if valid_565453 != nil:
+    section.add "api-version", valid_565453
+  var valid_565454 = query.getOrDefault("$expand")
+  valid_565454 = validateParameter(valid_565454, JString, required = false,
                                  default = nil)
-  if valid_569556 != nil:
-    section.add "$filter", valid_569556
+  if valid_565454 != nil:
+    section.add "$expand", valid_565454
+  var valid_565455 = query.getOrDefault("$orderby")
+  valid_565455 = validateParameter(valid_565455, JString, required = false,
+                                 default = nil)
+  if valid_565455 != nil:
+    section.add "$orderby", valid_565455
+  var valid_565456 = query.getOrDefault("$filter")
+  valid_565456 = validateParameter(valid_565456, JString, required = false,
+                                 default = nil)
+  if valid_565456 != nil:
+    section.add "$filter", valid_565456
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -14175,59 +14080,59 @@ proc validate_GlobalSchedulesListByResourceGroup_569548(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_569557: Call_GlobalSchedulesListByResourceGroup_569547;
+proc call*(call_565457: Call_GlobalSchedulesListByResourceGroup_565447;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## List schedules in a resource group.
   ## 
-  let valid = call_569557.validator(path, query, header, formData, body)
-  let scheme = call_569557.pickScheme
+  let valid = call_565457.validator(path, query, header, formData, body)
+  let scheme = call_565457.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_569557.url(scheme.get, call_569557.host, call_569557.base,
-                         call_569557.route, valid.getOrDefault("path"),
+  let url = call_565457.url(scheme.get, call_565457.host, call_565457.base,
+                         call_565457.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_569557, url, valid)
+  result = hook(call_565457, url, valid)
 
-proc call*(call_569558: Call_GlobalSchedulesListByResourceGroup_569547;
-          resourceGroupName: string; subscriptionId: string; Orderby: string = "";
-          Expand: string = ""; apiVersion: string = "2016-05-15"; Top: int = 0;
+proc call*(call_565458: Call_GlobalSchedulesListByResourceGroup_565447;
+          subscriptionId: string; resourceGroupName: string; Top: int = 0;
+          apiVersion: string = "2016-05-15"; Expand: string = ""; Orderby: string = "";
           Filter: string = ""): Recallable =
   ## globalSchedulesListByResourceGroup
   ## List schedules in a resource group.
+  ##   Top: int
+  ##      : The maximum number of resources to return from the operation.
+  ##   apiVersion: string (required)
+  ##             : Client API version.
+  ##   Expand: string
+  ##         : Specify the $expand query. Example: 'properties($select=status)'
+  ##   subscriptionId: string (required)
+  ##                 : The subscription ID.
   ##   Orderby: string
   ##          : The ordering expression for the results, using OData notation.
   ##   resourceGroupName: string (required)
   ##                    : The name of the resource group.
-  ##   Expand: string
-  ##         : Specify the $expand query. Example: 'properties($select=status)'
-  ##   apiVersion: string (required)
-  ##             : Client API version.
-  ##   subscriptionId: string (required)
-  ##                 : The subscription ID.
-  ##   Top: int
-  ##      : The maximum number of resources to return from the operation.
   ##   Filter: string
   ##         : The filter to apply to the operation.
-  var path_569559 = newJObject()
-  var query_569560 = newJObject()
-  add(query_569560, "$orderby", newJString(Orderby))
-  add(path_569559, "resourceGroupName", newJString(resourceGroupName))
-  add(query_569560, "$expand", newJString(Expand))
-  add(query_569560, "api-version", newJString(apiVersion))
-  add(path_569559, "subscriptionId", newJString(subscriptionId))
-  add(query_569560, "$top", newJInt(Top))
-  add(query_569560, "$filter", newJString(Filter))
-  result = call_569558.call(path_569559, query_569560, nil, nil, nil)
+  var path_565459 = newJObject()
+  var query_565460 = newJObject()
+  add(query_565460, "$top", newJInt(Top))
+  add(query_565460, "api-version", newJString(apiVersion))
+  add(query_565460, "$expand", newJString(Expand))
+  add(path_565459, "subscriptionId", newJString(subscriptionId))
+  add(query_565460, "$orderby", newJString(Orderby))
+  add(path_565459, "resourceGroupName", newJString(resourceGroupName))
+  add(query_565460, "$filter", newJString(Filter))
+  result = call_565458.call(path_565459, query_565460, nil, nil, nil)
 
-var globalSchedulesListByResourceGroup* = Call_GlobalSchedulesListByResourceGroup_569547(
+var globalSchedulesListByResourceGroup* = Call_GlobalSchedulesListByResourceGroup_565447(
     name: "globalSchedulesListByResourceGroup", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DevTestLab/schedules",
-    validator: validate_GlobalSchedulesListByResourceGroup_569548, base: "",
-    url: url_GlobalSchedulesListByResourceGroup_569549, schemes: {Scheme.Https})
+    validator: validate_GlobalSchedulesListByResourceGroup_565448, base: "",
+    url: url_GlobalSchedulesListByResourceGroup_565449, schemes: {Scheme.Https})
 type
-  Call_GlobalSchedulesCreateOrUpdate_569573 = ref object of OpenApiRestCall_567650
-proc url_GlobalSchedulesCreateOrUpdate_569575(protocol: Scheme; host: string;
+  Call_GlobalSchedulesCreateOrUpdate_565473 = ref object of OpenApiRestCall_563548
+proc url_GlobalSchedulesCreateOrUpdate_565475(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -14249,37 +14154,36 @@ proc url_GlobalSchedulesCreateOrUpdate_569575(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_GlobalSchedulesCreateOrUpdate_569574(path: JsonNode; query: JsonNode;
+proc validate_GlobalSchedulesCreateOrUpdate_565474(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Create or replace an existing schedule.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   name: JString (required)
   ##       : The name of the schedule.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_569576 = path.getOrDefault("resourceGroupName")
-  valid_569576 = validateParameter(valid_569576, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `name` field"
+  var valid_565476 = path.getOrDefault("name")
+  valid_565476 = validateParameter(valid_565476, JString, required = true,
                                  default = nil)
-  if valid_569576 != nil:
-    section.add "resourceGroupName", valid_569576
-  var valid_569577 = path.getOrDefault("name")
-  valid_569577 = validateParameter(valid_569577, JString, required = true,
+  if valid_565476 != nil:
+    section.add "name", valid_565476
+  var valid_565477 = path.getOrDefault("subscriptionId")
+  valid_565477 = validateParameter(valid_565477, JString, required = true,
                                  default = nil)
-  if valid_569577 != nil:
-    section.add "name", valid_569577
-  var valid_569578 = path.getOrDefault("subscriptionId")
-  valid_569578 = validateParameter(valid_569578, JString, required = true,
+  if valid_565477 != nil:
+    section.add "subscriptionId", valid_565477
+  var valid_565478 = path.getOrDefault("resourceGroupName")
+  valid_565478 = validateParameter(valid_565478, JString, required = true,
                                  default = nil)
-  if valid_569578 != nil:
-    section.add "subscriptionId", valid_569578
+  if valid_565478 != nil:
+    section.add "resourceGroupName", valid_565478
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -14287,11 +14191,11 @@ proc validate_GlobalSchedulesCreateOrUpdate_569574(path: JsonNode; query: JsonNo
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_569579 = query.getOrDefault("api-version")
-  valid_569579 = validateParameter(valid_569579, JString, required = true,
+  var valid_565479 = query.getOrDefault("api-version")
+  valid_565479 = validateParameter(valid_565479, JString, required = true,
                                  default = newJString("2016-05-15"))
-  if valid_569579 != nil:
-    section.add "api-version", valid_569579
+  if valid_565479 != nil:
+    section.add "api-version", valid_565479
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -14305,53 +14209,53 @@ proc validate_GlobalSchedulesCreateOrUpdate_569574(path: JsonNode; query: JsonNo
   if body != nil:
     result.add "body", body
 
-proc call*(call_569581: Call_GlobalSchedulesCreateOrUpdate_569573; path: JsonNode;
+proc call*(call_565481: Call_GlobalSchedulesCreateOrUpdate_565473; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Create or replace an existing schedule.
   ## 
-  let valid = call_569581.validator(path, query, header, formData, body)
-  let scheme = call_569581.pickScheme
+  let valid = call_565481.validator(path, query, header, formData, body)
+  let scheme = call_565481.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_569581.url(scheme.get, call_569581.host, call_569581.base,
-                         call_569581.route, valid.getOrDefault("path"),
+  let url = call_565481.url(scheme.get, call_565481.host, call_565481.base,
+                         call_565481.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_569581, url, valid)
+  result = hook(call_565481, url, valid)
 
-proc call*(call_569582: Call_GlobalSchedulesCreateOrUpdate_569573;
-          resourceGroupName: string; name: string; subscriptionId: string;
-          schedule: JsonNode; apiVersion: string = "2016-05-15"): Recallable =
+proc call*(call_565482: Call_GlobalSchedulesCreateOrUpdate_565473; name: string;
+          subscriptionId: string; resourceGroupName: string; schedule: JsonNode;
+          apiVersion: string = "2016-05-15"): Recallable =
   ## globalSchedulesCreateOrUpdate
   ## Create or replace an existing schedule.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client API version.
   ##   name: string (required)
   ##       : The name of the schedule.
   ##   subscriptionId: string (required)
   ##                 : The subscription ID.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   schedule: JObject (required)
   ##           : A schedule.
-  var path_569583 = newJObject()
-  var query_569584 = newJObject()
-  var body_569585 = newJObject()
-  add(path_569583, "resourceGroupName", newJString(resourceGroupName))
-  add(query_569584, "api-version", newJString(apiVersion))
-  add(path_569583, "name", newJString(name))
-  add(path_569583, "subscriptionId", newJString(subscriptionId))
+  var path_565483 = newJObject()
+  var query_565484 = newJObject()
+  var body_565485 = newJObject()
+  add(query_565484, "api-version", newJString(apiVersion))
+  add(path_565483, "name", newJString(name))
+  add(path_565483, "subscriptionId", newJString(subscriptionId))
+  add(path_565483, "resourceGroupName", newJString(resourceGroupName))
   if schedule != nil:
-    body_569585 = schedule
-  result = call_569582.call(path_569583, query_569584, nil, nil, body_569585)
+    body_565485 = schedule
+  result = call_565482.call(path_565483, query_565484, nil, nil, body_565485)
 
-var globalSchedulesCreateOrUpdate* = Call_GlobalSchedulesCreateOrUpdate_569573(
+var globalSchedulesCreateOrUpdate* = Call_GlobalSchedulesCreateOrUpdate_565473(
     name: "globalSchedulesCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DevTestLab/schedules/{name}",
-    validator: validate_GlobalSchedulesCreateOrUpdate_569574, base: "",
-    url: url_GlobalSchedulesCreateOrUpdate_569575, schemes: {Scheme.Https})
+    validator: validate_GlobalSchedulesCreateOrUpdate_565474, base: "",
+    url: url_GlobalSchedulesCreateOrUpdate_565475, schemes: {Scheme.Https})
 type
-  Call_GlobalSchedulesGet_569561 = ref object of OpenApiRestCall_567650
-proc url_GlobalSchedulesGet_569563(protocol: Scheme; host: string; base: string;
+  Call_GlobalSchedulesGet_565461 = ref object of OpenApiRestCall_563548
+proc url_GlobalSchedulesGet_565463(protocol: Scheme; host: string; base: string;
                                   route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -14373,7 +14277,7 @@ proc url_GlobalSchedulesGet_569563(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_GlobalSchedulesGet_569562(path: JsonNode; query: JsonNode;
+proc validate_GlobalSchedulesGet_565462(path: JsonNode; query: JsonNode;
                                        header: JsonNode; formData: JsonNode;
                                        body: JsonNode): JsonNode =
   ## Get schedule.
@@ -14381,49 +14285,48 @@ proc validate_GlobalSchedulesGet_569562(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   name: JString (required)
   ##       : The name of the schedule.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_569564 = path.getOrDefault("resourceGroupName")
-  valid_569564 = validateParameter(valid_569564, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `name` field"
+  var valid_565464 = path.getOrDefault("name")
+  valid_565464 = validateParameter(valid_565464, JString, required = true,
                                  default = nil)
-  if valid_569564 != nil:
-    section.add "resourceGroupName", valid_569564
-  var valid_569565 = path.getOrDefault("name")
-  valid_569565 = validateParameter(valid_569565, JString, required = true,
+  if valid_565464 != nil:
+    section.add "name", valid_565464
+  var valid_565465 = path.getOrDefault("subscriptionId")
+  valid_565465 = validateParameter(valid_565465, JString, required = true,
                                  default = nil)
-  if valid_569565 != nil:
-    section.add "name", valid_569565
-  var valid_569566 = path.getOrDefault("subscriptionId")
-  valid_569566 = validateParameter(valid_569566, JString, required = true,
+  if valid_565465 != nil:
+    section.add "subscriptionId", valid_565465
+  var valid_565466 = path.getOrDefault("resourceGroupName")
+  valid_565466 = validateParameter(valid_565466, JString, required = true,
                                  default = nil)
-  if valid_569566 != nil:
-    section.add "subscriptionId", valid_569566
+  if valid_565466 != nil:
+    section.add "resourceGroupName", valid_565466
   result.add "path", section
   ## parameters in `query` object:
-  ##   $expand: JString
-  ##          : Specify the $expand query. Example: 'properties($select=status)'
   ##   api-version: JString (required)
   ##              : Client API version.
+  ##   $expand: JString
+  ##          : Specify the $expand query. Example: 'properties($select=status)'
   section = newJObject()
-  var valid_569567 = query.getOrDefault("$expand")
-  valid_569567 = validateParameter(valid_569567, JString, required = false,
-                                 default = nil)
-  if valid_569567 != nil:
-    section.add "$expand", valid_569567
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_569568 = query.getOrDefault("api-version")
-  valid_569568 = validateParameter(valid_569568, JString, required = true,
+  var valid_565467 = query.getOrDefault("api-version")
+  valid_565467 = validateParameter(valid_565467, JString, required = true,
                                  default = newJString("2016-05-15"))
-  if valid_569568 != nil:
-    section.add "api-version", valid_569568
+  if valid_565467 != nil:
+    section.add "api-version", valid_565467
+  var valid_565468 = query.getOrDefault("$expand")
+  valid_565468 = validateParameter(valid_565468, JString, required = false,
+                                 default = nil)
+  if valid_565468 != nil:
+    section.add "$expand", valid_565468
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -14432,51 +14335,51 @@ proc validate_GlobalSchedulesGet_569562(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_569569: Call_GlobalSchedulesGet_569561; path: JsonNode;
+proc call*(call_565469: Call_GlobalSchedulesGet_565461; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get schedule.
   ## 
-  let valid = call_569569.validator(path, query, header, formData, body)
-  let scheme = call_569569.pickScheme
+  let valid = call_565469.validator(path, query, header, formData, body)
+  let scheme = call_565469.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_569569.url(scheme.get, call_569569.host, call_569569.base,
-                         call_569569.route, valid.getOrDefault("path"),
+  let url = call_565469.url(scheme.get, call_565469.host, call_565469.base,
+                         call_565469.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_569569, url, valid)
+  result = hook(call_565469, url, valid)
 
-proc call*(call_569570: Call_GlobalSchedulesGet_569561; resourceGroupName: string;
-          name: string; subscriptionId: string; Expand: string = "";
-          apiVersion: string = "2016-05-15"): Recallable =
+proc call*(call_565470: Call_GlobalSchedulesGet_565461; name: string;
+          subscriptionId: string; resourceGroupName: string;
+          apiVersion: string = "2016-05-15"; Expand: string = ""): Recallable =
   ## globalSchedulesGet
   ## Get schedule.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   apiVersion: string (required)
+  ##             : Client API version.
   ##   Expand: string
   ##         : Specify the $expand query. Example: 'properties($select=status)'
   ##   name: string (required)
   ##       : The name of the schedule.
-  ##   apiVersion: string (required)
-  ##             : Client API version.
   ##   subscriptionId: string (required)
   ##                 : The subscription ID.
-  var path_569571 = newJObject()
-  var query_569572 = newJObject()
-  add(path_569571, "resourceGroupName", newJString(resourceGroupName))
-  add(query_569572, "$expand", newJString(Expand))
-  add(path_569571, "name", newJString(name))
-  add(query_569572, "api-version", newJString(apiVersion))
-  add(path_569571, "subscriptionId", newJString(subscriptionId))
-  result = call_569570.call(path_569571, query_569572, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_565471 = newJObject()
+  var query_565472 = newJObject()
+  add(query_565472, "api-version", newJString(apiVersion))
+  add(query_565472, "$expand", newJString(Expand))
+  add(path_565471, "name", newJString(name))
+  add(path_565471, "subscriptionId", newJString(subscriptionId))
+  add(path_565471, "resourceGroupName", newJString(resourceGroupName))
+  result = call_565470.call(path_565471, query_565472, nil, nil, nil)
 
-var globalSchedulesGet* = Call_GlobalSchedulesGet_569561(
+var globalSchedulesGet* = Call_GlobalSchedulesGet_565461(
     name: "globalSchedulesGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DevTestLab/schedules/{name}",
-    validator: validate_GlobalSchedulesGet_569562, base: "",
-    url: url_GlobalSchedulesGet_569563, schemes: {Scheme.Https})
+    validator: validate_GlobalSchedulesGet_565462, base: "",
+    url: url_GlobalSchedulesGet_565463, schemes: {Scheme.Https})
 type
-  Call_GlobalSchedulesUpdate_569597 = ref object of OpenApiRestCall_567650
-proc url_GlobalSchedulesUpdate_569599(protocol: Scheme; host: string; base: string;
+  Call_GlobalSchedulesUpdate_565497 = ref object of OpenApiRestCall_563548
+proc url_GlobalSchedulesUpdate_565499(protocol: Scheme; host: string; base: string;
                                      route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -14498,37 +14401,36 @@ proc url_GlobalSchedulesUpdate_569599(protocol: Scheme; host: string; base: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_GlobalSchedulesUpdate_569598(path: JsonNode; query: JsonNode;
+proc validate_GlobalSchedulesUpdate_565498(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Modify properties of schedules.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   name: JString (required)
   ##       : The name of the schedule.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_569600 = path.getOrDefault("resourceGroupName")
-  valid_569600 = validateParameter(valid_569600, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `name` field"
+  var valid_565500 = path.getOrDefault("name")
+  valid_565500 = validateParameter(valid_565500, JString, required = true,
                                  default = nil)
-  if valid_569600 != nil:
-    section.add "resourceGroupName", valid_569600
-  var valid_569601 = path.getOrDefault("name")
-  valid_569601 = validateParameter(valid_569601, JString, required = true,
+  if valid_565500 != nil:
+    section.add "name", valid_565500
+  var valid_565501 = path.getOrDefault("subscriptionId")
+  valid_565501 = validateParameter(valid_565501, JString, required = true,
                                  default = nil)
-  if valid_569601 != nil:
-    section.add "name", valid_569601
-  var valid_569602 = path.getOrDefault("subscriptionId")
-  valid_569602 = validateParameter(valid_569602, JString, required = true,
+  if valid_565501 != nil:
+    section.add "subscriptionId", valid_565501
+  var valid_565502 = path.getOrDefault("resourceGroupName")
+  valid_565502 = validateParameter(valid_565502, JString, required = true,
                                  default = nil)
-  if valid_569602 != nil:
-    section.add "subscriptionId", valid_569602
+  if valid_565502 != nil:
+    section.add "resourceGroupName", valid_565502
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -14536,11 +14438,11 @@ proc validate_GlobalSchedulesUpdate_569598(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_569603 = query.getOrDefault("api-version")
-  valid_569603 = validateParameter(valid_569603, JString, required = true,
+  var valid_565503 = query.getOrDefault("api-version")
+  valid_565503 = validateParameter(valid_565503, JString, required = true,
                                  default = newJString("2016-05-15"))
-  if valid_569603 != nil:
-    section.add "api-version", valid_569603
+  if valid_565503 != nil:
+    section.add "api-version", valid_565503
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -14554,53 +14456,53 @@ proc validate_GlobalSchedulesUpdate_569598(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_569605: Call_GlobalSchedulesUpdate_569597; path: JsonNode;
+proc call*(call_565505: Call_GlobalSchedulesUpdate_565497; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Modify properties of schedules.
   ## 
-  let valid = call_569605.validator(path, query, header, formData, body)
-  let scheme = call_569605.pickScheme
+  let valid = call_565505.validator(path, query, header, formData, body)
+  let scheme = call_565505.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_569605.url(scheme.get, call_569605.host, call_569605.base,
-                         call_569605.route, valid.getOrDefault("path"),
+  let url = call_565505.url(scheme.get, call_565505.host, call_565505.base,
+                         call_565505.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_569605, url, valid)
+  result = hook(call_565505, url, valid)
 
-proc call*(call_569606: Call_GlobalSchedulesUpdate_569597;
-          resourceGroupName: string; name: string; subscriptionId: string;
-          schedule: JsonNode; apiVersion: string = "2016-05-15"): Recallable =
+proc call*(call_565506: Call_GlobalSchedulesUpdate_565497; name: string;
+          subscriptionId: string; resourceGroupName: string; schedule: JsonNode;
+          apiVersion: string = "2016-05-15"): Recallable =
   ## globalSchedulesUpdate
   ## Modify properties of schedules.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client API version.
   ##   name: string (required)
   ##       : The name of the schedule.
   ##   subscriptionId: string (required)
   ##                 : The subscription ID.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   schedule: JObject (required)
   ##           : A schedule.
-  var path_569607 = newJObject()
-  var query_569608 = newJObject()
-  var body_569609 = newJObject()
-  add(path_569607, "resourceGroupName", newJString(resourceGroupName))
-  add(query_569608, "api-version", newJString(apiVersion))
-  add(path_569607, "name", newJString(name))
-  add(path_569607, "subscriptionId", newJString(subscriptionId))
+  var path_565507 = newJObject()
+  var query_565508 = newJObject()
+  var body_565509 = newJObject()
+  add(query_565508, "api-version", newJString(apiVersion))
+  add(path_565507, "name", newJString(name))
+  add(path_565507, "subscriptionId", newJString(subscriptionId))
+  add(path_565507, "resourceGroupName", newJString(resourceGroupName))
   if schedule != nil:
-    body_569609 = schedule
-  result = call_569606.call(path_569607, query_569608, nil, nil, body_569609)
+    body_565509 = schedule
+  result = call_565506.call(path_565507, query_565508, nil, nil, body_565509)
 
-var globalSchedulesUpdate* = Call_GlobalSchedulesUpdate_569597(
+var globalSchedulesUpdate* = Call_GlobalSchedulesUpdate_565497(
     name: "globalSchedulesUpdate", meth: HttpMethod.HttpPatch,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DevTestLab/schedules/{name}",
-    validator: validate_GlobalSchedulesUpdate_569598, base: "",
-    url: url_GlobalSchedulesUpdate_569599, schemes: {Scheme.Https})
+    validator: validate_GlobalSchedulesUpdate_565498, base: "",
+    url: url_GlobalSchedulesUpdate_565499, schemes: {Scheme.Https})
 type
-  Call_GlobalSchedulesDelete_569586 = ref object of OpenApiRestCall_567650
-proc url_GlobalSchedulesDelete_569588(protocol: Scheme; host: string; base: string;
+  Call_GlobalSchedulesDelete_565486 = ref object of OpenApiRestCall_563548
+proc url_GlobalSchedulesDelete_565488(protocol: Scheme; host: string; base: string;
                                      route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -14622,37 +14524,36 @@ proc url_GlobalSchedulesDelete_569588(protocol: Scheme; host: string; base: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_GlobalSchedulesDelete_569587(path: JsonNode; query: JsonNode;
+proc validate_GlobalSchedulesDelete_565487(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Delete schedule.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   name: JString (required)
   ##       : The name of the schedule.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_569589 = path.getOrDefault("resourceGroupName")
-  valid_569589 = validateParameter(valid_569589, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `name` field"
+  var valid_565489 = path.getOrDefault("name")
+  valid_565489 = validateParameter(valid_565489, JString, required = true,
                                  default = nil)
-  if valid_569589 != nil:
-    section.add "resourceGroupName", valid_569589
-  var valid_569590 = path.getOrDefault("name")
-  valid_569590 = validateParameter(valid_569590, JString, required = true,
+  if valid_565489 != nil:
+    section.add "name", valid_565489
+  var valid_565490 = path.getOrDefault("subscriptionId")
+  valid_565490 = validateParameter(valid_565490, JString, required = true,
                                  default = nil)
-  if valid_569590 != nil:
-    section.add "name", valid_569590
-  var valid_569591 = path.getOrDefault("subscriptionId")
-  valid_569591 = validateParameter(valid_569591, JString, required = true,
+  if valid_565490 != nil:
+    section.add "subscriptionId", valid_565490
+  var valid_565491 = path.getOrDefault("resourceGroupName")
+  valid_565491 = validateParameter(valid_565491, JString, required = true,
                                  default = nil)
-  if valid_569591 != nil:
-    section.add "subscriptionId", valid_569591
+  if valid_565491 != nil:
+    section.add "resourceGroupName", valid_565491
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -14660,11 +14561,11 @@ proc validate_GlobalSchedulesDelete_569587(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_569592 = query.getOrDefault("api-version")
-  valid_569592 = validateParameter(valid_569592, JString, required = true,
+  var valid_565492 = query.getOrDefault("api-version")
+  valid_565492 = validateParameter(valid_565492, JString, required = true,
                                  default = newJString("2016-05-15"))
-  if valid_569592 != nil:
-    section.add "api-version", valid_569592
+  if valid_565492 != nil:
+    section.add "api-version", valid_565492
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -14673,48 +14574,48 @@ proc validate_GlobalSchedulesDelete_569587(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_569593: Call_GlobalSchedulesDelete_569586; path: JsonNode;
+proc call*(call_565493: Call_GlobalSchedulesDelete_565486; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Delete schedule.
   ## 
-  let valid = call_569593.validator(path, query, header, formData, body)
-  let scheme = call_569593.pickScheme
+  let valid = call_565493.validator(path, query, header, formData, body)
+  let scheme = call_565493.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_569593.url(scheme.get, call_569593.host, call_569593.base,
-                         call_569593.route, valid.getOrDefault("path"),
+  let url = call_565493.url(scheme.get, call_565493.host, call_565493.base,
+                         call_565493.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_569593, url, valid)
+  result = hook(call_565493, url, valid)
 
-proc call*(call_569594: Call_GlobalSchedulesDelete_569586;
-          resourceGroupName: string; name: string; subscriptionId: string;
+proc call*(call_565494: Call_GlobalSchedulesDelete_565486; name: string;
+          subscriptionId: string; resourceGroupName: string;
           apiVersion: string = "2016-05-15"): Recallable =
   ## globalSchedulesDelete
   ## Delete schedule.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client API version.
   ##   name: string (required)
   ##       : The name of the schedule.
   ##   subscriptionId: string (required)
   ##                 : The subscription ID.
-  var path_569595 = newJObject()
-  var query_569596 = newJObject()
-  add(path_569595, "resourceGroupName", newJString(resourceGroupName))
-  add(query_569596, "api-version", newJString(apiVersion))
-  add(path_569595, "name", newJString(name))
-  add(path_569595, "subscriptionId", newJString(subscriptionId))
-  result = call_569594.call(path_569595, query_569596, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_565495 = newJObject()
+  var query_565496 = newJObject()
+  add(query_565496, "api-version", newJString(apiVersion))
+  add(path_565495, "name", newJString(name))
+  add(path_565495, "subscriptionId", newJString(subscriptionId))
+  add(path_565495, "resourceGroupName", newJString(resourceGroupName))
+  result = call_565494.call(path_565495, query_565496, nil, nil, nil)
 
-var globalSchedulesDelete* = Call_GlobalSchedulesDelete_569586(
+var globalSchedulesDelete* = Call_GlobalSchedulesDelete_565486(
     name: "globalSchedulesDelete", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DevTestLab/schedules/{name}",
-    validator: validate_GlobalSchedulesDelete_569587, base: "",
-    url: url_GlobalSchedulesDelete_569588, schemes: {Scheme.Https})
+    validator: validate_GlobalSchedulesDelete_565487, base: "",
+    url: url_GlobalSchedulesDelete_565488, schemes: {Scheme.Https})
 type
-  Call_GlobalSchedulesExecute_569610 = ref object of OpenApiRestCall_567650
-proc url_GlobalSchedulesExecute_569612(protocol: Scheme; host: string; base: string;
+  Call_GlobalSchedulesExecute_565510 = ref object of OpenApiRestCall_563548
+proc url_GlobalSchedulesExecute_565512(protocol: Scheme; host: string; base: string;
                                       route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -14737,37 +14638,36 @@ proc url_GlobalSchedulesExecute_569612(protocol: Scheme; host: string; base: str
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_GlobalSchedulesExecute_569611(path: JsonNode; query: JsonNode;
+proc validate_GlobalSchedulesExecute_565511(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Execute a schedule. This operation can take a while to complete.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   name: JString (required)
   ##       : The name of the schedule.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_569613 = path.getOrDefault("resourceGroupName")
-  valid_569613 = validateParameter(valid_569613, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `name` field"
+  var valid_565513 = path.getOrDefault("name")
+  valid_565513 = validateParameter(valid_565513, JString, required = true,
                                  default = nil)
-  if valid_569613 != nil:
-    section.add "resourceGroupName", valid_569613
-  var valid_569614 = path.getOrDefault("name")
-  valid_569614 = validateParameter(valid_569614, JString, required = true,
+  if valid_565513 != nil:
+    section.add "name", valid_565513
+  var valid_565514 = path.getOrDefault("subscriptionId")
+  valid_565514 = validateParameter(valid_565514, JString, required = true,
                                  default = nil)
-  if valid_569614 != nil:
-    section.add "name", valid_569614
-  var valid_569615 = path.getOrDefault("subscriptionId")
-  valid_569615 = validateParameter(valid_569615, JString, required = true,
+  if valid_565514 != nil:
+    section.add "subscriptionId", valid_565514
+  var valid_565515 = path.getOrDefault("resourceGroupName")
+  valid_565515 = validateParameter(valid_565515, JString, required = true,
                                  default = nil)
-  if valid_569615 != nil:
-    section.add "subscriptionId", valid_569615
+  if valid_565515 != nil:
+    section.add "resourceGroupName", valid_565515
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -14775,11 +14675,11 @@ proc validate_GlobalSchedulesExecute_569611(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_569616 = query.getOrDefault("api-version")
-  valid_569616 = validateParameter(valid_569616, JString, required = true,
+  var valid_565516 = query.getOrDefault("api-version")
+  valid_565516 = validateParameter(valid_565516, JString, required = true,
                                  default = newJString("2016-05-15"))
-  if valid_569616 != nil:
-    section.add "api-version", valid_569616
+  if valid_565516 != nil:
+    section.add "api-version", valid_565516
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -14788,48 +14688,48 @@ proc validate_GlobalSchedulesExecute_569611(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_569617: Call_GlobalSchedulesExecute_569610; path: JsonNode;
+proc call*(call_565517: Call_GlobalSchedulesExecute_565510; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Execute a schedule. This operation can take a while to complete.
   ## 
-  let valid = call_569617.validator(path, query, header, formData, body)
-  let scheme = call_569617.pickScheme
+  let valid = call_565517.validator(path, query, header, formData, body)
+  let scheme = call_565517.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_569617.url(scheme.get, call_569617.host, call_569617.base,
-                         call_569617.route, valid.getOrDefault("path"),
+  let url = call_565517.url(scheme.get, call_565517.host, call_565517.base,
+                         call_565517.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_569617, url, valid)
+  result = hook(call_565517, url, valid)
 
-proc call*(call_569618: Call_GlobalSchedulesExecute_569610;
-          resourceGroupName: string; name: string; subscriptionId: string;
+proc call*(call_565518: Call_GlobalSchedulesExecute_565510; name: string;
+          subscriptionId: string; resourceGroupName: string;
           apiVersion: string = "2016-05-15"): Recallable =
   ## globalSchedulesExecute
   ## Execute a schedule. This operation can take a while to complete.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client API version.
   ##   name: string (required)
   ##       : The name of the schedule.
   ##   subscriptionId: string (required)
   ##                 : The subscription ID.
-  var path_569619 = newJObject()
-  var query_569620 = newJObject()
-  add(path_569619, "resourceGroupName", newJString(resourceGroupName))
-  add(query_569620, "api-version", newJString(apiVersion))
-  add(path_569619, "name", newJString(name))
-  add(path_569619, "subscriptionId", newJString(subscriptionId))
-  result = call_569618.call(path_569619, query_569620, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_565519 = newJObject()
+  var query_565520 = newJObject()
+  add(query_565520, "api-version", newJString(apiVersion))
+  add(path_565519, "name", newJString(name))
+  add(path_565519, "subscriptionId", newJString(subscriptionId))
+  add(path_565519, "resourceGroupName", newJString(resourceGroupName))
+  result = call_565518.call(path_565519, query_565520, nil, nil, nil)
 
-var globalSchedulesExecute* = Call_GlobalSchedulesExecute_569610(
+var globalSchedulesExecute* = Call_GlobalSchedulesExecute_565510(
     name: "globalSchedulesExecute", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DevTestLab/schedules/{name}/execute",
-    validator: validate_GlobalSchedulesExecute_569611, base: "",
-    url: url_GlobalSchedulesExecute_569612, schemes: {Scheme.Https})
+    validator: validate_GlobalSchedulesExecute_565511, base: "",
+    url: url_GlobalSchedulesExecute_565512, schemes: {Scheme.Https})
 type
-  Call_GlobalSchedulesRetarget_569621 = ref object of OpenApiRestCall_567650
-proc url_GlobalSchedulesRetarget_569623(protocol: Scheme; host: string; base: string;
+  Call_GlobalSchedulesRetarget_565521 = ref object of OpenApiRestCall_563548
+proc url_GlobalSchedulesRetarget_565523(protocol: Scheme; host: string; base: string;
                                        route: string; path: JsonNode;
                                        query: JsonNode): Uri =
   result.scheme = $protocol
@@ -14853,37 +14753,36 @@ proc url_GlobalSchedulesRetarget_569623(protocol: Scheme; host: string; base: st
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_GlobalSchedulesRetarget_569622(path: JsonNode; query: JsonNode;
+proc validate_GlobalSchedulesRetarget_565522(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Updates a schedule's target resource Id. This operation can take a while to complete.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   name: JString (required)
   ##       : The name of the schedule.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_569624 = path.getOrDefault("resourceGroupName")
-  valid_569624 = validateParameter(valid_569624, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `name` field"
+  var valid_565524 = path.getOrDefault("name")
+  valid_565524 = validateParameter(valid_565524, JString, required = true,
                                  default = nil)
-  if valid_569624 != nil:
-    section.add "resourceGroupName", valid_569624
-  var valid_569625 = path.getOrDefault("name")
-  valid_569625 = validateParameter(valid_569625, JString, required = true,
+  if valid_565524 != nil:
+    section.add "name", valid_565524
+  var valid_565525 = path.getOrDefault("subscriptionId")
+  valid_565525 = validateParameter(valid_565525, JString, required = true,
                                  default = nil)
-  if valid_569625 != nil:
-    section.add "name", valid_569625
-  var valid_569626 = path.getOrDefault("subscriptionId")
-  valid_569626 = validateParameter(valid_569626, JString, required = true,
+  if valid_565525 != nil:
+    section.add "subscriptionId", valid_565525
+  var valid_565526 = path.getOrDefault("resourceGroupName")
+  valid_565526 = validateParameter(valid_565526, JString, required = true,
                                  default = nil)
-  if valid_569626 != nil:
-    section.add "subscriptionId", valid_569626
+  if valid_565526 != nil:
+    section.add "resourceGroupName", valid_565526
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -14891,11 +14790,11 @@ proc validate_GlobalSchedulesRetarget_569622(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_569627 = query.getOrDefault("api-version")
-  valid_569627 = validateParameter(valid_569627, JString, required = true,
+  var valid_565527 = query.getOrDefault("api-version")
+  valid_565527 = validateParameter(valid_565527, JString, required = true,
                                  default = newJString("2016-05-15"))
-  if valid_569627 != nil:
-    section.add "api-version", valid_569627
+  if valid_565527 != nil:
+    section.add "api-version", valid_565527
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -14909,50 +14808,51 @@ proc validate_GlobalSchedulesRetarget_569622(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_569629: Call_GlobalSchedulesRetarget_569621; path: JsonNode;
+proc call*(call_565529: Call_GlobalSchedulesRetarget_565521; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Updates a schedule's target resource Id. This operation can take a while to complete.
   ## 
-  let valid = call_569629.validator(path, query, header, formData, body)
-  let scheme = call_569629.pickScheme
+  let valid = call_565529.validator(path, query, header, formData, body)
+  let scheme = call_565529.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_569629.url(scheme.get, call_569629.host, call_569629.base,
-                         call_569629.route, valid.getOrDefault("path"),
+  let url = call_565529.url(scheme.get, call_565529.host, call_565529.base,
+                         call_565529.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_569629, url, valid)
+  result = hook(call_565529, url, valid)
 
-proc call*(call_569630: Call_GlobalSchedulesRetarget_569621;
-          resourceGroupName: string; name: string; subscriptionId: string;
-          retargetScheduleProperties: JsonNode; apiVersion: string = "2016-05-15"): Recallable =
+proc call*(call_565530: Call_GlobalSchedulesRetarget_565521;
+          retargetScheduleProperties: JsonNode; name: string;
+          subscriptionId: string; resourceGroupName: string;
+          apiVersion: string = "2016-05-15"): Recallable =
   ## globalSchedulesRetarget
   ## Updates a schedule's target resource Id. This operation can take a while to complete.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client API version.
+  ##   retargetScheduleProperties: JObject (required)
+  ##                             : Properties for retargeting a virtual machine schedule.
   ##   name: string (required)
   ##       : The name of the schedule.
   ##   subscriptionId: string (required)
   ##                 : The subscription ID.
-  ##   retargetScheduleProperties: JObject (required)
-  ##                             : Properties for retargeting a virtual machine schedule.
-  var path_569631 = newJObject()
-  var query_569632 = newJObject()
-  var body_569633 = newJObject()
-  add(path_569631, "resourceGroupName", newJString(resourceGroupName))
-  add(query_569632, "api-version", newJString(apiVersion))
-  add(path_569631, "name", newJString(name))
-  add(path_569631, "subscriptionId", newJString(subscriptionId))
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_565531 = newJObject()
+  var query_565532 = newJObject()
+  var body_565533 = newJObject()
+  add(query_565532, "api-version", newJString(apiVersion))
   if retargetScheduleProperties != nil:
-    body_569633 = retargetScheduleProperties
-  result = call_569630.call(path_569631, query_569632, nil, nil, body_569633)
+    body_565533 = retargetScheduleProperties
+  add(path_565531, "name", newJString(name))
+  add(path_565531, "subscriptionId", newJString(subscriptionId))
+  add(path_565531, "resourceGroupName", newJString(resourceGroupName))
+  result = call_565530.call(path_565531, query_565532, nil, nil, body_565533)
 
-var globalSchedulesRetarget* = Call_GlobalSchedulesRetarget_569621(
+var globalSchedulesRetarget* = Call_GlobalSchedulesRetarget_565521(
     name: "globalSchedulesRetarget", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DevTestLab/schedules/{name}/retarget",
-    validator: validate_GlobalSchedulesRetarget_569622, base: "",
-    url: url_GlobalSchedulesRetarget_569623, schemes: {Scheme.Https})
+    validator: validate_GlobalSchedulesRetarget_565522, base: "",
+    url: url_GlobalSchedulesRetarget_565523, schemes: {Scheme.Https})
 export
   rest
 

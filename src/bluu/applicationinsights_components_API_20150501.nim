@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, httpcore
 
 ## auto-generated via openapi macro
 ## title: ApplicationInsightsManagementClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_596458 = ref object of OpenApiRestCall
+  OpenApiRestCall_563556 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_596458](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563556](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_596458): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563556): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,8 +107,8 @@ const
   macServiceName = "applicationinsights-components_API"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_ComponentsList_596680 = ref object of OpenApiRestCall_596458
-proc url_ComponentsList_596682(protocol: Scheme; host: string; base: string;
+  Call_ComponentsList_563778 = ref object of OpenApiRestCall_563556
+proc url_ComponentsList_563780(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -120,7 +124,7 @@ proc url_ComponentsList_596682(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ComponentsList_596681(path: JsonNode; query: JsonNode;
+proc validate_ComponentsList_563779(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## Gets a list of all Application Insights components within a subscription.
@@ -133,11 +137,11 @@ proc validate_ComponentsList_596681(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_596842 = path.getOrDefault("subscriptionId")
-  valid_596842 = validateParameter(valid_596842, JString, required = true,
+  var valid_563942 = path.getOrDefault("subscriptionId")
+  valid_563942 = validateParameter(valid_563942, JString, required = true,
                                  default = nil)
-  if valid_596842 != nil:
-    section.add "subscriptionId", valid_596842
+  if valid_563942 != nil:
+    section.add "subscriptionId", valid_563942
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -145,11 +149,11 @@ proc validate_ComponentsList_596681(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_596843 = query.getOrDefault("api-version")
-  valid_596843 = validateParameter(valid_596843, JString, required = true,
+  var valid_563943 = query.getOrDefault("api-version")
+  valid_563943 = validateParameter(valid_563943, JString, required = true,
                                  default = nil)
-  if valid_596843 != nil:
-    section.add "api-version", valid_596843
+  if valid_563943 != nil:
+    section.add "api-version", valid_563943
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -158,20 +162,20 @@ proc validate_ComponentsList_596681(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_596870: Call_ComponentsList_596680; path: JsonNode; query: JsonNode;
+proc call*(call_563970: Call_ComponentsList_563778; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets a list of all Application Insights components within a subscription.
   ## 
-  let valid = call_596870.validator(path, query, header, formData, body)
-  let scheme = call_596870.pickScheme
+  let valid = call_563970.validator(path, query, header, formData, body)
+  let scheme = call_563970.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_596870.url(scheme.get, call_596870.host, call_596870.base,
-                         call_596870.route, valid.getOrDefault("path"),
+  let url = call_563970.url(scheme.get, call_563970.host, call_563970.base,
+                         call_563970.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_596870, url, valid)
+  result = hook(call_563970, url, valid)
 
-proc call*(call_596941: Call_ComponentsList_596680; apiVersion: string;
+proc call*(call_564041: Call_ComponentsList_563778; apiVersion: string;
           subscriptionId: string): Recallable =
   ## componentsList
   ## Gets a list of all Application Insights components within a subscription.
@@ -179,19 +183,19 @@ proc call*(call_596941: Call_ComponentsList_596680; apiVersion: string;
   ##             : The API version to use for this operation.
   ##   subscriptionId: string (required)
   ##                 : The ID of the target subscription.
-  var path_596942 = newJObject()
-  var query_596944 = newJObject()
-  add(query_596944, "api-version", newJString(apiVersion))
-  add(path_596942, "subscriptionId", newJString(subscriptionId))
-  result = call_596941.call(path_596942, query_596944, nil, nil, nil)
+  var path_564042 = newJObject()
+  var query_564044 = newJObject()
+  add(query_564044, "api-version", newJString(apiVersion))
+  add(path_564042, "subscriptionId", newJString(subscriptionId))
+  result = call_564041.call(path_564042, query_564044, nil, nil, nil)
 
-var componentsList* = Call_ComponentsList_596680(name: "componentsList",
+var componentsList* = Call_ComponentsList_563778(name: "componentsList",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Insights/components",
-    validator: validate_ComponentsList_596681, base: "", url: url_ComponentsList_596682,
+    validator: validate_ComponentsList_563779, base: "", url: url_ComponentsList_563780,
     schemes: {Scheme.Https})
 type
-  Call_ComponentsListByResourceGroup_596983 = ref object of OpenApiRestCall_596458
-proc url_ComponentsListByResourceGroup_596985(protocol: Scheme; host: string;
+  Call_ComponentsListByResourceGroup_564083 = ref object of OpenApiRestCall_563556
+proc url_ComponentsListByResourceGroup_564085(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -211,30 +215,30 @@ proc url_ComponentsListByResourceGroup_596985(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ComponentsListByResourceGroup_596984(path: JsonNode; query: JsonNode;
+proc validate_ComponentsListByResourceGroup_564084(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets a list of Application Insights components within a resource group.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group. The name is case insensitive.
   ##   subscriptionId: JString (required)
   ##                 : The ID of the target subscription.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group. The name is case insensitive.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_596986 = path.getOrDefault("resourceGroupName")
-  valid_596986 = validateParameter(valid_596986, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564086 = path.getOrDefault("subscriptionId")
+  valid_564086 = validateParameter(valid_564086, JString, required = true,
                                  default = nil)
-  if valid_596986 != nil:
-    section.add "resourceGroupName", valid_596986
-  var valid_596987 = path.getOrDefault("subscriptionId")
-  valid_596987 = validateParameter(valid_596987, JString, required = true,
+  if valid_564086 != nil:
+    section.add "subscriptionId", valid_564086
+  var valid_564087 = path.getOrDefault("resourceGroupName")
+  valid_564087 = validateParameter(valid_564087, JString, required = true,
                                  default = nil)
-  if valid_596987 != nil:
-    section.add "subscriptionId", valid_596987
+  if valid_564087 != nil:
+    section.add "resourceGroupName", valid_564087
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -242,11 +246,11 @@ proc validate_ComponentsListByResourceGroup_596984(path: JsonNode; query: JsonNo
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_596988 = query.getOrDefault("api-version")
-  valid_596988 = validateParameter(valid_596988, JString, required = true,
+  var valid_564088 = query.getOrDefault("api-version")
+  valid_564088 = validateParameter(valid_564088, JString, required = true,
                                  default = nil)
-  if valid_596988 != nil:
-    section.add "api-version", valid_596988
+  if valid_564088 != nil:
+    section.add "api-version", valid_564088
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -255,44 +259,44 @@ proc validate_ComponentsListByResourceGroup_596984(path: JsonNode; query: JsonNo
   if body != nil:
     result.add "body", body
 
-proc call*(call_596989: Call_ComponentsListByResourceGroup_596983; path: JsonNode;
+proc call*(call_564089: Call_ComponentsListByResourceGroup_564083; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets a list of Application Insights components within a resource group.
   ## 
-  let valid = call_596989.validator(path, query, header, formData, body)
-  let scheme = call_596989.pickScheme
+  let valid = call_564089.validator(path, query, header, formData, body)
+  let scheme = call_564089.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_596989.url(scheme.get, call_596989.host, call_596989.base,
-                         call_596989.route, valid.getOrDefault("path"),
+  let url = call_564089.url(scheme.get, call_564089.host, call_564089.base,
+                         call_564089.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_596989, url, valid)
+  result = hook(call_564089, url, valid)
 
-proc call*(call_596990: Call_ComponentsListByResourceGroup_596983;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string): Recallable =
+proc call*(call_564090: Call_ComponentsListByResourceGroup_564083;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string): Recallable =
   ## componentsListByResourceGroup
   ## Gets a list of Application Insights components within a resource group.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group. The name is case insensitive.
   ##   apiVersion: string (required)
   ##             : The API version to use for this operation.
   ##   subscriptionId: string (required)
   ##                 : The ID of the target subscription.
-  var path_596991 = newJObject()
-  var query_596992 = newJObject()
-  add(path_596991, "resourceGroupName", newJString(resourceGroupName))
-  add(query_596992, "api-version", newJString(apiVersion))
-  add(path_596991, "subscriptionId", newJString(subscriptionId))
-  result = call_596990.call(path_596991, query_596992, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group. The name is case insensitive.
+  var path_564091 = newJObject()
+  var query_564092 = newJObject()
+  add(query_564092, "api-version", newJString(apiVersion))
+  add(path_564091, "subscriptionId", newJString(subscriptionId))
+  add(path_564091, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564090.call(path_564091, query_564092, nil, nil, nil)
 
-var componentsListByResourceGroup* = Call_ComponentsListByResourceGroup_596983(
+var componentsListByResourceGroup* = Call_ComponentsListByResourceGroup_564083(
     name: "componentsListByResourceGroup", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Insights/components",
-    validator: validate_ComponentsListByResourceGroup_596984, base: "",
-    url: url_ComponentsListByResourceGroup_596985, schemes: {Scheme.Https})
+    validator: validate_ComponentsListByResourceGroup_564084, base: "",
+    url: url_ComponentsListByResourceGroup_564085, schemes: {Scheme.Https})
 type
-  Call_ComponentsCreateOrUpdate_597013 = ref object of OpenApiRestCall_596458
-proc url_ComponentsCreateOrUpdate_597015(protocol: Scheme; host: string;
+  Call_ComponentsCreateOrUpdate_564113 = ref object of OpenApiRestCall_563556
+proc url_ComponentsCreateOrUpdate_564115(protocol: Scheme; host: string;
                                         base: string; route: string; path: JsonNode;
                                         query: JsonNode): Uri =
   result.scheme = $protocol
@@ -315,37 +319,37 @@ proc url_ComponentsCreateOrUpdate_597015(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ComponentsCreateOrUpdate_597014(path: JsonNode; query: JsonNode;
+proc validate_ComponentsCreateOrUpdate_564114(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Creates (or updates) an Application Insights component. Note: You cannot specify a different value for InstrumentationKey nor AppId in the Put operation.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group. The name is case insensitive.
   ##   subscriptionId: JString (required)
   ##                 : The ID of the target subscription.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group. The name is case insensitive.
   ##   resourceName: JString (required)
   ##               : The name of the Application Insights component resource.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_597033 = path.getOrDefault("resourceGroupName")
-  valid_597033 = validateParameter(valid_597033, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564133 = path.getOrDefault("subscriptionId")
+  valid_564133 = validateParameter(valid_564133, JString, required = true,
                                  default = nil)
-  if valid_597033 != nil:
-    section.add "resourceGroupName", valid_597033
-  var valid_597034 = path.getOrDefault("subscriptionId")
-  valid_597034 = validateParameter(valid_597034, JString, required = true,
+  if valid_564133 != nil:
+    section.add "subscriptionId", valid_564133
+  var valid_564134 = path.getOrDefault("resourceGroupName")
+  valid_564134 = validateParameter(valid_564134, JString, required = true,
                                  default = nil)
-  if valid_597034 != nil:
-    section.add "subscriptionId", valid_597034
-  var valid_597035 = path.getOrDefault("resourceName")
-  valid_597035 = validateParameter(valid_597035, JString, required = true,
+  if valid_564134 != nil:
+    section.add "resourceGroupName", valid_564134
+  var valid_564135 = path.getOrDefault("resourceName")
+  valid_564135 = validateParameter(valid_564135, JString, required = true,
                                  default = nil)
-  if valid_597035 != nil:
-    section.add "resourceName", valid_597035
+  if valid_564135 != nil:
+    section.add "resourceName", valid_564135
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -353,11 +357,11 @@ proc validate_ComponentsCreateOrUpdate_597014(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_597036 = query.getOrDefault("api-version")
-  valid_597036 = validateParameter(valid_597036, JString, required = true,
+  var valid_564136 = query.getOrDefault("api-version")
+  valid_564136 = validateParameter(valid_564136, JString, required = true,
                                  default = nil)
-  if valid_597036 != nil:
-    section.add "api-version", valid_597036
+  if valid_564136 != nil:
+    section.add "api-version", valid_564136
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -371,53 +375,53 @@ proc validate_ComponentsCreateOrUpdate_597014(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_597038: Call_ComponentsCreateOrUpdate_597013; path: JsonNode;
+proc call*(call_564138: Call_ComponentsCreateOrUpdate_564113; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Creates (or updates) an Application Insights component. Note: You cannot specify a different value for InstrumentationKey nor AppId in the Put operation.
   ## 
-  let valid = call_597038.validator(path, query, header, formData, body)
-  let scheme = call_597038.pickScheme
+  let valid = call_564138.validator(path, query, header, formData, body)
+  let scheme = call_564138.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_597038.url(scheme.get, call_597038.host, call_597038.base,
-                         call_597038.route, valid.getOrDefault("path"),
+  let url = call_564138.url(scheme.get, call_564138.host, call_564138.base,
+                         call_564138.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_597038, url, valid)
+  result = hook(call_564138, url, valid)
 
-proc call*(call_597039: Call_ComponentsCreateOrUpdate_597013;
-          resourceGroupName: string; apiVersion: string;
-          InsightProperties: JsonNode; subscriptionId: string; resourceName: string): Recallable =
+proc call*(call_564139: Call_ComponentsCreateOrUpdate_564113; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string; resourceName: string;
+          InsightProperties: JsonNode): Recallable =
   ## componentsCreateOrUpdate
   ## Creates (or updates) an Application Insights component. Note: You cannot specify a different value for InstrumentationKey nor AppId in the Put operation.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group. The name is case insensitive.
   ##   apiVersion: string (required)
   ##             : The API version to use for this operation.
-  ##   InsightProperties: JObject (required)
-  ##                    : Properties that need to be specified to create an Application Insights component.
   ##   subscriptionId: string (required)
   ##                 : The ID of the target subscription.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group. The name is case insensitive.
   ##   resourceName: string (required)
   ##               : The name of the Application Insights component resource.
-  var path_597040 = newJObject()
-  var query_597041 = newJObject()
-  var body_597042 = newJObject()
-  add(path_597040, "resourceGroupName", newJString(resourceGroupName))
-  add(query_597041, "api-version", newJString(apiVersion))
+  ##   InsightProperties: JObject (required)
+  ##                    : Properties that need to be specified to create an Application Insights component.
+  var path_564140 = newJObject()
+  var query_564141 = newJObject()
+  var body_564142 = newJObject()
+  add(query_564141, "api-version", newJString(apiVersion))
+  add(path_564140, "subscriptionId", newJString(subscriptionId))
+  add(path_564140, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564140, "resourceName", newJString(resourceName))
   if InsightProperties != nil:
-    body_597042 = InsightProperties
-  add(path_597040, "subscriptionId", newJString(subscriptionId))
-  add(path_597040, "resourceName", newJString(resourceName))
-  result = call_597039.call(path_597040, query_597041, nil, nil, body_597042)
+    body_564142 = InsightProperties
+  result = call_564139.call(path_564140, query_564141, nil, nil, body_564142)
 
-var componentsCreateOrUpdate* = Call_ComponentsCreateOrUpdate_597013(
+var componentsCreateOrUpdate* = Call_ComponentsCreateOrUpdate_564113(
     name: "componentsCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Insights/components/{resourceName}",
-    validator: validate_ComponentsCreateOrUpdate_597014, base: "",
-    url: url_ComponentsCreateOrUpdate_597015, schemes: {Scheme.Https})
+    validator: validate_ComponentsCreateOrUpdate_564114, base: "",
+    url: url_ComponentsCreateOrUpdate_564115, schemes: {Scheme.Https})
 type
-  Call_ComponentsGet_596993 = ref object of OpenApiRestCall_596458
-proc url_ComponentsGet_596995(protocol: Scheme; host: string; base: string;
+  Call_ComponentsGet_564093 = ref object of OpenApiRestCall_563556
+proc url_ComponentsGet_564095(protocol: Scheme; host: string; base: string;
                              route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -439,37 +443,37 @@ proc url_ComponentsGet_596995(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ComponentsGet_596994(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_ComponentsGet_564094(path: JsonNode; query: JsonNode; header: JsonNode;
                                   formData: JsonNode; body: JsonNode): JsonNode =
   ## Returns an Application Insights component.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group. The name is case insensitive.
   ##   subscriptionId: JString (required)
   ##                 : The ID of the target subscription.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group. The name is case insensitive.
   ##   resourceName: JString (required)
   ##               : The name of the Application Insights component resource.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_597005 = path.getOrDefault("resourceGroupName")
-  valid_597005 = validateParameter(valid_597005, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564105 = path.getOrDefault("subscriptionId")
+  valid_564105 = validateParameter(valid_564105, JString, required = true,
                                  default = nil)
-  if valid_597005 != nil:
-    section.add "resourceGroupName", valid_597005
-  var valid_597006 = path.getOrDefault("subscriptionId")
-  valid_597006 = validateParameter(valid_597006, JString, required = true,
+  if valid_564105 != nil:
+    section.add "subscriptionId", valid_564105
+  var valid_564106 = path.getOrDefault("resourceGroupName")
+  valid_564106 = validateParameter(valid_564106, JString, required = true,
                                  default = nil)
-  if valid_597006 != nil:
-    section.add "subscriptionId", valid_597006
-  var valid_597007 = path.getOrDefault("resourceName")
-  valid_597007 = validateParameter(valid_597007, JString, required = true,
+  if valid_564106 != nil:
+    section.add "resourceGroupName", valid_564106
+  var valid_564107 = path.getOrDefault("resourceName")
+  valid_564107 = validateParameter(valid_564107, JString, required = true,
                                  default = nil)
-  if valid_597007 != nil:
-    section.add "resourceName", valid_597007
+  if valid_564107 != nil:
+    section.add "resourceName", valid_564107
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -477,11 +481,11 @@ proc validate_ComponentsGet_596994(path: JsonNode; query: JsonNode; header: Json
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_597008 = query.getOrDefault("api-version")
-  valid_597008 = validateParameter(valid_597008, JString, required = true,
+  var valid_564108 = query.getOrDefault("api-version")
+  valid_564108 = validateParameter(valid_564108, JString, required = true,
                                  default = nil)
-  if valid_597008 != nil:
-    section.add "api-version", valid_597008
+  if valid_564108 != nil:
+    section.add "api-version", valid_564108
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -490,46 +494,46 @@ proc validate_ComponentsGet_596994(path: JsonNode; query: JsonNode; header: Json
   if body != nil:
     result.add "body", body
 
-proc call*(call_597009: Call_ComponentsGet_596993; path: JsonNode; query: JsonNode;
+proc call*(call_564109: Call_ComponentsGet_564093; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Returns an Application Insights component.
   ## 
-  let valid = call_597009.validator(path, query, header, formData, body)
-  let scheme = call_597009.pickScheme
+  let valid = call_564109.validator(path, query, header, formData, body)
+  let scheme = call_564109.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_597009.url(scheme.get, call_597009.host, call_597009.base,
-                         call_597009.route, valid.getOrDefault("path"),
+  let url = call_564109.url(scheme.get, call_564109.host, call_564109.base,
+                         call_564109.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_597009, url, valid)
+  result = hook(call_564109, url, valid)
 
-proc call*(call_597010: Call_ComponentsGet_596993; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; resourceName: string): Recallable =
+proc call*(call_564110: Call_ComponentsGet_564093; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string; resourceName: string): Recallable =
   ## componentsGet
   ## Returns an Application Insights component.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group. The name is case insensitive.
   ##   apiVersion: string (required)
   ##             : The API version to use for this operation.
   ##   subscriptionId: string (required)
   ##                 : The ID of the target subscription.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group. The name is case insensitive.
   ##   resourceName: string (required)
   ##               : The name of the Application Insights component resource.
-  var path_597011 = newJObject()
-  var query_597012 = newJObject()
-  add(path_597011, "resourceGroupName", newJString(resourceGroupName))
-  add(query_597012, "api-version", newJString(apiVersion))
-  add(path_597011, "subscriptionId", newJString(subscriptionId))
-  add(path_597011, "resourceName", newJString(resourceName))
-  result = call_597010.call(path_597011, query_597012, nil, nil, nil)
+  var path_564111 = newJObject()
+  var query_564112 = newJObject()
+  add(query_564112, "api-version", newJString(apiVersion))
+  add(path_564111, "subscriptionId", newJString(subscriptionId))
+  add(path_564111, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564111, "resourceName", newJString(resourceName))
+  result = call_564110.call(path_564111, query_564112, nil, nil, nil)
 
-var componentsGet* = Call_ComponentsGet_596993(name: "componentsGet",
+var componentsGet* = Call_ComponentsGet_564093(name: "componentsGet",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Insights/components/{resourceName}",
-    validator: validate_ComponentsGet_596994, base: "", url: url_ComponentsGet_596995,
+    validator: validate_ComponentsGet_564094, base: "", url: url_ComponentsGet_564095,
     schemes: {Scheme.Https})
 type
-  Call_ComponentsUpdateTags_597054 = ref object of OpenApiRestCall_596458
-proc url_ComponentsUpdateTags_597056(protocol: Scheme; host: string; base: string;
+  Call_ComponentsUpdateTags_564154 = ref object of OpenApiRestCall_563556
+proc url_ComponentsUpdateTags_564156(protocol: Scheme; host: string; base: string;
                                     route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -551,37 +555,37 @@ proc url_ComponentsUpdateTags_597056(protocol: Scheme; host: string; base: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ComponentsUpdateTags_597055(path: JsonNode; query: JsonNode;
+proc validate_ComponentsUpdateTags_564155(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Updates an existing component's tags. To update other fields use the CreateOrUpdate method.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group. The name is case insensitive.
   ##   subscriptionId: JString (required)
   ##                 : The ID of the target subscription.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group. The name is case insensitive.
   ##   resourceName: JString (required)
   ##               : The name of the Application Insights component resource.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_597057 = path.getOrDefault("resourceGroupName")
-  valid_597057 = validateParameter(valid_597057, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564157 = path.getOrDefault("subscriptionId")
+  valid_564157 = validateParameter(valid_564157, JString, required = true,
                                  default = nil)
-  if valid_597057 != nil:
-    section.add "resourceGroupName", valid_597057
-  var valid_597058 = path.getOrDefault("subscriptionId")
-  valid_597058 = validateParameter(valid_597058, JString, required = true,
+  if valid_564157 != nil:
+    section.add "subscriptionId", valid_564157
+  var valid_564158 = path.getOrDefault("resourceGroupName")
+  valid_564158 = validateParameter(valid_564158, JString, required = true,
                                  default = nil)
-  if valid_597058 != nil:
-    section.add "subscriptionId", valid_597058
-  var valid_597059 = path.getOrDefault("resourceName")
-  valid_597059 = validateParameter(valid_597059, JString, required = true,
+  if valid_564158 != nil:
+    section.add "resourceGroupName", valid_564158
+  var valid_564159 = path.getOrDefault("resourceName")
+  valid_564159 = validateParameter(valid_564159, JString, required = true,
                                  default = nil)
-  if valid_597059 != nil:
-    section.add "resourceName", valid_597059
+  if valid_564159 != nil:
+    section.add "resourceName", valid_564159
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -589,11 +593,11 @@ proc validate_ComponentsUpdateTags_597055(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_597060 = query.getOrDefault("api-version")
-  valid_597060 = validateParameter(valid_597060, JString, required = true,
+  var valid_564160 = query.getOrDefault("api-version")
+  valid_564160 = validateParameter(valid_564160, JString, required = true,
                                  default = nil)
-  if valid_597060 != nil:
-    section.add "api-version", valid_597060
+  if valid_564160 != nil:
+    section.add "api-version", valid_564160
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -607,53 +611,53 @@ proc validate_ComponentsUpdateTags_597055(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_597062: Call_ComponentsUpdateTags_597054; path: JsonNode;
+proc call*(call_564162: Call_ComponentsUpdateTags_564154; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Updates an existing component's tags. To update other fields use the CreateOrUpdate method.
   ## 
-  let valid = call_597062.validator(path, query, header, formData, body)
-  let scheme = call_597062.pickScheme
+  let valid = call_564162.validator(path, query, header, formData, body)
+  let scheme = call_564162.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_597062.url(scheme.get, call_597062.host, call_597062.base,
-                         call_597062.route, valid.getOrDefault("path"),
+  let url = call_564162.url(scheme.get, call_564162.host, call_564162.base,
+                         call_564162.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_597062, url, valid)
+  result = hook(call_564162, url, valid)
 
-proc call*(call_597063: Call_ComponentsUpdateTags_597054;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          resourceName: string; ComponentTags: JsonNode): Recallable =
+proc call*(call_564163: Call_ComponentsUpdateTags_564154; apiVersion: string;
+          ComponentTags: JsonNode; subscriptionId: string;
+          resourceGroupName: string; resourceName: string): Recallable =
   ## componentsUpdateTags
   ## Updates an existing component's tags. To update other fields use the CreateOrUpdate method.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group. The name is case insensitive.
   ##   apiVersion: string (required)
   ##             : The API version to use for this operation.
-  ##   subscriptionId: string (required)
-  ##                 : The ID of the target subscription.
-  ##   resourceName: string (required)
-  ##               : The name of the Application Insights component resource.
   ##   ComponentTags: JObject (required)
   ##                : Updated tag information to set into the component instance.
-  var path_597064 = newJObject()
-  var query_597065 = newJObject()
-  var body_597066 = newJObject()
-  add(path_597064, "resourceGroupName", newJString(resourceGroupName))
-  add(query_597065, "api-version", newJString(apiVersion))
-  add(path_597064, "subscriptionId", newJString(subscriptionId))
-  add(path_597064, "resourceName", newJString(resourceName))
+  ##   subscriptionId: string (required)
+  ##                 : The ID of the target subscription.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group. The name is case insensitive.
+  ##   resourceName: string (required)
+  ##               : The name of the Application Insights component resource.
+  var path_564164 = newJObject()
+  var query_564165 = newJObject()
+  var body_564166 = newJObject()
+  add(query_564165, "api-version", newJString(apiVersion))
   if ComponentTags != nil:
-    body_597066 = ComponentTags
-  result = call_597063.call(path_597064, query_597065, nil, nil, body_597066)
+    body_564166 = ComponentTags
+  add(path_564164, "subscriptionId", newJString(subscriptionId))
+  add(path_564164, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564164, "resourceName", newJString(resourceName))
+  result = call_564163.call(path_564164, query_564165, nil, nil, body_564166)
 
-var componentsUpdateTags* = Call_ComponentsUpdateTags_597054(
+var componentsUpdateTags* = Call_ComponentsUpdateTags_564154(
     name: "componentsUpdateTags", meth: HttpMethod.HttpPatch,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Insights/components/{resourceName}",
-    validator: validate_ComponentsUpdateTags_597055, base: "",
-    url: url_ComponentsUpdateTags_597056, schemes: {Scheme.Https})
+    validator: validate_ComponentsUpdateTags_564155, base: "",
+    url: url_ComponentsUpdateTags_564156, schemes: {Scheme.Https})
 type
-  Call_ComponentsDelete_597043 = ref object of OpenApiRestCall_596458
-proc url_ComponentsDelete_597045(protocol: Scheme; host: string; base: string;
+  Call_ComponentsDelete_564143 = ref object of OpenApiRestCall_563556
+proc url_ComponentsDelete_564145(protocol: Scheme; host: string; base: string;
                                 route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -675,7 +679,7 @@ proc url_ComponentsDelete_597045(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ComponentsDelete_597044(path: JsonNode; query: JsonNode;
+proc validate_ComponentsDelete_564144(path: JsonNode; query: JsonNode;
                                      header: JsonNode; formData: JsonNode;
                                      body: JsonNode): JsonNode =
   ## Deletes an Application Insights component.
@@ -683,30 +687,30 @@ proc validate_ComponentsDelete_597044(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group. The name is case insensitive.
   ##   subscriptionId: JString (required)
   ##                 : The ID of the target subscription.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group. The name is case insensitive.
   ##   resourceName: JString (required)
   ##               : The name of the Application Insights component resource.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_597046 = path.getOrDefault("resourceGroupName")
-  valid_597046 = validateParameter(valid_597046, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564146 = path.getOrDefault("subscriptionId")
+  valid_564146 = validateParameter(valid_564146, JString, required = true,
                                  default = nil)
-  if valid_597046 != nil:
-    section.add "resourceGroupName", valid_597046
-  var valid_597047 = path.getOrDefault("subscriptionId")
-  valid_597047 = validateParameter(valid_597047, JString, required = true,
+  if valid_564146 != nil:
+    section.add "subscriptionId", valid_564146
+  var valid_564147 = path.getOrDefault("resourceGroupName")
+  valid_564147 = validateParameter(valid_564147, JString, required = true,
                                  default = nil)
-  if valid_597047 != nil:
-    section.add "subscriptionId", valid_597047
-  var valid_597048 = path.getOrDefault("resourceName")
-  valid_597048 = validateParameter(valid_597048, JString, required = true,
+  if valid_564147 != nil:
+    section.add "resourceGroupName", valid_564147
+  var valid_564148 = path.getOrDefault("resourceName")
+  valid_564148 = validateParameter(valid_564148, JString, required = true,
                                  default = nil)
-  if valid_597048 != nil:
-    section.add "resourceName", valid_597048
+  if valid_564148 != nil:
+    section.add "resourceName", valid_564148
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -714,11 +718,11 @@ proc validate_ComponentsDelete_597044(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_597049 = query.getOrDefault("api-version")
-  valid_597049 = validateParameter(valid_597049, JString, required = true,
+  var valid_564149 = query.getOrDefault("api-version")
+  valid_564149 = validateParameter(valid_564149, JString, required = true,
                                  default = nil)
-  if valid_597049 != nil:
-    section.add "api-version", valid_597049
+  if valid_564149 != nil:
+    section.add "api-version", valid_564149
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -727,46 +731,46 @@ proc validate_ComponentsDelete_597044(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_597050: Call_ComponentsDelete_597043; path: JsonNode;
+proc call*(call_564150: Call_ComponentsDelete_564143; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes an Application Insights component.
   ## 
-  let valid = call_597050.validator(path, query, header, formData, body)
-  let scheme = call_597050.pickScheme
+  let valid = call_564150.validator(path, query, header, formData, body)
+  let scheme = call_564150.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_597050.url(scheme.get, call_597050.host, call_597050.base,
-                         call_597050.route, valid.getOrDefault("path"),
+  let url = call_564150.url(scheme.get, call_564150.host, call_564150.base,
+                         call_564150.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_597050, url, valid)
+  result = hook(call_564150, url, valid)
 
-proc call*(call_597051: Call_ComponentsDelete_597043; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; resourceName: string): Recallable =
+proc call*(call_564151: Call_ComponentsDelete_564143; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string; resourceName: string): Recallable =
   ## componentsDelete
   ## Deletes an Application Insights component.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group. The name is case insensitive.
   ##   apiVersion: string (required)
   ##             : The API version to use for this operation.
   ##   subscriptionId: string (required)
   ##                 : The ID of the target subscription.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group. The name is case insensitive.
   ##   resourceName: string (required)
   ##               : The name of the Application Insights component resource.
-  var path_597052 = newJObject()
-  var query_597053 = newJObject()
-  add(path_597052, "resourceGroupName", newJString(resourceGroupName))
-  add(query_597053, "api-version", newJString(apiVersion))
-  add(path_597052, "subscriptionId", newJString(subscriptionId))
-  add(path_597052, "resourceName", newJString(resourceName))
-  result = call_597051.call(path_597052, query_597053, nil, nil, nil)
+  var path_564152 = newJObject()
+  var query_564153 = newJObject()
+  add(query_564153, "api-version", newJString(apiVersion))
+  add(path_564152, "subscriptionId", newJString(subscriptionId))
+  add(path_564152, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564152, "resourceName", newJString(resourceName))
+  result = call_564151.call(path_564152, query_564153, nil, nil, nil)
 
-var componentsDelete* = Call_ComponentsDelete_597043(name: "componentsDelete",
+var componentsDelete* = Call_ComponentsDelete_564143(name: "componentsDelete",
     meth: HttpMethod.HttpDelete, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Insights/components/{resourceName}",
-    validator: validate_ComponentsDelete_597044, base: "",
-    url: url_ComponentsDelete_597045, schemes: {Scheme.Https})
+    validator: validate_ComponentsDelete_564144, base: "",
+    url: url_ComponentsDelete_564145, schemes: {Scheme.Https})
 type
-  Call_ComponentsGetPurgeStatus_597067 = ref object of OpenApiRestCall_596458
-proc url_ComponentsGetPurgeStatus_597069(protocol: Scheme; host: string;
+  Call_ComponentsGetPurgeStatus_564167 = ref object of OpenApiRestCall_563556
+proc url_ComponentsGetPurgeStatus_564169(protocol: Scheme; host: string;
                                         base: string; route: string; path: JsonNode;
                                         query: JsonNode): Uri =
   result.scheme = $protocol
@@ -792,44 +796,44 @@ proc url_ComponentsGetPurgeStatus_597069(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ComponentsGetPurgeStatus_597068(path: JsonNode; query: JsonNode;
+proc validate_ComponentsGetPurgeStatus_564168(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Get status for an ongoing purge operation.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group. The name is case insensitive.
   ##   subscriptionId: JString (required)
   ##                 : The ID of the target subscription.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group. The name is case insensitive.
   ##   resourceName: JString (required)
   ##               : The name of the Application Insights component resource.
   ##   purgeId: JString (required)
   ##          : In a purge status request, this is the Id of the operation the status of which is returned.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_597070 = path.getOrDefault("resourceGroupName")
-  valid_597070 = validateParameter(valid_597070, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564170 = path.getOrDefault("subscriptionId")
+  valid_564170 = validateParameter(valid_564170, JString, required = true,
                                  default = nil)
-  if valid_597070 != nil:
-    section.add "resourceGroupName", valid_597070
-  var valid_597071 = path.getOrDefault("subscriptionId")
-  valid_597071 = validateParameter(valid_597071, JString, required = true,
+  if valid_564170 != nil:
+    section.add "subscriptionId", valid_564170
+  var valid_564171 = path.getOrDefault("resourceGroupName")
+  valid_564171 = validateParameter(valid_564171, JString, required = true,
                                  default = nil)
-  if valid_597071 != nil:
-    section.add "subscriptionId", valid_597071
-  var valid_597072 = path.getOrDefault("resourceName")
-  valid_597072 = validateParameter(valid_597072, JString, required = true,
+  if valid_564171 != nil:
+    section.add "resourceGroupName", valid_564171
+  var valid_564172 = path.getOrDefault("resourceName")
+  valid_564172 = validateParameter(valid_564172, JString, required = true,
                                  default = nil)
-  if valid_597072 != nil:
-    section.add "resourceName", valid_597072
-  var valid_597073 = path.getOrDefault("purgeId")
-  valid_597073 = validateParameter(valid_597073, JString, required = true,
+  if valid_564172 != nil:
+    section.add "resourceName", valid_564172
+  var valid_564173 = path.getOrDefault("purgeId")
+  valid_564173 = validateParameter(valid_564173, JString, required = true,
                                  default = nil)
-  if valid_597073 != nil:
-    section.add "purgeId", valid_597073
+  if valid_564173 != nil:
+    section.add "purgeId", valid_564173
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -837,11 +841,11 @@ proc validate_ComponentsGetPurgeStatus_597068(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_597074 = query.getOrDefault("api-version")
-  valid_597074 = validateParameter(valid_597074, JString, required = true,
+  var valid_564174 = query.getOrDefault("api-version")
+  valid_564174 = validateParameter(valid_564174, JString, required = true,
                                  default = nil)
-  if valid_597074 != nil:
-    section.add "api-version", valid_597074
+  if valid_564174 != nil:
+    section.add "api-version", valid_564174
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -850,51 +854,51 @@ proc validate_ComponentsGetPurgeStatus_597068(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_597075: Call_ComponentsGetPurgeStatus_597067; path: JsonNode;
+proc call*(call_564175: Call_ComponentsGetPurgeStatus_564167; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get status for an ongoing purge operation.
   ## 
-  let valid = call_597075.validator(path, query, header, formData, body)
-  let scheme = call_597075.pickScheme
+  let valid = call_564175.validator(path, query, header, formData, body)
+  let scheme = call_564175.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_597075.url(scheme.get, call_597075.host, call_597075.base,
-                         call_597075.route, valid.getOrDefault("path"),
+  let url = call_564175.url(scheme.get, call_564175.host, call_564175.base,
+                         call_564175.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_597075, url, valid)
+  result = hook(call_564175, url, valid)
 
-proc call*(call_597076: Call_ComponentsGetPurgeStatus_597067;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          resourceName: string; purgeId: string): Recallable =
+proc call*(call_564176: Call_ComponentsGetPurgeStatus_564167; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string; resourceName: string;
+          purgeId: string): Recallable =
   ## componentsGetPurgeStatus
   ## Get status for an ongoing purge operation.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group. The name is case insensitive.
   ##   apiVersion: string (required)
   ##             : The API version to use for this operation.
   ##   subscriptionId: string (required)
   ##                 : The ID of the target subscription.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group. The name is case insensitive.
   ##   resourceName: string (required)
   ##               : The name of the Application Insights component resource.
   ##   purgeId: string (required)
   ##          : In a purge status request, this is the Id of the operation the status of which is returned.
-  var path_597077 = newJObject()
-  var query_597078 = newJObject()
-  add(path_597077, "resourceGroupName", newJString(resourceGroupName))
-  add(query_597078, "api-version", newJString(apiVersion))
-  add(path_597077, "subscriptionId", newJString(subscriptionId))
-  add(path_597077, "resourceName", newJString(resourceName))
-  add(path_597077, "purgeId", newJString(purgeId))
-  result = call_597076.call(path_597077, query_597078, nil, nil, nil)
+  var path_564177 = newJObject()
+  var query_564178 = newJObject()
+  add(query_564178, "api-version", newJString(apiVersion))
+  add(path_564177, "subscriptionId", newJString(subscriptionId))
+  add(path_564177, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564177, "resourceName", newJString(resourceName))
+  add(path_564177, "purgeId", newJString(purgeId))
+  result = call_564176.call(path_564177, query_564178, nil, nil, nil)
 
-var componentsGetPurgeStatus* = Call_ComponentsGetPurgeStatus_597067(
+var componentsGetPurgeStatus* = Call_ComponentsGetPurgeStatus_564167(
     name: "componentsGetPurgeStatus", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Insights/components/{resourceName}/operations/{purgeId}",
-    validator: validate_ComponentsGetPurgeStatus_597068, base: "",
-    url: url_ComponentsGetPurgeStatus_597069, schemes: {Scheme.Https})
+    validator: validate_ComponentsGetPurgeStatus_564168, base: "",
+    url: url_ComponentsGetPurgeStatus_564169, schemes: {Scheme.Https})
 type
-  Call_ComponentsPurge_597079 = ref object of OpenApiRestCall_596458
-proc url_ComponentsPurge_597081(protocol: Scheme; host: string; base: string;
+  Call_ComponentsPurge_564179 = ref object of OpenApiRestCall_563556
+proc url_ComponentsPurge_564181(protocol: Scheme; host: string; base: string;
                                route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -917,7 +921,7 @@ proc url_ComponentsPurge_597081(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ComponentsPurge_597080(path: JsonNode; query: JsonNode;
+proc validate_ComponentsPurge_564180(path: JsonNode; query: JsonNode;
                                     header: JsonNode; formData: JsonNode;
                                     body: JsonNode): JsonNode =
   ## Purges data in an Application Insights component by a set of user-defined filters.
@@ -927,30 +931,30 @@ proc validate_ComponentsPurge_597080(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group. The name is case insensitive.
   ##   subscriptionId: JString (required)
   ##                 : The ID of the target subscription.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group. The name is case insensitive.
   ##   resourceName: JString (required)
   ##               : The name of the Application Insights component resource.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_597082 = path.getOrDefault("resourceGroupName")
-  valid_597082 = validateParameter(valid_597082, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564182 = path.getOrDefault("subscriptionId")
+  valid_564182 = validateParameter(valid_564182, JString, required = true,
                                  default = nil)
-  if valid_597082 != nil:
-    section.add "resourceGroupName", valid_597082
-  var valid_597083 = path.getOrDefault("subscriptionId")
-  valid_597083 = validateParameter(valid_597083, JString, required = true,
+  if valid_564182 != nil:
+    section.add "subscriptionId", valid_564182
+  var valid_564183 = path.getOrDefault("resourceGroupName")
+  valid_564183 = validateParameter(valid_564183, JString, required = true,
                                  default = nil)
-  if valid_597083 != nil:
-    section.add "subscriptionId", valid_597083
-  var valid_597084 = path.getOrDefault("resourceName")
-  valid_597084 = validateParameter(valid_597084, JString, required = true,
+  if valid_564183 != nil:
+    section.add "resourceGroupName", valid_564183
+  var valid_564184 = path.getOrDefault("resourceName")
+  valid_564184 = validateParameter(valid_564184, JString, required = true,
                                  default = nil)
-  if valid_597084 != nil:
-    section.add "resourceName", valid_597084
+  if valid_564184 != nil:
+    section.add "resourceName", valid_564184
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -958,11 +962,11 @@ proc validate_ComponentsPurge_597080(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_597085 = query.getOrDefault("api-version")
-  valid_597085 = validateParameter(valid_597085, JString, required = true,
+  var valid_564185 = query.getOrDefault("api-version")
+  valid_564185 = validateParameter(valid_564185, JString, required = true,
                                  default = nil)
-  if valid_597085 != nil:
-    section.add "api-version", valid_597085
+  if valid_564185 != nil:
+    section.add "api-version", valid_564185
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -976,52 +980,52 @@ proc validate_ComponentsPurge_597080(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_597087: Call_ComponentsPurge_597079; path: JsonNode; query: JsonNode;
+proc call*(call_564187: Call_ComponentsPurge_564179; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Purges data in an Application Insights component by a set of user-defined filters.
   ## 
   ## In order to manage system resources, purge requests are throttled at 50 requests per hour. You should batch the execution of purge requests by sending a single command whose predicate includes all user identities that require purging. Use the in operator to specify multiple identities. You should run the query prior to using for a purge request to verify that the results are expected.
   ## 
-  let valid = call_597087.validator(path, query, header, formData, body)
-  let scheme = call_597087.pickScheme
+  let valid = call_564187.validator(path, query, header, formData, body)
+  let scheme = call_564187.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_597087.url(scheme.get, call_597087.host, call_597087.base,
-                         call_597087.route, valid.getOrDefault("path"),
+  let url = call_564187.url(scheme.get, call_564187.host, call_564187.base,
+                         call_564187.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_597087, url, valid)
+  result = hook(call_564187, url, valid)
 
-proc call*(call_597088: Call_ComponentsPurge_597079; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; resourceName: string;
-          body: JsonNode): Recallable =
+proc call*(call_564188: Call_ComponentsPurge_564179; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string; body: JsonNode;
+          resourceName: string): Recallable =
   ## componentsPurge
   ## Purges data in an Application Insights component by a set of user-defined filters.
   ## 
   ## In order to manage system resources, purge requests are throttled at 50 requests per hour. You should batch the execution of purge requests by sending a single command whose predicate includes all user identities that require purging. Use the in operator to specify multiple identities. You should run the query prior to using for a purge request to verify that the results are expected.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group. The name is case insensitive.
   ##   apiVersion: string (required)
   ##             : The API version to use for this operation.
   ##   subscriptionId: string (required)
   ##                 : The ID of the target subscription.
-  ##   resourceName: string (required)
-  ##               : The name of the Application Insights component resource.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group. The name is case insensitive.
   ##   body: JObject (required)
   ##       : Describes the body of a request to purge data in a single table of an Application Insights component
-  var path_597089 = newJObject()
-  var query_597090 = newJObject()
-  var body_597091 = newJObject()
-  add(path_597089, "resourceGroupName", newJString(resourceGroupName))
-  add(query_597090, "api-version", newJString(apiVersion))
-  add(path_597089, "subscriptionId", newJString(subscriptionId))
-  add(path_597089, "resourceName", newJString(resourceName))
+  ##   resourceName: string (required)
+  ##               : The name of the Application Insights component resource.
+  var path_564189 = newJObject()
+  var query_564190 = newJObject()
+  var body_564191 = newJObject()
+  add(query_564190, "api-version", newJString(apiVersion))
+  add(path_564189, "subscriptionId", newJString(subscriptionId))
+  add(path_564189, "resourceGroupName", newJString(resourceGroupName))
   if body != nil:
-    body_597091 = body
-  result = call_597088.call(path_597089, query_597090, nil, nil, body_597091)
+    body_564191 = body
+  add(path_564189, "resourceName", newJString(resourceName))
+  result = call_564188.call(path_564189, query_564190, nil, nil, body_564191)
 
-var componentsPurge* = Call_ComponentsPurge_597079(name: "componentsPurge",
+var componentsPurge* = Call_ComponentsPurge_564179(name: "componentsPurge",
     meth: HttpMethod.HttpPost, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Insights/components/{resourceName}/purge",
-    validator: validate_ComponentsPurge_597080, base: "", url: url_ComponentsPurge_597081,
+    validator: validate_ComponentsPurge_564180, base: "", url: url_ComponentsPurge_564181,
     schemes: {Scheme.Https})
 export
   rest

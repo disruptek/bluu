@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, httpcore
 
 ## auto-generated via openapi macro
 ## title: MonitorManagementClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_567642 = ref object of OpenApiRestCall
+  OpenApiRestCall_563540 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_567642](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563540](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_567642): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563540): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,8 +107,8 @@ const
   macServiceName = "monitor-metricNamespaces_API"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_MetricNamespacesList_567864 = ref object of OpenApiRestCall_567642
-proc url_MetricNamespacesList_567866(protocol: Scheme; host: string; base: string;
+  Call_MetricNamespacesList_563762 = ref object of OpenApiRestCall_563540
+proc url_MetricNamespacesList_563764(protocol: Scheme; host: string; base: string;
                                     route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -121,7 +125,7 @@ proc url_MetricNamespacesList_567866(protocol: Scheme; host: string; base: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_MetricNamespacesList_567865(path: JsonNode; query: JsonNode;
+proc validate_MetricNamespacesList_563763(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists the metric namespaces for the resource.
   ## 
@@ -133,11 +137,11 @@ proc validate_MetricNamespacesList_567865(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceUri` field"
-  var valid_568039 = path.getOrDefault("resourceUri")
-  valid_568039 = validateParameter(valid_568039, JString, required = true,
+  var valid_563939 = path.getOrDefault("resourceUri")
+  valid_563939 = validateParameter(valid_563939, JString, required = true,
                                  default = nil)
-  if valid_568039 != nil:
-    section.add "resourceUri", valid_568039
+  if valid_563939 != nil:
+    section.add "resourceUri", valid_563939
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -147,16 +151,16 @@ proc validate_MetricNamespacesList_567865(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568040 = query.getOrDefault("api-version")
-  valid_568040 = validateParameter(valid_568040, JString, required = true,
+  var valid_563940 = query.getOrDefault("api-version")
+  valid_563940 = validateParameter(valid_563940, JString, required = true,
                                  default = nil)
-  if valid_568040 != nil:
-    section.add "api-version", valid_568040
-  var valid_568041 = query.getOrDefault("startTime")
-  valid_568041 = validateParameter(valid_568041, JString, required = false,
+  if valid_563940 != nil:
+    section.add "api-version", valid_563940
+  var valid_563941 = query.getOrDefault("startTime")
+  valid_563941 = validateParameter(valid_563941, JString, required = false,
                                  default = nil)
-  if valid_568041 != nil:
-    section.add "startTime", valid_568041
+  if valid_563941 != nil:
+    section.add "startTime", valid_563941
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -165,42 +169,42 @@ proc validate_MetricNamespacesList_567865(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568064: Call_MetricNamespacesList_567864; path: JsonNode;
+proc call*(call_563964: Call_MetricNamespacesList_563762; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists the metric namespaces for the resource.
   ## 
-  let valid = call_568064.validator(path, query, header, formData, body)
-  let scheme = call_568064.pickScheme
+  let valid = call_563964.validator(path, query, header, formData, body)
+  let scheme = call_563964.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568064.url(scheme.get, call_568064.host, call_568064.base,
-                         call_568064.route, valid.getOrDefault("path"),
+  let url = call_563964.url(scheme.get, call_563964.host, call_563964.base,
+                         call_563964.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568064, url, valid)
+  result = hook(call_563964, url, valid)
 
-proc call*(call_568135: Call_MetricNamespacesList_567864; apiVersion: string;
+proc call*(call_564035: Call_MetricNamespacesList_563762; apiVersion: string;
           resourceUri: string; startTime: string = ""): Recallable =
   ## metricNamespacesList
   ## Lists the metric namespaces for the resource.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
-  ##   resourceUri: string (required)
-  ##              : The identifier of the resource.
   ##   startTime: string
   ##            : The ISO 8601 conform Date start time from which to query for metric namespaces.
-  var path_568136 = newJObject()
-  var query_568138 = newJObject()
-  add(query_568138, "api-version", newJString(apiVersion))
-  add(path_568136, "resourceUri", newJString(resourceUri))
-  add(query_568138, "startTime", newJString(startTime))
-  result = call_568135.call(path_568136, query_568138, nil, nil, nil)
+  ##   resourceUri: string (required)
+  ##              : The identifier of the resource.
+  var path_564036 = newJObject()
+  var query_564038 = newJObject()
+  add(query_564038, "api-version", newJString(apiVersion))
+  add(query_564038, "startTime", newJString(startTime))
+  add(path_564036, "resourceUri", newJString(resourceUri))
+  result = call_564035.call(path_564036, query_564038, nil, nil, nil)
 
-var metricNamespacesList* = Call_MetricNamespacesList_567864(
+var metricNamespacesList* = Call_MetricNamespacesList_563762(
     name: "metricNamespacesList", meth: HttpMethod.HttpGet,
     host: "management.azure.com",
     route: "/{resourceUri}/providers/microsoft.insights/metricNamespaces",
-    validator: validate_MetricNamespacesList_567865, base: "",
-    url: url_MetricNamespacesList_567866, schemes: {Scheme.Https})
+    validator: validate_MetricNamespacesList_563763, base: "",
+    url: url_MetricNamespacesList_563764, schemes: {Scheme.Https})
 export
   rest
 

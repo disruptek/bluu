@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_573657 = ref object of OpenApiRestCall
+  OpenApiRestCall_563555 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_573657](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563555](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_573657): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563555): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,8 +107,8 @@ const
   macServiceName = "network-usage"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_UsagesList_573879 = ref object of OpenApiRestCall_573657
-proc url_UsagesList_573881(protocol: Scheme; host: string; base: string; route: string;
+  Call_UsagesList_563777 = ref object of OpenApiRestCall_563555
+proc url_UsagesList_563779(protocol: Scheme; host: string; base: string; route: string;
                           path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -123,7 +127,7 @@ proc url_UsagesList_573881(protocol: Scheme; host: string; base: string; route: 
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_UsagesList_573880(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_UsagesList_563778(path: JsonNode; query: JsonNode; header: JsonNode;
                                formData: JsonNode; body: JsonNode): JsonNode =
   ## List network usages for a subscription.
   ## 
@@ -137,16 +141,16 @@ proc validate_UsagesList_573880(path: JsonNode; query: JsonNode; header: JsonNod
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_574041 = path.getOrDefault("subscriptionId")
-  valid_574041 = validateParameter(valid_574041, JString, required = true,
+  var valid_563941 = path.getOrDefault("subscriptionId")
+  valid_563941 = validateParameter(valid_563941, JString, required = true,
                                  default = nil)
-  if valid_574041 != nil:
-    section.add "subscriptionId", valid_574041
-  var valid_574042 = path.getOrDefault("location")
-  valid_574042 = validateParameter(valid_574042, JString, required = true,
+  if valid_563941 != nil:
+    section.add "subscriptionId", valid_563941
+  var valid_563942 = path.getOrDefault("location")
+  valid_563942 = validateParameter(valid_563942, JString, required = true,
                                  default = nil)
-  if valid_574042 != nil:
-    section.add "location", valid_574042
+  if valid_563942 != nil:
+    section.add "location", valid_563942
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -154,11 +158,11 @@ proc validate_UsagesList_573880(path: JsonNode; query: JsonNode; header: JsonNod
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574043 = query.getOrDefault("api-version")
-  valid_574043 = validateParameter(valid_574043, JString, required = true,
+  var valid_563943 = query.getOrDefault("api-version")
+  valid_563943 = validateParameter(valid_563943, JString, required = true,
                                  default = nil)
-  if valid_574043 != nil:
-    section.add "api-version", valid_574043
+  if valid_563943 != nil:
+    section.add "api-version", valid_563943
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -167,20 +171,20 @@ proc validate_UsagesList_573880(path: JsonNode; query: JsonNode; header: JsonNod
   if body != nil:
     result.add "body", body
 
-proc call*(call_574070: Call_UsagesList_573879; path: JsonNode; query: JsonNode;
+proc call*(call_563970: Call_UsagesList_563777; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## List network usages for a subscription.
   ## 
-  let valid = call_574070.validator(path, query, header, formData, body)
-  let scheme = call_574070.pickScheme
+  let valid = call_563970.validator(path, query, header, formData, body)
+  let scheme = call_563970.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574070.url(scheme.get, call_574070.host, call_574070.base,
-                         call_574070.route, valid.getOrDefault("path"),
+  let url = call_563970.url(scheme.get, call_563970.host, call_563970.base,
+                         call_563970.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574070, url, valid)
+  result = hook(call_563970, url, valid)
 
-proc call*(call_574141: Call_UsagesList_573879; apiVersion: string;
+proc call*(call_564041: Call_UsagesList_563777; apiVersion: string;
           subscriptionId: string; location: string): Recallable =
   ## usagesList
   ## List network usages for a subscription.
@@ -190,18 +194,18 @@ proc call*(call_574141: Call_UsagesList_573879; apiVersion: string;
   ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   location: string (required)
   ##           : The location where resource usage is queried.
-  var path_574142 = newJObject()
-  var query_574144 = newJObject()
-  add(query_574144, "api-version", newJString(apiVersion))
-  add(path_574142, "subscriptionId", newJString(subscriptionId))
-  add(path_574142, "location", newJString(location))
-  result = call_574141.call(path_574142, query_574144, nil, nil, nil)
+  var path_564042 = newJObject()
+  var query_564044 = newJObject()
+  add(query_564044, "api-version", newJString(apiVersion))
+  add(path_564042, "subscriptionId", newJString(subscriptionId))
+  add(path_564042, "location", newJString(location))
+  result = call_564041.call(path_564042, query_564044, nil, nil, nil)
 
-var usagesList* = Call_UsagesList_573879(name: "usagesList",
+var usagesList* = Call_UsagesList_563777(name: "usagesList",
                                       meth: HttpMethod.HttpGet,
                                       host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Network/locations/{location}/usages",
-                                      validator: validate_UsagesList_573880,
-                                      base: "", url: url_UsagesList_573881,
+                                      validator: validate_UsagesList_563778,
+                                      base: "", url: url_UsagesList_563779,
                                       schemes: {Scheme.Https})
 export
   rest

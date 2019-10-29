@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, httpcore
 
 ## auto-generated via openapi macro
 ## title: RemediationsClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_567657 = ref object of OpenApiRestCall
+  OpenApiRestCall_563555 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_567657](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563555](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_567657): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563555): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,8 +107,8 @@ const
   macServiceName = "policyinsights-remediations"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_RemediationsListForManagementGroup_567879 = ref object of OpenApiRestCall_567657
-proc url_RemediationsListForManagementGroup_567881(protocol: Scheme; host: string;
+  Call_RemediationsListForManagementGroup_563777 = ref object of OpenApiRestCall_563555
+proc url_RemediationsListForManagementGroup_563779(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -126,54 +130,55 @@ proc url_RemediationsListForManagementGroup_567881(protocol: Scheme; host: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_RemediationsListForManagementGroup_567880(path: JsonNode;
+proc validate_RemediationsListForManagementGroup_563778(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets all remediations for the management group.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   managementGroupsNamespace: JString (required)
-  ##                            : The namespace for Microsoft Management RP; only "Microsoft.Management" is allowed.
   ##   managementGroupId: JString (required)
   ##                    : Management group ID.
+  ##   managementGroupsNamespace: JString (required)
+  ##                            : The namespace for Microsoft Management RP; only "Microsoft.Management" is allowed.
   section = newJObject()
-  assert path != nil, "path argument is necessary due to required `managementGroupsNamespace` field"
-  var valid_568068 = path.getOrDefault("managementGroupsNamespace")
-  valid_568068 = validateParameter(valid_568068, JString, required = true,
-                                 default = newJString("Microsoft.Management"))
-  if valid_568068 != nil:
-    section.add "managementGroupsNamespace", valid_568068
-  var valid_568069 = path.getOrDefault("managementGroupId")
-  valid_568069 = validateParameter(valid_568069, JString, required = true,
+  assert path != nil,
+        "path argument is necessary due to required `managementGroupId` field"
+  var valid_563955 = path.getOrDefault("managementGroupId")
+  valid_563955 = validateParameter(valid_563955, JString, required = true,
                                  default = nil)
-  if valid_568069 != nil:
-    section.add "managementGroupId", valid_568069
+  if valid_563955 != nil:
+    section.add "managementGroupId", valid_563955
+  var valid_563969 = path.getOrDefault("managementGroupsNamespace")
+  valid_563969 = validateParameter(valid_563969, JString, required = true,
+                                 default = newJString("Microsoft.Management"))
+  if valid_563969 != nil:
+    section.add "managementGroupsNamespace", valid_563969
   result.add "path", section
   ## parameters in `query` object:
-  ##   api-version: JString (required)
-  ##              : Client Api Version.
   ##   $top: JInt
   ##       : Maximum number of records to return.
+  ##   api-version: JString (required)
+  ##              : Client Api Version.
   ##   $filter: JString
   ##          : OData filter expression.
   section = newJObject()
+  var valid_563970 = query.getOrDefault("$top")
+  valid_563970 = validateParameter(valid_563970, JInt, required = false, default = nil)
+  if valid_563970 != nil:
+    section.add "$top", valid_563970
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568070 = query.getOrDefault("api-version")
-  valid_568070 = validateParameter(valid_568070, JString, required = true,
+  var valid_563971 = query.getOrDefault("api-version")
+  valid_563971 = validateParameter(valid_563971, JString, required = true,
                                  default = nil)
-  if valid_568070 != nil:
-    section.add "api-version", valid_568070
-  var valid_568071 = query.getOrDefault("$top")
-  valid_568071 = validateParameter(valid_568071, JInt, required = false, default = nil)
-  if valid_568071 != nil:
-    section.add "$top", valid_568071
-  var valid_568072 = query.getOrDefault("$filter")
-  valid_568072 = validateParameter(valid_568072, JString, required = false,
+  if valid_563971 != nil:
+    section.add "api-version", valid_563971
+  var valid_563972 = query.getOrDefault("$filter")
+  valid_563972 = validateParameter(valid_563972, JString, required = false,
                                  default = nil)
-  if valid_568072 != nil:
-    section.add "$filter", valid_568072
+  if valid_563972 != nil:
+    section.add "$filter", valid_563972
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -182,54 +187,54 @@ proc validate_RemediationsListForManagementGroup_567880(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568095: Call_RemediationsListForManagementGroup_567879;
+proc call*(call_563995: Call_RemediationsListForManagementGroup_563777;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Gets all remediations for the management group.
   ## 
-  let valid = call_568095.validator(path, query, header, formData, body)
-  let scheme = call_568095.pickScheme
+  let valid = call_563995.validator(path, query, header, formData, body)
+  let scheme = call_563995.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568095.url(scheme.get, call_568095.host, call_568095.base,
-                         call_568095.route, valid.getOrDefault("path"),
+  let url = call_563995.url(scheme.get, call_563995.host, call_563995.base,
+                         call_563995.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568095, url, valid)
+  result = hook(call_563995, url, valid)
 
-proc call*(call_568166: Call_RemediationsListForManagementGroup_567879;
-          apiVersion: string; managementGroupId: string;
-          managementGroupsNamespace: string = "Microsoft.Management"; Top: int = 0;
+proc call*(call_564066: Call_RemediationsListForManagementGroup_563777;
+          managementGroupId: string; apiVersion: string; Top: int = 0;
+          managementGroupsNamespace: string = "Microsoft.Management";
           Filter: string = ""): Recallable =
   ## remediationsListForManagementGroup
   ## Gets all remediations for the management group.
-  ##   managementGroupsNamespace: string (required)
-  ##                            : The namespace for Microsoft Management RP; only "Microsoft.Management" is allowed.
-  ##   apiVersion: string (required)
-  ##             : Client Api Version.
   ##   managementGroupId: string (required)
   ##                    : Management group ID.
   ##   Top: int
   ##      : Maximum number of records to return.
+  ##   apiVersion: string (required)
+  ##             : Client Api Version.
+  ##   managementGroupsNamespace: string (required)
+  ##                            : The namespace for Microsoft Management RP; only "Microsoft.Management" is allowed.
   ##   Filter: string
   ##         : OData filter expression.
-  var path_568167 = newJObject()
-  var query_568169 = newJObject()
-  add(path_568167, "managementGroupsNamespace",
+  var path_564067 = newJObject()
+  var query_564069 = newJObject()
+  add(path_564067, "managementGroupId", newJString(managementGroupId))
+  add(query_564069, "$top", newJInt(Top))
+  add(query_564069, "api-version", newJString(apiVersion))
+  add(path_564067, "managementGroupsNamespace",
       newJString(managementGroupsNamespace))
-  add(query_568169, "api-version", newJString(apiVersion))
-  add(path_568167, "managementGroupId", newJString(managementGroupId))
-  add(query_568169, "$top", newJInt(Top))
-  add(query_568169, "$filter", newJString(Filter))
-  result = call_568166.call(path_568167, query_568169, nil, nil, nil)
+  add(query_564069, "$filter", newJString(Filter))
+  result = call_564066.call(path_564067, query_564069, nil, nil, nil)
 
-var remediationsListForManagementGroup* = Call_RemediationsListForManagementGroup_567879(
+var remediationsListForManagementGroup* = Call_RemediationsListForManagementGroup_563777(
     name: "remediationsListForManagementGroup", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/providers/{managementGroupsNamespace}/managementGroups/{managementGroupId}/providers/Microsoft.PolicyInsights/remediations",
-    validator: validate_RemediationsListForManagementGroup_567880, base: "",
-    url: url_RemediationsListForManagementGroup_567881, schemes: {Scheme.Https})
+    validator: validate_RemediationsListForManagementGroup_563778, base: "",
+    url: url_RemediationsListForManagementGroup_563779, schemes: {Scheme.Https})
 type
-  Call_RemediationsCreateOrUpdateAtManagementGroup_568219 = ref object of OpenApiRestCall_567657
-proc url_RemediationsCreateOrUpdateAtManagementGroup_568221(protocol: Scheme;
+  Call_RemediationsCreateOrUpdateAtManagementGroup_564119 = ref object of OpenApiRestCall_563555
+proc url_RemediationsCreateOrUpdateAtManagementGroup_564121(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -253,36 +258,37 @@ proc url_RemediationsCreateOrUpdateAtManagementGroup_568221(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_RemediationsCreateOrUpdateAtManagementGroup_568220(path: JsonNode;
+proc validate_RemediationsCreateOrUpdateAtManagementGroup_564120(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Creates or updates a remediation at management group scope.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   managementGroupsNamespace: JString (required)
-  ##                            : The namespace for Microsoft Management RP; only "Microsoft.Management" is allowed.
   ##   managementGroupId: JString (required)
   ##                    : Management group ID.
+  ##   managementGroupsNamespace: JString (required)
+  ##                            : The namespace for Microsoft Management RP; only "Microsoft.Management" is allowed.
   ##   remediationName: JString (required)
   ##                  : The name of the remediation.
   section = newJObject()
-  assert path != nil, "path argument is necessary due to required `managementGroupsNamespace` field"
-  var valid_568239 = path.getOrDefault("managementGroupsNamespace")
-  valid_568239 = validateParameter(valid_568239, JString, required = true,
+  assert path != nil,
+        "path argument is necessary due to required `managementGroupId` field"
+  var valid_564139 = path.getOrDefault("managementGroupId")
+  valid_564139 = validateParameter(valid_564139, JString, required = true,
+                                 default = nil)
+  if valid_564139 != nil:
+    section.add "managementGroupId", valid_564139
+  var valid_564140 = path.getOrDefault("managementGroupsNamespace")
+  valid_564140 = validateParameter(valid_564140, JString, required = true,
                                  default = newJString("Microsoft.Management"))
-  if valid_568239 != nil:
-    section.add "managementGroupsNamespace", valid_568239
-  var valid_568240 = path.getOrDefault("managementGroupId")
-  valid_568240 = validateParameter(valid_568240, JString, required = true,
+  if valid_564140 != nil:
+    section.add "managementGroupsNamespace", valid_564140
+  var valid_564141 = path.getOrDefault("remediationName")
+  valid_564141 = validateParameter(valid_564141, JString, required = true,
                                  default = nil)
-  if valid_568240 != nil:
-    section.add "managementGroupId", valid_568240
-  var valid_568241 = path.getOrDefault("remediationName")
-  valid_568241 = validateParameter(valid_568241, JString, required = true,
-                                 default = nil)
-  if valid_568241 != nil:
-    section.add "remediationName", valid_568241
+  if valid_564141 != nil:
+    section.add "remediationName", valid_564141
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -290,11 +296,11 @@ proc validate_RemediationsCreateOrUpdateAtManagementGroup_568220(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568242 = query.getOrDefault("api-version")
-  valid_568242 = validateParameter(valid_568242, JString, required = true,
+  var valid_564142 = query.getOrDefault("api-version")
+  valid_564142 = validateParameter(valid_564142, JString, required = true,
                                  default = nil)
-  if valid_568242 != nil:
-    section.add "api-version", valid_568242
+  if valid_564142 != nil:
+    section.add "api-version", valid_564142
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -308,57 +314,57 @@ proc validate_RemediationsCreateOrUpdateAtManagementGroup_568220(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568244: Call_RemediationsCreateOrUpdateAtManagementGroup_568219;
+proc call*(call_564144: Call_RemediationsCreateOrUpdateAtManagementGroup_564119;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Creates or updates a remediation at management group scope.
   ## 
-  let valid = call_568244.validator(path, query, header, formData, body)
-  let scheme = call_568244.pickScheme
+  let valid = call_564144.validator(path, query, header, formData, body)
+  let scheme = call_564144.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568244.url(scheme.get, call_568244.host, call_568244.base,
-                         call_568244.route, valid.getOrDefault("path"),
+  let url = call_564144.url(scheme.get, call_564144.host, call_564144.base,
+                         call_564144.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568244, url, valid)
+  result = hook(call_564144, url, valid)
 
-proc call*(call_568245: Call_RemediationsCreateOrUpdateAtManagementGroup_568219;
-          apiVersion: string; managementGroupId: string; parameters: JsonNode;
+proc call*(call_564145: Call_RemediationsCreateOrUpdateAtManagementGroup_564119;
+          managementGroupId: string; apiVersion: string; parameters: JsonNode;
           remediationName: string;
           managementGroupsNamespace: string = "Microsoft.Management"): Recallable =
   ## remediationsCreateOrUpdateAtManagementGroup
   ## Creates or updates a remediation at management group scope.
-  ##   managementGroupsNamespace: string (required)
-  ##                            : The namespace for Microsoft Management RP; only "Microsoft.Management" is allowed.
-  ##   apiVersion: string (required)
-  ##             : Client Api Version.
   ##   managementGroupId: string (required)
   ##                    : Management group ID.
+  ##   apiVersion: string (required)
+  ##             : Client Api Version.
+  ##   managementGroupsNamespace: string (required)
+  ##                            : The namespace for Microsoft Management RP; only "Microsoft.Management" is allowed.
   ##   parameters: JObject (required)
   ##             : The remediation parameters.
   ##   remediationName: string (required)
   ##                  : The name of the remediation.
-  var path_568246 = newJObject()
-  var query_568247 = newJObject()
-  var body_568248 = newJObject()
-  add(path_568246, "managementGroupsNamespace",
+  var path_564146 = newJObject()
+  var query_564147 = newJObject()
+  var body_564148 = newJObject()
+  add(path_564146, "managementGroupId", newJString(managementGroupId))
+  add(query_564147, "api-version", newJString(apiVersion))
+  add(path_564146, "managementGroupsNamespace",
       newJString(managementGroupsNamespace))
-  add(query_568247, "api-version", newJString(apiVersion))
-  add(path_568246, "managementGroupId", newJString(managementGroupId))
   if parameters != nil:
-    body_568248 = parameters
-  add(path_568246, "remediationName", newJString(remediationName))
-  result = call_568245.call(path_568246, query_568247, nil, nil, body_568248)
+    body_564148 = parameters
+  add(path_564146, "remediationName", newJString(remediationName))
+  result = call_564145.call(path_564146, query_564147, nil, nil, body_564148)
 
-var remediationsCreateOrUpdateAtManagementGroup* = Call_RemediationsCreateOrUpdateAtManagementGroup_568219(
+var remediationsCreateOrUpdateAtManagementGroup* = Call_RemediationsCreateOrUpdateAtManagementGroup_564119(
     name: "remediationsCreateOrUpdateAtManagementGroup", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/providers/{managementGroupsNamespace}/managementGroups/{managementGroupId}/providers/Microsoft.PolicyInsights/remediations/{remediationName}",
-    validator: validate_RemediationsCreateOrUpdateAtManagementGroup_568220,
-    base: "", url: url_RemediationsCreateOrUpdateAtManagementGroup_568221,
+    validator: validate_RemediationsCreateOrUpdateAtManagementGroup_564120,
+    base: "", url: url_RemediationsCreateOrUpdateAtManagementGroup_564121,
     schemes: {Scheme.Https})
 type
-  Call_RemediationsGetAtManagementGroup_568208 = ref object of OpenApiRestCall_567657
-proc url_RemediationsGetAtManagementGroup_568210(protocol: Scheme; host: string;
+  Call_RemediationsGetAtManagementGroup_564108 = ref object of OpenApiRestCall_563555
+proc url_RemediationsGetAtManagementGroup_564110(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -382,36 +388,37 @@ proc url_RemediationsGetAtManagementGroup_568210(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_RemediationsGetAtManagementGroup_568209(path: JsonNode;
+proc validate_RemediationsGetAtManagementGroup_564109(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets an existing remediation at management group scope.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   managementGroupsNamespace: JString (required)
-  ##                            : The namespace for Microsoft Management RP; only "Microsoft.Management" is allowed.
   ##   managementGroupId: JString (required)
   ##                    : Management group ID.
+  ##   managementGroupsNamespace: JString (required)
+  ##                            : The namespace for Microsoft Management RP; only "Microsoft.Management" is allowed.
   ##   remediationName: JString (required)
   ##                  : The name of the remediation.
   section = newJObject()
-  assert path != nil, "path argument is necessary due to required `managementGroupsNamespace` field"
-  var valid_568211 = path.getOrDefault("managementGroupsNamespace")
-  valid_568211 = validateParameter(valid_568211, JString, required = true,
+  assert path != nil,
+        "path argument is necessary due to required `managementGroupId` field"
+  var valid_564111 = path.getOrDefault("managementGroupId")
+  valid_564111 = validateParameter(valid_564111, JString, required = true,
+                                 default = nil)
+  if valid_564111 != nil:
+    section.add "managementGroupId", valid_564111
+  var valid_564112 = path.getOrDefault("managementGroupsNamespace")
+  valid_564112 = validateParameter(valid_564112, JString, required = true,
                                  default = newJString("Microsoft.Management"))
-  if valid_568211 != nil:
-    section.add "managementGroupsNamespace", valid_568211
-  var valid_568212 = path.getOrDefault("managementGroupId")
-  valid_568212 = validateParameter(valid_568212, JString, required = true,
+  if valid_564112 != nil:
+    section.add "managementGroupsNamespace", valid_564112
+  var valid_564113 = path.getOrDefault("remediationName")
+  valid_564113 = validateParameter(valid_564113, JString, required = true,
                                  default = nil)
-  if valid_568212 != nil:
-    section.add "managementGroupId", valid_568212
-  var valid_568213 = path.getOrDefault("remediationName")
-  valid_568213 = validateParameter(valid_568213, JString, required = true,
-                                 default = nil)
-  if valid_568213 != nil:
-    section.add "remediationName", valid_568213
+  if valid_564113 != nil:
+    section.add "remediationName", valid_564113
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -419,11 +426,11 @@ proc validate_RemediationsGetAtManagementGroup_568209(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568214 = query.getOrDefault("api-version")
-  valid_568214 = validateParameter(valid_568214, JString, required = true,
+  var valid_564114 = query.getOrDefault("api-version")
+  valid_564114 = validateParameter(valid_564114, JString, required = true,
                                  default = nil)
-  if valid_568214 != nil:
-    section.add "api-version", valid_568214
+  if valid_564114 != nil:
+    section.add "api-version", valid_564114
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -432,50 +439,50 @@ proc validate_RemediationsGetAtManagementGroup_568209(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568215: Call_RemediationsGetAtManagementGroup_568208;
+proc call*(call_564115: Call_RemediationsGetAtManagementGroup_564108;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Gets an existing remediation at management group scope.
   ## 
-  let valid = call_568215.validator(path, query, header, formData, body)
-  let scheme = call_568215.pickScheme
+  let valid = call_564115.validator(path, query, header, formData, body)
+  let scheme = call_564115.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568215.url(scheme.get, call_568215.host, call_568215.base,
-                         call_568215.route, valid.getOrDefault("path"),
+  let url = call_564115.url(scheme.get, call_564115.host, call_564115.base,
+                         call_564115.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568215, url, valid)
+  result = hook(call_564115, url, valid)
 
-proc call*(call_568216: Call_RemediationsGetAtManagementGroup_568208;
-          apiVersion: string; managementGroupId: string; remediationName: string;
+proc call*(call_564116: Call_RemediationsGetAtManagementGroup_564108;
+          managementGroupId: string; apiVersion: string; remediationName: string;
           managementGroupsNamespace: string = "Microsoft.Management"): Recallable =
   ## remediationsGetAtManagementGroup
   ## Gets an existing remediation at management group scope.
-  ##   managementGroupsNamespace: string (required)
-  ##                            : The namespace for Microsoft Management RP; only "Microsoft.Management" is allowed.
-  ##   apiVersion: string (required)
-  ##             : Client Api Version.
   ##   managementGroupId: string (required)
   ##                    : Management group ID.
+  ##   apiVersion: string (required)
+  ##             : Client Api Version.
+  ##   managementGroupsNamespace: string (required)
+  ##                            : The namespace for Microsoft Management RP; only "Microsoft.Management" is allowed.
   ##   remediationName: string (required)
   ##                  : The name of the remediation.
-  var path_568217 = newJObject()
-  var query_568218 = newJObject()
-  add(path_568217, "managementGroupsNamespace",
+  var path_564117 = newJObject()
+  var query_564118 = newJObject()
+  add(path_564117, "managementGroupId", newJString(managementGroupId))
+  add(query_564118, "api-version", newJString(apiVersion))
+  add(path_564117, "managementGroupsNamespace",
       newJString(managementGroupsNamespace))
-  add(query_568218, "api-version", newJString(apiVersion))
-  add(path_568217, "managementGroupId", newJString(managementGroupId))
-  add(path_568217, "remediationName", newJString(remediationName))
-  result = call_568216.call(path_568217, query_568218, nil, nil, nil)
+  add(path_564117, "remediationName", newJString(remediationName))
+  result = call_564116.call(path_564117, query_564118, nil, nil, nil)
 
-var remediationsGetAtManagementGroup* = Call_RemediationsGetAtManagementGroup_568208(
+var remediationsGetAtManagementGroup* = Call_RemediationsGetAtManagementGroup_564108(
     name: "remediationsGetAtManagementGroup", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/providers/{managementGroupsNamespace}/managementGroups/{managementGroupId}/providers/Microsoft.PolicyInsights/remediations/{remediationName}",
-    validator: validate_RemediationsGetAtManagementGroup_568209, base: "",
-    url: url_RemediationsGetAtManagementGroup_568210, schemes: {Scheme.Https})
+    validator: validate_RemediationsGetAtManagementGroup_564109, base: "",
+    url: url_RemediationsGetAtManagementGroup_564110, schemes: {Scheme.Https})
 type
-  Call_RemediationsDeleteAtManagementGroup_568249 = ref object of OpenApiRestCall_567657
-proc url_RemediationsDeleteAtManagementGroup_568251(protocol: Scheme; host: string;
+  Call_RemediationsDeleteAtManagementGroup_564149 = ref object of OpenApiRestCall_563555
+proc url_RemediationsDeleteAtManagementGroup_564151(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -499,36 +506,37 @@ proc url_RemediationsDeleteAtManagementGroup_568251(protocol: Scheme; host: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_RemediationsDeleteAtManagementGroup_568250(path: JsonNode;
+proc validate_RemediationsDeleteAtManagementGroup_564150(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Deletes an existing remediation at management group scope.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   managementGroupsNamespace: JString (required)
-  ##                            : The namespace for Microsoft Management RP; only "Microsoft.Management" is allowed.
   ##   managementGroupId: JString (required)
   ##                    : Management group ID.
+  ##   managementGroupsNamespace: JString (required)
+  ##                            : The namespace for Microsoft Management RP; only "Microsoft.Management" is allowed.
   ##   remediationName: JString (required)
   ##                  : The name of the remediation.
   section = newJObject()
-  assert path != nil, "path argument is necessary due to required `managementGroupsNamespace` field"
-  var valid_568252 = path.getOrDefault("managementGroupsNamespace")
-  valid_568252 = validateParameter(valid_568252, JString, required = true,
+  assert path != nil,
+        "path argument is necessary due to required `managementGroupId` field"
+  var valid_564152 = path.getOrDefault("managementGroupId")
+  valid_564152 = validateParameter(valid_564152, JString, required = true,
+                                 default = nil)
+  if valid_564152 != nil:
+    section.add "managementGroupId", valid_564152
+  var valid_564153 = path.getOrDefault("managementGroupsNamespace")
+  valid_564153 = validateParameter(valid_564153, JString, required = true,
                                  default = newJString("Microsoft.Management"))
-  if valid_568252 != nil:
-    section.add "managementGroupsNamespace", valid_568252
-  var valid_568253 = path.getOrDefault("managementGroupId")
-  valid_568253 = validateParameter(valid_568253, JString, required = true,
+  if valid_564153 != nil:
+    section.add "managementGroupsNamespace", valid_564153
+  var valid_564154 = path.getOrDefault("remediationName")
+  valid_564154 = validateParameter(valid_564154, JString, required = true,
                                  default = nil)
-  if valid_568253 != nil:
-    section.add "managementGroupId", valid_568253
-  var valid_568254 = path.getOrDefault("remediationName")
-  valid_568254 = validateParameter(valid_568254, JString, required = true,
-                                 default = nil)
-  if valid_568254 != nil:
-    section.add "remediationName", valid_568254
+  if valid_564154 != nil:
+    section.add "remediationName", valid_564154
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -536,11 +544,11 @@ proc validate_RemediationsDeleteAtManagementGroup_568250(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568255 = query.getOrDefault("api-version")
-  valid_568255 = validateParameter(valid_568255, JString, required = true,
+  var valid_564155 = query.getOrDefault("api-version")
+  valid_564155 = validateParameter(valid_564155, JString, required = true,
                                  default = nil)
-  if valid_568255 != nil:
-    section.add "api-version", valid_568255
+  if valid_564155 != nil:
+    section.add "api-version", valid_564155
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -549,50 +557,50 @@ proc validate_RemediationsDeleteAtManagementGroup_568250(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568256: Call_RemediationsDeleteAtManagementGroup_568249;
+proc call*(call_564156: Call_RemediationsDeleteAtManagementGroup_564149;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Deletes an existing remediation at management group scope.
   ## 
-  let valid = call_568256.validator(path, query, header, formData, body)
-  let scheme = call_568256.pickScheme
+  let valid = call_564156.validator(path, query, header, formData, body)
+  let scheme = call_564156.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568256.url(scheme.get, call_568256.host, call_568256.base,
-                         call_568256.route, valid.getOrDefault("path"),
+  let url = call_564156.url(scheme.get, call_564156.host, call_564156.base,
+                         call_564156.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568256, url, valid)
+  result = hook(call_564156, url, valid)
 
-proc call*(call_568257: Call_RemediationsDeleteAtManagementGroup_568249;
-          apiVersion: string; managementGroupId: string; remediationName: string;
+proc call*(call_564157: Call_RemediationsDeleteAtManagementGroup_564149;
+          managementGroupId: string; apiVersion: string; remediationName: string;
           managementGroupsNamespace: string = "Microsoft.Management"): Recallable =
   ## remediationsDeleteAtManagementGroup
   ## Deletes an existing remediation at management group scope.
-  ##   managementGroupsNamespace: string (required)
-  ##                            : The namespace for Microsoft Management RP; only "Microsoft.Management" is allowed.
-  ##   apiVersion: string (required)
-  ##             : Client Api Version.
   ##   managementGroupId: string (required)
   ##                    : Management group ID.
+  ##   apiVersion: string (required)
+  ##             : Client Api Version.
+  ##   managementGroupsNamespace: string (required)
+  ##                            : The namespace for Microsoft Management RP; only "Microsoft.Management" is allowed.
   ##   remediationName: string (required)
   ##                  : The name of the remediation.
-  var path_568258 = newJObject()
-  var query_568259 = newJObject()
-  add(path_568258, "managementGroupsNamespace",
+  var path_564158 = newJObject()
+  var query_564159 = newJObject()
+  add(path_564158, "managementGroupId", newJString(managementGroupId))
+  add(query_564159, "api-version", newJString(apiVersion))
+  add(path_564158, "managementGroupsNamespace",
       newJString(managementGroupsNamespace))
-  add(query_568259, "api-version", newJString(apiVersion))
-  add(path_568258, "managementGroupId", newJString(managementGroupId))
-  add(path_568258, "remediationName", newJString(remediationName))
-  result = call_568257.call(path_568258, query_568259, nil, nil, nil)
+  add(path_564158, "remediationName", newJString(remediationName))
+  result = call_564157.call(path_564158, query_564159, nil, nil, nil)
 
-var remediationsDeleteAtManagementGroup* = Call_RemediationsDeleteAtManagementGroup_568249(
+var remediationsDeleteAtManagementGroup* = Call_RemediationsDeleteAtManagementGroup_564149(
     name: "remediationsDeleteAtManagementGroup", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/providers/{managementGroupsNamespace}/managementGroups/{managementGroupId}/providers/Microsoft.PolicyInsights/remediations/{remediationName}",
-    validator: validate_RemediationsDeleteAtManagementGroup_568250, base: "",
-    url: url_RemediationsDeleteAtManagementGroup_568251, schemes: {Scheme.Https})
+    validator: validate_RemediationsDeleteAtManagementGroup_564150, base: "",
+    url: url_RemediationsDeleteAtManagementGroup_564151, schemes: {Scheme.Https})
 type
-  Call_RemediationsCancelAtManagementGroup_568260 = ref object of OpenApiRestCall_567657
-proc url_RemediationsCancelAtManagementGroup_568262(protocol: Scheme; host: string;
+  Call_RemediationsCancelAtManagementGroup_564160 = ref object of OpenApiRestCall_563555
+proc url_RemediationsCancelAtManagementGroup_564162(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -617,36 +625,37 @@ proc url_RemediationsCancelAtManagementGroup_568262(protocol: Scheme; host: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_RemediationsCancelAtManagementGroup_568261(path: JsonNode;
+proc validate_RemediationsCancelAtManagementGroup_564161(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Cancels a remediation at management group scope.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   managementGroupsNamespace: JString (required)
-  ##                            : The namespace for Microsoft Management RP; only "Microsoft.Management" is allowed.
   ##   managementGroupId: JString (required)
   ##                    : Management group ID.
+  ##   managementGroupsNamespace: JString (required)
+  ##                            : The namespace for Microsoft Management RP; only "Microsoft.Management" is allowed.
   ##   remediationName: JString (required)
   ##                  : The name of the remediation.
   section = newJObject()
-  assert path != nil, "path argument is necessary due to required `managementGroupsNamespace` field"
-  var valid_568263 = path.getOrDefault("managementGroupsNamespace")
-  valid_568263 = validateParameter(valid_568263, JString, required = true,
+  assert path != nil,
+        "path argument is necessary due to required `managementGroupId` field"
+  var valid_564163 = path.getOrDefault("managementGroupId")
+  valid_564163 = validateParameter(valid_564163, JString, required = true,
+                                 default = nil)
+  if valid_564163 != nil:
+    section.add "managementGroupId", valid_564163
+  var valid_564164 = path.getOrDefault("managementGroupsNamespace")
+  valid_564164 = validateParameter(valid_564164, JString, required = true,
                                  default = newJString("Microsoft.Management"))
-  if valid_568263 != nil:
-    section.add "managementGroupsNamespace", valid_568263
-  var valid_568264 = path.getOrDefault("managementGroupId")
-  valid_568264 = validateParameter(valid_568264, JString, required = true,
+  if valid_564164 != nil:
+    section.add "managementGroupsNamespace", valid_564164
+  var valid_564165 = path.getOrDefault("remediationName")
+  valid_564165 = validateParameter(valid_564165, JString, required = true,
                                  default = nil)
-  if valid_568264 != nil:
-    section.add "managementGroupId", valid_568264
-  var valid_568265 = path.getOrDefault("remediationName")
-  valid_568265 = validateParameter(valid_568265, JString, required = true,
-                                 default = nil)
-  if valid_568265 != nil:
-    section.add "remediationName", valid_568265
+  if valid_564165 != nil:
+    section.add "remediationName", valid_564165
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -654,11 +663,11 @@ proc validate_RemediationsCancelAtManagementGroup_568261(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568266 = query.getOrDefault("api-version")
-  valid_568266 = validateParameter(valid_568266, JString, required = true,
+  var valid_564166 = query.getOrDefault("api-version")
+  valid_564166 = validateParameter(valid_564166, JString, required = true,
                                  default = nil)
-  if valid_568266 != nil:
-    section.add "api-version", valid_568266
+  if valid_564166 != nil:
+    section.add "api-version", valid_564166
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -667,50 +676,50 @@ proc validate_RemediationsCancelAtManagementGroup_568261(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568267: Call_RemediationsCancelAtManagementGroup_568260;
+proc call*(call_564167: Call_RemediationsCancelAtManagementGroup_564160;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Cancels a remediation at management group scope.
   ## 
-  let valid = call_568267.validator(path, query, header, formData, body)
-  let scheme = call_568267.pickScheme
+  let valid = call_564167.validator(path, query, header, formData, body)
+  let scheme = call_564167.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568267.url(scheme.get, call_568267.host, call_568267.base,
-                         call_568267.route, valid.getOrDefault("path"),
+  let url = call_564167.url(scheme.get, call_564167.host, call_564167.base,
+                         call_564167.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568267, url, valid)
+  result = hook(call_564167, url, valid)
 
-proc call*(call_568268: Call_RemediationsCancelAtManagementGroup_568260;
-          apiVersion: string; managementGroupId: string; remediationName: string;
+proc call*(call_564168: Call_RemediationsCancelAtManagementGroup_564160;
+          managementGroupId: string; apiVersion: string; remediationName: string;
           managementGroupsNamespace: string = "Microsoft.Management"): Recallable =
   ## remediationsCancelAtManagementGroup
   ## Cancels a remediation at management group scope.
-  ##   managementGroupsNamespace: string (required)
-  ##                            : The namespace for Microsoft Management RP; only "Microsoft.Management" is allowed.
-  ##   apiVersion: string (required)
-  ##             : Client Api Version.
   ##   managementGroupId: string (required)
   ##                    : Management group ID.
+  ##   apiVersion: string (required)
+  ##             : Client Api Version.
+  ##   managementGroupsNamespace: string (required)
+  ##                            : The namespace for Microsoft Management RP; only "Microsoft.Management" is allowed.
   ##   remediationName: string (required)
   ##                  : The name of the remediation.
-  var path_568269 = newJObject()
-  var query_568270 = newJObject()
-  add(path_568269, "managementGroupsNamespace",
+  var path_564169 = newJObject()
+  var query_564170 = newJObject()
+  add(path_564169, "managementGroupId", newJString(managementGroupId))
+  add(query_564170, "api-version", newJString(apiVersion))
+  add(path_564169, "managementGroupsNamespace",
       newJString(managementGroupsNamespace))
-  add(query_568270, "api-version", newJString(apiVersion))
-  add(path_568269, "managementGroupId", newJString(managementGroupId))
-  add(path_568269, "remediationName", newJString(remediationName))
-  result = call_568268.call(path_568269, query_568270, nil, nil, nil)
+  add(path_564169, "remediationName", newJString(remediationName))
+  result = call_564168.call(path_564169, query_564170, nil, nil, nil)
 
-var remediationsCancelAtManagementGroup* = Call_RemediationsCancelAtManagementGroup_568260(
+var remediationsCancelAtManagementGroup* = Call_RemediationsCancelAtManagementGroup_564160(
     name: "remediationsCancelAtManagementGroup", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/providers/{managementGroupsNamespace}/managementGroups/{managementGroupId}/providers/Microsoft.PolicyInsights/remediations/{remediationName}/cancel",
-    validator: validate_RemediationsCancelAtManagementGroup_568261, base: "",
-    url: url_RemediationsCancelAtManagementGroup_568262, schemes: {Scheme.Https})
+    validator: validate_RemediationsCancelAtManagementGroup_564161, base: "",
+    url: url_RemediationsCancelAtManagementGroup_564162, schemes: {Scheme.Https})
 type
-  Call_RemediationsListDeploymentsAtManagementGroup_568271 = ref object of OpenApiRestCall_567657
-proc url_RemediationsListDeploymentsAtManagementGroup_568273(protocol: Scheme;
+  Call_RemediationsListDeploymentsAtManagementGroup_564171 = ref object of OpenApiRestCall_563555
+proc url_RemediationsListDeploymentsAtManagementGroup_564173(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -735,54 +744,55 @@ proc url_RemediationsListDeploymentsAtManagementGroup_568273(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_RemediationsListDeploymentsAtManagementGroup_568272(path: JsonNode;
+proc validate_RemediationsListDeploymentsAtManagementGroup_564172(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets all deployments for a remediation at management group scope.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   managementGroupsNamespace: JString (required)
-  ##                            : The namespace for Microsoft Management RP; only "Microsoft.Management" is allowed.
   ##   managementGroupId: JString (required)
   ##                    : Management group ID.
+  ##   managementGroupsNamespace: JString (required)
+  ##                            : The namespace for Microsoft Management RP; only "Microsoft.Management" is allowed.
   ##   remediationName: JString (required)
   ##                  : The name of the remediation.
   section = newJObject()
-  assert path != nil, "path argument is necessary due to required `managementGroupsNamespace` field"
-  var valid_568274 = path.getOrDefault("managementGroupsNamespace")
-  valid_568274 = validateParameter(valid_568274, JString, required = true,
+  assert path != nil,
+        "path argument is necessary due to required `managementGroupId` field"
+  var valid_564174 = path.getOrDefault("managementGroupId")
+  valid_564174 = validateParameter(valid_564174, JString, required = true,
+                                 default = nil)
+  if valid_564174 != nil:
+    section.add "managementGroupId", valid_564174
+  var valid_564175 = path.getOrDefault("managementGroupsNamespace")
+  valid_564175 = validateParameter(valid_564175, JString, required = true,
                                  default = newJString("Microsoft.Management"))
-  if valid_568274 != nil:
-    section.add "managementGroupsNamespace", valid_568274
-  var valid_568275 = path.getOrDefault("managementGroupId")
-  valid_568275 = validateParameter(valid_568275, JString, required = true,
+  if valid_564175 != nil:
+    section.add "managementGroupsNamespace", valid_564175
+  var valid_564176 = path.getOrDefault("remediationName")
+  valid_564176 = validateParameter(valid_564176, JString, required = true,
                                  default = nil)
-  if valid_568275 != nil:
-    section.add "managementGroupId", valid_568275
-  var valid_568276 = path.getOrDefault("remediationName")
-  valid_568276 = validateParameter(valid_568276, JString, required = true,
-                                 default = nil)
-  if valid_568276 != nil:
-    section.add "remediationName", valid_568276
+  if valid_564176 != nil:
+    section.add "remediationName", valid_564176
   result.add "path", section
   ## parameters in `query` object:
-  ##   api-version: JString (required)
-  ##              : Client Api Version.
   ##   $top: JInt
   ##       : Maximum number of records to return.
+  ##   api-version: JString (required)
+  ##              : Client Api Version.
   section = newJObject()
+  var valid_564177 = query.getOrDefault("$top")
+  valid_564177 = validateParameter(valid_564177, JInt, required = false, default = nil)
+  if valid_564177 != nil:
+    section.add "$top", valid_564177
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568277 = query.getOrDefault("api-version")
-  valid_568277 = validateParameter(valid_568277, JString, required = true,
+  var valid_564178 = query.getOrDefault("api-version")
+  valid_564178 = validateParameter(valid_564178, JString, required = true,
                                  default = nil)
-  if valid_568277 != nil:
-    section.add "api-version", valid_568277
-  var valid_568278 = query.getOrDefault("$top")
-  valid_568278 = validateParameter(valid_568278, JInt, required = false, default = nil)
-  if valid_568278 != nil:
-    section.add "$top", valid_568278
+  if valid_564178 != nil:
+    section.add "api-version", valid_564178
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -791,54 +801,54 @@ proc validate_RemediationsListDeploymentsAtManagementGroup_568272(path: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_568279: Call_RemediationsListDeploymentsAtManagementGroup_568271;
+proc call*(call_564179: Call_RemediationsListDeploymentsAtManagementGroup_564171;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Gets all deployments for a remediation at management group scope.
   ## 
-  let valid = call_568279.validator(path, query, header, formData, body)
-  let scheme = call_568279.pickScheme
+  let valid = call_564179.validator(path, query, header, formData, body)
+  let scheme = call_564179.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568279.url(scheme.get, call_568279.host, call_568279.base,
-                         call_568279.route, valid.getOrDefault("path"),
+  let url = call_564179.url(scheme.get, call_564179.host, call_564179.base,
+                         call_564179.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568279, url, valid)
+  result = hook(call_564179, url, valid)
 
-proc call*(call_568280: Call_RemediationsListDeploymentsAtManagementGroup_568271;
-          apiVersion: string; managementGroupId: string; remediationName: string;
-          managementGroupsNamespace: string = "Microsoft.Management"; Top: int = 0): Recallable =
+proc call*(call_564180: Call_RemediationsListDeploymentsAtManagementGroup_564171;
+          managementGroupId: string; apiVersion: string; remediationName: string;
+          Top: int = 0; managementGroupsNamespace: string = "Microsoft.Management"): Recallable =
   ## remediationsListDeploymentsAtManagementGroup
   ## Gets all deployments for a remediation at management group scope.
-  ##   managementGroupsNamespace: string (required)
-  ##                            : The namespace for Microsoft Management RP; only "Microsoft.Management" is allowed.
-  ##   apiVersion: string (required)
-  ##             : Client Api Version.
   ##   managementGroupId: string (required)
   ##                    : Management group ID.
   ##   Top: int
   ##      : Maximum number of records to return.
+  ##   apiVersion: string (required)
+  ##             : Client Api Version.
+  ##   managementGroupsNamespace: string (required)
+  ##                            : The namespace for Microsoft Management RP; only "Microsoft.Management" is allowed.
   ##   remediationName: string (required)
   ##                  : The name of the remediation.
-  var path_568281 = newJObject()
-  var query_568282 = newJObject()
-  add(path_568281, "managementGroupsNamespace",
+  var path_564181 = newJObject()
+  var query_564182 = newJObject()
+  add(path_564181, "managementGroupId", newJString(managementGroupId))
+  add(query_564182, "$top", newJInt(Top))
+  add(query_564182, "api-version", newJString(apiVersion))
+  add(path_564181, "managementGroupsNamespace",
       newJString(managementGroupsNamespace))
-  add(query_568282, "api-version", newJString(apiVersion))
-  add(path_568281, "managementGroupId", newJString(managementGroupId))
-  add(query_568282, "$top", newJInt(Top))
-  add(path_568281, "remediationName", newJString(remediationName))
-  result = call_568280.call(path_568281, query_568282, nil, nil, nil)
+  add(path_564181, "remediationName", newJString(remediationName))
+  result = call_564180.call(path_564181, query_564182, nil, nil, nil)
 
-var remediationsListDeploymentsAtManagementGroup* = Call_RemediationsListDeploymentsAtManagementGroup_568271(
+var remediationsListDeploymentsAtManagementGroup* = Call_RemediationsListDeploymentsAtManagementGroup_564171(
     name: "remediationsListDeploymentsAtManagementGroup",
     meth: HttpMethod.HttpPost, host: "management.azure.com", route: "/providers/{managementGroupsNamespace}/managementGroups/{managementGroupId}/providers/Microsoft.PolicyInsights/remediations/{remediationName}/listDeployments",
-    validator: validate_RemediationsListDeploymentsAtManagementGroup_568272,
-    base: "", url: url_RemediationsListDeploymentsAtManagementGroup_568273,
+    validator: validate_RemediationsListDeploymentsAtManagementGroup_564172,
+    base: "", url: url_RemediationsListDeploymentsAtManagementGroup_564173,
     schemes: {Scheme.Https})
 type
-  Call_RemediationsListForSubscription_568283 = ref object of OpenApiRestCall_567657
-proc url_RemediationsListForSubscription_568285(protocol: Scheme; host: string;
+  Call_RemediationsListForSubscription_564183 = ref object of OpenApiRestCall_563555
+proc url_RemediationsListForSubscription_564185(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -855,7 +865,7 @@ proc url_RemediationsListForSubscription_568285(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_RemediationsListForSubscription_568284(path: JsonNode;
+proc validate_RemediationsListForSubscription_564184(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets all remediations for the subscription.
   ## 
@@ -867,36 +877,36 @@ proc validate_RemediationsListForSubscription_568284(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_568286 = path.getOrDefault("subscriptionId")
-  valid_568286 = validateParameter(valid_568286, JString, required = true,
+  var valid_564186 = path.getOrDefault("subscriptionId")
+  valid_564186 = validateParameter(valid_564186, JString, required = true,
                                  default = nil)
-  if valid_568286 != nil:
-    section.add "subscriptionId", valid_568286
+  if valid_564186 != nil:
+    section.add "subscriptionId", valid_564186
   result.add "path", section
   ## parameters in `query` object:
-  ##   api-version: JString (required)
-  ##              : Client Api Version.
   ##   $top: JInt
   ##       : Maximum number of records to return.
+  ##   api-version: JString (required)
+  ##              : Client Api Version.
   ##   $filter: JString
   ##          : OData filter expression.
   section = newJObject()
+  var valid_564187 = query.getOrDefault("$top")
+  valid_564187 = validateParameter(valid_564187, JInt, required = false, default = nil)
+  if valid_564187 != nil:
+    section.add "$top", valid_564187
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568287 = query.getOrDefault("api-version")
-  valid_568287 = validateParameter(valid_568287, JString, required = true,
+  var valid_564188 = query.getOrDefault("api-version")
+  valid_564188 = validateParameter(valid_564188, JString, required = true,
                                  default = nil)
-  if valid_568287 != nil:
-    section.add "api-version", valid_568287
-  var valid_568288 = query.getOrDefault("$top")
-  valid_568288 = validateParameter(valid_568288, JInt, required = false, default = nil)
-  if valid_568288 != nil:
-    section.add "$top", valid_568288
-  var valid_568289 = query.getOrDefault("$filter")
-  valid_568289 = validateParameter(valid_568289, JString, required = false,
+  if valid_564188 != nil:
+    section.add "api-version", valid_564188
+  var valid_564189 = query.getOrDefault("$filter")
+  valid_564189 = validateParameter(valid_564189, JString, required = false,
                                  default = nil)
-  if valid_568289 != nil:
-    section.add "$filter", valid_568289
+  if valid_564189 != nil:
+    section.add "$filter", valid_564189
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -905,48 +915,48 @@ proc validate_RemediationsListForSubscription_568284(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568290: Call_RemediationsListForSubscription_568283;
+proc call*(call_564190: Call_RemediationsListForSubscription_564183;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Gets all remediations for the subscription.
   ## 
-  let valid = call_568290.validator(path, query, header, formData, body)
-  let scheme = call_568290.pickScheme
+  let valid = call_564190.validator(path, query, header, formData, body)
+  let scheme = call_564190.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568290.url(scheme.get, call_568290.host, call_568290.base,
-                         call_568290.route, valid.getOrDefault("path"),
+  let url = call_564190.url(scheme.get, call_564190.host, call_564190.base,
+                         call_564190.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568290, url, valid)
+  result = hook(call_564190, url, valid)
 
-proc call*(call_568291: Call_RemediationsListForSubscription_568283;
+proc call*(call_564191: Call_RemediationsListForSubscription_564183;
           apiVersion: string; subscriptionId: string; Top: int = 0; Filter: string = ""): Recallable =
   ## remediationsListForSubscription
   ## Gets all remediations for the subscription.
+  ##   Top: int
+  ##      : Maximum number of records to return.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
   ##   subscriptionId: string (required)
   ##                 : Microsoft Azure subscription ID.
-  ##   Top: int
-  ##      : Maximum number of records to return.
   ##   Filter: string
   ##         : OData filter expression.
-  var path_568292 = newJObject()
-  var query_568293 = newJObject()
-  add(query_568293, "api-version", newJString(apiVersion))
-  add(path_568292, "subscriptionId", newJString(subscriptionId))
-  add(query_568293, "$top", newJInt(Top))
-  add(query_568293, "$filter", newJString(Filter))
-  result = call_568291.call(path_568292, query_568293, nil, nil, nil)
+  var path_564192 = newJObject()
+  var query_564193 = newJObject()
+  add(query_564193, "$top", newJInt(Top))
+  add(query_564193, "api-version", newJString(apiVersion))
+  add(path_564192, "subscriptionId", newJString(subscriptionId))
+  add(query_564193, "$filter", newJString(Filter))
+  result = call_564191.call(path_564192, query_564193, nil, nil, nil)
 
-var remediationsListForSubscription* = Call_RemediationsListForSubscription_568283(
+var remediationsListForSubscription* = Call_RemediationsListForSubscription_564183(
     name: "remediationsListForSubscription", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.PolicyInsights/remediations",
-    validator: validate_RemediationsListForSubscription_568284, base: "",
-    url: url_RemediationsListForSubscription_568285, schemes: {Scheme.Https})
+    validator: validate_RemediationsListForSubscription_564184, base: "",
+    url: url_RemediationsListForSubscription_564185, schemes: {Scheme.Https})
 type
-  Call_RemediationsCreateOrUpdateAtSubscription_568304 = ref object of OpenApiRestCall_567657
-proc url_RemediationsCreateOrUpdateAtSubscription_568306(protocol: Scheme;
+  Call_RemediationsCreateOrUpdateAtSubscription_564204 = ref object of OpenApiRestCall_563555
+proc url_RemediationsCreateOrUpdateAtSubscription_564206(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -965,7 +975,7 @@ proc url_RemediationsCreateOrUpdateAtSubscription_568306(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_RemediationsCreateOrUpdateAtSubscription_568305(path: JsonNode;
+proc validate_RemediationsCreateOrUpdateAtSubscription_564205(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Creates or updates a remediation at subscription scope.
   ## 
@@ -979,16 +989,16 @@ proc validate_RemediationsCreateOrUpdateAtSubscription_568305(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_568307 = path.getOrDefault("subscriptionId")
-  valid_568307 = validateParameter(valid_568307, JString, required = true,
+  var valid_564207 = path.getOrDefault("subscriptionId")
+  valid_564207 = validateParameter(valid_564207, JString, required = true,
                                  default = nil)
-  if valid_568307 != nil:
-    section.add "subscriptionId", valid_568307
-  var valid_568308 = path.getOrDefault("remediationName")
-  valid_568308 = validateParameter(valid_568308, JString, required = true,
+  if valid_564207 != nil:
+    section.add "subscriptionId", valid_564207
+  var valid_564208 = path.getOrDefault("remediationName")
+  valid_564208 = validateParameter(valid_564208, JString, required = true,
                                  default = nil)
-  if valid_568308 != nil:
-    section.add "remediationName", valid_568308
+  if valid_564208 != nil:
+    section.add "remediationName", valid_564208
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -996,11 +1006,11 @@ proc validate_RemediationsCreateOrUpdateAtSubscription_568305(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568309 = query.getOrDefault("api-version")
-  valid_568309 = validateParameter(valid_568309, JString, required = true,
+  var valid_564209 = query.getOrDefault("api-version")
+  valid_564209 = validateParameter(valid_564209, JString, required = true,
                                  default = nil)
-  if valid_568309 != nil:
-    section.add "api-version", valid_568309
+  if valid_564209 != nil:
+    section.add "api-version", valid_564209
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1014,21 +1024,21 @@ proc validate_RemediationsCreateOrUpdateAtSubscription_568305(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568311: Call_RemediationsCreateOrUpdateAtSubscription_568304;
+proc call*(call_564211: Call_RemediationsCreateOrUpdateAtSubscription_564204;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Creates or updates a remediation at subscription scope.
   ## 
-  let valid = call_568311.validator(path, query, header, formData, body)
-  let scheme = call_568311.pickScheme
+  let valid = call_564211.validator(path, query, header, formData, body)
+  let scheme = call_564211.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568311.url(scheme.get, call_568311.host, call_568311.base,
-                         call_568311.route, valid.getOrDefault("path"),
+  let url = call_564211.url(scheme.get, call_564211.host, call_564211.base,
+                         call_564211.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568311, url, valid)
+  result = hook(call_564211, url, valid)
 
-proc call*(call_568312: Call_RemediationsCreateOrUpdateAtSubscription_568304;
+proc call*(call_564212: Call_RemediationsCreateOrUpdateAtSubscription_564204;
           apiVersion: string; subscriptionId: string; parameters: JsonNode;
           remediationName: string): Recallable =
   ## remediationsCreateOrUpdateAtSubscription
@@ -1041,25 +1051,25 @@ proc call*(call_568312: Call_RemediationsCreateOrUpdateAtSubscription_568304;
   ##             : The remediation parameters.
   ##   remediationName: string (required)
   ##                  : The name of the remediation.
-  var path_568313 = newJObject()
-  var query_568314 = newJObject()
-  var body_568315 = newJObject()
-  add(query_568314, "api-version", newJString(apiVersion))
-  add(path_568313, "subscriptionId", newJString(subscriptionId))
+  var path_564213 = newJObject()
+  var query_564214 = newJObject()
+  var body_564215 = newJObject()
+  add(query_564214, "api-version", newJString(apiVersion))
+  add(path_564213, "subscriptionId", newJString(subscriptionId))
   if parameters != nil:
-    body_568315 = parameters
-  add(path_568313, "remediationName", newJString(remediationName))
-  result = call_568312.call(path_568313, query_568314, nil, nil, body_568315)
+    body_564215 = parameters
+  add(path_564213, "remediationName", newJString(remediationName))
+  result = call_564212.call(path_564213, query_564214, nil, nil, body_564215)
 
-var remediationsCreateOrUpdateAtSubscription* = Call_RemediationsCreateOrUpdateAtSubscription_568304(
+var remediationsCreateOrUpdateAtSubscription* = Call_RemediationsCreateOrUpdateAtSubscription_564204(
     name: "remediationsCreateOrUpdateAtSubscription", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.PolicyInsights/remediations/{remediationName}",
-    validator: validate_RemediationsCreateOrUpdateAtSubscription_568305, base: "",
-    url: url_RemediationsCreateOrUpdateAtSubscription_568306,
+    validator: validate_RemediationsCreateOrUpdateAtSubscription_564205, base: "",
+    url: url_RemediationsCreateOrUpdateAtSubscription_564206,
     schemes: {Scheme.Https})
 type
-  Call_RemediationsGetAtSubscription_568294 = ref object of OpenApiRestCall_567657
-proc url_RemediationsGetAtSubscription_568296(protocol: Scheme; host: string;
+  Call_RemediationsGetAtSubscription_564194 = ref object of OpenApiRestCall_563555
+proc url_RemediationsGetAtSubscription_564196(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1078,7 +1088,7 @@ proc url_RemediationsGetAtSubscription_568296(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_RemediationsGetAtSubscription_568295(path: JsonNode; query: JsonNode;
+proc validate_RemediationsGetAtSubscription_564195(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets an existing remediation at subscription scope.
   ## 
@@ -1092,16 +1102,16 @@ proc validate_RemediationsGetAtSubscription_568295(path: JsonNode; query: JsonNo
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_568297 = path.getOrDefault("subscriptionId")
-  valid_568297 = validateParameter(valid_568297, JString, required = true,
+  var valid_564197 = path.getOrDefault("subscriptionId")
+  valid_564197 = validateParameter(valid_564197, JString, required = true,
                                  default = nil)
-  if valid_568297 != nil:
-    section.add "subscriptionId", valid_568297
-  var valid_568298 = path.getOrDefault("remediationName")
-  valid_568298 = validateParameter(valid_568298, JString, required = true,
+  if valid_564197 != nil:
+    section.add "subscriptionId", valid_564197
+  var valid_564198 = path.getOrDefault("remediationName")
+  valid_564198 = validateParameter(valid_564198, JString, required = true,
                                  default = nil)
-  if valid_568298 != nil:
-    section.add "remediationName", valid_568298
+  if valid_564198 != nil:
+    section.add "remediationName", valid_564198
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1109,11 +1119,11 @@ proc validate_RemediationsGetAtSubscription_568295(path: JsonNode; query: JsonNo
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568299 = query.getOrDefault("api-version")
-  valid_568299 = validateParameter(valid_568299, JString, required = true,
+  var valid_564199 = query.getOrDefault("api-version")
+  valid_564199 = validateParameter(valid_564199, JString, required = true,
                                  default = nil)
-  if valid_568299 != nil:
-    section.add "api-version", valid_568299
+  if valid_564199 != nil:
+    section.add "api-version", valid_564199
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1122,20 +1132,20 @@ proc validate_RemediationsGetAtSubscription_568295(path: JsonNode; query: JsonNo
   if body != nil:
     result.add "body", body
 
-proc call*(call_568300: Call_RemediationsGetAtSubscription_568294; path: JsonNode;
+proc call*(call_564200: Call_RemediationsGetAtSubscription_564194; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets an existing remediation at subscription scope.
   ## 
-  let valid = call_568300.validator(path, query, header, formData, body)
-  let scheme = call_568300.pickScheme
+  let valid = call_564200.validator(path, query, header, formData, body)
+  let scheme = call_564200.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568300.url(scheme.get, call_568300.host, call_568300.base,
-                         call_568300.route, valid.getOrDefault("path"),
+  let url = call_564200.url(scheme.get, call_564200.host, call_564200.base,
+                         call_564200.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568300, url, valid)
+  result = hook(call_564200, url, valid)
 
-proc call*(call_568301: Call_RemediationsGetAtSubscription_568294;
+proc call*(call_564201: Call_RemediationsGetAtSubscription_564194;
           apiVersion: string; subscriptionId: string; remediationName: string): Recallable =
   ## remediationsGetAtSubscription
   ## Gets an existing remediation at subscription scope.
@@ -1145,21 +1155,21 @@ proc call*(call_568301: Call_RemediationsGetAtSubscription_568294;
   ##                 : Microsoft Azure subscription ID.
   ##   remediationName: string (required)
   ##                  : The name of the remediation.
-  var path_568302 = newJObject()
-  var query_568303 = newJObject()
-  add(query_568303, "api-version", newJString(apiVersion))
-  add(path_568302, "subscriptionId", newJString(subscriptionId))
-  add(path_568302, "remediationName", newJString(remediationName))
-  result = call_568301.call(path_568302, query_568303, nil, nil, nil)
+  var path_564202 = newJObject()
+  var query_564203 = newJObject()
+  add(query_564203, "api-version", newJString(apiVersion))
+  add(path_564202, "subscriptionId", newJString(subscriptionId))
+  add(path_564202, "remediationName", newJString(remediationName))
+  result = call_564201.call(path_564202, query_564203, nil, nil, nil)
 
-var remediationsGetAtSubscription* = Call_RemediationsGetAtSubscription_568294(
+var remediationsGetAtSubscription* = Call_RemediationsGetAtSubscription_564194(
     name: "remediationsGetAtSubscription", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.PolicyInsights/remediations/{remediationName}",
-    validator: validate_RemediationsGetAtSubscription_568295, base: "",
-    url: url_RemediationsGetAtSubscription_568296, schemes: {Scheme.Https})
+    validator: validate_RemediationsGetAtSubscription_564195, base: "",
+    url: url_RemediationsGetAtSubscription_564196, schemes: {Scheme.Https})
 type
-  Call_RemediationsDeleteAtSubscription_568316 = ref object of OpenApiRestCall_567657
-proc url_RemediationsDeleteAtSubscription_568318(protocol: Scheme; host: string;
+  Call_RemediationsDeleteAtSubscription_564216 = ref object of OpenApiRestCall_563555
+proc url_RemediationsDeleteAtSubscription_564218(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1178,7 +1188,7 @@ proc url_RemediationsDeleteAtSubscription_568318(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_RemediationsDeleteAtSubscription_568317(path: JsonNode;
+proc validate_RemediationsDeleteAtSubscription_564217(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Deletes an existing remediation at subscription scope.
   ## 
@@ -1192,16 +1202,16 @@ proc validate_RemediationsDeleteAtSubscription_568317(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_568319 = path.getOrDefault("subscriptionId")
-  valid_568319 = validateParameter(valid_568319, JString, required = true,
+  var valid_564219 = path.getOrDefault("subscriptionId")
+  valid_564219 = validateParameter(valid_564219, JString, required = true,
                                  default = nil)
-  if valid_568319 != nil:
-    section.add "subscriptionId", valid_568319
-  var valid_568320 = path.getOrDefault("remediationName")
-  valid_568320 = validateParameter(valid_568320, JString, required = true,
+  if valid_564219 != nil:
+    section.add "subscriptionId", valid_564219
+  var valid_564220 = path.getOrDefault("remediationName")
+  valid_564220 = validateParameter(valid_564220, JString, required = true,
                                  default = nil)
-  if valid_568320 != nil:
-    section.add "remediationName", valid_568320
+  if valid_564220 != nil:
+    section.add "remediationName", valid_564220
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1209,11 +1219,11 @@ proc validate_RemediationsDeleteAtSubscription_568317(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568321 = query.getOrDefault("api-version")
-  valid_568321 = validateParameter(valid_568321, JString, required = true,
+  var valid_564221 = query.getOrDefault("api-version")
+  valid_564221 = validateParameter(valid_564221, JString, required = true,
                                  default = nil)
-  if valid_568321 != nil:
-    section.add "api-version", valid_568321
+  if valid_564221 != nil:
+    section.add "api-version", valid_564221
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1222,21 +1232,21 @@ proc validate_RemediationsDeleteAtSubscription_568317(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568322: Call_RemediationsDeleteAtSubscription_568316;
+proc call*(call_564222: Call_RemediationsDeleteAtSubscription_564216;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Deletes an existing remediation at subscription scope.
   ## 
-  let valid = call_568322.validator(path, query, header, formData, body)
-  let scheme = call_568322.pickScheme
+  let valid = call_564222.validator(path, query, header, formData, body)
+  let scheme = call_564222.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568322.url(scheme.get, call_568322.host, call_568322.base,
-                         call_568322.route, valid.getOrDefault("path"),
+  let url = call_564222.url(scheme.get, call_564222.host, call_564222.base,
+                         call_564222.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568322, url, valid)
+  result = hook(call_564222, url, valid)
 
-proc call*(call_568323: Call_RemediationsDeleteAtSubscription_568316;
+proc call*(call_564223: Call_RemediationsDeleteAtSubscription_564216;
           apiVersion: string; subscriptionId: string; remediationName: string): Recallable =
   ## remediationsDeleteAtSubscription
   ## Deletes an existing remediation at subscription scope.
@@ -1246,21 +1256,21 @@ proc call*(call_568323: Call_RemediationsDeleteAtSubscription_568316;
   ##                 : Microsoft Azure subscription ID.
   ##   remediationName: string (required)
   ##                  : The name of the remediation.
-  var path_568324 = newJObject()
-  var query_568325 = newJObject()
-  add(query_568325, "api-version", newJString(apiVersion))
-  add(path_568324, "subscriptionId", newJString(subscriptionId))
-  add(path_568324, "remediationName", newJString(remediationName))
-  result = call_568323.call(path_568324, query_568325, nil, nil, nil)
+  var path_564224 = newJObject()
+  var query_564225 = newJObject()
+  add(query_564225, "api-version", newJString(apiVersion))
+  add(path_564224, "subscriptionId", newJString(subscriptionId))
+  add(path_564224, "remediationName", newJString(remediationName))
+  result = call_564223.call(path_564224, query_564225, nil, nil, nil)
 
-var remediationsDeleteAtSubscription* = Call_RemediationsDeleteAtSubscription_568316(
+var remediationsDeleteAtSubscription* = Call_RemediationsDeleteAtSubscription_564216(
     name: "remediationsDeleteAtSubscription", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.PolicyInsights/remediations/{remediationName}",
-    validator: validate_RemediationsDeleteAtSubscription_568317, base: "",
-    url: url_RemediationsDeleteAtSubscription_568318, schemes: {Scheme.Https})
+    validator: validate_RemediationsDeleteAtSubscription_564217, base: "",
+    url: url_RemediationsDeleteAtSubscription_564218, schemes: {Scheme.Https})
 type
-  Call_RemediationsCancelAtSubscription_568326 = ref object of OpenApiRestCall_567657
-proc url_RemediationsCancelAtSubscription_568328(protocol: Scheme; host: string;
+  Call_RemediationsCancelAtSubscription_564226 = ref object of OpenApiRestCall_563555
+proc url_RemediationsCancelAtSubscription_564228(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1280,7 +1290,7 @@ proc url_RemediationsCancelAtSubscription_568328(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_RemediationsCancelAtSubscription_568327(path: JsonNode;
+proc validate_RemediationsCancelAtSubscription_564227(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Cancels a remediation at subscription scope.
   ## 
@@ -1294,16 +1304,16 @@ proc validate_RemediationsCancelAtSubscription_568327(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_568329 = path.getOrDefault("subscriptionId")
-  valid_568329 = validateParameter(valid_568329, JString, required = true,
+  var valid_564229 = path.getOrDefault("subscriptionId")
+  valid_564229 = validateParameter(valid_564229, JString, required = true,
                                  default = nil)
-  if valid_568329 != nil:
-    section.add "subscriptionId", valid_568329
-  var valid_568330 = path.getOrDefault("remediationName")
-  valid_568330 = validateParameter(valid_568330, JString, required = true,
+  if valid_564229 != nil:
+    section.add "subscriptionId", valid_564229
+  var valid_564230 = path.getOrDefault("remediationName")
+  valid_564230 = validateParameter(valid_564230, JString, required = true,
                                  default = nil)
-  if valid_568330 != nil:
-    section.add "remediationName", valid_568330
+  if valid_564230 != nil:
+    section.add "remediationName", valid_564230
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1311,11 +1321,11 @@ proc validate_RemediationsCancelAtSubscription_568327(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568331 = query.getOrDefault("api-version")
-  valid_568331 = validateParameter(valid_568331, JString, required = true,
+  var valid_564231 = query.getOrDefault("api-version")
+  valid_564231 = validateParameter(valid_564231, JString, required = true,
                                  default = nil)
-  if valid_568331 != nil:
-    section.add "api-version", valid_568331
+  if valid_564231 != nil:
+    section.add "api-version", valid_564231
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1324,21 +1334,21 @@ proc validate_RemediationsCancelAtSubscription_568327(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568332: Call_RemediationsCancelAtSubscription_568326;
+proc call*(call_564232: Call_RemediationsCancelAtSubscription_564226;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Cancels a remediation at subscription scope.
   ## 
-  let valid = call_568332.validator(path, query, header, formData, body)
-  let scheme = call_568332.pickScheme
+  let valid = call_564232.validator(path, query, header, formData, body)
+  let scheme = call_564232.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568332.url(scheme.get, call_568332.host, call_568332.base,
-                         call_568332.route, valid.getOrDefault("path"),
+  let url = call_564232.url(scheme.get, call_564232.host, call_564232.base,
+                         call_564232.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568332, url, valid)
+  result = hook(call_564232, url, valid)
 
-proc call*(call_568333: Call_RemediationsCancelAtSubscription_568326;
+proc call*(call_564233: Call_RemediationsCancelAtSubscription_564226;
           apiVersion: string; subscriptionId: string; remediationName: string): Recallable =
   ## remediationsCancelAtSubscription
   ## Cancels a remediation at subscription scope.
@@ -1348,21 +1358,21 @@ proc call*(call_568333: Call_RemediationsCancelAtSubscription_568326;
   ##                 : Microsoft Azure subscription ID.
   ##   remediationName: string (required)
   ##                  : The name of the remediation.
-  var path_568334 = newJObject()
-  var query_568335 = newJObject()
-  add(query_568335, "api-version", newJString(apiVersion))
-  add(path_568334, "subscriptionId", newJString(subscriptionId))
-  add(path_568334, "remediationName", newJString(remediationName))
-  result = call_568333.call(path_568334, query_568335, nil, nil, nil)
+  var path_564234 = newJObject()
+  var query_564235 = newJObject()
+  add(query_564235, "api-version", newJString(apiVersion))
+  add(path_564234, "subscriptionId", newJString(subscriptionId))
+  add(path_564234, "remediationName", newJString(remediationName))
+  result = call_564233.call(path_564234, query_564235, nil, nil, nil)
 
-var remediationsCancelAtSubscription* = Call_RemediationsCancelAtSubscription_568326(
+var remediationsCancelAtSubscription* = Call_RemediationsCancelAtSubscription_564226(
     name: "remediationsCancelAtSubscription", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.PolicyInsights/remediations/{remediationName}/cancel",
-    validator: validate_RemediationsCancelAtSubscription_568327, base: "",
-    url: url_RemediationsCancelAtSubscription_568328, schemes: {Scheme.Https})
+    validator: validate_RemediationsCancelAtSubscription_564227, base: "",
+    url: url_RemediationsCancelAtSubscription_564228, schemes: {Scheme.Https})
 type
-  Call_RemediationsListDeploymentsAtSubscription_568336 = ref object of OpenApiRestCall_567657
-proc url_RemediationsListDeploymentsAtSubscription_568338(protocol: Scheme;
+  Call_RemediationsListDeploymentsAtSubscription_564236 = ref object of OpenApiRestCall_563555
+proc url_RemediationsListDeploymentsAtSubscription_564238(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1382,7 +1392,7 @@ proc url_RemediationsListDeploymentsAtSubscription_568338(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_RemediationsListDeploymentsAtSubscription_568337(path: JsonNode;
+proc validate_RemediationsListDeploymentsAtSubscription_564237(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets all deployments for a remediation at subscription scope.
   ## 
@@ -1396,34 +1406,34 @@ proc validate_RemediationsListDeploymentsAtSubscription_568337(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_568339 = path.getOrDefault("subscriptionId")
-  valid_568339 = validateParameter(valid_568339, JString, required = true,
+  var valid_564239 = path.getOrDefault("subscriptionId")
+  valid_564239 = validateParameter(valid_564239, JString, required = true,
                                  default = nil)
-  if valid_568339 != nil:
-    section.add "subscriptionId", valid_568339
-  var valid_568340 = path.getOrDefault("remediationName")
-  valid_568340 = validateParameter(valid_568340, JString, required = true,
+  if valid_564239 != nil:
+    section.add "subscriptionId", valid_564239
+  var valid_564240 = path.getOrDefault("remediationName")
+  valid_564240 = validateParameter(valid_564240, JString, required = true,
                                  default = nil)
-  if valid_568340 != nil:
-    section.add "remediationName", valid_568340
+  if valid_564240 != nil:
+    section.add "remediationName", valid_564240
   result.add "path", section
   ## parameters in `query` object:
-  ##   api-version: JString (required)
-  ##              : Client Api Version.
   ##   $top: JInt
   ##       : Maximum number of records to return.
+  ##   api-version: JString (required)
+  ##              : Client Api Version.
   section = newJObject()
+  var valid_564241 = query.getOrDefault("$top")
+  valid_564241 = validateParameter(valid_564241, JInt, required = false, default = nil)
+  if valid_564241 != nil:
+    section.add "$top", valid_564241
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568341 = query.getOrDefault("api-version")
-  valid_568341 = validateParameter(valid_568341, JString, required = true,
+  var valid_564242 = query.getOrDefault("api-version")
+  valid_564242 = validateParameter(valid_564242, JString, required = true,
                                  default = nil)
-  if valid_568341 != nil:
-    section.add "api-version", valid_568341
-  var valid_568342 = query.getOrDefault("$top")
-  valid_568342 = validateParameter(valid_568342, JInt, required = false, default = nil)
-  if valid_568342 != nil:
-    section.add "$top", valid_568342
+  if valid_564242 != nil:
+    section.add "api-version", valid_564242
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1432,50 +1442,50 @@ proc validate_RemediationsListDeploymentsAtSubscription_568337(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568343: Call_RemediationsListDeploymentsAtSubscription_568336;
+proc call*(call_564243: Call_RemediationsListDeploymentsAtSubscription_564236;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Gets all deployments for a remediation at subscription scope.
   ## 
-  let valid = call_568343.validator(path, query, header, formData, body)
-  let scheme = call_568343.pickScheme
+  let valid = call_564243.validator(path, query, header, formData, body)
+  let scheme = call_564243.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568343.url(scheme.get, call_568343.host, call_568343.base,
-                         call_568343.route, valid.getOrDefault("path"),
+  let url = call_564243.url(scheme.get, call_564243.host, call_564243.base,
+                         call_564243.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568343, url, valid)
+  result = hook(call_564243, url, valid)
 
-proc call*(call_568344: Call_RemediationsListDeploymentsAtSubscription_568336;
+proc call*(call_564244: Call_RemediationsListDeploymentsAtSubscription_564236;
           apiVersion: string; subscriptionId: string; remediationName: string;
           Top: int = 0): Recallable =
   ## remediationsListDeploymentsAtSubscription
   ## Gets all deployments for a remediation at subscription scope.
+  ##   Top: int
+  ##      : Maximum number of records to return.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
   ##   subscriptionId: string (required)
   ##                 : Microsoft Azure subscription ID.
-  ##   Top: int
-  ##      : Maximum number of records to return.
   ##   remediationName: string (required)
   ##                  : The name of the remediation.
-  var path_568345 = newJObject()
-  var query_568346 = newJObject()
-  add(query_568346, "api-version", newJString(apiVersion))
-  add(path_568345, "subscriptionId", newJString(subscriptionId))
-  add(query_568346, "$top", newJInt(Top))
-  add(path_568345, "remediationName", newJString(remediationName))
-  result = call_568344.call(path_568345, query_568346, nil, nil, nil)
+  var path_564245 = newJObject()
+  var query_564246 = newJObject()
+  add(query_564246, "$top", newJInt(Top))
+  add(query_564246, "api-version", newJString(apiVersion))
+  add(path_564245, "subscriptionId", newJString(subscriptionId))
+  add(path_564245, "remediationName", newJString(remediationName))
+  result = call_564244.call(path_564245, query_564246, nil, nil, nil)
 
-var remediationsListDeploymentsAtSubscription* = Call_RemediationsListDeploymentsAtSubscription_568336(
+var remediationsListDeploymentsAtSubscription* = Call_RemediationsListDeploymentsAtSubscription_564236(
     name: "remediationsListDeploymentsAtSubscription", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.PolicyInsights/remediations/{remediationName}/listDeployments",
-    validator: validate_RemediationsListDeploymentsAtSubscription_568337,
-    base: "", url: url_RemediationsListDeploymentsAtSubscription_568338,
+    validator: validate_RemediationsListDeploymentsAtSubscription_564237,
+    base: "", url: url_RemediationsListDeploymentsAtSubscription_564238,
     schemes: {Scheme.Https})
 type
-  Call_RemediationsListForResourceGroup_568347 = ref object of OpenApiRestCall_567657
-proc url_RemediationsListForResourceGroup_568349(protocol: Scheme; host: string;
+  Call_RemediationsListForResourceGroup_564247 = ref object of OpenApiRestCall_563555
+proc url_RemediationsListForResourceGroup_564249(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1496,55 +1506,55 @@ proc url_RemediationsListForResourceGroup_568349(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_RemediationsListForResourceGroup_568348(path: JsonNode;
+proc validate_RemediationsListForResourceGroup_564248(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets all remediations for the subscription.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : Resource group name.
   ##   subscriptionId: JString (required)
   ##                 : Microsoft Azure subscription ID.
+  ##   resourceGroupName: JString (required)
+  ##                    : Resource group name.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568350 = path.getOrDefault("resourceGroupName")
-  valid_568350 = validateParameter(valid_568350, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564250 = path.getOrDefault("subscriptionId")
+  valid_564250 = validateParameter(valid_564250, JString, required = true,
                                  default = nil)
-  if valid_568350 != nil:
-    section.add "resourceGroupName", valid_568350
-  var valid_568351 = path.getOrDefault("subscriptionId")
-  valid_568351 = validateParameter(valid_568351, JString, required = true,
+  if valid_564250 != nil:
+    section.add "subscriptionId", valid_564250
+  var valid_564251 = path.getOrDefault("resourceGroupName")
+  valid_564251 = validateParameter(valid_564251, JString, required = true,
                                  default = nil)
-  if valid_568351 != nil:
-    section.add "subscriptionId", valid_568351
+  if valid_564251 != nil:
+    section.add "resourceGroupName", valid_564251
   result.add "path", section
   ## parameters in `query` object:
-  ##   api-version: JString (required)
-  ##              : Client Api Version.
   ##   $top: JInt
   ##       : Maximum number of records to return.
+  ##   api-version: JString (required)
+  ##              : Client Api Version.
   ##   $filter: JString
   ##          : OData filter expression.
   section = newJObject()
+  var valid_564252 = query.getOrDefault("$top")
+  valid_564252 = validateParameter(valid_564252, JInt, required = false, default = nil)
+  if valid_564252 != nil:
+    section.add "$top", valid_564252
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568352 = query.getOrDefault("api-version")
-  valid_568352 = validateParameter(valid_568352, JString, required = true,
+  var valid_564253 = query.getOrDefault("api-version")
+  valid_564253 = validateParameter(valid_564253, JString, required = true,
                                  default = nil)
-  if valid_568352 != nil:
-    section.add "api-version", valid_568352
-  var valid_568353 = query.getOrDefault("$top")
-  valid_568353 = validateParameter(valid_568353, JInt, required = false, default = nil)
-  if valid_568353 != nil:
-    section.add "$top", valid_568353
-  var valid_568354 = query.getOrDefault("$filter")
-  valid_568354 = validateParameter(valid_568354, JString, required = false,
+  if valid_564253 != nil:
+    section.add "api-version", valid_564253
+  var valid_564254 = query.getOrDefault("$filter")
+  valid_564254 = validateParameter(valid_564254, JString, required = false,
                                  default = nil)
-  if valid_568354 != nil:
-    section.add "$filter", valid_568354
+  if valid_564254 != nil:
+    section.add "$filter", valid_564254
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1553,52 +1563,52 @@ proc validate_RemediationsListForResourceGroup_568348(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568355: Call_RemediationsListForResourceGroup_568347;
+proc call*(call_564255: Call_RemediationsListForResourceGroup_564247;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Gets all remediations for the subscription.
   ## 
-  let valid = call_568355.validator(path, query, header, formData, body)
-  let scheme = call_568355.pickScheme
+  let valid = call_564255.validator(path, query, header, formData, body)
+  let scheme = call_564255.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568355.url(scheme.get, call_568355.host, call_568355.base,
-                         call_568355.route, valid.getOrDefault("path"),
+  let url = call_564255.url(scheme.get, call_564255.host, call_564255.base,
+                         call_564255.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568355, url, valid)
+  result = hook(call_564255, url, valid)
 
-proc call*(call_568356: Call_RemediationsListForResourceGroup_568347;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
+proc call*(call_564256: Call_RemediationsListForResourceGroup_564247;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string;
           Top: int = 0; Filter: string = ""): Recallable =
   ## remediationsListForResourceGroup
   ## Gets all remediations for the subscription.
-  ##   resourceGroupName: string (required)
-  ##                    : Resource group name.
+  ##   Top: int
+  ##      : Maximum number of records to return.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
   ##   subscriptionId: string (required)
   ##                 : Microsoft Azure subscription ID.
-  ##   Top: int
-  ##      : Maximum number of records to return.
+  ##   resourceGroupName: string (required)
+  ##                    : Resource group name.
   ##   Filter: string
   ##         : OData filter expression.
-  var path_568357 = newJObject()
-  var query_568358 = newJObject()
-  add(path_568357, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568358, "api-version", newJString(apiVersion))
-  add(path_568357, "subscriptionId", newJString(subscriptionId))
-  add(query_568358, "$top", newJInt(Top))
-  add(query_568358, "$filter", newJString(Filter))
-  result = call_568356.call(path_568357, query_568358, nil, nil, nil)
+  var path_564257 = newJObject()
+  var query_564258 = newJObject()
+  add(query_564258, "$top", newJInt(Top))
+  add(query_564258, "api-version", newJString(apiVersion))
+  add(path_564257, "subscriptionId", newJString(subscriptionId))
+  add(path_564257, "resourceGroupName", newJString(resourceGroupName))
+  add(query_564258, "$filter", newJString(Filter))
+  result = call_564256.call(path_564257, query_564258, nil, nil, nil)
 
-var remediationsListForResourceGroup* = Call_RemediationsListForResourceGroup_568347(
+var remediationsListForResourceGroup* = Call_RemediationsListForResourceGroup_564247(
     name: "remediationsListForResourceGroup", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.PolicyInsights/remediations",
-    validator: validate_RemediationsListForResourceGroup_568348, base: "",
-    url: url_RemediationsListForResourceGroup_568349, schemes: {Scheme.Https})
+    validator: validate_RemediationsListForResourceGroup_564248, base: "",
+    url: url_RemediationsListForResourceGroup_564249, schemes: {Scheme.Https})
 type
-  Call_RemediationsCreateOrUpdateAtResourceGroup_568370 = ref object of OpenApiRestCall_567657
-proc url_RemediationsCreateOrUpdateAtResourceGroup_568372(protocol: Scheme;
+  Call_RemediationsCreateOrUpdateAtResourceGroup_564270 = ref object of OpenApiRestCall_563555
+proc url_RemediationsCreateOrUpdateAtResourceGroup_564272(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1621,37 +1631,37 @@ proc url_RemediationsCreateOrUpdateAtResourceGroup_568372(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_RemediationsCreateOrUpdateAtResourceGroup_568371(path: JsonNode;
+proc validate_RemediationsCreateOrUpdateAtResourceGroup_564271(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Creates or updates a remediation at resource group scope.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : Resource group name.
   ##   subscriptionId: JString (required)
   ##                 : Microsoft Azure subscription ID.
+  ##   resourceGroupName: JString (required)
+  ##                    : Resource group name.
   ##   remediationName: JString (required)
   ##                  : The name of the remediation.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568373 = path.getOrDefault("resourceGroupName")
-  valid_568373 = validateParameter(valid_568373, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564273 = path.getOrDefault("subscriptionId")
+  valid_564273 = validateParameter(valid_564273, JString, required = true,
                                  default = nil)
-  if valid_568373 != nil:
-    section.add "resourceGroupName", valid_568373
-  var valid_568374 = path.getOrDefault("subscriptionId")
-  valid_568374 = validateParameter(valid_568374, JString, required = true,
+  if valid_564273 != nil:
+    section.add "subscriptionId", valid_564273
+  var valid_564274 = path.getOrDefault("resourceGroupName")
+  valid_564274 = validateParameter(valid_564274, JString, required = true,
                                  default = nil)
-  if valid_568374 != nil:
-    section.add "subscriptionId", valid_568374
-  var valid_568375 = path.getOrDefault("remediationName")
-  valid_568375 = validateParameter(valid_568375, JString, required = true,
+  if valid_564274 != nil:
+    section.add "resourceGroupName", valid_564274
+  var valid_564275 = path.getOrDefault("remediationName")
+  valid_564275 = validateParameter(valid_564275, JString, required = true,
                                  default = nil)
-  if valid_568375 != nil:
-    section.add "remediationName", valid_568375
+  if valid_564275 != nil:
+    section.add "remediationName", valid_564275
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1659,11 +1669,11 @@ proc validate_RemediationsCreateOrUpdateAtResourceGroup_568371(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568376 = query.getOrDefault("api-version")
-  valid_568376 = validateParameter(valid_568376, JString, required = true,
+  var valid_564276 = query.getOrDefault("api-version")
+  valid_564276 = validateParameter(valid_564276, JString, required = true,
                                  default = nil)
-  if valid_568376 != nil:
-    section.add "api-version", valid_568376
+  if valid_564276 != nil:
+    section.add "api-version", valid_564276
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1677,55 +1687,55 @@ proc validate_RemediationsCreateOrUpdateAtResourceGroup_568371(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568378: Call_RemediationsCreateOrUpdateAtResourceGroup_568370;
+proc call*(call_564278: Call_RemediationsCreateOrUpdateAtResourceGroup_564270;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Creates or updates a remediation at resource group scope.
   ## 
-  let valid = call_568378.validator(path, query, header, formData, body)
-  let scheme = call_568378.pickScheme
+  let valid = call_564278.validator(path, query, header, formData, body)
+  let scheme = call_564278.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568378.url(scheme.get, call_568378.host, call_568378.base,
-                         call_568378.route, valid.getOrDefault("path"),
+  let url = call_564278.url(scheme.get, call_564278.host, call_564278.base,
+                         call_564278.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568378, url, valid)
+  result = hook(call_564278, url, valid)
 
-proc call*(call_568379: Call_RemediationsCreateOrUpdateAtResourceGroup_568370;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
+proc call*(call_564279: Call_RemediationsCreateOrUpdateAtResourceGroup_564270;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string;
           parameters: JsonNode; remediationName: string): Recallable =
   ## remediationsCreateOrUpdateAtResourceGroup
   ## Creates or updates a remediation at resource group scope.
-  ##   resourceGroupName: string (required)
-  ##                    : Resource group name.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
   ##   subscriptionId: string (required)
   ##                 : Microsoft Azure subscription ID.
+  ##   resourceGroupName: string (required)
+  ##                    : Resource group name.
   ##   parameters: JObject (required)
   ##             : The remediation parameters.
   ##   remediationName: string (required)
   ##                  : The name of the remediation.
-  var path_568380 = newJObject()
-  var query_568381 = newJObject()
-  var body_568382 = newJObject()
-  add(path_568380, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568381, "api-version", newJString(apiVersion))
-  add(path_568380, "subscriptionId", newJString(subscriptionId))
+  var path_564280 = newJObject()
+  var query_564281 = newJObject()
+  var body_564282 = newJObject()
+  add(query_564281, "api-version", newJString(apiVersion))
+  add(path_564280, "subscriptionId", newJString(subscriptionId))
+  add(path_564280, "resourceGroupName", newJString(resourceGroupName))
   if parameters != nil:
-    body_568382 = parameters
-  add(path_568380, "remediationName", newJString(remediationName))
-  result = call_568379.call(path_568380, query_568381, nil, nil, body_568382)
+    body_564282 = parameters
+  add(path_564280, "remediationName", newJString(remediationName))
+  result = call_564279.call(path_564280, query_564281, nil, nil, body_564282)
 
-var remediationsCreateOrUpdateAtResourceGroup* = Call_RemediationsCreateOrUpdateAtResourceGroup_568370(
+var remediationsCreateOrUpdateAtResourceGroup* = Call_RemediationsCreateOrUpdateAtResourceGroup_564270(
     name: "remediationsCreateOrUpdateAtResourceGroup", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.PolicyInsights/remediations/{remediationName}",
-    validator: validate_RemediationsCreateOrUpdateAtResourceGroup_568371,
-    base: "", url: url_RemediationsCreateOrUpdateAtResourceGroup_568372,
+    validator: validate_RemediationsCreateOrUpdateAtResourceGroup_564271,
+    base: "", url: url_RemediationsCreateOrUpdateAtResourceGroup_564272,
     schemes: {Scheme.Https})
 type
-  Call_RemediationsGetAtResourceGroup_568359 = ref object of OpenApiRestCall_567657
-proc url_RemediationsGetAtResourceGroup_568361(protocol: Scheme; host: string;
+  Call_RemediationsGetAtResourceGroup_564259 = ref object of OpenApiRestCall_563555
+proc url_RemediationsGetAtResourceGroup_564261(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1748,37 +1758,37 @@ proc url_RemediationsGetAtResourceGroup_568361(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_RemediationsGetAtResourceGroup_568360(path: JsonNode;
+proc validate_RemediationsGetAtResourceGroup_564260(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets an existing remediation at resource group scope.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : Resource group name.
   ##   subscriptionId: JString (required)
   ##                 : Microsoft Azure subscription ID.
+  ##   resourceGroupName: JString (required)
+  ##                    : Resource group name.
   ##   remediationName: JString (required)
   ##                  : The name of the remediation.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568362 = path.getOrDefault("resourceGroupName")
-  valid_568362 = validateParameter(valid_568362, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564262 = path.getOrDefault("subscriptionId")
+  valid_564262 = validateParameter(valid_564262, JString, required = true,
                                  default = nil)
-  if valid_568362 != nil:
-    section.add "resourceGroupName", valid_568362
-  var valid_568363 = path.getOrDefault("subscriptionId")
-  valid_568363 = validateParameter(valid_568363, JString, required = true,
+  if valid_564262 != nil:
+    section.add "subscriptionId", valid_564262
+  var valid_564263 = path.getOrDefault("resourceGroupName")
+  valid_564263 = validateParameter(valid_564263, JString, required = true,
                                  default = nil)
-  if valid_568363 != nil:
-    section.add "subscriptionId", valid_568363
-  var valid_568364 = path.getOrDefault("remediationName")
-  valid_568364 = validateParameter(valid_568364, JString, required = true,
+  if valid_564263 != nil:
+    section.add "resourceGroupName", valid_564263
+  var valid_564264 = path.getOrDefault("remediationName")
+  valid_564264 = validateParameter(valid_564264, JString, required = true,
                                  default = nil)
-  if valid_568364 != nil:
-    section.add "remediationName", valid_568364
+  if valid_564264 != nil:
+    section.add "remediationName", valid_564264
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1786,11 +1796,11 @@ proc validate_RemediationsGetAtResourceGroup_568360(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568365 = query.getOrDefault("api-version")
-  valid_568365 = validateParameter(valid_568365, JString, required = true,
+  var valid_564265 = query.getOrDefault("api-version")
+  valid_564265 = validateParameter(valid_564265, JString, required = true,
                                  default = nil)
-  if valid_568365 != nil:
-    section.add "api-version", valid_568365
+  if valid_564265 != nil:
+    section.add "api-version", valid_564265
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1799,48 +1809,48 @@ proc validate_RemediationsGetAtResourceGroup_568360(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568366: Call_RemediationsGetAtResourceGroup_568359; path: JsonNode;
+proc call*(call_564266: Call_RemediationsGetAtResourceGroup_564259; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets an existing remediation at resource group scope.
   ## 
-  let valid = call_568366.validator(path, query, header, formData, body)
-  let scheme = call_568366.pickScheme
+  let valid = call_564266.validator(path, query, header, formData, body)
+  let scheme = call_564266.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568366.url(scheme.get, call_568366.host, call_568366.base,
-                         call_568366.route, valid.getOrDefault("path"),
+  let url = call_564266.url(scheme.get, call_564266.host, call_564266.base,
+                         call_564266.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568366, url, valid)
+  result = hook(call_564266, url, valid)
 
-proc call*(call_568367: Call_RemediationsGetAtResourceGroup_568359;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
+proc call*(call_564267: Call_RemediationsGetAtResourceGroup_564259;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string;
           remediationName: string): Recallable =
   ## remediationsGetAtResourceGroup
   ## Gets an existing remediation at resource group scope.
-  ##   resourceGroupName: string (required)
-  ##                    : Resource group name.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
   ##   subscriptionId: string (required)
   ##                 : Microsoft Azure subscription ID.
+  ##   resourceGroupName: string (required)
+  ##                    : Resource group name.
   ##   remediationName: string (required)
   ##                  : The name of the remediation.
-  var path_568368 = newJObject()
-  var query_568369 = newJObject()
-  add(path_568368, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568369, "api-version", newJString(apiVersion))
-  add(path_568368, "subscriptionId", newJString(subscriptionId))
-  add(path_568368, "remediationName", newJString(remediationName))
-  result = call_568367.call(path_568368, query_568369, nil, nil, nil)
+  var path_564268 = newJObject()
+  var query_564269 = newJObject()
+  add(query_564269, "api-version", newJString(apiVersion))
+  add(path_564268, "subscriptionId", newJString(subscriptionId))
+  add(path_564268, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564268, "remediationName", newJString(remediationName))
+  result = call_564267.call(path_564268, query_564269, nil, nil, nil)
 
-var remediationsGetAtResourceGroup* = Call_RemediationsGetAtResourceGroup_568359(
+var remediationsGetAtResourceGroup* = Call_RemediationsGetAtResourceGroup_564259(
     name: "remediationsGetAtResourceGroup", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.PolicyInsights/remediations/{remediationName}",
-    validator: validate_RemediationsGetAtResourceGroup_568360, base: "",
-    url: url_RemediationsGetAtResourceGroup_568361, schemes: {Scheme.Https})
+    validator: validate_RemediationsGetAtResourceGroup_564260, base: "",
+    url: url_RemediationsGetAtResourceGroup_564261, schemes: {Scheme.Https})
 type
-  Call_RemediationsDeleteAtResourceGroup_568383 = ref object of OpenApiRestCall_567657
-proc url_RemediationsDeleteAtResourceGroup_568385(protocol: Scheme; host: string;
+  Call_RemediationsDeleteAtResourceGroup_564283 = ref object of OpenApiRestCall_563555
+proc url_RemediationsDeleteAtResourceGroup_564285(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1863,37 +1873,37 @@ proc url_RemediationsDeleteAtResourceGroup_568385(protocol: Scheme; host: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_RemediationsDeleteAtResourceGroup_568384(path: JsonNode;
+proc validate_RemediationsDeleteAtResourceGroup_564284(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Deletes an existing remediation at resource group scope.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : Resource group name.
   ##   subscriptionId: JString (required)
   ##                 : Microsoft Azure subscription ID.
+  ##   resourceGroupName: JString (required)
+  ##                    : Resource group name.
   ##   remediationName: JString (required)
   ##                  : The name of the remediation.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568386 = path.getOrDefault("resourceGroupName")
-  valid_568386 = validateParameter(valid_568386, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564286 = path.getOrDefault("subscriptionId")
+  valid_564286 = validateParameter(valid_564286, JString, required = true,
                                  default = nil)
-  if valid_568386 != nil:
-    section.add "resourceGroupName", valid_568386
-  var valid_568387 = path.getOrDefault("subscriptionId")
-  valid_568387 = validateParameter(valid_568387, JString, required = true,
+  if valid_564286 != nil:
+    section.add "subscriptionId", valid_564286
+  var valid_564287 = path.getOrDefault("resourceGroupName")
+  valid_564287 = validateParameter(valid_564287, JString, required = true,
                                  default = nil)
-  if valid_568387 != nil:
-    section.add "subscriptionId", valid_568387
-  var valid_568388 = path.getOrDefault("remediationName")
-  valid_568388 = validateParameter(valid_568388, JString, required = true,
+  if valid_564287 != nil:
+    section.add "resourceGroupName", valid_564287
+  var valid_564288 = path.getOrDefault("remediationName")
+  valid_564288 = validateParameter(valid_564288, JString, required = true,
                                  default = nil)
-  if valid_568388 != nil:
-    section.add "remediationName", valid_568388
+  if valid_564288 != nil:
+    section.add "remediationName", valid_564288
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1901,11 +1911,11 @@ proc validate_RemediationsDeleteAtResourceGroup_568384(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568389 = query.getOrDefault("api-version")
-  valid_568389 = validateParameter(valid_568389, JString, required = true,
+  var valid_564289 = query.getOrDefault("api-version")
+  valid_564289 = validateParameter(valid_564289, JString, required = true,
                                  default = nil)
-  if valid_568389 != nil:
-    section.add "api-version", valid_568389
+  if valid_564289 != nil:
+    section.add "api-version", valid_564289
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1914,49 +1924,49 @@ proc validate_RemediationsDeleteAtResourceGroup_568384(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568390: Call_RemediationsDeleteAtResourceGroup_568383;
+proc call*(call_564290: Call_RemediationsDeleteAtResourceGroup_564283;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Deletes an existing remediation at resource group scope.
   ## 
-  let valid = call_568390.validator(path, query, header, formData, body)
-  let scheme = call_568390.pickScheme
+  let valid = call_564290.validator(path, query, header, formData, body)
+  let scheme = call_564290.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568390.url(scheme.get, call_568390.host, call_568390.base,
-                         call_568390.route, valid.getOrDefault("path"),
+  let url = call_564290.url(scheme.get, call_564290.host, call_564290.base,
+                         call_564290.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568390, url, valid)
+  result = hook(call_564290, url, valid)
 
-proc call*(call_568391: Call_RemediationsDeleteAtResourceGroup_568383;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
+proc call*(call_564291: Call_RemediationsDeleteAtResourceGroup_564283;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string;
           remediationName: string): Recallable =
   ## remediationsDeleteAtResourceGroup
   ## Deletes an existing remediation at resource group scope.
-  ##   resourceGroupName: string (required)
-  ##                    : Resource group name.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
   ##   subscriptionId: string (required)
   ##                 : Microsoft Azure subscription ID.
+  ##   resourceGroupName: string (required)
+  ##                    : Resource group name.
   ##   remediationName: string (required)
   ##                  : The name of the remediation.
-  var path_568392 = newJObject()
-  var query_568393 = newJObject()
-  add(path_568392, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568393, "api-version", newJString(apiVersion))
-  add(path_568392, "subscriptionId", newJString(subscriptionId))
-  add(path_568392, "remediationName", newJString(remediationName))
-  result = call_568391.call(path_568392, query_568393, nil, nil, nil)
+  var path_564292 = newJObject()
+  var query_564293 = newJObject()
+  add(query_564293, "api-version", newJString(apiVersion))
+  add(path_564292, "subscriptionId", newJString(subscriptionId))
+  add(path_564292, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564292, "remediationName", newJString(remediationName))
+  result = call_564291.call(path_564292, query_564293, nil, nil, nil)
 
-var remediationsDeleteAtResourceGroup* = Call_RemediationsDeleteAtResourceGroup_568383(
+var remediationsDeleteAtResourceGroup* = Call_RemediationsDeleteAtResourceGroup_564283(
     name: "remediationsDeleteAtResourceGroup", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.PolicyInsights/remediations/{remediationName}",
-    validator: validate_RemediationsDeleteAtResourceGroup_568384, base: "",
-    url: url_RemediationsDeleteAtResourceGroup_568385, schemes: {Scheme.Https})
+    validator: validate_RemediationsDeleteAtResourceGroup_564284, base: "",
+    url: url_RemediationsDeleteAtResourceGroup_564285, schemes: {Scheme.Https})
 type
-  Call_RemediationsCancelAtResourceGroup_568394 = ref object of OpenApiRestCall_567657
-proc url_RemediationsCancelAtResourceGroup_568396(protocol: Scheme; host: string;
+  Call_RemediationsCancelAtResourceGroup_564294 = ref object of OpenApiRestCall_563555
+proc url_RemediationsCancelAtResourceGroup_564296(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1980,37 +1990,37 @@ proc url_RemediationsCancelAtResourceGroup_568396(protocol: Scheme; host: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_RemediationsCancelAtResourceGroup_568395(path: JsonNode;
+proc validate_RemediationsCancelAtResourceGroup_564295(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Cancels a remediation at resource group scope.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : Resource group name.
   ##   subscriptionId: JString (required)
   ##                 : Microsoft Azure subscription ID.
+  ##   resourceGroupName: JString (required)
+  ##                    : Resource group name.
   ##   remediationName: JString (required)
   ##                  : The name of the remediation.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568397 = path.getOrDefault("resourceGroupName")
-  valid_568397 = validateParameter(valid_568397, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564297 = path.getOrDefault("subscriptionId")
+  valid_564297 = validateParameter(valid_564297, JString, required = true,
                                  default = nil)
-  if valid_568397 != nil:
-    section.add "resourceGroupName", valid_568397
-  var valid_568398 = path.getOrDefault("subscriptionId")
-  valid_568398 = validateParameter(valid_568398, JString, required = true,
+  if valid_564297 != nil:
+    section.add "subscriptionId", valid_564297
+  var valid_564298 = path.getOrDefault("resourceGroupName")
+  valid_564298 = validateParameter(valid_564298, JString, required = true,
                                  default = nil)
-  if valid_568398 != nil:
-    section.add "subscriptionId", valid_568398
-  var valid_568399 = path.getOrDefault("remediationName")
-  valid_568399 = validateParameter(valid_568399, JString, required = true,
+  if valid_564298 != nil:
+    section.add "resourceGroupName", valid_564298
+  var valid_564299 = path.getOrDefault("remediationName")
+  valid_564299 = validateParameter(valid_564299, JString, required = true,
                                  default = nil)
-  if valid_568399 != nil:
-    section.add "remediationName", valid_568399
+  if valid_564299 != nil:
+    section.add "remediationName", valid_564299
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2018,11 +2028,11 @@ proc validate_RemediationsCancelAtResourceGroup_568395(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568400 = query.getOrDefault("api-version")
-  valid_568400 = validateParameter(valid_568400, JString, required = true,
+  var valid_564300 = query.getOrDefault("api-version")
+  valid_564300 = validateParameter(valid_564300, JString, required = true,
                                  default = nil)
-  if valid_568400 != nil:
-    section.add "api-version", valid_568400
+  if valid_564300 != nil:
+    section.add "api-version", valid_564300
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2031,49 +2041,49 @@ proc validate_RemediationsCancelAtResourceGroup_568395(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568401: Call_RemediationsCancelAtResourceGroup_568394;
+proc call*(call_564301: Call_RemediationsCancelAtResourceGroup_564294;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Cancels a remediation at resource group scope.
   ## 
-  let valid = call_568401.validator(path, query, header, formData, body)
-  let scheme = call_568401.pickScheme
+  let valid = call_564301.validator(path, query, header, formData, body)
+  let scheme = call_564301.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568401.url(scheme.get, call_568401.host, call_568401.base,
-                         call_568401.route, valid.getOrDefault("path"),
+  let url = call_564301.url(scheme.get, call_564301.host, call_564301.base,
+                         call_564301.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568401, url, valid)
+  result = hook(call_564301, url, valid)
 
-proc call*(call_568402: Call_RemediationsCancelAtResourceGroup_568394;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
+proc call*(call_564302: Call_RemediationsCancelAtResourceGroup_564294;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string;
           remediationName: string): Recallable =
   ## remediationsCancelAtResourceGroup
   ## Cancels a remediation at resource group scope.
-  ##   resourceGroupName: string (required)
-  ##                    : Resource group name.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
   ##   subscriptionId: string (required)
   ##                 : Microsoft Azure subscription ID.
+  ##   resourceGroupName: string (required)
+  ##                    : Resource group name.
   ##   remediationName: string (required)
   ##                  : The name of the remediation.
-  var path_568403 = newJObject()
-  var query_568404 = newJObject()
-  add(path_568403, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568404, "api-version", newJString(apiVersion))
-  add(path_568403, "subscriptionId", newJString(subscriptionId))
-  add(path_568403, "remediationName", newJString(remediationName))
-  result = call_568402.call(path_568403, query_568404, nil, nil, nil)
+  var path_564303 = newJObject()
+  var query_564304 = newJObject()
+  add(query_564304, "api-version", newJString(apiVersion))
+  add(path_564303, "subscriptionId", newJString(subscriptionId))
+  add(path_564303, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564303, "remediationName", newJString(remediationName))
+  result = call_564302.call(path_564303, query_564304, nil, nil, nil)
 
-var remediationsCancelAtResourceGroup* = Call_RemediationsCancelAtResourceGroup_568394(
+var remediationsCancelAtResourceGroup* = Call_RemediationsCancelAtResourceGroup_564294(
     name: "remediationsCancelAtResourceGroup", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.PolicyInsights/remediations/{remediationName}/cancel",
-    validator: validate_RemediationsCancelAtResourceGroup_568395, base: "",
-    url: url_RemediationsCancelAtResourceGroup_568396, schemes: {Scheme.Https})
+    validator: validate_RemediationsCancelAtResourceGroup_564295, base: "",
+    url: url_RemediationsCancelAtResourceGroup_564296, schemes: {Scheme.Https})
 type
-  Call_RemediationsListDeploymentsAtResourceGroup_568405 = ref object of OpenApiRestCall_567657
-proc url_RemediationsListDeploymentsAtResourceGroup_568407(protocol: Scheme;
+  Call_RemediationsListDeploymentsAtResourceGroup_564305 = ref object of OpenApiRestCall_563555
+proc url_RemediationsListDeploymentsAtResourceGroup_564307(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2097,55 +2107,55 @@ proc url_RemediationsListDeploymentsAtResourceGroup_568407(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_RemediationsListDeploymentsAtResourceGroup_568406(path: JsonNode;
+proc validate_RemediationsListDeploymentsAtResourceGroup_564306(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets all deployments for a remediation at resource group scope.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : Resource group name.
   ##   subscriptionId: JString (required)
   ##                 : Microsoft Azure subscription ID.
+  ##   resourceGroupName: JString (required)
+  ##                    : Resource group name.
   ##   remediationName: JString (required)
   ##                  : The name of the remediation.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568408 = path.getOrDefault("resourceGroupName")
-  valid_568408 = validateParameter(valid_568408, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564308 = path.getOrDefault("subscriptionId")
+  valid_564308 = validateParameter(valid_564308, JString, required = true,
                                  default = nil)
-  if valid_568408 != nil:
-    section.add "resourceGroupName", valid_568408
-  var valid_568409 = path.getOrDefault("subscriptionId")
-  valid_568409 = validateParameter(valid_568409, JString, required = true,
+  if valid_564308 != nil:
+    section.add "subscriptionId", valid_564308
+  var valid_564309 = path.getOrDefault("resourceGroupName")
+  valid_564309 = validateParameter(valid_564309, JString, required = true,
                                  default = nil)
-  if valid_568409 != nil:
-    section.add "subscriptionId", valid_568409
-  var valid_568410 = path.getOrDefault("remediationName")
-  valid_568410 = validateParameter(valid_568410, JString, required = true,
+  if valid_564309 != nil:
+    section.add "resourceGroupName", valid_564309
+  var valid_564310 = path.getOrDefault("remediationName")
+  valid_564310 = validateParameter(valid_564310, JString, required = true,
                                  default = nil)
-  if valid_568410 != nil:
-    section.add "remediationName", valid_568410
+  if valid_564310 != nil:
+    section.add "remediationName", valid_564310
   result.add "path", section
   ## parameters in `query` object:
-  ##   api-version: JString (required)
-  ##              : Client Api Version.
   ##   $top: JInt
   ##       : Maximum number of records to return.
+  ##   api-version: JString (required)
+  ##              : Client Api Version.
   section = newJObject()
+  var valid_564311 = query.getOrDefault("$top")
+  valid_564311 = validateParameter(valid_564311, JInt, required = false, default = nil)
+  if valid_564311 != nil:
+    section.add "$top", valid_564311
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568411 = query.getOrDefault("api-version")
-  valid_568411 = validateParameter(valid_568411, JString, required = true,
+  var valid_564312 = query.getOrDefault("api-version")
+  valid_564312 = validateParameter(valid_564312, JString, required = true,
                                  default = nil)
-  if valid_568411 != nil:
-    section.add "api-version", valid_568411
-  var valid_568412 = query.getOrDefault("$top")
-  valid_568412 = validateParameter(valid_568412, JInt, required = false, default = nil)
-  if valid_568412 != nil:
-    section.add "$top", valid_568412
+  if valid_564312 != nil:
+    section.add "api-version", valid_564312
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2154,53 +2164,53 @@ proc validate_RemediationsListDeploymentsAtResourceGroup_568406(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568413: Call_RemediationsListDeploymentsAtResourceGroup_568405;
+proc call*(call_564313: Call_RemediationsListDeploymentsAtResourceGroup_564305;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Gets all deployments for a remediation at resource group scope.
   ## 
-  let valid = call_568413.validator(path, query, header, formData, body)
-  let scheme = call_568413.pickScheme
+  let valid = call_564313.validator(path, query, header, formData, body)
+  let scheme = call_564313.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568413.url(scheme.get, call_568413.host, call_568413.base,
-                         call_568413.route, valid.getOrDefault("path"),
+  let url = call_564313.url(scheme.get, call_564313.host, call_564313.base,
+                         call_564313.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568413, url, valid)
+  result = hook(call_564313, url, valid)
 
-proc call*(call_568414: Call_RemediationsListDeploymentsAtResourceGroup_568405;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
+proc call*(call_564314: Call_RemediationsListDeploymentsAtResourceGroup_564305;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string;
           remediationName: string; Top: int = 0): Recallable =
   ## remediationsListDeploymentsAtResourceGroup
   ## Gets all deployments for a remediation at resource group scope.
-  ##   resourceGroupName: string (required)
-  ##                    : Resource group name.
+  ##   Top: int
+  ##      : Maximum number of records to return.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
   ##   subscriptionId: string (required)
   ##                 : Microsoft Azure subscription ID.
-  ##   Top: int
-  ##      : Maximum number of records to return.
+  ##   resourceGroupName: string (required)
+  ##                    : Resource group name.
   ##   remediationName: string (required)
   ##                  : The name of the remediation.
-  var path_568415 = newJObject()
-  var query_568416 = newJObject()
-  add(path_568415, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568416, "api-version", newJString(apiVersion))
-  add(path_568415, "subscriptionId", newJString(subscriptionId))
-  add(query_568416, "$top", newJInt(Top))
-  add(path_568415, "remediationName", newJString(remediationName))
-  result = call_568414.call(path_568415, query_568416, nil, nil, nil)
+  var path_564315 = newJObject()
+  var query_564316 = newJObject()
+  add(query_564316, "$top", newJInt(Top))
+  add(query_564316, "api-version", newJString(apiVersion))
+  add(path_564315, "subscriptionId", newJString(subscriptionId))
+  add(path_564315, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564315, "remediationName", newJString(remediationName))
+  result = call_564314.call(path_564315, query_564316, nil, nil, nil)
 
-var remediationsListDeploymentsAtResourceGroup* = Call_RemediationsListDeploymentsAtResourceGroup_568405(
+var remediationsListDeploymentsAtResourceGroup* = Call_RemediationsListDeploymentsAtResourceGroup_564305(
     name: "remediationsListDeploymentsAtResourceGroup", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.PolicyInsights/remediations/{remediationName}/listDeployments",
-    validator: validate_RemediationsListDeploymentsAtResourceGroup_568406,
-    base: "", url: url_RemediationsListDeploymentsAtResourceGroup_568407,
+    validator: validate_RemediationsListDeploymentsAtResourceGroup_564306,
+    base: "", url: url_RemediationsListDeploymentsAtResourceGroup_564307,
     schemes: {Scheme.Https})
 type
-  Call_RemediationsListForResource_568417 = ref object of OpenApiRestCall_567657
-proc url_RemediationsListForResource_568419(protocol: Scheme; host: string;
+  Call_RemediationsListForResource_564317 = ref object of OpenApiRestCall_563555
+proc url_RemediationsListForResource_564319(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2216,7 +2226,7 @@ proc url_RemediationsListForResource_568419(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_RemediationsListForResource_568418(path: JsonNode; query: JsonNode;
+proc validate_RemediationsListForResource_564318(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets all remediations for a resource.
   ## 
@@ -2228,36 +2238,36 @@ proc validate_RemediationsListForResource_568418(path: JsonNode; query: JsonNode
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceId` field"
-  var valid_568420 = path.getOrDefault("resourceId")
-  valid_568420 = validateParameter(valid_568420, JString, required = true,
+  var valid_564320 = path.getOrDefault("resourceId")
+  valid_564320 = validateParameter(valid_564320, JString, required = true,
                                  default = nil)
-  if valid_568420 != nil:
-    section.add "resourceId", valid_568420
+  if valid_564320 != nil:
+    section.add "resourceId", valid_564320
   result.add "path", section
   ## parameters in `query` object:
-  ##   api-version: JString (required)
-  ##              : Client Api Version.
   ##   $top: JInt
   ##       : Maximum number of records to return.
+  ##   api-version: JString (required)
+  ##              : Client Api Version.
   ##   $filter: JString
   ##          : OData filter expression.
   section = newJObject()
+  var valid_564321 = query.getOrDefault("$top")
+  valid_564321 = validateParameter(valid_564321, JInt, required = false, default = nil)
+  if valid_564321 != nil:
+    section.add "$top", valid_564321
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568421 = query.getOrDefault("api-version")
-  valid_568421 = validateParameter(valid_568421, JString, required = true,
+  var valid_564322 = query.getOrDefault("api-version")
+  valid_564322 = validateParameter(valid_564322, JString, required = true,
                                  default = nil)
-  if valid_568421 != nil:
-    section.add "api-version", valid_568421
-  var valid_568422 = query.getOrDefault("$top")
-  valid_568422 = validateParameter(valid_568422, JInt, required = false, default = nil)
-  if valid_568422 != nil:
-    section.add "$top", valid_568422
-  var valid_568423 = query.getOrDefault("$filter")
-  valid_568423 = validateParameter(valid_568423, JString, required = false,
+  if valid_564322 != nil:
+    section.add "api-version", valid_564322
+  var valid_564323 = query.getOrDefault("$filter")
+  valid_564323 = validateParameter(valid_564323, JString, required = false,
                                  default = nil)
-  if valid_568423 != nil:
-    section.add "$filter", valid_568423
+  if valid_564323 != nil:
+    section.add "$filter", valid_564323
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2266,48 +2276,48 @@ proc validate_RemediationsListForResource_568418(path: JsonNode; query: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_568424: Call_RemediationsListForResource_568417; path: JsonNode;
+proc call*(call_564324: Call_RemediationsListForResource_564317; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets all remediations for a resource.
   ## 
-  let valid = call_568424.validator(path, query, header, formData, body)
-  let scheme = call_568424.pickScheme
+  let valid = call_564324.validator(path, query, header, formData, body)
+  let scheme = call_564324.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568424.url(scheme.get, call_568424.host, call_568424.base,
-                         call_568424.route, valid.getOrDefault("path"),
+  let url = call_564324.url(scheme.get, call_564324.host, call_564324.base,
+                         call_564324.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568424, url, valid)
+  result = hook(call_564324, url, valid)
 
-proc call*(call_568425: Call_RemediationsListForResource_568417;
+proc call*(call_564325: Call_RemediationsListForResource_564317;
           apiVersion: string; resourceId: string; Top: int = 0; Filter: string = ""): Recallable =
   ## remediationsListForResource
   ## Gets all remediations for a resource.
-  ##   apiVersion: string (required)
-  ##             : Client Api Version.
   ##   Top: int
   ##      : Maximum number of records to return.
-  ##   resourceId: string (required)
-  ##             : Resource ID.
+  ##   apiVersion: string (required)
+  ##             : Client Api Version.
   ##   Filter: string
   ##         : OData filter expression.
-  var path_568426 = newJObject()
-  var query_568427 = newJObject()
-  add(query_568427, "api-version", newJString(apiVersion))
-  add(query_568427, "$top", newJInt(Top))
-  add(path_568426, "resourceId", newJString(resourceId))
-  add(query_568427, "$filter", newJString(Filter))
-  result = call_568425.call(path_568426, query_568427, nil, nil, nil)
+  ##   resourceId: string (required)
+  ##             : Resource ID.
+  var path_564326 = newJObject()
+  var query_564327 = newJObject()
+  add(query_564327, "$top", newJInt(Top))
+  add(query_564327, "api-version", newJString(apiVersion))
+  add(query_564327, "$filter", newJString(Filter))
+  add(path_564326, "resourceId", newJString(resourceId))
+  result = call_564325.call(path_564326, query_564327, nil, nil, nil)
 
-var remediationsListForResource* = Call_RemediationsListForResource_568417(
+var remediationsListForResource* = Call_RemediationsListForResource_564317(
     name: "remediationsListForResource", meth: HttpMethod.HttpGet,
     host: "management.azure.com",
     route: "/{resourceId}/providers/Microsoft.PolicyInsights/remediations",
-    validator: validate_RemediationsListForResource_568418, base: "",
-    url: url_RemediationsListForResource_568419, schemes: {Scheme.Https})
+    validator: validate_RemediationsListForResource_564318, base: "",
+    url: url_RemediationsListForResource_564319, schemes: {Scheme.Https})
 type
-  Call_RemediationsCreateOrUpdateAtResource_568438 = ref object of OpenApiRestCall_567657
-proc url_RemediationsCreateOrUpdateAtResource_568440(protocol: Scheme;
+  Call_RemediationsCreateOrUpdateAtResource_564338 = ref object of OpenApiRestCall_563555
+proc url_RemediationsCreateOrUpdateAtResource_564340(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2325,7 +2335,7 @@ proc url_RemediationsCreateOrUpdateAtResource_568440(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_RemediationsCreateOrUpdateAtResource_568439(path: JsonNode;
+proc validate_RemediationsCreateOrUpdateAtResource_564339(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Creates or updates a remediation at resource scope.
   ## 
@@ -2339,16 +2349,16 @@ proc validate_RemediationsCreateOrUpdateAtResource_568439(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceId` field"
-  var valid_568441 = path.getOrDefault("resourceId")
-  valid_568441 = validateParameter(valid_568441, JString, required = true,
+  var valid_564341 = path.getOrDefault("resourceId")
+  valid_564341 = validateParameter(valid_564341, JString, required = true,
                                  default = nil)
-  if valid_568441 != nil:
-    section.add "resourceId", valid_568441
-  var valid_568442 = path.getOrDefault("remediationName")
-  valid_568442 = validateParameter(valid_568442, JString, required = true,
+  if valid_564341 != nil:
+    section.add "resourceId", valid_564341
+  var valid_564342 = path.getOrDefault("remediationName")
+  valid_564342 = validateParameter(valid_564342, JString, required = true,
                                  default = nil)
-  if valid_568442 != nil:
-    section.add "remediationName", valid_568442
+  if valid_564342 != nil:
+    section.add "remediationName", valid_564342
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2356,11 +2366,11 @@ proc validate_RemediationsCreateOrUpdateAtResource_568439(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568443 = query.getOrDefault("api-version")
-  valid_568443 = validateParameter(valid_568443, JString, required = true,
+  var valid_564343 = query.getOrDefault("api-version")
+  valid_564343 = validateParameter(valid_564343, JString, required = true,
                                  default = nil)
-  if valid_568443 != nil:
-    section.add "api-version", valid_568443
+  if valid_564343 != nil:
+    section.add "api-version", valid_564343
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2374,21 +2384,21 @@ proc validate_RemediationsCreateOrUpdateAtResource_568439(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568445: Call_RemediationsCreateOrUpdateAtResource_568438;
+proc call*(call_564345: Call_RemediationsCreateOrUpdateAtResource_564338;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Creates or updates a remediation at resource scope.
   ## 
-  let valid = call_568445.validator(path, query, header, formData, body)
-  let scheme = call_568445.pickScheme
+  let valid = call_564345.validator(path, query, header, formData, body)
+  let scheme = call_564345.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568445.url(scheme.get, call_568445.host, call_568445.base,
-                         call_568445.route, valid.getOrDefault("path"),
+  let url = call_564345.url(scheme.get, call_564345.host, call_564345.base,
+                         call_564345.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568445, url, valid)
+  result = hook(call_564345, url, valid)
 
-proc call*(call_568446: Call_RemediationsCreateOrUpdateAtResource_568438;
+proc call*(call_564346: Call_RemediationsCreateOrUpdateAtResource_564338;
           apiVersion: string; resourceId: string; parameters: JsonNode;
           remediationName: string): Recallable =
   ## remediationsCreateOrUpdateAtResource
@@ -2401,24 +2411,24 @@ proc call*(call_568446: Call_RemediationsCreateOrUpdateAtResource_568438;
   ##             : The remediation parameters.
   ##   remediationName: string (required)
   ##                  : The name of the remediation.
-  var path_568447 = newJObject()
-  var query_568448 = newJObject()
-  var body_568449 = newJObject()
-  add(query_568448, "api-version", newJString(apiVersion))
-  add(path_568447, "resourceId", newJString(resourceId))
+  var path_564347 = newJObject()
+  var query_564348 = newJObject()
+  var body_564349 = newJObject()
+  add(query_564348, "api-version", newJString(apiVersion))
+  add(path_564347, "resourceId", newJString(resourceId))
   if parameters != nil:
-    body_568449 = parameters
-  add(path_568447, "remediationName", newJString(remediationName))
-  result = call_568446.call(path_568447, query_568448, nil, nil, body_568449)
+    body_564349 = parameters
+  add(path_564347, "remediationName", newJString(remediationName))
+  result = call_564346.call(path_564347, query_564348, nil, nil, body_564349)
 
-var remediationsCreateOrUpdateAtResource* = Call_RemediationsCreateOrUpdateAtResource_568438(
+var remediationsCreateOrUpdateAtResource* = Call_RemediationsCreateOrUpdateAtResource_564338(
     name: "remediationsCreateOrUpdateAtResource", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/{resourceId}/providers/Microsoft.PolicyInsights/remediations/{remediationName}",
-    validator: validate_RemediationsCreateOrUpdateAtResource_568439, base: "",
-    url: url_RemediationsCreateOrUpdateAtResource_568440, schemes: {Scheme.Https})
+    validator: validate_RemediationsCreateOrUpdateAtResource_564339, base: "",
+    url: url_RemediationsCreateOrUpdateAtResource_564340, schemes: {Scheme.Https})
 type
-  Call_RemediationsGetAtResource_568428 = ref object of OpenApiRestCall_567657
-proc url_RemediationsGetAtResource_568430(protocol: Scheme; host: string;
+  Call_RemediationsGetAtResource_564328 = ref object of OpenApiRestCall_563555
+proc url_RemediationsGetAtResource_564330(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2436,7 +2446,7 @@ proc url_RemediationsGetAtResource_568430(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_RemediationsGetAtResource_568429(path: JsonNode; query: JsonNode;
+proc validate_RemediationsGetAtResource_564329(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets an existing remediation at resource scope.
   ## 
@@ -2450,16 +2460,16 @@ proc validate_RemediationsGetAtResource_568429(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceId` field"
-  var valid_568431 = path.getOrDefault("resourceId")
-  valid_568431 = validateParameter(valid_568431, JString, required = true,
+  var valid_564331 = path.getOrDefault("resourceId")
+  valid_564331 = validateParameter(valid_564331, JString, required = true,
                                  default = nil)
-  if valid_568431 != nil:
-    section.add "resourceId", valid_568431
-  var valid_568432 = path.getOrDefault("remediationName")
-  valid_568432 = validateParameter(valid_568432, JString, required = true,
+  if valid_564331 != nil:
+    section.add "resourceId", valid_564331
+  var valid_564332 = path.getOrDefault("remediationName")
+  valid_564332 = validateParameter(valid_564332, JString, required = true,
                                  default = nil)
-  if valid_568432 != nil:
-    section.add "remediationName", valid_568432
+  if valid_564332 != nil:
+    section.add "remediationName", valid_564332
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2467,11 +2477,11 @@ proc validate_RemediationsGetAtResource_568429(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568433 = query.getOrDefault("api-version")
-  valid_568433 = validateParameter(valid_568433, JString, required = true,
+  var valid_564333 = query.getOrDefault("api-version")
+  valid_564333 = validateParameter(valid_564333, JString, required = true,
                                  default = nil)
-  if valid_568433 != nil:
-    section.add "api-version", valid_568433
+  if valid_564333 != nil:
+    section.add "api-version", valid_564333
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2480,20 +2490,20 @@ proc validate_RemediationsGetAtResource_568429(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568434: Call_RemediationsGetAtResource_568428; path: JsonNode;
+proc call*(call_564334: Call_RemediationsGetAtResource_564328; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets an existing remediation at resource scope.
   ## 
-  let valid = call_568434.validator(path, query, header, formData, body)
-  let scheme = call_568434.pickScheme
+  let valid = call_564334.validator(path, query, header, formData, body)
+  let scheme = call_564334.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568434.url(scheme.get, call_568434.host, call_568434.base,
-                         call_568434.route, valid.getOrDefault("path"),
+  let url = call_564334.url(scheme.get, call_564334.host, call_564334.base,
+                         call_564334.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568434, url, valid)
+  result = hook(call_564334, url, valid)
 
-proc call*(call_568435: Call_RemediationsGetAtResource_568428; apiVersion: string;
+proc call*(call_564335: Call_RemediationsGetAtResource_564328; apiVersion: string;
           resourceId: string; remediationName: string): Recallable =
   ## remediationsGetAtResource
   ## Gets an existing remediation at resource scope.
@@ -2503,21 +2513,21 @@ proc call*(call_568435: Call_RemediationsGetAtResource_568428; apiVersion: strin
   ##             : Resource ID.
   ##   remediationName: string (required)
   ##                  : The name of the remediation.
-  var path_568436 = newJObject()
-  var query_568437 = newJObject()
-  add(query_568437, "api-version", newJString(apiVersion))
-  add(path_568436, "resourceId", newJString(resourceId))
-  add(path_568436, "remediationName", newJString(remediationName))
-  result = call_568435.call(path_568436, query_568437, nil, nil, nil)
+  var path_564336 = newJObject()
+  var query_564337 = newJObject()
+  add(query_564337, "api-version", newJString(apiVersion))
+  add(path_564336, "resourceId", newJString(resourceId))
+  add(path_564336, "remediationName", newJString(remediationName))
+  result = call_564335.call(path_564336, query_564337, nil, nil, nil)
 
-var remediationsGetAtResource* = Call_RemediationsGetAtResource_568428(
+var remediationsGetAtResource* = Call_RemediationsGetAtResource_564328(
     name: "remediationsGetAtResource", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/{resourceId}/providers/Microsoft.PolicyInsights/remediations/{remediationName}",
-    validator: validate_RemediationsGetAtResource_568429, base: "",
-    url: url_RemediationsGetAtResource_568430, schemes: {Scheme.Https})
+    validator: validate_RemediationsGetAtResource_564329, base: "",
+    url: url_RemediationsGetAtResource_564330, schemes: {Scheme.Https})
 type
-  Call_RemediationsDeleteAtResource_568450 = ref object of OpenApiRestCall_567657
-proc url_RemediationsDeleteAtResource_568452(protocol: Scheme; host: string;
+  Call_RemediationsDeleteAtResource_564350 = ref object of OpenApiRestCall_563555
+proc url_RemediationsDeleteAtResource_564352(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2535,7 +2545,7 @@ proc url_RemediationsDeleteAtResource_568452(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_RemediationsDeleteAtResource_568451(path: JsonNode; query: JsonNode;
+proc validate_RemediationsDeleteAtResource_564351(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Deletes an existing remediation at individual resource scope.
   ## 
@@ -2549,16 +2559,16 @@ proc validate_RemediationsDeleteAtResource_568451(path: JsonNode; query: JsonNod
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceId` field"
-  var valid_568453 = path.getOrDefault("resourceId")
-  valid_568453 = validateParameter(valid_568453, JString, required = true,
+  var valid_564353 = path.getOrDefault("resourceId")
+  valid_564353 = validateParameter(valid_564353, JString, required = true,
                                  default = nil)
-  if valid_568453 != nil:
-    section.add "resourceId", valid_568453
-  var valid_568454 = path.getOrDefault("remediationName")
-  valid_568454 = validateParameter(valid_568454, JString, required = true,
+  if valid_564353 != nil:
+    section.add "resourceId", valid_564353
+  var valid_564354 = path.getOrDefault("remediationName")
+  valid_564354 = validateParameter(valid_564354, JString, required = true,
                                  default = nil)
-  if valid_568454 != nil:
-    section.add "remediationName", valid_568454
+  if valid_564354 != nil:
+    section.add "remediationName", valid_564354
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2566,11 +2576,11 @@ proc validate_RemediationsDeleteAtResource_568451(path: JsonNode; query: JsonNod
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568455 = query.getOrDefault("api-version")
-  valid_568455 = validateParameter(valid_568455, JString, required = true,
+  var valid_564355 = query.getOrDefault("api-version")
+  valid_564355 = validateParameter(valid_564355, JString, required = true,
                                  default = nil)
-  if valid_568455 != nil:
-    section.add "api-version", valid_568455
+  if valid_564355 != nil:
+    section.add "api-version", valid_564355
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2579,20 +2589,20 @@ proc validate_RemediationsDeleteAtResource_568451(path: JsonNode; query: JsonNod
   if body != nil:
     result.add "body", body
 
-proc call*(call_568456: Call_RemediationsDeleteAtResource_568450; path: JsonNode;
+proc call*(call_564356: Call_RemediationsDeleteAtResource_564350; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes an existing remediation at individual resource scope.
   ## 
-  let valid = call_568456.validator(path, query, header, formData, body)
-  let scheme = call_568456.pickScheme
+  let valid = call_564356.validator(path, query, header, formData, body)
+  let scheme = call_564356.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568456.url(scheme.get, call_568456.host, call_568456.base,
-                         call_568456.route, valid.getOrDefault("path"),
+  let url = call_564356.url(scheme.get, call_564356.host, call_564356.base,
+                         call_564356.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568456, url, valid)
+  result = hook(call_564356, url, valid)
 
-proc call*(call_568457: Call_RemediationsDeleteAtResource_568450;
+proc call*(call_564357: Call_RemediationsDeleteAtResource_564350;
           apiVersion: string; resourceId: string; remediationName: string): Recallable =
   ## remediationsDeleteAtResource
   ## Deletes an existing remediation at individual resource scope.
@@ -2602,21 +2612,21 @@ proc call*(call_568457: Call_RemediationsDeleteAtResource_568450;
   ##             : Resource ID.
   ##   remediationName: string (required)
   ##                  : The name of the remediation.
-  var path_568458 = newJObject()
-  var query_568459 = newJObject()
-  add(query_568459, "api-version", newJString(apiVersion))
-  add(path_568458, "resourceId", newJString(resourceId))
-  add(path_568458, "remediationName", newJString(remediationName))
-  result = call_568457.call(path_568458, query_568459, nil, nil, nil)
+  var path_564358 = newJObject()
+  var query_564359 = newJObject()
+  add(query_564359, "api-version", newJString(apiVersion))
+  add(path_564358, "resourceId", newJString(resourceId))
+  add(path_564358, "remediationName", newJString(remediationName))
+  result = call_564357.call(path_564358, query_564359, nil, nil, nil)
 
-var remediationsDeleteAtResource* = Call_RemediationsDeleteAtResource_568450(
+var remediationsDeleteAtResource* = Call_RemediationsDeleteAtResource_564350(
     name: "remediationsDeleteAtResource", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/{resourceId}/providers/Microsoft.PolicyInsights/remediations/{remediationName}",
-    validator: validate_RemediationsDeleteAtResource_568451, base: "",
-    url: url_RemediationsDeleteAtResource_568452, schemes: {Scheme.Https})
+    validator: validate_RemediationsDeleteAtResource_564351, base: "",
+    url: url_RemediationsDeleteAtResource_564352, schemes: {Scheme.Https})
 type
-  Call_RemediationsCancelAtResource_568460 = ref object of OpenApiRestCall_567657
-proc url_RemediationsCancelAtResource_568462(protocol: Scheme; host: string;
+  Call_RemediationsCancelAtResource_564360 = ref object of OpenApiRestCall_563555
+proc url_RemediationsCancelAtResource_564362(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2635,7 +2645,7 @@ proc url_RemediationsCancelAtResource_568462(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_RemediationsCancelAtResource_568461(path: JsonNode; query: JsonNode;
+proc validate_RemediationsCancelAtResource_564361(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Cancel a remediation at resource scope.
   ## 
@@ -2649,16 +2659,16 @@ proc validate_RemediationsCancelAtResource_568461(path: JsonNode; query: JsonNod
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceId` field"
-  var valid_568463 = path.getOrDefault("resourceId")
-  valid_568463 = validateParameter(valid_568463, JString, required = true,
+  var valid_564363 = path.getOrDefault("resourceId")
+  valid_564363 = validateParameter(valid_564363, JString, required = true,
                                  default = nil)
-  if valid_568463 != nil:
-    section.add "resourceId", valid_568463
-  var valid_568464 = path.getOrDefault("remediationName")
-  valid_568464 = validateParameter(valid_568464, JString, required = true,
+  if valid_564363 != nil:
+    section.add "resourceId", valid_564363
+  var valid_564364 = path.getOrDefault("remediationName")
+  valid_564364 = validateParameter(valid_564364, JString, required = true,
                                  default = nil)
-  if valid_568464 != nil:
-    section.add "remediationName", valid_568464
+  if valid_564364 != nil:
+    section.add "remediationName", valid_564364
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2666,11 +2676,11 @@ proc validate_RemediationsCancelAtResource_568461(path: JsonNode; query: JsonNod
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568465 = query.getOrDefault("api-version")
-  valid_568465 = validateParameter(valid_568465, JString, required = true,
+  var valid_564365 = query.getOrDefault("api-version")
+  valid_564365 = validateParameter(valid_564365, JString, required = true,
                                  default = nil)
-  if valid_568465 != nil:
-    section.add "api-version", valid_568465
+  if valid_564365 != nil:
+    section.add "api-version", valid_564365
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2679,20 +2689,20 @@ proc validate_RemediationsCancelAtResource_568461(path: JsonNode; query: JsonNod
   if body != nil:
     result.add "body", body
 
-proc call*(call_568466: Call_RemediationsCancelAtResource_568460; path: JsonNode;
+proc call*(call_564366: Call_RemediationsCancelAtResource_564360; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Cancel a remediation at resource scope.
   ## 
-  let valid = call_568466.validator(path, query, header, formData, body)
-  let scheme = call_568466.pickScheme
+  let valid = call_564366.validator(path, query, header, formData, body)
+  let scheme = call_564366.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568466.url(scheme.get, call_568466.host, call_568466.base,
-                         call_568466.route, valid.getOrDefault("path"),
+  let url = call_564366.url(scheme.get, call_564366.host, call_564366.base,
+                         call_564366.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568466, url, valid)
+  result = hook(call_564366, url, valid)
 
-proc call*(call_568467: Call_RemediationsCancelAtResource_568460;
+proc call*(call_564367: Call_RemediationsCancelAtResource_564360;
           apiVersion: string; resourceId: string; remediationName: string): Recallable =
   ## remediationsCancelAtResource
   ## Cancel a remediation at resource scope.
@@ -2702,21 +2712,21 @@ proc call*(call_568467: Call_RemediationsCancelAtResource_568460;
   ##             : Resource ID.
   ##   remediationName: string (required)
   ##                  : The name of the remediation.
-  var path_568468 = newJObject()
-  var query_568469 = newJObject()
-  add(query_568469, "api-version", newJString(apiVersion))
-  add(path_568468, "resourceId", newJString(resourceId))
-  add(path_568468, "remediationName", newJString(remediationName))
-  result = call_568467.call(path_568468, query_568469, nil, nil, nil)
+  var path_564368 = newJObject()
+  var query_564369 = newJObject()
+  add(query_564369, "api-version", newJString(apiVersion))
+  add(path_564368, "resourceId", newJString(resourceId))
+  add(path_564368, "remediationName", newJString(remediationName))
+  result = call_564367.call(path_564368, query_564369, nil, nil, nil)
 
-var remediationsCancelAtResource* = Call_RemediationsCancelAtResource_568460(
+var remediationsCancelAtResource* = Call_RemediationsCancelAtResource_564360(
     name: "remediationsCancelAtResource", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/{resourceId}/providers/Microsoft.PolicyInsights/remediations/{remediationName}/cancel",
-    validator: validate_RemediationsCancelAtResource_568461, base: "",
-    url: url_RemediationsCancelAtResource_568462, schemes: {Scheme.Https})
+    validator: validate_RemediationsCancelAtResource_564361, base: "",
+    url: url_RemediationsCancelAtResource_564362, schemes: {Scheme.Https})
 type
-  Call_RemediationsListDeploymentsAtResource_568470 = ref object of OpenApiRestCall_567657
-proc url_RemediationsListDeploymentsAtResource_568472(protocol: Scheme;
+  Call_RemediationsListDeploymentsAtResource_564370 = ref object of OpenApiRestCall_563555
+proc url_RemediationsListDeploymentsAtResource_564372(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2735,7 +2745,7 @@ proc url_RemediationsListDeploymentsAtResource_568472(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_RemediationsListDeploymentsAtResource_568471(path: JsonNode;
+proc validate_RemediationsListDeploymentsAtResource_564371(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets all deployments for a remediation at resource scope.
   ## 
@@ -2749,34 +2759,34 @@ proc validate_RemediationsListDeploymentsAtResource_568471(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceId` field"
-  var valid_568473 = path.getOrDefault("resourceId")
-  valid_568473 = validateParameter(valid_568473, JString, required = true,
+  var valid_564373 = path.getOrDefault("resourceId")
+  valid_564373 = validateParameter(valid_564373, JString, required = true,
                                  default = nil)
-  if valid_568473 != nil:
-    section.add "resourceId", valid_568473
-  var valid_568474 = path.getOrDefault("remediationName")
-  valid_568474 = validateParameter(valid_568474, JString, required = true,
+  if valid_564373 != nil:
+    section.add "resourceId", valid_564373
+  var valid_564374 = path.getOrDefault("remediationName")
+  valid_564374 = validateParameter(valid_564374, JString, required = true,
                                  default = nil)
-  if valid_568474 != nil:
-    section.add "remediationName", valid_568474
+  if valid_564374 != nil:
+    section.add "remediationName", valid_564374
   result.add "path", section
   ## parameters in `query` object:
-  ##   api-version: JString (required)
-  ##              : Client Api Version.
   ##   $top: JInt
   ##       : Maximum number of records to return.
+  ##   api-version: JString (required)
+  ##              : Client Api Version.
   section = newJObject()
+  var valid_564375 = query.getOrDefault("$top")
+  valid_564375 = validateParameter(valid_564375, JInt, required = false, default = nil)
+  if valid_564375 != nil:
+    section.add "$top", valid_564375
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568475 = query.getOrDefault("api-version")
-  valid_568475 = validateParameter(valid_568475, JString, required = true,
+  var valid_564376 = query.getOrDefault("api-version")
+  valid_564376 = validateParameter(valid_564376, JString, required = true,
                                  default = nil)
-  if valid_568475 != nil:
-    section.add "api-version", valid_568475
-  var valid_568476 = query.getOrDefault("$top")
-  valid_568476 = validateParameter(valid_568476, JInt, required = false, default = nil)
-  if valid_568476 != nil:
-    section.add "$top", valid_568476
+  if valid_564376 != nil:
+    section.add "api-version", valid_564376
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2785,46 +2795,46 @@ proc validate_RemediationsListDeploymentsAtResource_568471(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568477: Call_RemediationsListDeploymentsAtResource_568470;
+proc call*(call_564377: Call_RemediationsListDeploymentsAtResource_564370;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Gets all deployments for a remediation at resource scope.
   ## 
-  let valid = call_568477.validator(path, query, header, formData, body)
-  let scheme = call_568477.pickScheme
+  let valid = call_564377.validator(path, query, header, formData, body)
+  let scheme = call_564377.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568477.url(scheme.get, call_568477.host, call_568477.base,
-                         call_568477.route, valid.getOrDefault("path"),
+  let url = call_564377.url(scheme.get, call_564377.host, call_564377.base,
+                         call_564377.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568477, url, valid)
+  result = hook(call_564377, url, valid)
 
-proc call*(call_568478: Call_RemediationsListDeploymentsAtResource_568470;
+proc call*(call_564378: Call_RemediationsListDeploymentsAtResource_564370;
           apiVersion: string; resourceId: string; remediationName: string;
           Top: int = 0): Recallable =
   ## remediationsListDeploymentsAtResource
   ## Gets all deployments for a remediation at resource scope.
-  ##   apiVersion: string (required)
-  ##             : Client Api Version.
   ##   Top: int
   ##      : Maximum number of records to return.
+  ##   apiVersion: string (required)
+  ##             : Client Api Version.
   ##   resourceId: string (required)
   ##             : Resource ID.
   ##   remediationName: string (required)
   ##                  : The name of the remediation.
-  var path_568479 = newJObject()
-  var query_568480 = newJObject()
-  add(query_568480, "api-version", newJString(apiVersion))
-  add(query_568480, "$top", newJInt(Top))
-  add(path_568479, "resourceId", newJString(resourceId))
-  add(path_568479, "remediationName", newJString(remediationName))
-  result = call_568478.call(path_568479, query_568480, nil, nil, nil)
+  var path_564379 = newJObject()
+  var query_564380 = newJObject()
+  add(query_564380, "$top", newJInt(Top))
+  add(query_564380, "api-version", newJString(apiVersion))
+  add(path_564379, "resourceId", newJString(resourceId))
+  add(path_564379, "remediationName", newJString(remediationName))
+  result = call_564378.call(path_564379, query_564380, nil, nil, nil)
 
-var remediationsListDeploymentsAtResource* = Call_RemediationsListDeploymentsAtResource_568470(
+var remediationsListDeploymentsAtResource* = Call_RemediationsListDeploymentsAtResource_564370(
     name: "remediationsListDeploymentsAtResource", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/{resourceId}/providers/Microsoft.PolicyInsights/remediations/{remediationName}/listDeployments",
-    validator: validate_RemediationsListDeploymentsAtResource_568471, base: "",
-    url: url_RemediationsListDeploymentsAtResource_568472, schemes: {Scheme.Https})
+    validator: validate_RemediationsListDeploymentsAtResource_564371, base: "",
+    url: url_RemediationsListDeploymentsAtResource_564372, schemes: {Scheme.Https})
 export
   rest
 

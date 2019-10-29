@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, httpcore
 
 ## auto-generated via openapi macro
 ## title: LogicManagementClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_567650 = ref object of OpenApiRestCall
+  OpenApiRestCall_563548 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_567650](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563548](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_567650): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563548): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,8 +107,8 @@ const
   macServiceName = "logic"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_IntegrationAccountsListBySubscription_567872 = ref object of OpenApiRestCall_567650
-proc url_IntegrationAccountsListBySubscription_567874(protocol: Scheme;
+  Call_IntegrationAccountsListBySubscription_563770 = ref object of OpenApiRestCall_563548
+proc url_IntegrationAccountsListBySubscription_563772(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -121,7 +125,7 @@ proc url_IntegrationAccountsListBySubscription_567874(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_IntegrationAccountsListBySubscription_567873(path: JsonNode;
+proc validate_IntegrationAccountsListBySubscription_563771(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets a list of integration accounts by subscription.
   ## 
@@ -133,11 +137,11 @@ proc validate_IntegrationAccountsListBySubscription_567873(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_568048 = path.getOrDefault("subscriptionId")
-  valid_568048 = validateParameter(valid_568048, JString, required = true,
+  var valid_563948 = path.getOrDefault("subscriptionId")
+  valid_563948 = validateParameter(valid_563948, JString, required = true,
                                  default = nil)
-  if valid_568048 != nil:
-    section.add "subscriptionId", valid_568048
+  if valid_563948 != nil:
+    section.add "subscriptionId", valid_563948
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -147,15 +151,15 @@ proc validate_IntegrationAccountsListBySubscription_567873(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568049 = query.getOrDefault("api-version")
-  valid_568049 = validateParameter(valid_568049, JString, required = true,
+  var valid_563949 = query.getOrDefault("api-version")
+  valid_563949 = validateParameter(valid_563949, JString, required = true,
                                  default = nil)
-  if valid_568049 != nil:
-    section.add "api-version", valid_568049
-  var valid_568050 = query.getOrDefault("$top")
-  valid_568050 = validateParameter(valid_568050, JInt, required = false, default = nil)
-  if valid_568050 != nil:
-    section.add "$top", valid_568050
+  if valid_563949 != nil:
+    section.add "api-version", valid_563949
+  var valid_563950 = query.getOrDefault("$top")
+  valid_563950 = validateParameter(valid_563950, JInt, required = false, default = nil)
+  if valid_563950 != nil:
+    section.add "$top", valid_563950
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -164,45 +168,45 @@ proc validate_IntegrationAccountsListBySubscription_567873(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568073: Call_IntegrationAccountsListBySubscription_567872;
+proc call*(call_563973: Call_IntegrationAccountsListBySubscription_563770;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Gets a list of integration accounts by subscription.
   ## 
-  let valid = call_568073.validator(path, query, header, formData, body)
-  let scheme = call_568073.pickScheme
+  let valid = call_563973.validator(path, query, header, formData, body)
+  let scheme = call_563973.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568073.url(scheme.get, call_568073.host, call_568073.base,
-                         call_568073.route, valid.getOrDefault("path"),
+  let url = call_563973.url(scheme.get, call_563973.host, call_563973.base,
+                         call_563973.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568073, url, valid)
+  result = hook(call_563973, url, valid)
 
-proc call*(call_568144: Call_IntegrationAccountsListBySubscription_567872;
+proc call*(call_564044: Call_IntegrationAccountsListBySubscription_563770;
           apiVersion: string; subscriptionId: string; Top: int = 0): Recallable =
   ## integrationAccountsListBySubscription
   ## Gets a list of integration accounts by subscription.
   ##   apiVersion: string (required)
   ##             : The API version.
-  ##   subscriptionId: string (required)
-  ##                 : The subscription id.
   ##   Top: int
   ##      : The number of items to be included in the result.
-  var path_568145 = newJObject()
-  var query_568147 = newJObject()
-  add(query_568147, "api-version", newJString(apiVersion))
-  add(path_568145, "subscriptionId", newJString(subscriptionId))
-  add(query_568147, "$top", newJInt(Top))
-  result = call_568144.call(path_568145, query_568147, nil, nil, nil)
+  ##   subscriptionId: string (required)
+  ##                 : The subscription id.
+  var path_564045 = newJObject()
+  var query_564047 = newJObject()
+  add(query_564047, "api-version", newJString(apiVersion))
+  add(query_564047, "$top", newJInt(Top))
+  add(path_564045, "subscriptionId", newJString(subscriptionId))
+  result = call_564044.call(path_564045, query_564047, nil, nil, nil)
 
-var integrationAccountsListBySubscription* = Call_IntegrationAccountsListBySubscription_567872(
+var integrationAccountsListBySubscription* = Call_IntegrationAccountsListBySubscription_563770(
     name: "integrationAccountsListBySubscription", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Logic/integrationAccounts",
-    validator: validate_IntegrationAccountsListBySubscription_567873, base: "",
-    url: url_IntegrationAccountsListBySubscription_567874, schemes: {Scheme.Https})
+    validator: validate_IntegrationAccountsListBySubscription_563771, base: "",
+    url: url_IntegrationAccountsListBySubscription_563772, schemes: {Scheme.Https})
 type
-  Call_IntegrationAccountsListByResourceGroup_568186 = ref object of OpenApiRestCall_567650
-proc url_IntegrationAccountsListByResourceGroup_568188(protocol: Scheme;
+  Call_IntegrationAccountsListByResourceGroup_564086 = ref object of OpenApiRestCall_563548
+proc url_IntegrationAccountsListByResourceGroup_564088(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -223,30 +227,30 @@ proc url_IntegrationAccountsListByResourceGroup_568188(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_IntegrationAccountsListByResourceGroup_568187(path: JsonNode;
+proc validate_IntegrationAccountsListByResourceGroup_564087(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets a list of integration accounts by resource group.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The resource group name.
   ##   subscriptionId: JString (required)
   ##                 : The subscription id.
+  ##   resourceGroupName: JString (required)
+  ##                    : The resource group name.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568189 = path.getOrDefault("resourceGroupName")
-  valid_568189 = validateParameter(valid_568189, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564089 = path.getOrDefault("subscriptionId")
+  valid_564089 = validateParameter(valid_564089, JString, required = true,
                                  default = nil)
-  if valid_568189 != nil:
-    section.add "resourceGroupName", valid_568189
-  var valid_568190 = path.getOrDefault("subscriptionId")
-  valid_568190 = validateParameter(valid_568190, JString, required = true,
+  if valid_564089 != nil:
+    section.add "subscriptionId", valid_564089
+  var valid_564090 = path.getOrDefault("resourceGroupName")
+  valid_564090 = validateParameter(valid_564090, JString, required = true,
                                  default = nil)
-  if valid_568190 != nil:
-    section.add "subscriptionId", valid_568190
+  if valid_564090 != nil:
+    section.add "resourceGroupName", valid_564090
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -256,15 +260,15 @@ proc validate_IntegrationAccountsListByResourceGroup_568187(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568191 = query.getOrDefault("api-version")
-  valid_568191 = validateParameter(valid_568191, JString, required = true,
+  var valid_564091 = query.getOrDefault("api-version")
+  valid_564091 = validateParameter(valid_564091, JString, required = true,
                                  default = nil)
-  if valid_568191 != nil:
-    section.add "api-version", valid_568191
-  var valid_568192 = query.getOrDefault("$top")
-  valid_568192 = validateParameter(valid_568192, JInt, required = false, default = nil)
-  if valid_568192 != nil:
-    section.add "$top", valid_568192
+  if valid_564091 != nil:
+    section.add "api-version", valid_564091
+  var valid_564092 = query.getOrDefault("$top")
+  valid_564092 = validateParameter(valid_564092, JInt, required = false, default = nil)
+  if valid_564092 != nil:
+    section.add "$top", valid_564092
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -273,50 +277,50 @@ proc validate_IntegrationAccountsListByResourceGroup_568187(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568193: Call_IntegrationAccountsListByResourceGroup_568186;
+proc call*(call_564093: Call_IntegrationAccountsListByResourceGroup_564086;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Gets a list of integration accounts by resource group.
   ## 
-  let valid = call_568193.validator(path, query, header, formData, body)
-  let scheme = call_568193.pickScheme
+  let valid = call_564093.validator(path, query, header, formData, body)
+  let scheme = call_564093.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568193.url(scheme.get, call_568193.host, call_568193.base,
-                         call_568193.route, valid.getOrDefault("path"),
+  let url = call_564093.url(scheme.get, call_564093.host, call_564093.base,
+                         call_564093.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568193, url, valid)
+  result = hook(call_564093, url, valid)
 
-proc call*(call_568194: Call_IntegrationAccountsListByResourceGroup_568186;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
+proc call*(call_564094: Call_IntegrationAccountsListByResourceGroup_564086;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string;
           Top: int = 0): Recallable =
   ## integrationAccountsListByResourceGroup
   ## Gets a list of integration accounts by resource group.
-  ##   resourceGroupName: string (required)
-  ##                    : The resource group name.
   ##   apiVersion: string (required)
   ##             : The API version.
-  ##   subscriptionId: string (required)
-  ##                 : The subscription id.
   ##   Top: int
   ##      : The number of items to be included in the result.
-  var path_568195 = newJObject()
-  var query_568196 = newJObject()
-  add(path_568195, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568196, "api-version", newJString(apiVersion))
-  add(path_568195, "subscriptionId", newJString(subscriptionId))
-  add(query_568196, "$top", newJInt(Top))
-  result = call_568194.call(path_568195, query_568196, nil, nil, nil)
+  ##   subscriptionId: string (required)
+  ##                 : The subscription id.
+  ##   resourceGroupName: string (required)
+  ##                    : The resource group name.
+  var path_564095 = newJObject()
+  var query_564096 = newJObject()
+  add(query_564096, "api-version", newJString(apiVersion))
+  add(query_564096, "$top", newJInt(Top))
+  add(path_564095, "subscriptionId", newJString(subscriptionId))
+  add(path_564095, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564094.call(path_564095, query_564096, nil, nil, nil)
 
-var integrationAccountsListByResourceGroup* = Call_IntegrationAccountsListByResourceGroup_568186(
+var integrationAccountsListByResourceGroup* = Call_IntegrationAccountsListByResourceGroup_564086(
     name: "integrationAccountsListByResourceGroup", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Logic/integrationAccounts",
-    validator: validate_IntegrationAccountsListByResourceGroup_568187, base: "",
-    url: url_IntegrationAccountsListByResourceGroup_568188,
+    validator: validate_IntegrationAccountsListByResourceGroup_564087, base: "",
+    url: url_IntegrationAccountsListByResourceGroup_564088,
     schemes: {Scheme.Https})
 type
-  Call_IntegrationAccountsCreateOrUpdate_568208 = ref object of OpenApiRestCall_567650
-proc url_IntegrationAccountsCreateOrUpdate_568210(protocol: Scheme; host: string;
+  Call_IntegrationAccountsCreateOrUpdate_564108 = ref object of OpenApiRestCall_563548
+proc url_IntegrationAccountsCreateOrUpdate_564110(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -340,37 +344,37 @@ proc url_IntegrationAccountsCreateOrUpdate_568210(protocol: Scheme; host: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_IntegrationAccountsCreateOrUpdate_568209(path: JsonNode;
+proc validate_IntegrationAccountsCreateOrUpdate_564109(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Creates or updates an integration account.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
+  ##   subscriptionId: JString (required)
+  ##                 : The subscription id.
   ##   resourceGroupName: JString (required)
   ##                    : The resource group name.
   ##   integrationAccountName: JString (required)
   ##                         : The integration account name.
-  ##   subscriptionId: JString (required)
-  ##                 : The subscription id.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568211 = path.getOrDefault("resourceGroupName")
-  valid_568211 = validateParameter(valid_568211, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564111 = path.getOrDefault("subscriptionId")
+  valid_564111 = validateParameter(valid_564111, JString, required = true,
                                  default = nil)
-  if valid_568211 != nil:
-    section.add "resourceGroupName", valid_568211
-  var valid_568212 = path.getOrDefault("integrationAccountName")
-  valid_568212 = validateParameter(valid_568212, JString, required = true,
+  if valid_564111 != nil:
+    section.add "subscriptionId", valid_564111
+  var valid_564112 = path.getOrDefault("resourceGroupName")
+  valid_564112 = validateParameter(valid_564112, JString, required = true,
                                  default = nil)
-  if valid_568212 != nil:
-    section.add "integrationAccountName", valid_568212
-  var valid_568213 = path.getOrDefault("subscriptionId")
-  valid_568213 = validateParameter(valid_568213, JString, required = true,
+  if valid_564112 != nil:
+    section.add "resourceGroupName", valid_564112
+  var valid_564113 = path.getOrDefault("integrationAccountName")
+  valid_564113 = validateParameter(valid_564113, JString, required = true,
                                  default = nil)
-  if valid_568213 != nil:
-    section.add "subscriptionId", valid_568213
+  if valid_564113 != nil:
+    section.add "integrationAccountName", valid_564113
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -378,11 +382,11 @@ proc validate_IntegrationAccountsCreateOrUpdate_568209(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568214 = query.getOrDefault("api-version")
-  valid_568214 = validateParameter(valid_568214, JString, required = true,
+  var valid_564114 = query.getOrDefault("api-version")
+  valid_564114 = validateParameter(valid_564114, JString, required = true,
                                  default = nil)
-  if valid_568214 != nil:
-    section.add "api-version", valid_568214
+  if valid_564114 != nil:
+    section.add "api-version", valid_564114
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -396,55 +400,54 @@ proc validate_IntegrationAccountsCreateOrUpdate_568209(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568216: Call_IntegrationAccountsCreateOrUpdate_568208;
+proc call*(call_564116: Call_IntegrationAccountsCreateOrUpdate_564108;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Creates or updates an integration account.
   ## 
-  let valid = call_568216.validator(path, query, header, formData, body)
-  let scheme = call_568216.pickScheme
+  let valid = call_564116.validator(path, query, header, formData, body)
+  let scheme = call_564116.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568216.url(scheme.get, call_568216.host, call_568216.base,
-                         call_568216.route, valid.getOrDefault("path"),
+  let url = call_564116.url(scheme.get, call_564116.host, call_564116.base,
+                         call_564116.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568216, url, valid)
+  result = hook(call_564116, url, valid)
 
-proc call*(call_568217: Call_IntegrationAccountsCreateOrUpdate_568208;
-          resourceGroupName: string; apiVersion: string;
-          integrationAccountName: string; subscriptionId: string;
-          integrationAccount: JsonNode): Recallable =
+proc call*(call_564117: Call_IntegrationAccountsCreateOrUpdate_564108;
+          apiVersion: string; subscriptionId: string; integrationAccount: JsonNode;
+          resourceGroupName: string; integrationAccountName: string): Recallable =
   ## integrationAccountsCreateOrUpdate
   ## Creates or updates an integration account.
-  ##   resourceGroupName: string (required)
-  ##                    : The resource group name.
   ##   apiVersion: string (required)
   ##             : The API version.
-  ##   integrationAccountName: string (required)
-  ##                         : The integration account name.
   ##   subscriptionId: string (required)
   ##                 : The subscription id.
   ##   integrationAccount: JObject (required)
   ##                     : The integration account.
-  var path_568218 = newJObject()
-  var query_568219 = newJObject()
-  var body_568220 = newJObject()
-  add(path_568218, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568219, "api-version", newJString(apiVersion))
-  add(path_568218, "integrationAccountName", newJString(integrationAccountName))
-  add(path_568218, "subscriptionId", newJString(subscriptionId))
+  ##   resourceGroupName: string (required)
+  ##                    : The resource group name.
+  ##   integrationAccountName: string (required)
+  ##                         : The integration account name.
+  var path_564118 = newJObject()
+  var query_564119 = newJObject()
+  var body_564120 = newJObject()
+  add(query_564119, "api-version", newJString(apiVersion))
+  add(path_564118, "subscriptionId", newJString(subscriptionId))
   if integrationAccount != nil:
-    body_568220 = integrationAccount
-  result = call_568217.call(path_568218, query_568219, nil, nil, body_568220)
+    body_564120 = integrationAccount
+  add(path_564118, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564118, "integrationAccountName", newJString(integrationAccountName))
+  result = call_564117.call(path_564118, query_564119, nil, nil, body_564120)
 
-var integrationAccountsCreateOrUpdate* = Call_IntegrationAccountsCreateOrUpdate_568208(
+var integrationAccountsCreateOrUpdate* = Call_IntegrationAccountsCreateOrUpdate_564108(
     name: "integrationAccountsCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Logic/integrationAccounts/{integrationAccountName}",
-    validator: validate_IntegrationAccountsCreateOrUpdate_568209, base: "",
-    url: url_IntegrationAccountsCreateOrUpdate_568210, schemes: {Scheme.Https})
+    validator: validate_IntegrationAccountsCreateOrUpdate_564109, base: "",
+    url: url_IntegrationAccountsCreateOrUpdate_564110, schemes: {Scheme.Https})
 type
-  Call_IntegrationAccountsGet_568197 = ref object of OpenApiRestCall_567650
-proc url_IntegrationAccountsGet_568199(protocol: Scheme; host: string; base: string;
+  Call_IntegrationAccountsGet_564097 = ref object of OpenApiRestCall_563548
+proc url_IntegrationAccountsGet_564099(protocol: Scheme; host: string; base: string;
                                       route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -468,37 +471,37 @@ proc url_IntegrationAccountsGet_568199(protocol: Scheme; host: string; base: str
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_IntegrationAccountsGet_568198(path: JsonNode; query: JsonNode;
+proc validate_IntegrationAccountsGet_564098(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets an integration account.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
+  ##   subscriptionId: JString (required)
+  ##                 : The subscription id.
   ##   resourceGroupName: JString (required)
   ##                    : The resource group name.
   ##   integrationAccountName: JString (required)
   ##                         : The integration account name.
-  ##   subscriptionId: JString (required)
-  ##                 : The subscription id.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568200 = path.getOrDefault("resourceGroupName")
-  valid_568200 = validateParameter(valid_568200, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564100 = path.getOrDefault("subscriptionId")
+  valid_564100 = validateParameter(valid_564100, JString, required = true,
                                  default = nil)
-  if valid_568200 != nil:
-    section.add "resourceGroupName", valid_568200
-  var valid_568201 = path.getOrDefault("integrationAccountName")
-  valid_568201 = validateParameter(valid_568201, JString, required = true,
+  if valid_564100 != nil:
+    section.add "subscriptionId", valid_564100
+  var valid_564101 = path.getOrDefault("resourceGroupName")
+  valid_564101 = validateParameter(valid_564101, JString, required = true,
                                  default = nil)
-  if valid_568201 != nil:
-    section.add "integrationAccountName", valid_568201
-  var valid_568202 = path.getOrDefault("subscriptionId")
-  valid_568202 = validateParameter(valid_568202, JString, required = true,
+  if valid_564101 != nil:
+    section.add "resourceGroupName", valid_564101
+  var valid_564102 = path.getOrDefault("integrationAccountName")
+  valid_564102 = validateParameter(valid_564102, JString, required = true,
                                  default = nil)
-  if valid_568202 != nil:
-    section.add "subscriptionId", valid_568202
+  if valid_564102 != nil:
+    section.add "integrationAccountName", valid_564102
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -506,11 +509,11 @@ proc validate_IntegrationAccountsGet_568198(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568203 = query.getOrDefault("api-version")
-  valid_568203 = validateParameter(valid_568203, JString, required = true,
+  var valid_564103 = query.getOrDefault("api-version")
+  valid_564103 = validateParameter(valid_564103, JString, required = true,
                                  default = nil)
-  if valid_568203 != nil:
-    section.add "api-version", valid_568203
+  if valid_564103 != nil:
+    section.add "api-version", valid_564103
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -519,48 +522,48 @@ proc validate_IntegrationAccountsGet_568198(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568204: Call_IntegrationAccountsGet_568197; path: JsonNode;
+proc call*(call_564104: Call_IntegrationAccountsGet_564097; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets an integration account.
   ## 
-  let valid = call_568204.validator(path, query, header, formData, body)
-  let scheme = call_568204.pickScheme
+  let valid = call_564104.validator(path, query, header, formData, body)
+  let scheme = call_564104.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568204.url(scheme.get, call_568204.host, call_568204.base,
-                         call_568204.route, valid.getOrDefault("path"),
+  let url = call_564104.url(scheme.get, call_564104.host, call_564104.base,
+                         call_564104.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568204, url, valid)
+  result = hook(call_564104, url, valid)
 
-proc call*(call_568205: Call_IntegrationAccountsGet_568197;
-          resourceGroupName: string; apiVersion: string;
-          integrationAccountName: string; subscriptionId: string): Recallable =
+proc call*(call_564105: Call_IntegrationAccountsGet_564097; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string;
+          integrationAccountName: string): Recallable =
   ## integrationAccountsGet
   ## Gets an integration account.
-  ##   resourceGroupName: string (required)
-  ##                    : The resource group name.
   ##   apiVersion: string (required)
   ##             : The API version.
-  ##   integrationAccountName: string (required)
-  ##                         : The integration account name.
   ##   subscriptionId: string (required)
   ##                 : The subscription id.
-  var path_568206 = newJObject()
-  var query_568207 = newJObject()
-  add(path_568206, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568207, "api-version", newJString(apiVersion))
-  add(path_568206, "integrationAccountName", newJString(integrationAccountName))
-  add(path_568206, "subscriptionId", newJString(subscriptionId))
-  result = call_568205.call(path_568206, query_568207, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The resource group name.
+  ##   integrationAccountName: string (required)
+  ##                         : The integration account name.
+  var path_564106 = newJObject()
+  var query_564107 = newJObject()
+  add(query_564107, "api-version", newJString(apiVersion))
+  add(path_564106, "subscriptionId", newJString(subscriptionId))
+  add(path_564106, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564106, "integrationAccountName", newJString(integrationAccountName))
+  result = call_564105.call(path_564106, query_564107, nil, nil, nil)
 
-var integrationAccountsGet* = Call_IntegrationAccountsGet_568197(
+var integrationAccountsGet* = Call_IntegrationAccountsGet_564097(
     name: "integrationAccountsGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Logic/integrationAccounts/{integrationAccountName}",
-    validator: validate_IntegrationAccountsGet_568198, base: "",
-    url: url_IntegrationAccountsGet_568199, schemes: {Scheme.Https})
+    validator: validate_IntegrationAccountsGet_564098, base: "",
+    url: url_IntegrationAccountsGet_564099, schemes: {Scheme.Https})
 type
-  Call_IntegrationAccountsUpdate_568232 = ref object of OpenApiRestCall_567650
-proc url_IntegrationAccountsUpdate_568234(protocol: Scheme; host: string;
+  Call_IntegrationAccountsUpdate_564132 = ref object of OpenApiRestCall_563548
+proc url_IntegrationAccountsUpdate_564134(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -584,37 +587,37 @@ proc url_IntegrationAccountsUpdate_568234(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_IntegrationAccountsUpdate_568233(path: JsonNode; query: JsonNode;
+proc validate_IntegrationAccountsUpdate_564133(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Updates an integration account.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
+  ##   subscriptionId: JString (required)
+  ##                 : The subscription id.
   ##   resourceGroupName: JString (required)
   ##                    : The resource group name.
   ##   integrationAccountName: JString (required)
   ##                         : The integration account name.
-  ##   subscriptionId: JString (required)
-  ##                 : The subscription id.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568235 = path.getOrDefault("resourceGroupName")
-  valid_568235 = validateParameter(valid_568235, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564135 = path.getOrDefault("subscriptionId")
+  valid_564135 = validateParameter(valid_564135, JString, required = true,
                                  default = nil)
-  if valid_568235 != nil:
-    section.add "resourceGroupName", valid_568235
-  var valid_568236 = path.getOrDefault("integrationAccountName")
-  valid_568236 = validateParameter(valid_568236, JString, required = true,
+  if valid_564135 != nil:
+    section.add "subscriptionId", valid_564135
+  var valid_564136 = path.getOrDefault("resourceGroupName")
+  valid_564136 = validateParameter(valid_564136, JString, required = true,
                                  default = nil)
-  if valid_568236 != nil:
-    section.add "integrationAccountName", valid_568236
-  var valid_568237 = path.getOrDefault("subscriptionId")
-  valid_568237 = validateParameter(valid_568237, JString, required = true,
+  if valid_564136 != nil:
+    section.add "resourceGroupName", valid_564136
+  var valid_564137 = path.getOrDefault("integrationAccountName")
+  valid_564137 = validateParameter(valid_564137, JString, required = true,
                                  default = nil)
-  if valid_568237 != nil:
-    section.add "subscriptionId", valid_568237
+  if valid_564137 != nil:
+    section.add "integrationAccountName", valid_564137
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -622,11 +625,11 @@ proc validate_IntegrationAccountsUpdate_568233(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568238 = query.getOrDefault("api-version")
-  valid_568238 = validateParameter(valid_568238, JString, required = true,
+  var valid_564138 = query.getOrDefault("api-version")
+  valid_564138 = validateParameter(valid_564138, JString, required = true,
                                  default = nil)
-  if valid_568238 != nil:
-    section.add "api-version", valid_568238
+  if valid_564138 != nil:
+    section.add "api-version", valid_564138
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -640,54 +643,53 @@ proc validate_IntegrationAccountsUpdate_568233(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568240: Call_IntegrationAccountsUpdate_568232; path: JsonNode;
+proc call*(call_564140: Call_IntegrationAccountsUpdate_564132; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Updates an integration account.
   ## 
-  let valid = call_568240.validator(path, query, header, formData, body)
-  let scheme = call_568240.pickScheme
+  let valid = call_564140.validator(path, query, header, formData, body)
+  let scheme = call_564140.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568240.url(scheme.get, call_568240.host, call_568240.base,
-                         call_568240.route, valid.getOrDefault("path"),
+  let url = call_564140.url(scheme.get, call_564140.host, call_564140.base,
+                         call_564140.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568240, url, valid)
+  result = hook(call_564140, url, valid)
 
-proc call*(call_568241: Call_IntegrationAccountsUpdate_568232;
-          resourceGroupName: string; apiVersion: string;
-          integrationAccountName: string; subscriptionId: string;
-          integrationAccount: JsonNode): Recallable =
+proc call*(call_564141: Call_IntegrationAccountsUpdate_564132; apiVersion: string;
+          subscriptionId: string; integrationAccount: JsonNode;
+          resourceGroupName: string; integrationAccountName: string): Recallable =
   ## integrationAccountsUpdate
   ## Updates an integration account.
-  ##   resourceGroupName: string (required)
-  ##                    : The resource group name.
   ##   apiVersion: string (required)
   ##             : The API version.
-  ##   integrationAccountName: string (required)
-  ##                         : The integration account name.
   ##   subscriptionId: string (required)
   ##                 : The subscription id.
   ##   integrationAccount: JObject (required)
   ##                     : The integration account.
-  var path_568242 = newJObject()
-  var query_568243 = newJObject()
-  var body_568244 = newJObject()
-  add(path_568242, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568243, "api-version", newJString(apiVersion))
-  add(path_568242, "integrationAccountName", newJString(integrationAccountName))
-  add(path_568242, "subscriptionId", newJString(subscriptionId))
+  ##   resourceGroupName: string (required)
+  ##                    : The resource group name.
+  ##   integrationAccountName: string (required)
+  ##                         : The integration account name.
+  var path_564142 = newJObject()
+  var query_564143 = newJObject()
+  var body_564144 = newJObject()
+  add(query_564143, "api-version", newJString(apiVersion))
+  add(path_564142, "subscriptionId", newJString(subscriptionId))
   if integrationAccount != nil:
-    body_568244 = integrationAccount
-  result = call_568241.call(path_568242, query_568243, nil, nil, body_568244)
+    body_564144 = integrationAccount
+  add(path_564142, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564142, "integrationAccountName", newJString(integrationAccountName))
+  result = call_564141.call(path_564142, query_564143, nil, nil, body_564144)
 
-var integrationAccountsUpdate* = Call_IntegrationAccountsUpdate_568232(
+var integrationAccountsUpdate* = Call_IntegrationAccountsUpdate_564132(
     name: "integrationAccountsUpdate", meth: HttpMethod.HttpPatch,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Logic/integrationAccounts/{integrationAccountName}",
-    validator: validate_IntegrationAccountsUpdate_568233, base: "",
-    url: url_IntegrationAccountsUpdate_568234, schemes: {Scheme.Https})
+    validator: validate_IntegrationAccountsUpdate_564133, base: "",
+    url: url_IntegrationAccountsUpdate_564134, schemes: {Scheme.Https})
 type
-  Call_IntegrationAccountsDelete_568221 = ref object of OpenApiRestCall_567650
-proc url_IntegrationAccountsDelete_568223(protocol: Scheme; host: string;
+  Call_IntegrationAccountsDelete_564121 = ref object of OpenApiRestCall_563548
+proc url_IntegrationAccountsDelete_564123(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -711,37 +713,37 @@ proc url_IntegrationAccountsDelete_568223(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_IntegrationAccountsDelete_568222(path: JsonNode; query: JsonNode;
+proc validate_IntegrationAccountsDelete_564122(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Deletes an integration account.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
+  ##   subscriptionId: JString (required)
+  ##                 : The subscription id.
   ##   resourceGroupName: JString (required)
   ##                    : The resource group name.
   ##   integrationAccountName: JString (required)
   ##                         : The integration account name.
-  ##   subscriptionId: JString (required)
-  ##                 : The subscription id.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568224 = path.getOrDefault("resourceGroupName")
-  valid_568224 = validateParameter(valid_568224, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564124 = path.getOrDefault("subscriptionId")
+  valid_564124 = validateParameter(valid_564124, JString, required = true,
                                  default = nil)
-  if valid_568224 != nil:
-    section.add "resourceGroupName", valid_568224
-  var valid_568225 = path.getOrDefault("integrationAccountName")
-  valid_568225 = validateParameter(valid_568225, JString, required = true,
+  if valid_564124 != nil:
+    section.add "subscriptionId", valid_564124
+  var valid_564125 = path.getOrDefault("resourceGroupName")
+  valid_564125 = validateParameter(valid_564125, JString, required = true,
                                  default = nil)
-  if valid_568225 != nil:
-    section.add "integrationAccountName", valid_568225
-  var valid_568226 = path.getOrDefault("subscriptionId")
-  valid_568226 = validateParameter(valid_568226, JString, required = true,
+  if valid_564125 != nil:
+    section.add "resourceGroupName", valid_564125
+  var valid_564126 = path.getOrDefault("integrationAccountName")
+  valid_564126 = validateParameter(valid_564126, JString, required = true,
                                  default = nil)
-  if valid_568226 != nil:
-    section.add "subscriptionId", valid_568226
+  if valid_564126 != nil:
+    section.add "integrationAccountName", valid_564126
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -749,11 +751,11 @@ proc validate_IntegrationAccountsDelete_568222(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568227 = query.getOrDefault("api-version")
-  valid_568227 = validateParameter(valid_568227, JString, required = true,
+  var valid_564127 = query.getOrDefault("api-version")
+  valid_564127 = validateParameter(valid_564127, JString, required = true,
                                  default = nil)
-  if valid_568227 != nil:
-    section.add "api-version", valid_568227
+  if valid_564127 != nil:
+    section.add "api-version", valid_564127
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -762,48 +764,48 @@ proc validate_IntegrationAccountsDelete_568222(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568228: Call_IntegrationAccountsDelete_568221; path: JsonNode;
+proc call*(call_564128: Call_IntegrationAccountsDelete_564121; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes an integration account.
   ## 
-  let valid = call_568228.validator(path, query, header, formData, body)
-  let scheme = call_568228.pickScheme
+  let valid = call_564128.validator(path, query, header, formData, body)
+  let scheme = call_564128.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568228.url(scheme.get, call_568228.host, call_568228.base,
-                         call_568228.route, valid.getOrDefault("path"),
+  let url = call_564128.url(scheme.get, call_564128.host, call_564128.base,
+                         call_564128.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568228, url, valid)
+  result = hook(call_564128, url, valid)
 
-proc call*(call_568229: Call_IntegrationAccountsDelete_568221;
-          resourceGroupName: string; apiVersion: string;
-          integrationAccountName: string; subscriptionId: string): Recallable =
+proc call*(call_564129: Call_IntegrationAccountsDelete_564121; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string;
+          integrationAccountName: string): Recallable =
   ## integrationAccountsDelete
   ## Deletes an integration account.
-  ##   resourceGroupName: string (required)
-  ##                    : The resource group name.
   ##   apiVersion: string (required)
   ##             : The API version.
-  ##   integrationAccountName: string (required)
-  ##                         : The integration account name.
   ##   subscriptionId: string (required)
   ##                 : The subscription id.
-  var path_568230 = newJObject()
-  var query_568231 = newJObject()
-  add(path_568230, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568231, "api-version", newJString(apiVersion))
-  add(path_568230, "integrationAccountName", newJString(integrationAccountName))
-  add(path_568230, "subscriptionId", newJString(subscriptionId))
-  result = call_568229.call(path_568230, query_568231, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The resource group name.
+  ##   integrationAccountName: string (required)
+  ##                         : The integration account name.
+  var path_564130 = newJObject()
+  var query_564131 = newJObject()
+  add(query_564131, "api-version", newJString(apiVersion))
+  add(path_564130, "subscriptionId", newJString(subscriptionId))
+  add(path_564130, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564130, "integrationAccountName", newJString(integrationAccountName))
+  result = call_564129.call(path_564130, query_564131, nil, nil, nil)
 
-var integrationAccountsDelete* = Call_IntegrationAccountsDelete_568221(
+var integrationAccountsDelete* = Call_IntegrationAccountsDelete_564121(
     name: "integrationAccountsDelete", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Logic/integrationAccounts/{integrationAccountName}",
-    validator: validate_IntegrationAccountsDelete_568222, base: "",
-    url: url_IntegrationAccountsDelete_568223, schemes: {Scheme.Https})
+    validator: validate_IntegrationAccountsDelete_564122, base: "",
+    url: url_IntegrationAccountsDelete_564123, schemes: {Scheme.Https})
 type
-  Call_IntegrationAccountAgreementsList_568245 = ref object of OpenApiRestCall_567650
-proc url_IntegrationAccountAgreementsList_568247(protocol: Scheme; host: string;
+  Call_IntegrationAccountAgreementsList_564145 = ref object of OpenApiRestCall_563548
+proc url_IntegrationAccountAgreementsList_564147(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -828,37 +830,37 @@ proc url_IntegrationAccountAgreementsList_568247(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_IntegrationAccountAgreementsList_568246(path: JsonNode;
+proc validate_IntegrationAccountAgreementsList_564146(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets a list of integration account agreements.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
+  ##   subscriptionId: JString (required)
+  ##                 : The subscription id.
   ##   resourceGroupName: JString (required)
   ##                    : The resource group name.
   ##   integrationAccountName: JString (required)
   ##                         : The integration account name.
-  ##   subscriptionId: JString (required)
-  ##                 : The subscription id.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568248 = path.getOrDefault("resourceGroupName")
-  valid_568248 = validateParameter(valid_568248, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564148 = path.getOrDefault("subscriptionId")
+  valid_564148 = validateParameter(valid_564148, JString, required = true,
                                  default = nil)
-  if valid_568248 != nil:
-    section.add "resourceGroupName", valid_568248
-  var valid_568249 = path.getOrDefault("integrationAccountName")
-  valid_568249 = validateParameter(valid_568249, JString, required = true,
+  if valid_564148 != nil:
+    section.add "subscriptionId", valid_564148
+  var valid_564149 = path.getOrDefault("resourceGroupName")
+  valid_564149 = validateParameter(valid_564149, JString, required = true,
                                  default = nil)
-  if valid_568249 != nil:
-    section.add "integrationAccountName", valid_568249
-  var valid_568250 = path.getOrDefault("subscriptionId")
-  valid_568250 = validateParameter(valid_568250, JString, required = true,
+  if valid_564149 != nil:
+    section.add "resourceGroupName", valid_564149
+  var valid_564150 = path.getOrDefault("integrationAccountName")
+  valid_564150 = validateParameter(valid_564150, JString, required = true,
                                  default = nil)
-  if valid_568250 != nil:
-    section.add "subscriptionId", valid_568250
+  if valid_564150 != nil:
+    section.add "integrationAccountName", valid_564150
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -870,20 +872,20 @@ proc validate_IntegrationAccountAgreementsList_568246(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568251 = query.getOrDefault("api-version")
-  valid_568251 = validateParameter(valid_568251, JString, required = true,
+  var valid_564151 = query.getOrDefault("api-version")
+  valid_564151 = validateParameter(valid_564151, JString, required = true,
                                  default = nil)
-  if valid_568251 != nil:
-    section.add "api-version", valid_568251
-  var valid_568252 = query.getOrDefault("$top")
-  valid_568252 = validateParameter(valid_568252, JInt, required = false, default = nil)
-  if valid_568252 != nil:
-    section.add "$top", valid_568252
-  var valid_568253 = query.getOrDefault("$filter")
-  valid_568253 = validateParameter(valid_568253, JString, required = false,
+  if valid_564151 != nil:
+    section.add "api-version", valid_564151
+  var valid_564152 = query.getOrDefault("$top")
+  valid_564152 = validateParameter(valid_564152, JInt, required = false, default = nil)
+  if valid_564152 != nil:
+    section.add "$top", valid_564152
+  var valid_564153 = query.getOrDefault("$filter")
+  valid_564153 = validateParameter(valid_564153, JString, required = false,
                                  default = nil)
-  if valid_568253 != nil:
-    section.add "$filter", valid_568253
+  if valid_564153 != nil:
+    section.add "$filter", valid_564153
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -892,56 +894,55 @@ proc validate_IntegrationAccountAgreementsList_568246(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568254: Call_IntegrationAccountAgreementsList_568245;
+proc call*(call_564154: Call_IntegrationAccountAgreementsList_564145;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Gets a list of integration account agreements.
   ## 
-  let valid = call_568254.validator(path, query, header, formData, body)
-  let scheme = call_568254.pickScheme
+  let valid = call_564154.validator(path, query, header, formData, body)
+  let scheme = call_564154.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568254.url(scheme.get, call_568254.host, call_568254.base,
-                         call_568254.route, valid.getOrDefault("path"),
+  let url = call_564154.url(scheme.get, call_564154.host, call_564154.base,
+                         call_564154.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568254, url, valid)
+  result = hook(call_564154, url, valid)
 
-proc call*(call_568255: Call_IntegrationAccountAgreementsList_568245;
-          resourceGroupName: string; apiVersion: string;
-          integrationAccountName: string; subscriptionId: string; Top: int = 0;
-          Filter: string = ""): Recallable =
+proc call*(call_564155: Call_IntegrationAccountAgreementsList_564145;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string;
+          integrationAccountName: string; Top: int = 0; Filter: string = ""): Recallable =
   ## integrationAccountAgreementsList
   ## Gets a list of integration account agreements.
-  ##   resourceGroupName: string (required)
-  ##                    : The resource group name.
   ##   apiVersion: string (required)
   ##             : The API version.
-  ##   integrationAccountName: string (required)
-  ##                         : The integration account name.
-  ##   subscriptionId: string (required)
-  ##                 : The subscription id.
   ##   Top: int
   ##      : The number of items to be included in the result.
+  ##   subscriptionId: string (required)
+  ##                 : The subscription id.
+  ##   resourceGroupName: string (required)
+  ##                    : The resource group name.
   ##   Filter: string
   ##         : The filter to apply on the operation.
-  var path_568256 = newJObject()
-  var query_568257 = newJObject()
-  add(path_568256, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568257, "api-version", newJString(apiVersion))
-  add(path_568256, "integrationAccountName", newJString(integrationAccountName))
-  add(path_568256, "subscriptionId", newJString(subscriptionId))
-  add(query_568257, "$top", newJInt(Top))
-  add(query_568257, "$filter", newJString(Filter))
-  result = call_568255.call(path_568256, query_568257, nil, nil, nil)
+  ##   integrationAccountName: string (required)
+  ##                         : The integration account name.
+  var path_564156 = newJObject()
+  var query_564157 = newJObject()
+  add(query_564157, "api-version", newJString(apiVersion))
+  add(query_564157, "$top", newJInt(Top))
+  add(path_564156, "subscriptionId", newJString(subscriptionId))
+  add(path_564156, "resourceGroupName", newJString(resourceGroupName))
+  add(query_564157, "$filter", newJString(Filter))
+  add(path_564156, "integrationAccountName", newJString(integrationAccountName))
+  result = call_564155.call(path_564156, query_564157, nil, nil, nil)
 
-var integrationAccountAgreementsList* = Call_IntegrationAccountAgreementsList_568245(
+var integrationAccountAgreementsList* = Call_IntegrationAccountAgreementsList_564145(
     name: "integrationAccountAgreementsList", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Logic/integrationAccounts/{integrationAccountName}/agreements",
-    validator: validate_IntegrationAccountAgreementsList_568246, base: "",
-    url: url_IntegrationAccountAgreementsList_568247, schemes: {Scheme.Https})
+    validator: validate_IntegrationAccountAgreementsList_564146, base: "",
+    url: url_IntegrationAccountAgreementsList_564147, schemes: {Scheme.Https})
 type
-  Call_IntegrationAccountAgreementsCreateOrUpdate_568270 = ref object of OpenApiRestCall_567650
-proc url_IntegrationAccountAgreementsCreateOrUpdate_568272(protocol: Scheme;
+  Call_IntegrationAccountAgreementsCreateOrUpdate_564170 = ref object of OpenApiRestCall_563548
+proc url_IntegrationAccountAgreementsCreateOrUpdate_564172(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -968,44 +969,44 @@ proc url_IntegrationAccountAgreementsCreateOrUpdate_568272(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_IntegrationAccountAgreementsCreateOrUpdate_568271(path: JsonNode;
+proc validate_IntegrationAccountAgreementsCreateOrUpdate_564171(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Creates or updates an integration account agreement.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
+  ##   agreementName: JString (required)
+  ##                : The integration account agreement name.
+  ##   subscriptionId: JString (required)
+  ##                 : The subscription id.
   ##   resourceGroupName: JString (required)
   ##                    : The resource group name.
   ##   integrationAccountName: JString (required)
   ##                         : The integration account name.
-  ##   subscriptionId: JString (required)
-  ##                 : The subscription id.
-  ##   agreementName: JString (required)
-  ##                : The integration account agreement name.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568273 = path.getOrDefault("resourceGroupName")
-  valid_568273 = validateParameter(valid_568273, JString, required = true,
+        "path argument is necessary due to required `agreementName` field"
+  var valid_564173 = path.getOrDefault("agreementName")
+  valid_564173 = validateParameter(valid_564173, JString, required = true,
                                  default = nil)
-  if valid_568273 != nil:
-    section.add "resourceGroupName", valid_568273
-  var valid_568274 = path.getOrDefault("integrationAccountName")
-  valid_568274 = validateParameter(valid_568274, JString, required = true,
+  if valid_564173 != nil:
+    section.add "agreementName", valid_564173
+  var valid_564174 = path.getOrDefault("subscriptionId")
+  valid_564174 = validateParameter(valid_564174, JString, required = true,
                                  default = nil)
-  if valid_568274 != nil:
-    section.add "integrationAccountName", valid_568274
-  var valid_568275 = path.getOrDefault("subscriptionId")
-  valid_568275 = validateParameter(valid_568275, JString, required = true,
+  if valid_564174 != nil:
+    section.add "subscriptionId", valid_564174
+  var valid_564175 = path.getOrDefault("resourceGroupName")
+  valid_564175 = validateParameter(valid_564175, JString, required = true,
                                  default = nil)
-  if valid_568275 != nil:
-    section.add "subscriptionId", valid_568275
-  var valid_568276 = path.getOrDefault("agreementName")
-  valid_568276 = validateParameter(valid_568276, JString, required = true,
+  if valid_564175 != nil:
+    section.add "resourceGroupName", valid_564175
+  var valid_564176 = path.getOrDefault("integrationAccountName")
+  valid_564176 = validateParameter(valid_564176, JString, required = true,
                                  default = nil)
-  if valid_568276 != nil:
-    section.add "agreementName", valid_568276
+  if valid_564176 != nil:
+    section.add "integrationAccountName", valid_564176
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1013,11 +1014,11 @@ proc validate_IntegrationAccountAgreementsCreateOrUpdate_568271(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568277 = query.getOrDefault("api-version")
-  valid_568277 = validateParameter(valid_568277, JString, required = true,
+  var valid_564177 = query.getOrDefault("api-version")
+  valid_564177 = validateParameter(valid_564177, JString, required = true,
                                  default = nil)
-  if valid_568277 != nil:
-    section.add "api-version", valid_568277
+  if valid_564177 != nil:
+    section.add "api-version", valid_564177
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1031,59 +1032,59 @@ proc validate_IntegrationAccountAgreementsCreateOrUpdate_568271(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568279: Call_IntegrationAccountAgreementsCreateOrUpdate_568270;
+proc call*(call_564179: Call_IntegrationAccountAgreementsCreateOrUpdate_564170;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Creates or updates an integration account agreement.
   ## 
-  let valid = call_568279.validator(path, query, header, formData, body)
-  let scheme = call_568279.pickScheme
+  let valid = call_564179.validator(path, query, header, formData, body)
+  let scheme = call_564179.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568279.url(scheme.get, call_568279.host, call_568279.base,
-                         call_568279.route, valid.getOrDefault("path"),
+  let url = call_564179.url(scheme.get, call_564179.host, call_564179.base,
+                         call_564179.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568279, url, valid)
+  result = hook(call_564179, url, valid)
 
-proc call*(call_568280: Call_IntegrationAccountAgreementsCreateOrUpdate_568270;
-          resourceGroupName: string; apiVersion: string;
-          integrationAccountName: string; subscriptionId: string;
-          agreementName: string; agreement: JsonNode): Recallable =
+proc call*(call_564180: Call_IntegrationAccountAgreementsCreateOrUpdate_564170;
+          apiVersion: string; agreement: JsonNode; agreementName: string;
+          subscriptionId: string; resourceGroupName: string;
+          integrationAccountName: string): Recallable =
   ## integrationAccountAgreementsCreateOrUpdate
   ## Creates or updates an integration account agreement.
-  ##   resourceGroupName: string (required)
-  ##                    : The resource group name.
   ##   apiVersion: string (required)
   ##             : The API version.
-  ##   integrationAccountName: string (required)
-  ##                         : The integration account name.
-  ##   subscriptionId: string (required)
-  ##                 : The subscription id.
-  ##   agreementName: string (required)
-  ##                : The integration account agreement name.
   ##   agreement: JObject (required)
   ##            : The integration account agreement.
-  var path_568281 = newJObject()
-  var query_568282 = newJObject()
-  var body_568283 = newJObject()
-  add(path_568281, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568282, "api-version", newJString(apiVersion))
-  add(path_568281, "integrationAccountName", newJString(integrationAccountName))
-  add(path_568281, "subscriptionId", newJString(subscriptionId))
-  add(path_568281, "agreementName", newJString(agreementName))
+  ##   agreementName: string (required)
+  ##                : The integration account agreement name.
+  ##   subscriptionId: string (required)
+  ##                 : The subscription id.
+  ##   resourceGroupName: string (required)
+  ##                    : The resource group name.
+  ##   integrationAccountName: string (required)
+  ##                         : The integration account name.
+  var path_564181 = newJObject()
+  var query_564182 = newJObject()
+  var body_564183 = newJObject()
+  add(query_564182, "api-version", newJString(apiVersion))
   if agreement != nil:
-    body_568283 = agreement
-  result = call_568280.call(path_568281, query_568282, nil, nil, body_568283)
+    body_564183 = agreement
+  add(path_564181, "agreementName", newJString(agreementName))
+  add(path_564181, "subscriptionId", newJString(subscriptionId))
+  add(path_564181, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564181, "integrationAccountName", newJString(integrationAccountName))
+  result = call_564180.call(path_564181, query_564182, nil, nil, body_564183)
 
-var integrationAccountAgreementsCreateOrUpdate* = Call_IntegrationAccountAgreementsCreateOrUpdate_568270(
+var integrationAccountAgreementsCreateOrUpdate* = Call_IntegrationAccountAgreementsCreateOrUpdate_564170(
     name: "integrationAccountAgreementsCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Logic/integrationAccounts/{integrationAccountName}/agreements/{agreementName}",
-    validator: validate_IntegrationAccountAgreementsCreateOrUpdate_568271,
-    base: "", url: url_IntegrationAccountAgreementsCreateOrUpdate_568272,
+    validator: validate_IntegrationAccountAgreementsCreateOrUpdate_564171,
+    base: "", url: url_IntegrationAccountAgreementsCreateOrUpdate_564172,
     schemes: {Scheme.Https})
 type
-  Call_IntegrationAccountAgreementsGet_568258 = ref object of OpenApiRestCall_567650
-proc url_IntegrationAccountAgreementsGet_568260(protocol: Scheme; host: string;
+  Call_IntegrationAccountAgreementsGet_564158 = ref object of OpenApiRestCall_563548
+proc url_IntegrationAccountAgreementsGet_564160(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1110,44 +1111,44 @@ proc url_IntegrationAccountAgreementsGet_568260(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_IntegrationAccountAgreementsGet_568259(path: JsonNode;
+proc validate_IntegrationAccountAgreementsGet_564159(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets an integration account agreement.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
+  ##   agreementName: JString (required)
+  ##                : The integration account agreement name.
+  ##   subscriptionId: JString (required)
+  ##                 : The subscription id.
   ##   resourceGroupName: JString (required)
   ##                    : The resource group name.
   ##   integrationAccountName: JString (required)
   ##                         : The integration account name.
-  ##   subscriptionId: JString (required)
-  ##                 : The subscription id.
-  ##   agreementName: JString (required)
-  ##                : The integration account agreement name.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568261 = path.getOrDefault("resourceGroupName")
-  valid_568261 = validateParameter(valid_568261, JString, required = true,
+        "path argument is necessary due to required `agreementName` field"
+  var valid_564161 = path.getOrDefault("agreementName")
+  valid_564161 = validateParameter(valid_564161, JString, required = true,
                                  default = nil)
-  if valid_568261 != nil:
-    section.add "resourceGroupName", valid_568261
-  var valid_568262 = path.getOrDefault("integrationAccountName")
-  valid_568262 = validateParameter(valid_568262, JString, required = true,
+  if valid_564161 != nil:
+    section.add "agreementName", valid_564161
+  var valid_564162 = path.getOrDefault("subscriptionId")
+  valid_564162 = validateParameter(valid_564162, JString, required = true,
                                  default = nil)
-  if valid_568262 != nil:
-    section.add "integrationAccountName", valid_568262
-  var valid_568263 = path.getOrDefault("subscriptionId")
-  valid_568263 = validateParameter(valid_568263, JString, required = true,
+  if valid_564162 != nil:
+    section.add "subscriptionId", valid_564162
+  var valid_564163 = path.getOrDefault("resourceGroupName")
+  valid_564163 = validateParameter(valid_564163, JString, required = true,
                                  default = nil)
-  if valid_568263 != nil:
-    section.add "subscriptionId", valid_568263
-  var valid_568264 = path.getOrDefault("agreementName")
-  valid_568264 = validateParameter(valid_568264, JString, required = true,
+  if valid_564163 != nil:
+    section.add "resourceGroupName", valid_564163
+  var valid_564164 = path.getOrDefault("integrationAccountName")
+  valid_564164 = validateParameter(valid_564164, JString, required = true,
                                  default = nil)
-  if valid_568264 != nil:
-    section.add "agreementName", valid_568264
+  if valid_564164 != nil:
+    section.add "integrationAccountName", valid_564164
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1155,11 +1156,11 @@ proc validate_IntegrationAccountAgreementsGet_568259(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568265 = query.getOrDefault("api-version")
-  valid_568265 = validateParameter(valid_568265, JString, required = true,
+  var valid_564165 = query.getOrDefault("api-version")
+  valid_564165 = validateParameter(valid_564165, JString, required = true,
                                  default = nil)
-  if valid_568265 != nil:
-    section.add "api-version", valid_568265
+  if valid_564165 != nil:
+    section.add "api-version", valid_564165
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1168,53 +1169,52 @@ proc validate_IntegrationAccountAgreementsGet_568259(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568266: Call_IntegrationAccountAgreementsGet_568258;
+proc call*(call_564166: Call_IntegrationAccountAgreementsGet_564158;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Gets an integration account agreement.
   ## 
-  let valid = call_568266.validator(path, query, header, formData, body)
-  let scheme = call_568266.pickScheme
+  let valid = call_564166.validator(path, query, header, formData, body)
+  let scheme = call_564166.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568266.url(scheme.get, call_568266.host, call_568266.base,
-                         call_568266.route, valid.getOrDefault("path"),
+  let url = call_564166.url(scheme.get, call_564166.host, call_564166.base,
+                         call_564166.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568266, url, valid)
+  result = hook(call_564166, url, valid)
 
-proc call*(call_568267: Call_IntegrationAccountAgreementsGet_568258;
-          resourceGroupName: string; apiVersion: string;
-          integrationAccountName: string; subscriptionId: string;
-          agreementName: string): Recallable =
+proc call*(call_564167: Call_IntegrationAccountAgreementsGet_564158;
+          apiVersion: string; agreementName: string; subscriptionId: string;
+          resourceGroupName: string; integrationAccountName: string): Recallable =
   ## integrationAccountAgreementsGet
   ## Gets an integration account agreement.
-  ##   resourceGroupName: string (required)
-  ##                    : The resource group name.
   ##   apiVersion: string (required)
   ##             : The API version.
-  ##   integrationAccountName: string (required)
-  ##                         : The integration account name.
-  ##   subscriptionId: string (required)
-  ##                 : The subscription id.
   ##   agreementName: string (required)
   ##                : The integration account agreement name.
-  var path_568268 = newJObject()
-  var query_568269 = newJObject()
-  add(path_568268, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568269, "api-version", newJString(apiVersion))
-  add(path_568268, "integrationAccountName", newJString(integrationAccountName))
-  add(path_568268, "subscriptionId", newJString(subscriptionId))
-  add(path_568268, "agreementName", newJString(agreementName))
-  result = call_568267.call(path_568268, query_568269, nil, nil, nil)
+  ##   subscriptionId: string (required)
+  ##                 : The subscription id.
+  ##   resourceGroupName: string (required)
+  ##                    : The resource group name.
+  ##   integrationAccountName: string (required)
+  ##                         : The integration account name.
+  var path_564168 = newJObject()
+  var query_564169 = newJObject()
+  add(query_564169, "api-version", newJString(apiVersion))
+  add(path_564168, "agreementName", newJString(agreementName))
+  add(path_564168, "subscriptionId", newJString(subscriptionId))
+  add(path_564168, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564168, "integrationAccountName", newJString(integrationAccountName))
+  result = call_564167.call(path_564168, query_564169, nil, nil, nil)
 
-var integrationAccountAgreementsGet* = Call_IntegrationAccountAgreementsGet_568258(
+var integrationAccountAgreementsGet* = Call_IntegrationAccountAgreementsGet_564158(
     name: "integrationAccountAgreementsGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Logic/integrationAccounts/{integrationAccountName}/agreements/{agreementName}",
-    validator: validate_IntegrationAccountAgreementsGet_568259, base: "",
-    url: url_IntegrationAccountAgreementsGet_568260, schemes: {Scheme.Https})
+    validator: validate_IntegrationAccountAgreementsGet_564159, base: "",
+    url: url_IntegrationAccountAgreementsGet_564160, schemes: {Scheme.Https})
 type
-  Call_IntegrationAccountAgreementsDelete_568284 = ref object of OpenApiRestCall_567650
-proc url_IntegrationAccountAgreementsDelete_568286(protocol: Scheme; host: string;
+  Call_IntegrationAccountAgreementsDelete_564184 = ref object of OpenApiRestCall_563548
+proc url_IntegrationAccountAgreementsDelete_564186(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1241,44 +1241,44 @@ proc url_IntegrationAccountAgreementsDelete_568286(protocol: Scheme; host: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_IntegrationAccountAgreementsDelete_568285(path: JsonNode;
+proc validate_IntegrationAccountAgreementsDelete_564185(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Deletes an integration account agreement.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
+  ##   agreementName: JString (required)
+  ##                : The integration account agreement name.
+  ##   subscriptionId: JString (required)
+  ##                 : The subscription id.
   ##   resourceGroupName: JString (required)
   ##                    : The resource group name.
   ##   integrationAccountName: JString (required)
   ##                         : The integration account name.
-  ##   subscriptionId: JString (required)
-  ##                 : The subscription id.
-  ##   agreementName: JString (required)
-  ##                : The integration account agreement name.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568287 = path.getOrDefault("resourceGroupName")
-  valid_568287 = validateParameter(valid_568287, JString, required = true,
+        "path argument is necessary due to required `agreementName` field"
+  var valid_564187 = path.getOrDefault("agreementName")
+  valid_564187 = validateParameter(valid_564187, JString, required = true,
                                  default = nil)
-  if valid_568287 != nil:
-    section.add "resourceGroupName", valid_568287
-  var valid_568288 = path.getOrDefault("integrationAccountName")
-  valid_568288 = validateParameter(valid_568288, JString, required = true,
+  if valid_564187 != nil:
+    section.add "agreementName", valid_564187
+  var valid_564188 = path.getOrDefault("subscriptionId")
+  valid_564188 = validateParameter(valid_564188, JString, required = true,
                                  default = nil)
-  if valid_568288 != nil:
-    section.add "integrationAccountName", valid_568288
-  var valid_568289 = path.getOrDefault("subscriptionId")
-  valid_568289 = validateParameter(valid_568289, JString, required = true,
+  if valid_564188 != nil:
+    section.add "subscriptionId", valid_564188
+  var valid_564189 = path.getOrDefault("resourceGroupName")
+  valid_564189 = validateParameter(valid_564189, JString, required = true,
                                  default = nil)
-  if valid_568289 != nil:
-    section.add "subscriptionId", valid_568289
-  var valid_568290 = path.getOrDefault("agreementName")
-  valid_568290 = validateParameter(valid_568290, JString, required = true,
+  if valid_564189 != nil:
+    section.add "resourceGroupName", valid_564189
+  var valid_564190 = path.getOrDefault("integrationAccountName")
+  valid_564190 = validateParameter(valid_564190, JString, required = true,
                                  default = nil)
-  if valid_568290 != nil:
-    section.add "agreementName", valid_568290
+  if valid_564190 != nil:
+    section.add "integrationAccountName", valid_564190
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1286,11 +1286,11 @@ proc validate_IntegrationAccountAgreementsDelete_568285(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568291 = query.getOrDefault("api-version")
-  valid_568291 = validateParameter(valid_568291, JString, required = true,
+  var valid_564191 = query.getOrDefault("api-version")
+  valid_564191 = validateParameter(valid_564191, JString, required = true,
                                  default = nil)
-  if valid_568291 != nil:
-    section.add "api-version", valid_568291
+  if valid_564191 != nil:
+    section.add "api-version", valid_564191
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1299,53 +1299,52 @@ proc validate_IntegrationAccountAgreementsDelete_568285(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568292: Call_IntegrationAccountAgreementsDelete_568284;
+proc call*(call_564192: Call_IntegrationAccountAgreementsDelete_564184;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Deletes an integration account agreement.
   ## 
-  let valid = call_568292.validator(path, query, header, formData, body)
-  let scheme = call_568292.pickScheme
+  let valid = call_564192.validator(path, query, header, formData, body)
+  let scheme = call_564192.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568292.url(scheme.get, call_568292.host, call_568292.base,
-                         call_568292.route, valid.getOrDefault("path"),
+  let url = call_564192.url(scheme.get, call_564192.host, call_564192.base,
+                         call_564192.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568292, url, valid)
+  result = hook(call_564192, url, valid)
 
-proc call*(call_568293: Call_IntegrationAccountAgreementsDelete_568284;
-          resourceGroupName: string; apiVersion: string;
-          integrationAccountName: string; subscriptionId: string;
-          agreementName: string): Recallable =
+proc call*(call_564193: Call_IntegrationAccountAgreementsDelete_564184;
+          apiVersion: string; agreementName: string; subscriptionId: string;
+          resourceGroupName: string; integrationAccountName: string): Recallable =
   ## integrationAccountAgreementsDelete
   ## Deletes an integration account agreement.
-  ##   resourceGroupName: string (required)
-  ##                    : The resource group name.
   ##   apiVersion: string (required)
   ##             : The API version.
-  ##   integrationAccountName: string (required)
-  ##                         : The integration account name.
-  ##   subscriptionId: string (required)
-  ##                 : The subscription id.
   ##   agreementName: string (required)
   ##                : The integration account agreement name.
-  var path_568294 = newJObject()
-  var query_568295 = newJObject()
-  add(path_568294, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568295, "api-version", newJString(apiVersion))
-  add(path_568294, "integrationAccountName", newJString(integrationAccountName))
-  add(path_568294, "subscriptionId", newJString(subscriptionId))
-  add(path_568294, "agreementName", newJString(agreementName))
-  result = call_568293.call(path_568294, query_568295, nil, nil, nil)
+  ##   subscriptionId: string (required)
+  ##                 : The subscription id.
+  ##   resourceGroupName: string (required)
+  ##                    : The resource group name.
+  ##   integrationAccountName: string (required)
+  ##                         : The integration account name.
+  var path_564194 = newJObject()
+  var query_564195 = newJObject()
+  add(query_564195, "api-version", newJString(apiVersion))
+  add(path_564194, "agreementName", newJString(agreementName))
+  add(path_564194, "subscriptionId", newJString(subscriptionId))
+  add(path_564194, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564194, "integrationAccountName", newJString(integrationAccountName))
+  result = call_564193.call(path_564194, query_564195, nil, nil, nil)
 
-var integrationAccountAgreementsDelete* = Call_IntegrationAccountAgreementsDelete_568284(
+var integrationAccountAgreementsDelete* = Call_IntegrationAccountAgreementsDelete_564184(
     name: "integrationAccountAgreementsDelete", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Logic/integrationAccounts/{integrationAccountName}/agreements/{agreementName}",
-    validator: validate_IntegrationAccountAgreementsDelete_568285, base: "",
-    url: url_IntegrationAccountAgreementsDelete_568286, schemes: {Scheme.Https})
+    validator: validate_IntegrationAccountAgreementsDelete_564185, base: "",
+    url: url_IntegrationAccountAgreementsDelete_564186, schemes: {Scheme.Https})
 type
-  Call_IntegrationAccountCertificatesList_568296 = ref object of OpenApiRestCall_567650
-proc url_IntegrationAccountCertificatesList_568298(protocol: Scheme; host: string;
+  Call_IntegrationAccountCertificatesList_564196 = ref object of OpenApiRestCall_563548
+proc url_IntegrationAccountCertificatesList_564198(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1370,37 +1369,37 @@ proc url_IntegrationAccountCertificatesList_568298(protocol: Scheme; host: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_IntegrationAccountCertificatesList_568297(path: JsonNode;
+proc validate_IntegrationAccountCertificatesList_564197(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets a list of integration account certificates.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
+  ##   subscriptionId: JString (required)
+  ##                 : The subscription id.
   ##   resourceGroupName: JString (required)
   ##                    : The resource group name.
   ##   integrationAccountName: JString (required)
   ##                         : The integration account name.
-  ##   subscriptionId: JString (required)
-  ##                 : The subscription id.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568299 = path.getOrDefault("resourceGroupName")
-  valid_568299 = validateParameter(valid_568299, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564199 = path.getOrDefault("subscriptionId")
+  valid_564199 = validateParameter(valid_564199, JString, required = true,
                                  default = nil)
-  if valid_568299 != nil:
-    section.add "resourceGroupName", valid_568299
-  var valid_568300 = path.getOrDefault("integrationAccountName")
-  valid_568300 = validateParameter(valid_568300, JString, required = true,
+  if valid_564199 != nil:
+    section.add "subscriptionId", valid_564199
+  var valid_564200 = path.getOrDefault("resourceGroupName")
+  valid_564200 = validateParameter(valid_564200, JString, required = true,
                                  default = nil)
-  if valid_568300 != nil:
-    section.add "integrationAccountName", valid_568300
-  var valid_568301 = path.getOrDefault("subscriptionId")
-  valid_568301 = validateParameter(valid_568301, JString, required = true,
+  if valid_564200 != nil:
+    section.add "resourceGroupName", valid_564200
+  var valid_564201 = path.getOrDefault("integrationAccountName")
+  valid_564201 = validateParameter(valid_564201, JString, required = true,
                                  default = nil)
-  if valid_568301 != nil:
-    section.add "subscriptionId", valid_568301
+  if valid_564201 != nil:
+    section.add "integrationAccountName", valid_564201
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1410,15 +1409,15 @@ proc validate_IntegrationAccountCertificatesList_568297(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568302 = query.getOrDefault("api-version")
-  valid_568302 = validateParameter(valid_568302, JString, required = true,
+  var valid_564202 = query.getOrDefault("api-version")
+  valid_564202 = validateParameter(valid_564202, JString, required = true,
                                  default = nil)
-  if valid_568302 != nil:
-    section.add "api-version", valid_568302
-  var valid_568303 = query.getOrDefault("$top")
-  valid_568303 = validateParameter(valid_568303, JInt, required = false, default = nil)
-  if valid_568303 != nil:
-    section.add "$top", valid_568303
+  if valid_564202 != nil:
+    section.add "api-version", valid_564202
+  var valid_564203 = query.getOrDefault("$top")
+  valid_564203 = validateParameter(valid_564203, JInt, required = false, default = nil)
+  if valid_564203 != nil:
+    section.add "$top", valid_564203
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1427,52 +1426,52 @@ proc validate_IntegrationAccountCertificatesList_568297(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568304: Call_IntegrationAccountCertificatesList_568296;
+proc call*(call_564204: Call_IntegrationAccountCertificatesList_564196;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Gets a list of integration account certificates.
   ## 
-  let valid = call_568304.validator(path, query, header, formData, body)
-  let scheme = call_568304.pickScheme
+  let valid = call_564204.validator(path, query, header, formData, body)
+  let scheme = call_564204.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568304.url(scheme.get, call_568304.host, call_568304.base,
-                         call_568304.route, valid.getOrDefault("path"),
+  let url = call_564204.url(scheme.get, call_564204.host, call_564204.base,
+                         call_564204.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568304, url, valid)
+  result = hook(call_564204, url, valid)
 
-proc call*(call_568305: Call_IntegrationAccountCertificatesList_568296;
-          resourceGroupName: string; apiVersion: string;
-          integrationAccountName: string; subscriptionId: string; Top: int = 0): Recallable =
+proc call*(call_564205: Call_IntegrationAccountCertificatesList_564196;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string;
+          integrationAccountName: string; Top: int = 0): Recallable =
   ## integrationAccountCertificatesList
   ## Gets a list of integration account certificates.
-  ##   resourceGroupName: string (required)
-  ##                    : The resource group name.
   ##   apiVersion: string (required)
   ##             : The API version.
-  ##   integrationAccountName: string (required)
-  ##                         : The integration account name.
-  ##   subscriptionId: string (required)
-  ##                 : The subscription id.
   ##   Top: int
   ##      : The number of items to be included in the result.
-  var path_568306 = newJObject()
-  var query_568307 = newJObject()
-  add(path_568306, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568307, "api-version", newJString(apiVersion))
-  add(path_568306, "integrationAccountName", newJString(integrationAccountName))
-  add(path_568306, "subscriptionId", newJString(subscriptionId))
-  add(query_568307, "$top", newJInt(Top))
-  result = call_568305.call(path_568306, query_568307, nil, nil, nil)
+  ##   subscriptionId: string (required)
+  ##                 : The subscription id.
+  ##   resourceGroupName: string (required)
+  ##                    : The resource group name.
+  ##   integrationAccountName: string (required)
+  ##                         : The integration account name.
+  var path_564206 = newJObject()
+  var query_564207 = newJObject()
+  add(query_564207, "api-version", newJString(apiVersion))
+  add(query_564207, "$top", newJInt(Top))
+  add(path_564206, "subscriptionId", newJString(subscriptionId))
+  add(path_564206, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564206, "integrationAccountName", newJString(integrationAccountName))
+  result = call_564205.call(path_564206, query_564207, nil, nil, nil)
 
-var integrationAccountCertificatesList* = Call_IntegrationAccountCertificatesList_568296(
+var integrationAccountCertificatesList* = Call_IntegrationAccountCertificatesList_564196(
     name: "integrationAccountCertificatesList", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Logic/integrationAccounts/{integrationAccountName}/certificates",
-    validator: validate_IntegrationAccountCertificatesList_568297, base: "",
-    url: url_IntegrationAccountCertificatesList_568298, schemes: {Scheme.Https})
+    validator: validate_IntegrationAccountCertificatesList_564197, base: "",
+    url: url_IntegrationAccountCertificatesList_564198, schemes: {Scheme.Https})
 type
-  Call_IntegrationAccountCertificatesCreateOrUpdate_568320 = ref object of OpenApiRestCall_567650
-proc url_IntegrationAccountCertificatesCreateOrUpdate_568322(protocol: Scheme;
+  Call_IntegrationAccountCertificatesCreateOrUpdate_564220 = ref object of OpenApiRestCall_563548
+proc url_IntegrationAccountCertificatesCreateOrUpdate_564222(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1499,44 +1498,44 @@ proc url_IntegrationAccountCertificatesCreateOrUpdate_568322(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_IntegrationAccountCertificatesCreateOrUpdate_568321(path: JsonNode;
+proc validate_IntegrationAccountCertificatesCreateOrUpdate_564221(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Creates or updates an integration account certificate.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
+  ##   subscriptionId: JString (required)
+  ##                 : The subscription id.
   ##   resourceGroupName: JString (required)
   ##                    : The resource group name.
   ##   integrationAccountName: JString (required)
   ##                         : The integration account name.
-  ##   subscriptionId: JString (required)
-  ##                 : The subscription id.
   ##   certificateName: JString (required)
   ##                  : The integration account certificate name.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568323 = path.getOrDefault("resourceGroupName")
-  valid_568323 = validateParameter(valid_568323, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564223 = path.getOrDefault("subscriptionId")
+  valid_564223 = validateParameter(valid_564223, JString, required = true,
                                  default = nil)
-  if valid_568323 != nil:
-    section.add "resourceGroupName", valid_568323
-  var valid_568324 = path.getOrDefault("integrationAccountName")
-  valid_568324 = validateParameter(valid_568324, JString, required = true,
+  if valid_564223 != nil:
+    section.add "subscriptionId", valid_564223
+  var valid_564224 = path.getOrDefault("resourceGroupName")
+  valid_564224 = validateParameter(valid_564224, JString, required = true,
                                  default = nil)
-  if valid_568324 != nil:
-    section.add "integrationAccountName", valid_568324
-  var valid_568325 = path.getOrDefault("subscriptionId")
-  valid_568325 = validateParameter(valid_568325, JString, required = true,
+  if valid_564224 != nil:
+    section.add "resourceGroupName", valid_564224
+  var valid_564225 = path.getOrDefault("integrationAccountName")
+  valid_564225 = validateParameter(valid_564225, JString, required = true,
                                  default = nil)
-  if valid_568325 != nil:
-    section.add "subscriptionId", valid_568325
-  var valid_568326 = path.getOrDefault("certificateName")
-  valid_568326 = validateParameter(valid_568326, JString, required = true,
+  if valid_564225 != nil:
+    section.add "integrationAccountName", valid_564225
+  var valid_564226 = path.getOrDefault("certificateName")
+  valid_564226 = validateParameter(valid_564226, JString, required = true,
                                  default = nil)
-  if valid_568326 != nil:
-    section.add "certificateName", valid_568326
+  if valid_564226 != nil:
+    section.add "certificateName", valid_564226
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1544,11 +1543,11 @@ proc validate_IntegrationAccountCertificatesCreateOrUpdate_568321(path: JsonNode
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568327 = query.getOrDefault("api-version")
-  valid_568327 = validateParameter(valid_568327, JString, required = true,
+  var valid_564227 = query.getOrDefault("api-version")
+  valid_564227 = validateParameter(valid_564227, JString, required = true,
                                  default = nil)
-  if valid_568327 != nil:
-    section.add "api-version", valid_568327
+  if valid_564227 != nil:
+    section.add "api-version", valid_564227
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1562,59 +1561,59 @@ proc validate_IntegrationAccountCertificatesCreateOrUpdate_568321(path: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_568329: Call_IntegrationAccountCertificatesCreateOrUpdate_568320;
+proc call*(call_564229: Call_IntegrationAccountCertificatesCreateOrUpdate_564220;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Creates or updates an integration account certificate.
   ## 
-  let valid = call_568329.validator(path, query, header, formData, body)
-  let scheme = call_568329.pickScheme
+  let valid = call_564229.validator(path, query, header, formData, body)
+  let scheme = call_564229.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568329.url(scheme.get, call_568329.host, call_568329.base,
-                         call_568329.route, valid.getOrDefault("path"),
+  let url = call_564229.url(scheme.get, call_564229.host, call_564229.base,
+                         call_564229.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568329, url, valid)
+  result = hook(call_564229, url, valid)
 
-proc call*(call_568330: Call_IntegrationAccountCertificatesCreateOrUpdate_568320;
-          resourceGroupName: string; apiVersion: string;
-          integrationAccountName: string; subscriptionId: string;
-          certificate: JsonNode; certificateName: string): Recallable =
+proc call*(call_564230: Call_IntegrationAccountCertificatesCreateOrUpdate_564220;
+          apiVersion: string; certificate: JsonNode; subscriptionId: string;
+          resourceGroupName: string; integrationAccountName: string;
+          certificateName: string): Recallable =
   ## integrationAccountCertificatesCreateOrUpdate
   ## Creates or updates an integration account certificate.
-  ##   resourceGroupName: string (required)
-  ##                    : The resource group name.
   ##   apiVersion: string (required)
   ##             : The API version.
-  ##   integrationAccountName: string (required)
-  ##                         : The integration account name.
-  ##   subscriptionId: string (required)
-  ##                 : The subscription id.
   ##   certificate: JObject (required)
   ##              : The integration account certificate.
+  ##   subscriptionId: string (required)
+  ##                 : The subscription id.
+  ##   resourceGroupName: string (required)
+  ##                    : The resource group name.
+  ##   integrationAccountName: string (required)
+  ##                         : The integration account name.
   ##   certificateName: string (required)
   ##                  : The integration account certificate name.
-  var path_568331 = newJObject()
-  var query_568332 = newJObject()
-  var body_568333 = newJObject()
-  add(path_568331, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568332, "api-version", newJString(apiVersion))
-  add(path_568331, "integrationAccountName", newJString(integrationAccountName))
-  add(path_568331, "subscriptionId", newJString(subscriptionId))
+  var path_564231 = newJObject()
+  var query_564232 = newJObject()
+  var body_564233 = newJObject()
+  add(query_564232, "api-version", newJString(apiVersion))
   if certificate != nil:
-    body_568333 = certificate
-  add(path_568331, "certificateName", newJString(certificateName))
-  result = call_568330.call(path_568331, query_568332, nil, nil, body_568333)
+    body_564233 = certificate
+  add(path_564231, "subscriptionId", newJString(subscriptionId))
+  add(path_564231, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564231, "integrationAccountName", newJString(integrationAccountName))
+  add(path_564231, "certificateName", newJString(certificateName))
+  result = call_564230.call(path_564231, query_564232, nil, nil, body_564233)
 
-var integrationAccountCertificatesCreateOrUpdate* = Call_IntegrationAccountCertificatesCreateOrUpdate_568320(
+var integrationAccountCertificatesCreateOrUpdate* = Call_IntegrationAccountCertificatesCreateOrUpdate_564220(
     name: "integrationAccountCertificatesCreateOrUpdate",
     meth: HttpMethod.HttpPut, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Logic/integrationAccounts/{integrationAccountName}/certificates/{certificateName}",
-    validator: validate_IntegrationAccountCertificatesCreateOrUpdate_568321,
-    base: "", url: url_IntegrationAccountCertificatesCreateOrUpdate_568322,
+    validator: validate_IntegrationAccountCertificatesCreateOrUpdate_564221,
+    base: "", url: url_IntegrationAccountCertificatesCreateOrUpdate_564222,
     schemes: {Scheme.Https})
 type
-  Call_IntegrationAccountCertificatesGet_568308 = ref object of OpenApiRestCall_567650
-proc url_IntegrationAccountCertificatesGet_568310(protocol: Scheme; host: string;
+  Call_IntegrationAccountCertificatesGet_564208 = ref object of OpenApiRestCall_563548
+proc url_IntegrationAccountCertificatesGet_564210(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1641,44 +1640,44 @@ proc url_IntegrationAccountCertificatesGet_568310(protocol: Scheme; host: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_IntegrationAccountCertificatesGet_568309(path: JsonNode;
+proc validate_IntegrationAccountCertificatesGet_564209(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets an integration account certificate.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
+  ##   subscriptionId: JString (required)
+  ##                 : The subscription id.
   ##   resourceGroupName: JString (required)
   ##                    : The resource group name.
   ##   integrationAccountName: JString (required)
   ##                         : The integration account name.
-  ##   subscriptionId: JString (required)
-  ##                 : The subscription id.
   ##   certificateName: JString (required)
   ##                  : The integration account certificate name.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568311 = path.getOrDefault("resourceGroupName")
-  valid_568311 = validateParameter(valid_568311, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564211 = path.getOrDefault("subscriptionId")
+  valid_564211 = validateParameter(valid_564211, JString, required = true,
                                  default = nil)
-  if valid_568311 != nil:
-    section.add "resourceGroupName", valid_568311
-  var valid_568312 = path.getOrDefault("integrationAccountName")
-  valid_568312 = validateParameter(valid_568312, JString, required = true,
+  if valid_564211 != nil:
+    section.add "subscriptionId", valid_564211
+  var valid_564212 = path.getOrDefault("resourceGroupName")
+  valid_564212 = validateParameter(valid_564212, JString, required = true,
                                  default = nil)
-  if valid_568312 != nil:
-    section.add "integrationAccountName", valid_568312
-  var valid_568313 = path.getOrDefault("subscriptionId")
-  valid_568313 = validateParameter(valid_568313, JString, required = true,
+  if valid_564212 != nil:
+    section.add "resourceGroupName", valid_564212
+  var valid_564213 = path.getOrDefault("integrationAccountName")
+  valid_564213 = validateParameter(valid_564213, JString, required = true,
                                  default = nil)
-  if valid_568313 != nil:
-    section.add "subscriptionId", valid_568313
-  var valid_568314 = path.getOrDefault("certificateName")
-  valid_568314 = validateParameter(valid_568314, JString, required = true,
+  if valid_564213 != nil:
+    section.add "integrationAccountName", valid_564213
+  var valid_564214 = path.getOrDefault("certificateName")
+  valid_564214 = validateParameter(valid_564214, JString, required = true,
                                  default = nil)
-  if valid_568314 != nil:
-    section.add "certificateName", valid_568314
+  if valid_564214 != nil:
+    section.add "certificateName", valid_564214
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1686,11 +1685,11 @@ proc validate_IntegrationAccountCertificatesGet_568309(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568315 = query.getOrDefault("api-version")
-  valid_568315 = validateParameter(valid_568315, JString, required = true,
+  var valid_564215 = query.getOrDefault("api-version")
+  valid_564215 = validateParameter(valid_564215, JString, required = true,
                                  default = nil)
-  if valid_568315 != nil:
-    section.add "api-version", valid_568315
+  if valid_564215 != nil:
+    section.add "api-version", valid_564215
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1699,53 +1698,52 @@ proc validate_IntegrationAccountCertificatesGet_568309(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568316: Call_IntegrationAccountCertificatesGet_568308;
+proc call*(call_564216: Call_IntegrationAccountCertificatesGet_564208;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Gets an integration account certificate.
   ## 
-  let valid = call_568316.validator(path, query, header, formData, body)
-  let scheme = call_568316.pickScheme
+  let valid = call_564216.validator(path, query, header, formData, body)
+  let scheme = call_564216.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568316.url(scheme.get, call_568316.host, call_568316.base,
-                         call_568316.route, valid.getOrDefault("path"),
+  let url = call_564216.url(scheme.get, call_564216.host, call_564216.base,
+                         call_564216.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568316, url, valid)
+  result = hook(call_564216, url, valid)
 
-proc call*(call_568317: Call_IntegrationAccountCertificatesGet_568308;
-          resourceGroupName: string; apiVersion: string;
-          integrationAccountName: string; subscriptionId: string;
-          certificateName: string): Recallable =
+proc call*(call_564217: Call_IntegrationAccountCertificatesGet_564208;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string;
+          integrationAccountName: string; certificateName: string): Recallable =
   ## integrationAccountCertificatesGet
   ## Gets an integration account certificate.
-  ##   resourceGroupName: string (required)
-  ##                    : The resource group name.
   ##   apiVersion: string (required)
   ##             : The API version.
-  ##   integrationAccountName: string (required)
-  ##                         : The integration account name.
   ##   subscriptionId: string (required)
   ##                 : The subscription id.
+  ##   resourceGroupName: string (required)
+  ##                    : The resource group name.
+  ##   integrationAccountName: string (required)
+  ##                         : The integration account name.
   ##   certificateName: string (required)
   ##                  : The integration account certificate name.
-  var path_568318 = newJObject()
-  var query_568319 = newJObject()
-  add(path_568318, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568319, "api-version", newJString(apiVersion))
-  add(path_568318, "integrationAccountName", newJString(integrationAccountName))
-  add(path_568318, "subscriptionId", newJString(subscriptionId))
-  add(path_568318, "certificateName", newJString(certificateName))
-  result = call_568317.call(path_568318, query_568319, nil, nil, nil)
+  var path_564218 = newJObject()
+  var query_564219 = newJObject()
+  add(query_564219, "api-version", newJString(apiVersion))
+  add(path_564218, "subscriptionId", newJString(subscriptionId))
+  add(path_564218, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564218, "integrationAccountName", newJString(integrationAccountName))
+  add(path_564218, "certificateName", newJString(certificateName))
+  result = call_564217.call(path_564218, query_564219, nil, nil, nil)
 
-var integrationAccountCertificatesGet* = Call_IntegrationAccountCertificatesGet_568308(
+var integrationAccountCertificatesGet* = Call_IntegrationAccountCertificatesGet_564208(
     name: "integrationAccountCertificatesGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Logic/integrationAccounts/{integrationAccountName}/certificates/{certificateName}",
-    validator: validate_IntegrationAccountCertificatesGet_568309, base: "",
-    url: url_IntegrationAccountCertificatesGet_568310, schemes: {Scheme.Https})
+    validator: validate_IntegrationAccountCertificatesGet_564209, base: "",
+    url: url_IntegrationAccountCertificatesGet_564210, schemes: {Scheme.Https})
 type
-  Call_IntegrationAccountCertificatesDelete_568334 = ref object of OpenApiRestCall_567650
-proc url_IntegrationAccountCertificatesDelete_568336(protocol: Scheme;
+  Call_IntegrationAccountCertificatesDelete_564234 = ref object of OpenApiRestCall_563548
+proc url_IntegrationAccountCertificatesDelete_564236(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1772,44 +1770,44 @@ proc url_IntegrationAccountCertificatesDelete_568336(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_IntegrationAccountCertificatesDelete_568335(path: JsonNode;
+proc validate_IntegrationAccountCertificatesDelete_564235(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Deletes an integration account certificate.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
+  ##   subscriptionId: JString (required)
+  ##                 : The subscription id.
   ##   resourceGroupName: JString (required)
   ##                    : The resource group name.
   ##   integrationAccountName: JString (required)
   ##                         : The integration account name.
-  ##   subscriptionId: JString (required)
-  ##                 : The subscription id.
   ##   certificateName: JString (required)
   ##                  : The integration account certificate name.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568337 = path.getOrDefault("resourceGroupName")
-  valid_568337 = validateParameter(valid_568337, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564237 = path.getOrDefault("subscriptionId")
+  valid_564237 = validateParameter(valid_564237, JString, required = true,
                                  default = nil)
-  if valid_568337 != nil:
-    section.add "resourceGroupName", valid_568337
-  var valid_568338 = path.getOrDefault("integrationAccountName")
-  valid_568338 = validateParameter(valid_568338, JString, required = true,
+  if valid_564237 != nil:
+    section.add "subscriptionId", valid_564237
+  var valid_564238 = path.getOrDefault("resourceGroupName")
+  valid_564238 = validateParameter(valid_564238, JString, required = true,
                                  default = nil)
-  if valid_568338 != nil:
-    section.add "integrationAccountName", valid_568338
-  var valid_568339 = path.getOrDefault("subscriptionId")
-  valid_568339 = validateParameter(valid_568339, JString, required = true,
+  if valid_564238 != nil:
+    section.add "resourceGroupName", valid_564238
+  var valid_564239 = path.getOrDefault("integrationAccountName")
+  valid_564239 = validateParameter(valid_564239, JString, required = true,
                                  default = nil)
-  if valid_568339 != nil:
-    section.add "subscriptionId", valid_568339
-  var valid_568340 = path.getOrDefault("certificateName")
-  valid_568340 = validateParameter(valid_568340, JString, required = true,
+  if valid_564239 != nil:
+    section.add "integrationAccountName", valid_564239
+  var valid_564240 = path.getOrDefault("certificateName")
+  valid_564240 = validateParameter(valid_564240, JString, required = true,
                                  default = nil)
-  if valid_568340 != nil:
-    section.add "certificateName", valid_568340
+  if valid_564240 != nil:
+    section.add "certificateName", valid_564240
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1817,11 +1815,11 @@ proc validate_IntegrationAccountCertificatesDelete_568335(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568341 = query.getOrDefault("api-version")
-  valid_568341 = validateParameter(valid_568341, JString, required = true,
+  var valid_564241 = query.getOrDefault("api-version")
+  valid_564241 = validateParameter(valid_564241, JString, required = true,
                                  default = nil)
-  if valid_568341 != nil:
-    section.add "api-version", valid_568341
+  if valid_564241 != nil:
+    section.add "api-version", valid_564241
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1830,53 +1828,52 @@ proc validate_IntegrationAccountCertificatesDelete_568335(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568342: Call_IntegrationAccountCertificatesDelete_568334;
+proc call*(call_564242: Call_IntegrationAccountCertificatesDelete_564234;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Deletes an integration account certificate.
   ## 
-  let valid = call_568342.validator(path, query, header, formData, body)
-  let scheme = call_568342.pickScheme
+  let valid = call_564242.validator(path, query, header, formData, body)
+  let scheme = call_564242.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568342.url(scheme.get, call_568342.host, call_568342.base,
-                         call_568342.route, valid.getOrDefault("path"),
+  let url = call_564242.url(scheme.get, call_564242.host, call_564242.base,
+                         call_564242.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568342, url, valid)
+  result = hook(call_564242, url, valid)
 
-proc call*(call_568343: Call_IntegrationAccountCertificatesDelete_568334;
-          resourceGroupName: string; apiVersion: string;
-          integrationAccountName: string; subscriptionId: string;
-          certificateName: string): Recallable =
+proc call*(call_564243: Call_IntegrationAccountCertificatesDelete_564234;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string;
+          integrationAccountName: string; certificateName: string): Recallable =
   ## integrationAccountCertificatesDelete
   ## Deletes an integration account certificate.
-  ##   resourceGroupName: string (required)
-  ##                    : The resource group name.
   ##   apiVersion: string (required)
   ##             : The API version.
-  ##   integrationAccountName: string (required)
-  ##                         : The integration account name.
   ##   subscriptionId: string (required)
   ##                 : The subscription id.
+  ##   resourceGroupName: string (required)
+  ##                    : The resource group name.
+  ##   integrationAccountName: string (required)
+  ##                         : The integration account name.
   ##   certificateName: string (required)
   ##                  : The integration account certificate name.
-  var path_568344 = newJObject()
-  var query_568345 = newJObject()
-  add(path_568344, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568345, "api-version", newJString(apiVersion))
-  add(path_568344, "integrationAccountName", newJString(integrationAccountName))
-  add(path_568344, "subscriptionId", newJString(subscriptionId))
-  add(path_568344, "certificateName", newJString(certificateName))
-  result = call_568343.call(path_568344, query_568345, nil, nil, nil)
+  var path_564244 = newJObject()
+  var query_564245 = newJObject()
+  add(query_564245, "api-version", newJString(apiVersion))
+  add(path_564244, "subscriptionId", newJString(subscriptionId))
+  add(path_564244, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564244, "integrationAccountName", newJString(integrationAccountName))
+  add(path_564244, "certificateName", newJString(certificateName))
+  result = call_564243.call(path_564244, query_564245, nil, nil, nil)
 
-var integrationAccountCertificatesDelete* = Call_IntegrationAccountCertificatesDelete_568334(
+var integrationAccountCertificatesDelete* = Call_IntegrationAccountCertificatesDelete_564234(
     name: "integrationAccountCertificatesDelete", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Logic/integrationAccounts/{integrationAccountName}/certificates/{certificateName}",
-    validator: validate_IntegrationAccountCertificatesDelete_568335, base: "",
-    url: url_IntegrationAccountCertificatesDelete_568336, schemes: {Scheme.Https})
+    validator: validate_IntegrationAccountCertificatesDelete_564235, base: "",
+    url: url_IntegrationAccountCertificatesDelete_564236, schemes: {Scheme.Https})
 type
-  Call_IntegrationAccountsListCallbackUrl_568346 = ref object of OpenApiRestCall_567650
-proc url_IntegrationAccountsListCallbackUrl_568348(protocol: Scheme; host: string;
+  Call_IntegrationAccountsListCallbackUrl_564246 = ref object of OpenApiRestCall_563548
+proc url_IntegrationAccountsListCallbackUrl_564248(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1901,37 +1898,37 @@ proc url_IntegrationAccountsListCallbackUrl_568348(protocol: Scheme; host: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_IntegrationAccountsListCallbackUrl_568347(path: JsonNode;
+proc validate_IntegrationAccountsListCallbackUrl_564247(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists the integration account callback URL.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
+  ##   subscriptionId: JString (required)
+  ##                 : The subscription id.
   ##   resourceGroupName: JString (required)
   ##                    : The resource group name.
   ##   integrationAccountName: JString (required)
   ##                         : The integration account name.
-  ##   subscriptionId: JString (required)
-  ##                 : The subscription id.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568349 = path.getOrDefault("resourceGroupName")
-  valid_568349 = validateParameter(valid_568349, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564249 = path.getOrDefault("subscriptionId")
+  valid_564249 = validateParameter(valid_564249, JString, required = true,
                                  default = nil)
-  if valid_568349 != nil:
-    section.add "resourceGroupName", valid_568349
-  var valid_568350 = path.getOrDefault("integrationAccountName")
-  valid_568350 = validateParameter(valid_568350, JString, required = true,
+  if valid_564249 != nil:
+    section.add "subscriptionId", valid_564249
+  var valid_564250 = path.getOrDefault("resourceGroupName")
+  valid_564250 = validateParameter(valid_564250, JString, required = true,
                                  default = nil)
-  if valid_568350 != nil:
-    section.add "integrationAccountName", valid_568350
-  var valid_568351 = path.getOrDefault("subscriptionId")
-  valid_568351 = validateParameter(valid_568351, JString, required = true,
+  if valid_564250 != nil:
+    section.add "resourceGroupName", valid_564250
+  var valid_564251 = path.getOrDefault("integrationAccountName")
+  valid_564251 = validateParameter(valid_564251, JString, required = true,
                                  default = nil)
-  if valid_568351 != nil:
-    section.add "subscriptionId", valid_568351
+  if valid_564251 != nil:
+    section.add "integrationAccountName", valid_564251
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1939,11 +1936,11 @@ proc validate_IntegrationAccountsListCallbackUrl_568347(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568352 = query.getOrDefault("api-version")
-  valid_568352 = validateParameter(valid_568352, JString, required = true,
+  var valid_564252 = query.getOrDefault("api-version")
+  valid_564252 = validateParameter(valid_564252, JString, required = true,
                                  default = nil)
-  if valid_568352 != nil:
-    section.add "api-version", valid_568352
+  if valid_564252 != nil:
+    section.add "api-version", valid_564252
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1957,55 +1954,54 @@ proc validate_IntegrationAccountsListCallbackUrl_568347(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568354: Call_IntegrationAccountsListCallbackUrl_568346;
+proc call*(call_564254: Call_IntegrationAccountsListCallbackUrl_564246;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Lists the integration account callback URL.
   ## 
-  let valid = call_568354.validator(path, query, header, formData, body)
-  let scheme = call_568354.pickScheme
+  let valid = call_564254.validator(path, query, header, formData, body)
+  let scheme = call_564254.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568354.url(scheme.get, call_568354.host, call_568354.base,
-                         call_568354.route, valid.getOrDefault("path"),
+  let url = call_564254.url(scheme.get, call_564254.host, call_564254.base,
+                         call_564254.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568354, url, valid)
+  result = hook(call_564254, url, valid)
 
-proc call*(call_568355: Call_IntegrationAccountsListCallbackUrl_568346;
-          resourceGroupName: string; apiVersion: string;
-          integrationAccountName: string; subscriptionId: string;
-          parameters: JsonNode): Recallable =
+proc call*(call_564255: Call_IntegrationAccountsListCallbackUrl_564246;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string;
+          parameters: JsonNode; integrationAccountName: string): Recallable =
   ## integrationAccountsListCallbackUrl
   ## Lists the integration account callback URL.
-  ##   resourceGroupName: string (required)
-  ##                    : The resource group name.
   ##   apiVersion: string (required)
   ##             : The API version.
-  ##   integrationAccountName: string (required)
-  ##                         : The integration account name.
   ##   subscriptionId: string (required)
   ##                 : The subscription id.
+  ##   resourceGroupName: string (required)
+  ##                    : The resource group name.
   ##   parameters: JObject (required)
   ##             : The callback URL parameters.
-  var path_568356 = newJObject()
-  var query_568357 = newJObject()
-  var body_568358 = newJObject()
-  add(path_568356, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568357, "api-version", newJString(apiVersion))
-  add(path_568356, "integrationAccountName", newJString(integrationAccountName))
-  add(path_568356, "subscriptionId", newJString(subscriptionId))
+  ##   integrationAccountName: string (required)
+  ##                         : The integration account name.
+  var path_564256 = newJObject()
+  var query_564257 = newJObject()
+  var body_564258 = newJObject()
+  add(query_564257, "api-version", newJString(apiVersion))
+  add(path_564256, "subscriptionId", newJString(subscriptionId))
+  add(path_564256, "resourceGroupName", newJString(resourceGroupName))
   if parameters != nil:
-    body_568358 = parameters
-  result = call_568355.call(path_568356, query_568357, nil, nil, body_568358)
+    body_564258 = parameters
+  add(path_564256, "integrationAccountName", newJString(integrationAccountName))
+  result = call_564255.call(path_564256, query_564257, nil, nil, body_564258)
 
-var integrationAccountsListCallbackUrl* = Call_IntegrationAccountsListCallbackUrl_568346(
+var integrationAccountsListCallbackUrl* = Call_IntegrationAccountsListCallbackUrl_564246(
     name: "integrationAccountsListCallbackUrl", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Logic/integrationAccounts/{integrationAccountName}/listCallbackUrl",
-    validator: validate_IntegrationAccountsListCallbackUrl_568347, base: "",
-    url: url_IntegrationAccountsListCallbackUrl_568348, schemes: {Scheme.Https})
+    validator: validate_IntegrationAccountsListCallbackUrl_564247, base: "",
+    url: url_IntegrationAccountsListCallbackUrl_564248, schemes: {Scheme.Https})
 type
-  Call_IntegrationAccountMapsList_568359 = ref object of OpenApiRestCall_567650
-proc url_IntegrationAccountMapsList_568361(protocol: Scheme; host: string;
+  Call_IntegrationAccountMapsList_564259 = ref object of OpenApiRestCall_563548
+proc url_IntegrationAccountMapsList_564261(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2030,37 +2026,37 @@ proc url_IntegrationAccountMapsList_568361(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_IntegrationAccountMapsList_568360(path: JsonNode; query: JsonNode;
+proc validate_IntegrationAccountMapsList_564260(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets a list of integration account maps.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
+  ##   subscriptionId: JString (required)
+  ##                 : The subscription id.
   ##   resourceGroupName: JString (required)
   ##                    : The resource group name.
   ##   integrationAccountName: JString (required)
   ##                         : The integration account name.
-  ##   subscriptionId: JString (required)
-  ##                 : The subscription id.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568362 = path.getOrDefault("resourceGroupName")
-  valid_568362 = validateParameter(valid_568362, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564262 = path.getOrDefault("subscriptionId")
+  valid_564262 = validateParameter(valid_564262, JString, required = true,
                                  default = nil)
-  if valid_568362 != nil:
-    section.add "resourceGroupName", valid_568362
-  var valid_568363 = path.getOrDefault("integrationAccountName")
-  valid_568363 = validateParameter(valid_568363, JString, required = true,
+  if valid_564262 != nil:
+    section.add "subscriptionId", valid_564262
+  var valid_564263 = path.getOrDefault("resourceGroupName")
+  valid_564263 = validateParameter(valid_564263, JString, required = true,
                                  default = nil)
-  if valid_568363 != nil:
-    section.add "integrationAccountName", valid_568363
-  var valid_568364 = path.getOrDefault("subscriptionId")
-  valid_568364 = validateParameter(valid_568364, JString, required = true,
+  if valid_564263 != nil:
+    section.add "resourceGroupName", valid_564263
+  var valid_564264 = path.getOrDefault("integrationAccountName")
+  valid_564264 = validateParameter(valid_564264, JString, required = true,
                                  default = nil)
-  if valid_568364 != nil:
-    section.add "subscriptionId", valid_568364
+  if valid_564264 != nil:
+    section.add "integrationAccountName", valid_564264
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2072,20 +2068,20 @@ proc validate_IntegrationAccountMapsList_568360(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568365 = query.getOrDefault("api-version")
-  valid_568365 = validateParameter(valid_568365, JString, required = true,
+  var valid_564265 = query.getOrDefault("api-version")
+  valid_564265 = validateParameter(valid_564265, JString, required = true,
                                  default = nil)
-  if valid_568365 != nil:
-    section.add "api-version", valid_568365
-  var valid_568366 = query.getOrDefault("$top")
-  valid_568366 = validateParameter(valid_568366, JInt, required = false, default = nil)
-  if valid_568366 != nil:
-    section.add "$top", valid_568366
-  var valid_568367 = query.getOrDefault("$filter")
-  valid_568367 = validateParameter(valid_568367, JString, required = false,
+  if valid_564265 != nil:
+    section.add "api-version", valid_564265
+  var valid_564266 = query.getOrDefault("$top")
+  valid_564266 = validateParameter(valid_564266, JInt, required = false, default = nil)
+  if valid_564266 != nil:
+    section.add "$top", valid_564266
+  var valid_564267 = query.getOrDefault("$filter")
+  valid_564267 = validateParameter(valid_564267, JString, required = false,
                                  default = nil)
-  if valid_568367 != nil:
-    section.add "$filter", valid_568367
+  if valid_564267 != nil:
+    section.add "$filter", valid_564267
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2094,55 +2090,54 @@ proc validate_IntegrationAccountMapsList_568360(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568368: Call_IntegrationAccountMapsList_568359; path: JsonNode;
+proc call*(call_564268: Call_IntegrationAccountMapsList_564259; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets a list of integration account maps.
   ## 
-  let valid = call_568368.validator(path, query, header, formData, body)
-  let scheme = call_568368.pickScheme
+  let valid = call_564268.validator(path, query, header, formData, body)
+  let scheme = call_564268.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568368.url(scheme.get, call_568368.host, call_568368.base,
-                         call_568368.route, valid.getOrDefault("path"),
+  let url = call_564268.url(scheme.get, call_564268.host, call_564268.base,
+                         call_564268.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568368, url, valid)
+  result = hook(call_564268, url, valid)
 
-proc call*(call_568369: Call_IntegrationAccountMapsList_568359;
-          resourceGroupName: string; apiVersion: string;
-          integrationAccountName: string; subscriptionId: string; Top: int = 0;
-          Filter: string = ""): Recallable =
+proc call*(call_564269: Call_IntegrationAccountMapsList_564259; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string;
+          integrationAccountName: string; Top: int = 0; Filter: string = ""): Recallable =
   ## integrationAccountMapsList
   ## Gets a list of integration account maps.
-  ##   resourceGroupName: string (required)
-  ##                    : The resource group name.
   ##   apiVersion: string (required)
   ##             : The API version.
-  ##   integrationAccountName: string (required)
-  ##                         : The integration account name.
-  ##   subscriptionId: string (required)
-  ##                 : The subscription id.
   ##   Top: int
   ##      : The number of items to be included in the result.
+  ##   subscriptionId: string (required)
+  ##                 : The subscription id.
+  ##   resourceGroupName: string (required)
+  ##                    : The resource group name.
   ##   Filter: string
   ##         : The filter to apply on the operation.
-  var path_568370 = newJObject()
-  var query_568371 = newJObject()
-  add(path_568370, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568371, "api-version", newJString(apiVersion))
-  add(path_568370, "integrationAccountName", newJString(integrationAccountName))
-  add(path_568370, "subscriptionId", newJString(subscriptionId))
-  add(query_568371, "$top", newJInt(Top))
-  add(query_568371, "$filter", newJString(Filter))
-  result = call_568369.call(path_568370, query_568371, nil, nil, nil)
+  ##   integrationAccountName: string (required)
+  ##                         : The integration account name.
+  var path_564270 = newJObject()
+  var query_564271 = newJObject()
+  add(query_564271, "api-version", newJString(apiVersion))
+  add(query_564271, "$top", newJInt(Top))
+  add(path_564270, "subscriptionId", newJString(subscriptionId))
+  add(path_564270, "resourceGroupName", newJString(resourceGroupName))
+  add(query_564271, "$filter", newJString(Filter))
+  add(path_564270, "integrationAccountName", newJString(integrationAccountName))
+  result = call_564269.call(path_564270, query_564271, nil, nil, nil)
 
-var integrationAccountMapsList* = Call_IntegrationAccountMapsList_568359(
+var integrationAccountMapsList* = Call_IntegrationAccountMapsList_564259(
     name: "integrationAccountMapsList", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Logic/integrationAccounts/{integrationAccountName}/maps",
-    validator: validate_IntegrationAccountMapsList_568360, base: "",
-    url: url_IntegrationAccountMapsList_568361, schemes: {Scheme.Https})
+    validator: validate_IntegrationAccountMapsList_564260, base: "",
+    url: url_IntegrationAccountMapsList_564261, schemes: {Scheme.Https})
 type
-  Call_IntegrationAccountMapsCreateOrUpdate_568384 = ref object of OpenApiRestCall_567650
-proc url_IntegrationAccountMapsCreateOrUpdate_568386(protocol: Scheme;
+  Call_IntegrationAccountMapsCreateOrUpdate_564284 = ref object of OpenApiRestCall_563548
+proc url_IntegrationAccountMapsCreateOrUpdate_564286(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2169,44 +2164,43 @@ proc url_IntegrationAccountMapsCreateOrUpdate_568386(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_IntegrationAccountMapsCreateOrUpdate_568385(path: JsonNode;
+proc validate_IntegrationAccountMapsCreateOrUpdate_564285(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Creates or updates an integration account map.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The resource group name.
   ##   mapName: JString (required)
   ##          : The integration account map name.
-  ##   integrationAccountName: JString (required)
-  ##                         : The integration account name.
   ##   subscriptionId: JString (required)
   ##                 : The subscription id.
+  ##   resourceGroupName: JString (required)
+  ##                    : The resource group name.
+  ##   integrationAccountName: JString (required)
+  ##                         : The integration account name.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568387 = path.getOrDefault("resourceGroupName")
-  valid_568387 = validateParameter(valid_568387, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `mapName` field"
+  var valid_564287 = path.getOrDefault("mapName")
+  valid_564287 = validateParameter(valid_564287, JString, required = true,
                                  default = nil)
-  if valid_568387 != nil:
-    section.add "resourceGroupName", valid_568387
-  var valid_568388 = path.getOrDefault("mapName")
-  valid_568388 = validateParameter(valid_568388, JString, required = true,
+  if valid_564287 != nil:
+    section.add "mapName", valid_564287
+  var valid_564288 = path.getOrDefault("subscriptionId")
+  valid_564288 = validateParameter(valid_564288, JString, required = true,
                                  default = nil)
-  if valid_568388 != nil:
-    section.add "mapName", valid_568388
-  var valid_568389 = path.getOrDefault("integrationAccountName")
-  valid_568389 = validateParameter(valid_568389, JString, required = true,
+  if valid_564288 != nil:
+    section.add "subscriptionId", valid_564288
+  var valid_564289 = path.getOrDefault("resourceGroupName")
+  valid_564289 = validateParameter(valid_564289, JString, required = true,
                                  default = nil)
-  if valid_568389 != nil:
-    section.add "integrationAccountName", valid_568389
-  var valid_568390 = path.getOrDefault("subscriptionId")
-  valid_568390 = validateParameter(valid_568390, JString, required = true,
+  if valid_564289 != nil:
+    section.add "resourceGroupName", valid_564289
+  var valid_564290 = path.getOrDefault("integrationAccountName")
+  valid_564290 = validateParameter(valid_564290, JString, required = true,
                                  default = nil)
-  if valid_568390 != nil:
-    section.add "subscriptionId", valid_568390
+  if valid_564290 != nil:
+    section.add "integrationAccountName", valid_564290
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2214,11 +2208,11 @@ proc validate_IntegrationAccountMapsCreateOrUpdate_568385(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568391 = query.getOrDefault("api-version")
-  valid_568391 = validateParameter(valid_568391, JString, required = true,
+  var valid_564291 = query.getOrDefault("api-version")
+  valid_564291 = validateParameter(valid_564291, JString, required = true,
                                  default = nil)
-  if valid_568391 != nil:
-    section.add "api-version", valid_568391
+  if valid_564291 != nil:
+    section.add "api-version", valid_564291
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2232,57 +2226,57 @@ proc validate_IntegrationAccountMapsCreateOrUpdate_568385(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568393: Call_IntegrationAccountMapsCreateOrUpdate_568384;
+proc call*(call_564293: Call_IntegrationAccountMapsCreateOrUpdate_564284;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Creates or updates an integration account map.
   ## 
-  let valid = call_568393.validator(path, query, header, formData, body)
-  let scheme = call_568393.pickScheme
+  let valid = call_564293.validator(path, query, header, formData, body)
+  let scheme = call_564293.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568393.url(scheme.get, call_568393.host, call_568393.base,
-                         call_568393.route, valid.getOrDefault("path"),
+  let url = call_564293.url(scheme.get, call_564293.host, call_564293.base,
+                         call_564293.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568393, url, valid)
+  result = hook(call_564293, url, valid)
 
-proc call*(call_568394: Call_IntegrationAccountMapsCreateOrUpdate_568384;
-          resourceGroupName: string; map: JsonNode; mapName: string;
-          apiVersion: string; integrationAccountName: string; subscriptionId: string): Recallable =
+proc call*(call_564294: Call_IntegrationAccountMapsCreateOrUpdate_564284;
+          map: JsonNode; apiVersion: string; mapName: string; subscriptionId: string;
+          resourceGroupName: string; integrationAccountName: string): Recallable =
   ## integrationAccountMapsCreateOrUpdate
   ## Creates or updates an integration account map.
-  ##   resourceGroupName: string (required)
-  ##                    : The resource group name.
   ##   map: JObject (required)
   ##      : The integration account map.
-  ##   mapName: string (required)
-  ##          : The integration account map name.
   ##   apiVersion: string (required)
   ##             : The API version.
-  ##   integrationAccountName: string (required)
-  ##                         : The integration account name.
+  ##   mapName: string (required)
+  ##          : The integration account map name.
   ##   subscriptionId: string (required)
   ##                 : The subscription id.
-  var path_568395 = newJObject()
-  var query_568396 = newJObject()
-  var body_568397 = newJObject()
-  add(path_568395, "resourceGroupName", newJString(resourceGroupName))
+  ##   resourceGroupName: string (required)
+  ##                    : The resource group name.
+  ##   integrationAccountName: string (required)
+  ##                         : The integration account name.
+  var path_564295 = newJObject()
+  var query_564296 = newJObject()
+  var body_564297 = newJObject()
   if map != nil:
-    body_568397 = map
-  add(path_568395, "mapName", newJString(mapName))
-  add(query_568396, "api-version", newJString(apiVersion))
-  add(path_568395, "integrationAccountName", newJString(integrationAccountName))
-  add(path_568395, "subscriptionId", newJString(subscriptionId))
-  result = call_568394.call(path_568395, query_568396, nil, nil, body_568397)
+    body_564297 = map
+  add(query_564296, "api-version", newJString(apiVersion))
+  add(path_564295, "mapName", newJString(mapName))
+  add(path_564295, "subscriptionId", newJString(subscriptionId))
+  add(path_564295, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564295, "integrationAccountName", newJString(integrationAccountName))
+  result = call_564294.call(path_564295, query_564296, nil, nil, body_564297)
 
-var integrationAccountMapsCreateOrUpdate* = Call_IntegrationAccountMapsCreateOrUpdate_568384(
+var integrationAccountMapsCreateOrUpdate* = Call_IntegrationAccountMapsCreateOrUpdate_564284(
     name: "integrationAccountMapsCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Logic/integrationAccounts/{integrationAccountName}/maps/{mapName}",
-    validator: validate_IntegrationAccountMapsCreateOrUpdate_568385, base: "",
-    url: url_IntegrationAccountMapsCreateOrUpdate_568386, schemes: {Scheme.Https})
+    validator: validate_IntegrationAccountMapsCreateOrUpdate_564285, base: "",
+    url: url_IntegrationAccountMapsCreateOrUpdate_564286, schemes: {Scheme.Https})
 type
-  Call_IntegrationAccountMapsGet_568372 = ref object of OpenApiRestCall_567650
-proc url_IntegrationAccountMapsGet_568374(protocol: Scheme; host: string;
+  Call_IntegrationAccountMapsGet_564272 = ref object of OpenApiRestCall_563548
+proc url_IntegrationAccountMapsGet_564274(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2309,44 +2303,43 @@ proc url_IntegrationAccountMapsGet_568374(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_IntegrationAccountMapsGet_568373(path: JsonNode; query: JsonNode;
+proc validate_IntegrationAccountMapsGet_564273(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets an integration account map.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The resource group name.
   ##   mapName: JString (required)
   ##          : The integration account map name.
-  ##   integrationAccountName: JString (required)
-  ##                         : The integration account name.
   ##   subscriptionId: JString (required)
   ##                 : The subscription id.
+  ##   resourceGroupName: JString (required)
+  ##                    : The resource group name.
+  ##   integrationAccountName: JString (required)
+  ##                         : The integration account name.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568375 = path.getOrDefault("resourceGroupName")
-  valid_568375 = validateParameter(valid_568375, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `mapName` field"
+  var valid_564275 = path.getOrDefault("mapName")
+  valid_564275 = validateParameter(valid_564275, JString, required = true,
                                  default = nil)
-  if valid_568375 != nil:
-    section.add "resourceGroupName", valid_568375
-  var valid_568376 = path.getOrDefault("mapName")
-  valid_568376 = validateParameter(valid_568376, JString, required = true,
+  if valid_564275 != nil:
+    section.add "mapName", valid_564275
+  var valid_564276 = path.getOrDefault("subscriptionId")
+  valid_564276 = validateParameter(valid_564276, JString, required = true,
                                  default = nil)
-  if valid_568376 != nil:
-    section.add "mapName", valid_568376
-  var valid_568377 = path.getOrDefault("integrationAccountName")
-  valid_568377 = validateParameter(valid_568377, JString, required = true,
+  if valid_564276 != nil:
+    section.add "subscriptionId", valid_564276
+  var valid_564277 = path.getOrDefault("resourceGroupName")
+  valid_564277 = validateParameter(valid_564277, JString, required = true,
                                  default = nil)
-  if valid_568377 != nil:
-    section.add "integrationAccountName", valid_568377
-  var valid_568378 = path.getOrDefault("subscriptionId")
-  valid_568378 = validateParameter(valid_568378, JString, required = true,
+  if valid_564277 != nil:
+    section.add "resourceGroupName", valid_564277
+  var valid_564278 = path.getOrDefault("integrationAccountName")
+  valid_564278 = validateParameter(valid_564278, JString, required = true,
                                  default = nil)
-  if valid_568378 != nil:
-    section.add "subscriptionId", valid_568378
+  if valid_564278 != nil:
+    section.add "integrationAccountName", valid_564278
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2354,11 +2347,11 @@ proc validate_IntegrationAccountMapsGet_568373(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568379 = query.getOrDefault("api-version")
-  valid_568379 = validateParameter(valid_568379, JString, required = true,
+  var valid_564279 = query.getOrDefault("api-version")
+  valid_564279 = validateParameter(valid_564279, JString, required = true,
                                  default = nil)
-  if valid_568379 != nil:
-    section.add "api-version", valid_568379
+  if valid_564279 != nil:
+    section.add "api-version", valid_564279
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2367,51 +2360,51 @@ proc validate_IntegrationAccountMapsGet_568373(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568380: Call_IntegrationAccountMapsGet_568372; path: JsonNode;
+proc call*(call_564280: Call_IntegrationAccountMapsGet_564272; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets an integration account map.
   ## 
-  let valid = call_568380.validator(path, query, header, formData, body)
-  let scheme = call_568380.pickScheme
+  let valid = call_564280.validator(path, query, header, formData, body)
+  let scheme = call_564280.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568380.url(scheme.get, call_568380.host, call_568380.base,
-                         call_568380.route, valid.getOrDefault("path"),
+  let url = call_564280.url(scheme.get, call_564280.host, call_564280.base,
+                         call_564280.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568380, url, valid)
+  result = hook(call_564280, url, valid)
 
-proc call*(call_568381: Call_IntegrationAccountMapsGet_568372;
-          resourceGroupName: string; mapName: string; apiVersion: string;
-          integrationAccountName: string; subscriptionId: string): Recallable =
+proc call*(call_564281: Call_IntegrationAccountMapsGet_564272; apiVersion: string;
+          mapName: string; subscriptionId: string; resourceGroupName: string;
+          integrationAccountName: string): Recallable =
   ## integrationAccountMapsGet
   ## Gets an integration account map.
-  ##   resourceGroupName: string (required)
-  ##                    : The resource group name.
-  ##   mapName: string (required)
-  ##          : The integration account map name.
   ##   apiVersion: string (required)
   ##             : The API version.
-  ##   integrationAccountName: string (required)
-  ##                         : The integration account name.
+  ##   mapName: string (required)
+  ##          : The integration account map name.
   ##   subscriptionId: string (required)
   ##                 : The subscription id.
-  var path_568382 = newJObject()
-  var query_568383 = newJObject()
-  add(path_568382, "resourceGroupName", newJString(resourceGroupName))
-  add(path_568382, "mapName", newJString(mapName))
-  add(query_568383, "api-version", newJString(apiVersion))
-  add(path_568382, "integrationAccountName", newJString(integrationAccountName))
-  add(path_568382, "subscriptionId", newJString(subscriptionId))
-  result = call_568381.call(path_568382, query_568383, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The resource group name.
+  ##   integrationAccountName: string (required)
+  ##                         : The integration account name.
+  var path_564282 = newJObject()
+  var query_564283 = newJObject()
+  add(query_564283, "api-version", newJString(apiVersion))
+  add(path_564282, "mapName", newJString(mapName))
+  add(path_564282, "subscriptionId", newJString(subscriptionId))
+  add(path_564282, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564282, "integrationAccountName", newJString(integrationAccountName))
+  result = call_564281.call(path_564282, query_564283, nil, nil, nil)
 
-var integrationAccountMapsGet* = Call_IntegrationAccountMapsGet_568372(
+var integrationAccountMapsGet* = Call_IntegrationAccountMapsGet_564272(
     name: "integrationAccountMapsGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Logic/integrationAccounts/{integrationAccountName}/maps/{mapName}",
-    validator: validate_IntegrationAccountMapsGet_568373, base: "",
-    url: url_IntegrationAccountMapsGet_568374, schemes: {Scheme.Https})
+    validator: validate_IntegrationAccountMapsGet_564273, base: "",
+    url: url_IntegrationAccountMapsGet_564274, schemes: {Scheme.Https})
 type
-  Call_IntegrationAccountMapsDelete_568398 = ref object of OpenApiRestCall_567650
-proc url_IntegrationAccountMapsDelete_568400(protocol: Scheme; host: string;
+  Call_IntegrationAccountMapsDelete_564298 = ref object of OpenApiRestCall_563548
+proc url_IntegrationAccountMapsDelete_564300(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2438,44 +2431,43 @@ proc url_IntegrationAccountMapsDelete_568400(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_IntegrationAccountMapsDelete_568399(path: JsonNode; query: JsonNode;
+proc validate_IntegrationAccountMapsDelete_564299(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Deletes an integration account map.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The resource group name.
   ##   mapName: JString (required)
   ##          : The integration account map name.
-  ##   integrationAccountName: JString (required)
-  ##                         : The integration account name.
   ##   subscriptionId: JString (required)
   ##                 : The subscription id.
+  ##   resourceGroupName: JString (required)
+  ##                    : The resource group name.
+  ##   integrationAccountName: JString (required)
+  ##                         : The integration account name.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568401 = path.getOrDefault("resourceGroupName")
-  valid_568401 = validateParameter(valid_568401, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `mapName` field"
+  var valid_564301 = path.getOrDefault("mapName")
+  valid_564301 = validateParameter(valid_564301, JString, required = true,
                                  default = nil)
-  if valid_568401 != nil:
-    section.add "resourceGroupName", valid_568401
-  var valid_568402 = path.getOrDefault("mapName")
-  valid_568402 = validateParameter(valid_568402, JString, required = true,
+  if valid_564301 != nil:
+    section.add "mapName", valid_564301
+  var valid_564302 = path.getOrDefault("subscriptionId")
+  valid_564302 = validateParameter(valid_564302, JString, required = true,
                                  default = nil)
-  if valid_568402 != nil:
-    section.add "mapName", valid_568402
-  var valid_568403 = path.getOrDefault("integrationAccountName")
-  valid_568403 = validateParameter(valid_568403, JString, required = true,
+  if valid_564302 != nil:
+    section.add "subscriptionId", valid_564302
+  var valid_564303 = path.getOrDefault("resourceGroupName")
+  valid_564303 = validateParameter(valid_564303, JString, required = true,
                                  default = nil)
-  if valid_568403 != nil:
-    section.add "integrationAccountName", valid_568403
-  var valid_568404 = path.getOrDefault("subscriptionId")
-  valid_568404 = validateParameter(valid_568404, JString, required = true,
+  if valid_564303 != nil:
+    section.add "resourceGroupName", valid_564303
+  var valid_564304 = path.getOrDefault("integrationAccountName")
+  valid_564304 = validateParameter(valid_564304, JString, required = true,
                                  default = nil)
-  if valid_568404 != nil:
-    section.add "subscriptionId", valid_568404
+  if valid_564304 != nil:
+    section.add "integrationAccountName", valid_564304
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2483,11 +2475,11 @@ proc validate_IntegrationAccountMapsDelete_568399(path: JsonNode; query: JsonNod
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568405 = query.getOrDefault("api-version")
-  valid_568405 = validateParameter(valid_568405, JString, required = true,
+  var valid_564305 = query.getOrDefault("api-version")
+  valid_564305 = validateParameter(valid_564305, JString, required = true,
                                  default = nil)
-  if valid_568405 != nil:
-    section.add "api-version", valid_568405
+  if valid_564305 != nil:
+    section.add "api-version", valid_564305
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2496,51 +2488,51 @@ proc validate_IntegrationAccountMapsDelete_568399(path: JsonNode; query: JsonNod
   if body != nil:
     result.add "body", body
 
-proc call*(call_568406: Call_IntegrationAccountMapsDelete_568398; path: JsonNode;
+proc call*(call_564306: Call_IntegrationAccountMapsDelete_564298; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes an integration account map.
   ## 
-  let valid = call_568406.validator(path, query, header, formData, body)
-  let scheme = call_568406.pickScheme
+  let valid = call_564306.validator(path, query, header, formData, body)
+  let scheme = call_564306.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568406.url(scheme.get, call_568406.host, call_568406.base,
-                         call_568406.route, valid.getOrDefault("path"),
+  let url = call_564306.url(scheme.get, call_564306.host, call_564306.base,
+                         call_564306.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568406, url, valid)
+  result = hook(call_564306, url, valid)
 
-proc call*(call_568407: Call_IntegrationAccountMapsDelete_568398;
-          resourceGroupName: string; mapName: string; apiVersion: string;
-          integrationAccountName: string; subscriptionId: string): Recallable =
+proc call*(call_564307: Call_IntegrationAccountMapsDelete_564298;
+          apiVersion: string; mapName: string; subscriptionId: string;
+          resourceGroupName: string; integrationAccountName: string): Recallable =
   ## integrationAccountMapsDelete
   ## Deletes an integration account map.
-  ##   resourceGroupName: string (required)
-  ##                    : The resource group name.
-  ##   mapName: string (required)
-  ##          : The integration account map name.
   ##   apiVersion: string (required)
   ##             : The API version.
-  ##   integrationAccountName: string (required)
-  ##                         : The integration account name.
+  ##   mapName: string (required)
+  ##          : The integration account map name.
   ##   subscriptionId: string (required)
   ##                 : The subscription id.
-  var path_568408 = newJObject()
-  var query_568409 = newJObject()
-  add(path_568408, "resourceGroupName", newJString(resourceGroupName))
-  add(path_568408, "mapName", newJString(mapName))
-  add(query_568409, "api-version", newJString(apiVersion))
-  add(path_568408, "integrationAccountName", newJString(integrationAccountName))
-  add(path_568408, "subscriptionId", newJString(subscriptionId))
-  result = call_568407.call(path_568408, query_568409, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The resource group name.
+  ##   integrationAccountName: string (required)
+  ##                         : The integration account name.
+  var path_564308 = newJObject()
+  var query_564309 = newJObject()
+  add(query_564309, "api-version", newJString(apiVersion))
+  add(path_564308, "mapName", newJString(mapName))
+  add(path_564308, "subscriptionId", newJString(subscriptionId))
+  add(path_564308, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564308, "integrationAccountName", newJString(integrationAccountName))
+  result = call_564307.call(path_564308, query_564309, nil, nil, nil)
 
-var integrationAccountMapsDelete* = Call_IntegrationAccountMapsDelete_568398(
+var integrationAccountMapsDelete* = Call_IntegrationAccountMapsDelete_564298(
     name: "integrationAccountMapsDelete", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Logic/integrationAccounts/{integrationAccountName}/maps/{mapName}",
-    validator: validate_IntegrationAccountMapsDelete_568399, base: "",
-    url: url_IntegrationAccountMapsDelete_568400, schemes: {Scheme.Https})
+    validator: validate_IntegrationAccountMapsDelete_564299, base: "",
+    url: url_IntegrationAccountMapsDelete_564300, schemes: {Scheme.Https})
 type
-  Call_IntegrationAccountPartnersList_568410 = ref object of OpenApiRestCall_567650
-proc url_IntegrationAccountPartnersList_568412(protocol: Scheme; host: string;
+  Call_IntegrationAccountPartnersList_564310 = ref object of OpenApiRestCall_563548
+proc url_IntegrationAccountPartnersList_564312(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2565,37 +2557,37 @@ proc url_IntegrationAccountPartnersList_568412(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_IntegrationAccountPartnersList_568411(path: JsonNode;
+proc validate_IntegrationAccountPartnersList_564311(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets a list of integration account partners.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
+  ##   subscriptionId: JString (required)
+  ##                 : The subscription id.
   ##   resourceGroupName: JString (required)
   ##                    : The resource group name.
   ##   integrationAccountName: JString (required)
   ##                         : The integration account name.
-  ##   subscriptionId: JString (required)
-  ##                 : The subscription id.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568413 = path.getOrDefault("resourceGroupName")
-  valid_568413 = validateParameter(valid_568413, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564313 = path.getOrDefault("subscriptionId")
+  valid_564313 = validateParameter(valid_564313, JString, required = true,
                                  default = nil)
-  if valid_568413 != nil:
-    section.add "resourceGroupName", valid_568413
-  var valid_568414 = path.getOrDefault("integrationAccountName")
-  valid_568414 = validateParameter(valid_568414, JString, required = true,
+  if valid_564313 != nil:
+    section.add "subscriptionId", valid_564313
+  var valid_564314 = path.getOrDefault("resourceGroupName")
+  valid_564314 = validateParameter(valid_564314, JString, required = true,
                                  default = nil)
-  if valid_568414 != nil:
-    section.add "integrationAccountName", valid_568414
-  var valid_568415 = path.getOrDefault("subscriptionId")
-  valid_568415 = validateParameter(valid_568415, JString, required = true,
+  if valid_564314 != nil:
+    section.add "resourceGroupName", valid_564314
+  var valid_564315 = path.getOrDefault("integrationAccountName")
+  valid_564315 = validateParameter(valid_564315, JString, required = true,
                                  default = nil)
-  if valid_568415 != nil:
-    section.add "subscriptionId", valid_568415
+  if valid_564315 != nil:
+    section.add "integrationAccountName", valid_564315
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2607,20 +2599,20 @@ proc validate_IntegrationAccountPartnersList_568411(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568416 = query.getOrDefault("api-version")
-  valid_568416 = validateParameter(valid_568416, JString, required = true,
+  var valid_564316 = query.getOrDefault("api-version")
+  valid_564316 = validateParameter(valid_564316, JString, required = true,
                                  default = nil)
-  if valid_568416 != nil:
-    section.add "api-version", valid_568416
-  var valid_568417 = query.getOrDefault("$top")
-  valid_568417 = validateParameter(valid_568417, JInt, required = false, default = nil)
-  if valid_568417 != nil:
-    section.add "$top", valid_568417
-  var valid_568418 = query.getOrDefault("$filter")
-  valid_568418 = validateParameter(valid_568418, JString, required = false,
+  if valid_564316 != nil:
+    section.add "api-version", valid_564316
+  var valid_564317 = query.getOrDefault("$top")
+  valid_564317 = validateParameter(valid_564317, JInt, required = false, default = nil)
+  if valid_564317 != nil:
+    section.add "$top", valid_564317
+  var valid_564318 = query.getOrDefault("$filter")
+  valid_564318 = validateParameter(valid_564318, JString, required = false,
                                  default = nil)
-  if valid_568418 != nil:
-    section.add "$filter", valid_568418
+  if valid_564318 != nil:
+    section.add "$filter", valid_564318
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2629,55 +2621,54 @@ proc validate_IntegrationAccountPartnersList_568411(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568419: Call_IntegrationAccountPartnersList_568410; path: JsonNode;
+proc call*(call_564319: Call_IntegrationAccountPartnersList_564310; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets a list of integration account partners.
   ## 
-  let valid = call_568419.validator(path, query, header, formData, body)
-  let scheme = call_568419.pickScheme
+  let valid = call_564319.validator(path, query, header, formData, body)
+  let scheme = call_564319.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568419.url(scheme.get, call_568419.host, call_568419.base,
-                         call_568419.route, valid.getOrDefault("path"),
+  let url = call_564319.url(scheme.get, call_564319.host, call_564319.base,
+                         call_564319.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568419, url, valid)
+  result = hook(call_564319, url, valid)
 
-proc call*(call_568420: Call_IntegrationAccountPartnersList_568410;
-          resourceGroupName: string; apiVersion: string;
-          integrationAccountName: string; subscriptionId: string; Top: int = 0;
-          Filter: string = ""): Recallable =
+proc call*(call_564320: Call_IntegrationAccountPartnersList_564310;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string;
+          integrationAccountName: string; Top: int = 0; Filter: string = ""): Recallable =
   ## integrationAccountPartnersList
   ## Gets a list of integration account partners.
-  ##   resourceGroupName: string (required)
-  ##                    : The resource group name.
   ##   apiVersion: string (required)
   ##             : The API version.
-  ##   integrationAccountName: string (required)
-  ##                         : The integration account name.
-  ##   subscriptionId: string (required)
-  ##                 : The subscription id.
   ##   Top: int
   ##      : The number of items to be included in the result.
+  ##   subscriptionId: string (required)
+  ##                 : The subscription id.
+  ##   resourceGroupName: string (required)
+  ##                    : The resource group name.
   ##   Filter: string
   ##         : The filter to apply on the operation.
-  var path_568421 = newJObject()
-  var query_568422 = newJObject()
-  add(path_568421, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568422, "api-version", newJString(apiVersion))
-  add(path_568421, "integrationAccountName", newJString(integrationAccountName))
-  add(path_568421, "subscriptionId", newJString(subscriptionId))
-  add(query_568422, "$top", newJInt(Top))
-  add(query_568422, "$filter", newJString(Filter))
-  result = call_568420.call(path_568421, query_568422, nil, nil, nil)
+  ##   integrationAccountName: string (required)
+  ##                         : The integration account name.
+  var path_564321 = newJObject()
+  var query_564322 = newJObject()
+  add(query_564322, "api-version", newJString(apiVersion))
+  add(query_564322, "$top", newJInt(Top))
+  add(path_564321, "subscriptionId", newJString(subscriptionId))
+  add(path_564321, "resourceGroupName", newJString(resourceGroupName))
+  add(query_564322, "$filter", newJString(Filter))
+  add(path_564321, "integrationAccountName", newJString(integrationAccountName))
+  result = call_564320.call(path_564321, query_564322, nil, nil, nil)
 
-var integrationAccountPartnersList* = Call_IntegrationAccountPartnersList_568410(
+var integrationAccountPartnersList* = Call_IntegrationAccountPartnersList_564310(
     name: "integrationAccountPartnersList", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Logic/integrationAccounts/{integrationAccountName}/partners",
-    validator: validate_IntegrationAccountPartnersList_568411, base: "",
-    url: url_IntegrationAccountPartnersList_568412, schemes: {Scheme.Https})
+    validator: validate_IntegrationAccountPartnersList_564311, base: "",
+    url: url_IntegrationAccountPartnersList_564312, schemes: {Scheme.Https})
 type
-  Call_IntegrationAccountPartnersCreateOrUpdate_568435 = ref object of OpenApiRestCall_567650
-proc url_IntegrationAccountPartnersCreateOrUpdate_568437(protocol: Scheme;
+  Call_IntegrationAccountPartnersCreateOrUpdate_564335 = ref object of OpenApiRestCall_563548
+proc url_IntegrationAccountPartnersCreateOrUpdate_564337(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2704,44 +2695,44 @@ proc url_IntegrationAccountPartnersCreateOrUpdate_568437(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_IntegrationAccountPartnersCreateOrUpdate_568436(path: JsonNode;
+proc validate_IntegrationAccountPartnersCreateOrUpdate_564336(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Creates or updates an integration account partner.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The resource group name.
-  ##   integrationAccountName: JString (required)
-  ##                         : The integration account name.
   ##   subscriptionId: JString (required)
   ##                 : The subscription id.
   ##   partnerName: JString (required)
   ##              : The integration account partner name.
+  ##   resourceGroupName: JString (required)
+  ##                    : The resource group name.
+  ##   integrationAccountName: JString (required)
+  ##                         : The integration account name.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568438 = path.getOrDefault("resourceGroupName")
-  valid_568438 = validateParameter(valid_568438, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564338 = path.getOrDefault("subscriptionId")
+  valid_564338 = validateParameter(valid_564338, JString, required = true,
                                  default = nil)
-  if valid_568438 != nil:
-    section.add "resourceGroupName", valid_568438
-  var valid_568439 = path.getOrDefault("integrationAccountName")
-  valid_568439 = validateParameter(valid_568439, JString, required = true,
+  if valid_564338 != nil:
+    section.add "subscriptionId", valid_564338
+  var valid_564339 = path.getOrDefault("partnerName")
+  valid_564339 = validateParameter(valid_564339, JString, required = true,
                                  default = nil)
-  if valid_568439 != nil:
-    section.add "integrationAccountName", valid_568439
-  var valid_568440 = path.getOrDefault("subscriptionId")
-  valid_568440 = validateParameter(valid_568440, JString, required = true,
+  if valid_564339 != nil:
+    section.add "partnerName", valid_564339
+  var valid_564340 = path.getOrDefault("resourceGroupName")
+  valid_564340 = validateParameter(valid_564340, JString, required = true,
                                  default = nil)
-  if valid_568440 != nil:
-    section.add "subscriptionId", valid_568440
-  var valid_568441 = path.getOrDefault("partnerName")
-  valid_568441 = validateParameter(valid_568441, JString, required = true,
+  if valid_564340 != nil:
+    section.add "resourceGroupName", valid_564340
+  var valid_564341 = path.getOrDefault("integrationAccountName")
+  valid_564341 = validateParameter(valid_564341, JString, required = true,
                                  default = nil)
-  if valid_568441 != nil:
-    section.add "partnerName", valid_568441
+  if valid_564341 != nil:
+    section.add "integrationAccountName", valid_564341
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2749,11 +2740,11 @@ proc validate_IntegrationAccountPartnersCreateOrUpdate_568436(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568442 = query.getOrDefault("api-version")
-  valid_568442 = validateParameter(valid_568442, JString, required = true,
+  var valid_564342 = query.getOrDefault("api-version")
+  valid_564342 = validateParameter(valid_564342, JString, required = true,
                                  default = nil)
-  if valid_568442 != nil:
-    section.add "api-version", valid_568442
+  if valid_564342 != nil:
+    section.add "api-version", valid_564342
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2767,59 +2758,59 @@ proc validate_IntegrationAccountPartnersCreateOrUpdate_568436(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568444: Call_IntegrationAccountPartnersCreateOrUpdate_568435;
+proc call*(call_564344: Call_IntegrationAccountPartnersCreateOrUpdate_564335;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Creates or updates an integration account partner.
   ## 
-  let valid = call_568444.validator(path, query, header, formData, body)
-  let scheme = call_568444.pickScheme
+  let valid = call_564344.validator(path, query, header, formData, body)
+  let scheme = call_564344.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568444.url(scheme.get, call_568444.host, call_568444.base,
-                         call_568444.route, valid.getOrDefault("path"),
+  let url = call_564344.url(scheme.get, call_564344.host, call_564344.base,
+                         call_564344.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568444, url, valid)
+  result = hook(call_564344, url, valid)
 
-proc call*(call_568445: Call_IntegrationAccountPartnersCreateOrUpdate_568435;
-          resourceGroupName: string; apiVersion: string;
-          integrationAccountName: string; subscriptionId: string; partner: JsonNode;
-          partnerName: string): Recallable =
+proc call*(call_564345: Call_IntegrationAccountPartnersCreateOrUpdate_564335;
+          partner: JsonNode; apiVersion: string; subscriptionId: string;
+          partnerName: string; resourceGroupName: string;
+          integrationAccountName: string): Recallable =
   ## integrationAccountPartnersCreateOrUpdate
   ## Creates or updates an integration account partner.
-  ##   resourceGroupName: string (required)
-  ##                    : The resource group name.
-  ##   apiVersion: string (required)
-  ##             : The API version.
-  ##   integrationAccountName: string (required)
-  ##                         : The integration account name.
-  ##   subscriptionId: string (required)
-  ##                 : The subscription id.
   ##   partner: JObject (required)
   ##          : The integration account partner.
+  ##   apiVersion: string (required)
+  ##             : The API version.
+  ##   subscriptionId: string (required)
+  ##                 : The subscription id.
   ##   partnerName: string (required)
   ##              : The integration account partner name.
-  var path_568446 = newJObject()
-  var query_568447 = newJObject()
-  var body_568448 = newJObject()
-  add(path_568446, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568447, "api-version", newJString(apiVersion))
-  add(path_568446, "integrationAccountName", newJString(integrationAccountName))
-  add(path_568446, "subscriptionId", newJString(subscriptionId))
+  ##   resourceGroupName: string (required)
+  ##                    : The resource group name.
+  ##   integrationAccountName: string (required)
+  ##                         : The integration account name.
+  var path_564346 = newJObject()
+  var query_564347 = newJObject()
+  var body_564348 = newJObject()
   if partner != nil:
-    body_568448 = partner
-  add(path_568446, "partnerName", newJString(partnerName))
-  result = call_568445.call(path_568446, query_568447, nil, nil, body_568448)
+    body_564348 = partner
+  add(query_564347, "api-version", newJString(apiVersion))
+  add(path_564346, "subscriptionId", newJString(subscriptionId))
+  add(path_564346, "partnerName", newJString(partnerName))
+  add(path_564346, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564346, "integrationAccountName", newJString(integrationAccountName))
+  result = call_564345.call(path_564346, query_564347, nil, nil, body_564348)
 
-var integrationAccountPartnersCreateOrUpdate* = Call_IntegrationAccountPartnersCreateOrUpdate_568435(
+var integrationAccountPartnersCreateOrUpdate* = Call_IntegrationAccountPartnersCreateOrUpdate_564335(
     name: "integrationAccountPartnersCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Logic/integrationAccounts/{integrationAccountName}/partners/{partnerName}",
-    validator: validate_IntegrationAccountPartnersCreateOrUpdate_568436, base: "",
-    url: url_IntegrationAccountPartnersCreateOrUpdate_568437,
+    validator: validate_IntegrationAccountPartnersCreateOrUpdate_564336, base: "",
+    url: url_IntegrationAccountPartnersCreateOrUpdate_564337,
     schemes: {Scheme.Https})
 type
-  Call_IntegrationAccountPartnersGet_568423 = ref object of OpenApiRestCall_567650
-proc url_IntegrationAccountPartnersGet_568425(protocol: Scheme; host: string;
+  Call_IntegrationAccountPartnersGet_564323 = ref object of OpenApiRestCall_563548
+proc url_IntegrationAccountPartnersGet_564325(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2846,44 +2837,44 @@ proc url_IntegrationAccountPartnersGet_568425(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_IntegrationAccountPartnersGet_568424(path: JsonNode; query: JsonNode;
+proc validate_IntegrationAccountPartnersGet_564324(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets an integration account partner.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The resource group name.
-  ##   integrationAccountName: JString (required)
-  ##                         : The integration account name.
   ##   subscriptionId: JString (required)
   ##                 : The subscription id.
   ##   partnerName: JString (required)
   ##              : The integration account partner name.
+  ##   resourceGroupName: JString (required)
+  ##                    : The resource group name.
+  ##   integrationAccountName: JString (required)
+  ##                         : The integration account name.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568426 = path.getOrDefault("resourceGroupName")
-  valid_568426 = validateParameter(valid_568426, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564326 = path.getOrDefault("subscriptionId")
+  valid_564326 = validateParameter(valid_564326, JString, required = true,
                                  default = nil)
-  if valid_568426 != nil:
-    section.add "resourceGroupName", valid_568426
-  var valid_568427 = path.getOrDefault("integrationAccountName")
-  valid_568427 = validateParameter(valid_568427, JString, required = true,
+  if valid_564326 != nil:
+    section.add "subscriptionId", valid_564326
+  var valid_564327 = path.getOrDefault("partnerName")
+  valid_564327 = validateParameter(valid_564327, JString, required = true,
                                  default = nil)
-  if valid_568427 != nil:
-    section.add "integrationAccountName", valid_568427
-  var valid_568428 = path.getOrDefault("subscriptionId")
-  valid_568428 = validateParameter(valid_568428, JString, required = true,
+  if valid_564327 != nil:
+    section.add "partnerName", valid_564327
+  var valid_564328 = path.getOrDefault("resourceGroupName")
+  valid_564328 = validateParameter(valid_564328, JString, required = true,
                                  default = nil)
-  if valid_568428 != nil:
-    section.add "subscriptionId", valid_568428
-  var valid_568429 = path.getOrDefault("partnerName")
-  valid_568429 = validateParameter(valid_568429, JString, required = true,
+  if valid_564328 != nil:
+    section.add "resourceGroupName", valid_564328
+  var valid_564329 = path.getOrDefault("integrationAccountName")
+  valid_564329 = validateParameter(valid_564329, JString, required = true,
                                  default = nil)
-  if valid_568429 != nil:
-    section.add "partnerName", valid_568429
+  if valid_564329 != nil:
+    section.add "integrationAccountName", valid_564329
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2891,11 +2882,11 @@ proc validate_IntegrationAccountPartnersGet_568424(path: JsonNode; query: JsonNo
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568430 = query.getOrDefault("api-version")
-  valid_568430 = validateParameter(valid_568430, JString, required = true,
+  var valid_564330 = query.getOrDefault("api-version")
+  valid_564330 = validateParameter(valid_564330, JString, required = true,
                                  default = nil)
-  if valid_568430 != nil:
-    section.add "api-version", valid_568430
+  if valid_564330 != nil:
+    section.add "api-version", valid_564330
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2904,52 +2895,51 @@ proc validate_IntegrationAccountPartnersGet_568424(path: JsonNode; query: JsonNo
   if body != nil:
     result.add "body", body
 
-proc call*(call_568431: Call_IntegrationAccountPartnersGet_568423; path: JsonNode;
+proc call*(call_564331: Call_IntegrationAccountPartnersGet_564323; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets an integration account partner.
   ## 
-  let valid = call_568431.validator(path, query, header, formData, body)
-  let scheme = call_568431.pickScheme
+  let valid = call_564331.validator(path, query, header, formData, body)
+  let scheme = call_564331.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568431.url(scheme.get, call_568431.host, call_568431.base,
-                         call_568431.route, valid.getOrDefault("path"),
+  let url = call_564331.url(scheme.get, call_564331.host, call_564331.base,
+                         call_564331.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568431, url, valid)
+  result = hook(call_564331, url, valid)
 
-proc call*(call_568432: Call_IntegrationAccountPartnersGet_568423;
-          resourceGroupName: string; apiVersion: string;
-          integrationAccountName: string; subscriptionId: string;
-          partnerName: string): Recallable =
+proc call*(call_564332: Call_IntegrationAccountPartnersGet_564323;
+          apiVersion: string; subscriptionId: string; partnerName: string;
+          resourceGroupName: string; integrationAccountName: string): Recallable =
   ## integrationAccountPartnersGet
   ## Gets an integration account partner.
-  ##   resourceGroupName: string (required)
-  ##                    : The resource group name.
   ##   apiVersion: string (required)
   ##             : The API version.
-  ##   integrationAccountName: string (required)
-  ##                         : The integration account name.
   ##   subscriptionId: string (required)
   ##                 : The subscription id.
   ##   partnerName: string (required)
   ##              : The integration account partner name.
-  var path_568433 = newJObject()
-  var query_568434 = newJObject()
-  add(path_568433, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568434, "api-version", newJString(apiVersion))
-  add(path_568433, "integrationAccountName", newJString(integrationAccountName))
-  add(path_568433, "subscriptionId", newJString(subscriptionId))
-  add(path_568433, "partnerName", newJString(partnerName))
-  result = call_568432.call(path_568433, query_568434, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The resource group name.
+  ##   integrationAccountName: string (required)
+  ##                         : The integration account name.
+  var path_564333 = newJObject()
+  var query_564334 = newJObject()
+  add(query_564334, "api-version", newJString(apiVersion))
+  add(path_564333, "subscriptionId", newJString(subscriptionId))
+  add(path_564333, "partnerName", newJString(partnerName))
+  add(path_564333, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564333, "integrationAccountName", newJString(integrationAccountName))
+  result = call_564332.call(path_564333, query_564334, nil, nil, nil)
 
-var integrationAccountPartnersGet* = Call_IntegrationAccountPartnersGet_568423(
+var integrationAccountPartnersGet* = Call_IntegrationAccountPartnersGet_564323(
     name: "integrationAccountPartnersGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Logic/integrationAccounts/{integrationAccountName}/partners/{partnerName}",
-    validator: validate_IntegrationAccountPartnersGet_568424, base: "",
-    url: url_IntegrationAccountPartnersGet_568425, schemes: {Scheme.Https})
+    validator: validate_IntegrationAccountPartnersGet_564324, base: "",
+    url: url_IntegrationAccountPartnersGet_564325, schemes: {Scheme.Https})
 type
-  Call_IntegrationAccountPartnersDelete_568449 = ref object of OpenApiRestCall_567650
-proc url_IntegrationAccountPartnersDelete_568451(protocol: Scheme; host: string;
+  Call_IntegrationAccountPartnersDelete_564349 = ref object of OpenApiRestCall_563548
+proc url_IntegrationAccountPartnersDelete_564351(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2976,44 +2966,44 @@ proc url_IntegrationAccountPartnersDelete_568451(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_IntegrationAccountPartnersDelete_568450(path: JsonNode;
+proc validate_IntegrationAccountPartnersDelete_564350(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Deletes an integration account partner.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The resource group name.
-  ##   integrationAccountName: JString (required)
-  ##                         : The integration account name.
   ##   subscriptionId: JString (required)
   ##                 : The subscription id.
   ##   partnerName: JString (required)
   ##              : The integration account partner name.
+  ##   resourceGroupName: JString (required)
+  ##                    : The resource group name.
+  ##   integrationAccountName: JString (required)
+  ##                         : The integration account name.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568452 = path.getOrDefault("resourceGroupName")
-  valid_568452 = validateParameter(valid_568452, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564352 = path.getOrDefault("subscriptionId")
+  valid_564352 = validateParameter(valid_564352, JString, required = true,
                                  default = nil)
-  if valid_568452 != nil:
-    section.add "resourceGroupName", valid_568452
-  var valid_568453 = path.getOrDefault("integrationAccountName")
-  valid_568453 = validateParameter(valid_568453, JString, required = true,
+  if valid_564352 != nil:
+    section.add "subscriptionId", valid_564352
+  var valid_564353 = path.getOrDefault("partnerName")
+  valid_564353 = validateParameter(valid_564353, JString, required = true,
                                  default = nil)
-  if valid_568453 != nil:
-    section.add "integrationAccountName", valid_568453
-  var valid_568454 = path.getOrDefault("subscriptionId")
-  valid_568454 = validateParameter(valid_568454, JString, required = true,
+  if valid_564353 != nil:
+    section.add "partnerName", valid_564353
+  var valid_564354 = path.getOrDefault("resourceGroupName")
+  valid_564354 = validateParameter(valid_564354, JString, required = true,
                                  default = nil)
-  if valid_568454 != nil:
-    section.add "subscriptionId", valid_568454
-  var valid_568455 = path.getOrDefault("partnerName")
-  valid_568455 = validateParameter(valid_568455, JString, required = true,
+  if valid_564354 != nil:
+    section.add "resourceGroupName", valid_564354
+  var valid_564355 = path.getOrDefault("integrationAccountName")
+  valid_564355 = validateParameter(valid_564355, JString, required = true,
                                  default = nil)
-  if valid_568455 != nil:
-    section.add "partnerName", valid_568455
+  if valid_564355 != nil:
+    section.add "integrationAccountName", valid_564355
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -3021,11 +3011,11 @@ proc validate_IntegrationAccountPartnersDelete_568450(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568456 = query.getOrDefault("api-version")
-  valid_568456 = validateParameter(valid_568456, JString, required = true,
+  var valid_564356 = query.getOrDefault("api-version")
+  valid_564356 = validateParameter(valid_564356, JString, required = true,
                                  default = nil)
-  if valid_568456 != nil:
-    section.add "api-version", valid_568456
+  if valid_564356 != nil:
+    section.add "api-version", valid_564356
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3034,53 +3024,52 @@ proc validate_IntegrationAccountPartnersDelete_568450(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568457: Call_IntegrationAccountPartnersDelete_568449;
+proc call*(call_564357: Call_IntegrationAccountPartnersDelete_564349;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Deletes an integration account partner.
   ## 
-  let valid = call_568457.validator(path, query, header, formData, body)
-  let scheme = call_568457.pickScheme
+  let valid = call_564357.validator(path, query, header, formData, body)
+  let scheme = call_564357.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568457.url(scheme.get, call_568457.host, call_568457.base,
-                         call_568457.route, valid.getOrDefault("path"),
+  let url = call_564357.url(scheme.get, call_564357.host, call_564357.base,
+                         call_564357.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568457, url, valid)
+  result = hook(call_564357, url, valid)
 
-proc call*(call_568458: Call_IntegrationAccountPartnersDelete_568449;
-          resourceGroupName: string; apiVersion: string;
-          integrationAccountName: string; subscriptionId: string;
-          partnerName: string): Recallable =
+proc call*(call_564358: Call_IntegrationAccountPartnersDelete_564349;
+          apiVersion: string; subscriptionId: string; partnerName: string;
+          resourceGroupName: string; integrationAccountName: string): Recallable =
   ## integrationAccountPartnersDelete
   ## Deletes an integration account partner.
-  ##   resourceGroupName: string (required)
-  ##                    : The resource group name.
   ##   apiVersion: string (required)
   ##             : The API version.
-  ##   integrationAccountName: string (required)
-  ##                         : The integration account name.
   ##   subscriptionId: string (required)
   ##                 : The subscription id.
   ##   partnerName: string (required)
   ##              : The integration account partner name.
-  var path_568459 = newJObject()
-  var query_568460 = newJObject()
-  add(path_568459, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568460, "api-version", newJString(apiVersion))
-  add(path_568459, "integrationAccountName", newJString(integrationAccountName))
-  add(path_568459, "subscriptionId", newJString(subscriptionId))
-  add(path_568459, "partnerName", newJString(partnerName))
-  result = call_568458.call(path_568459, query_568460, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The resource group name.
+  ##   integrationAccountName: string (required)
+  ##                         : The integration account name.
+  var path_564359 = newJObject()
+  var query_564360 = newJObject()
+  add(query_564360, "api-version", newJString(apiVersion))
+  add(path_564359, "subscriptionId", newJString(subscriptionId))
+  add(path_564359, "partnerName", newJString(partnerName))
+  add(path_564359, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564359, "integrationAccountName", newJString(integrationAccountName))
+  result = call_564358.call(path_564359, query_564360, nil, nil, nil)
 
-var integrationAccountPartnersDelete* = Call_IntegrationAccountPartnersDelete_568449(
+var integrationAccountPartnersDelete* = Call_IntegrationAccountPartnersDelete_564349(
     name: "integrationAccountPartnersDelete", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Logic/integrationAccounts/{integrationAccountName}/partners/{partnerName}",
-    validator: validate_IntegrationAccountPartnersDelete_568450, base: "",
-    url: url_IntegrationAccountPartnersDelete_568451, schemes: {Scheme.Https})
+    validator: validate_IntegrationAccountPartnersDelete_564350, base: "",
+    url: url_IntegrationAccountPartnersDelete_564351, schemes: {Scheme.Https})
 type
-  Call_IntegrationAccountSchemasList_568461 = ref object of OpenApiRestCall_567650
-proc url_IntegrationAccountSchemasList_568463(protocol: Scheme; host: string;
+  Call_IntegrationAccountSchemasList_564361 = ref object of OpenApiRestCall_563548
+proc url_IntegrationAccountSchemasList_564363(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -3105,37 +3094,37 @@ proc url_IntegrationAccountSchemasList_568463(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_IntegrationAccountSchemasList_568462(path: JsonNode; query: JsonNode;
+proc validate_IntegrationAccountSchemasList_564362(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets a list of integration account schemas.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
+  ##   subscriptionId: JString (required)
+  ##                 : The subscription id.
   ##   resourceGroupName: JString (required)
   ##                    : The resource group name.
   ##   integrationAccountName: JString (required)
   ##                         : The integration account name.
-  ##   subscriptionId: JString (required)
-  ##                 : The subscription id.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568464 = path.getOrDefault("resourceGroupName")
-  valid_568464 = validateParameter(valid_568464, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564364 = path.getOrDefault("subscriptionId")
+  valid_564364 = validateParameter(valid_564364, JString, required = true,
                                  default = nil)
-  if valid_568464 != nil:
-    section.add "resourceGroupName", valid_568464
-  var valid_568465 = path.getOrDefault("integrationAccountName")
-  valid_568465 = validateParameter(valid_568465, JString, required = true,
+  if valid_564364 != nil:
+    section.add "subscriptionId", valid_564364
+  var valid_564365 = path.getOrDefault("resourceGroupName")
+  valid_564365 = validateParameter(valid_564365, JString, required = true,
                                  default = nil)
-  if valid_568465 != nil:
-    section.add "integrationAccountName", valid_568465
-  var valid_568466 = path.getOrDefault("subscriptionId")
-  valid_568466 = validateParameter(valid_568466, JString, required = true,
+  if valid_564365 != nil:
+    section.add "resourceGroupName", valid_564365
+  var valid_564366 = path.getOrDefault("integrationAccountName")
+  valid_564366 = validateParameter(valid_564366, JString, required = true,
                                  default = nil)
-  if valid_568466 != nil:
-    section.add "subscriptionId", valid_568466
+  if valid_564366 != nil:
+    section.add "integrationAccountName", valid_564366
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -3147,20 +3136,20 @@ proc validate_IntegrationAccountSchemasList_568462(path: JsonNode; query: JsonNo
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568467 = query.getOrDefault("api-version")
-  valid_568467 = validateParameter(valid_568467, JString, required = true,
+  var valid_564367 = query.getOrDefault("api-version")
+  valid_564367 = validateParameter(valid_564367, JString, required = true,
                                  default = nil)
-  if valid_568467 != nil:
-    section.add "api-version", valid_568467
-  var valid_568468 = query.getOrDefault("$top")
-  valid_568468 = validateParameter(valid_568468, JInt, required = false, default = nil)
-  if valid_568468 != nil:
-    section.add "$top", valid_568468
-  var valid_568469 = query.getOrDefault("$filter")
-  valid_568469 = validateParameter(valid_568469, JString, required = false,
+  if valid_564367 != nil:
+    section.add "api-version", valid_564367
+  var valid_564368 = query.getOrDefault("$top")
+  valid_564368 = validateParameter(valid_564368, JInt, required = false, default = nil)
+  if valid_564368 != nil:
+    section.add "$top", valid_564368
+  var valid_564369 = query.getOrDefault("$filter")
+  valid_564369 = validateParameter(valid_564369, JString, required = false,
                                  default = nil)
-  if valid_568469 != nil:
-    section.add "$filter", valid_568469
+  if valid_564369 != nil:
+    section.add "$filter", valid_564369
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3169,55 +3158,54 @@ proc validate_IntegrationAccountSchemasList_568462(path: JsonNode; query: JsonNo
   if body != nil:
     result.add "body", body
 
-proc call*(call_568470: Call_IntegrationAccountSchemasList_568461; path: JsonNode;
+proc call*(call_564370: Call_IntegrationAccountSchemasList_564361; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets a list of integration account schemas.
   ## 
-  let valid = call_568470.validator(path, query, header, formData, body)
-  let scheme = call_568470.pickScheme
+  let valid = call_564370.validator(path, query, header, formData, body)
+  let scheme = call_564370.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568470.url(scheme.get, call_568470.host, call_568470.base,
-                         call_568470.route, valid.getOrDefault("path"),
+  let url = call_564370.url(scheme.get, call_564370.host, call_564370.base,
+                         call_564370.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568470, url, valid)
+  result = hook(call_564370, url, valid)
 
-proc call*(call_568471: Call_IntegrationAccountSchemasList_568461;
-          resourceGroupName: string; apiVersion: string;
-          integrationAccountName: string; subscriptionId: string; Top: int = 0;
-          Filter: string = ""): Recallable =
+proc call*(call_564371: Call_IntegrationAccountSchemasList_564361;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string;
+          integrationAccountName: string; Top: int = 0; Filter: string = ""): Recallable =
   ## integrationAccountSchemasList
   ## Gets a list of integration account schemas.
-  ##   resourceGroupName: string (required)
-  ##                    : The resource group name.
   ##   apiVersion: string (required)
   ##             : The API version.
-  ##   integrationAccountName: string (required)
-  ##                         : The integration account name.
-  ##   subscriptionId: string (required)
-  ##                 : The subscription id.
   ##   Top: int
   ##      : The number of items to be included in the result.
+  ##   subscriptionId: string (required)
+  ##                 : The subscription id.
+  ##   resourceGroupName: string (required)
+  ##                    : The resource group name.
   ##   Filter: string
   ##         : The filter to apply on the operation.
-  var path_568472 = newJObject()
-  var query_568473 = newJObject()
-  add(path_568472, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568473, "api-version", newJString(apiVersion))
-  add(path_568472, "integrationAccountName", newJString(integrationAccountName))
-  add(path_568472, "subscriptionId", newJString(subscriptionId))
-  add(query_568473, "$top", newJInt(Top))
-  add(query_568473, "$filter", newJString(Filter))
-  result = call_568471.call(path_568472, query_568473, nil, nil, nil)
+  ##   integrationAccountName: string (required)
+  ##                         : The integration account name.
+  var path_564372 = newJObject()
+  var query_564373 = newJObject()
+  add(query_564373, "api-version", newJString(apiVersion))
+  add(query_564373, "$top", newJInt(Top))
+  add(path_564372, "subscriptionId", newJString(subscriptionId))
+  add(path_564372, "resourceGroupName", newJString(resourceGroupName))
+  add(query_564373, "$filter", newJString(Filter))
+  add(path_564372, "integrationAccountName", newJString(integrationAccountName))
+  result = call_564371.call(path_564372, query_564373, nil, nil, nil)
 
-var integrationAccountSchemasList* = Call_IntegrationAccountSchemasList_568461(
+var integrationAccountSchemasList* = Call_IntegrationAccountSchemasList_564361(
     name: "integrationAccountSchemasList", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Logic/integrationAccounts/{integrationAccountName}/schemas",
-    validator: validate_IntegrationAccountSchemasList_568462, base: "",
-    url: url_IntegrationAccountSchemasList_568463, schemes: {Scheme.Https})
+    validator: validate_IntegrationAccountSchemasList_564362, base: "",
+    url: url_IntegrationAccountSchemasList_564363, schemes: {Scheme.Https})
 type
-  Call_IntegrationAccountSchemasCreateOrUpdate_568486 = ref object of OpenApiRestCall_567650
-proc url_IntegrationAccountSchemasCreateOrUpdate_568488(protocol: Scheme;
+  Call_IntegrationAccountSchemasCreateOrUpdate_564386 = ref object of OpenApiRestCall_563548
+proc url_IntegrationAccountSchemasCreateOrUpdate_564388(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -3244,44 +3232,44 @@ proc url_IntegrationAccountSchemasCreateOrUpdate_568488(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_IntegrationAccountSchemasCreateOrUpdate_568487(path: JsonNode;
+proc validate_IntegrationAccountSchemasCreateOrUpdate_564387(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Creates or updates an integration account schema.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The resource group name.
-  ##   integrationAccountName: JString (required)
-  ##                         : The integration account name.
   ##   subscriptionId: JString (required)
   ##                 : The subscription id.
+  ##   resourceGroupName: JString (required)
+  ##                    : The resource group name.
   ##   schemaName: JString (required)
   ##             : The integration account schema name.
+  ##   integrationAccountName: JString (required)
+  ##                         : The integration account name.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568489 = path.getOrDefault("resourceGroupName")
-  valid_568489 = validateParameter(valid_568489, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564389 = path.getOrDefault("subscriptionId")
+  valid_564389 = validateParameter(valid_564389, JString, required = true,
                                  default = nil)
-  if valid_568489 != nil:
-    section.add "resourceGroupName", valid_568489
-  var valid_568490 = path.getOrDefault("integrationAccountName")
-  valid_568490 = validateParameter(valid_568490, JString, required = true,
+  if valid_564389 != nil:
+    section.add "subscriptionId", valid_564389
+  var valid_564390 = path.getOrDefault("resourceGroupName")
+  valid_564390 = validateParameter(valid_564390, JString, required = true,
                                  default = nil)
-  if valid_568490 != nil:
-    section.add "integrationAccountName", valid_568490
-  var valid_568491 = path.getOrDefault("subscriptionId")
-  valid_568491 = validateParameter(valid_568491, JString, required = true,
+  if valid_564390 != nil:
+    section.add "resourceGroupName", valid_564390
+  var valid_564391 = path.getOrDefault("schemaName")
+  valid_564391 = validateParameter(valid_564391, JString, required = true,
                                  default = nil)
-  if valid_568491 != nil:
-    section.add "subscriptionId", valid_568491
-  var valid_568492 = path.getOrDefault("schemaName")
-  valid_568492 = validateParameter(valid_568492, JString, required = true,
+  if valid_564391 != nil:
+    section.add "schemaName", valid_564391
+  var valid_564392 = path.getOrDefault("integrationAccountName")
+  valid_564392 = validateParameter(valid_564392, JString, required = true,
                                  default = nil)
-  if valid_568492 != nil:
-    section.add "schemaName", valid_568492
+  if valid_564392 != nil:
+    section.add "integrationAccountName", valid_564392
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -3289,11 +3277,11 @@ proc validate_IntegrationAccountSchemasCreateOrUpdate_568487(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568493 = query.getOrDefault("api-version")
-  valid_568493 = validateParameter(valid_568493, JString, required = true,
+  var valid_564393 = query.getOrDefault("api-version")
+  valid_564393 = validateParameter(valid_564393, JString, required = true,
                                  default = nil)
-  if valid_568493 != nil:
-    section.add "api-version", valid_568493
+  if valid_564393 != nil:
+    section.add "api-version", valid_564393
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3307,59 +3295,59 @@ proc validate_IntegrationAccountSchemasCreateOrUpdate_568487(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568495: Call_IntegrationAccountSchemasCreateOrUpdate_568486;
+proc call*(call_564395: Call_IntegrationAccountSchemasCreateOrUpdate_564386;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Creates or updates an integration account schema.
   ## 
-  let valid = call_568495.validator(path, query, header, formData, body)
-  let scheme = call_568495.pickScheme
+  let valid = call_564395.validator(path, query, header, formData, body)
+  let scheme = call_564395.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568495.url(scheme.get, call_568495.host, call_568495.base,
-                         call_568495.route, valid.getOrDefault("path"),
+  let url = call_564395.url(scheme.get, call_564395.host, call_564395.base,
+                         call_564395.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568495, url, valid)
+  result = hook(call_564395, url, valid)
 
-proc call*(call_568496: Call_IntegrationAccountSchemasCreateOrUpdate_568486;
-          resourceGroupName: string; apiVersion: string;
-          integrationAccountName: string; subscriptionId: string;
-          schemaName: string; schema: JsonNode): Recallable =
+proc call*(call_564396: Call_IntegrationAccountSchemasCreateOrUpdate_564386;
+          apiVersion: string; schema: JsonNode; subscriptionId: string;
+          resourceGroupName: string; schemaName: string;
+          integrationAccountName: string): Recallable =
   ## integrationAccountSchemasCreateOrUpdate
   ## Creates or updates an integration account schema.
-  ##   resourceGroupName: string (required)
-  ##                    : The resource group name.
   ##   apiVersion: string (required)
   ##             : The API version.
-  ##   integrationAccountName: string (required)
-  ##                         : The integration account name.
-  ##   subscriptionId: string (required)
-  ##                 : The subscription id.
-  ##   schemaName: string (required)
-  ##             : The integration account schema name.
   ##   schema: JObject (required)
   ##         : The integration account schema.
-  var path_568497 = newJObject()
-  var query_568498 = newJObject()
-  var body_568499 = newJObject()
-  add(path_568497, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568498, "api-version", newJString(apiVersion))
-  add(path_568497, "integrationAccountName", newJString(integrationAccountName))
-  add(path_568497, "subscriptionId", newJString(subscriptionId))
-  add(path_568497, "schemaName", newJString(schemaName))
+  ##   subscriptionId: string (required)
+  ##                 : The subscription id.
+  ##   resourceGroupName: string (required)
+  ##                    : The resource group name.
+  ##   schemaName: string (required)
+  ##             : The integration account schema name.
+  ##   integrationAccountName: string (required)
+  ##                         : The integration account name.
+  var path_564397 = newJObject()
+  var query_564398 = newJObject()
+  var body_564399 = newJObject()
+  add(query_564398, "api-version", newJString(apiVersion))
   if schema != nil:
-    body_568499 = schema
-  result = call_568496.call(path_568497, query_568498, nil, nil, body_568499)
+    body_564399 = schema
+  add(path_564397, "subscriptionId", newJString(subscriptionId))
+  add(path_564397, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564397, "schemaName", newJString(schemaName))
+  add(path_564397, "integrationAccountName", newJString(integrationAccountName))
+  result = call_564396.call(path_564397, query_564398, nil, nil, body_564399)
 
-var integrationAccountSchemasCreateOrUpdate* = Call_IntegrationAccountSchemasCreateOrUpdate_568486(
+var integrationAccountSchemasCreateOrUpdate* = Call_IntegrationAccountSchemasCreateOrUpdate_564386(
     name: "integrationAccountSchemasCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Logic/integrationAccounts/{integrationAccountName}/schemas/{schemaName}",
-    validator: validate_IntegrationAccountSchemasCreateOrUpdate_568487, base: "",
-    url: url_IntegrationAccountSchemasCreateOrUpdate_568488,
+    validator: validate_IntegrationAccountSchemasCreateOrUpdate_564387, base: "",
+    url: url_IntegrationAccountSchemasCreateOrUpdate_564388,
     schemes: {Scheme.Https})
 type
-  Call_IntegrationAccountSchemasGet_568474 = ref object of OpenApiRestCall_567650
-proc url_IntegrationAccountSchemasGet_568476(protocol: Scheme; host: string;
+  Call_IntegrationAccountSchemasGet_564374 = ref object of OpenApiRestCall_563548
+proc url_IntegrationAccountSchemasGet_564376(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -3386,44 +3374,44 @@ proc url_IntegrationAccountSchemasGet_568476(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_IntegrationAccountSchemasGet_568475(path: JsonNode; query: JsonNode;
+proc validate_IntegrationAccountSchemasGet_564375(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets an integration account schema.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The resource group name.
-  ##   integrationAccountName: JString (required)
-  ##                         : The integration account name.
   ##   subscriptionId: JString (required)
   ##                 : The subscription id.
+  ##   resourceGroupName: JString (required)
+  ##                    : The resource group name.
   ##   schemaName: JString (required)
   ##             : The integration account schema name.
+  ##   integrationAccountName: JString (required)
+  ##                         : The integration account name.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568477 = path.getOrDefault("resourceGroupName")
-  valid_568477 = validateParameter(valid_568477, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564377 = path.getOrDefault("subscriptionId")
+  valid_564377 = validateParameter(valid_564377, JString, required = true,
                                  default = nil)
-  if valid_568477 != nil:
-    section.add "resourceGroupName", valid_568477
-  var valid_568478 = path.getOrDefault("integrationAccountName")
-  valid_568478 = validateParameter(valid_568478, JString, required = true,
+  if valid_564377 != nil:
+    section.add "subscriptionId", valid_564377
+  var valid_564378 = path.getOrDefault("resourceGroupName")
+  valid_564378 = validateParameter(valid_564378, JString, required = true,
                                  default = nil)
-  if valid_568478 != nil:
-    section.add "integrationAccountName", valid_568478
-  var valid_568479 = path.getOrDefault("subscriptionId")
-  valid_568479 = validateParameter(valid_568479, JString, required = true,
+  if valid_564378 != nil:
+    section.add "resourceGroupName", valid_564378
+  var valid_564379 = path.getOrDefault("schemaName")
+  valid_564379 = validateParameter(valid_564379, JString, required = true,
                                  default = nil)
-  if valid_568479 != nil:
-    section.add "subscriptionId", valid_568479
-  var valid_568480 = path.getOrDefault("schemaName")
-  valid_568480 = validateParameter(valid_568480, JString, required = true,
+  if valid_564379 != nil:
+    section.add "schemaName", valid_564379
+  var valid_564380 = path.getOrDefault("integrationAccountName")
+  valid_564380 = validateParameter(valid_564380, JString, required = true,
                                  default = nil)
-  if valid_568480 != nil:
-    section.add "schemaName", valid_568480
+  if valid_564380 != nil:
+    section.add "integrationAccountName", valid_564380
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -3431,11 +3419,11 @@ proc validate_IntegrationAccountSchemasGet_568475(path: JsonNode; query: JsonNod
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568481 = query.getOrDefault("api-version")
-  valid_568481 = validateParameter(valid_568481, JString, required = true,
+  var valid_564381 = query.getOrDefault("api-version")
+  valid_564381 = validateParameter(valid_564381, JString, required = true,
                                  default = nil)
-  if valid_568481 != nil:
-    section.add "api-version", valid_568481
+  if valid_564381 != nil:
+    section.add "api-version", valid_564381
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3444,51 +3432,51 @@ proc validate_IntegrationAccountSchemasGet_568475(path: JsonNode; query: JsonNod
   if body != nil:
     result.add "body", body
 
-proc call*(call_568482: Call_IntegrationAccountSchemasGet_568474; path: JsonNode;
+proc call*(call_564382: Call_IntegrationAccountSchemasGet_564374; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets an integration account schema.
   ## 
-  let valid = call_568482.validator(path, query, header, formData, body)
-  let scheme = call_568482.pickScheme
+  let valid = call_564382.validator(path, query, header, formData, body)
+  let scheme = call_564382.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568482.url(scheme.get, call_568482.host, call_568482.base,
-                         call_568482.route, valid.getOrDefault("path"),
+  let url = call_564382.url(scheme.get, call_564382.host, call_564382.base,
+                         call_564382.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568482, url, valid)
+  result = hook(call_564382, url, valid)
 
-proc call*(call_568483: Call_IntegrationAccountSchemasGet_568474;
-          resourceGroupName: string; apiVersion: string;
-          integrationAccountName: string; subscriptionId: string; schemaName: string): Recallable =
+proc call*(call_564383: Call_IntegrationAccountSchemasGet_564374;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string;
+          schemaName: string; integrationAccountName: string): Recallable =
   ## integrationAccountSchemasGet
   ## Gets an integration account schema.
-  ##   resourceGroupName: string (required)
-  ##                    : The resource group name.
   ##   apiVersion: string (required)
   ##             : The API version.
-  ##   integrationAccountName: string (required)
-  ##                         : The integration account name.
   ##   subscriptionId: string (required)
   ##                 : The subscription id.
+  ##   resourceGroupName: string (required)
+  ##                    : The resource group name.
   ##   schemaName: string (required)
   ##             : The integration account schema name.
-  var path_568484 = newJObject()
-  var query_568485 = newJObject()
-  add(path_568484, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568485, "api-version", newJString(apiVersion))
-  add(path_568484, "integrationAccountName", newJString(integrationAccountName))
-  add(path_568484, "subscriptionId", newJString(subscriptionId))
-  add(path_568484, "schemaName", newJString(schemaName))
-  result = call_568483.call(path_568484, query_568485, nil, nil, nil)
+  ##   integrationAccountName: string (required)
+  ##                         : The integration account name.
+  var path_564384 = newJObject()
+  var query_564385 = newJObject()
+  add(query_564385, "api-version", newJString(apiVersion))
+  add(path_564384, "subscriptionId", newJString(subscriptionId))
+  add(path_564384, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564384, "schemaName", newJString(schemaName))
+  add(path_564384, "integrationAccountName", newJString(integrationAccountName))
+  result = call_564383.call(path_564384, query_564385, nil, nil, nil)
 
-var integrationAccountSchemasGet* = Call_IntegrationAccountSchemasGet_568474(
+var integrationAccountSchemasGet* = Call_IntegrationAccountSchemasGet_564374(
     name: "integrationAccountSchemasGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Logic/integrationAccounts/{integrationAccountName}/schemas/{schemaName}",
-    validator: validate_IntegrationAccountSchemasGet_568475, base: "",
-    url: url_IntegrationAccountSchemasGet_568476, schemes: {Scheme.Https})
+    validator: validate_IntegrationAccountSchemasGet_564375, base: "",
+    url: url_IntegrationAccountSchemasGet_564376, schemes: {Scheme.Https})
 type
-  Call_IntegrationAccountSchemasDelete_568500 = ref object of OpenApiRestCall_567650
-proc url_IntegrationAccountSchemasDelete_568502(protocol: Scheme; host: string;
+  Call_IntegrationAccountSchemasDelete_564400 = ref object of OpenApiRestCall_563548
+proc url_IntegrationAccountSchemasDelete_564402(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -3515,44 +3503,44 @@ proc url_IntegrationAccountSchemasDelete_568502(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_IntegrationAccountSchemasDelete_568501(path: JsonNode;
+proc validate_IntegrationAccountSchemasDelete_564401(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Deletes an integration account schema.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The resource group name.
-  ##   integrationAccountName: JString (required)
-  ##                         : The integration account name.
   ##   subscriptionId: JString (required)
   ##                 : The subscription id.
+  ##   resourceGroupName: JString (required)
+  ##                    : The resource group name.
   ##   schemaName: JString (required)
   ##             : The integration account schema name.
+  ##   integrationAccountName: JString (required)
+  ##                         : The integration account name.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568503 = path.getOrDefault("resourceGroupName")
-  valid_568503 = validateParameter(valid_568503, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564403 = path.getOrDefault("subscriptionId")
+  valid_564403 = validateParameter(valid_564403, JString, required = true,
                                  default = nil)
-  if valid_568503 != nil:
-    section.add "resourceGroupName", valid_568503
-  var valid_568504 = path.getOrDefault("integrationAccountName")
-  valid_568504 = validateParameter(valid_568504, JString, required = true,
+  if valid_564403 != nil:
+    section.add "subscriptionId", valid_564403
+  var valid_564404 = path.getOrDefault("resourceGroupName")
+  valid_564404 = validateParameter(valid_564404, JString, required = true,
                                  default = nil)
-  if valid_568504 != nil:
-    section.add "integrationAccountName", valid_568504
-  var valid_568505 = path.getOrDefault("subscriptionId")
-  valid_568505 = validateParameter(valid_568505, JString, required = true,
+  if valid_564404 != nil:
+    section.add "resourceGroupName", valid_564404
+  var valid_564405 = path.getOrDefault("schemaName")
+  valid_564405 = validateParameter(valid_564405, JString, required = true,
                                  default = nil)
-  if valid_568505 != nil:
-    section.add "subscriptionId", valid_568505
-  var valid_568506 = path.getOrDefault("schemaName")
-  valid_568506 = validateParameter(valid_568506, JString, required = true,
+  if valid_564405 != nil:
+    section.add "schemaName", valid_564405
+  var valid_564406 = path.getOrDefault("integrationAccountName")
+  valid_564406 = validateParameter(valid_564406, JString, required = true,
                                  default = nil)
-  if valid_568506 != nil:
-    section.add "schemaName", valid_568506
+  if valid_564406 != nil:
+    section.add "integrationAccountName", valid_564406
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -3560,11 +3548,11 @@ proc validate_IntegrationAccountSchemasDelete_568501(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568507 = query.getOrDefault("api-version")
-  valid_568507 = validateParameter(valid_568507, JString, required = true,
+  var valid_564407 = query.getOrDefault("api-version")
+  valid_564407 = validateParameter(valid_564407, JString, required = true,
                                  default = nil)
-  if valid_568507 != nil:
-    section.add "api-version", valid_568507
+  if valid_564407 != nil:
+    section.add "api-version", valid_564407
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3573,49 +3561,49 @@ proc validate_IntegrationAccountSchemasDelete_568501(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568508: Call_IntegrationAccountSchemasDelete_568500;
+proc call*(call_564408: Call_IntegrationAccountSchemasDelete_564400;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Deletes an integration account schema.
   ## 
-  let valid = call_568508.validator(path, query, header, formData, body)
-  let scheme = call_568508.pickScheme
+  let valid = call_564408.validator(path, query, header, formData, body)
+  let scheme = call_564408.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568508.url(scheme.get, call_568508.host, call_568508.base,
-                         call_568508.route, valid.getOrDefault("path"),
+  let url = call_564408.url(scheme.get, call_564408.host, call_564408.base,
+                         call_564408.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568508, url, valid)
+  result = hook(call_564408, url, valid)
 
-proc call*(call_568509: Call_IntegrationAccountSchemasDelete_568500;
-          resourceGroupName: string; apiVersion: string;
-          integrationAccountName: string; subscriptionId: string; schemaName: string): Recallable =
+proc call*(call_564409: Call_IntegrationAccountSchemasDelete_564400;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string;
+          schemaName: string; integrationAccountName: string): Recallable =
   ## integrationAccountSchemasDelete
   ## Deletes an integration account schema.
-  ##   resourceGroupName: string (required)
-  ##                    : The resource group name.
   ##   apiVersion: string (required)
   ##             : The API version.
-  ##   integrationAccountName: string (required)
-  ##                         : The integration account name.
   ##   subscriptionId: string (required)
   ##                 : The subscription id.
+  ##   resourceGroupName: string (required)
+  ##                    : The resource group name.
   ##   schemaName: string (required)
   ##             : The integration account schema name.
-  var path_568510 = newJObject()
-  var query_568511 = newJObject()
-  add(path_568510, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568511, "api-version", newJString(apiVersion))
-  add(path_568510, "integrationAccountName", newJString(integrationAccountName))
-  add(path_568510, "subscriptionId", newJString(subscriptionId))
-  add(path_568510, "schemaName", newJString(schemaName))
-  result = call_568509.call(path_568510, query_568511, nil, nil, nil)
+  ##   integrationAccountName: string (required)
+  ##                         : The integration account name.
+  var path_564410 = newJObject()
+  var query_564411 = newJObject()
+  add(query_564411, "api-version", newJString(apiVersion))
+  add(path_564410, "subscriptionId", newJString(subscriptionId))
+  add(path_564410, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564410, "schemaName", newJString(schemaName))
+  add(path_564410, "integrationAccountName", newJString(integrationAccountName))
+  result = call_564409.call(path_564410, query_564411, nil, nil, nil)
 
-var integrationAccountSchemasDelete* = Call_IntegrationAccountSchemasDelete_568500(
+var integrationAccountSchemasDelete* = Call_IntegrationAccountSchemasDelete_564400(
     name: "integrationAccountSchemasDelete", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Logic/integrationAccounts/{integrationAccountName}/schemas/{schemaName}",
-    validator: validate_IntegrationAccountSchemasDelete_568501, base: "",
-    url: url_IntegrationAccountSchemasDelete_568502, schemes: {Scheme.Https})
+    validator: validate_IntegrationAccountSchemasDelete_564401, base: "",
+    url: url_IntegrationAccountSchemasDelete_564402, schemes: {Scheme.Https})
 export
   rest
 

@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_573657 = ref object of OpenApiRestCall
+  OpenApiRestCall_563555 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_573657](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563555](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_573657): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563555): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,8 +107,8 @@ const
   macServiceName = "network-azureFirewall"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_AzureFirewallsListAll_573879 = ref object of OpenApiRestCall_573657
-proc url_AzureFirewallsListAll_573881(protocol: Scheme; host: string; base: string;
+  Call_AzureFirewallsListAll_563777 = ref object of OpenApiRestCall_563555
+proc url_AzureFirewallsListAll_563779(protocol: Scheme; host: string; base: string;
                                      route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -121,7 +125,7 @@ proc url_AzureFirewallsListAll_573881(protocol: Scheme; host: string; base: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AzureFirewallsListAll_573880(path: JsonNode; query: JsonNode;
+proc validate_AzureFirewallsListAll_563778(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets all the Azure Firewalls in a subscription.
   ## 
@@ -133,11 +137,11 @@ proc validate_AzureFirewallsListAll_573880(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_574041 = path.getOrDefault("subscriptionId")
-  valid_574041 = validateParameter(valid_574041, JString, required = true,
+  var valid_563941 = path.getOrDefault("subscriptionId")
+  valid_563941 = validateParameter(valid_563941, JString, required = true,
                                  default = nil)
-  if valid_574041 != nil:
-    section.add "subscriptionId", valid_574041
+  if valid_563941 != nil:
+    section.add "subscriptionId", valid_563941
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -145,11 +149,11 @@ proc validate_AzureFirewallsListAll_573880(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574042 = query.getOrDefault("api-version")
-  valid_574042 = validateParameter(valid_574042, JString, required = true,
+  var valid_563942 = query.getOrDefault("api-version")
+  valid_563942 = validateParameter(valid_563942, JString, required = true,
                                  default = nil)
-  if valid_574042 != nil:
-    section.add "api-version", valid_574042
+  if valid_563942 != nil:
+    section.add "api-version", valid_563942
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -158,20 +162,20 @@ proc validate_AzureFirewallsListAll_573880(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574069: Call_AzureFirewallsListAll_573879; path: JsonNode;
+proc call*(call_563969: Call_AzureFirewallsListAll_563777; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets all the Azure Firewalls in a subscription.
   ## 
-  let valid = call_574069.validator(path, query, header, formData, body)
-  let scheme = call_574069.pickScheme
+  let valid = call_563969.validator(path, query, header, formData, body)
+  let scheme = call_563969.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574069.url(scheme.get, call_574069.host, call_574069.base,
-                         call_574069.route, valid.getOrDefault("path"),
+  let url = call_563969.url(scheme.get, call_563969.host, call_563969.base,
+                         call_563969.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574069, url, valid)
+  result = hook(call_563969, url, valid)
 
-proc call*(call_574140: Call_AzureFirewallsListAll_573879; apiVersion: string;
+proc call*(call_564040: Call_AzureFirewallsListAll_563777; apiVersion: string;
           subscriptionId: string): Recallable =
   ## azureFirewallsListAll
   ## Gets all the Azure Firewalls in a subscription.
@@ -179,20 +183,20 @@ proc call*(call_574140: Call_AzureFirewallsListAll_573879; apiVersion: string;
   ##             : Client API version.
   ##   subscriptionId: string (required)
   ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_574141 = newJObject()
-  var query_574143 = newJObject()
-  add(query_574143, "api-version", newJString(apiVersion))
-  add(path_574141, "subscriptionId", newJString(subscriptionId))
-  result = call_574140.call(path_574141, query_574143, nil, nil, nil)
+  var path_564041 = newJObject()
+  var query_564043 = newJObject()
+  add(query_564043, "api-version", newJString(apiVersion))
+  add(path_564041, "subscriptionId", newJString(subscriptionId))
+  result = call_564040.call(path_564041, query_564043, nil, nil, nil)
 
-var azureFirewallsListAll* = Call_AzureFirewallsListAll_573879(
+var azureFirewallsListAll* = Call_AzureFirewallsListAll_563777(
     name: "azureFirewallsListAll", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Network/azureFirewalls",
-    validator: validate_AzureFirewallsListAll_573880, base: "",
-    url: url_AzureFirewallsListAll_573881, schemes: {Scheme.Https})
+    validator: validate_AzureFirewallsListAll_563778, base: "",
+    url: url_AzureFirewallsListAll_563779, schemes: {Scheme.Https})
 type
-  Call_AzureFirewallsList_574182 = ref object of OpenApiRestCall_573657
-proc url_AzureFirewallsList_574184(protocol: Scheme; host: string; base: string;
+  Call_AzureFirewallsList_564082 = ref object of OpenApiRestCall_563555
+proc url_AzureFirewallsList_564084(protocol: Scheme; host: string; base: string;
                                   route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -213,7 +217,7 @@ proc url_AzureFirewallsList_574184(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AzureFirewallsList_574183(path: JsonNode; query: JsonNode;
+proc validate_AzureFirewallsList_564083(path: JsonNode; query: JsonNode;
                                        header: JsonNode; formData: JsonNode;
                                        body: JsonNode): JsonNode =
   ## Lists all Azure Firewalls in a resource group.
@@ -221,23 +225,23 @@ proc validate_AzureFirewallsList_574183(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   subscriptionId: JString (required)
   ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_574185 = path.getOrDefault("resourceGroupName")
-  valid_574185 = validateParameter(valid_574185, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564085 = path.getOrDefault("subscriptionId")
+  valid_564085 = validateParameter(valid_564085, JString, required = true,
                                  default = nil)
-  if valid_574185 != nil:
-    section.add "resourceGroupName", valid_574185
-  var valid_574186 = path.getOrDefault("subscriptionId")
-  valid_574186 = validateParameter(valid_574186, JString, required = true,
+  if valid_564085 != nil:
+    section.add "subscriptionId", valid_564085
+  var valid_564086 = path.getOrDefault("resourceGroupName")
+  valid_564086 = validateParameter(valid_564086, JString, required = true,
                                  default = nil)
-  if valid_574186 != nil:
-    section.add "subscriptionId", valid_574186
+  if valid_564086 != nil:
+    section.add "resourceGroupName", valid_564086
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -245,11 +249,11 @@ proc validate_AzureFirewallsList_574183(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574187 = query.getOrDefault("api-version")
-  valid_574187 = validateParameter(valid_574187, JString, required = true,
+  var valid_564087 = query.getOrDefault("api-version")
+  valid_564087 = validateParameter(valid_564087, JString, required = true,
                                  default = nil)
-  if valid_574187 != nil:
-    section.add "api-version", valid_574187
+  if valid_564087 != nil:
+    section.add "api-version", valid_564087
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -258,44 +262,44 @@ proc validate_AzureFirewallsList_574183(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574188: Call_AzureFirewallsList_574182; path: JsonNode;
+proc call*(call_564088: Call_AzureFirewallsList_564082; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists all Azure Firewalls in a resource group.
   ## 
-  let valid = call_574188.validator(path, query, header, formData, body)
-  let scheme = call_574188.pickScheme
+  let valid = call_564088.validator(path, query, header, formData, body)
+  let scheme = call_564088.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574188.url(scheme.get, call_574188.host, call_574188.base,
-                         call_574188.route, valid.getOrDefault("path"),
+  let url = call_564088.url(scheme.get, call_564088.host, call_564088.base,
+                         call_564088.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574188, url, valid)
+  result = hook(call_564088, url, valid)
 
-proc call*(call_574189: Call_AzureFirewallsList_574182; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string): Recallable =
+proc call*(call_564089: Call_AzureFirewallsList_564082; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string): Recallable =
   ## azureFirewallsList
   ## Lists all Azure Firewalls in a resource group.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client API version.
   ##   subscriptionId: string (required)
   ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_574190 = newJObject()
-  var query_574191 = newJObject()
-  add(path_574190, "resourceGroupName", newJString(resourceGroupName))
-  add(query_574191, "api-version", newJString(apiVersion))
-  add(path_574190, "subscriptionId", newJString(subscriptionId))
-  result = call_574189.call(path_574190, query_574191, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564090 = newJObject()
+  var query_564091 = newJObject()
+  add(query_564091, "api-version", newJString(apiVersion))
+  add(path_564090, "subscriptionId", newJString(subscriptionId))
+  add(path_564090, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564089.call(path_564090, query_564091, nil, nil, nil)
 
-var azureFirewallsList* = Call_AzureFirewallsList_574182(
+var azureFirewallsList* = Call_AzureFirewallsList_564082(
     name: "azureFirewallsList", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/azureFirewalls",
-    validator: validate_AzureFirewallsList_574183, base: "",
-    url: url_AzureFirewallsList_574184, schemes: {Scheme.Https})
+    validator: validate_AzureFirewallsList_564083, base: "",
+    url: url_AzureFirewallsList_564084, schemes: {Scheme.Https})
 type
-  Call_AzureFirewallsCreateOrUpdate_574203 = ref object of OpenApiRestCall_573657
-proc url_AzureFirewallsCreateOrUpdate_574205(protocol: Scheme; host: string;
+  Call_AzureFirewallsCreateOrUpdate_564103 = ref object of OpenApiRestCall_563555
+proc url_AzureFirewallsCreateOrUpdate_564105(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -319,37 +323,37 @@ proc url_AzureFirewallsCreateOrUpdate_574205(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AzureFirewallsCreateOrUpdate_574204(path: JsonNode; query: JsonNode;
+proc validate_AzureFirewallsCreateOrUpdate_564104(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Creates or updates the specified Azure Firewall.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
+  ##   subscriptionId: JString (required)
+  ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   resourceGroupName: JString (required)
   ##                    : The name of the resource group.
   ##   azureFirewallName: JString (required)
   ##                    : The name of the Azure Firewall.
-  ##   subscriptionId: JString (required)
-  ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_574232 = path.getOrDefault("resourceGroupName")
-  valid_574232 = validateParameter(valid_574232, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564132 = path.getOrDefault("subscriptionId")
+  valid_564132 = validateParameter(valid_564132, JString, required = true,
                                  default = nil)
-  if valid_574232 != nil:
-    section.add "resourceGroupName", valid_574232
-  var valid_574233 = path.getOrDefault("azureFirewallName")
-  valid_574233 = validateParameter(valid_574233, JString, required = true,
+  if valid_564132 != nil:
+    section.add "subscriptionId", valid_564132
+  var valid_564133 = path.getOrDefault("resourceGroupName")
+  valid_564133 = validateParameter(valid_564133, JString, required = true,
                                  default = nil)
-  if valid_574233 != nil:
-    section.add "azureFirewallName", valid_574233
-  var valid_574234 = path.getOrDefault("subscriptionId")
-  valid_574234 = validateParameter(valid_574234, JString, required = true,
+  if valid_564133 != nil:
+    section.add "resourceGroupName", valid_564133
+  var valid_564134 = path.getOrDefault("azureFirewallName")
+  valid_564134 = validateParameter(valid_564134, JString, required = true,
                                  default = nil)
-  if valid_574234 != nil:
-    section.add "subscriptionId", valid_574234
+  if valid_564134 != nil:
+    section.add "azureFirewallName", valid_564134
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -357,11 +361,11 @@ proc validate_AzureFirewallsCreateOrUpdate_574204(path: JsonNode; query: JsonNod
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574235 = query.getOrDefault("api-version")
-  valid_574235 = validateParameter(valid_574235, JString, required = true,
+  var valid_564135 = query.getOrDefault("api-version")
+  valid_564135 = validateParameter(valid_564135, JString, required = true,
                                  default = nil)
-  if valid_574235 != nil:
-    section.add "api-version", valid_574235
+  if valid_564135 != nil:
+    section.add "api-version", valid_564135
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -375,53 +379,53 @@ proc validate_AzureFirewallsCreateOrUpdate_574204(path: JsonNode; query: JsonNod
   if body != nil:
     result.add "body", body
 
-proc call*(call_574237: Call_AzureFirewallsCreateOrUpdate_574203; path: JsonNode;
+proc call*(call_564137: Call_AzureFirewallsCreateOrUpdate_564103; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Creates or updates the specified Azure Firewall.
   ## 
-  let valid = call_574237.validator(path, query, header, formData, body)
-  let scheme = call_574237.pickScheme
+  let valid = call_564137.validator(path, query, header, formData, body)
+  let scheme = call_564137.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574237.url(scheme.get, call_574237.host, call_574237.base,
-                         call_574237.route, valid.getOrDefault("path"),
+  let url = call_564137.url(scheme.get, call_564137.host, call_564137.base,
+                         call_564137.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574237, url, valid)
+  result = hook(call_564137, url, valid)
 
-proc call*(call_574238: Call_AzureFirewallsCreateOrUpdate_574203;
-          resourceGroupName: string; azureFirewallName: string; apiVersion: string;
-          subscriptionId: string; parameters: JsonNode): Recallable =
+proc call*(call_564138: Call_AzureFirewallsCreateOrUpdate_564103;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string;
+          azureFirewallName: string; parameters: JsonNode): Recallable =
   ## azureFirewallsCreateOrUpdate
   ## Creates or updates the specified Azure Firewall.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
-  ##   azureFirewallName: string (required)
-  ##                    : The name of the Azure Firewall.
   ##   apiVersion: string (required)
   ##             : Client API version.
   ##   subscriptionId: string (required)
   ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  ##   azureFirewallName: string (required)
+  ##                    : The name of the Azure Firewall.
   ##   parameters: JObject (required)
   ##             : Parameters supplied to the create or update Azure Firewall operation.
-  var path_574239 = newJObject()
-  var query_574240 = newJObject()
-  var body_574241 = newJObject()
-  add(path_574239, "resourceGroupName", newJString(resourceGroupName))
-  add(path_574239, "azureFirewallName", newJString(azureFirewallName))
-  add(query_574240, "api-version", newJString(apiVersion))
-  add(path_574239, "subscriptionId", newJString(subscriptionId))
+  var path_564139 = newJObject()
+  var query_564140 = newJObject()
+  var body_564141 = newJObject()
+  add(query_564140, "api-version", newJString(apiVersion))
+  add(path_564139, "subscriptionId", newJString(subscriptionId))
+  add(path_564139, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564139, "azureFirewallName", newJString(azureFirewallName))
   if parameters != nil:
-    body_574241 = parameters
-  result = call_574238.call(path_574239, query_574240, nil, nil, body_574241)
+    body_564141 = parameters
+  result = call_564138.call(path_564139, query_564140, nil, nil, body_564141)
 
-var azureFirewallsCreateOrUpdate* = Call_AzureFirewallsCreateOrUpdate_574203(
+var azureFirewallsCreateOrUpdate* = Call_AzureFirewallsCreateOrUpdate_564103(
     name: "azureFirewallsCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/azureFirewalls/{azureFirewallName}",
-    validator: validate_AzureFirewallsCreateOrUpdate_574204, base: "",
-    url: url_AzureFirewallsCreateOrUpdate_574205, schemes: {Scheme.Https})
+    validator: validate_AzureFirewallsCreateOrUpdate_564104, base: "",
+    url: url_AzureFirewallsCreateOrUpdate_564105, schemes: {Scheme.Https})
 type
-  Call_AzureFirewallsGet_574192 = ref object of OpenApiRestCall_573657
-proc url_AzureFirewallsGet_574194(protocol: Scheme; host: string; base: string;
+  Call_AzureFirewallsGet_564092 = ref object of OpenApiRestCall_563555
+proc url_AzureFirewallsGet_564094(protocol: Scheme; host: string; base: string;
                                  route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -445,7 +449,7 @@ proc url_AzureFirewallsGet_574194(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AzureFirewallsGet_574193(path: JsonNode; query: JsonNode;
+proc validate_AzureFirewallsGet_564093(path: JsonNode; query: JsonNode;
                                       header: JsonNode; formData: JsonNode;
                                       body: JsonNode): JsonNode =
   ## Gets the specified Azure Firewall.
@@ -453,30 +457,30 @@ proc validate_AzureFirewallsGet_574193(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
+  ##   subscriptionId: JString (required)
+  ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   resourceGroupName: JString (required)
   ##                    : The name of the resource group.
   ##   azureFirewallName: JString (required)
   ##                    : The name of the Azure Firewall.
-  ##   subscriptionId: JString (required)
-  ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_574195 = path.getOrDefault("resourceGroupName")
-  valid_574195 = validateParameter(valid_574195, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564095 = path.getOrDefault("subscriptionId")
+  valid_564095 = validateParameter(valid_564095, JString, required = true,
                                  default = nil)
-  if valid_574195 != nil:
-    section.add "resourceGroupName", valid_574195
-  var valid_574196 = path.getOrDefault("azureFirewallName")
-  valid_574196 = validateParameter(valid_574196, JString, required = true,
+  if valid_564095 != nil:
+    section.add "subscriptionId", valid_564095
+  var valid_564096 = path.getOrDefault("resourceGroupName")
+  valid_564096 = validateParameter(valid_564096, JString, required = true,
                                  default = nil)
-  if valid_574196 != nil:
-    section.add "azureFirewallName", valid_574196
-  var valid_574197 = path.getOrDefault("subscriptionId")
-  valid_574197 = validateParameter(valid_574197, JString, required = true,
+  if valid_564096 != nil:
+    section.add "resourceGroupName", valid_564096
+  var valid_564097 = path.getOrDefault("azureFirewallName")
+  valid_564097 = validateParameter(valid_564097, JString, required = true,
                                  default = nil)
-  if valid_574197 != nil:
-    section.add "subscriptionId", valid_574197
+  if valid_564097 != nil:
+    section.add "azureFirewallName", valid_564097
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -484,11 +488,11 @@ proc validate_AzureFirewallsGet_574193(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574198 = query.getOrDefault("api-version")
-  valid_574198 = validateParameter(valid_574198, JString, required = true,
+  var valid_564098 = query.getOrDefault("api-version")
+  valid_564098 = validateParameter(valid_564098, JString, required = true,
                                  default = nil)
-  if valid_574198 != nil:
-    section.add "api-version", valid_574198
+  if valid_564098 != nil:
+    section.add "api-version", valid_564098
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -497,46 +501,47 @@ proc validate_AzureFirewallsGet_574193(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574199: Call_AzureFirewallsGet_574192; path: JsonNode;
+proc call*(call_564099: Call_AzureFirewallsGet_564092; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the specified Azure Firewall.
   ## 
-  let valid = call_574199.validator(path, query, header, formData, body)
-  let scheme = call_574199.pickScheme
+  let valid = call_564099.validator(path, query, header, formData, body)
+  let scheme = call_564099.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574199.url(scheme.get, call_574199.host, call_574199.base,
-                         call_574199.route, valid.getOrDefault("path"),
+  let url = call_564099.url(scheme.get, call_564099.host, call_564099.base,
+                         call_564099.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574199, url, valid)
+  result = hook(call_564099, url, valid)
 
-proc call*(call_574200: Call_AzureFirewallsGet_574192; resourceGroupName: string;
-          azureFirewallName: string; apiVersion: string; subscriptionId: string): Recallable =
+proc call*(call_564100: Call_AzureFirewallsGet_564092; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string;
+          azureFirewallName: string): Recallable =
   ## azureFirewallsGet
   ## Gets the specified Azure Firewall.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
-  ##   azureFirewallName: string (required)
-  ##                    : The name of the Azure Firewall.
   ##   apiVersion: string (required)
   ##             : Client API version.
   ##   subscriptionId: string (required)
   ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_574201 = newJObject()
-  var query_574202 = newJObject()
-  add(path_574201, "resourceGroupName", newJString(resourceGroupName))
-  add(path_574201, "azureFirewallName", newJString(azureFirewallName))
-  add(query_574202, "api-version", newJString(apiVersion))
-  add(path_574201, "subscriptionId", newJString(subscriptionId))
-  result = call_574200.call(path_574201, query_574202, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  ##   azureFirewallName: string (required)
+  ##                    : The name of the Azure Firewall.
+  var path_564101 = newJObject()
+  var query_564102 = newJObject()
+  add(query_564102, "api-version", newJString(apiVersion))
+  add(path_564101, "subscriptionId", newJString(subscriptionId))
+  add(path_564101, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564101, "azureFirewallName", newJString(azureFirewallName))
+  result = call_564100.call(path_564101, query_564102, nil, nil, nil)
 
-var azureFirewallsGet* = Call_AzureFirewallsGet_574192(name: "azureFirewallsGet",
+var azureFirewallsGet* = Call_AzureFirewallsGet_564092(name: "azureFirewallsGet",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/azureFirewalls/{azureFirewallName}",
-    validator: validate_AzureFirewallsGet_574193, base: "",
-    url: url_AzureFirewallsGet_574194, schemes: {Scheme.Https})
+    validator: validate_AzureFirewallsGet_564093, base: "",
+    url: url_AzureFirewallsGet_564094, schemes: {Scheme.Https})
 type
-  Call_AzureFirewallsUpdateTags_574253 = ref object of OpenApiRestCall_573657
-proc url_AzureFirewallsUpdateTags_574255(protocol: Scheme; host: string;
+  Call_AzureFirewallsUpdateTags_564153 = ref object of OpenApiRestCall_563555
+proc url_AzureFirewallsUpdateTags_564155(protocol: Scheme; host: string;
                                         base: string; route: string; path: JsonNode;
                                         query: JsonNode): Uri =
   result.scheme = $protocol
@@ -561,37 +566,37 @@ proc url_AzureFirewallsUpdateTags_574255(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AzureFirewallsUpdateTags_574254(path: JsonNode; query: JsonNode;
+proc validate_AzureFirewallsUpdateTags_564154(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Updates tags for an Azure Firewall resource.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
+  ##   subscriptionId: JString (required)
+  ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   resourceGroupName: JString (required)
   ##                    : The name of the resource group.
   ##   azureFirewallName: JString (required)
   ##                    : The name of the Azure Firewall.
-  ##   subscriptionId: JString (required)
-  ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_574256 = path.getOrDefault("resourceGroupName")
-  valid_574256 = validateParameter(valid_574256, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564156 = path.getOrDefault("subscriptionId")
+  valid_564156 = validateParameter(valid_564156, JString, required = true,
                                  default = nil)
-  if valid_574256 != nil:
-    section.add "resourceGroupName", valid_574256
-  var valid_574257 = path.getOrDefault("azureFirewallName")
-  valid_574257 = validateParameter(valid_574257, JString, required = true,
+  if valid_564156 != nil:
+    section.add "subscriptionId", valid_564156
+  var valid_564157 = path.getOrDefault("resourceGroupName")
+  valid_564157 = validateParameter(valid_564157, JString, required = true,
                                  default = nil)
-  if valid_574257 != nil:
-    section.add "azureFirewallName", valid_574257
-  var valid_574258 = path.getOrDefault("subscriptionId")
-  valid_574258 = validateParameter(valid_574258, JString, required = true,
+  if valid_564157 != nil:
+    section.add "resourceGroupName", valid_564157
+  var valid_564158 = path.getOrDefault("azureFirewallName")
+  valid_564158 = validateParameter(valid_564158, JString, required = true,
                                  default = nil)
-  if valid_574258 != nil:
-    section.add "subscriptionId", valid_574258
+  if valid_564158 != nil:
+    section.add "azureFirewallName", valid_564158
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -599,11 +604,11 @@ proc validate_AzureFirewallsUpdateTags_574254(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574259 = query.getOrDefault("api-version")
-  valid_574259 = validateParameter(valid_574259, JString, required = true,
+  var valid_564159 = query.getOrDefault("api-version")
+  valid_564159 = validateParameter(valid_564159, JString, required = true,
                                  default = nil)
-  if valid_574259 != nil:
-    section.add "api-version", valid_574259
+  if valid_564159 != nil:
+    section.add "api-version", valid_564159
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -617,53 +622,53 @@ proc validate_AzureFirewallsUpdateTags_574254(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574261: Call_AzureFirewallsUpdateTags_574253; path: JsonNode;
+proc call*(call_564161: Call_AzureFirewallsUpdateTags_564153; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Updates tags for an Azure Firewall resource.
   ## 
-  let valid = call_574261.validator(path, query, header, formData, body)
-  let scheme = call_574261.pickScheme
+  let valid = call_564161.validator(path, query, header, formData, body)
+  let scheme = call_564161.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574261.url(scheme.get, call_574261.host, call_574261.base,
-                         call_574261.route, valid.getOrDefault("path"),
+  let url = call_564161.url(scheme.get, call_564161.host, call_564161.base,
+                         call_564161.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574261, url, valid)
+  result = hook(call_564161, url, valid)
 
-proc call*(call_574262: Call_AzureFirewallsUpdateTags_574253;
-          resourceGroupName: string; azureFirewallName: string; apiVersion: string;
-          subscriptionId: string; parameters: JsonNode): Recallable =
+proc call*(call_564162: Call_AzureFirewallsUpdateTags_564153; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string;
+          azureFirewallName: string; parameters: JsonNode): Recallable =
   ## azureFirewallsUpdateTags
   ## Updates tags for an Azure Firewall resource.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
-  ##   azureFirewallName: string (required)
-  ##                    : The name of the Azure Firewall.
   ##   apiVersion: string (required)
   ##             : Client API version.
   ##   subscriptionId: string (required)
   ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  ##   azureFirewallName: string (required)
+  ##                    : The name of the Azure Firewall.
   ##   parameters: JObject (required)
   ##             : Parameters supplied to the create or update Azure Firewall operation.
-  var path_574263 = newJObject()
-  var query_574264 = newJObject()
-  var body_574265 = newJObject()
-  add(path_574263, "resourceGroupName", newJString(resourceGroupName))
-  add(path_574263, "azureFirewallName", newJString(azureFirewallName))
-  add(query_574264, "api-version", newJString(apiVersion))
-  add(path_574263, "subscriptionId", newJString(subscriptionId))
+  var path_564163 = newJObject()
+  var query_564164 = newJObject()
+  var body_564165 = newJObject()
+  add(query_564164, "api-version", newJString(apiVersion))
+  add(path_564163, "subscriptionId", newJString(subscriptionId))
+  add(path_564163, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564163, "azureFirewallName", newJString(azureFirewallName))
   if parameters != nil:
-    body_574265 = parameters
-  result = call_574262.call(path_574263, query_574264, nil, nil, body_574265)
+    body_564165 = parameters
+  result = call_564162.call(path_564163, query_564164, nil, nil, body_564165)
 
-var azureFirewallsUpdateTags* = Call_AzureFirewallsUpdateTags_574253(
+var azureFirewallsUpdateTags* = Call_AzureFirewallsUpdateTags_564153(
     name: "azureFirewallsUpdateTags", meth: HttpMethod.HttpPatch,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/azureFirewalls/{azureFirewallName}",
-    validator: validate_AzureFirewallsUpdateTags_574254, base: "",
-    url: url_AzureFirewallsUpdateTags_574255, schemes: {Scheme.Https})
+    validator: validate_AzureFirewallsUpdateTags_564154, base: "",
+    url: url_AzureFirewallsUpdateTags_564155, schemes: {Scheme.Https})
 type
-  Call_AzureFirewallsDelete_574242 = ref object of OpenApiRestCall_573657
-proc url_AzureFirewallsDelete_574244(protocol: Scheme; host: string; base: string;
+  Call_AzureFirewallsDelete_564142 = ref object of OpenApiRestCall_563555
+proc url_AzureFirewallsDelete_564144(protocol: Scheme; host: string; base: string;
                                     route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -687,37 +692,37 @@ proc url_AzureFirewallsDelete_574244(protocol: Scheme; host: string; base: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AzureFirewallsDelete_574243(path: JsonNode; query: JsonNode;
+proc validate_AzureFirewallsDelete_564143(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Deletes the specified Azure Firewall.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
+  ##   subscriptionId: JString (required)
+  ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   resourceGroupName: JString (required)
   ##                    : The name of the resource group.
   ##   azureFirewallName: JString (required)
   ##                    : The name of the Azure Firewall.
-  ##   subscriptionId: JString (required)
-  ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_574245 = path.getOrDefault("resourceGroupName")
-  valid_574245 = validateParameter(valid_574245, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564145 = path.getOrDefault("subscriptionId")
+  valid_564145 = validateParameter(valid_564145, JString, required = true,
                                  default = nil)
-  if valid_574245 != nil:
-    section.add "resourceGroupName", valid_574245
-  var valid_574246 = path.getOrDefault("azureFirewallName")
-  valid_574246 = validateParameter(valid_574246, JString, required = true,
+  if valid_564145 != nil:
+    section.add "subscriptionId", valid_564145
+  var valid_564146 = path.getOrDefault("resourceGroupName")
+  valid_564146 = validateParameter(valid_564146, JString, required = true,
                                  default = nil)
-  if valid_574246 != nil:
-    section.add "azureFirewallName", valid_574246
-  var valid_574247 = path.getOrDefault("subscriptionId")
-  valid_574247 = validateParameter(valid_574247, JString, required = true,
+  if valid_564146 != nil:
+    section.add "resourceGroupName", valid_564146
+  var valid_564147 = path.getOrDefault("azureFirewallName")
+  valid_564147 = validateParameter(valid_564147, JString, required = true,
                                  default = nil)
-  if valid_574247 != nil:
-    section.add "subscriptionId", valid_574247
+  if valid_564147 != nil:
+    section.add "azureFirewallName", valid_564147
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -725,11 +730,11 @@ proc validate_AzureFirewallsDelete_574243(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574248 = query.getOrDefault("api-version")
-  valid_574248 = validateParameter(valid_574248, JString, required = true,
+  var valid_564148 = query.getOrDefault("api-version")
+  valid_564148 = validateParameter(valid_564148, JString, required = true,
                                  default = nil)
-  if valid_574248 != nil:
-    section.add "api-version", valid_574248
+  if valid_564148 != nil:
+    section.add "api-version", valid_564148
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -738,45 +743,45 @@ proc validate_AzureFirewallsDelete_574243(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574249: Call_AzureFirewallsDelete_574242; path: JsonNode;
+proc call*(call_564149: Call_AzureFirewallsDelete_564142; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes the specified Azure Firewall.
   ## 
-  let valid = call_574249.validator(path, query, header, formData, body)
-  let scheme = call_574249.pickScheme
+  let valid = call_564149.validator(path, query, header, formData, body)
+  let scheme = call_564149.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574249.url(scheme.get, call_574249.host, call_574249.base,
-                         call_574249.route, valid.getOrDefault("path"),
+  let url = call_564149.url(scheme.get, call_564149.host, call_564149.base,
+                         call_564149.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574249, url, valid)
+  result = hook(call_564149, url, valid)
 
-proc call*(call_574250: Call_AzureFirewallsDelete_574242;
-          resourceGroupName: string; azureFirewallName: string; apiVersion: string;
-          subscriptionId: string): Recallable =
+proc call*(call_564150: Call_AzureFirewallsDelete_564142; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string;
+          azureFirewallName: string): Recallable =
   ## azureFirewallsDelete
   ## Deletes the specified Azure Firewall.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
-  ##   azureFirewallName: string (required)
-  ##                    : The name of the Azure Firewall.
   ##   apiVersion: string (required)
   ##             : Client API version.
   ##   subscriptionId: string (required)
   ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_574251 = newJObject()
-  var query_574252 = newJObject()
-  add(path_574251, "resourceGroupName", newJString(resourceGroupName))
-  add(path_574251, "azureFirewallName", newJString(azureFirewallName))
-  add(query_574252, "api-version", newJString(apiVersion))
-  add(path_574251, "subscriptionId", newJString(subscriptionId))
-  result = call_574250.call(path_574251, query_574252, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  ##   azureFirewallName: string (required)
+  ##                    : The name of the Azure Firewall.
+  var path_564151 = newJObject()
+  var query_564152 = newJObject()
+  add(query_564152, "api-version", newJString(apiVersion))
+  add(path_564151, "subscriptionId", newJString(subscriptionId))
+  add(path_564151, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564151, "azureFirewallName", newJString(azureFirewallName))
+  result = call_564150.call(path_564151, query_564152, nil, nil, nil)
 
-var azureFirewallsDelete* = Call_AzureFirewallsDelete_574242(
+var azureFirewallsDelete* = Call_AzureFirewallsDelete_564142(
     name: "azureFirewallsDelete", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/azureFirewalls/{azureFirewallName}",
-    validator: validate_AzureFirewallsDelete_574243, base: "",
-    url: url_AzureFirewallsDelete_574244, schemes: {Scheme.Https})
+    validator: validate_AzureFirewallsDelete_564143, base: "",
+    url: url_AzureFirewallsDelete_564144, schemes: {Scheme.Https})
 export
   rest
 

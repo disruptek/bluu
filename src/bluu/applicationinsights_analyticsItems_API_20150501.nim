@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, httpcore
 
 ## auto-generated via openapi macro
 ## title: ApplicationInsightsManagementClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_596458 = ref object of OpenApiRestCall
+  OpenApiRestCall_563556 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_596458](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563556](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_596458): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563556): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,8 +107,8 @@ const
   macServiceName = "applicationinsights-analyticsItems_API"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_AnalyticsItemsList_596680 = ref object of OpenApiRestCall_596458
-proc url_AnalyticsItemsList_596682(protocol: Scheme; host: string; base: string;
+  Call_AnalyticsItemsList_563778 = ref object of OpenApiRestCall_563556
+proc url_AnalyticsItemsList_563780(protocol: Scheme; host: string; base: string;
                                   route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -129,7 +133,7 @@ proc url_AnalyticsItemsList_596682(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AnalyticsItemsList_596681(path: JsonNode; query: JsonNode;
+proc validate_AnalyticsItemsList_563779(path: JsonNode; query: JsonNode;
                                        header: JsonNode; formData: JsonNode;
                                        body: JsonNode): JsonNode =
   ## Gets a list of Analytics Items defined within an Application Insights component.
@@ -137,69 +141,69 @@ proc validate_AnalyticsItemsList_596681(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group. The name is case insensitive.
   ##   subscriptionId: JString (required)
   ##                 : The ID of the target subscription.
-  ##   resourceName: JString (required)
-  ##               : The name of the Application Insights component resource.
   ##   scopePath: JString (required)
   ##            : Enum indicating if this item definition is owned by a specific user or is shared between all users with access to the Application Insights component.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group. The name is case insensitive.
+  ##   resourceName: JString (required)
+  ##               : The name of the Application Insights component resource.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_596855 = path.getOrDefault("resourceGroupName")
-  valid_596855 = validateParameter(valid_596855, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_563955 = path.getOrDefault("subscriptionId")
+  valid_563955 = validateParameter(valid_563955, JString, required = true,
                                  default = nil)
-  if valid_596855 != nil:
-    section.add "resourceGroupName", valid_596855
-  var valid_596856 = path.getOrDefault("subscriptionId")
-  valid_596856 = validateParameter(valid_596856, JString, required = true,
-                                 default = nil)
-  if valid_596856 != nil:
-    section.add "subscriptionId", valid_596856
-  var valid_596857 = path.getOrDefault("resourceName")
-  valid_596857 = validateParameter(valid_596857, JString, required = true,
-                                 default = nil)
-  if valid_596857 != nil:
-    section.add "resourceName", valid_596857
-  var valid_596871 = path.getOrDefault("scopePath")
-  valid_596871 = validateParameter(valid_596871, JString, required = true,
+  if valid_563955 != nil:
+    section.add "subscriptionId", valid_563955
+  var valid_563969 = path.getOrDefault("scopePath")
+  valid_563969 = validateParameter(valid_563969, JString, required = true,
                                  default = newJString("analyticsItems"))
-  if valid_596871 != nil:
-    section.add "scopePath", valid_596871
+  if valid_563969 != nil:
+    section.add "scopePath", valid_563969
+  var valid_563970 = path.getOrDefault("resourceGroupName")
+  valid_563970 = validateParameter(valid_563970, JString, required = true,
+                                 default = nil)
+  if valid_563970 != nil:
+    section.add "resourceGroupName", valid_563970
+  var valid_563971 = path.getOrDefault("resourceName")
+  valid_563971 = validateParameter(valid_563971, JString, required = true,
+                                 default = nil)
+  if valid_563971 != nil:
+    section.add "resourceName", valid_563971
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
   ##              : The API version to use for this operation.
   ##   scope: JString
   ##        : Enum indicating if this item definition is owned by a specific user or is shared between all users with access to the Application Insights component.
-  ##   type: JString
-  ##       : Enum indicating the type of the Analytics item.
   ##   includeContent: JBool
   ##                 : Flag indicating whether or not to return the content of each applicable item. If false, only return the item information.
+  ##   type: JString
+  ##       : Enum indicating the type of the Analytics item.
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_596872 = query.getOrDefault("api-version")
-  valid_596872 = validateParameter(valid_596872, JString, required = true,
+  var valid_563972 = query.getOrDefault("api-version")
+  valid_563972 = validateParameter(valid_563972, JString, required = true,
                                  default = nil)
-  if valid_596872 != nil:
-    section.add "api-version", valid_596872
-  var valid_596873 = query.getOrDefault("scope")
-  valid_596873 = validateParameter(valid_596873, JString, required = false,
+  if valid_563972 != nil:
+    section.add "api-version", valid_563972
+  var valid_563973 = query.getOrDefault("scope")
+  valid_563973 = validateParameter(valid_563973, JString, required = false,
                                  default = newJString("shared"))
-  if valid_596873 != nil:
-    section.add "scope", valid_596873
-  var valid_596874 = query.getOrDefault("type")
-  valid_596874 = validateParameter(valid_596874, JString, required = false,
+  if valid_563973 != nil:
+    section.add "scope", valid_563973
+  var valid_563974 = query.getOrDefault("includeContent")
+  valid_563974 = validateParameter(valid_563974, JBool, required = false, default = nil)
+  if valid_563974 != nil:
+    section.add "includeContent", valid_563974
+  var valid_563975 = query.getOrDefault("type")
+  valid_563975 = validateParameter(valid_563975, JString, required = false,
                                  default = newJString("none"))
-  if valid_596874 != nil:
-    section.add "type", valid_596874
-  var valid_596875 = query.getOrDefault("includeContent")
-  valid_596875 = validateParameter(valid_596875, JBool, required = false, default = nil)
-  if valid_596875 != nil:
-    section.add "includeContent", valid_596875
+  if valid_563975 != nil:
+    section.add "type", valid_563975
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -208,61 +212,61 @@ proc validate_AnalyticsItemsList_596681(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_596898: Call_AnalyticsItemsList_596680; path: JsonNode;
+proc call*(call_563998: Call_AnalyticsItemsList_563778; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets a list of Analytics Items defined within an Application Insights component.
   ## 
-  let valid = call_596898.validator(path, query, header, formData, body)
-  let scheme = call_596898.pickScheme
+  let valid = call_563998.validator(path, query, header, formData, body)
+  let scheme = call_563998.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_596898.url(scheme.get, call_596898.host, call_596898.base,
-                         call_596898.route, valid.getOrDefault("path"),
+  let url = call_563998.url(scheme.get, call_563998.host, call_563998.base,
+                         call_563998.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_596898, url, valid)
+  result = hook(call_563998, url, valid)
 
-proc call*(call_596969: Call_AnalyticsItemsList_596680; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; resourceName: string;
-          scope: string = "shared"; `type`: string = "none";
-          includeContent: bool = false; scopePath: string = "analyticsItems"): Recallable =
+proc call*(call_564069: Call_AnalyticsItemsList_563778; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string; resourceName: string;
+          scope: string = "shared"; includeContent: bool = false;
+          `type`: string = "none"; scopePath: string = "analyticsItems"): Recallable =
   ## analyticsItemsList
   ## Gets a list of Analytics Items defined within an Application Insights component.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group. The name is case insensitive.
   ##   apiVersion: string (required)
   ##             : The API version to use for this operation.
   ##   scope: string
   ##        : Enum indicating if this item definition is owned by a specific user or is shared between all users with access to the Application Insights component.
-  ##   type: string
-  ##       : Enum indicating the type of the Analytics item.
-  ##   subscriptionId: string (required)
-  ##                 : The ID of the target subscription.
   ##   includeContent: bool
   ##                 : Flag indicating whether or not to return the content of each applicable item. If false, only return the item information.
-  ##   resourceName: string (required)
-  ##               : The name of the Application Insights component resource.
+  ##   subscriptionId: string (required)
+  ##                 : The ID of the target subscription.
+  ##   type: string
+  ##       : Enum indicating the type of the Analytics item.
   ##   scopePath: string (required)
   ##            : Enum indicating if this item definition is owned by a specific user or is shared between all users with access to the Application Insights component.
-  var path_596970 = newJObject()
-  var query_596972 = newJObject()
-  add(path_596970, "resourceGroupName", newJString(resourceGroupName))
-  add(query_596972, "api-version", newJString(apiVersion))
-  add(query_596972, "scope", newJString(scope))
-  add(query_596972, "type", newJString(`type`))
-  add(path_596970, "subscriptionId", newJString(subscriptionId))
-  add(query_596972, "includeContent", newJBool(includeContent))
-  add(path_596970, "resourceName", newJString(resourceName))
-  add(path_596970, "scopePath", newJString(scopePath))
-  result = call_596969.call(path_596970, query_596972, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group. The name is case insensitive.
+  ##   resourceName: string (required)
+  ##               : The name of the Application Insights component resource.
+  var path_564070 = newJObject()
+  var query_564072 = newJObject()
+  add(query_564072, "api-version", newJString(apiVersion))
+  add(query_564072, "scope", newJString(scope))
+  add(query_564072, "includeContent", newJBool(includeContent))
+  add(path_564070, "subscriptionId", newJString(subscriptionId))
+  add(query_564072, "type", newJString(`type`))
+  add(path_564070, "scopePath", newJString(scopePath))
+  add(path_564070, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564070, "resourceName", newJString(resourceName))
+  result = call_564069.call(path_564070, query_564072, nil, nil, nil)
 
-var analyticsItemsList* = Call_AnalyticsItemsList_596680(
+var analyticsItemsList* = Call_AnalyticsItemsList_563778(
     name: "analyticsItemsList", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/microsoft.insights/components/{resourceName}/{scopePath}",
-    validator: validate_AnalyticsItemsList_596681, base: "",
-    url: url_AnalyticsItemsList_596682, schemes: {Scheme.Https})
+    validator: validate_AnalyticsItemsList_563779, base: "",
+    url: url_AnalyticsItemsList_563780, schemes: {Scheme.Https})
 type
-  Call_AnalyticsItemsPut_597025 = ref object of OpenApiRestCall_596458
-proc url_AnalyticsItemsPut_597027(protocol: Scheme; host: string; base: string;
+  Call_AnalyticsItemsPut_564125 = ref object of OpenApiRestCall_563556
+proc url_AnalyticsItemsPut_564127(protocol: Scheme; host: string; base: string;
                                  route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -288,7 +292,7 @@ proc url_AnalyticsItemsPut_597027(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AnalyticsItemsPut_597026(path: JsonNode; query: JsonNode;
+proc validate_AnalyticsItemsPut_564126(path: JsonNode; query: JsonNode;
                                       header: JsonNode; formData: JsonNode;
                                       body: JsonNode): JsonNode =
   ## Adds or Updates a specific Analytics Item within an Application Insights component.
@@ -296,55 +300,55 @@ proc validate_AnalyticsItemsPut_597026(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group. The name is case insensitive.
   ##   subscriptionId: JString (required)
   ##                 : The ID of the target subscription.
-  ##   resourceName: JString (required)
-  ##               : The name of the Application Insights component resource.
   ##   scopePath: JString (required)
   ##            : Enum indicating if this item definition is owned by a specific user or is shared between all users with access to the Application Insights component.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group. The name is case insensitive.
+  ##   resourceName: JString (required)
+  ##               : The name of the Application Insights component resource.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_597028 = path.getOrDefault("resourceGroupName")
-  valid_597028 = validateParameter(valid_597028, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564128 = path.getOrDefault("subscriptionId")
+  valid_564128 = validateParameter(valid_564128, JString, required = true,
                                  default = nil)
-  if valid_597028 != nil:
-    section.add "resourceGroupName", valid_597028
-  var valid_597029 = path.getOrDefault("subscriptionId")
-  valid_597029 = validateParameter(valid_597029, JString, required = true,
-                                 default = nil)
-  if valid_597029 != nil:
-    section.add "subscriptionId", valid_597029
-  var valid_597030 = path.getOrDefault("resourceName")
-  valid_597030 = validateParameter(valid_597030, JString, required = true,
-                                 default = nil)
-  if valid_597030 != nil:
-    section.add "resourceName", valid_597030
-  var valid_597031 = path.getOrDefault("scopePath")
-  valid_597031 = validateParameter(valid_597031, JString, required = true,
+  if valid_564128 != nil:
+    section.add "subscriptionId", valid_564128
+  var valid_564129 = path.getOrDefault("scopePath")
+  valid_564129 = validateParameter(valid_564129, JString, required = true,
                                  default = newJString("analyticsItems"))
-  if valid_597031 != nil:
-    section.add "scopePath", valid_597031
+  if valid_564129 != nil:
+    section.add "scopePath", valid_564129
+  var valid_564130 = path.getOrDefault("resourceGroupName")
+  valid_564130 = validateParameter(valid_564130, JString, required = true,
+                                 default = nil)
+  if valid_564130 != nil:
+    section.add "resourceGroupName", valid_564130
+  var valid_564131 = path.getOrDefault("resourceName")
+  valid_564131 = validateParameter(valid_564131, JString, required = true,
+                                 default = nil)
+  if valid_564131 != nil:
+    section.add "resourceName", valid_564131
   result.add "path", section
   ## parameters in `query` object:
-  ##   overrideItem: JBool
-  ##               : Flag indicating whether or not to force save an item. This allows overriding an item if it already exists.
   ##   api-version: JString (required)
   ##              : The API version to use for this operation.
+  ##   overrideItem: JBool
+  ##               : Flag indicating whether or not to force save an item. This allows overriding an item if it already exists.
   section = newJObject()
-  var valid_597032 = query.getOrDefault("overrideItem")
-  valid_597032 = validateParameter(valid_597032, JBool, required = false, default = nil)
-  if valid_597032 != nil:
-    section.add "overrideItem", valid_597032
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_597033 = query.getOrDefault("api-version")
-  valid_597033 = validateParameter(valid_597033, JString, required = true,
+  var valid_564132 = query.getOrDefault("api-version")
+  valid_564132 = validateParameter(valid_564132, JString, required = true,
                                  default = nil)
-  if valid_597033 != nil:
-    section.add "api-version", valid_597033
+  if valid_564132 != nil:
+    section.add "api-version", valid_564132
+  var valid_564133 = query.getOrDefault("overrideItem")
+  valid_564133 = validateParameter(valid_564133, JBool, required = false, default = nil)
+  if valid_564133 != nil:
+    section.add "overrideItem", valid_564133
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -358,59 +362,59 @@ proc validate_AnalyticsItemsPut_597026(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_597035: Call_AnalyticsItemsPut_597025; path: JsonNode;
+proc call*(call_564135: Call_AnalyticsItemsPut_564125; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Adds or Updates a specific Analytics Item within an Application Insights component.
   ## 
-  let valid = call_597035.validator(path, query, header, formData, body)
-  let scheme = call_597035.pickScheme
+  let valid = call_564135.validator(path, query, header, formData, body)
+  let scheme = call_564135.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_597035.url(scheme.get, call_597035.host, call_597035.base,
-                         call_597035.route, valid.getOrDefault("path"),
+  let url = call_564135.url(scheme.get, call_564135.host, call_564135.base,
+                         call_564135.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_597035, url, valid)
+  result = hook(call_564135, url, valid)
 
-proc call*(call_597036: Call_AnalyticsItemsPut_597025; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; itemProperties: JsonNode;
-          resourceName: string; overrideItem: bool = false;
-          scopePath: string = "analyticsItems"): Recallable =
+proc call*(call_564136: Call_AnalyticsItemsPut_564125; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string; resourceName: string;
+          itemProperties: JsonNode; scopePath: string = "analyticsItems";
+          overrideItem: bool = false): Recallable =
   ## analyticsItemsPut
   ## Adds or Updates a specific Analytics Item within an Application Insights component.
-  ##   overrideItem: bool
-  ##               : Flag indicating whether or not to force save an item. This allows overriding an item if it already exists.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group. The name is case insensitive.
   ##   apiVersion: string (required)
   ##             : The API version to use for this operation.
   ##   subscriptionId: string (required)
   ##                 : The ID of the target subscription.
-  ##   itemProperties: JObject (required)
-  ##                 : Properties that need to be specified to create a new item and add it to an Application Insights component.
-  ##   resourceName: string (required)
-  ##               : The name of the Application Insights component resource.
   ##   scopePath: string (required)
   ##            : Enum indicating if this item definition is owned by a specific user or is shared between all users with access to the Application Insights component.
-  var path_597037 = newJObject()
-  var query_597038 = newJObject()
-  var body_597039 = newJObject()
-  add(query_597038, "overrideItem", newJBool(overrideItem))
-  add(path_597037, "resourceGroupName", newJString(resourceGroupName))
-  add(query_597038, "api-version", newJString(apiVersion))
-  add(path_597037, "subscriptionId", newJString(subscriptionId))
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group. The name is case insensitive.
+  ##   overrideItem: bool
+  ##               : Flag indicating whether or not to force save an item. This allows overriding an item if it already exists.
+  ##   resourceName: string (required)
+  ##               : The name of the Application Insights component resource.
+  ##   itemProperties: JObject (required)
+  ##                 : Properties that need to be specified to create a new item and add it to an Application Insights component.
+  var path_564137 = newJObject()
+  var query_564138 = newJObject()
+  var body_564139 = newJObject()
+  add(query_564138, "api-version", newJString(apiVersion))
+  add(path_564137, "subscriptionId", newJString(subscriptionId))
+  add(path_564137, "scopePath", newJString(scopePath))
+  add(path_564137, "resourceGroupName", newJString(resourceGroupName))
+  add(query_564138, "overrideItem", newJBool(overrideItem))
+  add(path_564137, "resourceName", newJString(resourceName))
   if itemProperties != nil:
-    body_597039 = itemProperties
-  add(path_597037, "resourceName", newJString(resourceName))
-  add(path_597037, "scopePath", newJString(scopePath))
-  result = call_597036.call(path_597037, query_597038, nil, nil, body_597039)
+    body_564139 = itemProperties
+  result = call_564136.call(path_564137, query_564138, nil, nil, body_564139)
 
-var analyticsItemsPut* = Call_AnalyticsItemsPut_597025(name: "analyticsItemsPut",
+var analyticsItemsPut* = Call_AnalyticsItemsPut_564125(name: "analyticsItemsPut",
     meth: HttpMethod.HttpPut, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/microsoft.insights/components/{resourceName}/{scopePath}/item",
-    validator: validate_AnalyticsItemsPut_597026, base: "",
-    url: url_AnalyticsItemsPut_597027, schemes: {Scheme.Https})
+    validator: validate_AnalyticsItemsPut_564126, base: "",
+    url: url_AnalyticsItemsPut_564127, schemes: {Scheme.Https})
 type
-  Call_AnalyticsItemsGet_597011 = ref object of OpenApiRestCall_596458
-proc url_AnalyticsItemsGet_597013(protocol: Scheme; host: string; base: string;
+  Call_AnalyticsItemsGet_564111 = ref object of OpenApiRestCall_563556
+proc url_AnalyticsItemsGet_564113(protocol: Scheme; host: string; base: string;
                                  route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -436,7 +440,7 @@ proc url_AnalyticsItemsGet_597013(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AnalyticsItemsGet_597012(path: JsonNode; query: JsonNode;
+proc validate_AnalyticsItemsGet_564112(path: JsonNode; query: JsonNode;
                                       header: JsonNode; formData: JsonNode;
                                       body: JsonNode): JsonNode =
   ## Gets a specific Analytics Items defined within an Application Insights component.
@@ -444,63 +448,63 @@ proc validate_AnalyticsItemsGet_597012(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group. The name is case insensitive.
   ##   subscriptionId: JString (required)
   ##                 : The ID of the target subscription.
-  ##   resourceName: JString (required)
-  ##               : The name of the Application Insights component resource.
   ##   scopePath: JString (required)
   ##            : Enum indicating if this item definition is owned by a specific user or is shared between all users with access to the Application Insights component.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group. The name is case insensitive.
+  ##   resourceName: JString (required)
+  ##               : The name of the Application Insights component resource.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_597014 = path.getOrDefault("resourceGroupName")
-  valid_597014 = validateParameter(valid_597014, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564114 = path.getOrDefault("subscriptionId")
+  valid_564114 = validateParameter(valid_564114, JString, required = true,
                                  default = nil)
-  if valid_597014 != nil:
-    section.add "resourceGroupName", valid_597014
-  var valid_597015 = path.getOrDefault("subscriptionId")
-  valid_597015 = validateParameter(valid_597015, JString, required = true,
-                                 default = nil)
-  if valid_597015 != nil:
-    section.add "subscriptionId", valid_597015
-  var valid_597016 = path.getOrDefault("resourceName")
-  valid_597016 = validateParameter(valid_597016, JString, required = true,
-                                 default = nil)
-  if valid_597016 != nil:
-    section.add "resourceName", valid_597016
-  var valid_597017 = path.getOrDefault("scopePath")
-  valid_597017 = validateParameter(valid_597017, JString, required = true,
+  if valid_564114 != nil:
+    section.add "subscriptionId", valid_564114
+  var valid_564115 = path.getOrDefault("scopePath")
+  valid_564115 = validateParameter(valid_564115, JString, required = true,
                                  default = newJString("analyticsItems"))
-  if valid_597017 != nil:
-    section.add "scopePath", valid_597017
+  if valid_564115 != nil:
+    section.add "scopePath", valid_564115
+  var valid_564116 = path.getOrDefault("resourceGroupName")
+  valid_564116 = validateParameter(valid_564116, JString, required = true,
+                                 default = nil)
+  if valid_564116 != nil:
+    section.add "resourceGroupName", valid_564116
+  var valid_564117 = path.getOrDefault("resourceName")
+  valid_564117 = validateParameter(valid_564117, JString, required = true,
+                                 default = nil)
+  if valid_564117 != nil:
+    section.add "resourceName", valid_564117
   result.add "path", section
   ## parameters in `query` object:
+  ##   name: JString
+  ##       : The name of a specific item defined in the Application Insights component
   ##   api-version: JString (required)
   ##              : The API version to use for this operation.
   ##   id: JString
   ##     : The Id of a specific item defined in the Application Insights component
-  ##   name: JString
-  ##       : The name of a specific item defined in the Application Insights component
   section = newJObject()
+  var valid_564118 = query.getOrDefault("name")
+  valid_564118 = validateParameter(valid_564118, JString, required = false,
+                                 default = nil)
+  if valid_564118 != nil:
+    section.add "name", valid_564118
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_597018 = query.getOrDefault("api-version")
-  valid_597018 = validateParameter(valid_597018, JString, required = true,
+  var valid_564119 = query.getOrDefault("api-version")
+  valid_564119 = validateParameter(valid_564119, JString, required = true,
                                  default = nil)
-  if valid_597018 != nil:
-    section.add "api-version", valid_597018
-  var valid_597019 = query.getOrDefault("id")
-  valid_597019 = validateParameter(valid_597019, JString, required = false,
+  if valid_564119 != nil:
+    section.add "api-version", valid_564119
+  var valid_564120 = query.getOrDefault("id")
+  valid_564120 = validateParameter(valid_564120, JString, required = false,
                                  default = nil)
-  if valid_597019 != nil:
-    section.add "id", valid_597019
-  var valid_597020 = query.getOrDefault("name")
-  valid_597020 = validateParameter(valid_597020, JString, required = false,
-                                 default = nil)
-  if valid_597020 != nil:
-    section.add "name", valid_597020
+  if valid_564120 != nil:
+    section.add "id", valid_564120
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -509,56 +513,56 @@ proc validate_AnalyticsItemsGet_597012(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_597021: Call_AnalyticsItemsGet_597011; path: JsonNode;
+proc call*(call_564121: Call_AnalyticsItemsGet_564111; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets a specific Analytics Items defined within an Application Insights component.
   ## 
-  let valid = call_597021.validator(path, query, header, formData, body)
-  let scheme = call_597021.pickScheme
+  let valid = call_564121.validator(path, query, header, formData, body)
+  let scheme = call_564121.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_597021.url(scheme.get, call_597021.host, call_597021.base,
-                         call_597021.route, valid.getOrDefault("path"),
+  let url = call_564121.url(scheme.get, call_564121.host, call_564121.base,
+                         call_564121.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_597021, url, valid)
+  result = hook(call_564121, url, valid)
 
-proc call*(call_597022: Call_AnalyticsItemsGet_597011; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; resourceName: string;
-          id: string = ""; name: string = ""; scopePath: string = "analyticsItems"): Recallable =
+proc call*(call_564122: Call_AnalyticsItemsGet_564111; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string; resourceName: string;
+          name: string = ""; id: string = ""; scopePath: string = "analyticsItems"): Recallable =
   ## analyticsItemsGet
   ## Gets a specific Analytics Items defined within an Application Insights component.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group. The name is case insensitive.
-  ##   apiVersion: string (required)
-  ##             : The API version to use for this operation.
-  ##   id: string
-  ##     : The Id of a specific item defined in the Application Insights component
-  ##   subscriptionId: string (required)
-  ##                 : The ID of the target subscription.
-  ##   resourceName: string (required)
-  ##               : The name of the Application Insights component resource.
   ##   name: string
   ##       : The name of a specific item defined in the Application Insights component
+  ##   apiVersion: string (required)
+  ##             : The API version to use for this operation.
+  ##   subscriptionId: string (required)
+  ##                 : The ID of the target subscription.
+  ##   id: string
+  ##     : The Id of a specific item defined in the Application Insights component
   ##   scopePath: string (required)
   ##            : Enum indicating if this item definition is owned by a specific user or is shared between all users with access to the Application Insights component.
-  var path_597023 = newJObject()
-  var query_597024 = newJObject()
-  add(path_597023, "resourceGroupName", newJString(resourceGroupName))
-  add(query_597024, "api-version", newJString(apiVersion))
-  add(query_597024, "id", newJString(id))
-  add(path_597023, "subscriptionId", newJString(subscriptionId))
-  add(path_597023, "resourceName", newJString(resourceName))
-  add(query_597024, "name", newJString(name))
-  add(path_597023, "scopePath", newJString(scopePath))
-  result = call_597022.call(path_597023, query_597024, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group. The name is case insensitive.
+  ##   resourceName: string (required)
+  ##               : The name of the Application Insights component resource.
+  var path_564123 = newJObject()
+  var query_564124 = newJObject()
+  add(query_564124, "name", newJString(name))
+  add(query_564124, "api-version", newJString(apiVersion))
+  add(path_564123, "subscriptionId", newJString(subscriptionId))
+  add(query_564124, "id", newJString(id))
+  add(path_564123, "scopePath", newJString(scopePath))
+  add(path_564123, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564123, "resourceName", newJString(resourceName))
+  result = call_564122.call(path_564123, query_564124, nil, nil, nil)
 
-var analyticsItemsGet* = Call_AnalyticsItemsGet_597011(name: "analyticsItemsGet",
+var analyticsItemsGet* = Call_AnalyticsItemsGet_564111(name: "analyticsItemsGet",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/microsoft.insights/components/{resourceName}/{scopePath}/item",
-    validator: validate_AnalyticsItemsGet_597012, base: "",
-    url: url_AnalyticsItemsGet_597013, schemes: {Scheme.Https})
+    validator: validate_AnalyticsItemsGet_564112, base: "",
+    url: url_AnalyticsItemsGet_564113, schemes: {Scheme.Https})
 type
-  Call_AnalyticsItemsDelete_597040 = ref object of OpenApiRestCall_596458
-proc url_AnalyticsItemsDelete_597042(protocol: Scheme; host: string; base: string;
+  Call_AnalyticsItemsDelete_564140 = ref object of OpenApiRestCall_563556
+proc url_AnalyticsItemsDelete_564142(protocol: Scheme; host: string; base: string;
                                     route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -584,70 +588,70 @@ proc url_AnalyticsItemsDelete_597042(protocol: Scheme; host: string; base: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AnalyticsItemsDelete_597041(path: JsonNode; query: JsonNode;
+proc validate_AnalyticsItemsDelete_564141(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Deletes a specific Analytics Items defined within an Application Insights component.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group. The name is case insensitive.
   ##   subscriptionId: JString (required)
   ##                 : The ID of the target subscription.
-  ##   resourceName: JString (required)
-  ##               : The name of the Application Insights component resource.
   ##   scopePath: JString (required)
   ##            : Enum indicating if this item definition is owned by a specific user or is shared between all users with access to the Application Insights component.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group. The name is case insensitive.
+  ##   resourceName: JString (required)
+  ##               : The name of the Application Insights component resource.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_597043 = path.getOrDefault("resourceGroupName")
-  valid_597043 = validateParameter(valid_597043, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564143 = path.getOrDefault("subscriptionId")
+  valid_564143 = validateParameter(valid_564143, JString, required = true,
                                  default = nil)
-  if valid_597043 != nil:
-    section.add "resourceGroupName", valid_597043
-  var valid_597044 = path.getOrDefault("subscriptionId")
-  valid_597044 = validateParameter(valid_597044, JString, required = true,
-                                 default = nil)
-  if valid_597044 != nil:
-    section.add "subscriptionId", valid_597044
-  var valid_597045 = path.getOrDefault("resourceName")
-  valid_597045 = validateParameter(valid_597045, JString, required = true,
-                                 default = nil)
-  if valid_597045 != nil:
-    section.add "resourceName", valid_597045
-  var valid_597046 = path.getOrDefault("scopePath")
-  valid_597046 = validateParameter(valid_597046, JString, required = true,
+  if valid_564143 != nil:
+    section.add "subscriptionId", valid_564143
+  var valid_564144 = path.getOrDefault("scopePath")
+  valid_564144 = validateParameter(valid_564144, JString, required = true,
                                  default = newJString("analyticsItems"))
-  if valid_597046 != nil:
-    section.add "scopePath", valid_597046
+  if valid_564144 != nil:
+    section.add "scopePath", valid_564144
+  var valid_564145 = path.getOrDefault("resourceGroupName")
+  valid_564145 = validateParameter(valid_564145, JString, required = true,
+                                 default = nil)
+  if valid_564145 != nil:
+    section.add "resourceGroupName", valid_564145
+  var valid_564146 = path.getOrDefault("resourceName")
+  valid_564146 = validateParameter(valid_564146, JString, required = true,
+                                 default = nil)
+  if valid_564146 != nil:
+    section.add "resourceName", valid_564146
   result.add "path", section
   ## parameters in `query` object:
+  ##   name: JString
+  ##       : The name of a specific item defined in the Application Insights component
   ##   api-version: JString (required)
   ##              : The API version to use for this operation.
   ##   id: JString
   ##     : The Id of a specific item defined in the Application Insights component
-  ##   name: JString
-  ##       : The name of a specific item defined in the Application Insights component
   section = newJObject()
+  var valid_564147 = query.getOrDefault("name")
+  valid_564147 = validateParameter(valid_564147, JString, required = false,
+                                 default = nil)
+  if valid_564147 != nil:
+    section.add "name", valid_564147
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_597047 = query.getOrDefault("api-version")
-  valid_597047 = validateParameter(valid_597047, JString, required = true,
+  var valid_564148 = query.getOrDefault("api-version")
+  valid_564148 = validateParameter(valid_564148, JString, required = true,
                                  default = nil)
-  if valid_597047 != nil:
-    section.add "api-version", valid_597047
-  var valid_597048 = query.getOrDefault("id")
-  valid_597048 = validateParameter(valid_597048, JString, required = false,
+  if valid_564148 != nil:
+    section.add "api-version", valid_564148
+  var valid_564149 = query.getOrDefault("id")
+  valid_564149 = validateParameter(valid_564149, JString, required = false,
                                  default = nil)
-  if valid_597048 != nil:
-    section.add "id", valid_597048
-  var valid_597049 = query.getOrDefault("name")
-  valid_597049 = validateParameter(valid_597049, JString, required = false,
-                                 default = nil)
-  if valid_597049 != nil:
-    section.add "name", valid_597049
+  if valid_564149 != nil:
+    section.add "id", valid_564149
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -656,55 +660,54 @@ proc validate_AnalyticsItemsDelete_597041(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_597050: Call_AnalyticsItemsDelete_597040; path: JsonNode;
+proc call*(call_564150: Call_AnalyticsItemsDelete_564140; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes a specific Analytics Items defined within an Application Insights component.
   ## 
-  let valid = call_597050.validator(path, query, header, formData, body)
-  let scheme = call_597050.pickScheme
+  let valid = call_564150.validator(path, query, header, formData, body)
+  let scheme = call_564150.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_597050.url(scheme.get, call_597050.host, call_597050.base,
-                         call_597050.route, valid.getOrDefault("path"),
+  let url = call_564150.url(scheme.get, call_564150.host, call_564150.base,
+                         call_564150.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_597050, url, valid)
+  result = hook(call_564150, url, valid)
 
-proc call*(call_597051: Call_AnalyticsItemsDelete_597040;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          resourceName: string; id: string = ""; name: string = "";
-          scopePath: string = "analyticsItems"): Recallable =
+proc call*(call_564151: Call_AnalyticsItemsDelete_564140; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string; resourceName: string;
+          name: string = ""; id: string = ""; scopePath: string = "analyticsItems"): Recallable =
   ## analyticsItemsDelete
   ## Deletes a specific Analytics Items defined within an Application Insights component.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group. The name is case insensitive.
-  ##   apiVersion: string (required)
-  ##             : The API version to use for this operation.
-  ##   id: string
-  ##     : The Id of a specific item defined in the Application Insights component
-  ##   subscriptionId: string (required)
-  ##                 : The ID of the target subscription.
-  ##   resourceName: string (required)
-  ##               : The name of the Application Insights component resource.
   ##   name: string
   ##       : The name of a specific item defined in the Application Insights component
+  ##   apiVersion: string (required)
+  ##             : The API version to use for this operation.
+  ##   subscriptionId: string (required)
+  ##                 : The ID of the target subscription.
+  ##   id: string
+  ##     : The Id of a specific item defined in the Application Insights component
   ##   scopePath: string (required)
   ##            : Enum indicating if this item definition is owned by a specific user or is shared between all users with access to the Application Insights component.
-  var path_597052 = newJObject()
-  var query_597053 = newJObject()
-  add(path_597052, "resourceGroupName", newJString(resourceGroupName))
-  add(query_597053, "api-version", newJString(apiVersion))
-  add(query_597053, "id", newJString(id))
-  add(path_597052, "subscriptionId", newJString(subscriptionId))
-  add(path_597052, "resourceName", newJString(resourceName))
-  add(query_597053, "name", newJString(name))
-  add(path_597052, "scopePath", newJString(scopePath))
-  result = call_597051.call(path_597052, query_597053, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group. The name is case insensitive.
+  ##   resourceName: string (required)
+  ##               : The name of the Application Insights component resource.
+  var path_564152 = newJObject()
+  var query_564153 = newJObject()
+  add(query_564153, "name", newJString(name))
+  add(query_564153, "api-version", newJString(apiVersion))
+  add(path_564152, "subscriptionId", newJString(subscriptionId))
+  add(query_564153, "id", newJString(id))
+  add(path_564152, "scopePath", newJString(scopePath))
+  add(path_564152, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564152, "resourceName", newJString(resourceName))
+  result = call_564151.call(path_564152, query_564153, nil, nil, nil)
 
-var analyticsItemsDelete* = Call_AnalyticsItemsDelete_597040(
+var analyticsItemsDelete* = Call_AnalyticsItemsDelete_564140(
     name: "analyticsItemsDelete", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/microsoft.insights/components/{resourceName}/{scopePath}/item",
-    validator: validate_AnalyticsItemsDelete_597041, base: "",
-    url: url_AnalyticsItemsDelete_597042, schemes: {Scheme.Https})
+    validator: validate_AnalyticsItemsDelete_564141, base: "",
+    url: url_AnalyticsItemsDelete_564142, schemes: {Scheme.Https})
 export
   rest
 

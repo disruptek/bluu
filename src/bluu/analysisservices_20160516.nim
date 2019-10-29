@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, httpcore
 
 ## auto-generated via openapi macro
 ## title: AzureAnalysisServices
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_593425 = ref object of OpenApiRestCall
+  OpenApiRestCall_563556 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_593425](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563556](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_593425): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563556): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,8 +107,8 @@ const
   macServiceName = "analysisservices"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_ServersCheckNameAvailability_593647 = ref object of OpenApiRestCall_593425
-proc url_ServersCheckNameAvailability_593649(protocol: Scheme; host: string;
+  Call_ServersCheckNameAvailability_563778 = ref object of OpenApiRestCall_563556
+proc url_ServersCheckNameAvailability_563780(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -124,7 +128,7 @@ proc url_ServersCheckNameAvailability_593649(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ServersCheckNameAvailability_593648(path: JsonNode; query: JsonNode;
+proc validate_ServersCheckNameAvailability_563779(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Check the name availability in the target location.
   ## 
@@ -138,16 +142,16 @@ proc validate_ServersCheckNameAvailability_593648(path: JsonNode; query: JsonNod
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_593822 = path.getOrDefault("subscriptionId")
-  valid_593822 = validateParameter(valid_593822, JString, required = true,
+  var valid_563955 = path.getOrDefault("subscriptionId")
+  valid_563955 = validateParameter(valid_563955, JString, required = true,
                                  default = nil)
-  if valid_593822 != nil:
-    section.add "subscriptionId", valid_593822
-  var valid_593823 = path.getOrDefault("location")
-  valid_593823 = validateParameter(valid_593823, JString, required = true,
+  if valid_563955 != nil:
+    section.add "subscriptionId", valid_563955
+  var valid_563956 = path.getOrDefault("location")
+  valid_563956 = validateParameter(valid_563956, JString, required = true,
                                  default = nil)
-  if valid_593823 != nil:
-    section.add "location", valid_593823
+  if valid_563956 != nil:
+    section.add "location", valid_563956
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -155,11 +159,11 @@ proc validate_ServersCheckNameAvailability_593648(path: JsonNode; query: JsonNod
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593824 = query.getOrDefault("api-version")
-  valid_593824 = validateParameter(valid_593824, JString, required = true,
+  var valid_563957 = query.getOrDefault("api-version")
+  valid_563957 = validateParameter(valid_563957, JString, required = true,
                                  default = nil)
-  if valid_593824 != nil:
-    section.add "api-version", valid_593824
+  if valid_563957 != nil:
+    section.add "api-version", valid_563957
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -173,20 +177,20 @@ proc validate_ServersCheckNameAvailability_593648(path: JsonNode; query: JsonNod
   if body != nil:
     result.add "body", body
 
-proc call*(call_593848: Call_ServersCheckNameAvailability_593647; path: JsonNode;
+proc call*(call_563981: Call_ServersCheckNameAvailability_563778; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Check the name availability in the target location.
   ## 
-  let valid = call_593848.validator(path, query, header, formData, body)
-  let scheme = call_593848.pickScheme
+  let valid = call_563981.validator(path, query, header, formData, body)
+  let scheme = call_563981.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593848.url(scheme.get, call_593848.host, call_593848.base,
-                         call_593848.route, valid.getOrDefault("path"),
+  let url = call_563981.url(scheme.get, call_563981.host, call_563981.base,
+                         call_563981.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593848, url, valid)
+  result = hook(call_563981, url, valid)
 
-proc call*(call_593919: Call_ServersCheckNameAvailability_593647;
+proc call*(call_564052: Call_ServersCheckNameAvailability_563778;
           apiVersion: string; subscriptionId: string; location: string;
           serverParameters: JsonNode): Recallable =
   ## serversCheckNameAvailability
@@ -199,24 +203,24 @@ proc call*(call_593919: Call_ServersCheckNameAvailability_593647;
   ##           : The region name which the operation will lookup into.
   ##   serverParameters: JObject (required)
   ##                   : Contains the information used to provision the Analysis Services server.
-  var path_593920 = newJObject()
-  var query_593922 = newJObject()
-  var body_593923 = newJObject()
-  add(query_593922, "api-version", newJString(apiVersion))
-  add(path_593920, "subscriptionId", newJString(subscriptionId))
-  add(path_593920, "location", newJString(location))
+  var path_564053 = newJObject()
+  var query_564055 = newJObject()
+  var body_564056 = newJObject()
+  add(query_564055, "api-version", newJString(apiVersion))
+  add(path_564053, "subscriptionId", newJString(subscriptionId))
+  add(path_564053, "location", newJString(location))
   if serverParameters != nil:
-    body_593923 = serverParameters
-  result = call_593919.call(path_593920, query_593922, nil, nil, body_593923)
+    body_564056 = serverParameters
+  result = call_564052.call(path_564053, query_564055, nil, nil, body_564056)
 
-var serversCheckNameAvailability* = Call_ServersCheckNameAvailability_593647(
+var serversCheckNameAvailability* = Call_ServersCheckNameAvailability_563778(
     name: "serversCheckNameAvailability", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.AnalysisServices/locations/{location}/checkNameAvailability",
-    validator: validate_ServersCheckNameAvailability_593648, base: "",
-    url: url_ServersCheckNameAvailability_593649, schemes: {Scheme.Https})
+    validator: validate_ServersCheckNameAvailability_563779, base: "",
+    url: url_ServersCheckNameAvailability_563780, schemes: {Scheme.Https})
 type
-  Call_ServersListOperationResults_593962 = ref object of OpenApiRestCall_593425
-proc url_ServersListOperationResults_593964(protocol: Scheme; host: string;
+  Call_ServersListOperationResults_564095 = ref object of OpenApiRestCall_563556
+proc url_ServersListOperationResults_564097(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -238,37 +242,37 @@ proc url_ServersListOperationResults_593964(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ServersListOperationResults_593963(path: JsonNode; query: JsonNode;
+proc validate_ServersListOperationResults_564096(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## List the result of the specified operation.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   subscriptionId: JString (required)
-  ##                 : A unique identifier for a Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   operationId: JString (required)
   ##              : The target operation Id.
+  ##   subscriptionId: JString (required)
+  ##                 : A unique identifier for a Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   location: JString (required)
   ##           : The region name which the operation will lookup into.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `subscriptionId` field"
-  var valid_593965 = path.getOrDefault("subscriptionId")
-  valid_593965 = validateParameter(valid_593965, JString, required = true,
+        "path argument is necessary due to required `operationId` field"
+  var valid_564098 = path.getOrDefault("operationId")
+  valid_564098 = validateParameter(valid_564098, JString, required = true,
                                  default = nil)
-  if valid_593965 != nil:
-    section.add "subscriptionId", valid_593965
-  var valid_593966 = path.getOrDefault("operationId")
-  valid_593966 = validateParameter(valid_593966, JString, required = true,
+  if valid_564098 != nil:
+    section.add "operationId", valid_564098
+  var valid_564099 = path.getOrDefault("subscriptionId")
+  valid_564099 = validateParameter(valid_564099, JString, required = true,
                                  default = nil)
-  if valid_593966 != nil:
-    section.add "operationId", valid_593966
-  var valid_593967 = path.getOrDefault("location")
-  valid_593967 = validateParameter(valid_593967, JString, required = true,
+  if valid_564099 != nil:
+    section.add "subscriptionId", valid_564099
+  var valid_564100 = path.getOrDefault("location")
+  valid_564100 = validateParameter(valid_564100, JString, required = true,
                                  default = nil)
-  if valid_593967 != nil:
-    section.add "location", valid_593967
+  if valid_564100 != nil:
+    section.add "location", valid_564100
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -276,11 +280,11 @@ proc validate_ServersListOperationResults_593963(path: JsonNode; query: JsonNode
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593968 = query.getOrDefault("api-version")
-  valid_593968 = validateParameter(valid_593968, JString, required = true,
+  var valid_564101 = query.getOrDefault("api-version")
+  valid_564101 = validateParameter(valid_564101, JString, required = true,
                                  default = nil)
-  if valid_593968 != nil:
-    section.add "api-version", valid_593968
+  if valid_564101 != nil:
+    section.add "api-version", valid_564101
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -289,48 +293,48 @@ proc validate_ServersListOperationResults_593963(path: JsonNode; query: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_593969: Call_ServersListOperationResults_593962; path: JsonNode;
+proc call*(call_564102: Call_ServersListOperationResults_564095; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## List the result of the specified operation.
   ## 
-  let valid = call_593969.validator(path, query, header, formData, body)
-  let scheme = call_593969.pickScheme
+  let valid = call_564102.validator(path, query, header, formData, body)
+  let scheme = call_564102.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593969.url(scheme.get, call_593969.host, call_593969.base,
-                         call_593969.route, valid.getOrDefault("path"),
+  let url = call_564102.url(scheme.get, call_564102.host, call_564102.base,
+                         call_564102.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593969, url, valid)
+  result = hook(call_564102, url, valid)
 
-proc call*(call_593970: Call_ServersListOperationResults_593962;
-          apiVersion: string; subscriptionId: string; operationId: string;
+proc call*(call_564103: Call_ServersListOperationResults_564095;
+          apiVersion: string; operationId: string; subscriptionId: string;
           location: string): Recallable =
   ## serversListOperationResults
   ## List the result of the specified operation.
   ##   apiVersion: string (required)
   ##             : The client API version.
-  ##   subscriptionId: string (required)
-  ##                 : A unique identifier for a Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   operationId: string (required)
   ##              : The target operation Id.
+  ##   subscriptionId: string (required)
+  ##                 : A unique identifier for a Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   location: string (required)
   ##           : The region name which the operation will lookup into.
-  var path_593971 = newJObject()
-  var query_593972 = newJObject()
-  add(query_593972, "api-version", newJString(apiVersion))
-  add(path_593971, "subscriptionId", newJString(subscriptionId))
-  add(path_593971, "operationId", newJString(operationId))
-  add(path_593971, "location", newJString(location))
-  result = call_593970.call(path_593971, query_593972, nil, nil, nil)
+  var path_564104 = newJObject()
+  var query_564105 = newJObject()
+  add(query_564105, "api-version", newJString(apiVersion))
+  add(path_564104, "operationId", newJString(operationId))
+  add(path_564104, "subscriptionId", newJString(subscriptionId))
+  add(path_564104, "location", newJString(location))
+  result = call_564103.call(path_564104, query_564105, nil, nil, nil)
 
-var serversListOperationResults* = Call_ServersListOperationResults_593962(
+var serversListOperationResults* = Call_ServersListOperationResults_564095(
     name: "serversListOperationResults", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.AnalysisServices/locations/{location}/operationresults/{operationId}",
-    validator: validate_ServersListOperationResults_593963, base: "",
-    url: url_ServersListOperationResults_593964, schemes: {Scheme.Https})
+    validator: validate_ServersListOperationResults_564096, base: "",
+    url: url_ServersListOperationResults_564097, schemes: {Scheme.Https})
 type
-  Call_ServersListOperationStatuses_593973 = ref object of OpenApiRestCall_593425
-proc url_ServersListOperationStatuses_593975(protocol: Scheme; host: string;
+  Call_ServersListOperationStatuses_564106 = ref object of OpenApiRestCall_563556
+proc url_ServersListOperationStatuses_564108(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -352,37 +356,37 @@ proc url_ServersListOperationStatuses_593975(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ServersListOperationStatuses_593974(path: JsonNode; query: JsonNode;
+proc validate_ServersListOperationStatuses_564107(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## List the status of operation.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   subscriptionId: JString (required)
-  ##                 : A unique identifier for a Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   operationId: JString (required)
   ##              : The target operation Id.
+  ##   subscriptionId: JString (required)
+  ##                 : A unique identifier for a Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   location: JString (required)
   ##           : The region name which the operation will lookup into.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `subscriptionId` field"
-  var valid_593976 = path.getOrDefault("subscriptionId")
-  valid_593976 = validateParameter(valid_593976, JString, required = true,
+        "path argument is necessary due to required `operationId` field"
+  var valid_564109 = path.getOrDefault("operationId")
+  valid_564109 = validateParameter(valid_564109, JString, required = true,
                                  default = nil)
-  if valid_593976 != nil:
-    section.add "subscriptionId", valid_593976
-  var valid_593977 = path.getOrDefault("operationId")
-  valid_593977 = validateParameter(valid_593977, JString, required = true,
+  if valid_564109 != nil:
+    section.add "operationId", valid_564109
+  var valid_564110 = path.getOrDefault("subscriptionId")
+  valid_564110 = validateParameter(valid_564110, JString, required = true,
                                  default = nil)
-  if valid_593977 != nil:
-    section.add "operationId", valid_593977
-  var valid_593978 = path.getOrDefault("location")
-  valid_593978 = validateParameter(valid_593978, JString, required = true,
+  if valid_564110 != nil:
+    section.add "subscriptionId", valid_564110
+  var valid_564111 = path.getOrDefault("location")
+  valid_564111 = validateParameter(valid_564111, JString, required = true,
                                  default = nil)
-  if valid_593978 != nil:
-    section.add "location", valid_593978
+  if valid_564111 != nil:
+    section.add "location", valid_564111
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -390,11 +394,11 @@ proc validate_ServersListOperationStatuses_593974(path: JsonNode; query: JsonNod
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593979 = query.getOrDefault("api-version")
-  valid_593979 = validateParameter(valid_593979, JString, required = true,
+  var valid_564112 = query.getOrDefault("api-version")
+  valid_564112 = validateParameter(valid_564112, JString, required = true,
                                  default = nil)
-  if valid_593979 != nil:
-    section.add "api-version", valid_593979
+  if valid_564112 != nil:
+    section.add "api-version", valid_564112
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -403,48 +407,48 @@ proc validate_ServersListOperationStatuses_593974(path: JsonNode; query: JsonNod
   if body != nil:
     result.add "body", body
 
-proc call*(call_593980: Call_ServersListOperationStatuses_593973; path: JsonNode;
+proc call*(call_564113: Call_ServersListOperationStatuses_564106; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## List the status of operation.
   ## 
-  let valid = call_593980.validator(path, query, header, formData, body)
-  let scheme = call_593980.pickScheme
+  let valid = call_564113.validator(path, query, header, formData, body)
+  let scheme = call_564113.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593980.url(scheme.get, call_593980.host, call_593980.base,
-                         call_593980.route, valid.getOrDefault("path"),
+  let url = call_564113.url(scheme.get, call_564113.host, call_564113.base,
+                         call_564113.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593980, url, valid)
+  result = hook(call_564113, url, valid)
 
-proc call*(call_593981: Call_ServersListOperationStatuses_593973;
-          apiVersion: string; subscriptionId: string; operationId: string;
+proc call*(call_564114: Call_ServersListOperationStatuses_564106;
+          apiVersion: string; operationId: string; subscriptionId: string;
           location: string): Recallable =
   ## serversListOperationStatuses
   ## List the status of operation.
   ##   apiVersion: string (required)
   ##             : The client API version.
-  ##   subscriptionId: string (required)
-  ##                 : A unique identifier for a Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   operationId: string (required)
   ##              : The target operation Id.
+  ##   subscriptionId: string (required)
+  ##                 : A unique identifier for a Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   location: string (required)
   ##           : The region name which the operation will lookup into.
-  var path_593982 = newJObject()
-  var query_593983 = newJObject()
-  add(query_593983, "api-version", newJString(apiVersion))
-  add(path_593982, "subscriptionId", newJString(subscriptionId))
-  add(path_593982, "operationId", newJString(operationId))
-  add(path_593982, "location", newJString(location))
-  result = call_593981.call(path_593982, query_593983, nil, nil, nil)
+  var path_564115 = newJObject()
+  var query_564116 = newJObject()
+  add(query_564116, "api-version", newJString(apiVersion))
+  add(path_564115, "operationId", newJString(operationId))
+  add(path_564115, "subscriptionId", newJString(subscriptionId))
+  add(path_564115, "location", newJString(location))
+  result = call_564114.call(path_564115, query_564116, nil, nil, nil)
 
-var serversListOperationStatuses* = Call_ServersListOperationStatuses_593973(
+var serversListOperationStatuses* = Call_ServersListOperationStatuses_564106(
     name: "serversListOperationStatuses", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.AnalysisServices/locations/{location}/operationstatuses/{operationId}",
-    validator: validate_ServersListOperationStatuses_593974, base: "",
-    url: url_ServersListOperationStatuses_593975, schemes: {Scheme.Https})
+    validator: validate_ServersListOperationStatuses_564107, base: "",
+    url: url_ServersListOperationStatuses_564108, schemes: {Scheme.Https})
 type
-  Call_ServersList_593984 = ref object of OpenApiRestCall_593425
-proc url_ServersList_593986(protocol: Scheme; host: string; base: string;
+  Call_ServersList_564117 = ref object of OpenApiRestCall_563556
+proc url_ServersList_564119(protocol: Scheme; host: string; base: string;
                            route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -461,7 +465,7 @@ proc url_ServersList_593986(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ServersList_593985(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_ServersList_564118(path: JsonNode; query: JsonNode; header: JsonNode;
                                 formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists all the Analysis Services servers for the given subscription.
   ## 
@@ -473,11 +477,11 @@ proc validate_ServersList_593985(path: JsonNode; query: JsonNode; header: JsonNo
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_593987 = path.getOrDefault("subscriptionId")
-  valid_593987 = validateParameter(valid_593987, JString, required = true,
+  var valid_564120 = path.getOrDefault("subscriptionId")
+  valid_564120 = validateParameter(valid_564120, JString, required = true,
                                  default = nil)
-  if valid_593987 != nil:
-    section.add "subscriptionId", valid_593987
+  if valid_564120 != nil:
+    section.add "subscriptionId", valid_564120
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -485,11 +489,11 @@ proc validate_ServersList_593985(path: JsonNode; query: JsonNode; header: JsonNo
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593988 = query.getOrDefault("api-version")
-  valid_593988 = validateParameter(valid_593988, JString, required = true,
+  var valid_564121 = query.getOrDefault("api-version")
+  valid_564121 = validateParameter(valid_564121, JString, required = true,
                                  default = nil)
-  if valid_593988 != nil:
-    section.add "api-version", valid_593988
+  if valid_564121 != nil:
+    section.add "api-version", valid_564121
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -498,20 +502,20 @@ proc validate_ServersList_593985(path: JsonNode; query: JsonNode; header: JsonNo
   if body != nil:
     result.add "body", body
 
-proc call*(call_593989: Call_ServersList_593984; path: JsonNode; query: JsonNode;
+proc call*(call_564122: Call_ServersList_564117; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists all the Analysis Services servers for the given subscription.
   ## 
-  let valid = call_593989.validator(path, query, header, formData, body)
-  let scheme = call_593989.pickScheme
+  let valid = call_564122.validator(path, query, header, formData, body)
+  let scheme = call_564122.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593989.url(scheme.get, call_593989.host, call_593989.base,
-                         call_593989.route, valid.getOrDefault("path"),
+  let url = call_564122.url(scheme.get, call_564122.host, call_564122.base,
+                         call_564122.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593989, url, valid)
+  result = hook(call_564122, url, valid)
 
-proc call*(call_593990: Call_ServersList_593984; apiVersion: string;
+proc call*(call_564123: Call_ServersList_564117; apiVersion: string;
           subscriptionId: string): Recallable =
   ## serversList
   ## Lists all the Analysis Services servers for the given subscription.
@@ -519,21 +523,21 @@ proc call*(call_593990: Call_ServersList_593984; apiVersion: string;
   ##             : The client API version.
   ##   subscriptionId: string (required)
   ##                 : A unique identifier for a Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_593991 = newJObject()
-  var query_593992 = newJObject()
-  add(query_593992, "api-version", newJString(apiVersion))
-  add(path_593991, "subscriptionId", newJString(subscriptionId))
-  result = call_593990.call(path_593991, query_593992, nil, nil, nil)
+  var path_564124 = newJObject()
+  var query_564125 = newJObject()
+  add(query_564125, "api-version", newJString(apiVersion))
+  add(path_564124, "subscriptionId", newJString(subscriptionId))
+  result = call_564123.call(path_564124, query_564125, nil, nil, nil)
 
-var serversList* = Call_ServersList_593984(name: "serversList",
+var serversList* = Call_ServersList_564117(name: "serversList",
                                         meth: HttpMethod.HttpGet,
                                         host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.AnalysisServices/servers",
-                                        validator: validate_ServersList_593985,
-                                        base: "", url: url_ServersList_593986,
+                                        validator: validate_ServersList_564118,
+                                        base: "", url: url_ServersList_564119,
                                         schemes: {Scheme.Https})
 type
-  Call_ServersListSkusForNew_593993 = ref object of OpenApiRestCall_593425
-proc url_ServersListSkusForNew_593995(protocol: Scheme; host: string; base: string;
+  Call_ServersListSkusForNew_564126 = ref object of OpenApiRestCall_563556
+proc url_ServersListSkusForNew_564128(protocol: Scheme; host: string; base: string;
                                      route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -549,7 +553,7 @@ proc url_ServersListSkusForNew_593995(protocol: Scheme; host: string; base: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ServersListSkusForNew_593994(path: JsonNode; query: JsonNode;
+proc validate_ServersListSkusForNew_564127(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists eligible SKUs for Analysis Services resource provider.
   ## 
@@ -561,11 +565,11 @@ proc validate_ServersListSkusForNew_593994(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_593996 = path.getOrDefault("subscriptionId")
-  valid_593996 = validateParameter(valid_593996, JString, required = true,
+  var valid_564129 = path.getOrDefault("subscriptionId")
+  valid_564129 = validateParameter(valid_564129, JString, required = true,
                                  default = nil)
-  if valid_593996 != nil:
-    section.add "subscriptionId", valid_593996
+  if valid_564129 != nil:
+    section.add "subscriptionId", valid_564129
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -573,11 +577,11 @@ proc validate_ServersListSkusForNew_593994(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593997 = query.getOrDefault("api-version")
-  valid_593997 = validateParameter(valid_593997, JString, required = true,
+  var valid_564130 = query.getOrDefault("api-version")
+  valid_564130 = validateParameter(valid_564130, JString, required = true,
                                  default = nil)
-  if valid_593997 != nil:
-    section.add "api-version", valid_593997
+  if valid_564130 != nil:
+    section.add "api-version", valid_564130
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -586,20 +590,20 @@ proc validate_ServersListSkusForNew_593994(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593998: Call_ServersListSkusForNew_593993; path: JsonNode;
+proc call*(call_564131: Call_ServersListSkusForNew_564126; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists eligible SKUs for Analysis Services resource provider.
   ## 
-  let valid = call_593998.validator(path, query, header, formData, body)
-  let scheme = call_593998.pickScheme
+  let valid = call_564131.validator(path, query, header, formData, body)
+  let scheme = call_564131.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593998.url(scheme.get, call_593998.host, call_593998.base,
-                         call_593998.route, valid.getOrDefault("path"),
+  let url = call_564131.url(scheme.get, call_564131.host, call_564131.base,
+                         call_564131.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593998, url, valid)
+  result = hook(call_564131, url, valid)
 
-proc call*(call_593999: Call_ServersListSkusForNew_593993; apiVersion: string;
+proc call*(call_564132: Call_ServersListSkusForNew_564126; apiVersion: string;
           subscriptionId: string): Recallable =
   ## serversListSkusForNew
   ## Lists eligible SKUs for Analysis Services resource provider.
@@ -607,20 +611,20 @@ proc call*(call_593999: Call_ServersListSkusForNew_593993; apiVersion: string;
   ##             : The client API version.
   ##   subscriptionId: string (required)
   ##                 : A unique identifier for a Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_594000 = newJObject()
-  var query_594001 = newJObject()
-  add(query_594001, "api-version", newJString(apiVersion))
-  add(path_594000, "subscriptionId", newJString(subscriptionId))
-  result = call_593999.call(path_594000, query_594001, nil, nil, nil)
+  var path_564133 = newJObject()
+  var query_564134 = newJObject()
+  add(query_564134, "api-version", newJString(apiVersion))
+  add(path_564133, "subscriptionId", newJString(subscriptionId))
+  result = call_564132.call(path_564133, query_564134, nil, nil, nil)
 
-var serversListSkusForNew* = Call_ServersListSkusForNew_593993(
+var serversListSkusForNew* = Call_ServersListSkusForNew_564126(
     name: "serversListSkusForNew", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.AnalysisServices/skus",
-    validator: validate_ServersListSkusForNew_593994, base: "",
-    url: url_ServersListSkusForNew_593995, schemes: {Scheme.Https})
+    validator: validate_ServersListSkusForNew_564127, base: "",
+    url: url_ServersListSkusForNew_564128, schemes: {Scheme.Https})
 type
-  Call_ServersListByResourceGroup_594002 = ref object of OpenApiRestCall_593425
-proc url_ServersListByResourceGroup_594004(protocol: Scheme; host: string;
+  Call_ServersListByResourceGroup_564135 = ref object of OpenApiRestCall_563556
+proc url_ServersListByResourceGroup_564137(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -641,30 +645,30 @@ proc url_ServersListByResourceGroup_594004(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ServersListByResourceGroup_594003(path: JsonNode; query: JsonNode;
+proc validate_ServersListByResourceGroup_564136(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets all the Analysis Services servers for the given resource group.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the Azure Resource group of which a given Analysis Services server is part. This name must be at least 1 character in length, and no more than 90.
   ##   subscriptionId: JString (required)
   ##                 : A unique identifier for a Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the Azure Resource group of which a given Analysis Services server is part. This name must be at least 1 character in length, and no more than 90.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594005 = path.getOrDefault("resourceGroupName")
-  valid_594005 = validateParameter(valid_594005, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564138 = path.getOrDefault("subscriptionId")
+  valid_564138 = validateParameter(valid_564138, JString, required = true,
                                  default = nil)
-  if valid_594005 != nil:
-    section.add "resourceGroupName", valid_594005
-  var valid_594006 = path.getOrDefault("subscriptionId")
-  valid_594006 = validateParameter(valid_594006, JString, required = true,
+  if valid_564138 != nil:
+    section.add "subscriptionId", valid_564138
+  var valid_564139 = path.getOrDefault("resourceGroupName")
+  valid_564139 = validateParameter(valid_564139, JString, required = true,
                                  default = nil)
-  if valid_594006 != nil:
-    section.add "subscriptionId", valid_594006
+  if valid_564139 != nil:
+    section.add "resourceGroupName", valid_564139
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -672,11 +676,11 @@ proc validate_ServersListByResourceGroup_594003(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594007 = query.getOrDefault("api-version")
-  valid_594007 = validateParameter(valid_594007, JString, required = true,
+  var valid_564140 = query.getOrDefault("api-version")
+  valid_564140 = validateParameter(valid_564140, JString, required = true,
                                  default = nil)
-  if valid_594007 != nil:
-    section.add "api-version", valid_594007
+  if valid_564140 != nil:
+    section.add "api-version", valid_564140
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -685,44 +689,44 @@ proc validate_ServersListByResourceGroup_594003(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594008: Call_ServersListByResourceGroup_594002; path: JsonNode;
+proc call*(call_564141: Call_ServersListByResourceGroup_564135; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets all the Analysis Services servers for the given resource group.
   ## 
-  let valid = call_594008.validator(path, query, header, formData, body)
-  let scheme = call_594008.pickScheme
+  let valid = call_564141.validator(path, query, header, formData, body)
+  let scheme = call_564141.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594008.url(scheme.get, call_594008.host, call_594008.base,
-                         call_594008.route, valid.getOrDefault("path"),
+  let url = call_564141.url(scheme.get, call_564141.host, call_564141.base,
+                         call_564141.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594008, url, valid)
+  result = hook(call_564141, url, valid)
 
-proc call*(call_594009: Call_ServersListByResourceGroup_594002;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string): Recallable =
+proc call*(call_564142: Call_ServersListByResourceGroup_564135; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string): Recallable =
   ## serversListByResourceGroup
   ## Gets all the Analysis Services servers for the given resource group.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the Azure Resource group of which a given Analysis Services server is part. This name must be at least 1 character in length, and no more than 90.
   ##   apiVersion: string (required)
   ##             : The client API version.
   ##   subscriptionId: string (required)
   ##                 : A unique identifier for a Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_594010 = newJObject()
-  var query_594011 = newJObject()
-  add(path_594010, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594011, "api-version", newJString(apiVersion))
-  add(path_594010, "subscriptionId", newJString(subscriptionId))
-  result = call_594009.call(path_594010, query_594011, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the Azure Resource group of which a given Analysis Services server is part. This name must be at least 1 character in length, and no more than 90.
+  var path_564143 = newJObject()
+  var query_564144 = newJObject()
+  add(query_564144, "api-version", newJString(apiVersion))
+  add(path_564143, "subscriptionId", newJString(subscriptionId))
+  add(path_564143, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564142.call(path_564143, query_564144, nil, nil, nil)
 
-var serversListByResourceGroup* = Call_ServersListByResourceGroup_594002(
+var serversListByResourceGroup* = Call_ServersListByResourceGroup_564135(
     name: "serversListByResourceGroup", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.AnalysisServices/servers",
-    validator: validate_ServersListByResourceGroup_594003, base: "",
-    url: url_ServersListByResourceGroup_594004, schemes: {Scheme.Https})
+    validator: validate_ServersListByResourceGroup_564136, base: "",
+    url: url_ServersListByResourceGroup_564137, schemes: {Scheme.Https})
 type
-  Call_ServersCreate_594023 = ref object of OpenApiRestCall_593425
-proc url_ServersCreate_594025(protocol: Scheme; host: string; base: string;
+  Call_ServersCreate_564156 = ref object of OpenApiRestCall_563556
+proc url_ServersCreate_564158(protocol: Scheme; host: string; base: string;
                              route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -745,37 +749,37 @@ proc url_ServersCreate_594025(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ServersCreate_594024(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_ServersCreate_564157(path: JsonNode; query: JsonNode; header: JsonNode;
                                   formData: JsonNode; body: JsonNode): JsonNode =
   ## Provisions the specified Analysis Services server based on the configuration specified in the request.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the Azure Resource group of which a given Analysis Services server is part. This name must be at least 1 character in length, and no more than 90.
   ##   serverName: JString (required)
   ##             : The name of the Analysis Services server. It must be a minimum of 3 characters, and a maximum of 63.
   ##   subscriptionId: JString (required)
   ##                 : A unique identifier for a Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the Azure Resource group of which a given Analysis Services server is part. This name must be at least 1 character in length, and no more than 90.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594026 = path.getOrDefault("resourceGroupName")
-  valid_594026 = validateParameter(valid_594026, JString, required = true,
+        "path argument is necessary due to required `serverName` field"
+  var valid_564159 = path.getOrDefault("serverName")
+  valid_564159 = validateParameter(valid_564159, JString, required = true,
                                  default = nil)
-  if valid_594026 != nil:
-    section.add "resourceGroupName", valid_594026
-  var valid_594027 = path.getOrDefault("serverName")
-  valid_594027 = validateParameter(valid_594027, JString, required = true,
+  if valid_564159 != nil:
+    section.add "serverName", valid_564159
+  var valid_564160 = path.getOrDefault("subscriptionId")
+  valid_564160 = validateParameter(valid_564160, JString, required = true,
                                  default = nil)
-  if valid_594027 != nil:
-    section.add "serverName", valid_594027
-  var valid_594028 = path.getOrDefault("subscriptionId")
-  valid_594028 = validateParameter(valid_594028, JString, required = true,
+  if valid_564160 != nil:
+    section.add "subscriptionId", valid_564160
+  var valid_564161 = path.getOrDefault("resourceGroupName")
+  valid_564161 = validateParameter(valid_564161, JString, required = true,
                                  default = nil)
-  if valid_594028 != nil:
-    section.add "subscriptionId", valid_594028
+  if valid_564161 != nil:
+    section.add "resourceGroupName", valid_564161
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -783,11 +787,11 @@ proc validate_ServersCreate_594024(path: JsonNode; query: JsonNode; header: Json
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594029 = query.getOrDefault("api-version")
-  valid_594029 = validateParameter(valid_594029, JString, required = true,
+  var valid_564162 = query.getOrDefault("api-version")
+  valid_564162 = validateParameter(valid_564162, JString, required = true,
                                  default = nil)
-  if valid_594029 != nil:
-    section.add "api-version", valid_594029
+  if valid_564162 != nil:
+    section.add "api-version", valid_564162
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -801,26 +805,24 @@ proc validate_ServersCreate_594024(path: JsonNode; query: JsonNode; header: Json
   if body != nil:
     result.add "body", body
 
-proc call*(call_594031: Call_ServersCreate_594023; path: JsonNode; query: JsonNode;
+proc call*(call_564164: Call_ServersCreate_564156; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Provisions the specified Analysis Services server based on the configuration specified in the request.
   ## 
-  let valid = call_594031.validator(path, query, header, formData, body)
-  let scheme = call_594031.pickScheme
+  let valid = call_564164.validator(path, query, header, formData, body)
+  let scheme = call_564164.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594031.url(scheme.get, call_594031.host, call_594031.base,
-                         call_594031.route, valid.getOrDefault("path"),
+  let url = call_564164.url(scheme.get, call_564164.host, call_564164.base,
+                         call_564164.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594031, url, valid)
+  result = hook(call_564164, url, valid)
 
-proc call*(call_594032: Call_ServersCreate_594023; resourceGroupName: string;
-          apiVersion: string; serverName: string; subscriptionId: string;
-          serverParameters: JsonNode): Recallable =
+proc call*(call_564165: Call_ServersCreate_564156; apiVersion: string;
+          serverName: string; subscriptionId: string; serverParameters: JsonNode;
+          resourceGroupName: string): Recallable =
   ## serversCreate
   ## Provisions the specified Analysis Services server based on the configuration specified in the request.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the Azure Resource group of which a given Analysis Services server is part. This name must be at least 1 character in length, and no more than 90.
   ##   apiVersion: string (required)
   ##             : The client API version.
   ##   serverName: string (required)
@@ -829,24 +831,26 @@ proc call*(call_594032: Call_ServersCreate_594023; resourceGroupName: string;
   ##                 : A unique identifier for a Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   serverParameters: JObject (required)
   ##                   : Contains the information used to provision the Analysis Services server.
-  var path_594033 = newJObject()
-  var query_594034 = newJObject()
-  var body_594035 = newJObject()
-  add(path_594033, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594034, "api-version", newJString(apiVersion))
-  add(path_594033, "serverName", newJString(serverName))
-  add(path_594033, "subscriptionId", newJString(subscriptionId))
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the Azure Resource group of which a given Analysis Services server is part. This name must be at least 1 character in length, and no more than 90.
+  var path_564166 = newJObject()
+  var query_564167 = newJObject()
+  var body_564168 = newJObject()
+  add(query_564167, "api-version", newJString(apiVersion))
+  add(path_564166, "serverName", newJString(serverName))
+  add(path_564166, "subscriptionId", newJString(subscriptionId))
   if serverParameters != nil:
-    body_594035 = serverParameters
-  result = call_594032.call(path_594033, query_594034, nil, nil, body_594035)
+    body_564168 = serverParameters
+  add(path_564166, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564165.call(path_564166, query_564167, nil, nil, body_564168)
 
-var serversCreate* = Call_ServersCreate_594023(name: "serversCreate",
+var serversCreate* = Call_ServersCreate_564156(name: "serversCreate",
     meth: HttpMethod.HttpPut, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.AnalysisServices/servers/{serverName}",
-    validator: validate_ServersCreate_594024, base: "", url: url_ServersCreate_594025,
+    validator: validate_ServersCreate_564157, base: "", url: url_ServersCreate_564158,
     schemes: {Scheme.Https})
 type
-  Call_ServersGetDetails_594012 = ref object of OpenApiRestCall_593425
-proc url_ServersGetDetails_594014(protocol: Scheme; host: string; base: string;
+  Call_ServersGetDetails_564145 = ref object of OpenApiRestCall_563556
+proc url_ServersGetDetails_564147(protocol: Scheme; host: string; base: string;
                                  route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -869,7 +873,7 @@ proc url_ServersGetDetails_594014(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ServersGetDetails_594013(path: JsonNode; query: JsonNode;
+proc validate_ServersGetDetails_564146(path: JsonNode; query: JsonNode;
                                       header: JsonNode; formData: JsonNode;
                                       body: JsonNode): JsonNode =
   ## Gets details about the specified Analysis Services server.
@@ -877,30 +881,30 @@ proc validate_ServersGetDetails_594013(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the Azure Resource group of which a given Analysis Services server is part. This name must be at least 1 character in length, and no more than 90.
   ##   serverName: JString (required)
   ##             : The name of the Analysis Services server. It must be a minimum of 3 characters, and a maximum of 63.
   ##   subscriptionId: JString (required)
   ##                 : A unique identifier for a Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the Azure Resource group of which a given Analysis Services server is part. This name must be at least 1 character in length, and no more than 90.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594015 = path.getOrDefault("resourceGroupName")
-  valid_594015 = validateParameter(valid_594015, JString, required = true,
+        "path argument is necessary due to required `serverName` field"
+  var valid_564148 = path.getOrDefault("serverName")
+  valid_564148 = validateParameter(valid_564148, JString, required = true,
                                  default = nil)
-  if valid_594015 != nil:
-    section.add "resourceGroupName", valid_594015
-  var valid_594016 = path.getOrDefault("serverName")
-  valid_594016 = validateParameter(valid_594016, JString, required = true,
+  if valid_564148 != nil:
+    section.add "serverName", valid_564148
+  var valid_564149 = path.getOrDefault("subscriptionId")
+  valid_564149 = validateParameter(valid_564149, JString, required = true,
                                  default = nil)
-  if valid_594016 != nil:
-    section.add "serverName", valid_594016
-  var valid_594017 = path.getOrDefault("subscriptionId")
-  valid_594017 = validateParameter(valid_594017, JString, required = true,
+  if valid_564149 != nil:
+    section.add "subscriptionId", valid_564149
+  var valid_564150 = path.getOrDefault("resourceGroupName")
+  valid_564150 = validateParameter(valid_564150, JString, required = true,
                                  default = nil)
-  if valid_594017 != nil:
-    section.add "subscriptionId", valid_594017
+  if valid_564150 != nil:
+    section.add "resourceGroupName", valid_564150
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -908,11 +912,11 @@ proc validate_ServersGetDetails_594013(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594018 = query.getOrDefault("api-version")
-  valid_594018 = validateParameter(valid_594018, JString, required = true,
+  var valid_564151 = query.getOrDefault("api-version")
+  valid_564151 = validateParameter(valid_564151, JString, required = true,
                                  default = nil)
-  if valid_594018 != nil:
-    section.add "api-version", valid_594018
+  if valid_564151 != nil:
+    section.add "api-version", valid_564151
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -921,46 +925,46 @@ proc validate_ServersGetDetails_594013(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594019: Call_ServersGetDetails_594012; path: JsonNode;
+proc call*(call_564152: Call_ServersGetDetails_564145; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets details about the specified Analysis Services server.
   ## 
-  let valid = call_594019.validator(path, query, header, formData, body)
-  let scheme = call_594019.pickScheme
+  let valid = call_564152.validator(path, query, header, formData, body)
+  let scheme = call_564152.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594019.url(scheme.get, call_594019.host, call_594019.base,
-                         call_594019.route, valid.getOrDefault("path"),
+  let url = call_564152.url(scheme.get, call_564152.host, call_564152.base,
+                         call_564152.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594019, url, valid)
+  result = hook(call_564152, url, valid)
 
-proc call*(call_594020: Call_ServersGetDetails_594012; resourceGroupName: string;
-          apiVersion: string; serverName: string; subscriptionId: string): Recallable =
+proc call*(call_564153: Call_ServersGetDetails_564145; apiVersion: string;
+          serverName: string; subscriptionId: string; resourceGroupName: string): Recallable =
   ## serversGetDetails
   ## Gets details about the specified Analysis Services server.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the Azure Resource group of which a given Analysis Services server is part. This name must be at least 1 character in length, and no more than 90.
   ##   apiVersion: string (required)
   ##             : The client API version.
   ##   serverName: string (required)
   ##             : The name of the Analysis Services server. It must be a minimum of 3 characters, and a maximum of 63.
   ##   subscriptionId: string (required)
   ##                 : A unique identifier for a Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_594021 = newJObject()
-  var query_594022 = newJObject()
-  add(path_594021, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594022, "api-version", newJString(apiVersion))
-  add(path_594021, "serverName", newJString(serverName))
-  add(path_594021, "subscriptionId", newJString(subscriptionId))
-  result = call_594020.call(path_594021, query_594022, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the Azure Resource group of which a given Analysis Services server is part. This name must be at least 1 character in length, and no more than 90.
+  var path_564154 = newJObject()
+  var query_564155 = newJObject()
+  add(query_564155, "api-version", newJString(apiVersion))
+  add(path_564154, "serverName", newJString(serverName))
+  add(path_564154, "subscriptionId", newJString(subscriptionId))
+  add(path_564154, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564153.call(path_564154, query_564155, nil, nil, nil)
 
-var serversGetDetails* = Call_ServersGetDetails_594012(name: "serversGetDetails",
+var serversGetDetails* = Call_ServersGetDetails_564145(name: "serversGetDetails",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.AnalysisServices/servers/{serverName}",
-    validator: validate_ServersGetDetails_594013, base: "",
-    url: url_ServersGetDetails_594014, schemes: {Scheme.Https})
+    validator: validate_ServersGetDetails_564146, base: "",
+    url: url_ServersGetDetails_564147, schemes: {Scheme.Https})
 type
-  Call_ServersUpdate_594047 = ref object of OpenApiRestCall_593425
-proc url_ServersUpdate_594049(protocol: Scheme; host: string; base: string;
+  Call_ServersUpdate_564180 = ref object of OpenApiRestCall_563556
+proc url_ServersUpdate_564182(protocol: Scheme; host: string; base: string;
                              route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -983,37 +987,37 @@ proc url_ServersUpdate_594049(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ServersUpdate_594048(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_ServersUpdate_564181(path: JsonNode; query: JsonNode; header: JsonNode;
                                   formData: JsonNode; body: JsonNode): JsonNode =
   ## Updates the current state of the specified Analysis Services server.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the Azure Resource group of which a given Analysis Services server is part. This name must be at least 1 character in length, and no more than 90.
   ##   serverName: JString (required)
   ##             : The name of the Analysis Services server. It must be at least 3 characters in length, and no more than 63.
   ##   subscriptionId: JString (required)
   ##                 : A unique identifier for a Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the Azure Resource group of which a given Analysis Services server is part. This name must be at least 1 character in length, and no more than 90.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594050 = path.getOrDefault("resourceGroupName")
-  valid_594050 = validateParameter(valid_594050, JString, required = true,
+        "path argument is necessary due to required `serverName` field"
+  var valid_564183 = path.getOrDefault("serverName")
+  valid_564183 = validateParameter(valid_564183, JString, required = true,
                                  default = nil)
-  if valid_594050 != nil:
-    section.add "resourceGroupName", valid_594050
-  var valid_594051 = path.getOrDefault("serverName")
-  valid_594051 = validateParameter(valid_594051, JString, required = true,
+  if valid_564183 != nil:
+    section.add "serverName", valid_564183
+  var valid_564184 = path.getOrDefault("subscriptionId")
+  valid_564184 = validateParameter(valid_564184, JString, required = true,
                                  default = nil)
-  if valid_594051 != nil:
-    section.add "serverName", valid_594051
-  var valid_594052 = path.getOrDefault("subscriptionId")
-  valid_594052 = validateParameter(valid_594052, JString, required = true,
+  if valid_564184 != nil:
+    section.add "subscriptionId", valid_564184
+  var valid_564185 = path.getOrDefault("resourceGroupName")
+  valid_564185 = validateParameter(valid_564185, JString, required = true,
                                  default = nil)
-  if valid_594052 != nil:
-    section.add "subscriptionId", valid_594052
+  if valid_564185 != nil:
+    section.add "resourceGroupName", valid_564185
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1021,11 +1025,11 @@ proc validate_ServersUpdate_594048(path: JsonNode; query: JsonNode; header: Json
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594053 = query.getOrDefault("api-version")
-  valid_594053 = validateParameter(valid_594053, JString, required = true,
+  var valid_564186 = query.getOrDefault("api-version")
+  valid_564186 = validateParameter(valid_564186, JString, required = true,
                                  default = nil)
-  if valid_594053 != nil:
-    section.add "api-version", valid_594053
+  if valid_564186 != nil:
+    section.add "api-version", valid_564186
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1039,52 +1043,52 @@ proc validate_ServersUpdate_594048(path: JsonNode; query: JsonNode; header: Json
   if body != nil:
     result.add "body", body
 
-proc call*(call_594055: Call_ServersUpdate_594047; path: JsonNode; query: JsonNode;
+proc call*(call_564188: Call_ServersUpdate_564180; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Updates the current state of the specified Analysis Services server.
   ## 
-  let valid = call_594055.validator(path, query, header, formData, body)
-  let scheme = call_594055.pickScheme
+  let valid = call_564188.validator(path, query, header, formData, body)
+  let scheme = call_564188.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594055.url(scheme.get, call_594055.host, call_594055.base,
-                         call_594055.route, valid.getOrDefault("path"),
+  let url = call_564188.url(scheme.get, call_564188.host, call_564188.base,
+                         call_564188.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594055, url, valid)
+  result = hook(call_564188, url, valid)
 
-proc call*(call_594056: Call_ServersUpdate_594047; resourceGroupName: string;
-          apiVersion: string; serverName: string; serverUpdateParameters: JsonNode;
-          subscriptionId: string): Recallable =
+proc call*(call_564189: Call_ServersUpdate_564180;
+          serverUpdateParameters: JsonNode; apiVersion: string; serverName: string;
+          subscriptionId: string; resourceGroupName: string): Recallable =
   ## serversUpdate
   ## Updates the current state of the specified Analysis Services server.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the Azure Resource group of which a given Analysis Services server is part. This name must be at least 1 character in length, and no more than 90.
+  ##   serverUpdateParameters: JObject (required)
+  ##                         : Request object that contains the updated information for the server.
   ##   apiVersion: string (required)
   ##             : The client API version.
   ##   serverName: string (required)
   ##             : The name of the Analysis Services server. It must be at least 3 characters in length, and no more than 63.
-  ##   serverUpdateParameters: JObject (required)
-  ##                         : Request object that contains the updated information for the server.
   ##   subscriptionId: string (required)
   ##                 : A unique identifier for a Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_594057 = newJObject()
-  var query_594058 = newJObject()
-  var body_594059 = newJObject()
-  add(path_594057, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594058, "api-version", newJString(apiVersion))
-  add(path_594057, "serverName", newJString(serverName))
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the Azure Resource group of which a given Analysis Services server is part. This name must be at least 1 character in length, and no more than 90.
+  var path_564190 = newJObject()
+  var query_564191 = newJObject()
+  var body_564192 = newJObject()
   if serverUpdateParameters != nil:
-    body_594059 = serverUpdateParameters
-  add(path_594057, "subscriptionId", newJString(subscriptionId))
-  result = call_594056.call(path_594057, query_594058, nil, nil, body_594059)
+    body_564192 = serverUpdateParameters
+  add(query_564191, "api-version", newJString(apiVersion))
+  add(path_564190, "serverName", newJString(serverName))
+  add(path_564190, "subscriptionId", newJString(subscriptionId))
+  add(path_564190, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564189.call(path_564190, query_564191, nil, nil, body_564192)
 
-var serversUpdate* = Call_ServersUpdate_594047(name: "serversUpdate",
+var serversUpdate* = Call_ServersUpdate_564180(name: "serversUpdate",
     meth: HttpMethod.HttpPatch, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.AnalysisServices/servers/{serverName}",
-    validator: validate_ServersUpdate_594048, base: "", url: url_ServersUpdate_594049,
+    validator: validate_ServersUpdate_564181, base: "", url: url_ServersUpdate_564182,
     schemes: {Scheme.Https})
 type
-  Call_ServersDelete_594036 = ref object of OpenApiRestCall_593425
-proc url_ServersDelete_594038(protocol: Scheme; host: string; base: string;
+  Call_ServersDelete_564169 = ref object of OpenApiRestCall_563556
+proc url_ServersDelete_564171(protocol: Scheme; host: string; base: string;
                              route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1107,37 +1111,37 @@ proc url_ServersDelete_594038(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ServersDelete_594037(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_ServersDelete_564170(path: JsonNode; query: JsonNode; header: JsonNode;
                                   formData: JsonNode; body: JsonNode): JsonNode =
   ## Deletes the specified Analysis Services server.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the Azure Resource group of which a given Analysis Services server is part. This name must be at least 1 character in length, and no more than 90.
   ##   serverName: JString (required)
   ##             : The name of the Analysis Services server. It must be at least 3 characters in length, and no more than 63.
   ##   subscriptionId: JString (required)
   ##                 : A unique identifier for a Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the Azure Resource group of which a given Analysis Services server is part. This name must be at least 1 character in length, and no more than 90.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594039 = path.getOrDefault("resourceGroupName")
-  valid_594039 = validateParameter(valid_594039, JString, required = true,
+        "path argument is necessary due to required `serverName` field"
+  var valid_564172 = path.getOrDefault("serverName")
+  valid_564172 = validateParameter(valid_564172, JString, required = true,
                                  default = nil)
-  if valid_594039 != nil:
-    section.add "resourceGroupName", valid_594039
-  var valid_594040 = path.getOrDefault("serverName")
-  valid_594040 = validateParameter(valid_594040, JString, required = true,
+  if valid_564172 != nil:
+    section.add "serverName", valid_564172
+  var valid_564173 = path.getOrDefault("subscriptionId")
+  valid_564173 = validateParameter(valid_564173, JString, required = true,
                                  default = nil)
-  if valid_594040 != nil:
-    section.add "serverName", valid_594040
-  var valid_594041 = path.getOrDefault("subscriptionId")
-  valid_594041 = validateParameter(valid_594041, JString, required = true,
+  if valid_564173 != nil:
+    section.add "subscriptionId", valid_564173
+  var valid_564174 = path.getOrDefault("resourceGroupName")
+  valid_564174 = validateParameter(valid_564174, JString, required = true,
                                  default = nil)
-  if valid_594041 != nil:
-    section.add "subscriptionId", valid_594041
+  if valid_564174 != nil:
+    section.add "resourceGroupName", valid_564174
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1145,11 +1149,11 @@ proc validate_ServersDelete_594037(path: JsonNode; query: JsonNode; header: Json
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594042 = query.getOrDefault("api-version")
-  valid_594042 = validateParameter(valid_594042, JString, required = true,
+  var valid_564175 = query.getOrDefault("api-version")
+  valid_564175 = validateParameter(valid_564175, JString, required = true,
                                  default = nil)
-  if valid_594042 != nil:
-    section.add "api-version", valid_594042
+  if valid_564175 != nil:
+    section.add "api-version", valid_564175
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1158,46 +1162,46 @@ proc validate_ServersDelete_594037(path: JsonNode; query: JsonNode; header: Json
   if body != nil:
     result.add "body", body
 
-proc call*(call_594043: Call_ServersDelete_594036; path: JsonNode; query: JsonNode;
+proc call*(call_564176: Call_ServersDelete_564169; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes the specified Analysis Services server.
   ## 
-  let valid = call_594043.validator(path, query, header, formData, body)
-  let scheme = call_594043.pickScheme
+  let valid = call_564176.validator(path, query, header, formData, body)
+  let scheme = call_564176.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594043.url(scheme.get, call_594043.host, call_594043.base,
-                         call_594043.route, valid.getOrDefault("path"),
+  let url = call_564176.url(scheme.get, call_564176.host, call_564176.base,
+                         call_564176.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594043, url, valid)
+  result = hook(call_564176, url, valid)
 
-proc call*(call_594044: Call_ServersDelete_594036; resourceGroupName: string;
-          apiVersion: string; serverName: string; subscriptionId: string): Recallable =
+proc call*(call_564177: Call_ServersDelete_564169; apiVersion: string;
+          serverName: string; subscriptionId: string; resourceGroupName: string): Recallable =
   ## serversDelete
   ## Deletes the specified Analysis Services server.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the Azure Resource group of which a given Analysis Services server is part. This name must be at least 1 character in length, and no more than 90.
   ##   apiVersion: string (required)
   ##             : The client API version.
   ##   serverName: string (required)
   ##             : The name of the Analysis Services server. It must be at least 3 characters in length, and no more than 63.
   ##   subscriptionId: string (required)
   ##                 : A unique identifier for a Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_594045 = newJObject()
-  var query_594046 = newJObject()
-  add(path_594045, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594046, "api-version", newJString(apiVersion))
-  add(path_594045, "serverName", newJString(serverName))
-  add(path_594045, "subscriptionId", newJString(subscriptionId))
-  result = call_594044.call(path_594045, query_594046, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the Azure Resource group of which a given Analysis Services server is part. This name must be at least 1 character in length, and no more than 90.
+  var path_564178 = newJObject()
+  var query_564179 = newJObject()
+  add(query_564179, "api-version", newJString(apiVersion))
+  add(path_564178, "serverName", newJString(serverName))
+  add(path_564178, "subscriptionId", newJString(subscriptionId))
+  add(path_564178, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564177.call(path_564178, query_564179, nil, nil, nil)
 
-var serversDelete* = Call_ServersDelete_594036(name: "serversDelete",
+var serversDelete* = Call_ServersDelete_564169(name: "serversDelete",
     meth: HttpMethod.HttpDelete, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.AnalysisServices/servers/{serverName}",
-    validator: validate_ServersDelete_594037, base: "", url: url_ServersDelete_594038,
+    validator: validate_ServersDelete_564170, base: "", url: url_ServersDelete_564171,
     schemes: {Scheme.Https})
 type
-  Call_ServersResume_594060 = ref object of OpenApiRestCall_593425
-proc url_ServersResume_594062(protocol: Scheme; host: string; base: string;
+  Call_ServersResume_564193 = ref object of OpenApiRestCall_563556
+proc url_ServersResume_564195(protocol: Scheme; host: string; base: string;
                              route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1221,37 +1225,37 @@ proc url_ServersResume_594062(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ServersResume_594061(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_ServersResume_564194(path: JsonNode; query: JsonNode; header: JsonNode;
                                   formData: JsonNode; body: JsonNode): JsonNode =
   ## Resumes operation of the specified Analysis Services server instance.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the Azure Resource group of which a given Analysis Services server is part. This name must be at least 1 character in length, and no more than 90.
   ##   serverName: JString (required)
   ##             : The name of the Analysis Services server. It must be at least 3 characters in length, and no more than 63.
   ##   subscriptionId: JString (required)
   ##                 : A unique identifier for a Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the Azure Resource group of which a given Analysis Services server is part. This name must be at least 1 character in length, and no more than 90.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594063 = path.getOrDefault("resourceGroupName")
-  valid_594063 = validateParameter(valid_594063, JString, required = true,
+        "path argument is necessary due to required `serverName` field"
+  var valid_564196 = path.getOrDefault("serverName")
+  valid_564196 = validateParameter(valid_564196, JString, required = true,
                                  default = nil)
-  if valid_594063 != nil:
-    section.add "resourceGroupName", valid_594063
-  var valid_594064 = path.getOrDefault("serverName")
-  valid_594064 = validateParameter(valid_594064, JString, required = true,
+  if valid_564196 != nil:
+    section.add "serverName", valid_564196
+  var valid_564197 = path.getOrDefault("subscriptionId")
+  valid_564197 = validateParameter(valid_564197, JString, required = true,
                                  default = nil)
-  if valid_594064 != nil:
-    section.add "serverName", valid_594064
-  var valid_594065 = path.getOrDefault("subscriptionId")
-  valid_594065 = validateParameter(valid_594065, JString, required = true,
+  if valid_564197 != nil:
+    section.add "subscriptionId", valid_564197
+  var valid_564198 = path.getOrDefault("resourceGroupName")
+  valid_564198 = validateParameter(valid_564198, JString, required = true,
                                  default = nil)
-  if valid_594065 != nil:
-    section.add "subscriptionId", valid_594065
+  if valid_564198 != nil:
+    section.add "resourceGroupName", valid_564198
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1259,11 +1263,11 @@ proc validate_ServersResume_594061(path: JsonNode; query: JsonNode; header: Json
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594066 = query.getOrDefault("api-version")
-  valid_594066 = validateParameter(valid_594066, JString, required = true,
+  var valid_564199 = query.getOrDefault("api-version")
+  valid_564199 = validateParameter(valid_564199, JString, required = true,
                                  default = nil)
-  if valid_594066 != nil:
-    section.add "api-version", valid_594066
+  if valid_564199 != nil:
+    section.add "api-version", valid_564199
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1272,46 +1276,46 @@ proc validate_ServersResume_594061(path: JsonNode; query: JsonNode; header: Json
   if body != nil:
     result.add "body", body
 
-proc call*(call_594067: Call_ServersResume_594060; path: JsonNode; query: JsonNode;
+proc call*(call_564200: Call_ServersResume_564193; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Resumes operation of the specified Analysis Services server instance.
   ## 
-  let valid = call_594067.validator(path, query, header, formData, body)
-  let scheme = call_594067.pickScheme
+  let valid = call_564200.validator(path, query, header, formData, body)
+  let scheme = call_564200.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594067.url(scheme.get, call_594067.host, call_594067.base,
-                         call_594067.route, valid.getOrDefault("path"),
+  let url = call_564200.url(scheme.get, call_564200.host, call_564200.base,
+                         call_564200.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594067, url, valid)
+  result = hook(call_564200, url, valid)
 
-proc call*(call_594068: Call_ServersResume_594060; resourceGroupName: string;
-          apiVersion: string; serverName: string; subscriptionId: string): Recallable =
+proc call*(call_564201: Call_ServersResume_564193; apiVersion: string;
+          serverName: string; subscriptionId: string; resourceGroupName: string): Recallable =
   ## serversResume
   ## Resumes operation of the specified Analysis Services server instance.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the Azure Resource group of which a given Analysis Services server is part. This name must be at least 1 character in length, and no more than 90.
   ##   apiVersion: string (required)
   ##             : The client API version.
   ##   serverName: string (required)
   ##             : The name of the Analysis Services server. It must be at least 3 characters in length, and no more than 63.
   ##   subscriptionId: string (required)
   ##                 : A unique identifier for a Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_594069 = newJObject()
-  var query_594070 = newJObject()
-  add(path_594069, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594070, "api-version", newJString(apiVersion))
-  add(path_594069, "serverName", newJString(serverName))
-  add(path_594069, "subscriptionId", newJString(subscriptionId))
-  result = call_594068.call(path_594069, query_594070, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the Azure Resource group of which a given Analysis Services server is part. This name must be at least 1 character in length, and no more than 90.
+  var path_564202 = newJObject()
+  var query_564203 = newJObject()
+  add(query_564203, "api-version", newJString(apiVersion))
+  add(path_564202, "serverName", newJString(serverName))
+  add(path_564202, "subscriptionId", newJString(subscriptionId))
+  add(path_564202, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564201.call(path_564202, query_564203, nil, nil, nil)
 
-var serversResume* = Call_ServersResume_594060(name: "serversResume",
+var serversResume* = Call_ServersResume_564193(name: "serversResume",
     meth: HttpMethod.HttpPost, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.AnalysisServices/servers/{serverName}/resume",
-    validator: validate_ServersResume_594061, base: "", url: url_ServersResume_594062,
+    validator: validate_ServersResume_564194, base: "", url: url_ServersResume_564195,
     schemes: {Scheme.Https})
 type
-  Call_ServersListSkusForExisting_594071 = ref object of OpenApiRestCall_593425
-proc url_ServersListSkusForExisting_594073(protocol: Scheme; host: string;
+  Call_ServersListSkusForExisting_564204 = ref object of OpenApiRestCall_563556
+proc url_ServersListSkusForExisting_564206(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1335,37 +1339,37 @@ proc url_ServersListSkusForExisting_594073(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ServersListSkusForExisting_594072(path: JsonNode; query: JsonNode;
+proc validate_ServersListSkusForExisting_564205(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists eligible SKUs for an Analysis Services resource.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the Azure Resource group of which a given Analysis Services server is part. This name must be at least 1 character in length, and no more than 90.
   ##   serverName: JString (required)
   ##             : The name of the Analysis Services server. It must be at least 3 characters in length, and no more than 63.
   ##   subscriptionId: JString (required)
   ##                 : A unique identifier for a Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the Azure Resource group of which a given Analysis Services server is part. This name must be at least 1 character in length, and no more than 90.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594074 = path.getOrDefault("resourceGroupName")
-  valid_594074 = validateParameter(valid_594074, JString, required = true,
+        "path argument is necessary due to required `serverName` field"
+  var valid_564207 = path.getOrDefault("serverName")
+  valid_564207 = validateParameter(valid_564207, JString, required = true,
                                  default = nil)
-  if valid_594074 != nil:
-    section.add "resourceGroupName", valid_594074
-  var valid_594075 = path.getOrDefault("serverName")
-  valid_594075 = validateParameter(valid_594075, JString, required = true,
+  if valid_564207 != nil:
+    section.add "serverName", valid_564207
+  var valid_564208 = path.getOrDefault("subscriptionId")
+  valid_564208 = validateParameter(valid_564208, JString, required = true,
                                  default = nil)
-  if valid_594075 != nil:
-    section.add "serverName", valid_594075
-  var valid_594076 = path.getOrDefault("subscriptionId")
-  valid_594076 = validateParameter(valid_594076, JString, required = true,
+  if valid_564208 != nil:
+    section.add "subscriptionId", valid_564208
+  var valid_564209 = path.getOrDefault("resourceGroupName")
+  valid_564209 = validateParameter(valid_564209, JString, required = true,
                                  default = nil)
-  if valid_594076 != nil:
-    section.add "subscriptionId", valid_594076
+  if valid_564209 != nil:
+    section.add "resourceGroupName", valid_564209
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1373,11 +1377,11 @@ proc validate_ServersListSkusForExisting_594072(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594077 = query.getOrDefault("api-version")
-  valid_594077 = validateParameter(valid_594077, JString, required = true,
+  var valid_564210 = query.getOrDefault("api-version")
+  valid_564210 = validateParameter(valid_564210, JString, required = true,
                                  default = nil)
-  if valid_594077 != nil:
-    section.add "api-version", valid_594077
+  if valid_564210 != nil:
+    section.add "api-version", valid_564210
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1386,48 +1390,47 @@ proc validate_ServersListSkusForExisting_594072(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594078: Call_ServersListSkusForExisting_594071; path: JsonNode;
+proc call*(call_564211: Call_ServersListSkusForExisting_564204; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists eligible SKUs for an Analysis Services resource.
   ## 
-  let valid = call_594078.validator(path, query, header, formData, body)
-  let scheme = call_594078.pickScheme
+  let valid = call_564211.validator(path, query, header, formData, body)
+  let scheme = call_564211.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594078.url(scheme.get, call_594078.host, call_594078.base,
-                         call_594078.route, valid.getOrDefault("path"),
+  let url = call_564211.url(scheme.get, call_564211.host, call_564211.base,
+                         call_564211.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594078, url, valid)
+  result = hook(call_564211, url, valid)
 
-proc call*(call_594079: Call_ServersListSkusForExisting_594071;
-          resourceGroupName: string; apiVersion: string; serverName: string;
-          subscriptionId: string): Recallable =
+proc call*(call_564212: Call_ServersListSkusForExisting_564204; apiVersion: string;
+          serverName: string; subscriptionId: string; resourceGroupName: string): Recallable =
   ## serversListSkusForExisting
   ## Lists eligible SKUs for an Analysis Services resource.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the Azure Resource group of which a given Analysis Services server is part. This name must be at least 1 character in length, and no more than 90.
   ##   apiVersion: string (required)
   ##             : The client API version.
   ##   serverName: string (required)
   ##             : The name of the Analysis Services server. It must be at least 3 characters in length, and no more than 63.
   ##   subscriptionId: string (required)
   ##                 : A unique identifier for a Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_594080 = newJObject()
-  var query_594081 = newJObject()
-  add(path_594080, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594081, "api-version", newJString(apiVersion))
-  add(path_594080, "serverName", newJString(serverName))
-  add(path_594080, "subscriptionId", newJString(subscriptionId))
-  result = call_594079.call(path_594080, query_594081, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the Azure Resource group of which a given Analysis Services server is part. This name must be at least 1 character in length, and no more than 90.
+  var path_564213 = newJObject()
+  var query_564214 = newJObject()
+  add(query_564214, "api-version", newJString(apiVersion))
+  add(path_564213, "serverName", newJString(serverName))
+  add(path_564213, "subscriptionId", newJString(subscriptionId))
+  add(path_564213, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564212.call(path_564213, query_564214, nil, nil, nil)
 
-var serversListSkusForExisting* = Call_ServersListSkusForExisting_594071(
+var serversListSkusForExisting* = Call_ServersListSkusForExisting_564204(
     name: "serversListSkusForExisting", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.AnalysisServices/servers/{serverName}/skus",
-    validator: validate_ServersListSkusForExisting_594072, base: "",
-    url: url_ServersListSkusForExisting_594073, schemes: {Scheme.Https})
+    validator: validate_ServersListSkusForExisting_564205, base: "",
+    url: url_ServersListSkusForExisting_564206, schemes: {Scheme.Https})
 type
-  Call_ServersSuspend_594082 = ref object of OpenApiRestCall_593425
-proc url_ServersSuspend_594084(protocol: Scheme; host: string; base: string;
+  Call_ServersSuspend_564215 = ref object of OpenApiRestCall_563556
+proc url_ServersSuspend_564217(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1451,7 +1454,7 @@ proc url_ServersSuspend_594084(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ServersSuspend_594083(path: JsonNode; query: JsonNode;
+proc validate_ServersSuspend_564216(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## Suspends operation of the specified Analysis Services server instance.
@@ -1459,30 +1462,30 @@ proc validate_ServersSuspend_594083(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the Azure Resource group of which a given Analysis Services server is part. This name must be at least 1 character in length, and no more than 90.
   ##   serverName: JString (required)
   ##             : The name of the Analysis Services server. It must be at least 3 characters in length, and no more than 63.
   ##   subscriptionId: JString (required)
   ##                 : A unique identifier for a Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the Azure Resource group of which a given Analysis Services server is part. This name must be at least 1 character in length, and no more than 90.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594085 = path.getOrDefault("resourceGroupName")
-  valid_594085 = validateParameter(valid_594085, JString, required = true,
+        "path argument is necessary due to required `serverName` field"
+  var valid_564218 = path.getOrDefault("serverName")
+  valid_564218 = validateParameter(valid_564218, JString, required = true,
                                  default = nil)
-  if valid_594085 != nil:
-    section.add "resourceGroupName", valid_594085
-  var valid_594086 = path.getOrDefault("serverName")
-  valid_594086 = validateParameter(valid_594086, JString, required = true,
+  if valid_564218 != nil:
+    section.add "serverName", valid_564218
+  var valid_564219 = path.getOrDefault("subscriptionId")
+  valid_564219 = validateParameter(valid_564219, JString, required = true,
                                  default = nil)
-  if valid_594086 != nil:
-    section.add "serverName", valid_594086
-  var valid_594087 = path.getOrDefault("subscriptionId")
-  valid_594087 = validateParameter(valid_594087, JString, required = true,
+  if valid_564219 != nil:
+    section.add "subscriptionId", valid_564219
+  var valid_564220 = path.getOrDefault("resourceGroupName")
+  valid_564220 = validateParameter(valid_564220, JString, required = true,
                                  default = nil)
-  if valid_594087 != nil:
-    section.add "subscriptionId", valid_594087
+  if valid_564220 != nil:
+    section.add "resourceGroupName", valid_564220
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1490,11 +1493,11 @@ proc validate_ServersSuspend_594083(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594088 = query.getOrDefault("api-version")
-  valid_594088 = validateParameter(valid_594088, JString, required = true,
+  var valid_564221 = query.getOrDefault("api-version")
+  valid_564221 = validateParameter(valid_564221, JString, required = true,
                                  default = nil)
-  if valid_594088 != nil:
-    section.add "api-version", valid_594088
+  if valid_564221 != nil:
+    section.add "api-version", valid_564221
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1503,42 +1506,42 @@ proc validate_ServersSuspend_594083(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594089: Call_ServersSuspend_594082; path: JsonNode; query: JsonNode;
+proc call*(call_564222: Call_ServersSuspend_564215; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Suspends operation of the specified Analysis Services server instance.
   ## 
-  let valid = call_594089.validator(path, query, header, formData, body)
-  let scheme = call_594089.pickScheme
+  let valid = call_564222.validator(path, query, header, formData, body)
+  let scheme = call_564222.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594089.url(scheme.get, call_594089.host, call_594089.base,
-                         call_594089.route, valid.getOrDefault("path"),
+  let url = call_564222.url(scheme.get, call_564222.host, call_564222.base,
+                         call_564222.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594089, url, valid)
+  result = hook(call_564222, url, valid)
 
-proc call*(call_594090: Call_ServersSuspend_594082; resourceGroupName: string;
-          apiVersion: string; serverName: string; subscriptionId: string): Recallable =
+proc call*(call_564223: Call_ServersSuspend_564215; apiVersion: string;
+          serverName: string; subscriptionId: string; resourceGroupName: string): Recallable =
   ## serversSuspend
   ## Suspends operation of the specified Analysis Services server instance.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the Azure Resource group of which a given Analysis Services server is part. This name must be at least 1 character in length, and no more than 90.
   ##   apiVersion: string (required)
   ##             : The client API version.
   ##   serverName: string (required)
   ##             : The name of the Analysis Services server. It must be at least 3 characters in length, and no more than 63.
   ##   subscriptionId: string (required)
   ##                 : A unique identifier for a Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_594091 = newJObject()
-  var query_594092 = newJObject()
-  add(path_594091, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594092, "api-version", newJString(apiVersion))
-  add(path_594091, "serverName", newJString(serverName))
-  add(path_594091, "subscriptionId", newJString(subscriptionId))
-  result = call_594090.call(path_594091, query_594092, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the Azure Resource group of which a given Analysis Services server is part. This name must be at least 1 character in length, and no more than 90.
+  var path_564224 = newJObject()
+  var query_564225 = newJObject()
+  add(query_564225, "api-version", newJString(apiVersion))
+  add(path_564224, "serverName", newJString(serverName))
+  add(path_564224, "subscriptionId", newJString(subscriptionId))
+  add(path_564224, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564223.call(path_564224, query_564225, nil, nil, nil)
 
-var serversSuspend* = Call_ServersSuspend_594082(name: "serversSuspend",
+var serversSuspend* = Call_ServersSuspend_564215(name: "serversSuspend",
     meth: HttpMethod.HttpPost, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.AnalysisServices/servers/{serverName}/suspend",
-    validator: validate_ServersSuspend_594083, base: "", url: url_ServersSuspend_594084,
+    validator: validate_ServersSuspend_564216, base: "", url: url_ServersSuspend_564217,
     schemes: {Scheme.Https})
 export
   rest

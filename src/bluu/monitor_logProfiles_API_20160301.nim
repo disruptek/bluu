@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, httpcore
 
 ## auto-generated via openapi macro
 ## title: MonitorManagementClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_567658 = ref object of OpenApiRestCall
+  OpenApiRestCall_563556 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_567658](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563556](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_567658): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563556): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,8 +107,8 @@ const
   macServiceName = "monitor-logProfiles_API"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_LogProfilesList_567880 = ref object of OpenApiRestCall_567658
-proc url_LogProfilesList_567882(protocol: Scheme; host: string; base: string;
+  Call_LogProfilesList_563778 = ref object of OpenApiRestCall_563556
+proc url_LogProfilesList_563780(protocol: Scheme; host: string; base: string;
                                route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -120,7 +124,7 @@ proc url_LogProfilesList_567882(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_LogProfilesList_567881(path: JsonNode; query: JsonNode;
+proc validate_LogProfilesList_563779(path: JsonNode; query: JsonNode;
                                     header: JsonNode; formData: JsonNode;
                                     body: JsonNode): JsonNode =
   ## List the log profiles.
@@ -133,11 +137,11 @@ proc validate_LogProfilesList_567881(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_568055 = path.getOrDefault("subscriptionId")
-  valid_568055 = validateParameter(valid_568055, JString, required = true,
+  var valid_563955 = path.getOrDefault("subscriptionId")
+  valid_563955 = validateParameter(valid_563955, JString, required = true,
                                  default = nil)
-  if valid_568055 != nil:
-    section.add "subscriptionId", valid_568055
+  if valid_563955 != nil:
+    section.add "subscriptionId", valid_563955
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -145,11 +149,11 @@ proc validate_LogProfilesList_567881(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568056 = query.getOrDefault("api-version")
-  valid_568056 = validateParameter(valid_568056, JString, required = true,
+  var valid_563956 = query.getOrDefault("api-version")
+  valid_563956 = validateParameter(valid_563956, JString, required = true,
                                  default = nil)
-  if valid_568056 != nil:
-    section.add "api-version", valid_568056
+  if valid_563956 != nil:
+    section.add "api-version", valid_563956
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -158,20 +162,20 @@ proc validate_LogProfilesList_567881(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568079: Call_LogProfilesList_567880; path: JsonNode; query: JsonNode;
+proc call*(call_563979: Call_LogProfilesList_563778; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## List the log profiles.
   ## 
-  let valid = call_568079.validator(path, query, header, formData, body)
-  let scheme = call_568079.pickScheme
+  let valid = call_563979.validator(path, query, header, formData, body)
+  let scheme = call_563979.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568079.url(scheme.get, call_568079.host, call_568079.base,
-                         call_568079.route, valid.getOrDefault("path"),
+  let url = call_563979.url(scheme.get, call_563979.host, call_563979.base,
+                         call_563979.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568079, url, valid)
+  result = hook(call_563979, url, valid)
 
-proc call*(call_568150: Call_LogProfilesList_567880; apiVersion: string;
+proc call*(call_564050: Call_LogProfilesList_563778; apiVersion: string;
           subscriptionId: string): Recallable =
   ## logProfilesList
   ## List the log profiles.
@@ -179,19 +183,19 @@ proc call*(call_568150: Call_LogProfilesList_567880; apiVersion: string;
   ##             : Client Api Version.
   ##   subscriptionId: string (required)
   ##                 : The Azure subscription Id.
-  var path_568151 = newJObject()
-  var query_568153 = newJObject()
-  add(query_568153, "api-version", newJString(apiVersion))
-  add(path_568151, "subscriptionId", newJString(subscriptionId))
-  result = call_568150.call(path_568151, query_568153, nil, nil, nil)
+  var path_564051 = newJObject()
+  var query_564053 = newJObject()
+  add(query_564053, "api-version", newJString(apiVersion))
+  add(path_564051, "subscriptionId", newJString(subscriptionId))
+  result = call_564050.call(path_564051, query_564053, nil, nil, nil)
 
-var logProfilesList* = Call_LogProfilesList_567880(name: "logProfilesList",
+var logProfilesList* = Call_LogProfilesList_563778(name: "logProfilesList",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/microsoft.insights/logprofiles",
-    validator: validate_LogProfilesList_567881, base: "", url: url_LogProfilesList_567882,
+    validator: validate_LogProfilesList_563779, base: "", url: url_LogProfilesList_563780,
     schemes: {Scheme.Https})
 type
-  Call_LogProfilesCreateOrUpdate_568202 = ref object of OpenApiRestCall_567658
-proc url_LogProfilesCreateOrUpdate_568204(protocol: Scheme; host: string;
+  Call_LogProfilesCreateOrUpdate_564102 = ref object of OpenApiRestCall_563556
+proc url_LogProfilesCreateOrUpdate_564104(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -209,7 +213,7 @@ proc url_LogProfilesCreateOrUpdate_568204(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_LogProfilesCreateOrUpdate_568203(path: JsonNode; query: JsonNode;
+proc validate_LogProfilesCreateOrUpdate_564103(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Create or update a log profile in Azure Monitoring REST API.
   ## 
@@ -223,16 +227,16 @@ proc validate_LogProfilesCreateOrUpdate_568203(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_568205 = path.getOrDefault("subscriptionId")
-  valid_568205 = validateParameter(valid_568205, JString, required = true,
+  var valid_564105 = path.getOrDefault("subscriptionId")
+  valid_564105 = validateParameter(valid_564105, JString, required = true,
                                  default = nil)
-  if valid_568205 != nil:
-    section.add "subscriptionId", valid_568205
-  var valid_568206 = path.getOrDefault("logProfileName")
-  valid_568206 = validateParameter(valid_568206, JString, required = true,
+  if valid_564105 != nil:
+    section.add "subscriptionId", valid_564105
+  var valid_564106 = path.getOrDefault("logProfileName")
+  valid_564106 = validateParameter(valid_564106, JString, required = true,
                                  default = nil)
-  if valid_568206 != nil:
-    section.add "logProfileName", valid_568206
+  if valid_564106 != nil:
+    section.add "logProfileName", valid_564106
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -240,11 +244,11 @@ proc validate_LogProfilesCreateOrUpdate_568203(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568207 = query.getOrDefault("api-version")
-  valid_568207 = validateParameter(valid_568207, JString, required = true,
+  var valid_564107 = query.getOrDefault("api-version")
+  valid_564107 = validateParameter(valid_564107, JString, required = true,
                                  default = nil)
-  if valid_568207 != nil:
-    section.add "api-version", valid_568207
+  if valid_564107 != nil:
+    section.add "api-version", valid_564107
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -258,20 +262,20 @@ proc validate_LogProfilesCreateOrUpdate_568203(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568209: Call_LogProfilesCreateOrUpdate_568202; path: JsonNode;
+proc call*(call_564109: Call_LogProfilesCreateOrUpdate_564102; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Create or update a log profile in Azure Monitoring REST API.
   ## 
-  let valid = call_568209.validator(path, query, header, formData, body)
-  let scheme = call_568209.pickScheme
+  let valid = call_564109.validator(path, query, header, formData, body)
+  let scheme = call_564109.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568209.url(scheme.get, call_568209.host, call_568209.base,
-                         call_568209.route, valid.getOrDefault("path"),
+  let url = call_564109.url(scheme.get, call_564109.host, call_564109.base,
+                         call_564109.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568209, url, valid)
+  result = hook(call_564109, url, valid)
 
-proc call*(call_568210: Call_LogProfilesCreateOrUpdate_568202; apiVersion: string;
+proc call*(call_564110: Call_LogProfilesCreateOrUpdate_564102; apiVersion: string;
           subscriptionId: string; logProfileName: string; parameters: JsonNode): Recallable =
   ## logProfilesCreateOrUpdate
   ## Create or update a log profile in Azure Monitoring REST API.
@@ -283,24 +287,24 @@ proc call*(call_568210: Call_LogProfilesCreateOrUpdate_568202; apiVersion: strin
   ##                 : The name of the log profile.
   ##   parameters: JObject (required)
   ##             : Parameters supplied to the operation.
-  var path_568211 = newJObject()
-  var query_568212 = newJObject()
-  var body_568213 = newJObject()
-  add(query_568212, "api-version", newJString(apiVersion))
-  add(path_568211, "subscriptionId", newJString(subscriptionId))
-  add(path_568211, "logProfileName", newJString(logProfileName))
+  var path_564111 = newJObject()
+  var query_564112 = newJObject()
+  var body_564113 = newJObject()
+  add(query_564112, "api-version", newJString(apiVersion))
+  add(path_564111, "subscriptionId", newJString(subscriptionId))
+  add(path_564111, "logProfileName", newJString(logProfileName))
   if parameters != nil:
-    body_568213 = parameters
-  result = call_568210.call(path_568211, query_568212, nil, nil, body_568213)
+    body_564113 = parameters
+  result = call_564110.call(path_564111, query_564112, nil, nil, body_564113)
 
-var logProfilesCreateOrUpdate* = Call_LogProfilesCreateOrUpdate_568202(
+var logProfilesCreateOrUpdate* = Call_LogProfilesCreateOrUpdate_564102(
     name: "logProfilesCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/microsoft.insights/logprofiles/{logProfileName}",
-    validator: validate_LogProfilesCreateOrUpdate_568203, base: "",
-    url: url_LogProfilesCreateOrUpdate_568204, schemes: {Scheme.Https})
+    validator: validate_LogProfilesCreateOrUpdate_564103, base: "",
+    url: url_LogProfilesCreateOrUpdate_564104, schemes: {Scheme.Https})
 type
-  Call_LogProfilesGet_568192 = ref object of OpenApiRestCall_567658
-proc url_LogProfilesGet_568194(protocol: Scheme; host: string; base: string;
+  Call_LogProfilesGet_564092 = ref object of OpenApiRestCall_563556
+proc url_LogProfilesGet_564094(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -318,7 +322,7 @@ proc url_LogProfilesGet_568194(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_LogProfilesGet_568193(path: JsonNode; query: JsonNode;
+proc validate_LogProfilesGet_564093(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## Gets the log profile.
@@ -333,16 +337,16 @@ proc validate_LogProfilesGet_568193(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_568195 = path.getOrDefault("subscriptionId")
-  valid_568195 = validateParameter(valid_568195, JString, required = true,
+  var valid_564095 = path.getOrDefault("subscriptionId")
+  valid_564095 = validateParameter(valid_564095, JString, required = true,
                                  default = nil)
-  if valid_568195 != nil:
-    section.add "subscriptionId", valid_568195
-  var valid_568196 = path.getOrDefault("logProfileName")
-  valid_568196 = validateParameter(valid_568196, JString, required = true,
+  if valid_564095 != nil:
+    section.add "subscriptionId", valid_564095
+  var valid_564096 = path.getOrDefault("logProfileName")
+  valid_564096 = validateParameter(valid_564096, JString, required = true,
                                  default = nil)
-  if valid_568196 != nil:
-    section.add "logProfileName", valid_568196
+  if valid_564096 != nil:
+    section.add "logProfileName", valid_564096
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -350,11 +354,11 @@ proc validate_LogProfilesGet_568193(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568197 = query.getOrDefault("api-version")
-  valid_568197 = validateParameter(valid_568197, JString, required = true,
+  var valid_564097 = query.getOrDefault("api-version")
+  valid_564097 = validateParameter(valid_564097, JString, required = true,
                                  default = nil)
-  if valid_568197 != nil:
-    section.add "api-version", valid_568197
+  if valid_564097 != nil:
+    section.add "api-version", valid_564097
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -363,20 +367,20 @@ proc validate_LogProfilesGet_568193(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568198: Call_LogProfilesGet_568192; path: JsonNode; query: JsonNode;
+proc call*(call_564098: Call_LogProfilesGet_564092; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the log profile.
   ## 
-  let valid = call_568198.validator(path, query, header, formData, body)
-  let scheme = call_568198.pickScheme
+  let valid = call_564098.validator(path, query, header, formData, body)
+  let scheme = call_564098.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568198.url(scheme.get, call_568198.host, call_568198.base,
-                         call_568198.route, valid.getOrDefault("path"),
+  let url = call_564098.url(scheme.get, call_564098.host, call_564098.base,
+                         call_564098.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568198, url, valid)
+  result = hook(call_564098, url, valid)
 
-proc call*(call_568199: Call_LogProfilesGet_568192; apiVersion: string;
+proc call*(call_564099: Call_LogProfilesGet_564092; apiVersion: string;
           subscriptionId: string; logProfileName: string): Recallable =
   ## logProfilesGet
   ## Gets the log profile.
@@ -386,20 +390,20 @@ proc call*(call_568199: Call_LogProfilesGet_568192; apiVersion: string;
   ##                 : The Azure subscription Id.
   ##   logProfileName: string (required)
   ##                 : The name of the log profile.
-  var path_568200 = newJObject()
-  var query_568201 = newJObject()
-  add(query_568201, "api-version", newJString(apiVersion))
-  add(path_568200, "subscriptionId", newJString(subscriptionId))
-  add(path_568200, "logProfileName", newJString(logProfileName))
-  result = call_568199.call(path_568200, query_568201, nil, nil, nil)
+  var path_564100 = newJObject()
+  var query_564101 = newJObject()
+  add(query_564101, "api-version", newJString(apiVersion))
+  add(path_564100, "subscriptionId", newJString(subscriptionId))
+  add(path_564100, "logProfileName", newJString(logProfileName))
+  result = call_564099.call(path_564100, query_564101, nil, nil, nil)
 
-var logProfilesGet* = Call_LogProfilesGet_568192(name: "logProfilesGet",
+var logProfilesGet* = Call_LogProfilesGet_564092(name: "logProfilesGet",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/microsoft.insights/logprofiles/{logProfileName}",
-    validator: validate_LogProfilesGet_568193, base: "", url: url_LogProfilesGet_568194,
+    validator: validate_LogProfilesGet_564093, base: "", url: url_LogProfilesGet_564094,
     schemes: {Scheme.Https})
 type
-  Call_LogProfilesUpdate_568224 = ref object of OpenApiRestCall_567658
-proc url_LogProfilesUpdate_568226(protocol: Scheme; host: string; base: string;
+  Call_LogProfilesUpdate_564124 = ref object of OpenApiRestCall_563556
+proc url_LogProfilesUpdate_564126(protocol: Scheme; host: string; base: string;
                                  route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -417,7 +421,7 @@ proc url_LogProfilesUpdate_568226(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_LogProfilesUpdate_568225(path: JsonNode; query: JsonNode;
+proc validate_LogProfilesUpdate_564125(path: JsonNode; query: JsonNode;
                                       header: JsonNode; formData: JsonNode;
                                       body: JsonNode): JsonNode =
   ## Updates an existing LogProfilesResource. To update other fields use the CreateOrUpdate method.
@@ -432,16 +436,16 @@ proc validate_LogProfilesUpdate_568225(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_568244 = path.getOrDefault("subscriptionId")
-  valid_568244 = validateParameter(valid_568244, JString, required = true,
+  var valid_564144 = path.getOrDefault("subscriptionId")
+  valid_564144 = validateParameter(valid_564144, JString, required = true,
                                  default = nil)
-  if valid_568244 != nil:
-    section.add "subscriptionId", valid_568244
-  var valid_568245 = path.getOrDefault("logProfileName")
-  valid_568245 = validateParameter(valid_568245, JString, required = true,
+  if valid_564144 != nil:
+    section.add "subscriptionId", valid_564144
+  var valid_564145 = path.getOrDefault("logProfileName")
+  valid_564145 = validateParameter(valid_564145, JString, required = true,
                                  default = nil)
-  if valid_568245 != nil:
-    section.add "logProfileName", valid_568245
+  if valid_564145 != nil:
+    section.add "logProfileName", valid_564145
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -449,11 +453,11 @@ proc validate_LogProfilesUpdate_568225(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568246 = query.getOrDefault("api-version")
-  valid_568246 = validateParameter(valid_568246, JString, required = true,
+  var valid_564146 = query.getOrDefault("api-version")
+  valid_564146 = validateParameter(valid_564146, JString, required = true,
                                  default = nil)
-  if valid_568246 != nil:
-    section.add "api-version", valid_568246
+  if valid_564146 != nil:
+    section.add "api-version", valid_564146
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -467,20 +471,20 @@ proc validate_LogProfilesUpdate_568225(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568248: Call_LogProfilesUpdate_568224; path: JsonNode;
+proc call*(call_564148: Call_LogProfilesUpdate_564124; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Updates an existing LogProfilesResource. To update other fields use the CreateOrUpdate method.
   ## 
-  let valid = call_568248.validator(path, query, header, formData, body)
-  let scheme = call_568248.pickScheme
+  let valid = call_564148.validator(path, query, header, formData, body)
+  let scheme = call_564148.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568248.url(scheme.get, call_568248.host, call_568248.base,
-                         call_568248.route, valid.getOrDefault("path"),
+  let url = call_564148.url(scheme.get, call_564148.host, call_564148.base,
+                         call_564148.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568248, url, valid)
+  result = hook(call_564148, url, valid)
 
-proc call*(call_568249: Call_LogProfilesUpdate_568224; apiVersion: string;
+proc call*(call_564149: Call_LogProfilesUpdate_564124; apiVersion: string;
           subscriptionId: string; logProfileName: string;
           logProfilesResource: JsonNode): Recallable =
   ## logProfilesUpdate
@@ -493,23 +497,23 @@ proc call*(call_568249: Call_LogProfilesUpdate_568224; apiVersion: string;
   ##                 : The name of the log profile.
   ##   logProfilesResource: JObject (required)
   ##                      : Parameters supplied to the operation.
-  var path_568250 = newJObject()
-  var query_568251 = newJObject()
-  var body_568252 = newJObject()
-  add(query_568251, "api-version", newJString(apiVersion))
-  add(path_568250, "subscriptionId", newJString(subscriptionId))
-  add(path_568250, "logProfileName", newJString(logProfileName))
+  var path_564150 = newJObject()
+  var query_564151 = newJObject()
+  var body_564152 = newJObject()
+  add(query_564151, "api-version", newJString(apiVersion))
+  add(path_564150, "subscriptionId", newJString(subscriptionId))
+  add(path_564150, "logProfileName", newJString(logProfileName))
   if logProfilesResource != nil:
-    body_568252 = logProfilesResource
-  result = call_568249.call(path_568250, query_568251, nil, nil, body_568252)
+    body_564152 = logProfilesResource
+  result = call_564149.call(path_564150, query_564151, nil, nil, body_564152)
 
-var logProfilesUpdate* = Call_LogProfilesUpdate_568224(name: "logProfilesUpdate",
+var logProfilesUpdate* = Call_LogProfilesUpdate_564124(name: "logProfilesUpdate",
     meth: HttpMethod.HttpPatch, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/microsoft.insights/logprofiles/{logProfileName}",
-    validator: validate_LogProfilesUpdate_568225, base: "",
-    url: url_LogProfilesUpdate_568226, schemes: {Scheme.Https})
+    validator: validate_LogProfilesUpdate_564125, base: "",
+    url: url_LogProfilesUpdate_564126, schemes: {Scheme.Https})
 type
-  Call_LogProfilesDelete_568214 = ref object of OpenApiRestCall_567658
-proc url_LogProfilesDelete_568216(protocol: Scheme; host: string; base: string;
+  Call_LogProfilesDelete_564114 = ref object of OpenApiRestCall_563556
+proc url_LogProfilesDelete_564116(protocol: Scheme; host: string; base: string;
                                  route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -527,7 +531,7 @@ proc url_LogProfilesDelete_568216(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_LogProfilesDelete_568215(path: JsonNode; query: JsonNode;
+proc validate_LogProfilesDelete_564115(path: JsonNode; query: JsonNode;
                                       header: JsonNode; formData: JsonNode;
                                       body: JsonNode): JsonNode =
   ## Deletes the log profile.
@@ -542,16 +546,16 @@ proc validate_LogProfilesDelete_568215(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_568217 = path.getOrDefault("subscriptionId")
-  valid_568217 = validateParameter(valid_568217, JString, required = true,
+  var valid_564117 = path.getOrDefault("subscriptionId")
+  valid_564117 = validateParameter(valid_564117, JString, required = true,
                                  default = nil)
-  if valid_568217 != nil:
-    section.add "subscriptionId", valid_568217
-  var valid_568218 = path.getOrDefault("logProfileName")
-  valid_568218 = validateParameter(valid_568218, JString, required = true,
+  if valid_564117 != nil:
+    section.add "subscriptionId", valid_564117
+  var valid_564118 = path.getOrDefault("logProfileName")
+  valid_564118 = validateParameter(valid_564118, JString, required = true,
                                  default = nil)
-  if valid_568218 != nil:
-    section.add "logProfileName", valid_568218
+  if valid_564118 != nil:
+    section.add "logProfileName", valid_564118
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -559,11 +563,11 @@ proc validate_LogProfilesDelete_568215(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568219 = query.getOrDefault("api-version")
-  valid_568219 = validateParameter(valid_568219, JString, required = true,
+  var valid_564119 = query.getOrDefault("api-version")
+  valid_564119 = validateParameter(valid_564119, JString, required = true,
                                  default = nil)
-  if valid_568219 != nil:
-    section.add "api-version", valid_568219
+  if valid_564119 != nil:
+    section.add "api-version", valid_564119
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -572,20 +576,20 @@ proc validate_LogProfilesDelete_568215(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568220: Call_LogProfilesDelete_568214; path: JsonNode;
+proc call*(call_564120: Call_LogProfilesDelete_564114; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes the log profile.
   ## 
-  let valid = call_568220.validator(path, query, header, formData, body)
-  let scheme = call_568220.pickScheme
+  let valid = call_564120.validator(path, query, header, formData, body)
+  let scheme = call_564120.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568220.url(scheme.get, call_568220.host, call_568220.base,
-                         call_568220.route, valid.getOrDefault("path"),
+  let url = call_564120.url(scheme.get, call_564120.host, call_564120.base,
+                         call_564120.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568220, url, valid)
+  result = hook(call_564120, url, valid)
 
-proc call*(call_568221: Call_LogProfilesDelete_568214; apiVersion: string;
+proc call*(call_564121: Call_LogProfilesDelete_564114; apiVersion: string;
           subscriptionId: string; logProfileName: string): Recallable =
   ## logProfilesDelete
   ## Deletes the log profile.
@@ -595,17 +599,17 @@ proc call*(call_568221: Call_LogProfilesDelete_568214; apiVersion: string;
   ##                 : The Azure subscription Id.
   ##   logProfileName: string (required)
   ##                 : The name of the log profile.
-  var path_568222 = newJObject()
-  var query_568223 = newJObject()
-  add(query_568223, "api-version", newJString(apiVersion))
-  add(path_568222, "subscriptionId", newJString(subscriptionId))
-  add(path_568222, "logProfileName", newJString(logProfileName))
-  result = call_568221.call(path_568222, query_568223, nil, nil, nil)
+  var path_564122 = newJObject()
+  var query_564123 = newJObject()
+  add(query_564123, "api-version", newJString(apiVersion))
+  add(path_564122, "subscriptionId", newJString(subscriptionId))
+  add(path_564122, "logProfileName", newJString(logProfileName))
+  result = call_564121.call(path_564122, query_564123, nil, nil, nil)
 
-var logProfilesDelete* = Call_LogProfilesDelete_568214(name: "logProfilesDelete",
+var logProfilesDelete* = Call_LogProfilesDelete_564114(name: "logProfilesDelete",
     meth: HttpMethod.HttpDelete, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/microsoft.insights/logprofiles/{logProfileName}",
-    validator: validate_LogProfilesDelete_568215, base: "",
-    url: url_LogProfilesDelete_568216, schemes: {Scheme.Https})
+    validator: validate_LogProfilesDelete_564115, base: "",
+    url: url_LogProfilesDelete_564116, schemes: {Scheme.Https})
 export
   rest
 

@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, httpcore
 
 ## auto-generated via openapi macro
 ## title: StorageManagementClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_574458 = ref object of OpenApiRestCall
+  OpenApiRestCall_563556 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_574458](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563556](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_574458): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563556): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,8 +107,8 @@ const
   macServiceName = "azsadmin-farms"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_FarmsList_574680 = ref object of OpenApiRestCall_574458
-proc url_FarmsList_574682(protocol: Scheme; host: string; base: string; route: string;
+  Call_FarmsList_563778 = ref object of OpenApiRestCall_563556
+proc url_FarmsList_563780(protocol: Scheme; host: string; base: string; route: string;
                          path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -124,30 +128,30 @@ proc url_FarmsList_574682(protocol: Scheme; host: string; base: string; route: s
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_FarmsList_574681(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_FarmsList_563779(path: JsonNode; query: JsonNode; header: JsonNode;
                               formData: JsonNode; body: JsonNode): JsonNode =
   ## Returns a list of all storage farms.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : Resource group name.
   ##   subscriptionId: JString (required)
   ##                 : Subscription Id.
+  ##   resourceGroupName: JString (required)
+  ##                    : Resource group name.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_574842 = path.getOrDefault("resourceGroupName")
-  valid_574842 = validateParameter(valid_574842, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_563942 = path.getOrDefault("subscriptionId")
+  valid_563942 = validateParameter(valid_563942, JString, required = true,
                                  default = nil)
-  if valid_574842 != nil:
-    section.add "resourceGroupName", valid_574842
-  var valid_574843 = path.getOrDefault("subscriptionId")
-  valid_574843 = validateParameter(valid_574843, JString, required = true,
+  if valid_563942 != nil:
+    section.add "subscriptionId", valid_563942
+  var valid_563943 = path.getOrDefault("resourceGroupName")
+  valid_563943 = validateParameter(valid_563943, JString, required = true,
                                  default = nil)
-  if valid_574843 != nil:
-    section.add "subscriptionId", valid_574843
+  if valid_563943 != nil:
+    section.add "resourceGroupName", valid_563943
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -155,11 +159,11 @@ proc validate_FarmsList_574681(path: JsonNode; query: JsonNode; header: JsonNode
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574844 = query.getOrDefault("api-version")
-  valid_574844 = validateParameter(valid_574844, JString, required = true,
+  var valid_563944 = query.getOrDefault("api-version")
+  valid_563944 = validateParameter(valid_563944, JString, required = true,
                                  default = nil)
-  if valid_574844 != nil:
-    section.add "api-version", valid_574844
+  if valid_563944 != nil:
+    section.add "api-version", valid_563944
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -168,43 +172,43 @@ proc validate_FarmsList_574681(path: JsonNode; query: JsonNode; header: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_574871: Call_FarmsList_574680; path: JsonNode; query: JsonNode;
+proc call*(call_563971: Call_FarmsList_563778; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Returns a list of all storage farms.
   ## 
-  let valid = call_574871.validator(path, query, header, formData, body)
-  let scheme = call_574871.pickScheme
+  let valid = call_563971.validator(path, query, header, formData, body)
+  let scheme = call_563971.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574871.url(scheme.get, call_574871.host, call_574871.base,
-                         call_574871.route, valid.getOrDefault("path"),
+  let url = call_563971.url(scheme.get, call_563971.host, call_563971.base,
+                         call_563971.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574871, url, valid)
+  result = hook(call_563971, url, valid)
 
-proc call*(call_574942: Call_FarmsList_574680; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string): Recallable =
+proc call*(call_564042: Call_FarmsList_563778; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string): Recallable =
   ## farmsList
   ## Returns a list of all storage farms.
-  ##   resourceGroupName: string (required)
-  ##                    : Resource group name.
   ##   apiVersion: string (required)
   ##             : REST Api Version.
   ##   subscriptionId: string (required)
   ##                 : Subscription Id.
-  var path_574943 = newJObject()
-  var query_574945 = newJObject()
-  add(path_574943, "resourceGroupName", newJString(resourceGroupName))
-  add(query_574945, "api-version", newJString(apiVersion))
-  add(path_574943, "subscriptionId", newJString(subscriptionId))
-  result = call_574942.call(path_574943, query_574945, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : Resource group name.
+  var path_564043 = newJObject()
+  var query_564045 = newJObject()
+  add(query_564045, "api-version", newJString(apiVersion))
+  add(path_564043, "subscriptionId", newJString(subscriptionId))
+  add(path_564043, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564042.call(path_564043, query_564045, nil, nil, nil)
 
-var farmsList* = Call_FarmsList_574680(name: "farmsList", meth: HttpMethod.HttpGet, host: "adminmanagement.local.azurestack.external", route: "/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.Storage.Admin/farms",
-                                    validator: validate_FarmsList_574681,
-                                    base: "", url: url_FarmsList_574682,
+var farmsList* = Call_FarmsList_563778(name: "farmsList", meth: HttpMethod.HttpGet, host: "adminmanagement.local.azurestack.external", route: "/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.Storage.Admin/farms",
+                                    validator: validate_FarmsList_563779,
+                                    base: "", url: url_FarmsList_563780,
                                     schemes: {Scheme.Https})
 type
-  Call_FarmsCreate_574995 = ref object of OpenApiRestCall_574458
-proc url_FarmsCreate_574997(protocol: Scheme; host: string; base: string;
+  Call_FarmsCreate_564095 = ref object of OpenApiRestCall_563556
+proc url_FarmsCreate_564097(protocol: Scheme; host: string; base: string;
                            route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -226,37 +230,36 @@ proc url_FarmsCreate_574997(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_FarmsCreate_574996(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_FarmsCreate_564096(path: JsonNode; query: JsonNode; header: JsonNode;
                                 formData: JsonNode; body: JsonNode): JsonNode =
   ## Create a new storage farm.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : Resource group name.
   ##   farmId: JString (required)
   ##         : Farm Id.
   ##   subscriptionId: JString (required)
   ##                 : Subscription Id.
+  ##   resourceGroupName: JString (required)
+  ##                    : Resource group name.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_575007 = path.getOrDefault("resourceGroupName")
-  valid_575007 = validateParameter(valid_575007, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `farmId` field"
+  var valid_564107 = path.getOrDefault("farmId")
+  valid_564107 = validateParameter(valid_564107, JString, required = true,
                                  default = nil)
-  if valid_575007 != nil:
-    section.add "resourceGroupName", valid_575007
-  var valid_575008 = path.getOrDefault("farmId")
-  valid_575008 = validateParameter(valid_575008, JString, required = true,
+  if valid_564107 != nil:
+    section.add "farmId", valid_564107
+  var valid_564108 = path.getOrDefault("subscriptionId")
+  valid_564108 = validateParameter(valid_564108, JString, required = true,
                                  default = nil)
-  if valid_575008 != nil:
-    section.add "farmId", valid_575008
-  var valid_575009 = path.getOrDefault("subscriptionId")
-  valid_575009 = validateParameter(valid_575009, JString, required = true,
+  if valid_564108 != nil:
+    section.add "subscriptionId", valid_564108
+  var valid_564109 = path.getOrDefault("resourceGroupName")
+  valid_564109 = validateParameter(valid_564109, JString, required = true,
                                  default = nil)
-  if valid_575009 != nil:
-    section.add "subscriptionId", valid_575009
+  if valid_564109 != nil:
+    section.add "resourceGroupName", valid_564109
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -264,11 +267,11 @@ proc validate_FarmsCreate_574996(path: JsonNode; query: JsonNode; header: JsonNo
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575010 = query.getOrDefault("api-version")
-  valid_575010 = validateParameter(valid_575010, JString, required = true,
+  var valid_564110 = query.getOrDefault("api-version")
+  valid_564110 = validateParameter(valid_564110, JString, required = true,
                                  default = nil)
-  if valid_575010 != nil:
-    section.add "api-version", valid_575010
+  if valid_564110 != nil:
+    section.add "api-version", valid_564110
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -282,53 +285,53 @@ proc validate_FarmsCreate_574996(path: JsonNode; query: JsonNode; header: JsonNo
   if body != nil:
     result.add "body", body
 
-proc call*(call_575012: Call_FarmsCreate_574995; path: JsonNode; query: JsonNode;
+proc call*(call_564112: Call_FarmsCreate_564095; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Create a new storage farm.
   ## 
-  let valid = call_575012.validator(path, query, header, formData, body)
-  let scheme = call_575012.pickScheme
+  let valid = call_564112.validator(path, query, header, formData, body)
+  let scheme = call_564112.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575012.url(scheme.get, call_575012.host, call_575012.base,
-                         call_575012.route, valid.getOrDefault("path"),
+  let url = call_564112.url(scheme.get, call_564112.host, call_564112.base,
+                         call_564112.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575012, url, valid)
+  result = hook(call_564112, url, valid)
 
-proc call*(call_575013: Call_FarmsCreate_574995; farmObject: JsonNode;
-          resourceGroupName: string; apiVersion: string; farmId: string;
-          subscriptionId: string): Recallable =
+proc call*(call_564113: Call_FarmsCreate_564095; farmObject: JsonNode;
+          apiVersion: string; farmId: string; subscriptionId: string;
+          resourceGroupName: string): Recallable =
   ## farmsCreate
   ## Create a new storage farm.
   ##   farmObject: JObject (required)
   ##             : Parameters used to create a farm
-  ##   resourceGroupName: string (required)
-  ##                    : Resource group name.
   ##   apiVersion: string (required)
   ##             : REST Api Version.
   ##   farmId: string (required)
   ##         : Farm Id.
   ##   subscriptionId: string (required)
   ##                 : Subscription Id.
-  var path_575014 = newJObject()
-  var query_575015 = newJObject()
-  var body_575016 = newJObject()
+  ##   resourceGroupName: string (required)
+  ##                    : Resource group name.
+  var path_564114 = newJObject()
+  var query_564115 = newJObject()
+  var body_564116 = newJObject()
   if farmObject != nil:
-    body_575016 = farmObject
-  add(path_575014, "resourceGroupName", newJString(resourceGroupName))
-  add(query_575015, "api-version", newJString(apiVersion))
-  add(path_575014, "farmId", newJString(farmId))
-  add(path_575014, "subscriptionId", newJString(subscriptionId))
-  result = call_575013.call(path_575014, query_575015, nil, nil, body_575016)
+    body_564116 = farmObject
+  add(query_564115, "api-version", newJString(apiVersion))
+  add(path_564114, "farmId", newJString(farmId))
+  add(path_564114, "subscriptionId", newJString(subscriptionId))
+  add(path_564114, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564113.call(path_564114, query_564115, nil, nil, body_564116)
 
-var farmsCreate* = Call_FarmsCreate_574995(name: "farmsCreate",
+var farmsCreate* = Call_FarmsCreate_564095(name: "farmsCreate",
                                         meth: HttpMethod.HttpPut, host: "adminmanagement.local.azurestack.external", route: "/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.Storage.Admin/farms/{farmId}",
-                                        validator: validate_FarmsCreate_574996,
-                                        base: "", url: url_FarmsCreate_574997,
+                                        validator: validate_FarmsCreate_564096,
+                                        base: "", url: url_FarmsCreate_564097,
                                         schemes: {Scheme.Https})
 type
-  Call_FarmsGet_574984 = ref object of OpenApiRestCall_574458
-proc url_FarmsGet_574986(protocol: Scheme; host: string; base: string; route: string;
+  Call_FarmsGet_564084 = ref object of OpenApiRestCall_563556
+proc url_FarmsGet_564086(protocol: Scheme; host: string; base: string; route: string;
                         path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -350,37 +353,36 @@ proc url_FarmsGet_574986(protocol: Scheme; host: string; base: string; route: st
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_FarmsGet_574985(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_FarmsGet_564085(path: JsonNode; query: JsonNode; header: JsonNode;
                              formData: JsonNode; body: JsonNode): JsonNode =
   ## Returns the Storage properties and settings for a specified storage farm.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : Resource group name.
   ##   farmId: JString (required)
   ##         : Farm Id.
   ##   subscriptionId: JString (required)
   ##                 : Subscription Id.
+  ##   resourceGroupName: JString (required)
+  ##                    : Resource group name.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_574987 = path.getOrDefault("resourceGroupName")
-  valid_574987 = validateParameter(valid_574987, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `farmId` field"
+  var valid_564087 = path.getOrDefault("farmId")
+  valid_564087 = validateParameter(valid_564087, JString, required = true,
                                  default = nil)
-  if valid_574987 != nil:
-    section.add "resourceGroupName", valid_574987
-  var valid_574988 = path.getOrDefault("farmId")
-  valid_574988 = validateParameter(valid_574988, JString, required = true,
+  if valid_564087 != nil:
+    section.add "farmId", valid_564087
+  var valid_564088 = path.getOrDefault("subscriptionId")
+  valid_564088 = validateParameter(valid_564088, JString, required = true,
                                  default = nil)
-  if valid_574988 != nil:
-    section.add "farmId", valid_574988
-  var valid_574989 = path.getOrDefault("subscriptionId")
-  valid_574989 = validateParameter(valid_574989, JString, required = true,
+  if valid_564088 != nil:
+    section.add "subscriptionId", valid_564088
+  var valid_564089 = path.getOrDefault("resourceGroupName")
+  valid_564089 = validateParameter(valid_564089, JString, required = true,
                                  default = nil)
-  if valid_574989 != nil:
-    section.add "subscriptionId", valid_574989
+  if valid_564089 != nil:
+    section.add "resourceGroupName", valid_564089
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -388,11 +390,11 @@ proc validate_FarmsGet_574985(path: JsonNode; query: JsonNode; header: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574990 = query.getOrDefault("api-version")
-  valid_574990 = validateParameter(valid_574990, JString, required = true,
+  var valid_564090 = query.getOrDefault("api-version")
+  valid_564090 = validateParameter(valid_564090, JString, required = true,
                                  default = nil)
-  if valid_574990 != nil:
-    section.add "api-version", valid_574990
+  if valid_564090 != nil:
+    section.add "api-version", valid_564090
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -401,46 +403,46 @@ proc validate_FarmsGet_574985(path: JsonNode; query: JsonNode; header: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574991: Call_FarmsGet_574984; path: JsonNode; query: JsonNode;
+proc call*(call_564091: Call_FarmsGet_564084; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Returns the Storage properties and settings for a specified storage farm.
   ## 
-  let valid = call_574991.validator(path, query, header, formData, body)
-  let scheme = call_574991.pickScheme
+  let valid = call_564091.validator(path, query, header, formData, body)
+  let scheme = call_564091.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574991.url(scheme.get, call_574991.host, call_574991.base,
-                         call_574991.route, valid.getOrDefault("path"),
+  let url = call_564091.url(scheme.get, call_564091.host, call_564091.base,
+                         call_564091.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574991, url, valid)
+  result = hook(call_564091, url, valid)
 
-proc call*(call_574992: Call_FarmsGet_574984; resourceGroupName: string;
-          apiVersion: string; farmId: string; subscriptionId: string): Recallable =
+proc call*(call_564092: Call_FarmsGet_564084; apiVersion: string; farmId: string;
+          subscriptionId: string; resourceGroupName: string): Recallable =
   ## farmsGet
   ## Returns the Storage properties and settings for a specified storage farm.
-  ##   resourceGroupName: string (required)
-  ##                    : Resource group name.
   ##   apiVersion: string (required)
   ##             : REST Api Version.
   ##   farmId: string (required)
   ##         : Farm Id.
   ##   subscriptionId: string (required)
   ##                 : Subscription Id.
-  var path_574993 = newJObject()
-  var query_574994 = newJObject()
-  add(path_574993, "resourceGroupName", newJString(resourceGroupName))
-  add(query_574994, "api-version", newJString(apiVersion))
-  add(path_574993, "farmId", newJString(farmId))
-  add(path_574993, "subscriptionId", newJString(subscriptionId))
-  result = call_574992.call(path_574993, query_574994, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : Resource group name.
+  var path_564093 = newJObject()
+  var query_564094 = newJObject()
+  add(query_564094, "api-version", newJString(apiVersion))
+  add(path_564093, "farmId", newJString(farmId))
+  add(path_564093, "subscriptionId", newJString(subscriptionId))
+  add(path_564093, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564092.call(path_564093, query_564094, nil, nil, nil)
 
-var farmsGet* = Call_FarmsGet_574984(name: "farmsGet", meth: HttpMethod.HttpGet, host: "adminmanagement.local.azurestack.external", route: "/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.Storage.Admin/farms/{farmId}",
-                                  validator: validate_FarmsGet_574985, base: "",
-                                  url: url_FarmsGet_574986,
+var farmsGet* = Call_FarmsGet_564084(name: "farmsGet", meth: HttpMethod.HttpGet, host: "adminmanagement.local.azurestack.external", route: "/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.Storage.Admin/farms/{farmId}",
+                                  validator: validate_FarmsGet_564085, base: "",
+                                  url: url_FarmsGet_564086,
                                   schemes: {Scheme.Https})
 type
-  Call_FarmsUpdate_575017 = ref object of OpenApiRestCall_574458
-proc url_FarmsUpdate_575019(protocol: Scheme; host: string; base: string;
+  Call_FarmsUpdate_564117 = ref object of OpenApiRestCall_563556
+proc url_FarmsUpdate_564119(protocol: Scheme; host: string; base: string;
                            route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -462,37 +464,36 @@ proc url_FarmsUpdate_575019(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_FarmsUpdate_575018(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_FarmsUpdate_564118(path: JsonNode; query: JsonNode; header: JsonNode;
                                 formData: JsonNode; body: JsonNode): JsonNode =
   ## Update an existing storage farm.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : Resource group name.
   ##   farmId: JString (required)
   ##         : Farm Id.
   ##   subscriptionId: JString (required)
   ##                 : Subscription Id.
+  ##   resourceGroupName: JString (required)
+  ##                    : Resource group name.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_575020 = path.getOrDefault("resourceGroupName")
-  valid_575020 = validateParameter(valid_575020, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `farmId` field"
+  var valid_564120 = path.getOrDefault("farmId")
+  valid_564120 = validateParameter(valid_564120, JString, required = true,
                                  default = nil)
-  if valid_575020 != nil:
-    section.add "resourceGroupName", valid_575020
-  var valid_575021 = path.getOrDefault("farmId")
-  valid_575021 = validateParameter(valid_575021, JString, required = true,
+  if valid_564120 != nil:
+    section.add "farmId", valid_564120
+  var valid_564121 = path.getOrDefault("subscriptionId")
+  valid_564121 = validateParameter(valid_564121, JString, required = true,
                                  default = nil)
-  if valid_575021 != nil:
-    section.add "farmId", valid_575021
-  var valid_575022 = path.getOrDefault("subscriptionId")
-  valid_575022 = validateParameter(valid_575022, JString, required = true,
+  if valid_564121 != nil:
+    section.add "subscriptionId", valid_564121
+  var valid_564122 = path.getOrDefault("resourceGroupName")
+  valid_564122 = validateParameter(valid_564122, JString, required = true,
                                  default = nil)
-  if valid_575022 != nil:
-    section.add "subscriptionId", valid_575022
+  if valid_564122 != nil:
+    section.add "resourceGroupName", valid_564122
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -500,11 +501,11 @@ proc validate_FarmsUpdate_575018(path: JsonNode; query: JsonNode; header: JsonNo
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575023 = query.getOrDefault("api-version")
-  valid_575023 = validateParameter(valid_575023, JString, required = true,
+  var valid_564123 = query.getOrDefault("api-version")
+  valid_564123 = validateParameter(valid_564123, JString, required = true,
                                  default = nil)
-  if valid_575023 != nil:
-    section.add "api-version", valid_575023
+  if valid_564123 != nil:
+    section.add "api-version", valid_564123
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -518,53 +519,53 @@ proc validate_FarmsUpdate_575018(path: JsonNode; query: JsonNode; header: JsonNo
   if body != nil:
     result.add "body", body
 
-proc call*(call_575025: Call_FarmsUpdate_575017; path: JsonNode; query: JsonNode;
+proc call*(call_564125: Call_FarmsUpdate_564117; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Update an existing storage farm.
   ## 
-  let valid = call_575025.validator(path, query, header, formData, body)
-  let scheme = call_575025.pickScheme
+  let valid = call_564125.validator(path, query, header, formData, body)
+  let scheme = call_564125.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575025.url(scheme.get, call_575025.host, call_575025.base,
-                         call_575025.route, valid.getOrDefault("path"),
+  let url = call_564125.url(scheme.get, call_564125.host, call_564125.base,
+                         call_564125.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575025, url, valid)
+  result = hook(call_564125, url, valid)
 
-proc call*(call_575026: Call_FarmsUpdate_575017; farmObject: JsonNode;
-          resourceGroupName: string; apiVersion: string; farmId: string;
-          subscriptionId: string): Recallable =
+proc call*(call_564126: Call_FarmsUpdate_564117; farmObject: JsonNode;
+          apiVersion: string; farmId: string; subscriptionId: string;
+          resourceGroupName: string): Recallable =
   ## farmsUpdate
   ## Update an existing storage farm.
   ##   farmObject: JObject (required)
   ##             : Farm to update.
-  ##   resourceGroupName: string (required)
-  ##                    : Resource group name.
   ##   apiVersion: string (required)
   ##             : REST Api Version.
   ##   farmId: string (required)
   ##         : Farm Id.
   ##   subscriptionId: string (required)
   ##                 : Subscription Id.
-  var path_575027 = newJObject()
-  var query_575028 = newJObject()
-  var body_575029 = newJObject()
+  ##   resourceGroupName: string (required)
+  ##                    : Resource group name.
+  var path_564127 = newJObject()
+  var query_564128 = newJObject()
+  var body_564129 = newJObject()
   if farmObject != nil:
-    body_575029 = farmObject
-  add(path_575027, "resourceGroupName", newJString(resourceGroupName))
-  add(query_575028, "api-version", newJString(apiVersion))
-  add(path_575027, "farmId", newJString(farmId))
-  add(path_575027, "subscriptionId", newJString(subscriptionId))
-  result = call_575026.call(path_575027, query_575028, nil, nil, body_575029)
+    body_564129 = farmObject
+  add(query_564128, "api-version", newJString(apiVersion))
+  add(path_564127, "farmId", newJString(farmId))
+  add(path_564127, "subscriptionId", newJString(subscriptionId))
+  add(path_564127, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564126.call(path_564127, query_564128, nil, nil, body_564129)
 
-var farmsUpdate* = Call_FarmsUpdate_575017(name: "farmsUpdate",
+var farmsUpdate* = Call_FarmsUpdate_564117(name: "farmsUpdate",
                                         meth: HttpMethod.HttpPatch, host: "adminmanagement.local.azurestack.external", route: "/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.Storage.Admin/farms/{farmId}",
-                                        validator: validate_FarmsUpdate_575018,
-                                        base: "", url: url_FarmsUpdate_575019,
+                                        validator: validate_FarmsUpdate_564118,
+                                        base: "", url: url_FarmsUpdate_564119,
                                         schemes: {Scheme.Https})
 type
-  Call_FarmsListMetricDefinitions_575030 = ref object of OpenApiRestCall_574458
-proc url_FarmsListMetricDefinitions_575032(protocol: Scheme; host: string;
+  Call_FarmsListMetricDefinitions_564130 = ref object of OpenApiRestCall_563556
+proc url_FarmsListMetricDefinitions_564132(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -587,37 +588,36 @@ proc url_FarmsListMetricDefinitions_575032(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_FarmsListMetricDefinitions_575031(path: JsonNode; query: JsonNode;
+proc validate_FarmsListMetricDefinitions_564131(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Returns a list of metric definitions for a storage farm.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : Resource group name.
   ##   farmId: JString (required)
   ##         : Farm Id.
   ##   subscriptionId: JString (required)
   ##                 : Subscription Id.
+  ##   resourceGroupName: JString (required)
+  ##                    : Resource group name.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_575033 = path.getOrDefault("resourceGroupName")
-  valid_575033 = validateParameter(valid_575033, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `farmId` field"
+  var valid_564133 = path.getOrDefault("farmId")
+  valid_564133 = validateParameter(valid_564133, JString, required = true,
                                  default = nil)
-  if valid_575033 != nil:
-    section.add "resourceGroupName", valid_575033
-  var valid_575034 = path.getOrDefault("farmId")
-  valid_575034 = validateParameter(valid_575034, JString, required = true,
+  if valid_564133 != nil:
+    section.add "farmId", valid_564133
+  var valid_564134 = path.getOrDefault("subscriptionId")
+  valid_564134 = validateParameter(valid_564134, JString, required = true,
                                  default = nil)
-  if valid_575034 != nil:
-    section.add "farmId", valid_575034
-  var valid_575035 = path.getOrDefault("subscriptionId")
-  valid_575035 = validateParameter(valid_575035, JString, required = true,
+  if valid_564134 != nil:
+    section.add "subscriptionId", valid_564134
+  var valid_564135 = path.getOrDefault("resourceGroupName")
+  valid_564135 = validateParameter(valid_564135, JString, required = true,
                                  default = nil)
-  if valid_575035 != nil:
-    section.add "subscriptionId", valid_575035
+  if valid_564135 != nil:
+    section.add "resourceGroupName", valid_564135
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -625,11 +625,11 @@ proc validate_FarmsListMetricDefinitions_575031(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575036 = query.getOrDefault("api-version")
-  valid_575036 = validateParameter(valid_575036, JString, required = true,
+  var valid_564136 = query.getOrDefault("api-version")
+  valid_564136 = validateParameter(valid_564136, JString, required = true,
                                  default = nil)
-  if valid_575036 != nil:
-    section.add "api-version", valid_575036
+  if valid_564136 != nil:
+    section.add "api-version", valid_564136
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -638,48 +638,47 @@ proc validate_FarmsListMetricDefinitions_575031(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_575037: Call_FarmsListMetricDefinitions_575030; path: JsonNode;
+proc call*(call_564137: Call_FarmsListMetricDefinitions_564130; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Returns a list of metric definitions for a storage farm.
   ## 
-  let valid = call_575037.validator(path, query, header, formData, body)
-  let scheme = call_575037.pickScheme
+  let valid = call_564137.validator(path, query, header, formData, body)
+  let scheme = call_564137.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575037.url(scheme.get, call_575037.host, call_575037.base,
-                         call_575037.route, valid.getOrDefault("path"),
+  let url = call_564137.url(scheme.get, call_564137.host, call_564137.base,
+                         call_564137.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575037, url, valid)
+  result = hook(call_564137, url, valid)
 
-proc call*(call_575038: Call_FarmsListMetricDefinitions_575030;
-          resourceGroupName: string; apiVersion: string; farmId: string;
-          subscriptionId: string): Recallable =
+proc call*(call_564138: Call_FarmsListMetricDefinitions_564130; apiVersion: string;
+          farmId: string; subscriptionId: string; resourceGroupName: string): Recallable =
   ## farmsListMetricDefinitions
   ## Returns a list of metric definitions for a storage farm.
-  ##   resourceGroupName: string (required)
-  ##                    : Resource group name.
   ##   apiVersion: string (required)
   ##             : REST Api Version.
   ##   farmId: string (required)
   ##         : Farm Id.
   ##   subscriptionId: string (required)
   ##                 : Subscription Id.
-  var path_575039 = newJObject()
-  var query_575040 = newJObject()
-  add(path_575039, "resourceGroupName", newJString(resourceGroupName))
-  add(query_575040, "api-version", newJString(apiVersion))
-  add(path_575039, "farmId", newJString(farmId))
-  add(path_575039, "subscriptionId", newJString(subscriptionId))
-  result = call_575038.call(path_575039, query_575040, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : Resource group name.
+  var path_564139 = newJObject()
+  var query_564140 = newJObject()
+  add(query_564140, "api-version", newJString(apiVersion))
+  add(path_564139, "farmId", newJString(farmId))
+  add(path_564139, "subscriptionId", newJString(subscriptionId))
+  add(path_564139, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564138.call(path_564139, query_564140, nil, nil, nil)
 
-var farmsListMetricDefinitions* = Call_FarmsListMetricDefinitions_575030(
+var farmsListMetricDefinitions* = Call_FarmsListMetricDefinitions_564130(
     name: "farmsListMetricDefinitions", meth: HttpMethod.HttpGet,
     host: "adminmanagement.local.azurestack.external", route: "/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.Storage.Admin/farms/{farmId}/metricdefinitions",
-    validator: validate_FarmsListMetricDefinitions_575031, base: "",
-    url: url_FarmsListMetricDefinitions_575032, schemes: {Scheme.Https})
+    validator: validate_FarmsListMetricDefinitions_564131, base: "",
+    url: url_FarmsListMetricDefinitions_564132, schemes: {Scheme.Https})
 type
-  Call_FarmsListMetrics_575041 = ref object of OpenApiRestCall_574458
-proc url_FarmsListMetrics_575043(protocol: Scheme; host: string; base: string;
+  Call_FarmsListMetrics_564141 = ref object of OpenApiRestCall_563556
+proc url_FarmsListMetrics_564143(protocol: Scheme; host: string; base: string;
                                 route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -702,7 +701,7 @@ proc url_FarmsListMetrics_575043(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_FarmsListMetrics_575042(path: JsonNode; query: JsonNode;
+proc validate_FarmsListMetrics_564142(path: JsonNode; query: JsonNode;
                                      header: JsonNode; formData: JsonNode;
                                      body: JsonNode): JsonNode =
   ## Returns a list of storage farm metrics.
@@ -710,30 +709,29 @@ proc validate_FarmsListMetrics_575042(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : Resource group name.
   ##   farmId: JString (required)
   ##         : Farm Id.
   ##   subscriptionId: JString (required)
   ##                 : Subscription Id.
+  ##   resourceGroupName: JString (required)
+  ##                    : Resource group name.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_575044 = path.getOrDefault("resourceGroupName")
-  valid_575044 = validateParameter(valid_575044, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `farmId` field"
+  var valid_564144 = path.getOrDefault("farmId")
+  valid_564144 = validateParameter(valid_564144, JString, required = true,
                                  default = nil)
-  if valid_575044 != nil:
-    section.add "resourceGroupName", valid_575044
-  var valid_575045 = path.getOrDefault("farmId")
-  valid_575045 = validateParameter(valid_575045, JString, required = true,
+  if valid_564144 != nil:
+    section.add "farmId", valid_564144
+  var valid_564145 = path.getOrDefault("subscriptionId")
+  valid_564145 = validateParameter(valid_564145, JString, required = true,
                                  default = nil)
-  if valid_575045 != nil:
-    section.add "farmId", valid_575045
-  var valid_575046 = path.getOrDefault("subscriptionId")
-  valid_575046 = validateParameter(valid_575046, JString, required = true,
+  if valid_564145 != nil:
+    section.add "subscriptionId", valid_564145
+  var valid_564146 = path.getOrDefault("resourceGroupName")
+  valid_564146 = validateParameter(valid_564146, JString, required = true,
                                  default = nil)
-  if valid_575046 != nil:
-    section.add "subscriptionId", valid_575046
+  if valid_564146 != nil:
+    section.add "resourceGroupName", valid_564146
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -741,11 +739,11 @@ proc validate_FarmsListMetrics_575042(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575047 = query.getOrDefault("api-version")
-  valid_575047 = validateParameter(valid_575047, JString, required = true,
+  var valid_564147 = query.getOrDefault("api-version")
+  valid_564147 = validateParameter(valid_564147, JString, required = true,
                                  default = nil)
-  if valid_575047 != nil:
-    section.add "api-version", valid_575047
+  if valid_564147 != nil:
+    section.add "api-version", valid_564147
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -754,46 +752,46 @@ proc validate_FarmsListMetrics_575042(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_575048: Call_FarmsListMetrics_575041; path: JsonNode;
+proc call*(call_564148: Call_FarmsListMetrics_564141; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Returns a list of storage farm metrics.
   ## 
-  let valid = call_575048.validator(path, query, header, formData, body)
-  let scheme = call_575048.pickScheme
+  let valid = call_564148.validator(path, query, header, formData, body)
+  let scheme = call_564148.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575048.url(scheme.get, call_575048.host, call_575048.base,
-                         call_575048.route, valid.getOrDefault("path"),
+  let url = call_564148.url(scheme.get, call_564148.host, call_564148.base,
+                         call_564148.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575048, url, valid)
+  result = hook(call_564148, url, valid)
 
-proc call*(call_575049: Call_FarmsListMetrics_575041; resourceGroupName: string;
-          apiVersion: string; farmId: string; subscriptionId: string): Recallable =
+proc call*(call_564149: Call_FarmsListMetrics_564141; apiVersion: string;
+          farmId: string; subscriptionId: string; resourceGroupName: string): Recallable =
   ## farmsListMetrics
   ## Returns a list of storage farm metrics.
-  ##   resourceGroupName: string (required)
-  ##                    : Resource group name.
   ##   apiVersion: string (required)
   ##             : REST Api Version.
   ##   farmId: string (required)
   ##         : Farm Id.
   ##   subscriptionId: string (required)
   ##                 : Subscription Id.
-  var path_575050 = newJObject()
-  var query_575051 = newJObject()
-  add(path_575050, "resourceGroupName", newJString(resourceGroupName))
-  add(query_575051, "api-version", newJString(apiVersion))
-  add(path_575050, "farmId", newJString(farmId))
-  add(path_575050, "subscriptionId", newJString(subscriptionId))
-  result = call_575049.call(path_575050, query_575051, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : Resource group name.
+  var path_564150 = newJObject()
+  var query_564151 = newJObject()
+  add(query_564151, "api-version", newJString(apiVersion))
+  add(path_564150, "farmId", newJString(farmId))
+  add(path_564150, "subscriptionId", newJString(subscriptionId))
+  add(path_564150, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564149.call(path_564150, query_564151, nil, nil, nil)
 
-var farmsListMetrics* = Call_FarmsListMetrics_575041(name: "farmsListMetrics",
+var farmsListMetrics* = Call_FarmsListMetrics_564141(name: "farmsListMetrics",
     meth: HttpMethod.HttpGet, host: "adminmanagement.local.azurestack.external", route: "/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.Storage.Admin/farms/{farmId}/metrics",
-    validator: validate_FarmsListMetrics_575042, base: "",
-    url: url_FarmsListMetrics_575043, schemes: {Scheme.Https})
+    validator: validate_FarmsListMetrics_564142, base: "",
+    url: url_FarmsListMetrics_564143, schemes: {Scheme.Https})
 type
-  Call_FarmsStartGarbageCollection_575052 = ref object of OpenApiRestCall_574458
-proc url_FarmsStartGarbageCollection_575054(protocol: Scheme; host: string;
+  Call_FarmsStartGarbageCollection_564152 = ref object of OpenApiRestCall_563556
+proc url_FarmsStartGarbageCollection_564154(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -816,37 +814,36 @@ proc url_FarmsStartGarbageCollection_575054(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_FarmsStartGarbageCollection_575053(path: JsonNode; query: JsonNode;
+proc validate_FarmsStartGarbageCollection_564153(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Start garbage collection on deleted storage objects.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : Resource group name.
   ##   farmId: JString (required)
   ##         : Farm Id.
   ##   subscriptionId: JString (required)
   ##                 : Subscription Id.
+  ##   resourceGroupName: JString (required)
+  ##                    : Resource group name.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_575055 = path.getOrDefault("resourceGroupName")
-  valid_575055 = validateParameter(valid_575055, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `farmId` field"
+  var valid_564155 = path.getOrDefault("farmId")
+  valid_564155 = validateParameter(valid_564155, JString, required = true,
                                  default = nil)
-  if valid_575055 != nil:
-    section.add "resourceGroupName", valid_575055
-  var valid_575056 = path.getOrDefault("farmId")
-  valid_575056 = validateParameter(valid_575056, JString, required = true,
+  if valid_564155 != nil:
+    section.add "farmId", valid_564155
+  var valid_564156 = path.getOrDefault("subscriptionId")
+  valid_564156 = validateParameter(valid_564156, JString, required = true,
                                  default = nil)
-  if valid_575056 != nil:
-    section.add "farmId", valid_575056
-  var valid_575057 = path.getOrDefault("subscriptionId")
-  valid_575057 = validateParameter(valid_575057, JString, required = true,
+  if valid_564156 != nil:
+    section.add "subscriptionId", valid_564156
+  var valid_564157 = path.getOrDefault("resourceGroupName")
+  valid_564157 = validateParameter(valid_564157, JString, required = true,
                                  default = nil)
-  if valid_575057 != nil:
-    section.add "subscriptionId", valid_575057
+  if valid_564157 != nil:
+    section.add "resourceGroupName", valid_564157
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -854,11 +851,11 @@ proc validate_FarmsStartGarbageCollection_575053(path: JsonNode; query: JsonNode
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575058 = query.getOrDefault("api-version")
-  valid_575058 = validateParameter(valid_575058, JString, required = true,
+  var valid_564158 = query.getOrDefault("api-version")
+  valid_564158 = validateParameter(valid_564158, JString, required = true,
                                  default = nil)
-  if valid_575058 != nil:
-    section.add "api-version", valid_575058
+  if valid_564158 != nil:
+    section.add "api-version", valid_564158
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -867,48 +864,48 @@ proc validate_FarmsStartGarbageCollection_575053(path: JsonNode; query: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_575059: Call_FarmsStartGarbageCollection_575052; path: JsonNode;
+proc call*(call_564159: Call_FarmsStartGarbageCollection_564152; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Start garbage collection on deleted storage objects.
   ## 
-  let valid = call_575059.validator(path, query, header, formData, body)
-  let scheme = call_575059.pickScheme
+  let valid = call_564159.validator(path, query, header, formData, body)
+  let scheme = call_564159.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575059.url(scheme.get, call_575059.host, call_575059.base,
-                         call_575059.route, valid.getOrDefault("path"),
+  let url = call_564159.url(scheme.get, call_564159.host, call_564159.base,
+                         call_564159.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575059, url, valid)
+  result = hook(call_564159, url, valid)
 
-proc call*(call_575060: Call_FarmsStartGarbageCollection_575052;
-          resourceGroupName: string; apiVersion: string; farmId: string;
-          subscriptionId: string): Recallable =
+proc call*(call_564160: Call_FarmsStartGarbageCollection_564152;
+          apiVersion: string; farmId: string; subscriptionId: string;
+          resourceGroupName: string): Recallable =
   ## farmsStartGarbageCollection
   ## Start garbage collection on deleted storage objects.
-  ##   resourceGroupName: string (required)
-  ##                    : Resource group name.
   ##   apiVersion: string (required)
   ##             : REST Api Version.
   ##   farmId: string (required)
   ##         : Farm Id.
   ##   subscriptionId: string (required)
   ##                 : Subscription Id.
-  var path_575061 = newJObject()
-  var query_575062 = newJObject()
-  add(path_575061, "resourceGroupName", newJString(resourceGroupName))
-  add(query_575062, "api-version", newJString(apiVersion))
-  add(path_575061, "farmId", newJString(farmId))
-  add(path_575061, "subscriptionId", newJString(subscriptionId))
-  result = call_575060.call(path_575061, query_575062, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : Resource group name.
+  var path_564161 = newJObject()
+  var query_564162 = newJObject()
+  add(query_564162, "api-version", newJString(apiVersion))
+  add(path_564161, "farmId", newJString(farmId))
+  add(path_564161, "subscriptionId", newJString(subscriptionId))
+  add(path_564161, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564160.call(path_564161, query_564162, nil, nil, nil)
 
-var farmsStartGarbageCollection* = Call_FarmsStartGarbageCollection_575052(
+var farmsStartGarbageCollection* = Call_FarmsStartGarbageCollection_564152(
     name: "farmsStartGarbageCollection", meth: HttpMethod.HttpPost,
     host: "adminmanagement.local.azurestack.external", route: "/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.Storage.Admin/farms/{farmId}/ondemandgc",
-    validator: validate_FarmsStartGarbageCollection_575053, base: "",
-    url: url_FarmsStartGarbageCollection_575054, schemes: {Scheme.Https})
+    validator: validate_FarmsStartGarbageCollection_564153, base: "",
+    url: url_FarmsStartGarbageCollection_564154, schemes: {Scheme.Https})
 type
-  Call_FarmsGetGarbageCollectionState_575063 = ref object of OpenApiRestCall_574458
-proc url_FarmsGetGarbageCollectionState_575065(protocol: Scheme; host: string;
+  Call_FarmsGetGarbageCollectionState_564163 = ref object of OpenApiRestCall_563556
+proc url_FarmsGetGarbageCollectionState_564165(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -933,44 +930,44 @@ proc url_FarmsGetGarbageCollectionState_575065(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_FarmsGetGarbageCollectionState_575064(path: JsonNode;
+proc validate_FarmsGetGarbageCollectionState_564164(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Returns the state of the garbage collection job.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : Resource group name.
+  ##   operationId: JString (required)
+  ##              : Operation Id.
   ##   farmId: JString (required)
   ##         : Farm Id.
   ##   subscriptionId: JString (required)
   ##                 : Subscription Id.
-  ##   operationId: JString (required)
-  ##              : Operation Id.
+  ##   resourceGroupName: JString (required)
+  ##                    : Resource group name.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_575066 = path.getOrDefault("resourceGroupName")
-  valid_575066 = validateParameter(valid_575066, JString, required = true,
+        "path argument is necessary due to required `operationId` field"
+  var valid_564166 = path.getOrDefault("operationId")
+  valid_564166 = validateParameter(valid_564166, JString, required = true,
                                  default = nil)
-  if valid_575066 != nil:
-    section.add "resourceGroupName", valid_575066
-  var valid_575067 = path.getOrDefault("farmId")
-  valid_575067 = validateParameter(valid_575067, JString, required = true,
+  if valid_564166 != nil:
+    section.add "operationId", valid_564166
+  var valid_564167 = path.getOrDefault("farmId")
+  valid_564167 = validateParameter(valid_564167, JString, required = true,
                                  default = nil)
-  if valid_575067 != nil:
-    section.add "farmId", valid_575067
-  var valid_575068 = path.getOrDefault("subscriptionId")
-  valid_575068 = validateParameter(valid_575068, JString, required = true,
+  if valid_564167 != nil:
+    section.add "farmId", valid_564167
+  var valid_564168 = path.getOrDefault("subscriptionId")
+  valid_564168 = validateParameter(valid_564168, JString, required = true,
                                  default = nil)
-  if valid_575068 != nil:
-    section.add "subscriptionId", valid_575068
-  var valid_575069 = path.getOrDefault("operationId")
-  valid_575069 = validateParameter(valid_575069, JString, required = true,
+  if valid_564168 != nil:
+    section.add "subscriptionId", valid_564168
+  var valid_564169 = path.getOrDefault("resourceGroupName")
+  valid_564169 = validateParameter(valid_564169, JString, required = true,
                                  default = nil)
-  if valid_575069 != nil:
-    section.add "operationId", valid_575069
+  if valid_564169 != nil:
+    section.add "resourceGroupName", valid_564169
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -978,11 +975,11 @@ proc validate_FarmsGetGarbageCollectionState_575064(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575070 = query.getOrDefault("api-version")
-  valid_575070 = validateParameter(valid_575070, JString, required = true,
+  var valid_564170 = query.getOrDefault("api-version")
+  valid_564170 = validateParameter(valid_564170, JString, required = true,
                                  default = nil)
-  if valid_575070 != nil:
-    section.add "api-version", valid_575070
+  if valid_564170 != nil:
+    section.add "api-version", valid_564170
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -991,48 +988,48 @@ proc validate_FarmsGetGarbageCollectionState_575064(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_575071: Call_FarmsGetGarbageCollectionState_575063; path: JsonNode;
+proc call*(call_564171: Call_FarmsGetGarbageCollectionState_564163; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Returns the state of the garbage collection job.
   ## 
-  let valid = call_575071.validator(path, query, header, formData, body)
-  let scheme = call_575071.pickScheme
+  let valid = call_564171.validator(path, query, header, formData, body)
+  let scheme = call_564171.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575071.url(scheme.get, call_575071.host, call_575071.base,
-                         call_575071.route, valid.getOrDefault("path"),
+  let url = call_564171.url(scheme.get, call_564171.host, call_564171.base,
+                         call_564171.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575071, url, valid)
+  result = hook(call_564171, url, valid)
 
-proc call*(call_575072: Call_FarmsGetGarbageCollectionState_575063;
-          resourceGroupName: string; apiVersion: string; farmId: string;
-          subscriptionId: string; operationId: string): Recallable =
+proc call*(call_564172: Call_FarmsGetGarbageCollectionState_564163;
+          apiVersion: string; operationId: string; farmId: string;
+          subscriptionId: string; resourceGroupName: string): Recallable =
   ## farmsGetGarbageCollectionState
   ## Returns the state of the garbage collection job.
-  ##   resourceGroupName: string (required)
-  ##                    : Resource group name.
   ##   apiVersion: string (required)
   ##             : REST Api Version.
+  ##   operationId: string (required)
+  ##              : Operation Id.
   ##   farmId: string (required)
   ##         : Farm Id.
   ##   subscriptionId: string (required)
   ##                 : Subscription Id.
-  ##   operationId: string (required)
-  ##              : Operation Id.
-  var path_575073 = newJObject()
-  var query_575074 = newJObject()
-  add(path_575073, "resourceGroupName", newJString(resourceGroupName))
-  add(query_575074, "api-version", newJString(apiVersion))
-  add(path_575073, "farmId", newJString(farmId))
-  add(path_575073, "subscriptionId", newJString(subscriptionId))
-  add(path_575073, "operationId", newJString(operationId))
-  result = call_575072.call(path_575073, query_575074, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : Resource group name.
+  var path_564173 = newJObject()
+  var query_564174 = newJObject()
+  add(query_564174, "api-version", newJString(apiVersion))
+  add(path_564173, "operationId", newJString(operationId))
+  add(path_564173, "farmId", newJString(farmId))
+  add(path_564173, "subscriptionId", newJString(subscriptionId))
+  add(path_564173, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564172.call(path_564173, query_564174, nil, nil, nil)
 
-var farmsGetGarbageCollectionState* = Call_FarmsGetGarbageCollectionState_575063(
+var farmsGetGarbageCollectionState* = Call_FarmsGetGarbageCollectionState_564163(
     name: "farmsGetGarbageCollectionState", meth: HttpMethod.HttpGet,
     host: "adminmanagement.local.azurestack.external", route: "/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.Storage.Admin/farms/{farmId}/operationresults/{operationId}",
-    validator: validate_FarmsGetGarbageCollectionState_575064, base: "",
-    url: url_FarmsGetGarbageCollectionState_575065, schemes: {Scheme.Https})
+    validator: validate_FarmsGetGarbageCollectionState_564164, base: "",
+    url: url_FarmsGetGarbageCollectionState_564165, schemes: {Scheme.Https})
 export
   rest
 

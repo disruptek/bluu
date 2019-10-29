@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, httpcore
 
 ## auto-generated via openapi macro
 ## title: DeletedWebApps API Client
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_567658 = ref object of OpenApiRestCall
+  OpenApiRestCall_563556 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_567658](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563556](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_567658): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563556): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,8 +107,8 @@ const
   macServiceName = "web-DeletedWebApps"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_DeletedWebAppsList_567880 = ref object of OpenApiRestCall_567658
-proc url_DeletedWebAppsList_567882(protocol: Scheme; host: string; base: string;
+  Call_DeletedWebAppsList_563778 = ref object of OpenApiRestCall_563556
+proc url_DeletedWebAppsList_563780(protocol: Scheme; host: string; base: string;
                                   route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -120,7 +124,7 @@ proc url_DeletedWebAppsList_567882(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DeletedWebAppsList_567881(path: JsonNode; query: JsonNode;
+proc validate_DeletedWebAppsList_563779(path: JsonNode; query: JsonNode;
                                        header: JsonNode; formData: JsonNode;
                                        body: JsonNode): JsonNode =
   ## Get all deleted apps for a subscription.
@@ -133,11 +137,11 @@ proc validate_DeletedWebAppsList_567881(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_568055 = path.getOrDefault("subscriptionId")
-  valid_568055 = validateParameter(valid_568055, JString, required = true,
+  var valid_563955 = path.getOrDefault("subscriptionId")
+  valid_563955 = validateParameter(valid_563955, JString, required = true,
                                  default = nil)
-  if valid_568055 != nil:
-    section.add "subscriptionId", valid_568055
+  if valid_563955 != nil:
+    section.add "subscriptionId", valid_563955
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -145,11 +149,11 @@ proc validate_DeletedWebAppsList_567881(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568056 = query.getOrDefault("api-version")
-  valid_568056 = validateParameter(valid_568056, JString, required = true,
+  var valid_563956 = query.getOrDefault("api-version")
+  valid_563956 = validateParameter(valid_563956, JString, required = true,
                                  default = nil)
-  if valid_568056 != nil:
-    section.add "api-version", valid_568056
+  if valid_563956 != nil:
+    section.add "api-version", valid_563956
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -158,20 +162,20 @@ proc validate_DeletedWebAppsList_567881(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568079: Call_DeletedWebAppsList_567880; path: JsonNode;
+proc call*(call_563979: Call_DeletedWebAppsList_563778; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get all deleted apps for a subscription.
   ## 
-  let valid = call_568079.validator(path, query, header, formData, body)
-  let scheme = call_568079.pickScheme
+  let valid = call_563979.validator(path, query, header, formData, body)
+  let scheme = call_563979.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568079.url(scheme.get, call_568079.host, call_568079.base,
-                         call_568079.route, valid.getOrDefault("path"),
+  let url = call_563979.url(scheme.get, call_563979.host, call_563979.base,
+                         call_563979.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568079, url, valid)
+  result = hook(call_563979, url, valid)
 
-proc call*(call_568150: Call_DeletedWebAppsList_567880; apiVersion: string;
+proc call*(call_564050: Call_DeletedWebAppsList_563778; apiVersion: string;
           subscriptionId: string): Recallable =
   ## deletedWebAppsList
   ## Get all deleted apps for a subscription.
@@ -179,20 +183,20 @@ proc call*(call_568150: Call_DeletedWebAppsList_567880; apiVersion: string;
   ##             : API Version
   ##   subscriptionId: string (required)
   ##                 : Your Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
-  var path_568151 = newJObject()
-  var query_568153 = newJObject()
-  add(query_568153, "api-version", newJString(apiVersion))
-  add(path_568151, "subscriptionId", newJString(subscriptionId))
-  result = call_568150.call(path_568151, query_568153, nil, nil, nil)
+  var path_564051 = newJObject()
+  var query_564053 = newJObject()
+  add(query_564053, "api-version", newJString(apiVersion))
+  add(path_564051, "subscriptionId", newJString(subscriptionId))
+  result = call_564050.call(path_564051, query_564053, nil, nil, nil)
 
-var deletedWebAppsList* = Call_DeletedWebAppsList_567880(
+var deletedWebAppsList* = Call_DeletedWebAppsList_563778(
     name: "deletedWebAppsList", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Web/deletedSites",
-    validator: validate_DeletedWebAppsList_567881, base: "",
-    url: url_DeletedWebAppsList_567882, schemes: {Scheme.Https})
+    validator: validate_DeletedWebAppsList_563779, base: "",
+    url: url_DeletedWebAppsList_563780, schemes: {Scheme.Https})
 type
-  Call_DeletedWebAppsListByLocation_568192 = ref object of OpenApiRestCall_567658
-proc url_DeletedWebAppsListByLocation_568194(protocol: Scheme; host: string;
+  Call_DeletedWebAppsListByLocation_564092 = ref object of OpenApiRestCall_563556
+proc url_DeletedWebAppsListByLocation_564094(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -211,7 +215,7 @@ proc url_DeletedWebAppsListByLocation_568194(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DeletedWebAppsListByLocation_568193(path: JsonNode; query: JsonNode;
+proc validate_DeletedWebAppsListByLocation_564093(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Get all deleted apps for a subscription at location
   ## 
@@ -224,16 +228,16 @@ proc validate_DeletedWebAppsListByLocation_568193(path: JsonNode; query: JsonNod
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_568195 = path.getOrDefault("subscriptionId")
-  valid_568195 = validateParameter(valid_568195, JString, required = true,
+  var valid_564095 = path.getOrDefault("subscriptionId")
+  valid_564095 = validateParameter(valid_564095, JString, required = true,
                                  default = nil)
-  if valid_568195 != nil:
-    section.add "subscriptionId", valid_568195
-  var valid_568196 = path.getOrDefault("location")
-  valid_568196 = validateParameter(valid_568196, JString, required = true,
+  if valid_564095 != nil:
+    section.add "subscriptionId", valid_564095
+  var valid_564096 = path.getOrDefault("location")
+  valid_564096 = validateParameter(valid_564096, JString, required = true,
                                  default = nil)
-  if valid_568196 != nil:
-    section.add "location", valid_568196
+  if valid_564096 != nil:
+    section.add "location", valid_564096
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -241,11 +245,11 @@ proc validate_DeletedWebAppsListByLocation_568193(path: JsonNode; query: JsonNod
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568197 = query.getOrDefault("api-version")
-  valid_568197 = validateParameter(valid_568197, JString, required = true,
+  var valid_564097 = query.getOrDefault("api-version")
+  valid_564097 = validateParameter(valid_564097, JString, required = true,
                                  default = nil)
-  if valid_568197 != nil:
-    section.add "api-version", valid_568197
+  if valid_564097 != nil:
+    section.add "api-version", valid_564097
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -254,20 +258,20 @@ proc validate_DeletedWebAppsListByLocation_568193(path: JsonNode; query: JsonNod
   if body != nil:
     result.add "body", body
 
-proc call*(call_568198: Call_DeletedWebAppsListByLocation_568192; path: JsonNode;
+proc call*(call_564098: Call_DeletedWebAppsListByLocation_564092; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get all deleted apps for a subscription at location
   ## 
-  let valid = call_568198.validator(path, query, header, formData, body)
-  let scheme = call_568198.pickScheme
+  let valid = call_564098.validator(path, query, header, formData, body)
+  let scheme = call_564098.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568198.url(scheme.get, call_568198.host, call_568198.base,
-                         call_568198.route, valid.getOrDefault("path"),
+  let url = call_564098.url(scheme.get, call_564098.host, call_564098.base,
+                         call_564098.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568198, url, valid)
+  result = hook(call_564098, url, valid)
 
-proc call*(call_568199: Call_DeletedWebAppsListByLocation_568192;
+proc call*(call_564099: Call_DeletedWebAppsListByLocation_564092;
           apiVersion: string; subscriptionId: string; location: string): Recallable =
   ## deletedWebAppsListByLocation
   ## Get all deleted apps for a subscription at location
@@ -276,21 +280,21 @@ proc call*(call_568199: Call_DeletedWebAppsListByLocation_568192;
   ##   subscriptionId: string (required)
   ##                 : Your Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
   ##   location: string (required)
-  var path_568200 = newJObject()
-  var query_568201 = newJObject()
-  add(query_568201, "api-version", newJString(apiVersion))
-  add(path_568200, "subscriptionId", newJString(subscriptionId))
-  add(path_568200, "location", newJString(location))
-  result = call_568199.call(path_568200, query_568201, nil, nil, nil)
+  var path_564100 = newJObject()
+  var query_564101 = newJObject()
+  add(query_564101, "api-version", newJString(apiVersion))
+  add(path_564100, "subscriptionId", newJString(subscriptionId))
+  add(path_564100, "location", newJString(location))
+  result = call_564099.call(path_564100, query_564101, nil, nil, nil)
 
-var deletedWebAppsListByLocation* = Call_DeletedWebAppsListByLocation_568192(
+var deletedWebAppsListByLocation* = Call_DeletedWebAppsListByLocation_564092(
     name: "deletedWebAppsListByLocation", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Web/locations/{location}/deletedSites",
-    validator: validate_DeletedWebAppsListByLocation_568193, base: "",
-    url: url_DeletedWebAppsListByLocation_568194, schemes: {Scheme.Https})
+    validator: validate_DeletedWebAppsListByLocation_564093, base: "",
+    url: url_DeletedWebAppsListByLocation_564094, schemes: {Scheme.Https})
 type
-  Call_DeletedWebAppsGetDeletedWebAppByLocation_568202 = ref object of OpenApiRestCall_567658
-proc url_DeletedWebAppsGetDeletedWebAppByLocation_568204(protocol: Scheme;
+  Call_DeletedWebAppsGetDeletedWebAppByLocation_564102 = ref object of OpenApiRestCall_563556
+proc url_DeletedWebAppsGetDeletedWebAppByLocation_564104(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -311,7 +315,7 @@ proc url_DeletedWebAppsGetDeletedWebAppByLocation_568204(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DeletedWebAppsGetDeletedWebAppByLocation_568203(path: JsonNode;
+proc validate_DeletedWebAppsGetDeletedWebAppByLocation_564103(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Get deleted app for a subscription at location.
   ## 
@@ -326,21 +330,21 @@ proc validate_DeletedWebAppsGetDeletedWebAppByLocation_568203(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `deletedSiteId` field"
-  var valid_568205 = path.getOrDefault("deletedSiteId")
-  valid_568205 = validateParameter(valid_568205, JString, required = true,
+  var valid_564105 = path.getOrDefault("deletedSiteId")
+  valid_564105 = validateParameter(valid_564105, JString, required = true,
                                  default = nil)
-  if valid_568205 != nil:
-    section.add "deletedSiteId", valid_568205
-  var valid_568206 = path.getOrDefault("subscriptionId")
-  valid_568206 = validateParameter(valid_568206, JString, required = true,
+  if valid_564105 != nil:
+    section.add "deletedSiteId", valid_564105
+  var valid_564106 = path.getOrDefault("subscriptionId")
+  valid_564106 = validateParameter(valid_564106, JString, required = true,
                                  default = nil)
-  if valid_568206 != nil:
-    section.add "subscriptionId", valid_568206
-  var valid_568207 = path.getOrDefault("location")
-  valid_568207 = validateParameter(valid_568207, JString, required = true,
+  if valid_564106 != nil:
+    section.add "subscriptionId", valid_564106
+  var valid_564107 = path.getOrDefault("location")
+  valid_564107 = validateParameter(valid_564107, JString, required = true,
                                  default = nil)
-  if valid_568207 != nil:
-    section.add "location", valid_568207
+  if valid_564107 != nil:
+    section.add "location", valid_564107
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -348,11 +352,11 @@ proc validate_DeletedWebAppsGetDeletedWebAppByLocation_568203(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568208 = query.getOrDefault("api-version")
-  valid_568208 = validateParameter(valid_568208, JString, required = true,
+  var valid_564108 = query.getOrDefault("api-version")
+  valid_564108 = validateParameter(valid_564108, JString, required = true,
                                  default = nil)
-  if valid_568208 != nil:
-    section.add "api-version", valid_568208
+  if valid_564108 != nil:
+    section.add "api-version", valid_564108
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -361,21 +365,21 @@ proc validate_DeletedWebAppsGetDeletedWebAppByLocation_568203(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568209: Call_DeletedWebAppsGetDeletedWebAppByLocation_568202;
+proc call*(call_564109: Call_DeletedWebAppsGetDeletedWebAppByLocation_564102;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Get deleted app for a subscription at location.
   ## 
-  let valid = call_568209.validator(path, query, header, formData, body)
-  let scheme = call_568209.pickScheme
+  let valid = call_564109.validator(path, query, header, formData, body)
+  let scheme = call_564109.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568209.url(scheme.get, call_568209.host, call_568209.base,
-                         call_568209.route, valid.getOrDefault("path"),
+  let url = call_564109.url(scheme.get, call_564109.host, call_564109.base,
+                         call_564109.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568209, url, valid)
+  result = hook(call_564109, url, valid)
 
-proc call*(call_568210: Call_DeletedWebAppsGetDeletedWebAppByLocation_568202;
+proc call*(call_564110: Call_DeletedWebAppsGetDeletedWebAppByLocation_564102;
           apiVersion: string; deletedSiteId: string; subscriptionId: string;
           location: string): Recallable =
   ## deletedWebAppsGetDeletedWebAppByLocation
@@ -387,19 +391,19 @@ proc call*(call_568210: Call_DeletedWebAppsGetDeletedWebAppByLocation_568202;
   ##   subscriptionId: string (required)
   ##                 : Your Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
   ##   location: string (required)
-  var path_568211 = newJObject()
-  var query_568212 = newJObject()
-  add(query_568212, "api-version", newJString(apiVersion))
-  add(path_568211, "deletedSiteId", newJString(deletedSiteId))
-  add(path_568211, "subscriptionId", newJString(subscriptionId))
-  add(path_568211, "location", newJString(location))
-  result = call_568210.call(path_568211, query_568212, nil, nil, nil)
+  var path_564111 = newJObject()
+  var query_564112 = newJObject()
+  add(query_564112, "api-version", newJString(apiVersion))
+  add(path_564111, "deletedSiteId", newJString(deletedSiteId))
+  add(path_564111, "subscriptionId", newJString(subscriptionId))
+  add(path_564111, "location", newJString(location))
+  result = call_564110.call(path_564111, query_564112, nil, nil, nil)
 
-var deletedWebAppsGetDeletedWebAppByLocation* = Call_DeletedWebAppsGetDeletedWebAppByLocation_568202(
+var deletedWebAppsGetDeletedWebAppByLocation* = Call_DeletedWebAppsGetDeletedWebAppByLocation_564102(
     name: "deletedWebAppsGetDeletedWebAppByLocation", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Web/locations/{location}/deletedSites/{deletedSiteId}",
-    validator: validate_DeletedWebAppsGetDeletedWebAppByLocation_568203, base: "",
-    url: url_DeletedWebAppsGetDeletedWebAppByLocation_568204,
+    validator: validate_DeletedWebAppsGetDeletedWebAppByLocation_564103, base: "",
+    url: url_DeletedWebAppsGetDeletedWebAppByLocation_564104,
     schemes: {Scheme.Https})
 export
   rest

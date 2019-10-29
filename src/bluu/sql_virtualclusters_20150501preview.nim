@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, httpcore
 
 ## auto-generated via openapi macro
 ## title: SqlManagementClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_567641 = ref object of OpenApiRestCall
+  OpenApiRestCall_563539 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_567641](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563539](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_567641): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563539): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,8 +107,8 @@ const
   macServiceName = "sql-virtualclusters"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_VirtualClustersList_567863 = ref object of OpenApiRestCall_567641
-proc url_VirtualClustersList_567865(protocol: Scheme; host: string; base: string;
+  Call_VirtualClustersList_563761 = ref object of OpenApiRestCall_563539
+proc url_VirtualClustersList_563763(protocol: Scheme; host: string; base: string;
                                    route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -120,7 +124,7 @@ proc url_VirtualClustersList_567865(protocol: Scheme; host: string; base: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_VirtualClustersList_567864(path: JsonNode; query: JsonNode;
+proc validate_VirtualClustersList_563762(path: JsonNode; query: JsonNode;
                                         header: JsonNode; formData: JsonNode;
                                         body: JsonNode): JsonNode =
   ## Gets a list of all virtualClusters in the subscription.
@@ -133,11 +137,11 @@ proc validate_VirtualClustersList_567864(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_568038 = path.getOrDefault("subscriptionId")
-  valid_568038 = validateParameter(valid_568038, JString, required = true,
+  var valid_563938 = path.getOrDefault("subscriptionId")
+  valid_563938 = validateParameter(valid_563938, JString, required = true,
                                  default = nil)
-  if valid_568038 != nil:
-    section.add "subscriptionId", valid_568038
+  if valid_563938 != nil:
+    section.add "subscriptionId", valid_563938
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -145,11 +149,11 @@ proc validate_VirtualClustersList_567864(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568039 = query.getOrDefault("api-version")
-  valid_568039 = validateParameter(valid_568039, JString, required = true,
+  var valid_563939 = query.getOrDefault("api-version")
+  valid_563939 = validateParameter(valid_563939, JString, required = true,
                                  default = nil)
-  if valid_568039 != nil:
-    section.add "api-version", valid_568039
+  if valid_563939 != nil:
+    section.add "api-version", valid_563939
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -158,20 +162,20 @@ proc validate_VirtualClustersList_567864(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568062: Call_VirtualClustersList_567863; path: JsonNode;
+proc call*(call_563962: Call_VirtualClustersList_563761; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets a list of all virtualClusters in the subscription.
   ## 
-  let valid = call_568062.validator(path, query, header, formData, body)
-  let scheme = call_568062.pickScheme
+  let valid = call_563962.validator(path, query, header, formData, body)
+  let scheme = call_563962.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568062.url(scheme.get, call_568062.host, call_568062.base,
-                         call_568062.route, valid.getOrDefault("path"),
+  let url = call_563962.url(scheme.get, call_563962.host, call_563962.base,
+                         call_563962.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568062, url, valid)
+  result = hook(call_563962, url, valid)
 
-proc call*(call_568133: Call_VirtualClustersList_567863; apiVersion: string;
+proc call*(call_564033: Call_VirtualClustersList_563761; apiVersion: string;
           subscriptionId: string): Recallable =
   ## virtualClustersList
   ## Gets a list of all virtualClusters in the subscription.
@@ -179,20 +183,20 @@ proc call*(call_568133: Call_VirtualClustersList_567863; apiVersion: string;
   ##             : The API version to use for the request.
   ##   subscriptionId: string (required)
   ##                 : The subscription ID that identifies an Azure subscription.
-  var path_568134 = newJObject()
-  var query_568136 = newJObject()
-  add(query_568136, "api-version", newJString(apiVersion))
-  add(path_568134, "subscriptionId", newJString(subscriptionId))
-  result = call_568133.call(path_568134, query_568136, nil, nil, nil)
+  var path_564034 = newJObject()
+  var query_564036 = newJObject()
+  add(query_564036, "api-version", newJString(apiVersion))
+  add(path_564034, "subscriptionId", newJString(subscriptionId))
+  result = call_564033.call(path_564034, query_564036, nil, nil, nil)
 
-var virtualClustersList* = Call_VirtualClustersList_567863(
+var virtualClustersList* = Call_VirtualClustersList_563761(
     name: "virtualClustersList", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Sql/virtualClusters",
-    validator: validate_VirtualClustersList_567864, base: "",
-    url: url_VirtualClustersList_567865, schemes: {Scheme.Https})
+    validator: validate_VirtualClustersList_563762, base: "",
+    url: url_VirtualClustersList_563763, schemes: {Scheme.Https})
 type
-  Call_VirtualClustersListByResourceGroup_568175 = ref object of OpenApiRestCall_567641
-proc url_VirtualClustersListByResourceGroup_568177(protocol: Scheme; host: string;
+  Call_VirtualClustersListByResourceGroup_564075 = ref object of OpenApiRestCall_563539
+proc url_VirtualClustersListByResourceGroup_564077(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -212,30 +216,30 @@ proc url_VirtualClustersListByResourceGroup_568177(protocol: Scheme; host: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_VirtualClustersListByResourceGroup_568176(path: JsonNode;
+proc validate_VirtualClustersListByResourceGroup_564076(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets a list of virtual clusters in a resource group.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID that identifies an Azure subscription.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568178 = path.getOrDefault("resourceGroupName")
-  valid_568178 = validateParameter(valid_568178, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564078 = path.getOrDefault("subscriptionId")
+  valid_564078 = validateParameter(valid_564078, JString, required = true,
                                  default = nil)
-  if valid_568178 != nil:
-    section.add "resourceGroupName", valid_568178
-  var valid_568179 = path.getOrDefault("subscriptionId")
-  valid_568179 = validateParameter(valid_568179, JString, required = true,
+  if valid_564078 != nil:
+    section.add "subscriptionId", valid_564078
+  var valid_564079 = path.getOrDefault("resourceGroupName")
+  valid_564079 = validateParameter(valid_564079, JString, required = true,
                                  default = nil)
-  if valid_568179 != nil:
-    section.add "subscriptionId", valid_568179
+  if valid_564079 != nil:
+    section.add "resourceGroupName", valid_564079
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -243,11 +247,11 @@ proc validate_VirtualClustersListByResourceGroup_568176(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568180 = query.getOrDefault("api-version")
-  valid_568180 = validateParameter(valid_568180, JString, required = true,
+  var valid_564080 = query.getOrDefault("api-version")
+  valid_564080 = validateParameter(valid_564080, JString, required = true,
                                  default = nil)
-  if valid_568180 != nil:
-    section.add "api-version", valid_568180
+  if valid_564080 != nil:
+    section.add "api-version", valid_564080
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -256,45 +260,45 @@ proc validate_VirtualClustersListByResourceGroup_568176(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568181: Call_VirtualClustersListByResourceGroup_568175;
+proc call*(call_564081: Call_VirtualClustersListByResourceGroup_564075;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Gets a list of virtual clusters in a resource group.
   ## 
-  let valid = call_568181.validator(path, query, header, formData, body)
-  let scheme = call_568181.pickScheme
+  let valid = call_564081.validator(path, query, header, formData, body)
+  let scheme = call_564081.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568181.url(scheme.get, call_568181.host, call_568181.base,
-                         call_568181.route, valid.getOrDefault("path"),
+  let url = call_564081.url(scheme.get, call_564081.host, call_564081.base,
+                         call_564081.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568181, url, valid)
+  result = hook(call_564081, url, valid)
 
-proc call*(call_568182: Call_VirtualClustersListByResourceGroup_568175;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string): Recallable =
+proc call*(call_564082: Call_VirtualClustersListByResourceGroup_564075;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string): Recallable =
   ## virtualClustersListByResourceGroup
   ## Gets a list of virtual clusters in a resource group.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   ##   apiVersion: string (required)
   ##             : The API version to use for the request.
   ##   subscriptionId: string (required)
   ##                 : The subscription ID that identifies an Azure subscription.
-  var path_568183 = newJObject()
-  var query_568184 = newJObject()
-  add(path_568183, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568184, "api-version", newJString(apiVersion))
-  add(path_568183, "subscriptionId", newJString(subscriptionId))
-  result = call_568182.call(path_568183, query_568184, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
+  var path_564083 = newJObject()
+  var query_564084 = newJObject()
+  add(query_564084, "api-version", newJString(apiVersion))
+  add(path_564083, "subscriptionId", newJString(subscriptionId))
+  add(path_564083, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564082.call(path_564083, query_564084, nil, nil, nil)
 
-var virtualClustersListByResourceGroup* = Call_VirtualClustersListByResourceGroup_568175(
+var virtualClustersListByResourceGroup* = Call_VirtualClustersListByResourceGroup_564075(
     name: "virtualClustersListByResourceGroup", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/virtualClusters",
-    validator: validate_VirtualClustersListByResourceGroup_568176, base: "",
-    url: url_VirtualClustersListByResourceGroup_568177, schemes: {Scheme.Https})
+    validator: validate_VirtualClustersListByResourceGroup_564076, base: "",
+    url: url_VirtualClustersListByResourceGroup_564077, schemes: {Scheme.Https})
 type
-  Call_VirtualClustersGet_568185 = ref object of OpenApiRestCall_567641
-proc url_VirtualClustersGet_568187(protocol: Scheme; host: string; base: string;
+  Call_VirtualClustersGet_564085 = ref object of OpenApiRestCall_563539
+proc url_VirtualClustersGet_564087(protocol: Scheme; host: string; base: string;
                                   route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -317,7 +321,7 @@ proc url_VirtualClustersGet_568187(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_VirtualClustersGet_568186(path: JsonNode; query: JsonNode;
+proc validate_VirtualClustersGet_564086(path: JsonNode; query: JsonNode;
                                        header: JsonNode; formData: JsonNode;
                                        body: JsonNode): JsonNode =
   ## Gets a virtual cluster.
@@ -325,30 +329,30 @@ proc validate_VirtualClustersGet_568186(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   ##   virtualClusterName: JString (required)
   ##                     : The name of the virtual cluster.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID that identifies an Azure subscription.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568188 = path.getOrDefault("resourceGroupName")
-  valid_568188 = validateParameter(valid_568188, JString, required = true,
+        "path argument is necessary due to required `virtualClusterName` field"
+  var valid_564088 = path.getOrDefault("virtualClusterName")
+  valid_564088 = validateParameter(valid_564088, JString, required = true,
                                  default = nil)
-  if valid_568188 != nil:
-    section.add "resourceGroupName", valid_568188
-  var valid_568189 = path.getOrDefault("virtualClusterName")
-  valid_568189 = validateParameter(valid_568189, JString, required = true,
+  if valid_564088 != nil:
+    section.add "virtualClusterName", valid_564088
+  var valid_564089 = path.getOrDefault("subscriptionId")
+  valid_564089 = validateParameter(valid_564089, JString, required = true,
                                  default = nil)
-  if valid_568189 != nil:
-    section.add "virtualClusterName", valid_568189
-  var valid_568190 = path.getOrDefault("subscriptionId")
-  valid_568190 = validateParameter(valid_568190, JString, required = true,
+  if valid_564089 != nil:
+    section.add "subscriptionId", valid_564089
+  var valid_564090 = path.getOrDefault("resourceGroupName")
+  valid_564090 = validateParameter(valid_564090, JString, required = true,
                                  default = nil)
-  if valid_568190 != nil:
-    section.add "subscriptionId", valid_568190
+  if valid_564090 != nil:
+    section.add "resourceGroupName", valid_564090
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -356,11 +360,11 @@ proc validate_VirtualClustersGet_568186(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568191 = query.getOrDefault("api-version")
-  valid_568191 = validateParameter(valid_568191, JString, required = true,
+  var valid_564091 = query.getOrDefault("api-version")
+  valid_564091 = validateParameter(valid_564091, JString, required = true,
                                  default = nil)
-  if valid_568191 != nil:
-    section.add "api-version", valid_568191
+  if valid_564091 != nil:
+    section.add "api-version", valid_564091
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -369,47 +373,48 @@ proc validate_VirtualClustersGet_568186(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568192: Call_VirtualClustersGet_568185; path: JsonNode;
+proc call*(call_564092: Call_VirtualClustersGet_564085; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets a virtual cluster.
   ## 
-  let valid = call_568192.validator(path, query, header, formData, body)
-  let scheme = call_568192.pickScheme
+  let valid = call_564092.validator(path, query, header, formData, body)
+  let scheme = call_564092.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568192.url(scheme.get, call_568192.host, call_568192.base,
-                         call_568192.route, valid.getOrDefault("path"),
+  let url = call_564092.url(scheme.get, call_564092.host, call_564092.base,
+                         call_564092.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568192, url, valid)
+  result = hook(call_564092, url, valid)
 
-proc call*(call_568193: Call_VirtualClustersGet_568185; resourceGroupName: string;
-          apiVersion: string; virtualClusterName: string; subscriptionId: string): Recallable =
+proc call*(call_564093: Call_VirtualClustersGet_564085; apiVersion: string;
+          virtualClusterName: string; subscriptionId: string;
+          resourceGroupName: string): Recallable =
   ## virtualClustersGet
   ## Gets a virtual cluster.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   ##   apiVersion: string (required)
   ##             : The API version to use for the request.
   ##   virtualClusterName: string (required)
   ##                     : The name of the virtual cluster.
   ##   subscriptionId: string (required)
   ##                 : The subscription ID that identifies an Azure subscription.
-  var path_568194 = newJObject()
-  var query_568195 = newJObject()
-  add(path_568194, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568195, "api-version", newJString(apiVersion))
-  add(path_568194, "virtualClusterName", newJString(virtualClusterName))
-  add(path_568194, "subscriptionId", newJString(subscriptionId))
-  result = call_568193.call(path_568194, query_568195, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
+  var path_564094 = newJObject()
+  var query_564095 = newJObject()
+  add(query_564095, "api-version", newJString(apiVersion))
+  add(path_564094, "virtualClusterName", newJString(virtualClusterName))
+  add(path_564094, "subscriptionId", newJString(subscriptionId))
+  add(path_564094, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564093.call(path_564094, query_564095, nil, nil, nil)
 
-var virtualClustersGet* = Call_VirtualClustersGet_568185(
+var virtualClustersGet* = Call_VirtualClustersGet_564085(
     name: "virtualClustersGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/virtualClusters/{virtualClusterName}",
-    validator: validate_VirtualClustersGet_568186, base: "",
-    url: url_VirtualClustersGet_568187, schemes: {Scheme.Https})
+    validator: validate_VirtualClustersGet_564086, base: "",
+    url: url_VirtualClustersGet_564087, schemes: {Scheme.Https})
 type
-  Call_VirtualClustersUpdate_568207 = ref object of OpenApiRestCall_567641
-proc url_VirtualClustersUpdate_568209(protocol: Scheme; host: string; base: string;
+  Call_VirtualClustersUpdate_564107 = ref object of OpenApiRestCall_563539
+proc url_VirtualClustersUpdate_564109(protocol: Scheme; host: string; base: string;
                                      route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -432,37 +437,37 @@ proc url_VirtualClustersUpdate_568209(protocol: Scheme; host: string; base: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_VirtualClustersUpdate_568208(path: JsonNode; query: JsonNode;
+proc validate_VirtualClustersUpdate_564108(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Updates a virtual cluster.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   ##   virtualClusterName: JString (required)
   ##                     : The name of the virtual cluster.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID that identifies an Azure subscription.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568210 = path.getOrDefault("resourceGroupName")
-  valid_568210 = validateParameter(valid_568210, JString, required = true,
+        "path argument is necessary due to required `virtualClusterName` field"
+  var valid_564110 = path.getOrDefault("virtualClusterName")
+  valid_564110 = validateParameter(valid_564110, JString, required = true,
                                  default = nil)
-  if valid_568210 != nil:
-    section.add "resourceGroupName", valid_568210
-  var valid_568211 = path.getOrDefault("virtualClusterName")
-  valid_568211 = validateParameter(valid_568211, JString, required = true,
+  if valid_564110 != nil:
+    section.add "virtualClusterName", valid_564110
+  var valid_564111 = path.getOrDefault("subscriptionId")
+  valid_564111 = validateParameter(valid_564111, JString, required = true,
                                  default = nil)
-  if valid_568211 != nil:
-    section.add "virtualClusterName", valid_568211
-  var valid_568212 = path.getOrDefault("subscriptionId")
-  valid_568212 = validateParameter(valid_568212, JString, required = true,
+  if valid_564111 != nil:
+    section.add "subscriptionId", valid_564111
+  var valid_564112 = path.getOrDefault("resourceGroupName")
+  valid_564112 = validateParameter(valid_564112, JString, required = true,
                                  default = nil)
-  if valid_568212 != nil:
-    section.add "subscriptionId", valid_568212
+  if valid_564112 != nil:
+    section.add "resourceGroupName", valid_564112
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -470,11 +475,11 @@ proc validate_VirtualClustersUpdate_568208(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568213 = query.getOrDefault("api-version")
-  valid_568213 = validateParameter(valid_568213, JString, required = true,
+  var valid_564113 = query.getOrDefault("api-version")
+  valid_564113 = validateParameter(valid_564113, JString, required = true,
                                  default = nil)
-  if valid_568213 != nil:
-    section.add "api-version", valid_568213
+  if valid_564113 != nil:
+    section.add "api-version", valid_564113
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -488,53 +493,53 @@ proc validate_VirtualClustersUpdate_568208(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568215: Call_VirtualClustersUpdate_568207; path: JsonNode;
+proc call*(call_564115: Call_VirtualClustersUpdate_564107; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Updates a virtual cluster.
   ## 
-  let valid = call_568215.validator(path, query, header, formData, body)
-  let scheme = call_568215.pickScheme
+  let valid = call_564115.validator(path, query, header, formData, body)
+  let scheme = call_564115.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568215.url(scheme.get, call_568215.host, call_568215.base,
-                         call_568215.route, valid.getOrDefault("path"),
+  let url = call_564115.url(scheme.get, call_564115.host, call_564115.base,
+                         call_564115.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568215, url, valid)
+  result = hook(call_564115, url, valid)
 
-proc call*(call_568216: Call_VirtualClustersUpdate_568207;
-          resourceGroupName: string; apiVersion: string; virtualClusterName: string;
-          subscriptionId: string; parameters: JsonNode): Recallable =
+proc call*(call_564116: Call_VirtualClustersUpdate_564107; apiVersion: string;
+          virtualClusterName: string; subscriptionId: string;
+          resourceGroupName: string; parameters: JsonNode): Recallable =
   ## virtualClustersUpdate
   ## Updates a virtual cluster.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   ##   apiVersion: string (required)
   ##             : The API version to use for the request.
   ##   virtualClusterName: string (required)
   ##                     : The name of the virtual cluster.
   ##   subscriptionId: string (required)
   ##                 : The subscription ID that identifies an Azure subscription.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   ##   parameters: JObject (required)
   ##             : The requested managed instance resource state.
-  var path_568217 = newJObject()
-  var query_568218 = newJObject()
-  var body_568219 = newJObject()
-  add(path_568217, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568218, "api-version", newJString(apiVersion))
-  add(path_568217, "virtualClusterName", newJString(virtualClusterName))
-  add(path_568217, "subscriptionId", newJString(subscriptionId))
+  var path_564117 = newJObject()
+  var query_564118 = newJObject()
+  var body_564119 = newJObject()
+  add(query_564118, "api-version", newJString(apiVersion))
+  add(path_564117, "virtualClusterName", newJString(virtualClusterName))
+  add(path_564117, "subscriptionId", newJString(subscriptionId))
+  add(path_564117, "resourceGroupName", newJString(resourceGroupName))
   if parameters != nil:
-    body_568219 = parameters
-  result = call_568216.call(path_568217, query_568218, nil, nil, body_568219)
+    body_564119 = parameters
+  result = call_564116.call(path_564117, query_564118, nil, nil, body_564119)
 
-var virtualClustersUpdate* = Call_VirtualClustersUpdate_568207(
+var virtualClustersUpdate* = Call_VirtualClustersUpdate_564107(
     name: "virtualClustersUpdate", meth: HttpMethod.HttpPatch,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/virtualClusters/{virtualClusterName}",
-    validator: validate_VirtualClustersUpdate_568208, base: "",
-    url: url_VirtualClustersUpdate_568209, schemes: {Scheme.Https})
+    validator: validate_VirtualClustersUpdate_564108, base: "",
+    url: url_VirtualClustersUpdate_564109, schemes: {Scheme.Https})
 type
-  Call_VirtualClustersDelete_568196 = ref object of OpenApiRestCall_567641
-proc url_VirtualClustersDelete_568198(protocol: Scheme; host: string; base: string;
+  Call_VirtualClustersDelete_564096 = ref object of OpenApiRestCall_563539
+proc url_VirtualClustersDelete_564098(protocol: Scheme; host: string; base: string;
                                      route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -557,37 +562,37 @@ proc url_VirtualClustersDelete_568198(protocol: Scheme; host: string; base: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_VirtualClustersDelete_568197(path: JsonNode; query: JsonNode;
+proc validate_VirtualClustersDelete_564097(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Deletes a virtual cluster.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   ##   virtualClusterName: JString (required)
   ##                     : The name of the virtual cluster.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID that identifies an Azure subscription.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568199 = path.getOrDefault("resourceGroupName")
-  valid_568199 = validateParameter(valid_568199, JString, required = true,
+        "path argument is necessary due to required `virtualClusterName` field"
+  var valid_564099 = path.getOrDefault("virtualClusterName")
+  valid_564099 = validateParameter(valid_564099, JString, required = true,
                                  default = nil)
-  if valid_568199 != nil:
-    section.add "resourceGroupName", valid_568199
-  var valid_568200 = path.getOrDefault("virtualClusterName")
-  valid_568200 = validateParameter(valid_568200, JString, required = true,
+  if valid_564099 != nil:
+    section.add "virtualClusterName", valid_564099
+  var valid_564100 = path.getOrDefault("subscriptionId")
+  valid_564100 = validateParameter(valid_564100, JString, required = true,
                                  default = nil)
-  if valid_568200 != nil:
-    section.add "virtualClusterName", valid_568200
-  var valid_568201 = path.getOrDefault("subscriptionId")
-  valid_568201 = validateParameter(valid_568201, JString, required = true,
+  if valid_564100 != nil:
+    section.add "subscriptionId", valid_564100
+  var valid_564101 = path.getOrDefault("resourceGroupName")
+  valid_564101 = validateParameter(valid_564101, JString, required = true,
                                  default = nil)
-  if valid_568201 != nil:
-    section.add "subscriptionId", valid_568201
+  if valid_564101 != nil:
+    section.add "resourceGroupName", valid_564101
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -595,11 +600,11 @@ proc validate_VirtualClustersDelete_568197(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568202 = query.getOrDefault("api-version")
-  valid_568202 = validateParameter(valid_568202, JString, required = true,
+  var valid_564102 = query.getOrDefault("api-version")
+  valid_564102 = validateParameter(valid_564102, JString, required = true,
                                  default = nil)
-  if valid_568202 != nil:
-    section.add "api-version", valid_568202
+  if valid_564102 != nil:
+    section.add "api-version", valid_564102
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -608,45 +613,45 @@ proc validate_VirtualClustersDelete_568197(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568203: Call_VirtualClustersDelete_568196; path: JsonNode;
+proc call*(call_564103: Call_VirtualClustersDelete_564096; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes a virtual cluster.
   ## 
-  let valid = call_568203.validator(path, query, header, formData, body)
-  let scheme = call_568203.pickScheme
+  let valid = call_564103.validator(path, query, header, formData, body)
+  let scheme = call_564103.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568203.url(scheme.get, call_568203.host, call_568203.base,
-                         call_568203.route, valid.getOrDefault("path"),
+  let url = call_564103.url(scheme.get, call_564103.host, call_564103.base,
+                         call_564103.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568203, url, valid)
+  result = hook(call_564103, url, valid)
 
-proc call*(call_568204: Call_VirtualClustersDelete_568196;
-          resourceGroupName: string; apiVersion: string; virtualClusterName: string;
-          subscriptionId: string): Recallable =
+proc call*(call_564104: Call_VirtualClustersDelete_564096; apiVersion: string;
+          virtualClusterName: string; subscriptionId: string;
+          resourceGroupName: string): Recallable =
   ## virtualClustersDelete
   ## Deletes a virtual cluster.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   ##   apiVersion: string (required)
   ##             : The API version to use for the request.
   ##   virtualClusterName: string (required)
   ##                     : The name of the virtual cluster.
   ##   subscriptionId: string (required)
   ##                 : The subscription ID that identifies an Azure subscription.
-  var path_568205 = newJObject()
-  var query_568206 = newJObject()
-  add(path_568205, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568206, "api-version", newJString(apiVersion))
-  add(path_568205, "virtualClusterName", newJString(virtualClusterName))
-  add(path_568205, "subscriptionId", newJString(subscriptionId))
-  result = call_568204.call(path_568205, query_568206, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
+  var path_564105 = newJObject()
+  var query_564106 = newJObject()
+  add(query_564106, "api-version", newJString(apiVersion))
+  add(path_564105, "virtualClusterName", newJString(virtualClusterName))
+  add(path_564105, "subscriptionId", newJString(subscriptionId))
+  add(path_564105, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564104.call(path_564105, query_564106, nil, nil, nil)
 
-var virtualClustersDelete* = Call_VirtualClustersDelete_568196(
+var virtualClustersDelete* = Call_VirtualClustersDelete_564096(
     name: "virtualClustersDelete", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/virtualClusters/{virtualClusterName}",
-    validator: validate_VirtualClustersDelete_568197, base: "",
-    url: url_VirtualClustersDelete_568198, schemes: {Scheme.Https})
+    validator: validate_VirtualClustersDelete_564097, base: "",
+    url: url_VirtualClustersDelete_564098, schemes: {Scheme.Https})
 export
   rest
 

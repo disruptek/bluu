@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, httpcore
 
 ## auto-generated via openapi macro
 ## title: StorageManagementClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_567657 = ref object of OpenApiRestCall
+  OpenApiRestCall_563555 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_567657](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563555](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_567657): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563555): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,8 +107,8 @@ const
   macServiceName = "storage-managementpolicy"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_ManagementPoliciesCreateOrUpdate_568207 = ref object of OpenApiRestCall_567657
-proc url_ManagementPoliciesCreateOrUpdate_568209(protocol: Scheme; host: string;
+  Call_ManagementPoliciesCreateOrUpdate_564107 = ref object of OpenApiRestCall_563555
+proc url_ManagementPoliciesCreateOrUpdate_564109(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -131,44 +135,44 @@ proc url_ManagementPoliciesCreateOrUpdate_568209(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ManagementPoliciesCreateOrUpdate_568208(path: JsonNode;
+proc validate_ManagementPoliciesCreateOrUpdate_564108(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Sets the data policy rules associated with the specified storage account.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
   ##   subscriptionId: JString (required)
   ##                 : The ID of the target subscription.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
   ##   managementPolicyName: JString (required)
   ##                       : The name of the Storage Account Management Policy. It should always be 'default'
   ##   accountName: JString (required)
   ##              : The name of the storage account within the specified resource group. Storage account names must be between 3 and 24 characters in length and use numbers and lower-case letters only.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568227 = path.getOrDefault("resourceGroupName")
-  valid_568227 = validateParameter(valid_568227, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564127 = path.getOrDefault("subscriptionId")
+  valid_564127 = validateParameter(valid_564127, JString, required = true,
                                  default = nil)
-  if valid_568227 != nil:
-    section.add "resourceGroupName", valid_568227
-  var valid_568228 = path.getOrDefault("subscriptionId")
-  valid_568228 = validateParameter(valid_568228, JString, required = true,
+  if valid_564127 != nil:
+    section.add "subscriptionId", valid_564127
+  var valid_564128 = path.getOrDefault("resourceGroupName")
+  valid_564128 = validateParameter(valid_564128, JString, required = true,
                                  default = nil)
-  if valid_568228 != nil:
-    section.add "subscriptionId", valid_568228
-  var valid_568229 = path.getOrDefault("managementPolicyName")
-  valid_568229 = validateParameter(valid_568229, JString, required = true,
+  if valid_564128 != nil:
+    section.add "resourceGroupName", valid_564128
+  var valid_564129 = path.getOrDefault("managementPolicyName")
+  valid_564129 = validateParameter(valid_564129, JString, required = true,
                                  default = newJString("default"))
-  if valid_568229 != nil:
-    section.add "managementPolicyName", valid_568229
-  var valid_568230 = path.getOrDefault("accountName")
-  valid_568230 = validateParameter(valid_568230, JString, required = true,
+  if valid_564129 != nil:
+    section.add "managementPolicyName", valid_564129
+  var valid_564130 = path.getOrDefault("accountName")
+  valid_564130 = validateParameter(valid_564130, JString, required = true,
                                  default = nil)
-  if valid_568230 != nil:
-    section.add "accountName", valid_568230
+  if valid_564130 != nil:
+    section.add "accountName", valid_564130
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -176,11 +180,11 @@ proc validate_ManagementPoliciesCreateOrUpdate_568208(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568231 = query.getOrDefault("api-version")
-  valid_568231 = validateParameter(valid_568231, JString, required = true,
+  var valid_564131 = query.getOrDefault("api-version")
+  valid_564131 = validateParameter(valid_564131, JString, required = true,
                                  default = nil)
-  if valid_568231 != nil:
-    section.add "api-version", valid_568231
+  if valid_564131 != nil:
+    section.add "api-version", valid_564131
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -194,58 +198,58 @@ proc validate_ManagementPoliciesCreateOrUpdate_568208(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568233: Call_ManagementPoliciesCreateOrUpdate_568207;
+proc call*(call_564133: Call_ManagementPoliciesCreateOrUpdate_564107;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Sets the data policy rules associated with the specified storage account.
   ## 
-  let valid = call_568233.validator(path, query, header, formData, body)
-  let scheme = call_568233.pickScheme
+  let valid = call_564133.validator(path, query, header, formData, body)
+  let scheme = call_564133.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568233.url(scheme.get, call_568233.host, call_568233.base,
-                         call_568233.route, valid.getOrDefault("path"),
+  let url = call_564133.url(scheme.get, call_564133.host, call_564133.base,
+                         call_564133.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568233, url, valid)
+  result = hook(call_564133, url, valid)
 
-proc call*(call_568234: Call_ManagementPoliciesCreateOrUpdate_568207;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          properties: JsonNode; accountName: string;
+proc call*(call_564134: Call_ManagementPoliciesCreateOrUpdate_564107;
+          properties: JsonNode; apiVersion: string; subscriptionId: string;
+          resourceGroupName: string; accountName: string;
           managementPolicyName: string = "default"): Recallable =
   ## managementPoliciesCreateOrUpdate
   ## Sets the data policy rules associated with the specified storage account.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
+  ##   properties: JObject (required)
+  ##             : The data policy rules to set to a storage account.
   ##   apiVersion: string (required)
   ##             : The API version to use for this operation.
   ##   subscriptionId: string (required)
   ##                 : The ID of the target subscription.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
   ##   managementPolicyName: string (required)
   ##                       : The name of the Storage Account Management Policy. It should always be 'default'
-  ##   properties: JObject (required)
-  ##             : The data policy rules to set to a storage account.
   ##   accountName: string (required)
   ##              : The name of the storage account within the specified resource group. Storage account names must be between 3 and 24 characters in length and use numbers and lower-case letters only.
-  var path_568235 = newJObject()
-  var query_568236 = newJObject()
-  var body_568237 = newJObject()
-  add(path_568235, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568236, "api-version", newJString(apiVersion))
-  add(path_568235, "subscriptionId", newJString(subscriptionId))
-  add(path_568235, "managementPolicyName", newJString(managementPolicyName))
+  var path_564135 = newJObject()
+  var query_564136 = newJObject()
+  var body_564137 = newJObject()
   if properties != nil:
-    body_568237 = properties
-  add(path_568235, "accountName", newJString(accountName))
-  result = call_568234.call(path_568235, query_568236, nil, nil, body_568237)
+    body_564137 = properties
+  add(query_564136, "api-version", newJString(apiVersion))
+  add(path_564135, "subscriptionId", newJString(subscriptionId))
+  add(path_564135, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564135, "managementPolicyName", newJString(managementPolicyName))
+  add(path_564135, "accountName", newJString(accountName))
+  result = call_564134.call(path_564135, query_564136, nil, nil, body_564137)
 
-var managementPoliciesCreateOrUpdate* = Call_ManagementPoliciesCreateOrUpdate_568207(
+var managementPoliciesCreateOrUpdate* = Call_ManagementPoliciesCreateOrUpdate_564107(
     name: "managementPoliciesCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Storage/storageAccounts/{accountName}/managementPolicies/{managementPolicyName}",
-    validator: validate_ManagementPoliciesCreateOrUpdate_568208, base: "",
-    url: url_ManagementPoliciesCreateOrUpdate_568209, schemes: {Scheme.Https})
+    validator: validate_ManagementPoliciesCreateOrUpdate_564108, base: "",
+    url: url_ManagementPoliciesCreateOrUpdate_564109, schemes: {Scheme.Https})
 type
-  Call_ManagementPoliciesGet_567879 = ref object of OpenApiRestCall_567657
-proc url_ManagementPoliciesGet_567881(protocol: Scheme; host: string; base: string;
+  Call_ManagementPoliciesGet_563777 = ref object of OpenApiRestCall_563555
+proc url_ManagementPoliciesGet_563779(protocol: Scheme; host: string; base: string;
                                      route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -272,44 +276,44 @@ proc url_ManagementPoliciesGet_567881(protocol: Scheme; host: string; base: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ManagementPoliciesGet_567880(path: JsonNode; query: JsonNode;
+proc validate_ManagementPoliciesGet_563778(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the data policy rules associated with the specified storage account.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
   ##   subscriptionId: JString (required)
   ##                 : The ID of the target subscription.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
   ##   managementPolicyName: JString (required)
   ##                       : The name of the Storage Account Management Policy. It should always be 'default'
   ##   accountName: JString (required)
   ##              : The name of the storage account within the specified resource group. Storage account names must be between 3 and 24 characters in length and use numbers and lower-case letters only.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568054 = path.getOrDefault("resourceGroupName")
-  valid_568054 = validateParameter(valid_568054, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_563954 = path.getOrDefault("subscriptionId")
+  valid_563954 = validateParameter(valid_563954, JString, required = true,
                                  default = nil)
-  if valid_568054 != nil:
-    section.add "resourceGroupName", valid_568054
-  var valid_568055 = path.getOrDefault("subscriptionId")
-  valid_568055 = validateParameter(valid_568055, JString, required = true,
+  if valid_563954 != nil:
+    section.add "subscriptionId", valid_563954
+  var valid_563955 = path.getOrDefault("resourceGroupName")
+  valid_563955 = validateParameter(valid_563955, JString, required = true,
                                  default = nil)
-  if valid_568055 != nil:
-    section.add "subscriptionId", valid_568055
-  var valid_568069 = path.getOrDefault("managementPolicyName")
-  valid_568069 = validateParameter(valid_568069, JString, required = true,
+  if valid_563955 != nil:
+    section.add "resourceGroupName", valid_563955
+  var valid_563969 = path.getOrDefault("managementPolicyName")
+  valid_563969 = validateParameter(valid_563969, JString, required = true,
                                  default = newJString("default"))
-  if valid_568069 != nil:
-    section.add "managementPolicyName", valid_568069
-  var valid_568070 = path.getOrDefault("accountName")
-  valid_568070 = validateParameter(valid_568070, JString, required = true,
+  if valid_563969 != nil:
+    section.add "managementPolicyName", valid_563969
+  var valid_563970 = path.getOrDefault("accountName")
+  valid_563970 = validateParameter(valid_563970, JString, required = true,
                                  default = nil)
-  if valid_568070 != nil:
-    section.add "accountName", valid_568070
+  if valid_563970 != nil:
+    section.add "accountName", valid_563970
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -317,11 +321,11 @@ proc validate_ManagementPoliciesGet_567880(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568071 = query.getOrDefault("api-version")
-  valid_568071 = validateParameter(valid_568071, JString, required = true,
+  var valid_563971 = query.getOrDefault("api-version")
+  valid_563971 = validateParameter(valid_563971, JString, required = true,
                                  default = nil)
-  if valid_568071 != nil:
-    section.add "api-version", valid_568071
+  if valid_563971 != nil:
+    section.add "api-version", valid_563971
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -330,51 +334,51 @@ proc validate_ManagementPoliciesGet_567880(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568094: Call_ManagementPoliciesGet_567879; path: JsonNode;
+proc call*(call_563994: Call_ManagementPoliciesGet_563777; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the data policy rules associated with the specified storage account.
   ## 
-  let valid = call_568094.validator(path, query, header, formData, body)
-  let scheme = call_568094.pickScheme
+  let valid = call_563994.validator(path, query, header, formData, body)
+  let scheme = call_563994.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568094.url(scheme.get, call_568094.host, call_568094.base,
-                         call_568094.route, valid.getOrDefault("path"),
+  let url = call_563994.url(scheme.get, call_563994.host, call_563994.base,
+                         call_563994.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568094, url, valid)
+  result = hook(call_563994, url, valid)
 
-proc call*(call_568165: Call_ManagementPoliciesGet_567879;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          accountName: string; managementPolicyName: string = "default"): Recallable =
+proc call*(call_564065: Call_ManagementPoliciesGet_563777; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string; accountName: string;
+          managementPolicyName: string = "default"): Recallable =
   ## managementPoliciesGet
   ## Gets the data policy rules associated with the specified storage account.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
   ##   apiVersion: string (required)
   ##             : The API version to use for this operation.
   ##   subscriptionId: string (required)
   ##                 : The ID of the target subscription.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
   ##   managementPolicyName: string (required)
   ##                       : The name of the Storage Account Management Policy. It should always be 'default'
   ##   accountName: string (required)
   ##              : The name of the storage account within the specified resource group. Storage account names must be between 3 and 24 characters in length and use numbers and lower-case letters only.
-  var path_568166 = newJObject()
-  var query_568168 = newJObject()
-  add(path_568166, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568168, "api-version", newJString(apiVersion))
-  add(path_568166, "subscriptionId", newJString(subscriptionId))
-  add(path_568166, "managementPolicyName", newJString(managementPolicyName))
-  add(path_568166, "accountName", newJString(accountName))
-  result = call_568165.call(path_568166, query_568168, nil, nil, nil)
+  var path_564066 = newJObject()
+  var query_564068 = newJObject()
+  add(query_564068, "api-version", newJString(apiVersion))
+  add(path_564066, "subscriptionId", newJString(subscriptionId))
+  add(path_564066, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564066, "managementPolicyName", newJString(managementPolicyName))
+  add(path_564066, "accountName", newJString(accountName))
+  result = call_564065.call(path_564066, query_564068, nil, nil, nil)
 
-var managementPoliciesGet* = Call_ManagementPoliciesGet_567879(
+var managementPoliciesGet* = Call_ManagementPoliciesGet_563777(
     name: "managementPoliciesGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Storage/storageAccounts/{accountName}/managementPolicies/{managementPolicyName}",
-    validator: validate_ManagementPoliciesGet_567880, base: "",
-    url: url_ManagementPoliciesGet_567881, schemes: {Scheme.Https})
+    validator: validate_ManagementPoliciesGet_563778, base: "",
+    url: url_ManagementPoliciesGet_563779, schemes: {Scheme.Https})
 type
-  Call_ManagementPoliciesDelete_568238 = ref object of OpenApiRestCall_567657
-proc url_ManagementPoliciesDelete_568240(protocol: Scheme; host: string;
+  Call_ManagementPoliciesDelete_564138 = ref object of OpenApiRestCall_563555
+proc url_ManagementPoliciesDelete_564140(protocol: Scheme; host: string;
                                         base: string; route: string; path: JsonNode;
                                         query: JsonNode): Uri =
   result.scheme = $protocol
@@ -402,44 +406,44 @@ proc url_ManagementPoliciesDelete_568240(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ManagementPoliciesDelete_568239(path: JsonNode; query: JsonNode;
+proc validate_ManagementPoliciesDelete_564139(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Deletes the data policy rules associated with the specified storage account.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
   ##   subscriptionId: JString (required)
   ##                 : The ID of the target subscription.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
   ##   managementPolicyName: JString (required)
   ##                       : The name of the Storage Account Management Policy. It should always be 'default'
   ##   accountName: JString (required)
   ##              : The name of the storage account within the specified resource group. Storage account names must be between 3 and 24 characters in length and use numbers and lower-case letters only.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568241 = path.getOrDefault("resourceGroupName")
-  valid_568241 = validateParameter(valid_568241, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564141 = path.getOrDefault("subscriptionId")
+  valid_564141 = validateParameter(valid_564141, JString, required = true,
                                  default = nil)
-  if valid_568241 != nil:
-    section.add "resourceGroupName", valid_568241
-  var valid_568242 = path.getOrDefault("subscriptionId")
-  valid_568242 = validateParameter(valid_568242, JString, required = true,
+  if valid_564141 != nil:
+    section.add "subscriptionId", valid_564141
+  var valid_564142 = path.getOrDefault("resourceGroupName")
+  valid_564142 = validateParameter(valid_564142, JString, required = true,
                                  default = nil)
-  if valid_568242 != nil:
-    section.add "subscriptionId", valid_568242
-  var valid_568243 = path.getOrDefault("managementPolicyName")
-  valid_568243 = validateParameter(valid_568243, JString, required = true,
+  if valid_564142 != nil:
+    section.add "resourceGroupName", valid_564142
+  var valid_564143 = path.getOrDefault("managementPolicyName")
+  valid_564143 = validateParameter(valid_564143, JString, required = true,
                                  default = newJString("default"))
-  if valid_568243 != nil:
-    section.add "managementPolicyName", valid_568243
-  var valid_568244 = path.getOrDefault("accountName")
-  valid_568244 = validateParameter(valid_568244, JString, required = true,
+  if valid_564143 != nil:
+    section.add "managementPolicyName", valid_564143
+  var valid_564144 = path.getOrDefault("accountName")
+  valid_564144 = validateParameter(valid_564144, JString, required = true,
                                  default = nil)
-  if valid_568244 != nil:
-    section.add "accountName", valid_568244
+  if valid_564144 != nil:
+    section.add "accountName", valid_564144
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -447,11 +451,11 @@ proc validate_ManagementPoliciesDelete_568239(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568245 = query.getOrDefault("api-version")
-  valid_568245 = validateParameter(valid_568245, JString, required = true,
+  var valid_564145 = query.getOrDefault("api-version")
+  valid_564145 = validateParameter(valid_564145, JString, required = true,
                                  default = nil)
-  if valid_568245 != nil:
-    section.add "api-version", valid_568245
+  if valid_564145 != nil:
+    section.add "api-version", valid_564145
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -460,48 +464,48 @@ proc validate_ManagementPoliciesDelete_568239(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568246: Call_ManagementPoliciesDelete_568238; path: JsonNode;
+proc call*(call_564146: Call_ManagementPoliciesDelete_564138; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes the data policy rules associated with the specified storage account.
   ## 
-  let valid = call_568246.validator(path, query, header, formData, body)
-  let scheme = call_568246.pickScheme
+  let valid = call_564146.validator(path, query, header, formData, body)
+  let scheme = call_564146.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568246.url(scheme.get, call_568246.host, call_568246.base,
-                         call_568246.route, valid.getOrDefault("path"),
+  let url = call_564146.url(scheme.get, call_564146.host, call_564146.base,
+                         call_564146.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568246, url, valid)
+  result = hook(call_564146, url, valid)
 
-proc call*(call_568247: Call_ManagementPoliciesDelete_568238;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          accountName: string; managementPolicyName: string = "default"): Recallable =
+proc call*(call_564147: Call_ManagementPoliciesDelete_564138; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string; accountName: string;
+          managementPolicyName: string = "default"): Recallable =
   ## managementPoliciesDelete
   ## Deletes the data policy rules associated with the specified storage account.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
   ##   apiVersion: string (required)
   ##             : The API version to use for this operation.
   ##   subscriptionId: string (required)
   ##                 : The ID of the target subscription.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
   ##   managementPolicyName: string (required)
   ##                       : The name of the Storage Account Management Policy. It should always be 'default'
   ##   accountName: string (required)
   ##              : The name of the storage account within the specified resource group. Storage account names must be between 3 and 24 characters in length and use numbers and lower-case letters only.
-  var path_568248 = newJObject()
-  var query_568249 = newJObject()
-  add(path_568248, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568249, "api-version", newJString(apiVersion))
-  add(path_568248, "subscriptionId", newJString(subscriptionId))
-  add(path_568248, "managementPolicyName", newJString(managementPolicyName))
-  add(path_568248, "accountName", newJString(accountName))
-  result = call_568247.call(path_568248, query_568249, nil, nil, nil)
+  var path_564148 = newJObject()
+  var query_564149 = newJObject()
+  add(query_564149, "api-version", newJString(apiVersion))
+  add(path_564148, "subscriptionId", newJString(subscriptionId))
+  add(path_564148, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564148, "managementPolicyName", newJString(managementPolicyName))
+  add(path_564148, "accountName", newJString(accountName))
+  result = call_564147.call(path_564148, query_564149, nil, nil, nil)
 
-var managementPoliciesDelete* = Call_ManagementPoliciesDelete_568238(
+var managementPoliciesDelete* = Call_ManagementPoliciesDelete_564138(
     name: "managementPoliciesDelete", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Storage/storageAccounts/{accountName}/managementPolicies/{managementPolicyName}",
-    validator: validate_ManagementPoliciesDelete_568239, base: "",
-    url: url_ManagementPoliciesDelete_568240, schemes: {Scheme.Https})
+    validator: validate_ManagementPoliciesDelete_564139, base: "",
+    url: url_ManagementPoliciesDelete_564140, schemes: {Scheme.Https})
 export
   rest
 

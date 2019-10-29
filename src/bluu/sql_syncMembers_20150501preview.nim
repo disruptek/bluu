@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, httpcore
 
 ## auto-generated via openapi macro
 ## title: SqlManagementClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_567641 = ref object of OpenApiRestCall
+  OpenApiRestCall_563539 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_567641](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563539](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_567641): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563539): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,8 +107,8 @@ const
   macServiceName = "sql-syncMembers"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_SyncMembersListBySyncGroup_567863 = ref object of OpenApiRestCall_567641
-proc url_SyncMembersListBySyncGroup_567865(protocol: Scheme; host: string;
+  Call_SyncMembersListBySyncGroup_563761 = ref object of OpenApiRestCall_563539
+proc url_SyncMembersListBySyncGroup_563763(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -133,51 +137,51 @@ proc url_SyncMembersListBySyncGroup_567865(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_SyncMembersListBySyncGroup_567864(path: JsonNode; query: JsonNode;
+proc validate_SyncMembersListBySyncGroup_563762(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists sync members in the given sync group.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
+  ##   syncGroupName: JString (required)
+  ##                : The name of the sync group.
   ##   serverName: JString (required)
   ##             : The name of the server.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID that identifies an Azure subscription.
   ##   databaseName: JString (required)
   ##               : The name of the database on which the sync group is hosted.
-  ##   syncGroupName: JString (required)
-  ##                : The name of the sync group.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568038 = path.getOrDefault("resourceGroupName")
-  valid_568038 = validateParameter(valid_568038, JString, required = true,
+        "path argument is necessary due to required `syncGroupName` field"
+  var valid_563938 = path.getOrDefault("syncGroupName")
+  valid_563938 = validateParameter(valid_563938, JString, required = true,
                                  default = nil)
-  if valid_568038 != nil:
-    section.add "resourceGroupName", valid_568038
-  var valid_568039 = path.getOrDefault("serverName")
-  valid_568039 = validateParameter(valid_568039, JString, required = true,
+  if valid_563938 != nil:
+    section.add "syncGroupName", valid_563938
+  var valid_563939 = path.getOrDefault("serverName")
+  valid_563939 = validateParameter(valid_563939, JString, required = true,
                                  default = nil)
-  if valid_568039 != nil:
-    section.add "serverName", valid_568039
-  var valid_568040 = path.getOrDefault("subscriptionId")
-  valid_568040 = validateParameter(valid_568040, JString, required = true,
+  if valid_563939 != nil:
+    section.add "serverName", valid_563939
+  var valid_563940 = path.getOrDefault("subscriptionId")
+  valid_563940 = validateParameter(valid_563940, JString, required = true,
                                  default = nil)
-  if valid_568040 != nil:
-    section.add "subscriptionId", valid_568040
-  var valid_568041 = path.getOrDefault("databaseName")
-  valid_568041 = validateParameter(valid_568041, JString, required = true,
+  if valid_563940 != nil:
+    section.add "subscriptionId", valid_563940
+  var valid_563941 = path.getOrDefault("databaseName")
+  valid_563941 = validateParameter(valid_563941, JString, required = true,
                                  default = nil)
-  if valid_568041 != nil:
-    section.add "databaseName", valid_568041
-  var valid_568042 = path.getOrDefault("syncGroupName")
-  valid_568042 = validateParameter(valid_568042, JString, required = true,
+  if valid_563941 != nil:
+    section.add "databaseName", valid_563941
+  var valid_563942 = path.getOrDefault("resourceGroupName")
+  valid_563942 = validateParameter(valid_563942, JString, required = true,
                                  default = nil)
-  if valid_568042 != nil:
-    section.add "syncGroupName", valid_568042
+  if valid_563942 != nil:
+    section.add "resourceGroupName", valid_563942
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -185,11 +189,11 @@ proc validate_SyncMembersListBySyncGroup_567864(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568043 = query.getOrDefault("api-version")
-  valid_568043 = validateParameter(valid_568043, JString, required = true,
+  var valid_563943 = query.getOrDefault("api-version")
+  valid_563943 = validateParameter(valid_563943, JString, required = true,
                                  default = nil)
-  if valid_568043 != nil:
-    section.add "api-version", valid_568043
+  if valid_563943 != nil:
+    section.add "api-version", valid_563943
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -198,26 +202,26 @@ proc validate_SyncMembersListBySyncGroup_567864(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568066: Call_SyncMembersListBySyncGroup_567863; path: JsonNode;
+proc call*(call_563966: Call_SyncMembersListBySyncGroup_563761; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists sync members in the given sync group.
   ## 
-  let valid = call_568066.validator(path, query, header, formData, body)
-  let scheme = call_568066.pickScheme
+  let valid = call_563966.validator(path, query, header, formData, body)
+  let scheme = call_563966.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568066.url(scheme.get, call_568066.host, call_568066.base,
-                         call_568066.route, valid.getOrDefault("path"),
+  let url = call_563966.url(scheme.get, call_563966.host, call_563966.base,
+                         call_563966.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568066, url, valid)
+  result = hook(call_563966, url, valid)
 
-proc call*(call_568137: Call_SyncMembersListBySyncGroup_567863;
-          resourceGroupName: string; apiVersion: string; serverName: string;
-          subscriptionId: string; databaseName: string; syncGroupName: string): Recallable =
+proc call*(call_564037: Call_SyncMembersListBySyncGroup_563761;
+          syncGroupName: string; apiVersion: string; serverName: string;
+          subscriptionId: string; databaseName: string; resourceGroupName: string): Recallable =
   ## syncMembersListBySyncGroup
   ## Lists sync members in the given sync group.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
+  ##   syncGroupName: string (required)
+  ##                : The name of the sync group.
   ##   apiVersion: string (required)
   ##             : The API version to use for the request.
   ##   serverName: string (required)
@@ -226,26 +230,26 @@ proc call*(call_568137: Call_SyncMembersListBySyncGroup_567863;
   ##                 : The subscription ID that identifies an Azure subscription.
   ##   databaseName: string (required)
   ##               : The name of the database on which the sync group is hosted.
-  ##   syncGroupName: string (required)
-  ##                : The name of the sync group.
-  var path_568138 = newJObject()
-  var query_568140 = newJObject()
-  add(path_568138, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568140, "api-version", newJString(apiVersion))
-  add(path_568138, "serverName", newJString(serverName))
-  add(path_568138, "subscriptionId", newJString(subscriptionId))
-  add(path_568138, "databaseName", newJString(databaseName))
-  add(path_568138, "syncGroupName", newJString(syncGroupName))
-  result = call_568137.call(path_568138, query_568140, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
+  var path_564038 = newJObject()
+  var query_564040 = newJObject()
+  add(path_564038, "syncGroupName", newJString(syncGroupName))
+  add(query_564040, "api-version", newJString(apiVersion))
+  add(path_564038, "serverName", newJString(serverName))
+  add(path_564038, "subscriptionId", newJString(subscriptionId))
+  add(path_564038, "databaseName", newJString(databaseName))
+  add(path_564038, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564037.call(path_564038, query_564040, nil, nil, nil)
 
-var syncMembersListBySyncGroup* = Call_SyncMembersListBySyncGroup_567863(
+var syncMembersListBySyncGroup* = Call_SyncMembersListBySyncGroup_563761(
     name: "syncMembersListBySyncGroup", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/servers/{serverName}/databases/{databaseName}/syncGroups/{syncGroupName}/syncMembers",
-    validator: validate_SyncMembersListBySyncGroup_567864, base: "",
-    url: url_SyncMembersListBySyncGroup_567865, schemes: {Scheme.Https})
+    validator: validate_SyncMembersListBySyncGroup_563762, base: "",
+    url: url_SyncMembersListBySyncGroup_563763, schemes: {Scheme.Https})
 type
-  Call_SyncMembersCreateOrUpdate_568193 = ref object of OpenApiRestCall_567641
-proc url_SyncMembersCreateOrUpdate_568195(protocol: Scheme; host: string;
+  Call_SyncMembersCreateOrUpdate_564093 = ref object of OpenApiRestCall_563539
+proc url_SyncMembersCreateOrUpdate_564095(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -276,58 +280,58 @@ proc url_SyncMembersCreateOrUpdate_568195(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_SyncMembersCreateOrUpdate_568194(path: JsonNode; query: JsonNode;
+proc validate_SyncMembersCreateOrUpdate_564094(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Creates or updates a sync member.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
-  ##   syncMemberName: JString (required)
-  ##                 : The name of the sync member.
+  ##   syncGroupName: JString (required)
+  ##                : The name of the sync group on which the sync member is hosted.
   ##   serverName: JString (required)
   ##             : The name of the server.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID that identifies an Azure subscription.
   ##   databaseName: JString (required)
   ##               : The name of the database on which the sync group is hosted.
-  ##   syncGroupName: JString (required)
-  ##                : The name of the sync group on which the sync member is hosted.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
+  ##   syncMemberName: JString (required)
+  ##                 : The name of the sync member.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568196 = path.getOrDefault("resourceGroupName")
-  valid_568196 = validateParameter(valid_568196, JString, required = true,
+        "path argument is necessary due to required `syncGroupName` field"
+  var valid_564096 = path.getOrDefault("syncGroupName")
+  valid_564096 = validateParameter(valid_564096, JString, required = true,
                                  default = nil)
-  if valid_568196 != nil:
-    section.add "resourceGroupName", valid_568196
-  var valid_568197 = path.getOrDefault("syncMemberName")
-  valid_568197 = validateParameter(valid_568197, JString, required = true,
+  if valid_564096 != nil:
+    section.add "syncGroupName", valid_564096
+  var valid_564097 = path.getOrDefault("serverName")
+  valid_564097 = validateParameter(valid_564097, JString, required = true,
                                  default = nil)
-  if valid_568197 != nil:
-    section.add "syncMemberName", valid_568197
-  var valid_568198 = path.getOrDefault("serverName")
-  valid_568198 = validateParameter(valid_568198, JString, required = true,
+  if valid_564097 != nil:
+    section.add "serverName", valid_564097
+  var valid_564098 = path.getOrDefault("subscriptionId")
+  valid_564098 = validateParameter(valid_564098, JString, required = true,
                                  default = nil)
-  if valid_568198 != nil:
-    section.add "serverName", valid_568198
-  var valid_568199 = path.getOrDefault("subscriptionId")
-  valid_568199 = validateParameter(valid_568199, JString, required = true,
+  if valid_564098 != nil:
+    section.add "subscriptionId", valid_564098
+  var valid_564099 = path.getOrDefault("databaseName")
+  valid_564099 = validateParameter(valid_564099, JString, required = true,
                                  default = nil)
-  if valid_568199 != nil:
-    section.add "subscriptionId", valid_568199
-  var valid_568200 = path.getOrDefault("databaseName")
-  valid_568200 = validateParameter(valid_568200, JString, required = true,
+  if valid_564099 != nil:
+    section.add "databaseName", valid_564099
+  var valid_564100 = path.getOrDefault("resourceGroupName")
+  valid_564100 = validateParameter(valid_564100, JString, required = true,
                                  default = nil)
-  if valid_568200 != nil:
-    section.add "databaseName", valid_568200
-  var valid_568201 = path.getOrDefault("syncGroupName")
-  valid_568201 = validateParameter(valid_568201, JString, required = true,
+  if valid_564100 != nil:
+    section.add "resourceGroupName", valid_564100
+  var valid_564101 = path.getOrDefault("syncMemberName")
+  valid_564101 = validateParameter(valid_564101, JString, required = true,
                                  default = nil)
-  if valid_568201 != nil:
-    section.add "syncGroupName", valid_568201
+  if valid_564101 != nil:
+    section.add "syncMemberName", valid_564101
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -335,11 +339,11 @@ proc validate_SyncMembersCreateOrUpdate_568194(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568202 = query.getOrDefault("api-version")
-  valid_568202 = validateParameter(valid_568202, JString, required = true,
+  var valid_564102 = query.getOrDefault("api-version")
+  valid_564102 = validateParameter(valid_564102, JString, required = true,
                                  default = nil)
-  if valid_568202 != nil:
-    section.add "api-version", valid_568202
+  if valid_564102 != nil:
+    section.add "api-version", valid_564102
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -353,29 +357,27 @@ proc validate_SyncMembersCreateOrUpdate_568194(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568204: Call_SyncMembersCreateOrUpdate_568193; path: JsonNode;
+proc call*(call_564104: Call_SyncMembersCreateOrUpdate_564093; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Creates or updates a sync member.
   ## 
-  let valid = call_568204.validator(path, query, header, formData, body)
-  let scheme = call_568204.pickScheme
+  let valid = call_564104.validator(path, query, header, formData, body)
+  let scheme = call_564104.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568204.url(scheme.get, call_568204.host, call_568204.base,
-                         call_568204.route, valid.getOrDefault("path"),
+  let url = call_564104.url(scheme.get, call_564104.host, call_564104.base,
+                         call_564104.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568204, url, valid)
+  result = hook(call_564104, url, valid)
 
-proc call*(call_568205: Call_SyncMembersCreateOrUpdate_568193;
-          resourceGroupName: string; syncMemberName: string; apiVersion: string;
-          serverName: string; subscriptionId: string; databaseName: string;
-          syncGroupName: string; parameters: JsonNode): Recallable =
+proc call*(call_564105: Call_SyncMembersCreateOrUpdate_564093;
+          syncGroupName: string; apiVersion: string; serverName: string;
+          subscriptionId: string; databaseName: string; resourceGroupName: string;
+          syncMemberName: string; parameters: JsonNode): Recallable =
   ## syncMembersCreateOrUpdate
   ## Creates or updates a sync member.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
-  ##   syncMemberName: string (required)
-  ##                 : The name of the sync member.
+  ##   syncGroupName: string (required)
+  ##                : The name of the sync group on which the sync member is hosted.
   ##   apiVersion: string (required)
   ##             : The API version to use for the request.
   ##   serverName: string (required)
@@ -384,32 +386,34 @@ proc call*(call_568205: Call_SyncMembersCreateOrUpdate_568193;
   ##                 : The subscription ID that identifies an Azure subscription.
   ##   databaseName: string (required)
   ##               : The name of the database on which the sync group is hosted.
-  ##   syncGroupName: string (required)
-  ##                : The name of the sync group on which the sync member is hosted.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
+  ##   syncMemberName: string (required)
+  ##                 : The name of the sync member.
   ##   parameters: JObject (required)
   ##             : The requested sync member resource state.
-  var path_568206 = newJObject()
-  var query_568207 = newJObject()
-  var body_568208 = newJObject()
-  add(path_568206, "resourceGroupName", newJString(resourceGroupName))
-  add(path_568206, "syncMemberName", newJString(syncMemberName))
-  add(query_568207, "api-version", newJString(apiVersion))
-  add(path_568206, "serverName", newJString(serverName))
-  add(path_568206, "subscriptionId", newJString(subscriptionId))
-  add(path_568206, "databaseName", newJString(databaseName))
-  add(path_568206, "syncGroupName", newJString(syncGroupName))
+  var path_564106 = newJObject()
+  var query_564107 = newJObject()
+  var body_564108 = newJObject()
+  add(path_564106, "syncGroupName", newJString(syncGroupName))
+  add(query_564107, "api-version", newJString(apiVersion))
+  add(path_564106, "serverName", newJString(serverName))
+  add(path_564106, "subscriptionId", newJString(subscriptionId))
+  add(path_564106, "databaseName", newJString(databaseName))
+  add(path_564106, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564106, "syncMemberName", newJString(syncMemberName))
   if parameters != nil:
-    body_568208 = parameters
-  result = call_568205.call(path_568206, query_568207, nil, nil, body_568208)
+    body_564108 = parameters
+  result = call_564105.call(path_564106, query_564107, nil, nil, body_564108)
 
-var syncMembersCreateOrUpdate* = Call_SyncMembersCreateOrUpdate_568193(
+var syncMembersCreateOrUpdate* = Call_SyncMembersCreateOrUpdate_564093(
     name: "syncMembersCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/servers/{serverName}/databases/{databaseName}/syncGroups/{syncGroupName}/syncMembers/{syncMemberName}",
-    validator: validate_SyncMembersCreateOrUpdate_568194, base: "",
-    url: url_SyncMembersCreateOrUpdate_568195, schemes: {Scheme.Https})
+    validator: validate_SyncMembersCreateOrUpdate_564094, base: "",
+    url: url_SyncMembersCreateOrUpdate_564095, schemes: {Scheme.Https})
 type
-  Call_SyncMembersGet_568179 = ref object of OpenApiRestCall_567641
-proc url_SyncMembersGet_568181(protocol: Scheme; host: string; base: string;
+  Call_SyncMembersGet_564079 = ref object of OpenApiRestCall_563539
+proc url_SyncMembersGet_564081(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -440,7 +444,7 @@ proc url_SyncMembersGet_568181(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_SyncMembersGet_568180(path: JsonNode; query: JsonNode;
+proc validate_SyncMembersGet_564080(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## Gets a sync member.
@@ -448,51 +452,51 @@ proc validate_SyncMembersGet_568180(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
-  ##   syncMemberName: JString (required)
-  ##                 : The name of the sync member.
+  ##   syncGroupName: JString (required)
+  ##                : The name of the sync group on which the sync member is hosted.
   ##   serverName: JString (required)
   ##             : The name of the server.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID that identifies an Azure subscription.
   ##   databaseName: JString (required)
   ##               : The name of the database on which the sync group is hosted.
-  ##   syncGroupName: JString (required)
-  ##                : The name of the sync group on which the sync member is hosted.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
+  ##   syncMemberName: JString (required)
+  ##                 : The name of the sync member.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568182 = path.getOrDefault("resourceGroupName")
-  valid_568182 = validateParameter(valid_568182, JString, required = true,
+        "path argument is necessary due to required `syncGroupName` field"
+  var valid_564082 = path.getOrDefault("syncGroupName")
+  valid_564082 = validateParameter(valid_564082, JString, required = true,
                                  default = nil)
-  if valid_568182 != nil:
-    section.add "resourceGroupName", valid_568182
-  var valid_568183 = path.getOrDefault("syncMemberName")
-  valid_568183 = validateParameter(valid_568183, JString, required = true,
+  if valid_564082 != nil:
+    section.add "syncGroupName", valid_564082
+  var valid_564083 = path.getOrDefault("serverName")
+  valid_564083 = validateParameter(valid_564083, JString, required = true,
                                  default = nil)
-  if valid_568183 != nil:
-    section.add "syncMemberName", valid_568183
-  var valid_568184 = path.getOrDefault("serverName")
-  valid_568184 = validateParameter(valid_568184, JString, required = true,
+  if valid_564083 != nil:
+    section.add "serverName", valid_564083
+  var valid_564084 = path.getOrDefault("subscriptionId")
+  valid_564084 = validateParameter(valid_564084, JString, required = true,
                                  default = nil)
-  if valid_568184 != nil:
-    section.add "serverName", valid_568184
-  var valid_568185 = path.getOrDefault("subscriptionId")
-  valid_568185 = validateParameter(valid_568185, JString, required = true,
+  if valid_564084 != nil:
+    section.add "subscriptionId", valid_564084
+  var valid_564085 = path.getOrDefault("databaseName")
+  valid_564085 = validateParameter(valid_564085, JString, required = true,
                                  default = nil)
-  if valid_568185 != nil:
-    section.add "subscriptionId", valid_568185
-  var valid_568186 = path.getOrDefault("databaseName")
-  valid_568186 = validateParameter(valid_568186, JString, required = true,
+  if valid_564085 != nil:
+    section.add "databaseName", valid_564085
+  var valid_564086 = path.getOrDefault("resourceGroupName")
+  valid_564086 = validateParameter(valid_564086, JString, required = true,
                                  default = nil)
-  if valid_568186 != nil:
-    section.add "databaseName", valid_568186
-  var valid_568187 = path.getOrDefault("syncGroupName")
-  valid_568187 = validateParameter(valid_568187, JString, required = true,
+  if valid_564086 != nil:
+    section.add "resourceGroupName", valid_564086
+  var valid_564087 = path.getOrDefault("syncMemberName")
+  valid_564087 = validateParameter(valid_564087, JString, required = true,
                                  default = nil)
-  if valid_568187 != nil:
-    section.add "syncGroupName", valid_568187
+  if valid_564087 != nil:
+    section.add "syncMemberName", valid_564087
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -500,11 +504,11 @@ proc validate_SyncMembersGet_568180(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568188 = query.getOrDefault("api-version")
-  valid_568188 = validateParameter(valid_568188, JString, required = true,
+  var valid_564088 = query.getOrDefault("api-version")
+  valid_564088 = validateParameter(valid_564088, JString, required = true,
                                  default = nil)
-  if valid_568188 != nil:
-    section.add "api-version", valid_568188
+  if valid_564088 != nil:
+    section.add "api-version", valid_564088
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -513,28 +517,26 @@ proc validate_SyncMembersGet_568180(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568189: Call_SyncMembersGet_568179; path: JsonNode; query: JsonNode;
+proc call*(call_564089: Call_SyncMembersGet_564079; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets a sync member.
   ## 
-  let valid = call_568189.validator(path, query, header, formData, body)
-  let scheme = call_568189.pickScheme
+  let valid = call_564089.validator(path, query, header, formData, body)
+  let scheme = call_564089.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568189.url(scheme.get, call_568189.host, call_568189.base,
-                         call_568189.route, valid.getOrDefault("path"),
+  let url = call_564089.url(scheme.get, call_564089.host, call_564089.base,
+                         call_564089.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568189, url, valid)
+  result = hook(call_564089, url, valid)
 
-proc call*(call_568190: Call_SyncMembersGet_568179; resourceGroupName: string;
-          syncMemberName: string; apiVersion: string; serverName: string;
-          subscriptionId: string; databaseName: string; syncGroupName: string): Recallable =
+proc call*(call_564090: Call_SyncMembersGet_564079; syncGroupName: string;
+          apiVersion: string; serverName: string; subscriptionId: string;
+          databaseName: string; resourceGroupName: string; syncMemberName: string): Recallable =
   ## syncMembersGet
   ## Gets a sync member.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
-  ##   syncMemberName: string (required)
-  ##                 : The name of the sync member.
+  ##   syncGroupName: string (required)
+  ##                : The name of the sync group on which the sync member is hosted.
   ##   apiVersion: string (required)
   ##             : The API version to use for the request.
   ##   serverName: string (required)
@@ -543,26 +545,28 @@ proc call*(call_568190: Call_SyncMembersGet_568179; resourceGroupName: string;
   ##                 : The subscription ID that identifies an Azure subscription.
   ##   databaseName: string (required)
   ##               : The name of the database on which the sync group is hosted.
-  ##   syncGroupName: string (required)
-  ##                : The name of the sync group on which the sync member is hosted.
-  var path_568191 = newJObject()
-  var query_568192 = newJObject()
-  add(path_568191, "resourceGroupName", newJString(resourceGroupName))
-  add(path_568191, "syncMemberName", newJString(syncMemberName))
-  add(query_568192, "api-version", newJString(apiVersion))
-  add(path_568191, "serverName", newJString(serverName))
-  add(path_568191, "subscriptionId", newJString(subscriptionId))
-  add(path_568191, "databaseName", newJString(databaseName))
-  add(path_568191, "syncGroupName", newJString(syncGroupName))
-  result = call_568190.call(path_568191, query_568192, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
+  ##   syncMemberName: string (required)
+  ##                 : The name of the sync member.
+  var path_564091 = newJObject()
+  var query_564092 = newJObject()
+  add(path_564091, "syncGroupName", newJString(syncGroupName))
+  add(query_564092, "api-version", newJString(apiVersion))
+  add(path_564091, "serverName", newJString(serverName))
+  add(path_564091, "subscriptionId", newJString(subscriptionId))
+  add(path_564091, "databaseName", newJString(databaseName))
+  add(path_564091, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564091, "syncMemberName", newJString(syncMemberName))
+  result = call_564090.call(path_564091, query_564092, nil, nil, nil)
 
-var syncMembersGet* = Call_SyncMembersGet_568179(name: "syncMembersGet",
+var syncMembersGet* = Call_SyncMembersGet_564079(name: "syncMembersGet",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/servers/{serverName}/databases/{databaseName}/syncGroups/{syncGroupName}/syncMembers/{syncMemberName}",
-    validator: validate_SyncMembersGet_568180, base: "", url: url_SyncMembersGet_568181,
+    validator: validate_SyncMembersGet_564080, base: "", url: url_SyncMembersGet_564081,
     schemes: {Scheme.Https})
 type
-  Call_SyncMembersUpdate_568223 = ref object of OpenApiRestCall_567641
-proc url_SyncMembersUpdate_568225(protocol: Scheme; host: string; base: string;
+  Call_SyncMembersUpdate_564123 = ref object of OpenApiRestCall_563539
+proc url_SyncMembersUpdate_564125(protocol: Scheme; host: string; base: string;
                                  route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -593,7 +597,7 @@ proc url_SyncMembersUpdate_568225(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_SyncMembersUpdate_568224(path: JsonNode; query: JsonNode;
+proc validate_SyncMembersUpdate_564124(path: JsonNode; query: JsonNode;
                                       header: JsonNode; formData: JsonNode;
                                       body: JsonNode): JsonNode =
   ## Updates an existing sync member.
@@ -601,51 +605,51 @@ proc validate_SyncMembersUpdate_568224(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
-  ##   syncMemberName: JString (required)
-  ##                 : The name of the sync member.
+  ##   syncGroupName: JString (required)
+  ##                : The name of the sync group on which the sync member is hosted.
   ##   serverName: JString (required)
   ##             : The name of the server.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID that identifies an Azure subscription.
   ##   databaseName: JString (required)
   ##               : The name of the database on which the sync group is hosted.
-  ##   syncGroupName: JString (required)
-  ##                : The name of the sync group on which the sync member is hosted.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
+  ##   syncMemberName: JString (required)
+  ##                 : The name of the sync member.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568226 = path.getOrDefault("resourceGroupName")
-  valid_568226 = validateParameter(valid_568226, JString, required = true,
+        "path argument is necessary due to required `syncGroupName` field"
+  var valid_564126 = path.getOrDefault("syncGroupName")
+  valid_564126 = validateParameter(valid_564126, JString, required = true,
                                  default = nil)
-  if valid_568226 != nil:
-    section.add "resourceGroupName", valid_568226
-  var valid_568227 = path.getOrDefault("syncMemberName")
-  valid_568227 = validateParameter(valid_568227, JString, required = true,
+  if valid_564126 != nil:
+    section.add "syncGroupName", valid_564126
+  var valid_564127 = path.getOrDefault("serverName")
+  valid_564127 = validateParameter(valid_564127, JString, required = true,
                                  default = nil)
-  if valid_568227 != nil:
-    section.add "syncMemberName", valid_568227
-  var valid_568228 = path.getOrDefault("serverName")
-  valid_568228 = validateParameter(valid_568228, JString, required = true,
+  if valid_564127 != nil:
+    section.add "serverName", valid_564127
+  var valid_564128 = path.getOrDefault("subscriptionId")
+  valid_564128 = validateParameter(valid_564128, JString, required = true,
                                  default = nil)
-  if valid_568228 != nil:
-    section.add "serverName", valid_568228
-  var valid_568229 = path.getOrDefault("subscriptionId")
-  valid_568229 = validateParameter(valid_568229, JString, required = true,
+  if valid_564128 != nil:
+    section.add "subscriptionId", valid_564128
+  var valid_564129 = path.getOrDefault("databaseName")
+  valid_564129 = validateParameter(valid_564129, JString, required = true,
                                  default = nil)
-  if valid_568229 != nil:
-    section.add "subscriptionId", valid_568229
-  var valid_568230 = path.getOrDefault("databaseName")
-  valid_568230 = validateParameter(valid_568230, JString, required = true,
+  if valid_564129 != nil:
+    section.add "databaseName", valid_564129
+  var valid_564130 = path.getOrDefault("resourceGroupName")
+  valid_564130 = validateParameter(valid_564130, JString, required = true,
                                  default = nil)
-  if valid_568230 != nil:
-    section.add "databaseName", valid_568230
-  var valid_568231 = path.getOrDefault("syncGroupName")
-  valid_568231 = validateParameter(valid_568231, JString, required = true,
+  if valid_564130 != nil:
+    section.add "resourceGroupName", valid_564130
+  var valid_564131 = path.getOrDefault("syncMemberName")
+  valid_564131 = validateParameter(valid_564131, JString, required = true,
                                  default = nil)
-  if valid_568231 != nil:
-    section.add "syncGroupName", valid_568231
+  if valid_564131 != nil:
+    section.add "syncMemberName", valid_564131
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -653,11 +657,11 @@ proc validate_SyncMembersUpdate_568224(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568232 = query.getOrDefault("api-version")
-  valid_568232 = validateParameter(valid_568232, JString, required = true,
+  var valid_564132 = query.getOrDefault("api-version")
+  valid_564132 = validateParameter(valid_564132, JString, required = true,
                                  default = nil)
-  if valid_568232 != nil:
-    section.add "api-version", valid_568232
+  if valid_564132 != nil:
+    section.add "api-version", valid_564132
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -671,29 +675,27 @@ proc validate_SyncMembersUpdate_568224(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568234: Call_SyncMembersUpdate_568223; path: JsonNode;
+proc call*(call_564134: Call_SyncMembersUpdate_564123; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Updates an existing sync member.
   ## 
-  let valid = call_568234.validator(path, query, header, formData, body)
-  let scheme = call_568234.pickScheme
+  let valid = call_564134.validator(path, query, header, formData, body)
+  let scheme = call_564134.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568234.url(scheme.get, call_568234.host, call_568234.base,
-                         call_568234.route, valid.getOrDefault("path"),
+  let url = call_564134.url(scheme.get, call_564134.host, call_564134.base,
+                         call_564134.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568234, url, valid)
+  result = hook(call_564134, url, valid)
 
-proc call*(call_568235: Call_SyncMembersUpdate_568223; resourceGroupName: string;
-          syncMemberName: string; apiVersion: string; serverName: string;
-          subscriptionId: string; databaseName: string; syncGroupName: string;
+proc call*(call_564135: Call_SyncMembersUpdate_564123; syncGroupName: string;
+          apiVersion: string; serverName: string; subscriptionId: string;
+          databaseName: string; resourceGroupName: string; syncMemberName: string;
           parameters: JsonNode): Recallable =
   ## syncMembersUpdate
   ## Updates an existing sync member.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
-  ##   syncMemberName: string (required)
-  ##                 : The name of the sync member.
+  ##   syncGroupName: string (required)
+  ##                : The name of the sync group on which the sync member is hosted.
   ##   apiVersion: string (required)
   ##             : The API version to use for the request.
   ##   serverName: string (required)
@@ -702,31 +704,33 @@ proc call*(call_568235: Call_SyncMembersUpdate_568223; resourceGroupName: string
   ##                 : The subscription ID that identifies an Azure subscription.
   ##   databaseName: string (required)
   ##               : The name of the database on which the sync group is hosted.
-  ##   syncGroupName: string (required)
-  ##                : The name of the sync group on which the sync member is hosted.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
+  ##   syncMemberName: string (required)
+  ##                 : The name of the sync member.
   ##   parameters: JObject (required)
   ##             : The requested sync member resource state.
-  var path_568236 = newJObject()
-  var query_568237 = newJObject()
-  var body_568238 = newJObject()
-  add(path_568236, "resourceGroupName", newJString(resourceGroupName))
-  add(path_568236, "syncMemberName", newJString(syncMemberName))
-  add(query_568237, "api-version", newJString(apiVersion))
-  add(path_568236, "serverName", newJString(serverName))
-  add(path_568236, "subscriptionId", newJString(subscriptionId))
-  add(path_568236, "databaseName", newJString(databaseName))
-  add(path_568236, "syncGroupName", newJString(syncGroupName))
+  var path_564136 = newJObject()
+  var query_564137 = newJObject()
+  var body_564138 = newJObject()
+  add(path_564136, "syncGroupName", newJString(syncGroupName))
+  add(query_564137, "api-version", newJString(apiVersion))
+  add(path_564136, "serverName", newJString(serverName))
+  add(path_564136, "subscriptionId", newJString(subscriptionId))
+  add(path_564136, "databaseName", newJString(databaseName))
+  add(path_564136, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564136, "syncMemberName", newJString(syncMemberName))
   if parameters != nil:
-    body_568238 = parameters
-  result = call_568235.call(path_568236, query_568237, nil, nil, body_568238)
+    body_564138 = parameters
+  result = call_564135.call(path_564136, query_564137, nil, nil, body_564138)
 
-var syncMembersUpdate* = Call_SyncMembersUpdate_568223(name: "syncMembersUpdate",
+var syncMembersUpdate* = Call_SyncMembersUpdate_564123(name: "syncMembersUpdate",
     meth: HttpMethod.HttpPatch, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/servers/{serverName}/databases/{databaseName}/syncGroups/{syncGroupName}/syncMembers/{syncMemberName}",
-    validator: validate_SyncMembersUpdate_568224, base: "",
-    url: url_SyncMembersUpdate_568225, schemes: {Scheme.Https})
+    validator: validate_SyncMembersUpdate_564124, base: "",
+    url: url_SyncMembersUpdate_564125, schemes: {Scheme.Https})
 type
-  Call_SyncMembersDelete_568209 = ref object of OpenApiRestCall_567641
-proc url_SyncMembersDelete_568211(protocol: Scheme; host: string; base: string;
+  Call_SyncMembersDelete_564109 = ref object of OpenApiRestCall_563539
+proc url_SyncMembersDelete_564111(protocol: Scheme; host: string; base: string;
                                  route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -757,7 +761,7 @@ proc url_SyncMembersDelete_568211(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_SyncMembersDelete_568210(path: JsonNode; query: JsonNode;
+proc validate_SyncMembersDelete_564110(path: JsonNode; query: JsonNode;
                                       header: JsonNode; formData: JsonNode;
                                       body: JsonNode): JsonNode =
   ## Deletes a sync member.
@@ -765,51 +769,51 @@ proc validate_SyncMembersDelete_568210(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
-  ##   syncMemberName: JString (required)
-  ##                 : The name of the sync member.
+  ##   syncGroupName: JString (required)
+  ##                : The name of the sync group on which the sync member is hosted.
   ##   serverName: JString (required)
   ##             : The name of the server.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID that identifies an Azure subscription.
   ##   databaseName: JString (required)
   ##               : The name of the database on which the sync group is hosted.
-  ##   syncGroupName: JString (required)
-  ##                : The name of the sync group on which the sync member is hosted.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
+  ##   syncMemberName: JString (required)
+  ##                 : The name of the sync member.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568212 = path.getOrDefault("resourceGroupName")
-  valid_568212 = validateParameter(valid_568212, JString, required = true,
+        "path argument is necessary due to required `syncGroupName` field"
+  var valid_564112 = path.getOrDefault("syncGroupName")
+  valid_564112 = validateParameter(valid_564112, JString, required = true,
                                  default = nil)
-  if valid_568212 != nil:
-    section.add "resourceGroupName", valid_568212
-  var valid_568213 = path.getOrDefault("syncMemberName")
-  valid_568213 = validateParameter(valid_568213, JString, required = true,
+  if valid_564112 != nil:
+    section.add "syncGroupName", valid_564112
+  var valid_564113 = path.getOrDefault("serverName")
+  valid_564113 = validateParameter(valid_564113, JString, required = true,
                                  default = nil)
-  if valid_568213 != nil:
-    section.add "syncMemberName", valid_568213
-  var valid_568214 = path.getOrDefault("serverName")
-  valid_568214 = validateParameter(valid_568214, JString, required = true,
+  if valid_564113 != nil:
+    section.add "serverName", valid_564113
+  var valid_564114 = path.getOrDefault("subscriptionId")
+  valid_564114 = validateParameter(valid_564114, JString, required = true,
                                  default = nil)
-  if valid_568214 != nil:
-    section.add "serverName", valid_568214
-  var valid_568215 = path.getOrDefault("subscriptionId")
-  valid_568215 = validateParameter(valid_568215, JString, required = true,
+  if valid_564114 != nil:
+    section.add "subscriptionId", valid_564114
+  var valid_564115 = path.getOrDefault("databaseName")
+  valid_564115 = validateParameter(valid_564115, JString, required = true,
                                  default = nil)
-  if valid_568215 != nil:
-    section.add "subscriptionId", valid_568215
-  var valid_568216 = path.getOrDefault("databaseName")
-  valid_568216 = validateParameter(valid_568216, JString, required = true,
+  if valid_564115 != nil:
+    section.add "databaseName", valid_564115
+  var valid_564116 = path.getOrDefault("resourceGroupName")
+  valid_564116 = validateParameter(valid_564116, JString, required = true,
                                  default = nil)
-  if valid_568216 != nil:
-    section.add "databaseName", valid_568216
-  var valid_568217 = path.getOrDefault("syncGroupName")
-  valid_568217 = validateParameter(valid_568217, JString, required = true,
+  if valid_564116 != nil:
+    section.add "resourceGroupName", valid_564116
+  var valid_564117 = path.getOrDefault("syncMemberName")
+  valid_564117 = validateParameter(valid_564117, JString, required = true,
                                  default = nil)
-  if valid_568217 != nil:
-    section.add "syncGroupName", valid_568217
+  if valid_564117 != nil:
+    section.add "syncMemberName", valid_564117
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -817,11 +821,11 @@ proc validate_SyncMembersDelete_568210(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568218 = query.getOrDefault("api-version")
-  valid_568218 = validateParameter(valid_568218, JString, required = true,
+  var valid_564118 = query.getOrDefault("api-version")
+  valid_564118 = validateParameter(valid_564118, JString, required = true,
                                  default = nil)
-  if valid_568218 != nil:
-    section.add "api-version", valid_568218
+  if valid_564118 != nil:
+    section.add "api-version", valid_564118
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -830,28 +834,26 @@ proc validate_SyncMembersDelete_568210(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568219: Call_SyncMembersDelete_568209; path: JsonNode;
+proc call*(call_564119: Call_SyncMembersDelete_564109; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes a sync member.
   ## 
-  let valid = call_568219.validator(path, query, header, formData, body)
-  let scheme = call_568219.pickScheme
+  let valid = call_564119.validator(path, query, header, formData, body)
+  let scheme = call_564119.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568219.url(scheme.get, call_568219.host, call_568219.base,
-                         call_568219.route, valid.getOrDefault("path"),
+  let url = call_564119.url(scheme.get, call_564119.host, call_564119.base,
+                         call_564119.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568219, url, valid)
+  result = hook(call_564119, url, valid)
 
-proc call*(call_568220: Call_SyncMembersDelete_568209; resourceGroupName: string;
-          syncMemberName: string; apiVersion: string; serverName: string;
-          subscriptionId: string; databaseName: string; syncGroupName: string): Recallable =
+proc call*(call_564120: Call_SyncMembersDelete_564109; syncGroupName: string;
+          apiVersion: string; serverName: string; subscriptionId: string;
+          databaseName: string; resourceGroupName: string; syncMemberName: string): Recallable =
   ## syncMembersDelete
   ## Deletes a sync member.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
-  ##   syncMemberName: string (required)
-  ##                 : The name of the sync member.
+  ##   syncGroupName: string (required)
+  ##                : The name of the sync group on which the sync member is hosted.
   ##   apiVersion: string (required)
   ##             : The API version to use for the request.
   ##   serverName: string (required)
@@ -860,26 +862,28 @@ proc call*(call_568220: Call_SyncMembersDelete_568209; resourceGroupName: string
   ##                 : The subscription ID that identifies an Azure subscription.
   ##   databaseName: string (required)
   ##               : The name of the database on which the sync group is hosted.
-  ##   syncGroupName: string (required)
-  ##                : The name of the sync group on which the sync member is hosted.
-  var path_568221 = newJObject()
-  var query_568222 = newJObject()
-  add(path_568221, "resourceGroupName", newJString(resourceGroupName))
-  add(path_568221, "syncMemberName", newJString(syncMemberName))
-  add(query_568222, "api-version", newJString(apiVersion))
-  add(path_568221, "serverName", newJString(serverName))
-  add(path_568221, "subscriptionId", newJString(subscriptionId))
-  add(path_568221, "databaseName", newJString(databaseName))
-  add(path_568221, "syncGroupName", newJString(syncGroupName))
-  result = call_568220.call(path_568221, query_568222, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
+  ##   syncMemberName: string (required)
+  ##                 : The name of the sync member.
+  var path_564121 = newJObject()
+  var query_564122 = newJObject()
+  add(path_564121, "syncGroupName", newJString(syncGroupName))
+  add(query_564122, "api-version", newJString(apiVersion))
+  add(path_564121, "serverName", newJString(serverName))
+  add(path_564121, "subscriptionId", newJString(subscriptionId))
+  add(path_564121, "databaseName", newJString(databaseName))
+  add(path_564121, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564121, "syncMemberName", newJString(syncMemberName))
+  result = call_564120.call(path_564121, query_564122, nil, nil, nil)
 
-var syncMembersDelete* = Call_SyncMembersDelete_568209(name: "syncMembersDelete",
+var syncMembersDelete* = Call_SyncMembersDelete_564109(name: "syncMembersDelete",
     meth: HttpMethod.HttpDelete, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/servers/{serverName}/databases/{databaseName}/syncGroups/{syncGroupName}/syncMembers/{syncMemberName}",
-    validator: validate_SyncMembersDelete_568210, base: "",
-    url: url_SyncMembersDelete_568211, schemes: {Scheme.Https})
+    validator: validate_SyncMembersDelete_564110, base: "",
+    url: url_SyncMembersDelete_564111, schemes: {Scheme.Https})
 type
-  Call_SyncMembersRefreshMemberSchema_568239 = ref object of OpenApiRestCall_567641
-proc url_SyncMembersRefreshMemberSchema_568241(protocol: Scheme; host: string;
+  Call_SyncMembersRefreshMemberSchema_564139 = ref object of OpenApiRestCall_563539
+proc url_SyncMembersRefreshMemberSchema_564141(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -911,58 +915,58 @@ proc url_SyncMembersRefreshMemberSchema_568241(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_SyncMembersRefreshMemberSchema_568240(path: JsonNode;
+proc validate_SyncMembersRefreshMemberSchema_564140(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Refreshes a sync member database schema.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
-  ##   syncMemberName: JString (required)
-  ##                 : The name of the sync member.
+  ##   syncGroupName: JString (required)
+  ##                : The name of the sync group on which the sync member is hosted.
   ##   serverName: JString (required)
   ##             : The name of the server.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID that identifies an Azure subscription.
   ##   databaseName: JString (required)
   ##               : The name of the database on which the sync group is hosted.
-  ##   syncGroupName: JString (required)
-  ##                : The name of the sync group on which the sync member is hosted.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
+  ##   syncMemberName: JString (required)
+  ##                 : The name of the sync member.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568242 = path.getOrDefault("resourceGroupName")
-  valid_568242 = validateParameter(valid_568242, JString, required = true,
+        "path argument is necessary due to required `syncGroupName` field"
+  var valid_564142 = path.getOrDefault("syncGroupName")
+  valid_564142 = validateParameter(valid_564142, JString, required = true,
                                  default = nil)
-  if valid_568242 != nil:
-    section.add "resourceGroupName", valid_568242
-  var valid_568243 = path.getOrDefault("syncMemberName")
-  valid_568243 = validateParameter(valid_568243, JString, required = true,
+  if valid_564142 != nil:
+    section.add "syncGroupName", valid_564142
+  var valid_564143 = path.getOrDefault("serverName")
+  valid_564143 = validateParameter(valid_564143, JString, required = true,
                                  default = nil)
-  if valid_568243 != nil:
-    section.add "syncMemberName", valid_568243
-  var valid_568244 = path.getOrDefault("serverName")
-  valid_568244 = validateParameter(valid_568244, JString, required = true,
+  if valid_564143 != nil:
+    section.add "serverName", valid_564143
+  var valid_564144 = path.getOrDefault("subscriptionId")
+  valid_564144 = validateParameter(valid_564144, JString, required = true,
                                  default = nil)
-  if valid_568244 != nil:
-    section.add "serverName", valid_568244
-  var valid_568245 = path.getOrDefault("subscriptionId")
-  valid_568245 = validateParameter(valid_568245, JString, required = true,
+  if valid_564144 != nil:
+    section.add "subscriptionId", valid_564144
+  var valid_564145 = path.getOrDefault("databaseName")
+  valid_564145 = validateParameter(valid_564145, JString, required = true,
                                  default = nil)
-  if valid_568245 != nil:
-    section.add "subscriptionId", valid_568245
-  var valid_568246 = path.getOrDefault("databaseName")
-  valid_568246 = validateParameter(valid_568246, JString, required = true,
+  if valid_564145 != nil:
+    section.add "databaseName", valid_564145
+  var valid_564146 = path.getOrDefault("resourceGroupName")
+  valid_564146 = validateParameter(valid_564146, JString, required = true,
                                  default = nil)
-  if valid_568246 != nil:
-    section.add "databaseName", valid_568246
-  var valid_568247 = path.getOrDefault("syncGroupName")
-  valid_568247 = validateParameter(valid_568247, JString, required = true,
+  if valid_564146 != nil:
+    section.add "resourceGroupName", valid_564146
+  var valid_564147 = path.getOrDefault("syncMemberName")
+  valid_564147 = validateParameter(valid_564147, JString, required = true,
                                  default = nil)
-  if valid_568247 != nil:
-    section.add "syncGroupName", valid_568247
+  if valid_564147 != nil:
+    section.add "syncMemberName", valid_564147
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -970,11 +974,11 @@ proc validate_SyncMembersRefreshMemberSchema_568240(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568248 = query.getOrDefault("api-version")
-  valid_568248 = validateParameter(valid_568248, JString, required = true,
+  var valid_564148 = query.getOrDefault("api-version")
+  valid_564148 = validateParameter(valid_564148, JString, required = true,
                                  default = nil)
-  if valid_568248 != nil:
-    section.add "api-version", valid_568248
+  if valid_564148 != nil:
+    section.add "api-version", valid_564148
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -983,29 +987,27 @@ proc validate_SyncMembersRefreshMemberSchema_568240(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568249: Call_SyncMembersRefreshMemberSchema_568239; path: JsonNode;
+proc call*(call_564149: Call_SyncMembersRefreshMemberSchema_564139; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Refreshes a sync member database schema.
   ## 
-  let valid = call_568249.validator(path, query, header, formData, body)
-  let scheme = call_568249.pickScheme
+  let valid = call_564149.validator(path, query, header, formData, body)
+  let scheme = call_564149.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568249.url(scheme.get, call_568249.host, call_568249.base,
-                         call_568249.route, valid.getOrDefault("path"),
+  let url = call_564149.url(scheme.get, call_564149.host, call_564149.base,
+                         call_564149.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568249, url, valid)
+  result = hook(call_564149, url, valid)
 
-proc call*(call_568250: Call_SyncMembersRefreshMemberSchema_568239;
-          resourceGroupName: string; syncMemberName: string; apiVersion: string;
-          serverName: string; subscriptionId: string; databaseName: string;
-          syncGroupName: string): Recallable =
+proc call*(call_564150: Call_SyncMembersRefreshMemberSchema_564139;
+          syncGroupName: string; apiVersion: string; serverName: string;
+          subscriptionId: string; databaseName: string; resourceGroupName: string;
+          syncMemberName: string): Recallable =
   ## syncMembersRefreshMemberSchema
   ## Refreshes a sync member database schema.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
-  ##   syncMemberName: string (required)
-  ##                 : The name of the sync member.
+  ##   syncGroupName: string (required)
+  ##                : The name of the sync group on which the sync member is hosted.
   ##   apiVersion: string (required)
   ##             : The API version to use for the request.
   ##   serverName: string (required)
@@ -1014,27 +1016,29 @@ proc call*(call_568250: Call_SyncMembersRefreshMemberSchema_568239;
   ##                 : The subscription ID that identifies an Azure subscription.
   ##   databaseName: string (required)
   ##               : The name of the database on which the sync group is hosted.
-  ##   syncGroupName: string (required)
-  ##                : The name of the sync group on which the sync member is hosted.
-  var path_568251 = newJObject()
-  var query_568252 = newJObject()
-  add(path_568251, "resourceGroupName", newJString(resourceGroupName))
-  add(path_568251, "syncMemberName", newJString(syncMemberName))
-  add(query_568252, "api-version", newJString(apiVersion))
-  add(path_568251, "serverName", newJString(serverName))
-  add(path_568251, "subscriptionId", newJString(subscriptionId))
-  add(path_568251, "databaseName", newJString(databaseName))
-  add(path_568251, "syncGroupName", newJString(syncGroupName))
-  result = call_568250.call(path_568251, query_568252, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
+  ##   syncMemberName: string (required)
+  ##                 : The name of the sync member.
+  var path_564151 = newJObject()
+  var query_564152 = newJObject()
+  add(path_564151, "syncGroupName", newJString(syncGroupName))
+  add(query_564152, "api-version", newJString(apiVersion))
+  add(path_564151, "serverName", newJString(serverName))
+  add(path_564151, "subscriptionId", newJString(subscriptionId))
+  add(path_564151, "databaseName", newJString(databaseName))
+  add(path_564151, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564151, "syncMemberName", newJString(syncMemberName))
+  result = call_564150.call(path_564151, query_564152, nil, nil, nil)
 
-var syncMembersRefreshMemberSchema* = Call_SyncMembersRefreshMemberSchema_568239(
+var syncMembersRefreshMemberSchema* = Call_SyncMembersRefreshMemberSchema_564139(
     name: "syncMembersRefreshMemberSchema", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/servers/{serverName}/databases/{databaseName}/syncGroups/{syncGroupName}/syncMembers/{syncMemberName}/refreshSchema",
-    validator: validate_SyncMembersRefreshMemberSchema_568240, base: "",
-    url: url_SyncMembersRefreshMemberSchema_568241, schemes: {Scheme.Https})
+    validator: validate_SyncMembersRefreshMemberSchema_564140, base: "",
+    url: url_SyncMembersRefreshMemberSchema_564141, schemes: {Scheme.Https})
 type
-  Call_SyncMembersListMemberSchemas_568253 = ref object of OpenApiRestCall_567641
-proc url_SyncMembersListMemberSchemas_568255(protocol: Scheme; host: string;
+  Call_SyncMembersListMemberSchemas_564153 = ref object of OpenApiRestCall_563539
+proc url_SyncMembersListMemberSchemas_564155(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1066,58 +1070,58 @@ proc url_SyncMembersListMemberSchemas_568255(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_SyncMembersListMemberSchemas_568254(path: JsonNode; query: JsonNode;
+proc validate_SyncMembersListMemberSchemas_564154(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets a sync member database schema.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
-  ##   syncMemberName: JString (required)
-  ##                 : The name of the sync member.
+  ##   syncGroupName: JString (required)
+  ##                : The name of the sync group on which the sync member is hosted.
   ##   serverName: JString (required)
   ##             : The name of the server.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID that identifies an Azure subscription.
   ##   databaseName: JString (required)
   ##               : The name of the database on which the sync group is hosted.
-  ##   syncGroupName: JString (required)
-  ##                : The name of the sync group on which the sync member is hosted.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
+  ##   syncMemberName: JString (required)
+  ##                 : The name of the sync member.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568256 = path.getOrDefault("resourceGroupName")
-  valid_568256 = validateParameter(valid_568256, JString, required = true,
+        "path argument is necessary due to required `syncGroupName` field"
+  var valid_564156 = path.getOrDefault("syncGroupName")
+  valid_564156 = validateParameter(valid_564156, JString, required = true,
                                  default = nil)
-  if valid_568256 != nil:
-    section.add "resourceGroupName", valid_568256
-  var valid_568257 = path.getOrDefault("syncMemberName")
-  valid_568257 = validateParameter(valid_568257, JString, required = true,
+  if valid_564156 != nil:
+    section.add "syncGroupName", valid_564156
+  var valid_564157 = path.getOrDefault("serverName")
+  valid_564157 = validateParameter(valid_564157, JString, required = true,
                                  default = nil)
-  if valid_568257 != nil:
-    section.add "syncMemberName", valid_568257
-  var valid_568258 = path.getOrDefault("serverName")
-  valid_568258 = validateParameter(valid_568258, JString, required = true,
+  if valid_564157 != nil:
+    section.add "serverName", valid_564157
+  var valid_564158 = path.getOrDefault("subscriptionId")
+  valid_564158 = validateParameter(valid_564158, JString, required = true,
                                  default = nil)
-  if valid_568258 != nil:
-    section.add "serverName", valid_568258
-  var valid_568259 = path.getOrDefault("subscriptionId")
-  valid_568259 = validateParameter(valid_568259, JString, required = true,
+  if valid_564158 != nil:
+    section.add "subscriptionId", valid_564158
+  var valid_564159 = path.getOrDefault("databaseName")
+  valid_564159 = validateParameter(valid_564159, JString, required = true,
                                  default = nil)
-  if valid_568259 != nil:
-    section.add "subscriptionId", valid_568259
-  var valid_568260 = path.getOrDefault("databaseName")
-  valid_568260 = validateParameter(valid_568260, JString, required = true,
+  if valid_564159 != nil:
+    section.add "databaseName", valid_564159
+  var valid_564160 = path.getOrDefault("resourceGroupName")
+  valid_564160 = validateParameter(valid_564160, JString, required = true,
                                  default = nil)
-  if valid_568260 != nil:
-    section.add "databaseName", valid_568260
-  var valid_568261 = path.getOrDefault("syncGroupName")
-  valid_568261 = validateParameter(valid_568261, JString, required = true,
+  if valid_564160 != nil:
+    section.add "resourceGroupName", valid_564160
+  var valid_564161 = path.getOrDefault("syncMemberName")
+  valid_564161 = validateParameter(valid_564161, JString, required = true,
                                  default = nil)
-  if valid_568261 != nil:
-    section.add "syncGroupName", valid_568261
+  if valid_564161 != nil:
+    section.add "syncMemberName", valid_564161
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1125,11 +1129,11 @@ proc validate_SyncMembersListMemberSchemas_568254(path: JsonNode; query: JsonNod
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568262 = query.getOrDefault("api-version")
-  valid_568262 = validateParameter(valid_568262, JString, required = true,
+  var valid_564162 = query.getOrDefault("api-version")
+  valid_564162 = validateParameter(valid_564162, JString, required = true,
                                  default = nil)
-  if valid_568262 != nil:
-    section.add "api-version", valid_568262
+  if valid_564162 != nil:
+    section.add "api-version", valid_564162
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1138,29 +1142,27 @@ proc validate_SyncMembersListMemberSchemas_568254(path: JsonNode; query: JsonNod
   if body != nil:
     result.add "body", body
 
-proc call*(call_568263: Call_SyncMembersListMemberSchemas_568253; path: JsonNode;
+proc call*(call_564163: Call_SyncMembersListMemberSchemas_564153; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets a sync member database schema.
   ## 
-  let valid = call_568263.validator(path, query, header, formData, body)
-  let scheme = call_568263.pickScheme
+  let valid = call_564163.validator(path, query, header, formData, body)
+  let scheme = call_564163.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568263.url(scheme.get, call_568263.host, call_568263.base,
-                         call_568263.route, valid.getOrDefault("path"),
+  let url = call_564163.url(scheme.get, call_564163.host, call_564163.base,
+                         call_564163.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568263, url, valid)
+  result = hook(call_564163, url, valid)
 
-proc call*(call_568264: Call_SyncMembersListMemberSchemas_568253;
-          resourceGroupName: string; syncMemberName: string; apiVersion: string;
-          serverName: string; subscriptionId: string; databaseName: string;
-          syncGroupName: string): Recallable =
+proc call*(call_564164: Call_SyncMembersListMemberSchemas_564153;
+          syncGroupName: string; apiVersion: string; serverName: string;
+          subscriptionId: string; databaseName: string; resourceGroupName: string;
+          syncMemberName: string): Recallable =
   ## syncMembersListMemberSchemas
   ## Gets a sync member database schema.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
-  ##   syncMemberName: string (required)
-  ##                 : The name of the sync member.
+  ##   syncGroupName: string (required)
+  ##                : The name of the sync group on which the sync member is hosted.
   ##   apiVersion: string (required)
   ##             : The API version to use for the request.
   ##   serverName: string (required)
@@ -1169,24 +1171,26 @@ proc call*(call_568264: Call_SyncMembersListMemberSchemas_568253;
   ##                 : The subscription ID that identifies an Azure subscription.
   ##   databaseName: string (required)
   ##               : The name of the database on which the sync group is hosted.
-  ##   syncGroupName: string (required)
-  ##                : The name of the sync group on which the sync member is hosted.
-  var path_568265 = newJObject()
-  var query_568266 = newJObject()
-  add(path_568265, "resourceGroupName", newJString(resourceGroupName))
-  add(path_568265, "syncMemberName", newJString(syncMemberName))
-  add(query_568266, "api-version", newJString(apiVersion))
-  add(path_568265, "serverName", newJString(serverName))
-  add(path_568265, "subscriptionId", newJString(subscriptionId))
-  add(path_568265, "databaseName", newJString(databaseName))
-  add(path_568265, "syncGroupName", newJString(syncGroupName))
-  result = call_568264.call(path_568265, query_568266, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
+  ##   syncMemberName: string (required)
+  ##                 : The name of the sync member.
+  var path_564165 = newJObject()
+  var query_564166 = newJObject()
+  add(path_564165, "syncGroupName", newJString(syncGroupName))
+  add(query_564166, "api-version", newJString(apiVersion))
+  add(path_564165, "serverName", newJString(serverName))
+  add(path_564165, "subscriptionId", newJString(subscriptionId))
+  add(path_564165, "databaseName", newJString(databaseName))
+  add(path_564165, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564165, "syncMemberName", newJString(syncMemberName))
+  result = call_564164.call(path_564165, query_564166, nil, nil, nil)
 
-var syncMembersListMemberSchemas* = Call_SyncMembersListMemberSchemas_568253(
+var syncMembersListMemberSchemas* = Call_SyncMembersListMemberSchemas_564153(
     name: "syncMembersListMemberSchemas", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/servers/{serverName}/databases/{databaseName}/syncGroups/{syncGroupName}/syncMembers/{syncMemberName}/schemas",
-    validator: validate_SyncMembersListMemberSchemas_568254, base: "",
-    url: url_SyncMembersListMemberSchemas_568255, schemes: {Scheme.Https})
+    validator: validate_SyncMembersListMemberSchemas_564154, base: "",
+    url: url_SyncMembersListMemberSchemas_564155, schemes: {Scheme.Https})
 export
   rest
 

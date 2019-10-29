@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, httpcore
 
 ## auto-generated via openapi macro
 ## title: Security Center
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_567641 = ref object of OpenApiRestCall
+  OpenApiRestCall_563539 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_567641](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563539](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_567641): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563539): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,8 +107,8 @@ const
   macServiceName = "security-autoProvisioningSettings"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_AutoProvisioningSettingsList_567863 = ref object of OpenApiRestCall_567641
-proc url_AutoProvisioningSettingsList_567865(protocol: Scheme; host: string;
+  Call_AutoProvisioningSettingsList_563761 = ref object of OpenApiRestCall_563539
+proc url_AutoProvisioningSettingsList_563763(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -121,7 +125,7 @@ proc url_AutoProvisioningSettingsList_567865(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AutoProvisioningSettingsList_567864(path: JsonNode; query: JsonNode;
+proc validate_AutoProvisioningSettingsList_563762(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Exposes the auto provisioning settings of the subscriptions
   ## 
@@ -133,11 +137,11 @@ proc validate_AutoProvisioningSettingsList_567864(path: JsonNode; query: JsonNod
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_568025 = path.getOrDefault("subscriptionId")
-  valid_568025 = validateParameter(valid_568025, JString, required = true,
+  var valid_563925 = path.getOrDefault("subscriptionId")
+  valid_563925 = validateParameter(valid_563925, JString, required = true,
                                  default = nil)
-  if valid_568025 != nil:
-    section.add "subscriptionId", valid_568025
+  if valid_563925 != nil:
+    section.add "subscriptionId", valid_563925
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -145,11 +149,11 @@ proc validate_AutoProvisioningSettingsList_567864(path: JsonNode; query: JsonNod
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568026 = query.getOrDefault("api-version")
-  valid_568026 = validateParameter(valid_568026, JString, required = true,
+  var valid_563926 = query.getOrDefault("api-version")
+  valid_563926 = validateParameter(valid_563926, JString, required = true,
                                  default = nil)
-  if valid_568026 != nil:
-    section.add "api-version", valid_568026
+  if valid_563926 != nil:
+    section.add "api-version", valid_563926
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -158,20 +162,20 @@ proc validate_AutoProvisioningSettingsList_567864(path: JsonNode; query: JsonNod
   if body != nil:
     result.add "body", body
 
-proc call*(call_568053: Call_AutoProvisioningSettingsList_567863; path: JsonNode;
+proc call*(call_563953: Call_AutoProvisioningSettingsList_563761; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Exposes the auto provisioning settings of the subscriptions
   ## 
-  let valid = call_568053.validator(path, query, header, formData, body)
-  let scheme = call_568053.pickScheme
+  let valid = call_563953.validator(path, query, header, formData, body)
+  let scheme = call_563953.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568053.url(scheme.get, call_568053.host, call_568053.base,
-                         call_568053.route, valid.getOrDefault("path"),
+  let url = call_563953.url(scheme.get, call_563953.host, call_563953.base,
+                         call_563953.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568053, url, valid)
+  result = hook(call_563953, url, valid)
 
-proc call*(call_568124: Call_AutoProvisioningSettingsList_567863;
+proc call*(call_564024: Call_AutoProvisioningSettingsList_563761;
           apiVersion: string; subscriptionId: string): Recallable =
   ## autoProvisioningSettingsList
   ## Exposes the auto provisioning settings of the subscriptions
@@ -179,20 +183,20 @@ proc call*(call_568124: Call_AutoProvisioningSettingsList_567863;
   ##             : API version for the operation
   ##   subscriptionId: string (required)
   ##                 : Azure subscription ID
-  var path_568125 = newJObject()
-  var query_568127 = newJObject()
-  add(query_568127, "api-version", newJString(apiVersion))
-  add(path_568125, "subscriptionId", newJString(subscriptionId))
-  result = call_568124.call(path_568125, query_568127, nil, nil, nil)
+  var path_564025 = newJObject()
+  var query_564027 = newJObject()
+  add(query_564027, "api-version", newJString(apiVersion))
+  add(path_564025, "subscriptionId", newJString(subscriptionId))
+  result = call_564024.call(path_564025, query_564027, nil, nil, nil)
 
-var autoProvisioningSettingsList* = Call_AutoProvisioningSettingsList_567863(
+var autoProvisioningSettingsList* = Call_AutoProvisioningSettingsList_563761(
     name: "autoProvisioningSettingsList", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Security/autoProvisioningSettings",
-    validator: validate_AutoProvisioningSettingsList_567864, base: "",
-    url: url_AutoProvisioningSettingsList_567865, schemes: {Scheme.Https})
+    validator: validate_AutoProvisioningSettingsList_563762, base: "",
+    url: url_AutoProvisioningSettingsList_563763, schemes: {Scheme.Https})
 type
-  Call_AutoProvisioningSettingsCreate_568185 = ref object of OpenApiRestCall_567641
-proc url_AutoProvisioningSettingsCreate_568187(protocol: Scheme; host: string;
+  Call_AutoProvisioningSettingsCreate_564085 = ref object of OpenApiRestCall_563539
+proc url_AutoProvisioningSettingsCreate_564087(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -211,30 +215,30 @@ proc url_AutoProvisioningSettingsCreate_568187(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AutoProvisioningSettingsCreate_568186(path: JsonNode;
+proc validate_AutoProvisioningSettingsCreate_564086(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Details of a specific setting
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   settingName: JString (required)
-  ##              : Auto provisioning setting key
   ##   subscriptionId: JString (required)
   ##                 : Azure subscription ID
+  ##   settingName: JString (required)
+  ##              : Auto provisioning setting key
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `settingName` field"
-  var valid_568188 = path.getOrDefault("settingName")
-  valid_568188 = validateParameter(valid_568188, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564088 = path.getOrDefault("subscriptionId")
+  valid_564088 = validateParameter(valid_564088, JString, required = true,
                                  default = nil)
-  if valid_568188 != nil:
-    section.add "settingName", valid_568188
-  var valid_568189 = path.getOrDefault("subscriptionId")
-  valid_568189 = validateParameter(valid_568189, JString, required = true,
+  if valid_564088 != nil:
+    section.add "subscriptionId", valid_564088
+  var valid_564089 = path.getOrDefault("settingName")
+  valid_564089 = validateParameter(valid_564089, JString, required = true,
                                  default = nil)
-  if valid_568189 != nil:
-    section.add "subscriptionId", valid_568189
+  if valid_564089 != nil:
+    section.add "settingName", valid_564089
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -242,11 +246,11 @@ proc validate_AutoProvisioningSettingsCreate_568186(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568190 = query.getOrDefault("api-version")
-  valid_568190 = validateParameter(valid_568190, JString, required = true,
+  var valid_564090 = query.getOrDefault("api-version")
+  valid_564090 = validateParameter(valid_564090, JString, required = true,
                                  default = nil)
-  if valid_568190 != nil:
-    section.add "api-version", valid_568190
+  if valid_564090 != nil:
+    section.add "api-version", valid_564090
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -260,50 +264,50 @@ proc validate_AutoProvisioningSettingsCreate_568186(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568192: Call_AutoProvisioningSettingsCreate_568185; path: JsonNode;
+proc call*(call_564092: Call_AutoProvisioningSettingsCreate_564085; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Details of a specific setting
   ## 
-  let valid = call_568192.validator(path, query, header, formData, body)
-  let scheme = call_568192.pickScheme
+  let valid = call_564092.validator(path, query, header, formData, body)
+  let scheme = call_564092.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568192.url(scheme.get, call_568192.host, call_568192.base,
-                         call_568192.route, valid.getOrDefault("path"),
+  let url = call_564092.url(scheme.get, call_564092.host, call_564092.base,
+                         call_564092.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568192, url, valid)
+  result = hook(call_564092, url, valid)
 
-proc call*(call_568193: Call_AutoProvisioningSettingsCreate_568185;
-          apiVersion: string; settingName: string; subscriptionId: string;
+proc call*(call_564093: Call_AutoProvisioningSettingsCreate_564085;
+          apiVersion: string; subscriptionId: string; settingName: string;
           setting: JsonNode): Recallable =
   ## autoProvisioningSettingsCreate
   ## Details of a specific setting
   ##   apiVersion: string (required)
   ##             : API version for the operation
-  ##   settingName: string (required)
-  ##              : Auto provisioning setting key
   ##   subscriptionId: string (required)
   ##                 : Azure subscription ID
+  ##   settingName: string (required)
+  ##              : Auto provisioning setting key
   ##   setting: JObject (required)
   ##          : Auto provisioning setting key
-  var path_568194 = newJObject()
-  var query_568195 = newJObject()
-  var body_568196 = newJObject()
-  add(query_568195, "api-version", newJString(apiVersion))
-  add(path_568194, "settingName", newJString(settingName))
-  add(path_568194, "subscriptionId", newJString(subscriptionId))
+  var path_564094 = newJObject()
+  var query_564095 = newJObject()
+  var body_564096 = newJObject()
+  add(query_564095, "api-version", newJString(apiVersion))
+  add(path_564094, "subscriptionId", newJString(subscriptionId))
+  add(path_564094, "settingName", newJString(settingName))
   if setting != nil:
-    body_568196 = setting
-  result = call_568193.call(path_568194, query_568195, nil, nil, body_568196)
+    body_564096 = setting
+  result = call_564093.call(path_564094, query_564095, nil, nil, body_564096)
 
-var autoProvisioningSettingsCreate* = Call_AutoProvisioningSettingsCreate_568185(
+var autoProvisioningSettingsCreate* = Call_AutoProvisioningSettingsCreate_564085(
     name: "autoProvisioningSettingsCreate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Security/autoProvisioningSettings/{settingName}",
-    validator: validate_AutoProvisioningSettingsCreate_568186, base: "",
-    url: url_AutoProvisioningSettingsCreate_568187, schemes: {Scheme.Https})
+    validator: validate_AutoProvisioningSettingsCreate_564086, base: "",
+    url: url_AutoProvisioningSettingsCreate_564087, schemes: {Scheme.Https})
 type
-  Call_AutoProvisioningSettingsGet_568166 = ref object of OpenApiRestCall_567641
-proc url_AutoProvisioningSettingsGet_568168(protocol: Scheme; host: string;
+  Call_AutoProvisioningSettingsGet_564066 = ref object of OpenApiRestCall_563539
+proc url_AutoProvisioningSettingsGet_564068(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -322,30 +326,30 @@ proc url_AutoProvisioningSettingsGet_568168(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AutoProvisioningSettingsGet_568167(path: JsonNode; query: JsonNode;
+proc validate_AutoProvisioningSettingsGet_564067(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Details of a specific setting
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   settingName: JString (required)
-  ##              : Auto provisioning setting key
   ##   subscriptionId: JString (required)
   ##                 : Azure subscription ID
+  ##   settingName: JString (required)
+  ##              : Auto provisioning setting key
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `settingName` field"
-  var valid_568178 = path.getOrDefault("settingName")
-  valid_568178 = validateParameter(valid_568178, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564078 = path.getOrDefault("subscriptionId")
+  valid_564078 = validateParameter(valid_564078, JString, required = true,
                                  default = nil)
-  if valid_568178 != nil:
-    section.add "settingName", valid_568178
-  var valid_568179 = path.getOrDefault("subscriptionId")
-  valid_568179 = validateParameter(valid_568179, JString, required = true,
+  if valid_564078 != nil:
+    section.add "subscriptionId", valid_564078
+  var valid_564079 = path.getOrDefault("settingName")
+  valid_564079 = validateParameter(valid_564079, JString, required = true,
                                  default = nil)
-  if valid_568179 != nil:
-    section.add "subscriptionId", valid_568179
+  if valid_564079 != nil:
+    section.add "settingName", valid_564079
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -353,11 +357,11 @@ proc validate_AutoProvisioningSettingsGet_568167(path: JsonNode; query: JsonNode
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568180 = query.getOrDefault("api-version")
-  valid_568180 = validateParameter(valid_568180, JString, required = true,
+  var valid_564080 = query.getOrDefault("api-version")
+  valid_564080 = validateParameter(valid_564080, JString, required = true,
                                  default = nil)
-  if valid_568180 != nil:
-    section.add "api-version", valid_568180
+  if valid_564080 != nil:
+    section.add "api-version", valid_564080
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -366,41 +370,41 @@ proc validate_AutoProvisioningSettingsGet_568167(path: JsonNode; query: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_568181: Call_AutoProvisioningSettingsGet_568166; path: JsonNode;
+proc call*(call_564081: Call_AutoProvisioningSettingsGet_564066; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Details of a specific setting
   ## 
-  let valid = call_568181.validator(path, query, header, formData, body)
-  let scheme = call_568181.pickScheme
+  let valid = call_564081.validator(path, query, header, formData, body)
+  let scheme = call_564081.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568181.url(scheme.get, call_568181.host, call_568181.base,
-                         call_568181.route, valid.getOrDefault("path"),
+  let url = call_564081.url(scheme.get, call_564081.host, call_564081.base,
+                         call_564081.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568181, url, valid)
+  result = hook(call_564081, url, valid)
 
-proc call*(call_568182: Call_AutoProvisioningSettingsGet_568166;
-          apiVersion: string; settingName: string; subscriptionId: string): Recallable =
+proc call*(call_564082: Call_AutoProvisioningSettingsGet_564066;
+          apiVersion: string; subscriptionId: string; settingName: string): Recallable =
   ## autoProvisioningSettingsGet
   ## Details of a specific setting
   ##   apiVersion: string (required)
   ##             : API version for the operation
-  ##   settingName: string (required)
-  ##              : Auto provisioning setting key
   ##   subscriptionId: string (required)
   ##                 : Azure subscription ID
-  var path_568183 = newJObject()
-  var query_568184 = newJObject()
-  add(query_568184, "api-version", newJString(apiVersion))
-  add(path_568183, "settingName", newJString(settingName))
-  add(path_568183, "subscriptionId", newJString(subscriptionId))
-  result = call_568182.call(path_568183, query_568184, nil, nil, nil)
+  ##   settingName: string (required)
+  ##              : Auto provisioning setting key
+  var path_564083 = newJObject()
+  var query_564084 = newJObject()
+  add(query_564084, "api-version", newJString(apiVersion))
+  add(path_564083, "subscriptionId", newJString(subscriptionId))
+  add(path_564083, "settingName", newJString(settingName))
+  result = call_564082.call(path_564083, query_564084, nil, nil, nil)
 
-var autoProvisioningSettingsGet* = Call_AutoProvisioningSettingsGet_568166(
+var autoProvisioningSettingsGet* = Call_AutoProvisioningSettingsGet_564066(
     name: "autoProvisioningSettingsGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Security/autoProvisioningSettings/{settingName}",
-    validator: validate_AutoProvisioningSettingsGet_568167, base: "",
-    url: url_AutoProvisioningSettingsGet_568168, schemes: {Scheme.Https})
+    validator: validate_AutoProvisioningSettingsGet_564067, base: "",
+    url: url_AutoProvisioningSettingsGet_564068, schemes: {Scheme.Https})
 export
   rest
 

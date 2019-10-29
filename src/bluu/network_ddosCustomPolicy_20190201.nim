@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, httpcore
 
 ## auto-generated via openapi macro
 ## title: NetworkManagementClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_567641 = ref object of OpenApiRestCall
+  OpenApiRestCall_563539 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_567641](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563539](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_567641): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563539): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,8 +107,8 @@ const
   macServiceName = "network-ddosCustomPolicy"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_DdosCustomPoliciesCreateOrUpdate_568168 = ref object of OpenApiRestCall_567641
-proc url_DdosCustomPoliciesCreateOrUpdate_568170(protocol: Scheme; host: string;
+  Call_DdosCustomPoliciesCreateOrUpdate_564068 = ref object of OpenApiRestCall_563539
+proc url_DdosCustomPoliciesCreateOrUpdate_564070(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -128,37 +132,37 @@ proc url_DdosCustomPoliciesCreateOrUpdate_568170(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DdosCustomPoliciesCreateOrUpdate_568169(path: JsonNode;
+proc validate_DdosCustomPoliciesCreateOrUpdate_564069(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Creates or updates a DDoS custom policy.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   subscriptionId: JString (required)
   ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   ##   ddosCustomPolicyName: JString (required)
   ##                       : The name of the DDoS custom policy.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568197 = path.getOrDefault("resourceGroupName")
-  valid_568197 = validateParameter(valid_568197, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564097 = path.getOrDefault("subscriptionId")
+  valid_564097 = validateParameter(valid_564097, JString, required = true,
                                  default = nil)
-  if valid_568197 != nil:
-    section.add "resourceGroupName", valid_568197
-  var valid_568198 = path.getOrDefault("subscriptionId")
-  valid_568198 = validateParameter(valid_568198, JString, required = true,
+  if valid_564097 != nil:
+    section.add "subscriptionId", valid_564097
+  var valid_564098 = path.getOrDefault("resourceGroupName")
+  valid_564098 = validateParameter(valid_564098, JString, required = true,
                                  default = nil)
-  if valid_568198 != nil:
-    section.add "subscriptionId", valid_568198
-  var valid_568199 = path.getOrDefault("ddosCustomPolicyName")
-  valid_568199 = validateParameter(valid_568199, JString, required = true,
+  if valid_564098 != nil:
+    section.add "resourceGroupName", valid_564098
+  var valid_564099 = path.getOrDefault("ddosCustomPolicyName")
+  valid_564099 = validateParameter(valid_564099, JString, required = true,
                                  default = nil)
-  if valid_568199 != nil:
-    section.add "ddosCustomPolicyName", valid_568199
+  if valid_564099 != nil:
+    section.add "ddosCustomPolicyName", valid_564099
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -166,11 +170,11 @@ proc validate_DdosCustomPoliciesCreateOrUpdate_568169(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568200 = query.getOrDefault("api-version")
-  valid_568200 = validateParameter(valid_568200, JString, required = true,
+  var valid_564100 = query.getOrDefault("api-version")
+  valid_564100 = validateParameter(valid_564100, JString, required = true,
                                  default = nil)
-  if valid_568200 != nil:
-    section.add "api-version", valid_568200
+  if valid_564100 != nil:
+    section.add "api-version", valid_564100
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -184,54 +188,54 @@ proc validate_DdosCustomPoliciesCreateOrUpdate_568169(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568202: Call_DdosCustomPoliciesCreateOrUpdate_568168;
+proc call*(call_564102: Call_DdosCustomPoliciesCreateOrUpdate_564068;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Creates or updates a DDoS custom policy.
   ## 
-  let valid = call_568202.validator(path, query, header, formData, body)
-  let scheme = call_568202.pickScheme
+  let valid = call_564102.validator(path, query, header, formData, body)
+  let scheme = call_564102.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568202.url(scheme.get, call_568202.host, call_568202.base,
-                         call_568202.route, valid.getOrDefault("path"),
+  let url = call_564102.url(scheme.get, call_564102.host, call_564102.base,
+                         call_564102.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568202, url, valid)
+  result = hook(call_564102, url, valid)
 
-proc call*(call_568203: Call_DdosCustomPoliciesCreateOrUpdate_568168;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
+proc call*(call_564103: Call_DdosCustomPoliciesCreateOrUpdate_564068;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string;
           ddosCustomPolicyName: string; parameters: JsonNode): Recallable =
   ## ddosCustomPoliciesCreateOrUpdate
   ## Creates or updates a DDoS custom policy.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client API version.
   ##   subscriptionId: string (required)
   ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   ddosCustomPolicyName: string (required)
   ##                       : The name of the DDoS custom policy.
   ##   parameters: JObject (required)
   ##             : Parameters supplied to the create or update operation.
-  var path_568204 = newJObject()
-  var query_568205 = newJObject()
-  var body_568206 = newJObject()
-  add(path_568204, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568205, "api-version", newJString(apiVersion))
-  add(path_568204, "subscriptionId", newJString(subscriptionId))
-  add(path_568204, "ddosCustomPolicyName", newJString(ddosCustomPolicyName))
+  var path_564104 = newJObject()
+  var query_564105 = newJObject()
+  var body_564106 = newJObject()
+  add(query_564105, "api-version", newJString(apiVersion))
+  add(path_564104, "subscriptionId", newJString(subscriptionId))
+  add(path_564104, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564104, "ddosCustomPolicyName", newJString(ddosCustomPolicyName))
   if parameters != nil:
-    body_568206 = parameters
-  result = call_568203.call(path_568204, query_568205, nil, nil, body_568206)
+    body_564106 = parameters
+  result = call_564103.call(path_564104, query_564105, nil, nil, body_564106)
 
-var ddosCustomPoliciesCreateOrUpdate* = Call_DdosCustomPoliciesCreateOrUpdate_568168(
+var ddosCustomPoliciesCreateOrUpdate* = Call_DdosCustomPoliciesCreateOrUpdate_564068(
     name: "ddosCustomPoliciesCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/ddosCustomPolicies/{ddosCustomPolicyName}",
-    validator: validate_DdosCustomPoliciesCreateOrUpdate_568169, base: "",
-    url: url_DdosCustomPoliciesCreateOrUpdate_568170, schemes: {Scheme.Https})
+    validator: validate_DdosCustomPoliciesCreateOrUpdate_564069, base: "",
+    url: url_DdosCustomPoliciesCreateOrUpdate_564070, schemes: {Scheme.Https})
 type
-  Call_DdosCustomPoliciesGet_567863 = ref object of OpenApiRestCall_567641
-proc url_DdosCustomPoliciesGet_567865(protocol: Scheme; host: string; base: string;
+  Call_DdosCustomPoliciesGet_563761 = ref object of OpenApiRestCall_563539
+proc url_DdosCustomPoliciesGet_563763(protocol: Scheme; host: string; base: string;
                                      route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -255,37 +259,37 @@ proc url_DdosCustomPoliciesGet_567865(protocol: Scheme; host: string; base: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DdosCustomPoliciesGet_567864(path: JsonNode; query: JsonNode;
+proc validate_DdosCustomPoliciesGet_563762(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets information about the specified DDoS custom policy.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   subscriptionId: JString (required)
   ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   ##   ddosCustomPolicyName: JString (required)
   ##                       : The name of the DDoS custom policy.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568025 = path.getOrDefault("resourceGroupName")
-  valid_568025 = validateParameter(valid_568025, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_563925 = path.getOrDefault("subscriptionId")
+  valid_563925 = validateParameter(valid_563925, JString, required = true,
                                  default = nil)
-  if valid_568025 != nil:
-    section.add "resourceGroupName", valid_568025
-  var valid_568026 = path.getOrDefault("subscriptionId")
-  valid_568026 = validateParameter(valid_568026, JString, required = true,
+  if valid_563925 != nil:
+    section.add "subscriptionId", valid_563925
+  var valid_563926 = path.getOrDefault("resourceGroupName")
+  valid_563926 = validateParameter(valid_563926, JString, required = true,
                                  default = nil)
-  if valid_568026 != nil:
-    section.add "subscriptionId", valid_568026
-  var valid_568027 = path.getOrDefault("ddosCustomPolicyName")
-  valid_568027 = validateParameter(valid_568027, JString, required = true,
+  if valid_563926 != nil:
+    section.add "resourceGroupName", valid_563926
+  var valid_563927 = path.getOrDefault("ddosCustomPolicyName")
+  valid_563927 = validateParameter(valid_563927, JString, required = true,
                                  default = nil)
-  if valid_568027 != nil:
-    section.add "ddosCustomPolicyName", valid_568027
+  if valid_563927 != nil:
+    section.add "ddosCustomPolicyName", valid_563927
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -293,11 +297,11 @@ proc validate_DdosCustomPoliciesGet_567864(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568028 = query.getOrDefault("api-version")
-  valid_568028 = validateParameter(valid_568028, JString, required = true,
+  var valid_563928 = query.getOrDefault("api-version")
+  valid_563928 = validateParameter(valid_563928, JString, required = true,
                                  default = nil)
-  if valid_568028 != nil:
-    section.add "api-version", valid_568028
+  if valid_563928 != nil:
+    section.add "api-version", valid_563928
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -306,48 +310,48 @@ proc validate_DdosCustomPoliciesGet_567864(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568055: Call_DdosCustomPoliciesGet_567863; path: JsonNode;
+proc call*(call_563955: Call_DdosCustomPoliciesGet_563761; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets information about the specified DDoS custom policy.
   ## 
-  let valid = call_568055.validator(path, query, header, formData, body)
-  let scheme = call_568055.pickScheme
+  let valid = call_563955.validator(path, query, header, formData, body)
+  let scheme = call_563955.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568055.url(scheme.get, call_568055.host, call_568055.base,
-                         call_568055.route, valid.getOrDefault("path"),
+  let url = call_563955.url(scheme.get, call_563955.host, call_563955.base,
+                         call_563955.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568055, url, valid)
+  result = hook(call_563955, url, valid)
 
-proc call*(call_568126: Call_DdosCustomPoliciesGet_567863;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
+proc call*(call_564026: Call_DdosCustomPoliciesGet_563761; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string;
           ddosCustomPolicyName: string): Recallable =
   ## ddosCustomPoliciesGet
   ## Gets information about the specified DDoS custom policy.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client API version.
   ##   subscriptionId: string (required)
   ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   ddosCustomPolicyName: string (required)
   ##                       : The name of the DDoS custom policy.
-  var path_568127 = newJObject()
-  var query_568129 = newJObject()
-  add(path_568127, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568129, "api-version", newJString(apiVersion))
-  add(path_568127, "subscriptionId", newJString(subscriptionId))
-  add(path_568127, "ddosCustomPolicyName", newJString(ddosCustomPolicyName))
-  result = call_568126.call(path_568127, query_568129, nil, nil, nil)
+  var path_564027 = newJObject()
+  var query_564029 = newJObject()
+  add(query_564029, "api-version", newJString(apiVersion))
+  add(path_564027, "subscriptionId", newJString(subscriptionId))
+  add(path_564027, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564027, "ddosCustomPolicyName", newJString(ddosCustomPolicyName))
+  result = call_564026.call(path_564027, query_564029, nil, nil, nil)
 
-var ddosCustomPoliciesGet* = Call_DdosCustomPoliciesGet_567863(
+var ddosCustomPoliciesGet* = Call_DdosCustomPoliciesGet_563761(
     name: "ddosCustomPoliciesGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/ddosCustomPolicies/{ddosCustomPolicyName}",
-    validator: validate_DdosCustomPoliciesGet_567864, base: "",
-    url: url_DdosCustomPoliciesGet_567865, schemes: {Scheme.Https})
+    validator: validate_DdosCustomPoliciesGet_563762, base: "",
+    url: url_DdosCustomPoliciesGet_563763, schemes: {Scheme.Https})
 type
-  Call_DdosCustomPoliciesUpdateTags_568218 = ref object of OpenApiRestCall_567641
-proc url_DdosCustomPoliciesUpdateTags_568220(protocol: Scheme; host: string;
+  Call_DdosCustomPoliciesUpdateTags_564118 = ref object of OpenApiRestCall_563539
+proc url_DdosCustomPoliciesUpdateTags_564120(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -371,37 +375,37 @@ proc url_DdosCustomPoliciesUpdateTags_568220(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DdosCustomPoliciesUpdateTags_568219(path: JsonNode; query: JsonNode;
+proc validate_DdosCustomPoliciesUpdateTags_564119(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Update a DDoS custom policy tags
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   subscriptionId: JString (required)
   ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   ##   ddosCustomPolicyName: JString (required)
   ##                       : The name of the DDoS custom policy.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568221 = path.getOrDefault("resourceGroupName")
-  valid_568221 = validateParameter(valid_568221, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564121 = path.getOrDefault("subscriptionId")
+  valid_564121 = validateParameter(valid_564121, JString, required = true,
                                  default = nil)
-  if valid_568221 != nil:
-    section.add "resourceGroupName", valid_568221
-  var valid_568222 = path.getOrDefault("subscriptionId")
-  valid_568222 = validateParameter(valid_568222, JString, required = true,
+  if valid_564121 != nil:
+    section.add "subscriptionId", valid_564121
+  var valid_564122 = path.getOrDefault("resourceGroupName")
+  valid_564122 = validateParameter(valid_564122, JString, required = true,
                                  default = nil)
-  if valid_568222 != nil:
-    section.add "subscriptionId", valid_568222
-  var valid_568223 = path.getOrDefault("ddosCustomPolicyName")
-  valid_568223 = validateParameter(valid_568223, JString, required = true,
+  if valid_564122 != nil:
+    section.add "resourceGroupName", valid_564122
+  var valid_564123 = path.getOrDefault("ddosCustomPolicyName")
+  valid_564123 = validateParameter(valid_564123, JString, required = true,
                                  default = nil)
-  if valid_568223 != nil:
-    section.add "ddosCustomPolicyName", valid_568223
+  if valid_564123 != nil:
+    section.add "ddosCustomPolicyName", valid_564123
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -409,11 +413,11 @@ proc validate_DdosCustomPoliciesUpdateTags_568219(path: JsonNode; query: JsonNod
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568224 = query.getOrDefault("api-version")
-  valid_568224 = validateParameter(valid_568224, JString, required = true,
+  var valid_564124 = query.getOrDefault("api-version")
+  valid_564124 = validateParameter(valid_564124, JString, required = true,
                                  default = nil)
-  if valid_568224 != nil:
-    section.add "api-version", valid_568224
+  if valid_564124 != nil:
+    section.add "api-version", valid_564124
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -427,53 +431,53 @@ proc validate_DdosCustomPoliciesUpdateTags_568219(path: JsonNode; query: JsonNod
   if body != nil:
     result.add "body", body
 
-proc call*(call_568226: Call_DdosCustomPoliciesUpdateTags_568218; path: JsonNode;
+proc call*(call_564126: Call_DdosCustomPoliciesUpdateTags_564118; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Update a DDoS custom policy tags
   ## 
-  let valid = call_568226.validator(path, query, header, formData, body)
-  let scheme = call_568226.pickScheme
+  let valid = call_564126.validator(path, query, header, formData, body)
+  let scheme = call_564126.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568226.url(scheme.get, call_568226.host, call_568226.base,
-                         call_568226.route, valid.getOrDefault("path"),
+  let url = call_564126.url(scheme.get, call_564126.host, call_564126.base,
+                         call_564126.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568226, url, valid)
+  result = hook(call_564126, url, valid)
 
-proc call*(call_568227: Call_DdosCustomPoliciesUpdateTags_568218;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
+proc call*(call_564127: Call_DdosCustomPoliciesUpdateTags_564118;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string;
           ddosCustomPolicyName: string; parameters: JsonNode): Recallable =
   ## ddosCustomPoliciesUpdateTags
   ## Update a DDoS custom policy tags
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client API version.
   ##   subscriptionId: string (required)
   ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   ddosCustomPolicyName: string (required)
   ##                       : The name of the DDoS custom policy.
   ##   parameters: JObject (required)
   ##             : Parameters supplied to the update DDoS custom policy resource tags.
-  var path_568228 = newJObject()
-  var query_568229 = newJObject()
-  var body_568230 = newJObject()
-  add(path_568228, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568229, "api-version", newJString(apiVersion))
-  add(path_568228, "subscriptionId", newJString(subscriptionId))
-  add(path_568228, "ddosCustomPolicyName", newJString(ddosCustomPolicyName))
+  var path_564128 = newJObject()
+  var query_564129 = newJObject()
+  var body_564130 = newJObject()
+  add(query_564129, "api-version", newJString(apiVersion))
+  add(path_564128, "subscriptionId", newJString(subscriptionId))
+  add(path_564128, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564128, "ddosCustomPolicyName", newJString(ddosCustomPolicyName))
   if parameters != nil:
-    body_568230 = parameters
-  result = call_568227.call(path_568228, query_568229, nil, nil, body_568230)
+    body_564130 = parameters
+  result = call_564127.call(path_564128, query_564129, nil, nil, body_564130)
 
-var ddosCustomPoliciesUpdateTags* = Call_DdosCustomPoliciesUpdateTags_568218(
+var ddosCustomPoliciesUpdateTags* = Call_DdosCustomPoliciesUpdateTags_564118(
     name: "ddosCustomPoliciesUpdateTags", meth: HttpMethod.HttpPatch,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/ddosCustomPolicies/{ddosCustomPolicyName}",
-    validator: validate_DdosCustomPoliciesUpdateTags_568219, base: "",
-    url: url_DdosCustomPoliciesUpdateTags_568220, schemes: {Scheme.Https})
+    validator: validate_DdosCustomPoliciesUpdateTags_564119, base: "",
+    url: url_DdosCustomPoliciesUpdateTags_564120, schemes: {Scheme.Https})
 type
-  Call_DdosCustomPoliciesDelete_568207 = ref object of OpenApiRestCall_567641
-proc url_DdosCustomPoliciesDelete_568209(protocol: Scheme; host: string;
+  Call_DdosCustomPoliciesDelete_564107 = ref object of OpenApiRestCall_563539
+proc url_DdosCustomPoliciesDelete_564109(protocol: Scheme; host: string;
                                         base: string; route: string; path: JsonNode;
                                         query: JsonNode): Uri =
   result.scheme = $protocol
@@ -498,37 +502,37 @@ proc url_DdosCustomPoliciesDelete_568209(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DdosCustomPoliciesDelete_568208(path: JsonNode; query: JsonNode;
+proc validate_DdosCustomPoliciesDelete_564108(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Deletes the specified DDoS custom policy.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   subscriptionId: JString (required)
   ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   ##   ddosCustomPolicyName: JString (required)
   ##                       : The name of the DDoS custom policy.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568210 = path.getOrDefault("resourceGroupName")
-  valid_568210 = validateParameter(valid_568210, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564110 = path.getOrDefault("subscriptionId")
+  valid_564110 = validateParameter(valid_564110, JString, required = true,
                                  default = nil)
-  if valid_568210 != nil:
-    section.add "resourceGroupName", valid_568210
-  var valid_568211 = path.getOrDefault("subscriptionId")
-  valid_568211 = validateParameter(valid_568211, JString, required = true,
+  if valid_564110 != nil:
+    section.add "subscriptionId", valid_564110
+  var valid_564111 = path.getOrDefault("resourceGroupName")
+  valid_564111 = validateParameter(valid_564111, JString, required = true,
                                  default = nil)
-  if valid_568211 != nil:
-    section.add "subscriptionId", valid_568211
-  var valid_568212 = path.getOrDefault("ddosCustomPolicyName")
-  valid_568212 = validateParameter(valid_568212, JString, required = true,
+  if valid_564111 != nil:
+    section.add "resourceGroupName", valid_564111
+  var valid_564112 = path.getOrDefault("ddosCustomPolicyName")
+  valid_564112 = validateParameter(valid_564112, JString, required = true,
                                  default = nil)
-  if valid_568212 != nil:
-    section.add "ddosCustomPolicyName", valid_568212
+  if valid_564112 != nil:
+    section.add "ddosCustomPolicyName", valid_564112
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -536,11 +540,11 @@ proc validate_DdosCustomPoliciesDelete_568208(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568213 = query.getOrDefault("api-version")
-  valid_568213 = validateParameter(valid_568213, JString, required = true,
+  var valid_564113 = query.getOrDefault("api-version")
+  valid_564113 = validateParameter(valid_564113, JString, required = true,
                                  default = nil)
-  if valid_568213 != nil:
-    section.add "api-version", valid_568213
+  if valid_564113 != nil:
+    section.add "api-version", valid_564113
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -549,45 +553,45 @@ proc validate_DdosCustomPoliciesDelete_568208(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568214: Call_DdosCustomPoliciesDelete_568207; path: JsonNode;
+proc call*(call_564114: Call_DdosCustomPoliciesDelete_564107; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes the specified DDoS custom policy.
   ## 
-  let valid = call_568214.validator(path, query, header, formData, body)
-  let scheme = call_568214.pickScheme
+  let valid = call_564114.validator(path, query, header, formData, body)
+  let scheme = call_564114.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568214.url(scheme.get, call_568214.host, call_568214.base,
-                         call_568214.route, valid.getOrDefault("path"),
+  let url = call_564114.url(scheme.get, call_564114.host, call_564114.base,
+                         call_564114.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568214, url, valid)
+  result = hook(call_564114, url, valid)
 
-proc call*(call_568215: Call_DdosCustomPoliciesDelete_568207;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
+proc call*(call_564115: Call_DdosCustomPoliciesDelete_564107; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string;
           ddosCustomPolicyName: string): Recallable =
   ## ddosCustomPoliciesDelete
   ## Deletes the specified DDoS custom policy.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client API version.
   ##   subscriptionId: string (required)
   ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   ddosCustomPolicyName: string (required)
   ##                       : The name of the DDoS custom policy.
-  var path_568216 = newJObject()
-  var query_568217 = newJObject()
-  add(path_568216, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568217, "api-version", newJString(apiVersion))
-  add(path_568216, "subscriptionId", newJString(subscriptionId))
-  add(path_568216, "ddosCustomPolicyName", newJString(ddosCustomPolicyName))
-  result = call_568215.call(path_568216, query_568217, nil, nil, nil)
+  var path_564116 = newJObject()
+  var query_564117 = newJObject()
+  add(query_564117, "api-version", newJString(apiVersion))
+  add(path_564116, "subscriptionId", newJString(subscriptionId))
+  add(path_564116, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564116, "ddosCustomPolicyName", newJString(ddosCustomPolicyName))
+  result = call_564115.call(path_564116, query_564117, nil, nil, nil)
 
-var ddosCustomPoliciesDelete* = Call_DdosCustomPoliciesDelete_568207(
+var ddosCustomPoliciesDelete* = Call_DdosCustomPoliciesDelete_564107(
     name: "ddosCustomPoliciesDelete", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/ddosCustomPolicies/{ddosCustomPolicyName}",
-    validator: validate_DdosCustomPoliciesDelete_568208, base: "",
-    url: url_DdosCustomPoliciesDelete_568209, schemes: {Scheme.Https})
+    validator: validate_DdosCustomPoliciesDelete_564108, base: "",
+    url: url_DdosCustomPoliciesDelete_564109, schemes: {Scheme.Https})
 export
   rest
 

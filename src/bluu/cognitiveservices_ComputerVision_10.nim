@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, httpcore
 
 ## auto-generated via openapi macro
 ## title: Computer Vision
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_567658 = ref object of OpenApiRestCall
+  OpenApiRestCall_563556 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_567658](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563556](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_567658): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563556): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,15 +107,15 @@ const
   macServiceName = "cognitiveservices-ComputerVision"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_AnalyzeImage_567880 = ref object of OpenApiRestCall_567658
-proc url_AnalyzeImage_567882(protocol: Scheme; host: string; base: string;
+  Call_AnalyzeImage_563778 = ref object of OpenApiRestCall_563556
+proc url_AnalyzeImage_563780(protocol: Scheme; host: string; base: string;
                             route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_AnalyzeImage_567881(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_AnalyzeImage_563779(path: JsonNode; query: JsonNode; header: JsonNode;
                                  formData: JsonNode; body: JsonNode): JsonNode =
   ## This operation extracts a rich set of visual features based on the image content. Two input methods are supported -- (1) Uploading an image or (2) specifying an image URL.  Within your request, there is an optional parameter to allow you to choose which features to return.  By default, image categories are returned in the response.
   ## 
@@ -120,28 +124,28 @@ proc validate_AnalyzeImage_567881(path: JsonNode; query: JsonNode; header: JsonN
   section = newJObject()
   result.add "path", section
   ## parameters in `query` object:
+  ##   details: JArray
+  ##          : A string indicating which domain-specific details to return. Multiple values should be comma-separated. Valid visual feature types include:Celebrities - identifies celebrities if detected in the image.
   ##   visualFeatures: JArray
   ##                 : A string indicating what visual feature types to return. Multiple values should be comma-separated. Valid visual feature types include:Categories - categorizes image content according to a taxonomy defined in documentation. Tags - tags the image with a detailed list of words related to the image content. Description - describes the image content with a complete English sentence. Faces - detects if faces are present. If present, generate coordinates, gender and age. ImageType - detects if image is clipart or a line drawing. Color - determines the accent color, dominant color, and whether an image is black&white.Adult - detects if the image is pornographic in nature (depicts nudity or a sex act).  Sexually suggestive content is also detected.
   ##   language: JString
   ##           : The desired language for output generation. If this parameter is not specified, the default value is &quot;en&quot;.Supported languages:en - English, Default. es - Spanish, ja - Japanese, pt - Portuguese, zh - Simplified Chinese.
-  ##   details: JArray
-  ##          : A string indicating which domain-specific details to return. Multiple values should be comma-separated. Valid visual feature types include:Celebrities - identifies celebrities if detected in the image.
   section = newJObject()
-  var valid_568041 = query.getOrDefault("visualFeatures")
-  valid_568041 = validateParameter(valid_568041, JArray, required = false,
+  var valid_563941 = query.getOrDefault("details")
+  valid_563941 = validateParameter(valid_563941, JArray, required = false,
                                  default = nil)
-  if valid_568041 != nil:
-    section.add "visualFeatures", valid_568041
-  var valid_568055 = query.getOrDefault("language")
-  valid_568055 = validateParameter(valid_568055, JString, required = false,
+  if valid_563941 != nil:
+    section.add "details", valid_563941
+  var valid_563942 = query.getOrDefault("visualFeatures")
+  valid_563942 = validateParameter(valid_563942, JArray, required = false,
+                                 default = nil)
+  if valid_563942 != nil:
+    section.add "visualFeatures", valid_563942
+  var valid_563956 = query.getOrDefault("language")
+  valid_563956 = validateParameter(valid_563956, JString, required = false,
                                  default = newJString("en"))
-  if valid_568055 != nil:
-    section.add "language", valid_568055
-  var valid_568056 = query.getOrDefault("details")
-  valid_568056 = validateParameter(valid_568056, JArray, required = false,
-                                 default = nil)
-  if valid_568056 != nil:
-    section.add "details", valid_568056
+  if valid_563956 != nil:
+    section.add "language", valid_563956
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -155,57 +159,57 @@ proc validate_AnalyzeImage_567881(path: JsonNode; query: JsonNode; header: JsonN
   if body != nil:
     result.add "body", body
 
-proc call*(call_568080: Call_AnalyzeImage_567880; path: JsonNode; query: JsonNode;
+proc call*(call_563980: Call_AnalyzeImage_563778; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## This operation extracts a rich set of visual features based on the image content. Two input methods are supported -- (1) Uploading an image or (2) specifying an image URL.  Within your request, there is an optional parameter to allow you to choose which features to return.  By default, image categories are returned in the response.
   ## 
-  let valid = call_568080.validator(path, query, header, formData, body)
-  let scheme = call_568080.pickScheme
+  let valid = call_563980.validator(path, query, header, formData, body)
+  let scheme = call_563980.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568080.url(scheme.get, call_568080.host, call_568080.base,
-                         call_568080.route, valid.getOrDefault("path"),
+  let url = call_563980.url(scheme.get, call_563980.host, call_563980.base,
+                         call_563980.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568080, url, valid)
+  result = hook(call_563980, url, valid)
 
-proc call*(call_568151: Call_AnalyzeImage_567880; ImageUrl: JsonNode;
-          visualFeatures: JsonNode = nil; language: string = "en";
-          details: JsonNode = nil): Recallable =
+proc call*(call_564051: Call_AnalyzeImage_563778; ImageUrl: JsonNode;
+          details: JsonNode = nil; visualFeatures: JsonNode = nil;
+          language: string = "en"): Recallable =
   ## analyzeImage
   ## This operation extracts a rich set of visual features based on the image content. Two input methods are supported -- (1) Uploading an image or (2) specifying an image URL.  Within your request, there is an optional parameter to allow you to choose which features to return.  By default, image categories are returned in the response.
+  ##   details: JArray
+  ##          : A string indicating which domain-specific details to return. Multiple values should be comma-separated. Valid visual feature types include:Celebrities - identifies celebrities if detected in the image.
   ##   visualFeatures: JArray
   ##                 : A string indicating what visual feature types to return. Multiple values should be comma-separated. Valid visual feature types include:Categories - categorizes image content according to a taxonomy defined in documentation. Tags - tags the image with a detailed list of words related to the image content. Description - describes the image content with a complete English sentence. Faces - detects if faces are present. If present, generate coordinates, gender and age. ImageType - detects if image is clipart or a line drawing. Color - determines the accent color, dominant color, and whether an image is black&white.Adult - detects if the image is pornographic in nature (depicts nudity or a sex act).  Sexually suggestive content is also detected.
   ##   language: string
   ##           : The desired language for output generation. If this parameter is not specified, the default value is &quot;en&quot;.Supported languages:en - English, Default. es - Spanish, ja - Japanese, pt - Portuguese, zh - Simplified Chinese.
-  ##   details: JArray
-  ##          : A string indicating which domain-specific details to return. Multiple values should be comma-separated. Valid visual feature types include:Celebrities - identifies celebrities if detected in the image.
   ##   ImageUrl: JObject (required)
   ##           : A JSON document with a URL pointing to the image that is to be analyzed.
-  var query_568152 = newJObject()
-  var body_568154 = newJObject()
-  if visualFeatures != nil:
-    query_568152.add "visualFeatures", visualFeatures
-  add(query_568152, "language", newJString(language))
+  var query_564052 = newJObject()
+  var body_564054 = newJObject()
   if details != nil:
-    query_568152.add "details", details
+    query_564052.add "details", details
+  if visualFeatures != nil:
+    query_564052.add "visualFeatures", visualFeatures
+  add(query_564052, "language", newJString(language))
   if ImageUrl != nil:
-    body_568154 = ImageUrl
-  result = call_568151.call(nil, query_568152, nil, nil, body_568154)
+    body_564054 = ImageUrl
+  result = call_564051.call(nil, query_564052, nil, nil, body_564054)
 
-var analyzeImage* = Call_AnalyzeImage_567880(name: "analyzeImage",
+var analyzeImage* = Call_AnalyzeImage_563778(name: "analyzeImage",
     meth: HttpMethod.HttpPost, host: "azure.local", route: "/analyze",
-    validator: validate_AnalyzeImage_567881, base: "/vision/v1.0",
-    url: url_AnalyzeImage_567882, schemes: {Scheme.Https})
+    validator: validate_AnalyzeImage_563779, base: "/vision/v1.0",
+    url: url_AnalyzeImage_563780, schemes: {Scheme.Https})
 type
-  Call_DescribeImage_568193 = ref object of OpenApiRestCall_567658
-proc url_DescribeImage_568195(protocol: Scheme; host: string; base: string;
+  Call_DescribeImage_564093 = ref object of OpenApiRestCall_563556
+proc url_DescribeImage_564095(protocol: Scheme; host: string; base: string;
                              route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_DescribeImage_568194(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_DescribeImage_564094(path: JsonNode; query: JsonNode; header: JsonNode;
                                   formData: JsonNode; body: JsonNode): JsonNode =
   ## This operation generates a description of an image in human readable language with complete sentences.  The description is based on a collection of content tags, which are also returned by the operation. More than one description can be generated for each image.  Descriptions are ordered by their confidence score. All descriptions are in English. Two input methods are supported -- (1) Uploading an image or (2) specifying an image URL.A successful response will be returned in JSON.  If the request failed, the response will contain an error code and a message to help understand what went wrong.
   ## 
@@ -214,21 +218,21 @@ proc validate_DescribeImage_568194(path: JsonNode; query: JsonNode; header: Json
   section = newJObject()
   result.add "path", section
   ## parameters in `query` object:
-  ##   language: JString
-  ##           : The desired language for output generation. If this parameter is not specified, the default value is &quot;en&quot;.Supported languages:en - English, Default. es - Spanish, ja - Japanese, pt - Portuguese, zh - Simplified Chinese.
   ##   maxCandidates: JString
   ##                : Maximum number of candidate descriptions to be returned.  The default is 1.
+  ##   language: JString
+  ##           : The desired language for output generation. If this parameter is not specified, the default value is &quot;en&quot;.Supported languages:en - English, Default. es - Spanish, ja - Japanese, pt - Portuguese, zh - Simplified Chinese.
   section = newJObject()
-  var valid_568196 = query.getOrDefault("language")
-  valid_568196 = validateParameter(valid_568196, JString, required = false,
-                                 default = newJString("en"))
-  if valid_568196 != nil:
-    section.add "language", valid_568196
-  var valid_568197 = query.getOrDefault("maxCandidates")
-  valid_568197 = validateParameter(valid_568197, JString, required = false,
+  var valid_564096 = query.getOrDefault("maxCandidates")
+  valid_564096 = validateParameter(valid_564096, JString, required = false,
                                  default = newJString("1"))
-  if valid_568197 != nil:
-    section.add "maxCandidates", valid_568197
+  if valid_564096 != nil:
+    section.add "maxCandidates", valid_564096
+  var valid_564097 = query.getOrDefault("language")
+  valid_564097 = validateParameter(valid_564097, JString, required = false,
+                                 default = newJString("en"))
+  if valid_564097 != nil:
+    section.add "language", valid_564097
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -242,51 +246,51 @@ proc validate_DescribeImage_568194(path: JsonNode; query: JsonNode; header: Json
   if body != nil:
     result.add "body", body
 
-proc call*(call_568199: Call_DescribeImage_568193; path: JsonNode; query: JsonNode;
+proc call*(call_564099: Call_DescribeImage_564093; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## This operation generates a description of an image in human readable language with complete sentences.  The description is based on a collection of content tags, which are also returned by the operation. More than one description can be generated for each image.  Descriptions are ordered by their confidence score. All descriptions are in English. Two input methods are supported -- (1) Uploading an image or (2) specifying an image URL.A successful response will be returned in JSON.  If the request failed, the response will contain an error code and a message to help understand what went wrong.
   ## 
-  let valid = call_568199.validator(path, query, header, formData, body)
-  let scheme = call_568199.pickScheme
+  let valid = call_564099.validator(path, query, header, formData, body)
+  let scheme = call_564099.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568199.url(scheme.get, call_568199.host, call_568199.base,
-                         call_568199.route, valid.getOrDefault("path"),
+  let url = call_564099.url(scheme.get, call_564099.host, call_564099.base,
+                         call_564099.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568199, url, valid)
+  result = hook(call_564099, url, valid)
 
-proc call*(call_568200: Call_DescribeImage_568193; ImageUrl: JsonNode;
-          language: string = "en"; maxCandidates: string = "1"): Recallable =
+proc call*(call_564100: Call_DescribeImage_564093; ImageUrl: JsonNode;
+          maxCandidates: string = "1"; language: string = "en"): Recallable =
   ## describeImage
   ## This operation generates a description of an image in human readable language with complete sentences.  The description is based on a collection of content tags, which are also returned by the operation. More than one description can be generated for each image.  Descriptions are ordered by their confidence score. All descriptions are in English. Two input methods are supported -- (1) Uploading an image or (2) specifying an image URL.A successful response will be returned in JSON.  If the request failed, the response will contain an error code and a message to help understand what went wrong.
+  ##   maxCandidates: string
+  ##                : Maximum number of candidate descriptions to be returned.  The default is 1.
   ##   language: string
   ##           : The desired language for output generation. If this parameter is not specified, the default value is &quot;en&quot;.Supported languages:en - English, Default. es - Spanish, ja - Japanese, pt - Portuguese, zh - Simplified Chinese.
   ##   ImageUrl: JObject (required)
   ##           : A JSON document with a URL pointing to the image that is to be analyzed.
-  ##   maxCandidates: string
-  ##                : Maximum number of candidate descriptions to be returned.  The default is 1.
-  var query_568201 = newJObject()
-  var body_568202 = newJObject()
-  add(query_568201, "language", newJString(language))
+  var query_564101 = newJObject()
+  var body_564102 = newJObject()
+  add(query_564101, "maxCandidates", newJString(maxCandidates))
+  add(query_564101, "language", newJString(language))
   if ImageUrl != nil:
-    body_568202 = ImageUrl
-  add(query_568201, "maxCandidates", newJString(maxCandidates))
-  result = call_568200.call(nil, query_568201, nil, nil, body_568202)
+    body_564102 = ImageUrl
+  result = call_564100.call(nil, query_564101, nil, nil, body_564102)
 
-var describeImage* = Call_DescribeImage_568193(name: "describeImage",
+var describeImage* = Call_DescribeImage_564093(name: "describeImage",
     meth: HttpMethod.HttpPost, host: "azure.local", route: "/describe",
-    validator: validate_DescribeImage_568194, base: "/vision/v1.0",
-    url: url_DescribeImage_568195, schemes: {Scheme.Https})
+    validator: validate_DescribeImage_564094, base: "/vision/v1.0",
+    url: url_DescribeImage_564095, schemes: {Scheme.Https})
 type
-  Call_GenerateThumbnail_568203 = ref object of OpenApiRestCall_567658
-proc url_GenerateThumbnail_568205(protocol: Scheme; host: string; base: string;
+  Call_GenerateThumbnail_564103 = ref object of OpenApiRestCall_563556
+proc url_GenerateThumbnail_564105(protocol: Scheme; host: string; base: string;
                                  route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_GenerateThumbnail_568204(path: JsonNode; query: JsonNode;
+proc validate_GenerateThumbnail_564104(path: JsonNode; query: JsonNode;
                                       header: JsonNode; formData: JsonNode;
                                       body: JsonNode): JsonNode =
   ## This operation generates a thumbnail image with the user-specified width and height. By default, the service analyzes the image, identifies the region of interest (ROI), and generates smart cropping coordinates based on the ROI. Smart cropping helps when you specify an aspect ratio that differs from that of the input image. A successful response contains the thumbnail image binary. If the request failed, the response contains an error code and a message to help determine what went wrong.
@@ -304,19 +308,19 @@ proc validate_GenerateThumbnail_568204(path: JsonNode; query: JsonNode;
   ##                : Boolean flag for enabling smart cropping.
   section = newJObject()
   assert query != nil, "query argument is necessary due to required `height` field"
-  var valid_568206 = query.getOrDefault("height")
-  valid_568206 = validateParameter(valid_568206, JInt, required = true, default = nil)
-  if valid_568206 != nil:
-    section.add "height", valid_568206
-  var valid_568207 = query.getOrDefault("width")
-  valid_568207 = validateParameter(valid_568207, JInt, required = true, default = nil)
-  if valid_568207 != nil:
-    section.add "width", valid_568207
-  var valid_568208 = query.getOrDefault("smartCropping")
-  valid_568208 = validateParameter(valid_568208, JBool, required = false,
+  var valid_564106 = query.getOrDefault("height")
+  valid_564106 = validateParameter(valid_564106, JInt, required = true, default = nil)
+  if valid_564106 != nil:
+    section.add "height", valid_564106
+  var valid_564107 = query.getOrDefault("width")
+  valid_564107 = validateParameter(valid_564107, JInt, required = true, default = nil)
+  if valid_564107 != nil:
+    section.add "width", valid_564107
+  var valid_564108 = query.getOrDefault("smartCropping")
+  valid_564108 = validateParameter(valid_564108, JBool, required = false,
                                  default = newJBool(false))
-  if valid_568208 != nil:
-    section.add "smartCropping", valid_568208
+  if valid_564108 != nil:
+    section.add "smartCropping", valid_564108
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -330,54 +334,54 @@ proc validate_GenerateThumbnail_568204(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568210: Call_GenerateThumbnail_568203; path: JsonNode;
+proc call*(call_564110: Call_GenerateThumbnail_564103; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## This operation generates a thumbnail image with the user-specified width and height. By default, the service analyzes the image, identifies the region of interest (ROI), and generates smart cropping coordinates based on the ROI. Smart cropping helps when you specify an aspect ratio that differs from that of the input image. A successful response contains the thumbnail image binary. If the request failed, the response contains an error code and a message to help determine what went wrong.
   ## 
-  let valid = call_568210.validator(path, query, header, formData, body)
-  let scheme = call_568210.pickScheme
+  let valid = call_564110.validator(path, query, header, formData, body)
+  let scheme = call_564110.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568210.url(scheme.get, call_568210.host, call_568210.base,
-                         call_568210.route, valid.getOrDefault("path"),
+  let url = call_564110.url(scheme.get, call_564110.host, call_564110.base,
+                         call_564110.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568210, url, valid)
+  result = hook(call_564110, url, valid)
 
-proc call*(call_568211: Call_GenerateThumbnail_568203; height: int;
-          ImageUrl: JsonNode; width: int; smartCropping: bool = false): Recallable =
+proc call*(call_564111: Call_GenerateThumbnail_564103; height: int; width: int;
+          ImageUrl: JsonNode; smartCropping: bool = false): Recallable =
   ## generateThumbnail
   ## This operation generates a thumbnail image with the user-specified width and height. By default, the service analyzes the image, identifies the region of interest (ROI), and generates smart cropping coordinates based on the ROI. Smart cropping helps when you specify an aspect ratio that differs from that of the input image. A successful response contains the thumbnail image binary. If the request failed, the response contains an error code and a message to help determine what went wrong.
   ##   height: int (required)
   ##         : Height of the thumbnail. It must be between 1 and 1024. Recommended minimum of 50.
-  ##   ImageUrl: JObject (required)
-  ##           : A JSON document with a URL pointing to the image that is to be analyzed.
   ##   width: int (required)
   ##        : Width of the thumbnail. It must be between 1 and 1024. Recommended minimum of 50.
   ##   smartCropping: bool
   ##                : Boolean flag for enabling smart cropping.
-  var query_568212 = newJObject()
-  var body_568213 = newJObject()
-  add(query_568212, "height", newJInt(height))
+  ##   ImageUrl: JObject (required)
+  ##           : A JSON document with a URL pointing to the image that is to be analyzed.
+  var query_564112 = newJObject()
+  var body_564113 = newJObject()
+  add(query_564112, "height", newJInt(height))
+  add(query_564112, "width", newJInt(width))
+  add(query_564112, "smartCropping", newJBool(smartCropping))
   if ImageUrl != nil:
-    body_568213 = ImageUrl
-  add(query_568212, "width", newJInt(width))
-  add(query_568212, "smartCropping", newJBool(smartCropping))
-  result = call_568211.call(nil, query_568212, nil, nil, body_568213)
+    body_564113 = ImageUrl
+  result = call_564111.call(nil, query_564112, nil, nil, body_564113)
 
-var generateThumbnail* = Call_GenerateThumbnail_568203(name: "generateThumbnail",
+var generateThumbnail* = Call_GenerateThumbnail_564103(name: "generateThumbnail",
     meth: HttpMethod.HttpPost, host: "azure.local", route: "/generateThumbnail",
-    validator: validate_GenerateThumbnail_568204, base: "/vision/v1.0",
-    url: url_GenerateThumbnail_568205, schemes: {Scheme.Https})
+    validator: validate_GenerateThumbnail_564104, base: "/vision/v1.0",
+    url: url_GenerateThumbnail_564105, schemes: {Scheme.Https})
 type
-  Call_ListModels_568214 = ref object of OpenApiRestCall_567658
-proc url_ListModels_568216(protocol: Scheme; host: string; base: string; route: string;
+  Call_ListModels_564114 = ref object of OpenApiRestCall_563556
+proc url_ListModels_564116(protocol: Scheme; host: string; base: string; route: string;
                           path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_ListModels_568215(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_ListModels_564115(path: JsonNode; query: JsonNode; header: JsonNode;
                                formData: JsonNode; body: JsonNode): JsonNode =
   ## This operation returns the list of domain-specific models that are supported by the Computer Vision API.  Currently, the API only supports one domain-specific model: a celebrity recognizer. A successful response will be returned in JSON.  If the request failed, the response will contain an error code and a message to help understand what went wrong.
   ## 
@@ -394,33 +398,33 @@ proc validate_ListModels_568215(path: JsonNode; query: JsonNode; header: JsonNod
   if body != nil:
     result.add "body", body
 
-proc call*(call_568217: Call_ListModels_568214; path: JsonNode; query: JsonNode;
+proc call*(call_564117: Call_ListModels_564114; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## This operation returns the list of domain-specific models that are supported by the Computer Vision API.  Currently, the API only supports one domain-specific model: a celebrity recognizer. A successful response will be returned in JSON.  If the request failed, the response will contain an error code and a message to help understand what went wrong.
   ## 
-  let valid = call_568217.validator(path, query, header, formData, body)
-  let scheme = call_568217.pickScheme
+  let valid = call_564117.validator(path, query, header, formData, body)
+  let scheme = call_564117.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568217.url(scheme.get, call_568217.host, call_568217.base,
-                         call_568217.route, valid.getOrDefault("path"),
+  let url = call_564117.url(scheme.get, call_564117.host, call_564117.base,
+                         call_564117.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568217, url, valid)
+  result = hook(call_564117, url, valid)
 
-proc call*(call_568218: Call_ListModels_568214): Recallable =
+proc call*(call_564118: Call_ListModels_564114): Recallable =
   ## listModels
   ## This operation returns the list of domain-specific models that are supported by the Computer Vision API.  Currently, the API only supports one domain-specific model: a celebrity recognizer. A successful response will be returned in JSON.  If the request failed, the response will contain an error code and a message to help understand what went wrong.
-  result = call_568218.call(nil, nil, nil, nil, nil)
+  result = call_564118.call(nil, nil, nil, nil, nil)
 
-var listModels* = Call_ListModels_568214(name: "listModels",
+var listModels* = Call_ListModels_564114(name: "listModels",
                                       meth: HttpMethod.HttpGet,
                                       host: "azure.local", route: "/models",
-                                      validator: validate_ListModels_568215,
-                                      base: "/vision/v1.0", url: url_ListModels_568216,
+                                      validator: validate_ListModels_564115,
+                                      base: "/vision/v1.0", url: url_ListModels_564116,
                                       schemes: {Scheme.Https})
 type
-  Call_AnalyzeImageByDomain_568219 = ref object of OpenApiRestCall_567658
-proc url_AnalyzeImageByDomain_568221(protocol: Scheme; host: string; base: string;
+  Call_AnalyzeImageByDomain_564119 = ref object of OpenApiRestCall_563556
+proc url_AnalyzeImageByDomain_564121(protocol: Scheme; host: string; base: string;
                                     route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -436,7 +440,7 @@ proc url_AnalyzeImageByDomain_568221(protocol: Scheme; host: string; base: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AnalyzeImageByDomain_568220(path: JsonNode; query: JsonNode;
+proc validate_AnalyzeImageByDomain_564120(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## This operation recognizes content within an image by applying a domain-specific model.  The list of domain-specific models that are supported by the Computer Vision API can be retrieved using the /models GET request.  Currently, the API only provides a single domain-specific model: celebrities. Two input methods are supported -- (1) Uploading an image or (2) specifying an image URL. A successful response will be returned in JSON.  If the request failed, the response will contain an error code and a message to help understand what went wrong.
   ## 
@@ -447,21 +451,21 @@ proc validate_AnalyzeImageByDomain_568220(path: JsonNode; query: JsonNode;
   ##        : The domain-specific content to recognize.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `model` field"
-  var valid_568236 = path.getOrDefault("model")
-  valid_568236 = validateParameter(valid_568236, JString, required = true,
+  var valid_564136 = path.getOrDefault("model")
+  valid_564136 = validateParameter(valid_564136, JString, required = true,
                                  default = nil)
-  if valid_568236 != nil:
-    section.add "model", valid_568236
+  if valid_564136 != nil:
+    section.add "model", valid_564136
   result.add "path", section
   ## parameters in `query` object:
   ##   language: JString
   ##           : The desired language for output generation. If this parameter is not specified, the default value is &quot;en&quot;.Supported languages:en - English, Default. es - Spanish, ja - Japanese, pt - Portuguese, zh - Simplified Chinese.
   section = newJObject()
-  var valid_568237 = query.getOrDefault("language")
-  valid_568237 = validateParameter(valid_568237, JString, required = false,
+  var valid_564137 = query.getOrDefault("language")
+  valid_564137 = validateParameter(valid_564137, JString, required = false,
                                  default = newJString("en"))
-  if valid_568237 != nil:
-    section.add "language", valid_568237
+  if valid_564137 != nil:
+    section.add "language", valid_564137
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -475,53 +479,53 @@ proc validate_AnalyzeImageByDomain_568220(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568239: Call_AnalyzeImageByDomain_568219; path: JsonNode;
+proc call*(call_564139: Call_AnalyzeImageByDomain_564119; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## This operation recognizes content within an image by applying a domain-specific model.  The list of domain-specific models that are supported by the Computer Vision API can be retrieved using the /models GET request.  Currently, the API only provides a single domain-specific model: celebrities. Two input methods are supported -- (1) Uploading an image or (2) specifying an image URL. A successful response will be returned in JSON.  If the request failed, the response will contain an error code and a message to help understand what went wrong.
   ## 
-  let valid = call_568239.validator(path, query, header, formData, body)
-  let scheme = call_568239.pickScheme
+  let valid = call_564139.validator(path, query, header, formData, body)
+  let scheme = call_564139.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568239.url(scheme.get, call_568239.host, call_568239.base,
-                         call_568239.route, valid.getOrDefault("path"),
+  let url = call_564139.url(scheme.get, call_564139.host, call_564139.base,
+                         call_564139.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568239, url, valid)
+  result = hook(call_564139, url, valid)
 
-proc call*(call_568240: Call_AnalyzeImageByDomain_568219; ImageUrl: JsonNode;
-          model: string; language: string = "en"): Recallable =
+proc call*(call_564140: Call_AnalyzeImageByDomain_564119; model: string;
+          ImageUrl: JsonNode; language: string = "en"): Recallable =
   ## analyzeImageByDomain
   ## This operation recognizes content within an image by applying a domain-specific model.  The list of domain-specific models that are supported by the Computer Vision API can be retrieved using the /models GET request.  Currently, the API only provides a single domain-specific model: celebrities. Two input methods are supported -- (1) Uploading an image or (2) specifying an image URL. A successful response will be returned in JSON.  If the request failed, the response will contain an error code and a message to help understand what went wrong.
+  ##   model: string (required)
+  ##        : The domain-specific content to recognize.
   ##   language: string
   ##           : The desired language for output generation. If this parameter is not specified, the default value is &quot;en&quot;.Supported languages:en - English, Default. es - Spanish, ja - Japanese, pt - Portuguese, zh - Simplified Chinese.
   ##   ImageUrl: JObject (required)
   ##           : A JSON document with a URL pointing to the image that is to be analyzed.
-  ##   model: string (required)
-  ##        : The domain-specific content to recognize.
-  var path_568241 = newJObject()
-  var query_568242 = newJObject()
-  var body_568243 = newJObject()
-  add(query_568242, "language", newJString(language))
+  var path_564141 = newJObject()
+  var query_564142 = newJObject()
+  var body_564143 = newJObject()
+  add(path_564141, "model", newJString(model))
+  add(query_564142, "language", newJString(language))
   if ImageUrl != nil:
-    body_568243 = ImageUrl
-  add(path_568241, "model", newJString(model))
-  result = call_568240.call(path_568241, query_568242, nil, nil, body_568243)
+    body_564143 = ImageUrl
+  result = call_564140.call(path_564141, query_564142, nil, nil, body_564143)
 
-var analyzeImageByDomain* = Call_AnalyzeImageByDomain_568219(
+var analyzeImageByDomain* = Call_AnalyzeImageByDomain_564119(
     name: "analyzeImageByDomain", meth: HttpMethod.HttpPost, host: "azure.local",
-    route: "/models/{model}/analyze", validator: validate_AnalyzeImageByDomain_568220,
-    base: "/vision/v1.0", url: url_AnalyzeImageByDomain_568221,
+    route: "/models/{model}/analyze", validator: validate_AnalyzeImageByDomain_564120,
+    base: "/vision/v1.0", url: url_AnalyzeImageByDomain_564121,
     schemes: {Scheme.Https})
 type
-  Call_RecognizePrintedText_568244 = ref object of OpenApiRestCall_567658
-proc url_RecognizePrintedText_568246(protocol: Scheme; host: string; base: string;
+  Call_RecognizePrintedText_564144 = ref object of OpenApiRestCall_563556
+proc url_RecognizePrintedText_564146(protocol: Scheme; host: string; base: string;
                                     route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_RecognizePrintedText_568245(path: JsonNode; query: JsonNode;
+proc validate_RecognizePrintedText_564145(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Optical Character Recognition (OCR) detects printed text in an image and extracts the recognized characters into a machine-usable character stream.   Upon success, the OCR results will be returned. Upon failure, the error code together with an error message will be returned. The error code can be one of InvalidImageUrl, InvalidImageFormat, InvalidImageSize, NotSupportedImage,  NotSupportedLanguage, or InternalServerError.
   ## 
@@ -530,23 +534,23 @@ proc validate_RecognizePrintedText_568245(path: JsonNode; query: JsonNode;
   section = newJObject()
   result.add "path", section
   ## parameters in `query` object:
-  ##   language: JString
-  ##           : The BCP-47 language code of the text to be detected in the image. The default value is 'unk'
   ##   detectOrientation: JBool (required)
   ##                    : Whether detect the text orientation in the image. With detectOrientation=true the OCR service tries to detect the image orientation and correct it before further processing (e.g. if it's upside-down). 
+  ##   language: JString
+  ##           : The BCP-47 language code of the text to be detected in the image. The default value is 'unk'
   section = newJObject()
-  var valid_568247 = query.getOrDefault("language")
-  valid_568247 = validateParameter(valid_568247, JString, required = false,
-                                 default = newJString("unk"))
-  if valid_568247 != nil:
-    section.add "language", valid_568247
   assert query != nil,
         "query argument is necessary due to required `detectOrientation` field"
-  var valid_568248 = query.getOrDefault("detectOrientation")
-  valid_568248 = validateParameter(valid_568248, JBool, required = true,
+  var valid_564147 = query.getOrDefault("detectOrientation")
+  valid_564147 = validateParameter(valid_564147, JBool, required = true,
                                  default = newJBool(true))
-  if valid_568248 != nil:
-    section.add "detectOrientation", valid_568248
+  if valid_564147 != nil:
+    section.add "detectOrientation", valid_564147
+  var valid_564148 = query.getOrDefault("language")
+  valid_564148 = validateParameter(valid_564148, JString, required = false,
+                                 default = newJString("unk"))
+  if valid_564148 != nil:
+    section.add "language", valid_564148
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -560,52 +564,52 @@ proc validate_RecognizePrintedText_568245(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568250: Call_RecognizePrintedText_568244; path: JsonNode;
+proc call*(call_564150: Call_RecognizePrintedText_564144; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Optical Character Recognition (OCR) detects printed text in an image and extracts the recognized characters into a machine-usable character stream.   Upon success, the OCR results will be returned. Upon failure, the error code together with an error message will be returned. The error code can be one of InvalidImageUrl, InvalidImageFormat, InvalidImageSize, NotSupportedImage,  NotSupportedLanguage, or InternalServerError.
   ## 
-  let valid = call_568250.validator(path, query, header, formData, body)
-  let scheme = call_568250.pickScheme
+  let valid = call_564150.validator(path, query, header, formData, body)
+  let scheme = call_564150.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568250.url(scheme.get, call_568250.host, call_568250.base,
-                         call_568250.route, valid.getOrDefault("path"),
+  let url = call_564150.url(scheme.get, call_564150.host, call_564150.base,
+                         call_564150.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568250, url, valid)
+  result = hook(call_564150, url, valid)
 
-proc call*(call_568251: Call_RecognizePrintedText_568244; ImageUrl: JsonNode;
-          language: string = "unk"; detectOrientation: bool = true): Recallable =
+proc call*(call_564151: Call_RecognizePrintedText_564144; ImageUrl: JsonNode;
+          detectOrientation: bool = true; language: string = "unk"): Recallable =
   ## recognizePrintedText
   ## Optical Character Recognition (OCR) detects printed text in an image and extracts the recognized characters into a machine-usable character stream.   Upon success, the OCR results will be returned. Upon failure, the error code together with an error message will be returned. The error code can be one of InvalidImageUrl, InvalidImageFormat, InvalidImageSize, NotSupportedImage,  NotSupportedLanguage, or InternalServerError.
-  ##   language: string
-  ##           : The BCP-47 language code of the text to be detected in the image. The default value is 'unk'
   ##   detectOrientation: bool (required)
   ##                    : Whether detect the text orientation in the image. With detectOrientation=true the OCR service tries to detect the image orientation and correct it before further processing (e.g. if it's upside-down). 
   ##   ImageUrl: JObject (required)
   ##           : A JSON document with a URL pointing to the image that is to be analyzed.
-  var query_568252 = newJObject()
-  var body_568253 = newJObject()
-  add(query_568252, "language", newJString(language))
-  add(query_568252, "detectOrientation", newJBool(detectOrientation))
+  ##   language: string
+  ##           : The BCP-47 language code of the text to be detected in the image. The default value is 'unk'
+  var query_564152 = newJObject()
+  var body_564153 = newJObject()
+  add(query_564152, "detectOrientation", newJBool(detectOrientation))
   if ImageUrl != nil:
-    body_568253 = ImageUrl
-  result = call_568251.call(nil, query_568252, nil, nil, body_568253)
+    body_564153 = ImageUrl
+  add(query_564152, "language", newJString(language))
+  result = call_564151.call(nil, query_564152, nil, nil, body_564153)
 
-var recognizePrintedText* = Call_RecognizePrintedText_568244(
+var recognizePrintedText* = Call_RecognizePrintedText_564144(
     name: "recognizePrintedText", meth: HttpMethod.HttpPost, host: "azure.local",
-    route: "/ocr", validator: validate_RecognizePrintedText_568245,
-    base: "/vision/v1.0", url: url_RecognizePrintedText_568246,
+    route: "/ocr", validator: validate_RecognizePrintedText_564145,
+    base: "/vision/v1.0", url: url_RecognizePrintedText_564146,
     schemes: {Scheme.Https})
 type
-  Call_RecognizeText_568254 = ref object of OpenApiRestCall_567658
-proc url_RecognizeText_568256(protocol: Scheme; host: string; base: string;
+  Call_RecognizeText_564154 = ref object of OpenApiRestCall_563556
+proc url_RecognizeText_564156(protocol: Scheme; host: string; base: string;
                              route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_RecognizeText_568255(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_RecognizeText_564155(path: JsonNode; query: JsonNode; header: JsonNode;
                                   formData: JsonNode; body: JsonNode): JsonNode =
   ## Recognize Text operation. When you use the Recognize Text interface, the response contains a field called 'Operation-Location'. The 'Operation-Location' field contains the URL that you must use for your Get Handwritten Text Operation Result operation.
   ## 
@@ -617,11 +621,11 @@ proc validate_RecognizeText_568255(path: JsonNode; query: JsonNode; header: Json
   ##   detectHandwriting: JBool
   ##                    : If 'true' is specified, handwriting recognition is performed. If this parameter is set to 'false' or is not specified, printed text recognition is performed.
   section = newJObject()
-  var valid_568257 = query.getOrDefault("detectHandwriting")
-  valid_568257 = validateParameter(valid_568257, JBool, required = false,
+  var valid_564157 = query.getOrDefault("detectHandwriting")
+  valid_564157 = validateParameter(valid_564157, JBool, required = false,
                                  default = newJBool(false))
-  if valid_568257 != nil:
-    section.add "detectHandwriting", valid_568257
+  if valid_564157 != nil:
+    section.add "detectHandwriting", valid_564157
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -635,20 +639,20 @@ proc validate_RecognizeText_568255(path: JsonNode; query: JsonNode; header: Json
   if body != nil:
     result.add "body", body
 
-proc call*(call_568259: Call_RecognizeText_568254; path: JsonNode; query: JsonNode;
+proc call*(call_564159: Call_RecognizeText_564154; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Recognize Text operation. When you use the Recognize Text interface, the response contains a field called 'Operation-Location'. The 'Operation-Location' field contains the URL that you must use for your Get Handwritten Text Operation Result operation.
   ## 
-  let valid = call_568259.validator(path, query, header, formData, body)
-  let scheme = call_568259.pickScheme
+  let valid = call_564159.validator(path, query, header, formData, body)
+  let scheme = call_564159.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568259.url(scheme.get, call_568259.host, call_568259.base,
-                         call_568259.route, valid.getOrDefault("path"),
+  let url = call_564159.url(scheme.get, call_564159.host, call_564159.base,
+                         call_564159.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568259, url, valid)
+  result = hook(call_564159, url, valid)
 
-proc call*(call_568260: Call_RecognizeText_568254; ImageUrl: JsonNode;
+proc call*(call_564160: Call_RecognizeText_564154; ImageUrl: JsonNode;
           detectHandwriting: bool = false): Recallable =
   ## recognizeText
   ## Recognize Text operation. When you use the Recognize Text interface, the response contains a field called 'Operation-Location'. The 'Operation-Location' field contains the URL that you must use for your Get Handwritten Text Operation Result operation.
@@ -656,27 +660,27 @@ proc call*(call_568260: Call_RecognizeText_568254; ImageUrl: JsonNode;
   ##                    : If 'true' is specified, handwriting recognition is performed. If this parameter is set to 'false' or is not specified, printed text recognition is performed.
   ##   ImageUrl: JObject (required)
   ##           : A JSON document with a URL pointing to the image that is to be analyzed.
-  var query_568261 = newJObject()
-  var body_568262 = newJObject()
-  add(query_568261, "detectHandwriting", newJBool(detectHandwriting))
+  var query_564161 = newJObject()
+  var body_564162 = newJObject()
+  add(query_564161, "detectHandwriting", newJBool(detectHandwriting))
   if ImageUrl != nil:
-    body_568262 = ImageUrl
-  result = call_568260.call(nil, query_568261, nil, nil, body_568262)
+    body_564162 = ImageUrl
+  result = call_564160.call(nil, query_564161, nil, nil, body_564162)
 
-var recognizeText* = Call_RecognizeText_568254(name: "recognizeText",
+var recognizeText* = Call_RecognizeText_564154(name: "recognizeText",
     meth: HttpMethod.HttpPost, host: "azure.local", route: "/recognizeText",
-    validator: validate_RecognizeText_568255, base: "/vision/v1.0",
-    url: url_RecognizeText_568256, schemes: {Scheme.Https})
+    validator: validate_RecognizeText_564155, base: "/vision/v1.0",
+    url: url_RecognizeText_564156, schemes: {Scheme.Https})
 type
-  Call_TagImage_568263 = ref object of OpenApiRestCall_567658
-proc url_TagImage_568265(protocol: Scheme; host: string; base: string; route: string;
+  Call_TagImage_564163 = ref object of OpenApiRestCall_563556
+proc url_TagImage_564165(protocol: Scheme; host: string; base: string; route: string;
                         path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_TagImage_568264(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_TagImage_564164(path: JsonNode; query: JsonNode; header: JsonNode;
                              formData: JsonNode; body: JsonNode): JsonNode =
   ## This operation generates a list of words, or tags, that are relevant to the content of the supplied image. The Computer Vision API can return tags based on objects, living beings, scenery or actions found in images. Unlike categories, tags are not organized according to a hierarchical classification system, but correspond to image content. Tags may contain hints to avoid ambiguity or provide context, for example the tag 'cello' may be accompanied by the hint 'musical instrument'. All tags are in English.
   ## 
@@ -688,11 +692,11 @@ proc validate_TagImage_568264(path: JsonNode; query: JsonNode; header: JsonNode;
   ##   language: JString
   ##           : The desired language for output generation. If this parameter is not specified, the default value is &quot;en&quot;.Supported languages:en - English, Default. es - Spanish, ja - Japanese, pt - Portuguese, zh - Simplified Chinese.
   section = newJObject()
-  var valid_568266 = query.getOrDefault("language")
-  valid_568266 = validateParameter(valid_568266, JString, required = false,
+  var valid_564166 = query.getOrDefault("language")
+  valid_564166 = validateParameter(valid_564166, JString, required = false,
                                  default = newJString("en"))
-  if valid_568266 != nil:
-    section.add "language", valid_568266
+  if valid_564166 != nil:
+    section.add "language", valid_564166
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -706,20 +710,20 @@ proc validate_TagImage_568264(path: JsonNode; query: JsonNode; header: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568268: Call_TagImage_568263; path: JsonNode; query: JsonNode;
+proc call*(call_564168: Call_TagImage_564163; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## This operation generates a list of words, or tags, that are relevant to the content of the supplied image. The Computer Vision API can return tags based on objects, living beings, scenery or actions found in images. Unlike categories, tags are not organized according to a hierarchical classification system, but correspond to image content. Tags may contain hints to avoid ambiguity or provide context, for example the tag 'cello' may be accompanied by the hint 'musical instrument'. All tags are in English.
   ## 
-  let valid = call_568268.validator(path, query, header, formData, body)
-  let scheme = call_568268.pickScheme
+  let valid = call_564168.validator(path, query, header, formData, body)
+  let scheme = call_564168.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568268.url(scheme.get, call_568268.host, call_568268.base,
-                         call_568268.route, valid.getOrDefault("path"),
+  let url = call_564168.url(scheme.get, call_564168.host, call_564168.base,
+                         call_564168.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568268, url, valid)
+  result = hook(call_564168, url, valid)
 
-proc call*(call_568269: Call_TagImage_568263; ImageUrl: JsonNode;
+proc call*(call_564169: Call_TagImage_564163; ImageUrl: JsonNode;
           language: string = "en"): Recallable =
   ## tagImage
   ## This operation generates a list of words, or tags, that are relevant to the content of the supplied image. The Computer Vision API can return tags based on objects, living beings, scenery or actions found in images. Unlike categories, tags are not organized according to a hierarchical classification system, but correspond to image content. Tags may contain hints to avoid ambiguity or provide context, for example the tag 'cello' may be accompanied by the hint 'musical instrument'. All tags are in English.
@@ -727,21 +731,21 @@ proc call*(call_568269: Call_TagImage_568263; ImageUrl: JsonNode;
   ##           : The desired language for output generation. If this parameter is not specified, the default value is &quot;en&quot;.Supported languages:en - English, Default. es - Spanish, ja - Japanese, pt - Portuguese, zh - Simplified Chinese.
   ##   ImageUrl: JObject (required)
   ##           : A JSON document with a URL pointing to the image that is to be analyzed.
-  var query_568270 = newJObject()
-  var body_568271 = newJObject()
-  add(query_568270, "language", newJString(language))
+  var query_564170 = newJObject()
+  var body_564171 = newJObject()
+  add(query_564170, "language", newJString(language))
   if ImageUrl != nil:
-    body_568271 = ImageUrl
-  result = call_568269.call(nil, query_568270, nil, nil, body_568271)
+    body_564171 = ImageUrl
+  result = call_564169.call(nil, query_564170, nil, nil, body_564171)
 
-var tagImage* = Call_TagImage_568263(name: "tagImage", meth: HttpMethod.HttpPost,
+var tagImage* = Call_TagImage_564163(name: "tagImage", meth: HttpMethod.HttpPost,
                                   host: "azure.local", route: "/tag",
-                                  validator: validate_TagImage_568264,
-                                  base: "/vision/v1.0", url: url_TagImage_568265,
+                                  validator: validate_TagImage_564164,
+                                  base: "/vision/v1.0", url: url_TagImage_564165,
                                   schemes: {Scheme.Https})
 type
-  Call_GetTextOperationResult_568272 = ref object of OpenApiRestCall_567658
-proc url_GetTextOperationResult_568274(protocol: Scheme; host: string; base: string;
+  Call_GetTextOperationResult_564172 = ref object of OpenApiRestCall_563556
+proc url_GetTextOperationResult_564174(protocol: Scheme; host: string; base: string;
                                       route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -756,7 +760,7 @@ proc url_GetTextOperationResult_568274(protocol: Scheme; host: string; base: str
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_GetTextOperationResult_568273(path: JsonNode; query: JsonNode;
+proc validate_GetTextOperationResult_564173(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## This interface is used for getting text operation result. The URL to this interface should be retrieved from 'Operation-Location' field returned from Recognize Text interface.
   ## 
@@ -768,11 +772,11 @@ proc validate_GetTextOperationResult_568273(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `operationId` field"
-  var valid_568275 = path.getOrDefault("operationId")
-  valid_568275 = validateParameter(valid_568275, JString, required = true,
+  var valid_564175 = path.getOrDefault("operationId")
+  valid_564175 = validateParameter(valid_564175, JString, required = true,
                                  default = nil)
-  if valid_568275 != nil:
-    section.add "operationId", valid_568275
+  if valid_564175 != nil:
+    section.add "operationId", valid_564175
   result.add "path", section
   section = newJObject()
   result.add "query", section
@@ -783,33 +787,33 @@ proc validate_GetTextOperationResult_568273(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568276: Call_GetTextOperationResult_568272; path: JsonNode;
+proc call*(call_564176: Call_GetTextOperationResult_564172; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## This interface is used for getting text operation result. The URL to this interface should be retrieved from 'Operation-Location' field returned from Recognize Text interface.
   ## 
-  let valid = call_568276.validator(path, query, header, formData, body)
-  let scheme = call_568276.pickScheme
+  let valid = call_564176.validator(path, query, header, formData, body)
+  let scheme = call_564176.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568276.url(scheme.get, call_568276.host, call_568276.base,
-                         call_568276.route, valid.getOrDefault("path"),
+  let url = call_564176.url(scheme.get, call_564176.host, call_564176.base,
+                         call_564176.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568276, url, valid)
+  result = hook(call_564176, url, valid)
 
-proc call*(call_568277: Call_GetTextOperationResult_568272; operationId: string): Recallable =
+proc call*(call_564177: Call_GetTextOperationResult_564172; operationId: string): Recallable =
   ## getTextOperationResult
   ## This interface is used for getting text operation result. The URL to this interface should be retrieved from 'Operation-Location' field returned from Recognize Text interface.
   ##   operationId: string (required)
   ##              : Id of the text operation returned in the response of the 'Recognize Handwritten Text'
-  var path_568278 = newJObject()
-  add(path_568278, "operationId", newJString(operationId))
-  result = call_568277.call(path_568278, nil, nil, nil, nil)
+  var path_564178 = newJObject()
+  add(path_564178, "operationId", newJString(operationId))
+  result = call_564177.call(path_564178, nil, nil, nil, nil)
 
-var getTextOperationResult* = Call_GetTextOperationResult_568272(
+var getTextOperationResult* = Call_GetTextOperationResult_564172(
     name: "getTextOperationResult", meth: HttpMethod.HttpGet, host: "azure.local",
     route: "/textOperations/{operationId}",
-    validator: validate_GetTextOperationResult_568273, base: "/vision/v1.0",
-    url: url_GetTextOperationResult_568274, schemes: {Scheme.Https})
+    validator: validate_GetTextOperationResult_564173, base: "/vision/v1.0",
+    url: url_GetTextOperationResult_564174, schemes: {Scheme.Https})
 export
   rest
 

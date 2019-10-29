@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, httpcore
 
 ## auto-generated via openapi macro
 ## title: SubscriptionsManagementClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_582441 = ref object of OpenApiRestCall
+  OpenApiRestCall_563539 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_582441](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563539](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_582441): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563539): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,8 +107,8 @@ const
   macServiceName = "azsadmin-AcquiredPlan"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_AcquiredPlansList_582663 = ref object of OpenApiRestCall_582441
-proc url_AcquiredPlansList_582665(protocol: Scheme; host: string; base: string;
+  Call_AcquiredPlansList_563761 = ref object of OpenApiRestCall_563539
+proc url_AcquiredPlansList_563763(protocol: Scheme; host: string; base: string;
                                  route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -125,7 +129,7 @@ proc url_AcquiredPlansList_582665(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AcquiredPlansList_582664(path: JsonNode; query: JsonNode;
+proc validate_AcquiredPlansList_563762(path: JsonNode; query: JsonNode;
                                       header: JsonNode; formData: JsonNode;
                                       body: JsonNode): JsonNode =
   ## Get a collection of all acquired plans that subscription has access to.
@@ -140,16 +144,16 @@ proc validate_AcquiredPlansList_582664(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_582838 = path.getOrDefault("subscriptionId")
-  valid_582838 = validateParameter(valid_582838, JString, required = true,
+  var valid_563938 = path.getOrDefault("subscriptionId")
+  valid_563938 = validateParameter(valid_563938, JString, required = true,
                                  default = nil)
-  if valid_582838 != nil:
-    section.add "subscriptionId", valid_582838
-  var valid_582839 = path.getOrDefault("targetSubscriptionId")
-  valid_582839 = validateParameter(valid_582839, JString, required = true,
+  if valid_563938 != nil:
+    section.add "subscriptionId", valid_563938
+  var valid_563939 = path.getOrDefault("targetSubscriptionId")
+  valid_563939 = validateParameter(valid_563939, JString, required = true,
                                  default = nil)
-  if valid_582839 != nil:
-    section.add "targetSubscriptionId", valid_582839
+  if valid_563939 != nil:
+    section.add "targetSubscriptionId", valid_563939
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -157,11 +161,11 @@ proc validate_AcquiredPlansList_582664(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_582853 = query.getOrDefault("api-version")
-  valid_582853 = validateParameter(valid_582853, JString, required = true,
+  var valid_563953 = query.getOrDefault("api-version")
+  valid_563953 = validateParameter(valid_563953, JString, required = true,
                                  default = newJString("2015-11-01"))
-  if valid_582853 != nil:
-    section.add "api-version", valid_582853
+  if valid_563953 != nil:
+    section.add "api-version", valid_563953
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -170,20 +174,20 @@ proc validate_AcquiredPlansList_582664(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_582876: Call_AcquiredPlansList_582663; path: JsonNode;
+proc call*(call_563976: Call_AcquiredPlansList_563761; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get a collection of all acquired plans that subscription has access to.
   ## 
-  let valid = call_582876.validator(path, query, header, formData, body)
-  let scheme = call_582876.pickScheme
+  let valid = call_563976.validator(path, query, header, formData, body)
+  let scheme = call_563976.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_582876.url(scheme.get, call_582876.host, call_582876.base,
-                         call_582876.route, valid.getOrDefault("path"),
+  let url = call_563976.url(scheme.get, call_563976.host, call_563976.base,
+                         call_563976.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_582876, url, valid)
+  result = hook(call_563976, url, valid)
 
-proc call*(call_582947: Call_AcquiredPlansList_582663; subscriptionId: string;
+proc call*(call_564047: Call_AcquiredPlansList_563761; subscriptionId: string;
           targetSubscriptionId: string; apiVersion: string = "2015-11-01"): Recallable =
   ## acquiredPlansList
   ## Get a collection of all acquired plans that subscription has access to.
@@ -193,20 +197,20 @@ proc call*(call_582947: Call_AcquiredPlansList_582663; subscriptionId: string;
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription.The subscription ID forms part of the URI for every service call.
   ##   targetSubscriptionId: string (required)
   ##                       : The target subscription ID.
-  var path_582948 = newJObject()
-  var query_582950 = newJObject()
-  add(query_582950, "api-version", newJString(apiVersion))
-  add(path_582948, "subscriptionId", newJString(subscriptionId))
-  add(path_582948, "targetSubscriptionId", newJString(targetSubscriptionId))
-  result = call_582947.call(path_582948, query_582950, nil, nil, nil)
+  var path_564048 = newJObject()
+  var query_564050 = newJObject()
+  add(query_564050, "api-version", newJString(apiVersion))
+  add(path_564048, "subscriptionId", newJString(subscriptionId))
+  add(path_564048, "targetSubscriptionId", newJString(targetSubscriptionId))
+  result = call_564047.call(path_564048, query_564050, nil, nil, nil)
 
-var acquiredPlansList* = Call_AcquiredPlansList_582663(name: "acquiredPlansList",
+var acquiredPlansList* = Call_AcquiredPlansList_563761(name: "acquiredPlansList",
     meth: HttpMethod.HttpGet, host: "adminmanagement.local.azurestack.external", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Subscriptions.Admin/subscriptions/{targetSubscriptionId}/acquiredPlans",
-    validator: validate_AcquiredPlansList_582664, base: "",
-    url: url_AcquiredPlansList_582665, schemes: {Scheme.Https})
+    validator: validate_AcquiredPlansList_563762, base: "",
+    url: url_AcquiredPlansList_563763, schemes: {Scheme.Https})
 type
-  Call_AcquiredPlansCreate_583000 = ref object of OpenApiRestCall_582441
-proc url_AcquiredPlansCreate_583002(protocol: Scheme; host: string; base: string;
+  Call_AcquiredPlansCreate_564100 = ref object of OpenApiRestCall_563539
+proc url_AcquiredPlansCreate_564102(protocol: Scheme; host: string; base: string;
                                    route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -230,7 +234,7 @@ proc url_AcquiredPlansCreate_583002(protocol: Scheme; host: string; base: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AcquiredPlansCreate_583001(path: JsonNode; query: JsonNode;
+proc validate_AcquiredPlansCreate_564101(path: JsonNode; query: JsonNode;
                                         header: JsonNode; formData: JsonNode;
                                         body: JsonNode): JsonNode =
   ## Creates an acquired plan.
@@ -240,28 +244,28 @@ proc validate_AcquiredPlansCreate_583001(path: JsonNode; query: JsonNode;
   ## parameters in `path` object:
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription.The subscription ID forms part of the URI for every service call.
-  ##   planAcquisitionId: JString (required)
-  ##                    : The plan acquisition Identifier
   ##   targetSubscriptionId: JString (required)
   ##                       : The target subscription ID.
+  ##   planAcquisitionId: JString (required)
+  ##                    : The plan acquisition Identifier
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_583003 = path.getOrDefault("subscriptionId")
-  valid_583003 = validateParameter(valid_583003, JString, required = true,
+  var valid_564103 = path.getOrDefault("subscriptionId")
+  valid_564103 = validateParameter(valid_564103, JString, required = true,
                                  default = nil)
-  if valid_583003 != nil:
-    section.add "subscriptionId", valid_583003
-  var valid_583004 = path.getOrDefault("planAcquisitionId")
-  valid_583004 = validateParameter(valid_583004, JString, required = true,
+  if valid_564103 != nil:
+    section.add "subscriptionId", valid_564103
+  var valid_564104 = path.getOrDefault("targetSubscriptionId")
+  valid_564104 = validateParameter(valid_564104, JString, required = true,
                                  default = nil)
-  if valid_583004 != nil:
-    section.add "planAcquisitionId", valid_583004
-  var valid_583005 = path.getOrDefault("targetSubscriptionId")
-  valid_583005 = validateParameter(valid_583005, JString, required = true,
+  if valid_564104 != nil:
+    section.add "targetSubscriptionId", valid_564104
+  var valid_564105 = path.getOrDefault("planAcquisitionId")
+  valid_564105 = validateParameter(valid_564105, JString, required = true,
                                  default = nil)
-  if valid_583005 != nil:
-    section.add "targetSubscriptionId", valid_583005
+  if valid_564105 != nil:
+    section.add "planAcquisitionId", valid_564105
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -269,11 +273,11 @@ proc validate_AcquiredPlansCreate_583001(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_583006 = query.getOrDefault("api-version")
-  valid_583006 = validateParameter(valid_583006, JString, required = true,
+  var valid_564106 = query.getOrDefault("api-version")
+  valid_564106 = validateParameter(valid_564106, JString, required = true,
                                  default = newJString("2015-11-01"))
-  if valid_583006 != nil:
-    section.add "api-version", valid_583006
+  if valid_564106 != nil:
+    section.add "api-version", valid_564106
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -287,53 +291,53 @@ proc validate_AcquiredPlansCreate_583001(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_583008: Call_AcquiredPlansCreate_583000; path: JsonNode;
+proc call*(call_564108: Call_AcquiredPlansCreate_564100; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Creates an acquired plan.
   ## 
-  let valid = call_583008.validator(path, query, header, formData, body)
-  let scheme = call_583008.pickScheme
+  let valid = call_564108.validator(path, query, header, formData, body)
+  let scheme = call_564108.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_583008.url(scheme.get, call_583008.host, call_583008.base,
-                         call_583008.route, valid.getOrDefault("path"),
+  let url = call_564108.url(scheme.get, call_564108.host, call_564108.base,
+                         call_564108.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_583008, url, valid)
+  result = hook(call_564108, url, valid)
 
-proc call*(call_583009: Call_AcquiredPlansCreate_583000; subscriptionId: string;
-          planAcquisitionId: string; newAcquiredPlan: JsonNode;
-          targetSubscriptionId: string; apiVersion: string = "2015-11-01"): Recallable =
+proc call*(call_564109: Call_AcquiredPlansCreate_564100; subscriptionId: string;
+          newAcquiredPlan: JsonNode; targetSubscriptionId: string;
+          planAcquisitionId: string; apiVersion: string = "2015-11-01"): Recallable =
   ## acquiredPlansCreate
   ## Creates an acquired plan.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription.The subscription ID forms part of the URI for every service call.
-  ##   planAcquisitionId: string (required)
-  ##                    : The plan acquisition Identifier
   ##   newAcquiredPlan: JObject (required)
   ##                  : The new acquired plan.
   ##   targetSubscriptionId: string (required)
   ##                       : The target subscription ID.
-  var path_583010 = newJObject()
-  var query_583011 = newJObject()
-  var body_583012 = newJObject()
-  add(query_583011, "api-version", newJString(apiVersion))
-  add(path_583010, "subscriptionId", newJString(subscriptionId))
-  add(path_583010, "planAcquisitionId", newJString(planAcquisitionId))
+  ##   planAcquisitionId: string (required)
+  ##                    : The plan acquisition Identifier
+  var path_564110 = newJObject()
+  var query_564111 = newJObject()
+  var body_564112 = newJObject()
+  add(query_564111, "api-version", newJString(apiVersion))
+  add(path_564110, "subscriptionId", newJString(subscriptionId))
   if newAcquiredPlan != nil:
-    body_583012 = newAcquiredPlan
-  add(path_583010, "targetSubscriptionId", newJString(targetSubscriptionId))
-  result = call_583009.call(path_583010, query_583011, nil, nil, body_583012)
+    body_564112 = newAcquiredPlan
+  add(path_564110, "targetSubscriptionId", newJString(targetSubscriptionId))
+  add(path_564110, "planAcquisitionId", newJString(planAcquisitionId))
+  result = call_564109.call(path_564110, query_564111, nil, nil, body_564112)
 
-var acquiredPlansCreate* = Call_AcquiredPlansCreate_583000(
+var acquiredPlansCreate* = Call_AcquiredPlansCreate_564100(
     name: "acquiredPlansCreate", meth: HttpMethod.HttpPut,
     host: "adminmanagement.local.azurestack.external", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Subscriptions.Admin/subscriptions/{targetSubscriptionId}/acquiredPlans/{planAcquisitionId}",
-    validator: validate_AcquiredPlansCreate_583001, base: "",
-    url: url_AcquiredPlansCreate_583002, schemes: {Scheme.Https})
+    validator: validate_AcquiredPlansCreate_564101, base: "",
+    url: url_AcquiredPlansCreate_564102, schemes: {Scheme.Https})
 type
-  Call_AcquiredPlansGet_582989 = ref object of OpenApiRestCall_582441
-proc url_AcquiredPlansGet_582991(protocol: Scheme; host: string; base: string;
+  Call_AcquiredPlansGet_564089 = ref object of OpenApiRestCall_563539
+proc url_AcquiredPlansGet_564091(protocol: Scheme; host: string; base: string;
                                 route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -357,7 +361,7 @@ proc url_AcquiredPlansGet_582991(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AcquiredPlansGet_582990(path: JsonNode; query: JsonNode;
+proc validate_AcquiredPlansGet_564090(path: JsonNode; query: JsonNode;
                                      header: JsonNode; formData: JsonNode;
                                      body: JsonNode): JsonNode =
   ## Gets the specified plan acquired by a subscription consuming the offer.
@@ -367,28 +371,28 @@ proc validate_AcquiredPlansGet_582990(path: JsonNode; query: JsonNode;
   ## parameters in `path` object:
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription.The subscription ID forms part of the URI for every service call.
-  ##   planAcquisitionId: JString (required)
-  ##                    : The plan acquisition Identifier
   ##   targetSubscriptionId: JString (required)
   ##                       : The target subscription ID.
+  ##   planAcquisitionId: JString (required)
+  ##                    : The plan acquisition Identifier
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_582992 = path.getOrDefault("subscriptionId")
-  valid_582992 = validateParameter(valid_582992, JString, required = true,
+  var valid_564092 = path.getOrDefault("subscriptionId")
+  valid_564092 = validateParameter(valid_564092, JString, required = true,
                                  default = nil)
-  if valid_582992 != nil:
-    section.add "subscriptionId", valid_582992
-  var valid_582993 = path.getOrDefault("planAcquisitionId")
-  valid_582993 = validateParameter(valid_582993, JString, required = true,
+  if valid_564092 != nil:
+    section.add "subscriptionId", valid_564092
+  var valid_564093 = path.getOrDefault("targetSubscriptionId")
+  valid_564093 = validateParameter(valid_564093, JString, required = true,
                                  default = nil)
-  if valid_582993 != nil:
-    section.add "planAcquisitionId", valid_582993
-  var valid_582994 = path.getOrDefault("targetSubscriptionId")
-  valid_582994 = validateParameter(valid_582994, JString, required = true,
+  if valid_564093 != nil:
+    section.add "targetSubscriptionId", valid_564093
+  var valid_564094 = path.getOrDefault("planAcquisitionId")
+  valid_564094 = validateParameter(valid_564094, JString, required = true,
                                  default = nil)
-  if valid_582994 != nil:
-    section.add "targetSubscriptionId", valid_582994
+  if valid_564094 != nil:
+    section.add "planAcquisitionId", valid_564094
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -396,11 +400,11 @@ proc validate_AcquiredPlansGet_582990(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_582995 = query.getOrDefault("api-version")
-  valid_582995 = validateParameter(valid_582995, JString, required = true,
+  var valid_564095 = query.getOrDefault("api-version")
+  valid_564095 = validateParameter(valid_564095, JString, required = true,
                                  default = newJString("2015-11-01"))
-  if valid_582995 != nil:
-    section.add "api-version", valid_582995
+  if valid_564095 != nil:
+    section.add "api-version", valid_564095
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -409,21 +413,21 @@ proc validate_AcquiredPlansGet_582990(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_582996: Call_AcquiredPlansGet_582989; path: JsonNode;
+proc call*(call_564096: Call_AcquiredPlansGet_564089; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the specified plan acquired by a subscription consuming the offer.
   ## 
-  let valid = call_582996.validator(path, query, header, formData, body)
-  let scheme = call_582996.pickScheme
+  let valid = call_564096.validator(path, query, header, formData, body)
+  let scheme = call_564096.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_582996.url(scheme.get, call_582996.host, call_582996.base,
-                         call_582996.route, valid.getOrDefault("path"),
+  let url = call_564096.url(scheme.get, call_564096.host, call_564096.base,
+                         call_564096.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_582996, url, valid)
+  result = hook(call_564096, url, valid)
 
-proc call*(call_582997: Call_AcquiredPlansGet_582989; subscriptionId: string;
-          planAcquisitionId: string; targetSubscriptionId: string;
+proc call*(call_564097: Call_AcquiredPlansGet_564089; subscriptionId: string;
+          targetSubscriptionId: string; planAcquisitionId: string;
           apiVersion: string = "2015-11-01"): Recallable =
   ## acquiredPlansGet
   ## Gets the specified plan acquired by a subscription consuming the offer.
@@ -431,25 +435,25 @@ proc call*(call_582997: Call_AcquiredPlansGet_582989; subscriptionId: string;
   ##             : Client Api Version.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription.The subscription ID forms part of the URI for every service call.
-  ##   planAcquisitionId: string (required)
-  ##                    : The plan acquisition Identifier
   ##   targetSubscriptionId: string (required)
   ##                       : The target subscription ID.
-  var path_582998 = newJObject()
-  var query_582999 = newJObject()
-  add(query_582999, "api-version", newJString(apiVersion))
-  add(path_582998, "subscriptionId", newJString(subscriptionId))
-  add(path_582998, "planAcquisitionId", newJString(planAcquisitionId))
-  add(path_582998, "targetSubscriptionId", newJString(targetSubscriptionId))
-  result = call_582997.call(path_582998, query_582999, nil, nil, nil)
+  ##   planAcquisitionId: string (required)
+  ##                    : The plan acquisition Identifier
+  var path_564098 = newJObject()
+  var query_564099 = newJObject()
+  add(query_564099, "api-version", newJString(apiVersion))
+  add(path_564098, "subscriptionId", newJString(subscriptionId))
+  add(path_564098, "targetSubscriptionId", newJString(targetSubscriptionId))
+  add(path_564098, "planAcquisitionId", newJString(planAcquisitionId))
+  result = call_564097.call(path_564098, query_564099, nil, nil, nil)
 
-var acquiredPlansGet* = Call_AcquiredPlansGet_582989(name: "acquiredPlansGet",
+var acquiredPlansGet* = Call_AcquiredPlansGet_564089(name: "acquiredPlansGet",
     meth: HttpMethod.HttpGet, host: "adminmanagement.local.azurestack.external", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Subscriptions.Admin/subscriptions/{targetSubscriptionId}/acquiredPlans/{planAcquisitionId}",
-    validator: validate_AcquiredPlansGet_582990, base: "",
-    url: url_AcquiredPlansGet_582991, schemes: {Scheme.Https})
+    validator: validate_AcquiredPlansGet_564090, base: "",
+    url: url_AcquiredPlansGet_564091, schemes: {Scheme.Https})
 type
-  Call_AcquiredPlansDelete_583013 = ref object of OpenApiRestCall_582441
-proc url_AcquiredPlansDelete_583015(protocol: Scheme; host: string; base: string;
+  Call_AcquiredPlansDelete_564113 = ref object of OpenApiRestCall_563539
+proc url_AcquiredPlansDelete_564115(protocol: Scheme; host: string; base: string;
                                    route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -473,7 +477,7 @@ proc url_AcquiredPlansDelete_583015(protocol: Scheme; host: string; base: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AcquiredPlansDelete_583014(path: JsonNode; query: JsonNode;
+proc validate_AcquiredPlansDelete_564114(path: JsonNode; query: JsonNode;
                                         header: JsonNode; formData: JsonNode;
                                         body: JsonNode): JsonNode =
   ## Deletes an acquired plan.
@@ -483,28 +487,28 @@ proc validate_AcquiredPlansDelete_583014(path: JsonNode; query: JsonNode;
   ## parameters in `path` object:
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription.The subscription ID forms part of the URI for every service call.
-  ##   planAcquisitionId: JString (required)
-  ##                    : The plan acquisition Identifier
   ##   targetSubscriptionId: JString (required)
   ##                       : The target subscription ID.
+  ##   planAcquisitionId: JString (required)
+  ##                    : The plan acquisition Identifier
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_583016 = path.getOrDefault("subscriptionId")
-  valid_583016 = validateParameter(valid_583016, JString, required = true,
+  var valid_564116 = path.getOrDefault("subscriptionId")
+  valid_564116 = validateParameter(valid_564116, JString, required = true,
                                  default = nil)
-  if valid_583016 != nil:
-    section.add "subscriptionId", valid_583016
-  var valid_583017 = path.getOrDefault("planAcquisitionId")
-  valid_583017 = validateParameter(valid_583017, JString, required = true,
+  if valid_564116 != nil:
+    section.add "subscriptionId", valid_564116
+  var valid_564117 = path.getOrDefault("targetSubscriptionId")
+  valid_564117 = validateParameter(valid_564117, JString, required = true,
                                  default = nil)
-  if valid_583017 != nil:
-    section.add "planAcquisitionId", valid_583017
-  var valid_583018 = path.getOrDefault("targetSubscriptionId")
-  valid_583018 = validateParameter(valid_583018, JString, required = true,
+  if valid_564117 != nil:
+    section.add "targetSubscriptionId", valid_564117
+  var valid_564118 = path.getOrDefault("planAcquisitionId")
+  valid_564118 = validateParameter(valid_564118, JString, required = true,
                                  default = nil)
-  if valid_583018 != nil:
-    section.add "targetSubscriptionId", valid_583018
+  if valid_564118 != nil:
+    section.add "planAcquisitionId", valid_564118
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -512,11 +516,11 @@ proc validate_AcquiredPlansDelete_583014(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_583019 = query.getOrDefault("api-version")
-  valid_583019 = validateParameter(valid_583019, JString, required = true,
+  var valid_564119 = query.getOrDefault("api-version")
+  valid_564119 = validateParameter(valid_564119, JString, required = true,
                                  default = newJString("2015-11-01"))
-  if valid_583019 != nil:
-    section.add "api-version", valid_583019
+  if valid_564119 != nil:
+    section.add "api-version", valid_564119
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -525,21 +529,21 @@ proc validate_AcquiredPlansDelete_583014(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_583020: Call_AcquiredPlansDelete_583013; path: JsonNode;
+proc call*(call_564120: Call_AcquiredPlansDelete_564113; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes an acquired plan.
   ## 
-  let valid = call_583020.validator(path, query, header, formData, body)
-  let scheme = call_583020.pickScheme
+  let valid = call_564120.validator(path, query, header, formData, body)
+  let scheme = call_564120.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_583020.url(scheme.get, call_583020.host, call_583020.base,
-                         call_583020.route, valid.getOrDefault("path"),
+  let url = call_564120.url(scheme.get, call_564120.host, call_564120.base,
+                         call_564120.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_583020, url, valid)
+  result = hook(call_564120, url, valid)
 
-proc call*(call_583021: Call_AcquiredPlansDelete_583013; subscriptionId: string;
-          planAcquisitionId: string; targetSubscriptionId: string;
+proc call*(call_564121: Call_AcquiredPlansDelete_564113; subscriptionId: string;
+          targetSubscriptionId: string; planAcquisitionId: string;
           apiVersion: string = "2015-11-01"): Recallable =
   ## acquiredPlansDelete
   ## Deletes an acquired plan.
@@ -547,23 +551,23 @@ proc call*(call_583021: Call_AcquiredPlansDelete_583013; subscriptionId: string;
   ##             : Client Api Version.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription.The subscription ID forms part of the URI for every service call.
-  ##   planAcquisitionId: string (required)
-  ##                    : The plan acquisition Identifier
   ##   targetSubscriptionId: string (required)
   ##                       : The target subscription ID.
-  var path_583022 = newJObject()
-  var query_583023 = newJObject()
-  add(query_583023, "api-version", newJString(apiVersion))
-  add(path_583022, "subscriptionId", newJString(subscriptionId))
-  add(path_583022, "planAcquisitionId", newJString(planAcquisitionId))
-  add(path_583022, "targetSubscriptionId", newJString(targetSubscriptionId))
-  result = call_583021.call(path_583022, query_583023, nil, nil, nil)
+  ##   planAcquisitionId: string (required)
+  ##                    : The plan acquisition Identifier
+  var path_564122 = newJObject()
+  var query_564123 = newJObject()
+  add(query_564123, "api-version", newJString(apiVersion))
+  add(path_564122, "subscriptionId", newJString(subscriptionId))
+  add(path_564122, "targetSubscriptionId", newJString(targetSubscriptionId))
+  add(path_564122, "planAcquisitionId", newJString(planAcquisitionId))
+  result = call_564121.call(path_564122, query_564123, nil, nil, nil)
 
-var acquiredPlansDelete* = Call_AcquiredPlansDelete_583013(
+var acquiredPlansDelete* = Call_AcquiredPlansDelete_564113(
     name: "acquiredPlansDelete", meth: HttpMethod.HttpDelete,
     host: "adminmanagement.local.azurestack.external", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Subscriptions.Admin/subscriptions/{targetSubscriptionId}/acquiredPlans/{planAcquisitionId}",
-    validator: validate_AcquiredPlansDelete_583014, base: "",
-    url: url_AcquiredPlansDelete_583015, schemes: {Scheme.Https})
+    validator: validate_AcquiredPlansDelete_564114, base: "",
+    url: url_AcquiredPlansDelete_564115, schemes: {Scheme.Https})
 export
   rest
 

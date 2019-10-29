@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, httpcore
 
 ## auto-generated via openapi macro
 ## title: NetworkManagementClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_567657 = ref object of OpenApiRestCall
+  OpenApiRestCall_563555 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_567657](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563555](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_567657): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563555): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,8 +107,8 @@ const
   macServiceName = "network-loadBalancer"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_LoadBalancersListAll_567879 = ref object of OpenApiRestCall_567657
-proc url_LoadBalancersListAll_567881(protocol: Scheme; host: string; base: string;
+  Call_LoadBalancersListAll_563777 = ref object of OpenApiRestCall_563555
+proc url_LoadBalancersListAll_563779(protocol: Scheme; host: string; base: string;
                                     route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -120,7 +124,7 @@ proc url_LoadBalancersListAll_567881(protocol: Scheme; host: string; base: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_LoadBalancersListAll_567880(path: JsonNode; query: JsonNode;
+proc validate_LoadBalancersListAll_563778(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets all the load balancers in a subscription.
   ## 
@@ -132,11 +136,11 @@ proc validate_LoadBalancersListAll_567880(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_568041 = path.getOrDefault("subscriptionId")
-  valid_568041 = validateParameter(valid_568041, JString, required = true,
+  var valid_563941 = path.getOrDefault("subscriptionId")
+  valid_563941 = validateParameter(valid_563941, JString, required = true,
                                  default = nil)
-  if valid_568041 != nil:
-    section.add "subscriptionId", valid_568041
+  if valid_563941 != nil:
+    section.add "subscriptionId", valid_563941
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -144,11 +148,11 @@ proc validate_LoadBalancersListAll_567880(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568042 = query.getOrDefault("api-version")
-  valid_568042 = validateParameter(valid_568042, JString, required = true,
+  var valid_563942 = query.getOrDefault("api-version")
+  valid_563942 = validateParameter(valid_563942, JString, required = true,
                                  default = nil)
-  if valid_568042 != nil:
-    section.add "api-version", valid_568042
+  if valid_563942 != nil:
+    section.add "api-version", valid_563942
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -157,20 +161,20 @@ proc validate_LoadBalancersListAll_567880(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568069: Call_LoadBalancersListAll_567879; path: JsonNode;
+proc call*(call_563969: Call_LoadBalancersListAll_563777; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets all the load balancers in a subscription.
   ## 
-  let valid = call_568069.validator(path, query, header, formData, body)
-  let scheme = call_568069.pickScheme
+  let valid = call_563969.validator(path, query, header, formData, body)
+  let scheme = call_563969.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568069.url(scheme.get, call_568069.host, call_568069.base,
-                         call_568069.route, valid.getOrDefault("path"),
+  let url = call_563969.url(scheme.get, call_563969.host, call_563969.base,
+                         call_563969.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568069, url, valid)
+  result = hook(call_563969, url, valid)
 
-proc call*(call_568140: Call_LoadBalancersListAll_567879; apiVersion: string;
+proc call*(call_564040: Call_LoadBalancersListAll_563777; apiVersion: string;
           subscriptionId: string): Recallable =
   ## loadBalancersListAll
   ## Gets all the load balancers in a subscription.
@@ -178,20 +182,20 @@ proc call*(call_568140: Call_LoadBalancersListAll_567879; apiVersion: string;
   ##             : Client API version.
   ##   subscriptionId: string (required)
   ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_568141 = newJObject()
-  var query_568143 = newJObject()
-  add(query_568143, "api-version", newJString(apiVersion))
-  add(path_568141, "subscriptionId", newJString(subscriptionId))
-  result = call_568140.call(path_568141, query_568143, nil, nil, nil)
+  var path_564041 = newJObject()
+  var query_564043 = newJObject()
+  add(query_564043, "api-version", newJString(apiVersion))
+  add(path_564041, "subscriptionId", newJString(subscriptionId))
+  result = call_564040.call(path_564041, query_564043, nil, nil, nil)
 
-var loadBalancersListAll* = Call_LoadBalancersListAll_567879(
+var loadBalancersListAll* = Call_LoadBalancersListAll_563777(
     name: "loadBalancersListAll", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Network/loadBalancers",
-    validator: validate_LoadBalancersListAll_567880, base: "",
-    url: url_LoadBalancersListAll_567881, schemes: {Scheme.Https})
+    validator: validate_LoadBalancersListAll_563778, base: "",
+    url: url_LoadBalancersListAll_563779, schemes: {Scheme.Https})
 type
-  Call_LoadBalancersList_568182 = ref object of OpenApiRestCall_567657
-proc url_LoadBalancersList_568184(protocol: Scheme; host: string; base: string;
+  Call_LoadBalancersList_564082 = ref object of OpenApiRestCall_563555
+proc url_LoadBalancersList_564084(protocol: Scheme; host: string; base: string;
                                  route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -211,7 +215,7 @@ proc url_LoadBalancersList_568184(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_LoadBalancersList_568183(path: JsonNode; query: JsonNode;
+proc validate_LoadBalancersList_564083(path: JsonNode; query: JsonNode;
                                       header: JsonNode; formData: JsonNode;
                                       body: JsonNode): JsonNode =
   ## Gets all the load balancers in a resource group.
@@ -219,23 +223,23 @@ proc validate_LoadBalancersList_568183(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   subscriptionId: JString (required)
   ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568185 = path.getOrDefault("resourceGroupName")
-  valid_568185 = validateParameter(valid_568185, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564085 = path.getOrDefault("subscriptionId")
+  valid_564085 = validateParameter(valid_564085, JString, required = true,
                                  default = nil)
-  if valid_568185 != nil:
-    section.add "resourceGroupName", valid_568185
-  var valid_568186 = path.getOrDefault("subscriptionId")
-  valid_568186 = validateParameter(valid_568186, JString, required = true,
+  if valid_564085 != nil:
+    section.add "subscriptionId", valid_564085
+  var valid_564086 = path.getOrDefault("resourceGroupName")
+  valid_564086 = validateParameter(valid_564086, JString, required = true,
                                  default = nil)
-  if valid_568186 != nil:
-    section.add "subscriptionId", valid_568186
+  if valid_564086 != nil:
+    section.add "resourceGroupName", valid_564086
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -243,11 +247,11 @@ proc validate_LoadBalancersList_568183(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568187 = query.getOrDefault("api-version")
-  valid_568187 = validateParameter(valid_568187, JString, required = true,
+  var valid_564087 = query.getOrDefault("api-version")
+  valid_564087 = validateParameter(valid_564087, JString, required = true,
                                  default = nil)
-  if valid_568187 != nil:
-    section.add "api-version", valid_568187
+  if valid_564087 != nil:
+    section.add "api-version", valid_564087
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -256,43 +260,43 @@ proc validate_LoadBalancersList_568183(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568188: Call_LoadBalancersList_568182; path: JsonNode;
+proc call*(call_564088: Call_LoadBalancersList_564082; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets all the load balancers in a resource group.
   ## 
-  let valid = call_568188.validator(path, query, header, formData, body)
-  let scheme = call_568188.pickScheme
+  let valid = call_564088.validator(path, query, header, formData, body)
+  let scheme = call_564088.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568188.url(scheme.get, call_568188.host, call_568188.base,
-                         call_568188.route, valid.getOrDefault("path"),
+  let url = call_564088.url(scheme.get, call_564088.host, call_564088.base,
+                         call_564088.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568188, url, valid)
+  result = hook(call_564088, url, valid)
 
-proc call*(call_568189: Call_LoadBalancersList_568182; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string): Recallable =
+proc call*(call_564089: Call_LoadBalancersList_564082; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string): Recallable =
   ## loadBalancersList
   ## Gets all the load balancers in a resource group.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client API version.
   ##   subscriptionId: string (required)
   ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_568190 = newJObject()
-  var query_568191 = newJObject()
-  add(path_568190, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568191, "api-version", newJString(apiVersion))
-  add(path_568190, "subscriptionId", newJString(subscriptionId))
-  result = call_568189.call(path_568190, query_568191, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564090 = newJObject()
+  var query_564091 = newJObject()
+  add(query_564091, "api-version", newJString(apiVersion))
+  add(path_564090, "subscriptionId", newJString(subscriptionId))
+  add(path_564090, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564089.call(path_564090, query_564091, nil, nil, nil)
 
-var loadBalancersList* = Call_LoadBalancersList_568182(name: "loadBalancersList",
+var loadBalancersList* = Call_LoadBalancersList_564082(name: "loadBalancersList",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/loadBalancers",
-    validator: validate_LoadBalancersList_568183, base: "",
-    url: url_LoadBalancersList_568184, schemes: {Scheme.Https})
+    validator: validate_LoadBalancersList_564083, base: "",
+    url: url_LoadBalancersList_564084, schemes: {Scheme.Https})
 type
-  Call_LoadBalancersCreateOrUpdate_568205 = ref object of OpenApiRestCall_567657
-proc url_LoadBalancersCreateOrUpdate_568207(protocol: Scheme; host: string;
+  Call_LoadBalancersCreateOrUpdate_564105 = ref object of OpenApiRestCall_563555
+proc url_LoadBalancersCreateOrUpdate_564107(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -316,37 +320,37 @@ proc url_LoadBalancersCreateOrUpdate_568207(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_LoadBalancersCreateOrUpdate_568206(path: JsonNode; query: JsonNode;
+proc validate_LoadBalancersCreateOrUpdate_564106(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Creates or updates a load balancer.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   loadBalancerName: JString (required)
   ##                   : The name of the load balancer.
   ##   subscriptionId: JString (required)
   ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568234 = path.getOrDefault("resourceGroupName")
-  valid_568234 = validateParameter(valid_568234, JString, required = true,
+        "path argument is necessary due to required `loadBalancerName` field"
+  var valid_564134 = path.getOrDefault("loadBalancerName")
+  valid_564134 = validateParameter(valid_564134, JString, required = true,
                                  default = nil)
-  if valid_568234 != nil:
-    section.add "resourceGroupName", valid_568234
-  var valid_568235 = path.getOrDefault("loadBalancerName")
-  valid_568235 = validateParameter(valid_568235, JString, required = true,
+  if valid_564134 != nil:
+    section.add "loadBalancerName", valid_564134
+  var valid_564135 = path.getOrDefault("subscriptionId")
+  valid_564135 = validateParameter(valid_564135, JString, required = true,
                                  default = nil)
-  if valid_568235 != nil:
-    section.add "loadBalancerName", valid_568235
-  var valid_568236 = path.getOrDefault("subscriptionId")
-  valid_568236 = validateParameter(valid_568236, JString, required = true,
+  if valid_564135 != nil:
+    section.add "subscriptionId", valid_564135
+  var valid_564136 = path.getOrDefault("resourceGroupName")
+  valid_564136 = validateParameter(valid_564136, JString, required = true,
                                  default = nil)
-  if valid_568236 != nil:
-    section.add "subscriptionId", valid_568236
+  if valid_564136 != nil:
+    section.add "resourceGroupName", valid_564136
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -354,11 +358,11 @@ proc validate_LoadBalancersCreateOrUpdate_568206(path: JsonNode; query: JsonNode
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568237 = query.getOrDefault("api-version")
-  valid_568237 = validateParameter(valid_568237, JString, required = true,
+  var valid_564137 = query.getOrDefault("api-version")
+  valid_564137 = validateParameter(valid_564137, JString, required = true,
                                  default = nil)
-  if valid_568237 != nil:
-    section.add "api-version", valid_568237
+  if valid_564137 != nil:
+    section.add "api-version", valid_564137
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -372,53 +376,53 @@ proc validate_LoadBalancersCreateOrUpdate_568206(path: JsonNode; query: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_568239: Call_LoadBalancersCreateOrUpdate_568205; path: JsonNode;
+proc call*(call_564139: Call_LoadBalancersCreateOrUpdate_564105; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Creates or updates a load balancer.
   ## 
-  let valid = call_568239.validator(path, query, header, formData, body)
-  let scheme = call_568239.pickScheme
+  let valid = call_564139.validator(path, query, header, formData, body)
+  let scheme = call_564139.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568239.url(scheme.get, call_568239.host, call_568239.base,
-                         call_568239.route, valid.getOrDefault("path"),
+  let url = call_564139.url(scheme.get, call_564139.host, call_564139.base,
+                         call_564139.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568239, url, valid)
+  result = hook(call_564139, url, valid)
 
-proc call*(call_568240: Call_LoadBalancersCreateOrUpdate_568205;
-          resourceGroupName: string; apiVersion: string; loadBalancerName: string;
-          subscriptionId: string; parameters: JsonNode): Recallable =
+proc call*(call_564140: Call_LoadBalancersCreateOrUpdate_564105;
+          loadBalancerName: string; apiVersion: string; subscriptionId: string;
+          resourceGroupName: string; parameters: JsonNode): Recallable =
   ## loadBalancersCreateOrUpdate
   ## Creates or updates a load balancer.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
-  ##   apiVersion: string (required)
-  ##             : Client API version.
   ##   loadBalancerName: string (required)
   ##                   : The name of the load balancer.
+  ##   apiVersion: string (required)
+  ##             : Client API version.
   ##   subscriptionId: string (required)
   ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   parameters: JObject (required)
   ##             : Parameters supplied to the create or update load balancer operation.
-  var path_568241 = newJObject()
-  var query_568242 = newJObject()
-  var body_568243 = newJObject()
-  add(path_568241, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568242, "api-version", newJString(apiVersion))
-  add(path_568241, "loadBalancerName", newJString(loadBalancerName))
-  add(path_568241, "subscriptionId", newJString(subscriptionId))
+  var path_564141 = newJObject()
+  var query_564142 = newJObject()
+  var body_564143 = newJObject()
+  add(path_564141, "loadBalancerName", newJString(loadBalancerName))
+  add(query_564142, "api-version", newJString(apiVersion))
+  add(path_564141, "subscriptionId", newJString(subscriptionId))
+  add(path_564141, "resourceGroupName", newJString(resourceGroupName))
   if parameters != nil:
-    body_568243 = parameters
-  result = call_568240.call(path_568241, query_568242, nil, nil, body_568243)
+    body_564143 = parameters
+  result = call_564140.call(path_564141, query_564142, nil, nil, body_564143)
 
-var loadBalancersCreateOrUpdate* = Call_LoadBalancersCreateOrUpdate_568205(
+var loadBalancersCreateOrUpdate* = Call_LoadBalancersCreateOrUpdate_564105(
     name: "loadBalancersCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/loadBalancers/{loadBalancerName}",
-    validator: validate_LoadBalancersCreateOrUpdate_568206, base: "",
-    url: url_LoadBalancersCreateOrUpdate_568207, schemes: {Scheme.Https})
+    validator: validate_LoadBalancersCreateOrUpdate_564106, base: "",
+    url: url_LoadBalancersCreateOrUpdate_564107, schemes: {Scheme.Https})
 type
-  Call_LoadBalancersGet_568192 = ref object of OpenApiRestCall_567657
-proc url_LoadBalancersGet_568194(protocol: Scheme; host: string; base: string;
+  Call_LoadBalancersGet_564092 = ref object of OpenApiRestCall_563555
+proc url_LoadBalancersGet_564094(protocol: Scheme; host: string; base: string;
                                 route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -442,7 +446,7 @@ proc url_LoadBalancersGet_568194(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_LoadBalancersGet_568193(path: JsonNode; query: JsonNode;
+proc validate_LoadBalancersGet_564093(path: JsonNode; query: JsonNode;
                                      header: JsonNode; formData: JsonNode;
                                      body: JsonNode): JsonNode =
   ## Gets the specified load balancer.
@@ -450,30 +454,30 @@ proc validate_LoadBalancersGet_568193(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   loadBalancerName: JString (required)
   ##                   : The name of the load balancer.
   ##   subscriptionId: JString (required)
   ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568196 = path.getOrDefault("resourceGroupName")
-  valid_568196 = validateParameter(valid_568196, JString, required = true,
+        "path argument is necessary due to required `loadBalancerName` field"
+  var valid_564096 = path.getOrDefault("loadBalancerName")
+  valid_564096 = validateParameter(valid_564096, JString, required = true,
                                  default = nil)
-  if valid_568196 != nil:
-    section.add "resourceGroupName", valid_568196
-  var valid_568197 = path.getOrDefault("loadBalancerName")
-  valid_568197 = validateParameter(valid_568197, JString, required = true,
+  if valid_564096 != nil:
+    section.add "loadBalancerName", valid_564096
+  var valid_564097 = path.getOrDefault("subscriptionId")
+  valid_564097 = validateParameter(valid_564097, JString, required = true,
                                  default = nil)
-  if valid_568197 != nil:
-    section.add "loadBalancerName", valid_568197
-  var valid_568198 = path.getOrDefault("subscriptionId")
-  valid_568198 = validateParameter(valid_568198, JString, required = true,
+  if valid_564097 != nil:
+    section.add "subscriptionId", valid_564097
+  var valid_564098 = path.getOrDefault("resourceGroupName")
+  valid_564098 = validateParameter(valid_564098, JString, required = true,
                                  default = nil)
-  if valid_568198 != nil:
-    section.add "subscriptionId", valid_568198
+  if valid_564098 != nil:
+    section.add "resourceGroupName", valid_564098
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -483,16 +487,16 @@ proc validate_LoadBalancersGet_568193(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568199 = query.getOrDefault("api-version")
-  valid_568199 = validateParameter(valid_568199, JString, required = true,
+  var valid_564099 = query.getOrDefault("api-version")
+  valid_564099 = validateParameter(valid_564099, JString, required = true,
                                  default = nil)
-  if valid_568199 != nil:
-    section.add "api-version", valid_568199
-  var valid_568200 = query.getOrDefault("$expand")
-  valid_568200 = validateParameter(valid_568200, JString, required = false,
+  if valid_564099 != nil:
+    section.add "api-version", valid_564099
+  var valid_564100 = query.getOrDefault("$expand")
+  valid_564100 = validateParameter(valid_564100, JString, required = false,
                                  default = nil)
-  if valid_568200 != nil:
-    section.add "$expand", valid_568200
+  if valid_564100 != nil:
+    section.add "$expand", valid_564100
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -501,50 +505,50 @@ proc validate_LoadBalancersGet_568193(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568201: Call_LoadBalancersGet_568192; path: JsonNode;
+proc call*(call_564101: Call_LoadBalancersGet_564092; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the specified load balancer.
   ## 
-  let valid = call_568201.validator(path, query, header, formData, body)
-  let scheme = call_568201.pickScheme
+  let valid = call_564101.validator(path, query, header, formData, body)
+  let scheme = call_564101.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568201.url(scheme.get, call_568201.host, call_568201.base,
-                         call_568201.route, valid.getOrDefault("path"),
+  let url = call_564101.url(scheme.get, call_564101.host, call_564101.base,
+                         call_564101.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568201, url, valid)
+  result = hook(call_564101, url, valid)
 
-proc call*(call_568202: Call_LoadBalancersGet_568192; resourceGroupName: string;
-          apiVersion: string; loadBalancerName: string; subscriptionId: string;
+proc call*(call_564102: Call_LoadBalancersGet_564092; loadBalancerName: string;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string;
           Expand: string = ""): Recallable =
   ## loadBalancersGet
   ## Gets the specified load balancer.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   loadBalancerName: string (required)
+  ##                   : The name of the load balancer.
   ##   apiVersion: string (required)
   ##             : Client API version.
   ##   Expand: string
   ##         : Expands referenced resources.
-  ##   loadBalancerName: string (required)
-  ##                   : The name of the load balancer.
   ##   subscriptionId: string (required)
   ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_568203 = newJObject()
-  var query_568204 = newJObject()
-  add(path_568203, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568204, "api-version", newJString(apiVersion))
-  add(query_568204, "$expand", newJString(Expand))
-  add(path_568203, "loadBalancerName", newJString(loadBalancerName))
-  add(path_568203, "subscriptionId", newJString(subscriptionId))
-  result = call_568202.call(path_568203, query_568204, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564103 = newJObject()
+  var query_564104 = newJObject()
+  add(path_564103, "loadBalancerName", newJString(loadBalancerName))
+  add(query_564104, "api-version", newJString(apiVersion))
+  add(query_564104, "$expand", newJString(Expand))
+  add(path_564103, "subscriptionId", newJString(subscriptionId))
+  add(path_564103, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564102.call(path_564103, query_564104, nil, nil, nil)
 
-var loadBalancersGet* = Call_LoadBalancersGet_568192(name: "loadBalancersGet",
+var loadBalancersGet* = Call_LoadBalancersGet_564092(name: "loadBalancersGet",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/loadBalancers/{loadBalancerName}",
-    validator: validate_LoadBalancersGet_568193, base: "",
-    url: url_LoadBalancersGet_568194, schemes: {Scheme.Https})
+    validator: validate_LoadBalancersGet_564093, base: "",
+    url: url_LoadBalancersGet_564094, schemes: {Scheme.Https})
 type
-  Call_LoadBalancersUpdateTags_568255 = ref object of OpenApiRestCall_567657
-proc url_LoadBalancersUpdateTags_568257(protocol: Scheme; host: string; base: string;
+  Call_LoadBalancersUpdateTags_564155 = ref object of OpenApiRestCall_563555
+proc url_LoadBalancersUpdateTags_564157(protocol: Scheme; host: string; base: string;
                                        route: string; path: JsonNode;
                                        query: JsonNode): Uri =
   result.scheme = $protocol
@@ -569,37 +573,37 @@ proc url_LoadBalancersUpdateTags_568257(protocol: Scheme; host: string; base: st
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_LoadBalancersUpdateTags_568256(path: JsonNode; query: JsonNode;
+proc validate_LoadBalancersUpdateTags_564156(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Updates a load balancer tags.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   loadBalancerName: JString (required)
   ##                   : The name of the load balancer.
   ##   subscriptionId: JString (required)
   ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568258 = path.getOrDefault("resourceGroupName")
-  valid_568258 = validateParameter(valid_568258, JString, required = true,
+        "path argument is necessary due to required `loadBalancerName` field"
+  var valid_564158 = path.getOrDefault("loadBalancerName")
+  valid_564158 = validateParameter(valid_564158, JString, required = true,
                                  default = nil)
-  if valid_568258 != nil:
-    section.add "resourceGroupName", valid_568258
-  var valid_568259 = path.getOrDefault("loadBalancerName")
-  valid_568259 = validateParameter(valid_568259, JString, required = true,
+  if valid_564158 != nil:
+    section.add "loadBalancerName", valid_564158
+  var valid_564159 = path.getOrDefault("subscriptionId")
+  valid_564159 = validateParameter(valid_564159, JString, required = true,
                                  default = nil)
-  if valid_568259 != nil:
-    section.add "loadBalancerName", valid_568259
-  var valid_568260 = path.getOrDefault("subscriptionId")
-  valid_568260 = validateParameter(valid_568260, JString, required = true,
+  if valid_564159 != nil:
+    section.add "subscriptionId", valid_564159
+  var valid_564160 = path.getOrDefault("resourceGroupName")
+  valid_564160 = validateParameter(valid_564160, JString, required = true,
                                  default = nil)
-  if valid_568260 != nil:
-    section.add "subscriptionId", valid_568260
+  if valid_564160 != nil:
+    section.add "resourceGroupName", valid_564160
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -607,11 +611,11 @@ proc validate_LoadBalancersUpdateTags_568256(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568261 = query.getOrDefault("api-version")
-  valid_568261 = validateParameter(valid_568261, JString, required = true,
+  var valid_564161 = query.getOrDefault("api-version")
+  valid_564161 = validateParameter(valid_564161, JString, required = true,
                                  default = nil)
-  if valid_568261 != nil:
-    section.add "api-version", valid_568261
+  if valid_564161 != nil:
+    section.add "api-version", valid_564161
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -625,53 +629,53 @@ proc validate_LoadBalancersUpdateTags_568256(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568263: Call_LoadBalancersUpdateTags_568255; path: JsonNode;
+proc call*(call_564163: Call_LoadBalancersUpdateTags_564155; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Updates a load balancer tags.
   ## 
-  let valid = call_568263.validator(path, query, header, formData, body)
-  let scheme = call_568263.pickScheme
+  let valid = call_564163.validator(path, query, header, formData, body)
+  let scheme = call_564163.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568263.url(scheme.get, call_568263.host, call_568263.base,
-                         call_568263.route, valid.getOrDefault("path"),
+  let url = call_564163.url(scheme.get, call_564163.host, call_564163.base,
+                         call_564163.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568263, url, valid)
+  result = hook(call_564163, url, valid)
 
-proc call*(call_568264: Call_LoadBalancersUpdateTags_568255;
-          resourceGroupName: string; apiVersion: string; loadBalancerName: string;
-          subscriptionId: string; parameters: JsonNode): Recallable =
+proc call*(call_564164: Call_LoadBalancersUpdateTags_564155;
+          loadBalancerName: string; apiVersion: string; subscriptionId: string;
+          resourceGroupName: string; parameters: JsonNode): Recallable =
   ## loadBalancersUpdateTags
   ## Updates a load balancer tags.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
-  ##   apiVersion: string (required)
-  ##             : Client API version.
   ##   loadBalancerName: string (required)
   ##                   : The name of the load balancer.
+  ##   apiVersion: string (required)
+  ##             : Client API version.
   ##   subscriptionId: string (required)
   ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   parameters: JObject (required)
   ##             : Parameters supplied to update load balancer tags.
-  var path_568265 = newJObject()
-  var query_568266 = newJObject()
-  var body_568267 = newJObject()
-  add(path_568265, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568266, "api-version", newJString(apiVersion))
-  add(path_568265, "loadBalancerName", newJString(loadBalancerName))
-  add(path_568265, "subscriptionId", newJString(subscriptionId))
+  var path_564165 = newJObject()
+  var query_564166 = newJObject()
+  var body_564167 = newJObject()
+  add(path_564165, "loadBalancerName", newJString(loadBalancerName))
+  add(query_564166, "api-version", newJString(apiVersion))
+  add(path_564165, "subscriptionId", newJString(subscriptionId))
+  add(path_564165, "resourceGroupName", newJString(resourceGroupName))
   if parameters != nil:
-    body_568267 = parameters
-  result = call_568264.call(path_568265, query_568266, nil, nil, body_568267)
+    body_564167 = parameters
+  result = call_564164.call(path_564165, query_564166, nil, nil, body_564167)
 
-var loadBalancersUpdateTags* = Call_LoadBalancersUpdateTags_568255(
+var loadBalancersUpdateTags* = Call_LoadBalancersUpdateTags_564155(
     name: "loadBalancersUpdateTags", meth: HttpMethod.HttpPatch,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/loadBalancers/{loadBalancerName}",
-    validator: validate_LoadBalancersUpdateTags_568256, base: "",
-    url: url_LoadBalancersUpdateTags_568257, schemes: {Scheme.Https})
+    validator: validate_LoadBalancersUpdateTags_564156, base: "",
+    url: url_LoadBalancersUpdateTags_564157, schemes: {Scheme.Https})
 type
-  Call_LoadBalancersDelete_568244 = ref object of OpenApiRestCall_567657
-proc url_LoadBalancersDelete_568246(protocol: Scheme; host: string; base: string;
+  Call_LoadBalancersDelete_564144 = ref object of OpenApiRestCall_563555
+proc url_LoadBalancersDelete_564146(protocol: Scheme; host: string; base: string;
                                    route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -695,7 +699,7 @@ proc url_LoadBalancersDelete_568246(protocol: Scheme; host: string; base: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_LoadBalancersDelete_568245(path: JsonNode; query: JsonNode;
+proc validate_LoadBalancersDelete_564145(path: JsonNode; query: JsonNode;
                                         header: JsonNode; formData: JsonNode;
                                         body: JsonNode): JsonNode =
   ## Deletes the specified load balancer.
@@ -703,30 +707,30 @@ proc validate_LoadBalancersDelete_568245(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   loadBalancerName: JString (required)
   ##                   : The name of the load balancer.
   ##   subscriptionId: JString (required)
   ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568247 = path.getOrDefault("resourceGroupName")
-  valid_568247 = validateParameter(valid_568247, JString, required = true,
+        "path argument is necessary due to required `loadBalancerName` field"
+  var valid_564147 = path.getOrDefault("loadBalancerName")
+  valid_564147 = validateParameter(valid_564147, JString, required = true,
                                  default = nil)
-  if valid_568247 != nil:
-    section.add "resourceGroupName", valid_568247
-  var valid_568248 = path.getOrDefault("loadBalancerName")
-  valid_568248 = validateParameter(valid_568248, JString, required = true,
+  if valid_564147 != nil:
+    section.add "loadBalancerName", valid_564147
+  var valid_564148 = path.getOrDefault("subscriptionId")
+  valid_564148 = validateParameter(valid_564148, JString, required = true,
                                  default = nil)
-  if valid_568248 != nil:
-    section.add "loadBalancerName", valid_568248
-  var valid_568249 = path.getOrDefault("subscriptionId")
-  valid_568249 = validateParameter(valid_568249, JString, required = true,
+  if valid_564148 != nil:
+    section.add "subscriptionId", valid_564148
+  var valid_564149 = path.getOrDefault("resourceGroupName")
+  valid_564149 = validateParameter(valid_564149, JString, required = true,
                                  default = nil)
-  if valid_568249 != nil:
-    section.add "subscriptionId", valid_568249
+  if valid_564149 != nil:
+    section.add "resourceGroupName", valid_564149
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -734,11 +738,11 @@ proc validate_LoadBalancersDelete_568245(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568250 = query.getOrDefault("api-version")
-  valid_568250 = validateParameter(valid_568250, JString, required = true,
+  var valid_564150 = query.getOrDefault("api-version")
+  valid_564150 = validateParameter(valid_564150, JString, required = true,
                                  default = nil)
-  if valid_568250 != nil:
-    section.add "api-version", valid_568250
+  if valid_564150 != nil:
+    section.add "api-version", valid_564150
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -747,47 +751,47 @@ proc validate_LoadBalancersDelete_568245(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568251: Call_LoadBalancersDelete_568244; path: JsonNode;
+proc call*(call_564151: Call_LoadBalancersDelete_564144; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes the specified load balancer.
   ## 
-  let valid = call_568251.validator(path, query, header, formData, body)
-  let scheme = call_568251.pickScheme
+  let valid = call_564151.validator(path, query, header, formData, body)
+  let scheme = call_564151.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568251.url(scheme.get, call_568251.host, call_568251.base,
-                         call_568251.route, valid.getOrDefault("path"),
+  let url = call_564151.url(scheme.get, call_564151.host, call_564151.base,
+                         call_564151.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568251, url, valid)
+  result = hook(call_564151, url, valid)
 
-proc call*(call_568252: Call_LoadBalancersDelete_568244; resourceGroupName: string;
-          apiVersion: string; loadBalancerName: string; subscriptionId: string): Recallable =
+proc call*(call_564152: Call_LoadBalancersDelete_564144; loadBalancerName: string;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string): Recallable =
   ## loadBalancersDelete
   ## Deletes the specified load balancer.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
-  ##   apiVersion: string (required)
-  ##             : Client API version.
   ##   loadBalancerName: string (required)
   ##                   : The name of the load balancer.
+  ##   apiVersion: string (required)
+  ##             : Client API version.
   ##   subscriptionId: string (required)
   ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_568253 = newJObject()
-  var query_568254 = newJObject()
-  add(path_568253, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568254, "api-version", newJString(apiVersion))
-  add(path_568253, "loadBalancerName", newJString(loadBalancerName))
-  add(path_568253, "subscriptionId", newJString(subscriptionId))
-  result = call_568252.call(path_568253, query_568254, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564153 = newJObject()
+  var query_564154 = newJObject()
+  add(path_564153, "loadBalancerName", newJString(loadBalancerName))
+  add(query_564154, "api-version", newJString(apiVersion))
+  add(path_564153, "subscriptionId", newJString(subscriptionId))
+  add(path_564153, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564152.call(path_564153, query_564154, nil, nil, nil)
 
-var loadBalancersDelete* = Call_LoadBalancersDelete_568244(
+var loadBalancersDelete* = Call_LoadBalancersDelete_564144(
     name: "loadBalancersDelete", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/loadBalancers/{loadBalancerName}",
-    validator: validate_LoadBalancersDelete_568245, base: "",
-    url: url_LoadBalancersDelete_568246, schemes: {Scheme.Https})
+    validator: validate_LoadBalancersDelete_564145, base: "",
+    url: url_LoadBalancersDelete_564146, schemes: {Scheme.Https})
 type
-  Call_LoadBalancerBackendAddressPoolsList_568268 = ref object of OpenApiRestCall_567657
-proc url_LoadBalancerBackendAddressPoolsList_568270(protocol: Scheme; host: string;
+  Call_LoadBalancerBackendAddressPoolsList_564168 = ref object of OpenApiRestCall_563555
+proc url_LoadBalancerBackendAddressPoolsList_564170(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -812,37 +816,37 @@ proc url_LoadBalancerBackendAddressPoolsList_568270(protocol: Scheme; host: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_LoadBalancerBackendAddressPoolsList_568269(path: JsonNode;
+proc validate_LoadBalancerBackendAddressPoolsList_564169(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets all the load balancer backed address pools.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   loadBalancerName: JString (required)
   ##                   : The name of the load balancer.
   ##   subscriptionId: JString (required)
   ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568271 = path.getOrDefault("resourceGroupName")
-  valid_568271 = validateParameter(valid_568271, JString, required = true,
+        "path argument is necessary due to required `loadBalancerName` field"
+  var valid_564171 = path.getOrDefault("loadBalancerName")
+  valid_564171 = validateParameter(valid_564171, JString, required = true,
                                  default = nil)
-  if valid_568271 != nil:
-    section.add "resourceGroupName", valid_568271
-  var valid_568272 = path.getOrDefault("loadBalancerName")
-  valid_568272 = validateParameter(valid_568272, JString, required = true,
+  if valid_564171 != nil:
+    section.add "loadBalancerName", valid_564171
+  var valid_564172 = path.getOrDefault("subscriptionId")
+  valid_564172 = validateParameter(valid_564172, JString, required = true,
                                  default = nil)
-  if valid_568272 != nil:
-    section.add "loadBalancerName", valid_568272
-  var valid_568273 = path.getOrDefault("subscriptionId")
-  valid_568273 = validateParameter(valid_568273, JString, required = true,
+  if valid_564172 != nil:
+    section.add "subscriptionId", valid_564172
+  var valid_564173 = path.getOrDefault("resourceGroupName")
+  valid_564173 = validateParameter(valid_564173, JString, required = true,
                                  default = nil)
-  if valid_568273 != nil:
-    section.add "subscriptionId", valid_568273
+  if valid_564173 != nil:
+    section.add "resourceGroupName", valid_564173
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -850,11 +854,11 @@ proc validate_LoadBalancerBackendAddressPoolsList_568269(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568274 = query.getOrDefault("api-version")
-  valid_568274 = validateParameter(valid_568274, JString, required = true,
+  var valid_564174 = query.getOrDefault("api-version")
+  valid_564174 = validateParameter(valid_564174, JString, required = true,
                                  default = nil)
-  if valid_568274 != nil:
-    section.add "api-version", valid_568274
+  if valid_564174 != nil:
+    section.add "api-version", valid_564174
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -863,49 +867,49 @@ proc validate_LoadBalancerBackendAddressPoolsList_568269(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568275: Call_LoadBalancerBackendAddressPoolsList_568268;
+proc call*(call_564175: Call_LoadBalancerBackendAddressPoolsList_564168;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Gets all the load balancer backed address pools.
   ## 
-  let valid = call_568275.validator(path, query, header, formData, body)
-  let scheme = call_568275.pickScheme
+  let valid = call_564175.validator(path, query, header, formData, body)
+  let scheme = call_564175.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568275.url(scheme.get, call_568275.host, call_568275.base,
-                         call_568275.route, valid.getOrDefault("path"),
+  let url = call_564175.url(scheme.get, call_564175.host, call_564175.base,
+                         call_564175.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568275, url, valid)
+  result = hook(call_564175, url, valid)
 
-proc call*(call_568276: Call_LoadBalancerBackendAddressPoolsList_568268;
-          resourceGroupName: string; apiVersion: string; loadBalancerName: string;
-          subscriptionId: string): Recallable =
+proc call*(call_564176: Call_LoadBalancerBackendAddressPoolsList_564168;
+          loadBalancerName: string; apiVersion: string; subscriptionId: string;
+          resourceGroupName: string): Recallable =
   ## loadBalancerBackendAddressPoolsList
   ## Gets all the load balancer backed address pools.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
-  ##   apiVersion: string (required)
-  ##             : Client API version.
   ##   loadBalancerName: string (required)
   ##                   : The name of the load balancer.
+  ##   apiVersion: string (required)
+  ##             : Client API version.
   ##   subscriptionId: string (required)
   ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_568277 = newJObject()
-  var query_568278 = newJObject()
-  add(path_568277, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568278, "api-version", newJString(apiVersion))
-  add(path_568277, "loadBalancerName", newJString(loadBalancerName))
-  add(path_568277, "subscriptionId", newJString(subscriptionId))
-  result = call_568276.call(path_568277, query_568278, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564177 = newJObject()
+  var query_564178 = newJObject()
+  add(path_564177, "loadBalancerName", newJString(loadBalancerName))
+  add(query_564178, "api-version", newJString(apiVersion))
+  add(path_564177, "subscriptionId", newJString(subscriptionId))
+  add(path_564177, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564176.call(path_564177, query_564178, nil, nil, nil)
 
-var loadBalancerBackendAddressPoolsList* = Call_LoadBalancerBackendAddressPoolsList_568268(
+var loadBalancerBackendAddressPoolsList* = Call_LoadBalancerBackendAddressPoolsList_564168(
     name: "loadBalancerBackendAddressPoolsList", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/loadBalancers/{loadBalancerName}/backendAddressPools",
-    validator: validate_LoadBalancerBackendAddressPoolsList_568269, base: "",
-    url: url_LoadBalancerBackendAddressPoolsList_568270, schemes: {Scheme.Https})
+    validator: validate_LoadBalancerBackendAddressPoolsList_564169, base: "",
+    url: url_LoadBalancerBackendAddressPoolsList_564170, schemes: {Scheme.Https})
 type
-  Call_LoadBalancerBackendAddressPoolsGet_568279 = ref object of OpenApiRestCall_567657
-proc url_LoadBalancerBackendAddressPoolsGet_568281(protocol: Scheme; host: string;
+  Call_LoadBalancerBackendAddressPoolsGet_564179 = ref object of OpenApiRestCall_563555
+proc url_LoadBalancerBackendAddressPoolsGet_564181(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -933,44 +937,44 @@ proc url_LoadBalancerBackendAddressPoolsGet_568281(protocol: Scheme; host: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_LoadBalancerBackendAddressPoolsGet_568280(path: JsonNode;
+proc validate_LoadBalancerBackendAddressPoolsGet_564180(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets load balancer backend address pool.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
-  ##   backendAddressPoolName: JString (required)
-  ##                         : The name of the backend address pool.
   ##   loadBalancerName: JString (required)
   ##                   : The name of the load balancer.
   ##   subscriptionId: JString (required)
   ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
+  ##   backendAddressPoolName: JString (required)
+  ##                         : The name of the backend address pool.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568282 = path.getOrDefault("resourceGroupName")
-  valid_568282 = validateParameter(valid_568282, JString, required = true,
+        "path argument is necessary due to required `loadBalancerName` field"
+  var valid_564182 = path.getOrDefault("loadBalancerName")
+  valid_564182 = validateParameter(valid_564182, JString, required = true,
                                  default = nil)
-  if valid_568282 != nil:
-    section.add "resourceGroupName", valid_568282
-  var valid_568283 = path.getOrDefault("backendAddressPoolName")
-  valid_568283 = validateParameter(valid_568283, JString, required = true,
+  if valid_564182 != nil:
+    section.add "loadBalancerName", valid_564182
+  var valid_564183 = path.getOrDefault("subscriptionId")
+  valid_564183 = validateParameter(valid_564183, JString, required = true,
                                  default = nil)
-  if valid_568283 != nil:
-    section.add "backendAddressPoolName", valid_568283
-  var valid_568284 = path.getOrDefault("loadBalancerName")
-  valid_568284 = validateParameter(valid_568284, JString, required = true,
+  if valid_564183 != nil:
+    section.add "subscriptionId", valid_564183
+  var valid_564184 = path.getOrDefault("resourceGroupName")
+  valid_564184 = validateParameter(valid_564184, JString, required = true,
                                  default = nil)
-  if valid_568284 != nil:
-    section.add "loadBalancerName", valid_568284
-  var valid_568285 = path.getOrDefault("subscriptionId")
-  valid_568285 = validateParameter(valid_568285, JString, required = true,
+  if valid_564184 != nil:
+    section.add "resourceGroupName", valid_564184
+  var valid_564185 = path.getOrDefault("backendAddressPoolName")
+  valid_564185 = validateParameter(valid_564185, JString, required = true,
                                  default = nil)
-  if valid_568285 != nil:
-    section.add "subscriptionId", valid_568285
+  if valid_564185 != nil:
+    section.add "backendAddressPoolName", valid_564185
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -978,11 +982,11 @@ proc validate_LoadBalancerBackendAddressPoolsGet_568280(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568286 = query.getOrDefault("api-version")
-  valid_568286 = validateParameter(valid_568286, JString, required = true,
+  var valid_564186 = query.getOrDefault("api-version")
+  valid_564186 = validateParameter(valid_564186, JString, required = true,
                                  default = nil)
-  if valid_568286 != nil:
-    section.add "api-version", valid_568286
+  if valid_564186 != nil:
+    section.add "api-version", valid_564186
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -991,52 +995,52 @@ proc validate_LoadBalancerBackendAddressPoolsGet_568280(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568287: Call_LoadBalancerBackendAddressPoolsGet_568279;
+proc call*(call_564187: Call_LoadBalancerBackendAddressPoolsGet_564179;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Gets load balancer backend address pool.
   ## 
-  let valid = call_568287.validator(path, query, header, formData, body)
-  let scheme = call_568287.pickScheme
+  let valid = call_564187.validator(path, query, header, formData, body)
+  let scheme = call_564187.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568287.url(scheme.get, call_568287.host, call_568287.base,
-                         call_568287.route, valid.getOrDefault("path"),
+  let url = call_564187.url(scheme.get, call_564187.host, call_564187.base,
+                         call_564187.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568287, url, valid)
+  result = hook(call_564187, url, valid)
 
-proc call*(call_568288: Call_LoadBalancerBackendAddressPoolsGet_568279;
-          resourceGroupName: string; backendAddressPoolName: string;
-          apiVersion: string; loadBalancerName: string; subscriptionId: string): Recallable =
+proc call*(call_564188: Call_LoadBalancerBackendAddressPoolsGet_564179;
+          loadBalancerName: string; apiVersion: string; subscriptionId: string;
+          resourceGroupName: string; backendAddressPoolName: string): Recallable =
   ## loadBalancerBackendAddressPoolsGet
   ## Gets load balancer backend address pool.
+  ##   loadBalancerName: string (required)
+  ##                   : The name of the load balancer.
+  ##   apiVersion: string (required)
+  ##             : Client API version.
+  ##   subscriptionId: string (required)
+  ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   resourceGroupName: string (required)
   ##                    : The name of the resource group.
   ##   backendAddressPoolName: string (required)
   ##                         : The name of the backend address pool.
-  ##   apiVersion: string (required)
-  ##             : Client API version.
-  ##   loadBalancerName: string (required)
-  ##                   : The name of the load balancer.
-  ##   subscriptionId: string (required)
-  ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_568289 = newJObject()
-  var query_568290 = newJObject()
-  add(path_568289, "resourceGroupName", newJString(resourceGroupName))
-  add(path_568289, "backendAddressPoolName", newJString(backendAddressPoolName))
-  add(query_568290, "api-version", newJString(apiVersion))
-  add(path_568289, "loadBalancerName", newJString(loadBalancerName))
-  add(path_568289, "subscriptionId", newJString(subscriptionId))
-  result = call_568288.call(path_568289, query_568290, nil, nil, nil)
+  var path_564189 = newJObject()
+  var query_564190 = newJObject()
+  add(path_564189, "loadBalancerName", newJString(loadBalancerName))
+  add(query_564190, "api-version", newJString(apiVersion))
+  add(path_564189, "subscriptionId", newJString(subscriptionId))
+  add(path_564189, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564189, "backendAddressPoolName", newJString(backendAddressPoolName))
+  result = call_564188.call(path_564189, query_564190, nil, nil, nil)
 
-var loadBalancerBackendAddressPoolsGet* = Call_LoadBalancerBackendAddressPoolsGet_568279(
+var loadBalancerBackendAddressPoolsGet* = Call_LoadBalancerBackendAddressPoolsGet_564179(
     name: "loadBalancerBackendAddressPoolsGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/loadBalancers/{loadBalancerName}/backendAddressPools/{backendAddressPoolName}",
-    validator: validate_LoadBalancerBackendAddressPoolsGet_568280, base: "",
-    url: url_LoadBalancerBackendAddressPoolsGet_568281, schemes: {Scheme.Https})
+    validator: validate_LoadBalancerBackendAddressPoolsGet_564180, base: "",
+    url: url_LoadBalancerBackendAddressPoolsGet_564181, schemes: {Scheme.Https})
 type
-  Call_LoadBalancerFrontendIPConfigurationsList_568291 = ref object of OpenApiRestCall_567657
-proc url_LoadBalancerFrontendIPConfigurationsList_568293(protocol: Scheme;
+  Call_LoadBalancerFrontendIPConfigurationsList_564191 = ref object of OpenApiRestCall_563555
+proc url_LoadBalancerFrontendIPConfigurationsList_564193(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1061,37 +1065,37 @@ proc url_LoadBalancerFrontendIPConfigurationsList_568293(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_LoadBalancerFrontendIPConfigurationsList_568292(path: JsonNode;
+proc validate_LoadBalancerFrontendIPConfigurationsList_564192(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets all the load balancer frontend IP configurations.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   loadBalancerName: JString (required)
   ##                   : The name of the load balancer.
   ##   subscriptionId: JString (required)
   ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568294 = path.getOrDefault("resourceGroupName")
-  valid_568294 = validateParameter(valid_568294, JString, required = true,
+        "path argument is necessary due to required `loadBalancerName` field"
+  var valid_564194 = path.getOrDefault("loadBalancerName")
+  valid_564194 = validateParameter(valid_564194, JString, required = true,
                                  default = nil)
-  if valid_568294 != nil:
-    section.add "resourceGroupName", valid_568294
-  var valid_568295 = path.getOrDefault("loadBalancerName")
-  valid_568295 = validateParameter(valid_568295, JString, required = true,
+  if valid_564194 != nil:
+    section.add "loadBalancerName", valid_564194
+  var valid_564195 = path.getOrDefault("subscriptionId")
+  valid_564195 = validateParameter(valid_564195, JString, required = true,
                                  default = nil)
-  if valid_568295 != nil:
-    section.add "loadBalancerName", valid_568295
-  var valid_568296 = path.getOrDefault("subscriptionId")
-  valid_568296 = validateParameter(valid_568296, JString, required = true,
+  if valid_564195 != nil:
+    section.add "subscriptionId", valid_564195
+  var valid_564196 = path.getOrDefault("resourceGroupName")
+  valid_564196 = validateParameter(valid_564196, JString, required = true,
                                  default = nil)
-  if valid_568296 != nil:
-    section.add "subscriptionId", valid_568296
+  if valid_564196 != nil:
+    section.add "resourceGroupName", valid_564196
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1099,11 +1103,11 @@ proc validate_LoadBalancerFrontendIPConfigurationsList_568292(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568297 = query.getOrDefault("api-version")
-  valid_568297 = validateParameter(valid_568297, JString, required = true,
+  var valid_564197 = query.getOrDefault("api-version")
+  valid_564197 = validateParameter(valid_564197, JString, required = true,
                                  default = nil)
-  if valid_568297 != nil:
-    section.add "api-version", valid_568297
+  if valid_564197 != nil:
+    section.add "api-version", valid_564197
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1112,50 +1116,50 @@ proc validate_LoadBalancerFrontendIPConfigurationsList_568292(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568298: Call_LoadBalancerFrontendIPConfigurationsList_568291;
+proc call*(call_564198: Call_LoadBalancerFrontendIPConfigurationsList_564191;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Gets all the load balancer frontend IP configurations.
   ## 
-  let valid = call_568298.validator(path, query, header, formData, body)
-  let scheme = call_568298.pickScheme
+  let valid = call_564198.validator(path, query, header, formData, body)
+  let scheme = call_564198.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568298.url(scheme.get, call_568298.host, call_568298.base,
-                         call_568298.route, valid.getOrDefault("path"),
+  let url = call_564198.url(scheme.get, call_564198.host, call_564198.base,
+                         call_564198.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568298, url, valid)
+  result = hook(call_564198, url, valid)
 
-proc call*(call_568299: Call_LoadBalancerFrontendIPConfigurationsList_568291;
-          resourceGroupName: string; apiVersion: string; loadBalancerName: string;
-          subscriptionId: string): Recallable =
+proc call*(call_564199: Call_LoadBalancerFrontendIPConfigurationsList_564191;
+          loadBalancerName: string; apiVersion: string; subscriptionId: string;
+          resourceGroupName: string): Recallable =
   ## loadBalancerFrontendIPConfigurationsList
   ## Gets all the load balancer frontend IP configurations.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
-  ##   apiVersion: string (required)
-  ##             : Client API version.
   ##   loadBalancerName: string (required)
   ##                   : The name of the load balancer.
+  ##   apiVersion: string (required)
+  ##             : Client API version.
   ##   subscriptionId: string (required)
   ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_568300 = newJObject()
-  var query_568301 = newJObject()
-  add(path_568300, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568301, "api-version", newJString(apiVersion))
-  add(path_568300, "loadBalancerName", newJString(loadBalancerName))
-  add(path_568300, "subscriptionId", newJString(subscriptionId))
-  result = call_568299.call(path_568300, query_568301, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564200 = newJObject()
+  var query_564201 = newJObject()
+  add(path_564200, "loadBalancerName", newJString(loadBalancerName))
+  add(query_564201, "api-version", newJString(apiVersion))
+  add(path_564200, "subscriptionId", newJString(subscriptionId))
+  add(path_564200, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564199.call(path_564200, query_564201, nil, nil, nil)
 
-var loadBalancerFrontendIPConfigurationsList* = Call_LoadBalancerFrontendIPConfigurationsList_568291(
+var loadBalancerFrontendIPConfigurationsList* = Call_LoadBalancerFrontendIPConfigurationsList_564191(
     name: "loadBalancerFrontendIPConfigurationsList", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/loadBalancers/{loadBalancerName}/frontendIPConfigurations",
-    validator: validate_LoadBalancerFrontendIPConfigurationsList_568292, base: "",
-    url: url_LoadBalancerFrontendIPConfigurationsList_568293,
+    validator: validate_LoadBalancerFrontendIPConfigurationsList_564192, base: "",
+    url: url_LoadBalancerFrontendIPConfigurationsList_564193,
     schemes: {Scheme.Https})
 type
-  Call_LoadBalancerFrontendIPConfigurationsGet_568302 = ref object of OpenApiRestCall_567657
-proc url_LoadBalancerFrontendIPConfigurationsGet_568304(protocol: Scheme;
+  Call_LoadBalancerFrontendIPConfigurationsGet_564202 = ref object of OpenApiRestCall_563555
+proc url_LoadBalancerFrontendIPConfigurationsGet_564204(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1183,44 +1187,44 @@ proc url_LoadBalancerFrontendIPConfigurationsGet_568304(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_LoadBalancerFrontendIPConfigurationsGet_568303(path: JsonNode;
+proc validate_LoadBalancerFrontendIPConfigurationsGet_564203(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets load balancer frontend IP configuration.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   loadBalancerName: JString (required)
   ##                   : The name of the load balancer.
-  ##   subscriptionId: JString (required)
-  ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   frontendIPConfigurationName: JString (required)
   ##                              : The name of the frontend IP configuration.
+  ##   subscriptionId: JString (required)
+  ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568305 = path.getOrDefault("resourceGroupName")
-  valid_568305 = validateParameter(valid_568305, JString, required = true,
+        "path argument is necessary due to required `loadBalancerName` field"
+  var valid_564205 = path.getOrDefault("loadBalancerName")
+  valid_564205 = validateParameter(valid_564205, JString, required = true,
                                  default = nil)
-  if valid_568305 != nil:
-    section.add "resourceGroupName", valid_568305
-  var valid_568306 = path.getOrDefault("loadBalancerName")
-  valid_568306 = validateParameter(valid_568306, JString, required = true,
+  if valid_564205 != nil:
+    section.add "loadBalancerName", valid_564205
+  var valid_564206 = path.getOrDefault("frontendIPConfigurationName")
+  valid_564206 = validateParameter(valid_564206, JString, required = true,
                                  default = nil)
-  if valid_568306 != nil:
-    section.add "loadBalancerName", valid_568306
-  var valid_568307 = path.getOrDefault("subscriptionId")
-  valid_568307 = validateParameter(valid_568307, JString, required = true,
+  if valid_564206 != nil:
+    section.add "frontendIPConfigurationName", valid_564206
+  var valid_564207 = path.getOrDefault("subscriptionId")
+  valid_564207 = validateParameter(valid_564207, JString, required = true,
                                  default = nil)
-  if valid_568307 != nil:
-    section.add "subscriptionId", valid_568307
-  var valid_568308 = path.getOrDefault("frontendIPConfigurationName")
-  valid_568308 = validateParameter(valid_568308, JString, required = true,
+  if valid_564207 != nil:
+    section.add "subscriptionId", valid_564207
+  var valid_564208 = path.getOrDefault("resourceGroupName")
+  valid_564208 = validateParameter(valid_564208, JString, required = true,
                                  default = nil)
-  if valid_568308 != nil:
-    section.add "frontendIPConfigurationName", valid_568308
+  if valid_564208 != nil:
+    section.add "resourceGroupName", valid_564208
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1228,11 +1232,11 @@ proc validate_LoadBalancerFrontendIPConfigurationsGet_568303(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568309 = query.getOrDefault("api-version")
-  valid_568309 = validateParameter(valid_568309, JString, required = true,
+  var valid_564209 = query.getOrDefault("api-version")
+  valid_564209 = validateParameter(valid_564209, JString, required = true,
                                  default = nil)
-  if valid_568309 != nil:
-    section.add "api-version", valid_568309
+  if valid_564209 != nil:
+    section.add "api-version", valid_564209
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1241,54 +1245,54 @@ proc validate_LoadBalancerFrontendIPConfigurationsGet_568303(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568310: Call_LoadBalancerFrontendIPConfigurationsGet_568302;
+proc call*(call_564210: Call_LoadBalancerFrontendIPConfigurationsGet_564202;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Gets load balancer frontend IP configuration.
   ## 
-  let valid = call_568310.validator(path, query, header, formData, body)
-  let scheme = call_568310.pickScheme
+  let valid = call_564210.validator(path, query, header, formData, body)
+  let scheme = call_564210.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568310.url(scheme.get, call_568310.host, call_568310.base,
-                         call_568310.route, valid.getOrDefault("path"),
+  let url = call_564210.url(scheme.get, call_564210.host, call_564210.base,
+                         call_564210.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568310, url, valid)
+  result = hook(call_564210, url, valid)
 
-proc call*(call_568311: Call_LoadBalancerFrontendIPConfigurationsGet_568302;
-          resourceGroupName: string; apiVersion: string; loadBalancerName: string;
-          subscriptionId: string; frontendIPConfigurationName: string): Recallable =
+proc call*(call_564211: Call_LoadBalancerFrontendIPConfigurationsGet_564202;
+          loadBalancerName: string; frontendIPConfigurationName: string;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string): Recallable =
   ## loadBalancerFrontendIPConfigurationsGet
   ## Gets load balancer frontend IP configuration.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
-  ##   apiVersion: string (required)
-  ##             : Client API version.
   ##   loadBalancerName: string (required)
   ##                   : The name of the load balancer.
-  ##   subscriptionId: string (required)
-  ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   frontendIPConfigurationName: string (required)
   ##                              : The name of the frontend IP configuration.
-  var path_568312 = newJObject()
-  var query_568313 = newJObject()
-  add(path_568312, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568313, "api-version", newJString(apiVersion))
-  add(path_568312, "loadBalancerName", newJString(loadBalancerName))
-  add(path_568312, "subscriptionId", newJString(subscriptionId))
-  add(path_568312, "frontendIPConfigurationName",
+  ##   apiVersion: string (required)
+  ##             : Client API version.
+  ##   subscriptionId: string (required)
+  ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564212 = newJObject()
+  var query_564213 = newJObject()
+  add(path_564212, "loadBalancerName", newJString(loadBalancerName))
+  add(path_564212, "frontendIPConfigurationName",
       newJString(frontendIPConfigurationName))
-  result = call_568311.call(path_568312, query_568313, nil, nil, nil)
+  add(query_564213, "api-version", newJString(apiVersion))
+  add(path_564212, "subscriptionId", newJString(subscriptionId))
+  add(path_564212, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564211.call(path_564212, query_564213, nil, nil, nil)
 
-var loadBalancerFrontendIPConfigurationsGet* = Call_LoadBalancerFrontendIPConfigurationsGet_568302(
+var loadBalancerFrontendIPConfigurationsGet* = Call_LoadBalancerFrontendIPConfigurationsGet_564202(
     name: "loadBalancerFrontendIPConfigurationsGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/loadBalancers/{loadBalancerName}/frontendIPConfigurations/{frontendIPConfigurationName}",
-    validator: validate_LoadBalancerFrontendIPConfigurationsGet_568303, base: "",
-    url: url_LoadBalancerFrontendIPConfigurationsGet_568304,
+    validator: validate_LoadBalancerFrontendIPConfigurationsGet_564203, base: "",
+    url: url_LoadBalancerFrontendIPConfigurationsGet_564204,
     schemes: {Scheme.Https})
 type
-  Call_InboundNatRulesList_568314 = ref object of OpenApiRestCall_567657
-proc url_InboundNatRulesList_568316(protocol: Scheme; host: string; base: string;
+  Call_InboundNatRulesList_564214 = ref object of OpenApiRestCall_563555
+proc url_InboundNatRulesList_564216(protocol: Scheme; host: string; base: string;
                                    route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1313,7 +1317,7 @@ proc url_InboundNatRulesList_568316(protocol: Scheme; host: string; base: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_InboundNatRulesList_568315(path: JsonNode; query: JsonNode;
+proc validate_InboundNatRulesList_564215(path: JsonNode; query: JsonNode;
                                         header: JsonNode; formData: JsonNode;
                                         body: JsonNode): JsonNode =
   ## Gets all the inbound nat rules in a load balancer.
@@ -1321,30 +1325,30 @@ proc validate_InboundNatRulesList_568315(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   loadBalancerName: JString (required)
   ##                   : The name of the load balancer.
   ##   subscriptionId: JString (required)
   ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568317 = path.getOrDefault("resourceGroupName")
-  valid_568317 = validateParameter(valid_568317, JString, required = true,
+        "path argument is necessary due to required `loadBalancerName` field"
+  var valid_564217 = path.getOrDefault("loadBalancerName")
+  valid_564217 = validateParameter(valid_564217, JString, required = true,
                                  default = nil)
-  if valid_568317 != nil:
-    section.add "resourceGroupName", valid_568317
-  var valid_568318 = path.getOrDefault("loadBalancerName")
-  valid_568318 = validateParameter(valid_568318, JString, required = true,
+  if valid_564217 != nil:
+    section.add "loadBalancerName", valid_564217
+  var valid_564218 = path.getOrDefault("subscriptionId")
+  valid_564218 = validateParameter(valid_564218, JString, required = true,
                                  default = nil)
-  if valid_568318 != nil:
-    section.add "loadBalancerName", valid_568318
-  var valid_568319 = path.getOrDefault("subscriptionId")
-  valid_568319 = validateParameter(valid_568319, JString, required = true,
+  if valid_564218 != nil:
+    section.add "subscriptionId", valid_564218
+  var valid_564219 = path.getOrDefault("resourceGroupName")
+  valid_564219 = validateParameter(valid_564219, JString, required = true,
                                  default = nil)
-  if valid_568319 != nil:
-    section.add "subscriptionId", valid_568319
+  if valid_564219 != nil:
+    section.add "resourceGroupName", valid_564219
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1352,11 +1356,11 @@ proc validate_InboundNatRulesList_568315(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568320 = query.getOrDefault("api-version")
-  valid_568320 = validateParameter(valid_568320, JString, required = true,
+  var valid_564220 = query.getOrDefault("api-version")
+  valid_564220 = validateParameter(valid_564220, JString, required = true,
                                  default = nil)
-  if valid_568320 != nil:
-    section.add "api-version", valid_568320
+  if valid_564220 != nil:
+    section.add "api-version", valid_564220
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1365,47 +1369,47 @@ proc validate_InboundNatRulesList_568315(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568321: Call_InboundNatRulesList_568314; path: JsonNode;
+proc call*(call_564221: Call_InboundNatRulesList_564214; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets all the inbound nat rules in a load balancer.
   ## 
-  let valid = call_568321.validator(path, query, header, formData, body)
-  let scheme = call_568321.pickScheme
+  let valid = call_564221.validator(path, query, header, formData, body)
+  let scheme = call_564221.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568321.url(scheme.get, call_568321.host, call_568321.base,
-                         call_568321.route, valid.getOrDefault("path"),
+  let url = call_564221.url(scheme.get, call_564221.host, call_564221.base,
+                         call_564221.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568321, url, valid)
+  result = hook(call_564221, url, valid)
 
-proc call*(call_568322: Call_InboundNatRulesList_568314; resourceGroupName: string;
-          apiVersion: string; loadBalancerName: string; subscriptionId: string): Recallable =
+proc call*(call_564222: Call_InboundNatRulesList_564214; loadBalancerName: string;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string): Recallable =
   ## inboundNatRulesList
   ## Gets all the inbound nat rules in a load balancer.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
-  ##   apiVersion: string (required)
-  ##             : Client API version.
   ##   loadBalancerName: string (required)
   ##                   : The name of the load balancer.
+  ##   apiVersion: string (required)
+  ##             : Client API version.
   ##   subscriptionId: string (required)
   ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_568323 = newJObject()
-  var query_568324 = newJObject()
-  add(path_568323, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568324, "api-version", newJString(apiVersion))
-  add(path_568323, "loadBalancerName", newJString(loadBalancerName))
-  add(path_568323, "subscriptionId", newJString(subscriptionId))
-  result = call_568322.call(path_568323, query_568324, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564223 = newJObject()
+  var query_564224 = newJObject()
+  add(path_564223, "loadBalancerName", newJString(loadBalancerName))
+  add(query_564224, "api-version", newJString(apiVersion))
+  add(path_564223, "subscriptionId", newJString(subscriptionId))
+  add(path_564223, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564222.call(path_564223, query_564224, nil, nil, nil)
 
-var inboundNatRulesList* = Call_InboundNatRulesList_568314(
+var inboundNatRulesList* = Call_InboundNatRulesList_564214(
     name: "inboundNatRulesList", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/loadBalancers/{loadBalancerName}/inboundNatRules",
-    validator: validate_InboundNatRulesList_568315, base: "",
-    url: url_InboundNatRulesList_568316, schemes: {Scheme.Https})
+    validator: validate_InboundNatRulesList_564215, base: "",
+    url: url_InboundNatRulesList_564216, schemes: {Scheme.Https})
 type
-  Call_InboundNatRulesCreateOrUpdate_568338 = ref object of OpenApiRestCall_567657
-proc url_InboundNatRulesCreateOrUpdate_568340(protocol: Scheme; host: string;
+  Call_InboundNatRulesCreateOrUpdate_564238 = ref object of OpenApiRestCall_563555
+proc url_InboundNatRulesCreateOrUpdate_564240(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1433,44 +1437,44 @@ proc url_InboundNatRulesCreateOrUpdate_568340(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_InboundNatRulesCreateOrUpdate_568339(path: JsonNode; query: JsonNode;
+proc validate_InboundNatRulesCreateOrUpdate_564239(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Creates or updates a load balancer inbound nat rule.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   loadBalancerName: JString (required)
   ##                   : The name of the load balancer.
-  ##   subscriptionId: JString (required)
-  ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   inboundNatRuleName: JString (required)
   ##                     : The name of the inbound nat rule.
+  ##   subscriptionId: JString (required)
+  ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568341 = path.getOrDefault("resourceGroupName")
-  valid_568341 = validateParameter(valid_568341, JString, required = true,
+        "path argument is necessary due to required `loadBalancerName` field"
+  var valid_564241 = path.getOrDefault("loadBalancerName")
+  valid_564241 = validateParameter(valid_564241, JString, required = true,
                                  default = nil)
-  if valid_568341 != nil:
-    section.add "resourceGroupName", valid_568341
-  var valid_568342 = path.getOrDefault("loadBalancerName")
-  valid_568342 = validateParameter(valid_568342, JString, required = true,
+  if valid_564241 != nil:
+    section.add "loadBalancerName", valid_564241
+  var valid_564242 = path.getOrDefault("inboundNatRuleName")
+  valid_564242 = validateParameter(valid_564242, JString, required = true,
                                  default = nil)
-  if valid_568342 != nil:
-    section.add "loadBalancerName", valid_568342
-  var valid_568343 = path.getOrDefault("subscriptionId")
-  valid_568343 = validateParameter(valid_568343, JString, required = true,
+  if valid_564242 != nil:
+    section.add "inboundNatRuleName", valid_564242
+  var valid_564243 = path.getOrDefault("subscriptionId")
+  valid_564243 = validateParameter(valid_564243, JString, required = true,
                                  default = nil)
-  if valid_568343 != nil:
-    section.add "subscriptionId", valid_568343
-  var valid_568344 = path.getOrDefault("inboundNatRuleName")
-  valid_568344 = validateParameter(valid_568344, JString, required = true,
+  if valid_564243 != nil:
+    section.add "subscriptionId", valid_564243
+  var valid_564244 = path.getOrDefault("resourceGroupName")
+  valid_564244 = validateParameter(valid_564244, JString, required = true,
                                  default = nil)
-  if valid_568344 != nil:
-    section.add "inboundNatRuleName", valid_568344
+  if valid_564244 != nil:
+    section.add "resourceGroupName", valid_564244
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1478,11 +1482,11 @@ proc validate_InboundNatRulesCreateOrUpdate_568339(path: JsonNode; query: JsonNo
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568345 = query.getOrDefault("api-version")
-  valid_568345 = validateParameter(valid_568345, JString, required = true,
+  var valid_564245 = query.getOrDefault("api-version")
+  valid_564245 = validateParameter(valid_564245, JString, required = true,
                                  default = nil)
-  if valid_568345 != nil:
-    section.add "api-version", valid_568345
+  if valid_564245 != nil:
+    section.add "api-version", valid_564245
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1496,57 +1500,57 @@ proc validate_InboundNatRulesCreateOrUpdate_568339(path: JsonNode; query: JsonNo
   if body != nil:
     result.add "body", body
 
-proc call*(call_568347: Call_InboundNatRulesCreateOrUpdate_568338; path: JsonNode;
+proc call*(call_564247: Call_InboundNatRulesCreateOrUpdate_564238; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Creates or updates a load balancer inbound nat rule.
   ## 
-  let valid = call_568347.validator(path, query, header, formData, body)
-  let scheme = call_568347.pickScheme
+  let valid = call_564247.validator(path, query, header, formData, body)
+  let scheme = call_564247.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568347.url(scheme.get, call_568347.host, call_568347.base,
-                         call_568347.route, valid.getOrDefault("path"),
+  let url = call_564247.url(scheme.get, call_564247.host, call_564247.base,
+                         call_564247.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568347, url, valid)
+  result = hook(call_564247, url, valid)
 
-proc call*(call_568348: Call_InboundNatRulesCreateOrUpdate_568338;
-          resourceGroupName: string; apiVersion: string; loadBalancerName: string;
-          subscriptionId: string; inboundNatRuleParameters: JsonNode;
-          inboundNatRuleName: string): Recallable =
+proc call*(call_564248: Call_InboundNatRulesCreateOrUpdate_564238;
+          loadBalancerName: string; inboundNatRuleParameters: JsonNode;
+          apiVersion: string; inboundNatRuleName: string; subscriptionId: string;
+          resourceGroupName: string): Recallable =
   ## inboundNatRulesCreateOrUpdate
   ## Creates or updates a load balancer inbound nat rule.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
-  ##   apiVersion: string (required)
-  ##             : Client API version.
   ##   loadBalancerName: string (required)
   ##                   : The name of the load balancer.
-  ##   subscriptionId: string (required)
-  ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   inboundNatRuleParameters: JObject (required)
   ##                           : Parameters supplied to the create or update inbound nat rule operation.
+  ##   apiVersion: string (required)
+  ##             : Client API version.
   ##   inboundNatRuleName: string (required)
   ##                     : The name of the inbound nat rule.
-  var path_568349 = newJObject()
-  var query_568350 = newJObject()
-  var body_568351 = newJObject()
-  add(path_568349, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568350, "api-version", newJString(apiVersion))
-  add(path_568349, "loadBalancerName", newJString(loadBalancerName))
-  add(path_568349, "subscriptionId", newJString(subscriptionId))
+  ##   subscriptionId: string (required)
+  ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564249 = newJObject()
+  var query_564250 = newJObject()
+  var body_564251 = newJObject()
+  add(path_564249, "loadBalancerName", newJString(loadBalancerName))
   if inboundNatRuleParameters != nil:
-    body_568351 = inboundNatRuleParameters
-  add(path_568349, "inboundNatRuleName", newJString(inboundNatRuleName))
-  result = call_568348.call(path_568349, query_568350, nil, nil, body_568351)
+    body_564251 = inboundNatRuleParameters
+  add(query_564250, "api-version", newJString(apiVersion))
+  add(path_564249, "inboundNatRuleName", newJString(inboundNatRuleName))
+  add(path_564249, "subscriptionId", newJString(subscriptionId))
+  add(path_564249, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564248.call(path_564249, query_564250, nil, nil, body_564251)
 
-var inboundNatRulesCreateOrUpdate* = Call_InboundNatRulesCreateOrUpdate_568338(
+var inboundNatRulesCreateOrUpdate* = Call_InboundNatRulesCreateOrUpdate_564238(
     name: "inboundNatRulesCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/loadBalancers/{loadBalancerName}/inboundNatRules/{inboundNatRuleName}",
-    validator: validate_InboundNatRulesCreateOrUpdate_568339, base: "",
-    url: url_InboundNatRulesCreateOrUpdate_568340, schemes: {Scheme.Https})
+    validator: validate_InboundNatRulesCreateOrUpdate_564239, base: "",
+    url: url_InboundNatRulesCreateOrUpdate_564240, schemes: {Scheme.Https})
 type
-  Call_InboundNatRulesGet_568325 = ref object of OpenApiRestCall_567657
-proc url_InboundNatRulesGet_568327(protocol: Scheme; host: string; base: string;
+  Call_InboundNatRulesGet_564225 = ref object of OpenApiRestCall_563555
+proc url_InboundNatRulesGet_564227(protocol: Scheme; host: string; base: string;
                                   route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1574,7 +1578,7 @@ proc url_InboundNatRulesGet_568327(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_InboundNatRulesGet_568326(path: JsonNode; query: JsonNode;
+proc validate_InboundNatRulesGet_564226(path: JsonNode; query: JsonNode;
                                        header: JsonNode; formData: JsonNode;
                                        body: JsonNode): JsonNode =
   ## Gets the specified load balancer inbound nat rule.
@@ -1582,37 +1586,37 @@ proc validate_InboundNatRulesGet_568326(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   loadBalancerName: JString (required)
   ##                   : The name of the load balancer.
-  ##   subscriptionId: JString (required)
-  ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   inboundNatRuleName: JString (required)
   ##                     : The name of the inbound nat rule.
+  ##   subscriptionId: JString (required)
+  ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568328 = path.getOrDefault("resourceGroupName")
-  valid_568328 = validateParameter(valid_568328, JString, required = true,
+        "path argument is necessary due to required `loadBalancerName` field"
+  var valid_564228 = path.getOrDefault("loadBalancerName")
+  valid_564228 = validateParameter(valid_564228, JString, required = true,
                                  default = nil)
-  if valid_568328 != nil:
-    section.add "resourceGroupName", valid_568328
-  var valid_568329 = path.getOrDefault("loadBalancerName")
-  valid_568329 = validateParameter(valid_568329, JString, required = true,
+  if valid_564228 != nil:
+    section.add "loadBalancerName", valid_564228
+  var valid_564229 = path.getOrDefault("inboundNatRuleName")
+  valid_564229 = validateParameter(valid_564229, JString, required = true,
                                  default = nil)
-  if valid_568329 != nil:
-    section.add "loadBalancerName", valid_568329
-  var valid_568330 = path.getOrDefault("subscriptionId")
-  valid_568330 = validateParameter(valid_568330, JString, required = true,
+  if valid_564229 != nil:
+    section.add "inboundNatRuleName", valid_564229
+  var valid_564230 = path.getOrDefault("subscriptionId")
+  valid_564230 = validateParameter(valid_564230, JString, required = true,
                                  default = nil)
-  if valid_568330 != nil:
-    section.add "subscriptionId", valid_568330
-  var valid_568331 = path.getOrDefault("inboundNatRuleName")
-  valid_568331 = validateParameter(valid_568331, JString, required = true,
+  if valid_564230 != nil:
+    section.add "subscriptionId", valid_564230
+  var valid_564231 = path.getOrDefault("resourceGroupName")
+  valid_564231 = validateParameter(valid_564231, JString, required = true,
                                  default = nil)
-  if valid_568331 != nil:
-    section.add "inboundNatRuleName", valid_568331
+  if valid_564231 != nil:
+    section.add "resourceGroupName", valid_564231
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1622,16 +1626,16 @@ proc validate_InboundNatRulesGet_568326(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568332 = query.getOrDefault("api-version")
-  valid_568332 = validateParameter(valid_568332, JString, required = true,
+  var valid_564232 = query.getOrDefault("api-version")
+  valid_564232 = validateParameter(valid_564232, JString, required = true,
                                  default = nil)
-  if valid_568332 != nil:
-    section.add "api-version", valid_568332
-  var valid_568333 = query.getOrDefault("$expand")
-  valid_568333 = validateParameter(valid_568333, JString, required = false,
+  if valid_564232 != nil:
+    section.add "api-version", valid_564232
+  var valid_564233 = query.getOrDefault("$expand")
+  valid_564233 = validateParameter(valid_564233, JString, required = false,
                                  default = nil)
-  if valid_568333 != nil:
-    section.add "$expand", valid_568333
+  if valid_564233 != nil:
+    section.add "$expand", valid_564233
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1640,54 +1644,54 @@ proc validate_InboundNatRulesGet_568326(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568334: Call_InboundNatRulesGet_568325; path: JsonNode;
+proc call*(call_564234: Call_InboundNatRulesGet_564225; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the specified load balancer inbound nat rule.
   ## 
-  let valid = call_568334.validator(path, query, header, formData, body)
-  let scheme = call_568334.pickScheme
+  let valid = call_564234.validator(path, query, header, formData, body)
+  let scheme = call_564234.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568334.url(scheme.get, call_568334.host, call_568334.base,
-                         call_568334.route, valid.getOrDefault("path"),
+  let url = call_564234.url(scheme.get, call_564234.host, call_564234.base,
+                         call_564234.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568334, url, valid)
+  result = hook(call_564234, url, valid)
 
-proc call*(call_568335: Call_InboundNatRulesGet_568325; resourceGroupName: string;
-          apiVersion: string; loadBalancerName: string; subscriptionId: string;
-          inboundNatRuleName: string; Expand: string = ""): Recallable =
+proc call*(call_564235: Call_InboundNatRulesGet_564225; loadBalancerName: string;
+          apiVersion: string; inboundNatRuleName: string; subscriptionId: string;
+          resourceGroupName: string; Expand: string = ""): Recallable =
   ## inboundNatRulesGet
   ## Gets the specified load balancer inbound nat rule.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   loadBalancerName: string (required)
+  ##                   : The name of the load balancer.
   ##   apiVersion: string (required)
   ##             : Client API version.
   ##   Expand: string
   ##         : Expands referenced resources.
-  ##   loadBalancerName: string (required)
-  ##                   : The name of the load balancer.
-  ##   subscriptionId: string (required)
-  ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   inboundNatRuleName: string (required)
   ##                     : The name of the inbound nat rule.
-  var path_568336 = newJObject()
-  var query_568337 = newJObject()
-  add(path_568336, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568337, "api-version", newJString(apiVersion))
-  add(query_568337, "$expand", newJString(Expand))
-  add(path_568336, "loadBalancerName", newJString(loadBalancerName))
-  add(path_568336, "subscriptionId", newJString(subscriptionId))
-  add(path_568336, "inboundNatRuleName", newJString(inboundNatRuleName))
-  result = call_568335.call(path_568336, query_568337, nil, nil, nil)
+  ##   subscriptionId: string (required)
+  ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564236 = newJObject()
+  var query_564237 = newJObject()
+  add(path_564236, "loadBalancerName", newJString(loadBalancerName))
+  add(query_564237, "api-version", newJString(apiVersion))
+  add(query_564237, "$expand", newJString(Expand))
+  add(path_564236, "inboundNatRuleName", newJString(inboundNatRuleName))
+  add(path_564236, "subscriptionId", newJString(subscriptionId))
+  add(path_564236, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564235.call(path_564236, query_564237, nil, nil, nil)
 
-var inboundNatRulesGet* = Call_InboundNatRulesGet_568325(
+var inboundNatRulesGet* = Call_InboundNatRulesGet_564225(
     name: "inboundNatRulesGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/loadBalancers/{loadBalancerName}/inboundNatRules/{inboundNatRuleName}",
-    validator: validate_InboundNatRulesGet_568326, base: "",
-    url: url_InboundNatRulesGet_568327, schemes: {Scheme.Https})
+    validator: validate_InboundNatRulesGet_564226, base: "",
+    url: url_InboundNatRulesGet_564227, schemes: {Scheme.Https})
 type
-  Call_InboundNatRulesDelete_568352 = ref object of OpenApiRestCall_567657
-proc url_InboundNatRulesDelete_568354(protocol: Scheme; host: string; base: string;
+  Call_InboundNatRulesDelete_564252 = ref object of OpenApiRestCall_563555
+proc url_InboundNatRulesDelete_564254(protocol: Scheme; host: string; base: string;
                                      route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1715,44 +1719,44 @@ proc url_InboundNatRulesDelete_568354(protocol: Scheme; host: string; base: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_InboundNatRulesDelete_568353(path: JsonNode; query: JsonNode;
+proc validate_InboundNatRulesDelete_564253(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Deletes the specified load balancer inbound nat rule.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   loadBalancerName: JString (required)
   ##                   : The name of the load balancer.
-  ##   subscriptionId: JString (required)
-  ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   inboundNatRuleName: JString (required)
   ##                     : The name of the inbound nat rule.
+  ##   subscriptionId: JString (required)
+  ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568355 = path.getOrDefault("resourceGroupName")
-  valid_568355 = validateParameter(valid_568355, JString, required = true,
+        "path argument is necessary due to required `loadBalancerName` field"
+  var valid_564255 = path.getOrDefault("loadBalancerName")
+  valid_564255 = validateParameter(valid_564255, JString, required = true,
                                  default = nil)
-  if valid_568355 != nil:
-    section.add "resourceGroupName", valid_568355
-  var valid_568356 = path.getOrDefault("loadBalancerName")
-  valid_568356 = validateParameter(valid_568356, JString, required = true,
+  if valid_564255 != nil:
+    section.add "loadBalancerName", valid_564255
+  var valid_564256 = path.getOrDefault("inboundNatRuleName")
+  valid_564256 = validateParameter(valid_564256, JString, required = true,
                                  default = nil)
-  if valid_568356 != nil:
-    section.add "loadBalancerName", valid_568356
-  var valid_568357 = path.getOrDefault("subscriptionId")
-  valid_568357 = validateParameter(valid_568357, JString, required = true,
+  if valid_564256 != nil:
+    section.add "inboundNatRuleName", valid_564256
+  var valid_564257 = path.getOrDefault("subscriptionId")
+  valid_564257 = validateParameter(valid_564257, JString, required = true,
                                  default = nil)
-  if valid_568357 != nil:
-    section.add "subscriptionId", valid_568357
-  var valid_568358 = path.getOrDefault("inboundNatRuleName")
-  valid_568358 = validateParameter(valid_568358, JString, required = true,
+  if valid_564257 != nil:
+    section.add "subscriptionId", valid_564257
+  var valid_564258 = path.getOrDefault("resourceGroupName")
+  valid_564258 = validateParameter(valid_564258, JString, required = true,
                                  default = nil)
-  if valid_568358 != nil:
-    section.add "inboundNatRuleName", valid_568358
+  if valid_564258 != nil:
+    section.add "resourceGroupName", valid_564258
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1760,11 +1764,11 @@ proc validate_InboundNatRulesDelete_568353(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568359 = query.getOrDefault("api-version")
-  valid_568359 = validateParameter(valid_568359, JString, required = true,
+  var valid_564259 = query.getOrDefault("api-version")
+  valid_564259 = validateParameter(valid_564259, JString, required = true,
                                  default = nil)
-  if valid_568359 != nil:
-    section.add "api-version", valid_568359
+  if valid_564259 != nil:
+    section.add "api-version", valid_564259
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1773,51 +1777,51 @@ proc validate_InboundNatRulesDelete_568353(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568360: Call_InboundNatRulesDelete_568352; path: JsonNode;
+proc call*(call_564260: Call_InboundNatRulesDelete_564252; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes the specified load balancer inbound nat rule.
   ## 
-  let valid = call_568360.validator(path, query, header, formData, body)
-  let scheme = call_568360.pickScheme
+  let valid = call_564260.validator(path, query, header, formData, body)
+  let scheme = call_564260.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568360.url(scheme.get, call_568360.host, call_568360.base,
-                         call_568360.route, valid.getOrDefault("path"),
+  let url = call_564260.url(scheme.get, call_564260.host, call_564260.base,
+                         call_564260.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568360, url, valid)
+  result = hook(call_564260, url, valid)
 
-proc call*(call_568361: Call_InboundNatRulesDelete_568352;
-          resourceGroupName: string; apiVersion: string; loadBalancerName: string;
-          subscriptionId: string; inboundNatRuleName: string): Recallable =
+proc call*(call_564261: Call_InboundNatRulesDelete_564252;
+          loadBalancerName: string; apiVersion: string; inboundNatRuleName: string;
+          subscriptionId: string; resourceGroupName: string): Recallable =
   ## inboundNatRulesDelete
   ## Deletes the specified load balancer inbound nat rule.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
-  ##   apiVersion: string (required)
-  ##             : Client API version.
   ##   loadBalancerName: string (required)
   ##                   : The name of the load balancer.
-  ##   subscriptionId: string (required)
-  ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   apiVersion: string (required)
+  ##             : Client API version.
   ##   inboundNatRuleName: string (required)
   ##                     : The name of the inbound nat rule.
-  var path_568362 = newJObject()
-  var query_568363 = newJObject()
-  add(path_568362, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568363, "api-version", newJString(apiVersion))
-  add(path_568362, "loadBalancerName", newJString(loadBalancerName))
-  add(path_568362, "subscriptionId", newJString(subscriptionId))
-  add(path_568362, "inboundNatRuleName", newJString(inboundNatRuleName))
-  result = call_568361.call(path_568362, query_568363, nil, nil, nil)
+  ##   subscriptionId: string (required)
+  ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564262 = newJObject()
+  var query_564263 = newJObject()
+  add(path_564262, "loadBalancerName", newJString(loadBalancerName))
+  add(query_564263, "api-version", newJString(apiVersion))
+  add(path_564262, "inboundNatRuleName", newJString(inboundNatRuleName))
+  add(path_564262, "subscriptionId", newJString(subscriptionId))
+  add(path_564262, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564261.call(path_564262, query_564263, nil, nil, nil)
 
-var inboundNatRulesDelete* = Call_InboundNatRulesDelete_568352(
+var inboundNatRulesDelete* = Call_InboundNatRulesDelete_564252(
     name: "inboundNatRulesDelete", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/loadBalancers/{loadBalancerName}/inboundNatRules/{inboundNatRuleName}",
-    validator: validate_InboundNatRulesDelete_568353, base: "",
-    url: url_InboundNatRulesDelete_568354, schemes: {Scheme.Https})
+    validator: validate_InboundNatRulesDelete_564253, base: "",
+    url: url_InboundNatRulesDelete_564254, schemes: {Scheme.Https})
 type
-  Call_LoadBalancerLoadBalancingRulesList_568364 = ref object of OpenApiRestCall_567657
-proc url_LoadBalancerLoadBalancingRulesList_568366(protocol: Scheme; host: string;
+  Call_LoadBalancerLoadBalancingRulesList_564264 = ref object of OpenApiRestCall_563555
+proc url_LoadBalancerLoadBalancingRulesList_564266(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1842,37 +1846,37 @@ proc url_LoadBalancerLoadBalancingRulesList_568366(protocol: Scheme; host: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_LoadBalancerLoadBalancingRulesList_568365(path: JsonNode;
+proc validate_LoadBalancerLoadBalancingRulesList_564265(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets all the load balancing rules in a load balancer.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   loadBalancerName: JString (required)
   ##                   : The name of the load balancer.
   ##   subscriptionId: JString (required)
   ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568367 = path.getOrDefault("resourceGroupName")
-  valid_568367 = validateParameter(valid_568367, JString, required = true,
+        "path argument is necessary due to required `loadBalancerName` field"
+  var valid_564267 = path.getOrDefault("loadBalancerName")
+  valid_564267 = validateParameter(valid_564267, JString, required = true,
                                  default = nil)
-  if valid_568367 != nil:
-    section.add "resourceGroupName", valid_568367
-  var valid_568368 = path.getOrDefault("loadBalancerName")
-  valid_568368 = validateParameter(valid_568368, JString, required = true,
+  if valid_564267 != nil:
+    section.add "loadBalancerName", valid_564267
+  var valid_564268 = path.getOrDefault("subscriptionId")
+  valid_564268 = validateParameter(valid_564268, JString, required = true,
                                  default = nil)
-  if valid_568368 != nil:
-    section.add "loadBalancerName", valid_568368
-  var valid_568369 = path.getOrDefault("subscriptionId")
-  valid_568369 = validateParameter(valid_568369, JString, required = true,
+  if valid_564268 != nil:
+    section.add "subscriptionId", valid_564268
+  var valid_564269 = path.getOrDefault("resourceGroupName")
+  valid_564269 = validateParameter(valid_564269, JString, required = true,
                                  default = nil)
-  if valid_568369 != nil:
-    section.add "subscriptionId", valid_568369
+  if valid_564269 != nil:
+    section.add "resourceGroupName", valid_564269
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1880,11 +1884,11 @@ proc validate_LoadBalancerLoadBalancingRulesList_568365(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568370 = query.getOrDefault("api-version")
-  valid_568370 = validateParameter(valid_568370, JString, required = true,
+  var valid_564270 = query.getOrDefault("api-version")
+  valid_564270 = validateParameter(valid_564270, JString, required = true,
                                  default = nil)
-  if valid_568370 != nil:
-    section.add "api-version", valid_568370
+  if valid_564270 != nil:
+    section.add "api-version", valid_564270
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1893,49 +1897,49 @@ proc validate_LoadBalancerLoadBalancingRulesList_568365(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568371: Call_LoadBalancerLoadBalancingRulesList_568364;
+proc call*(call_564271: Call_LoadBalancerLoadBalancingRulesList_564264;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Gets all the load balancing rules in a load balancer.
   ## 
-  let valid = call_568371.validator(path, query, header, formData, body)
-  let scheme = call_568371.pickScheme
+  let valid = call_564271.validator(path, query, header, formData, body)
+  let scheme = call_564271.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568371.url(scheme.get, call_568371.host, call_568371.base,
-                         call_568371.route, valid.getOrDefault("path"),
+  let url = call_564271.url(scheme.get, call_564271.host, call_564271.base,
+                         call_564271.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568371, url, valid)
+  result = hook(call_564271, url, valid)
 
-proc call*(call_568372: Call_LoadBalancerLoadBalancingRulesList_568364;
-          resourceGroupName: string; apiVersion: string; loadBalancerName: string;
-          subscriptionId: string): Recallable =
+proc call*(call_564272: Call_LoadBalancerLoadBalancingRulesList_564264;
+          loadBalancerName: string; apiVersion: string; subscriptionId: string;
+          resourceGroupName: string): Recallable =
   ## loadBalancerLoadBalancingRulesList
   ## Gets all the load balancing rules in a load balancer.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
-  ##   apiVersion: string (required)
-  ##             : Client API version.
   ##   loadBalancerName: string (required)
   ##                   : The name of the load balancer.
+  ##   apiVersion: string (required)
+  ##             : Client API version.
   ##   subscriptionId: string (required)
   ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_568373 = newJObject()
-  var query_568374 = newJObject()
-  add(path_568373, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568374, "api-version", newJString(apiVersion))
-  add(path_568373, "loadBalancerName", newJString(loadBalancerName))
-  add(path_568373, "subscriptionId", newJString(subscriptionId))
-  result = call_568372.call(path_568373, query_568374, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564273 = newJObject()
+  var query_564274 = newJObject()
+  add(path_564273, "loadBalancerName", newJString(loadBalancerName))
+  add(query_564274, "api-version", newJString(apiVersion))
+  add(path_564273, "subscriptionId", newJString(subscriptionId))
+  add(path_564273, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564272.call(path_564273, query_564274, nil, nil, nil)
 
-var loadBalancerLoadBalancingRulesList* = Call_LoadBalancerLoadBalancingRulesList_568364(
+var loadBalancerLoadBalancingRulesList* = Call_LoadBalancerLoadBalancingRulesList_564264(
     name: "loadBalancerLoadBalancingRulesList", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/loadBalancers/{loadBalancerName}/loadBalancingRules",
-    validator: validate_LoadBalancerLoadBalancingRulesList_568365, base: "",
-    url: url_LoadBalancerLoadBalancingRulesList_568366, schemes: {Scheme.Https})
+    validator: validate_LoadBalancerLoadBalancingRulesList_564265, base: "",
+    url: url_LoadBalancerLoadBalancingRulesList_564266, schemes: {Scheme.Https})
 type
-  Call_LoadBalancerLoadBalancingRulesGet_568375 = ref object of OpenApiRestCall_567657
-proc url_LoadBalancerLoadBalancingRulesGet_568377(protocol: Scheme; host: string;
+  Call_LoadBalancerLoadBalancingRulesGet_564275 = ref object of OpenApiRestCall_563555
+proc url_LoadBalancerLoadBalancingRulesGet_564277(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1963,44 +1967,44 @@ proc url_LoadBalancerLoadBalancingRulesGet_568377(protocol: Scheme; host: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_LoadBalancerLoadBalancingRulesGet_568376(path: JsonNode;
+proc validate_LoadBalancerLoadBalancingRulesGet_564276(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the specified load balancer load balancing rule.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   loadBalancerName: JString (required)
   ##                   : The name of the load balancer.
-  ##   subscriptionId: JString (required)
-  ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   loadBalancingRuleName: JString (required)
   ##                        : The name of the load balancing rule.
+  ##   subscriptionId: JString (required)
+  ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568378 = path.getOrDefault("resourceGroupName")
-  valid_568378 = validateParameter(valid_568378, JString, required = true,
+        "path argument is necessary due to required `loadBalancerName` field"
+  var valid_564278 = path.getOrDefault("loadBalancerName")
+  valid_564278 = validateParameter(valid_564278, JString, required = true,
                                  default = nil)
-  if valid_568378 != nil:
-    section.add "resourceGroupName", valid_568378
-  var valid_568379 = path.getOrDefault("loadBalancerName")
-  valid_568379 = validateParameter(valid_568379, JString, required = true,
+  if valid_564278 != nil:
+    section.add "loadBalancerName", valid_564278
+  var valid_564279 = path.getOrDefault("loadBalancingRuleName")
+  valid_564279 = validateParameter(valid_564279, JString, required = true,
                                  default = nil)
-  if valid_568379 != nil:
-    section.add "loadBalancerName", valid_568379
-  var valid_568380 = path.getOrDefault("subscriptionId")
-  valid_568380 = validateParameter(valid_568380, JString, required = true,
+  if valid_564279 != nil:
+    section.add "loadBalancingRuleName", valid_564279
+  var valid_564280 = path.getOrDefault("subscriptionId")
+  valid_564280 = validateParameter(valid_564280, JString, required = true,
                                  default = nil)
-  if valid_568380 != nil:
-    section.add "subscriptionId", valid_568380
-  var valid_568381 = path.getOrDefault("loadBalancingRuleName")
-  valid_568381 = validateParameter(valid_568381, JString, required = true,
+  if valid_564280 != nil:
+    section.add "subscriptionId", valid_564280
+  var valid_564281 = path.getOrDefault("resourceGroupName")
+  valid_564281 = validateParameter(valid_564281, JString, required = true,
                                  default = nil)
-  if valid_568381 != nil:
-    section.add "loadBalancingRuleName", valid_568381
+  if valid_564281 != nil:
+    section.add "resourceGroupName", valid_564281
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2008,11 +2012,11 @@ proc validate_LoadBalancerLoadBalancingRulesGet_568376(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568382 = query.getOrDefault("api-version")
-  valid_568382 = validateParameter(valid_568382, JString, required = true,
+  var valid_564282 = query.getOrDefault("api-version")
+  valid_564282 = validateParameter(valid_564282, JString, required = true,
                                  default = nil)
-  if valid_568382 != nil:
-    section.add "api-version", valid_568382
+  if valid_564282 != nil:
+    section.add "api-version", valid_564282
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2021,52 +2025,53 @@ proc validate_LoadBalancerLoadBalancingRulesGet_568376(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568383: Call_LoadBalancerLoadBalancingRulesGet_568375;
+proc call*(call_564283: Call_LoadBalancerLoadBalancingRulesGet_564275;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Gets the specified load balancer load balancing rule.
   ## 
-  let valid = call_568383.validator(path, query, header, formData, body)
-  let scheme = call_568383.pickScheme
+  let valid = call_564283.validator(path, query, header, formData, body)
+  let scheme = call_564283.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568383.url(scheme.get, call_568383.host, call_568383.base,
-                         call_568383.route, valid.getOrDefault("path"),
+  let url = call_564283.url(scheme.get, call_564283.host, call_564283.base,
+                         call_564283.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568383, url, valid)
+  result = hook(call_564283, url, valid)
 
-proc call*(call_568384: Call_LoadBalancerLoadBalancingRulesGet_568375;
-          resourceGroupName: string; apiVersion: string; loadBalancerName: string;
-          subscriptionId: string; loadBalancingRuleName: string): Recallable =
+proc call*(call_564284: Call_LoadBalancerLoadBalancingRulesGet_564275;
+          loadBalancerName: string; apiVersion: string;
+          loadBalancingRuleName: string; subscriptionId: string;
+          resourceGroupName: string): Recallable =
   ## loadBalancerLoadBalancingRulesGet
   ## Gets the specified load balancer load balancing rule.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
-  ##   apiVersion: string (required)
-  ##             : Client API version.
   ##   loadBalancerName: string (required)
   ##                   : The name of the load balancer.
-  ##   subscriptionId: string (required)
-  ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   apiVersion: string (required)
+  ##             : Client API version.
   ##   loadBalancingRuleName: string (required)
   ##                        : The name of the load balancing rule.
-  var path_568385 = newJObject()
-  var query_568386 = newJObject()
-  add(path_568385, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568386, "api-version", newJString(apiVersion))
-  add(path_568385, "loadBalancerName", newJString(loadBalancerName))
-  add(path_568385, "subscriptionId", newJString(subscriptionId))
-  add(path_568385, "loadBalancingRuleName", newJString(loadBalancingRuleName))
-  result = call_568384.call(path_568385, query_568386, nil, nil, nil)
+  ##   subscriptionId: string (required)
+  ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564285 = newJObject()
+  var query_564286 = newJObject()
+  add(path_564285, "loadBalancerName", newJString(loadBalancerName))
+  add(query_564286, "api-version", newJString(apiVersion))
+  add(path_564285, "loadBalancingRuleName", newJString(loadBalancingRuleName))
+  add(path_564285, "subscriptionId", newJString(subscriptionId))
+  add(path_564285, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564284.call(path_564285, query_564286, nil, nil, nil)
 
-var loadBalancerLoadBalancingRulesGet* = Call_LoadBalancerLoadBalancingRulesGet_568375(
+var loadBalancerLoadBalancingRulesGet* = Call_LoadBalancerLoadBalancingRulesGet_564275(
     name: "loadBalancerLoadBalancingRulesGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/loadBalancers/{loadBalancerName}/loadBalancingRules/{loadBalancingRuleName}",
-    validator: validate_LoadBalancerLoadBalancingRulesGet_568376, base: "",
-    url: url_LoadBalancerLoadBalancingRulesGet_568377, schemes: {Scheme.Https})
+    validator: validate_LoadBalancerLoadBalancingRulesGet_564276, base: "",
+    url: url_LoadBalancerLoadBalancingRulesGet_564277, schemes: {Scheme.Https})
 type
-  Call_LoadBalancerNetworkInterfacesList_568387 = ref object of OpenApiRestCall_567657
-proc url_LoadBalancerNetworkInterfacesList_568389(protocol: Scheme; host: string;
+  Call_LoadBalancerNetworkInterfacesList_564287 = ref object of OpenApiRestCall_563555
+proc url_LoadBalancerNetworkInterfacesList_564289(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2091,37 +2096,37 @@ proc url_LoadBalancerNetworkInterfacesList_568389(protocol: Scheme; host: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_LoadBalancerNetworkInterfacesList_568388(path: JsonNode;
+proc validate_LoadBalancerNetworkInterfacesList_564288(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets associated load balancer network interfaces.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   loadBalancerName: JString (required)
   ##                   : The name of the load balancer.
   ##   subscriptionId: JString (required)
   ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568390 = path.getOrDefault("resourceGroupName")
-  valid_568390 = validateParameter(valid_568390, JString, required = true,
+        "path argument is necessary due to required `loadBalancerName` field"
+  var valid_564290 = path.getOrDefault("loadBalancerName")
+  valid_564290 = validateParameter(valid_564290, JString, required = true,
                                  default = nil)
-  if valid_568390 != nil:
-    section.add "resourceGroupName", valid_568390
-  var valid_568391 = path.getOrDefault("loadBalancerName")
-  valid_568391 = validateParameter(valid_568391, JString, required = true,
+  if valid_564290 != nil:
+    section.add "loadBalancerName", valid_564290
+  var valid_564291 = path.getOrDefault("subscriptionId")
+  valid_564291 = validateParameter(valid_564291, JString, required = true,
                                  default = nil)
-  if valid_568391 != nil:
-    section.add "loadBalancerName", valid_568391
-  var valid_568392 = path.getOrDefault("subscriptionId")
-  valid_568392 = validateParameter(valid_568392, JString, required = true,
+  if valid_564291 != nil:
+    section.add "subscriptionId", valid_564291
+  var valid_564292 = path.getOrDefault("resourceGroupName")
+  valid_564292 = validateParameter(valid_564292, JString, required = true,
                                  default = nil)
-  if valid_568392 != nil:
-    section.add "subscriptionId", valid_568392
+  if valid_564292 != nil:
+    section.add "resourceGroupName", valid_564292
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2129,11 +2134,11 @@ proc validate_LoadBalancerNetworkInterfacesList_568388(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568393 = query.getOrDefault("api-version")
-  valid_568393 = validateParameter(valid_568393, JString, required = true,
+  var valid_564293 = query.getOrDefault("api-version")
+  valid_564293 = validateParameter(valid_564293, JString, required = true,
                                  default = nil)
-  if valid_568393 != nil:
-    section.add "api-version", valid_568393
+  if valid_564293 != nil:
+    section.add "api-version", valid_564293
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2142,49 +2147,49 @@ proc validate_LoadBalancerNetworkInterfacesList_568388(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568394: Call_LoadBalancerNetworkInterfacesList_568387;
+proc call*(call_564294: Call_LoadBalancerNetworkInterfacesList_564287;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Gets associated load balancer network interfaces.
   ## 
-  let valid = call_568394.validator(path, query, header, formData, body)
-  let scheme = call_568394.pickScheme
+  let valid = call_564294.validator(path, query, header, formData, body)
+  let scheme = call_564294.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568394.url(scheme.get, call_568394.host, call_568394.base,
-                         call_568394.route, valid.getOrDefault("path"),
+  let url = call_564294.url(scheme.get, call_564294.host, call_564294.base,
+                         call_564294.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568394, url, valid)
+  result = hook(call_564294, url, valid)
 
-proc call*(call_568395: Call_LoadBalancerNetworkInterfacesList_568387;
-          resourceGroupName: string; apiVersion: string; loadBalancerName: string;
-          subscriptionId: string): Recallable =
+proc call*(call_564295: Call_LoadBalancerNetworkInterfacesList_564287;
+          loadBalancerName: string; apiVersion: string; subscriptionId: string;
+          resourceGroupName: string): Recallable =
   ## loadBalancerNetworkInterfacesList
   ## Gets associated load balancer network interfaces.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
-  ##   apiVersion: string (required)
-  ##             : Client API version.
   ##   loadBalancerName: string (required)
   ##                   : The name of the load balancer.
+  ##   apiVersion: string (required)
+  ##             : Client API version.
   ##   subscriptionId: string (required)
   ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_568396 = newJObject()
-  var query_568397 = newJObject()
-  add(path_568396, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568397, "api-version", newJString(apiVersion))
-  add(path_568396, "loadBalancerName", newJString(loadBalancerName))
-  add(path_568396, "subscriptionId", newJString(subscriptionId))
-  result = call_568395.call(path_568396, query_568397, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564296 = newJObject()
+  var query_564297 = newJObject()
+  add(path_564296, "loadBalancerName", newJString(loadBalancerName))
+  add(query_564297, "api-version", newJString(apiVersion))
+  add(path_564296, "subscriptionId", newJString(subscriptionId))
+  add(path_564296, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564295.call(path_564296, query_564297, nil, nil, nil)
 
-var loadBalancerNetworkInterfacesList* = Call_LoadBalancerNetworkInterfacesList_568387(
+var loadBalancerNetworkInterfacesList* = Call_LoadBalancerNetworkInterfacesList_564287(
     name: "loadBalancerNetworkInterfacesList", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/loadBalancers/{loadBalancerName}/networkInterfaces",
-    validator: validate_LoadBalancerNetworkInterfacesList_568388, base: "",
-    url: url_LoadBalancerNetworkInterfacesList_568389, schemes: {Scheme.Https})
+    validator: validate_LoadBalancerNetworkInterfacesList_564288, base: "",
+    url: url_LoadBalancerNetworkInterfacesList_564289, schemes: {Scheme.Https})
 type
-  Call_LoadBalancerProbesList_568398 = ref object of OpenApiRestCall_567657
-proc url_LoadBalancerProbesList_568400(protocol: Scheme; host: string; base: string;
+  Call_LoadBalancerProbesList_564298 = ref object of OpenApiRestCall_563555
+proc url_LoadBalancerProbesList_564300(protocol: Scheme; host: string; base: string;
                                       route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2209,37 +2214,37 @@ proc url_LoadBalancerProbesList_568400(protocol: Scheme; host: string; base: str
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_LoadBalancerProbesList_568399(path: JsonNode; query: JsonNode;
+proc validate_LoadBalancerProbesList_564299(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets all the load balancer probes.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   loadBalancerName: JString (required)
   ##                   : The name of the load balancer.
   ##   subscriptionId: JString (required)
   ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568401 = path.getOrDefault("resourceGroupName")
-  valid_568401 = validateParameter(valid_568401, JString, required = true,
+        "path argument is necessary due to required `loadBalancerName` field"
+  var valid_564301 = path.getOrDefault("loadBalancerName")
+  valid_564301 = validateParameter(valid_564301, JString, required = true,
                                  default = nil)
-  if valid_568401 != nil:
-    section.add "resourceGroupName", valid_568401
-  var valid_568402 = path.getOrDefault("loadBalancerName")
-  valid_568402 = validateParameter(valid_568402, JString, required = true,
+  if valid_564301 != nil:
+    section.add "loadBalancerName", valid_564301
+  var valid_564302 = path.getOrDefault("subscriptionId")
+  valid_564302 = validateParameter(valid_564302, JString, required = true,
                                  default = nil)
-  if valid_568402 != nil:
-    section.add "loadBalancerName", valid_568402
-  var valid_568403 = path.getOrDefault("subscriptionId")
-  valid_568403 = validateParameter(valid_568403, JString, required = true,
+  if valid_564302 != nil:
+    section.add "subscriptionId", valid_564302
+  var valid_564303 = path.getOrDefault("resourceGroupName")
+  valid_564303 = validateParameter(valid_564303, JString, required = true,
                                  default = nil)
-  if valid_568403 != nil:
-    section.add "subscriptionId", valid_568403
+  if valid_564303 != nil:
+    section.add "resourceGroupName", valid_564303
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2247,11 +2252,11 @@ proc validate_LoadBalancerProbesList_568399(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568404 = query.getOrDefault("api-version")
-  valid_568404 = validateParameter(valid_568404, JString, required = true,
+  var valid_564304 = query.getOrDefault("api-version")
+  valid_564304 = validateParameter(valid_564304, JString, required = true,
                                  default = nil)
-  if valid_568404 != nil:
-    section.add "api-version", valid_568404
+  if valid_564304 != nil:
+    section.add "api-version", valid_564304
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2260,48 +2265,48 @@ proc validate_LoadBalancerProbesList_568399(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568405: Call_LoadBalancerProbesList_568398; path: JsonNode;
+proc call*(call_564305: Call_LoadBalancerProbesList_564298; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets all the load balancer probes.
   ## 
-  let valid = call_568405.validator(path, query, header, formData, body)
-  let scheme = call_568405.pickScheme
+  let valid = call_564305.validator(path, query, header, formData, body)
+  let scheme = call_564305.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568405.url(scheme.get, call_568405.host, call_568405.base,
-                         call_568405.route, valid.getOrDefault("path"),
+  let url = call_564305.url(scheme.get, call_564305.host, call_564305.base,
+                         call_564305.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568405, url, valid)
+  result = hook(call_564305, url, valid)
 
-proc call*(call_568406: Call_LoadBalancerProbesList_568398;
-          resourceGroupName: string; apiVersion: string; loadBalancerName: string;
-          subscriptionId: string): Recallable =
+proc call*(call_564306: Call_LoadBalancerProbesList_564298;
+          loadBalancerName: string; apiVersion: string; subscriptionId: string;
+          resourceGroupName: string): Recallable =
   ## loadBalancerProbesList
   ## Gets all the load balancer probes.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
-  ##   apiVersion: string (required)
-  ##             : Client API version.
   ##   loadBalancerName: string (required)
   ##                   : The name of the load balancer.
+  ##   apiVersion: string (required)
+  ##             : Client API version.
   ##   subscriptionId: string (required)
   ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_568407 = newJObject()
-  var query_568408 = newJObject()
-  add(path_568407, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568408, "api-version", newJString(apiVersion))
-  add(path_568407, "loadBalancerName", newJString(loadBalancerName))
-  add(path_568407, "subscriptionId", newJString(subscriptionId))
-  result = call_568406.call(path_568407, query_568408, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564307 = newJObject()
+  var query_564308 = newJObject()
+  add(path_564307, "loadBalancerName", newJString(loadBalancerName))
+  add(query_564308, "api-version", newJString(apiVersion))
+  add(path_564307, "subscriptionId", newJString(subscriptionId))
+  add(path_564307, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564306.call(path_564307, query_564308, nil, nil, nil)
 
-var loadBalancerProbesList* = Call_LoadBalancerProbesList_568398(
+var loadBalancerProbesList* = Call_LoadBalancerProbesList_564298(
     name: "loadBalancerProbesList", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/loadBalancers/{loadBalancerName}/probes",
-    validator: validate_LoadBalancerProbesList_568399, base: "",
-    url: url_LoadBalancerProbesList_568400, schemes: {Scheme.Https})
+    validator: validate_LoadBalancerProbesList_564299, base: "",
+    url: url_LoadBalancerProbesList_564300, schemes: {Scheme.Https})
 type
-  Call_LoadBalancerProbesGet_568409 = ref object of OpenApiRestCall_567657
-proc url_LoadBalancerProbesGet_568411(protocol: Scheme; host: string; base: string;
+  Call_LoadBalancerProbesGet_564309 = ref object of OpenApiRestCall_563555
+proc url_LoadBalancerProbesGet_564311(protocol: Scheme; host: string; base: string;
                                      route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2328,44 +2333,43 @@ proc url_LoadBalancerProbesGet_568411(protocol: Scheme; host: string; base: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_LoadBalancerProbesGet_568410(path: JsonNode; query: JsonNode;
+proc validate_LoadBalancerProbesGet_564310(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets load balancer probe.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   probeName: JString (required)
   ##            : The name of the probe.
   ##   loadBalancerName: JString (required)
   ##                   : The name of the load balancer.
   ##   subscriptionId: JString (required)
   ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568412 = path.getOrDefault("resourceGroupName")
-  valid_568412 = validateParameter(valid_568412, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `probeName` field"
+  var valid_564312 = path.getOrDefault("probeName")
+  valid_564312 = validateParameter(valid_564312, JString, required = true,
                                  default = nil)
-  if valid_568412 != nil:
-    section.add "resourceGroupName", valid_568412
-  var valid_568413 = path.getOrDefault("probeName")
-  valid_568413 = validateParameter(valid_568413, JString, required = true,
+  if valid_564312 != nil:
+    section.add "probeName", valid_564312
+  var valid_564313 = path.getOrDefault("loadBalancerName")
+  valid_564313 = validateParameter(valid_564313, JString, required = true,
                                  default = nil)
-  if valid_568413 != nil:
-    section.add "probeName", valid_568413
-  var valid_568414 = path.getOrDefault("loadBalancerName")
-  valid_568414 = validateParameter(valid_568414, JString, required = true,
+  if valid_564313 != nil:
+    section.add "loadBalancerName", valid_564313
+  var valid_564314 = path.getOrDefault("subscriptionId")
+  valid_564314 = validateParameter(valid_564314, JString, required = true,
                                  default = nil)
-  if valid_568414 != nil:
-    section.add "loadBalancerName", valid_568414
-  var valid_568415 = path.getOrDefault("subscriptionId")
-  valid_568415 = validateParameter(valid_568415, JString, required = true,
+  if valid_564314 != nil:
+    section.add "subscriptionId", valid_564314
+  var valid_564315 = path.getOrDefault("resourceGroupName")
+  valid_564315 = validateParameter(valid_564315, JString, required = true,
                                  default = nil)
-  if valid_568415 != nil:
-    section.add "subscriptionId", valid_568415
+  if valid_564315 != nil:
+    section.add "resourceGroupName", valid_564315
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2373,11 +2377,11 @@ proc validate_LoadBalancerProbesGet_568410(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568416 = query.getOrDefault("api-version")
-  valid_568416 = validateParameter(valid_568416, JString, required = true,
+  var valid_564316 = query.getOrDefault("api-version")
+  valid_564316 = validateParameter(valid_564316, JString, required = true,
                                  default = nil)
-  if valid_568416 != nil:
-    section.add "api-version", valid_568416
+  if valid_564316 != nil:
+    section.add "api-version", valid_564316
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2386,48 +2390,48 @@ proc validate_LoadBalancerProbesGet_568410(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568417: Call_LoadBalancerProbesGet_568409; path: JsonNode;
+proc call*(call_564317: Call_LoadBalancerProbesGet_564309; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets load balancer probe.
   ## 
-  let valid = call_568417.validator(path, query, header, formData, body)
-  let scheme = call_568417.pickScheme
+  let valid = call_564317.validator(path, query, header, formData, body)
+  let scheme = call_564317.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568417.url(scheme.get, call_568417.host, call_568417.base,
-                         call_568417.route, valid.getOrDefault("path"),
+  let url = call_564317.url(scheme.get, call_564317.host, call_564317.base,
+                         call_564317.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568417, url, valid)
+  result = hook(call_564317, url, valid)
 
-proc call*(call_568418: Call_LoadBalancerProbesGet_568409;
-          resourceGroupName: string; apiVersion: string; probeName: string;
-          loadBalancerName: string; subscriptionId: string): Recallable =
+proc call*(call_564318: Call_LoadBalancerProbesGet_564309; probeName: string;
+          loadBalancerName: string; apiVersion: string; subscriptionId: string;
+          resourceGroupName: string): Recallable =
   ## loadBalancerProbesGet
   ## Gets load balancer probe.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
-  ##   apiVersion: string (required)
-  ##             : Client API version.
   ##   probeName: string (required)
   ##            : The name of the probe.
   ##   loadBalancerName: string (required)
   ##                   : The name of the load balancer.
+  ##   apiVersion: string (required)
+  ##             : Client API version.
   ##   subscriptionId: string (required)
   ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_568419 = newJObject()
-  var query_568420 = newJObject()
-  add(path_568419, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568420, "api-version", newJString(apiVersion))
-  add(path_568419, "probeName", newJString(probeName))
-  add(path_568419, "loadBalancerName", newJString(loadBalancerName))
-  add(path_568419, "subscriptionId", newJString(subscriptionId))
-  result = call_568418.call(path_568419, query_568420, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564319 = newJObject()
+  var query_564320 = newJObject()
+  add(path_564319, "probeName", newJString(probeName))
+  add(path_564319, "loadBalancerName", newJString(loadBalancerName))
+  add(query_564320, "api-version", newJString(apiVersion))
+  add(path_564319, "subscriptionId", newJString(subscriptionId))
+  add(path_564319, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564318.call(path_564319, query_564320, nil, nil, nil)
 
-var loadBalancerProbesGet* = Call_LoadBalancerProbesGet_568409(
+var loadBalancerProbesGet* = Call_LoadBalancerProbesGet_564309(
     name: "loadBalancerProbesGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/loadBalancers/{loadBalancerName}/probes/{probeName}",
-    validator: validate_LoadBalancerProbesGet_568410, base: "",
-    url: url_LoadBalancerProbesGet_568411, schemes: {Scheme.Https})
+    validator: validate_LoadBalancerProbesGet_564310, base: "",
+    url: url_LoadBalancerProbesGet_564311, schemes: {Scheme.Https})
 export
   rest
 

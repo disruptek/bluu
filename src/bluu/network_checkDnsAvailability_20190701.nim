@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_573641 = ref object of OpenApiRestCall
+  OpenApiRestCall_563539 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_573641](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563539](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_573641): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563539): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,8 +107,8 @@ const
   macServiceName = "network-checkDnsAvailability"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_CheckDnsNameAvailability_573863 = ref object of OpenApiRestCall_573641
-proc url_CheckDnsNameAvailability_573865(protocol: Scheme; host: string;
+  Call_CheckDnsNameAvailability_563761 = ref object of OpenApiRestCall_563539
+proc url_CheckDnsNameAvailability_563763(protocol: Scheme; host: string;
                                         base: string; route: string; path: JsonNode;
                                         query: JsonNode): Uri =
   result.scheme = $protocol
@@ -124,7 +128,7 @@ proc url_CheckDnsNameAvailability_573865(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_CheckDnsNameAvailability_573864(path: JsonNode; query: JsonNode;
+proc validate_CheckDnsNameAvailability_563762(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Checks whether a domain name in the cloudapp.azure.com zone is available for use.
   ## 
@@ -138,16 +142,16 @@ proc validate_CheckDnsNameAvailability_573864(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_574025 = path.getOrDefault("subscriptionId")
-  valid_574025 = validateParameter(valid_574025, JString, required = true,
+  var valid_563925 = path.getOrDefault("subscriptionId")
+  valid_563925 = validateParameter(valid_563925, JString, required = true,
                                  default = nil)
-  if valid_574025 != nil:
-    section.add "subscriptionId", valid_574025
-  var valid_574026 = path.getOrDefault("location")
-  valid_574026 = validateParameter(valid_574026, JString, required = true,
+  if valid_563925 != nil:
+    section.add "subscriptionId", valid_563925
+  var valid_563926 = path.getOrDefault("location")
+  valid_563926 = validateParameter(valid_563926, JString, required = true,
                                  default = nil)
-  if valid_574026 != nil:
-    section.add "location", valid_574026
+  if valid_563926 != nil:
+    section.add "location", valid_563926
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -157,16 +161,16 @@ proc validate_CheckDnsNameAvailability_573864(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574027 = query.getOrDefault("api-version")
-  valid_574027 = validateParameter(valid_574027, JString, required = true,
+  var valid_563927 = query.getOrDefault("api-version")
+  valid_563927 = validateParameter(valid_563927, JString, required = true,
                                  default = nil)
-  if valid_574027 != nil:
-    section.add "api-version", valid_574027
-  var valid_574028 = query.getOrDefault("domainNameLabel")
-  valid_574028 = validateParameter(valid_574028, JString, required = true,
+  if valid_563927 != nil:
+    section.add "api-version", valid_563927
+  var valid_563928 = query.getOrDefault("domainNameLabel")
+  valid_563928 = validateParameter(valid_563928, JString, required = true,
                                  default = nil)
-  if valid_574028 != nil:
-    section.add "domainNameLabel", valid_574028
+  if valid_563928 != nil:
+    section.add "domainNameLabel", valid_563928
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -175,20 +179,20 @@ proc validate_CheckDnsNameAvailability_573864(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574055: Call_CheckDnsNameAvailability_573863; path: JsonNode;
+proc call*(call_563955: Call_CheckDnsNameAvailability_563761; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Checks whether a domain name in the cloudapp.azure.com zone is available for use.
   ## 
-  let valid = call_574055.validator(path, query, header, formData, body)
-  let scheme = call_574055.pickScheme
+  let valid = call_563955.validator(path, query, header, formData, body)
+  let scheme = call_563955.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574055.url(scheme.get, call_574055.host, call_574055.base,
-                         call_574055.route, valid.getOrDefault("path"),
+  let url = call_563955.url(scheme.get, call_563955.host, call_563955.base,
+                         call_563955.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574055, url, valid)
+  result = hook(call_563955, url, valid)
 
-proc call*(call_574126: Call_CheckDnsNameAvailability_573863; apiVersion: string;
+proc call*(call_564026: Call_CheckDnsNameAvailability_563761; apiVersion: string;
           subscriptionId: string; domainNameLabel: string; location: string): Recallable =
   ## checkDnsNameAvailability
   ## Checks whether a domain name in the cloudapp.azure.com zone is available for use.
@@ -200,19 +204,19 @@ proc call*(call_574126: Call_CheckDnsNameAvailability_573863; apiVersion: string
   ##                  : The domain name to be verified. It must conform to the following regular expression: ^[a-z][a-z0-9-]{1,61}[a-z0-9]$.
   ##   location: string (required)
   ##           : The location of the domain name.
-  var path_574127 = newJObject()
-  var query_574129 = newJObject()
-  add(query_574129, "api-version", newJString(apiVersion))
-  add(path_574127, "subscriptionId", newJString(subscriptionId))
-  add(query_574129, "domainNameLabel", newJString(domainNameLabel))
-  add(path_574127, "location", newJString(location))
-  result = call_574126.call(path_574127, query_574129, nil, nil, nil)
+  var path_564027 = newJObject()
+  var query_564029 = newJObject()
+  add(query_564029, "api-version", newJString(apiVersion))
+  add(path_564027, "subscriptionId", newJString(subscriptionId))
+  add(query_564029, "domainNameLabel", newJString(domainNameLabel))
+  add(path_564027, "location", newJString(location))
+  result = call_564026.call(path_564027, query_564029, nil, nil, nil)
 
-var checkDnsNameAvailability* = Call_CheckDnsNameAvailability_573863(
+var checkDnsNameAvailability* = Call_CheckDnsNameAvailability_563761(
     name: "checkDnsNameAvailability", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Network/locations/{location}/CheckDnsNameAvailability",
-    validator: validate_CheckDnsNameAvailability_573864, base: "",
-    url: url_CheckDnsNameAvailability_573865, schemes: {Scheme.Https})
+    validator: validate_CheckDnsNameAvailability_563762, base: "",
+    url: url_CheckDnsNameAvailability_563763, schemes: {Scheme.Https})
 export
   rest
 

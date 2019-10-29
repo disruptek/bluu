@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, httpcore
 
 ## auto-generated via openapi macro
 ## title: StorageImportExport
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_567658 = ref object of OpenApiRestCall
+  OpenApiRestCall_563556 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_567658](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563556](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_567658): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563556): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,15 +107,15 @@ const
   macServiceName = "storageimportexport"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_LocationsList_567880 = ref object of OpenApiRestCall_567658
-proc url_LocationsList_567882(protocol: Scheme; host: string; base: string;
+  Call_LocationsList_563778 = ref object of OpenApiRestCall_563556
+proc url_LocationsList_563780(protocol: Scheme; host: string; base: string;
                              route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_LocationsList_567881(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_LocationsList_563779(path: JsonNode; query: JsonNode; header: JsonNode;
                                   formData: JsonNode; body: JsonNode): JsonNode =
   ## Returns a list of locations to which you can ship the disks associated with an import or export job. A location is a Microsoft data center region.
   ## 
@@ -125,58 +129,58 @@ proc validate_LocationsList_567881(path: JsonNode; query: JsonNode; header: Json
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568054 = query.getOrDefault("api-version")
-  valid_568054 = validateParameter(valid_568054, JString, required = true,
+  var valid_563954 = query.getOrDefault("api-version")
+  valid_563954 = validateParameter(valid_563954, JString, required = true,
                                  default = newJString("2016-11-01"))
-  if valid_568054 != nil:
-    section.add "api-version", valid_568054
+  if valid_563954 != nil:
+    section.add "api-version", valid_563954
   result.add "query", section
   ## parameters in `header` object:
   ##   Accept-Language: JString
   ##                  : Specifies the preferred language for the response.
   section = newJObject()
-  var valid_568055 = header.getOrDefault("Accept-Language")
-  valid_568055 = validateParameter(valid_568055, JString, required = false,
+  var valid_563955 = header.getOrDefault("Accept-Language")
+  valid_563955 = validateParameter(valid_563955, JString, required = false,
                                  default = nil)
-  if valid_568055 != nil:
-    section.add "Accept-Language", valid_568055
+  if valid_563955 != nil:
+    section.add "Accept-Language", valid_563955
   result.add "header", section
   section = newJObject()
   result.add "formData", section
   if body != nil:
     result.add "body", body
 
-proc call*(call_568078: Call_LocationsList_567880; path: JsonNode; query: JsonNode;
+proc call*(call_563978: Call_LocationsList_563778; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Returns a list of locations to which you can ship the disks associated with an import or export job. A location is a Microsoft data center region.
   ## 
-  let valid = call_568078.validator(path, query, header, formData, body)
-  let scheme = call_568078.pickScheme
+  let valid = call_563978.validator(path, query, header, formData, body)
+  let scheme = call_563978.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568078.url(scheme.get, call_568078.host, call_568078.base,
-                         call_568078.route, valid.getOrDefault("path"),
+  let url = call_563978.url(scheme.get, call_563978.host, call_563978.base,
+                         call_563978.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568078, url, valid)
+  result = hook(call_563978, url, valid)
 
-proc call*(call_568149: Call_LocationsList_567880;
+proc call*(call_564049: Call_LocationsList_563778;
           apiVersion: string = "2016-11-01"): Recallable =
   ## locationsList
   ## Returns a list of locations to which you can ship the disks associated with an import or export job. A location is a Microsoft data center region.
   ##   apiVersion: string (required)
   ##             : Specifies the API version to use for this request.
-  var query_568150 = newJObject()
-  add(query_568150, "api-version", newJString(apiVersion))
-  result = call_568149.call(nil, query_568150, nil, nil, nil)
+  var query_564050 = newJObject()
+  add(query_564050, "api-version", newJString(apiVersion))
+  result = call_564049.call(nil, query_564050, nil, nil, nil)
 
-var locationsList* = Call_LocationsList_567880(name: "locationsList",
+var locationsList* = Call_LocationsList_563778(name: "locationsList",
     meth: HttpMethod.HttpGet, host: "management.azure.com",
     route: "/providers/Microsoft.ImportExport/locations",
-    validator: validate_LocationsList_567881, base: "", url: url_LocationsList_567882,
+    validator: validate_LocationsList_563779, base: "", url: url_LocationsList_563780,
     schemes: {Scheme.Https})
 type
-  Call_LocationsGet_568190 = ref object of OpenApiRestCall_567658
-proc url_LocationsGet_568192(protocol: Scheme; host: string; base: string;
+  Call_LocationsGet_564090 = ref object of OpenApiRestCall_563556
+proc url_LocationsGet_564092(protocol: Scheme; host: string; base: string;
                             route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -192,7 +196,7 @@ proc url_LocationsGet_568192(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_LocationsGet_568191(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_LocationsGet_564091(path: JsonNode; query: JsonNode; header: JsonNode;
                                  formData: JsonNode; body: JsonNode): JsonNode =
   ## Returns the details about a location to which you can ship the disks associated with an import or export job. A location is an Azure region.
   ## 
@@ -204,11 +208,11 @@ proc validate_LocationsGet_568191(path: JsonNode; query: JsonNode; header: JsonN
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `locationName` field"
-  var valid_568207 = path.getOrDefault("locationName")
-  valid_568207 = validateParameter(valid_568207, JString, required = true,
+  var valid_564107 = path.getOrDefault("locationName")
+  valid_564107 = validateParameter(valid_564107, JString, required = true,
                                  default = nil)
-  if valid_568207 != nil:
-    section.add "locationName", valid_568207
+  if valid_564107 != nil:
+    section.add "locationName", valid_564107
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -216,41 +220,41 @@ proc validate_LocationsGet_568191(path: JsonNode; query: JsonNode; header: JsonN
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568208 = query.getOrDefault("api-version")
-  valid_568208 = validateParameter(valid_568208, JString, required = true,
+  var valid_564108 = query.getOrDefault("api-version")
+  valid_564108 = validateParameter(valid_564108, JString, required = true,
                                  default = newJString("2016-11-01"))
-  if valid_568208 != nil:
-    section.add "api-version", valid_568208
+  if valid_564108 != nil:
+    section.add "api-version", valid_564108
   result.add "query", section
   ## parameters in `header` object:
   ##   Accept-Language: JString
   ##                  : Specifies the preferred language for the response.
   section = newJObject()
-  var valid_568209 = header.getOrDefault("Accept-Language")
-  valid_568209 = validateParameter(valid_568209, JString, required = false,
+  var valid_564109 = header.getOrDefault("Accept-Language")
+  valid_564109 = validateParameter(valid_564109, JString, required = false,
                                  default = nil)
-  if valid_568209 != nil:
-    section.add "Accept-Language", valid_568209
+  if valid_564109 != nil:
+    section.add "Accept-Language", valid_564109
   result.add "header", section
   section = newJObject()
   result.add "formData", section
   if body != nil:
     result.add "body", body
 
-proc call*(call_568210: Call_LocationsGet_568190; path: JsonNode; query: JsonNode;
+proc call*(call_564110: Call_LocationsGet_564090; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Returns the details about a location to which you can ship the disks associated with an import or export job. A location is an Azure region.
   ## 
-  let valid = call_568210.validator(path, query, header, formData, body)
-  let scheme = call_568210.pickScheme
+  let valid = call_564110.validator(path, query, header, formData, body)
+  let scheme = call_564110.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568210.url(scheme.get, call_568210.host, call_568210.base,
-                         call_568210.route, valid.getOrDefault("path"),
+  let url = call_564110.url(scheme.get, call_564110.host, call_564110.base,
+                         call_564110.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568210, url, valid)
+  result = hook(call_564110, url, valid)
 
-proc call*(call_568211: Call_LocationsGet_568190; locationName: string;
+proc call*(call_564111: Call_LocationsGet_564090; locationName: string;
           apiVersion: string = "2016-11-01"): Recallable =
   ## locationsGet
   ## Returns the details about a location to which you can ship the disks associated with an import or export job. A location is an Azure region.
@@ -258,27 +262,27 @@ proc call*(call_568211: Call_LocationsGet_568190; locationName: string;
   ##             : Specifies the API version to use for this request.
   ##   locationName: string (required)
   ##               : The name of the location. For example, West US or westus.
-  var path_568212 = newJObject()
-  var query_568213 = newJObject()
-  add(query_568213, "api-version", newJString(apiVersion))
-  add(path_568212, "locationName", newJString(locationName))
-  result = call_568211.call(path_568212, query_568213, nil, nil, nil)
+  var path_564112 = newJObject()
+  var query_564113 = newJObject()
+  add(query_564113, "api-version", newJString(apiVersion))
+  add(path_564112, "locationName", newJString(locationName))
+  result = call_564111.call(path_564112, query_564113, nil, nil, nil)
 
-var locationsGet* = Call_LocationsGet_568190(name: "locationsGet",
+var locationsGet* = Call_LocationsGet_564090(name: "locationsGet",
     meth: HttpMethod.HttpGet, host: "management.azure.com",
     route: "/providers/Microsoft.ImportExport/locations/{locationName}",
-    validator: validate_LocationsGet_568191, base: "", url: url_LocationsGet_568192,
+    validator: validate_LocationsGet_564091, base: "", url: url_LocationsGet_564092,
     schemes: {Scheme.Https})
 type
-  Call_OperationsList_568214 = ref object of OpenApiRestCall_567658
-proc url_OperationsList_568216(protocol: Scheme; host: string; base: string;
+  Call_OperationsList_564114 = ref object of OpenApiRestCall_563556
+proc url_OperationsList_564116(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_OperationsList_568215(path: JsonNode; query: JsonNode;
+proc validate_OperationsList_564115(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## Returns the list of operations supported by the import/export resource provider.
@@ -293,58 +297,58 @@ proc validate_OperationsList_568215(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568217 = query.getOrDefault("api-version")
-  valid_568217 = validateParameter(valid_568217, JString, required = true,
+  var valid_564117 = query.getOrDefault("api-version")
+  valid_564117 = validateParameter(valid_564117, JString, required = true,
                                  default = newJString("2016-11-01"))
-  if valid_568217 != nil:
-    section.add "api-version", valid_568217
+  if valid_564117 != nil:
+    section.add "api-version", valid_564117
   result.add "query", section
   ## parameters in `header` object:
   ##   Accept-Language: JString
   ##                  : Specifies the preferred language for the response.
   section = newJObject()
-  var valid_568218 = header.getOrDefault("Accept-Language")
-  valid_568218 = validateParameter(valid_568218, JString, required = false,
+  var valid_564118 = header.getOrDefault("Accept-Language")
+  valid_564118 = validateParameter(valid_564118, JString, required = false,
                                  default = nil)
-  if valid_568218 != nil:
-    section.add "Accept-Language", valid_568218
+  if valid_564118 != nil:
+    section.add "Accept-Language", valid_564118
   result.add "header", section
   section = newJObject()
   result.add "formData", section
   if body != nil:
     result.add "body", body
 
-proc call*(call_568219: Call_OperationsList_568214; path: JsonNode; query: JsonNode;
+proc call*(call_564119: Call_OperationsList_564114; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Returns the list of operations supported by the import/export resource provider.
   ## 
-  let valid = call_568219.validator(path, query, header, formData, body)
-  let scheme = call_568219.pickScheme
+  let valid = call_564119.validator(path, query, header, formData, body)
+  let scheme = call_564119.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568219.url(scheme.get, call_568219.host, call_568219.base,
-                         call_568219.route, valid.getOrDefault("path"),
+  let url = call_564119.url(scheme.get, call_564119.host, call_564119.base,
+                         call_564119.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568219, url, valid)
+  result = hook(call_564119, url, valid)
 
-proc call*(call_568220: Call_OperationsList_568214;
+proc call*(call_564120: Call_OperationsList_564114;
           apiVersion: string = "2016-11-01"): Recallable =
   ## operationsList
   ## Returns the list of operations supported by the import/export resource provider.
   ##   apiVersion: string (required)
   ##             : Specifies the API version to use for this request.
-  var query_568221 = newJObject()
-  add(query_568221, "api-version", newJString(apiVersion))
-  result = call_568220.call(nil, query_568221, nil, nil, nil)
+  var query_564121 = newJObject()
+  add(query_564121, "api-version", newJString(apiVersion))
+  result = call_564120.call(nil, query_564121, nil, nil, nil)
 
-var operationsList* = Call_OperationsList_568214(name: "operationsList",
+var operationsList* = Call_OperationsList_564114(name: "operationsList",
     meth: HttpMethod.HttpGet, host: "management.azure.com",
     route: "/providers/Microsoft.ImportExport/operations",
-    validator: validate_OperationsList_568215, base: "", url: url_OperationsList_568216,
+    validator: validate_OperationsList_564115, base: "", url: url_OperationsList_564116,
     schemes: {Scheme.Https})
 type
-  Call_JobsListBySubscription_568222 = ref object of OpenApiRestCall_567658
-proc url_JobsListBySubscription_568224(protocol: Scheme; host: string; base: string;
+  Call_JobsListBySubscription_564122 = ref object of OpenApiRestCall_563556
+proc url_JobsListBySubscription_564124(protocol: Scheme; host: string; base: string;
                                       route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -360,7 +364,7 @@ proc url_JobsListBySubscription_568224(protocol: Scheme; host: string; base: str
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_JobsListBySubscription_568223(path: JsonNode; query: JsonNode;
+proc validate_JobsListBySubscription_564123(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Returns all active and completed jobs in a subscription.
   ## 
@@ -372,93 +376,93 @@ proc validate_JobsListBySubscription_568223(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_568226 = path.getOrDefault("subscriptionId")
-  valid_568226 = validateParameter(valid_568226, JString, required = true,
+  var valid_564126 = path.getOrDefault("subscriptionId")
+  valid_564126 = validateParameter(valid_564126, JString, required = true,
                                  default = nil)
-  if valid_568226 != nil:
-    section.add "subscriptionId", valid_568226
+  if valid_564126 != nil:
+    section.add "subscriptionId", valid_564126
   result.add "path", section
   ## parameters in `query` object:
-  ##   api-version: JString (required)
-  ##              : Specifies the API version to use for this request.
   ##   $top: JInt
   ##       : An integer value that specifies how many jobs at most should be returned. The value cannot exceed 100.
+  ##   api-version: JString (required)
+  ##              : Specifies the API version to use for this request.
   ##   $filter: JString
   ##          : Can be used to restrict the results to certain conditions.
   section = newJObject()
+  var valid_564127 = query.getOrDefault("$top")
+  valid_564127 = validateParameter(valid_564127, JInt, required = false, default = nil)
+  if valid_564127 != nil:
+    section.add "$top", valid_564127
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568227 = query.getOrDefault("api-version")
-  valid_568227 = validateParameter(valid_568227, JString, required = true,
+  var valid_564128 = query.getOrDefault("api-version")
+  valid_564128 = validateParameter(valid_564128, JString, required = true,
                                  default = newJString("2016-11-01"))
-  if valid_568227 != nil:
-    section.add "api-version", valid_568227
-  var valid_568228 = query.getOrDefault("$top")
-  valid_568228 = validateParameter(valid_568228, JInt, required = false, default = nil)
-  if valid_568228 != nil:
-    section.add "$top", valid_568228
-  var valid_568229 = query.getOrDefault("$filter")
-  valid_568229 = validateParameter(valid_568229, JString, required = false,
+  if valid_564128 != nil:
+    section.add "api-version", valid_564128
+  var valid_564129 = query.getOrDefault("$filter")
+  valid_564129 = validateParameter(valid_564129, JString, required = false,
                                  default = nil)
-  if valid_568229 != nil:
-    section.add "$filter", valid_568229
+  if valid_564129 != nil:
+    section.add "$filter", valid_564129
   result.add "query", section
   ## parameters in `header` object:
   ##   Accept-Language: JString
   ##                  : Specifies the preferred language for the response.
   section = newJObject()
-  var valid_568230 = header.getOrDefault("Accept-Language")
-  valid_568230 = validateParameter(valid_568230, JString, required = false,
+  var valid_564130 = header.getOrDefault("Accept-Language")
+  valid_564130 = validateParameter(valid_564130, JString, required = false,
                                  default = nil)
-  if valid_568230 != nil:
-    section.add "Accept-Language", valid_568230
+  if valid_564130 != nil:
+    section.add "Accept-Language", valid_564130
   result.add "header", section
   section = newJObject()
   result.add "formData", section
   if body != nil:
     result.add "body", body
 
-proc call*(call_568231: Call_JobsListBySubscription_568222; path: JsonNode;
+proc call*(call_564131: Call_JobsListBySubscription_564122; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Returns all active and completed jobs in a subscription.
   ## 
-  let valid = call_568231.validator(path, query, header, formData, body)
-  let scheme = call_568231.pickScheme
+  let valid = call_564131.validator(path, query, header, formData, body)
+  let scheme = call_564131.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568231.url(scheme.get, call_568231.host, call_568231.base,
-                         call_568231.route, valid.getOrDefault("path"),
+  let url = call_564131.url(scheme.get, call_564131.host, call_564131.base,
+                         call_564131.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568231, url, valid)
+  result = hook(call_564131, url, valid)
 
-proc call*(call_568232: Call_JobsListBySubscription_568222; subscriptionId: string;
-          apiVersion: string = "2016-11-01"; Top: int = 0; Filter: string = ""): Recallable =
+proc call*(call_564132: Call_JobsListBySubscription_564122; subscriptionId: string;
+          Top: int = 0; apiVersion: string = "2016-11-01"; Filter: string = ""): Recallable =
   ## jobsListBySubscription
   ## Returns all active and completed jobs in a subscription.
+  ##   Top: int
+  ##      : An integer value that specifies how many jobs at most should be returned. The value cannot exceed 100.
   ##   apiVersion: string (required)
   ##             : Specifies the API version to use for this request.
   ##   subscriptionId: string (required)
   ##                 : The subscription ID for the Azure user.
-  ##   Top: int
-  ##      : An integer value that specifies how many jobs at most should be returned. The value cannot exceed 100.
   ##   Filter: string
   ##         : Can be used to restrict the results to certain conditions.
-  var path_568233 = newJObject()
-  var query_568234 = newJObject()
-  add(query_568234, "api-version", newJString(apiVersion))
-  add(path_568233, "subscriptionId", newJString(subscriptionId))
-  add(query_568234, "$top", newJInt(Top))
-  add(query_568234, "$filter", newJString(Filter))
-  result = call_568232.call(path_568233, query_568234, nil, nil, nil)
+  var path_564133 = newJObject()
+  var query_564134 = newJObject()
+  add(query_564134, "$top", newJInt(Top))
+  add(query_564134, "api-version", newJString(apiVersion))
+  add(path_564133, "subscriptionId", newJString(subscriptionId))
+  add(query_564134, "$filter", newJString(Filter))
+  result = call_564132.call(path_564133, query_564134, nil, nil, nil)
 
-var jobsListBySubscription* = Call_JobsListBySubscription_568222(
+var jobsListBySubscription* = Call_JobsListBySubscription_564122(
     name: "jobsListBySubscription", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.ImportExport/jobs",
-    validator: validate_JobsListBySubscription_568223, base: "",
-    url: url_JobsListBySubscription_568224, schemes: {Scheme.Https})
+    validator: validate_JobsListBySubscription_564123, base: "",
+    url: url_JobsListBySubscription_564124, schemes: {Scheme.Https})
 type
-  Call_JobsListByResourceGroup_568235 = ref object of OpenApiRestCall_567658
-proc url_JobsListByResourceGroup_568237(protocol: Scheme; host: string; base: string;
+  Call_JobsListByResourceGroup_564135 = ref object of OpenApiRestCall_563556
+proc url_JobsListByResourceGroup_564137(protocol: Scheme; host: string; base: string;
                                        route: string; path: JsonNode;
                                        query: JsonNode): Uri =
   result.scheme = $protocol
@@ -479,116 +483,116 @@ proc url_JobsListByResourceGroup_568237(protocol: Scheme; host: string; base: st
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_JobsListByResourceGroup_568236(path: JsonNode; query: JsonNode;
+proc validate_JobsListByResourceGroup_564136(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Returns all active and completed jobs in a resource group.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The resource group name uniquely identifies the resource group within the user subscription.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID for the Azure user.
+  ##   resourceGroupName: JString (required)
+  ##                    : The resource group name uniquely identifies the resource group within the user subscription.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568238 = path.getOrDefault("resourceGroupName")
-  valid_568238 = validateParameter(valid_568238, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564138 = path.getOrDefault("subscriptionId")
+  valid_564138 = validateParameter(valid_564138, JString, required = true,
                                  default = nil)
-  if valid_568238 != nil:
-    section.add "resourceGroupName", valid_568238
-  var valid_568239 = path.getOrDefault("subscriptionId")
-  valid_568239 = validateParameter(valid_568239, JString, required = true,
+  if valid_564138 != nil:
+    section.add "subscriptionId", valid_564138
+  var valid_564139 = path.getOrDefault("resourceGroupName")
+  valid_564139 = validateParameter(valid_564139, JString, required = true,
                                  default = nil)
-  if valid_568239 != nil:
-    section.add "subscriptionId", valid_568239
+  if valid_564139 != nil:
+    section.add "resourceGroupName", valid_564139
   result.add "path", section
   ## parameters in `query` object:
-  ##   api-version: JString (required)
-  ##              : Specifies the API version to use for this request.
   ##   $top: JInt
   ##       : An integer value that specifies how many jobs at most should be returned. The value cannot exceed 100.
+  ##   api-version: JString (required)
+  ##              : Specifies the API version to use for this request.
   ##   $filter: JString
   ##          : Can be used to restrict the results to certain conditions.
   section = newJObject()
+  var valid_564140 = query.getOrDefault("$top")
+  valid_564140 = validateParameter(valid_564140, JInt, required = false, default = nil)
+  if valid_564140 != nil:
+    section.add "$top", valid_564140
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568240 = query.getOrDefault("api-version")
-  valid_568240 = validateParameter(valid_568240, JString, required = true,
+  var valid_564141 = query.getOrDefault("api-version")
+  valid_564141 = validateParameter(valid_564141, JString, required = true,
                                  default = newJString("2016-11-01"))
-  if valid_568240 != nil:
-    section.add "api-version", valid_568240
-  var valid_568241 = query.getOrDefault("$top")
-  valid_568241 = validateParameter(valid_568241, JInt, required = false, default = nil)
-  if valid_568241 != nil:
-    section.add "$top", valid_568241
-  var valid_568242 = query.getOrDefault("$filter")
-  valid_568242 = validateParameter(valid_568242, JString, required = false,
+  if valid_564141 != nil:
+    section.add "api-version", valid_564141
+  var valid_564142 = query.getOrDefault("$filter")
+  valid_564142 = validateParameter(valid_564142, JString, required = false,
                                  default = nil)
-  if valid_568242 != nil:
-    section.add "$filter", valid_568242
+  if valid_564142 != nil:
+    section.add "$filter", valid_564142
   result.add "query", section
   ## parameters in `header` object:
   ##   Accept-Language: JString
   ##                  : Specifies the preferred language for the response.
   section = newJObject()
-  var valid_568243 = header.getOrDefault("Accept-Language")
-  valid_568243 = validateParameter(valid_568243, JString, required = false,
+  var valid_564143 = header.getOrDefault("Accept-Language")
+  valid_564143 = validateParameter(valid_564143, JString, required = false,
                                  default = nil)
-  if valid_568243 != nil:
-    section.add "Accept-Language", valid_568243
+  if valid_564143 != nil:
+    section.add "Accept-Language", valid_564143
   result.add "header", section
   section = newJObject()
   result.add "formData", section
   if body != nil:
     result.add "body", body
 
-proc call*(call_568244: Call_JobsListByResourceGroup_568235; path: JsonNode;
+proc call*(call_564144: Call_JobsListByResourceGroup_564135; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Returns all active and completed jobs in a resource group.
   ## 
-  let valid = call_568244.validator(path, query, header, formData, body)
-  let scheme = call_568244.pickScheme
+  let valid = call_564144.validator(path, query, header, formData, body)
+  let scheme = call_564144.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568244.url(scheme.get, call_568244.host, call_568244.base,
-                         call_568244.route, valid.getOrDefault("path"),
+  let url = call_564144.url(scheme.get, call_564144.host, call_564144.base,
+                         call_564144.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568244, url, valid)
+  result = hook(call_564144, url, valid)
 
-proc call*(call_568245: Call_JobsListByResourceGroup_568235;
-          resourceGroupName: string; subscriptionId: string;
-          apiVersion: string = "2016-11-01"; Top: int = 0; Filter: string = ""): Recallable =
+proc call*(call_564145: Call_JobsListByResourceGroup_564135;
+          subscriptionId: string; resourceGroupName: string; Top: int = 0;
+          apiVersion: string = "2016-11-01"; Filter: string = ""): Recallable =
   ## jobsListByResourceGroup
   ## Returns all active and completed jobs in a resource group.
-  ##   resourceGroupName: string (required)
-  ##                    : The resource group name uniquely identifies the resource group within the user subscription.
+  ##   Top: int
+  ##      : An integer value that specifies how many jobs at most should be returned. The value cannot exceed 100.
   ##   apiVersion: string (required)
   ##             : Specifies the API version to use for this request.
   ##   subscriptionId: string (required)
   ##                 : The subscription ID for the Azure user.
-  ##   Top: int
-  ##      : An integer value that specifies how many jobs at most should be returned. The value cannot exceed 100.
+  ##   resourceGroupName: string (required)
+  ##                    : The resource group name uniquely identifies the resource group within the user subscription.
   ##   Filter: string
   ##         : Can be used to restrict the results to certain conditions.
-  var path_568246 = newJObject()
-  var query_568247 = newJObject()
-  add(path_568246, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568247, "api-version", newJString(apiVersion))
-  add(path_568246, "subscriptionId", newJString(subscriptionId))
-  add(query_568247, "$top", newJInt(Top))
-  add(query_568247, "$filter", newJString(Filter))
-  result = call_568245.call(path_568246, query_568247, nil, nil, nil)
+  var path_564146 = newJObject()
+  var query_564147 = newJObject()
+  add(query_564147, "$top", newJInt(Top))
+  add(query_564147, "api-version", newJString(apiVersion))
+  add(path_564146, "subscriptionId", newJString(subscriptionId))
+  add(path_564146, "resourceGroupName", newJString(resourceGroupName))
+  add(query_564147, "$filter", newJString(Filter))
+  result = call_564145.call(path_564146, query_564147, nil, nil, nil)
 
-var jobsListByResourceGroup* = Call_JobsListByResourceGroup_568235(
+var jobsListByResourceGroup* = Call_JobsListByResourceGroup_564135(
     name: "jobsListByResourceGroup", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ImportExport/jobs",
-    validator: validate_JobsListByResourceGroup_568236, base: "",
-    url: url_JobsListByResourceGroup_568237, schemes: {Scheme.Https})
+    validator: validate_JobsListByResourceGroup_564136, base: "",
+    url: url_JobsListByResourceGroup_564137, schemes: {Scheme.Https})
 type
-  Call_JobsCreate_568260 = ref object of OpenApiRestCall_567658
-proc url_JobsCreate_568262(protocol: Scheme; host: string; base: string; route: string;
+  Call_JobsCreate_564160 = ref object of OpenApiRestCall_563556
+proc url_JobsCreate_564162(protocol: Scheme; host: string; base: string; route: string;
                           path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -610,37 +614,37 @@ proc url_JobsCreate_568262(protocol: Scheme; host: string; base: string; route: 
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_JobsCreate_568261(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_JobsCreate_564161(path: JsonNode; query: JsonNode; header: JsonNode;
                                formData: JsonNode; body: JsonNode): JsonNode =
   ## Creates a new job or updates an existing job in the specified subscription.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The resource group name uniquely identifies the resource group within the user subscription.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID for the Azure user.
+  ##   resourceGroupName: JString (required)
+  ##                    : The resource group name uniquely identifies the resource group within the user subscription.
   ##   jobName: JString (required)
   ##          : The name of the import/export job.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568280 = path.getOrDefault("resourceGroupName")
-  valid_568280 = validateParameter(valid_568280, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564180 = path.getOrDefault("subscriptionId")
+  valid_564180 = validateParameter(valid_564180, JString, required = true,
                                  default = nil)
-  if valid_568280 != nil:
-    section.add "resourceGroupName", valid_568280
-  var valid_568281 = path.getOrDefault("subscriptionId")
-  valid_568281 = validateParameter(valid_568281, JString, required = true,
+  if valid_564180 != nil:
+    section.add "subscriptionId", valid_564180
+  var valid_564181 = path.getOrDefault("resourceGroupName")
+  valid_564181 = validateParameter(valid_564181, JString, required = true,
                                  default = nil)
-  if valid_568281 != nil:
-    section.add "subscriptionId", valid_568281
-  var valid_568282 = path.getOrDefault("jobName")
-  valid_568282 = validateParameter(valid_568282, JString, required = true,
+  if valid_564181 != nil:
+    section.add "resourceGroupName", valid_564181
+  var valid_564182 = path.getOrDefault("jobName")
+  valid_564182 = validateParameter(valid_564182, JString, required = true,
                                  default = nil)
-  if valid_568282 != nil:
-    section.add "jobName", valid_568282
+  if valid_564182 != nil:
+    section.add "jobName", valid_564182
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -648,11 +652,11 @@ proc validate_JobsCreate_568261(path: JsonNode; query: JsonNode; header: JsonNod
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568283 = query.getOrDefault("api-version")
-  valid_568283 = validateParameter(valid_568283, JString, required = true,
+  var valid_564183 = query.getOrDefault("api-version")
+  valid_564183 = validateParameter(valid_564183, JString, required = true,
                                  default = newJString("2016-11-01"))
-  if valid_568283 != nil:
-    section.add "api-version", valid_568283
+  if valid_564183 != nil:
+    section.add "api-version", valid_564183
   result.add "query", section
   ## parameters in `header` object:
   ##   Accept-Language: JString
@@ -660,16 +664,16 @@ proc validate_JobsCreate_568261(path: JsonNode; query: JsonNode; header: JsonNod
   ##   x-ms-client-tenant-id: JString
   ##                        : The tenant ID of the client making the request.
   section = newJObject()
-  var valid_568284 = header.getOrDefault("Accept-Language")
-  valid_568284 = validateParameter(valid_568284, JString, required = false,
+  var valid_564184 = header.getOrDefault("Accept-Language")
+  valid_564184 = validateParameter(valid_564184, JString, required = false,
                                  default = nil)
-  if valid_568284 != nil:
-    section.add "Accept-Language", valid_568284
-  var valid_568285 = header.getOrDefault("x-ms-client-tenant-id")
-  valid_568285 = validateParameter(valid_568285, JString, required = false,
+  if valid_564184 != nil:
+    section.add "Accept-Language", valid_564184
+  var valid_564185 = header.getOrDefault("x-ms-client-tenant-id")
+  valid_564185 = validateParameter(valid_564185, JString, required = false,
                                  default = nil)
-  if valid_568285 != nil:
-    section.add "x-ms-client-tenant-id", valid_568285
+  if valid_564185 != nil:
+    section.add "x-ms-client-tenant-id", valid_564185
   result.add "header", section
   section = newJObject()
   result.add "formData", section
@@ -681,54 +685,54 @@ proc validate_JobsCreate_568261(path: JsonNode; query: JsonNode; header: JsonNod
   if body != nil:
     result.add "body", body
 
-proc call*(call_568287: Call_JobsCreate_568260; path: JsonNode; query: JsonNode;
+proc call*(call_564187: Call_JobsCreate_564160; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Creates a new job or updates an existing job in the specified subscription.
   ## 
-  let valid = call_568287.validator(path, query, header, formData, body)
-  let scheme = call_568287.pickScheme
+  let valid = call_564187.validator(path, query, header, formData, body)
+  let scheme = call_564187.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568287.url(scheme.get, call_568287.host, call_568287.base,
-                         call_568287.route, valid.getOrDefault("path"),
+  let url = call_564187.url(scheme.get, call_564187.host, call_564187.base,
+                         call_564187.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568287, url, valid)
+  result = hook(call_564187, url, valid)
 
-proc call*(call_568288: Call_JobsCreate_568260; resourceGroupName: string;
-          subscriptionId: string; jobName: string; body: JsonNode;
+proc call*(call_564188: Call_JobsCreate_564160; subscriptionId: string;
+          resourceGroupName: string; body: JsonNode; jobName: string;
           apiVersion: string = "2016-11-01"): Recallable =
   ## jobsCreate
   ## Creates a new job or updates an existing job in the specified subscription.
-  ##   resourceGroupName: string (required)
-  ##                    : The resource group name uniquely identifies the resource group within the user subscription.
   ##   apiVersion: string (required)
   ##             : Specifies the API version to use for this request.
   ##   subscriptionId: string (required)
   ##                 : The subscription ID for the Azure user.
-  ##   jobName: string (required)
-  ##          : The name of the import/export job.
+  ##   resourceGroupName: string (required)
+  ##                    : The resource group name uniquely identifies the resource group within the user subscription.
   ##   body: JObject (required)
   ##       : The parameters used for creating the job
-  var path_568289 = newJObject()
-  var query_568290 = newJObject()
-  var body_568291 = newJObject()
-  add(path_568289, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568290, "api-version", newJString(apiVersion))
-  add(path_568289, "subscriptionId", newJString(subscriptionId))
-  add(path_568289, "jobName", newJString(jobName))
+  ##   jobName: string (required)
+  ##          : The name of the import/export job.
+  var path_564189 = newJObject()
+  var query_564190 = newJObject()
+  var body_564191 = newJObject()
+  add(query_564190, "api-version", newJString(apiVersion))
+  add(path_564189, "subscriptionId", newJString(subscriptionId))
+  add(path_564189, "resourceGroupName", newJString(resourceGroupName))
   if body != nil:
-    body_568291 = body
-  result = call_568288.call(path_568289, query_568290, nil, nil, body_568291)
+    body_564191 = body
+  add(path_564189, "jobName", newJString(jobName))
+  result = call_564188.call(path_564189, query_564190, nil, nil, body_564191)
 
-var jobsCreate* = Call_JobsCreate_568260(name: "jobsCreate",
+var jobsCreate* = Call_JobsCreate_564160(name: "jobsCreate",
                                       meth: HttpMethod.HttpPut,
                                       host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ImportExport/jobs/{jobName}",
-                                      validator: validate_JobsCreate_568261,
-                                      base: "", url: url_JobsCreate_568262,
+                                      validator: validate_JobsCreate_564161,
+                                      base: "", url: url_JobsCreate_564162,
                                       schemes: {Scheme.Https})
 type
-  Call_JobsGet_568248 = ref object of OpenApiRestCall_567658
-proc url_JobsGet_568250(protocol: Scheme; host: string; base: string; route: string;
+  Call_JobsGet_564148 = ref object of OpenApiRestCall_563556
+proc url_JobsGet_564150(protocol: Scheme; host: string; base: string; route: string;
                        path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -750,37 +754,37 @@ proc url_JobsGet_568250(protocol: Scheme; host: string; base: string; route: str
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_JobsGet_568249(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_JobsGet_564149(path: JsonNode; query: JsonNode; header: JsonNode;
                             formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets information about an existing job.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The resource group name uniquely identifies the resource group within the user subscription.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID for the Azure user.
+  ##   resourceGroupName: JString (required)
+  ##                    : The resource group name uniquely identifies the resource group within the user subscription.
   ##   jobName: JString (required)
   ##          : The name of the import/export job.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568251 = path.getOrDefault("resourceGroupName")
-  valid_568251 = validateParameter(valid_568251, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564151 = path.getOrDefault("subscriptionId")
+  valid_564151 = validateParameter(valid_564151, JString, required = true,
                                  default = nil)
-  if valid_568251 != nil:
-    section.add "resourceGroupName", valid_568251
-  var valid_568252 = path.getOrDefault("subscriptionId")
-  valid_568252 = validateParameter(valid_568252, JString, required = true,
+  if valid_564151 != nil:
+    section.add "subscriptionId", valid_564151
+  var valid_564152 = path.getOrDefault("resourceGroupName")
+  valid_564152 = validateParameter(valid_564152, JString, required = true,
                                  default = nil)
-  if valid_568252 != nil:
-    section.add "subscriptionId", valid_568252
-  var valid_568253 = path.getOrDefault("jobName")
-  valid_568253 = validateParameter(valid_568253, JString, required = true,
+  if valid_564152 != nil:
+    section.add "resourceGroupName", valid_564152
+  var valid_564153 = path.getOrDefault("jobName")
+  valid_564153 = validateParameter(valid_564153, JString, required = true,
                                  default = nil)
-  if valid_568253 != nil:
-    section.add "jobName", valid_568253
+  if valid_564153 != nil:
+    section.add "jobName", valid_564153
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -788,67 +792,68 @@ proc validate_JobsGet_568249(path: JsonNode; query: JsonNode; header: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568254 = query.getOrDefault("api-version")
-  valid_568254 = validateParameter(valid_568254, JString, required = true,
+  var valid_564154 = query.getOrDefault("api-version")
+  valid_564154 = validateParameter(valid_564154, JString, required = true,
                                  default = newJString("2016-11-01"))
-  if valid_568254 != nil:
-    section.add "api-version", valid_568254
+  if valid_564154 != nil:
+    section.add "api-version", valid_564154
   result.add "query", section
   ## parameters in `header` object:
   ##   Accept-Language: JString
   ##                  : Specifies the preferred language for the response.
   section = newJObject()
-  var valid_568255 = header.getOrDefault("Accept-Language")
-  valid_568255 = validateParameter(valid_568255, JString, required = false,
+  var valid_564155 = header.getOrDefault("Accept-Language")
+  valid_564155 = validateParameter(valid_564155, JString, required = false,
                                  default = nil)
-  if valid_568255 != nil:
-    section.add "Accept-Language", valid_568255
+  if valid_564155 != nil:
+    section.add "Accept-Language", valid_564155
   result.add "header", section
   section = newJObject()
   result.add "formData", section
   if body != nil:
     result.add "body", body
 
-proc call*(call_568256: Call_JobsGet_568248; path: JsonNode; query: JsonNode;
+proc call*(call_564156: Call_JobsGet_564148; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets information about an existing job.
   ## 
-  let valid = call_568256.validator(path, query, header, formData, body)
-  let scheme = call_568256.pickScheme
+  let valid = call_564156.validator(path, query, header, formData, body)
+  let scheme = call_564156.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568256.url(scheme.get, call_568256.host, call_568256.base,
-                         call_568256.route, valid.getOrDefault("path"),
+  let url = call_564156.url(scheme.get, call_564156.host, call_564156.base,
+                         call_564156.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568256, url, valid)
+  result = hook(call_564156, url, valid)
 
-proc call*(call_568257: Call_JobsGet_568248; resourceGroupName: string;
-          subscriptionId: string; jobName: string; apiVersion: string = "2016-11-01"): Recallable =
+proc call*(call_564157: Call_JobsGet_564148; subscriptionId: string;
+          resourceGroupName: string; jobName: string;
+          apiVersion: string = "2016-11-01"): Recallable =
   ## jobsGet
   ## Gets information about an existing job.
-  ##   resourceGroupName: string (required)
-  ##                    : The resource group name uniquely identifies the resource group within the user subscription.
   ##   apiVersion: string (required)
   ##             : Specifies the API version to use for this request.
   ##   subscriptionId: string (required)
   ##                 : The subscription ID for the Azure user.
+  ##   resourceGroupName: string (required)
+  ##                    : The resource group name uniquely identifies the resource group within the user subscription.
   ##   jobName: string (required)
   ##          : The name of the import/export job.
-  var path_568258 = newJObject()
-  var query_568259 = newJObject()
-  add(path_568258, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568259, "api-version", newJString(apiVersion))
-  add(path_568258, "subscriptionId", newJString(subscriptionId))
-  add(path_568258, "jobName", newJString(jobName))
-  result = call_568257.call(path_568258, query_568259, nil, nil, nil)
+  var path_564158 = newJObject()
+  var query_564159 = newJObject()
+  add(query_564159, "api-version", newJString(apiVersion))
+  add(path_564158, "subscriptionId", newJString(subscriptionId))
+  add(path_564158, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564158, "jobName", newJString(jobName))
+  result = call_564157.call(path_564158, query_564159, nil, nil, nil)
 
-var jobsGet* = Call_JobsGet_568248(name: "jobsGet", meth: HttpMethod.HttpGet,
+var jobsGet* = Call_JobsGet_564148(name: "jobsGet", meth: HttpMethod.HttpGet,
                                 host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ImportExport/jobs/{jobName}",
-                                validator: validate_JobsGet_568249, base: "",
-                                url: url_JobsGet_568250, schemes: {Scheme.Https})
+                                validator: validate_JobsGet_564149, base: "",
+                                url: url_JobsGet_564150, schemes: {Scheme.Https})
 type
-  Call_JobsUpdate_568304 = ref object of OpenApiRestCall_567658
-proc url_JobsUpdate_568306(protocol: Scheme; host: string; base: string; route: string;
+  Call_JobsUpdate_564204 = ref object of OpenApiRestCall_563556
+proc url_JobsUpdate_564206(protocol: Scheme; host: string; base: string; route: string;
                           path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -870,37 +875,37 @@ proc url_JobsUpdate_568306(protocol: Scheme; host: string; base: string; route: 
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_JobsUpdate_568305(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_JobsUpdate_564205(path: JsonNode; query: JsonNode; header: JsonNode;
                                formData: JsonNode; body: JsonNode): JsonNode =
   ## Updates specific properties of a job. You can call this operation to notify the Import/Export service that the hard drives comprising the import or export job have been shipped to the Microsoft data center. It can also be used to cancel an existing job.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The resource group name uniquely identifies the resource group within the user subscription.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID for the Azure user.
+  ##   resourceGroupName: JString (required)
+  ##                    : The resource group name uniquely identifies the resource group within the user subscription.
   ##   jobName: JString (required)
   ##          : The name of the import/export job.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568307 = path.getOrDefault("resourceGroupName")
-  valid_568307 = validateParameter(valid_568307, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564207 = path.getOrDefault("subscriptionId")
+  valid_564207 = validateParameter(valid_564207, JString, required = true,
                                  default = nil)
-  if valid_568307 != nil:
-    section.add "resourceGroupName", valid_568307
-  var valid_568308 = path.getOrDefault("subscriptionId")
-  valid_568308 = validateParameter(valid_568308, JString, required = true,
+  if valid_564207 != nil:
+    section.add "subscriptionId", valid_564207
+  var valid_564208 = path.getOrDefault("resourceGroupName")
+  valid_564208 = validateParameter(valid_564208, JString, required = true,
                                  default = nil)
-  if valid_568308 != nil:
-    section.add "subscriptionId", valid_568308
-  var valid_568309 = path.getOrDefault("jobName")
-  valid_568309 = validateParameter(valid_568309, JString, required = true,
+  if valid_564208 != nil:
+    section.add "resourceGroupName", valid_564208
+  var valid_564209 = path.getOrDefault("jobName")
+  valid_564209 = validateParameter(valid_564209, JString, required = true,
                                  default = nil)
-  if valid_568309 != nil:
-    section.add "jobName", valid_568309
+  if valid_564209 != nil:
+    section.add "jobName", valid_564209
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -908,21 +913,21 @@ proc validate_JobsUpdate_568305(path: JsonNode; query: JsonNode; header: JsonNod
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568310 = query.getOrDefault("api-version")
-  valid_568310 = validateParameter(valid_568310, JString, required = true,
+  var valid_564210 = query.getOrDefault("api-version")
+  valid_564210 = validateParameter(valid_564210, JString, required = true,
                                  default = newJString("2016-11-01"))
-  if valid_568310 != nil:
-    section.add "api-version", valid_568310
+  if valid_564210 != nil:
+    section.add "api-version", valid_564210
   result.add "query", section
   ## parameters in `header` object:
   ##   Accept-Language: JString
   ##                  : Specifies the preferred language for the response.
   section = newJObject()
-  var valid_568311 = header.getOrDefault("Accept-Language")
-  valid_568311 = validateParameter(valid_568311, JString, required = false,
+  var valid_564211 = header.getOrDefault("Accept-Language")
+  valid_564211 = validateParameter(valid_564211, JString, required = false,
                                  default = nil)
-  if valid_568311 != nil:
-    section.add "Accept-Language", valid_568311
+  if valid_564211 != nil:
+    section.add "Accept-Language", valid_564211
   result.add "header", section
   section = newJObject()
   result.add "formData", section
@@ -934,54 +939,54 @@ proc validate_JobsUpdate_568305(path: JsonNode; query: JsonNode; header: JsonNod
   if body != nil:
     result.add "body", body
 
-proc call*(call_568313: Call_JobsUpdate_568304; path: JsonNode; query: JsonNode;
+proc call*(call_564213: Call_JobsUpdate_564204; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Updates specific properties of a job. You can call this operation to notify the Import/Export service that the hard drives comprising the import or export job have been shipped to the Microsoft data center. It can also be used to cancel an existing job.
   ## 
-  let valid = call_568313.validator(path, query, header, formData, body)
-  let scheme = call_568313.pickScheme
+  let valid = call_564213.validator(path, query, header, formData, body)
+  let scheme = call_564213.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568313.url(scheme.get, call_568313.host, call_568313.base,
-                         call_568313.route, valid.getOrDefault("path"),
+  let url = call_564213.url(scheme.get, call_564213.host, call_564213.base,
+                         call_564213.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568313, url, valid)
+  result = hook(call_564213, url, valid)
 
-proc call*(call_568314: Call_JobsUpdate_568304; resourceGroupName: string;
-          subscriptionId: string; jobName: string; body: JsonNode;
+proc call*(call_564214: Call_JobsUpdate_564204; subscriptionId: string;
+          resourceGroupName: string; body: JsonNode; jobName: string;
           apiVersion: string = "2016-11-01"): Recallable =
   ## jobsUpdate
   ## Updates specific properties of a job. You can call this operation to notify the Import/Export service that the hard drives comprising the import or export job have been shipped to the Microsoft data center. It can also be used to cancel an existing job.
-  ##   resourceGroupName: string (required)
-  ##                    : The resource group name uniquely identifies the resource group within the user subscription.
   ##   apiVersion: string (required)
   ##             : Specifies the API version to use for this request.
   ##   subscriptionId: string (required)
   ##                 : The subscription ID for the Azure user.
-  ##   jobName: string (required)
-  ##          : The name of the import/export job.
+  ##   resourceGroupName: string (required)
+  ##                    : The resource group name uniquely identifies the resource group within the user subscription.
   ##   body: JObject (required)
   ##       : The parameters to update in the job
-  var path_568315 = newJObject()
-  var query_568316 = newJObject()
-  var body_568317 = newJObject()
-  add(path_568315, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568316, "api-version", newJString(apiVersion))
-  add(path_568315, "subscriptionId", newJString(subscriptionId))
-  add(path_568315, "jobName", newJString(jobName))
+  ##   jobName: string (required)
+  ##          : The name of the import/export job.
+  var path_564215 = newJObject()
+  var query_564216 = newJObject()
+  var body_564217 = newJObject()
+  add(query_564216, "api-version", newJString(apiVersion))
+  add(path_564215, "subscriptionId", newJString(subscriptionId))
+  add(path_564215, "resourceGroupName", newJString(resourceGroupName))
   if body != nil:
-    body_568317 = body
-  result = call_568314.call(path_568315, query_568316, nil, nil, body_568317)
+    body_564217 = body
+  add(path_564215, "jobName", newJString(jobName))
+  result = call_564214.call(path_564215, query_564216, nil, nil, body_564217)
 
-var jobsUpdate* = Call_JobsUpdate_568304(name: "jobsUpdate",
+var jobsUpdate* = Call_JobsUpdate_564204(name: "jobsUpdate",
                                       meth: HttpMethod.HttpPatch,
                                       host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ImportExport/jobs/{jobName}",
-                                      validator: validate_JobsUpdate_568305,
-                                      base: "", url: url_JobsUpdate_568306,
+                                      validator: validate_JobsUpdate_564205,
+                                      base: "", url: url_JobsUpdate_564206,
                                       schemes: {Scheme.Https})
 type
-  Call_JobsDelete_568292 = ref object of OpenApiRestCall_567658
-proc url_JobsDelete_568294(protocol: Scheme; host: string; base: string; route: string;
+  Call_JobsDelete_564192 = ref object of OpenApiRestCall_563556
+proc url_JobsDelete_564194(protocol: Scheme; host: string; base: string; route: string;
                           path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1003,37 +1008,37 @@ proc url_JobsDelete_568294(protocol: Scheme; host: string; base: string; route: 
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_JobsDelete_568293(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_JobsDelete_564193(path: JsonNode; query: JsonNode; header: JsonNode;
                                formData: JsonNode; body: JsonNode): JsonNode =
   ## Deletes an existing job. Only jobs in the Creating or Completed states can be deleted.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The resource group name uniquely identifies the resource group within the user subscription.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID for the Azure user.
+  ##   resourceGroupName: JString (required)
+  ##                    : The resource group name uniquely identifies the resource group within the user subscription.
   ##   jobName: JString (required)
   ##          : The name of the import/export job.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568295 = path.getOrDefault("resourceGroupName")
-  valid_568295 = validateParameter(valid_568295, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564195 = path.getOrDefault("subscriptionId")
+  valid_564195 = validateParameter(valid_564195, JString, required = true,
                                  default = nil)
-  if valid_568295 != nil:
-    section.add "resourceGroupName", valid_568295
-  var valid_568296 = path.getOrDefault("subscriptionId")
-  valid_568296 = validateParameter(valid_568296, JString, required = true,
+  if valid_564195 != nil:
+    section.add "subscriptionId", valid_564195
+  var valid_564196 = path.getOrDefault("resourceGroupName")
+  valid_564196 = validateParameter(valid_564196, JString, required = true,
                                  default = nil)
-  if valid_568296 != nil:
-    section.add "subscriptionId", valid_568296
-  var valid_568297 = path.getOrDefault("jobName")
-  valid_568297 = validateParameter(valid_568297, JString, required = true,
+  if valid_564196 != nil:
+    section.add "resourceGroupName", valid_564196
+  var valid_564197 = path.getOrDefault("jobName")
+  valid_564197 = validateParameter(valid_564197, JString, required = true,
                                  default = nil)
-  if valid_568297 != nil:
-    section.add "jobName", valid_568297
+  if valid_564197 != nil:
+    section.add "jobName", valid_564197
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1041,69 +1046,70 @@ proc validate_JobsDelete_568293(path: JsonNode; query: JsonNode; header: JsonNod
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568298 = query.getOrDefault("api-version")
-  valid_568298 = validateParameter(valid_568298, JString, required = true,
+  var valid_564198 = query.getOrDefault("api-version")
+  valid_564198 = validateParameter(valid_564198, JString, required = true,
                                  default = newJString("2016-11-01"))
-  if valid_568298 != nil:
-    section.add "api-version", valid_568298
+  if valid_564198 != nil:
+    section.add "api-version", valid_564198
   result.add "query", section
   ## parameters in `header` object:
   ##   Accept-Language: JString
   ##                  : Specifies the preferred language for the response.
   section = newJObject()
-  var valid_568299 = header.getOrDefault("Accept-Language")
-  valid_568299 = validateParameter(valid_568299, JString, required = false,
+  var valid_564199 = header.getOrDefault("Accept-Language")
+  valid_564199 = validateParameter(valid_564199, JString, required = false,
                                  default = nil)
-  if valid_568299 != nil:
-    section.add "Accept-Language", valid_568299
+  if valid_564199 != nil:
+    section.add "Accept-Language", valid_564199
   result.add "header", section
   section = newJObject()
   result.add "formData", section
   if body != nil:
     result.add "body", body
 
-proc call*(call_568300: Call_JobsDelete_568292; path: JsonNode; query: JsonNode;
+proc call*(call_564200: Call_JobsDelete_564192; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes an existing job. Only jobs in the Creating or Completed states can be deleted.
   ## 
-  let valid = call_568300.validator(path, query, header, formData, body)
-  let scheme = call_568300.pickScheme
+  let valid = call_564200.validator(path, query, header, formData, body)
+  let scheme = call_564200.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568300.url(scheme.get, call_568300.host, call_568300.base,
-                         call_568300.route, valid.getOrDefault("path"),
+  let url = call_564200.url(scheme.get, call_564200.host, call_564200.base,
+                         call_564200.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568300, url, valid)
+  result = hook(call_564200, url, valid)
 
-proc call*(call_568301: Call_JobsDelete_568292; resourceGroupName: string;
-          subscriptionId: string; jobName: string; apiVersion: string = "2016-11-01"): Recallable =
+proc call*(call_564201: Call_JobsDelete_564192; subscriptionId: string;
+          resourceGroupName: string; jobName: string;
+          apiVersion: string = "2016-11-01"): Recallable =
   ## jobsDelete
   ## Deletes an existing job. Only jobs in the Creating or Completed states can be deleted.
-  ##   resourceGroupName: string (required)
-  ##                    : The resource group name uniquely identifies the resource group within the user subscription.
   ##   apiVersion: string (required)
   ##             : Specifies the API version to use for this request.
   ##   subscriptionId: string (required)
   ##                 : The subscription ID for the Azure user.
+  ##   resourceGroupName: string (required)
+  ##                    : The resource group name uniquely identifies the resource group within the user subscription.
   ##   jobName: string (required)
   ##          : The name of the import/export job.
-  var path_568302 = newJObject()
-  var query_568303 = newJObject()
-  add(path_568302, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568303, "api-version", newJString(apiVersion))
-  add(path_568302, "subscriptionId", newJString(subscriptionId))
-  add(path_568302, "jobName", newJString(jobName))
-  result = call_568301.call(path_568302, query_568303, nil, nil, nil)
+  var path_564202 = newJObject()
+  var query_564203 = newJObject()
+  add(query_564203, "api-version", newJString(apiVersion))
+  add(path_564202, "subscriptionId", newJString(subscriptionId))
+  add(path_564202, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564202, "jobName", newJString(jobName))
+  result = call_564201.call(path_564202, query_564203, nil, nil, nil)
 
-var jobsDelete* = Call_JobsDelete_568292(name: "jobsDelete",
+var jobsDelete* = Call_JobsDelete_564192(name: "jobsDelete",
                                       meth: HttpMethod.HttpDelete,
                                       host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ImportExport/jobs/{jobName}",
-                                      validator: validate_JobsDelete_568293,
-                                      base: "", url: url_JobsDelete_568294,
+                                      validator: validate_JobsDelete_564193,
+                                      base: "", url: url_JobsDelete_564194,
                                       schemes: {Scheme.Https})
 type
-  Call_BitLockerKeysList_568318 = ref object of OpenApiRestCall_567658
-proc url_BitLockerKeysList_568320(protocol: Scheme; host: string; base: string;
+  Call_BitLockerKeysList_564218 = ref object of OpenApiRestCall_563556
+proc url_BitLockerKeysList_564220(protocol: Scheme; host: string; base: string;
                                  route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1126,7 +1132,7 @@ proc url_BitLockerKeysList_568320(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_BitLockerKeysList_568319(path: JsonNode; query: JsonNode;
+proc validate_BitLockerKeysList_564219(path: JsonNode; query: JsonNode;
                                       header: JsonNode; formData: JsonNode;
                                       body: JsonNode): JsonNode =
   ## Returns the BitLocker Keys for all drives in the specified job.
@@ -1134,30 +1140,30 @@ proc validate_BitLockerKeysList_568319(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The resource group name uniquely identifies the resource group within the user subscription.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID for the Azure user.
+  ##   resourceGroupName: JString (required)
+  ##                    : The resource group name uniquely identifies the resource group within the user subscription.
   ##   jobName: JString (required)
   ##          : The name of the import/export job.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568321 = path.getOrDefault("resourceGroupName")
-  valid_568321 = validateParameter(valid_568321, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564221 = path.getOrDefault("subscriptionId")
+  valid_564221 = validateParameter(valid_564221, JString, required = true,
                                  default = nil)
-  if valid_568321 != nil:
-    section.add "resourceGroupName", valid_568321
-  var valid_568322 = path.getOrDefault("subscriptionId")
-  valid_568322 = validateParameter(valid_568322, JString, required = true,
+  if valid_564221 != nil:
+    section.add "subscriptionId", valid_564221
+  var valid_564222 = path.getOrDefault("resourceGroupName")
+  valid_564222 = validateParameter(valid_564222, JString, required = true,
                                  default = nil)
-  if valid_568322 != nil:
-    section.add "subscriptionId", valid_568322
-  var valid_568323 = path.getOrDefault("jobName")
-  valid_568323 = validateParameter(valid_568323, JString, required = true,
+  if valid_564222 != nil:
+    section.add "resourceGroupName", valid_564222
+  var valid_564223 = path.getOrDefault("jobName")
+  valid_564223 = validateParameter(valid_564223, JString, required = true,
                                  default = nil)
-  if valid_568323 != nil:
-    section.add "jobName", valid_568323
+  if valid_564223 != nil:
+    section.add "jobName", valid_564223
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1165,64 +1171,65 @@ proc validate_BitLockerKeysList_568319(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568324 = query.getOrDefault("api-version")
-  valid_568324 = validateParameter(valid_568324, JString, required = true,
+  var valid_564224 = query.getOrDefault("api-version")
+  valid_564224 = validateParameter(valid_564224, JString, required = true,
                                  default = newJString("2016-11-01"))
-  if valid_568324 != nil:
-    section.add "api-version", valid_568324
+  if valid_564224 != nil:
+    section.add "api-version", valid_564224
   result.add "query", section
   ## parameters in `header` object:
   ##   Accept-Language: JString
   ##                  : Specifies the preferred language for the response.
   section = newJObject()
-  var valid_568325 = header.getOrDefault("Accept-Language")
-  valid_568325 = validateParameter(valid_568325, JString, required = false,
+  var valid_564225 = header.getOrDefault("Accept-Language")
+  valid_564225 = validateParameter(valid_564225, JString, required = false,
                                  default = nil)
-  if valid_568325 != nil:
-    section.add "Accept-Language", valid_568325
+  if valid_564225 != nil:
+    section.add "Accept-Language", valid_564225
   result.add "header", section
   section = newJObject()
   result.add "formData", section
   if body != nil:
     result.add "body", body
 
-proc call*(call_568326: Call_BitLockerKeysList_568318; path: JsonNode;
+proc call*(call_564226: Call_BitLockerKeysList_564218; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Returns the BitLocker Keys for all drives in the specified job.
   ## 
-  let valid = call_568326.validator(path, query, header, formData, body)
-  let scheme = call_568326.pickScheme
+  let valid = call_564226.validator(path, query, header, formData, body)
+  let scheme = call_564226.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568326.url(scheme.get, call_568326.host, call_568326.base,
-                         call_568326.route, valid.getOrDefault("path"),
+  let url = call_564226.url(scheme.get, call_564226.host, call_564226.base,
+                         call_564226.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568326, url, valid)
+  result = hook(call_564226, url, valid)
 
-proc call*(call_568327: Call_BitLockerKeysList_568318; resourceGroupName: string;
-          subscriptionId: string; jobName: string; apiVersion: string = "2016-11-01"): Recallable =
+proc call*(call_564227: Call_BitLockerKeysList_564218; subscriptionId: string;
+          resourceGroupName: string; jobName: string;
+          apiVersion: string = "2016-11-01"): Recallable =
   ## bitLockerKeysList
   ## Returns the BitLocker Keys for all drives in the specified job.
-  ##   resourceGroupName: string (required)
-  ##                    : The resource group name uniquely identifies the resource group within the user subscription.
   ##   apiVersion: string (required)
   ##             : Specifies the API version to use for this request.
   ##   subscriptionId: string (required)
   ##                 : The subscription ID for the Azure user.
+  ##   resourceGroupName: string (required)
+  ##                    : The resource group name uniquely identifies the resource group within the user subscription.
   ##   jobName: string (required)
   ##          : The name of the import/export job.
-  var path_568328 = newJObject()
-  var query_568329 = newJObject()
-  add(path_568328, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568329, "api-version", newJString(apiVersion))
-  add(path_568328, "subscriptionId", newJString(subscriptionId))
-  add(path_568328, "jobName", newJString(jobName))
-  result = call_568327.call(path_568328, query_568329, nil, nil, nil)
+  var path_564228 = newJObject()
+  var query_564229 = newJObject()
+  add(query_564229, "api-version", newJString(apiVersion))
+  add(path_564228, "subscriptionId", newJString(subscriptionId))
+  add(path_564228, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564228, "jobName", newJString(jobName))
+  result = call_564227.call(path_564228, query_564229, nil, nil, nil)
 
-var bitLockerKeysList* = Call_BitLockerKeysList_568318(name: "bitLockerKeysList",
+var bitLockerKeysList* = Call_BitLockerKeysList_564218(name: "bitLockerKeysList",
     meth: HttpMethod.HttpPost, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ImportExport/jobs/{jobName}/listBitLockerKeys",
-    validator: validate_BitLockerKeysList_568319, base: "",
-    url: url_BitLockerKeysList_568320, schemes: {Scheme.Https})
+    validator: validate_BitLockerKeysList_564219, base: "",
+    url: url_BitLockerKeysList_564220, schemes: {Scheme.Https})
 export
   rest
 

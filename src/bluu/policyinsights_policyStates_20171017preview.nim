@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, httpcore
 
 ## auto-generated via openapi macro
 ## title: PolicyStatesClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_567658 = ref object of OpenApiRestCall
+  OpenApiRestCall_563556 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_567658](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563556](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_567658): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563556): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,15 +107,15 @@ const
   macServiceName = "policyinsights-policyStates"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_OperationsList_567880 = ref object of OpenApiRestCall_567658
-proc url_OperationsList_567882(protocol: Scheme; host: string; base: string;
+  Call_OperationsList_563778 = ref object of OpenApiRestCall_563556
+proc url_OperationsList_563780(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_OperationsList_567881(path: JsonNode; query: JsonNode;
+proc validate_OperationsList_563779(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## Lists available operations.
@@ -126,11 +130,11 @@ proc validate_OperationsList_567881(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568041 = query.getOrDefault("api-version")
-  valid_568041 = validateParameter(valid_568041, JString, required = true,
+  var valid_563941 = query.getOrDefault("api-version")
+  valid_563941 = validateParameter(valid_563941, JString, required = true,
                                  default = nil)
-  if valid_568041 != nil:
-    section.add "api-version", valid_568041
+  if valid_563941 != nil:
+    section.add "api-version", valid_563941
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -139,36 +143,36 @@ proc validate_OperationsList_567881(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568064: Call_OperationsList_567880; path: JsonNode; query: JsonNode;
+proc call*(call_563964: Call_OperationsList_563778; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists available operations.
   ## 
-  let valid = call_568064.validator(path, query, header, formData, body)
-  let scheme = call_568064.pickScheme
+  let valid = call_563964.validator(path, query, header, formData, body)
+  let scheme = call_563964.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568064.url(scheme.get, call_568064.host, call_568064.base,
-                         call_568064.route, valid.getOrDefault("path"),
+  let url = call_563964.url(scheme.get, call_563964.host, call_563964.base,
+                         call_563964.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568064, url, valid)
+  result = hook(call_563964, url, valid)
 
-proc call*(call_568135: Call_OperationsList_567880; apiVersion: string): Recallable =
+proc call*(call_564035: Call_OperationsList_563778; apiVersion: string): Recallable =
   ## operationsList
   ## Lists available operations.
   ##   apiVersion: string (required)
   ##             : API version to use with the client requests.
-  var query_568136 = newJObject()
-  add(query_568136, "api-version", newJString(apiVersion))
-  result = call_568135.call(nil, query_568136, nil, nil, nil)
+  var query_564036 = newJObject()
+  add(query_564036, "api-version", newJString(apiVersion))
+  result = call_564035.call(nil, query_564036, nil, nil, nil)
 
-var operationsList* = Call_OperationsList_567880(name: "operationsList",
+var operationsList* = Call_OperationsList_563778(name: "operationsList",
     meth: HttpMethod.HttpGet, host: "management.azure.com",
     route: "/providers/Microsoft.PolicyInsights/operations",
-    validator: validate_OperationsList_567881, base: "", url: url_OperationsList_567882,
+    validator: validate_OperationsList_563779, base: "", url: url_OperationsList_563780,
     schemes: {Scheme.Https})
 type
-  Call_PolicyStatesListQueryResultsForManagementGroup_568176 = ref object of OpenApiRestCall_567658
-proc url_PolicyStatesListQueryResultsForManagementGroup_568178(protocol: Scheme;
+  Call_PolicyStatesListQueryResultsForManagementGroup_564076 = ref object of OpenApiRestCall_563556
+proc url_PolicyStatesListQueryResultsForManagementGroup_564078(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -194,7 +198,7 @@ proc url_PolicyStatesListQueryResultsForManagementGroup_568178(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_PolicyStatesListQueryResultsForManagementGroup_568177(
+proc validate_PolicyStatesListQueryResultsForManagementGroup_564077(
     path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
     body: JsonNode): JsonNode =
   ## Queries policy states for the resources under the management group.
@@ -204,87 +208,87 @@ proc validate_PolicyStatesListQueryResultsForManagementGroup_568177(
   ## parameters in `path` object:
   ##   managementGroupName: JString (required)
   ##                      : Management group name.
-  ##   managementGroupsNamespace: JString (required)
-  ##                            : The namespace for Microsoft Management resource provider; only "Microsoft.Management" is allowed.
   ##   policyStatesResource: JString (required)
   ##                       : The virtual resource under PolicyStates resource type. In a given time range, 'latest' represents the latest policy state(s), whereas 'default' represents all policy state(s).
+  ##   managementGroupsNamespace: JString (required)
+  ##                            : The namespace for Microsoft Management resource provider; only "Microsoft.Management" is allowed.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `managementGroupName` field"
-  var valid_568194 = path.getOrDefault("managementGroupName")
-  valid_568194 = validateParameter(valid_568194, JString, required = true,
+  var valid_564094 = path.getOrDefault("managementGroupName")
+  valid_564094 = validateParameter(valid_564094, JString, required = true,
                                  default = nil)
-  if valid_568194 != nil:
-    section.add "managementGroupName", valid_568194
-  var valid_568208 = path.getOrDefault("managementGroupsNamespace")
-  valid_568208 = validateParameter(valid_568208, JString, required = true,
-                                 default = newJString("Microsoft.Management"))
-  if valid_568208 != nil:
-    section.add "managementGroupsNamespace", valid_568208
-  var valid_568209 = path.getOrDefault("policyStatesResource")
-  valid_568209 = validateParameter(valid_568209, JString, required = true,
+  if valid_564094 != nil:
+    section.add "managementGroupName", valid_564094
+  var valid_564108 = path.getOrDefault("policyStatesResource")
+  valid_564108 = validateParameter(valid_564108, JString, required = true,
                                  default = newJString("default"))
-  if valid_568209 != nil:
-    section.add "policyStatesResource", valid_568209
+  if valid_564108 != nil:
+    section.add "policyStatesResource", valid_564108
+  var valid_564109 = path.getOrDefault("managementGroupsNamespace")
+  valid_564109 = validateParameter(valid_564109, JString, required = true,
+                                 default = newJString("Microsoft.Management"))
+  if valid_564109 != nil:
+    section.add "managementGroupsNamespace", valid_564109
   result.add "path", section
   ## parameters in `query` object:
-  ##   $orderby: JString
-  ##           : Ordering expression using OData notation. One or more comma-separated column names with an optional "desc" (the default) or "asc", e.g. "$orderby=PolicyAssignmentId, ResourceId asc".
   ##   api-version: JString (required)
   ##              : API version to use with the client requests.
-  ##   $from: JString
-  ##        : ISO 8601 formatted timestamp specifying the start time of the interval to query. When not specified, the service uses ($to - 1-day).
   ##   $top: JInt
   ##       : Maximum number of records to return.
   ##   $select: JString
   ##          : Select expression using OData notation. Limits the columns on each record to just those requested, e.g. "$select=PolicyAssignmentId, ResourceId".
   ##   $to: JString
   ##      : ISO 8601 formatted timestamp specifying the end time of the interval to query. When not specified, the service uses request time.
+  ##   $orderby: JString
+  ##           : Ordering expression using OData notation. One or more comma-separated column names with an optional "desc" (the default) or "asc", e.g. "$orderby=PolicyAssignmentId, ResourceId asc".
   ##   $apply: JString
   ##         : OData apply expression for aggregations.
   ##   $filter: JString
   ##          : OData filter expression.
+  ##   $from: JString
+  ##        : ISO 8601 formatted timestamp specifying the start time of the interval to query. When not specified, the service uses ($to - 1-day).
   section = newJObject()
-  var valid_568210 = query.getOrDefault("$orderby")
-  valid_568210 = validateParameter(valid_568210, JString, required = false,
-                                 default = nil)
-  if valid_568210 != nil:
-    section.add "$orderby", valid_568210
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568211 = query.getOrDefault("api-version")
-  valid_568211 = validateParameter(valid_568211, JString, required = true,
+  var valid_564110 = query.getOrDefault("api-version")
+  valid_564110 = validateParameter(valid_564110, JString, required = true,
                                  default = nil)
-  if valid_568211 != nil:
-    section.add "api-version", valid_568211
-  var valid_568212 = query.getOrDefault("$from")
-  valid_568212 = validateParameter(valid_568212, JString, required = false,
+  if valid_564110 != nil:
+    section.add "api-version", valid_564110
+  var valid_564111 = query.getOrDefault("$top")
+  valid_564111 = validateParameter(valid_564111, JInt, required = false, default = nil)
+  if valid_564111 != nil:
+    section.add "$top", valid_564111
+  var valid_564112 = query.getOrDefault("$select")
+  valid_564112 = validateParameter(valid_564112, JString, required = false,
                                  default = nil)
-  if valid_568212 != nil:
-    section.add "$from", valid_568212
-  var valid_568213 = query.getOrDefault("$top")
-  valid_568213 = validateParameter(valid_568213, JInt, required = false, default = nil)
-  if valid_568213 != nil:
-    section.add "$top", valid_568213
-  var valid_568214 = query.getOrDefault("$select")
-  valid_568214 = validateParameter(valid_568214, JString, required = false,
+  if valid_564112 != nil:
+    section.add "$select", valid_564112
+  var valid_564113 = query.getOrDefault("$to")
+  valid_564113 = validateParameter(valid_564113, JString, required = false,
                                  default = nil)
-  if valid_568214 != nil:
-    section.add "$select", valid_568214
-  var valid_568215 = query.getOrDefault("$to")
-  valid_568215 = validateParameter(valid_568215, JString, required = false,
+  if valid_564113 != nil:
+    section.add "$to", valid_564113
+  var valid_564114 = query.getOrDefault("$orderby")
+  valid_564114 = validateParameter(valid_564114, JString, required = false,
                                  default = nil)
-  if valid_568215 != nil:
-    section.add "$to", valid_568215
-  var valid_568216 = query.getOrDefault("$apply")
-  valid_568216 = validateParameter(valid_568216, JString, required = false,
+  if valid_564114 != nil:
+    section.add "$orderby", valid_564114
+  var valid_564115 = query.getOrDefault("$apply")
+  valid_564115 = validateParameter(valid_564115, JString, required = false,
                                  default = nil)
-  if valid_568216 != nil:
-    section.add "$apply", valid_568216
-  var valid_568217 = query.getOrDefault("$filter")
-  valid_568217 = validateParameter(valid_568217, JString, required = false,
+  if valid_564115 != nil:
+    section.add "$apply", valid_564115
+  var valid_564116 = query.getOrDefault("$filter")
+  valid_564116 = validateParameter(valid_564116, JString, required = false,
                                  default = nil)
-  if valid_568217 != nil:
-    section.add "$filter", valid_568217
+  if valid_564116 != nil:
+    section.add "$filter", valid_564116
+  var valid_564117 = query.getOrDefault("$from")
+  valid_564117 = validateParameter(valid_564117, JString, required = false,
+                                 default = nil)
+  if valid_564117 != nil:
+    section.add "$from", valid_564117
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -293,38 +297,32 @@ proc validate_PolicyStatesListQueryResultsForManagementGroup_568177(
   if body != nil:
     result.add "body", body
 
-proc call*(call_568218: Call_PolicyStatesListQueryResultsForManagementGroup_568176;
+proc call*(call_564118: Call_PolicyStatesListQueryResultsForManagementGroup_564076;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Queries policy states for the resources under the management group.
   ## 
-  let valid = call_568218.validator(path, query, header, formData, body)
-  let scheme = call_568218.pickScheme
+  let valid = call_564118.validator(path, query, header, formData, body)
+  let scheme = call_564118.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568218.url(scheme.get, call_568218.host, call_568218.base,
-                         call_568218.route, valid.getOrDefault("path"),
+  let url = call_564118.url(scheme.get, call_564118.host, call_564118.base,
+                         call_564118.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568218, url, valid)
+  result = hook(call_564118, url, valid)
 
-proc call*(call_568219: Call_PolicyStatesListQueryResultsForManagementGroup_568176;
-          managementGroupName: string; apiVersion: string;
+proc call*(call_564119: Call_PolicyStatesListQueryResultsForManagementGroup_564076;
+          apiVersion: string; managementGroupName: string; Top: int = 0;
+          Select: string = ""; policyStatesResource: string = "default";
+          To: string = ""; Orderby: string = "";
           managementGroupsNamespace: string = "Microsoft.Management";
-          Orderby: string = ""; From: string = ""; Top: int = 0; Select: string = "";
-          policyStatesResource: string = "default"; To: string = ""; Apply: string = "";
-          Filter: string = ""): Recallable =
+          Apply: string = ""; Filter: string = ""; From: string = ""): Recallable =
   ## policyStatesListQueryResultsForManagementGroup
   ## Queries policy states for the resources under the management group.
-  ##   managementGroupName: string (required)
-  ##                      : Management group name.
-  ##   managementGroupsNamespace: string (required)
-  ##                            : The namespace for Microsoft Management resource provider; only "Microsoft.Management" is allowed.
-  ##   Orderby: string
-  ##          : Ordering expression using OData notation. One or more comma-separated column names with an optional "desc" (the default) or "asc", e.g. "$orderby=PolicyAssignmentId, ResourceId asc".
   ##   apiVersion: string (required)
   ##             : API version to use with the client requests.
-  ##   From: string
-  ##       : ISO 8601 formatted timestamp specifying the start time of the interval to query. When not specified, the service uses ($to - 1-day).
+  ##   managementGroupName: string (required)
+  ##                      : Management group name.
   ##   Top: int
   ##      : Maximum number of records to return.
   ##   Select: string
@@ -333,35 +331,41 @@ proc call*(call_568219: Call_PolicyStatesListQueryResultsForManagementGroup_5681
   ##                       : The virtual resource under PolicyStates resource type. In a given time range, 'latest' represents the latest policy state(s), whereas 'default' represents all policy state(s).
   ##   To: string
   ##     : ISO 8601 formatted timestamp specifying the end time of the interval to query. When not specified, the service uses request time.
+  ##   Orderby: string
+  ##          : Ordering expression using OData notation. One or more comma-separated column names with an optional "desc" (the default) or "asc", e.g. "$orderby=PolicyAssignmentId, ResourceId asc".
+  ##   managementGroupsNamespace: string (required)
+  ##                            : The namespace for Microsoft Management resource provider; only "Microsoft.Management" is allowed.
   ##   Apply: string
   ##        : OData apply expression for aggregations.
   ##   Filter: string
   ##         : OData filter expression.
-  var path_568220 = newJObject()
-  var query_568221 = newJObject()
-  add(path_568220, "managementGroupName", newJString(managementGroupName))
-  add(path_568220, "managementGroupsNamespace",
+  ##   From: string
+  ##       : ISO 8601 formatted timestamp specifying the start time of the interval to query. When not specified, the service uses ($to - 1-day).
+  var path_564120 = newJObject()
+  var query_564121 = newJObject()
+  add(query_564121, "api-version", newJString(apiVersion))
+  add(path_564120, "managementGroupName", newJString(managementGroupName))
+  add(query_564121, "$top", newJInt(Top))
+  add(query_564121, "$select", newJString(Select))
+  add(path_564120, "policyStatesResource", newJString(policyStatesResource))
+  add(query_564121, "$to", newJString(To))
+  add(query_564121, "$orderby", newJString(Orderby))
+  add(path_564120, "managementGroupsNamespace",
       newJString(managementGroupsNamespace))
-  add(query_568221, "$orderby", newJString(Orderby))
-  add(query_568221, "api-version", newJString(apiVersion))
-  add(query_568221, "$from", newJString(From))
-  add(query_568221, "$top", newJInt(Top))
-  add(query_568221, "$select", newJString(Select))
-  add(path_568220, "policyStatesResource", newJString(policyStatesResource))
-  add(query_568221, "$to", newJString(To))
-  add(query_568221, "$apply", newJString(Apply))
-  add(query_568221, "$filter", newJString(Filter))
-  result = call_568219.call(path_568220, query_568221, nil, nil, nil)
+  add(query_564121, "$apply", newJString(Apply))
+  add(query_564121, "$filter", newJString(Filter))
+  add(query_564121, "$from", newJString(From))
+  result = call_564119.call(path_564120, query_564121, nil, nil, nil)
 
-var policyStatesListQueryResultsForManagementGroup* = Call_PolicyStatesListQueryResultsForManagementGroup_568176(
+var policyStatesListQueryResultsForManagementGroup* = Call_PolicyStatesListQueryResultsForManagementGroup_564076(
     name: "policyStatesListQueryResultsForManagementGroup",
     meth: HttpMethod.HttpPost, host: "management.azure.com", route: "/providers/{managementGroupsNamespace}/managementGroups/{managementGroupName}/providers/Microsoft.PolicyInsights/policyStates/{policyStatesResource}/queryResults",
-    validator: validate_PolicyStatesListQueryResultsForManagementGroup_568177,
-    base: "", url: url_PolicyStatesListQueryResultsForManagementGroup_568178,
+    validator: validate_PolicyStatesListQueryResultsForManagementGroup_564077,
+    base: "", url: url_PolicyStatesListQueryResultsForManagementGroup_564078,
     schemes: {Scheme.Https})
 type
-  Call_PolicyStatesListQueryResultsForSubscription_568222 = ref object of OpenApiRestCall_567658
-proc url_PolicyStatesListQueryResultsForSubscription_568224(protocol: Scheme;
+  Call_PolicyStatesListQueryResultsForSubscription_564122 = ref object of OpenApiRestCall_563556
+proc url_PolicyStatesListQueryResultsForSubscription_564124(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -382,90 +386,89 @@ proc url_PolicyStatesListQueryResultsForSubscription_568224(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_PolicyStatesListQueryResultsForSubscription_568223(path: JsonNode;
+proc validate_PolicyStatesListQueryResultsForSubscription_564123(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Queries policy states for the resources under the subscription.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   subscriptionId: JString (required)
-  ##                 : Microsoft Azure subscription ID.
   ##   policyStatesResource: JString (required)
   ##                       : The virtual resource under PolicyStates resource type. In a given time range, 'latest' represents the latest policy state(s), whereas 'default' represents all policy state(s).
+  ##   subscriptionId: JString (required)
+  ##                 : Microsoft Azure subscription ID.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `subscriptionId` field"
-  var valid_568225 = path.getOrDefault("subscriptionId")
-  valid_568225 = validateParameter(valid_568225, JString, required = true,
-                                 default = nil)
-  if valid_568225 != nil:
-    section.add "subscriptionId", valid_568225
-  var valid_568226 = path.getOrDefault("policyStatesResource")
-  valid_568226 = validateParameter(valid_568226, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `policyStatesResource` field"
+  var valid_564125 = path.getOrDefault("policyStatesResource")
+  valid_564125 = validateParameter(valid_564125, JString, required = true,
                                  default = newJString("default"))
-  if valid_568226 != nil:
-    section.add "policyStatesResource", valid_568226
+  if valid_564125 != nil:
+    section.add "policyStatesResource", valid_564125
+  var valid_564126 = path.getOrDefault("subscriptionId")
+  valid_564126 = validateParameter(valid_564126, JString, required = true,
+                                 default = nil)
+  if valid_564126 != nil:
+    section.add "subscriptionId", valid_564126
   result.add "path", section
   ## parameters in `query` object:
-  ##   $orderby: JString
-  ##           : Ordering expression using OData notation. One or more comma-separated column names with an optional "desc" (the default) or "asc", e.g. "$orderby=PolicyAssignmentId, ResourceId asc".
   ##   api-version: JString (required)
   ##              : API version to use with the client requests.
-  ##   $from: JString
-  ##        : ISO 8601 formatted timestamp specifying the start time of the interval to query. When not specified, the service uses ($to - 1-day).
   ##   $top: JInt
   ##       : Maximum number of records to return.
   ##   $select: JString
   ##          : Select expression using OData notation. Limits the columns on each record to just those requested, e.g. "$select=PolicyAssignmentId, ResourceId".
   ##   $to: JString
   ##      : ISO 8601 formatted timestamp specifying the end time of the interval to query. When not specified, the service uses request time.
+  ##   $orderby: JString
+  ##           : Ordering expression using OData notation. One or more comma-separated column names with an optional "desc" (the default) or "asc", e.g. "$orderby=PolicyAssignmentId, ResourceId asc".
   ##   $apply: JString
   ##         : OData apply expression for aggregations.
   ##   $filter: JString
   ##          : OData filter expression.
+  ##   $from: JString
+  ##        : ISO 8601 formatted timestamp specifying the start time of the interval to query. When not specified, the service uses ($to - 1-day).
   section = newJObject()
-  var valid_568227 = query.getOrDefault("$orderby")
-  valid_568227 = validateParameter(valid_568227, JString, required = false,
-                                 default = nil)
-  if valid_568227 != nil:
-    section.add "$orderby", valid_568227
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568228 = query.getOrDefault("api-version")
-  valid_568228 = validateParameter(valid_568228, JString, required = true,
+  var valid_564127 = query.getOrDefault("api-version")
+  valid_564127 = validateParameter(valid_564127, JString, required = true,
                                  default = nil)
-  if valid_568228 != nil:
-    section.add "api-version", valid_568228
-  var valid_568229 = query.getOrDefault("$from")
-  valid_568229 = validateParameter(valid_568229, JString, required = false,
+  if valid_564127 != nil:
+    section.add "api-version", valid_564127
+  var valid_564128 = query.getOrDefault("$top")
+  valid_564128 = validateParameter(valid_564128, JInt, required = false, default = nil)
+  if valid_564128 != nil:
+    section.add "$top", valid_564128
+  var valid_564129 = query.getOrDefault("$select")
+  valid_564129 = validateParameter(valid_564129, JString, required = false,
                                  default = nil)
-  if valid_568229 != nil:
-    section.add "$from", valid_568229
-  var valid_568230 = query.getOrDefault("$top")
-  valid_568230 = validateParameter(valid_568230, JInt, required = false, default = nil)
-  if valid_568230 != nil:
-    section.add "$top", valid_568230
-  var valid_568231 = query.getOrDefault("$select")
-  valid_568231 = validateParameter(valid_568231, JString, required = false,
+  if valid_564129 != nil:
+    section.add "$select", valid_564129
+  var valid_564130 = query.getOrDefault("$to")
+  valid_564130 = validateParameter(valid_564130, JString, required = false,
                                  default = nil)
-  if valid_568231 != nil:
-    section.add "$select", valid_568231
-  var valid_568232 = query.getOrDefault("$to")
-  valid_568232 = validateParameter(valid_568232, JString, required = false,
+  if valid_564130 != nil:
+    section.add "$to", valid_564130
+  var valid_564131 = query.getOrDefault("$orderby")
+  valid_564131 = validateParameter(valid_564131, JString, required = false,
                                  default = nil)
-  if valid_568232 != nil:
-    section.add "$to", valid_568232
-  var valid_568233 = query.getOrDefault("$apply")
-  valid_568233 = validateParameter(valid_568233, JString, required = false,
+  if valid_564131 != nil:
+    section.add "$orderby", valid_564131
+  var valid_564132 = query.getOrDefault("$apply")
+  valid_564132 = validateParameter(valid_564132, JString, required = false,
                                  default = nil)
-  if valid_568233 != nil:
-    section.add "$apply", valid_568233
-  var valid_568234 = query.getOrDefault("$filter")
-  valid_568234 = validateParameter(valid_568234, JString, required = false,
+  if valid_564132 != nil:
+    section.add "$apply", valid_564132
+  var valid_564133 = query.getOrDefault("$filter")
+  valid_564133 = validateParameter(valid_564133, JString, required = false,
                                  default = nil)
-  if valid_568234 != nil:
-    section.add "$filter", valid_568234
+  if valid_564133 != nil:
+    section.add "$filter", valid_564133
+  var valid_564134 = query.getOrDefault("$from")
+  valid_564134 = validateParameter(valid_564134, JString, required = false,
+                                 default = nil)
+  if valid_564134 != nil:
+    section.add "$from", valid_564134
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -474,70 +477,69 @@ proc validate_PolicyStatesListQueryResultsForSubscription_568223(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568235: Call_PolicyStatesListQueryResultsForSubscription_568222;
+proc call*(call_564135: Call_PolicyStatesListQueryResultsForSubscription_564122;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Queries policy states for the resources under the subscription.
   ## 
-  let valid = call_568235.validator(path, query, header, formData, body)
-  let scheme = call_568235.pickScheme
+  let valid = call_564135.validator(path, query, header, formData, body)
+  let scheme = call_564135.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568235.url(scheme.get, call_568235.host, call_568235.base,
-                         call_568235.route, valid.getOrDefault("path"),
+  let url = call_564135.url(scheme.get, call_564135.host, call_564135.base,
+                         call_564135.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568235, url, valid)
+  result = hook(call_564135, url, valid)
 
-proc call*(call_568236: Call_PolicyStatesListQueryResultsForSubscription_568222;
-          apiVersion: string; subscriptionId: string; Orderby: string = "";
-          From: string = ""; Top: int = 0; Select: string = "";
-          policyStatesResource: string = "default"; To: string = ""; Apply: string = "";
-          Filter: string = ""): Recallable =
+proc call*(call_564136: Call_PolicyStatesListQueryResultsForSubscription_564122;
+          apiVersion: string; subscriptionId: string; Top: int = 0; Select: string = "";
+          policyStatesResource: string = "default"; To: string = "";
+          Orderby: string = ""; Apply: string = ""; Filter: string = ""; From: string = ""): Recallable =
   ## policyStatesListQueryResultsForSubscription
   ## Queries policy states for the resources under the subscription.
-  ##   Orderby: string
-  ##          : Ordering expression using OData notation. One or more comma-separated column names with an optional "desc" (the default) or "asc", e.g. "$orderby=PolicyAssignmentId, ResourceId asc".
   ##   apiVersion: string (required)
   ##             : API version to use with the client requests.
-  ##   From: string
-  ##       : ISO 8601 formatted timestamp specifying the start time of the interval to query. When not specified, the service uses ($to - 1-day).
-  ##   subscriptionId: string (required)
-  ##                 : Microsoft Azure subscription ID.
   ##   Top: int
   ##      : Maximum number of records to return.
   ##   Select: string
   ##         : Select expression using OData notation. Limits the columns on each record to just those requested, e.g. "$select=PolicyAssignmentId, ResourceId".
   ##   policyStatesResource: string (required)
   ##                       : The virtual resource under PolicyStates resource type. In a given time range, 'latest' represents the latest policy state(s), whereas 'default' represents all policy state(s).
+  ##   subscriptionId: string (required)
+  ##                 : Microsoft Azure subscription ID.
   ##   To: string
   ##     : ISO 8601 formatted timestamp specifying the end time of the interval to query. When not specified, the service uses request time.
+  ##   Orderby: string
+  ##          : Ordering expression using OData notation. One or more comma-separated column names with an optional "desc" (the default) or "asc", e.g. "$orderby=PolicyAssignmentId, ResourceId asc".
   ##   Apply: string
   ##        : OData apply expression for aggregations.
   ##   Filter: string
   ##         : OData filter expression.
-  var path_568237 = newJObject()
-  var query_568238 = newJObject()
-  add(query_568238, "$orderby", newJString(Orderby))
-  add(query_568238, "api-version", newJString(apiVersion))
-  add(query_568238, "$from", newJString(From))
-  add(path_568237, "subscriptionId", newJString(subscriptionId))
-  add(query_568238, "$top", newJInt(Top))
-  add(query_568238, "$select", newJString(Select))
-  add(path_568237, "policyStatesResource", newJString(policyStatesResource))
-  add(query_568238, "$to", newJString(To))
-  add(query_568238, "$apply", newJString(Apply))
-  add(query_568238, "$filter", newJString(Filter))
-  result = call_568236.call(path_568237, query_568238, nil, nil, nil)
+  ##   From: string
+  ##       : ISO 8601 formatted timestamp specifying the start time of the interval to query. When not specified, the service uses ($to - 1-day).
+  var path_564137 = newJObject()
+  var query_564138 = newJObject()
+  add(query_564138, "api-version", newJString(apiVersion))
+  add(query_564138, "$top", newJInt(Top))
+  add(query_564138, "$select", newJString(Select))
+  add(path_564137, "policyStatesResource", newJString(policyStatesResource))
+  add(path_564137, "subscriptionId", newJString(subscriptionId))
+  add(query_564138, "$to", newJString(To))
+  add(query_564138, "$orderby", newJString(Orderby))
+  add(query_564138, "$apply", newJString(Apply))
+  add(query_564138, "$filter", newJString(Filter))
+  add(query_564138, "$from", newJString(From))
+  result = call_564136.call(path_564137, query_564138, nil, nil, nil)
 
-var policyStatesListQueryResultsForSubscription* = Call_PolicyStatesListQueryResultsForSubscription_568222(
+var policyStatesListQueryResultsForSubscription* = Call_PolicyStatesListQueryResultsForSubscription_564122(
     name: "policyStatesListQueryResultsForSubscription",
     meth: HttpMethod.HttpPost, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.PolicyInsights/policyStates/{policyStatesResource}/queryResults",
-    validator: validate_PolicyStatesListQueryResultsForSubscription_568223,
-    base: "", url: url_PolicyStatesListQueryResultsForSubscription_568224,
+    validator: validate_PolicyStatesListQueryResultsForSubscription_564123,
+    base: "", url: url_PolicyStatesListQueryResultsForSubscription_564124,
     schemes: {Scheme.Https})
 type
-  Call_PolicyStatesListQueryResultsForResourceGroup_568239 = ref object of OpenApiRestCall_567658
-proc url_PolicyStatesListQueryResultsForResourceGroup_568241(protocol: Scheme;
+  Call_PolicyStatesListQueryResultsForResourceGroup_564139 = ref object of OpenApiRestCall_563556
+proc url_PolicyStatesListQueryResultsForResourceGroup_564141(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -562,97 +564,96 @@ proc url_PolicyStatesListQueryResultsForResourceGroup_568241(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_PolicyStatesListQueryResultsForResourceGroup_568240(path: JsonNode;
+proc validate_PolicyStatesListQueryResultsForResourceGroup_564140(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Queries policy states for the resources under the resource group.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : Resource group name.
-  ##   subscriptionId: JString (required)
-  ##                 : Microsoft Azure subscription ID.
   ##   policyStatesResource: JString (required)
   ##                       : The virtual resource under PolicyStates resource type. In a given time range, 'latest' represents the latest policy state(s), whereas 'default' represents all policy state(s).
+  ##   subscriptionId: JString (required)
+  ##                 : Microsoft Azure subscription ID.
+  ##   resourceGroupName: JString (required)
+  ##                    : Resource group name.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568242 = path.getOrDefault("resourceGroupName")
-  valid_568242 = validateParameter(valid_568242, JString, required = true,
-                                 default = nil)
-  if valid_568242 != nil:
-    section.add "resourceGroupName", valid_568242
-  var valid_568243 = path.getOrDefault("subscriptionId")
-  valid_568243 = validateParameter(valid_568243, JString, required = true,
-                                 default = nil)
-  if valid_568243 != nil:
-    section.add "subscriptionId", valid_568243
-  var valid_568244 = path.getOrDefault("policyStatesResource")
-  valid_568244 = validateParameter(valid_568244, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `policyStatesResource` field"
+  var valid_564142 = path.getOrDefault("policyStatesResource")
+  valid_564142 = validateParameter(valid_564142, JString, required = true,
                                  default = newJString("default"))
-  if valid_568244 != nil:
-    section.add "policyStatesResource", valid_568244
+  if valid_564142 != nil:
+    section.add "policyStatesResource", valid_564142
+  var valid_564143 = path.getOrDefault("subscriptionId")
+  valid_564143 = validateParameter(valid_564143, JString, required = true,
+                                 default = nil)
+  if valid_564143 != nil:
+    section.add "subscriptionId", valid_564143
+  var valid_564144 = path.getOrDefault("resourceGroupName")
+  valid_564144 = validateParameter(valid_564144, JString, required = true,
+                                 default = nil)
+  if valid_564144 != nil:
+    section.add "resourceGroupName", valid_564144
   result.add "path", section
   ## parameters in `query` object:
-  ##   $orderby: JString
-  ##           : Ordering expression using OData notation. One or more comma-separated column names with an optional "desc" (the default) or "asc", e.g. "$orderby=PolicyAssignmentId, ResourceId asc".
   ##   api-version: JString (required)
   ##              : API version to use with the client requests.
-  ##   $from: JString
-  ##        : ISO 8601 formatted timestamp specifying the start time of the interval to query. When not specified, the service uses ($to - 1-day).
   ##   $top: JInt
   ##       : Maximum number of records to return.
   ##   $select: JString
   ##          : Select expression using OData notation. Limits the columns on each record to just those requested, e.g. "$select=PolicyAssignmentId, ResourceId".
   ##   $to: JString
   ##      : ISO 8601 formatted timestamp specifying the end time of the interval to query. When not specified, the service uses request time.
+  ##   $orderby: JString
+  ##           : Ordering expression using OData notation. One or more comma-separated column names with an optional "desc" (the default) or "asc", e.g. "$orderby=PolicyAssignmentId, ResourceId asc".
   ##   $apply: JString
   ##         : OData apply expression for aggregations.
   ##   $filter: JString
   ##          : OData filter expression.
+  ##   $from: JString
+  ##        : ISO 8601 formatted timestamp specifying the start time of the interval to query. When not specified, the service uses ($to - 1-day).
   section = newJObject()
-  var valid_568245 = query.getOrDefault("$orderby")
-  valid_568245 = validateParameter(valid_568245, JString, required = false,
-                                 default = nil)
-  if valid_568245 != nil:
-    section.add "$orderby", valid_568245
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568246 = query.getOrDefault("api-version")
-  valid_568246 = validateParameter(valid_568246, JString, required = true,
+  var valid_564145 = query.getOrDefault("api-version")
+  valid_564145 = validateParameter(valid_564145, JString, required = true,
                                  default = nil)
-  if valid_568246 != nil:
-    section.add "api-version", valid_568246
-  var valid_568247 = query.getOrDefault("$from")
-  valid_568247 = validateParameter(valid_568247, JString, required = false,
+  if valid_564145 != nil:
+    section.add "api-version", valid_564145
+  var valid_564146 = query.getOrDefault("$top")
+  valid_564146 = validateParameter(valid_564146, JInt, required = false, default = nil)
+  if valid_564146 != nil:
+    section.add "$top", valid_564146
+  var valid_564147 = query.getOrDefault("$select")
+  valid_564147 = validateParameter(valid_564147, JString, required = false,
                                  default = nil)
-  if valid_568247 != nil:
-    section.add "$from", valid_568247
-  var valid_568248 = query.getOrDefault("$top")
-  valid_568248 = validateParameter(valid_568248, JInt, required = false, default = nil)
-  if valid_568248 != nil:
-    section.add "$top", valid_568248
-  var valid_568249 = query.getOrDefault("$select")
-  valid_568249 = validateParameter(valid_568249, JString, required = false,
+  if valid_564147 != nil:
+    section.add "$select", valid_564147
+  var valid_564148 = query.getOrDefault("$to")
+  valid_564148 = validateParameter(valid_564148, JString, required = false,
                                  default = nil)
-  if valid_568249 != nil:
-    section.add "$select", valid_568249
-  var valid_568250 = query.getOrDefault("$to")
-  valid_568250 = validateParameter(valid_568250, JString, required = false,
+  if valid_564148 != nil:
+    section.add "$to", valid_564148
+  var valid_564149 = query.getOrDefault("$orderby")
+  valid_564149 = validateParameter(valid_564149, JString, required = false,
                                  default = nil)
-  if valid_568250 != nil:
-    section.add "$to", valid_568250
-  var valid_568251 = query.getOrDefault("$apply")
-  valid_568251 = validateParameter(valid_568251, JString, required = false,
+  if valid_564149 != nil:
+    section.add "$orderby", valid_564149
+  var valid_564150 = query.getOrDefault("$apply")
+  valid_564150 = validateParameter(valid_564150, JString, required = false,
                                  default = nil)
-  if valid_568251 != nil:
-    section.add "$apply", valid_568251
-  var valid_568252 = query.getOrDefault("$filter")
-  valid_568252 = validateParameter(valid_568252, JString, required = false,
+  if valid_564150 != nil:
+    section.add "$apply", valid_564150
+  var valid_564151 = query.getOrDefault("$filter")
+  valid_564151 = validateParameter(valid_564151, JString, required = false,
                                  default = nil)
-  if valid_568252 != nil:
-    section.add "$filter", valid_568252
+  if valid_564151 != nil:
+    section.add "$filter", valid_564151
+  var valid_564152 = query.getOrDefault("$from")
+  valid_564152 = validateParameter(valid_564152, JString, required = false,
+                                 default = nil)
+  if valid_564152 != nil:
+    section.add "$from", valid_564152
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -661,73 +662,73 @@ proc validate_PolicyStatesListQueryResultsForResourceGroup_568240(path: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_568253: Call_PolicyStatesListQueryResultsForResourceGroup_568239;
+proc call*(call_564153: Call_PolicyStatesListQueryResultsForResourceGroup_564139;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Queries policy states for the resources under the resource group.
   ## 
-  let valid = call_568253.validator(path, query, header, formData, body)
-  let scheme = call_568253.pickScheme
+  let valid = call_564153.validator(path, query, header, formData, body)
+  let scheme = call_564153.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568253.url(scheme.get, call_568253.host, call_568253.base,
-                         call_568253.route, valid.getOrDefault("path"),
+  let url = call_564153.url(scheme.get, call_564153.host, call_564153.base,
+                         call_564153.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568253, url, valid)
+  result = hook(call_564153, url, valid)
 
-proc call*(call_568254: Call_PolicyStatesListQueryResultsForResourceGroup_568239;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          Orderby: string = ""; From: string = ""; Top: int = 0; Select: string = "";
-          policyStatesResource: string = "default"; To: string = ""; Apply: string = "";
-          Filter: string = ""): Recallable =
+proc call*(call_564154: Call_PolicyStatesListQueryResultsForResourceGroup_564139;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string;
+          Top: int = 0; Select: string = ""; policyStatesResource: string = "default";
+          To: string = ""; Orderby: string = ""; Apply: string = ""; Filter: string = "";
+          From: string = ""): Recallable =
   ## policyStatesListQueryResultsForResourceGroup
   ## Queries policy states for the resources under the resource group.
-  ##   Orderby: string
-  ##          : Ordering expression using OData notation. One or more comma-separated column names with an optional "desc" (the default) or "asc", e.g. "$orderby=PolicyAssignmentId, ResourceId asc".
-  ##   resourceGroupName: string (required)
-  ##                    : Resource group name.
   ##   apiVersion: string (required)
   ##             : API version to use with the client requests.
-  ##   From: string
-  ##       : ISO 8601 formatted timestamp specifying the start time of the interval to query. When not specified, the service uses ($to - 1-day).
-  ##   subscriptionId: string (required)
-  ##                 : Microsoft Azure subscription ID.
   ##   Top: int
   ##      : Maximum number of records to return.
   ##   Select: string
   ##         : Select expression using OData notation. Limits the columns on each record to just those requested, e.g. "$select=PolicyAssignmentId, ResourceId".
   ##   policyStatesResource: string (required)
   ##                       : The virtual resource under PolicyStates resource type. In a given time range, 'latest' represents the latest policy state(s), whereas 'default' represents all policy state(s).
+  ##   subscriptionId: string (required)
+  ##                 : Microsoft Azure subscription ID.
   ##   To: string
   ##     : ISO 8601 formatted timestamp specifying the end time of the interval to query. When not specified, the service uses request time.
+  ##   Orderby: string
+  ##          : Ordering expression using OData notation. One or more comma-separated column names with an optional "desc" (the default) or "asc", e.g. "$orderby=PolicyAssignmentId, ResourceId asc".
   ##   Apply: string
   ##        : OData apply expression for aggregations.
+  ##   resourceGroupName: string (required)
+  ##                    : Resource group name.
   ##   Filter: string
   ##         : OData filter expression.
-  var path_568255 = newJObject()
-  var query_568256 = newJObject()
-  add(query_568256, "$orderby", newJString(Orderby))
-  add(path_568255, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568256, "api-version", newJString(apiVersion))
-  add(query_568256, "$from", newJString(From))
-  add(path_568255, "subscriptionId", newJString(subscriptionId))
-  add(query_568256, "$top", newJInt(Top))
-  add(query_568256, "$select", newJString(Select))
-  add(path_568255, "policyStatesResource", newJString(policyStatesResource))
-  add(query_568256, "$to", newJString(To))
-  add(query_568256, "$apply", newJString(Apply))
-  add(query_568256, "$filter", newJString(Filter))
-  result = call_568254.call(path_568255, query_568256, nil, nil, nil)
+  ##   From: string
+  ##       : ISO 8601 formatted timestamp specifying the start time of the interval to query. When not specified, the service uses ($to - 1-day).
+  var path_564155 = newJObject()
+  var query_564156 = newJObject()
+  add(query_564156, "api-version", newJString(apiVersion))
+  add(query_564156, "$top", newJInt(Top))
+  add(query_564156, "$select", newJString(Select))
+  add(path_564155, "policyStatesResource", newJString(policyStatesResource))
+  add(path_564155, "subscriptionId", newJString(subscriptionId))
+  add(query_564156, "$to", newJString(To))
+  add(query_564156, "$orderby", newJString(Orderby))
+  add(query_564156, "$apply", newJString(Apply))
+  add(path_564155, "resourceGroupName", newJString(resourceGroupName))
+  add(query_564156, "$filter", newJString(Filter))
+  add(query_564156, "$from", newJString(From))
+  result = call_564154.call(path_564155, query_564156, nil, nil, nil)
 
-var policyStatesListQueryResultsForResourceGroup* = Call_PolicyStatesListQueryResultsForResourceGroup_568239(
+var policyStatesListQueryResultsForResourceGroup* = Call_PolicyStatesListQueryResultsForResourceGroup_564139(
     name: "policyStatesListQueryResultsForResourceGroup",
     meth: HttpMethod.HttpPost, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.PolicyInsights/policyStates/{policyStatesResource}/queryResults",
-    validator: validate_PolicyStatesListQueryResultsForResourceGroup_568240,
-    base: "", url: url_PolicyStatesListQueryResultsForResourceGroup_568241,
+    validator: validate_PolicyStatesListQueryResultsForResourceGroup_564140,
+    base: "", url: url_PolicyStatesListQueryResultsForResourceGroup_564141,
     schemes: {Scheme.Https})
 type
-  Call_PolicyStatesListQueryResultsForResource_568257 = ref object of OpenApiRestCall_567658
-proc url_PolicyStatesListQueryResultsForResource_568259(protocol: Scheme;
+  Call_PolicyStatesListQueryResultsForResource_564157 = ref object of OpenApiRestCall_563556
+proc url_PolicyStatesListQueryResultsForResource_564159(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -747,7 +748,7 @@ proc url_PolicyStatesListQueryResultsForResource_568259(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_PolicyStatesListQueryResultsForResource_568258(path: JsonNode;
+proc validate_PolicyStatesListQueryResultsForResource_564158(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Queries policy states for the resource.
   ## 
@@ -760,76 +761,76 @@ proc validate_PolicyStatesListQueryResultsForResource_568258(path: JsonNode;
   ##             : Resource ID.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `policyStatesResource` field"
-  var valid_568260 = path.getOrDefault("policyStatesResource")
-  valid_568260 = validateParameter(valid_568260, JString, required = true,
+  var valid_564160 = path.getOrDefault("policyStatesResource")
+  valid_564160 = validateParameter(valid_564160, JString, required = true,
                                  default = newJString("default"))
-  if valid_568260 != nil:
-    section.add "policyStatesResource", valid_568260
-  var valid_568261 = path.getOrDefault("resourceId")
-  valid_568261 = validateParameter(valid_568261, JString, required = true,
+  if valid_564160 != nil:
+    section.add "policyStatesResource", valid_564160
+  var valid_564161 = path.getOrDefault("resourceId")
+  valid_564161 = validateParameter(valid_564161, JString, required = true,
                                  default = nil)
-  if valid_568261 != nil:
-    section.add "resourceId", valid_568261
+  if valid_564161 != nil:
+    section.add "resourceId", valid_564161
   result.add "path", section
   ## parameters in `query` object:
-  ##   $orderby: JString
-  ##           : Ordering expression using OData notation. One or more comma-separated column names with an optional "desc" (the default) or "asc", e.g. "$orderby=PolicyAssignmentId, ResourceId asc".
   ##   api-version: JString (required)
   ##              : API version to use with the client requests.
-  ##   $from: JString
-  ##        : ISO 8601 formatted timestamp specifying the start time of the interval to query. When not specified, the service uses ($to - 1-day).
   ##   $top: JInt
   ##       : Maximum number of records to return.
   ##   $select: JString
   ##          : Select expression using OData notation. Limits the columns on each record to just those requested, e.g. "$select=PolicyAssignmentId, ResourceId".
   ##   $to: JString
   ##      : ISO 8601 formatted timestamp specifying the end time of the interval to query. When not specified, the service uses request time.
+  ##   $orderby: JString
+  ##           : Ordering expression using OData notation. One or more comma-separated column names with an optional "desc" (the default) or "asc", e.g. "$orderby=PolicyAssignmentId, ResourceId asc".
   ##   $apply: JString
   ##         : OData apply expression for aggregations.
   ##   $filter: JString
   ##          : OData filter expression.
+  ##   $from: JString
+  ##        : ISO 8601 formatted timestamp specifying the start time of the interval to query. When not specified, the service uses ($to - 1-day).
   section = newJObject()
-  var valid_568262 = query.getOrDefault("$orderby")
-  valid_568262 = validateParameter(valid_568262, JString, required = false,
-                                 default = nil)
-  if valid_568262 != nil:
-    section.add "$orderby", valid_568262
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568263 = query.getOrDefault("api-version")
-  valid_568263 = validateParameter(valid_568263, JString, required = true,
+  var valid_564162 = query.getOrDefault("api-version")
+  valid_564162 = validateParameter(valid_564162, JString, required = true,
                                  default = nil)
-  if valid_568263 != nil:
-    section.add "api-version", valid_568263
-  var valid_568264 = query.getOrDefault("$from")
-  valid_568264 = validateParameter(valid_568264, JString, required = false,
+  if valid_564162 != nil:
+    section.add "api-version", valid_564162
+  var valid_564163 = query.getOrDefault("$top")
+  valid_564163 = validateParameter(valid_564163, JInt, required = false, default = nil)
+  if valid_564163 != nil:
+    section.add "$top", valid_564163
+  var valid_564164 = query.getOrDefault("$select")
+  valid_564164 = validateParameter(valid_564164, JString, required = false,
                                  default = nil)
-  if valid_568264 != nil:
-    section.add "$from", valid_568264
-  var valid_568265 = query.getOrDefault("$top")
-  valid_568265 = validateParameter(valid_568265, JInt, required = false, default = nil)
-  if valid_568265 != nil:
-    section.add "$top", valid_568265
-  var valid_568266 = query.getOrDefault("$select")
-  valid_568266 = validateParameter(valid_568266, JString, required = false,
+  if valid_564164 != nil:
+    section.add "$select", valid_564164
+  var valid_564165 = query.getOrDefault("$to")
+  valid_564165 = validateParameter(valid_564165, JString, required = false,
                                  default = nil)
-  if valid_568266 != nil:
-    section.add "$select", valid_568266
-  var valid_568267 = query.getOrDefault("$to")
-  valid_568267 = validateParameter(valid_568267, JString, required = false,
+  if valid_564165 != nil:
+    section.add "$to", valid_564165
+  var valid_564166 = query.getOrDefault("$orderby")
+  valid_564166 = validateParameter(valid_564166, JString, required = false,
                                  default = nil)
-  if valid_568267 != nil:
-    section.add "$to", valid_568267
-  var valid_568268 = query.getOrDefault("$apply")
-  valid_568268 = validateParameter(valid_568268, JString, required = false,
+  if valid_564166 != nil:
+    section.add "$orderby", valid_564166
+  var valid_564167 = query.getOrDefault("$apply")
+  valid_564167 = validateParameter(valid_564167, JString, required = false,
                                  default = nil)
-  if valid_568268 != nil:
-    section.add "$apply", valid_568268
-  var valid_568269 = query.getOrDefault("$filter")
-  valid_568269 = validateParameter(valid_568269, JString, required = false,
+  if valid_564167 != nil:
+    section.add "$apply", valid_564167
+  var valid_564168 = query.getOrDefault("$filter")
+  valid_564168 = validateParameter(valid_564168, JString, required = false,
                                  default = nil)
-  if valid_568269 != nil:
-    section.add "$filter", valid_568269
+  if valid_564168 != nil:
+    section.add "$filter", valid_564168
+  var valid_564169 = query.getOrDefault("$from")
+  valid_564169 = validateParameter(valid_564169, JString, required = false,
+                                 default = nil)
+  if valid_564169 != nil:
+    section.add "$from", valid_564169
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -838,70 +839,69 @@ proc validate_PolicyStatesListQueryResultsForResource_568258(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568270: Call_PolicyStatesListQueryResultsForResource_568257;
+proc call*(call_564170: Call_PolicyStatesListQueryResultsForResource_564157;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Queries policy states for the resource.
   ## 
-  let valid = call_568270.validator(path, query, header, formData, body)
-  let scheme = call_568270.pickScheme
+  let valid = call_564170.validator(path, query, header, formData, body)
+  let scheme = call_564170.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568270.url(scheme.get, call_568270.host, call_568270.base,
-                         call_568270.route, valid.getOrDefault("path"),
+  let url = call_564170.url(scheme.get, call_564170.host, call_564170.base,
+                         call_564170.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568270, url, valid)
+  result = hook(call_564170, url, valid)
 
-proc call*(call_568271: Call_PolicyStatesListQueryResultsForResource_568257;
-          apiVersion: string; resourceId: string; Orderby: string = "";
-          From: string = ""; Top: int = 0; Select: string = "";
-          policyStatesResource: string = "default"; To: string = ""; Apply: string = "";
-          Filter: string = ""): Recallable =
+proc call*(call_564171: Call_PolicyStatesListQueryResultsForResource_564157;
+          apiVersion: string; resourceId: string; Top: int = 0; Select: string = "";
+          policyStatesResource: string = "default"; To: string = "";
+          Orderby: string = ""; Apply: string = ""; Filter: string = ""; From: string = ""): Recallable =
   ## policyStatesListQueryResultsForResource
   ## Queries policy states for the resource.
-  ##   Orderby: string
-  ##          : Ordering expression using OData notation. One or more comma-separated column names with an optional "desc" (the default) or "asc", e.g. "$orderby=PolicyAssignmentId, ResourceId asc".
   ##   apiVersion: string (required)
   ##             : API version to use with the client requests.
-  ##   From: string
-  ##       : ISO 8601 formatted timestamp specifying the start time of the interval to query. When not specified, the service uses ($to - 1-day).
   ##   Top: int
   ##      : Maximum number of records to return.
   ##   Select: string
   ##         : Select expression using OData notation. Limits the columns on each record to just those requested, e.g. "$select=PolicyAssignmentId, ResourceId".
   ##   policyStatesResource: string (required)
   ##                       : The virtual resource under PolicyStates resource type. In a given time range, 'latest' represents the latest policy state(s), whereas 'default' represents all policy state(s).
-  ##   resourceId: string (required)
-  ##             : Resource ID.
   ##   To: string
   ##     : ISO 8601 formatted timestamp specifying the end time of the interval to query. When not specified, the service uses request time.
+  ##   Orderby: string
+  ##          : Ordering expression using OData notation. One or more comma-separated column names with an optional "desc" (the default) or "asc", e.g. "$orderby=PolicyAssignmentId, ResourceId asc".
   ##   Apply: string
   ##        : OData apply expression for aggregations.
   ##   Filter: string
   ##         : OData filter expression.
-  var path_568272 = newJObject()
-  var query_568273 = newJObject()
-  add(query_568273, "$orderby", newJString(Orderby))
-  add(query_568273, "api-version", newJString(apiVersion))
-  add(query_568273, "$from", newJString(From))
-  add(query_568273, "$top", newJInt(Top))
-  add(query_568273, "$select", newJString(Select))
-  add(path_568272, "policyStatesResource", newJString(policyStatesResource))
-  add(path_568272, "resourceId", newJString(resourceId))
-  add(query_568273, "$to", newJString(To))
-  add(query_568273, "$apply", newJString(Apply))
-  add(query_568273, "$filter", newJString(Filter))
-  result = call_568271.call(path_568272, query_568273, nil, nil, nil)
+  ##   From: string
+  ##       : ISO 8601 formatted timestamp specifying the start time of the interval to query. When not specified, the service uses ($to - 1-day).
+  ##   resourceId: string (required)
+  ##             : Resource ID.
+  var path_564172 = newJObject()
+  var query_564173 = newJObject()
+  add(query_564173, "api-version", newJString(apiVersion))
+  add(query_564173, "$top", newJInt(Top))
+  add(query_564173, "$select", newJString(Select))
+  add(path_564172, "policyStatesResource", newJString(policyStatesResource))
+  add(query_564173, "$to", newJString(To))
+  add(query_564173, "$orderby", newJString(Orderby))
+  add(query_564173, "$apply", newJString(Apply))
+  add(query_564173, "$filter", newJString(Filter))
+  add(query_564173, "$from", newJString(From))
+  add(path_564172, "resourceId", newJString(resourceId))
+  result = call_564171.call(path_564172, query_564173, nil, nil, nil)
 
-var policyStatesListQueryResultsForResource* = Call_PolicyStatesListQueryResultsForResource_568257(
+var policyStatesListQueryResultsForResource* = Call_PolicyStatesListQueryResultsForResource_564157(
     name: "policyStatesListQueryResultsForResource", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/{resourceId}/providers/Microsoft.PolicyInsights/policyStates/{policyStatesResource}/queryResults",
-    validator: validate_PolicyStatesListQueryResultsForResource_568258, base: "",
-    url: url_PolicyStatesListQueryResultsForResource_568259,
+    validator: validate_PolicyStatesListQueryResultsForResource_564158, base: "",
+    url: url_PolicyStatesListQueryResultsForResource_564159,
     schemes: {Scheme.Https})
 type
-  Call_PolicyStatesGetMetadata_568274 = ref object of OpenApiRestCall_567658
-proc url_PolicyStatesGetMetadata_568276(protocol: Scheme; host: string; base: string;
+  Call_PolicyStatesGetMetadata_564174 = ref object of OpenApiRestCall_563556
+proc url_PolicyStatesGetMetadata_564176(protocol: Scheme; host: string; base: string;
                                        route: string; path: JsonNode;
                                        query: JsonNode): Uri =
   result.scheme = $protocol
@@ -918,7 +918,7 @@ proc url_PolicyStatesGetMetadata_568276(protocol: Scheme; host: string; base: st
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_PolicyStatesGetMetadata_568275(path: JsonNode; query: JsonNode;
+proc validate_PolicyStatesGetMetadata_564175(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets OData metadata XML document.
   ## 
@@ -929,11 +929,11 @@ proc validate_PolicyStatesGetMetadata_568275(path: JsonNode; query: JsonNode;
   ##        : A valid scope, i.e. management group, subscription, resource group, or resource ID. Scope used has no effect on metadata returned.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `scope` field"
-  var valid_568277 = path.getOrDefault("scope")
-  valid_568277 = validateParameter(valid_568277, JString, required = true,
+  var valid_564177 = path.getOrDefault("scope")
+  valid_564177 = validateParameter(valid_564177, JString, required = true,
                                  default = nil)
-  if valid_568277 != nil:
-    section.add "scope", valid_568277
+  if valid_564177 != nil:
+    section.add "scope", valid_564177
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -941,11 +941,11 @@ proc validate_PolicyStatesGetMetadata_568275(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568278 = query.getOrDefault("api-version")
-  valid_568278 = validateParameter(valid_568278, JString, required = true,
+  var valid_564178 = query.getOrDefault("api-version")
+  valid_564178 = validateParameter(valid_564178, JString, required = true,
                                  default = nil)
-  if valid_568278 != nil:
-    section.add "api-version", valid_568278
+  if valid_564178 != nil:
+    section.add "api-version", valid_564178
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -954,20 +954,20 @@ proc validate_PolicyStatesGetMetadata_568275(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568279: Call_PolicyStatesGetMetadata_568274; path: JsonNode;
+proc call*(call_564179: Call_PolicyStatesGetMetadata_564174; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets OData metadata XML document.
   ## 
-  let valid = call_568279.validator(path, query, header, formData, body)
-  let scheme = call_568279.pickScheme
+  let valid = call_564179.validator(path, query, header, formData, body)
+  let scheme = call_564179.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568279.url(scheme.get, call_568279.host, call_568279.base,
-                         call_568279.route, valid.getOrDefault("path"),
+  let url = call_564179.url(scheme.get, call_564179.host, call_564179.base,
+                         call_564179.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568279, url, valid)
+  result = hook(call_564179, url, valid)
 
-proc call*(call_568280: Call_PolicyStatesGetMetadata_568274; apiVersion: string;
+proc call*(call_564180: Call_PolicyStatesGetMetadata_564174; apiVersion: string;
           scope: string): Recallable =
   ## policyStatesGetMetadata
   ## Gets OData metadata XML document.
@@ -975,17 +975,17 @@ proc call*(call_568280: Call_PolicyStatesGetMetadata_568274; apiVersion: string;
   ##             : API version to use with the client requests.
   ##   scope: string (required)
   ##        : A valid scope, i.e. management group, subscription, resource group, or resource ID. Scope used has no effect on metadata returned.
-  var path_568281 = newJObject()
-  var query_568282 = newJObject()
-  add(query_568282, "api-version", newJString(apiVersion))
-  add(path_568281, "scope", newJString(scope))
-  result = call_568280.call(path_568281, query_568282, nil, nil, nil)
+  var path_564181 = newJObject()
+  var query_564182 = newJObject()
+  add(query_564182, "api-version", newJString(apiVersion))
+  add(path_564181, "scope", newJString(scope))
+  result = call_564180.call(path_564181, query_564182, nil, nil, nil)
 
-var policyStatesGetMetadata* = Call_PolicyStatesGetMetadata_568274(
+var policyStatesGetMetadata* = Call_PolicyStatesGetMetadata_564174(
     name: "policyStatesGetMetadata", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/{scope}/providers/Microsoft.PolicyInsights/policyStates/$metadata",
-    validator: validate_PolicyStatesGetMetadata_568275, base: "",
-    url: url_PolicyStatesGetMetadata_568276, schemes: {Scheme.Https})
+    validator: validate_PolicyStatesGetMetadata_564175, base: "",
+    url: url_PolicyStatesGetMetadata_564176, schemes: {Scheme.Https})
 export
   rest
 

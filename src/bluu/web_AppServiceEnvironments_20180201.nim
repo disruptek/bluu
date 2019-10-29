@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, httpcore
 
 ## auto-generated via openapi macro
 ## title: AppServiceEnvironments API Client
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_567659 = ref object of OpenApiRestCall
+  OpenApiRestCall_563557 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_567659](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563557](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_567659): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563557): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,8 +107,8 @@ const
   macServiceName = "web-AppServiceEnvironments"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_AppServiceEnvironmentsList_567881 = ref object of OpenApiRestCall_567659
-proc url_AppServiceEnvironmentsList_567883(protocol: Scheme; host: string;
+  Call_AppServiceEnvironmentsList_563779 = ref object of OpenApiRestCall_563557
+proc url_AppServiceEnvironmentsList_563781(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -121,7 +125,7 @@ proc url_AppServiceEnvironmentsList_567883(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AppServiceEnvironmentsList_567882(path: JsonNode; query: JsonNode;
+proc validate_AppServiceEnvironmentsList_563780(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Get all App Service Environments for a subscription.
   ## 
@@ -133,11 +137,11 @@ proc validate_AppServiceEnvironmentsList_567882(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_568056 = path.getOrDefault("subscriptionId")
-  valid_568056 = validateParameter(valid_568056, JString, required = true,
+  var valid_563956 = path.getOrDefault("subscriptionId")
+  valid_563956 = validateParameter(valid_563956, JString, required = true,
                                  default = nil)
-  if valid_568056 != nil:
-    section.add "subscriptionId", valid_568056
+  if valid_563956 != nil:
+    section.add "subscriptionId", valid_563956
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -145,11 +149,11 @@ proc validate_AppServiceEnvironmentsList_567882(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568057 = query.getOrDefault("api-version")
-  valid_568057 = validateParameter(valid_568057, JString, required = true,
+  var valid_563957 = query.getOrDefault("api-version")
+  valid_563957 = validateParameter(valid_563957, JString, required = true,
                                  default = nil)
-  if valid_568057 != nil:
-    section.add "api-version", valid_568057
+  if valid_563957 != nil:
+    section.add "api-version", valid_563957
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -158,20 +162,20 @@ proc validate_AppServiceEnvironmentsList_567882(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568080: Call_AppServiceEnvironmentsList_567881; path: JsonNode;
+proc call*(call_563980: Call_AppServiceEnvironmentsList_563779; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get all App Service Environments for a subscription.
   ## 
-  let valid = call_568080.validator(path, query, header, formData, body)
-  let scheme = call_568080.pickScheme
+  let valid = call_563980.validator(path, query, header, formData, body)
+  let scheme = call_563980.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568080.url(scheme.get, call_568080.host, call_568080.base,
-                         call_568080.route, valid.getOrDefault("path"),
+  let url = call_563980.url(scheme.get, call_563980.host, call_563980.base,
+                         call_563980.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568080, url, valid)
+  result = hook(call_563980, url, valid)
 
-proc call*(call_568151: Call_AppServiceEnvironmentsList_567881; apiVersion: string;
+proc call*(call_564051: Call_AppServiceEnvironmentsList_563779; apiVersion: string;
           subscriptionId: string): Recallable =
   ## appServiceEnvironmentsList
   ## Get all App Service Environments for a subscription.
@@ -179,20 +183,20 @@ proc call*(call_568151: Call_AppServiceEnvironmentsList_567881; apiVersion: stri
   ##             : API Version
   ##   subscriptionId: string (required)
   ##                 : Your Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
-  var path_568152 = newJObject()
-  var query_568154 = newJObject()
-  add(query_568154, "api-version", newJString(apiVersion))
-  add(path_568152, "subscriptionId", newJString(subscriptionId))
-  result = call_568151.call(path_568152, query_568154, nil, nil, nil)
+  var path_564052 = newJObject()
+  var query_564054 = newJObject()
+  add(query_564054, "api-version", newJString(apiVersion))
+  add(path_564052, "subscriptionId", newJString(subscriptionId))
+  result = call_564051.call(path_564052, query_564054, nil, nil, nil)
 
-var appServiceEnvironmentsList* = Call_AppServiceEnvironmentsList_567881(
+var appServiceEnvironmentsList* = Call_AppServiceEnvironmentsList_563779(
     name: "appServiceEnvironmentsList", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Web/hostingEnvironments",
-    validator: validate_AppServiceEnvironmentsList_567882, base: "",
-    url: url_AppServiceEnvironmentsList_567883, schemes: {Scheme.Https})
+    validator: validate_AppServiceEnvironmentsList_563780, base: "",
+    url: url_AppServiceEnvironmentsList_563781, schemes: {Scheme.Https})
 type
-  Call_AppServiceEnvironmentsListByResourceGroup_568193 = ref object of OpenApiRestCall_567659
-proc url_AppServiceEnvironmentsListByResourceGroup_568195(protocol: Scheme;
+  Call_AppServiceEnvironmentsListByResourceGroup_564093 = ref object of OpenApiRestCall_563557
+proc url_AppServiceEnvironmentsListByResourceGroup_564095(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -213,30 +217,30 @@ proc url_AppServiceEnvironmentsListByResourceGroup_568195(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AppServiceEnvironmentsListByResourceGroup_568194(path: JsonNode;
+proc validate_AppServiceEnvironmentsListByResourceGroup_564094(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Get all App Service Environments in a resource group.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : Name of the resource group to which the resource belongs.
   ##   subscriptionId: JString (required)
   ##                 : Your Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
+  ##   resourceGroupName: JString (required)
+  ##                    : Name of the resource group to which the resource belongs.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568196 = path.getOrDefault("resourceGroupName")
-  valid_568196 = validateParameter(valid_568196, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564096 = path.getOrDefault("subscriptionId")
+  valid_564096 = validateParameter(valid_564096, JString, required = true,
                                  default = nil)
-  if valid_568196 != nil:
-    section.add "resourceGroupName", valid_568196
-  var valid_568197 = path.getOrDefault("subscriptionId")
-  valid_568197 = validateParameter(valid_568197, JString, required = true,
+  if valid_564096 != nil:
+    section.add "subscriptionId", valid_564096
+  var valid_564097 = path.getOrDefault("resourceGroupName")
+  valid_564097 = validateParameter(valid_564097, JString, required = true,
                                  default = nil)
-  if valid_568197 != nil:
-    section.add "subscriptionId", valid_568197
+  if valid_564097 != nil:
+    section.add "resourceGroupName", valid_564097
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -244,11 +248,11 @@ proc validate_AppServiceEnvironmentsListByResourceGroup_568194(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568198 = query.getOrDefault("api-version")
-  valid_568198 = validateParameter(valid_568198, JString, required = true,
+  var valid_564098 = query.getOrDefault("api-version")
+  valid_564098 = validateParameter(valid_564098, JString, required = true,
                                  default = nil)
-  if valid_568198 != nil:
-    section.add "api-version", valid_568198
+  if valid_564098 != nil:
+    section.add "api-version", valid_564098
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -257,46 +261,46 @@ proc validate_AppServiceEnvironmentsListByResourceGroup_568194(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568199: Call_AppServiceEnvironmentsListByResourceGroup_568193;
+proc call*(call_564099: Call_AppServiceEnvironmentsListByResourceGroup_564093;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Get all App Service Environments in a resource group.
   ## 
-  let valid = call_568199.validator(path, query, header, formData, body)
-  let scheme = call_568199.pickScheme
+  let valid = call_564099.validator(path, query, header, formData, body)
+  let scheme = call_564099.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568199.url(scheme.get, call_568199.host, call_568199.base,
-                         call_568199.route, valid.getOrDefault("path"),
+  let url = call_564099.url(scheme.get, call_564099.host, call_564099.base,
+                         call_564099.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568199, url, valid)
+  result = hook(call_564099, url, valid)
 
-proc call*(call_568200: Call_AppServiceEnvironmentsListByResourceGroup_568193;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string): Recallable =
+proc call*(call_564100: Call_AppServiceEnvironmentsListByResourceGroup_564093;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string): Recallable =
   ## appServiceEnvironmentsListByResourceGroup
   ## Get all App Service Environments in a resource group.
-  ##   resourceGroupName: string (required)
-  ##                    : Name of the resource group to which the resource belongs.
   ##   apiVersion: string (required)
   ##             : API Version
   ##   subscriptionId: string (required)
   ##                 : Your Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
-  var path_568201 = newJObject()
-  var query_568202 = newJObject()
-  add(path_568201, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568202, "api-version", newJString(apiVersion))
-  add(path_568201, "subscriptionId", newJString(subscriptionId))
-  result = call_568200.call(path_568201, query_568202, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : Name of the resource group to which the resource belongs.
+  var path_564101 = newJObject()
+  var query_564102 = newJObject()
+  add(query_564102, "api-version", newJString(apiVersion))
+  add(path_564101, "subscriptionId", newJString(subscriptionId))
+  add(path_564101, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564100.call(path_564101, query_564102, nil, nil, nil)
 
-var appServiceEnvironmentsListByResourceGroup* = Call_AppServiceEnvironmentsListByResourceGroup_568193(
+var appServiceEnvironmentsListByResourceGroup* = Call_AppServiceEnvironmentsListByResourceGroup_564093(
     name: "appServiceEnvironmentsListByResourceGroup", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Web/hostingEnvironments",
-    validator: validate_AppServiceEnvironmentsListByResourceGroup_568194,
-    base: "", url: url_AppServiceEnvironmentsListByResourceGroup_568195,
+    validator: validate_AppServiceEnvironmentsListByResourceGroup_564094,
+    base: "", url: url_AppServiceEnvironmentsListByResourceGroup_564095,
     schemes: {Scheme.Https})
 type
-  Call_AppServiceEnvironmentsCreateOrUpdate_568214 = ref object of OpenApiRestCall_567659
-proc url_AppServiceEnvironmentsCreateOrUpdate_568216(protocol: Scheme;
+  Call_AppServiceEnvironmentsCreateOrUpdate_564114 = ref object of OpenApiRestCall_563557
+proc url_AppServiceEnvironmentsCreateOrUpdate_564116(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -319,37 +323,36 @@ proc url_AppServiceEnvironmentsCreateOrUpdate_568216(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AppServiceEnvironmentsCreateOrUpdate_568215(path: JsonNode;
+proc validate_AppServiceEnvironmentsCreateOrUpdate_564115(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Create or update an App Service Environment.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : Name of the resource group to which the resource belongs.
   ##   name: JString (required)
   ##       : Name of the App Service Environment.
   ##   subscriptionId: JString (required)
   ##                 : Your Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
+  ##   resourceGroupName: JString (required)
+  ##                    : Name of the resource group to which the resource belongs.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568217 = path.getOrDefault("resourceGroupName")
-  valid_568217 = validateParameter(valid_568217, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `name` field"
+  var valid_564117 = path.getOrDefault("name")
+  valid_564117 = validateParameter(valid_564117, JString, required = true,
                                  default = nil)
-  if valid_568217 != nil:
-    section.add "resourceGroupName", valid_568217
-  var valid_568218 = path.getOrDefault("name")
-  valid_568218 = validateParameter(valid_568218, JString, required = true,
+  if valid_564117 != nil:
+    section.add "name", valid_564117
+  var valid_564118 = path.getOrDefault("subscriptionId")
+  valid_564118 = validateParameter(valid_564118, JString, required = true,
                                  default = nil)
-  if valid_568218 != nil:
-    section.add "name", valid_568218
-  var valid_568219 = path.getOrDefault("subscriptionId")
-  valid_568219 = validateParameter(valid_568219, JString, required = true,
+  if valid_564118 != nil:
+    section.add "subscriptionId", valid_564118
+  var valid_564119 = path.getOrDefault("resourceGroupName")
+  valid_564119 = validateParameter(valid_564119, JString, required = true,
                                  default = nil)
-  if valid_568219 != nil:
-    section.add "subscriptionId", valid_568219
+  if valid_564119 != nil:
+    section.add "resourceGroupName", valid_564119
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -357,11 +360,11 @@ proc validate_AppServiceEnvironmentsCreateOrUpdate_568215(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568220 = query.getOrDefault("api-version")
-  valid_568220 = validateParameter(valid_568220, JString, required = true,
+  var valid_564120 = query.getOrDefault("api-version")
+  valid_564120 = validateParameter(valid_564120, JString, required = true,
                                  default = nil)
-  if valid_568220 != nil:
-    section.add "api-version", valid_568220
+  if valid_564120 != nil:
+    section.add "api-version", valid_564120
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -375,54 +378,54 @@ proc validate_AppServiceEnvironmentsCreateOrUpdate_568215(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568222: Call_AppServiceEnvironmentsCreateOrUpdate_568214;
+proc call*(call_564122: Call_AppServiceEnvironmentsCreateOrUpdate_564114;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Create or update an App Service Environment.
   ## 
-  let valid = call_568222.validator(path, query, header, formData, body)
-  let scheme = call_568222.pickScheme
+  let valid = call_564122.validator(path, query, header, formData, body)
+  let scheme = call_564122.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568222.url(scheme.get, call_568222.host, call_568222.base,
-                         call_568222.route, valid.getOrDefault("path"),
+  let url = call_564122.url(scheme.get, call_564122.host, call_564122.base,
+                         call_564122.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568222, url, valid)
+  result = hook(call_564122, url, valid)
 
-proc call*(call_568223: Call_AppServiceEnvironmentsCreateOrUpdate_568214;
-          resourceGroupName: string; apiVersion: string; name: string;
-          hostingEnvironmentEnvelope: JsonNode; subscriptionId: string): Recallable =
+proc call*(call_564123: Call_AppServiceEnvironmentsCreateOrUpdate_564114;
+          apiVersion: string; name: string; subscriptionId: string;
+          resourceGroupName: string; hostingEnvironmentEnvelope: JsonNode): Recallable =
   ## appServiceEnvironmentsCreateOrUpdate
   ## Create or update an App Service Environment.
-  ##   resourceGroupName: string (required)
-  ##                    : Name of the resource group to which the resource belongs.
   ##   apiVersion: string (required)
   ##             : API Version
   ##   name: string (required)
   ##       : Name of the App Service Environment.
-  ##   hostingEnvironmentEnvelope: JObject (required)
-  ##                             : Configuration details of the App Service Environment.
   ##   subscriptionId: string (required)
   ##                 : Your Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
-  var path_568224 = newJObject()
-  var query_568225 = newJObject()
-  var body_568226 = newJObject()
-  add(path_568224, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568225, "api-version", newJString(apiVersion))
-  add(path_568224, "name", newJString(name))
+  ##   resourceGroupName: string (required)
+  ##                    : Name of the resource group to which the resource belongs.
+  ##   hostingEnvironmentEnvelope: JObject (required)
+  ##                             : Configuration details of the App Service Environment.
+  var path_564124 = newJObject()
+  var query_564125 = newJObject()
+  var body_564126 = newJObject()
+  add(query_564125, "api-version", newJString(apiVersion))
+  add(path_564124, "name", newJString(name))
+  add(path_564124, "subscriptionId", newJString(subscriptionId))
+  add(path_564124, "resourceGroupName", newJString(resourceGroupName))
   if hostingEnvironmentEnvelope != nil:
-    body_568226 = hostingEnvironmentEnvelope
-  add(path_568224, "subscriptionId", newJString(subscriptionId))
-  result = call_568223.call(path_568224, query_568225, nil, nil, body_568226)
+    body_564126 = hostingEnvironmentEnvelope
+  result = call_564123.call(path_564124, query_564125, nil, nil, body_564126)
 
-var appServiceEnvironmentsCreateOrUpdate* = Call_AppServiceEnvironmentsCreateOrUpdate_568214(
+var appServiceEnvironmentsCreateOrUpdate* = Call_AppServiceEnvironmentsCreateOrUpdate_564114(
     name: "appServiceEnvironmentsCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Web/hostingEnvironments/{name}",
-    validator: validate_AppServiceEnvironmentsCreateOrUpdate_568215, base: "",
-    url: url_AppServiceEnvironmentsCreateOrUpdate_568216, schemes: {Scheme.Https})
+    validator: validate_AppServiceEnvironmentsCreateOrUpdate_564115, base: "",
+    url: url_AppServiceEnvironmentsCreateOrUpdate_564116, schemes: {Scheme.Https})
 type
-  Call_AppServiceEnvironmentsGet_568203 = ref object of OpenApiRestCall_567659
-proc url_AppServiceEnvironmentsGet_568205(protocol: Scheme; host: string;
+  Call_AppServiceEnvironmentsGet_564103 = ref object of OpenApiRestCall_563557
+proc url_AppServiceEnvironmentsGet_564105(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -445,37 +448,36 @@ proc url_AppServiceEnvironmentsGet_568205(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AppServiceEnvironmentsGet_568204(path: JsonNode; query: JsonNode;
+proc validate_AppServiceEnvironmentsGet_564104(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Get the properties of an App Service Environment.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : Name of the resource group to which the resource belongs.
   ##   name: JString (required)
   ##       : Name of the App Service Environment.
   ##   subscriptionId: JString (required)
   ##                 : Your Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
+  ##   resourceGroupName: JString (required)
+  ##                    : Name of the resource group to which the resource belongs.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568206 = path.getOrDefault("resourceGroupName")
-  valid_568206 = validateParameter(valid_568206, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `name` field"
+  var valid_564106 = path.getOrDefault("name")
+  valid_564106 = validateParameter(valid_564106, JString, required = true,
                                  default = nil)
-  if valid_568206 != nil:
-    section.add "resourceGroupName", valid_568206
-  var valid_568207 = path.getOrDefault("name")
-  valid_568207 = validateParameter(valid_568207, JString, required = true,
+  if valid_564106 != nil:
+    section.add "name", valid_564106
+  var valid_564107 = path.getOrDefault("subscriptionId")
+  valid_564107 = validateParameter(valid_564107, JString, required = true,
                                  default = nil)
-  if valid_568207 != nil:
-    section.add "name", valid_568207
-  var valid_568208 = path.getOrDefault("subscriptionId")
-  valid_568208 = validateParameter(valid_568208, JString, required = true,
+  if valid_564107 != nil:
+    section.add "subscriptionId", valid_564107
+  var valid_564108 = path.getOrDefault("resourceGroupName")
+  valid_564108 = validateParameter(valid_564108, JString, required = true,
                                  default = nil)
-  if valid_568208 != nil:
-    section.add "subscriptionId", valid_568208
+  if valid_564108 != nil:
+    section.add "resourceGroupName", valid_564108
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -483,11 +485,11 @@ proc validate_AppServiceEnvironmentsGet_568204(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568209 = query.getOrDefault("api-version")
-  valid_568209 = validateParameter(valid_568209, JString, required = true,
+  var valid_564109 = query.getOrDefault("api-version")
+  valid_564109 = validateParameter(valid_564109, JString, required = true,
                                  default = nil)
-  if valid_568209 != nil:
-    section.add "api-version", valid_568209
+  if valid_564109 != nil:
+    section.add "api-version", valid_564109
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -496,48 +498,47 @@ proc validate_AppServiceEnvironmentsGet_568204(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568210: Call_AppServiceEnvironmentsGet_568203; path: JsonNode;
+proc call*(call_564110: Call_AppServiceEnvironmentsGet_564103; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get the properties of an App Service Environment.
   ## 
-  let valid = call_568210.validator(path, query, header, formData, body)
-  let scheme = call_568210.pickScheme
+  let valid = call_564110.validator(path, query, header, formData, body)
+  let scheme = call_564110.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568210.url(scheme.get, call_568210.host, call_568210.base,
-                         call_568210.route, valid.getOrDefault("path"),
+  let url = call_564110.url(scheme.get, call_564110.host, call_564110.base,
+                         call_564110.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568210, url, valid)
+  result = hook(call_564110, url, valid)
 
-proc call*(call_568211: Call_AppServiceEnvironmentsGet_568203;
-          resourceGroupName: string; apiVersion: string; name: string;
-          subscriptionId: string): Recallable =
+proc call*(call_564111: Call_AppServiceEnvironmentsGet_564103; apiVersion: string;
+          name: string; subscriptionId: string; resourceGroupName: string): Recallable =
   ## appServiceEnvironmentsGet
   ## Get the properties of an App Service Environment.
-  ##   resourceGroupName: string (required)
-  ##                    : Name of the resource group to which the resource belongs.
   ##   apiVersion: string (required)
   ##             : API Version
   ##   name: string (required)
   ##       : Name of the App Service Environment.
   ##   subscriptionId: string (required)
   ##                 : Your Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
-  var path_568212 = newJObject()
-  var query_568213 = newJObject()
-  add(path_568212, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568213, "api-version", newJString(apiVersion))
-  add(path_568212, "name", newJString(name))
-  add(path_568212, "subscriptionId", newJString(subscriptionId))
-  result = call_568211.call(path_568212, query_568213, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : Name of the resource group to which the resource belongs.
+  var path_564112 = newJObject()
+  var query_564113 = newJObject()
+  add(query_564113, "api-version", newJString(apiVersion))
+  add(path_564112, "name", newJString(name))
+  add(path_564112, "subscriptionId", newJString(subscriptionId))
+  add(path_564112, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564111.call(path_564112, query_564113, nil, nil, nil)
 
-var appServiceEnvironmentsGet* = Call_AppServiceEnvironmentsGet_568203(
+var appServiceEnvironmentsGet* = Call_AppServiceEnvironmentsGet_564103(
     name: "appServiceEnvironmentsGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Web/hostingEnvironments/{name}",
-    validator: validate_AppServiceEnvironmentsGet_568204, base: "",
-    url: url_AppServiceEnvironmentsGet_568205, schemes: {Scheme.Https})
+    validator: validate_AppServiceEnvironmentsGet_564104, base: "",
+    url: url_AppServiceEnvironmentsGet_564105, schemes: {Scheme.Https})
 type
-  Call_AppServiceEnvironmentsUpdate_568239 = ref object of OpenApiRestCall_567659
-proc url_AppServiceEnvironmentsUpdate_568241(protocol: Scheme; host: string;
+  Call_AppServiceEnvironmentsUpdate_564139 = ref object of OpenApiRestCall_563557
+proc url_AppServiceEnvironmentsUpdate_564141(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -560,37 +561,36 @@ proc url_AppServiceEnvironmentsUpdate_568241(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AppServiceEnvironmentsUpdate_568240(path: JsonNode; query: JsonNode;
+proc validate_AppServiceEnvironmentsUpdate_564140(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Create or update an App Service Environment.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : Name of the resource group to which the resource belongs.
   ##   name: JString (required)
   ##       : Name of the App Service Environment.
   ##   subscriptionId: JString (required)
   ##                 : Your Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
+  ##   resourceGroupName: JString (required)
+  ##                    : Name of the resource group to which the resource belongs.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568242 = path.getOrDefault("resourceGroupName")
-  valid_568242 = validateParameter(valid_568242, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `name` field"
+  var valid_564142 = path.getOrDefault("name")
+  valid_564142 = validateParameter(valid_564142, JString, required = true,
                                  default = nil)
-  if valid_568242 != nil:
-    section.add "resourceGroupName", valid_568242
-  var valid_568243 = path.getOrDefault("name")
-  valid_568243 = validateParameter(valid_568243, JString, required = true,
+  if valid_564142 != nil:
+    section.add "name", valid_564142
+  var valid_564143 = path.getOrDefault("subscriptionId")
+  valid_564143 = validateParameter(valid_564143, JString, required = true,
                                  default = nil)
-  if valid_568243 != nil:
-    section.add "name", valid_568243
-  var valid_568244 = path.getOrDefault("subscriptionId")
-  valid_568244 = validateParameter(valid_568244, JString, required = true,
+  if valid_564143 != nil:
+    section.add "subscriptionId", valid_564143
+  var valid_564144 = path.getOrDefault("resourceGroupName")
+  valid_564144 = validateParameter(valid_564144, JString, required = true,
                                  default = nil)
-  if valid_568244 != nil:
-    section.add "subscriptionId", valid_568244
+  if valid_564144 != nil:
+    section.add "resourceGroupName", valid_564144
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -598,11 +598,11 @@ proc validate_AppServiceEnvironmentsUpdate_568240(path: JsonNode; query: JsonNod
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568245 = query.getOrDefault("api-version")
-  valid_568245 = validateParameter(valid_568245, JString, required = true,
+  var valid_564145 = query.getOrDefault("api-version")
+  valid_564145 = validateParameter(valid_564145, JString, required = true,
                                  default = nil)
-  if valid_568245 != nil:
-    section.add "api-version", valid_568245
+  if valid_564145 != nil:
+    section.add "api-version", valid_564145
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -616,53 +616,53 @@ proc validate_AppServiceEnvironmentsUpdate_568240(path: JsonNode; query: JsonNod
   if body != nil:
     result.add "body", body
 
-proc call*(call_568247: Call_AppServiceEnvironmentsUpdate_568239; path: JsonNode;
+proc call*(call_564147: Call_AppServiceEnvironmentsUpdate_564139; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Create or update an App Service Environment.
   ## 
-  let valid = call_568247.validator(path, query, header, formData, body)
-  let scheme = call_568247.pickScheme
+  let valid = call_564147.validator(path, query, header, formData, body)
+  let scheme = call_564147.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568247.url(scheme.get, call_568247.host, call_568247.base,
-                         call_568247.route, valid.getOrDefault("path"),
+  let url = call_564147.url(scheme.get, call_564147.host, call_564147.base,
+                         call_564147.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568247, url, valid)
+  result = hook(call_564147, url, valid)
 
-proc call*(call_568248: Call_AppServiceEnvironmentsUpdate_568239;
-          resourceGroupName: string; apiVersion: string; name: string;
-          hostingEnvironmentEnvelope: JsonNode; subscriptionId: string): Recallable =
+proc call*(call_564148: Call_AppServiceEnvironmentsUpdate_564139;
+          apiVersion: string; name: string; subscriptionId: string;
+          resourceGroupName: string; hostingEnvironmentEnvelope: JsonNode): Recallable =
   ## appServiceEnvironmentsUpdate
   ## Create or update an App Service Environment.
-  ##   resourceGroupName: string (required)
-  ##                    : Name of the resource group to which the resource belongs.
   ##   apiVersion: string (required)
   ##             : API Version
   ##   name: string (required)
   ##       : Name of the App Service Environment.
-  ##   hostingEnvironmentEnvelope: JObject (required)
-  ##                             : Configuration details of the App Service Environment.
   ##   subscriptionId: string (required)
   ##                 : Your Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
-  var path_568249 = newJObject()
-  var query_568250 = newJObject()
-  var body_568251 = newJObject()
-  add(path_568249, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568250, "api-version", newJString(apiVersion))
-  add(path_568249, "name", newJString(name))
+  ##   resourceGroupName: string (required)
+  ##                    : Name of the resource group to which the resource belongs.
+  ##   hostingEnvironmentEnvelope: JObject (required)
+  ##                             : Configuration details of the App Service Environment.
+  var path_564149 = newJObject()
+  var query_564150 = newJObject()
+  var body_564151 = newJObject()
+  add(query_564150, "api-version", newJString(apiVersion))
+  add(path_564149, "name", newJString(name))
+  add(path_564149, "subscriptionId", newJString(subscriptionId))
+  add(path_564149, "resourceGroupName", newJString(resourceGroupName))
   if hostingEnvironmentEnvelope != nil:
-    body_568251 = hostingEnvironmentEnvelope
-  add(path_568249, "subscriptionId", newJString(subscriptionId))
-  result = call_568248.call(path_568249, query_568250, nil, nil, body_568251)
+    body_564151 = hostingEnvironmentEnvelope
+  result = call_564148.call(path_564149, query_564150, nil, nil, body_564151)
 
-var appServiceEnvironmentsUpdate* = Call_AppServiceEnvironmentsUpdate_568239(
+var appServiceEnvironmentsUpdate* = Call_AppServiceEnvironmentsUpdate_564139(
     name: "appServiceEnvironmentsUpdate", meth: HttpMethod.HttpPatch,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Web/hostingEnvironments/{name}",
-    validator: validate_AppServiceEnvironmentsUpdate_568240, base: "",
-    url: url_AppServiceEnvironmentsUpdate_568241, schemes: {Scheme.Https})
+    validator: validate_AppServiceEnvironmentsUpdate_564140, base: "",
+    url: url_AppServiceEnvironmentsUpdate_564141, schemes: {Scheme.Https})
 type
-  Call_AppServiceEnvironmentsDelete_568227 = ref object of OpenApiRestCall_567659
-proc url_AppServiceEnvironmentsDelete_568229(protocol: Scheme; host: string;
+  Call_AppServiceEnvironmentsDelete_564127 = ref object of OpenApiRestCall_563557
+proc url_AppServiceEnvironmentsDelete_564129(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -685,37 +685,36 @@ proc url_AppServiceEnvironmentsDelete_568229(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AppServiceEnvironmentsDelete_568228(path: JsonNode; query: JsonNode;
+proc validate_AppServiceEnvironmentsDelete_564128(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Delete an App Service Environment.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : Name of the resource group to which the resource belongs.
   ##   name: JString (required)
   ##       : Name of the App Service Environment.
   ##   subscriptionId: JString (required)
   ##                 : Your Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
+  ##   resourceGroupName: JString (required)
+  ##                    : Name of the resource group to which the resource belongs.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568230 = path.getOrDefault("resourceGroupName")
-  valid_568230 = validateParameter(valid_568230, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `name` field"
+  var valid_564130 = path.getOrDefault("name")
+  valid_564130 = validateParameter(valid_564130, JString, required = true,
                                  default = nil)
-  if valid_568230 != nil:
-    section.add "resourceGroupName", valid_568230
-  var valid_568231 = path.getOrDefault("name")
-  valid_568231 = validateParameter(valid_568231, JString, required = true,
+  if valid_564130 != nil:
+    section.add "name", valid_564130
+  var valid_564131 = path.getOrDefault("subscriptionId")
+  valid_564131 = validateParameter(valid_564131, JString, required = true,
                                  default = nil)
-  if valid_568231 != nil:
-    section.add "name", valid_568231
-  var valid_568232 = path.getOrDefault("subscriptionId")
-  valid_568232 = validateParameter(valid_568232, JString, required = true,
+  if valid_564131 != nil:
+    section.add "subscriptionId", valid_564131
+  var valid_564132 = path.getOrDefault("resourceGroupName")
+  valid_564132 = validateParameter(valid_564132, JString, required = true,
                                  default = nil)
-  if valid_568232 != nil:
-    section.add "subscriptionId", valid_568232
+  if valid_564132 != nil:
+    section.add "resourceGroupName", valid_564132
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -725,15 +724,15 @@ proc validate_AppServiceEnvironmentsDelete_568228(path: JsonNode; query: JsonNod
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568233 = query.getOrDefault("api-version")
-  valid_568233 = validateParameter(valid_568233, JString, required = true,
+  var valid_564133 = query.getOrDefault("api-version")
+  valid_564133 = validateParameter(valid_564133, JString, required = true,
                                  default = nil)
-  if valid_568233 != nil:
-    section.add "api-version", valid_568233
-  var valid_568234 = query.getOrDefault("forceDelete")
-  valid_568234 = validateParameter(valid_568234, JBool, required = false, default = nil)
-  if valid_568234 != nil:
-    section.add "forceDelete", valid_568234
+  if valid_564133 != nil:
+    section.add "api-version", valid_564133
+  var valid_564134 = query.getOrDefault("forceDelete")
+  valid_564134 = validateParameter(valid_564134, JBool, required = false, default = nil)
+  if valid_564134 != nil:
+    section.add "forceDelete", valid_564134
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -742,51 +741,51 @@ proc validate_AppServiceEnvironmentsDelete_568228(path: JsonNode; query: JsonNod
   if body != nil:
     result.add "body", body
 
-proc call*(call_568235: Call_AppServiceEnvironmentsDelete_568227; path: JsonNode;
+proc call*(call_564135: Call_AppServiceEnvironmentsDelete_564127; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Delete an App Service Environment.
   ## 
-  let valid = call_568235.validator(path, query, header, formData, body)
-  let scheme = call_568235.pickScheme
+  let valid = call_564135.validator(path, query, header, formData, body)
+  let scheme = call_564135.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568235.url(scheme.get, call_568235.host, call_568235.base,
-                         call_568235.route, valid.getOrDefault("path"),
+  let url = call_564135.url(scheme.get, call_564135.host, call_564135.base,
+                         call_564135.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568235, url, valid)
+  result = hook(call_564135, url, valid)
 
-proc call*(call_568236: Call_AppServiceEnvironmentsDelete_568227;
-          resourceGroupName: string; apiVersion: string; name: string;
-          subscriptionId: string; forceDelete: bool = false): Recallable =
+proc call*(call_564136: Call_AppServiceEnvironmentsDelete_564127;
+          apiVersion: string; name: string; subscriptionId: string;
+          resourceGroupName: string; forceDelete: bool = false): Recallable =
   ## appServiceEnvironmentsDelete
   ## Delete an App Service Environment.
-  ##   resourceGroupName: string (required)
-  ##                    : Name of the resource group to which the resource belongs.
   ##   apiVersion: string (required)
   ##             : API Version
   ##   name: string (required)
   ##       : Name of the App Service Environment.
-  ##   forceDelete: bool
-  ##              : Specify <code>true</code> to force the deletion even if the App Service Environment contains resources. The default is <code>false</code>.
   ##   subscriptionId: string (required)
   ##                 : Your Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
-  var path_568237 = newJObject()
-  var query_568238 = newJObject()
-  add(path_568237, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568238, "api-version", newJString(apiVersion))
-  add(path_568237, "name", newJString(name))
-  add(query_568238, "forceDelete", newJBool(forceDelete))
-  add(path_568237, "subscriptionId", newJString(subscriptionId))
-  result = call_568236.call(path_568237, query_568238, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : Name of the resource group to which the resource belongs.
+  ##   forceDelete: bool
+  ##              : Specify <code>true</code> to force the deletion even if the App Service Environment contains resources. The default is <code>false</code>.
+  var path_564137 = newJObject()
+  var query_564138 = newJObject()
+  add(query_564138, "api-version", newJString(apiVersion))
+  add(path_564137, "name", newJString(name))
+  add(path_564137, "subscriptionId", newJString(subscriptionId))
+  add(path_564137, "resourceGroupName", newJString(resourceGroupName))
+  add(query_564138, "forceDelete", newJBool(forceDelete))
+  result = call_564136.call(path_564137, query_564138, nil, nil, nil)
 
-var appServiceEnvironmentsDelete* = Call_AppServiceEnvironmentsDelete_568227(
+var appServiceEnvironmentsDelete* = Call_AppServiceEnvironmentsDelete_564127(
     name: "appServiceEnvironmentsDelete", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Web/hostingEnvironments/{name}",
-    validator: validate_AppServiceEnvironmentsDelete_568228, base: "",
-    url: url_AppServiceEnvironmentsDelete_568229, schemes: {Scheme.Https})
+    validator: validate_AppServiceEnvironmentsDelete_564128, base: "",
+    url: url_AppServiceEnvironmentsDelete_564129, schemes: {Scheme.Https})
 type
-  Call_AppServiceEnvironmentsListCapacities_568252 = ref object of OpenApiRestCall_567659
-proc url_AppServiceEnvironmentsListCapacities_568254(protocol: Scheme;
+  Call_AppServiceEnvironmentsListCapacities_564152 = ref object of OpenApiRestCall_563557
+proc url_AppServiceEnvironmentsListCapacities_564154(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -810,37 +809,36 @@ proc url_AppServiceEnvironmentsListCapacities_568254(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AppServiceEnvironmentsListCapacities_568253(path: JsonNode;
+proc validate_AppServiceEnvironmentsListCapacities_564153(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Get the used, available, and total worker capacity an App Service Environment.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : Name of the resource group to which the resource belongs.
   ##   name: JString (required)
   ##       : Name of the App Service Environment.
   ##   subscriptionId: JString (required)
   ##                 : Your Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
+  ##   resourceGroupName: JString (required)
+  ##                    : Name of the resource group to which the resource belongs.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568255 = path.getOrDefault("resourceGroupName")
-  valid_568255 = validateParameter(valid_568255, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `name` field"
+  var valid_564155 = path.getOrDefault("name")
+  valid_564155 = validateParameter(valid_564155, JString, required = true,
                                  default = nil)
-  if valid_568255 != nil:
-    section.add "resourceGroupName", valid_568255
-  var valid_568256 = path.getOrDefault("name")
-  valid_568256 = validateParameter(valid_568256, JString, required = true,
+  if valid_564155 != nil:
+    section.add "name", valid_564155
+  var valid_564156 = path.getOrDefault("subscriptionId")
+  valid_564156 = validateParameter(valid_564156, JString, required = true,
                                  default = nil)
-  if valid_568256 != nil:
-    section.add "name", valid_568256
-  var valid_568257 = path.getOrDefault("subscriptionId")
-  valid_568257 = validateParameter(valid_568257, JString, required = true,
+  if valid_564156 != nil:
+    section.add "subscriptionId", valid_564156
+  var valid_564157 = path.getOrDefault("resourceGroupName")
+  valid_564157 = validateParameter(valid_564157, JString, required = true,
                                  default = nil)
-  if valid_568257 != nil:
-    section.add "subscriptionId", valid_568257
+  if valid_564157 != nil:
+    section.add "resourceGroupName", valid_564157
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -848,11 +846,11 @@ proc validate_AppServiceEnvironmentsListCapacities_568253(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568258 = query.getOrDefault("api-version")
-  valid_568258 = validateParameter(valid_568258, JString, required = true,
+  var valid_564158 = query.getOrDefault("api-version")
+  valid_564158 = validateParameter(valid_564158, JString, required = true,
                                  default = nil)
-  if valid_568258 != nil:
-    section.add "api-version", valid_568258
+  if valid_564158 != nil:
+    section.add "api-version", valid_564158
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -861,49 +859,49 @@ proc validate_AppServiceEnvironmentsListCapacities_568253(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568259: Call_AppServiceEnvironmentsListCapacities_568252;
+proc call*(call_564159: Call_AppServiceEnvironmentsListCapacities_564152;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Get the used, available, and total worker capacity an App Service Environment.
   ## 
-  let valid = call_568259.validator(path, query, header, formData, body)
-  let scheme = call_568259.pickScheme
+  let valid = call_564159.validator(path, query, header, formData, body)
+  let scheme = call_564159.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568259.url(scheme.get, call_568259.host, call_568259.base,
-                         call_568259.route, valid.getOrDefault("path"),
+  let url = call_564159.url(scheme.get, call_564159.host, call_564159.base,
+                         call_564159.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568259, url, valid)
+  result = hook(call_564159, url, valid)
 
-proc call*(call_568260: Call_AppServiceEnvironmentsListCapacities_568252;
-          resourceGroupName: string; apiVersion: string; name: string;
-          subscriptionId: string): Recallable =
+proc call*(call_564160: Call_AppServiceEnvironmentsListCapacities_564152;
+          apiVersion: string; name: string; subscriptionId: string;
+          resourceGroupName: string): Recallable =
   ## appServiceEnvironmentsListCapacities
   ## Get the used, available, and total worker capacity an App Service Environment.
-  ##   resourceGroupName: string (required)
-  ##                    : Name of the resource group to which the resource belongs.
   ##   apiVersion: string (required)
   ##             : API Version
   ##   name: string (required)
   ##       : Name of the App Service Environment.
   ##   subscriptionId: string (required)
   ##                 : Your Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
-  var path_568261 = newJObject()
-  var query_568262 = newJObject()
-  add(path_568261, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568262, "api-version", newJString(apiVersion))
-  add(path_568261, "name", newJString(name))
-  add(path_568261, "subscriptionId", newJString(subscriptionId))
-  result = call_568260.call(path_568261, query_568262, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : Name of the resource group to which the resource belongs.
+  var path_564161 = newJObject()
+  var query_564162 = newJObject()
+  add(query_564162, "api-version", newJString(apiVersion))
+  add(path_564161, "name", newJString(name))
+  add(path_564161, "subscriptionId", newJString(subscriptionId))
+  add(path_564161, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564160.call(path_564161, query_564162, nil, nil, nil)
 
-var appServiceEnvironmentsListCapacities* = Call_AppServiceEnvironmentsListCapacities_568252(
+var appServiceEnvironmentsListCapacities* = Call_AppServiceEnvironmentsListCapacities_564152(
     name: "appServiceEnvironmentsListCapacities", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Web/hostingEnvironments/{name}/capacities/compute",
-    validator: validate_AppServiceEnvironmentsListCapacities_568253, base: "",
-    url: url_AppServiceEnvironmentsListCapacities_568254, schemes: {Scheme.Https})
+    validator: validate_AppServiceEnvironmentsListCapacities_564153, base: "",
+    url: url_AppServiceEnvironmentsListCapacities_564154, schemes: {Scheme.Https})
 type
-  Call_AppServiceEnvironmentsListVips_568263 = ref object of OpenApiRestCall_567659
-proc url_AppServiceEnvironmentsListVips_568265(protocol: Scheme; host: string;
+  Call_AppServiceEnvironmentsListVips_564163 = ref object of OpenApiRestCall_563557
+proc url_AppServiceEnvironmentsListVips_564165(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -927,37 +925,36 @@ proc url_AppServiceEnvironmentsListVips_568265(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AppServiceEnvironmentsListVips_568264(path: JsonNode;
+proc validate_AppServiceEnvironmentsListVips_564164(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Get IP addresses assigned to an App Service Environment.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : Name of the resource group to which the resource belongs.
   ##   name: JString (required)
   ##       : Name of the App Service Environment.
   ##   subscriptionId: JString (required)
   ##                 : Your Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
+  ##   resourceGroupName: JString (required)
+  ##                    : Name of the resource group to which the resource belongs.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568266 = path.getOrDefault("resourceGroupName")
-  valid_568266 = validateParameter(valid_568266, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `name` field"
+  var valid_564166 = path.getOrDefault("name")
+  valid_564166 = validateParameter(valid_564166, JString, required = true,
                                  default = nil)
-  if valid_568266 != nil:
-    section.add "resourceGroupName", valid_568266
-  var valid_568267 = path.getOrDefault("name")
-  valid_568267 = validateParameter(valid_568267, JString, required = true,
+  if valid_564166 != nil:
+    section.add "name", valid_564166
+  var valid_564167 = path.getOrDefault("subscriptionId")
+  valid_564167 = validateParameter(valid_564167, JString, required = true,
                                  default = nil)
-  if valid_568267 != nil:
-    section.add "name", valid_568267
-  var valid_568268 = path.getOrDefault("subscriptionId")
-  valid_568268 = validateParameter(valid_568268, JString, required = true,
+  if valid_564167 != nil:
+    section.add "subscriptionId", valid_564167
+  var valid_564168 = path.getOrDefault("resourceGroupName")
+  valid_564168 = validateParameter(valid_564168, JString, required = true,
                                  default = nil)
-  if valid_568268 != nil:
-    section.add "subscriptionId", valid_568268
+  if valid_564168 != nil:
+    section.add "resourceGroupName", valid_564168
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -965,11 +962,11 @@ proc validate_AppServiceEnvironmentsListVips_568264(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568269 = query.getOrDefault("api-version")
-  valid_568269 = validateParameter(valid_568269, JString, required = true,
+  var valid_564169 = query.getOrDefault("api-version")
+  valid_564169 = validateParameter(valid_564169, JString, required = true,
                                  default = nil)
-  if valid_568269 != nil:
-    section.add "api-version", valid_568269
+  if valid_564169 != nil:
+    section.add "api-version", valid_564169
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -978,48 +975,48 @@ proc validate_AppServiceEnvironmentsListVips_568264(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568270: Call_AppServiceEnvironmentsListVips_568263; path: JsonNode;
+proc call*(call_564170: Call_AppServiceEnvironmentsListVips_564163; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get IP addresses assigned to an App Service Environment.
   ## 
-  let valid = call_568270.validator(path, query, header, formData, body)
-  let scheme = call_568270.pickScheme
+  let valid = call_564170.validator(path, query, header, formData, body)
+  let scheme = call_564170.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568270.url(scheme.get, call_568270.host, call_568270.base,
-                         call_568270.route, valid.getOrDefault("path"),
+  let url = call_564170.url(scheme.get, call_564170.host, call_564170.base,
+                         call_564170.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568270, url, valid)
+  result = hook(call_564170, url, valid)
 
-proc call*(call_568271: Call_AppServiceEnvironmentsListVips_568263;
-          resourceGroupName: string; apiVersion: string; name: string;
-          subscriptionId: string): Recallable =
+proc call*(call_564171: Call_AppServiceEnvironmentsListVips_564163;
+          apiVersion: string; name: string; subscriptionId: string;
+          resourceGroupName: string): Recallable =
   ## appServiceEnvironmentsListVips
   ## Get IP addresses assigned to an App Service Environment.
-  ##   resourceGroupName: string (required)
-  ##                    : Name of the resource group to which the resource belongs.
   ##   apiVersion: string (required)
   ##             : API Version
   ##   name: string (required)
   ##       : Name of the App Service Environment.
   ##   subscriptionId: string (required)
   ##                 : Your Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
-  var path_568272 = newJObject()
-  var query_568273 = newJObject()
-  add(path_568272, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568273, "api-version", newJString(apiVersion))
-  add(path_568272, "name", newJString(name))
-  add(path_568272, "subscriptionId", newJString(subscriptionId))
-  result = call_568271.call(path_568272, query_568273, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : Name of the resource group to which the resource belongs.
+  var path_564172 = newJObject()
+  var query_564173 = newJObject()
+  add(query_564173, "api-version", newJString(apiVersion))
+  add(path_564172, "name", newJString(name))
+  add(path_564172, "subscriptionId", newJString(subscriptionId))
+  add(path_564172, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564171.call(path_564172, query_564173, nil, nil, nil)
 
-var appServiceEnvironmentsListVips* = Call_AppServiceEnvironmentsListVips_568263(
+var appServiceEnvironmentsListVips* = Call_AppServiceEnvironmentsListVips_564163(
     name: "appServiceEnvironmentsListVips", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Web/hostingEnvironments/{name}/capacities/virtualip",
-    validator: validate_AppServiceEnvironmentsListVips_568264, base: "",
-    url: url_AppServiceEnvironmentsListVips_568265, schemes: {Scheme.Https})
+    validator: validate_AppServiceEnvironmentsListVips_564164, base: "",
+    url: url_AppServiceEnvironmentsListVips_564165, schemes: {Scheme.Https})
 type
-  Call_AppServiceEnvironmentsChangeVnet_568274 = ref object of OpenApiRestCall_567659
-proc url_AppServiceEnvironmentsChangeVnet_568276(protocol: Scheme; host: string;
+  Call_AppServiceEnvironmentsChangeVnet_564174 = ref object of OpenApiRestCall_563557
+proc url_AppServiceEnvironmentsChangeVnet_564176(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1043,37 +1040,36 @@ proc url_AppServiceEnvironmentsChangeVnet_568276(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AppServiceEnvironmentsChangeVnet_568275(path: JsonNode;
+proc validate_AppServiceEnvironmentsChangeVnet_564175(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Move an App Service Environment to a different VNET.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : Name of the resource group to which the resource belongs.
   ##   name: JString (required)
   ##       : Name of the App Service Environment.
   ##   subscriptionId: JString (required)
   ##                 : Your Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
+  ##   resourceGroupName: JString (required)
+  ##                    : Name of the resource group to which the resource belongs.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568277 = path.getOrDefault("resourceGroupName")
-  valid_568277 = validateParameter(valid_568277, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `name` field"
+  var valid_564177 = path.getOrDefault("name")
+  valid_564177 = validateParameter(valid_564177, JString, required = true,
                                  default = nil)
-  if valid_568277 != nil:
-    section.add "resourceGroupName", valid_568277
-  var valid_568278 = path.getOrDefault("name")
-  valid_568278 = validateParameter(valid_568278, JString, required = true,
+  if valid_564177 != nil:
+    section.add "name", valid_564177
+  var valid_564178 = path.getOrDefault("subscriptionId")
+  valid_564178 = validateParameter(valid_564178, JString, required = true,
                                  default = nil)
-  if valid_568278 != nil:
-    section.add "name", valid_568278
-  var valid_568279 = path.getOrDefault("subscriptionId")
-  valid_568279 = validateParameter(valid_568279, JString, required = true,
+  if valid_564178 != nil:
+    section.add "subscriptionId", valid_564178
+  var valid_564179 = path.getOrDefault("resourceGroupName")
+  valid_564179 = validateParameter(valid_564179, JString, required = true,
                                  default = nil)
-  if valid_568279 != nil:
-    section.add "subscriptionId", valid_568279
+  if valid_564179 != nil:
+    section.add "resourceGroupName", valid_564179
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1081,11 +1077,11 @@ proc validate_AppServiceEnvironmentsChangeVnet_568275(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568280 = query.getOrDefault("api-version")
-  valid_568280 = validateParameter(valid_568280, JString, required = true,
+  var valid_564180 = query.getOrDefault("api-version")
+  valid_564180 = validateParameter(valid_564180, JString, required = true,
                                  default = nil)
-  if valid_568280 != nil:
-    section.add "api-version", valid_568280
+  if valid_564180 != nil:
+    section.add "api-version", valid_564180
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1099,54 +1095,54 @@ proc validate_AppServiceEnvironmentsChangeVnet_568275(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568282: Call_AppServiceEnvironmentsChangeVnet_568274;
+proc call*(call_564182: Call_AppServiceEnvironmentsChangeVnet_564174;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Move an App Service Environment to a different VNET.
   ## 
-  let valid = call_568282.validator(path, query, header, formData, body)
-  let scheme = call_568282.pickScheme
+  let valid = call_564182.validator(path, query, header, formData, body)
+  let scheme = call_564182.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568282.url(scheme.get, call_568282.host, call_568282.base,
-                         call_568282.route, valid.getOrDefault("path"),
+  let url = call_564182.url(scheme.get, call_564182.host, call_564182.base,
+                         call_564182.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568282, url, valid)
+  result = hook(call_564182, url, valid)
 
-proc call*(call_568283: Call_AppServiceEnvironmentsChangeVnet_568274;
-          resourceGroupName: string; vnetInfo: JsonNode; apiVersion: string;
-          name: string; subscriptionId: string): Recallable =
+proc call*(call_564183: Call_AppServiceEnvironmentsChangeVnet_564174;
+          apiVersion: string; name: string; vnetInfo: JsonNode;
+          subscriptionId: string; resourceGroupName: string): Recallable =
   ## appServiceEnvironmentsChangeVnet
   ## Move an App Service Environment to a different VNET.
-  ##   resourceGroupName: string (required)
-  ##                    : Name of the resource group to which the resource belongs.
-  ##   vnetInfo: JObject (required)
-  ##           : Details for the new virtual network.
   ##   apiVersion: string (required)
   ##             : API Version
   ##   name: string (required)
   ##       : Name of the App Service Environment.
+  ##   vnetInfo: JObject (required)
+  ##           : Details for the new virtual network.
   ##   subscriptionId: string (required)
   ##                 : Your Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
-  var path_568284 = newJObject()
-  var query_568285 = newJObject()
-  var body_568286 = newJObject()
-  add(path_568284, "resourceGroupName", newJString(resourceGroupName))
+  ##   resourceGroupName: string (required)
+  ##                    : Name of the resource group to which the resource belongs.
+  var path_564184 = newJObject()
+  var query_564185 = newJObject()
+  var body_564186 = newJObject()
+  add(query_564185, "api-version", newJString(apiVersion))
+  add(path_564184, "name", newJString(name))
   if vnetInfo != nil:
-    body_568286 = vnetInfo
-  add(query_568285, "api-version", newJString(apiVersion))
-  add(path_568284, "name", newJString(name))
-  add(path_568284, "subscriptionId", newJString(subscriptionId))
-  result = call_568283.call(path_568284, query_568285, nil, nil, body_568286)
+    body_564186 = vnetInfo
+  add(path_564184, "subscriptionId", newJString(subscriptionId))
+  add(path_564184, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564183.call(path_564184, query_564185, nil, nil, body_564186)
 
-var appServiceEnvironmentsChangeVnet* = Call_AppServiceEnvironmentsChangeVnet_568274(
+var appServiceEnvironmentsChangeVnet* = Call_AppServiceEnvironmentsChangeVnet_564174(
     name: "appServiceEnvironmentsChangeVnet", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Web/hostingEnvironments/{name}/changeVirtualNetwork",
-    validator: validate_AppServiceEnvironmentsChangeVnet_568275, base: "",
-    url: url_AppServiceEnvironmentsChangeVnet_568276, schemes: {Scheme.Https})
+    validator: validate_AppServiceEnvironmentsChangeVnet_564175, base: "",
+    url: url_AppServiceEnvironmentsChangeVnet_564176, schemes: {Scheme.Https})
 type
-  Call_AppServiceEnvironmentsListDiagnostics_568287 = ref object of OpenApiRestCall_567659
-proc url_AppServiceEnvironmentsListDiagnostics_568289(protocol: Scheme;
+  Call_AppServiceEnvironmentsListDiagnostics_564187 = ref object of OpenApiRestCall_563557
+proc url_AppServiceEnvironmentsListDiagnostics_564189(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1170,37 +1166,36 @@ proc url_AppServiceEnvironmentsListDiagnostics_568289(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AppServiceEnvironmentsListDiagnostics_568288(path: JsonNode;
+proc validate_AppServiceEnvironmentsListDiagnostics_564188(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Get diagnostic information for an App Service Environment.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : Name of the resource group to which the resource belongs.
   ##   name: JString (required)
   ##       : Name of the App Service Environment.
   ##   subscriptionId: JString (required)
   ##                 : Your Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
+  ##   resourceGroupName: JString (required)
+  ##                    : Name of the resource group to which the resource belongs.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568290 = path.getOrDefault("resourceGroupName")
-  valid_568290 = validateParameter(valid_568290, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `name` field"
+  var valid_564190 = path.getOrDefault("name")
+  valid_564190 = validateParameter(valid_564190, JString, required = true,
                                  default = nil)
-  if valid_568290 != nil:
-    section.add "resourceGroupName", valid_568290
-  var valid_568291 = path.getOrDefault("name")
-  valid_568291 = validateParameter(valid_568291, JString, required = true,
+  if valid_564190 != nil:
+    section.add "name", valid_564190
+  var valid_564191 = path.getOrDefault("subscriptionId")
+  valid_564191 = validateParameter(valid_564191, JString, required = true,
                                  default = nil)
-  if valid_568291 != nil:
-    section.add "name", valid_568291
-  var valid_568292 = path.getOrDefault("subscriptionId")
-  valid_568292 = validateParameter(valid_568292, JString, required = true,
+  if valid_564191 != nil:
+    section.add "subscriptionId", valid_564191
+  var valid_564192 = path.getOrDefault("resourceGroupName")
+  valid_564192 = validateParameter(valid_564192, JString, required = true,
                                  default = nil)
-  if valid_568292 != nil:
-    section.add "subscriptionId", valid_568292
+  if valid_564192 != nil:
+    section.add "resourceGroupName", valid_564192
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1208,11 +1203,11 @@ proc validate_AppServiceEnvironmentsListDiagnostics_568288(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568293 = query.getOrDefault("api-version")
-  valid_568293 = validateParameter(valid_568293, JString, required = true,
+  var valid_564193 = query.getOrDefault("api-version")
+  valid_564193 = validateParameter(valid_564193, JString, required = true,
                                  default = nil)
-  if valid_568293 != nil:
-    section.add "api-version", valid_568293
+  if valid_564193 != nil:
+    section.add "api-version", valid_564193
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1221,49 +1216,49 @@ proc validate_AppServiceEnvironmentsListDiagnostics_568288(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568294: Call_AppServiceEnvironmentsListDiagnostics_568287;
+proc call*(call_564194: Call_AppServiceEnvironmentsListDiagnostics_564187;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Get diagnostic information for an App Service Environment.
   ## 
-  let valid = call_568294.validator(path, query, header, formData, body)
-  let scheme = call_568294.pickScheme
+  let valid = call_564194.validator(path, query, header, formData, body)
+  let scheme = call_564194.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568294.url(scheme.get, call_568294.host, call_568294.base,
-                         call_568294.route, valid.getOrDefault("path"),
+  let url = call_564194.url(scheme.get, call_564194.host, call_564194.base,
+                         call_564194.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568294, url, valid)
+  result = hook(call_564194, url, valid)
 
-proc call*(call_568295: Call_AppServiceEnvironmentsListDiagnostics_568287;
-          resourceGroupName: string; apiVersion: string; name: string;
-          subscriptionId: string): Recallable =
+proc call*(call_564195: Call_AppServiceEnvironmentsListDiagnostics_564187;
+          apiVersion: string; name: string; subscriptionId: string;
+          resourceGroupName: string): Recallable =
   ## appServiceEnvironmentsListDiagnostics
   ## Get diagnostic information for an App Service Environment.
-  ##   resourceGroupName: string (required)
-  ##                    : Name of the resource group to which the resource belongs.
   ##   apiVersion: string (required)
   ##             : API Version
   ##   name: string (required)
   ##       : Name of the App Service Environment.
   ##   subscriptionId: string (required)
   ##                 : Your Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
-  var path_568296 = newJObject()
-  var query_568297 = newJObject()
-  add(path_568296, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568297, "api-version", newJString(apiVersion))
-  add(path_568296, "name", newJString(name))
-  add(path_568296, "subscriptionId", newJString(subscriptionId))
-  result = call_568295.call(path_568296, query_568297, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : Name of the resource group to which the resource belongs.
+  var path_564196 = newJObject()
+  var query_564197 = newJObject()
+  add(query_564197, "api-version", newJString(apiVersion))
+  add(path_564196, "name", newJString(name))
+  add(path_564196, "subscriptionId", newJString(subscriptionId))
+  add(path_564196, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564195.call(path_564196, query_564197, nil, nil, nil)
 
-var appServiceEnvironmentsListDiagnostics* = Call_AppServiceEnvironmentsListDiagnostics_568287(
+var appServiceEnvironmentsListDiagnostics* = Call_AppServiceEnvironmentsListDiagnostics_564187(
     name: "appServiceEnvironmentsListDiagnostics", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Web/hostingEnvironments/{name}/diagnostics",
-    validator: validate_AppServiceEnvironmentsListDiagnostics_568288, base: "",
-    url: url_AppServiceEnvironmentsListDiagnostics_568289, schemes: {Scheme.Https})
+    validator: validate_AppServiceEnvironmentsListDiagnostics_564188, base: "",
+    url: url_AppServiceEnvironmentsListDiagnostics_564189, schemes: {Scheme.Https})
 type
-  Call_AppServiceEnvironmentsGetDiagnosticsItem_568298 = ref object of OpenApiRestCall_567659
-proc url_AppServiceEnvironmentsGetDiagnosticsItem_568300(protocol: Scheme;
+  Call_AppServiceEnvironmentsGetDiagnosticsItem_564198 = ref object of OpenApiRestCall_563557
+proc url_AppServiceEnvironmentsGetDiagnosticsItem_564200(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1289,44 +1284,43 @@ proc url_AppServiceEnvironmentsGetDiagnosticsItem_568300(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AppServiceEnvironmentsGetDiagnosticsItem_568299(path: JsonNode;
+proc validate_AppServiceEnvironmentsGetDiagnosticsItem_564199(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Get a diagnostics item for an App Service Environment.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : Name of the resource group to which the resource belongs.
   ##   name: JString (required)
   ##       : Name of the App Service Environment.
   ##   subscriptionId: JString (required)
   ##                 : Your Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
   ##   diagnosticsName: JString (required)
   ##                  : Name of the diagnostics item.
+  ##   resourceGroupName: JString (required)
+  ##                    : Name of the resource group to which the resource belongs.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568301 = path.getOrDefault("resourceGroupName")
-  valid_568301 = validateParameter(valid_568301, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `name` field"
+  var valid_564201 = path.getOrDefault("name")
+  valid_564201 = validateParameter(valid_564201, JString, required = true,
                                  default = nil)
-  if valid_568301 != nil:
-    section.add "resourceGroupName", valid_568301
-  var valid_568302 = path.getOrDefault("name")
-  valid_568302 = validateParameter(valid_568302, JString, required = true,
+  if valid_564201 != nil:
+    section.add "name", valid_564201
+  var valid_564202 = path.getOrDefault("subscriptionId")
+  valid_564202 = validateParameter(valid_564202, JString, required = true,
                                  default = nil)
-  if valid_568302 != nil:
-    section.add "name", valid_568302
-  var valid_568303 = path.getOrDefault("subscriptionId")
-  valid_568303 = validateParameter(valid_568303, JString, required = true,
+  if valid_564202 != nil:
+    section.add "subscriptionId", valid_564202
+  var valid_564203 = path.getOrDefault("diagnosticsName")
+  valid_564203 = validateParameter(valid_564203, JString, required = true,
                                  default = nil)
-  if valid_568303 != nil:
-    section.add "subscriptionId", valid_568303
-  var valid_568304 = path.getOrDefault("diagnosticsName")
-  valid_568304 = validateParameter(valid_568304, JString, required = true,
+  if valid_564203 != nil:
+    section.add "diagnosticsName", valid_564203
+  var valid_564204 = path.getOrDefault("resourceGroupName")
+  valid_564204 = validateParameter(valid_564204, JString, required = true,
                                  default = nil)
-  if valid_568304 != nil:
-    section.add "diagnosticsName", valid_568304
+  if valid_564204 != nil:
+    section.add "resourceGroupName", valid_564204
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1334,11 +1328,11 @@ proc validate_AppServiceEnvironmentsGetDiagnosticsItem_568299(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568305 = query.getOrDefault("api-version")
-  valid_568305 = validateParameter(valid_568305, JString, required = true,
+  var valid_564205 = query.getOrDefault("api-version")
+  valid_564205 = validateParameter(valid_564205, JString, required = true,
                                  default = nil)
-  if valid_568305 != nil:
-    section.add "api-version", valid_568305
+  if valid_564205 != nil:
+    section.add "api-version", valid_564205
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1347,27 +1341,25 @@ proc validate_AppServiceEnvironmentsGetDiagnosticsItem_568299(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568306: Call_AppServiceEnvironmentsGetDiagnosticsItem_568298;
+proc call*(call_564206: Call_AppServiceEnvironmentsGetDiagnosticsItem_564198;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Get a diagnostics item for an App Service Environment.
   ## 
-  let valid = call_568306.validator(path, query, header, formData, body)
-  let scheme = call_568306.pickScheme
+  let valid = call_564206.validator(path, query, header, formData, body)
+  let scheme = call_564206.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568306.url(scheme.get, call_568306.host, call_568306.base,
-                         call_568306.route, valid.getOrDefault("path"),
+  let url = call_564206.url(scheme.get, call_564206.host, call_564206.base,
+                         call_564206.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568306, url, valid)
+  result = hook(call_564206, url, valid)
 
-proc call*(call_568307: Call_AppServiceEnvironmentsGetDiagnosticsItem_568298;
-          resourceGroupName: string; apiVersion: string; name: string;
-          subscriptionId: string; diagnosticsName: string): Recallable =
+proc call*(call_564207: Call_AppServiceEnvironmentsGetDiagnosticsItem_564198;
+          apiVersion: string; name: string; subscriptionId: string;
+          diagnosticsName: string; resourceGroupName: string): Recallable =
   ## appServiceEnvironmentsGetDiagnosticsItem
   ## Get a diagnostics item for an App Service Environment.
-  ##   resourceGroupName: string (required)
-  ##                    : Name of the resource group to which the resource belongs.
   ##   apiVersion: string (required)
   ##             : API Version
   ##   name: string (required)
@@ -1376,24 +1368,26 @@ proc call*(call_568307: Call_AppServiceEnvironmentsGetDiagnosticsItem_568298;
   ##                 : Your Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
   ##   diagnosticsName: string (required)
   ##                  : Name of the diagnostics item.
-  var path_568308 = newJObject()
-  var query_568309 = newJObject()
-  add(path_568308, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568309, "api-version", newJString(apiVersion))
-  add(path_568308, "name", newJString(name))
-  add(path_568308, "subscriptionId", newJString(subscriptionId))
-  add(path_568308, "diagnosticsName", newJString(diagnosticsName))
-  result = call_568307.call(path_568308, query_568309, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : Name of the resource group to which the resource belongs.
+  var path_564208 = newJObject()
+  var query_564209 = newJObject()
+  add(query_564209, "api-version", newJString(apiVersion))
+  add(path_564208, "name", newJString(name))
+  add(path_564208, "subscriptionId", newJString(subscriptionId))
+  add(path_564208, "diagnosticsName", newJString(diagnosticsName))
+  add(path_564208, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564207.call(path_564208, query_564209, nil, nil, nil)
 
-var appServiceEnvironmentsGetDiagnosticsItem* = Call_AppServiceEnvironmentsGetDiagnosticsItem_568298(
+var appServiceEnvironmentsGetDiagnosticsItem* = Call_AppServiceEnvironmentsGetDiagnosticsItem_564198(
     name: "appServiceEnvironmentsGetDiagnosticsItem", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Web/hostingEnvironments/{name}/diagnostics/{diagnosticsName}",
-    validator: validate_AppServiceEnvironmentsGetDiagnosticsItem_568299, base: "",
-    url: url_AppServiceEnvironmentsGetDiagnosticsItem_568300,
+    validator: validate_AppServiceEnvironmentsGetDiagnosticsItem_564199, base: "",
+    url: url_AppServiceEnvironmentsGetDiagnosticsItem_564200,
     schemes: {Scheme.Https})
 type
-  Call_AppServiceEnvironmentsGetInboundNetworkDependenciesEndpoints_568310 = ref object of OpenApiRestCall_567659
-proc url_AppServiceEnvironmentsGetInboundNetworkDependenciesEndpoints_568312(
+  Call_AppServiceEnvironmentsGetInboundNetworkDependenciesEndpoints_564210 = ref object of OpenApiRestCall_563557
+proc url_AppServiceEnvironmentsGetInboundNetworkDependenciesEndpoints_564212(
     protocol: Scheme; host: string; base: string; route: string; path: JsonNode;
     query: JsonNode): Uri =
   result.scheme = $protocol
@@ -1418,7 +1412,7 @@ proc url_AppServiceEnvironmentsGetInboundNetworkDependenciesEndpoints_568312(
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AppServiceEnvironmentsGetInboundNetworkDependenciesEndpoints_568311(
+proc validate_AppServiceEnvironmentsGetInboundNetworkDependenciesEndpoints_564211(
     path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
     body: JsonNode): JsonNode =
   ## Get the network endpoints of all inbound dependencies of an App Service Environment.
@@ -1426,30 +1420,29 @@ proc validate_AppServiceEnvironmentsGetInboundNetworkDependenciesEndpoints_56831
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : Name of the resource group to which the resource belongs.
   ##   name: JString (required)
   ##       : Name of the App Service Environment.
   ##   subscriptionId: JString (required)
   ##                 : Your Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
+  ##   resourceGroupName: JString (required)
+  ##                    : Name of the resource group to which the resource belongs.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568313 = path.getOrDefault("resourceGroupName")
-  valid_568313 = validateParameter(valid_568313, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `name` field"
+  var valid_564213 = path.getOrDefault("name")
+  valid_564213 = validateParameter(valid_564213, JString, required = true,
                                  default = nil)
-  if valid_568313 != nil:
-    section.add "resourceGroupName", valid_568313
-  var valid_568314 = path.getOrDefault("name")
-  valid_568314 = validateParameter(valid_568314, JString, required = true,
+  if valid_564213 != nil:
+    section.add "name", valid_564213
+  var valid_564214 = path.getOrDefault("subscriptionId")
+  valid_564214 = validateParameter(valid_564214, JString, required = true,
                                  default = nil)
-  if valid_568314 != nil:
-    section.add "name", valid_568314
-  var valid_568315 = path.getOrDefault("subscriptionId")
-  valid_568315 = validateParameter(valid_568315, JString, required = true,
+  if valid_564214 != nil:
+    section.add "subscriptionId", valid_564214
+  var valid_564215 = path.getOrDefault("resourceGroupName")
+  valid_564215 = validateParameter(valid_564215, JString, required = true,
                                  default = nil)
-  if valid_568315 != nil:
-    section.add "subscriptionId", valid_568315
+  if valid_564215 != nil:
+    section.add "resourceGroupName", valid_564215
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1457,11 +1450,11 @@ proc validate_AppServiceEnvironmentsGetInboundNetworkDependenciesEndpoints_56831
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568316 = query.getOrDefault("api-version")
-  valid_568316 = validateParameter(valid_568316, JString, required = true,
+  var valid_564216 = query.getOrDefault("api-version")
+  valid_564216 = validateParameter(valid_564216, JString, required = true,
                                  default = nil)
-  if valid_568316 != nil:
-    section.add "api-version", valid_568316
+  if valid_564216 != nil:
+    section.add "api-version", valid_564216
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1470,50 +1463,50 @@ proc validate_AppServiceEnvironmentsGetInboundNetworkDependenciesEndpoints_56831
   if body != nil:
     result.add "body", body
 
-proc call*(call_568317: Call_AppServiceEnvironmentsGetInboundNetworkDependenciesEndpoints_568310;
+proc call*(call_564217: Call_AppServiceEnvironmentsGetInboundNetworkDependenciesEndpoints_564210;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Get the network endpoints of all inbound dependencies of an App Service Environment.
   ## 
-  let valid = call_568317.validator(path, query, header, formData, body)
-  let scheme = call_568317.pickScheme
+  let valid = call_564217.validator(path, query, header, formData, body)
+  let scheme = call_564217.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568317.url(scheme.get, call_568317.host, call_568317.base,
-                         call_568317.route, valid.getOrDefault("path"),
+  let url = call_564217.url(scheme.get, call_564217.host, call_564217.base,
+                         call_564217.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568317, url, valid)
+  result = hook(call_564217, url, valid)
 
-proc call*(call_568318: Call_AppServiceEnvironmentsGetInboundNetworkDependenciesEndpoints_568310;
-          resourceGroupName: string; apiVersion: string; name: string;
-          subscriptionId: string): Recallable =
+proc call*(call_564218: Call_AppServiceEnvironmentsGetInboundNetworkDependenciesEndpoints_564210;
+          apiVersion: string; name: string; subscriptionId: string;
+          resourceGroupName: string): Recallable =
   ## appServiceEnvironmentsGetInboundNetworkDependenciesEndpoints
   ## Get the network endpoints of all inbound dependencies of an App Service Environment.
-  ##   resourceGroupName: string (required)
-  ##                    : Name of the resource group to which the resource belongs.
   ##   apiVersion: string (required)
   ##             : API Version
   ##   name: string (required)
   ##       : Name of the App Service Environment.
   ##   subscriptionId: string (required)
   ##                 : Your Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
-  var path_568319 = newJObject()
-  var query_568320 = newJObject()
-  add(path_568319, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568320, "api-version", newJString(apiVersion))
-  add(path_568319, "name", newJString(name))
-  add(path_568319, "subscriptionId", newJString(subscriptionId))
-  result = call_568318.call(path_568319, query_568320, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : Name of the resource group to which the resource belongs.
+  var path_564219 = newJObject()
+  var query_564220 = newJObject()
+  add(query_564220, "api-version", newJString(apiVersion))
+  add(path_564219, "name", newJString(name))
+  add(path_564219, "subscriptionId", newJString(subscriptionId))
+  add(path_564219, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564218.call(path_564219, query_564220, nil, nil, nil)
 
-var appServiceEnvironmentsGetInboundNetworkDependenciesEndpoints* = Call_AppServiceEnvironmentsGetInboundNetworkDependenciesEndpoints_568310(
+var appServiceEnvironmentsGetInboundNetworkDependenciesEndpoints* = Call_AppServiceEnvironmentsGetInboundNetworkDependenciesEndpoints_564210(
     name: "appServiceEnvironmentsGetInboundNetworkDependenciesEndpoints",
-    meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Web/hostingEnvironments/{name}/inboundNetworkDependenciesEndpoints", validator: validate_AppServiceEnvironmentsGetInboundNetworkDependenciesEndpoints_568311,
+    meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Web/hostingEnvironments/{name}/inboundNetworkDependenciesEndpoints", validator: validate_AppServiceEnvironmentsGetInboundNetworkDependenciesEndpoints_564211,
     base: "",
-    url: url_AppServiceEnvironmentsGetInboundNetworkDependenciesEndpoints_568312,
+    url: url_AppServiceEnvironmentsGetInboundNetworkDependenciesEndpoints_564212,
     schemes: {Scheme.Https})
 type
-  Call_AppServiceEnvironmentsListMetricDefinitions_568321 = ref object of OpenApiRestCall_567659
-proc url_AppServiceEnvironmentsListMetricDefinitions_568323(protocol: Scheme;
+  Call_AppServiceEnvironmentsListMetricDefinitions_564221 = ref object of OpenApiRestCall_563557
+proc url_AppServiceEnvironmentsListMetricDefinitions_564223(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1537,37 +1530,36 @@ proc url_AppServiceEnvironmentsListMetricDefinitions_568323(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AppServiceEnvironmentsListMetricDefinitions_568322(path: JsonNode;
+proc validate_AppServiceEnvironmentsListMetricDefinitions_564222(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Get global metric definitions of an App Service Environment.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : Name of the resource group to which the resource belongs.
   ##   name: JString (required)
   ##       : Name of the App Service Environment.
   ##   subscriptionId: JString (required)
   ##                 : Your Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
+  ##   resourceGroupName: JString (required)
+  ##                    : Name of the resource group to which the resource belongs.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568324 = path.getOrDefault("resourceGroupName")
-  valid_568324 = validateParameter(valid_568324, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `name` field"
+  var valid_564224 = path.getOrDefault("name")
+  valid_564224 = validateParameter(valid_564224, JString, required = true,
                                  default = nil)
-  if valid_568324 != nil:
-    section.add "resourceGroupName", valid_568324
-  var valid_568325 = path.getOrDefault("name")
-  valid_568325 = validateParameter(valid_568325, JString, required = true,
+  if valid_564224 != nil:
+    section.add "name", valid_564224
+  var valid_564225 = path.getOrDefault("subscriptionId")
+  valid_564225 = validateParameter(valid_564225, JString, required = true,
                                  default = nil)
-  if valid_568325 != nil:
-    section.add "name", valid_568325
-  var valid_568326 = path.getOrDefault("subscriptionId")
-  valid_568326 = validateParameter(valid_568326, JString, required = true,
+  if valid_564225 != nil:
+    section.add "subscriptionId", valid_564225
+  var valid_564226 = path.getOrDefault("resourceGroupName")
+  valid_564226 = validateParameter(valid_564226, JString, required = true,
                                  default = nil)
-  if valid_568326 != nil:
-    section.add "subscriptionId", valid_568326
+  if valid_564226 != nil:
+    section.add "resourceGroupName", valid_564226
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1575,11 +1567,11 @@ proc validate_AppServiceEnvironmentsListMetricDefinitions_568322(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568327 = query.getOrDefault("api-version")
-  valid_568327 = validateParameter(valid_568327, JString, required = true,
+  var valid_564227 = query.getOrDefault("api-version")
+  valid_564227 = validateParameter(valid_564227, JString, required = true,
                                  default = nil)
-  if valid_568327 != nil:
-    section.add "api-version", valid_568327
+  if valid_564227 != nil:
+    section.add "api-version", valid_564227
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1588,50 +1580,50 @@ proc validate_AppServiceEnvironmentsListMetricDefinitions_568322(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568328: Call_AppServiceEnvironmentsListMetricDefinitions_568321;
+proc call*(call_564228: Call_AppServiceEnvironmentsListMetricDefinitions_564221;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Get global metric definitions of an App Service Environment.
   ## 
-  let valid = call_568328.validator(path, query, header, formData, body)
-  let scheme = call_568328.pickScheme
+  let valid = call_564228.validator(path, query, header, formData, body)
+  let scheme = call_564228.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568328.url(scheme.get, call_568328.host, call_568328.base,
-                         call_568328.route, valid.getOrDefault("path"),
+  let url = call_564228.url(scheme.get, call_564228.host, call_564228.base,
+                         call_564228.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568328, url, valid)
+  result = hook(call_564228, url, valid)
 
-proc call*(call_568329: Call_AppServiceEnvironmentsListMetricDefinitions_568321;
-          resourceGroupName: string; apiVersion: string; name: string;
-          subscriptionId: string): Recallable =
+proc call*(call_564229: Call_AppServiceEnvironmentsListMetricDefinitions_564221;
+          apiVersion: string; name: string; subscriptionId: string;
+          resourceGroupName: string): Recallable =
   ## appServiceEnvironmentsListMetricDefinitions
   ## Get global metric definitions of an App Service Environment.
-  ##   resourceGroupName: string (required)
-  ##                    : Name of the resource group to which the resource belongs.
   ##   apiVersion: string (required)
   ##             : API Version
   ##   name: string (required)
   ##       : Name of the App Service Environment.
   ##   subscriptionId: string (required)
   ##                 : Your Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
-  var path_568330 = newJObject()
-  var query_568331 = newJObject()
-  add(path_568330, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568331, "api-version", newJString(apiVersion))
-  add(path_568330, "name", newJString(name))
-  add(path_568330, "subscriptionId", newJString(subscriptionId))
-  result = call_568329.call(path_568330, query_568331, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : Name of the resource group to which the resource belongs.
+  var path_564230 = newJObject()
+  var query_564231 = newJObject()
+  add(query_564231, "api-version", newJString(apiVersion))
+  add(path_564230, "name", newJString(name))
+  add(path_564230, "subscriptionId", newJString(subscriptionId))
+  add(path_564230, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564229.call(path_564230, query_564231, nil, nil, nil)
 
-var appServiceEnvironmentsListMetricDefinitions* = Call_AppServiceEnvironmentsListMetricDefinitions_568321(
+var appServiceEnvironmentsListMetricDefinitions* = Call_AppServiceEnvironmentsListMetricDefinitions_564221(
     name: "appServiceEnvironmentsListMetricDefinitions", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Web/hostingEnvironments/{name}/metricdefinitions",
-    validator: validate_AppServiceEnvironmentsListMetricDefinitions_568322,
-    base: "", url: url_AppServiceEnvironmentsListMetricDefinitions_568323,
+    validator: validate_AppServiceEnvironmentsListMetricDefinitions_564222,
+    base: "", url: url_AppServiceEnvironmentsListMetricDefinitions_564223,
     schemes: {Scheme.Https})
 type
-  Call_AppServiceEnvironmentsListMetrics_568332 = ref object of OpenApiRestCall_567659
-proc url_AppServiceEnvironmentsListMetrics_568334(protocol: Scheme; host: string;
+  Call_AppServiceEnvironmentsListMetrics_564232 = ref object of OpenApiRestCall_563557
+proc url_AppServiceEnvironmentsListMetrics_564234(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1655,62 +1647,61 @@ proc url_AppServiceEnvironmentsListMetrics_568334(protocol: Scheme; host: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AppServiceEnvironmentsListMetrics_568333(path: JsonNode;
+proc validate_AppServiceEnvironmentsListMetrics_564233(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Get global metrics of an App Service Environment.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : Name of the resource group to which the resource belongs.
   ##   name: JString (required)
   ##       : Name of the App Service Environment.
   ##   subscriptionId: JString (required)
   ##                 : Your Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
+  ##   resourceGroupName: JString (required)
+  ##                    : Name of the resource group to which the resource belongs.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568336 = path.getOrDefault("resourceGroupName")
-  valid_568336 = validateParameter(valid_568336, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `name` field"
+  var valid_564236 = path.getOrDefault("name")
+  valid_564236 = validateParameter(valid_564236, JString, required = true,
                                  default = nil)
-  if valid_568336 != nil:
-    section.add "resourceGroupName", valid_568336
-  var valid_568337 = path.getOrDefault("name")
-  valid_568337 = validateParameter(valid_568337, JString, required = true,
+  if valid_564236 != nil:
+    section.add "name", valid_564236
+  var valid_564237 = path.getOrDefault("subscriptionId")
+  valid_564237 = validateParameter(valid_564237, JString, required = true,
                                  default = nil)
-  if valid_568337 != nil:
-    section.add "name", valid_568337
-  var valid_568338 = path.getOrDefault("subscriptionId")
-  valid_568338 = validateParameter(valid_568338, JString, required = true,
+  if valid_564237 != nil:
+    section.add "subscriptionId", valid_564237
+  var valid_564238 = path.getOrDefault("resourceGroupName")
+  valid_564238 = validateParameter(valid_564238, JString, required = true,
                                  default = nil)
-  if valid_568338 != nil:
-    section.add "subscriptionId", valid_568338
+  if valid_564238 != nil:
+    section.add "resourceGroupName", valid_564238
   result.add "path", section
   ## parameters in `query` object:
-  ##   api-version: JString (required)
-  ##              : API Version
   ##   details: JBool
   ##          : Specify <code>true</code> to include instance details. The default is <code>false</code>.
+  ##   api-version: JString (required)
+  ##              : API Version
   ##   $filter: JString
   ##          : Return only usages/metrics specified in the filter. Filter conforms to odata syntax. Example: $filter=(name.value eq 'Metric1' or name.value eq 'Metric2') and startTime eq 2014-01-01T00:00:00Z and endTime eq 2014-12-31T23:59:59Z and timeGrain eq duration'[Hour|Minute|Day]'.
   section = newJObject()
+  var valid_564239 = query.getOrDefault("details")
+  valid_564239 = validateParameter(valid_564239, JBool, required = false, default = nil)
+  if valid_564239 != nil:
+    section.add "details", valid_564239
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568339 = query.getOrDefault("api-version")
-  valid_568339 = validateParameter(valid_568339, JString, required = true,
+  var valid_564240 = query.getOrDefault("api-version")
+  valid_564240 = validateParameter(valid_564240, JString, required = true,
                                  default = nil)
-  if valid_568339 != nil:
-    section.add "api-version", valid_568339
-  var valid_568340 = query.getOrDefault("details")
-  valid_568340 = validateParameter(valid_568340, JBool, required = false, default = nil)
-  if valid_568340 != nil:
-    section.add "details", valid_568340
-  var valid_568341 = query.getOrDefault("$filter")
-  valid_568341 = validateParameter(valid_568341, JString, required = false,
+  if valid_564240 != nil:
+    section.add "api-version", valid_564240
+  var valid_564241 = query.getOrDefault("$filter")
+  valid_564241 = validateParameter(valid_564241, JString, required = false,
                                  default = nil)
-  if valid_568341 != nil:
-    section.add "$filter", valid_568341
+  if valid_564241 != nil:
+    section.add "$filter", valid_564241
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1719,55 +1710,55 @@ proc validate_AppServiceEnvironmentsListMetrics_568333(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568342: Call_AppServiceEnvironmentsListMetrics_568332;
+proc call*(call_564242: Call_AppServiceEnvironmentsListMetrics_564232;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Get global metrics of an App Service Environment.
   ## 
-  let valid = call_568342.validator(path, query, header, formData, body)
-  let scheme = call_568342.pickScheme
+  let valid = call_564242.validator(path, query, header, formData, body)
+  let scheme = call_564242.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568342.url(scheme.get, call_568342.host, call_568342.base,
-                         call_568342.route, valid.getOrDefault("path"),
+  let url = call_564242.url(scheme.get, call_564242.host, call_564242.base,
+                         call_564242.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568342, url, valid)
+  result = hook(call_564242, url, valid)
 
-proc call*(call_568343: Call_AppServiceEnvironmentsListMetrics_568332;
-          resourceGroupName: string; apiVersion: string; name: string;
-          subscriptionId: string; details: bool = false; Filter: string = ""): Recallable =
+proc call*(call_564243: Call_AppServiceEnvironmentsListMetrics_564232;
+          apiVersion: string; name: string; subscriptionId: string;
+          resourceGroupName: string; details: bool = false; Filter: string = ""): Recallable =
   ## appServiceEnvironmentsListMetrics
   ## Get global metrics of an App Service Environment.
-  ##   resourceGroupName: string (required)
-  ##                    : Name of the resource group to which the resource belongs.
+  ##   details: bool
+  ##          : Specify <code>true</code> to include instance details. The default is <code>false</code>.
   ##   apiVersion: string (required)
   ##             : API Version
   ##   name: string (required)
   ##       : Name of the App Service Environment.
-  ##   details: bool
-  ##          : Specify <code>true</code> to include instance details. The default is <code>false</code>.
   ##   subscriptionId: string (required)
   ##                 : Your Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
+  ##   resourceGroupName: string (required)
+  ##                    : Name of the resource group to which the resource belongs.
   ##   Filter: string
   ##         : Return only usages/metrics specified in the filter. Filter conforms to odata syntax. Example: $filter=(name.value eq 'Metric1' or name.value eq 'Metric2') and startTime eq 2014-01-01T00:00:00Z and endTime eq 2014-12-31T23:59:59Z and timeGrain eq duration'[Hour|Minute|Day]'.
-  var path_568344 = newJObject()
-  var query_568345 = newJObject()
-  add(path_568344, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568345, "api-version", newJString(apiVersion))
-  add(path_568344, "name", newJString(name))
-  add(query_568345, "details", newJBool(details))
-  add(path_568344, "subscriptionId", newJString(subscriptionId))
-  add(query_568345, "$filter", newJString(Filter))
-  result = call_568343.call(path_568344, query_568345, nil, nil, nil)
+  var path_564244 = newJObject()
+  var query_564245 = newJObject()
+  add(query_564245, "details", newJBool(details))
+  add(query_564245, "api-version", newJString(apiVersion))
+  add(path_564244, "name", newJString(name))
+  add(path_564244, "subscriptionId", newJString(subscriptionId))
+  add(path_564244, "resourceGroupName", newJString(resourceGroupName))
+  add(query_564245, "$filter", newJString(Filter))
+  result = call_564243.call(path_564244, query_564245, nil, nil, nil)
 
-var appServiceEnvironmentsListMetrics* = Call_AppServiceEnvironmentsListMetrics_568332(
+var appServiceEnvironmentsListMetrics* = Call_AppServiceEnvironmentsListMetrics_564232(
     name: "appServiceEnvironmentsListMetrics", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Web/hostingEnvironments/{name}/metrics",
-    validator: validate_AppServiceEnvironmentsListMetrics_568333, base: "",
-    url: url_AppServiceEnvironmentsListMetrics_568334, schemes: {Scheme.Https})
+    validator: validate_AppServiceEnvironmentsListMetrics_564233, base: "",
+    url: url_AppServiceEnvironmentsListMetrics_564234, schemes: {Scheme.Https})
 type
-  Call_AppServiceEnvironmentsListMultiRolePools_568346 = ref object of OpenApiRestCall_567659
-proc url_AppServiceEnvironmentsListMultiRolePools_568348(protocol: Scheme;
+  Call_AppServiceEnvironmentsListMultiRolePools_564246 = ref object of OpenApiRestCall_563557
+proc url_AppServiceEnvironmentsListMultiRolePools_564248(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1791,37 +1782,36 @@ proc url_AppServiceEnvironmentsListMultiRolePools_568348(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AppServiceEnvironmentsListMultiRolePools_568347(path: JsonNode;
+proc validate_AppServiceEnvironmentsListMultiRolePools_564247(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Get all multi-role pools.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : Name of the resource group to which the resource belongs.
   ##   name: JString (required)
   ##       : Name of the App Service Environment.
   ##   subscriptionId: JString (required)
   ##                 : Your Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
+  ##   resourceGroupName: JString (required)
+  ##                    : Name of the resource group to which the resource belongs.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568349 = path.getOrDefault("resourceGroupName")
-  valid_568349 = validateParameter(valid_568349, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `name` field"
+  var valid_564249 = path.getOrDefault("name")
+  valid_564249 = validateParameter(valid_564249, JString, required = true,
                                  default = nil)
-  if valid_568349 != nil:
-    section.add "resourceGroupName", valid_568349
-  var valid_568350 = path.getOrDefault("name")
-  valid_568350 = validateParameter(valid_568350, JString, required = true,
+  if valid_564249 != nil:
+    section.add "name", valid_564249
+  var valid_564250 = path.getOrDefault("subscriptionId")
+  valid_564250 = validateParameter(valid_564250, JString, required = true,
                                  default = nil)
-  if valid_568350 != nil:
-    section.add "name", valid_568350
-  var valid_568351 = path.getOrDefault("subscriptionId")
-  valid_568351 = validateParameter(valid_568351, JString, required = true,
+  if valid_564250 != nil:
+    section.add "subscriptionId", valid_564250
+  var valid_564251 = path.getOrDefault("resourceGroupName")
+  valid_564251 = validateParameter(valid_564251, JString, required = true,
                                  default = nil)
-  if valid_568351 != nil:
-    section.add "subscriptionId", valid_568351
+  if valid_564251 != nil:
+    section.add "resourceGroupName", valid_564251
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1829,11 +1819,11 @@ proc validate_AppServiceEnvironmentsListMultiRolePools_568347(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568352 = query.getOrDefault("api-version")
-  valid_568352 = validateParameter(valid_568352, JString, required = true,
+  var valid_564252 = query.getOrDefault("api-version")
+  valid_564252 = validateParameter(valid_564252, JString, required = true,
                                  default = nil)
-  if valid_568352 != nil:
-    section.add "api-version", valid_568352
+  if valid_564252 != nil:
+    section.add "api-version", valid_564252
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1842,50 +1832,50 @@ proc validate_AppServiceEnvironmentsListMultiRolePools_568347(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568353: Call_AppServiceEnvironmentsListMultiRolePools_568346;
+proc call*(call_564253: Call_AppServiceEnvironmentsListMultiRolePools_564246;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Get all multi-role pools.
   ## 
-  let valid = call_568353.validator(path, query, header, formData, body)
-  let scheme = call_568353.pickScheme
+  let valid = call_564253.validator(path, query, header, formData, body)
+  let scheme = call_564253.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568353.url(scheme.get, call_568353.host, call_568353.base,
-                         call_568353.route, valid.getOrDefault("path"),
+  let url = call_564253.url(scheme.get, call_564253.host, call_564253.base,
+                         call_564253.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568353, url, valid)
+  result = hook(call_564253, url, valid)
 
-proc call*(call_568354: Call_AppServiceEnvironmentsListMultiRolePools_568346;
-          resourceGroupName: string; apiVersion: string; name: string;
-          subscriptionId: string): Recallable =
+proc call*(call_564254: Call_AppServiceEnvironmentsListMultiRolePools_564246;
+          apiVersion: string; name: string; subscriptionId: string;
+          resourceGroupName: string): Recallable =
   ## appServiceEnvironmentsListMultiRolePools
   ## Get all multi-role pools.
-  ##   resourceGroupName: string (required)
-  ##                    : Name of the resource group to which the resource belongs.
   ##   apiVersion: string (required)
   ##             : API Version
   ##   name: string (required)
   ##       : Name of the App Service Environment.
   ##   subscriptionId: string (required)
   ##                 : Your Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
-  var path_568355 = newJObject()
-  var query_568356 = newJObject()
-  add(path_568355, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568356, "api-version", newJString(apiVersion))
-  add(path_568355, "name", newJString(name))
-  add(path_568355, "subscriptionId", newJString(subscriptionId))
-  result = call_568354.call(path_568355, query_568356, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : Name of the resource group to which the resource belongs.
+  var path_564255 = newJObject()
+  var query_564256 = newJObject()
+  add(query_564256, "api-version", newJString(apiVersion))
+  add(path_564255, "name", newJString(name))
+  add(path_564255, "subscriptionId", newJString(subscriptionId))
+  add(path_564255, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564254.call(path_564255, query_564256, nil, nil, nil)
 
-var appServiceEnvironmentsListMultiRolePools* = Call_AppServiceEnvironmentsListMultiRolePools_568346(
+var appServiceEnvironmentsListMultiRolePools* = Call_AppServiceEnvironmentsListMultiRolePools_564246(
     name: "appServiceEnvironmentsListMultiRolePools", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Web/hostingEnvironments/{name}/multiRolePools",
-    validator: validate_AppServiceEnvironmentsListMultiRolePools_568347, base: "",
-    url: url_AppServiceEnvironmentsListMultiRolePools_568348,
+    validator: validate_AppServiceEnvironmentsListMultiRolePools_564247, base: "",
+    url: url_AppServiceEnvironmentsListMultiRolePools_564248,
     schemes: {Scheme.Https})
 type
-  Call_AppServiceEnvironmentsCreateOrUpdateMultiRolePool_568368 = ref object of OpenApiRestCall_567659
-proc url_AppServiceEnvironmentsCreateOrUpdateMultiRolePool_568370(
+  Call_AppServiceEnvironmentsCreateOrUpdateMultiRolePool_564268 = ref object of OpenApiRestCall_563557
+proc url_AppServiceEnvironmentsCreateOrUpdateMultiRolePool_564270(
     protocol: Scheme; host: string; base: string; route: string; path: JsonNode;
     query: JsonNode): Uri =
   result.scheme = $protocol
@@ -1910,7 +1900,7 @@ proc url_AppServiceEnvironmentsCreateOrUpdateMultiRolePool_568370(
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AppServiceEnvironmentsCreateOrUpdateMultiRolePool_568369(
+proc validate_AppServiceEnvironmentsCreateOrUpdateMultiRolePool_564269(
     path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
     body: JsonNode): JsonNode =
   ## Create or update a multi-role pool.
@@ -1918,30 +1908,29 @@ proc validate_AppServiceEnvironmentsCreateOrUpdateMultiRolePool_568369(
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : Name of the resource group to which the resource belongs.
   ##   name: JString (required)
   ##       : Name of the App Service Environment.
   ##   subscriptionId: JString (required)
   ##                 : Your Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
+  ##   resourceGroupName: JString (required)
+  ##                    : Name of the resource group to which the resource belongs.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568371 = path.getOrDefault("resourceGroupName")
-  valid_568371 = validateParameter(valid_568371, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `name` field"
+  var valid_564271 = path.getOrDefault("name")
+  valid_564271 = validateParameter(valid_564271, JString, required = true,
                                  default = nil)
-  if valid_568371 != nil:
-    section.add "resourceGroupName", valid_568371
-  var valid_568372 = path.getOrDefault("name")
-  valid_568372 = validateParameter(valid_568372, JString, required = true,
+  if valid_564271 != nil:
+    section.add "name", valid_564271
+  var valid_564272 = path.getOrDefault("subscriptionId")
+  valid_564272 = validateParameter(valid_564272, JString, required = true,
                                  default = nil)
-  if valid_568372 != nil:
-    section.add "name", valid_568372
-  var valid_568373 = path.getOrDefault("subscriptionId")
-  valid_568373 = validateParameter(valid_568373, JString, required = true,
+  if valid_564272 != nil:
+    section.add "subscriptionId", valid_564272
+  var valid_564273 = path.getOrDefault("resourceGroupName")
+  valid_564273 = validateParameter(valid_564273, JString, required = true,
                                  default = nil)
-  if valid_568373 != nil:
-    section.add "subscriptionId", valid_568373
+  if valid_564273 != nil:
+    section.add "resourceGroupName", valid_564273
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1949,11 +1938,11 @@ proc validate_AppServiceEnvironmentsCreateOrUpdateMultiRolePool_568369(
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568374 = query.getOrDefault("api-version")
-  valid_568374 = validateParameter(valid_568374, JString, required = true,
+  var valid_564274 = query.getOrDefault("api-version")
+  valid_564274 = validateParameter(valid_564274, JString, required = true,
                                  default = nil)
-  if valid_568374 != nil:
-    section.add "api-version", valid_568374
+  if valid_564274 != nil:
+    section.add "api-version", valid_564274
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1967,55 +1956,55 @@ proc validate_AppServiceEnvironmentsCreateOrUpdateMultiRolePool_568369(
   if body != nil:
     result.add "body", body
 
-proc call*(call_568376: Call_AppServiceEnvironmentsCreateOrUpdateMultiRolePool_568368;
+proc call*(call_564276: Call_AppServiceEnvironmentsCreateOrUpdateMultiRolePool_564268;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Create or update a multi-role pool.
   ## 
-  let valid = call_568376.validator(path, query, header, formData, body)
-  let scheme = call_568376.pickScheme
+  let valid = call_564276.validator(path, query, header, formData, body)
+  let scheme = call_564276.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568376.url(scheme.get, call_568376.host, call_568376.base,
-                         call_568376.route, valid.getOrDefault("path"),
+  let url = call_564276.url(scheme.get, call_564276.host, call_564276.base,
+                         call_564276.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568376, url, valid)
+  result = hook(call_564276, url, valid)
 
-proc call*(call_568377: Call_AppServiceEnvironmentsCreateOrUpdateMultiRolePool_568368;
-          resourceGroupName: string; apiVersion: string; name: string;
-          subscriptionId: string; multiRolePoolEnvelope: JsonNode): Recallable =
+proc call*(call_564277: Call_AppServiceEnvironmentsCreateOrUpdateMultiRolePool_564268;
+          apiVersion: string; multiRolePoolEnvelope: JsonNode; name: string;
+          subscriptionId: string; resourceGroupName: string): Recallable =
   ## appServiceEnvironmentsCreateOrUpdateMultiRolePool
   ## Create or update a multi-role pool.
-  ##   resourceGroupName: string (required)
-  ##                    : Name of the resource group to which the resource belongs.
   ##   apiVersion: string (required)
   ##             : API Version
+  ##   multiRolePoolEnvelope: JObject (required)
+  ##                        : Properties of the multi-role pool.
   ##   name: string (required)
   ##       : Name of the App Service Environment.
   ##   subscriptionId: string (required)
   ##                 : Your Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
-  ##   multiRolePoolEnvelope: JObject (required)
-  ##                        : Properties of the multi-role pool.
-  var path_568378 = newJObject()
-  var query_568379 = newJObject()
-  var body_568380 = newJObject()
-  add(path_568378, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568379, "api-version", newJString(apiVersion))
-  add(path_568378, "name", newJString(name))
-  add(path_568378, "subscriptionId", newJString(subscriptionId))
+  ##   resourceGroupName: string (required)
+  ##                    : Name of the resource group to which the resource belongs.
+  var path_564278 = newJObject()
+  var query_564279 = newJObject()
+  var body_564280 = newJObject()
+  add(query_564279, "api-version", newJString(apiVersion))
   if multiRolePoolEnvelope != nil:
-    body_568380 = multiRolePoolEnvelope
-  result = call_568377.call(path_568378, query_568379, nil, nil, body_568380)
+    body_564280 = multiRolePoolEnvelope
+  add(path_564278, "name", newJString(name))
+  add(path_564278, "subscriptionId", newJString(subscriptionId))
+  add(path_564278, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564277.call(path_564278, query_564279, nil, nil, body_564280)
 
-var appServiceEnvironmentsCreateOrUpdateMultiRolePool* = Call_AppServiceEnvironmentsCreateOrUpdateMultiRolePool_568368(
+var appServiceEnvironmentsCreateOrUpdateMultiRolePool* = Call_AppServiceEnvironmentsCreateOrUpdateMultiRolePool_564268(
     name: "appServiceEnvironmentsCreateOrUpdateMultiRolePool",
     meth: HttpMethod.HttpPut, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Web/hostingEnvironments/{name}/multiRolePools/default",
-    validator: validate_AppServiceEnvironmentsCreateOrUpdateMultiRolePool_568369,
-    base: "", url: url_AppServiceEnvironmentsCreateOrUpdateMultiRolePool_568370,
+    validator: validate_AppServiceEnvironmentsCreateOrUpdateMultiRolePool_564269,
+    base: "", url: url_AppServiceEnvironmentsCreateOrUpdateMultiRolePool_564270,
     schemes: {Scheme.Https})
 type
-  Call_AppServiceEnvironmentsGetMultiRolePool_568357 = ref object of OpenApiRestCall_567659
-proc url_AppServiceEnvironmentsGetMultiRolePool_568359(protocol: Scheme;
+  Call_AppServiceEnvironmentsGetMultiRolePool_564257 = ref object of OpenApiRestCall_563557
+proc url_AppServiceEnvironmentsGetMultiRolePool_564259(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2039,37 +2028,36 @@ proc url_AppServiceEnvironmentsGetMultiRolePool_568359(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AppServiceEnvironmentsGetMultiRolePool_568358(path: JsonNode;
+proc validate_AppServiceEnvironmentsGetMultiRolePool_564258(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Get properties of a multi-role pool.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : Name of the resource group to which the resource belongs.
   ##   name: JString (required)
   ##       : Name of the App Service Environment.
   ##   subscriptionId: JString (required)
   ##                 : Your Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
+  ##   resourceGroupName: JString (required)
+  ##                    : Name of the resource group to which the resource belongs.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568360 = path.getOrDefault("resourceGroupName")
-  valid_568360 = validateParameter(valid_568360, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `name` field"
+  var valid_564260 = path.getOrDefault("name")
+  valid_564260 = validateParameter(valid_564260, JString, required = true,
                                  default = nil)
-  if valid_568360 != nil:
-    section.add "resourceGroupName", valid_568360
-  var valid_568361 = path.getOrDefault("name")
-  valid_568361 = validateParameter(valid_568361, JString, required = true,
+  if valid_564260 != nil:
+    section.add "name", valid_564260
+  var valid_564261 = path.getOrDefault("subscriptionId")
+  valid_564261 = validateParameter(valid_564261, JString, required = true,
                                  default = nil)
-  if valid_568361 != nil:
-    section.add "name", valid_568361
-  var valid_568362 = path.getOrDefault("subscriptionId")
-  valid_568362 = validateParameter(valid_568362, JString, required = true,
+  if valid_564261 != nil:
+    section.add "subscriptionId", valid_564261
+  var valid_564262 = path.getOrDefault("resourceGroupName")
+  valid_564262 = validateParameter(valid_564262, JString, required = true,
                                  default = nil)
-  if valid_568362 != nil:
-    section.add "subscriptionId", valid_568362
+  if valid_564262 != nil:
+    section.add "resourceGroupName", valid_564262
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2077,11 +2065,11 @@ proc validate_AppServiceEnvironmentsGetMultiRolePool_568358(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568363 = query.getOrDefault("api-version")
-  valid_568363 = validateParameter(valid_568363, JString, required = true,
+  var valid_564263 = query.getOrDefault("api-version")
+  valid_564263 = validateParameter(valid_564263, JString, required = true,
                                  default = nil)
-  if valid_568363 != nil:
-    section.add "api-version", valid_568363
+  if valid_564263 != nil:
+    section.add "api-version", valid_564263
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2090,50 +2078,50 @@ proc validate_AppServiceEnvironmentsGetMultiRolePool_568358(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568364: Call_AppServiceEnvironmentsGetMultiRolePool_568357;
+proc call*(call_564264: Call_AppServiceEnvironmentsGetMultiRolePool_564257;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Get properties of a multi-role pool.
   ## 
-  let valid = call_568364.validator(path, query, header, formData, body)
-  let scheme = call_568364.pickScheme
+  let valid = call_564264.validator(path, query, header, formData, body)
+  let scheme = call_564264.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568364.url(scheme.get, call_568364.host, call_568364.base,
-                         call_568364.route, valid.getOrDefault("path"),
+  let url = call_564264.url(scheme.get, call_564264.host, call_564264.base,
+                         call_564264.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568364, url, valid)
+  result = hook(call_564264, url, valid)
 
-proc call*(call_568365: Call_AppServiceEnvironmentsGetMultiRolePool_568357;
-          resourceGroupName: string; apiVersion: string; name: string;
-          subscriptionId: string): Recallable =
+proc call*(call_564265: Call_AppServiceEnvironmentsGetMultiRolePool_564257;
+          apiVersion: string; name: string; subscriptionId: string;
+          resourceGroupName: string): Recallable =
   ## appServiceEnvironmentsGetMultiRolePool
   ## Get properties of a multi-role pool.
-  ##   resourceGroupName: string (required)
-  ##                    : Name of the resource group to which the resource belongs.
   ##   apiVersion: string (required)
   ##             : API Version
   ##   name: string (required)
   ##       : Name of the App Service Environment.
   ##   subscriptionId: string (required)
   ##                 : Your Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
-  var path_568366 = newJObject()
-  var query_568367 = newJObject()
-  add(path_568366, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568367, "api-version", newJString(apiVersion))
-  add(path_568366, "name", newJString(name))
-  add(path_568366, "subscriptionId", newJString(subscriptionId))
-  result = call_568365.call(path_568366, query_568367, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : Name of the resource group to which the resource belongs.
+  var path_564266 = newJObject()
+  var query_564267 = newJObject()
+  add(query_564267, "api-version", newJString(apiVersion))
+  add(path_564266, "name", newJString(name))
+  add(path_564266, "subscriptionId", newJString(subscriptionId))
+  add(path_564266, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564265.call(path_564266, query_564267, nil, nil, nil)
 
-var appServiceEnvironmentsGetMultiRolePool* = Call_AppServiceEnvironmentsGetMultiRolePool_568357(
+var appServiceEnvironmentsGetMultiRolePool* = Call_AppServiceEnvironmentsGetMultiRolePool_564257(
     name: "appServiceEnvironmentsGetMultiRolePool", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Web/hostingEnvironments/{name}/multiRolePools/default",
-    validator: validate_AppServiceEnvironmentsGetMultiRolePool_568358, base: "",
-    url: url_AppServiceEnvironmentsGetMultiRolePool_568359,
+    validator: validate_AppServiceEnvironmentsGetMultiRolePool_564258, base: "",
+    url: url_AppServiceEnvironmentsGetMultiRolePool_564259,
     schemes: {Scheme.Https})
 type
-  Call_AppServiceEnvironmentsUpdateMultiRolePool_568381 = ref object of OpenApiRestCall_567659
-proc url_AppServiceEnvironmentsUpdateMultiRolePool_568383(protocol: Scheme;
+  Call_AppServiceEnvironmentsUpdateMultiRolePool_564281 = ref object of OpenApiRestCall_563557
+proc url_AppServiceEnvironmentsUpdateMultiRolePool_564283(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2157,37 +2145,36 @@ proc url_AppServiceEnvironmentsUpdateMultiRolePool_568383(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AppServiceEnvironmentsUpdateMultiRolePool_568382(path: JsonNode;
+proc validate_AppServiceEnvironmentsUpdateMultiRolePool_564282(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Create or update a multi-role pool.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : Name of the resource group to which the resource belongs.
   ##   name: JString (required)
   ##       : Name of the App Service Environment.
   ##   subscriptionId: JString (required)
   ##                 : Your Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
+  ##   resourceGroupName: JString (required)
+  ##                    : Name of the resource group to which the resource belongs.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568384 = path.getOrDefault("resourceGroupName")
-  valid_568384 = validateParameter(valid_568384, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `name` field"
+  var valid_564284 = path.getOrDefault("name")
+  valid_564284 = validateParameter(valid_564284, JString, required = true,
                                  default = nil)
-  if valid_568384 != nil:
-    section.add "resourceGroupName", valid_568384
-  var valid_568385 = path.getOrDefault("name")
-  valid_568385 = validateParameter(valid_568385, JString, required = true,
+  if valid_564284 != nil:
+    section.add "name", valid_564284
+  var valid_564285 = path.getOrDefault("subscriptionId")
+  valid_564285 = validateParameter(valid_564285, JString, required = true,
                                  default = nil)
-  if valid_568385 != nil:
-    section.add "name", valid_568385
-  var valid_568386 = path.getOrDefault("subscriptionId")
-  valid_568386 = validateParameter(valid_568386, JString, required = true,
+  if valid_564285 != nil:
+    section.add "subscriptionId", valid_564285
+  var valid_564286 = path.getOrDefault("resourceGroupName")
+  valid_564286 = validateParameter(valid_564286, JString, required = true,
                                  default = nil)
-  if valid_568386 != nil:
-    section.add "subscriptionId", valid_568386
+  if valid_564286 != nil:
+    section.add "resourceGroupName", valid_564286
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2195,11 +2182,11 @@ proc validate_AppServiceEnvironmentsUpdateMultiRolePool_568382(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568387 = query.getOrDefault("api-version")
-  valid_568387 = validateParameter(valid_568387, JString, required = true,
+  var valid_564287 = query.getOrDefault("api-version")
+  valid_564287 = validateParameter(valid_564287, JString, required = true,
                                  default = nil)
-  if valid_568387 != nil:
-    section.add "api-version", valid_568387
+  if valid_564287 != nil:
+    section.add "api-version", valid_564287
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2213,55 +2200,55 @@ proc validate_AppServiceEnvironmentsUpdateMultiRolePool_568382(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568389: Call_AppServiceEnvironmentsUpdateMultiRolePool_568381;
+proc call*(call_564289: Call_AppServiceEnvironmentsUpdateMultiRolePool_564281;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Create or update a multi-role pool.
   ## 
-  let valid = call_568389.validator(path, query, header, formData, body)
-  let scheme = call_568389.pickScheme
+  let valid = call_564289.validator(path, query, header, formData, body)
+  let scheme = call_564289.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568389.url(scheme.get, call_568389.host, call_568389.base,
-                         call_568389.route, valid.getOrDefault("path"),
+  let url = call_564289.url(scheme.get, call_564289.host, call_564289.base,
+                         call_564289.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568389, url, valid)
+  result = hook(call_564289, url, valid)
 
-proc call*(call_568390: Call_AppServiceEnvironmentsUpdateMultiRolePool_568381;
-          resourceGroupName: string; apiVersion: string; name: string;
-          subscriptionId: string; multiRolePoolEnvelope: JsonNode): Recallable =
+proc call*(call_564290: Call_AppServiceEnvironmentsUpdateMultiRolePool_564281;
+          apiVersion: string; multiRolePoolEnvelope: JsonNode; name: string;
+          subscriptionId: string; resourceGroupName: string): Recallable =
   ## appServiceEnvironmentsUpdateMultiRolePool
   ## Create or update a multi-role pool.
-  ##   resourceGroupName: string (required)
-  ##                    : Name of the resource group to which the resource belongs.
   ##   apiVersion: string (required)
   ##             : API Version
+  ##   multiRolePoolEnvelope: JObject (required)
+  ##                        : Properties of the multi-role pool.
   ##   name: string (required)
   ##       : Name of the App Service Environment.
   ##   subscriptionId: string (required)
   ##                 : Your Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
-  ##   multiRolePoolEnvelope: JObject (required)
-  ##                        : Properties of the multi-role pool.
-  var path_568391 = newJObject()
-  var query_568392 = newJObject()
-  var body_568393 = newJObject()
-  add(path_568391, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568392, "api-version", newJString(apiVersion))
-  add(path_568391, "name", newJString(name))
-  add(path_568391, "subscriptionId", newJString(subscriptionId))
+  ##   resourceGroupName: string (required)
+  ##                    : Name of the resource group to which the resource belongs.
+  var path_564291 = newJObject()
+  var query_564292 = newJObject()
+  var body_564293 = newJObject()
+  add(query_564292, "api-version", newJString(apiVersion))
   if multiRolePoolEnvelope != nil:
-    body_568393 = multiRolePoolEnvelope
-  result = call_568390.call(path_568391, query_568392, nil, nil, body_568393)
+    body_564293 = multiRolePoolEnvelope
+  add(path_564291, "name", newJString(name))
+  add(path_564291, "subscriptionId", newJString(subscriptionId))
+  add(path_564291, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564290.call(path_564291, query_564292, nil, nil, body_564293)
 
-var appServiceEnvironmentsUpdateMultiRolePool* = Call_AppServiceEnvironmentsUpdateMultiRolePool_568381(
+var appServiceEnvironmentsUpdateMultiRolePool* = Call_AppServiceEnvironmentsUpdateMultiRolePool_564281(
     name: "appServiceEnvironmentsUpdateMultiRolePool", meth: HttpMethod.HttpPatch,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Web/hostingEnvironments/{name}/multiRolePools/default",
-    validator: validate_AppServiceEnvironmentsUpdateMultiRolePool_568382,
-    base: "", url: url_AppServiceEnvironmentsUpdateMultiRolePool_568383,
+    validator: validate_AppServiceEnvironmentsUpdateMultiRolePool_564282,
+    base: "", url: url_AppServiceEnvironmentsUpdateMultiRolePool_564283,
     schemes: {Scheme.Https})
 type
-  Call_AppServiceEnvironmentsListMultiRolePoolInstanceMetricDefinitions_568394 = ref object of OpenApiRestCall_567659
-proc url_AppServiceEnvironmentsListMultiRolePoolInstanceMetricDefinitions_568396(
+  Call_AppServiceEnvironmentsListMultiRolePoolInstanceMetricDefinitions_564294 = ref object of OpenApiRestCall_563557
+proc url_AppServiceEnvironmentsListMultiRolePoolInstanceMetricDefinitions_564296(
     protocol: Scheme; host: string; base: string; route: string; path: JsonNode;
     query: JsonNode): Uri =
   result.scheme = $protocol
@@ -2289,7 +2276,7 @@ proc url_AppServiceEnvironmentsListMultiRolePoolInstanceMetricDefinitions_568396
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AppServiceEnvironmentsListMultiRolePoolInstanceMetricDefinitions_568395(
+proc validate_AppServiceEnvironmentsListMultiRolePoolInstanceMetricDefinitions_564295(
     path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
     body: JsonNode): JsonNode =
   ## Get metric definitions for a specific instance of a multi-role pool of an App Service Environment.
@@ -2297,37 +2284,36 @@ proc validate_AppServiceEnvironmentsListMultiRolePoolInstanceMetricDefinitions_5
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : Name of the resource group to which the resource belongs.
   ##   name: JString (required)
   ##       : Name of the App Service Environment.
   ##   subscriptionId: JString (required)
   ##                 : Your Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
   ##   instance: JString (required)
   ##           : Name of the instance in the multi-role pool.
+  ##   resourceGroupName: JString (required)
+  ##                    : Name of the resource group to which the resource belongs.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568397 = path.getOrDefault("resourceGroupName")
-  valid_568397 = validateParameter(valid_568397, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `name` field"
+  var valid_564297 = path.getOrDefault("name")
+  valid_564297 = validateParameter(valid_564297, JString, required = true,
                                  default = nil)
-  if valid_568397 != nil:
-    section.add "resourceGroupName", valid_568397
-  var valid_568398 = path.getOrDefault("name")
-  valid_568398 = validateParameter(valid_568398, JString, required = true,
+  if valid_564297 != nil:
+    section.add "name", valid_564297
+  var valid_564298 = path.getOrDefault("subscriptionId")
+  valid_564298 = validateParameter(valid_564298, JString, required = true,
                                  default = nil)
-  if valid_568398 != nil:
-    section.add "name", valid_568398
-  var valid_568399 = path.getOrDefault("subscriptionId")
-  valid_568399 = validateParameter(valid_568399, JString, required = true,
+  if valid_564298 != nil:
+    section.add "subscriptionId", valid_564298
+  var valid_564299 = path.getOrDefault("instance")
+  valid_564299 = validateParameter(valid_564299, JString, required = true,
                                  default = nil)
-  if valid_568399 != nil:
-    section.add "subscriptionId", valid_568399
-  var valid_568400 = path.getOrDefault("instance")
-  valid_568400 = validateParameter(valid_568400, JString, required = true,
+  if valid_564299 != nil:
+    section.add "instance", valid_564299
+  var valid_564300 = path.getOrDefault("resourceGroupName")
+  valid_564300 = validateParameter(valid_564300, JString, required = true,
                                  default = nil)
-  if valid_568400 != nil:
-    section.add "instance", valid_568400
+  if valid_564300 != nil:
+    section.add "resourceGroupName", valid_564300
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2335,11 +2321,11 @@ proc validate_AppServiceEnvironmentsListMultiRolePoolInstanceMetricDefinitions_5
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568401 = query.getOrDefault("api-version")
-  valid_568401 = validateParameter(valid_568401, JString, required = true,
+  var valid_564301 = query.getOrDefault("api-version")
+  valid_564301 = validateParameter(valid_564301, JString, required = true,
                                  default = nil)
-  if valid_568401 != nil:
-    section.add "api-version", valid_568401
+  if valid_564301 != nil:
+    section.add "api-version", valid_564301
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2348,27 +2334,25 @@ proc validate_AppServiceEnvironmentsListMultiRolePoolInstanceMetricDefinitions_5
   if body != nil:
     result.add "body", body
 
-proc call*(call_568402: Call_AppServiceEnvironmentsListMultiRolePoolInstanceMetricDefinitions_568394;
+proc call*(call_564302: Call_AppServiceEnvironmentsListMultiRolePoolInstanceMetricDefinitions_564294;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Get metric definitions for a specific instance of a multi-role pool of an App Service Environment.
   ## 
-  let valid = call_568402.validator(path, query, header, formData, body)
-  let scheme = call_568402.pickScheme
+  let valid = call_564302.validator(path, query, header, formData, body)
+  let scheme = call_564302.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568402.url(scheme.get, call_568402.host, call_568402.base,
-                         call_568402.route, valid.getOrDefault("path"),
+  let url = call_564302.url(scheme.get, call_564302.host, call_564302.base,
+                         call_564302.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568402, url, valid)
+  result = hook(call_564302, url, valid)
 
-proc call*(call_568403: Call_AppServiceEnvironmentsListMultiRolePoolInstanceMetricDefinitions_568394;
-          resourceGroupName: string; apiVersion: string; name: string;
-          subscriptionId: string; instance: string): Recallable =
+proc call*(call_564303: Call_AppServiceEnvironmentsListMultiRolePoolInstanceMetricDefinitions_564294;
+          apiVersion: string; name: string; subscriptionId: string; instance: string;
+          resourceGroupName: string): Recallable =
   ## appServiceEnvironmentsListMultiRolePoolInstanceMetricDefinitions
   ## Get metric definitions for a specific instance of a multi-role pool of an App Service Environment.
-  ##   resourceGroupName: string (required)
-  ##                    : Name of the resource group to which the resource belongs.
   ##   apiVersion: string (required)
   ##             : API Version
   ##   name: string (required)
@@ -2377,24 +2361,26 @@ proc call*(call_568403: Call_AppServiceEnvironmentsListMultiRolePoolInstanceMetr
   ##                 : Your Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
   ##   instance: string (required)
   ##           : Name of the instance in the multi-role pool.
-  var path_568404 = newJObject()
-  var query_568405 = newJObject()
-  add(path_568404, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568405, "api-version", newJString(apiVersion))
-  add(path_568404, "name", newJString(name))
-  add(path_568404, "subscriptionId", newJString(subscriptionId))
-  add(path_568404, "instance", newJString(instance))
-  result = call_568403.call(path_568404, query_568405, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : Name of the resource group to which the resource belongs.
+  var path_564304 = newJObject()
+  var query_564305 = newJObject()
+  add(query_564305, "api-version", newJString(apiVersion))
+  add(path_564304, "name", newJString(name))
+  add(path_564304, "subscriptionId", newJString(subscriptionId))
+  add(path_564304, "instance", newJString(instance))
+  add(path_564304, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564303.call(path_564304, query_564305, nil, nil, nil)
 
-var appServiceEnvironmentsListMultiRolePoolInstanceMetricDefinitions* = Call_AppServiceEnvironmentsListMultiRolePoolInstanceMetricDefinitions_568394(
+var appServiceEnvironmentsListMultiRolePoolInstanceMetricDefinitions* = Call_AppServiceEnvironmentsListMultiRolePoolInstanceMetricDefinitions_564294(
     name: "appServiceEnvironmentsListMultiRolePoolInstanceMetricDefinitions",
-    meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Web/hostingEnvironments/{name}/multiRolePools/default/instances/{instance}/metricdefinitions", validator: validate_AppServiceEnvironmentsListMultiRolePoolInstanceMetricDefinitions_568395,
+    meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Web/hostingEnvironments/{name}/multiRolePools/default/instances/{instance}/metricdefinitions", validator: validate_AppServiceEnvironmentsListMultiRolePoolInstanceMetricDefinitions_564295,
     base: "",
-    url: url_AppServiceEnvironmentsListMultiRolePoolInstanceMetricDefinitions_568396,
+    url: url_AppServiceEnvironmentsListMultiRolePoolInstanceMetricDefinitions_564296,
     schemes: {Scheme.Https})
 type
-  Call_AppServiceEnvironmentsListMultiRolePoolInstanceMetrics_568406 = ref object of OpenApiRestCall_567659
-proc url_AppServiceEnvironmentsListMultiRolePoolInstanceMetrics_568408(
+  Call_AppServiceEnvironmentsListMultiRolePoolInstanceMetrics_564306 = ref object of OpenApiRestCall_563557
+proc url_AppServiceEnvironmentsListMultiRolePoolInstanceMetrics_564308(
     protocol: Scheme; host: string; base: string; route: string; path: JsonNode;
     query: JsonNode): Uri =
   result.scheme = $protocol
@@ -2422,7 +2408,7 @@ proc url_AppServiceEnvironmentsListMultiRolePoolInstanceMetrics_568408(
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AppServiceEnvironmentsListMultiRolePoolInstanceMetrics_568407(
+proc validate_AppServiceEnvironmentsListMultiRolePoolInstanceMetrics_564307(
     path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
     body: JsonNode): JsonNode =
   ## Get metrics for a specific instance of a multi-role pool of an App Service Environment.
@@ -2430,55 +2416,54 @@ proc validate_AppServiceEnvironmentsListMultiRolePoolInstanceMetrics_568407(
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : Name of the resource group to which the resource belongs.
   ##   name: JString (required)
   ##       : Name of the App Service Environment.
   ##   subscriptionId: JString (required)
   ##                 : Your Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
   ##   instance: JString (required)
   ##           : Name of the instance in the multi-role pool.
+  ##   resourceGroupName: JString (required)
+  ##                    : Name of the resource group to which the resource belongs.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568409 = path.getOrDefault("resourceGroupName")
-  valid_568409 = validateParameter(valid_568409, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `name` field"
+  var valid_564309 = path.getOrDefault("name")
+  valid_564309 = validateParameter(valid_564309, JString, required = true,
                                  default = nil)
-  if valid_568409 != nil:
-    section.add "resourceGroupName", valid_568409
-  var valid_568410 = path.getOrDefault("name")
-  valid_568410 = validateParameter(valid_568410, JString, required = true,
+  if valid_564309 != nil:
+    section.add "name", valid_564309
+  var valid_564310 = path.getOrDefault("subscriptionId")
+  valid_564310 = validateParameter(valid_564310, JString, required = true,
                                  default = nil)
-  if valid_568410 != nil:
-    section.add "name", valid_568410
-  var valid_568411 = path.getOrDefault("subscriptionId")
-  valid_568411 = validateParameter(valid_568411, JString, required = true,
+  if valid_564310 != nil:
+    section.add "subscriptionId", valid_564310
+  var valid_564311 = path.getOrDefault("instance")
+  valid_564311 = validateParameter(valid_564311, JString, required = true,
                                  default = nil)
-  if valid_568411 != nil:
-    section.add "subscriptionId", valid_568411
-  var valid_568412 = path.getOrDefault("instance")
-  valid_568412 = validateParameter(valid_568412, JString, required = true,
+  if valid_564311 != nil:
+    section.add "instance", valid_564311
+  var valid_564312 = path.getOrDefault("resourceGroupName")
+  valid_564312 = validateParameter(valid_564312, JString, required = true,
                                  default = nil)
-  if valid_568412 != nil:
-    section.add "instance", valid_568412
+  if valid_564312 != nil:
+    section.add "resourceGroupName", valid_564312
   result.add "path", section
   ## parameters in `query` object:
-  ##   api-version: JString (required)
-  ##              : API Version
   ##   details: JBool
   ##          : Specify <code>true</code> to include instance details. The default is <code>false</code>.
+  ##   api-version: JString (required)
+  ##              : API Version
   section = newJObject()
+  var valid_564313 = query.getOrDefault("details")
+  valid_564313 = validateParameter(valid_564313, JBool, required = false, default = nil)
+  if valid_564313 != nil:
+    section.add "details", valid_564313
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568413 = query.getOrDefault("api-version")
-  valid_568413 = validateParameter(valid_568413, JString, required = true,
+  var valid_564314 = query.getOrDefault("api-version")
+  valid_564314 = validateParameter(valid_564314, JString, required = true,
                                  default = nil)
-  if valid_568413 != nil:
-    section.add "api-version", valid_568413
-  var valid_568414 = query.getOrDefault("details")
-  valid_568414 = validateParameter(valid_568414, JBool, required = false, default = nil)
-  if valid_568414 != nil:
-    section.add "details", valid_568414
+  if valid_564314 != nil:
+    section.add "api-version", valid_564314
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2487,56 +2472,56 @@ proc validate_AppServiceEnvironmentsListMultiRolePoolInstanceMetrics_568407(
   if body != nil:
     result.add "body", body
 
-proc call*(call_568415: Call_AppServiceEnvironmentsListMultiRolePoolInstanceMetrics_568406;
+proc call*(call_564315: Call_AppServiceEnvironmentsListMultiRolePoolInstanceMetrics_564306;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Get metrics for a specific instance of a multi-role pool of an App Service Environment.
   ## 
-  let valid = call_568415.validator(path, query, header, formData, body)
-  let scheme = call_568415.pickScheme
+  let valid = call_564315.validator(path, query, header, formData, body)
+  let scheme = call_564315.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568415.url(scheme.get, call_568415.host, call_568415.base,
-                         call_568415.route, valid.getOrDefault("path"),
+  let url = call_564315.url(scheme.get, call_564315.host, call_564315.base,
+                         call_564315.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568415, url, valid)
+  result = hook(call_564315, url, valid)
 
-proc call*(call_568416: Call_AppServiceEnvironmentsListMultiRolePoolInstanceMetrics_568406;
-          resourceGroupName: string; apiVersion: string; name: string;
-          subscriptionId: string; instance: string; details: bool = false): Recallable =
+proc call*(call_564316: Call_AppServiceEnvironmentsListMultiRolePoolInstanceMetrics_564306;
+          apiVersion: string; name: string; subscriptionId: string; instance: string;
+          resourceGroupName: string; details: bool = false): Recallable =
   ## appServiceEnvironmentsListMultiRolePoolInstanceMetrics
   ## Get metrics for a specific instance of a multi-role pool of an App Service Environment.
-  ##   resourceGroupName: string (required)
-  ##                    : Name of the resource group to which the resource belongs.
+  ##   details: bool
+  ##          : Specify <code>true</code> to include instance details. The default is <code>false</code>.
   ##   apiVersion: string (required)
   ##             : API Version
   ##   name: string (required)
   ##       : Name of the App Service Environment.
-  ##   details: bool
-  ##          : Specify <code>true</code> to include instance details. The default is <code>false</code>.
   ##   subscriptionId: string (required)
   ##                 : Your Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
   ##   instance: string (required)
   ##           : Name of the instance in the multi-role pool.
-  var path_568417 = newJObject()
-  var query_568418 = newJObject()
-  add(path_568417, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568418, "api-version", newJString(apiVersion))
-  add(path_568417, "name", newJString(name))
-  add(query_568418, "details", newJBool(details))
-  add(path_568417, "subscriptionId", newJString(subscriptionId))
-  add(path_568417, "instance", newJString(instance))
-  result = call_568416.call(path_568417, query_568418, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : Name of the resource group to which the resource belongs.
+  var path_564317 = newJObject()
+  var query_564318 = newJObject()
+  add(query_564318, "details", newJBool(details))
+  add(query_564318, "api-version", newJString(apiVersion))
+  add(path_564317, "name", newJString(name))
+  add(path_564317, "subscriptionId", newJString(subscriptionId))
+  add(path_564317, "instance", newJString(instance))
+  add(path_564317, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564316.call(path_564317, query_564318, nil, nil, nil)
 
-var appServiceEnvironmentsListMultiRolePoolInstanceMetrics* = Call_AppServiceEnvironmentsListMultiRolePoolInstanceMetrics_568406(
+var appServiceEnvironmentsListMultiRolePoolInstanceMetrics* = Call_AppServiceEnvironmentsListMultiRolePoolInstanceMetrics_564306(
     name: "appServiceEnvironmentsListMultiRolePoolInstanceMetrics",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Web/hostingEnvironments/{name}/multiRolePools/default/instances/{instance}/metrics",
-    validator: validate_AppServiceEnvironmentsListMultiRolePoolInstanceMetrics_568407,
-    base: "", url: url_AppServiceEnvironmentsListMultiRolePoolInstanceMetrics_568408,
+    validator: validate_AppServiceEnvironmentsListMultiRolePoolInstanceMetrics_564307,
+    base: "", url: url_AppServiceEnvironmentsListMultiRolePoolInstanceMetrics_564308,
     schemes: {Scheme.Https})
 type
-  Call_AppServiceEnvironmentsListMultiRoleMetricDefinitions_568419 = ref object of OpenApiRestCall_567659
-proc url_AppServiceEnvironmentsListMultiRoleMetricDefinitions_568421(
+  Call_AppServiceEnvironmentsListMultiRoleMetricDefinitions_564319 = ref object of OpenApiRestCall_563557
+proc url_AppServiceEnvironmentsListMultiRoleMetricDefinitions_564321(
     protocol: Scheme; host: string; base: string; route: string; path: JsonNode;
     query: JsonNode): Uri =
   result.scheme = $protocol
@@ -2561,7 +2546,7 @@ proc url_AppServiceEnvironmentsListMultiRoleMetricDefinitions_568421(
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AppServiceEnvironmentsListMultiRoleMetricDefinitions_568420(
+proc validate_AppServiceEnvironmentsListMultiRoleMetricDefinitions_564320(
     path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
     body: JsonNode): JsonNode =
   ## Get metric definitions for a multi-role pool of an App Service Environment.
@@ -2569,30 +2554,29 @@ proc validate_AppServiceEnvironmentsListMultiRoleMetricDefinitions_568420(
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : Name of the resource group to which the resource belongs.
   ##   name: JString (required)
   ##       : Name of the App Service Environment.
   ##   subscriptionId: JString (required)
   ##                 : Your Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
+  ##   resourceGroupName: JString (required)
+  ##                    : Name of the resource group to which the resource belongs.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568422 = path.getOrDefault("resourceGroupName")
-  valid_568422 = validateParameter(valid_568422, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `name` field"
+  var valid_564322 = path.getOrDefault("name")
+  valid_564322 = validateParameter(valid_564322, JString, required = true,
                                  default = nil)
-  if valid_568422 != nil:
-    section.add "resourceGroupName", valid_568422
-  var valid_568423 = path.getOrDefault("name")
-  valid_568423 = validateParameter(valid_568423, JString, required = true,
+  if valid_564322 != nil:
+    section.add "name", valid_564322
+  var valid_564323 = path.getOrDefault("subscriptionId")
+  valid_564323 = validateParameter(valid_564323, JString, required = true,
                                  default = nil)
-  if valid_568423 != nil:
-    section.add "name", valid_568423
-  var valid_568424 = path.getOrDefault("subscriptionId")
-  valid_568424 = validateParameter(valid_568424, JString, required = true,
+  if valid_564323 != nil:
+    section.add "subscriptionId", valid_564323
+  var valid_564324 = path.getOrDefault("resourceGroupName")
+  valid_564324 = validateParameter(valid_564324, JString, required = true,
                                  default = nil)
-  if valid_568424 != nil:
-    section.add "subscriptionId", valid_568424
+  if valid_564324 != nil:
+    section.add "resourceGroupName", valid_564324
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2600,11 +2584,11 @@ proc validate_AppServiceEnvironmentsListMultiRoleMetricDefinitions_568420(
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568425 = query.getOrDefault("api-version")
-  valid_568425 = validateParameter(valid_568425, JString, required = true,
+  var valid_564325 = query.getOrDefault("api-version")
+  valid_564325 = validateParameter(valid_564325, JString, required = true,
                                  default = nil)
-  if valid_568425 != nil:
-    section.add "api-version", valid_568425
+  if valid_564325 != nil:
+    section.add "api-version", valid_564325
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2613,50 +2597,50 @@ proc validate_AppServiceEnvironmentsListMultiRoleMetricDefinitions_568420(
   if body != nil:
     result.add "body", body
 
-proc call*(call_568426: Call_AppServiceEnvironmentsListMultiRoleMetricDefinitions_568419;
+proc call*(call_564326: Call_AppServiceEnvironmentsListMultiRoleMetricDefinitions_564319;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Get metric definitions for a multi-role pool of an App Service Environment.
   ## 
-  let valid = call_568426.validator(path, query, header, formData, body)
-  let scheme = call_568426.pickScheme
+  let valid = call_564326.validator(path, query, header, formData, body)
+  let scheme = call_564326.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568426.url(scheme.get, call_568426.host, call_568426.base,
-                         call_568426.route, valid.getOrDefault("path"),
+  let url = call_564326.url(scheme.get, call_564326.host, call_564326.base,
+                         call_564326.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568426, url, valid)
+  result = hook(call_564326, url, valid)
 
-proc call*(call_568427: Call_AppServiceEnvironmentsListMultiRoleMetricDefinitions_568419;
-          resourceGroupName: string; apiVersion: string; name: string;
-          subscriptionId: string): Recallable =
+proc call*(call_564327: Call_AppServiceEnvironmentsListMultiRoleMetricDefinitions_564319;
+          apiVersion: string; name: string; subscriptionId: string;
+          resourceGroupName: string): Recallable =
   ## appServiceEnvironmentsListMultiRoleMetricDefinitions
   ## Get metric definitions for a multi-role pool of an App Service Environment.
-  ##   resourceGroupName: string (required)
-  ##                    : Name of the resource group to which the resource belongs.
   ##   apiVersion: string (required)
   ##             : API Version
   ##   name: string (required)
   ##       : Name of the App Service Environment.
   ##   subscriptionId: string (required)
   ##                 : Your Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
-  var path_568428 = newJObject()
-  var query_568429 = newJObject()
-  add(path_568428, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568429, "api-version", newJString(apiVersion))
-  add(path_568428, "name", newJString(name))
-  add(path_568428, "subscriptionId", newJString(subscriptionId))
-  result = call_568427.call(path_568428, query_568429, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : Name of the resource group to which the resource belongs.
+  var path_564328 = newJObject()
+  var query_564329 = newJObject()
+  add(query_564329, "api-version", newJString(apiVersion))
+  add(path_564328, "name", newJString(name))
+  add(path_564328, "subscriptionId", newJString(subscriptionId))
+  add(path_564328, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564327.call(path_564328, query_564329, nil, nil, nil)
 
-var appServiceEnvironmentsListMultiRoleMetricDefinitions* = Call_AppServiceEnvironmentsListMultiRoleMetricDefinitions_568419(
+var appServiceEnvironmentsListMultiRoleMetricDefinitions* = Call_AppServiceEnvironmentsListMultiRoleMetricDefinitions_564319(
     name: "appServiceEnvironmentsListMultiRoleMetricDefinitions",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Web/hostingEnvironments/{name}/multiRolePools/default/metricdefinitions",
-    validator: validate_AppServiceEnvironmentsListMultiRoleMetricDefinitions_568420,
-    base: "", url: url_AppServiceEnvironmentsListMultiRoleMetricDefinitions_568421,
+    validator: validate_AppServiceEnvironmentsListMultiRoleMetricDefinitions_564320,
+    base: "", url: url_AppServiceEnvironmentsListMultiRoleMetricDefinitions_564321,
     schemes: {Scheme.Https})
 type
-  Call_AppServiceEnvironmentsListMultiRoleMetrics_568430 = ref object of OpenApiRestCall_567659
-proc url_AppServiceEnvironmentsListMultiRoleMetrics_568432(protocol: Scheme;
+  Call_AppServiceEnvironmentsListMultiRoleMetrics_564330 = ref object of OpenApiRestCall_563557
+proc url_AppServiceEnvironmentsListMultiRoleMetrics_564332(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2680,83 +2664,82 @@ proc url_AppServiceEnvironmentsListMultiRoleMetrics_568432(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AppServiceEnvironmentsListMultiRoleMetrics_568431(path: JsonNode;
+proc validate_AppServiceEnvironmentsListMultiRoleMetrics_564331(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Get metrics for a multi-role pool of an App Service Environment.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : Name of the resource group to which the resource belongs.
   ##   name: JString (required)
   ##       : Name of the App Service Environment.
   ##   subscriptionId: JString (required)
   ##                 : Your Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
+  ##   resourceGroupName: JString (required)
+  ##                    : Name of the resource group to which the resource belongs.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568433 = path.getOrDefault("resourceGroupName")
-  valid_568433 = validateParameter(valid_568433, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `name` field"
+  var valid_564333 = path.getOrDefault("name")
+  valid_564333 = validateParameter(valid_564333, JString, required = true,
                                  default = nil)
-  if valid_568433 != nil:
-    section.add "resourceGroupName", valid_568433
-  var valid_568434 = path.getOrDefault("name")
-  valid_568434 = validateParameter(valid_568434, JString, required = true,
+  if valid_564333 != nil:
+    section.add "name", valid_564333
+  var valid_564334 = path.getOrDefault("subscriptionId")
+  valid_564334 = validateParameter(valid_564334, JString, required = true,
                                  default = nil)
-  if valid_568434 != nil:
-    section.add "name", valid_568434
-  var valid_568435 = path.getOrDefault("subscriptionId")
-  valid_568435 = validateParameter(valid_568435, JString, required = true,
+  if valid_564334 != nil:
+    section.add "subscriptionId", valid_564334
+  var valid_564335 = path.getOrDefault("resourceGroupName")
+  valid_564335 = validateParameter(valid_564335, JString, required = true,
                                  default = nil)
-  if valid_568435 != nil:
-    section.add "subscriptionId", valid_568435
+  if valid_564335 != nil:
+    section.add "resourceGroupName", valid_564335
   result.add "path", section
   ## parameters in `query` object:
-  ##   api-version: JString (required)
-  ##              : API Version
   ##   details: JBool
   ##          : Specify <code>true</code> to include instance details. The default is <code>false</code>.
-  ##   endTime: JString
-  ##          : End time of the metrics query.
-  ##   timeGrain: JString
-  ##            : Time granularity of the metrics query.
+  ##   api-version: JString (required)
+  ##              : API Version
   ##   startTime: JString
   ##            : Beginning time of the metrics query.
   ##   $filter: JString
   ##          : Return only usages/metrics specified in the filter. Filter conforms to odata syntax. Example: $filter=(name.value eq 'Metric1' or name.value eq 'Metric2') and startTime eq 2014-01-01T00:00:00Z and endTime eq 2014-12-31T23:59:59Z and timeGrain eq duration'[Hour|Minute|Day]'.
+  ##   timeGrain: JString
+  ##            : Time granularity of the metrics query.
+  ##   endTime: JString
+  ##          : End time of the metrics query.
   section = newJObject()
+  var valid_564336 = query.getOrDefault("details")
+  valid_564336 = validateParameter(valid_564336, JBool, required = false, default = nil)
+  if valid_564336 != nil:
+    section.add "details", valid_564336
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568436 = query.getOrDefault("api-version")
-  valid_568436 = validateParameter(valid_568436, JString, required = true,
+  var valid_564337 = query.getOrDefault("api-version")
+  valid_564337 = validateParameter(valid_564337, JString, required = true,
                                  default = nil)
-  if valid_568436 != nil:
-    section.add "api-version", valid_568436
-  var valid_568437 = query.getOrDefault("details")
-  valid_568437 = validateParameter(valid_568437, JBool, required = false, default = nil)
-  if valid_568437 != nil:
-    section.add "details", valid_568437
-  var valid_568438 = query.getOrDefault("endTime")
-  valid_568438 = validateParameter(valid_568438, JString, required = false,
+  if valid_564337 != nil:
+    section.add "api-version", valid_564337
+  var valid_564338 = query.getOrDefault("startTime")
+  valid_564338 = validateParameter(valid_564338, JString, required = false,
                                  default = nil)
-  if valid_568438 != nil:
-    section.add "endTime", valid_568438
-  var valid_568439 = query.getOrDefault("timeGrain")
-  valid_568439 = validateParameter(valid_568439, JString, required = false,
+  if valid_564338 != nil:
+    section.add "startTime", valid_564338
+  var valid_564339 = query.getOrDefault("$filter")
+  valid_564339 = validateParameter(valid_564339, JString, required = false,
                                  default = nil)
-  if valid_568439 != nil:
-    section.add "timeGrain", valid_568439
-  var valid_568440 = query.getOrDefault("startTime")
-  valid_568440 = validateParameter(valid_568440, JString, required = false,
+  if valid_564339 != nil:
+    section.add "$filter", valid_564339
+  var valid_564340 = query.getOrDefault("timeGrain")
+  valid_564340 = validateParameter(valid_564340, JString, required = false,
                                  default = nil)
-  if valid_568440 != nil:
-    section.add "startTime", valid_568440
-  var valid_568441 = query.getOrDefault("$filter")
-  valid_568441 = validateParameter(valid_568441, JString, required = false,
+  if valid_564340 != nil:
+    section.add "timeGrain", valid_564340
+  var valid_564341 = query.getOrDefault("endTime")
+  valid_564341 = validateParameter(valid_564341, JString, required = false,
                                  default = nil)
-  if valid_568441 != nil:
-    section.add "$filter", valid_568441
+  if valid_564341 != nil:
+    section.add "endTime", valid_564341
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2765,66 +2748,66 @@ proc validate_AppServiceEnvironmentsListMultiRoleMetrics_568431(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568442: Call_AppServiceEnvironmentsListMultiRoleMetrics_568430;
+proc call*(call_564342: Call_AppServiceEnvironmentsListMultiRoleMetrics_564330;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Get metrics for a multi-role pool of an App Service Environment.
   ## 
-  let valid = call_568442.validator(path, query, header, formData, body)
-  let scheme = call_568442.pickScheme
+  let valid = call_564342.validator(path, query, header, formData, body)
+  let scheme = call_564342.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568442.url(scheme.get, call_568442.host, call_568442.base,
-                         call_568442.route, valid.getOrDefault("path"),
+  let url = call_564342.url(scheme.get, call_564342.host, call_564342.base,
+                         call_564342.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568442, url, valid)
+  result = hook(call_564342, url, valid)
 
-proc call*(call_568443: Call_AppServiceEnvironmentsListMultiRoleMetrics_568430;
-          resourceGroupName: string; apiVersion: string; name: string;
-          subscriptionId: string; details: bool = false; endTime: string = "";
-          timeGrain: string = ""; startTime: string = ""; Filter: string = ""): Recallable =
+proc call*(call_564343: Call_AppServiceEnvironmentsListMultiRoleMetrics_564330;
+          apiVersion: string; name: string; subscriptionId: string;
+          resourceGroupName: string; details: bool = false; startTime: string = "";
+          Filter: string = ""; timeGrain: string = ""; endTime: string = ""): Recallable =
   ## appServiceEnvironmentsListMultiRoleMetrics
   ## Get metrics for a multi-role pool of an App Service Environment.
-  ##   resourceGroupName: string (required)
-  ##                    : Name of the resource group to which the resource belongs.
-  ##   apiVersion: string (required)
-  ##             : API Version
-  ##   name: string (required)
-  ##       : Name of the App Service Environment.
   ##   details: bool
   ##          : Specify <code>true</code> to include instance details. The default is <code>false</code>.
-  ##   subscriptionId: string (required)
-  ##                 : Your Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
-  ##   endTime: string
-  ##          : End time of the metrics query.
-  ##   timeGrain: string
-  ##            : Time granularity of the metrics query.
+  ##   apiVersion: string (required)
+  ##             : API Version
   ##   startTime: string
   ##            : Beginning time of the metrics query.
+  ##   name: string (required)
+  ##       : Name of the App Service Environment.
+  ##   subscriptionId: string (required)
+  ##                 : Your Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
+  ##   resourceGroupName: string (required)
+  ##                    : Name of the resource group to which the resource belongs.
   ##   Filter: string
   ##         : Return only usages/metrics specified in the filter. Filter conforms to odata syntax. Example: $filter=(name.value eq 'Metric1' or name.value eq 'Metric2') and startTime eq 2014-01-01T00:00:00Z and endTime eq 2014-12-31T23:59:59Z and timeGrain eq duration'[Hour|Minute|Day]'.
-  var path_568444 = newJObject()
-  var query_568445 = newJObject()
-  add(path_568444, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568445, "api-version", newJString(apiVersion))
-  add(path_568444, "name", newJString(name))
-  add(query_568445, "details", newJBool(details))
-  add(path_568444, "subscriptionId", newJString(subscriptionId))
-  add(query_568445, "endTime", newJString(endTime))
-  add(query_568445, "timeGrain", newJString(timeGrain))
-  add(query_568445, "startTime", newJString(startTime))
-  add(query_568445, "$filter", newJString(Filter))
-  result = call_568443.call(path_568444, query_568445, nil, nil, nil)
+  ##   timeGrain: string
+  ##            : Time granularity of the metrics query.
+  ##   endTime: string
+  ##          : End time of the metrics query.
+  var path_564344 = newJObject()
+  var query_564345 = newJObject()
+  add(query_564345, "details", newJBool(details))
+  add(query_564345, "api-version", newJString(apiVersion))
+  add(query_564345, "startTime", newJString(startTime))
+  add(path_564344, "name", newJString(name))
+  add(path_564344, "subscriptionId", newJString(subscriptionId))
+  add(path_564344, "resourceGroupName", newJString(resourceGroupName))
+  add(query_564345, "$filter", newJString(Filter))
+  add(query_564345, "timeGrain", newJString(timeGrain))
+  add(query_564345, "endTime", newJString(endTime))
+  result = call_564343.call(path_564344, query_564345, nil, nil, nil)
 
-var appServiceEnvironmentsListMultiRoleMetrics* = Call_AppServiceEnvironmentsListMultiRoleMetrics_568430(
+var appServiceEnvironmentsListMultiRoleMetrics* = Call_AppServiceEnvironmentsListMultiRoleMetrics_564330(
     name: "appServiceEnvironmentsListMultiRoleMetrics", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Web/hostingEnvironments/{name}/multiRolePools/default/metrics",
-    validator: validate_AppServiceEnvironmentsListMultiRoleMetrics_568431,
-    base: "", url: url_AppServiceEnvironmentsListMultiRoleMetrics_568432,
+    validator: validate_AppServiceEnvironmentsListMultiRoleMetrics_564331,
+    base: "", url: url_AppServiceEnvironmentsListMultiRoleMetrics_564332,
     schemes: {Scheme.Https})
 type
-  Call_AppServiceEnvironmentsListMultiRolePoolSkus_568446 = ref object of OpenApiRestCall_567659
-proc url_AppServiceEnvironmentsListMultiRolePoolSkus_568448(protocol: Scheme;
+  Call_AppServiceEnvironmentsListMultiRolePoolSkus_564346 = ref object of OpenApiRestCall_563557
+proc url_AppServiceEnvironmentsListMultiRolePoolSkus_564348(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2848,37 +2831,36 @@ proc url_AppServiceEnvironmentsListMultiRolePoolSkus_568448(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AppServiceEnvironmentsListMultiRolePoolSkus_568447(path: JsonNode;
+proc validate_AppServiceEnvironmentsListMultiRolePoolSkus_564347(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Get available SKUs for scaling a multi-role pool.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : Name of the resource group to which the resource belongs.
   ##   name: JString (required)
   ##       : Name of the App Service Environment.
   ##   subscriptionId: JString (required)
   ##                 : Your Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
+  ##   resourceGroupName: JString (required)
+  ##                    : Name of the resource group to which the resource belongs.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568449 = path.getOrDefault("resourceGroupName")
-  valid_568449 = validateParameter(valid_568449, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `name` field"
+  var valid_564349 = path.getOrDefault("name")
+  valid_564349 = validateParameter(valid_564349, JString, required = true,
                                  default = nil)
-  if valid_568449 != nil:
-    section.add "resourceGroupName", valid_568449
-  var valid_568450 = path.getOrDefault("name")
-  valid_568450 = validateParameter(valid_568450, JString, required = true,
+  if valid_564349 != nil:
+    section.add "name", valid_564349
+  var valid_564350 = path.getOrDefault("subscriptionId")
+  valid_564350 = validateParameter(valid_564350, JString, required = true,
                                  default = nil)
-  if valid_568450 != nil:
-    section.add "name", valid_568450
-  var valid_568451 = path.getOrDefault("subscriptionId")
-  valid_568451 = validateParameter(valid_568451, JString, required = true,
+  if valid_564350 != nil:
+    section.add "subscriptionId", valid_564350
+  var valid_564351 = path.getOrDefault("resourceGroupName")
+  valid_564351 = validateParameter(valid_564351, JString, required = true,
                                  default = nil)
-  if valid_568451 != nil:
-    section.add "subscriptionId", valid_568451
+  if valid_564351 != nil:
+    section.add "resourceGroupName", valid_564351
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2886,11 +2868,11 @@ proc validate_AppServiceEnvironmentsListMultiRolePoolSkus_568447(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568452 = query.getOrDefault("api-version")
-  valid_568452 = validateParameter(valid_568452, JString, required = true,
+  var valid_564352 = query.getOrDefault("api-version")
+  valid_564352 = validateParameter(valid_564352, JString, required = true,
                                  default = nil)
-  if valid_568452 != nil:
-    section.add "api-version", valid_568452
+  if valid_564352 != nil:
+    section.add "api-version", valid_564352
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2899,50 +2881,50 @@ proc validate_AppServiceEnvironmentsListMultiRolePoolSkus_568447(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568453: Call_AppServiceEnvironmentsListMultiRolePoolSkus_568446;
+proc call*(call_564353: Call_AppServiceEnvironmentsListMultiRolePoolSkus_564346;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Get available SKUs for scaling a multi-role pool.
   ## 
-  let valid = call_568453.validator(path, query, header, formData, body)
-  let scheme = call_568453.pickScheme
+  let valid = call_564353.validator(path, query, header, formData, body)
+  let scheme = call_564353.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568453.url(scheme.get, call_568453.host, call_568453.base,
-                         call_568453.route, valid.getOrDefault("path"),
+  let url = call_564353.url(scheme.get, call_564353.host, call_564353.base,
+                         call_564353.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568453, url, valid)
+  result = hook(call_564353, url, valid)
 
-proc call*(call_568454: Call_AppServiceEnvironmentsListMultiRolePoolSkus_568446;
-          resourceGroupName: string; apiVersion: string; name: string;
-          subscriptionId: string): Recallable =
+proc call*(call_564354: Call_AppServiceEnvironmentsListMultiRolePoolSkus_564346;
+          apiVersion: string; name: string; subscriptionId: string;
+          resourceGroupName: string): Recallable =
   ## appServiceEnvironmentsListMultiRolePoolSkus
   ## Get available SKUs for scaling a multi-role pool.
-  ##   resourceGroupName: string (required)
-  ##                    : Name of the resource group to which the resource belongs.
   ##   apiVersion: string (required)
   ##             : API Version
   ##   name: string (required)
   ##       : Name of the App Service Environment.
   ##   subscriptionId: string (required)
   ##                 : Your Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
-  var path_568455 = newJObject()
-  var query_568456 = newJObject()
-  add(path_568455, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568456, "api-version", newJString(apiVersion))
-  add(path_568455, "name", newJString(name))
-  add(path_568455, "subscriptionId", newJString(subscriptionId))
-  result = call_568454.call(path_568455, query_568456, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : Name of the resource group to which the resource belongs.
+  var path_564355 = newJObject()
+  var query_564356 = newJObject()
+  add(query_564356, "api-version", newJString(apiVersion))
+  add(path_564355, "name", newJString(name))
+  add(path_564355, "subscriptionId", newJString(subscriptionId))
+  add(path_564355, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564354.call(path_564355, query_564356, nil, nil, nil)
 
-var appServiceEnvironmentsListMultiRolePoolSkus* = Call_AppServiceEnvironmentsListMultiRolePoolSkus_568446(
+var appServiceEnvironmentsListMultiRolePoolSkus* = Call_AppServiceEnvironmentsListMultiRolePoolSkus_564346(
     name: "appServiceEnvironmentsListMultiRolePoolSkus", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Web/hostingEnvironments/{name}/multiRolePools/default/skus",
-    validator: validate_AppServiceEnvironmentsListMultiRolePoolSkus_568447,
-    base: "", url: url_AppServiceEnvironmentsListMultiRolePoolSkus_568448,
+    validator: validate_AppServiceEnvironmentsListMultiRolePoolSkus_564347,
+    base: "", url: url_AppServiceEnvironmentsListMultiRolePoolSkus_564348,
     schemes: {Scheme.Https})
 type
-  Call_AppServiceEnvironmentsListMultiRoleUsages_568457 = ref object of OpenApiRestCall_567659
-proc url_AppServiceEnvironmentsListMultiRoleUsages_568459(protocol: Scheme;
+  Call_AppServiceEnvironmentsListMultiRoleUsages_564357 = ref object of OpenApiRestCall_563557
+proc url_AppServiceEnvironmentsListMultiRoleUsages_564359(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2966,37 +2948,36 @@ proc url_AppServiceEnvironmentsListMultiRoleUsages_568459(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AppServiceEnvironmentsListMultiRoleUsages_568458(path: JsonNode;
+proc validate_AppServiceEnvironmentsListMultiRoleUsages_564358(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Get usage metrics for a multi-role pool of an App Service Environment.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : Name of the resource group to which the resource belongs.
   ##   name: JString (required)
   ##       : Name of the App Service Environment.
   ##   subscriptionId: JString (required)
   ##                 : Your Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
+  ##   resourceGroupName: JString (required)
+  ##                    : Name of the resource group to which the resource belongs.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568460 = path.getOrDefault("resourceGroupName")
-  valid_568460 = validateParameter(valid_568460, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `name` field"
+  var valid_564360 = path.getOrDefault("name")
+  valid_564360 = validateParameter(valid_564360, JString, required = true,
                                  default = nil)
-  if valid_568460 != nil:
-    section.add "resourceGroupName", valid_568460
-  var valid_568461 = path.getOrDefault("name")
-  valid_568461 = validateParameter(valid_568461, JString, required = true,
+  if valid_564360 != nil:
+    section.add "name", valid_564360
+  var valid_564361 = path.getOrDefault("subscriptionId")
+  valid_564361 = validateParameter(valid_564361, JString, required = true,
                                  default = nil)
-  if valid_568461 != nil:
-    section.add "name", valid_568461
-  var valid_568462 = path.getOrDefault("subscriptionId")
-  valid_568462 = validateParameter(valid_568462, JString, required = true,
+  if valid_564361 != nil:
+    section.add "subscriptionId", valid_564361
+  var valid_564362 = path.getOrDefault("resourceGroupName")
+  valid_564362 = validateParameter(valid_564362, JString, required = true,
                                  default = nil)
-  if valid_568462 != nil:
-    section.add "subscriptionId", valid_568462
+  if valid_564362 != nil:
+    section.add "resourceGroupName", valid_564362
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -3004,11 +2985,11 @@ proc validate_AppServiceEnvironmentsListMultiRoleUsages_568458(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568463 = query.getOrDefault("api-version")
-  valid_568463 = validateParameter(valid_568463, JString, required = true,
+  var valid_564363 = query.getOrDefault("api-version")
+  valid_564363 = validateParameter(valid_564363, JString, required = true,
                                  default = nil)
-  if valid_568463 != nil:
-    section.add "api-version", valid_568463
+  if valid_564363 != nil:
+    section.add "api-version", valid_564363
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3017,50 +2998,50 @@ proc validate_AppServiceEnvironmentsListMultiRoleUsages_568458(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568464: Call_AppServiceEnvironmentsListMultiRoleUsages_568457;
+proc call*(call_564364: Call_AppServiceEnvironmentsListMultiRoleUsages_564357;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Get usage metrics for a multi-role pool of an App Service Environment.
   ## 
-  let valid = call_568464.validator(path, query, header, formData, body)
-  let scheme = call_568464.pickScheme
+  let valid = call_564364.validator(path, query, header, formData, body)
+  let scheme = call_564364.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568464.url(scheme.get, call_568464.host, call_568464.base,
-                         call_568464.route, valid.getOrDefault("path"),
+  let url = call_564364.url(scheme.get, call_564364.host, call_564364.base,
+                         call_564364.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568464, url, valid)
+  result = hook(call_564364, url, valid)
 
-proc call*(call_568465: Call_AppServiceEnvironmentsListMultiRoleUsages_568457;
-          resourceGroupName: string; apiVersion: string; name: string;
-          subscriptionId: string): Recallable =
+proc call*(call_564365: Call_AppServiceEnvironmentsListMultiRoleUsages_564357;
+          apiVersion: string; name: string; subscriptionId: string;
+          resourceGroupName: string): Recallable =
   ## appServiceEnvironmentsListMultiRoleUsages
   ## Get usage metrics for a multi-role pool of an App Service Environment.
-  ##   resourceGroupName: string (required)
-  ##                    : Name of the resource group to which the resource belongs.
   ##   apiVersion: string (required)
   ##             : API Version
   ##   name: string (required)
   ##       : Name of the App Service Environment.
   ##   subscriptionId: string (required)
   ##                 : Your Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
-  var path_568466 = newJObject()
-  var query_568467 = newJObject()
-  add(path_568466, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568467, "api-version", newJString(apiVersion))
-  add(path_568466, "name", newJString(name))
-  add(path_568466, "subscriptionId", newJString(subscriptionId))
-  result = call_568465.call(path_568466, query_568467, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : Name of the resource group to which the resource belongs.
+  var path_564366 = newJObject()
+  var query_564367 = newJObject()
+  add(query_564367, "api-version", newJString(apiVersion))
+  add(path_564366, "name", newJString(name))
+  add(path_564366, "subscriptionId", newJString(subscriptionId))
+  add(path_564366, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564365.call(path_564366, query_564367, nil, nil, nil)
 
-var appServiceEnvironmentsListMultiRoleUsages* = Call_AppServiceEnvironmentsListMultiRoleUsages_568457(
+var appServiceEnvironmentsListMultiRoleUsages* = Call_AppServiceEnvironmentsListMultiRoleUsages_564357(
     name: "appServiceEnvironmentsListMultiRoleUsages", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Web/hostingEnvironments/{name}/multiRolePools/default/usages",
-    validator: validate_AppServiceEnvironmentsListMultiRoleUsages_568458,
-    base: "", url: url_AppServiceEnvironmentsListMultiRoleUsages_568459,
+    validator: validate_AppServiceEnvironmentsListMultiRoleUsages_564358,
+    base: "", url: url_AppServiceEnvironmentsListMultiRoleUsages_564359,
     schemes: {Scheme.Https})
 type
-  Call_AppServiceEnvironmentsListOperations_568468 = ref object of OpenApiRestCall_567659
-proc url_AppServiceEnvironmentsListOperations_568470(protocol: Scheme;
+  Call_AppServiceEnvironmentsListOperations_564368 = ref object of OpenApiRestCall_563557
+proc url_AppServiceEnvironmentsListOperations_564370(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -3084,37 +3065,36 @@ proc url_AppServiceEnvironmentsListOperations_568470(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AppServiceEnvironmentsListOperations_568469(path: JsonNode;
+proc validate_AppServiceEnvironmentsListOperations_564369(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## List all currently running operations on the App Service Environment.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : Name of the resource group to which the resource belongs.
   ##   name: JString (required)
   ##       : Name of the App Service Environment.
   ##   subscriptionId: JString (required)
   ##                 : Your Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
+  ##   resourceGroupName: JString (required)
+  ##                    : Name of the resource group to which the resource belongs.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568471 = path.getOrDefault("resourceGroupName")
-  valid_568471 = validateParameter(valid_568471, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `name` field"
+  var valid_564371 = path.getOrDefault("name")
+  valid_564371 = validateParameter(valid_564371, JString, required = true,
                                  default = nil)
-  if valid_568471 != nil:
-    section.add "resourceGroupName", valid_568471
-  var valid_568472 = path.getOrDefault("name")
-  valid_568472 = validateParameter(valid_568472, JString, required = true,
+  if valid_564371 != nil:
+    section.add "name", valid_564371
+  var valid_564372 = path.getOrDefault("subscriptionId")
+  valid_564372 = validateParameter(valid_564372, JString, required = true,
                                  default = nil)
-  if valid_568472 != nil:
-    section.add "name", valid_568472
-  var valid_568473 = path.getOrDefault("subscriptionId")
-  valid_568473 = validateParameter(valid_568473, JString, required = true,
+  if valid_564372 != nil:
+    section.add "subscriptionId", valid_564372
+  var valid_564373 = path.getOrDefault("resourceGroupName")
+  valid_564373 = validateParameter(valid_564373, JString, required = true,
                                  default = nil)
-  if valid_568473 != nil:
-    section.add "subscriptionId", valid_568473
+  if valid_564373 != nil:
+    section.add "resourceGroupName", valid_564373
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -3122,11 +3102,11 @@ proc validate_AppServiceEnvironmentsListOperations_568469(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568474 = query.getOrDefault("api-version")
-  valid_568474 = validateParameter(valid_568474, JString, required = true,
+  var valid_564374 = query.getOrDefault("api-version")
+  valid_564374 = validateParameter(valid_564374, JString, required = true,
                                  default = nil)
-  if valid_568474 != nil:
-    section.add "api-version", valid_568474
+  if valid_564374 != nil:
+    section.add "api-version", valid_564374
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3135,49 +3115,49 @@ proc validate_AppServiceEnvironmentsListOperations_568469(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568475: Call_AppServiceEnvironmentsListOperations_568468;
+proc call*(call_564375: Call_AppServiceEnvironmentsListOperations_564368;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## List all currently running operations on the App Service Environment.
   ## 
-  let valid = call_568475.validator(path, query, header, formData, body)
-  let scheme = call_568475.pickScheme
+  let valid = call_564375.validator(path, query, header, formData, body)
+  let scheme = call_564375.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568475.url(scheme.get, call_568475.host, call_568475.base,
-                         call_568475.route, valid.getOrDefault("path"),
+  let url = call_564375.url(scheme.get, call_564375.host, call_564375.base,
+                         call_564375.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568475, url, valid)
+  result = hook(call_564375, url, valid)
 
-proc call*(call_568476: Call_AppServiceEnvironmentsListOperations_568468;
-          resourceGroupName: string; apiVersion: string; name: string;
-          subscriptionId: string): Recallable =
+proc call*(call_564376: Call_AppServiceEnvironmentsListOperations_564368;
+          apiVersion: string; name: string; subscriptionId: string;
+          resourceGroupName: string): Recallable =
   ## appServiceEnvironmentsListOperations
   ## List all currently running operations on the App Service Environment.
-  ##   resourceGroupName: string (required)
-  ##                    : Name of the resource group to which the resource belongs.
   ##   apiVersion: string (required)
   ##             : API Version
   ##   name: string (required)
   ##       : Name of the App Service Environment.
   ##   subscriptionId: string (required)
   ##                 : Your Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
-  var path_568477 = newJObject()
-  var query_568478 = newJObject()
-  add(path_568477, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568478, "api-version", newJString(apiVersion))
-  add(path_568477, "name", newJString(name))
-  add(path_568477, "subscriptionId", newJString(subscriptionId))
-  result = call_568476.call(path_568477, query_568478, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : Name of the resource group to which the resource belongs.
+  var path_564377 = newJObject()
+  var query_564378 = newJObject()
+  add(query_564378, "api-version", newJString(apiVersion))
+  add(path_564377, "name", newJString(name))
+  add(path_564377, "subscriptionId", newJString(subscriptionId))
+  add(path_564377, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564376.call(path_564377, query_564378, nil, nil, nil)
 
-var appServiceEnvironmentsListOperations* = Call_AppServiceEnvironmentsListOperations_568468(
+var appServiceEnvironmentsListOperations* = Call_AppServiceEnvironmentsListOperations_564368(
     name: "appServiceEnvironmentsListOperations", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Web/hostingEnvironments/{name}/operations",
-    validator: validate_AppServiceEnvironmentsListOperations_568469, base: "",
-    url: url_AppServiceEnvironmentsListOperations_568470, schemes: {Scheme.Https})
+    validator: validate_AppServiceEnvironmentsListOperations_564369, base: "",
+    url: url_AppServiceEnvironmentsListOperations_564370, schemes: {Scheme.Https})
 type
-  Call_AppServiceEnvironmentsGetOutboundNetworkDependenciesEndpoints_568479 = ref object of OpenApiRestCall_567659
-proc url_AppServiceEnvironmentsGetOutboundNetworkDependenciesEndpoints_568481(
+  Call_AppServiceEnvironmentsGetOutboundNetworkDependenciesEndpoints_564379 = ref object of OpenApiRestCall_563557
+proc url_AppServiceEnvironmentsGetOutboundNetworkDependenciesEndpoints_564381(
     protocol: Scheme; host: string; base: string; route: string; path: JsonNode;
     query: JsonNode): Uri =
   result.scheme = $protocol
@@ -3202,7 +3182,7 @@ proc url_AppServiceEnvironmentsGetOutboundNetworkDependenciesEndpoints_568481(
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AppServiceEnvironmentsGetOutboundNetworkDependenciesEndpoints_568480(
+proc validate_AppServiceEnvironmentsGetOutboundNetworkDependenciesEndpoints_564380(
     path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
     body: JsonNode): JsonNode =
   ## Get the network endpoints of all outbound dependencies of an App Service Environment.
@@ -3210,30 +3190,29 @@ proc validate_AppServiceEnvironmentsGetOutboundNetworkDependenciesEndpoints_5684
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : Name of the resource group to which the resource belongs.
   ##   name: JString (required)
   ##       : Name of the App Service Environment.
   ##   subscriptionId: JString (required)
   ##                 : Your Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
+  ##   resourceGroupName: JString (required)
+  ##                    : Name of the resource group to which the resource belongs.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568482 = path.getOrDefault("resourceGroupName")
-  valid_568482 = validateParameter(valid_568482, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `name` field"
+  var valid_564382 = path.getOrDefault("name")
+  valid_564382 = validateParameter(valid_564382, JString, required = true,
                                  default = nil)
-  if valid_568482 != nil:
-    section.add "resourceGroupName", valid_568482
-  var valid_568483 = path.getOrDefault("name")
-  valid_568483 = validateParameter(valid_568483, JString, required = true,
+  if valid_564382 != nil:
+    section.add "name", valid_564382
+  var valid_564383 = path.getOrDefault("subscriptionId")
+  valid_564383 = validateParameter(valid_564383, JString, required = true,
                                  default = nil)
-  if valid_568483 != nil:
-    section.add "name", valid_568483
-  var valid_568484 = path.getOrDefault("subscriptionId")
-  valid_568484 = validateParameter(valid_568484, JString, required = true,
+  if valid_564383 != nil:
+    section.add "subscriptionId", valid_564383
+  var valid_564384 = path.getOrDefault("resourceGroupName")
+  valid_564384 = validateParameter(valid_564384, JString, required = true,
                                  default = nil)
-  if valid_568484 != nil:
-    section.add "subscriptionId", valid_568484
+  if valid_564384 != nil:
+    section.add "resourceGroupName", valid_564384
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -3241,11 +3220,11 @@ proc validate_AppServiceEnvironmentsGetOutboundNetworkDependenciesEndpoints_5684
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568485 = query.getOrDefault("api-version")
-  valid_568485 = validateParameter(valid_568485, JString, required = true,
+  var valid_564385 = query.getOrDefault("api-version")
+  valid_564385 = validateParameter(valid_564385, JString, required = true,
                                  default = nil)
-  if valid_568485 != nil:
-    section.add "api-version", valid_568485
+  if valid_564385 != nil:
+    section.add "api-version", valid_564385
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3254,50 +3233,50 @@ proc validate_AppServiceEnvironmentsGetOutboundNetworkDependenciesEndpoints_5684
   if body != nil:
     result.add "body", body
 
-proc call*(call_568486: Call_AppServiceEnvironmentsGetOutboundNetworkDependenciesEndpoints_568479;
+proc call*(call_564386: Call_AppServiceEnvironmentsGetOutboundNetworkDependenciesEndpoints_564379;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Get the network endpoints of all outbound dependencies of an App Service Environment.
   ## 
-  let valid = call_568486.validator(path, query, header, formData, body)
-  let scheme = call_568486.pickScheme
+  let valid = call_564386.validator(path, query, header, formData, body)
+  let scheme = call_564386.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568486.url(scheme.get, call_568486.host, call_568486.base,
-                         call_568486.route, valid.getOrDefault("path"),
+  let url = call_564386.url(scheme.get, call_564386.host, call_564386.base,
+                         call_564386.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568486, url, valid)
+  result = hook(call_564386, url, valid)
 
-proc call*(call_568487: Call_AppServiceEnvironmentsGetOutboundNetworkDependenciesEndpoints_568479;
-          resourceGroupName: string; apiVersion: string; name: string;
-          subscriptionId: string): Recallable =
+proc call*(call_564387: Call_AppServiceEnvironmentsGetOutboundNetworkDependenciesEndpoints_564379;
+          apiVersion: string; name: string; subscriptionId: string;
+          resourceGroupName: string): Recallable =
   ## appServiceEnvironmentsGetOutboundNetworkDependenciesEndpoints
   ## Get the network endpoints of all outbound dependencies of an App Service Environment.
-  ##   resourceGroupName: string (required)
-  ##                    : Name of the resource group to which the resource belongs.
   ##   apiVersion: string (required)
   ##             : API Version
   ##   name: string (required)
   ##       : Name of the App Service Environment.
   ##   subscriptionId: string (required)
   ##                 : Your Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
-  var path_568488 = newJObject()
-  var query_568489 = newJObject()
-  add(path_568488, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568489, "api-version", newJString(apiVersion))
-  add(path_568488, "name", newJString(name))
-  add(path_568488, "subscriptionId", newJString(subscriptionId))
-  result = call_568487.call(path_568488, query_568489, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : Name of the resource group to which the resource belongs.
+  var path_564388 = newJObject()
+  var query_564389 = newJObject()
+  add(query_564389, "api-version", newJString(apiVersion))
+  add(path_564388, "name", newJString(name))
+  add(path_564388, "subscriptionId", newJString(subscriptionId))
+  add(path_564388, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564387.call(path_564388, query_564389, nil, nil, nil)
 
-var appServiceEnvironmentsGetOutboundNetworkDependenciesEndpoints* = Call_AppServiceEnvironmentsGetOutboundNetworkDependenciesEndpoints_568479(
+var appServiceEnvironmentsGetOutboundNetworkDependenciesEndpoints* = Call_AppServiceEnvironmentsGetOutboundNetworkDependenciesEndpoints_564379(
     name: "appServiceEnvironmentsGetOutboundNetworkDependenciesEndpoints",
-    meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Web/hostingEnvironments/{name}/outboundNetworkDependenciesEndpoints", validator: validate_AppServiceEnvironmentsGetOutboundNetworkDependenciesEndpoints_568480,
+    meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Web/hostingEnvironments/{name}/outboundNetworkDependenciesEndpoints", validator: validate_AppServiceEnvironmentsGetOutboundNetworkDependenciesEndpoints_564380,
     base: "",
-    url: url_AppServiceEnvironmentsGetOutboundNetworkDependenciesEndpoints_568481,
+    url: url_AppServiceEnvironmentsGetOutboundNetworkDependenciesEndpoints_564381,
     schemes: {Scheme.Https})
 type
-  Call_AppServiceEnvironmentsReboot_568490 = ref object of OpenApiRestCall_567659
-proc url_AppServiceEnvironmentsReboot_568492(protocol: Scheme; host: string;
+  Call_AppServiceEnvironmentsReboot_564390 = ref object of OpenApiRestCall_563557
+proc url_AppServiceEnvironmentsReboot_564392(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -3321,37 +3300,36 @@ proc url_AppServiceEnvironmentsReboot_568492(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AppServiceEnvironmentsReboot_568491(path: JsonNode; query: JsonNode;
+proc validate_AppServiceEnvironmentsReboot_564391(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Reboot all machines in an App Service Environment.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : Name of the resource group to which the resource belongs.
   ##   name: JString (required)
   ##       : Name of the App Service Environment.
   ##   subscriptionId: JString (required)
   ##                 : Your Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
+  ##   resourceGroupName: JString (required)
+  ##                    : Name of the resource group to which the resource belongs.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568493 = path.getOrDefault("resourceGroupName")
-  valid_568493 = validateParameter(valid_568493, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `name` field"
+  var valid_564393 = path.getOrDefault("name")
+  valid_564393 = validateParameter(valid_564393, JString, required = true,
                                  default = nil)
-  if valid_568493 != nil:
-    section.add "resourceGroupName", valid_568493
-  var valid_568494 = path.getOrDefault("name")
-  valid_568494 = validateParameter(valid_568494, JString, required = true,
+  if valid_564393 != nil:
+    section.add "name", valid_564393
+  var valid_564394 = path.getOrDefault("subscriptionId")
+  valid_564394 = validateParameter(valid_564394, JString, required = true,
                                  default = nil)
-  if valid_568494 != nil:
-    section.add "name", valid_568494
-  var valid_568495 = path.getOrDefault("subscriptionId")
-  valid_568495 = validateParameter(valid_568495, JString, required = true,
+  if valid_564394 != nil:
+    section.add "subscriptionId", valid_564394
+  var valid_564395 = path.getOrDefault("resourceGroupName")
+  valid_564395 = validateParameter(valid_564395, JString, required = true,
                                  default = nil)
-  if valid_568495 != nil:
-    section.add "subscriptionId", valid_568495
+  if valid_564395 != nil:
+    section.add "resourceGroupName", valid_564395
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -3359,11 +3337,11 @@ proc validate_AppServiceEnvironmentsReboot_568491(path: JsonNode; query: JsonNod
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568496 = query.getOrDefault("api-version")
-  valid_568496 = validateParameter(valid_568496, JString, required = true,
+  var valid_564396 = query.getOrDefault("api-version")
+  valid_564396 = validateParameter(valid_564396, JString, required = true,
                                  default = nil)
-  if valid_568496 != nil:
-    section.add "api-version", valid_568496
+  if valid_564396 != nil:
+    section.add "api-version", valid_564396
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3372,48 +3350,48 @@ proc validate_AppServiceEnvironmentsReboot_568491(path: JsonNode; query: JsonNod
   if body != nil:
     result.add "body", body
 
-proc call*(call_568497: Call_AppServiceEnvironmentsReboot_568490; path: JsonNode;
+proc call*(call_564397: Call_AppServiceEnvironmentsReboot_564390; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Reboot all machines in an App Service Environment.
   ## 
-  let valid = call_568497.validator(path, query, header, formData, body)
-  let scheme = call_568497.pickScheme
+  let valid = call_564397.validator(path, query, header, formData, body)
+  let scheme = call_564397.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568497.url(scheme.get, call_568497.host, call_568497.base,
-                         call_568497.route, valid.getOrDefault("path"),
+  let url = call_564397.url(scheme.get, call_564397.host, call_564397.base,
+                         call_564397.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568497, url, valid)
+  result = hook(call_564397, url, valid)
 
-proc call*(call_568498: Call_AppServiceEnvironmentsReboot_568490;
-          resourceGroupName: string; apiVersion: string; name: string;
-          subscriptionId: string): Recallable =
+proc call*(call_564398: Call_AppServiceEnvironmentsReboot_564390;
+          apiVersion: string; name: string; subscriptionId: string;
+          resourceGroupName: string): Recallable =
   ## appServiceEnvironmentsReboot
   ## Reboot all machines in an App Service Environment.
-  ##   resourceGroupName: string (required)
-  ##                    : Name of the resource group to which the resource belongs.
   ##   apiVersion: string (required)
   ##             : API Version
   ##   name: string (required)
   ##       : Name of the App Service Environment.
   ##   subscriptionId: string (required)
   ##                 : Your Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
-  var path_568499 = newJObject()
-  var query_568500 = newJObject()
-  add(path_568499, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568500, "api-version", newJString(apiVersion))
-  add(path_568499, "name", newJString(name))
-  add(path_568499, "subscriptionId", newJString(subscriptionId))
-  result = call_568498.call(path_568499, query_568500, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : Name of the resource group to which the resource belongs.
+  var path_564399 = newJObject()
+  var query_564400 = newJObject()
+  add(query_564400, "api-version", newJString(apiVersion))
+  add(path_564399, "name", newJString(name))
+  add(path_564399, "subscriptionId", newJString(subscriptionId))
+  add(path_564399, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564398.call(path_564399, query_564400, nil, nil, nil)
 
-var appServiceEnvironmentsReboot* = Call_AppServiceEnvironmentsReboot_568490(
+var appServiceEnvironmentsReboot* = Call_AppServiceEnvironmentsReboot_564390(
     name: "appServiceEnvironmentsReboot", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Web/hostingEnvironments/{name}/reboot",
-    validator: validate_AppServiceEnvironmentsReboot_568491, base: "",
-    url: url_AppServiceEnvironmentsReboot_568492, schemes: {Scheme.Https})
+    validator: validate_AppServiceEnvironmentsReboot_564391, base: "",
+    url: url_AppServiceEnvironmentsReboot_564392, schemes: {Scheme.Https})
 type
-  Call_AppServiceEnvironmentsResume_568501 = ref object of OpenApiRestCall_567659
-proc url_AppServiceEnvironmentsResume_568503(protocol: Scheme; host: string;
+  Call_AppServiceEnvironmentsResume_564401 = ref object of OpenApiRestCall_563557
+proc url_AppServiceEnvironmentsResume_564403(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -3437,37 +3415,36 @@ proc url_AppServiceEnvironmentsResume_568503(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AppServiceEnvironmentsResume_568502(path: JsonNode; query: JsonNode;
+proc validate_AppServiceEnvironmentsResume_564402(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Resume an App Service Environment.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : Name of the resource group to which the resource belongs.
   ##   name: JString (required)
   ##       : Name of the App Service Environment.
   ##   subscriptionId: JString (required)
   ##                 : Your Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
+  ##   resourceGroupName: JString (required)
+  ##                    : Name of the resource group to which the resource belongs.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568504 = path.getOrDefault("resourceGroupName")
-  valid_568504 = validateParameter(valid_568504, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `name` field"
+  var valid_564404 = path.getOrDefault("name")
+  valid_564404 = validateParameter(valid_564404, JString, required = true,
                                  default = nil)
-  if valid_568504 != nil:
-    section.add "resourceGroupName", valid_568504
-  var valid_568505 = path.getOrDefault("name")
-  valid_568505 = validateParameter(valid_568505, JString, required = true,
+  if valid_564404 != nil:
+    section.add "name", valid_564404
+  var valid_564405 = path.getOrDefault("subscriptionId")
+  valid_564405 = validateParameter(valid_564405, JString, required = true,
                                  default = nil)
-  if valid_568505 != nil:
-    section.add "name", valid_568505
-  var valid_568506 = path.getOrDefault("subscriptionId")
-  valid_568506 = validateParameter(valid_568506, JString, required = true,
+  if valid_564405 != nil:
+    section.add "subscriptionId", valid_564405
+  var valid_564406 = path.getOrDefault("resourceGroupName")
+  valid_564406 = validateParameter(valid_564406, JString, required = true,
                                  default = nil)
-  if valid_568506 != nil:
-    section.add "subscriptionId", valid_568506
+  if valid_564406 != nil:
+    section.add "resourceGroupName", valid_564406
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -3475,11 +3452,11 @@ proc validate_AppServiceEnvironmentsResume_568502(path: JsonNode; query: JsonNod
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568507 = query.getOrDefault("api-version")
-  valid_568507 = validateParameter(valid_568507, JString, required = true,
+  var valid_564407 = query.getOrDefault("api-version")
+  valid_564407 = validateParameter(valid_564407, JString, required = true,
                                  default = nil)
-  if valid_568507 != nil:
-    section.add "api-version", valid_568507
+  if valid_564407 != nil:
+    section.add "api-version", valid_564407
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3488,48 +3465,48 @@ proc validate_AppServiceEnvironmentsResume_568502(path: JsonNode; query: JsonNod
   if body != nil:
     result.add "body", body
 
-proc call*(call_568508: Call_AppServiceEnvironmentsResume_568501; path: JsonNode;
+proc call*(call_564408: Call_AppServiceEnvironmentsResume_564401; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Resume an App Service Environment.
   ## 
-  let valid = call_568508.validator(path, query, header, formData, body)
-  let scheme = call_568508.pickScheme
+  let valid = call_564408.validator(path, query, header, formData, body)
+  let scheme = call_564408.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568508.url(scheme.get, call_568508.host, call_568508.base,
-                         call_568508.route, valid.getOrDefault("path"),
+  let url = call_564408.url(scheme.get, call_564408.host, call_564408.base,
+                         call_564408.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568508, url, valid)
+  result = hook(call_564408, url, valid)
 
-proc call*(call_568509: Call_AppServiceEnvironmentsResume_568501;
-          resourceGroupName: string; apiVersion: string; name: string;
-          subscriptionId: string): Recallable =
+proc call*(call_564409: Call_AppServiceEnvironmentsResume_564401;
+          apiVersion: string; name: string; subscriptionId: string;
+          resourceGroupName: string): Recallable =
   ## appServiceEnvironmentsResume
   ## Resume an App Service Environment.
-  ##   resourceGroupName: string (required)
-  ##                    : Name of the resource group to which the resource belongs.
   ##   apiVersion: string (required)
   ##             : API Version
   ##   name: string (required)
   ##       : Name of the App Service Environment.
   ##   subscriptionId: string (required)
   ##                 : Your Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
-  var path_568510 = newJObject()
-  var query_568511 = newJObject()
-  add(path_568510, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568511, "api-version", newJString(apiVersion))
-  add(path_568510, "name", newJString(name))
-  add(path_568510, "subscriptionId", newJString(subscriptionId))
-  result = call_568509.call(path_568510, query_568511, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : Name of the resource group to which the resource belongs.
+  var path_564410 = newJObject()
+  var query_564411 = newJObject()
+  add(query_564411, "api-version", newJString(apiVersion))
+  add(path_564410, "name", newJString(name))
+  add(path_564410, "subscriptionId", newJString(subscriptionId))
+  add(path_564410, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564409.call(path_564410, query_564411, nil, nil, nil)
 
-var appServiceEnvironmentsResume* = Call_AppServiceEnvironmentsResume_568501(
+var appServiceEnvironmentsResume* = Call_AppServiceEnvironmentsResume_564401(
     name: "appServiceEnvironmentsResume", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Web/hostingEnvironments/{name}/resume",
-    validator: validate_AppServiceEnvironmentsResume_568502, base: "",
-    url: url_AppServiceEnvironmentsResume_568503, schemes: {Scheme.Https})
+    validator: validate_AppServiceEnvironmentsResume_564402, base: "",
+    url: url_AppServiceEnvironmentsResume_564403, schemes: {Scheme.Https})
 type
-  Call_AppServiceEnvironmentsListAppServicePlans_568512 = ref object of OpenApiRestCall_567659
-proc url_AppServiceEnvironmentsListAppServicePlans_568514(protocol: Scheme;
+  Call_AppServiceEnvironmentsListAppServicePlans_564412 = ref object of OpenApiRestCall_563557
+proc url_AppServiceEnvironmentsListAppServicePlans_564414(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -3553,37 +3530,36 @@ proc url_AppServiceEnvironmentsListAppServicePlans_568514(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AppServiceEnvironmentsListAppServicePlans_568513(path: JsonNode;
+proc validate_AppServiceEnvironmentsListAppServicePlans_564413(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Get all App Service plans in an App Service Environment.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : Name of the resource group to which the resource belongs.
   ##   name: JString (required)
   ##       : Name of the App Service Environment.
   ##   subscriptionId: JString (required)
   ##                 : Your Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
+  ##   resourceGroupName: JString (required)
+  ##                    : Name of the resource group to which the resource belongs.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568515 = path.getOrDefault("resourceGroupName")
-  valid_568515 = validateParameter(valid_568515, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `name` field"
+  var valid_564415 = path.getOrDefault("name")
+  valid_564415 = validateParameter(valid_564415, JString, required = true,
                                  default = nil)
-  if valid_568515 != nil:
-    section.add "resourceGroupName", valid_568515
-  var valid_568516 = path.getOrDefault("name")
-  valid_568516 = validateParameter(valid_568516, JString, required = true,
+  if valid_564415 != nil:
+    section.add "name", valid_564415
+  var valid_564416 = path.getOrDefault("subscriptionId")
+  valid_564416 = validateParameter(valid_564416, JString, required = true,
                                  default = nil)
-  if valid_568516 != nil:
-    section.add "name", valid_568516
-  var valid_568517 = path.getOrDefault("subscriptionId")
-  valid_568517 = validateParameter(valid_568517, JString, required = true,
+  if valid_564416 != nil:
+    section.add "subscriptionId", valid_564416
+  var valid_564417 = path.getOrDefault("resourceGroupName")
+  valid_564417 = validateParameter(valid_564417, JString, required = true,
                                  default = nil)
-  if valid_568517 != nil:
-    section.add "subscriptionId", valid_568517
+  if valid_564417 != nil:
+    section.add "resourceGroupName", valid_564417
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -3591,11 +3567,11 @@ proc validate_AppServiceEnvironmentsListAppServicePlans_568513(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568518 = query.getOrDefault("api-version")
-  valid_568518 = validateParameter(valid_568518, JString, required = true,
+  var valid_564418 = query.getOrDefault("api-version")
+  valid_564418 = validateParameter(valid_564418, JString, required = true,
                                  default = nil)
-  if valid_568518 != nil:
-    section.add "api-version", valid_568518
+  if valid_564418 != nil:
+    section.add "api-version", valid_564418
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3604,50 +3580,50 @@ proc validate_AppServiceEnvironmentsListAppServicePlans_568513(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568519: Call_AppServiceEnvironmentsListAppServicePlans_568512;
+proc call*(call_564419: Call_AppServiceEnvironmentsListAppServicePlans_564412;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Get all App Service plans in an App Service Environment.
   ## 
-  let valid = call_568519.validator(path, query, header, formData, body)
-  let scheme = call_568519.pickScheme
+  let valid = call_564419.validator(path, query, header, formData, body)
+  let scheme = call_564419.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568519.url(scheme.get, call_568519.host, call_568519.base,
-                         call_568519.route, valid.getOrDefault("path"),
+  let url = call_564419.url(scheme.get, call_564419.host, call_564419.base,
+                         call_564419.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568519, url, valid)
+  result = hook(call_564419, url, valid)
 
-proc call*(call_568520: Call_AppServiceEnvironmentsListAppServicePlans_568512;
-          resourceGroupName: string; apiVersion: string; name: string;
-          subscriptionId: string): Recallable =
+proc call*(call_564420: Call_AppServiceEnvironmentsListAppServicePlans_564412;
+          apiVersion: string; name: string; subscriptionId: string;
+          resourceGroupName: string): Recallable =
   ## appServiceEnvironmentsListAppServicePlans
   ## Get all App Service plans in an App Service Environment.
-  ##   resourceGroupName: string (required)
-  ##                    : Name of the resource group to which the resource belongs.
   ##   apiVersion: string (required)
   ##             : API Version
   ##   name: string (required)
   ##       : Name of the App Service Environment.
   ##   subscriptionId: string (required)
   ##                 : Your Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
-  var path_568521 = newJObject()
-  var query_568522 = newJObject()
-  add(path_568521, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568522, "api-version", newJString(apiVersion))
-  add(path_568521, "name", newJString(name))
-  add(path_568521, "subscriptionId", newJString(subscriptionId))
-  result = call_568520.call(path_568521, query_568522, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : Name of the resource group to which the resource belongs.
+  var path_564421 = newJObject()
+  var query_564422 = newJObject()
+  add(query_564422, "api-version", newJString(apiVersion))
+  add(path_564421, "name", newJString(name))
+  add(path_564421, "subscriptionId", newJString(subscriptionId))
+  add(path_564421, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564420.call(path_564421, query_564422, nil, nil, nil)
 
-var appServiceEnvironmentsListAppServicePlans* = Call_AppServiceEnvironmentsListAppServicePlans_568512(
+var appServiceEnvironmentsListAppServicePlans* = Call_AppServiceEnvironmentsListAppServicePlans_564412(
     name: "appServiceEnvironmentsListAppServicePlans", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Web/hostingEnvironments/{name}/serverfarms",
-    validator: validate_AppServiceEnvironmentsListAppServicePlans_568513,
-    base: "", url: url_AppServiceEnvironmentsListAppServicePlans_568514,
+    validator: validate_AppServiceEnvironmentsListAppServicePlans_564413,
+    base: "", url: url_AppServiceEnvironmentsListAppServicePlans_564414,
     schemes: {Scheme.Https})
 type
-  Call_AppServiceEnvironmentsListWebApps_568523 = ref object of OpenApiRestCall_567659
-proc url_AppServiceEnvironmentsListWebApps_568525(protocol: Scheme; host: string;
+  Call_AppServiceEnvironmentsListWebApps_564423 = ref object of OpenApiRestCall_563557
+proc url_AppServiceEnvironmentsListWebApps_564425(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -3671,56 +3647,55 @@ proc url_AppServiceEnvironmentsListWebApps_568525(protocol: Scheme; host: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AppServiceEnvironmentsListWebApps_568524(path: JsonNode;
+proc validate_AppServiceEnvironmentsListWebApps_564424(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Get all apps in an App Service Environment.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : Name of the resource group to which the resource belongs.
   ##   name: JString (required)
   ##       : Name of the App Service Environment.
   ##   subscriptionId: JString (required)
   ##                 : Your Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
+  ##   resourceGroupName: JString (required)
+  ##                    : Name of the resource group to which the resource belongs.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568526 = path.getOrDefault("resourceGroupName")
-  valid_568526 = validateParameter(valid_568526, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `name` field"
+  var valid_564426 = path.getOrDefault("name")
+  valid_564426 = validateParameter(valid_564426, JString, required = true,
                                  default = nil)
-  if valid_568526 != nil:
-    section.add "resourceGroupName", valid_568526
-  var valid_568527 = path.getOrDefault("name")
-  valid_568527 = validateParameter(valid_568527, JString, required = true,
+  if valid_564426 != nil:
+    section.add "name", valid_564426
+  var valid_564427 = path.getOrDefault("subscriptionId")
+  valid_564427 = validateParameter(valid_564427, JString, required = true,
                                  default = nil)
-  if valid_568527 != nil:
-    section.add "name", valid_568527
-  var valid_568528 = path.getOrDefault("subscriptionId")
-  valid_568528 = validateParameter(valid_568528, JString, required = true,
+  if valid_564427 != nil:
+    section.add "subscriptionId", valid_564427
+  var valid_564428 = path.getOrDefault("resourceGroupName")
+  valid_564428 = validateParameter(valid_564428, JString, required = true,
                                  default = nil)
-  if valid_568528 != nil:
-    section.add "subscriptionId", valid_568528
+  if valid_564428 != nil:
+    section.add "resourceGroupName", valid_564428
   result.add "path", section
   ## parameters in `query` object:
-  ##   propertiesToInclude: JString
-  ##                      : Comma separated list of app properties to include.
   ##   api-version: JString (required)
   ##              : API Version
+  ##   propertiesToInclude: JString
+  ##                      : Comma separated list of app properties to include.
   section = newJObject()
-  var valid_568529 = query.getOrDefault("propertiesToInclude")
-  valid_568529 = validateParameter(valid_568529, JString, required = false,
-                                 default = nil)
-  if valid_568529 != nil:
-    section.add "propertiesToInclude", valid_568529
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568530 = query.getOrDefault("api-version")
-  valid_568530 = validateParameter(valid_568530, JString, required = true,
+  var valid_564429 = query.getOrDefault("api-version")
+  valid_564429 = validateParameter(valid_564429, JString, required = true,
                                  default = nil)
-  if valid_568530 != nil:
-    section.add "api-version", valid_568530
+  if valid_564429 != nil:
+    section.add "api-version", valid_564429
+  var valid_564430 = query.getOrDefault("propertiesToInclude")
+  valid_564430 = validateParameter(valid_564430, JString, required = false,
+                                 default = nil)
+  if valid_564430 != nil:
+    section.add "propertiesToInclude", valid_564430
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3729,52 +3704,52 @@ proc validate_AppServiceEnvironmentsListWebApps_568524(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568531: Call_AppServiceEnvironmentsListWebApps_568523;
+proc call*(call_564431: Call_AppServiceEnvironmentsListWebApps_564423;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Get all apps in an App Service Environment.
   ## 
-  let valid = call_568531.validator(path, query, header, formData, body)
-  let scheme = call_568531.pickScheme
+  let valid = call_564431.validator(path, query, header, formData, body)
+  let scheme = call_564431.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568531.url(scheme.get, call_568531.host, call_568531.base,
-                         call_568531.route, valid.getOrDefault("path"),
+  let url = call_564431.url(scheme.get, call_564431.host, call_564431.base,
+                         call_564431.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568531, url, valid)
+  result = hook(call_564431, url, valid)
 
-proc call*(call_568532: Call_AppServiceEnvironmentsListWebApps_568523;
-          resourceGroupName: string; apiVersion: string; name: string;
-          subscriptionId: string; propertiesToInclude: string = ""): Recallable =
+proc call*(call_564432: Call_AppServiceEnvironmentsListWebApps_564423;
+          apiVersion: string; name: string; subscriptionId: string;
+          resourceGroupName: string; propertiesToInclude: string = ""): Recallable =
   ## appServiceEnvironmentsListWebApps
   ## Get all apps in an App Service Environment.
-  ##   resourceGroupName: string (required)
-  ##                    : Name of the resource group to which the resource belongs.
-  ##   propertiesToInclude: string
-  ##                      : Comma separated list of app properties to include.
   ##   apiVersion: string (required)
   ##             : API Version
   ##   name: string (required)
   ##       : Name of the App Service Environment.
   ##   subscriptionId: string (required)
   ##                 : Your Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
-  var path_568533 = newJObject()
-  var query_568534 = newJObject()
-  add(path_568533, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568534, "propertiesToInclude", newJString(propertiesToInclude))
-  add(query_568534, "api-version", newJString(apiVersion))
-  add(path_568533, "name", newJString(name))
-  add(path_568533, "subscriptionId", newJString(subscriptionId))
-  result = call_568532.call(path_568533, query_568534, nil, nil, nil)
+  ##   propertiesToInclude: string
+  ##                      : Comma separated list of app properties to include.
+  ##   resourceGroupName: string (required)
+  ##                    : Name of the resource group to which the resource belongs.
+  var path_564433 = newJObject()
+  var query_564434 = newJObject()
+  add(query_564434, "api-version", newJString(apiVersion))
+  add(path_564433, "name", newJString(name))
+  add(path_564433, "subscriptionId", newJString(subscriptionId))
+  add(query_564434, "propertiesToInclude", newJString(propertiesToInclude))
+  add(path_564433, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564432.call(path_564433, query_564434, nil, nil, nil)
 
-var appServiceEnvironmentsListWebApps* = Call_AppServiceEnvironmentsListWebApps_568523(
+var appServiceEnvironmentsListWebApps* = Call_AppServiceEnvironmentsListWebApps_564423(
     name: "appServiceEnvironmentsListWebApps", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Web/hostingEnvironments/{name}/sites",
-    validator: validate_AppServiceEnvironmentsListWebApps_568524, base: "",
-    url: url_AppServiceEnvironmentsListWebApps_568525, schemes: {Scheme.Https})
+    validator: validate_AppServiceEnvironmentsListWebApps_564424, base: "",
+    url: url_AppServiceEnvironmentsListWebApps_564425, schemes: {Scheme.Https})
 type
-  Call_AppServiceEnvironmentsSuspend_568535 = ref object of OpenApiRestCall_567659
-proc url_AppServiceEnvironmentsSuspend_568537(protocol: Scheme; host: string;
+  Call_AppServiceEnvironmentsSuspend_564435 = ref object of OpenApiRestCall_563557
+proc url_AppServiceEnvironmentsSuspend_564437(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -3798,37 +3773,36 @@ proc url_AppServiceEnvironmentsSuspend_568537(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AppServiceEnvironmentsSuspend_568536(path: JsonNode; query: JsonNode;
+proc validate_AppServiceEnvironmentsSuspend_564436(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Suspend an App Service Environment.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : Name of the resource group to which the resource belongs.
   ##   name: JString (required)
   ##       : Name of the App Service Environment.
   ##   subscriptionId: JString (required)
   ##                 : Your Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
+  ##   resourceGroupName: JString (required)
+  ##                    : Name of the resource group to which the resource belongs.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568538 = path.getOrDefault("resourceGroupName")
-  valid_568538 = validateParameter(valid_568538, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `name` field"
+  var valid_564438 = path.getOrDefault("name")
+  valid_564438 = validateParameter(valid_564438, JString, required = true,
                                  default = nil)
-  if valid_568538 != nil:
-    section.add "resourceGroupName", valid_568538
-  var valid_568539 = path.getOrDefault("name")
-  valid_568539 = validateParameter(valid_568539, JString, required = true,
+  if valid_564438 != nil:
+    section.add "name", valid_564438
+  var valid_564439 = path.getOrDefault("subscriptionId")
+  valid_564439 = validateParameter(valid_564439, JString, required = true,
                                  default = nil)
-  if valid_568539 != nil:
-    section.add "name", valid_568539
-  var valid_568540 = path.getOrDefault("subscriptionId")
-  valid_568540 = validateParameter(valid_568540, JString, required = true,
+  if valid_564439 != nil:
+    section.add "subscriptionId", valid_564439
+  var valid_564440 = path.getOrDefault("resourceGroupName")
+  valid_564440 = validateParameter(valid_564440, JString, required = true,
                                  default = nil)
-  if valid_568540 != nil:
-    section.add "subscriptionId", valid_568540
+  if valid_564440 != nil:
+    section.add "resourceGroupName", valid_564440
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -3836,11 +3810,11 @@ proc validate_AppServiceEnvironmentsSuspend_568536(path: JsonNode; query: JsonNo
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568541 = query.getOrDefault("api-version")
-  valid_568541 = validateParameter(valid_568541, JString, required = true,
+  var valid_564441 = query.getOrDefault("api-version")
+  valid_564441 = validateParameter(valid_564441, JString, required = true,
                                  default = nil)
-  if valid_568541 != nil:
-    section.add "api-version", valid_568541
+  if valid_564441 != nil:
+    section.add "api-version", valid_564441
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3849,48 +3823,48 @@ proc validate_AppServiceEnvironmentsSuspend_568536(path: JsonNode; query: JsonNo
   if body != nil:
     result.add "body", body
 
-proc call*(call_568542: Call_AppServiceEnvironmentsSuspend_568535; path: JsonNode;
+proc call*(call_564442: Call_AppServiceEnvironmentsSuspend_564435; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Suspend an App Service Environment.
   ## 
-  let valid = call_568542.validator(path, query, header, formData, body)
-  let scheme = call_568542.pickScheme
+  let valid = call_564442.validator(path, query, header, formData, body)
+  let scheme = call_564442.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568542.url(scheme.get, call_568542.host, call_568542.base,
-                         call_568542.route, valid.getOrDefault("path"),
+  let url = call_564442.url(scheme.get, call_564442.host, call_564442.base,
+                         call_564442.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568542, url, valid)
+  result = hook(call_564442, url, valid)
 
-proc call*(call_568543: Call_AppServiceEnvironmentsSuspend_568535;
-          resourceGroupName: string; apiVersion: string; name: string;
-          subscriptionId: string): Recallable =
+proc call*(call_564443: Call_AppServiceEnvironmentsSuspend_564435;
+          apiVersion: string; name: string; subscriptionId: string;
+          resourceGroupName: string): Recallable =
   ## appServiceEnvironmentsSuspend
   ## Suspend an App Service Environment.
-  ##   resourceGroupName: string (required)
-  ##                    : Name of the resource group to which the resource belongs.
   ##   apiVersion: string (required)
   ##             : API Version
   ##   name: string (required)
   ##       : Name of the App Service Environment.
   ##   subscriptionId: string (required)
   ##                 : Your Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
-  var path_568544 = newJObject()
-  var query_568545 = newJObject()
-  add(path_568544, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568545, "api-version", newJString(apiVersion))
-  add(path_568544, "name", newJString(name))
-  add(path_568544, "subscriptionId", newJString(subscriptionId))
-  result = call_568543.call(path_568544, query_568545, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : Name of the resource group to which the resource belongs.
+  var path_564444 = newJObject()
+  var query_564445 = newJObject()
+  add(query_564445, "api-version", newJString(apiVersion))
+  add(path_564444, "name", newJString(name))
+  add(path_564444, "subscriptionId", newJString(subscriptionId))
+  add(path_564444, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564443.call(path_564444, query_564445, nil, nil, nil)
 
-var appServiceEnvironmentsSuspend* = Call_AppServiceEnvironmentsSuspend_568535(
+var appServiceEnvironmentsSuspend* = Call_AppServiceEnvironmentsSuspend_564435(
     name: "appServiceEnvironmentsSuspend", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Web/hostingEnvironments/{name}/suspend",
-    validator: validate_AppServiceEnvironmentsSuspend_568536, base: "",
-    url: url_AppServiceEnvironmentsSuspend_568537, schemes: {Scheme.Https})
+    validator: validate_AppServiceEnvironmentsSuspend_564436, base: "",
+    url: url_AppServiceEnvironmentsSuspend_564437, schemes: {Scheme.Https})
 type
-  Call_AppServiceEnvironmentsListUsages_568546 = ref object of OpenApiRestCall_567659
-proc url_AppServiceEnvironmentsListUsages_568548(protocol: Scheme; host: string;
+  Call_AppServiceEnvironmentsListUsages_564446 = ref object of OpenApiRestCall_563557
+proc url_AppServiceEnvironmentsListUsages_564448(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -3914,37 +3888,36 @@ proc url_AppServiceEnvironmentsListUsages_568548(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AppServiceEnvironmentsListUsages_568547(path: JsonNode;
+proc validate_AppServiceEnvironmentsListUsages_564447(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Get global usage metrics of an App Service Environment.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : Name of the resource group to which the resource belongs.
   ##   name: JString (required)
   ##       : Name of the App Service Environment.
   ##   subscriptionId: JString (required)
   ##                 : Your Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
+  ##   resourceGroupName: JString (required)
+  ##                    : Name of the resource group to which the resource belongs.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568549 = path.getOrDefault("resourceGroupName")
-  valid_568549 = validateParameter(valid_568549, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `name` field"
+  var valid_564449 = path.getOrDefault("name")
+  valid_564449 = validateParameter(valid_564449, JString, required = true,
                                  default = nil)
-  if valid_568549 != nil:
-    section.add "resourceGroupName", valid_568549
-  var valid_568550 = path.getOrDefault("name")
-  valid_568550 = validateParameter(valid_568550, JString, required = true,
+  if valid_564449 != nil:
+    section.add "name", valid_564449
+  var valid_564450 = path.getOrDefault("subscriptionId")
+  valid_564450 = validateParameter(valid_564450, JString, required = true,
                                  default = nil)
-  if valid_568550 != nil:
-    section.add "name", valid_568550
-  var valid_568551 = path.getOrDefault("subscriptionId")
-  valid_568551 = validateParameter(valid_568551, JString, required = true,
+  if valid_564450 != nil:
+    section.add "subscriptionId", valid_564450
+  var valid_564451 = path.getOrDefault("resourceGroupName")
+  valid_564451 = validateParameter(valid_564451, JString, required = true,
                                  default = nil)
-  if valid_568551 != nil:
-    section.add "subscriptionId", valid_568551
+  if valid_564451 != nil:
+    section.add "resourceGroupName", valid_564451
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -3954,16 +3927,16 @@ proc validate_AppServiceEnvironmentsListUsages_568547(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568552 = query.getOrDefault("api-version")
-  valid_568552 = validateParameter(valid_568552, JString, required = true,
+  var valid_564452 = query.getOrDefault("api-version")
+  valid_564452 = validateParameter(valid_564452, JString, required = true,
                                  default = nil)
-  if valid_568552 != nil:
-    section.add "api-version", valid_568552
-  var valid_568553 = query.getOrDefault("$filter")
-  valid_568553 = validateParameter(valid_568553, JString, required = false,
+  if valid_564452 != nil:
+    section.add "api-version", valid_564452
+  var valid_564453 = query.getOrDefault("$filter")
+  valid_564453 = validateParameter(valid_564453, JString, required = false,
                                  default = nil)
-  if valid_568553 != nil:
-    section.add "$filter", valid_568553
+  if valid_564453 != nil:
+    section.add "$filter", valid_564453
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3972,52 +3945,52 @@ proc validate_AppServiceEnvironmentsListUsages_568547(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568554: Call_AppServiceEnvironmentsListUsages_568546;
+proc call*(call_564454: Call_AppServiceEnvironmentsListUsages_564446;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Get global usage metrics of an App Service Environment.
   ## 
-  let valid = call_568554.validator(path, query, header, formData, body)
-  let scheme = call_568554.pickScheme
+  let valid = call_564454.validator(path, query, header, formData, body)
+  let scheme = call_564454.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568554.url(scheme.get, call_568554.host, call_568554.base,
-                         call_568554.route, valid.getOrDefault("path"),
+  let url = call_564454.url(scheme.get, call_564454.host, call_564454.base,
+                         call_564454.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568554, url, valid)
+  result = hook(call_564454, url, valid)
 
-proc call*(call_568555: Call_AppServiceEnvironmentsListUsages_568546;
-          resourceGroupName: string; apiVersion: string; name: string;
-          subscriptionId: string; Filter: string = ""): Recallable =
+proc call*(call_564455: Call_AppServiceEnvironmentsListUsages_564446;
+          apiVersion: string; name: string; subscriptionId: string;
+          resourceGroupName: string; Filter: string = ""): Recallable =
   ## appServiceEnvironmentsListUsages
   ## Get global usage metrics of an App Service Environment.
-  ##   resourceGroupName: string (required)
-  ##                    : Name of the resource group to which the resource belongs.
   ##   apiVersion: string (required)
   ##             : API Version
   ##   name: string (required)
   ##       : Name of the App Service Environment.
   ##   subscriptionId: string (required)
   ##                 : Your Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
+  ##   resourceGroupName: string (required)
+  ##                    : Name of the resource group to which the resource belongs.
   ##   Filter: string
   ##         : Return only usages/metrics specified in the filter. Filter conforms to odata syntax. Example: $filter=(name.value eq 'Metric1' or name.value eq 'Metric2') and startTime eq 2014-01-01T00:00:00Z and endTime eq 2014-12-31T23:59:59Z and timeGrain eq duration'[Hour|Minute|Day]'.
-  var path_568556 = newJObject()
-  var query_568557 = newJObject()
-  add(path_568556, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568557, "api-version", newJString(apiVersion))
-  add(path_568556, "name", newJString(name))
-  add(path_568556, "subscriptionId", newJString(subscriptionId))
-  add(query_568557, "$filter", newJString(Filter))
-  result = call_568555.call(path_568556, query_568557, nil, nil, nil)
+  var path_564456 = newJObject()
+  var query_564457 = newJObject()
+  add(query_564457, "api-version", newJString(apiVersion))
+  add(path_564456, "name", newJString(name))
+  add(path_564456, "subscriptionId", newJString(subscriptionId))
+  add(path_564456, "resourceGroupName", newJString(resourceGroupName))
+  add(query_564457, "$filter", newJString(Filter))
+  result = call_564455.call(path_564456, query_564457, nil, nil, nil)
 
-var appServiceEnvironmentsListUsages* = Call_AppServiceEnvironmentsListUsages_568546(
+var appServiceEnvironmentsListUsages* = Call_AppServiceEnvironmentsListUsages_564446(
     name: "appServiceEnvironmentsListUsages", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Web/hostingEnvironments/{name}/usages",
-    validator: validate_AppServiceEnvironmentsListUsages_568547, base: "",
-    url: url_AppServiceEnvironmentsListUsages_568548, schemes: {Scheme.Https})
+    validator: validate_AppServiceEnvironmentsListUsages_564447, base: "",
+    url: url_AppServiceEnvironmentsListUsages_564448, schemes: {Scheme.Https})
 type
-  Call_AppServiceEnvironmentsListWorkerPools_568558 = ref object of OpenApiRestCall_567659
-proc url_AppServiceEnvironmentsListWorkerPools_568560(protocol: Scheme;
+  Call_AppServiceEnvironmentsListWorkerPools_564458 = ref object of OpenApiRestCall_563557
+proc url_AppServiceEnvironmentsListWorkerPools_564460(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -4041,37 +4014,36 @@ proc url_AppServiceEnvironmentsListWorkerPools_568560(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AppServiceEnvironmentsListWorkerPools_568559(path: JsonNode;
+proc validate_AppServiceEnvironmentsListWorkerPools_564459(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Get all worker pools of an App Service Environment.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : Name of the resource group to which the resource belongs.
   ##   name: JString (required)
   ##       : Name of the App Service Environment.
   ##   subscriptionId: JString (required)
   ##                 : Your Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
+  ##   resourceGroupName: JString (required)
+  ##                    : Name of the resource group to which the resource belongs.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568561 = path.getOrDefault("resourceGroupName")
-  valid_568561 = validateParameter(valid_568561, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `name` field"
+  var valid_564461 = path.getOrDefault("name")
+  valid_564461 = validateParameter(valid_564461, JString, required = true,
                                  default = nil)
-  if valid_568561 != nil:
-    section.add "resourceGroupName", valid_568561
-  var valid_568562 = path.getOrDefault("name")
-  valid_568562 = validateParameter(valid_568562, JString, required = true,
+  if valid_564461 != nil:
+    section.add "name", valid_564461
+  var valid_564462 = path.getOrDefault("subscriptionId")
+  valid_564462 = validateParameter(valid_564462, JString, required = true,
                                  default = nil)
-  if valid_568562 != nil:
-    section.add "name", valid_568562
-  var valid_568563 = path.getOrDefault("subscriptionId")
-  valid_568563 = validateParameter(valid_568563, JString, required = true,
+  if valid_564462 != nil:
+    section.add "subscriptionId", valid_564462
+  var valid_564463 = path.getOrDefault("resourceGroupName")
+  valid_564463 = validateParameter(valid_564463, JString, required = true,
                                  default = nil)
-  if valid_568563 != nil:
-    section.add "subscriptionId", valid_568563
+  if valid_564463 != nil:
+    section.add "resourceGroupName", valid_564463
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -4079,11 +4051,11 @@ proc validate_AppServiceEnvironmentsListWorkerPools_568559(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568564 = query.getOrDefault("api-version")
-  valid_568564 = validateParameter(valid_568564, JString, required = true,
+  var valid_564464 = query.getOrDefault("api-version")
+  valid_564464 = validateParameter(valid_564464, JString, required = true,
                                  default = nil)
-  if valid_568564 != nil:
-    section.add "api-version", valid_568564
+  if valid_564464 != nil:
+    section.add "api-version", valid_564464
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -4092,49 +4064,49 @@ proc validate_AppServiceEnvironmentsListWorkerPools_568559(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568565: Call_AppServiceEnvironmentsListWorkerPools_568558;
+proc call*(call_564465: Call_AppServiceEnvironmentsListWorkerPools_564458;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Get all worker pools of an App Service Environment.
   ## 
-  let valid = call_568565.validator(path, query, header, formData, body)
-  let scheme = call_568565.pickScheme
+  let valid = call_564465.validator(path, query, header, formData, body)
+  let scheme = call_564465.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568565.url(scheme.get, call_568565.host, call_568565.base,
-                         call_568565.route, valid.getOrDefault("path"),
+  let url = call_564465.url(scheme.get, call_564465.host, call_564465.base,
+                         call_564465.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568565, url, valid)
+  result = hook(call_564465, url, valid)
 
-proc call*(call_568566: Call_AppServiceEnvironmentsListWorkerPools_568558;
-          resourceGroupName: string; apiVersion: string; name: string;
-          subscriptionId: string): Recallable =
+proc call*(call_564466: Call_AppServiceEnvironmentsListWorkerPools_564458;
+          apiVersion: string; name: string; subscriptionId: string;
+          resourceGroupName: string): Recallable =
   ## appServiceEnvironmentsListWorkerPools
   ## Get all worker pools of an App Service Environment.
-  ##   resourceGroupName: string (required)
-  ##                    : Name of the resource group to which the resource belongs.
   ##   apiVersion: string (required)
   ##             : API Version
   ##   name: string (required)
   ##       : Name of the App Service Environment.
   ##   subscriptionId: string (required)
   ##                 : Your Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
-  var path_568567 = newJObject()
-  var query_568568 = newJObject()
-  add(path_568567, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568568, "api-version", newJString(apiVersion))
-  add(path_568567, "name", newJString(name))
-  add(path_568567, "subscriptionId", newJString(subscriptionId))
-  result = call_568566.call(path_568567, query_568568, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : Name of the resource group to which the resource belongs.
+  var path_564467 = newJObject()
+  var query_564468 = newJObject()
+  add(query_564468, "api-version", newJString(apiVersion))
+  add(path_564467, "name", newJString(name))
+  add(path_564467, "subscriptionId", newJString(subscriptionId))
+  add(path_564467, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564466.call(path_564467, query_564468, nil, nil, nil)
 
-var appServiceEnvironmentsListWorkerPools* = Call_AppServiceEnvironmentsListWorkerPools_568558(
+var appServiceEnvironmentsListWorkerPools* = Call_AppServiceEnvironmentsListWorkerPools_564458(
     name: "appServiceEnvironmentsListWorkerPools", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Web/hostingEnvironments/{name}/workerPools",
-    validator: validate_AppServiceEnvironmentsListWorkerPools_568559, base: "",
-    url: url_AppServiceEnvironmentsListWorkerPools_568560, schemes: {Scheme.Https})
+    validator: validate_AppServiceEnvironmentsListWorkerPools_564459, base: "",
+    url: url_AppServiceEnvironmentsListWorkerPools_564460, schemes: {Scheme.Https})
 type
-  Call_AppServiceEnvironmentsCreateOrUpdateWorkerPool_568581 = ref object of OpenApiRestCall_567659
-proc url_AppServiceEnvironmentsCreateOrUpdateWorkerPool_568583(protocol: Scheme;
+  Call_AppServiceEnvironmentsCreateOrUpdateWorkerPool_564481 = ref object of OpenApiRestCall_563557
+proc url_AppServiceEnvironmentsCreateOrUpdateWorkerPool_564483(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -4160,7 +4132,7 @@ proc url_AppServiceEnvironmentsCreateOrUpdateWorkerPool_568583(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AppServiceEnvironmentsCreateOrUpdateWorkerPool_568582(
+proc validate_AppServiceEnvironmentsCreateOrUpdateWorkerPool_564482(
     path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
     body: JsonNode): JsonNode =
   ## Create or update a worker pool.
@@ -4168,37 +4140,36 @@ proc validate_AppServiceEnvironmentsCreateOrUpdateWorkerPool_568582(
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : Name of the resource group to which the resource belongs.
   ##   name: JString (required)
   ##       : Name of the App Service Environment.
-  ##   workerPoolName: JString (required)
-  ##                 : Name of the worker pool.
   ##   subscriptionId: JString (required)
   ##                 : Your Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
+  ##   resourceGroupName: JString (required)
+  ##                    : Name of the resource group to which the resource belongs.
+  ##   workerPoolName: JString (required)
+  ##                 : Name of the worker pool.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568584 = path.getOrDefault("resourceGroupName")
-  valid_568584 = validateParameter(valid_568584, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `name` field"
+  var valid_564484 = path.getOrDefault("name")
+  valid_564484 = validateParameter(valid_564484, JString, required = true,
                                  default = nil)
-  if valid_568584 != nil:
-    section.add "resourceGroupName", valid_568584
-  var valid_568585 = path.getOrDefault("name")
-  valid_568585 = validateParameter(valid_568585, JString, required = true,
+  if valid_564484 != nil:
+    section.add "name", valid_564484
+  var valid_564485 = path.getOrDefault("subscriptionId")
+  valid_564485 = validateParameter(valid_564485, JString, required = true,
                                  default = nil)
-  if valid_568585 != nil:
-    section.add "name", valid_568585
-  var valid_568586 = path.getOrDefault("workerPoolName")
-  valid_568586 = validateParameter(valid_568586, JString, required = true,
+  if valid_564485 != nil:
+    section.add "subscriptionId", valid_564485
+  var valid_564486 = path.getOrDefault("resourceGroupName")
+  valid_564486 = validateParameter(valid_564486, JString, required = true,
                                  default = nil)
-  if valid_568586 != nil:
-    section.add "workerPoolName", valid_568586
-  var valid_568587 = path.getOrDefault("subscriptionId")
-  valid_568587 = validateParameter(valid_568587, JString, required = true,
+  if valid_564486 != nil:
+    section.add "resourceGroupName", valid_564486
+  var valid_564487 = path.getOrDefault("workerPoolName")
+  valid_564487 = validateParameter(valid_564487, JString, required = true,
                                  default = nil)
-  if valid_568587 != nil:
-    section.add "subscriptionId", valid_568587
+  if valid_564487 != nil:
+    section.add "workerPoolName", valid_564487
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -4206,11 +4177,11 @@ proc validate_AppServiceEnvironmentsCreateOrUpdateWorkerPool_568582(
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568588 = query.getOrDefault("api-version")
-  valid_568588 = validateParameter(valid_568588, JString, required = true,
+  var valid_564488 = query.getOrDefault("api-version")
+  valid_564488 = validateParameter(valid_564488, JString, required = true,
                                  default = nil)
-  if valid_568588 != nil:
-    section.add "api-version", valid_568588
+  if valid_564488 != nil:
+    section.add "api-version", valid_564488
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -4224,59 +4195,58 @@ proc validate_AppServiceEnvironmentsCreateOrUpdateWorkerPool_568582(
   if body != nil:
     result.add "body", body
 
-proc call*(call_568590: Call_AppServiceEnvironmentsCreateOrUpdateWorkerPool_568581;
+proc call*(call_564490: Call_AppServiceEnvironmentsCreateOrUpdateWorkerPool_564481;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Create or update a worker pool.
   ## 
-  let valid = call_568590.validator(path, query, header, formData, body)
-  let scheme = call_568590.pickScheme
+  let valid = call_564490.validator(path, query, header, formData, body)
+  let scheme = call_564490.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568590.url(scheme.get, call_568590.host, call_568590.base,
-                         call_568590.route, valid.getOrDefault("path"),
+  let url = call_564490.url(scheme.get, call_564490.host, call_564490.base,
+                         call_564490.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568590, url, valid)
+  result = hook(call_564490, url, valid)
 
-proc call*(call_568591: Call_AppServiceEnvironmentsCreateOrUpdateWorkerPool_568581;
-          resourceGroupName: string; apiVersion: string; name: string;
-          workerPoolName: string; subscriptionId: string;
-          workerPoolEnvelope: JsonNode): Recallable =
+proc call*(call_564491: Call_AppServiceEnvironmentsCreateOrUpdateWorkerPool_564481;
+          apiVersion: string; name: string; workerPoolEnvelope: JsonNode;
+          subscriptionId: string; resourceGroupName: string; workerPoolName: string): Recallable =
   ## appServiceEnvironmentsCreateOrUpdateWorkerPool
   ## Create or update a worker pool.
-  ##   resourceGroupName: string (required)
-  ##                    : Name of the resource group to which the resource belongs.
   ##   apiVersion: string (required)
   ##             : API Version
   ##   name: string (required)
   ##       : Name of the App Service Environment.
-  ##   workerPoolName: string (required)
-  ##                 : Name of the worker pool.
-  ##   subscriptionId: string (required)
-  ##                 : Your Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
   ##   workerPoolEnvelope: JObject (required)
   ##                     : Properties of the worker pool.
-  var path_568592 = newJObject()
-  var query_568593 = newJObject()
-  var body_568594 = newJObject()
-  add(path_568592, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568593, "api-version", newJString(apiVersion))
-  add(path_568592, "name", newJString(name))
-  add(path_568592, "workerPoolName", newJString(workerPoolName))
-  add(path_568592, "subscriptionId", newJString(subscriptionId))
+  ##   subscriptionId: string (required)
+  ##                 : Your Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
+  ##   resourceGroupName: string (required)
+  ##                    : Name of the resource group to which the resource belongs.
+  ##   workerPoolName: string (required)
+  ##                 : Name of the worker pool.
+  var path_564492 = newJObject()
+  var query_564493 = newJObject()
+  var body_564494 = newJObject()
+  add(query_564493, "api-version", newJString(apiVersion))
+  add(path_564492, "name", newJString(name))
   if workerPoolEnvelope != nil:
-    body_568594 = workerPoolEnvelope
-  result = call_568591.call(path_568592, query_568593, nil, nil, body_568594)
+    body_564494 = workerPoolEnvelope
+  add(path_564492, "subscriptionId", newJString(subscriptionId))
+  add(path_564492, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564492, "workerPoolName", newJString(workerPoolName))
+  result = call_564491.call(path_564492, query_564493, nil, nil, body_564494)
 
-var appServiceEnvironmentsCreateOrUpdateWorkerPool* = Call_AppServiceEnvironmentsCreateOrUpdateWorkerPool_568581(
+var appServiceEnvironmentsCreateOrUpdateWorkerPool* = Call_AppServiceEnvironmentsCreateOrUpdateWorkerPool_564481(
     name: "appServiceEnvironmentsCreateOrUpdateWorkerPool",
     meth: HttpMethod.HttpPut, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Web/hostingEnvironments/{name}/workerPools/{workerPoolName}",
-    validator: validate_AppServiceEnvironmentsCreateOrUpdateWorkerPool_568582,
-    base: "", url: url_AppServiceEnvironmentsCreateOrUpdateWorkerPool_568583,
+    validator: validate_AppServiceEnvironmentsCreateOrUpdateWorkerPool_564482,
+    base: "", url: url_AppServiceEnvironmentsCreateOrUpdateWorkerPool_564483,
     schemes: {Scheme.Https})
 type
-  Call_AppServiceEnvironmentsGetWorkerPool_568569 = ref object of OpenApiRestCall_567659
-proc url_AppServiceEnvironmentsGetWorkerPool_568571(protocol: Scheme; host: string;
+  Call_AppServiceEnvironmentsGetWorkerPool_564469 = ref object of OpenApiRestCall_563557
+proc url_AppServiceEnvironmentsGetWorkerPool_564471(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -4302,44 +4272,43 @@ proc url_AppServiceEnvironmentsGetWorkerPool_568571(protocol: Scheme; host: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AppServiceEnvironmentsGetWorkerPool_568570(path: JsonNode;
+proc validate_AppServiceEnvironmentsGetWorkerPool_564470(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Get properties of a worker pool.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : Name of the resource group to which the resource belongs.
   ##   name: JString (required)
   ##       : Name of the App Service Environment.
-  ##   workerPoolName: JString (required)
-  ##                 : Name of the worker pool.
   ##   subscriptionId: JString (required)
   ##                 : Your Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
+  ##   resourceGroupName: JString (required)
+  ##                    : Name of the resource group to which the resource belongs.
+  ##   workerPoolName: JString (required)
+  ##                 : Name of the worker pool.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568572 = path.getOrDefault("resourceGroupName")
-  valid_568572 = validateParameter(valid_568572, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `name` field"
+  var valid_564472 = path.getOrDefault("name")
+  valid_564472 = validateParameter(valid_564472, JString, required = true,
                                  default = nil)
-  if valid_568572 != nil:
-    section.add "resourceGroupName", valid_568572
-  var valid_568573 = path.getOrDefault("name")
-  valid_568573 = validateParameter(valid_568573, JString, required = true,
+  if valid_564472 != nil:
+    section.add "name", valid_564472
+  var valid_564473 = path.getOrDefault("subscriptionId")
+  valid_564473 = validateParameter(valid_564473, JString, required = true,
                                  default = nil)
-  if valid_568573 != nil:
-    section.add "name", valid_568573
-  var valid_568574 = path.getOrDefault("workerPoolName")
-  valid_568574 = validateParameter(valid_568574, JString, required = true,
+  if valid_564473 != nil:
+    section.add "subscriptionId", valid_564473
+  var valid_564474 = path.getOrDefault("resourceGroupName")
+  valid_564474 = validateParameter(valid_564474, JString, required = true,
                                  default = nil)
-  if valid_568574 != nil:
-    section.add "workerPoolName", valid_568574
-  var valid_568575 = path.getOrDefault("subscriptionId")
-  valid_568575 = validateParameter(valid_568575, JString, required = true,
+  if valid_564474 != nil:
+    section.add "resourceGroupName", valid_564474
+  var valid_564475 = path.getOrDefault("workerPoolName")
+  valid_564475 = validateParameter(valid_564475, JString, required = true,
                                  default = nil)
-  if valid_568575 != nil:
-    section.add "subscriptionId", valid_568575
+  if valid_564475 != nil:
+    section.add "workerPoolName", valid_564475
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -4347,11 +4316,11 @@ proc validate_AppServiceEnvironmentsGetWorkerPool_568570(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568576 = query.getOrDefault("api-version")
-  valid_568576 = validateParameter(valid_568576, JString, required = true,
+  var valid_564476 = query.getOrDefault("api-version")
+  valid_564476 = validateParameter(valid_564476, JString, required = true,
                                  default = nil)
-  if valid_568576 != nil:
-    section.add "api-version", valid_568576
+  if valid_564476 != nil:
+    section.add "api-version", valid_564476
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -4360,52 +4329,52 @@ proc validate_AppServiceEnvironmentsGetWorkerPool_568570(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568577: Call_AppServiceEnvironmentsGetWorkerPool_568569;
+proc call*(call_564477: Call_AppServiceEnvironmentsGetWorkerPool_564469;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Get properties of a worker pool.
   ## 
-  let valid = call_568577.validator(path, query, header, formData, body)
-  let scheme = call_568577.pickScheme
+  let valid = call_564477.validator(path, query, header, formData, body)
+  let scheme = call_564477.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568577.url(scheme.get, call_568577.host, call_568577.base,
-                         call_568577.route, valid.getOrDefault("path"),
+  let url = call_564477.url(scheme.get, call_564477.host, call_564477.base,
+                         call_564477.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568577, url, valid)
+  result = hook(call_564477, url, valid)
 
-proc call*(call_568578: Call_AppServiceEnvironmentsGetWorkerPool_568569;
-          resourceGroupName: string; apiVersion: string; name: string;
-          workerPoolName: string; subscriptionId: string): Recallable =
+proc call*(call_564478: Call_AppServiceEnvironmentsGetWorkerPool_564469;
+          apiVersion: string; name: string; subscriptionId: string;
+          resourceGroupName: string; workerPoolName: string): Recallable =
   ## appServiceEnvironmentsGetWorkerPool
   ## Get properties of a worker pool.
-  ##   resourceGroupName: string (required)
-  ##                    : Name of the resource group to which the resource belongs.
   ##   apiVersion: string (required)
   ##             : API Version
   ##   name: string (required)
   ##       : Name of the App Service Environment.
-  ##   workerPoolName: string (required)
-  ##                 : Name of the worker pool.
   ##   subscriptionId: string (required)
   ##                 : Your Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
-  var path_568579 = newJObject()
-  var query_568580 = newJObject()
-  add(path_568579, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568580, "api-version", newJString(apiVersion))
-  add(path_568579, "name", newJString(name))
-  add(path_568579, "workerPoolName", newJString(workerPoolName))
-  add(path_568579, "subscriptionId", newJString(subscriptionId))
-  result = call_568578.call(path_568579, query_568580, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : Name of the resource group to which the resource belongs.
+  ##   workerPoolName: string (required)
+  ##                 : Name of the worker pool.
+  var path_564479 = newJObject()
+  var query_564480 = newJObject()
+  add(query_564480, "api-version", newJString(apiVersion))
+  add(path_564479, "name", newJString(name))
+  add(path_564479, "subscriptionId", newJString(subscriptionId))
+  add(path_564479, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564479, "workerPoolName", newJString(workerPoolName))
+  result = call_564478.call(path_564479, query_564480, nil, nil, nil)
 
-var appServiceEnvironmentsGetWorkerPool* = Call_AppServiceEnvironmentsGetWorkerPool_568569(
+var appServiceEnvironmentsGetWorkerPool* = Call_AppServiceEnvironmentsGetWorkerPool_564469(
     name: "appServiceEnvironmentsGetWorkerPool", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Web/hostingEnvironments/{name}/workerPools/{workerPoolName}",
-    validator: validate_AppServiceEnvironmentsGetWorkerPool_568570, base: "",
-    url: url_AppServiceEnvironmentsGetWorkerPool_568571, schemes: {Scheme.Https})
+    validator: validate_AppServiceEnvironmentsGetWorkerPool_564470, base: "",
+    url: url_AppServiceEnvironmentsGetWorkerPool_564471, schemes: {Scheme.Https})
 type
-  Call_AppServiceEnvironmentsUpdateWorkerPool_568595 = ref object of OpenApiRestCall_567659
-proc url_AppServiceEnvironmentsUpdateWorkerPool_568597(protocol: Scheme;
+  Call_AppServiceEnvironmentsUpdateWorkerPool_564495 = ref object of OpenApiRestCall_563557
+proc url_AppServiceEnvironmentsUpdateWorkerPool_564497(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -4431,44 +4400,43 @@ proc url_AppServiceEnvironmentsUpdateWorkerPool_568597(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AppServiceEnvironmentsUpdateWorkerPool_568596(path: JsonNode;
+proc validate_AppServiceEnvironmentsUpdateWorkerPool_564496(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Create or update a worker pool.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : Name of the resource group to which the resource belongs.
   ##   name: JString (required)
   ##       : Name of the App Service Environment.
-  ##   workerPoolName: JString (required)
-  ##                 : Name of the worker pool.
   ##   subscriptionId: JString (required)
   ##                 : Your Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
+  ##   resourceGroupName: JString (required)
+  ##                    : Name of the resource group to which the resource belongs.
+  ##   workerPoolName: JString (required)
+  ##                 : Name of the worker pool.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568598 = path.getOrDefault("resourceGroupName")
-  valid_568598 = validateParameter(valid_568598, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `name` field"
+  var valid_564498 = path.getOrDefault("name")
+  valid_564498 = validateParameter(valid_564498, JString, required = true,
                                  default = nil)
-  if valid_568598 != nil:
-    section.add "resourceGroupName", valid_568598
-  var valid_568599 = path.getOrDefault("name")
-  valid_568599 = validateParameter(valid_568599, JString, required = true,
+  if valid_564498 != nil:
+    section.add "name", valid_564498
+  var valid_564499 = path.getOrDefault("subscriptionId")
+  valid_564499 = validateParameter(valid_564499, JString, required = true,
                                  default = nil)
-  if valid_568599 != nil:
-    section.add "name", valid_568599
-  var valid_568600 = path.getOrDefault("workerPoolName")
-  valid_568600 = validateParameter(valid_568600, JString, required = true,
+  if valid_564499 != nil:
+    section.add "subscriptionId", valid_564499
+  var valid_564500 = path.getOrDefault("resourceGroupName")
+  valid_564500 = validateParameter(valid_564500, JString, required = true,
                                  default = nil)
-  if valid_568600 != nil:
-    section.add "workerPoolName", valid_568600
-  var valid_568601 = path.getOrDefault("subscriptionId")
-  valid_568601 = validateParameter(valid_568601, JString, required = true,
+  if valid_564500 != nil:
+    section.add "resourceGroupName", valid_564500
+  var valid_564501 = path.getOrDefault("workerPoolName")
+  valid_564501 = validateParameter(valid_564501, JString, required = true,
                                  default = nil)
-  if valid_568601 != nil:
-    section.add "subscriptionId", valid_568601
+  if valid_564501 != nil:
+    section.add "workerPoolName", valid_564501
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -4476,11 +4444,11 @@ proc validate_AppServiceEnvironmentsUpdateWorkerPool_568596(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568602 = query.getOrDefault("api-version")
-  valid_568602 = validateParameter(valid_568602, JString, required = true,
+  var valid_564502 = query.getOrDefault("api-version")
+  valid_564502 = validateParameter(valid_564502, JString, required = true,
                                  default = nil)
-  if valid_568602 != nil:
-    section.add "api-version", valid_568602
+  if valid_564502 != nil:
+    section.add "api-version", valid_564502
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -4494,59 +4462,58 @@ proc validate_AppServiceEnvironmentsUpdateWorkerPool_568596(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568604: Call_AppServiceEnvironmentsUpdateWorkerPool_568595;
+proc call*(call_564504: Call_AppServiceEnvironmentsUpdateWorkerPool_564495;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Create or update a worker pool.
   ## 
-  let valid = call_568604.validator(path, query, header, formData, body)
-  let scheme = call_568604.pickScheme
+  let valid = call_564504.validator(path, query, header, formData, body)
+  let scheme = call_564504.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568604.url(scheme.get, call_568604.host, call_568604.base,
-                         call_568604.route, valid.getOrDefault("path"),
+  let url = call_564504.url(scheme.get, call_564504.host, call_564504.base,
+                         call_564504.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568604, url, valid)
+  result = hook(call_564504, url, valid)
 
-proc call*(call_568605: Call_AppServiceEnvironmentsUpdateWorkerPool_568595;
-          resourceGroupName: string; apiVersion: string; name: string;
-          workerPoolName: string; subscriptionId: string;
-          workerPoolEnvelope: JsonNode): Recallable =
+proc call*(call_564505: Call_AppServiceEnvironmentsUpdateWorkerPool_564495;
+          apiVersion: string; name: string; workerPoolEnvelope: JsonNode;
+          subscriptionId: string; resourceGroupName: string; workerPoolName: string): Recallable =
   ## appServiceEnvironmentsUpdateWorkerPool
   ## Create or update a worker pool.
-  ##   resourceGroupName: string (required)
-  ##                    : Name of the resource group to which the resource belongs.
   ##   apiVersion: string (required)
   ##             : API Version
   ##   name: string (required)
   ##       : Name of the App Service Environment.
-  ##   workerPoolName: string (required)
-  ##                 : Name of the worker pool.
-  ##   subscriptionId: string (required)
-  ##                 : Your Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
   ##   workerPoolEnvelope: JObject (required)
   ##                     : Properties of the worker pool.
-  var path_568606 = newJObject()
-  var query_568607 = newJObject()
-  var body_568608 = newJObject()
-  add(path_568606, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568607, "api-version", newJString(apiVersion))
-  add(path_568606, "name", newJString(name))
-  add(path_568606, "workerPoolName", newJString(workerPoolName))
-  add(path_568606, "subscriptionId", newJString(subscriptionId))
+  ##   subscriptionId: string (required)
+  ##                 : Your Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
+  ##   resourceGroupName: string (required)
+  ##                    : Name of the resource group to which the resource belongs.
+  ##   workerPoolName: string (required)
+  ##                 : Name of the worker pool.
+  var path_564506 = newJObject()
+  var query_564507 = newJObject()
+  var body_564508 = newJObject()
+  add(query_564507, "api-version", newJString(apiVersion))
+  add(path_564506, "name", newJString(name))
   if workerPoolEnvelope != nil:
-    body_568608 = workerPoolEnvelope
-  result = call_568605.call(path_568606, query_568607, nil, nil, body_568608)
+    body_564508 = workerPoolEnvelope
+  add(path_564506, "subscriptionId", newJString(subscriptionId))
+  add(path_564506, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564506, "workerPoolName", newJString(workerPoolName))
+  result = call_564505.call(path_564506, query_564507, nil, nil, body_564508)
 
-var appServiceEnvironmentsUpdateWorkerPool* = Call_AppServiceEnvironmentsUpdateWorkerPool_568595(
+var appServiceEnvironmentsUpdateWorkerPool* = Call_AppServiceEnvironmentsUpdateWorkerPool_564495(
     name: "appServiceEnvironmentsUpdateWorkerPool", meth: HttpMethod.HttpPatch,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Web/hostingEnvironments/{name}/workerPools/{workerPoolName}",
-    validator: validate_AppServiceEnvironmentsUpdateWorkerPool_568596, base: "",
-    url: url_AppServiceEnvironmentsUpdateWorkerPool_568597,
+    validator: validate_AppServiceEnvironmentsUpdateWorkerPool_564496, base: "",
+    url: url_AppServiceEnvironmentsUpdateWorkerPool_564497,
     schemes: {Scheme.Https})
 type
-  Call_AppServiceEnvironmentsListWorkerPoolInstanceMetricDefinitions_568609 = ref object of OpenApiRestCall_567659
-proc url_AppServiceEnvironmentsListWorkerPoolInstanceMetricDefinitions_568611(
+  Call_AppServiceEnvironmentsListWorkerPoolInstanceMetricDefinitions_564509 = ref object of OpenApiRestCall_563557
+proc url_AppServiceEnvironmentsListWorkerPoolInstanceMetricDefinitions_564511(
     protocol: Scheme; host: string; base: string; route: string; path: JsonNode;
     query: JsonNode): Uri =
   result.scheme = $protocol
@@ -4577,7 +4544,7 @@ proc url_AppServiceEnvironmentsListWorkerPoolInstanceMetricDefinitions_568611(
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AppServiceEnvironmentsListWorkerPoolInstanceMetricDefinitions_568610(
+proc validate_AppServiceEnvironmentsListWorkerPoolInstanceMetricDefinitions_564510(
     path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
     body: JsonNode): JsonNode =
   ## Get metric definitions for a specific instance of a worker pool of an App Service Environment.
@@ -4585,44 +4552,43 @@ proc validate_AppServiceEnvironmentsListWorkerPoolInstanceMetricDefinitions_5686
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : Name of the resource group to which the resource belongs.
   ##   name: JString (required)
   ##       : Name of the App Service Environment.
-  ##   workerPoolName: JString (required)
-  ##                 : Name of the worker pool.
   ##   subscriptionId: JString (required)
   ##                 : Your Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
   ##   instance: JString (required)
   ##           : Name of the instance in the worker pool.
+  ##   resourceGroupName: JString (required)
+  ##                    : Name of the resource group to which the resource belongs.
+  ##   workerPoolName: JString (required)
+  ##                 : Name of the worker pool.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568612 = path.getOrDefault("resourceGroupName")
-  valid_568612 = validateParameter(valid_568612, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `name` field"
+  var valid_564512 = path.getOrDefault("name")
+  valid_564512 = validateParameter(valid_564512, JString, required = true,
                                  default = nil)
-  if valid_568612 != nil:
-    section.add "resourceGroupName", valid_568612
-  var valid_568613 = path.getOrDefault("name")
-  valid_568613 = validateParameter(valid_568613, JString, required = true,
+  if valid_564512 != nil:
+    section.add "name", valid_564512
+  var valid_564513 = path.getOrDefault("subscriptionId")
+  valid_564513 = validateParameter(valid_564513, JString, required = true,
                                  default = nil)
-  if valid_568613 != nil:
-    section.add "name", valid_568613
-  var valid_568614 = path.getOrDefault("workerPoolName")
-  valid_568614 = validateParameter(valid_568614, JString, required = true,
+  if valid_564513 != nil:
+    section.add "subscriptionId", valid_564513
+  var valid_564514 = path.getOrDefault("instance")
+  valid_564514 = validateParameter(valid_564514, JString, required = true,
                                  default = nil)
-  if valid_568614 != nil:
-    section.add "workerPoolName", valid_568614
-  var valid_568615 = path.getOrDefault("subscriptionId")
-  valid_568615 = validateParameter(valid_568615, JString, required = true,
+  if valid_564514 != nil:
+    section.add "instance", valid_564514
+  var valid_564515 = path.getOrDefault("resourceGroupName")
+  valid_564515 = validateParameter(valid_564515, JString, required = true,
                                  default = nil)
-  if valid_568615 != nil:
-    section.add "subscriptionId", valid_568615
-  var valid_568616 = path.getOrDefault("instance")
-  valid_568616 = validateParameter(valid_568616, JString, required = true,
+  if valid_564515 != nil:
+    section.add "resourceGroupName", valid_564515
+  var valid_564516 = path.getOrDefault("workerPoolName")
+  valid_564516 = validateParameter(valid_564516, JString, required = true,
                                  default = nil)
-  if valid_568616 != nil:
-    section.add "instance", valid_568616
+  if valid_564516 != nil:
+    section.add "workerPoolName", valid_564516
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -4630,11 +4596,11 @@ proc validate_AppServiceEnvironmentsListWorkerPoolInstanceMetricDefinitions_5686
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568617 = query.getOrDefault("api-version")
-  valid_568617 = validateParameter(valid_568617, JString, required = true,
+  var valid_564517 = query.getOrDefault("api-version")
+  valid_564517 = validateParameter(valid_564517, JString, required = true,
                                  default = nil)
-  if valid_568617 != nil:
-    section.add "api-version", valid_568617
+  if valid_564517 != nil:
+    section.add "api-version", valid_564517
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -4643,56 +4609,56 @@ proc validate_AppServiceEnvironmentsListWorkerPoolInstanceMetricDefinitions_5686
   if body != nil:
     result.add "body", body
 
-proc call*(call_568618: Call_AppServiceEnvironmentsListWorkerPoolInstanceMetricDefinitions_568609;
+proc call*(call_564518: Call_AppServiceEnvironmentsListWorkerPoolInstanceMetricDefinitions_564509;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Get metric definitions for a specific instance of a worker pool of an App Service Environment.
   ## 
-  let valid = call_568618.validator(path, query, header, formData, body)
-  let scheme = call_568618.pickScheme
+  let valid = call_564518.validator(path, query, header, formData, body)
+  let scheme = call_564518.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568618.url(scheme.get, call_568618.host, call_568618.base,
-                         call_568618.route, valid.getOrDefault("path"),
+  let url = call_564518.url(scheme.get, call_564518.host, call_564518.base,
+                         call_564518.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568618, url, valid)
+  result = hook(call_564518, url, valid)
 
-proc call*(call_568619: Call_AppServiceEnvironmentsListWorkerPoolInstanceMetricDefinitions_568609;
-          resourceGroupName: string; apiVersion: string; name: string;
-          workerPoolName: string; subscriptionId: string; instance: string): Recallable =
+proc call*(call_564519: Call_AppServiceEnvironmentsListWorkerPoolInstanceMetricDefinitions_564509;
+          apiVersion: string; name: string; subscriptionId: string; instance: string;
+          resourceGroupName: string; workerPoolName: string): Recallable =
   ## appServiceEnvironmentsListWorkerPoolInstanceMetricDefinitions
   ## Get metric definitions for a specific instance of a worker pool of an App Service Environment.
-  ##   resourceGroupName: string (required)
-  ##                    : Name of the resource group to which the resource belongs.
   ##   apiVersion: string (required)
   ##             : API Version
   ##   name: string (required)
   ##       : Name of the App Service Environment.
-  ##   workerPoolName: string (required)
-  ##                 : Name of the worker pool.
   ##   subscriptionId: string (required)
   ##                 : Your Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
   ##   instance: string (required)
   ##           : Name of the instance in the worker pool.
-  var path_568620 = newJObject()
-  var query_568621 = newJObject()
-  add(path_568620, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568621, "api-version", newJString(apiVersion))
-  add(path_568620, "name", newJString(name))
-  add(path_568620, "workerPoolName", newJString(workerPoolName))
-  add(path_568620, "subscriptionId", newJString(subscriptionId))
-  add(path_568620, "instance", newJString(instance))
-  result = call_568619.call(path_568620, query_568621, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : Name of the resource group to which the resource belongs.
+  ##   workerPoolName: string (required)
+  ##                 : Name of the worker pool.
+  var path_564520 = newJObject()
+  var query_564521 = newJObject()
+  add(query_564521, "api-version", newJString(apiVersion))
+  add(path_564520, "name", newJString(name))
+  add(path_564520, "subscriptionId", newJString(subscriptionId))
+  add(path_564520, "instance", newJString(instance))
+  add(path_564520, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564520, "workerPoolName", newJString(workerPoolName))
+  result = call_564519.call(path_564520, query_564521, nil, nil, nil)
 
-var appServiceEnvironmentsListWorkerPoolInstanceMetricDefinitions* = Call_AppServiceEnvironmentsListWorkerPoolInstanceMetricDefinitions_568609(
+var appServiceEnvironmentsListWorkerPoolInstanceMetricDefinitions* = Call_AppServiceEnvironmentsListWorkerPoolInstanceMetricDefinitions_564509(
     name: "appServiceEnvironmentsListWorkerPoolInstanceMetricDefinitions",
-    meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Web/hostingEnvironments/{name}/workerPools/{workerPoolName}/instances/{instance}/metricdefinitions", validator: validate_AppServiceEnvironmentsListWorkerPoolInstanceMetricDefinitions_568610,
+    meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Web/hostingEnvironments/{name}/workerPools/{workerPoolName}/instances/{instance}/metricdefinitions", validator: validate_AppServiceEnvironmentsListWorkerPoolInstanceMetricDefinitions_564510,
     base: "",
-    url: url_AppServiceEnvironmentsListWorkerPoolInstanceMetricDefinitions_568611,
+    url: url_AppServiceEnvironmentsListWorkerPoolInstanceMetricDefinitions_564511,
     schemes: {Scheme.Https})
 type
-  Call_AppServiceEnvironmentsListWorkerPoolInstanceMetrics_568622 = ref object of OpenApiRestCall_567659
-proc url_AppServiceEnvironmentsListWorkerPoolInstanceMetrics_568624(
+  Call_AppServiceEnvironmentsListWorkerPoolInstanceMetrics_564522 = ref object of OpenApiRestCall_563557
+proc url_AppServiceEnvironmentsListWorkerPoolInstanceMetrics_564524(
     protocol: Scheme; host: string; base: string; route: string; path: JsonNode;
     query: JsonNode): Uri =
   result.scheme = $protocol
@@ -4723,7 +4689,7 @@ proc url_AppServiceEnvironmentsListWorkerPoolInstanceMetrics_568624(
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AppServiceEnvironmentsListWorkerPoolInstanceMetrics_568623(
+proc validate_AppServiceEnvironmentsListWorkerPoolInstanceMetrics_564523(
     path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
     body: JsonNode): JsonNode =
   ## Get metrics for a specific instance of a worker pool of an App Service Environment.
@@ -4731,69 +4697,68 @@ proc validate_AppServiceEnvironmentsListWorkerPoolInstanceMetrics_568623(
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : Name of the resource group to which the resource belongs.
   ##   name: JString (required)
   ##       : Name of the App Service Environment.
-  ##   workerPoolName: JString (required)
-  ##                 : Name of the worker pool.
   ##   subscriptionId: JString (required)
   ##                 : Your Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
   ##   instance: JString (required)
   ##           : Name of the instance in the worker pool.
+  ##   resourceGroupName: JString (required)
+  ##                    : Name of the resource group to which the resource belongs.
+  ##   workerPoolName: JString (required)
+  ##                 : Name of the worker pool.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568625 = path.getOrDefault("resourceGroupName")
-  valid_568625 = validateParameter(valid_568625, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `name` field"
+  var valid_564525 = path.getOrDefault("name")
+  valid_564525 = validateParameter(valid_564525, JString, required = true,
                                  default = nil)
-  if valid_568625 != nil:
-    section.add "resourceGroupName", valid_568625
-  var valid_568626 = path.getOrDefault("name")
-  valid_568626 = validateParameter(valid_568626, JString, required = true,
+  if valid_564525 != nil:
+    section.add "name", valid_564525
+  var valid_564526 = path.getOrDefault("subscriptionId")
+  valid_564526 = validateParameter(valid_564526, JString, required = true,
                                  default = nil)
-  if valid_568626 != nil:
-    section.add "name", valid_568626
-  var valid_568627 = path.getOrDefault("workerPoolName")
-  valid_568627 = validateParameter(valid_568627, JString, required = true,
+  if valid_564526 != nil:
+    section.add "subscriptionId", valid_564526
+  var valid_564527 = path.getOrDefault("instance")
+  valid_564527 = validateParameter(valid_564527, JString, required = true,
                                  default = nil)
-  if valid_568627 != nil:
-    section.add "workerPoolName", valid_568627
-  var valid_568628 = path.getOrDefault("subscriptionId")
-  valid_568628 = validateParameter(valid_568628, JString, required = true,
+  if valid_564527 != nil:
+    section.add "instance", valid_564527
+  var valid_564528 = path.getOrDefault("resourceGroupName")
+  valid_564528 = validateParameter(valid_564528, JString, required = true,
                                  default = nil)
-  if valid_568628 != nil:
-    section.add "subscriptionId", valid_568628
-  var valid_568629 = path.getOrDefault("instance")
-  valid_568629 = validateParameter(valid_568629, JString, required = true,
+  if valid_564528 != nil:
+    section.add "resourceGroupName", valid_564528
+  var valid_564529 = path.getOrDefault("workerPoolName")
+  valid_564529 = validateParameter(valid_564529, JString, required = true,
                                  default = nil)
-  if valid_568629 != nil:
-    section.add "instance", valid_568629
+  if valid_564529 != nil:
+    section.add "workerPoolName", valid_564529
   result.add "path", section
   ## parameters in `query` object:
-  ##   api-version: JString (required)
-  ##              : API Version
   ##   details: JBool
   ##          : Specify <code>true</code> to include instance details. The default is <code>false</code>.
+  ##   api-version: JString (required)
+  ##              : API Version
   ##   $filter: JString
   ##          : Return only usages/metrics specified in the filter. Filter conforms to odata syntax. Example: $filter=(name.value eq 'Metric1' or name.value eq 'Metric2') and startTime eq 2014-01-01T00:00:00Z and endTime eq 2014-12-31T23:59:59Z and timeGrain eq duration'[Hour|Minute|Day]'.
   section = newJObject()
+  var valid_564530 = query.getOrDefault("details")
+  valid_564530 = validateParameter(valid_564530, JBool, required = false, default = nil)
+  if valid_564530 != nil:
+    section.add "details", valid_564530
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568630 = query.getOrDefault("api-version")
-  valid_568630 = validateParameter(valid_568630, JString, required = true,
+  var valid_564531 = query.getOrDefault("api-version")
+  valid_564531 = validateParameter(valid_564531, JString, required = true,
                                  default = nil)
-  if valid_568630 != nil:
-    section.add "api-version", valid_568630
-  var valid_568631 = query.getOrDefault("details")
-  valid_568631 = validateParameter(valid_568631, JBool, required = false, default = nil)
-  if valid_568631 != nil:
-    section.add "details", valid_568631
-  var valid_568632 = query.getOrDefault("$filter")
-  valid_568632 = validateParameter(valid_568632, JString, required = false,
+  if valid_564531 != nil:
+    section.add "api-version", valid_564531
+  var valid_564532 = query.getOrDefault("$filter")
+  valid_564532 = validateParameter(valid_564532, JString, required = false,
                                  default = nil)
-  if valid_568632 != nil:
-    section.add "$filter", valid_568632
+  if valid_564532 != nil:
+    section.add "$filter", valid_564532
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -4802,63 +4767,63 @@ proc validate_AppServiceEnvironmentsListWorkerPoolInstanceMetrics_568623(
   if body != nil:
     result.add "body", body
 
-proc call*(call_568633: Call_AppServiceEnvironmentsListWorkerPoolInstanceMetrics_568622;
+proc call*(call_564533: Call_AppServiceEnvironmentsListWorkerPoolInstanceMetrics_564522;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Get metrics for a specific instance of a worker pool of an App Service Environment.
   ## 
-  let valid = call_568633.validator(path, query, header, formData, body)
-  let scheme = call_568633.pickScheme
+  let valid = call_564533.validator(path, query, header, formData, body)
+  let scheme = call_564533.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568633.url(scheme.get, call_568633.host, call_568633.base,
-                         call_568633.route, valid.getOrDefault("path"),
+  let url = call_564533.url(scheme.get, call_564533.host, call_564533.base,
+                         call_564533.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568633, url, valid)
+  result = hook(call_564533, url, valid)
 
-proc call*(call_568634: Call_AppServiceEnvironmentsListWorkerPoolInstanceMetrics_568622;
-          resourceGroupName: string; apiVersion: string; name: string;
-          workerPoolName: string; subscriptionId: string; instance: string;
-          details: bool = false; Filter: string = ""): Recallable =
+proc call*(call_564534: Call_AppServiceEnvironmentsListWorkerPoolInstanceMetrics_564522;
+          apiVersion: string; name: string; subscriptionId: string; instance: string;
+          resourceGroupName: string; workerPoolName: string; details: bool = false;
+          Filter: string = ""): Recallable =
   ## appServiceEnvironmentsListWorkerPoolInstanceMetrics
   ## Get metrics for a specific instance of a worker pool of an App Service Environment.
-  ##   resourceGroupName: string (required)
-  ##                    : Name of the resource group to which the resource belongs.
+  ##   details: bool
+  ##          : Specify <code>true</code> to include instance details. The default is <code>false</code>.
   ##   apiVersion: string (required)
   ##             : API Version
   ##   name: string (required)
   ##       : Name of the App Service Environment.
-  ##   details: bool
-  ##          : Specify <code>true</code> to include instance details. The default is <code>false</code>.
-  ##   workerPoolName: string (required)
-  ##                 : Name of the worker pool.
   ##   subscriptionId: string (required)
   ##                 : Your Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
   ##   instance: string (required)
   ##           : Name of the instance in the worker pool.
+  ##   resourceGroupName: string (required)
+  ##                    : Name of the resource group to which the resource belongs.
   ##   Filter: string
   ##         : Return only usages/metrics specified in the filter. Filter conforms to odata syntax. Example: $filter=(name.value eq 'Metric1' or name.value eq 'Metric2') and startTime eq 2014-01-01T00:00:00Z and endTime eq 2014-12-31T23:59:59Z and timeGrain eq duration'[Hour|Minute|Day]'.
-  var path_568635 = newJObject()
-  var query_568636 = newJObject()
-  add(path_568635, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568636, "api-version", newJString(apiVersion))
-  add(path_568635, "name", newJString(name))
-  add(query_568636, "details", newJBool(details))
-  add(path_568635, "workerPoolName", newJString(workerPoolName))
-  add(path_568635, "subscriptionId", newJString(subscriptionId))
-  add(path_568635, "instance", newJString(instance))
-  add(query_568636, "$filter", newJString(Filter))
-  result = call_568634.call(path_568635, query_568636, nil, nil, nil)
+  ##   workerPoolName: string (required)
+  ##                 : Name of the worker pool.
+  var path_564535 = newJObject()
+  var query_564536 = newJObject()
+  add(query_564536, "details", newJBool(details))
+  add(query_564536, "api-version", newJString(apiVersion))
+  add(path_564535, "name", newJString(name))
+  add(path_564535, "subscriptionId", newJString(subscriptionId))
+  add(path_564535, "instance", newJString(instance))
+  add(path_564535, "resourceGroupName", newJString(resourceGroupName))
+  add(query_564536, "$filter", newJString(Filter))
+  add(path_564535, "workerPoolName", newJString(workerPoolName))
+  result = call_564534.call(path_564535, query_564536, nil, nil, nil)
 
-var appServiceEnvironmentsListWorkerPoolInstanceMetrics* = Call_AppServiceEnvironmentsListWorkerPoolInstanceMetrics_568622(
+var appServiceEnvironmentsListWorkerPoolInstanceMetrics* = Call_AppServiceEnvironmentsListWorkerPoolInstanceMetrics_564522(
     name: "appServiceEnvironmentsListWorkerPoolInstanceMetrics",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Web/hostingEnvironments/{name}/workerPools/{workerPoolName}/instances/{instance}/metrics",
-    validator: validate_AppServiceEnvironmentsListWorkerPoolInstanceMetrics_568623,
-    base: "", url: url_AppServiceEnvironmentsListWorkerPoolInstanceMetrics_568624,
+    validator: validate_AppServiceEnvironmentsListWorkerPoolInstanceMetrics_564523,
+    base: "", url: url_AppServiceEnvironmentsListWorkerPoolInstanceMetrics_564524,
     schemes: {Scheme.Https})
 type
-  Call_AppServiceEnvironmentsListWebWorkerMetricDefinitions_568637 = ref object of OpenApiRestCall_567659
-proc url_AppServiceEnvironmentsListWebWorkerMetricDefinitions_568639(
+  Call_AppServiceEnvironmentsListWebWorkerMetricDefinitions_564537 = ref object of OpenApiRestCall_563557
+proc url_AppServiceEnvironmentsListWebWorkerMetricDefinitions_564539(
     protocol: Scheme; host: string; base: string; route: string; path: JsonNode;
     query: JsonNode): Uri =
   result.scheme = $protocol
@@ -4886,7 +4851,7 @@ proc url_AppServiceEnvironmentsListWebWorkerMetricDefinitions_568639(
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AppServiceEnvironmentsListWebWorkerMetricDefinitions_568638(
+proc validate_AppServiceEnvironmentsListWebWorkerMetricDefinitions_564538(
     path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
     body: JsonNode): JsonNode =
   ## Get metric definitions for a worker pool of an App Service Environment.
@@ -4894,37 +4859,36 @@ proc validate_AppServiceEnvironmentsListWebWorkerMetricDefinitions_568638(
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : Name of the resource group to which the resource belongs.
   ##   name: JString (required)
   ##       : Name of the App Service Environment.
-  ##   workerPoolName: JString (required)
-  ##                 : Name of the worker pool.
   ##   subscriptionId: JString (required)
   ##                 : Your Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
+  ##   resourceGroupName: JString (required)
+  ##                    : Name of the resource group to which the resource belongs.
+  ##   workerPoolName: JString (required)
+  ##                 : Name of the worker pool.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568640 = path.getOrDefault("resourceGroupName")
-  valid_568640 = validateParameter(valid_568640, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `name` field"
+  var valid_564540 = path.getOrDefault("name")
+  valid_564540 = validateParameter(valid_564540, JString, required = true,
                                  default = nil)
-  if valid_568640 != nil:
-    section.add "resourceGroupName", valid_568640
-  var valid_568641 = path.getOrDefault("name")
-  valid_568641 = validateParameter(valid_568641, JString, required = true,
+  if valid_564540 != nil:
+    section.add "name", valid_564540
+  var valid_564541 = path.getOrDefault("subscriptionId")
+  valid_564541 = validateParameter(valid_564541, JString, required = true,
                                  default = nil)
-  if valid_568641 != nil:
-    section.add "name", valid_568641
-  var valid_568642 = path.getOrDefault("workerPoolName")
-  valid_568642 = validateParameter(valid_568642, JString, required = true,
+  if valid_564541 != nil:
+    section.add "subscriptionId", valid_564541
+  var valid_564542 = path.getOrDefault("resourceGroupName")
+  valid_564542 = validateParameter(valid_564542, JString, required = true,
                                  default = nil)
-  if valid_568642 != nil:
-    section.add "workerPoolName", valid_568642
-  var valid_568643 = path.getOrDefault("subscriptionId")
-  valid_568643 = validateParameter(valid_568643, JString, required = true,
+  if valid_564542 != nil:
+    section.add "resourceGroupName", valid_564542
+  var valid_564543 = path.getOrDefault("workerPoolName")
+  valid_564543 = validateParameter(valid_564543, JString, required = true,
                                  default = nil)
-  if valid_568643 != nil:
-    section.add "subscriptionId", valid_568643
+  if valid_564543 != nil:
+    section.add "workerPoolName", valid_564543
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -4932,11 +4896,11 @@ proc validate_AppServiceEnvironmentsListWebWorkerMetricDefinitions_568638(
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568644 = query.getOrDefault("api-version")
-  valid_568644 = validateParameter(valid_568644, JString, required = true,
+  var valid_564544 = query.getOrDefault("api-version")
+  valid_564544 = validateParameter(valid_564544, JString, required = true,
                                  default = nil)
-  if valid_568644 != nil:
-    section.add "api-version", valid_568644
+  if valid_564544 != nil:
+    section.add "api-version", valid_564544
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -4945,53 +4909,53 @@ proc validate_AppServiceEnvironmentsListWebWorkerMetricDefinitions_568638(
   if body != nil:
     result.add "body", body
 
-proc call*(call_568645: Call_AppServiceEnvironmentsListWebWorkerMetricDefinitions_568637;
+proc call*(call_564545: Call_AppServiceEnvironmentsListWebWorkerMetricDefinitions_564537;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Get metric definitions for a worker pool of an App Service Environment.
   ## 
-  let valid = call_568645.validator(path, query, header, formData, body)
-  let scheme = call_568645.pickScheme
+  let valid = call_564545.validator(path, query, header, formData, body)
+  let scheme = call_564545.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568645.url(scheme.get, call_568645.host, call_568645.base,
-                         call_568645.route, valid.getOrDefault("path"),
+  let url = call_564545.url(scheme.get, call_564545.host, call_564545.base,
+                         call_564545.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568645, url, valid)
+  result = hook(call_564545, url, valid)
 
-proc call*(call_568646: Call_AppServiceEnvironmentsListWebWorkerMetricDefinitions_568637;
-          resourceGroupName: string; apiVersion: string; name: string;
-          workerPoolName: string; subscriptionId: string): Recallable =
+proc call*(call_564546: Call_AppServiceEnvironmentsListWebWorkerMetricDefinitions_564537;
+          apiVersion: string; name: string; subscriptionId: string;
+          resourceGroupName: string; workerPoolName: string): Recallable =
   ## appServiceEnvironmentsListWebWorkerMetricDefinitions
   ## Get metric definitions for a worker pool of an App Service Environment.
-  ##   resourceGroupName: string (required)
-  ##                    : Name of the resource group to which the resource belongs.
   ##   apiVersion: string (required)
   ##             : API Version
   ##   name: string (required)
   ##       : Name of the App Service Environment.
-  ##   workerPoolName: string (required)
-  ##                 : Name of the worker pool.
   ##   subscriptionId: string (required)
   ##                 : Your Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
-  var path_568647 = newJObject()
-  var query_568648 = newJObject()
-  add(path_568647, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568648, "api-version", newJString(apiVersion))
-  add(path_568647, "name", newJString(name))
-  add(path_568647, "workerPoolName", newJString(workerPoolName))
-  add(path_568647, "subscriptionId", newJString(subscriptionId))
-  result = call_568646.call(path_568647, query_568648, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : Name of the resource group to which the resource belongs.
+  ##   workerPoolName: string (required)
+  ##                 : Name of the worker pool.
+  var path_564547 = newJObject()
+  var query_564548 = newJObject()
+  add(query_564548, "api-version", newJString(apiVersion))
+  add(path_564547, "name", newJString(name))
+  add(path_564547, "subscriptionId", newJString(subscriptionId))
+  add(path_564547, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564547, "workerPoolName", newJString(workerPoolName))
+  result = call_564546.call(path_564547, query_564548, nil, nil, nil)
 
-var appServiceEnvironmentsListWebWorkerMetricDefinitions* = Call_AppServiceEnvironmentsListWebWorkerMetricDefinitions_568637(
+var appServiceEnvironmentsListWebWorkerMetricDefinitions* = Call_AppServiceEnvironmentsListWebWorkerMetricDefinitions_564537(
     name: "appServiceEnvironmentsListWebWorkerMetricDefinitions",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Web/hostingEnvironments/{name}/workerPools/{workerPoolName}/metricdefinitions",
-    validator: validate_AppServiceEnvironmentsListWebWorkerMetricDefinitions_568638,
-    base: "", url: url_AppServiceEnvironmentsListWebWorkerMetricDefinitions_568639,
+    validator: validate_AppServiceEnvironmentsListWebWorkerMetricDefinitions_564538,
+    base: "", url: url_AppServiceEnvironmentsListWebWorkerMetricDefinitions_564539,
     schemes: {Scheme.Https})
 type
-  Call_AppServiceEnvironmentsListWebWorkerMetrics_568649 = ref object of OpenApiRestCall_567659
-proc url_AppServiceEnvironmentsListWebWorkerMetrics_568651(protocol: Scheme;
+  Call_AppServiceEnvironmentsListWebWorkerMetrics_564549 = ref object of OpenApiRestCall_563557
+proc url_AppServiceEnvironmentsListWebWorkerMetrics_564551(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -5018,69 +4982,68 @@ proc url_AppServiceEnvironmentsListWebWorkerMetrics_568651(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AppServiceEnvironmentsListWebWorkerMetrics_568650(path: JsonNode;
+proc validate_AppServiceEnvironmentsListWebWorkerMetrics_564550(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Get metrics for a worker pool of a AppServiceEnvironment (App Service Environment).
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : Name of the resource group to which the resource belongs.
   ##   name: JString (required)
   ##       : Name of the App Service Environment.
-  ##   workerPoolName: JString (required)
-  ##                 : Name of worker pool
   ##   subscriptionId: JString (required)
   ##                 : Your Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
+  ##   resourceGroupName: JString (required)
+  ##                    : Name of the resource group to which the resource belongs.
+  ##   workerPoolName: JString (required)
+  ##                 : Name of worker pool
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568652 = path.getOrDefault("resourceGroupName")
-  valid_568652 = validateParameter(valid_568652, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `name` field"
+  var valid_564552 = path.getOrDefault("name")
+  valid_564552 = validateParameter(valid_564552, JString, required = true,
                                  default = nil)
-  if valid_568652 != nil:
-    section.add "resourceGroupName", valid_568652
-  var valid_568653 = path.getOrDefault("name")
-  valid_568653 = validateParameter(valid_568653, JString, required = true,
+  if valid_564552 != nil:
+    section.add "name", valid_564552
+  var valid_564553 = path.getOrDefault("subscriptionId")
+  valid_564553 = validateParameter(valid_564553, JString, required = true,
                                  default = nil)
-  if valid_568653 != nil:
-    section.add "name", valid_568653
-  var valid_568654 = path.getOrDefault("workerPoolName")
-  valid_568654 = validateParameter(valid_568654, JString, required = true,
+  if valid_564553 != nil:
+    section.add "subscriptionId", valid_564553
+  var valid_564554 = path.getOrDefault("resourceGroupName")
+  valid_564554 = validateParameter(valid_564554, JString, required = true,
                                  default = nil)
-  if valid_568654 != nil:
-    section.add "workerPoolName", valid_568654
-  var valid_568655 = path.getOrDefault("subscriptionId")
-  valid_568655 = validateParameter(valid_568655, JString, required = true,
+  if valid_564554 != nil:
+    section.add "resourceGroupName", valid_564554
+  var valid_564555 = path.getOrDefault("workerPoolName")
+  valid_564555 = validateParameter(valid_564555, JString, required = true,
                                  default = nil)
-  if valid_568655 != nil:
-    section.add "subscriptionId", valid_568655
+  if valid_564555 != nil:
+    section.add "workerPoolName", valid_564555
   result.add "path", section
   ## parameters in `query` object:
-  ##   api-version: JString (required)
-  ##              : API Version
   ##   details: JBool
   ##          : Specify <code>true</code> to include instance details. The default is <code>false</code>.
+  ##   api-version: JString (required)
+  ##              : API Version
   ##   $filter: JString
   ##          : Return only usages/metrics specified in the filter. Filter conforms to odata syntax. Example: $filter=(name.value eq 'Metric1' or name.value eq 'Metric2') and startTime eq 2014-01-01T00:00:00Z and endTime eq 2014-12-31T23:59:59Z and timeGrain eq duration'[Hour|Minute|Day]'.
   section = newJObject()
+  var valid_564556 = query.getOrDefault("details")
+  valid_564556 = validateParameter(valid_564556, JBool, required = false, default = nil)
+  if valid_564556 != nil:
+    section.add "details", valid_564556
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568656 = query.getOrDefault("api-version")
-  valid_568656 = validateParameter(valid_568656, JString, required = true,
+  var valid_564557 = query.getOrDefault("api-version")
+  valid_564557 = validateParameter(valid_564557, JString, required = true,
                                  default = nil)
-  if valid_568656 != nil:
-    section.add "api-version", valid_568656
-  var valid_568657 = query.getOrDefault("details")
-  valid_568657 = validateParameter(valid_568657, JBool, required = false, default = nil)
-  if valid_568657 != nil:
-    section.add "details", valid_568657
-  var valid_568658 = query.getOrDefault("$filter")
-  valid_568658 = validateParameter(valid_568658, JString, required = false,
+  if valid_564557 != nil:
+    section.add "api-version", valid_564557
+  var valid_564558 = query.getOrDefault("$filter")
+  valid_564558 = validateParameter(valid_564558, JString, required = false,
                                  default = nil)
-  if valid_568658 != nil:
-    section.add "$filter", valid_568658
+  if valid_564558 != nil:
+    section.add "$filter", valid_564558
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -5089,60 +5052,60 @@ proc validate_AppServiceEnvironmentsListWebWorkerMetrics_568650(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568659: Call_AppServiceEnvironmentsListWebWorkerMetrics_568649;
+proc call*(call_564559: Call_AppServiceEnvironmentsListWebWorkerMetrics_564549;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Get metrics for a worker pool of a AppServiceEnvironment (App Service Environment).
   ## 
-  let valid = call_568659.validator(path, query, header, formData, body)
-  let scheme = call_568659.pickScheme
+  let valid = call_564559.validator(path, query, header, formData, body)
+  let scheme = call_564559.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568659.url(scheme.get, call_568659.host, call_568659.base,
-                         call_568659.route, valid.getOrDefault("path"),
+  let url = call_564559.url(scheme.get, call_564559.host, call_564559.base,
+                         call_564559.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568659, url, valid)
+  result = hook(call_564559, url, valid)
 
-proc call*(call_568660: Call_AppServiceEnvironmentsListWebWorkerMetrics_568649;
-          resourceGroupName: string; apiVersion: string; name: string;
-          workerPoolName: string; subscriptionId: string; details: bool = false;
+proc call*(call_564560: Call_AppServiceEnvironmentsListWebWorkerMetrics_564549;
+          apiVersion: string; name: string; subscriptionId: string;
+          resourceGroupName: string; workerPoolName: string; details: bool = false;
           Filter: string = ""): Recallable =
   ## appServiceEnvironmentsListWebWorkerMetrics
   ## Get metrics for a worker pool of a AppServiceEnvironment (App Service Environment).
-  ##   resourceGroupName: string (required)
-  ##                    : Name of the resource group to which the resource belongs.
+  ##   details: bool
+  ##          : Specify <code>true</code> to include instance details. The default is <code>false</code>.
   ##   apiVersion: string (required)
   ##             : API Version
   ##   name: string (required)
   ##       : Name of the App Service Environment.
-  ##   details: bool
-  ##          : Specify <code>true</code> to include instance details. The default is <code>false</code>.
-  ##   workerPoolName: string (required)
-  ##                 : Name of worker pool
   ##   subscriptionId: string (required)
   ##                 : Your Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
+  ##   resourceGroupName: string (required)
+  ##                    : Name of the resource group to which the resource belongs.
   ##   Filter: string
   ##         : Return only usages/metrics specified in the filter. Filter conforms to odata syntax. Example: $filter=(name.value eq 'Metric1' or name.value eq 'Metric2') and startTime eq 2014-01-01T00:00:00Z and endTime eq 2014-12-31T23:59:59Z and timeGrain eq duration'[Hour|Minute|Day]'.
-  var path_568661 = newJObject()
-  var query_568662 = newJObject()
-  add(path_568661, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568662, "api-version", newJString(apiVersion))
-  add(path_568661, "name", newJString(name))
-  add(query_568662, "details", newJBool(details))
-  add(path_568661, "workerPoolName", newJString(workerPoolName))
-  add(path_568661, "subscriptionId", newJString(subscriptionId))
-  add(query_568662, "$filter", newJString(Filter))
-  result = call_568660.call(path_568661, query_568662, nil, nil, nil)
+  ##   workerPoolName: string (required)
+  ##                 : Name of worker pool
+  var path_564561 = newJObject()
+  var query_564562 = newJObject()
+  add(query_564562, "details", newJBool(details))
+  add(query_564562, "api-version", newJString(apiVersion))
+  add(path_564561, "name", newJString(name))
+  add(path_564561, "subscriptionId", newJString(subscriptionId))
+  add(path_564561, "resourceGroupName", newJString(resourceGroupName))
+  add(query_564562, "$filter", newJString(Filter))
+  add(path_564561, "workerPoolName", newJString(workerPoolName))
+  result = call_564560.call(path_564561, query_564562, nil, nil, nil)
 
-var appServiceEnvironmentsListWebWorkerMetrics* = Call_AppServiceEnvironmentsListWebWorkerMetrics_568649(
+var appServiceEnvironmentsListWebWorkerMetrics* = Call_AppServiceEnvironmentsListWebWorkerMetrics_564549(
     name: "appServiceEnvironmentsListWebWorkerMetrics", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Web/hostingEnvironments/{name}/workerPools/{workerPoolName}/metrics",
-    validator: validate_AppServiceEnvironmentsListWebWorkerMetrics_568650,
-    base: "", url: url_AppServiceEnvironmentsListWebWorkerMetrics_568651,
+    validator: validate_AppServiceEnvironmentsListWebWorkerMetrics_564550,
+    base: "", url: url_AppServiceEnvironmentsListWebWorkerMetrics_564551,
     schemes: {Scheme.Https})
 type
-  Call_AppServiceEnvironmentsListWorkerPoolSkus_568663 = ref object of OpenApiRestCall_567659
-proc url_AppServiceEnvironmentsListWorkerPoolSkus_568665(protocol: Scheme;
+  Call_AppServiceEnvironmentsListWorkerPoolSkus_564563 = ref object of OpenApiRestCall_563557
+proc url_AppServiceEnvironmentsListWorkerPoolSkus_564565(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -5169,44 +5132,43 @@ proc url_AppServiceEnvironmentsListWorkerPoolSkus_568665(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AppServiceEnvironmentsListWorkerPoolSkus_568664(path: JsonNode;
+proc validate_AppServiceEnvironmentsListWorkerPoolSkus_564564(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Get available SKUs for scaling a worker pool.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : Name of the resource group to which the resource belongs.
   ##   name: JString (required)
   ##       : Name of the App Service Environment.
-  ##   workerPoolName: JString (required)
-  ##                 : Name of the worker pool.
   ##   subscriptionId: JString (required)
   ##                 : Your Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
+  ##   resourceGroupName: JString (required)
+  ##                    : Name of the resource group to which the resource belongs.
+  ##   workerPoolName: JString (required)
+  ##                 : Name of the worker pool.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568666 = path.getOrDefault("resourceGroupName")
-  valid_568666 = validateParameter(valid_568666, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `name` field"
+  var valid_564566 = path.getOrDefault("name")
+  valid_564566 = validateParameter(valid_564566, JString, required = true,
                                  default = nil)
-  if valid_568666 != nil:
-    section.add "resourceGroupName", valid_568666
-  var valid_568667 = path.getOrDefault("name")
-  valid_568667 = validateParameter(valid_568667, JString, required = true,
+  if valid_564566 != nil:
+    section.add "name", valid_564566
+  var valid_564567 = path.getOrDefault("subscriptionId")
+  valid_564567 = validateParameter(valid_564567, JString, required = true,
                                  default = nil)
-  if valid_568667 != nil:
-    section.add "name", valid_568667
-  var valid_568668 = path.getOrDefault("workerPoolName")
-  valid_568668 = validateParameter(valid_568668, JString, required = true,
+  if valid_564567 != nil:
+    section.add "subscriptionId", valid_564567
+  var valid_564568 = path.getOrDefault("resourceGroupName")
+  valid_564568 = validateParameter(valid_564568, JString, required = true,
                                  default = nil)
-  if valid_568668 != nil:
-    section.add "workerPoolName", valid_568668
-  var valid_568669 = path.getOrDefault("subscriptionId")
-  valid_568669 = validateParameter(valid_568669, JString, required = true,
+  if valid_564568 != nil:
+    section.add "resourceGroupName", valid_564568
+  var valid_564569 = path.getOrDefault("workerPoolName")
+  valid_564569 = validateParameter(valid_564569, JString, required = true,
                                  default = nil)
-  if valid_568669 != nil:
-    section.add "subscriptionId", valid_568669
+  if valid_564569 != nil:
+    section.add "workerPoolName", valid_564569
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -5214,11 +5176,11 @@ proc validate_AppServiceEnvironmentsListWorkerPoolSkus_568664(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568670 = query.getOrDefault("api-version")
-  valid_568670 = validateParameter(valid_568670, JString, required = true,
+  var valid_564570 = query.getOrDefault("api-version")
+  valid_564570 = validateParameter(valid_564570, JString, required = true,
                                  default = nil)
-  if valid_568670 != nil:
-    section.add "api-version", valid_568670
+  if valid_564570 != nil:
+    section.add "api-version", valid_564570
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -5227,53 +5189,53 @@ proc validate_AppServiceEnvironmentsListWorkerPoolSkus_568664(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568671: Call_AppServiceEnvironmentsListWorkerPoolSkus_568663;
+proc call*(call_564571: Call_AppServiceEnvironmentsListWorkerPoolSkus_564563;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Get available SKUs for scaling a worker pool.
   ## 
-  let valid = call_568671.validator(path, query, header, formData, body)
-  let scheme = call_568671.pickScheme
+  let valid = call_564571.validator(path, query, header, formData, body)
+  let scheme = call_564571.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568671.url(scheme.get, call_568671.host, call_568671.base,
-                         call_568671.route, valid.getOrDefault("path"),
+  let url = call_564571.url(scheme.get, call_564571.host, call_564571.base,
+                         call_564571.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568671, url, valid)
+  result = hook(call_564571, url, valid)
 
-proc call*(call_568672: Call_AppServiceEnvironmentsListWorkerPoolSkus_568663;
-          resourceGroupName: string; apiVersion: string; name: string;
-          workerPoolName: string; subscriptionId: string): Recallable =
+proc call*(call_564572: Call_AppServiceEnvironmentsListWorkerPoolSkus_564563;
+          apiVersion: string; name: string; subscriptionId: string;
+          resourceGroupName: string; workerPoolName: string): Recallable =
   ## appServiceEnvironmentsListWorkerPoolSkus
   ## Get available SKUs for scaling a worker pool.
-  ##   resourceGroupName: string (required)
-  ##                    : Name of the resource group to which the resource belongs.
   ##   apiVersion: string (required)
   ##             : API Version
   ##   name: string (required)
   ##       : Name of the App Service Environment.
-  ##   workerPoolName: string (required)
-  ##                 : Name of the worker pool.
   ##   subscriptionId: string (required)
   ##                 : Your Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
-  var path_568673 = newJObject()
-  var query_568674 = newJObject()
-  add(path_568673, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568674, "api-version", newJString(apiVersion))
-  add(path_568673, "name", newJString(name))
-  add(path_568673, "workerPoolName", newJString(workerPoolName))
-  add(path_568673, "subscriptionId", newJString(subscriptionId))
-  result = call_568672.call(path_568673, query_568674, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : Name of the resource group to which the resource belongs.
+  ##   workerPoolName: string (required)
+  ##                 : Name of the worker pool.
+  var path_564573 = newJObject()
+  var query_564574 = newJObject()
+  add(query_564574, "api-version", newJString(apiVersion))
+  add(path_564573, "name", newJString(name))
+  add(path_564573, "subscriptionId", newJString(subscriptionId))
+  add(path_564573, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564573, "workerPoolName", newJString(workerPoolName))
+  result = call_564572.call(path_564573, query_564574, nil, nil, nil)
 
-var appServiceEnvironmentsListWorkerPoolSkus* = Call_AppServiceEnvironmentsListWorkerPoolSkus_568663(
+var appServiceEnvironmentsListWorkerPoolSkus* = Call_AppServiceEnvironmentsListWorkerPoolSkus_564563(
     name: "appServiceEnvironmentsListWorkerPoolSkus", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Web/hostingEnvironments/{name}/workerPools/{workerPoolName}/skus",
-    validator: validate_AppServiceEnvironmentsListWorkerPoolSkus_568664, base: "",
-    url: url_AppServiceEnvironmentsListWorkerPoolSkus_568665,
+    validator: validate_AppServiceEnvironmentsListWorkerPoolSkus_564564, base: "",
+    url: url_AppServiceEnvironmentsListWorkerPoolSkus_564565,
     schemes: {Scheme.Https})
 type
-  Call_AppServiceEnvironmentsListWebWorkerUsages_568675 = ref object of OpenApiRestCall_567659
-proc url_AppServiceEnvironmentsListWebWorkerUsages_568677(protocol: Scheme;
+  Call_AppServiceEnvironmentsListWebWorkerUsages_564575 = ref object of OpenApiRestCall_563557
+proc url_AppServiceEnvironmentsListWebWorkerUsages_564577(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -5300,44 +5262,43 @@ proc url_AppServiceEnvironmentsListWebWorkerUsages_568677(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AppServiceEnvironmentsListWebWorkerUsages_568676(path: JsonNode;
+proc validate_AppServiceEnvironmentsListWebWorkerUsages_564576(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Get usage metrics for a worker pool of an App Service Environment.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : Name of the resource group to which the resource belongs.
   ##   name: JString (required)
   ##       : Name of the App Service Environment.
-  ##   workerPoolName: JString (required)
-  ##                 : Name of the worker pool.
   ##   subscriptionId: JString (required)
   ##                 : Your Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
+  ##   resourceGroupName: JString (required)
+  ##                    : Name of the resource group to which the resource belongs.
+  ##   workerPoolName: JString (required)
+  ##                 : Name of the worker pool.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568678 = path.getOrDefault("resourceGroupName")
-  valid_568678 = validateParameter(valid_568678, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `name` field"
+  var valid_564578 = path.getOrDefault("name")
+  valid_564578 = validateParameter(valid_564578, JString, required = true,
                                  default = nil)
-  if valid_568678 != nil:
-    section.add "resourceGroupName", valid_568678
-  var valid_568679 = path.getOrDefault("name")
-  valid_568679 = validateParameter(valid_568679, JString, required = true,
+  if valid_564578 != nil:
+    section.add "name", valid_564578
+  var valid_564579 = path.getOrDefault("subscriptionId")
+  valid_564579 = validateParameter(valid_564579, JString, required = true,
                                  default = nil)
-  if valid_568679 != nil:
-    section.add "name", valid_568679
-  var valid_568680 = path.getOrDefault("workerPoolName")
-  valid_568680 = validateParameter(valid_568680, JString, required = true,
+  if valid_564579 != nil:
+    section.add "subscriptionId", valid_564579
+  var valid_564580 = path.getOrDefault("resourceGroupName")
+  valid_564580 = validateParameter(valid_564580, JString, required = true,
                                  default = nil)
-  if valid_568680 != nil:
-    section.add "workerPoolName", valid_568680
-  var valid_568681 = path.getOrDefault("subscriptionId")
-  valid_568681 = validateParameter(valid_568681, JString, required = true,
+  if valid_564580 != nil:
+    section.add "resourceGroupName", valid_564580
+  var valid_564581 = path.getOrDefault("workerPoolName")
+  valid_564581 = validateParameter(valid_564581, JString, required = true,
                                  default = nil)
-  if valid_568681 != nil:
-    section.add "subscriptionId", valid_568681
+  if valid_564581 != nil:
+    section.add "workerPoolName", valid_564581
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -5345,11 +5306,11 @@ proc validate_AppServiceEnvironmentsListWebWorkerUsages_568676(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568682 = query.getOrDefault("api-version")
-  valid_568682 = validateParameter(valid_568682, JString, required = true,
+  var valid_564582 = query.getOrDefault("api-version")
+  valid_564582 = validateParameter(valid_564582, JString, required = true,
                                  default = nil)
-  if valid_568682 != nil:
-    section.add "api-version", valid_568682
+  if valid_564582 != nil:
+    section.add "api-version", valid_564582
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -5358,49 +5319,49 @@ proc validate_AppServiceEnvironmentsListWebWorkerUsages_568676(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568683: Call_AppServiceEnvironmentsListWebWorkerUsages_568675;
+proc call*(call_564583: Call_AppServiceEnvironmentsListWebWorkerUsages_564575;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Get usage metrics for a worker pool of an App Service Environment.
   ## 
-  let valid = call_568683.validator(path, query, header, formData, body)
-  let scheme = call_568683.pickScheme
+  let valid = call_564583.validator(path, query, header, formData, body)
+  let scheme = call_564583.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568683.url(scheme.get, call_568683.host, call_568683.base,
-                         call_568683.route, valid.getOrDefault("path"),
+  let url = call_564583.url(scheme.get, call_564583.host, call_564583.base,
+                         call_564583.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568683, url, valid)
+  result = hook(call_564583, url, valid)
 
-proc call*(call_568684: Call_AppServiceEnvironmentsListWebWorkerUsages_568675;
-          resourceGroupName: string; apiVersion: string; name: string;
-          workerPoolName: string; subscriptionId: string): Recallable =
+proc call*(call_564584: Call_AppServiceEnvironmentsListWebWorkerUsages_564575;
+          apiVersion: string; name: string; subscriptionId: string;
+          resourceGroupName: string; workerPoolName: string): Recallable =
   ## appServiceEnvironmentsListWebWorkerUsages
   ## Get usage metrics for a worker pool of an App Service Environment.
-  ##   resourceGroupName: string (required)
-  ##                    : Name of the resource group to which the resource belongs.
   ##   apiVersion: string (required)
   ##             : API Version
   ##   name: string (required)
   ##       : Name of the App Service Environment.
-  ##   workerPoolName: string (required)
-  ##                 : Name of the worker pool.
   ##   subscriptionId: string (required)
   ##                 : Your Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
-  var path_568685 = newJObject()
-  var query_568686 = newJObject()
-  add(path_568685, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568686, "api-version", newJString(apiVersion))
-  add(path_568685, "name", newJString(name))
-  add(path_568685, "workerPoolName", newJString(workerPoolName))
-  add(path_568685, "subscriptionId", newJString(subscriptionId))
-  result = call_568684.call(path_568685, query_568686, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : Name of the resource group to which the resource belongs.
+  ##   workerPoolName: string (required)
+  ##                 : Name of the worker pool.
+  var path_564585 = newJObject()
+  var query_564586 = newJObject()
+  add(query_564586, "api-version", newJString(apiVersion))
+  add(path_564585, "name", newJString(name))
+  add(path_564585, "subscriptionId", newJString(subscriptionId))
+  add(path_564585, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564585, "workerPoolName", newJString(workerPoolName))
+  result = call_564584.call(path_564585, query_564586, nil, nil, nil)
 
-var appServiceEnvironmentsListWebWorkerUsages* = Call_AppServiceEnvironmentsListWebWorkerUsages_568675(
+var appServiceEnvironmentsListWebWorkerUsages* = Call_AppServiceEnvironmentsListWebWorkerUsages_564575(
     name: "appServiceEnvironmentsListWebWorkerUsages", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Web/hostingEnvironments/{name}/workerPools/{workerPoolName}/usages",
-    validator: validate_AppServiceEnvironmentsListWebWorkerUsages_568676,
-    base: "", url: url_AppServiceEnvironmentsListWebWorkerUsages_568677,
+    validator: validate_AppServiceEnvironmentsListWebWorkerUsages_564576,
+    base: "", url: url_AppServiceEnvironmentsListWebWorkerUsages_564577,
     schemes: {Scheme.Https})
 export
   rest

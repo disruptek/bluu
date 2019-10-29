@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, httpcore
 
 ## auto-generated via openapi macro
 ## title: Management Groups
@@ -28,15 +28,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_567658 = ref object of OpenApiRestCall
+  OpenApiRestCall_563556 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_567658](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563556](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_567658): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563556): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -94,9 +94,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -106,15 +110,15 @@ const
   macServiceName = "managementgroups-management"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_CheckNameAvailability_567880 = ref object of OpenApiRestCall_567658
-proc url_CheckNameAvailability_567882(protocol: Scheme; host: string; base: string;
+  Call_CheckNameAvailability_563778 = ref object of OpenApiRestCall_563556
+proc url_CheckNameAvailability_563780(protocol: Scheme; host: string; base: string;
                                      route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_CheckNameAvailability_567881(path: JsonNode; query: JsonNode;
+proc validate_CheckNameAvailability_563779(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Checks if the specified management group name is valid and unique
   ## 
@@ -128,11 +132,11 @@ proc validate_CheckNameAvailability_567881(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568041 = query.getOrDefault("api-version")
-  valid_568041 = validateParameter(valid_568041, JString, required = true,
+  var valid_563941 = query.getOrDefault("api-version")
+  valid_563941 = validateParameter(valid_563941, JString, required = true,
                                  default = nil)
-  if valid_568041 != nil:
-    section.add "api-version", valid_568041
+  if valid_563941 != nil:
+    section.add "api-version", valid_563941
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -146,20 +150,20 @@ proc validate_CheckNameAvailability_567881(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568065: Call_CheckNameAvailability_567880; path: JsonNode;
+proc call*(call_563965: Call_CheckNameAvailability_563778; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Checks if the specified management group name is valid and unique
   ## 
-  let valid = call_568065.validator(path, query, header, formData, body)
-  let scheme = call_568065.pickScheme
+  let valid = call_563965.validator(path, query, header, formData, body)
+  let scheme = call_563965.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568065.url(scheme.get, call_568065.host, call_568065.base,
-                         call_568065.route, valid.getOrDefault("path"),
+  let url = call_563965.url(scheme.get, call_563965.host, call_563965.base,
+                         call_563965.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568065, url, valid)
+  result = hook(call_563965, url, valid)
 
-proc call*(call_568136: Call_CheckNameAvailability_567880; apiVersion: string;
+proc call*(call_564036: Call_CheckNameAvailability_563778; apiVersion: string;
           checkNameAvailabilityRequest: JsonNode): Recallable =
   ## checkNameAvailability
   ## Checks if the specified management group name is valid and unique
@@ -167,29 +171,29 @@ proc call*(call_568136: Call_CheckNameAvailability_567880; apiVersion: string;
   ##             : Version of the API to be used with the client request. The current version is 2018-01-01-preview.
   ##   checkNameAvailabilityRequest: JObject (required)
   ##                               : Management group name availability check parameters.
-  var query_568137 = newJObject()
-  var body_568139 = newJObject()
-  add(query_568137, "api-version", newJString(apiVersion))
+  var query_564037 = newJObject()
+  var body_564039 = newJObject()
+  add(query_564037, "api-version", newJString(apiVersion))
   if checkNameAvailabilityRequest != nil:
-    body_568139 = checkNameAvailabilityRequest
-  result = call_568136.call(nil, query_568137, nil, nil, body_568139)
+    body_564039 = checkNameAvailabilityRequest
+  result = call_564036.call(nil, query_564037, nil, nil, body_564039)
 
-var checkNameAvailability* = Call_CheckNameAvailability_567880(
+var checkNameAvailability* = Call_CheckNameAvailability_563778(
     name: "checkNameAvailability", meth: HttpMethod.HttpPost,
     host: "management.azure.com",
     route: "/providers/Microsoft.Management/checkNameAvailability",
-    validator: validate_CheckNameAvailability_567881, base: "",
-    url: url_CheckNameAvailability_567882, schemes: {Scheme.Https})
+    validator: validate_CheckNameAvailability_563779, base: "",
+    url: url_CheckNameAvailability_563780, schemes: {Scheme.Https})
 type
-  Call_EntitiesList_568178 = ref object of OpenApiRestCall_567658
-proc url_EntitiesList_568180(protocol: Scheme; host: string; base: string;
+  Call_EntitiesList_564078 = ref object of OpenApiRestCall_563556
+proc url_EntitiesList_564080(protocol: Scheme; host: string; base: string;
                             route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_EntitiesList_568179(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_EntitiesList_564079(path: JsonNode; query: JsonNode; header: JsonNode;
                                  formData: JsonNode; body: JsonNode): JsonNode =
   ## List all entities (Management Groups, Subscriptions, etc.) for the authenticated user.
   ## 
@@ -201,94 +205,94 @@ proc validate_EntitiesList_568179(path: JsonNode; query: JsonNode; header: JsonN
   ## parameters in `query` object:
   ##   api-version: JString (required)
   ##              : Version of the API to be used with the client request. The current version is 2018-01-01-preview.
+  ##   groupName: JString
+  ##            : A filter which allows the call to be filtered for a specific group.
   ##   $skiptoken: JString
   ##             : Page continuation token is only used if a previous operation returned a partial result. 
   ## If a previous response contains a nextLink element, the value of the nextLink element will include a token parameter that specifies a starting point to use for subsequent calls.
   ## 
-  ##   groupName: JString
-  ##            : A filter which allows the call to be filtered for a specific group.
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568182 = query.getOrDefault("api-version")
-  valid_568182 = validateParameter(valid_568182, JString, required = true,
+  var valid_564082 = query.getOrDefault("api-version")
+  valid_564082 = validateParameter(valid_564082, JString, required = true,
                                  default = nil)
-  if valid_568182 != nil:
-    section.add "api-version", valid_568182
-  var valid_568183 = query.getOrDefault("$skiptoken")
-  valid_568183 = validateParameter(valid_568183, JString, required = false,
+  if valid_564082 != nil:
+    section.add "api-version", valid_564082
+  var valid_564083 = query.getOrDefault("groupName")
+  valid_564083 = validateParameter(valid_564083, JString, required = false,
                                  default = nil)
-  if valid_568183 != nil:
-    section.add "$skiptoken", valid_568183
-  var valid_568184 = query.getOrDefault("groupName")
-  valid_568184 = validateParameter(valid_568184, JString, required = false,
+  if valid_564083 != nil:
+    section.add "groupName", valid_564083
+  var valid_564084 = query.getOrDefault("$skiptoken")
+  valid_564084 = validateParameter(valid_564084, JString, required = false,
                                  default = nil)
-  if valid_568184 != nil:
-    section.add "groupName", valid_568184
+  if valid_564084 != nil:
+    section.add "$skiptoken", valid_564084
   result.add "query", section
   ## parameters in `header` object:
   ##   Cache-Control: JString
   ##                : Indicates that the request shouldn't utilize any caches.
   section = newJObject()
-  var valid_568198 = header.getOrDefault("Cache-Control")
-  valid_568198 = validateParameter(valid_568198, JString, required = false,
+  var valid_564098 = header.getOrDefault("Cache-Control")
+  valid_564098 = validateParameter(valid_564098, JString, required = false,
                                  default = newJString("no-cache"))
-  if valid_568198 != nil:
-    section.add "Cache-Control", valid_568198
+  if valid_564098 != nil:
+    section.add "Cache-Control", valid_564098
   result.add "header", section
   section = newJObject()
   result.add "formData", section
   if body != nil:
     result.add "body", body
 
-proc call*(call_568199: Call_EntitiesList_568178; path: JsonNode; query: JsonNode;
+proc call*(call_564099: Call_EntitiesList_564078; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## List all entities (Management Groups, Subscriptions, etc.) for the authenticated user.
   ## 
   ## 
-  let valid = call_568199.validator(path, query, header, formData, body)
-  let scheme = call_568199.pickScheme
+  let valid = call_564099.validator(path, query, header, formData, body)
+  let scheme = call_564099.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568199.url(scheme.get, call_568199.host, call_568199.base,
-                         call_568199.route, valid.getOrDefault("path"),
+  let url = call_564099.url(scheme.get, call_564099.host, call_564099.base,
+                         call_564099.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568199, url, valid)
+  result = hook(call_564099, url, valid)
 
-proc call*(call_568200: Call_EntitiesList_568178; apiVersion: string;
-          Skiptoken: string = ""; groupName: string = ""): Recallable =
+proc call*(call_564100: Call_EntitiesList_564078; apiVersion: string;
+          groupName: string = ""; Skiptoken: string = ""): Recallable =
   ## entitiesList
   ## List all entities (Management Groups, Subscriptions, etc.) for the authenticated user.
   ## 
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request. The current version is 2018-01-01-preview.
+  ##   groupName: string
+  ##            : A filter which allows the call to be filtered for a specific group.
   ##   Skiptoken: string
   ##            : Page continuation token is only used if a previous operation returned a partial result. 
   ## If a previous response contains a nextLink element, the value of the nextLink element will include a token parameter that specifies a starting point to use for subsequent calls.
   ## 
-  ##   groupName: string
-  ##            : A filter which allows the call to be filtered for a specific group.
-  var query_568201 = newJObject()
-  add(query_568201, "api-version", newJString(apiVersion))
-  add(query_568201, "$skiptoken", newJString(Skiptoken))
-  add(query_568201, "groupName", newJString(groupName))
-  result = call_568200.call(nil, query_568201, nil, nil, nil)
+  var query_564101 = newJObject()
+  add(query_564101, "api-version", newJString(apiVersion))
+  add(query_564101, "groupName", newJString(groupName))
+  add(query_564101, "$skiptoken", newJString(Skiptoken))
+  result = call_564100.call(nil, query_564101, nil, nil, nil)
 
-var entitiesList* = Call_EntitiesList_568178(name: "entitiesList",
+var entitiesList* = Call_EntitiesList_564078(name: "entitiesList",
     meth: HttpMethod.HttpPost, host: "management.azure.com",
     route: "/providers/Microsoft.Management/getEntities",
-    validator: validate_EntitiesList_568179, base: "", url: url_EntitiesList_568180,
+    validator: validate_EntitiesList_564079, base: "", url: url_EntitiesList_564080,
     schemes: {Scheme.Https})
 type
-  Call_ManagementGroupsList_568202 = ref object of OpenApiRestCall_567658
-proc url_ManagementGroupsList_568204(protocol: Scheme; host: string; base: string;
+  Call_ManagementGroupsList_564102 = ref object of OpenApiRestCall_563556
+proc url_ManagementGroupsList_564104(protocol: Scheme; host: string; base: string;
                                     route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_ManagementGroupsList_568203(path: JsonNode; query: JsonNode;
+proc validate_ManagementGroupsList_564103(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## List management groups for the authenticated user.
   ## 
@@ -307,47 +311,47 @@ proc validate_ManagementGroupsList_568203(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568205 = query.getOrDefault("api-version")
-  valid_568205 = validateParameter(valid_568205, JString, required = true,
+  var valid_564105 = query.getOrDefault("api-version")
+  valid_564105 = validateParameter(valid_564105, JString, required = true,
                                  default = nil)
-  if valid_568205 != nil:
-    section.add "api-version", valid_568205
-  var valid_568206 = query.getOrDefault("$skiptoken")
-  valid_568206 = validateParameter(valid_568206, JString, required = false,
+  if valid_564105 != nil:
+    section.add "api-version", valid_564105
+  var valid_564106 = query.getOrDefault("$skiptoken")
+  valid_564106 = validateParameter(valid_564106, JString, required = false,
                                  default = nil)
-  if valid_568206 != nil:
-    section.add "$skiptoken", valid_568206
+  if valid_564106 != nil:
+    section.add "$skiptoken", valid_564106
   result.add "query", section
   ## parameters in `header` object:
   ##   Cache-Control: JString
   ##                : Indicates that the request shouldn't utilize any caches.
   section = newJObject()
-  var valid_568207 = header.getOrDefault("Cache-Control")
-  valid_568207 = validateParameter(valid_568207, JString, required = false,
+  var valid_564107 = header.getOrDefault("Cache-Control")
+  valid_564107 = validateParameter(valid_564107, JString, required = false,
                                  default = newJString("no-cache"))
-  if valid_568207 != nil:
-    section.add "Cache-Control", valid_568207
+  if valid_564107 != nil:
+    section.add "Cache-Control", valid_564107
   result.add "header", section
   section = newJObject()
   result.add "formData", section
   if body != nil:
     result.add "body", body
 
-proc call*(call_568208: Call_ManagementGroupsList_568202; path: JsonNode;
+proc call*(call_564108: Call_ManagementGroupsList_564102; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## List management groups for the authenticated user.
   ## 
   ## 
-  let valid = call_568208.validator(path, query, header, formData, body)
-  let scheme = call_568208.pickScheme
+  let valid = call_564108.validator(path, query, header, formData, body)
+  let scheme = call_564108.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568208.url(scheme.get, call_568208.host, call_568208.base,
-                         call_568208.route, valid.getOrDefault("path"),
+  let url = call_564108.url(scheme.get, call_564108.host, call_564108.base,
+                         call_564108.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568208, url, valid)
+  result = hook(call_564108, url, valid)
 
-proc call*(call_568209: Call_ManagementGroupsList_568202; apiVersion: string;
+proc call*(call_564109: Call_ManagementGroupsList_564102; apiVersion: string;
           Skiptoken: string = ""): Recallable =
   ## managementGroupsList
   ## List management groups for the authenticated user.
@@ -358,20 +362,20 @@ proc call*(call_568209: Call_ManagementGroupsList_568202; apiVersion: string;
   ##            : Page continuation token is only used if a previous operation returned a partial result. 
   ## If a previous response contains a nextLink element, the value of the nextLink element will include a token parameter that specifies a starting point to use for subsequent calls.
   ## 
-  var query_568210 = newJObject()
-  add(query_568210, "api-version", newJString(apiVersion))
-  add(query_568210, "$skiptoken", newJString(Skiptoken))
-  result = call_568209.call(nil, query_568210, nil, nil, nil)
+  var query_564110 = newJObject()
+  add(query_564110, "api-version", newJString(apiVersion))
+  add(query_564110, "$skiptoken", newJString(Skiptoken))
+  result = call_564109.call(nil, query_564110, nil, nil, nil)
 
-var managementGroupsList* = Call_ManagementGroupsList_568202(
+var managementGroupsList* = Call_ManagementGroupsList_564102(
     name: "managementGroupsList", meth: HttpMethod.HttpGet,
     host: "management.azure.com",
     route: "/providers/Microsoft.Management/managementGroups",
-    validator: validate_ManagementGroupsList_568203, base: "",
-    url: url_ManagementGroupsList_568204, schemes: {Scheme.Https})
+    validator: validate_ManagementGroupsList_564103, base: "",
+    url: url_ManagementGroupsList_564104, schemes: {Scheme.Https})
 type
-  Call_ManagementGroupsCreateOrUpdate_568238 = ref object of OpenApiRestCall_567658
-proc url_ManagementGroupsCreateOrUpdate_568240(protocol: Scheme; host: string;
+  Call_ManagementGroupsCreateOrUpdate_564138 = ref object of OpenApiRestCall_563556
+proc url_ManagementGroupsCreateOrUpdate_564140(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -387,7 +391,7 @@ proc url_ManagementGroupsCreateOrUpdate_568240(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ManagementGroupsCreateOrUpdate_568239(path: JsonNode;
+proc validate_ManagementGroupsCreateOrUpdate_564139(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Create or update a management group.
   ## If a management group is already created and a subsequent create request is issued with different properties, the management group properties will be updated.
@@ -400,11 +404,11 @@ proc validate_ManagementGroupsCreateOrUpdate_568239(path: JsonNode;
   ##          : Management Group ID.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `groupId` field"
-  var valid_568241 = path.getOrDefault("groupId")
-  valid_568241 = validateParameter(valid_568241, JString, required = true,
+  var valid_564141 = path.getOrDefault("groupId")
+  valid_564141 = validateParameter(valid_564141, JString, required = true,
                                  default = nil)
-  if valid_568241 != nil:
-    section.add "groupId", valid_568241
+  if valid_564141 != nil:
+    section.add "groupId", valid_564141
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -412,21 +416,21 @@ proc validate_ManagementGroupsCreateOrUpdate_568239(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568242 = query.getOrDefault("api-version")
-  valid_568242 = validateParameter(valid_568242, JString, required = true,
+  var valid_564142 = query.getOrDefault("api-version")
+  valid_564142 = validateParameter(valid_564142, JString, required = true,
                                  default = nil)
-  if valid_568242 != nil:
-    section.add "api-version", valid_568242
+  if valid_564142 != nil:
+    section.add "api-version", valid_564142
   result.add "query", section
   ## parameters in `header` object:
   ##   Cache-Control: JString
   ##                : Indicates that the request shouldn't utilize any caches.
   section = newJObject()
-  var valid_568243 = header.getOrDefault("Cache-Control")
-  valid_568243 = validateParameter(valid_568243, JString, required = false,
+  var valid_564143 = header.getOrDefault("Cache-Control")
+  valid_564143 = validateParameter(valid_564143, JString, required = false,
                                  default = newJString("no-cache"))
-  if valid_568243 != nil:
-    section.add "Cache-Control", valid_568243
+  if valid_564143 != nil:
+    section.add "Cache-Control", valid_564143
   result.add "header", section
   section = newJObject()
   result.add "formData", section
@@ -438,52 +442,52 @@ proc validate_ManagementGroupsCreateOrUpdate_568239(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568245: Call_ManagementGroupsCreateOrUpdate_568238; path: JsonNode;
+proc call*(call_564145: Call_ManagementGroupsCreateOrUpdate_564138; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Create or update a management group.
   ## If a management group is already created and a subsequent create request is issued with different properties, the management group properties will be updated.
   ## 
   ## 
-  let valid = call_568245.validator(path, query, header, formData, body)
-  let scheme = call_568245.pickScheme
+  let valid = call_564145.validator(path, query, header, formData, body)
+  let scheme = call_564145.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568245.url(scheme.get, call_568245.host, call_568245.base,
-                         call_568245.route, valid.getOrDefault("path"),
+  let url = call_564145.url(scheme.get, call_564145.host, call_564145.base,
+                         call_564145.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568245, url, valid)
+  result = hook(call_564145, url, valid)
 
-proc call*(call_568246: Call_ManagementGroupsCreateOrUpdate_568238;
-          groupId: string; apiVersion: string;
+proc call*(call_564146: Call_ManagementGroupsCreateOrUpdate_564138;
+          apiVersion: string; groupId: string;
           createManagementGroupRequest: JsonNode): Recallable =
   ## managementGroupsCreateOrUpdate
   ## Create or update a management group.
   ## If a management group is already created and a subsequent create request is issued with different properties, the management group properties will be updated.
   ## 
-  ##   groupId: string (required)
-  ##          : Management Group ID.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request. The current version is 2018-01-01-preview.
+  ##   groupId: string (required)
+  ##          : Management Group ID.
   ##   createManagementGroupRequest: JObject (required)
   ##                               : Management group creation parameters.
-  var path_568247 = newJObject()
-  var query_568248 = newJObject()
-  var body_568249 = newJObject()
-  add(path_568247, "groupId", newJString(groupId))
-  add(query_568248, "api-version", newJString(apiVersion))
+  var path_564147 = newJObject()
+  var query_564148 = newJObject()
+  var body_564149 = newJObject()
+  add(query_564148, "api-version", newJString(apiVersion))
+  add(path_564147, "groupId", newJString(groupId))
   if createManagementGroupRequest != nil:
-    body_568249 = createManagementGroupRequest
-  result = call_568246.call(path_568247, query_568248, nil, nil, body_568249)
+    body_564149 = createManagementGroupRequest
+  result = call_564146.call(path_564147, query_564148, nil, nil, body_564149)
 
-var managementGroupsCreateOrUpdate* = Call_ManagementGroupsCreateOrUpdate_568238(
+var managementGroupsCreateOrUpdate* = Call_ManagementGroupsCreateOrUpdate_564138(
     name: "managementGroupsCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com",
     route: "/providers/Microsoft.Management/managementGroups/{groupId}",
-    validator: validate_ManagementGroupsCreateOrUpdate_568239, base: "",
-    url: url_ManagementGroupsCreateOrUpdate_568240, schemes: {Scheme.Https})
+    validator: validate_ManagementGroupsCreateOrUpdate_564139, base: "",
+    url: url_ManagementGroupsCreateOrUpdate_564140, schemes: {Scheme.Https})
 type
-  Call_ManagementGroupsGet_568211 = ref object of OpenApiRestCall_567658
-proc url_ManagementGroupsGet_568213(protocol: Scheme; host: string; base: string;
+  Call_ManagementGroupsGet_564111 = ref object of OpenApiRestCall_563556
+proc url_ManagementGroupsGet_564113(protocol: Scheme; host: string; base: string;
                                    route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -499,7 +503,7 @@ proc url_ManagementGroupsGet_568213(protocol: Scheme; host: string; base: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ManagementGroupsGet_568212(path: JsonNode; query: JsonNode;
+proc validate_ManagementGroupsGet_564112(path: JsonNode; query: JsonNode;
                                         header: JsonNode; formData: JsonNode;
                                         body: JsonNode): JsonNode =
   ## Get the details of the management group.
@@ -512,11 +516,11 @@ proc validate_ManagementGroupsGet_568212(path: JsonNode; query: JsonNode;
   ##          : Management Group ID.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `groupId` field"
-  var valid_568228 = path.getOrDefault("groupId")
-  valid_568228 = validateParameter(valid_568228, JString, required = true,
+  var valid_564128 = path.getOrDefault("groupId")
+  valid_564128 = validateParameter(valid_564128, JString, required = true,
                                  default = nil)
-  if valid_568228 != nil:
-    section.add "groupId", valid_568228
+  if valid_564128 != nil:
+    section.add "groupId", valid_564128
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -530,89 +534,89 @@ proc validate_ManagementGroupsGet_568212(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568229 = query.getOrDefault("api-version")
-  valid_568229 = validateParameter(valid_568229, JString, required = true,
+  var valid_564129 = query.getOrDefault("api-version")
+  valid_564129 = validateParameter(valid_564129, JString, required = true,
                                  default = nil)
-  if valid_568229 != nil:
-    section.add "api-version", valid_568229
-  var valid_568230 = query.getOrDefault("$expand")
-  valid_568230 = validateParameter(valid_568230, JString, required = false,
+  if valid_564129 != nil:
+    section.add "api-version", valid_564129
+  var valid_564130 = query.getOrDefault("$expand")
+  valid_564130 = validateParameter(valid_564130, JString, required = false,
                                  default = newJString("children"))
-  if valid_568230 != nil:
-    section.add "$expand", valid_568230
-  var valid_568231 = query.getOrDefault("$recurse")
-  valid_568231 = validateParameter(valid_568231, JBool, required = false, default = nil)
-  if valid_568231 != nil:
-    section.add "$recurse", valid_568231
-  var valid_568232 = query.getOrDefault("$filter")
-  valid_568232 = validateParameter(valid_568232, JString, required = false,
+  if valid_564130 != nil:
+    section.add "$expand", valid_564130
+  var valid_564131 = query.getOrDefault("$recurse")
+  valid_564131 = validateParameter(valid_564131, JBool, required = false, default = nil)
+  if valid_564131 != nil:
+    section.add "$recurse", valid_564131
+  var valid_564132 = query.getOrDefault("$filter")
+  valid_564132 = validateParameter(valid_564132, JString, required = false,
                                  default = nil)
-  if valid_568232 != nil:
-    section.add "$filter", valid_568232
+  if valid_564132 != nil:
+    section.add "$filter", valid_564132
   result.add "query", section
   ## parameters in `header` object:
   ##   Cache-Control: JString
   ##                : Indicates that the request shouldn't utilize any caches.
   section = newJObject()
-  var valid_568233 = header.getOrDefault("Cache-Control")
-  valid_568233 = validateParameter(valid_568233, JString, required = false,
+  var valid_564133 = header.getOrDefault("Cache-Control")
+  valid_564133 = validateParameter(valid_564133, JString, required = false,
                                  default = newJString("no-cache"))
-  if valid_568233 != nil:
-    section.add "Cache-Control", valid_568233
+  if valid_564133 != nil:
+    section.add "Cache-Control", valid_564133
   result.add "header", section
   section = newJObject()
   result.add "formData", section
   if body != nil:
     result.add "body", body
 
-proc call*(call_568234: Call_ManagementGroupsGet_568211; path: JsonNode;
+proc call*(call_564134: Call_ManagementGroupsGet_564111; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get the details of the management group.
   ## 
   ## 
-  let valid = call_568234.validator(path, query, header, formData, body)
-  let scheme = call_568234.pickScheme
+  let valid = call_564134.validator(path, query, header, formData, body)
+  let scheme = call_564134.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568234.url(scheme.get, call_568234.host, call_568234.base,
-                         call_568234.route, valid.getOrDefault("path"),
+  let url = call_564134.url(scheme.get, call_564134.host, call_564134.base,
+                         call_564134.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568234, url, valid)
+  result = hook(call_564134, url, valid)
 
-proc call*(call_568235: Call_ManagementGroupsGet_568211; groupId: string;
-          apiVersion: string; Expand: string = "children"; Recurse: bool = false;
+proc call*(call_564135: Call_ManagementGroupsGet_564111; apiVersion: string;
+          groupId: string; Expand: string = "children"; Recurse: bool = false;
           Filter: string = ""): Recallable =
   ## managementGroupsGet
   ## Get the details of the management group.
   ## 
-  ##   groupId: string (required)
-  ##          : Management Group ID.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request. The current version is 2018-01-01-preview.
+  ##   groupId: string (required)
+  ##          : Management Group ID.
   ##   Expand: string
   ##         : The $expand=children query string parameter allows clients to request inclusion of children in the response payload.
   ##   Recurse: bool
   ##          : The $recurse=true query string parameter allows clients to request inclusion of entire hierarchy in the response payload. Note that  $expand=children must be passed up if $recurse is set to true.
   ##   Filter: string
   ##         : A filter which allows the exclusion of subscriptions from results (i.e. '$filter=children.childType ne Subscription')
-  var path_568236 = newJObject()
-  var query_568237 = newJObject()
-  add(path_568236, "groupId", newJString(groupId))
-  add(query_568237, "api-version", newJString(apiVersion))
-  add(query_568237, "$expand", newJString(Expand))
-  add(query_568237, "$recurse", newJBool(Recurse))
-  add(query_568237, "$filter", newJString(Filter))
-  result = call_568235.call(path_568236, query_568237, nil, nil, nil)
+  var path_564136 = newJObject()
+  var query_564137 = newJObject()
+  add(query_564137, "api-version", newJString(apiVersion))
+  add(path_564136, "groupId", newJString(groupId))
+  add(query_564137, "$expand", newJString(Expand))
+  add(query_564137, "$recurse", newJBool(Recurse))
+  add(query_564137, "$filter", newJString(Filter))
+  result = call_564135.call(path_564136, query_564137, nil, nil, nil)
 
-var managementGroupsGet* = Call_ManagementGroupsGet_568211(
+var managementGroupsGet* = Call_ManagementGroupsGet_564111(
     name: "managementGroupsGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com",
     route: "/providers/Microsoft.Management/managementGroups/{groupId}",
-    validator: validate_ManagementGroupsGet_568212, base: "",
-    url: url_ManagementGroupsGet_568213, schemes: {Scheme.Https})
+    validator: validate_ManagementGroupsGet_564112, base: "",
+    url: url_ManagementGroupsGet_564113, schemes: {Scheme.Https})
 type
-  Call_ManagementGroupsUpdate_568260 = ref object of OpenApiRestCall_567658
-proc url_ManagementGroupsUpdate_568262(protocol: Scheme; host: string; base: string;
+  Call_ManagementGroupsUpdate_564160 = ref object of OpenApiRestCall_563556
+proc url_ManagementGroupsUpdate_564162(protocol: Scheme; host: string; base: string;
                                       route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -628,7 +632,7 @@ proc url_ManagementGroupsUpdate_568262(protocol: Scheme; host: string; base: str
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ManagementGroupsUpdate_568261(path: JsonNode; query: JsonNode;
+proc validate_ManagementGroupsUpdate_564161(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Update a management group.
   ## 
@@ -640,11 +644,11 @@ proc validate_ManagementGroupsUpdate_568261(path: JsonNode; query: JsonNode;
   ##          : Management Group ID.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `groupId` field"
-  var valid_568263 = path.getOrDefault("groupId")
-  valid_568263 = validateParameter(valid_568263, JString, required = true,
+  var valid_564163 = path.getOrDefault("groupId")
+  valid_564163 = validateParameter(valid_564163, JString, required = true,
                                  default = nil)
-  if valid_568263 != nil:
-    section.add "groupId", valid_568263
+  if valid_564163 != nil:
+    section.add "groupId", valid_564163
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -652,21 +656,21 @@ proc validate_ManagementGroupsUpdate_568261(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568264 = query.getOrDefault("api-version")
-  valid_568264 = validateParameter(valid_568264, JString, required = true,
+  var valid_564164 = query.getOrDefault("api-version")
+  valid_564164 = validateParameter(valid_564164, JString, required = true,
                                  default = nil)
-  if valid_568264 != nil:
-    section.add "api-version", valid_568264
+  if valid_564164 != nil:
+    section.add "api-version", valid_564164
   result.add "query", section
   ## parameters in `header` object:
   ##   Cache-Control: JString
   ##                : Indicates that the request shouldn't utilize any caches.
   section = newJObject()
-  var valid_568265 = header.getOrDefault("Cache-Control")
-  valid_568265 = validateParameter(valid_568265, JString, required = false,
+  var valid_564165 = header.getOrDefault("Cache-Control")
+  valid_564165 = validateParameter(valid_564165, JString, required = false,
                                  default = newJString("no-cache"))
-  if valid_568265 != nil:
-    section.add "Cache-Control", valid_568265
+  if valid_564165 != nil:
+    section.add "Cache-Control", valid_564165
   result.add "header", section
   section = newJObject()
   result.add "formData", section
@@ -678,49 +682,49 @@ proc validate_ManagementGroupsUpdate_568261(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568267: Call_ManagementGroupsUpdate_568260; path: JsonNode;
+proc call*(call_564167: Call_ManagementGroupsUpdate_564160; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Update a management group.
   ## 
   ## 
-  let valid = call_568267.validator(path, query, header, formData, body)
-  let scheme = call_568267.pickScheme
+  let valid = call_564167.validator(path, query, header, formData, body)
+  let scheme = call_564167.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568267.url(scheme.get, call_568267.host, call_568267.base,
-                         call_568267.route, valid.getOrDefault("path"),
+  let url = call_564167.url(scheme.get, call_564167.host, call_564167.base,
+                         call_564167.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568267, url, valid)
+  result = hook(call_564167, url, valid)
 
-proc call*(call_568268: Call_ManagementGroupsUpdate_568260; groupId: string;
-          apiVersion: string; patchGroupRequest: JsonNode): Recallable =
+proc call*(call_564168: Call_ManagementGroupsUpdate_564160; apiVersion: string;
+          groupId: string; patchGroupRequest: JsonNode): Recallable =
   ## managementGroupsUpdate
   ## Update a management group.
   ## 
-  ##   groupId: string (required)
-  ##          : Management Group ID.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request. The current version is 2018-01-01-preview.
+  ##   groupId: string (required)
+  ##          : Management Group ID.
   ##   patchGroupRequest: JObject (required)
   ##                    : Management group patch parameters.
-  var path_568269 = newJObject()
-  var query_568270 = newJObject()
-  var body_568271 = newJObject()
-  add(path_568269, "groupId", newJString(groupId))
-  add(query_568270, "api-version", newJString(apiVersion))
+  var path_564169 = newJObject()
+  var query_564170 = newJObject()
+  var body_564171 = newJObject()
+  add(query_564170, "api-version", newJString(apiVersion))
+  add(path_564169, "groupId", newJString(groupId))
   if patchGroupRequest != nil:
-    body_568271 = patchGroupRequest
-  result = call_568268.call(path_568269, query_568270, nil, nil, body_568271)
+    body_564171 = patchGroupRequest
+  result = call_564168.call(path_564169, query_564170, nil, nil, body_564171)
 
-var managementGroupsUpdate* = Call_ManagementGroupsUpdate_568260(
+var managementGroupsUpdate* = Call_ManagementGroupsUpdate_564160(
     name: "managementGroupsUpdate", meth: HttpMethod.HttpPatch,
     host: "management.azure.com",
     route: "/providers/Microsoft.Management/managementGroups/{groupId}",
-    validator: validate_ManagementGroupsUpdate_568261, base: "",
-    url: url_ManagementGroupsUpdate_568262, schemes: {Scheme.Https})
+    validator: validate_ManagementGroupsUpdate_564161, base: "",
+    url: url_ManagementGroupsUpdate_564162, schemes: {Scheme.Https})
 type
-  Call_ManagementGroupsDelete_568250 = ref object of OpenApiRestCall_567658
-proc url_ManagementGroupsDelete_568252(protocol: Scheme; host: string; base: string;
+  Call_ManagementGroupsDelete_564150 = ref object of OpenApiRestCall_563556
+proc url_ManagementGroupsDelete_564152(protocol: Scheme; host: string; base: string;
                                       route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -736,7 +740,7 @@ proc url_ManagementGroupsDelete_568252(protocol: Scheme; host: string; base: str
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ManagementGroupsDelete_568251(path: JsonNode; query: JsonNode;
+proc validate_ManagementGroupsDelete_564151(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Delete management group.
   ## If a management group contains child resources, the request will fail.
@@ -749,11 +753,11 @@ proc validate_ManagementGroupsDelete_568251(path: JsonNode; query: JsonNode;
   ##          : Management Group ID.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `groupId` field"
-  var valid_568253 = path.getOrDefault("groupId")
-  valid_568253 = validateParameter(valid_568253, JString, required = true,
+  var valid_564153 = path.getOrDefault("groupId")
+  valid_564153 = validateParameter(valid_564153, JString, required = true,
                                  default = nil)
-  if valid_568253 != nil:
-    section.add "groupId", valid_568253
+  if valid_564153 != nil:
+    section.add "groupId", valid_564153
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -761,67 +765,67 @@ proc validate_ManagementGroupsDelete_568251(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568254 = query.getOrDefault("api-version")
-  valid_568254 = validateParameter(valid_568254, JString, required = true,
+  var valid_564154 = query.getOrDefault("api-version")
+  valid_564154 = validateParameter(valid_564154, JString, required = true,
                                  default = nil)
-  if valid_568254 != nil:
-    section.add "api-version", valid_568254
+  if valid_564154 != nil:
+    section.add "api-version", valid_564154
   result.add "query", section
   ## parameters in `header` object:
   ##   Cache-Control: JString
   ##                : Indicates that the request shouldn't utilize any caches.
   section = newJObject()
-  var valid_568255 = header.getOrDefault("Cache-Control")
-  valid_568255 = validateParameter(valid_568255, JString, required = false,
+  var valid_564155 = header.getOrDefault("Cache-Control")
+  valid_564155 = validateParameter(valid_564155, JString, required = false,
                                  default = newJString("no-cache"))
-  if valid_568255 != nil:
-    section.add "Cache-Control", valid_568255
+  if valid_564155 != nil:
+    section.add "Cache-Control", valid_564155
   result.add "header", section
   section = newJObject()
   result.add "formData", section
   if body != nil:
     result.add "body", body
 
-proc call*(call_568256: Call_ManagementGroupsDelete_568250; path: JsonNode;
+proc call*(call_564156: Call_ManagementGroupsDelete_564150; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Delete management group.
   ## If a management group contains child resources, the request will fail.
   ## 
   ## 
-  let valid = call_568256.validator(path, query, header, formData, body)
-  let scheme = call_568256.pickScheme
+  let valid = call_564156.validator(path, query, header, formData, body)
+  let scheme = call_564156.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568256.url(scheme.get, call_568256.host, call_568256.base,
-                         call_568256.route, valid.getOrDefault("path"),
+  let url = call_564156.url(scheme.get, call_564156.host, call_564156.base,
+                         call_564156.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568256, url, valid)
+  result = hook(call_564156, url, valid)
 
-proc call*(call_568257: Call_ManagementGroupsDelete_568250; groupId: string;
-          apiVersion: string): Recallable =
+proc call*(call_564157: Call_ManagementGroupsDelete_564150; apiVersion: string;
+          groupId: string): Recallable =
   ## managementGroupsDelete
   ## Delete management group.
   ## If a management group contains child resources, the request will fail.
   ## 
-  ##   groupId: string (required)
-  ##          : Management Group ID.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request. The current version is 2018-01-01-preview.
-  var path_568258 = newJObject()
-  var query_568259 = newJObject()
-  add(path_568258, "groupId", newJString(groupId))
-  add(query_568259, "api-version", newJString(apiVersion))
-  result = call_568257.call(path_568258, query_568259, nil, nil, nil)
+  ##   groupId: string (required)
+  ##          : Management Group ID.
+  var path_564158 = newJObject()
+  var query_564159 = newJObject()
+  add(query_564159, "api-version", newJString(apiVersion))
+  add(path_564158, "groupId", newJString(groupId))
+  result = call_564157.call(path_564158, query_564159, nil, nil, nil)
 
-var managementGroupsDelete* = Call_ManagementGroupsDelete_568250(
+var managementGroupsDelete* = Call_ManagementGroupsDelete_564150(
     name: "managementGroupsDelete", meth: HttpMethod.HttpDelete,
     host: "management.azure.com",
     route: "/providers/Microsoft.Management/managementGroups/{groupId}",
-    validator: validate_ManagementGroupsDelete_568251, base: "",
-    url: url_ManagementGroupsDelete_568252, schemes: {Scheme.Https})
+    validator: validate_ManagementGroupsDelete_564151, base: "",
+    url: url_ManagementGroupsDelete_564152, schemes: {Scheme.Https})
 type
-  Call_ManagementGroupSubscriptionsCreate_568272 = ref object of OpenApiRestCall_567658
-proc url_ManagementGroupSubscriptionsCreate_568274(protocol: Scheme; host: string;
+  Call_ManagementGroupSubscriptionsCreate_564172 = ref object of OpenApiRestCall_563556
+proc url_ManagementGroupSubscriptionsCreate_564174(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -840,7 +844,7 @@ proc url_ManagementGroupSubscriptionsCreate_568274(protocol: Scheme; host: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ManagementGroupSubscriptionsCreate_568273(path: JsonNode;
+proc validate_ManagementGroupSubscriptionsCreate_564173(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Associates existing subscription with the management group.
   ## 
@@ -854,16 +858,16 @@ proc validate_ManagementGroupSubscriptionsCreate_568273(path: JsonNode;
   ##                 : Subscription ID.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `groupId` field"
-  var valid_568275 = path.getOrDefault("groupId")
-  valid_568275 = validateParameter(valid_568275, JString, required = true,
+  var valid_564175 = path.getOrDefault("groupId")
+  valid_564175 = validateParameter(valid_564175, JString, required = true,
                                  default = nil)
-  if valid_568275 != nil:
-    section.add "groupId", valid_568275
-  var valid_568276 = path.getOrDefault("subscriptionId")
-  valid_568276 = validateParameter(valid_568276, JString, required = true,
+  if valid_564175 != nil:
+    section.add "groupId", valid_564175
+  var valid_564176 = path.getOrDefault("subscriptionId")
+  valid_564176 = validateParameter(valid_564176, JString, required = true,
                                  default = nil)
-  if valid_568276 != nil:
-    section.add "subscriptionId", valid_568276
+  if valid_564176 != nil:
+    section.add "subscriptionId", valid_564176
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -871,68 +875,68 @@ proc validate_ManagementGroupSubscriptionsCreate_568273(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568277 = query.getOrDefault("api-version")
-  valid_568277 = validateParameter(valid_568277, JString, required = true,
+  var valid_564177 = query.getOrDefault("api-version")
+  valid_564177 = validateParameter(valid_564177, JString, required = true,
                                  default = nil)
-  if valid_568277 != nil:
-    section.add "api-version", valid_568277
+  if valid_564177 != nil:
+    section.add "api-version", valid_564177
   result.add "query", section
   ## parameters in `header` object:
   ##   Cache-Control: JString
   ##                : Indicates that the request shouldn't utilize any caches.
   section = newJObject()
-  var valid_568278 = header.getOrDefault("Cache-Control")
-  valid_568278 = validateParameter(valid_568278, JString, required = false,
+  var valid_564178 = header.getOrDefault("Cache-Control")
+  valid_564178 = validateParameter(valid_564178, JString, required = false,
                                  default = newJString("no-cache"))
-  if valid_568278 != nil:
-    section.add "Cache-Control", valid_568278
+  if valid_564178 != nil:
+    section.add "Cache-Control", valid_564178
   result.add "header", section
   section = newJObject()
   result.add "formData", section
   if body != nil:
     result.add "body", body
 
-proc call*(call_568279: Call_ManagementGroupSubscriptionsCreate_568272;
+proc call*(call_564179: Call_ManagementGroupSubscriptionsCreate_564172;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Associates existing subscription with the management group.
   ## 
   ## 
-  let valid = call_568279.validator(path, query, header, formData, body)
-  let scheme = call_568279.pickScheme
+  let valid = call_564179.validator(path, query, header, formData, body)
+  let scheme = call_564179.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568279.url(scheme.get, call_568279.host, call_568279.base,
-                         call_568279.route, valid.getOrDefault("path"),
+  let url = call_564179.url(scheme.get, call_564179.host, call_564179.base,
+                         call_564179.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568279, url, valid)
+  result = hook(call_564179, url, valid)
 
-proc call*(call_568280: Call_ManagementGroupSubscriptionsCreate_568272;
-          groupId: string; apiVersion: string; subscriptionId: string): Recallable =
+proc call*(call_564180: Call_ManagementGroupSubscriptionsCreate_564172;
+          apiVersion: string; groupId: string; subscriptionId: string): Recallable =
   ## managementGroupSubscriptionsCreate
   ## Associates existing subscription with the management group.
   ## 
-  ##   groupId: string (required)
-  ##          : Management Group ID.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request. The current version is 2018-01-01-preview.
+  ##   groupId: string (required)
+  ##          : Management Group ID.
   ##   subscriptionId: string (required)
   ##                 : Subscription ID.
-  var path_568281 = newJObject()
-  var query_568282 = newJObject()
-  add(path_568281, "groupId", newJString(groupId))
-  add(query_568282, "api-version", newJString(apiVersion))
-  add(path_568281, "subscriptionId", newJString(subscriptionId))
-  result = call_568280.call(path_568281, query_568282, nil, nil, nil)
+  var path_564181 = newJObject()
+  var query_564182 = newJObject()
+  add(query_564182, "api-version", newJString(apiVersion))
+  add(path_564181, "groupId", newJString(groupId))
+  add(path_564181, "subscriptionId", newJString(subscriptionId))
+  result = call_564180.call(path_564181, query_564182, nil, nil, nil)
 
-var managementGroupSubscriptionsCreate* = Call_ManagementGroupSubscriptionsCreate_568272(
+var managementGroupSubscriptionsCreate* = Call_ManagementGroupSubscriptionsCreate_564172(
     name: "managementGroupSubscriptionsCreate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/providers/Microsoft.Management/managementGroups/{groupId}/subscriptions/{subscriptionId}",
-    validator: validate_ManagementGroupSubscriptionsCreate_568273, base: "",
-    url: url_ManagementGroupSubscriptionsCreate_568274, schemes: {Scheme.Https})
+    validator: validate_ManagementGroupSubscriptionsCreate_564173, base: "",
+    url: url_ManagementGroupSubscriptionsCreate_564174, schemes: {Scheme.Https})
 type
-  Call_ManagementGroupSubscriptionsDelete_568283 = ref object of OpenApiRestCall_567658
-proc url_ManagementGroupSubscriptionsDelete_568285(protocol: Scheme; host: string;
+  Call_ManagementGroupSubscriptionsDelete_564183 = ref object of OpenApiRestCall_563556
+proc url_ManagementGroupSubscriptionsDelete_564185(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -951,7 +955,7 @@ proc url_ManagementGroupSubscriptionsDelete_568285(protocol: Scheme; host: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ManagementGroupSubscriptionsDelete_568284(path: JsonNode;
+proc validate_ManagementGroupSubscriptionsDelete_564184(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## De-associates subscription from the management group.
   ## 
@@ -965,16 +969,16 @@ proc validate_ManagementGroupSubscriptionsDelete_568284(path: JsonNode;
   ##                 : Subscription ID.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `groupId` field"
-  var valid_568286 = path.getOrDefault("groupId")
-  valid_568286 = validateParameter(valid_568286, JString, required = true,
+  var valid_564186 = path.getOrDefault("groupId")
+  valid_564186 = validateParameter(valid_564186, JString, required = true,
                                  default = nil)
-  if valid_568286 != nil:
-    section.add "groupId", valid_568286
-  var valid_568287 = path.getOrDefault("subscriptionId")
-  valid_568287 = validateParameter(valid_568287, JString, required = true,
+  if valid_564186 != nil:
+    section.add "groupId", valid_564186
+  var valid_564187 = path.getOrDefault("subscriptionId")
+  valid_564187 = validateParameter(valid_564187, JString, required = true,
                                  default = nil)
-  if valid_568287 != nil:
-    section.add "subscriptionId", valid_568287
+  if valid_564187 != nil:
+    section.add "subscriptionId", valid_564187
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -982,75 +986,75 @@ proc validate_ManagementGroupSubscriptionsDelete_568284(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568288 = query.getOrDefault("api-version")
-  valid_568288 = validateParameter(valid_568288, JString, required = true,
+  var valid_564188 = query.getOrDefault("api-version")
+  valid_564188 = validateParameter(valid_564188, JString, required = true,
                                  default = nil)
-  if valid_568288 != nil:
-    section.add "api-version", valid_568288
+  if valid_564188 != nil:
+    section.add "api-version", valid_564188
   result.add "query", section
   ## parameters in `header` object:
   ##   Cache-Control: JString
   ##                : Indicates that the request shouldn't utilize any caches.
   section = newJObject()
-  var valid_568289 = header.getOrDefault("Cache-Control")
-  valid_568289 = validateParameter(valid_568289, JString, required = false,
+  var valid_564189 = header.getOrDefault("Cache-Control")
+  valid_564189 = validateParameter(valid_564189, JString, required = false,
                                  default = newJString("no-cache"))
-  if valid_568289 != nil:
-    section.add "Cache-Control", valid_568289
+  if valid_564189 != nil:
+    section.add "Cache-Control", valid_564189
   result.add "header", section
   section = newJObject()
   result.add "formData", section
   if body != nil:
     result.add "body", body
 
-proc call*(call_568290: Call_ManagementGroupSubscriptionsDelete_568283;
+proc call*(call_564190: Call_ManagementGroupSubscriptionsDelete_564183;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## De-associates subscription from the management group.
   ## 
   ## 
-  let valid = call_568290.validator(path, query, header, formData, body)
-  let scheme = call_568290.pickScheme
+  let valid = call_564190.validator(path, query, header, formData, body)
+  let scheme = call_564190.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568290.url(scheme.get, call_568290.host, call_568290.base,
-                         call_568290.route, valid.getOrDefault("path"),
+  let url = call_564190.url(scheme.get, call_564190.host, call_564190.base,
+                         call_564190.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568290, url, valid)
+  result = hook(call_564190, url, valid)
 
-proc call*(call_568291: Call_ManagementGroupSubscriptionsDelete_568283;
-          groupId: string; apiVersion: string; subscriptionId: string): Recallable =
+proc call*(call_564191: Call_ManagementGroupSubscriptionsDelete_564183;
+          apiVersion: string; groupId: string; subscriptionId: string): Recallable =
   ## managementGroupSubscriptionsDelete
   ## De-associates subscription from the management group.
   ## 
-  ##   groupId: string (required)
-  ##          : Management Group ID.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request. The current version is 2018-01-01-preview.
+  ##   groupId: string (required)
+  ##          : Management Group ID.
   ##   subscriptionId: string (required)
   ##                 : Subscription ID.
-  var path_568292 = newJObject()
-  var query_568293 = newJObject()
-  add(path_568292, "groupId", newJString(groupId))
-  add(query_568293, "api-version", newJString(apiVersion))
-  add(path_568292, "subscriptionId", newJString(subscriptionId))
-  result = call_568291.call(path_568292, query_568293, nil, nil, nil)
+  var path_564192 = newJObject()
+  var query_564193 = newJObject()
+  add(query_564193, "api-version", newJString(apiVersion))
+  add(path_564192, "groupId", newJString(groupId))
+  add(path_564192, "subscriptionId", newJString(subscriptionId))
+  result = call_564191.call(path_564192, query_564193, nil, nil, nil)
 
-var managementGroupSubscriptionsDelete* = Call_ManagementGroupSubscriptionsDelete_568283(
+var managementGroupSubscriptionsDelete* = Call_ManagementGroupSubscriptionsDelete_564183(
     name: "managementGroupSubscriptionsDelete", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/providers/Microsoft.Management/managementGroups/{groupId}/subscriptions/{subscriptionId}",
-    validator: validate_ManagementGroupSubscriptionsDelete_568284, base: "",
-    url: url_ManagementGroupSubscriptionsDelete_568285, schemes: {Scheme.Https})
+    validator: validate_ManagementGroupSubscriptionsDelete_564184, base: "",
+    url: url_ManagementGroupSubscriptionsDelete_564185, schemes: {Scheme.Https})
 type
-  Call_OperationsList_568294 = ref object of OpenApiRestCall_567658
-proc url_OperationsList_568296(protocol: Scheme; host: string; base: string;
+  Call_OperationsList_564194 = ref object of OpenApiRestCall_563556
+proc url_OperationsList_564196(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_OperationsList_568295(path: JsonNode; query: JsonNode;
+proc validate_OperationsList_564195(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## Lists all of the available Management REST API operations.
@@ -1065,11 +1069,11 @@ proc validate_OperationsList_568295(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568297 = query.getOrDefault("api-version")
-  valid_568297 = validateParameter(valid_568297, JString, required = true,
+  var valid_564197 = query.getOrDefault("api-version")
+  valid_564197 = validateParameter(valid_564197, JString, required = true,
                                  default = nil)
-  if valid_568297 != nil:
-    section.add "api-version", valid_568297
+  if valid_564197 != nil:
+    section.add "api-version", valid_564197
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1078,32 +1082,32 @@ proc validate_OperationsList_568295(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568298: Call_OperationsList_568294; path: JsonNode; query: JsonNode;
+proc call*(call_564198: Call_OperationsList_564194; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists all of the available Management REST API operations.
   ## 
-  let valid = call_568298.validator(path, query, header, formData, body)
-  let scheme = call_568298.pickScheme
+  let valid = call_564198.validator(path, query, header, formData, body)
+  let scheme = call_564198.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568298.url(scheme.get, call_568298.host, call_568298.base,
-                         call_568298.route, valid.getOrDefault("path"),
+  let url = call_564198.url(scheme.get, call_564198.host, call_564198.base,
+                         call_564198.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568298, url, valid)
+  result = hook(call_564198, url, valid)
 
-proc call*(call_568299: Call_OperationsList_568294; apiVersion: string): Recallable =
+proc call*(call_564199: Call_OperationsList_564194; apiVersion: string): Recallable =
   ## operationsList
   ## Lists all of the available Management REST API operations.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request. The current version is 2018-01-01-preview.
-  var query_568300 = newJObject()
-  add(query_568300, "api-version", newJString(apiVersion))
-  result = call_568299.call(nil, query_568300, nil, nil, nil)
+  var query_564200 = newJObject()
+  add(query_564200, "api-version", newJString(apiVersion))
+  result = call_564199.call(nil, query_564200, nil, nil, nil)
 
-var operationsList* = Call_OperationsList_568294(name: "operationsList",
+var operationsList* = Call_OperationsList_564194(name: "operationsList",
     meth: HttpMethod.HttpGet, host: "management.azure.com",
     route: "/providers/Microsoft.Management/operations",
-    validator: validate_OperationsList_568295, base: "", url: url_OperationsList_568296,
+    validator: validate_OperationsList_564195, base: "", url: url_OperationsList_564196,
     schemes: {Scheme.Https})
 export
   rest

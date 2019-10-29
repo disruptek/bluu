@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_573641 = ref object of OpenApiRestCall
+  OpenApiRestCall_563539 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_573641](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563539](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_573641): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563539): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,8 +107,8 @@ const
   macServiceName = "mediaservices-MediaGraphs"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_MediaGraphsList_573863 = ref object of OpenApiRestCall_573641
-proc url_MediaGraphsList_573865(protocol: Scheme; host: string; base: string;
+  Call_MediaGraphsList_563761 = ref object of OpenApiRestCall_563539
+proc url_MediaGraphsList_563763(protocol: Scheme; host: string; base: string;
                                route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -127,7 +131,7 @@ proc url_MediaGraphsList_573865(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_MediaGraphsList_573864(path: JsonNode; query: JsonNode;
+proc validate_MediaGraphsList_563762(path: JsonNode; query: JsonNode;
                                     header: JsonNode; formData: JsonNode;
                                     body: JsonNode): JsonNode =
   ## Lists Media Graphs in the Media Services account
@@ -135,30 +139,30 @@ proc validate_MediaGraphsList_573864(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group within the Azure subscription.
   ##   subscriptionId: JString (required)
   ##                 : The unique identifier for a Microsoft Azure subscription.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group within the Azure subscription.
   ##   accountName: JString (required)
   ##              : The Media Services account name.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_574039 = path.getOrDefault("resourceGroupName")
-  valid_574039 = validateParameter(valid_574039, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_563939 = path.getOrDefault("subscriptionId")
+  valid_563939 = validateParameter(valid_563939, JString, required = true,
                                  default = nil)
-  if valid_574039 != nil:
-    section.add "resourceGroupName", valid_574039
-  var valid_574040 = path.getOrDefault("subscriptionId")
-  valid_574040 = validateParameter(valid_574040, JString, required = true,
+  if valid_563939 != nil:
+    section.add "subscriptionId", valid_563939
+  var valid_563940 = path.getOrDefault("resourceGroupName")
+  valid_563940 = validateParameter(valid_563940, JString, required = true,
                                  default = nil)
-  if valid_574040 != nil:
-    section.add "subscriptionId", valid_574040
-  var valid_574041 = path.getOrDefault("accountName")
-  valid_574041 = validateParameter(valid_574041, JString, required = true,
+  if valid_563940 != nil:
+    section.add "resourceGroupName", valid_563940
+  var valid_563941 = path.getOrDefault("accountName")
+  valid_563941 = validateParameter(valid_563941, JString, required = true,
                                  default = nil)
-  if valid_574041 != nil:
-    section.add "accountName", valid_574041
+  if valid_563941 != nil:
+    section.add "accountName", valid_563941
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -168,15 +172,15 @@ proc validate_MediaGraphsList_573864(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574042 = query.getOrDefault("api-version")
-  valid_574042 = validateParameter(valid_574042, JString, required = true,
+  var valid_563942 = query.getOrDefault("api-version")
+  valid_563942 = validateParameter(valid_563942, JString, required = true,
                                  default = nil)
-  if valid_574042 != nil:
-    section.add "api-version", valid_574042
-  var valid_574043 = query.getOrDefault("$top")
-  valid_574043 = validateParameter(valid_574043, JInt, required = false, default = nil)
-  if valid_574043 != nil:
-    section.add "$top", valid_574043
+  if valid_563942 != nil:
+    section.add "api-version", valid_563942
+  var valid_563943 = query.getOrDefault("$top")
+  valid_563943 = validateParameter(valid_563943, JInt, required = false, default = nil)
+  if valid_563943 != nil:
+    section.add "$top", valid_563943
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -185,50 +189,50 @@ proc validate_MediaGraphsList_573864(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574066: Call_MediaGraphsList_573863; path: JsonNode; query: JsonNode;
+proc call*(call_563966: Call_MediaGraphsList_563761; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists Media Graphs in the Media Services account
   ## 
-  let valid = call_574066.validator(path, query, header, formData, body)
-  let scheme = call_574066.pickScheme
+  let valid = call_563966.validator(path, query, header, formData, body)
+  let scheme = call_563966.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574066.url(scheme.get, call_574066.host, call_574066.base,
-                         call_574066.route, valid.getOrDefault("path"),
+  let url = call_563966.url(scheme.get, call_563966.host, call_563966.base,
+                         call_563966.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574066, url, valid)
+  result = hook(call_563966, url, valid)
 
-proc call*(call_574137: Call_MediaGraphsList_573863; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; accountName: string;
+proc call*(call_564037: Call_MediaGraphsList_563761; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string; accountName: string;
           Top: int = 0): Recallable =
   ## mediaGraphsList
   ## Lists Media Graphs in the Media Services account
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group within the Azure subscription.
   ##   apiVersion: string (required)
   ##             : The Version of the API to be used with the client request.
-  ##   subscriptionId: string (required)
-  ##                 : The unique identifier for a Microsoft Azure subscription.
   ##   Top: int
   ##      : Specifies a non-negative integer n that limits the number of items returned from a collection. The service returns the number of available items up to but not greater than the specified value n.
+  ##   subscriptionId: string (required)
+  ##                 : The unique identifier for a Microsoft Azure subscription.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group within the Azure subscription.
   ##   accountName: string (required)
   ##              : The Media Services account name.
-  var path_574138 = newJObject()
-  var query_574140 = newJObject()
-  add(path_574138, "resourceGroupName", newJString(resourceGroupName))
-  add(query_574140, "api-version", newJString(apiVersion))
-  add(path_574138, "subscriptionId", newJString(subscriptionId))
-  add(query_574140, "$top", newJInt(Top))
-  add(path_574138, "accountName", newJString(accountName))
-  result = call_574137.call(path_574138, query_574140, nil, nil, nil)
+  var path_564038 = newJObject()
+  var query_564040 = newJObject()
+  add(query_564040, "api-version", newJString(apiVersion))
+  add(query_564040, "$top", newJInt(Top))
+  add(path_564038, "subscriptionId", newJString(subscriptionId))
+  add(path_564038, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564038, "accountName", newJString(accountName))
+  result = call_564037.call(path_564038, query_564040, nil, nil, nil)
 
-var mediaGraphsList* = Call_MediaGraphsList_573863(name: "mediaGraphsList",
+var mediaGraphsList* = Call_MediaGraphsList_563761(name: "mediaGraphsList",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Media/mediaServices/{accountName}/mediaGraphs",
-    validator: validate_MediaGraphsList_573864, base: "", url: url_MediaGraphsList_573865,
+    validator: validate_MediaGraphsList_563762, base: "", url: url_MediaGraphsList_563763,
     schemes: {Scheme.Https})
 type
-  Call_MediaGraphsCreateOrUpdate_574191 = ref object of OpenApiRestCall_573641
-proc url_MediaGraphsCreateOrUpdate_574193(protocol: Scheme; host: string;
+  Call_MediaGraphsCreateOrUpdate_564091 = ref object of OpenApiRestCall_563539
+proc url_MediaGraphsCreateOrUpdate_564093(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -253,44 +257,44 @@ proc url_MediaGraphsCreateOrUpdate_574193(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_MediaGraphsCreateOrUpdate_574192(path: JsonNode; query: JsonNode;
+proc validate_MediaGraphsCreateOrUpdate_564092(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Create or update a Media Graph in the Media Services account
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group within the Azure subscription.
   ##   subscriptionId: JString (required)
   ##                 : The unique identifier for a Microsoft Azure subscription.
-  ##   accountName: JString (required)
-  ##              : The Media Services account name.
   ##   mediaGraphName: JString (required)
   ##                 : The Media Graph name.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group within the Azure subscription.
+  ##   accountName: JString (required)
+  ##              : The Media Services account name.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_574194 = path.getOrDefault("resourceGroupName")
-  valid_574194 = validateParameter(valid_574194, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564094 = path.getOrDefault("subscriptionId")
+  valid_564094 = validateParameter(valid_564094, JString, required = true,
                                  default = nil)
-  if valid_574194 != nil:
-    section.add "resourceGroupName", valid_574194
-  var valid_574195 = path.getOrDefault("subscriptionId")
-  valid_574195 = validateParameter(valid_574195, JString, required = true,
+  if valid_564094 != nil:
+    section.add "subscriptionId", valid_564094
+  var valid_564095 = path.getOrDefault("mediaGraphName")
+  valid_564095 = validateParameter(valid_564095, JString, required = true,
                                  default = nil)
-  if valid_574195 != nil:
-    section.add "subscriptionId", valid_574195
-  var valid_574196 = path.getOrDefault("accountName")
-  valid_574196 = validateParameter(valid_574196, JString, required = true,
+  if valid_564095 != nil:
+    section.add "mediaGraphName", valid_564095
+  var valid_564096 = path.getOrDefault("resourceGroupName")
+  valid_564096 = validateParameter(valid_564096, JString, required = true,
                                  default = nil)
-  if valid_574196 != nil:
-    section.add "accountName", valid_574196
-  var valid_574197 = path.getOrDefault("mediaGraphName")
-  valid_574197 = validateParameter(valid_574197, JString, required = true,
+  if valid_564096 != nil:
+    section.add "resourceGroupName", valid_564096
+  var valid_564097 = path.getOrDefault("accountName")
+  valid_564097 = validateParameter(valid_564097, JString, required = true,
                                  default = nil)
-  if valid_574197 != nil:
-    section.add "mediaGraphName", valid_574197
+  if valid_564097 != nil:
+    section.add "accountName", valid_564097
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -298,11 +302,11 @@ proc validate_MediaGraphsCreateOrUpdate_574192(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574198 = query.getOrDefault("api-version")
-  valid_574198 = validateParameter(valid_574198, JString, required = true,
+  var valid_564098 = query.getOrDefault("api-version")
+  valid_564098 = validateParameter(valid_564098, JString, required = true,
                                  default = nil)
-  if valid_574198 != nil:
-    section.add "api-version", valid_574198
+  if valid_564098 != nil:
+    section.add "api-version", valid_564098
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -316,56 +320,56 @@ proc validate_MediaGraphsCreateOrUpdate_574192(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574200: Call_MediaGraphsCreateOrUpdate_574191; path: JsonNode;
+proc call*(call_564100: Call_MediaGraphsCreateOrUpdate_564091; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Create or update a Media Graph in the Media Services account
   ## 
-  let valid = call_574200.validator(path, query, header, formData, body)
-  let scheme = call_574200.pickScheme
+  let valid = call_564100.validator(path, query, header, formData, body)
+  let scheme = call_564100.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574200.url(scheme.get, call_574200.host, call_574200.base,
-                         call_574200.route, valid.getOrDefault("path"),
+  let url = call_564100.url(scheme.get, call_564100.host, call_564100.base,
+                         call_564100.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574200, url, valid)
+  result = hook(call_564100, url, valid)
 
-proc call*(call_574201: Call_MediaGraphsCreateOrUpdate_574191;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          parameters: JsonNode; accountName: string; mediaGraphName: string): Recallable =
+proc call*(call_564101: Call_MediaGraphsCreateOrUpdate_564091; apiVersion: string;
+          subscriptionId: string; mediaGraphName: string; resourceGroupName: string;
+          parameters: JsonNode; accountName: string): Recallable =
   ## mediaGraphsCreateOrUpdate
   ## Create or update a Media Graph in the Media Services account
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group within the Azure subscription.
   ##   apiVersion: string (required)
   ##             : The Version of the API to be used with the client request.
   ##   subscriptionId: string (required)
   ##                 : The unique identifier for a Microsoft Azure subscription.
+  ##   mediaGraphName: string (required)
+  ##                 : The Media Graph name.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group within the Azure subscription.
   ##   parameters: JObject (required)
   ##             : The request parameters
   ##   accountName: string (required)
   ##              : The Media Services account name.
-  ##   mediaGraphName: string (required)
-  ##                 : The Media Graph name.
-  var path_574202 = newJObject()
-  var query_574203 = newJObject()
-  var body_574204 = newJObject()
-  add(path_574202, "resourceGroupName", newJString(resourceGroupName))
-  add(query_574203, "api-version", newJString(apiVersion))
-  add(path_574202, "subscriptionId", newJString(subscriptionId))
+  var path_564102 = newJObject()
+  var query_564103 = newJObject()
+  var body_564104 = newJObject()
+  add(query_564103, "api-version", newJString(apiVersion))
+  add(path_564102, "subscriptionId", newJString(subscriptionId))
+  add(path_564102, "mediaGraphName", newJString(mediaGraphName))
+  add(path_564102, "resourceGroupName", newJString(resourceGroupName))
   if parameters != nil:
-    body_574204 = parameters
-  add(path_574202, "accountName", newJString(accountName))
-  add(path_574202, "mediaGraphName", newJString(mediaGraphName))
-  result = call_574201.call(path_574202, query_574203, nil, nil, body_574204)
+    body_564104 = parameters
+  add(path_564102, "accountName", newJString(accountName))
+  result = call_564101.call(path_564102, query_564103, nil, nil, body_564104)
 
-var mediaGraphsCreateOrUpdate* = Call_MediaGraphsCreateOrUpdate_574191(
+var mediaGraphsCreateOrUpdate* = Call_MediaGraphsCreateOrUpdate_564091(
     name: "mediaGraphsCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Media/mediaServices/{accountName}/mediaGraphs/{mediaGraphName}",
-    validator: validate_MediaGraphsCreateOrUpdate_574192, base: "",
-    url: url_MediaGraphsCreateOrUpdate_574193, schemes: {Scheme.Https})
+    validator: validate_MediaGraphsCreateOrUpdate_564092, base: "",
+    url: url_MediaGraphsCreateOrUpdate_564093, schemes: {Scheme.Https})
 type
-  Call_MediaGraphsGet_574179 = ref object of OpenApiRestCall_573641
-proc url_MediaGraphsGet_574181(protocol: Scheme; host: string; base: string;
+  Call_MediaGraphsGet_564079 = ref object of OpenApiRestCall_563539
+proc url_MediaGraphsGet_564081(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -390,7 +394,7 @@ proc url_MediaGraphsGet_574181(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_MediaGraphsGet_574180(path: JsonNode; query: JsonNode;
+proc validate_MediaGraphsGet_564080(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## Get the details of a Media Graph in the Media Services account
@@ -398,37 +402,37 @@ proc validate_MediaGraphsGet_574180(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group within the Azure subscription.
   ##   subscriptionId: JString (required)
   ##                 : The unique identifier for a Microsoft Azure subscription.
-  ##   accountName: JString (required)
-  ##              : The Media Services account name.
   ##   mediaGraphName: JString (required)
   ##                 : The Media Graph name.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group within the Azure subscription.
+  ##   accountName: JString (required)
+  ##              : The Media Services account name.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_574182 = path.getOrDefault("resourceGroupName")
-  valid_574182 = validateParameter(valid_574182, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564082 = path.getOrDefault("subscriptionId")
+  valid_564082 = validateParameter(valid_564082, JString, required = true,
                                  default = nil)
-  if valid_574182 != nil:
-    section.add "resourceGroupName", valid_574182
-  var valid_574183 = path.getOrDefault("subscriptionId")
-  valid_574183 = validateParameter(valid_574183, JString, required = true,
+  if valid_564082 != nil:
+    section.add "subscriptionId", valid_564082
+  var valid_564083 = path.getOrDefault("mediaGraphName")
+  valid_564083 = validateParameter(valid_564083, JString, required = true,
                                  default = nil)
-  if valid_574183 != nil:
-    section.add "subscriptionId", valid_574183
-  var valid_574184 = path.getOrDefault("accountName")
-  valid_574184 = validateParameter(valid_574184, JString, required = true,
+  if valid_564083 != nil:
+    section.add "mediaGraphName", valid_564083
+  var valid_564084 = path.getOrDefault("resourceGroupName")
+  valid_564084 = validateParameter(valid_564084, JString, required = true,
                                  default = nil)
-  if valid_574184 != nil:
-    section.add "accountName", valid_574184
-  var valid_574185 = path.getOrDefault("mediaGraphName")
-  valid_574185 = validateParameter(valid_574185, JString, required = true,
+  if valid_564084 != nil:
+    section.add "resourceGroupName", valid_564084
+  var valid_564085 = path.getOrDefault("accountName")
+  valid_564085 = validateParameter(valid_564085, JString, required = true,
                                  default = nil)
-  if valid_574185 != nil:
-    section.add "mediaGraphName", valid_574185
+  if valid_564085 != nil:
+    section.add "accountName", valid_564085
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -436,11 +440,11 @@ proc validate_MediaGraphsGet_574180(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574186 = query.getOrDefault("api-version")
-  valid_574186 = validateParameter(valid_574186, JString, required = true,
+  var valid_564086 = query.getOrDefault("api-version")
+  valid_564086 = validateParameter(valid_564086, JString, required = true,
                                  default = nil)
-  if valid_574186 != nil:
-    section.add "api-version", valid_574186
+  if valid_564086 != nil:
+    section.add "api-version", valid_564086
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -449,50 +453,50 @@ proc validate_MediaGraphsGet_574180(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574187: Call_MediaGraphsGet_574179; path: JsonNode; query: JsonNode;
+proc call*(call_564087: Call_MediaGraphsGet_564079; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get the details of a Media Graph in the Media Services account
   ## 
-  let valid = call_574187.validator(path, query, header, formData, body)
-  let scheme = call_574187.pickScheme
+  let valid = call_564087.validator(path, query, header, formData, body)
+  let scheme = call_564087.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574187.url(scheme.get, call_574187.host, call_574187.base,
-                         call_574187.route, valid.getOrDefault("path"),
+  let url = call_564087.url(scheme.get, call_564087.host, call_564087.base,
+                         call_564087.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574187, url, valid)
+  result = hook(call_564087, url, valid)
 
-proc call*(call_574188: Call_MediaGraphsGet_574179; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; accountName: string;
-          mediaGraphName: string): Recallable =
+proc call*(call_564088: Call_MediaGraphsGet_564079; apiVersion: string;
+          subscriptionId: string; mediaGraphName: string; resourceGroupName: string;
+          accountName: string): Recallable =
   ## mediaGraphsGet
   ## Get the details of a Media Graph in the Media Services account
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group within the Azure subscription.
   ##   apiVersion: string (required)
   ##             : The Version of the API to be used with the client request.
   ##   subscriptionId: string (required)
   ##                 : The unique identifier for a Microsoft Azure subscription.
-  ##   accountName: string (required)
-  ##              : The Media Services account name.
   ##   mediaGraphName: string (required)
   ##                 : The Media Graph name.
-  var path_574189 = newJObject()
-  var query_574190 = newJObject()
-  add(path_574189, "resourceGroupName", newJString(resourceGroupName))
-  add(query_574190, "api-version", newJString(apiVersion))
-  add(path_574189, "subscriptionId", newJString(subscriptionId))
-  add(path_574189, "accountName", newJString(accountName))
-  add(path_574189, "mediaGraphName", newJString(mediaGraphName))
-  result = call_574188.call(path_574189, query_574190, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group within the Azure subscription.
+  ##   accountName: string (required)
+  ##              : The Media Services account name.
+  var path_564089 = newJObject()
+  var query_564090 = newJObject()
+  add(query_564090, "api-version", newJString(apiVersion))
+  add(path_564089, "subscriptionId", newJString(subscriptionId))
+  add(path_564089, "mediaGraphName", newJString(mediaGraphName))
+  add(path_564089, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564089, "accountName", newJString(accountName))
+  result = call_564088.call(path_564089, query_564090, nil, nil, nil)
 
-var mediaGraphsGet* = Call_MediaGraphsGet_574179(name: "mediaGraphsGet",
+var mediaGraphsGet* = Call_MediaGraphsGet_564079(name: "mediaGraphsGet",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Media/mediaServices/{accountName}/mediaGraphs/{mediaGraphName}",
-    validator: validate_MediaGraphsGet_574180, base: "", url: url_MediaGraphsGet_574181,
+    validator: validate_MediaGraphsGet_564080, base: "", url: url_MediaGraphsGet_564081,
     schemes: {Scheme.Https})
 type
-  Call_MediaGraphsDelete_574205 = ref object of OpenApiRestCall_573641
-proc url_MediaGraphsDelete_574207(protocol: Scheme; host: string; base: string;
+  Call_MediaGraphsDelete_564105 = ref object of OpenApiRestCall_563539
+proc url_MediaGraphsDelete_564107(protocol: Scheme; host: string; base: string;
                                  route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -517,7 +521,7 @@ proc url_MediaGraphsDelete_574207(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_MediaGraphsDelete_574206(path: JsonNode; query: JsonNode;
+proc validate_MediaGraphsDelete_564106(path: JsonNode; query: JsonNode;
                                       header: JsonNode; formData: JsonNode;
                                       body: JsonNode): JsonNode =
   ## Deletes a Media Graph in the Media Services account
@@ -525,37 +529,37 @@ proc validate_MediaGraphsDelete_574206(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group within the Azure subscription.
   ##   subscriptionId: JString (required)
   ##                 : The unique identifier for a Microsoft Azure subscription.
-  ##   accountName: JString (required)
-  ##              : The Media Services account name.
   ##   mediaGraphName: JString (required)
   ##                 : The Media Graph name.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group within the Azure subscription.
+  ##   accountName: JString (required)
+  ##              : The Media Services account name.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_574208 = path.getOrDefault("resourceGroupName")
-  valid_574208 = validateParameter(valid_574208, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564108 = path.getOrDefault("subscriptionId")
+  valid_564108 = validateParameter(valid_564108, JString, required = true,
                                  default = nil)
-  if valid_574208 != nil:
-    section.add "resourceGroupName", valid_574208
-  var valid_574209 = path.getOrDefault("subscriptionId")
-  valid_574209 = validateParameter(valid_574209, JString, required = true,
+  if valid_564108 != nil:
+    section.add "subscriptionId", valid_564108
+  var valid_564109 = path.getOrDefault("mediaGraphName")
+  valid_564109 = validateParameter(valid_564109, JString, required = true,
                                  default = nil)
-  if valid_574209 != nil:
-    section.add "subscriptionId", valid_574209
-  var valid_574210 = path.getOrDefault("accountName")
-  valid_574210 = validateParameter(valid_574210, JString, required = true,
+  if valid_564109 != nil:
+    section.add "mediaGraphName", valid_564109
+  var valid_564110 = path.getOrDefault("resourceGroupName")
+  valid_564110 = validateParameter(valid_564110, JString, required = true,
                                  default = nil)
-  if valid_574210 != nil:
-    section.add "accountName", valid_574210
-  var valid_574211 = path.getOrDefault("mediaGraphName")
-  valid_574211 = validateParameter(valid_574211, JString, required = true,
+  if valid_564110 != nil:
+    section.add "resourceGroupName", valid_564110
+  var valid_564111 = path.getOrDefault("accountName")
+  valid_564111 = validateParameter(valid_564111, JString, required = true,
                                  default = nil)
-  if valid_574211 != nil:
-    section.add "mediaGraphName", valid_574211
+  if valid_564111 != nil:
+    section.add "accountName", valid_564111
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -563,11 +567,11 @@ proc validate_MediaGraphsDelete_574206(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574212 = query.getOrDefault("api-version")
-  valid_574212 = validateParameter(valid_574212, JString, required = true,
+  var valid_564112 = query.getOrDefault("api-version")
+  valid_564112 = validateParameter(valid_564112, JString, required = true,
                                  default = nil)
-  if valid_574212 != nil:
-    section.add "api-version", valid_574212
+  if valid_564112 != nil:
+    section.add "api-version", valid_564112
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -576,50 +580,50 @@ proc validate_MediaGraphsDelete_574206(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574213: Call_MediaGraphsDelete_574205; path: JsonNode;
+proc call*(call_564113: Call_MediaGraphsDelete_564105; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes a Media Graph in the Media Services account
   ## 
-  let valid = call_574213.validator(path, query, header, formData, body)
-  let scheme = call_574213.pickScheme
+  let valid = call_564113.validator(path, query, header, formData, body)
+  let scheme = call_564113.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574213.url(scheme.get, call_574213.host, call_574213.base,
-                         call_574213.route, valid.getOrDefault("path"),
+  let url = call_564113.url(scheme.get, call_564113.host, call_564113.base,
+                         call_564113.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574213, url, valid)
+  result = hook(call_564113, url, valid)
 
-proc call*(call_574214: Call_MediaGraphsDelete_574205; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; accountName: string;
-          mediaGraphName: string): Recallable =
+proc call*(call_564114: Call_MediaGraphsDelete_564105; apiVersion: string;
+          subscriptionId: string; mediaGraphName: string; resourceGroupName: string;
+          accountName: string): Recallable =
   ## mediaGraphsDelete
   ## Deletes a Media Graph in the Media Services account
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group within the Azure subscription.
   ##   apiVersion: string (required)
   ##             : The Version of the API to be used with the client request.
   ##   subscriptionId: string (required)
   ##                 : The unique identifier for a Microsoft Azure subscription.
-  ##   accountName: string (required)
-  ##              : The Media Services account name.
   ##   mediaGraphName: string (required)
   ##                 : The Media Graph name.
-  var path_574215 = newJObject()
-  var query_574216 = newJObject()
-  add(path_574215, "resourceGroupName", newJString(resourceGroupName))
-  add(query_574216, "api-version", newJString(apiVersion))
-  add(path_574215, "subscriptionId", newJString(subscriptionId))
-  add(path_574215, "accountName", newJString(accountName))
-  add(path_574215, "mediaGraphName", newJString(mediaGraphName))
-  result = call_574214.call(path_574215, query_574216, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group within the Azure subscription.
+  ##   accountName: string (required)
+  ##              : The Media Services account name.
+  var path_564115 = newJObject()
+  var query_564116 = newJObject()
+  add(query_564116, "api-version", newJString(apiVersion))
+  add(path_564115, "subscriptionId", newJString(subscriptionId))
+  add(path_564115, "mediaGraphName", newJString(mediaGraphName))
+  add(path_564115, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564115, "accountName", newJString(accountName))
+  result = call_564114.call(path_564115, query_564116, nil, nil, nil)
 
-var mediaGraphsDelete* = Call_MediaGraphsDelete_574205(name: "mediaGraphsDelete",
+var mediaGraphsDelete* = Call_MediaGraphsDelete_564105(name: "mediaGraphsDelete",
     meth: HttpMethod.HttpDelete, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Media/mediaServices/{accountName}/mediaGraphs/{mediaGraphName}",
-    validator: validate_MediaGraphsDelete_574206, base: "",
-    url: url_MediaGraphsDelete_574207, schemes: {Scheme.Https})
+    validator: validate_MediaGraphsDelete_564106, base: "",
+    url: url_MediaGraphsDelete_564107, schemes: {Scheme.Https})
 type
-  Call_OperationResultsGet_574217 = ref object of OpenApiRestCall_573641
-proc url_OperationResultsGet_574219(protocol: Scheme; host: string; base: string;
+  Call_OperationResultsGet_564117 = ref object of OpenApiRestCall_563539
+proc url_OperationResultsGet_564119(protocol: Scheme; host: string; base: string;
                                    route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -647,7 +651,7 @@ proc url_OperationResultsGet_574219(protocol: Scheme; host: string; base: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_OperationResultsGet_574218(path: JsonNode; query: JsonNode;
+proc validate_OperationResultsGet_564118(path: JsonNode; query: JsonNode;
                                         header: JsonNode; formData: JsonNode;
                                         body: JsonNode): JsonNode =
   ## Get the operation result of a Media Graph in the Media Services account
@@ -655,44 +659,44 @@ proc validate_OperationResultsGet_574218(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group within the Azure subscription.
-  ##   subscriptionId: JString (required)
-  ##                 : The unique identifier for a Microsoft Azure subscription.
   ##   operationId: JString (required)
   ##              : The operation ID
-  ##   accountName: JString (required)
-  ##              : The Media Services account name.
+  ##   subscriptionId: JString (required)
+  ##                 : The unique identifier for a Microsoft Azure subscription.
   ##   mediaGraphName: JString (required)
   ##                 : The Media Graph name.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group within the Azure subscription.
+  ##   accountName: JString (required)
+  ##              : The Media Services account name.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_574220 = path.getOrDefault("resourceGroupName")
-  valid_574220 = validateParameter(valid_574220, JString, required = true,
+        "path argument is necessary due to required `operationId` field"
+  var valid_564120 = path.getOrDefault("operationId")
+  valid_564120 = validateParameter(valid_564120, JString, required = true,
                                  default = nil)
-  if valid_574220 != nil:
-    section.add "resourceGroupName", valid_574220
-  var valid_574221 = path.getOrDefault("subscriptionId")
-  valid_574221 = validateParameter(valid_574221, JString, required = true,
+  if valid_564120 != nil:
+    section.add "operationId", valid_564120
+  var valid_564121 = path.getOrDefault("subscriptionId")
+  valid_564121 = validateParameter(valid_564121, JString, required = true,
                                  default = nil)
-  if valid_574221 != nil:
-    section.add "subscriptionId", valid_574221
-  var valid_574222 = path.getOrDefault("operationId")
-  valid_574222 = validateParameter(valid_574222, JString, required = true,
+  if valid_564121 != nil:
+    section.add "subscriptionId", valid_564121
+  var valid_564122 = path.getOrDefault("mediaGraphName")
+  valid_564122 = validateParameter(valid_564122, JString, required = true,
                                  default = nil)
-  if valid_574222 != nil:
-    section.add "operationId", valid_574222
-  var valid_574223 = path.getOrDefault("accountName")
-  valid_574223 = validateParameter(valid_574223, JString, required = true,
+  if valid_564122 != nil:
+    section.add "mediaGraphName", valid_564122
+  var valid_564123 = path.getOrDefault("resourceGroupName")
+  valid_564123 = validateParameter(valid_564123, JString, required = true,
                                  default = nil)
-  if valid_574223 != nil:
-    section.add "accountName", valid_574223
-  var valid_574224 = path.getOrDefault("mediaGraphName")
-  valid_574224 = validateParameter(valid_574224, JString, required = true,
+  if valid_564123 != nil:
+    section.add "resourceGroupName", valid_564123
+  var valid_564124 = path.getOrDefault("accountName")
+  valid_564124 = validateParameter(valid_564124, JString, required = true,
                                  default = nil)
-  if valid_574224 != nil:
-    section.add "mediaGraphName", valid_574224
+  if valid_564124 != nil:
+    section.add "accountName", valid_564124
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -700,11 +704,11 @@ proc validate_OperationResultsGet_574218(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574225 = query.getOrDefault("api-version")
-  valid_574225 = validateParameter(valid_574225, JString, required = true,
+  var valid_564125 = query.getOrDefault("api-version")
+  valid_564125 = validateParameter(valid_564125, JString, required = true,
                                  default = nil)
-  if valid_574225 != nil:
-    section.add "api-version", valid_574225
+  if valid_564125 != nil:
+    section.add "api-version", valid_564125
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -713,54 +717,54 @@ proc validate_OperationResultsGet_574218(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574226: Call_OperationResultsGet_574217; path: JsonNode;
+proc call*(call_564126: Call_OperationResultsGet_564117; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get the operation result of a Media Graph in the Media Services account
   ## 
-  let valid = call_574226.validator(path, query, header, formData, body)
-  let scheme = call_574226.pickScheme
+  let valid = call_564126.validator(path, query, header, formData, body)
+  let scheme = call_564126.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574226.url(scheme.get, call_574226.host, call_574226.base,
-                         call_574226.route, valid.getOrDefault("path"),
+  let url = call_564126.url(scheme.get, call_564126.host, call_564126.base,
+                         call_564126.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574226, url, valid)
+  result = hook(call_564126, url, valid)
 
-proc call*(call_574227: Call_OperationResultsGet_574217; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; operationId: string;
-          accountName: string; mediaGraphName: string): Recallable =
+proc call*(call_564127: Call_OperationResultsGet_564117; apiVersion: string;
+          operationId: string; subscriptionId: string; mediaGraphName: string;
+          resourceGroupName: string; accountName: string): Recallable =
   ## operationResultsGet
   ## Get the operation result of a Media Graph in the Media Services account
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group within the Azure subscription.
   ##   apiVersion: string (required)
   ##             : The Version of the API to be used with the client request.
-  ##   subscriptionId: string (required)
-  ##                 : The unique identifier for a Microsoft Azure subscription.
   ##   operationId: string (required)
   ##              : The operation ID
-  ##   accountName: string (required)
-  ##              : The Media Services account name.
+  ##   subscriptionId: string (required)
+  ##                 : The unique identifier for a Microsoft Azure subscription.
   ##   mediaGraphName: string (required)
   ##                 : The Media Graph name.
-  var path_574228 = newJObject()
-  var query_574229 = newJObject()
-  add(path_574228, "resourceGroupName", newJString(resourceGroupName))
-  add(query_574229, "api-version", newJString(apiVersion))
-  add(path_574228, "subscriptionId", newJString(subscriptionId))
-  add(path_574228, "operationId", newJString(operationId))
-  add(path_574228, "accountName", newJString(accountName))
-  add(path_574228, "mediaGraphName", newJString(mediaGraphName))
-  result = call_574227.call(path_574228, query_574229, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group within the Azure subscription.
+  ##   accountName: string (required)
+  ##              : The Media Services account name.
+  var path_564128 = newJObject()
+  var query_564129 = newJObject()
+  add(query_564129, "api-version", newJString(apiVersion))
+  add(path_564128, "operationId", newJString(operationId))
+  add(path_564128, "subscriptionId", newJString(subscriptionId))
+  add(path_564128, "mediaGraphName", newJString(mediaGraphName))
+  add(path_564128, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564128, "accountName", newJString(accountName))
+  result = call_564127.call(path_564128, query_564129, nil, nil, nil)
 
-var operationResultsGet* = Call_OperationResultsGet_574217(
+var operationResultsGet* = Call_OperationResultsGet_564117(
     name: "operationResultsGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Media/mediaServices/{accountName}/mediaGraphs/{mediaGraphName}/operationResults/{operationId}",
-    validator: validate_OperationResultsGet_574218, base: "",
-    url: url_OperationResultsGet_574219, schemes: {Scheme.Https})
+    validator: validate_OperationResultsGet_564118, base: "",
+    url: url_OperationResultsGet_564119, schemes: {Scheme.Https})
 type
-  Call_OperationsStatusGet_574230 = ref object of OpenApiRestCall_573641
-proc url_OperationsStatusGet_574232(protocol: Scheme; host: string; base: string;
+  Call_OperationsStatusGet_564130 = ref object of OpenApiRestCall_563539
+proc url_OperationsStatusGet_564132(protocol: Scheme; host: string; base: string;
                                    route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -788,7 +792,7 @@ proc url_OperationsStatusGet_574232(protocol: Scheme; host: string; base: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_OperationsStatusGet_574231(path: JsonNode; query: JsonNode;
+proc validate_OperationsStatusGet_564131(path: JsonNode; query: JsonNode;
                                         header: JsonNode; formData: JsonNode;
                                         body: JsonNode): JsonNode =
   ## Get the operation status of a Media Graph in the media services account
@@ -796,44 +800,44 @@ proc validate_OperationsStatusGet_574231(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group within the Azure subscription.
-  ##   subscriptionId: JString (required)
-  ##                 : The unique identifier for a Microsoft Azure subscription.
   ##   operationId: JString (required)
   ##              : The operation ID
-  ##   accountName: JString (required)
-  ##              : The Media Services account name.
+  ##   subscriptionId: JString (required)
+  ##                 : The unique identifier for a Microsoft Azure subscription.
   ##   mediaGraphName: JString (required)
   ##                 : The Media Graph name.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group within the Azure subscription.
+  ##   accountName: JString (required)
+  ##              : The Media Services account name.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_574233 = path.getOrDefault("resourceGroupName")
-  valid_574233 = validateParameter(valid_574233, JString, required = true,
+        "path argument is necessary due to required `operationId` field"
+  var valid_564133 = path.getOrDefault("operationId")
+  valid_564133 = validateParameter(valid_564133, JString, required = true,
                                  default = nil)
-  if valid_574233 != nil:
-    section.add "resourceGroupName", valid_574233
-  var valid_574234 = path.getOrDefault("subscriptionId")
-  valid_574234 = validateParameter(valid_574234, JString, required = true,
+  if valid_564133 != nil:
+    section.add "operationId", valid_564133
+  var valid_564134 = path.getOrDefault("subscriptionId")
+  valid_564134 = validateParameter(valid_564134, JString, required = true,
                                  default = nil)
-  if valid_574234 != nil:
-    section.add "subscriptionId", valid_574234
-  var valid_574235 = path.getOrDefault("operationId")
-  valid_574235 = validateParameter(valid_574235, JString, required = true,
+  if valid_564134 != nil:
+    section.add "subscriptionId", valid_564134
+  var valid_564135 = path.getOrDefault("mediaGraphName")
+  valid_564135 = validateParameter(valid_564135, JString, required = true,
                                  default = nil)
-  if valid_574235 != nil:
-    section.add "operationId", valid_574235
-  var valid_574236 = path.getOrDefault("accountName")
-  valid_574236 = validateParameter(valid_574236, JString, required = true,
+  if valid_564135 != nil:
+    section.add "mediaGraphName", valid_564135
+  var valid_564136 = path.getOrDefault("resourceGroupName")
+  valid_564136 = validateParameter(valid_564136, JString, required = true,
                                  default = nil)
-  if valid_574236 != nil:
-    section.add "accountName", valid_574236
-  var valid_574237 = path.getOrDefault("mediaGraphName")
-  valid_574237 = validateParameter(valid_574237, JString, required = true,
+  if valid_564136 != nil:
+    section.add "resourceGroupName", valid_564136
+  var valid_564137 = path.getOrDefault("accountName")
+  valid_564137 = validateParameter(valid_564137, JString, required = true,
                                  default = nil)
-  if valid_574237 != nil:
-    section.add "mediaGraphName", valid_574237
+  if valid_564137 != nil:
+    section.add "accountName", valid_564137
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -841,11 +845,11 @@ proc validate_OperationsStatusGet_574231(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574238 = query.getOrDefault("api-version")
-  valid_574238 = validateParameter(valid_574238, JString, required = true,
+  var valid_564138 = query.getOrDefault("api-version")
+  valid_564138 = validateParameter(valid_564138, JString, required = true,
                                  default = nil)
-  if valid_574238 != nil:
-    section.add "api-version", valid_574238
+  if valid_564138 != nil:
+    section.add "api-version", valid_564138
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -854,54 +858,54 @@ proc validate_OperationsStatusGet_574231(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574239: Call_OperationsStatusGet_574230; path: JsonNode;
+proc call*(call_564139: Call_OperationsStatusGet_564130; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get the operation status of a Media Graph in the media services account
   ## 
-  let valid = call_574239.validator(path, query, header, formData, body)
-  let scheme = call_574239.pickScheme
+  let valid = call_564139.validator(path, query, header, formData, body)
+  let scheme = call_564139.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574239.url(scheme.get, call_574239.host, call_574239.base,
-                         call_574239.route, valid.getOrDefault("path"),
+  let url = call_564139.url(scheme.get, call_564139.host, call_564139.base,
+                         call_564139.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574239, url, valid)
+  result = hook(call_564139, url, valid)
 
-proc call*(call_574240: Call_OperationsStatusGet_574230; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; operationId: string;
-          accountName: string; mediaGraphName: string): Recallable =
+proc call*(call_564140: Call_OperationsStatusGet_564130; apiVersion: string;
+          operationId: string; subscriptionId: string; mediaGraphName: string;
+          resourceGroupName: string; accountName: string): Recallable =
   ## operationsStatusGet
   ## Get the operation status of a Media Graph in the media services account
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group within the Azure subscription.
   ##   apiVersion: string (required)
   ##             : The Version of the API to be used with the client request.
-  ##   subscriptionId: string (required)
-  ##                 : The unique identifier for a Microsoft Azure subscription.
   ##   operationId: string (required)
   ##              : The operation ID
-  ##   accountName: string (required)
-  ##              : The Media Services account name.
+  ##   subscriptionId: string (required)
+  ##                 : The unique identifier for a Microsoft Azure subscription.
   ##   mediaGraphName: string (required)
   ##                 : The Media Graph name.
-  var path_574241 = newJObject()
-  var query_574242 = newJObject()
-  add(path_574241, "resourceGroupName", newJString(resourceGroupName))
-  add(query_574242, "api-version", newJString(apiVersion))
-  add(path_574241, "subscriptionId", newJString(subscriptionId))
-  add(path_574241, "operationId", newJString(operationId))
-  add(path_574241, "accountName", newJString(accountName))
-  add(path_574241, "mediaGraphName", newJString(mediaGraphName))
-  result = call_574240.call(path_574241, query_574242, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group within the Azure subscription.
+  ##   accountName: string (required)
+  ##              : The Media Services account name.
+  var path_564141 = newJObject()
+  var query_564142 = newJObject()
+  add(query_564142, "api-version", newJString(apiVersion))
+  add(path_564141, "operationId", newJString(operationId))
+  add(path_564141, "subscriptionId", newJString(subscriptionId))
+  add(path_564141, "mediaGraphName", newJString(mediaGraphName))
+  add(path_564141, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564141, "accountName", newJString(accountName))
+  result = call_564140.call(path_564141, query_564142, nil, nil, nil)
 
-var operationsStatusGet* = Call_OperationsStatusGet_574230(
+var operationsStatusGet* = Call_OperationsStatusGet_564130(
     name: "operationsStatusGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Media/mediaServices/{accountName}/mediaGraphs/{mediaGraphName}/operationsStatus/{operationId}",
-    validator: validate_OperationsStatusGet_574231, base: "",
-    url: url_OperationsStatusGet_574232, schemes: {Scheme.Https})
+    validator: validate_OperationsStatusGet_564131, base: "",
+    url: url_OperationsStatusGet_564132, schemes: {Scheme.Https})
 type
-  Call_MediaGraphsStart_574243 = ref object of OpenApiRestCall_573641
-proc url_MediaGraphsStart_574245(protocol: Scheme; host: string; base: string;
+  Call_MediaGraphsStart_564143 = ref object of OpenApiRestCall_563539
+proc url_MediaGraphsStart_564145(protocol: Scheme; host: string; base: string;
                                 route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -927,7 +931,7 @@ proc url_MediaGraphsStart_574245(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_MediaGraphsStart_574244(path: JsonNode; query: JsonNode;
+proc validate_MediaGraphsStart_564144(path: JsonNode; query: JsonNode;
                                      header: JsonNode; formData: JsonNode;
                                      body: JsonNode): JsonNode =
   ## Start a Media Graph in the Media Services account
@@ -935,37 +939,37 @@ proc validate_MediaGraphsStart_574244(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group within the Azure subscription.
   ##   subscriptionId: JString (required)
   ##                 : The unique identifier for a Microsoft Azure subscription.
-  ##   accountName: JString (required)
-  ##              : The Media Services account name.
   ##   mediaGraphName: JString (required)
   ##                 : The Media Graph name.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group within the Azure subscription.
+  ##   accountName: JString (required)
+  ##              : The Media Services account name.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_574246 = path.getOrDefault("resourceGroupName")
-  valid_574246 = validateParameter(valid_574246, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564146 = path.getOrDefault("subscriptionId")
+  valid_564146 = validateParameter(valid_564146, JString, required = true,
                                  default = nil)
-  if valid_574246 != nil:
-    section.add "resourceGroupName", valid_574246
-  var valid_574247 = path.getOrDefault("subscriptionId")
-  valid_574247 = validateParameter(valid_574247, JString, required = true,
+  if valid_564146 != nil:
+    section.add "subscriptionId", valid_564146
+  var valid_564147 = path.getOrDefault("mediaGraphName")
+  valid_564147 = validateParameter(valid_564147, JString, required = true,
                                  default = nil)
-  if valid_574247 != nil:
-    section.add "subscriptionId", valid_574247
-  var valid_574248 = path.getOrDefault("accountName")
-  valid_574248 = validateParameter(valid_574248, JString, required = true,
+  if valid_564147 != nil:
+    section.add "mediaGraphName", valid_564147
+  var valid_564148 = path.getOrDefault("resourceGroupName")
+  valid_564148 = validateParameter(valid_564148, JString, required = true,
                                  default = nil)
-  if valid_574248 != nil:
-    section.add "accountName", valid_574248
-  var valid_574249 = path.getOrDefault("mediaGraphName")
-  valid_574249 = validateParameter(valid_574249, JString, required = true,
+  if valid_564148 != nil:
+    section.add "resourceGroupName", valid_564148
+  var valid_564149 = path.getOrDefault("accountName")
+  valid_564149 = validateParameter(valid_564149, JString, required = true,
                                  default = nil)
-  if valid_574249 != nil:
-    section.add "mediaGraphName", valid_574249
+  if valid_564149 != nil:
+    section.add "accountName", valid_564149
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -973,11 +977,11 @@ proc validate_MediaGraphsStart_574244(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574250 = query.getOrDefault("api-version")
-  valid_574250 = validateParameter(valid_574250, JString, required = true,
+  var valid_564150 = query.getOrDefault("api-version")
+  valid_564150 = validateParameter(valid_564150, JString, required = true,
                                  default = nil)
-  if valid_574250 != nil:
-    section.add "api-version", valid_574250
+  if valid_564150 != nil:
+    section.add "api-version", valid_564150
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -986,50 +990,50 @@ proc validate_MediaGraphsStart_574244(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574251: Call_MediaGraphsStart_574243; path: JsonNode;
+proc call*(call_564151: Call_MediaGraphsStart_564143; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Start a Media Graph in the Media Services account
   ## 
-  let valid = call_574251.validator(path, query, header, formData, body)
-  let scheme = call_574251.pickScheme
+  let valid = call_564151.validator(path, query, header, formData, body)
+  let scheme = call_564151.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574251.url(scheme.get, call_574251.host, call_574251.base,
-                         call_574251.route, valid.getOrDefault("path"),
+  let url = call_564151.url(scheme.get, call_564151.host, call_564151.base,
+                         call_564151.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574251, url, valid)
+  result = hook(call_564151, url, valid)
 
-proc call*(call_574252: Call_MediaGraphsStart_574243; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; accountName: string;
-          mediaGraphName: string): Recallable =
+proc call*(call_564152: Call_MediaGraphsStart_564143; apiVersion: string;
+          subscriptionId: string; mediaGraphName: string; resourceGroupName: string;
+          accountName: string): Recallable =
   ## mediaGraphsStart
   ## Start a Media Graph in the Media Services account
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group within the Azure subscription.
   ##   apiVersion: string (required)
   ##             : The Version of the API to be used with the client request.
   ##   subscriptionId: string (required)
   ##                 : The unique identifier for a Microsoft Azure subscription.
-  ##   accountName: string (required)
-  ##              : The Media Services account name.
   ##   mediaGraphName: string (required)
   ##                 : The Media Graph name.
-  var path_574253 = newJObject()
-  var query_574254 = newJObject()
-  add(path_574253, "resourceGroupName", newJString(resourceGroupName))
-  add(query_574254, "api-version", newJString(apiVersion))
-  add(path_574253, "subscriptionId", newJString(subscriptionId))
-  add(path_574253, "accountName", newJString(accountName))
-  add(path_574253, "mediaGraphName", newJString(mediaGraphName))
-  result = call_574252.call(path_574253, query_574254, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group within the Azure subscription.
+  ##   accountName: string (required)
+  ##              : The Media Services account name.
+  var path_564153 = newJObject()
+  var query_564154 = newJObject()
+  add(query_564154, "api-version", newJString(apiVersion))
+  add(path_564153, "subscriptionId", newJString(subscriptionId))
+  add(path_564153, "mediaGraphName", newJString(mediaGraphName))
+  add(path_564153, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564153, "accountName", newJString(accountName))
+  result = call_564152.call(path_564153, query_564154, nil, nil, nil)
 
-var mediaGraphsStart* = Call_MediaGraphsStart_574243(name: "mediaGraphsStart",
+var mediaGraphsStart* = Call_MediaGraphsStart_564143(name: "mediaGraphsStart",
     meth: HttpMethod.HttpPost, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Media/mediaServices/{accountName}/mediaGraphs/{mediaGraphName}/start",
-    validator: validate_MediaGraphsStart_574244, base: "",
-    url: url_MediaGraphsStart_574245, schemes: {Scheme.Https})
+    validator: validate_MediaGraphsStart_564144, base: "",
+    url: url_MediaGraphsStart_564145, schemes: {Scheme.Https})
 type
-  Call_MediaGraphsStop_574255 = ref object of OpenApiRestCall_573641
-proc url_MediaGraphsStop_574257(protocol: Scheme; host: string; base: string;
+  Call_MediaGraphsStop_564155 = ref object of OpenApiRestCall_563539
+proc url_MediaGraphsStop_564157(protocol: Scheme; host: string; base: string;
                                route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1055,7 +1059,7 @@ proc url_MediaGraphsStop_574257(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_MediaGraphsStop_574256(path: JsonNode; query: JsonNode;
+proc validate_MediaGraphsStop_564156(path: JsonNode; query: JsonNode;
                                     header: JsonNode; formData: JsonNode;
                                     body: JsonNode): JsonNode =
   ## Stop a Media Graph in the Media Services account
@@ -1063,37 +1067,37 @@ proc validate_MediaGraphsStop_574256(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group within the Azure subscription.
   ##   subscriptionId: JString (required)
   ##                 : The unique identifier for a Microsoft Azure subscription.
-  ##   accountName: JString (required)
-  ##              : The Media Services account name.
   ##   mediaGraphName: JString (required)
   ##                 : The Media Graph name.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group within the Azure subscription.
+  ##   accountName: JString (required)
+  ##              : The Media Services account name.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_574258 = path.getOrDefault("resourceGroupName")
-  valid_574258 = validateParameter(valid_574258, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564158 = path.getOrDefault("subscriptionId")
+  valid_564158 = validateParameter(valid_564158, JString, required = true,
                                  default = nil)
-  if valid_574258 != nil:
-    section.add "resourceGroupName", valid_574258
-  var valid_574259 = path.getOrDefault("subscriptionId")
-  valid_574259 = validateParameter(valid_574259, JString, required = true,
+  if valid_564158 != nil:
+    section.add "subscriptionId", valid_564158
+  var valid_564159 = path.getOrDefault("mediaGraphName")
+  valid_564159 = validateParameter(valid_564159, JString, required = true,
                                  default = nil)
-  if valid_574259 != nil:
-    section.add "subscriptionId", valid_574259
-  var valid_574260 = path.getOrDefault("accountName")
-  valid_574260 = validateParameter(valid_574260, JString, required = true,
+  if valid_564159 != nil:
+    section.add "mediaGraphName", valid_564159
+  var valid_564160 = path.getOrDefault("resourceGroupName")
+  valid_564160 = validateParameter(valid_564160, JString, required = true,
                                  default = nil)
-  if valid_574260 != nil:
-    section.add "accountName", valid_574260
-  var valid_574261 = path.getOrDefault("mediaGraphName")
-  valid_574261 = validateParameter(valid_574261, JString, required = true,
+  if valid_564160 != nil:
+    section.add "resourceGroupName", valid_564160
+  var valid_564161 = path.getOrDefault("accountName")
+  valid_564161 = validateParameter(valid_564161, JString, required = true,
                                  default = nil)
-  if valid_574261 != nil:
-    section.add "mediaGraphName", valid_574261
+  if valid_564161 != nil:
+    section.add "accountName", valid_564161
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1101,11 +1105,11 @@ proc validate_MediaGraphsStop_574256(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574262 = query.getOrDefault("api-version")
-  valid_574262 = validateParameter(valid_574262, JString, required = true,
+  var valid_564162 = query.getOrDefault("api-version")
+  valid_564162 = validateParameter(valid_564162, JString, required = true,
                                  default = nil)
-  if valid_574262 != nil:
-    section.add "api-version", valid_574262
+  if valid_564162 != nil:
+    section.add "api-version", valid_564162
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1114,46 +1118,46 @@ proc validate_MediaGraphsStop_574256(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574263: Call_MediaGraphsStop_574255; path: JsonNode; query: JsonNode;
+proc call*(call_564163: Call_MediaGraphsStop_564155; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Stop a Media Graph in the Media Services account
   ## 
-  let valid = call_574263.validator(path, query, header, formData, body)
-  let scheme = call_574263.pickScheme
+  let valid = call_564163.validator(path, query, header, formData, body)
+  let scheme = call_564163.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574263.url(scheme.get, call_574263.host, call_574263.base,
-                         call_574263.route, valid.getOrDefault("path"),
+  let url = call_564163.url(scheme.get, call_564163.host, call_564163.base,
+                         call_564163.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574263, url, valid)
+  result = hook(call_564163, url, valid)
 
-proc call*(call_574264: Call_MediaGraphsStop_574255; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; accountName: string;
-          mediaGraphName: string): Recallable =
+proc call*(call_564164: Call_MediaGraphsStop_564155; apiVersion: string;
+          subscriptionId: string; mediaGraphName: string; resourceGroupName: string;
+          accountName: string): Recallable =
   ## mediaGraphsStop
   ## Stop a Media Graph in the Media Services account
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group within the Azure subscription.
   ##   apiVersion: string (required)
   ##             : The Version of the API to be used with the client request.
   ##   subscriptionId: string (required)
   ##                 : The unique identifier for a Microsoft Azure subscription.
-  ##   accountName: string (required)
-  ##              : The Media Services account name.
   ##   mediaGraphName: string (required)
   ##                 : The Media Graph name.
-  var path_574265 = newJObject()
-  var query_574266 = newJObject()
-  add(path_574265, "resourceGroupName", newJString(resourceGroupName))
-  add(query_574266, "api-version", newJString(apiVersion))
-  add(path_574265, "subscriptionId", newJString(subscriptionId))
-  add(path_574265, "accountName", newJString(accountName))
-  add(path_574265, "mediaGraphName", newJString(mediaGraphName))
-  result = call_574264.call(path_574265, query_574266, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group within the Azure subscription.
+  ##   accountName: string (required)
+  ##              : The Media Services account name.
+  var path_564165 = newJObject()
+  var query_564166 = newJObject()
+  add(query_564166, "api-version", newJString(apiVersion))
+  add(path_564165, "subscriptionId", newJString(subscriptionId))
+  add(path_564165, "mediaGraphName", newJString(mediaGraphName))
+  add(path_564165, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564165, "accountName", newJString(accountName))
+  result = call_564164.call(path_564165, query_564166, nil, nil, nil)
 
-var mediaGraphsStop* = Call_MediaGraphsStop_574255(name: "mediaGraphsStop",
+var mediaGraphsStop* = Call_MediaGraphsStop_564155(name: "mediaGraphsStop",
     meth: HttpMethod.HttpPost, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Media/mediaServices/{accountName}/mediaGraphs/{mediaGraphName}/stop",
-    validator: validate_MediaGraphsStop_574256, base: "", url: url_MediaGraphsStop_574257,
+    validator: validate_MediaGraphsStop_564156, base: "", url: url_MediaGraphsStop_564157,
     schemes: {Scheme.Https})
 export
   rest

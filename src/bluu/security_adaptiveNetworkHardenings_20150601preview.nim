@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, httpcore
 
 ## auto-generated via openapi macro
 ## title: Security Center
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_567657 = ref object of OpenApiRestCall
+  OpenApiRestCall_563555 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_567657](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563555](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_567657): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563555): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,8 +107,8 @@ const
   macServiceName = "security-adaptiveNetworkHardenings"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_AdaptiveNetworkHardeningsListByExtendedResource_567879 = ref object of OpenApiRestCall_567657
-proc url_AdaptiveNetworkHardeningsListByExtendedResource_567881(protocol: Scheme;
+  Call_AdaptiveNetworkHardeningsListByExtendedResource_563777 = ref object of OpenApiRestCall_563555
+proc url_AdaptiveNetworkHardeningsListByExtendedResource_563779(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -135,7 +139,7 @@ proc url_AdaptiveNetworkHardeningsListByExtendedResource_567881(protocol: Scheme
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AdaptiveNetworkHardeningsListByExtendedResource_567880(
+proc validate_AdaptiveNetworkHardeningsListByExtendedResource_563778(
     path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
     body: JsonNode): JsonNode =
   ## Gets a list of Adaptive Network Hardenings resources in scope of an extended resource.
@@ -145,42 +149,42 @@ proc validate_AdaptiveNetworkHardeningsListByExtendedResource_567880(
   ## parameters in `path` object:
   ##   resourceType: JString (required)
   ##               : The type of the resource.
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
   ##   subscriptionId: JString (required)
   ##                 : Azure subscription ID
-  ##   resourceName: JString (required)
-  ##               : Name of the resource.
   ##   resourceNamespace: JString (required)
   ##                    : The Namespace of the resource.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
+  ##   resourceName: JString (required)
+  ##               : Name of the resource.
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceType` field"
-  var valid_568041 = path.getOrDefault("resourceType")
-  valid_568041 = validateParameter(valid_568041, JString, required = true,
+  var valid_563941 = path.getOrDefault("resourceType")
+  valid_563941 = validateParameter(valid_563941, JString, required = true,
                                  default = nil)
-  if valid_568041 != nil:
-    section.add "resourceType", valid_568041
-  var valid_568042 = path.getOrDefault("resourceGroupName")
-  valid_568042 = validateParameter(valid_568042, JString, required = true,
+  if valid_563941 != nil:
+    section.add "resourceType", valid_563941
+  var valid_563942 = path.getOrDefault("subscriptionId")
+  valid_563942 = validateParameter(valid_563942, JString, required = true,
                                  default = nil)
-  if valid_568042 != nil:
-    section.add "resourceGroupName", valid_568042
-  var valid_568043 = path.getOrDefault("subscriptionId")
-  valid_568043 = validateParameter(valid_568043, JString, required = true,
+  if valid_563942 != nil:
+    section.add "subscriptionId", valid_563942
+  var valid_563943 = path.getOrDefault("resourceNamespace")
+  valid_563943 = validateParameter(valid_563943, JString, required = true,
                                  default = nil)
-  if valid_568043 != nil:
-    section.add "subscriptionId", valid_568043
-  var valid_568044 = path.getOrDefault("resourceName")
-  valid_568044 = validateParameter(valid_568044, JString, required = true,
+  if valid_563943 != nil:
+    section.add "resourceNamespace", valid_563943
+  var valid_563944 = path.getOrDefault("resourceGroupName")
+  valid_563944 = validateParameter(valid_563944, JString, required = true,
                                  default = nil)
-  if valid_568044 != nil:
-    section.add "resourceName", valid_568044
-  var valid_568045 = path.getOrDefault("resourceNamespace")
-  valid_568045 = validateParameter(valid_568045, JString, required = true,
+  if valid_563944 != nil:
+    section.add "resourceGroupName", valid_563944
+  var valid_563945 = path.getOrDefault("resourceName")
+  valid_563945 = validateParameter(valid_563945, JString, required = true,
                                  default = nil)
-  if valid_568045 != nil:
-    section.add "resourceNamespace", valid_568045
+  if valid_563945 != nil:
+    section.add "resourceName", valid_563945
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -188,11 +192,11 @@ proc validate_AdaptiveNetworkHardeningsListByExtendedResource_567880(
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568046 = query.getOrDefault("api-version")
-  valid_568046 = validateParameter(valid_568046, JString, required = true,
+  var valid_563946 = query.getOrDefault("api-version")
+  valid_563946 = validateParameter(valid_563946, JString, required = true,
                                  default = nil)
-  if valid_568046 != nil:
-    section.add "api-version", valid_568046
+  if valid_563946 != nil:
+    section.add "api-version", valid_563946
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -201,56 +205,56 @@ proc validate_AdaptiveNetworkHardeningsListByExtendedResource_567880(
   if body != nil:
     result.add "body", body
 
-proc call*(call_568073: Call_AdaptiveNetworkHardeningsListByExtendedResource_567879;
+proc call*(call_563973: Call_AdaptiveNetworkHardeningsListByExtendedResource_563777;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Gets a list of Adaptive Network Hardenings resources in scope of an extended resource.
   ## 
-  let valid = call_568073.validator(path, query, header, formData, body)
-  let scheme = call_568073.pickScheme
+  let valid = call_563973.validator(path, query, header, formData, body)
+  let scheme = call_563973.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568073.url(scheme.get, call_568073.host, call_568073.base,
-                         call_568073.route, valid.getOrDefault("path"),
+  let url = call_563973.url(scheme.get, call_563973.host, call_563973.base,
+                         call_563973.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568073, url, valid)
+  result = hook(call_563973, url, valid)
 
-proc call*(call_568144: Call_AdaptiveNetworkHardeningsListByExtendedResource_567879;
-          resourceType: string; resourceGroupName: string; apiVersion: string;
-          subscriptionId: string; resourceName: string; resourceNamespace: string): Recallable =
+proc call*(call_564044: Call_AdaptiveNetworkHardeningsListByExtendedResource_563777;
+          apiVersion: string; resourceType: string; subscriptionId: string;
+          resourceNamespace: string; resourceGroupName: string; resourceName: string): Recallable =
   ## adaptiveNetworkHardeningsListByExtendedResource
   ## Gets a list of Adaptive Network Hardenings resources in scope of an extended resource.
-  ##   resourceType: string (required)
-  ##               : The type of the resource.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
   ##   apiVersion: string (required)
   ##             : API version for the operation
+  ##   resourceType: string (required)
+  ##               : The type of the resource.
   ##   subscriptionId: string (required)
   ##                 : Azure subscription ID
-  ##   resourceName: string (required)
-  ##               : Name of the resource.
   ##   resourceNamespace: string (required)
   ##                    : The Namespace of the resource.
-  var path_568145 = newJObject()
-  var query_568147 = newJObject()
-  add(path_568145, "resourceType", newJString(resourceType))
-  add(path_568145, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568147, "api-version", newJString(apiVersion))
-  add(path_568145, "subscriptionId", newJString(subscriptionId))
-  add(path_568145, "resourceName", newJString(resourceName))
-  add(path_568145, "resourceNamespace", newJString(resourceNamespace))
-  result = call_568144.call(path_568145, query_568147, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
+  ##   resourceName: string (required)
+  ##               : Name of the resource.
+  var path_564045 = newJObject()
+  var query_564047 = newJObject()
+  add(query_564047, "api-version", newJString(apiVersion))
+  add(path_564045, "resourceType", newJString(resourceType))
+  add(path_564045, "subscriptionId", newJString(subscriptionId))
+  add(path_564045, "resourceNamespace", newJString(resourceNamespace))
+  add(path_564045, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564045, "resourceName", newJString(resourceName))
+  result = call_564044.call(path_564045, query_564047, nil, nil, nil)
 
-var adaptiveNetworkHardeningsListByExtendedResource* = Call_AdaptiveNetworkHardeningsListByExtendedResource_567879(
+var adaptiveNetworkHardeningsListByExtendedResource* = Call_AdaptiveNetworkHardeningsListByExtendedResource_563777(
     name: "adaptiveNetworkHardeningsListByExtendedResource",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/{resourceNamespace}/{resourceType}/{resourceName}/providers/Microsoft.Security/adaptiveNetworkHardenings",
-    validator: validate_AdaptiveNetworkHardeningsListByExtendedResource_567880,
-    base: "", url: url_AdaptiveNetworkHardeningsListByExtendedResource_567881,
+    validator: validate_AdaptiveNetworkHardeningsListByExtendedResource_563778,
+    base: "", url: url_AdaptiveNetworkHardeningsListByExtendedResource_563779,
     schemes: {Scheme.Https})
 type
-  Call_AdaptiveNetworkHardeningsGet_568186 = ref object of OpenApiRestCall_567657
-proc url_AdaptiveNetworkHardeningsGet_568188(protocol: Scheme; host: string;
+  Call_AdaptiveNetworkHardeningsGet_564086 = ref object of OpenApiRestCall_563555
+proc url_AdaptiveNetworkHardeningsGet_564088(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -284,7 +288,7 @@ proc url_AdaptiveNetworkHardeningsGet_568188(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AdaptiveNetworkHardeningsGet_568187(path: JsonNode; query: JsonNode;
+proc validate_AdaptiveNetworkHardeningsGet_564087(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets a single Adaptive Network Hardening resource
   ## 
@@ -293,49 +297,49 @@ proc validate_AdaptiveNetworkHardeningsGet_568187(path: JsonNode; query: JsonNod
   ## parameters in `path` object:
   ##   resourceType: JString (required)
   ##               : The type of the resource.
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
   ##   subscriptionId: JString (required)
   ##                 : Azure subscription ID
-  ##   resourceName: JString (required)
-  ##               : Name of the resource.
   ##   resourceNamespace: JString (required)
   ##                    : The Namespace of the resource.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
   ##   adaptiveNetworkHardeningResourceName: JString (required)
   ##                                       : The name of the Adaptive Network Hardening resource.
+  ##   resourceName: JString (required)
+  ##               : Name of the resource.
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceType` field"
-  var valid_568198 = path.getOrDefault("resourceType")
-  valid_568198 = validateParameter(valid_568198, JString, required = true,
+  var valid_564098 = path.getOrDefault("resourceType")
+  valid_564098 = validateParameter(valid_564098, JString, required = true,
                                  default = nil)
-  if valid_568198 != nil:
-    section.add "resourceType", valid_568198
-  var valid_568199 = path.getOrDefault("resourceGroupName")
-  valid_568199 = validateParameter(valid_568199, JString, required = true,
+  if valid_564098 != nil:
+    section.add "resourceType", valid_564098
+  var valid_564099 = path.getOrDefault("subscriptionId")
+  valid_564099 = validateParameter(valid_564099, JString, required = true,
                                  default = nil)
-  if valid_568199 != nil:
-    section.add "resourceGroupName", valid_568199
-  var valid_568200 = path.getOrDefault("subscriptionId")
-  valid_568200 = validateParameter(valid_568200, JString, required = true,
+  if valid_564099 != nil:
+    section.add "subscriptionId", valid_564099
+  var valid_564100 = path.getOrDefault("resourceNamespace")
+  valid_564100 = validateParameter(valid_564100, JString, required = true,
                                  default = nil)
-  if valid_568200 != nil:
-    section.add "subscriptionId", valid_568200
-  var valid_568201 = path.getOrDefault("resourceName")
-  valid_568201 = validateParameter(valid_568201, JString, required = true,
+  if valid_564100 != nil:
+    section.add "resourceNamespace", valid_564100
+  var valid_564101 = path.getOrDefault("resourceGroupName")
+  valid_564101 = validateParameter(valid_564101, JString, required = true,
                                  default = nil)
-  if valid_568201 != nil:
-    section.add "resourceName", valid_568201
-  var valid_568202 = path.getOrDefault("resourceNamespace")
-  valid_568202 = validateParameter(valid_568202, JString, required = true,
+  if valid_564101 != nil:
+    section.add "resourceGroupName", valid_564101
+  var valid_564102 = path.getOrDefault("adaptiveNetworkHardeningResourceName")
+  valid_564102 = validateParameter(valid_564102, JString, required = true,
                                  default = nil)
-  if valid_568202 != nil:
-    section.add "resourceNamespace", valid_568202
-  var valid_568203 = path.getOrDefault("adaptiveNetworkHardeningResourceName")
-  valid_568203 = validateParameter(valid_568203, JString, required = true,
+  if valid_564102 != nil:
+    section.add "adaptiveNetworkHardeningResourceName", valid_564102
+  var valid_564103 = path.getOrDefault("resourceName")
+  valid_564103 = validateParameter(valid_564103, JString, required = true,
                                  default = nil)
-  if valid_568203 != nil:
-    section.add "adaptiveNetworkHardeningResourceName", valid_568203
+  if valid_564103 != nil:
+    section.add "resourceName", valid_564103
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -343,11 +347,11 @@ proc validate_AdaptiveNetworkHardeningsGet_568187(path: JsonNode; query: JsonNod
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568204 = query.getOrDefault("api-version")
-  valid_568204 = validateParameter(valid_568204, JString, required = true,
+  var valid_564104 = query.getOrDefault("api-version")
+  valid_564104 = validateParameter(valid_564104, JString, required = true,
                                  default = nil)
-  if valid_568204 != nil:
-    section.add "api-version", valid_568204
+  if valid_564104 != nil:
+    section.add "api-version", valid_564104
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -356,59 +360,59 @@ proc validate_AdaptiveNetworkHardeningsGet_568187(path: JsonNode; query: JsonNod
   if body != nil:
     result.add "body", body
 
-proc call*(call_568205: Call_AdaptiveNetworkHardeningsGet_568186; path: JsonNode;
+proc call*(call_564105: Call_AdaptiveNetworkHardeningsGet_564086; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets a single Adaptive Network Hardening resource
   ## 
-  let valid = call_568205.validator(path, query, header, formData, body)
-  let scheme = call_568205.pickScheme
+  let valid = call_564105.validator(path, query, header, formData, body)
+  let scheme = call_564105.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568205.url(scheme.get, call_568205.host, call_568205.base,
-                         call_568205.route, valid.getOrDefault("path"),
+  let url = call_564105.url(scheme.get, call_564105.host, call_564105.base,
+                         call_564105.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568205, url, valid)
+  result = hook(call_564105, url, valid)
 
-proc call*(call_568206: Call_AdaptiveNetworkHardeningsGet_568186;
-          resourceType: string; resourceGroupName: string; apiVersion: string;
-          subscriptionId: string; resourceName: string; resourceNamespace: string;
-          adaptiveNetworkHardeningResourceName: string): Recallable =
+proc call*(call_564106: Call_AdaptiveNetworkHardeningsGet_564086;
+          apiVersion: string; resourceType: string; subscriptionId: string;
+          resourceNamespace: string; resourceGroupName: string;
+          adaptiveNetworkHardeningResourceName: string; resourceName: string): Recallable =
   ## adaptiveNetworkHardeningsGet
   ## Gets a single Adaptive Network Hardening resource
-  ##   resourceType: string (required)
-  ##               : The type of the resource.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
   ##   apiVersion: string (required)
   ##             : API version for the operation
+  ##   resourceType: string (required)
+  ##               : The type of the resource.
   ##   subscriptionId: string (required)
   ##                 : Azure subscription ID
-  ##   resourceName: string (required)
-  ##               : Name of the resource.
   ##   resourceNamespace: string (required)
   ##                    : The Namespace of the resource.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
   ##   adaptiveNetworkHardeningResourceName: string (required)
   ##                                       : The name of the Adaptive Network Hardening resource.
-  var path_568207 = newJObject()
-  var query_568208 = newJObject()
-  add(path_568207, "resourceType", newJString(resourceType))
-  add(path_568207, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568208, "api-version", newJString(apiVersion))
-  add(path_568207, "subscriptionId", newJString(subscriptionId))
-  add(path_568207, "resourceName", newJString(resourceName))
-  add(path_568207, "resourceNamespace", newJString(resourceNamespace))
-  add(path_568207, "adaptiveNetworkHardeningResourceName",
+  ##   resourceName: string (required)
+  ##               : Name of the resource.
+  var path_564107 = newJObject()
+  var query_564108 = newJObject()
+  add(query_564108, "api-version", newJString(apiVersion))
+  add(path_564107, "resourceType", newJString(resourceType))
+  add(path_564107, "subscriptionId", newJString(subscriptionId))
+  add(path_564107, "resourceNamespace", newJString(resourceNamespace))
+  add(path_564107, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564107, "adaptiveNetworkHardeningResourceName",
       newJString(adaptiveNetworkHardeningResourceName))
-  result = call_568206.call(path_568207, query_568208, nil, nil, nil)
+  add(path_564107, "resourceName", newJString(resourceName))
+  result = call_564106.call(path_564107, query_564108, nil, nil, nil)
 
-var adaptiveNetworkHardeningsGet* = Call_AdaptiveNetworkHardeningsGet_568186(
+var adaptiveNetworkHardeningsGet* = Call_AdaptiveNetworkHardeningsGet_564086(
     name: "adaptiveNetworkHardeningsGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/{resourceNamespace}/{resourceType}/{resourceName}/providers/Microsoft.Security/adaptiveNetworkHardenings/{adaptiveNetworkHardeningResourceName}",
-    validator: validate_AdaptiveNetworkHardeningsGet_568187, base: "",
-    url: url_AdaptiveNetworkHardeningsGet_568188, schemes: {Scheme.Https})
+    validator: validate_AdaptiveNetworkHardeningsGet_564087, base: "",
+    url: url_AdaptiveNetworkHardeningsGet_564088, schemes: {Scheme.Https})
 type
-  Call_AdaptiveNetworkHardeningsEnforce_568209 = ref object of OpenApiRestCall_567657
-proc url_AdaptiveNetworkHardeningsEnforce_568211(protocol: Scheme; host: string;
+  Call_AdaptiveNetworkHardeningsEnforce_564109 = ref object of OpenApiRestCall_563555
+proc url_AdaptiveNetworkHardeningsEnforce_564111(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -446,7 +450,7 @@ proc url_AdaptiveNetworkHardeningsEnforce_568211(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AdaptiveNetworkHardeningsEnforce_568210(path: JsonNode;
+proc validate_AdaptiveNetworkHardeningsEnforce_564110(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Enforces the given rules on the NSG(s) listed in the request
   ## 
@@ -455,56 +459,56 @@ proc validate_AdaptiveNetworkHardeningsEnforce_568210(path: JsonNode;
   ## parameters in `path` object:
   ##   resourceType: JString (required)
   ##               : The type of the resource.
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
   ##   subscriptionId: JString (required)
   ##                 : Azure subscription ID
+  ##   resourceNamespace: JString (required)
+  ##                    : The Namespace of the resource.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
+  ##   adaptiveNetworkHardeningResourceName: JString (required)
+  ##                                       : The name of the Adaptive Network Hardening resource.
   ##   resourceName: JString (required)
   ##               : Name of the resource.
   ##   adaptiveNetworkHardeningEnforceAction: JString (required)
   ##                                        : Enforces the given rules on the NSG(s) listed in the request
-  ##   resourceNamespace: JString (required)
-  ##                    : The Namespace of the resource.
-  ##   adaptiveNetworkHardeningResourceName: JString (required)
-  ##                                       : The name of the Adaptive Network Hardening resource.
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceType` field"
-  var valid_568212 = path.getOrDefault("resourceType")
-  valid_568212 = validateParameter(valid_568212, JString, required = true,
+  var valid_564112 = path.getOrDefault("resourceType")
+  valid_564112 = validateParameter(valid_564112, JString, required = true,
                                  default = nil)
-  if valid_568212 != nil:
-    section.add "resourceType", valid_568212
-  var valid_568213 = path.getOrDefault("resourceGroupName")
-  valid_568213 = validateParameter(valid_568213, JString, required = true,
+  if valid_564112 != nil:
+    section.add "resourceType", valid_564112
+  var valid_564113 = path.getOrDefault("subscriptionId")
+  valid_564113 = validateParameter(valid_564113, JString, required = true,
                                  default = nil)
-  if valid_568213 != nil:
-    section.add "resourceGroupName", valid_568213
-  var valid_568214 = path.getOrDefault("subscriptionId")
-  valid_568214 = validateParameter(valid_568214, JString, required = true,
+  if valid_564113 != nil:
+    section.add "subscriptionId", valid_564113
+  var valid_564114 = path.getOrDefault("resourceNamespace")
+  valid_564114 = validateParameter(valid_564114, JString, required = true,
                                  default = nil)
-  if valid_568214 != nil:
-    section.add "subscriptionId", valid_568214
-  var valid_568215 = path.getOrDefault("resourceName")
-  valid_568215 = validateParameter(valid_568215, JString, required = true,
+  if valid_564114 != nil:
+    section.add "resourceNamespace", valid_564114
+  var valid_564115 = path.getOrDefault("resourceGroupName")
+  valid_564115 = validateParameter(valid_564115, JString, required = true,
                                  default = nil)
-  if valid_568215 != nil:
-    section.add "resourceName", valid_568215
-  var valid_568229 = path.getOrDefault("adaptiveNetworkHardeningEnforceAction")
-  valid_568229 = validateParameter(valid_568229, JString, required = true,
+  if valid_564115 != nil:
+    section.add "resourceGroupName", valid_564115
+  var valid_564116 = path.getOrDefault("adaptiveNetworkHardeningResourceName")
+  valid_564116 = validateParameter(valid_564116, JString, required = true,
+                                 default = nil)
+  if valid_564116 != nil:
+    section.add "adaptiveNetworkHardeningResourceName", valid_564116
+  var valid_564117 = path.getOrDefault("resourceName")
+  valid_564117 = validateParameter(valid_564117, JString, required = true,
+                                 default = nil)
+  if valid_564117 != nil:
+    section.add "resourceName", valid_564117
+  var valid_564131 = path.getOrDefault("adaptiveNetworkHardeningEnforceAction")
+  valid_564131 = validateParameter(valid_564131, JString, required = true,
                                  default = newJString("enforce"))
-  if valid_568229 != nil:
-    section.add "adaptiveNetworkHardeningEnforceAction", valid_568229
-  var valid_568230 = path.getOrDefault("resourceNamespace")
-  valid_568230 = validateParameter(valid_568230, JString, required = true,
-                                 default = nil)
-  if valid_568230 != nil:
-    section.add "resourceNamespace", valid_568230
-  var valid_568231 = path.getOrDefault("adaptiveNetworkHardeningResourceName")
-  valid_568231 = validateParameter(valid_568231, JString, required = true,
-                                 default = nil)
-  if valid_568231 != nil:
-    section.add "adaptiveNetworkHardeningResourceName", valid_568231
+  if valid_564131 != nil:
+    section.add "adaptiveNetworkHardeningEnforceAction", valid_564131
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -512,11 +516,11 @@ proc validate_AdaptiveNetworkHardeningsEnforce_568210(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568232 = query.getOrDefault("api-version")
-  valid_568232 = validateParameter(valid_568232, JString, required = true,
+  var valid_564132 = query.getOrDefault("api-version")
+  valid_564132 = validateParameter(valid_564132, JString, required = true,
                                  default = nil)
-  if valid_568232 != nil:
-    section.add "api-version", valid_568232
+  if valid_564132 != nil:
+    section.add "api-version", valid_564132
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -529,66 +533,67 @@ proc validate_AdaptiveNetworkHardeningsEnforce_568210(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568234: Call_AdaptiveNetworkHardeningsEnforce_568209;
+proc call*(call_564134: Call_AdaptiveNetworkHardeningsEnforce_564109;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Enforces the given rules on the NSG(s) listed in the request
   ## 
-  let valid = call_568234.validator(path, query, header, formData, body)
-  let scheme = call_568234.pickScheme
+  let valid = call_564134.validator(path, query, header, formData, body)
+  let scheme = call_564134.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568234.url(scheme.get, call_568234.host, call_568234.base,
-                         call_568234.route, valid.getOrDefault("path"),
+  let url = call_564134.url(scheme.get, call_564134.host, call_564134.base,
+                         call_564134.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568234, url, valid)
+  result = hook(call_564134, url, valid)
 
-proc call*(call_568235: Call_AdaptiveNetworkHardeningsEnforce_568209;
-          resourceType: string; resourceGroupName: string; apiVersion: string;
-          subscriptionId: string; resourceName: string; resourceNamespace: string;
+proc call*(call_564135: Call_AdaptiveNetworkHardeningsEnforce_564109;
+          apiVersion: string; resourceType: string; subscriptionId: string;
+          resourceNamespace: string; resourceGroupName: string;
           adaptiveNetworkHardeningResourceName: string; body: JsonNode;
+          resourceName: string;
           adaptiveNetworkHardeningEnforceAction: string = "enforce"): Recallable =
   ## adaptiveNetworkHardeningsEnforce
   ## Enforces the given rules on the NSG(s) listed in the request
-  ##   resourceType: string (required)
-  ##               : The type of the resource.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
   ##   apiVersion: string (required)
   ##             : API version for the operation
+  ##   resourceType: string (required)
+  ##               : The type of the resource.
   ##   subscriptionId: string (required)
   ##                 : Azure subscription ID
+  ##   resourceNamespace: string (required)
+  ##                    : The Namespace of the resource.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
+  ##   adaptiveNetworkHardeningResourceName: string (required)
+  ##                                       : The name of the Adaptive Network Hardening resource.
+  ##   body: JObject (required)
   ##   resourceName: string (required)
   ##               : Name of the resource.
   ##   adaptiveNetworkHardeningEnforceAction: string (required)
   ##                                        : Enforces the given rules on the NSG(s) listed in the request
-  ##   resourceNamespace: string (required)
-  ##                    : The Namespace of the resource.
-  ##   adaptiveNetworkHardeningResourceName: string (required)
-  ##                                       : The name of the Adaptive Network Hardening resource.
-  ##   body: JObject (required)
-  var path_568236 = newJObject()
-  var query_568237 = newJObject()
-  var body_568238 = newJObject()
-  add(path_568236, "resourceType", newJString(resourceType))
-  add(path_568236, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568237, "api-version", newJString(apiVersion))
-  add(path_568236, "subscriptionId", newJString(subscriptionId))
-  add(path_568236, "resourceName", newJString(resourceName))
-  add(path_568236, "adaptiveNetworkHardeningEnforceAction",
-      newJString(adaptiveNetworkHardeningEnforceAction))
-  add(path_568236, "resourceNamespace", newJString(resourceNamespace))
-  add(path_568236, "adaptiveNetworkHardeningResourceName",
+  var path_564136 = newJObject()
+  var query_564137 = newJObject()
+  var body_564138 = newJObject()
+  add(query_564137, "api-version", newJString(apiVersion))
+  add(path_564136, "resourceType", newJString(resourceType))
+  add(path_564136, "subscriptionId", newJString(subscriptionId))
+  add(path_564136, "resourceNamespace", newJString(resourceNamespace))
+  add(path_564136, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564136, "adaptiveNetworkHardeningResourceName",
       newJString(adaptiveNetworkHardeningResourceName))
   if body != nil:
-    body_568238 = body
-  result = call_568235.call(path_568236, query_568237, nil, nil, body_568238)
+    body_564138 = body
+  add(path_564136, "resourceName", newJString(resourceName))
+  add(path_564136, "adaptiveNetworkHardeningEnforceAction",
+      newJString(adaptiveNetworkHardeningEnforceAction))
+  result = call_564135.call(path_564136, query_564137, nil, nil, body_564138)
 
-var adaptiveNetworkHardeningsEnforce* = Call_AdaptiveNetworkHardeningsEnforce_568209(
+var adaptiveNetworkHardeningsEnforce* = Call_AdaptiveNetworkHardeningsEnforce_564109(
     name: "adaptiveNetworkHardeningsEnforce", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/{resourceNamespace}/{resourceType}/{resourceName}/providers/Microsoft.Security/adaptiveNetworkHardenings/{adaptiveNetworkHardeningResourceName}/{adaptiveNetworkHardeningEnforceAction}",
-    validator: validate_AdaptiveNetworkHardeningsEnforce_568210, base: "",
-    url: url_AdaptiveNetworkHardeningsEnforce_568211, schemes: {Scheme.Https})
+    validator: validate_AdaptiveNetworkHardeningsEnforce_564110, base: "",
+    url: url_AdaptiveNetworkHardeningsEnforce_564111, schemes: {Scheme.Https})
 export
   rest
 

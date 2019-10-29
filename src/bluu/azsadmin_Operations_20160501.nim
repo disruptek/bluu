@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, httpcore
 
 ## auto-generated via openapi macro
 ## title: FabricAdminClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_574441 = ref object of OpenApiRestCall
+  OpenApiRestCall_563539 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_574441](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563539](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_574441): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563539): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,8 +107,8 @@ const
   macServiceName = "azsadmin-Operations"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_ComputeFabricOperationsGet_574663 = ref object of OpenApiRestCall_574441
-proc url_ComputeFabricOperationsGet_574665(protocol: Scheme; host: string;
+  Call_ComputeFabricOperationsGet_563761 = ref object of OpenApiRestCall_563539
+proc url_ComputeFabricOperationsGet_563763(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -132,44 +136,43 @@ proc url_ComputeFabricOperationsGet_574665(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ComputeFabricOperationsGet_574664(path: JsonNode; query: JsonNode;
+proc validate_ComputeFabricOperationsGet_563762(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Get the status of a compute fabric operation.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   subscriptionId: JString (required)
-  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription.The subscription ID forms part of the URI for every service call.
   ##   computeOperationResult: JString (required)
   ##                         : Id of a compute fabric operation.
+  ##   subscriptionId: JString (required)
+  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription.The subscription ID forms part of the URI for every service call.
   ##   provider: JString (required)
   ##           : Name of the provider.
   ##   location: JString (required)
   ##           : Location of the resource.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `subscriptionId` field"
-  var valid_574838 = path.getOrDefault("subscriptionId")
-  valid_574838 = validateParameter(valid_574838, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `computeOperationResult` field"
+  var valid_563938 = path.getOrDefault("computeOperationResult")
+  valid_563938 = validateParameter(valid_563938, JString, required = true,
                                  default = nil)
-  if valid_574838 != nil:
-    section.add "subscriptionId", valid_574838
-  var valid_574839 = path.getOrDefault("computeOperationResult")
-  valid_574839 = validateParameter(valid_574839, JString, required = true,
+  if valid_563938 != nil:
+    section.add "computeOperationResult", valid_563938
+  var valid_563939 = path.getOrDefault("subscriptionId")
+  valid_563939 = validateParameter(valid_563939, JString, required = true,
                                  default = nil)
-  if valid_574839 != nil:
-    section.add "computeOperationResult", valid_574839
-  var valid_574840 = path.getOrDefault("provider")
-  valid_574840 = validateParameter(valid_574840, JString, required = true,
+  if valid_563939 != nil:
+    section.add "subscriptionId", valid_563939
+  var valid_563940 = path.getOrDefault("provider")
+  valid_563940 = validateParameter(valid_563940, JString, required = true,
                                  default = nil)
-  if valid_574840 != nil:
-    section.add "provider", valid_574840
-  var valid_574841 = path.getOrDefault("location")
-  valid_574841 = validateParameter(valid_574841, JString, required = true,
+  if valid_563940 != nil:
+    section.add "provider", valid_563940
+  var valid_563941 = path.getOrDefault("location")
+  valid_563941 = validateParameter(valid_563941, JString, required = true,
                                  default = nil)
-  if valid_574841 != nil:
-    section.add "location", valid_574841
+  if valid_563941 != nil:
+    section.add "location", valid_563941
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -177,11 +180,11 @@ proc validate_ComputeFabricOperationsGet_574664(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574855 = query.getOrDefault("api-version")
-  valid_574855 = validateParameter(valid_574855, JString, required = true,
+  var valid_563955 = query.getOrDefault("api-version")
+  valid_563955 = validateParameter(valid_563955, JString, required = true,
                                  default = newJString("2016-05-01"))
-  if valid_574855 != nil:
-    section.add "api-version", valid_574855
+  if valid_563955 != nil:
+    section.add "api-version", valid_563955
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -190,51 +193,51 @@ proc validate_ComputeFabricOperationsGet_574664(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574878: Call_ComputeFabricOperationsGet_574663; path: JsonNode;
+proc call*(call_563978: Call_ComputeFabricOperationsGet_563761; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get the status of a compute fabric operation.
   ## 
-  let valid = call_574878.validator(path, query, header, formData, body)
-  let scheme = call_574878.pickScheme
+  let valid = call_563978.validator(path, query, header, formData, body)
+  let scheme = call_563978.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574878.url(scheme.get, call_574878.host, call_574878.base,
-                         call_574878.route, valid.getOrDefault("path"),
+  let url = call_563978.url(scheme.get, call_563978.host, call_563978.base,
+                         call_563978.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574878, url, valid)
+  result = hook(call_563978, url, valid)
 
-proc call*(call_574949: Call_ComputeFabricOperationsGet_574663;
-          subscriptionId: string; computeOperationResult: string; provider: string;
+proc call*(call_564049: Call_ComputeFabricOperationsGet_563761;
+          computeOperationResult: string; subscriptionId: string; provider: string;
           location: string; apiVersion: string = "2016-05-01"): Recallable =
   ## computeFabricOperationsGet
   ## Get the status of a compute fabric operation.
+  ##   computeOperationResult: string (required)
+  ##                         : Id of a compute fabric operation.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription.The subscription ID forms part of the URI for every service call.
-  ##   computeOperationResult: string (required)
-  ##                         : Id of a compute fabric operation.
   ##   provider: string (required)
   ##           : Name of the provider.
   ##   location: string (required)
   ##           : Location of the resource.
-  var path_574950 = newJObject()
-  var query_574952 = newJObject()
-  add(query_574952, "api-version", newJString(apiVersion))
-  add(path_574950, "subscriptionId", newJString(subscriptionId))
-  add(path_574950, "computeOperationResult", newJString(computeOperationResult))
-  add(path_574950, "provider", newJString(provider))
-  add(path_574950, "location", newJString(location))
-  result = call_574949.call(path_574950, query_574952, nil, nil, nil)
+  var path_564050 = newJObject()
+  var query_564052 = newJObject()
+  add(path_564050, "computeOperationResult", newJString(computeOperationResult))
+  add(query_564052, "api-version", newJString(apiVersion))
+  add(path_564050, "subscriptionId", newJString(subscriptionId))
+  add(path_564050, "provider", newJString(provider))
+  add(path_564050, "location", newJString(location))
+  result = call_564049.call(path_564050, query_564052, nil, nil, nil)
 
-var computeFabricOperationsGet* = Call_ComputeFabricOperationsGet_574663(
+var computeFabricOperationsGet* = Call_ComputeFabricOperationsGet_563761(
     name: "computeFabricOperationsGet", meth: HttpMethod.HttpGet,
     host: "adminmanagement.local.azurestack.external", route: "/subscriptions/{subscriptionId}/resourceGroups/System.{location}/providers/{provider}/fabricLocations/{location}/computeOperationResults/{computeOperationResult}",
-    validator: validate_ComputeFabricOperationsGet_574664, base: "",
-    url: url_ComputeFabricOperationsGet_574665, schemes: {Scheme.Https})
+    validator: validate_ComputeFabricOperationsGet_563762, base: "",
+    url: url_ComputeFabricOperationsGet_563763, schemes: {Scheme.Https})
 type
-  Call_NetworkFabricOperationsGet_574991 = ref object of OpenApiRestCall_574441
-proc url_NetworkFabricOperationsGet_574993(protocol: Scheme; host: string;
+  Call_NetworkFabricOperationsGet_564091 = ref object of OpenApiRestCall_563539
+proc url_NetworkFabricOperationsGet_564093(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -262,44 +265,43 @@ proc url_NetworkFabricOperationsGet_574993(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_NetworkFabricOperationsGet_574992(path: JsonNode; query: JsonNode;
+proc validate_NetworkFabricOperationsGet_564092(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Get the status of a network fabric operation.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   subscriptionId: JString (required)
-  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription.The subscription ID forms part of the URI for every service call.
   ##   networkOperationResult: JString (required)
   ##                         : Id of a network fabric operation.
+  ##   subscriptionId: JString (required)
+  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription.The subscription ID forms part of the URI for every service call.
   ##   provider: JString (required)
   ##           : Name of the provider.
   ##   location: JString (required)
   ##           : Location of the resource.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `subscriptionId` field"
-  var valid_574994 = path.getOrDefault("subscriptionId")
-  valid_574994 = validateParameter(valid_574994, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `networkOperationResult` field"
+  var valid_564094 = path.getOrDefault("networkOperationResult")
+  valid_564094 = validateParameter(valid_564094, JString, required = true,
                                  default = nil)
-  if valid_574994 != nil:
-    section.add "subscriptionId", valid_574994
-  var valid_574995 = path.getOrDefault("networkOperationResult")
-  valid_574995 = validateParameter(valid_574995, JString, required = true,
+  if valid_564094 != nil:
+    section.add "networkOperationResult", valid_564094
+  var valid_564095 = path.getOrDefault("subscriptionId")
+  valid_564095 = validateParameter(valid_564095, JString, required = true,
                                  default = nil)
-  if valid_574995 != nil:
-    section.add "networkOperationResult", valid_574995
-  var valid_574996 = path.getOrDefault("provider")
-  valid_574996 = validateParameter(valid_574996, JString, required = true,
+  if valid_564095 != nil:
+    section.add "subscriptionId", valid_564095
+  var valid_564096 = path.getOrDefault("provider")
+  valid_564096 = validateParameter(valid_564096, JString, required = true,
                                  default = nil)
-  if valid_574996 != nil:
-    section.add "provider", valid_574996
-  var valid_574997 = path.getOrDefault("location")
-  valid_574997 = validateParameter(valid_574997, JString, required = true,
+  if valid_564096 != nil:
+    section.add "provider", valid_564096
+  var valid_564097 = path.getOrDefault("location")
+  valid_564097 = validateParameter(valid_564097, JString, required = true,
                                  default = nil)
-  if valid_574997 != nil:
-    section.add "location", valid_574997
+  if valid_564097 != nil:
+    section.add "location", valid_564097
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -307,11 +309,11 @@ proc validate_NetworkFabricOperationsGet_574992(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574998 = query.getOrDefault("api-version")
-  valid_574998 = validateParameter(valid_574998, JString, required = true,
+  var valid_564098 = query.getOrDefault("api-version")
+  valid_564098 = validateParameter(valid_564098, JString, required = true,
                                  default = newJString("2016-05-01"))
-  if valid_574998 != nil:
-    section.add "api-version", valid_574998
+  if valid_564098 != nil:
+    section.add "api-version", valid_564098
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -320,48 +322,48 @@ proc validate_NetworkFabricOperationsGet_574992(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574999: Call_NetworkFabricOperationsGet_574991; path: JsonNode;
+proc call*(call_564099: Call_NetworkFabricOperationsGet_564091; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get the status of a network fabric operation.
   ## 
-  let valid = call_574999.validator(path, query, header, formData, body)
-  let scheme = call_574999.pickScheme
+  let valid = call_564099.validator(path, query, header, formData, body)
+  let scheme = call_564099.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574999.url(scheme.get, call_574999.host, call_574999.base,
-                         call_574999.route, valid.getOrDefault("path"),
+  let url = call_564099.url(scheme.get, call_564099.host, call_564099.base,
+                         call_564099.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574999, url, valid)
+  result = hook(call_564099, url, valid)
 
-proc call*(call_575000: Call_NetworkFabricOperationsGet_574991;
-          subscriptionId: string; networkOperationResult: string; provider: string;
+proc call*(call_564100: Call_NetworkFabricOperationsGet_564091;
+          networkOperationResult: string; subscriptionId: string; provider: string;
           location: string; apiVersion: string = "2016-05-01"): Recallable =
   ## networkFabricOperationsGet
   ## Get the status of a network fabric operation.
+  ##   networkOperationResult: string (required)
+  ##                         : Id of a network fabric operation.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription.The subscription ID forms part of the URI for every service call.
-  ##   networkOperationResult: string (required)
-  ##                         : Id of a network fabric operation.
   ##   provider: string (required)
   ##           : Name of the provider.
   ##   location: string (required)
   ##           : Location of the resource.
-  var path_575001 = newJObject()
-  var query_575002 = newJObject()
-  add(query_575002, "api-version", newJString(apiVersion))
-  add(path_575001, "subscriptionId", newJString(subscriptionId))
-  add(path_575001, "networkOperationResult", newJString(networkOperationResult))
-  add(path_575001, "provider", newJString(provider))
-  add(path_575001, "location", newJString(location))
-  result = call_575000.call(path_575001, query_575002, nil, nil, nil)
+  var path_564101 = newJObject()
+  var query_564102 = newJObject()
+  add(path_564101, "networkOperationResult", newJString(networkOperationResult))
+  add(query_564102, "api-version", newJString(apiVersion))
+  add(path_564101, "subscriptionId", newJString(subscriptionId))
+  add(path_564101, "provider", newJString(provider))
+  add(path_564101, "location", newJString(location))
+  result = call_564100.call(path_564101, query_564102, nil, nil, nil)
 
-var networkFabricOperationsGet* = Call_NetworkFabricOperationsGet_574991(
+var networkFabricOperationsGet* = Call_NetworkFabricOperationsGet_564091(
     name: "networkFabricOperationsGet", meth: HttpMethod.HttpGet,
     host: "adminmanagement.local.azurestack.external", route: "/subscriptions/{subscriptionId}/resourceGroups/System.{location}/providers/{provider}/fabricLocations/{location}/networkOperationResults/{networkOperationResult}",
-    validator: validate_NetworkFabricOperationsGet_574992, base: "",
-    url: url_NetworkFabricOperationsGet_574993, schemes: {Scheme.Https})
+    validator: validate_NetworkFabricOperationsGet_564092, base: "",
+    url: url_NetworkFabricOperationsGet_564093, schemes: {Scheme.Https})
 export
   rest
 

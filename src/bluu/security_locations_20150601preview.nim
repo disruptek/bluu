@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, httpcore
 
 ## auto-generated via openapi macro
 ## title: Security Center
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_567641 = ref object of OpenApiRestCall
+  OpenApiRestCall_563539 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_567641](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563539](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_567641): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563539): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,8 +107,8 @@ const
   macServiceName = "security-locations"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_LocationsList_567863 = ref object of OpenApiRestCall_567641
-proc url_LocationsList_567865(protocol: Scheme; host: string; base: string;
+  Call_LocationsList_563761 = ref object of OpenApiRestCall_563539
+proc url_LocationsList_563763(protocol: Scheme; host: string; base: string;
                              route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -120,7 +124,7 @@ proc url_LocationsList_567865(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_LocationsList_567864(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_LocationsList_563762(path: JsonNode; query: JsonNode; header: JsonNode;
                                   formData: JsonNode; body: JsonNode): JsonNode =
   ## The location of the responsible ASC of the specific subscription (home region). For each subscription there is only one responsible location. The location in the response should be used to read or write other resources in ASC according to their ID.
   ## 
@@ -132,11 +136,11 @@ proc validate_LocationsList_567864(path: JsonNode; query: JsonNode; header: Json
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_568025 = path.getOrDefault("subscriptionId")
-  valid_568025 = validateParameter(valid_568025, JString, required = true,
+  var valid_563925 = path.getOrDefault("subscriptionId")
+  valid_563925 = validateParameter(valid_563925, JString, required = true,
                                  default = nil)
-  if valid_568025 != nil:
-    section.add "subscriptionId", valid_568025
+  if valid_563925 != nil:
+    section.add "subscriptionId", valid_563925
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -144,11 +148,11 @@ proc validate_LocationsList_567864(path: JsonNode; query: JsonNode; header: Json
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568026 = query.getOrDefault("api-version")
-  valid_568026 = validateParameter(valid_568026, JString, required = true,
+  var valid_563926 = query.getOrDefault("api-version")
+  valid_563926 = validateParameter(valid_563926, JString, required = true,
                                  default = nil)
-  if valid_568026 != nil:
-    section.add "api-version", valid_568026
+  if valid_563926 != nil:
+    section.add "api-version", valid_563926
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -157,20 +161,20 @@ proc validate_LocationsList_567864(path: JsonNode; query: JsonNode; header: Json
   if body != nil:
     result.add "body", body
 
-proc call*(call_568053: Call_LocationsList_567863; path: JsonNode; query: JsonNode;
+proc call*(call_563953: Call_LocationsList_563761; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## The location of the responsible ASC of the specific subscription (home region). For each subscription there is only one responsible location. The location in the response should be used to read or write other resources in ASC according to their ID.
   ## 
-  let valid = call_568053.validator(path, query, header, formData, body)
-  let scheme = call_568053.pickScheme
+  let valid = call_563953.validator(path, query, header, formData, body)
+  let scheme = call_563953.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568053.url(scheme.get, call_568053.host, call_568053.base,
-                         call_568053.route, valid.getOrDefault("path"),
+  let url = call_563953.url(scheme.get, call_563953.host, call_563953.base,
+                         call_563953.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568053, url, valid)
+  result = hook(call_563953, url, valid)
 
-proc call*(call_568124: Call_LocationsList_567863; apiVersion: string;
+proc call*(call_564024: Call_LocationsList_563761; apiVersion: string;
           subscriptionId: string): Recallable =
   ## locationsList
   ## The location of the responsible ASC of the specific subscription (home region). For each subscription there is only one responsible location. The location in the response should be used to read or write other resources in ASC according to their ID.
@@ -178,19 +182,19 @@ proc call*(call_568124: Call_LocationsList_567863; apiVersion: string;
   ##             : API version for the operation
   ##   subscriptionId: string (required)
   ##                 : Azure subscription ID
-  var path_568125 = newJObject()
-  var query_568127 = newJObject()
-  add(query_568127, "api-version", newJString(apiVersion))
-  add(path_568125, "subscriptionId", newJString(subscriptionId))
-  result = call_568124.call(path_568125, query_568127, nil, nil, nil)
+  var path_564025 = newJObject()
+  var query_564027 = newJObject()
+  add(query_564027, "api-version", newJString(apiVersion))
+  add(path_564025, "subscriptionId", newJString(subscriptionId))
+  result = call_564024.call(path_564025, query_564027, nil, nil, nil)
 
-var locationsList* = Call_LocationsList_567863(name: "locationsList",
+var locationsList* = Call_LocationsList_563761(name: "locationsList",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Security/locations",
-    validator: validate_LocationsList_567864, base: "", url: url_LocationsList_567865,
+    validator: validate_LocationsList_563762, base: "", url: url_LocationsList_563763,
     schemes: {Scheme.Https})
 type
-  Call_LocationsGet_568166 = ref object of OpenApiRestCall_567641
-proc url_LocationsGet_568168(protocol: Scheme; host: string; base: string;
+  Call_LocationsGet_564066 = ref object of OpenApiRestCall_563539
+proc url_LocationsGet_564068(protocol: Scheme; host: string; base: string;
                             route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -208,30 +212,30 @@ proc url_LocationsGet_568168(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_LocationsGet_568167(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_LocationsGet_564067(path: JsonNode; query: JsonNode; header: JsonNode;
                                  formData: JsonNode; body: JsonNode): JsonNode =
   ## Details of a specific location
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   ascLocation: JString (required)
-  ##              : The location where ASC stores the data of the subscription. can be retrieved from Get locations
   ##   subscriptionId: JString (required)
   ##                 : Azure subscription ID
+  ##   ascLocation: JString (required)
+  ##              : The location where ASC stores the data of the subscription. can be retrieved from Get locations
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `ascLocation` field"
-  var valid_568169 = path.getOrDefault("ascLocation")
-  valid_568169 = validateParameter(valid_568169, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564069 = path.getOrDefault("subscriptionId")
+  valid_564069 = validateParameter(valid_564069, JString, required = true,
                                  default = nil)
-  if valid_568169 != nil:
-    section.add "ascLocation", valid_568169
-  var valid_568170 = path.getOrDefault("subscriptionId")
-  valid_568170 = validateParameter(valid_568170, JString, required = true,
+  if valid_564069 != nil:
+    section.add "subscriptionId", valid_564069
+  var valid_564070 = path.getOrDefault("ascLocation")
+  valid_564070 = validateParameter(valid_564070, JString, required = true,
                                  default = nil)
-  if valid_568170 != nil:
-    section.add "subscriptionId", valid_568170
+  if valid_564070 != nil:
+    section.add "ascLocation", valid_564070
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -239,11 +243,11 @@ proc validate_LocationsGet_568167(path: JsonNode; query: JsonNode; header: JsonN
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568171 = query.getOrDefault("api-version")
-  valid_568171 = validateParameter(valid_568171, JString, required = true,
+  var valid_564071 = query.getOrDefault("api-version")
+  valid_564071 = validateParameter(valid_564071, JString, required = true,
                                  default = nil)
-  if valid_568171 != nil:
-    section.add "api-version", valid_568171
+  if valid_564071 != nil:
+    section.add "api-version", valid_564071
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -252,39 +256,39 @@ proc validate_LocationsGet_568167(path: JsonNode; query: JsonNode; header: JsonN
   if body != nil:
     result.add "body", body
 
-proc call*(call_568172: Call_LocationsGet_568166; path: JsonNode; query: JsonNode;
+proc call*(call_564072: Call_LocationsGet_564066; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Details of a specific location
   ## 
-  let valid = call_568172.validator(path, query, header, formData, body)
-  let scheme = call_568172.pickScheme
+  let valid = call_564072.validator(path, query, header, formData, body)
+  let scheme = call_564072.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568172.url(scheme.get, call_568172.host, call_568172.base,
-                         call_568172.route, valid.getOrDefault("path"),
+  let url = call_564072.url(scheme.get, call_564072.host, call_564072.base,
+                         call_564072.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568172, url, valid)
+  result = hook(call_564072, url, valid)
 
-proc call*(call_568173: Call_LocationsGet_568166; apiVersion: string;
-          ascLocation: string; subscriptionId: string): Recallable =
+proc call*(call_564073: Call_LocationsGet_564066; apiVersion: string;
+          subscriptionId: string; ascLocation: string): Recallable =
   ## locationsGet
   ## Details of a specific location
   ##   apiVersion: string (required)
   ##             : API version for the operation
-  ##   ascLocation: string (required)
-  ##              : The location where ASC stores the data of the subscription. can be retrieved from Get locations
   ##   subscriptionId: string (required)
   ##                 : Azure subscription ID
-  var path_568174 = newJObject()
-  var query_568175 = newJObject()
-  add(query_568175, "api-version", newJString(apiVersion))
-  add(path_568174, "ascLocation", newJString(ascLocation))
-  add(path_568174, "subscriptionId", newJString(subscriptionId))
-  result = call_568173.call(path_568174, query_568175, nil, nil, nil)
+  ##   ascLocation: string (required)
+  ##              : The location where ASC stores the data of the subscription. can be retrieved from Get locations
+  var path_564074 = newJObject()
+  var query_564075 = newJObject()
+  add(query_564075, "api-version", newJString(apiVersion))
+  add(path_564074, "subscriptionId", newJString(subscriptionId))
+  add(path_564074, "ascLocation", newJString(ascLocation))
+  result = call_564073.call(path_564074, query_564075, nil, nil, nil)
 
-var locationsGet* = Call_LocationsGet_568166(name: "locationsGet",
+var locationsGet* = Call_LocationsGet_564066(name: "locationsGet",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Security/locations/{ascLocation}",
-    validator: validate_LocationsGet_568167, base: "", url: url_LocationsGet_568168,
+    validator: validate_LocationsGet_564067, base: "", url: url_LocationsGet_564068,
     schemes: {Scheme.Https})
 export
   rest

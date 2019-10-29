@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, httpcore
 
 ## auto-generated via openapi macro
 ## title: ApiManagementClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_593424 = ref object of OpenApiRestCall
+  OpenApiRestCall_563555 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_593424](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563555](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_593424): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563555): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,8 +107,8 @@ const
   macServiceName = "apimanagement-apimbackends"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_BackendListByService_593646 = ref object of OpenApiRestCall_593424
-proc url_BackendListByService_593648(protocol: Scheme; host: string; base: string;
+  Call_BackendListByService_563777 = ref object of OpenApiRestCall_563555
+proc url_BackendListByService_563779(protocol: Scheme; host: string; base: string;
                                     route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -128,43 +132,43 @@ proc url_BackendListByService_593648(protocol: Scheme; host: string; base: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_BackendListByService_593647(path: JsonNode; query: JsonNode;
+proc validate_BackendListByService_563778(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists a collection of backends in the specified service instance.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
-  ##   subscriptionId: JString (required)
-  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   serviceName: JString (required)
   ##              : The name of the API Management service.
+  ##   subscriptionId: JString (required)
+  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593809 = path.getOrDefault("resourceGroupName")
-  valid_593809 = validateParameter(valid_593809, JString, required = true,
+        "path argument is necessary due to required `serviceName` field"
+  var valid_563942 = path.getOrDefault("serviceName")
+  valid_563942 = validateParameter(valid_563942, JString, required = true,
                                  default = nil)
-  if valid_593809 != nil:
-    section.add "resourceGroupName", valid_593809
-  var valid_593810 = path.getOrDefault("subscriptionId")
-  valid_593810 = validateParameter(valid_593810, JString, required = true,
+  if valid_563942 != nil:
+    section.add "serviceName", valid_563942
+  var valid_563943 = path.getOrDefault("subscriptionId")
+  valid_563943 = validateParameter(valid_563943, JString, required = true,
                                  default = nil)
-  if valid_593810 != nil:
-    section.add "subscriptionId", valid_593810
-  var valid_593811 = path.getOrDefault("serviceName")
-  valid_593811 = validateParameter(valid_593811, JString, required = true,
+  if valid_563943 != nil:
+    section.add "subscriptionId", valid_563943
+  var valid_563944 = path.getOrDefault("resourceGroupName")
+  valid_563944 = validateParameter(valid_563944, JString, required = true,
                                  default = nil)
-  if valid_593811 != nil:
-    section.add "serviceName", valid_593811
+  if valid_563944 != nil:
+    section.add "resourceGroupName", valid_563944
   result.add "path", section
   ## parameters in `query` object:
-  ##   api-version: JString (required)
-  ##              : Version of the API to be used with the client request.
   ##   $top: JInt
   ##       : Number of records to return.
+  ##   api-version: JString (required)
+  ##              : Version of the API to be used with the client request.
   ##   $skip: JInt
   ##        : Number of records to skip.
   ##   $filter: JString
@@ -176,26 +180,26 @@ proc validate_BackendListByService_593647(path: JsonNode; query: JsonNode;
   ## |url | ge, le, eq, ne, gt, lt | substringof, contains, startswith, endswith|
   ## 
   section = newJObject()
+  var valid_563945 = query.getOrDefault("$top")
+  valid_563945 = validateParameter(valid_563945, JInt, required = false, default = nil)
+  if valid_563945 != nil:
+    section.add "$top", valid_563945
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593812 = query.getOrDefault("api-version")
-  valid_593812 = validateParameter(valid_593812, JString, required = true,
+  var valid_563946 = query.getOrDefault("api-version")
+  valid_563946 = validateParameter(valid_563946, JString, required = true,
                                  default = nil)
-  if valid_593812 != nil:
-    section.add "api-version", valid_593812
-  var valid_593813 = query.getOrDefault("$top")
-  valid_593813 = validateParameter(valid_593813, JInt, required = false, default = nil)
-  if valid_593813 != nil:
-    section.add "$top", valid_593813
-  var valid_593814 = query.getOrDefault("$skip")
-  valid_593814 = validateParameter(valid_593814, JInt, required = false, default = nil)
-  if valid_593814 != nil:
-    section.add "$skip", valid_593814
-  var valid_593815 = query.getOrDefault("$filter")
-  valid_593815 = validateParameter(valid_593815, JString, required = false,
+  if valid_563946 != nil:
+    section.add "api-version", valid_563946
+  var valid_563947 = query.getOrDefault("$skip")
+  valid_563947 = validateParameter(valid_563947, JInt, required = false, default = nil)
+  if valid_563947 != nil:
+    section.add "$skip", valid_563947
+  var valid_563948 = query.getOrDefault("$filter")
+  valid_563948 = validateParameter(valid_563948, JString, required = false,
                                  default = nil)
-  if valid_593815 != nil:
-    section.add "$filter", valid_593815
+  if valid_563948 != nil:
+    section.add "$filter", valid_563948
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -204,36 +208,36 @@ proc validate_BackendListByService_593647(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593842: Call_BackendListByService_593646; path: JsonNode;
+proc call*(call_563975: Call_BackendListByService_563777; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists a collection of backends in the specified service instance.
   ## 
-  let valid = call_593842.validator(path, query, header, formData, body)
-  let scheme = call_593842.pickScheme
+  let valid = call_563975.validator(path, query, header, formData, body)
+  let scheme = call_563975.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593842.url(scheme.get, call_593842.host, call_593842.base,
-                         call_593842.route, valid.getOrDefault("path"),
+  let url = call_563975.url(scheme.get, call_563975.host, call_563975.base,
+                         call_563975.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593842, url, valid)
+  result = hook(call_563975, url, valid)
 
-proc call*(call_593913: Call_BackendListByService_593646;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          serviceName: string; Top: int = 0; Skip: int = 0; Filter: string = ""): Recallable =
+proc call*(call_564046: Call_BackendListByService_563777; serviceName: string;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string;
+          Top: int = 0; Skip: int = 0; Filter: string = ""): Recallable =
   ## backendListByService
   ## Lists a collection of backends in the specified service instance.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   serviceName: string (required)
+  ##              : The name of the API Management service.
+  ##   Top: int
+  ##      : Number of records to return.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   Top: int
-  ##      : Number of records to return.
   ##   Skip: int
   ##       : Number of records to skip.
-  ##   serviceName: string (required)
-  ##              : The name of the API Management service.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   Filter: string
   ##         : | Field       | Supported operators    | Supported functions               |
   ## |-------------|------------------------|-----------------------------------|
@@ -242,25 +246,25 @@ proc call*(call_593913: Call_BackendListByService_593646;
   ## |title | ge, le, eq, ne, gt, lt | substringof, contains, startswith, endswith|
   ## |url | ge, le, eq, ne, gt, lt | substringof, contains, startswith, endswith|
   ## 
-  var path_593914 = newJObject()
-  var query_593916 = newJObject()
-  add(path_593914, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593916, "api-version", newJString(apiVersion))
-  add(path_593914, "subscriptionId", newJString(subscriptionId))
-  add(query_593916, "$top", newJInt(Top))
-  add(query_593916, "$skip", newJInt(Skip))
-  add(path_593914, "serviceName", newJString(serviceName))
-  add(query_593916, "$filter", newJString(Filter))
-  result = call_593913.call(path_593914, query_593916, nil, nil, nil)
+  var path_564047 = newJObject()
+  var query_564049 = newJObject()
+  add(path_564047, "serviceName", newJString(serviceName))
+  add(query_564049, "$top", newJInt(Top))
+  add(query_564049, "api-version", newJString(apiVersion))
+  add(path_564047, "subscriptionId", newJString(subscriptionId))
+  add(query_564049, "$skip", newJInt(Skip))
+  add(path_564047, "resourceGroupName", newJString(resourceGroupName))
+  add(query_564049, "$filter", newJString(Filter))
+  result = call_564046.call(path_564047, query_564049, nil, nil, nil)
 
-var backendListByService* = Call_BackendListByService_593646(
+var backendListByService* = Call_BackendListByService_563777(
     name: "backendListByService", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ApiManagement/service/{serviceName}/backends",
-    validator: validate_BackendListByService_593647, base: "",
-    url: url_BackendListByService_593648, schemes: {Scheme.Https})
+    validator: validate_BackendListByService_563778, base: "",
+    url: url_BackendListByService_563779, schemes: {Scheme.Https})
 type
-  Call_BackendCreateOrUpdate_593967 = ref object of OpenApiRestCall_593424
-proc url_BackendCreateOrUpdate_593969(protocol: Scheme; host: string; base: string;
+  Call_BackendCreateOrUpdate_564100 = ref object of OpenApiRestCall_563555
+proc url_BackendCreateOrUpdate_564102(protocol: Scheme; host: string; base: string;
                                      route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -286,44 +290,43 @@ proc url_BackendCreateOrUpdate_593969(protocol: Scheme; host: string; base: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_BackendCreateOrUpdate_593968(path: JsonNode; query: JsonNode;
+proc validate_BackendCreateOrUpdate_564101(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Creates or Updates a backend.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
-  ##   subscriptionId: JString (required)
-  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   backendId: JString (required)
   ##            : Identifier of the Backend entity. Must be unique in the current API Management service instance.
   ##   serviceName: JString (required)
   ##              : The name of the API Management service.
+  ##   subscriptionId: JString (required)
+  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593997 = path.getOrDefault("resourceGroupName")
-  valid_593997 = validateParameter(valid_593997, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `backendId` field"
+  var valid_564130 = path.getOrDefault("backendId")
+  valid_564130 = validateParameter(valid_564130, JString, required = true,
                                  default = nil)
-  if valid_593997 != nil:
-    section.add "resourceGroupName", valid_593997
-  var valid_593998 = path.getOrDefault("subscriptionId")
-  valid_593998 = validateParameter(valid_593998, JString, required = true,
+  if valid_564130 != nil:
+    section.add "backendId", valid_564130
+  var valid_564131 = path.getOrDefault("serviceName")
+  valid_564131 = validateParameter(valid_564131, JString, required = true,
                                  default = nil)
-  if valid_593998 != nil:
-    section.add "subscriptionId", valid_593998
-  var valid_593999 = path.getOrDefault("backendId")
-  valid_593999 = validateParameter(valid_593999, JString, required = true,
+  if valid_564131 != nil:
+    section.add "serviceName", valid_564131
+  var valid_564132 = path.getOrDefault("subscriptionId")
+  valid_564132 = validateParameter(valid_564132, JString, required = true,
                                  default = nil)
-  if valid_593999 != nil:
-    section.add "backendId", valid_593999
-  var valid_594000 = path.getOrDefault("serviceName")
-  valid_594000 = validateParameter(valid_594000, JString, required = true,
+  if valid_564132 != nil:
+    section.add "subscriptionId", valid_564132
+  var valid_564133 = path.getOrDefault("resourceGroupName")
+  valid_564133 = validateParameter(valid_564133, JString, required = true,
                                  default = nil)
-  if valid_594000 != nil:
-    section.add "serviceName", valid_594000
+  if valid_564133 != nil:
+    section.add "resourceGroupName", valid_564133
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -331,21 +334,21 @@ proc validate_BackendCreateOrUpdate_593968(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594001 = query.getOrDefault("api-version")
-  valid_594001 = validateParameter(valid_594001, JString, required = true,
+  var valid_564134 = query.getOrDefault("api-version")
+  valid_564134 = validateParameter(valid_564134, JString, required = true,
                                  default = nil)
-  if valid_594001 != nil:
-    section.add "api-version", valid_594001
+  if valid_564134 != nil:
+    section.add "api-version", valid_564134
   result.add "query", section
   ## parameters in `header` object:
   ##   If-Match: JString
   ##           : ETag of the Entity. Not required when creating an entity, but required when updating an entity.
   section = newJObject()
-  var valid_594002 = header.getOrDefault("If-Match")
-  valid_594002 = validateParameter(valid_594002, JString, required = false,
+  var valid_564135 = header.getOrDefault("If-Match")
+  valid_564135 = validateParameter(valid_564135, JString, required = false,
                                  default = nil)
-  if valid_594002 != nil:
-    section.add "If-Match", valid_594002
+  if valid_564135 != nil:
+    section.add "If-Match", valid_564135
   result.add "header", section
   section = newJObject()
   result.add "formData", section
@@ -357,56 +360,56 @@ proc validate_BackendCreateOrUpdate_593968(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594004: Call_BackendCreateOrUpdate_593967; path: JsonNode;
+proc call*(call_564137: Call_BackendCreateOrUpdate_564100; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Creates or Updates a backend.
   ## 
-  let valid = call_594004.validator(path, query, header, formData, body)
-  let scheme = call_594004.pickScheme
+  let valid = call_564137.validator(path, query, header, formData, body)
+  let scheme = call_564137.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594004.url(scheme.get, call_594004.host, call_594004.base,
-                         call_594004.route, valid.getOrDefault("path"),
+  let url = call_564137.url(scheme.get, call_564137.host, call_564137.base,
+                         call_564137.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594004, url, valid)
+  result = hook(call_564137, url, valid)
 
-proc call*(call_594005: Call_BackendCreateOrUpdate_593967;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          backendId: string; parameters: JsonNode; serviceName: string): Recallable =
+proc call*(call_564138: Call_BackendCreateOrUpdate_564100; backendId: string;
+          serviceName: string; apiVersion: string; subscriptionId: string;
+          resourceGroupName: string; parameters: JsonNode): Recallable =
   ## backendCreateOrUpdate
   ## Creates or Updates a backend.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   backendId: string (required)
+  ##            : Identifier of the Backend entity. Must be unique in the current API Management service instance.
+  ##   serviceName: string (required)
+  ##              : The name of the API Management service.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   backendId: string (required)
-  ##            : Identifier of the Backend entity. Must be unique in the current API Management service instance.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   parameters: JObject (required)
   ##             : Create parameters.
-  ##   serviceName: string (required)
-  ##              : The name of the API Management service.
-  var path_594006 = newJObject()
-  var query_594007 = newJObject()
-  var body_594008 = newJObject()
-  add(path_594006, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594007, "api-version", newJString(apiVersion))
-  add(path_594006, "subscriptionId", newJString(subscriptionId))
-  add(path_594006, "backendId", newJString(backendId))
+  var path_564139 = newJObject()
+  var query_564140 = newJObject()
+  var body_564141 = newJObject()
+  add(path_564139, "backendId", newJString(backendId))
+  add(path_564139, "serviceName", newJString(serviceName))
+  add(query_564140, "api-version", newJString(apiVersion))
+  add(path_564139, "subscriptionId", newJString(subscriptionId))
+  add(path_564139, "resourceGroupName", newJString(resourceGroupName))
   if parameters != nil:
-    body_594008 = parameters
-  add(path_594006, "serviceName", newJString(serviceName))
-  result = call_594005.call(path_594006, query_594007, nil, nil, body_594008)
+    body_564141 = parameters
+  result = call_564138.call(path_564139, query_564140, nil, nil, body_564141)
 
-var backendCreateOrUpdate* = Call_BackendCreateOrUpdate_593967(
+var backendCreateOrUpdate* = Call_BackendCreateOrUpdate_564100(
     name: "backendCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ApiManagement/service/{serviceName}/backends/{backendId}",
-    validator: validate_BackendCreateOrUpdate_593968, base: "",
-    url: url_BackendCreateOrUpdate_593969, schemes: {Scheme.Https})
+    validator: validate_BackendCreateOrUpdate_564101, base: "",
+    url: url_BackendCreateOrUpdate_564102, schemes: {Scheme.Https})
 type
-  Call_BackendGetEntityTag_594022 = ref object of OpenApiRestCall_593424
-proc url_BackendGetEntityTag_594024(protocol: Scheme; host: string; base: string;
+  Call_BackendGetEntityTag_564155 = ref object of OpenApiRestCall_563555
+proc url_BackendGetEntityTag_564157(protocol: Scheme; host: string; base: string;
                                    route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -432,7 +435,7 @@ proc url_BackendGetEntityTag_594024(protocol: Scheme; host: string; base: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_BackendGetEntityTag_594023(path: JsonNode; query: JsonNode;
+proc validate_BackendGetEntityTag_564156(path: JsonNode; query: JsonNode;
                                         header: JsonNode; formData: JsonNode;
                                         body: JsonNode): JsonNode =
   ## Gets the entity state (Etag) version of the backend specified by its identifier.
@@ -440,37 +443,36 @@ proc validate_BackendGetEntityTag_594023(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
-  ##   subscriptionId: JString (required)
-  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   backendId: JString (required)
   ##            : Identifier of the Backend entity. Must be unique in the current API Management service instance.
   ##   serviceName: JString (required)
   ##              : The name of the API Management service.
+  ##   subscriptionId: JString (required)
+  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594025 = path.getOrDefault("resourceGroupName")
-  valid_594025 = validateParameter(valid_594025, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `backendId` field"
+  var valid_564158 = path.getOrDefault("backendId")
+  valid_564158 = validateParameter(valid_564158, JString, required = true,
                                  default = nil)
-  if valid_594025 != nil:
-    section.add "resourceGroupName", valid_594025
-  var valid_594026 = path.getOrDefault("subscriptionId")
-  valid_594026 = validateParameter(valid_594026, JString, required = true,
+  if valid_564158 != nil:
+    section.add "backendId", valid_564158
+  var valid_564159 = path.getOrDefault("serviceName")
+  valid_564159 = validateParameter(valid_564159, JString, required = true,
                                  default = nil)
-  if valid_594026 != nil:
-    section.add "subscriptionId", valid_594026
-  var valid_594027 = path.getOrDefault("backendId")
-  valid_594027 = validateParameter(valid_594027, JString, required = true,
+  if valid_564159 != nil:
+    section.add "serviceName", valid_564159
+  var valid_564160 = path.getOrDefault("subscriptionId")
+  valid_564160 = validateParameter(valid_564160, JString, required = true,
                                  default = nil)
-  if valid_594027 != nil:
-    section.add "backendId", valid_594027
-  var valid_594028 = path.getOrDefault("serviceName")
-  valid_594028 = validateParameter(valid_594028, JString, required = true,
+  if valid_564160 != nil:
+    section.add "subscriptionId", valid_564160
+  var valid_564161 = path.getOrDefault("resourceGroupName")
+  valid_564161 = validateParameter(valid_564161, JString, required = true,
                                  default = nil)
-  if valid_594028 != nil:
-    section.add "serviceName", valid_594028
+  if valid_564161 != nil:
+    section.add "resourceGroupName", valid_564161
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -478,11 +480,11 @@ proc validate_BackendGetEntityTag_594023(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594029 = query.getOrDefault("api-version")
-  valid_594029 = validateParameter(valid_594029, JString, required = true,
+  var valid_564162 = query.getOrDefault("api-version")
+  valid_564162 = validateParameter(valid_564162, JString, required = true,
                                  default = nil)
-  if valid_594029 != nil:
-    section.add "api-version", valid_594029
+  if valid_564162 != nil:
+    section.add "api-version", valid_564162
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -491,51 +493,51 @@ proc validate_BackendGetEntityTag_594023(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594030: Call_BackendGetEntityTag_594022; path: JsonNode;
+proc call*(call_564163: Call_BackendGetEntityTag_564155; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the entity state (Etag) version of the backend specified by its identifier.
   ## 
-  let valid = call_594030.validator(path, query, header, formData, body)
-  let scheme = call_594030.pickScheme
+  let valid = call_564163.validator(path, query, header, formData, body)
+  let scheme = call_564163.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594030.url(scheme.get, call_594030.host, call_594030.base,
-                         call_594030.route, valid.getOrDefault("path"),
+  let url = call_564163.url(scheme.get, call_564163.host, call_564163.base,
+                         call_564163.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594030, url, valid)
+  result = hook(call_564163, url, valid)
 
-proc call*(call_594031: Call_BackendGetEntityTag_594022; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; backendId: string;
-          serviceName: string): Recallable =
+proc call*(call_564164: Call_BackendGetEntityTag_564155; backendId: string;
+          serviceName: string; apiVersion: string; subscriptionId: string;
+          resourceGroupName: string): Recallable =
   ## backendGetEntityTag
   ## Gets the entity state (Etag) version of the backend specified by its identifier.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
-  ##   apiVersion: string (required)
-  ##             : Version of the API to be used with the client request.
-  ##   subscriptionId: string (required)
-  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   backendId: string (required)
   ##            : Identifier of the Backend entity. Must be unique in the current API Management service instance.
   ##   serviceName: string (required)
   ##              : The name of the API Management service.
-  var path_594032 = newJObject()
-  var query_594033 = newJObject()
-  add(path_594032, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594033, "api-version", newJString(apiVersion))
-  add(path_594032, "subscriptionId", newJString(subscriptionId))
-  add(path_594032, "backendId", newJString(backendId))
-  add(path_594032, "serviceName", newJString(serviceName))
-  result = call_594031.call(path_594032, query_594033, nil, nil, nil)
+  ##   apiVersion: string (required)
+  ##             : Version of the API to be used with the client request.
+  ##   subscriptionId: string (required)
+  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564165 = newJObject()
+  var query_564166 = newJObject()
+  add(path_564165, "backendId", newJString(backendId))
+  add(path_564165, "serviceName", newJString(serviceName))
+  add(query_564166, "api-version", newJString(apiVersion))
+  add(path_564165, "subscriptionId", newJString(subscriptionId))
+  add(path_564165, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564164.call(path_564165, query_564166, nil, nil, nil)
 
-var backendGetEntityTag* = Call_BackendGetEntityTag_594022(
+var backendGetEntityTag* = Call_BackendGetEntityTag_564155(
     name: "backendGetEntityTag", meth: HttpMethod.HttpHead,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ApiManagement/service/{serviceName}/backends/{backendId}",
-    validator: validate_BackendGetEntityTag_594023, base: "",
-    url: url_BackendGetEntityTag_594024, schemes: {Scheme.Https})
+    validator: validate_BackendGetEntityTag_564156, base: "",
+    url: url_BackendGetEntityTag_564157, schemes: {Scheme.Https})
 type
-  Call_BackendGet_593955 = ref object of OpenApiRestCall_593424
-proc url_BackendGet_593957(protocol: Scheme; host: string; base: string; route: string;
+  Call_BackendGet_564088 = ref object of OpenApiRestCall_563555
+proc url_BackendGet_564090(protocol: Scheme; host: string; base: string; route: string;
                           path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -561,44 +563,43 @@ proc url_BackendGet_593957(protocol: Scheme; host: string; base: string; route: 
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_BackendGet_593956(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_BackendGet_564089(path: JsonNode; query: JsonNode; header: JsonNode;
                                formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the details of the backend specified by its identifier.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
-  ##   subscriptionId: JString (required)
-  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   backendId: JString (required)
   ##            : Identifier of the Backend entity. Must be unique in the current API Management service instance.
   ##   serviceName: JString (required)
   ##              : The name of the API Management service.
+  ##   subscriptionId: JString (required)
+  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593958 = path.getOrDefault("resourceGroupName")
-  valid_593958 = validateParameter(valid_593958, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `backendId` field"
+  var valid_564091 = path.getOrDefault("backendId")
+  valid_564091 = validateParameter(valid_564091, JString, required = true,
                                  default = nil)
-  if valid_593958 != nil:
-    section.add "resourceGroupName", valid_593958
-  var valid_593959 = path.getOrDefault("subscriptionId")
-  valid_593959 = validateParameter(valid_593959, JString, required = true,
+  if valid_564091 != nil:
+    section.add "backendId", valid_564091
+  var valid_564092 = path.getOrDefault("serviceName")
+  valid_564092 = validateParameter(valid_564092, JString, required = true,
                                  default = nil)
-  if valid_593959 != nil:
-    section.add "subscriptionId", valid_593959
-  var valid_593960 = path.getOrDefault("backendId")
-  valid_593960 = validateParameter(valid_593960, JString, required = true,
+  if valid_564092 != nil:
+    section.add "serviceName", valid_564092
+  var valid_564093 = path.getOrDefault("subscriptionId")
+  valid_564093 = validateParameter(valid_564093, JString, required = true,
                                  default = nil)
-  if valid_593960 != nil:
-    section.add "backendId", valid_593960
-  var valid_593961 = path.getOrDefault("serviceName")
-  valid_593961 = validateParameter(valid_593961, JString, required = true,
+  if valid_564093 != nil:
+    section.add "subscriptionId", valid_564093
+  var valid_564094 = path.getOrDefault("resourceGroupName")
+  valid_564094 = validateParameter(valid_564094, JString, required = true,
                                  default = nil)
-  if valid_593961 != nil:
-    section.add "serviceName", valid_593961
+  if valid_564094 != nil:
+    section.add "resourceGroupName", valid_564094
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -606,11 +607,11 @@ proc validate_BackendGet_593956(path: JsonNode; query: JsonNode; header: JsonNod
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593962 = query.getOrDefault("api-version")
-  valid_593962 = validateParameter(valid_593962, JString, required = true,
+  var valid_564095 = query.getOrDefault("api-version")
+  valid_564095 = validateParameter(valid_564095, JString, required = true,
                                  default = nil)
-  if valid_593962 != nil:
-    section.add "api-version", valid_593962
+  if valid_564095 != nil:
+    section.add "api-version", valid_564095
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -619,52 +620,52 @@ proc validate_BackendGet_593956(path: JsonNode; query: JsonNode; header: JsonNod
   if body != nil:
     result.add "body", body
 
-proc call*(call_593963: Call_BackendGet_593955; path: JsonNode; query: JsonNode;
+proc call*(call_564096: Call_BackendGet_564088; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the details of the backend specified by its identifier.
   ## 
-  let valid = call_593963.validator(path, query, header, formData, body)
-  let scheme = call_593963.pickScheme
+  let valid = call_564096.validator(path, query, header, formData, body)
+  let scheme = call_564096.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593963.url(scheme.get, call_593963.host, call_593963.base,
-                         call_593963.route, valid.getOrDefault("path"),
+  let url = call_564096.url(scheme.get, call_564096.host, call_564096.base,
+                         call_564096.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593963, url, valid)
+  result = hook(call_564096, url, valid)
 
-proc call*(call_593964: Call_BackendGet_593955; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; backendId: string;
-          serviceName: string): Recallable =
+proc call*(call_564097: Call_BackendGet_564088; backendId: string;
+          serviceName: string; apiVersion: string; subscriptionId: string;
+          resourceGroupName: string): Recallable =
   ## backendGet
   ## Gets the details of the backend specified by its identifier.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
-  ##   apiVersion: string (required)
-  ##             : Version of the API to be used with the client request.
-  ##   subscriptionId: string (required)
-  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   backendId: string (required)
   ##            : Identifier of the Backend entity. Must be unique in the current API Management service instance.
   ##   serviceName: string (required)
   ##              : The name of the API Management service.
-  var path_593965 = newJObject()
-  var query_593966 = newJObject()
-  add(path_593965, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593966, "api-version", newJString(apiVersion))
-  add(path_593965, "subscriptionId", newJString(subscriptionId))
-  add(path_593965, "backendId", newJString(backendId))
-  add(path_593965, "serviceName", newJString(serviceName))
-  result = call_593964.call(path_593965, query_593966, nil, nil, nil)
+  ##   apiVersion: string (required)
+  ##             : Version of the API to be used with the client request.
+  ##   subscriptionId: string (required)
+  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564098 = newJObject()
+  var query_564099 = newJObject()
+  add(path_564098, "backendId", newJString(backendId))
+  add(path_564098, "serviceName", newJString(serviceName))
+  add(query_564099, "api-version", newJString(apiVersion))
+  add(path_564098, "subscriptionId", newJString(subscriptionId))
+  add(path_564098, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564097.call(path_564098, query_564099, nil, nil, nil)
 
-var backendGet* = Call_BackendGet_593955(name: "backendGet",
+var backendGet* = Call_BackendGet_564088(name: "backendGet",
                                       meth: HttpMethod.HttpGet,
                                       host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ApiManagement/service/{serviceName}/backends/{backendId}",
-                                      validator: validate_BackendGet_593956,
-                                      base: "", url: url_BackendGet_593957,
+                                      validator: validate_BackendGet_564089,
+                                      base: "", url: url_BackendGet_564090,
                                       schemes: {Scheme.Https})
 type
-  Call_BackendUpdate_594034 = ref object of OpenApiRestCall_593424
-proc url_BackendUpdate_594036(protocol: Scheme; host: string; base: string;
+  Call_BackendUpdate_564167 = ref object of OpenApiRestCall_563555
+proc url_BackendUpdate_564169(protocol: Scheme; host: string; base: string;
                              route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -690,44 +691,43 @@ proc url_BackendUpdate_594036(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_BackendUpdate_594035(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_BackendUpdate_564168(path: JsonNode; query: JsonNode; header: JsonNode;
                                   formData: JsonNode; body: JsonNode): JsonNode =
   ## Updates an existing backend.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
-  ##   subscriptionId: JString (required)
-  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   backendId: JString (required)
   ##            : Identifier of the Backend entity. Must be unique in the current API Management service instance.
   ##   serviceName: JString (required)
   ##              : The name of the API Management service.
+  ##   subscriptionId: JString (required)
+  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594037 = path.getOrDefault("resourceGroupName")
-  valid_594037 = validateParameter(valid_594037, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `backendId` field"
+  var valid_564170 = path.getOrDefault("backendId")
+  valid_564170 = validateParameter(valid_564170, JString, required = true,
                                  default = nil)
-  if valid_594037 != nil:
-    section.add "resourceGroupName", valid_594037
-  var valid_594038 = path.getOrDefault("subscriptionId")
-  valid_594038 = validateParameter(valid_594038, JString, required = true,
+  if valid_564170 != nil:
+    section.add "backendId", valid_564170
+  var valid_564171 = path.getOrDefault("serviceName")
+  valid_564171 = validateParameter(valid_564171, JString, required = true,
                                  default = nil)
-  if valid_594038 != nil:
-    section.add "subscriptionId", valid_594038
-  var valid_594039 = path.getOrDefault("backendId")
-  valid_594039 = validateParameter(valid_594039, JString, required = true,
+  if valid_564171 != nil:
+    section.add "serviceName", valid_564171
+  var valid_564172 = path.getOrDefault("subscriptionId")
+  valid_564172 = validateParameter(valid_564172, JString, required = true,
                                  default = nil)
-  if valid_594039 != nil:
-    section.add "backendId", valid_594039
-  var valid_594040 = path.getOrDefault("serviceName")
-  valid_594040 = validateParameter(valid_594040, JString, required = true,
+  if valid_564172 != nil:
+    section.add "subscriptionId", valid_564172
+  var valid_564173 = path.getOrDefault("resourceGroupName")
+  valid_564173 = validateParameter(valid_564173, JString, required = true,
                                  default = nil)
-  if valid_594040 != nil:
-    section.add "serviceName", valid_594040
+  if valid_564173 != nil:
+    section.add "resourceGroupName", valid_564173
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -735,11 +735,11 @@ proc validate_BackendUpdate_594035(path: JsonNode; query: JsonNode; header: Json
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594041 = query.getOrDefault("api-version")
-  valid_594041 = validateParameter(valid_594041, JString, required = true,
+  var valid_564174 = query.getOrDefault("api-version")
+  valid_564174 = validateParameter(valid_564174, JString, required = true,
                                  default = nil)
-  if valid_594041 != nil:
-    section.add "api-version", valid_594041
+  if valid_564174 != nil:
+    section.add "api-version", valid_564174
   result.add "query", section
   ## parameters in `header` object:
   ##   If-Match: JString (required)
@@ -747,11 +747,11 @@ proc validate_BackendUpdate_594035(path: JsonNode; query: JsonNode; header: Json
   section = newJObject()
   assert header != nil,
         "header argument is necessary due to required `If-Match` field"
-  var valid_594042 = header.getOrDefault("If-Match")
-  valid_594042 = validateParameter(valid_594042, JString, required = true,
+  var valid_564175 = header.getOrDefault("If-Match")
+  valid_564175 = validateParameter(valid_564175, JString, required = true,
                                  default = nil)
-  if valid_594042 != nil:
-    section.add "If-Match", valid_594042
+  if valid_564175 != nil:
+    section.add "If-Match", valid_564175
   result.add "header", section
   section = newJObject()
   result.add "formData", section
@@ -763,55 +763,55 @@ proc validate_BackendUpdate_594035(path: JsonNode; query: JsonNode; header: Json
   if body != nil:
     result.add "body", body
 
-proc call*(call_594044: Call_BackendUpdate_594034; path: JsonNode; query: JsonNode;
+proc call*(call_564177: Call_BackendUpdate_564167; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Updates an existing backend.
   ## 
-  let valid = call_594044.validator(path, query, header, formData, body)
-  let scheme = call_594044.pickScheme
+  let valid = call_564177.validator(path, query, header, formData, body)
+  let scheme = call_564177.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594044.url(scheme.get, call_594044.host, call_594044.base,
-                         call_594044.route, valid.getOrDefault("path"),
+  let url = call_564177.url(scheme.get, call_564177.host, call_564177.base,
+                         call_564177.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594044, url, valid)
+  result = hook(call_564177, url, valid)
 
-proc call*(call_594045: Call_BackendUpdate_594034; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; backendId: string;
-          parameters: JsonNode; serviceName: string): Recallable =
+proc call*(call_564178: Call_BackendUpdate_564167; backendId: string;
+          serviceName: string; apiVersion: string; subscriptionId: string;
+          resourceGroupName: string; parameters: JsonNode): Recallable =
   ## backendUpdate
   ## Updates an existing backend.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   backendId: string (required)
+  ##            : Identifier of the Backend entity. Must be unique in the current API Management service instance.
+  ##   serviceName: string (required)
+  ##              : The name of the API Management service.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   backendId: string (required)
-  ##            : Identifier of the Backend entity. Must be unique in the current API Management service instance.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   parameters: JObject (required)
   ##             : Update parameters.
-  ##   serviceName: string (required)
-  ##              : The name of the API Management service.
-  var path_594046 = newJObject()
-  var query_594047 = newJObject()
-  var body_594048 = newJObject()
-  add(path_594046, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594047, "api-version", newJString(apiVersion))
-  add(path_594046, "subscriptionId", newJString(subscriptionId))
-  add(path_594046, "backendId", newJString(backendId))
+  var path_564179 = newJObject()
+  var query_564180 = newJObject()
+  var body_564181 = newJObject()
+  add(path_564179, "backendId", newJString(backendId))
+  add(path_564179, "serviceName", newJString(serviceName))
+  add(query_564180, "api-version", newJString(apiVersion))
+  add(path_564179, "subscriptionId", newJString(subscriptionId))
+  add(path_564179, "resourceGroupName", newJString(resourceGroupName))
   if parameters != nil:
-    body_594048 = parameters
-  add(path_594046, "serviceName", newJString(serviceName))
-  result = call_594045.call(path_594046, query_594047, nil, nil, body_594048)
+    body_564181 = parameters
+  result = call_564178.call(path_564179, query_564180, nil, nil, body_564181)
 
-var backendUpdate* = Call_BackendUpdate_594034(name: "backendUpdate",
+var backendUpdate* = Call_BackendUpdate_564167(name: "backendUpdate",
     meth: HttpMethod.HttpPatch, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ApiManagement/service/{serviceName}/backends/{backendId}",
-    validator: validate_BackendUpdate_594035, base: "", url: url_BackendUpdate_594036,
+    validator: validate_BackendUpdate_564168, base: "", url: url_BackendUpdate_564169,
     schemes: {Scheme.Https})
 type
-  Call_BackendDelete_594009 = ref object of OpenApiRestCall_593424
-proc url_BackendDelete_594011(protocol: Scheme; host: string; base: string;
+  Call_BackendDelete_564142 = ref object of OpenApiRestCall_563555
+proc url_BackendDelete_564144(protocol: Scheme; host: string; base: string;
                              route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -837,44 +837,43 @@ proc url_BackendDelete_594011(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_BackendDelete_594010(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_BackendDelete_564143(path: JsonNode; query: JsonNode; header: JsonNode;
                                   formData: JsonNode; body: JsonNode): JsonNode =
   ## Deletes the specified backend.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
-  ##   subscriptionId: JString (required)
-  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   backendId: JString (required)
   ##            : Identifier of the Backend entity. Must be unique in the current API Management service instance.
   ##   serviceName: JString (required)
   ##              : The name of the API Management service.
+  ##   subscriptionId: JString (required)
+  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594012 = path.getOrDefault("resourceGroupName")
-  valid_594012 = validateParameter(valid_594012, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `backendId` field"
+  var valid_564145 = path.getOrDefault("backendId")
+  valid_564145 = validateParameter(valid_564145, JString, required = true,
                                  default = nil)
-  if valid_594012 != nil:
-    section.add "resourceGroupName", valid_594012
-  var valid_594013 = path.getOrDefault("subscriptionId")
-  valid_594013 = validateParameter(valid_594013, JString, required = true,
+  if valid_564145 != nil:
+    section.add "backendId", valid_564145
+  var valid_564146 = path.getOrDefault("serviceName")
+  valid_564146 = validateParameter(valid_564146, JString, required = true,
                                  default = nil)
-  if valid_594013 != nil:
-    section.add "subscriptionId", valid_594013
-  var valid_594014 = path.getOrDefault("backendId")
-  valid_594014 = validateParameter(valid_594014, JString, required = true,
+  if valid_564146 != nil:
+    section.add "serviceName", valid_564146
+  var valid_564147 = path.getOrDefault("subscriptionId")
+  valid_564147 = validateParameter(valid_564147, JString, required = true,
                                  default = nil)
-  if valid_594014 != nil:
-    section.add "backendId", valid_594014
-  var valid_594015 = path.getOrDefault("serviceName")
-  valid_594015 = validateParameter(valid_594015, JString, required = true,
+  if valid_564147 != nil:
+    section.add "subscriptionId", valid_564147
+  var valid_564148 = path.getOrDefault("resourceGroupName")
+  valid_564148 = validateParameter(valid_564148, JString, required = true,
                                  default = nil)
-  if valid_594015 != nil:
-    section.add "serviceName", valid_594015
+  if valid_564148 != nil:
+    section.add "resourceGroupName", valid_564148
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -882,11 +881,11 @@ proc validate_BackendDelete_594010(path: JsonNode; query: JsonNode; header: Json
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594016 = query.getOrDefault("api-version")
-  valid_594016 = validateParameter(valid_594016, JString, required = true,
+  var valid_564149 = query.getOrDefault("api-version")
+  valid_564149 = validateParameter(valid_564149, JString, required = true,
                                  default = nil)
-  if valid_594016 != nil:
-    section.add "api-version", valid_594016
+  if valid_564149 != nil:
+    section.add "api-version", valid_564149
   result.add "query", section
   ## parameters in `header` object:
   ##   If-Match: JString (required)
@@ -894,61 +893,61 @@ proc validate_BackendDelete_594010(path: JsonNode; query: JsonNode; header: Json
   section = newJObject()
   assert header != nil,
         "header argument is necessary due to required `If-Match` field"
-  var valid_594017 = header.getOrDefault("If-Match")
-  valid_594017 = validateParameter(valid_594017, JString, required = true,
+  var valid_564150 = header.getOrDefault("If-Match")
+  valid_564150 = validateParameter(valid_564150, JString, required = true,
                                  default = nil)
-  if valid_594017 != nil:
-    section.add "If-Match", valid_594017
+  if valid_564150 != nil:
+    section.add "If-Match", valid_564150
   result.add "header", section
   section = newJObject()
   result.add "formData", section
   if body != nil:
     result.add "body", body
 
-proc call*(call_594018: Call_BackendDelete_594009; path: JsonNode; query: JsonNode;
+proc call*(call_564151: Call_BackendDelete_564142; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes the specified backend.
   ## 
-  let valid = call_594018.validator(path, query, header, formData, body)
-  let scheme = call_594018.pickScheme
+  let valid = call_564151.validator(path, query, header, formData, body)
+  let scheme = call_564151.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594018.url(scheme.get, call_594018.host, call_594018.base,
-                         call_594018.route, valid.getOrDefault("path"),
+  let url = call_564151.url(scheme.get, call_564151.host, call_564151.base,
+                         call_564151.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594018, url, valid)
+  result = hook(call_564151, url, valid)
 
-proc call*(call_594019: Call_BackendDelete_594009; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; backendId: string;
-          serviceName: string): Recallable =
+proc call*(call_564152: Call_BackendDelete_564142; backendId: string;
+          serviceName: string; apiVersion: string; subscriptionId: string;
+          resourceGroupName: string): Recallable =
   ## backendDelete
   ## Deletes the specified backend.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
-  ##   apiVersion: string (required)
-  ##             : Version of the API to be used with the client request.
-  ##   subscriptionId: string (required)
-  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   backendId: string (required)
   ##            : Identifier of the Backend entity. Must be unique in the current API Management service instance.
   ##   serviceName: string (required)
   ##              : The name of the API Management service.
-  var path_594020 = newJObject()
-  var query_594021 = newJObject()
-  add(path_594020, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594021, "api-version", newJString(apiVersion))
-  add(path_594020, "subscriptionId", newJString(subscriptionId))
-  add(path_594020, "backendId", newJString(backendId))
-  add(path_594020, "serviceName", newJString(serviceName))
-  result = call_594019.call(path_594020, query_594021, nil, nil, nil)
+  ##   apiVersion: string (required)
+  ##             : Version of the API to be used with the client request.
+  ##   subscriptionId: string (required)
+  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564153 = newJObject()
+  var query_564154 = newJObject()
+  add(path_564153, "backendId", newJString(backendId))
+  add(path_564153, "serviceName", newJString(serviceName))
+  add(query_564154, "api-version", newJString(apiVersion))
+  add(path_564153, "subscriptionId", newJString(subscriptionId))
+  add(path_564153, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564152.call(path_564153, query_564154, nil, nil, nil)
 
-var backendDelete* = Call_BackendDelete_594009(name: "backendDelete",
+var backendDelete* = Call_BackendDelete_564142(name: "backendDelete",
     meth: HttpMethod.HttpDelete, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ApiManagement/service/{serviceName}/backends/{backendId}",
-    validator: validate_BackendDelete_594010, base: "", url: url_BackendDelete_594011,
+    validator: validate_BackendDelete_564143, base: "", url: url_BackendDelete_564144,
     schemes: {Scheme.Https})
 type
-  Call_BackendReconnect_594049 = ref object of OpenApiRestCall_593424
-proc url_BackendReconnect_594051(protocol: Scheme; host: string; base: string;
+  Call_BackendReconnect_564182 = ref object of OpenApiRestCall_563555
+proc url_BackendReconnect_564184(protocol: Scheme; host: string; base: string;
                                 route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -975,7 +974,7 @@ proc url_BackendReconnect_594051(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_BackendReconnect_594050(path: JsonNode; query: JsonNode;
+proc validate_BackendReconnect_564183(path: JsonNode; query: JsonNode;
                                      header: JsonNode; formData: JsonNode;
                                      body: JsonNode): JsonNode =
   ## Notifies the APIM proxy to create a new connection to the backend after the specified timeout. If no timeout was specified, timeout of 2 minutes is used.
@@ -983,37 +982,36 @@ proc validate_BackendReconnect_594050(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
-  ##   subscriptionId: JString (required)
-  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   backendId: JString (required)
   ##            : Identifier of the Backend entity. Must be unique in the current API Management service instance.
   ##   serviceName: JString (required)
   ##              : The name of the API Management service.
+  ##   subscriptionId: JString (required)
+  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594052 = path.getOrDefault("resourceGroupName")
-  valid_594052 = validateParameter(valid_594052, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `backendId` field"
+  var valid_564185 = path.getOrDefault("backendId")
+  valid_564185 = validateParameter(valid_564185, JString, required = true,
                                  default = nil)
-  if valid_594052 != nil:
-    section.add "resourceGroupName", valid_594052
-  var valid_594053 = path.getOrDefault("subscriptionId")
-  valid_594053 = validateParameter(valid_594053, JString, required = true,
+  if valid_564185 != nil:
+    section.add "backendId", valid_564185
+  var valid_564186 = path.getOrDefault("serviceName")
+  valid_564186 = validateParameter(valid_564186, JString, required = true,
                                  default = nil)
-  if valid_594053 != nil:
-    section.add "subscriptionId", valid_594053
-  var valid_594054 = path.getOrDefault("backendId")
-  valid_594054 = validateParameter(valid_594054, JString, required = true,
+  if valid_564186 != nil:
+    section.add "serviceName", valid_564186
+  var valid_564187 = path.getOrDefault("subscriptionId")
+  valid_564187 = validateParameter(valid_564187, JString, required = true,
                                  default = nil)
-  if valid_594054 != nil:
-    section.add "backendId", valid_594054
-  var valid_594055 = path.getOrDefault("serviceName")
-  valid_594055 = validateParameter(valid_594055, JString, required = true,
+  if valid_564187 != nil:
+    section.add "subscriptionId", valid_564187
+  var valid_564188 = path.getOrDefault("resourceGroupName")
+  valid_564188 = validateParameter(valid_564188, JString, required = true,
                                  default = nil)
-  if valid_594055 != nil:
-    section.add "serviceName", valid_594055
+  if valid_564188 != nil:
+    section.add "resourceGroupName", valid_564188
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1021,11 +1019,11 @@ proc validate_BackendReconnect_594050(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594056 = query.getOrDefault("api-version")
-  valid_594056 = validateParameter(valid_594056, JString, required = true,
+  var valid_564189 = query.getOrDefault("api-version")
+  valid_564189 = validateParameter(valid_564189, JString, required = true,
                                  default = nil)
-  if valid_594056 != nil:
-    section.add "api-version", valid_594056
+  if valid_564189 != nil:
+    section.add "api-version", valid_564189
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1038,52 +1036,52 @@ proc validate_BackendReconnect_594050(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594058: Call_BackendReconnect_594049; path: JsonNode;
+proc call*(call_564191: Call_BackendReconnect_564182; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Notifies the APIM proxy to create a new connection to the backend after the specified timeout. If no timeout was specified, timeout of 2 minutes is used.
   ## 
-  let valid = call_594058.validator(path, query, header, formData, body)
-  let scheme = call_594058.pickScheme
+  let valid = call_564191.validator(path, query, header, formData, body)
+  let scheme = call_564191.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594058.url(scheme.get, call_594058.host, call_594058.base,
-                         call_594058.route, valid.getOrDefault("path"),
+  let url = call_564191.url(scheme.get, call_564191.host, call_564191.base,
+                         call_564191.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594058, url, valid)
+  result = hook(call_564191, url, valid)
 
-proc call*(call_594059: Call_BackendReconnect_594049; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; backendId: string;
-          serviceName: string; parameters: JsonNode = nil): Recallable =
+proc call*(call_564192: Call_BackendReconnect_564182; backendId: string;
+          serviceName: string; apiVersion: string; subscriptionId: string;
+          resourceGroupName: string; parameters: JsonNode = nil): Recallable =
   ## backendReconnect
   ## Notifies the APIM proxy to create a new connection to the backend after the specified timeout. If no timeout was specified, timeout of 2 minutes is used.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   backendId: string (required)
+  ##            : Identifier of the Backend entity. Must be unique in the current API Management service instance.
+  ##   serviceName: string (required)
+  ##              : The name of the API Management service.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   backendId: string (required)
-  ##            : Identifier of the Backend entity. Must be unique in the current API Management service instance.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   parameters: JObject
   ##             : Reconnect request parameters.
-  ##   serviceName: string (required)
-  ##              : The name of the API Management service.
-  var path_594060 = newJObject()
-  var query_594061 = newJObject()
-  var body_594062 = newJObject()
-  add(path_594060, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594061, "api-version", newJString(apiVersion))
-  add(path_594060, "subscriptionId", newJString(subscriptionId))
-  add(path_594060, "backendId", newJString(backendId))
+  var path_564193 = newJObject()
+  var query_564194 = newJObject()
+  var body_564195 = newJObject()
+  add(path_564193, "backendId", newJString(backendId))
+  add(path_564193, "serviceName", newJString(serviceName))
+  add(query_564194, "api-version", newJString(apiVersion))
+  add(path_564193, "subscriptionId", newJString(subscriptionId))
+  add(path_564193, "resourceGroupName", newJString(resourceGroupName))
   if parameters != nil:
-    body_594062 = parameters
-  add(path_594060, "serviceName", newJString(serviceName))
-  result = call_594059.call(path_594060, query_594061, nil, nil, body_594062)
+    body_564195 = parameters
+  result = call_564192.call(path_564193, query_564194, nil, nil, body_564195)
 
-var backendReconnect* = Call_BackendReconnect_594049(name: "backendReconnect",
+var backendReconnect* = Call_BackendReconnect_564182(name: "backendReconnect",
     meth: HttpMethod.HttpPost, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ApiManagement/service/{serviceName}/backends/{backendId}/reconnect",
-    validator: validate_BackendReconnect_594050, base: "",
-    url: url_BackendReconnect_594051, schemes: {Scheme.Https})
+    validator: validate_BackendReconnect_564183, base: "",
+    url: url_BackendReconnect_564184, schemes: {Scheme.Https})
 export
   rest
 

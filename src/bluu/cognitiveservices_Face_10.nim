@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, httpcore
 
 ## auto-generated via openapi macro
 ## title: Face Client
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_567668 = ref object of OpenApiRestCall
+  OpenApiRestCall_563566 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_567668](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563566](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_567668): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563566): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,15 +107,15 @@ const
   macServiceName = "cognitiveservices-Face"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_FaceDetectWithUrl_567890 = ref object of OpenApiRestCall_567668
-proc url_FaceDetectWithUrl_567892(protocol: Scheme; host: string; base: string;
+  Call_FaceDetectWithUrl_563788 = ref object of OpenApiRestCall_563566
+proc url_FaceDetectWithUrl_563790(protocol: Scheme; host: string; base: string;
                                  route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_FaceDetectWithUrl_567891(path: JsonNode; query: JsonNode;
+proc validate_FaceDetectWithUrl_563789(path: JsonNode; query: JsonNode;
                                       header: JsonNode; formData: JsonNode;
                                       body: JsonNode): JsonNode =
   ## Detect human faces in an image, return face rectangles, and optionally with faceIds, landmarks, and attributes.<br />
@@ -138,49 +142,49 @@ proc validate_FaceDetectWithUrl_567891(path: JsonNode; query: JsonNode;
   section = newJObject()
   result.add "path", section
   ## parameters in `query` object:
-  ##   returnFaceAttributes: JArray
-  ##                       : Analyze and return the one or more specified face attributes in the comma-separated string like "returnFaceAttributes=age,gender". Supported face attributes include age, gender, headPose, smile, facialHair, glasses and emotion. Note that each face attribute analysis has additional computational and time cost.
+  ##   detectionModel: JString
+  ##                 : Name of detection model. Detection model is used to detect faces in the submitted image. A detection model name can be provided when performing Face - Detect or (Large)FaceList - Add Face or (Large)PersonGroup - Add Face. The default value is 'detection_01', if another model is needed, please explicitly specify it.
+  ##   recognitionModel: JString
+  ##                   : Name of recognition model. Recognition model is used when the face features are extracted and associated with detected faceIds, (Large)FaceList or (Large)PersonGroup. A recognition model name can be provided when performing Face - Detect or (Large)FaceList - Create or (Large)PersonGroup - Create. The default value is 'recognition_01', if latest model needed, please explicitly specify the model you need.
+  ##   returnRecognitionModel: JBool
+  ##                         : A value indicating whether the operation should return 'recognitionModel' in response.
   ##   returnFaceId: JBool
   ##               : A value indicating whether the operation should return faceIds of detected faces.
   ##   returnFaceLandmarks: JBool
   ##                      : A value indicating whether the operation should return landmarks of the detected faces.
-  ##   detectionModel: JString
-  ##                 : Name of detection model. Detection model is used to detect faces in the submitted image. A detection model name can be provided when performing Face - Detect or (Large)FaceList - Add Face or (Large)PersonGroup - Add Face. The default value is 'detection_01', if another model is needed, please explicitly specify it.
-  ##   returnRecognitionModel: JBool
-  ##                         : A value indicating whether the operation should return 'recognitionModel' in response.
-  ##   recognitionModel: JString
-  ##                   : Name of recognition model. Recognition model is used when the face features are extracted and associated with detected faceIds, (Large)FaceList or (Large)PersonGroup. A recognition model name can be provided when performing Face - Detect or (Large)FaceList - Create or (Large)PersonGroup - Create. The default value is 'recognition_01', if latest model needed, please explicitly specify the model you need.
+  ##   returnFaceAttributes: JArray
+  ##                       : Analyze and return the one or more specified face attributes in the comma-separated string like "returnFaceAttributes=age,gender". Supported face attributes include age, gender, headPose, smile, facialHair, glasses and emotion. Note that each face attribute analysis has additional computational and time cost.
   section = newJObject()
-  var valid_568051 = query.getOrDefault("returnFaceAttributes")
-  valid_568051 = validateParameter(valid_568051, JArray, required = false,
-                                 default = nil)
-  if valid_568051 != nil:
-    section.add "returnFaceAttributes", valid_568051
-  var valid_568065 = query.getOrDefault("returnFaceId")
-  valid_568065 = validateParameter(valid_568065, JBool, required = false,
-                                 default = newJBool(true))
-  if valid_568065 != nil:
-    section.add "returnFaceId", valid_568065
-  var valid_568066 = query.getOrDefault("returnFaceLandmarks")
-  valid_568066 = validateParameter(valid_568066, JBool, required = false,
-                                 default = newJBool(false))
-  if valid_568066 != nil:
-    section.add "returnFaceLandmarks", valid_568066
-  var valid_568067 = query.getOrDefault("detectionModel")
-  valid_568067 = validateParameter(valid_568067, JString, required = false,
+  var valid_563964 = query.getOrDefault("detectionModel")
+  valid_563964 = validateParameter(valid_563964, JString, required = false,
                                  default = newJString("detection_01"))
-  if valid_568067 != nil:
-    section.add "detectionModel", valid_568067
-  var valid_568068 = query.getOrDefault("returnRecognitionModel")
-  valid_568068 = validateParameter(valid_568068, JBool, required = false,
-                                 default = newJBool(false))
-  if valid_568068 != nil:
-    section.add "returnRecognitionModel", valid_568068
-  var valid_568069 = query.getOrDefault("recognitionModel")
-  valid_568069 = validateParameter(valid_568069, JString, required = false,
+  if valid_563964 != nil:
+    section.add "detectionModel", valid_563964
+  var valid_563965 = query.getOrDefault("recognitionModel")
+  valid_563965 = validateParameter(valid_563965, JString, required = false,
                                  default = newJString("recognition_01"))
-  if valid_568069 != nil:
-    section.add "recognitionModel", valid_568069
+  if valid_563965 != nil:
+    section.add "recognitionModel", valid_563965
+  var valid_563966 = query.getOrDefault("returnRecognitionModel")
+  valid_563966 = validateParameter(valid_563966, JBool, required = false,
+                                 default = newJBool(false))
+  if valid_563966 != nil:
+    section.add "returnRecognitionModel", valid_563966
+  var valid_563967 = query.getOrDefault("returnFaceId")
+  valid_563967 = validateParameter(valid_563967, JBool, required = false,
+                                 default = newJBool(true))
+  if valid_563967 != nil:
+    section.add "returnFaceId", valid_563967
+  var valid_563968 = query.getOrDefault("returnFaceLandmarks")
+  valid_563968 = validateParameter(valid_563968, JBool, required = false,
+                                 default = newJBool(false))
+  if valid_563968 != nil:
+    section.add "returnFaceLandmarks", valid_563968
+  var valid_563969 = query.getOrDefault("returnFaceAttributes")
+  valid_563969 = validateParameter(valid_563969, JArray, required = false,
+                                 default = nil)
+  if valid_563969 != nil:
+    section.add "returnFaceAttributes", valid_563969
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -194,7 +198,7 @@ proc validate_FaceDetectWithUrl_567891(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568093: Call_FaceDetectWithUrl_567890; path: JsonNode;
+proc call*(call_563993: Call_FaceDetectWithUrl_563788; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Detect human faces in an image, return face rectangles, and optionally with faceIds, landmarks, and attributes.<br />
   ## * No image will be stored. Only the extracted face feature will be stored on server. The faceId is an identifier of the face feature and will be used in [Face - Identify](/docs/services/563879b61984550e40cbbe8d/operations/563879b61984550f30395239), [Face - Verify](/docs/services/563879b61984550e40cbbe8d/operations/563879b61984550f3039523a), and [Face - Find Similar](/docs/services/563879b61984550e40cbbe8d/operations/563879b61984550f30395237). The stored face feature(s) will expire and be deleted 24 hours after the original detection call.
@@ -215,21 +219,20 @@ proc call*(call_568093: Call_FaceDetectWithUrl_567890; path: JsonNode;
   ##   | 'recognition_01': | The default recognition model for [Face - Detect](/docs/services/563879b61984550e40cbbe8d/operations/563879b61984550f30395236). All those faceIds created before 2019 March are bonded with this recognition model. |
   ##   | 'recognition_02': | Recognition model released in 2019 March. 'recognition_02' is recommended since its overall accuracy is improved compared with 'recognition_01'. |
   ## 
-  let valid = call_568093.validator(path, query, header, formData, body)
-  let scheme = call_568093.pickScheme
+  let valid = call_563993.validator(path, query, header, formData, body)
+  let scheme = call_563993.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568093.url(scheme.get, call_568093.host, call_568093.base,
-                         call_568093.route, valid.getOrDefault("path"),
+  let url = call_563993.url(scheme.get, call_563993.host, call_563993.base,
+                         call_563993.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568093, url, valid)
+  result = hook(call_563993, url, valid)
 
-proc call*(call_568164: Call_FaceDetectWithUrl_567890; ImageUrl: JsonNode;
-          returnFaceAttributes: JsonNode = nil; returnFaceId: bool = true;
-          returnFaceLandmarks: bool = false;
+proc call*(call_564064: Call_FaceDetectWithUrl_563788; ImageUrl: JsonNode;
           detectionModel: string = "detection_01";
-          returnRecognitionModel: bool = false;
-          recognitionModel: string = "recognition_01"): Recallable =
+          recognitionModel: string = "recognition_01";
+          returnRecognitionModel: bool = false; returnFaceId: bool = true;
+          returnFaceLandmarks: bool = false; returnFaceAttributes: JsonNode = nil): Recallable =
   ## faceDetectWithUrl
   ## Detect human faces in an image, return face rectangles, and optionally with faceIds, landmarks, and attributes.<br />
   ## * No image will be stored. Only the extracted face feature will be stored on server. The faceId is an identifier of the face feature and will be used in [Face - Identify](/docs/services/563879b61984550e40cbbe8d/operations/563879b61984550f30395239), [Face - Verify](/docs/services/563879b61984550e40cbbe8d/operations/563879b61984550f3039523a), and [Face - Find Similar](/docs/services/563879b61984550e40cbbe8d/operations/563879b61984550f30395237). The stored face feature(s) will expire and be deleted 24 hours after the original detection call.
@@ -249,47 +252,47 @@ proc call*(call_568164: Call_FaceDetectWithUrl_567890; ImageUrl: JsonNode;
   ##   | ---------- | -------- |
   ##   | 'recognition_01': | The default recognition model for [Face - Detect](/docs/services/563879b61984550e40cbbe8d/operations/563879b61984550f30395236). All those faceIds created before 2019 March are bonded with this recognition model. |
   ##   | 'recognition_02': | Recognition model released in 2019 March. 'recognition_02' is recommended since its overall accuracy is improved compared with 'recognition_01'. |
-  ##   returnFaceAttributes: JArray
-  ##                       : Analyze and return the one or more specified face attributes in the comma-separated string like "returnFaceAttributes=age,gender". Supported face attributes include age, gender, headPose, smile, facialHair, glasses and emotion. Note that each face attribute analysis has additional computational and time cost.
-  ##   returnFaceId: bool
-  ##               : A value indicating whether the operation should return faceIds of detected faces.
-  ##   ImageUrl: JObject (required)
-  ##           : A JSON document with a URL pointing to the image that is to be analyzed.
-  ##   returnFaceLandmarks: bool
-  ##                      : A value indicating whether the operation should return landmarks of the detected faces.
   ##   detectionModel: string
   ##                 : Name of detection model. Detection model is used to detect faces in the submitted image. A detection model name can be provided when performing Face - Detect or (Large)FaceList - Add Face or (Large)PersonGroup - Add Face. The default value is 'detection_01', if another model is needed, please explicitly specify it.
-  ##   returnRecognitionModel: bool
-  ##                         : A value indicating whether the operation should return 'recognitionModel' in response.
   ##   recognitionModel: string
   ##                   : Name of recognition model. Recognition model is used when the face features are extracted and associated with detected faceIds, (Large)FaceList or (Large)PersonGroup. A recognition model name can be provided when performing Face - Detect or (Large)FaceList - Create or (Large)PersonGroup - Create. The default value is 'recognition_01', if latest model needed, please explicitly specify the model you need.
-  var query_568165 = newJObject()
-  var body_568167 = newJObject()
-  if returnFaceAttributes != nil:
-    query_568165.add "returnFaceAttributes", returnFaceAttributes
-  add(query_568165, "returnFaceId", newJBool(returnFaceId))
+  ##   returnRecognitionModel: bool
+  ##                         : A value indicating whether the operation should return 'recognitionModel' in response.
+  ##   returnFaceId: bool
+  ##               : A value indicating whether the operation should return faceIds of detected faces.
+  ##   returnFaceLandmarks: bool
+  ##                      : A value indicating whether the operation should return landmarks of the detected faces.
+  ##   ImageUrl: JObject (required)
+  ##           : A JSON document with a URL pointing to the image that is to be analyzed.
+  ##   returnFaceAttributes: JArray
+  ##                       : Analyze and return the one or more specified face attributes in the comma-separated string like "returnFaceAttributes=age,gender". Supported face attributes include age, gender, headPose, smile, facialHair, glasses and emotion. Note that each face attribute analysis has additional computational and time cost.
+  var query_564065 = newJObject()
+  var body_564067 = newJObject()
+  add(query_564065, "detectionModel", newJString(detectionModel))
+  add(query_564065, "recognitionModel", newJString(recognitionModel))
+  add(query_564065, "returnRecognitionModel", newJBool(returnRecognitionModel))
+  add(query_564065, "returnFaceId", newJBool(returnFaceId))
+  add(query_564065, "returnFaceLandmarks", newJBool(returnFaceLandmarks))
   if ImageUrl != nil:
-    body_568167 = ImageUrl
-  add(query_568165, "returnFaceLandmarks", newJBool(returnFaceLandmarks))
-  add(query_568165, "detectionModel", newJString(detectionModel))
-  add(query_568165, "returnRecognitionModel", newJBool(returnRecognitionModel))
-  add(query_568165, "recognitionModel", newJString(recognitionModel))
-  result = call_568164.call(nil, query_568165, nil, nil, body_568167)
+    body_564067 = ImageUrl
+  if returnFaceAttributes != nil:
+    query_564065.add "returnFaceAttributes", returnFaceAttributes
+  result = call_564064.call(nil, query_564065, nil, nil, body_564067)
 
-var faceDetectWithUrl* = Call_FaceDetectWithUrl_567890(name: "faceDetectWithUrl",
+var faceDetectWithUrl* = Call_FaceDetectWithUrl_563788(name: "faceDetectWithUrl",
     meth: HttpMethod.HttpPost, host: "azure.local", route: "/detect",
-    validator: validate_FaceDetectWithUrl_567891, base: "",
-    url: url_FaceDetectWithUrl_567892, schemes: {Scheme.Https})
+    validator: validate_FaceDetectWithUrl_563789, base: "",
+    url: url_FaceDetectWithUrl_563790, schemes: {Scheme.Https})
 type
-  Call_FaceListList_568206 = ref object of OpenApiRestCall_567668
-proc url_FaceListList_568208(protocol: Scheme; host: string; base: string;
+  Call_FaceListList_564106 = ref object of OpenApiRestCall_563566
+proc url_FaceListList_564108(protocol: Scheme; host: string; base: string;
                             route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_FaceListList_568207(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_FaceListList_564107(path: JsonNode; query: JsonNode; header: JsonNode;
                                  formData: JsonNode; body: JsonNode): JsonNode =
   ## List face lists’ faceListId, name, userData and recognitionModel. <br /> 
   ## To get face information inside faceList use [FaceList - Get](/docs/services/563879b61984550e40cbbe8d/operations/563879b61984550f3039524c)
@@ -303,11 +306,11 @@ proc validate_FaceListList_568207(path: JsonNode; query: JsonNode; header: JsonN
   ##   returnRecognitionModel: JBool
   ##                         : A value indicating whether the operation should return 'recognitionModel' in response.
   section = newJObject()
-  var valid_568209 = query.getOrDefault("returnRecognitionModel")
-  valid_568209 = validateParameter(valid_568209, JBool, required = false,
+  var valid_564109 = query.getOrDefault("returnRecognitionModel")
+  valid_564109 = validateParameter(valid_564109, JBool, required = false,
                                  default = newJBool(false))
-  if valid_568209 != nil:
-    section.add "returnRecognitionModel", valid_568209
+  if valid_564109 != nil:
+    section.add "returnRecognitionModel", valid_564109
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -316,22 +319,22 @@ proc validate_FaceListList_568207(path: JsonNode; query: JsonNode; header: JsonN
   if body != nil:
     result.add "body", body
 
-proc call*(call_568210: Call_FaceListList_568206; path: JsonNode; query: JsonNode;
+proc call*(call_564110: Call_FaceListList_564106; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## List face lists’ faceListId, name, userData and recognitionModel. <br /> 
   ## To get face information inside faceList use [FaceList - Get](/docs/services/563879b61984550e40cbbe8d/operations/563879b61984550f3039524c)
   ## 
   ## 
-  let valid = call_568210.validator(path, query, header, formData, body)
-  let scheme = call_568210.pickScheme
+  let valid = call_564110.validator(path, query, header, formData, body)
+  let scheme = call_564110.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568210.url(scheme.get, call_568210.host, call_568210.base,
-                         call_568210.route, valid.getOrDefault("path"),
+  let url = call_564110.url(scheme.get, call_564110.host, call_564110.base,
+                         call_564110.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568210, url, valid)
+  result = hook(call_564110, url, valid)
 
-proc call*(call_568211: Call_FaceListList_568206;
+proc call*(call_564111: Call_FaceListList_564106;
           returnRecognitionModel: bool = false): Recallable =
   ## faceListList
   ## List face lists’ faceListId, name, userData and recognitionModel. <br /> 
@@ -339,17 +342,17 @@ proc call*(call_568211: Call_FaceListList_568206;
   ## 
   ##   returnRecognitionModel: bool
   ##                         : A value indicating whether the operation should return 'recognitionModel' in response.
-  var query_568212 = newJObject()
-  add(query_568212, "returnRecognitionModel", newJBool(returnRecognitionModel))
-  result = call_568211.call(nil, query_568212, nil, nil, nil)
+  var query_564112 = newJObject()
+  add(query_564112, "returnRecognitionModel", newJBool(returnRecognitionModel))
+  result = call_564111.call(nil, query_564112, nil, nil, nil)
 
-var faceListList* = Call_FaceListList_568206(name: "faceListList",
+var faceListList* = Call_FaceListList_564106(name: "faceListList",
     meth: HttpMethod.HttpGet, host: "azure.local", route: "/facelists",
-    validator: validate_FaceListList_568207, base: "", url: url_FaceListList_568208,
+    validator: validate_FaceListList_564107, base: "", url: url_FaceListList_564108,
     schemes: {Scheme.Https})
 type
-  Call_FaceListCreate_568236 = ref object of OpenApiRestCall_567668
-proc url_FaceListCreate_568238(protocol: Scheme; host: string; base: string;
+  Call_FaceListCreate_564136 = ref object of OpenApiRestCall_563566
+proc url_FaceListCreate_564138(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -364,7 +367,7 @@ proc url_FaceListCreate_568238(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_FaceListCreate_568237(path: JsonNode; query: JsonNode;
+proc validate_FaceListCreate_564137(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## Create an empty face list with user-specified faceListId, name, an optional userData and recognitionModel. Up to 64 face lists are allowed in one subscription.
@@ -384,11 +387,11 @@ proc validate_FaceListCreate_568237(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `faceListId` field"
-  var valid_568239 = path.getOrDefault("faceListId")
-  valid_568239 = validateParameter(valid_568239, JString, required = true,
+  var valid_564139 = path.getOrDefault("faceListId")
+  valid_564139 = validateParameter(valid_564139, JString, required = true,
                                  default = nil)
-  if valid_568239 != nil:
-    section.add "faceListId", valid_568239
+  if valid_564139 != nil:
+    section.add "faceListId", valid_564139
   result.add "path", section
   section = newJObject()
   result.add "query", section
@@ -404,7 +407,7 @@ proc validate_FaceListCreate_568237(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568241: Call_FaceListCreate_568236; path: JsonNode; query: JsonNode;
+proc call*(call_564141: Call_FaceListCreate_564136; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Create an empty face list with user-specified faceListId, name, an optional userData and recognitionModel. Up to 64 face lists are allowed in one subscription.
   ## <br /> Face list is a list of faces, up to 1,000 faces, and used by [Face - Find Similar](/docs/services/563879b61984550e40cbbe8d/operations/563879b61984550f30395237).
@@ -415,17 +418,17 @@ proc call*(call_568241: Call_FaceListCreate_568236; path: JsonNode; query: JsonN
   ## * 'recognition_01': The default recognition model for [FaceList- Create](/docs/services/563879b61984550e40cbbe8d/operations/563879b61984550f3039524b). All those face lists created before 2019 March are bonded with this recognition model.
   ## * 'recognition_02': Recognition model released in 2019 March. 'recognition_02' is recommended since its overall accuracy is improved compared with 'recognition_01'.
   ## 
-  let valid = call_568241.validator(path, query, header, formData, body)
-  let scheme = call_568241.pickScheme
+  let valid = call_564141.validator(path, query, header, formData, body)
+  let scheme = call_564141.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568241.url(scheme.get, call_568241.host, call_568241.base,
-                         call_568241.route, valid.getOrDefault("path"),
+  let url = call_564141.url(scheme.get, call_564141.host, call_564141.base,
+                         call_564141.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568241, url, valid)
+  result = hook(call_564141, url, valid)
 
-proc call*(call_568242: Call_FaceListCreate_568236; faceListId: string;
-          body: JsonNode): Recallable =
+proc call*(call_564142: Call_FaceListCreate_564136; body: JsonNode;
+          faceListId: string): Recallable =
   ## faceListCreate
   ## Create an empty face list with user-specified faceListId, name, an optional userData and recognitionModel. Up to 64 face lists are allowed in one subscription.
   ## <br /> Face list is a list of faces, up to 1,000 faces, and used by [Face - Find Similar](/docs/services/563879b61984550e40cbbe8d/operations/563879b61984550f30395237).
@@ -435,24 +438,24 @@ proc call*(call_568242: Call_FaceListCreate_568236; faceListId: string;
   ## <br />'recognitionModel' should be specified to associate with this face list. The default value for 'recognitionModel' is 'recognition_01', if the latest model needed, please explicitly specify the model you need in this parameter. New faces that are added to an existing face list will use the recognition model that's already associated with the collection. Existing face features in a face list can't be updated to features extracted by another version of recognition model.
   ## * 'recognition_01': The default recognition model for [FaceList- Create](/docs/services/563879b61984550e40cbbe8d/operations/563879b61984550f3039524b). All those face lists created before 2019 March are bonded with this recognition model.
   ## * 'recognition_02': Recognition model released in 2019 March. 'recognition_02' is recommended since its overall accuracy is improved compared with 'recognition_01'.
-  ##   faceListId: string (required)
-  ##             : Id referencing a particular face list.
   ##   body: JObject (required)
   ##       : Request body for creating a face list.
-  var path_568243 = newJObject()
-  var body_568244 = newJObject()
-  add(path_568243, "faceListId", newJString(faceListId))
+  ##   faceListId: string (required)
+  ##             : Id referencing a particular face list.
+  var path_564143 = newJObject()
+  var body_564144 = newJObject()
   if body != nil:
-    body_568244 = body
-  result = call_568242.call(path_568243, nil, nil, nil, body_568244)
+    body_564144 = body
+  add(path_564143, "faceListId", newJString(faceListId))
+  result = call_564142.call(path_564143, nil, nil, nil, body_564144)
 
-var faceListCreate* = Call_FaceListCreate_568236(name: "faceListCreate",
+var faceListCreate* = Call_FaceListCreate_564136(name: "faceListCreate",
     meth: HttpMethod.HttpPut, host: "azure.local", route: "/facelists/{faceListId}",
-    validator: validate_FaceListCreate_568237, base: "", url: url_FaceListCreate_568238,
+    validator: validate_FaceListCreate_564137, base: "", url: url_FaceListCreate_564138,
     schemes: {Scheme.Https})
 type
-  Call_FaceListGet_568213 = ref object of OpenApiRestCall_567668
-proc url_FaceListGet_568215(protocol: Scheme; host: string; base: string;
+  Call_FaceListGet_564113 = ref object of OpenApiRestCall_563566
+proc url_FaceListGet_564115(protocol: Scheme; host: string; base: string;
                            route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -467,7 +470,7 @@ proc url_FaceListGet_568215(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_FaceListGet_568214(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_FaceListGet_564114(path: JsonNode; query: JsonNode; header: JsonNode;
                                 formData: JsonNode; body: JsonNode): JsonNode =
   ## Retrieve a face list’s faceListId, name, userData, recognitionModel and faces in the face list.
   ## 
@@ -480,21 +483,21 @@ proc validate_FaceListGet_568214(path: JsonNode; query: JsonNode; header: JsonNo
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `faceListId` field"
-  var valid_568230 = path.getOrDefault("faceListId")
-  valid_568230 = validateParameter(valid_568230, JString, required = true,
+  var valid_564130 = path.getOrDefault("faceListId")
+  valid_564130 = validateParameter(valid_564130, JString, required = true,
                                  default = nil)
-  if valid_568230 != nil:
-    section.add "faceListId", valid_568230
+  if valid_564130 != nil:
+    section.add "faceListId", valid_564130
   result.add "path", section
   ## parameters in `query` object:
   ##   returnRecognitionModel: JBool
   ##                         : A value indicating whether the operation should return 'recognitionModel' in response.
   section = newJObject()
-  var valid_568231 = query.getOrDefault("returnRecognitionModel")
-  valid_568231 = validateParameter(valid_568231, JBool, required = false,
+  var valid_564131 = query.getOrDefault("returnRecognitionModel")
+  valid_564131 = validateParameter(valid_564131, JBool, required = false,
                                  default = newJBool(false))
-  if valid_568231 != nil:
-    section.add "returnRecognitionModel", valid_568231
+  if valid_564131 != nil:
+    section.add "returnRecognitionModel", valid_564131
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -503,45 +506,45 @@ proc validate_FaceListGet_568214(path: JsonNode; query: JsonNode; header: JsonNo
   if body != nil:
     result.add "body", body
 
-proc call*(call_568232: Call_FaceListGet_568213; path: JsonNode; query: JsonNode;
+proc call*(call_564132: Call_FaceListGet_564113; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Retrieve a face list’s faceListId, name, userData, recognitionModel and faces in the face list.
   ## 
   ## 
-  let valid = call_568232.validator(path, query, header, formData, body)
-  let scheme = call_568232.pickScheme
+  let valid = call_564132.validator(path, query, header, formData, body)
+  let scheme = call_564132.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568232.url(scheme.get, call_568232.host, call_568232.base,
-                         call_568232.route, valid.getOrDefault("path"),
+  let url = call_564132.url(scheme.get, call_564132.host, call_564132.base,
+                         call_564132.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568232, url, valid)
+  result = hook(call_564132, url, valid)
 
-proc call*(call_568233: Call_FaceListGet_568213; faceListId: string;
+proc call*(call_564133: Call_FaceListGet_564113; faceListId: string;
           returnRecognitionModel: bool = false): Recallable =
   ## faceListGet
   ## Retrieve a face list’s faceListId, name, userData, recognitionModel and faces in the face list.
   ## 
-  ##   faceListId: string (required)
-  ##             : Id referencing a particular face list.
   ##   returnRecognitionModel: bool
   ##                         : A value indicating whether the operation should return 'recognitionModel' in response.
-  var path_568234 = newJObject()
-  var query_568235 = newJObject()
-  add(path_568234, "faceListId", newJString(faceListId))
-  add(query_568235, "returnRecognitionModel", newJBool(returnRecognitionModel))
-  result = call_568233.call(path_568234, query_568235, nil, nil, nil)
+  ##   faceListId: string (required)
+  ##             : Id referencing a particular face list.
+  var path_564134 = newJObject()
+  var query_564135 = newJObject()
+  add(query_564135, "returnRecognitionModel", newJBool(returnRecognitionModel))
+  add(path_564134, "faceListId", newJString(faceListId))
+  result = call_564133.call(path_564134, query_564135, nil, nil, nil)
 
-var faceListGet* = Call_FaceListGet_568213(name: "faceListGet",
+var faceListGet* = Call_FaceListGet_564113(name: "faceListGet",
                                         meth: HttpMethod.HttpGet,
                                         host: "azure.local",
                                         route: "/facelists/{faceListId}",
-                                        validator: validate_FaceListGet_568214,
-                                        base: "", url: url_FaceListGet_568215,
+                                        validator: validate_FaceListGet_564114,
+                                        base: "", url: url_FaceListGet_564115,
                                         schemes: {Scheme.Https})
 type
-  Call_FaceListUpdate_568252 = ref object of OpenApiRestCall_567668
-proc url_FaceListUpdate_568254(protocol: Scheme; host: string; base: string;
+  Call_FaceListUpdate_564152 = ref object of OpenApiRestCall_563566
+proc url_FaceListUpdate_564154(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -556,7 +559,7 @@ proc url_FaceListUpdate_568254(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_FaceListUpdate_568253(path: JsonNode; query: JsonNode;
+proc validate_FaceListUpdate_564153(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## Update information of a face list.
@@ -569,11 +572,11 @@ proc validate_FaceListUpdate_568253(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `faceListId` field"
-  var valid_568255 = path.getOrDefault("faceListId")
-  valid_568255 = validateParameter(valid_568255, JString, required = true,
+  var valid_564155 = path.getOrDefault("faceListId")
+  valid_564155 = validateParameter(valid_564155, JString, required = true,
                                  default = nil)
-  if valid_568255 != nil:
-    section.add "faceListId", valid_568255
+  if valid_564155 != nil:
+    section.add "faceListId", valid_564155
   result.add "path", section
   section = newJObject()
   result.add "query", section
@@ -589,41 +592,41 @@ proc validate_FaceListUpdate_568253(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568257: Call_FaceListUpdate_568252; path: JsonNode; query: JsonNode;
+proc call*(call_564157: Call_FaceListUpdate_564152; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Update information of a face list.
   ## 
-  let valid = call_568257.validator(path, query, header, formData, body)
-  let scheme = call_568257.pickScheme
+  let valid = call_564157.validator(path, query, header, formData, body)
+  let scheme = call_564157.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568257.url(scheme.get, call_568257.host, call_568257.base,
-                         call_568257.route, valid.getOrDefault("path"),
+  let url = call_564157.url(scheme.get, call_564157.host, call_564157.base,
+                         call_564157.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568257, url, valid)
+  result = hook(call_564157, url, valid)
 
-proc call*(call_568258: Call_FaceListUpdate_568252; faceListId: string;
-          body: JsonNode): Recallable =
+proc call*(call_564158: Call_FaceListUpdate_564152; body: JsonNode;
+          faceListId: string): Recallable =
   ## faceListUpdate
   ## Update information of a face list.
-  ##   faceListId: string (required)
-  ##             : Id referencing a particular face list.
   ##   body: JObject (required)
   ##       : Request body for updating a face list.
-  var path_568259 = newJObject()
-  var body_568260 = newJObject()
-  add(path_568259, "faceListId", newJString(faceListId))
+  ##   faceListId: string (required)
+  ##             : Id referencing a particular face list.
+  var path_564159 = newJObject()
+  var body_564160 = newJObject()
   if body != nil:
-    body_568260 = body
-  result = call_568258.call(path_568259, nil, nil, nil, body_568260)
+    body_564160 = body
+  add(path_564159, "faceListId", newJString(faceListId))
+  result = call_564158.call(path_564159, nil, nil, nil, body_564160)
 
-var faceListUpdate* = Call_FaceListUpdate_568252(name: "faceListUpdate",
+var faceListUpdate* = Call_FaceListUpdate_564152(name: "faceListUpdate",
     meth: HttpMethod.HttpPatch, host: "azure.local",
-    route: "/facelists/{faceListId}", validator: validate_FaceListUpdate_568253,
-    base: "", url: url_FaceListUpdate_568254, schemes: {Scheme.Https})
+    route: "/facelists/{faceListId}", validator: validate_FaceListUpdate_564153,
+    base: "", url: url_FaceListUpdate_564154, schemes: {Scheme.Https})
 type
-  Call_FaceListDelete_568245 = ref object of OpenApiRestCall_567668
-proc url_FaceListDelete_568247(protocol: Scheme; host: string; base: string;
+  Call_FaceListDelete_564145 = ref object of OpenApiRestCall_563566
+proc url_FaceListDelete_564147(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -638,7 +641,7 @@ proc url_FaceListDelete_568247(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_FaceListDelete_568246(path: JsonNode; query: JsonNode;
+proc validate_FaceListDelete_564146(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## Delete a specified face list.
@@ -651,11 +654,11 @@ proc validate_FaceListDelete_568246(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `faceListId` field"
-  var valid_568248 = path.getOrDefault("faceListId")
-  valid_568248 = validateParameter(valid_568248, JString, required = true,
+  var valid_564148 = path.getOrDefault("faceListId")
+  valid_564148 = validateParameter(valid_564148, JString, required = true,
                                  default = nil)
-  if valid_568248 != nil:
-    section.add "faceListId", valid_568248
+  if valid_564148 != nil:
+    section.add "faceListId", valid_564148
   result.add "path", section
   section = newJObject()
   result.add "query", section
@@ -666,35 +669,35 @@ proc validate_FaceListDelete_568246(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568249: Call_FaceListDelete_568245; path: JsonNode; query: JsonNode;
+proc call*(call_564149: Call_FaceListDelete_564145; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Delete a specified face list.
   ## 
-  let valid = call_568249.validator(path, query, header, formData, body)
-  let scheme = call_568249.pickScheme
+  let valid = call_564149.validator(path, query, header, formData, body)
+  let scheme = call_564149.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568249.url(scheme.get, call_568249.host, call_568249.base,
-                         call_568249.route, valid.getOrDefault("path"),
+  let url = call_564149.url(scheme.get, call_564149.host, call_564149.base,
+                         call_564149.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568249, url, valid)
+  result = hook(call_564149, url, valid)
 
-proc call*(call_568250: Call_FaceListDelete_568245; faceListId: string): Recallable =
+proc call*(call_564150: Call_FaceListDelete_564145; faceListId: string): Recallable =
   ## faceListDelete
   ## Delete a specified face list.
   ##   faceListId: string (required)
   ##             : Id referencing a particular face list.
-  var path_568251 = newJObject()
-  add(path_568251, "faceListId", newJString(faceListId))
-  result = call_568250.call(path_568251, nil, nil, nil, nil)
+  var path_564151 = newJObject()
+  add(path_564151, "faceListId", newJString(faceListId))
+  result = call_564150.call(path_564151, nil, nil, nil, nil)
 
-var faceListDelete* = Call_FaceListDelete_568245(name: "faceListDelete",
+var faceListDelete* = Call_FaceListDelete_564145(name: "faceListDelete",
     meth: HttpMethod.HttpDelete, host: "azure.local",
-    route: "/facelists/{faceListId}", validator: validate_FaceListDelete_568246,
-    base: "", url: url_FaceListDelete_568247, schemes: {Scheme.Https})
+    route: "/facelists/{faceListId}", validator: validate_FaceListDelete_564146,
+    base: "", url: url_FaceListDelete_564147, schemes: {Scheme.Https})
 type
-  Call_FaceListAddFaceFromUrl_568261 = ref object of OpenApiRestCall_567668
-proc url_FaceListAddFaceFromUrl_568263(protocol: Scheme; host: string; base: string;
+  Call_FaceListAddFaceFromUrl_564161 = ref object of OpenApiRestCall_563566
+proc url_FaceListAddFaceFromUrl_564163(protocol: Scheme; host: string; base: string;
                                       route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -710,7 +713,7 @@ proc url_FaceListAddFaceFromUrl_568263(protocol: Scheme; host: string; base: str
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_FaceListAddFaceFromUrl_568262(path: JsonNode; query: JsonNode;
+proc validate_FaceListAddFaceFromUrl_564162(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Add a face to a specified face list, up to 1,000 faces.
   ## <br /> To deal with an image contains multiple faces, input face can be specified as an image with a targetFace rectangle. It returns a persistedFaceId representing the added face. No image will be stored. Only the extracted face feature will be stored on server until [FaceList - Delete Face](/docs/services/563879b61984550e40cbbe8d/operations/563879b61984550f30395251) or [FaceList - Delete](/docs/services/563879b61984550e40cbbe8d/operations/563879b61984550f3039524f) is called.
@@ -735,35 +738,35 @@ proc validate_FaceListAddFaceFromUrl_568262(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `faceListId` field"
-  var valid_568264 = path.getOrDefault("faceListId")
-  valid_568264 = validateParameter(valid_568264, JString, required = true,
+  var valid_564164 = path.getOrDefault("faceListId")
+  valid_564164 = validateParameter(valid_564164, JString, required = true,
                                  default = nil)
-  if valid_568264 != nil:
-    section.add "faceListId", valid_568264
+  if valid_564164 != nil:
+    section.add "faceListId", valid_564164
   result.add "path", section
   ## parameters in `query` object:
-  ##   userData: JString
-  ##           : User-specified data about the face for any purpose. The maximum length is 1KB.
   ##   detectionModel: JString
   ##                 : Name of detection model. Detection model is used to detect faces in the submitted image. A detection model name can be provided when performing Face - Detect or (Large)FaceList - Add Face or (Large)PersonGroup - Add Face. The default value is 'detection_01', if another model is needed, please explicitly specify it.
   ##   targetFace: JArray
   ##             : A face rectangle to specify the target face to be added to a person in the format of "targetFace=left,top,width,height". E.g. "targetFace=10,10,100,100". If there is more than one face in the image, targetFace is required to specify which face to add. No targetFace means there is only one face detected in the entire image.
+  ##   userData: JString
+  ##           : User-specified data about the face for any purpose. The maximum length is 1KB.
   section = newJObject()
-  var valid_568265 = query.getOrDefault("userData")
-  valid_568265 = validateParameter(valid_568265, JString, required = false,
-                                 default = nil)
-  if valid_568265 != nil:
-    section.add "userData", valid_568265
-  var valid_568266 = query.getOrDefault("detectionModel")
-  valid_568266 = validateParameter(valid_568266, JString, required = false,
+  var valid_564165 = query.getOrDefault("detectionModel")
+  valid_564165 = validateParameter(valid_564165, JString, required = false,
                                  default = newJString("detection_01"))
-  if valid_568266 != nil:
-    section.add "detectionModel", valid_568266
-  var valid_568267 = query.getOrDefault("targetFace")
-  valid_568267 = validateParameter(valid_568267, JArray, required = false,
+  if valid_564165 != nil:
+    section.add "detectionModel", valid_564165
+  var valid_564166 = query.getOrDefault("targetFace")
+  valid_564166 = validateParameter(valid_564166, JArray, required = false,
                                  default = nil)
-  if valid_568267 != nil:
-    section.add "targetFace", valid_568267
+  if valid_564166 != nil:
+    section.add "targetFace", valid_564166
+  var valid_564167 = query.getOrDefault("userData")
+  valid_564167 = validateParameter(valid_564167, JString, required = false,
+                                 default = nil)
+  if valid_564167 != nil:
+    section.add "userData", valid_564167
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -777,7 +780,7 @@ proc validate_FaceListAddFaceFromUrl_568262(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568269: Call_FaceListAddFaceFromUrl_568261; path: JsonNode;
+proc call*(call_564169: Call_FaceListAddFaceFromUrl_564161; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Add a face to a specified face list, up to 1,000 faces.
   ## <br /> To deal with an image contains multiple faces, input face can be specified as an image with a targetFace rectangle. It returns a persistedFaceId representing the added face. No image will be stored. Only the extracted face feature will be stored on server until [FaceList - Delete Face](/docs/services/563879b61984550e40cbbe8d/operations/563879b61984550f30395251) or [FaceList - Delete](/docs/services/563879b61984550e40cbbe8d/operations/563879b61984550f3039524f) is called.
@@ -794,18 +797,18 @@ proc call*(call_568269: Call_FaceListAddFaceFromUrl_568261; path: JsonNode;
   ##   | 'detection_01': | The default detection model for [FaceList - Add Face](/docs/services/563879b61984550e40cbbe8d/operations/563879b61984550f30395250). Recommend for near frontal face detection. For scenarios with exceptionally large angle (head-pose) faces, occluded faces or wrong image orientation, the faces in such cases may not be detected. |
   ##   | 'detection_02': | Detection model released in 2019 May with improved accuracy especially on small, side and blurry faces. |
   ## 
-  let valid = call_568269.validator(path, query, header, formData, body)
-  let scheme = call_568269.pickScheme
+  let valid = call_564169.validator(path, query, header, formData, body)
+  let scheme = call_564169.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568269.url(scheme.get, call_568269.host, call_568269.base,
-                         call_568269.route, valid.getOrDefault("path"),
+  let url = call_564169.url(scheme.get, call_564169.host, call_564169.base,
+                         call_564169.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568269, url, valid)
+  result = hook(call_564169, url, valid)
 
-proc call*(call_568270: Call_FaceListAddFaceFromUrl_568261; faceListId: string;
-          ImageUrl: JsonNode; userData: string = "";
-          detectionModel: string = "detection_01"; targetFace: JsonNode = nil): Recallable =
+proc call*(call_564170: Call_FaceListAddFaceFromUrl_564161; faceListId: string;
+          ImageUrl: JsonNode; detectionModel: string = "detection_01";
+          targetFace: JsonNode = nil; userData: string = ""): Recallable =
   ## faceListAddFaceFromUrl
   ## Add a face to a specified face list, up to 1,000 faces.
   ## <br /> To deal with an image contains multiple faces, input face can be specified as an image with a targetFace rectangle. It returns a persistedFaceId representing the added face. No image will be stored. Only the extracted face feature will be stored on server until [FaceList - Delete Face](/docs/services/563879b61984550e40cbbe8d/operations/563879b61984550f30395251) or [FaceList - Delete](/docs/services/563879b61984550e40cbbe8d/operations/563879b61984550f3039524f) is called.
@@ -821,36 +824,36 @@ proc call*(call_568270: Call_FaceListAddFaceFromUrl_568261; faceListId: string;
   ##   | ---------- | -------- |
   ##   | 'detection_01': | The default detection model for [FaceList - Add Face](/docs/services/563879b61984550e40cbbe8d/operations/563879b61984550f30395250). Recommend for near frontal face detection. For scenarios with exceptionally large angle (head-pose) faces, occluded faces or wrong image orientation, the faces in such cases may not be detected. |
   ##   | 'detection_02': | Detection model released in 2019 May with improved accuracy especially on small, side and blurry faces. |
-  ##   faceListId: string (required)
-  ##             : Id referencing a particular face list.
-  ##   userData: string
-  ##           : User-specified data about the face for any purpose. The maximum length is 1KB.
-  ##   ImageUrl: JObject (required)
-  ##           : A JSON document with a URL pointing to the image that is to be analyzed.
   ##   detectionModel: string
   ##                 : Name of detection model. Detection model is used to detect faces in the submitted image. A detection model name can be provided when performing Face - Detect or (Large)FaceList - Add Face or (Large)PersonGroup - Add Face. The default value is 'detection_01', if another model is needed, please explicitly specify it.
   ##   targetFace: JArray
   ##             : A face rectangle to specify the target face to be added to a person in the format of "targetFace=left,top,width,height". E.g. "targetFace=10,10,100,100". If there is more than one face in the image, targetFace is required to specify which face to add. No targetFace means there is only one face detected in the entire image.
-  var path_568271 = newJObject()
-  var query_568272 = newJObject()
-  var body_568273 = newJObject()
-  add(path_568271, "faceListId", newJString(faceListId))
-  add(query_568272, "userData", newJString(userData))
-  if ImageUrl != nil:
-    body_568273 = ImageUrl
-  add(query_568272, "detectionModel", newJString(detectionModel))
+  ##   userData: string
+  ##           : User-specified data about the face for any purpose. The maximum length is 1KB.
+  ##   faceListId: string (required)
+  ##             : Id referencing a particular face list.
+  ##   ImageUrl: JObject (required)
+  ##           : A JSON document with a URL pointing to the image that is to be analyzed.
+  var path_564171 = newJObject()
+  var query_564172 = newJObject()
+  var body_564173 = newJObject()
+  add(query_564172, "detectionModel", newJString(detectionModel))
   if targetFace != nil:
-    query_568272.add "targetFace", targetFace
-  result = call_568270.call(path_568271, query_568272, nil, nil, body_568273)
+    query_564172.add "targetFace", targetFace
+  add(query_564172, "userData", newJString(userData))
+  add(path_564171, "faceListId", newJString(faceListId))
+  if ImageUrl != nil:
+    body_564173 = ImageUrl
+  result = call_564170.call(path_564171, query_564172, nil, nil, body_564173)
 
-var faceListAddFaceFromUrl* = Call_FaceListAddFaceFromUrl_568261(
+var faceListAddFaceFromUrl* = Call_FaceListAddFaceFromUrl_564161(
     name: "faceListAddFaceFromUrl", meth: HttpMethod.HttpPost, host: "azure.local",
     route: "/facelists/{faceListId}/persistedfaces",
-    validator: validate_FaceListAddFaceFromUrl_568262, base: "",
-    url: url_FaceListAddFaceFromUrl_568263, schemes: {Scheme.Https})
+    validator: validate_FaceListAddFaceFromUrl_564162, base: "",
+    url: url_FaceListAddFaceFromUrl_564163, schemes: {Scheme.Https})
 type
-  Call_FaceListDeleteFace_568274 = ref object of OpenApiRestCall_567668
-proc url_FaceListDeleteFace_568276(protocol: Scheme; host: string; base: string;
+  Call_FaceListDeleteFace_564174 = ref object of OpenApiRestCall_563566
+proc url_FaceListDeleteFace_564176(protocol: Scheme; host: string; base: string;
                                   route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -868,7 +871,7 @@ proc url_FaceListDeleteFace_568276(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_FaceListDeleteFace_568275(path: JsonNode; query: JsonNode;
+proc validate_FaceListDeleteFace_564175(path: JsonNode; query: JsonNode;
                                        header: JsonNode; formData: JsonNode;
                                        body: JsonNode): JsonNode =
   ## Delete a face from a face list by specified faceListId and persistedFaceId.
@@ -877,23 +880,23 @@ proc validate_FaceListDeleteFace_568275(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   faceListId: JString (required)
-  ##             : Id referencing a particular face list.
   ##   persistedFaceId: JString (required)
   ##                  : Id referencing a particular persistedFaceId of an existing face.
+  ##   faceListId: JString (required)
+  ##             : Id referencing a particular face list.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `faceListId` field"
-  var valid_568277 = path.getOrDefault("faceListId")
-  valid_568277 = validateParameter(valid_568277, JString, required = true,
+        "path argument is necessary due to required `persistedFaceId` field"
+  var valid_564177 = path.getOrDefault("persistedFaceId")
+  valid_564177 = validateParameter(valid_564177, JString, required = true,
                                  default = nil)
-  if valid_568277 != nil:
-    section.add "faceListId", valid_568277
-  var valid_568278 = path.getOrDefault("persistedFaceId")
-  valid_568278 = validateParameter(valid_568278, JString, required = true,
+  if valid_564177 != nil:
+    section.add "persistedFaceId", valid_564177
+  var valid_564178 = path.getOrDefault("faceListId")
+  valid_564178 = validateParameter(valid_564178, JString, required = true,
                                  default = nil)
-  if valid_568278 != nil:
-    section.add "persistedFaceId", valid_568278
+  if valid_564178 != nil:
+    section.add "faceListId", valid_564178
   result.add "path", section
   section = newJObject()
   result.add "query", section
@@ -904,49 +907,49 @@ proc validate_FaceListDeleteFace_568275(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568279: Call_FaceListDeleteFace_568274; path: JsonNode;
+proc call*(call_564179: Call_FaceListDeleteFace_564174; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Delete a face from a face list by specified faceListId and persistedFaceId.
   ## <br /> Adding/deleting faces to/from a same face list are processed sequentially and to/from different face lists are in parallel.
   ## 
-  let valid = call_568279.validator(path, query, header, formData, body)
-  let scheme = call_568279.pickScheme
+  let valid = call_564179.validator(path, query, header, formData, body)
+  let scheme = call_564179.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568279.url(scheme.get, call_568279.host, call_568279.base,
-                         call_568279.route, valid.getOrDefault("path"),
+  let url = call_564179.url(scheme.get, call_564179.host, call_564179.base,
+                         call_564179.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568279, url, valid)
+  result = hook(call_564179, url, valid)
 
-proc call*(call_568280: Call_FaceListDeleteFace_568274; faceListId: string;
-          persistedFaceId: string): Recallable =
+proc call*(call_564180: Call_FaceListDeleteFace_564174; persistedFaceId: string;
+          faceListId: string): Recallable =
   ## faceListDeleteFace
   ## Delete a face from a face list by specified faceListId and persistedFaceId.
   ## <br /> Adding/deleting faces to/from a same face list are processed sequentially and to/from different face lists are in parallel.
-  ##   faceListId: string (required)
-  ##             : Id referencing a particular face list.
   ##   persistedFaceId: string (required)
   ##                  : Id referencing a particular persistedFaceId of an existing face.
-  var path_568281 = newJObject()
-  add(path_568281, "faceListId", newJString(faceListId))
-  add(path_568281, "persistedFaceId", newJString(persistedFaceId))
-  result = call_568280.call(path_568281, nil, nil, nil, nil)
+  ##   faceListId: string (required)
+  ##             : Id referencing a particular face list.
+  var path_564181 = newJObject()
+  add(path_564181, "persistedFaceId", newJString(persistedFaceId))
+  add(path_564181, "faceListId", newJString(faceListId))
+  result = call_564180.call(path_564181, nil, nil, nil, nil)
 
-var faceListDeleteFace* = Call_FaceListDeleteFace_568274(
+var faceListDeleteFace* = Call_FaceListDeleteFace_564174(
     name: "faceListDeleteFace", meth: HttpMethod.HttpDelete, host: "azure.local",
     route: "/facelists/{faceListId}/persistedfaces/{persistedFaceId}",
-    validator: validate_FaceListDeleteFace_568275, base: "",
-    url: url_FaceListDeleteFace_568276, schemes: {Scheme.Https})
+    validator: validate_FaceListDeleteFace_564175, base: "",
+    url: url_FaceListDeleteFace_564176, schemes: {Scheme.Https})
 type
-  Call_FaceFindSimilar_568282 = ref object of OpenApiRestCall_567668
-proc url_FaceFindSimilar_568284(protocol: Scheme; host: string; base: string;
+  Call_FaceFindSimilar_564182 = ref object of OpenApiRestCall_563566
+proc url_FaceFindSimilar_564184(protocol: Scheme; host: string; base: string;
                                route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_FaceFindSimilar_568283(path: JsonNode; query: JsonNode;
+proc validate_FaceFindSimilar_564183(path: JsonNode; query: JsonNode;
                                     header: JsonNode; formData: JsonNode;
                                     body: JsonNode): JsonNode =
   ## Given query face's faceId, to search the similar-looking faces from a faceId array, a face list or a large face list. faceId array contains the faces created by [Face - Detect](/docs/services/563879b61984550e40cbbe8d/operations/563879b61984550f30395236), which will expire 24 hours after creation. A "faceListId" is created by [FaceList - Create](/docs/services/563879b61984550e40cbbe8d/operations/563879b61984550f3039524b) containing persistedFaceIds that will not expire. And a "largeFaceListId" is created by [LargeFaceList - Create](/docs/services/563879b61984550e40cbbe8d/operations/5a157b68d2de3616c086f2cc) containing persistedFaceIds that will also not expire. Depending on the input the returned similar faces list contains faceIds or persistedFaceIds ranked by similarity.
@@ -972,23 +975,23 @@ proc validate_FaceFindSimilar_568283(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568286: Call_FaceFindSimilar_568282; path: JsonNode; query: JsonNode;
+proc call*(call_564186: Call_FaceFindSimilar_564182; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Given query face's faceId, to search the similar-looking faces from a faceId array, a face list or a large face list. faceId array contains the faces created by [Face - Detect](/docs/services/563879b61984550e40cbbe8d/operations/563879b61984550f30395236), which will expire 24 hours after creation. A "faceListId" is created by [FaceList - Create](/docs/services/563879b61984550e40cbbe8d/operations/563879b61984550f3039524b) containing persistedFaceIds that will not expire. And a "largeFaceListId" is created by [LargeFaceList - Create](/docs/services/563879b61984550e40cbbe8d/operations/5a157b68d2de3616c086f2cc) containing persistedFaceIds that will also not expire. Depending on the input the returned similar faces list contains faceIds or persistedFaceIds ranked by similarity.
   ## <br/>Find similar has two working modes, "matchPerson" and "matchFace". "matchPerson" is the default mode that it tries to find faces of the same person as possible by using internal same-person thresholds. It is useful to find a known person's other photos. Note that an empty list will be returned if no faces pass the internal thresholds. "matchFace" mode ignores same-person thresholds and returns ranked similar faces anyway, even the similarity is low. It can be used in the cases like searching celebrity-looking faces.
   ## <br/>The 'recognitionModel' associated with the query face's faceId should be the same as the 'recognitionModel' used by the target faceId array, face list or large face list.
   ## 
   ## 
-  let valid = call_568286.validator(path, query, header, formData, body)
-  let scheme = call_568286.pickScheme
+  let valid = call_564186.validator(path, query, header, formData, body)
+  let scheme = call_564186.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568286.url(scheme.get, call_568286.host, call_568286.base,
-                         call_568286.route, valid.getOrDefault("path"),
+  let url = call_564186.url(scheme.get, call_564186.host, call_564186.base,
+                         call_564186.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568286, url, valid)
+  result = hook(call_564186, url, valid)
 
-proc call*(call_568287: Call_FaceFindSimilar_568282; body: JsonNode): Recallable =
+proc call*(call_564187: Call_FaceFindSimilar_564182; body: JsonNode): Recallable =
   ## faceFindSimilar
   ## Given query face's faceId, to search the similar-looking faces from a faceId array, a face list or a large face list. faceId array contains the faces created by [Face - Detect](/docs/services/563879b61984550e40cbbe8d/operations/563879b61984550f30395236), which will expire 24 hours after creation. A "faceListId" is created by [FaceList - Create](/docs/services/563879b61984550e40cbbe8d/operations/563879b61984550f3039524b) containing persistedFaceIds that will not expire. And a "largeFaceListId" is created by [LargeFaceList - Create](/docs/services/563879b61984550e40cbbe8d/operations/5a157b68d2de3616c086f2cc) containing persistedFaceIds that will also not expire. Depending on the input the returned similar faces list contains faceIds or persistedFaceIds ranked by similarity.
   ## <br/>Find similar has two working modes, "matchPerson" and "matchFace". "matchPerson" is the default mode that it tries to find faces of the same person as possible by using internal same-person thresholds. It is useful to find a known person's other photos. Note that an empty list will be returned if no faces pass the internal thresholds. "matchFace" mode ignores same-person thresholds and returns ranked similar faces anyway, even the similarity is low. It can be used in the cases like searching celebrity-looking faces.
@@ -996,25 +999,25 @@ proc call*(call_568287: Call_FaceFindSimilar_568282; body: JsonNode): Recallable
   ## 
   ##   body: JObject (required)
   ##       : Request body for Find Similar.
-  var body_568288 = newJObject()
+  var body_564188 = newJObject()
   if body != nil:
-    body_568288 = body
-  result = call_568287.call(nil, nil, nil, nil, body_568288)
+    body_564188 = body
+  result = call_564187.call(nil, nil, nil, nil, body_564188)
 
-var faceFindSimilar* = Call_FaceFindSimilar_568282(name: "faceFindSimilar",
+var faceFindSimilar* = Call_FaceFindSimilar_564182(name: "faceFindSimilar",
     meth: HttpMethod.HttpPost, host: "azure.local", route: "/findsimilars",
-    validator: validate_FaceFindSimilar_568283, base: "", url: url_FaceFindSimilar_568284,
+    validator: validate_FaceFindSimilar_564183, base: "", url: url_FaceFindSimilar_564184,
     schemes: {Scheme.Https})
 type
-  Call_FaceGroup_568289 = ref object of OpenApiRestCall_567668
-proc url_FaceGroup_568291(protocol: Scheme; host: string; base: string; route: string;
+  Call_FaceGroup_564189 = ref object of OpenApiRestCall_563566
+proc url_FaceGroup_564191(protocol: Scheme; host: string; base: string; route: string;
                          path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_FaceGroup_568290(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_FaceGroup_564190(path: JsonNode; query: JsonNode; header: JsonNode;
                               formData: JsonNode; body: JsonNode): JsonNode =
   ## Divide candidate faces into groups based on face similarity.<br />
   ## * The output is one or more disjointed face groups and a messyGroup. A face group contains faces that have similar looking, often of the same person. Face groups are ranked by group size, i.e. number of faces. Notice that faces belonging to a same person might be split into several groups in the result.
@@ -1041,7 +1044,7 @@ proc validate_FaceGroup_568290(path: JsonNode; query: JsonNode; header: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_568293: Call_FaceGroup_568289; path: JsonNode; query: JsonNode;
+proc call*(call_564193: Call_FaceGroup_564189; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Divide candidate faces into groups based on face similarity.<br />
   ## * The output is one or more disjointed face groups and a messyGroup. A face group contains faces that have similar looking, often of the same person. Face groups are ranked by group size, i.e. number of faces. Notice that faces belonging to a same person might be split into several groups in the result.
@@ -1050,16 +1053,16 @@ proc call*(call_568293: Call_FaceGroup_568289; path: JsonNode; query: JsonNode;
   ## * The 'recognitionModel' associated with the query faces' faceIds should be the same.
   ## 
   ## 
-  let valid = call_568293.validator(path, query, header, formData, body)
-  let scheme = call_568293.pickScheme
+  let valid = call_564193.validator(path, query, header, formData, body)
+  let scheme = call_564193.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568293.url(scheme.get, call_568293.host, call_568293.base,
-                         call_568293.route, valid.getOrDefault("path"),
+  let url = call_564193.url(scheme.get, call_564193.host, call_564193.base,
+                         call_564193.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568293, url, valid)
+  result = hook(call_564193, url, valid)
 
-proc call*(call_568294: Call_FaceGroup_568289; body: JsonNode): Recallable =
+proc call*(call_564194: Call_FaceGroup_564189; body: JsonNode): Recallable =
   ## faceGroup
   ## Divide candidate faces into groups based on face similarity.<br />
   ## * The output is one or more disjointed face groups and a messyGroup. A face group contains faces that have similar looking, often of the same person. Face groups are ranked by group size, i.e. number of faces. Notice that faces belonging to a same person might be split into several groups in the result.
@@ -1069,26 +1072,26 @@ proc call*(call_568294: Call_FaceGroup_568289; body: JsonNode): Recallable =
   ## 
   ##   body: JObject (required)
   ##       : Request body for grouping.
-  var body_568295 = newJObject()
+  var body_564195 = newJObject()
   if body != nil:
-    body_568295 = body
-  result = call_568294.call(nil, nil, nil, nil, body_568295)
+    body_564195 = body
+  result = call_564194.call(nil, nil, nil, nil, body_564195)
 
-var faceGroup* = Call_FaceGroup_568289(name: "faceGroup", meth: HttpMethod.HttpPost,
+var faceGroup* = Call_FaceGroup_564189(name: "faceGroup", meth: HttpMethod.HttpPost,
                                     host: "azure.local", route: "/group",
-                                    validator: validate_FaceGroup_568290,
-                                    base: "", url: url_FaceGroup_568291,
+                                    validator: validate_FaceGroup_564190,
+                                    base: "", url: url_FaceGroup_564191,
                                     schemes: {Scheme.Https})
 type
-  Call_FaceIdentify_568296 = ref object of OpenApiRestCall_567668
-proc url_FaceIdentify_568298(protocol: Scheme; host: string; base: string;
+  Call_FaceIdentify_564196 = ref object of OpenApiRestCall_563566
+proc url_FaceIdentify_564198(protocol: Scheme; host: string; base: string;
                             route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_FaceIdentify_568297(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_FaceIdentify_564197(path: JsonNode; query: JsonNode; header: JsonNode;
                                  formData: JsonNode; body: JsonNode): JsonNode =
   ## 1-to-many identification to find the closest matches of the specific query person face from a person group or large person group.
   ## <br/> For each face in the faceIds array, Face Identify will compute similarities between the query face and all the faces in the person group (given by personGroupId) or large person group (given by largePersonGroupId), and return candidate person(s) for that face ranked by similarity confidence. The person group/large person group should be trained to make it ready for identification. See more in [PersonGroup - Train](/docs/services/563879b61984550e40cbbe8d/operations/563879b61984550f30395249) and [LargePersonGroup - Train](/docs/services/563879b61984550e40cbbe8d/operations/599ae2d16ac60f11b48b5aa4).
@@ -1121,7 +1124,7 @@ proc validate_FaceIdentify_568297(path: JsonNode; query: JsonNode; header: JsonN
   if body != nil:
     result.add "body", body
 
-proc call*(call_568300: Call_FaceIdentify_568296; path: JsonNode; query: JsonNode;
+proc call*(call_564200: Call_FaceIdentify_564196; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## 1-to-many identification to find the closest matches of the specific query person face from a person group or large person group.
   ## <br/> For each face in the faceIds array, Face Identify will compute similarities between the query face and all the faces in the person group (given by personGroupId) or large person group (given by largePersonGroupId), and return candidate person(s) for that face ranked by similarity confidence. The person group/large person group should be trained to make it ready for identification. See more in [PersonGroup - Train](/docs/services/563879b61984550e40cbbe8d/operations/563879b61984550f30395249) and [LargePersonGroup - Train](/docs/services/563879b61984550e40cbbe8d/operations/599ae2d16ac60f11b48b5aa4).
@@ -1136,16 +1139,16 @@ proc call*(call_568300: Call_FaceIdentify_568296; path: JsonNode; query: JsonNod
   ## * The 'recognitionModel' associated with the query faces' faceIds should be the same as the 'recognitionModel' used by the target person group or large person group.
   ## 
   ## 
-  let valid = call_568300.validator(path, query, header, formData, body)
-  let scheme = call_568300.pickScheme
+  let valid = call_564200.validator(path, query, header, formData, body)
+  let scheme = call_564200.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568300.url(scheme.get, call_568300.host, call_568300.base,
-                         call_568300.route, valid.getOrDefault("path"),
+  let url = call_564200.url(scheme.get, call_564200.host, call_564200.base,
+                         call_564200.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568300, url, valid)
+  result = hook(call_564200, url, valid)
 
-proc call*(call_568301: Call_FaceIdentify_568296; body: JsonNode): Recallable =
+proc call*(call_564201: Call_FaceIdentify_564196; body: JsonNode): Recallable =
   ## faceIdentify
   ## 1-to-many identification to find the closest matches of the specific query person face from a person group or large person group.
   ## <br/> For each face in the faceIds array, Face Identify will compute similarities between the query face and all the faces in the person group (given by personGroupId) or large person group (given by largePersonGroupId), and return candidate person(s) for that face ranked by similarity confidence. The person group/large person group should be trained to make it ready for identification. See more in [PersonGroup - Train](/docs/services/563879b61984550e40cbbe8d/operations/563879b61984550f30395249) and [LargePersonGroup - Train](/docs/services/563879b61984550e40cbbe8d/operations/599ae2d16ac60f11b48b5aa4).
@@ -1161,25 +1164,25 @@ proc call*(call_568301: Call_FaceIdentify_568296; body: JsonNode): Recallable =
   ## 
   ##   body: JObject (required)
   ##       : Request body for identify operation.
-  var body_568302 = newJObject()
+  var body_564202 = newJObject()
   if body != nil:
-    body_568302 = body
-  result = call_568301.call(nil, nil, nil, nil, body_568302)
+    body_564202 = body
+  result = call_564201.call(nil, nil, nil, nil, body_564202)
 
-var faceIdentify* = Call_FaceIdentify_568296(name: "faceIdentify",
+var faceIdentify* = Call_FaceIdentify_564196(name: "faceIdentify",
     meth: HttpMethod.HttpPost, host: "azure.local", route: "/identify",
-    validator: validate_FaceIdentify_568297, base: "", url: url_FaceIdentify_568298,
+    validator: validate_FaceIdentify_564197, base: "", url: url_FaceIdentify_564198,
     schemes: {Scheme.Https})
 type
-  Call_LargeFaceListList_568303 = ref object of OpenApiRestCall_567668
-proc url_LargeFaceListList_568305(protocol: Scheme; host: string; base: string;
+  Call_LargeFaceListList_564203 = ref object of OpenApiRestCall_563566
+proc url_LargeFaceListList_564205(protocol: Scheme; host: string; base: string;
                                  route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_LargeFaceListList_568304(path: JsonNode; query: JsonNode;
+proc validate_LargeFaceListList_564204(path: JsonNode; query: JsonNode;
                                       header: JsonNode; formData: JsonNode;
                                       body: JsonNode): JsonNode =
   ## List large face lists’ information of largeFaceListId, name, userData and recognitionModel. <br /> 
@@ -1202,11 +1205,11 @@ proc validate_LargeFaceListList_568304(path: JsonNode; query: JsonNode;
   ##   returnRecognitionModel: JBool
   ##                         : A value indicating whether the operation should return 'recognitionModel' in response.
   section = newJObject()
-  var valid_568306 = query.getOrDefault("returnRecognitionModel")
-  valid_568306 = validateParameter(valid_568306, JBool, required = false,
+  var valid_564206 = query.getOrDefault("returnRecognitionModel")
+  valid_564206 = validateParameter(valid_564206, JBool, required = false,
                                  default = newJBool(false))
-  if valid_568306 != nil:
-    section.add "returnRecognitionModel", valid_568306
+  if valid_564206 != nil:
+    section.add "returnRecognitionModel", valid_564206
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1215,7 +1218,7 @@ proc validate_LargeFaceListList_568304(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568307: Call_LargeFaceListList_568303; path: JsonNode;
+proc call*(call_564207: Call_LargeFaceListList_564203; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## List large face lists’ information of largeFaceListId, name, userData and recognitionModel. <br /> 
   ## To get face information inside largeFaceList use [LargeFaceList Face - Get](/docs/services/563879b61984550e40cbbe8d/operations/5a158cf2d2de3616c086f2d5)<br />
@@ -1229,16 +1232,16 @@ proc call*(call_568307: Call_LargeFaceListList_568303; path: JsonNode;
   ## <br /> "start=list2&top=3" will return "list3", "list4", "list5".
   ## 
   ## 
-  let valid = call_568307.validator(path, query, header, formData, body)
-  let scheme = call_568307.pickScheme
+  let valid = call_564207.validator(path, query, header, formData, body)
+  let scheme = call_564207.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568307.url(scheme.get, call_568307.host, call_568307.base,
-                         call_568307.route, valid.getOrDefault("path"),
+  let url = call_564207.url(scheme.get, call_564207.host, call_564207.base,
+                         call_564207.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568307, url, valid)
+  result = hook(call_564207, url, valid)
 
-proc call*(call_568308: Call_LargeFaceListList_568303;
+proc call*(call_564208: Call_LargeFaceListList_564203;
           returnRecognitionModel: bool = false): Recallable =
   ## largeFaceListList
   ## List large face lists’ information of largeFaceListId, name, userData and recognitionModel. <br /> 
@@ -1254,17 +1257,17 @@ proc call*(call_568308: Call_LargeFaceListList_568303;
   ## 
   ##   returnRecognitionModel: bool
   ##                         : A value indicating whether the operation should return 'recognitionModel' in response.
-  var query_568309 = newJObject()
-  add(query_568309, "returnRecognitionModel", newJBool(returnRecognitionModel))
-  result = call_568308.call(nil, query_568309, nil, nil, nil)
+  var query_564209 = newJObject()
+  add(query_564209, "returnRecognitionModel", newJBool(returnRecognitionModel))
+  result = call_564208.call(nil, query_564209, nil, nil, nil)
 
-var largeFaceListList* = Call_LargeFaceListList_568303(name: "largeFaceListList",
+var largeFaceListList* = Call_LargeFaceListList_564203(name: "largeFaceListList",
     meth: HttpMethod.HttpGet, host: "azure.local", route: "/largefacelists",
-    validator: validate_LargeFaceListList_568304, base: "",
-    url: url_LargeFaceListList_568305, schemes: {Scheme.Https})
+    validator: validate_LargeFaceListList_564204, base: "",
+    url: url_LargeFaceListList_564205, schemes: {Scheme.Https})
 type
-  Call_LargeFaceListCreate_568319 = ref object of OpenApiRestCall_567668
-proc url_LargeFaceListCreate_568321(protocol: Scheme; host: string; base: string;
+  Call_LargeFaceListCreate_564219 = ref object of OpenApiRestCall_563566
+proc url_LargeFaceListCreate_564221(protocol: Scheme; host: string; base: string;
                                    route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1279,7 +1282,7 @@ proc url_LargeFaceListCreate_568321(protocol: Scheme; host: string; base: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_LargeFaceListCreate_568320(path: JsonNode; query: JsonNode;
+proc validate_LargeFaceListCreate_564220(path: JsonNode; query: JsonNode;
                                         header: JsonNode; formData: JsonNode;
                                         body: JsonNode): JsonNode =
   ## Create an empty large face list with user-specified largeFaceListId, name, an optional userData and recognitionModel.
@@ -1302,11 +1305,11 @@ proc validate_LargeFaceListCreate_568320(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `largeFaceListId` field"
-  var valid_568322 = path.getOrDefault("largeFaceListId")
-  valid_568322 = validateParameter(valid_568322, JString, required = true,
+  var valid_564222 = path.getOrDefault("largeFaceListId")
+  valid_564222 = validateParameter(valid_564222, JString, required = true,
                                  default = nil)
-  if valid_568322 != nil:
-    section.add "largeFaceListId", valid_568322
+  if valid_564222 != nil:
+    section.add "largeFaceListId", valid_564222
   result.add "path", section
   section = newJObject()
   result.add "query", section
@@ -1322,7 +1325,7 @@ proc validate_LargeFaceListCreate_568320(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568324: Call_LargeFaceListCreate_568319; path: JsonNode;
+proc call*(call_564224: Call_LargeFaceListCreate_564219; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Create an empty large face list with user-specified largeFaceListId, name, an optional userData and recognitionModel.
   ## <br /> Large face list is a list of faces, up to 1,000,000 faces, and used by [Face - Find Similar](/docs/services/563879b61984550e40cbbe8d/operations/563879b61984550f30395237).
@@ -1336,16 +1339,16 @@ proc call*(call_568324: Call_LargeFaceListCreate_568319; path: JsonNode;
   ## * Free-tier subscription quota: 64 large face lists.
   ## * S0-tier subscription quota: 1,000,000 large face lists.
   ## 
-  let valid = call_568324.validator(path, query, header, formData, body)
-  let scheme = call_568324.pickScheme
+  let valid = call_564224.validator(path, query, header, formData, body)
+  let scheme = call_564224.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568324.url(scheme.get, call_568324.host, call_568324.base,
-                         call_568324.route, valid.getOrDefault("path"),
+  let url = call_564224.url(scheme.get, call_564224.host, call_564224.base,
+                         call_564224.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568324, url, valid)
+  result = hook(call_564224, url, valid)
 
-proc call*(call_568325: Call_LargeFaceListCreate_568319; largeFaceListId: string;
+proc call*(call_564225: Call_LargeFaceListCreate_564219; largeFaceListId: string;
           body: JsonNode): Recallable =
   ## largeFaceListCreate
   ## Create an empty large face list with user-specified largeFaceListId, name, an optional userData and recognitionModel.
@@ -1363,21 +1366,21 @@ proc call*(call_568325: Call_LargeFaceListCreate_568319; largeFaceListId: string
   ##                  : Id referencing a particular large face list.
   ##   body: JObject (required)
   ##       : Request body for creating a large face list.
-  var path_568326 = newJObject()
-  var body_568327 = newJObject()
-  add(path_568326, "largeFaceListId", newJString(largeFaceListId))
+  var path_564226 = newJObject()
+  var body_564227 = newJObject()
+  add(path_564226, "largeFaceListId", newJString(largeFaceListId))
   if body != nil:
-    body_568327 = body
-  result = call_568325.call(path_568326, nil, nil, nil, body_568327)
+    body_564227 = body
+  result = call_564225.call(path_564226, nil, nil, nil, body_564227)
 
-var largeFaceListCreate* = Call_LargeFaceListCreate_568319(
+var largeFaceListCreate* = Call_LargeFaceListCreate_564219(
     name: "largeFaceListCreate", meth: HttpMethod.HttpPut, host: "azure.local",
     route: "/largefacelists/{largeFaceListId}",
-    validator: validate_LargeFaceListCreate_568320, base: "",
-    url: url_LargeFaceListCreate_568321, schemes: {Scheme.Https})
+    validator: validate_LargeFaceListCreate_564220, base: "",
+    url: url_LargeFaceListCreate_564221, schemes: {Scheme.Https})
 type
-  Call_LargeFaceListGet_568310 = ref object of OpenApiRestCall_567668
-proc url_LargeFaceListGet_568312(protocol: Scheme; host: string; base: string;
+  Call_LargeFaceListGet_564210 = ref object of OpenApiRestCall_563566
+proc url_LargeFaceListGet_564212(protocol: Scheme; host: string; base: string;
                                 route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1392,7 +1395,7 @@ proc url_LargeFaceListGet_568312(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_LargeFaceListGet_568311(path: JsonNode; query: JsonNode;
+proc validate_LargeFaceListGet_564211(path: JsonNode; query: JsonNode;
                                      header: JsonNode; formData: JsonNode;
                                      body: JsonNode): JsonNode =
   ## Retrieve a large face list’s largeFaceListId, name, userData and recognitionModel.
@@ -1405,21 +1408,21 @@ proc validate_LargeFaceListGet_568311(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `largeFaceListId` field"
-  var valid_568313 = path.getOrDefault("largeFaceListId")
-  valid_568313 = validateParameter(valid_568313, JString, required = true,
+  var valid_564213 = path.getOrDefault("largeFaceListId")
+  valid_564213 = validateParameter(valid_564213, JString, required = true,
                                  default = nil)
-  if valid_568313 != nil:
-    section.add "largeFaceListId", valid_568313
+  if valid_564213 != nil:
+    section.add "largeFaceListId", valid_564213
   result.add "path", section
   ## parameters in `query` object:
   ##   returnRecognitionModel: JBool
   ##                         : A value indicating whether the operation should return 'recognitionModel' in response.
   section = newJObject()
-  var valid_568314 = query.getOrDefault("returnRecognitionModel")
-  valid_568314 = validateParameter(valid_568314, JBool, required = false,
+  var valid_564214 = query.getOrDefault("returnRecognitionModel")
+  valid_564214 = validateParameter(valid_564214, JBool, required = false,
                                  default = newJBool(false))
-  if valid_568314 != nil:
-    section.add "returnRecognitionModel", valid_568314
+  if valid_564214 != nil:
+    section.add "returnRecognitionModel", valid_564214
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1428,20 +1431,20 @@ proc validate_LargeFaceListGet_568311(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568315: Call_LargeFaceListGet_568310; path: JsonNode;
+proc call*(call_564215: Call_LargeFaceListGet_564210; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Retrieve a large face list’s largeFaceListId, name, userData and recognitionModel.
   ## 
-  let valid = call_568315.validator(path, query, header, formData, body)
-  let scheme = call_568315.pickScheme
+  let valid = call_564215.validator(path, query, header, formData, body)
+  let scheme = call_564215.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568315.url(scheme.get, call_568315.host, call_568315.base,
-                         call_568315.route, valid.getOrDefault("path"),
+  let url = call_564215.url(scheme.get, call_564215.host, call_564215.base,
+                         call_564215.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568315, url, valid)
+  result = hook(call_564215, url, valid)
 
-proc call*(call_568316: Call_LargeFaceListGet_568310; largeFaceListId: string;
+proc call*(call_564216: Call_LargeFaceListGet_564210; largeFaceListId: string;
           returnRecognitionModel: bool = false): Recallable =
   ## largeFaceListGet
   ## Retrieve a large face list’s largeFaceListId, name, userData and recognitionModel.
@@ -1449,20 +1452,20 @@ proc call*(call_568316: Call_LargeFaceListGet_568310; largeFaceListId: string;
   ##                  : Id referencing a particular large face list.
   ##   returnRecognitionModel: bool
   ##                         : A value indicating whether the operation should return 'recognitionModel' in response.
-  var path_568317 = newJObject()
-  var query_568318 = newJObject()
-  add(path_568317, "largeFaceListId", newJString(largeFaceListId))
-  add(query_568318, "returnRecognitionModel", newJBool(returnRecognitionModel))
-  result = call_568316.call(path_568317, query_568318, nil, nil, nil)
+  var path_564217 = newJObject()
+  var query_564218 = newJObject()
+  add(path_564217, "largeFaceListId", newJString(largeFaceListId))
+  add(query_564218, "returnRecognitionModel", newJBool(returnRecognitionModel))
+  result = call_564216.call(path_564217, query_564218, nil, nil, nil)
 
-var largeFaceListGet* = Call_LargeFaceListGet_568310(name: "largeFaceListGet",
+var largeFaceListGet* = Call_LargeFaceListGet_564210(name: "largeFaceListGet",
     meth: HttpMethod.HttpGet, host: "azure.local",
     route: "/largefacelists/{largeFaceListId}",
-    validator: validate_LargeFaceListGet_568311, base: "",
-    url: url_LargeFaceListGet_568312, schemes: {Scheme.Https})
+    validator: validate_LargeFaceListGet_564211, base: "",
+    url: url_LargeFaceListGet_564212, schemes: {Scheme.Https})
 type
-  Call_LargeFaceListUpdate_568335 = ref object of OpenApiRestCall_567668
-proc url_LargeFaceListUpdate_568337(protocol: Scheme; host: string; base: string;
+  Call_LargeFaceListUpdate_564235 = ref object of OpenApiRestCall_563566
+proc url_LargeFaceListUpdate_564237(protocol: Scheme; host: string; base: string;
                                    route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1477,7 +1480,7 @@ proc url_LargeFaceListUpdate_568337(protocol: Scheme; host: string; base: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_LargeFaceListUpdate_568336(path: JsonNode; query: JsonNode;
+proc validate_LargeFaceListUpdate_564236(path: JsonNode; query: JsonNode;
                                         header: JsonNode; formData: JsonNode;
                                         body: JsonNode): JsonNode =
   ## Update information of a large face list.
@@ -1490,11 +1493,11 @@ proc validate_LargeFaceListUpdate_568336(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `largeFaceListId` field"
-  var valid_568338 = path.getOrDefault("largeFaceListId")
-  valid_568338 = validateParameter(valid_568338, JString, required = true,
+  var valid_564238 = path.getOrDefault("largeFaceListId")
+  valid_564238 = validateParameter(valid_564238, JString, required = true,
                                  default = nil)
-  if valid_568338 != nil:
-    section.add "largeFaceListId", valid_568338
+  if valid_564238 != nil:
+    section.add "largeFaceListId", valid_564238
   result.add "path", section
   section = newJObject()
   result.add "query", section
@@ -1510,20 +1513,20 @@ proc validate_LargeFaceListUpdate_568336(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568340: Call_LargeFaceListUpdate_568335; path: JsonNode;
+proc call*(call_564240: Call_LargeFaceListUpdate_564235; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Update information of a large face list.
   ## 
-  let valid = call_568340.validator(path, query, header, formData, body)
-  let scheme = call_568340.pickScheme
+  let valid = call_564240.validator(path, query, header, formData, body)
+  let scheme = call_564240.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568340.url(scheme.get, call_568340.host, call_568340.base,
-                         call_568340.route, valid.getOrDefault("path"),
+  let url = call_564240.url(scheme.get, call_564240.host, call_564240.base,
+                         call_564240.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568340, url, valid)
+  result = hook(call_564240, url, valid)
 
-proc call*(call_568341: Call_LargeFaceListUpdate_568335; largeFaceListId: string;
+proc call*(call_564241: Call_LargeFaceListUpdate_564235; largeFaceListId: string;
           body: JsonNode): Recallable =
   ## largeFaceListUpdate
   ## Update information of a large face list.
@@ -1531,21 +1534,21 @@ proc call*(call_568341: Call_LargeFaceListUpdate_568335; largeFaceListId: string
   ##                  : Id referencing a particular large face list.
   ##   body: JObject (required)
   ##       : Request body for updating a large face list.
-  var path_568342 = newJObject()
-  var body_568343 = newJObject()
-  add(path_568342, "largeFaceListId", newJString(largeFaceListId))
+  var path_564242 = newJObject()
+  var body_564243 = newJObject()
+  add(path_564242, "largeFaceListId", newJString(largeFaceListId))
   if body != nil:
-    body_568343 = body
-  result = call_568341.call(path_568342, nil, nil, nil, body_568343)
+    body_564243 = body
+  result = call_564241.call(path_564242, nil, nil, nil, body_564243)
 
-var largeFaceListUpdate* = Call_LargeFaceListUpdate_568335(
+var largeFaceListUpdate* = Call_LargeFaceListUpdate_564235(
     name: "largeFaceListUpdate", meth: HttpMethod.HttpPatch, host: "azure.local",
     route: "/largefacelists/{largeFaceListId}",
-    validator: validate_LargeFaceListUpdate_568336, base: "",
-    url: url_LargeFaceListUpdate_568337, schemes: {Scheme.Https})
+    validator: validate_LargeFaceListUpdate_564236, base: "",
+    url: url_LargeFaceListUpdate_564237, schemes: {Scheme.Https})
 type
-  Call_LargeFaceListDelete_568328 = ref object of OpenApiRestCall_567668
-proc url_LargeFaceListDelete_568330(protocol: Scheme; host: string; base: string;
+  Call_LargeFaceListDelete_564228 = ref object of OpenApiRestCall_563566
+proc url_LargeFaceListDelete_564230(protocol: Scheme; host: string; base: string;
                                    route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1560,7 +1563,7 @@ proc url_LargeFaceListDelete_568330(protocol: Scheme; host: string; base: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_LargeFaceListDelete_568329(path: JsonNode; query: JsonNode;
+proc validate_LargeFaceListDelete_564229(path: JsonNode; query: JsonNode;
                                         header: JsonNode; formData: JsonNode;
                                         body: JsonNode): JsonNode =
   ## Delete a specified large face list.
@@ -1573,11 +1576,11 @@ proc validate_LargeFaceListDelete_568329(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `largeFaceListId` field"
-  var valid_568331 = path.getOrDefault("largeFaceListId")
-  valid_568331 = validateParameter(valid_568331, JString, required = true,
+  var valid_564231 = path.getOrDefault("largeFaceListId")
+  valid_564231 = validateParameter(valid_564231, JString, required = true,
                                  default = nil)
-  if valid_568331 != nil:
-    section.add "largeFaceListId", valid_568331
+  if valid_564231 != nil:
+    section.add "largeFaceListId", valid_564231
   result.add "path", section
   section = newJObject()
   result.add "query", section
@@ -1588,36 +1591,36 @@ proc validate_LargeFaceListDelete_568329(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568332: Call_LargeFaceListDelete_568328; path: JsonNode;
+proc call*(call_564232: Call_LargeFaceListDelete_564228; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Delete a specified large face list.
   ## 
-  let valid = call_568332.validator(path, query, header, formData, body)
-  let scheme = call_568332.pickScheme
+  let valid = call_564232.validator(path, query, header, formData, body)
+  let scheme = call_564232.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568332.url(scheme.get, call_568332.host, call_568332.base,
-                         call_568332.route, valid.getOrDefault("path"),
+  let url = call_564232.url(scheme.get, call_564232.host, call_564232.base,
+                         call_564232.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568332, url, valid)
+  result = hook(call_564232, url, valid)
 
-proc call*(call_568333: Call_LargeFaceListDelete_568328; largeFaceListId: string): Recallable =
+proc call*(call_564233: Call_LargeFaceListDelete_564228; largeFaceListId: string): Recallable =
   ## largeFaceListDelete
   ## Delete a specified large face list.
   ##   largeFaceListId: string (required)
   ##                  : Id referencing a particular large face list.
-  var path_568334 = newJObject()
-  add(path_568334, "largeFaceListId", newJString(largeFaceListId))
-  result = call_568333.call(path_568334, nil, nil, nil, nil)
+  var path_564234 = newJObject()
+  add(path_564234, "largeFaceListId", newJString(largeFaceListId))
+  result = call_564233.call(path_564234, nil, nil, nil, nil)
 
-var largeFaceListDelete* = Call_LargeFaceListDelete_568328(
+var largeFaceListDelete* = Call_LargeFaceListDelete_564228(
     name: "largeFaceListDelete", meth: HttpMethod.HttpDelete, host: "azure.local",
     route: "/largefacelists/{largeFaceListId}",
-    validator: validate_LargeFaceListDelete_568329, base: "",
-    url: url_LargeFaceListDelete_568330, schemes: {Scheme.Https})
+    validator: validate_LargeFaceListDelete_564229, base: "",
+    url: url_LargeFaceListDelete_564230, schemes: {Scheme.Https})
 type
-  Call_LargeFaceListAddFaceFromUrl_568354 = ref object of OpenApiRestCall_567668
-proc url_LargeFaceListAddFaceFromUrl_568356(protocol: Scheme; host: string;
+  Call_LargeFaceListAddFaceFromUrl_564254 = ref object of OpenApiRestCall_563566
+proc url_LargeFaceListAddFaceFromUrl_564256(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1633,7 +1636,7 @@ proc url_LargeFaceListAddFaceFromUrl_568356(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_LargeFaceListAddFaceFromUrl_568355(path: JsonNode; query: JsonNode;
+proc validate_LargeFaceListAddFaceFromUrl_564255(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Add a face to a specified large face list, up to 1,000,000 faces.
   ## <br /> To deal with an image contains multiple faces, input face can be specified as an image with a targetFace rectangle. It returns a persistedFaceId representing the added face. No image will be stored. Only the extracted face feature will be stored on server until [LargeFaceList Face - Delete](/docs/services/563879b61984550e40cbbe8d/operations/5a158c8ad2de3616c086f2d4) or [LargeFaceList - Delete](/docs/services/563879b61984550e40cbbe8d/operations/5a1580d5d2de3616c086f2cd) is called.
@@ -1662,35 +1665,35 @@ proc validate_LargeFaceListAddFaceFromUrl_568355(path: JsonNode; query: JsonNode
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `largeFaceListId` field"
-  var valid_568357 = path.getOrDefault("largeFaceListId")
-  valid_568357 = validateParameter(valid_568357, JString, required = true,
+  var valid_564257 = path.getOrDefault("largeFaceListId")
+  valid_564257 = validateParameter(valid_564257, JString, required = true,
                                  default = nil)
-  if valid_568357 != nil:
-    section.add "largeFaceListId", valid_568357
+  if valid_564257 != nil:
+    section.add "largeFaceListId", valid_564257
   result.add "path", section
   ## parameters in `query` object:
-  ##   userData: JString
-  ##           : User-specified data about the face for any purpose. The maximum length is 1KB.
   ##   detectionModel: JString
   ##                 : Name of detection model. Detection model is used to detect faces in the submitted image. A detection model name can be provided when performing Face - Detect or (Large)FaceList - Add Face or (Large)PersonGroup - Add Face. The default value is 'detection_01', if another model is needed, please explicitly specify it.
   ##   targetFace: JArray
   ##             : A face rectangle to specify the target face to be added to a person in the format of "targetFace=left,top,width,height". E.g. "targetFace=10,10,100,100". If there is more than one face in the image, targetFace is required to specify which face to add. No targetFace means there is only one face detected in the entire image.
+  ##   userData: JString
+  ##           : User-specified data about the face for any purpose. The maximum length is 1KB.
   section = newJObject()
-  var valid_568358 = query.getOrDefault("userData")
-  valid_568358 = validateParameter(valid_568358, JString, required = false,
-                                 default = nil)
-  if valid_568358 != nil:
-    section.add "userData", valid_568358
-  var valid_568359 = query.getOrDefault("detectionModel")
-  valid_568359 = validateParameter(valid_568359, JString, required = false,
+  var valid_564258 = query.getOrDefault("detectionModel")
+  valid_564258 = validateParameter(valid_564258, JString, required = false,
                                  default = newJString("detection_01"))
-  if valid_568359 != nil:
-    section.add "detectionModel", valid_568359
-  var valid_568360 = query.getOrDefault("targetFace")
-  valid_568360 = validateParameter(valid_568360, JArray, required = false,
+  if valid_564258 != nil:
+    section.add "detectionModel", valid_564258
+  var valid_564259 = query.getOrDefault("targetFace")
+  valid_564259 = validateParameter(valid_564259, JArray, required = false,
                                  default = nil)
-  if valid_568360 != nil:
-    section.add "targetFace", valid_568360
+  if valid_564259 != nil:
+    section.add "targetFace", valid_564259
+  var valid_564260 = query.getOrDefault("userData")
+  valid_564260 = validateParameter(valid_564260, JString, required = false,
+                                 default = nil)
+  if valid_564260 != nil:
+    section.add "userData", valid_564260
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1704,7 +1707,7 @@ proc validate_LargeFaceListAddFaceFromUrl_568355(path: JsonNode; query: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_568362: Call_LargeFaceListAddFaceFromUrl_568354; path: JsonNode;
+proc call*(call_564262: Call_LargeFaceListAddFaceFromUrl_564254; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Add a face to a specified large face list, up to 1,000,000 faces.
   ## <br /> To deal with an image contains multiple faces, input face can be specified as an image with a targetFace rectangle. It returns a persistedFaceId representing the added face. No image will be stored. Only the extracted face feature will be stored on server until [LargeFaceList Face - Delete](/docs/services/563879b61984550e40cbbe8d/operations/5a158c8ad2de3616c086f2d4) or [LargeFaceList - Delete](/docs/services/563879b61984550e40cbbe8d/operations/5a1580d5d2de3616c086f2cd) is called.
@@ -1725,18 +1728,19 @@ proc call*(call_568362: Call_LargeFaceListAddFaceFromUrl_568354; path: JsonNode;
   ## * Free-tier subscription quota: 1,000 faces per large face list.
   ## * S0-tier subscription quota: 1,000,000 faces per large face list.
   ## 
-  let valid = call_568362.validator(path, query, header, formData, body)
-  let scheme = call_568362.pickScheme
+  let valid = call_564262.validator(path, query, header, formData, body)
+  let scheme = call_564262.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568362.url(scheme.get, call_568362.host, call_568362.base,
-                         call_568362.route, valid.getOrDefault("path"),
+  let url = call_564262.url(scheme.get, call_564262.host, call_564262.base,
+                         call_564262.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568362, url, valid)
+  result = hook(call_564262, url, valid)
 
-proc call*(call_568363: Call_LargeFaceListAddFaceFromUrl_568354;
-          largeFaceListId: string; ImageUrl: JsonNode; userData: string = "";
-          detectionModel: string = "detection_01"; targetFace: JsonNode = nil): Recallable =
+proc call*(call_564263: Call_LargeFaceListAddFaceFromUrl_564254;
+          largeFaceListId: string; ImageUrl: JsonNode;
+          detectionModel: string = "detection_01"; targetFace: JsonNode = nil;
+          userData: string = ""): Recallable =
   ## largeFaceListAddFaceFromUrl
   ## Add a face to a specified large face list, up to 1,000,000 faces.
   ## <br /> To deal with an image contains multiple faces, input face can be specified as an image with a targetFace rectangle. It returns a persistedFaceId representing the added face. No image will be stored. Only the extracted face feature will be stored on server until [LargeFaceList Face - Delete](/docs/services/563879b61984550e40cbbe8d/operations/5a158c8ad2de3616c086f2d4) or [LargeFaceList - Delete](/docs/services/563879b61984550e40cbbe8d/operations/5a1580d5d2de3616c086f2cd) is called.
@@ -1758,35 +1762,35 @@ proc call*(call_568363: Call_LargeFaceListAddFaceFromUrl_568354;
   ## * S0-tier subscription quota: 1,000,000 faces per large face list.
   ##   largeFaceListId: string (required)
   ##                  : Id referencing a particular large face list.
-  ##   userData: string
-  ##           : User-specified data about the face for any purpose. The maximum length is 1KB.
-  ##   ImageUrl: JObject (required)
-  ##           : A JSON document with a URL pointing to the image that is to be analyzed.
   ##   detectionModel: string
   ##                 : Name of detection model. Detection model is used to detect faces in the submitted image. A detection model name can be provided when performing Face - Detect or (Large)FaceList - Add Face or (Large)PersonGroup - Add Face. The default value is 'detection_01', if another model is needed, please explicitly specify it.
   ##   targetFace: JArray
   ##             : A face rectangle to specify the target face to be added to a person in the format of "targetFace=left,top,width,height". E.g. "targetFace=10,10,100,100". If there is more than one face in the image, targetFace is required to specify which face to add. No targetFace means there is only one face detected in the entire image.
-  var path_568364 = newJObject()
-  var query_568365 = newJObject()
-  var body_568366 = newJObject()
-  add(path_568364, "largeFaceListId", newJString(largeFaceListId))
-  add(query_568365, "userData", newJString(userData))
-  if ImageUrl != nil:
-    body_568366 = ImageUrl
-  add(query_568365, "detectionModel", newJString(detectionModel))
+  ##   userData: string
+  ##           : User-specified data about the face for any purpose. The maximum length is 1KB.
+  ##   ImageUrl: JObject (required)
+  ##           : A JSON document with a URL pointing to the image that is to be analyzed.
+  var path_564264 = newJObject()
+  var query_564265 = newJObject()
+  var body_564266 = newJObject()
+  add(path_564264, "largeFaceListId", newJString(largeFaceListId))
+  add(query_564265, "detectionModel", newJString(detectionModel))
   if targetFace != nil:
-    query_568365.add "targetFace", targetFace
-  result = call_568363.call(path_568364, query_568365, nil, nil, body_568366)
+    query_564265.add "targetFace", targetFace
+  add(query_564265, "userData", newJString(userData))
+  if ImageUrl != nil:
+    body_564266 = ImageUrl
+  result = call_564263.call(path_564264, query_564265, nil, nil, body_564266)
 
-var largeFaceListAddFaceFromUrl* = Call_LargeFaceListAddFaceFromUrl_568354(
+var largeFaceListAddFaceFromUrl* = Call_LargeFaceListAddFaceFromUrl_564254(
     name: "largeFaceListAddFaceFromUrl", meth: HttpMethod.HttpPost,
     host: "azure.local",
     route: "/largefacelists/{largeFaceListId}/persistedfaces",
-    validator: validate_LargeFaceListAddFaceFromUrl_568355, base: "",
-    url: url_LargeFaceListAddFaceFromUrl_568356, schemes: {Scheme.Https})
+    validator: validate_LargeFaceListAddFaceFromUrl_564255, base: "",
+    url: url_LargeFaceListAddFaceFromUrl_564256, schemes: {Scheme.Https})
 type
-  Call_LargeFaceListListFaces_568344 = ref object of OpenApiRestCall_567668
-proc url_LargeFaceListListFaces_568346(protocol: Scheme; host: string; base: string;
+  Call_LargeFaceListListFaces_564244 = ref object of OpenApiRestCall_563566
+proc url_LargeFaceListListFaces_564246(protocol: Scheme; host: string; base: string;
                                       route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1802,7 +1806,7 @@ proc url_LargeFaceListListFaces_568346(protocol: Scheme; host: string; base: str
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_LargeFaceListListFaces_568345(path: JsonNode; query: JsonNode;
+proc validate_LargeFaceListListFaces_564245(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## List all faces in a large face list, and retrieve face information (including userData and persistedFaceIds of registered faces of the face).
   ## 
@@ -1814,27 +1818,27 @@ proc validate_LargeFaceListListFaces_568345(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `largeFaceListId` field"
-  var valid_568347 = path.getOrDefault("largeFaceListId")
-  valid_568347 = validateParameter(valid_568347, JString, required = true,
+  var valid_564247 = path.getOrDefault("largeFaceListId")
+  valid_564247 = validateParameter(valid_564247, JString, required = true,
                                  default = nil)
-  if valid_568347 != nil:
-    section.add "largeFaceListId", valid_568347
+  if valid_564247 != nil:
+    section.add "largeFaceListId", valid_564247
   result.add "path", section
   ## parameters in `query` object:
-  ##   top: JInt
-  ##      : Number of faces to return starting with the face id indicated by the 'start' parameter.
   ##   start: JString
   ##        : Starting face id to return (used to list a range of faces).
+  ##   top: JInt
+  ##      : Number of faces to return starting with the face id indicated by the 'start' parameter.
   section = newJObject()
-  var valid_568348 = query.getOrDefault("top")
-  valid_568348 = validateParameter(valid_568348, JInt, required = false, default = nil)
-  if valid_568348 != nil:
-    section.add "top", valid_568348
-  var valid_568349 = query.getOrDefault("start")
-  valid_568349 = validateParameter(valid_568349, JString, required = false,
+  var valid_564248 = query.getOrDefault("start")
+  valid_564248 = validateParameter(valid_564248, JString, required = false,
                                  default = nil)
-  if valid_568349 != nil:
-    section.add "start", valid_568349
+  if valid_564248 != nil:
+    section.add "start", valid_564248
+  var valid_564249 = query.getOrDefault("top")
+  valid_564249 = validateParameter(valid_564249, JInt, required = false, default = nil)
+  if valid_564249 != nil:
+    section.add "top", valid_564249
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1843,44 +1847,44 @@ proc validate_LargeFaceListListFaces_568345(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568350: Call_LargeFaceListListFaces_568344; path: JsonNode;
+proc call*(call_564250: Call_LargeFaceListListFaces_564244; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## List all faces in a large face list, and retrieve face information (including userData and persistedFaceIds of registered faces of the face).
   ## 
-  let valid = call_568350.validator(path, query, header, formData, body)
-  let scheme = call_568350.pickScheme
+  let valid = call_564250.validator(path, query, header, formData, body)
+  let scheme = call_564250.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568350.url(scheme.get, call_568350.host, call_568350.base,
-                         call_568350.route, valid.getOrDefault("path"),
+  let url = call_564250.url(scheme.get, call_564250.host, call_564250.base,
+                         call_564250.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568350, url, valid)
+  result = hook(call_564250, url, valid)
 
-proc call*(call_568351: Call_LargeFaceListListFaces_568344;
-          largeFaceListId: string; top: int = 0; start: string = ""): Recallable =
+proc call*(call_564251: Call_LargeFaceListListFaces_564244;
+          largeFaceListId: string; start: string = ""; top: int = 0): Recallable =
   ## largeFaceListListFaces
   ## List all faces in a large face list, and retrieve face information (including userData and persistedFaceIds of registered faces of the face).
   ##   largeFaceListId: string (required)
   ##                  : Id referencing a particular large face list.
-  ##   top: int
-  ##      : Number of faces to return starting with the face id indicated by the 'start' parameter.
   ##   start: string
   ##        : Starting face id to return (used to list a range of faces).
-  var path_568352 = newJObject()
-  var query_568353 = newJObject()
-  add(path_568352, "largeFaceListId", newJString(largeFaceListId))
-  add(query_568353, "top", newJInt(top))
-  add(query_568353, "start", newJString(start))
-  result = call_568351.call(path_568352, query_568353, nil, nil, nil)
+  ##   top: int
+  ##      : Number of faces to return starting with the face id indicated by the 'start' parameter.
+  var path_564252 = newJObject()
+  var query_564253 = newJObject()
+  add(path_564252, "largeFaceListId", newJString(largeFaceListId))
+  add(query_564253, "start", newJString(start))
+  add(query_564253, "top", newJInt(top))
+  result = call_564251.call(path_564252, query_564253, nil, nil, nil)
 
-var largeFaceListListFaces* = Call_LargeFaceListListFaces_568344(
+var largeFaceListListFaces* = Call_LargeFaceListListFaces_564244(
     name: "largeFaceListListFaces", meth: HttpMethod.HttpGet, host: "azure.local",
     route: "/largefacelists/{largeFaceListId}/persistedfaces",
-    validator: validate_LargeFaceListListFaces_568345, base: "",
-    url: url_LargeFaceListListFaces_568346, schemes: {Scheme.Https})
+    validator: validate_LargeFaceListListFaces_564245, base: "",
+    url: url_LargeFaceListListFaces_564246, schemes: {Scheme.Https})
 type
-  Call_LargeFaceListGetFace_568367 = ref object of OpenApiRestCall_567668
-proc url_LargeFaceListGetFace_568369(protocol: Scheme; host: string; base: string;
+  Call_LargeFaceListGetFace_564267 = ref object of OpenApiRestCall_563566
+proc url_LargeFaceListGetFace_564269(protocol: Scheme; host: string; base: string;
                                     route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1898,7 +1902,7 @@ proc url_LargeFaceListGetFace_568369(protocol: Scheme; host: string; base: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_LargeFaceListGetFace_568368(path: JsonNode; query: JsonNode;
+proc validate_LargeFaceListGetFace_564268(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Retrieve information about a persisted face (specified by persistedFaceId and its belonging largeFaceListId).
   ## 
@@ -1912,16 +1916,16 @@ proc validate_LargeFaceListGetFace_568368(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `largeFaceListId` field"
-  var valid_568370 = path.getOrDefault("largeFaceListId")
-  valid_568370 = validateParameter(valid_568370, JString, required = true,
+  var valid_564270 = path.getOrDefault("largeFaceListId")
+  valid_564270 = validateParameter(valid_564270, JString, required = true,
                                  default = nil)
-  if valid_568370 != nil:
-    section.add "largeFaceListId", valid_568370
-  var valid_568371 = path.getOrDefault("persistedFaceId")
-  valid_568371 = validateParameter(valid_568371, JString, required = true,
+  if valid_564270 != nil:
+    section.add "largeFaceListId", valid_564270
+  var valid_564271 = path.getOrDefault("persistedFaceId")
+  valid_564271 = validateParameter(valid_564271, JString, required = true,
                                  default = nil)
-  if valid_568371 != nil:
-    section.add "persistedFaceId", valid_568371
+  if valid_564271 != nil:
+    section.add "persistedFaceId", valid_564271
   result.add "path", section
   section = newJObject()
   result.add "query", section
@@ -1932,20 +1936,20 @@ proc validate_LargeFaceListGetFace_568368(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568372: Call_LargeFaceListGetFace_568367; path: JsonNode;
+proc call*(call_564272: Call_LargeFaceListGetFace_564267; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Retrieve information about a persisted face (specified by persistedFaceId and its belonging largeFaceListId).
   ## 
-  let valid = call_568372.validator(path, query, header, formData, body)
-  let scheme = call_568372.pickScheme
+  let valid = call_564272.validator(path, query, header, formData, body)
+  let scheme = call_564272.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568372.url(scheme.get, call_568372.host, call_568372.base,
-                         call_568372.route, valid.getOrDefault("path"),
+  let url = call_564272.url(scheme.get, call_564272.host, call_564272.base,
+                         call_564272.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568372, url, valid)
+  result = hook(call_564272, url, valid)
 
-proc call*(call_568373: Call_LargeFaceListGetFace_568367; largeFaceListId: string;
+proc call*(call_564273: Call_LargeFaceListGetFace_564267; largeFaceListId: string;
           persistedFaceId: string): Recallable =
   ## largeFaceListGetFace
   ## Retrieve information about a persisted face (specified by persistedFaceId and its belonging largeFaceListId).
@@ -1953,18 +1957,18 @@ proc call*(call_568373: Call_LargeFaceListGetFace_568367; largeFaceListId: strin
   ##                  : Id referencing a particular large face list.
   ##   persistedFaceId: string (required)
   ##                  : Id referencing a particular persistedFaceId of an existing face.
-  var path_568374 = newJObject()
-  add(path_568374, "largeFaceListId", newJString(largeFaceListId))
-  add(path_568374, "persistedFaceId", newJString(persistedFaceId))
-  result = call_568373.call(path_568374, nil, nil, nil, nil)
+  var path_564274 = newJObject()
+  add(path_564274, "largeFaceListId", newJString(largeFaceListId))
+  add(path_564274, "persistedFaceId", newJString(persistedFaceId))
+  result = call_564273.call(path_564274, nil, nil, nil, nil)
 
-var largeFaceListGetFace* = Call_LargeFaceListGetFace_568367(
+var largeFaceListGetFace* = Call_LargeFaceListGetFace_564267(
     name: "largeFaceListGetFace", meth: HttpMethod.HttpGet, host: "azure.local", route: "/largefacelists/{largeFaceListId}/persistedfaces/{persistedFaceId}",
-    validator: validate_LargeFaceListGetFace_568368, base: "",
-    url: url_LargeFaceListGetFace_568369, schemes: {Scheme.Https})
+    validator: validate_LargeFaceListGetFace_564268, base: "",
+    url: url_LargeFaceListGetFace_564269, schemes: {Scheme.Https})
 type
-  Call_LargeFaceListUpdateFace_568383 = ref object of OpenApiRestCall_567668
-proc url_LargeFaceListUpdateFace_568385(protocol: Scheme; host: string; base: string;
+  Call_LargeFaceListUpdateFace_564283 = ref object of OpenApiRestCall_563566
+proc url_LargeFaceListUpdateFace_564285(protocol: Scheme; host: string; base: string;
                                        route: string; path: JsonNode;
                                        query: JsonNode): Uri =
   result.scheme = $protocol
@@ -1983,7 +1987,7 @@ proc url_LargeFaceListUpdateFace_568385(protocol: Scheme; host: string; base: st
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_LargeFaceListUpdateFace_568384(path: JsonNode; query: JsonNode;
+proc validate_LargeFaceListUpdateFace_564284(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Update a persisted face's userData field.
   ## 
@@ -1997,16 +2001,16 @@ proc validate_LargeFaceListUpdateFace_568384(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `largeFaceListId` field"
-  var valid_568386 = path.getOrDefault("largeFaceListId")
-  valid_568386 = validateParameter(valid_568386, JString, required = true,
+  var valid_564286 = path.getOrDefault("largeFaceListId")
+  valid_564286 = validateParameter(valid_564286, JString, required = true,
                                  default = nil)
-  if valid_568386 != nil:
-    section.add "largeFaceListId", valid_568386
-  var valid_568387 = path.getOrDefault("persistedFaceId")
-  valid_568387 = validateParameter(valid_568387, JString, required = true,
+  if valid_564286 != nil:
+    section.add "largeFaceListId", valid_564286
+  var valid_564287 = path.getOrDefault("persistedFaceId")
+  valid_564287 = validateParameter(valid_564287, JString, required = true,
                                  default = nil)
-  if valid_568387 != nil:
-    section.add "persistedFaceId", valid_568387
+  if valid_564287 != nil:
+    section.add "persistedFaceId", valid_564287
   result.add "path", section
   section = newJObject()
   result.add "query", section
@@ -2022,20 +2026,20 @@ proc validate_LargeFaceListUpdateFace_568384(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568389: Call_LargeFaceListUpdateFace_568383; path: JsonNode;
+proc call*(call_564289: Call_LargeFaceListUpdateFace_564283; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Update a persisted face's userData field.
   ## 
-  let valid = call_568389.validator(path, query, header, formData, body)
-  let scheme = call_568389.pickScheme
+  let valid = call_564289.validator(path, query, header, formData, body)
+  let scheme = call_564289.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568389.url(scheme.get, call_568389.host, call_568389.base,
-                         call_568389.route, valid.getOrDefault("path"),
+  let url = call_564289.url(scheme.get, call_564289.host, call_564289.base,
+                         call_564289.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568389, url, valid)
+  result = hook(call_564289, url, valid)
 
-proc call*(call_568390: Call_LargeFaceListUpdateFace_568383;
+proc call*(call_564290: Call_LargeFaceListUpdateFace_564283;
           largeFaceListId: string; persistedFaceId: string; body: JsonNode): Recallable =
   ## largeFaceListUpdateFace
   ## Update a persisted face's userData field.
@@ -2045,22 +2049,22 @@ proc call*(call_568390: Call_LargeFaceListUpdateFace_568383;
   ##                  : Id referencing a particular persistedFaceId of an existing face.
   ##   body: JObject (required)
   ##       : Request body for updating persisted face.
-  var path_568391 = newJObject()
-  var body_568392 = newJObject()
-  add(path_568391, "largeFaceListId", newJString(largeFaceListId))
-  add(path_568391, "persistedFaceId", newJString(persistedFaceId))
+  var path_564291 = newJObject()
+  var body_564292 = newJObject()
+  add(path_564291, "largeFaceListId", newJString(largeFaceListId))
+  add(path_564291, "persistedFaceId", newJString(persistedFaceId))
   if body != nil:
-    body_568392 = body
-  result = call_568390.call(path_568391, nil, nil, nil, body_568392)
+    body_564292 = body
+  result = call_564290.call(path_564291, nil, nil, nil, body_564292)
 
-var largeFaceListUpdateFace* = Call_LargeFaceListUpdateFace_568383(
+var largeFaceListUpdateFace* = Call_LargeFaceListUpdateFace_564283(
     name: "largeFaceListUpdateFace", meth: HttpMethod.HttpPatch,
     host: "azure.local", route: "/largefacelists/{largeFaceListId}/persistedfaces/{persistedFaceId}",
-    validator: validate_LargeFaceListUpdateFace_568384, base: "",
-    url: url_LargeFaceListUpdateFace_568385, schemes: {Scheme.Https})
+    validator: validate_LargeFaceListUpdateFace_564284, base: "",
+    url: url_LargeFaceListUpdateFace_564285, schemes: {Scheme.Https})
 type
-  Call_LargeFaceListDeleteFace_568375 = ref object of OpenApiRestCall_567668
-proc url_LargeFaceListDeleteFace_568377(protocol: Scheme; host: string; base: string;
+  Call_LargeFaceListDeleteFace_564275 = ref object of OpenApiRestCall_563566
+proc url_LargeFaceListDeleteFace_564277(protocol: Scheme; host: string; base: string;
                                        route: string; path: JsonNode;
                                        query: JsonNode): Uri =
   result.scheme = $protocol
@@ -2079,7 +2083,7 @@ proc url_LargeFaceListDeleteFace_568377(protocol: Scheme; host: string; base: st
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_LargeFaceListDeleteFace_568376(path: JsonNode; query: JsonNode;
+proc validate_LargeFaceListDeleteFace_564276(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Delete a face from a large face list by specified largeFaceListId and persistedFaceId.
   ## <br /> Adding/deleting faces to/from a same large face list are processed sequentially and to/from different large face lists are in parallel.
@@ -2094,16 +2098,16 @@ proc validate_LargeFaceListDeleteFace_568376(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `largeFaceListId` field"
-  var valid_568378 = path.getOrDefault("largeFaceListId")
-  valid_568378 = validateParameter(valid_568378, JString, required = true,
+  var valid_564278 = path.getOrDefault("largeFaceListId")
+  valid_564278 = validateParameter(valid_564278, JString, required = true,
                                  default = nil)
-  if valid_568378 != nil:
-    section.add "largeFaceListId", valid_568378
-  var valid_568379 = path.getOrDefault("persistedFaceId")
-  valid_568379 = validateParameter(valid_568379, JString, required = true,
+  if valid_564278 != nil:
+    section.add "largeFaceListId", valid_564278
+  var valid_564279 = path.getOrDefault("persistedFaceId")
+  valid_564279 = validateParameter(valid_564279, JString, required = true,
                                  default = nil)
-  if valid_568379 != nil:
-    section.add "persistedFaceId", valid_568379
+  if valid_564279 != nil:
+    section.add "persistedFaceId", valid_564279
   result.add "path", section
   section = newJObject()
   result.add "query", section
@@ -2114,21 +2118,21 @@ proc validate_LargeFaceListDeleteFace_568376(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568380: Call_LargeFaceListDeleteFace_568375; path: JsonNode;
+proc call*(call_564280: Call_LargeFaceListDeleteFace_564275; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Delete a face from a large face list by specified largeFaceListId and persistedFaceId.
   ## <br /> Adding/deleting faces to/from a same large face list are processed sequentially and to/from different large face lists are in parallel.
   ## 
-  let valid = call_568380.validator(path, query, header, formData, body)
-  let scheme = call_568380.pickScheme
+  let valid = call_564280.validator(path, query, header, formData, body)
+  let scheme = call_564280.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568380.url(scheme.get, call_568380.host, call_568380.base,
-                         call_568380.route, valid.getOrDefault("path"),
+  let url = call_564280.url(scheme.get, call_564280.host, call_564280.base,
+                         call_564280.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568380, url, valid)
+  result = hook(call_564280, url, valid)
 
-proc call*(call_568381: Call_LargeFaceListDeleteFace_568375;
+proc call*(call_564281: Call_LargeFaceListDeleteFace_564275;
           largeFaceListId: string; persistedFaceId: string): Recallable =
   ## largeFaceListDeleteFace
   ## Delete a face from a large face list by specified largeFaceListId and persistedFaceId.
@@ -2137,19 +2141,19 @@ proc call*(call_568381: Call_LargeFaceListDeleteFace_568375;
   ##                  : Id referencing a particular large face list.
   ##   persistedFaceId: string (required)
   ##                  : Id referencing a particular persistedFaceId of an existing face.
-  var path_568382 = newJObject()
-  add(path_568382, "largeFaceListId", newJString(largeFaceListId))
-  add(path_568382, "persistedFaceId", newJString(persistedFaceId))
-  result = call_568381.call(path_568382, nil, nil, nil, nil)
+  var path_564282 = newJObject()
+  add(path_564282, "largeFaceListId", newJString(largeFaceListId))
+  add(path_564282, "persistedFaceId", newJString(persistedFaceId))
+  result = call_564281.call(path_564282, nil, nil, nil, nil)
 
-var largeFaceListDeleteFace* = Call_LargeFaceListDeleteFace_568375(
+var largeFaceListDeleteFace* = Call_LargeFaceListDeleteFace_564275(
     name: "largeFaceListDeleteFace", meth: HttpMethod.HttpDelete,
     host: "azure.local", route: "/largefacelists/{largeFaceListId}/persistedfaces/{persistedFaceId}",
-    validator: validate_LargeFaceListDeleteFace_568376, base: "",
-    url: url_LargeFaceListDeleteFace_568377, schemes: {Scheme.Https})
+    validator: validate_LargeFaceListDeleteFace_564276, base: "",
+    url: url_LargeFaceListDeleteFace_564277, schemes: {Scheme.Https})
 type
-  Call_LargeFaceListTrain_568393 = ref object of OpenApiRestCall_567668
-proc url_LargeFaceListTrain_568395(protocol: Scheme; host: string; base: string;
+  Call_LargeFaceListTrain_564293 = ref object of OpenApiRestCall_563566
+proc url_LargeFaceListTrain_564295(protocol: Scheme; host: string; base: string;
                                   route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2165,7 +2169,7 @@ proc url_LargeFaceListTrain_568395(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_LargeFaceListTrain_568394(path: JsonNode; query: JsonNode;
+proc validate_LargeFaceListTrain_564294(path: JsonNode; query: JsonNode;
                                        header: JsonNode; formData: JsonNode;
                                        body: JsonNode): JsonNode =
   ## Queue a large face list training task, the training task may not be started immediately.
@@ -2178,11 +2182,11 @@ proc validate_LargeFaceListTrain_568394(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `largeFaceListId` field"
-  var valid_568396 = path.getOrDefault("largeFaceListId")
-  valid_568396 = validateParameter(valid_568396, JString, required = true,
+  var valid_564296 = path.getOrDefault("largeFaceListId")
+  valid_564296 = validateParameter(valid_564296, JString, required = true,
                                  default = nil)
-  if valid_568396 != nil:
-    section.add "largeFaceListId", valid_568396
+  if valid_564296 != nil:
+    section.add "largeFaceListId", valid_564296
   result.add "path", section
   section = newJObject()
   result.add "query", section
@@ -2193,36 +2197,36 @@ proc validate_LargeFaceListTrain_568394(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568397: Call_LargeFaceListTrain_568393; path: JsonNode;
+proc call*(call_564297: Call_LargeFaceListTrain_564293; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Queue a large face list training task, the training task may not be started immediately.
   ## 
-  let valid = call_568397.validator(path, query, header, formData, body)
-  let scheme = call_568397.pickScheme
+  let valid = call_564297.validator(path, query, header, formData, body)
+  let scheme = call_564297.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568397.url(scheme.get, call_568397.host, call_568397.base,
-                         call_568397.route, valid.getOrDefault("path"),
+  let url = call_564297.url(scheme.get, call_564297.host, call_564297.base,
+                         call_564297.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568397, url, valid)
+  result = hook(call_564297, url, valid)
 
-proc call*(call_568398: Call_LargeFaceListTrain_568393; largeFaceListId: string): Recallable =
+proc call*(call_564298: Call_LargeFaceListTrain_564293; largeFaceListId: string): Recallable =
   ## largeFaceListTrain
   ## Queue a large face list training task, the training task may not be started immediately.
   ##   largeFaceListId: string (required)
   ##                  : Id referencing a particular large face list.
-  var path_568399 = newJObject()
-  add(path_568399, "largeFaceListId", newJString(largeFaceListId))
-  result = call_568398.call(path_568399, nil, nil, nil, nil)
+  var path_564299 = newJObject()
+  add(path_564299, "largeFaceListId", newJString(largeFaceListId))
+  result = call_564298.call(path_564299, nil, nil, nil, nil)
 
-var largeFaceListTrain* = Call_LargeFaceListTrain_568393(
+var largeFaceListTrain* = Call_LargeFaceListTrain_564293(
     name: "largeFaceListTrain", meth: HttpMethod.HttpPost, host: "azure.local",
     route: "/largefacelists/{largeFaceListId}/train",
-    validator: validate_LargeFaceListTrain_568394, base: "",
-    url: url_LargeFaceListTrain_568395, schemes: {Scheme.Https})
+    validator: validate_LargeFaceListTrain_564294, base: "",
+    url: url_LargeFaceListTrain_564295, schemes: {Scheme.Https})
 type
-  Call_LargeFaceListGetTrainingStatus_568400 = ref object of OpenApiRestCall_567668
-proc url_LargeFaceListGetTrainingStatus_568402(protocol: Scheme; host: string;
+  Call_LargeFaceListGetTrainingStatus_564300 = ref object of OpenApiRestCall_563566
+proc url_LargeFaceListGetTrainingStatus_564302(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2238,7 +2242,7 @@ proc url_LargeFaceListGetTrainingStatus_568402(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_LargeFaceListGetTrainingStatus_568401(path: JsonNode;
+proc validate_LargeFaceListGetTrainingStatus_564301(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Retrieve the training status of a large face list (completed or ongoing).
   ## 
@@ -2250,11 +2254,11 @@ proc validate_LargeFaceListGetTrainingStatus_568401(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `largeFaceListId` field"
-  var valid_568403 = path.getOrDefault("largeFaceListId")
-  valid_568403 = validateParameter(valid_568403, JString, required = true,
+  var valid_564303 = path.getOrDefault("largeFaceListId")
+  valid_564303 = validateParameter(valid_564303, JString, required = true,
                                  default = nil)
-  if valid_568403 != nil:
-    section.add "largeFaceListId", valid_568403
+  if valid_564303 != nil:
+    section.add "largeFaceListId", valid_564303
   result.add "path", section
   section = newJObject()
   result.add "query", section
@@ -2265,44 +2269,44 @@ proc validate_LargeFaceListGetTrainingStatus_568401(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568404: Call_LargeFaceListGetTrainingStatus_568400; path: JsonNode;
+proc call*(call_564304: Call_LargeFaceListGetTrainingStatus_564300; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Retrieve the training status of a large face list (completed or ongoing).
   ## 
-  let valid = call_568404.validator(path, query, header, formData, body)
-  let scheme = call_568404.pickScheme
+  let valid = call_564304.validator(path, query, header, formData, body)
+  let scheme = call_564304.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568404.url(scheme.get, call_568404.host, call_568404.base,
-                         call_568404.route, valid.getOrDefault("path"),
+  let url = call_564304.url(scheme.get, call_564304.host, call_564304.base,
+                         call_564304.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568404, url, valid)
+  result = hook(call_564304, url, valid)
 
-proc call*(call_568405: Call_LargeFaceListGetTrainingStatus_568400;
+proc call*(call_564305: Call_LargeFaceListGetTrainingStatus_564300;
           largeFaceListId: string): Recallable =
   ## largeFaceListGetTrainingStatus
   ## Retrieve the training status of a large face list (completed or ongoing).
   ##   largeFaceListId: string (required)
   ##                  : Id referencing a particular large face list.
-  var path_568406 = newJObject()
-  add(path_568406, "largeFaceListId", newJString(largeFaceListId))
-  result = call_568405.call(path_568406, nil, nil, nil, nil)
+  var path_564306 = newJObject()
+  add(path_564306, "largeFaceListId", newJString(largeFaceListId))
+  result = call_564305.call(path_564306, nil, nil, nil, nil)
 
-var largeFaceListGetTrainingStatus* = Call_LargeFaceListGetTrainingStatus_568400(
+var largeFaceListGetTrainingStatus* = Call_LargeFaceListGetTrainingStatus_564300(
     name: "largeFaceListGetTrainingStatus", meth: HttpMethod.HttpGet,
     host: "azure.local", route: "/largefacelists/{largeFaceListId}/training",
-    validator: validate_LargeFaceListGetTrainingStatus_568401, base: "",
-    url: url_LargeFaceListGetTrainingStatus_568402, schemes: {Scheme.Https})
+    validator: validate_LargeFaceListGetTrainingStatus_564301, base: "",
+    url: url_LargeFaceListGetTrainingStatus_564302, schemes: {Scheme.Https})
 type
-  Call_LargePersonGroupList_568407 = ref object of OpenApiRestCall_567668
-proc url_LargePersonGroupList_568409(protocol: Scheme; host: string; base: string;
+  Call_LargePersonGroupList_564307 = ref object of OpenApiRestCall_563566
+proc url_LargePersonGroupList_564309(protocol: Scheme; host: string; base: string;
                                     route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_LargePersonGroupList_568408(path: JsonNode; query: JsonNode;
+proc validate_LargePersonGroupList_564308(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## List all existing large person groups’ largePersonGroupId, name, userData and recognitionModel.<br />
   ## * Large person groups are stored in alphabetical order of largePersonGroupId.
@@ -2320,28 +2324,28 @@ proc validate_LargePersonGroupList_568408(path: JsonNode; query: JsonNode;
   section = newJObject()
   result.add "path", section
   ## parameters in `query` object:
-  ##   top: JInt
-  ##      : The number of large person groups to list.
   ##   returnRecognitionModel: JBool
   ##                         : A value indicating whether the operation should return 'recognitionModel' in response.
   ##   start: JString
   ##        : List large person groups from the least largePersonGroupId greater than the "start".
+  ##   top: JInt
+  ##      : The number of large person groups to list.
   section = newJObject()
-  var valid_568411 = query.getOrDefault("top")
-  valid_568411 = validateParameter(valid_568411, JInt, required = false,
-                                 default = newJInt(1000))
-  if valid_568411 != nil:
-    section.add "top", valid_568411
-  var valid_568412 = query.getOrDefault("returnRecognitionModel")
-  valid_568412 = validateParameter(valid_568412, JBool, required = false,
+  var valid_564310 = query.getOrDefault("returnRecognitionModel")
+  valid_564310 = validateParameter(valid_564310, JBool, required = false,
                                  default = newJBool(false))
-  if valid_568412 != nil:
-    section.add "returnRecognitionModel", valid_568412
-  var valid_568413 = query.getOrDefault("start")
-  valid_568413 = validateParameter(valid_568413, JString, required = false,
+  if valid_564310 != nil:
+    section.add "returnRecognitionModel", valid_564310
+  var valid_564311 = query.getOrDefault("start")
+  valid_564311 = validateParameter(valid_564311, JString, required = false,
                                  default = nil)
-  if valid_568413 != nil:
-    section.add "start", valid_568413
+  if valid_564311 != nil:
+    section.add "start", valid_564311
+  var valid_564313 = query.getOrDefault("top")
+  valid_564313 = validateParameter(valid_564313, JInt, required = false,
+                                 default = newJInt(1000))
+  if valid_564313 != nil:
+    section.add "top", valid_564313
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2350,7 +2354,7 @@ proc validate_LargePersonGroupList_568408(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568414: Call_LargePersonGroupList_568407; path: JsonNode;
+proc call*(call_564314: Call_LargePersonGroupList_564307; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## List all existing large person groups’ largePersonGroupId, name, userData and recognitionModel.<br />
   ## * Large person groups are stored in alphabetical order of largePersonGroupId.
@@ -2363,17 +2367,17 @@ proc call*(call_568414: Call_LargePersonGroupList_568407; path: JsonNode;
   ## <br /> "start=group2&top=3" will return "group3", "group4", "group5".
   ## 
   ## 
-  let valid = call_568414.validator(path, query, header, formData, body)
-  let scheme = call_568414.pickScheme
+  let valid = call_564314.validator(path, query, header, formData, body)
+  let scheme = call_564314.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568414.url(scheme.get, call_568414.host, call_568414.base,
-                         call_568414.route, valid.getOrDefault("path"),
+  let url = call_564314.url(scheme.get, call_564314.host, call_564314.base,
+                         call_564314.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568414, url, valid)
+  result = hook(call_564314, url, valid)
 
-proc call*(call_568415: Call_LargePersonGroupList_568407; top: int = 1000;
-          returnRecognitionModel: bool = false; start: string = ""): Recallable =
+proc call*(call_564315: Call_LargePersonGroupList_564307;
+          returnRecognitionModel: bool = false; start: string = ""; top: int = 1000): Recallable =
   ## largePersonGroupList
   ## List all existing large person groups’ largePersonGroupId, name, userData and recognitionModel.<br />
   ## * Large person groups are stored in alphabetical order of largePersonGroupId.
@@ -2385,25 +2389,25 @@ proc call*(call_568415: Call_LargePersonGroupList_568407; top: int = 1000;
   ## <br /> "start=&top=2" will return "group1", "group2".
   ## <br /> "start=group2&top=3" will return "group3", "group4", "group5".
   ## 
-  ##   top: int
-  ##      : The number of large person groups to list.
   ##   returnRecognitionModel: bool
   ##                         : A value indicating whether the operation should return 'recognitionModel' in response.
   ##   start: string
   ##        : List large person groups from the least largePersonGroupId greater than the "start".
-  var query_568416 = newJObject()
-  add(query_568416, "top", newJInt(top))
-  add(query_568416, "returnRecognitionModel", newJBool(returnRecognitionModel))
-  add(query_568416, "start", newJString(start))
-  result = call_568415.call(nil, query_568416, nil, nil, nil)
+  ##   top: int
+  ##      : The number of large person groups to list.
+  var query_564316 = newJObject()
+  add(query_564316, "returnRecognitionModel", newJBool(returnRecognitionModel))
+  add(query_564316, "start", newJString(start))
+  add(query_564316, "top", newJInt(top))
+  result = call_564315.call(nil, query_564316, nil, nil, nil)
 
-var largePersonGroupList* = Call_LargePersonGroupList_568407(
+var largePersonGroupList* = Call_LargePersonGroupList_564307(
     name: "largePersonGroupList", meth: HttpMethod.HttpGet, host: "azure.local",
-    route: "/largepersongroups", validator: validate_LargePersonGroupList_568408,
-    base: "", url: url_LargePersonGroupList_568409, schemes: {Scheme.Https})
+    route: "/largepersongroups", validator: validate_LargePersonGroupList_564308,
+    base: "", url: url_LargePersonGroupList_564309, schemes: {Scheme.Https})
 type
-  Call_LargePersonGroupCreate_568426 = ref object of OpenApiRestCall_567668
-proc url_LargePersonGroupCreate_568428(protocol: Scheme; host: string; base: string;
+  Call_LargePersonGroupCreate_564326 = ref object of OpenApiRestCall_563566
+proc url_LargePersonGroupCreate_564328(protocol: Scheme; host: string; base: string;
                                       route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2419,7 +2423,7 @@ proc url_LargePersonGroupCreate_568428(protocol: Scheme; host: string; base: str
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_LargePersonGroupCreate_568427(path: JsonNode; query: JsonNode;
+proc validate_LargePersonGroupCreate_564327(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Create a new large person group with user-specified largePersonGroupId, name, an optional userData and recognitionModel.
   ## <br /> A large person group is the container of the uploaded person data, including face recognition feature, and up to 1,000,000
@@ -2442,11 +2446,11 @@ proc validate_LargePersonGroupCreate_568427(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `largePersonGroupId` field"
-  var valid_568429 = path.getOrDefault("largePersonGroupId")
-  valid_568429 = validateParameter(valid_568429, JString, required = true,
+  var valid_564329 = path.getOrDefault("largePersonGroupId")
+  valid_564329 = validateParameter(valid_564329, JString, required = true,
                                  default = nil)
-  if valid_568429 != nil:
-    section.add "largePersonGroupId", valid_568429
+  if valid_564329 != nil:
+    section.add "largePersonGroupId", valid_564329
   result.add "path", section
   section = newJObject()
   result.add "query", section
@@ -2462,7 +2466,7 @@ proc validate_LargePersonGroupCreate_568427(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568431: Call_LargePersonGroupCreate_568426; path: JsonNode;
+proc call*(call_564331: Call_LargePersonGroupCreate_564326; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Create a new large person group with user-specified largePersonGroupId, name, an optional userData and recognitionModel.
   ## <br /> A large person group is the container of the uploaded person data, including face recognition feature, and up to 1,000,000
@@ -2477,16 +2481,16 @@ proc call*(call_568431: Call_LargePersonGroupCreate_568426; path: JsonNode;
   ## * Free-tier subscription quota: 1,000 large person groups.
   ## * S0-tier subscription quota: 1,000,000 large person groups.
   ## 
-  let valid = call_568431.validator(path, query, header, formData, body)
-  let scheme = call_568431.pickScheme
+  let valid = call_564331.validator(path, query, header, formData, body)
+  let scheme = call_564331.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568431.url(scheme.get, call_568431.host, call_568431.base,
-                         call_568431.route, valid.getOrDefault("path"),
+  let url = call_564331.url(scheme.get, call_564331.host, call_564331.base,
+                         call_564331.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568431, url, valid)
+  result = hook(call_564331, url, valid)
 
-proc call*(call_568432: Call_LargePersonGroupCreate_568426;
+proc call*(call_564332: Call_LargePersonGroupCreate_564326;
           largePersonGroupId: string; body: JsonNode): Recallable =
   ## largePersonGroupCreate
   ## Create a new large person group with user-specified largePersonGroupId, name, an optional userData and recognitionModel.
@@ -2505,21 +2509,21 @@ proc call*(call_568432: Call_LargePersonGroupCreate_568426;
   ##                     : Id referencing a particular large person group.
   ##   body: JObject (required)
   ##       : Request body for creating new large person group.
-  var path_568433 = newJObject()
-  var body_568434 = newJObject()
-  add(path_568433, "largePersonGroupId", newJString(largePersonGroupId))
+  var path_564333 = newJObject()
+  var body_564334 = newJObject()
+  add(path_564333, "largePersonGroupId", newJString(largePersonGroupId))
   if body != nil:
-    body_568434 = body
-  result = call_568432.call(path_568433, nil, nil, nil, body_568434)
+    body_564334 = body
+  result = call_564332.call(path_564333, nil, nil, nil, body_564334)
 
-var largePersonGroupCreate* = Call_LargePersonGroupCreate_568426(
+var largePersonGroupCreate* = Call_LargePersonGroupCreate_564326(
     name: "largePersonGroupCreate", meth: HttpMethod.HttpPut, host: "azure.local",
     route: "/largepersongroups/{largePersonGroupId}",
-    validator: validate_LargePersonGroupCreate_568427, base: "",
-    url: url_LargePersonGroupCreate_568428, schemes: {Scheme.Https})
+    validator: validate_LargePersonGroupCreate_564327, base: "",
+    url: url_LargePersonGroupCreate_564328, schemes: {Scheme.Https})
 type
-  Call_LargePersonGroupGet_568417 = ref object of OpenApiRestCall_567668
-proc url_LargePersonGroupGet_568419(protocol: Scheme; host: string; base: string;
+  Call_LargePersonGroupGet_564317 = ref object of OpenApiRestCall_563566
+proc url_LargePersonGroupGet_564319(protocol: Scheme; host: string; base: string;
                                    route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2535,7 +2539,7 @@ proc url_LargePersonGroupGet_568419(protocol: Scheme; host: string; base: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_LargePersonGroupGet_568418(path: JsonNode; query: JsonNode;
+proc validate_LargePersonGroupGet_564318(path: JsonNode; query: JsonNode;
                                         header: JsonNode; formData: JsonNode;
                                         body: JsonNode): JsonNode =
   ## Retrieve the information of a large person group, including its name, userData and recognitionModel. This API returns large person group information only, use [LargePersonGroup Person - List](/docs/services/563879b61984550e40cbbe8d/operations/599adda06ac60f11b48b5aa1) instead to retrieve person information under the large person group.
@@ -2549,21 +2553,21 @@ proc validate_LargePersonGroupGet_568418(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `largePersonGroupId` field"
-  var valid_568420 = path.getOrDefault("largePersonGroupId")
-  valid_568420 = validateParameter(valid_568420, JString, required = true,
+  var valid_564320 = path.getOrDefault("largePersonGroupId")
+  valid_564320 = validateParameter(valid_564320, JString, required = true,
                                  default = nil)
-  if valid_568420 != nil:
-    section.add "largePersonGroupId", valid_568420
+  if valid_564320 != nil:
+    section.add "largePersonGroupId", valid_564320
   result.add "path", section
   ## parameters in `query` object:
   ##   returnRecognitionModel: JBool
   ##                         : A value indicating whether the operation should return 'recognitionModel' in response.
   section = newJObject()
-  var valid_568421 = query.getOrDefault("returnRecognitionModel")
-  valid_568421 = validateParameter(valid_568421, JBool, required = false,
+  var valid_564321 = query.getOrDefault("returnRecognitionModel")
+  valid_564321 = validateParameter(valid_564321, JBool, required = false,
                                  default = newJBool(false))
-  if valid_568421 != nil:
-    section.add "returnRecognitionModel", valid_568421
+  if valid_564321 != nil:
+    section.add "returnRecognitionModel", valid_564321
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2572,21 +2576,21 @@ proc validate_LargePersonGroupGet_568418(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568422: Call_LargePersonGroupGet_568417; path: JsonNode;
+proc call*(call_564322: Call_LargePersonGroupGet_564317; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Retrieve the information of a large person group, including its name, userData and recognitionModel. This API returns large person group information only, use [LargePersonGroup Person - List](/docs/services/563879b61984550e40cbbe8d/operations/599adda06ac60f11b48b5aa1) instead to retrieve person information under the large person group.
   ## 
   ## 
-  let valid = call_568422.validator(path, query, header, formData, body)
-  let scheme = call_568422.pickScheme
+  let valid = call_564322.validator(path, query, header, formData, body)
+  let scheme = call_564322.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568422.url(scheme.get, call_568422.host, call_568422.base,
-                         call_568422.route, valid.getOrDefault("path"),
+  let url = call_564322.url(scheme.get, call_564322.host, call_564322.base,
+                         call_564322.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568422, url, valid)
+  result = hook(call_564322, url, valid)
 
-proc call*(call_568423: Call_LargePersonGroupGet_568417;
+proc call*(call_564323: Call_LargePersonGroupGet_564317;
           largePersonGroupId: string; returnRecognitionModel: bool = false): Recallable =
   ## largePersonGroupGet
   ## Retrieve the information of a large person group, including its name, userData and recognitionModel. This API returns large person group information only, use [LargePersonGroup Person - List](/docs/services/563879b61984550e40cbbe8d/operations/599adda06ac60f11b48b5aa1) instead to retrieve person information under the large person group.
@@ -2595,20 +2599,20 @@ proc call*(call_568423: Call_LargePersonGroupGet_568417;
   ##                     : Id referencing a particular large person group.
   ##   returnRecognitionModel: bool
   ##                         : A value indicating whether the operation should return 'recognitionModel' in response.
-  var path_568424 = newJObject()
-  var query_568425 = newJObject()
-  add(path_568424, "largePersonGroupId", newJString(largePersonGroupId))
-  add(query_568425, "returnRecognitionModel", newJBool(returnRecognitionModel))
-  result = call_568423.call(path_568424, query_568425, nil, nil, nil)
+  var path_564324 = newJObject()
+  var query_564325 = newJObject()
+  add(path_564324, "largePersonGroupId", newJString(largePersonGroupId))
+  add(query_564325, "returnRecognitionModel", newJBool(returnRecognitionModel))
+  result = call_564323.call(path_564324, query_564325, nil, nil, nil)
 
-var largePersonGroupGet* = Call_LargePersonGroupGet_568417(
+var largePersonGroupGet* = Call_LargePersonGroupGet_564317(
     name: "largePersonGroupGet", meth: HttpMethod.HttpGet, host: "azure.local",
     route: "/largepersongroups/{largePersonGroupId}",
-    validator: validate_LargePersonGroupGet_568418, base: "",
-    url: url_LargePersonGroupGet_568419, schemes: {Scheme.Https})
+    validator: validate_LargePersonGroupGet_564318, base: "",
+    url: url_LargePersonGroupGet_564319, schemes: {Scheme.Https})
 type
-  Call_LargePersonGroupUpdate_568442 = ref object of OpenApiRestCall_567668
-proc url_LargePersonGroupUpdate_568444(protocol: Scheme; host: string; base: string;
+  Call_LargePersonGroupUpdate_564342 = ref object of OpenApiRestCall_563566
+proc url_LargePersonGroupUpdate_564344(protocol: Scheme; host: string; base: string;
                                       route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2624,7 +2628,7 @@ proc url_LargePersonGroupUpdate_568444(protocol: Scheme; host: string; base: str
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_LargePersonGroupUpdate_568443(path: JsonNode; query: JsonNode;
+proc validate_LargePersonGroupUpdate_564343(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Update an existing large person group's display name and userData. The properties which does not appear in request body will not be updated.
   ## 
@@ -2636,11 +2640,11 @@ proc validate_LargePersonGroupUpdate_568443(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `largePersonGroupId` field"
-  var valid_568445 = path.getOrDefault("largePersonGroupId")
-  valid_568445 = validateParameter(valid_568445, JString, required = true,
+  var valid_564345 = path.getOrDefault("largePersonGroupId")
+  valid_564345 = validateParameter(valid_564345, JString, required = true,
                                  default = nil)
-  if valid_568445 != nil:
-    section.add "largePersonGroupId", valid_568445
+  if valid_564345 != nil:
+    section.add "largePersonGroupId", valid_564345
   result.add "path", section
   section = newJObject()
   result.add "query", section
@@ -2656,20 +2660,20 @@ proc validate_LargePersonGroupUpdate_568443(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568447: Call_LargePersonGroupUpdate_568442; path: JsonNode;
+proc call*(call_564347: Call_LargePersonGroupUpdate_564342; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Update an existing large person group's display name and userData. The properties which does not appear in request body will not be updated.
   ## 
-  let valid = call_568447.validator(path, query, header, formData, body)
-  let scheme = call_568447.pickScheme
+  let valid = call_564347.validator(path, query, header, formData, body)
+  let scheme = call_564347.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568447.url(scheme.get, call_568447.host, call_568447.base,
-                         call_568447.route, valid.getOrDefault("path"),
+  let url = call_564347.url(scheme.get, call_564347.host, call_564347.base,
+                         call_564347.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568447, url, valid)
+  result = hook(call_564347, url, valid)
 
-proc call*(call_568448: Call_LargePersonGroupUpdate_568442;
+proc call*(call_564348: Call_LargePersonGroupUpdate_564342;
           largePersonGroupId: string; body: JsonNode): Recallable =
   ## largePersonGroupUpdate
   ## Update an existing large person group's display name and userData. The properties which does not appear in request body will not be updated.
@@ -2677,21 +2681,21 @@ proc call*(call_568448: Call_LargePersonGroupUpdate_568442;
   ##                     : Id referencing a particular large person group.
   ##   body: JObject (required)
   ##       : Request body for updating large person group.
-  var path_568449 = newJObject()
-  var body_568450 = newJObject()
-  add(path_568449, "largePersonGroupId", newJString(largePersonGroupId))
+  var path_564349 = newJObject()
+  var body_564350 = newJObject()
+  add(path_564349, "largePersonGroupId", newJString(largePersonGroupId))
   if body != nil:
-    body_568450 = body
-  result = call_568448.call(path_568449, nil, nil, nil, body_568450)
+    body_564350 = body
+  result = call_564348.call(path_564349, nil, nil, nil, body_564350)
 
-var largePersonGroupUpdate* = Call_LargePersonGroupUpdate_568442(
+var largePersonGroupUpdate* = Call_LargePersonGroupUpdate_564342(
     name: "largePersonGroupUpdate", meth: HttpMethod.HttpPatch, host: "azure.local",
     route: "/largepersongroups/{largePersonGroupId}",
-    validator: validate_LargePersonGroupUpdate_568443, base: "",
-    url: url_LargePersonGroupUpdate_568444, schemes: {Scheme.Https})
+    validator: validate_LargePersonGroupUpdate_564343, base: "",
+    url: url_LargePersonGroupUpdate_564344, schemes: {Scheme.Https})
 type
-  Call_LargePersonGroupDelete_568435 = ref object of OpenApiRestCall_567668
-proc url_LargePersonGroupDelete_568437(protocol: Scheme; host: string; base: string;
+  Call_LargePersonGroupDelete_564335 = ref object of OpenApiRestCall_563566
+proc url_LargePersonGroupDelete_564337(protocol: Scheme; host: string; base: string;
                                       route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2707,7 +2711,7 @@ proc url_LargePersonGroupDelete_568437(protocol: Scheme; host: string; base: str
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_LargePersonGroupDelete_568436(path: JsonNode; query: JsonNode;
+proc validate_LargePersonGroupDelete_564336(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Delete an existing large person group. Persisted face features of all people in the large person group will also be deleted.
   ## 
@@ -2719,11 +2723,11 @@ proc validate_LargePersonGroupDelete_568436(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `largePersonGroupId` field"
-  var valid_568438 = path.getOrDefault("largePersonGroupId")
-  valid_568438 = validateParameter(valid_568438, JString, required = true,
+  var valid_564338 = path.getOrDefault("largePersonGroupId")
+  valid_564338 = validateParameter(valid_564338, JString, required = true,
                                  default = nil)
-  if valid_568438 != nil:
-    section.add "largePersonGroupId", valid_568438
+  if valid_564338 != nil:
+    section.add "largePersonGroupId", valid_564338
   result.add "path", section
   section = newJObject()
   result.add "query", section
@@ -2734,37 +2738,37 @@ proc validate_LargePersonGroupDelete_568436(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568439: Call_LargePersonGroupDelete_568435; path: JsonNode;
+proc call*(call_564339: Call_LargePersonGroupDelete_564335; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Delete an existing large person group. Persisted face features of all people in the large person group will also be deleted.
   ## 
-  let valid = call_568439.validator(path, query, header, formData, body)
-  let scheme = call_568439.pickScheme
+  let valid = call_564339.validator(path, query, header, formData, body)
+  let scheme = call_564339.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568439.url(scheme.get, call_568439.host, call_568439.base,
-                         call_568439.route, valid.getOrDefault("path"),
+  let url = call_564339.url(scheme.get, call_564339.host, call_564339.base,
+                         call_564339.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568439, url, valid)
+  result = hook(call_564339, url, valid)
 
-proc call*(call_568440: Call_LargePersonGroupDelete_568435;
+proc call*(call_564340: Call_LargePersonGroupDelete_564335;
           largePersonGroupId: string): Recallable =
   ## largePersonGroupDelete
   ## Delete an existing large person group. Persisted face features of all people in the large person group will also be deleted.
   ##   largePersonGroupId: string (required)
   ##                     : Id referencing a particular large person group.
-  var path_568441 = newJObject()
-  add(path_568441, "largePersonGroupId", newJString(largePersonGroupId))
-  result = call_568440.call(path_568441, nil, nil, nil, nil)
+  var path_564341 = newJObject()
+  add(path_564341, "largePersonGroupId", newJString(largePersonGroupId))
+  result = call_564340.call(path_564341, nil, nil, nil, nil)
 
-var largePersonGroupDelete* = Call_LargePersonGroupDelete_568435(
+var largePersonGroupDelete* = Call_LargePersonGroupDelete_564335(
     name: "largePersonGroupDelete", meth: HttpMethod.HttpDelete,
     host: "azure.local", route: "/largepersongroups/{largePersonGroupId}",
-    validator: validate_LargePersonGroupDelete_568436, base: "",
-    url: url_LargePersonGroupDelete_568437, schemes: {Scheme.Https})
+    validator: validate_LargePersonGroupDelete_564336, base: "",
+    url: url_LargePersonGroupDelete_564337, schemes: {Scheme.Https})
 type
-  Call_LargePersonGroupPersonCreate_568461 = ref object of OpenApiRestCall_567668
-proc url_LargePersonGroupPersonCreate_568463(protocol: Scheme; host: string;
+  Call_LargePersonGroupPersonCreate_564361 = ref object of OpenApiRestCall_563566
+proc url_LargePersonGroupPersonCreate_564363(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2781,7 +2785,7 @@ proc url_LargePersonGroupPersonCreate_568463(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_LargePersonGroupPersonCreate_568462(path: JsonNode; query: JsonNode;
+proc validate_LargePersonGroupPersonCreate_564362(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Create a new person in a specified large person group.
   ## 
@@ -2793,11 +2797,11 @@ proc validate_LargePersonGroupPersonCreate_568462(path: JsonNode; query: JsonNod
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `largePersonGroupId` field"
-  var valid_568464 = path.getOrDefault("largePersonGroupId")
-  valid_568464 = validateParameter(valid_568464, JString, required = true,
+  var valid_564364 = path.getOrDefault("largePersonGroupId")
+  valid_564364 = validateParameter(valid_564364, JString, required = true,
                                  default = nil)
-  if valid_568464 != nil:
-    section.add "largePersonGroupId", valid_568464
+  if valid_564364 != nil:
+    section.add "largePersonGroupId", valid_564364
   result.add "path", section
   section = newJObject()
   result.add "query", section
@@ -2813,20 +2817,20 @@ proc validate_LargePersonGroupPersonCreate_568462(path: JsonNode; query: JsonNod
   if body != nil:
     result.add "body", body
 
-proc call*(call_568466: Call_LargePersonGroupPersonCreate_568461; path: JsonNode;
+proc call*(call_564366: Call_LargePersonGroupPersonCreate_564361; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Create a new person in a specified large person group.
   ## 
-  let valid = call_568466.validator(path, query, header, formData, body)
-  let scheme = call_568466.pickScheme
+  let valid = call_564366.validator(path, query, header, formData, body)
+  let scheme = call_564366.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568466.url(scheme.get, call_568466.host, call_568466.base,
-                         call_568466.route, valid.getOrDefault("path"),
+  let url = call_564366.url(scheme.get, call_564366.host, call_564366.base,
+                         call_564366.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568466, url, valid)
+  result = hook(call_564366, url, valid)
 
-proc call*(call_568467: Call_LargePersonGroupPersonCreate_568461;
+proc call*(call_564367: Call_LargePersonGroupPersonCreate_564361;
           largePersonGroupId: string; body: JsonNode): Recallable =
   ## largePersonGroupPersonCreate
   ## Create a new person in a specified large person group.
@@ -2834,21 +2838,21 @@ proc call*(call_568467: Call_LargePersonGroupPersonCreate_568461;
   ##                     : Id referencing a particular large person group.
   ##   body: JObject (required)
   ##       : Request body for creating new person.
-  var path_568468 = newJObject()
-  var body_568469 = newJObject()
-  add(path_568468, "largePersonGroupId", newJString(largePersonGroupId))
+  var path_564368 = newJObject()
+  var body_564369 = newJObject()
+  add(path_564368, "largePersonGroupId", newJString(largePersonGroupId))
   if body != nil:
-    body_568469 = body
-  result = call_568467.call(path_568468, nil, nil, nil, body_568469)
+    body_564369 = body
+  result = call_564367.call(path_564368, nil, nil, nil, body_564369)
 
-var largePersonGroupPersonCreate* = Call_LargePersonGroupPersonCreate_568461(
+var largePersonGroupPersonCreate* = Call_LargePersonGroupPersonCreate_564361(
     name: "largePersonGroupPersonCreate", meth: HttpMethod.HttpPost,
     host: "azure.local", route: "/largepersongroups/{largePersonGroupId}/persons",
-    validator: validate_LargePersonGroupPersonCreate_568462, base: "",
-    url: url_LargePersonGroupPersonCreate_568463, schemes: {Scheme.Https})
+    validator: validate_LargePersonGroupPersonCreate_564362, base: "",
+    url: url_LargePersonGroupPersonCreate_564363, schemes: {Scheme.Https})
 type
-  Call_LargePersonGroupPersonList_568451 = ref object of OpenApiRestCall_567668
-proc url_LargePersonGroupPersonList_568453(protocol: Scheme; host: string;
+  Call_LargePersonGroupPersonList_564351 = ref object of OpenApiRestCall_563566
+proc url_LargePersonGroupPersonList_564353(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2865,7 +2869,7 @@ proc url_LargePersonGroupPersonList_568453(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_LargePersonGroupPersonList_568452(path: JsonNode; query: JsonNode;
+proc validate_LargePersonGroupPersonList_564352(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## List all persons in a large person group, and retrieve person information (including personId, name, userData and persistedFaceIds of registered faces of the person).
   ## 
@@ -2877,27 +2881,27 @@ proc validate_LargePersonGroupPersonList_568452(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `largePersonGroupId` field"
-  var valid_568454 = path.getOrDefault("largePersonGroupId")
-  valid_568454 = validateParameter(valid_568454, JString, required = true,
+  var valid_564354 = path.getOrDefault("largePersonGroupId")
+  valid_564354 = validateParameter(valid_564354, JString, required = true,
                                  default = nil)
-  if valid_568454 != nil:
-    section.add "largePersonGroupId", valid_568454
+  if valid_564354 != nil:
+    section.add "largePersonGroupId", valid_564354
   result.add "path", section
   ## parameters in `query` object:
-  ##   top: JInt
-  ##      : Number of persons to return starting with the person id indicated by the 'start' parameter.
   ##   start: JString
   ##        : Starting person id to return (used to list a range of persons).
+  ##   top: JInt
+  ##      : Number of persons to return starting with the person id indicated by the 'start' parameter.
   section = newJObject()
-  var valid_568455 = query.getOrDefault("top")
-  valid_568455 = validateParameter(valid_568455, JInt, required = false, default = nil)
-  if valid_568455 != nil:
-    section.add "top", valid_568455
-  var valid_568456 = query.getOrDefault("start")
-  valid_568456 = validateParameter(valid_568456, JString, required = false,
+  var valid_564355 = query.getOrDefault("start")
+  valid_564355 = validateParameter(valid_564355, JString, required = false,
                                  default = nil)
-  if valid_568456 != nil:
-    section.add "start", valid_568456
+  if valid_564355 != nil:
+    section.add "start", valid_564355
+  var valid_564356 = query.getOrDefault("top")
+  valid_564356 = validateParameter(valid_564356, JInt, required = false, default = nil)
+  if valid_564356 != nil:
+    section.add "top", valid_564356
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2906,44 +2910,44 @@ proc validate_LargePersonGroupPersonList_568452(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568457: Call_LargePersonGroupPersonList_568451; path: JsonNode;
+proc call*(call_564357: Call_LargePersonGroupPersonList_564351; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## List all persons in a large person group, and retrieve person information (including personId, name, userData and persistedFaceIds of registered faces of the person).
   ## 
-  let valid = call_568457.validator(path, query, header, formData, body)
-  let scheme = call_568457.pickScheme
+  let valid = call_564357.validator(path, query, header, formData, body)
+  let scheme = call_564357.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568457.url(scheme.get, call_568457.host, call_568457.base,
-                         call_568457.route, valid.getOrDefault("path"),
+  let url = call_564357.url(scheme.get, call_564357.host, call_564357.base,
+                         call_564357.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568457, url, valid)
+  result = hook(call_564357, url, valid)
 
-proc call*(call_568458: Call_LargePersonGroupPersonList_568451;
-          largePersonGroupId: string; top: int = 0; start: string = ""): Recallable =
+proc call*(call_564358: Call_LargePersonGroupPersonList_564351;
+          largePersonGroupId: string; start: string = ""; top: int = 0): Recallable =
   ## largePersonGroupPersonList
   ## List all persons in a large person group, and retrieve person information (including personId, name, userData and persistedFaceIds of registered faces of the person).
-  ##   top: int
-  ##      : Number of persons to return starting with the person id indicated by the 'start' parameter.
   ##   largePersonGroupId: string (required)
   ##                     : Id referencing a particular large person group.
   ##   start: string
   ##        : Starting person id to return (used to list a range of persons).
-  var path_568459 = newJObject()
-  var query_568460 = newJObject()
-  add(query_568460, "top", newJInt(top))
-  add(path_568459, "largePersonGroupId", newJString(largePersonGroupId))
-  add(query_568460, "start", newJString(start))
-  result = call_568458.call(path_568459, query_568460, nil, nil, nil)
+  ##   top: int
+  ##      : Number of persons to return starting with the person id indicated by the 'start' parameter.
+  var path_564359 = newJObject()
+  var query_564360 = newJObject()
+  add(path_564359, "largePersonGroupId", newJString(largePersonGroupId))
+  add(query_564360, "start", newJString(start))
+  add(query_564360, "top", newJInt(top))
+  result = call_564358.call(path_564359, query_564360, nil, nil, nil)
 
-var largePersonGroupPersonList* = Call_LargePersonGroupPersonList_568451(
+var largePersonGroupPersonList* = Call_LargePersonGroupPersonList_564351(
     name: "largePersonGroupPersonList", meth: HttpMethod.HttpGet,
     host: "azure.local", route: "/largepersongroups/{largePersonGroupId}/persons",
-    validator: validate_LargePersonGroupPersonList_568452, base: "",
-    url: url_LargePersonGroupPersonList_568453, schemes: {Scheme.Https})
+    validator: validate_LargePersonGroupPersonList_564352, base: "",
+    url: url_LargePersonGroupPersonList_564353, schemes: {Scheme.Https})
 type
-  Call_LargePersonGroupPersonGet_568470 = ref object of OpenApiRestCall_567668
-proc url_LargePersonGroupPersonGet_568472(protocol: Scheme; host: string;
+  Call_LargePersonGroupPersonGet_564370 = ref object of OpenApiRestCall_563566
+proc url_LargePersonGroupPersonGet_564372(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2962,29 +2966,30 @@ proc url_LargePersonGroupPersonGet_568472(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_LargePersonGroupPersonGet_568471(path: JsonNode; query: JsonNode;
+proc validate_LargePersonGroupPersonGet_564371(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Retrieve a person's name and userData, and the persisted faceIds representing the registered person face feature.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   personId: JString (required)
-  ##           : Id referencing a particular person.
   ##   largePersonGroupId: JString (required)
   ##                     : Id referencing a particular large person group.
+  ##   personId: JString (required)
+  ##           : Id referencing a particular person.
   section = newJObject()
-  assert path != nil, "path argument is necessary due to required `personId` field"
-  var valid_568473 = path.getOrDefault("personId")
-  valid_568473 = validateParameter(valid_568473, JString, required = true,
+  assert path != nil,
+        "path argument is necessary due to required `largePersonGroupId` field"
+  var valid_564373 = path.getOrDefault("largePersonGroupId")
+  valid_564373 = validateParameter(valid_564373, JString, required = true,
                                  default = nil)
-  if valid_568473 != nil:
-    section.add "personId", valid_568473
-  var valid_568474 = path.getOrDefault("largePersonGroupId")
-  valid_568474 = validateParameter(valid_568474, JString, required = true,
+  if valid_564373 != nil:
+    section.add "largePersonGroupId", valid_564373
+  var valid_564374 = path.getOrDefault("personId")
+  valid_564374 = validateParameter(valid_564374, JString, required = true,
                                  default = nil)
-  if valid_568474 != nil:
-    section.add "largePersonGroupId", valid_568474
+  if valid_564374 != nil:
+    section.add "personId", valid_564374
   result.add "path", section
   section = newJObject()
   result.add "query", section
@@ -2995,41 +3000,41 @@ proc validate_LargePersonGroupPersonGet_568471(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568475: Call_LargePersonGroupPersonGet_568470; path: JsonNode;
+proc call*(call_564375: Call_LargePersonGroupPersonGet_564370; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Retrieve a person's name and userData, and the persisted faceIds representing the registered person face feature.
   ## 
-  let valid = call_568475.validator(path, query, header, formData, body)
-  let scheme = call_568475.pickScheme
+  let valid = call_564375.validator(path, query, header, formData, body)
+  let scheme = call_564375.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568475.url(scheme.get, call_568475.host, call_568475.base,
-                         call_568475.route, valid.getOrDefault("path"),
+  let url = call_564375.url(scheme.get, call_564375.host, call_564375.base,
+                         call_564375.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568475, url, valid)
+  result = hook(call_564375, url, valid)
 
-proc call*(call_568476: Call_LargePersonGroupPersonGet_568470; personId: string;
-          largePersonGroupId: string): Recallable =
+proc call*(call_564376: Call_LargePersonGroupPersonGet_564370;
+          largePersonGroupId: string; personId: string): Recallable =
   ## largePersonGroupPersonGet
   ## Retrieve a person's name and userData, and the persisted faceIds representing the registered person face feature.
-  ##   personId: string (required)
-  ##           : Id referencing a particular person.
   ##   largePersonGroupId: string (required)
   ##                     : Id referencing a particular large person group.
-  var path_568477 = newJObject()
-  add(path_568477, "personId", newJString(personId))
-  add(path_568477, "largePersonGroupId", newJString(largePersonGroupId))
-  result = call_568476.call(path_568477, nil, nil, nil, nil)
+  ##   personId: string (required)
+  ##           : Id referencing a particular person.
+  var path_564377 = newJObject()
+  add(path_564377, "largePersonGroupId", newJString(largePersonGroupId))
+  add(path_564377, "personId", newJString(personId))
+  result = call_564376.call(path_564377, nil, nil, nil, nil)
 
-var largePersonGroupPersonGet* = Call_LargePersonGroupPersonGet_568470(
+var largePersonGroupPersonGet* = Call_LargePersonGroupPersonGet_564370(
     name: "largePersonGroupPersonGet", meth: HttpMethod.HttpGet,
     host: "azure.local",
     route: "/largepersongroups/{largePersonGroupId}/persons/{personId}",
-    validator: validate_LargePersonGroupPersonGet_568471, base: "",
-    url: url_LargePersonGroupPersonGet_568472, schemes: {Scheme.Https})
+    validator: validate_LargePersonGroupPersonGet_564371, base: "",
+    url: url_LargePersonGroupPersonGet_564372, schemes: {Scheme.Https})
 type
-  Call_LargePersonGroupPersonUpdate_568486 = ref object of OpenApiRestCall_567668
-proc url_LargePersonGroupPersonUpdate_568488(protocol: Scheme; host: string;
+  Call_LargePersonGroupPersonUpdate_564386 = ref object of OpenApiRestCall_563566
+proc url_LargePersonGroupPersonUpdate_564388(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -3048,29 +3053,30 @@ proc url_LargePersonGroupPersonUpdate_568488(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_LargePersonGroupPersonUpdate_568487(path: JsonNode; query: JsonNode;
+proc validate_LargePersonGroupPersonUpdate_564387(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Update name or userData of a person.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   personId: JString (required)
-  ##           : Id referencing a particular person.
   ##   largePersonGroupId: JString (required)
   ##                     : Id referencing a particular large person group.
+  ##   personId: JString (required)
+  ##           : Id referencing a particular person.
   section = newJObject()
-  assert path != nil, "path argument is necessary due to required `personId` field"
-  var valid_568489 = path.getOrDefault("personId")
-  valid_568489 = validateParameter(valid_568489, JString, required = true,
+  assert path != nil,
+        "path argument is necessary due to required `largePersonGroupId` field"
+  var valid_564389 = path.getOrDefault("largePersonGroupId")
+  valid_564389 = validateParameter(valid_564389, JString, required = true,
                                  default = nil)
-  if valid_568489 != nil:
-    section.add "personId", valid_568489
-  var valid_568490 = path.getOrDefault("largePersonGroupId")
-  valid_568490 = validateParameter(valid_568490, JString, required = true,
+  if valid_564389 != nil:
+    section.add "largePersonGroupId", valid_564389
+  var valid_564390 = path.getOrDefault("personId")
+  valid_564390 = validateParameter(valid_564390, JString, required = true,
                                  default = nil)
-  if valid_568490 != nil:
-    section.add "largePersonGroupId", valid_568490
+  if valid_564390 != nil:
+    section.add "personId", valid_564390
   result.add "path", section
   section = newJObject()
   result.add "query", section
@@ -3086,46 +3092,46 @@ proc validate_LargePersonGroupPersonUpdate_568487(path: JsonNode; query: JsonNod
   if body != nil:
     result.add "body", body
 
-proc call*(call_568492: Call_LargePersonGroupPersonUpdate_568486; path: JsonNode;
+proc call*(call_564392: Call_LargePersonGroupPersonUpdate_564386; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Update name or userData of a person.
   ## 
-  let valid = call_568492.validator(path, query, header, formData, body)
-  let scheme = call_568492.pickScheme
+  let valid = call_564392.validator(path, query, header, formData, body)
+  let scheme = call_564392.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568492.url(scheme.get, call_568492.host, call_568492.base,
-                         call_568492.route, valid.getOrDefault("path"),
+  let url = call_564392.url(scheme.get, call_564392.host, call_564392.base,
+                         call_564392.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568492, url, valid)
+  result = hook(call_564392, url, valid)
 
-proc call*(call_568493: Call_LargePersonGroupPersonUpdate_568486; personId: string;
-          largePersonGroupId: string; body: JsonNode): Recallable =
+proc call*(call_564393: Call_LargePersonGroupPersonUpdate_564386;
+          largePersonGroupId: string; body: JsonNode; personId: string): Recallable =
   ## largePersonGroupPersonUpdate
   ## Update name or userData of a person.
-  ##   personId: string (required)
-  ##           : Id referencing a particular person.
   ##   largePersonGroupId: string (required)
   ##                     : Id referencing a particular large person group.
   ##   body: JObject (required)
   ##       : Request body for person update operation.
-  var path_568494 = newJObject()
-  var body_568495 = newJObject()
-  add(path_568494, "personId", newJString(personId))
-  add(path_568494, "largePersonGroupId", newJString(largePersonGroupId))
+  ##   personId: string (required)
+  ##           : Id referencing a particular person.
+  var path_564394 = newJObject()
+  var body_564395 = newJObject()
+  add(path_564394, "largePersonGroupId", newJString(largePersonGroupId))
   if body != nil:
-    body_568495 = body
-  result = call_568493.call(path_568494, nil, nil, nil, body_568495)
+    body_564395 = body
+  add(path_564394, "personId", newJString(personId))
+  result = call_564393.call(path_564394, nil, nil, nil, body_564395)
 
-var largePersonGroupPersonUpdate* = Call_LargePersonGroupPersonUpdate_568486(
+var largePersonGroupPersonUpdate* = Call_LargePersonGroupPersonUpdate_564386(
     name: "largePersonGroupPersonUpdate", meth: HttpMethod.HttpPatch,
     host: "azure.local",
     route: "/largepersongroups/{largePersonGroupId}/persons/{personId}",
-    validator: validate_LargePersonGroupPersonUpdate_568487, base: "",
-    url: url_LargePersonGroupPersonUpdate_568488, schemes: {Scheme.Https})
+    validator: validate_LargePersonGroupPersonUpdate_564387, base: "",
+    url: url_LargePersonGroupPersonUpdate_564388, schemes: {Scheme.Https})
 type
-  Call_LargePersonGroupPersonDelete_568478 = ref object of OpenApiRestCall_567668
-proc url_LargePersonGroupPersonDelete_568480(protocol: Scheme; host: string;
+  Call_LargePersonGroupPersonDelete_564378 = ref object of OpenApiRestCall_563566
+proc url_LargePersonGroupPersonDelete_564380(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -3144,29 +3150,30 @@ proc url_LargePersonGroupPersonDelete_568480(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_LargePersonGroupPersonDelete_568479(path: JsonNode; query: JsonNode;
+proc validate_LargePersonGroupPersonDelete_564379(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Delete an existing person from a large person group. The persistedFaceId, userData, person name and face feature in the person entry will all be deleted.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   personId: JString (required)
-  ##           : Id referencing a particular person.
   ##   largePersonGroupId: JString (required)
   ##                     : Id referencing a particular large person group.
+  ##   personId: JString (required)
+  ##           : Id referencing a particular person.
   section = newJObject()
-  assert path != nil, "path argument is necessary due to required `personId` field"
-  var valid_568481 = path.getOrDefault("personId")
-  valid_568481 = validateParameter(valid_568481, JString, required = true,
+  assert path != nil,
+        "path argument is necessary due to required `largePersonGroupId` field"
+  var valid_564381 = path.getOrDefault("largePersonGroupId")
+  valid_564381 = validateParameter(valid_564381, JString, required = true,
                                  default = nil)
-  if valid_568481 != nil:
-    section.add "personId", valid_568481
-  var valid_568482 = path.getOrDefault("largePersonGroupId")
-  valid_568482 = validateParameter(valid_568482, JString, required = true,
+  if valid_564381 != nil:
+    section.add "largePersonGroupId", valid_564381
+  var valid_564382 = path.getOrDefault("personId")
+  valid_564382 = validateParameter(valid_564382, JString, required = true,
                                  default = nil)
-  if valid_568482 != nil:
-    section.add "largePersonGroupId", valid_568482
+  if valid_564382 != nil:
+    section.add "personId", valid_564382
   result.add "path", section
   section = newJObject()
   result.add "query", section
@@ -3177,41 +3184,41 @@ proc validate_LargePersonGroupPersonDelete_568479(path: JsonNode; query: JsonNod
   if body != nil:
     result.add "body", body
 
-proc call*(call_568483: Call_LargePersonGroupPersonDelete_568478; path: JsonNode;
+proc call*(call_564383: Call_LargePersonGroupPersonDelete_564378; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Delete an existing person from a large person group. The persistedFaceId, userData, person name and face feature in the person entry will all be deleted.
   ## 
-  let valid = call_568483.validator(path, query, header, formData, body)
-  let scheme = call_568483.pickScheme
+  let valid = call_564383.validator(path, query, header, formData, body)
+  let scheme = call_564383.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568483.url(scheme.get, call_568483.host, call_568483.base,
-                         call_568483.route, valid.getOrDefault("path"),
+  let url = call_564383.url(scheme.get, call_564383.host, call_564383.base,
+                         call_564383.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568483, url, valid)
+  result = hook(call_564383, url, valid)
 
-proc call*(call_568484: Call_LargePersonGroupPersonDelete_568478; personId: string;
-          largePersonGroupId: string): Recallable =
+proc call*(call_564384: Call_LargePersonGroupPersonDelete_564378;
+          largePersonGroupId: string; personId: string): Recallable =
   ## largePersonGroupPersonDelete
   ## Delete an existing person from a large person group. The persistedFaceId, userData, person name and face feature in the person entry will all be deleted.
-  ##   personId: string (required)
-  ##           : Id referencing a particular person.
   ##   largePersonGroupId: string (required)
   ##                     : Id referencing a particular large person group.
-  var path_568485 = newJObject()
-  add(path_568485, "personId", newJString(personId))
-  add(path_568485, "largePersonGroupId", newJString(largePersonGroupId))
-  result = call_568484.call(path_568485, nil, nil, nil, nil)
+  ##   personId: string (required)
+  ##           : Id referencing a particular person.
+  var path_564385 = newJObject()
+  add(path_564385, "largePersonGroupId", newJString(largePersonGroupId))
+  add(path_564385, "personId", newJString(personId))
+  result = call_564384.call(path_564385, nil, nil, nil, nil)
 
-var largePersonGroupPersonDelete* = Call_LargePersonGroupPersonDelete_568478(
+var largePersonGroupPersonDelete* = Call_LargePersonGroupPersonDelete_564378(
     name: "largePersonGroupPersonDelete", meth: HttpMethod.HttpDelete,
     host: "azure.local",
     route: "/largepersongroups/{largePersonGroupId}/persons/{personId}",
-    validator: validate_LargePersonGroupPersonDelete_568479, base: "",
-    url: url_LargePersonGroupPersonDelete_568480, schemes: {Scheme.Https})
+    validator: validate_LargePersonGroupPersonDelete_564379, base: "",
+    url: url_LargePersonGroupPersonDelete_564380, schemes: {Scheme.Https})
 type
-  Call_LargePersonGroupPersonAddFaceFromUrl_568496 = ref object of OpenApiRestCall_567668
-proc url_LargePersonGroupPersonAddFaceFromUrl_568498(protocol: Scheme;
+  Call_LargePersonGroupPersonAddFaceFromUrl_564396 = ref object of OpenApiRestCall_563566
+proc url_LargePersonGroupPersonAddFaceFromUrl_564398(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -3231,7 +3238,7 @@ proc url_LargePersonGroupPersonAddFaceFromUrl_568498(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_LargePersonGroupPersonAddFaceFromUrl_568497(path: JsonNode;
+proc validate_LargePersonGroupPersonAddFaceFromUrl_564397(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Add a face to a person into a large person group for face identification or verification. To deal with an image contains multiple faces, input face can be specified as an image with a targetFace rectangle. It returns a persistedFaceId representing the added face. No image will be stored. Only the extracted face feature will be stored on server until [LargePersonGroup PersonFace - Delete](/docs/services/563879b61984550e40cbbe8d/operations/599ae2966ac60f11b48b5aa3), [LargePersonGroup Person - Delete](/docs/services/563879b61984550e40cbbe8d/operations/599ade5c6ac60f11b48b5aa2) or [LargePersonGroup - Delete](/docs/services/563879b61984550e40cbbe8d/operations/599adc216ac60f11b48b5a9f) is called.
   ## <br /> Note persistedFaceId is different from faceId generated by [Face - Detect](/docs/services/563879b61984550e40cbbe8d/operations/563879b61984550f30395236).
@@ -3251,46 +3258,47 @@ proc validate_LargePersonGroupPersonAddFaceFromUrl_568497(path: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   personId: JString (required)
-  ##           : Id referencing a particular person.
   ##   largePersonGroupId: JString (required)
   ##                     : Id referencing a particular large person group.
+  ##   personId: JString (required)
+  ##           : Id referencing a particular person.
   section = newJObject()
-  assert path != nil, "path argument is necessary due to required `personId` field"
-  var valid_568499 = path.getOrDefault("personId")
-  valid_568499 = validateParameter(valid_568499, JString, required = true,
+  assert path != nil,
+        "path argument is necessary due to required `largePersonGroupId` field"
+  var valid_564399 = path.getOrDefault("largePersonGroupId")
+  valid_564399 = validateParameter(valid_564399, JString, required = true,
                                  default = nil)
-  if valid_568499 != nil:
-    section.add "personId", valid_568499
-  var valid_568500 = path.getOrDefault("largePersonGroupId")
-  valid_568500 = validateParameter(valid_568500, JString, required = true,
+  if valid_564399 != nil:
+    section.add "largePersonGroupId", valid_564399
+  var valid_564400 = path.getOrDefault("personId")
+  valid_564400 = validateParameter(valid_564400, JString, required = true,
                                  default = nil)
-  if valid_568500 != nil:
-    section.add "largePersonGroupId", valid_568500
+  if valid_564400 != nil:
+    section.add "personId", valid_564400
   result.add "path", section
   ## parameters in `query` object:
-  ##   userData: JString
-  ##           : User-specified data about the face for any purpose. The maximum length is 1KB.
   ##   detectionModel: JString
   ##                 : Name of detection model. Detection model is used to detect faces in the submitted image. A detection model name can be provided when performing Face - Detect or (Large)FaceList - Add Face or (Large)PersonGroup - Add Face. The default value is 'detection_01', if another model is needed, please explicitly specify it.
   ##   targetFace: JArray
   ##             : A face rectangle to specify the target face to be added to a person in the format of "targetFace=left,top,width,height". E.g. "targetFace=10,10,100,100". If there is more than one face in the image, targetFace is required to specify which face to add. No targetFace means there is only one face detected in the entire image.
+  ##   userData: JString
+  ##           : User-specified data about the face for any purpose. The maximum length is 1KB.
   section = newJObject()
-  var valid_568501 = query.getOrDefault("userData")
-  valid_568501 = validateParameter(valid_568501, JString, required = false,
-                                 default = nil)
-  if valid_568501 != nil:
-    section.add "userData", valid_568501
-  var valid_568502 = query.getOrDefault("detectionModel")
-  valid_568502 = validateParameter(valid_568502, JString, required = false,
+  var valid_564401 = query.getOrDefault("detectionModel")
+  valid_564401 = validateParameter(valid_564401, JString, required = false,
                                  default = newJString("detection_01"))
-  if valid_568502 != nil:
-    section.add "detectionModel", valid_568502
-  var valid_568503 = query.getOrDefault("targetFace")
-  valid_568503 = validateParameter(valid_568503, JArray, required = false,
+  if valid_564401 != nil:
+    section.add "detectionModel", valid_564401
+  var valid_564402 = query.getOrDefault("targetFace")
+  valid_564402 = validateParameter(valid_564402, JArray, required = false,
                                  default = nil)
-  if valid_568503 != nil:
-    section.add "targetFace", valid_568503
+  if valid_564402 != nil:
+    section.add "targetFace", valid_564402
+  var valid_564403 = query.getOrDefault("userData")
+  valid_564403 = validateParameter(valid_564403, JString, required = false,
+                                 default = nil)
+  if valid_564403 != nil:
+    section.add "userData", valid_564403
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3304,7 +3312,7 @@ proc validate_LargePersonGroupPersonAddFaceFromUrl_568497(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568505: Call_LargePersonGroupPersonAddFaceFromUrl_568496;
+proc call*(call_564405: Call_LargePersonGroupPersonAddFaceFromUrl_564396;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Add a face to a person into a large person group for face identification or verification. To deal with an image contains multiple faces, input face can be specified as an image with a targetFace rectangle. It returns a persistedFaceId representing the added face. No image will be stored. Only the extracted face feature will be stored on server until [LargePersonGroup PersonFace - Delete](/docs/services/563879b61984550e40cbbe8d/operations/599ae2966ac60f11b48b5aa3), [LargePersonGroup Person - Delete](/docs/services/563879b61984550e40cbbe8d/operations/599ade5c6ac60f11b48b5aa2) or [LargePersonGroup - Delete](/docs/services/563879b61984550e40cbbe8d/operations/599adc216ac60f11b48b5a9f) is called.
@@ -3322,19 +3330,19 @@ proc call*(call_568505: Call_LargePersonGroupPersonAddFaceFromUrl_568496;
   ##   | 'detection_01': | The default detection model for [LargePersonGroup Person - Add Face](/docs/services/563879b61984550e40cbbe8d/operations/599adf2a3a7b9412a4d53f42). Recommend for near frontal face detection. For scenarios with exceptionally large angle (head-pose) faces, occluded faces or wrong image orientation, the faces in such cases may not be detected. |
   ##   | 'detection_02': | Detection model released in 2019 May with improved accuracy especially on small, side and blurry faces. |
   ## 
-  let valid = call_568505.validator(path, query, header, formData, body)
-  let scheme = call_568505.pickScheme
+  let valid = call_564405.validator(path, query, header, formData, body)
+  let scheme = call_564405.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568505.url(scheme.get, call_568505.host, call_568505.base,
-                         call_568505.route, valid.getOrDefault("path"),
+  let url = call_564405.url(scheme.get, call_564405.host, call_564405.base,
+                         call_564405.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568505, url, valid)
+  result = hook(call_564405, url, valid)
 
-proc call*(call_568506: Call_LargePersonGroupPersonAddFaceFromUrl_568496;
-          personId: string; ImageUrl: JsonNode; largePersonGroupId: string;
-          userData: string = ""; detectionModel: string = "detection_01";
-          targetFace: JsonNode = nil): Recallable =
+proc call*(call_564406: Call_LargePersonGroupPersonAddFaceFromUrl_564396;
+          largePersonGroupId: string; personId: string; ImageUrl: JsonNode;
+          detectionModel: string = "detection_01"; targetFace: JsonNode = nil;
+          userData: string = ""): Recallable =
   ## largePersonGroupPersonAddFaceFromUrl
   ## Add a face to a person into a large person group for face identification or verification. To deal with an image contains multiple faces, input face can be specified as an image with a targetFace rectangle. It returns a persistedFaceId representing the added face. No image will be stored. Only the extracted face feature will be stored on server until [LargePersonGroup PersonFace - Delete](/docs/services/563879b61984550e40cbbe8d/operations/599ae2966ac60f11b48b5aa3), [LargePersonGroup Person - Delete](/docs/services/563879b61984550e40cbbe8d/operations/599ade5c6ac60f11b48b5aa2) or [LargePersonGroup - Delete](/docs/services/563879b61984550e40cbbe8d/operations/599adc216ac60f11b48b5a9f) is called.
   ## <br /> Note persistedFaceId is different from faceId generated by [Face - Detect](/docs/services/563879b61984550e40cbbe8d/operations/563879b61984550f30395236).
@@ -3350,39 +3358,39 @@ proc call*(call_568506: Call_LargePersonGroupPersonAddFaceFromUrl_568496;
   ##   | ---------- | -------- |
   ##   | 'detection_01': | The default detection model for [LargePersonGroup Person - Add Face](/docs/services/563879b61984550e40cbbe8d/operations/599adf2a3a7b9412a4d53f42). Recommend for near frontal face detection. For scenarios with exceptionally large angle (head-pose) faces, occluded faces or wrong image orientation, the faces in such cases may not be detected. |
   ##   | 'detection_02': | Detection model released in 2019 May with improved accuracy especially on small, side and blurry faces. |
-  ##   personId: string (required)
-  ##           : Id referencing a particular person.
-  ##   userData: string
-  ##           : User-specified data about the face for any purpose. The maximum length is 1KB.
-  ##   ImageUrl: JObject (required)
-  ##           : A JSON document with a URL pointing to the image that is to be analyzed.
   ##   detectionModel: string
   ##                 : Name of detection model. Detection model is used to detect faces in the submitted image. A detection model name can be provided when performing Face - Detect or (Large)FaceList - Add Face or (Large)PersonGroup - Add Face. The default value is 'detection_01', if another model is needed, please explicitly specify it.
-  ##   largePersonGroupId: string (required)
-  ##                     : Id referencing a particular large person group.
   ##   targetFace: JArray
   ##             : A face rectangle to specify the target face to be added to a person in the format of "targetFace=left,top,width,height". E.g. "targetFace=10,10,100,100". If there is more than one face in the image, targetFace is required to specify which face to add. No targetFace means there is only one face detected in the entire image.
-  var path_568507 = newJObject()
-  var query_568508 = newJObject()
-  var body_568509 = newJObject()
-  add(path_568507, "personId", newJString(personId))
-  add(query_568508, "userData", newJString(userData))
-  if ImageUrl != nil:
-    body_568509 = ImageUrl
-  add(query_568508, "detectionModel", newJString(detectionModel))
-  add(path_568507, "largePersonGroupId", newJString(largePersonGroupId))
+  ##   largePersonGroupId: string (required)
+  ##                     : Id referencing a particular large person group.
+  ##   userData: string
+  ##           : User-specified data about the face for any purpose. The maximum length is 1KB.
+  ##   personId: string (required)
+  ##           : Id referencing a particular person.
+  ##   ImageUrl: JObject (required)
+  ##           : A JSON document with a URL pointing to the image that is to be analyzed.
+  var path_564407 = newJObject()
+  var query_564408 = newJObject()
+  var body_564409 = newJObject()
+  add(query_564408, "detectionModel", newJString(detectionModel))
   if targetFace != nil:
-    query_568508.add "targetFace", targetFace
-  result = call_568506.call(path_568507, query_568508, nil, nil, body_568509)
+    query_564408.add "targetFace", targetFace
+  add(path_564407, "largePersonGroupId", newJString(largePersonGroupId))
+  add(query_564408, "userData", newJString(userData))
+  add(path_564407, "personId", newJString(personId))
+  if ImageUrl != nil:
+    body_564409 = ImageUrl
+  result = call_564406.call(path_564407, query_564408, nil, nil, body_564409)
 
-var largePersonGroupPersonAddFaceFromUrl* = Call_LargePersonGroupPersonAddFaceFromUrl_568496(
+var largePersonGroupPersonAddFaceFromUrl* = Call_LargePersonGroupPersonAddFaceFromUrl_564396(
     name: "largePersonGroupPersonAddFaceFromUrl", meth: HttpMethod.HttpPost,
     host: "azure.local", route: "/largepersongroups/{largePersonGroupId}/persons/{personId}/persistedfaces",
-    validator: validate_LargePersonGroupPersonAddFaceFromUrl_568497, base: "",
-    url: url_LargePersonGroupPersonAddFaceFromUrl_568498, schemes: {Scheme.Https})
+    validator: validate_LargePersonGroupPersonAddFaceFromUrl_564397, base: "",
+    url: url_LargePersonGroupPersonAddFaceFromUrl_564398, schemes: {Scheme.Https})
 type
-  Call_LargePersonGroupPersonGetFace_568510 = ref object of OpenApiRestCall_567668
-proc url_LargePersonGroupPersonGetFace_568512(protocol: Scheme; host: string;
+  Call_LargePersonGroupPersonGetFace_564410 = ref object of OpenApiRestCall_563566
+proc url_LargePersonGroupPersonGetFace_564412(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -3404,7 +3412,7 @@ proc url_LargePersonGroupPersonGetFace_568512(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_LargePersonGroupPersonGetFace_568511(path: JsonNode; query: JsonNode;
+proc validate_LargePersonGroupPersonGetFace_564411(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Retrieve information about a persisted face (specified by persistedFaceId, personId and its belonging largePersonGroupId).
   ## 
@@ -3413,28 +3421,28 @@ proc validate_LargePersonGroupPersonGetFace_568511(path: JsonNode; query: JsonNo
   ## parameters in `path` object:
   ##   persistedFaceId: JString (required)
   ##                  : Id referencing a particular persistedFaceId of an existing face.
-  ##   personId: JString (required)
-  ##           : Id referencing a particular person.
   ##   largePersonGroupId: JString (required)
   ##                     : Id referencing a particular large person group.
+  ##   personId: JString (required)
+  ##           : Id referencing a particular person.
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `persistedFaceId` field"
-  var valid_568513 = path.getOrDefault("persistedFaceId")
-  valid_568513 = validateParameter(valid_568513, JString, required = true,
+  var valid_564413 = path.getOrDefault("persistedFaceId")
+  valid_564413 = validateParameter(valid_564413, JString, required = true,
                                  default = nil)
-  if valid_568513 != nil:
-    section.add "persistedFaceId", valid_568513
-  var valid_568514 = path.getOrDefault("personId")
-  valid_568514 = validateParameter(valid_568514, JString, required = true,
+  if valid_564413 != nil:
+    section.add "persistedFaceId", valid_564413
+  var valid_564414 = path.getOrDefault("largePersonGroupId")
+  valid_564414 = validateParameter(valid_564414, JString, required = true,
                                  default = nil)
-  if valid_568514 != nil:
-    section.add "personId", valid_568514
-  var valid_568515 = path.getOrDefault("largePersonGroupId")
-  valid_568515 = validateParameter(valid_568515, JString, required = true,
+  if valid_564414 != nil:
+    section.add "largePersonGroupId", valid_564414
+  var valid_564415 = path.getOrDefault("personId")
+  valid_564415 = validateParameter(valid_564415, JString, required = true,
                                  default = nil)
-  if valid_568515 != nil:
-    section.add "largePersonGroupId", valid_568515
+  if valid_564415 != nil:
+    section.add "personId", valid_564415
   result.add "path", section
   section = newJObject()
   result.add "query", section
@@ -3445,43 +3453,43 @@ proc validate_LargePersonGroupPersonGetFace_568511(path: JsonNode; query: JsonNo
   if body != nil:
     result.add "body", body
 
-proc call*(call_568516: Call_LargePersonGroupPersonGetFace_568510; path: JsonNode;
+proc call*(call_564416: Call_LargePersonGroupPersonGetFace_564410; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Retrieve information about a persisted face (specified by persistedFaceId, personId and its belonging largePersonGroupId).
   ## 
-  let valid = call_568516.validator(path, query, header, formData, body)
-  let scheme = call_568516.pickScheme
+  let valid = call_564416.validator(path, query, header, formData, body)
+  let scheme = call_564416.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568516.url(scheme.get, call_568516.host, call_568516.base,
-                         call_568516.route, valid.getOrDefault("path"),
+  let url = call_564416.url(scheme.get, call_564416.host, call_564416.base,
+                         call_564416.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568516, url, valid)
+  result = hook(call_564416, url, valid)
 
-proc call*(call_568517: Call_LargePersonGroupPersonGetFace_568510;
-          persistedFaceId: string; personId: string; largePersonGroupId: string): Recallable =
+proc call*(call_564417: Call_LargePersonGroupPersonGetFace_564410;
+          persistedFaceId: string; largePersonGroupId: string; personId: string): Recallable =
   ## largePersonGroupPersonGetFace
   ## Retrieve information about a persisted face (specified by persistedFaceId, personId and its belonging largePersonGroupId).
   ##   persistedFaceId: string (required)
   ##                  : Id referencing a particular persistedFaceId of an existing face.
-  ##   personId: string (required)
-  ##           : Id referencing a particular person.
   ##   largePersonGroupId: string (required)
   ##                     : Id referencing a particular large person group.
-  var path_568518 = newJObject()
-  add(path_568518, "persistedFaceId", newJString(persistedFaceId))
-  add(path_568518, "personId", newJString(personId))
-  add(path_568518, "largePersonGroupId", newJString(largePersonGroupId))
-  result = call_568517.call(path_568518, nil, nil, nil, nil)
+  ##   personId: string (required)
+  ##           : Id referencing a particular person.
+  var path_564418 = newJObject()
+  add(path_564418, "persistedFaceId", newJString(persistedFaceId))
+  add(path_564418, "largePersonGroupId", newJString(largePersonGroupId))
+  add(path_564418, "personId", newJString(personId))
+  result = call_564417.call(path_564418, nil, nil, nil, nil)
 
-var largePersonGroupPersonGetFace* = Call_LargePersonGroupPersonGetFace_568510(
+var largePersonGroupPersonGetFace* = Call_LargePersonGroupPersonGetFace_564410(
     name: "largePersonGroupPersonGetFace", meth: HttpMethod.HttpGet,
     host: "azure.local", route: "/largepersongroups/{largePersonGroupId}/persons/{personId}/persistedfaces/{persistedFaceId}",
-    validator: validate_LargePersonGroupPersonGetFace_568511, base: "",
-    url: url_LargePersonGroupPersonGetFace_568512, schemes: {Scheme.Https})
+    validator: validate_LargePersonGroupPersonGetFace_564411, base: "",
+    url: url_LargePersonGroupPersonGetFace_564412, schemes: {Scheme.Https})
 type
-  Call_LargePersonGroupPersonUpdateFace_568528 = ref object of OpenApiRestCall_567668
-proc url_LargePersonGroupPersonUpdateFace_568530(protocol: Scheme; host: string;
+  Call_LargePersonGroupPersonUpdateFace_564428 = ref object of OpenApiRestCall_563566
+proc url_LargePersonGroupPersonUpdateFace_564430(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -3503,7 +3511,7 @@ proc url_LargePersonGroupPersonUpdateFace_568530(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_LargePersonGroupPersonUpdateFace_568529(path: JsonNode;
+proc validate_LargePersonGroupPersonUpdateFace_564429(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Update a person persisted face's userData field.
   ## 
@@ -3512,28 +3520,28 @@ proc validate_LargePersonGroupPersonUpdateFace_568529(path: JsonNode;
   ## parameters in `path` object:
   ##   persistedFaceId: JString (required)
   ##                  : Id referencing a particular persistedFaceId of an existing face.
-  ##   personId: JString (required)
-  ##           : Id referencing a particular person.
   ##   largePersonGroupId: JString (required)
   ##                     : Id referencing a particular large person group.
+  ##   personId: JString (required)
+  ##           : Id referencing a particular person.
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `persistedFaceId` field"
-  var valid_568531 = path.getOrDefault("persistedFaceId")
-  valid_568531 = validateParameter(valid_568531, JString, required = true,
+  var valid_564431 = path.getOrDefault("persistedFaceId")
+  valid_564431 = validateParameter(valid_564431, JString, required = true,
                                  default = nil)
-  if valid_568531 != nil:
-    section.add "persistedFaceId", valid_568531
-  var valid_568532 = path.getOrDefault("personId")
-  valid_568532 = validateParameter(valid_568532, JString, required = true,
+  if valid_564431 != nil:
+    section.add "persistedFaceId", valid_564431
+  var valid_564432 = path.getOrDefault("largePersonGroupId")
+  valid_564432 = validateParameter(valid_564432, JString, required = true,
                                  default = nil)
-  if valid_568532 != nil:
-    section.add "personId", valid_568532
-  var valid_568533 = path.getOrDefault("largePersonGroupId")
-  valid_568533 = validateParameter(valid_568533, JString, required = true,
+  if valid_564432 != nil:
+    section.add "largePersonGroupId", valid_564432
+  var valid_564433 = path.getOrDefault("personId")
+  valid_564433 = validateParameter(valid_564433, JString, required = true,
                                  default = nil)
-  if valid_568533 != nil:
-    section.add "largePersonGroupId", valid_568533
+  if valid_564433 != nil:
+    section.add "personId", valid_564433
   result.add "path", section
   section = newJObject()
   result.add "query", section
@@ -3549,50 +3557,50 @@ proc validate_LargePersonGroupPersonUpdateFace_568529(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568535: Call_LargePersonGroupPersonUpdateFace_568528;
+proc call*(call_564435: Call_LargePersonGroupPersonUpdateFace_564428;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Update a person persisted face's userData field.
   ## 
-  let valid = call_568535.validator(path, query, header, formData, body)
-  let scheme = call_568535.pickScheme
+  let valid = call_564435.validator(path, query, header, formData, body)
+  let scheme = call_564435.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568535.url(scheme.get, call_568535.host, call_568535.base,
-                         call_568535.route, valid.getOrDefault("path"),
+  let url = call_564435.url(scheme.get, call_564435.host, call_564435.base,
+                         call_564435.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568535, url, valid)
+  result = hook(call_564435, url, valid)
 
-proc call*(call_568536: Call_LargePersonGroupPersonUpdateFace_568528;
-          persistedFaceId: string; personId: string; largePersonGroupId: string;
-          body: JsonNode): Recallable =
+proc call*(call_564436: Call_LargePersonGroupPersonUpdateFace_564428;
+          persistedFaceId: string; largePersonGroupId: string; body: JsonNode;
+          personId: string): Recallable =
   ## largePersonGroupPersonUpdateFace
   ## Update a person persisted face's userData field.
   ##   persistedFaceId: string (required)
   ##                  : Id referencing a particular persistedFaceId of an existing face.
-  ##   personId: string (required)
-  ##           : Id referencing a particular person.
   ##   largePersonGroupId: string (required)
   ##                     : Id referencing a particular large person group.
   ##   body: JObject (required)
   ##       : Request body for updating persisted face.
-  var path_568537 = newJObject()
-  var body_568538 = newJObject()
-  add(path_568537, "persistedFaceId", newJString(persistedFaceId))
-  add(path_568537, "personId", newJString(personId))
-  add(path_568537, "largePersonGroupId", newJString(largePersonGroupId))
+  ##   personId: string (required)
+  ##           : Id referencing a particular person.
+  var path_564437 = newJObject()
+  var body_564438 = newJObject()
+  add(path_564437, "persistedFaceId", newJString(persistedFaceId))
+  add(path_564437, "largePersonGroupId", newJString(largePersonGroupId))
   if body != nil:
-    body_568538 = body
-  result = call_568536.call(path_568537, nil, nil, nil, body_568538)
+    body_564438 = body
+  add(path_564437, "personId", newJString(personId))
+  result = call_564436.call(path_564437, nil, nil, nil, body_564438)
 
-var largePersonGroupPersonUpdateFace* = Call_LargePersonGroupPersonUpdateFace_568528(
+var largePersonGroupPersonUpdateFace* = Call_LargePersonGroupPersonUpdateFace_564428(
     name: "largePersonGroupPersonUpdateFace", meth: HttpMethod.HttpPatch,
     host: "azure.local", route: "/largepersongroups/{largePersonGroupId}/persons/{personId}/persistedfaces/{persistedFaceId}",
-    validator: validate_LargePersonGroupPersonUpdateFace_568529, base: "",
-    url: url_LargePersonGroupPersonUpdateFace_568530, schemes: {Scheme.Https})
+    validator: validate_LargePersonGroupPersonUpdateFace_564429, base: "",
+    url: url_LargePersonGroupPersonUpdateFace_564430, schemes: {Scheme.Https})
 type
-  Call_LargePersonGroupPersonDeleteFace_568519 = ref object of OpenApiRestCall_567668
-proc url_LargePersonGroupPersonDeleteFace_568521(protocol: Scheme; host: string;
+  Call_LargePersonGroupPersonDeleteFace_564419 = ref object of OpenApiRestCall_563566
+proc url_LargePersonGroupPersonDeleteFace_564421(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -3614,7 +3622,7 @@ proc url_LargePersonGroupPersonDeleteFace_568521(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_LargePersonGroupPersonDeleteFace_568520(path: JsonNode;
+proc validate_LargePersonGroupPersonDeleteFace_564420(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Delete a face from a person in a large person group by specified largePersonGroupId, personId and persistedFaceId.
   ## <br /> Adding/deleting faces to/from a same person will be processed sequentially. Adding/deleting faces to/from different persons are processed in parallel.
@@ -3624,28 +3632,28 @@ proc validate_LargePersonGroupPersonDeleteFace_568520(path: JsonNode;
   ## parameters in `path` object:
   ##   persistedFaceId: JString (required)
   ##                  : Id referencing a particular persistedFaceId of an existing face.
-  ##   personId: JString (required)
-  ##           : Id referencing a particular person.
   ##   largePersonGroupId: JString (required)
   ##                     : Id referencing a particular large person group.
+  ##   personId: JString (required)
+  ##           : Id referencing a particular person.
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `persistedFaceId` field"
-  var valid_568522 = path.getOrDefault("persistedFaceId")
-  valid_568522 = validateParameter(valid_568522, JString, required = true,
+  var valid_564422 = path.getOrDefault("persistedFaceId")
+  valid_564422 = validateParameter(valid_564422, JString, required = true,
                                  default = nil)
-  if valid_568522 != nil:
-    section.add "persistedFaceId", valid_568522
-  var valid_568523 = path.getOrDefault("personId")
-  valid_568523 = validateParameter(valid_568523, JString, required = true,
+  if valid_564422 != nil:
+    section.add "persistedFaceId", valid_564422
+  var valid_564423 = path.getOrDefault("largePersonGroupId")
+  valid_564423 = validateParameter(valid_564423, JString, required = true,
                                  default = nil)
-  if valid_568523 != nil:
-    section.add "personId", valid_568523
-  var valid_568524 = path.getOrDefault("largePersonGroupId")
-  valid_568524 = validateParameter(valid_568524, JString, required = true,
+  if valid_564423 != nil:
+    section.add "largePersonGroupId", valid_564423
+  var valid_564424 = path.getOrDefault("personId")
+  valid_564424 = validateParameter(valid_564424, JString, required = true,
                                  default = nil)
-  if valid_568524 != nil:
-    section.add "largePersonGroupId", valid_568524
+  if valid_564424 != nil:
+    section.add "personId", valid_564424
   result.add "path", section
   section = newJObject()
   result.add "query", section
@@ -3656,46 +3664,46 @@ proc validate_LargePersonGroupPersonDeleteFace_568520(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568525: Call_LargePersonGroupPersonDeleteFace_568519;
+proc call*(call_564425: Call_LargePersonGroupPersonDeleteFace_564419;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Delete a face from a person in a large person group by specified largePersonGroupId, personId and persistedFaceId.
   ## <br /> Adding/deleting faces to/from a same person will be processed sequentially. Adding/deleting faces to/from different persons are processed in parallel.
   ## 
-  let valid = call_568525.validator(path, query, header, formData, body)
-  let scheme = call_568525.pickScheme
+  let valid = call_564425.validator(path, query, header, formData, body)
+  let scheme = call_564425.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568525.url(scheme.get, call_568525.host, call_568525.base,
-                         call_568525.route, valid.getOrDefault("path"),
+  let url = call_564425.url(scheme.get, call_564425.host, call_564425.base,
+                         call_564425.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568525, url, valid)
+  result = hook(call_564425, url, valid)
 
-proc call*(call_568526: Call_LargePersonGroupPersonDeleteFace_568519;
-          persistedFaceId: string; personId: string; largePersonGroupId: string): Recallable =
+proc call*(call_564426: Call_LargePersonGroupPersonDeleteFace_564419;
+          persistedFaceId: string; largePersonGroupId: string; personId: string): Recallable =
   ## largePersonGroupPersonDeleteFace
   ## Delete a face from a person in a large person group by specified largePersonGroupId, personId and persistedFaceId.
   ## <br /> Adding/deleting faces to/from a same person will be processed sequentially. Adding/deleting faces to/from different persons are processed in parallel.
   ##   persistedFaceId: string (required)
   ##                  : Id referencing a particular persistedFaceId of an existing face.
-  ##   personId: string (required)
-  ##           : Id referencing a particular person.
   ##   largePersonGroupId: string (required)
   ##                     : Id referencing a particular large person group.
-  var path_568527 = newJObject()
-  add(path_568527, "persistedFaceId", newJString(persistedFaceId))
-  add(path_568527, "personId", newJString(personId))
-  add(path_568527, "largePersonGroupId", newJString(largePersonGroupId))
-  result = call_568526.call(path_568527, nil, nil, nil, nil)
+  ##   personId: string (required)
+  ##           : Id referencing a particular person.
+  var path_564427 = newJObject()
+  add(path_564427, "persistedFaceId", newJString(persistedFaceId))
+  add(path_564427, "largePersonGroupId", newJString(largePersonGroupId))
+  add(path_564427, "personId", newJString(personId))
+  result = call_564426.call(path_564427, nil, nil, nil, nil)
 
-var largePersonGroupPersonDeleteFace* = Call_LargePersonGroupPersonDeleteFace_568519(
+var largePersonGroupPersonDeleteFace* = Call_LargePersonGroupPersonDeleteFace_564419(
     name: "largePersonGroupPersonDeleteFace", meth: HttpMethod.HttpDelete,
     host: "azure.local", route: "/largepersongroups/{largePersonGroupId}/persons/{personId}/persistedfaces/{persistedFaceId}",
-    validator: validate_LargePersonGroupPersonDeleteFace_568520, base: "",
-    url: url_LargePersonGroupPersonDeleteFace_568521, schemes: {Scheme.Https})
+    validator: validate_LargePersonGroupPersonDeleteFace_564420, base: "",
+    url: url_LargePersonGroupPersonDeleteFace_564421, schemes: {Scheme.Https})
 type
-  Call_LargePersonGroupTrain_568539 = ref object of OpenApiRestCall_567668
-proc url_LargePersonGroupTrain_568541(protocol: Scheme; host: string; base: string;
+  Call_LargePersonGroupTrain_564439 = ref object of OpenApiRestCall_563566
+proc url_LargePersonGroupTrain_564441(protocol: Scheme; host: string; base: string;
                                      route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -3712,7 +3720,7 @@ proc url_LargePersonGroupTrain_568541(protocol: Scheme; host: string; base: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_LargePersonGroupTrain_568540(path: JsonNode; query: JsonNode;
+proc validate_LargePersonGroupTrain_564440(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Queue a large person group training task, the training task may not be started immediately.
   ## 
@@ -3724,11 +3732,11 @@ proc validate_LargePersonGroupTrain_568540(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `largePersonGroupId` field"
-  var valid_568542 = path.getOrDefault("largePersonGroupId")
-  valid_568542 = validateParameter(valid_568542, JString, required = true,
+  var valid_564442 = path.getOrDefault("largePersonGroupId")
+  valid_564442 = validateParameter(valid_564442, JString, required = true,
                                  default = nil)
-  if valid_568542 != nil:
-    section.add "largePersonGroupId", valid_568542
+  if valid_564442 != nil:
+    section.add "largePersonGroupId", valid_564442
   result.add "path", section
   section = newJObject()
   result.add "query", section
@@ -3739,37 +3747,37 @@ proc validate_LargePersonGroupTrain_568540(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568543: Call_LargePersonGroupTrain_568539; path: JsonNode;
+proc call*(call_564443: Call_LargePersonGroupTrain_564439; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Queue a large person group training task, the training task may not be started immediately.
   ## 
-  let valid = call_568543.validator(path, query, header, formData, body)
-  let scheme = call_568543.pickScheme
+  let valid = call_564443.validator(path, query, header, formData, body)
+  let scheme = call_564443.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568543.url(scheme.get, call_568543.host, call_568543.base,
-                         call_568543.route, valid.getOrDefault("path"),
+  let url = call_564443.url(scheme.get, call_564443.host, call_564443.base,
+                         call_564443.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568543, url, valid)
+  result = hook(call_564443, url, valid)
 
-proc call*(call_568544: Call_LargePersonGroupTrain_568539;
+proc call*(call_564444: Call_LargePersonGroupTrain_564439;
           largePersonGroupId: string): Recallable =
   ## largePersonGroupTrain
   ## Queue a large person group training task, the training task may not be started immediately.
   ##   largePersonGroupId: string (required)
   ##                     : Id referencing a particular large person group.
-  var path_568545 = newJObject()
-  add(path_568545, "largePersonGroupId", newJString(largePersonGroupId))
-  result = call_568544.call(path_568545, nil, nil, nil, nil)
+  var path_564445 = newJObject()
+  add(path_564445, "largePersonGroupId", newJString(largePersonGroupId))
+  result = call_564444.call(path_564445, nil, nil, nil, nil)
 
-var largePersonGroupTrain* = Call_LargePersonGroupTrain_568539(
+var largePersonGroupTrain* = Call_LargePersonGroupTrain_564439(
     name: "largePersonGroupTrain", meth: HttpMethod.HttpPost, host: "azure.local",
     route: "/largepersongroups/{largePersonGroupId}/train",
-    validator: validate_LargePersonGroupTrain_568540, base: "",
-    url: url_LargePersonGroupTrain_568541, schemes: {Scheme.Https})
+    validator: validate_LargePersonGroupTrain_564440, base: "",
+    url: url_LargePersonGroupTrain_564441, schemes: {Scheme.Https})
 type
-  Call_LargePersonGroupGetTrainingStatus_568546 = ref object of OpenApiRestCall_567668
-proc url_LargePersonGroupGetTrainingStatus_568548(protocol: Scheme; host: string;
+  Call_LargePersonGroupGetTrainingStatus_564446 = ref object of OpenApiRestCall_563566
+proc url_LargePersonGroupGetTrainingStatus_564448(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -3786,7 +3794,7 @@ proc url_LargePersonGroupGetTrainingStatus_568548(protocol: Scheme; host: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_LargePersonGroupGetTrainingStatus_568547(path: JsonNode;
+proc validate_LargePersonGroupGetTrainingStatus_564447(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Retrieve the training status of a large person group (completed or ongoing).
   ## 
@@ -3798,11 +3806,11 @@ proc validate_LargePersonGroupGetTrainingStatus_568547(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `largePersonGroupId` field"
-  var valid_568549 = path.getOrDefault("largePersonGroupId")
-  valid_568549 = validateParameter(valid_568549, JString, required = true,
+  var valid_564449 = path.getOrDefault("largePersonGroupId")
+  valid_564449 = validateParameter(valid_564449, JString, required = true,
                                  default = nil)
-  if valid_568549 != nil:
-    section.add "largePersonGroupId", valid_568549
+  if valid_564449 != nil:
+    section.add "largePersonGroupId", valid_564449
   result.add "path", section
   section = newJObject()
   result.add "query", section
@@ -3813,39 +3821,39 @@ proc validate_LargePersonGroupGetTrainingStatus_568547(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568550: Call_LargePersonGroupGetTrainingStatus_568546;
+proc call*(call_564450: Call_LargePersonGroupGetTrainingStatus_564446;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Retrieve the training status of a large person group (completed or ongoing).
   ## 
-  let valid = call_568550.validator(path, query, header, formData, body)
-  let scheme = call_568550.pickScheme
+  let valid = call_564450.validator(path, query, header, formData, body)
+  let scheme = call_564450.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568550.url(scheme.get, call_568550.host, call_568550.base,
-                         call_568550.route, valid.getOrDefault("path"),
+  let url = call_564450.url(scheme.get, call_564450.host, call_564450.base,
+                         call_564450.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568550, url, valid)
+  result = hook(call_564450, url, valid)
 
-proc call*(call_568551: Call_LargePersonGroupGetTrainingStatus_568546;
+proc call*(call_564451: Call_LargePersonGroupGetTrainingStatus_564446;
           largePersonGroupId: string): Recallable =
   ## largePersonGroupGetTrainingStatus
   ## Retrieve the training status of a large person group (completed or ongoing).
   ##   largePersonGroupId: string (required)
   ##                     : Id referencing a particular large person group.
-  var path_568552 = newJObject()
-  add(path_568552, "largePersonGroupId", newJString(largePersonGroupId))
-  result = call_568551.call(path_568552, nil, nil, nil, nil)
+  var path_564452 = newJObject()
+  add(path_564452, "largePersonGroupId", newJString(largePersonGroupId))
+  result = call_564451.call(path_564452, nil, nil, nil, nil)
 
-var largePersonGroupGetTrainingStatus* = Call_LargePersonGroupGetTrainingStatus_568546(
+var largePersonGroupGetTrainingStatus* = Call_LargePersonGroupGetTrainingStatus_564446(
     name: "largePersonGroupGetTrainingStatus", meth: HttpMethod.HttpGet,
     host: "azure.local",
     route: "/largepersongroups/{largePersonGroupId}/training",
-    validator: validate_LargePersonGroupGetTrainingStatus_568547, base: "",
-    url: url_LargePersonGroupGetTrainingStatus_568548, schemes: {Scheme.Https})
+    validator: validate_LargePersonGroupGetTrainingStatus_564447, base: "",
+    url: url_LargePersonGroupGetTrainingStatus_564448, schemes: {Scheme.Https})
 type
-  Call_SnapshotGetOperationStatus_568553 = ref object of OpenApiRestCall_567668
-proc url_SnapshotGetOperationStatus_568555(protocol: Scheme; host: string;
+  Call_SnapshotGetOperationStatus_564453 = ref object of OpenApiRestCall_563566
+proc url_SnapshotGetOperationStatus_564455(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -3860,7 +3868,7 @@ proc url_SnapshotGetOperationStatus_568555(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_SnapshotGetOperationStatus_568554(path: JsonNode; query: JsonNode;
+proc validate_SnapshotGetOperationStatus_564454(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Retrieve the status of a take/apply snapshot operation.
   ## 
@@ -3872,11 +3880,11 @@ proc validate_SnapshotGetOperationStatus_568554(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `operationId` field"
-  var valid_568556 = path.getOrDefault("operationId")
-  valid_568556 = validateParameter(valid_568556, JString, required = true,
+  var valid_564456 = path.getOrDefault("operationId")
+  valid_564456 = validateParameter(valid_564456, JString, required = true,
                                  default = nil)
-  if valid_568556 != nil:
-    section.add "operationId", valid_568556
+  if valid_564456 != nil:
+    section.add "operationId", valid_564456
   result.add "path", section
   section = newJObject()
   result.add "query", section
@@ -3887,43 +3895,43 @@ proc validate_SnapshotGetOperationStatus_568554(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568557: Call_SnapshotGetOperationStatus_568553; path: JsonNode;
+proc call*(call_564457: Call_SnapshotGetOperationStatus_564453; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Retrieve the status of a take/apply snapshot operation.
   ## 
-  let valid = call_568557.validator(path, query, header, formData, body)
-  let scheme = call_568557.pickScheme
+  let valid = call_564457.validator(path, query, header, formData, body)
+  let scheme = call_564457.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568557.url(scheme.get, call_568557.host, call_568557.base,
-                         call_568557.route, valid.getOrDefault("path"),
+  let url = call_564457.url(scheme.get, call_564457.host, call_564457.base,
+                         call_564457.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568557, url, valid)
+  result = hook(call_564457, url, valid)
 
-proc call*(call_568558: Call_SnapshotGetOperationStatus_568553; operationId: string): Recallable =
+proc call*(call_564458: Call_SnapshotGetOperationStatus_564453; operationId: string): Recallable =
   ## snapshotGetOperationStatus
   ## Retrieve the status of a take/apply snapshot operation.
   ##   operationId: string (required)
   ##              : Id referencing a particular take/apply snapshot operation.
-  var path_568559 = newJObject()
-  add(path_568559, "operationId", newJString(operationId))
-  result = call_568558.call(path_568559, nil, nil, nil, nil)
+  var path_564459 = newJObject()
+  add(path_564459, "operationId", newJString(operationId))
+  result = call_564458.call(path_564459, nil, nil, nil, nil)
 
-var snapshotGetOperationStatus* = Call_SnapshotGetOperationStatus_568553(
+var snapshotGetOperationStatus* = Call_SnapshotGetOperationStatus_564453(
     name: "snapshotGetOperationStatus", meth: HttpMethod.HttpGet,
     host: "azure.local", route: "/operations/{operationId}",
-    validator: validate_SnapshotGetOperationStatus_568554, base: "",
-    url: url_SnapshotGetOperationStatus_568555, schemes: {Scheme.Https})
+    validator: validate_SnapshotGetOperationStatus_564454, base: "",
+    url: url_SnapshotGetOperationStatus_564455, schemes: {Scheme.Https})
 type
-  Call_PersonGroupList_568560 = ref object of OpenApiRestCall_567668
-proc url_PersonGroupList_568562(protocol: Scheme; host: string; base: string;
+  Call_PersonGroupList_564460 = ref object of OpenApiRestCall_563566
+proc url_PersonGroupList_564462(protocol: Scheme; host: string; base: string;
                                route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_PersonGroupList_568561(path: JsonNode; query: JsonNode;
+proc validate_PersonGroupList_564461(path: JsonNode; query: JsonNode;
                                     header: JsonNode; formData: JsonNode;
                                     body: JsonNode): JsonNode =
   ## List person groups’ personGroupId, name, userData and recognitionModel.<br />
@@ -3942,28 +3950,28 @@ proc validate_PersonGroupList_568561(path: JsonNode; query: JsonNode;
   section = newJObject()
   result.add "path", section
   ## parameters in `query` object:
-  ##   top: JInt
-  ##      : The number of person groups to list.
   ##   returnRecognitionModel: JBool
   ##                         : A value indicating whether the operation should return 'recognitionModel' in response.
   ##   start: JString
   ##        : List person groups from the least personGroupId greater than the "start".
+  ##   top: JInt
+  ##      : The number of person groups to list.
   section = newJObject()
-  var valid_568563 = query.getOrDefault("top")
-  valid_568563 = validateParameter(valid_568563, JInt, required = false,
-                                 default = newJInt(1000))
-  if valid_568563 != nil:
-    section.add "top", valid_568563
-  var valid_568564 = query.getOrDefault("returnRecognitionModel")
-  valid_568564 = validateParameter(valid_568564, JBool, required = false,
+  var valid_564463 = query.getOrDefault("returnRecognitionModel")
+  valid_564463 = validateParameter(valid_564463, JBool, required = false,
                                  default = newJBool(false))
-  if valid_568564 != nil:
-    section.add "returnRecognitionModel", valid_568564
-  var valid_568565 = query.getOrDefault("start")
-  valid_568565 = validateParameter(valid_568565, JString, required = false,
+  if valid_564463 != nil:
+    section.add "returnRecognitionModel", valid_564463
+  var valid_564464 = query.getOrDefault("start")
+  valid_564464 = validateParameter(valid_564464, JString, required = false,
                                  default = nil)
-  if valid_568565 != nil:
-    section.add "start", valid_568565
+  if valid_564464 != nil:
+    section.add "start", valid_564464
+  var valid_564465 = query.getOrDefault("top")
+  valid_564465 = validateParameter(valid_564465, JInt, required = false,
+                                 default = newJInt(1000))
+  if valid_564465 != nil:
+    section.add "top", valid_564465
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3972,7 +3980,7 @@ proc validate_PersonGroupList_568561(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568566: Call_PersonGroupList_568560; path: JsonNode; query: JsonNode;
+proc call*(call_564466: Call_PersonGroupList_564460; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## List person groups’ personGroupId, name, userData and recognitionModel.<br />
   ## * Person groups are stored in alphabetical order of personGroupId.
@@ -3985,17 +3993,17 @@ proc call*(call_568566: Call_PersonGroupList_568560; path: JsonNode; query: Json
   ## <br /> "start=group2&top=3" will return "group3", "group4", "group5".
   ## 
   ## 
-  let valid = call_568566.validator(path, query, header, formData, body)
-  let scheme = call_568566.pickScheme
+  let valid = call_564466.validator(path, query, header, formData, body)
+  let scheme = call_564466.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568566.url(scheme.get, call_568566.host, call_568566.base,
-                         call_568566.route, valid.getOrDefault("path"),
+  let url = call_564466.url(scheme.get, call_564466.host, call_564466.base,
+                         call_564466.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568566, url, valid)
+  result = hook(call_564466, url, valid)
 
-proc call*(call_568567: Call_PersonGroupList_568560; top: int = 1000;
-          returnRecognitionModel: bool = false; start: string = ""): Recallable =
+proc call*(call_564467: Call_PersonGroupList_564460;
+          returnRecognitionModel: bool = false; start: string = ""; top: int = 1000): Recallable =
   ## personGroupList
   ## List person groups’ personGroupId, name, userData and recognitionModel.<br />
   ## * Person groups are stored in alphabetical order of personGroupId.
@@ -4007,25 +4015,25 @@ proc call*(call_568567: Call_PersonGroupList_568560; top: int = 1000;
   ## <br /> "start=&top=2" will return "group1", "group2".
   ## <br /> "start=group2&top=3" will return "group3", "group4", "group5".
   ## 
-  ##   top: int
-  ##      : The number of person groups to list.
   ##   returnRecognitionModel: bool
   ##                         : A value indicating whether the operation should return 'recognitionModel' in response.
   ##   start: string
   ##        : List person groups from the least personGroupId greater than the "start".
-  var query_568568 = newJObject()
-  add(query_568568, "top", newJInt(top))
-  add(query_568568, "returnRecognitionModel", newJBool(returnRecognitionModel))
-  add(query_568568, "start", newJString(start))
-  result = call_568567.call(nil, query_568568, nil, nil, nil)
+  ##   top: int
+  ##      : The number of person groups to list.
+  var query_564468 = newJObject()
+  add(query_564468, "returnRecognitionModel", newJBool(returnRecognitionModel))
+  add(query_564468, "start", newJString(start))
+  add(query_564468, "top", newJInt(top))
+  result = call_564467.call(nil, query_564468, nil, nil, nil)
 
-var personGroupList* = Call_PersonGroupList_568560(name: "personGroupList",
+var personGroupList* = Call_PersonGroupList_564460(name: "personGroupList",
     meth: HttpMethod.HttpGet, host: "azure.local", route: "/persongroups",
-    validator: validate_PersonGroupList_568561, base: "", url: url_PersonGroupList_568562,
+    validator: validate_PersonGroupList_564461, base: "", url: url_PersonGroupList_564462,
     schemes: {Scheme.Https})
 type
-  Call_PersonGroupCreate_568578 = ref object of OpenApiRestCall_567668
-proc url_PersonGroupCreate_568580(protocol: Scheme; host: string; base: string;
+  Call_PersonGroupCreate_564478 = ref object of OpenApiRestCall_563566
+proc url_PersonGroupCreate_564480(protocol: Scheme; host: string; base: string;
                                  route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -4040,7 +4048,7 @@ proc url_PersonGroupCreate_568580(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_PersonGroupCreate_568579(path: JsonNode; query: JsonNode;
+proc validate_PersonGroupCreate_564479(path: JsonNode; query: JsonNode;
                                       header: JsonNode; formData: JsonNode;
                                       body: JsonNode): JsonNode =
   ## Create a new person group with specified personGroupId, name, user-provided userData and recognitionModel.
@@ -4064,11 +4072,11 @@ proc validate_PersonGroupCreate_568579(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `personGroupId` field"
-  var valid_568581 = path.getOrDefault("personGroupId")
-  valid_568581 = validateParameter(valid_568581, JString, required = true,
+  var valid_564481 = path.getOrDefault("personGroupId")
+  valid_564481 = validateParameter(valid_564481, JString, required = true,
                                  default = nil)
-  if valid_568581 != nil:
-    section.add "personGroupId", valid_568581
+  if valid_564481 != nil:
+    section.add "personGroupId", valid_564481
   result.add "path", section
   section = newJObject()
   result.add "query", section
@@ -4084,7 +4092,7 @@ proc validate_PersonGroupCreate_568579(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568583: Call_PersonGroupCreate_568578; path: JsonNode;
+proc call*(call_564483: Call_PersonGroupCreate_564478; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Create a new person group with specified personGroupId, name, user-provided userData and recognitionModel.
   ## <br /> A person group is the container of the uploaded person data, including face recognition features.
@@ -4099,17 +4107,17 @@ proc call*(call_568583: Call_PersonGroupCreate_568578; path: JsonNode;
   ## * S0-tier subscription quota: 1,000,000 person groups. Each holds up to 10,000 persons.
   ## * to handle larger scale face identification problem, please consider using [LargePersonGroup](/docs/services/563879b61984550e40cbbe8d/operations/599acdee6ac60f11b48b5a9d).
   ## 
-  let valid = call_568583.validator(path, query, header, formData, body)
-  let scheme = call_568583.pickScheme
+  let valid = call_564483.validator(path, query, header, formData, body)
+  let scheme = call_564483.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568583.url(scheme.get, call_568583.host, call_568583.base,
-                         call_568583.route, valid.getOrDefault("path"),
+  let url = call_564483.url(scheme.get, call_564483.host, call_564483.base,
+                         call_564483.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568583, url, valid)
+  result = hook(call_564483, url, valid)
 
-proc call*(call_568584: Call_PersonGroupCreate_568578; personGroupId: string;
-          body: JsonNode): Recallable =
+proc call*(call_564484: Call_PersonGroupCreate_564478; body: JsonNode;
+          personGroupId: string): Recallable =
   ## personGroupCreate
   ## Create a new person group with specified personGroupId, name, user-provided userData and recognitionModel.
   ## <br /> A person group is the container of the uploaded person data, including face recognition features.
@@ -4123,24 +4131,24 @@ proc call*(call_568584: Call_PersonGroupCreate_568578; personGroupId: string;
   ## * Free-tier subscription quota: 1,000 person groups. Each holds up to 1,000 persons.
   ## * S0-tier subscription quota: 1,000,000 person groups. Each holds up to 10,000 persons.
   ## * to handle larger scale face identification problem, please consider using [LargePersonGroup](/docs/services/563879b61984550e40cbbe8d/operations/599acdee6ac60f11b48b5a9d).
-  ##   personGroupId: string (required)
-  ##                : Id referencing a particular person group.
   ##   body: JObject (required)
   ##       : Request body for creating new person group.
-  var path_568585 = newJObject()
-  var body_568586 = newJObject()
-  add(path_568585, "personGroupId", newJString(personGroupId))
+  ##   personGroupId: string (required)
+  ##                : Id referencing a particular person group.
+  var path_564485 = newJObject()
+  var body_564486 = newJObject()
   if body != nil:
-    body_568586 = body
-  result = call_568584.call(path_568585, nil, nil, nil, body_568586)
+    body_564486 = body
+  add(path_564485, "personGroupId", newJString(personGroupId))
+  result = call_564484.call(path_564485, nil, nil, nil, body_564486)
 
-var personGroupCreate* = Call_PersonGroupCreate_568578(name: "personGroupCreate",
+var personGroupCreate* = Call_PersonGroupCreate_564478(name: "personGroupCreate",
     meth: HttpMethod.HttpPut, host: "azure.local",
-    route: "/persongroups/{personGroupId}", validator: validate_PersonGroupCreate_568579,
-    base: "", url: url_PersonGroupCreate_568580, schemes: {Scheme.Https})
+    route: "/persongroups/{personGroupId}", validator: validate_PersonGroupCreate_564479,
+    base: "", url: url_PersonGroupCreate_564480, schemes: {Scheme.Https})
 type
-  Call_PersonGroupGet_568569 = ref object of OpenApiRestCall_567668
-proc url_PersonGroupGet_568571(protocol: Scheme; host: string; base: string;
+  Call_PersonGroupGet_564469 = ref object of OpenApiRestCall_563566
+proc url_PersonGroupGet_564471(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -4155,7 +4163,7 @@ proc url_PersonGroupGet_568571(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_PersonGroupGet_568570(path: JsonNode; query: JsonNode;
+proc validate_PersonGroupGet_564470(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## Retrieve person group name, userData and recognitionModel. To get person information under this personGroup, use [PersonGroup Person - List](/docs/services/563879b61984550e40cbbe8d/operations/563879b61984550f30395241).
@@ -4168,21 +4176,21 @@ proc validate_PersonGroupGet_568570(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `personGroupId` field"
-  var valid_568572 = path.getOrDefault("personGroupId")
-  valid_568572 = validateParameter(valid_568572, JString, required = true,
+  var valid_564472 = path.getOrDefault("personGroupId")
+  valid_564472 = validateParameter(valid_564472, JString, required = true,
                                  default = nil)
-  if valid_568572 != nil:
-    section.add "personGroupId", valid_568572
+  if valid_564472 != nil:
+    section.add "personGroupId", valid_564472
   result.add "path", section
   ## parameters in `query` object:
   ##   returnRecognitionModel: JBool
   ##                         : A value indicating whether the operation should return 'recognitionModel' in response.
   section = newJObject()
-  var valid_568573 = query.getOrDefault("returnRecognitionModel")
-  valid_568573 = validateParameter(valid_568573, JBool, required = false,
+  var valid_564473 = query.getOrDefault("returnRecognitionModel")
+  valid_564473 = validateParameter(valid_564473, JBool, required = false,
                                  default = newJBool(false))
-  if valid_568573 != nil:
-    section.add "returnRecognitionModel", valid_568573
+  if valid_564473 != nil:
+    section.add "returnRecognitionModel", valid_564473
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -4191,40 +4199,40 @@ proc validate_PersonGroupGet_568570(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568574: Call_PersonGroupGet_568569; path: JsonNode; query: JsonNode;
+proc call*(call_564474: Call_PersonGroupGet_564469; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Retrieve person group name, userData and recognitionModel. To get person information under this personGroup, use [PersonGroup Person - List](/docs/services/563879b61984550e40cbbe8d/operations/563879b61984550f30395241).
   ## 
-  let valid = call_568574.validator(path, query, header, formData, body)
-  let scheme = call_568574.pickScheme
+  let valid = call_564474.validator(path, query, header, formData, body)
+  let scheme = call_564474.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568574.url(scheme.get, call_568574.host, call_568574.base,
-                         call_568574.route, valid.getOrDefault("path"),
+  let url = call_564474.url(scheme.get, call_564474.host, call_564474.base,
+                         call_564474.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568574, url, valid)
+  result = hook(call_564474, url, valid)
 
-proc call*(call_568575: Call_PersonGroupGet_568569; personGroupId: string;
+proc call*(call_564475: Call_PersonGroupGet_564469; personGroupId: string;
           returnRecognitionModel: bool = false): Recallable =
   ## personGroupGet
   ## Retrieve person group name, userData and recognitionModel. To get person information under this personGroup, use [PersonGroup Person - List](/docs/services/563879b61984550e40cbbe8d/operations/563879b61984550f30395241).
-  ##   personGroupId: string (required)
-  ##                : Id referencing a particular person group.
   ##   returnRecognitionModel: bool
   ##                         : A value indicating whether the operation should return 'recognitionModel' in response.
-  var path_568576 = newJObject()
-  var query_568577 = newJObject()
-  add(path_568576, "personGroupId", newJString(personGroupId))
-  add(query_568577, "returnRecognitionModel", newJBool(returnRecognitionModel))
-  result = call_568575.call(path_568576, query_568577, nil, nil, nil)
+  ##   personGroupId: string (required)
+  ##                : Id referencing a particular person group.
+  var path_564476 = newJObject()
+  var query_564477 = newJObject()
+  add(query_564477, "returnRecognitionModel", newJBool(returnRecognitionModel))
+  add(path_564476, "personGroupId", newJString(personGroupId))
+  result = call_564475.call(path_564476, query_564477, nil, nil, nil)
 
-var personGroupGet* = Call_PersonGroupGet_568569(name: "personGroupGet",
+var personGroupGet* = Call_PersonGroupGet_564469(name: "personGroupGet",
     meth: HttpMethod.HttpGet, host: "azure.local",
-    route: "/persongroups/{personGroupId}", validator: validate_PersonGroupGet_568570,
-    base: "", url: url_PersonGroupGet_568571, schemes: {Scheme.Https})
+    route: "/persongroups/{personGroupId}", validator: validate_PersonGroupGet_564470,
+    base: "", url: url_PersonGroupGet_564471, schemes: {Scheme.Https})
 type
-  Call_PersonGroupUpdate_568594 = ref object of OpenApiRestCall_567668
-proc url_PersonGroupUpdate_568596(protocol: Scheme; host: string; base: string;
+  Call_PersonGroupUpdate_564494 = ref object of OpenApiRestCall_563566
+proc url_PersonGroupUpdate_564496(protocol: Scheme; host: string; base: string;
                                  route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -4239,7 +4247,7 @@ proc url_PersonGroupUpdate_568596(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_PersonGroupUpdate_568595(path: JsonNode; query: JsonNode;
+proc validate_PersonGroupUpdate_564495(path: JsonNode; query: JsonNode;
                                       header: JsonNode; formData: JsonNode;
                                       body: JsonNode): JsonNode =
   ## Update an existing person group's display name and userData. The properties which does not appear in request body will not be updated.
@@ -4252,11 +4260,11 @@ proc validate_PersonGroupUpdate_568595(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `personGroupId` field"
-  var valid_568597 = path.getOrDefault("personGroupId")
-  valid_568597 = validateParameter(valid_568597, JString, required = true,
+  var valid_564497 = path.getOrDefault("personGroupId")
+  valid_564497 = validateParameter(valid_564497, JString, required = true,
                                  default = nil)
-  if valid_568597 != nil:
-    section.add "personGroupId", valid_568597
+  if valid_564497 != nil:
+    section.add "personGroupId", valid_564497
   result.add "path", section
   section = newJObject()
   result.add "query", section
@@ -4272,41 +4280,41 @@ proc validate_PersonGroupUpdate_568595(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568599: Call_PersonGroupUpdate_568594; path: JsonNode;
+proc call*(call_564499: Call_PersonGroupUpdate_564494; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Update an existing person group's display name and userData. The properties which does not appear in request body will not be updated.
   ## 
-  let valid = call_568599.validator(path, query, header, formData, body)
-  let scheme = call_568599.pickScheme
+  let valid = call_564499.validator(path, query, header, formData, body)
+  let scheme = call_564499.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568599.url(scheme.get, call_568599.host, call_568599.base,
-                         call_568599.route, valid.getOrDefault("path"),
+  let url = call_564499.url(scheme.get, call_564499.host, call_564499.base,
+                         call_564499.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568599, url, valid)
+  result = hook(call_564499, url, valid)
 
-proc call*(call_568600: Call_PersonGroupUpdate_568594; personGroupId: string;
-          body: JsonNode): Recallable =
+proc call*(call_564500: Call_PersonGroupUpdate_564494; body: JsonNode;
+          personGroupId: string): Recallable =
   ## personGroupUpdate
   ## Update an existing person group's display name and userData. The properties which does not appear in request body will not be updated.
-  ##   personGroupId: string (required)
-  ##                : Id referencing a particular person group.
   ##   body: JObject (required)
   ##       : Request body for updating person group.
-  var path_568601 = newJObject()
-  var body_568602 = newJObject()
-  add(path_568601, "personGroupId", newJString(personGroupId))
+  ##   personGroupId: string (required)
+  ##                : Id referencing a particular person group.
+  var path_564501 = newJObject()
+  var body_564502 = newJObject()
   if body != nil:
-    body_568602 = body
-  result = call_568600.call(path_568601, nil, nil, nil, body_568602)
+    body_564502 = body
+  add(path_564501, "personGroupId", newJString(personGroupId))
+  result = call_564500.call(path_564501, nil, nil, nil, body_564502)
 
-var personGroupUpdate* = Call_PersonGroupUpdate_568594(name: "personGroupUpdate",
+var personGroupUpdate* = Call_PersonGroupUpdate_564494(name: "personGroupUpdate",
     meth: HttpMethod.HttpPatch, host: "azure.local",
-    route: "/persongroups/{personGroupId}", validator: validate_PersonGroupUpdate_568595,
-    base: "", url: url_PersonGroupUpdate_568596, schemes: {Scheme.Https})
+    route: "/persongroups/{personGroupId}", validator: validate_PersonGroupUpdate_564495,
+    base: "", url: url_PersonGroupUpdate_564496, schemes: {Scheme.Https})
 type
-  Call_PersonGroupDelete_568587 = ref object of OpenApiRestCall_567668
-proc url_PersonGroupDelete_568589(protocol: Scheme; host: string; base: string;
+  Call_PersonGroupDelete_564487 = ref object of OpenApiRestCall_563566
+proc url_PersonGroupDelete_564489(protocol: Scheme; host: string; base: string;
                                  route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -4321,7 +4329,7 @@ proc url_PersonGroupDelete_568589(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_PersonGroupDelete_568588(path: JsonNode; query: JsonNode;
+proc validate_PersonGroupDelete_564488(path: JsonNode; query: JsonNode;
                                       header: JsonNode; formData: JsonNode;
                                       body: JsonNode): JsonNode =
   ## Delete an existing person group. Persisted face features of all people in the person group will also be deleted.
@@ -4334,11 +4342,11 @@ proc validate_PersonGroupDelete_568588(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `personGroupId` field"
-  var valid_568590 = path.getOrDefault("personGroupId")
-  valid_568590 = validateParameter(valid_568590, JString, required = true,
+  var valid_564490 = path.getOrDefault("personGroupId")
+  valid_564490 = validateParameter(valid_564490, JString, required = true,
                                  default = nil)
-  if valid_568590 != nil:
-    section.add "personGroupId", valid_568590
+  if valid_564490 != nil:
+    section.add "personGroupId", valid_564490
   result.add "path", section
   section = newJObject()
   result.add "query", section
@@ -4349,35 +4357,35 @@ proc validate_PersonGroupDelete_568588(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568591: Call_PersonGroupDelete_568587; path: JsonNode;
+proc call*(call_564491: Call_PersonGroupDelete_564487; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Delete an existing person group. Persisted face features of all people in the person group will also be deleted.
   ## 
-  let valid = call_568591.validator(path, query, header, formData, body)
-  let scheme = call_568591.pickScheme
+  let valid = call_564491.validator(path, query, header, formData, body)
+  let scheme = call_564491.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568591.url(scheme.get, call_568591.host, call_568591.base,
-                         call_568591.route, valid.getOrDefault("path"),
+  let url = call_564491.url(scheme.get, call_564491.host, call_564491.base,
+                         call_564491.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568591, url, valid)
+  result = hook(call_564491, url, valid)
 
-proc call*(call_568592: Call_PersonGroupDelete_568587; personGroupId: string): Recallable =
+proc call*(call_564492: Call_PersonGroupDelete_564487; personGroupId: string): Recallable =
   ## personGroupDelete
   ## Delete an existing person group. Persisted face features of all people in the person group will also be deleted.
   ##   personGroupId: string (required)
   ##                : Id referencing a particular person group.
-  var path_568593 = newJObject()
-  add(path_568593, "personGroupId", newJString(personGroupId))
-  result = call_568592.call(path_568593, nil, nil, nil, nil)
+  var path_564493 = newJObject()
+  add(path_564493, "personGroupId", newJString(personGroupId))
+  result = call_564492.call(path_564493, nil, nil, nil, nil)
 
-var personGroupDelete* = Call_PersonGroupDelete_568587(name: "personGroupDelete",
+var personGroupDelete* = Call_PersonGroupDelete_564487(name: "personGroupDelete",
     meth: HttpMethod.HttpDelete, host: "azure.local",
-    route: "/persongroups/{personGroupId}", validator: validate_PersonGroupDelete_568588,
-    base: "", url: url_PersonGroupDelete_568589, schemes: {Scheme.Https})
+    route: "/persongroups/{personGroupId}", validator: validate_PersonGroupDelete_564488,
+    base: "", url: url_PersonGroupDelete_564489, schemes: {Scheme.Https})
 type
-  Call_PersonGroupPersonCreate_568613 = ref object of OpenApiRestCall_567668
-proc url_PersonGroupPersonCreate_568615(protocol: Scheme; host: string; base: string;
+  Call_PersonGroupPersonCreate_564513 = ref object of OpenApiRestCall_563566
+proc url_PersonGroupPersonCreate_564515(protocol: Scheme; host: string; base: string;
                                        route: string; path: JsonNode;
                                        query: JsonNode): Uri =
   result.scheme = $protocol
@@ -4394,7 +4402,7 @@ proc url_PersonGroupPersonCreate_568615(protocol: Scheme; host: string; base: st
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_PersonGroupPersonCreate_568614(path: JsonNode; query: JsonNode;
+proc validate_PersonGroupPersonCreate_564514(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Create a new person in a specified person group.
   ## 
@@ -4406,11 +4414,11 @@ proc validate_PersonGroupPersonCreate_568614(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `personGroupId` field"
-  var valid_568616 = path.getOrDefault("personGroupId")
-  valid_568616 = validateParameter(valid_568616, JString, required = true,
+  var valid_564516 = path.getOrDefault("personGroupId")
+  valid_564516 = validateParameter(valid_564516, JString, required = true,
                                  default = nil)
-  if valid_568616 != nil:
-    section.add "personGroupId", valid_568616
+  if valid_564516 != nil:
+    section.add "personGroupId", valid_564516
   result.add "path", section
   section = newJObject()
   result.add "query", section
@@ -4426,42 +4434,42 @@ proc validate_PersonGroupPersonCreate_568614(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568618: Call_PersonGroupPersonCreate_568613; path: JsonNode;
+proc call*(call_564518: Call_PersonGroupPersonCreate_564513; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Create a new person in a specified person group.
   ## 
-  let valid = call_568618.validator(path, query, header, formData, body)
-  let scheme = call_568618.pickScheme
+  let valid = call_564518.validator(path, query, header, formData, body)
+  let scheme = call_564518.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568618.url(scheme.get, call_568618.host, call_568618.base,
-                         call_568618.route, valid.getOrDefault("path"),
+  let url = call_564518.url(scheme.get, call_564518.host, call_564518.base,
+                         call_564518.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568618, url, valid)
+  result = hook(call_564518, url, valid)
 
-proc call*(call_568619: Call_PersonGroupPersonCreate_568613; personGroupId: string;
-          body: JsonNode): Recallable =
+proc call*(call_564519: Call_PersonGroupPersonCreate_564513; body: JsonNode;
+          personGroupId: string): Recallable =
   ## personGroupPersonCreate
   ## Create a new person in a specified person group.
-  ##   personGroupId: string (required)
-  ##                : Id referencing a particular person group.
   ##   body: JObject (required)
   ##       : Request body for creating new person.
-  var path_568620 = newJObject()
-  var body_568621 = newJObject()
-  add(path_568620, "personGroupId", newJString(personGroupId))
+  ##   personGroupId: string (required)
+  ##                : Id referencing a particular person group.
+  var path_564520 = newJObject()
+  var body_564521 = newJObject()
   if body != nil:
-    body_568621 = body
-  result = call_568619.call(path_568620, nil, nil, nil, body_568621)
+    body_564521 = body
+  add(path_564520, "personGroupId", newJString(personGroupId))
+  result = call_564519.call(path_564520, nil, nil, nil, body_564521)
 
-var personGroupPersonCreate* = Call_PersonGroupPersonCreate_568613(
+var personGroupPersonCreate* = Call_PersonGroupPersonCreate_564513(
     name: "personGroupPersonCreate", meth: HttpMethod.HttpPost, host: "azure.local",
     route: "/persongroups/{personGroupId}/persons",
-    validator: validate_PersonGroupPersonCreate_568614, base: "",
-    url: url_PersonGroupPersonCreate_568615, schemes: {Scheme.Https})
+    validator: validate_PersonGroupPersonCreate_564514, base: "",
+    url: url_PersonGroupPersonCreate_564515, schemes: {Scheme.Https})
 type
-  Call_PersonGroupPersonList_568603 = ref object of OpenApiRestCall_567668
-proc url_PersonGroupPersonList_568605(protocol: Scheme; host: string; base: string;
+  Call_PersonGroupPersonList_564503 = ref object of OpenApiRestCall_563566
+proc url_PersonGroupPersonList_564505(protocol: Scheme; host: string; base: string;
                                      route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -4477,7 +4485,7 @@ proc url_PersonGroupPersonList_568605(protocol: Scheme; host: string; base: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_PersonGroupPersonList_568604(path: JsonNode; query: JsonNode;
+proc validate_PersonGroupPersonList_564504(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## List all persons in a person group, and retrieve person information (including personId, name, userData and persistedFaceIds of registered faces of the person).
   ## 
@@ -4489,27 +4497,27 @@ proc validate_PersonGroupPersonList_568604(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `personGroupId` field"
-  var valid_568606 = path.getOrDefault("personGroupId")
-  valid_568606 = validateParameter(valid_568606, JString, required = true,
+  var valid_564506 = path.getOrDefault("personGroupId")
+  valid_564506 = validateParameter(valid_564506, JString, required = true,
                                  default = nil)
-  if valid_568606 != nil:
-    section.add "personGroupId", valid_568606
+  if valid_564506 != nil:
+    section.add "personGroupId", valid_564506
   result.add "path", section
   ## parameters in `query` object:
-  ##   top: JInt
-  ##      : Number of persons to return starting with the person id indicated by the 'start' parameter.
   ##   start: JString
   ##        : Starting person id to return (used to list a range of persons).
+  ##   top: JInt
+  ##      : Number of persons to return starting with the person id indicated by the 'start' parameter.
   section = newJObject()
-  var valid_568607 = query.getOrDefault("top")
-  valid_568607 = validateParameter(valid_568607, JInt, required = false, default = nil)
-  if valid_568607 != nil:
-    section.add "top", valid_568607
-  var valid_568608 = query.getOrDefault("start")
-  valid_568608 = validateParameter(valid_568608, JString, required = false,
+  var valid_564507 = query.getOrDefault("start")
+  valid_564507 = validateParameter(valid_564507, JString, required = false,
                                  default = nil)
-  if valid_568608 != nil:
-    section.add "start", valid_568608
+  if valid_564507 != nil:
+    section.add "start", valid_564507
+  var valid_564508 = query.getOrDefault("top")
+  valid_564508 = validateParameter(valid_564508, JInt, required = false, default = nil)
+  if valid_564508 != nil:
+    section.add "top", valid_564508
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -4518,44 +4526,44 @@ proc validate_PersonGroupPersonList_568604(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568609: Call_PersonGroupPersonList_568603; path: JsonNode;
+proc call*(call_564509: Call_PersonGroupPersonList_564503; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## List all persons in a person group, and retrieve person information (including personId, name, userData and persistedFaceIds of registered faces of the person).
   ## 
-  let valid = call_568609.validator(path, query, header, formData, body)
-  let scheme = call_568609.pickScheme
+  let valid = call_564509.validator(path, query, header, formData, body)
+  let scheme = call_564509.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568609.url(scheme.get, call_568609.host, call_568609.base,
-                         call_568609.route, valid.getOrDefault("path"),
+  let url = call_564509.url(scheme.get, call_564509.host, call_564509.base,
+                         call_564509.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568609, url, valid)
+  result = hook(call_564509, url, valid)
 
-proc call*(call_568610: Call_PersonGroupPersonList_568603; personGroupId: string;
-          top: int = 0; start: string = ""): Recallable =
+proc call*(call_564510: Call_PersonGroupPersonList_564503; personGroupId: string;
+          start: string = ""; top: int = 0): Recallable =
   ## personGroupPersonList
   ## List all persons in a person group, and retrieve person information (including personId, name, userData and persistedFaceIds of registered faces of the person).
-  ##   personGroupId: string (required)
-  ##                : Id referencing a particular person group.
-  ##   top: int
-  ##      : Number of persons to return starting with the person id indicated by the 'start' parameter.
   ##   start: string
   ##        : Starting person id to return (used to list a range of persons).
-  var path_568611 = newJObject()
-  var query_568612 = newJObject()
-  add(path_568611, "personGroupId", newJString(personGroupId))
-  add(query_568612, "top", newJInt(top))
-  add(query_568612, "start", newJString(start))
-  result = call_568610.call(path_568611, query_568612, nil, nil, nil)
+  ##   top: int
+  ##      : Number of persons to return starting with the person id indicated by the 'start' parameter.
+  ##   personGroupId: string (required)
+  ##                : Id referencing a particular person group.
+  var path_564511 = newJObject()
+  var query_564512 = newJObject()
+  add(query_564512, "start", newJString(start))
+  add(query_564512, "top", newJInt(top))
+  add(path_564511, "personGroupId", newJString(personGroupId))
+  result = call_564510.call(path_564511, query_564512, nil, nil, nil)
 
-var personGroupPersonList* = Call_PersonGroupPersonList_568603(
+var personGroupPersonList* = Call_PersonGroupPersonList_564503(
     name: "personGroupPersonList", meth: HttpMethod.HttpGet, host: "azure.local",
     route: "/persongroups/{personGroupId}/persons",
-    validator: validate_PersonGroupPersonList_568604, base: "",
-    url: url_PersonGroupPersonList_568605, schemes: {Scheme.Https})
+    validator: validate_PersonGroupPersonList_564504, base: "",
+    url: url_PersonGroupPersonList_564505, schemes: {Scheme.Https})
 type
-  Call_PersonGroupPersonGet_568622 = ref object of OpenApiRestCall_567668
-proc url_PersonGroupPersonGet_568624(protocol: Scheme; host: string; base: string;
+  Call_PersonGroupPersonGet_564522 = ref object of OpenApiRestCall_563566
+proc url_PersonGroupPersonGet_564524(protocol: Scheme; host: string; base: string;
                                     route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -4573,30 +4581,29 @@ proc url_PersonGroupPersonGet_568624(protocol: Scheme; host: string; base: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_PersonGroupPersonGet_568623(path: JsonNode; query: JsonNode;
+proc validate_PersonGroupPersonGet_564523(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Retrieve a person's information, including registered persisted faces, name and userData.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   personGroupId: JString (required)
-  ##                : Id referencing a particular person group.
   ##   personId: JString (required)
   ##           : Id referencing a particular person.
+  ##   personGroupId: JString (required)
+  ##                : Id referencing a particular person group.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `personGroupId` field"
-  var valid_568625 = path.getOrDefault("personGroupId")
-  valid_568625 = validateParameter(valid_568625, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `personId` field"
+  var valid_564525 = path.getOrDefault("personId")
+  valid_564525 = validateParameter(valid_564525, JString, required = true,
                                  default = nil)
-  if valid_568625 != nil:
-    section.add "personGroupId", valid_568625
-  var valid_568626 = path.getOrDefault("personId")
-  valid_568626 = validateParameter(valid_568626, JString, required = true,
+  if valid_564525 != nil:
+    section.add "personId", valid_564525
+  var valid_564526 = path.getOrDefault("personGroupId")
+  valid_564526 = validateParameter(valid_564526, JString, required = true,
                                  default = nil)
-  if valid_568626 != nil:
-    section.add "personId", valid_568626
+  if valid_564526 != nil:
+    section.add "personGroupId", valid_564526
   result.add "path", section
   section = newJObject()
   result.add "query", section
@@ -4607,40 +4614,40 @@ proc validate_PersonGroupPersonGet_568623(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568627: Call_PersonGroupPersonGet_568622; path: JsonNode;
+proc call*(call_564527: Call_PersonGroupPersonGet_564522; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Retrieve a person's information, including registered persisted faces, name and userData.
   ## 
-  let valid = call_568627.validator(path, query, header, formData, body)
-  let scheme = call_568627.pickScheme
+  let valid = call_564527.validator(path, query, header, formData, body)
+  let scheme = call_564527.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568627.url(scheme.get, call_568627.host, call_568627.base,
-                         call_568627.route, valid.getOrDefault("path"),
+  let url = call_564527.url(scheme.get, call_564527.host, call_564527.base,
+                         call_564527.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568627, url, valid)
+  result = hook(call_564527, url, valid)
 
-proc call*(call_568628: Call_PersonGroupPersonGet_568622; personGroupId: string;
-          personId: string): Recallable =
+proc call*(call_564528: Call_PersonGroupPersonGet_564522; personId: string;
+          personGroupId: string): Recallable =
   ## personGroupPersonGet
   ## Retrieve a person's information, including registered persisted faces, name and userData.
-  ##   personGroupId: string (required)
-  ##                : Id referencing a particular person group.
   ##   personId: string (required)
   ##           : Id referencing a particular person.
-  var path_568629 = newJObject()
-  add(path_568629, "personGroupId", newJString(personGroupId))
-  add(path_568629, "personId", newJString(personId))
-  result = call_568628.call(path_568629, nil, nil, nil, nil)
+  ##   personGroupId: string (required)
+  ##                : Id referencing a particular person group.
+  var path_564529 = newJObject()
+  add(path_564529, "personId", newJString(personId))
+  add(path_564529, "personGroupId", newJString(personGroupId))
+  result = call_564528.call(path_564529, nil, nil, nil, nil)
 
-var personGroupPersonGet* = Call_PersonGroupPersonGet_568622(
+var personGroupPersonGet* = Call_PersonGroupPersonGet_564522(
     name: "personGroupPersonGet", meth: HttpMethod.HttpGet, host: "azure.local",
     route: "/persongroups/{personGroupId}/persons/{personId}",
-    validator: validate_PersonGroupPersonGet_568623, base: "",
-    url: url_PersonGroupPersonGet_568624, schemes: {Scheme.Https})
+    validator: validate_PersonGroupPersonGet_564523, base: "",
+    url: url_PersonGroupPersonGet_564524, schemes: {Scheme.Https})
 type
-  Call_PersonGroupPersonUpdate_568638 = ref object of OpenApiRestCall_567668
-proc url_PersonGroupPersonUpdate_568640(protocol: Scheme; host: string; base: string;
+  Call_PersonGroupPersonUpdate_564538 = ref object of OpenApiRestCall_563566
+proc url_PersonGroupPersonUpdate_564540(protocol: Scheme; host: string; base: string;
                                        route: string; path: JsonNode;
                                        query: JsonNode): Uri =
   result.scheme = $protocol
@@ -4659,30 +4666,29 @@ proc url_PersonGroupPersonUpdate_568640(protocol: Scheme; host: string; base: st
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_PersonGroupPersonUpdate_568639(path: JsonNode; query: JsonNode;
+proc validate_PersonGroupPersonUpdate_564539(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Update name or userData of a person.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   personGroupId: JString (required)
-  ##                : Id referencing a particular person group.
   ##   personId: JString (required)
   ##           : Id referencing a particular person.
+  ##   personGroupId: JString (required)
+  ##                : Id referencing a particular person group.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `personGroupId` field"
-  var valid_568641 = path.getOrDefault("personGroupId")
-  valid_568641 = validateParameter(valid_568641, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `personId` field"
+  var valid_564541 = path.getOrDefault("personId")
+  valid_564541 = validateParameter(valid_564541, JString, required = true,
                                  default = nil)
-  if valid_568641 != nil:
-    section.add "personGroupId", valid_568641
-  var valid_568642 = path.getOrDefault("personId")
-  valid_568642 = validateParameter(valid_568642, JString, required = true,
+  if valid_564541 != nil:
+    section.add "personId", valid_564541
+  var valid_564542 = path.getOrDefault("personGroupId")
+  valid_564542 = validateParameter(valid_564542, JString, required = true,
                                  default = nil)
-  if valid_568642 != nil:
-    section.add "personId", valid_568642
+  if valid_564542 != nil:
+    section.add "personGroupId", valid_564542
   result.add "path", section
   section = newJObject()
   result.add "query", section
@@ -4698,46 +4704,46 @@ proc validate_PersonGroupPersonUpdate_568639(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568644: Call_PersonGroupPersonUpdate_568638; path: JsonNode;
+proc call*(call_564544: Call_PersonGroupPersonUpdate_564538; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Update name or userData of a person.
   ## 
-  let valid = call_568644.validator(path, query, header, formData, body)
-  let scheme = call_568644.pickScheme
+  let valid = call_564544.validator(path, query, header, formData, body)
+  let scheme = call_564544.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568644.url(scheme.get, call_568644.host, call_568644.base,
-                         call_568644.route, valid.getOrDefault("path"),
+  let url = call_564544.url(scheme.get, call_564544.host, call_564544.base,
+                         call_564544.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568644, url, valid)
+  result = hook(call_564544, url, valid)
 
-proc call*(call_568645: Call_PersonGroupPersonUpdate_568638; personGroupId: string;
-          personId: string; body: JsonNode): Recallable =
+proc call*(call_564545: Call_PersonGroupPersonUpdate_564538; body: JsonNode;
+          personId: string; personGroupId: string): Recallable =
   ## personGroupPersonUpdate
   ## Update name or userData of a person.
-  ##   personGroupId: string (required)
-  ##                : Id referencing a particular person group.
-  ##   personId: string (required)
-  ##           : Id referencing a particular person.
   ##   body: JObject (required)
   ##       : Request body for person update operation.
-  var path_568646 = newJObject()
-  var body_568647 = newJObject()
-  add(path_568646, "personGroupId", newJString(personGroupId))
-  add(path_568646, "personId", newJString(personId))
+  ##   personId: string (required)
+  ##           : Id referencing a particular person.
+  ##   personGroupId: string (required)
+  ##                : Id referencing a particular person group.
+  var path_564546 = newJObject()
+  var body_564547 = newJObject()
   if body != nil:
-    body_568647 = body
-  result = call_568645.call(path_568646, nil, nil, nil, body_568647)
+    body_564547 = body
+  add(path_564546, "personId", newJString(personId))
+  add(path_564546, "personGroupId", newJString(personGroupId))
+  result = call_564545.call(path_564546, nil, nil, nil, body_564547)
 
-var personGroupPersonUpdate* = Call_PersonGroupPersonUpdate_568638(
+var personGroupPersonUpdate* = Call_PersonGroupPersonUpdate_564538(
     name: "personGroupPersonUpdate", meth: HttpMethod.HttpPatch,
     host: "azure.local",
     route: "/persongroups/{personGroupId}/persons/{personId}",
-    validator: validate_PersonGroupPersonUpdate_568639, base: "",
-    url: url_PersonGroupPersonUpdate_568640, schemes: {Scheme.Https})
+    validator: validate_PersonGroupPersonUpdate_564539, base: "",
+    url: url_PersonGroupPersonUpdate_564540, schemes: {Scheme.Https})
 type
-  Call_PersonGroupPersonDelete_568630 = ref object of OpenApiRestCall_567668
-proc url_PersonGroupPersonDelete_568632(protocol: Scheme; host: string; base: string;
+  Call_PersonGroupPersonDelete_564530 = ref object of OpenApiRestCall_563566
+proc url_PersonGroupPersonDelete_564532(protocol: Scheme; host: string; base: string;
                                        route: string; path: JsonNode;
                                        query: JsonNode): Uri =
   result.scheme = $protocol
@@ -4756,30 +4762,29 @@ proc url_PersonGroupPersonDelete_568632(protocol: Scheme; host: string; base: st
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_PersonGroupPersonDelete_568631(path: JsonNode; query: JsonNode;
+proc validate_PersonGroupPersonDelete_564531(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Delete an existing person from a person group. The persistedFaceId, userData, person name and face feature in the person entry will all be deleted.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   personGroupId: JString (required)
-  ##                : Id referencing a particular person group.
   ##   personId: JString (required)
   ##           : Id referencing a particular person.
+  ##   personGroupId: JString (required)
+  ##                : Id referencing a particular person group.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `personGroupId` field"
-  var valid_568633 = path.getOrDefault("personGroupId")
-  valid_568633 = validateParameter(valid_568633, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `personId` field"
+  var valid_564533 = path.getOrDefault("personId")
+  valid_564533 = validateParameter(valid_564533, JString, required = true,
                                  default = nil)
-  if valid_568633 != nil:
-    section.add "personGroupId", valid_568633
-  var valid_568634 = path.getOrDefault("personId")
-  valid_568634 = validateParameter(valid_568634, JString, required = true,
+  if valid_564533 != nil:
+    section.add "personId", valid_564533
+  var valid_564534 = path.getOrDefault("personGroupId")
+  valid_564534 = validateParameter(valid_564534, JString, required = true,
                                  default = nil)
-  if valid_568634 != nil:
-    section.add "personId", valid_568634
+  if valid_564534 != nil:
+    section.add "personGroupId", valid_564534
   result.add "path", section
   section = newJObject()
   result.add "query", section
@@ -4790,41 +4795,41 @@ proc validate_PersonGroupPersonDelete_568631(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568635: Call_PersonGroupPersonDelete_568630; path: JsonNode;
+proc call*(call_564535: Call_PersonGroupPersonDelete_564530; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Delete an existing person from a person group. The persistedFaceId, userData, person name and face feature in the person entry will all be deleted.
   ## 
-  let valid = call_568635.validator(path, query, header, formData, body)
-  let scheme = call_568635.pickScheme
+  let valid = call_564535.validator(path, query, header, formData, body)
+  let scheme = call_564535.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568635.url(scheme.get, call_568635.host, call_568635.base,
-                         call_568635.route, valid.getOrDefault("path"),
+  let url = call_564535.url(scheme.get, call_564535.host, call_564535.base,
+                         call_564535.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568635, url, valid)
+  result = hook(call_564535, url, valid)
 
-proc call*(call_568636: Call_PersonGroupPersonDelete_568630; personGroupId: string;
-          personId: string): Recallable =
+proc call*(call_564536: Call_PersonGroupPersonDelete_564530; personId: string;
+          personGroupId: string): Recallable =
   ## personGroupPersonDelete
   ## Delete an existing person from a person group. The persistedFaceId, userData, person name and face feature in the person entry will all be deleted.
-  ##   personGroupId: string (required)
-  ##                : Id referencing a particular person group.
   ##   personId: string (required)
   ##           : Id referencing a particular person.
-  var path_568637 = newJObject()
-  add(path_568637, "personGroupId", newJString(personGroupId))
-  add(path_568637, "personId", newJString(personId))
-  result = call_568636.call(path_568637, nil, nil, nil, nil)
+  ##   personGroupId: string (required)
+  ##                : Id referencing a particular person group.
+  var path_564537 = newJObject()
+  add(path_564537, "personId", newJString(personId))
+  add(path_564537, "personGroupId", newJString(personGroupId))
+  result = call_564536.call(path_564537, nil, nil, nil, nil)
 
-var personGroupPersonDelete* = Call_PersonGroupPersonDelete_568630(
+var personGroupPersonDelete* = Call_PersonGroupPersonDelete_564530(
     name: "personGroupPersonDelete", meth: HttpMethod.HttpDelete,
     host: "azure.local",
     route: "/persongroups/{personGroupId}/persons/{personId}",
-    validator: validate_PersonGroupPersonDelete_568631, base: "",
-    url: url_PersonGroupPersonDelete_568632, schemes: {Scheme.Https})
+    validator: validate_PersonGroupPersonDelete_564531, base: "",
+    url: url_PersonGroupPersonDelete_564532, schemes: {Scheme.Https})
 type
-  Call_PersonGroupPersonAddFaceFromUrl_568648 = ref object of OpenApiRestCall_567668
-proc url_PersonGroupPersonAddFaceFromUrl_568650(protocol: Scheme; host: string;
+  Call_PersonGroupPersonAddFaceFromUrl_564548 = ref object of OpenApiRestCall_563566
+proc url_PersonGroupPersonAddFaceFromUrl_564550(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -4843,7 +4848,7 @@ proc url_PersonGroupPersonAddFaceFromUrl_568650(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_PersonGroupPersonAddFaceFromUrl_568649(path: JsonNode;
+proc validate_PersonGroupPersonAddFaceFromUrl_564549(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Add a face to a person into a person group for face identification or verification. To deal with an image contains multiple faces, input face can be specified as an image with a targetFace rectangle. It returns a persistedFaceId representing the added face. No image will be stored. Only the extracted face feature will be stored on server until [PersonGroup PersonFace - Delete](/docs/services/563879b61984550e40cbbe8d/operations/563879b61984550f3039523e), [PersonGroup Person - Delete](/docs/services/563879b61984550e40cbbe8d/operations/563879b61984550f3039523d) or [PersonGroup - Delete](/docs/services/563879b61984550e40cbbe8d/operations/563879b61984550f30395245) is called.
   ## <br /> Note persistedFaceId is different from faceId generated by [Face - Detect](/docs/services/563879b61984550e40cbbe8d/operations/563879b61984550f30395236).
@@ -4863,47 +4868,46 @@ proc validate_PersonGroupPersonAddFaceFromUrl_568649(path: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   personGroupId: JString (required)
-  ##                : Id referencing a particular person group.
   ##   personId: JString (required)
   ##           : Id referencing a particular person.
+  ##   personGroupId: JString (required)
+  ##                : Id referencing a particular person group.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `personGroupId` field"
-  var valid_568651 = path.getOrDefault("personGroupId")
-  valid_568651 = validateParameter(valid_568651, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `personId` field"
+  var valid_564551 = path.getOrDefault("personId")
+  valid_564551 = validateParameter(valid_564551, JString, required = true,
                                  default = nil)
-  if valid_568651 != nil:
-    section.add "personGroupId", valid_568651
-  var valid_568652 = path.getOrDefault("personId")
-  valid_568652 = validateParameter(valid_568652, JString, required = true,
+  if valid_564551 != nil:
+    section.add "personId", valid_564551
+  var valid_564552 = path.getOrDefault("personGroupId")
+  valid_564552 = validateParameter(valid_564552, JString, required = true,
                                  default = nil)
-  if valid_568652 != nil:
-    section.add "personId", valid_568652
+  if valid_564552 != nil:
+    section.add "personGroupId", valid_564552
   result.add "path", section
   ## parameters in `query` object:
-  ##   userData: JString
-  ##           : User-specified data about the face for any purpose. The maximum length is 1KB.
   ##   detectionModel: JString
   ##                 : Name of detection model. Detection model is used to detect faces in the submitted image. A detection model name can be provided when performing Face - Detect or (Large)FaceList - Add Face or (Large)PersonGroup - Add Face. The default value is 'detection_01', if another model is needed, please explicitly specify it.
   ##   targetFace: JArray
   ##             : A face rectangle to specify the target face to be added to a person in the format of "targetFace=left,top,width,height". E.g. "targetFace=10,10,100,100". If there is more than one face in the image, targetFace is required to specify which face to add. No targetFace means there is only one face detected in the entire image.
+  ##   userData: JString
+  ##           : User-specified data about the face for any purpose. The maximum length is 1KB.
   section = newJObject()
-  var valid_568653 = query.getOrDefault("userData")
-  valid_568653 = validateParameter(valid_568653, JString, required = false,
-                                 default = nil)
-  if valid_568653 != nil:
-    section.add "userData", valid_568653
-  var valid_568654 = query.getOrDefault("detectionModel")
-  valid_568654 = validateParameter(valid_568654, JString, required = false,
+  var valid_564553 = query.getOrDefault("detectionModel")
+  valid_564553 = validateParameter(valid_564553, JString, required = false,
                                  default = newJString("detection_01"))
-  if valid_568654 != nil:
-    section.add "detectionModel", valid_568654
-  var valid_568655 = query.getOrDefault("targetFace")
-  valid_568655 = validateParameter(valid_568655, JArray, required = false,
+  if valid_564553 != nil:
+    section.add "detectionModel", valid_564553
+  var valid_564554 = query.getOrDefault("targetFace")
+  valid_564554 = validateParameter(valid_564554, JArray, required = false,
                                  default = nil)
-  if valid_568655 != nil:
-    section.add "targetFace", valid_568655
+  if valid_564554 != nil:
+    section.add "targetFace", valid_564554
+  var valid_564555 = query.getOrDefault("userData")
+  valid_564555 = validateParameter(valid_564555, JString, required = false,
+                                 default = nil)
+  if valid_564555 != nil:
+    section.add "userData", valid_564555
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -4917,7 +4921,7 @@ proc validate_PersonGroupPersonAddFaceFromUrl_568649(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568657: Call_PersonGroupPersonAddFaceFromUrl_568648;
+proc call*(call_564557: Call_PersonGroupPersonAddFaceFromUrl_564548;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Add a face to a person into a person group for face identification or verification. To deal with an image contains multiple faces, input face can be specified as an image with a targetFace rectangle. It returns a persistedFaceId representing the added face. No image will be stored. Only the extracted face feature will be stored on server until [PersonGroup PersonFace - Delete](/docs/services/563879b61984550e40cbbe8d/operations/563879b61984550f3039523e), [PersonGroup Person - Delete](/docs/services/563879b61984550e40cbbe8d/operations/563879b61984550f3039523d) or [PersonGroup - Delete](/docs/services/563879b61984550e40cbbe8d/operations/563879b61984550f30395245) is called.
@@ -4935,19 +4939,19 @@ proc call*(call_568657: Call_PersonGroupPersonAddFaceFromUrl_568648;
   ##   | 'detection_01': | The default detection model for [PersonGroup Person - Add Face](/docs/services/563879b61984550e40cbbe8d/operations/563879b61984550f3039523b). Recommend for near frontal face detection. For scenarios with exceptionally large angle (head-pose) faces, occluded faces or wrong image orientation, the faces in such cases may not be detected. |
   ##   | 'detection_02': | Detection model released in 2019 May with improved accuracy especially on small, side and blurry faces. |
   ## 
-  let valid = call_568657.validator(path, query, header, formData, body)
-  let scheme = call_568657.pickScheme
+  let valid = call_564557.validator(path, query, header, formData, body)
+  let scheme = call_564557.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568657.url(scheme.get, call_568657.host, call_568657.base,
-                         call_568657.route, valid.getOrDefault("path"),
+  let url = call_564557.url(scheme.get, call_564557.host, call_564557.base,
+                         call_564557.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568657, url, valid)
+  result = hook(call_564557, url, valid)
 
-proc call*(call_568658: Call_PersonGroupPersonAddFaceFromUrl_568648;
-          personGroupId: string; personId: string; ImageUrl: JsonNode;
-          userData: string = ""; detectionModel: string = "detection_01";
-          targetFace: JsonNode = nil): Recallable =
+proc call*(call_564558: Call_PersonGroupPersonAddFaceFromUrl_564548;
+          personId: string; personGroupId: string; ImageUrl: JsonNode;
+          detectionModel: string = "detection_01"; targetFace: JsonNode = nil;
+          userData: string = ""): Recallable =
   ## personGroupPersonAddFaceFromUrl
   ## Add a face to a person into a person group for face identification or verification. To deal with an image contains multiple faces, input face can be specified as an image with a targetFace rectangle. It returns a persistedFaceId representing the added face. No image will be stored. Only the extracted face feature will be stored on server until [PersonGroup PersonFace - Delete](/docs/services/563879b61984550e40cbbe8d/operations/563879b61984550f3039523e), [PersonGroup Person - Delete](/docs/services/563879b61984550e40cbbe8d/operations/563879b61984550f3039523d) or [PersonGroup - Delete](/docs/services/563879b61984550e40cbbe8d/operations/563879b61984550f30395245) is called.
   ## <br /> Note persistedFaceId is different from faceId generated by [Face - Detect](/docs/services/563879b61984550e40cbbe8d/operations/563879b61984550f30395236).
@@ -4963,40 +4967,40 @@ proc call*(call_568658: Call_PersonGroupPersonAddFaceFromUrl_568648;
   ##   | ---------- | -------- |
   ##   | 'detection_01': | The default detection model for [PersonGroup Person - Add Face](/docs/services/563879b61984550e40cbbe8d/operations/563879b61984550f3039523b). Recommend for near frontal face detection. For scenarios with exceptionally large angle (head-pose) faces, occluded faces or wrong image orientation, the faces in such cases may not be detected. |
   ##   | 'detection_02': | Detection model released in 2019 May with improved accuracy especially on small, side and blurry faces. |
-  ##   personGroupId: string (required)
-  ##                : Id referencing a particular person group.
-  ##   personId: string (required)
-  ##           : Id referencing a particular person.
-  ##   userData: string
-  ##           : User-specified data about the face for any purpose. The maximum length is 1KB.
-  ##   ImageUrl: JObject (required)
-  ##           : A JSON document with a URL pointing to the image that is to be analyzed.
   ##   detectionModel: string
   ##                 : Name of detection model. Detection model is used to detect faces in the submitted image. A detection model name can be provided when performing Face - Detect or (Large)FaceList - Add Face or (Large)PersonGroup - Add Face. The default value is 'detection_01', if another model is needed, please explicitly specify it.
   ##   targetFace: JArray
   ##             : A face rectangle to specify the target face to be added to a person in the format of "targetFace=left,top,width,height". E.g. "targetFace=10,10,100,100". If there is more than one face in the image, targetFace is required to specify which face to add. No targetFace means there is only one face detected in the entire image.
-  var path_568659 = newJObject()
-  var query_568660 = newJObject()
-  var body_568661 = newJObject()
-  add(path_568659, "personGroupId", newJString(personGroupId))
-  add(path_568659, "personId", newJString(personId))
-  add(query_568660, "userData", newJString(userData))
-  if ImageUrl != nil:
-    body_568661 = ImageUrl
-  add(query_568660, "detectionModel", newJString(detectionModel))
+  ##   userData: string
+  ##           : User-specified data about the face for any purpose. The maximum length is 1KB.
+  ##   personId: string (required)
+  ##           : Id referencing a particular person.
+  ##   personGroupId: string (required)
+  ##                : Id referencing a particular person group.
+  ##   ImageUrl: JObject (required)
+  ##           : A JSON document with a URL pointing to the image that is to be analyzed.
+  var path_564559 = newJObject()
+  var query_564560 = newJObject()
+  var body_564561 = newJObject()
+  add(query_564560, "detectionModel", newJString(detectionModel))
   if targetFace != nil:
-    query_568660.add "targetFace", targetFace
-  result = call_568658.call(path_568659, query_568660, nil, nil, body_568661)
+    query_564560.add "targetFace", targetFace
+  add(query_564560, "userData", newJString(userData))
+  add(path_564559, "personId", newJString(personId))
+  add(path_564559, "personGroupId", newJString(personGroupId))
+  if ImageUrl != nil:
+    body_564561 = ImageUrl
+  result = call_564558.call(path_564559, query_564560, nil, nil, body_564561)
 
-var personGroupPersonAddFaceFromUrl* = Call_PersonGroupPersonAddFaceFromUrl_568648(
+var personGroupPersonAddFaceFromUrl* = Call_PersonGroupPersonAddFaceFromUrl_564548(
     name: "personGroupPersonAddFaceFromUrl", meth: HttpMethod.HttpPost,
     host: "azure.local",
     route: "/persongroups/{personGroupId}/persons/{personId}/persistedfaces",
-    validator: validate_PersonGroupPersonAddFaceFromUrl_568649, base: "",
-    url: url_PersonGroupPersonAddFaceFromUrl_568650, schemes: {Scheme.Https})
+    validator: validate_PersonGroupPersonAddFaceFromUrl_564549, base: "",
+    url: url_PersonGroupPersonAddFaceFromUrl_564550, schemes: {Scheme.Https})
 type
-  Call_PersonGroupPersonGetFace_568662 = ref object of OpenApiRestCall_567668
-proc url_PersonGroupPersonGetFace_568664(protocol: Scheme; host: string;
+  Call_PersonGroupPersonGetFace_564562 = ref object of OpenApiRestCall_563566
+proc url_PersonGroupPersonGetFace_564564(protocol: Scheme; host: string;
                                         base: string; route: string; path: JsonNode;
                                         query: JsonNode): Uri =
   result.scheme = $protocol
@@ -5018,37 +5022,37 @@ proc url_PersonGroupPersonGetFace_568664(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_PersonGroupPersonGetFace_568663(path: JsonNode; query: JsonNode;
+proc validate_PersonGroupPersonGetFace_564563(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Retrieve information about a persisted face (specified by persistedFaceId, personId and its belonging personGroupId).
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   personGroupId: JString (required)
-  ##                : Id referencing a particular person group.
   ##   persistedFaceId: JString (required)
   ##                  : Id referencing a particular persistedFaceId of an existing face.
   ##   personId: JString (required)
   ##           : Id referencing a particular person.
+  ##   personGroupId: JString (required)
+  ##                : Id referencing a particular person group.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `personGroupId` field"
-  var valid_568665 = path.getOrDefault("personGroupId")
-  valid_568665 = validateParameter(valid_568665, JString, required = true,
+        "path argument is necessary due to required `persistedFaceId` field"
+  var valid_564565 = path.getOrDefault("persistedFaceId")
+  valid_564565 = validateParameter(valid_564565, JString, required = true,
                                  default = nil)
-  if valid_568665 != nil:
-    section.add "personGroupId", valid_568665
-  var valid_568666 = path.getOrDefault("persistedFaceId")
-  valid_568666 = validateParameter(valid_568666, JString, required = true,
+  if valid_564565 != nil:
+    section.add "persistedFaceId", valid_564565
+  var valid_564566 = path.getOrDefault("personId")
+  valid_564566 = validateParameter(valid_564566, JString, required = true,
                                  default = nil)
-  if valid_568666 != nil:
-    section.add "persistedFaceId", valid_568666
-  var valid_568667 = path.getOrDefault("personId")
-  valid_568667 = validateParameter(valid_568667, JString, required = true,
+  if valid_564566 != nil:
+    section.add "personId", valid_564566
+  var valid_564567 = path.getOrDefault("personGroupId")
+  valid_564567 = validateParameter(valid_564567, JString, required = true,
                                  default = nil)
-  if valid_568667 != nil:
-    section.add "personId", valid_568667
+  if valid_564567 != nil:
+    section.add "personGroupId", valid_564567
   result.add "path", section
   section = newJObject()
   result.add "query", section
@@ -5059,42 +5063,42 @@ proc validate_PersonGroupPersonGetFace_568663(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568668: Call_PersonGroupPersonGetFace_568662; path: JsonNode;
+proc call*(call_564568: Call_PersonGroupPersonGetFace_564562; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Retrieve information about a persisted face (specified by persistedFaceId, personId and its belonging personGroupId).
   ## 
-  let valid = call_568668.validator(path, query, header, formData, body)
-  let scheme = call_568668.pickScheme
+  let valid = call_564568.validator(path, query, header, formData, body)
+  let scheme = call_564568.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568668.url(scheme.get, call_568668.host, call_568668.base,
-                         call_568668.route, valid.getOrDefault("path"),
+  let url = call_564568.url(scheme.get, call_564568.host, call_564568.base,
+                         call_564568.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568668, url, valid)
+  result = hook(call_564568, url, valid)
 
-proc call*(call_568669: Call_PersonGroupPersonGetFace_568662;
-          personGroupId: string; persistedFaceId: string; personId: string): Recallable =
+proc call*(call_564569: Call_PersonGroupPersonGetFace_564562;
+          persistedFaceId: string; personId: string; personGroupId: string): Recallable =
   ## personGroupPersonGetFace
   ## Retrieve information about a persisted face (specified by persistedFaceId, personId and its belonging personGroupId).
-  ##   personGroupId: string (required)
-  ##                : Id referencing a particular person group.
   ##   persistedFaceId: string (required)
   ##                  : Id referencing a particular persistedFaceId of an existing face.
   ##   personId: string (required)
   ##           : Id referencing a particular person.
-  var path_568670 = newJObject()
-  add(path_568670, "personGroupId", newJString(personGroupId))
-  add(path_568670, "persistedFaceId", newJString(persistedFaceId))
-  add(path_568670, "personId", newJString(personId))
-  result = call_568669.call(path_568670, nil, nil, nil, nil)
+  ##   personGroupId: string (required)
+  ##                : Id referencing a particular person group.
+  var path_564570 = newJObject()
+  add(path_564570, "persistedFaceId", newJString(persistedFaceId))
+  add(path_564570, "personId", newJString(personId))
+  add(path_564570, "personGroupId", newJString(personGroupId))
+  result = call_564569.call(path_564570, nil, nil, nil, nil)
 
-var personGroupPersonGetFace* = Call_PersonGroupPersonGetFace_568662(
+var personGroupPersonGetFace* = Call_PersonGroupPersonGetFace_564562(
     name: "personGroupPersonGetFace", meth: HttpMethod.HttpGet, host: "azure.local", route: "/persongroups/{personGroupId}/persons/{personId}/persistedfaces/{persistedFaceId}",
-    validator: validate_PersonGroupPersonGetFace_568663, base: "",
-    url: url_PersonGroupPersonGetFace_568664, schemes: {Scheme.Https})
+    validator: validate_PersonGroupPersonGetFace_564563, base: "",
+    url: url_PersonGroupPersonGetFace_564564, schemes: {Scheme.Https})
 type
-  Call_PersonGroupPersonUpdateFace_568680 = ref object of OpenApiRestCall_567668
-proc url_PersonGroupPersonUpdateFace_568682(protocol: Scheme; host: string;
+  Call_PersonGroupPersonUpdateFace_564580 = ref object of OpenApiRestCall_563566
+proc url_PersonGroupPersonUpdateFace_564582(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -5115,7 +5119,7 @@ proc url_PersonGroupPersonUpdateFace_568682(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_PersonGroupPersonUpdateFace_568681(path: JsonNode; query: JsonNode;
+proc validate_PersonGroupPersonUpdateFace_564581(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Add a face to a person into a person group for face identification or verification. To deal with an image contains multiple faces, input face can be specified as an image with a targetFace rectangle. It returns a persistedFaceId representing the added face. No image will be stored. Only the extracted face feature will be stored on server until [PersonGroup PersonFace - Delete](/docs/services/563879b61984550e40cbbe8d/operations/563879b61984550f3039523e), [PersonGroup Person - Delete](/docs/services/563879b61984550e40cbbe8d/operations/563879b61984550f3039523d) or [PersonGroup - Delete](/docs/services/563879b61984550e40cbbe8d/operations/563879b61984550f30395245) is called.
   ## <br /> Note persistedFaceId is different from faceId generated by [Face - Detect](/docs/services/563879b61984550e40cbbe8d/operations/563879b61984550f30395236).
@@ -5129,30 +5133,30 @@ proc validate_PersonGroupPersonUpdateFace_568681(path: JsonNode; query: JsonNode
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   personGroupId: JString (required)
-  ##                : Id referencing a particular person group.
   ##   persistedFaceId: JString (required)
   ##                  : Id referencing a particular persistedFaceId of an existing face.
   ##   personId: JString (required)
   ##           : Id referencing a particular person.
+  ##   personGroupId: JString (required)
+  ##                : Id referencing a particular person group.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `personGroupId` field"
-  var valid_568683 = path.getOrDefault("personGroupId")
-  valid_568683 = validateParameter(valid_568683, JString, required = true,
+        "path argument is necessary due to required `persistedFaceId` field"
+  var valid_564583 = path.getOrDefault("persistedFaceId")
+  valid_564583 = validateParameter(valid_564583, JString, required = true,
                                  default = nil)
-  if valid_568683 != nil:
-    section.add "personGroupId", valid_568683
-  var valid_568684 = path.getOrDefault("persistedFaceId")
-  valid_568684 = validateParameter(valid_568684, JString, required = true,
+  if valid_564583 != nil:
+    section.add "persistedFaceId", valid_564583
+  var valid_564584 = path.getOrDefault("personId")
+  valid_564584 = validateParameter(valid_564584, JString, required = true,
                                  default = nil)
-  if valid_568684 != nil:
-    section.add "persistedFaceId", valid_568684
-  var valid_568685 = path.getOrDefault("personId")
-  valid_568685 = validateParameter(valid_568685, JString, required = true,
+  if valid_564584 != nil:
+    section.add "personId", valid_564584
+  var valid_564585 = path.getOrDefault("personGroupId")
+  valid_564585 = validateParameter(valid_564585, JString, required = true,
                                  default = nil)
-  if valid_568685 != nil:
-    section.add "personId", valid_568685
+  if valid_564585 != nil:
+    section.add "personGroupId", valid_564585
   result.add "path", section
   section = newJObject()
   result.add "query", section
@@ -5168,7 +5172,7 @@ proc validate_PersonGroupPersonUpdateFace_568681(path: JsonNode; query: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_568687: Call_PersonGroupPersonUpdateFace_568680; path: JsonNode;
+proc call*(call_564587: Call_PersonGroupPersonUpdateFace_564580; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Add a face to a person into a person group for face identification or verification. To deal with an image contains multiple faces, input face can be specified as an image with a targetFace rectangle. It returns a persistedFaceId representing the added face. No image will be stored. Only the extracted face feature will be stored on server until [PersonGroup PersonFace - Delete](/docs/services/563879b61984550e40cbbe8d/operations/563879b61984550f3039523e), [PersonGroup Person - Delete](/docs/services/563879b61984550e40cbbe8d/operations/563879b61984550f3039523d) or [PersonGroup - Delete](/docs/services/563879b61984550e40cbbe8d/operations/563879b61984550f30395245) is called.
   ## <br /> Note persistedFaceId is different from faceId generated by [Face - Detect](/docs/services/563879b61984550e40cbbe8d/operations/563879b61984550f30395236).
@@ -5179,18 +5183,18 @@ proc call*(call_568687: Call_PersonGroupPersonUpdateFace_568680; path: JsonNode;
   ## * Out of detectable face size (36x36 - 4096x4096 pixels), large head-pose, or large occlusions will cause failures.
   ## * Adding/deleting faces to/from a same person will be processed sequentially. Adding/deleting faces to/from different persons are processed in parallel.
   ## 
-  let valid = call_568687.validator(path, query, header, formData, body)
-  let scheme = call_568687.pickScheme
+  let valid = call_564587.validator(path, query, header, formData, body)
+  let scheme = call_564587.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568687.url(scheme.get, call_568687.host, call_568687.base,
-                         call_568687.route, valid.getOrDefault("path"),
+  let url = call_564587.url(scheme.get, call_564587.host, call_564587.base,
+                         call_564587.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568687, url, valid)
+  result = hook(call_564587, url, valid)
 
-proc call*(call_568688: Call_PersonGroupPersonUpdateFace_568680;
-          personGroupId: string; persistedFaceId: string; personId: string;
-          body: JsonNode): Recallable =
+proc call*(call_564588: Call_PersonGroupPersonUpdateFace_564580;
+          persistedFaceId: string; body: JsonNode; personId: string;
+          personGroupId: string): Recallable =
   ## personGroupPersonUpdateFace
   ## Add a face to a person into a person group for face identification or verification. To deal with an image contains multiple faces, input face can be specified as an image with a targetFace rectangle. It returns a persistedFaceId representing the added face. No image will be stored. Only the extracted face feature will be stored on server until [PersonGroup PersonFace - Delete](/docs/services/563879b61984550e40cbbe8d/operations/563879b61984550f3039523e), [PersonGroup Person - Delete](/docs/services/563879b61984550e40cbbe8d/operations/563879b61984550f3039523d) or [PersonGroup - Delete](/docs/services/563879b61984550e40cbbe8d/operations/563879b61984550f30395245) is called.
   ## <br /> Note persistedFaceId is different from faceId generated by [Face - Detect](/docs/services/563879b61984550e40cbbe8d/operations/563879b61984550f30395236).
@@ -5200,31 +5204,31 @@ proc call*(call_568688: Call_PersonGroupPersonUpdateFace_568680;
   ## * "targetFace" rectangle should contain one face. Zero or multiple faces will be regarded as an error. If the provided "targetFace" rectangle is not returned from [Face - Detect](/docs/services/563879b61984550e40cbbe8d/operations/563879b61984550f30395236), there’s no guarantee to detect and add the face successfully.
   ## * Out of detectable face size (36x36 - 4096x4096 pixels), large head-pose, or large occlusions will cause failures.
   ## * Adding/deleting faces to/from a same person will be processed sequentially. Adding/deleting faces to/from different persons are processed in parallel.
-  ##   personGroupId: string (required)
-  ##                : Id referencing a particular person group.
   ##   persistedFaceId: string (required)
   ##                  : Id referencing a particular persistedFaceId of an existing face.
-  ##   personId: string (required)
-  ##           : Id referencing a particular person.
   ##   body: JObject (required)
   ##       : Request body for updating persisted face.
-  var path_568689 = newJObject()
-  var body_568690 = newJObject()
-  add(path_568689, "personGroupId", newJString(personGroupId))
-  add(path_568689, "persistedFaceId", newJString(persistedFaceId))
-  add(path_568689, "personId", newJString(personId))
+  ##   personId: string (required)
+  ##           : Id referencing a particular person.
+  ##   personGroupId: string (required)
+  ##                : Id referencing a particular person group.
+  var path_564589 = newJObject()
+  var body_564590 = newJObject()
+  add(path_564589, "persistedFaceId", newJString(persistedFaceId))
   if body != nil:
-    body_568690 = body
-  result = call_568688.call(path_568689, nil, nil, nil, body_568690)
+    body_564590 = body
+  add(path_564589, "personId", newJString(personId))
+  add(path_564589, "personGroupId", newJString(personGroupId))
+  result = call_564588.call(path_564589, nil, nil, nil, body_564590)
 
-var personGroupPersonUpdateFace* = Call_PersonGroupPersonUpdateFace_568680(
+var personGroupPersonUpdateFace* = Call_PersonGroupPersonUpdateFace_564580(
     name: "personGroupPersonUpdateFace", meth: HttpMethod.HttpPatch,
     host: "azure.local", route: "/persongroups/{personGroupId}/persons/{personId}/persistedfaces/{persistedFaceId}",
-    validator: validate_PersonGroupPersonUpdateFace_568681, base: "",
-    url: url_PersonGroupPersonUpdateFace_568682, schemes: {Scheme.Https})
+    validator: validate_PersonGroupPersonUpdateFace_564581, base: "",
+    url: url_PersonGroupPersonUpdateFace_564582, schemes: {Scheme.Https})
 type
-  Call_PersonGroupPersonDeleteFace_568671 = ref object of OpenApiRestCall_567668
-proc url_PersonGroupPersonDeleteFace_568673(protocol: Scheme; host: string;
+  Call_PersonGroupPersonDeleteFace_564571 = ref object of OpenApiRestCall_563566
+proc url_PersonGroupPersonDeleteFace_564573(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -5245,7 +5249,7 @@ proc url_PersonGroupPersonDeleteFace_568673(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_PersonGroupPersonDeleteFace_568672(path: JsonNode; query: JsonNode;
+proc validate_PersonGroupPersonDeleteFace_564572(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Delete a face from a person in a person group by specified personGroupId, personId and persistedFaceId.
   ## <br /> Adding/deleting faces to/from a same person will be processed sequentially. Adding/deleting faces to/from different persons are processed in parallel.
@@ -5253,30 +5257,30 @@ proc validate_PersonGroupPersonDeleteFace_568672(path: JsonNode; query: JsonNode
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   personGroupId: JString (required)
-  ##                : Id referencing a particular person group.
   ##   persistedFaceId: JString (required)
   ##                  : Id referencing a particular persistedFaceId of an existing face.
   ##   personId: JString (required)
   ##           : Id referencing a particular person.
+  ##   personGroupId: JString (required)
+  ##                : Id referencing a particular person group.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `personGroupId` field"
-  var valid_568674 = path.getOrDefault("personGroupId")
-  valid_568674 = validateParameter(valid_568674, JString, required = true,
+        "path argument is necessary due to required `persistedFaceId` field"
+  var valid_564574 = path.getOrDefault("persistedFaceId")
+  valid_564574 = validateParameter(valid_564574, JString, required = true,
                                  default = nil)
-  if valid_568674 != nil:
-    section.add "personGroupId", valid_568674
-  var valid_568675 = path.getOrDefault("persistedFaceId")
-  valid_568675 = validateParameter(valid_568675, JString, required = true,
+  if valid_564574 != nil:
+    section.add "persistedFaceId", valid_564574
+  var valid_564575 = path.getOrDefault("personId")
+  valid_564575 = validateParameter(valid_564575, JString, required = true,
                                  default = nil)
-  if valid_568675 != nil:
-    section.add "persistedFaceId", valid_568675
-  var valid_568676 = path.getOrDefault("personId")
-  valid_568676 = validateParameter(valid_568676, JString, required = true,
+  if valid_564575 != nil:
+    section.add "personId", valid_564575
+  var valid_564576 = path.getOrDefault("personGroupId")
+  valid_564576 = validateParameter(valid_564576, JString, required = true,
                                  default = nil)
-  if valid_568676 != nil:
-    section.add "personId", valid_568676
+  if valid_564576 != nil:
+    section.add "personGroupId", valid_564576
   result.add "path", section
   section = newJObject()
   result.add "query", section
@@ -5287,45 +5291,45 @@ proc validate_PersonGroupPersonDeleteFace_568672(path: JsonNode; query: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_568677: Call_PersonGroupPersonDeleteFace_568671; path: JsonNode;
+proc call*(call_564577: Call_PersonGroupPersonDeleteFace_564571; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Delete a face from a person in a person group by specified personGroupId, personId and persistedFaceId.
   ## <br /> Adding/deleting faces to/from a same person will be processed sequentially. Adding/deleting faces to/from different persons are processed in parallel.
   ## 
-  let valid = call_568677.validator(path, query, header, formData, body)
-  let scheme = call_568677.pickScheme
+  let valid = call_564577.validator(path, query, header, formData, body)
+  let scheme = call_564577.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568677.url(scheme.get, call_568677.host, call_568677.base,
-                         call_568677.route, valid.getOrDefault("path"),
+  let url = call_564577.url(scheme.get, call_564577.host, call_564577.base,
+                         call_564577.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568677, url, valid)
+  result = hook(call_564577, url, valid)
 
-proc call*(call_568678: Call_PersonGroupPersonDeleteFace_568671;
-          personGroupId: string; persistedFaceId: string; personId: string): Recallable =
+proc call*(call_564578: Call_PersonGroupPersonDeleteFace_564571;
+          persistedFaceId: string; personId: string; personGroupId: string): Recallable =
   ## personGroupPersonDeleteFace
   ## Delete a face from a person in a person group by specified personGroupId, personId and persistedFaceId.
   ## <br /> Adding/deleting faces to/from a same person will be processed sequentially. Adding/deleting faces to/from different persons are processed in parallel.
-  ##   personGroupId: string (required)
-  ##                : Id referencing a particular person group.
   ##   persistedFaceId: string (required)
   ##                  : Id referencing a particular persistedFaceId of an existing face.
   ##   personId: string (required)
   ##           : Id referencing a particular person.
-  var path_568679 = newJObject()
-  add(path_568679, "personGroupId", newJString(personGroupId))
-  add(path_568679, "persistedFaceId", newJString(persistedFaceId))
-  add(path_568679, "personId", newJString(personId))
-  result = call_568678.call(path_568679, nil, nil, nil, nil)
+  ##   personGroupId: string (required)
+  ##                : Id referencing a particular person group.
+  var path_564579 = newJObject()
+  add(path_564579, "persistedFaceId", newJString(persistedFaceId))
+  add(path_564579, "personId", newJString(personId))
+  add(path_564579, "personGroupId", newJString(personGroupId))
+  result = call_564578.call(path_564579, nil, nil, nil, nil)
 
-var personGroupPersonDeleteFace* = Call_PersonGroupPersonDeleteFace_568671(
+var personGroupPersonDeleteFace* = Call_PersonGroupPersonDeleteFace_564571(
     name: "personGroupPersonDeleteFace", meth: HttpMethod.HttpDelete,
     host: "azure.local", route: "/persongroups/{personGroupId}/persons/{personId}/persistedfaces/{persistedFaceId}",
-    validator: validate_PersonGroupPersonDeleteFace_568672, base: "",
-    url: url_PersonGroupPersonDeleteFace_568673, schemes: {Scheme.Https})
+    validator: validate_PersonGroupPersonDeleteFace_564572, base: "",
+    url: url_PersonGroupPersonDeleteFace_564573, schemes: {Scheme.Https})
 type
-  Call_PersonGroupTrain_568691 = ref object of OpenApiRestCall_567668
-proc url_PersonGroupTrain_568693(protocol: Scheme; host: string; base: string;
+  Call_PersonGroupTrain_564591 = ref object of OpenApiRestCall_563566
+proc url_PersonGroupTrain_564593(protocol: Scheme; host: string; base: string;
                                 route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -5341,7 +5345,7 @@ proc url_PersonGroupTrain_568693(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_PersonGroupTrain_568692(path: JsonNode; query: JsonNode;
+proc validate_PersonGroupTrain_564592(path: JsonNode; query: JsonNode;
                                      header: JsonNode; formData: JsonNode;
                                      body: JsonNode): JsonNode =
   ## Queue a person group training task, the training task may not be started immediately.
@@ -5354,11 +5358,11 @@ proc validate_PersonGroupTrain_568692(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `personGroupId` field"
-  var valid_568694 = path.getOrDefault("personGroupId")
-  valid_568694 = validateParameter(valid_568694, JString, required = true,
+  var valid_564594 = path.getOrDefault("personGroupId")
+  valid_564594 = validateParameter(valid_564594, JString, required = true,
                                  default = nil)
-  if valid_568694 != nil:
-    section.add "personGroupId", valid_568694
+  if valid_564594 != nil:
+    section.add "personGroupId", valid_564594
   result.add "path", section
   section = newJObject()
   result.add "query", section
@@ -5369,36 +5373,36 @@ proc validate_PersonGroupTrain_568692(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568695: Call_PersonGroupTrain_568691; path: JsonNode;
+proc call*(call_564595: Call_PersonGroupTrain_564591; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Queue a person group training task, the training task may not be started immediately.
   ## 
-  let valid = call_568695.validator(path, query, header, formData, body)
-  let scheme = call_568695.pickScheme
+  let valid = call_564595.validator(path, query, header, formData, body)
+  let scheme = call_564595.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568695.url(scheme.get, call_568695.host, call_568695.base,
-                         call_568695.route, valid.getOrDefault("path"),
+  let url = call_564595.url(scheme.get, call_564595.host, call_564595.base,
+                         call_564595.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568695, url, valid)
+  result = hook(call_564595, url, valid)
 
-proc call*(call_568696: Call_PersonGroupTrain_568691; personGroupId: string): Recallable =
+proc call*(call_564596: Call_PersonGroupTrain_564591; personGroupId: string): Recallable =
   ## personGroupTrain
   ## Queue a person group training task, the training task may not be started immediately.
   ##   personGroupId: string (required)
   ##                : Id referencing a particular person group.
-  var path_568697 = newJObject()
-  add(path_568697, "personGroupId", newJString(personGroupId))
-  result = call_568696.call(path_568697, nil, nil, nil, nil)
+  var path_564597 = newJObject()
+  add(path_564597, "personGroupId", newJString(personGroupId))
+  result = call_564596.call(path_564597, nil, nil, nil, nil)
 
-var personGroupTrain* = Call_PersonGroupTrain_568691(name: "personGroupTrain",
+var personGroupTrain* = Call_PersonGroupTrain_564591(name: "personGroupTrain",
     meth: HttpMethod.HttpPost, host: "azure.local",
     route: "/persongroups/{personGroupId}/train",
-    validator: validate_PersonGroupTrain_568692, base: "",
-    url: url_PersonGroupTrain_568693, schemes: {Scheme.Https})
+    validator: validate_PersonGroupTrain_564592, base: "",
+    url: url_PersonGroupTrain_564593, schemes: {Scheme.Https})
 type
-  Call_PersonGroupGetTrainingStatus_568698 = ref object of OpenApiRestCall_567668
-proc url_PersonGroupGetTrainingStatus_568700(protocol: Scheme; host: string;
+  Call_PersonGroupGetTrainingStatus_564598 = ref object of OpenApiRestCall_563566
+proc url_PersonGroupGetTrainingStatus_564600(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -5414,7 +5418,7 @@ proc url_PersonGroupGetTrainingStatus_568700(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_PersonGroupGetTrainingStatus_568699(path: JsonNode; query: JsonNode;
+proc validate_PersonGroupGetTrainingStatus_564599(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Retrieve the training status of a person group (completed or ongoing).
   ## 
@@ -5426,11 +5430,11 @@ proc validate_PersonGroupGetTrainingStatus_568699(path: JsonNode; query: JsonNod
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `personGroupId` field"
-  var valid_568701 = path.getOrDefault("personGroupId")
-  valid_568701 = validateParameter(valid_568701, JString, required = true,
+  var valid_564601 = path.getOrDefault("personGroupId")
+  valid_564601 = validateParameter(valid_564601, JString, required = true,
                                  default = nil)
-  if valid_568701 != nil:
-    section.add "personGroupId", valid_568701
+  if valid_564601 != nil:
+    section.add "personGroupId", valid_564601
   result.add "path", section
   section = newJObject()
   result.add "query", section
@@ -5441,44 +5445,44 @@ proc validate_PersonGroupGetTrainingStatus_568699(path: JsonNode; query: JsonNod
   if body != nil:
     result.add "body", body
 
-proc call*(call_568702: Call_PersonGroupGetTrainingStatus_568698; path: JsonNode;
+proc call*(call_564602: Call_PersonGroupGetTrainingStatus_564598; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Retrieve the training status of a person group (completed or ongoing).
   ## 
-  let valid = call_568702.validator(path, query, header, formData, body)
-  let scheme = call_568702.pickScheme
+  let valid = call_564602.validator(path, query, header, formData, body)
+  let scheme = call_564602.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568702.url(scheme.get, call_568702.host, call_568702.base,
-                         call_568702.route, valid.getOrDefault("path"),
+  let url = call_564602.url(scheme.get, call_564602.host, call_564602.base,
+                         call_564602.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568702, url, valid)
+  result = hook(call_564602, url, valid)
 
-proc call*(call_568703: Call_PersonGroupGetTrainingStatus_568698;
+proc call*(call_564603: Call_PersonGroupGetTrainingStatus_564598;
           personGroupId: string): Recallable =
   ## personGroupGetTrainingStatus
   ## Retrieve the training status of a person group (completed or ongoing).
   ##   personGroupId: string (required)
   ##                : Id referencing a particular person group.
-  var path_568704 = newJObject()
-  add(path_568704, "personGroupId", newJString(personGroupId))
-  result = call_568703.call(path_568704, nil, nil, nil, nil)
+  var path_564604 = newJObject()
+  add(path_564604, "personGroupId", newJString(personGroupId))
+  result = call_564603.call(path_564604, nil, nil, nil, nil)
 
-var personGroupGetTrainingStatus* = Call_PersonGroupGetTrainingStatus_568698(
+var personGroupGetTrainingStatus* = Call_PersonGroupGetTrainingStatus_564598(
     name: "personGroupGetTrainingStatus", meth: HttpMethod.HttpGet,
     host: "azure.local", route: "/persongroups/{personGroupId}/training",
-    validator: validate_PersonGroupGetTrainingStatus_568699, base: "",
-    url: url_PersonGroupGetTrainingStatus_568700, schemes: {Scheme.Https})
+    validator: validate_PersonGroupGetTrainingStatus_564599, base: "",
+    url: url_PersonGroupGetTrainingStatus_564600, schemes: {Scheme.Https})
 type
-  Call_SnapshotTake_568713 = ref object of OpenApiRestCall_567668
-proc url_SnapshotTake_568715(protocol: Scheme; host: string; base: string;
+  Call_SnapshotTake_564613 = ref object of OpenApiRestCall_563566
+proc url_SnapshotTake_564615(protocol: Scheme; host: string; base: string;
                             route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_SnapshotTake_568714(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_SnapshotTake_564614(path: JsonNode; query: JsonNode; header: JsonNode;
                                  formData: JsonNode; body: JsonNode): JsonNode =
   ## Submit an operation to take a snapshot of face list, large face list, person group or large person group, with user-specified snapshot type, source object id, apply scope and an optional user data.<br />
   ## The snapshot interfaces are for users to backup and restore their face data from one face subscription to another, inside same region or across regions. The workflow contains two phases, user first calls Snapshot - Take to create a copy of the source object and store it as a snapshot, then calls Snapshot - Apply to paste the snapshot to target subscription. The snapshots are stored in a centralized location (per Azure instance), so that they can be applied cross accounts and regions.<br />
@@ -5507,7 +5511,7 @@ proc validate_SnapshotTake_568714(path: JsonNode; query: JsonNode; header: JsonN
   if body != nil:
     result.add "body", body
 
-proc call*(call_568717: Call_SnapshotTake_568713; path: JsonNode; query: JsonNode;
+proc call*(call_564617: Call_SnapshotTake_564613; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Submit an operation to take a snapshot of face list, large face list, person group or large person group, with user-specified snapshot type, source object id, apply scope and an optional user data.<br />
   ## The snapshot interfaces are for users to backup and restore their face data from one face subscription to another, inside same region or across regions. The workflow contains two phases, user first calls Snapshot - Take to create a copy of the source object and store it as a snapshot, then calls Snapshot - Apply to paste the snapshot to target subscription. The snapshots are stored in a centralized location (per Azure instance), so that they can be applied cross accounts and regions.<br />
@@ -5518,16 +5522,16 @@ proc call*(call_568717: Call_SnapshotTake_568713; path: JsonNode; query: JsonNod
   ## * Free-tier subscription quota: 100 take operations per month.
   ## * S0-tier subscription quota: 100 take operations per day.
   ## 
-  let valid = call_568717.validator(path, query, header, formData, body)
-  let scheme = call_568717.pickScheme
+  let valid = call_564617.validator(path, query, header, formData, body)
+  let scheme = call_564617.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568717.url(scheme.get, call_568717.host, call_568717.base,
-                         call_568717.route, valid.getOrDefault("path"),
+  let url = call_564617.url(scheme.get, call_564617.host, call_564617.base,
+                         call_564617.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568717, url, valid)
+  result = hook(call_564617, url, valid)
 
-proc call*(call_568718: Call_SnapshotTake_568713; body: JsonNode): Recallable =
+proc call*(call_564618: Call_SnapshotTake_564613; body: JsonNode): Recallable =
   ## snapshotTake
   ## Submit an operation to take a snapshot of face list, large face list, person group or large person group, with user-specified snapshot type, source object id, apply scope and an optional user data.<br />
   ## The snapshot interfaces are for users to backup and restore their face data from one face subscription to another, inside same region or across regions. The workflow contains two phases, user first calls Snapshot - Take to create a copy of the source object and store it as a snapshot, then calls Snapshot - Apply to paste the snapshot to target subscription. The snapshots are stored in a centralized location (per Azure instance), so that they can be applied cross accounts and regions.<br />
@@ -5539,25 +5543,25 @@ proc call*(call_568718: Call_SnapshotTake_568713; body: JsonNode): Recallable =
   ## * S0-tier subscription quota: 100 take operations per day.
   ##   body: JObject (required)
   ##       : Request body for taking a snapshot.
-  var body_568719 = newJObject()
+  var body_564619 = newJObject()
   if body != nil:
-    body_568719 = body
-  result = call_568718.call(nil, nil, nil, nil, body_568719)
+    body_564619 = body
+  result = call_564618.call(nil, nil, nil, nil, body_564619)
 
-var snapshotTake* = Call_SnapshotTake_568713(name: "snapshotTake",
+var snapshotTake* = Call_SnapshotTake_564613(name: "snapshotTake",
     meth: HttpMethod.HttpPost, host: "azure.local", route: "/snapshots",
-    validator: validate_SnapshotTake_568714, base: "", url: url_SnapshotTake_568715,
+    validator: validate_SnapshotTake_564614, base: "", url: url_SnapshotTake_564615,
     schemes: {Scheme.Https})
 type
-  Call_SnapshotList_568705 = ref object of OpenApiRestCall_567668
-proc url_SnapshotList_568707(protocol: Scheme; host: string; base: string;
+  Call_SnapshotList_564605 = ref object of OpenApiRestCall_563566
+proc url_SnapshotList_564607(protocol: Scheme; host: string; base: string;
                             route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_SnapshotList_568706(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_SnapshotList_564606(path: JsonNode; query: JsonNode; header: JsonNode;
                                  formData: JsonNode; body: JsonNode): JsonNode =
   ## List all accessible snapshots with related information, including snapshots that were taken by the user, or snapshots to be applied to the user (subscription id was included in the applyScope in Snapshot - Take).
   ## 
@@ -5566,21 +5570,21 @@ proc validate_SnapshotList_568706(path: JsonNode; query: JsonNode; header: JsonN
   section = newJObject()
   result.add "path", section
   ## parameters in `query` object:
-  ##   applyScope: JArray
-  ##             : User specified snapshot apply scopes as a search filter. ApplyScope is an array of the target Azure subscription ids for the snapshot, specified by the user who created the snapshot by Snapshot - Take.
   ##   type: JString
   ##       : User specified object type as a search filter.
+  ##   applyScope: JArray
+  ##             : User specified snapshot apply scopes as a search filter. ApplyScope is an array of the target Azure subscription ids for the snapshot, specified by the user who created the snapshot by Snapshot - Take.
   section = newJObject()
-  var valid_568708 = query.getOrDefault("applyScope")
-  valid_568708 = validateParameter(valid_568708, JArray, required = false,
-                                 default = nil)
-  if valid_568708 != nil:
-    section.add "applyScope", valid_568708
-  var valid_568709 = query.getOrDefault("type")
-  valid_568709 = validateParameter(valid_568709, JString, required = false,
+  var valid_564608 = query.getOrDefault("type")
+  valid_564608 = validateParameter(valid_564608, JString, required = false,
                                  default = newJString("FaceList"))
-  if valid_568709 != nil:
-    section.add "type", valid_568709
+  if valid_564608 != nil:
+    section.add "type", valid_564608
+  var valid_564609 = query.getOrDefault("applyScope")
+  valid_564609 = validateParameter(valid_564609, JArray, required = false,
+                                 default = nil)
+  if valid_564609 != nil:
+    section.add "applyScope", valid_564609
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -5589,40 +5593,40 @@ proc validate_SnapshotList_568706(path: JsonNode; query: JsonNode; header: JsonN
   if body != nil:
     result.add "body", body
 
-proc call*(call_568710: Call_SnapshotList_568705; path: JsonNode; query: JsonNode;
+proc call*(call_564610: Call_SnapshotList_564605; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## List all accessible snapshots with related information, including snapshots that were taken by the user, or snapshots to be applied to the user (subscription id was included in the applyScope in Snapshot - Take).
   ## 
-  let valid = call_568710.validator(path, query, header, formData, body)
-  let scheme = call_568710.pickScheme
+  let valid = call_564610.validator(path, query, header, formData, body)
+  let scheme = call_564610.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568710.url(scheme.get, call_568710.host, call_568710.base,
-                         call_568710.route, valid.getOrDefault("path"),
+  let url = call_564610.url(scheme.get, call_564610.host, call_564610.base,
+                         call_564610.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568710, url, valid)
+  result = hook(call_564610, url, valid)
 
-proc call*(call_568711: Call_SnapshotList_568705; applyScope: JsonNode = nil;
-          `type`: string = "FaceList"): Recallable =
+proc call*(call_564611: Call_SnapshotList_564605; `type`: string = "FaceList";
+          applyScope: JsonNode = nil): Recallable =
   ## snapshotList
   ## List all accessible snapshots with related information, including snapshots that were taken by the user, or snapshots to be applied to the user (subscription id was included in the applyScope in Snapshot - Take).
-  ##   applyScope: JArray
-  ##             : User specified snapshot apply scopes as a search filter. ApplyScope is an array of the target Azure subscription ids for the snapshot, specified by the user who created the snapshot by Snapshot - Take.
   ##   type: string
   ##       : User specified object type as a search filter.
-  var query_568712 = newJObject()
+  ##   applyScope: JArray
+  ##             : User specified snapshot apply scopes as a search filter. ApplyScope is an array of the target Azure subscription ids for the snapshot, specified by the user who created the snapshot by Snapshot - Take.
+  var query_564612 = newJObject()
+  add(query_564612, "type", newJString(`type`))
   if applyScope != nil:
-    query_568712.add "applyScope", applyScope
-  add(query_568712, "type", newJString(`type`))
-  result = call_568711.call(nil, query_568712, nil, nil, nil)
+    query_564612.add "applyScope", applyScope
+  result = call_564611.call(nil, query_564612, nil, nil, nil)
 
-var snapshotList* = Call_SnapshotList_568705(name: "snapshotList",
+var snapshotList* = Call_SnapshotList_564605(name: "snapshotList",
     meth: HttpMethod.HttpGet, host: "azure.local", route: "/snapshots",
-    validator: validate_SnapshotList_568706, base: "", url: url_SnapshotList_568707,
+    validator: validate_SnapshotList_564606, base: "", url: url_SnapshotList_564607,
     schemes: {Scheme.Https})
 type
-  Call_SnapshotGet_568720 = ref object of OpenApiRestCall_567668
-proc url_SnapshotGet_568722(protocol: Scheme; host: string; base: string;
+  Call_SnapshotGet_564620 = ref object of OpenApiRestCall_563566
+proc url_SnapshotGet_564622(protocol: Scheme; host: string; base: string;
                            route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -5637,7 +5641,7 @@ proc url_SnapshotGet_568722(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_SnapshotGet_568721(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_SnapshotGet_564621(path: JsonNode; query: JsonNode; header: JsonNode;
                                 formData: JsonNode; body: JsonNode): JsonNode =
   ## Retrieve information about a snapshot. Snapshot is only accessible to the source subscription who took it, and target subscriptions included in the applyScope in Snapshot - Take.
   ## 
@@ -5649,11 +5653,11 @@ proc validate_SnapshotGet_568721(path: JsonNode; query: JsonNode; header: JsonNo
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `snapshotId` field"
-  var valid_568723 = path.getOrDefault("snapshotId")
-  valid_568723 = validateParameter(valid_568723, JString, required = true,
+  var valid_564623 = path.getOrDefault("snapshotId")
+  valid_564623 = validateParameter(valid_564623, JString, required = true,
                                  default = nil)
-  if valid_568723 != nil:
-    section.add "snapshotId", valid_568723
+  if valid_564623 != nil:
+    section.add "snapshotId", valid_564623
   result.add "path", section
   section = newJObject()
   result.add "query", section
@@ -5664,38 +5668,38 @@ proc validate_SnapshotGet_568721(path: JsonNode; query: JsonNode; header: JsonNo
   if body != nil:
     result.add "body", body
 
-proc call*(call_568724: Call_SnapshotGet_568720; path: JsonNode; query: JsonNode;
+proc call*(call_564624: Call_SnapshotGet_564620; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Retrieve information about a snapshot. Snapshot is only accessible to the source subscription who took it, and target subscriptions included in the applyScope in Snapshot - Take.
   ## 
-  let valid = call_568724.validator(path, query, header, formData, body)
-  let scheme = call_568724.pickScheme
+  let valid = call_564624.validator(path, query, header, formData, body)
+  let scheme = call_564624.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568724.url(scheme.get, call_568724.host, call_568724.base,
-                         call_568724.route, valid.getOrDefault("path"),
+  let url = call_564624.url(scheme.get, call_564624.host, call_564624.base,
+                         call_564624.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568724, url, valid)
+  result = hook(call_564624, url, valid)
 
-proc call*(call_568725: Call_SnapshotGet_568720; snapshotId: string): Recallable =
+proc call*(call_564625: Call_SnapshotGet_564620; snapshotId: string): Recallable =
   ## snapshotGet
   ## Retrieve information about a snapshot. Snapshot is only accessible to the source subscription who took it, and target subscriptions included in the applyScope in Snapshot - Take.
   ##   snapshotId: string (required)
   ##             : Id referencing a particular snapshot.
-  var path_568726 = newJObject()
-  add(path_568726, "snapshotId", newJString(snapshotId))
-  result = call_568725.call(path_568726, nil, nil, nil, nil)
+  var path_564626 = newJObject()
+  add(path_564626, "snapshotId", newJString(snapshotId))
+  result = call_564625.call(path_564626, nil, nil, nil, nil)
 
-var snapshotGet* = Call_SnapshotGet_568720(name: "snapshotGet",
+var snapshotGet* = Call_SnapshotGet_564620(name: "snapshotGet",
                                         meth: HttpMethod.HttpGet,
                                         host: "azure.local",
                                         route: "/snapshots/{snapshotId}",
-                                        validator: validate_SnapshotGet_568721,
-                                        base: "", url: url_SnapshotGet_568722,
+                                        validator: validate_SnapshotGet_564621,
+                                        base: "", url: url_SnapshotGet_564622,
                                         schemes: {Scheme.Https})
 type
-  Call_SnapshotUpdate_568734 = ref object of OpenApiRestCall_567668
-proc url_SnapshotUpdate_568736(protocol: Scheme; host: string; base: string;
+  Call_SnapshotUpdate_564634 = ref object of OpenApiRestCall_563566
+proc url_SnapshotUpdate_564636(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -5710,7 +5714,7 @@ proc url_SnapshotUpdate_568736(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_SnapshotUpdate_568735(path: JsonNode; query: JsonNode;
+proc validate_SnapshotUpdate_564635(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## Update the information of a snapshot. Only the source subscription who took the snapshot can update the snapshot.
@@ -5723,11 +5727,11 @@ proc validate_SnapshotUpdate_568735(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `snapshotId` field"
-  var valid_568737 = path.getOrDefault("snapshotId")
-  valid_568737 = validateParameter(valid_568737, JString, required = true,
+  var valid_564637 = path.getOrDefault("snapshotId")
+  valid_564637 = validateParameter(valid_564637, JString, required = true,
                                  default = nil)
-  if valid_568737 != nil:
-    section.add "snapshotId", valid_568737
+  if valid_564637 != nil:
+    section.add "snapshotId", valid_564637
   result.add "path", section
   section = newJObject()
   result.add "query", section
@@ -5743,20 +5747,20 @@ proc validate_SnapshotUpdate_568735(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568739: Call_SnapshotUpdate_568734; path: JsonNode; query: JsonNode;
+proc call*(call_564639: Call_SnapshotUpdate_564634; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Update the information of a snapshot. Only the source subscription who took the snapshot can update the snapshot.
   ## 
-  let valid = call_568739.validator(path, query, header, formData, body)
-  let scheme = call_568739.pickScheme
+  let valid = call_564639.validator(path, query, header, formData, body)
+  let scheme = call_564639.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568739.url(scheme.get, call_568739.host, call_568739.base,
-                         call_568739.route, valid.getOrDefault("path"),
+  let url = call_564639.url(scheme.get, call_564639.host, call_564639.base,
+                         call_564639.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568739, url, valid)
+  result = hook(call_564639, url, valid)
 
-proc call*(call_568740: Call_SnapshotUpdate_568734; snapshotId: string;
+proc call*(call_564640: Call_SnapshotUpdate_564634; snapshotId: string;
           body: JsonNode): Recallable =
   ## snapshotUpdate
   ## Update the information of a snapshot. Only the source subscription who took the snapshot can update the snapshot.
@@ -5764,20 +5768,20 @@ proc call*(call_568740: Call_SnapshotUpdate_568734; snapshotId: string;
   ##             : Id referencing a particular snapshot.
   ##   body: JObject (required)
   ##       : Request body for updating a snapshot.
-  var path_568741 = newJObject()
-  var body_568742 = newJObject()
-  add(path_568741, "snapshotId", newJString(snapshotId))
+  var path_564641 = newJObject()
+  var body_564642 = newJObject()
+  add(path_564641, "snapshotId", newJString(snapshotId))
   if body != nil:
-    body_568742 = body
-  result = call_568740.call(path_568741, nil, nil, nil, body_568742)
+    body_564642 = body
+  result = call_564640.call(path_564641, nil, nil, nil, body_564642)
 
-var snapshotUpdate* = Call_SnapshotUpdate_568734(name: "snapshotUpdate",
+var snapshotUpdate* = Call_SnapshotUpdate_564634(name: "snapshotUpdate",
     meth: HttpMethod.HttpPatch, host: "azure.local",
-    route: "/snapshots/{snapshotId}", validator: validate_SnapshotUpdate_568735,
-    base: "", url: url_SnapshotUpdate_568736, schemes: {Scheme.Https})
+    route: "/snapshots/{snapshotId}", validator: validate_SnapshotUpdate_564635,
+    base: "", url: url_SnapshotUpdate_564636, schemes: {Scheme.Https})
 type
-  Call_SnapshotDelete_568727 = ref object of OpenApiRestCall_567668
-proc url_SnapshotDelete_568729(protocol: Scheme; host: string; base: string;
+  Call_SnapshotDelete_564627 = ref object of OpenApiRestCall_563566
+proc url_SnapshotDelete_564629(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -5792,7 +5796,7 @@ proc url_SnapshotDelete_568729(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_SnapshotDelete_568728(path: JsonNode; query: JsonNode;
+proc validate_SnapshotDelete_564628(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## Delete an existing snapshot according to the snapshotId. All object data and information in the snapshot will also be deleted. Only the source subscription who took the snapshot can delete the snapshot. If the user does not delete a snapshot with this API, the snapshot will still be automatically deleted in 48 hours after creation.
@@ -5805,11 +5809,11 @@ proc validate_SnapshotDelete_568728(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `snapshotId` field"
-  var valid_568730 = path.getOrDefault("snapshotId")
-  valid_568730 = validateParameter(valid_568730, JString, required = true,
+  var valid_564630 = path.getOrDefault("snapshotId")
+  valid_564630 = validateParameter(valid_564630, JString, required = true,
                                  default = nil)
-  if valid_568730 != nil:
-    section.add "snapshotId", valid_568730
+  if valid_564630 != nil:
+    section.add "snapshotId", valid_564630
   result.add "path", section
   section = newJObject()
   result.add "query", section
@@ -5820,35 +5824,35 @@ proc validate_SnapshotDelete_568728(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568731: Call_SnapshotDelete_568727; path: JsonNode; query: JsonNode;
+proc call*(call_564631: Call_SnapshotDelete_564627; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Delete an existing snapshot according to the snapshotId. All object data and information in the snapshot will also be deleted. Only the source subscription who took the snapshot can delete the snapshot. If the user does not delete a snapshot with this API, the snapshot will still be automatically deleted in 48 hours after creation.
   ## 
-  let valid = call_568731.validator(path, query, header, formData, body)
-  let scheme = call_568731.pickScheme
+  let valid = call_564631.validator(path, query, header, formData, body)
+  let scheme = call_564631.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568731.url(scheme.get, call_568731.host, call_568731.base,
-                         call_568731.route, valid.getOrDefault("path"),
+  let url = call_564631.url(scheme.get, call_564631.host, call_564631.base,
+                         call_564631.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568731, url, valid)
+  result = hook(call_564631, url, valid)
 
-proc call*(call_568732: Call_SnapshotDelete_568727; snapshotId: string): Recallable =
+proc call*(call_564632: Call_SnapshotDelete_564627; snapshotId: string): Recallable =
   ## snapshotDelete
   ## Delete an existing snapshot according to the snapshotId. All object data and information in the snapshot will also be deleted. Only the source subscription who took the snapshot can delete the snapshot. If the user does not delete a snapshot with this API, the snapshot will still be automatically deleted in 48 hours after creation.
   ##   snapshotId: string (required)
   ##             : Id referencing a particular snapshot.
-  var path_568733 = newJObject()
-  add(path_568733, "snapshotId", newJString(snapshotId))
-  result = call_568732.call(path_568733, nil, nil, nil, nil)
+  var path_564633 = newJObject()
+  add(path_564633, "snapshotId", newJString(snapshotId))
+  result = call_564632.call(path_564633, nil, nil, nil, nil)
 
-var snapshotDelete* = Call_SnapshotDelete_568727(name: "snapshotDelete",
+var snapshotDelete* = Call_SnapshotDelete_564627(name: "snapshotDelete",
     meth: HttpMethod.HttpDelete, host: "azure.local",
-    route: "/snapshots/{snapshotId}", validator: validate_SnapshotDelete_568728,
-    base: "", url: url_SnapshotDelete_568729, schemes: {Scheme.Https})
+    route: "/snapshots/{snapshotId}", validator: validate_SnapshotDelete_564628,
+    base: "", url: url_SnapshotDelete_564629, schemes: {Scheme.Https})
 type
-  Call_SnapshotApply_568743 = ref object of OpenApiRestCall_567668
-proc url_SnapshotApply_568745(protocol: Scheme; host: string; base: string;
+  Call_SnapshotApply_564643 = ref object of OpenApiRestCall_563566
+proc url_SnapshotApply_564645(protocol: Scheme; host: string; base: string;
                              route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -5864,7 +5868,7 @@ proc url_SnapshotApply_568745(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_SnapshotApply_568744(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_SnapshotApply_564644(path: JsonNode; query: JsonNode; header: JsonNode;
                                   formData: JsonNode; body: JsonNode): JsonNode =
   ## Submit an operation to apply a snapshot to current subscription. For each snapshot, only subscriptions included in the applyScope of Snapshot - Take can apply it.<br />
   ## The snapshot interfaces are for users to backup and restore their face data from one face subscription to another, inside same region or across regions. The workflow contains two phases, user first calls Snapshot - Take to create a copy of the source object and store it as a snapshot, then calls Snapshot - Apply to paste the snapshot to target subscription. The snapshots are stored in a centralized location (per Azure instance), so that they can be applied cross accounts and regions.<br />
@@ -5884,11 +5888,11 @@ proc validate_SnapshotApply_568744(path: JsonNode; query: JsonNode; header: Json
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `snapshotId` field"
-  var valid_568746 = path.getOrDefault("snapshotId")
-  valid_568746 = validateParameter(valid_568746, JString, required = true,
+  var valid_564646 = path.getOrDefault("snapshotId")
+  valid_564646 = validateParameter(valid_564646, JString, required = true,
                                  default = nil)
-  if valid_568746 != nil:
-    section.add "snapshotId", valid_568746
+  if valid_564646 != nil:
+    section.add "snapshotId", valid_564646
   result.add "path", section
   section = newJObject()
   result.add "query", section
@@ -5904,7 +5908,7 @@ proc validate_SnapshotApply_568744(path: JsonNode; query: JsonNode; header: Json
   if body != nil:
     result.add "body", body
 
-proc call*(call_568748: Call_SnapshotApply_568743; path: JsonNode; query: JsonNode;
+proc call*(call_564648: Call_SnapshotApply_564643; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Submit an operation to apply a snapshot to current subscription. For each snapshot, only subscriptions included in the applyScope of Snapshot - Take can apply it.<br />
   ## The snapshot interfaces are for users to backup and restore their face data from one face subscription to another, inside same region or across regions. The workflow contains two phases, user first calls Snapshot - Take to create a copy of the source object and store it as a snapshot, then calls Snapshot - Apply to paste the snapshot to target subscription. The snapshots are stored in a centralized location (per Azure instance), so that they can be applied cross accounts and regions.<br />
@@ -5916,16 +5920,16 @@ proc call*(call_568748: Call_SnapshotApply_568743; path: JsonNode; query: JsonNo
   ## * Free-tier subscription quota: 100 apply operations per month.
   ## * S0-tier subscription quota: 100 apply operations per day.
   ## 
-  let valid = call_568748.validator(path, query, header, formData, body)
-  let scheme = call_568748.pickScheme
+  let valid = call_564648.validator(path, query, header, formData, body)
+  let scheme = call_564648.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568748.url(scheme.get, call_568748.host, call_568748.base,
-                         call_568748.route, valid.getOrDefault("path"),
+  let url = call_564648.url(scheme.get, call_564648.host, call_564648.base,
+                         call_564648.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568748, url, valid)
+  result = hook(call_564648, url, valid)
 
-proc call*(call_568749: Call_SnapshotApply_568743; snapshotId: string; body: JsonNode): Recallable =
+proc call*(call_564649: Call_SnapshotApply_564643; snapshotId: string; body: JsonNode): Recallable =
   ## snapshotApply
   ## Submit an operation to apply a snapshot to current subscription. For each snapshot, only subscriptions included in the applyScope of Snapshot - Take can apply it.<br />
   ## The snapshot interfaces are for users to backup and restore their face data from one face subscription to another, inside same region or across regions. The workflow contains two phases, user first calls Snapshot - Take to create a copy of the source object and store it as a snapshot, then calls Snapshot - Apply to paste the snapshot to target subscription. The snapshots are stored in a centralized location (per Azure instance), so that they can be applied cross accounts and regions.<br />
@@ -5940,27 +5944,27 @@ proc call*(call_568749: Call_SnapshotApply_568743; snapshotId: string; body: Jso
   ##             : Id referencing a particular snapshot.
   ##   body: JObject (required)
   ##       : Request body for applying a snapshot.
-  var path_568750 = newJObject()
-  var body_568751 = newJObject()
-  add(path_568750, "snapshotId", newJString(snapshotId))
+  var path_564650 = newJObject()
+  var body_564651 = newJObject()
+  add(path_564650, "snapshotId", newJString(snapshotId))
   if body != nil:
-    body_568751 = body
-  result = call_568749.call(path_568750, nil, nil, nil, body_568751)
+    body_564651 = body
+  result = call_564649.call(path_564650, nil, nil, nil, body_564651)
 
-var snapshotApply* = Call_SnapshotApply_568743(name: "snapshotApply",
+var snapshotApply* = Call_SnapshotApply_564643(name: "snapshotApply",
     meth: HttpMethod.HttpPost, host: "azure.local",
-    route: "/snapshots/{snapshotId}/apply", validator: validate_SnapshotApply_568744,
-    base: "", url: url_SnapshotApply_568745, schemes: {Scheme.Https})
+    route: "/snapshots/{snapshotId}/apply", validator: validate_SnapshotApply_564644,
+    base: "", url: url_SnapshotApply_564645, schemes: {Scheme.Https})
 type
-  Call_FaceVerifyFaceToFace_568752 = ref object of OpenApiRestCall_567668
-proc url_FaceVerifyFaceToFace_568754(protocol: Scheme; host: string; base: string;
+  Call_FaceVerifyFaceToFace_564652 = ref object of OpenApiRestCall_563566
+proc url_FaceVerifyFaceToFace_564654(protocol: Scheme; host: string; base: string;
                                     route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_FaceVerifyFaceToFace_568753(path: JsonNode; query: JsonNode;
+proc validate_FaceVerifyFaceToFace_564653(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Verify whether two faces belong to a same person or whether one face belongs to a person.
   ## <br/>
@@ -5988,7 +5992,7 @@ proc validate_FaceVerifyFaceToFace_568753(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568756: Call_FaceVerifyFaceToFace_568752; path: JsonNode;
+proc call*(call_564656: Call_FaceVerifyFaceToFace_564652; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Verify whether two faces belong to a same person or whether one face belongs to a person.
   ## <br/>
@@ -5998,16 +6002,16 @@ proc call*(call_568756: Call_FaceVerifyFaceToFace_568752; path: JsonNode;
   ## * The 'recognitionModel' associated with the query faces' faceIds should be the same as the 'recognitionModel' used by the target face, person group or large person group.
   ## 
   ## 
-  let valid = call_568756.validator(path, query, header, formData, body)
-  let scheme = call_568756.pickScheme
+  let valid = call_564656.validator(path, query, header, formData, body)
+  let scheme = call_564656.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568756.url(scheme.get, call_568756.host, call_568756.base,
-                         call_568756.route, valid.getOrDefault("path"),
+  let url = call_564656.url(scheme.get, call_564656.host, call_564656.base,
+                         call_564656.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568756, url, valid)
+  result = hook(call_564656, url, valid)
 
-proc call*(call_568757: Call_FaceVerifyFaceToFace_568752; body: JsonNode): Recallable =
+proc call*(call_564657: Call_FaceVerifyFaceToFace_564652; body: JsonNode): Recallable =
   ## faceVerifyFaceToFace
   ## Verify whether two faces belong to a same person or whether one face belongs to a person.
   ## <br/>
@@ -6018,15 +6022,15 @@ proc call*(call_568757: Call_FaceVerifyFaceToFace_568752; body: JsonNode): Recal
   ## 
   ##   body: JObject (required)
   ##       : Request body for face to face verification.
-  var body_568758 = newJObject()
+  var body_564658 = newJObject()
   if body != nil:
-    body_568758 = body
-  result = call_568757.call(nil, nil, nil, nil, body_568758)
+    body_564658 = body
+  result = call_564657.call(nil, nil, nil, nil, body_564658)
 
-var faceVerifyFaceToFace* = Call_FaceVerifyFaceToFace_568752(
+var faceVerifyFaceToFace* = Call_FaceVerifyFaceToFace_564652(
     name: "faceVerifyFaceToFace", meth: HttpMethod.HttpPost, host: "azure.local",
-    route: "/verify", validator: validate_FaceVerifyFaceToFace_568753, base: "",
-    url: url_FaceVerifyFaceToFace_568754, schemes: {Scheme.Https})
+    route: "/verify", validator: validate_FaceVerifyFaceToFace_564653, base: "",
+    url: url_FaceVerifyFaceToFace_564654, schemes: {Scheme.Https})
 export
   rest
 

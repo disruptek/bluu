@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_573658 = ref object of OpenApiRestCall
+  OpenApiRestCall_563556 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_573658](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563556](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_573658): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563556): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,15 +107,15 @@ const
   macServiceName = "apimanagement-apimidentityprovider"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_IdentityProviderList_573880 = ref object of OpenApiRestCall_573658
-proc url_IdentityProviderList_573882(protocol: Scheme; host: string; base: string;
+  Call_IdentityProviderList_563778 = ref object of OpenApiRestCall_563556
+proc url_IdentityProviderList_563780(protocol: Scheme; host: string; base: string;
                                     route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_IdentityProviderList_573881(path: JsonNode; query: JsonNode;
+proc validate_IdentityProviderList_563779(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists a collection of Identity Provider configured in the specified service instance.
   ## 
@@ -126,11 +130,11 @@ proc validate_IdentityProviderList_573881(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574028 = query.getOrDefault("api-version")
-  valid_574028 = validateParameter(valid_574028, JString, required = true,
+  var valid_563928 = query.getOrDefault("api-version")
+  valid_563928 = validateParameter(valid_563928, JString, required = true,
                                  default = nil)
-  if valid_574028 != nil:
-    section.add "api-version", valid_574028
+  if valid_563928 != nil:
+    section.add "api-version", valid_563928
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -139,37 +143,37 @@ proc validate_IdentityProviderList_573881(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574055: Call_IdentityProviderList_573880; path: JsonNode;
+proc call*(call_563955: Call_IdentityProviderList_563778; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists a collection of Identity Provider configured in the specified service instance.
   ## 
   ## https://docs.microsoft.com/en-us/azure/api-management/api-management-howto-aad#how-to-authorize-developer-accounts-using-azure-active-directory
-  let valid = call_574055.validator(path, query, header, formData, body)
-  let scheme = call_574055.pickScheme
+  let valid = call_563955.validator(path, query, header, formData, body)
+  let scheme = call_563955.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574055.url(scheme.get, call_574055.host, call_574055.base,
-                         call_574055.route, valid.getOrDefault("path"),
+  let url = call_563955.url(scheme.get, call_563955.host, call_563955.base,
+                         call_563955.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574055, url, valid)
+  result = hook(call_563955, url, valid)
 
-proc call*(call_574126: Call_IdentityProviderList_573880; apiVersion: string): Recallable =
+proc call*(call_564026: Call_IdentityProviderList_563778; apiVersion: string): Recallable =
   ## identityProviderList
   ## Lists a collection of Identity Provider configured in the specified service instance.
   ## https://docs.microsoft.com/en-us/azure/api-management/api-management-howto-aad#how-to-authorize-developer-accounts-using-azure-active-directory
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
-  var query_574127 = newJObject()
-  add(query_574127, "api-version", newJString(apiVersion))
-  result = call_574126.call(nil, query_574127, nil, nil, nil)
+  var query_564027 = newJObject()
+  add(query_564027, "api-version", newJString(apiVersion))
+  result = call_564026.call(nil, query_564027, nil, nil, nil)
 
-var identityProviderList* = Call_IdentityProviderList_573880(
+var identityProviderList* = Call_IdentityProviderList_563778(
     name: "identityProviderList", meth: HttpMethod.HttpGet, host: "azure.local",
-    route: "/identityProviders", validator: validate_IdentityProviderList_573881,
-    base: "", url: url_IdentityProviderList_573882, schemes: {Scheme.Https})
+    route: "/identityProviders", validator: validate_IdentityProviderList_563779,
+    base: "", url: url_IdentityProviderList_563780, schemes: {Scheme.Https})
 type
-  Call_IdentityProviderCreateOrUpdate_574212 = ref object of OpenApiRestCall_573658
-proc url_IdentityProviderCreateOrUpdate_574214(protocol: Scheme; host: string;
+  Call_IdentityProviderCreateOrUpdate_564112 = ref object of OpenApiRestCall_563556
+proc url_IdentityProviderCreateOrUpdate_564114(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -185,7 +189,7 @@ proc url_IdentityProviderCreateOrUpdate_574214(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_IdentityProviderCreateOrUpdate_574213(path: JsonNode;
+proc validate_IdentityProviderCreateOrUpdate_564113(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Creates or Updates the IdentityProvider configuration.
   ## 
@@ -196,11 +200,11 @@ proc validate_IdentityProviderCreateOrUpdate_574213(path: JsonNode;
   ##                       : Identity Provider Type identifier.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `identityProviderName` field"
-  var valid_574232 = path.getOrDefault("identityProviderName")
-  valid_574232 = validateParameter(valid_574232, JString, required = true,
+  var valid_564132 = path.getOrDefault("identityProviderName")
+  valid_564132 = validateParameter(valid_564132, JString, required = true,
                                  default = newJString("facebook"))
-  if valid_574232 != nil:
-    section.add "identityProviderName", valid_574232
+  if valid_564132 != nil:
+    section.add "identityProviderName", valid_564132
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -208,11 +212,11 @@ proc validate_IdentityProviderCreateOrUpdate_574213(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574233 = query.getOrDefault("api-version")
-  valid_574233 = validateParameter(valid_574233, JString, required = true,
+  var valid_564133 = query.getOrDefault("api-version")
+  valid_564133 = validateParameter(valid_564133, JString, required = true,
                                  default = nil)
-  if valid_574233 != nil:
-    section.add "api-version", valid_574233
+  if valid_564133 != nil:
+    section.add "api-version", valid_564133
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -226,47 +230,47 @@ proc validate_IdentityProviderCreateOrUpdate_574213(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574235: Call_IdentityProviderCreateOrUpdate_574212; path: JsonNode;
+proc call*(call_564135: Call_IdentityProviderCreateOrUpdate_564112; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Creates or Updates the IdentityProvider configuration.
   ## 
-  let valid = call_574235.validator(path, query, header, formData, body)
-  let scheme = call_574235.pickScheme
+  let valid = call_564135.validator(path, query, header, formData, body)
+  let scheme = call_564135.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574235.url(scheme.get, call_574235.host, call_574235.base,
-                         call_574235.route, valid.getOrDefault("path"),
+  let url = call_564135.url(scheme.get, call_564135.host, call_564135.base,
+                         call_564135.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574235, url, valid)
+  result = hook(call_564135, url, valid)
 
-proc call*(call_574236: Call_IdentityProviderCreateOrUpdate_574212;
+proc call*(call_564136: Call_IdentityProviderCreateOrUpdate_564112;
           apiVersion: string; parameters: JsonNode;
           identityProviderName: string = "facebook"): Recallable =
   ## identityProviderCreateOrUpdate
   ## Creates or Updates the IdentityProvider configuration.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
-  ##   parameters: JObject (required)
-  ##             : Create parameters.
   ##   identityProviderName: string (required)
   ##                       : Identity Provider Type identifier.
-  var path_574237 = newJObject()
-  var query_574238 = newJObject()
-  var body_574239 = newJObject()
-  add(query_574238, "api-version", newJString(apiVersion))
+  ##   parameters: JObject (required)
+  ##             : Create parameters.
+  var path_564137 = newJObject()
+  var query_564138 = newJObject()
+  var body_564139 = newJObject()
+  add(query_564138, "api-version", newJString(apiVersion))
+  add(path_564137, "identityProviderName", newJString(identityProviderName))
   if parameters != nil:
-    body_574239 = parameters
-  add(path_574237, "identityProviderName", newJString(identityProviderName))
-  result = call_574236.call(path_574237, query_574238, nil, nil, body_574239)
+    body_564139 = parameters
+  result = call_564136.call(path_564137, query_564138, nil, nil, body_564139)
 
-var identityProviderCreateOrUpdate* = Call_IdentityProviderCreateOrUpdate_574212(
+var identityProviderCreateOrUpdate* = Call_IdentityProviderCreateOrUpdate_564112(
     name: "identityProviderCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "azure.local", route: "/identityProviders/{identityProviderName}",
-    validator: validate_IdentityProviderCreateOrUpdate_574213, base: "",
-    url: url_IdentityProviderCreateOrUpdate_574214, schemes: {Scheme.Https})
+    validator: validate_IdentityProviderCreateOrUpdate_564113, base: "",
+    url: url_IdentityProviderCreateOrUpdate_564114, schemes: {Scheme.Https})
 type
-  Call_IdentityProviderGet_574167 = ref object of OpenApiRestCall_573658
-proc url_IdentityProviderGet_574169(protocol: Scheme; host: string; base: string;
+  Call_IdentityProviderGet_564067 = ref object of OpenApiRestCall_563556
+proc url_IdentityProviderGet_564069(protocol: Scheme; host: string; base: string;
                                    route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -282,7 +286,7 @@ proc url_IdentityProviderGet_574169(protocol: Scheme; host: string; base: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_IdentityProviderGet_574168(path: JsonNode; query: JsonNode;
+proc validate_IdentityProviderGet_564068(path: JsonNode; query: JsonNode;
                                         header: JsonNode; formData: JsonNode;
                                         body: JsonNode): JsonNode =
   ## Gets the configuration details of the identity Provider configured in specified service instance.
@@ -294,11 +298,11 @@ proc validate_IdentityProviderGet_574168(path: JsonNode; query: JsonNode;
   ##                       : Identity Provider Type identifier.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `identityProviderName` field"
-  var valid_574206 = path.getOrDefault("identityProviderName")
-  valid_574206 = validateParameter(valid_574206, JString, required = true,
+  var valid_564106 = path.getOrDefault("identityProviderName")
+  valid_564106 = validateParameter(valid_564106, JString, required = true,
                                  default = newJString("facebook"))
-  if valid_574206 != nil:
-    section.add "identityProviderName", valid_574206
+  if valid_564106 != nil:
+    section.add "identityProviderName", valid_564106
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -306,11 +310,11 @@ proc validate_IdentityProviderGet_574168(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574207 = query.getOrDefault("api-version")
-  valid_574207 = validateParameter(valid_574207, JString, required = true,
+  var valid_564107 = query.getOrDefault("api-version")
+  valid_564107 = validateParameter(valid_564107, JString, required = true,
                                  default = nil)
-  if valid_574207 != nil:
-    section.add "api-version", valid_574207
+  if valid_564107 != nil:
+    section.add "api-version", valid_564107
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -319,20 +323,20 @@ proc validate_IdentityProviderGet_574168(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574208: Call_IdentityProviderGet_574167; path: JsonNode;
+proc call*(call_564108: Call_IdentityProviderGet_564067; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the configuration details of the identity Provider configured in specified service instance.
   ## 
-  let valid = call_574208.validator(path, query, header, formData, body)
-  let scheme = call_574208.pickScheme
+  let valid = call_564108.validator(path, query, header, formData, body)
+  let scheme = call_564108.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574208.url(scheme.get, call_574208.host, call_574208.base,
-                         call_574208.route, valid.getOrDefault("path"),
+  let url = call_564108.url(scheme.get, call_564108.host, call_564108.base,
+                         call_564108.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574208, url, valid)
+  result = hook(call_564108, url, valid)
 
-proc call*(call_574209: Call_IdentityProviderGet_574167; apiVersion: string;
+proc call*(call_564109: Call_IdentityProviderGet_564067; apiVersion: string;
           identityProviderName: string = "facebook"): Recallable =
   ## identityProviderGet
   ## Gets the configuration details of the identity Provider configured in specified service instance.
@@ -340,20 +344,20 @@ proc call*(call_574209: Call_IdentityProviderGet_574167; apiVersion: string;
   ##             : Version of the API to be used with the client request.
   ##   identityProviderName: string (required)
   ##                       : Identity Provider Type identifier.
-  var path_574210 = newJObject()
-  var query_574211 = newJObject()
-  add(query_574211, "api-version", newJString(apiVersion))
-  add(path_574210, "identityProviderName", newJString(identityProviderName))
-  result = call_574209.call(path_574210, query_574211, nil, nil, nil)
+  var path_564110 = newJObject()
+  var query_564111 = newJObject()
+  add(query_564111, "api-version", newJString(apiVersion))
+  add(path_564110, "identityProviderName", newJString(identityProviderName))
+  result = call_564109.call(path_564110, query_564111, nil, nil, nil)
 
-var identityProviderGet* = Call_IdentityProviderGet_574167(
+var identityProviderGet* = Call_IdentityProviderGet_564067(
     name: "identityProviderGet", meth: HttpMethod.HttpGet, host: "azure.local",
     route: "/identityProviders/{identityProviderName}",
-    validator: validate_IdentityProviderGet_574168, base: "",
-    url: url_IdentityProviderGet_574169, schemes: {Scheme.Https})
+    validator: validate_IdentityProviderGet_564068, base: "",
+    url: url_IdentityProviderGet_564069, schemes: {Scheme.Https})
 type
-  Call_IdentityProviderUpdate_574250 = ref object of OpenApiRestCall_573658
-proc url_IdentityProviderUpdate_574252(protocol: Scheme; host: string; base: string;
+  Call_IdentityProviderUpdate_564150 = ref object of OpenApiRestCall_563556
+proc url_IdentityProviderUpdate_564152(protocol: Scheme; host: string; base: string;
                                       route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -369,7 +373,7 @@ proc url_IdentityProviderUpdate_574252(protocol: Scheme; host: string; base: str
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_IdentityProviderUpdate_574251(path: JsonNode; query: JsonNode;
+proc validate_IdentityProviderUpdate_564151(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Updates an existing IdentityProvider configuration.
   ## 
@@ -380,11 +384,11 @@ proc validate_IdentityProviderUpdate_574251(path: JsonNode; query: JsonNode;
   ##                       : Identity Provider Type identifier.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `identityProviderName` field"
-  var valid_574263 = path.getOrDefault("identityProviderName")
-  valid_574263 = validateParameter(valid_574263, JString, required = true,
+  var valid_564163 = path.getOrDefault("identityProviderName")
+  valid_564163 = validateParameter(valid_564163, JString, required = true,
                                  default = newJString("facebook"))
-  if valid_574263 != nil:
-    section.add "identityProviderName", valid_574263
+  if valid_564163 != nil:
+    section.add "identityProviderName", valid_564163
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -392,11 +396,11 @@ proc validate_IdentityProviderUpdate_574251(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574264 = query.getOrDefault("api-version")
-  valid_574264 = validateParameter(valid_574264, JString, required = true,
+  var valid_564164 = query.getOrDefault("api-version")
+  valid_564164 = validateParameter(valid_564164, JString, required = true,
                                  default = nil)
-  if valid_574264 != nil:
-    section.add "api-version", valid_574264
+  if valid_564164 != nil:
+    section.add "api-version", valid_564164
   result.add "query", section
   ## parameters in `header` object:
   ##   If-Match: JString (required)
@@ -404,11 +408,11 @@ proc validate_IdentityProviderUpdate_574251(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert header != nil,
         "header argument is necessary due to required `If-Match` field"
-  var valid_574265 = header.getOrDefault("If-Match")
-  valid_574265 = validateParameter(valid_574265, JString, required = true,
+  var valid_564165 = header.getOrDefault("If-Match")
+  valid_564165 = validateParameter(valid_564165, JString, required = true,
                                  default = nil)
-  if valid_574265 != nil:
-    section.add "If-Match", valid_574265
+  if valid_564165 != nil:
+    section.add "If-Match", valid_564165
   result.add "header", section
   section = newJObject()
   result.add "formData", section
@@ -420,46 +424,46 @@ proc validate_IdentityProviderUpdate_574251(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574267: Call_IdentityProviderUpdate_574250; path: JsonNode;
+proc call*(call_564167: Call_IdentityProviderUpdate_564150; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Updates an existing IdentityProvider configuration.
   ## 
-  let valid = call_574267.validator(path, query, header, formData, body)
-  let scheme = call_574267.pickScheme
+  let valid = call_564167.validator(path, query, header, formData, body)
+  let scheme = call_564167.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574267.url(scheme.get, call_574267.host, call_574267.base,
-                         call_574267.route, valid.getOrDefault("path"),
+  let url = call_564167.url(scheme.get, call_564167.host, call_564167.base,
+                         call_564167.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574267, url, valid)
+  result = hook(call_564167, url, valid)
 
-proc call*(call_574268: Call_IdentityProviderUpdate_574250; apiVersion: string;
+proc call*(call_564168: Call_IdentityProviderUpdate_564150; apiVersion: string;
           parameters: JsonNode; identityProviderName: string = "facebook"): Recallable =
   ## identityProviderUpdate
   ## Updates an existing IdentityProvider configuration.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
-  ##   parameters: JObject (required)
-  ##             : Update parameters.
   ##   identityProviderName: string (required)
   ##                       : Identity Provider Type identifier.
-  var path_574269 = newJObject()
-  var query_574270 = newJObject()
-  var body_574271 = newJObject()
-  add(query_574270, "api-version", newJString(apiVersion))
+  ##   parameters: JObject (required)
+  ##             : Update parameters.
+  var path_564169 = newJObject()
+  var query_564170 = newJObject()
+  var body_564171 = newJObject()
+  add(query_564170, "api-version", newJString(apiVersion))
+  add(path_564169, "identityProviderName", newJString(identityProviderName))
   if parameters != nil:
-    body_574271 = parameters
-  add(path_574269, "identityProviderName", newJString(identityProviderName))
-  result = call_574268.call(path_574269, query_574270, nil, nil, body_574271)
+    body_564171 = parameters
+  result = call_564168.call(path_564169, query_564170, nil, nil, body_564171)
 
-var identityProviderUpdate* = Call_IdentityProviderUpdate_574250(
+var identityProviderUpdate* = Call_IdentityProviderUpdate_564150(
     name: "identityProviderUpdate", meth: HttpMethod.HttpPatch, host: "azure.local",
     route: "/identityProviders/{identityProviderName}",
-    validator: validate_IdentityProviderUpdate_574251, base: "",
-    url: url_IdentityProviderUpdate_574252, schemes: {Scheme.Https})
+    validator: validate_IdentityProviderUpdate_564151, base: "",
+    url: url_IdentityProviderUpdate_564152, schemes: {Scheme.Https})
 type
-  Call_IdentityProviderDelete_574240 = ref object of OpenApiRestCall_573658
-proc url_IdentityProviderDelete_574242(protocol: Scheme; host: string; base: string;
+  Call_IdentityProviderDelete_564140 = ref object of OpenApiRestCall_563556
+proc url_IdentityProviderDelete_564142(protocol: Scheme; host: string; base: string;
                                       route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -475,7 +479,7 @@ proc url_IdentityProviderDelete_574242(protocol: Scheme; host: string; base: str
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_IdentityProviderDelete_574241(path: JsonNode; query: JsonNode;
+proc validate_IdentityProviderDelete_564141(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Deletes the specified identity provider configuration.
   ## 
@@ -486,11 +490,11 @@ proc validate_IdentityProviderDelete_574241(path: JsonNode; query: JsonNode;
   ##                       : Identity Provider Type identifier.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `identityProviderName` field"
-  var valid_574243 = path.getOrDefault("identityProviderName")
-  valid_574243 = validateParameter(valid_574243, JString, required = true,
+  var valid_564143 = path.getOrDefault("identityProviderName")
+  valid_564143 = validateParameter(valid_564143, JString, required = true,
                                  default = newJString("facebook"))
-  if valid_574243 != nil:
-    section.add "identityProviderName", valid_574243
+  if valid_564143 != nil:
+    section.add "identityProviderName", valid_564143
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -498,11 +502,11 @@ proc validate_IdentityProviderDelete_574241(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574244 = query.getOrDefault("api-version")
-  valid_574244 = validateParameter(valid_574244, JString, required = true,
+  var valid_564144 = query.getOrDefault("api-version")
+  valid_564144 = validateParameter(valid_564144, JString, required = true,
                                  default = nil)
-  if valid_574244 != nil:
-    section.add "api-version", valid_574244
+  if valid_564144 != nil:
+    section.add "api-version", valid_564144
   result.add "query", section
   ## parameters in `header` object:
   ##   If-Match: JString (required)
@@ -510,31 +514,31 @@ proc validate_IdentityProviderDelete_574241(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert header != nil,
         "header argument is necessary due to required `If-Match` field"
-  var valid_574245 = header.getOrDefault("If-Match")
-  valid_574245 = validateParameter(valid_574245, JString, required = true,
+  var valid_564145 = header.getOrDefault("If-Match")
+  valid_564145 = validateParameter(valid_564145, JString, required = true,
                                  default = nil)
-  if valid_574245 != nil:
-    section.add "If-Match", valid_574245
+  if valid_564145 != nil:
+    section.add "If-Match", valid_564145
   result.add "header", section
   section = newJObject()
   result.add "formData", section
   if body != nil:
     result.add "body", body
 
-proc call*(call_574246: Call_IdentityProviderDelete_574240; path: JsonNode;
+proc call*(call_564146: Call_IdentityProviderDelete_564140; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes the specified identity provider configuration.
   ## 
-  let valid = call_574246.validator(path, query, header, formData, body)
-  let scheme = call_574246.pickScheme
+  let valid = call_564146.validator(path, query, header, formData, body)
+  let scheme = call_564146.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574246.url(scheme.get, call_574246.host, call_574246.base,
-                         call_574246.route, valid.getOrDefault("path"),
+  let url = call_564146.url(scheme.get, call_564146.host, call_564146.base,
+                         call_564146.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574246, url, valid)
+  result = hook(call_564146, url, valid)
 
-proc call*(call_574247: Call_IdentityProviderDelete_574240; apiVersion: string;
+proc call*(call_564147: Call_IdentityProviderDelete_564140; apiVersion: string;
           identityProviderName: string = "facebook"): Recallable =
   ## identityProviderDelete
   ## Deletes the specified identity provider configuration.
@@ -542,17 +546,17 @@ proc call*(call_574247: Call_IdentityProviderDelete_574240; apiVersion: string;
   ##             : Version of the API to be used with the client request.
   ##   identityProviderName: string (required)
   ##                       : Identity Provider Type identifier.
-  var path_574248 = newJObject()
-  var query_574249 = newJObject()
-  add(query_574249, "api-version", newJString(apiVersion))
-  add(path_574248, "identityProviderName", newJString(identityProviderName))
-  result = call_574247.call(path_574248, query_574249, nil, nil, nil)
+  var path_564148 = newJObject()
+  var query_564149 = newJObject()
+  add(query_564149, "api-version", newJString(apiVersion))
+  add(path_564148, "identityProviderName", newJString(identityProviderName))
+  result = call_564147.call(path_564148, query_564149, nil, nil, nil)
 
-var identityProviderDelete* = Call_IdentityProviderDelete_574240(
+var identityProviderDelete* = Call_IdentityProviderDelete_564140(
     name: "identityProviderDelete", meth: HttpMethod.HttpDelete,
     host: "azure.local", route: "/identityProviders/{identityProviderName}",
-    validator: validate_IdentityProviderDelete_574241, base: "",
-    url: url_IdentityProviderDelete_574242, schemes: {Scheme.Https})
+    validator: validate_IdentityProviderDelete_564141, base: "",
+    url: url_IdentityProviderDelete_564142, schemes: {Scheme.Https})
 export
   rest
 

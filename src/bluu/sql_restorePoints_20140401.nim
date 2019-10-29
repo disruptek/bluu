@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, httpcore
 
 ## auto-generated via openapi macro
 ## title: Azure SQL Database Backup
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_567642 = ref object of OpenApiRestCall
+  OpenApiRestCall_563540 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_567642](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563540](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_567642): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563540): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,8 +107,8 @@ const
   macServiceName = "sql-restorePoints"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_RestorePointsListByDatabase_567864 = ref object of OpenApiRestCall_567642
-proc url_RestorePointsListByDatabase_567866(protocol: Scheme; host: string;
+  Call_RestorePointsListByDatabase_563762 = ref object of OpenApiRestCall_563540
+proc url_RestorePointsListByDatabase_563764(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -130,44 +134,44 @@ proc url_RestorePointsListByDatabase_567866(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_RestorePointsListByDatabase_567865(path: JsonNode; query: JsonNode;
+proc validate_RestorePointsListByDatabase_563763(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets a list of database restore points.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   ##   serverName: JString (required)
   ##             : The name of the server.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID that identifies an Azure subscription.
   ##   databaseName: JString (required)
   ##               : The name of the database to get available restore points.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568039 = path.getOrDefault("resourceGroupName")
-  valid_568039 = validateParameter(valid_568039, JString, required = true,
+        "path argument is necessary due to required `serverName` field"
+  var valid_563939 = path.getOrDefault("serverName")
+  valid_563939 = validateParameter(valid_563939, JString, required = true,
                                  default = nil)
-  if valid_568039 != nil:
-    section.add "resourceGroupName", valid_568039
-  var valid_568040 = path.getOrDefault("serverName")
-  valid_568040 = validateParameter(valid_568040, JString, required = true,
+  if valid_563939 != nil:
+    section.add "serverName", valid_563939
+  var valid_563940 = path.getOrDefault("subscriptionId")
+  valid_563940 = validateParameter(valid_563940, JString, required = true,
                                  default = nil)
-  if valid_568040 != nil:
-    section.add "serverName", valid_568040
-  var valid_568041 = path.getOrDefault("subscriptionId")
-  valid_568041 = validateParameter(valid_568041, JString, required = true,
+  if valid_563940 != nil:
+    section.add "subscriptionId", valid_563940
+  var valid_563941 = path.getOrDefault("databaseName")
+  valid_563941 = validateParameter(valid_563941, JString, required = true,
                                  default = nil)
-  if valid_568041 != nil:
-    section.add "subscriptionId", valid_568041
-  var valid_568042 = path.getOrDefault("databaseName")
-  valid_568042 = validateParameter(valid_568042, JString, required = true,
+  if valid_563941 != nil:
+    section.add "databaseName", valid_563941
+  var valid_563942 = path.getOrDefault("resourceGroupName")
+  valid_563942 = validateParameter(valid_563942, JString, required = true,
                                  default = nil)
-  if valid_568042 != nil:
-    section.add "databaseName", valid_568042
+  if valid_563942 != nil:
+    section.add "resourceGroupName", valid_563942
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -175,11 +179,11 @@ proc validate_RestorePointsListByDatabase_567865(path: JsonNode; query: JsonNode
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568043 = query.getOrDefault("api-version")
-  valid_568043 = validateParameter(valid_568043, JString, required = true,
+  var valid_563943 = query.getOrDefault("api-version")
+  valid_563943 = validateParameter(valid_563943, JString, required = true,
                                  default = nil)
-  if valid_568043 != nil:
-    section.add "api-version", valid_568043
+  if valid_563943 != nil:
+    section.add "api-version", valid_563943
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -188,26 +192,24 @@ proc validate_RestorePointsListByDatabase_567865(path: JsonNode; query: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_568066: Call_RestorePointsListByDatabase_567864; path: JsonNode;
+proc call*(call_563966: Call_RestorePointsListByDatabase_563762; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets a list of database restore points.
   ## 
-  let valid = call_568066.validator(path, query, header, formData, body)
-  let scheme = call_568066.pickScheme
+  let valid = call_563966.validator(path, query, header, formData, body)
+  let scheme = call_563966.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568066.url(scheme.get, call_568066.host, call_568066.base,
-                         call_568066.route, valid.getOrDefault("path"),
+  let url = call_563966.url(scheme.get, call_563966.host, call_563966.base,
+                         call_563966.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568066, url, valid)
+  result = hook(call_563966, url, valid)
 
-proc call*(call_568137: Call_RestorePointsListByDatabase_567864;
-          resourceGroupName: string; apiVersion: string; serverName: string;
-          subscriptionId: string; databaseName: string): Recallable =
+proc call*(call_564037: Call_RestorePointsListByDatabase_563762;
+          apiVersion: string; serverName: string; subscriptionId: string;
+          databaseName: string; resourceGroupName: string): Recallable =
   ## restorePointsListByDatabase
   ## Gets a list of database restore points.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   ##   apiVersion: string (required)
   ##             : The API version to use for the request.
   ##   serverName: string (required)
@@ -216,20 +218,22 @@ proc call*(call_568137: Call_RestorePointsListByDatabase_567864;
   ##                 : The subscription ID that identifies an Azure subscription.
   ##   databaseName: string (required)
   ##               : The name of the database to get available restore points.
-  var path_568138 = newJObject()
-  var query_568140 = newJObject()
-  add(path_568138, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568140, "api-version", newJString(apiVersion))
-  add(path_568138, "serverName", newJString(serverName))
-  add(path_568138, "subscriptionId", newJString(subscriptionId))
-  add(path_568138, "databaseName", newJString(databaseName))
-  result = call_568137.call(path_568138, query_568140, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
+  var path_564038 = newJObject()
+  var query_564040 = newJObject()
+  add(query_564040, "api-version", newJString(apiVersion))
+  add(path_564038, "serverName", newJString(serverName))
+  add(path_564038, "subscriptionId", newJString(subscriptionId))
+  add(path_564038, "databaseName", newJString(databaseName))
+  add(path_564038, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564037.call(path_564038, query_564040, nil, nil, nil)
 
-var restorePointsListByDatabase* = Call_RestorePointsListByDatabase_567864(
+var restorePointsListByDatabase* = Call_RestorePointsListByDatabase_563762(
     name: "restorePointsListByDatabase", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/servers/{serverName}/databases/{databaseName}/restorePoints",
-    validator: validate_RestorePointsListByDatabase_567865, base: "",
-    url: url_RestorePointsListByDatabase_567866, schemes: {Scheme.Https})
+    validator: validate_RestorePointsListByDatabase_563763, base: "",
+    url: url_RestorePointsListByDatabase_563764, schemes: {Scheme.Https})
 export
   rest
 

@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_573641 = ref object of OpenApiRestCall
+  OpenApiRestCall_563539 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_573641](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563539](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_573641): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563539): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,8 +107,8 @@ const
   macServiceName = "network-serviceCommunity"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_BgpServiceCommunitiesList_573863 = ref object of OpenApiRestCall_573641
-proc url_BgpServiceCommunitiesList_573865(protocol: Scheme; host: string;
+  Call_BgpServiceCommunitiesList_563761 = ref object of OpenApiRestCall_563539
+proc url_BgpServiceCommunitiesList_563763(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -121,7 +125,7 @@ proc url_BgpServiceCommunitiesList_573865(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_BgpServiceCommunitiesList_573864(path: JsonNode; query: JsonNode;
+proc validate_BgpServiceCommunitiesList_563762(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets all the available bgp service communities.
   ## 
@@ -133,11 +137,11 @@ proc validate_BgpServiceCommunitiesList_573864(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_574025 = path.getOrDefault("subscriptionId")
-  valid_574025 = validateParameter(valid_574025, JString, required = true,
+  var valid_563925 = path.getOrDefault("subscriptionId")
+  valid_563925 = validateParameter(valid_563925, JString, required = true,
                                  default = nil)
-  if valid_574025 != nil:
-    section.add "subscriptionId", valid_574025
+  if valid_563925 != nil:
+    section.add "subscriptionId", valid_563925
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -145,11 +149,11 @@ proc validate_BgpServiceCommunitiesList_573864(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574026 = query.getOrDefault("api-version")
-  valid_574026 = validateParameter(valid_574026, JString, required = true,
+  var valid_563926 = query.getOrDefault("api-version")
+  valid_563926 = validateParameter(valid_563926, JString, required = true,
                                  default = nil)
-  if valid_574026 != nil:
-    section.add "api-version", valid_574026
+  if valid_563926 != nil:
+    section.add "api-version", valid_563926
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -158,20 +162,20 @@ proc validate_BgpServiceCommunitiesList_573864(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574053: Call_BgpServiceCommunitiesList_573863; path: JsonNode;
+proc call*(call_563953: Call_BgpServiceCommunitiesList_563761; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets all the available bgp service communities.
   ## 
-  let valid = call_574053.validator(path, query, header, formData, body)
-  let scheme = call_574053.pickScheme
+  let valid = call_563953.validator(path, query, header, formData, body)
+  let scheme = call_563953.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574053.url(scheme.get, call_574053.host, call_574053.base,
-                         call_574053.route, valid.getOrDefault("path"),
+  let url = call_563953.url(scheme.get, call_563953.host, call_563953.base,
+                         call_563953.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574053, url, valid)
+  result = hook(call_563953, url, valid)
 
-proc call*(call_574124: Call_BgpServiceCommunitiesList_573863; apiVersion: string;
+proc call*(call_564024: Call_BgpServiceCommunitiesList_563761; apiVersion: string;
           subscriptionId: string): Recallable =
   ## bgpServiceCommunitiesList
   ## Gets all the available bgp service communities.
@@ -179,17 +183,17 @@ proc call*(call_574124: Call_BgpServiceCommunitiesList_573863; apiVersion: strin
   ##             : Client API version.
   ##   subscriptionId: string (required)
   ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_574125 = newJObject()
-  var query_574127 = newJObject()
-  add(query_574127, "api-version", newJString(apiVersion))
-  add(path_574125, "subscriptionId", newJString(subscriptionId))
-  result = call_574124.call(path_574125, query_574127, nil, nil, nil)
+  var path_564025 = newJObject()
+  var query_564027 = newJObject()
+  add(query_564027, "api-version", newJString(apiVersion))
+  add(path_564025, "subscriptionId", newJString(subscriptionId))
+  result = call_564024.call(path_564025, query_564027, nil, nil, nil)
 
-var bgpServiceCommunitiesList* = Call_BgpServiceCommunitiesList_573863(
+var bgpServiceCommunitiesList* = Call_BgpServiceCommunitiesList_563761(
     name: "bgpServiceCommunitiesList", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Network/bgpServiceCommunities",
-    validator: validate_BgpServiceCommunitiesList_573864, base: "",
-    url: url_BgpServiceCommunitiesList_573865, schemes: {Scheme.Https})
+    validator: validate_BgpServiceCommunitiesList_563762, base: "",
+    url: url_BgpServiceCommunitiesList_563763, schemes: {Scheme.Https})
 export
   rest
 

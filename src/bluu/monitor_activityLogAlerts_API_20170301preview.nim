@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, httpcore
 
 ## auto-generated via openapi macro
 ## title: Azure Activity Log Alerts
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_567642 = ref object of OpenApiRestCall
+  OpenApiRestCall_563540 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_567642](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563540](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_567642): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563540): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,8 +107,8 @@ const
   macServiceName = "monitor-activityLogAlerts_API"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_ActivityLogAlertsListBySubscriptionId_567864 = ref object of OpenApiRestCall_567642
-proc url_ActivityLogAlertsListBySubscriptionId_567866(protocol: Scheme;
+  Call_ActivityLogAlertsListBySubscriptionId_563762 = ref object of OpenApiRestCall_563540
+proc url_ActivityLogAlertsListBySubscriptionId_563764(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -121,7 +125,7 @@ proc url_ActivityLogAlertsListBySubscriptionId_567866(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ActivityLogAlertsListBySubscriptionId_567865(path: JsonNode;
+proc validate_ActivityLogAlertsListBySubscriptionId_563763(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Get a list of all activity log alerts in a subscription.
   ## 
@@ -133,11 +137,11 @@ proc validate_ActivityLogAlertsListBySubscriptionId_567865(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_568039 = path.getOrDefault("subscriptionId")
-  valid_568039 = validateParameter(valid_568039, JString, required = true,
+  var valid_563939 = path.getOrDefault("subscriptionId")
+  valid_563939 = validateParameter(valid_563939, JString, required = true,
                                  default = nil)
-  if valid_568039 != nil:
-    section.add "subscriptionId", valid_568039
+  if valid_563939 != nil:
+    section.add "subscriptionId", valid_563939
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -145,11 +149,11 @@ proc validate_ActivityLogAlertsListBySubscriptionId_567865(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568040 = query.getOrDefault("api-version")
-  valid_568040 = validateParameter(valid_568040, JString, required = true,
+  var valid_563940 = query.getOrDefault("api-version")
+  valid_563940 = validateParameter(valid_563940, JString, required = true,
                                  default = nil)
-  if valid_568040 != nil:
-    section.add "api-version", valid_568040
+  if valid_563940 != nil:
+    section.add "api-version", valid_563940
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -158,21 +162,21 @@ proc validate_ActivityLogAlertsListBySubscriptionId_567865(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568063: Call_ActivityLogAlertsListBySubscriptionId_567864;
+proc call*(call_563963: Call_ActivityLogAlertsListBySubscriptionId_563762;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Get a list of all activity log alerts in a subscription.
   ## 
-  let valid = call_568063.validator(path, query, header, formData, body)
-  let scheme = call_568063.pickScheme
+  let valid = call_563963.validator(path, query, header, formData, body)
+  let scheme = call_563963.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568063.url(scheme.get, call_568063.host, call_568063.base,
-                         call_568063.route, valid.getOrDefault("path"),
+  let url = call_563963.url(scheme.get, call_563963.host, call_563963.base,
+                         call_563963.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568063, url, valid)
+  result = hook(call_563963, url, valid)
 
-proc call*(call_568134: Call_ActivityLogAlertsListBySubscriptionId_567864;
+proc call*(call_564034: Call_ActivityLogAlertsListBySubscriptionId_563762;
           apiVersion: string; subscriptionId: string): Recallable =
   ## activityLogAlertsListBySubscriptionId
   ## Get a list of all activity log alerts in a subscription.
@@ -180,20 +184,20 @@ proc call*(call_568134: Call_ActivityLogAlertsListBySubscriptionId_567864;
   ##             : Client Api Version.
   ##   subscriptionId: string (required)
   ##                 : The Azure subscription Id.
-  var path_568135 = newJObject()
-  var query_568137 = newJObject()
-  add(query_568137, "api-version", newJString(apiVersion))
-  add(path_568135, "subscriptionId", newJString(subscriptionId))
-  result = call_568134.call(path_568135, query_568137, nil, nil, nil)
+  var path_564035 = newJObject()
+  var query_564037 = newJObject()
+  add(query_564037, "api-version", newJString(apiVersion))
+  add(path_564035, "subscriptionId", newJString(subscriptionId))
+  result = call_564034.call(path_564035, query_564037, nil, nil, nil)
 
-var activityLogAlertsListBySubscriptionId* = Call_ActivityLogAlertsListBySubscriptionId_567864(
+var activityLogAlertsListBySubscriptionId* = Call_ActivityLogAlertsListBySubscriptionId_563762(
     name: "activityLogAlertsListBySubscriptionId", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/microsoft.insights/activityLogAlerts",
-    validator: validate_ActivityLogAlertsListBySubscriptionId_567865, base: "",
-    url: url_ActivityLogAlertsListBySubscriptionId_567866, schemes: {Scheme.Https})
+    validator: validate_ActivityLogAlertsListBySubscriptionId_563763, base: "",
+    url: url_ActivityLogAlertsListBySubscriptionId_563764, schemes: {Scheme.Https})
 type
-  Call_ActivityLogAlertsListByResourceGroup_568176 = ref object of OpenApiRestCall_567642
-proc url_ActivityLogAlertsListByResourceGroup_568178(protocol: Scheme;
+  Call_ActivityLogAlertsListByResourceGroup_564076 = ref object of OpenApiRestCall_563540
+proc url_ActivityLogAlertsListByResourceGroup_564078(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -214,30 +218,30 @@ proc url_ActivityLogAlertsListByResourceGroup_568178(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ActivityLogAlertsListByResourceGroup_568177(path: JsonNode;
+proc validate_ActivityLogAlertsListByResourceGroup_564077(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Get a list of all activity log alerts in a resource group.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   subscriptionId: JString (required)
   ##                 : The Azure subscription Id.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568179 = path.getOrDefault("resourceGroupName")
-  valid_568179 = validateParameter(valid_568179, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564079 = path.getOrDefault("subscriptionId")
+  valid_564079 = validateParameter(valid_564079, JString, required = true,
                                  default = nil)
-  if valid_568179 != nil:
-    section.add "resourceGroupName", valid_568179
-  var valid_568180 = path.getOrDefault("subscriptionId")
-  valid_568180 = validateParameter(valid_568180, JString, required = true,
+  if valid_564079 != nil:
+    section.add "subscriptionId", valid_564079
+  var valid_564080 = path.getOrDefault("resourceGroupName")
+  valid_564080 = validateParameter(valid_564080, JString, required = true,
                                  default = nil)
-  if valid_568180 != nil:
-    section.add "subscriptionId", valid_568180
+  if valid_564080 != nil:
+    section.add "resourceGroupName", valid_564080
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -245,11 +249,11 @@ proc validate_ActivityLogAlertsListByResourceGroup_568177(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568181 = query.getOrDefault("api-version")
-  valid_568181 = validateParameter(valid_568181, JString, required = true,
+  var valid_564081 = query.getOrDefault("api-version")
+  valid_564081 = validateParameter(valid_564081, JString, required = true,
                                  default = nil)
-  if valid_568181 != nil:
-    section.add "api-version", valid_568181
+  if valid_564081 != nil:
+    section.add "api-version", valid_564081
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -258,45 +262,45 @@ proc validate_ActivityLogAlertsListByResourceGroup_568177(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568182: Call_ActivityLogAlertsListByResourceGroup_568176;
+proc call*(call_564082: Call_ActivityLogAlertsListByResourceGroup_564076;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Get a list of all activity log alerts in a resource group.
   ## 
-  let valid = call_568182.validator(path, query, header, formData, body)
-  let scheme = call_568182.pickScheme
+  let valid = call_564082.validator(path, query, header, formData, body)
+  let scheme = call_564082.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568182.url(scheme.get, call_568182.host, call_568182.base,
-                         call_568182.route, valid.getOrDefault("path"),
+  let url = call_564082.url(scheme.get, call_564082.host, call_564082.base,
+                         call_564082.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568182, url, valid)
+  result = hook(call_564082, url, valid)
 
-proc call*(call_568183: Call_ActivityLogAlertsListByResourceGroup_568176;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string): Recallable =
+proc call*(call_564083: Call_ActivityLogAlertsListByResourceGroup_564076;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string): Recallable =
   ## activityLogAlertsListByResourceGroup
   ## Get a list of all activity log alerts in a resource group.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
   ##   subscriptionId: string (required)
   ##                 : The Azure subscription Id.
-  var path_568184 = newJObject()
-  var query_568185 = newJObject()
-  add(path_568184, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568185, "api-version", newJString(apiVersion))
-  add(path_568184, "subscriptionId", newJString(subscriptionId))
-  result = call_568183.call(path_568184, query_568185, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564084 = newJObject()
+  var query_564085 = newJObject()
+  add(query_564085, "api-version", newJString(apiVersion))
+  add(path_564084, "subscriptionId", newJString(subscriptionId))
+  add(path_564084, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564083.call(path_564084, query_564085, nil, nil, nil)
 
-var activityLogAlertsListByResourceGroup* = Call_ActivityLogAlertsListByResourceGroup_568176(
+var activityLogAlertsListByResourceGroup* = Call_ActivityLogAlertsListByResourceGroup_564076(
     name: "activityLogAlertsListByResourceGroup", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/microsoft.insights/activityLogAlerts",
-    validator: validate_ActivityLogAlertsListByResourceGroup_568177, base: "",
-    url: url_ActivityLogAlertsListByResourceGroup_568178, schemes: {Scheme.Https})
+    validator: validate_ActivityLogAlertsListByResourceGroup_564077, base: "",
+    url: url_ActivityLogAlertsListByResourceGroup_564078, schemes: {Scheme.Https})
 type
-  Call_ActivityLogAlertsCreateOrUpdate_568197 = ref object of OpenApiRestCall_567642
-proc url_ActivityLogAlertsCreateOrUpdate_568199(protocol: Scheme; host: string;
+  Call_ActivityLogAlertsCreateOrUpdate_564097 = ref object of OpenApiRestCall_563540
+proc url_ActivityLogAlertsCreateOrUpdate_564099(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -320,37 +324,37 @@ proc url_ActivityLogAlertsCreateOrUpdate_568199(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ActivityLogAlertsCreateOrUpdate_568198(path: JsonNode;
+proc validate_ActivityLogAlertsCreateOrUpdate_564098(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Create a new activity log alert or update an existing one.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
+  ##   subscriptionId: JString (required)
+  ##                 : The Azure subscription Id.
   ##   resourceGroupName: JString (required)
   ##                    : The name of the resource group.
   ##   activityLogAlertName: JString (required)
   ##                       : The name of the activity log alert.
-  ##   subscriptionId: JString (required)
-  ##                 : The Azure subscription Id.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568217 = path.getOrDefault("resourceGroupName")
-  valid_568217 = validateParameter(valid_568217, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564117 = path.getOrDefault("subscriptionId")
+  valid_564117 = validateParameter(valid_564117, JString, required = true,
                                  default = nil)
-  if valid_568217 != nil:
-    section.add "resourceGroupName", valid_568217
-  var valid_568218 = path.getOrDefault("activityLogAlertName")
-  valid_568218 = validateParameter(valid_568218, JString, required = true,
+  if valid_564117 != nil:
+    section.add "subscriptionId", valid_564117
+  var valid_564118 = path.getOrDefault("resourceGroupName")
+  valid_564118 = validateParameter(valid_564118, JString, required = true,
                                  default = nil)
-  if valid_568218 != nil:
-    section.add "activityLogAlertName", valid_568218
-  var valid_568219 = path.getOrDefault("subscriptionId")
-  valid_568219 = validateParameter(valid_568219, JString, required = true,
+  if valid_564118 != nil:
+    section.add "resourceGroupName", valid_564118
+  var valid_564119 = path.getOrDefault("activityLogAlertName")
+  valid_564119 = validateParameter(valid_564119, JString, required = true,
                                  default = nil)
-  if valid_568219 != nil:
-    section.add "subscriptionId", valid_568219
+  if valid_564119 != nil:
+    section.add "activityLogAlertName", valid_564119
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -358,11 +362,11 @@ proc validate_ActivityLogAlertsCreateOrUpdate_568198(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568220 = query.getOrDefault("api-version")
-  valid_568220 = validateParameter(valid_568220, JString, required = true,
+  var valid_564120 = query.getOrDefault("api-version")
+  valid_564120 = validateParameter(valid_564120, JString, required = true,
                                  default = nil)
-  if valid_568220 != nil:
-    section.add "api-version", valid_568220
+  if valid_564120 != nil:
+    section.add "api-version", valid_564120
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -376,54 +380,54 @@ proc validate_ActivityLogAlertsCreateOrUpdate_568198(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568222: Call_ActivityLogAlertsCreateOrUpdate_568197;
+proc call*(call_564122: Call_ActivityLogAlertsCreateOrUpdate_564097;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Create a new activity log alert or update an existing one.
   ## 
-  let valid = call_568222.validator(path, query, header, formData, body)
-  let scheme = call_568222.pickScheme
+  let valid = call_564122.validator(path, query, header, formData, body)
+  let scheme = call_564122.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568222.url(scheme.get, call_568222.host, call_568222.base,
-                         call_568222.route, valid.getOrDefault("path"),
+  let url = call_564122.url(scheme.get, call_564122.host, call_564122.base,
+                         call_564122.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568222, url, valid)
+  result = hook(call_564122, url, valid)
 
-proc call*(call_568223: Call_ActivityLogAlertsCreateOrUpdate_568197;
-          resourceGroupName: string; activityLogAlert: JsonNode; apiVersion: string;
-          activityLogAlertName: string; subscriptionId: string): Recallable =
+proc call*(call_564123: Call_ActivityLogAlertsCreateOrUpdate_564097;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string;
+          activityLogAlert: JsonNode; activityLogAlertName: string): Recallable =
   ## activityLogAlertsCreateOrUpdate
   ## Create a new activity log alert or update an existing one.
+  ##   apiVersion: string (required)
+  ##             : Client Api Version.
+  ##   subscriptionId: string (required)
+  ##                 : The Azure subscription Id.
   ##   resourceGroupName: string (required)
   ##                    : The name of the resource group.
   ##   activityLogAlert: JObject (required)
   ##                   : The activity log alert to create or use for the update.
-  ##   apiVersion: string (required)
-  ##             : Client Api Version.
   ##   activityLogAlertName: string (required)
   ##                       : The name of the activity log alert.
-  ##   subscriptionId: string (required)
-  ##                 : The Azure subscription Id.
-  var path_568224 = newJObject()
-  var query_568225 = newJObject()
-  var body_568226 = newJObject()
-  add(path_568224, "resourceGroupName", newJString(resourceGroupName))
+  var path_564124 = newJObject()
+  var query_564125 = newJObject()
+  var body_564126 = newJObject()
+  add(query_564125, "api-version", newJString(apiVersion))
+  add(path_564124, "subscriptionId", newJString(subscriptionId))
+  add(path_564124, "resourceGroupName", newJString(resourceGroupName))
   if activityLogAlert != nil:
-    body_568226 = activityLogAlert
-  add(query_568225, "api-version", newJString(apiVersion))
-  add(path_568224, "activityLogAlertName", newJString(activityLogAlertName))
-  add(path_568224, "subscriptionId", newJString(subscriptionId))
-  result = call_568223.call(path_568224, query_568225, nil, nil, body_568226)
+    body_564126 = activityLogAlert
+  add(path_564124, "activityLogAlertName", newJString(activityLogAlertName))
+  result = call_564123.call(path_564124, query_564125, nil, nil, body_564126)
 
-var activityLogAlertsCreateOrUpdate* = Call_ActivityLogAlertsCreateOrUpdate_568197(
+var activityLogAlertsCreateOrUpdate* = Call_ActivityLogAlertsCreateOrUpdate_564097(
     name: "activityLogAlertsCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/microsoft.insights/activityLogAlerts/{activityLogAlertName}",
-    validator: validate_ActivityLogAlertsCreateOrUpdate_568198, base: "",
-    url: url_ActivityLogAlertsCreateOrUpdate_568199, schemes: {Scheme.Https})
+    validator: validate_ActivityLogAlertsCreateOrUpdate_564098, base: "",
+    url: url_ActivityLogAlertsCreateOrUpdate_564099, schemes: {Scheme.Https})
 type
-  Call_ActivityLogAlertsGet_568186 = ref object of OpenApiRestCall_567642
-proc url_ActivityLogAlertsGet_568188(protocol: Scheme; host: string; base: string;
+  Call_ActivityLogAlertsGet_564086 = ref object of OpenApiRestCall_563540
+proc url_ActivityLogAlertsGet_564088(protocol: Scheme; host: string; base: string;
                                     route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -447,37 +451,37 @@ proc url_ActivityLogAlertsGet_568188(protocol: Scheme; host: string; base: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ActivityLogAlertsGet_568187(path: JsonNode; query: JsonNode;
+proc validate_ActivityLogAlertsGet_564087(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Get an activity log alert.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
+  ##   subscriptionId: JString (required)
+  ##                 : The Azure subscription Id.
   ##   resourceGroupName: JString (required)
   ##                    : The name of the resource group.
   ##   activityLogAlertName: JString (required)
   ##                       : The name of the activity log alert.
-  ##   subscriptionId: JString (required)
-  ##                 : The Azure subscription Id.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568189 = path.getOrDefault("resourceGroupName")
-  valid_568189 = validateParameter(valid_568189, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564089 = path.getOrDefault("subscriptionId")
+  valid_564089 = validateParameter(valid_564089, JString, required = true,
                                  default = nil)
-  if valid_568189 != nil:
-    section.add "resourceGroupName", valid_568189
-  var valid_568190 = path.getOrDefault("activityLogAlertName")
-  valid_568190 = validateParameter(valid_568190, JString, required = true,
+  if valid_564089 != nil:
+    section.add "subscriptionId", valid_564089
+  var valid_564090 = path.getOrDefault("resourceGroupName")
+  valid_564090 = validateParameter(valid_564090, JString, required = true,
                                  default = nil)
-  if valid_568190 != nil:
-    section.add "activityLogAlertName", valid_568190
-  var valid_568191 = path.getOrDefault("subscriptionId")
-  valid_568191 = validateParameter(valid_568191, JString, required = true,
+  if valid_564090 != nil:
+    section.add "resourceGroupName", valid_564090
+  var valid_564091 = path.getOrDefault("activityLogAlertName")
+  valid_564091 = validateParameter(valid_564091, JString, required = true,
                                  default = nil)
-  if valid_568191 != nil:
-    section.add "subscriptionId", valid_568191
+  if valid_564091 != nil:
+    section.add "activityLogAlertName", valid_564091
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -485,11 +489,11 @@ proc validate_ActivityLogAlertsGet_568187(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568192 = query.getOrDefault("api-version")
-  valid_568192 = validateParameter(valid_568192, JString, required = true,
+  var valid_564092 = query.getOrDefault("api-version")
+  valid_564092 = validateParameter(valid_564092, JString, required = true,
                                  default = nil)
-  if valid_568192 != nil:
-    section.add "api-version", valid_568192
+  if valid_564092 != nil:
+    section.add "api-version", valid_564092
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -498,48 +502,48 @@ proc validate_ActivityLogAlertsGet_568187(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568193: Call_ActivityLogAlertsGet_568186; path: JsonNode;
+proc call*(call_564093: Call_ActivityLogAlertsGet_564086; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get an activity log alert.
   ## 
-  let valid = call_568193.validator(path, query, header, formData, body)
-  let scheme = call_568193.pickScheme
+  let valid = call_564093.validator(path, query, header, formData, body)
+  let scheme = call_564093.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568193.url(scheme.get, call_568193.host, call_568193.base,
-                         call_568193.route, valid.getOrDefault("path"),
+  let url = call_564093.url(scheme.get, call_564093.host, call_564093.base,
+                         call_564093.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568193, url, valid)
+  result = hook(call_564093, url, valid)
 
-proc call*(call_568194: Call_ActivityLogAlertsGet_568186;
-          resourceGroupName: string; apiVersion: string;
-          activityLogAlertName: string; subscriptionId: string): Recallable =
+proc call*(call_564094: Call_ActivityLogAlertsGet_564086; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string;
+          activityLogAlertName: string): Recallable =
   ## activityLogAlertsGet
   ## Get an activity log alert.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
-  ##   activityLogAlertName: string (required)
-  ##                       : The name of the activity log alert.
   ##   subscriptionId: string (required)
   ##                 : The Azure subscription Id.
-  var path_568195 = newJObject()
-  var query_568196 = newJObject()
-  add(path_568195, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568196, "api-version", newJString(apiVersion))
-  add(path_568195, "activityLogAlertName", newJString(activityLogAlertName))
-  add(path_568195, "subscriptionId", newJString(subscriptionId))
-  result = call_568194.call(path_568195, query_568196, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  ##   activityLogAlertName: string (required)
+  ##                       : The name of the activity log alert.
+  var path_564095 = newJObject()
+  var query_564096 = newJObject()
+  add(query_564096, "api-version", newJString(apiVersion))
+  add(path_564095, "subscriptionId", newJString(subscriptionId))
+  add(path_564095, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564095, "activityLogAlertName", newJString(activityLogAlertName))
+  result = call_564094.call(path_564095, query_564096, nil, nil, nil)
 
-var activityLogAlertsGet* = Call_ActivityLogAlertsGet_568186(
+var activityLogAlertsGet* = Call_ActivityLogAlertsGet_564086(
     name: "activityLogAlertsGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/microsoft.insights/activityLogAlerts/{activityLogAlertName}",
-    validator: validate_ActivityLogAlertsGet_568187, base: "",
-    url: url_ActivityLogAlertsGet_568188, schemes: {Scheme.Https})
+    validator: validate_ActivityLogAlertsGet_564087, base: "",
+    url: url_ActivityLogAlertsGet_564088, schemes: {Scheme.Https})
 type
-  Call_ActivityLogAlertsUpdate_568238 = ref object of OpenApiRestCall_567642
-proc url_ActivityLogAlertsUpdate_568240(protocol: Scheme; host: string; base: string;
+  Call_ActivityLogAlertsUpdate_564138 = ref object of OpenApiRestCall_563540
+proc url_ActivityLogAlertsUpdate_564140(protocol: Scheme; host: string; base: string;
                                        route: string; path: JsonNode;
                                        query: JsonNode): Uri =
   result.scheme = $protocol
@@ -564,37 +568,37 @@ proc url_ActivityLogAlertsUpdate_568240(protocol: Scheme; host: string; base: st
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ActivityLogAlertsUpdate_568239(path: JsonNode; query: JsonNode;
+proc validate_ActivityLogAlertsUpdate_564139(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Updates an existing ActivityLogAlertResource's tags. To update other fields use the CreateOrUpdate method.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
+  ##   subscriptionId: JString (required)
+  ##                 : The Azure subscription Id.
   ##   resourceGroupName: JString (required)
   ##                    : The name of the resource group.
   ##   activityLogAlertName: JString (required)
   ##                       : The name of the activity log alert.
-  ##   subscriptionId: JString (required)
-  ##                 : The Azure subscription Id.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568241 = path.getOrDefault("resourceGroupName")
-  valid_568241 = validateParameter(valid_568241, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564141 = path.getOrDefault("subscriptionId")
+  valid_564141 = validateParameter(valid_564141, JString, required = true,
                                  default = nil)
-  if valid_568241 != nil:
-    section.add "resourceGroupName", valid_568241
-  var valid_568242 = path.getOrDefault("activityLogAlertName")
-  valid_568242 = validateParameter(valid_568242, JString, required = true,
+  if valid_564141 != nil:
+    section.add "subscriptionId", valid_564141
+  var valid_564142 = path.getOrDefault("resourceGroupName")
+  valid_564142 = validateParameter(valid_564142, JString, required = true,
                                  default = nil)
-  if valid_568242 != nil:
-    section.add "activityLogAlertName", valid_568242
-  var valid_568243 = path.getOrDefault("subscriptionId")
-  valid_568243 = validateParameter(valid_568243, JString, required = true,
+  if valid_564142 != nil:
+    section.add "resourceGroupName", valid_564142
+  var valid_564143 = path.getOrDefault("activityLogAlertName")
+  valid_564143 = validateParameter(valid_564143, JString, required = true,
                                  default = nil)
-  if valid_568243 != nil:
-    section.add "subscriptionId", valid_568243
+  if valid_564143 != nil:
+    section.add "activityLogAlertName", valid_564143
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -602,11 +606,11 @@ proc validate_ActivityLogAlertsUpdate_568239(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568244 = query.getOrDefault("api-version")
-  valid_568244 = validateParameter(valid_568244, JString, required = true,
+  var valid_564144 = query.getOrDefault("api-version")
+  valid_564144 = validateParameter(valid_564144, JString, required = true,
                                  default = nil)
-  if valid_568244 != nil:
-    section.add "api-version", valid_568244
+  if valid_564144 != nil:
+    section.add "api-version", valid_564144
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -620,54 +624,53 @@ proc validate_ActivityLogAlertsUpdate_568239(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568246: Call_ActivityLogAlertsUpdate_568238; path: JsonNode;
+proc call*(call_564146: Call_ActivityLogAlertsUpdate_564138; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Updates an existing ActivityLogAlertResource's tags. To update other fields use the CreateOrUpdate method.
   ## 
-  let valid = call_568246.validator(path, query, header, formData, body)
-  let scheme = call_568246.pickScheme
+  let valid = call_564146.validator(path, query, header, formData, body)
+  let scheme = call_564146.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568246.url(scheme.get, call_568246.host, call_568246.base,
-                         call_568246.route, valid.getOrDefault("path"),
+  let url = call_564146.url(scheme.get, call_564146.host, call_564146.base,
+                         call_564146.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568246, url, valid)
+  result = hook(call_564146, url, valid)
 
-proc call*(call_568247: Call_ActivityLogAlertsUpdate_568238;
-          resourceGroupName: string; apiVersion: string;
-          activityLogAlertName: string; activityLogAlertPatch: JsonNode;
-          subscriptionId: string): Recallable =
+proc call*(call_564147: Call_ActivityLogAlertsUpdate_564138; apiVersion: string;
+          activityLogAlertPatch: JsonNode; subscriptionId: string;
+          resourceGroupName: string; activityLogAlertName: string): Recallable =
   ## activityLogAlertsUpdate
   ## Updates an existing ActivityLogAlertResource's tags. To update other fields use the CreateOrUpdate method.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
-  ##   activityLogAlertName: string (required)
-  ##                       : The name of the activity log alert.
   ##   activityLogAlertPatch: JObject (required)
   ##                        : Parameters supplied to the operation.
   ##   subscriptionId: string (required)
   ##                 : The Azure subscription Id.
-  var path_568248 = newJObject()
-  var query_568249 = newJObject()
-  var body_568250 = newJObject()
-  add(path_568248, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568249, "api-version", newJString(apiVersion))
-  add(path_568248, "activityLogAlertName", newJString(activityLogAlertName))
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  ##   activityLogAlertName: string (required)
+  ##                       : The name of the activity log alert.
+  var path_564148 = newJObject()
+  var query_564149 = newJObject()
+  var body_564150 = newJObject()
+  add(query_564149, "api-version", newJString(apiVersion))
   if activityLogAlertPatch != nil:
-    body_568250 = activityLogAlertPatch
-  add(path_568248, "subscriptionId", newJString(subscriptionId))
-  result = call_568247.call(path_568248, query_568249, nil, nil, body_568250)
+    body_564150 = activityLogAlertPatch
+  add(path_564148, "subscriptionId", newJString(subscriptionId))
+  add(path_564148, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564148, "activityLogAlertName", newJString(activityLogAlertName))
+  result = call_564147.call(path_564148, query_564149, nil, nil, body_564150)
 
-var activityLogAlertsUpdate* = Call_ActivityLogAlertsUpdate_568238(
+var activityLogAlertsUpdate* = Call_ActivityLogAlertsUpdate_564138(
     name: "activityLogAlertsUpdate", meth: HttpMethod.HttpPatch,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/microsoft.insights/activityLogAlerts/{activityLogAlertName}",
-    validator: validate_ActivityLogAlertsUpdate_568239, base: "",
-    url: url_ActivityLogAlertsUpdate_568240, schemes: {Scheme.Https})
+    validator: validate_ActivityLogAlertsUpdate_564139, base: "",
+    url: url_ActivityLogAlertsUpdate_564140, schemes: {Scheme.Https})
 type
-  Call_ActivityLogAlertsDelete_568227 = ref object of OpenApiRestCall_567642
-proc url_ActivityLogAlertsDelete_568229(protocol: Scheme; host: string; base: string;
+  Call_ActivityLogAlertsDelete_564127 = ref object of OpenApiRestCall_563540
+proc url_ActivityLogAlertsDelete_564129(protocol: Scheme; host: string; base: string;
                                        route: string; path: JsonNode;
                                        query: JsonNode): Uri =
   result.scheme = $protocol
@@ -692,37 +695,37 @@ proc url_ActivityLogAlertsDelete_568229(protocol: Scheme; host: string; base: st
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ActivityLogAlertsDelete_568228(path: JsonNode; query: JsonNode;
+proc validate_ActivityLogAlertsDelete_564128(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Delete an activity log alert.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
+  ##   subscriptionId: JString (required)
+  ##                 : The Azure subscription Id.
   ##   resourceGroupName: JString (required)
   ##                    : The name of the resource group.
   ##   activityLogAlertName: JString (required)
   ##                       : The name of the activity log alert.
-  ##   subscriptionId: JString (required)
-  ##                 : The Azure subscription Id.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568230 = path.getOrDefault("resourceGroupName")
-  valid_568230 = validateParameter(valid_568230, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564130 = path.getOrDefault("subscriptionId")
+  valid_564130 = validateParameter(valid_564130, JString, required = true,
                                  default = nil)
-  if valid_568230 != nil:
-    section.add "resourceGroupName", valid_568230
-  var valid_568231 = path.getOrDefault("activityLogAlertName")
-  valid_568231 = validateParameter(valid_568231, JString, required = true,
+  if valid_564130 != nil:
+    section.add "subscriptionId", valid_564130
+  var valid_564131 = path.getOrDefault("resourceGroupName")
+  valid_564131 = validateParameter(valid_564131, JString, required = true,
                                  default = nil)
-  if valid_568231 != nil:
-    section.add "activityLogAlertName", valid_568231
-  var valid_568232 = path.getOrDefault("subscriptionId")
-  valid_568232 = validateParameter(valid_568232, JString, required = true,
+  if valid_564131 != nil:
+    section.add "resourceGroupName", valid_564131
+  var valid_564132 = path.getOrDefault("activityLogAlertName")
+  valid_564132 = validateParameter(valid_564132, JString, required = true,
                                  default = nil)
-  if valid_568232 != nil:
-    section.add "subscriptionId", valid_568232
+  if valid_564132 != nil:
+    section.add "activityLogAlertName", valid_564132
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -730,11 +733,11 @@ proc validate_ActivityLogAlertsDelete_568228(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568233 = query.getOrDefault("api-version")
-  valid_568233 = validateParameter(valid_568233, JString, required = true,
+  var valid_564133 = query.getOrDefault("api-version")
+  valid_564133 = validateParameter(valid_564133, JString, required = true,
                                  default = nil)
-  if valid_568233 != nil:
-    section.add "api-version", valid_568233
+  if valid_564133 != nil:
+    section.add "api-version", valid_564133
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -743,45 +746,45 @@ proc validate_ActivityLogAlertsDelete_568228(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568234: Call_ActivityLogAlertsDelete_568227; path: JsonNode;
+proc call*(call_564134: Call_ActivityLogAlertsDelete_564127; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Delete an activity log alert.
   ## 
-  let valid = call_568234.validator(path, query, header, formData, body)
-  let scheme = call_568234.pickScheme
+  let valid = call_564134.validator(path, query, header, formData, body)
+  let scheme = call_564134.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568234.url(scheme.get, call_568234.host, call_568234.base,
-                         call_568234.route, valid.getOrDefault("path"),
+  let url = call_564134.url(scheme.get, call_564134.host, call_564134.base,
+                         call_564134.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568234, url, valid)
+  result = hook(call_564134, url, valid)
 
-proc call*(call_568235: Call_ActivityLogAlertsDelete_568227;
-          resourceGroupName: string; apiVersion: string;
-          activityLogAlertName: string; subscriptionId: string): Recallable =
+proc call*(call_564135: Call_ActivityLogAlertsDelete_564127; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string;
+          activityLogAlertName: string): Recallable =
   ## activityLogAlertsDelete
   ## Delete an activity log alert.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
-  ##   activityLogAlertName: string (required)
-  ##                       : The name of the activity log alert.
   ##   subscriptionId: string (required)
   ##                 : The Azure subscription Id.
-  var path_568236 = newJObject()
-  var query_568237 = newJObject()
-  add(path_568236, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568237, "api-version", newJString(apiVersion))
-  add(path_568236, "activityLogAlertName", newJString(activityLogAlertName))
-  add(path_568236, "subscriptionId", newJString(subscriptionId))
-  result = call_568235.call(path_568236, query_568237, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  ##   activityLogAlertName: string (required)
+  ##                       : The name of the activity log alert.
+  var path_564136 = newJObject()
+  var query_564137 = newJObject()
+  add(query_564137, "api-version", newJString(apiVersion))
+  add(path_564136, "subscriptionId", newJString(subscriptionId))
+  add(path_564136, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564136, "activityLogAlertName", newJString(activityLogAlertName))
+  result = call_564135.call(path_564136, query_564137, nil, nil, nil)
 
-var activityLogAlertsDelete* = Call_ActivityLogAlertsDelete_568227(
+var activityLogAlertsDelete* = Call_ActivityLogAlertsDelete_564127(
     name: "activityLogAlertsDelete", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/microsoft.insights/activityLogAlerts/{activityLogAlertName}",
-    validator: validate_ActivityLogAlertsDelete_568228, base: "",
-    url: url_ActivityLogAlertsDelete_568229, schemes: {Scheme.Https})
+    validator: validate_ActivityLogAlertsDelete_564128, base: "",
+    url: url_ActivityLogAlertsDelete_564129, schemes: {Scheme.Https})
 export
   rest
 

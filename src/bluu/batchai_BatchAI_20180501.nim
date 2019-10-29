@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, httpcore
 
 ## auto-generated via openapi macro
 ## title: BatchAI
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_574467 = ref object of OpenApiRestCall
+  OpenApiRestCall_563565 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_574467](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563565](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_574467): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563565): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,15 +107,15 @@ const
   macServiceName = "batchai-BatchAI"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_OperationsList_574689 = ref object of OpenApiRestCall_574467
-proc url_OperationsList_574691(protocol: Scheme; host: string; base: string;
+  Call_OperationsList_563787 = ref object of OpenApiRestCall_563565
+proc url_OperationsList_563789(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_OperationsList_574690(path: JsonNode; query: JsonNode;
+proc validate_OperationsList_563788(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## Lists available operations for the Microsoft.BatchAI provider.
@@ -126,11 +130,11 @@ proc validate_OperationsList_574690(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574850 = query.getOrDefault("api-version")
-  valid_574850 = validateParameter(valid_574850, JString, required = true,
+  var valid_563950 = query.getOrDefault("api-version")
+  valid_563950 = validateParameter(valid_563950, JString, required = true,
                                  default = nil)
-  if valid_574850 != nil:
-    section.add "api-version", valid_574850
+  if valid_563950 != nil:
+    section.add "api-version", valid_563950
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -139,36 +143,36 @@ proc validate_OperationsList_574690(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574873: Call_OperationsList_574689; path: JsonNode; query: JsonNode;
+proc call*(call_563973: Call_OperationsList_563787; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists available operations for the Microsoft.BatchAI provider.
   ## 
-  let valid = call_574873.validator(path, query, header, formData, body)
-  let scheme = call_574873.pickScheme
+  let valid = call_563973.validator(path, query, header, formData, body)
+  let scheme = call_563973.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574873.url(scheme.get, call_574873.host, call_574873.base,
-                         call_574873.route, valid.getOrDefault("path"),
+  let url = call_563973.url(scheme.get, call_563973.host, call_563973.base,
+                         call_563973.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574873, url, valid)
+  result = hook(call_563973, url, valid)
 
-proc call*(call_574944: Call_OperationsList_574689; apiVersion: string): Recallable =
+proc call*(call_564044: Call_OperationsList_563787; apiVersion: string): Recallable =
   ## operationsList
   ## Lists available operations for the Microsoft.BatchAI provider.
   ##   apiVersion: string (required)
   ##             : Specifies the version of API used for this request.
-  var query_574945 = newJObject()
-  add(query_574945, "api-version", newJString(apiVersion))
-  result = call_574944.call(nil, query_574945, nil, nil, nil)
+  var query_564045 = newJObject()
+  add(query_564045, "api-version", newJString(apiVersion))
+  result = call_564044.call(nil, query_564045, nil, nil, nil)
 
-var operationsList* = Call_OperationsList_574689(name: "operationsList",
+var operationsList* = Call_OperationsList_563787(name: "operationsList",
     meth: HttpMethod.HttpGet, host: "management.azure.com",
     route: "/providers/Microsoft.BatchAI/operations",
-    validator: validate_OperationsList_574690, base: "", url: url_OperationsList_574691,
+    validator: validate_OperationsList_563788, base: "", url: url_OperationsList_563789,
     schemes: {Scheme.Https})
 type
-  Call_UsagesList_574985 = ref object of OpenApiRestCall_574467
-proc url_UsagesList_574987(protocol: Scheme; host: string; base: string; route: string;
+  Call_UsagesList_564085 = ref object of OpenApiRestCall_563565
+proc url_UsagesList_564087(protocol: Scheme; host: string; base: string; route: string;
                           path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -187,7 +191,7 @@ proc url_UsagesList_574987(protocol: Scheme; host: string; base: string; route: 
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_UsagesList_574986(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_UsagesList_564086(path: JsonNode; query: JsonNode; header: JsonNode;
                                formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the current usage information as well as limits for Batch AI resources for given subscription.
   ## 
@@ -201,16 +205,16 @@ proc validate_UsagesList_574986(path: JsonNode; query: JsonNode; header: JsonNod
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_575002 = path.getOrDefault("subscriptionId")
-  valid_575002 = validateParameter(valid_575002, JString, required = true,
+  var valid_564102 = path.getOrDefault("subscriptionId")
+  valid_564102 = validateParameter(valid_564102, JString, required = true,
                                  default = nil)
-  if valid_575002 != nil:
-    section.add "subscriptionId", valid_575002
-  var valid_575003 = path.getOrDefault("location")
-  valid_575003 = validateParameter(valid_575003, JString, required = true,
+  if valid_564102 != nil:
+    section.add "subscriptionId", valid_564102
+  var valid_564103 = path.getOrDefault("location")
+  valid_564103 = validateParameter(valid_564103, JString, required = true,
                                  default = nil)
-  if valid_575003 != nil:
-    section.add "location", valid_575003
+  if valid_564103 != nil:
+    section.add "location", valid_564103
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -218,11 +222,11 @@ proc validate_UsagesList_574986(path: JsonNode; query: JsonNode; header: JsonNod
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575004 = query.getOrDefault("api-version")
-  valid_575004 = validateParameter(valid_575004, JString, required = true,
+  var valid_564104 = query.getOrDefault("api-version")
+  valid_564104 = validateParameter(valid_564104, JString, required = true,
                                  default = nil)
-  if valid_575004 != nil:
-    section.add "api-version", valid_575004
+  if valid_564104 != nil:
+    section.add "api-version", valid_564104
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -231,20 +235,20 @@ proc validate_UsagesList_574986(path: JsonNode; query: JsonNode; header: JsonNod
   if body != nil:
     result.add "body", body
 
-proc call*(call_575005: Call_UsagesList_574985; path: JsonNode; query: JsonNode;
+proc call*(call_564105: Call_UsagesList_564085; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the current usage information as well as limits for Batch AI resources for given subscription.
   ## 
-  let valid = call_575005.validator(path, query, header, formData, body)
-  let scheme = call_575005.pickScheme
+  let valid = call_564105.validator(path, query, header, formData, body)
+  let scheme = call_564105.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575005.url(scheme.get, call_575005.host, call_575005.base,
-                         call_575005.route, valid.getOrDefault("path"),
+  let url = call_564105.url(scheme.get, call_564105.host, call_564105.base,
+                         call_564105.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575005, url, valid)
+  result = hook(call_564105, url, valid)
 
-proc call*(call_575006: Call_UsagesList_574985; apiVersion: string;
+proc call*(call_564106: Call_UsagesList_564085; apiVersion: string;
           subscriptionId: string; location: string): Recallable =
   ## usagesList
   ## Gets the current usage information as well as limits for Batch AI resources for given subscription.
@@ -254,22 +258,22 @@ proc call*(call_575006: Call_UsagesList_574985; apiVersion: string;
   ##                 : The subscriptionID for the Azure user.
   ##   location: string (required)
   ##           : The location for which resource usage is queried.
-  var path_575007 = newJObject()
-  var query_575008 = newJObject()
-  add(query_575008, "api-version", newJString(apiVersion))
-  add(path_575007, "subscriptionId", newJString(subscriptionId))
-  add(path_575007, "location", newJString(location))
-  result = call_575006.call(path_575007, query_575008, nil, nil, nil)
+  var path_564107 = newJObject()
+  var query_564108 = newJObject()
+  add(query_564108, "api-version", newJString(apiVersion))
+  add(path_564107, "subscriptionId", newJString(subscriptionId))
+  add(path_564107, "location", newJString(location))
+  result = call_564106.call(path_564107, query_564108, nil, nil, nil)
 
-var usagesList* = Call_UsagesList_574985(name: "usagesList",
+var usagesList* = Call_UsagesList_564085(name: "usagesList",
                                       meth: HttpMethod.HttpGet,
                                       host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.BatchAI/locations/{location}/usages",
-                                      validator: validate_UsagesList_574986,
-                                      base: "", url: url_UsagesList_574987,
+                                      validator: validate_UsagesList_564086,
+                                      base: "", url: url_UsagesList_564087,
                                       schemes: {Scheme.Https})
 type
-  Call_WorkspacesList_575009 = ref object of OpenApiRestCall_574467
-proc url_WorkspacesList_575011(protocol: Scheme; host: string; base: string;
+  Call_WorkspacesList_564109 = ref object of OpenApiRestCall_563565
+proc url_WorkspacesList_564111(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -285,7 +289,7 @@ proc url_WorkspacesList_575011(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_WorkspacesList_575010(path: JsonNode; query: JsonNode;
+proc validate_WorkspacesList_564110(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## Gets a list of Workspaces associated with the given subscription.
@@ -298,11 +302,11 @@ proc validate_WorkspacesList_575010(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_575012 = path.getOrDefault("subscriptionId")
-  valid_575012 = validateParameter(valid_575012, JString, required = true,
+  var valid_564112 = path.getOrDefault("subscriptionId")
+  valid_564112 = validateParameter(valid_564112, JString, required = true,
                                  default = nil)
-  if valid_575012 != nil:
-    section.add "subscriptionId", valid_575012
+  if valid_564112 != nil:
+    section.add "subscriptionId", valid_564112
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -312,16 +316,16 @@ proc validate_WorkspacesList_575010(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575013 = query.getOrDefault("api-version")
-  valid_575013 = validateParameter(valid_575013, JString, required = true,
+  var valid_564113 = query.getOrDefault("api-version")
+  valid_564113 = validateParameter(valid_564113, JString, required = true,
                                  default = nil)
-  if valid_575013 != nil:
-    section.add "api-version", valid_575013
-  var valid_575028 = query.getOrDefault("maxresults")
-  valid_575028 = validateParameter(valid_575028, JInt, required = false,
+  if valid_564113 != nil:
+    section.add "api-version", valid_564113
+  var valid_564128 = query.getOrDefault("maxresults")
+  valid_564128 = validateParameter(valid_564128, JInt, required = false,
                                  default = newJInt(1000))
-  if valid_575028 != nil:
-    section.add "maxresults", valid_575028
+  if valid_564128 != nil:
+    section.add "maxresults", valid_564128
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -330,20 +334,20 @@ proc validate_WorkspacesList_575010(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_575029: Call_WorkspacesList_575009; path: JsonNode; query: JsonNode;
+proc call*(call_564129: Call_WorkspacesList_564109; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets a list of Workspaces associated with the given subscription.
   ## 
-  let valid = call_575029.validator(path, query, header, formData, body)
-  let scheme = call_575029.pickScheme
+  let valid = call_564129.validator(path, query, header, formData, body)
+  let scheme = call_564129.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575029.url(scheme.get, call_575029.host, call_575029.base,
-                         call_575029.route, valid.getOrDefault("path"),
+  let url = call_564129.url(scheme.get, call_564129.host, call_564129.base,
+                         call_564129.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575029, url, valid)
+  result = hook(call_564129, url, valid)
 
-proc call*(call_575030: Call_WorkspacesList_575009; apiVersion: string;
+proc call*(call_564130: Call_WorkspacesList_564109; apiVersion: string;
           subscriptionId: string; maxresults: int = 1000): Recallable =
   ## workspacesList
   ## Gets a list of Workspaces associated with the given subscription.
@@ -353,20 +357,20 @@ proc call*(call_575030: Call_WorkspacesList_575009; apiVersion: string;
   ##                 : The subscriptionID for the Azure user.
   ##   maxresults: int
   ##             : The maximum number of items to return in the response. A maximum of 1000 files can be returned.
-  var path_575031 = newJObject()
-  var query_575032 = newJObject()
-  add(query_575032, "api-version", newJString(apiVersion))
-  add(path_575031, "subscriptionId", newJString(subscriptionId))
-  add(query_575032, "maxresults", newJInt(maxresults))
-  result = call_575030.call(path_575031, query_575032, nil, nil, nil)
+  var path_564131 = newJObject()
+  var query_564132 = newJObject()
+  add(query_564132, "api-version", newJString(apiVersion))
+  add(path_564131, "subscriptionId", newJString(subscriptionId))
+  add(query_564132, "maxresults", newJInt(maxresults))
+  result = call_564130.call(path_564131, query_564132, nil, nil, nil)
 
-var workspacesList* = Call_WorkspacesList_575009(name: "workspacesList",
+var workspacesList* = Call_WorkspacesList_564109(name: "workspacesList",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.BatchAI/workspaces",
-    validator: validate_WorkspacesList_575010, base: "", url: url_WorkspacesList_575011,
+    validator: validate_WorkspacesList_564110, base: "", url: url_WorkspacesList_564111,
     schemes: {Scheme.Https})
 type
-  Call_WorkspacesListByResourceGroup_575033 = ref object of OpenApiRestCall_574467
-proc url_WorkspacesListByResourceGroup_575035(protocol: Scheme; host: string;
+  Call_WorkspacesListByResourceGroup_564133 = ref object of OpenApiRestCall_563565
+proc url_WorkspacesListByResourceGroup_564135(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -386,30 +390,30 @@ proc url_WorkspacesListByResourceGroup_575035(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_WorkspacesListByResourceGroup_575034(path: JsonNode; query: JsonNode;
+proc validate_WorkspacesListByResourceGroup_564134(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets a list of Workspaces within the specified resource group.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : Name of the resource group to which the resource belongs.
   ##   subscriptionId: JString (required)
   ##                 : The subscriptionID for the Azure user.
+  ##   resourceGroupName: JString (required)
+  ##                    : Name of the resource group to which the resource belongs.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_575036 = path.getOrDefault("resourceGroupName")
-  valid_575036 = validateParameter(valid_575036, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564136 = path.getOrDefault("subscriptionId")
+  valid_564136 = validateParameter(valid_564136, JString, required = true,
                                  default = nil)
-  if valid_575036 != nil:
-    section.add "resourceGroupName", valid_575036
-  var valid_575037 = path.getOrDefault("subscriptionId")
-  valid_575037 = validateParameter(valid_575037, JString, required = true,
+  if valid_564136 != nil:
+    section.add "subscriptionId", valid_564136
+  var valid_564137 = path.getOrDefault("resourceGroupName")
+  valid_564137 = validateParameter(valid_564137, JString, required = true,
                                  default = nil)
-  if valid_575037 != nil:
-    section.add "subscriptionId", valid_575037
+  if valid_564137 != nil:
+    section.add "resourceGroupName", valid_564137
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -419,16 +423,16 @@ proc validate_WorkspacesListByResourceGroup_575034(path: JsonNode; query: JsonNo
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575038 = query.getOrDefault("api-version")
-  valid_575038 = validateParameter(valid_575038, JString, required = true,
+  var valid_564138 = query.getOrDefault("api-version")
+  valid_564138 = validateParameter(valid_564138, JString, required = true,
                                  default = nil)
-  if valid_575038 != nil:
-    section.add "api-version", valid_575038
-  var valid_575039 = query.getOrDefault("maxresults")
-  valid_575039 = validateParameter(valid_575039, JInt, required = false,
+  if valid_564138 != nil:
+    section.add "api-version", valid_564138
+  var valid_564139 = query.getOrDefault("maxresults")
+  valid_564139 = validateParameter(valid_564139, JInt, required = false,
                                  default = newJInt(1000))
-  if valid_575039 != nil:
-    section.add "maxresults", valid_575039
+  if valid_564139 != nil:
+    section.add "maxresults", valid_564139
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -437,48 +441,48 @@ proc validate_WorkspacesListByResourceGroup_575034(path: JsonNode; query: JsonNo
   if body != nil:
     result.add "body", body
 
-proc call*(call_575040: Call_WorkspacesListByResourceGroup_575033; path: JsonNode;
+proc call*(call_564140: Call_WorkspacesListByResourceGroup_564133; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets a list of Workspaces within the specified resource group.
   ## 
-  let valid = call_575040.validator(path, query, header, formData, body)
-  let scheme = call_575040.pickScheme
+  let valid = call_564140.validator(path, query, header, formData, body)
+  let scheme = call_564140.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575040.url(scheme.get, call_575040.host, call_575040.base,
-                         call_575040.route, valid.getOrDefault("path"),
+  let url = call_564140.url(scheme.get, call_564140.host, call_564140.base,
+                         call_564140.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575040, url, valid)
+  result = hook(call_564140, url, valid)
 
-proc call*(call_575041: Call_WorkspacesListByResourceGroup_575033;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
+proc call*(call_564141: Call_WorkspacesListByResourceGroup_564133;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string;
           maxresults: int = 1000): Recallable =
   ## workspacesListByResourceGroup
   ## Gets a list of Workspaces within the specified resource group.
-  ##   resourceGroupName: string (required)
-  ##                    : Name of the resource group to which the resource belongs.
   ##   apiVersion: string (required)
   ##             : Specifies the version of API used for this request.
   ##   subscriptionId: string (required)
   ##                 : The subscriptionID for the Azure user.
   ##   maxresults: int
   ##             : The maximum number of items to return in the response. A maximum of 1000 files can be returned.
-  var path_575042 = newJObject()
-  var query_575043 = newJObject()
-  add(path_575042, "resourceGroupName", newJString(resourceGroupName))
-  add(query_575043, "api-version", newJString(apiVersion))
-  add(path_575042, "subscriptionId", newJString(subscriptionId))
-  add(query_575043, "maxresults", newJInt(maxresults))
-  result = call_575041.call(path_575042, query_575043, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : Name of the resource group to which the resource belongs.
+  var path_564142 = newJObject()
+  var query_564143 = newJObject()
+  add(query_564143, "api-version", newJString(apiVersion))
+  add(path_564142, "subscriptionId", newJString(subscriptionId))
+  add(query_564143, "maxresults", newJInt(maxresults))
+  add(path_564142, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564141.call(path_564142, query_564143, nil, nil, nil)
 
-var workspacesListByResourceGroup* = Call_WorkspacesListByResourceGroup_575033(
+var workspacesListByResourceGroup* = Call_WorkspacesListByResourceGroup_564133(
     name: "workspacesListByResourceGroup", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.BatchAI/workspaces",
-    validator: validate_WorkspacesListByResourceGroup_575034, base: "",
-    url: url_WorkspacesListByResourceGroup_575035, schemes: {Scheme.Https})
+    validator: validate_WorkspacesListByResourceGroup_564134, base: "",
+    url: url_WorkspacesListByResourceGroup_564135, schemes: {Scheme.Https})
 type
-  Call_WorkspacesCreate_575055 = ref object of OpenApiRestCall_574467
-proc url_WorkspacesCreate_575057(protocol: Scheme; host: string; base: string;
+  Call_WorkspacesCreate_564155 = ref object of OpenApiRestCall_563565
+proc url_WorkspacesCreate_564157(protocol: Scheme; host: string; base: string;
                                 route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -500,7 +504,7 @@ proc url_WorkspacesCreate_575057(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_WorkspacesCreate_575056(path: JsonNode; query: JsonNode;
+proc validate_WorkspacesCreate_564156(path: JsonNode; query: JsonNode;
                                      header: JsonNode; formData: JsonNode;
                                      body: JsonNode): JsonNode =
   ## Creates a Workspace.
@@ -508,30 +512,30 @@ proc validate_WorkspacesCreate_575056(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : Name of the resource group to which the resource belongs.
   ##   subscriptionId: JString (required)
   ##                 : The subscriptionID for the Azure user.
+  ##   resourceGroupName: JString (required)
+  ##                    : Name of the resource group to which the resource belongs.
   ##   workspaceName: JString (required)
   ##                : The name of the workspace. Workspace names can only contain a combination of alphanumeric characters along with dash (-) and underscore (_). The name must be from 1 through 64 characters long.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_575075 = path.getOrDefault("resourceGroupName")
-  valid_575075 = validateParameter(valid_575075, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564175 = path.getOrDefault("subscriptionId")
+  valid_564175 = validateParameter(valid_564175, JString, required = true,
                                  default = nil)
-  if valid_575075 != nil:
-    section.add "resourceGroupName", valid_575075
-  var valid_575076 = path.getOrDefault("subscriptionId")
-  valid_575076 = validateParameter(valid_575076, JString, required = true,
+  if valid_564175 != nil:
+    section.add "subscriptionId", valid_564175
+  var valid_564176 = path.getOrDefault("resourceGroupName")
+  valid_564176 = validateParameter(valid_564176, JString, required = true,
                                  default = nil)
-  if valid_575076 != nil:
-    section.add "subscriptionId", valid_575076
-  var valid_575077 = path.getOrDefault("workspaceName")
-  valid_575077 = validateParameter(valid_575077, JString, required = true,
+  if valid_564176 != nil:
+    section.add "resourceGroupName", valid_564176
+  var valid_564177 = path.getOrDefault("workspaceName")
+  valid_564177 = validateParameter(valid_564177, JString, required = true,
                                  default = nil)
-  if valid_575077 != nil:
-    section.add "workspaceName", valid_575077
+  if valid_564177 != nil:
+    section.add "workspaceName", valid_564177
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -539,11 +543,11 @@ proc validate_WorkspacesCreate_575056(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575078 = query.getOrDefault("api-version")
-  valid_575078 = validateParameter(valid_575078, JString, required = true,
+  var valid_564178 = query.getOrDefault("api-version")
+  valid_564178 = validateParameter(valid_564178, JString, required = true,
                                  default = nil)
-  if valid_575078 != nil:
-    section.add "api-version", valid_575078
+  if valid_564178 != nil:
+    section.add "api-version", valid_564178
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -557,52 +561,52 @@ proc validate_WorkspacesCreate_575056(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_575080: Call_WorkspacesCreate_575055; path: JsonNode;
+proc call*(call_564180: Call_WorkspacesCreate_564155; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Creates a Workspace.
   ## 
-  let valid = call_575080.validator(path, query, header, formData, body)
-  let scheme = call_575080.pickScheme
+  let valid = call_564180.validator(path, query, header, formData, body)
+  let scheme = call_564180.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575080.url(scheme.get, call_575080.host, call_575080.base,
-                         call_575080.route, valid.getOrDefault("path"),
+  let url = call_564180.url(scheme.get, call_564180.host, call_564180.base,
+                         call_564180.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575080, url, valid)
+  result = hook(call_564180, url, valid)
 
-proc call*(call_575081: Call_WorkspacesCreate_575055; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; parameters: JsonNode;
-          workspaceName: string): Recallable =
+proc call*(call_564181: Call_WorkspacesCreate_564155; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string; workspaceName: string;
+          parameters: JsonNode): Recallable =
   ## workspacesCreate
   ## Creates a Workspace.
-  ##   resourceGroupName: string (required)
-  ##                    : Name of the resource group to which the resource belongs.
   ##   apiVersion: string (required)
   ##             : Specifies the version of API used for this request.
   ##   subscriptionId: string (required)
   ##                 : The subscriptionID for the Azure user.
-  ##   parameters: JObject (required)
-  ##             : Workspace creation parameters.
+  ##   resourceGroupName: string (required)
+  ##                    : Name of the resource group to which the resource belongs.
   ##   workspaceName: string (required)
   ##                : The name of the workspace. Workspace names can only contain a combination of alphanumeric characters along with dash (-) and underscore (_). The name must be from 1 through 64 characters long.
-  var path_575082 = newJObject()
-  var query_575083 = newJObject()
-  var body_575084 = newJObject()
-  add(path_575082, "resourceGroupName", newJString(resourceGroupName))
-  add(query_575083, "api-version", newJString(apiVersion))
-  add(path_575082, "subscriptionId", newJString(subscriptionId))
+  ##   parameters: JObject (required)
+  ##             : Workspace creation parameters.
+  var path_564182 = newJObject()
+  var query_564183 = newJObject()
+  var body_564184 = newJObject()
+  add(query_564183, "api-version", newJString(apiVersion))
+  add(path_564182, "subscriptionId", newJString(subscriptionId))
+  add(path_564182, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564182, "workspaceName", newJString(workspaceName))
   if parameters != nil:
-    body_575084 = parameters
-  add(path_575082, "workspaceName", newJString(workspaceName))
-  result = call_575081.call(path_575082, query_575083, nil, nil, body_575084)
+    body_564184 = parameters
+  result = call_564181.call(path_564182, query_564183, nil, nil, body_564184)
 
-var workspacesCreate* = Call_WorkspacesCreate_575055(name: "workspacesCreate",
+var workspacesCreate* = Call_WorkspacesCreate_564155(name: "workspacesCreate",
     meth: HttpMethod.HttpPut, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.BatchAI/workspaces/{workspaceName}",
-    validator: validate_WorkspacesCreate_575056, base: "",
-    url: url_WorkspacesCreate_575057, schemes: {Scheme.Https})
+    validator: validate_WorkspacesCreate_564156, base: "",
+    url: url_WorkspacesCreate_564157, schemes: {Scheme.Https})
 type
-  Call_WorkspacesGet_575044 = ref object of OpenApiRestCall_574467
-proc url_WorkspacesGet_575046(protocol: Scheme; host: string; base: string;
+  Call_WorkspacesGet_564144 = ref object of OpenApiRestCall_563565
+proc url_WorkspacesGet_564146(protocol: Scheme; host: string; base: string;
                              route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -624,37 +628,37 @@ proc url_WorkspacesGet_575046(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_WorkspacesGet_575045(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_WorkspacesGet_564145(path: JsonNode; query: JsonNode; header: JsonNode;
                                   formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets information about a Workspace.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : Name of the resource group to which the resource belongs.
   ##   subscriptionId: JString (required)
   ##                 : The subscriptionID for the Azure user.
+  ##   resourceGroupName: JString (required)
+  ##                    : Name of the resource group to which the resource belongs.
   ##   workspaceName: JString (required)
   ##                : The name of the workspace. Workspace names can only contain a combination of alphanumeric characters along with dash (-) and underscore (_). The name must be from 1 through 64 characters long.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_575047 = path.getOrDefault("resourceGroupName")
-  valid_575047 = validateParameter(valid_575047, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564147 = path.getOrDefault("subscriptionId")
+  valid_564147 = validateParameter(valid_564147, JString, required = true,
                                  default = nil)
-  if valid_575047 != nil:
-    section.add "resourceGroupName", valid_575047
-  var valid_575048 = path.getOrDefault("subscriptionId")
-  valid_575048 = validateParameter(valid_575048, JString, required = true,
+  if valid_564147 != nil:
+    section.add "subscriptionId", valid_564147
+  var valid_564148 = path.getOrDefault("resourceGroupName")
+  valid_564148 = validateParameter(valid_564148, JString, required = true,
                                  default = nil)
-  if valid_575048 != nil:
-    section.add "subscriptionId", valid_575048
-  var valid_575049 = path.getOrDefault("workspaceName")
-  valid_575049 = validateParameter(valid_575049, JString, required = true,
+  if valid_564148 != nil:
+    section.add "resourceGroupName", valid_564148
+  var valid_564149 = path.getOrDefault("workspaceName")
+  valid_564149 = validateParameter(valid_564149, JString, required = true,
                                  default = nil)
-  if valid_575049 != nil:
-    section.add "workspaceName", valid_575049
+  if valid_564149 != nil:
+    section.add "workspaceName", valid_564149
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -662,11 +666,11 @@ proc validate_WorkspacesGet_575045(path: JsonNode; query: JsonNode; header: Json
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575050 = query.getOrDefault("api-version")
-  valid_575050 = validateParameter(valid_575050, JString, required = true,
+  var valid_564150 = query.getOrDefault("api-version")
+  valid_564150 = validateParameter(valid_564150, JString, required = true,
                                  default = nil)
-  if valid_575050 != nil:
-    section.add "api-version", valid_575050
+  if valid_564150 != nil:
+    section.add "api-version", valid_564150
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -675,46 +679,46 @@ proc validate_WorkspacesGet_575045(path: JsonNode; query: JsonNode; header: Json
   if body != nil:
     result.add "body", body
 
-proc call*(call_575051: Call_WorkspacesGet_575044; path: JsonNode; query: JsonNode;
+proc call*(call_564151: Call_WorkspacesGet_564144; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets information about a Workspace.
   ## 
-  let valid = call_575051.validator(path, query, header, formData, body)
-  let scheme = call_575051.pickScheme
+  let valid = call_564151.validator(path, query, header, formData, body)
+  let scheme = call_564151.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575051.url(scheme.get, call_575051.host, call_575051.base,
-                         call_575051.route, valid.getOrDefault("path"),
+  let url = call_564151.url(scheme.get, call_564151.host, call_564151.base,
+                         call_564151.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575051, url, valid)
+  result = hook(call_564151, url, valid)
 
-proc call*(call_575052: Call_WorkspacesGet_575044; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; workspaceName: string): Recallable =
+proc call*(call_564152: Call_WorkspacesGet_564144; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string; workspaceName: string): Recallable =
   ## workspacesGet
   ## Gets information about a Workspace.
-  ##   resourceGroupName: string (required)
-  ##                    : Name of the resource group to which the resource belongs.
   ##   apiVersion: string (required)
   ##             : Specifies the version of API used for this request.
   ##   subscriptionId: string (required)
   ##                 : The subscriptionID for the Azure user.
+  ##   resourceGroupName: string (required)
+  ##                    : Name of the resource group to which the resource belongs.
   ##   workspaceName: string (required)
   ##                : The name of the workspace. Workspace names can only contain a combination of alphanumeric characters along with dash (-) and underscore (_). The name must be from 1 through 64 characters long.
-  var path_575053 = newJObject()
-  var query_575054 = newJObject()
-  add(path_575053, "resourceGroupName", newJString(resourceGroupName))
-  add(query_575054, "api-version", newJString(apiVersion))
-  add(path_575053, "subscriptionId", newJString(subscriptionId))
-  add(path_575053, "workspaceName", newJString(workspaceName))
-  result = call_575052.call(path_575053, query_575054, nil, nil, nil)
+  var path_564153 = newJObject()
+  var query_564154 = newJObject()
+  add(query_564154, "api-version", newJString(apiVersion))
+  add(path_564153, "subscriptionId", newJString(subscriptionId))
+  add(path_564153, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564153, "workspaceName", newJString(workspaceName))
+  result = call_564152.call(path_564153, query_564154, nil, nil, nil)
 
-var workspacesGet* = Call_WorkspacesGet_575044(name: "workspacesGet",
+var workspacesGet* = Call_WorkspacesGet_564144(name: "workspacesGet",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.BatchAI/workspaces/{workspaceName}",
-    validator: validate_WorkspacesGet_575045, base: "", url: url_WorkspacesGet_575046,
+    validator: validate_WorkspacesGet_564145, base: "", url: url_WorkspacesGet_564146,
     schemes: {Scheme.Https})
 type
-  Call_WorkspacesUpdate_575096 = ref object of OpenApiRestCall_574467
-proc url_WorkspacesUpdate_575098(protocol: Scheme; host: string; base: string;
+  Call_WorkspacesUpdate_564196 = ref object of OpenApiRestCall_563565
+proc url_WorkspacesUpdate_564198(protocol: Scheme; host: string; base: string;
                                 route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -736,7 +740,7 @@ proc url_WorkspacesUpdate_575098(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_WorkspacesUpdate_575097(path: JsonNode; query: JsonNode;
+proc validate_WorkspacesUpdate_564197(path: JsonNode; query: JsonNode;
                                      header: JsonNode; formData: JsonNode;
                                      body: JsonNode): JsonNode =
   ## Updates properties of a Workspace.
@@ -744,30 +748,30 @@ proc validate_WorkspacesUpdate_575097(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : Name of the resource group to which the resource belongs.
   ##   subscriptionId: JString (required)
   ##                 : The subscriptionID for the Azure user.
+  ##   resourceGroupName: JString (required)
+  ##                    : Name of the resource group to which the resource belongs.
   ##   workspaceName: JString (required)
   ##                : The name of the workspace. Workspace names can only contain a combination of alphanumeric characters along with dash (-) and underscore (_). The name must be from 1 through 64 characters long.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_575099 = path.getOrDefault("resourceGroupName")
-  valid_575099 = validateParameter(valid_575099, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564199 = path.getOrDefault("subscriptionId")
+  valid_564199 = validateParameter(valid_564199, JString, required = true,
                                  default = nil)
-  if valid_575099 != nil:
-    section.add "resourceGroupName", valid_575099
-  var valid_575100 = path.getOrDefault("subscriptionId")
-  valid_575100 = validateParameter(valid_575100, JString, required = true,
+  if valid_564199 != nil:
+    section.add "subscriptionId", valid_564199
+  var valid_564200 = path.getOrDefault("resourceGroupName")
+  valid_564200 = validateParameter(valid_564200, JString, required = true,
                                  default = nil)
-  if valid_575100 != nil:
-    section.add "subscriptionId", valid_575100
-  var valid_575101 = path.getOrDefault("workspaceName")
-  valid_575101 = validateParameter(valid_575101, JString, required = true,
+  if valid_564200 != nil:
+    section.add "resourceGroupName", valid_564200
+  var valid_564201 = path.getOrDefault("workspaceName")
+  valid_564201 = validateParameter(valid_564201, JString, required = true,
                                  default = nil)
-  if valid_575101 != nil:
-    section.add "workspaceName", valid_575101
+  if valid_564201 != nil:
+    section.add "workspaceName", valid_564201
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -775,11 +779,11 @@ proc validate_WorkspacesUpdate_575097(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575102 = query.getOrDefault("api-version")
-  valid_575102 = validateParameter(valid_575102, JString, required = true,
+  var valid_564202 = query.getOrDefault("api-version")
+  valid_564202 = validateParameter(valid_564202, JString, required = true,
                                  default = nil)
-  if valid_575102 != nil:
-    section.add "api-version", valid_575102
+  if valid_564202 != nil:
+    section.add "api-version", valid_564202
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -793,52 +797,52 @@ proc validate_WorkspacesUpdate_575097(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_575104: Call_WorkspacesUpdate_575096; path: JsonNode;
+proc call*(call_564204: Call_WorkspacesUpdate_564196; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Updates properties of a Workspace.
   ## 
-  let valid = call_575104.validator(path, query, header, formData, body)
-  let scheme = call_575104.pickScheme
+  let valid = call_564204.validator(path, query, header, formData, body)
+  let scheme = call_564204.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575104.url(scheme.get, call_575104.host, call_575104.base,
-                         call_575104.route, valid.getOrDefault("path"),
+  let url = call_564204.url(scheme.get, call_564204.host, call_564204.base,
+                         call_564204.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575104, url, valid)
+  result = hook(call_564204, url, valid)
 
-proc call*(call_575105: Call_WorkspacesUpdate_575096; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; parameters: JsonNode;
-          workspaceName: string): Recallable =
+proc call*(call_564205: Call_WorkspacesUpdate_564196; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string; workspaceName: string;
+          parameters: JsonNode): Recallable =
   ## workspacesUpdate
   ## Updates properties of a Workspace.
-  ##   resourceGroupName: string (required)
-  ##                    : Name of the resource group to which the resource belongs.
   ##   apiVersion: string (required)
   ##             : Specifies the version of API used for this request.
   ##   subscriptionId: string (required)
   ##                 : The subscriptionID for the Azure user.
-  ##   parameters: JObject (required)
-  ##             : Additional parameters for workspace update.
+  ##   resourceGroupName: string (required)
+  ##                    : Name of the resource group to which the resource belongs.
   ##   workspaceName: string (required)
   ##                : The name of the workspace. Workspace names can only contain a combination of alphanumeric characters along with dash (-) and underscore (_). The name must be from 1 through 64 characters long.
-  var path_575106 = newJObject()
-  var query_575107 = newJObject()
-  var body_575108 = newJObject()
-  add(path_575106, "resourceGroupName", newJString(resourceGroupName))
-  add(query_575107, "api-version", newJString(apiVersion))
-  add(path_575106, "subscriptionId", newJString(subscriptionId))
+  ##   parameters: JObject (required)
+  ##             : Additional parameters for workspace update.
+  var path_564206 = newJObject()
+  var query_564207 = newJObject()
+  var body_564208 = newJObject()
+  add(query_564207, "api-version", newJString(apiVersion))
+  add(path_564206, "subscriptionId", newJString(subscriptionId))
+  add(path_564206, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564206, "workspaceName", newJString(workspaceName))
   if parameters != nil:
-    body_575108 = parameters
-  add(path_575106, "workspaceName", newJString(workspaceName))
-  result = call_575105.call(path_575106, query_575107, nil, nil, body_575108)
+    body_564208 = parameters
+  result = call_564205.call(path_564206, query_564207, nil, nil, body_564208)
 
-var workspacesUpdate* = Call_WorkspacesUpdate_575096(name: "workspacesUpdate",
+var workspacesUpdate* = Call_WorkspacesUpdate_564196(name: "workspacesUpdate",
     meth: HttpMethod.HttpPatch, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.BatchAI/workspaces/{workspaceName}",
-    validator: validate_WorkspacesUpdate_575097, base: "",
-    url: url_WorkspacesUpdate_575098, schemes: {Scheme.Https})
+    validator: validate_WorkspacesUpdate_564197, base: "",
+    url: url_WorkspacesUpdate_564198, schemes: {Scheme.Https})
 type
-  Call_WorkspacesDelete_575085 = ref object of OpenApiRestCall_574467
-proc url_WorkspacesDelete_575087(protocol: Scheme; host: string; base: string;
+  Call_WorkspacesDelete_564185 = ref object of OpenApiRestCall_563565
+proc url_WorkspacesDelete_564187(protocol: Scheme; host: string; base: string;
                                 route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -860,7 +864,7 @@ proc url_WorkspacesDelete_575087(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_WorkspacesDelete_575086(path: JsonNode; query: JsonNode;
+proc validate_WorkspacesDelete_564186(path: JsonNode; query: JsonNode;
                                      header: JsonNode; formData: JsonNode;
                                      body: JsonNode): JsonNode =
   ## Deletes a Workspace.
@@ -868,30 +872,30 @@ proc validate_WorkspacesDelete_575086(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : Name of the resource group to which the resource belongs.
   ##   subscriptionId: JString (required)
   ##                 : The subscriptionID for the Azure user.
+  ##   resourceGroupName: JString (required)
+  ##                    : Name of the resource group to which the resource belongs.
   ##   workspaceName: JString (required)
   ##                : The name of the workspace. Workspace names can only contain a combination of alphanumeric characters along with dash (-) and underscore (_). The name must be from 1 through 64 characters long.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_575088 = path.getOrDefault("resourceGroupName")
-  valid_575088 = validateParameter(valid_575088, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564188 = path.getOrDefault("subscriptionId")
+  valid_564188 = validateParameter(valid_564188, JString, required = true,
                                  default = nil)
-  if valid_575088 != nil:
-    section.add "resourceGroupName", valid_575088
-  var valid_575089 = path.getOrDefault("subscriptionId")
-  valid_575089 = validateParameter(valid_575089, JString, required = true,
+  if valid_564188 != nil:
+    section.add "subscriptionId", valid_564188
+  var valid_564189 = path.getOrDefault("resourceGroupName")
+  valid_564189 = validateParameter(valid_564189, JString, required = true,
                                  default = nil)
-  if valid_575089 != nil:
-    section.add "subscriptionId", valid_575089
-  var valid_575090 = path.getOrDefault("workspaceName")
-  valid_575090 = validateParameter(valid_575090, JString, required = true,
+  if valid_564189 != nil:
+    section.add "resourceGroupName", valid_564189
+  var valid_564190 = path.getOrDefault("workspaceName")
+  valid_564190 = validateParameter(valid_564190, JString, required = true,
                                  default = nil)
-  if valid_575090 != nil:
-    section.add "workspaceName", valid_575090
+  if valid_564190 != nil:
+    section.add "workspaceName", valid_564190
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -899,11 +903,11 @@ proc validate_WorkspacesDelete_575086(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575091 = query.getOrDefault("api-version")
-  valid_575091 = validateParameter(valid_575091, JString, required = true,
+  var valid_564191 = query.getOrDefault("api-version")
+  valid_564191 = validateParameter(valid_564191, JString, required = true,
                                  default = nil)
-  if valid_575091 != nil:
-    section.add "api-version", valid_575091
+  if valid_564191 != nil:
+    section.add "api-version", valid_564191
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -912,46 +916,46 @@ proc validate_WorkspacesDelete_575086(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_575092: Call_WorkspacesDelete_575085; path: JsonNode;
+proc call*(call_564192: Call_WorkspacesDelete_564185; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes a Workspace.
   ## 
-  let valid = call_575092.validator(path, query, header, formData, body)
-  let scheme = call_575092.pickScheme
+  let valid = call_564192.validator(path, query, header, formData, body)
+  let scheme = call_564192.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575092.url(scheme.get, call_575092.host, call_575092.base,
-                         call_575092.route, valid.getOrDefault("path"),
+  let url = call_564192.url(scheme.get, call_564192.host, call_564192.base,
+                         call_564192.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575092, url, valid)
+  result = hook(call_564192, url, valid)
 
-proc call*(call_575093: Call_WorkspacesDelete_575085; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; workspaceName: string): Recallable =
+proc call*(call_564193: Call_WorkspacesDelete_564185; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string; workspaceName: string): Recallable =
   ## workspacesDelete
   ## Deletes a Workspace.
-  ##   resourceGroupName: string (required)
-  ##                    : Name of the resource group to which the resource belongs.
   ##   apiVersion: string (required)
   ##             : Specifies the version of API used for this request.
   ##   subscriptionId: string (required)
   ##                 : The subscriptionID for the Azure user.
+  ##   resourceGroupName: string (required)
+  ##                    : Name of the resource group to which the resource belongs.
   ##   workspaceName: string (required)
   ##                : The name of the workspace. Workspace names can only contain a combination of alphanumeric characters along with dash (-) and underscore (_). The name must be from 1 through 64 characters long.
-  var path_575094 = newJObject()
-  var query_575095 = newJObject()
-  add(path_575094, "resourceGroupName", newJString(resourceGroupName))
-  add(query_575095, "api-version", newJString(apiVersion))
-  add(path_575094, "subscriptionId", newJString(subscriptionId))
-  add(path_575094, "workspaceName", newJString(workspaceName))
-  result = call_575093.call(path_575094, query_575095, nil, nil, nil)
+  var path_564194 = newJObject()
+  var query_564195 = newJObject()
+  add(query_564195, "api-version", newJString(apiVersion))
+  add(path_564194, "subscriptionId", newJString(subscriptionId))
+  add(path_564194, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564194, "workspaceName", newJString(workspaceName))
+  result = call_564193.call(path_564194, query_564195, nil, nil, nil)
 
-var workspacesDelete* = Call_WorkspacesDelete_575085(name: "workspacesDelete",
+var workspacesDelete* = Call_WorkspacesDelete_564185(name: "workspacesDelete",
     meth: HttpMethod.HttpDelete, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.BatchAI/workspaces/{workspaceName}",
-    validator: validate_WorkspacesDelete_575086, base: "",
-    url: url_WorkspacesDelete_575087, schemes: {Scheme.Https})
+    validator: validate_WorkspacesDelete_564186, base: "",
+    url: url_WorkspacesDelete_564187, schemes: {Scheme.Https})
 type
-  Call_ClustersListByWorkspace_575109 = ref object of OpenApiRestCall_574467
-proc url_ClustersListByWorkspace_575111(protocol: Scheme; host: string; base: string;
+  Call_ClustersListByWorkspace_564209 = ref object of OpenApiRestCall_563565
+proc url_ClustersListByWorkspace_564211(protocol: Scheme; host: string; base: string;
                                        route: string; path: JsonNode;
                                        query: JsonNode): Uri =
   result.scheme = $protocol
@@ -975,37 +979,37 @@ proc url_ClustersListByWorkspace_575111(protocol: Scheme; host: string; base: st
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ClustersListByWorkspace_575110(path: JsonNode; query: JsonNode;
+proc validate_ClustersListByWorkspace_564210(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets information about Clusters associated with the given Workspace.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : Name of the resource group to which the resource belongs.
   ##   subscriptionId: JString (required)
   ##                 : The subscriptionID for the Azure user.
+  ##   resourceGroupName: JString (required)
+  ##                    : Name of the resource group to which the resource belongs.
   ##   workspaceName: JString (required)
   ##                : The name of the workspace. Workspace names can only contain a combination of alphanumeric characters along with dash (-) and underscore (_). The name must be from 1 through 64 characters long.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_575112 = path.getOrDefault("resourceGroupName")
-  valid_575112 = validateParameter(valid_575112, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564212 = path.getOrDefault("subscriptionId")
+  valid_564212 = validateParameter(valid_564212, JString, required = true,
                                  default = nil)
-  if valid_575112 != nil:
-    section.add "resourceGroupName", valid_575112
-  var valid_575113 = path.getOrDefault("subscriptionId")
-  valid_575113 = validateParameter(valid_575113, JString, required = true,
+  if valid_564212 != nil:
+    section.add "subscriptionId", valid_564212
+  var valid_564213 = path.getOrDefault("resourceGroupName")
+  valid_564213 = validateParameter(valid_564213, JString, required = true,
                                  default = nil)
-  if valid_575113 != nil:
-    section.add "subscriptionId", valid_575113
-  var valid_575114 = path.getOrDefault("workspaceName")
-  valid_575114 = validateParameter(valid_575114, JString, required = true,
+  if valid_564213 != nil:
+    section.add "resourceGroupName", valid_564213
+  var valid_564214 = path.getOrDefault("workspaceName")
+  valid_564214 = validateParameter(valid_564214, JString, required = true,
                                  default = nil)
-  if valid_575114 != nil:
-    section.add "workspaceName", valid_575114
+  if valid_564214 != nil:
+    section.add "workspaceName", valid_564214
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1015,16 +1019,16 @@ proc validate_ClustersListByWorkspace_575110(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575115 = query.getOrDefault("api-version")
-  valid_575115 = validateParameter(valid_575115, JString, required = true,
+  var valid_564215 = query.getOrDefault("api-version")
+  valid_564215 = validateParameter(valid_564215, JString, required = true,
                                  default = nil)
-  if valid_575115 != nil:
-    section.add "api-version", valid_575115
-  var valid_575116 = query.getOrDefault("maxresults")
-  valid_575116 = validateParameter(valid_575116, JInt, required = false,
+  if valid_564215 != nil:
+    section.add "api-version", valid_564215
+  var valid_564216 = query.getOrDefault("maxresults")
+  valid_564216 = validateParameter(valid_564216, JInt, required = false,
                                  default = newJInt(1000))
-  if valid_575116 != nil:
-    section.add "maxresults", valid_575116
+  if valid_564216 != nil:
+    section.add "maxresults", valid_564216
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1033,51 +1037,51 @@ proc validate_ClustersListByWorkspace_575110(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_575117: Call_ClustersListByWorkspace_575109; path: JsonNode;
+proc call*(call_564217: Call_ClustersListByWorkspace_564209; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets information about Clusters associated with the given Workspace.
   ## 
-  let valid = call_575117.validator(path, query, header, formData, body)
-  let scheme = call_575117.pickScheme
+  let valid = call_564217.validator(path, query, header, formData, body)
+  let scheme = call_564217.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575117.url(scheme.get, call_575117.host, call_575117.base,
-                         call_575117.route, valid.getOrDefault("path"),
+  let url = call_564217.url(scheme.get, call_564217.host, call_564217.base,
+                         call_564217.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575117, url, valid)
+  result = hook(call_564217, url, valid)
 
-proc call*(call_575118: Call_ClustersListByWorkspace_575109;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          workspaceName: string; maxresults: int = 1000): Recallable =
+proc call*(call_564218: Call_ClustersListByWorkspace_564209; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string; workspaceName: string;
+          maxresults: int = 1000): Recallable =
   ## clustersListByWorkspace
   ## Gets information about Clusters associated with the given Workspace.
-  ##   resourceGroupName: string (required)
-  ##                    : Name of the resource group to which the resource belongs.
   ##   apiVersion: string (required)
   ##             : Specifies the version of API used for this request.
   ##   subscriptionId: string (required)
   ##                 : The subscriptionID for the Azure user.
   ##   maxresults: int
   ##             : The maximum number of items to return in the response. A maximum of 1000 files can be returned.
+  ##   resourceGroupName: string (required)
+  ##                    : Name of the resource group to which the resource belongs.
   ##   workspaceName: string (required)
   ##                : The name of the workspace. Workspace names can only contain a combination of alphanumeric characters along with dash (-) and underscore (_). The name must be from 1 through 64 characters long.
-  var path_575119 = newJObject()
-  var query_575120 = newJObject()
-  add(path_575119, "resourceGroupName", newJString(resourceGroupName))
-  add(query_575120, "api-version", newJString(apiVersion))
-  add(path_575119, "subscriptionId", newJString(subscriptionId))
-  add(query_575120, "maxresults", newJInt(maxresults))
-  add(path_575119, "workspaceName", newJString(workspaceName))
-  result = call_575118.call(path_575119, query_575120, nil, nil, nil)
+  var path_564219 = newJObject()
+  var query_564220 = newJObject()
+  add(query_564220, "api-version", newJString(apiVersion))
+  add(path_564219, "subscriptionId", newJString(subscriptionId))
+  add(query_564220, "maxresults", newJInt(maxresults))
+  add(path_564219, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564219, "workspaceName", newJString(workspaceName))
+  result = call_564218.call(path_564219, query_564220, nil, nil, nil)
 
-var clustersListByWorkspace* = Call_ClustersListByWorkspace_575109(
+var clustersListByWorkspace* = Call_ClustersListByWorkspace_564209(
     name: "clustersListByWorkspace", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.BatchAI/workspaces/{workspaceName}/clusters",
-    validator: validate_ClustersListByWorkspace_575110, base: "",
-    url: url_ClustersListByWorkspace_575111, schemes: {Scheme.Https})
+    validator: validate_ClustersListByWorkspace_564210, base: "",
+    url: url_ClustersListByWorkspace_564211, schemes: {Scheme.Https})
 type
-  Call_ClustersCreate_575133 = ref object of OpenApiRestCall_574467
-proc url_ClustersCreate_575135(protocol: Scheme; host: string; base: string;
+  Call_ClustersCreate_564233 = ref object of OpenApiRestCall_563565
+proc url_ClustersCreate_564235(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1102,7 +1106,7 @@ proc url_ClustersCreate_575135(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ClustersCreate_575134(path: JsonNode; query: JsonNode;
+proc validate_ClustersCreate_564234(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## Creates a Cluster in the given Workspace.
@@ -1112,35 +1116,35 @@ proc validate_ClustersCreate_575134(path: JsonNode; query: JsonNode;
   ## parameters in `path` object:
   ##   clusterName: JString (required)
   ##              : The name of the cluster within the specified resource group. Cluster names can only contain a combination of alphanumeric characters along with dash (-) and underscore (_). The name must be from 1 through 64 characters long.
-  ##   resourceGroupName: JString (required)
-  ##                    : Name of the resource group to which the resource belongs.
   ##   subscriptionId: JString (required)
   ##                 : The subscriptionID for the Azure user.
+  ##   resourceGroupName: JString (required)
+  ##                    : Name of the resource group to which the resource belongs.
   ##   workspaceName: JString (required)
   ##                : The name of the workspace. Workspace names can only contain a combination of alphanumeric characters along with dash (-) and underscore (_). The name must be from 1 through 64 characters long.
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `clusterName` field"
-  var valid_575136 = path.getOrDefault("clusterName")
-  valid_575136 = validateParameter(valid_575136, JString, required = true,
+  var valid_564236 = path.getOrDefault("clusterName")
+  valid_564236 = validateParameter(valid_564236, JString, required = true,
                                  default = nil)
-  if valid_575136 != nil:
-    section.add "clusterName", valid_575136
-  var valid_575137 = path.getOrDefault("resourceGroupName")
-  valid_575137 = validateParameter(valid_575137, JString, required = true,
+  if valid_564236 != nil:
+    section.add "clusterName", valid_564236
+  var valid_564237 = path.getOrDefault("subscriptionId")
+  valid_564237 = validateParameter(valid_564237, JString, required = true,
                                  default = nil)
-  if valid_575137 != nil:
-    section.add "resourceGroupName", valid_575137
-  var valid_575138 = path.getOrDefault("subscriptionId")
-  valid_575138 = validateParameter(valid_575138, JString, required = true,
+  if valid_564237 != nil:
+    section.add "subscriptionId", valid_564237
+  var valid_564238 = path.getOrDefault("resourceGroupName")
+  valid_564238 = validateParameter(valid_564238, JString, required = true,
                                  default = nil)
-  if valid_575138 != nil:
-    section.add "subscriptionId", valid_575138
-  var valid_575139 = path.getOrDefault("workspaceName")
-  valid_575139 = validateParameter(valid_575139, JString, required = true,
+  if valid_564238 != nil:
+    section.add "resourceGroupName", valid_564238
+  var valid_564239 = path.getOrDefault("workspaceName")
+  valid_564239 = validateParameter(valid_564239, JString, required = true,
                                  default = nil)
-  if valid_575139 != nil:
-    section.add "workspaceName", valid_575139
+  if valid_564239 != nil:
+    section.add "workspaceName", valid_564239
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1148,11 +1152,11 @@ proc validate_ClustersCreate_575134(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575140 = query.getOrDefault("api-version")
-  valid_575140 = validateParameter(valid_575140, JString, required = true,
+  var valid_564240 = query.getOrDefault("api-version")
+  valid_564240 = validateParameter(valid_564240, JString, required = true,
                                  default = nil)
-  if valid_575140 != nil:
-    section.add "api-version", valid_575140
+  if valid_564240 != nil:
+    section.add "api-version", valid_564240
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1166,55 +1170,55 @@ proc validate_ClustersCreate_575134(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_575142: Call_ClustersCreate_575133; path: JsonNode; query: JsonNode;
+proc call*(call_564242: Call_ClustersCreate_564233; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Creates a Cluster in the given Workspace.
   ## 
-  let valid = call_575142.validator(path, query, header, formData, body)
-  let scheme = call_575142.pickScheme
+  let valid = call_564242.validator(path, query, header, formData, body)
+  let scheme = call_564242.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575142.url(scheme.get, call_575142.host, call_575142.base,
-                         call_575142.route, valid.getOrDefault("path"),
+  let url = call_564242.url(scheme.get, call_564242.host, call_564242.base,
+                         call_564242.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575142, url, valid)
+  result = hook(call_564242, url, valid)
 
-proc call*(call_575143: Call_ClustersCreate_575133; clusterName: string;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          parameters: JsonNode; workspaceName: string): Recallable =
+proc call*(call_564243: Call_ClustersCreate_564233; clusterName: string;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string;
+          workspaceName: string; parameters: JsonNode): Recallable =
   ## clustersCreate
   ## Creates a Cluster in the given Workspace.
   ##   clusterName: string (required)
   ##              : The name of the cluster within the specified resource group. Cluster names can only contain a combination of alphanumeric characters along with dash (-) and underscore (_). The name must be from 1 through 64 characters long.
-  ##   resourceGroupName: string (required)
-  ##                    : Name of the resource group to which the resource belongs.
   ##   apiVersion: string (required)
   ##             : Specifies the version of API used for this request.
   ##   subscriptionId: string (required)
   ##                 : The subscriptionID for the Azure user.
-  ##   parameters: JObject (required)
-  ##             : The parameters to provide for the Cluster creation.
+  ##   resourceGroupName: string (required)
+  ##                    : Name of the resource group to which the resource belongs.
   ##   workspaceName: string (required)
   ##                : The name of the workspace. Workspace names can only contain a combination of alphanumeric characters along with dash (-) and underscore (_). The name must be from 1 through 64 characters long.
-  var path_575144 = newJObject()
-  var query_575145 = newJObject()
-  var body_575146 = newJObject()
-  add(path_575144, "clusterName", newJString(clusterName))
-  add(path_575144, "resourceGroupName", newJString(resourceGroupName))
-  add(query_575145, "api-version", newJString(apiVersion))
-  add(path_575144, "subscriptionId", newJString(subscriptionId))
+  ##   parameters: JObject (required)
+  ##             : The parameters to provide for the Cluster creation.
+  var path_564244 = newJObject()
+  var query_564245 = newJObject()
+  var body_564246 = newJObject()
+  add(path_564244, "clusterName", newJString(clusterName))
+  add(query_564245, "api-version", newJString(apiVersion))
+  add(path_564244, "subscriptionId", newJString(subscriptionId))
+  add(path_564244, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564244, "workspaceName", newJString(workspaceName))
   if parameters != nil:
-    body_575146 = parameters
-  add(path_575144, "workspaceName", newJString(workspaceName))
-  result = call_575143.call(path_575144, query_575145, nil, nil, body_575146)
+    body_564246 = parameters
+  result = call_564243.call(path_564244, query_564245, nil, nil, body_564246)
 
-var clustersCreate* = Call_ClustersCreate_575133(name: "clustersCreate",
+var clustersCreate* = Call_ClustersCreate_564233(name: "clustersCreate",
     meth: HttpMethod.HttpPut, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.BatchAI/workspaces/{workspaceName}/clusters/{clusterName}",
-    validator: validate_ClustersCreate_575134, base: "", url: url_ClustersCreate_575135,
+    validator: validate_ClustersCreate_564234, base: "", url: url_ClustersCreate_564235,
     schemes: {Scheme.Https})
 type
-  Call_ClustersGet_575121 = ref object of OpenApiRestCall_574467
-proc url_ClustersGet_575123(protocol: Scheme; host: string; base: string;
+  Call_ClustersGet_564221 = ref object of OpenApiRestCall_563565
+proc url_ClustersGet_564223(protocol: Scheme; host: string; base: string;
                            route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1239,7 +1243,7 @@ proc url_ClustersGet_575123(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ClustersGet_575122(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_ClustersGet_564222(path: JsonNode; query: JsonNode; header: JsonNode;
                                 formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets information about a Cluster.
   ## 
@@ -1248,35 +1252,35 @@ proc validate_ClustersGet_575122(path: JsonNode; query: JsonNode; header: JsonNo
   ## parameters in `path` object:
   ##   clusterName: JString (required)
   ##              : The name of the cluster within the specified resource group. Cluster names can only contain a combination of alphanumeric characters along with dash (-) and underscore (_). The name must be from 1 through 64 characters long.
-  ##   resourceGroupName: JString (required)
-  ##                    : Name of the resource group to which the resource belongs.
   ##   subscriptionId: JString (required)
   ##                 : The subscriptionID for the Azure user.
+  ##   resourceGroupName: JString (required)
+  ##                    : Name of the resource group to which the resource belongs.
   ##   workspaceName: JString (required)
   ##                : The name of the workspace. Workspace names can only contain a combination of alphanumeric characters along with dash (-) and underscore (_). The name must be from 1 through 64 characters long.
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `clusterName` field"
-  var valid_575124 = path.getOrDefault("clusterName")
-  valid_575124 = validateParameter(valid_575124, JString, required = true,
+  var valid_564224 = path.getOrDefault("clusterName")
+  valid_564224 = validateParameter(valid_564224, JString, required = true,
                                  default = nil)
-  if valid_575124 != nil:
-    section.add "clusterName", valid_575124
-  var valid_575125 = path.getOrDefault("resourceGroupName")
-  valid_575125 = validateParameter(valid_575125, JString, required = true,
+  if valid_564224 != nil:
+    section.add "clusterName", valid_564224
+  var valid_564225 = path.getOrDefault("subscriptionId")
+  valid_564225 = validateParameter(valid_564225, JString, required = true,
                                  default = nil)
-  if valid_575125 != nil:
-    section.add "resourceGroupName", valid_575125
-  var valid_575126 = path.getOrDefault("subscriptionId")
-  valid_575126 = validateParameter(valid_575126, JString, required = true,
+  if valid_564225 != nil:
+    section.add "subscriptionId", valid_564225
+  var valid_564226 = path.getOrDefault("resourceGroupName")
+  valid_564226 = validateParameter(valid_564226, JString, required = true,
                                  default = nil)
-  if valid_575126 != nil:
-    section.add "subscriptionId", valid_575126
-  var valid_575127 = path.getOrDefault("workspaceName")
-  valid_575127 = validateParameter(valid_575127, JString, required = true,
+  if valid_564226 != nil:
+    section.add "resourceGroupName", valid_564226
+  var valid_564227 = path.getOrDefault("workspaceName")
+  valid_564227 = validateParameter(valid_564227, JString, required = true,
                                  default = nil)
-  if valid_575127 != nil:
-    section.add "workspaceName", valid_575127
+  if valid_564227 != nil:
+    section.add "workspaceName", valid_564227
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1284,11 +1288,11 @@ proc validate_ClustersGet_575122(path: JsonNode; query: JsonNode; header: JsonNo
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575128 = query.getOrDefault("api-version")
-  valid_575128 = validateParameter(valid_575128, JString, required = true,
+  var valid_564228 = query.getOrDefault("api-version")
+  valid_564228 = validateParameter(valid_564228, JString, required = true,
                                  default = nil)
-  if valid_575128 != nil:
-    section.add "api-version", valid_575128
+  if valid_564228 != nil:
+    section.add "api-version", valid_564228
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1297,52 +1301,52 @@ proc validate_ClustersGet_575122(path: JsonNode; query: JsonNode; header: JsonNo
   if body != nil:
     result.add "body", body
 
-proc call*(call_575129: Call_ClustersGet_575121; path: JsonNode; query: JsonNode;
+proc call*(call_564229: Call_ClustersGet_564221; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets information about a Cluster.
   ## 
-  let valid = call_575129.validator(path, query, header, formData, body)
-  let scheme = call_575129.pickScheme
+  let valid = call_564229.validator(path, query, header, formData, body)
+  let scheme = call_564229.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575129.url(scheme.get, call_575129.host, call_575129.base,
-                         call_575129.route, valid.getOrDefault("path"),
+  let url = call_564229.url(scheme.get, call_564229.host, call_564229.base,
+                         call_564229.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575129, url, valid)
+  result = hook(call_564229, url, valid)
 
-proc call*(call_575130: Call_ClustersGet_575121; clusterName: string;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
+proc call*(call_564230: Call_ClustersGet_564221; clusterName: string;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string;
           workspaceName: string): Recallable =
   ## clustersGet
   ## Gets information about a Cluster.
   ##   clusterName: string (required)
   ##              : The name of the cluster within the specified resource group. Cluster names can only contain a combination of alphanumeric characters along with dash (-) and underscore (_). The name must be from 1 through 64 characters long.
-  ##   resourceGroupName: string (required)
-  ##                    : Name of the resource group to which the resource belongs.
   ##   apiVersion: string (required)
   ##             : Specifies the version of API used for this request.
   ##   subscriptionId: string (required)
   ##                 : The subscriptionID for the Azure user.
+  ##   resourceGroupName: string (required)
+  ##                    : Name of the resource group to which the resource belongs.
   ##   workspaceName: string (required)
   ##                : The name of the workspace. Workspace names can only contain a combination of alphanumeric characters along with dash (-) and underscore (_). The name must be from 1 through 64 characters long.
-  var path_575131 = newJObject()
-  var query_575132 = newJObject()
-  add(path_575131, "clusterName", newJString(clusterName))
-  add(path_575131, "resourceGroupName", newJString(resourceGroupName))
-  add(query_575132, "api-version", newJString(apiVersion))
-  add(path_575131, "subscriptionId", newJString(subscriptionId))
-  add(path_575131, "workspaceName", newJString(workspaceName))
-  result = call_575130.call(path_575131, query_575132, nil, nil, nil)
+  var path_564231 = newJObject()
+  var query_564232 = newJObject()
+  add(path_564231, "clusterName", newJString(clusterName))
+  add(query_564232, "api-version", newJString(apiVersion))
+  add(path_564231, "subscriptionId", newJString(subscriptionId))
+  add(path_564231, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564231, "workspaceName", newJString(workspaceName))
+  result = call_564230.call(path_564231, query_564232, nil, nil, nil)
 
-var clustersGet* = Call_ClustersGet_575121(name: "clustersGet",
+var clustersGet* = Call_ClustersGet_564221(name: "clustersGet",
                                         meth: HttpMethod.HttpGet,
                                         host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.BatchAI/workspaces/{workspaceName}/clusters/{clusterName}",
-                                        validator: validate_ClustersGet_575122,
-                                        base: "", url: url_ClustersGet_575123,
+                                        validator: validate_ClustersGet_564222,
+                                        base: "", url: url_ClustersGet_564223,
                                         schemes: {Scheme.Https})
 type
-  Call_ClustersUpdate_575159 = ref object of OpenApiRestCall_574467
-proc url_ClustersUpdate_575161(protocol: Scheme; host: string; base: string;
+  Call_ClustersUpdate_564259 = ref object of OpenApiRestCall_563565
+proc url_ClustersUpdate_564261(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1367,7 +1371,7 @@ proc url_ClustersUpdate_575161(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ClustersUpdate_575160(path: JsonNode; query: JsonNode;
+proc validate_ClustersUpdate_564260(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## Updates properties of a Cluster.
@@ -1377,35 +1381,35 @@ proc validate_ClustersUpdate_575160(path: JsonNode; query: JsonNode;
   ## parameters in `path` object:
   ##   clusterName: JString (required)
   ##              : The name of the cluster within the specified resource group. Cluster names can only contain a combination of alphanumeric characters along with dash (-) and underscore (_). The name must be from 1 through 64 characters long.
-  ##   resourceGroupName: JString (required)
-  ##                    : Name of the resource group to which the resource belongs.
   ##   subscriptionId: JString (required)
   ##                 : The subscriptionID for the Azure user.
+  ##   resourceGroupName: JString (required)
+  ##                    : Name of the resource group to which the resource belongs.
   ##   workspaceName: JString (required)
   ##                : The name of the workspace. Workspace names can only contain a combination of alphanumeric characters along with dash (-) and underscore (_). The name must be from 1 through 64 characters long.
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `clusterName` field"
-  var valid_575162 = path.getOrDefault("clusterName")
-  valid_575162 = validateParameter(valid_575162, JString, required = true,
+  var valid_564262 = path.getOrDefault("clusterName")
+  valid_564262 = validateParameter(valid_564262, JString, required = true,
                                  default = nil)
-  if valid_575162 != nil:
-    section.add "clusterName", valid_575162
-  var valid_575163 = path.getOrDefault("resourceGroupName")
-  valid_575163 = validateParameter(valid_575163, JString, required = true,
+  if valid_564262 != nil:
+    section.add "clusterName", valid_564262
+  var valid_564263 = path.getOrDefault("subscriptionId")
+  valid_564263 = validateParameter(valid_564263, JString, required = true,
                                  default = nil)
-  if valid_575163 != nil:
-    section.add "resourceGroupName", valid_575163
-  var valid_575164 = path.getOrDefault("subscriptionId")
-  valid_575164 = validateParameter(valid_575164, JString, required = true,
+  if valid_564263 != nil:
+    section.add "subscriptionId", valid_564263
+  var valid_564264 = path.getOrDefault("resourceGroupName")
+  valid_564264 = validateParameter(valid_564264, JString, required = true,
                                  default = nil)
-  if valid_575164 != nil:
-    section.add "subscriptionId", valid_575164
-  var valid_575165 = path.getOrDefault("workspaceName")
-  valid_575165 = validateParameter(valid_575165, JString, required = true,
+  if valid_564264 != nil:
+    section.add "resourceGroupName", valid_564264
+  var valid_564265 = path.getOrDefault("workspaceName")
+  valid_564265 = validateParameter(valid_564265, JString, required = true,
                                  default = nil)
-  if valid_575165 != nil:
-    section.add "workspaceName", valid_575165
+  if valid_564265 != nil:
+    section.add "workspaceName", valid_564265
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1413,11 +1417,11 @@ proc validate_ClustersUpdate_575160(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575166 = query.getOrDefault("api-version")
-  valid_575166 = validateParameter(valid_575166, JString, required = true,
+  var valid_564266 = query.getOrDefault("api-version")
+  valid_564266 = validateParameter(valid_564266, JString, required = true,
                                  default = nil)
-  if valid_575166 != nil:
-    section.add "api-version", valid_575166
+  if valid_564266 != nil:
+    section.add "api-version", valid_564266
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1431,55 +1435,55 @@ proc validate_ClustersUpdate_575160(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_575168: Call_ClustersUpdate_575159; path: JsonNode; query: JsonNode;
+proc call*(call_564268: Call_ClustersUpdate_564259; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Updates properties of a Cluster.
   ## 
-  let valid = call_575168.validator(path, query, header, formData, body)
-  let scheme = call_575168.pickScheme
+  let valid = call_564268.validator(path, query, header, formData, body)
+  let scheme = call_564268.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575168.url(scheme.get, call_575168.host, call_575168.base,
-                         call_575168.route, valid.getOrDefault("path"),
+  let url = call_564268.url(scheme.get, call_564268.host, call_564268.base,
+                         call_564268.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575168, url, valid)
+  result = hook(call_564268, url, valid)
 
-proc call*(call_575169: Call_ClustersUpdate_575159; clusterName: string;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          parameters: JsonNode; workspaceName: string): Recallable =
+proc call*(call_564269: Call_ClustersUpdate_564259; clusterName: string;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string;
+          workspaceName: string; parameters: JsonNode): Recallable =
   ## clustersUpdate
   ## Updates properties of a Cluster.
   ##   clusterName: string (required)
   ##              : The name of the cluster within the specified resource group. Cluster names can only contain a combination of alphanumeric characters along with dash (-) and underscore (_). The name must be from 1 through 64 characters long.
-  ##   resourceGroupName: string (required)
-  ##                    : Name of the resource group to which the resource belongs.
   ##   apiVersion: string (required)
   ##             : Specifies the version of API used for this request.
   ##   subscriptionId: string (required)
   ##                 : The subscriptionID for the Azure user.
-  ##   parameters: JObject (required)
-  ##             : Additional parameters for cluster update.
+  ##   resourceGroupName: string (required)
+  ##                    : Name of the resource group to which the resource belongs.
   ##   workspaceName: string (required)
   ##                : The name of the workspace. Workspace names can only contain a combination of alphanumeric characters along with dash (-) and underscore (_). The name must be from 1 through 64 characters long.
-  var path_575170 = newJObject()
-  var query_575171 = newJObject()
-  var body_575172 = newJObject()
-  add(path_575170, "clusterName", newJString(clusterName))
-  add(path_575170, "resourceGroupName", newJString(resourceGroupName))
-  add(query_575171, "api-version", newJString(apiVersion))
-  add(path_575170, "subscriptionId", newJString(subscriptionId))
+  ##   parameters: JObject (required)
+  ##             : Additional parameters for cluster update.
+  var path_564270 = newJObject()
+  var query_564271 = newJObject()
+  var body_564272 = newJObject()
+  add(path_564270, "clusterName", newJString(clusterName))
+  add(query_564271, "api-version", newJString(apiVersion))
+  add(path_564270, "subscriptionId", newJString(subscriptionId))
+  add(path_564270, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564270, "workspaceName", newJString(workspaceName))
   if parameters != nil:
-    body_575172 = parameters
-  add(path_575170, "workspaceName", newJString(workspaceName))
-  result = call_575169.call(path_575170, query_575171, nil, nil, body_575172)
+    body_564272 = parameters
+  result = call_564269.call(path_564270, query_564271, nil, nil, body_564272)
 
-var clustersUpdate* = Call_ClustersUpdate_575159(name: "clustersUpdate",
+var clustersUpdate* = Call_ClustersUpdate_564259(name: "clustersUpdate",
     meth: HttpMethod.HttpPatch, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.BatchAI/workspaces/{workspaceName}/clusters/{clusterName}",
-    validator: validate_ClustersUpdate_575160, base: "", url: url_ClustersUpdate_575161,
+    validator: validate_ClustersUpdate_564260, base: "", url: url_ClustersUpdate_564261,
     schemes: {Scheme.Https})
 type
-  Call_ClustersDelete_575147 = ref object of OpenApiRestCall_574467
-proc url_ClustersDelete_575149(protocol: Scheme; host: string; base: string;
+  Call_ClustersDelete_564247 = ref object of OpenApiRestCall_563565
+proc url_ClustersDelete_564249(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1504,7 +1508,7 @@ proc url_ClustersDelete_575149(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ClustersDelete_575148(path: JsonNode; query: JsonNode;
+proc validate_ClustersDelete_564248(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## Deletes a Cluster.
@@ -1514,35 +1518,35 @@ proc validate_ClustersDelete_575148(path: JsonNode; query: JsonNode;
   ## parameters in `path` object:
   ##   clusterName: JString (required)
   ##              : The name of the cluster within the specified resource group. Cluster names can only contain a combination of alphanumeric characters along with dash (-) and underscore (_). The name must be from 1 through 64 characters long.
-  ##   resourceGroupName: JString (required)
-  ##                    : Name of the resource group to which the resource belongs.
   ##   subscriptionId: JString (required)
   ##                 : The subscriptionID for the Azure user.
+  ##   resourceGroupName: JString (required)
+  ##                    : Name of the resource group to which the resource belongs.
   ##   workspaceName: JString (required)
   ##                : The name of the workspace. Workspace names can only contain a combination of alphanumeric characters along with dash (-) and underscore (_). The name must be from 1 through 64 characters long.
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `clusterName` field"
-  var valid_575150 = path.getOrDefault("clusterName")
-  valid_575150 = validateParameter(valid_575150, JString, required = true,
+  var valid_564250 = path.getOrDefault("clusterName")
+  valid_564250 = validateParameter(valid_564250, JString, required = true,
                                  default = nil)
-  if valid_575150 != nil:
-    section.add "clusterName", valid_575150
-  var valid_575151 = path.getOrDefault("resourceGroupName")
-  valid_575151 = validateParameter(valid_575151, JString, required = true,
+  if valid_564250 != nil:
+    section.add "clusterName", valid_564250
+  var valid_564251 = path.getOrDefault("subscriptionId")
+  valid_564251 = validateParameter(valid_564251, JString, required = true,
                                  default = nil)
-  if valid_575151 != nil:
-    section.add "resourceGroupName", valid_575151
-  var valid_575152 = path.getOrDefault("subscriptionId")
-  valid_575152 = validateParameter(valid_575152, JString, required = true,
+  if valid_564251 != nil:
+    section.add "subscriptionId", valid_564251
+  var valid_564252 = path.getOrDefault("resourceGroupName")
+  valid_564252 = validateParameter(valid_564252, JString, required = true,
                                  default = nil)
-  if valid_575152 != nil:
-    section.add "subscriptionId", valid_575152
-  var valid_575153 = path.getOrDefault("workspaceName")
-  valid_575153 = validateParameter(valid_575153, JString, required = true,
+  if valid_564252 != nil:
+    section.add "resourceGroupName", valid_564252
+  var valid_564253 = path.getOrDefault("workspaceName")
+  valid_564253 = validateParameter(valid_564253, JString, required = true,
                                  default = nil)
-  if valid_575153 != nil:
-    section.add "workspaceName", valid_575153
+  if valid_564253 != nil:
+    section.add "workspaceName", valid_564253
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1550,11 +1554,11 @@ proc validate_ClustersDelete_575148(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575154 = query.getOrDefault("api-version")
-  valid_575154 = validateParameter(valid_575154, JString, required = true,
+  var valid_564254 = query.getOrDefault("api-version")
+  valid_564254 = validateParameter(valid_564254, JString, required = true,
                                  default = nil)
-  if valid_575154 != nil:
-    section.add "api-version", valid_575154
+  if valid_564254 != nil:
+    section.add "api-version", valid_564254
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1563,50 +1567,50 @@ proc validate_ClustersDelete_575148(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_575155: Call_ClustersDelete_575147; path: JsonNode; query: JsonNode;
+proc call*(call_564255: Call_ClustersDelete_564247; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes a Cluster.
   ## 
-  let valid = call_575155.validator(path, query, header, formData, body)
-  let scheme = call_575155.pickScheme
+  let valid = call_564255.validator(path, query, header, formData, body)
+  let scheme = call_564255.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575155.url(scheme.get, call_575155.host, call_575155.base,
-                         call_575155.route, valid.getOrDefault("path"),
+  let url = call_564255.url(scheme.get, call_564255.host, call_564255.base,
+                         call_564255.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575155, url, valid)
+  result = hook(call_564255, url, valid)
 
-proc call*(call_575156: Call_ClustersDelete_575147; clusterName: string;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
+proc call*(call_564256: Call_ClustersDelete_564247; clusterName: string;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string;
           workspaceName: string): Recallable =
   ## clustersDelete
   ## Deletes a Cluster.
   ##   clusterName: string (required)
   ##              : The name of the cluster within the specified resource group. Cluster names can only contain a combination of alphanumeric characters along with dash (-) and underscore (_). The name must be from 1 through 64 characters long.
-  ##   resourceGroupName: string (required)
-  ##                    : Name of the resource group to which the resource belongs.
   ##   apiVersion: string (required)
   ##             : Specifies the version of API used for this request.
   ##   subscriptionId: string (required)
   ##                 : The subscriptionID for the Azure user.
+  ##   resourceGroupName: string (required)
+  ##                    : Name of the resource group to which the resource belongs.
   ##   workspaceName: string (required)
   ##                : The name of the workspace. Workspace names can only contain a combination of alphanumeric characters along with dash (-) and underscore (_). The name must be from 1 through 64 characters long.
-  var path_575157 = newJObject()
-  var query_575158 = newJObject()
-  add(path_575157, "clusterName", newJString(clusterName))
-  add(path_575157, "resourceGroupName", newJString(resourceGroupName))
-  add(query_575158, "api-version", newJString(apiVersion))
-  add(path_575157, "subscriptionId", newJString(subscriptionId))
-  add(path_575157, "workspaceName", newJString(workspaceName))
-  result = call_575156.call(path_575157, query_575158, nil, nil, nil)
+  var path_564257 = newJObject()
+  var query_564258 = newJObject()
+  add(path_564257, "clusterName", newJString(clusterName))
+  add(query_564258, "api-version", newJString(apiVersion))
+  add(path_564257, "subscriptionId", newJString(subscriptionId))
+  add(path_564257, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564257, "workspaceName", newJString(workspaceName))
+  result = call_564256.call(path_564257, query_564258, nil, nil, nil)
 
-var clustersDelete* = Call_ClustersDelete_575147(name: "clustersDelete",
+var clustersDelete* = Call_ClustersDelete_564247(name: "clustersDelete",
     meth: HttpMethod.HttpDelete, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.BatchAI/workspaces/{workspaceName}/clusters/{clusterName}",
-    validator: validate_ClustersDelete_575148, base: "", url: url_ClustersDelete_575149,
+    validator: validate_ClustersDelete_564248, base: "", url: url_ClustersDelete_564249,
     schemes: {Scheme.Https})
 type
-  Call_ClustersListRemoteLoginInformation_575173 = ref object of OpenApiRestCall_574467
-proc url_ClustersListRemoteLoginInformation_575175(protocol: Scheme; host: string;
+  Call_ClustersListRemoteLoginInformation_564273 = ref object of OpenApiRestCall_563565
+proc url_ClustersListRemoteLoginInformation_564275(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1632,7 +1636,7 @@ proc url_ClustersListRemoteLoginInformation_575175(protocol: Scheme; host: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ClustersListRemoteLoginInformation_575174(path: JsonNode;
+proc validate_ClustersListRemoteLoginInformation_564274(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Get the IP address, port of all the compute nodes in the Cluster.
   ## 
@@ -1641,35 +1645,35 @@ proc validate_ClustersListRemoteLoginInformation_575174(path: JsonNode;
   ## parameters in `path` object:
   ##   clusterName: JString (required)
   ##              : The name of the cluster within the specified resource group. Cluster names can only contain a combination of alphanumeric characters along with dash (-) and underscore (_). The name must be from 1 through 64 characters long.
-  ##   resourceGroupName: JString (required)
-  ##                    : Name of the resource group to which the resource belongs.
   ##   subscriptionId: JString (required)
   ##                 : The subscriptionID for the Azure user.
+  ##   resourceGroupName: JString (required)
+  ##                    : Name of the resource group to which the resource belongs.
   ##   workspaceName: JString (required)
   ##                : The name of the workspace. Workspace names can only contain a combination of alphanumeric characters along with dash (-) and underscore (_). The name must be from 1 through 64 characters long.
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `clusterName` field"
-  var valid_575176 = path.getOrDefault("clusterName")
-  valid_575176 = validateParameter(valid_575176, JString, required = true,
+  var valid_564276 = path.getOrDefault("clusterName")
+  valid_564276 = validateParameter(valid_564276, JString, required = true,
                                  default = nil)
-  if valid_575176 != nil:
-    section.add "clusterName", valid_575176
-  var valid_575177 = path.getOrDefault("resourceGroupName")
-  valid_575177 = validateParameter(valid_575177, JString, required = true,
+  if valid_564276 != nil:
+    section.add "clusterName", valid_564276
+  var valid_564277 = path.getOrDefault("subscriptionId")
+  valid_564277 = validateParameter(valid_564277, JString, required = true,
                                  default = nil)
-  if valid_575177 != nil:
-    section.add "resourceGroupName", valid_575177
-  var valid_575178 = path.getOrDefault("subscriptionId")
-  valid_575178 = validateParameter(valid_575178, JString, required = true,
+  if valid_564277 != nil:
+    section.add "subscriptionId", valid_564277
+  var valid_564278 = path.getOrDefault("resourceGroupName")
+  valid_564278 = validateParameter(valid_564278, JString, required = true,
                                  default = nil)
-  if valid_575178 != nil:
-    section.add "subscriptionId", valid_575178
-  var valid_575179 = path.getOrDefault("workspaceName")
-  valid_575179 = validateParameter(valid_575179, JString, required = true,
+  if valid_564278 != nil:
+    section.add "resourceGroupName", valid_564278
+  var valid_564279 = path.getOrDefault("workspaceName")
+  valid_564279 = validateParameter(valid_564279, JString, required = true,
                                  default = nil)
-  if valid_575179 != nil:
-    section.add "workspaceName", valid_575179
+  if valid_564279 != nil:
+    section.add "workspaceName", valid_564279
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1677,11 +1681,11 @@ proc validate_ClustersListRemoteLoginInformation_575174(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575180 = query.getOrDefault("api-version")
-  valid_575180 = validateParameter(valid_575180, JString, required = true,
+  var valid_564280 = query.getOrDefault("api-version")
+  valid_564280 = validateParameter(valid_564280, JString, required = true,
                                  default = nil)
-  if valid_575180 != nil:
-    section.add "api-version", valid_575180
+  if valid_564280 != nil:
+    section.add "api-version", valid_564280
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1690,52 +1694,52 @@ proc validate_ClustersListRemoteLoginInformation_575174(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_575181: Call_ClustersListRemoteLoginInformation_575173;
+proc call*(call_564281: Call_ClustersListRemoteLoginInformation_564273;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Get the IP address, port of all the compute nodes in the Cluster.
   ## 
-  let valid = call_575181.validator(path, query, header, formData, body)
-  let scheme = call_575181.pickScheme
+  let valid = call_564281.validator(path, query, header, formData, body)
+  let scheme = call_564281.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575181.url(scheme.get, call_575181.host, call_575181.base,
-                         call_575181.route, valid.getOrDefault("path"),
+  let url = call_564281.url(scheme.get, call_564281.host, call_564281.base,
+                         call_564281.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575181, url, valid)
+  result = hook(call_564281, url, valid)
 
-proc call*(call_575182: Call_ClustersListRemoteLoginInformation_575173;
-          clusterName: string; resourceGroupName: string; apiVersion: string;
-          subscriptionId: string; workspaceName: string): Recallable =
+proc call*(call_564282: Call_ClustersListRemoteLoginInformation_564273;
+          clusterName: string; apiVersion: string; subscriptionId: string;
+          resourceGroupName: string; workspaceName: string): Recallable =
   ## clustersListRemoteLoginInformation
   ## Get the IP address, port of all the compute nodes in the Cluster.
   ##   clusterName: string (required)
   ##              : The name of the cluster within the specified resource group. Cluster names can only contain a combination of alphanumeric characters along with dash (-) and underscore (_). The name must be from 1 through 64 characters long.
-  ##   resourceGroupName: string (required)
-  ##                    : Name of the resource group to which the resource belongs.
   ##   apiVersion: string (required)
   ##             : Specifies the version of API used for this request.
   ##   subscriptionId: string (required)
   ##                 : The subscriptionID for the Azure user.
+  ##   resourceGroupName: string (required)
+  ##                    : Name of the resource group to which the resource belongs.
   ##   workspaceName: string (required)
   ##                : The name of the workspace. Workspace names can only contain a combination of alphanumeric characters along with dash (-) and underscore (_). The name must be from 1 through 64 characters long.
-  var path_575183 = newJObject()
-  var query_575184 = newJObject()
-  add(path_575183, "clusterName", newJString(clusterName))
-  add(path_575183, "resourceGroupName", newJString(resourceGroupName))
-  add(query_575184, "api-version", newJString(apiVersion))
-  add(path_575183, "subscriptionId", newJString(subscriptionId))
-  add(path_575183, "workspaceName", newJString(workspaceName))
-  result = call_575182.call(path_575183, query_575184, nil, nil, nil)
+  var path_564283 = newJObject()
+  var query_564284 = newJObject()
+  add(path_564283, "clusterName", newJString(clusterName))
+  add(query_564284, "api-version", newJString(apiVersion))
+  add(path_564283, "subscriptionId", newJString(subscriptionId))
+  add(path_564283, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564283, "workspaceName", newJString(workspaceName))
+  result = call_564282.call(path_564283, query_564284, nil, nil, nil)
 
-var clustersListRemoteLoginInformation* = Call_ClustersListRemoteLoginInformation_575173(
+var clustersListRemoteLoginInformation* = Call_ClustersListRemoteLoginInformation_564273(
     name: "clustersListRemoteLoginInformation", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.BatchAI/workspaces/{workspaceName}/clusters/{clusterName}/listRemoteLoginInformation",
-    validator: validate_ClustersListRemoteLoginInformation_575174, base: "",
-    url: url_ClustersListRemoteLoginInformation_575175, schemes: {Scheme.Https})
+    validator: validate_ClustersListRemoteLoginInformation_564274, base: "",
+    url: url_ClustersListRemoteLoginInformation_564275, schemes: {Scheme.Https})
 type
-  Call_ExperimentsListByWorkspace_575185 = ref object of OpenApiRestCall_574467
-proc url_ExperimentsListByWorkspace_575187(protocol: Scheme; host: string;
+  Call_ExperimentsListByWorkspace_564285 = ref object of OpenApiRestCall_563565
+proc url_ExperimentsListByWorkspace_564287(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1758,37 +1762,37 @@ proc url_ExperimentsListByWorkspace_575187(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ExperimentsListByWorkspace_575186(path: JsonNode; query: JsonNode;
+proc validate_ExperimentsListByWorkspace_564286(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets a list of Experiments within the specified Workspace.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : Name of the resource group to which the resource belongs.
   ##   subscriptionId: JString (required)
   ##                 : The subscriptionID for the Azure user.
+  ##   resourceGroupName: JString (required)
+  ##                    : Name of the resource group to which the resource belongs.
   ##   workspaceName: JString (required)
   ##                : The name of the workspace. Workspace names can only contain a combination of alphanumeric characters along with dash (-) and underscore (_). The name must be from 1 through 64 characters long.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_575188 = path.getOrDefault("resourceGroupName")
-  valid_575188 = validateParameter(valid_575188, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564288 = path.getOrDefault("subscriptionId")
+  valid_564288 = validateParameter(valid_564288, JString, required = true,
                                  default = nil)
-  if valid_575188 != nil:
-    section.add "resourceGroupName", valid_575188
-  var valid_575189 = path.getOrDefault("subscriptionId")
-  valid_575189 = validateParameter(valid_575189, JString, required = true,
+  if valid_564288 != nil:
+    section.add "subscriptionId", valid_564288
+  var valid_564289 = path.getOrDefault("resourceGroupName")
+  valid_564289 = validateParameter(valid_564289, JString, required = true,
                                  default = nil)
-  if valid_575189 != nil:
-    section.add "subscriptionId", valid_575189
-  var valid_575190 = path.getOrDefault("workspaceName")
-  valid_575190 = validateParameter(valid_575190, JString, required = true,
+  if valid_564289 != nil:
+    section.add "resourceGroupName", valid_564289
+  var valid_564290 = path.getOrDefault("workspaceName")
+  valid_564290 = validateParameter(valid_564290, JString, required = true,
                                  default = nil)
-  if valid_575190 != nil:
-    section.add "workspaceName", valid_575190
+  if valid_564290 != nil:
+    section.add "workspaceName", valid_564290
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1798,16 +1802,16 @@ proc validate_ExperimentsListByWorkspace_575186(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575191 = query.getOrDefault("api-version")
-  valid_575191 = validateParameter(valid_575191, JString, required = true,
+  var valid_564291 = query.getOrDefault("api-version")
+  valid_564291 = validateParameter(valid_564291, JString, required = true,
                                  default = nil)
-  if valid_575191 != nil:
-    section.add "api-version", valid_575191
-  var valid_575192 = query.getOrDefault("maxresults")
-  valid_575192 = validateParameter(valid_575192, JInt, required = false,
+  if valid_564291 != nil:
+    section.add "api-version", valid_564291
+  var valid_564292 = query.getOrDefault("maxresults")
+  valid_564292 = validateParameter(valid_564292, JInt, required = false,
                                  default = newJInt(1000))
-  if valid_575192 != nil:
-    section.add "maxresults", valid_575192
+  if valid_564292 != nil:
+    section.add "maxresults", valid_564292
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1816,51 +1820,51 @@ proc validate_ExperimentsListByWorkspace_575186(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_575193: Call_ExperimentsListByWorkspace_575185; path: JsonNode;
+proc call*(call_564293: Call_ExperimentsListByWorkspace_564285; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets a list of Experiments within the specified Workspace.
   ## 
-  let valid = call_575193.validator(path, query, header, formData, body)
-  let scheme = call_575193.pickScheme
+  let valid = call_564293.validator(path, query, header, formData, body)
+  let scheme = call_564293.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575193.url(scheme.get, call_575193.host, call_575193.base,
-                         call_575193.route, valid.getOrDefault("path"),
+  let url = call_564293.url(scheme.get, call_564293.host, call_564293.base,
+                         call_564293.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575193, url, valid)
+  result = hook(call_564293, url, valid)
 
-proc call*(call_575194: Call_ExperimentsListByWorkspace_575185;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          workspaceName: string; maxresults: int = 1000): Recallable =
+proc call*(call_564294: Call_ExperimentsListByWorkspace_564285; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string; workspaceName: string;
+          maxresults: int = 1000): Recallable =
   ## experimentsListByWorkspace
   ## Gets a list of Experiments within the specified Workspace.
-  ##   resourceGroupName: string (required)
-  ##                    : Name of the resource group to which the resource belongs.
   ##   apiVersion: string (required)
   ##             : Specifies the version of API used for this request.
   ##   subscriptionId: string (required)
   ##                 : The subscriptionID for the Azure user.
   ##   maxresults: int
   ##             : The maximum number of items to return in the response. A maximum of 1000 files can be returned.
+  ##   resourceGroupName: string (required)
+  ##                    : Name of the resource group to which the resource belongs.
   ##   workspaceName: string (required)
   ##                : The name of the workspace. Workspace names can only contain a combination of alphanumeric characters along with dash (-) and underscore (_). The name must be from 1 through 64 characters long.
-  var path_575195 = newJObject()
-  var query_575196 = newJObject()
-  add(path_575195, "resourceGroupName", newJString(resourceGroupName))
-  add(query_575196, "api-version", newJString(apiVersion))
-  add(path_575195, "subscriptionId", newJString(subscriptionId))
-  add(query_575196, "maxresults", newJInt(maxresults))
-  add(path_575195, "workspaceName", newJString(workspaceName))
-  result = call_575194.call(path_575195, query_575196, nil, nil, nil)
+  var path_564295 = newJObject()
+  var query_564296 = newJObject()
+  add(query_564296, "api-version", newJString(apiVersion))
+  add(path_564295, "subscriptionId", newJString(subscriptionId))
+  add(query_564296, "maxresults", newJInt(maxresults))
+  add(path_564295, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564295, "workspaceName", newJString(workspaceName))
+  result = call_564294.call(path_564295, query_564296, nil, nil, nil)
 
-var experimentsListByWorkspace* = Call_ExperimentsListByWorkspace_575185(
+var experimentsListByWorkspace* = Call_ExperimentsListByWorkspace_564285(
     name: "experimentsListByWorkspace", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.BatchAI/workspaces/{workspaceName}/experiments",
-    validator: validate_ExperimentsListByWorkspace_575186, base: "",
-    url: url_ExperimentsListByWorkspace_575187, schemes: {Scheme.Https})
+    validator: validate_ExperimentsListByWorkspace_564286, base: "",
+    url: url_ExperimentsListByWorkspace_564287, schemes: {Scheme.Https})
 type
-  Call_ExperimentsCreate_575209 = ref object of OpenApiRestCall_574467
-proc url_ExperimentsCreate_575211(protocol: Scheme; host: string; base: string;
+  Call_ExperimentsCreate_564309 = ref object of OpenApiRestCall_563565
+proc url_ExperimentsCreate_564311(protocol: Scheme; host: string; base: string;
                                  route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1885,7 +1889,7 @@ proc url_ExperimentsCreate_575211(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ExperimentsCreate_575210(path: JsonNode; query: JsonNode;
+proc validate_ExperimentsCreate_564310(path: JsonNode; query: JsonNode;
                                       header: JsonNode; formData: JsonNode;
                                       body: JsonNode): JsonNode =
   ## Creates an Experiment.
@@ -1893,37 +1897,37 @@ proc validate_ExperimentsCreate_575210(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : Name of the resource group to which the resource belongs.
   ##   subscriptionId: JString (required)
   ##                 : The subscriptionID for the Azure user.
   ##   experimentName: JString (required)
   ##                 : The name of the experiment. Experiment names can only contain a combination of alphanumeric characters along with dash (-) and underscore (_). The name must be from 1 through 64 characters long.
+  ##   resourceGroupName: JString (required)
+  ##                    : Name of the resource group to which the resource belongs.
   ##   workspaceName: JString (required)
   ##                : The name of the workspace. Workspace names can only contain a combination of alphanumeric characters along with dash (-) and underscore (_). The name must be from 1 through 64 characters long.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_575212 = path.getOrDefault("resourceGroupName")
-  valid_575212 = validateParameter(valid_575212, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564312 = path.getOrDefault("subscriptionId")
+  valid_564312 = validateParameter(valid_564312, JString, required = true,
                                  default = nil)
-  if valid_575212 != nil:
-    section.add "resourceGroupName", valid_575212
-  var valid_575213 = path.getOrDefault("subscriptionId")
-  valid_575213 = validateParameter(valid_575213, JString, required = true,
+  if valid_564312 != nil:
+    section.add "subscriptionId", valid_564312
+  var valid_564313 = path.getOrDefault("experimentName")
+  valid_564313 = validateParameter(valid_564313, JString, required = true,
                                  default = nil)
-  if valid_575213 != nil:
-    section.add "subscriptionId", valid_575213
-  var valid_575214 = path.getOrDefault("experimentName")
-  valid_575214 = validateParameter(valid_575214, JString, required = true,
+  if valid_564313 != nil:
+    section.add "experimentName", valid_564313
+  var valid_564314 = path.getOrDefault("resourceGroupName")
+  valid_564314 = validateParameter(valid_564314, JString, required = true,
                                  default = nil)
-  if valid_575214 != nil:
-    section.add "experimentName", valid_575214
-  var valid_575215 = path.getOrDefault("workspaceName")
-  valid_575215 = validateParameter(valid_575215, JString, required = true,
+  if valid_564314 != nil:
+    section.add "resourceGroupName", valid_564314
+  var valid_564315 = path.getOrDefault("workspaceName")
+  valid_564315 = validateParameter(valid_564315, JString, required = true,
                                  default = nil)
-  if valid_575215 != nil:
-    section.add "workspaceName", valid_575215
+  if valid_564315 != nil:
+    section.add "workspaceName", valid_564315
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1931,11 +1935,11 @@ proc validate_ExperimentsCreate_575210(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575216 = query.getOrDefault("api-version")
-  valid_575216 = validateParameter(valid_575216, JString, required = true,
+  var valid_564316 = query.getOrDefault("api-version")
+  valid_564316 = validateParameter(valid_564316, JString, required = true,
                                  default = nil)
-  if valid_575216 != nil:
-    section.add "api-version", valid_575216
+  if valid_564316 != nil:
+    section.add "api-version", valid_564316
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1944,50 +1948,50 @@ proc validate_ExperimentsCreate_575210(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_575217: Call_ExperimentsCreate_575209; path: JsonNode;
+proc call*(call_564317: Call_ExperimentsCreate_564309; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Creates an Experiment.
   ## 
-  let valid = call_575217.validator(path, query, header, formData, body)
-  let scheme = call_575217.pickScheme
+  let valid = call_564317.validator(path, query, header, formData, body)
+  let scheme = call_564317.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575217.url(scheme.get, call_575217.host, call_575217.base,
-                         call_575217.route, valid.getOrDefault("path"),
+  let url = call_564317.url(scheme.get, call_564317.host, call_564317.base,
+                         call_564317.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575217, url, valid)
+  result = hook(call_564317, url, valid)
 
-proc call*(call_575218: Call_ExperimentsCreate_575209; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; experimentName: string;
+proc call*(call_564318: Call_ExperimentsCreate_564309; apiVersion: string;
+          subscriptionId: string; experimentName: string; resourceGroupName: string;
           workspaceName: string): Recallable =
   ## experimentsCreate
   ## Creates an Experiment.
-  ##   resourceGroupName: string (required)
-  ##                    : Name of the resource group to which the resource belongs.
   ##   apiVersion: string (required)
   ##             : Specifies the version of API used for this request.
   ##   subscriptionId: string (required)
   ##                 : The subscriptionID for the Azure user.
   ##   experimentName: string (required)
   ##                 : The name of the experiment. Experiment names can only contain a combination of alphanumeric characters along with dash (-) and underscore (_). The name must be from 1 through 64 characters long.
+  ##   resourceGroupName: string (required)
+  ##                    : Name of the resource group to which the resource belongs.
   ##   workspaceName: string (required)
   ##                : The name of the workspace. Workspace names can only contain a combination of alphanumeric characters along with dash (-) and underscore (_). The name must be from 1 through 64 characters long.
-  var path_575219 = newJObject()
-  var query_575220 = newJObject()
-  add(path_575219, "resourceGroupName", newJString(resourceGroupName))
-  add(query_575220, "api-version", newJString(apiVersion))
-  add(path_575219, "subscriptionId", newJString(subscriptionId))
-  add(path_575219, "experimentName", newJString(experimentName))
-  add(path_575219, "workspaceName", newJString(workspaceName))
-  result = call_575218.call(path_575219, query_575220, nil, nil, nil)
+  var path_564319 = newJObject()
+  var query_564320 = newJObject()
+  add(query_564320, "api-version", newJString(apiVersion))
+  add(path_564319, "subscriptionId", newJString(subscriptionId))
+  add(path_564319, "experimentName", newJString(experimentName))
+  add(path_564319, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564319, "workspaceName", newJString(workspaceName))
+  result = call_564318.call(path_564319, query_564320, nil, nil, nil)
 
-var experimentsCreate* = Call_ExperimentsCreate_575209(name: "experimentsCreate",
+var experimentsCreate* = Call_ExperimentsCreate_564309(name: "experimentsCreate",
     meth: HttpMethod.HttpPut, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.BatchAI/workspaces/{workspaceName}/experiments/{experimentName}",
-    validator: validate_ExperimentsCreate_575210, base: "",
-    url: url_ExperimentsCreate_575211, schemes: {Scheme.Https})
+    validator: validate_ExperimentsCreate_564310, base: "",
+    url: url_ExperimentsCreate_564311, schemes: {Scheme.Https})
 type
-  Call_ExperimentsGet_575197 = ref object of OpenApiRestCall_574467
-proc url_ExperimentsGet_575199(protocol: Scheme; host: string; base: string;
+  Call_ExperimentsGet_564297 = ref object of OpenApiRestCall_563565
+proc url_ExperimentsGet_564299(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2012,7 +2016,7 @@ proc url_ExperimentsGet_575199(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ExperimentsGet_575198(path: JsonNode; query: JsonNode;
+proc validate_ExperimentsGet_564298(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## Gets information about an Experiment.
@@ -2020,37 +2024,37 @@ proc validate_ExperimentsGet_575198(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : Name of the resource group to which the resource belongs.
   ##   subscriptionId: JString (required)
   ##                 : The subscriptionID for the Azure user.
   ##   experimentName: JString (required)
   ##                 : The name of the experiment. Experiment names can only contain a combination of alphanumeric characters along with dash (-) and underscore (_). The name must be from 1 through 64 characters long.
+  ##   resourceGroupName: JString (required)
+  ##                    : Name of the resource group to which the resource belongs.
   ##   workspaceName: JString (required)
   ##                : The name of the workspace. Workspace names can only contain a combination of alphanumeric characters along with dash (-) and underscore (_). The name must be from 1 through 64 characters long.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_575200 = path.getOrDefault("resourceGroupName")
-  valid_575200 = validateParameter(valid_575200, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564300 = path.getOrDefault("subscriptionId")
+  valid_564300 = validateParameter(valid_564300, JString, required = true,
                                  default = nil)
-  if valid_575200 != nil:
-    section.add "resourceGroupName", valid_575200
-  var valid_575201 = path.getOrDefault("subscriptionId")
-  valid_575201 = validateParameter(valid_575201, JString, required = true,
+  if valid_564300 != nil:
+    section.add "subscriptionId", valid_564300
+  var valid_564301 = path.getOrDefault("experimentName")
+  valid_564301 = validateParameter(valid_564301, JString, required = true,
                                  default = nil)
-  if valid_575201 != nil:
-    section.add "subscriptionId", valid_575201
-  var valid_575202 = path.getOrDefault("experimentName")
-  valid_575202 = validateParameter(valid_575202, JString, required = true,
+  if valid_564301 != nil:
+    section.add "experimentName", valid_564301
+  var valid_564302 = path.getOrDefault("resourceGroupName")
+  valid_564302 = validateParameter(valid_564302, JString, required = true,
                                  default = nil)
-  if valid_575202 != nil:
-    section.add "experimentName", valid_575202
-  var valid_575203 = path.getOrDefault("workspaceName")
-  valid_575203 = validateParameter(valid_575203, JString, required = true,
+  if valid_564302 != nil:
+    section.add "resourceGroupName", valid_564302
+  var valid_564303 = path.getOrDefault("workspaceName")
+  valid_564303 = validateParameter(valid_564303, JString, required = true,
                                  default = nil)
-  if valid_575203 != nil:
-    section.add "workspaceName", valid_575203
+  if valid_564303 != nil:
+    section.add "workspaceName", valid_564303
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2058,11 +2062,11 @@ proc validate_ExperimentsGet_575198(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575204 = query.getOrDefault("api-version")
-  valid_575204 = validateParameter(valid_575204, JString, required = true,
+  var valid_564304 = query.getOrDefault("api-version")
+  valid_564304 = validateParameter(valid_564304, JString, required = true,
                                  default = nil)
-  if valid_575204 != nil:
-    section.add "api-version", valid_575204
+  if valid_564304 != nil:
+    section.add "api-version", valid_564304
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2071,50 +2075,50 @@ proc validate_ExperimentsGet_575198(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_575205: Call_ExperimentsGet_575197; path: JsonNode; query: JsonNode;
+proc call*(call_564305: Call_ExperimentsGet_564297; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets information about an Experiment.
   ## 
-  let valid = call_575205.validator(path, query, header, formData, body)
-  let scheme = call_575205.pickScheme
+  let valid = call_564305.validator(path, query, header, formData, body)
+  let scheme = call_564305.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575205.url(scheme.get, call_575205.host, call_575205.base,
-                         call_575205.route, valid.getOrDefault("path"),
+  let url = call_564305.url(scheme.get, call_564305.host, call_564305.base,
+                         call_564305.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575205, url, valid)
+  result = hook(call_564305, url, valid)
 
-proc call*(call_575206: Call_ExperimentsGet_575197; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; experimentName: string;
+proc call*(call_564306: Call_ExperimentsGet_564297; apiVersion: string;
+          subscriptionId: string; experimentName: string; resourceGroupName: string;
           workspaceName: string): Recallable =
   ## experimentsGet
   ## Gets information about an Experiment.
-  ##   resourceGroupName: string (required)
-  ##                    : Name of the resource group to which the resource belongs.
   ##   apiVersion: string (required)
   ##             : Specifies the version of API used for this request.
   ##   subscriptionId: string (required)
   ##                 : The subscriptionID for the Azure user.
   ##   experimentName: string (required)
   ##                 : The name of the experiment. Experiment names can only contain a combination of alphanumeric characters along with dash (-) and underscore (_). The name must be from 1 through 64 characters long.
+  ##   resourceGroupName: string (required)
+  ##                    : Name of the resource group to which the resource belongs.
   ##   workspaceName: string (required)
   ##                : The name of the workspace. Workspace names can only contain a combination of alphanumeric characters along with dash (-) and underscore (_). The name must be from 1 through 64 characters long.
-  var path_575207 = newJObject()
-  var query_575208 = newJObject()
-  add(path_575207, "resourceGroupName", newJString(resourceGroupName))
-  add(query_575208, "api-version", newJString(apiVersion))
-  add(path_575207, "subscriptionId", newJString(subscriptionId))
-  add(path_575207, "experimentName", newJString(experimentName))
-  add(path_575207, "workspaceName", newJString(workspaceName))
-  result = call_575206.call(path_575207, query_575208, nil, nil, nil)
+  var path_564307 = newJObject()
+  var query_564308 = newJObject()
+  add(query_564308, "api-version", newJString(apiVersion))
+  add(path_564307, "subscriptionId", newJString(subscriptionId))
+  add(path_564307, "experimentName", newJString(experimentName))
+  add(path_564307, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564307, "workspaceName", newJString(workspaceName))
+  result = call_564306.call(path_564307, query_564308, nil, nil, nil)
 
-var experimentsGet* = Call_ExperimentsGet_575197(name: "experimentsGet",
+var experimentsGet* = Call_ExperimentsGet_564297(name: "experimentsGet",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.BatchAI/workspaces/{workspaceName}/experiments/{experimentName}",
-    validator: validate_ExperimentsGet_575198, base: "", url: url_ExperimentsGet_575199,
+    validator: validate_ExperimentsGet_564298, base: "", url: url_ExperimentsGet_564299,
     schemes: {Scheme.Https})
 type
-  Call_ExperimentsDelete_575221 = ref object of OpenApiRestCall_574467
-proc url_ExperimentsDelete_575223(protocol: Scheme; host: string; base: string;
+  Call_ExperimentsDelete_564321 = ref object of OpenApiRestCall_563565
+proc url_ExperimentsDelete_564323(protocol: Scheme; host: string; base: string;
                                  route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2139,7 +2143,7 @@ proc url_ExperimentsDelete_575223(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ExperimentsDelete_575222(path: JsonNode; query: JsonNode;
+proc validate_ExperimentsDelete_564322(path: JsonNode; query: JsonNode;
                                       header: JsonNode; formData: JsonNode;
                                       body: JsonNode): JsonNode =
   ## Deletes an Experiment.
@@ -2147,37 +2151,37 @@ proc validate_ExperimentsDelete_575222(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : Name of the resource group to which the resource belongs.
   ##   subscriptionId: JString (required)
   ##                 : The subscriptionID for the Azure user.
   ##   experimentName: JString (required)
   ##                 : The name of the experiment. Experiment names can only contain a combination of alphanumeric characters along with dash (-) and underscore (_). The name must be from 1 through 64 characters long.
+  ##   resourceGroupName: JString (required)
+  ##                    : Name of the resource group to which the resource belongs.
   ##   workspaceName: JString (required)
   ##                : The name of the workspace. Workspace names can only contain a combination of alphanumeric characters along with dash (-) and underscore (_). The name must be from 1 through 64 characters long.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_575224 = path.getOrDefault("resourceGroupName")
-  valid_575224 = validateParameter(valid_575224, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564324 = path.getOrDefault("subscriptionId")
+  valid_564324 = validateParameter(valid_564324, JString, required = true,
                                  default = nil)
-  if valid_575224 != nil:
-    section.add "resourceGroupName", valid_575224
-  var valid_575225 = path.getOrDefault("subscriptionId")
-  valid_575225 = validateParameter(valid_575225, JString, required = true,
+  if valid_564324 != nil:
+    section.add "subscriptionId", valid_564324
+  var valid_564325 = path.getOrDefault("experimentName")
+  valid_564325 = validateParameter(valid_564325, JString, required = true,
                                  default = nil)
-  if valid_575225 != nil:
-    section.add "subscriptionId", valid_575225
-  var valid_575226 = path.getOrDefault("experimentName")
-  valid_575226 = validateParameter(valid_575226, JString, required = true,
+  if valid_564325 != nil:
+    section.add "experimentName", valid_564325
+  var valid_564326 = path.getOrDefault("resourceGroupName")
+  valid_564326 = validateParameter(valid_564326, JString, required = true,
                                  default = nil)
-  if valid_575226 != nil:
-    section.add "experimentName", valid_575226
-  var valid_575227 = path.getOrDefault("workspaceName")
-  valid_575227 = validateParameter(valid_575227, JString, required = true,
+  if valid_564326 != nil:
+    section.add "resourceGroupName", valid_564326
+  var valid_564327 = path.getOrDefault("workspaceName")
+  valid_564327 = validateParameter(valid_564327, JString, required = true,
                                  default = nil)
-  if valid_575227 != nil:
-    section.add "workspaceName", valid_575227
+  if valid_564327 != nil:
+    section.add "workspaceName", valid_564327
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2185,11 +2189,11 @@ proc validate_ExperimentsDelete_575222(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575228 = query.getOrDefault("api-version")
-  valid_575228 = validateParameter(valid_575228, JString, required = true,
+  var valid_564328 = query.getOrDefault("api-version")
+  valid_564328 = validateParameter(valid_564328, JString, required = true,
                                  default = nil)
-  if valid_575228 != nil:
-    section.add "api-version", valid_575228
+  if valid_564328 != nil:
+    section.add "api-version", valid_564328
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2198,50 +2202,50 @@ proc validate_ExperimentsDelete_575222(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_575229: Call_ExperimentsDelete_575221; path: JsonNode;
+proc call*(call_564329: Call_ExperimentsDelete_564321; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes an Experiment.
   ## 
-  let valid = call_575229.validator(path, query, header, formData, body)
-  let scheme = call_575229.pickScheme
+  let valid = call_564329.validator(path, query, header, formData, body)
+  let scheme = call_564329.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575229.url(scheme.get, call_575229.host, call_575229.base,
-                         call_575229.route, valid.getOrDefault("path"),
+  let url = call_564329.url(scheme.get, call_564329.host, call_564329.base,
+                         call_564329.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575229, url, valid)
+  result = hook(call_564329, url, valid)
 
-proc call*(call_575230: Call_ExperimentsDelete_575221; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; experimentName: string;
+proc call*(call_564330: Call_ExperimentsDelete_564321; apiVersion: string;
+          subscriptionId: string; experimentName: string; resourceGroupName: string;
           workspaceName: string): Recallable =
   ## experimentsDelete
   ## Deletes an Experiment.
-  ##   resourceGroupName: string (required)
-  ##                    : Name of the resource group to which the resource belongs.
   ##   apiVersion: string (required)
   ##             : Specifies the version of API used for this request.
   ##   subscriptionId: string (required)
   ##                 : The subscriptionID for the Azure user.
   ##   experimentName: string (required)
   ##                 : The name of the experiment. Experiment names can only contain a combination of alphanumeric characters along with dash (-) and underscore (_). The name must be from 1 through 64 characters long.
+  ##   resourceGroupName: string (required)
+  ##                    : Name of the resource group to which the resource belongs.
   ##   workspaceName: string (required)
   ##                : The name of the workspace. Workspace names can only contain a combination of alphanumeric characters along with dash (-) and underscore (_). The name must be from 1 through 64 characters long.
-  var path_575231 = newJObject()
-  var query_575232 = newJObject()
-  add(path_575231, "resourceGroupName", newJString(resourceGroupName))
-  add(query_575232, "api-version", newJString(apiVersion))
-  add(path_575231, "subscriptionId", newJString(subscriptionId))
-  add(path_575231, "experimentName", newJString(experimentName))
-  add(path_575231, "workspaceName", newJString(workspaceName))
-  result = call_575230.call(path_575231, query_575232, nil, nil, nil)
+  var path_564331 = newJObject()
+  var query_564332 = newJObject()
+  add(query_564332, "api-version", newJString(apiVersion))
+  add(path_564331, "subscriptionId", newJString(subscriptionId))
+  add(path_564331, "experimentName", newJString(experimentName))
+  add(path_564331, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564331, "workspaceName", newJString(workspaceName))
+  result = call_564330.call(path_564331, query_564332, nil, nil, nil)
 
-var experimentsDelete* = Call_ExperimentsDelete_575221(name: "experimentsDelete",
+var experimentsDelete* = Call_ExperimentsDelete_564321(name: "experimentsDelete",
     meth: HttpMethod.HttpDelete, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.BatchAI/workspaces/{workspaceName}/experiments/{experimentName}",
-    validator: validate_ExperimentsDelete_575222, base: "",
-    url: url_ExperimentsDelete_575223, schemes: {Scheme.Https})
+    validator: validate_ExperimentsDelete_564322, base: "",
+    url: url_ExperimentsDelete_564323, schemes: {Scheme.Https})
 type
-  Call_JobsListByExperiment_575233 = ref object of OpenApiRestCall_574467
-proc url_JobsListByExperiment_575235(protocol: Scheme; host: string; base: string;
+  Call_JobsListByExperiment_564333 = ref object of OpenApiRestCall_563565
+proc url_JobsListByExperiment_564335(protocol: Scheme; host: string; base: string;
                                     route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2267,44 +2271,44 @@ proc url_JobsListByExperiment_575235(protocol: Scheme; host: string; base: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_JobsListByExperiment_575234(path: JsonNode; query: JsonNode;
+proc validate_JobsListByExperiment_564334(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets a list of Jobs within the specified Experiment.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : Name of the resource group to which the resource belongs.
   ##   subscriptionId: JString (required)
   ##                 : The subscriptionID for the Azure user.
   ##   experimentName: JString (required)
   ##                 : The name of the experiment. Experiment names can only contain a combination of alphanumeric characters along with dash (-) and underscore (_). The name must be from 1 through 64 characters long.
+  ##   resourceGroupName: JString (required)
+  ##                    : Name of the resource group to which the resource belongs.
   ##   workspaceName: JString (required)
   ##                : The name of the workspace. Workspace names can only contain a combination of alphanumeric characters along with dash (-) and underscore (_). The name must be from 1 through 64 characters long.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_575236 = path.getOrDefault("resourceGroupName")
-  valid_575236 = validateParameter(valid_575236, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564336 = path.getOrDefault("subscriptionId")
+  valid_564336 = validateParameter(valid_564336, JString, required = true,
                                  default = nil)
-  if valid_575236 != nil:
-    section.add "resourceGroupName", valid_575236
-  var valid_575237 = path.getOrDefault("subscriptionId")
-  valid_575237 = validateParameter(valid_575237, JString, required = true,
+  if valid_564336 != nil:
+    section.add "subscriptionId", valid_564336
+  var valid_564337 = path.getOrDefault("experimentName")
+  valid_564337 = validateParameter(valid_564337, JString, required = true,
                                  default = nil)
-  if valid_575237 != nil:
-    section.add "subscriptionId", valid_575237
-  var valid_575238 = path.getOrDefault("experimentName")
-  valid_575238 = validateParameter(valid_575238, JString, required = true,
+  if valid_564337 != nil:
+    section.add "experimentName", valid_564337
+  var valid_564338 = path.getOrDefault("resourceGroupName")
+  valid_564338 = validateParameter(valid_564338, JString, required = true,
                                  default = nil)
-  if valid_575238 != nil:
-    section.add "experimentName", valid_575238
-  var valid_575239 = path.getOrDefault("workspaceName")
-  valid_575239 = validateParameter(valid_575239, JString, required = true,
+  if valid_564338 != nil:
+    section.add "resourceGroupName", valid_564338
+  var valid_564339 = path.getOrDefault("workspaceName")
+  valid_564339 = validateParameter(valid_564339, JString, required = true,
                                  default = nil)
-  if valid_575239 != nil:
-    section.add "workspaceName", valid_575239
+  if valid_564339 != nil:
+    section.add "workspaceName", valid_564339
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2314,16 +2318,16 @@ proc validate_JobsListByExperiment_575234(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575240 = query.getOrDefault("api-version")
-  valid_575240 = validateParameter(valid_575240, JString, required = true,
+  var valid_564340 = query.getOrDefault("api-version")
+  valid_564340 = validateParameter(valid_564340, JString, required = true,
                                  default = nil)
-  if valid_575240 != nil:
-    section.add "api-version", valid_575240
-  var valid_575241 = query.getOrDefault("maxresults")
-  valid_575241 = validateParameter(valid_575241, JInt, required = false,
+  if valid_564340 != nil:
+    section.add "api-version", valid_564340
+  var valid_564341 = query.getOrDefault("maxresults")
+  valid_564341 = validateParameter(valid_564341, JInt, required = false,
                                  default = newJInt(1000))
-  if valid_575241 != nil:
-    section.add "maxresults", valid_575241
+  if valid_564341 != nil:
+    section.add "maxresults", valid_564341
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2332,54 +2336,54 @@ proc validate_JobsListByExperiment_575234(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_575242: Call_JobsListByExperiment_575233; path: JsonNode;
+proc call*(call_564342: Call_JobsListByExperiment_564333; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets a list of Jobs within the specified Experiment.
   ## 
-  let valid = call_575242.validator(path, query, header, formData, body)
-  let scheme = call_575242.pickScheme
+  let valid = call_564342.validator(path, query, header, formData, body)
+  let scheme = call_564342.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575242.url(scheme.get, call_575242.host, call_575242.base,
-                         call_575242.route, valid.getOrDefault("path"),
+  let url = call_564342.url(scheme.get, call_564342.host, call_564342.base,
+                         call_564342.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575242, url, valid)
+  result = hook(call_564342, url, valid)
 
-proc call*(call_575243: Call_JobsListByExperiment_575233;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          experimentName: string; workspaceName: string; maxresults: int = 1000): Recallable =
+proc call*(call_564343: Call_JobsListByExperiment_564333; apiVersion: string;
+          subscriptionId: string; experimentName: string; resourceGroupName: string;
+          workspaceName: string; maxresults: int = 1000): Recallable =
   ## jobsListByExperiment
   ## Gets a list of Jobs within the specified Experiment.
-  ##   resourceGroupName: string (required)
-  ##                    : Name of the resource group to which the resource belongs.
   ##   apiVersion: string (required)
   ##             : Specifies the version of API used for this request.
   ##   subscriptionId: string (required)
   ##                 : The subscriptionID for the Azure user.
-  ##   maxresults: int
-  ##             : The maximum number of items to return in the response. A maximum of 1000 files can be returned.
   ##   experimentName: string (required)
   ##                 : The name of the experiment. Experiment names can only contain a combination of alphanumeric characters along with dash (-) and underscore (_). The name must be from 1 through 64 characters long.
+  ##   maxresults: int
+  ##             : The maximum number of items to return in the response. A maximum of 1000 files can be returned.
+  ##   resourceGroupName: string (required)
+  ##                    : Name of the resource group to which the resource belongs.
   ##   workspaceName: string (required)
   ##                : The name of the workspace. Workspace names can only contain a combination of alphanumeric characters along with dash (-) and underscore (_). The name must be from 1 through 64 characters long.
-  var path_575244 = newJObject()
-  var query_575245 = newJObject()
-  add(path_575244, "resourceGroupName", newJString(resourceGroupName))
-  add(query_575245, "api-version", newJString(apiVersion))
-  add(path_575244, "subscriptionId", newJString(subscriptionId))
-  add(query_575245, "maxresults", newJInt(maxresults))
-  add(path_575244, "experimentName", newJString(experimentName))
-  add(path_575244, "workspaceName", newJString(workspaceName))
-  result = call_575243.call(path_575244, query_575245, nil, nil, nil)
+  var path_564344 = newJObject()
+  var query_564345 = newJObject()
+  add(query_564345, "api-version", newJString(apiVersion))
+  add(path_564344, "subscriptionId", newJString(subscriptionId))
+  add(path_564344, "experimentName", newJString(experimentName))
+  add(query_564345, "maxresults", newJInt(maxresults))
+  add(path_564344, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564344, "workspaceName", newJString(workspaceName))
+  result = call_564343.call(path_564344, query_564345, nil, nil, nil)
 
-var jobsListByExperiment* = Call_JobsListByExperiment_575233(
+var jobsListByExperiment* = Call_JobsListByExperiment_564333(
     name: "jobsListByExperiment", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.BatchAI/workspaces/{workspaceName}/experiments/{experimentName}/jobs",
-    validator: validate_JobsListByExperiment_575234, base: "",
-    url: url_JobsListByExperiment_575235, schemes: {Scheme.Https})
+    validator: validate_JobsListByExperiment_564334, base: "",
+    url: url_JobsListByExperiment_564335, schemes: {Scheme.Https})
 type
-  Call_JobsCreate_575259 = ref object of OpenApiRestCall_574467
-proc url_JobsCreate_575261(protocol: Scheme; host: string; base: string; route: string;
+  Call_JobsCreate_564359 = ref object of OpenApiRestCall_563565
+proc url_JobsCreate_564361(protocol: Scheme; host: string; base: string; route: string;
                           path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2407,51 +2411,51 @@ proc url_JobsCreate_575261(protocol: Scheme; host: string; base: string; route: 
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_JobsCreate_575260(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_JobsCreate_564360(path: JsonNode; query: JsonNode; header: JsonNode;
                                formData: JsonNode; body: JsonNode): JsonNode =
   ## Creates a Job in the given Experiment.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : Name of the resource group to which the resource belongs.
   ##   subscriptionId: JString (required)
   ##                 : The subscriptionID for the Azure user.
-  ##   jobName: JString (required)
-  ##          : The name of the job within the specified resource group. Job names can only contain a combination of alphanumeric characters along with dash (-) and underscore (_). The name must be from 1 through 64 characters long.
   ##   experimentName: JString (required)
   ##                 : The name of the experiment. Experiment names can only contain a combination of alphanumeric characters along with dash (-) and underscore (_). The name must be from 1 through 64 characters long.
+  ##   resourceGroupName: JString (required)
+  ##                    : Name of the resource group to which the resource belongs.
   ##   workspaceName: JString (required)
   ##                : The name of the workspace. Workspace names can only contain a combination of alphanumeric characters along with dash (-) and underscore (_). The name must be from 1 through 64 characters long.
+  ##   jobName: JString (required)
+  ##          : The name of the job within the specified resource group. Job names can only contain a combination of alphanumeric characters along with dash (-) and underscore (_). The name must be from 1 through 64 characters long.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_575262 = path.getOrDefault("resourceGroupName")
-  valid_575262 = validateParameter(valid_575262, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564362 = path.getOrDefault("subscriptionId")
+  valid_564362 = validateParameter(valid_564362, JString, required = true,
                                  default = nil)
-  if valid_575262 != nil:
-    section.add "resourceGroupName", valid_575262
-  var valid_575263 = path.getOrDefault("subscriptionId")
-  valid_575263 = validateParameter(valid_575263, JString, required = true,
+  if valid_564362 != nil:
+    section.add "subscriptionId", valid_564362
+  var valid_564363 = path.getOrDefault("experimentName")
+  valid_564363 = validateParameter(valid_564363, JString, required = true,
                                  default = nil)
-  if valid_575263 != nil:
-    section.add "subscriptionId", valid_575263
-  var valid_575264 = path.getOrDefault("jobName")
-  valid_575264 = validateParameter(valid_575264, JString, required = true,
+  if valid_564363 != nil:
+    section.add "experimentName", valid_564363
+  var valid_564364 = path.getOrDefault("resourceGroupName")
+  valid_564364 = validateParameter(valid_564364, JString, required = true,
                                  default = nil)
-  if valid_575264 != nil:
-    section.add "jobName", valid_575264
-  var valid_575265 = path.getOrDefault("experimentName")
-  valid_575265 = validateParameter(valid_575265, JString, required = true,
+  if valid_564364 != nil:
+    section.add "resourceGroupName", valid_564364
+  var valid_564365 = path.getOrDefault("workspaceName")
+  valid_564365 = validateParameter(valid_564365, JString, required = true,
                                  default = nil)
-  if valid_575265 != nil:
-    section.add "experimentName", valid_575265
-  var valid_575266 = path.getOrDefault("workspaceName")
-  valid_575266 = validateParameter(valid_575266, JString, required = true,
+  if valid_564365 != nil:
+    section.add "workspaceName", valid_564365
+  var valid_564366 = path.getOrDefault("jobName")
+  valid_564366 = validateParameter(valid_564366, JString, required = true,
                                  default = nil)
-  if valid_575266 != nil:
-    section.add "workspaceName", valid_575266
+  if valid_564366 != nil:
+    section.add "jobName", valid_564366
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2459,11 +2463,11 @@ proc validate_JobsCreate_575260(path: JsonNode; query: JsonNode; header: JsonNod
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575267 = query.getOrDefault("api-version")
-  valid_575267 = validateParameter(valid_575267, JString, required = true,
+  var valid_564367 = query.getOrDefault("api-version")
+  valid_564367 = validateParameter(valid_564367, JString, required = true,
                                  default = nil)
-  if valid_575267 != nil:
-    section.add "api-version", valid_575267
+  if valid_564367 != nil:
+    section.add "api-version", valid_564367
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2477,60 +2481,60 @@ proc validate_JobsCreate_575260(path: JsonNode; query: JsonNode; header: JsonNod
   if body != nil:
     result.add "body", body
 
-proc call*(call_575269: Call_JobsCreate_575259; path: JsonNode; query: JsonNode;
+proc call*(call_564369: Call_JobsCreate_564359; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Creates a Job in the given Experiment.
   ## 
-  let valid = call_575269.validator(path, query, header, formData, body)
-  let scheme = call_575269.pickScheme
+  let valid = call_564369.validator(path, query, header, formData, body)
+  let scheme = call_564369.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575269.url(scheme.get, call_575269.host, call_575269.base,
-                         call_575269.route, valid.getOrDefault("path"),
+  let url = call_564369.url(scheme.get, call_564369.host, call_564369.base,
+                         call_564369.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575269, url, valid)
+  result = hook(call_564369, url, valid)
 
-proc call*(call_575270: Call_JobsCreate_575259; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; jobName: string;
-          parameters: JsonNode; experimentName: string; workspaceName: string): Recallable =
+proc call*(call_564370: Call_JobsCreate_564359; apiVersion: string;
+          subscriptionId: string; experimentName: string; resourceGroupName: string;
+          workspaceName: string; parameters: JsonNode; jobName: string): Recallable =
   ## jobsCreate
   ## Creates a Job in the given Experiment.
-  ##   resourceGroupName: string (required)
-  ##                    : Name of the resource group to which the resource belongs.
   ##   apiVersion: string (required)
   ##             : Specifies the version of API used for this request.
   ##   subscriptionId: string (required)
   ##                 : The subscriptionID for the Azure user.
-  ##   jobName: string (required)
-  ##          : The name of the job within the specified resource group. Job names can only contain a combination of alphanumeric characters along with dash (-) and underscore (_). The name must be from 1 through 64 characters long.
-  ##   parameters: JObject (required)
-  ##             : The parameters to provide for job creation.
   ##   experimentName: string (required)
   ##                 : The name of the experiment. Experiment names can only contain a combination of alphanumeric characters along with dash (-) and underscore (_). The name must be from 1 through 64 characters long.
+  ##   resourceGroupName: string (required)
+  ##                    : Name of the resource group to which the resource belongs.
   ##   workspaceName: string (required)
   ##                : The name of the workspace. Workspace names can only contain a combination of alphanumeric characters along with dash (-) and underscore (_). The name must be from 1 through 64 characters long.
-  var path_575271 = newJObject()
-  var query_575272 = newJObject()
-  var body_575273 = newJObject()
-  add(path_575271, "resourceGroupName", newJString(resourceGroupName))
-  add(query_575272, "api-version", newJString(apiVersion))
-  add(path_575271, "subscriptionId", newJString(subscriptionId))
-  add(path_575271, "jobName", newJString(jobName))
+  ##   parameters: JObject (required)
+  ##             : The parameters to provide for job creation.
+  ##   jobName: string (required)
+  ##          : The name of the job within the specified resource group. Job names can only contain a combination of alphanumeric characters along with dash (-) and underscore (_). The name must be from 1 through 64 characters long.
+  var path_564371 = newJObject()
+  var query_564372 = newJObject()
+  var body_564373 = newJObject()
+  add(query_564372, "api-version", newJString(apiVersion))
+  add(path_564371, "subscriptionId", newJString(subscriptionId))
+  add(path_564371, "experimentName", newJString(experimentName))
+  add(path_564371, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564371, "workspaceName", newJString(workspaceName))
   if parameters != nil:
-    body_575273 = parameters
-  add(path_575271, "experimentName", newJString(experimentName))
-  add(path_575271, "workspaceName", newJString(workspaceName))
-  result = call_575270.call(path_575271, query_575272, nil, nil, body_575273)
+    body_564373 = parameters
+  add(path_564371, "jobName", newJString(jobName))
+  result = call_564370.call(path_564371, query_564372, nil, nil, body_564373)
 
-var jobsCreate* = Call_JobsCreate_575259(name: "jobsCreate",
+var jobsCreate* = Call_JobsCreate_564359(name: "jobsCreate",
                                       meth: HttpMethod.HttpPut,
                                       host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.BatchAI/workspaces/{workspaceName}/experiments/{experimentName}/jobs/{jobName}",
-                                      validator: validate_JobsCreate_575260,
-                                      base: "", url: url_JobsCreate_575261,
+                                      validator: validate_JobsCreate_564360,
+                                      base: "", url: url_JobsCreate_564361,
                                       schemes: {Scheme.Https})
 type
-  Call_JobsGet_575246 = ref object of OpenApiRestCall_574467
-proc url_JobsGet_575248(protocol: Scheme; host: string; base: string; route: string;
+  Call_JobsGet_564346 = ref object of OpenApiRestCall_563565
+proc url_JobsGet_564348(protocol: Scheme; host: string; base: string; route: string;
                        path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2558,51 +2562,51 @@ proc url_JobsGet_575248(protocol: Scheme; host: string; base: string; route: str
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_JobsGet_575247(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_JobsGet_564347(path: JsonNode; query: JsonNode; header: JsonNode;
                             formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets information about a Job.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : Name of the resource group to which the resource belongs.
   ##   subscriptionId: JString (required)
   ##                 : The subscriptionID for the Azure user.
-  ##   jobName: JString (required)
-  ##          : The name of the job within the specified resource group. Job names can only contain a combination of alphanumeric characters along with dash (-) and underscore (_). The name must be from 1 through 64 characters long.
   ##   experimentName: JString (required)
   ##                 : The name of the experiment. Experiment names can only contain a combination of alphanumeric characters along with dash (-) and underscore (_). The name must be from 1 through 64 characters long.
+  ##   resourceGroupName: JString (required)
+  ##                    : Name of the resource group to which the resource belongs.
   ##   workspaceName: JString (required)
   ##                : The name of the workspace. Workspace names can only contain a combination of alphanumeric characters along with dash (-) and underscore (_). The name must be from 1 through 64 characters long.
+  ##   jobName: JString (required)
+  ##          : The name of the job within the specified resource group. Job names can only contain a combination of alphanumeric characters along with dash (-) and underscore (_). The name must be from 1 through 64 characters long.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_575249 = path.getOrDefault("resourceGroupName")
-  valid_575249 = validateParameter(valid_575249, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564349 = path.getOrDefault("subscriptionId")
+  valid_564349 = validateParameter(valid_564349, JString, required = true,
                                  default = nil)
-  if valid_575249 != nil:
-    section.add "resourceGroupName", valid_575249
-  var valid_575250 = path.getOrDefault("subscriptionId")
-  valid_575250 = validateParameter(valid_575250, JString, required = true,
+  if valid_564349 != nil:
+    section.add "subscriptionId", valid_564349
+  var valid_564350 = path.getOrDefault("experimentName")
+  valid_564350 = validateParameter(valid_564350, JString, required = true,
                                  default = nil)
-  if valid_575250 != nil:
-    section.add "subscriptionId", valid_575250
-  var valid_575251 = path.getOrDefault("jobName")
-  valid_575251 = validateParameter(valid_575251, JString, required = true,
+  if valid_564350 != nil:
+    section.add "experimentName", valid_564350
+  var valid_564351 = path.getOrDefault("resourceGroupName")
+  valid_564351 = validateParameter(valid_564351, JString, required = true,
                                  default = nil)
-  if valid_575251 != nil:
-    section.add "jobName", valid_575251
-  var valid_575252 = path.getOrDefault("experimentName")
-  valid_575252 = validateParameter(valid_575252, JString, required = true,
+  if valid_564351 != nil:
+    section.add "resourceGroupName", valid_564351
+  var valid_564352 = path.getOrDefault("workspaceName")
+  valid_564352 = validateParameter(valid_564352, JString, required = true,
                                  default = nil)
-  if valid_575252 != nil:
-    section.add "experimentName", valid_575252
-  var valid_575253 = path.getOrDefault("workspaceName")
-  valid_575253 = validateParameter(valid_575253, JString, required = true,
+  if valid_564352 != nil:
+    section.add "workspaceName", valid_564352
+  var valid_564353 = path.getOrDefault("jobName")
+  valid_564353 = validateParameter(valid_564353, JString, required = true,
                                  default = nil)
-  if valid_575253 != nil:
-    section.add "workspaceName", valid_575253
+  if valid_564353 != nil:
+    section.add "jobName", valid_564353
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2610,11 +2614,11 @@ proc validate_JobsGet_575247(path: JsonNode; query: JsonNode; header: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575254 = query.getOrDefault("api-version")
-  valid_575254 = validateParameter(valid_575254, JString, required = true,
+  var valid_564354 = query.getOrDefault("api-version")
+  valid_564354 = validateParameter(valid_564354, JString, required = true,
                                  default = nil)
-  if valid_575254 != nil:
-    section.add "api-version", valid_575254
+  if valid_564354 != nil:
+    section.add "api-version", valid_564354
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2623,53 +2627,53 @@ proc validate_JobsGet_575247(path: JsonNode; query: JsonNode; header: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_575255: Call_JobsGet_575246; path: JsonNode; query: JsonNode;
+proc call*(call_564355: Call_JobsGet_564346; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets information about a Job.
   ## 
-  let valid = call_575255.validator(path, query, header, formData, body)
-  let scheme = call_575255.pickScheme
+  let valid = call_564355.validator(path, query, header, formData, body)
+  let scheme = call_564355.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575255.url(scheme.get, call_575255.host, call_575255.base,
-                         call_575255.route, valid.getOrDefault("path"),
+  let url = call_564355.url(scheme.get, call_564355.host, call_564355.base,
+                         call_564355.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575255, url, valid)
+  result = hook(call_564355, url, valid)
 
-proc call*(call_575256: Call_JobsGet_575246; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; jobName: string;
-          experimentName: string; workspaceName: string): Recallable =
+proc call*(call_564356: Call_JobsGet_564346; apiVersion: string;
+          subscriptionId: string; experimentName: string; resourceGroupName: string;
+          workspaceName: string; jobName: string): Recallable =
   ## jobsGet
   ## Gets information about a Job.
-  ##   resourceGroupName: string (required)
-  ##                    : Name of the resource group to which the resource belongs.
   ##   apiVersion: string (required)
   ##             : Specifies the version of API used for this request.
   ##   subscriptionId: string (required)
   ##                 : The subscriptionID for the Azure user.
-  ##   jobName: string (required)
-  ##          : The name of the job within the specified resource group. Job names can only contain a combination of alphanumeric characters along with dash (-) and underscore (_). The name must be from 1 through 64 characters long.
   ##   experimentName: string (required)
   ##                 : The name of the experiment. Experiment names can only contain a combination of alphanumeric characters along with dash (-) and underscore (_). The name must be from 1 through 64 characters long.
+  ##   resourceGroupName: string (required)
+  ##                    : Name of the resource group to which the resource belongs.
   ##   workspaceName: string (required)
   ##                : The name of the workspace. Workspace names can only contain a combination of alphanumeric characters along with dash (-) and underscore (_). The name must be from 1 through 64 characters long.
-  var path_575257 = newJObject()
-  var query_575258 = newJObject()
-  add(path_575257, "resourceGroupName", newJString(resourceGroupName))
-  add(query_575258, "api-version", newJString(apiVersion))
-  add(path_575257, "subscriptionId", newJString(subscriptionId))
-  add(path_575257, "jobName", newJString(jobName))
-  add(path_575257, "experimentName", newJString(experimentName))
-  add(path_575257, "workspaceName", newJString(workspaceName))
-  result = call_575256.call(path_575257, query_575258, nil, nil, nil)
+  ##   jobName: string (required)
+  ##          : The name of the job within the specified resource group. Job names can only contain a combination of alphanumeric characters along with dash (-) and underscore (_). The name must be from 1 through 64 characters long.
+  var path_564357 = newJObject()
+  var query_564358 = newJObject()
+  add(query_564358, "api-version", newJString(apiVersion))
+  add(path_564357, "subscriptionId", newJString(subscriptionId))
+  add(path_564357, "experimentName", newJString(experimentName))
+  add(path_564357, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564357, "workspaceName", newJString(workspaceName))
+  add(path_564357, "jobName", newJString(jobName))
+  result = call_564356.call(path_564357, query_564358, nil, nil, nil)
 
-var jobsGet* = Call_JobsGet_575246(name: "jobsGet", meth: HttpMethod.HttpGet,
+var jobsGet* = Call_JobsGet_564346(name: "jobsGet", meth: HttpMethod.HttpGet,
                                 host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.BatchAI/workspaces/{workspaceName}/experiments/{experimentName}/jobs/{jobName}",
-                                validator: validate_JobsGet_575247, base: "",
-                                url: url_JobsGet_575248, schemes: {Scheme.Https})
+                                validator: validate_JobsGet_564347, base: "",
+                                url: url_JobsGet_564348, schemes: {Scheme.Https})
 type
-  Call_JobsDelete_575274 = ref object of OpenApiRestCall_574467
-proc url_JobsDelete_575276(protocol: Scheme; host: string; base: string; route: string;
+  Call_JobsDelete_564374 = ref object of OpenApiRestCall_563565
+proc url_JobsDelete_564376(protocol: Scheme; host: string; base: string; route: string;
                           path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2697,51 +2701,51 @@ proc url_JobsDelete_575276(protocol: Scheme; host: string; base: string; route: 
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_JobsDelete_575275(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_JobsDelete_564375(path: JsonNode; query: JsonNode; header: JsonNode;
                                formData: JsonNode; body: JsonNode): JsonNode =
   ## Deletes a Job.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : Name of the resource group to which the resource belongs.
   ##   subscriptionId: JString (required)
   ##                 : The subscriptionID for the Azure user.
-  ##   jobName: JString (required)
-  ##          : The name of the job within the specified resource group. Job names can only contain a combination of alphanumeric characters along with dash (-) and underscore (_). The name must be from 1 through 64 characters long.
   ##   experimentName: JString (required)
   ##                 : The name of the experiment. Experiment names can only contain a combination of alphanumeric characters along with dash (-) and underscore (_). The name must be from 1 through 64 characters long.
+  ##   resourceGroupName: JString (required)
+  ##                    : Name of the resource group to which the resource belongs.
   ##   workspaceName: JString (required)
   ##                : The name of the workspace. Workspace names can only contain a combination of alphanumeric characters along with dash (-) and underscore (_). The name must be from 1 through 64 characters long.
+  ##   jobName: JString (required)
+  ##          : The name of the job within the specified resource group. Job names can only contain a combination of alphanumeric characters along with dash (-) and underscore (_). The name must be from 1 through 64 characters long.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_575277 = path.getOrDefault("resourceGroupName")
-  valid_575277 = validateParameter(valid_575277, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564377 = path.getOrDefault("subscriptionId")
+  valid_564377 = validateParameter(valid_564377, JString, required = true,
                                  default = nil)
-  if valid_575277 != nil:
-    section.add "resourceGroupName", valid_575277
-  var valid_575278 = path.getOrDefault("subscriptionId")
-  valid_575278 = validateParameter(valid_575278, JString, required = true,
+  if valid_564377 != nil:
+    section.add "subscriptionId", valid_564377
+  var valid_564378 = path.getOrDefault("experimentName")
+  valid_564378 = validateParameter(valid_564378, JString, required = true,
                                  default = nil)
-  if valid_575278 != nil:
-    section.add "subscriptionId", valid_575278
-  var valid_575279 = path.getOrDefault("jobName")
-  valid_575279 = validateParameter(valid_575279, JString, required = true,
+  if valid_564378 != nil:
+    section.add "experimentName", valid_564378
+  var valid_564379 = path.getOrDefault("resourceGroupName")
+  valid_564379 = validateParameter(valid_564379, JString, required = true,
                                  default = nil)
-  if valid_575279 != nil:
-    section.add "jobName", valid_575279
-  var valid_575280 = path.getOrDefault("experimentName")
-  valid_575280 = validateParameter(valid_575280, JString, required = true,
+  if valid_564379 != nil:
+    section.add "resourceGroupName", valid_564379
+  var valid_564380 = path.getOrDefault("workspaceName")
+  valid_564380 = validateParameter(valid_564380, JString, required = true,
                                  default = nil)
-  if valid_575280 != nil:
-    section.add "experimentName", valid_575280
-  var valid_575281 = path.getOrDefault("workspaceName")
-  valid_575281 = validateParameter(valid_575281, JString, required = true,
+  if valid_564380 != nil:
+    section.add "workspaceName", valid_564380
+  var valid_564381 = path.getOrDefault("jobName")
+  valid_564381 = validateParameter(valid_564381, JString, required = true,
                                  default = nil)
-  if valid_575281 != nil:
-    section.add "workspaceName", valid_575281
+  if valid_564381 != nil:
+    section.add "jobName", valid_564381
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2749,11 +2753,11 @@ proc validate_JobsDelete_575275(path: JsonNode; query: JsonNode; header: JsonNod
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575282 = query.getOrDefault("api-version")
-  valid_575282 = validateParameter(valid_575282, JString, required = true,
+  var valid_564382 = query.getOrDefault("api-version")
+  valid_564382 = validateParameter(valid_564382, JString, required = true,
                                  default = nil)
-  if valid_575282 != nil:
-    section.add "api-version", valid_575282
+  if valid_564382 != nil:
+    section.add "api-version", valid_564382
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2762,55 +2766,55 @@ proc validate_JobsDelete_575275(path: JsonNode; query: JsonNode; header: JsonNod
   if body != nil:
     result.add "body", body
 
-proc call*(call_575283: Call_JobsDelete_575274; path: JsonNode; query: JsonNode;
+proc call*(call_564383: Call_JobsDelete_564374; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes a Job.
   ## 
-  let valid = call_575283.validator(path, query, header, formData, body)
-  let scheme = call_575283.pickScheme
+  let valid = call_564383.validator(path, query, header, formData, body)
+  let scheme = call_564383.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575283.url(scheme.get, call_575283.host, call_575283.base,
-                         call_575283.route, valid.getOrDefault("path"),
+  let url = call_564383.url(scheme.get, call_564383.host, call_564383.base,
+                         call_564383.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575283, url, valid)
+  result = hook(call_564383, url, valid)
 
-proc call*(call_575284: Call_JobsDelete_575274; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; jobName: string;
-          experimentName: string; workspaceName: string): Recallable =
+proc call*(call_564384: Call_JobsDelete_564374; apiVersion: string;
+          subscriptionId: string; experimentName: string; resourceGroupName: string;
+          workspaceName: string; jobName: string): Recallable =
   ## jobsDelete
   ## Deletes a Job.
-  ##   resourceGroupName: string (required)
-  ##                    : Name of the resource group to which the resource belongs.
   ##   apiVersion: string (required)
   ##             : Specifies the version of API used for this request.
   ##   subscriptionId: string (required)
   ##                 : The subscriptionID for the Azure user.
-  ##   jobName: string (required)
-  ##          : The name of the job within the specified resource group. Job names can only contain a combination of alphanumeric characters along with dash (-) and underscore (_). The name must be from 1 through 64 characters long.
   ##   experimentName: string (required)
   ##                 : The name of the experiment. Experiment names can only contain a combination of alphanumeric characters along with dash (-) and underscore (_). The name must be from 1 through 64 characters long.
+  ##   resourceGroupName: string (required)
+  ##                    : Name of the resource group to which the resource belongs.
   ##   workspaceName: string (required)
   ##                : The name of the workspace. Workspace names can only contain a combination of alphanumeric characters along with dash (-) and underscore (_). The name must be from 1 through 64 characters long.
-  var path_575285 = newJObject()
-  var query_575286 = newJObject()
-  add(path_575285, "resourceGroupName", newJString(resourceGroupName))
-  add(query_575286, "api-version", newJString(apiVersion))
-  add(path_575285, "subscriptionId", newJString(subscriptionId))
-  add(path_575285, "jobName", newJString(jobName))
-  add(path_575285, "experimentName", newJString(experimentName))
-  add(path_575285, "workspaceName", newJString(workspaceName))
-  result = call_575284.call(path_575285, query_575286, nil, nil, nil)
+  ##   jobName: string (required)
+  ##          : The name of the job within the specified resource group. Job names can only contain a combination of alphanumeric characters along with dash (-) and underscore (_). The name must be from 1 through 64 characters long.
+  var path_564385 = newJObject()
+  var query_564386 = newJObject()
+  add(query_564386, "api-version", newJString(apiVersion))
+  add(path_564385, "subscriptionId", newJString(subscriptionId))
+  add(path_564385, "experimentName", newJString(experimentName))
+  add(path_564385, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564385, "workspaceName", newJString(workspaceName))
+  add(path_564385, "jobName", newJString(jobName))
+  result = call_564384.call(path_564385, query_564386, nil, nil, nil)
 
-var jobsDelete* = Call_JobsDelete_575274(name: "jobsDelete",
+var jobsDelete* = Call_JobsDelete_564374(name: "jobsDelete",
                                       meth: HttpMethod.HttpDelete,
                                       host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.BatchAI/workspaces/{workspaceName}/experiments/{experimentName}/jobs/{jobName}",
-                                      validator: validate_JobsDelete_575275,
-                                      base: "", url: url_JobsDelete_575276,
+                                      validator: validate_JobsDelete_564375,
+                                      base: "", url: url_JobsDelete_564376,
                                       schemes: {Scheme.Https})
 type
-  Call_JobsListOutputFiles_575287 = ref object of OpenApiRestCall_574467
-proc url_JobsListOutputFiles_575289(protocol: Scheme; host: string; base: string;
+  Call_JobsListOutputFiles_564387 = ref object of OpenApiRestCall_563565
+proc url_JobsListOutputFiles_564389(protocol: Scheme; host: string; base: string;
                                    route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2839,7 +2843,7 @@ proc url_JobsListOutputFiles_575289(protocol: Scheme; host: string; base: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_JobsListOutputFiles_575288(path: JsonNode; query: JsonNode;
+proc validate_JobsListOutputFiles_564388(path: JsonNode; query: JsonNode;
                                         header: JsonNode; formData: JsonNode;
                                         body: JsonNode): JsonNode =
   ## List all directories and files inside the given directory of the Job's output directory (if the output directory is on Azure File Share or Azure Storage Container).
@@ -2847,84 +2851,84 @@ proc validate_JobsListOutputFiles_575288(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : Name of the resource group to which the resource belongs.
   ##   subscriptionId: JString (required)
   ##                 : The subscriptionID for the Azure user.
-  ##   jobName: JString (required)
-  ##          : The name of the job within the specified resource group. Job names can only contain a combination of alphanumeric characters along with dash (-) and underscore (_). The name must be from 1 through 64 characters long.
   ##   experimentName: JString (required)
   ##                 : The name of the experiment. Experiment names can only contain a combination of alphanumeric characters along with dash (-) and underscore (_). The name must be from 1 through 64 characters long.
+  ##   resourceGroupName: JString (required)
+  ##                    : Name of the resource group to which the resource belongs.
   ##   workspaceName: JString (required)
   ##                : The name of the workspace. Workspace names can only contain a combination of alphanumeric characters along with dash (-) and underscore (_). The name must be from 1 through 64 characters long.
+  ##   jobName: JString (required)
+  ##          : The name of the job within the specified resource group. Job names can only contain a combination of alphanumeric characters along with dash (-) and underscore (_). The name must be from 1 through 64 characters long.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_575290 = path.getOrDefault("resourceGroupName")
-  valid_575290 = validateParameter(valid_575290, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564390 = path.getOrDefault("subscriptionId")
+  valid_564390 = validateParameter(valid_564390, JString, required = true,
                                  default = nil)
-  if valid_575290 != nil:
-    section.add "resourceGroupName", valid_575290
-  var valid_575291 = path.getOrDefault("subscriptionId")
-  valid_575291 = validateParameter(valid_575291, JString, required = true,
+  if valid_564390 != nil:
+    section.add "subscriptionId", valid_564390
+  var valid_564391 = path.getOrDefault("experimentName")
+  valid_564391 = validateParameter(valid_564391, JString, required = true,
                                  default = nil)
-  if valid_575291 != nil:
-    section.add "subscriptionId", valid_575291
-  var valid_575292 = path.getOrDefault("jobName")
-  valid_575292 = validateParameter(valid_575292, JString, required = true,
+  if valid_564391 != nil:
+    section.add "experimentName", valid_564391
+  var valid_564392 = path.getOrDefault("resourceGroupName")
+  valid_564392 = validateParameter(valid_564392, JString, required = true,
                                  default = nil)
-  if valid_575292 != nil:
-    section.add "jobName", valid_575292
-  var valid_575293 = path.getOrDefault("experimentName")
-  valid_575293 = validateParameter(valid_575293, JString, required = true,
+  if valid_564392 != nil:
+    section.add "resourceGroupName", valid_564392
+  var valid_564393 = path.getOrDefault("workspaceName")
+  valid_564393 = validateParameter(valid_564393, JString, required = true,
                                  default = nil)
-  if valid_575293 != nil:
-    section.add "experimentName", valid_575293
-  var valid_575294 = path.getOrDefault("workspaceName")
-  valid_575294 = validateParameter(valid_575294, JString, required = true,
+  if valid_564393 != nil:
+    section.add "workspaceName", valid_564393
+  var valid_564394 = path.getOrDefault("jobName")
+  valid_564394 = validateParameter(valid_564394, JString, required = true,
                                  default = nil)
-  if valid_575294 != nil:
-    section.add "workspaceName", valid_575294
+  if valid_564394 != nil:
+    section.add "jobName", valid_564394
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
   ##              : Specifies the version of API used for this request.
   ##   directory: JString
   ##            : The path to the directory.
-  ##   maxresults: JInt
-  ##             : The maximum number of items to return in the response. A maximum of 1000 files can be returned.
   ##   linkexpiryinminutes: JInt
   ##                      : The number of minutes after which the download link will expire.
+  ##   maxresults: JInt
+  ##             : The maximum number of items to return in the response. A maximum of 1000 files can be returned.
   ##   outputdirectoryid: JString (required)
   ##                    : Id of the job output directory. This is the OutputDirectory-->id parameter that is given by the user during Create Job.
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575295 = query.getOrDefault("api-version")
-  valid_575295 = validateParameter(valid_575295, JString, required = true,
+  var valid_564395 = query.getOrDefault("api-version")
+  valid_564395 = validateParameter(valid_564395, JString, required = true,
                                  default = nil)
-  if valid_575295 != nil:
-    section.add "api-version", valid_575295
-  var valid_575296 = query.getOrDefault("directory")
-  valid_575296 = validateParameter(valid_575296, JString, required = false,
+  if valid_564395 != nil:
+    section.add "api-version", valid_564395
+  var valid_564396 = query.getOrDefault("directory")
+  valid_564396 = validateParameter(valid_564396, JString, required = false,
                                  default = newJString("."))
-  if valid_575296 != nil:
-    section.add "directory", valid_575296
-  var valid_575297 = query.getOrDefault("maxresults")
-  valid_575297 = validateParameter(valid_575297, JInt, required = false,
-                                 default = newJInt(1000))
-  if valid_575297 != nil:
-    section.add "maxresults", valid_575297
-  var valid_575298 = query.getOrDefault("linkexpiryinminutes")
-  valid_575298 = validateParameter(valid_575298, JInt, required = false,
+  if valid_564396 != nil:
+    section.add "directory", valid_564396
+  var valid_564397 = query.getOrDefault("linkexpiryinminutes")
+  valid_564397 = validateParameter(valid_564397, JInt, required = false,
                                  default = newJInt(60))
-  if valid_575298 != nil:
-    section.add "linkexpiryinminutes", valid_575298
-  var valid_575299 = query.getOrDefault("outputdirectoryid")
-  valid_575299 = validateParameter(valid_575299, JString, required = true,
+  if valid_564397 != nil:
+    section.add "linkexpiryinminutes", valid_564397
+  var valid_564398 = query.getOrDefault("maxresults")
+  valid_564398 = validateParameter(valid_564398, JInt, required = false,
+                                 default = newJInt(1000))
+  if valid_564398 != nil:
+    section.add "maxresults", valid_564398
+  var valid_564399 = query.getOrDefault("outputdirectoryid")
+  valid_564399 = validateParameter(valid_564399, JString, required = true,
                                  default = nil)
-  if valid_575299 != nil:
-    section.add "outputdirectoryid", valid_575299
+  if valid_564399 != nil:
+    section.add "outputdirectoryid", valid_564399
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2933,67 +2937,67 @@ proc validate_JobsListOutputFiles_575288(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_575300: Call_JobsListOutputFiles_575287; path: JsonNode;
+proc call*(call_564400: Call_JobsListOutputFiles_564387; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## List all directories and files inside the given directory of the Job's output directory (if the output directory is on Azure File Share or Azure Storage Container).
   ## 
-  let valid = call_575300.validator(path, query, header, formData, body)
-  let scheme = call_575300.pickScheme
+  let valid = call_564400.validator(path, query, header, formData, body)
+  let scheme = call_564400.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575300.url(scheme.get, call_575300.host, call_575300.base,
-                         call_575300.route, valid.getOrDefault("path"),
+  let url = call_564400.url(scheme.get, call_564400.host, call_564400.base,
+                         call_564400.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575300, url, valid)
+  result = hook(call_564400, url, valid)
 
-proc call*(call_575301: Call_JobsListOutputFiles_575287; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; jobName: string;
-          outputdirectoryid: string; experimentName: string; workspaceName: string;
-          directory: string = "."; maxresults: int = 1000; linkexpiryinminutes: int = 60): Recallable =
+proc call*(call_564401: Call_JobsListOutputFiles_564387; apiVersion: string;
+          subscriptionId: string; experimentName: string; outputdirectoryid: string;
+          resourceGroupName: string; workspaceName: string; jobName: string;
+          directory: string = "."; linkexpiryinminutes: int = 60; maxresults: int = 1000): Recallable =
   ## jobsListOutputFiles
   ## List all directories and files inside the given directory of the Job's output directory (if the output directory is on Azure File Share or Azure Storage Container).
-  ##   resourceGroupName: string (required)
-  ##                    : Name of the resource group to which the resource belongs.
   ##   apiVersion: string (required)
   ##             : Specifies the version of API used for this request.
   ##   directory: string
   ##            : The path to the directory.
-  ##   subscriptionId: string (required)
-  ##                 : The subscriptionID for the Azure user.
-  ##   jobName: string (required)
-  ##          : The name of the job within the specified resource group. Job names can only contain a combination of alphanumeric characters along with dash (-) and underscore (_). The name must be from 1 through 64 characters long.
-  ##   maxresults: int
-  ##             : The maximum number of items to return in the response. A maximum of 1000 files can be returned.
   ##   linkexpiryinminutes: int
   ##                      : The number of minutes after which the download link will expire.
-  ##   outputdirectoryid: string (required)
-  ##                    : Id of the job output directory. This is the OutputDirectory-->id parameter that is given by the user during Create Job.
+  ##   subscriptionId: string (required)
+  ##                 : The subscriptionID for the Azure user.
   ##   experimentName: string (required)
   ##                 : The name of the experiment. Experiment names can only contain a combination of alphanumeric characters along with dash (-) and underscore (_). The name must be from 1 through 64 characters long.
+  ##   maxresults: int
+  ##             : The maximum number of items to return in the response. A maximum of 1000 files can be returned.
+  ##   outputdirectoryid: string (required)
+  ##                    : Id of the job output directory. This is the OutputDirectory-->id parameter that is given by the user during Create Job.
+  ##   resourceGroupName: string (required)
+  ##                    : Name of the resource group to which the resource belongs.
   ##   workspaceName: string (required)
   ##                : The name of the workspace. Workspace names can only contain a combination of alphanumeric characters along with dash (-) and underscore (_). The name must be from 1 through 64 characters long.
-  var path_575302 = newJObject()
-  var query_575303 = newJObject()
-  add(path_575302, "resourceGroupName", newJString(resourceGroupName))
-  add(query_575303, "api-version", newJString(apiVersion))
-  add(query_575303, "directory", newJString(directory))
-  add(path_575302, "subscriptionId", newJString(subscriptionId))
-  add(path_575302, "jobName", newJString(jobName))
-  add(query_575303, "maxresults", newJInt(maxresults))
-  add(query_575303, "linkexpiryinminutes", newJInt(linkexpiryinminutes))
-  add(query_575303, "outputdirectoryid", newJString(outputdirectoryid))
-  add(path_575302, "experimentName", newJString(experimentName))
-  add(path_575302, "workspaceName", newJString(workspaceName))
-  result = call_575301.call(path_575302, query_575303, nil, nil, nil)
+  ##   jobName: string (required)
+  ##          : The name of the job within the specified resource group. Job names can only contain a combination of alphanumeric characters along with dash (-) and underscore (_). The name must be from 1 through 64 characters long.
+  var path_564402 = newJObject()
+  var query_564403 = newJObject()
+  add(query_564403, "api-version", newJString(apiVersion))
+  add(query_564403, "directory", newJString(directory))
+  add(query_564403, "linkexpiryinminutes", newJInt(linkexpiryinminutes))
+  add(path_564402, "subscriptionId", newJString(subscriptionId))
+  add(path_564402, "experimentName", newJString(experimentName))
+  add(query_564403, "maxresults", newJInt(maxresults))
+  add(query_564403, "outputdirectoryid", newJString(outputdirectoryid))
+  add(path_564402, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564402, "workspaceName", newJString(workspaceName))
+  add(path_564402, "jobName", newJString(jobName))
+  result = call_564401.call(path_564402, query_564403, nil, nil, nil)
 
-var jobsListOutputFiles* = Call_JobsListOutputFiles_575287(
+var jobsListOutputFiles* = Call_JobsListOutputFiles_564387(
     name: "jobsListOutputFiles", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.BatchAI/workspaces/{workspaceName}/experiments/{experimentName}/jobs/{jobName}/listOutputFiles",
-    validator: validate_JobsListOutputFiles_575288, base: "",
-    url: url_JobsListOutputFiles_575289, schemes: {Scheme.Https})
+    validator: validate_JobsListOutputFiles_564388, base: "",
+    url: url_JobsListOutputFiles_564389, schemes: {Scheme.Https})
 type
-  Call_JobsListRemoteLoginInformation_575304 = ref object of OpenApiRestCall_574467
-proc url_JobsListRemoteLoginInformation_575306(protocol: Scheme; host: string;
+  Call_JobsListRemoteLoginInformation_564404 = ref object of OpenApiRestCall_563565
+proc url_JobsListRemoteLoginInformation_564406(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -3022,51 +3026,51 @@ proc url_JobsListRemoteLoginInformation_575306(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_JobsListRemoteLoginInformation_575305(path: JsonNode;
+proc validate_JobsListRemoteLoginInformation_564405(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets a list of currently existing nodes which were used for the Job execution. The returned information contains the node ID, its public IP and SSH port.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : Name of the resource group to which the resource belongs.
   ##   subscriptionId: JString (required)
   ##                 : The subscriptionID for the Azure user.
-  ##   jobName: JString (required)
-  ##          : The name of the job within the specified resource group. Job names can only contain a combination of alphanumeric characters along with dash (-) and underscore (_). The name must be from 1 through 64 characters long.
   ##   experimentName: JString (required)
   ##                 : The name of the experiment. Experiment names can only contain a combination of alphanumeric characters along with dash (-) and underscore (_). The name must be from 1 through 64 characters long.
+  ##   resourceGroupName: JString (required)
+  ##                    : Name of the resource group to which the resource belongs.
   ##   workspaceName: JString (required)
   ##                : The name of the workspace. Workspace names can only contain a combination of alphanumeric characters along with dash (-) and underscore (_). The name must be from 1 through 64 characters long.
+  ##   jobName: JString (required)
+  ##          : The name of the job within the specified resource group. Job names can only contain a combination of alphanumeric characters along with dash (-) and underscore (_). The name must be from 1 through 64 characters long.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_575307 = path.getOrDefault("resourceGroupName")
-  valid_575307 = validateParameter(valid_575307, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564407 = path.getOrDefault("subscriptionId")
+  valid_564407 = validateParameter(valid_564407, JString, required = true,
                                  default = nil)
-  if valid_575307 != nil:
-    section.add "resourceGroupName", valid_575307
-  var valid_575308 = path.getOrDefault("subscriptionId")
-  valid_575308 = validateParameter(valid_575308, JString, required = true,
+  if valid_564407 != nil:
+    section.add "subscriptionId", valid_564407
+  var valid_564408 = path.getOrDefault("experimentName")
+  valid_564408 = validateParameter(valid_564408, JString, required = true,
                                  default = nil)
-  if valid_575308 != nil:
-    section.add "subscriptionId", valid_575308
-  var valid_575309 = path.getOrDefault("jobName")
-  valid_575309 = validateParameter(valid_575309, JString, required = true,
+  if valid_564408 != nil:
+    section.add "experimentName", valid_564408
+  var valid_564409 = path.getOrDefault("resourceGroupName")
+  valid_564409 = validateParameter(valid_564409, JString, required = true,
                                  default = nil)
-  if valid_575309 != nil:
-    section.add "jobName", valid_575309
-  var valid_575310 = path.getOrDefault("experimentName")
-  valid_575310 = validateParameter(valid_575310, JString, required = true,
+  if valid_564409 != nil:
+    section.add "resourceGroupName", valid_564409
+  var valid_564410 = path.getOrDefault("workspaceName")
+  valid_564410 = validateParameter(valid_564410, JString, required = true,
                                  default = nil)
-  if valid_575310 != nil:
-    section.add "experimentName", valid_575310
-  var valid_575311 = path.getOrDefault("workspaceName")
-  valid_575311 = validateParameter(valid_575311, JString, required = true,
+  if valid_564410 != nil:
+    section.add "workspaceName", valid_564410
+  var valid_564411 = path.getOrDefault("jobName")
+  valid_564411 = validateParameter(valid_564411, JString, required = true,
                                  default = nil)
-  if valid_575311 != nil:
-    section.add "workspaceName", valid_575311
+  if valid_564411 != nil:
+    section.add "jobName", valid_564411
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -3074,11 +3078,11 @@ proc validate_JobsListRemoteLoginInformation_575305(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575312 = query.getOrDefault("api-version")
-  valid_575312 = validateParameter(valid_575312, JString, required = true,
+  var valid_564412 = query.getOrDefault("api-version")
+  valid_564412 = validateParameter(valid_564412, JString, required = true,
                                  default = nil)
-  if valid_575312 != nil:
-    section.add "api-version", valid_575312
+  if valid_564412 != nil:
+    section.add "api-version", valid_564412
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3087,54 +3091,54 @@ proc validate_JobsListRemoteLoginInformation_575305(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_575313: Call_JobsListRemoteLoginInformation_575304; path: JsonNode;
+proc call*(call_564413: Call_JobsListRemoteLoginInformation_564404; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets a list of currently existing nodes which were used for the Job execution. The returned information contains the node ID, its public IP and SSH port.
   ## 
-  let valid = call_575313.validator(path, query, header, formData, body)
-  let scheme = call_575313.pickScheme
+  let valid = call_564413.validator(path, query, header, formData, body)
+  let scheme = call_564413.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575313.url(scheme.get, call_575313.host, call_575313.base,
-                         call_575313.route, valid.getOrDefault("path"),
+  let url = call_564413.url(scheme.get, call_564413.host, call_564413.base,
+                         call_564413.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575313, url, valid)
+  result = hook(call_564413, url, valid)
 
-proc call*(call_575314: Call_JobsListRemoteLoginInformation_575304;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          jobName: string; experimentName: string; workspaceName: string): Recallable =
+proc call*(call_564414: Call_JobsListRemoteLoginInformation_564404;
+          apiVersion: string; subscriptionId: string; experimentName: string;
+          resourceGroupName: string; workspaceName: string; jobName: string): Recallable =
   ## jobsListRemoteLoginInformation
   ## Gets a list of currently existing nodes which were used for the Job execution. The returned information contains the node ID, its public IP and SSH port.
-  ##   resourceGroupName: string (required)
-  ##                    : Name of the resource group to which the resource belongs.
   ##   apiVersion: string (required)
   ##             : Specifies the version of API used for this request.
   ##   subscriptionId: string (required)
   ##                 : The subscriptionID for the Azure user.
-  ##   jobName: string (required)
-  ##          : The name of the job within the specified resource group. Job names can only contain a combination of alphanumeric characters along with dash (-) and underscore (_). The name must be from 1 through 64 characters long.
   ##   experimentName: string (required)
   ##                 : The name of the experiment. Experiment names can only contain a combination of alphanumeric characters along with dash (-) and underscore (_). The name must be from 1 through 64 characters long.
+  ##   resourceGroupName: string (required)
+  ##                    : Name of the resource group to which the resource belongs.
   ##   workspaceName: string (required)
   ##                : The name of the workspace. Workspace names can only contain a combination of alphanumeric characters along with dash (-) and underscore (_). The name must be from 1 through 64 characters long.
-  var path_575315 = newJObject()
-  var query_575316 = newJObject()
-  add(path_575315, "resourceGroupName", newJString(resourceGroupName))
-  add(query_575316, "api-version", newJString(apiVersion))
-  add(path_575315, "subscriptionId", newJString(subscriptionId))
-  add(path_575315, "jobName", newJString(jobName))
-  add(path_575315, "experimentName", newJString(experimentName))
-  add(path_575315, "workspaceName", newJString(workspaceName))
-  result = call_575314.call(path_575315, query_575316, nil, nil, nil)
+  ##   jobName: string (required)
+  ##          : The name of the job within the specified resource group. Job names can only contain a combination of alphanumeric characters along with dash (-) and underscore (_). The name must be from 1 through 64 characters long.
+  var path_564415 = newJObject()
+  var query_564416 = newJObject()
+  add(query_564416, "api-version", newJString(apiVersion))
+  add(path_564415, "subscriptionId", newJString(subscriptionId))
+  add(path_564415, "experimentName", newJString(experimentName))
+  add(path_564415, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564415, "workspaceName", newJString(workspaceName))
+  add(path_564415, "jobName", newJString(jobName))
+  result = call_564414.call(path_564415, query_564416, nil, nil, nil)
 
-var jobsListRemoteLoginInformation* = Call_JobsListRemoteLoginInformation_575304(
+var jobsListRemoteLoginInformation* = Call_JobsListRemoteLoginInformation_564404(
     name: "jobsListRemoteLoginInformation", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.BatchAI/workspaces/{workspaceName}/experiments/{experimentName}/jobs/{jobName}/listRemoteLoginInformation",
-    validator: validate_JobsListRemoteLoginInformation_575305, base: "",
-    url: url_JobsListRemoteLoginInformation_575306, schemes: {Scheme.Https})
+    validator: validate_JobsListRemoteLoginInformation_564405, base: "",
+    url: url_JobsListRemoteLoginInformation_564406, schemes: {Scheme.Https})
 type
-  Call_JobsTerminate_575317 = ref object of OpenApiRestCall_574467
-proc url_JobsTerminate_575319(protocol: Scheme; host: string; base: string;
+  Call_JobsTerminate_564417 = ref object of OpenApiRestCall_563565
+proc url_JobsTerminate_564419(protocol: Scheme; host: string; base: string;
                              route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -3163,51 +3167,51 @@ proc url_JobsTerminate_575319(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_JobsTerminate_575318(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_JobsTerminate_564418(path: JsonNode; query: JsonNode; header: JsonNode;
                                   formData: JsonNode; body: JsonNode): JsonNode =
   ## Terminates a job.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : Name of the resource group to which the resource belongs.
   ##   subscriptionId: JString (required)
   ##                 : The subscriptionID for the Azure user.
-  ##   jobName: JString (required)
-  ##          : The name of the job within the specified resource group. Job names can only contain a combination of alphanumeric characters along with dash (-) and underscore (_). The name must be from 1 through 64 characters long.
   ##   experimentName: JString (required)
   ##                 : The name of the experiment. Experiment names can only contain a combination of alphanumeric characters along with dash (-) and underscore (_). The name must be from 1 through 64 characters long.
+  ##   resourceGroupName: JString (required)
+  ##                    : Name of the resource group to which the resource belongs.
   ##   workspaceName: JString (required)
   ##                : The name of the workspace. Workspace names can only contain a combination of alphanumeric characters along with dash (-) and underscore (_). The name must be from 1 through 64 characters long.
+  ##   jobName: JString (required)
+  ##          : The name of the job within the specified resource group. Job names can only contain a combination of alphanumeric characters along with dash (-) and underscore (_). The name must be from 1 through 64 characters long.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_575320 = path.getOrDefault("resourceGroupName")
-  valid_575320 = validateParameter(valid_575320, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564420 = path.getOrDefault("subscriptionId")
+  valid_564420 = validateParameter(valid_564420, JString, required = true,
                                  default = nil)
-  if valid_575320 != nil:
-    section.add "resourceGroupName", valid_575320
-  var valid_575321 = path.getOrDefault("subscriptionId")
-  valid_575321 = validateParameter(valid_575321, JString, required = true,
+  if valid_564420 != nil:
+    section.add "subscriptionId", valid_564420
+  var valid_564421 = path.getOrDefault("experimentName")
+  valid_564421 = validateParameter(valid_564421, JString, required = true,
                                  default = nil)
-  if valid_575321 != nil:
-    section.add "subscriptionId", valid_575321
-  var valid_575322 = path.getOrDefault("jobName")
-  valid_575322 = validateParameter(valid_575322, JString, required = true,
+  if valid_564421 != nil:
+    section.add "experimentName", valid_564421
+  var valid_564422 = path.getOrDefault("resourceGroupName")
+  valid_564422 = validateParameter(valid_564422, JString, required = true,
                                  default = nil)
-  if valid_575322 != nil:
-    section.add "jobName", valid_575322
-  var valid_575323 = path.getOrDefault("experimentName")
-  valid_575323 = validateParameter(valid_575323, JString, required = true,
+  if valid_564422 != nil:
+    section.add "resourceGroupName", valid_564422
+  var valid_564423 = path.getOrDefault("workspaceName")
+  valid_564423 = validateParameter(valid_564423, JString, required = true,
                                  default = nil)
-  if valid_575323 != nil:
-    section.add "experimentName", valid_575323
-  var valid_575324 = path.getOrDefault("workspaceName")
-  valid_575324 = validateParameter(valid_575324, JString, required = true,
+  if valid_564423 != nil:
+    section.add "workspaceName", valid_564423
+  var valid_564424 = path.getOrDefault("jobName")
+  valid_564424 = validateParameter(valid_564424, JString, required = true,
                                  default = nil)
-  if valid_575324 != nil:
-    section.add "workspaceName", valid_575324
+  if valid_564424 != nil:
+    section.add "jobName", valid_564424
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -3215,11 +3219,11 @@ proc validate_JobsTerminate_575318(path: JsonNode; query: JsonNode; header: Json
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575325 = query.getOrDefault("api-version")
-  valid_575325 = validateParameter(valid_575325, JString, required = true,
+  var valid_564425 = query.getOrDefault("api-version")
+  valid_564425 = validateParameter(valid_564425, JString, required = true,
                                  default = nil)
-  if valid_575325 != nil:
-    section.add "api-version", valid_575325
+  if valid_564425 != nil:
+    section.add "api-version", valid_564425
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3228,53 +3232,53 @@ proc validate_JobsTerminate_575318(path: JsonNode; query: JsonNode; header: Json
   if body != nil:
     result.add "body", body
 
-proc call*(call_575326: Call_JobsTerminate_575317; path: JsonNode; query: JsonNode;
+proc call*(call_564426: Call_JobsTerminate_564417; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Terminates a job.
   ## 
-  let valid = call_575326.validator(path, query, header, formData, body)
-  let scheme = call_575326.pickScheme
+  let valid = call_564426.validator(path, query, header, formData, body)
+  let scheme = call_564426.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575326.url(scheme.get, call_575326.host, call_575326.base,
-                         call_575326.route, valid.getOrDefault("path"),
+  let url = call_564426.url(scheme.get, call_564426.host, call_564426.base,
+                         call_564426.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575326, url, valid)
+  result = hook(call_564426, url, valid)
 
-proc call*(call_575327: Call_JobsTerminate_575317; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; jobName: string;
-          experimentName: string; workspaceName: string): Recallable =
+proc call*(call_564427: Call_JobsTerminate_564417; apiVersion: string;
+          subscriptionId: string; experimentName: string; resourceGroupName: string;
+          workspaceName: string; jobName: string): Recallable =
   ## jobsTerminate
   ## Terminates a job.
-  ##   resourceGroupName: string (required)
-  ##                    : Name of the resource group to which the resource belongs.
   ##   apiVersion: string (required)
   ##             : Specifies the version of API used for this request.
   ##   subscriptionId: string (required)
   ##                 : The subscriptionID for the Azure user.
-  ##   jobName: string (required)
-  ##          : The name of the job within the specified resource group. Job names can only contain a combination of alphanumeric characters along with dash (-) and underscore (_). The name must be from 1 through 64 characters long.
   ##   experimentName: string (required)
   ##                 : The name of the experiment. Experiment names can only contain a combination of alphanumeric characters along with dash (-) and underscore (_). The name must be from 1 through 64 characters long.
+  ##   resourceGroupName: string (required)
+  ##                    : Name of the resource group to which the resource belongs.
   ##   workspaceName: string (required)
   ##                : The name of the workspace. Workspace names can only contain a combination of alphanumeric characters along with dash (-) and underscore (_). The name must be from 1 through 64 characters long.
-  var path_575328 = newJObject()
-  var query_575329 = newJObject()
-  add(path_575328, "resourceGroupName", newJString(resourceGroupName))
-  add(query_575329, "api-version", newJString(apiVersion))
-  add(path_575328, "subscriptionId", newJString(subscriptionId))
-  add(path_575328, "jobName", newJString(jobName))
-  add(path_575328, "experimentName", newJString(experimentName))
-  add(path_575328, "workspaceName", newJString(workspaceName))
-  result = call_575327.call(path_575328, query_575329, nil, nil, nil)
+  ##   jobName: string (required)
+  ##          : The name of the job within the specified resource group. Job names can only contain a combination of alphanumeric characters along with dash (-) and underscore (_). The name must be from 1 through 64 characters long.
+  var path_564428 = newJObject()
+  var query_564429 = newJObject()
+  add(query_564429, "api-version", newJString(apiVersion))
+  add(path_564428, "subscriptionId", newJString(subscriptionId))
+  add(path_564428, "experimentName", newJString(experimentName))
+  add(path_564428, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564428, "workspaceName", newJString(workspaceName))
+  add(path_564428, "jobName", newJString(jobName))
+  result = call_564427.call(path_564428, query_564429, nil, nil, nil)
 
-var jobsTerminate* = Call_JobsTerminate_575317(name: "jobsTerminate",
+var jobsTerminate* = Call_JobsTerminate_564417(name: "jobsTerminate",
     meth: HttpMethod.HttpPost, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.BatchAI/workspaces/{workspaceName}/experiments/{experimentName}/jobs/{jobName}/terminate",
-    validator: validate_JobsTerminate_575318, base: "", url: url_JobsTerminate_575319,
+    validator: validate_JobsTerminate_564418, base: "", url: url_JobsTerminate_564419,
     schemes: {Scheme.Https})
 type
-  Call_FileServersListByWorkspace_575330 = ref object of OpenApiRestCall_574467
-proc url_FileServersListByWorkspace_575332(protocol: Scheme; host: string;
+  Call_FileServersListByWorkspace_564430 = ref object of OpenApiRestCall_563565
+proc url_FileServersListByWorkspace_564432(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -3297,37 +3301,37 @@ proc url_FileServersListByWorkspace_575332(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_FileServersListByWorkspace_575331(path: JsonNode; query: JsonNode;
+proc validate_FileServersListByWorkspace_564431(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets a list of File Servers associated with the specified workspace.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : Name of the resource group to which the resource belongs.
   ##   subscriptionId: JString (required)
   ##                 : The subscriptionID for the Azure user.
+  ##   resourceGroupName: JString (required)
+  ##                    : Name of the resource group to which the resource belongs.
   ##   workspaceName: JString (required)
   ##                : The name of the workspace. Workspace names can only contain a combination of alphanumeric characters along with dash (-) and underscore (_). The name must be from 1 through 64 characters long.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_575333 = path.getOrDefault("resourceGroupName")
-  valid_575333 = validateParameter(valid_575333, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564433 = path.getOrDefault("subscriptionId")
+  valid_564433 = validateParameter(valid_564433, JString, required = true,
                                  default = nil)
-  if valid_575333 != nil:
-    section.add "resourceGroupName", valid_575333
-  var valid_575334 = path.getOrDefault("subscriptionId")
-  valid_575334 = validateParameter(valid_575334, JString, required = true,
+  if valid_564433 != nil:
+    section.add "subscriptionId", valid_564433
+  var valid_564434 = path.getOrDefault("resourceGroupName")
+  valid_564434 = validateParameter(valid_564434, JString, required = true,
                                  default = nil)
-  if valid_575334 != nil:
-    section.add "subscriptionId", valid_575334
-  var valid_575335 = path.getOrDefault("workspaceName")
-  valid_575335 = validateParameter(valid_575335, JString, required = true,
+  if valid_564434 != nil:
+    section.add "resourceGroupName", valid_564434
+  var valid_564435 = path.getOrDefault("workspaceName")
+  valid_564435 = validateParameter(valid_564435, JString, required = true,
                                  default = nil)
-  if valid_575335 != nil:
-    section.add "workspaceName", valid_575335
+  if valid_564435 != nil:
+    section.add "workspaceName", valid_564435
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -3337,16 +3341,16 @@ proc validate_FileServersListByWorkspace_575331(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575336 = query.getOrDefault("api-version")
-  valid_575336 = validateParameter(valid_575336, JString, required = true,
+  var valid_564436 = query.getOrDefault("api-version")
+  valid_564436 = validateParameter(valid_564436, JString, required = true,
                                  default = nil)
-  if valid_575336 != nil:
-    section.add "api-version", valid_575336
-  var valid_575337 = query.getOrDefault("maxresults")
-  valid_575337 = validateParameter(valid_575337, JInt, required = false,
+  if valid_564436 != nil:
+    section.add "api-version", valid_564436
+  var valid_564437 = query.getOrDefault("maxresults")
+  valid_564437 = validateParameter(valid_564437, JInt, required = false,
                                  default = newJInt(1000))
-  if valid_575337 != nil:
-    section.add "maxresults", valid_575337
+  if valid_564437 != nil:
+    section.add "maxresults", valid_564437
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3355,51 +3359,51 @@ proc validate_FileServersListByWorkspace_575331(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_575338: Call_FileServersListByWorkspace_575330; path: JsonNode;
+proc call*(call_564438: Call_FileServersListByWorkspace_564430; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets a list of File Servers associated with the specified workspace.
   ## 
-  let valid = call_575338.validator(path, query, header, formData, body)
-  let scheme = call_575338.pickScheme
+  let valid = call_564438.validator(path, query, header, formData, body)
+  let scheme = call_564438.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575338.url(scheme.get, call_575338.host, call_575338.base,
-                         call_575338.route, valid.getOrDefault("path"),
+  let url = call_564438.url(scheme.get, call_564438.host, call_564438.base,
+                         call_564438.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575338, url, valid)
+  result = hook(call_564438, url, valid)
 
-proc call*(call_575339: Call_FileServersListByWorkspace_575330;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          workspaceName: string; maxresults: int = 1000): Recallable =
+proc call*(call_564439: Call_FileServersListByWorkspace_564430; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string; workspaceName: string;
+          maxresults: int = 1000): Recallable =
   ## fileServersListByWorkspace
   ## Gets a list of File Servers associated with the specified workspace.
-  ##   resourceGroupName: string (required)
-  ##                    : Name of the resource group to which the resource belongs.
   ##   apiVersion: string (required)
   ##             : Specifies the version of API used for this request.
   ##   subscriptionId: string (required)
   ##                 : The subscriptionID for the Azure user.
   ##   maxresults: int
   ##             : The maximum number of items to return in the response. A maximum of 1000 files can be returned.
+  ##   resourceGroupName: string (required)
+  ##                    : Name of the resource group to which the resource belongs.
   ##   workspaceName: string (required)
   ##                : The name of the workspace. Workspace names can only contain a combination of alphanumeric characters along with dash (-) and underscore (_). The name must be from 1 through 64 characters long.
-  var path_575340 = newJObject()
-  var query_575341 = newJObject()
-  add(path_575340, "resourceGroupName", newJString(resourceGroupName))
-  add(query_575341, "api-version", newJString(apiVersion))
-  add(path_575340, "subscriptionId", newJString(subscriptionId))
-  add(query_575341, "maxresults", newJInt(maxresults))
-  add(path_575340, "workspaceName", newJString(workspaceName))
-  result = call_575339.call(path_575340, query_575341, nil, nil, nil)
+  var path_564440 = newJObject()
+  var query_564441 = newJObject()
+  add(query_564441, "api-version", newJString(apiVersion))
+  add(path_564440, "subscriptionId", newJString(subscriptionId))
+  add(query_564441, "maxresults", newJInt(maxresults))
+  add(path_564440, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564440, "workspaceName", newJString(workspaceName))
+  result = call_564439.call(path_564440, query_564441, nil, nil, nil)
 
-var fileServersListByWorkspace* = Call_FileServersListByWorkspace_575330(
+var fileServersListByWorkspace* = Call_FileServersListByWorkspace_564430(
     name: "fileServersListByWorkspace", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.BatchAI/workspaces/{workspaceName}/fileServers",
-    validator: validate_FileServersListByWorkspace_575331, base: "",
-    url: url_FileServersListByWorkspace_575332, schemes: {Scheme.Https})
+    validator: validate_FileServersListByWorkspace_564431, base: "",
+    url: url_FileServersListByWorkspace_564432, schemes: {Scheme.Https})
 type
-  Call_FileServersCreate_575354 = ref object of OpenApiRestCall_574467
-proc url_FileServersCreate_575356(protocol: Scheme; host: string; base: string;
+  Call_FileServersCreate_564454 = ref object of OpenApiRestCall_563565
+proc url_FileServersCreate_564456(protocol: Scheme; host: string; base: string;
                                  route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -3424,7 +3428,7 @@ proc url_FileServersCreate_575356(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_FileServersCreate_575355(path: JsonNode; query: JsonNode;
+proc validate_FileServersCreate_564455(path: JsonNode; query: JsonNode;
                                       header: JsonNode; formData: JsonNode;
                                       body: JsonNode): JsonNode =
   ## Creates a File Server in the given workspace.
@@ -3432,37 +3436,37 @@ proc validate_FileServersCreate_575355(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : Name of the resource group to which the resource belongs.
   ##   subscriptionId: JString (required)
   ##                 : The subscriptionID for the Azure user.
   ##   fileServerName: JString (required)
   ##                 : The name of the file server within the specified resource group. File server names can only contain a combination of alphanumeric characters along with dash (-) and underscore (_). The name must be from 1 through 64 characters long.
+  ##   resourceGroupName: JString (required)
+  ##                    : Name of the resource group to which the resource belongs.
   ##   workspaceName: JString (required)
   ##                : The name of the workspace. Workspace names can only contain a combination of alphanumeric characters along with dash (-) and underscore (_). The name must be from 1 through 64 characters long.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_575357 = path.getOrDefault("resourceGroupName")
-  valid_575357 = validateParameter(valid_575357, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564457 = path.getOrDefault("subscriptionId")
+  valid_564457 = validateParameter(valid_564457, JString, required = true,
                                  default = nil)
-  if valid_575357 != nil:
-    section.add "resourceGroupName", valid_575357
-  var valid_575358 = path.getOrDefault("subscriptionId")
-  valid_575358 = validateParameter(valid_575358, JString, required = true,
+  if valid_564457 != nil:
+    section.add "subscriptionId", valid_564457
+  var valid_564458 = path.getOrDefault("fileServerName")
+  valid_564458 = validateParameter(valid_564458, JString, required = true,
                                  default = nil)
-  if valid_575358 != nil:
-    section.add "subscriptionId", valid_575358
-  var valid_575359 = path.getOrDefault("fileServerName")
-  valid_575359 = validateParameter(valid_575359, JString, required = true,
+  if valid_564458 != nil:
+    section.add "fileServerName", valid_564458
+  var valid_564459 = path.getOrDefault("resourceGroupName")
+  valid_564459 = validateParameter(valid_564459, JString, required = true,
                                  default = nil)
-  if valid_575359 != nil:
-    section.add "fileServerName", valid_575359
-  var valid_575360 = path.getOrDefault("workspaceName")
-  valid_575360 = validateParameter(valid_575360, JString, required = true,
+  if valid_564459 != nil:
+    section.add "resourceGroupName", valid_564459
+  var valid_564460 = path.getOrDefault("workspaceName")
+  valid_564460 = validateParameter(valid_564460, JString, required = true,
                                  default = nil)
-  if valid_575360 != nil:
-    section.add "workspaceName", valid_575360
+  if valid_564460 != nil:
+    section.add "workspaceName", valid_564460
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -3470,11 +3474,11 @@ proc validate_FileServersCreate_575355(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575361 = query.getOrDefault("api-version")
-  valid_575361 = validateParameter(valid_575361, JString, required = true,
+  var valid_564461 = query.getOrDefault("api-version")
+  valid_564461 = validateParameter(valid_564461, JString, required = true,
                                  default = nil)
-  if valid_575361 != nil:
-    section.add "api-version", valid_575361
+  if valid_564461 != nil:
+    section.add "api-version", valid_564461
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3488,55 +3492,55 @@ proc validate_FileServersCreate_575355(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_575363: Call_FileServersCreate_575354; path: JsonNode;
+proc call*(call_564463: Call_FileServersCreate_564454; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Creates a File Server in the given workspace.
   ## 
-  let valid = call_575363.validator(path, query, header, formData, body)
-  let scheme = call_575363.pickScheme
+  let valid = call_564463.validator(path, query, header, formData, body)
+  let scheme = call_564463.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575363.url(scheme.get, call_575363.host, call_575363.base,
-                         call_575363.route, valid.getOrDefault("path"),
+  let url = call_564463.url(scheme.get, call_564463.host, call_564463.base,
+                         call_564463.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575363, url, valid)
+  result = hook(call_564463, url, valid)
 
-proc call*(call_575364: Call_FileServersCreate_575354; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; parameters: JsonNode;
-          fileServerName: string; workspaceName: string): Recallable =
+proc call*(call_564464: Call_FileServersCreate_564454; apiVersion: string;
+          subscriptionId: string; fileServerName: string; resourceGroupName: string;
+          workspaceName: string; parameters: JsonNode): Recallable =
   ## fileServersCreate
   ## Creates a File Server in the given workspace.
-  ##   resourceGroupName: string (required)
-  ##                    : Name of the resource group to which the resource belongs.
   ##   apiVersion: string (required)
   ##             : Specifies the version of API used for this request.
   ##   subscriptionId: string (required)
   ##                 : The subscriptionID for the Azure user.
-  ##   parameters: JObject (required)
-  ##             : The parameters to provide for File Server creation.
   ##   fileServerName: string (required)
   ##                 : The name of the file server within the specified resource group. File server names can only contain a combination of alphanumeric characters along with dash (-) and underscore (_). The name must be from 1 through 64 characters long.
+  ##   resourceGroupName: string (required)
+  ##                    : Name of the resource group to which the resource belongs.
   ##   workspaceName: string (required)
   ##                : The name of the workspace. Workspace names can only contain a combination of alphanumeric characters along with dash (-) and underscore (_). The name must be from 1 through 64 characters long.
-  var path_575365 = newJObject()
-  var query_575366 = newJObject()
-  var body_575367 = newJObject()
-  add(path_575365, "resourceGroupName", newJString(resourceGroupName))
-  add(query_575366, "api-version", newJString(apiVersion))
-  add(path_575365, "subscriptionId", newJString(subscriptionId))
+  ##   parameters: JObject (required)
+  ##             : The parameters to provide for File Server creation.
+  var path_564465 = newJObject()
+  var query_564466 = newJObject()
+  var body_564467 = newJObject()
+  add(query_564466, "api-version", newJString(apiVersion))
+  add(path_564465, "subscriptionId", newJString(subscriptionId))
+  add(path_564465, "fileServerName", newJString(fileServerName))
+  add(path_564465, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564465, "workspaceName", newJString(workspaceName))
   if parameters != nil:
-    body_575367 = parameters
-  add(path_575365, "fileServerName", newJString(fileServerName))
-  add(path_575365, "workspaceName", newJString(workspaceName))
-  result = call_575364.call(path_575365, query_575366, nil, nil, body_575367)
+    body_564467 = parameters
+  result = call_564464.call(path_564465, query_564466, nil, nil, body_564467)
 
-var fileServersCreate* = Call_FileServersCreate_575354(name: "fileServersCreate",
+var fileServersCreate* = Call_FileServersCreate_564454(name: "fileServersCreate",
     meth: HttpMethod.HttpPut, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.BatchAI/workspaces/{workspaceName}/fileServers/{fileServerName}",
-    validator: validate_FileServersCreate_575355, base: "",
-    url: url_FileServersCreate_575356, schemes: {Scheme.Https})
+    validator: validate_FileServersCreate_564455, base: "",
+    url: url_FileServersCreate_564456, schemes: {Scheme.Https})
 type
-  Call_FileServersGet_575342 = ref object of OpenApiRestCall_574467
-proc url_FileServersGet_575344(protocol: Scheme; host: string; base: string;
+  Call_FileServersGet_564442 = ref object of OpenApiRestCall_563565
+proc url_FileServersGet_564444(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -3561,7 +3565,7 @@ proc url_FileServersGet_575344(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_FileServersGet_575343(path: JsonNode; query: JsonNode;
+proc validate_FileServersGet_564443(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## Gets information about a File Server.
@@ -3569,37 +3573,37 @@ proc validate_FileServersGet_575343(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : Name of the resource group to which the resource belongs.
   ##   subscriptionId: JString (required)
   ##                 : The subscriptionID for the Azure user.
   ##   fileServerName: JString (required)
   ##                 : The name of the file server within the specified resource group. File server names can only contain a combination of alphanumeric characters along with dash (-) and underscore (_). The name must be from 1 through 64 characters long.
+  ##   resourceGroupName: JString (required)
+  ##                    : Name of the resource group to which the resource belongs.
   ##   workspaceName: JString (required)
   ##                : The name of the workspace. Workspace names can only contain a combination of alphanumeric characters along with dash (-) and underscore (_). The name must be from 1 through 64 characters long.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_575345 = path.getOrDefault("resourceGroupName")
-  valid_575345 = validateParameter(valid_575345, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564445 = path.getOrDefault("subscriptionId")
+  valid_564445 = validateParameter(valid_564445, JString, required = true,
                                  default = nil)
-  if valid_575345 != nil:
-    section.add "resourceGroupName", valid_575345
-  var valid_575346 = path.getOrDefault("subscriptionId")
-  valid_575346 = validateParameter(valid_575346, JString, required = true,
+  if valid_564445 != nil:
+    section.add "subscriptionId", valid_564445
+  var valid_564446 = path.getOrDefault("fileServerName")
+  valid_564446 = validateParameter(valid_564446, JString, required = true,
                                  default = nil)
-  if valid_575346 != nil:
-    section.add "subscriptionId", valid_575346
-  var valid_575347 = path.getOrDefault("fileServerName")
-  valid_575347 = validateParameter(valid_575347, JString, required = true,
+  if valid_564446 != nil:
+    section.add "fileServerName", valid_564446
+  var valid_564447 = path.getOrDefault("resourceGroupName")
+  valid_564447 = validateParameter(valid_564447, JString, required = true,
                                  default = nil)
-  if valid_575347 != nil:
-    section.add "fileServerName", valid_575347
-  var valid_575348 = path.getOrDefault("workspaceName")
-  valid_575348 = validateParameter(valid_575348, JString, required = true,
+  if valid_564447 != nil:
+    section.add "resourceGroupName", valid_564447
+  var valid_564448 = path.getOrDefault("workspaceName")
+  valid_564448 = validateParameter(valid_564448, JString, required = true,
                                  default = nil)
-  if valid_575348 != nil:
-    section.add "workspaceName", valid_575348
+  if valid_564448 != nil:
+    section.add "workspaceName", valid_564448
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -3607,11 +3611,11 @@ proc validate_FileServersGet_575343(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575349 = query.getOrDefault("api-version")
-  valid_575349 = validateParameter(valid_575349, JString, required = true,
+  var valid_564449 = query.getOrDefault("api-version")
+  valid_564449 = validateParameter(valid_564449, JString, required = true,
                                  default = nil)
-  if valid_575349 != nil:
-    section.add "api-version", valid_575349
+  if valid_564449 != nil:
+    section.add "api-version", valid_564449
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3620,50 +3624,50 @@ proc validate_FileServersGet_575343(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_575350: Call_FileServersGet_575342; path: JsonNode; query: JsonNode;
+proc call*(call_564450: Call_FileServersGet_564442; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets information about a File Server.
   ## 
-  let valid = call_575350.validator(path, query, header, formData, body)
-  let scheme = call_575350.pickScheme
+  let valid = call_564450.validator(path, query, header, formData, body)
+  let scheme = call_564450.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575350.url(scheme.get, call_575350.host, call_575350.base,
-                         call_575350.route, valid.getOrDefault("path"),
+  let url = call_564450.url(scheme.get, call_564450.host, call_564450.base,
+                         call_564450.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575350, url, valid)
+  result = hook(call_564450, url, valid)
 
-proc call*(call_575351: Call_FileServersGet_575342; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; fileServerName: string;
+proc call*(call_564451: Call_FileServersGet_564442; apiVersion: string;
+          subscriptionId: string; fileServerName: string; resourceGroupName: string;
           workspaceName: string): Recallable =
   ## fileServersGet
   ## Gets information about a File Server.
-  ##   resourceGroupName: string (required)
-  ##                    : Name of the resource group to which the resource belongs.
   ##   apiVersion: string (required)
   ##             : Specifies the version of API used for this request.
   ##   subscriptionId: string (required)
   ##                 : The subscriptionID for the Azure user.
   ##   fileServerName: string (required)
   ##                 : The name of the file server within the specified resource group. File server names can only contain a combination of alphanumeric characters along with dash (-) and underscore (_). The name must be from 1 through 64 characters long.
+  ##   resourceGroupName: string (required)
+  ##                    : Name of the resource group to which the resource belongs.
   ##   workspaceName: string (required)
   ##                : The name of the workspace. Workspace names can only contain a combination of alphanumeric characters along with dash (-) and underscore (_). The name must be from 1 through 64 characters long.
-  var path_575352 = newJObject()
-  var query_575353 = newJObject()
-  add(path_575352, "resourceGroupName", newJString(resourceGroupName))
-  add(query_575353, "api-version", newJString(apiVersion))
-  add(path_575352, "subscriptionId", newJString(subscriptionId))
-  add(path_575352, "fileServerName", newJString(fileServerName))
-  add(path_575352, "workspaceName", newJString(workspaceName))
-  result = call_575351.call(path_575352, query_575353, nil, nil, nil)
+  var path_564452 = newJObject()
+  var query_564453 = newJObject()
+  add(query_564453, "api-version", newJString(apiVersion))
+  add(path_564452, "subscriptionId", newJString(subscriptionId))
+  add(path_564452, "fileServerName", newJString(fileServerName))
+  add(path_564452, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564452, "workspaceName", newJString(workspaceName))
+  result = call_564451.call(path_564452, query_564453, nil, nil, nil)
 
-var fileServersGet* = Call_FileServersGet_575342(name: "fileServersGet",
+var fileServersGet* = Call_FileServersGet_564442(name: "fileServersGet",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.BatchAI/workspaces/{workspaceName}/fileServers/{fileServerName}",
-    validator: validate_FileServersGet_575343, base: "", url: url_FileServersGet_575344,
+    validator: validate_FileServersGet_564443, base: "", url: url_FileServersGet_564444,
     schemes: {Scheme.Https})
 type
-  Call_FileServersDelete_575368 = ref object of OpenApiRestCall_574467
-proc url_FileServersDelete_575370(protocol: Scheme; host: string; base: string;
+  Call_FileServersDelete_564468 = ref object of OpenApiRestCall_563565
+proc url_FileServersDelete_564470(protocol: Scheme; host: string; base: string;
                                  route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -3688,7 +3692,7 @@ proc url_FileServersDelete_575370(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_FileServersDelete_575369(path: JsonNode; query: JsonNode;
+proc validate_FileServersDelete_564469(path: JsonNode; query: JsonNode;
                                       header: JsonNode; formData: JsonNode;
                                       body: JsonNode): JsonNode =
   ## Deletes a File Server.
@@ -3696,37 +3700,37 @@ proc validate_FileServersDelete_575369(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : Name of the resource group to which the resource belongs.
   ##   subscriptionId: JString (required)
   ##                 : The subscriptionID for the Azure user.
   ##   fileServerName: JString (required)
   ##                 : The name of the file server within the specified resource group. File server names can only contain a combination of alphanumeric characters along with dash (-) and underscore (_). The name must be from 1 through 64 characters long.
+  ##   resourceGroupName: JString (required)
+  ##                    : Name of the resource group to which the resource belongs.
   ##   workspaceName: JString (required)
   ##                : The name of the workspace. Workspace names can only contain a combination of alphanumeric characters along with dash (-) and underscore (_). The name must be from 1 through 64 characters long.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_575371 = path.getOrDefault("resourceGroupName")
-  valid_575371 = validateParameter(valid_575371, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564471 = path.getOrDefault("subscriptionId")
+  valid_564471 = validateParameter(valid_564471, JString, required = true,
                                  default = nil)
-  if valid_575371 != nil:
-    section.add "resourceGroupName", valid_575371
-  var valid_575372 = path.getOrDefault("subscriptionId")
-  valid_575372 = validateParameter(valid_575372, JString, required = true,
+  if valid_564471 != nil:
+    section.add "subscriptionId", valid_564471
+  var valid_564472 = path.getOrDefault("fileServerName")
+  valid_564472 = validateParameter(valid_564472, JString, required = true,
                                  default = nil)
-  if valid_575372 != nil:
-    section.add "subscriptionId", valid_575372
-  var valid_575373 = path.getOrDefault("fileServerName")
-  valid_575373 = validateParameter(valid_575373, JString, required = true,
+  if valid_564472 != nil:
+    section.add "fileServerName", valid_564472
+  var valid_564473 = path.getOrDefault("resourceGroupName")
+  valid_564473 = validateParameter(valid_564473, JString, required = true,
                                  default = nil)
-  if valid_575373 != nil:
-    section.add "fileServerName", valid_575373
-  var valid_575374 = path.getOrDefault("workspaceName")
-  valid_575374 = validateParameter(valid_575374, JString, required = true,
+  if valid_564473 != nil:
+    section.add "resourceGroupName", valid_564473
+  var valid_564474 = path.getOrDefault("workspaceName")
+  valid_564474 = validateParameter(valid_564474, JString, required = true,
                                  default = nil)
-  if valid_575374 != nil:
-    section.add "workspaceName", valid_575374
+  if valid_564474 != nil:
+    section.add "workspaceName", valid_564474
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -3734,11 +3738,11 @@ proc validate_FileServersDelete_575369(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575375 = query.getOrDefault("api-version")
-  valid_575375 = validateParameter(valid_575375, JString, required = true,
+  var valid_564475 = query.getOrDefault("api-version")
+  valid_564475 = validateParameter(valid_564475, JString, required = true,
                                  default = nil)
-  if valid_575375 != nil:
-    section.add "api-version", valid_575375
+  if valid_564475 != nil:
+    section.add "api-version", valid_564475
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3747,47 +3751,47 @@ proc validate_FileServersDelete_575369(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_575376: Call_FileServersDelete_575368; path: JsonNode;
+proc call*(call_564476: Call_FileServersDelete_564468; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes a File Server.
   ## 
-  let valid = call_575376.validator(path, query, header, formData, body)
-  let scheme = call_575376.pickScheme
+  let valid = call_564476.validator(path, query, header, formData, body)
+  let scheme = call_564476.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575376.url(scheme.get, call_575376.host, call_575376.base,
-                         call_575376.route, valid.getOrDefault("path"),
+  let url = call_564476.url(scheme.get, call_564476.host, call_564476.base,
+                         call_564476.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575376, url, valid)
+  result = hook(call_564476, url, valid)
 
-proc call*(call_575377: Call_FileServersDelete_575368; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; fileServerName: string;
+proc call*(call_564477: Call_FileServersDelete_564468; apiVersion: string;
+          subscriptionId: string; fileServerName: string; resourceGroupName: string;
           workspaceName: string): Recallable =
   ## fileServersDelete
   ## Deletes a File Server.
-  ##   resourceGroupName: string (required)
-  ##                    : Name of the resource group to which the resource belongs.
   ##   apiVersion: string (required)
   ##             : Specifies the version of API used for this request.
   ##   subscriptionId: string (required)
   ##                 : The subscriptionID for the Azure user.
   ##   fileServerName: string (required)
   ##                 : The name of the file server within the specified resource group. File server names can only contain a combination of alphanumeric characters along with dash (-) and underscore (_). The name must be from 1 through 64 characters long.
+  ##   resourceGroupName: string (required)
+  ##                    : Name of the resource group to which the resource belongs.
   ##   workspaceName: string (required)
   ##                : The name of the workspace. Workspace names can only contain a combination of alphanumeric characters along with dash (-) and underscore (_). The name must be from 1 through 64 characters long.
-  var path_575378 = newJObject()
-  var query_575379 = newJObject()
-  add(path_575378, "resourceGroupName", newJString(resourceGroupName))
-  add(query_575379, "api-version", newJString(apiVersion))
-  add(path_575378, "subscriptionId", newJString(subscriptionId))
-  add(path_575378, "fileServerName", newJString(fileServerName))
-  add(path_575378, "workspaceName", newJString(workspaceName))
-  result = call_575377.call(path_575378, query_575379, nil, nil, nil)
+  var path_564478 = newJObject()
+  var query_564479 = newJObject()
+  add(query_564479, "api-version", newJString(apiVersion))
+  add(path_564478, "subscriptionId", newJString(subscriptionId))
+  add(path_564478, "fileServerName", newJString(fileServerName))
+  add(path_564478, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564478, "workspaceName", newJString(workspaceName))
+  result = call_564477.call(path_564478, query_564479, nil, nil, nil)
 
-var fileServersDelete* = Call_FileServersDelete_575368(name: "fileServersDelete",
+var fileServersDelete* = Call_FileServersDelete_564468(name: "fileServersDelete",
     meth: HttpMethod.HttpDelete, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.BatchAI/workspaces/{workspaceName}/fileServers/{fileServerName}",
-    validator: validate_FileServersDelete_575369, base: "",
-    url: url_FileServersDelete_575370, schemes: {Scheme.Https})
+    validator: validate_FileServersDelete_564469, base: "",
+    url: url_FileServersDelete_564470, schemes: {Scheme.Https})
 export
   rest
 

@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, httpcore
 
 ## auto-generated via openapi macro
 ## title: ApiManagementClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_593424 = ref object of OpenApiRestCall
+  OpenApiRestCall_563555 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_593424](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563555](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_593424): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563555): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,8 +107,8 @@ const
   macServiceName = "apimanagement-apimnetworkstatus"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_NetworkStatusListByLocation_593646 = ref object of OpenApiRestCall_593424
-proc url_NetworkStatusListByLocation_593648(protocol: Scheme; host: string;
+  Call_NetworkStatusListByLocation_563777 = ref object of OpenApiRestCall_563555
+proc url_NetworkStatusListByLocation_563779(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -131,44 +135,44 @@ proc url_NetworkStatusListByLocation_593648(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_NetworkStatusListByLocation_593647(path: JsonNode; query: JsonNode;
+proc validate_NetworkStatusListByLocation_563778(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the Connectivity Status to the external resources on which the Api Management service depends from inside the Cloud Service. This also returns the DNS Servers as visible to the CloudService.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
-  ##   subscriptionId: JString (required)
-  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   serviceName: JString (required)
   ##              : The name of the API Management service.
   ##   locationName: JString (required)
   ##               : Location in which the API Management service is deployed. This is one of the Azure Regions like West US, East US, South Central US.
+  ##   subscriptionId: JString (required)
+  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593808 = path.getOrDefault("resourceGroupName")
-  valid_593808 = validateParameter(valid_593808, JString, required = true,
+        "path argument is necessary due to required `serviceName` field"
+  var valid_563941 = path.getOrDefault("serviceName")
+  valid_563941 = validateParameter(valid_563941, JString, required = true,
                                  default = nil)
-  if valid_593808 != nil:
-    section.add "resourceGroupName", valid_593808
-  var valid_593809 = path.getOrDefault("subscriptionId")
-  valid_593809 = validateParameter(valid_593809, JString, required = true,
+  if valid_563941 != nil:
+    section.add "serviceName", valid_563941
+  var valid_563942 = path.getOrDefault("locationName")
+  valid_563942 = validateParameter(valid_563942, JString, required = true,
                                  default = nil)
-  if valid_593809 != nil:
-    section.add "subscriptionId", valid_593809
-  var valid_593810 = path.getOrDefault("serviceName")
-  valid_593810 = validateParameter(valid_593810, JString, required = true,
+  if valid_563942 != nil:
+    section.add "locationName", valid_563942
+  var valid_563943 = path.getOrDefault("subscriptionId")
+  valid_563943 = validateParameter(valid_563943, JString, required = true,
                                  default = nil)
-  if valid_593810 != nil:
-    section.add "serviceName", valid_593810
-  var valid_593811 = path.getOrDefault("locationName")
-  valid_593811 = validateParameter(valid_593811, JString, required = true,
+  if valid_563943 != nil:
+    section.add "subscriptionId", valid_563943
+  var valid_563944 = path.getOrDefault("resourceGroupName")
+  valid_563944 = validateParameter(valid_563944, JString, required = true,
                                  default = nil)
-  if valid_593811 != nil:
-    section.add "locationName", valid_593811
+  if valid_563944 != nil:
+    section.add "resourceGroupName", valid_563944
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -176,11 +180,11 @@ proc validate_NetworkStatusListByLocation_593647(path: JsonNode; query: JsonNode
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593812 = query.getOrDefault("api-version")
-  valid_593812 = validateParameter(valid_593812, JString, required = true,
+  var valid_563945 = query.getOrDefault("api-version")
+  valid_563945 = validateParameter(valid_563945, JString, required = true,
                                  default = nil)
-  if valid_593812 != nil:
-    section.add "api-version", valid_593812
+  if valid_563945 != nil:
+    section.add "api-version", valid_563945
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -189,51 +193,51 @@ proc validate_NetworkStatusListByLocation_593647(path: JsonNode; query: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_593839: Call_NetworkStatusListByLocation_593646; path: JsonNode;
+proc call*(call_563972: Call_NetworkStatusListByLocation_563777; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the Connectivity Status to the external resources on which the Api Management service depends from inside the Cloud Service. This also returns the DNS Servers as visible to the CloudService.
   ## 
-  let valid = call_593839.validator(path, query, header, formData, body)
-  let scheme = call_593839.pickScheme
+  let valid = call_563972.validator(path, query, header, formData, body)
+  let scheme = call_563972.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593839.url(scheme.get, call_593839.host, call_593839.base,
-                         call_593839.route, valid.getOrDefault("path"),
+  let url = call_563972.url(scheme.get, call_563972.host, call_563972.base,
+                         call_563972.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593839, url, valid)
+  result = hook(call_563972, url, valid)
 
-proc call*(call_593910: Call_NetworkStatusListByLocation_593646;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          serviceName: string; locationName: string): Recallable =
+proc call*(call_564043: Call_NetworkStatusListByLocation_563777;
+          serviceName: string; apiVersion: string; locationName: string;
+          subscriptionId: string; resourceGroupName: string): Recallable =
   ## networkStatusListByLocation
   ## Gets the Connectivity Status to the external resources on which the Api Management service depends from inside the Cloud Service. This also returns the DNS Servers as visible to the CloudService.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
-  ##   apiVersion: string (required)
-  ##             : Version of the API to be used with the client request.
-  ##   subscriptionId: string (required)
-  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   serviceName: string (required)
   ##              : The name of the API Management service.
+  ##   apiVersion: string (required)
+  ##             : Version of the API to be used with the client request.
   ##   locationName: string (required)
   ##               : Location in which the API Management service is deployed. This is one of the Azure Regions like West US, East US, South Central US.
-  var path_593911 = newJObject()
-  var query_593913 = newJObject()
-  add(path_593911, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593913, "api-version", newJString(apiVersion))
-  add(path_593911, "subscriptionId", newJString(subscriptionId))
-  add(path_593911, "serviceName", newJString(serviceName))
-  add(path_593911, "locationName", newJString(locationName))
-  result = call_593910.call(path_593911, query_593913, nil, nil, nil)
+  ##   subscriptionId: string (required)
+  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564044 = newJObject()
+  var query_564046 = newJObject()
+  add(path_564044, "serviceName", newJString(serviceName))
+  add(query_564046, "api-version", newJString(apiVersion))
+  add(path_564044, "locationName", newJString(locationName))
+  add(path_564044, "subscriptionId", newJString(subscriptionId))
+  add(path_564044, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564043.call(path_564044, query_564046, nil, nil, nil)
 
-var networkStatusListByLocation* = Call_NetworkStatusListByLocation_593646(
+var networkStatusListByLocation* = Call_NetworkStatusListByLocation_563777(
     name: "networkStatusListByLocation", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ApiManagement/service/{serviceName}/locations/{locationName}/networkstatus",
-    validator: validate_NetworkStatusListByLocation_593647, base: "",
-    url: url_NetworkStatusListByLocation_593648, schemes: {Scheme.Https})
+    validator: validate_NetworkStatusListByLocation_563778, base: "",
+    url: url_NetworkStatusListByLocation_563779, schemes: {Scheme.Https})
 type
-  Call_NetworkStatusListByService_593952 = ref object of OpenApiRestCall_593424
-proc url_NetworkStatusListByService_593954(protocol: Scheme; host: string;
+  Call_NetworkStatusListByService_564085 = ref object of OpenApiRestCall_563555
+proc url_NetworkStatusListByService_564087(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -257,37 +261,37 @@ proc url_NetworkStatusListByService_593954(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_NetworkStatusListByService_593953(path: JsonNode; query: JsonNode;
+proc validate_NetworkStatusListByService_564086(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the Connectivity Status to the external resources on which the Api Management service depends from inside the Cloud Service. This also returns the DNS Servers as visible to the CloudService.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
-  ##   subscriptionId: JString (required)
-  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   serviceName: JString (required)
   ##              : The name of the API Management service.
+  ##   subscriptionId: JString (required)
+  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593955 = path.getOrDefault("resourceGroupName")
-  valid_593955 = validateParameter(valid_593955, JString, required = true,
+        "path argument is necessary due to required `serviceName` field"
+  var valid_564088 = path.getOrDefault("serviceName")
+  valid_564088 = validateParameter(valid_564088, JString, required = true,
                                  default = nil)
-  if valid_593955 != nil:
-    section.add "resourceGroupName", valid_593955
-  var valid_593956 = path.getOrDefault("subscriptionId")
-  valid_593956 = validateParameter(valid_593956, JString, required = true,
+  if valid_564088 != nil:
+    section.add "serviceName", valid_564088
+  var valid_564089 = path.getOrDefault("subscriptionId")
+  valid_564089 = validateParameter(valid_564089, JString, required = true,
                                  default = nil)
-  if valid_593956 != nil:
-    section.add "subscriptionId", valid_593956
-  var valid_593957 = path.getOrDefault("serviceName")
-  valid_593957 = validateParameter(valid_593957, JString, required = true,
+  if valid_564089 != nil:
+    section.add "subscriptionId", valid_564089
+  var valid_564090 = path.getOrDefault("resourceGroupName")
+  valid_564090 = validateParameter(valid_564090, JString, required = true,
                                  default = nil)
-  if valid_593957 != nil:
-    section.add "serviceName", valid_593957
+  if valid_564090 != nil:
+    section.add "resourceGroupName", valid_564090
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -295,11 +299,11 @@ proc validate_NetworkStatusListByService_593953(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593958 = query.getOrDefault("api-version")
-  valid_593958 = validateParameter(valid_593958, JString, required = true,
+  var valid_564091 = query.getOrDefault("api-version")
+  valid_564091 = validateParameter(valid_564091, JString, required = true,
                                  default = nil)
-  if valid_593958 != nil:
-    section.add "api-version", valid_593958
+  if valid_564091 != nil:
+    section.add "api-version", valid_564091
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -308,45 +312,45 @@ proc validate_NetworkStatusListByService_593953(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593959: Call_NetworkStatusListByService_593952; path: JsonNode;
+proc call*(call_564092: Call_NetworkStatusListByService_564085; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the Connectivity Status to the external resources on which the Api Management service depends from inside the Cloud Service. This also returns the DNS Servers as visible to the CloudService.
   ## 
-  let valid = call_593959.validator(path, query, header, formData, body)
-  let scheme = call_593959.pickScheme
+  let valid = call_564092.validator(path, query, header, formData, body)
+  let scheme = call_564092.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593959.url(scheme.get, call_593959.host, call_593959.base,
-                         call_593959.route, valid.getOrDefault("path"),
+  let url = call_564092.url(scheme.get, call_564092.host, call_564092.base,
+                         call_564092.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593959, url, valid)
+  result = hook(call_564092, url, valid)
 
-proc call*(call_593960: Call_NetworkStatusListByService_593952;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          serviceName: string): Recallable =
+proc call*(call_564093: Call_NetworkStatusListByService_564085;
+          serviceName: string; apiVersion: string; subscriptionId: string;
+          resourceGroupName: string): Recallable =
   ## networkStatusListByService
   ## Gets the Connectivity Status to the external resources on which the Api Management service depends from inside the Cloud Service. This also returns the DNS Servers as visible to the CloudService.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   serviceName: string (required)
+  ##              : The name of the API Management service.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   serviceName: string (required)
-  ##              : The name of the API Management service.
-  var path_593961 = newJObject()
-  var query_593962 = newJObject()
-  add(path_593961, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593962, "api-version", newJString(apiVersion))
-  add(path_593961, "subscriptionId", newJString(subscriptionId))
-  add(path_593961, "serviceName", newJString(serviceName))
-  result = call_593960.call(path_593961, query_593962, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564094 = newJObject()
+  var query_564095 = newJObject()
+  add(path_564094, "serviceName", newJString(serviceName))
+  add(query_564095, "api-version", newJString(apiVersion))
+  add(path_564094, "subscriptionId", newJString(subscriptionId))
+  add(path_564094, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564093.call(path_564094, query_564095, nil, nil, nil)
 
-var networkStatusListByService* = Call_NetworkStatusListByService_593952(
+var networkStatusListByService* = Call_NetworkStatusListByService_564085(
     name: "networkStatusListByService", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ApiManagement/service/{serviceName}/networkstatus",
-    validator: validate_NetworkStatusListByService_593953, base: "",
-    url: url_NetworkStatusListByService_593954, schemes: {Scheme.Https})
+    validator: validate_NetworkStatusListByService_564086, base: "",
+    url: url_NetworkStatusListByService_564087, schemes: {Scheme.Https})
 export
   rest
 

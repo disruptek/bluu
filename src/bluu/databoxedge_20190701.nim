@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_573667 = ref object of OpenApiRestCall
+  OpenApiRestCall_563565 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_573667](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563565](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_573667): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563565): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,15 +107,15 @@ const
   macServiceName = "databoxedge"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_OperationsList_573889 = ref object of OpenApiRestCall_573667
-proc url_OperationsList_573891(protocol: Scheme; host: string; base: string;
+  Call_OperationsList_563787 = ref object of OpenApiRestCall_563565
+proc url_OperationsList_563789(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_OperationsList_573890(path: JsonNode; query: JsonNode;
+proc validate_OperationsList_563788(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   var section: JsonNode
@@ -124,11 +128,11 @@ proc validate_OperationsList_573890(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574050 = query.getOrDefault("api-version")
-  valid_574050 = validateParameter(valid_574050, JString, required = true,
+  var valid_563950 = query.getOrDefault("api-version")
+  valid_563950 = validateParameter(valid_563950, JString, required = true,
                                  default = nil)
-  if valid_574050 != nil:
-    section.add "api-version", valid_574050
+  if valid_563950 != nil:
+    section.add "api-version", valid_563950
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -137,33 +141,33 @@ proc validate_OperationsList_573890(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574073: Call_OperationsList_573889; path: JsonNode; query: JsonNode;
+proc call*(call_563973: Call_OperationsList_563787; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
-  let valid = call_574073.validator(path, query, header, formData, body)
-  let scheme = call_574073.pickScheme
+  let valid = call_563973.validator(path, query, header, formData, body)
+  let scheme = call_563973.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574073.url(scheme.get, call_574073.host, call_574073.base,
-                         call_574073.route, valid.getOrDefault("path"),
+  let url = call_563973.url(scheme.get, call_563973.host, call_563973.base,
+                         call_563973.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574073, url, valid)
+  result = hook(call_563973, url, valid)
 
-proc call*(call_574144: Call_OperationsList_573889; apiVersion: string): Recallable =
+proc call*(call_564044: Call_OperationsList_563787; apiVersion: string): Recallable =
   ## operationsList
   ##   apiVersion: string (required)
   ##             : The API version.
-  var query_574145 = newJObject()
-  add(query_574145, "api-version", newJString(apiVersion))
-  result = call_574144.call(nil, query_574145, nil, nil, nil)
+  var query_564045 = newJObject()
+  add(query_564045, "api-version", newJString(apiVersion))
+  result = call_564044.call(nil, query_564045, nil, nil, nil)
 
-var operationsList* = Call_OperationsList_573889(name: "operationsList",
+var operationsList* = Call_OperationsList_563787(name: "operationsList",
     meth: HttpMethod.HttpGet, host: "management.azure.com",
     route: "/providers/Microsoft.DataBoxEdge/operations",
-    validator: validate_OperationsList_573890, base: "", url: url_OperationsList_573891,
+    validator: validate_OperationsList_563788, base: "", url: url_OperationsList_563789,
     schemes: {Scheme.Https})
 type
-  Call_DevicesListBySubscription_574185 = ref object of OpenApiRestCall_573667
-proc url_DevicesListBySubscription_574187(protocol: Scheme; host: string;
+  Call_DevicesListBySubscription_564085 = ref object of OpenApiRestCall_563565
+proc url_DevicesListBySubscription_564087(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -180,7 +184,7 @@ proc url_DevicesListBySubscription_574187(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DevicesListBySubscription_574186(path: JsonNode; query: JsonNode;
+proc validate_DevicesListBySubscription_564086(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets all the Data Box Edge/Data Box Gateway devices in a subscription.
   ## 
@@ -192,11 +196,11 @@ proc validate_DevicesListBySubscription_574186(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_574203 = path.getOrDefault("subscriptionId")
-  valid_574203 = validateParameter(valid_574203, JString, required = true,
+  var valid_564103 = path.getOrDefault("subscriptionId")
+  valid_564103 = validateParameter(valid_564103, JString, required = true,
                                  default = nil)
-  if valid_574203 != nil:
-    section.add "subscriptionId", valid_574203
+  if valid_564103 != nil:
+    section.add "subscriptionId", valid_564103
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -206,16 +210,16 @@ proc validate_DevicesListBySubscription_574186(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574204 = query.getOrDefault("api-version")
-  valid_574204 = validateParameter(valid_574204, JString, required = true,
+  var valid_564104 = query.getOrDefault("api-version")
+  valid_564104 = validateParameter(valid_564104, JString, required = true,
                                  default = nil)
-  if valid_574204 != nil:
-    section.add "api-version", valid_574204
-  var valid_574205 = query.getOrDefault("$expand")
-  valid_574205 = validateParameter(valid_574205, JString, required = false,
+  if valid_564104 != nil:
+    section.add "api-version", valid_564104
+  var valid_564105 = query.getOrDefault("$expand")
+  valid_564105 = validateParameter(valid_564105, JString, required = false,
                                  default = nil)
-  if valid_574205 != nil:
-    section.add "$expand", valid_574205
+  if valid_564105 != nil:
+    section.add "$expand", valid_564105
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -224,20 +228,20 @@ proc validate_DevicesListBySubscription_574186(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574206: Call_DevicesListBySubscription_574185; path: JsonNode;
+proc call*(call_564106: Call_DevicesListBySubscription_564085; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets all the Data Box Edge/Data Box Gateway devices in a subscription.
   ## 
-  let valid = call_574206.validator(path, query, header, formData, body)
-  let scheme = call_574206.pickScheme
+  let valid = call_564106.validator(path, query, header, formData, body)
+  let scheme = call_564106.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574206.url(scheme.get, call_574206.host, call_574206.base,
-                         call_574206.route, valid.getOrDefault("path"),
+  let url = call_564106.url(scheme.get, call_564106.host, call_564106.base,
+                         call_564106.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574206, url, valid)
+  result = hook(call_564106, url, valid)
 
-proc call*(call_574207: Call_DevicesListBySubscription_574185; apiVersion: string;
+proc call*(call_564107: Call_DevicesListBySubscription_564085; apiVersion: string;
           subscriptionId: string; Expand: string = ""): Recallable =
   ## devicesListBySubscription
   ## Gets all the Data Box Edge/Data Box Gateway devices in a subscription.
@@ -247,21 +251,21 @@ proc call*(call_574207: Call_DevicesListBySubscription_574185; apiVersion: strin
   ##         : Specify $expand=details to populate additional fields related to the resource or Specify $skipToken=<token> to populate the next page in the list.
   ##   subscriptionId: string (required)
   ##                 : The subscription ID.
-  var path_574208 = newJObject()
-  var query_574209 = newJObject()
-  add(query_574209, "api-version", newJString(apiVersion))
-  add(query_574209, "$expand", newJString(Expand))
-  add(path_574208, "subscriptionId", newJString(subscriptionId))
-  result = call_574207.call(path_574208, query_574209, nil, nil, nil)
+  var path_564108 = newJObject()
+  var query_564109 = newJObject()
+  add(query_564109, "api-version", newJString(apiVersion))
+  add(query_564109, "$expand", newJString(Expand))
+  add(path_564108, "subscriptionId", newJString(subscriptionId))
+  result = call_564107.call(path_564108, query_564109, nil, nil, nil)
 
-var devicesListBySubscription* = Call_DevicesListBySubscription_574185(
+var devicesListBySubscription* = Call_DevicesListBySubscription_564085(
     name: "devicesListBySubscription", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.DataBoxEdge/dataBoxEdgeDevices",
-    validator: validate_DevicesListBySubscription_574186, base: "",
-    url: url_DevicesListBySubscription_574187, schemes: {Scheme.Https})
+    validator: validate_DevicesListBySubscription_564086, base: "",
+    url: url_DevicesListBySubscription_564087, schemes: {Scheme.Https})
 type
-  Call_DevicesListByResourceGroup_574210 = ref object of OpenApiRestCall_573667
-proc url_DevicesListByResourceGroup_574212(protocol: Scheme; host: string;
+  Call_DevicesListByResourceGroup_564110 = ref object of OpenApiRestCall_563565
+proc url_DevicesListByResourceGroup_564112(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -282,30 +286,30 @@ proc url_DevicesListByResourceGroup_574212(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DevicesListByResourceGroup_574211(path: JsonNode; query: JsonNode;
+proc validate_DevicesListByResourceGroup_564111(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets all the Data Box Edge/Data Box Gateway devices in a resource group.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The resource group name.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID.
+  ##   resourceGroupName: JString (required)
+  ##                    : The resource group name.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_574213 = path.getOrDefault("resourceGroupName")
-  valid_574213 = validateParameter(valid_574213, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564113 = path.getOrDefault("subscriptionId")
+  valid_564113 = validateParameter(valid_564113, JString, required = true,
                                  default = nil)
-  if valid_574213 != nil:
-    section.add "resourceGroupName", valid_574213
-  var valid_574214 = path.getOrDefault("subscriptionId")
-  valid_574214 = validateParameter(valid_574214, JString, required = true,
+  if valid_564113 != nil:
+    section.add "subscriptionId", valid_564113
+  var valid_564114 = path.getOrDefault("resourceGroupName")
+  valid_564114 = validateParameter(valid_564114, JString, required = true,
                                  default = nil)
-  if valid_574214 != nil:
-    section.add "subscriptionId", valid_574214
+  if valid_564114 != nil:
+    section.add "resourceGroupName", valid_564114
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -315,16 +319,16 @@ proc validate_DevicesListByResourceGroup_574211(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574215 = query.getOrDefault("api-version")
-  valid_574215 = validateParameter(valid_574215, JString, required = true,
+  var valid_564115 = query.getOrDefault("api-version")
+  valid_564115 = validateParameter(valid_564115, JString, required = true,
                                  default = nil)
-  if valid_574215 != nil:
-    section.add "api-version", valid_574215
-  var valid_574216 = query.getOrDefault("$expand")
-  valid_574216 = validateParameter(valid_574216, JString, required = false,
+  if valid_564115 != nil:
+    section.add "api-version", valid_564115
+  var valid_564116 = query.getOrDefault("$expand")
+  valid_564116 = validateParameter(valid_564116, JString, required = false,
                                  default = nil)
-  if valid_574216 != nil:
-    section.add "$expand", valid_574216
+  if valid_564116 != nil:
+    section.add "$expand", valid_564116
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -333,48 +337,47 @@ proc validate_DevicesListByResourceGroup_574211(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574217: Call_DevicesListByResourceGroup_574210; path: JsonNode;
+proc call*(call_564117: Call_DevicesListByResourceGroup_564110; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets all the Data Box Edge/Data Box Gateway devices in a resource group.
   ## 
-  let valid = call_574217.validator(path, query, header, formData, body)
-  let scheme = call_574217.pickScheme
+  let valid = call_564117.validator(path, query, header, formData, body)
+  let scheme = call_564117.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574217.url(scheme.get, call_574217.host, call_574217.base,
-                         call_574217.route, valid.getOrDefault("path"),
+  let url = call_564117.url(scheme.get, call_564117.host, call_564117.base,
+                         call_564117.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574217, url, valid)
+  result = hook(call_564117, url, valid)
 
-proc call*(call_574218: Call_DevicesListByResourceGroup_574210;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          Expand: string = ""): Recallable =
+proc call*(call_564118: Call_DevicesListByResourceGroup_564110; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string; Expand: string = ""): Recallable =
   ## devicesListByResourceGroup
   ## Gets all the Data Box Edge/Data Box Gateway devices in a resource group.
-  ##   resourceGroupName: string (required)
-  ##                    : The resource group name.
   ##   apiVersion: string (required)
   ##             : The API version.
   ##   Expand: string
   ##         : Specify $expand=details to populate additional fields related to the resource or Specify $skipToken=<token> to populate the next page in the list.
   ##   subscriptionId: string (required)
   ##                 : The subscription ID.
-  var path_574219 = newJObject()
-  var query_574220 = newJObject()
-  add(path_574219, "resourceGroupName", newJString(resourceGroupName))
-  add(query_574220, "api-version", newJString(apiVersion))
-  add(query_574220, "$expand", newJString(Expand))
-  add(path_574219, "subscriptionId", newJString(subscriptionId))
-  result = call_574218.call(path_574219, query_574220, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The resource group name.
+  var path_564119 = newJObject()
+  var query_564120 = newJObject()
+  add(query_564120, "api-version", newJString(apiVersion))
+  add(query_564120, "$expand", newJString(Expand))
+  add(path_564119, "subscriptionId", newJString(subscriptionId))
+  add(path_564119, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564118.call(path_564119, query_564120, nil, nil, nil)
 
-var devicesListByResourceGroup* = Call_DevicesListByResourceGroup_574210(
+var devicesListByResourceGroup* = Call_DevicesListByResourceGroup_564110(
     name: "devicesListByResourceGroup", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DataBoxEdge/dataBoxEdgeDevices",
-    validator: validate_DevicesListByResourceGroup_574211, base: "",
-    url: url_DevicesListByResourceGroup_574212, schemes: {Scheme.Https})
+    validator: validate_DevicesListByResourceGroup_564111, base: "",
+    url: url_DevicesListByResourceGroup_564112, schemes: {Scheme.Https})
 type
-  Call_DevicesCreateOrUpdate_574232 = ref object of OpenApiRestCall_573667
-proc url_DevicesCreateOrUpdate_574234(protocol: Scheme; host: string; base: string;
+  Call_DevicesCreateOrUpdate_564132 = ref object of OpenApiRestCall_563565
+proc url_DevicesCreateOrUpdate_564134(protocol: Scheme; host: string; base: string;
                                      route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -397,37 +400,37 @@ proc url_DevicesCreateOrUpdate_574234(protocol: Scheme; host: string; base: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DevicesCreateOrUpdate_574233(path: JsonNode; query: JsonNode;
+proc validate_DevicesCreateOrUpdate_564133(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Creates or updates a Data Box Edge/Data Box Gateway resource.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The resource group name.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID.
   ##   deviceName: JString (required)
   ##             : The device name.
+  ##   resourceGroupName: JString (required)
+  ##                    : The resource group name.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_574235 = path.getOrDefault("resourceGroupName")
-  valid_574235 = validateParameter(valid_574235, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564135 = path.getOrDefault("subscriptionId")
+  valid_564135 = validateParameter(valid_564135, JString, required = true,
                                  default = nil)
-  if valid_574235 != nil:
-    section.add "resourceGroupName", valid_574235
-  var valid_574236 = path.getOrDefault("subscriptionId")
-  valid_574236 = validateParameter(valid_574236, JString, required = true,
+  if valid_564135 != nil:
+    section.add "subscriptionId", valid_564135
+  var valid_564136 = path.getOrDefault("deviceName")
+  valid_564136 = validateParameter(valid_564136, JString, required = true,
                                  default = nil)
-  if valid_574236 != nil:
-    section.add "subscriptionId", valid_574236
-  var valid_574237 = path.getOrDefault("deviceName")
-  valid_574237 = validateParameter(valid_574237, JString, required = true,
+  if valid_564136 != nil:
+    section.add "deviceName", valid_564136
+  var valid_564137 = path.getOrDefault("resourceGroupName")
+  valid_564137 = validateParameter(valid_564137, JString, required = true,
                                  default = nil)
-  if valid_574237 != nil:
-    section.add "deviceName", valid_574237
+  if valid_564137 != nil:
+    section.add "resourceGroupName", valid_564137
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -435,11 +438,11 @@ proc validate_DevicesCreateOrUpdate_574233(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574238 = query.getOrDefault("api-version")
-  valid_574238 = validateParameter(valid_574238, JString, required = true,
+  var valid_564138 = query.getOrDefault("api-version")
+  valid_564138 = validateParameter(valid_564138, JString, required = true,
                                  default = nil)
-  if valid_574238 != nil:
-    section.add "api-version", valid_574238
+  if valid_564138 != nil:
+    section.add "api-version", valid_564138
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -453,53 +456,53 @@ proc validate_DevicesCreateOrUpdate_574233(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574240: Call_DevicesCreateOrUpdate_574232; path: JsonNode;
+proc call*(call_564140: Call_DevicesCreateOrUpdate_564132; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Creates or updates a Data Box Edge/Data Box Gateway resource.
   ## 
-  let valid = call_574240.validator(path, query, header, formData, body)
-  let scheme = call_574240.pickScheme
+  let valid = call_564140.validator(path, query, header, formData, body)
+  let scheme = call_564140.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574240.url(scheme.get, call_574240.host, call_574240.base,
-                         call_574240.route, valid.getOrDefault("path"),
+  let url = call_564140.url(scheme.get, call_564140.host, call_564140.base,
+                         call_564140.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574240, url, valid)
+  result = hook(call_564140, url, valid)
 
-proc call*(call_574241: Call_DevicesCreateOrUpdate_574232;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          DataBoxEdgeDevice: JsonNode; deviceName: string): Recallable =
+proc call*(call_564141: Call_DevicesCreateOrUpdate_564132;
+          DataBoxEdgeDevice: JsonNode; apiVersion: string; subscriptionId: string;
+          deviceName: string; resourceGroupName: string): Recallable =
   ## devicesCreateOrUpdate
   ## Creates or updates a Data Box Edge/Data Box Gateway resource.
-  ##   resourceGroupName: string (required)
-  ##                    : The resource group name.
+  ##   DataBoxEdgeDevice: JObject (required)
+  ##                    : The resource object.
   ##   apiVersion: string (required)
   ##             : The API version.
   ##   subscriptionId: string (required)
   ##                 : The subscription ID.
-  ##   DataBoxEdgeDevice: JObject (required)
-  ##                    : The resource object.
   ##   deviceName: string (required)
   ##             : The device name.
-  var path_574242 = newJObject()
-  var query_574243 = newJObject()
-  var body_574244 = newJObject()
-  add(path_574242, "resourceGroupName", newJString(resourceGroupName))
-  add(query_574243, "api-version", newJString(apiVersion))
-  add(path_574242, "subscriptionId", newJString(subscriptionId))
+  ##   resourceGroupName: string (required)
+  ##                    : The resource group name.
+  var path_564142 = newJObject()
+  var query_564143 = newJObject()
+  var body_564144 = newJObject()
   if DataBoxEdgeDevice != nil:
-    body_574244 = DataBoxEdgeDevice
-  add(path_574242, "deviceName", newJString(deviceName))
-  result = call_574241.call(path_574242, query_574243, nil, nil, body_574244)
+    body_564144 = DataBoxEdgeDevice
+  add(query_564143, "api-version", newJString(apiVersion))
+  add(path_564142, "subscriptionId", newJString(subscriptionId))
+  add(path_564142, "deviceName", newJString(deviceName))
+  add(path_564142, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564141.call(path_564142, query_564143, nil, nil, body_564144)
 
-var devicesCreateOrUpdate* = Call_DevicesCreateOrUpdate_574232(
+var devicesCreateOrUpdate* = Call_DevicesCreateOrUpdate_564132(
     name: "devicesCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DataBoxEdge/dataBoxEdgeDevices/{deviceName}",
-    validator: validate_DevicesCreateOrUpdate_574233, base: "",
-    url: url_DevicesCreateOrUpdate_574234, schemes: {Scheme.Https})
+    validator: validate_DevicesCreateOrUpdate_564133, base: "",
+    url: url_DevicesCreateOrUpdate_564134, schemes: {Scheme.Https})
 type
-  Call_DevicesGet_574221 = ref object of OpenApiRestCall_573667
-proc url_DevicesGet_574223(protocol: Scheme; host: string; base: string; route: string;
+  Call_DevicesGet_564121 = ref object of OpenApiRestCall_563565
+proc url_DevicesGet_564123(protocol: Scheme; host: string; base: string; route: string;
                           path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -522,37 +525,37 @@ proc url_DevicesGet_574223(protocol: Scheme; host: string; base: string; route: 
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DevicesGet_574222(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_DevicesGet_564122(path: JsonNode; query: JsonNode; header: JsonNode;
                                formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the properties of the Data Box Edge/Data Box Gateway device.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The resource group name.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID.
   ##   deviceName: JString (required)
   ##             : The device name.
+  ##   resourceGroupName: JString (required)
+  ##                    : The resource group name.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_574224 = path.getOrDefault("resourceGroupName")
-  valid_574224 = validateParameter(valid_574224, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564124 = path.getOrDefault("subscriptionId")
+  valid_564124 = validateParameter(valid_564124, JString, required = true,
                                  default = nil)
-  if valid_574224 != nil:
-    section.add "resourceGroupName", valid_574224
-  var valid_574225 = path.getOrDefault("subscriptionId")
-  valid_574225 = validateParameter(valid_574225, JString, required = true,
+  if valid_564124 != nil:
+    section.add "subscriptionId", valid_564124
+  var valid_564125 = path.getOrDefault("deviceName")
+  valid_564125 = validateParameter(valid_564125, JString, required = true,
                                  default = nil)
-  if valid_574225 != nil:
-    section.add "subscriptionId", valid_574225
-  var valid_574226 = path.getOrDefault("deviceName")
-  valid_574226 = validateParameter(valid_574226, JString, required = true,
+  if valid_564125 != nil:
+    section.add "deviceName", valid_564125
+  var valid_564126 = path.getOrDefault("resourceGroupName")
+  valid_564126 = validateParameter(valid_564126, JString, required = true,
                                  default = nil)
-  if valid_574226 != nil:
-    section.add "deviceName", valid_574226
+  if valid_564126 != nil:
+    section.add "resourceGroupName", valid_564126
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -560,11 +563,11 @@ proc validate_DevicesGet_574222(path: JsonNode; query: JsonNode; header: JsonNod
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574227 = query.getOrDefault("api-version")
-  valid_574227 = validateParameter(valid_574227, JString, required = true,
+  var valid_564127 = query.getOrDefault("api-version")
+  valid_564127 = validateParameter(valid_564127, JString, required = true,
                                  default = nil)
-  if valid_574227 != nil:
-    section.add "api-version", valid_574227
+  if valid_564127 != nil:
+    section.add "api-version", valid_564127
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -573,48 +576,48 @@ proc validate_DevicesGet_574222(path: JsonNode; query: JsonNode; header: JsonNod
   if body != nil:
     result.add "body", body
 
-proc call*(call_574228: Call_DevicesGet_574221; path: JsonNode; query: JsonNode;
+proc call*(call_564128: Call_DevicesGet_564121; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the properties of the Data Box Edge/Data Box Gateway device.
   ## 
-  let valid = call_574228.validator(path, query, header, formData, body)
-  let scheme = call_574228.pickScheme
+  let valid = call_564128.validator(path, query, header, formData, body)
+  let scheme = call_564128.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574228.url(scheme.get, call_574228.host, call_574228.base,
-                         call_574228.route, valid.getOrDefault("path"),
+  let url = call_564128.url(scheme.get, call_564128.host, call_564128.base,
+                         call_564128.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574228, url, valid)
+  result = hook(call_564128, url, valid)
 
-proc call*(call_574229: Call_DevicesGet_574221; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; deviceName: string): Recallable =
+proc call*(call_564129: Call_DevicesGet_564121; apiVersion: string;
+          subscriptionId: string; deviceName: string; resourceGroupName: string): Recallable =
   ## devicesGet
   ## Gets the properties of the Data Box Edge/Data Box Gateway device.
-  ##   resourceGroupName: string (required)
-  ##                    : The resource group name.
   ##   apiVersion: string (required)
   ##             : The API version.
   ##   subscriptionId: string (required)
   ##                 : The subscription ID.
   ##   deviceName: string (required)
   ##             : The device name.
-  var path_574230 = newJObject()
-  var query_574231 = newJObject()
-  add(path_574230, "resourceGroupName", newJString(resourceGroupName))
-  add(query_574231, "api-version", newJString(apiVersion))
-  add(path_574230, "subscriptionId", newJString(subscriptionId))
-  add(path_574230, "deviceName", newJString(deviceName))
-  result = call_574229.call(path_574230, query_574231, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The resource group name.
+  var path_564130 = newJObject()
+  var query_564131 = newJObject()
+  add(query_564131, "api-version", newJString(apiVersion))
+  add(path_564130, "subscriptionId", newJString(subscriptionId))
+  add(path_564130, "deviceName", newJString(deviceName))
+  add(path_564130, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564129.call(path_564130, query_564131, nil, nil, nil)
 
-var devicesGet* = Call_DevicesGet_574221(name: "devicesGet",
+var devicesGet* = Call_DevicesGet_564121(name: "devicesGet",
                                       meth: HttpMethod.HttpGet,
                                       host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DataBoxEdge/dataBoxEdgeDevices/{deviceName}",
-                                      validator: validate_DevicesGet_574222,
-                                      base: "", url: url_DevicesGet_574223,
+                                      validator: validate_DevicesGet_564122,
+                                      base: "", url: url_DevicesGet_564123,
                                       schemes: {Scheme.Https})
 type
-  Call_DevicesUpdate_574256 = ref object of OpenApiRestCall_573667
-proc url_DevicesUpdate_574258(protocol: Scheme; host: string; base: string;
+  Call_DevicesUpdate_564156 = ref object of OpenApiRestCall_563565
+proc url_DevicesUpdate_564158(protocol: Scheme; host: string; base: string;
                              route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -637,37 +640,37 @@ proc url_DevicesUpdate_574258(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DevicesUpdate_574257(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_DevicesUpdate_564157(path: JsonNode; query: JsonNode; header: JsonNode;
                                   formData: JsonNode; body: JsonNode): JsonNode =
   ## Modifies a Data Box Edge/Data Box Gateway resource.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The resource group name.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID.
   ##   deviceName: JString (required)
   ##             : The device name.
+  ##   resourceGroupName: JString (required)
+  ##                    : The resource group name.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_574259 = path.getOrDefault("resourceGroupName")
-  valid_574259 = validateParameter(valid_574259, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564159 = path.getOrDefault("subscriptionId")
+  valid_564159 = validateParameter(valid_564159, JString, required = true,
                                  default = nil)
-  if valid_574259 != nil:
-    section.add "resourceGroupName", valid_574259
-  var valid_574260 = path.getOrDefault("subscriptionId")
-  valid_574260 = validateParameter(valid_574260, JString, required = true,
+  if valid_564159 != nil:
+    section.add "subscriptionId", valid_564159
+  var valid_564160 = path.getOrDefault("deviceName")
+  valid_564160 = validateParameter(valid_564160, JString, required = true,
                                  default = nil)
-  if valid_574260 != nil:
-    section.add "subscriptionId", valid_574260
-  var valid_574261 = path.getOrDefault("deviceName")
-  valid_574261 = validateParameter(valid_574261, JString, required = true,
+  if valid_564160 != nil:
+    section.add "deviceName", valid_564160
+  var valid_564161 = path.getOrDefault("resourceGroupName")
+  valid_564161 = validateParameter(valid_564161, JString, required = true,
                                  default = nil)
-  if valid_574261 != nil:
-    section.add "deviceName", valid_574261
+  if valid_564161 != nil:
+    section.add "resourceGroupName", valid_564161
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -675,11 +678,11 @@ proc validate_DevicesUpdate_574257(path: JsonNode; query: JsonNode; header: Json
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574262 = query.getOrDefault("api-version")
-  valid_574262 = validateParameter(valid_574262, JString, required = true,
+  var valid_564162 = query.getOrDefault("api-version")
+  valid_564162 = validateParameter(valid_564162, JString, required = true,
                                  default = nil)
-  if valid_574262 != nil:
-    section.add "api-version", valid_574262
+  if valid_564162 != nil:
+    section.add "api-version", valid_564162
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -693,52 +696,52 @@ proc validate_DevicesUpdate_574257(path: JsonNode; query: JsonNode; header: Json
   if body != nil:
     result.add "body", body
 
-proc call*(call_574264: Call_DevicesUpdate_574256; path: JsonNode; query: JsonNode;
+proc call*(call_564164: Call_DevicesUpdate_564156; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Modifies a Data Box Edge/Data Box Gateway resource.
   ## 
-  let valid = call_574264.validator(path, query, header, formData, body)
-  let scheme = call_574264.pickScheme
+  let valid = call_564164.validator(path, query, header, formData, body)
+  let scheme = call_564164.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574264.url(scheme.get, call_574264.host, call_574264.base,
-                         call_574264.route, valid.getOrDefault("path"),
+  let url = call_564164.url(scheme.get, call_564164.host, call_564164.base,
+                         call_564164.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574264, url, valid)
+  result = hook(call_564164, url, valid)
 
-proc call*(call_574265: Call_DevicesUpdate_574256; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; parameters: JsonNode;
-          deviceName: string): Recallable =
+proc call*(call_564165: Call_DevicesUpdate_564156; apiVersion: string;
+          subscriptionId: string; deviceName: string; resourceGroupName: string;
+          parameters: JsonNode): Recallable =
   ## devicesUpdate
   ## Modifies a Data Box Edge/Data Box Gateway resource.
-  ##   resourceGroupName: string (required)
-  ##                    : The resource group name.
   ##   apiVersion: string (required)
   ##             : The API version.
   ##   subscriptionId: string (required)
   ##                 : The subscription ID.
-  ##   parameters: JObject (required)
-  ##             : The resource parameters.
   ##   deviceName: string (required)
   ##             : The device name.
-  var path_574266 = newJObject()
-  var query_574267 = newJObject()
-  var body_574268 = newJObject()
-  add(path_574266, "resourceGroupName", newJString(resourceGroupName))
-  add(query_574267, "api-version", newJString(apiVersion))
-  add(path_574266, "subscriptionId", newJString(subscriptionId))
+  ##   resourceGroupName: string (required)
+  ##                    : The resource group name.
+  ##   parameters: JObject (required)
+  ##             : The resource parameters.
+  var path_564166 = newJObject()
+  var query_564167 = newJObject()
+  var body_564168 = newJObject()
+  add(query_564167, "api-version", newJString(apiVersion))
+  add(path_564166, "subscriptionId", newJString(subscriptionId))
+  add(path_564166, "deviceName", newJString(deviceName))
+  add(path_564166, "resourceGroupName", newJString(resourceGroupName))
   if parameters != nil:
-    body_574268 = parameters
-  add(path_574266, "deviceName", newJString(deviceName))
-  result = call_574265.call(path_574266, query_574267, nil, nil, body_574268)
+    body_564168 = parameters
+  result = call_564165.call(path_564166, query_564167, nil, nil, body_564168)
 
-var devicesUpdate* = Call_DevicesUpdate_574256(name: "devicesUpdate",
+var devicesUpdate* = Call_DevicesUpdate_564156(name: "devicesUpdate",
     meth: HttpMethod.HttpPatch, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DataBoxEdge/dataBoxEdgeDevices/{deviceName}",
-    validator: validate_DevicesUpdate_574257, base: "", url: url_DevicesUpdate_574258,
+    validator: validate_DevicesUpdate_564157, base: "", url: url_DevicesUpdate_564158,
     schemes: {Scheme.Https})
 type
-  Call_DevicesDelete_574245 = ref object of OpenApiRestCall_573667
-proc url_DevicesDelete_574247(protocol: Scheme; host: string; base: string;
+  Call_DevicesDelete_564145 = ref object of OpenApiRestCall_563565
+proc url_DevicesDelete_564147(protocol: Scheme; host: string; base: string;
                              route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -761,37 +764,37 @@ proc url_DevicesDelete_574247(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DevicesDelete_574246(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_DevicesDelete_564146(path: JsonNode; query: JsonNode; header: JsonNode;
                                   formData: JsonNode; body: JsonNode): JsonNode =
   ## Deletes the Data Box Edge/Data Box Gateway device.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The resource group name.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID.
   ##   deviceName: JString (required)
   ##             : The device name.
+  ##   resourceGroupName: JString (required)
+  ##                    : The resource group name.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_574248 = path.getOrDefault("resourceGroupName")
-  valid_574248 = validateParameter(valid_574248, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564148 = path.getOrDefault("subscriptionId")
+  valid_564148 = validateParameter(valid_564148, JString, required = true,
                                  default = nil)
-  if valid_574248 != nil:
-    section.add "resourceGroupName", valid_574248
-  var valid_574249 = path.getOrDefault("subscriptionId")
-  valid_574249 = validateParameter(valid_574249, JString, required = true,
+  if valid_564148 != nil:
+    section.add "subscriptionId", valid_564148
+  var valid_564149 = path.getOrDefault("deviceName")
+  valid_564149 = validateParameter(valid_564149, JString, required = true,
                                  default = nil)
-  if valid_574249 != nil:
-    section.add "subscriptionId", valid_574249
-  var valid_574250 = path.getOrDefault("deviceName")
-  valid_574250 = validateParameter(valid_574250, JString, required = true,
+  if valid_564149 != nil:
+    section.add "deviceName", valid_564149
+  var valid_564150 = path.getOrDefault("resourceGroupName")
+  valid_564150 = validateParameter(valid_564150, JString, required = true,
                                  default = nil)
-  if valid_574250 != nil:
-    section.add "deviceName", valid_574250
+  if valid_564150 != nil:
+    section.add "resourceGroupName", valid_564150
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -799,11 +802,11 @@ proc validate_DevicesDelete_574246(path: JsonNode; query: JsonNode; header: Json
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574251 = query.getOrDefault("api-version")
-  valid_574251 = validateParameter(valid_574251, JString, required = true,
+  var valid_564151 = query.getOrDefault("api-version")
+  valid_564151 = validateParameter(valid_564151, JString, required = true,
                                  default = nil)
-  if valid_574251 != nil:
-    section.add "api-version", valid_574251
+  if valid_564151 != nil:
+    section.add "api-version", valid_564151
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -812,46 +815,46 @@ proc validate_DevicesDelete_574246(path: JsonNode; query: JsonNode; header: Json
   if body != nil:
     result.add "body", body
 
-proc call*(call_574252: Call_DevicesDelete_574245; path: JsonNode; query: JsonNode;
+proc call*(call_564152: Call_DevicesDelete_564145; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes the Data Box Edge/Data Box Gateway device.
   ## 
-  let valid = call_574252.validator(path, query, header, formData, body)
-  let scheme = call_574252.pickScheme
+  let valid = call_564152.validator(path, query, header, formData, body)
+  let scheme = call_564152.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574252.url(scheme.get, call_574252.host, call_574252.base,
-                         call_574252.route, valid.getOrDefault("path"),
+  let url = call_564152.url(scheme.get, call_564152.host, call_564152.base,
+                         call_564152.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574252, url, valid)
+  result = hook(call_564152, url, valid)
 
-proc call*(call_574253: Call_DevicesDelete_574245; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; deviceName: string): Recallable =
+proc call*(call_564153: Call_DevicesDelete_564145; apiVersion: string;
+          subscriptionId: string; deviceName: string; resourceGroupName: string): Recallable =
   ## devicesDelete
   ## Deletes the Data Box Edge/Data Box Gateway device.
-  ##   resourceGroupName: string (required)
-  ##                    : The resource group name.
   ##   apiVersion: string (required)
   ##             : The API version.
   ##   subscriptionId: string (required)
   ##                 : The subscription ID.
   ##   deviceName: string (required)
   ##             : The device name.
-  var path_574254 = newJObject()
-  var query_574255 = newJObject()
-  add(path_574254, "resourceGroupName", newJString(resourceGroupName))
-  add(query_574255, "api-version", newJString(apiVersion))
-  add(path_574254, "subscriptionId", newJString(subscriptionId))
-  add(path_574254, "deviceName", newJString(deviceName))
-  result = call_574253.call(path_574254, query_574255, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The resource group name.
+  var path_564154 = newJObject()
+  var query_564155 = newJObject()
+  add(query_564155, "api-version", newJString(apiVersion))
+  add(path_564154, "subscriptionId", newJString(subscriptionId))
+  add(path_564154, "deviceName", newJString(deviceName))
+  add(path_564154, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564153.call(path_564154, query_564155, nil, nil, nil)
 
-var devicesDelete* = Call_DevicesDelete_574245(name: "devicesDelete",
+var devicesDelete* = Call_DevicesDelete_564145(name: "devicesDelete",
     meth: HttpMethod.HttpDelete, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DataBoxEdge/dataBoxEdgeDevices/{deviceName}",
-    validator: validate_DevicesDelete_574246, base: "", url: url_DevicesDelete_574247,
+    validator: validate_DevicesDelete_564146, base: "", url: url_DevicesDelete_564147,
     schemes: {Scheme.Https})
 type
-  Call_AlertsListByDataBoxEdgeDevice_574269 = ref object of OpenApiRestCall_573667
-proc url_AlertsListByDataBoxEdgeDevice_574271(protocol: Scheme; host: string;
+  Call_AlertsListByDataBoxEdgeDevice_564169 = ref object of OpenApiRestCall_563565
+proc url_AlertsListByDataBoxEdgeDevice_564171(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -875,37 +878,37 @@ proc url_AlertsListByDataBoxEdgeDevice_574271(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AlertsListByDataBoxEdgeDevice_574270(path: JsonNode; query: JsonNode;
+proc validate_AlertsListByDataBoxEdgeDevice_564170(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets all the alerts for a Data Box Edge/Data Box Gateway device.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The resource group name.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID.
   ##   deviceName: JString (required)
   ##             : The device name.
+  ##   resourceGroupName: JString (required)
+  ##                    : The resource group name.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_574272 = path.getOrDefault("resourceGroupName")
-  valid_574272 = validateParameter(valid_574272, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564172 = path.getOrDefault("subscriptionId")
+  valid_564172 = validateParameter(valid_564172, JString, required = true,
                                  default = nil)
-  if valid_574272 != nil:
-    section.add "resourceGroupName", valid_574272
-  var valid_574273 = path.getOrDefault("subscriptionId")
-  valid_574273 = validateParameter(valid_574273, JString, required = true,
+  if valid_564172 != nil:
+    section.add "subscriptionId", valid_564172
+  var valid_564173 = path.getOrDefault("deviceName")
+  valid_564173 = validateParameter(valid_564173, JString, required = true,
                                  default = nil)
-  if valid_574273 != nil:
-    section.add "subscriptionId", valid_574273
-  var valid_574274 = path.getOrDefault("deviceName")
-  valid_574274 = validateParameter(valid_574274, JString, required = true,
+  if valid_564173 != nil:
+    section.add "deviceName", valid_564173
+  var valid_564174 = path.getOrDefault("resourceGroupName")
+  valid_564174 = validateParameter(valid_564174, JString, required = true,
                                  default = nil)
-  if valid_574274 != nil:
-    section.add "deviceName", valid_574274
+  if valid_564174 != nil:
+    section.add "resourceGroupName", valid_564174
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -913,11 +916,11 @@ proc validate_AlertsListByDataBoxEdgeDevice_574270(path: JsonNode; query: JsonNo
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574275 = query.getOrDefault("api-version")
-  valid_574275 = validateParameter(valid_574275, JString, required = true,
+  var valid_564175 = query.getOrDefault("api-version")
+  valid_564175 = validateParameter(valid_564175, JString, required = true,
                                  default = nil)
-  if valid_574275 != nil:
-    section.add "api-version", valid_574275
+  if valid_564175 != nil:
+    section.add "api-version", valid_564175
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -926,48 +929,48 @@ proc validate_AlertsListByDataBoxEdgeDevice_574270(path: JsonNode; query: JsonNo
   if body != nil:
     result.add "body", body
 
-proc call*(call_574276: Call_AlertsListByDataBoxEdgeDevice_574269; path: JsonNode;
+proc call*(call_564176: Call_AlertsListByDataBoxEdgeDevice_564169; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets all the alerts for a Data Box Edge/Data Box Gateway device.
   ## 
-  let valid = call_574276.validator(path, query, header, formData, body)
-  let scheme = call_574276.pickScheme
+  let valid = call_564176.validator(path, query, header, formData, body)
+  let scheme = call_564176.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574276.url(scheme.get, call_574276.host, call_574276.base,
-                         call_574276.route, valid.getOrDefault("path"),
+  let url = call_564176.url(scheme.get, call_564176.host, call_564176.base,
+                         call_564176.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574276, url, valid)
+  result = hook(call_564176, url, valid)
 
-proc call*(call_574277: Call_AlertsListByDataBoxEdgeDevice_574269;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          deviceName: string): Recallable =
+proc call*(call_564177: Call_AlertsListByDataBoxEdgeDevice_564169;
+          apiVersion: string; subscriptionId: string; deviceName: string;
+          resourceGroupName: string): Recallable =
   ## alertsListByDataBoxEdgeDevice
   ## Gets all the alerts for a Data Box Edge/Data Box Gateway device.
-  ##   resourceGroupName: string (required)
-  ##                    : The resource group name.
   ##   apiVersion: string (required)
   ##             : The API version.
   ##   subscriptionId: string (required)
   ##                 : The subscription ID.
   ##   deviceName: string (required)
   ##             : The device name.
-  var path_574278 = newJObject()
-  var query_574279 = newJObject()
-  add(path_574278, "resourceGroupName", newJString(resourceGroupName))
-  add(query_574279, "api-version", newJString(apiVersion))
-  add(path_574278, "subscriptionId", newJString(subscriptionId))
-  add(path_574278, "deviceName", newJString(deviceName))
-  result = call_574277.call(path_574278, query_574279, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The resource group name.
+  var path_564178 = newJObject()
+  var query_564179 = newJObject()
+  add(query_564179, "api-version", newJString(apiVersion))
+  add(path_564178, "subscriptionId", newJString(subscriptionId))
+  add(path_564178, "deviceName", newJString(deviceName))
+  add(path_564178, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564177.call(path_564178, query_564179, nil, nil, nil)
 
-var alertsListByDataBoxEdgeDevice* = Call_AlertsListByDataBoxEdgeDevice_574269(
+var alertsListByDataBoxEdgeDevice* = Call_AlertsListByDataBoxEdgeDevice_564169(
     name: "alertsListByDataBoxEdgeDevice", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DataBoxEdge/dataBoxEdgeDevices/{deviceName}/alerts",
-    validator: validate_AlertsListByDataBoxEdgeDevice_574270, base: "",
-    url: url_AlertsListByDataBoxEdgeDevice_574271, schemes: {Scheme.Https})
+    validator: validate_AlertsListByDataBoxEdgeDevice_564170, base: "",
+    url: url_AlertsListByDataBoxEdgeDevice_564171, schemes: {Scheme.Https})
 type
-  Call_AlertsGet_574280 = ref object of OpenApiRestCall_573667
-proc url_AlertsGet_574282(protocol: Scheme; host: string; base: string; route: string;
+  Call_AlertsGet_564180 = ref object of OpenApiRestCall_563565
+proc url_AlertsGet_564182(protocol: Scheme; host: string; base: string; route: string;
                          path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -993,42 +996,41 @@ proc url_AlertsGet_574282(protocol: Scheme; host: string; base: string; route: s
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AlertsGet_574281(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_AlertsGet_564181(path: JsonNode; query: JsonNode; header: JsonNode;
                               formData: JsonNode; body: JsonNode): JsonNode =
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The resource group name.
   ##   name: JString (required)
   ##       : The alert name.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID.
   ##   deviceName: JString (required)
   ##             : The device name.
+  ##   resourceGroupName: JString (required)
+  ##                    : The resource group name.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_574283 = path.getOrDefault("resourceGroupName")
-  valid_574283 = validateParameter(valid_574283, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `name` field"
+  var valid_564183 = path.getOrDefault("name")
+  valid_564183 = validateParameter(valid_564183, JString, required = true,
                                  default = nil)
-  if valid_574283 != nil:
-    section.add "resourceGroupName", valid_574283
-  var valid_574284 = path.getOrDefault("name")
-  valid_574284 = validateParameter(valid_574284, JString, required = true,
+  if valid_564183 != nil:
+    section.add "name", valid_564183
+  var valid_564184 = path.getOrDefault("subscriptionId")
+  valid_564184 = validateParameter(valid_564184, JString, required = true,
                                  default = nil)
-  if valid_574284 != nil:
-    section.add "name", valid_574284
-  var valid_574285 = path.getOrDefault("subscriptionId")
-  valid_574285 = validateParameter(valid_574285, JString, required = true,
+  if valid_564184 != nil:
+    section.add "subscriptionId", valid_564184
+  var valid_564185 = path.getOrDefault("deviceName")
+  valid_564185 = validateParameter(valid_564185, JString, required = true,
                                  default = nil)
-  if valid_574285 != nil:
-    section.add "subscriptionId", valid_574285
-  var valid_574286 = path.getOrDefault("deviceName")
-  valid_574286 = validateParameter(valid_574286, JString, required = true,
+  if valid_564185 != nil:
+    section.add "deviceName", valid_564185
+  var valid_564186 = path.getOrDefault("resourceGroupName")
+  valid_564186 = validateParameter(valid_564186, JString, required = true,
                                  default = nil)
-  if valid_574286 != nil:
-    section.add "deviceName", valid_574286
+  if valid_564186 != nil:
+    section.add "resourceGroupName", valid_564186
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1036,11 +1038,11 @@ proc validate_AlertsGet_574281(path: JsonNode; query: JsonNode; header: JsonNode
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574287 = query.getOrDefault("api-version")
-  valid_574287 = validateParameter(valid_574287, JString, required = true,
+  var valid_564187 = query.getOrDefault("api-version")
+  valid_564187 = validateParameter(valid_564187, JString, required = true,
                                  default = nil)
-  if valid_574287 != nil:
-    section.add "api-version", valid_574287
+  if valid_564187 != nil:
+    section.add "api-version", valid_564187
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1049,22 +1051,20 @@ proc validate_AlertsGet_574281(path: JsonNode; query: JsonNode; header: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_574288: Call_AlertsGet_574280; path: JsonNode; query: JsonNode;
+proc call*(call_564188: Call_AlertsGet_564180; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
-  let valid = call_574288.validator(path, query, header, formData, body)
-  let scheme = call_574288.pickScheme
+  let valid = call_564188.validator(path, query, header, formData, body)
+  let scheme = call_564188.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574288.url(scheme.get, call_574288.host, call_574288.base,
-                         call_574288.route, valid.getOrDefault("path"),
+  let url = call_564188.url(scheme.get, call_564188.host, call_564188.base,
+                         call_564188.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574288, url, valid)
+  result = hook(call_564188, url, valid)
 
-proc call*(call_574289: Call_AlertsGet_574280; resourceGroupName: string;
-          apiVersion: string; name: string; subscriptionId: string; deviceName: string): Recallable =
+proc call*(call_564189: Call_AlertsGet_564180; apiVersion: string; name: string;
+          subscriptionId: string; deviceName: string; resourceGroupName: string): Recallable =
   ## alertsGet
-  ##   resourceGroupName: string (required)
-  ##                    : The resource group name.
   ##   apiVersion: string (required)
   ##             : The API version.
   ##   name: string (required)
@@ -1073,23 +1073,25 @@ proc call*(call_574289: Call_AlertsGet_574280; resourceGroupName: string;
   ##                 : The subscription ID.
   ##   deviceName: string (required)
   ##             : The device name.
-  var path_574290 = newJObject()
-  var query_574291 = newJObject()
-  add(path_574290, "resourceGroupName", newJString(resourceGroupName))
-  add(query_574291, "api-version", newJString(apiVersion))
-  add(path_574290, "name", newJString(name))
-  add(path_574290, "subscriptionId", newJString(subscriptionId))
-  add(path_574290, "deviceName", newJString(deviceName))
-  result = call_574289.call(path_574290, query_574291, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The resource group name.
+  var path_564190 = newJObject()
+  var query_564191 = newJObject()
+  add(query_564191, "api-version", newJString(apiVersion))
+  add(path_564190, "name", newJString(name))
+  add(path_564190, "subscriptionId", newJString(subscriptionId))
+  add(path_564190, "deviceName", newJString(deviceName))
+  add(path_564190, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564189.call(path_564190, query_564191, nil, nil, nil)
 
-var alertsGet* = Call_AlertsGet_574280(name: "alertsGet", meth: HttpMethod.HttpGet,
+var alertsGet* = Call_AlertsGet_564180(name: "alertsGet", meth: HttpMethod.HttpGet,
                                     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DataBoxEdge/dataBoxEdgeDevices/{deviceName}/alerts/{name}",
-                                    validator: validate_AlertsGet_574281,
-                                    base: "", url: url_AlertsGet_574282,
+                                    validator: validate_AlertsGet_564181,
+                                    base: "", url: url_AlertsGet_564182,
                                     schemes: {Scheme.Https})
 type
-  Call_BandwidthSchedulesListByDataBoxEdgeDevice_574292 = ref object of OpenApiRestCall_573667
-proc url_BandwidthSchedulesListByDataBoxEdgeDevice_574294(protocol: Scheme;
+  Call_BandwidthSchedulesListByDataBoxEdgeDevice_564192 = ref object of OpenApiRestCall_563565
+proc url_BandwidthSchedulesListByDataBoxEdgeDevice_564194(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1113,37 +1115,37 @@ proc url_BandwidthSchedulesListByDataBoxEdgeDevice_574294(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_BandwidthSchedulesListByDataBoxEdgeDevice_574293(path: JsonNode;
+proc validate_BandwidthSchedulesListByDataBoxEdgeDevice_564193(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets all the bandwidth schedules for a Data Box Edge/Data Box Gateway device.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The resource group name.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID.
   ##   deviceName: JString (required)
   ##             : The device name.
+  ##   resourceGroupName: JString (required)
+  ##                    : The resource group name.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_574295 = path.getOrDefault("resourceGroupName")
-  valid_574295 = validateParameter(valid_574295, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564195 = path.getOrDefault("subscriptionId")
+  valid_564195 = validateParameter(valid_564195, JString, required = true,
                                  default = nil)
-  if valid_574295 != nil:
-    section.add "resourceGroupName", valid_574295
-  var valid_574296 = path.getOrDefault("subscriptionId")
-  valid_574296 = validateParameter(valid_574296, JString, required = true,
+  if valid_564195 != nil:
+    section.add "subscriptionId", valid_564195
+  var valid_564196 = path.getOrDefault("deviceName")
+  valid_564196 = validateParameter(valid_564196, JString, required = true,
                                  default = nil)
-  if valid_574296 != nil:
-    section.add "subscriptionId", valid_574296
-  var valid_574297 = path.getOrDefault("deviceName")
-  valid_574297 = validateParameter(valid_574297, JString, required = true,
+  if valid_564196 != nil:
+    section.add "deviceName", valid_564196
+  var valid_564197 = path.getOrDefault("resourceGroupName")
+  valid_564197 = validateParameter(valid_564197, JString, required = true,
                                  default = nil)
-  if valid_574297 != nil:
-    section.add "deviceName", valid_574297
+  if valid_564197 != nil:
+    section.add "resourceGroupName", valid_564197
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1151,11 +1153,11 @@ proc validate_BandwidthSchedulesListByDataBoxEdgeDevice_574293(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574298 = query.getOrDefault("api-version")
-  valid_574298 = validateParameter(valid_574298, JString, required = true,
+  var valid_564198 = query.getOrDefault("api-version")
+  valid_564198 = validateParameter(valid_564198, JString, required = true,
                                  default = nil)
-  if valid_574298 != nil:
-    section.add "api-version", valid_574298
+  if valid_564198 != nil:
+    section.add "api-version", valid_564198
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1164,50 +1166,50 @@ proc validate_BandwidthSchedulesListByDataBoxEdgeDevice_574293(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574299: Call_BandwidthSchedulesListByDataBoxEdgeDevice_574292;
+proc call*(call_564199: Call_BandwidthSchedulesListByDataBoxEdgeDevice_564192;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Gets all the bandwidth schedules for a Data Box Edge/Data Box Gateway device.
   ## 
-  let valid = call_574299.validator(path, query, header, formData, body)
-  let scheme = call_574299.pickScheme
+  let valid = call_564199.validator(path, query, header, formData, body)
+  let scheme = call_564199.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574299.url(scheme.get, call_574299.host, call_574299.base,
-                         call_574299.route, valid.getOrDefault("path"),
+  let url = call_564199.url(scheme.get, call_564199.host, call_564199.base,
+                         call_564199.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574299, url, valid)
+  result = hook(call_564199, url, valid)
 
-proc call*(call_574300: Call_BandwidthSchedulesListByDataBoxEdgeDevice_574292;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          deviceName: string): Recallable =
+proc call*(call_564200: Call_BandwidthSchedulesListByDataBoxEdgeDevice_564192;
+          apiVersion: string; subscriptionId: string; deviceName: string;
+          resourceGroupName: string): Recallable =
   ## bandwidthSchedulesListByDataBoxEdgeDevice
   ## Gets all the bandwidth schedules for a Data Box Edge/Data Box Gateway device.
-  ##   resourceGroupName: string (required)
-  ##                    : The resource group name.
   ##   apiVersion: string (required)
   ##             : The API version.
   ##   subscriptionId: string (required)
   ##                 : The subscription ID.
   ##   deviceName: string (required)
   ##             : The device name.
-  var path_574301 = newJObject()
-  var query_574302 = newJObject()
-  add(path_574301, "resourceGroupName", newJString(resourceGroupName))
-  add(query_574302, "api-version", newJString(apiVersion))
-  add(path_574301, "subscriptionId", newJString(subscriptionId))
-  add(path_574301, "deviceName", newJString(deviceName))
-  result = call_574300.call(path_574301, query_574302, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The resource group name.
+  var path_564201 = newJObject()
+  var query_564202 = newJObject()
+  add(query_564202, "api-version", newJString(apiVersion))
+  add(path_564201, "subscriptionId", newJString(subscriptionId))
+  add(path_564201, "deviceName", newJString(deviceName))
+  add(path_564201, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564200.call(path_564201, query_564202, nil, nil, nil)
 
-var bandwidthSchedulesListByDataBoxEdgeDevice* = Call_BandwidthSchedulesListByDataBoxEdgeDevice_574292(
+var bandwidthSchedulesListByDataBoxEdgeDevice* = Call_BandwidthSchedulesListByDataBoxEdgeDevice_564192(
     name: "bandwidthSchedulesListByDataBoxEdgeDevice", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DataBoxEdge/dataBoxEdgeDevices/{deviceName}/bandwidthSchedules",
-    validator: validate_BandwidthSchedulesListByDataBoxEdgeDevice_574293,
-    base: "", url: url_BandwidthSchedulesListByDataBoxEdgeDevice_574294,
+    validator: validate_BandwidthSchedulesListByDataBoxEdgeDevice_564193,
+    base: "", url: url_BandwidthSchedulesListByDataBoxEdgeDevice_564194,
     schemes: {Scheme.Https})
 type
-  Call_BandwidthSchedulesCreateOrUpdate_574315 = ref object of OpenApiRestCall_573667
-proc url_BandwidthSchedulesCreateOrUpdate_574317(protocol: Scheme; host: string;
+  Call_BandwidthSchedulesCreateOrUpdate_564215 = ref object of OpenApiRestCall_563565
+proc url_BandwidthSchedulesCreateOrUpdate_564217(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1233,44 +1235,43 @@ proc url_BandwidthSchedulesCreateOrUpdate_574317(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_BandwidthSchedulesCreateOrUpdate_574316(path: JsonNode;
+proc validate_BandwidthSchedulesCreateOrUpdate_564216(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Creates or updates a bandwidth schedule.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The resource group name.
   ##   name: JString (required)
   ##       : The bandwidth schedule name which needs to be added/updated.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID.
   ##   deviceName: JString (required)
   ##             : The device name.
+  ##   resourceGroupName: JString (required)
+  ##                    : The resource group name.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_574318 = path.getOrDefault("resourceGroupName")
-  valid_574318 = validateParameter(valid_574318, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `name` field"
+  var valid_564218 = path.getOrDefault("name")
+  valid_564218 = validateParameter(valid_564218, JString, required = true,
                                  default = nil)
-  if valid_574318 != nil:
-    section.add "resourceGroupName", valid_574318
-  var valid_574319 = path.getOrDefault("name")
-  valid_574319 = validateParameter(valid_574319, JString, required = true,
+  if valid_564218 != nil:
+    section.add "name", valid_564218
+  var valid_564219 = path.getOrDefault("subscriptionId")
+  valid_564219 = validateParameter(valid_564219, JString, required = true,
                                  default = nil)
-  if valid_574319 != nil:
-    section.add "name", valid_574319
-  var valid_574320 = path.getOrDefault("subscriptionId")
-  valid_574320 = validateParameter(valid_574320, JString, required = true,
+  if valid_564219 != nil:
+    section.add "subscriptionId", valid_564219
+  var valid_564220 = path.getOrDefault("deviceName")
+  valid_564220 = validateParameter(valid_564220, JString, required = true,
                                  default = nil)
-  if valid_574320 != nil:
-    section.add "subscriptionId", valid_574320
-  var valid_574321 = path.getOrDefault("deviceName")
-  valid_574321 = validateParameter(valid_574321, JString, required = true,
+  if valid_564220 != nil:
+    section.add "deviceName", valid_564220
+  var valid_564221 = path.getOrDefault("resourceGroupName")
+  valid_564221 = validateParameter(valid_564221, JString, required = true,
                                  default = nil)
-  if valid_574321 != nil:
-    section.add "deviceName", valid_574321
+  if valid_564221 != nil:
+    section.add "resourceGroupName", valid_564221
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1278,11 +1279,11 @@ proc validate_BandwidthSchedulesCreateOrUpdate_574316(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574322 = query.getOrDefault("api-version")
-  valid_574322 = validateParameter(valid_574322, JString, required = true,
+  var valid_564222 = query.getOrDefault("api-version")
+  valid_564222 = validateParameter(valid_564222, JString, required = true,
                                  default = nil)
-  if valid_574322 != nil:
-    section.add "api-version", valid_574322
+  if valid_564222 != nil:
+    section.add "api-version", valid_564222
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1296,57 +1297,57 @@ proc validate_BandwidthSchedulesCreateOrUpdate_574316(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574324: Call_BandwidthSchedulesCreateOrUpdate_574315;
+proc call*(call_564224: Call_BandwidthSchedulesCreateOrUpdate_564215;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Creates or updates a bandwidth schedule.
   ## 
-  let valid = call_574324.validator(path, query, header, formData, body)
-  let scheme = call_574324.pickScheme
+  let valid = call_564224.validator(path, query, header, formData, body)
+  let scheme = call_564224.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574324.url(scheme.get, call_574324.host, call_574324.base,
-                         call_574324.route, valid.getOrDefault("path"),
+  let url = call_564224.url(scheme.get, call_564224.host, call_564224.base,
+                         call_564224.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574324, url, valid)
+  result = hook(call_564224, url, valid)
 
-proc call*(call_574325: Call_BandwidthSchedulesCreateOrUpdate_574315;
-          resourceGroupName: string; apiVersion: string; name: string;
-          subscriptionId: string; parameters: JsonNode; deviceName: string): Recallable =
+proc call*(call_564225: Call_BandwidthSchedulesCreateOrUpdate_564215;
+          apiVersion: string; name: string; subscriptionId: string;
+          deviceName: string; resourceGroupName: string; parameters: JsonNode): Recallable =
   ## bandwidthSchedulesCreateOrUpdate
   ## Creates or updates a bandwidth schedule.
-  ##   resourceGroupName: string (required)
-  ##                    : The resource group name.
   ##   apiVersion: string (required)
   ##             : The API version.
   ##   name: string (required)
   ##       : The bandwidth schedule name which needs to be added/updated.
   ##   subscriptionId: string (required)
   ##                 : The subscription ID.
-  ##   parameters: JObject (required)
-  ##             : The bandwidth schedule to be added or updated.
   ##   deviceName: string (required)
   ##             : The device name.
-  var path_574326 = newJObject()
-  var query_574327 = newJObject()
-  var body_574328 = newJObject()
-  add(path_574326, "resourceGroupName", newJString(resourceGroupName))
-  add(query_574327, "api-version", newJString(apiVersion))
-  add(path_574326, "name", newJString(name))
-  add(path_574326, "subscriptionId", newJString(subscriptionId))
+  ##   resourceGroupName: string (required)
+  ##                    : The resource group name.
+  ##   parameters: JObject (required)
+  ##             : The bandwidth schedule to be added or updated.
+  var path_564226 = newJObject()
+  var query_564227 = newJObject()
+  var body_564228 = newJObject()
+  add(query_564227, "api-version", newJString(apiVersion))
+  add(path_564226, "name", newJString(name))
+  add(path_564226, "subscriptionId", newJString(subscriptionId))
+  add(path_564226, "deviceName", newJString(deviceName))
+  add(path_564226, "resourceGroupName", newJString(resourceGroupName))
   if parameters != nil:
-    body_574328 = parameters
-  add(path_574326, "deviceName", newJString(deviceName))
-  result = call_574325.call(path_574326, query_574327, nil, nil, body_574328)
+    body_564228 = parameters
+  result = call_564225.call(path_564226, query_564227, nil, nil, body_564228)
 
-var bandwidthSchedulesCreateOrUpdate* = Call_BandwidthSchedulesCreateOrUpdate_574315(
+var bandwidthSchedulesCreateOrUpdate* = Call_BandwidthSchedulesCreateOrUpdate_564215(
     name: "bandwidthSchedulesCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DataBoxEdge/dataBoxEdgeDevices/{deviceName}/bandwidthSchedules/{name}",
-    validator: validate_BandwidthSchedulesCreateOrUpdate_574316, base: "",
-    url: url_BandwidthSchedulesCreateOrUpdate_574317, schemes: {Scheme.Https})
+    validator: validate_BandwidthSchedulesCreateOrUpdate_564216, base: "",
+    url: url_BandwidthSchedulesCreateOrUpdate_564217, schemes: {Scheme.Https})
 type
-  Call_BandwidthSchedulesGet_574303 = ref object of OpenApiRestCall_573667
-proc url_BandwidthSchedulesGet_574305(protocol: Scheme; host: string; base: string;
+  Call_BandwidthSchedulesGet_564203 = ref object of OpenApiRestCall_563565
+proc url_BandwidthSchedulesGet_564205(protocol: Scheme; host: string; base: string;
                                      route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1372,44 +1373,43 @@ proc url_BandwidthSchedulesGet_574305(protocol: Scheme; host: string; base: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_BandwidthSchedulesGet_574304(path: JsonNode; query: JsonNode;
+proc validate_BandwidthSchedulesGet_564204(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the properties of the specified bandwidth schedule.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The resource group name.
   ##   name: JString (required)
   ##       : The bandwidth schedule name.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID.
   ##   deviceName: JString (required)
   ##             : The device name.
+  ##   resourceGroupName: JString (required)
+  ##                    : The resource group name.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_574306 = path.getOrDefault("resourceGroupName")
-  valid_574306 = validateParameter(valid_574306, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `name` field"
+  var valid_564206 = path.getOrDefault("name")
+  valid_564206 = validateParameter(valid_564206, JString, required = true,
                                  default = nil)
-  if valid_574306 != nil:
-    section.add "resourceGroupName", valid_574306
-  var valid_574307 = path.getOrDefault("name")
-  valid_574307 = validateParameter(valid_574307, JString, required = true,
+  if valid_564206 != nil:
+    section.add "name", valid_564206
+  var valid_564207 = path.getOrDefault("subscriptionId")
+  valid_564207 = validateParameter(valid_564207, JString, required = true,
                                  default = nil)
-  if valid_574307 != nil:
-    section.add "name", valid_574307
-  var valid_574308 = path.getOrDefault("subscriptionId")
-  valid_574308 = validateParameter(valid_574308, JString, required = true,
+  if valid_564207 != nil:
+    section.add "subscriptionId", valid_564207
+  var valid_564208 = path.getOrDefault("deviceName")
+  valid_564208 = validateParameter(valid_564208, JString, required = true,
                                  default = nil)
-  if valid_574308 != nil:
-    section.add "subscriptionId", valid_574308
-  var valid_574309 = path.getOrDefault("deviceName")
-  valid_574309 = validateParameter(valid_574309, JString, required = true,
+  if valid_564208 != nil:
+    section.add "deviceName", valid_564208
+  var valid_564209 = path.getOrDefault("resourceGroupName")
+  valid_564209 = validateParameter(valid_564209, JString, required = true,
                                  default = nil)
-  if valid_574309 != nil:
-    section.add "deviceName", valid_574309
+  if valid_564209 != nil:
+    section.add "resourceGroupName", valid_564209
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1417,11 +1417,11 @@ proc validate_BandwidthSchedulesGet_574304(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574310 = query.getOrDefault("api-version")
-  valid_574310 = validateParameter(valid_574310, JString, required = true,
+  var valid_564210 = query.getOrDefault("api-version")
+  valid_564210 = validateParameter(valid_564210, JString, required = true,
                                  default = nil)
-  if valid_574310 != nil:
-    section.add "api-version", valid_574310
+  if valid_564210 != nil:
+    section.add "api-version", valid_564210
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1430,26 +1430,24 @@ proc validate_BandwidthSchedulesGet_574304(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574311: Call_BandwidthSchedulesGet_574303; path: JsonNode;
+proc call*(call_564211: Call_BandwidthSchedulesGet_564203; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the properties of the specified bandwidth schedule.
   ## 
-  let valid = call_574311.validator(path, query, header, formData, body)
-  let scheme = call_574311.pickScheme
+  let valid = call_564211.validator(path, query, header, formData, body)
+  let scheme = call_564211.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574311.url(scheme.get, call_574311.host, call_574311.base,
-                         call_574311.route, valid.getOrDefault("path"),
+  let url = call_564211.url(scheme.get, call_564211.host, call_564211.base,
+                         call_564211.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574311, url, valid)
+  result = hook(call_564211, url, valid)
 
-proc call*(call_574312: Call_BandwidthSchedulesGet_574303;
-          resourceGroupName: string; apiVersion: string; name: string;
-          subscriptionId: string; deviceName: string): Recallable =
+proc call*(call_564212: Call_BandwidthSchedulesGet_564203; apiVersion: string;
+          name: string; subscriptionId: string; deviceName: string;
+          resourceGroupName: string): Recallable =
   ## bandwidthSchedulesGet
   ## Gets the properties of the specified bandwidth schedule.
-  ##   resourceGroupName: string (required)
-  ##                    : The resource group name.
   ##   apiVersion: string (required)
   ##             : The API version.
   ##   name: string (required)
@@ -1458,23 +1456,25 @@ proc call*(call_574312: Call_BandwidthSchedulesGet_574303;
   ##                 : The subscription ID.
   ##   deviceName: string (required)
   ##             : The device name.
-  var path_574313 = newJObject()
-  var query_574314 = newJObject()
-  add(path_574313, "resourceGroupName", newJString(resourceGroupName))
-  add(query_574314, "api-version", newJString(apiVersion))
-  add(path_574313, "name", newJString(name))
-  add(path_574313, "subscriptionId", newJString(subscriptionId))
-  add(path_574313, "deviceName", newJString(deviceName))
-  result = call_574312.call(path_574313, query_574314, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The resource group name.
+  var path_564213 = newJObject()
+  var query_564214 = newJObject()
+  add(query_564214, "api-version", newJString(apiVersion))
+  add(path_564213, "name", newJString(name))
+  add(path_564213, "subscriptionId", newJString(subscriptionId))
+  add(path_564213, "deviceName", newJString(deviceName))
+  add(path_564213, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564212.call(path_564213, query_564214, nil, nil, nil)
 
-var bandwidthSchedulesGet* = Call_BandwidthSchedulesGet_574303(
+var bandwidthSchedulesGet* = Call_BandwidthSchedulesGet_564203(
     name: "bandwidthSchedulesGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DataBoxEdge/dataBoxEdgeDevices/{deviceName}/bandwidthSchedules/{name}",
-    validator: validate_BandwidthSchedulesGet_574304, base: "",
-    url: url_BandwidthSchedulesGet_574305, schemes: {Scheme.Https})
+    validator: validate_BandwidthSchedulesGet_564204, base: "",
+    url: url_BandwidthSchedulesGet_564205, schemes: {Scheme.Https})
 type
-  Call_BandwidthSchedulesDelete_574329 = ref object of OpenApiRestCall_573667
-proc url_BandwidthSchedulesDelete_574331(protocol: Scheme; host: string;
+  Call_BandwidthSchedulesDelete_564229 = ref object of OpenApiRestCall_563565
+proc url_BandwidthSchedulesDelete_564231(protocol: Scheme; host: string;
                                         base: string; route: string; path: JsonNode;
                                         query: JsonNode): Uri =
   result.scheme = $protocol
@@ -1501,44 +1501,43 @@ proc url_BandwidthSchedulesDelete_574331(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_BandwidthSchedulesDelete_574330(path: JsonNode; query: JsonNode;
+proc validate_BandwidthSchedulesDelete_564230(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Deletes the specified bandwidth schedule.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The resource group name.
   ##   name: JString (required)
   ##       : The bandwidth schedule name.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID.
   ##   deviceName: JString (required)
   ##             : The device name.
+  ##   resourceGroupName: JString (required)
+  ##                    : The resource group name.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_574332 = path.getOrDefault("resourceGroupName")
-  valid_574332 = validateParameter(valid_574332, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `name` field"
+  var valid_564232 = path.getOrDefault("name")
+  valid_564232 = validateParameter(valid_564232, JString, required = true,
                                  default = nil)
-  if valid_574332 != nil:
-    section.add "resourceGroupName", valid_574332
-  var valid_574333 = path.getOrDefault("name")
-  valid_574333 = validateParameter(valid_574333, JString, required = true,
+  if valid_564232 != nil:
+    section.add "name", valid_564232
+  var valid_564233 = path.getOrDefault("subscriptionId")
+  valid_564233 = validateParameter(valid_564233, JString, required = true,
                                  default = nil)
-  if valid_574333 != nil:
-    section.add "name", valid_574333
-  var valid_574334 = path.getOrDefault("subscriptionId")
-  valid_574334 = validateParameter(valid_574334, JString, required = true,
+  if valid_564233 != nil:
+    section.add "subscriptionId", valid_564233
+  var valid_564234 = path.getOrDefault("deviceName")
+  valid_564234 = validateParameter(valid_564234, JString, required = true,
                                  default = nil)
-  if valid_574334 != nil:
-    section.add "subscriptionId", valid_574334
-  var valid_574335 = path.getOrDefault("deviceName")
-  valid_574335 = validateParameter(valid_574335, JString, required = true,
+  if valid_564234 != nil:
+    section.add "deviceName", valid_564234
+  var valid_564235 = path.getOrDefault("resourceGroupName")
+  valid_564235 = validateParameter(valid_564235, JString, required = true,
                                  default = nil)
-  if valid_574335 != nil:
-    section.add "deviceName", valid_574335
+  if valid_564235 != nil:
+    section.add "resourceGroupName", valid_564235
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1546,11 +1545,11 @@ proc validate_BandwidthSchedulesDelete_574330(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574336 = query.getOrDefault("api-version")
-  valid_574336 = validateParameter(valid_574336, JString, required = true,
+  var valid_564236 = query.getOrDefault("api-version")
+  valid_564236 = validateParameter(valid_564236, JString, required = true,
                                  default = nil)
-  if valid_574336 != nil:
-    section.add "api-version", valid_574336
+  if valid_564236 != nil:
+    section.add "api-version", valid_564236
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1559,26 +1558,24 @@ proc validate_BandwidthSchedulesDelete_574330(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574337: Call_BandwidthSchedulesDelete_574329; path: JsonNode;
+proc call*(call_564237: Call_BandwidthSchedulesDelete_564229; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes the specified bandwidth schedule.
   ## 
-  let valid = call_574337.validator(path, query, header, formData, body)
-  let scheme = call_574337.pickScheme
+  let valid = call_564237.validator(path, query, header, formData, body)
+  let scheme = call_564237.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574337.url(scheme.get, call_574337.host, call_574337.base,
-                         call_574337.route, valid.getOrDefault("path"),
+  let url = call_564237.url(scheme.get, call_564237.host, call_564237.base,
+                         call_564237.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574337, url, valid)
+  result = hook(call_564237, url, valid)
 
-proc call*(call_574338: Call_BandwidthSchedulesDelete_574329;
-          resourceGroupName: string; apiVersion: string; name: string;
-          subscriptionId: string; deviceName: string): Recallable =
+proc call*(call_564238: Call_BandwidthSchedulesDelete_564229; apiVersion: string;
+          name: string; subscriptionId: string; deviceName: string;
+          resourceGroupName: string): Recallable =
   ## bandwidthSchedulesDelete
   ## Deletes the specified bandwidth schedule.
-  ##   resourceGroupName: string (required)
-  ##                    : The resource group name.
   ##   apiVersion: string (required)
   ##             : The API version.
   ##   name: string (required)
@@ -1587,23 +1584,25 @@ proc call*(call_574338: Call_BandwidthSchedulesDelete_574329;
   ##                 : The subscription ID.
   ##   deviceName: string (required)
   ##             : The device name.
-  var path_574339 = newJObject()
-  var query_574340 = newJObject()
-  add(path_574339, "resourceGroupName", newJString(resourceGroupName))
-  add(query_574340, "api-version", newJString(apiVersion))
-  add(path_574339, "name", newJString(name))
-  add(path_574339, "subscriptionId", newJString(subscriptionId))
-  add(path_574339, "deviceName", newJString(deviceName))
-  result = call_574338.call(path_574339, query_574340, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The resource group name.
+  var path_564239 = newJObject()
+  var query_564240 = newJObject()
+  add(query_564240, "api-version", newJString(apiVersion))
+  add(path_564239, "name", newJString(name))
+  add(path_564239, "subscriptionId", newJString(subscriptionId))
+  add(path_564239, "deviceName", newJString(deviceName))
+  add(path_564239, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564238.call(path_564239, query_564240, nil, nil, nil)
 
-var bandwidthSchedulesDelete* = Call_BandwidthSchedulesDelete_574329(
+var bandwidthSchedulesDelete* = Call_BandwidthSchedulesDelete_564229(
     name: "bandwidthSchedulesDelete", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DataBoxEdge/dataBoxEdgeDevices/{deviceName}/bandwidthSchedules/{name}",
-    validator: validate_BandwidthSchedulesDelete_574330, base: "",
-    url: url_BandwidthSchedulesDelete_574331, schemes: {Scheme.Https})
+    validator: validate_BandwidthSchedulesDelete_564230, base: "",
+    url: url_BandwidthSchedulesDelete_564231, schemes: {Scheme.Https})
 type
-  Call_DevicesDownloadUpdates_574341 = ref object of OpenApiRestCall_573667
-proc url_DevicesDownloadUpdates_574343(protocol: Scheme; host: string; base: string;
+  Call_DevicesDownloadUpdates_564241 = ref object of OpenApiRestCall_563565
+proc url_DevicesDownloadUpdates_564243(protocol: Scheme; host: string; base: string;
                                       route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1627,35 +1626,35 @@ proc url_DevicesDownloadUpdates_574343(protocol: Scheme; host: string; base: str
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DevicesDownloadUpdates_574342(path: JsonNode; query: JsonNode;
+proc validate_DevicesDownloadUpdates_564242(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The resource group name.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID.
   ##   deviceName: JString (required)
   ##             : The device name.
+  ##   resourceGroupName: JString (required)
+  ##                    : The resource group name.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_574344 = path.getOrDefault("resourceGroupName")
-  valid_574344 = validateParameter(valid_574344, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564244 = path.getOrDefault("subscriptionId")
+  valid_564244 = validateParameter(valid_564244, JString, required = true,
                                  default = nil)
-  if valid_574344 != nil:
-    section.add "resourceGroupName", valid_574344
-  var valid_574345 = path.getOrDefault("subscriptionId")
-  valid_574345 = validateParameter(valid_574345, JString, required = true,
+  if valid_564244 != nil:
+    section.add "subscriptionId", valid_564244
+  var valid_564245 = path.getOrDefault("deviceName")
+  valid_564245 = validateParameter(valid_564245, JString, required = true,
                                  default = nil)
-  if valid_574345 != nil:
-    section.add "subscriptionId", valid_574345
-  var valid_574346 = path.getOrDefault("deviceName")
-  valid_574346 = validateParameter(valid_574346, JString, required = true,
+  if valid_564245 != nil:
+    section.add "deviceName", valid_564245
+  var valid_564246 = path.getOrDefault("resourceGroupName")
+  valid_564246 = validateParameter(valid_564246, JString, required = true,
                                  default = nil)
-  if valid_574346 != nil:
-    section.add "deviceName", valid_574346
+  if valid_564246 != nil:
+    section.add "resourceGroupName", valid_564246
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1663,11 +1662,11 @@ proc validate_DevicesDownloadUpdates_574342(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574347 = query.getOrDefault("api-version")
-  valid_574347 = validateParameter(valid_574347, JString, required = true,
+  var valid_564247 = query.getOrDefault("api-version")
+  valid_564247 = validateParameter(valid_564247, JString, required = true,
                                  default = nil)
-  if valid_574347 != nil:
-    section.add "api-version", valid_574347
+  if valid_564247 != nil:
+    section.add "api-version", valid_564247
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1676,45 +1675,44 @@ proc validate_DevicesDownloadUpdates_574342(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574348: Call_DevicesDownloadUpdates_574341; path: JsonNode;
+proc call*(call_564248: Call_DevicesDownloadUpdates_564241; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
-  let valid = call_574348.validator(path, query, header, formData, body)
-  let scheme = call_574348.pickScheme
+  let valid = call_564248.validator(path, query, header, formData, body)
+  let scheme = call_564248.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574348.url(scheme.get, call_574348.host, call_574348.base,
-                         call_574348.route, valid.getOrDefault("path"),
+  let url = call_564248.url(scheme.get, call_564248.host, call_564248.base,
+                         call_564248.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574348, url, valid)
+  result = hook(call_564248, url, valid)
 
-proc call*(call_574349: Call_DevicesDownloadUpdates_574341;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          deviceName: string): Recallable =
+proc call*(call_564249: Call_DevicesDownloadUpdates_564241; apiVersion: string;
+          subscriptionId: string; deviceName: string; resourceGroupName: string): Recallable =
   ## devicesDownloadUpdates
-  ##   resourceGroupName: string (required)
-  ##                    : The resource group name.
   ##   apiVersion: string (required)
   ##             : The API version.
   ##   subscriptionId: string (required)
   ##                 : The subscription ID.
   ##   deviceName: string (required)
   ##             : The device name.
-  var path_574350 = newJObject()
-  var query_574351 = newJObject()
-  add(path_574350, "resourceGroupName", newJString(resourceGroupName))
-  add(query_574351, "api-version", newJString(apiVersion))
-  add(path_574350, "subscriptionId", newJString(subscriptionId))
-  add(path_574350, "deviceName", newJString(deviceName))
-  result = call_574349.call(path_574350, query_574351, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The resource group name.
+  var path_564250 = newJObject()
+  var query_564251 = newJObject()
+  add(query_564251, "api-version", newJString(apiVersion))
+  add(path_564250, "subscriptionId", newJString(subscriptionId))
+  add(path_564250, "deviceName", newJString(deviceName))
+  add(path_564250, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564249.call(path_564250, query_564251, nil, nil, nil)
 
-var devicesDownloadUpdates* = Call_DevicesDownloadUpdates_574341(
+var devicesDownloadUpdates* = Call_DevicesDownloadUpdates_564241(
     name: "devicesDownloadUpdates", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DataBoxEdge/dataBoxEdgeDevices/{deviceName}/downloadUpdates",
-    validator: validate_DevicesDownloadUpdates_574342, base: "",
-    url: url_DevicesDownloadUpdates_574343, schemes: {Scheme.Https})
+    validator: validate_DevicesDownloadUpdates_564242, base: "",
+    url: url_DevicesDownloadUpdates_564243, schemes: {Scheme.Https})
 type
-  Call_DevicesGetExtendedInformation_574352 = ref object of OpenApiRestCall_573667
-proc url_DevicesGetExtendedInformation_574354(protocol: Scheme; host: string;
+  Call_DevicesGetExtendedInformation_564252 = ref object of OpenApiRestCall_563565
+proc url_DevicesGetExtendedInformation_564254(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1738,37 +1736,37 @@ proc url_DevicesGetExtendedInformation_574354(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DevicesGetExtendedInformation_574353(path: JsonNode; query: JsonNode;
+proc validate_DevicesGetExtendedInformation_564253(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets additional information for the specified Data Box Edge/Data Box Gateway device.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The resource group name.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID.
   ##   deviceName: JString (required)
   ##             : The device name.
+  ##   resourceGroupName: JString (required)
+  ##                    : The resource group name.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_574355 = path.getOrDefault("resourceGroupName")
-  valid_574355 = validateParameter(valid_574355, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564255 = path.getOrDefault("subscriptionId")
+  valid_564255 = validateParameter(valid_564255, JString, required = true,
                                  default = nil)
-  if valid_574355 != nil:
-    section.add "resourceGroupName", valid_574355
-  var valid_574356 = path.getOrDefault("subscriptionId")
-  valid_574356 = validateParameter(valid_574356, JString, required = true,
+  if valid_564255 != nil:
+    section.add "subscriptionId", valid_564255
+  var valid_564256 = path.getOrDefault("deviceName")
+  valid_564256 = validateParameter(valid_564256, JString, required = true,
                                  default = nil)
-  if valid_574356 != nil:
-    section.add "subscriptionId", valid_574356
-  var valid_574357 = path.getOrDefault("deviceName")
-  valid_574357 = validateParameter(valid_574357, JString, required = true,
+  if valid_564256 != nil:
+    section.add "deviceName", valid_564256
+  var valid_564257 = path.getOrDefault("resourceGroupName")
+  valid_564257 = validateParameter(valid_564257, JString, required = true,
                                  default = nil)
-  if valid_574357 != nil:
-    section.add "deviceName", valid_574357
+  if valid_564257 != nil:
+    section.add "resourceGroupName", valid_564257
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1776,11 +1774,11 @@ proc validate_DevicesGetExtendedInformation_574353(path: JsonNode; query: JsonNo
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574358 = query.getOrDefault("api-version")
-  valid_574358 = validateParameter(valid_574358, JString, required = true,
+  var valid_564258 = query.getOrDefault("api-version")
+  valid_564258 = validateParameter(valid_564258, JString, required = true,
                                  default = nil)
-  if valid_574358 != nil:
-    section.add "api-version", valid_574358
+  if valid_564258 != nil:
+    section.add "api-version", valid_564258
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1789,48 +1787,48 @@ proc validate_DevicesGetExtendedInformation_574353(path: JsonNode; query: JsonNo
   if body != nil:
     result.add "body", body
 
-proc call*(call_574359: Call_DevicesGetExtendedInformation_574352; path: JsonNode;
+proc call*(call_564259: Call_DevicesGetExtendedInformation_564252; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets additional information for the specified Data Box Edge/Data Box Gateway device.
   ## 
-  let valid = call_574359.validator(path, query, header, formData, body)
-  let scheme = call_574359.pickScheme
+  let valid = call_564259.validator(path, query, header, formData, body)
+  let scheme = call_564259.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574359.url(scheme.get, call_574359.host, call_574359.base,
-                         call_574359.route, valid.getOrDefault("path"),
+  let url = call_564259.url(scheme.get, call_564259.host, call_564259.base,
+                         call_564259.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574359, url, valid)
+  result = hook(call_564259, url, valid)
 
-proc call*(call_574360: Call_DevicesGetExtendedInformation_574352;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          deviceName: string): Recallable =
+proc call*(call_564260: Call_DevicesGetExtendedInformation_564252;
+          apiVersion: string; subscriptionId: string; deviceName: string;
+          resourceGroupName: string): Recallable =
   ## devicesGetExtendedInformation
   ## Gets additional information for the specified Data Box Edge/Data Box Gateway device.
-  ##   resourceGroupName: string (required)
-  ##                    : The resource group name.
   ##   apiVersion: string (required)
   ##             : The API version.
   ##   subscriptionId: string (required)
   ##                 : The subscription ID.
   ##   deviceName: string (required)
   ##             : The device name.
-  var path_574361 = newJObject()
-  var query_574362 = newJObject()
-  add(path_574361, "resourceGroupName", newJString(resourceGroupName))
-  add(query_574362, "api-version", newJString(apiVersion))
-  add(path_574361, "subscriptionId", newJString(subscriptionId))
-  add(path_574361, "deviceName", newJString(deviceName))
-  result = call_574360.call(path_574361, query_574362, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The resource group name.
+  var path_564261 = newJObject()
+  var query_564262 = newJObject()
+  add(query_564262, "api-version", newJString(apiVersion))
+  add(path_564261, "subscriptionId", newJString(subscriptionId))
+  add(path_564261, "deviceName", newJString(deviceName))
+  add(path_564261, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564260.call(path_564261, query_564262, nil, nil, nil)
 
-var devicesGetExtendedInformation* = Call_DevicesGetExtendedInformation_574352(
+var devicesGetExtendedInformation* = Call_DevicesGetExtendedInformation_564252(
     name: "devicesGetExtendedInformation", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DataBoxEdge/dataBoxEdgeDevices/{deviceName}/getExtendedInformation",
-    validator: validate_DevicesGetExtendedInformation_574353, base: "",
-    url: url_DevicesGetExtendedInformation_574354, schemes: {Scheme.Https})
+    validator: validate_DevicesGetExtendedInformation_564253, base: "",
+    url: url_DevicesGetExtendedInformation_564254, schemes: {Scheme.Https})
 type
-  Call_DevicesInstallUpdates_574363 = ref object of OpenApiRestCall_573667
-proc url_DevicesInstallUpdates_574365(protocol: Scheme; host: string; base: string;
+  Call_DevicesInstallUpdates_564263 = ref object of OpenApiRestCall_563565
+proc url_DevicesInstallUpdates_564265(protocol: Scheme; host: string; base: string;
                                      route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1854,35 +1852,35 @@ proc url_DevicesInstallUpdates_574365(protocol: Scheme; host: string; base: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DevicesInstallUpdates_574364(path: JsonNode; query: JsonNode;
+proc validate_DevicesInstallUpdates_564264(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The resource group name.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID.
   ##   deviceName: JString (required)
   ##             : The device name.
+  ##   resourceGroupName: JString (required)
+  ##                    : The resource group name.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_574366 = path.getOrDefault("resourceGroupName")
-  valid_574366 = validateParameter(valid_574366, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564266 = path.getOrDefault("subscriptionId")
+  valid_564266 = validateParameter(valid_564266, JString, required = true,
                                  default = nil)
-  if valid_574366 != nil:
-    section.add "resourceGroupName", valid_574366
-  var valid_574367 = path.getOrDefault("subscriptionId")
-  valid_574367 = validateParameter(valid_574367, JString, required = true,
+  if valid_564266 != nil:
+    section.add "subscriptionId", valid_564266
+  var valid_564267 = path.getOrDefault("deviceName")
+  valid_564267 = validateParameter(valid_564267, JString, required = true,
                                  default = nil)
-  if valid_574367 != nil:
-    section.add "subscriptionId", valid_574367
-  var valid_574368 = path.getOrDefault("deviceName")
-  valid_574368 = validateParameter(valid_574368, JString, required = true,
+  if valid_564267 != nil:
+    section.add "deviceName", valid_564267
+  var valid_564268 = path.getOrDefault("resourceGroupName")
+  valid_564268 = validateParameter(valid_564268, JString, required = true,
                                  default = nil)
-  if valid_574368 != nil:
-    section.add "deviceName", valid_574368
+  if valid_564268 != nil:
+    section.add "resourceGroupName", valid_564268
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1890,11 +1888,11 @@ proc validate_DevicesInstallUpdates_574364(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574369 = query.getOrDefault("api-version")
-  valid_574369 = validateParameter(valid_574369, JString, required = true,
+  var valid_564269 = query.getOrDefault("api-version")
+  valid_564269 = validateParameter(valid_564269, JString, required = true,
                                  default = nil)
-  if valid_574369 != nil:
-    section.add "api-version", valid_574369
+  if valid_564269 != nil:
+    section.add "api-version", valid_564269
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1903,45 +1901,44 @@ proc validate_DevicesInstallUpdates_574364(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574370: Call_DevicesInstallUpdates_574363; path: JsonNode;
+proc call*(call_564270: Call_DevicesInstallUpdates_564263; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
-  let valid = call_574370.validator(path, query, header, formData, body)
-  let scheme = call_574370.pickScheme
+  let valid = call_564270.validator(path, query, header, formData, body)
+  let scheme = call_564270.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574370.url(scheme.get, call_574370.host, call_574370.base,
-                         call_574370.route, valid.getOrDefault("path"),
+  let url = call_564270.url(scheme.get, call_564270.host, call_564270.base,
+                         call_564270.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574370, url, valid)
+  result = hook(call_564270, url, valid)
 
-proc call*(call_574371: Call_DevicesInstallUpdates_574363;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          deviceName: string): Recallable =
+proc call*(call_564271: Call_DevicesInstallUpdates_564263; apiVersion: string;
+          subscriptionId: string; deviceName: string; resourceGroupName: string): Recallable =
   ## devicesInstallUpdates
-  ##   resourceGroupName: string (required)
-  ##                    : The resource group name.
   ##   apiVersion: string (required)
   ##             : The API version.
   ##   subscriptionId: string (required)
   ##                 : The subscription ID.
   ##   deviceName: string (required)
   ##             : The device name.
-  var path_574372 = newJObject()
-  var query_574373 = newJObject()
-  add(path_574372, "resourceGroupName", newJString(resourceGroupName))
-  add(query_574373, "api-version", newJString(apiVersion))
-  add(path_574372, "subscriptionId", newJString(subscriptionId))
-  add(path_574372, "deviceName", newJString(deviceName))
-  result = call_574371.call(path_574372, query_574373, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The resource group name.
+  var path_564272 = newJObject()
+  var query_564273 = newJObject()
+  add(query_564273, "api-version", newJString(apiVersion))
+  add(path_564272, "subscriptionId", newJString(subscriptionId))
+  add(path_564272, "deviceName", newJString(deviceName))
+  add(path_564272, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564271.call(path_564272, query_564273, nil, nil, nil)
 
-var devicesInstallUpdates* = Call_DevicesInstallUpdates_574363(
+var devicesInstallUpdates* = Call_DevicesInstallUpdates_564263(
     name: "devicesInstallUpdates", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DataBoxEdge/dataBoxEdgeDevices/{deviceName}/installUpdates",
-    validator: validate_DevicesInstallUpdates_574364, base: "",
-    url: url_DevicesInstallUpdates_574365, schemes: {Scheme.Https})
+    validator: validate_DevicesInstallUpdates_564264, base: "",
+    url: url_DevicesInstallUpdates_564265, schemes: {Scheme.Https})
 type
-  Call_JobsGet_574374 = ref object of OpenApiRestCall_573667
-proc url_JobsGet_574376(protocol: Scheme; host: string; base: string; route: string;
+  Call_JobsGet_564274 = ref object of OpenApiRestCall_563565
+proc url_JobsGet_564276(protocol: Scheme; host: string; base: string; route: string;
                        path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1967,42 +1964,41 @@ proc url_JobsGet_574376(protocol: Scheme; host: string; base: string; route: str
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_JobsGet_574375(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_JobsGet_564275(path: JsonNode; query: JsonNode; header: JsonNode;
                             formData: JsonNode; body: JsonNode): JsonNode =
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The resource group name.
   ##   name: JString (required)
   ##       : The job name.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID.
   ##   deviceName: JString (required)
   ##             : The device name.
+  ##   resourceGroupName: JString (required)
+  ##                    : The resource group name.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_574377 = path.getOrDefault("resourceGroupName")
-  valid_574377 = validateParameter(valid_574377, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `name` field"
+  var valid_564277 = path.getOrDefault("name")
+  valid_564277 = validateParameter(valid_564277, JString, required = true,
                                  default = nil)
-  if valid_574377 != nil:
-    section.add "resourceGroupName", valid_574377
-  var valid_574378 = path.getOrDefault("name")
-  valid_574378 = validateParameter(valid_574378, JString, required = true,
+  if valid_564277 != nil:
+    section.add "name", valid_564277
+  var valid_564278 = path.getOrDefault("subscriptionId")
+  valid_564278 = validateParameter(valid_564278, JString, required = true,
                                  default = nil)
-  if valid_574378 != nil:
-    section.add "name", valid_574378
-  var valid_574379 = path.getOrDefault("subscriptionId")
-  valid_574379 = validateParameter(valid_574379, JString, required = true,
+  if valid_564278 != nil:
+    section.add "subscriptionId", valid_564278
+  var valid_564279 = path.getOrDefault("deviceName")
+  valid_564279 = validateParameter(valid_564279, JString, required = true,
                                  default = nil)
-  if valid_574379 != nil:
-    section.add "subscriptionId", valid_574379
-  var valid_574380 = path.getOrDefault("deviceName")
-  valid_574380 = validateParameter(valid_574380, JString, required = true,
+  if valid_564279 != nil:
+    section.add "deviceName", valid_564279
+  var valid_564280 = path.getOrDefault("resourceGroupName")
+  valid_564280 = validateParameter(valid_564280, JString, required = true,
                                  default = nil)
-  if valid_574380 != nil:
-    section.add "deviceName", valid_574380
+  if valid_564280 != nil:
+    section.add "resourceGroupName", valid_564280
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2010,11 +2006,11 @@ proc validate_JobsGet_574375(path: JsonNode; query: JsonNode; header: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574381 = query.getOrDefault("api-version")
-  valid_574381 = validateParameter(valid_574381, JString, required = true,
+  var valid_564281 = query.getOrDefault("api-version")
+  valid_564281 = validateParameter(valid_564281, JString, required = true,
                                  default = nil)
-  if valid_574381 != nil:
-    section.add "api-version", valid_574381
+  if valid_564281 != nil:
+    section.add "api-version", valid_564281
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2023,22 +2019,20 @@ proc validate_JobsGet_574375(path: JsonNode; query: JsonNode; header: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574382: Call_JobsGet_574374; path: JsonNode; query: JsonNode;
+proc call*(call_564282: Call_JobsGet_564274; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
-  let valid = call_574382.validator(path, query, header, formData, body)
-  let scheme = call_574382.pickScheme
+  let valid = call_564282.validator(path, query, header, formData, body)
+  let scheme = call_564282.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574382.url(scheme.get, call_574382.host, call_574382.base,
-                         call_574382.route, valid.getOrDefault("path"),
+  let url = call_564282.url(scheme.get, call_564282.host, call_564282.base,
+                         call_564282.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574382, url, valid)
+  result = hook(call_564282, url, valid)
 
-proc call*(call_574383: Call_JobsGet_574374; resourceGroupName: string;
-          apiVersion: string; name: string; subscriptionId: string; deviceName: string): Recallable =
+proc call*(call_564283: Call_JobsGet_564274; apiVersion: string; name: string;
+          subscriptionId: string; deviceName: string; resourceGroupName: string): Recallable =
   ## jobsGet
-  ##   resourceGroupName: string (required)
-  ##                    : The resource group name.
   ##   apiVersion: string (required)
   ##             : The API version.
   ##   name: string (required)
@@ -2047,22 +2041,24 @@ proc call*(call_574383: Call_JobsGet_574374; resourceGroupName: string;
   ##                 : The subscription ID.
   ##   deviceName: string (required)
   ##             : The device name.
-  var path_574384 = newJObject()
-  var query_574385 = newJObject()
-  add(path_574384, "resourceGroupName", newJString(resourceGroupName))
-  add(query_574385, "api-version", newJString(apiVersion))
-  add(path_574384, "name", newJString(name))
-  add(path_574384, "subscriptionId", newJString(subscriptionId))
-  add(path_574384, "deviceName", newJString(deviceName))
-  result = call_574383.call(path_574384, query_574385, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The resource group name.
+  var path_564284 = newJObject()
+  var query_564285 = newJObject()
+  add(query_564285, "api-version", newJString(apiVersion))
+  add(path_564284, "name", newJString(name))
+  add(path_564284, "subscriptionId", newJString(subscriptionId))
+  add(path_564284, "deviceName", newJString(deviceName))
+  add(path_564284, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564283.call(path_564284, query_564285, nil, nil, nil)
 
-var jobsGet* = Call_JobsGet_574374(name: "jobsGet", meth: HttpMethod.HttpGet,
+var jobsGet* = Call_JobsGet_564274(name: "jobsGet", meth: HttpMethod.HttpGet,
                                 host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DataBoxEdge/dataBoxEdgeDevices/{deviceName}/jobs/{name}",
-                                validator: validate_JobsGet_574375, base: "",
-                                url: url_JobsGet_574376, schemes: {Scheme.Https})
+                                validator: validate_JobsGet_564275, base: "",
+                                url: url_JobsGet_564276, schemes: {Scheme.Https})
 type
-  Call_DevicesGetNetworkSettings_574386 = ref object of OpenApiRestCall_573667
-proc url_DevicesGetNetworkSettings_574388(protocol: Scheme; host: string;
+  Call_DevicesGetNetworkSettings_564286 = ref object of OpenApiRestCall_563565
+proc url_DevicesGetNetworkSettings_564288(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2086,37 +2082,37 @@ proc url_DevicesGetNetworkSettings_574388(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DevicesGetNetworkSettings_574387(path: JsonNode; query: JsonNode;
+proc validate_DevicesGetNetworkSettings_564287(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the network settings of the specified Data Box Edge/Data Box Gateway device.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The resource group name.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID.
   ##   deviceName: JString (required)
   ##             : The device name.
+  ##   resourceGroupName: JString (required)
+  ##                    : The resource group name.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_574389 = path.getOrDefault("resourceGroupName")
-  valid_574389 = validateParameter(valid_574389, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564289 = path.getOrDefault("subscriptionId")
+  valid_564289 = validateParameter(valid_564289, JString, required = true,
                                  default = nil)
-  if valid_574389 != nil:
-    section.add "resourceGroupName", valid_574389
-  var valid_574390 = path.getOrDefault("subscriptionId")
-  valid_574390 = validateParameter(valid_574390, JString, required = true,
+  if valid_564289 != nil:
+    section.add "subscriptionId", valid_564289
+  var valid_564290 = path.getOrDefault("deviceName")
+  valid_564290 = validateParameter(valid_564290, JString, required = true,
                                  default = nil)
-  if valid_574390 != nil:
-    section.add "subscriptionId", valid_574390
-  var valid_574391 = path.getOrDefault("deviceName")
-  valid_574391 = validateParameter(valid_574391, JString, required = true,
+  if valid_564290 != nil:
+    section.add "deviceName", valid_564290
+  var valid_564291 = path.getOrDefault("resourceGroupName")
+  valid_564291 = validateParameter(valid_564291, JString, required = true,
                                  default = nil)
-  if valid_574391 != nil:
-    section.add "deviceName", valid_574391
+  if valid_564291 != nil:
+    section.add "resourceGroupName", valid_564291
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2124,11 +2120,11 @@ proc validate_DevicesGetNetworkSettings_574387(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574392 = query.getOrDefault("api-version")
-  valid_574392 = validateParameter(valid_574392, JString, required = true,
+  var valid_564292 = query.getOrDefault("api-version")
+  valid_564292 = validateParameter(valid_564292, JString, required = true,
                                  default = nil)
-  if valid_574392 != nil:
-    section.add "api-version", valid_574392
+  if valid_564292 != nil:
+    section.add "api-version", valid_564292
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2137,48 +2133,47 @@ proc validate_DevicesGetNetworkSettings_574387(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574393: Call_DevicesGetNetworkSettings_574386; path: JsonNode;
+proc call*(call_564293: Call_DevicesGetNetworkSettings_564286; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the network settings of the specified Data Box Edge/Data Box Gateway device.
   ## 
-  let valid = call_574393.validator(path, query, header, formData, body)
-  let scheme = call_574393.pickScheme
+  let valid = call_564293.validator(path, query, header, formData, body)
+  let scheme = call_564293.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574393.url(scheme.get, call_574393.host, call_574393.base,
-                         call_574393.route, valid.getOrDefault("path"),
+  let url = call_564293.url(scheme.get, call_564293.host, call_564293.base,
+                         call_564293.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574393, url, valid)
+  result = hook(call_564293, url, valid)
 
-proc call*(call_574394: Call_DevicesGetNetworkSettings_574386;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          deviceName: string): Recallable =
+proc call*(call_564294: Call_DevicesGetNetworkSettings_564286; apiVersion: string;
+          subscriptionId: string; deviceName: string; resourceGroupName: string): Recallable =
   ## devicesGetNetworkSettings
   ## Gets the network settings of the specified Data Box Edge/Data Box Gateway device.
-  ##   resourceGroupName: string (required)
-  ##                    : The resource group name.
   ##   apiVersion: string (required)
   ##             : The API version.
   ##   subscriptionId: string (required)
   ##                 : The subscription ID.
   ##   deviceName: string (required)
   ##             : The device name.
-  var path_574395 = newJObject()
-  var query_574396 = newJObject()
-  add(path_574395, "resourceGroupName", newJString(resourceGroupName))
-  add(query_574396, "api-version", newJString(apiVersion))
-  add(path_574395, "subscriptionId", newJString(subscriptionId))
-  add(path_574395, "deviceName", newJString(deviceName))
-  result = call_574394.call(path_574395, query_574396, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The resource group name.
+  var path_564295 = newJObject()
+  var query_564296 = newJObject()
+  add(query_564296, "api-version", newJString(apiVersion))
+  add(path_564295, "subscriptionId", newJString(subscriptionId))
+  add(path_564295, "deviceName", newJString(deviceName))
+  add(path_564295, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564294.call(path_564295, query_564296, nil, nil, nil)
 
-var devicesGetNetworkSettings* = Call_DevicesGetNetworkSettings_574386(
+var devicesGetNetworkSettings* = Call_DevicesGetNetworkSettings_564286(
     name: "devicesGetNetworkSettings", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DataBoxEdge/dataBoxEdgeDevices/{deviceName}/networkSettings/default",
-    validator: validate_DevicesGetNetworkSettings_574387, base: "",
-    url: url_DevicesGetNetworkSettings_574388, schemes: {Scheme.Https})
+    validator: validate_DevicesGetNetworkSettings_564287, base: "",
+    url: url_DevicesGetNetworkSettings_564288, schemes: {Scheme.Https})
 type
-  Call_NodesListByDataBoxEdgeDevice_574397 = ref object of OpenApiRestCall_573667
-proc url_NodesListByDataBoxEdgeDevice_574399(protocol: Scheme; host: string;
+  Call_NodesListByDataBoxEdgeDevice_564297 = ref object of OpenApiRestCall_563565
+proc url_NodesListByDataBoxEdgeDevice_564299(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2202,37 +2197,37 @@ proc url_NodesListByDataBoxEdgeDevice_574399(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_NodesListByDataBoxEdgeDevice_574398(path: JsonNode; query: JsonNode;
+proc validate_NodesListByDataBoxEdgeDevice_564298(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets all the nodes currently configured under this Data Box Edge device
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The resource group name.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID.
   ##   deviceName: JString (required)
   ##             : The device name.
+  ##   resourceGroupName: JString (required)
+  ##                    : The resource group name.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_574400 = path.getOrDefault("resourceGroupName")
-  valid_574400 = validateParameter(valid_574400, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564300 = path.getOrDefault("subscriptionId")
+  valid_564300 = validateParameter(valid_564300, JString, required = true,
                                  default = nil)
-  if valid_574400 != nil:
-    section.add "resourceGroupName", valid_574400
-  var valid_574401 = path.getOrDefault("subscriptionId")
-  valid_574401 = validateParameter(valid_574401, JString, required = true,
+  if valid_564300 != nil:
+    section.add "subscriptionId", valid_564300
+  var valid_564301 = path.getOrDefault("deviceName")
+  valid_564301 = validateParameter(valid_564301, JString, required = true,
                                  default = nil)
-  if valid_574401 != nil:
-    section.add "subscriptionId", valid_574401
-  var valid_574402 = path.getOrDefault("deviceName")
-  valid_574402 = validateParameter(valid_574402, JString, required = true,
+  if valid_564301 != nil:
+    section.add "deviceName", valid_564301
+  var valid_564302 = path.getOrDefault("resourceGroupName")
+  valid_564302 = validateParameter(valid_564302, JString, required = true,
                                  default = nil)
-  if valid_574402 != nil:
-    section.add "deviceName", valid_574402
+  if valid_564302 != nil:
+    section.add "resourceGroupName", valid_564302
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2240,11 +2235,11 @@ proc validate_NodesListByDataBoxEdgeDevice_574398(path: JsonNode; query: JsonNod
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574403 = query.getOrDefault("api-version")
-  valid_574403 = validateParameter(valid_574403, JString, required = true,
+  var valid_564303 = query.getOrDefault("api-version")
+  valid_564303 = validateParameter(valid_564303, JString, required = true,
                                  default = nil)
-  if valid_574403 != nil:
-    section.add "api-version", valid_574403
+  if valid_564303 != nil:
+    section.add "api-version", valid_564303
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2253,48 +2248,48 @@ proc validate_NodesListByDataBoxEdgeDevice_574398(path: JsonNode; query: JsonNod
   if body != nil:
     result.add "body", body
 
-proc call*(call_574404: Call_NodesListByDataBoxEdgeDevice_574397; path: JsonNode;
+proc call*(call_564304: Call_NodesListByDataBoxEdgeDevice_564297; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets all the nodes currently configured under this Data Box Edge device
   ## 
-  let valid = call_574404.validator(path, query, header, formData, body)
-  let scheme = call_574404.pickScheme
+  let valid = call_564304.validator(path, query, header, formData, body)
+  let scheme = call_564304.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574404.url(scheme.get, call_574404.host, call_574404.base,
-                         call_574404.route, valid.getOrDefault("path"),
+  let url = call_564304.url(scheme.get, call_564304.host, call_564304.base,
+                         call_564304.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574404, url, valid)
+  result = hook(call_564304, url, valid)
 
-proc call*(call_574405: Call_NodesListByDataBoxEdgeDevice_574397;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          deviceName: string): Recallable =
+proc call*(call_564305: Call_NodesListByDataBoxEdgeDevice_564297;
+          apiVersion: string; subscriptionId: string; deviceName: string;
+          resourceGroupName: string): Recallable =
   ## nodesListByDataBoxEdgeDevice
   ## Gets all the nodes currently configured under this Data Box Edge device
-  ##   resourceGroupName: string (required)
-  ##                    : The resource group name.
   ##   apiVersion: string (required)
   ##             : The API version.
   ##   subscriptionId: string (required)
   ##                 : The subscription ID.
   ##   deviceName: string (required)
   ##             : The device name.
-  var path_574406 = newJObject()
-  var query_574407 = newJObject()
-  add(path_574406, "resourceGroupName", newJString(resourceGroupName))
-  add(query_574407, "api-version", newJString(apiVersion))
-  add(path_574406, "subscriptionId", newJString(subscriptionId))
-  add(path_574406, "deviceName", newJString(deviceName))
-  result = call_574405.call(path_574406, query_574407, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The resource group name.
+  var path_564306 = newJObject()
+  var query_564307 = newJObject()
+  add(query_564307, "api-version", newJString(apiVersion))
+  add(path_564306, "subscriptionId", newJString(subscriptionId))
+  add(path_564306, "deviceName", newJString(deviceName))
+  add(path_564306, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564305.call(path_564306, query_564307, nil, nil, nil)
 
-var nodesListByDataBoxEdgeDevice* = Call_NodesListByDataBoxEdgeDevice_574397(
+var nodesListByDataBoxEdgeDevice* = Call_NodesListByDataBoxEdgeDevice_564297(
     name: "nodesListByDataBoxEdgeDevice", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DataBoxEdge/dataBoxEdgeDevices/{deviceName}/nodes",
-    validator: validate_NodesListByDataBoxEdgeDevice_574398, base: "",
-    url: url_NodesListByDataBoxEdgeDevice_574399, schemes: {Scheme.Https})
+    validator: validate_NodesListByDataBoxEdgeDevice_564298, base: "",
+    url: url_NodesListByDataBoxEdgeDevice_564299, schemes: {Scheme.Https})
 type
-  Call_OperationsStatusGet_574408 = ref object of OpenApiRestCall_573667
-proc url_OperationsStatusGet_574410(protocol: Scheme; host: string; base: string;
+  Call_OperationsStatusGet_564308 = ref object of OpenApiRestCall_563565
+proc url_OperationsStatusGet_564310(protocol: Scheme; host: string; base: string;
                                    route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2320,43 +2315,42 @@ proc url_OperationsStatusGet_574410(protocol: Scheme; host: string; base: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_OperationsStatusGet_574409(path: JsonNode; query: JsonNode;
+proc validate_OperationsStatusGet_564309(path: JsonNode; query: JsonNode;
                                         header: JsonNode; formData: JsonNode;
                                         body: JsonNode): JsonNode =
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The resource group name.
   ##   name: JString (required)
   ##       : The job name.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID.
   ##   deviceName: JString (required)
   ##             : The device name.
+  ##   resourceGroupName: JString (required)
+  ##                    : The resource group name.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_574411 = path.getOrDefault("resourceGroupName")
-  valid_574411 = validateParameter(valid_574411, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `name` field"
+  var valid_564311 = path.getOrDefault("name")
+  valid_564311 = validateParameter(valid_564311, JString, required = true,
                                  default = nil)
-  if valid_574411 != nil:
-    section.add "resourceGroupName", valid_574411
-  var valid_574412 = path.getOrDefault("name")
-  valid_574412 = validateParameter(valid_574412, JString, required = true,
+  if valid_564311 != nil:
+    section.add "name", valid_564311
+  var valid_564312 = path.getOrDefault("subscriptionId")
+  valid_564312 = validateParameter(valid_564312, JString, required = true,
                                  default = nil)
-  if valid_574412 != nil:
-    section.add "name", valid_574412
-  var valid_574413 = path.getOrDefault("subscriptionId")
-  valid_574413 = validateParameter(valid_574413, JString, required = true,
+  if valid_564312 != nil:
+    section.add "subscriptionId", valid_564312
+  var valid_564313 = path.getOrDefault("deviceName")
+  valid_564313 = validateParameter(valid_564313, JString, required = true,
                                  default = nil)
-  if valid_574413 != nil:
-    section.add "subscriptionId", valid_574413
-  var valid_574414 = path.getOrDefault("deviceName")
-  valid_574414 = validateParameter(valid_574414, JString, required = true,
+  if valid_564313 != nil:
+    section.add "deviceName", valid_564313
+  var valid_564314 = path.getOrDefault("resourceGroupName")
+  valid_564314 = validateParameter(valid_564314, JString, required = true,
                                  default = nil)
-  if valid_574414 != nil:
-    section.add "deviceName", valid_574414
+  if valid_564314 != nil:
+    section.add "resourceGroupName", valid_564314
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2364,11 +2358,11 @@ proc validate_OperationsStatusGet_574409(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574415 = query.getOrDefault("api-version")
-  valid_574415 = validateParameter(valid_574415, JString, required = true,
+  var valid_564315 = query.getOrDefault("api-version")
+  valid_564315 = validateParameter(valid_564315, JString, required = true,
                                  default = nil)
-  if valid_574415 != nil:
-    section.add "api-version", valid_574415
+  if valid_564315 != nil:
+    section.add "api-version", valid_564315
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2377,22 +2371,21 @@ proc validate_OperationsStatusGet_574409(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574416: Call_OperationsStatusGet_574408; path: JsonNode;
+proc call*(call_564316: Call_OperationsStatusGet_564308; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
-  let valid = call_574416.validator(path, query, header, formData, body)
-  let scheme = call_574416.pickScheme
+  let valid = call_564316.validator(path, query, header, formData, body)
+  let scheme = call_564316.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574416.url(scheme.get, call_574416.host, call_574416.base,
-                         call_574416.route, valid.getOrDefault("path"),
+  let url = call_564316.url(scheme.get, call_564316.host, call_564316.base,
+                         call_564316.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574416, url, valid)
+  result = hook(call_564316, url, valid)
 
-proc call*(call_574417: Call_OperationsStatusGet_574408; resourceGroupName: string;
-          apiVersion: string; name: string; subscriptionId: string; deviceName: string): Recallable =
+proc call*(call_564317: Call_OperationsStatusGet_564308; apiVersion: string;
+          name: string; subscriptionId: string; deviceName: string;
+          resourceGroupName: string): Recallable =
   ## operationsStatusGet
-  ##   resourceGroupName: string (required)
-  ##                    : The resource group name.
   ##   apiVersion: string (required)
   ##             : The API version.
   ##   name: string (required)
@@ -2401,23 +2394,25 @@ proc call*(call_574417: Call_OperationsStatusGet_574408; resourceGroupName: stri
   ##                 : The subscription ID.
   ##   deviceName: string (required)
   ##             : The device name.
-  var path_574418 = newJObject()
-  var query_574419 = newJObject()
-  add(path_574418, "resourceGroupName", newJString(resourceGroupName))
-  add(query_574419, "api-version", newJString(apiVersion))
-  add(path_574418, "name", newJString(name))
-  add(path_574418, "subscriptionId", newJString(subscriptionId))
-  add(path_574418, "deviceName", newJString(deviceName))
-  result = call_574417.call(path_574418, query_574419, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The resource group name.
+  var path_564318 = newJObject()
+  var query_564319 = newJObject()
+  add(query_564319, "api-version", newJString(apiVersion))
+  add(path_564318, "name", newJString(name))
+  add(path_564318, "subscriptionId", newJString(subscriptionId))
+  add(path_564318, "deviceName", newJString(deviceName))
+  add(path_564318, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564317.call(path_564318, query_564319, nil, nil, nil)
 
-var operationsStatusGet* = Call_OperationsStatusGet_574408(
+var operationsStatusGet* = Call_OperationsStatusGet_564308(
     name: "operationsStatusGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DataBoxEdge/dataBoxEdgeDevices/{deviceName}/operationsStatus/{name}",
-    validator: validate_OperationsStatusGet_574409, base: "",
-    url: url_OperationsStatusGet_574410, schemes: {Scheme.Https})
+    validator: validate_OperationsStatusGet_564309, base: "",
+    url: url_OperationsStatusGet_564310, schemes: {Scheme.Https})
 type
-  Call_OrdersListByDataBoxEdgeDevice_574420 = ref object of OpenApiRestCall_573667
-proc url_OrdersListByDataBoxEdgeDevice_574422(protocol: Scheme; host: string;
+  Call_OrdersListByDataBoxEdgeDevice_564320 = ref object of OpenApiRestCall_563565
+proc url_OrdersListByDataBoxEdgeDevice_564322(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2441,35 +2436,35 @@ proc url_OrdersListByDataBoxEdgeDevice_574422(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_OrdersListByDataBoxEdgeDevice_574421(path: JsonNode; query: JsonNode;
+proc validate_OrdersListByDataBoxEdgeDevice_564321(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The resource group name.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID.
   ##   deviceName: JString (required)
   ##             : The device name.
+  ##   resourceGroupName: JString (required)
+  ##                    : The resource group name.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_574423 = path.getOrDefault("resourceGroupName")
-  valid_574423 = validateParameter(valid_574423, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564323 = path.getOrDefault("subscriptionId")
+  valid_564323 = validateParameter(valid_564323, JString, required = true,
                                  default = nil)
-  if valid_574423 != nil:
-    section.add "resourceGroupName", valid_574423
-  var valid_574424 = path.getOrDefault("subscriptionId")
-  valid_574424 = validateParameter(valid_574424, JString, required = true,
+  if valid_564323 != nil:
+    section.add "subscriptionId", valid_564323
+  var valid_564324 = path.getOrDefault("deviceName")
+  valid_564324 = validateParameter(valid_564324, JString, required = true,
                                  default = nil)
-  if valid_574424 != nil:
-    section.add "subscriptionId", valid_574424
-  var valid_574425 = path.getOrDefault("deviceName")
-  valid_574425 = validateParameter(valid_574425, JString, required = true,
+  if valid_564324 != nil:
+    section.add "deviceName", valid_564324
+  var valid_564325 = path.getOrDefault("resourceGroupName")
+  valid_564325 = validateParameter(valid_564325, JString, required = true,
                                  default = nil)
-  if valid_574425 != nil:
-    section.add "deviceName", valid_574425
+  if valid_564325 != nil:
+    section.add "resourceGroupName", valid_564325
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2477,11 +2472,11 @@ proc validate_OrdersListByDataBoxEdgeDevice_574421(path: JsonNode; query: JsonNo
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574426 = query.getOrDefault("api-version")
-  valid_574426 = validateParameter(valid_574426, JString, required = true,
+  var valid_564326 = query.getOrDefault("api-version")
+  valid_564326 = validateParameter(valid_564326, JString, required = true,
                                  default = nil)
-  if valid_574426 != nil:
-    section.add "api-version", valid_574426
+  if valid_564326 != nil:
+    section.add "api-version", valid_564326
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2490,45 +2485,45 @@ proc validate_OrdersListByDataBoxEdgeDevice_574421(path: JsonNode; query: JsonNo
   if body != nil:
     result.add "body", body
 
-proc call*(call_574427: Call_OrdersListByDataBoxEdgeDevice_574420; path: JsonNode;
+proc call*(call_564327: Call_OrdersListByDataBoxEdgeDevice_564320; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
-  let valid = call_574427.validator(path, query, header, formData, body)
-  let scheme = call_574427.pickScheme
+  let valid = call_564327.validator(path, query, header, formData, body)
+  let scheme = call_564327.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574427.url(scheme.get, call_574427.host, call_574427.base,
-                         call_574427.route, valid.getOrDefault("path"),
+  let url = call_564327.url(scheme.get, call_564327.host, call_564327.base,
+                         call_564327.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574427, url, valid)
+  result = hook(call_564327, url, valid)
 
-proc call*(call_574428: Call_OrdersListByDataBoxEdgeDevice_574420;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          deviceName: string): Recallable =
+proc call*(call_564328: Call_OrdersListByDataBoxEdgeDevice_564320;
+          apiVersion: string; subscriptionId: string; deviceName: string;
+          resourceGroupName: string): Recallable =
   ## ordersListByDataBoxEdgeDevice
-  ##   resourceGroupName: string (required)
-  ##                    : The resource group name.
   ##   apiVersion: string (required)
   ##             : The API version.
   ##   subscriptionId: string (required)
   ##                 : The subscription ID.
   ##   deviceName: string (required)
   ##             : The device name.
-  var path_574429 = newJObject()
-  var query_574430 = newJObject()
-  add(path_574429, "resourceGroupName", newJString(resourceGroupName))
-  add(query_574430, "api-version", newJString(apiVersion))
-  add(path_574429, "subscriptionId", newJString(subscriptionId))
-  add(path_574429, "deviceName", newJString(deviceName))
-  result = call_574428.call(path_574429, query_574430, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The resource group name.
+  var path_564329 = newJObject()
+  var query_564330 = newJObject()
+  add(query_564330, "api-version", newJString(apiVersion))
+  add(path_564329, "subscriptionId", newJString(subscriptionId))
+  add(path_564329, "deviceName", newJString(deviceName))
+  add(path_564329, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564328.call(path_564329, query_564330, nil, nil, nil)
 
-var ordersListByDataBoxEdgeDevice* = Call_OrdersListByDataBoxEdgeDevice_574420(
+var ordersListByDataBoxEdgeDevice* = Call_OrdersListByDataBoxEdgeDevice_564320(
     name: "ordersListByDataBoxEdgeDevice", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DataBoxEdge/dataBoxEdgeDevices/{deviceName}/orders",
-    validator: validate_OrdersListByDataBoxEdgeDevice_574421, base: "",
-    url: url_OrdersListByDataBoxEdgeDevice_574422, schemes: {Scheme.Https})
+    validator: validate_OrdersListByDataBoxEdgeDevice_564321, base: "",
+    url: url_OrdersListByDataBoxEdgeDevice_564322, schemes: {Scheme.Https})
 type
-  Call_OrdersCreateOrUpdate_574442 = ref object of OpenApiRestCall_573667
-proc url_OrdersCreateOrUpdate_574444(protocol: Scheme; host: string; base: string;
+  Call_OrdersCreateOrUpdate_564342 = ref object of OpenApiRestCall_563565
+proc url_OrdersCreateOrUpdate_564344(protocol: Scheme; host: string; base: string;
                                     route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2552,35 +2547,35 @@ proc url_OrdersCreateOrUpdate_574444(protocol: Scheme; host: string; base: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_OrdersCreateOrUpdate_574443(path: JsonNode; query: JsonNode;
+proc validate_OrdersCreateOrUpdate_564343(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The resource group name.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID.
   ##   deviceName: JString (required)
   ##             : The device name.
+  ##   resourceGroupName: JString (required)
+  ##                    : The resource group name.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_574445 = path.getOrDefault("resourceGroupName")
-  valid_574445 = validateParameter(valid_574445, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564345 = path.getOrDefault("subscriptionId")
+  valid_564345 = validateParameter(valid_564345, JString, required = true,
                                  default = nil)
-  if valid_574445 != nil:
-    section.add "resourceGroupName", valid_574445
-  var valid_574446 = path.getOrDefault("subscriptionId")
-  valid_574446 = validateParameter(valid_574446, JString, required = true,
+  if valid_564345 != nil:
+    section.add "subscriptionId", valid_564345
+  var valid_564346 = path.getOrDefault("deviceName")
+  valid_564346 = validateParameter(valid_564346, JString, required = true,
                                  default = nil)
-  if valid_574446 != nil:
-    section.add "subscriptionId", valid_574446
-  var valid_574447 = path.getOrDefault("deviceName")
-  valid_574447 = validateParameter(valid_574447, JString, required = true,
+  if valid_564346 != nil:
+    section.add "deviceName", valid_564346
+  var valid_564347 = path.getOrDefault("resourceGroupName")
+  valid_564347 = validateParameter(valid_564347, JString, required = true,
                                  default = nil)
-  if valid_574447 != nil:
-    section.add "deviceName", valid_574447
+  if valid_564347 != nil:
+    section.add "resourceGroupName", valid_564347
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2588,11 +2583,11 @@ proc validate_OrdersCreateOrUpdate_574443(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574448 = query.getOrDefault("api-version")
-  valid_574448 = validateParameter(valid_574448, JString, required = true,
+  var valid_564348 = query.getOrDefault("api-version")
+  valid_564348 = validateParameter(valid_564348, JString, required = true,
                                  default = nil)
-  if valid_574448 != nil:
-    section.add "api-version", valid_574448
+  if valid_564348 != nil:
+    section.add "api-version", valid_564348
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2606,23 +2601,21 @@ proc validate_OrdersCreateOrUpdate_574443(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574450: Call_OrdersCreateOrUpdate_574442; path: JsonNode;
+proc call*(call_564350: Call_OrdersCreateOrUpdate_564342; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
-  let valid = call_574450.validator(path, query, header, formData, body)
-  let scheme = call_574450.pickScheme
+  let valid = call_564350.validator(path, query, header, formData, body)
+  let scheme = call_564350.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574450.url(scheme.get, call_574450.host, call_574450.base,
-                         call_574450.route, valid.getOrDefault("path"),
+  let url = call_564350.url(scheme.get, call_564350.host, call_564350.base,
+                         call_564350.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574450, url, valid)
+  result = hook(call_564350, url, valid)
 
-proc call*(call_574451: Call_OrdersCreateOrUpdate_574442;
-          resourceGroupName: string; apiVersion: string; order: JsonNode;
-          subscriptionId: string; deviceName: string): Recallable =
+proc call*(call_564351: Call_OrdersCreateOrUpdate_564342; apiVersion: string;
+          order: JsonNode; subscriptionId: string; deviceName: string;
+          resourceGroupName: string): Recallable =
   ## ordersCreateOrUpdate
-  ##   resourceGroupName: string (required)
-  ##                    : The resource group name.
   ##   apiVersion: string (required)
   ##             : The API version.
   ##   order: JObject (required)
@@ -2631,25 +2624,27 @@ proc call*(call_574451: Call_OrdersCreateOrUpdate_574442;
   ##                 : The subscription ID.
   ##   deviceName: string (required)
   ##             : The device name.
-  var path_574452 = newJObject()
-  var query_574453 = newJObject()
-  var body_574454 = newJObject()
-  add(path_574452, "resourceGroupName", newJString(resourceGroupName))
-  add(query_574453, "api-version", newJString(apiVersion))
+  ##   resourceGroupName: string (required)
+  ##                    : The resource group name.
+  var path_564352 = newJObject()
+  var query_564353 = newJObject()
+  var body_564354 = newJObject()
+  add(query_564353, "api-version", newJString(apiVersion))
   if order != nil:
-    body_574454 = order
-  add(path_574452, "subscriptionId", newJString(subscriptionId))
-  add(path_574452, "deviceName", newJString(deviceName))
-  result = call_574451.call(path_574452, query_574453, nil, nil, body_574454)
+    body_564354 = order
+  add(path_564352, "subscriptionId", newJString(subscriptionId))
+  add(path_564352, "deviceName", newJString(deviceName))
+  add(path_564352, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564351.call(path_564352, query_564353, nil, nil, body_564354)
 
-var ordersCreateOrUpdate* = Call_OrdersCreateOrUpdate_574442(
+var ordersCreateOrUpdate* = Call_OrdersCreateOrUpdate_564342(
     name: "ordersCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DataBoxEdge/dataBoxEdgeDevices/{deviceName}/orders/default",
-    validator: validate_OrdersCreateOrUpdate_574443, base: "",
-    url: url_OrdersCreateOrUpdate_574444, schemes: {Scheme.Https})
+    validator: validate_OrdersCreateOrUpdate_564343, base: "",
+    url: url_OrdersCreateOrUpdate_564344, schemes: {Scheme.Https})
 type
-  Call_OrdersGet_574431 = ref object of OpenApiRestCall_573667
-proc url_OrdersGet_574433(protocol: Scheme; host: string; base: string; route: string;
+  Call_OrdersGet_564331 = ref object of OpenApiRestCall_563565
+proc url_OrdersGet_564333(protocol: Scheme; host: string; base: string; route: string;
                          path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2673,35 +2668,35 @@ proc url_OrdersGet_574433(protocol: Scheme; host: string; base: string; route: s
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_OrdersGet_574432(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_OrdersGet_564332(path: JsonNode; query: JsonNode; header: JsonNode;
                               formData: JsonNode; body: JsonNode): JsonNode =
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The resource group name.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID.
   ##   deviceName: JString (required)
   ##             : The device name.
+  ##   resourceGroupName: JString (required)
+  ##                    : The resource group name.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_574434 = path.getOrDefault("resourceGroupName")
-  valid_574434 = validateParameter(valid_574434, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564334 = path.getOrDefault("subscriptionId")
+  valid_564334 = validateParameter(valid_564334, JString, required = true,
                                  default = nil)
-  if valid_574434 != nil:
-    section.add "resourceGroupName", valid_574434
-  var valid_574435 = path.getOrDefault("subscriptionId")
-  valid_574435 = validateParameter(valid_574435, JString, required = true,
+  if valid_564334 != nil:
+    section.add "subscriptionId", valid_564334
+  var valid_564335 = path.getOrDefault("deviceName")
+  valid_564335 = validateParameter(valid_564335, JString, required = true,
                                  default = nil)
-  if valid_574435 != nil:
-    section.add "subscriptionId", valid_574435
-  var valid_574436 = path.getOrDefault("deviceName")
-  valid_574436 = validateParameter(valid_574436, JString, required = true,
+  if valid_564335 != nil:
+    section.add "deviceName", valid_564335
+  var valid_564336 = path.getOrDefault("resourceGroupName")
+  valid_564336 = validateParameter(valid_564336, JString, required = true,
                                  default = nil)
-  if valid_574436 != nil:
-    section.add "deviceName", valid_574436
+  if valid_564336 != nil:
+    section.add "resourceGroupName", valid_564336
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2709,11 +2704,11 @@ proc validate_OrdersGet_574432(path: JsonNode; query: JsonNode; header: JsonNode
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574437 = query.getOrDefault("api-version")
-  valid_574437 = validateParameter(valid_574437, JString, required = true,
+  var valid_564337 = query.getOrDefault("api-version")
+  valid_564337 = validateParameter(valid_564337, JString, required = true,
                                  default = nil)
-  if valid_574437 != nil:
-    section.add "api-version", valid_574437
+  if valid_564337 != nil:
+    section.add "api-version", valid_564337
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2722,44 +2717,44 @@ proc validate_OrdersGet_574432(path: JsonNode; query: JsonNode; header: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_574438: Call_OrdersGet_574431; path: JsonNode; query: JsonNode;
+proc call*(call_564338: Call_OrdersGet_564331; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
-  let valid = call_574438.validator(path, query, header, formData, body)
-  let scheme = call_574438.pickScheme
+  let valid = call_564338.validator(path, query, header, formData, body)
+  let scheme = call_564338.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574438.url(scheme.get, call_574438.host, call_574438.base,
-                         call_574438.route, valid.getOrDefault("path"),
+  let url = call_564338.url(scheme.get, call_564338.host, call_564338.base,
+                         call_564338.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574438, url, valid)
+  result = hook(call_564338, url, valid)
 
-proc call*(call_574439: Call_OrdersGet_574431; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; deviceName: string): Recallable =
+proc call*(call_564339: Call_OrdersGet_564331; apiVersion: string;
+          subscriptionId: string; deviceName: string; resourceGroupName: string): Recallable =
   ## ordersGet
-  ##   resourceGroupName: string (required)
-  ##                    : The resource group name.
   ##   apiVersion: string (required)
   ##             : The API version.
   ##   subscriptionId: string (required)
   ##                 : The subscription ID.
   ##   deviceName: string (required)
   ##             : The device name.
-  var path_574440 = newJObject()
-  var query_574441 = newJObject()
-  add(path_574440, "resourceGroupName", newJString(resourceGroupName))
-  add(query_574441, "api-version", newJString(apiVersion))
-  add(path_574440, "subscriptionId", newJString(subscriptionId))
-  add(path_574440, "deviceName", newJString(deviceName))
-  result = call_574439.call(path_574440, query_574441, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The resource group name.
+  var path_564340 = newJObject()
+  var query_564341 = newJObject()
+  add(query_564341, "api-version", newJString(apiVersion))
+  add(path_564340, "subscriptionId", newJString(subscriptionId))
+  add(path_564340, "deviceName", newJString(deviceName))
+  add(path_564340, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564339.call(path_564340, query_564341, nil, nil, nil)
 
-var ordersGet* = Call_OrdersGet_574431(name: "ordersGet", meth: HttpMethod.HttpGet,
+var ordersGet* = Call_OrdersGet_564331(name: "ordersGet", meth: HttpMethod.HttpGet,
                                     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DataBoxEdge/dataBoxEdgeDevices/{deviceName}/orders/default",
-                                    validator: validate_OrdersGet_574432,
-                                    base: "", url: url_OrdersGet_574433,
+                                    validator: validate_OrdersGet_564332,
+                                    base: "", url: url_OrdersGet_564333,
                                     schemes: {Scheme.Https})
 type
-  Call_OrdersDelete_574455 = ref object of OpenApiRestCall_573667
-proc url_OrdersDelete_574457(protocol: Scheme; host: string; base: string;
+  Call_OrdersDelete_564355 = ref object of OpenApiRestCall_563565
+proc url_OrdersDelete_564357(protocol: Scheme; host: string; base: string;
                             route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2783,35 +2778,35 @@ proc url_OrdersDelete_574457(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_OrdersDelete_574456(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_OrdersDelete_564356(path: JsonNode; query: JsonNode; header: JsonNode;
                                  formData: JsonNode; body: JsonNode): JsonNode =
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The resource group name.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID.
   ##   deviceName: JString (required)
   ##             : The device name.
+  ##   resourceGroupName: JString (required)
+  ##                    : The resource group name.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_574458 = path.getOrDefault("resourceGroupName")
-  valid_574458 = validateParameter(valid_574458, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564358 = path.getOrDefault("subscriptionId")
+  valid_564358 = validateParameter(valid_564358, JString, required = true,
                                  default = nil)
-  if valid_574458 != nil:
-    section.add "resourceGroupName", valid_574458
-  var valid_574459 = path.getOrDefault("subscriptionId")
-  valid_574459 = validateParameter(valid_574459, JString, required = true,
+  if valid_564358 != nil:
+    section.add "subscriptionId", valid_564358
+  var valid_564359 = path.getOrDefault("deviceName")
+  valid_564359 = validateParameter(valid_564359, JString, required = true,
                                  default = nil)
-  if valid_574459 != nil:
-    section.add "subscriptionId", valid_574459
-  var valid_574460 = path.getOrDefault("deviceName")
-  valid_574460 = validateParameter(valid_574460, JString, required = true,
+  if valid_564359 != nil:
+    section.add "deviceName", valid_564359
+  var valid_564360 = path.getOrDefault("resourceGroupName")
+  valid_564360 = validateParameter(valid_564360, JString, required = true,
                                  default = nil)
-  if valid_574460 != nil:
-    section.add "deviceName", valid_574460
+  if valid_564360 != nil:
+    section.add "resourceGroupName", valid_564360
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2819,11 +2814,11 @@ proc validate_OrdersDelete_574456(path: JsonNode; query: JsonNode; header: JsonN
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574461 = query.getOrDefault("api-version")
-  valid_574461 = validateParameter(valid_574461, JString, required = true,
+  var valid_564361 = query.getOrDefault("api-version")
+  valid_564361 = validateParameter(valid_564361, JString, required = true,
                                  default = nil)
-  if valid_574461 != nil:
-    section.add "api-version", valid_574461
+  if valid_564361 != nil:
+    section.add "api-version", valid_564361
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2832,43 +2827,43 @@ proc validate_OrdersDelete_574456(path: JsonNode; query: JsonNode; header: JsonN
   if body != nil:
     result.add "body", body
 
-proc call*(call_574462: Call_OrdersDelete_574455; path: JsonNode; query: JsonNode;
+proc call*(call_564362: Call_OrdersDelete_564355; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
-  let valid = call_574462.validator(path, query, header, formData, body)
-  let scheme = call_574462.pickScheme
+  let valid = call_564362.validator(path, query, header, formData, body)
+  let scheme = call_564362.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574462.url(scheme.get, call_574462.host, call_574462.base,
-                         call_574462.route, valid.getOrDefault("path"),
+  let url = call_564362.url(scheme.get, call_564362.host, call_564362.base,
+                         call_564362.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574462, url, valid)
+  result = hook(call_564362, url, valid)
 
-proc call*(call_574463: Call_OrdersDelete_574455; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; deviceName: string): Recallable =
+proc call*(call_564363: Call_OrdersDelete_564355; apiVersion: string;
+          subscriptionId: string; deviceName: string; resourceGroupName: string): Recallable =
   ## ordersDelete
-  ##   resourceGroupName: string (required)
-  ##                    : The resource group name.
   ##   apiVersion: string (required)
   ##             : The API version.
   ##   subscriptionId: string (required)
   ##                 : The subscription ID.
   ##   deviceName: string (required)
   ##             : The device name.
-  var path_574464 = newJObject()
-  var query_574465 = newJObject()
-  add(path_574464, "resourceGroupName", newJString(resourceGroupName))
-  add(query_574465, "api-version", newJString(apiVersion))
-  add(path_574464, "subscriptionId", newJString(subscriptionId))
-  add(path_574464, "deviceName", newJString(deviceName))
-  result = call_574463.call(path_574464, query_574465, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The resource group name.
+  var path_564364 = newJObject()
+  var query_564365 = newJObject()
+  add(query_564365, "api-version", newJString(apiVersion))
+  add(path_564364, "subscriptionId", newJString(subscriptionId))
+  add(path_564364, "deviceName", newJString(deviceName))
+  add(path_564364, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564363.call(path_564364, query_564365, nil, nil, nil)
 
-var ordersDelete* = Call_OrdersDelete_574455(name: "ordersDelete",
+var ordersDelete* = Call_OrdersDelete_564355(name: "ordersDelete",
     meth: HttpMethod.HttpDelete, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DataBoxEdge/dataBoxEdgeDevices/{deviceName}/orders/default",
-    validator: validate_OrdersDelete_574456, base: "", url: url_OrdersDelete_574457,
+    validator: validate_OrdersDelete_564356, base: "", url: url_OrdersDelete_564357,
     schemes: {Scheme.Https})
 type
-  Call_RolesListByDataBoxEdgeDevice_574466 = ref object of OpenApiRestCall_573667
-proc url_RolesListByDataBoxEdgeDevice_574468(protocol: Scheme; host: string;
+  Call_RolesListByDataBoxEdgeDevice_564366 = ref object of OpenApiRestCall_563565
+proc url_RolesListByDataBoxEdgeDevice_564368(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2892,37 +2887,37 @@ proc url_RolesListByDataBoxEdgeDevice_574468(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_RolesListByDataBoxEdgeDevice_574467(path: JsonNode; query: JsonNode;
+proc validate_RolesListByDataBoxEdgeDevice_564367(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists all the roles configured in a Data Box Edge/Data Box Gateway device.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The resource group name.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID.
   ##   deviceName: JString (required)
   ##             : The device name.
+  ##   resourceGroupName: JString (required)
+  ##                    : The resource group name.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_574469 = path.getOrDefault("resourceGroupName")
-  valid_574469 = validateParameter(valid_574469, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564369 = path.getOrDefault("subscriptionId")
+  valid_564369 = validateParameter(valid_564369, JString, required = true,
                                  default = nil)
-  if valid_574469 != nil:
-    section.add "resourceGroupName", valid_574469
-  var valid_574470 = path.getOrDefault("subscriptionId")
-  valid_574470 = validateParameter(valid_574470, JString, required = true,
+  if valid_564369 != nil:
+    section.add "subscriptionId", valid_564369
+  var valid_564370 = path.getOrDefault("deviceName")
+  valid_564370 = validateParameter(valid_564370, JString, required = true,
                                  default = nil)
-  if valid_574470 != nil:
-    section.add "subscriptionId", valid_574470
-  var valid_574471 = path.getOrDefault("deviceName")
-  valid_574471 = validateParameter(valid_574471, JString, required = true,
+  if valid_564370 != nil:
+    section.add "deviceName", valid_564370
+  var valid_564371 = path.getOrDefault("resourceGroupName")
+  valid_564371 = validateParameter(valid_564371, JString, required = true,
                                  default = nil)
-  if valid_574471 != nil:
-    section.add "deviceName", valid_574471
+  if valid_564371 != nil:
+    section.add "resourceGroupName", valid_564371
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2930,11 +2925,11 @@ proc validate_RolesListByDataBoxEdgeDevice_574467(path: JsonNode; query: JsonNod
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574472 = query.getOrDefault("api-version")
-  valid_574472 = validateParameter(valid_574472, JString, required = true,
+  var valid_564372 = query.getOrDefault("api-version")
+  valid_564372 = validateParameter(valid_564372, JString, required = true,
                                  default = nil)
-  if valid_574472 != nil:
-    section.add "api-version", valid_574472
+  if valid_564372 != nil:
+    section.add "api-version", valid_564372
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2943,48 +2938,48 @@ proc validate_RolesListByDataBoxEdgeDevice_574467(path: JsonNode; query: JsonNod
   if body != nil:
     result.add "body", body
 
-proc call*(call_574473: Call_RolesListByDataBoxEdgeDevice_574466; path: JsonNode;
+proc call*(call_564373: Call_RolesListByDataBoxEdgeDevice_564366; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists all the roles configured in a Data Box Edge/Data Box Gateway device.
   ## 
-  let valid = call_574473.validator(path, query, header, formData, body)
-  let scheme = call_574473.pickScheme
+  let valid = call_564373.validator(path, query, header, formData, body)
+  let scheme = call_564373.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574473.url(scheme.get, call_574473.host, call_574473.base,
-                         call_574473.route, valid.getOrDefault("path"),
+  let url = call_564373.url(scheme.get, call_564373.host, call_564373.base,
+                         call_564373.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574473, url, valid)
+  result = hook(call_564373, url, valid)
 
-proc call*(call_574474: Call_RolesListByDataBoxEdgeDevice_574466;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          deviceName: string): Recallable =
+proc call*(call_564374: Call_RolesListByDataBoxEdgeDevice_564366;
+          apiVersion: string; subscriptionId: string; deviceName: string;
+          resourceGroupName: string): Recallable =
   ## rolesListByDataBoxEdgeDevice
   ## Lists all the roles configured in a Data Box Edge/Data Box Gateway device.
-  ##   resourceGroupName: string (required)
-  ##                    : The resource group name.
   ##   apiVersion: string (required)
   ##             : The API version.
   ##   subscriptionId: string (required)
   ##                 : The subscription ID.
   ##   deviceName: string (required)
   ##             : The device name.
-  var path_574475 = newJObject()
-  var query_574476 = newJObject()
-  add(path_574475, "resourceGroupName", newJString(resourceGroupName))
-  add(query_574476, "api-version", newJString(apiVersion))
-  add(path_574475, "subscriptionId", newJString(subscriptionId))
-  add(path_574475, "deviceName", newJString(deviceName))
-  result = call_574474.call(path_574475, query_574476, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The resource group name.
+  var path_564375 = newJObject()
+  var query_564376 = newJObject()
+  add(query_564376, "api-version", newJString(apiVersion))
+  add(path_564375, "subscriptionId", newJString(subscriptionId))
+  add(path_564375, "deviceName", newJString(deviceName))
+  add(path_564375, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564374.call(path_564375, query_564376, nil, nil, nil)
 
-var rolesListByDataBoxEdgeDevice* = Call_RolesListByDataBoxEdgeDevice_574466(
+var rolesListByDataBoxEdgeDevice* = Call_RolesListByDataBoxEdgeDevice_564366(
     name: "rolesListByDataBoxEdgeDevice", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DataBoxEdge/dataBoxEdgeDevices/{deviceName}/roles",
-    validator: validate_RolesListByDataBoxEdgeDevice_574467, base: "",
-    url: url_RolesListByDataBoxEdgeDevice_574468, schemes: {Scheme.Https})
+    validator: validate_RolesListByDataBoxEdgeDevice_564367, base: "",
+    url: url_RolesListByDataBoxEdgeDevice_564368, schemes: {Scheme.Https})
 type
-  Call_RolesCreateOrUpdate_574489 = ref object of OpenApiRestCall_573667
-proc url_RolesCreateOrUpdate_574491(protocol: Scheme; host: string; base: string;
+  Call_RolesCreateOrUpdate_564389 = ref object of OpenApiRestCall_563565
+proc url_RolesCreateOrUpdate_564391(protocol: Scheme; host: string; base: string;
                                    route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -3010,7 +3005,7 @@ proc url_RolesCreateOrUpdate_574491(protocol: Scheme; host: string; base: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_RolesCreateOrUpdate_574490(path: JsonNode; query: JsonNode;
+proc validate_RolesCreateOrUpdate_564390(path: JsonNode; query: JsonNode;
                                         header: JsonNode; formData: JsonNode;
                                         body: JsonNode): JsonNode =
   ## Create or update a role.
@@ -3018,37 +3013,36 @@ proc validate_RolesCreateOrUpdate_574490(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The resource group name.
   ##   name: JString (required)
   ##       : The role name.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID.
   ##   deviceName: JString (required)
   ##             : The device name.
+  ##   resourceGroupName: JString (required)
+  ##                    : The resource group name.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_574492 = path.getOrDefault("resourceGroupName")
-  valid_574492 = validateParameter(valid_574492, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `name` field"
+  var valid_564392 = path.getOrDefault("name")
+  valid_564392 = validateParameter(valid_564392, JString, required = true,
                                  default = nil)
-  if valid_574492 != nil:
-    section.add "resourceGroupName", valid_574492
-  var valid_574493 = path.getOrDefault("name")
-  valid_574493 = validateParameter(valid_574493, JString, required = true,
+  if valid_564392 != nil:
+    section.add "name", valid_564392
+  var valid_564393 = path.getOrDefault("subscriptionId")
+  valid_564393 = validateParameter(valid_564393, JString, required = true,
                                  default = nil)
-  if valid_574493 != nil:
-    section.add "name", valid_574493
-  var valid_574494 = path.getOrDefault("subscriptionId")
-  valid_574494 = validateParameter(valid_574494, JString, required = true,
+  if valid_564393 != nil:
+    section.add "subscriptionId", valid_564393
+  var valid_564394 = path.getOrDefault("deviceName")
+  valid_564394 = validateParameter(valid_564394, JString, required = true,
                                  default = nil)
-  if valid_574494 != nil:
-    section.add "subscriptionId", valid_574494
-  var valid_574495 = path.getOrDefault("deviceName")
-  valid_574495 = validateParameter(valid_574495, JString, required = true,
+  if valid_564394 != nil:
+    section.add "deviceName", valid_564394
+  var valid_564395 = path.getOrDefault("resourceGroupName")
+  valid_564395 = validateParameter(valid_564395, JString, required = true,
                                  default = nil)
-  if valid_574495 != nil:
-    section.add "deviceName", valid_574495
+  if valid_564395 != nil:
+    section.add "resourceGroupName", valid_564395
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -3056,11 +3050,11 @@ proc validate_RolesCreateOrUpdate_574490(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574496 = query.getOrDefault("api-version")
-  valid_574496 = validateParameter(valid_574496, JString, required = true,
+  var valid_564396 = query.getOrDefault("api-version")
+  valid_564396 = validateParameter(valid_564396, JString, required = true,
                                  default = nil)
-  if valid_574496 != nil:
-    section.add "api-version", valid_574496
+  if valid_564396 != nil:
+    section.add "api-version", valid_564396
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3074,56 +3068,56 @@ proc validate_RolesCreateOrUpdate_574490(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574498: Call_RolesCreateOrUpdate_574489; path: JsonNode;
+proc call*(call_564398: Call_RolesCreateOrUpdate_564389; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Create or update a role.
   ## 
-  let valid = call_574498.validator(path, query, header, formData, body)
-  let scheme = call_574498.pickScheme
+  let valid = call_564398.validator(path, query, header, formData, body)
+  let scheme = call_564398.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574498.url(scheme.get, call_574498.host, call_574498.base,
-                         call_574498.route, valid.getOrDefault("path"),
+  let url = call_564398.url(scheme.get, call_564398.host, call_564398.base,
+                         call_564398.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574498, url, valid)
+  result = hook(call_564398, url, valid)
 
-proc call*(call_574499: Call_RolesCreateOrUpdate_574489; resourceGroupName: string;
-          apiVersion: string; name: string; subscriptionId: string; role: JsonNode;
-          deviceName: string): Recallable =
+proc call*(call_564399: Call_RolesCreateOrUpdate_564389; apiVersion: string;
+          role: JsonNode; name: string; subscriptionId: string; deviceName: string;
+          resourceGroupName: string): Recallable =
   ## rolesCreateOrUpdate
   ## Create or update a role.
-  ##   resourceGroupName: string (required)
-  ##                    : The resource group name.
   ##   apiVersion: string (required)
   ##             : The API version.
+  ##   role: JObject (required)
+  ##       : The role properties.
   ##   name: string (required)
   ##       : The role name.
   ##   subscriptionId: string (required)
   ##                 : The subscription ID.
-  ##   role: JObject (required)
-  ##       : The role properties.
   ##   deviceName: string (required)
   ##             : The device name.
-  var path_574500 = newJObject()
-  var query_574501 = newJObject()
-  var body_574502 = newJObject()
-  add(path_574500, "resourceGroupName", newJString(resourceGroupName))
-  add(query_574501, "api-version", newJString(apiVersion))
-  add(path_574500, "name", newJString(name))
-  add(path_574500, "subscriptionId", newJString(subscriptionId))
+  ##   resourceGroupName: string (required)
+  ##                    : The resource group name.
+  var path_564400 = newJObject()
+  var query_564401 = newJObject()
+  var body_564402 = newJObject()
+  add(query_564401, "api-version", newJString(apiVersion))
   if role != nil:
-    body_574502 = role
-  add(path_574500, "deviceName", newJString(deviceName))
-  result = call_574499.call(path_574500, query_574501, nil, nil, body_574502)
+    body_564402 = role
+  add(path_564400, "name", newJString(name))
+  add(path_564400, "subscriptionId", newJString(subscriptionId))
+  add(path_564400, "deviceName", newJString(deviceName))
+  add(path_564400, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564399.call(path_564400, query_564401, nil, nil, body_564402)
 
-var rolesCreateOrUpdate* = Call_RolesCreateOrUpdate_574489(
+var rolesCreateOrUpdate* = Call_RolesCreateOrUpdate_564389(
     name: "rolesCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DataBoxEdge/dataBoxEdgeDevices/{deviceName}/roles/{name}",
-    validator: validate_RolesCreateOrUpdate_574490, base: "",
-    url: url_RolesCreateOrUpdate_574491, schemes: {Scheme.Https})
+    validator: validate_RolesCreateOrUpdate_564390, base: "",
+    url: url_RolesCreateOrUpdate_564391, schemes: {Scheme.Https})
 type
-  Call_RolesGet_574477 = ref object of OpenApiRestCall_573667
-proc url_RolesGet_574479(protocol: Scheme; host: string; base: string; route: string;
+  Call_RolesGet_564377 = ref object of OpenApiRestCall_563565
+proc url_RolesGet_564379(protocol: Scheme; host: string; base: string; route: string;
                         path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -3149,44 +3143,43 @@ proc url_RolesGet_574479(protocol: Scheme; host: string; base: string; route: st
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_RolesGet_574478(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_RolesGet_564378(path: JsonNode; query: JsonNode; header: JsonNode;
                              formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets a specific role by name.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The resource group name.
   ##   name: JString (required)
   ##       : The role name.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID.
   ##   deviceName: JString (required)
   ##             : The device name.
+  ##   resourceGroupName: JString (required)
+  ##                    : The resource group name.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_574480 = path.getOrDefault("resourceGroupName")
-  valid_574480 = validateParameter(valid_574480, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `name` field"
+  var valid_564380 = path.getOrDefault("name")
+  valid_564380 = validateParameter(valid_564380, JString, required = true,
                                  default = nil)
-  if valid_574480 != nil:
-    section.add "resourceGroupName", valid_574480
-  var valid_574481 = path.getOrDefault("name")
-  valid_574481 = validateParameter(valid_574481, JString, required = true,
+  if valid_564380 != nil:
+    section.add "name", valid_564380
+  var valid_564381 = path.getOrDefault("subscriptionId")
+  valid_564381 = validateParameter(valid_564381, JString, required = true,
                                  default = nil)
-  if valid_574481 != nil:
-    section.add "name", valid_574481
-  var valid_574482 = path.getOrDefault("subscriptionId")
-  valid_574482 = validateParameter(valid_574482, JString, required = true,
+  if valid_564381 != nil:
+    section.add "subscriptionId", valid_564381
+  var valid_564382 = path.getOrDefault("deviceName")
+  valid_564382 = validateParameter(valid_564382, JString, required = true,
                                  default = nil)
-  if valid_574482 != nil:
-    section.add "subscriptionId", valid_574482
-  var valid_574483 = path.getOrDefault("deviceName")
-  valid_574483 = validateParameter(valid_574483, JString, required = true,
+  if valid_564382 != nil:
+    section.add "deviceName", valid_564382
+  var valid_564383 = path.getOrDefault("resourceGroupName")
+  valid_564383 = validateParameter(valid_564383, JString, required = true,
                                  default = nil)
-  if valid_574483 != nil:
-    section.add "deviceName", valid_574483
+  if valid_564383 != nil:
+    section.add "resourceGroupName", valid_564383
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -3194,11 +3187,11 @@ proc validate_RolesGet_574478(path: JsonNode; query: JsonNode; header: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574484 = query.getOrDefault("api-version")
-  valid_574484 = validateParameter(valid_574484, JString, required = true,
+  var valid_564384 = query.getOrDefault("api-version")
+  valid_564384 = validateParameter(valid_564384, JString, required = true,
                                  default = nil)
-  if valid_574484 != nil:
-    section.add "api-version", valid_574484
+  if valid_564384 != nil:
+    section.add "api-version", valid_564384
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3207,25 +3200,23 @@ proc validate_RolesGet_574478(path: JsonNode; query: JsonNode; header: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574485: Call_RolesGet_574477; path: JsonNode; query: JsonNode;
+proc call*(call_564385: Call_RolesGet_564377; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets a specific role by name.
   ## 
-  let valid = call_574485.validator(path, query, header, formData, body)
-  let scheme = call_574485.pickScheme
+  let valid = call_564385.validator(path, query, header, formData, body)
+  let scheme = call_564385.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574485.url(scheme.get, call_574485.host, call_574485.base,
-                         call_574485.route, valid.getOrDefault("path"),
+  let url = call_564385.url(scheme.get, call_564385.host, call_564385.base,
+                         call_564385.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574485, url, valid)
+  result = hook(call_564385, url, valid)
 
-proc call*(call_574486: Call_RolesGet_574477; resourceGroupName: string;
-          apiVersion: string; name: string; subscriptionId: string; deviceName: string): Recallable =
+proc call*(call_564386: Call_RolesGet_564377; apiVersion: string; name: string;
+          subscriptionId: string; deviceName: string; resourceGroupName: string): Recallable =
   ## rolesGet
   ## Gets a specific role by name.
-  ##   resourceGroupName: string (required)
-  ##                    : The resource group name.
   ##   apiVersion: string (required)
   ##             : The API version.
   ##   name: string (required)
@@ -3234,23 +3225,25 @@ proc call*(call_574486: Call_RolesGet_574477; resourceGroupName: string;
   ##                 : The subscription ID.
   ##   deviceName: string (required)
   ##             : The device name.
-  var path_574487 = newJObject()
-  var query_574488 = newJObject()
-  add(path_574487, "resourceGroupName", newJString(resourceGroupName))
-  add(query_574488, "api-version", newJString(apiVersion))
-  add(path_574487, "name", newJString(name))
-  add(path_574487, "subscriptionId", newJString(subscriptionId))
-  add(path_574487, "deviceName", newJString(deviceName))
-  result = call_574486.call(path_574487, query_574488, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The resource group name.
+  var path_564387 = newJObject()
+  var query_564388 = newJObject()
+  add(query_564388, "api-version", newJString(apiVersion))
+  add(path_564387, "name", newJString(name))
+  add(path_564387, "subscriptionId", newJString(subscriptionId))
+  add(path_564387, "deviceName", newJString(deviceName))
+  add(path_564387, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564386.call(path_564387, query_564388, nil, nil, nil)
 
-var rolesGet* = Call_RolesGet_574477(name: "rolesGet", meth: HttpMethod.HttpGet,
+var rolesGet* = Call_RolesGet_564377(name: "rolesGet", meth: HttpMethod.HttpGet,
                                   host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DataBoxEdge/dataBoxEdgeDevices/{deviceName}/roles/{name}",
-                                  validator: validate_RolesGet_574478, base: "",
-                                  url: url_RolesGet_574479,
+                                  validator: validate_RolesGet_564378, base: "",
+                                  url: url_RolesGet_564379,
                                   schemes: {Scheme.Https})
 type
-  Call_RolesDelete_574503 = ref object of OpenApiRestCall_573667
-proc url_RolesDelete_574505(protocol: Scheme; host: string; base: string;
+  Call_RolesDelete_564403 = ref object of OpenApiRestCall_563565
+proc url_RolesDelete_564405(protocol: Scheme; host: string; base: string;
                            route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -3276,44 +3269,43 @@ proc url_RolesDelete_574505(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_RolesDelete_574504(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_RolesDelete_564404(path: JsonNode; query: JsonNode; header: JsonNode;
                                 formData: JsonNode; body: JsonNode): JsonNode =
   ## Deletes the role on the device.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The resource group name.
   ##   name: JString (required)
   ##       : The role name.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID.
   ##   deviceName: JString (required)
   ##             : The device name.
+  ##   resourceGroupName: JString (required)
+  ##                    : The resource group name.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_574506 = path.getOrDefault("resourceGroupName")
-  valid_574506 = validateParameter(valid_574506, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `name` field"
+  var valid_564406 = path.getOrDefault("name")
+  valid_564406 = validateParameter(valid_564406, JString, required = true,
                                  default = nil)
-  if valid_574506 != nil:
-    section.add "resourceGroupName", valid_574506
-  var valid_574507 = path.getOrDefault("name")
-  valid_574507 = validateParameter(valid_574507, JString, required = true,
+  if valid_564406 != nil:
+    section.add "name", valid_564406
+  var valid_564407 = path.getOrDefault("subscriptionId")
+  valid_564407 = validateParameter(valid_564407, JString, required = true,
                                  default = nil)
-  if valid_574507 != nil:
-    section.add "name", valid_574507
-  var valid_574508 = path.getOrDefault("subscriptionId")
-  valid_574508 = validateParameter(valid_574508, JString, required = true,
+  if valid_564407 != nil:
+    section.add "subscriptionId", valid_564407
+  var valid_564408 = path.getOrDefault("deviceName")
+  valid_564408 = validateParameter(valid_564408, JString, required = true,
                                  default = nil)
-  if valid_574508 != nil:
-    section.add "subscriptionId", valid_574508
-  var valid_574509 = path.getOrDefault("deviceName")
-  valid_574509 = validateParameter(valid_574509, JString, required = true,
+  if valid_564408 != nil:
+    section.add "deviceName", valid_564408
+  var valid_564409 = path.getOrDefault("resourceGroupName")
+  valid_564409 = validateParameter(valid_564409, JString, required = true,
                                  default = nil)
-  if valid_574509 != nil:
-    section.add "deviceName", valid_574509
+  if valid_564409 != nil:
+    section.add "resourceGroupName", valid_564409
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -3321,11 +3313,11 @@ proc validate_RolesDelete_574504(path: JsonNode; query: JsonNode; header: JsonNo
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574510 = query.getOrDefault("api-version")
-  valid_574510 = validateParameter(valid_574510, JString, required = true,
+  var valid_564410 = query.getOrDefault("api-version")
+  valid_564410 = validateParameter(valid_564410, JString, required = true,
                                  default = nil)
-  if valid_574510 != nil:
-    section.add "api-version", valid_574510
+  if valid_564410 != nil:
+    section.add "api-version", valid_564410
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3334,25 +3326,23 @@ proc validate_RolesDelete_574504(path: JsonNode; query: JsonNode; header: JsonNo
   if body != nil:
     result.add "body", body
 
-proc call*(call_574511: Call_RolesDelete_574503; path: JsonNode; query: JsonNode;
+proc call*(call_564411: Call_RolesDelete_564403; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes the role on the device.
   ## 
-  let valid = call_574511.validator(path, query, header, formData, body)
-  let scheme = call_574511.pickScheme
+  let valid = call_564411.validator(path, query, header, formData, body)
+  let scheme = call_564411.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574511.url(scheme.get, call_574511.host, call_574511.base,
-                         call_574511.route, valid.getOrDefault("path"),
+  let url = call_564411.url(scheme.get, call_564411.host, call_564411.base,
+                         call_564411.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574511, url, valid)
+  result = hook(call_564411, url, valid)
 
-proc call*(call_574512: Call_RolesDelete_574503; resourceGroupName: string;
-          apiVersion: string; name: string; subscriptionId: string; deviceName: string): Recallable =
+proc call*(call_564412: Call_RolesDelete_564403; apiVersion: string; name: string;
+          subscriptionId: string; deviceName: string; resourceGroupName: string): Recallable =
   ## rolesDelete
   ## Deletes the role on the device.
-  ##   resourceGroupName: string (required)
-  ##                    : The resource group name.
   ##   apiVersion: string (required)
   ##             : The API version.
   ##   name: string (required)
@@ -3361,24 +3351,26 @@ proc call*(call_574512: Call_RolesDelete_574503; resourceGroupName: string;
   ##                 : The subscription ID.
   ##   deviceName: string (required)
   ##             : The device name.
-  var path_574513 = newJObject()
-  var query_574514 = newJObject()
-  add(path_574513, "resourceGroupName", newJString(resourceGroupName))
-  add(query_574514, "api-version", newJString(apiVersion))
-  add(path_574513, "name", newJString(name))
-  add(path_574513, "subscriptionId", newJString(subscriptionId))
-  add(path_574513, "deviceName", newJString(deviceName))
-  result = call_574512.call(path_574513, query_574514, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The resource group name.
+  var path_564413 = newJObject()
+  var query_564414 = newJObject()
+  add(query_564414, "api-version", newJString(apiVersion))
+  add(path_564413, "name", newJString(name))
+  add(path_564413, "subscriptionId", newJString(subscriptionId))
+  add(path_564413, "deviceName", newJString(deviceName))
+  add(path_564413, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564412.call(path_564413, query_564414, nil, nil, nil)
 
-var rolesDelete* = Call_RolesDelete_574503(name: "rolesDelete",
+var rolesDelete* = Call_RolesDelete_564403(name: "rolesDelete",
                                         meth: HttpMethod.HttpDelete,
                                         host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DataBoxEdge/dataBoxEdgeDevices/{deviceName}/roles/{name}",
-                                        validator: validate_RolesDelete_574504,
-                                        base: "", url: url_RolesDelete_574505,
+                                        validator: validate_RolesDelete_564404,
+                                        base: "", url: url_RolesDelete_564405,
                                         schemes: {Scheme.Https})
 type
-  Call_DevicesScanForUpdates_574515 = ref object of OpenApiRestCall_573667
-proc url_DevicesScanForUpdates_574517(protocol: Scheme; host: string; base: string;
+  Call_DevicesScanForUpdates_564415 = ref object of OpenApiRestCall_563565
+proc url_DevicesScanForUpdates_564417(protocol: Scheme; host: string; base: string;
                                      route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -3402,35 +3394,35 @@ proc url_DevicesScanForUpdates_574517(protocol: Scheme; host: string; base: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DevicesScanForUpdates_574516(path: JsonNode; query: JsonNode;
+proc validate_DevicesScanForUpdates_564416(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The resource group name.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID.
   ##   deviceName: JString (required)
   ##             : The device name.
+  ##   resourceGroupName: JString (required)
+  ##                    : The resource group name.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_574518 = path.getOrDefault("resourceGroupName")
-  valid_574518 = validateParameter(valid_574518, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564418 = path.getOrDefault("subscriptionId")
+  valid_564418 = validateParameter(valid_564418, JString, required = true,
                                  default = nil)
-  if valid_574518 != nil:
-    section.add "resourceGroupName", valid_574518
-  var valid_574519 = path.getOrDefault("subscriptionId")
-  valid_574519 = validateParameter(valid_574519, JString, required = true,
+  if valid_564418 != nil:
+    section.add "subscriptionId", valid_564418
+  var valid_564419 = path.getOrDefault("deviceName")
+  valid_564419 = validateParameter(valid_564419, JString, required = true,
                                  default = nil)
-  if valid_574519 != nil:
-    section.add "subscriptionId", valid_574519
-  var valid_574520 = path.getOrDefault("deviceName")
-  valid_574520 = validateParameter(valid_574520, JString, required = true,
+  if valid_564419 != nil:
+    section.add "deviceName", valid_564419
+  var valid_564420 = path.getOrDefault("resourceGroupName")
+  valid_564420 = validateParameter(valid_564420, JString, required = true,
                                  default = nil)
-  if valid_574520 != nil:
-    section.add "deviceName", valid_574520
+  if valid_564420 != nil:
+    section.add "resourceGroupName", valid_564420
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -3438,11 +3430,11 @@ proc validate_DevicesScanForUpdates_574516(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574521 = query.getOrDefault("api-version")
-  valid_574521 = validateParameter(valid_574521, JString, required = true,
+  var valid_564421 = query.getOrDefault("api-version")
+  valid_564421 = validateParameter(valid_564421, JString, required = true,
                                  default = nil)
-  if valid_574521 != nil:
-    section.add "api-version", valid_574521
+  if valid_564421 != nil:
+    section.add "api-version", valid_564421
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3451,45 +3443,44 @@ proc validate_DevicesScanForUpdates_574516(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574522: Call_DevicesScanForUpdates_574515; path: JsonNode;
+proc call*(call_564422: Call_DevicesScanForUpdates_564415; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
-  let valid = call_574522.validator(path, query, header, formData, body)
-  let scheme = call_574522.pickScheme
+  let valid = call_564422.validator(path, query, header, formData, body)
+  let scheme = call_564422.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574522.url(scheme.get, call_574522.host, call_574522.base,
-                         call_574522.route, valid.getOrDefault("path"),
+  let url = call_564422.url(scheme.get, call_564422.host, call_564422.base,
+                         call_564422.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574522, url, valid)
+  result = hook(call_564422, url, valid)
 
-proc call*(call_574523: Call_DevicesScanForUpdates_574515;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          deviceName: string): Recallable =
+proc call*(call_564423: Call_DevicesScanForUpdates_564415; apiVersion: string;
+          subscriptionId: string; deviceName: string; resourceGroupName: string): Recallable =
   ## devicesScanForUpdates
-  ##   resourceGroupName: string (required)
-  ##                    : The resource group name.
   ##   apiVersion: string (required)
   ##             : The API version.
   ##   subscriptionId: string (required)
   ##                 : The subscription ID.
   ##   deviceName: string (required)
   ##             : The device name.
-  var path_574524 = newJObject()
-  var query_574525 = newJObject()
-  add(path_574524, "resourceGroupName", newJString(resourceGroupName))
-  add(query_574525, "api-version", newJString(apiVersion))
-  add(path_574524, "subscriptionId", newJString(subscriptionId))
-  add(path_574524, "deviceName", newJString(deviceName))
-  result = call_574523.call(path_574524, query_574525, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The resource group name.
+  var path_564424 = newJObject()
+  var query_564425 = newJObject()
+  add(query_564425, "api-version", newJString(apiVersion))
+  add(path_564424, "subscriptionId", newJString(subscriptionId))
+  add(path_564424, "deviceName", newJString(deviceName))
+  add(path_564424, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564423.call(path_564424, query_564425, nil, nil, nil)
 
-var devicesScanForUpdates* = Call_DevicesScanForUpdates_574515(
+var devicesScanForUpdates* = Call_DevicesScanForUpdates_564415(
     name: "devicesScanForUpdates", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DataBoxEdge/dataBoxEdgeDevices/{deviceName}/scanForUpdates",
-    validator: validate_DevicesScanForUpdates_574516, base: "",
-    url: url_DevicesScanForUpdates_574517, schemes: {Scheme.Https})
+    validator: validate_DevicesScanForUpdates_564416, base: "",
+    url: url_DevicesScanForUpdates_564417, schemes: {Scheme.Https})
 type
-  Call_DevicesCreateOrUpdateSecuritySettings_574526 = ref object of OpenApiRestCall_573667
-proc url_DevicesCreateOrUpdateSecuritySettings_574528(protocol: Scheme;
+  Call_DevicesCreateOrUpdateSecuritySettings_564426 = ref object of OpenApiRestCall_563565
+proc url_DevicesCreateOrUpdateSecuritySettings_564428(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -3513,37 +3504,37 @@ proc url_DevicesCreateOrUpdateSecuritySettings_574528(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DevicesCreateOrUpdateSecuritySettings_574527(path: JsonNode;
+proc validate_DevicesCreateOrUpdateSecuritySettings_564427(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Updates the security settings on a Data Box Edge/Data Box Gateway device.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The resource group name.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID.
   ##   deviceName: JString (required)
   ##             : The device name.
+  ##   resourceGroupName: JString (required)
+  ##                    : The resource group name.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_574529 = path.getOrDefault("resourceGroupName")
-  valid_574529 = validateParameter(valid_574529, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564429 = path.getOrDefault("subscriptionId")
+  valid_564429 = validateParameter(valid_564429, JString, required = true,
                                  default = nil)
-  if valid_574529 != nil:
-    section.add "resourceGroupName", valid_574529
-  var valid_574530 = path.getOrDefault("subscriptionId")
-  valid_574530 = validateParameter(valid_574530, JString, required = true,
+  if valid_564429 != nil:
+    section.add "subscriptionId", valid_564429
+  var valid_564430 = path.getOrDefault("deviceName")
+  valid_564430 = validateParameter(valid_564430, JString, required = true,
                                  default = nil)
-  if valid_574530 != nil:
-    section.add "subscriptionId", valid_574530
-  var valid_574531 = path.getOrDefault("deviceName")
-  valid_574531 = validateParameter(valid_574531, JString, required = true,
+  if valid_564430 != nil:
+    section.add "deviceName", valid_564430
+  var valid_564431 = path.getOrDefault("resourceGroupName")
+  valid_564431 = validateParameter(valid_564431, JString, required = true,
                                  default = nil)
-  if valid_574531 != nil:
-    section.add "deviceName", valid_574531
+  if valid_564431 != nil:
+    section.add "resourceGroupName", valid_564431
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -3551,11 +3542,11 @@ proc validate_DevicesCreateOrUpdateSecuritySettings_574527(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574532 = query.getOrDefault("api-version")
-  valid_574532 = validateParameter(valid_574532, JString, required = true,
+  var valid_564432 = query.getOrDefault("api-version")
+  valid_564432 = validateParameter(valid_564432, JString, required = true,
                                  default = nil)
-  if valid_574532 != nil:
-    section.add "api-version", valid_574532
+  if valid_564432 != nil:
+    section.add "api-version", valid_564432
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3569,54 +3560,54 @@ proc validate_DevicesCreateOrUpdateSecuritySettings_574527(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574534: Call_DevicesCreateOrUpdateSecuritySettings_574526;
+proc call*(call_564434: Call_DevicesCreateOrUpdateSecuritySettings_564426;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Updates the security settings on a Data Box Edge/Data Box Gateway device.
   ## 
-  let valid = call_574534.validator(path, query, header, formData, body)
-  let scheme = call_574534.pickScheme
+  let valid = call_564434.validator(path, query, header, formData, body)
+  let scheme = call_564434.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574534.url(scheme.get, call_574534.host, call_574534.base,
-                         call_574534.route, valid.getOrDefault("path"),
+  let url = call_564434.url(scheme.get, call_564434.host, call_564434.base,
+                         call_564434.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574534, url, valid)
+  result = hook(call_564434, url, valid)
 
-proc call*(call_574535: Call_DevicesCreateOrUpdateSecuritySettings_574526;
-          resourceGroupName: string; apiVersion: string; securitySettings: JsonNode;
-          subscriptionId: string; deviceName: string): Recallable =
+proc call*(call_564435: Call_DevicesCreateOrUpdateSecuritySettings_564426;
+          securitySettings: JsonNode; apiVersion: string; subscriptionId: string;
+          deviceName: string; resourceGroupName: string): Recallable =
   ## devicesCreateOrUpdateSecuritySettings
   ## Updates the security settings on a Data Box Edge/Data Box Gateway device.
-  ##   resourceGroupName: string (required)
-  ##                    : The resource group name.
-  ##   apiVersion: string (required)
-  ##             : The API version.
   ##   securitySettings: JObject (required)
   ##                   : The security settings.
+  ##   apiVersion: string (required)
+  ##             : The API version.
   ##   subscriptionId: string (required)
   ##                 : The subscription ID.
   ##   deviceName: string (required)
   ##             : The device name.
-  var path_574536 = newJObject()
-  var query_574537 = newJObject()
-  var body_574538 = newJObject()
-  add(path_574536, "resourceGroupName", newJString(resourceGroupName))
-  add(query_574537, "api-version", newJString(apiVersion))
+  ##   resourceGroupName: string (required)
+  ##                    : The resource group name.
+  var path_564436 = newJObject()
+  var query_564437 = newJObject()
+  var body_564438 = newJObject()
   if securitySettings != nil:
-    body_574538 = securitySettings
-  add(path_574536, "subscriptionId", newJString(subscriptionId))
-  add(path_574536, "deviceName", newJString(deviceName))
-  result = call_574535.call(path_574536, query_574537, nil, nil, body_574538)
+    body_564438 = securitySettings
+  add(query_564437, "api-version", newJString(apiVersion))
+  add(path_564436, "subscriptionId", newJString(subscriptionId))
+  add(path_564436, "deviceName", newJString(deviceName))
+  add(path_564436, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564435.call(path_564436, query_564437, nil, nil, body_564438)
 
-var devicesCreateOrUpdateSecuritySettings* = Call_DevicesCreateOrUpdateSecuritySettings_574526(
+var devicesCreateOrUpdateSecuritySettings* = Call_DevicesCreateOrUpdateSecuritySettings_564426(
     name: "devicesCreateOrUpdateSecuritySettings", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DataBoxEdge/dataBoxEdgeDevices/{deviceName}/securitySettings/default/update",
-    validator: validate_DevicesCreateOrUpdateSecuritySettings_574527, base: "",
-    url: url_DevicesCreateOrUpdateSecuritySettings_574528, schemes: {Scheme.Https})
+    validator: validate_DevicesCreateOrUpdateSecuritySettings_564427, base: "",
+    url: url_DevicesCreateOrUpdateSecuritySettings_564428, schemes: {Scheme.Https})
 type
-  Call_SharesListByDataBoxEdgeDevice_574539 = ref object of OpenApiRestCall_573667
-proc url_SharesListByDataBoxEdgeDevice_574541(protocol: Scheme; host: string;
+  Call_SharesListByDataBoxEdgeDevice_564439 = ref object of OpenApiRestCall_563565
+proc url_SharesListByDataBoxEdgeDevice_564441(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -3640,35 +3631,35 @@ proc url_SharesListByDataBoxEdgeDevice_574541(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_SharesListByDataBoxEdgeDevice_574540(path: JsonNode; query: JsonNode;
+proc validate_SharesListByDataBoxEdgeDevice_564440(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The resource group name.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID.
   ##   deviceName: JString (required)
   ##             : The device name.
+  ##   resourceGroupName: JString (required)
+  ##                    : The resource group name.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_574542 = path.getOrDefault("resourceGroupName")
-  valid_574542 = validateParameter(valid_574542, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564442 = path.getOrDefault("subscriptionId")
+  valid_564442 = validateParameter(valid_564442, JString, required = true,
                                  default = nil)
-  if valid_574542 != nil:
-    section.add "resourceGroupName", valid_574542
-  var valid_574543 = path.getOrDefault("subscriptionId")
-  valid_574543 = validateParameter(valid_574543, JString, required = true,
+  if valid_564442 != nil:
+    section.add "subscriptionId", valid_564442
+  var valid_564443 = path.getOrDefault("deviceName")
+  valid_564443 = validateParameter(valid_564443, JString, required = true,
                                  default = nil)
-  if valid_574543 != nil:
-    section.add "subscriptionId", valid_574543
-  var valid_574544 = path.getOrDefault("deviceName")
-  valid_574544 = validateParameter(valid_574544, JString, required = true,
+  if valid_564443 != nil:
+    section.add "deviceName", valid_564443
+  var valid_564444 = path.getOrDefault("resourceGroupName")
+  valid_564444 = validateParameter(valid_564444, JString, required = true,
                                  default = nil)
-  if valid_574544 != nil:
-    section.add "deviceName", valid_574544
+  if valid_564444 != nil:
+    section.add "resourceGroupName", valid_564444
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -3676,11 +3667,11 @@ proc validate_SharesListByDataBoxEdgeDevice_574540(path: JsonNode; query: JsonNo
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574545 = query.getOrDefault("api-version")
-  valid_574545 = validateParameter(valid_574545, JString, required = true,
+  var valid_564445 = query.getOrDefault("api-version")
+  valid_564445 = validateParameter(valid_564445, JString, required = true,
                                  default = nil)
-  if valid_574545 != nil:
-    section.add "api-version", valid_574545
+  if valid_564445 != nil:
+    section.add "api-version", valid_564445
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3689,45 +3680,45 @@ proc validate_SharesListByDataBoxEdgeDevice_574540(path: JsonNode; query: JsonNo
   if body != nil:
     result.add "body", body
 
-proc call*(call_574546: Call_SharesListByDataBoxEdgeDevice_574539; path: JsonNode;
+proc call*(call_564446: Call_SharesListByDataBoxEdgeDevice_564439; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
-  let valid = call_574546.validator(path, query, header, formData, body)
-  let scheme = call_574546.pickScheme
+  let valid = call_564446.validator(path, query, header, formData, body)
+  let scheme = call_564446.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574546.url(scheme.get, call_574546.host, call_574546.base,
-                         call_574546.route, valid.getOrDefault("path"),
+  let url = call_564446.url(scheme.get, call_564446.host, call_564446.base,
+                         call_564446.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574546, url, valid)
+  result = hook(call_564446, url, valid)
 
-proc call*(call_574547: Call_SharesListByDataBoxEdgeDevice_574539;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          deviceName: string): Recallable =
+proc call*(call_564447: Call_SharesListByDataBoxEdgeDevice_564439;
+          apiVersion: string; subscriptionId: string; deviceName: string;
+          resourceGroupName: string): Recallable =
   ## sharesListByDataBoxEdgeDevice
-  ##   resourceGroupName: string (required)
-  ##                    : The resource group name.
   ##   apiVersion: string (required)
   ##             : The API version.
   ##   subscriptionId: string (required)
   ##                 : The subscription ID.
   ##   deviceName: string (required)
   ##             : The device name.
-  var path_574548 = newJObject()
-  var query_574549 = newJObject()
-  add(path_574548, "resourceGroupName", newJString(resourceGroupName))
-  add(query_574549, "api-version", newJString(apiVersion))
-  add(path_574548, "subscriptionId", newJString(subscriptionId))
-  add(path_574548, "deviceName", newJString(deviceName))
-  result = call_574547.call(path_574548, query_574549, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The resource group name.
+  var path_564448 = newJObject()
+  var query_564449 = newJObject()
+  add(query_564449, "api-version", newJString(apiVersion))
+  add(path_564448, "subscriptionId", newJString(subscriptionId))
+  add(path_564448, "deviceName", newJString(deviceName))
+  add(path_564448, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564447.call(path_564448, query_564449, nil, nil, nil)
 
-var sharesListByDataBoxEdgeDevice* = Call_SharesListByDataBoxEdgeDevice_574539(
+var sharesListByDataBoxEdgeDevice* = Call_SharesListByDataBoxEdgeDevice_564439(
     name: "sharesListByDataBoxEdgeDevice", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DataBoxEdge/dataBoxEdgeDevices/{deviceName}/shares",
-    validator: validate_SharesListByDataBoxEdgeDevice_574540, base: "",
-    url: url_SharesListByDataBoxEdgeDevice_574541, schemes: {Scheme.Https})
+    validator: validate_SharesListByDataBoxEdgeDevice_564440, base: "",
+    url: url_SharesListByDataBoxEdgeDevice_564441, schemes: {Scheme.Https})
 type
-  Call_SharesCreateOrUpdate_574562 = ref object of OpenApiRestCall_573667
-proc url_SharesCreateOrUpdate_574564(protocol: Scheme; host: string; base: string;
+  Call_SharesCreateOrUpdate_564462 = ref object of OpenApiRestCall_563565
+proc url_SharesCreateOrUpdate_564464(protocol: Scheme; host: string; base: string;
                                     route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -3753,42 +3744,41 @@ proc url_SharesCreateOrUpdate_574564(protocol: Scheme; host: string; base: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_SharesCreateOrUpdate_574563(path: JsonNode; query: JsonNode;
+proc validate_SharesCreateOrUpdate_564463(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The resource group name.
   ##   name: JString (required)
   ##       : The share name.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID.
   ##   deviceName: JString (required)
   ##             : The device name.
+  ##   resourceGroupName: JString (required)
+  ##                    : The resource group name.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_574565 = path.getOrDefault("resourceGroupName")
-  valid_574565 = validateParameter(valid_574565, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `name` field"
+  var valid_564465 = path.getOrDefault("name")
+  valid_564465 = validateParameter(valid_564465, JString, required = true,
                                  default = nil)
-  if valid_574565 != nil:
-    section.add "resourceGroupName", valid_574565
-  var valid_574566 = path.getOrDefault("name")
-  valid_574566 = validateParameter(valid_574566, JString, required = true,
+  if valid_564465 != nil:
+    section.add "name", valid_564465
+  var valid_564466 = path.getOrDefault("subscriptionId")
+  valid_564466 = validateParameter(valid_564466, JString, required = true,
                                  default = nil)
-  if valid_574566 != nil:
-    section.add "name", valid_574566
-  var valid_574567 = path.getOrDefault("subscriptionId")
-  valid_574567 = validateParameter(valid_574567, JString, required = true,
+  if valid_564466 != nil:
+    section.add "subscriptionId", valid_564466
+  var valid_564467 = path.getOrDefault("deviceName")
+  valid_564467 = validateParameter(valid_564467, JString, required = true,
                                  default = nil)
-  if valid_574567 != nil:
-    section.add "subscriptionId", valid_574567
-  var valid_574568 = path.getOrDefault("deviceName")
-  valid_574568 = validateParameter(valid_574568, JString, required = true,
+  if valid_564467 != nil:
+    section.add "deviceName", valid_564467
+  var valid_564468 = path.getOrDefault("resourceGroupName")
+  valid_564468 = validateParameter(valid_564468, JString, required = true,
                                  default = nil)
-  if valid_574568 != nil:
-    section.add "deviceName", valid_574568
+  if valid_564468 != nil:
+    section.add "resourceGroupName", valid_564468
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -3796,11 +3786,11 @@ proc validate_SharesCreateOrUpdate_574563(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574569 = query.getOrDefault("api-version")
-  valid_574569 = validateParameter(valid_574569, JString, required = true,
+  var valid_564469 = query.getOrDefault("api-version")
+  valid_564469 = validateParameter(valid_564469, JString, required = true,
                                  default = nil)
-  if valid_574569 != nil:
-    section.add "api-version", valid_574569
+  if valid_564469 != nil:
+    section.add "api-version", valid_564469
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3814,23 +3804,21 @@ proc validate_SharesCreateOrUpdate_574563(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574571: Call_SharesCreateOrUpdate_574562; path: JsonNode;
+proc call*(call_564471: Call_SharesCreateOrUpdate_564462; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
-  let valid = call_574571.validator(path, query, header, formData, body)
-  let scheme = call_574571.pickScheme
+  let valid = call_564471.validator(path, query, header, formData, body)
+  let scheme = call_564471.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574571.url(scheme.get, call_574571.host, call_574571.base,
-                         call_574571.route, valid.getOrDefault("path"),
+  let url = call_564471.url(scheme.get, call_564471.host, call_564471.base,
+                         call_564471.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574571, url, valid)
+  result = hook(call_564471, url, valid)
 
-proc call*(call_574572: Call_SharesCreateOrUpdate_574562;
-          resourceGroupName: string; apiVersion: string; name: string;
-          subscriptionId: string; share: JsonNode; deviceName: string): Recallable =
+proc call*(call_564472: Call_SharesCreateOrUpdate_564462; apiVersion: string;
+          name: string; subscriptionId: string; share: JsonNode; deviceName: string;
+          resourceGroupName: string): Recallable =
   ## sharesCreateOrUpdate
-  ##   resourceGroupName: string (required)
-  ##                    : The resource group name.
   ##   apiVersion: string (required)
   ##             : The API version.
   ##   name: string (required)
@@ -3841,26 +3829,28 @@ proc call*(call_574572: Call_SharesCreateOrUpdate_574562;
   ##        : The share properties.
   ##   deviceName: string (required)
   ##             : The device name.
-  var path_574573 = newJObject()
-  var query_574574 = newJObject()
-  var body_574575 = newJObject()
-  add(path_574573, "resourceGroupName", newJString(resourceGroupName))
-  add(query_574574, "api-version", newJString(apiVersion))
-  add(path_574573, "name", newJString(name))
-  add(path_574573, "subscriptionId", newJString(subscriptionId))
+  ##   resourceGroupName: string (required)
+  ##                    : The resource group name.
+  var path_564473 = newJObject()
+  var query_564474 = newJObject()
+  var body_564475 = newJObject()
+  add(query_564474, "api-version", newJString(apiVersion))
+  add(path_564473, "name", newJString(name))
+  add(path_564473, "subscriptionId", newJString(subscriptionId))
   if share != nil:
-    body_574575 = share
-  add(path_574573, "deviceName", newJString(deviceName))
-  result = call_574572.call(path_574573, query_574574, nil, nil, body_574575)
+    body_564475 = share
+  add(path_564473, "deviceName", newJString(deviceName))
+  add(path_564473, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564472.call(path_564473, query_564474, nil, nil, body_564475)
 
-var sharesCreateOrUpdate* = Call_SharesCreateOrUpdate_574562(
+var sharesCreateOrUpdate* = Call_SharesCreateOrUpdate_564462(
     name: "sharesCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DataBoxEdge/dataBoxEdgeDevices/{deviceName}/shares/{name}",
-    validator: validate_SharesCreateOrUpdate_574563, base: "",
-    url: url_SharesCreateOrUpdate_574564, schemes: {Scheme.Https})
+    validator: validate_SharesCreateOrUpdate_564463, base: "",
+    url: url_SharesCreateOrUpdate_564464, schemes: {Scheme.Https})
 type
-  Call_SharesGet_574550 = ref object of OpenApiRestCall_573667
-proc url_SharesGet_574552(protocol: Scheme; host: string; base: string; route: string;
+  Call_SharesGet_564450 = ref object of OpenApiRestCall_563565
+proc url_SharesGet_564452(protocol: Scheme; host: string; base: string; route: string;
                          path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -3886,42 +3876,41 @@ proc url_SharesGet_574552(protocol: Scheme; host: string; base: string; route: s
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_SharesGet_574551(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_SharesGet_564451(path: JsonNode; query: JsonNode; header: JsonNode;
                               formData: JsonNode; body: JsonNode): JsonNode =
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The resource group name.
   ##   name: JString (required)
   ##       : The share name.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID.
   ##   deviceName: JString (required)
   ##             : The device name.
+  ##   resourceGroupName: JString (required)
+  ##                    : The resource group name.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_574553 = path.getOrDefault("resourceGroupName")
-  valid_574553 = validateParameter(valid_574553, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `name` field"
+  var valid_564453 = path.getOrDefault("name")
+  valid_564453 = validateParameter(valid_564453, JString, required = true,
                                  default = nil)
-  if valid_574553 != nil:
-    section.add "resourceGroupName", valid_574553
-  var valid_574554 = path.getOrDefault("name")
-  valid_574554 = validateParameter(valid_574554, JString, required = true,
+  if valid_564453 != nil:
+    section.add "name", valid_564453
+  var valid_564454 = path.getOrDefault("subscriptionId")
+  valid_564454 = validateParameter(valid_564454, JString, required = true,
                                  default = nil)
-  if valid_574554 != nil:
-    section.add "name", valid_574554
-  var valid_574555 = path.getOrDefault("subscriptionId")
-  valid_574555 = validateParameter(valid_574555, JString, required = true,
+  if valid_564454 != nil:
+    section.add "subscriptionId", valid_564454
+  var valid_564455 = path.getOrDefault("deviceName")
+  valid_564455 = validateParameter(valid_564455, JString, required = true,
                                  default = nil)
-  if valid_574555 != nil:
-    section.add "subscriptionId", valid_574555
-  var valid_574556 = path.getOrDefault("deviceName")
-  valid_574556 = validateParameter(valid_574556, JString, required = true,
+  if valid_564455 != nil:
+    section.add "deviceName", valid_564455
+  var valid_564456 = path.getOrDefault("resourceGroupName")
+  valid_564456 = validateParameter(valid_564456, JString, required = true,
                                  default = nil)
-  if valid_574556 != nil:
-    section.add "deviceName", valid_574556
+  if valid_564456 != nil:
+    section.add "resourceGroupName", valid_564456
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -3929,11 +3918,11 @@ proc validate_SharesGet_574551(path: JsonNode; query: JsonNode; header: JsonNode
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574557 = query.getOrDefault("api-version")
-  valid_574557 = validateParameter(valid_574557, JString, required = true,
+  var valid_564457 = query.getOrDefault("api-version")
+  valid_564457 = validateParameter(valid_564457, JString, required = true,
                                  default = nil)
-  if valid_574557 != nil:
-    section.add "api-version", valid_574557
+  if valid_564457 != nil:
+    section.add "api-version", valid_564457
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3942,22 +3931,20 @@ proc validate_SharesGet_574551(path: JsonNode; query: JsonNode; header: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_574558: Call_SharesGet_574550; path: JsonNode; query: JsonNode;
+proc call*(call_564458: Call_SharesGet_564450; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
-  let valid = call_574558.validator(path, query, header, formData, body)
-  let scheme = call_574558.pickScheme
+  let valid = call_564458.validator(path, query, header, formData, body)
+  let scheme = call_564458.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574558.url(scheme.get, call_574558.host, call_574558.base,
-                         call_574558.route, valid.getOrDefault("path"),
+  let url = call_564458.url(scheme.get, call_564458.host, call_564458.base,
+                         call_564458.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574558, url, valid)
+  result = hook(call_564458, url, valid)
 
-proc call*(call_574559: Call_SharesGet_574550; resourceGroupName: string;
-          apiVersion: string; name: string; subscriptionId: string; deviceName: string): Recallable =
+proc call*(call_564459: Call_SharesGet_564450; apiVersion: string; name: string;
+          subscriptionId: string; deviceName: string; resourceGroupName: string): Recallable =
   ## sharesGet
-  ##   resourceGroupName: string (required)
-  ##                    : The resource group name.
   ##   apiVersion: string (required)
   ##             : The API version.
   ##   name: string (required)
@@ -3966,23 +3953,25 @@ proc call*(call_574559: Call_SharesGet_574550; resourceGroupName: string;
   ##                 : The subscription ID.
   ##   deviceName: string (required)
   ##             : The device name.
-  var path_574560 = newJObject()
-  var query_574561 = newJObject()
-  add(path_574560, "resourceGroupName", newJString(resourceGroupName))
-  add(query_574561, "api-version", newJString(apiVersion))
-  add(path_574560, "name", newJString(name))
-  add(path_574560, "subscriptionId", newJString(subscriptionId))
-  add(path_574560, "deviceName", newJString(deviceName))
-  result = call_574559.call(path_574560, query_574561, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The resource group name.
+  var path_564460 = newJObject()
+  var query_564461 = newJObject()
+  add(query_564461, "api-version", newJString(apiVersion))
+  add(path_564460, "name", newJString(name))
+  add(path_564460, "subscriptionId", newJString(subscriptionId))
+  add(path_564460, "deviceName", newJString(deviceName))
+  add(path_564460, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564459.call(path_564460, query_564461, nil, nil, nil)
 
-var sharesGet* = Call_SharesGet_574550(name: "sharesGet", meth: HttpMethod.HttpGet,
+var sharesGet* = Call_SharesGet_564450(name: "sharesGet", meth: HttpMethod.HttpGet,
                                     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DataBoxEdge/dataBoxEdgeDevices/{deviceName}/shares/{name}",
-                                    validator: validate_SharesGet_574551,
-                                    base: "", url: url_SharesGet_574552,
+                                    validator: validate_SharesGet_564451,
+                                    base: "", url: url_SharesGet_564452,
                                     schemes: {Scheme.Https})
 type
-  Call_SharesDelete_574576 = ref object of OpenApiRestCall_573667
-proc url_SharesDelete_574578(protocol: Scheme; host: string; base: string;
+  Call_SharesDelete_564476 = ref object of OpenApiRestCall_563565
+proc url_SharesDelete_564478(protocol: Scheme; host: string; base: string;
                             route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -4008,44 +3997,43 @@ proc url_SharesDelete_574578(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_SharesDelete_574577(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_SharesDelete_564477(path: JsonNode; query: JsonNode; header: JsonNode;
                                  formData: JsonNode; body: JsonNode): JsonNode =
   ## Deletes the share on the Data Box Edge/Data Box Gateway device.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The resource group name.
   ##   name: JString (required)
   ##       : The share name.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID.
   ##   deviceName: JString (required)
   ##             : The device name.
+  ##   resourceGroupName: JString (required)
+  ##                    : The resource group name.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_574579 = path.getOrDefault("resourceGroupName")
-  valid_574579 = validateParameter(valid_574579, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `name` field"
+  var valid_564479 = path.getOrDefault("name")
+  valid_564479 = validateParameter(valid_564479, JString, required = true,
                                  default = nil)
-  if valid_574579 != nil:
-    section.add "resourceGroupName", valid_574579
-  var valid_574580 = path.getOrDefault("name")
-  valid_574580 = validateParameter(valid_574580, JString, required = true,
+  if valid_564479 != nil:
+    section.add "name", valid_564479
+  var valid_564480 = path.getOrDefault("subscriptionId")
+  valid_564480 = validateParameter(valid_564480, JString, required = true,
                                  default = nil)
-  if valid_574580 != nil:
-    section.add "name", valid_574580
-  var valid_574581 = path.getOrDefault("subscriptionId")
-  valid_574581 = validateParameter(valid_574581, JString, required = true,
+  if valid_564480 != nil:
+    section.add "subscriptionId", valid_564480
+  var valid_564481 = path.getOrDefault("deviceName")
+  valid_564481 = validateParameter(valid_564481, JString, required = true,
                                  default = nil)
-  if valid_574581 != nil:
-    section.add "subscriptionId", valid_574581
-  var valid_574582 = path.getOrDefault("deviceName")
-  valid_574582 = validateParameter(valid_574582, JString, required = true,
+  if valid_564481 != nil:
+    section.add "deviceName", valid_564481
+  var valid_564482 = path.getOrDefault("resourceGroupName")
+  valid_564482 = validateParameter(valid_564482, JString, required = true,
                                  default = nil)
-  if valid_574582 != nil:
-    section.add "deviceName", valid_574582
+  if valid_564482 != nil:
+    section.add "resourceGroupName", valid_564482
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -4053,11 +4041,11 @@ proc validate_SharesDelete_574577(path: JsonNode; query: JsonNode; header: JsonN
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574583 = query.getOrDefault("api-version")
-  valid_574583 = validateParameter(valid_574583, JString, required = true,
+  var valid_564483 = query.getOrDefault("api-version")
+  valid_564483 = validateParameter(valid_564483, JString, required = true,
                                  default = nil)
-  if valid_574583 != nil:
-    section.add "api-version", valid_574583
+  if valid_564483 != nil:
+    section.add "api-version", valid_564483
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -4066,25 +4054,23 @@ proc validate_SharesDelete_574577(path: JsonNode; query: JsonNode; header: JsonN
   if body != nil:
     result.add "body", body
 
-proc call*(call_574584: Call_SharesDelete_574576; path: JsonNode; query: JsonNode;
+proc call*(call_564484: Call_SharesDelete_564476; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes the share on the Data Box Edge/Data Box Gateway device.
   ## 
-  let valid = call_574584.validator(path, query, header, formData, body)
-  let scheme = call_574584.pickScheme
+  let valid = call_564484.validator(path, query, header, formData, body)
+  let scheme = call_564484.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574584.url(scheme.get, call_574584.host, call_574584.base,
-                         call_574584.route, valid.getOrDefault("path"),
+  let url = call_564484.url(scheme.get, call_564484.host, call_564484.base,
+                         call_564484.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574584, url, valid)
+  result = hook(call_564484, url, valid)
 
-proc call*(call_574585: Call_SharesDelete_574576; resourceGroupName: string;
-          apiVersion: string; name: string; subscriptionId: string; deviceName: string): Recallable =
+proc call*(call_564485: Call_SharesDelete_564476; apiVersion: string; name: string;
+          subscriptionId: string; deviceName: string; resourceGroupName: string): Recallable =
   ## sharesDelete
   ## Deletes the share on the Data Box Edge/Data Box Gateway device.
-  ##   resourceGroupName: string (required)
-  ##                    : The resource group name.
   ##   apiVersion: string (required)
   ##             : The API version.
   ##   name: string (required)
@@ -4093,22 +4079,24 @@ proc call*(call_574585: Call_SharesDelete_574576; resourceGroupName: string;
   ##                 : The subscription ID.
   ##   deviceName: string (required)
   ##             : The device name.
-  var path_574586 = newJObject()
-  var query_574587 = newJObject()
-  add(path_574586, "resourceGroupName", newJString(resourceGroupName))
-  add(query_574587, "api-version", newJString(apiVersion))
-  add(path_574586, "name", newJString(name))
-  add(path_574586, "subscriptionId", newJString(subscriptionId))
-  add(path_574586, "deviceName", newJString(deviceName))
-  result = call_574585.call(path_574586, query_574587, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The resource group name.
+  var path_564486 = newJObject()
+  var query_564487 = newJObject()
+  add(query_564487, "api-version", newJString(apiVersion))
+  add(path_564486, "name", newJString(name))
+  add(path_564486, "subscriptionId", newJString(subscriptionId))
+  add(path_564486, "deviceName", newJString(deviceName))
+  add(path_564486, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564485.call(path_564486, query_564487, nil, nil, nil)
 
-var sharesDelete* = Call_SharesDelete_574576(name: "sharesDelete",
+var sharesDelete* = Call_SharesDelete_564476(name: "sharesDelete",
     meth: HttpMethod.HttpDelete, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DataBoxEdge/dataBoxEdgeDevices/{deviceName}/shares/{name}",
-    validator: validate_SharesDelete_574577, base: "", url: url_SharesDelete_574578,
+    validator: validate_SharesDelete_564477, base: "", url: url_SharesDelete_564478,
     schemes: {Scheme.Https})
 type
-  Call_SharesRefresh_574588 = ref object of OpenApiRestCall_573667
-proc url_SharesRefresh_574590(protocol: Scheme; host: string; base: string;
+  Call_SharesRefresh_564488 = ref object of OpenApiRestCall_563565
+proc url_SharesRefresh_564490(protocol: Scheme; host: string; base: string;
                              route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -4135,42 +4123,41 @@ proc url_SharesRefresh_574590(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_SharesRefresh_574589(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_SharesRefresh_564489(path: JsonNode; query: JsonNode; header: JsonNode;
                                   formData: JsonNode; body: JsonNode): JsonNode =
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The resource group name.
   ##   name: JString (required)
   ##       : The share name.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID.
   ##   deviceName: JString (required)
   ##             : The device name.
+  ##   resourceGroupName: JString (required)
+  ##                    : The resource group name.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_574591 = path.getOrDefault("resourceGroupName")
-  valid_574591 = validateParameter(valid_574591, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `name` field"
+  var valid_564491 = path.getOrDefault("name")
+  valid_564491 = validateParameter(valid_564491, JString, required = true,
                                  default = nil)
-  if valid_574591 != nil:
-    section.add "resourceGroupName", valid_574591
-  var valid_574592 = path.getOrDefault("name")
-  valid_574592 = validateParameter(valid_574592, JString, required = true,
+  if valid_564491 != nil:
+    section.add "name", valid_564491
+  var valid_564492 = path.getOrDefault("subscriptionId")
+  valid_564492 = validateParameter(valid_564492, JString, required = true,
                                  default = nil)
-  if valid_574592 != nil:
-    section.add "name", valid_574592
-  var valid_574593 = path.getOrDefault("subscriptionId")
-  valid_574593 = validateParameter(valid_574593, JString, required = true,
+  if valid_564492 != nil:
+    section.add "subscriptionId", valid_564492
+  var valid_564493 = path.getOrDefault("deviceName")
+  valid_564493 = validateParameter(valid_564493, JString, required = true,
                                  default = nil)
-  if valid_574593 != nil:
-    section.add "subscriptionId", valid_574593
-  var valid_574594 = path.getOrDefault("deviceName")
-  valid_574594 = validateParameter(valid_574594, JString, required = true,
+  if valid_564493 != nil:
+    section.add "deviceName", valid_564493
+  var valid_564494 = path.getOrDefault("resourceGroupName")
+  valid_564494 = validateParameter(valid_564494, JString, required = true,
                                  default = nil)
-  if valid_574594 != nil:
-    section.add "deviceName", valid_574594
+  if valid_564494 != nil:
+    section.add "resourceGroupName", valid_564494
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -4178,11 +4165,11 @@ proc validate_SharesRefresh_574589(path: JsonNode; query: JsonNode; header: Json
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574595 = query.getOrDefault("api-version")
-  valid_574595 = validateParameter(valid_574595, JString, required = true,
+  var valid_564495 = query.getOrDefault("api-version")
+  valid_564495 = validateParameter(valid_564495, JString, required = true,
                                  default = nil)
-  if valid_574595 != nil:
-    section.add "api-version", valid_574595
+  if valid_564495 != nil:
+    section.add "api-version", valid_564495
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -4191,22 +4178,20 @@ proc validate_SharesRefresh_574589(path: JsonNode; query: JsonNode; header: Json
   if body != nil:
     result.add "body", body
 
-proc call*(call_574596: Call_SharesRefresh_574588; path: JsonNode; query: JsonNode;
+proc call*(call_564496: Call_SharesRefresh_564488; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
-  let valid = call_574596.validator(path, query, header, formData, body)
-  let scheme = call_574596.pickScheme
+  let valid = call_564496.validator(path, query, header, formData, body)
+  let scheme = call_564496.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574596.url(scheme.get, call_574596.host, call_574596.base,
-                         call_574596.route, valid.getOrDefault("path"),
+  let url = call_564496.url(scheme.get, call_564496.host, call_564496.base,
+                         call_564496.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574596, url, valid)
+  result = hook(call_564496, url, valid)
 
-proc call*(call_574597: Call_SharesRefresh_574588; resourceGroupName: string;
-          apiVersion: string; name: string; subscriptionId: string; deviceName: string): Recallable =
+proc call*(call_564497: Call_SharesRefresh_564488; apiVersion: string; name: string;
+          subscriptionId: string; deviceName: string; resourceGroupName: string): Recallable =
   ## sharesRefresh
-  ##   resourceGroupName: string (required)
-  ##                    : The resource group name.
   ##   apiVersion: string (required)
   ##             : The API version.
   ##   name: string (required)
@@ -4215,22 +4200,24 @@ proc call*(call_574597: Call_SharesRefresh_574588; resourceGroupName: string;
   ##                 : The subscription ID.
   ##   deviceName: string (required)
   ##             : The device name.
-  var path_574598 = newJObject()
-  var query_574599 = newJObject()
-  add(path_574598, "resourceGroupName", newJString(resourceGroupName))
-  add(query_574599, "api-version", newJString(apiVersion))
-  add(path_574598, "name", newJString(name))
-  add(path_574598, "subscriptionId", newJString(subscriptionId))
-  add(path_574598, "deviceName", newJString(deviceName))
-  result = call_574597.call(path_574598, query_574599, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The resource group name.
+  var path_564498 = newJObject()
+  var query_564499 = newJObject()
+  add(query_564499, "api-version", newJString(apiVersion))
+  add(path_564498, "name", newJString(name))
+  add(path_564498, "subscriptionId", newJString(subscriptionId))
+  add(path_564498, "deviceName", newJString(deviceName))
+  add(path_564498, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564497.call(path_564498, query_564499, nil, nil, nil)
 
-var sharesRefresh* = Call_SharesRefresh_574588(name: "sharesRefresh",
+var sharesRefresh* = Call_SharesRefresh_564488(name: "sharesRefresh",
     meth: HttpMethod.HttpPost, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DataBoxEdge/dataBoxEdgeDevices/{deviceName}/shares/{name}/refresh",
-    validator: validate_SharesRefresh_574589, base: "", url: url_SharesRefresh_574590,
+    validator: validate_SharesRefresh_564489, base: "", url: url_SharesRefresh_564490,
     schemes: {Scheme.Https})
 type
-  Call_StorageAccountCredentialsListByDataBoxEdgeDevice_574600 = ref object of OpenApiRestCall_573667
-proc url_StorageAccountCredentialsListByDataBoxEdgeDevice_574602(
+  Call_StorageAccountCredentialsListByDataBoxEdgeDevice_564500 = ref object of OpenApiRestCall_563565
+proc url_StorageAccountCredentialsListByDataBoxEdgeDevice_564502(
     protocol: Scheme; host: string; base: string; route: string; path: JsonNode;
     query: JsonNode): Uri =
   result.scheme = $protocol
@@ -4255,36 +4242,36 @@ proc url_StorageAccountCredentialsListByDataBoxEdgeDevice_574602(
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_StorageAccountCredentialsListByDataBoxEdgeDevice_574601(
+proc validate_StorageAccountCredentialsListByDataBoxEdgeDevice_564501(
     path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
     body: JsonNode): JsonNode =
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The resource group name.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID.
   ##   deviceName: JString (required)
   ##             : The device name.
+  ##   resourceGroupName: JString (required)
+  ##                    : The resource group name.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_574603 = path.getOrDefault("resourceGroupName")
-  valid_574603 = validateParameter(valid_574603, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564503 = path.getOrDefault("subscriptionId")
+  valid_564503 = validateParameter(valid_564503, JString, required = true,
                                  default = nil)
-  if valid_574603 != nil:
-    section.add "resourceGroupName", valid_574603
-  var valid_574604 = path.getOrDefault("subscriptionId")
-  valid_574604 = validateParameter(valid_574604, JString, required = true,
+  if valid_564503 != nil:
+    section.add "subscriptionId", valid_564503
+  var valid_564504 = path.getOrDefault("deviceName")
+  valid_564504 = validateParameter(valid_564504, JString, required = true,
                                  default = nil)
-  if valid_574604 != nil:
-    section.add "subscriptionId", valid_574604
-  var valid_574605 = path.getOrDefault("deviceName")
-  valid_574605 = validateParameter(valid_574605, JString, required = true,
+  if valid_564504 != nil:
+    section.add "deviceName", valid_564504
+  var valid_564505 = path.getOrDefault("resourceGroupName")
+  valid_564505 = validateParameter(valid_564505, JString, required = true,
                                  default = nil)
-  if valid_574605 != nil:
-    section.add "deviceName", valid_574605
+  if valid_564505 != nil:
+    section.add "resourceGroupName", valid_564505
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -4292,11 +4279,11 @@ proc validate_StorageAccountCredentialsListByDataBoxEdgeDevice_574601(
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574606 = query.getOrDefault("api-version")
-  valid_574606 = validateParameter(valid_574606, JString, required = true,
+  var valid_564506 = query.getOrDefault("api-version")
+  valid_564506 = validateParameter(valid_564506, JString, required = true,
                                  default = nil)
-  if valid_574606 != nil:
-    section.add "api-version", valid_574606
+  if valid_564506 != nil:
+    section.add "api-version", valid_564506
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -4305,47 +4292,47 @@ proc validate_StorageAccountCredentialsListByDataBoxEdgeDevice_574601(
   if body != nil:
     result.add "body", body
 
-proc call*(call_574607: Call_StorageAccountCredentialsListByDataBoxEdgeDevice_574600;
+proc call*(call_564507: Call_StorageAccountCredentialsListByDataBoxEdgeDevice_564500;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
-  let valid = call_574607.validator(path, query, header, formData, body)
-  let scheme = call_574607.pickScheme
+  let valid = call_564507.validator(path, query, header, formData, body)
+  let scheme = call_564507.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574607.url(scheme.get, call_574607.host, call_574607.base,
-                         call_574607.route, valid.getOrDefault("path"),
+  let url = call_564507.url(scheme.get, call_564507.host, call_564507.base,
+                         call_564507.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574607, url, valid)
+  result = hook(call_564507, url, valid)
 
-proc call*(call_574608: Call_StorageAccountCredentialsListByDataBoxEdgeDevice_574600;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          deviceName: string): Recallable =
+proc call*(call_564508: Call_StorageAccountCredentialsListByDataBoxEdgeDevice_564500;
+          apiVersion: string; subscriptionId: string; deviceName: string;
+          resourceGroupName: string): Recallable =
   ## storageAccountCredentialsListByDataBoxEdgeDevice
-  ##   resourceGroupName: string (required)
-  ##                    : The resource group name.
   ##   apiVersion: string (required)
   ##             : The API version.
   ##   subscriptionId: string (required)
   ##                 : The subscription ID.
   ##   deviceName: string (required)
   ##             : The device name.
-  var path_574609 = newJObject()
-  var query_574610 = newJObject()
-  add(path_574609, "resourceGroupName", newJString(resourceGroupName))
-  add(query_574610, "api-version", newJString(apiVersion))
-  add(path_574609, "subscriptionId", newJString(subscriptionId))
-  add(path_574609, "deviceName", newJString(deviceName))
-  result = call_574608.call(path_574609, query_574610, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The resource group name.
+  var path_564509 = newJObject()
+  var query_564510 = newJObject()
+  add(query_564510, "api-version", newJString(apiVersion))
+  add(path_564509, "subscriptionId", newJString(subscriptionId))
+  add(path_564509, "deviceName", newJString(deviceName))
+  add(path_564509, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564508.call(path_564509, query_564510, nil, nil, nil)
 
-var storageAccountCredentialsListByDataBoxEdgeDevice* = Call_StorageAccountCredentialsListByDataBoxEdgeDevice_574600(
+var storageAccountCredentialsListByDataBoxEdgeDevice* = Call_StorageAccountCredentialsListByDataBoxEdgeDevice_564500(
     name: "storageAccountCredentialsListByDataBoxEdgeDevice",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DataBoxEdge/dataBoxEdgeDevices/{deviceName}/storageAccountCredentials",
-    validator: validate_StorageAccountCredentialsListByDataBoxEdgeDevice_574601,
-    base: "", url: url_StorageAccountCredentialsListByDataBoxEdgeDevice_574602,
+    validator: validate_StorageAccountCredentialsListByDataBoxEdgeDevice_564501,
+    base: "", url: url_StorageAccountCredentialsListByDataBoxEdgeDevice_564502,
     schemes: {Scheme.Https})
 type
-  Call_StorageAccountCredentialsCreateOrUpdate_574623 = ref object of OpenApiRestCall_573667
-proc url_StorageAccountCredentialsCreateOrUpdate_574625(protocol: Scheme;
+  Call_StorageAccountCredentialsCreateOrUpdate_564523 = ref object of OpenApiRestCall_563565
+proc url_StorageAccountCredentialsCreateOrUpdate_564525(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -4371,44 +4358,43 @@ proc url_StorageAccountCredentialsCreateOrUpdate_574625(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_StorageAccountCredentialsCreateOrUpdate_574624(path: JsonNode;
+proc validate_StorageAccountCredentialsCreateOrUpdate_564524(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Creates or updates the storage account credential.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The resource group name.
   ##   name: JString (required)
   ##       : The storage account credential name.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID.
   ##   deviceName: JString (required)
   ##             : The device name.
+  ##   resourceGroupName: JString (required)
+  ##                    : The resource group name.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_574626 = path.getOrDefault("resourceGroupName")
-  valid_574626 = validateParameter(valid_574626, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `name` field"
+  var valid_564526 = path.getOrDefault("name")
+  valid_564526 = validateParameter(valid_564526, JString, required = true,
                                  default = nil)
-  if valid_574626 != nil:
-    section.add "resourceGroupName", valid_574626
-  var valid_574627 = path.getOrDefault("name")
-  valid_574627 = validateParameter(valid_574627, JString, required = true,
+  if valid_564526 != nil:
+    section.add "name", valid_564526
+  var valid_564527 = path.getOrDefault("subscriptionId")
+  valid_564527 = validateParameter(valid_564527, JString, required = true,
                                  default = nil)
-  if valid_574627 != nil:
-    section.add "name", valid_574627
-  var valid_574628 = path.getOrDefault("subscriptionId")
-  valid_574628 = validateParameter(valid_574628, JString, required = true,
+  if valid_564527 != nil:
+    section.add "subscriptionId", valid_564527
+  var valid_564528 = path.getOrDefault("deviceName")
+  valid_564528 = validateParameter(valid_564528, JString, required = true,
                                  default = nil)
-  if valid_574628 != nil:
-    section.add "subscriptionId", valid_574628
-  var valid_574629 = path.getOrDefault("deviceName")
-  valid_574629 = validateParameter(valid_574629, JString, required = true,
+  if valid_564528 != nil:
+    section.add "deviceName", valid_564528
+  var valid_564529 = path.getOrDefault("resourceGroupName")
+  valid_564529 = validateParameter(valid_564529, JString, required = true,
                                  default = nil)
-  if valid_574629 != nil:
-    section.add "deviceName", valid_574629
+  if valid_564529 != nil:
+    section.add "resourceGroupName", valid_564529
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -4416,11 +4402,11 @@ proc validate_StorageAccountCredentialsCreateOrUpdate_574624(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574630 = query.getOrDefault("api-version")
-  valid_574630 = validateParameter(valid_574630, JString, required = true,
+  var valid_564530 = query.getOrDefault("api-version")
+  valid_564530 = validateParameter(valid_564530, JString, required = true,
                                  default = nil)
-  if valid_574630 != nil:
-    section.add "api-version", valid_574630
+  if valid_564530 != nil:
+    section.add "api-version", valid_564530
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -4434,59 +4420,59 @@ proc validate_StorageAccountCredentialsCreateOrUpdate_574624(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574632: Call_StorageAccountCredentialsCreateOrUpdate_574623;
+proc call*(call_564532: Call_StorageAccountCredentialsCreateOrUpdate_564523;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Creates or updates the storage account credential.
   ## 
-  let valid = call_574632.validator(path, query, header, formData, body)
-  let scheme = call_574632.pickScheme
+  let valid = call_564532.validator(path, query, header, formData, body)
+  let scheme = call_564532.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574632.url(scheme.get, call_574632.host, call_574632.base,
-                         call_574632.route, valid.getOrDefault("path"),
+  let url = call_564532.url(scheme.get, call_564532.host, call_564532.base,
+                         call_564532.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574632, url, valid)
+  result = hook(call_564532, url, valid)
 
-proc call*(call_574633: Call_StorageAccountCredentialsCreateOrUpdate_574623;
-          resourceGroupName: string; apiVersion: string; name: string;
-          subscriptionId: string; storageAccountCredential: JsonNode;
-          deviceName: string): Recallable =
+proc call*(call_564533: Call_StorageAccountCredentialsCreateOrUpdate_564523;
+          apiVersion: string; name: string; subscriptionId: string;
+          deviceName: string; resourceGroupName: string;
+          storageAccountCredential: JsonNode): Recallable =
   ## storageAccountCredentialsCreateOrUpdate
   ## Creates or updates the storage account credential.
-  ##   resourceGroupName: string (required)
-  ##                    : The resource group name.
   ##   apiVersion: string (required)
   ##             : The API version.
   ##   name: string (required)
   ##       : The storage account credential name.
   ##   subscriptionId: string (required)
   ##                 : The subscription ID.
-  ##   storageAccountCredential: JObject (required)
-  ##                           : The storage account credential.
   ##   deviceName: string (required)
   ##             : The device name.
-  var path_574634 = newJObject()
-  var query_574635 = newJObject()
-  var body_574636 = newJObject()
-  add(path_574634, "resourceGroupName", newJString(resourceGroupName))
-  add(query_574635, "api-version", newJString(apiVersion))
-  add(path_574634, "name", newJString(name))
-  add(path_574634, "subscriptionId", newJString(subscriptionId))
+  ##   resourceGroupName: string (required)
+  ##                    : The resource group name.
+  ##   storageAccountCredential: JObject (required)
+  ##                           : The storage account credential.
+  var path_564534 = newJObject()
+  var query_564535 = newJObject()
+  var body_564536 = newJObject()
+  add(query_564535, "api-version", newJString(apiVersion))
+  add(path_564534, "name", newJString(name))
+  add(path_564534, "subscriptionId", newJString(subscriptionId))
+  add(path_564534, "deviceName", newJString(deviceName))
+  add(path_564534, "resourceGroupName", newJString(resourceGroupName))
   if storageAccountCredential != nil:
-    body_574636 = storageAccountCredential
-  add(path_574634, "deviceName", newJString(deviceName))
-  result = call_574633.call(path_574634, query_574635, nil, nil, body_574636)
+    body_564536 = storageAccountCredential
+  result = call_564533.call(path_564534, query_564535, nil, nil, body_564536)
 
-var storageAccountCredentialsCreateOrUpdate* = Call_StorageAccountCredentialsCreateOrUpdate_574623(
+var storageAccountCredentialsCreateOrUpdate* = Call_StorageAccountCredentialsCreateOrUpdate_564523(
     name: "storageAccountCredentialsCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DataBoxEdge/dataBoxEdgeDevices/{deviceName}/storageAccountCredentials/{name}",
-    validator: validate_StorageAccountCredentialsCreateOrUpdate_574624, base: "",
-    url: url_StorageAccountCredentialsCreateOrUpdate_574625,
+    validator: validate_StorageAccountCredentialsCreateOrUpdate_564524, base: "",
+    url: url_StorageAccountCredentialsCreateOrUpdate_564525,
     schemes: {Scheme.Https})
 type
-  Call_StorageAccountCredentialsGet_574611 = ref object of OpenApiRestCall_573667
-proc url_StorageAccountCredentialsGet_574613(protocol: Scheme; host: string;
+  Call_StorageAccountCredentialsGet_564511 = ref object of OpenApiRestCall_563565
+proc url_StorageAccountCredentialsGet_564513(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -4512,44 +4498,43 @@ proc url_StorageAccountCredentialsGet_574613(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_StorageAccountCredentialsGet_574612(path: JsonNode; query: JsonNode;
+proc validate_StorageAccountCredentialsGet_564512(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the properties of the specified storage account credential.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The resource group name.
   ##   name: JString (required)
   ##       : The storage account credential name.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID.
   ##   deviceName: JString (required)
   ##             : The device name.
+  ##   resourceGroupName: JString (required)
+  ##                    : The resource group name.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_574614 = path.getOrDefault("resourceGroupName")
-  valid_574614 = validateParameter(valid_574614, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `name` field"
+  var valid_564514 = path.getOrDefault("name")
+  valid_564514 = validateParameter(valid_564514, JString, required = true,
                                  default = nil)
-  if valid_574614 != nil:
-    section.add "resourceGroupName", valid_574614
-  var valid_574615 = path.getOrDefault("name")
-  valid_574615 = validateParameter(valid_574615, JString, required = true,
+  if valid_564514 != nil:
+    section.add "name", valid_564514
+  var valid_564515 = path.getOrDefault("subscriptionId")
+  valid_564515 = validateParameter(valid_564515, JString, required = true,
                                  default = nil)
-  if valid_574615 != nil:
-    section.add "name", valid_574615
-  var valid_574616 = path.getOrDefault("subscriptionId")
-  valid_574616 = validateParameter(valid_574616, JString, required = true,
+  if valid_564515 != nil:
+    section.add "subscriptionId", valid_564515
+  var valid_564516 = path.getOrDefault("deviceName")
+  valid_564516 = validateParameter(valid_564516, JString, required = true,
                                  default = nil)
-  if valid_574616 != nil:
-    section.add "subscriptionId", valid_574616
-  var valid_574617 = path.getOrDefault("deviceName")
-  valid_574617 = validateParameter(valid_574617, JString, required = true,
+  if valid_564516 != nil:
+    section.add "deviceName", valid_564516
+  var valid_564517 = path.getOrDefault("resourceGroupName")
+  valid_564517 = validateParameter(valid_564517, JString, required = true,
                                  default = nil)
-  if valid_574617 != nil:
-    section.add "deviceName", valid_574617
+  if valid_564517 != nil:
+    section.add "resourceGroupName", valid_564517
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -4557,11 +4542,11 @@ proc validate_StorageAccountCredentialsGet_574612(path: JsonNode; query: JsonNod
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574618 = query.getOrDefault("api-version")
-  valid_574618 = validateParameter(valid_574618, JString, required = true,
+  var valid_564518 = query.getOrDefault("api-version")
+  valid_564518 = validateParameter(valid_564518, JString, required = true,
                                  default = nil)
-  if valid_574618 != nil:
-    section.add "api-version", valid_574618
+  if valid_564518 != nil:
+    section.add "api-version", valid_564518
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -4570,26 +4555,24 @@ proc validate_StorageAccountCredentialsGet_574612(path: JsonNode; query: JsonNod
   if body != nil:
     result.add "body", body
 
-proc call*(call_574619: Call_StorageAccountCredentialsGet_574611; path: JsonNode;
+proc call*(call_564519: Call_StorageAccountCredentialsGet_564511; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the properties of the specified storage account credential.
   ## 
-  let valid = call_574619.validator(path, query, header, formData, body)
-  let scheme = call_574619.pickScheme
+  let valid = call_564519.validator(path, query, header, formData, body)
+  let scheme = call_564519.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574619.url(scheme.get, call_574619.host, call_574619.base,
-                         call_574619.route, valid.getOrDefault("path"),
+  let url = call_564519.url(scheme.get, call_564519.host, call_564519.base,
+                         call_564519.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574619, url, valid)
+  result = hook(call_564519, url, valid)
 
-proc call*(call_574620: Call_StorageAccountCredentialsGet_574611;
-          resourceGroupName: string; apiVersion: string; name: string;
-          subscriptionId: string; deviceName: string): Recallable =
+proc call*(call_564520: Call_StorageAccountCredentialsGet_564511;
+          apiVersion: string; name: string; subscriptionId: string;
+          deviceName: string; resourceGroupName: string): Recallable =
   ## storageAccountCredentialsGet
   ## Gets the properties of the specified storage account credential.
-  ##   resourceGroupName: string (required)
-  ##                    : The resource group name.
   ##   apiVersion: string (required)
   ##             : The API version.
   ##   name: string (required)
@@ -4598,23 +4581,25 @@ proc call*(call_574620: Call_StorageAccountCredentialsGet_574611;
   ##                 : The subscription ID.
   ##   deviceName: string (required)
   ##             : The device name.
-  var path_574621 = newJObject()
-  var query_574622 = newJObject()
-  add(path_574621, "resourceGroupName", newJString(resourceGroupName))
-  add(query_574622, "api-version", newJString(apiVersion))
-  add(path_574621, "name", newJString(name))
-  add(path_574621, "subscriptionId", newJString(subscriptionId))
-  add(path_574621, "deviceName", newJString(deviceName))
-  result = call_574620.call(path_574621, query_574622, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The resource group name.
+  var path_564521 = newJObject()
+  var query_564522 = newJObject()
+  add(query_564522, "api-version", newJString(apiVersion))
+  add(path_564521, "name", newJString(name))
+  add(path_564521, "subscriptionId", newJString(subscriptionId))
+  add(path_564521, "deviceName", newJString(deviceName))
+  add(path_564521, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564520.call(path_564521, query_564522, nil, nil, nil)
 
-var storageAccountCredentialsGet* = Call_StorageAccountCredentialsGet_574611(
+var storageAccountCredentialsGet* = Call_StorageAccountCredentialsGet_564511(
     name: "storageAccountCredentialsGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DataBoxEdge/dataBoxEdgeDevices/{deviceName}/storageAccountCredentials/{name}",
-    validator: validate_StorageAccountCredentialsGet_574612, base: "",
-    url: url_StorageAccountCredentialsGet_574613, schemes: {Scheme.Https})
+    validator: validate_StorageAccountCredentialsGet_564512, base: "",
+    url: url_StorageAccountCredentialsGet_564513, schemes: {Scheme.Https})
 type
-  Call_StorageAccountCredentialsDelete_574637 = ref object of OpenApiRestCall_573667
-proc url_StorageAccountCredentialsDelete_574639(protocol: Scheme; host: string;
+  Call_StorageAccountCredentialsDelete_564537 = ref object of OpenApiRestCall_563565
+proc url_StorageAccountCredentialsDelete_564539(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -4640,44 +4625,43 @@ proc url_StorageAccountCredentialsDelete_574639(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_StorageAccountCredentialsDelete_574638(path: JsonNode;
+proc validate_StorageAccountCredentialsDelete_564538(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Deletes the storage account credential.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The resource group name.
   ##   name: JString (required)
   ##       : The storage account credential name.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID.
   ##   deviceName: JString (required)
   ##             : The device name.
+  ##   resourceGroupName: JString (required)
+  ##                    : The resource group name.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_574640 = path.getOrDefault("resourceGroupName")
-  valid_574640 = validateParameter(valid_574640, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `name` field"
+  var valid_564540 = path.getOrDefault("name")
+  valid_564540 = validateParameter(valid_564540, JString, required = true,
                                  default = nil)
-  if valid_574640 != nil:
-    section.add "resourceGroupName", valid_574640
-  var valid_574641 = path.getOrDefault("name")
-  valid_574641 = validateParameter(valid_574641, JString, required = true,
+  if valid_564540 != nil:
+    section.add "name", valid_564540
+  var valid_564541 = path.getOrDefault("subscriptionId")
+  valid_564541 = validateParameter(valid_564541, JString, required = true,
                                  default = nil)
-  if valid_574641 != nil:
-    section.add "name", valid_574641
-  var valid_574642 = path.getOrDefault("subscriptionId")
-  valid_574642 = validateParameter(valid_574642, JString, required = true,
+  if valid_564541 != nil:
+    section.add "subscriptionId", valid_564541
+  var valid_564542 = path.getOrDefault("deviceName")
+  valid_564542 = validateParameter(valid_564542, JString, required = true,
                                  default = nil)
-  if valid_574642 != nil:
-    section.add "subscriptionId", valid_574642
-  var valid_574643 = path.getOrDefault("deviceName")
-  valid_574643 = validateParameter(valid_574643, JString, required = true,
+  if valid_564542 != nil:
+    section.add "deviceName", valid_564542
+  var valid_564543 = path.getOrDefault("resourceGroupName")
+  valid_564543 = validateParameter(valid_564543, JString, required = true,
                                  default = nil)
-  if valid_574643 != nil:
-    section.add "deviceName", valid_574643
+  if valid_564543 != nil:
+    section.add "resourceGroupName", valid_564543
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -4685,11 +4669,11 @@ proc validate_StorageAccountCredentialsDelete_574638(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574644 = query.getOrDefault("api-version")
-  valid_574644 = validateParameter(valid_574644, JString, required = true,
+  var valid_564544 = query.getOrDefault("api-version")
+  valid_564544 = validateParameter(valid_564544, JString, required = true,
                                  default = nil)
-  if valid_574644 != nil:
-    section.add "api-version", valid_574644
+  if valid_564544 != nil:
+    section.add "api-version", valid_564544
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -4698,27 +4682,25 @@ proc validate_StorageAccountCredentialsDelete_574638(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574645: Call_StorageAccountCredentialsDelete_574637;
+proc call*(call_564545: Call_StorageAccountCredentialsDelete_564537;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Deletes the storage account credential.
   ## 
-  let valid = call_574645.validator(path, query, header, formData, body)
-  let scheme = call_574645.pickScheme
+  let valid = call_564545.validator(path, query, header, formData, body)
+  let scheme = call_564545.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574645.url(scheme.get, call_574645.host, call_574645.base,
-                         call_574645.route, valid.getOrDefault("path"),
+  let url = call_564545.url(scheme.get, call_564545.host, call_564545.base,
+                         call_564545.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574645, url, valid)
+  result = hook(call_564545, url, valid)
 
-proc call*(call_574646: Call_StorageAccountCredentialsDelete_574637;
-          resourceGroupName: string; apiVersion: string; name: string;
-          subscriptionId: string; deviceName: string): Recallable =
+proc call*(call_564546: Call_StorageAccountCredentialsDelete_564537;
+          apiVersion: string; name: string; subscriptionId: string;
+          deviceName: string; resourceGroupName: string): Recallable =
   ## storageAccountCredentialsDelete
   ## Deletes the storage account credential.
-  ##   resourceGroupName: string (required)
-  ##                    : The resource group name.
   ##   apiVersion: string (required)
   ##             : The API version.
   ##   name: string (required)
@@ -4727,23 +4709,25 @@ proc call*(call_574646: Call_StorageAccountCredentialsDelete_574637;
   ##                 : The subscription ID.
   ##   deviceName: string (required)
   ##             : The device name.
-  var path_574647 = newJObject()
-  var query_574648 = newJObject()
-  add(path_574647, "resourceGroupName", newJString(resourceGroupName))
-  add(query_574648, "api-version", newJString(apiVersion))
-  add(path_574647, "name", newJString(name))
-  add(path_574647, "subscriptionId", newJString(subscriptionId))
-  add(path_574647, "deviceName", newJString(deviceName))
-  result = call_574646.call(path_574647, query_574648, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The resource group name.
+  var path_564547 = newJObject()
+  var query_564548 = newJObject()
+  add(query_564548, "api-version", newJString(apiVersion))
+  add(path_564547, "name", newJString(name))
+  add(path_564547, "subscriptionId", newJString(subscriptionId))
+  add(path_564547, "deviceName", newJString(deviceName))
+  add(path_564547, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564546.call(path_564547, query_564548, nil, nil, nil)
 
-var storageAccountCredentialsDelete* = Call_StorageAccountCredentialsDelete_574637(
+var storageAccountCredentialsDelete* = Call_StorageAccountCredentialsDelete_564537(
     name: "storageAccountCredentialsDelete", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DataBoxEdge/dataBoxEdgeDevices/{deviceName}/storageAccountCredentials/{name}",
-    validator: validate_StorageAccountCredentialsDelete_574638, base: "",
-    url: url_StorageAccountCredentialsDelete_574639, schemes: {Scheme.Https})
+    validator: validate_StorageAccountCredentialsDelete_564538, base: "",
+    url: url_StorageAccountCredentialsDelete_564539, schemes: {Scheme.Https})
 type
-  Call_TriggersListByDataBoxEdgeDevice_574649 = ref object of OpenApiRestCall_573667
-proc url_TriggersListByDataBoxEdgeDevice_574651(protocol: Scheme; host: string;
+  Call_TriggersListByDataBoxEdgeDevice_564549 = ref object of OpenApiRestCall_563565
+proc url_TriggersListByDataBoxEdgeDevice_564551(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -4767,37 +4751,37 @@ proc url_TriggersListByDataBoxEdgeDevice_574651(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_TriggersListByDataBoxEdgeDevice_574650(path: JsonNode;
+proc validate_TriggersListByDataBoxEdgeDevice_564550(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists all the triggers configured in the device.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The resource group name.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID.
   ##   deviceName: JString (required)
   ##             : The device name.
+  ##   resourceGroupName: JString (required)
+  ##                    : The resource group name.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_574652 = path.getOrDefault("resourceGroupName")
-  valid_574652 = validateParameter(valid_574652, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564552 = path.getOrDefault("subscriptionId")
+  valid_564552 = validateParameter(valid_564552, JString, required = true,
                                  default = nil)
-  if valid_574652 != nil:
-    section.add "resourceGroupName", valid_574652
-  var valid_574653 = path.getOrDefault("subscriptionId")
-  valid_574653 = validateParameter(valid_574653, JString, required = true,
+  if valid_564552 != nil:
+    section.add "subscriptionId", valid_564552
+  var valid_564553 = path.getOrDefault("deviceName")
+  valid_564553 = validateParameter(valid_564553, JString, required = true,
                                  default = nil)
-  if valid_574653 != nil:
-    section.add "subscriptionId", valid_574653
-  var valid_574654 = path.getOrDefault("deviceName")
-  valid_574654 = validateParameter(valid_574654, JString, required = true,
+  if valid_564553 != nil:
+    section.add "deviceName", valid_564553
+  var valid_564554 = path.getOrDefault("resourceGroupName")
+  valid_564554 = validateParameter(valid_564554, JString, required = true,
                                  default = nil)
-  if valid_574654 != nil:
-    section.add "deviceName", valid_574654
+  if valid_564554 != nil:
+    section.add "resourceGroupName", valid_564554
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -4807,16 +4791,16 @@ proc validate_TriggersListByDataBoxEdgeDevice_574650(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574655 = query.getOrDefault("api-version")
-  valid_574655 = validateParameter(valid_574655, JString, required = true,
+  var valid_564555 = query.getOrDefault("api-version")
+  valid_564555 = validateParameter(valid_564555, JString, required = true,
                                  default = nil)
-  if valid_574655 != nil:
-    section.add "api-version", valid_574655
-  var valid_574656 = query.getOrDefault("$expand")
-  valid_574656 = validateParameter(valid_574656, JString, required = false,
+  if valid_564555 != nil:
+    section.add "api-version", valid_564555
+  var valid_564556 = query.getOrDefault("$expand")
+  valid_564556 = validateParameter(valid_564556, JString, required = false,
                                  default = nil)
-  if valid_574656 != nil:
-    section.add "$expand", valid_574656
+  if valid_564556 != nil:
+    section.add "$expand", valid_564556
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -4825,27 +4809,25 @@ proc validate_TriggersListByDataBoxEdgeDevice_574650(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574657: Call_TriggersListByDataBoxEdgeDevice_574649;
+proc call*(call_564557: Call_TriggersListByDataBoxEdgeDevice_564549;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Lists all the triggers configured in the device.
   ## 
-  let valid = call_574657.validator(path, query, header, formData, body)
-  let scheme = call_574657.pickScheme
+  let valid = call_564557.validator(path, query, header, formData, body)
+  let scheme = call_564557.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574657.url(scheme.get, call_574657.host, call_574657.base,
-                         call_574657.route, valid.getOrDefault("path"),
+  let url = call_564557.url(scheme.get, call_564557.host, call_564557.base,
+                         call_564557.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574657, url, valid)
+  result = hook(call_564557, url, valid)
 
-proc call*(call_574658: Call_TriggersListByDataBoxEdgeDevice_574649;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          deviceName: string; Expand: string = ""): Recallable =
+proc call*(call_564558: Call_TriggersListByDataBoxEdgeDevice_564549;
+          apiVersion: string; subscriptionId: string; deviceName: string;
+          resourceGroupName: string; Expand: string = ""): Recallable =
   ## triggersListByDataBoxEdgeDevice
   ## Lists all the triggers configured in the device.
-  ##   resourceGroupName: string (required)
-  ##                    : The resource group name.
   ##   apiVersion: string (required)
   ##             : The API version.
   ##   Expand: string
@@ -4854,23 +4836,25 @@ proc call*(call_574658: Call_TriggersListByDataBoxEdgeDevice_574649;
   ##                 : The subscription ID.
   ##   deviceName: string (required)
   ##             : The device name.
-  var path_574659 = newJObject()
-  var query_574660 = newJObject()
-  add(path_574659, "resourceGroupName", newJString(resourceGroupName))
-  add(query_574660, "api-version", newJString(apiVersion))
-  add(query_574660, "$expand", newJString(Expand))
-  add(path_574659, "subscriptionId", newJString(subscriptionId))
-  add(path_574659, "deviceName", newJString(deviceName))
-  result = call_574658.call(path_574659, query_574660, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The resource group name.
+  var path_564559 = newJObject()
+  var query_564560 = newJObject()
+  add(query_564560, "api-version", newJString(apiVersion))
+  add(query_564560, "$expand", newJString(Expand))
+  add(path_564559, "subscriptionId", newJString(subscriptionId))
+  add(path_564559, "deviceName", newJString(deviceName))
+  add(path_564559, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564558.call(path_564559, query_564560, nil, nil, nil)
 
-var triggersListByDataBoxEdgeDevice* = Call_TriggersListByDataBoxEdgeDevice_574649(
+var triggersListByDataBoxEdgeDevice* = Call_TriggersListByDataBoxEdgeDevice_564549(
     name: "triggersListByDataBoxEdgeDevice", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DataBoxEdge/dataBoxEdgeDevices/{deviceName}/triggers",
-    validator: validate_TriggersListByDataBoxEdgeDevice_574650, base: "",
-    url: url_TriggersListByDataBoxEdgeDevice_574651, schemes: {Scheme.Https})
+    validator: validate_TriggersListByDataBoxEdgeDevice_564550, base: "",
+    url: url_TriggersListByDataBoxEdgeDevice_564551, schemes: {Scheme.Https})
 type
-  Call_TriggersCreateOrUpdate_574673 = ref object of OpenApiRestCall_573667
-proc url_TriggersCreateOrUpdate_574675(protocol: Scheme; host: string; base: string;
+  Call_TriggersCreateOrUpdate_564573 = ref object of OpenApiRestCall_563565
+proc url_TriggersCreateOrUpdate_564575(protocol: Scheme; host: string; base: string;
                                       route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -4896,44 +4880,43 @@ proc url_TriggersCreateOrUpdate_574675(protocol: Scheme; host: string; base: str
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_TriggersCreateOrUpdate_574674(path: JsonNode; query: JsonNode;
+proc validate_TriggersCreateOrUpdate_564574(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Creates or updates a trigger.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The resource group name.
   ##   name: JString (required)
   ##       : The trigger name.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID.
   ##   deviceName: JString (required)
   ##             : Creates or updates a trigger
+  ##   resourceGroupName: JString (required)
+  ##                    : The resource group name.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_574676 = path.getOrDefault("resourceGroupName")
-  valid_574676 = validateParameter(valid_574676, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `name` field"
+  var valid_564576 = path.getOrDefault("name")
+  valid_564576 = validateParameter(valid_564576, JString, required = true,
                                  default = nil)
-  if valid_574676 != nil:
-    section.add "resourceGroupName", valid_574676
-  var valid_574677 = path.getOrDefault("name")
-  valid_574677 = validateParameter(valid_574677, JString, required = true,
+  if valid_564576 != nil:
+    section.add "name", valid_564576
+  var valid_564577 = path.getOrDefault("subscriptionId")
+  valid_564577 = validateParameter(valid_564577, JString, required = true,
                                  default = nil)
-  if valid_574677 != nil:
-    section.add "name", valid_574677
-  var valid_574678 = path.getOrDefault("subscriptionId")
-  valid_574678 = validateParameter(valid_574678, JString, required = true,
+  if valid_564577 != nil:
+    section.add "subscriptionId", valid_564577
+  var valid_564578 = path.getOrDefault("deviceName")
+  valid_564578 = validateParameter(valid_564578, JString, required = true,
                                  default = nil)
-  if valid_574678 != nil:
-    section.add "subscriptionId", valid_574678
-  var valid_574679 = path.getOrDefault("deviceName")
-  valid_574679 = validateParameter(valid_574679, JString, required = true,
+  if valid_564578 != nil:
+    section.add "deviceName", valid_564578
+  var valid_564579 = path.getOrDefault("resourceGroupName")
+  valid_564579 = validateParameter(valid_564579, JString, required = true,
                                  default = nil)
-  if valid_574679 != nil:
-    section.add "deviceName", valid_574679
+  if valid_564579 != nil:
+    section.add "resourceGroupName", valid_564579
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -4941,11 +4924,11 @@ proc validate_TriggersCreateOrUpdate_574674(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574680 = query.getOrDefault("api-version")
-  valid_574680 = validateParameter(valid_574680, JString, required = true,
+  var valid_564580 = query.getOrDefault("api-version")
+  valid_564580 = validateParameter(valid_564580, JString, required = true,
                                  default = nil)
-  if valid_574680 != nil:
-    section.add "api-version", valid_574680
+  if valid_564580 != nil:
+    section.add "api-version", valid_564580
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -4959,56 +4942,56 @@ proc validate_TriggersCreateOrUpdate_574674(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574682: Call_TriggersCreateOrUpdate_574673; path: JsonNode;
+proc call*(call_564582: Call_TriggersCreateOrUpdate_564573; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Creates or updates a trigger.
   ## 
-  let valid = call_574682.validator(path, query, header, formData, body)
-  let scheme = call_574682.pickScheme
+  let valid = call_564582.validator(path, query, header, formData, body)
+  let scheme = call_564582.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574682.url(scheme.get, call_574682.host, call_574682.base,
-                         call_574682.route, valid.getOrDefault("path"),
+  let url = call_564582.url(scheme.get, call_564582.host, call_564582.base,
+                         call_564582.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574682, url, valid)
+  result = hook(call_564582, url, valid)
 
-proc call*(call_574683: Call_TriggersCreateOrUpdate_574673;
-          resourceGroupName: string; apiVersion: string; name: string;
-          subscriptionId: string; trigger: JsonNode; deviceName: string): Recallable =
+proc call*(call_564583: Call_TriggersCreateOrUpdate_564573; apiVersion: string;
+          name: string; subscriptionId: string; deviceName: string;
+          resourceGroupName: string; trigger: JsonNode): Recallable =
   ## triggersCreateOrUpdate
   ## Creates or updates a trigger.
-  ##   resourceGroupName: string (required)
-  ##                    : The resource group name.
   ##   apiVersion: string (required)
   ##             : The API version.
   ##   name: string (required)
   ##       : The trigger name.
   ##   subscriptionId: string (required)
   ##                 : The subscription ID.
-  ##   trigger: JObject (required)
-  ##          : The trigger.
   ##   deviceName: string (required)
   ##             : Creates or updates a trigger
-  var path_574684 = newJObject()
-  var query_574685 = newJObject()
-  var body_574686 = newJObject()
-  add(path_574684, "resourceGroupName", newJString(resourceGroupName))
-  add(query_574685, "api-version", newJString(apiVersion))
-  add(path_574684, "name", newJString(name))
-  add(path_574684, "subscriptionId", newJString(subscriptionId))
+  ##   resourceGroupName: string (required)
+  ##                    : The resource group name.
+  ##   trigger: JObject (required)
+  ##          : The trigger.
+  var path_564584 = newJObject()
+  var query_564585 = newJObject()
+  var body_564586 = newJObject()
+  add(query_564585, "api-version", newJString(apiVersion))
+  add(path_564584, "name", newJString(name))
+  add(path_564584, "subscriptionId", newJString(subscriptionId))
+  add(path_564584, "deviceName", newJString(deviceName))
+  add(path_564584, "resourceGroupName", newJString(resourceGroupName))
   if trigger != nil:
-    body_574686 = trigger
-  add(path_574684, "deviceName", newJString(deviceName))
-  result = call_574683.call(path_574684, query_574685, nil, nil, body_574686)
+    body_564586 = trigger
+  result = call_564583.call(path_564584, query_564585, nil, nil, body_564586)
 
-var triggersCreateOrUpdate* = Call_TriggersCreateOrUpdate_574673(
+var triggersCreateOrUpdate* = Call_TriggersCreateOrUpdate_564573(
     name: "triggersCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DataBoxEdge/dataBoxEdgeDevices/{deviceName}/triggers/{name}",
-    validator: validate_TriggersCreateOrUpdate_574674, base: "",
-    url: url_TriggersCreateOrUpdate_574675, schemes: {Scheme.Https})
+    validator: validate_TriggersCreateOrUpdate_564574, base: "",
+    url: url_TriggersCreateOrUpdate_564575, schemes: {Scheme.Https})
 type
-  Call_TriggersGet_574661 = ref object of OpenApiRestCall_573667
-proc url_TriggersGet_574663(protocol: Scheme; host: string; base: string;
+  Call_TriggersGet_564561 = ref object of OpenApiRestCall_563565
+proc url_TriggersGet_564563(protocol: Scheme; host: string; base: string;
                            route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -5034,44 +5017,43 @@ proc url_TriggersGet_574663(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_TriggersGet_574662(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_TriggersGet_564562(path: JsonNode; query: JsonNode; header: JsonNode;
                                 formData: JsonNode; body: JsonNode): JsonNode =
   ## Get a specific trigger by name.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The resource group name.
   ##   name: JString (required)
   ##       : The trigger name.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID.
   ##   deviceName: JString (required)
   ##             : The device name.
+  ##   resourceGroupName: JString (required)
+  ##                    : The resource group name.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_574664 = path.getOrDefault("resourceGroupName")
-  valid_574664 = validateParameter(valid_574664, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `name` field"
+  var valid_564564 = path.getOrDefault("name")
+  valid_564564 = validateParameter(valid_564564, JString, required = true,
                                  default = nil)
-  if valid_574664 != nil:
-    section.add "resourceGroupName", valid_574664
-  var valid_574665 = path.getOrDefault("name")
-  valid_574665 = validateParameter(valid_574665, JString, required = true,
+  if valid_564564 != nil:
+    section.add "name", valid_564564
+  var valid_564565 = path.getOrDefault("subscriptionId")
+  valid_564565 = validateParameter(valid_564565, JString, required = true,
                                  default = nil)
-  if valid_574665 != nil:
-    section.add "name", valid_574665
-  var valid_574666 = path.getOrDefault("subscriptionId")
-  valid_574666 = validateParameter(valid_574666, JString, required = true,
+  if valid_564565 != nil:
+    section.add "subscriptionId", valid_564565
+  var valid_564566 = path.getOrDefault("deviceName")
+  valid_564566 = validateParameter(valid_564566, JString, required = true,
                                  default = nil)
-  if valid_574666 != nil:
-    section.add "subscriptionId", valid_574666
-  var valid_574667 = path.getOrDefault("deviceName")
-  valid_574667 = validateParameter(valid_574667, JString, required = true,
+  if valid_564566 != nil:
+    section.add "deviceName", valid_564566
+  var valid_564567 = path.getOrDefault("resourceGroupName")
+  valid_564567 = validateParameter(valid_564567, JString, required = true,
                                  default = nil)
-  if valid_574667 != nil:
-    section.add "deviceName", valid_574667
+  if valid_564567 != nil:
+    section.add "resourceGroupName", valid_564567
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -5079,11 +5061,11 @@ proc validate_TriggersGet_574662(path: JsonNode; query: JsonNode; header: JsonNo
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574668 = query.getOrDefault("api-version")
-  valid_574668 = validateParameter(valid_574668, JString, required = true,
+  var valid_564568 = query.getOrDefault("api-version")
+  valid_564568 = validateParameter(valid_564568, JString, required = true,
                                  default = nil)
-  if valid_574668 != nil:
-    section.add "api-version", valid_574668
+  if valid_564568 != nil:
+    section.add "api-version", valid_564568
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -5092,25 +5074,23 @@ proc validate_TriggersGet_574662(path: JsonNode; query: JsonNode; header: JsonNo
   if body != nil:
     result.add "body", body
 
-proc call*(call_574669: Call_TriggersGet_574661; path: JsonNode; query: JsonNode;
+proc call*(call_564569: Call_TriggersGet_564561; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get a specific trigger by name.
   ## 
-  let valid = call_574669.validator(path, query, header, formData, body)
-  let scheme = call_574669.pickScheme
+  let valid = call_564569.validator(path, query, header, formData, body)
+  let scheme = call_564569.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574669.url(scheme.get, call_574669.host, call_574669.base,
-                         call_574669.route, valid.getOrDefault("path"),
+  let url = call_564569.url(scheme.get, call_564569.host, call_564569.base,
+                         call_564569.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574669, url, valid)
+  result = hook(call_564569, url, valid)
 
-proc call*(call_574670: Call_TriggersGet_574661; resourceGroupName: string;
-          apiVersion: string; name: string; subscriptionId: string; deviceName: string): Recallable =
+proc call*(call_564570: Call_TriggersGet_564561; apiVersion: string; name: string;
+          subscriptionId: string; deviceName: string; resourceGroupName: string): Recallable =
   ## triggersGet
   ## Get a specific trigger by name.
-  ##   resourceGroupName: string (required)
-  ##                    : The resource group name.
   ##   apiVersion: string (required)
   ##             : The API version.
   ##   name: string (required)
@@ -5119,24 +5099,26 @@ proc call*(call_574670: Call_TriggersGet_574661; resourceGroupName: string;
   ##                 : The subscription ID.
   ##   deviceName: string (required)
   ##             : The device name.
-  var path_574671 = newJObject()
-  var query_574672 = newJObject()
-  add(path_574671, "resourceGroupName", newJString(resourceGroupName))
-  add(query_574672, "api-version", newJString(apiVersion))
-  add(path_574671, "name", newJString(name))
-  add(path_574671, "subscriptionId", newJString(subscriptionId))
-  add(path_574671, "deviceName", newJString(deviceName))
-  result = call_574670.call(path_574671, query_574672, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The resource group name.
+  var path_564571 = newJObject()
+  var query_564572 = newJObject()
+  add(query_564572, "api-version", newJString(apiVersion))
+  add(path_564571, "name", newJString(name))
+  add(path_564571, "subscriptionId", newJString(subscriptionId))
+  add(path_564571, "deviceName", newJString(deviceName))
+  add(path_564571, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564570.call(path_564571, query_564572, nil, nil, nil)
 
-var triggersGet* = Call_TriggersGet_574661(name: "triggersGet",
+var triggersGet* = Call_TriggersGet_564561(name: "triggersGet",
                                         meth: HttpMethod.HttpGet,
                                         host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DataBoxEdge/dataBoxEdgeDevices/{deviceName}/triggers/{name}",
-                                        validator: validate_TriggersGet_574662,
-                                        base: "", url: url_TriggersGet_574663,
+                                        validator: validate_TriggersGet_564562,
+                                        base: "", url: url_TriggersGet_564563,
                                         schemes: {Scheme.Https})
 type
-  Call_TriggersDelete_574687 = ref object of OpenApiRestCall_573667
-proc url_TriggersDelete_574689(protocol: Scheme; host: string; base: string;
+  Call_TriggersDelete_564587 = ref object of OpenApiRestCall_563565
+proc url_TriggersDelete_564589(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -5162,7 +5144,7 @@ proc url_TriggersDelete_574689(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_TriggersDelete_574688(path: JsonNode; query: JsonNode;
+proc validate_TriggersDelete_564588(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## Deletes the trigger on the gateway device.
@@ -5170,37 +5152,36 @@ proc validate_TriggersDelete_574688(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The resource group name.
   ##   name: JString (required)
   ##       : The trigger name.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID.
   ##   deviceName: JString (required)
   ##             : The device name.
+  ##   resourceGroupName: JString (required)
+  ##                    : The resource group name.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_574690 = path.getOrDefault("resourceGroupName")
-  valid_574690 = validateParameter(valid_574690, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `name` field"
+  var valid_564590 = path.getOrDefault("name")
+  valid_564590 = validateParameter(valid_564590, JString, required = true,
                                  default = nil)
-  if valid_574690 != nil:
-    section.add "resourceGroupName", valid_574690
-  var valid_574691 = path.getOrDefault("name")
-  valid_574691 = validateParameter(valid_574691, JString, required = true,
+  if valid_564590 != nil:
+    section.add "name", valid_564590
+  var valid_564591 = path.getOrDefault("subscriptionId")
+  valid_564591 = validateParameter(valid_564591, JString, required = true,
                                  default = nil)
-  if valid_574691 != nil:
-    section.add "name", valid_574691
-  var valid_574692 = path.getOrDefault("subscriptionId")
-  valid_574692 = validateParameter(valid_574692, JString, required = true,
+  if valid_564591 != nil:
+    section.add "subscriptionId", valid_564591
+  var valid_564592 = path.getOrDefault("deviceName")
+  valid_564592 = validateParameter(valid_564592, JString, required = true,
                                  default = nil)
-  if valid_574692 != nil:
-    section.add "subscriptionId", valid_574692
-  var valid_574693 = path.getOrDefault("deviceName")
-  valid_574693 = validateParameter(valid_574693, JString, required = true,
+  if valid_564592 != nil:
+    section.add "deviceName", valid_564592
+  var valid_564593 = path.getOrDefault("resourceGroupName")
+  valid_564593 = validateParameter(valid_564593, JString, required = true,
                                  default = nil)
-  if valid_574693 != nil:
-    section.add "deviceName", valid_574693
+  if valid_564593 != nil:
+    section.add "resourceGroupName", valid_564593
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -5208,11 +5189,11 @@ proc validate_TriggersDelete_574688(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574694 = query.getOrDefault("api-version")
-  valid_574694 = validateParameter(valid_574694, JString, required = true,
+  var valid_564594 = query.getOrDefault("api-version")
+  valid_564594 = validateParameter(valid_564594, JString, required = true,
                                  default = nil)
-  if valid_574694 != nil:
-    section.add "api-version", valid_574694
+  if valid_564594 != nil:
+    section.add "api-version", valid_564594
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -5221,25 +5202,23 @@ proc validate_TriggersDelete_574688(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574695: Call_TriggersDelete_574687; path: JsonNode; query: JsonNode;
+proc call*(call_564595: Call_TriggersDelete_564587; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes the trigger on the gateway device.
   ## 
-  let valid = call_574695.validator(path, query, header, formData, body)
-  let scheme = call_574695.pickScheme
+  let valid = call_564595.validator(path, query, header, formData, body)
+  let scheme = call_564595.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574695.url(scheme.get, call_574695.host, call_574695.base,
-                         call_574695.route, valid.getOrDefault("path"),
+  let url = call_564595.url(scheme.get, call_564595.host, call_564595.base,
+                         call_564595.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574695, url, valid)
+  result = hook(call_564595, url, valid)
 
-proc call*(call_574696: Call_TriggersDelete_574687; resourceGroupName: string;
-          apiVersion: string; name: string; subscriptionId: string; deviceName: string): Recallable =
+proc call*(call_564596: Call_TriggersDelete_564587; apiVersion: string; name: string;
+          subscriptionId: string; deviceName: string; resourceGroupName: string): Recallable =
   ## triggersDelete
   ## Deletes the trigger on the gateway device.
-  ##   resourceGroupName: string (required)
-  ##                    : The resource group name.
   ##   apiVersion: string (required)
   ##             : The API version.
   ##   name: string (required)
@@ -5248,22 +5227,24 @@ proc call*(call_574696: Call_TriggersDelete_574687; resourceGroupName: string;
   ##                 : The subscription ID.
   ##   deviceName: string (required)
   ##             : The device name.
-  var path_574697 = newJObject()
-  var query_574698 = newJObject()
-  add(path_574697, "resourceGroupName", newJString(resourceGroupName))
-  add(query_574698, "api-version", newJString(apiVersion))
-  add(path_574697, "name", newJString(name))
-  add(path_574697, "subscriptionId", newJString(subscriptionId))
-  add(path_574697, "deviceName", newJString(deviceName))
-  result = call_574696.call(path_574697, query_574698, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The resource group name.
+  var path_564597 = newJObject()
+  var query_564598 = newJObject()
+  add(query_564598, "api-version", newJString(apiVersion))
+  add(path_564597, "name", newJString(name))
+  add(path_564597, "subscriptionId", newJString(subscriptionId))
+  add(path_564597, "deviceName", newJString(deviceName))
+  add(path_564597, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564596.call(path_564597, query_564598, nil, nil, nil)
 
-var triggersDelete* = Call_TriggersDelete_574687(name: "triggersDelete",
+var triggersDelete* = Call_TriggersDelete_564587(name: "triggersDelete",
     meth: HttpMethod.HttpDelete, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DataBoxEdge/dataBoxEdgeDevices/{deviceName}/triggers/{name}",
-    validator: validate_TriggersDelete_574688, base: "", url: url_TriggersDelete_574689,
+    validator: validate_TriggersDelete_564588, base: "", url: url_TriggersDelete_564589,
     schemes: {Scheme.Https})
 type
-  Call_DevicesGetUpdateSummary_574699 = ref object of OpenApiRestCall_573667
-proc url_DevicesGetUpdateSummary_574701(protocol: Scheme; host: string; base: string;
+  Call_DevicesGetUpdateSummary_564599 = ref object of OpenApiRestCall_563565
+proc url_DevicesGetUpdateSummary_564601(protocol: Scheme; host: string; base: string;
                                        route: string; path: JsonNode;
                                        query: JsonNode): Uri =
   result.scheme = $protocol
@@ -5288,35 +5269,35 @@ proc url_DevicesGetUpdateSummary_574701(protocol: Scheme; host: string; base: st
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DevicesGetUpdateSummary_574700(path: JsonNode; query: JsonNode;
+proc validate_DevicesGetUpdateSummary_564600(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The resource group name.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID.
   ##   deviceName: JString (required)
   ##             : The device name.
+  ##   resourceGroupName: JString (required)
+  ##                    : The resource group name.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_574702 = path.getOrDefault("resourceGroupName")
-  valid_574702 = validateParameter(valid_574702, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564602 = path.getOrDefault("subscriptionId")
+  valid_564602 = validateParameter(valid_564602, JString, required = true,
                                  default = nil)
-  if valid_574702 != nil:
-    section.add "resourceGroupName", valid_574702
-  var valid_574703 = path.getOrDefault("subscriptionId")
-  valid_574703 = validateParameter(valid_574703, JString, required = true,
+  if valid_564602 != nil:
+    section.add "subscriptionId", valid_564602
+  var valid_564603 = path.getOrDefault("deviceName")
+  valid_564603 = validateParameter(valid_564603, JString, required = true,
                                  default = nil)
-  if valid_574703 != nil:
-    section.add "subscriptionId", valid_574703
-  var valid_574704 = path.getOrDefault("deviceName")
-  valid_574704 = validateParameter(valid_574704, JString, required = true,
+  if valid_564603 != nil:
+    section.add "deviceName", valid_564603
+  var valid_564604 = path.getOrDefault("resourceGroupName")
+  valid_564604 = validateParameter(valid_564604, JString, required = true,
                                  default = nil)
-  if valid_574704 != nil:
-    section.add "deviceName", valid_574704
+  if valid_564604 != nil:
+    section.add "resourceGroupName", valid_564604
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -5324,11 +5305,11 @@ proc validate_DevicesGetUpdateSummary_574700(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574705 = query.getOrDefault("api-version")
-  valid_574705 = validateParameter(valid_574705, JString, required = true,
+  var valid_564605 = query.getOrDefault("api-version")
+  valid_564605 = validateParameter(valid_564605, JString, required = true,
                                  default = nil)
-  if valid_574705 != nil:
-    section.add "api-version", valid_574705
+  if valid_564605 != nil:
+    section.add "api-version", valid_564605
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -5337,45 +5318,44 @@ proc validate_DevicesGetUpdateSummary_574700(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574706: Call_DevicesGetUpdateSummary_574699; path: JsonNode;
+proc call*(call_564606: Call_DevicesGetUpdateSummary_564599; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
-  let valid = call_574706.validator(path, query, header, formData, body)
-  let scheme = call_574706.pickScheme
+  let valid = call_564606.validator(path, query, header, formData, body)
+  let scheme = call_564606.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574706.url(scheme.get, call_574706.host, call_574706.base,
-                         call_574706.route, valid.getOrDefault("path"),
+  let url = call_564606.url(scheme.get, call_564606.host, call_564606.base,
+                         call_564606.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574706, url, valid)
+  result = hook(call_564606, url, valid)
 
-proc call*(call_574707: Call_DevicesGetUpdateSummary_574699;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          deviceName: string): Recallable =
+proc call*(call_564607: Call_DevicesGetUpdateSummary_564599; apiVersion: string;
+          subscriptionId: string; deviceName: string; resourceGroupName: string): Recallable =
   ## devicesGetUpdateSummary
-  ##   resourceGroupName: string (required)
-  ##                    : The resource group name.
   ##   apiVersion: string (required)
   ##             : The API version.
   ##   subscriptionId: string (required)
   ##                 : The subscription ID.
   ##   deviceName: string (required)
   ##             : The device name.
-  var path_574708 = newJObject()
-  var query_574709 = newJObject()
-  add(path_574708, "resourceGroupName", newJString(resourceGroupName))
-  add(query_574709, "api-version", newJString(apiVersion))
-  add(path_574708, "subscriptionId", newJString(subscriptionId))
-  add(path_574708, "deviceName", newJString(deviceName))
-  result = call_574707.call(path_574708, query_574709, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The resource group name.
+  var path_564608 = newJObject()
+  var query_564609 = newJObject()
+  add(query_564609, "api-version", newJString(apiVersion))
+  add(path_564608, "subscriptionId", newJString(subscriptionId))
+  add(path_564608, "deviceName", newJString(deviceName))
+  add(path_564608, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564607.call(path_564608, query_564609, nil, nil, nil)
 
-var devicesGetUpdateSummary* = Call_DevicesGetUpdateSummary_574699(
+var devicesGetUpdateSummary* = Call_DevicesGetUpdateSummary_564599(
     name: "devicesGetUpdateSummary", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DataBoxEdge/dataBoxEdgeDevices/{deviceName}/updateSummary/default",
-    validator: validate_DevicesGetUpdateSummary_574700, base: "",
-    url: url_DevicesGetUpdateSummary_574701, schemes: {Scheme.Https})
+    validator: validate_DevicesGetUpdateSummary_564600, base: "",
+    url: url_DevicesGetUpdateSummary_564601, schemes: {Scheme.Https})
 type
-  Call_DevicesUploadCertificate_574710 = ref object of OpenApiRestCall_573667
-proc url_DevicesUploadCertificate_574712(protocol: Scheme; host: string;
+  Call_DevicesUploadCertificate_564610 = ref object of OpenApiRestCall_563565
+proc url_DevicesUploadCertificate_564612(protocol: Scheme; host: string;
                                         base: string; route: string; path: JsonNode;
                                         query: JsonNode): Uri =
   result.scheme = $protocol
@@ -5400,37 +5380,37 @@ proc url_DevicesUploadCertificate_574712(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DevicesUploadCertificate_574711(path: JsonNode; query: JsonNode;
+proc validate_DevicesUploadCertificate_564611(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Uploads registration certificate for the device.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The resource group name.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID.
   ##   deviceName: JString (required)
   ##             : The device name.
+  ##   resourceGroupName: JString (required)
+  ##                    : The resource group name.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_574713 = path.getOrDefault("resourceGroupName")
-  valid_574713 = validateParameter(valid_574713, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564613 = path.getOrDefault("subscriptionId")
+  valid_564613 = validateParameter(valid_564613, JString, required = true,
                                  default = nil)
-  if valid_574713 != nil:
-    section.add "resourceGroupName", valid_574713
-  var valid_574714 = path.getOrDefault("subscriptionId")
-  valid_574714 = validateParameter(valid_574714, JString, required = true,
+  if valid_564613 != nil:
+    section.add "subscriptionId", valid_564613
+  var valid_564614 = path.getOrDefault("deviceName")
+  valid_564614 = validateParameter(valid_564614, JString, required = true,
                                  default = nil)
-  if valid_574714 != nil:
-    section.add "subscriptionId", valid_574714
-  var valid_574715 = path.getOrDefault("deviceName")
-  valid_574715 = validateParameter(valid_574715, JString, required = true,
+  if valid_564614 != nil:
+    section.add "deviceName", valid_564614
+  var valid_564615 = path.getOrDefault("resourceGroupName")
+  valid_564615 = validateParameter(valid_564615, JString, required = true,
                                  default = nil)
-  if valid_574715 != nil:
-    section.add "deviceName", valid_574715
+  if valid_564615 != nil:
+    section.add "resourceGroupName", valid_564615
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -5438,11 +5418,11 @@ proc validate_DevicesUploadCertificate_574711(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574716 = query.getOrDefault("api-version")
-  valid_574716 = validateParameter(valid_574716, JString, required = true,
+  var valid_564616 = query.getOrDefault("api-version")
+  valid_564616 = validateParameter(valid_564616, JString, required = true,
                                  default = nil)
-  if valid_574716 != nil:
-    section.add "api-version", valid_574716
+  if valid_564616 != nil:
+    section.add "api-version", valid_564616
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -5456,53 +5436,53 @@ proc validate_DevicesUploadCertificate_574711(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574718: Call_DevicesUploadCertificate_574710; path: JsonNode;
+proc call*(call_564618: Call_DevicesUploadCertificate_564610; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Uploads registration certificate for the device.
   ## 
-  let valid = call_574718.validator(path, query, header, formData, body)
-  let scheme = call_574718.pickScheme
+  let valid = call_564618.validator(path, query, header, formData, body)
+  let scheme = call_564618.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574718.url(scheme.get, call_574718.host, call_574718.base,
-                         call_574718.route, valid.getOrDefault("path"),
+  let url = call_564618.url(scheme.get, call_564618.host, call_564618.base,
+                         call_564618.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574718, url, valid)
+  result = hook(call_564618, url, valid)
 
-proc call*(call_574719: Call_DevicesUploadCertificate_574710;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          parameters: JsonNode; deviceName: string): Recallable =
+proc call*(call_564619: Call_DevicesUploadCertificate_564610; apiVersion: string;
+          subscriptionId: string; deviceName: string; resourceGroupName: string;
+          parameters: JsonNode): Recallable =
   ## devicesUploadCertificate
   ## Uploads registration certificate for the device.
-  ##   resourceGroupName: string (required)
-  ##                    : The resource group name.
   ##   apiVersion: string (required)
   ##             : The API version.
   ##   subscriptionId: string (required)
   ##                 : The subscription ID.
-  ##   parameters: JObject (required)
-  ##             : The upload certificate request.
   ##   deviceName: string (required)
   ##             : The device name.
-  var path_574720 = newJObject()
-  var query_574721 = newJObject()
-  var body_574722 = newJObject()
-  add(path_574720, "resourceGroupName", newJString(resourceGroupName))
-  add(query_574721, "api-version", newJString(apiVersion))
-  add(path_574720, "subscriptionId", newJString(subscriptionId))
+  ##   resourceGroupName: string (required)
+  ##                    : The resource group name.
+  ##   parameters: JObject (required)
+  ##             : The upload certificate request.
+  var path_564620 = newJObject()
+  var query_564621 = newJObject()
+  var body_564622 = newJObject()
+  add(query_564621, "api-version", newJString(apiVersion))
+  add(path_564620, "subscriptionId", newJString(subscriptionId))
+  add(path_564620, "deviceName", newJString(deviceName))
+  add(path_564620, "resourceGroupName", newJString(resourceGroupName))
   if parameters != nil:
-    body_574722 = parameters
-  add(path_574720, "deviceName", newJString(deviceName))
-  result = call_574719.call(path_574720, query_574721, nil, nil, body_574722)
+    body_564622 = parameters
+  result = call_564619.call(path_564620, query_564621, nil, nil, body_564622)
 
-var devicesUploadCertificate* = Call_DevicesUploadCertificate_574710(
+var devicesUploadCertificate* = Call_DevicesUploadCertificate_564610(
     name: "devicesUploadCertificate", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DataBoxEdge/dataBoxEdgeDevices/{deviceName}/uploadCertificate",
-    validator: validate_DevicesUploadCertificate_574711, base: "",
-    url: url_DevicesUploadCertificate_574712, schemes: {Scheme.Https})
+    validator: validate_DevicesUploadCertificate_564611, base: "",
+    url: url_DevicesUploadCertificate_564612, schemes: {Scheme.Https})
 type
-  Call_UsersListByDataBoxEdgeDevice_574723 = ref object of OpenApiRestCall_573667
-proc url_UsersListByDataBoxEdgeDevice_574725(protocol: Scheme; host: string;
+  Call_UsersListByDataBoxEdgeDevice_564623 = ref object of OpenApiRestCall_563565
+proc url_UsersListByDataBoxEdgeDevice_564625(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -5526,37 +5506,37 @@ proc url_UsersListByDataBoxEdgeDevice_574725(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_UsersListByDataBoxEdgeDevice_574724(path: JsonNode; query: JsonNode;
+proc validate_UsersListByDataBoxEdgeDevice_564624(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets all the users registered on a Data Box Edge/Data Box Gateway device.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The resource group name.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID.
   ##   deviceName: JString (required)
   ##             : The device name.
+  ##   resourceGroupName: JString (required)
+  ##                    : The resource group name.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_574726 = path.getOrDefault("resourceGroupName")
-  valid_574726 = validateParameter(valid_574726, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564626 = path.getOrDefault("subscriptionId")
+  valid_564626 = validateParameter(valid_564626, JString, required = true,
                                  default = nil)
-  if valid_574726 != nil:
-    section.add "resourceGroupName", valid_574726
-  var valid_574727 = path.getOrDefault("subscriptionId")
-  valid_574727 = validateParameter(valid_574727, JString, required = true,
+  if valid_564626 != nil:
+    section.add "subscriptionId", valid_564626
+  var valid_564627 = path.getOrDefault("deviceName")
+  valid_564627 = validateParameter(valid_564627, JString, required = true,
                                  default = nil)
-  if valid_574727 != nil:
-    section.add "subscriptionId", valid_574727
-  var valid_574728 = path.getOrDefault("deviceName")
-  valid_574728 = validateParameter(valid_574728, JString, required = true,
+  if valid_564627 != nil:
+    section.add "deviceName", valid_564627
+  var valid_564628 = path.getOrDefault("resourceGroupName")
+  valid_564628 = validateParameter(valid_564628, JString, required = true,
                                  default = nil)
-  if valid_574728 != nil:
-    section.add "deviceName", valid_574728
+  if valid_564628 != nil:
+    section.add "resourceGroupName", valid_564628
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -5564,11 +5544,11 @@ proc validate_UsersListByDataBoxEdgeDevice_574724(path: JsonNode; query: JsonNod
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574729 = query.getOrDefault("api-version")
-  valid_574729 = validateParameter(valid_574729, JString, required = true,
+  var valid_564629 = query.getOrDefault("api-version")
+  valid_564629 = validateParameter(valid_564629, JString, required = true,
                                  default = nil)
-  if valid_574729 != nil:
-    section.add "api-version", valid_574729
+  if valid_564629 != nil:
+    section.add "api-version", valid_564629
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -5577,48 +5557,48 @@ proc validate_UsersListByDataBoxEdgeDevice_574724(path: JsonNode; query: JsonNod
   if body != nil:
     result.add "body", body
 
-proc call*(call_574730: Call_UsersListByDataBoxEdgeDevice_574723; path: JsonNode;
+proc call*(call_564630: Call_UsersListByDataBoxEdgeDevice_564623; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets all the users registered on a Data Box Edge/Data Box Gateway device.
   ## 
-  let valid = call_574730.validator(path, query, header, formData, body)
-  let scheme = call_574730.pickScheme
+  let valid = call_564630.validator(path, query, header, formData, body)
+  let scheme = call_564630.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574730.url(scheme.get, call_574730.host, call_574730.base,
-                         call_574730.route, valid.getOrDefault("path"),
+  let url = call_564630.url(scheme.get, call_564630.host, call_564630.base,
+                         call_564630.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574730, url, valid)
+  result = hook(call_564630, url, valid)
 
-proc call*(call_574731: Call_UsersListByDataBoxEdgeDevice_574723;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          deviceName: string): Recallable =
+proc call*(call_564631: Call_UsersListByDataBoxEdgeDevice_564623;
+          apiVersion: string; subscriptionId: string; deviceName: string;
+          resourceGroupName: string): Recallable =
   ## usersListByDataBoxEdgeDevice
   ## Gets all the users registered on a Data Box Edge/Data Box Gateway device.
-  ##   resourceGroupName: string (required)
-  ##                    : The resource group name.
   ##   apiVersion: string (required)
   ##             : The API version.
   ##   subscriptionId: string (required)
   ##                 : The subscription ID.
   ##   deviceName: string (required)
   ##             : The device name.
-  var path_574732 = newJObject()
-  var query_574733 = newJObject()
-  add(path_574732, "resourceGroupName", newJString(resourceGroupName))
-  add(query_574733, "api-version", newJString(apiVersion))
-  add(path_574732, "subscriptionId", newJString(subscriptionId))
-  add(path_574732, "deviceName", newJString(deviceName))
-  result = call_574731.call(path_574732, query_574733, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The resource group name.
+  var path_564632 = newJObject()
+  var query_564633 = newJObject()
+  add(query_564633, "api-version", newJString(apiVersion))
+  add(path_564632, "subscriptionId", newJString(subscriptionId))
+  add(path_564632, "deviceName", newJString(deviceName))
+  add(path_564632, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564631.call(path_564632, query_564633, nil, nil, nil)
 
-var usersListByDataBoxEdgeDevice* = Call_UsersListByDataBoxEdgeDevice_574723(
+var usersListByDataBoxEdgeDevice* = Call_UsersListByDataBoxEdgeDevice_564623(
     name: "usersListByDataBoxEdgeDevice", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DataBoxEdge/dataBoxEdgeDevices/{deviceName}/users",
-    validator: validate_UsersListByDataBoxEdgeDevice_574724, base: "",
-    url: url_UsersListByDataBoxEdgeDevice_574725, schemes: {Scheme.Https})
+    validator: validate_UsersListByDataBoxEdgeDevice_564624, base: "",
+    url: url_UsersListByDataBoxEdgeDevice_564625, schemes: {Scheme.Https})
 type
-  Call_UsersCreateOrUpdate_574746 = ref object of OpenApiRestCall_573667
-proc url_UsersCreateOrUpdate_574748(protocol: Scheme; host: string; base: string;
+  Call_UsersCreateOrUpdate_564646 = ref object of OpenApiRestCall_563565
+proc url_UsersCreateOrUpdate_564648(protocol: Scheme; host: string; base: string;
                                    route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -5644,7 +5624,7 @@ proc url_UsersCreateOrUpdate_574748(protocol: Scheme; host: string; base: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_UsersCreateOrUpdate_574747(path: JsonNode; query: JsonNode;
+proc validate_UsersCreateOrUpdate_564647(path: JsonNode; query: JsonNode;
                                         header: JsonNode; formData: JsonNode;
                                         body: JsonNode): JsonNode =
   ## Creates a new user or updates an existing user's information on a Data Box Edge/Data Box Gateway device.
@@ -5652,37 +5632,36 @@ proc validate_UsersCreateOrUpdate_574747(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The resource group name.
   ##   name: JString (required)
   ##       : The user name.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID.
   ##   deviceName: JString (required)
   ##             : The device name.
+  ##   resourceGroupName: JString (required)
+  ##                    : The resource group name.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_574749 = path.getOrDefault("resourceGroupName")
-  valid_574749 = validateParameter(valid_574749, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `name` field"
+  var valid_564649 = path.getOrDefault("name")
+  valid_564649 = validateParameter(valid_564649, JString, required = true,
                                  default = nil)
-  if valid_574749 != nil:
-    section.add "resourceGroupName", valid_574749
-  var valid_574750 = path.getOrDefault("name")
-  valid_574750 = validateParameter(valid_574750, JString, required = true,
+  if valid_564649 != nil:
+    section.add "name", valid_564649
+  var valid_564650 = path.getOrDefault("subscriptionId")
+  valid_564650 = validateParameter(valid_564650, JString, required = true,
                                  default = nil)
-  if valid_574750 != nil:
-    section.add "name", valid_574750
-  var valid_574751 = path.getOrDefault("subscriptionId")
-  valid_574751 = validateParameter(valid_574751, JString, required = true,
+  if valid_564650 != nil:
+    section.add "subscriptionId", valid_564650
+  var valid_564651 = path.getOrDefault("deviceName")
+  valid_564651 = validateParameter(valid_564651, JString, required = true,
                                  default = nil)
-  if valid_574751 != nil:
-    section.add "subscriptionId", valid_574751
-  var valid_574752 = path.getOrDefault("deviceName")
-  valid_574752 = validateParameter(valid_574752, JString, required = true,
+  if valid_564651 != nil:
+    section.add "deviceName", valid_564651
+  var valid_564652 = path.getOrDefault("resourceGroupName")
+  valid_564652 = validateParameter(valid_564652, JString, required = true,
                                  default = nil)
-  if valid_574752 != nil:
-    section.add "deviceName", valid_574752
+  if valid_564652 != nil:
+    section.add "resourceGroupName", valid_564652
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -5690,11 +5669,11 @@ proc validate_UsersCreateOrUpdate_574747(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574753 = query.getOrDefault("api-version")
-  valid_574753 = validateParameter(valid_574753, JString, required = true,
+  var valid_564653 = query.getOrDefault("api-version")
+  valid_564653 = validateParameter(valid_564653, JString, required = true,
                                  default = nil)
-  if valid_574753 != nil:
-    section.add "api-version", valid_574753
+  if valid_564653 != nil:
+    section.add "api-version", valid_564653
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -5708,56 +5687,56 @@ proc validate_UsersCreateOrUpdate_574747(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574755: Call_UsersCreateOrUpdate_574746; path: JsonNode;
+proc call*(call_564655: Call_UsersCreateOrUpdate_564646; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Creates a new user or updates an existing user's information on a Data Box Edge/Data Box Gateway device.
   ## 
-  let valid = call_574755.validator(path, query, header, formData, body)
-  let scheme = call_574755.pickScheme
+  let valid = call_564655.validator(path, query, header, formData, body)
+  let scheme = call_564655.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574755.url(scheme.get, call_574755.host, call_574755.base,
-                         call_574755.route, valid.getOrDefault("path"),
+  let url = call_564655.url(scheme.get, call_564655.host, call_564655.base,
+                         call_564655.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574755, url, valid)
+  result = hook(call_564655, url, valid)
 
-proc call*(call_574756: Call_UsersCreateOrUpdate_574746; resourceGroupName: string;
-          apiVersion: string; name: string; user: JsonNode; subscriptionId: string;
-          deviceName: string): Recallable =
+proc call*(call_564656: Call_UsersCreateOrUpdate_564646; apiVersion: string;
+          name: string; subscriptionId: string; user: JsonNode; deviceName: string;
+          resourceGroupName: string): Recallable =
   ## usersCreateOrUpdate
   ## Creates a new user or updates an existing user's information on a Data Box Edge/Data Box Gateway device.
-  ##   resourceGroupName: string (required)
-  ##                    : The resource group name.
   ##   apiVersion: string (required)
   ##             : The API version.
   ##   name: string (required)
   ##       : The user name.
-  ##   user: JObject (required)
-  ##       : The user details.
   ##   subscriptionId: string (required)
   ##                 : The subscription ID.
+  ##   user: JObject (required)
+  ##       : The user details.
   ##   deviceName: string (required)
   ##             : The device name.
-  var path_574757 = newJObject()
-  var query_574758 = newJObject()
-  var body_574759 = newJObject()
-  add(path_574757, "resourceGroupName", newJString(resourceGroupName))
-  add(query_574758, "api-version", newJString(apiVersion))
-  add(path_574757, "name", newJString(name))
+  ##   resourceGroupName: string (required)
+  ##                    : The resource group name.
+  var path_564657 = newJObject()
+  var query_564658 = newJObject()
+  var body_564659 = newJObject()
+  add(query_564658, "api-version", newJString(apiVersion))
+  add(path_564657, "name", newJString(name))
+  add(path_564657, "subscriptionId", newJString(subscriptionId))
   if user != nil:
-    body_574759 = user
-  add(path_574757, "subscriptionId", newJString(subscriptionId))
-  add(path_574757, "deviceName", newJString(deviceName))
-  result = call_574756.call(path_574757, query_574758, nil, nil, body_574759)
+    body_564659 = user
+  add(path_564657, "deviceName", newJString(deviceName))
+  add(path_564657, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564656.call(path_564657, query_564658, nil, nil, body_564659)
 
-var usersCreateOrUpdate* = Call_UsersCreateOrUpdate_574746(
+var usersCreateOrUpdate* = Call_UsersCreateOrUpdate_564646(
     name: "usersCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DataBoxEdge/dataBoxEdgeDevices/{deviceName}/users/{name}",
-    validator: validate_UsersCreateOrUpdate_574747, base: "",
-    url: url_UsersCreateOrUpdate_574748, schemes: {Scheme.Https})
+    validator: validate_UsersCreateOrUpdate_564647, base: "",
+    url: url_UsersCreateOrUpdate_564648, schemes: {Scheme.Https})
 type
-  Call_UsersGet_574734 = ref object of OpenApiRestCall_573667
-proc url_UsersGet_574736(protocol: Scheme; host: string; base: string; route: string;
+  Call_UsersGet_564634 = ref object of OpenApiRestCall_563565
+proc url_UsersGet_564636(protocol: Scheme; host: string; base: string; route: string;
                         path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -5783,44 +5762,43 @@ proc url_UsersGet_574736(protocol: Scheme; host: string; base: string; route: st
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_UsersGet_574735(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_UsersGet_564635(path: JsonNode; query: JsonNode; header: JsonNode;
                              formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the properties of the specified user.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The resource group name.
   ##   name: JString (required)
   ##       : The user name.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID.
   ##   deviceName: JString (required)
   ##             : The device name.
+  ##   resourceGroupName: JString (required)
+  ##                    : The resource group name.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_574737 = path.getOrDefault("resourceGroupName")
-  valid_574737 = validateParameter(valid_574737, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `name` field"
+  var valid_564637 = path.getOrDefault("name")
+  valid_564637 = validateParameter(valid_564637, JString, required = true,
                                  default = nil)
-  if valid_574737 != nil:
-    section.add "resourceGroupName", valid_574737
-  var valid_574738 = path.getOrDefault("name")
-  valid_574738 = validateParameter(valid_574738, JString, required = true,
+  if valid_564637 != nil:
+    section.add "name", valid_564637
+  var valid_564638 = path.getOrDefault("subscriptionId")
+  valid_564638 = validateParameter(valid_564638, JString, required = true,
                                  default = nil)
-  if valid_574738 != nil:
-    section.add "name", valid_574738
-  var valid_574739 = path.getOrDefault("subscriptionId")
-  valid_574739 = validateParameter(valid_574739, JString, required = true,
+  if valid_564638 != nil:
+    section.add "subscriptionId", valid_564638
+  var valid_564639 = path.getOrDefault("deviceName")
+  valid_564639 = validateParameter(valid_564639, JString, required = true,
                                  default = nil)
-  if valid_574739 != nil:
-    section.add "subscriptionId", valid_574739
-  var valid_574740 = path.getOrDefault("deviceName")
-  valid_574740 = validateParameter(valid_574740, JString, required = true,
+  if valid_564639 != nil:
+    section.add "deviceName", valid_564639
+  var valid_564640 = path.getOrDefault("resourceGroupName")
+  valid_564640 = validateParameter(valid_564640, JString, required = true,
                                  default = nil)
-  if valid_574740 != nil:
-    section.add "deviceName", valid_574740
+  if valid_564640 != nil:
+    section.add "resourceGroupName", valid_564640
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -5828,11 +5806,11 @@ proc validate_UsersGet_574735(path: JsonNode; query: JsonNode; header: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574741 = query.getOrDefault("api-version")
-  valid_574741 = validateParameter(valid_574741, JString, required = true,
+  var valid_564641 = query.getOrDefault("api-version")
+  valid_564641 = validateParameter(valid_564641, JString, required = true,
                                  default = nil)
-  if valid_574741 != nil:
-    section.add "api-version", valid_574741
+  if valid_564641 != nil:
+    section.add "api-version", valid_564641
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -5841,25 +5819,23 @@ proc validate_UsersGet_574735(path: JsonNode; query: JsonNode; header: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574742: Call_UsersGet_574734; path: JsonNode; query: JsonNode;
+proc call*(call_564642: Call_UsersGet_564634; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the properties of the specified user.
   ## 
-  let valid = call_574742.validator(path, query, header, formData, body)
-  let scheme = call_574742.pickScheme
+  let valid = call_564642.validator(path, query, header, formData, body)
+  let scheme = call_564642.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574742.url(scheme.get, call_574742.host, call_574742.base,
-                         call_574742.route, valid.getOrDefault("path"),
+  let url = call_564642.url(scheme.get, call_564642.host, call_564642.base,
+                         call_564642.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574742, url, valid)
+  result = hook(call_564642, url, valid)
 
-proc call*(call_574743: Call_UsersGet_574734; resourceGroupName: string;
-          apiVersion: string; name: string; subscriptionId: string; deviceName: string): Recallable =
+proc call*(call_564643: Call_UsersGet_564634; apiVersion: string; name: string;
+          subscriptionId: string; deviceName: string; resourceGroupName: string): Recallable =
   ## usersGet
   ## Gets the properties of the specified user.
-  ##   resourceGroupName: string (required)
-  ##                    : The resource group name.
   ##   apiVersion: string (required)
   ##             : The API version.
   ##   name: string (required)
@@ -5868,23 +5844,25 @@ proc call*(call_574743: Call_UsersGet_574734; resourceGroupName: string;
   ##                 : The subscription ID.
   ##   deviceName: string (required)
   ##             : The device name.
-  var path_574744 = newJObject()
-  var query_574745 = newJObject()
-  add(path_574744, "resourceGroupName", newJString(resourceGroupName))
-  add(query_574745, "api-version", newJString(apiVersion))
-  add(path_574744, "name", newJString(name))
-  add(path_574744, "subscriptionId", newJString(subscriptionId))
-  add(path_574744, "deviceName", newJString(deviceName))
-  result = call_574743.call(path_574744, query_574745, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The resource group name.
+  var path_564644 = newJObject()
+  var query_564645 = newJObject()
+  add(query_564645, "api-version", newJString(apiVersion))
+  add(path_564644, "name", newJString(name))
+  add(path_564644, "subscriptionId", newJString(subscriptionId))
+  add(path_564644, "deviceName", newJString(deviceName))
+  add(path_564644, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564643.call(path_564644, query_564645, nil, nil, nil)
 
-var usersGet* = Call_UsersGet_574734(name: "usersGet", meth: HttpMethod.HttpGet,
+var usersGet* = Call_UsersGet_564634(name: "usersGet", meth: HttpMethod.HttpGet,
                                   host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DataBoxEdge/dataBoxEdgeDevices/{deviceName}/users/{name}",
-                                  validator: validate_UsersGet_574735, base: "",
-                                  url: url_UsersGet_574736,
+                                  validator: validate_UsersGet_564635, base: "",
+                                  url: url_UsersGet_564636,
                                   schemes: {Scheme.Https})
 type
-  Call_UsersDelete_574760 = ref object of OpenApiRestCall_573667
-proc url_UsersDelete_574762(protocol: Scheme; host: string; base: string;
+  Call_UsersDelete_564660 = ref object of OpenApiRestCall_563565
+proc url_UsersDelete_564662(protocol: Scheme; host: string; base: string;
                            route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -5910,44 +5888,43 @@ proc url_UsersDelete_574762(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_UsersDelete_574761(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_UsersDelete_564661(path: JsonNode; query: JsonNode; header: JsonNode;
                                 formData: JsonNode; body: JsonNode): JsonNode =
   ## Deletes the user on a databox edge/gateway device.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The resource group name.
   ##   name: JString (required)
   ##       : The user name.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID.
   ##   deviceName: JString (required)
   ##             : The device name.
+  ##   resourceGroupName: JString (required)
+  ##                    : The resource group name.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_574763 = path.getOrDefault("resourceGroupName")
-  valid_574763 = validateParameter(valid_574763, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `name` field"
+  var valid_564663 = path.getOrDefault("name")
+  valid_564663 = validateParameter(valid_564663, JString, required = true,
                                  default = nil)
-  if valid_574763 != nil:
-    section.add "resourceGroupName", valid_574763
-  var valid_574764 = path.getOrDefault("name")
-  valid_574764 = validateParameter(valid_574764, JString, required = true,
+  if valid_564663 != nil:
+    section.add "name", valid_564663
+  var valid_564664 = path.getOrDefault("subscriptionId")
+  valid_564664 = validateParameter(valid_564664, JString, required = true,
                                  default = nil)
-  if valid_574764 != nil:
-    section.add "name", valid_574764
-  var valid_574765 = path.getOrDefault("subscriptionId")
-  valid_574765 = validateParameter(valid_574765, JString, required = true,
+  if valid_564664 != nil:
+    section.add "subscriptionId", valid_564664
+  var valid_564665 = path.getOrDefault("deviceName")
+  valid_564665 = validateParameter(valid_564665, JString, required = true,
                                  default = nil)
-  if valid_574765 != nil:
-    section.add "subscriptionId", valid_574765
-  var valid_574766 = path.getOrDefault("deviceName")
-  valid_574766 = validateParameter(valid_574766, JString, required = true,
+  if valid_564665 != nil:
+    section.add "deviceName", valid_564665
+  var valid_564666 = path.getOrDefault("resourceGroupName")
+  valid_564666 = validateParameter(valid_564666, JString, required = true,
                                  default = nil)
-  if valid_574766 != nil:
-    section.add "deviceName", valid_574766
+  if valid_564666 != nil:
+    section.add "resourceGroupName", valid_564666
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -5955,11 +5932,11 @@ proc validate_UsersDelete_574761(path: JsonNode; query: JsonNode; header: JsonNo
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574767 = query.getOrDefault("api-version")
-  valid_574767 = validateParameter(valid_574767, JString, required = true,
+  var valid_564667 = query.getOrDefault("api-version")
+  valid_564667 = validateParameter(valid_564667, JString, required = true,
                                  default = nil)
-  if valid_574767 != nil:
-    section.add "api-version", valid_574767
+  if valid_564667 != nil:
+    section.add "api-version", valid_564667
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -5968,25 +5945,23 @@ proc validate_UsersDelete_574761(path: JsonNode; query: JsonNode; header: JsonNo
   if body != nil:
     result.add "body", body
 
-proc call*(call_574768: Call_UsersDelete_574760; path: JsonNode; query: JsonNode;
+proc call*(call_564668: Call_UsersDelete_564660; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes the user on a databox edge/gateway device.
   ## 
-  let valid = call_574768.validator(path, query, header, formData, body)
-  let scheme = call_574768.pickScheme
+  let valid = call_564668.validator(path, query, header, formData, body)
+  let scheme = call_564668.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574768.url(scheme.get, call_574768.host, call_574768.base,
-                         call_574768.route, valid.getOrDefault("path"),
+  let url = call_564668.url(scheme.get, call_564668.host, call_564668.base,
+                         call_564668.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574768, url, valid)
+  result = hook(call_564668, url, valid)
 
-proc call*(call_574769: Call_UsersDelete_574760; resourceGroupName: string;
-          apiVersion: string; name: string; subscriptionId: string; deviceName: string): Recallable =
+proc call*(call_564669: Call_UsersDelete_564660; apiVersion: string; name: string;
+          subscriptionId: string; deviceName: string; resourceGroupName: string): Recallable =
   ## usersDelete
   ## Deletes the user on a databox edge/gateway device.
-  ##   resourceGroupName: string (required)
-  ##                    : The resource group name.
   ##   apiVersion: string (required)
   ##             : The API version.
   ##   name: string (required)
@@ -5995,20 +5970,22 @@ proc call*(call_574769: Call_UsersDelete_574760; resourceGroupName: string;
   ##                 : The subscription ID.
   ##   deviceName: string (required)
   ##             : The device name.
-  var path_574770 = newJObject()
-  var query_574771 = newJObject()
-  add(path_574770, "resourceGroupName", newJString(resourceGroupName))
-  add(query_574771, "api-version", newJString(apiVersion))
-  add(path_574770, "name", newJString(name))
-  add(path_574770, "subscriptionId", newJString(subscriptionId))
-  add(path_574770, "deviceName", newJString(deviceName))
-  result = call_574769.call(path_574770, query_574771, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The resource group name.
+  var path_564670 = newJObject()
+  var query_564671 = newJObject()
+  add(query_564671, "api-version", newJString(apiVersion))
+  add(path_564670, "name", newJString(name))
+  add(path_564670, "subscriptionId", newJString(subscriptionId))
+  add(path_564670, "deviceName", newJString(deviceName))
+  add(path_564670, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564669.call(path_564670, query_564671, nil, nil, nil)
 
-var usersDelete* = Call_UsersDelete_574760(name: "usersDelete",
+var usersDelete* = Call_UsersDelete_564660(name: "usersDelete",
                                         meth: HttpMethod.HttpDelete,
                                         host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DataBoxEdge/dataBoxEdgeDevices/{deviceName}/users/{name}",
-                                        validator: validate_UsersDelete_574761,
-                                        base: "", url: url_UsersDelete_574762,
+                                        validator: validate_UsersDelete_564661,
+                                        base: "", url: url_UsersDelete_564662,
                                         schemes: {Scheme.Https})
 export
   rest

@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, httpcore
 
 ## auto-generated via openapi macro
 ## title: BillingManagementClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_574467 = ref object of OpenApiRestCall
+  OpenApiRestCall_563565 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_574467](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563565](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_574467): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563565): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,15 +107,15 @@ const
   macServiceName = "billing"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_BillingAccountsList_574689 = ref object of OpenApiRestCall_574467
-proc url_BillingAccountsList_574691(protocol: Scheme; host: string; base: string;
+  Call_BillingAccountsList_563787 = ref object of OpenApiRestCall_563565
+proc url_BillingAccountsList_563789(protocol: Scheme; host: string; base: string;
                                    route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_BillingAccountsList_574690(path: JsonNode; query: JsonNode;
+proc validate_BillingAccountsList_563788(path: JsonNode; query: JsonNode;
                                         header: JsonNode; formData: JsonNode;
                                         body: JsonNode): JsonNode =
   ## Lists all billing accounts for which a user has access.
@@ -128,16 +132,16 @@ proc validate_BillingAccountsList_574690(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574851 = query.getOrDefault("api-version")
-  valid_574851 = validateParameter(valid_574851, JString, required = true,
+  var valid_563951 = query.getOrDefault("api-version")
+  valid_563951 = validateParameter(valid_563951, JString, required = true,
                                  default = nil)
-  if valid_574851 != nil:
-    section.add "api-version", valid_574851
-  var valid_574852 = query.getOrDefault("$expand")
-  valid_574852 = validateParameter(valid_574852, JString, required = false,
+  if valid_563951 != nil:
+    section.add "api-version", valid_563951
+  var valid_563952 = query.getOrDefault("$expand")
+  valid_563952 = validateParameter(valid_563952, JString, required = false,
                                  default = nil)
-  if valid_574852 != nil:
-    section.add "$expand", valid_574852
+  if valid_563952 != nil:
+    section.add "$expand", valid_563952
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -146,20 +150,20 @@ proc validate_BillingAccountsList_574690(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574875: Call_BillingAccountsList_574689; path: JsonNode;
+proc call*(call_563975: Call_BillingAccountsList_563787; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists all billing accounts for which a user has access.
   ## 
-  let valid = call_574875.validator(path, query, header, formData, body)
-  let scheme = call_574875.pickScheme
+  let valid = call_563975.validator(path, query, header, formData, body)
+  let scheme = call_563975.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574875.url(scheme.get, call_574875.host, call_574875.base,
-                         call_574875.route, valid.getOrDefault("path"),
+  let url = call_563975.url(scheme.get, call_563975.host, call_563975.base,
+                         call_563975.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574875, url, valid)
+  result = hook(call_563975, url, valid)
 
-proc call*(call_574946: Call_BillingAccountsList_574689; apiVersion: string;
+proc call*(call_564046: Call_BillingAccountsList_563787; apiVersion: string;
           Expand: string = ""): Recallable =
   ## billingAccountsList
   ## Lists all billing accounts for which a user has access.
@@ -167,20 +171,20 @@ proc call*(call_574946: Call_BillingAccountsList_574689; apiVersion: string;
   ##             : Version of the API to be used with the client request. The current version is 2018-11-01-preview.
   ##   Expand: string
   ##         : May be used to expand the invoiceSections and billingProfiles.
-  var query_574947 = newJObject()
-  add(query_574947, "api-version", newJString(apiVersion))
-  add(query_574947, "$expand", newJString(Expand))
-  result = call_574946.call(nil, query_574947, nil, nil, nil)
+  var query_564047 = newJObject()
+  add(query_564047, "api-version", newJString(apiVersion))
+  add(query_564047, "$expand", newJString(Expand))
+  result = call_564046.call(nil, query_564047, nil, nil, nil)
 
-var billingAccountsList* = Call_BillingAccountsList_574689(
+var billingAccountsList* = Call_BillingAccountsList_563787(
     name: "billingAccountsList", meth: HttpMethod.HttpGet,
     host: "management.azure.com",
     route: "/providers/Microsoft.Billing/billingAccounts",
-    validator: validate_BillingAccountsList_574690, base: "",
-    url: url_BillingAccountsList_574691, schemes: {Scheme.Https})
+    validator: validate_BillingAccountsList_563788, base: "",
+    url: url_BillingAccountsList_563789, schemes: {Scheme.Https})
 type
-  Call_BillingAccountsGet_574987 = ref object of OpenApiRestCall_574467
-proc url_BillingAccountsGet_574989(protocol: Scheme; host: string; base: string;
+  Call_BillingAccountsGet_564087 = ref object of OpenApiRestCall_563565
+proc url_BillingAccountsGet_564089(protocol: Scheme; host: string; base: string;
                                   route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -197,7 +201,7 @@ proc url_BillingAccountsGet_574989(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_BillingAccountsGet_574988(path: JsonNode; query: JsonNode;
+proc validate_BillingAccountsGet_564088(path: JsonNode; query: JsonNode;
                                        header: JsonNode; formData: JsonNode;
                                        body: JsonNode): JsonNode =
   ## Get the billing account by id.
@@ -210,11 +214,11 @@ proc validate_BillingAccountsGet_574988(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `billingAccountName` field"
-  var valid_575004 = path.getOrDefault("billingAccountName")
-  valid_575004 = validateParameter(valid_575004, JString, required = true,
+  var valid_564104 = path.getOrDefault("billingAccountName")
+  valid_564104 = validateParameter(valid_564104, JString, required = true,
                                  default = nil)
-  if valid_575004 != nil:
-    section.add "billingAccountName", valid_575004
+  if valid_564104 != nil:
+    section.add "billingAccountName", valid_564104
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -224,16 +228,16 @@ proc validate_BillingAccountsGet_574988(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575005 = query.getOrDefault("api-version")
-  valid_575005 = validateParameter(valid_575005, JString, required = true,
+  var valid_564105 = query.getOrDefault("api-version")
+  valid_564105 = validateParameter(valid_564105, JString, required = true,
                                  default = nil)
-  if valid_575005 != nil:
-    section.add "api-version", valid_575005
-  var valid_575006 = query.getOrDefault("$expand")
-  valid_575006 = validateParameter(valid_575006, JString, required = false,
+  if valid_564105 != nil:
+    section.add "api-version", valid_564105
+  var valid_564106 = query.getOrDefault("$expand")
+  valid_564106 = validateParameter(valid_564106, JString, required = false,
                                  default = nil)
-  if valid_575006 != nil:
-    section.add "$expand", valid_575006
+  if valid_564106 != nil:
+    section.add "$expand", valid_564106
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -242,45 +246,45 @@ proc validate_BillingAccountsGet_574988(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_575007: Call_BillingAccountsGet_574987; path: JsonNode;
+proc call*(call_564107: Call_BillingAccountsGet_564087; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get the billing account by id.
   ## 
-  let valid = call_575007.validator(path, query, header, formData, body)
-  let scheme = call_575007.pickScheme
+  let valid = call_564107.validator(path, query, header, formData, body)
+  let scheme = call_564107.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575007.url(scheme.get, call_575007.host, call_575007.base,
-                         call_575007.route, valid.getOrDefault("path"),
+  let url = call_564107.url(scheme.get, call_564107.host, call_564107.base,
+                         call_564107.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575007, url, valid)
+  result = hook(call_564107, url, valid)
 
-proc call*(call_575008: Call_BillingAccountsGet_574987; apiVersion: string;
+proc call*(call_564108: Call_BillingAccountsGet_564087; apiVersion: string;
           billingAccountName: string; Expand: string = ""): Recallable =
   ## billingAccountsGet
   ## Get the billing account by id.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request. The current version is 2018-11-01-preview.
-  ##   Expand: string
-  ##         : May be used to expand the invoiceSections and billingProfiles.
   ##   billingAccountName: string (required)
   ##                     : Billing Account Id.
-  var path_575009 = newJObject()
-  var query_575010 = newJObject()
-  add(query_575010, "api-version", newJString(apiVersion))
-  add(query_575010, "$expand", newJString(Expand))
-  add(path_575009, "billingAccountName", newJString(billingAccountName))
-  result = call_575008.call(path_575009, query_575010, nil, nil, nil)
+  ##   Expand: string
+  ##         : May be used to expand the invoiceSections and billingProfiles.
+  var path_564109 = newJObject()
+  var query_564110 = newJObject()
+  add(query_564110, "api-version", newJString(apiVersion))
+  add(path_564109, "billingAccountName", newJString(billingAccountName))
+  add(query_564110, "$expand", newJString(Expand))
+  result = call_564108.call(path_564109, query_564110, nil, nil, nil)
 
-var billingAccountsGet* = Call_BillingAccountsGet_574987(
+var billingAccountsGet* = Call_BillingAccountsGet_564087(
     name: "billingAccountsGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com",
     route: "/providers/Microsoft.Billing/billingAccounts/{billingAccountName}",
-    validator: validate_BillingAccountsGet_574988, base: "",
-    url: url_BillingAccountsGet_574989, schemes: {Scheme.Https})
+    validator: validate_BillingAccountsGet_564088, base: "",
+    url: url_BillingAccountsGet_564089, schemes: {Scheme.Https})
 type
-  Call_BillingAccountsUpdate_575011 = ref object of OpenApiRestCall_574467
-proc url_BillingAccountsUpdate_575013(protocol: Scheme; host: string; base: string;
+  Call_BillingAccountsUpdate_564111 = ref object of OpenApiRestCall_563565
+proc url_BillingAccountsUpdate_564113(protocol: Scheme; host: string; base: string;
                                      route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -297,7 +301,7 @@ proc url_BillingAccountsUpdate_575013(protocol: Scheme; host: string; base: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_BillingAccountsUpdate_575012(path: JsonNode; query: JsonNode;
+proc validate_BillingAccountsUpdate_564112(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## The operation to update a billing account.
   ## 
@@ -309,11 +313,11 @@ proc validate_BillingAccountsUpdate_575012(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `billingAccountName` field"
-  var valid_575031 = path.getOrDefault("billingAccountName")
-  valid_575031 = validateParameter(valid_575031, JString, required = true,
+  var valid_564131 = path.getOrDefault("billingAccountName")
+  valid_564131 = validateParameter(valid_564131, JString, required = true,
                                  default = nil)
-  if valid_575031 != nil:
-    section.add "billingAccountName", valid_575031
+  if valid_564131 != nil:
+    section.add "billingAccountName", valid_564131
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -321,11 +325,11 @@ proc validate_BillingAccountsUpdate_575012(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575032 = query.getOrDefault("api-version")
-  valid_575032 = validateParameter(valid_575032, JString, required = true,
+  var valid_564132 = query.getOrDefault("api-version")
+  valid_564132 = validateParameter(valid_564132, JString, required = true,
                                  default = nil)
-  if valid_575032 != nil:
-    section.add "api-version", valid_575032
+  if valid_564132 != nil:
+    section.add "api-version", valid_564132
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -339,20 +343,20 @@ proc validate_BillingAccountsUpdate_575012(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_575034: Call_BillingAccountsUpdate_575011; path: JsonNode;
+proc call*(call_564134: Call_BillingAccountsUpdate_564111; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## The operation to update a billing account.
   ## 
-  let valid = call_575034.validator(path, query, header, formData, body)
-  let scheme = call_575034.pickScheme
+  let valid = call_564134.validator(path, query, header, formData, body)
+  let scheme = call_564134.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575034.url(scheme.get, call_575034.host, call_575034.base,
-                         call_575034.route, valid.getOrDefault("path"),
+  let url = call_564134.url(scheme.get, call_564134.host, call_564134.base,
+                         call_564134.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575034, url, valid)
+  result = hook(call_564134, url, valid)
 
-proc call*(call_575035: Call_BillingAccountsUpdate_575011; apiVersion: string;
+proc call*(call_564135: Call_BillingAccountsUpdate_564111; apiVersion: string;
           billingAccountName: string; parameters: JsonNode): Recallable =
   ## billingAccountsUpdate
   ## The operation to update a billing account.
@@ -362,24 +366,24 @@ proc call*(call_575035: Call_BillingAccountsUpdate_575011; apiVersion: string;
   ##                     : Billing Account Id.
   ##   parameters: JObject (required)
   ##             : Parameters supplied to the update billing account operation.
-  var path_575036 = newJObject()
-  var query_575037 = newJObject()
-  var body_575038 = newJObject()
-  add(query_575037, "api-version", newJString(apiVersion))
-  add(path_575036, "billingAccountName", newJString(billingAccountName))
+  var path_564136 = newJObject()
+  var query_564137 = newJObject()
+  var body_564138 = newJObject()
+  add(query_564137, "api-version", newJString(apiVersion))
+  add(path_564136, "billingAccountName", newJString(billingAccountName))
   if parameters != nil:
-    body_575038 = parameters
-  result = call_575035.call(path_575036, query_575037, nil, nil, body_575038)
+    body_564138 = parameters
+  result = call_564135.call(path_564136, query_564137, nil, nil, body_564138)
 
-var billingAccountsUpdate* = Call_BillingAccountsUpdate_575011(
+var billingAccountsUpdate* = Call_BillingAccountsUpdate_564111(
     name: "billingAccountsUpdate", meth: HttpMethod.HttpPatch,
     host: "management.azure.com",
     route: "/providers/Microsoft.Billing/billingAccounts/{billingAccountName}",
-    validator: validate_BillingAccountsUpdate_575012, base: "",
-    url: url_BillingAccountsUpdate_575013, schemes: {Scheme.Https})
+    validator: validate_BillingAccountsUpdate_564112, base: "",
+    url: url_BillingAccountsUpdate_564113, schemes: {Scheme.Https})
 type
-  Call_AgreementsListByBillingAccountName_575039 = ref object of OpenApiRestCall_574467
-proc url_AgreementsListByBillingAccountName_575041(protocol: Scheme; host: string;
+  Call_AgreementsListByBillingAccountName_564139 = ref object of OpenApiRestCall_563565
+proc url_AgreementsListByBillingAccountName_564141(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -397,7 +401,7 @@ proc url_AgreementsListByBillingAccountName_575041(protocol: Scheme; host: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AgreementsListByBillingAccountName_575040(path: JsonNode;
+proc validate_AgreementsListByBillingAccountName_564140(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists all agreements for a billing account.
   ## 
@@ -409,11 +413,11 @@ proc validate_AgreementsListByBillingAccountName_575040(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `billingAccountName` field"
-  var valid_575042 = path.getOrDefault("billingAccountName")
-  valid_575042 = validateParameter(valid_575042, JString, required = true,
+  var valid_564142 = path.getOrDefault("billingAccountName")
+  valid_564142 = validateParameter(valid_564142, JString, required = true,
                                  default = nil)
-  if valid_575042 != nil:
-    section.add "billingAccountName", valid_575042
+  if valid_564142 != nil:
+    section.add "billingAccountName", valid_564142
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -423,16 +427,16 @@ proc validate_AgreementsListByBillingAccountName_575040(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575043 = query.getOrDefault("api-version")
-  valid_575043 = validateParameter(valid_575043, JString, required = true,
+  var valid_564143 = query.getOrDefault("api-version")
+  valid_564143 = validateParameter(valid_564143, JString, required = true,
                                  default = nil)
-  if valid_575043 != nil:
-    section.add "api-version", valid_575043
-  var valid_575044 = query.getOrDefault("$expand")
-  valid_575044 = validateParameter(valid_575044, JString, required = false,
+  if valid_564143 != nil:
+    section.add "api-version", valid_564143
+  var valid_564144 = query.getOrDefault("$expand")
+  valid_564144 = validateParameter(valid_564144, JString, required = false,
                                  default = nil)
-  if valid_575044 != nil:
-    section.add "$expand", valid_575044
+  if valid_564144 != nil:
+    section.add "$expand", valid_564144
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -441,45 +445,45 @@ proc validate_AgreementsListByBillingAccountName_575040(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_575045: Call_AgreementsListByBillingAccountName_575039;
+proc call*(call_564145: Call_AgreementsListByBillingAccountName_564139;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Lists all agreements for a billing account.
   ## 
-  let valid = call_575045.validator(path, query, header, formData, body)
-  let scheme = call_575045.pickScheme
+  let valid = call_564145.validator(path, query, header, formData, body)
+  let scheme = call_564145.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575045.url(scheme.get, call_575045.host, call_575045.base,
-                         call_575045.route, valid.getOrDefault("path"),
+  let url = call_564145.url(scheme.get, call_564145.host, call_564145.base,
+                         call_564145.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575045, url, valid)
+  result = hook(call_564145, url, valid)
 
-proc call*(call_575046: Call_AgreementsListByBillingAccountName_575039;
+proc call*(call_564146: Call_AgreementsListByBillingAccountName_564139;
           apiVersion: string; billingAccountName: string; Expand: string = ""): Recallable =
   ## agreementsListByBillingAccountName
   ## Lists all agreements for a billing account.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request. The current version is 2018-11-01-preview.
-  ##   Expand: string
-  ##         : May be used to expand the participants.
   ##   billingAccountName: string (required)
   ##                     : Billing Account Id.
-  var path_575047 = newJObject()
-  var query_575048 = newJObject()
-  add(query_575048, "api-version", newJString(apiVersion))
-  add(query_575048, "$expand", newJString(Expand))
-  add(path_575047, "billingAccountName", newJString(billingAccountName))
-  result = call_575046.call(path_575047, query_575048, nil, nil, nil)
+  ##   Expand: string
+  ##         : May be used to expand the participants.
+  var path_564147 = newJObject()
+  var query_564148 = newJObject()
+  add(query_564148, "api-version", newJString(apiVersion))
+  add(path_564147, "billingAccountName", newJString(billingAccountName))
+  add(query_564148, "$expand", newJString(Expand))
+  result = call_564146.call(path_564147, query_564148, nil, nil, nil)
 
-var agreementsListByBillingAccountName* = Call_AgreementsListByBillingAccountName_575039(
+var agreementsListByBillingAccountName* = Call_AgreementsListByBillingAccountName_564139(
     name: "agreementsListByBillingAccountName", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/providers/Microsoft.Billing/billingAccounts/{billingAccountName}/agreements",
-    validator: validate_AgreementsListByBillingAccountName_575040, base: "",
-    url: url_AgreementsListByBillingAccountName_575041, schemes: {Scheme.Https})
+    validator: validate_AgreementsListByBillingAccountName_564140, base: "",
+    url: url_AgreementsListByBillingAccountName_564141, schemes: {Scheme.Https})
 type
-  Call_AgreementsGet_575049 = ref object of OpenApiRestCall_574467
-proc url_AgreementsGet_575051(protocol: Scheme; host: string; base: string;
+  Call_AgreementsGet_564149 = ref object of OpenApiRestCall_563565
+proc url_AgreementsGet_564151(protocol: Scheme; host: string; base: string;
                              route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -499,7 +503,7 @@ proc url_AgreementsGet_575051(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AgreementsGet_575050(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_AgreementsGet_564150(path: JsonNode; query: JsonNode; header: JsonNode;
                                   formData: JsonNode; body: JsonNode): JsonNode =
   ## Get the agreement by name.
   ## 
@@ -513,16 +517,16 @@ proc validate_AgreementsGet_575050(path: JsonNode; query: JsonNode; header: Json
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `billingAccountName` field"
-  var valid_575052 = path.getOrDefault("billingAccountName")
-  valid_575052 = validateParameter(valid_575052, JString, required = true,
+  var valid_564152 = path.getOrDefault("billingAccountName")
+  valid_564152 = validateParameter(valid_564152, JString, required = true,
                                  default = nil)
-  if valid_575052 != nil:
-    section.add "billingAccountName", valid_575052
-  var valid_575053 = path.getOrDefault("agreementName")
-  valid_575053 = validateParameter(valid_575053, JString, required = true,
+  if valid_564152 != nil:
+    section.add "billingAccountName", valid_564152
+  var valid_564153 = path.getOrDefault("agreementName")
+  valid_564153 = validateParameter(valid_564153, JString, required = true,
                                  default = nil)
-  if valid_575053 != nil:
-    section.add "agreementName", valid_575053
+  if valid_564153 != nil:
+    section.add "agreementName", valid_564153
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -532,16 +536,16 @@ proc validate_AgreementsGet_575050(path: JsonNode; query: JsonNode; header: Json
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575054 = query.getOrDefault("api-version")
-  valid_575054 = validateParameter(valid_575054, JString, required = true,
+  var valid_564154 = query.getOrDefault("api-version")
+  valid_564154 = validateParameter(valid_564154, JString, required = true,
                                  default = nil)
-  if valid_575054 != nil:
-    section.add "api-version", valid_575054
-  var valid_575055 = query.getOrDefault("$expand")
-  valid_575055 = validateParameter(valid_575055, JString, required = false,
+  if valid_564154 != nil:
+    section.add "api-version", valid_564154
+  var valid_564155 = query.getOrDefault("$expand")
+  valid_564155 = validateParameter(valid_564155, JString, required = false,
                                  default = nil)
-  if valid_575055 != nil:
-    section.add "$expand", valid_575055
+  if valid_564155 != nil:
+    section.add "$expand", valid_564155
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -550,46 +554,46 @@ proc validate_AgreementsGet_575050(path: JsonNode; query: JsonNode; header: Json
   if body != nil:
     result.add "body", body
 
-proc call*(call_575056: Call_AgreementsGet_575049; path: JsonNode; query: JsonNode;
+proc call*(call_564156: Call_AgreementsGet_564149; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get the agreement by name.
   ## 
-  let valid = call_575056.validator(path, query, header, formData, body)
-  let scheme = call_575056.pickScheme
+  let valid = call_564156.validator(path, query, header, formData, body)
+  let scheme = call_564156.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575056.url(scheme.get, call_575056.host, call_575056.base,
-                         call_575056.route, valid.getOrDefault("path"),
+  let url = call_564156.url(scheme.get, call_564156.host, call_564156.base,
+                         call_564156.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575056, url, valid)
+  result = hook(call_564156, url, valid)
 
-proc call*(call_575057: Call_AgreementsGet_575049; apiVersion: string;
+proc call*(call_564157: Call_AgreementsGet_564149; apiVersion: string;
           billingAccountName: string; agreementName: string; Expand: string = ""): Recallable =
   ## agreementsGet
   ## Get the agreement by name.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request. The current version is 2018-11-01-preview.
-  ##   Expand: string
-  ##         : May be used to expand the participants.
   ##   billingAccountName: string (required)
   ##                     : Billing Account Id.
+  ##   Expand: string
+  ##         : May be used to expand the participants.
   ##   agreementName: string (required)
   ##                : Agreement Id.
-  var path_575058 = newJObject()
-  var query_575059 = newJObject()
-  add(query_575059, "api-version", newJString(apiVersion))
-  add(query_575059, "$expand", newJString(Expand))
-  add(path_575058, "billingAccountName", newJString(billingAccountName))
-  add(path_575058, "agreementName", newJString(agreementName))
-  result = call_575057.call(path_575058, query_575059, nil, nil, nil)
+  var path_564158 = newJObject()
+  var query_564159 = newJObject()
+  add(query_564159, "api-version", newJString(apiVersion))
+  add(path_564158, "billingAccountName", newJString(billingAccountName))
+  add(query_564159, "$expand", newJString(Expand))
+  add(path_564158, "agreementName", newJString(agreementName))
+  result = call_564157.call(path_564158, query_564159, nil, nil, nil)
 
-var agreementsGet* = Call_AgreementsGet_575049(name: "agreementsGet",
+var agreementsGet* = Call_AgreementsGet_564149(name: "agreementsGet",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/providers/Microsoft.Billing/billingAccounts/{billingAccountName}/agreements/{agreementName}",
-    validator: validate_AgreementsGet_575050, base: "", url: url_AgreementsGet_575051,
+    validator: validate_AgreementsGet_564150, base: "", url: url_AgreementsGet_564151,
     schemes: {Scheme.Https})
 type
-  Call_BillingProfilesCreate_575070 = ref object of OpenApiRestCall_574467
-proc url_BillingProfilesCreate_575072(protocol: Scheme; host: string; base: string;
+  Call_BillingProfilesCreate_564170 = ref object of OpenApiRestCall_563565
+proc url_BillingProfilesCreate_564172(protocol: Scheme; host: string; base: string;
                                      route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -607,7 +611,7 @@ proc url_BillingProfilesCreate_575072(protocol: Scheme; host: string; base: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_BillingProfilesCreate_575071(path: JsonNode; query: JsonNode;
+proc validate_BillingProfilesCreate_564171(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## The operation to create a BillingProfile.
   ## 
@@ -619,11 +623,11 @@ proc validate_BillingProfilesCreate_575071(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `billingAccountName` field"
-  var valid_575073 = path.getOrDefault("billingAccountName")
-  valid_575073 = validateParameter(valid_575073, JString, required = true,
+  var valid_564173 = path.getOrDefault("billingAccountName")
+  valid_564173 = validateParameter(valid_564173, JString, required = true,
                                  default = nil)
-  if valid_575073 != nil:
-    section.add "billingAccountName", valid_575073
+  if valid_564173 != nil:
+    section.add "billingAccountName", valid_564173
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -631,11 +635,11 @@ proc validate_BillingProfilesCreate_575071(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575074 = query.getOrDefault("api-version")
-  valid_575074 = validateParameter(valid_575074, JString, required = true,
+  var valid_564174 = query.getOrDefault("api-version")
+  valid_564174 = validateParameter(valid_564174, JString, required = true,
                                  default = nil)
-  if valid_575074 != nil:
-    section.add "api-version", valid_575074
+  if valid_564174 != nil:
+    section.add "api-version", valid_564174
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -649,20 +653,20 @@ proc validate_BillingProfilesCreate_575071(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_575076: Call_BillingProfilesCreate_575070; path: JsonNode;
+proc call*(call_564176: Call_BillingProfilesCreate_564170; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## The operation to create a BillingProfile.
   ## 
-  let valid = call_575076.validator(path, query, header, formData, body)
-  let scheme = call_575076.pickScheme
+  let valid = call_564176.validator(path, query, header, formData, body)
+  let scheme = call_564176.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575076.url(scheme.get, call_575076.host, call_575076.base,
-                         call_575076.route, valid.getOrDefault("path"),
+  let url = call_564176.url(scheme.get, call_564176.host, call_564176.base,
+                         call_564176.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575076, url, valid)
+  result = hook(call_564176, url, valid)
 
-proc call*(call_575077: Call_BillingProfilesCreate_575070; apiVersion: string;
+proc call*(call_564177: Call_BillingProfilesCreate_564170; apiVersion: string;
           billingAccountName: string; parameters: JsonNode): Recallable =
   ## billingProfilesCreate
   ## The operation to create a BillingProfile.
@@ -672,23 +676,23 @@ proc call*(call_575077: Call_BillingProfilesCreate_575070; apiVersion: string;
   ##                     : Billing Account Id.
   ##   parameters: JObject (required)
   ##             : Parameters supplied to the Create BillingProfile operation.
-  var path_575078 = newJObject()
-  var query_575079 = newJObject()
-  var body_575080 = newJObject()
-  add(query_575079, "api-version", newJString(apiVersion))
-  add(path_575078, "billingAccountName", newJString(billingAccountName))
+  var path_564178 = newJObject()
+  var query_564179 = newJObject()
+  var body_564180 = newJObject()
+  add(query_564179, "api-version", newJString(apiVersion))
+  add(path_564178, "billingAccountName", newJString(billingAccountName))
   if parameters != nil:
-    body_575080 = parameters
-  result = call_575077.call(path_575078, query_575079, nil, nil, body_575080)
+    body_564180 = parameters
+  result = call_564177.call(path_564178, query_564179, nil, nil, body_564180)
 
-var billingProfilesCreate* = Call_BillingProfilesCreate_575070(
+var billingProfilesCreate* = Call_BillingProfilesCreate_564170(
     name: "billingProfilesCreate", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/providers/Microsoft.Billing/billingAccounts/{billingAccountName}/billingProfiles",
-    validator: validate_BillingProfilesCreate_575071, base: "",
-    url: url_BillingProfilesCreate_575072, schemes: {Scheme.Https})
+    validator: validate_BillingProfilesCreate_564171, base: "",
+    url: url_BillingProfilesCreate_564172, schemes: {Scheme.Https})
 type
-  Call_BillingProfilesListByBillingAccountName_575060 = ref object of OpenApiRestCall_574467
-proc url_BillingProfilesListByBillingAccountName_575062(protocol: Scheme;
+  Call_BillingProfilesListByBillingAccountName_564160 = ref object of OpenApiRestCall_563565
+proc url_BillingProfilesListByBillingAccountName_564162(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -706,7 +710,7 @@ proc url_BillingProfilesListByBillingAccountName_575062(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_BillingProfilesListByBillingAccountName_575061(path: JsonNode;
+proc validate_BillingProfilesListByBillingAccountName_564161(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists all billing profiles for a user which that user has access to.
   ## 
@@ -718,11 +722,11 @@ proc validate_BillingProfilesListByBillingAccountName_575061(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `billingAccountName` field"
-  var valid_575063 = path.getOrDefault("billingAccountName")
-  valid_575063 = validateParameter(valid_575063, JString, required = true,
+  var valid_564163 = path.getOrDefault("billingAccountName")
+  valid_564163 = validateParameter(valid_564163, JString, required = true,
                                  default = nil)
-  if valid_575063 != nil:
-    section.add "billingAccountName", valid_575063
+  if valid_564163 != nil:
+    section.add "billingAccountName", valid_564163
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -732,16 +736,16 @@ proc validate_BillingProfilesListByBillingAccountName_575061(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575064 = query.getOrDefault("api-version")
-  valid_575064 = validateParameter(valid_575064, JString, required = true,
+  var valid_564164 = query.getOrDefault("api-version")
+  valid_564164 = validateParameter(valid_564164, JString, required = true,
                                  default = nil)
-  if valid_575064 != nil:
-    section.add "api-version", valid_575064
-  var valid_575065 = query.getOrDefault("$expand")
-  valid_575065 = validateParameter(valid_575065, JString, required = false,
+  if valid_564164 != nil:
+    section.add "api-version", valid_564164
+  var valid_564165 = query.getOrDefault("$expand")
+  valid_564165 = validateParameter(valid_564165, JString, required = false,
                                  default = nil)
-  if valid_575065 != nil:
-    section.add "$expand", valid_575065
+  if valid_564165 != nil:
+    section.add "$expand", valid_564165
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -750,46 +754,46 @@ proc validate_BillingProfilesListByBillingAccountName_575061(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_575066: Call_BillingProfilesListByBillingAccountName_575060;
+proc call*(call_564166: Call_BillingProfilesListByBillingAccountName_564160;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Lists all billing profiles for a user which that user has access to.
   ## 
-  let valid = call_575066.validator(path, query, header, formData, body)
-  let scheme = call_575066.pickScheme
+  let valid = call_564166.validator(path, query, header, formData, body)
+  let scheme = call_564166.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575066.url(scheme.get, call_575066.host, call_575066.base,
-                         call_575066.route, valid.getOrDefault("path"),
+  let url = call_564166.url(scheme.get, call_564166.host, call_564166.base,
+                         call_564166.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575066, url, valid)
+  result = hook(call_564166, url, valid)
 
-proc call*(call_575067: Call_BillingProfilesListByBillingAccountName_575060;
+proc call*(call_564167: Call_BillingProfilesListByBillingAccountName_564160;
           apiVersion: string; billingAccountName: string; Expand: string = ""): Recallable =
   ## billingProfilesListByBillingAccountName
   ## Lists all billing profiles for a user which that user has access to.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request. The current version is 2018-11-01-preview.
-  ##   Expand: string
-  ##         : May be used to expand the invoiceSections.
   ##   billingAccountName: string (required)
   ##                     : Billing Account Id.
-  var path_575068 = newJObject()
-  var query_575069 = newJObject()
-  add(query_575069, "api-version", newJString(apiVersion))
-  add(query_575069, "$expand", newJString(Expand))
-  add(path_575068, "billingAccountName", newJString(billingAccountName))
-  result = call_575067.call(path_575068, query_575069, nil, nil, nil)
+  ##   Expand: string
+  ##         : May be used to expand the invoiceSections.
+  var path_564168 = newJObject()
+  var query_564169 = newJObject()
+  add(query_564169, "api-version", newJString(apiVersion))
+  add(path_564168, "billingAccountName", newJString(billingAccountName))
+  add(query_564169, "$expand", newJString(Expand))
+  result = call_564167.call(path_564168, query_564169, nil, nil, nil)
 
-var billingProfilesListByBillingAccountName* = Call_BillingProfilesListByBillingAccountName_575060(
+var billingProfilesListByBillingAccountName* = Call_BillingProfilesListByBillingAccountName_564160(
     name: "billingProfilesListByBillingAccountName", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/providers/Microsoft.Billing/billingAccounts/{billingAccountName}/billingProfiles",
-    validator: validate_BillingProfilesListByBillingAccountName_575061, base: "",
-    url: url_BillingProfilesListByBillingAccountName_575062,
+    validator: validate_BillingProfilesListByBillingAccountName_564161, base: "",
+    url: url_BillingProfilesListByBillingAccountName_564162,
     schemes: {Scheme.Https})
 type
-  Call_BillingProfilesUpdate_575092 = ref object of OpenApiRestCall_574467
-proc url_BillingProfilesUpdate_575094(protocol: Scheme; host: string; base: string;
+  Call_BillingProfilesUpdate_564192 = ref object of OpenApiRestCall_563565
+proc url_BillingProfilesUpdate_564194(protocol: Scheme; host: string; base: string;
                                      route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -810,7 +814,7 @@ proc url_BillingProfilesUpdate_575094(protocol: Scheme; host: string; base: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_BillingProfilesUpdate_575093(path: JsonNode; query: JsonNode;
+proc validate_BillingProfilesUpdate_564193(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## The operation to update a billing profile.
   ## 
@@ -824,16 +828,16 @@ proc validate_BillingProfilesUpdate_575093(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `billingAccountName` field"
-  var valid_575095 = path.getOrDefault("billingAccountName")
-  valid_575095 = validateParameter(valid_575095, JString, required = true,
+  var valid_564195 = path.getOrDefault("billingAccountName")
+  valid_564195 = validateParameter(valid_564195, JString, required = true,
                                  default = nil)
-  if valid_575095 != nil:
-    section.add "billingAccountName", valid_575095
-  var valid_575096 = path.getOrDefault("billingProfileName")
-  valid_575096 = validateParameter(valid_575096, JString, required = true,
+  if valid_564195 != nil:
+    section.add "billingAccountName", valid_564195
+  var valid_564196 = path.getOrDefault("billingProfileName")
+  valid_564196 = validateParameter(valid_564196, JString, required = true,
                                  default = nil)
-  if valid_575096 != nil:
-    section.add "billingProfileName", valid_575096
+  if valid_564196 != nil:
+    section.add "billingProfileName", valid_564196
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -841,11 +845,11 @@ proc validate_BillingProfilesUpdate_575093(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575097 = query.getOrDefault("api-version")
-  valid_575097 = validateParameter(valid_575097, JString, required = true,
+  var valid_564197 = query.getOrDefault("api-version")
+  valid_564197 = validateParameter(valid_564197, JString, required = true,
                                  default = nil)
-  if valid_575097 != nil:
-    section.add "api-version", valid_575097
+  if valid_564197 != nil:
+    section.add "api-version", valid_564197
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -859,20 +863,20 @@ proc validate_BillingProfilesUpdate_575093(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_575099: Call_BillingProfilesUpdate_575092; path: JsonNode;
+proc call*(call_564199: Call_BillingProfilesUpdate_564192; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## The operation to update a billing profile.
   ## 
-  let valid = call_575099.validator(path, query, header, formData, body)
-  let scheme = call_575099.pickScheme
+  let valid = call_564199.validator(path, query, header, formData, body)
+  let scheme = call_564199.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575099.url(scheme.get, call_575099.host, call_575099.base,
-                         call_575099.route, valid.getOrDefault("path"),
+  let url = call_564199.url(scheme.get, call_564199.host, call_564199.base,
+                         call_564199.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575099, url, valid)
+  result = hook(call_564199, url, valid)
 
-proc call*(call_575100: Call_BillingProfilesUpdate_575092; apiVersion: string;
+proc call*(call_564200: Call_BillingProfilesUpdate_564192; apiVersion: string;
           billingAccountName: string; billingProfileName: string;
           parameters: JsonNode): Recallable =
   ## billingProfilesUpdate
@@ -885,24 +889,24 @@ proc call*(call_575100: Call_BillingProfilesUpdate_575092; apiVersion: string;
   ##                     : Billing Profile Id.
   ##   parameters: JObject (required)
   ##             : Parameters supplied to the update billing profile operation.
-  var path_575101 = newJObject()
-  var query_575102 = newJObject()
-  var body_575103 = newJObject()
-  add(query_575102, "api-version", newJString(apiVersion))
-  add(path_575101, "billingAccountName", newJString(billingAccountName))
-  add(path_575101, "billingProfileName", newJString(billingProfileName))
+  var path_564201 = newJObject()
+  var query_564202 = newJObject()
+  var body_564203 = newJObject()
+  add(query_564202, "api-version", newJString(apiVersion))
+  add(path_564201, "billingAccountName", newJString(billingAccountName))
+  add(path_564201, "billingProfileName", newJString(billingProfileName))
   if parameters != nil:
-    body_575103 = parameters
-  result = call_575100.call(path_575101, query_575102, nil, nil, body_575103)
+    body_564203 = parameters
+  result = call_564200.call(path_564201, query_564202, nil, nil, body_564203)
 
-var billingProfilesUpdate* = Call_BillingProfilesUpdate_575092(
+var billingProfilesUpdate* = Call_BillingProfilesUpdate_564192(
     name: "billingProfilesUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/providers/Microsoft.Billing/billingAccounts/{billingAccountName}/billingProfiles/{billingProfileName}",
-    validator: validate_BillingProfilesUpdate_575093, base: "",
-    url: url_BillingProfilesUpdate_575094, schemes: {Scheme.Https})
+    validator: validate_BillingProfilesUpdate_564193, base: "",
+    url: url_BillingProfilesUpdate_564194, schemes: {Scheme.Https})
 type
-  Call_BillingProfilesGet_575081 = ref object of OpenApiRestCall_574467
-proc url_BillingProfilesGet_575083(protocol: Scheme; host: string; base: string;
+  Call_BillingProfilesGet_564181 = ref object of OpenApiRestCall_563565
+proc url_BillingProfilesGet_564183(protocol: Scheme; host: string; base: string;
                                   route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -923,7 +927,7 @@ proc url_BillingProfilesGet_575083(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_BillingProfilesGet_575082(path: JsonNode; query: JsonNode;
+proc validate_BillingProfilesGet_564182(path: JsonNode; query: JsonNode;
                                        header: JsonNode; formData: JsonNode;
                                        body: JsonNode): JsonNode =
   ## Get the billing profile by id.
@@ -938,16 +942,16 @@ proc validate_BillingProfilesGet_575082(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `billingAccountName` field"
-  var valid_575084 = path.getOrDefault("billingAccountName")
-  valid_575084 = validateParameter(valid_575084, JString, required = true,
+  var valid_564184 = path.getOrDefault("billingAccountName")
+  valid_564184 = validateParameter(valid_564184, JString, required = true,
                                  default = nil)
-  if valid_575084 != nil:
-    section.add "billingAccountName", valid_575084
-  var valid_575085 = path.getOrDefault("billingProfileName")
-  valid_575085 = validateParameter(valid_575085, JString, required = true,
+  if valid_564184 != nil:
+    section.add "billingAccountName", valid_564184
+  var valid_564185 = path.getOrDefault("billingProfileName")
+  valid_564185 = validateParameter(valid_564185, JString, required = true,
                                  default = nil)
-  if valid_575085 != nil:
-    section.add "billingProfileName", valid_575085
+  if valid_564185 != nil:
+    section.add "billingProfileName", valid_564185
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -957,16 +961,16 @@ proc validate_BillingProfilesGet_575082(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575086 = query.getOrDefault("api-version")
-  valid_575086 = validateParameter(valid_575086, JString, required = true,
+  var valid_564186 = query.getOrDefault("api-version")
+  valid_564186 = validateParameter(valid_564186, JString, required = true,
                                  default = nil)
-  if valid_575086 != nil:
-    section.add "api-version", valid_575086
-  var valid_575087 = query.getOrDefault("$expand")
-  valid_575087 = validateParameter(valid_575087, JString, required = false,
+  if valid_564186 != nil:
+    section.add "api-version", valid_564186
+  var valid_564187 = query.getOrDefault("$expand")
+  valid_564187 = validateParameter(valid_564187, JString, required = false,
                                  default = nil)
-  if valid_575087 != nil:
-    section.add "$expand", valid_575087
+  if valid_564187 != nil:
+    section.add "$expand", valid_564187
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -975,48 +979,48 @@ proc validate_BillingProfilesGet_575082(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_575088: Call_BillingProfilesGet_575081; path: JsonNode;
+proc call*(call_564188: Call_BillingProfilesGet_564181; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get the billing profile by id.
   ## 
-  let valid = call_575088.validator(path, query, header, formData, body)
-  let scheme = call_575088.pickScheme
+  let valid = call_564188.validator(path, query, header, formData, body)
+  let scheme = call_564188.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575088.url(scheme.get, call_575088.host, call_575088.base,
-                         call_575088.route, valid.getOrDefault("path"),
+  let url = call_564188.url(scheme.get, call_564188.host, call_564188.base,
+                         call_564188.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575088, url, valid)
+  result = hook(call_564188, url, valid)
 
-proc call*(call_575089: Call_BillingProfilesGet_575081; apiVersion: string;
+proc call*(call_564189: Call_BillingProfilesGet_564181; apiVersion: string;
           billingAccountName: string; billingProfileName: string;
           Expand: string = ""): Recallable =
   ## billingProfilesGet
   ## Get the billing profile by id.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request. The current version is 2018-11-01-preview.
-  ##   Expand: string
-  ##         : May be used to expand the invoiceSections.
   ##   billingAccountName: string (required)
   ##                     : Billing Account Id.
+  ##   Expand: string
+  ##         : May be used to expand the invoiceSections.
   ##   billingProfileName: string (required)
   ##                     : Billing Profile Id.
-  var path_575090 = newJObject()
-  var query_575091 = newJObject()
-  add(query_575091, "api-version", newJString(apiVersion))
-  add(query_575091, "$expand", newJString(Expand))
-  add(path_575090, "billingAccountName", newJString(billingAccountName))
-  add(path_575090, "billingProfileName", newJString(billingProfileName))
-  result = call_575089.call(path_575090, query_575091, nil, nil, nil)
+  var path_564190 = newJObject()
+  var query_564191 = newJObject()
+  add(query_564191, "api-version", newJString(apiVersion))
+  add(path_564190, "billingAccountName", newJString(billingAccountName))
+  add(query_564191, "$expand", newJString(Expand))
+  add(path_564190, "billingProfileName", newJString(billingProfileName))
+  result = call_564189.call(path_564190, query_564191, nil, nil, nil)
 
-var billingProfilesGet* = Call_BillingProfilesGet_575081(
+var billingProfilesGet* = Call_BillingProfilesGet_564181(
     name: "billingProfilesGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/providers/Microsoft.Billing/billingAccounts/{billingAccountName}/billingProfiles/{billingProfileName}",
-    validator: validate_BillingProfilesGet_575082, base: "",
-    url: url_BillingProfilesGet_575083, schemes: {Scheme.Https})
+    validator: validate_BillingProfilesGet_564182, base: "",
+    url: url_BillingProfilesGet_564183, schemes: {Scheme.Https})
 type
-  Call_AvailableBalancesGetByBillingProfile_575104 = ref object of OpenApiRestCall_574467
-proc url_AvailableBalancesGetByBillingProfile_575106(protocol: Scheme;
+  Call_AvailableBalancesGetByBillingProfile_564204 = ref object of OpenApiRestCall_563565
+proc url_AvailableBalancesGetByBillingProfile_564206(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1038,7 +1042,7 @@ proc url_AvailableBalancesGetByBillingProfile_575106(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AvailableBalancesGetByBillingProfile_575105(path: JsonNode;
+proc validate_AvailableBalancesGetByBillingProfile_564205(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## The latest available credit balance for a given billingAccountName and billingProfileName.
   ## 
@@ -1052,16 +1056,16 @@ proc validate_AvailableBalancesGetByBillingProfile_575105(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `billingAccountName` field"
-  var valid_575107 = path.getOrDefault("billingAccountName")
-  valid_575107 = validateParameter(valid_575107, JString, required = true,
+  var valid_564207 = path.getOrDefault("billingAccountName")
+  valid_564207 = validateParameter(valid_564207, JString, required = true,
                                  default = nil)
-  if valid_575107 != nil:
-    section.add "billingAccountName", valid_575107
-  var valid_575108 = path.getOrDefault("billingProfileName")
-  valid_575108 = validateParameter(valid_575108, JString, required = true,
+  if valid_564207 != nil:
+    section.add "billingAccountName", valid_564207
+  var valid_564208 = path.getOrDefault("billingProfileName")
+  valid_564208 = validateParameter(valid_564208, JString, required = true,
                                  default = nil)
-  if valid_575108 != nil:
-    section.add "billingProfileName", valid_575108
+  if valid_564208 != nil:
+    section.add "billingProfileName", valid_564208
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1069,11 +1073,11 @@ proc validate_AvailableBalancesGetByBillingProfile_575105(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575109 = query.getOrDefault("api-version")
-  valid_575109 = validateParameter(valid_575109, JString, required = true,
+  var valid_564209 = query.getOrDefault("api-version")
+  valid_564209 = validateParameter(valid_564209, JString, required = true,
                                  default = nil)
-  if valid_575109 != nil:
-    section.add "api-version", valid_575109
+  if valid_564209 != nil:
+    section.add "api-version", valid_564209
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1082,21 +1086,21 @@ proc validate_AvailableBalancesGetByBillingProfile_575105(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_575110: Call_AvailableBalancesGetByBillingProfile_575104;
+proc call*(call_564210: Call_AvailableBalancesGetByBillingProfile_564204;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## The latest available credit balance for a given billingAccountName and billingProfileName.
   ## 
-  let valid = call_575110.validator(path, query, header, formData, body)
-  let scheme = call_575110.pickScheme
+  let valid = call_564210.validator(path, query, header, formData, body)
+  let scheme = call_564210.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575110.url(scheme.get, call_575110.host, call_575110.base,
-                         call_575110.route, valid.getOrDefault("path"),
+  let url = call_564210.url(scheme.get, call_564210.host, call_564210.base,
+                         call_564210.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575110, url, valid)
+  result = hook(call_564210, url, valid)
 
-proc call*(call_575111: Call_AvailableBalancesGetByBillingProfile_575104;
+proc call*(call_564211: Call_AvailableBalancesGetByBillingProfile_564204;
           apiVersion: string; billingAccountName: string; billingProfileName: string): Recallable =
   ## availableBalancesGetByBillingProfile
   ## The latest available credit balance for a given billingAccountName and billingProfileName.
@@ -1106,21 +1110,21 @@ proc call*(call_575111: Call_AvailableBalancesGetByBillingProfile_575104;
   ##                     : Billing Account Id.
   ##   billingProfileName: string (required)
   ##                     : Billing Profile Id.
-  var path_575112 = newJObject()
-  var query_575113 = newJObject()
-  add(query_575113, "api-version", newJString(apiVersion))
-  add(path_575112, "billingAccountName", newJString(billingAccountName))
-  add(path_575112, "billingProfileName", newJString(billingProfileName))
-  result = call_575111.call(path_575112, query_575113, nil, nil, nil)
+  var path_564212 = newJObject()
+  var query_564213 = newJObject()
+  add(query_564213, "api-version", newJString(apiVersion))
+  add(path_564212, "billingAccountName", newJString(billingAccountName))
+  add(path_564212, "billingProfileName", newJString(billingProfileName))
+  result = call_564211.call(path_564212, query_564213, nil, nil, nil)
 
-var availableBalancesGetByBillingProfile* = Call_AvailableBalancesGetByBillingProfile_575104(
+var availableBalancesGetByBillingProfile* = Call_AvailableBalancesGetByBillingProfile_564204(
     name: "availableBalancesGetByBillingProfile", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/providers/Microsoft.Billing/billingAccounts/{billingAccountName}/billingProfiles/{billingProfileName}/availableBalance/default",
-    validator: validate_AvailableBalancesGetByBillingProfile_575105, base: "",
-    url: url_AvailableBalancesGetByBillingProfile_575106, schemes: {Scheme.Https})
+    validator: validate_AvailableBalancesGetByBillingProfile_564205, base: "",
+    url: url_AvailableBalancesGetByBillingProfile_564206, schemes: {Scheme.Https})
 type
-  Call_BillingSubscriptionsListByBillingProfileName_575114 = ref object of OpenApiRestCall_574467
-proc url_BillingSubscriptionsListByBillingProfileName_575116(protocol: Scheme;
+  Call_BillingSubscriptionsListByBillingProfileName_564214 = ref object of OpenApiRestCall_563565
+proc url_BillingSubscriptionsListByBillingProfileName_564216(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1142,7 +1146,7 @@ proc url_BillingSubscriptionsListByBillingProfileName_575116(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_BillingSubscriptionsListByBillingProfileName_575115(path: JsonNode;
+proc validate_BillingSubscriptionsListByBillingProfileName_564215(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists billing subscriptions by billing profile name.
   ## 
@@ -1157,16 +1161,16 @@ proc validate_BillingSubscriptionsListByBillingProfileName_575115(path: JsonNode
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `billingAccountName` field"
-  var valid_575117 = path.getOrDefault("billingAccountName")
-  valid_575117 = validateParameter(valid_575117, JString, required = true,
+  var valid_564217 = path.getOrDefault("billingAccountName")
+  valid_564217 = validateParameter(valid_564217, JString, required = true,
                                  default = nil)
-  if valid_575117 != nil:
-    section.add "billingAccountName", valid_575117
-  var valid_575118 = path.getOrDefault("billingProfileName")
-  valid_575118 = validateParameter(valid_575118, JString, required = true,
+  if valid_564217 != nil:
+    section.add "billingAccountName", valid_564217
+  var valid_564218 = path.getOrDefault("billingProfileName")
+  valid_564218 = validateParameter(valid_564218, JString, required = true,
                                  default = nil)
-  if valid_575118 != nil:
-    section.add "billingProfileName", valid_575118
+  if valid_564218 != nil:
+    section.add "billingProfileName", valid_564218
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1174,11 +1178,11 @@ proc validate_BillingSubscriptionsListByBillingProfileName_575115(path: JsonNode
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575119 = query.getOrDefault("api-version")
-  valid_575119 = validateParameter(valid_575119, JString, required = true,
+  var valid_564219 = query.getOrDefault("api-version")
+  valid_564219 = validateParameter(valid_564219, JString, required = true,
                                  default = nil)
-  if valid_575119 != nil:
-    section.add "api-version", valid_575119
+  if valid_564219 != nil:
+    section.add "api-version", valid_564219
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1187,22 +1191,22 @@ proc validate_BillingSubscriptionsListByBillingProfileName_575115(path: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_575120: Call_BillingSubscriptionsListByBillingProfileName_575114;
+proc call*(call_564220: Call_BillingSubscriptionsListByBillingProfileName_564214;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Lists billing subscriptions by billing profile name.
   ## 
   ## https://docs.microsoft.com/en-us/rest/api/consumption/
-  let valid = call_575120.validator(path, query, header, formData, body)
-  let scheme = call_575120.pickScheme
+  let valid = call_564220.validator(path, query, header, formData, body)
+  let scheme = call_564220.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575120.url(scheme.get, call_575120.host, call_575120.base,
-                         call_575120.route, valid.getOrDefault("path"),
+  let url = call_564220.url(scheme.get, call_564220.host, call_564220.base,
+                         call_564220.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575120, url, valid)
+  result = hook(call_564220, url, valid)
 
-proc call*(call_575121: Call_BillingSubscriptionsListByBillingProfileName_575114;
+proc call*(call_564221: Call_BillingSubscriptionsListByBillingProfileName_564214;
           apiVersion: string; billingAccountName: string; billingProfileName: string): Recallable =
   ## billingSubscriptionsListByBillingProfileName
   ## Lists billing subscriptions by billing profile name.
@@ -1213,22 +1217,22 @@ proc call*(call_575121: Call_BillingSubscriptionsListByBillingProfileName_575114
   ##                     : Billing Account Id.
   ##   billingProfileName: string (required)
   ##                     : Billing Profile Id.
-  var path_575122 = newJObject()
-  var query_575123 = newJObject()
-  add(query_575123, "api-version", newJString(apiVersion))
-  add(path_575122, "billingAccountName", newJString(billingAccountName))
-  add(path_575122, "billingProfileName", newJString(billingProfileName))
-  result = call_575121.call(path_575122, query_575123, nil, nil, nil)
+  var path_564222 = newJObject()
+  var query_564223 = newJObject()
+  add(query_564223, "api-version", newJString(apiVersion))
+  add(path_564222, "billingAccountName", newJString(billingAccountName))
+  add(path_564222, "billingProfileName", newJString(billingProfileName))
+  result = call_564221.call(path_564222, query_564223, nil, nil, nil)
 
-var billingSubscriptionsListByBillingProfileName* = Call_BillingSubscriptionsListByBillingProfileName_575114(
+var billingSubscriptionsListByBillingProfileName* = Call_BillingSubscriptionsListByBillingProfileName_564214(
     name: "billingSubscriptionsListByBillingProfileName",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/providers/Microsoft.Billing/billingAccounts/{billingAccountName}/billingProfiles/{billingProfileName}/billingSubscriptions",
-    validator: validate_BillingSubscriptionsListByBillingProfileName_575115,
-    base: "", url: url_BillingSubscriptionsListByBillingProfileName_575116,
+    validator: validate_BillingSubscriptionsListByBillingProfileName_564215,
+    base: "", url: url_BillingSubscriptionsListByBillingProfileName_564216,
     schemes: {Scheme.Https})
 type
-  Call_InvoiceSectionsListByBillingProfileName_575124 = ref object of OpenApiRestCall_574467
-proc url_InvoiceSectionsListByBillingProfileName_575126(protocol: Scheme;
+  Call_InvoiceSectionsListByBillingProfileName_564224 = ref object of OpenApiRestCall_563565
+proc url_InvoiceSectionsListByBillingProfileName_564226(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1250,7 +1254,7 @@ proc url_InvoiceSectionsListByBillingProfileName_575126(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_InvoiceSectionsListByBillingProfileName_575125(path: JsonNode;
+proc validate_InvoiceSectionsListByBillingProfileName_564225(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists all invoice sections under a billing profile for which a user has access.
   ## 
@@ -1264,16 +1268,16 @@ proc validate_InvoiceSectionsListByBillingProfileName_575125(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `billingAccountName` field"
-  var valid_575127 = path.getOrDefault("billingAccountName")
-  valid_575127 = validateParameter(valid_575127, JString, required = true,
+  var valid_564227 = path.getOrDefault("billingAccountName")
+  valid_564227 = validateParameter(valid_564227, JString, required = true,
                                  default = nil)
-  if valid_575127 != nil:
-    section.add "billingAccountName", valid_575127
-  var valid_575128 = path.getOrDefault("billingProfileName")
-  valid_575128 = validateParameter(valid_575128, JString, required = true,
+  if valid_564227 != nil:
+    section.add "billingAccountName", valid_564227
+  var valid_564228 = path.getOrDefault("billingProfileName")
+  valid_564228 = validateParameter(valid_564228, JString, required = true,
                                  default = nil)
-  if valid_575128 != nil:
-    section.add "billingProfileName", valid_575128
+  if valid_564228 != nil:
+    section.add "billingProfileName", valid_564228
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1281,11 +1285,11 @@ proc validate_InvoiceSectionsListByBillingProfileName_575125(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575129 = query.getOrDefault("api-version")
-  valid_575129 = validateParameter(valid_575129, JString, required = true,
+  var valid_564229 = query.getOrDefault("api-version")
+  valid_564229 = validateParameter(valid_564229, JString, required = true,
                                  default = nil)
-  if valid_575129 != nil:
-    section.add "api-version", valid_575129
+  if valid_564229 != nil:
+    section.add "api-version", valid_564229
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1294,21 +1298,21 @@ proc validate_InvoiceSectionsListByBillingProfileName_575125(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_575130: Call_InvoiceSectionsListByBillingProfileName_575124;
+proc call*(call_564230: Call_InvoiceSectionsListByBillingProfileName_564224;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Lists all invoice sections under a billing profile for which a user has access.
   ## 
-  let valid = call_575130.validator(path, query, header, formData, body)
-  let scheme = call_575130.pickScheme
+  let valid = call_564230.validator(path, query, header, formData, body)
+  let scheme = call_564230.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575130.url(scheme.get, call_575130.host, call_575130.base,
-                         call_575130.route, valid.getOrDefault("path"),
+  let url = call_564230.url(scheme.get, call_564230.host, call_564230.base,
+                         call_564230.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575130, url, valid)
+  result = hook(call_564230, url, valid)
 
-proc call*(call_575131: Call_InvoiceSectionsListByBillingProfileName_575124;
+proc call*(call_564231: Call_InvoiceSectionsListByBillingProfileName_564224;
           apiVersion: string; billingAccountName: string; billingProfileName: string): Recallable =
   ## invoiceSectionsListByBillingProfileName
   ## Lists all invoice sections under a billing profile for which a user has access.
@@ -1318,22 +1322,22 @@ proc call*(call_575131: Call_InvoiceSectionsListByBillingProfileName_575124;
   ##                     : Billing Account Id.
   ##   billingProfileName: string (required)
   ##                     : Billing Profile Id.
-  var path_575132 = newJObject()
-  var query_575133 = newJObject()
-  add(query_575133, "api-version", newJString(apiVersion))
-  add(path_575132, "billingAccountName", newJString(billingAccountName))
-  add(path_575132, "billingProfileName", newJString(billingProfileName))
-  result = call_575131.call(path_575132, query_575133, nil, nil, nil)
+  var path_564232 = newJObject()
+  var query_564233 = newJObject()
+  add(query_564233, "api-version", newJString(apiVersion))
+  add(path_564232, "billingAccountName", newJString(billingAccountName))
+  add(path_564232, "billingProfileName", newJString(billingProfileName))
+  result = call_564231.call(path_564232, query_564233, nil, nil, nil)
 
-var invoiceSectionsListByBillingProfileName* = Call_InvoiceSectionsListByBillingProfileName_575124(
+var invoiceSectionsListByBillingProfileName* = Call_InvoiceSectionsListByBillingProfileName_564224(
     name: "invoiceSectionsListByBillingProfileName", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/providers/Microsoft.Billing/billingAccounts/{billingAccountName}/billingProfiles/{billingProfileName}/invoiceSections",
-    validator: validate_InvoiceSectionsListByBillingProfileName_575125, base: "",
-    url: url_InvoiceSectionsListByBillingProfileName_575126,
+    validator: validate_InvoiceSectionsListByBillingProfileName_564225, base: "",
+    url: url_InvoiceSectionsListByBillingProfileName_564226,
     schemes: {Scheme.Https})
 type
-  Call_InvoicesListByBillingProfile_575134 = ref object of OpenApiRestCall_574467
-proc url_InvoicesListByBillingProfile_575136(protocol: Scheme; host: string;
+  Call_InvoicesListByBillingProfile_564234 = ref object of OpenApiRestCall_563565
+proc url_InvoicesListByBillingProfile_564236(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1355,7 +1359,7 @@ proc url_InvoicesListByBillingProfile_575136(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_InvoicesListByBillingProfile_575135(path: JsonNode; query: JsonNode;
+proc validate_InvoicesListByBillingProfile_564235(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## List of invoices for a billing profile.
   ## 
@@ -1369,16 +1373,16 @@ proc validate_InvoicesListByBillingProfile_575135(path: JsonNode; query: JsonNod
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `billingAccountName` field"
-  var valid_575137 = path.getOrDefault("billingAccountName")
-  valid_575137 = validateParameter(valid_575137, JString, required = true,
+  var valid_564237 = path.getOrDefault("billingAccountName")
+  valid_564237 = validateParameter(valid_564237, JString, required = true,
                                  default = nil)
-  if valid_575137 != nil:
-    section.add "billingAccountName", valid_575137
-  var valid_575138 = path.getOrDefault("billingProfileName")
-  valid_575138 = validateParameter(valid_575138, JString, required = true,
+  if valid_564237 != nil:
+    section.add "billingAccountName", valid_564237
+  var valid_564238 = path.getOrDefault("billingProfileName")
+  valid_564238 = validateParameter(valid_564238, JString, required = true,
                                  default = nil)
-  if valid_575138 != nil:
-    section.add "billingProfileName", valid_575138
+  if valid_564238 != nil:
+    section.add "billingProfileName", valid_564238
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1390,21 +1394,21 @@ proc validate_InvoicesListByBillingProfile_575135(path: JsonNode; query: JsonNod
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575139 = query.getOrDefault("api-version")
-  valid_575139 = validateParameter(valid_575139, JString, required = true,
+  var valid_564239 = query.getOrDefault("api-version")
+  valid_564239 = validateParameter(valid_564239, JString, required = true,
                                  default = nil)
-  if valid_575139 != nil:
-    section.add "api-version", valid_575139
-  var valid_575140 = query.getOrDefault("periodEndDate")
-  valid_575140 = validateParameter(valid_575140, JString, required = true,
+  if valid_564239 != nil:
+    section.add "api-version", valid_564239
+  var valid_564240 = query.getOrDefault("periodEndDate")
+  valid_564240 = validateParameter(valid_564240, JString, required = true,
                                  default = nil)
-  if valid_575140 != nil:
-    section.add "periodEndDate", valid_575140
-  var valid_575141 = query.getOrDefault("periodStartDate")
-  valid_575141 = validateParameter(valid_575141, JString, required = true,
+  if valid_564240 != nil:
+    section.add "periodEndDate", valid_564240
+  var valid_564241 = query.getOrDefault("periodStartDate")
+  valid_564241 = validateParameter(valid_564241, JString, required = true,
                                  default = nil)
-  if valid_575141 != nil:
-    section.add "periodStartDate", valid_575141
+  if valid_564241 != nil:
+    section.add "periodStartDate", valid_564241
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1413,22 +1417,22 @@ proc validate_InvoicesListByBillingProfile_575135(path: JsonNode; query: JsonNod
   if body != nil:
     result.add "body", body
 
-proc call*(call_575142: Call_InvoicesListByBillingProfile_575134; path: JsonNode;
+proc call*(call_564242: Call_InvoicesListByBillingProfile_564234; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## List of invoices for a billing profile.
   ## 
-  let valid = call_575142.validator(path, query, header, formData, body)
-  let scheme = call_575142.pickScheme
+  let valid = call_564242.validator(path, query, header, formData, body)
+  let scheme = call_564242.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575142.url(scheme.get, call_575142.host, call_575142.base,
-                         call_575142.route, valid.getOrDefault("path"),
+  let url = call_564242.url(scheme.get, call_564242.host, call_564242.base,
+                         call_564242.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575142, url, valid)
+  result = hook(call_564242, url, valid)
 
-proc call*(call_575143: Call_InvoicesListByBillingProfile_575134;
+proc call*(call_564243: Call_InvoicesListByBillingProfile_564234;
           apiVersion: string; billingAccountName: string; periodEndDate: string;
-          periodStartDate: string; billingProfileName: string): Recallable =
+          billingProfileName: string; periodStartDate: string): Recallable =
   ## invoicesListByBillingProfile
   ## List of invoices for a billing profile.
   ##   apiVersion: string (required)
@@ -1437,27 +1441,27 @@ proc call*(call_575143: Call_InvoicesListByBillingProfile_575134;
   ##                     : Billing Account Id.
   ##   periodEndDate: string (required)
   ##                : Invoice period end date.
-  ##   periodStartDate: string (required)
-  ##                  : Invoice period start date.
   ##   billingProfileName: string (required)
   ##                     : Billing Profile Id.
-  var path_575144 = newJObject()
-  var query_575145 = newJObject()
-  add(query_575145, "api-version", newJString(apiVersion))
-  add(path_575144, "billingAccountName", newJString(billingAccountName))
-  add(query_575145, "periodEndDate", newJString(periodEndDate))
-  add(query_575145, "periodStartDate", newJString(periodStartDate))
-  add(path_575144, "billingProfileName", newJString(billingProfileName))
-  result = call_575143.call(path_575144, query_575145, nil, nil, nil)
+  ##   periodStartDate: string (required)
+  ##                  : Invoice period start date.
+  var path_564244 = newJObject()
+  var query_564245 = newJObject()
+  add(query_564245, "api-version", newJString(apiVersion))
+  add(path_564244, "billingAccountName", newJString(billingAccountName))
+  add(query_564245, "periodEndDate", newJString(periodEndDate))
+  add(path_564244, "billingProfileName", newJString(billingProfileName))
+  add(query_564245, "periodStartDate", newJString(periodStartDate))
+  result = call_564243.call(path_564244, query_564245, nil, nil, nil)
 
-var invoicesListByBillingProfile* = Call_InvoicesListByBillingProfile_575134(
+var invoicesListByBillingProfile* = Call_InvoicesListByBillingProfile_564234(
     name: "invoicesListByBillingProfile", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/providers/Microsoft.Billing/billingAccounts/{billingAccountName}/billingProfiles/{billingProfileName}/invoices",
-    validator: validate_InvoicesListByBillingProfile_575135, base: "",
-    url: url_InvoicesListByBillingProfile_575136, schemes: {Scheme.Https})
+    validator: validate_InvoicesListByBillingProfile_564235, base: "",
+    url: url_InvoicesListByBillingProfile_564236, schemes: {Scheme.Https})
 type
-  Call_InvoicesGet_575146 = ref object of OpenApiRestCall_574467
-proc url_InvoicesGet_575148(protocol: Scheme; host: string; base: string;
+  Call_InvoicesGet_564246 = ref object of OpenApiRestCall_563565
+proc url_InvoicesGet_564248(protocol: Scheme; host: string; base: string;
                            route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1481,7 +1485,7 @@ proc url_InvoicesGet_575148(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_InvoicesGet_575147(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_InvoicesGet_564247(path: JsonNode; query: JsonNode; header: JsonNode;
                                 formData: JsonNode; body: JsonNode): JsonNode =
   ## Get the invoice by name.
   ## 
@@ -1497,21 +1501,21 @@ proc validate_InvoicesGet_575147(path: JsonNode; query: JsonNode; header: JsonNo
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `billingAccountName` field"
-  var valid_575149 = path.getOrDefault("billingAccountName")
-  valid_575149 = validateParameter(valid_575149, JString, required = true,
+  var valid_564249 = path.getOrDefault("billingAccountName")
+  valid_564249 = validateParameter(valid_564249, JString, required = true,
                                  default = nil)
-  if valid_575149 != nil:
-    section.add "billingAccountName", valid_575149
-  var valid_575150 = path.getOrDefault("invoiceName")
-  valid_575150 = validateParameter(valid_575150, JString, required = true,
+  if valid_564249 != nil:
+    section.add "billingAccountName", valid_564249
+  var valid_564250 = path.getOrDefault("invoiceName")
+  valid_564250 = validateParameter(valid_564250, JString, required = true,
                                  default = nil)
-  if valid_575150 != nil:
-    section.add "invoiceName", valid_575150
-  var valid_575151 = path.getOrDefault("billingProfileName")
-  valid_575151 = validateParameter(valid_575151, JString, required = true,
+  if valid_564250 != nil:
+    section.add "invoiceName", valid_564250
+  var valid_564251 = path.getOrDefault("billingProfileName")
+  valid_564251 = validateParameter(valid_564251, JString, required = true,
                                  default = nil)
-  if valid_575151 != nil:
-    section.add "billingProfileName", valid_575151
+  if valid_564251 != nil:
+    section.add "billingProfileName", valid_564251
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1519,11 +1523,11 @@ proc validate_InvoicesGet_575147(path: JsonNode; query: JsonNode; header: JsonNo
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575152 = query.getOrDefault("api-version")
-  valid_575152 = validateParameter(valid_575152, JString, required = true,
+  var valid_564252 = query.getOrDefault("api-version")
+  valid_564252 = validateParameter(valid_564252, JString, required = true,
                                  default = nil)
-  if valid_575152 != nil:
-    section.add "api-version", valid_575152
+  if valid_564252 != nil:
+    section.add "api-version", valid_564252
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1532,20 +1536,20 @@ proc validate_InvoicesGet_575147(path: JsonNode; query: JsonNode; header: JsonNo
   if body != nil:
     result.add "body", body
 
-proc call*(call_575153: Call_InvoicesGet_575146; path: JsonNode; query: JsonNode;
+proc call*(call_564253: Call_InvoicesGet_564246; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get the invoice by name.
   ## 
-  let valid = call_575153.validator(path, query, header, formData, body)
-  let scheme = call_575153.pickScheme
+  let valid = call_564253.validator(path, query, header, formData, body)
+  let scheme = call_564253.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575153.url(scheme.get, call_575153.host, call_575153.base,
-                         call_575153.route, valid.getOrDefault("path"),
+  let url = call_564253.url(scheme.get, call_564253.host, call_564253.base,
+                         call_564253.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575153, url, valid)
+  result = hook(call_564253, url, valid)
 
-proc call*(call_575154: Call_InvoicesGet_575146; apiVersion: string;
+proc call*(call_564254: Call_InvoicesGet_564246; apiVersion: string;
           billingAccountName: string; invoiceName: string;
           billingProfileName: string): Recallable =
   ## invoicesGet
@@ -1558,23 +1562,23 @@ proc call*(call_575154: Call_InvoicesGet_575146; apiVersion: string;
   ##              : Invoice Id.
   ##   billingProfileName: string (required)
   ##                     : Billing Profile Id.
-  var path_575155 = newJObject()
-  var query_575156 = newJObject()
-  add(query_575156, "api-version", newJString(apiVersion))
-  add(path_575155, "billingAccountName", newJString(billingAccountName))
-  add(path_575155, "invoiceName", newJString(invoiceName))
-  add(path_575155, "billingProfileName", newJString(billingProfileName))
-  result = call_575154.call(path_575155, query_575156, nil, nil, nil)
+  var path_564255 = newJObject()
+  var query_564256 = newJObject()
+  add(query_564256, "api-version", newJString(apiVersion))
+  add(path_564255, "billingAccountName", newJString(billingAccountName))
+  add(path_564255, "invoiceName", newJString(invoiceName))
+  add(path_564255, "billingProfileName", newJString(billingProfileName))
+  result = call_564254.call(path_564255, query_564256, nil, nil, nil)
 
-var invoicesGet* = Call_InvoicesGet_575146(name: "invoicesGet",
+var invoicesGet* = Call_InvoicesGet_564246(name: "invoicesGet",
                                         meth: HttpMethod.HttpGet,
                                         host: "management.azure.com", route: "/providers/Microsoft.Billing/billingAccounts/{billingAccountName}/billingProfiles/{billingProfileName}/invoices/{invoiceName}",
-                                        validator: validate_InvoicesGet_575147,
-                                        base: "", url: url_InvoicesGet_575148,
+                                        validator: validate_InvoicesGet_564247,
+                                        base: "", url: url_InvoicesGet_564248,
                                         schemes: {Scheme.Https})
 type
-  Call_PaymentMethodsListByBillingProfileName_575157 = ref object of OpenApiRestCall_574467
-proc url_PaymentMethodsListByBillingProfileName_575159(protocol: Scheme;
+  Call_PaymentMethodsListByBillingProfileName_564257 = ref object of OpenApiRestCall_563565
+proc url_PaymentMethodsListByBillingProfileName_564259(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1596,7 +1600,7 @@ proc url_PaymentMethodsListByBillingProfileName_575159(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_PaymentMethodsListByBillingProfileName_575158(path: JsonNode;
+proc validate_PaymentMethodsListByBillingProfileName_564258(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists the Payment Methods by billing profile Id.
   ## 
@@ -1611,16 +1615,16 @@ proc validate_PaymentMethodsListByBillingProfileName_575158(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `billingAccountName` field"
-  var valid_575160 = path.getOrDefault("billingAccountName")
-  valid_575160 = validateParameter(valid_575160, JString, required = true,
+  var valid_564260 = path.getOrDefault("billingAccountName")
+  valid_564260 = validateParameter(valid_564260, JString, required = true,
                                  default = nil)
-  if valid_575160 != nil:
-    section.add "billingAccountName", valid_575160
-  var valid_575161 = path.getOrDefault("billingProfileName")
-  valid_575161 = validateParameter(valid_575161, JString, required = true,
+  if valid_564260 != nil:
+    section.add "billingAccountName", valid_564260
+  var valid_564261 = path.getOrDefault("billingProfileName")
+  valid_564261 = validateParameter(valid_564261, JString, required = true,
                                  default = nil)
-  if valid_575161 != nil:
-    section.add "billingProfileName", valid_575161
+  if valid_564261 != nil:
+    section.add "billingProfileName", valid_564261
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1628,11 +1632,11 @@ proc validate_PaymentMethodsListByBillingProfileName_575158(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575162 = query.getOrDefault("api-version")
-  valid_575162 = validateParameter(valid_575162, JString, required = true,
+  var valid_564262 = query.getOrDefault("api-version")
+  valid_564262 = validateParameter(valid_564262, JString, required = true,
                                  default = nil)
-  if valid_575162 != nil:
-    section.add "api-version", valid_575162
+  if valid_564262 != nil:
+    section.add "api-version", valid_564262
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1641,22 +1645,22 @@ proc validate_PaymentMethodsListByBillingProfileName_575158(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_575163: Call_PaymentMethodsListByBillingProfileName_575157;
+proc call*(call_564263: Call_PaymentMethodsListByBillingProfileName_564257;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Lists the Payment Methods by billing profile Id.
   ## 
   ## https://docs.microsoft.com/en-us/rest/api/consumption/
-  let valid = call_575163.validator(path, query, header, formData, body)
-  let scheme = call_575163.pickScheme
+  let valid = call_564263.validator(path, query, header, formData, body)
+  let scheme = call_564263.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575163.url(scheme.get, call_575163.host, call_575163.base,
-                         call_575163.route, valid.getOrDefault("path"),
+  let url = call_564263.url(scheme.get, call_564263.host, call_564263.base,
+                         call_564263.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575163, url, valid)
+  result = hook(call_564263, url, valid)
 
-proc call*(call_575164: Call_PaymentMethodsListByBillingProfileName_575157;
+proc call*(call_564264: Call_PaymentMethodsListByBillingProfileName_564257;
           apiVersion: string; billingAccountName: string; billingProfileName: string): Recallable =
   ## paymentMethodsListByBillingProfileName
   ## Lists the Payment Methods by billing profile Id.
@@ -1667,22 +1671,22 @@ proc call*(call_575164: Call_PaymentMethodsListByBillingProfileName_575157;
   ##                     : Billing Account Id.
   ##   billingProfileName: string (required)
   ##                     : Billing Profile Id.
-  var path_575165 = newJObject()
-  var query_575166 = newJObject()
-  add(query_575166, "api-version", newJString(apiVersion))
-  add(path_575165, "billingAccountName", newJString(billingAccountName))
-  add(path_575165, "billingProfileName", newJString(billingProfileName))
-  result = call_575164.call(path_575165, query_575166, nil, nil, nil)
+  var path_564265 = newJObject()
+  var query_564266 = newJObject()
+  add(query_564266, "api-version", newJString(apiVersion))
+  add(path_564265, "billingAccountName", newJString(billingAccountName))
+  add(path_564265, "billingProfileName", newJString(billingProfileName))
+  result = call_564264.call(path_564265, query_564266, nil, nil, nil)
 
-var paymentMethodsListByBillingProfileName* = Call_PaymentMethodsListByBillingProfileName_575157(
+var paymentMethodsListByBillingProfileName* = Call_PaymentMethodsListByBillingProfileName_564257(
     name: "paymentMethodsListByBillingProfileName", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/providers/Microsoft.Billing/billingAccounts/{billingAccountName}/billingProfiles/{billingProfileName}/paymentMethods",
-    validator: validate_PaymentMethodsListByBillingProfileName_575158, base: "",
-    url: url_PaymentMethodsListByBillingProfileName_575159,
+    validator: validate_PaymentMethodsListByBillingProfileName_564258, base: "",
+    url: url_PaymentMethodsListByBillingProfileName_564259,
     schemes: {Scheme.Https})
 type
-  Call_PoliciesUpdate_575177 = ref object of OpenApiRestCall_574467
-proc url_PoliciesUpdate_575179(protocol: Scheme; host: string; base: string;
+  Call_PoliciesUpdate_564277 = ref object of OpenApiRestCall_563565
+proc url_PoliciesUpdate_564279(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1704,7 +1708,7 @@ proc url_PoliciesUpdate_575179(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_PoliciesUpdate_575178(path: JsonNode; query: JsonNode;
+proc validate_PoliciesUpdate_564278(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## The operation to update a policy.
@@ -1719,16 +1723,16 @@ proc validate_PoliciesUpdate_575178(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `billingAccountName` field"
-  var valid_575180 = path.getOrDefault("billingAccountName")
-  valid_575180 = validateParameter(valid_575180, JString, required = true,
+  var valid_564280 = path.getOrDefault("billingAccountName")
+  valid_564280 = validateParameter(valid_564280, JString, required = true,
                                  default = nil)
-  if valid_575180 != nil:
-    section.add "billingAccountName", valid_575180
-  var valid_575181 = path.getOrDefault("billingProfileName")
-  valid_575181 = validateParameter(valid_575181, JString, required = true,
+  if valid_564280 != nil:
+    section.add "billingAccountName", valid_564280
+  var valid_564281 = path.getOrDefault("billingProfileName")
+  valid_564281 = validateParameter(valid_564281, JString, required = true,
                                  default = nil)
-  if valid_575181 != nil:
-    section.add "billingProfileName", valid_575181
+  if valid_564281 != nil:
+    section.add "billingProfileName", valid_564281
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1736,11 +1740,11 @@ proc validate_PoliciesUpdate_575178(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575182 = query.getOrDefault("api-version")
-  valid_575182 = validateParameter(valid_575182, JString, required = true,
+  var valid_564282 = query.getOrDefault("api-version")
+  valid_564282 = validateParameter(valid_564282, JString, required = true,
                                  default = nil)
-  if valid_575182 != nil:
-    section.add "api-version", valid_575182
+  if valid_564282 != nil:
+    section.add "api-version", valid_564282
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1754,20 +1758,20 @@ proc validate_PoliciesUpdate_575178(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_575184: Call_PoliciesUpdate_575177; path: JsonNode; query: JsonNode;
+proc call*(call_564284: Call_PoliciesUpdate_564277; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## The operation to update a policy.
   ## 
-  let valid = call_575184.validator(path, query, header, formData, body)
-  let scheme = call_575184.pickScheme
+  let valid = call_564284.validator(path, query, header, formData, body)
+  let scheme = call_564284.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575184.url(scheme.get, call_575184.host, call_575184.base,
-                         call_575184.route, valid.getOrDefault("path"),
+  let url = call_564284.url(scheme.get, call_564284.host, call_564284.base,
+                         call_564284.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575184, url, valid)
+  result = hook(call_564284, url, valid)
 
-proc call*(call_575185: Call_PoliciesUpdate_575177; apiVersion: string;
+proc call*(call_564285: Call_PoliciesUpdate_564277; apiVersion: string;
           billingAccountName: string; billingProfileName: string;
           parameters: JsonNode): Recallable =
   ## policiesUpdate
@@ -1780,23 +1784,23 @@ proc call*(call_575185: Call_PoliciesUpdate_575177; apiVersion: string;
   ##                     : Billing Profile Id.
   ##   parameters: JObject (required)
   ##             : Parameters supplied to the update policy operation.
-  var path_575186 = newJObject()
-  var query_575187 = newJObject()
-  var body_575188 = newJObject()
-  add(query_575187, "api-version", newJString(apiVersion))
-  add(path_575186, "billingAccountName", newJString(billingAccountName))
-  add(path_575186, "billingProfileName", newJString(billingProfileName))
+  var path_564286 = newJObject()
+  var query_564287 = newJObject()
+  var body_564288 = newJObject()
+  add(query_564287, "api-version", newJString(apiVersion))
+  add(path_564286, "billingAccountName", newJString(billingAccountName))
+  add(path_564286, "billingProfileName", newJString(billingProfileName))
   if parameters != nil:
-    body_575188 = parameters
-  result = call_575185.call(path_575186, query_575187, nil, nil, body_575188)
+    body_564288 = parameters
+  result = call_564285.call(path_564286, query_564287, nil, nil, body_564288)
 
-var policiesUpdate* = Call_PoliciesUpdate_575177(name: "policiesUpdate",
+var policiesUpdate* = Call_PoliciesUpdate_564277(name: "policiesUpdate",
     meth: HttpMethod.HttpPut, host: "management.azure.com", route: "/providers/Microsoft.Billing/billingAccounts/{billingAccountName}/billingProfiles/{billingProfileName}/policies/default",
-    validator: validate_PoliciesUpdate_575178, base: "", url: url_PoliciesUpdate_575179,
+    validator: validate_PoliciesUpdate_564278, base: "", url: url_PoliciesUpdate_564279,
     schemes: {Scheme.Https})
 type
-  Call_PoliciesGetByBillingProfileName_575167 = ref object of OpenApiRestCall_574467
-proc url_PoliciesGetByBillingProfileName_575169(protocol: Scheme; host: string;
+  Call_PoliciesGetByBillingProfileName_564267 = ref object of OpenApiRestCall_563565
+proc url_PoliciesGetByBillingProfileName_564269(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1818,7 +1822,7 @@ proc url_PoliciesGetByBillingProfileName_575169(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_PoliciesGetByBillingProfileName_575168(path: JsonNode;
+proc validate_PoliciesGetByBillingProfileName_564268(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## The policy for a given billing account name and billing profile name.
   ## 
@@ -1833,16 +1837,16 @@ proc validate_PoliciesGetByBillingProfileName_575168(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `billingAccountName` field"
-  var valid_575170 = path.getOrDefault("billingAccountName")
-  valid_575170 = validateParameter(valid_575170, JString, required = true,
+  var valid_564270 = path.getOrDefault("billingAccountName")
+  valid_564270 = validateParameter(valid_564270, JString, required = true,
                                  default = nil)
-  if valid_575170 != nil:
-    section.add "billingAccountName", valid_575170
-  var valid_575171 = path.getOrDefault("billingProfileName")
-  valid_575171 = validateParameter(valid_575171, JString, required = true,
+  if valid_564270 != nil:
+    section.add "billingAccountName", valid_564270
+  var valid_564271 = path.getOrDefault("billingProfileName")
+  valid_564271 = validateParameter(valid_564271, JString, required = true,
                                  default = nil)
-  if valid_575171 != nil:
-    section.add "billingProfileName", valid_575171
+  if valid_564271 != nil:
+    section.add "billingProfileName", valid_564271
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1850,11 +1854,11 @@ proc validate_PoliciesGetByBillingProfileName_575168(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575172 = query.getOrDefault("api-version")
-  valid_575172 = validateParameter(valid_575172, JString, required = true,
+  var valid_564272 = query.getOrDefault("api-version")
+  valid_564272 = validateParameter(valid_564272, JString, required = true,
                                  default = nil)
-  if valid_575172 != nil:
-    section.add "api-version", valid_575172
+  if valid_564272 != nil:
+    section.add "api-version", valid_564272
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1863,22 +1867,22 @@ proc validate_PoliciesGetByBillingProfileName_575168(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_575173: Call_PoliciesGetByBillingProfileName_575167;
+proc call*(call_564273: Call_PoliciesGetByBillingProfileName_564267;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## The policy for a given billing account name and billing profile name.
   ## 
   ## https://docs.microsoft.com/en-us/rest/api/consumption/
-  let valid = call_575173.validator(path, query, header, formData, body)
-  let scheme = call_575173.pickScheme
+  let valid = call_564273.validator(path, query, header, formData, body)
+  let scheme = call_564273.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575173.url(scheme.get, call_575173.host, call_575173.base,
-                         call_575173.route, valid.getOrDefault("path"),
+  let url = call_564273.url(scheme.get, call_564273.host, call_564273.base,
+                         call_564273.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575173, url, valid)
+  result = hook(call_564273, url, valid)
 
-proc call*(call_575174: Call_PoliciesGetByBillingProfileName_575167;
+proc call*(call_564274: Call_PoliciesGetByBillingProfileName_564267;
           apiVersion: string; billingAccountName: string; billingProfileName: string): Recallable =
   ## policiesGetByBillingProfileName
   ## The policy for a given billing account name and billing profile name.
@@ -1889,21 +1893,21 @@ proc call*(call_575174: Call_PoliciesGetByBillingProfileName_575167;
   ##                     : Billing Account Id.
   ##   billingProfileName: string (required)
   ##                     : Billing Profile Id.
-  var path_575175 = newJObject()
-  var query_575176 = newJObject()
-  add(query_575176, "api-version", newJString(apiVersion))
-  add(path_575175, "billingAccountName", newJString(billingAccountName))
-  add(path_575175, "billingProfileName", newJString(billingProfileName))
-  result = call_575174.call(path_575175, query_575176, nil, nil, nil)
+  var path_564275 = newJObject()
+  var query_564276 = newJObject()
+  add(query_564276, "api-version", newJString(apiVersion))
+  add(path_564275, "billingAccountName", newJString(billingAccountName))
+  add(path_564275, "billingProfileName", newJString(billingProfileName))
+  result = call_564274.call(path_564275, query_564276, nil, nil, nil)
 
-var policiesGetByBillingProfileName* = Call_PoliciesGetByBillingProfileName_575167(
+var policiesGetByBillingProfileName* = Call_PoliciesGetByBillingProfileName_564267(
     name: "policiesGetByBillingProfileName", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/providers/Microsoft.Billing/billingAccounts/{billingAccountName}/billingProfiles/{billingProfileName}/policies/default",
-    validator: validate_PoliciesGetByBillingProfileName_575168, base: "",
-    url: url_PoliciesGetByBillingProfileName_575169, schemes: {Scheme.Https})
+    validator: validate_PoliciesGetByBillingProfileName_564268, base: "",
+    url: url_PoliciesGetByBillingProfileName_564269, schemes: {Scheme.Https})
 type
-  Call_BillingPermissionsListByBillingProfile_575189 = ref object of OpenApiRestCall_574467
-proc url_BillingPermissionsListByBillingProfile_575191(protocol: Scheme;
+  Call_BillingPermissionsListByBillingProfile_564289 = ref object of OpenApiRestCall_563565
+proc url_BillingPermissionsListByBillingProfile_564291(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1926,7 +1930,7 @@ proc url_BillingPermissionsListByBillingProfile_575191(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_BillingPermissionsListByBillingProfile_575190(path: JsonNode;
+proc validate_BillingPermissionsListByBillingProfile_564290(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists all billingPermissions for the caller has for a billing account.
   ## 
@@ -1940,16 +1944,16 @@ proc validate_BillingPermissionsListByBillingProfile_575190(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `billingAccountName` field"
-  var valid_575192 = path.getOrDefault("billingAccountName")
-  valid_575192 = validateParameter(valid_575192, JString, required = true,
+  var valid_564292 = path.getOrDefault("billingAccountName")
+  valid_564292 = validateParameter(valid_564292, JString, required = true,
                                  default = nil)
-  if valid_575192 != nil:
-    section.add "billingAccountName", valid_575192
-  var valid_575193 = path.getOrDefault("billingProfileName")
-  valid_575193 = validateParameter(valid_575193, JString, required = true,
+  if valid_564292 != nil:
+    section.add "billingAccountName", valid_564292
+  var valid_564293 = path.getOrDefault("billingProfileName")
+  valid_564293 = validateParameter(valid_564293, JString, required = true,
                                  default = nil)
-  if valid_575193 != nil:
-    section.add "billingProfileName", valid_575193
+  if valid_564293 != nil:
+    section.add "billingProfileName", valid_564293
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1957,11 +1961,11 @@ proc validate_BillingPermissionsListByBillingProfile_575190(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575194 = query.getOrDefault("api-version")
-  valid_575194 = validateParameter(valid_575194, JString, required = true,
+  var valid_564294 = query.getOrDefault("api-version")
+  valid_564294 = validateParameter(valid_564294, JString, required = true,
                                  default = nil)
-  if valid_575194 != nil:
-    section.add "api-version", valid_575194
+  if valid_564294 != nil:
+    section.add "api-version", valid_564294
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1970,21 +1974,21 @@ proc validate_BillingPermissionsListByBillingProfile_575190(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_575195: Call_BillingPermissionsListByBillingProfile_575189;
+proc call*(call_564295: Call_BillingPermissionsListByBillingProfile_564289;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Lists all billingPermissions for the caller has for a billing account.
   ## 
-  let valid = call_575195.validator(path, query, header, formData, body)
-  let scheme = call_575195.pickScheme
+  let valid = call_564295.validator(path, query, header, formData, body)
+  let scheme = call_564295.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575195.url(scheme.get, call_575195.host, call_575195.base,
-                         call_575195.route, valid.getOrDefault("path"),
+  let url = call_564295.url(scheme.get, call_564295.host, call_564295.base,
+                         call_564295.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575195, url, valid)
+  result = hook(call_564295, url, valid)
 
-proc call*(call_575196: Call_BillingPermissionsListByBillingProfile_575189;
+proc call*(call_564296: Call_BillingPermissionsListByBillingProfile_564289;
           apiVersion: string; billingAccountName: string; billingProfileName: string): Recallable =
   ## billingPermissionsListByBillingProfile
   ## Lists all billingPermissions for the caller has for a billing account.
@@ -1994,22 +1998,22 @@ proc call*(call_575196: Call_BillingPermissionsListByBillingProfile_575189;
   ##                     : Billing Account Id.
   ##   billingProfileName: string (required)
   ##                     : Billing Profile Id.
-  var path_575197 = newJObject()
-  var query_575198 = newJObject()
-  add(query_575198, "api-version", newJString(apiVersion))
-  add(path_575197, "billingAccountName", newJString(billingAccountName))
-  add(path_575197, "billingProfileName", newJString(billingProfileName))
-  result = call_575196.call(path_575197, query_575198, nil, nil, nil)
+  var path_564297 = newJObject()
+  var query_564298 = newJObject()
+  add(query_564298, "api-version", newJString(apiVersion))
+  add(path_564297, "billingAccountName", newJString(billingAccountName))
+  add(path_564297, "billingProfileName", newJString(billingProfileName))
+  result = call_564296.call(path_564297, query_564298, nil, nil, nil)
 
-var billingPermissionsListByBillingProfile* = Call_BillingPermissionsListByBillingProfile_575189(
+var billingPermissionsListByBillingProfile* = Call_BillingPermissionsListByBillingProfile_564289(
     name: "billingPermissionsListByBillingProfile", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/providers/Microsoft.Billing/billingAccounts/{billingAccountName}/billingProfiles/{billingProfileName}/providers/Microsoft.Billing/billingPermissions",
-    validator: validate_BillingPermissionsListByBillingProfile_575190, base: "",
-    url: url_BillingPermissionsListByBillingProfile_575191,
+    validator: validate_BillingPermissionsListByBillingProfile_564290, base: "",
+    url: url_BillingPermissionsListByBillingProfile_564291,
     schemes: {Scheme.Https})
 type
-  Call_BillingRoleAssignmentsListByBillingProfileName_575199 = ref object of OpenApiRestCall_574467
-proc url_BillingRoleAssignmentsListByBillingProfileName_575201(protocol: Scheme;
+  Call_BillingRoleAssignmentsListByBillingProfileName_564299 = ref object of OpenApiRestCall_563565
+proc url_BillingRoleAssignmentsListByBillingProfileName_564301(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2032,7 +2036,7 @@ proc url_BillingRoleAssignmentsListByBillingProfileName_575201(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_BillingRoleAssignmentsListByBillingProfileName_575200(
+proc validate_BillingRoleAssignmentsListByBillingProfileName_564300(
     path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
     body: JsonNode): JsonNode =
   ## Get the role assignments on the Billing Profile
@@ -2047,16 +2051,16 @@ proc validate_BillingRoleAssignmentsListByBillingProfileName_575200(
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `billingAccountName` field"
-  var valid_575202 = path.getOrDefault("billingAccountName")
-  valid_575202 = validateParameter(valid_575202, JString, required = true,
+  var valid_564302 = path.getOrDefault("billingAccountName")
+  valid_564302 = validateParameter(valid_564302, JString, required = true,
                                  default = nil)
-  if valid_575202 != nil:
-    section.add "billingAccountName", valid_575202
-  var valid_575203 = path.getOrDefault("billingProfileName")
-  valid_575203 = validateParameter(valid_575203, JString, required = true,
+  if valid_564302 != nil:
+    section.add "billingAccountName", valid_564302
+  var valid_564303 = path.getOrDefault("billingProfileName")
+  valid_564303 = validateParameter(valid_564303, JString, required = true,
                                  default = nil)
-  if valid_575203 != nil:
-    section.add "billingProfileName", valid_575203
+  if valid_564303 != nil:
+    section.add "billingProfileName", valid_564303
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2064,11 +2068,11 @@ proc validate_BillingRoleAssignmentsListByBillingProfileName_575200(
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575204 = query.getOrDefault("api-version")
-  valid_575204 = validateParameter(valid_575204, JString, required = true,
+  var valid_564304 = query.getOrDefault("api-version")
+  valid_564304 = validateParameter(valid_564304, JString, required = true,
                                  default = nil)
-  if valid_575204 != nil:
-    section.add "api-version", valid_575204
+  if valid_564304 != nil:
+    section.add "api-version", valid_564304
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2077,21 +2081,21 @@ proc validate_BillingRoleAssignmentsListByBillingProfileName_575200(
   if body != nil:
     result.add "body", body
 
-proc call*(call_575205: Call_BillingRoleAssignmentsListByBillingProfileName_575199;
+proc call*(call_564305: Call_BillingRoleAssignmentsListByBillingProfileName_564299;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Get the role assignments on the Billing Profile
   ## 
-  let valid = call_575205.validator(path, query, header, formData, body)
-  let scheme = call_575205.pickScheme
+  let valid = call_564305.validator(path, query, header, formData, body)
+  let scheme = call_564305.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575205.url(scheme.get, call_575205.host, call_575205.base,
-                         call_575205.route, valid.getOrDefault("path"),
+  let url = call_564305.url(scheme.get, call_564305.host, call_564305.base,
+                         call_564305.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575205, url, valid)
+  result = hook(call_564305, url, valid)
 
-proc call*(call_575206: Call_BillingRoleAssignmentsListByBillingProfileName_575199;
+proc call*(call_564306: Call_BillingRoleAssignmentsListByBillingProfileName_564299;
           apiVersion: string; billingAccountName: string; billingProfileName: string): Recallable =
   ## billingRoleAssignmentsListByBillingProfileName
   ## Get the role assignments on the Billing Profile
@@ -2101,22 +2105,22 @@ proc call*(call_575206: Call_BillingRoleAssignmentsListByBillingProfileName_5751
   ##                     : Billing Account Id.
   ##   billingProfileName: string (required)
   ##                     : Billing Profile Id.
-  var path_575207 = newJObject()
-  var query_575208 = newJObject()
-  add(query_575208, "api-version", newJString(apiVersion))
-  add(path_575207, "billingAccountName", newJString(billingAccountName))
-  add(path_575207, "billingProfileName", newJString(billingProfileName))
-  result = call_575206.call(path_575207, query_575208, nil, nil, nil)
+  var path_564307 = newJObject()
+  var query_564308 = newJObject()
+  add(query_564308, "api-version", newJString(apiVersion))
+  add(path_564307, "billingAccountName", newJString(billingAccountName))
+  add(path_564307, "billingProfileName", newJString(billingProfileName))
+  result = call_564306.call(path_564307, query_564308, nil, nil, nil)
 
-var billingRoleAssignmentsListByBillingProfileName* = Call_BillingRoleAssignmentsListByBillingProfileName_575199(
+var billingRoleAssignmentsListByBillingProfileName* = Call_BillingRoleAssignmentsListByBillingProfileName_564299(
     name: "billingRoleAssignmentsListByBillingProfileName",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/providers/Microsoft.Billing/billingAccounts/{billingAccountName}/billingProfiles/{billingProfileName}/providers/Microsoft.Billing/billingRoleAssignments",
-    validator: validate_BillingRoleAssignmentsListByBillingProfileName_575200,
-    base: "", url: url_BillingRoleAssignmentsListByBillingProfileName_575201,
+    validator: validate_BillingRoleAssignmentsListByBillingProfileName_564300,
+    base: "", url: url_BillingRoleAssignmentsListByBillingProfileName_564301,
     schemes: {Scheme.Https})
 type
-  Call_BillingRoleAssignmentsGetByBillingProfileName_575209 = ref object of OpenApiRestCall_574467
-proc url_BillingRoleAssignmentsGetByBillingProfileName_575211(protocol: Scheme;
+  Call_BillingRoleAssignmentsGetByBillingProfileName_564309 = ref object of OpenApiRestCall_563565
+proc url_BillingRoleAssignmentsGetByBillingProfileName_564311(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2142,7 +2146,7 @@ proc url_BillingRoleAssignmentsGetByBillingProfileName_575211(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_BillingRoleAssignmentsGetByBillingProfileName_575210(
+proc validate_BillingRoleAssignmentsGetByBillingProfileName_564310(
     path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
     body: JsonNode): JsonNode =
   ## Get the role assignment for the caller on the Billing Profile
@@ -2150,29 +2154,30 @@ proc validate_BillingRoleAssignmentsGetByBillingProfileName_575210(
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   billingRoleAssignmentName: JString (required)
-  ##                            : role assignment id.
   ##   billingAccountName: JString (required)
   ##                     : Billing Account Id.
+  ##   billingRoleAssignmentName: JString (required)
+  ##                            : role assignment id.
   ##   billingProfileName: JString (required)
   ##                     : Billing Profile Id.
   section = newJObject()
-  assert path != nil, "path argument is necessary due to required `billingRoleAssignmentName` field"
-  var valid_575212 = path.getOrDefault("billingRoleAssignmentName")
-  valid_575212 = validateParameter(valid_575212, JString, required = true,
+  assert path != nil,
+        "path argument is necessary due to required `billingAccountName` field"
+  var valid_564312 = path.getOrDefault("billingAccountName")
+  valid_564312 = validateParameter(valid_564312, JString, required = true,
                                  default = nil)
-  if valid_575212 != nil:
-    section.add "billingRoleAssignmentName", valid_575212
-  var valid_575213 = path.getOrDefault("billingAccountName")
-  valid_575213 = validateParameter(valid_575213, JString, required = true,
+  if valid_564312 != nil:
+    section.add "billingAccountName", valid_564312
+  var valid_564313 = path.getOrDefault("billingRoleAssignmentName")
+  valid_564313 = validateParameter(valid_564313, JString, required = true,
                                  default = nil)
-  if valid_575213 != nil:
-    section.add "billingAccountName", valid_575213
-  var valid_575214 = path.getOrDefault("billingProfileName")
-  valid_575214 = validateParameter(valid_575214, JString, required = true,
+  if valid_564313 != nil:
+    section.add "billingRoleAssignmentName", valid_564313
+  var valid_564314 = path.getOrDefault("billingProfileName")
+  valid_564314 = validateParameter(valid_564314, JString, required = true,
                                  default = nil)
-  if valid_575214 != nil:
-    section.add "billingProfileName", valid_575214
+  if valid_564314 != nil:
+    section.add "billingProfileName", valid_564314
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2180,11 +2185,11 @@ proc validate_BillingRoleAssignmentsGetByBillingProfileName_575210(
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575215 = query.getOrDefault("api-version")
-  valid_575215 = validateParameter(valid_575215, JString, required = true,
+  var valid_564315 = query.getOrDefault("api-version")
+  valid_564315 = validateParameter(valid_564315, JString, required = true,
                                  default = nil)
-  if valid_575215 != nil:
-    section.add "api-version", valid_575215
+  if valid_564315 != nil:
+    section.add "api-version", valid_564315
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2193,51 +2198,51 @@ proc validate_BillingRoleAssignmentsGetByBillingProfileName_575210(
   if body != nil:
     result.add "body", body
 
-proc call*(call_575216: Call_BillingRoleAssignmentsGetByBillingProfileName_575209;
+proc call*(call_564316: Call_BillingRoleAssignmentsGetByBillingProfileName_564309;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Get the role assignment for the caller on the Billing Profile
   ## 
-  let valid = call_575216.validator(path, query, header, formData, body)
-  let scheme = call_575216.pickScheme
+  let valid = call_564316.validator(path, query, header, formData, body)
+  let scheme = call_564316.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575216.url(scheme.get, call_575216.host, call_575216.base,
-                         call_575216.route, valid.getOrDefault("path"),
+  let url = call_564316.url(scheme.get, call_564316.host, call_564316.base,
+                         call_564316.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575216, url, valid)
+  result = hook(call_564316, url, valid)
 
-proc call*(call_575217: Call_BillingRoleAssignmentsGetByBillingProfileName_575209;
-          apiVersion: string; billingRoleAssignmentName: string;
-          billingAccountName: string; billingProfileName: string): Recallable =
+proc call*(call_564317: Call_BillingRoleAssignmentsGetByBillingProfileName_564309;
+          apiVersion: string; billingAccountName: string;
+          billingRoleAssignmentName: string; billingProfileName: string): Recallable =
   ## billingRoleAssignmentsGetByBillingProfileName
   ## Get the role assignment for the caller on the Billing Profile
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request. The current version is 2018-11-01-preview.
-  ##   billingRoleAssignmentName: string (required)
-  ##                            : role assignment id.
   ##   billingAccountName: string (required)
   ##                     : Billing Account Id.
+  ##   billingRoleAssignmentName: string (required)
+  ##                            : role assignment id.
   ##   billingProfileName: string (required)
   ##                     : Billing Profile Id.
-  var path_575218 = newJObject()
-  var query_575219 = newJObject()
-  add(query_575219, "api-version", newJString(apiVersion))
-  add(path_575218, "billingRoleAssignmentName",
+  var path_564318 = newJObject()
+  var query_564319 = newJObject()
+  add(query_564319, "api-version", newJString(apiVersion))
+  add(path_564318, "billingAccountName", newJString(billingAccountName))
+  add(path_564318, "billingRoleAssignmentName",
       newJString(billingRoleAssignmentName))
-  add(path_575218, "billingAccountName", newJString(billingAccountName))
-  add(path_575218, "billingProfileName", newJString(billingProfileName))
-  result = call_575217.call(path_575218, query_575219, nil, nil, nil)
+  add(path_564318, "billingProfileName", newJString(billingProfileName))
+  result = call_564317.call(path_564318, query_564319, nil, nil, nil)
 
-var billingRoleAssignmentsGetByBillingProfileName* = Call_BillingRoleAssignmentsGetByBillingProfileName_575209(
+var billingRoleAssignmentsGetByBillingProfileName* = Call_BillingRoleAssignmentsGetByBillingProfileName_564309(
     name: "billingRoleAssignmentsGetByBillingProfileName",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/providers/Microsoft.Billing/billingAccounts/{billingAccountName}/billingProfiles/{billingProfileName}/providers/Microsoft.Billing/billingRoleAssignments/{billingRoleAssignmentName}",
-    validator: validate_BillingRoleAssignmentsGetByBillingProfileName_575210,
-    base: "", url: url_BillingRoleAssignmentsGetByBillingProfileName_575211,
+    validator: validate_BillingRoleAssignmentsGetByBillingProfileName_564310,
+    base: "", url: url_BillingRoleAssignmentsGetByBillingProfileName_564311,
     schemes: {Scheme.Https})
 type
-  Call_BillingRoleAssignmentsDeleteByBillingProfileName_575220 = ref object of OpenApiRestCall_574467
-proc url_BillingRoleAssignmentsDeleteByBillingProfileName_575222(
+  Call_BillingRoleAssignmentsDeleteByBillingProfileName_564320 = ref object of OpenApiRestCall_563565
+proc url_BillingRoleAssignmentsDeleteByBillingProfileName_564322(
     protocol: Scheme; host: string; base: string; route: string; path: JsonNode;
     query: JsonNode): Uri =
   result.scheme = $protocol
@@ -2264,7 +2269,7 @@ proc url_BillingRoleAssignmentsDeleteByBillingProfileName_575222(
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_BillingRoleAssignmentsDeleteByBillingProfileName_575221(
+proc validate_BillingRoleAssignmentsDeleteByBillingProfileName_564321(
     path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
     body: JsonNode): JsonNode =
   ## Delete the role assignment on this Billing Profile
@@ -2272,29 +2277,30 @@ proc validate_BillingRoleAssignmentsDeleteByBillingProfileName_575221(
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   billingRoleAssignmentName: JString (required)
-  ##                            : role assignment id.
   ##   billingAccountName: JString (required)
   ##                     : Billing Account Id.
+  ##   billingRoleAssignmentName: JString (required)
+  ##                            : role assignment id.
   ##   billingProfileName: JString (required)
   ##                     : Billing Profile Id.
   section = newJObject()
-  assert path != nil, "path argument is necessary due to required `billingRoleAssignmentName` field"
-  var valid_575223 = path.getOrDefault("billingRoleAssignmentName")
-  valid_575223 = validateParameter(valid_575223, JString, required = true,
+  assert path != nil,
+        "path argument is necessary due to required `billingAccountName` field"
+  var valid_564323 = path.getOrDefault("billingAccountName")
+  valid_564323 = validateParameter(valid_564323, JString, required = true,
                                  default = nil)
-  if valid_575223 != nil:
-    section.add "billingRoleAssignmentName", valid_575223
-  var valid_575224 = path.getOrDefault("billingAccountName")
-  valid_575224 = validateParameter(valid_575224, JString, required = true,
+  if valid_564323 != nil:
+    section.add "billingAccountName", valid_564323
+  var valid_564324 = path.getOrDefault("billingRoleAssignmentName")
+  valid_564324 = validateParameter(valid_564324, JString, required = true,
                                  default = nil)
-  if valid_575224 != nil:
-    section.add "billingAccountName", valid_575224
-  var valid_575225 = path.getOrDefault("billingProfileName")
-  valid_575225 = validateParameter(valid_575225, JString, required = true,
+  if valid_564324 != nil:
+    section.add "billingRoleAssignmentName", valid_564324
+  var valid_564325 = path.getOrDefault("billingProfileName")
+  valid_564325 = validateParameter(valid_564325, JString, required = true,
                                  default = nil)
-  if valid_575225 != nil:
-    section.add "billingProfileName", valid_575225
+  if valid_564325 != nil:
+    section.add "billingProfileName", valid_564325
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2302,11 +2308,11 @@ proc validate_BillingRoleAssignmentsDeleteByBillingProfileName_575221(
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575226 = query.getOrDefault("api-version")
-  valid_575226 = validateParameter(valid_575226, JString, required = true,
+  var valid_564326 = query.getOrDefault("api-version")
+  valid_564326 = validateParameter(valid_564326, JString, required = true,
                                  default = nil)
-  if valid_575226 != nil:
-    section.add "api-version", valid_575226
+  if valid_564326 != nil:
+    section.add "api-version", valid_564326
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2315,51 +2321,51 @@ proc validate_BillingRoleAssignmentsDeleteByBillingProfileName_575221(
   if body != nil:
     result.add "body", body
 
-proc call*(call_575227: Call_BillingRoleAssignmentsDeleteByBillingProfileName_575220;
+proc call*(call_564327: Call_BillingRoleAssignmentsDeleteByBillingProfileName_564320;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Delete the role assignment on this Billing Profile
   ## 
-  let valid = call_575227.validator(path, query, header, formData, body)
-  let scheme = call_575227.pickScheme
+  let valid = call_564327.validator(path, query, header, formData, body)
+  let scheme = call_564327.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575227.url(scheme.get, call_575227.host, call_575227.base,
-                         call_575227.route, valid.getOrDefault("path"),
+  let url = call_564327.url(scheme.get, call_564327.host, call_564327.base,
+                         call_564327.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575227, url, valid)
+  result = hook(call_564327, url, valid)
 
-proc call*(call_575228: Call_BillingRoleAssignmentsDeleteByBillingProfileName_575220;
-          apiVersion: string; billingRoleAssignmentName: string;
-          billingAccountName: string; billingProfileName: string): Recallable =
+proc call*(call_564328: Call_BillingRoleAssignmentsDeleteByBillingProfileName_564320;
+          apiVersion: string; billingAccountName: string;
+          billingRoleAssignmentName: string; billingProfileName: string): Recallable =
   ## billingRoleAssignmentsDeleteByBillingProfileName
   ## Delete the role assignment on this Billing Profile
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request. The current version is 2018-11-01-preview.
-  ##   billingRoleAssignmentName: string (required)
-  ##                            : role assignment id.
   ##   billingAccountName: string (required)
   ##                     : Billing Account Id.
+  ##   billingRoleAssignmentName: string (required)
+  ##                            : role assignment id.
   ##   billingProfileName: string (required)
   ##                     : Billing Profile Id.
-  var path_575229 = newJObject()
-  var query_575230 = newJObject()
-  add(query_575230, "api-version", newJString(apiVersion))
-  add(path_575229, "billingRoleAssignmentName",
+  var path_564329 = newJObject()
+  var query_564330 = newJObject()
+  add(query_564330, "api-version", newJString(apiVersion))
+  add(path_564329, "billingAccountName", newJString(billingAccountName))
+  add(path_564329, "billingRoleAssignmentName",
       newJString(billingRoleAssignmentName))
-  add(path_575229, "billingAccountName", newJString(billingAccountName))
-  add(path_575229, "billingProfileName", newJString(billingProfileName))
-  result = call_575228.call(path_575229, query_575230, nil, nil, nil)
+  add(path_564329, "billingProfileName", newJString(billingProfileName))
+  result = call_564328.call(path_564329, query_564330, nil, nil, nil)
 
-var billingRoleAssignmentsDeleteByBillingProfileName* = Call_BillingRoleAssignmentsDeleteByBillingProfileName_575220(
+var billingRoleAssignmentsDeleteByBillingProfileName* = Call_BillingRoleAssignmentsDeleteByBillingProfileName_564320(
     name: "billingRoleAssignmentsDeleteByBillingProfileName",
     meth: HttpMethod.HttpDelete, host: "management.azure.com", route: "/providers/Microsoft.Billing/billingAccounts/{billingAccountName}/billingProfiles/{billingProfileName}/providers/Microsoft.Billing/billingRoleAssignments/{billingRoleAssignmentName}",
-    validator: validate_BillingRoleAssignmentsDeleteByBillingProfileName_575221,
-    base: "", url: url_BillingRoleAssignmentsDeleteByBillingProfileName_575222,
+    validator: validate_BillingRoleAssignmentsDeleteByBillingProfileName_564321,
+    base: "", url: url_BillingRoleAssignmentsDeleteByBillingProfileName_564322,
     schemes: {Scheme.Https})
 type
-  Call_BillingRoleDefinitionsListByBillingProfileName_575231 = ref object of OpenApiRestCall_574467
-proc url_BillingRoleDefinitionsListByBillingProfileName_575233(protocol: Scheme;
+  Call_BillingRoleDefinitionsListByBillingProfileName_564331 = ref object of OpenApiRestCall_563565
+proc url_BillingRoleDefinitionsListByBillingProfileName_564333(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2382,7 +2388,7 @@ proc url_BillingRoleDefinitionsListByBillingProfileName_575233(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_BillingRoleDefinitionsListByBillingProfileName_575232(
+proc validate_BillingRoleDefinitionsListByBillingProfileName_564332(
     path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
     body: JsonNode): JsonNode =
   ## Lists the role definition for a Billing Profile
@@ -2397,16 +2403,16 @@ proc validate_BillingRoleDefinitionsListByBillingProfileName_575232(
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `billingAccountName` field"
-  var valid_575234 = path.getOrDefault("billingAccountName")
-  valid_575234 = validateParameter(valid_575234, JString, required = true,
+  var valid_564334 = path.getOrDefault("billingAccountName")
+  valid_564334 = validateParameter(valid_564334, JString, required = true,
                                  default = nil)
-  if valid_575234 != nil:
-    section.add "billingAccountName", valid_575234
-  var valid_575235 = path.getOrDefault("billingProfileName")
-  valid_575235 = validateParameter(valid_575235, JString, required = true,
+  if valid_564334 != nil:
+    section.add "billingAccountName", valid_564334
+  var valid_564335 = path.getOrDefault("billingProfileName")
+  valid_564335 = validateParameter(valid_564335, JString, required = true,
                                  default = nil)
-  if valid_575235 != nil:
-    section.add "billingProfileName", valid_575235
+  if valid_564335 != nil:
+    section.add "billingProfileName", valid_564335
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2414,11 +2420,11 @@ proc validate_BillingRoleDefinitionsListByBillingProfileName_575232(
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575236 = query.getOrDefault("api-version")
-  valid_575236 = validateParameter(valid_575236, JString, required = true,
+  var valid_564336 = query.getOrDefault("api-version")
+  valid_564336 = validateParameter(valid_564336, JString, required = true,
                                  default = nil)
-  if valid_575236 != nil:
-    section.add "api-version", valid_575236
+  if valid_564336 != nil:
+    section.add "api-version", valid_564336
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2427,21 +2433,21 @@ proc validate_BillingRoleDefinitionsListByBillingProfileName_575232(
   if body != nil:
     result.add "body", body
 
-proc call*(call_575237: Call_BillingRoleDefinitionsListByBillingProfileName_575231;
+proc call*(call_564337: Call_BillingRoleDefinitionsListByBillingProfileName_564331;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Lists the role definition for a Billing Profile
   ## 
-  let valid = call_575237.validator(path, query, header, formData, body)
-  let scheme = call_575237.pickScheme
+  let valid = call_564337.validator(path, query, header, formData, body)
+  let scheme = call_564337.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575237.url(scheme.get, call_575237.host, call_575237.base,
-                         call_575237.route, valid.getOrDefault("path"),
+  let url = call_564337.url(scheme.get, call_564337.host, call_564337.base,
+                         call_564337.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575237, url, valid)
+  result = hook(call_564337, url, valid)
 
-proc call*(call_575238: Call_BillingRoleDefinitionsListByBillingProfileName_575231;
+proc call*(call_564338: Call_BillingRoleDefinitionsListByBillingProfileName_564331;
           apiVersion: string; billingAccountName: string; billingProfileName: string): Recallable =
   ## billingRoleDefinitionsListByBillingProfileName
   ## Lists the role definition for a Billing Profile
@@ -2451,22 +2457,22 @@ proc call*(call_575238: Call_BillingRoleDefinitionsListByBillingProfileName_5752
   ##                     : Billing Account Id.
   ##   billingProfileName: string (required)
   ##                     : Billing Profile Id.
-  var path_575239 = newJObject()
-  var query_575240 = newJObject()
-  add(query_575240, "api-version", newJString(apiVersion))
-  add(path_575239, "billingAccountName", newJString(billingAccountName))
-  add(path_575239, "billingProfileName", newJString(billingProfileName))
-  result = call_575238.call(path_575239, query_575240, nil, nil, nil)
+  var path_564339 = newJObject()
+  var query_564340 = newJObject()
+  add(query_564340, "api-version", newJString(apiVersion))
+  add(path_564339, "billingAccountName", newJString(billingAccountName))
+  add(path_564339, "billingProfileName", newJString(billingProfileName))
+  result = call_564338.call(path_564339, query_564340, nil, nil, nil)
 
-var billingRoleDefinitionsListByBillingProfileName* = Call_BillingRoleDefinitionsListByBillingProfileName_575231(
+var billingRoleDefinitionsListByBillingProfileName* = Call_BillingRoleDefinitionsListByBillingProfileName_564331(
     name: "billingRoleDefinitionsListByBillingProfileName",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/providers/Microsoft.Billing/billingAccounts/{billingAccountName}/billingProfiles/{billingProfileName}/providers/Microsoft.Billing/billingRoleDefinitions",
-    validator: validate_BillingRoleDefinitionsListByBillingProfileName_575232,
-    base: "", url: url_BillingRoleDefinitionsListByBillingProfileName_575233,
+    validator: validate_BillingRoleDefinitionsListByBillingProfileName_564332,
+    base: "", url: url_BillingRoleDefinitionsListByBillingProfileName_564333,
     schemes: {Scheme.Https})
 type
-  Call_BillingRoleDefinitionsGetByBillingProfileName_575241 = ref object of OpenApiRestCall_574467
-proc url_BillingRoleDefinitionsGetByBillingProfileName_575243(protocol: Scheme;
+  Call_BillingRoleDefinitionsGetByBillingProfileName_564341 = ref object of OpenApiRestCall_563565
+proc url_BillingRoleDefinitionsGetByBillingProfileName_564343(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2492,7 +2498,7 @@ proc url_BillingRoleDefinitionsGetByBillingProfileName_575243(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_BillingRoleDefinitionsGetByBillingProfileName_575242(
+proc validate_BillingRoleDefinitionsGetByBillingProfileName_564342(
     path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
     body: JsonNode): JsonNode =
   ## Gets the role definition for a role
@@ -2509,21 +2515,21 @@ proc validate_BillingRoleDefinitionsGetByBillingProfileName_575242(
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `billingAccountName` field"
-  var valid_575244 = path.getOrDefault("billingAccountName")
-  valid_575244 = validateParameter(valid_575244, JString, required = true,
+  var valid_564344 = path.getOrDefault("billingAccountName")
+  valid_564344 = validateParameter(valid_564344, JString, required = true,
                                  default = nil)
-  if valid_575244 != nil:
-    section.add "billingAccountName", valid_575244
-  var valid_575245 = path.getOrDefault("billingRoleDefinitionName")
-  valid_575245 = validateParameter(valid_575245, JString, required = true,
+  if valid_564344 != nil:
+    section.add "billingAccountName", valid_564344
+  var valid_564345 = path.getOrDefault("billingRoleDefinitionName")
+  valid_564345 = validateParameter(valid_564345, JString, required = true,
                                  default = nil)
-  if valid_575245 != nil:
-    section.add "billingRoleDefinitionName", valid_575245
-  var valid_575246 = path.getOrDefault("billingProfileName")
-  valid_575246 = validateParameter(valid_575246, JString, required = true,
+  if valid_564345 != nil:
+    section.add "billingRoleDefinitionName", valid_564345
+  var valid_564346 = path.getOrDefault("billingProfileName")
+  valid_564346 = validateParameter(valid_564346, JString, required = true,
                                  default = nil)
-  if valid_575246 != nil:
-    section.add "billingProfileName", valid_575246
+  if valid_564346 != nil:
+    section.add "billingProfileName", valid_564346
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2531,11 +2537,11 @@ proc validate_BillingRoleDefinitionsGetByBillingProfileName_575242(
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575247 = query.getOrDefault("api-version")
-  valid_575247 = validateParameter(valid_575247, JString, required = true,
+  var valid_564347 = query.getOrDefault("api-version")
+  valid_564347 = validateParameter(valid_564347, JString, required = true,
                                  default = nil)
-  if valid_575247 != nil:
-    section.add "api-version", valid_575247
+  if valid_564347 != nil:
+    section.add "api-version", valid_564347
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2544,21 +2550,21 @@ proc validate_BillingRoleDefinitionsGetByBillingProfileName_575242(
   if body != nil:
     result.add "body", body
 
-proc call*(call_575248: Call_BillingRoleDefinitionsGetByBillingProfileName_575241;
+proc call*(call_564348: Call_BillingRoleDefinitionsGetByBillingProfileName_564341;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Gets the role definition for a role
   ## 
-  let valid = call_575248.validator(path, query, header, formData, body)
-  let scheme = call_575248.pickScheme
+  let valid = call_564348.validator(path, query, header, formData, body)
+  let scheme = call_564348.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575248.url(scheme.get, call_575248.host, call_575248.base,
-                         call_575248.route, valid.getOrDefault("path"),
+  let url = call_564348.url(scheme.get, call_564348.host, call_564348.base,
+                         call_564348.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575248, url, valid)
+  result = hook(call_564348, url, valid)
 
-proc call*(call_575249: Call_BillingRoleDefinitionsGetByBillingProfileName_575241;
+proc call*(call_564349: Call_BillingRoleDefinitionsGetByBillingProfileName_564341;
           apiVersion: string; billingAccountName: string;
           billingRoleDefinitionName: string; billingProfileName: string): Recallable =
   ## billingRoleDefinitionsGetByBillingProfileName
@@ -2571,24 +2577,24 @@ proc call*(call_575249: Call_BillingRoleDefinitionsGetByBillingProfileName_57524
   ##                            : role definition id.
   ##   billingProfileName: string (required)
   ##                     : Billing Profile Id.
-  var path_575250 = newJObject()
-  var query_575251 = newJObject()
-  add(query_575251, "api-version", newJString(apiVersion))
-  add(path_575250, "billingAccountName", newJString(billingAccountName))
-  add(path_575250, "billingRoleDefinitionName",
+  var path_564350 = newJObject()
+  var query_564351 = newJObject()
+  add(query_564351, "api-version", newJString(apiVersion))
+  add(path_564350, "billingAccountName", newJString(billingAccountName))
+  add(path_564350, "billingRoleDefinitionName",
       newJString(billingRoleDefinitionName))
-  add(path_575250, "billingProfileName", newJString(billingProfileName))
-  result = call_575249.call(path_575250, query_575251, nil, nil, nil)
+  add(path_564350, "billingProfileName", newJString(billingProfileName))
+  result = call_564349.call(path_564350, query_564351, nil, nil, nil)
 
-var billingRoleDefinitionsGetByBillingProfileName* = Call_BillingRoleDefinitionsGetByBillingProfileName_575241(
+var billingRoleDefinitionsGetByBillingProfileName* = Call_BillingRoleDefinitionsGetByBillingProfileName_564341(
     name: "billingRoleDefinitionsGetByBillingProfileName",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/providers/Microsoft.Billing/billingAccounts/{billingAccountName}/billingProfiles/{billingProfileName}/providers/Microsoft.Billing/billingRoleDefinitions/{billingRoleDefinitionName}",
-    validator: validate_BillingRoleDefinitionsGetByBillingProfileName_575242,
-    base: "", url: url_BillingRoleDefinitionsGetByBillingProfileName_575243,
+    validator: validate_BillingRoleDefinitionsGetByBillingProfileName_564342,
+    base: "", url: url_BillingRoleDefinitionsGetByBillingProfileName_564343,
     schemes: {Scheme.Https})
 type
-  Call_BillingRoleAssignmentsAddByBillingProfileName_575252 = ref object of OpenApiRestCall_574467
-proc url_BillingRoleAssignmentsAddByBillingProfileName_575254(protocol: Scheme;
+  Call_BillingRoleAssignmentsAddByBillingProfileName_564352 = ref object of OpenApiRestCall_563565
+proc url_BillingRoleAssignmentsAddByBillingProfileName_564354(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2611,7 +2617,7 @@ proc url_BillingRoleAssignmentsAddByBillingProfileName_575254(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_BillingRoleAssignmentsAddByBillingProfileName_575253(
+proc validate_BillingRoleAssignmentsAddByBillingProfileName_564353(
     path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
     body: JsonNode): JsonNode =
   ## The operation to add a role assignment to a billing profile.
@@ -2626,16 +2632,16 @@ proc validate_BillingRoleAssignmentsAddByBillingProfileName_575253(
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `billingAccountName` field"
-  var valid_575255 = path.getOrDefault("billingAccountName")
-  valid_575255 = validateParameter(valid_575255, JString, required = true,
+  var valid_564355 = path.getOrDefault("billingAccountName")
+  valid_564355 = validateParameter(valid_564355, JString, required = true,
                                  default = nil)
-  if valid_575255 != nil:
-    section.add "billingAccountName", valid_575255
-  var valid_575256 = path.getOrDefault("billingProfileName")
-  valid_575256 = validateParameter(valid_575256, JString, required = true,
+  if valid_564355 != nil:
+    section.add "billingAccountName", valid_564355
+  var valid_564356 = path.getOrDefault("billingProfileName")
+  valid_564356 = validateParameter(valid_564356, JString, required = true,
                                  default = nil)
-  if valid_575256 != nil:
-    section.add "billingProfileName", valid_575256
+  if valid_564356 != nil:
+    section.add "billingProfileName", valid_564356
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2643,11 +2649,11 @@ proc validate_BillingRoleAssignmentsAddByBillingProfileName_575253(
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575257 = query.getOrDefault("api-version")
-  valid_575257 = validateParameter(valid_575257, JString, required = true,
+  var valid_564357 = query.getOrDefault("api-version")
+  valid_564357 = validateParameter(valid_564357, JString, required = true,
                                  default = nil)
-  if valid_575257 != nil:
-    section.add "api-version", valid_575257
+  if valid_564357 != nil:
+    section.add "api-version", valid_564357
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2661,21 +2667,21 @@ proc validate_BillingRoleAssignmentsAddByBillingProfileName_575253(
   if body != nil:
     result.add "body", body
 
-proc call*(call_575259: Call_BillingRoleAssignmentsAddByBillingProfileName_575252;
+proc call*(call_564359: Call_BillingRoleAssignmentsAddByBillingProfileName_564352;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## The operation to add a role assignment to a billing profile.
   ## 
-  let valid = call_575259.validator(path, query, header, formData, body)
-  let scheme = call_575259.pickScheme
+  let valid = call_564359.validator(path, query, header, formData, body)
+  let scheme = call_564359.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575259.url(scheme.get, call_575259.host, call_575259.base,
-                         call_575259.route, valid.getOrDefault("path"),
+  let url = call_564359.url(scheme.get, call_564359.host, call_564359.base,
+                         call_564359.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575259, url, valid)
+  result = hook(call_564359, url, valid)
 
-proc call*(call_575260: Call_BillingRoleAssignmentsAddByBillingProfileName_575252;
+proc call*(call_564360: Call_BillingRoleAssignmentsAddByBillingProfileName_564352;
           apiVersion: string; billingAccountName: string;
           billingProfileName: string; parameters: JsonNode): Recallable =
   ## billingRoleAssignmentsAddByBillingProfileName
@@ -2688,25 +2694,25 @@ proc call*(call_575260: Call_BillingRoleAssignmentsAddByBillingProfileName_57525
   ##                     : Billing Profile Id.
   ##   parameters: JObject (required)
   ##             : Parameters supplied to add a role assignment.
-  var path_575261 = newJObject()
-  var query_575262 = newJObject()
-  var body_575263 = newJObject()
-  add(query_575262, "api-version", newJString(apiVersion))
-  add(path_575261, "billingAccountName", newJString(billingAccountName))
-  add(path_575261, "billingProfileName", newJString(billingProfileName))
+  var path_564361 = newJObject()
+  var query_564362 = newJObject()
+  var body_564363 = newJObject()
+  add(query_564362, "api-version", newJString(apiVersion))
+  add(path_564361, "billingAccountName", newJString(billingAccountName))
+  add(path_564361, "billingProfileName", newJString(billingProfileName))
   if parameters != nil:
-    body_575263 = parameters
-  result = call_575260.call(path_575261, query_575262, nil, nil, body_575263)
+    body_564363 = parameters
+  result = call_564360.call(path_564361, query_564362, nil, nil, body_564363)
 
-var billingRoleAssignmentsAddByBillingProfileName* = Call_BillingRoleAssignmentsAddByBillingProfileName_575252(
+var billingRoleAssignmentsAddByBillingProfileName* = Call_BillingRoleAssignmentsAddByBillingProfileName_564352(
     name: "billingRoleAssignmentsAddByBillingProfileName",
     meth: HttpMethod.HttpPost, host: "management.azure.com", route: "/providers/Microsoft.Billing/billingAccounts/{billingAccountName}/billingProfiles/{billingProfileName}/providers/Microsoft.Billing/createBillingRoleAssignment",
-    validator: validate_BillingRoleAssignmentsAddByBillingProfileName_575253,
-    base: "", url: url_BillingRoleAssignmentsAddByBillingProfileName_575254,
+    validator: validate_BillingRoleAssignmentsAddByBillingProfileName_564353,
+    base: "", url: url_BillingRoleAssignmentsAddByBillingProfileName_564354,
     schemes: {Scheme.Https})
 type
-  Call_TransactionsListByBillingProfileName_575264 = ref object of OpenApiRestCall_574467
-proc url_TransactionsListByBillingProfileName_575266(protocol: Scheme;
+  Call_TransactionsListByBillingProfileName_564364 = ref object of OpenApiRestCall_563565
+proc url_TransactionsListByBillingProfileName_564366(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2728,7 +2734,7 @@ proc url_TransactionsListByBillingProfileName_575266(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_TransactionsListByBillingProfileName_575265(path: JsonNode;
+proc validate_TransactionsListByBillingProfileName_564365(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists the transactions by billing profile name for given start date and end date.
   ## 
@@ -2743,49 +2749,49 @@ proc validate_TransactionsListByBillingProfileName_575265(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `billingAccountName` field"
-  var valid_575267 = path.getOrDefault("billingAccountName")
-  valid_575267 = validateParameter(valid_575267, JString, required = true,
+  var valid_564367 = path.getOrDefault("billingAccountName")
+  valid_564367 = validateParameter(valid_564367, JString, required = true,
                                  default = nil)
-  if valid_575267 != nil:
-    section.add "billingAccountName", valid_575267
-  var valid_575268 = path.getOrDefault("billingProfileName")
-  valid_575268 = validateParameter(valid_575268, JString, required = true,
+  if valid_564367 != nil:
+    section.add "billingAccountName", valid_564367
+  var valid_564368 = path.getOrDefault("billingProfileName")
+  valid_564368 = validateParameter(valid_564368, JString, required = true,
                                  default = nil)
-  if valid_575268 != nil:
-    section.add "billingProfileName", valid_575268
+  if valid_564368 != nil:
+    section.add "billingProfileName", valid_564368
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
   ##              : Version of the API to be used with the client request. The current version is 2018-11-01-preview.
   ##   endDate: JString (required)
   ##          : End date
-  ##   startDate: JString (required)
-  ##            : Start date
   ##   $filter: JString
   ##          : May be used to filter by transaction kind. The filter supports 'eq', 'lt', 'gt', 'le', 'ge', and 'and'. It does not currently support 'ne', 'or', or 'not'. Tag filter is a key value pair string where key and value is separated by a colon (:).
+  ##   startDate: JString (required)
+  ##            : Start date
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575269 = query.getOrDefault("api-version")
-  valid_575269 = validateParameter(valid_575269, JString, required = true,
+  var valid_564369 = query.getOrDefault("api-version")
+  valid_564369 = validateParameter(valid_564369, JString, required = true,
                                  default = nil)
-  if valid_575269 != nil:
-    section.add "api-version", valid_575269
-  var valid_575270 = query.getOrDefault("endDate")
-  valid_575270 = validateParameter(valid_575270, JString, required = true,
+  if valid_564369 != nil:
+    section.add "api-version", valid_564369
+  var valid_564370 = query.getOrDefault("endDate")
+  valid_564370 = validateParameter(valid_564370, JString, required = true,
                                  default = nil)
-  if valid_575270 != nil:
-    section.add "endDate", valid_575270
-  var valid_575271 = query.getOrDefault("startDate")
-  valid_575271 = validateParameter(valid_575271, JString, required = true,
+  if valid_564370 != nil:
+    section.add "endDate", valid_564370
+  var valid_564371 = query.getOrDefault("$filter")
+  valid_564371 = validateParameter(valid_564371, JString, required = false,
                                  default = nil)
-  if valid_575271 != nil:
-    section.add "startDate", valid_575271
-  var valid_575272 = query.getOrDefault("$filter")
-  valid_575272 = validateParameter(valid_575272, JString, required = false,
+  if valid_564371 != nil:
+    section.add "$filter", valid_564371
+  var valid_564372 = query.getOrDefault("startDate")
+  valid_564372 = validateParameter(valid_564372, JString, required = true,
                                  default = nil)
-  if valid_575272 != nil:
-    section.add "$filter", valid_575272
+  if valid_564372 != nil:
+    section.add "startDate", valid_564372
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2794,57 +2800,57 @@ proc validate_TransactionsListByBillingProfileName_575265(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_575273: Call_TransactionsListByBillingProfileName_575264;
+proc call*(call_564373: Call_TransactionsListByBillingProfileName_564364;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Lists the transactions by billing profile name for given start date and end date.
   ## 
   ## https://docs.microsoft.com/en-us/rest/api/consumption/
-  let valid = call_575273.validator(path, query, header, formData, body)
-  let scheme = call_575273.pickScheme
+  let valid = call_564373.validator(path, query, header, formData, body)
+  let scheme = call_564373.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575273.url(scheme.get, call_575273.host, call_575273.base,
-                         call_575273.route, valid.getOrDefault("path"),
+  let url = call_564373.url(scheme.get, call_564373.host, call_564373.base,
+                         call_564373.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575273, url, valid)
+  result = hook(call_564373, url, valid)
 
-proc call*(call_575274: Call_TransactionsListByBillingProfileName_575264;
-          apiVersion: string; endDate: string; billingAccountName: string;
+proc call*(call_564374: Call_TransactionsListByBillingProfileName_564364;
+          apiVersion: string; billingAccountName: string; endDate: string;
           startDate: string; billingProfileName: string; Filter: string = ""): Recallable =
   ## transactionsListByBillingProfileName
   ## Lists the transactions by billing profile name for given start date and end date.
   ## https://docs.microsoft.com/en-us/rest/api/consumption/
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request. The current version is 2018-11-01-preview.
-  ##   endDate: string (required)
-  ##          : End date
   ##   billingAccountName: string (required)
   ##                     : Billing Account Id.
+  ##   endDate: string (required)
+  ##          : End date
+  ##   Filter: string
+  ##         : May be used to filter by transaction kind. The filter supports 'eq', 'lt', 'gt', 'le', 'ge', and 'and'. It does not currently support 'ne', 'or', or 'not'. Tag filter is a key value pair string where key and value is separated by a colon (:).
   ##   startDate: string (required)
   ##            : Start date
   ##   billingProfileName: string (required)
   ##                     : Billing Profile Id.
-  ##   Filter: string
-  ##         : May be used to filter by transaction kind. The filter supports 'eq', 'lt', 'gt', 'le', 'ge', and 'and'. It does not currently support 'ne', 'or', or 'not'. Tag filter is a key value pair string where key and value is separated by a colon (:).
-  var path_575275 = newJObject()
-  var query_575276 = newJObject()
-  add(query_575276, "api-version", newJString(apiVersion))
-  add(query_575276, "endDate", newJString(endDate))
-  add(path_575275, "billingAccountName", newJString(billingAccountName))
-  add(query_575276, "startDate", newJString(startDate))
-  add(path_575275, "billingProfileName", newJString(billingProfileName))
-  add(query_575276, "$filter", newJString(Filter))
-  result = call_575274.call(path_575275, query_575276, nil, nil, nil)
+  var path_564375 = newJObject()
+  var query_564376 = newJObject()
+  add(query_564376, "api-version", newJString(apiVersion))
+  add(path_564375, "billingAccountName", newJString(billingAccountName))
+  add(query_564376, "endDate", newJString(endDate))
+  add(query_564376, "$filter", newJString(Filter))
+  add(query_564376, "startDate", newJString(startDate))
+  add(path_564375, "billingProfileName", newJString(billingProfileName))
+  result = call_564374.call(path_564375, query_564376, nil, nil, nil)
 
-var transactionsListByBillingProfileName* = Call_TransactionsListByBillingProfileName_575264(
+var transactionsListByBillingProfileName* = Call_TransactionsListByBillingProfileName_564364(
     name: "transactionsListByBillingProfileName", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/providers/Microsoft.Billing/billingAccounts/{billingAccountName}/billingProfiles/{billingProfileName}/transactions",
-    validator: validate_TransactionsListByBillingProfileName_575265, base: "",
-    url: url_TransactionsListByBillingProfileName_575266, schemes: {Scheme.Https})
+    validator: validate_TransactionsListByBillingProfileName_564365, base: "",
+    url: url_TransactionsListByBillingProfileName_564366, schemes: {Scheme.Https})
 type
-  Call_BillingSubscriptionsListByBillingAccountName_575277 = ref object of OpenApiRestCall_574467
-proc url_BillingSubscriptionsListByBillingAccountName_575279(protocol: Scheme;
+  Call_BillingSubscriptionsListByBillingAccountName_564377 = ref object of OpenApiRestCall_563565
+proc url_BillingSubscriptionsListByBillingAccountName_564379(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2862,7 +2868,7 @@ proc url_BillingSubscriptionsListByBillingAccountName_575279(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_BillingSubscriptionsListByBillingAccountName_575278(path: JsonNode;
+proc validate_BillingSubscriptionsListByBillingAccountName_564378(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists billing subscriptions by billing account name.
   ## 
@@ -2875,11 +2881,11 @@ proc validate_BillingSubscriptionsListByBillingAccountName_575278(path: JsonNode
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `billingAccountName` field"
-  var valid_575280 = path.getOrDefault("billingAccountName")
-  valid_575280 = validateParameter(valid_575280, JString, required = true,
+  var valid_564380 = path.getOrDefault("billingAccountName")
+  valid_564380 = validateParameter(valid_564380, JString, required = true,
                                  default = nil)
-  if valid_575280 != nil:
-    section.add "billingAccountName", valid_575280
+  if valid_564380 != nil:
+    section.add "billingAccountName", valid_564380
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2887,11 +2893,11 @@ proc validate_BillingSubscriptionsListByBillingAccountName_575278(path: JsonNode
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575281 = query.getOrDefault("api-version")
-  valid_575281 = validateParameter(valid_575281, JString, required = true,
+  var valid_564381 = query.getOrDefault("api-version")
+  valid_564381 = validateParameter(valid_564381, JString, required = true,
                                  default = nil)
-  if valid_575281 != nil:
-    section.add "api-version", valid_575281
+  if valid_564381 != nil:
+    section.add "api-version", valid_564381
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2900,22 +2906,22 @@ proc validate_BillingSubscriptionsListByBillingAccountName_575278(path: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_575282: Call_BillingSubscriptionsListByBillingAccountName_575277;
+proc call*(call_564382: Call_BillingSubscriptionsListByBillingAccountName_564377;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Lists billing subscriptions by billing account name.
   ## 
   ## https://docs.microsoft.com/en-us/rest/api/consumption/
-  let valid = call_575282.validator(path, query, header, formData, body)
-  let scheme = call_575282.pickScheme
+  let valid = call_564382.validator(path, query, header, formData, body)
+  let scheme = call_564382.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575282.url(scheme.get, call_575282.host, call_575282.base,
-                         call_575282.route, valid.getOrDefault("path"),
+  let url = call_564382.url(scheme.get, call_564382.host, call_564382.base,
+                         call_564382.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575282, url, valid)
+  result = hook(call_564382, url, valid)
 
-proc call*(call_575283: Call_BillingSubscriptionsListByBillingAccountName_575277;
+proc call*(call_564383: Call_BillingSubscriptionsListByBillingAccountName_564377;
           apiVersion: string; billingAccountName: string): Recallable =
   ## billingSubscriptionsListByBillingAccountName
   ## Lists billing subscriptions by billing account name.
@@ -2924,21 +2930,21 @@ proc call*(call_575283: Call_BillingSubscriptionsListByBillingAccountName_575277
   ##             : Version of the API to be used with the client request. The current version is 2018-11-01-preview.
   ##   billingAccountName: string (required)
   ##                     : Billing Account Id.
-  var path_575284 = newJObject()
-  var query_575285 = newJObject()
-  add(query_575285, "api-version", newJString(apiVersion))
-  add(path_575284, "billingAccountName", newJString(billingAccountName))
-  result = call_575283.call(path_575284, query_575285, nil, nil, nil)
+  var path_564384 = newJObject()
+  var query_564385 = newJObject()
+  add(query_564385, "api-version", newJString(apiVersion))
+  add(path_564384, "billingAccountName", newJString(billingAccountName))
+  result = call_564383.call(path_564384, query_564385, nil, nil, nil)
 
-var billingSubscriptionsListByBillingAccountName* = Call_BillingSubscriptionsListByBillingAccountName_575277(
+var billingSubscriptionsListByBillingAccountName* = Call_BillingSubscriptionsListByBillingAccountName_564377(
     name: "billingSubscriptionsListByBillingAccountName",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/providers/Microsoft.Billing/billingAccounts/{billingAccountName}/billingSubscriptions",
-    validator: validate_BillingSubscriptionsListByBillingAccountName_575278,
-    base: "", url: url_BillingSubscriptionsListByBillingAccountName_575279,
+    validator: validate_BillingSubscriptionsListByBillingAccountName_564378,
+    base: "", url: url_BillingSubscriptionsListByBillingAccountName_564379,
     schemes: {Scheme.Https})
 type
-  Call_CustomersListByBillingAccountName_575286 = ref object of OpenApiRestCall_574467
-proc url_CustomersListByBillingAccountName_575288(protocol: Scheme; host: string;
+  Call_CustomersListByBillingAccountName_564386 = ref object of OpenApiRestCall_563565
+proc url_CustomersListByBillingAccountName_564388(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2956,7 +2962,7 @@ proc url_CustomersListByBillingAccountName_575288(protocol: Scheme; host: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_CustomersListByBillingAccountName_575287(path: JsonNode;
+proc validate_CustomersListByBillingAccountName_564387(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists all customers which the current user can work with on-behalf of a partner.
   ## 
@@ -2968,11 +2974,11 @@ proc validate_CustomersListByBillingAccountName_575287(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `billingAccountName` field"
-  var valid_575289 = path.getOrDefault("billingAccountName")
-  valid_575289 = validateParameter(valid_575289, JString, required = true,
+  var valid_564389 = path.getOrDefault("billingAccountName")
+  valid_564389 = validateParameter(valid_564389, JString, required = true,
                                  default = nil)
-  if valid_575289 != nil:
-    section.add "billingAccountName", valid_575289
+  if valid_564389 != nil:
+    section.add "billingAccountName", valid_564389
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2984,21 +2990,21 @@ proc validate_CustomersListByBillingAccountName_575287(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575290 = query.getOrDefault("api-version")
-  valid_575290 = validateParameter(valid_575290, JString, required = true,
+  var valid_564390 = query.getOrDefault("api-version")
+  valid_564390 = validateParameter(valid_564390, JString, required = true,
                                  default = nil)
-  if valid_575290 != nil:
-    section.add "api-version", valid_575290
-  var valid_575291 = query.getOrDefault("$skiptoken")
-  valid_575291 = validateParameter(valid_575291, JString, required = false,
+  if valid_564390 != nil:
+    section.add "api-version", valid_564390
+  var valid_564391 = query.getOrDefault("$skiptoken")
+  valid_564391 = validateParameter(valid_564391, JString, required = false,
                                  default = nil)
-  if valid_575291 != nil:
-    section.add "$skiptoken", valid_575291
-  var valid_575292 = query.getOrDefault("$filter")
-  valid_575292 = validateParameter(valid_575292, JString, required = false,
+  if valid_564391 != nil:
+    section.add "$skiptoken", valid_564391
+  var valid_564392 = query.getOrDefault("$filter")
+  valid_564392 = validateParameter(valid_564392, JString, required = false,
                                  default = nil)
-  if valid_575292 != nil:
-    section.add "$filter", valid_575292
+  if valid_564392 != nil:
+    section.add "$filter", valid_564392
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3007,21 +3013,21 @@ proc validate_CustomersListByBillingAccountName_575287(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_575293: Call_CustomersListByBillingAccountName_575286;
+proc call*(call_564393: Call_CustomersListByBillingAccountName_564386;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Lists all customers which the current user can work with on-behalf of a partner.
   ## 
-  let valid = call_575293.validator(path, query, header, formData, body)
-  let scheme = call_575293.pickScheme
+  let valid = call_564393.validator(path, query, header, formData, body)
+  let scheme = call_564393.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575293.url(scheme.get, call_575293.host, call_575293.base,
-                         call_575293.route, valid.getOrDefault("path"),
+  let url = call_564393.url(scheme.get, call_564393.host, call_564393.base,
+                         call_564393.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575293, url, valid)
+  result = hook(call_564393, url, valid)
 
-proc call*(call_575294: Call_CustomersListByBillingAccountName_575286;
+proc call*(call_564394: Call_CustomersListByBillingAccountName_564386;
           apiVersion: string; billingAccountName: string; Skiptoken: string = "";
           Filter: string = ""): Recallable =
   ## customersListByBillingAccountName
@@ -3034,22 +3040,22 @@ proc call*(call_575294: Call_CustomersListByBillingAccountName_575286;
   ##            : Skiptoken is only used if a previous operation returned a partial result. If a previous response contains a nextLink element, the value of the nextLink element will include a skiptoken parameter that specifies a starting point to use for subsequent calls.
   ##   Filter: string
   ##         : May be used to filter using hasPermission('{permissionId}') to only return customers for which the caller has the specified permission.
-  var path_575295 = newJObject()
-  var query_575296 = newJObject()
-  add(query_575296, "api-version", newJString(apiVersion))
-  add(path_575295, "billingAccountName", newJString(billingAccountName))
-  add(query_575296, "$skiptoken", newJString(Skiptoken))
-  add(query_575296, "$filter", newJString(Filter))
-  result = call_575294.call(path_575295, query_575296, nil, nil, nil)
+  var path_564395 = newJObject()
+  var query_564396 = newJObject()
+  add(query_564396, "api-version", newJString(apiVersion))
+  add(path_564395, "billingAccountName", newJString(billingAccountName))
+  add(query_564396, "$skiptoken", newJString(Skiptoken))
+  add(query_564396, "$filter", newJString(Filter))
+  result = call_564394.call(path_564395, query_564396, nil, nil, nil)
 
-var customersListByBillingAccountName* = Call_CustomersListByBillingAccountName_575286(
+var customersListByBillingAccountName* = Call_CustomersListByBillingAccountName_564386(
     name: "customersListByBillingAccountName", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/providers/Microsoft.Billing/billingAccounts/{billingAccountName}/customers",
-    validator: validate_CustomersListByBillingAccountName_575287, base: "",
-    url: url_CustomersListByBillingAccountName_575288, schemes: {Scheme.Https})
+    validator: validate_CustomersListByBillingAccountName_564387, base: "",
+    url: url_CustomersListByBillingAccountName_564388, schemes: {Scheme.Https})
 type
-  Call_CustomersGet_575297 = ref object of OpenApiRestCall_574467
-proc url_CustomersGet_575299(protocol: Scheme; host: string; base: string;
+  Call_CustomersGet_564397 = ref object of OpenApiRestCall_563565
+proc url_CustomersGet_564399(protocol: Scheme; host: string; base: string;
                             route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -3069,7 +3075,7 @@ proc url_CustomersGet_575299(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_CustomersGet_575298(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_CustomersGet_564398(path: JsonNode; query: JsonNode; header: JsonNode;
                                  formData: JsonNode; body: JsonNode): JsonNode =
   ## Get the customer by id.
   ## 
@@ -3083,16 +3089,16 @@ proc validate_CustomersGet_575298(path: JsonNode; query: JsonNode; header: JsonN
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `billingAccountName` field"
-  var valid_575300 = path.getOrDefault("billingAccountName")
-  valid_575300 = validateParameter(valid_575300, JString, required = true,
+  var valid_564400 = path.getOrDefault("billingAccountName")
+  valid_564400 = validateParameter(valid_564400, JString, required = true,
                                  default = nil)
-  if valid_575300 != nil:
-    section.add "billingAccountName", valid_575300
-  var valid_575301 = path.getOrDefault("customerName")
-  valid_575301 = validateParameter(valid_575301, JString, required = true,
+  if valid_564400 != nil:
+    section.add "billingAccountName", valid_564400
+  var valid_564401 = path.getOrDefault("customerName")
+  valid_564401 = validateParameter(valid_564401, JString, required = true,
                                  default = nil)
-  if valid_575301 != nil:
-    section.add "customerName", valid_575301
+  if valid_564401 != nil:
+    section.add "customerName", valid_564401
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -3102,16 +3108,16 @@ proc validate_CustomersGet_575298(path: JsonNode; query: JsonNode; header: JsonN
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575302 = query.getOrDefault("api-version")
-  valid_575302 = validateParameter(valid_575302, JString, required = true,
+  var valid_564402 = query.getOrDefault("api-version")
+  valid_564402 = validateParameter(valid_564402, JString, required = true,
                                  default = nil)
-  if valid_575302 != nil:
-    section.add "api-version", valid_575302
-  var valid_575303 = query.getOrDefault("$expand")
-  valid_575303 = validateParameter(valid_575303, JString, required = false,
+  if valid_564402 != nil:
+    section.add "api-version", valid_564402
+  var valid_564403 = query.getOrDefault("$expand")
+  valid_564403 = validateParameter(valid_564403, JString, required = false,
                                  default = nil)
-  if valid_575303 != nil:
-    section.add "$expand", valid_575303
+  if valid_564403 != nil:
+    section.add "$expand", valid_564403
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3120,46 +3126,46 @@ proc validate_CustomersGet_575298(path: JsonNode; query: JsonNode; header: JsonN
   if body != nil:
     result.add "body", body
 
-proc call*(call_575304: Call_CustomersGet_575297; path: JsonNode; query: JsonNode;
+proc call*(call_564404: Call_CustomersGet_564397; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get the customer by id.
   ## 
-  let valid = call_575304.validator(path, query, header, formData, body)
-  let scheme = call_575304.pickScheme
+  let valid = call_564404.validator(path, query, header, formData, body)
+  let scheme = call_564404.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575304.url(scheme.get, call_575304.host, call_575304.base,
-                         call_575304.route, valid.getOrDefault("path"),
+  let url = call_564404.url(scheme.get, call_564404.host, call_564404.base,
+                         call_564404.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575304, url, valid)
+  result = hook(call_564404, url, valid)
 
-proc call*(call_575305: Call_CustomersGet_575297; apiVersion: string;
+proc call*(call_564405: Call_CustomersGet_564397; apiVersion: string;
           billingAccountName: string; customerName: string; Expand: string = ""): Recallable =
   ## customersGet
   ## Get the customer by id.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request. The current version is 2018-11-01-preview.
-  ##   Expand: string
-  ##         : May be used to expand enabledAzureSkus, resellers.
   ##   billingAccountName: string (required)
   ##                     : Billing Account Id.
   ##   customerName: string (required)
   ##               : Customer Id.
-  var path_575306 = newJObject()
-  var query_575307 = newJObject()
-  add(query_575307, "api-version", newJString(apiVersion))
-  add(query_575307, "$expand", newJString(Expand))
-  add(path_575306, "billingAccountName", newJString(billingAccountName))
-  add(path_575306, "customerName", newJString(customerName))
-  result = call_575305.call(path_575306, query_575307, nil, nil, nil)
+  ##   Expand: string
+  ##         : May be used to expand enabledAzureSkus, resellers.
+  var path_564406 = newJObject()
+  var query_564407 = newJObject()
+  add(query_564407, "api-version", newJString(apiVersion))
+  add(path_564406, "billingAccountName", newJString(billingAccountName))
+  add(path_564406, "customerName", newJString(customerName))
+  add(query_564407, "$expand", newJString(Expand))
+  result = call_564405.call(path_564406, query_564407, nil, nil, nil)
 
-var customersGet* = Call_CustomersGet_575297(name: "customersGet",
+var customersGet* = Call_CustomersGet_564397(name: "customersGet",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/providers/Microsoft.Billing/billingAccounts/{billingAccountName}/customers/{customerName}",
-    validator: validate_CustomersGet_575298, base: "", url: url_CustomersGet_575299,
+    validator: validate_CustomersGet_564398, base: "", url: url_CustomersGet_564399,
     schemes: {Scheme.Https})
 type
-  Call_BillingSubscriptionsListByCustomerName_575308 = ref object of OpenApiRestCall_574467
-proc url_BillingSubscriptionsListByCustomerName_575310(protocol: Scheme;
+  Call_BillingSubscriptionsListByCustomerName_564408 = ref object of OpenApiRestCall_563565
+proc url_BillingSubscriptionsListByCustomerName_564410(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -3180,7 +3186,7 @@ proc url_BillingSubscriptionsListByCustomerName_575310(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_BillingSubscriptionsListByCustomerName_575309(path: JsonNode;
+proc validate_BillingSubscriptionsListByCustomerName_564409(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists billing subscription by customer name.
   ## 
@@ -3195,16 +3201,16 @@ proc validate_BillingSubscriptionsListByCustomerName_575309(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `billingAccountName` field"
-  var valid_575311 = path.getOrDefault("billingAccountName")
-  valid_575311 = validateParameter(valid_575311, JString, required = true,
+  var valid_564411 = path.getOrDefault("billingAccountName")
+  valid_564411 = validateParameter(valid_564411, JString, required = true,
                                  default = nil)
-  if valid_575311 != nil:
-    section.add "billingAccountName", valid_575311
-  var valid_575312 = path.getOrDefault("customerName")
-  valid_575312 = validateParameter(valid_575312, JString, required = true,
+  if valid_564411 != nil:
+    section.add "billingAccountName", valid_564411
+  var valid_564412 = path.getOrDefault("customerName")
+  valid_564412 = validateParameter(valid_564412, JString, required = true,
                                  default = nil)
-  if valid_575312 != nil:
-    section.add "customerName", valid_575312
+  if valid_564412 != nil:
+    section.add "customerName", valid_564412
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -3212,11 +3218,11 @@ proc validate_BillingSubscriptionsListByCustomerName_575309(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575313 = query.getOrDefault("api-version")
-  valid_575313 = validateParameter(valid_575313, JString, required = true,
+  var valid_564413 = query.getOrDefault("api-version")
+  valid_564413 = validateParameter(valid_564413, JString, required = true,
                                  default = nil)
-  if valid_575313 != nil:
-    section.add "api-version", valid_575313
+  if valid_564413 != nil:
+    section.add "api-version", valid_564413
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3225,22 +3231,22 @@ proc validate_BillingSubscriptionsListByCustomerName_575309(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_575314: Call_BillingSubscriptionsListByCustomerName_575308;
+proc call*(call_564414: Call_BillingSubscriptionsListByCustomerName_564408;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Lists billing subscription by customer name.
   ## 
   ## https://docs.microsoft.com/en-us/rest/api/consumption/
-  let valid = call_575314.validator(path, query, header, formData, body)
-  let scheme = call_575314.pickScheme
+  let valid = call_564414.validator(path, query, header, formData, body)
+  let scheme = call_564414.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575314.url(scheme.get, call_575314.host, call_575314.base,
-                         call_575314.route, valid.getOrDefault("path"),
+  let url = call_564414.url(scheme.get, call_564414.host, call_564414.base,
+                         call_564414.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575314, url, valid)
+  result = hook(call_564414, url, valid)
 
-proc call*(call_575315: Call_BillingSubscriptionsListByCustomerName_575308;
+proc call*(call_564415: Call_BillingSubscriptionsListByCustomerName_564408;
           apiVersion: string; billingAccountName: string; customerName: string): Recallable =
   ## billingSubscriptionsListByCustomerName
   ## Lists billing subscription by customer name.
@@ -3251,22 +3257,22 @@ proc call*(call_575315: Call_BillingSubscriptionsListByCustomerName_575308;
   ##                     : Billing Account Id.
   ##   customerName: string (required)
   ##               : Customer Id.
-  var path_575316 = newJObject()
-  var query_575317 = newJObject()
-  add(query_575317, "api-version", newJString(apiVersion))
-  add(path_575316, "billingAccountName", newJString(billingAccountName))
-  add(path_575316, "customerName", newJString(customerName))
-  result = call_575315.call(path_575316, query_575317, nil, nil, nil)
+  var path_564416 = newJObject()
+  var query_564417 = newJObject()
+  add(query_564417, "api-version", newJString(apiVersion))
+  add(path_564416, "billingAccountName", newJString(billingAccountName))
+  add(path_564416, "customerName", newJString(customerName))
+  result = call_564415.call(path_564416, query_564417, nil, nil, nil)
 
-var billingSubscriptionsListByCustomerName* = Call_BillingSubscriptionsListByCustomerName_575308(
+var billingSubscriptionsListByCustomerName* = Call_BillingSubscriptionsListByCustomerName_564408(
     name: "billingSubscriptionsListByCustomerName", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/providers/Microsoft.Billing/billingAccounts/{billingAccountName}/customers/{customerName}/billingSubscriptions",
-    validator: validate_BillingSubscriptionsListByCustomerName_575309, base: "",
-    url: url_BillingSubscriptionsListByCustomerName_575310,
+    validator: validate_BillingSubscriptionsListByCustomerName_564409, base: "",
+    url: url_BillingSubscriptionsListByCustomerName_564410,
     schemes: {Scheme.Https})
 type
-  Call_BillingSubscriptionsGetByCustomerName_575318 = ref object of OpenApiRestCall_574467
-proc url_BillingSubscriptionsGetByCustomerName_575320(protocol: Scheme;
+  Call_BillingSubscriptionsGetByCustomerName_564418 = ref object of OpenApiRestCall_563565
+proc url_BillingSubscriptionsGetByCustomerName_564420(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -3290,7 +3296,7 @@ proc url_BillingSubscriptionsGetByCustomerName_575320(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_BillingSubscriptionsGetByCustomerName_575319(path: JsonNode;
+proc validate_BillingSubscriptionsGetByCustomerName_564419(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Get a single billing subscription by name.
   ## 
@@ -3300,28 +3306,28 @@ proc validate_BillingSubscriptionsGetByCustomerName_575319(path: JsonNode;
   ## parameters in `path` object:
   ##   billingAccountName: JString (required)
   ##                     : Billing Account Id.
-  ##   billingSubscriptionName: JString (required)
-  ##                          : Billing Subscription Id.
   ##   customerName: JString (required)
   ##               : Customer Id.
+  ##   billingSubscriptionName: JString (required)
+  ##                          : Billing Subscription Id.
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `billingAccountName` field"
-  var valid_575321 = path.getOrDefault("billingAccountName")
-  valid_575321 = validateParameter(valid_575321, JString, required = true,
+  var valid_564421 = path.getOrDefault("billingAccountName")
+  valid_564421 = validateParameter(valid_564421, JString, required = true,
                                  default = nil)
-  if valid_575321 != nil:
-    section.add "billingAccountName", valid_575321
-  var valid_575322 = path.getOrDefault("billingSubscriptionName")
-  valid_575322 = validateParameter(valid_575322, JString, required = true,
+  if valid_564421 != nil:
+    section.add "billingAccountName", valid_564421
+  var valid_564422 = path.getOrDefault("customerName")
+  valid_564422 = validateParameter(valid_564422, JString, required = true,
                                  default = nil)
-  if valid_575322 != nil:
-    section.add "billingSubscriptionName", valid_575322
-  var valid_575323 = path.getOrDefault("customerName")
-  valid_575323 = validateParameter(valid_575323, JString, required = true,
+  if valid_564422 != nil:
+    section.add "customerName", valid_564422
+  var valid_564423 = path.getOrDefault("billingSubscriptionName")
+  valid_564423 = validateParameter(valid_564423, JString, required = true,
                                  default = nil)
-  if valid_575323 != nil:
-    section.add "customerName", valid_575323
+  if valid_564423 != nil:
+    section.add "billingSubscriptionName", valid_564423
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -3329,11 +3335,11 @@ proc validate_BillingSubscriptionsGetByCustomerName_575319(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575324 = query.getOrDefault("api-version")
-  valid_575324 = validateParameter(valid_575324, JString, required = true,
+  var valid_564424 = query.getOrDefault("api-version")
+  valid_564424 = validateParameter(valid_564424, JString, required = true,
                                  default = nil)
-  if valid_575324 != nil:
-    section.add "api-version", valid_575324
+  if valid_564424 != nil:
+    section.add "api-version", valid_564424
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3342,24 +3348,24 @@ proc validate_BillingSubscriptionsGetByCustomerName_575319(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_575325: Call_BillingSubscriptionsGetByCustomerName_575318;
+proc call*(call_564425: Call_BillingSubscriptionsGetByCustomerName_564418;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Get a single billing subscription by name.
   ## 
   ## https://docs.microsoft.com/en-us/rest/api/consumption/
-  let valid = call_575325.validator(path, query, header, formData, body)
-  let scheme = call_575325.pickScheme
+  let valid = call_564425.validator(path, query, header, formData, body)
+  let scheme = call_564425.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575325.url(scheme.get, call_575325.host, call_575325.base,
-                         call_575325.route, valid.getOrDefault("path"),
+  let url = call_564425.url(scheme.get, call_564425.host, call_564425.base,
+                         call_564425.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575325, url, valid)
+  result = hook(call_564425, url, valid)
 
-proc call*(call_575326: Call_BillingSubscriptionsGetByCustomerName_575318;
-          apiVersion: string; billingAccountName: string;
-          billingSubscriptionName: string; customerName: string): Recallable =
+proc call*(call_564426: Call_BillingSubscriptionsGetByCustomerName_564418;
+          apiVersion: string; billingAccountName: string; customerName: string;
+          billingSubscriptionName: string): Recallable =
   ## billingSubscriptionsGetByCustomerName
   ## Get a single billing subscription by name.
   ## https://docs.microsoft.com/en-us/rest/api/consumption/
@@ -3367,26 +3373,26 @@ proc call*(call_575326: Call_BillingSubscriptionsGetByCustomerName_575318;
   ##             : Version of the API to be used with the client request. The current version is 2018-11-01-preview.
   ##   billingAccountName: string (required)
   ##                     : Billing Account Id.
-  ##   billingSubscriptionName: string (required)
-  ##                          : Billing Subscription Id.
   ##   customerName: string (required)
   ##               : Customer Id.
-  var path_575327 = newJObject()
-  var query_575328 = newJObject()
-  add(query_575328, "api-version", newJString(apiVersion))
-  add(path_575327, "billingAccountName", newJString(billingAccountName))
-  add(path_575327, "billingSubscriptionName", newJString(billingSubscriptionName))
-  add(path_575327, "customerName", newJString(customerName))
-  result = call_575326.call(path_575327, query_575328, nil, nil, nil)
+  ##   billingSubscriptionName: string (required)
+  ##                          : Billing Subscription Id.
+  var path_564427 = newJObject()
+  var query_564428 = newJObject()
+  add(query_564428, "api-version", newJString(apiVersion))
+  add(path_564427, "billingAccountName", newJString(billingAccountName))
+  add(path_564427, "customerName", newJString(customerName))
+  add(path_564427, "billingSubscriptionName", newJString(billingSubscriptionName))
+  result = call_564426.call(path_564427, query_564428, nil, nil, nil)
 
-var billingSubscriptionsGetByCustomerName* = Call_BillingSubscriptionsGetByCustomerName_575318(
+var billingSubscriptionsGetByCustomerName* = Call_BillingSubscriptionsGetByCustomerName_564418(
     name: "billingSubscriptionsGetByCustomerName", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/providers/Microsoft.Billing/billingAccounts/{billingAccountName}/customers/{customerName}/billingSubscriptions/{billingSubscriptionName}",
-    validator: validate_BillingSubscriptionsGetByCustomerName_575319, base: "",
-    url: url_BillingSubscriptionsGetByCustomerName_575320, schemes: {Scheme.Https})
+    validator: validate_BillingSubscriptionsGetByCustomerName_564419, base: "",
+    url: url_BillingSubscriptionsGetByCustomerName_564420, schemes: {Scheme.Https})
 type
-  Call_BillingPermissionsListByCustomers_575329 = ref object of OpenApiRestCall_574467
-proc url_BillingPermissionsListByCustomers_575331(protocol: Scheme; host: string;
+  Call_BillingPermissionsListByCustomers_564429 = ref object of OpenApiRestCall_563565
+proc url_BillingPermissionsListByCustomers_564431(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -3408,7 +3414,7 @@ proc url_BillingPermissionsListByCustomers_575331(protocol: Scheme; host: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_BillingPermissionsListByCustomers_575330(path: JsonNode;
+proc validate_BillingPermissionsListByCustomers_564430(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists all billing permissions for the caller under customer.
   ## 
@@ -3422,16 +3428,16 @@ proc validate_BillingPermissionsListByCustomers_575330(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `billingAccountName` field"
-  var valid_575332 = path.getOrDefault("billingAccountName")
-  valid_575332 = validateParameter(valid_575332, JString, required = true,
+  var valid_564432 = path.getOrDefault("billingAccountName")
+  valid_564432 = validateParameter(valid_564432, JString, required = true,
                                  default = nil)
-  if valid_575332 != nil:
-    section.add "billingAccountName", valid_575332
-  var valid_575333 = path.getOrDefault("customerName")
-  valid_575333 = validateParameter(valid_575333, JString, required = true,
+  if valid_564432 != nil:
+    section.add "billingAccountName", valid_564432
+  var valid_564433 = path.getOrDefault("customerName")
+  valid_564433 = validateParameter(valid_564433, JString, required = true,
                                  default = nil)
-  if valid_575333 != nil:
-    section.add "customerName", valid_575333
+  if valid_564433 != nil:
+    section.add "customerName", valid_564433
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -3439,11 +3445,11 @@ proc validate_BillingPermissionsListByCustomers_575330(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575334 = query.getOrDefault("api-version")
-  valid_575334 = validateParameter(valid_575334, JString, required = true,
+  var valid_564434 = query.getOrDefault("api-version")
+  valid_564434 = validateParameter(valid_564434, JString, required = true,
                                  default = nil)
-  if valid_575334 != nil:
-    section.add "api-version", valid_575334
+  if valid_564434 != nil:
+    section.add "api-version", valid_564434
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3452,21 +3458,21 @@ proc validate_BillingPermissionsListByCustomers_575330(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_575335: Call_BillingPermissionsListByCustomers_575329;
+proc call*(call_564435: Call_BillingPermissionsListByCustomers_564429;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Lists all billing permissions for the caller under customer.
   ## 
-  let valid = call_575335.validator(path, query, header, formData, body)
-  let scheme = call_575335.pickScheme
+  let valid = call_564435.validator(path, query, header, formData, body)
+  let scheme = call_564435.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575335.url(scheme.get, call_575335.host, call_575335.base,
-                         call_575335.route, valid.getOrDefault("path"),
+  let url = call_564435.url(scheme.get, call_564435.host, call_564435.base,
+                         call_564435.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575335, url, valid)
+  result = hook(call_564435, url, valid)
 
-proc call*(call_575336: Call_BillingPermissionsListByCustomers_575329;
+proc call*(call_564436: Call_BillingPermissionsListByCustomers_564429;
           apiVersion: string; billingAccountName: string; customerName: string): Recallable =
   ## billingPermissionsListByCustomers
   ## Lists all billing permissions for the caller under customer.
@@ -3476,21 +3482,21 @@ proc call*(call_575336: Call_BillingPermissionsListByCustomers_575329;
   ##                     : Billing Account Id.
   ##   customerName: string (required)
   ##               : Customer Id.
-  var path_575337 = newJObject()
-  var query_575338 = newJObject()
-  add(query_575338, "api-version", newJString(apiVersion))
-  add(path_575337, "billingAccountName", newJString(billingAccountName))
-  add(path_575337, "customerName", newJString(customerName))
-  result = call_575336.call(path_575337, query_575338, nil, nil, nil)
+  var path_564437 = newJObject()
+  var query_564438 = newJObject()
+  add(query_564438, "api-version", newJString(apiVersion))
+  add(path_564437, "billingAccountName", newJString(billingAccountName))
+  add(path_564437, "customerName", newJString(customerName))
+  result = call_564436.call(path_564437, query_564438, nil, nil, nil)
 
-var billingPermissionsListByCustomers* = Call_BillingPermissionsListByCustomers_575329(
+var billingPermissionsListByCustomers* = Call_BillingPermissionsListByCustomers_564429(
     name: "billingPermissionsListByCustomers", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/providers/Microsoft.Billing/billingAccounts/{billingAccountName}/customers/{customerName}/providers/Microsoft.Billing/billingPermissions",
-    validator: validate_BillingPermissionsListByCustomers_575330, base: "",
-    url: url_BillingPermissionsListByCustomers_575331, schemes: {Scheme.Https})
+    validator: validate_BillingPermissionsListByCustomers_564430, base: "",
+    url: url_BillingPermissionsListByCustomers_564431, schemes: {Scheme.Https})
 type
-  Call_TransactionsListByCustomerName_575339 = ref object of OpenApiRestCall_574467
-proc url_TransactionsListByCustomerName_575341(protocol: Scheme; host: string;
+  Call_TransactionsListByCustomerName_564439 = ref object of OpenApiRestCall_563565
+proc url_TransactionsListByCustomerName_564441(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -3511,7 +3517,7 @@ proc url_TransactionsListByCustomerName_575341(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_TransactionsListByCustomerName_575340(path: JsonNode;
+proc validate_TransactionsListByCustomerName_564440(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists the transactions by invoice section name for given start date and end date.
   ## 
@@ -3526,49 +3532,49 @@ proc validate_TransactionsListByCustomerName_575340(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `billingAccountName` field"
-  var valid_575342 = path.getOrDefault("billingAccountName")
-  valid_575342 = validateParameter(valid_575342, JString, required = true,
+  var valid_564442 = path.getOrDefault("billingAccountName")
+  valid_564442 = validateParameter(valid_564442, JString, required = true,
                                  default = nil)
-  if valid_575342 != nil:
-    section.add "billingAccountName", valid_575342
-  var valid_575343 = path.getOrDefault("customerName")
-  valid_575343 = validateParameter(valid_575343, JString, required = true,
+  if valid_564442 != nil:
+    section.add "billingAccountName", valid_564442
+  var valid_564443 = path.getOrDefault("customerName")
+  valid_564443 = validateParameter(valid_564443, JString, required = true,
                                  default = nil)
-  if valid_575343 != nil:
-    section.add "customerName", valid_575343
+  if valid_564443 != nil:
+    section.add "customerName", valid_564443
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
   ##              : Version of the API to be used with the client request. The current version is 2018-11-01-preview.
   ##   endDate: JString (required)
   ##          : End date
-  ##   startDate: JString (required)
-  ##            : Start date
   ##   $filter: JString
   ##          : May be used to filter by transaction kind. The filter supports 'eq', 'lt', 'gt', 'le', 'ge', and 'and'. It does not currently support 'ne', 'or', or 'not'. Tag filter is a key value pair string where key and value is separated by a colon (:).
+  ##   startDate: JString (required)
+  ##            : Start date
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575344 = query.getOrDefault("api-version")
-  valid_575344 = validateParameter(valid_575344, JString, required = true,
+  var valid_564444 = query.getOrDefault("api-version")
+  valid_564444 = validateParameter(valid_564444, JString, required = true,
                                  default = nil)
-  if valid_575344 != nil:
-    section.add "api-version", valid_575344
-  var valid_575345 = query.getOrDefault("endDate")
-  valid_575345 = validateParameter(valid_575345, JString, required = true,
+  if valid_564444 != nil:
+    section.add "api-version", valid_564444
+  var valid_564445 = query.getOrDefault("endDate")
+  valid_564445 = validateParameter(valid_564445, JString, required = true,
                                  default = nil)
-  if valid_575345 != nil:
-    section.add "endDate", valid_575345
-  var valid_575346 = query.getOrDefault("startDate")
-  valid_575346 = validateParameter(valid_575346, JString, required = true,
+  if valid_564445 != nil:
+    section.add "endDate", valid_564445
+  var valid_564446 = query.getOrDefault("$filter")
+  valid_564446 = validateParameter(valid_564446, JString, required = false,
                                  default = nil)
-  if valid_575346 != nil:
-    section.add "startDate", valid_575346
-  var valid_575347 = query.getOrDefault("$filter")
-  valid_575347 = validateParameter(valid_575347, JString, required = false,
+  if valid_564446 != nil:
+    section.add "$filter", valid_564446
+  var valid_564447 = query.getOrDefault("startDate")
+  valid_564447 = validateParameter(valid_564447, JString, required = true,
                                  default = nil)
-  if valid_575347 != nil:
-    section.add "$filter", valid_575347
+  if valid_564447 != nil:
+    section.add "startDate", valid_564447
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3577,56 +3583,56 @@ proc validate_TransactionsListByCustomerName_575340(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_575348: Call_TransactionsListByCustomerName_575339; path: JsonNode;
+proc call*(call_564448: Call_TransactionsListByCustomerName_564439; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists the transactions by invoice section name for given start date and end date.
   ## 
   ## https://docs.microsoft.com/en-us/rest/api/consumption/
-  let valid = call_575348.validator(path, query, header, formData, body)
-  let scheme = call_575348.pickScheme
+  let valid = call_564448.validator(path, query, header, formData, body)
+  let scheme = call_564448.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575348.url(scheme.get, call_575348.host, call_575348.base,
-                         call_575348.route, valid.getOrDefault("path"),
+  let url = call_564448.url(scheme.get, call_564448.host, call_564448.base,
+                         call_564448.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575348, url, valid)
+  result = hook(call_564448, url, valid)
 
-proc call*(call_575349: Call_TransactionsListByCustomerName_575339;
-          apiVersion: string; endDate: string; billingAccountName: string;
-          startDate: string; customerName: string; Filter: string = ""): Recallable =
+proc call*(call_564449: Call_TransactionsListByCustomerName_564439;
+          apiVersion: string; billingAccountName: string; customerName: string;
+          endDate: string; startDate: string; Filter: string = ""): Recallable =
   ## transactionsListByCustomerName
   ## Lists the transactions by invoice section name for given start date and end date.
   ## https://docs.microsoft.com/en-us/rest/api/consumption/
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request. The current version is 2018-11-01-preview.
-  ##   endDate: string (required)
-  ##          : End date
   ##   billingAccountName: string (required)
   ##                     : Billing Account Id.
-  ##   startDate: string (required)
-  ##            : Start date
   ##   customerName: string (required)
   ##               : Customer Id.
+  ##   endDate: string (required)
+  ##          : End date
   ##   Filter: string
   ##         : May be used to filter by transaction kind. The filter supports 'eq', 'lt', 'gt', 'le', 'ge', and 'and'. It does not currently support 'ne', 'or', or 'not'. Tag filter is a key value pair string where key and value is separated by a colon (:).
-  var path_575350 = newJObject()
-  var query_575351 = newJObject()
-  add(query_575351, "api-version", newJString(apiVersion))
-  add(query_575351, "endDate", newJString(endDate))
-  add(path_575350, "billingAccountName", newJString(billingAccountName))
-  add(query_575351, "startDate", newJString(startDate))
-  add(path_575350, "customerName", newJString(customerName))
-  add(query_575351, "$filter", newJString(Filter))
-  result = call_575349.call(path_575350, query_575351, nil, nil, nil)
+  ##   startDate: string (required)
+  ##            : Start date
+  var path_564450 = newJObject()
+  var query_564451 = newJObject()
+  add(query_564451, "api-version", newJString(apiVersion))
+  add(path_564450, "billingAccountName", newJString(billingAccountName))
+  add(path_564450, "customerName", newJString(customerName))
+  add(query_564451, "endDate", newJString(endDate))
+  add(query_564451, "$filter", newJString(Filter))
+  add(query_564451, "startDate", newJString(startDate))
+  result = call_564449.call(path_564450, query_564451, nil, nil, nil)
 
-var transactionsListByCustomerName* = Call_TransactionsListByCustomerName_575339(
+var transactionsListByCustomerName* = Call_TransactionsListByCustomerName_564439(
     name: "transactionsListByCustomerName", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/providers/Microsoft.Billing/billingAccounts/{billingAccountName}/customers/{customerName}/transactions",
-    validator: validate_TransactionsListByCustomerName_575340, base: "",
-    url: url_TransactionsListByCustomerName_575341, schemes: {Scheme.Https})
+    validator: validate_TransactionsListByCustomerName_564440, base: "",
+    url: url_TransactionsListByCustomerName_564441, schemes: {Scheme.Https})
 type
-  Call_DepartmentsListByBillingAccountName_575352 = ref object of OpenApiRestCall_574467
-proc url_DepartmentsListByBillingAccountName_575354(protocol: Scheme; host: string;
+  Call_DepartmentsListByBillingAccountName_564452 = ref object of OpenApiRestCall_563565
+proc url_DepartmentsListByBillingAccountName_564454(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -3644,7 +3650,7 @@ proc url_DepartmentsListByBillingAccountName_575354(protocol: Scheme; host: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DepartmentsListByBillingAccountName_575353(path: JsonNode;
+proc validate_DepartmentsListByBillingAccountName_564453(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists all departments for which a user has access.
   ## 
@@ -3656,11 +3662,11 @@ proc validate_DepartmentsListByBillingAccountName_575353(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `billingAccountName` field"
-  var valid_575355 = path.getOrDefault("billingAccountName")
-  valid_575355 = validateParameter(valid_575355, JString, required = true,
+  var valid_564455 = path.getOrDefault("billingAccountName")
+  valid_564455 = validateParameter(valid_564455, JString, required = true,
                                  default = nil)
-  if valid_575355 != nil:
-    section.add "billingAccountName", valid_575355
+  if valid_564455 != nil:
+    section.add "billingAccountName", valid_564455
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -3672,21 +3678,21 @@ proc validate_DepartmentsListByBillingAccountName_575353(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575356 = query.getOrDefault("api-version")
-  valid_575356 = validateParameter(valid_575356, JString, required = true,
+  var valid_564456 = query.getOrDefault("api-version")
+  valid_564456 = validateParameter(valid_564456, JString, required = true,
                                  default = nil)
-  if valid_575356 != nil:
-    section.add "api-version", valid_575356
-  var valid_575357 = query.getOrDefault("$expand")
-  valid_575357 = validateParameter(valid_575357, JString, required = false,
+  if valid_564456 != nil:
+    section.add "api-version", valid_564456
+  var valid_564457 = query.getOrDefault("$expand")
+  valid_564457 = validateParameter(valid_564457, JString, required = false,
                                  default = nil)
-  if valid_575357 != nil:
-    section.add "$expand", valid_575357
-  var valid_575358 = query.getOrDefault("$filter")
-  valid_575358 = validateParameter(valid_575358, JString, required = false,
+  if valid_564457 != nil:
+    section.add "$expand", valid_564457
+  var valid_564458 = query.getOrDefault("$filter")
+  valid_564458 = validateParameter(valid_564458, JString, required = false,
                                  default = nil)
-  if valid_575358 != nil:
-    section.add "$filter", valid_575358
+  if valid_564458 != nil:
+    section.add "$filter", valid_564458
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3695,49 +3701,49 @@ proc validate_DepartmentsListByBillingAccountName_575353(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_575359: Call_DepartmentsListByBillingAccountName_575352;
+proc call*(call_564459: Call_DepartmentsListByBillingAccountName_564452;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Lists all departments for which a user has access.
   ## 
-  let valid = call_575359.validator(path, query, header, formData, body)
-  let scheme = call_575359.pickScheme
+  let valid = call_564459.validator(path, query, header, formData, body)
+  let scheme = call_564459.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575359.url(scheme.get, call_575359.host, call_575359.base,
-                         call_575359.route, valid.getOrDefault("path"),
+  let url = call_564459.url(scheme.get, call_564459.host, call_564459.base,
+                         call_564459.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575359, url, valid)
+  result = hook(call_564459, url, valid)
 
-proc call*(call_575360: Call_DepartmentsListByBillingAccountName_575352;
+proc call*(call_564460: Call_DepartmentsListByBillingAccountName_564452;
           apiVersion: string; billingAccountName: string; Expand: string = "";
           Filter: string = ""): Recallable =
   ## departmentsListByBillingAccountName
   ## Lists all departments for which a user has access.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request. The current version is 2018-11-01-preview.
-  ##   Expand: string
-  ##         : May be used to expand the enrollmentAccounts.
   ##   billingAccountName: string (required)
   ##                     : Billing Account Id.
+  ##   Expand: string
+  ##         : May be used to expand the enrollmentAccounts.
   ##   Filter: string
   ##         : The filter supports 'eq', 'lt', 'gt', 'le', 'ge', and 'and'. It does not currently support 'ne', 'or', or 'not'. Tag filter is a key value pair string where key and value is separated by a colon (:).
-  var path_575361 = newJObject()
-  var query_575362 = newJObject()
-  add(query_575362, "api-version", newJString(apiVersion))
-  add(query_575362, "$expand", newJString(Expand))
-  add(path_575361, "billingAccountName", newJString(billingAccountName))
-  add(query_575362, "$filter", newJString(Filter))
-  result = call_575360.call(path_575361, query_575362, nil, nil, nil)
+  var path_564461 = newJObject()
+  var query_564462 = newJObject()
+  add(query_564462, "api-version", newJString(apiVersion))
+  add(path_564461, "billingAccountName", newJString(billingAccountName))
+  add(query_564462, "$expand", newJString(Expand))
+  add(query_564462, "$filter", newJString(Filter))
+  result = call_564460.call(path_564461, query_564462, nil, nil, nil)
 
-var departmentsListByBillingAccountName* = Call_DepartmentsListByBillingAccountName_575352(
+var departmentsListByBillingAccountName* = Call_DepartmentsListByBillingAccountName_564452(
     name: "departmentsListByBillingAccountName", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/providers/Microsoft.Billing/billingAccounts/{billingAccountName}/departments",
-    validator: validate_DepartmentsListByBillingAccountName_575353, base: "",
-    url: url_DepartmentsListByBillingAccountName_575354, schemes: {Scheme.Https})
+    validator: validate_DepartmentsListByBillingAccountName_564453, base: "",
+    url: url_DepartmentsListByBillingAccountName_564454, schemes: {Scheme.Https})
 type
-  Call_DepartmentsGet_575363 = ref object of OpenApiRestCall_574467
-proc url_DepartmentsGet_575365(protocol: Scheme; host: string; base: string;
+  Call_DepartmentsGet_564463 = ref object of OpenApiRestCall_563565
+proc url_DepartmentsGet_564465(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -3757,7 +3763,7 @@ proc url_DepartmentsGet_575365(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DepartmentsGet_575364(path: JsonNode; query: JsonNode;
+proc validate_DepartmentsGet_564464(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## Get the department by id.
@@ -3772,16 +3778,16 @@ proc validate_DepartmentsGet_575364(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `billingAccountName` field"
-  var valid_575366 = path.getOrDefault("billingAccountName")
-  valid_575366 = validateParameter(valid_575366, JString, required = true,
+  var valid_564466 = path.getOrDefault("billingAccountName")
+  valid_564466 = validateParameter(valid_564466, JString, required = true,
                                  default = nil)
-  if valid_575366 != nil:
-    section.add "billingAccountName", valid_575366
-  var valid_575367 = path.getOrDefault("departmentName")
-  valid_575367 = validateParameter(valid_575367, JString, required = true,
+  if valid_564466 != nil:
+    section.add "billingAccountName", valid_564466
+  var valid_564467 = path.getOrDefault("departmentName")
+  valid_564467 = validateParameter(valid_564467, JString, required = true,
                                  default = nil)
-  if valid_575367 != nil:
-    section.add "departmentName", valid_575367
+  if valid_564467 != nil:
+    section.add "departmentName", valid_564467
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -3793,21 +3799,21 @@ proc validate_DepartmentsGet_575364(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575368 = query.getOrDefault("api-version")
-  valid_575368 = validateParameter(valid_575368, JString, required = true,
+  var valid_564468 = query.getOrDefault("api-version")
+  valid_564468 = validateParameter(valid_564468, JString, required = true,
                                  default = nil)
-  if valid_575368 != nil:
-    section.add "api-version", valid_575368
-  var valid_575369 = query.getOrDefault("$expand")
-  valid_575369 = validateParameter(valid_575369, JString, required = false,
+  if valid_564468 != nil:
+    section.add "api-version", valid_564468
+  var valid_564469 = query.getOrDefault("$expand")
+  valid_564469 = validateParameter(valid_564469, JString, required = false,
                                  default = nil)
-  if valid_575369 != nil:
-    section.add "$expand", valid_575369
-  var valid_575370 = query.getOrDefault("$filter")
-  valid_575370 = validateParameter(valid_575370, JString, required = false,
+  if valid_564469 != nil:
+    section.add "$expand", valid_564469
+  var valid_564470 = query.getOrDefault("$filter")
+  valid_564470 = validateParameter(valid_564470, JString, required = false,
                                  default = nil)
-  if valid_575370 != nil:
-    section.add "$filter", valid_575370
+  if valid_564470 != nil:
+    section.add "$filter", valid_564470
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3816,50 +3822,50 @@ proc validate_DepartmentsGet_575364(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_575371: Call_DepartmentsGet_575363; path: JsonNode; query: JsonNode;
+proc call*(call_564471: Call_DepartmentsGet_564463; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get the department by id.
   ## 
-  let valid = call_575371.validator(path, query, header, formData, body)
-  let scheme = call_575371.pickScheme
+  let valid = call_564471.validator(path, query, header, formData, body)
+  let scheme = call_564471.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575371.url(scheme.get, call_575371.host, call_575371.base,
-                         call_575371.route, valid.getOrDefault("path"),
+  let url = call_564471.url(scheme.get, call_564471.host, call_564471.base,
+                         call_564471.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575371, url, valid)
+  result = hook(call_564471, url, valid)
 
-proc call*(call_575372: Call_DepartmentsGet_575363; apiVersion: string;
+proc call*(call_564472: Call_DepartmentsGet_564463; apiVersion: string;
           billingAccountName: string; departmentName: string; Expand: string = "";
           Filter: string = ""): Recallable =
   ## departmentsGet
   ## Get the department by id.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request. The current version is 2018-11-01-preview.
-  ##   Expand: string
-  ##         : May be used to expand the enrollmentAccounts.
   ##   billingAccountName: string (required)
   ##                     : Billing Account Id.
-  ##   departmentName: string (required)
-  ##                 : Department Id.
+  ##   Expand: string
+  ##         : May be used to expand the enrollmentAccounts.
   ##   Filter: string
   ##         : The filter supports 'eq', 'lt', 'gt', 'le', 'ge', and 'and'. It does not currently support 'ne', 'or', or 'not'. Tag filter is a key value pair string where key and value is separated by a colon (:).
-  var path_575373 = newJObject()
-  var query_575374 = newJObject()
-  add(query_575374, "api-version", newJString(apiVersion))
-  add(query_575374, "$expand", newJString(Expand))
-  add(path_575373, "billingAccountName", newJString(billingAccountName))
-  add(path_575373, "departmentName", newJString(departmentName))
-  add(query_575374, "$filter", newJString(Filter))
-  result = call_575372.call(path_575373, query_575374, nil, nil, nil)
+  ##   departmentName: string (required)
+  ##                 : Department Id.
+  var path_564473 = newJObject()
+  var query_564474 = newJObject()
+  add(query_564474, "api-version", newJString(apiVersion))
+  add(path_564473, "billingAccountName", newJString(billingAccountName))
+  add(query_564474, "$expand", newJString(Expand))
+  add(query_564474, "$filter", newJString(Filter))
+  add(path_564473, "departmentName", newJString(departmentName))
+  result = call_564472.call(path_564473, query_564474, nil, nil, nil)
 
-var departmentsGet* = Call_DepartmentsGet_575363(name: "departmentsGet",
+var departmentsGet* = Call_DepartmentsGet_564463(name: "departmentsGet",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/providers/Microsoft.Billing/billingAccounts/{billingAccountName}/departments/{departmentName}",
-    validator: validate_DepartmentsGet_575364, base: "", url: url_DepartmentsGet_575365,
+    validator: validate_DepartmentsGet_564464, base: "", url: url_DepartmentsGet_564465,
     schemes: {Scheme.Https})
 type
-  Call_EnrollmentAccountsListByBillingAccountName_575375 = ref object of OpenApiRestCall_574467
-proc url_EnrollmentAccountsListByBillingAccountName_575377(protocol: Scheme;
+  Call_EnrollmentAccountsListByBillingAccountName_564475 = ref object of OpenApiRestCall_563565
+proc url_EnrollmentAccountsListByBillingAccountName_564477(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -3877,7 +3883,7 @@ proc url_EnrollmentAccountsListByBillingAccountName_575377(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_EnrollmentAccountsListByBillingAccountName_575376(path: JsonNode;
+proc validate_EnrollmentAccountsListByBillingAccountName_564476(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists all Enrollment Accounts for which a user has access.
   ## 
@@ -3889,11 +3895,11 @@ proc validate_EnrollmentAccountsListByBillingAccountName_575376(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `billingAccountName` field"
-  var valid_575378 = path.getOrDefault("billingAccountName")
-  valid_575378 = validateParameter(valid_575378, JString, required = true,
+  var valid_564478 = path.getOrDefault("billingAccountName")
+  valid_564478 = validateParameter(valid_564478, JString, required = true,
                                  default = nil)
-  if valid_575378 != nil:
-    section.add "billingAccountName", valid_575378
+  if valid_564478 != nil:
+    section.add "billingAccountName", valid_564478
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -3905,21 +3911,21 @@ proc validate_EnrollmentAccountsListByBillingAccountName_575376(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575379 = query.getOrDefault("api-version")
-  valid_575379 = validateParameter(valid_575379, JString, required = true,
+  var valid_564479 = query.getOrDefault("api-version")
+  valid_564479 = validateParameter(valid_564479, JString, required = true,
                                  default = nil)
-  if valid_575379 != nil:
-    section.add "api-version", valid_575379
-  var valid_575380 = query.getOrDefault("$expand")
-  valid_575380 = validateParameter(valid_575380, JString, required = false,
+  if valid_564479 != nil:
+    section.add "api-version", valid_564479
+  var valid_564480 = query.getOrDefault("$expand")
+  valid_564480 = validateParameter(valid_564480, JString, required = false,
                                  default = nil)
-  if valid_575380 != nil:
-    section.add "$expand", valid_575380
-  var valid_575381 = query.getOrDefault("$filter")
-  valid_575381 = validateParameter(valid_575381, JString, required = false,
+  if valid_564480 != nil:
+    section.add "$expand", valid_564480
+  var valid_564481 = query.getOrDefault("$filter")
+  valid_564481 = validateParameter(valid_564481, JString, required = false,
                                  default = nil)
-  if valid_575381 != nil:
-    section.add "$filter", valid_575381
+  if valid_564481 != nil:
+    section.add "$filter", valid_564481
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3928,50 +3934,50 @@ proc validate_EnrollmentAccountsListByBillingAccountName_575376(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_575382: Call_EnrollmentAccountsListByBillingAccountName_575375;
+proc call*(call_564482: Call_EnrollmentAccountsListByBillingAccountName_564475;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Lists all Enrollment Accounts for which a user has access.
   ## 
-  let valid = call_575382.validator(path, query, header, formData, body)
-  let scheme = call_575382.pickScheme
+  let valid = call_564482.validator(path, query, header, formData, body)
+  let scheme = call_564482.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575382.url(scheme.get, call_575382.host, call_575382.base,
-                         call_575382.route, valid.getOrDefault("path"),
+  let url = call_564482.url(scheme.get, call_564482.host, call_564482.base,
+                         call_564482.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575382, url, valid)
+  result = hook(call_564482, url, valid)
 
-proc call*(call_575383: Call_EnrollmentAccountsListByBillingAccountName_575375;
+proc call*(call_564483: Call_EnrollmentAccountsListByBillingAccountName_564475;
           apiVersion: string; billingAccountName: string; Expand: string = "";
           Filter: string = ""): Recallable =
   ## enrollmentAccountsListByBillingAccountName
   ## Lists all Enrollment Accounts for which a user has access.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request. The current version is 2018-11-01-preview.
-  ##   Expand: string
-  ##         : May be used to expand the department.
   ##   billingAccountName: string (required)
   ##                     : Billing Account Id.
+  ##   Expand: string
+  ##         : May be used to expand the department.
   ##   Filter: string
   ##         : The filter supports 'eq', 'lt', 'gt', 'le', 'ge', and 'and'. It does not currently support 'ne', 'or', or 'not'. Tag filter is a key value pair string where key and value is separated by a colon (:).
-  var path_575384 = newJObject()
-  var query_575385 = newJObject()
-  add(query_575385, "api-version", newJString(apiVersion))
-  add(query_575385, "$expand", newJString(Expand))
-  add(path_575384, "billingAccountName", newJString(billingAccountName))
-  add(query_575385, "$filter", newJString(Filter))
-  result = call_575383.call(path_575384, query_575385, nil, nil, nil)
+  var path_564484 = newJObject()
+  var query_564485 = newJObject()
+  add(query_564485, "api-version", newJString(apiVersion))
+  add(path_564484, "billingAccountName", newJString(billingAccountName))
+  add(query_564485, "$expand", newJString(Expand))
+  add(query_564485, "$filter", newJString(Filter))
+  result = call_564483.call(path_564484, query_564485, nil, nil, nil)
 
-var enrollmentAccountsListByBillingAccountName* = Call_EnrollmentAccountsListByBillingAccountName_575375(
+var enrollmentAccountsListByBillingAccountName* = Call_EnrollmentAccountsListByBillingAccountName_564475(
     name: "enrollmentAccountsListByBillingAccountName", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/providers/Microsoft.Billing/billingAccounts/{billingAccountName}/enrollmentAccounts",
-    validator: validate_EnrollmentAccountsListByBillingAccountName_575376,
-    base: "", url: url_EnrollmentAccountsListByBillingAccountName_575377,
+    validator: validate_EnrollmentAccountsListByBillingAccountName_564476,
+    base: "", url: url_EnrollmentAccountsListByBillingAccountName_564477,
     schemes: {Scheme.Https})
 type
-  Call_EnrollmentAccountsGetByEnrollmentAccountId_575386 = ref object of OpenApiRestCall_574467
-proc url_EnrollmentAccountsGetByEnrollmentAccountId_575388(protocol: Scheme;
+  Call_EnrollmentAccountsGetByEnrollmentAccountId_564486 = ref object of OpenApiRestCall_563565
+proc url_EnrollmentAccountsGetByEnrollmentAccountId_564488(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -3992,7 +3998,7 @@ proc url_EnrollmentAccountsGetByEnrollmentAccountId_575388(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_EnrollmentAccountsGetByEnrollmentAccountId_575387(path: JsonNode;
+proc validate_EnrollmentAccountsGetByEnrollmentAccountId_564487(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Get the enrollment account by id.
   ## 
@@ -4006,16 +4012,16 @@ proc validate_EnrollmentAccountsGetByEnrollmentAccountId_575387(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `billingAccountName` field"
-  var valid_575389 = path.getOrDefault("billingAccountName")
-  valid_575389 = validateParameter(valid_575389, JString, required = true,
+  var valid_564489 = path.getOrDefault("billingAccountName")
+  valid_564489 = validateParameter(valid_564489, JString, required = true,
                                  default = nil)
-  if valid_575389 != nil:
-    section.add "billingAccountName", valid_575389
-  var valid_575390 = path.getOrDefault("enrollmentAccountName")
-  valid_575390 = validateParameter(valid_575390, JString, required = true,
+  if valid_564489 != nil:
+    section.add "billingAccountName", valid_564489
+  var valid_564490 = path.getOrDefault("enrollmentAccountName")
+  valid_564490 = validateParameter(valid_564490, JString, required = true,
                                  default = nil)
-  if valid_575390 != nil:
-    section.add "enrollmentAccountName", valid_575390
+  if valid_564490 != nil:
+    section.add "enrollmentAccountName", valid_564490
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -4027,21 +4033,21 @@ proc validate_EnrollmentAccountsGetByEnrollmentAccountId_575387(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575391 = query.getOrDefault("api-version")
-  valid_575391 = validateParameter(valid_575391, JString, required = true,
+  var valid_564491 = query.getOrDefault("api-version")
+  valid_564491 = validateParameter(valid_564491, JString, required = true,
                                  default = nil)
-  if valid_575391 != nil:
-    section.add "api-version", valid_575391
-  var valid_575392 = query.getOrDefault("$expand")
-  valid_575392 = validateParameter(valid_575392, JString, required = false,
+  if valid_564491 != nil:
+    section.add "api-version", valid_564491
+  var valid_564492 = query.getOrDefault("$expand")
+  valid_564492 = validateParameter(valid_564492, JString, required = false,
                                  default = nil)
-  if valid_575392 != nil:
-    section.add "$expand", valid_575392
-  var valid_575393 = query.getOrDefault("$filter")
-  valid_575393 = validateParameter(valid_575393, JString, required = false,
+  if valid_564492 != nil:
+    section.add "$expand", valid_564492
+  var valid_564493 = query.getOrDefault("$filter")
+  valid_564493 = validateParameter(valid_564493, JString, required = false,
                                  default = nil)
-  if valid_575393 != nil:
-    section.add "$filter", valid_575393
+  if valid_564493 != nil:
+    section.add "$filter", valid_564493
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -4050,53 +4056,53 @@ proc validate_EnrollmentAccountsGetByEnrollmentAccountId_575387(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_575394: Call_EnrollmentAccountsGetByEnrollmentAccountId_575386;
+proc call*(call_564494: Call_EnrollmentAccountsGetByEnrollmentAccountId_564486;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Get the enrollment account by id.
   ## 
-  let valid = call_575394.validator(path, query, header, formData, body)
-  let scheme = call_575394.pickScheme
+  let valid = call_564494.validator(path, query, header, formData, body)
+  let scheme = call_564494.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575394.url(scheme.get, call_575394.host, call_575394.base,
-                         call_575394.route, valid.getOrDefault("path"),
+  let url = call_564494.url(scheme.get, call_564494.host, call_564494.base,
+                         call_564494.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575394, url, valid)
+  result = hook(call_564494, url, valid)
 
-proc call*(call_575395: Call_EnrollmentAccountsGetByEnrollmentAccountId_575386;
+proc call*(call_564495: Call_EnrollmentAccountsGetByEnrollmentAccountId_564486;
           apiVersion: string; billingAccountName: string;
           enrollmentAccountName: string; Expand: string = ""; Filter: string = ""): Recallable =
   ## enrollmentAccountsGetByEnrollmentAccountId
   ## Get the enrollment account by id.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request. The current version is 2018-11-01-preview.
-  ##   Expand: string
-  ##         : May be used to expand the Department.
   ##   billingAccountName: string (required)
   ##                     : Billing Account Id.
-  ##   Filter: string
-  ##         : The filter supports 'eq', 'lt', 'gt', 'le', 'ge', and 'and'. It does not currently support 'ne', 'or', or 'not'. Tag filter is a key value pair string where key and value is separated by a colon (:).
+  ##   Expand: string
+  ##         : May be used to expand the Department.
   ##   enrollmentAccountName: string (required)
   ##                        : Enrollment Account Id.
-  var path_575396 = newJObject()
-  var query_575397 = newJObject()
-  add(query_575397, "api-version", newJString(apiVersion))
-  add(query_575397, "$expand", newJString(Expand))
-  add(path_575396, "billingAccountName", newJString(billingAccountName))
-  add(query_575397, "$filter", newJString(Filter))
-  add(path_575396, "enrollmentAccountName", newJString(enrollmentAccountName))
-  result = call_575395.call(path_575396, query_575397, nil, nil, nil)
+  ##   Filter: string
+  ##         : The filter supports 'eq', 'lt', 'gt', 'le', 'ge', and 'and'. It does not currently support 'ne', 'or', or 'not'. Tag filter is a key value pair string where key and value is separated by a colon (:).
+  var path_564496 = newJObject()
+  var query_564497 = newJObject()
+  add(query_564497, "api-version", newJString(apiVersion))
+  add(path_564496, "billingAccountName", newJString(billingAccountName))
+  add(query_564497, "$expand", newJString(Expand))
+  add(path_564496, "enrollmentAccountName", newJString(enrollmentAccountName))
+  add(query_564497, "$filter", newJString(Filter))
+  result = call_564495.call(path_564496, query_564497, nil, nil, nil)
 
-var enrollmentAccountsGetByEnrollmentAccountId* = Call_EnrollmentAccountsGetByEnrollmentAccountId_575386(
+var enrollmentAccountsGetByEnrollmentAccountId* = Call_EnrollmentAccountsGetByEnrollmentAccountId_564486(
     name: "enrollmentAccountsGetByEnrollmentAccountId", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/providers/Microsoft.Billing/billingAccounts/{billingAccountName}/enrollmentAccounts/{enrollmentAccountName}",
-    validator: validate_EnrollmentAccountsGetByEnrollmentAccountId_575387,
-    base: "", url: url_EnrollmentAccountsGetByEnrollmentAccountId_575388,
+    validator: validate_EnrollmentAccountsGetByEnrollmentAccountId_564487,
+    base: "", url: url_EnrollmentAccountsGetByEnrollmentAccountId_564488,
     schemes: {Scheme.Https})
 type
-  Call_InvoiceSectionsCreate_575408 = ref object of OpenApiRestCall_574467
-proc url_InvoiceSectionsCreate_575410(protocol: Scheme; host: string; base: string;
+  Call_InvoiceSectionsCreate_564508 = ref object of OpenApiRestCall_563565
+proc url_InvoiceSectionsCreate_564510(protocol: Scheme; host: string; base: string;
                                      route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -4114,7 +4120,7 @@ proc url_InvoiceSectionsCreate_575410(protocol: Scheme; host: string; base: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_InvoiceSectionsCreate_575409(path: JsonNode; query: JsonNode;
+proc validate_InvoiceSectionsCreate_564509(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## The operation to create a InvoiceSection.
   ## 
@@ -4126,11 +4132,11 @@ proc validate_InvoiceSectionsCreate_575409(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `billingAccountName` field"
-  var valid_575411 = path.getOrDefault("billingAccountName")
-  valid_575411 = validateParameter(valid_575411, JString, required = true,
+  var valid_564511 = path.getOrDefault("billingAccountName")
+  valid_564511 = validateParameter(valid_564511, JString, required = true,
                                  default = nil)
-  if valid_575411 != nil:
-    section.add "billingAccountName", valid_575411
+  if valid_564511 != nil:
+    section.add "billingAccountName", valid_564511
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -4138,11 +4144,11 @@ proc validate_InvoiceSectionsCreate_575409(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575412 = query.getOrDefault("api-version")
-  valid_575412 = validateParameter(valid_575412, JString, required = true,
+  var valid_564512 = query.getOrDefault("api-version")
+  valid_564512 = validateParameter(valid_564512, JString, required = true,
                                  default = nil)
-  if valid_575412 != nil:
-    section.add "api-version", valid_575412
+  if valid_564512 != nil:
+    section.add "api-version", valid_564512
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -4156,20 +4162,20 @@ proc validate_InvoiceSectionsCreate_575409(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_575414: Call_InvoiceSectionsCreate_575408; path: JsonNode;
+proc call*(call_564514: Call_InvoiceSectionsCreate_564508; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## The operation to create a InvoiceSection.
   ## 
-  let valid = call_575414.validator(path, query, header, formData, body)
-  let scheme = call_575414.pickScheme
+  let valid = call_564514.validator(path, query, header, formData, body)
+  let scheme = call_564514.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575414.url(scheme.get, call_575414.host, call_575414.base,
-                         call_575414.route, valid.getOrDefault("path"),
+  let url = call_564514.url(scheme.get, call_564514.host, call_564514.base,
+                         call_564514.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575414, url, valid)
+  result = hook(call_564514, url, valid)
 
-proc call*(call_575415: Call_InvoiceSectionsCreate_575408; apiVersion: string;
+proc call*(call_564515: Call_InvoiceSectionsCreate_564508; apiVersion: string;
           billingAccountName: string; parameters: JsonNode): Recallable =
   ## invoiceSectionsCreate
   ## The operation to create a InvoiceSection.
@@ -4179,23 +4185,23 @@ proc call*(call_575415: Call_InvoiceSectionsCreate_575408; apiVersion: string;
   ##                     : Billing Account Id.
   ##   parameters: JObject (required)
   ##             : Parameters supplied to the Create InvoiceSection operation.
-  var path_575416 = newJObject()
-  var query_575417 = newJObject()
-  var body_575418 = newJObject()
-  add(query_575417, "api-version", newJString(apiVersion))
-  add(path_575416, "billingAccountName", newJString(billingAccountName))
+  var path_564516 = newJObject()
+  var query_564517 = newJObject()
+  var body_564518 = newJObject()
+  add(query_564517, "api-version", newJString(apiVersion))
+  add(path_564516, "billingAccountName", newJString(billingAccountName))
   if parameters != nil:
-    body_575418 = parameters
-  result = call_575415.call(path_575416, query_575417, nil, nil, body_575418)
+    body_564518 = parameters
+  result = call_564515.call(path_564516, query_564517, nil, nil, body_564518)
 
-var invoiceSectionsCreate* = Call_InvoiceSectionsCreate_575408(
+var invoiceSectionsCreate* = Call_InvoiceSectionsCreate_564508(
     name: "invoiceSectionsCreate", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/providers/Microsoft.Billing/billingAccounts/{billingAccountName}/invoiceSections",
-    validator: validate_InvoiceSectionsCreate_575409, base: "",
-    url: url_InvoiceSectionsCreate_575410, schemes: {Scheme.Https})
+    validator: validate_InvoiceSectionsCreate_564509, base: "",
+    url: url_InvoiceSectionsCreate_564510, schemes: {Scheme.Https})
 type
-  Call_InvoiceSectionsListByBillingAccountName_575398 = ref object of OpenApiRestCall_574467
-proc url_InvoiceSectionsListByBillingAccountName_575400(protocol: Scheme;
+  Call_InvoiceSectionsListByBillingAccountName_564498 = ref object of OpenApiRestCall_563565
+proc url_InvoiceSectionsListByBillingAccountName_564500(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -4213,7 +4219,7 @@ proc url_InvoiceSectionsListByBillingAccountName_575400(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_InvoiceSectionsListByBillingAccountName_575399(path: JsonNode;
+proc validate_InvoiceSectionsListByBillingAccountName_564499(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists all invoice sections for which a user has access.
   ## 
@@ -4225,11 +4231,11 @@ proc validate_InvoiceSectionsListByBillingAccountName_575399(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `billingAccountName` field"
-  var valid_575401 = path.getOrDefault("billingAccountName")
-  valid_575401 = validateParameter(valid_575401, JString, required = true,
+  var valid_564501 = path.getOrDefault("billingAccountName")
+  valid_564501 = validateParameter(valid_564501, JString, required = true,
                                  default = nil)
-  if valid_575401 != nil:
-    section.add "billingAccountName", valid_575401
+  if valid_564501 != nil:
+    section.add "billingAccountName", valid_564501
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -4239,16 +4245,16 @@ proc validate_InvoiceSectionsListByBillingAccountName_575399(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575402 = query.getOrDefault("api-version")
-  valid_575402 = validateParameter(valid_575402, JString, required = true,
+  var valid_564502 = query.getOrDefault("api-version")
+  valid_564502 = validateParameter(valid_564502, JString, required = true,
                                  default = nil)
-  if valid_575402 != nil:
-    section.add "api-version", valid_575402
-  var valid_575403 = query.getOrDefault("$expand")
-  valid_575403 = validateParameter(valid_575403, JString, required = false,
+  if valid_564502 != nil:
+    section.add "api-version", valid_564502
+  var valid_564503 = query.getOrDefault("$expand")
+  valid_564503 = validateParameter(valid_564503, JString, required = false,
                                  default = nil)
-  if valid_575403 != nil:
-    section.add "$expand", valid_575403
+  if valid_564503 != nil:
+    section.add "$expand", valid_564503
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -4257,46 +4263,46 @@ proc validate_InvoiceSectionsListByBillingAccountName_575399(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_575404: Call_InvoiceSectionsListByBillingAccountName_575398;
+proc call*(call_564504: Call_InvoiceSectionsListByBillingAccountName_564498;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Lists all invoice sections for which a user has access.
   ## 
-  let valid = call_575404.validator(path, query, header, formData, body)
-  let scheme = call_575404.pickScheme
+  let valid = call_564504.validator(path, query, header, formData, body)
+  let scheme = call_564504.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575404.url(scheme.get, call_575404.host, call_575404.base,
-                         call_575404.route, valid.getOrDefault("path"),
+  let url = call_564504.url(scheme.get, call_564504.host, call_564504.base,
+                         call_564504.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575404, url, valid)
+  result = hook(call_564504, url, valid)
 
-proc call*(call_575405: Call_InvoiceSectionsListByBillingAccountName_575398;
+proc call*(call_564505: Call_InvoiceSectionsListByBillingAccountName_564498;
           apiVersion: string; billingAccountName: string; Expand: string = ""): Recallable =
   ## invoiceSectionsListByBillingAccountName
   ## Lists all invoice sections for which a user has access.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request. The current version is 2018-11-01-preview.
-  ##   Expand: string
-  ##         : May be used to expand the billingProfiles.
   ##   billingAccountName: string (required)
   ##                     : Billing Account Id.
-  var path_575406 = newJObject()
-  var query_575407 = newJObject()
-  add(query_575407, "api-version", newJString(apiVersion))
-  add(query_575407, "$expand", newJString(Expand))
-  add(path_575406, "billingAccountName", newJString(billingAccountName))
-  result = call_575405.call(path_575406, query_575407, nil, nil, nil)
+  ##   Expand: string
+  ##         : May be used to expand the billingProfiles.
+  var path_564506 = newJObject()
+  var query_564507 = newJObject()
+  add(query_564507, "api-version", newJString(apiVersion))
+  add(path_564506, "billingAccountName", newJString(billingAccountName))
+  add(query_564507, "$expand", newJString(Expand))
+  result = call_564505.call(path_564506, query_564507, nil, nil, nil)
 
-var invoiceSectionsListByBillingAccountName* = Call_InvoiceSectionsListByBillingAccountName_575398(
+var invoiceSectionsListByBillingAccountName* = Call_InvoiceSectionsListByBillingAccountName_564498(
     name: "invoiceSectionsListByBillingAccountName", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/providers/Microsoft.Billing/billingAccounts/{billingAccountName}/invoiceSections",
-    validator: validate_InvoiceSectionsListByBillingAccountName_575399, base: "",
-    url: url_InvoiceSectionsListByBillingAccountName_575400,
+    validator: validate_InvoiceSectionsListByBillingAccountName_564499, base: "",
+    url: url_InvoiceSectionsListByBillingAccountName_564500,
     schemes: {Scheme.Https})
 type
-  Call_InvoiceSectionsUpdate_575430 = ref object of OpenApiRestCall_574467
-proc url_InvoiceSectionsUpdate_575432(protocol: Scheme; host: string; base: string;
+  Call_InvoiceSectionsUpdate_564530 = ref object of OpenApiRestCall_563565
+proc url_InvoiceSectionsUpdate_564532(protocol: Scheme; host: string; base: string;
                                      route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -4317,7 +4323,7 @@ proc url_InvoiceSectionsUpdate_575432(protocol: Scheme; host: string; base: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_InvoiceSectionsUpdate_575431(path: JsonNode; query: JsonNode;
+proc validate_InvoiceSectionsUpdate_564531(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## The operation to update a InvoiceSection.
   ## 
@@ -4331,16 +4337,16 @@ proc validate_InvoiceSectionsUpdate_575431(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `billingAccountName` field"
-  var valid_575433 = path.getOrDefault("billingAccountName")
-  valid_575433 = validateParameter(valid_575433, JString, required = true,
+  var valid_564533 = path.getOrDefault("billingAccountName")
+  valid_564533 = validateParameter(valid_564533, JString, required = true,
                                  default = nil)
-  if valid_575433 != nil:
-    section.add "billingAccountName", valid_575433
-  var valid_575434 = path.getOrDefault("invoiceSectionName")
-  valid_575434 = validateParameter(valid_575434, JString, required = true,
+  if valid_564533 != nil:
+    section.add "billingAccountName", valid_564533
+  var valid_564534 = path.getOrDefault("invoiceSectionName")
+  valid_564534 = validateParameter(valid_564534, JString, required = true,
                                  default = nil)
-  if valid_575434 != nil:
-    section.add "invoiceSectionName", valid_575434
+  if valid_564534 != nil:
+    section.add "invoiceSectionName", valid_564534
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -4348,11 +4354,11 @@ proc validate_InvoiceSectionsUpdate_575431(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575435 = query.getOrDefault("api-version")
-  valid_575435 = validateParameter(valid_575435, JString, required = true,
+  var valid_564535 = query.getOrDefault("api-version")
+  valid_564535 = validateParameter(valid_564535, JString, required = true,
                                  default = nil)
-  if valid_575435 != nil:
-    section.add "api-version", valid_575435
+  if valid_564535 != nil:
+    section.add "api-version", valid_564535
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -4366,50 +4372,50 @@ proc validate_InvoiceSectionsUpdate_575431(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_575437: Call_InvoiceSectionsUpdate_575430; path: JsonNode;
+proc call*(call_564537: Call_InvoiceSectionsUpdate_564530; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## The operation to update a InvoiceSection.
   ## 
-  let valid = call_575437.validator(path, query, header, formData, body)
-  let scheme = call_575437.pickScheme
+  let valid = call_564537.validator(path, query, header, formData, body)
+  let scheme = call_564537.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575437.url(scheme.get, call_575437.host, call_575437.base,
-                         call_575437.route, valid.getOrDefault("path"),
+  let url = call_564537.url(scheme.get, call_564537.host, call_564537.base,
+                         call_564537.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575437, url, valid)
+  result = hook(call_564537, url, valid)
 
-proc call*(call_575438: Call_InvoiceSectionsUpdate_575430; apiVersion: string;
-          billingAccountName: string; invoiceSectionName: string;
-          parameters: JsonNode): Recallable =
+proc call*(call_564538: Call_InvoiceSectionsUpdate_564530; apiVersion: string;
+          billingAccountName: string; parameters: JsonNode;
+          invoiceSectionName: string): Recallable =
   ## invoiceSectionsUpdate
   ## The operation to update a InvoiceSection.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request. The current version is 2018-11-01-preview.
   ##   billingAccountName: string (required)
   ##                     : Billing Account Id.
-  ##   invoiceSectionName: string (required)
-  ##                     : InvoiceSection Id.
   ##   parameters: JObject (required)
   ##             : Parameters supplied to the Create InvoiceSection operation.
-  var path_575439 = newJObject()
-  var query_575440 = newJObject()
-  var body_575441 = newJObject()
-  add(query_575440, "api-version", newJString(apiVersion))
-  add(path_575439, "billingAccountName", newJString(billingAccountName))
-  add(path_575439, "invoiceSectionName", newJString(invoiceSectionName))
+  ##   invoiceSectionName: string (required)
+  ##                     : InvoiceSection Id.
+  var path_564539 = newJObject()
+  var query_564540 = newJObject()
+  var body_564541 = newJObject()
+  add(query_564540, "api-version", newJString(apiVersion))
+  add(path_564539, "billingAccountName", newJString(billingAccountName))
   if parameters != nil:
-    body_575441 = parameters
-  result = call_575438.call(path_575439, query_575440, nil, nil, body_575441)
+    body_564541 = parameters
+  add(path_564539, "invoiceSectionName", newJString(invoiceSectionName))
+  result = call_564538.call(path_564539, query_564540, nil, nil, body_564541)
 
-var invoiceSectionsUpdate* = Call_InvoiceSectionsUpdate_575430(
+var invoiceSectionsUpdate* = Call_InvoiceSectionsUpdate_564530(
     name: "invoiceSectionsUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/providers/Microsoft.Billing/billingAccounts/{billingAccountName}/invoiceSections/{invoiceSectionName}",
-    validator: validate_InvoiceSectionsUpdate_575431, base: "",
-    url: url_InvoiceSectionsUpdate_575432, schemes: {Scheme.Https})
+    validator: validate_InvoiceSectionsUpdate_564531, base: "",
+    url: url_InvoiceSectionsUpdate_564532, schemes: {Scheme.Https})
 type
-  Call_InvoiceSectionsGet_575419 = ref object of OpenApiRestCall_574467
-proc url_InvoiceSectionsGet_575421(protocol: Scheme; host: string; base: string;
+  Call_InvoiceSectionsGet_564519 = ref object of OpenApiRestCall_563565
+proc url_InvoiceSectionsGet_564521(protocol: Scheme; host: string; base: string;
                                   route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -4430,7 +4436,7 @@ proc url_InvoiceSectionsGet_575421(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_InvoiceSectionsGet_575420(path: JsonNode; query: JsonNode;
+proc validate_InvoiceSectionsGet_564520(path: JsonNode; query: JsonNode;
                                        header: JsonNode; formData: JsonNode;
                                        body: JsonNode): JsonNode =
   ## Get the InvoiceSection by id.
@@ -4445,16 +4451,16 @@ proc validate_InvoiceSectionsGet_575420(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `billingAccountName` field"
-  var valid_575422 = path.getOrDefault("billingAccountName")
-  valid_575422 = validateParameter(valid_575422, JString, required = true,
+  var valid_564522 = path.getOrDefault("billingAccountName")
+  valid_564522 = validateParameter(valid_564522, JString, required = true,
                                  default = nil)
-  if valid_575422 != nil:
-    section.add "billingAccountName", valid_575422
-  var valid_575423 = path.getOrDefault("invoiceSectionName")
-  valid_575423 = validateParameter(valid_575423, JString, required = true,
+  if valid_564522 != nil:
+    section.add "billingAccountName", valid_564522
+  var valid_564523 = path.getOrDefault("invoiceSectionName")
+  valid_564523 = validateParameter(valid_564523, JString, required = true,
                                  default = nil)
-  if valid_575423 != nil:
-    section.add "invoiceSectionName", valid_575423
+  if valid_564523 != nil:
+    section.add "invoiceSectionName", valid_564523
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -4464,16 +4470,16 @@ proc validate_InvoiceSectionsGet_575420(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575424 = query.getOrDefault("api-version")
-  valid_575424 = validateParameter(valid_575424, JString, required = true,
+  var valid_564524 = query.getOrDefault("api-version")
+  valid_564524 = validateParameter(valid_564524, JString, required = true,
                                  default = nil)
-  if valid_575424 != nil:
-    section.add "api-version", valid_575424
-  var valid_575425 = query.getOrDefault("$expand")
-  valid_575425 = validateParameter(valid_575425, JString, required = false,
+  if valid_564524 != nil:
+    section.add "api-version", valid_564524
+  var valid_564525 = query.getOrDefault("$expand")
+  valid_564525 = validateParameter(valid_564525, JString, required = false,
                                  default = nil)
-  if valid_575425 != nil:
-    section.add "$expand", valid_575425
+  if valid_564525 != nil:
+    section.add "$expand", valid_564525
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -4482,48 +4488,48 @@ proc validate_InvoiceSectionsGet_575420(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_575426: Call_InvoiceSectionsGet_575419; path: JsonNode;
+proc call*(call_564526: Call_InvoiceSectionsGet_564519; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get the InvoiceSection by id.
   ## 
-  let valid = call_575426.validator(path, query, header, formData, body)
-  let scheme = call_575426.pickScheme
+  let valid = call_564526.validator(path, query, header, formData, body)
+  let scheme = call_564526.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575426.url(scheme.get, call_575426.host, call_575426.base,
-                         call_575426.route, valid.getOrDefault("path"),
+  let url = call_564526.url(scheme.get, call_564526.host, call_564526.base,
+                         call_564526.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575426, url, valid)
+  result = hook(call_564526, url, valid)
 
-proc call*(call_575427: Call_InvoiceSectionsGet_575419; apiVersion: string;
+proc call*(call_564527: Call_InvoiceSectionsGet_564519; apiVersion: string;
           billingAccountName: string; invoiceSectionName: string;
           Expand: string = ""): Recallable =
   ## invoiceSectionsGet
   ## Get the InvoiceSection by id.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request. The current version is 2018-11-01-preview.
-  ##   Expand: string
-  ##         : May be used to expand the billingProfiles.
   ##   billingAccountName: string (required)
   ##                     : Billing Account Id.
+  ##   Expand: string
+  ##         : May be used to expand the billingProfiles.
   ##   invoiceSectionName: string (required)
   ##                     : InvoiceSection Id.
-  var path_575428 = newJObject()
-  var query_575429 = newJObject()
-  add(query_575429, "api-version", newJString(apiVersion))
-  add(query_575429, "$expand", newJString(Expand))
-  add(path_575428, "billingAccountName", newJString(billingAccountName))
-  add(path_575428, "invoiceSectionName", newJString(invoiceSectionName))
-  result = call_575427.call(path_575428, query_575429, nil, nil, nil)
+  var path_564528 = newJObject()
+  var query_564529 = newJObject()
+  add(query_564529, "api-version", newJString(apiVersion))
+  add(path_564528, "billingAccountName", newJString(billingAccountName))
+  add(query_564529, "$expand", newJString(Expand))
+  add(path_564528, "invoiceSectionName", newJString(invoiceSectionName))
+  result = call_564527.call(path_564528, query_564529, nil, nil, nil)
 
-var invoiceSectionsGet* = Call_InvoiceSectionsGet_575419(
+var invoiceSectionsGet* = Call_InvoiceSectionsGet_564519(
     name: "invoiceSectionsGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/providers/Microsoft.Billing/billingAccounts/{billingAccountName}/invoiceSections/{invoiceSectionName}",
-    validator: validate_InvoiceSectionsGet_575420, base: "",
-    url: url_InvoiceSectionsGet_575421, schemes: {Scheme.Https})
+    validator: validate_InvoiceSectionsGet_564520, base: "",
+    url: url_InvoiceSectionsGet_564521, schemes: {Scheme.Https})
 type
-  Call_BillingSubscriptionsListByInvoiceSectionName_575442 = ref object of OpenApiRestCall_574467
-proc url_BillingSubscriptionsListByInvoiceSectionName_575444(protocol: Scheme;
+  Call_BillingSubscriptionsListByInvoiceSectionName_564542 = ref object of OpenApiRestCall_563565
+proc url_BillingSubscriptionsListByInvoiceSectionName_564544(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -4545,7 +4551,7 @@ proc url_BillingSubscriptionsListByInvoiceSectionName_575444(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_BillingSubscriptionsListByInvoiceSectionName_575443(path: JsonNode;
+proc validate_BillingSubscriptionsListByInvoiceSectionName_564543(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists billing subscription by invoice section name.
   ## 
@@ -4560,16 +4566,16 @@ proc validate_BillingSubscriptionsListByInvoiceSectionName_575443(path: JsonNode
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `billingAccountName` field"
-  var valid_575445 = path.getOrDefault("billingAccountName")
-  valid_575445 = validateParameter(valid_575445, JString, required = true,
+  var valid_564545 = path.getOrDefault("billingAccountName")
+  valid_564545 = validateParameter(valid_564545, JString, required = true,
                                  default = nil)
-  if valid_575445 != nil:
-    section.add "billingAccountName", valid_575445
-  var valid_575446 = path.getOrDefault("invoiceSectionName")
-  valid_575446 = validateParameter(valid_575446, JString, required = true,
+  if valid_564545 != nil:
+    section.add "billingAccountName", valid_564545
+  var valid_564546 = path.getOrDefault("invoiceSectionName")
+  valid_564546 = validateParameter(valid_564546, JString, required = true,
                                  default = nil)
-  if valid_575446 != nil:
-    section.add "invoiceSectionName", valid_575446
+  if valid_564546 != nil:
+    section.add "invoiceSectionName", valid_564546
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -4577,11 +4583,11 @@ proc validate_BillingSubscriptionsListByInvoiceSectionName_575443(path: JsonNode
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575447 = query.getOrDefault("api-version")
-  valid_575447 = validateParameter(valid_575447, JString, required = true,
+  var valid_564547 = query.getOrDefault("api-version")
+  valid_564547 = validateParameter(valid_564547, JString, required = true,
                                  default = nil)
-  if valid_575447 != nil:
-    section.add "api-version", valid_575447
+  if valid_564547 != nil:
+    section.add "api-version", valid_564547
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -4590,22 +4596,22 @@ proc validate_BillingSubscriptionsListByInvoiceSectionName_575443(path: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_575448: Call_BillingSubscriptionsListByInvoiceSectionName_575442;
+proc call*(call_564548: Call_BillingSubscriptionsListByInvoiceSectionName_564542;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Lists billing subscription by invoice section name.
   ## 
   ## https://docs.microsoft.com/en-us/rest/api/consumption/
-  let valid = call_575448.validator(path, query, header, formData, body)
-  let scheme = call_575448.pickScheme
+  let valid = call_564548.validator(path, query, header, formData, body)
+  let scheme = call_564548.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575448.url(scheme.get, call_575448.host, call_575448.base,
-                         call_575448.route, valid.getOrDefault("path"),
+  let url = call_564548.url(scheme.get, call_564548.host, call_564548.base,
+                         call_564548.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575448, url, valid)
+  result = hook(call_564548, url, valid)
 
-proc call*(call_575449: Call_BillingSubscriptionsListByInvoiceSectionName_575442;
+proc call*(call_564549: Call_BillingSubscriptionsListByInvoiceSectionName_564542;
           apiVersion: string; billingAccountName: string; invoiceSectionName: string): Recallable =
   ## billingSubscriptionsListByInvoiceSectionName
   ## Lists billing subscription by invoice section name.
@@ -4616,22 +4622,22 @@ proc call*(call_575449: Call_BillingSubscriptionsListByInvoiceSectionName_575442
   ##                     : Billing Account Id.
   ##   invoiceSectionName: string (required)
   ##                     : InvoiceSection Id.
-  var path_575450 = newJObject()
-  var query_575451 = newJObject()
-  add(query_575451, "api-version", newJString(apiVersion))
-  add(path_575450, "billingAccountName", newJString(billingAccountName))
-  add(path_575450, "invoiceSectionName", newJString(invoiceSectionName))
-  result = call_575449.call(path_575450, query_575451, nil, nil, nil)
+  var path_564550 = newJObject()
+  var query_564551 = newJObject()
+  add(query_564551, "api-version", newJString(apiVersion))
+  add(path_564550, "billingAccountName", newJString(billingAccountName))
+  add(path_564550, "invoiceSectionName", newJString(invoiceSectionName))
+  result = call_564549.call(path_564550, query_564551, nil, nil, nil)
 
-var billingSubscriptionsListByInvoiceSectionName* = Call_BillingSubscriptionsListByInvoiceSectionName_575442(
+var billingSubscriptionsListByInvoiceSectionName* = Call_BillingSubscriptionsListByInvoiceSectionName_564542(
     name: "billingSubscriptionsListByInvoiceSectionName",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/providers/Microsoft.Billing/billingAccounts/{billingAccountName}/invoiceSections/{invoiceSectionName}/billingSubscriptions",
-    validator: validate_BillingSubscriptionsListByInvoiceSectionName_575443,
-    base: "", url: url_BillingSubscriptionsListByInvoiceSectionName_575444,
+    validator: validate_BillingSubscriptionsListByInvoiceSectionName_564543,
+    base: "", url: url_BillingSubscriptionsListByInvoiceSectionName_564544,
     schemes: {Scheme.Https})
 type
-  Call_BillingSubscriptionsGet_575452 = ref object of OpenApiRestCall_574467
-proc url_BillingSubscriptionsGet_575454(protocol: Scheme; host: string; base: string;
+  Call_BillingSubscriptionsGet_564552 = ref object of OpenApiRestCall_563565
+proc url_BillingSubscriptionsGet_564554(protocol: Scheme; host: string; base: string;
                                        route: string; path: JsonNode;
                                        query: JsonNode): Uri =
   result.scheme = $protocol
@@ -4657,7 +4663,7 @@ proc url_BillingSubscriptionsGet_575454(protocol: Scheme; host: string; base: st
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_BillingSubscriptionsGet_575453(path: JsonNode; query: JsonNode;
+proc validate_BillingSubscriptionsGet_564553(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Get a single billing subscription by name.
   ## 
@@ -4674,21 +4680,21 @@ proc validate_BillingSubscriptionsGet_575453(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `billingAccountName` field"
-  var valid_575455 = path.getOrDefault("billingAccountName")
-  valid_575455 = validateParameter(valid_575455, JString, required = true,
+  var valid_564555 = path.getOrDefault("billingAccountName")
+  valid_564555 = validateParameter(valid_564555, JString, required = true,
                                  default = nil)
-  if valid_575455 != nil:
-    section.add "billingAccountName", valid_575455
-  var valid_575456 = path.getOrDefault("billingSubscriptionName")
-  valid_575456 = validateParameter(valid_575456, JString, required = true,
+  if valid_564555 != nil:
+    section.add "billingAccountName", valid_564555
+  var valid_564556 = path.getOrDefault("billingSubscriptionName")
+  valid_564556 = validateParameter(valid_564556, JString, required = true,
                                  default = nil)
-  if valid_575456 != nil:
-    section.add "billingSubscriptionName", valid_575456
-  var valid_575457 = path.getOrDefault("invoiceSectionName")
-  valid_575457 = validateParameter(valid_575457, JString, required = true,
+  if valid_564556 != nil:
+    section.add "billingSubscriptionName", valid_564556
+  var valid_564557 = path.getOrDefault("invoiceSectionName")
+  valid_564557 = validateParameter(valid_564557, JString, required = true,
                                  default = nil)
-  if valid_575457 != nil:
-    section.add "invoiceSectionName", valid_575457
+  if valid_564557 != nil:
+    section.add "invoiceSectionName", valid_564557
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -4696,11 +4702,11 @@ proc validate_BillingSubscriptionsGet_575453(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575458 = query.getOrDefault("api-version")
-  valid_575458 = validateParameter(valid_575458, JString, required = true,
+  var valid_564558 = query.getOrDefault("api-version")
+  valid_564558 = validateParameter(valid_564558, JString, required = true,
                                  default = nil)
-  if valid_575458 != nil:
-    section.add "api-version", valid_575458
+  if valid_564558 != nil:
+    section.add "api-version", valid_564558
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -4709,21 +4715,21 @@ proc validate_BillingSubscriptionsGet_575453(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_575459: Call_BillingSubscriptionsGet_575452; path: JsonNode;
+proc call*(call_564559: Call_BillingSubscriptionsGet_564552; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get a single billing subscription by name.
   ## 
   ## https://docs.microsoft.com/en-us/rest/api/consumption/
-  let valid = call_575459.validator(path, query, header, formData, body)
-  let scheme = call_575459.pickScheme
+  let valid = call_564559.validator(path, query, header, formData, body)
+  let scheme = call_564559.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575459.url(scheme.get, call_575459.host, call_575459.base,
-                         call_575459.route, valid.getOrDefault("path"),
+  let url = call_564559.url(scheme.get, call_564559.host, call_564559.base,
+                         call_564559.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575459, url, valid)
+  result = hook(call_564559, url, valid)
 
-proc call*(call_575460: Call_BillingSubscriptionsGet_575452; apiVersion: string;
+proc call*(call_564560: Call_BillingSubscriptionsGet_564552; apiVersion: string;
           billingAccountName: string; billingSubscriptionName: string;
           invoiceSectionName: string): Recallable =
   ## billingSubscriptionsGet
@@ -4737,22 +4743,22 @@ proc call*(call_575460: Call_BillingSubscriptionsGet_575452; apiVersion: string;
   ##                          : Billing Subscription Id.
   ##   invoiceSectionName: string (required)
   ##                     : InvoiceSection Id.
-  var path_575461 = newJObject()
-  var query_575462 = newJObject()
-  add(query_575462, "api-version", newJString(apiVersion))
-  add(path_575461, "billingAccountName", newJString(billingAccountName))
-  add(path_575461, "billingSubscriptionName", newJString(billingSubscriptionName))
-  add(path_575461, "invoiceSectionName", newJString(invoiceSectionName))
-  result = call_575460.call(path_575461, query_575462, nil, nil, nil)
+  var path_564561 = newJObject()
+  var query_564562 = newJObject()
+  add(query_564562, "api-version", newJString(apiVersion))
+  add(path_564561, "billingAccountName", newJString(billingAccountName))
+  add(path_564561, "billingSubscriptionName", newJString(billingSubscriptionName))
+  add(path_564561, "invoiceSectionName", newJString(invoiceSectionName))
+  result = call_564560.call(path_564561, query_564562, nil, nil, nil)
 
-var billingSubscriptionsGet* = Call_BillingSubscriptionsGet_575452(
+var billingSubscriptionsGet* = Call_BillingSubscriptionsGet_564552(
     name: "billingSubscriptionsGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/providers/Microsoft.Billing/billingAccounts/{billingAccountName}/invoiceSections/{invoiceSectionName}/billingSubscriptions/{billingSubscriptionName}",
-    validator: validate_BillingSubscriptionsGet_575453, base: "",
-    url: url_BillingSubscriptionsGet_575454, schemes: {Scheme.Https})
+    validator: validate_BillingSubscriptionsGet_564553, base: "",
+    url: url_BillingSubscriptionsGet_564554, schemes: {Scheme.Https})
 type
-  Call_BillingSubscriptionsTransfer_575463 = ref object of OpenApiRestCall_574467
-proc url_BillingSubscriptionsTransfer_575465(protocol: Scheme; host: string;
+  Call_BillingSubscriptionsTransfer_564563 = ref object of OpenApiRestCall_563565
+proc url_BillingSubscriptionsTransfer_564565(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -4778,7 +4784,7 @@ proc url_BillingSubscriptionsTransfer_575465(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_BillingSubscriptionsTransfer_575464(path: JsonNode; query: JsonNode;
+proc validate_BillingSubscriptionsTransfer_564564(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Transfers the subscription from one invoice section to another within a billing account.
   ## 
@@ -4794,21 +4800,21 @@ proc validate_BillingSubscriptionsTransfer_575464(path: JsonNode; query: JsonNod
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `billingAccountName` field"
-  var valid_575466 = path.getOrDefault("billingAccountName")
-  valid_575466 = validateParameter(valid_575466, JString, required = true,
+  var valid_564566 = path.getOrDefault("billingAccountName")
+  valid_564566 = validateParameter(valid_564566, JString, required = true,
                                  default = nil)
-  if valid_575466 != nil:
-    section.add "billingAccountName", valid_575466
-  var valid_575467 = path.getOrDefault("billingSubscriptionName")
-  valid_575467 = validateParameter(valid_575467, JString, required = true,
+  if valid_564566 != nil:
+    section.add "billingAccountName", valid_564566
+  var valid_564567 = path.getOrDefault("billingSubscriptionName")
+  valid_564567 = validateParameter(valid_564567, JString, required = true,
                                  default = nil)
-  if valid_575467 != nil:
-    section.add "billingSubscriptionName", valid_575467
-  var valid_575468 = path.getOrDefault("invoiceSectionName")
-  valid_575468 = validateParameter(valid_575468, JString, required = true,
+  if valid_564567 != nil:
+    section.add "billingSubscriptionName", valid_564567
+  var valid_564568 = path.getOrDefault("invoiceSectionName")
+  valid_564568 = validateParameter(valid_564568, JString, required = true,
                                  default = nil)
-  if valid_575468 != nil:
-    section.add "invoiceSectionName", valid_575468
+  if valid_564568 != nil:
+    section.add "invoiceSectionName", valid_564568
   result.add "path", section
   section = newJObject()
   result.add "query", section
@@ -4824,49 +4830,49 @@ proc validate_BillingSubscriptionsTransfer_575464(path: JsonNode; query: JsonNod
   if body != nil:
     result.add "body", body
 
-proc call*(call_575470: Call_BillingSubscriptionsTransfer_575463; path: JsonNode;
+proc call*(call_564570: Call_BillingSubscriptionsTransfer_564563; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Transfers the subscription from one invoice section to another within a billing account.
   ## 
-  let valid = call_575470.validator(path, query, header, formData, body)
-  let scheme = call_575470.pickScheme
+  let valid = call_564570.validator(path, query, header, formData, body)
+  let scheme = call_564570.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575470.url(scheme.get, call_575470.host, call_575470.base,
-                         call_575470.route, valid.getOrDefault("path"),
+  let url = call_564570.url(scheme.get, call_564570.host, call_564570.base,
+                         call_564570.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575470, url, valid)
+  result = hook(call_564570, url, valid)
 
-proc call*(call_575471: Call_BillingSubscriptionsTransfer_575463;
+proc call*(call_564571: Call_BillingSubscriptionsTransfer_564563;
           billingAccountName: string; billingSubscriptionName: string;
-          invoiceSectionName: string; parameters: JsonNode): Recallable =
+          parameters: JsonNode; invoiceSectionName: string): Recallable =
   ## billingSubscriptionsTransfer
   ## Transfers the subscription from one invoice section to another within a billing account.
   ##   billingAccountName: string (required)
   ##                     : Billing Account Id.
   ##   billingSubscriptionName: string (required)
   ##                          : Billing Subscription Id.
-  ##   invoiceSectionName: string (required)
-  ##                     : InvoiceSection Id.
   ##   parameters: JObject (required)
   ##             : Parameters supplied to the Transfer Billing Subscription operation.
-  var path_575472 = newJObject()
-  var body_575473 = newJObject()
-  add(path_575472, "billingAccountName", newJString(billingAccountName))
-  add(path_575472, "billingSubscriptionName", newJString(billingSubscriptionName))
-  add(path_575472, "invoiceSectionName", newJString(invoiceSectionName))
+  ##   invoiceSectionName: string (required)
+  ##                     : InvoiceSection Id.
+  var path_564572 = newJObject()
+  var body_564573 = newJObject()
+  add(path_564572, "billingAccountName", newJString(billingAccountName))
+  add(path_564572, "billingSubscriptionName", newJString(billingSubscriptionName))
   if parameters != nil:
-    body_575473 = parameters
-  result = call_575471.call(path_575472, nil, nil, nil, body_575473)
+    body_564573 = parameters
+  add(path_564572, "invoiceSectionName", newJString(invoiceSectionName))
+  result = call_564571.call(path_564572, nil, nil, nil, body_564573)
 
-var billingSubscriptionsTransfer* = Call_BillingSubscriptionsTransfer_575463(
+var billingSubscriptionsTransfer* = Call_BillingSubscriptionsTransfer_564563(
     name: "billingSubscriptionsTransfer", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/providers/Microsoft.Billing/billingAccounts/{billingAccountName}/invoiceSections/{invoiceSectionName}/billingSubscriptions/{billingSubscriptionName}/transfer",
-    validator: validate_BillingSubscriptionsTransfer_575464, base: "",
-    url: url_BillingSubscriptionsTransfer_575465, schemes: {Scheme.Https})
+    validator: validate_BillingSubscriptionsTransfer_564564, base: "",
+    url: url_BillingSubscriptionsTransfer_564565, schemes: {Scheme.Https})
 type
-  Call_BillingSubscriptionsValidateTransfer_575474 = ref object of OpenApiRestCall_574467
-proc url_BillingSubscriptionsValidateTransfer_575476(protocol: Scheme;
+  Call_BillingSubscriptionsValidateTransfer_564574 = ref object of OpenApiRestCall_563565
+proc url_BillingSubscriptionsValidateTransfer_564576(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -4892,7 +4898,7 @@ proc url_BillingSubscriptionsValidateTransfer_575476(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_BillingSubscriptionsValidateTransfer_575475(path: JsonNode;
+proc validate_BillingSubscriptionsValidateTransfer_564575(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Validates the transfer of billing subscriptions across invoice sections.
   ## 
@@ -4908,21 +4914,21 @@ proc validate_BillingSubscriptionsValidateTransfer_575475(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `billingAccountName` field"
-  var valid_575477 = path.getOrDefault("billingAccountName")
-  valid_575477 = validateParameter(valid_575477, JString, required = true,
+  var valid_564577 = path.getOrDefault("billingAccountName")
+  valid_564577 = validateParameter(valid_564577, JString, required = true,
                                  default = nil)
-  if valid_575477 != nil:
-    section.add "billingAccountName", valid_575477
-  var valid_575478 = path.getOrDefault("billingSubscriptionName")
-  valid_575478 = validateParameter(valid_575478, JString, required = true,
+  if valid_564577 != nil:
+    section.add "billingAccountName", valid_564577
+  var valid_564578 = path.getOrDefault("billingSubscriptionName")
+  valid_564578 = validateParameter(valid_564578, JString, required = true,
                                  default = nil)
-  if valid_575478 != nil:
-    section.add "billingSubscriptionName", valid_575478
-  var valid_575479 = path.getOrDefault("invoiceSectionName")
-  valid_575479 = validateParameter(valid_575479, JString, required = true,
+  if valid_564578 != nil:
+    section.add "billingSubscriptionName", valid_564578
+  var valid_564579 = path.getOrDefault("invoiceSectionName")
+  valid_564579 = validateParameter(valid_564579, JString, required = true,
                                  default = nil)
-  if valid_575479 != nil:
-    section.add "invoiceSectionName", valid_575479
+  if valid_564579 != nil:
+    section.add "invoiceSectionName", valid_564579
   result.add "path", section
   section = newJObject()
   result.add "query", section
@@ -4938,50 +4944,50 @@ proc validate_BillingSubscriptionsValidateTransfer_575475(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_575481: Call_BillingSubscriptionsValidateTransfer_575474;
+proc call*(call_564581: Call_BillingSubscriptionsValidateTransfer_564574;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Validates the transfer of billing subscriptions across invoice sections.
   ## 
-  let valid = call_575481.validator(path, query, header, formData, body)
-  let scheme = call_575481.pickScheme
+  let valid = call_564581.validator(path, query, header, formData, body)
+  let scheme = call_564581.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575481.url(scheme.get, call_575481.host, call_575481.base,
-                         call_575481.route, valid.getOrDefault("path"),
+  let url = call_564581.url(scheme.get, call_564581.host, call_564581.base,
+                         call_564581.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575481, url, valid)
+  result = hook(call_564581, url, valid)
 
-proc call*(call_575482: Call_BillingSubscriptionsValidateTransfer_575474;
+proc call*(call_564582: Call_BillingSubscriptionsValidateTransfer_564574;
           billingAccountName: string; billingSubscriptionName: string;
-          invoiceSectionName: string; parameters: JsonNode): Recallable =
+          parameters: JsonNode; invoiceSectionName: string): Recallable =
   ## billingSubscriptionsValidateTransfer
   ## Validates the transfer of billing subscriptions across invoice sections.
   ##   billingAccountName: string (required)
   ##                     : Billing Account Id.
   ##   billingSubscriptionName: string (required)
   ##                          : Billing Subscription Id.
-  ##   invoiceSectionName: string (required)
-  ##                     : InvoiceSection Id.
   ##   parameters: JObject (required)
   ##             : Parameters supplied to the Transfer Billing Subscription operation.
-  var path_575483 = newJObject()
-  var body_575484 = newJObject()
-  add(path_575483, "billingAccountName", newJString(billingAccountName))
-  add(path_575483, "billingSubscriptionName", newJString(billingSubscriptionName))
-  add(path_575483, "invoiceSectionName", newJString(invoiceSectionName))
+  ##   invoiceSectionName: string (required)
+  ##                     : InvoiceSection Id.
+  var path_564583 = newJObject()
+  var body_564584 = newJObject()
+  add(path_564583, "billingAccountName", newJString(billingAccountName))
+  add(path_564583, "billingSubscriptionName", newJString(billingSubscriptionName))
   if parameters != nil:
-    body_575484 = parameters
-  result = call_575482.call(path_575483, nil, nil, nil, body_575484)
+    body_564584 = parameters
+  add(path_564583, "invoiceSectionName", newJString(invoiceSectionName))
+  result = call_564582.call(path_564583, nil, nil, nil, body_564584)
 
-var billingSubscriptionsValidateTransfer* = Call_BillingSubscriptionsValidateTransfer_575474(
+var billingSubscriptionsValidateTransfer* = Call_BillingSubscriptionsValidateTransfer_564574(
     name: "billingSubscriptionsValidateTransfer", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/providers/Microsoft.Billing/billingAccounts/{billingAccountName}/invoiceSections/{invoiceSectionName}/billingSubscriptions/{billingSubscriptionName}/validateTransferEligibility",
-    validator: validate_BillingSubscriptionsValidateTransfer_575475, base: "",
-    url: url_BillingSubscriptionsValidateTransfer_575476, schemes: {Scheme.Https})
+    validator: validate_BillingSubscriptionsValidateTransfer_564575, base: "",
+    url: url_BillingSubscriptionsValidateTransfer_564576, schemes: {Scheme.Https})
 type
-  Call_InvoiceSectionsElevateToBillingProfile_575485 = ref object of OpenApiRestCall_574467
-proc url_InvoiceSectionsElevateToBillingProfile_575487(protocol: Scheme;
+  Call_InvoiceSectionsElevateToBillingProfile_564585 = ref object of OpenApiRestCall_563565
+proc url_InvoiceSectionsElevateToBillingProfile_564587(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -5003,7 +5009,7 @@ proc url_InvoiceSectionsElevateToBillingProfile_575487(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_InvoiceSectionsElevateToBillingProfile_575486(path: JsonNode;
+proc validate_InvoiceSectionsElevateToBillingProfile_564586(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Elevates the caller's access to match their billing profile access.
   ## 
@@ -5017,16 +5023,16 @@ proc validate_InvoiceSectionsElevateToBillingProfile_575486(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `billingAccountName` field"
-  var valid_575488 = path.getOrDefault("billingAccountName")
-  valid_575488 = validateParameter(valid_575488, JString, required = true,
+  var valid_564588 = path.getOrDefault("billingAccountName")
+  valid_564588 = validateParameter(valid_564588, JString, required = true,
                                  default = nil)
-  if valid_575488 != nil:
-    section.add "billingAccountName", valid_575488
-  var valid_575489 = path.getOrDefault("invoiceSectionName")
-  valid_575489 = validateParameter(valid_575489, JString, required = true,
+  if valid_564588 != nil:
+    section.add "billingAccountName", valid_564588
+  var valid_564589 = path.getOrDefault("invoiceSectionName")
+  valid_564589 = validateParameter(valid_564589, JString, required = true,
                                  default = nil)
-  if valid_575489 != nil:
-    section.add "invoiceSectionName", valid_575489
+  if valid_564589 != nil:
+    section.add "invoiceSectionName", valid_564589
   result.add "path", section
   section = newJObject()
   result.add "query", section
@@ -5037,21 +5043,21 @@ proc validate_InvoiceSectionsElevateToBillingProfile_575486(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_575490: Call_InvoiceSectionsElevateToBillingProfile_575485;
+proc call*(call_564590: Call_InvoiceSectionsElevateToBillingProfile_564585;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Elevates the caller's access to match their billing profile access.
   ## 
-  let valid = call_575490.validator(path, query, header, formData, body)
-  let scheme = call_575490.pickScheme
+  let valid = call_564590.validator(path, query, header, formData, body)
+  let scheme = call_564590.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575490.url(scheme.get, call_575490.host, call_575490.base,
-                         call_575490.route, valid.getOrDefault("path"),
+  let url = call_564590.url(scheme.get, call_564590.host, call_564590.base,
+                         call_564590.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575490, url, valid)
+  result = hook(call_564590, url, valid)
 
-proc call*(call_575491: Call_InvoiceSectionsElevateToBillingProfile_575485;
+proc call*(call_564591: Call_InvoiceSectionsElevateToBillingProfile_564585;
           billingAccountName: string; invoiceSectionName: string): Recallable =
   ## invoiceSectionsElevateToBillingProfile
   ## Elevates the caller's access to match their billing profile access.
@@ -5059,20 +5065,20 @@ proc call*(call_575491: Call_InvoiceSectionsElevateToBillingProfile_575485;
   ##                     : Billing Account Id.
   ##   invoiceSectionName: string (required)
   ##                     : InvoiceSection Id.
-  var path_575492 = newJObject()
-  add(path_575492, "billingAccountName", newJString(billingAccountName))
-  add(path_575492, "invoiceSectionName", newJString(invoiceSectionName))
-  result = call_575491.call(path_575492, nil, nil, nil, nil)
+  var path_564592 = newJObject()
+  add(path_564592, "billingAccountName", newJString(billingAccountName))
+  add(path_564592, "invoiceSectionName", newJString(invoiceSectionName))
+  result = call_564591.call(path_564592, nil, nil, nil, nil)
 
-var invoiceSectionsElevateToBillingProfile* = Call_InvoiceSectionsElevateToBillingProfile_575485(
+var invoiceSectionsElevateToBillingProfile* = Call_InvoiceSectionsElevateToBillingProfile_564585(
     name: "invoiceSectionsElevateToBillingProfile", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/providers/Microsoft.Billing/billingAccounts/{billingAccountName}/invoiceSections/{invoiceSectionName}/elevate",
-    validator: validate_InvoiceSectionsElevateToBillingProfile_575486, base: "",
-    url: url_InvoiceSectionsElevateToBillingProfile_575487,
+    validator: validate_InvoiceSectionsElevateToBillingProfile_564586, base: "",
+    url: url_InvoiceSectionsElevateToBillingProfile_564587,
     schemes: {Scheme.Https})
 type
-  Call_TransfersInitiate_575493 = ref object of OpenApiRestCall_574467
-proc url_TransfersInitiate_575495(protocol: Scheme; host: string; base: string;
+  Call_TransfersInitiate_564593 = ref object of OpenApiRestCall_563565
+proc url_TransfersInitiate_564595(protocol: Scheme; host: string; base: string;
                                  route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -5094,7 +5100,7 @@ proc url_TransfersInitiate_575495(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_TransfersInitiate_575494(path: JsonNode; query: JsonNode;
+proc validate_TransfersInitiate_564594(path: JsonNode; query: JsonNode;
                                       header: JsonNode; formData: JsonNode;
                                       body: JsonNode): JsonNode =
   ## Initiates the request to transfer the legacy subscriptions or RIs.
@@ -5109,16 +5115,16 @@ proc validate_TransfersInitiate_575494(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `billingAccountName` field"
-  var valid_575496 = path.getOrDefault("billingAccountName")
-  valid_575496 = validateParameter(valid_575496, JString, required = true,
+  var valid_564596 = path.getOrDefault("billingAccountName")
+  valid_564596 = validateParameter(valid_564596, JString, required = true,
                                  default = nil)
-  if valid_575496 != nil:
-    section.add "billingAccountName", valid_575496
-  var valid_575497 = path.getOrDefault("invoiceSectionName")
-  valid_575497 = validateParameter(valid_575497, JString, required = true,
+  if valid_564596 != nil:
+    section.add "billingAccountName", valid_564596
+  var valid_564597 = path.getOrDefault("invoiceSectionName")
+  valid_564597 = validateParameter(valid_564597, JString, required = true,
                                  default = nil)
-  if valid_575497 != nil:
-    section.add "invoiceSectionName", valid_575497
+  if valid_564597 != nil:
+    section.add "invoiceSectionName", valid_564597
   result.add "path", section
   section = newJObject()
   result.add "query", section
@@ -5134,44 +5140,44 @@ proc validate_TransfersInitiate_575494(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_575499: Call_TransfersInitiate_575493; path: JsonNode;
+proc call*(call_564599: Call_TransfersInitiate_564593; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Initiates the request to transfer the legacy subscriptions or RIs.
   ## 
-  let valid = call_575499.validator(path, query, header, formData, body)
-  let scheme = call_575499.pickScheme
+  let valid = call_564599.validator(path, query, header, formData, body)
+  let scheme = call_564599.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575499.url(scheme.get, call_575499.host, call_575499.base,
-                         call_575499.route, valid.getOrDefault("path"),
+  let url = call_564599.url(scheme.get, call_564599.host, call_564599.base,
+                         call_564599.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575499, url, valid)
+  result = hook(call_564599, url, valid)
 
-proc call*(call_575500: Call_TransfersInitiate_575493; billingAccountName: string;
-          invoiceSectionName: string; body: JsonNode): Recallable =
+proc call*(call_564600: Call_TransfersInitiate_564593; billingAccountName: string;
+          body: JsonNode; invoiceSectionName: string): Recallable =
   ## transfersInitiate
   ## Initiates the request to transfer the legacy subscriptions or RIs.
   ##   billingAccountName: string (required)
   ##                     : Billing Account Id.
-  ##   invoiceSectionName: string (required)
-  ##                     : InvoiceSection Id.
   ##   body: JObject (required)
   ##       : Initiate transfer parameters.
-  var path_575501 = newJObject()
-  var body_575502 = newJObject()
-  add(path_575501, "billingAccountName", newJString(billingAccountName))
-  add(path_575501, "invoiceSectionName", newJString(invoiceSectionName))
+  ##   invoiceSectionName: string (required)
+  ##                     : InvoiceSection Id.
+  var path_564601 = newJObject()
+  var body_564602 = newJObject()
+  add(path_564601, "billingAccountName", newJString(billingAccountName))
   if body != nil:
-    body_575502 = body
-  result = call_575500.call(path_575501, nil, nil, nil, body_575502)
+    body_564602 = body
+  add(path_564601, "invoiceSectionName", newJString(invoiceSectionName))
+  result = call_564600.call(path_564601, nil, nil, nil, body_564602)
 
-var transfersInitiate* = Call_TransfersInitiate_575493(name: "transfersInitiate",
+var transfersInitiate* = Call_TransfersInitiate_564593(name: "transfersInitiate",
     meth: HttpMethod.HttpPost, host: "management.azure.com", route: "/providers/Microsoft.Billing/billingAccounts/{billingAccountName}/invoiceSections/{invoiceSectionName}/initiateTransfer",
-    validator: validate_TransfersInitiate_575494, base: "",
-    url: url_TransfersInitiate_575495, schemes: {Scheme.Https})
+    validator: validate_TransfersInitiate_564594, base: "",
+    url: url_TransfersInitiate_564595, schemes: {Scheme.Https})
 type
-  Call_ProductsListByInvoiceSectionName_575503 = ref object of OpenApiRestCall_574467
-proc url_ProductsListByInvoiceSectionName_575505(protocol: Scheme; host: string;
+  Call_ProductsListByInvoiceSectionName_564603 = ref object of OpenApiRestCall_563565
+proc url_ProductsListByInvoiceSectionName_564605(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -5193,7 +5199,7 @@ proc url_ProductsListByInvoiceSectionName_575505(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ProductsListByInvoiceSectionName_575504(path: JsonNode;
+proc validate_ProductsListByInvoiceSectionName_564604(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists products by invoice section name.
   ## 
@@ -5208,16 +5214,16 @@ proc validate_ProductsListByInvoiceSectionName_575504(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `billingAccountName` field"
-  var valid_575506 = path.getOrDefault("billingAccountName")
-  valid_575506 = validateParameter(valid_575506, JString, required = true,
+  var valid_564606 = path.getOrDefault("billingAccountName")
+  valid_564606 = validateParameter(valid_564606, JString, required = true,
                                  default = nil)
-  if valid_575506 != nil:
-    section.add "billingAccountName", valid_575506
-  var valid_575507 = path.getOrDefault("invoiceSectionName")
-  valid_575507 = validateParameter(valid_575507, JString, required = true,
+  if valid_564606 != nil:
+    section.add "billingAccountName", valid_564606
+  var valid_564607 = path.getOrDefault("invoiceSectionName")
+  valid_564607 = validateParameter(valid_564607, JString, required = true,
                                  default = nil)
-  if valid_575507 != nil:
-    section.add "invoiceSectionName", valid_575507
+  if valid_564607 != nil:
+    section.add "invoiceSectionName", valid_564607
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -5227,16 +5233,16 @@ proc validate_ProductsListByInvoiceSectionName_575504(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575508 = query.getOrDefault("api-version")
-  valid_575508 = validateParameter(valid_575508, JString, required = true,
+  var valid_564608 = query.getOrDefault("api-version")
+  valid_564608 = validateParameter(valid_564608, JString, required = true,
                                  default = nil)
-  if valid_575508 != nil:
-    section.add "api-version", valid_575508
-  var valid_575509 = query.getOrDefault("$filter")
-  valid_575509 = validateParameter(valid_575509, JString, required = false,
+  if valid_564608 != nil:
+    section.add "api-version", valid_564608
+  var valid_564609 = query.getOrDefault("$filter")
+  valid_564609 = validateParameter(valid_564609, JString, required = false,
                                  default = nil)
-  if valid_575509 != nil:
-    section.add "$filter", valid_575509
+  if valid_564609 != nil:
+    section.add "$filter", valid_564609
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -5245,22 +5251,22 @@ proc validate_ProductsListByInvoiceSectionName_575504(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_575510: Call_ProductsListByInvoiceSectionName_575503;
+proc call*(call_564610: Call_ProductsListByInvoiceSectionName_564603;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Lists products by invoice section name.
   ## 
   ## https://docs.microsoft.com/en-us/rest/api/consumption/
-  let valid = call_575510.validator(path, query, header, formData, body)
-  let scheme = call_575510.pickScheme
+  let valid = call_564610.validator(path, query, header, formData, body)
+  let scheme = call_564610.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575510.url(scheme.get, call_575510.host, call_575510.base,
-                         call_575510.route, valid.getOrDefault("path"),
+  let url = call_564610.url(scheme.get, call_564610.host, call_564610.base,
+                         call_564610.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575510, url, valid)
+  result = hook(call_564610, url, valid)
 
-proc call*(call_575511: Call_ProductsListByInvoiceSectionName_575503;
+proc call*(call_564611: Call_ProductsListByInvoiceSectionName_564603;
           apiVersion: string; billingAccountName: string;
           invoiceSectionName: string; Filter: string = ""): Recallable =
   ## productsListByInvoiceSectionName
@@ -5270,26 +5276,26 @@ proc call*(call_575511: Call_ProductsListByInvoiceSectionName_575503;
   ##             : Version of the API to be used with the client request. The current version is 2018-11-01-preview.
   ##   billingAccountName: string (required)
   ##                     : Billing Account Id.
-  ##   invoiceSectionName: string (required)
-  ##                     : InvoiceSection Id.
   ##   Filter: string
   ##         : May be used to filter by product type. The filter supports 'eq', 'lt', 'gt', 'le', 'ge', and 'and'. It does not currently support 'ne', 'or', or 'not'. Tag filter is a key value pair string where key and value is separated by a colon (:).
-  var path_575512 = newJObject()
-  var query_575513 = newJObject()
-  add(query_575513, "api-version", newJString(apiVersion))
-  add(path_575512, "billingAccountName", newJString(billingAccountName))
-  add(path_575512, "invoiceSectionName", newJString(invoiceSectionName))
-  add(query_575513, "$filter", newJString(Filter))
-  result = call_575511.call(path_575512, query_575513, nil, nil, nil)
+  ##   invoiceSectionName: string (required)
+  ##                     : InvoiceSection Id.
+  var path_564612 = newJObject()
+  var query_564613 = newJObject()
+  add(query_564613, "api-version", newJString(apiVersion))
+  add(path_564612, "billingAccountName", newJString(billingAccountName))
+  add(query_564613, "$filter", newJString(Filter))
+  add(path_564612, "invoiceSectionName", newJString(invoiceSectionName))
+  result = call_564611.call(path_564612, query_564613, nil, nil, nil)
 
-var productsListByInvoiceSectionName* = Call_ProductsListByInvoiceSectionName_575503(
+var productsListByInvoiceSectionName* = Call_ProductsListByInvoiceSectionName_564603(
     name: "productsListByInvoiceSectionName", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/providers/Microsoft.Billing/billingAccounts/{billingAccountName}/invoiceSections/{invoiceSectionName}/products",
-    validator: validate_ProductsListByInvoiceSectionName_575504, base: "",
-    url: url_ProductsListByInvoiceSectionName_575505, schemes: {Scheme.Https})
+    validator: validate_ProductsListByInvoiceSectionName_564604, base: "",
+    url: url_ProductsListByInvoiceSectionName_564605, schemes: {Scheme.Https})
 type
-  Call_ProductsGet_575514 = ref object of OpenApiRestCall_574467
-proc url_ProductsGet_575516(protocol: Scheme; host: string; base: string;
+  Call_ProductsGet_564614 = ref object of OpenApiRestCall_563565
+proc url_ProductsGet_564616(protocol: Scheme; host: string; base: string;
                            route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -5313,7 +5319,7 @@ proc url_ProductsGet_575516(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ProductsGet_575515(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_ProductsGet_564615(path: JsonNode; query: JsonNode; header: JsonNode;
                                 formData: JsonNode; body: JsonNode): JsonNode =
   ## Get a single product by name.
   ## 
@@ -5321,30 +5327,30 @@ proc validate_ProductsGet_575515(path: JsonNode; query: JsonNode; header: JsonNo
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   productName: JString (required)
-  ##              : Invoice Id.
   ##   billingAccountName: JString (required)
   ##                     : Billing Account Id.
+  ##   productName: JString (required)
+  ##              : Invoice Id.
   ##   invoiceSectionName: JString (required)
   ##                     : InvoiceSection Id.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `productName` field"
-  var valid_575517 = path.getOrDefault("productName")
-  valid_575517 = validateParameter(valid_575517, JString, required = true,
+        "path argument is necessary due to required `billingAccountName` field"
+  var valid_564617 = path.getOrDefault("billingAccountName")
+  valid_564617 = validateParameter(valid_564617, JString, required = true,
                                  default = nil)
-  if valid_575517 != nil:
-    section.add "productName", valid_575517
-  var valid_575518 = path.getOrDefault("billingAccountName")
-  valid_575518 = validateParameter(valid_575518, JString, required = true,
+  if valid_564617 != nil:
+    section.add "billingAccountName", valid_564617
+  var valid_564618 = path.getOrDefault("productName")
+  valid_564618 = validateParameter(valid_564618, JString, required = true,
                                  default = nil)
-  if valid_575518 != nil:
-    section.add "billingAccountName", valid_575518
-  var valid_575519 = path.getOrDefault("invoiceSectionName")
-  valid_575519 = validateParameter(valid_575519, JString, required = true,
+  if valid_564618 != nil:
+    section.add "productName", valid_564618
+  var valid_564619 = path.getOrDefault("invoiceSectionName")
+  valid_564619 = validateParameter(valid_564619, JString, required = true,
                                  default = nil)
-  if valid_575519 != nil:
-    section.add "invoiceSectionName", valid_575519
+  if valid_564619 != nil:
+    section.add "invoiceSectionName", valid_564619
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -5352,11 +5358,11 @@ proc validate_ProductsGet_575515(path: JsonNode; query: JsonNode; header: JsonNo
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575520 = query.getOrDefault("api-version")
-  valid_575520 = validateParameter(valid_575520, JString, required = true,
+  var valid_564620 = query.getOrDefault("api-version")
+  valid_564620 = validateParameter(valid_564620, JString, required = true,
                                  default = nil)
-  if valid_575520 != nil:
-    section.add "api-version", valid_575520
+  if valid_564620 != nil:
+    section.add "api-version", valid_564620
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -5365,50 +5371,51 @@ proc validate_ProductsGet_575515(path: JsonNode; query: JsonNode; header: JsonNo
   if body != nil:
     result.add "body", body
 
-proc call*(call_575521: Call_ProductsGet_575514; path: JsonNode; query: JsonNode;
+proc call*(call_564621: Call_ProductsGet_564614; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get a single product by name.
   ## 
   ## https://docs.microsoft.com/en-us/rest/api/consumption/
-  let valid = call_575521.validator(path, query, header, formData, body)
-  let scheme = call_575521.pickScheme
+  let valid = call_564621.validator(path, query, header, formData, body)
+  let scheme = call_564621.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575521.url(scheme.get, call_575521.host, call_575521.base,
-                         call_575521.route, valid.getOrDefault("path"),
+  let url = call_564621.url(scheme.get, call_564621.host, call_564621.base,
+                         call_564621.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575521, url, valid)
+  result = hook(call_564621, url, valid)
 
-proc call*(call_575522: Call_ProductsGet_575514; productName: string;
-          apiVersion: string; billingAccountName: string; invoiceSectionName: string): Recallable =
+proc call*(call_564622: Call_ProductsGet_564614; apiVersion: string;
+          billingAccountName: string; productName: string;
+          invoiceSectionName: string): Recallable =
   ## productsGet
   ## Get a single product by name.
   ## https://docs.microsoft.com/en-us/rest/api/consumption/
-  ##   productName: string (required)
-  ##              : Invoice Id.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request. The current version is 2018-11-01-preview.
   ##   billingAccountName: string (required)
   ##                     : Billing Account Id.
+  ##   productName: string (required)
+  ##              : Invoice Id.
   ##   invoiceSectionName: string (required)
   ##                     : InvoiceSection Id.
-  var path_575523 = newJObject()
-  var query_575524 = newJObject()
-  add(path_575523, "productName", newJString(productName))
-  add(query_575524, "api-version", newJString(apiVersion))
-  add(path_575523, "billingAccountName", newJString(billingAccountName))
-  add(path_575523, "invoiceSectionName", newJString(invoiceSectionName))
-  result = call_575522.call(path_575523, query_575524, nil, nil, nil)
+  var path_564623 = newJObject()
+  var query_564624 = newJObject()
+  add(query_564624, "api-version", newJString(apiVersion))
+  add(path_564623, "billingAccountName", newJString(billingAccountName))
+  add(path_564623, "productName", newJString(productName))
+  add(path_564623, "invoiceSectionName", newJString(invoiceSectionName))
+  result = call_564622.call(path_564623, query_564624, nil, nil, nil)
 
-var productsGet* = Call_ProductsGet_575514(name: "productsGet",
+var productsGet* = Call_ProductsGet_564614(name: "productsGet",
                                         meth: HttpMethod.HttpGet,
                                         host: "management.azure.com", route: "/providers/Microsoft.Billing/billingAccounts/{billingAccountName}/invoiceSections/{invoiceSectionName}/products/{productName}",
-                                        validator: validate_ProductsGet_575515,
-                                        base: "", url: url_ProductsGet_575516,
+                                        validator: validate_ProductsGet_564615,
+                                        base: "", url: url_ProductsGet_564616,
                                         schemes: {Scheme.Https})
 type
-  Call_ProductsTransfer_575525 = ref object of OpenApiRestCall_574467
-proc url_ProductsTransfer_575527(protocol: Scheme; host: string; base: string;
+  Call_ProductsTransfer_564625 = ref object of OpenApiRestCall_563565
+proc url_ProductsTransfer_564627(protocol: Scheme; host: string; base: string;
                                 route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -5433,7 +5440,7 @@ proc url_ProductsTransfer_575527(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ProductsTransfer_575526(path: JsonNode; query: JsonNode;
+proc validate_ProductsTransfer_564626(path: JsonNode; query: JsonNode;
                                      header: JsonNode; formData: JsonNode;
                                      body: JsonNode): JsonNode =
   ## The operation to transfer a Product to another invoice section.
@@ -5441,30 +5448,30 @@ proc validate_ProductsTransfer_575526(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   productName: JString (required)
-  ##              : Invoice Id.
   ##   billingAccountName: JString (required)
   ##                     : Billing Account Id.
+  ##   productName: JString (required)
+  ##              : Invoice Id.
   ##   invoiceSectionName: JString (required)
   ##                     : InvoiceSection Id.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `productName` field"
-  var valid_575528 = path.getOrDefault("productName")
-  valid_575528 = validateParameter(valid_575528, JString, required = true,
+        "path argument is necessary due to required `billingAccountName` field"
+  var valid_564628 = path.getOrDefault("billingAccountName")
+  valid_564628 = validateParameter(valid_564628, JString, required = true,
                                  default = nil)
-  if valid_575528 != nil:
-    section.add "productName", valid_575528
-  var valid_575529 = path.getOrDefault("billingAccountName")
-  valid_575529 = validateParameter(valid_575529, JString, required = true,
+  if valid_564628 != nil:
+    section.add "billingAccountName", valid_564628
+  var valid_564629 = path.getOrDefault("productName")
+  valid_564629 = validateParameter(valid_564629, JString, required = true,
                                  default = nil)
-  if valid_575529 != nil:
-    section.add "billingAccountName", valid_575529
-  var valid_575530 = path.getOrDefault("invoiceSectionName")
-  valid_575530 = validateParameter(valid_575530, JString, required = true,
+  if valid_564629 != nil:
+    section.add "productName", valid_564629
+  var valid_564630 = path.getOrDefault("invoiceSectionName")
+  valid_564630 = validateParameter(valid_564630, JString, required = true,
                                  default = nil)
-  if valid_575530 != nil:
-    section.add "invoiceSectionName", valid_575530
+  if valid_564630 != nil:
+    section.add "invoiceSectionName", valid_564630
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -5472,11 +5479,11 @@ proc validate_ProductsTransfer_575526(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575531 = query.getOrDefault("api-version")
-  valid_575531 = validateParameter(valid_575531, JString, required = true,
+  var valid_564631 = query.getOrDefault("api-version")
+  valid_564631 = validateParameter(valid_564631, JString, required = true,
                                  default = nil)
-  if valid_575531 != nil:
-    section.add "api-version", valid_575531
+  if valid_564631 != nil:
+    section.add "api-version", valid_564631
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -5490,52 +5497,52 @@ proc validate_ProductsTransfer_575526(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_575533: Call_ProductsTransfer_575525; path: JsonNode;
+proc call*(call_564633: Call_ProductsTransfer_564625; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## The operation to transfer a Product to another invoice section.
   ## 
-  let valid = call_575533.validator(path, query, header, formData, body)
-  let scheme = call_575533.pickScheme
+  let valid = call_564633.validator(path, query, header, formData, body)
+  let scheme = call_564633.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575533.url(scheme.get, call_575533.host, call_575533.base,
-                         call_575533.route, valid.getOrDefault("path"),
+  let url = call_564633.url(scheme.get, call_564633.host, call_564633.base,
+                         call_564633.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575533, url, valid)
+  result = hook(call_564633, url, valid)
 
-proc call*(call_575534: Call_ProductsTransfer_575525; productName: string;
-          apiVersion: string; billingAccountName: string;
-          invoiceSectionName: string; parameters: JsonNode): Recallable =
+proc call*(call_564634: Call_ProductsTransfer_564625; apiVersion: string;
+          billingAccountName: string; productName: string; parameters: JsonNode;
+          invoiceSectionName: string): Recallable =
   ## productsTransfer
   ## The operation to transfer a Product to another invoice section.
-  ##   productName: string (required)
-  ##              : Invoice Id.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request. The current version is 2018-11-01-preview.
   ##   billingAccountName: string (required)
   ##                     : Billing Account Id.
-  ##   invoiceSectionName: string (required)
-  ##                     : InvoiceSection Id.
+  ##   productName: string (required)
+  ##              : Invoice Id.
   ##   parameters: JObject (required)
   ##             : Parameters supplied to the Transfer Product operation.
-  var path_575535 = newJObject()
-  var query_575536 = newJObject()
-  var body_575537 = newJObject()
-  add(path_575535, "productName", newJString(productName))
-  add(query_575536, "api-version", newJString(apiVersion))
-  add(path_575535, "billingAccountName", newJString(billingAccountName))
-  add(path_575535, "invoiceSectionName", newJString(invoiceSectionName))
+  ##   invoiceSectionName: string (required)
+  ##                     : InvoiceSection Id.
+  var path_564635 = newJObject()
+  var query_564636 = newJObject()
+  var body_564637 = newJObject()
+  add(query_564636, "api-version", newJString(apiVersion))
+  add(path_564635, "billingAccountName", newJString(billingAccountName))
+  add(path_564635, "productName", newJString(productName))
   if parameters != nil:
-    body_575537 = parameters
-  result = call_575534.call(path_575535, query_575536, nil, nil, body_575537)
+    body_564637 = parameters
+  add(path_564635, "invoiceSectionName", newJString(invoiceSectionName))
+  result = call_564634.call(path_564635, query_564636, nil, nil, body_564637)
 
-var productsTransfer* = Call_ProductsTransfer_575525(name: "productsTransfer",
+var productsTransfer* = Call_ProductsTransfer_564625(name: "productsTransfer",
     meth: HttpMethod.HttpPost, host: "management.azure.com", route: "/providers/Microsoft.Billing/billingAccounts/{billingAccountName}/invoiceSections/{invoiceSectionName}/products/{productName}/transfer",
-    validator: validate_ProductsTransfer_575526, base: "",
-    url: url_ProductsTransfer_575527, schemes: {Scheme.Https})
+    validator: validate_ProductsTransfer_564626, base: "",
+    url: url_ProductsTransfer_564627, schemes: {Scheme.Https})
 type
-  Call_ProductsUpdateAutoRenewByInvoiceSectionName_575538 = ref object of OpenApiRestCall_574467
-proc url_ProductsUpdateAutoRenewByInvoiceSectionName_575540(protocol: Scheme;
+  Call_ProductsUpdateAutoRenewByInvoiceSectionName_564638 = ref object of OpenApiRestCall_563565
+proc url_ProductsUpdateAutoRenewByInvoiceSectionName_564640(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -5560,37 +5567,37 @@ proc url_ProductsUpdateAutoRenewByInvoiceSectionName_575540(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ProductsUpdateAutoRenewByInvoiceSectionName_575539(path: JsonNode;
+proc validate_ProductsUpdateAutoRenewByInvoiceSectionName_564639(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Cancel auto renew for product by product id and invoice section name
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   productName: JString (required)
-  ##              : Invoice Id.
   ##   billingAccountName: JString (required)
   ##                     : Billing Account Id.
+  ##   productName: JString (required)
+  ##              : Invoice Id.
   ##   invoiceSectionName: JString (required)
   ##                     : InvoiceSection Id.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `productName` field"
-  var valid_575541 = path.getOrDefault("productName")
-  valid_575541 = validateParameter(valid_575541, JString, required = true,
+        "path argument is necessary due to required `billingAccountName` field"
+  var valid_564641 = path.getOrDefault("billingAccountName")
+  valid_564641 = validateParameter(valid_564641, JString, required = true,
                                  default = nil)
-  if valid_575541 != nil:
-    section.add "productName", valid_575541
-  var valid_575542 = path.getOrDefault("billingAccountName")
-  valid_575542 = validateParameter(valid_575542, JString, required = true,
+  if valid_564641 != nil:
+    section.add "billingAccountName", valid_564641
+  var valid_564642 = path.getOrDefault("productName")
+  valid_564642 = validateParameter(valid_564642, JString, required = true,
                                  default = nil)
-  if valid_575542 != nil:
-    section.add "billingAccountName", valid_575542
-  var valid_575543 = path.getOrDefault("invoiceSectionName")
-  valid_575543 = validateParameter(valid_575543, JString, required = true,
+  if valid_564642 != nil:
+    section.add "productName", valid_564642
+  var valid_564643 = path.getOrDefault("invoiceSectionName")
+  valid_564643 = validateParameter(valid_564643, JString, required = true,
                                  default = nil)
-  if valid_575543 != nil:
-    section.add "invoiceSectionName", valid_575543
+  if valid_564643 != nil:
+    section.add "invoiceSectionName", valid_564643
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -5598,11 +5605,11 @@ proc validate_ProductsUpdateAutoRenewByInvoiceSectionName_575539(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575544 = query.getOrDefault("api-version")
-  valid_575544 = validateParameter(valid_575544, JString, required = true,
+  var valid_564644 = query.getOrDefault("api-version")
+  valid_564644 = validateParameter(valid_564644, JString, required = true,
                                  default = nil)
-  if valid_575544 != nil:
-    section.add "api-version", valid_575544
+  if valid_564644 != nil:
+    section.add "api-version", valid_564644
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -5616,55 +5623,55 @@ proc validate_ProductsUpdateAutoRenewByInvoiceSectionName_575539(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_575546: Call_ProductsUpdateAutoRenewByInvoiceSectionName_575538;
+proc call*(call_564646: Call_ProductsUpdateAutoRenewByInvoiceSectionName_564638;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Cancel auto renew for product by product id and invoice section name
   ## 
-  let valid = call_575546.validator(path, query, header, formData, body)
-  let scheme = call_575546.pickScheme
+  let valid = call_564646.validator(path, query, header, formData, body)
+  let scheme = call_564646.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575546.url(scheme.get, call_575546.host, call_575546.base,
-                         call_575546.route, valid.getOrDefault("path"),
+  let url = call_564646.url(scheme.get, call_564646.host, call_564646.base,
+                         call_564646.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575546, url, valid)
+  result = hook(call_564646, url, valid)
 
-proc call*(call_575547: Call_ProductsUpdateAutoRenewByInvoiceSectionName_575538;
-          productName: string; apiVersion: string; billingAccountName: string;
-          invoiceSectionName: string; body: JsonNode): Recallable =
+proc call*(call_564647: Call_ProductsUpdateAutoRenewByInvoiceSectionName_564638;
+          apiVersion: string; billingAccountName: string; productName: string;
+          body: JsonNode; invoiceSectionName: string): Recallable =
   ## productsUpdateAutoRenewByInvoiceSectionName
   ## Cancel auto renew for product by product id and invoice section name
-  ##   productName: string (required)
-  ##              : Invoice Id.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request. The current version is 2018-11-01-preview.
   ##   billingAccountName: string (required)
   ##                     : Billing Account Id.
-  ##   invoiceSectionName: string (required)
-  ##                     : InvoiceSection Id.
+  ##   productName: string (required)
+  ##              : Invoice Id.
   ##   body: JObject (required)
   ##       : Update auto renew request parameters.
-  var path_575548 = newJObject()
-  var query_575549 = newJObject()
-  var body_575550 = newJObject()
-  add(path_575548, "productName", newJString(productName))
-  add(query_575549, "api-version", newJString(apiVersion))
-  add(path_575548, "billingAccountName", newJString(billingAccountName))
-  add(path_575548, "invoiceSectionName", newJString(invoiceSectionName))
+  ##   invoiceSectionName: string (required)
+  ##                     : InvoiceSection Id.
+  var path_564648 = newJObject()
+  var query_564649 = newJObject()
+  var body_564650 = newJObject()
+  add(query_564649, "api-version", newJString(apiVersion))
+  add(path_564648, "billingAccountName", newJString(billingAccountName))
+  add(path_564648, "productName", newJString(productName))
   if body != nil:
-    body_575550 = body
-  result = call_575547.call(path_575548, query_575549, nil, nil, body_575550)
+    body_564650 = body
+  add(path_564648, "invoiceSectionName", newJString(invoiceSectionName))
+  result = call_564647.call(path_564648, query_564649, nil, nil, body_564650)
 
-var productsUpdateAutoRenewByInvoiceSectionName* = Call_ProductsUpdateAutoRenewByInvoiceSectionName_575538(
+var productsUpdateAutoRenewByInvoiceSectionName* = Call_ProductsUpdateAutoRenewByInvoiceSectionName_564638(
     name: "productsUpdateAutoRenewByInvoiceSectionName",
     meth: HttpMethod.HttpPost, host: "management.azure.com", route: "/providers/Microsoft.Billing/billingAccounts/{billingAccountName}/invoiceSections/{invoiceSectionName}/products/{productName}/updateAutoRenew",
-    validator: validate_ProductsUpdateAutoRenewByInvoiceSectionName_575539,
-    base: "", url: url_ProductsUpdateAutoRenewByInvoiceSectionName_575540,
+    validator: validate_ProductsUpdateAutoRenewByInvoiceSectionName_564639,
+    base: "", url: url_ProductsUpdateAutoRenewByInvoiceSectionName_564640,
     schemes: {Scheme.Https})
 type
-  Call_ProductsValidateTransfer_575551 = ref object of OpenApiRestCall_574467
-proc url_ProductsValidateTransfer_575553(protocol: Scheme; host: string;
+  Call_ProductsValidateTransfer_564651 = ref object of OpenApiRestCall_563565
+proc url_ProductsValidateTransfer_564653(protocol: Scheme; host: string;
                                         base: string; route: string; path: JsonNode;
                                         query: JsonNode): Uri =
   result.scheme = $protocol
@@ -5690,37 +5697,37 @@ proc url_ProductsValidateTransfer_575553(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ProductsValidateTransfer_575552(path: JsonNode; query: JsonNode;
+proc validate_ProductsValidateTransfer_564652(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Validates the transfer of products across invoice sections.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   productName: JString (required)
-  ##              : Invoice Id.
   ##   billingAccountName: JString (required)
   ##                     : Billing Account Id.
+  ##   productName: JString (required)
+  ##              : Invoice Id.
   ##   invoiceSectionName: JString (required)
   ##                     : InvoiceSection Id.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `productName` field"
-  var valid_575554 = path.getOrDefault("productName")
-  valid_575554 = validateParameter(valid_575554, JString, required = true,
+        "path argument is necessary due to required `billingAccountName` field"
+  var valid_564654 = path.getOrDefault("billingAccountName")
+  valid_564654 = validateParameter(valid_564654, JString, required = true,
                                  default = nil)
-  if valid_575554 != nil:
-    section.add "productName", valid_575554
-  var valid_575555 = path.getOrDefault("billingAccountName")
-  valid_575555 = validateParameter(valid_575555, JString, required = true,
+  if valid_564654 != nil:
+    section.add "billingAccountName", valid_564654
+  var valid_564655 = path.getOrDefault("productName")
+  valid_564655 = validateParameter(valid_564655, JString, required = true,
                                  default = nil)
-  if valid_575555 != nil:
-    section.add "billingAccountName", valid_575555
-  var valid_575556 = path.getOrDefault("invoiceSectionName")
-  valid_575556 = validateParameter(valid_575556, JString, required = true,
+  if valid_564655 != nil:
+    section.add "productName", valid_564655
+  var valid_564656 = path.getOrDefault("invoiceSectionName")
+  valid_564656 = validateParameter(valid_564656, JString, required = true,
                                  default = nil)
-  if valid_575556 != nil:
-    section.add "invoiceSectionName", valid_575556
+  if valid_564656 != nil:
+    section.add "invoiceSectionName", valid_564656
   result.add "path", section
   section = newJObject()
   result.add "query", section
@@ -5736,49 +5743,49 @@ proc validate_ProductsValidateTransfer_575552(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_575558: Call_ProductsValidateTransfer_575551; path: JsonNode;
+proc call*(call_564658: Call_ProductsValidateTransfer_564651; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Validates the transfer of products across invoice sections.
   ## 
-  let valid = call_575558.validator(path, query, header, formData, body)
-  let scheme = call_575558.pickScheme
+  let valid = call_564658.validator(path, query, header, formData, body)
+  let scheme = call_564658.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575558.url(scheme.get, call_575558.host, call_575558.base,
-                         call_575558.route, valid.getOrDefault("path"),
+  let url = call_564658.url(scheme.get, call_564658.host, call_564658.base,
+                         call_564658.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575558, url, valid)
+  result = hook(call_564658, url, valid)
 
-proc call*(call_575559: Call_ProductsValidateTransfer_575551; productName: string;
-          billingAccountName: string; invoiceSectionName: string;
-          parameters: JsonNode): Recallable =
+proc call*(call_564659: Call_ProductsValidateTransfer_564651;
+          billingAccountName: string; productName: string; parameters: JsonNode;
+          invoiceSectionName: string): Recallable =
   ## productsValidateTransfer
   ## Validates the transfer of products across invoice sections.
-  ##   productName: string (required)
-  ##              : Invoice Id.
   ##   billingAccountName: string (required)
   ##                     : Billing Account Id.
-  ##   invoiceSectionName: string (required)
-  ##                     : InvoiceSection Id.
+  ##   productName: string (required)
+  ##              : Invoice Id.
   ##   parameters: JObject (required)
   ##             : Parameters supplied to the Transfer Products operation.
-  var path_575560 = newJObject()
-  var body_575561 = newJObject()
-  add(path_575560, "productName", newJString(productName))
-  add(path_575560, "billingAccountName", newJString(billingAccountName))
-  add(path_575560, "invoiceSectionName", newJString(invoiceSectionName))
+  ##   invoiceSectionName: string (required)
+  ##                     : InvoiceSection Id.
+  var path_564660 = newJObject()
+  var body_564661 = newJObject()
+  add(path_564660, "billingAccountName", newJString(billingAccountName))
+  add(path_564660, "productName", newJString(productName))
   if parameters != nil:
-    body_575561 = parameters
-  result = call_575559.call(path_575560, nil, nil, nil, body_575561)
+    body_564661 = parameters
+  add(path_564660, "invoiceSectionName", newJString(invoiceSectionName))
+  result = call_564659.call(path_564660, nil, nil, nil, body_564661)
 
-var productsValidateTransfer* = Call_ProductsValidateTransfer_575551(
+var productsValidateTransfer* = Call_ProductsValidateTransfer_564651(
     name: "productsValidateTransfer", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/providers/Microsoft.Billing/billingAccounts/{billingAccountName}/invoiceSections/{invoiceSectionName}/products/{productName}/validateTransferEligibility",
-    validator: validate_ProductsValidateTransfer_575552, base: "",
-    url: url_ProductsValidateTransfer_575553, schemes: {Scheme.Https})
+    validator: validate_ProductsValidateTransfer_564652, base: "",
+    url: url_ProductsValidateTransfer_564653, schemes: {Scheme.Https})
 type
-  Call_BillingPermissionsListByInvoiceSections_575562 = ref object of OpenApiRestCall_574467
-proc url_BillingPermissionsListByInvoiceSections_575564(protocol: Scheme;
+  Call_BillingPermissionsListByInvoiceSections_564662 = ref object of OpenApiRestCall_563565
+proc url_BillingPermissionsListByInvoiceSections_564664(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -5801,7 +5808,7 @@ proc url_BillingPermissionsListByInvoiceSections_575564(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_BillingPermissionsListByInvoiceSections_575563(path: JsonNode;
+proc validate_BillingPermissionsListByInvoiceSections_564663(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists all billing permissions for the caller under invoice section.
   ## 
@@ -5815,16 +5822,16 @@ proc validate_BillingPermissionsListByInvoiceSections_575563(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `billingAccountName` field"
-  var valid_575565 = path.getOrDefault("billingAccountName")
-  valid_575565 = validateParameter(valid_575565, JString, required = true,
+  var valid_564665 = path.getOrDefault("billingAccountName")
+  valid_564665 = validateParameter(valid_564665, JString, required = true,
                                  default = nil)
-  if valid_575565 != nil:
-    section.add "billingAccountName", valid_575565
-  var valid_575566 = path.getOrDefault("invoiceSectionName")
-  valid_575566 = validateParameter(valid_575566, JString, required = true,
+  if valid_564665 != nil:
+    section.add "billingAccountName", valid_564665
+  var valid_564666 = path.getOrDefault("invoiceSectionName")
+  valid_564666 = validateParameter(valid_564666, JString, required = true,
                                  default = nil)
-  if valid_575566 != nil:
-    section.add "invoiceSectionName", valid_575566
+  if valid_564666 != nil:
+    section.add "invoiceSectionName", valid_564666
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -5832,11 +5839,11 @@ proc validate_BillingPermissionsListByInvoiceSections_575563(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575567 = query.getOrDefault("api-version")
-  valid_575567 = validateParameter(valid_575567, JString, required = true,
+  var valid_564667 = query.getOrDefault("api-version")
+  valid_564667 = validateParameter(valid_564667, JString, required = true,
                                  default = nil)
-  if valid_575567 != nil:
-    section.add "api-version", valid_575567
+  if valid_564667 != nil:
+    section.add "api-version", valid_564667
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -5845,21 +5852,21 @@ proc validate_BillingPermissionsListByInvoiceSections_575563(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_575568: Call_BillingPermissionsListByInvoiceSections_575562;
+proc call*(call_564668: Call_BillingPermissionsListByInvoiceSections_564662;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Lists all billing permissions for the caller under invoice section.
   ## 
-  let valid = call_575568.validator(path, query, header, formData, body)
-  let scheme = call_575568.pickScheme
+  let valid = call_564668.validator(path, query, header, formData, body)
+  let scheme = call_564668.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575568.url(scheme.get, call_575568.host, call_575568.base,
-                         call_575568.route, valid.getOrDefault("path"),
+  let url = call_564668.url(scheme.get, call_564668.host, call_564668.base,
+                         call_564668.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575568, url, valid)
+  result = hook(call_564668, url, valid)
 
-proc call*(call_575569: Call_BillingPermissionsListByInvoiceSections_575562;
+proc call*(call_564669: Call_BillingPermissionsListByInvoiceSections_564662;
           apiVersion: string; billingAccountName: string; invoiceSectionName: string): Recallable =
   ## billingPermissionsListByInvoiceSections
   ## Lists all billing permissions for the caller under invoice section.
@@ -5869,22 +5876,22 @@ proc call*(call_575569: Call_BillingPermissionsListByInvoiceSections_575562;
   ##                     : Billing Account Id.
   ##   invoiceSectionName: string (required)
   ##                     : InvoiceSection Id.
-  var path_575570 = newJObject()
-  var query_575571 = newJObject()
-  add(query_575571, "api-version", newJString(apiVersion))
-  add(path_575570, "billingAccountName", newJString(billingAccountName))
-  add(path_575570, "invoiceSectionName", newJString(invoiceSectionName))
-  result = call_575569.call(path_575570, query_575571, nil, nil, nil)
+  var path_564670 = newJObject()
+  var query_564671 = newJObject()
+  add(query_564671, "api-version", newJString(apiVersion))
+  add(path_564670, "billingAccountName", newJString(billingAccountName))
+  add(path_564670, "invoiceSectionName", newJString(invoiceSectionName))
+  result = call_564669.call(path_564670, query_564671, nil, nil, nil)
 
-var billingPermissionsListByInvoiceSections* = Call_BillingPermissionsListByInvoiceSections_575562(
+var billingPermissionsListByInvoiceSections* = Call_BillingPermissionsListByInvoiceSections_564662(
     name: "billingPermissionsListByInvoiceSections", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/providers/Microsoft.Billing/billingAccounts/{billingAccountName}/invoiceSections/{invoiceSectionName}/providers/Microsoft.Billing/billingPermissions",
-    validator: validate_BillingPermissionsListByInvoiceSections_575563, base: "",
-    url: url_BillingPermissionsListByInvoiceSections_575564,
+    validator: validate_BillingPermissionsListByInvoiceSections_564663, base: "",
+    url: url_BillingPermissionsListByInvoiceSections_564664,
     schemes: {Scheme.Https})
 type
-  Call_BillingRoleAssignmentsListByInvoiceSectionName_575572 = ref object of OpenApiRestCall_574467
-proc url_BillingRoleAssignmentsListByInvoiceSectionName_575574(protocol: Scheme;
+  Call_BillingRoleAssignmentsListByInvoiceSectionName_564672 = ref object of OpenApiRestCall_563565
+proc url_BillingRoleAssignmentsListByInvoiceSectionName_564674(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -5907,7 +5914,7 @@ proc url_BillingRoleAssignmentsListByInvoiceSectionName_575574(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_BillingRoleAssignmentsListByInvoiceSectionName_575573(
+proc validate_BillingRoleAssignmentsListByInvoiceSectionName_564673(
     path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
     body: JsonNode): JsonNode =
   ## Get the role assignments on the invoice Section
@@ -5922,16 +5929,16 @@ proc validate_BillingRoleAssignmentsListByInvoiceSectionName_575573(
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `billingAccountName` field"
-  var valid_575575 = path.getOrDefault("billingAccountName")
-  valid_575575 = validateParameter(valid_575575, JString, required = true,
+  var valid_564675 = path.getOrDefault("billingAccountName")
+  valid_564675 = validateParameter(valid_564675, JString, required = true,
                                  default = nil)
-  if valid_575575 != nil:
-    section.add "billingAccountName", valid_575575
-  var valid_575576 = path.getOrDefault("invoiceSectionName")
-  valid_575576 = validateParameter(valid_575576, JString, required = true,
+  if valid_564675 != nil:
+    section.add "billingAccountName", valid_564675
+  var valid_564676 = path.getOrDefault("invoiceSectionName")
+  valid_564676 = validateParameter(valid_564676, JString, required = true,
                                  default = nil)
-  if valid_575576 != nil:
-    section.add "invoiceSectionName", valid_575576
+  if valid_564676 != nil:
+    section.add "invoiceSectionName", valid_564676
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -5939,11 +5946,11 @@ proc validate_BillingRoleAssignmentsListByInvoiceSectionName_575573(
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575577 = query.getOrDefault("api-version")
-  valid_575577 = validateParameter(valid_575577, JString, required = true,
+  var valid_564677 = query.getOrDefault("api-version")
+  valid_564677 = validateParameter(valid_564677, JString, required = true,
                                  default = nil)
-  if valid_575577 != nil:
-    section.add "api-version", valid_575577
+  if valid_564677 != nil:
+    section.add "api-version", valid_564677
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -5952,21 +5959,21 @@ proc validate_BillingRoleAssignmentsListByInvoiceSectionName_575573(
   if body != nil:
     result.add "body", body
 
-proc call*(call_575578: Call_BillingRoleAssignmentsListByInvoiceSectionName_575572;
+proc call*(call_564678: Call_BillingRoleAssignmentsListByInvoiceSectionName_564672;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Get the role assignments on the invoice Section
   ## 
-  let valid = call_575578.validator(path, query, header, formData, body)
-  let scheme = call_575578.pickScheme
+  let valid = call_564678.validator(path, query, header, formData, body)
+  let scheme = call_564678.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575578.url(scheme.get, call_575578.host, call_575578.base,
-                         call_575578.route, valid.getOrDefault("path"),
+  let url = call_564678.url(scheme.get, call_564678.host, call_564678.base,
+                         call_564678.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575578, url, valid)
+  result = hook(call_564678, url, valid)
 
-proc call*(call_575579: Call_BillingRoleAssignmentsListByInvoiceSectionName_575572;
+proc call*(call_564679: Call_BillingRoleAssignmentsListByInvoiceSectionName_564672;
           apiVersion: string; billingAccountName: string; invoiceSectionName: string): Recallable =
   ## billingRoleAssignmentsListByInvoiceSectionName
   ## Get the role assignments on the invoice Section
@@ -5976,22 +5983,22 @@ proc call*(call_575579: Call_BillingRoleAssignmentsListByInvoiceSectionName_5755
   ##                     : Billing Account Id.
   ##   invoiceSectionName: string (required)
   ##                     : InvoiceSection Id.
-  var path_575580 = newJObject()
-  var query_575581 = newJObject()
-  add(query_575581, "api-version", newJString(apiVersion))
-  add(path_575580, "billingAccountName", newJString(billingAccountName))
-  add(path_575580, "invoiceSectionName", newJString(invoiceSectionName))
-  result = call_575579.call(path_575580, query_575581, nil, nil, nil)
+  var path_564680 = newJObject()
+  var query_564681 = newJObject()
+  add(query_564681, "api-version", newJString(apiVersion))
+  add(path_564680, "billingAccountName", newJString(billingAccountName))
+  add(path_564680, "invoiceSectionName", newJString(invoiceSectionName))
+  result = call_564679.call(path_564680, query_564681, nil, nil, nil)
 
-var billingRoleAssignmentsListByInvoiceSectionName* = Call_BillingRoleAssignmentsListByInvoiceSectionName_575572(
+var billingRoleAssignmentsListByInvoiceSectionName* = Call_BillingRoleAssignmentsListByInvoiceSectionName_564672(
     name: "billingRoleAssignmentsListByInvoiceSectionName",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/providers/Microsoft.Billing/billingAccounts/{billingAccountName}/invoiceSections/{invoiceSectionName}/providers/Microsoft.Billing/billingRoleAssignments",
-    validator: validate_BillingRoleAssignmentsListByInvoiceSectionName_575573,
-    base: "", url: url_BillingRoleAssignmentsListByInvoiceSectionName_575574,
+    validator: validate_BillingRoleAssignmentsListByInvoiceSectionName_564673,
+    base: "", url: url_BillingRoleAssignmentsListByInvoiceSectionName_564674,
     schemes: {Scheme.Https})
 type
-  Call_BillingRoleAssignmentsGetByInvoiceSectionName_575582 = ref object of OpenApiRestCall_574467
-proc url_BillingRoleAssignmentsGetByInvoiceSectionName_575584(protocol: Scheme;
+  Call_BillingRoleAssignmentsGetByInvoiceSectionName_564682 = ref object of OpenApiRestCall_563565
+proc url_BillingRoleAssignmentsGetByInvoiceSectionName_564684(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -6017,7 +6024,7 @@ proc url_BillingRoleAssignmentsGetByInvoiceSectionName_575584(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_BillingRoleAssignmentsGetByInvoiceSectionName_575583(
+proc validate_BillingRoleAssignmentsGetByInvoiceSectionName_564683(
     path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
     body: JsonNode): JsonNode =
   ## Get the role assignment for the caller on the invoice Section
@@ -6025,29 +6032,30 @@ proc validate_BillingRoleAssignmentsGetByInvoiceSectionName_575583(
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   billingRoleAssignmentName: JString (required)
-  ##                            : role assignment id.
   ##   billingAccountName: JString (required)
   ##                     : Billing Account Id.
+  ##   billingRoleAssignmentName: JString (required)
+  ##                            : role assignment id.
   ##   invoiceSectionName: JString (required)
   ##                     : InvoiceSection Id.
   section = newJObject()
-  assert path != nil, "path argument is necessary due to required `billingRoleAssignmentName` field"
-  var valid_575585 = path.getOrDefault("billingRoleAssignmentName")
-  valid_575585 = validateParameter(valid_575585, JString, required = true,
+  assert path != nil,
+        "path argument is necessary due to required `billingAccountName` field"
+  var valid_564685 = path.getOrDefault("billingAccountName")
+  valid_564685 = validateParameter(valid_564685, JString, required = true,
                                  default = nil)
-  if valid_575585 != nil:
-    section.add "billingRoleAssignmentName", valid_575585
-  var valid_575586 = path.getOrDefault("billingAccountName")
-  valid_575586 = validateParameter(valid_575586, JString, required = true,
+  if valid_564685 != nil:
+    section.add "billingAccountName", valid_564685
+  var valid_564686 = path.getOrDefault("billingRoleAssignmentName")
+  valid_564686 = validateParameter(valid_564686, JString, required = true,
                                  default = nil)
-  if valid_575586 != nil:
-    section.add "billingAccountName", valid_575586
-  var valid_575587 = path.getOrDefault("invoiceSectionName")
-  valid_575587 = validateParameter(valid_575587, JString, required = true,
+  if valid_564686 != nil:
+    section.add "billingRoleAssignmentName", valid_564686
+  var valid_564687 = path.getOrDefault("invoiceSectionName")
+  valid_564687 = validateParameter(valid_564687, JString, required = true,
                                  default = nil)
-  if valid_575587 != nil:
-    section.add "invoiceSectionName", valid_575587
+  if valid_564687 != nil:
+    section.add "invoiceSectionName", valid_564687
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -6055,11 +6063,11 @@ proc validate_BillingRoleAssignmentsGetByInvoiceSectionName_575583(
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575588 = query.getOrDefault("api-version")
-  valid_575588 = validateParameter(valid_575588, JString, required = true,
+  var valid_564688 = query.getOrDefault("api-version")
+  valid_564688 = validateParameter(valid_564688, JString, required = true,
                                  default = nil)
-  if valid_575588 != nil:
-    section.add "api-version", valid_575588
+  if valid_564688 != nil:
+    section.add "api-version", valid_564688
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -6068,51 +6076,51 @@ proc validate_BillingRoleAssignmentsGetByInvoiceSectionName_575583(
   if body != nil:
     result.add "body", body
 
-proc call*(call_575589: Call_BillingRoleAssignmentsGetByInvoiceSectionName_575582;
+proc call*(call_564689: Call_BillingRoleAssignmentsGetByInvoiceSectionName_564682;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Get the role assignment for the caller on the invoice Section
   ## 
-  let valid = call_575589.validator(path, query, header, formData, body)
-  let scheme = call_575589.pickScheme
+  let valid = call_564689.validator(path, query, header, formData, body)
+  let scheme = call_564689.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575589.url(scheme.get, call_575589.host, call_575589.base,
-                         call_575589.route, valid.getOrDefault("path"),
+  let url = call_564689.url(scheme.get, call_564689.host, call_564689.base,
+                         call_564689.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575589, url, valid)
+  result = hook(call_564689, url, valid)
 
-proc call*(call_575590: Call_BillingRoleAssignmentsGetByInvoiceSectionName_575582;
-          apiVersion: string; billingRoleAssignmentName: string;
-          billingAccountName: string; invoiceSectionName: string): Recallable =
+proc call*(call_564690: Call_BillingRoleAssignmentsGetByInvoiceSectionName_564682;
+          apiVersion: string; billingAccountName: string;
+          billingRoleAssignmentName: string; invoiceSectionName: string): Recallable =
   ## billingRoleAssignmentsGetByInvoiceSectionName
   ## Get the role assignment for the caller on the invoice Section
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request. The current version is 2018-11-01-preview.
-  ##   billingRoleAssignmentName: string (required)
-  ##                            : role assignment id.
   ##   billingAccountName: string (required)
   ##                     : Billing Account Id.
+  ##   billingRoleAssignmentName: string (required)
+  ##                            : role assignment id.
   ##   invoiceSectionName: string (required)
   ##                     : InvoiceSection Id.
-  var path_575591 = newJObject()
-  var query_575592 = newJObject()
-  add(query_575592, "api-version", newJString(apiVersion))
-  add(path_575591, "billingRoleAssignmentName",
+  var path_564691 = newJObject()
+  var query_564692 = newJObject()
+  add(query_564692, "api-version", newJString(apiVersion))
+  add(path_564691, "billingAccountName", newJString(billingAccountName))
+  add(path_564691, "billingRoleAssignmentName",
       newJString(billingRoleAssignmentName))
-  add(path_575591, "billingAccountName", newJString(billingAccountName))
-  add(path_575591, "invoiceSectionName", newJString(invoiceSectionName))
-  result = call_575590.call(path_575591, query_575592, nil, nil, nil)
+  add(path_564691, "invoiceSectionName", newJString(invoiceSectionName))
+  result = call_564690.call(path_564691, query_564692, nil, nil, nil)
 
-var billingRoleAssignmentsGetByInvoiceSectionName* = Call_BillingRoleAssignmentsGetByInvoiceSectionName_575582(
+var billingRoleAssignmentsGetByInvoiceSectionName* = Call_BillingRoleAssignmentsGetByInvoiceSectionName_564682(
     name: "billingRoleAssignmentsGetByInvoiceSectionName",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/providers/Microsoft.Billing/billingAccounts/{billingAccountName}/invoiceSections/{invoiceSectionName}/providers/Microsoft.Billing/billingRoleAssignments/{billingRoleAssignmentName}",
-    validator: validate_BillingRoleAssignmentsGetByInvoiceSectionName_575583,
-    base: "", url: url_BillingRoleAssignmentsGetByInvoiceSectionName_575584,
+    validator: validate_BillingRoleAssignmentsGetByInvoiceSectionName_564683,
+    base: "", url: url_BillingRoleAssignmentsGetByInvoiceSectionName_564684,
     schemes: {Scheme.Https})
 type
-  Call_BillingRoleAssignmentsDeleteByInvoiceSectionName_575593 = ref object of OpenApiRestCall_574467
-proc url_BillingRoleAssignmentsDeleteByInvoiceSectionName_575595(
+  Call_BillingRoleAssignmentsDeleteByInvoiceSectionName_564693 = ref object of OpenApiRestCall_563565
+proc url_BillingRoleAssignmentsDeleteByInvoiceSectionName_564695(
     protocol: Scheme; host: string; base: string; route: string; path: JsonNode;
     query: JsonNode): Uri =
   result.scheme = $protocol
@@ -6139,7 +6147,7 @@ proc url_BillingRoleAssignmentsDeleteByInvoiceSectionName_575595(
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_BillingRoleAssignmentsDeleteByInvoiceSectionName_575594(
+proc validate_BillingRoleAssignmentsDeleteByInvoiceSectionName_564694(
     path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
     body: JsonNode): JsonNode =
   ## Delete the role assignment on the invoice Section
@@ -6147,29 +6155,30 @@ proc validate_BillingRoleAssignmentsDeleteByInvoiceSectionName_575594(
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   billingRoleAssignmentName: JString (required)
-  ##                            : role assignment id.
   ##   billingAccountName: JString (required)
   ##                     : Billing Account Id.
+  ##   billingRoleAssignmentName: JString (required)
+  ##                            : role assignment id.
   ##   invoiceSectionName: JString (required)
   ##                     : InvoiceSection Id.
   section = newJObject()
-  assert path != nil, "path argument is necessary due to required `billingRoleAssignmentName` field"
-  var valid_575596 = path.getOrDefault("billingRoleAssignmentName")
-  valid_575596 = validateParameter(valid_575596, JString, required = true,
+  assert path != nil,
+        "path argument is necessary due to required `billingAccountName` field"
+  var valid_564696 = path.getOrDefault("billingAccountName")
+  valid_564696 = validateParameter(valid_564696, JString, required = true,
                                  default = nil)
-  if valid_575596 != nil:
-    section.add "billingRoleAssignmentName", valid_575596
-  var valid_575597 = path.getOrDefault("billingAccountName")
-  valid_575597 = validateParameter(valid_575597, JString, required = true,
+  if valid_564696 != nil:
+    section.add "billingAccountName", valid_564696
+  var valid_564697 = path.getOrDefault("billingRoleAssignmentName")
+  valid_564697 = validateParameter(valid_564697, JString, required = true,
                                  default = nil)
-  if valid_575597 != nil:
-    section.add "billingAccountName", valid_575597
-  var valid_575598 = path.getOrDefault("invoiceSectionName")
-  valid_575598 = validateParameter(valid_575598, JString, required = true,
+  if valid_564697 != nil:
+    section.add "billingRoleAssignmentName", valid_564697
+  var valid_564698 = path.getOrDefault("invoiceSectionName")
+  valid_564698 = validateParameter(valid_564698, JString, required = true,
                                  default = nil)
-  if valid_575598 != nil:
-    section.add "invoiceSectionName", valid_575598
+  if valid_564698 != nil:
+    section.add "invoiceSectionName", valid_564698
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -6177,11 +6186,11 @@ proc validate_BillingRoleAssignmentsDeleteByInvoiceSectionName_575594(
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575599 = query.getOrDefault("api-version")
-  valid_575599 = validateParameter(valid_575599, JString, required = true,
+  var valid_564699 = query.getOrDefault("api-version")
+  valid_564699 = validateParameter(valid_564699, JString, required = true,
                                  default = nil)
-  if valid_575599 != nil:
-    section.add "api-version", valid_575599
+  if valid_564699 != nil:
+    section.add "api-version", valid_564699
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -6190,51 +6199,51 @@ proc validate_BillingRoleAssignmentsDeleteByInvoiceSectionName_575594(
   if body != nil:
     result.add "body", body
 
-proc call*(call_575600: Call_BillingRoleAssignmentsDeleteByInvoiceSectionName_575593;
+proc call*(call_564700: Call_BillingRoleAssignmentsDeleteByInvoiceSectionName_564693;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Delete the role assignment on the invoice Section
   ## 
-  let valid = call_575600.validator(path, query, header, formData, body)
-  let scheme = call_575600.pickScheme
+  let valid = call_564700.validator(path, query, header, formData, body)
+  let scheme = call_564700.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575600.url(scheme.get, call_575600.host, call_575600.base,
-                         call_575600.route, valid.getOrDefault("path"),
+  let url = call_564700.url(scheme.get, call_564700.host, call_564700.base,
+                         call_564700.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575600, url, valid)
+  result = hook(call_564700, url, valid)
 
-proc call*(call_575601: Call_BillingRoleAssignmentsDeleteByInvoiceSectionName_575593;
-          apiVersion: string; billingRoleAssignmentName: string;
-          billingAccountName: string; invoiceSectionName: string): Recallable =
+proc call*(call_564701: Call_BillingRoleAssignmentsDeleteByInvoiceSectionName_564693;
+          apiVersion: string; billingAccountName: string;
+          billingRoleAssignmentName: string; invoiceSectionName: string): Recallable =
   ## billingRoleAssignmentsDeleteByInvoiceSectionName
   ## Delete the role assignment on the invoice Section
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request. The current version is 2018-11-01-preview.
-  ##   billingRoleAssignmentName: string (required)
-  ##                            : role assignment id.
   ##   billingAccountName: string (required)
   ##                     : Billing Account Id.
+  ##   billingRoleAssignmentName: string (required)
+  ##                            : role assignment id.
   ##   invoiceSectionName: string (required)
   ##                     : InvoiceSection Id.
-  var path_575602 = newJObject()
-  var query_575603 = newJObject()
-  add(query_575603, "api-version", newJString(apiVersion))
-  add(path_575602, "billingRoleAssignmentName",
+  var path_564702 = newJObject()
+  var query_564703 = newJObject()
+  add(query_564703, "api-version", newJString(apiVersion))
+  add(path_564702, "billingAccountName", newJString(billingAccountName))
+  add(path_564702, "billingRoleAssignmentName",
       newJString(billingRoleAssignmentName))
-  add(path_575602, "billingAccountName", newJString(billingAccountName))
-  add(path_575602, "invoiceSectionName", newJString(invoiceSectionName))
-  result = call_575601.call(path_575602, query_575603, nil, nil, nil)
+  add(path_564702, "invoiceSectionName", newJString(invoiceSectionName))
+  result = call_564701.call(path_564702, query_564703, nil, nil, nil)
 
-var billingRoleAssignmentsDeleteByInvoiceSectionName* = Call_BillingRoleAssignmentsDeleteByInvoiceSectionName_575593(
+var billingRoleAssignmentsDeleteByInvoiceSectionName* = Call_BillingRoleAssignmentsDeleteByInvoiceSectionName_564693(
     name: "billingRoleAssignmentsDeleteByInvoiceSectionName",
     meth: HttpMethod.HttpDelete, host: "management.azure.com", route: "/providers/Microsoft.Billing/billingAccounts/{billingAccountName}/invoiceSections/{invoiceSectionName}/providers/Microsoft.Billing/billingRoleAssignments/{billingRoleAssignmentName}",
-    validator: validate_BillingRoleAssignmentsDeleteByInvoiceSectionName_575594,
-    base: "", url: url_BillingRoleAssignmentsDeleteByInvoiceSectionName_575595,
+    validator: validate_BillingRoleAssignmentsDeleteByInvoiceSectionName_564694,
+    base: "", url: url_BillingRoleAssignmentsDeleteByInvoiceSectionName_564695,
     schemes: {Scheme.Https})
 type
-  Call_BillingRoleDefinitionsListByInvoiceSectionName_575604 = ref object of OpenApiRestCall_574467
-proc url_BillingRoleDefinitionsListByInvoiceSectionName_575606(protocol: Scheme;
+  Call_BillingRoleDefinitionsListByInvoiceSectionName_564704 = ref object of OpenApiRestCall_563565
+proc url_BillingRoleDefinitionsListByInvoiceSectionName_564706(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -6257,7 +6266,7 @@ proc url_BillingRoleDefinitionsListByInvoiceSectionName_575606(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_BillingRoleDefinitionsListByInvoiceSectionName_575605(
+proc validate_BillingRoleDefinitionsListByInvoiceSectionName_564705(
     path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
     body: JsonNode): JsonNode =
   ## Lists the role definition for an invoice Section
@@ -6272,16 +6281,16 @@ proc validate_BillingRoleDefinitionsListByInvoiceSectionName_575605(
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `billingAccountName` field"
-  var valid_575607 = path.getOrDefault("billingAccountName")
-  valid_575607 = validateParameter(valid_575607, JString, required = true,
+  var valid_564707 = path.getOrDefault("billingAccountName")
+  valid_564707 = validateParameter(valid_564707, JString, required = true,
                                  default = nil)
-  if valid_575607 != nil:
-    section.add "billingAccountName", valid_575607
-  var valid_575608 = path.getOrDefault("invoiceSectionName")
-  valid_575608 = validateParameter(valid_575608, JString, required = true,
+  if valid_564707 != nil:
+    section.add "billingAccountName", valid_564707
+  var valid_564708 = path.getOrDefault("invoiceSectionName")
+  valid_564708 = validateParameter(valid_564708, JString, required = true,
                                  default = nil)
-  if valid_575608 != nil:
-    section.add "invoiceSectionName", valid_575608
+  if valid_564708 != nil:
+    section.add "invoiceSectionName", valid_564708
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -6289,11 +6298,11 @@ proc validate_BillingRoleDefinitionsListByInvoiceSectionName_575605(
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575609 = query.getOrDefault("api-version")
-  valid_575609 = validateParameter(valid_575609, JString, required = true,
+  var valid_564709 = query.getOrDefault("api-version")
+  valid_564709 = validateParameter(valid_564709, JString, required = true,
                                  default = nil)
-  if valid_575609 != nil:
-    section.add "api-version", valid_575609
+  if valid_564709 != nil:
+    section.add "api-version", valid_564709
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -6302,21 +6311,21 @@ proc validate_BillingRoleDefinitionsListByInvoiceSectionName_575605(
   if body != nil:
     result.add "body", body
 
-proc call*(call_575610: Call_BillingRoleDefinitionsListByInvoiceSectionName_575604;
+proc call*(call_564710: Call_BillingRoleDefinitionsListByInvoiceSectionName_564704;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Lists the role definition for an invoice Section
   ## 
-  let valid = call_575610.validator(path, query, header, formData, body)
-  let scheme = call_575610.pickScheme
+  let valid = call_564710.validator(path, query, header, formData, body)
+  let scheme = call_564710.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575610.url(scheme.get, call_575610.host, call_575610.base,
-                         call_575610.route, valid.getOrDefault("path"),
+  let url = call_564710.url(scheme.get, call_564710.host, call_564710.base,
+                         call_564710.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575610, url, valid)
+  result = hook(call_564710, url, valid)
 
-proc call*(call_575611: Call_BillingRoleDefinitionsListByInvoiceSectionName_575604;
+proc call*(call_564711: Call_BillingRoleDefinitionsListByInvoiceSectionName_564704;
           apiVersion: string; billingAccountName: string; invoiceSectionName: string): Recallable =
   ## billingRoleDefinitionsListByInvoiceSectionName
   ## Lists the role definition for an invoice Section
@@ -6326,22 +6335,22 @@ proc call*(call_575611: Call_BillingRoleDefinitionsListByInvoiceSectionName_5756
   ##                     : Billing Account Id.
   ##   invoiceSectionName: string (required)
   ##                     : InvoiceSection Id.
-  var path_575612 = newJObject()
-  var query_575613 = newJObject()
-  add(query_575613, "api-version", newJString(apiVersion))
-  add(path_575612, "billingAccountName", newJString(billingAccountName))
-  add(path_575612, "invoiceSectionName", newJString(invoiceSectionName))
-  result = call_575611.call(path_575612, query_575613, nil, nil, nil)
+  var path_564712 = newJObject()
+  var query_564713 = newJObject()
+  add(query_564713, "api-version", newJString(apiVersion))
+  add(path_564712, "billingAccountName", newJString(billingAccountName))
+  add(path_564712, "invoiceSectionName", newJString(invoiceSectionName))
+  result = call_564711.call(path_564712, query_564713, nil, nil, nil)
 
-var billingRoleDefinitionsListByInvoiceSectionName* = Call_BillingRoleDefinitionsListByInvoiceSectionName_575604(
+var billingRoleDefinitionsListByInvoiceSectionName* = Call_BillingRoleDefinitionsListByInvoiceSectionName_564704(
     name: "billingRoleDefinitionsListByInvoiceSectionName",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/providers/Microsoft.Billing/billingAccounts/{billingAccountName}/invoiceSections/{invoiceSectionName}/providers/Microsoft.Billing/billingRoleDefinitions",
-    validator: validate_BillingRoleDefinitionsListByInvoiceSectionName_575605,
-    base: "", url: url_BillingRoleDefinitionsListByInvoiceSectionName_575606,
+    validator: validate_BillingRoleDefinitionsListByInvoiceSectionName_564705,
+    base: "", url: url_BillingRoleDefinitionsListByInvoiceSectionName_564706,
     schemes: {Scheme.Https})
 type
-  Call_BillingRoleDefinitionsGetByInvoiceSectionName_575614 = ref object of OpenApiRestCall_574467
-proc url_BillingRoleDefinitionsGetByInvoiceSectionName_575616(protocol: Scheme;
+  Call_BillingRoleDefinitionsGetByInvoiceSectionName_564714 = ref object of OpenApiRestCall_563565
+proc url_BillingRoleDefinitionsGetByInvoiceSectionName_564716(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -6367,7 +6376,7 @@ proc url_BillingRoleDefinitionsGetByInvoiceSectionName_575616(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_BillingRoleDefinitionsGetByInvoiceSectionName_575615(
+proc validate_BillingRoleDefinitionsGetByInvoiceSectionName_564715(
     path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
     body: JsonNode): JsonNode =
   ## Gets the role definition for a role
@@ -6377,28 +6386,28 @@ proc validate_BillingRoleDefinitionsGetByInvoiceSectionName_575615(
   ## parameters in `path` object:
   ##   billingAccountName: JString (required)
   ##                     : Billing Account Id.
-  ##   invoiceSectionName: JString (required)
-  ##                     : InvoiceSection Id.
   ##   billingRoleDefinitionName: JString (required)
   ##                            : role definition id.
+  ##   invoiceSectionName: JString (required)
+  ##                     : InvoiceSection Id.
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `billingAccountName` field"
-  var valid_575617 = path.getOrDefault("billingAccountName")
-  valid_575617 = validateParameter(valid_575617, JString, required = true,
+  var valid_564717 = path.getOrDefault("billingAccountName")
+  valid_564717 = validateParameter(valid_564717, JString, required = true,
                                  default = nil)
-  if valid_575617 != nil:
-    section.add "billingAccountName", valid_575617
-  var valid_575618 = path.getOrDefault("invoiceSectionName")
-  valid_575618 = validateParameter(valid_575618, JString, required = true,
+  if valid_564717 != nil:
+    section.add "billingAccountName", valid_564717
+  var valid_564718 = path.getOrDefault("billingRoleDefinitionName")
+  valid_564718 = validateParameter(valid_564718, JString, required = true,
                                  default = nil)
-  if valid_575618 != nil:
-    section.add "invoiceSectionName", valid_575618
-  var valid_575619 = path.getOrDefault("billingRoleDefinitionName")
-  valid_575619 = validateParameter(valid_575619, JString, required = true,
+  if valid_564718 != nil:
+    section.add "billingRoleDefinitionName", valid_564718
+  var valid_564719 = path.getOrDefault("invoiceSectionName")
+  valid_564719 = validateParameter(valid_564719, JString, required = true,
                                  default = nil)
-  if valid_575619 != nil:
-    section.add "billingRoleDefinitionName", valid_575619
+  if valid_564719 != nil:
+    section.add "invoiceSectionName", valid_564719
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -6406,11 +6415,11 @@ proc validate_BillingRoleDefinitionsGetByInvoiceSectionName_575615(
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575620 = query.getOrDefault("api-version")
-  valid_575620 = validateParameter(valid_575620, JString, required = true,
+  var valid_564720 = query.getOrDefault("api-version")
+  valid_564720 = validateParameter(valid_564720, JString, required = true,
                                  default = nil)
-  if valid_575620 != nil:
-    section.add "api-version", valid_575620
+  if valid_564720 != nil:
+    section.add "api-version", valid_564720
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -6419,51 +6428,51 @@ proc validate_BillingRoleDefinitionsGetByInvoiceSectionName_575615(
   if body != nil:
     result.add "body", body
 
-proc call*(call_575621: Call_BillingRoleDefinitionsGetByInvoiceSectionName_575614;
+proc call*(call_564721: Call_BillingRoleDefinitionsGetByInvoiceSectionName_564714;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Gets the role definition for a role
   ## 
-  let valid = call_575621.validator(path, query, header, formData, body)
-  let scheme = call_575621.pickScheme
+  let valid = call_564721.validator(path, query, header, formData, body)
+  let scheme = call_564721.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575621.url(scheme.get, call_575621.host, call_575621.base,
-                         call_575621.route, valid.getOrDefault("path"),
+  let url = call_564721.url(scheme.get, call_564721.host, call_564721.base,
+                         call_564721.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575621, url, valid)
+  result = hook(call_564721, url, valid)
 
-proc call*(call_575622: Call_BillingRoleDefinitionsGetByInvoiceSectionName_575614;
+proc call*(call_564722: Call_BillingRoleDefinitionsGetByInvoiceSectionName_564714;
           apiVersion: string; billingAccountName: string;
-          invoiceSectionName: string; billingRoleDefinitionName: string): Recallable =
+          billingRoleDefinitionName: string; invoiceSectionName: string): Recallable =
   ## billingRoleDefinitionsGetByInvoiceSectionName
   ## Gets the role definition for a role
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request. The current version is 2018-11-01-preview.
   ##   billingAccountName: string (required)
   ##                     : Billing Account Id.
-  ##   invoiceSectionName: string (required)
-  ##                     : InvoiceSection Id.
   ##   billingRoleDefinitionName: string (required)
   ##                            : role definition id.
-  var path_575623 = newJObject()
-  var query_575624 = newJObject()
-  add(query_575624, "api-version", newJString(apiVersion))
-  add(path_575623, "billingAccountName", newJString(billingAccountName))
-  add(path_575623, "invoiceSectionName", newJString(invoiceSectionName))
-  add(path_575623, "billingRoleDefinitionName",
+  ##   invoiceSectionName: string (required)
+  ##                     : InvoiceSection Id.
+  var path_564723 = newJObject()
+  var query_564724 = newJObject()
+  add(query_564724, "api-version", newJString(apiVersion))
+  add(path_564723, "billingAccountName", newJString(billingAccountName))
+  add(path_564723, "billingRoleDefinitionName",
       newJString(billingRoleDefinitionName))
-  result = call_575622.call(path_575623, query_575624, nil, nil, nil)
+  add(path_564723, "invoiceSectionName", newJString(invoiceSectionName))
+  result = call_564722.call(path_564723, query_564724, nil, nil, nil)
 
-var billingRoleDefinitionsGetByInvoiceSectionName* = Call_BillingRoleDefinitionsGetByInvoiceSectionName_575614(
+var billingRoleDefinitionsGetByInvoiceSectionName* = Call_BillingRoleDefinitionsGetByInvoiceSectionName_564714(
     name: "billingRoleDefinitionsGetByInvoiceSectionName",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/providers/Microsoft.Billing/billingAccounts/{billingAccountName}/invoiceSections/{invoiceSectionName}/providers/Microsoft.Billing/billingRoleDefinitions/{billingRoleDefinitionName}",
-    validator: validate_BillingRoleDefinitionsGetByInvoiceSectionName_575615,
-    base: "", url: url_BillingRoleDefinitionsGetByInvoiceSectionName_575616,
+    validator: validate_BillingRoleDefinitionsGetByInvoiceSectionName_564715,
+    base: "", url: url_BillingRoleDefinitionsGetByInvoiceSectionName_564716,
     schemes: {Scheme.Https})
 type
-  Call_BillingRoleAssignmentsAddByInvoiceSectionName_575625 = ref object of OpenApiRestCall_574467
-proc url_BillingRoleAssignmentsAddByInvoiceSectionName_575627(protocol: Scheme;
+  Call_BillingRoleAssignmentsAddByInvoiceSectionName_564725 = ref object of OpenApiRestCall_563565
+proc url_BillingRoleAssignmentsAddByInvoiceSectionName_564727(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -6486,7 +6495,7 @@ proc url_BillingRoleAssignmentsAddByInvoiceSectionName_575627(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_BillingRoleAssignmentsAddByInvoiceSectionName_575626(
+proc validate_BillingRoleAssignmentsAddByInvoiceSectionName_564726(
     path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
     body: JsonNode): JsonNode =
   ## The operation to add a role assignment to a invoice Section.
@@ -6501,16 +6510,16 @@ proc validate_BillingRoleAssignmentsAddByInvoiceSectionName_575626(
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `billingAccountName` field"
-  var valid_575628 = path.getOrDefault("billingAccountName")
-  valid_575628 = validateParameter(valid_575628, JString, required = true,
+  var valid_564728 = path.getOrDefault("billingAccountName")
+  valid_564728 = validateParameter(valid_564728, JString, required = true,
                                  default = nil)
-  if valid_575628 != nil:
-    section.add "billingAccountName", valid_575628
-  var valid_575629 = path.getOrDefault("invoiceSectionName")
-  valid_575629 = validateParameter(valid_575629, JString, required = true,
+  if valid_564728 != nil:
+    section.add "billingAccountName", valid_564728
+  var valid_564729 = path.getOrDefault("invoiceSectionName")
+  valid_564729 = validateParameter(valid_564729, JString, required = true,
                                  default = nil)
-  if valid_575629 != nil:
-    section.add "invoiceSectionName", valid_575629
+  if valid_564729 != nil:
+    section.add "invoiceSectionName", valid_564729
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -6518,11 +6527,11 @@ proc validate_BillingRoleAssignmentsAddByInvoiceSectionName_575626(
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575630 = query.getOrDefault("api-version")
-  valid_575630 = validateParameter(valid_575630, JString, required = true,
+  var valid_564730 = query.getOrDefault("api-version")
+  valid_564730 = validateParameter(valid_564730, JString, required = true,
                                  default = nil)
-  if valid_575630 != nil:
-    section.add "api-version", valid_575630
+  if valid_564730 != nil:
+    section.add "api-version", valid_564730
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -6536,52 +6545,52 @@ proc validate_BillingRoleAssignmentsAddByInvoiceSectionName_575626(
   if body != nil:
     result.add "body", body
 
-proc call*(call_575632: Call_BillingRoleAssignmentsAddByInvoiceSectionName_575625;
+proc call*(call_564732: Call_BillingRoleAssignmentsAddByInvoiceSectionName_564725;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## The operation to add a role assignment to a invoice Section.
   ## 
-  let valid = call_575632.validator(path, query, header, formData, body)
-  let scheme = call_575632.pickScheme
+  let valid = call_564732.validator(path, query, header, formData, body)
+  let scheme = call_564732.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575632.url(scheme.get, call_575632.host, call_575632.base,
-                         call_575632.route, valid.getOrDefault("path"),
+  let url = call_564732.url(scheme.get, call_564732.host, call_564732.base,
+                         call_564732.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575632, url, valid)
+  result = hook(call_564732, url, valid)
 
-proc call*(call_575633: Call_BillingRoleAssignmentsAddByInvoiceSectionName_575625;
-          apiVersion: string; billingAccountName: string;
-          invoiceSectionName: string; parameters: JsonNode): Recallable =
+proc call*(call_564733: Call_BillingRoleAssignmentsAddByInvoiceSectionName_564725;
+          apiVersion: string; billingAccountName: string; parameters: JsonNode;
+          invoiceSectionName: string): Recallable =
   ## billingRoleAssignmentsAddByInvoiceSectionName
   ## The operation to add a role assignment to a invoice Section.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request. The current version is 2018-11-01-preview.
   ##   billingAccountName: string (required)
   ##                     : Billing Account Id.
-  ##   invoiceSectionName: string (required)
-  ##                     : InvoiceSection Id.
   ##   parameters: JObject (required)
   ##             : Parameters supplied to add a role assignment.
-  var path_575634 = newJObject()
-  var query_575635 = newJObject()
-  var body_575636 = newJObject()
-  add(query_575635, "api-version", newJString(apiVersion))
-  add(path_575634, "billingAccountName", newJString(billingAccountName))
-  add(path_575634, "invoiceSectionName", newJString(invoiceSectionName))
+  ##   invoiceSectionName: string (required)
+  ##                     : InvoiceSection Id.
+  var path_564734 = newJObject()
+  var query_564735 = newJObject()
+  var body_564736 = newJObject()
+  add(query_564735, "api-version", newJString(apiVersion))
+  add(path_564734, "billingAccountName", newJString(billingAccountName))
   if parameters != nil:
-    body_575636 = parameters
-  result = call_575633.call(path_575634, query_575635, nil, nil, body_575636)
+    body_564736 = parameters
+  add(path_564734, "invoiceSectionName", newJString(invoiceSectionName))
+  result = call_564733.call(path_564734, query_564735, nil, nil, body_564736)
 
-var billingRoleAssignmentsAddByInvoiceSectionName* = Call_BillingRoleAssignmentsAddByInvoiceSectionName_575625(
+var billingRoleAssignmentsAddByInvoiceSectionName* = Call_BillingRoleAssignmentsAddByInvoiceSectionName_564725(
     name: "billingRoleAssignmentsAddByInvoiceSectionName",
     meth: HttpMethod.HttpPost, host: "management.azure.com", route: "/providers/Microsoft.Billing/billingAccounts/{billingAccountName}/invoiceSections/{invoiceSectionName}/providers/Microsoft.Billing/createBillingRoleAssignment",
-    validator: validate_BillingRoleAssignmentsAddByInvoiceSectionName_575626,
-    base: "", url: url_BillingRoleAssignmentsAddByInvoiceSectionName_575627,
+    validator: validate_BillingRoleAssignmentsAddByInvoiceSectionName_564726,
+    base: "", url: url_BillingRoleAssignmentsAddByInvoiceSectionName_564727,
     schemes: {Scheme.Https})
 type
-  Call_TransactionsListByInvoiceSectionName_575637 = ref object of OpenApiRestCall_574467
-proc url_TransactionsListByInvoiceSectionName_575639(protocol: Scheme;
+  Call_TransactionsListByInvoiceSectionName_564737 = ref object of OpenApiRestCall_563565
+proc url_TransactionsListByInvoiceSectionName_564739(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -6603,7 +6612,7 @@ proc url_TransactionsListByInvoiceSectionName_575639(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_TransactionsListByInvoiceSectionName_575638(path: JsonNode;
+proc validate_TransactionsListByInvoiceSectionName_564738(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists the transactions by invoice section name for given start date and end date.
   ## 
@@ -6618,49 +6627,49 @@ proc validate_TransactionsListByInvoiceSectionName_575638(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `billingAccountName` field"
-  var valid_575640 = path.getOrDefault("billingAccountName")
-  valid_575640 = validateParameter(valid_575640, JString, required = true,
+  var valid_564740 = path.getOrDefault("billingAccountName")
+  valid_564740 = validateParameter(valid_564740, JString, required = true,
                                  default = nil)
-  if valid_575640 != nil:
-    section.add "billingAccountName", valid_575640
-  var valid_575641 = path.getOrDefault("invoiceSectionName")
-  valid_575641 = validateParameter(valid_575641, JString, required = true,
+  if valid_564740 != nil:
+    section.add "billingAccountName", valid_564740
+  var valid_564741 = path.getOrDefault("invoiceSectionName")
+  valid_564741 = validateParameter(valid_564741, JString, required = true,
                                  default = nil)
-  if valid_575641 != nil:
-    section.add "invoiceSectionName", valid_575641
+  if valid_564741 != nil:
+    section.add "invoiceSectionName", valid_564741
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
   ##              : Version of the API to be used with the client request. The current version is 2018-11-01-preview.
   ##   endDate: JString (required)
   ##          : End date
-  ##   startDate: JString (required)
-  ##            : Start date
   ##   $filter: JString
   ##          : May be used to filter by transaction kind. The filter supports 'eq', 'lt', 'gt', 'le', 'ge', and 'and'. It does not currently support 'ne', 'or', or 'not'. Tag filter is a key value pair string where key and value is separated by a colon (:).
+  ##   startDate: JString (required)
+  ##            : Start date
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575642 = query.getOrDefault("api-version")
-  valid_575642 = validateParameter(valid_575642, JString, required = true,
+  var valid_564742 = query.getOrDefault("api-version")
+  valid_564742 = validateParameter(valid_564742, JString, required = true,
                                  default = nil)
-  if valid_575642 != nil:
-    section.add "api-version", valid_575642
-  var valid_575643 = query.getOrDefault("endDate")
-  valid_575643 = validateParameter(valid_575643, JString, required = true,
+  if valid_564742 != nil:
+    section.add "api-version", valid_564742
+  var valid_564743 = query.getOrDefault("endDate")
+  valid_564743 = validateParameter(valid_564743, JString, required = true,
                                  default = nil)
-  if valid_575643 != nil:
-    section.add "endDate", valid_575643
-  var valid_575644 = query.getOrDefault("startDate")
-  valid_575644 = validateParameter(valid_575644, JString, required = true,
+  if valid_564743 != nil:
+    section.add "endDate", valid_564743
+  var valid_564744 = query.getOrDefault("$filter")
+  valid_564744 = validateParameter(valid_564744, JString, required = false,
                                  default = nil)
-  if valid_575644 != nil:
-    section.add "startDate", valid_575644
-  var valid_575645 = query.getOrDefault("$filter")
-  valid_575645 = validateParameter(valid_575645, JString, required = false,
+  if valid_564744 != nil:
+    section.add "$filter", valid_564744
+  var valid_564745 = query.getOrDefault("startDate")
+  valid_564745 = validateParameter(valid_564745, JString, required = true,
                                  default = nil)
-  if valid_575645 != nil:
-    section.add "$filter", valid_575645
+  if valid_564745 != nil:
+    section.add "startDate", valid_564745
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -6669,57 +6678,57 @@ proc validate_TransactionsListByInvoiceSectionName_575638(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_575646: Call_TransactionsListByInvoiceSectionName_575637;
+proc call*(call_564746: Call_TransactionsListByInvoiceSectionName_564737;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Lists the transactions by invoice section name for given start date and end date.
   ## 
   ## https://docs.microsoft.com/en-us/rest/api/consumption/
-  let valid = call_575646.validator(path, query, header, formData, body)
-  let scheme = call_575646.pickScheme
+  let valid = call_564746.validator(path, query, header, formData, body)
+  let scheme = call_564746.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575646.url(scheme.get, call_575646.host, call_575646.base,
-                         call_575646.route, valid.getOrDefault("path"),
+  let url = call_564746.url(scheme.get, call_564746.host, call_564746.base,
+                         call_564746.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575646, url, valid)
+  result = hook(call_564746, url, valid)
 
-proc call*(call_575647: Call_TransactionsListByInvoiceSectionName_575637;
-          apiVersion: string; endDate: string; billingAccountName: string;
+proc call*(call_564747: Call_TransactionsListByInvoiceSectionName_564737;
+          apiVersion: string; billingAccountName: string; endDate: string;
           startDate: string; invoiceSectionName: string; Filter: string = ""): Recallable =
   ## transactionsListByInvoiceSectionName
   ## Lists the transactions by invoice section name for given start date and end date.
   ## https://docs.microsoft.com/en-us/rest/api/consumption/
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request. The current version is 2018-11-01-preview.
-  ##   endDate: string (required)
-  ##          : End date
   ##   billingAccountName: string (required)
   ##                     : Billing Account Id.
+  ##   endDate: string (required)
+  ##          : End date
+  ##   Filter: string
+  ##         : May be used to filter by transaction kind. The filter supports 'eq', 'lt', 'gt', 'le', 'ge', and 'and'. It does not currently support 'ne', 'or', or 'not'. Tag filter is a key value pair string where key and value is separated by a colon (:).
   ##   startDate: string (required)
   ##            : Start date
   ##   invoiceSectionName: string (required)
   ##                     : InvoiceSection Id.
-  ##   Filter: string
-  ##         : May be used to filter by transaction kind. The filter supports 'eq', 'lt', 'gt', 'le', 'ge', and 'and'. It does not currently support 'ne', 'or', or 'not'. Tag filter is a key value pair string where key and value is separated by a colon (:).
-  var path_575648 = newJObject()
-  var query_575649 = newJObject()
-  add(query_575649, "api-version", newJString(apiVersion))
-  add(query_575649, "endDate", newJString(endDate))
-  add(path_575648, "billingAccountName", newJString(billingAccountName))
-  add(query_575649, "startDate", newJString(startDate))
-  add(path_575648, "invoiceSectionName", newJString(invoiceSectionName))
-  add(query_575649, "$filter", newJString(Filter))
-  result = call_575647.call(path_575648, query_575649, nil, nil, nil)
+  var path_564748 = newJObject()
+  var query_564749 = newJObject()
+  add(query_564749, "api-version", newJString(apiVersion))
+  add(path_564748, "billingAccountName", newJString(billingAccountName))
+  add(query_564749, "endDate", newJString(endDate))
+  add(query_564749, "$filter", newJString(Filter))
+  add(query_564749, "startDate", newJString(startDate))
+  add(path_564748, "invoiceSectionName", newJString(invoiceSectionName))
+  result = call_564747.call(path_564748, query_564749, nil, nil, nil)
 
-var transactionsListByInvoiceSectionName* = Call_TransactionsListByInvoiceSectionName_575637(
+var transactionsListByInvoiceSectionName* = Call_TransactionsListByInvoiceSectionName_564737(
     name: "transactionsListByInvoiceSectionName", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/providers/Microsoft.Billing/billingAccounts/{billingAccountName}/invoiceSections/{invoiceSectionName}/transactions",
-    validator: validate_TransactionsListByInvoiceSectionName_575638, base: "",
-    url: url_TransactionsListByInvoiceSectionName_575639, schemes: {Scheme.Https})
+    validator: validate_TransactionsListByInvoiceSectionName_564738, base: "",
+    url: url_TransactionsListByInvoiceSectionName_564739, schemes: {Scheme.Https})
 type
-  Call_TransfersList_575650 = ref object of OpenApiRestCall_574467
-proc url_TransfersList_575652(protocol: Scheme; host: string; base: string;
+  Call_TransfersList_564750 = ref object of OpenApiRestCall_563565
+proc url_TransfersList_564752(protocol: Scheme; host: string; base: string;
                              route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -6741,7 +6750,7 @@ proc url_TransfersList_575652(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_TransfersList_575651(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_TransfersList_564751(path: JsonNode; query: JsonNode; header: JsonNode;
                                   formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists all transfer's details initiated from given invoice section.
   ## 
@@ -6755,16 +6764,16 @@ proc validate_TransfersList_575651(path: JsonNode; query: JsonNode; header: Json
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `billingAccountName` field"
-  var valid_575653 = path.getOrDefault("billingAccountName")
-  valid_575653 = validateParameter(valid_575653, JString, required = true,
+  var valid_564753 = path.getOrDefault("billingAccountName")
+  valid_564753 = validateParameter(valid_564753, JString, required = true,
                                  default = nil)
-  if valid_575653 != nil:
-    section.add "billingAccountName", valid_575653
-  var valid_575654 = path.getOrDefault("invoiceSectionName")
-  valid_575654 = validateParameter(valid_575654, JString, required = true,
+  if valid_564753 != nil:
+    section.add "billingAccountName", valid_564753
+  var valid_564754 = path.getOrDefault("invoiceSectionName")
+  valid_564754 = validateParameter(valid_564754, JString, required = true,
                                  default = nil)
-  if valid_575654 != nil:
-    section.add "invoiceSectionName", valid_575654
+  if valid_564754 != nil:
+    section.add "invoiceSectionName", valid_564754
   result.add "path", section
   section = newJObject()
   result.add "query", section
@@ -6775,20 +6784,20 @@ proc validate_TransfersList_575651(path: JsonNode; query: JsonNode; header: Json
   if body != nil:
     result.add "body", body
 
-proc call*(call_575655: Call_TransfersList_575650; path: JsonNode; query: JsonNode;
+proc call*(call_564755: Call_TransfersList_564750; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists all transfer's details initiated from given invoice section.
   ## 
-  let valid = call_575655.validator(path, query, header, formData, body)
-  let scheme = call_575655.pickScheme
+  let valid = call_564755.validator(path, query, header, formData, body)
+  let scheme = call_564755.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575655.url(scheme.get, call_575655.host, call_575655.base,
-                         call_575655.route, valid.getOrDefault("path"),
+  let url = call_564755.url(scheme.get, call_564755.host, call_564755.base,
+                         call_564755.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575655, url, valid)
+  result = hook(call_564755, url, valid)
 
-proc call*(call_575656: Call_TransfersList_575650; billingAccountName: string;
+proc call*(call_564756: Call_TransfersList_564750; billingAccountName: string;
           invoiceSectionName: string): Recallable =
   ## transfersList
   ## Lists all transfer's details initiated from given invoice section.
@@ -6796,18 +6805,18 @@ proc call*(call_575656: Call_TransfersList_575650; billingAccountName: string;
   ##                     : Billing Account Id.
   ##   invoiceSectionName: string (required)
   ##                     : InvoiceSection Id.
-  var path_575657 = newJObject()
-  add(path_575657, "billingAccountName", newJString(billingAccountName))
-  add(path_575657, "invoiceSectionName", newJString(invoiceSectionName))
-  result = call_575656.call(path_575657, nil, nil, nil, nil)
+  var path_564757 = newJObject()
+  add(path_564757, "billingAccountName", newJString(billingAccountName))
+  add(path_564757, "invoiceSectionName", newJString(invoiceSectionName))
+  result = call_564756.call(path_564757, nil, nil, nil, nil)
 
-var transfersList* = Call_TransfersList_575650(name: "transfersList",
+var transfersList* = Call_TransfersList_564750(name: "transfersList",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/providers/Microsoft.Billing/billingAccounts/{billingAccountName}/invoiceSections/{invoiceSectionName}/transfers",
-    validator: validate_TransfersList_575651, base: "", url: url_TransfersList_575652,
+    validator: validate_TransfersList_564751, base: "", url: url_TransfersList_564752,
     schemes: {Scheme.Https})
 type
-  Call_TransfersGet_575658 = ref object of OpenApiRestCall_574467
-proc url_TransfersGet_575660(protocol: Scheme; host: string; base: string;
+  Call_TransfersGet_564758 = ref object of OpenApiRestCall_563565
+proc url_TransfersGet_564760(protocol: Scheme; host: string; base: string;
                             route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -6831,37 +6840,37 @@ proc url_TransfersGet_575660(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_TransfersGet_575659(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_TransfersGet_564759(path: JsonNode; query: JsonNode; header: JsonNode;
                                  formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the transfer details for given transfer Id.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
+  ##   transferName: JString (required)
+  ##               : Transfer Name.
   ##   billingAccountName: JString (required)
   ##                     : Billing Account Id.
   ##   invoiceSectionName: JString (required)
   ##                     : InvoiceSection Id.
-  ##   transferName: JString (required)
-  ##               : Transfer Name.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `billingAccountName` field"
-  var valid_575661 = path.getOrDefault("billingAccountName")
-  valid_575661 = validateParameter(valid_575661, JString, required = true,
+        "path argument is necessary due to required `transferName` field"
+  var valid_564761 = path.getOrDefault("transferName")
+  valid_564761 = validateParameter(valid_564761, JString, required = true,
                                  default = nil)
-  if valid_575661 != nil:
-    section.add "billingAccountName", valid_575661
-  var valid_575662 = path.getOrDefault("invoiceSectionName")
-  valid_575662 = validateParameter(valid_575662, JString, required = true,
+  if valid_564761 != nil:
+    section.add "transferName", valid_564761
+  var valid_564762 = path.getOrDefault("billingAccountName")
+  valid_564762 = validateParameter(valid_564762, JString, required = true,
                                  default = nil)
-  if valid_575662 != nil:
-    section.add "invoiceSectionName", valid_575662
-  var valid_575663 = path.getOrDefault("transferName")
-  valid_575663 = validateParameter(valid_575663, JString, required = true,
+  if valid_564762 != nil:
+    section.add "billingAccountName", valid_564762
+  var valid_564763 = path.getOrDefault("invoiceSectionName")
+  valid_564763 = validateParameter(valid_564763, JString, required = true,
                                  default = nil)
-  if valid_575663 != nil:
-    section.add "transferName", valid_575663
+  if valid_564763 != nil:
+    section.add "invoiceSectionName", valid_564763
   result.add "path", section
   section = newJObject()
   result.add "query", section
@@ -6872,42 +6881,42 @@ proc validate_TransfersGet_575659(path: JsonNode; query: JsonNode; header: JsonN
   if body != nil:
     result.add "body", body
 
-proc call*(call_575664: Call_TransfersGet_575658; path: JsonNode; query: JsonNode;
+proc call*(call_564764: Call_TransfersGet_564758; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the transfer details for given transfer Id.
   ## 
-  let valid = call_575664.validator(path, query, header, formData, body)
-  let scheme = call_575664.pickScheme
+  let valid = call_564764.validator(path, query, header, formData, body)
+  let scheme = call_564764.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575664.url(scheme.get, call_575664.host, call_575664.base,
-                         call_575664.route, valid.getOrDefault("path"),
+  let url = call_564764.url(scheme.get, call_564764.host, call_564764.base,
+                         call_564764.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575664, url, valid)
+  result = hook(call_564764, url, valid)
 
-proc call*(call_575665: Call_TransfersGet_575658; billingAccountName: string;
-          invoiceSectionName: string; transferName: string): Recallable =
+proc call*(call_564765: Call_TransfersGet_564758; transferName: string;
+          billingAccountName: string; invoiceSectionName: string): Recallable =
   ## transfersGet
   ## Gets the transfer details for given transfer Id.
+  ##   transferName: string (required)
+  ##               : Transfer Name.
   ##   billingAccountName: string (required)
   ##                     : Billing Account Id.
   ##   invoiceSectionName: string (required)
   ##                     : InvoiceSection Id.
-  ##   transferName: string (required)
-  ##               : Transfer Name.
-  var path_575666 = newJObject()
-  add(path_575666, "billingAccountName", newJString(billingAccountName))
-  add(path_575666, "invoiceSectionName", newJString(invoiceSectionName))
-  add(path_575666, "transferName", newJString(transferName))
-  result = call_575665.call(path_575666, nil, nil, nil, nil)
+  var path_564766 = newJObject()
+  add(path_564766, "transferName", newJString(transferName))
+  add(path_564766, "billingAccountName", newJString(billingAccountName))
+  add(path_564766, "invoiceSectionName", newJString(invoiceSectionName))
+  result = call_564765.call(path_564766, nil, nil, nil, nil)
 
-var transfersGet* = Call_TransfersGet_575658(name: "transfersGet",
+var transfersGet* = Call_TransfersGet_564758(name: "transfersGet",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/providers/Microsoft.Billing/billingAccounts/{billingAccountName}/invoiceSections/{invoiceSectionName}/transfers/{transferName}",
-    validator: validate_TransfersGet_575659, base: "", url: url_TransfersGet_575660,
+    validator: validate_TransfersGet_564759, base: "", url: url_TransfersGet_564760,
     schemes: {Scheme.Https})
 type
-  Call_TransfersCancel_575667 = ref object of OpenApiRestCall_574467
-proc url_TransfersCancel_575669(protocol: Scheme; host: string; base: string;
+  Call_TransfersCancel_564767 = ref object of OpenApiRestCall_563565
+proc url_TransfersCancel_564769(protocol: Scheme; host: string; base: string;
                                route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -6931,7 +6940,7 @@ proc url_TransfersCancel_575669(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_TransfersCancel_575668(path: JsonNode; query: JsonNode;
+proc validate_TransfersCancel_564768(path: JsonNode; query: JsonNode;
                                     header: JsonNode; formData: JsonNode;
                                     body: JsonNode): JsonNode =
   ## Cancels the transfer for given transfer Id.
@@ -6939,30 +6948,30 @@ proc validate_TransfersCancel_575668(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
+  ##   transferName: JString (required)
+  ##               : Transfer Name.
   ##   billingAccountName: JString (required)
   ##                     : Billing Account Id.
   ##   invoiceSectionName: JString (required)
   ##                     : InvoiceSection Id.
-  ##   transferName: JString (required)
-  ##               : Transfer Name.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `billingAccountName` field"
-  var valid_575670 = path.getOrDefault("billingAccountName")
-  valid_575670 = validateParameter(valid_575670, JString, required = true,
+        "path argument is necessary due to required `transferName` field"
+  var valid_564770 = path.getOrDefault("transferName")
+  valid_564770 = validateParameter(valid_564770, JString, required = true,
                                  default = nil)
-  if valid_575670 != nil:
-    section.add "billingAccountName", valid_575670
-  var valid_575671 = path.getOrDefault("invoiceSectionName")
-  valid_575671 = validateParameter(valid_575671, JString, required = true,
+  if valid_564770 != nil:
+    section.add "transferName", valid_564770
+  var valid_564771 = path.getOrDefault("billingAccountName")
+  valid_564771 = validateParameter(valid_564771, JString, required = true,
                                  default = nil)
-  if valid_575671 != nil:
-    section.add "invoiceSectionName", valid_575671
-  var valid_575672 = path.getOrDefault("transferName")
-  valid_575672 = validateParameter(valid_575672, JString, required = true,
+  if valid_564771 != nil:
+    section.add "billingAccountName", valid_564771
+  var valid_564772 = path.getOrDefault("invoiceSectionName")
+  valid_564772 = validateParameter(valid_564772, JString, required = true,
                                  default = nil)
-  if valid_575672 != nil:
-    section.add "transferName", valid_575672
+  if valid_564772 != nil:
+    section.add "invoiceSectionName", valid_564772
   result.add "path", section
   section = newJObject()
   result.add "query", section
@@ -6973,42 +6982,42 @@ proc validate_TransfersCancel_575668(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_575673: Call_TransfersCancel_575667; path: JsonNode; query: JsonNode;
+proc call*(call_564773: Call_TransfersCancel_564767; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Cancels the transfer for given transfer Id.
   ## 
-  let valid = call_575673.validator(path, query, header, formData, body)
-  let scheme = call_575673.pickScheme
+  let valid = call_564773.validator(path, query, header, formData, body)
+  let scheme = call_564773.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575673.url(scheme.get, call_575673.host, call_575673.base,
-                         call_575673.route, valid.getOrDefault("path"),
+  let url = call_564773.url(scheme.get, call_564773.host, call_564773.base,
+                         call_564773.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575673, url, valid)
+  result = hook(call_564773, url, valid)
 
-proc call*(call_575674: Call_TransfersCancel_575667; billingAccountName: string;
-          invoiceSectionName: string; transferName: string): Recallable =
+proc call*(call_564774: Call_TransfersCancel_564767; transferName: string;
+          billingAccountName: string; invoiceSectionName: string): Recallable =
   ## transfersCancel
   ## Cancels the transfer for given transfer Id.
+  ##   transferName: string (required)
+  ##               : Transfer Name.
   ##   billingAccountName: string (required)
   ##                     : Billing Account Id.
   ##   invoiceSectionName: string (required)
   ##                     : InvoiceSection Id.
-  ##   transferName: string (required)
-  ##               : Transfer Name.
-  var path_575675 = newJObject()
-  add(path_575675, "billingAccountName", newJString(billingAccountName))
-  add(path_575675, "invoiceSectionName", newJString(invoiceSectionName))
-  add(path_575675, "transferName", newJString(transferName))
-  result = call_575674.call(path_575675, nil, nil, nil, nil)
+  var path_564775 = newJObject()
+  add(path_564775, "transferName", newJString(transferName))
+  add(path_564775, "billingAccountName", newJString(billingAccountName))
+  add(path_564775, "invoiceSectionName", newJString(invoiceSectionName))
+  result = call_564774.call(path_564775, nil, nil, nil, nil)
 
-var transfersCancel* = Call_TransfersCancel_575667(name: "transfersCancel",
+var transfersCancel* = Call_TransfersCancel_564767(name: "transfersCancel",
     meth: HttpMethod.HttpDelete, host: "management.azure.com", route: "/providers/Microsoft.Billing/billingAccounts/{billingAccountName}/invoiceSections/{invoiceSectionName}/transfers/{transferName}",
-    validator: validate_TransfersCancel_575668, base: "", url: url_TransfersCancel_575669,
+    validator: validate_TransfersCancel_564768, base: "", url: url_TransfersCancel_564769,
     schemes: {Scheme.Https})
 type
-  Call_InvoicesListByBillingAccountName_575676 = ref object of OpenApiRestCall_574467
-proc url_InvoicesListByBillingAccountName_575678(protocol: Scheme; host: string;
+  Call_InvoicesListByBillingAccountName_564776 = ref object of OpenApiRestCall_563565
+proc url_InvoicesListByBillingAccountName_564778(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -7026,7 +7035,7 @@ proc url_InvoicesListByBillingAccountName_575678(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_InvoicesListByBillingAccountName_575677(path: JsonNode;
+proc validate_InvoicesListByBillingAccountName_564777(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## List of invoices for a billing account.
   ## 
@@ -7038,11 +7047,11 @@ proc validate_InvoicesListByBillingAccountName_575677(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `billingAccountName` field"
-  var valid_575679 = path.getOrDefault("billingAccountName")
-  valid_575679 = validateParameter(valid_575679, JString, required = true,
+  var valid_564779 = path.getOrDefault("billingAccountName")
+  valid_564779 = validateParameter(valid_564779, JString, required = true,
                                  default = nil)
-  if valid_575679 != nil:
-    section.add "billingAccountName", valid_575679
+  if valid_564779 != nil:
+    section.add "billingAccountName", valid_564779
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -7054,21 +7063,21 @@ proc validate_InvoicesListByBillingAccountName_575677(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575680 = query.getOrDefault("api-version")
-  valid_575680 = validateParameter(valid_575680, JString, required = true,
+  var valid_564780 = query.getOrDefault("api-version")
+  valid_564780 = validateParameter(valid_564780, JString, required = true,
                                  default = nil)
-  if valid_575680 != nil:
-    section.add "api-version", valid_575680
-  var valid_575681 = query.getOrDefault("periodEndDate")
-  valid_575681 = validateParameter(valid_575681, JString, required = true,
+  if valid_564780 != nil:
+    section.add "api-version", valid_564780
+  var valid_564781 = query.getOrDefault("periodEndDate")
+  valid_564781 = validateParameter(valid_564781, JString, required = true,
                                  default = nil)
-  if valid_575681 != nil:
-    section.add "periodEndDate", valid_575681
-  var valid_575682 = query.getOrDefault("periodStartDate")
-  valid_575682 = validateParameter(valid_575682, JString, required = true,
+  if valid_564781 != nil:
+    section.add "periodEndDate", valid_564781
+  var valid_564782 = query.getOrDefault("periodStartDate")
+  valid_564782 = validateParameter(valid_564782, JString, required = true,
                                  default = nil)
-  if valid_575682 != nil:
-    section.add "periodStartDate", valid_575682
+  if valid_564782 != nil:
+    section.add "periodStartDate", valid_564782
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -7077,21 +7086,21 @@ proc validate_InvoicesListByBillingAccountName_575677(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_575683: Call_InvoicesListByBillingAccountName_575676;
+proc call*(call_564783: Call_InvoicesListByBillingAccountName_564776;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## List of invoices for a billing account.
   ## 
-  let valid = call_575683.validator(path, query, header, formData, body)
-  let scheme = call_575683.pickScheme
+  let valid = call_564783.validator(path, query, header, formData, body)
+  let scheme = call_564783.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575683.url(scheme.get, call_575683.host, call_575683.base,
-                         call_575683.route, valid.getOrDefault("path"),
+  let url = call_564783.url(scheme.get, call_564783.host, call_564783.base,
+                         call_564783.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575683, url, valid)
+  result = hook(call_564783, url, valid)
 
-proc call*(call_575684: Call_InvoicesListByBillingAccountName_575676;
+proc call*(call_564784: Call_InvoicesListByBillingAccountName_564776;
           apiVersion: string; billingAccountName: string; periodEndDate: string;
           periodStartDate: string): Recallable =
   ## invoicesListByBillingAccountName
@@ -7104,22 +7113,22 @@ proc call*(call_575684: Call_InvoicesListByBillingAccountName_575676;
   ##                : Invoice period end date.
   ##   periodStartDate: string (required)
   ##                  : Invoice period start date.
-  var path_575685 = newJObject()
-  var query_575686 = newJObject()
-  add(query_575686, "api-version", newJString(apiVersion))
-  add(path_575685, "billingAccountName", newJString(billingAccountName))
-  add(query_575686, "periodEndDate", newJString(periodEndDate))
-  add(query_575686, "periodStartDate", newJString(periodStartDate))
-  result = call_575684.call(path_575685, query_575686, nil, nil, nil)
+  var path_564785 = newJObject()
+  var query_564786 = newJObject()
+  add(query_564786, "api-version", newJString(apiVersion))
+  add(path_564785, "billingAccountName", newJString(billingAccountName))
+  add(query_564786, "periodEndDate", newJString(periodEndDate))
+  add(query_564786, "periodStartDate", newJString(periodStartDate))
+  result = call_564784.call(path_564785, query_564786, nil, nil, nil)
 
-var invoicesListByBillingAccountName* = Call_InvoicesListByBillingAccountName_575676(
+var invoicesListByBillingAccountName* = Call_InvoicesListByBillingAccountName_564776(
     name: "invoicesListByBillingAccountName", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/providers/Microsoft.Billing/billingAccounts/{billingAccountName}/invoices",
-    validator: validate_InvoicesListByBillingAccountName_575677, base: "",
-    url: url_InvoicesListByBillingAccountName_575678, schemes: {Scheme.Https})
+    validator: validate_InvoicesListByBillingAccountName_564777, base: "",
+    url: url_InvoicesListByBillingAccountName_564778, schemes: {Scheme.Https})
 type
-  Call_PriceSheetDownload_575687 = ref object of OpenApiRestCall_574467
-proc url_PriceSheetDownload_575689(protocol: Scheme; host: string; base: string;
+  Call_PriceSheetDownload_564787 = ref object of OpenApiRestCall_563565
+proc url_PriceSheetDownload_564789(protocol: Scheme; host: string; base: string;
                                   route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -7140,7 +7149,7 @@ proc url_PriceSheetDownload_575689(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_PriceSheetDownload_575688(path: JsonNode; query: JsonNode;
+proc validate_PriceSheetDownload_564788(path: JsonNode; query: JsonNode;
                                        header: JsonNode; formData: JsonNode;
                                        body: JsonNode): JsonNode =
   ## Download price sheet for an invoice.
@@ -7155,16 +7164,16 @@ proc validate_PriceSheetDownload_575688(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `billingAccountName` field"
-  var valid_575690 = path.getOrDefault("billingAccountName")
-  valid_575690 = validateParameter(valid_575690, JString, required = true,
+  var valid_564790 = path.getOrDefault("billingAccountName")
+  valid_564790 = validateParameter(valid_564790, JString, required = true,
                                  default = nil)
-  if valid_575690 != nil:
-    section.add "billingAccountName", valid_575690
-  var valid_575691 = path.getOrDefault("invoiceName")
-  valid_575691 = validateParameter(valid_575691, JString, required = true,
+  if valid_564790 != nil:
+    section.add "billingAccountName", valid_564790
+  var valid_564791 = path.getOrDefault("invoiceName")
+  valid_564791 = validateParameter(valid_564791, JString, required = true,
                                  default = nil)
-  if valid_575691 != nil:
-    section.add "invoiceName", valid_575691
+  if valid_564791 != nil:
+    section.add "invoiceName", valid_564791
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -7172,11 +7181,11 @@ proc validate_PriceSheetDownload_575688(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575692 = query.getOrDefault("api-version")
-  valid_575692 = validateParameter(valid_575692, JString, required = true,
+  var valid_564792 = query.getOrDefault("api-version")
+  valid_564792 = validateParameter(valid_564792, JString, required = true,
                                  default = nil)
-  if valid_575692 != nil:
-    section.add "api-version", valid_575692
+  if valid_564792 != nil:
+    section.add "api-version", valid_564792
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -7185,20 +7194,20 @@ proc validate_PriceSheetDownload_575688(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_575693: Call_PriceSheetDownload_575687; path: JsonNode;
+proc call*(call_564793: Call_PriceSheetDownload_564787; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Download price sheet for an invoice.
   ## 
-  let valid = call_575693.validator(path, query, header, formData, body)
-  let scheme = call_575693.pickScheme
+  let valid = call_564793.validator(path, query, header, formData, body)
+  let scheme = call_564793.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575693.url(scheme.get, call_575693.host, call_575693.base,
-                         call_575693.route, valid.getOrDefault("path"),
+  let url = call_564793.url(scheme.get, call_564793.host, call_564793.base,
+                         call_564793.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575693, url, valid)
+  result = hook(call_564793, url, valid)
 
-proc call*(call_575694: Call_PriceSheetDownload_575687; apiVersion: string;
+proc call*(call_564794: Call_PriceSheetDownload_564787; apiVersion: string;
           billingAccountName: string; invoiceName: string): Recallable =
   ## priceSheetDownload
   ## Download price sheet for an invoice.
@@ -7208,21 +7217,21 @@ proc call*(call_575694: Call_PriceSheetDownload_575687; apiVersion: string;
   ##                     : Azure Billing Account ID.
   ##   invoiceName: string (required)
   ##              : The name of an invoice resource.
-  var path_575695 = newJObject()
-  var query_575696 = newJObject()
-  add(query_575696, "api-version", newJString(apiVersion))
-  add(path_575695, "billingAccountName", newJString(billingAccountName))
-  add(path_575695, "invoiceName", newJString(invoiceName))
-  result = call_575694.call(path_575695, query_575696, nil, nil, nil)
+  var path_564795 = newJObject()
+  var query_564796 = newJObject()
+  add(query_564796, "api-version", newJString(apiVersion))
+  add(path_564795, "billingAccountName", newJString(billingAccountName))
+  add(path_564795, "invoiceName", newJString(invoiceName))
+  result = call_564794.call(path_564795, query_564796, nil, nil, nil)
 
-var priceSheetDownload* = Call_PriceSheetDownload_575687(
+var priceSheetDownload* = Call_PriceSheetDownload_564787(
     name: "priceSheetDownload", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/providers/Microsoft.Billing/billingAccounts/{billingAccountName}/invoices/{invoiceName}/pricesheet/default/download",
-    validator: validate_PriceSheetDownload_575688, base: "",
-    url: url_PriceSheetDownload_575689, schemes: {Scheme.Https})
+    validator: validate_PriceSheetDownload_564788, base: "",
+    url: url_PriceSheetDownload_564789, schemes: {Scheme.Https})
 type
-  Call_InvoiceSectionsListByCreateSubscriptionPermission_575697 = ref object of OpenApiRestCall_574467
-proc url_InvoiceSectionsListByCreateSubscriptionPermission_575699(
+  Call_InvoiceSectionsListByCreateSubscriptionPermission_564797 = ref object of OpenApiRestCall_563565
+proc url_InvoiceSectionsListByCreateSubscriptionPermission_564799(
     protocol: Scheme; host: string; base: string; route: string; path: JsonNode;
     query: JsonNode): Uri =
   result.scheme = $protocol
@@ -7242,7 +7251,7 @@ proc url_InvoiceSectionsListByCreateSubscriptionPermission_575699(
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_InvoiceSectionsListByCreateSubscriptionPermission_575698(
+proc validate_InvoiceSectionsListByCreateSubscriptionPermission_564798(
     path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
     body: JsonNode): JsonNode =
   ## Lists all invoiceSections with create subscription permission for a user.
@@ -7255,11 +7264,11 @@ proc validate_InvoiceSectionsListByCreateSubscriptionPermission_575698(
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `billingAccountName` field"
-  var valid_575700 = path.getOrDefault("billingAccountName")
-  valid_575700 = validateParameter(valid_575700, JString, required = true,
+  var valid_564800 = path.getOrDefault("billingAccountName")
+  valid_564800 = validateParameter(valid_564800, JString, required = true,
                                  default = nil)
-  if valid_575700 != nil:
-    section.add "billingAccountName", valid_575700
+  if valid_564800 != nil:
+    section.add "billingAccountName", valid_564800
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -7269,16 +7278,16 @@ proc validate_InvoiceSectionsListByCreateSubscriptionPermission_575698(
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575701 = query.getOrDefault("api-version")
-  valid_575701 = validateParameter(valid_575701, JString, required = true,
+  var valid_564801 = query.getOrDefault("api-version")
+  valid_564801 = validateParameter(valid_564801, JString, required = true,
                                  default = nil)
-  if valid_575701 != nil:
-    section.add "api-version", valid_575701
-  var valid_575702 = query.getOrDefault("$expand")
-  valid_575702 = validateParameter(valid_575702, JString, required = false,
+  if valid_564801 != nil:
+    section.add "api-version", valid_564801
+  var valid_564802 = query.getOrDefault("$expand")
+  valid_564802 = validateParameter(valid_564802, JString, required = false,
                                  default = nil)
-  if valid_575702 != nil:
-    section.add "$expand", valid_575702
+  if valid_564802 != nil:
+    section.add "$expand", valid_564802
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -7287,46 +7296,46 @@ proc validate_InvoiceSectionsListByCreateSubscriptionPermission_575698(
   if body != nil:
     result.add "body", body
 
-proc call*(call_575703: Call_InvoiceSectionsListByCreateSubscriptionPermission_575697;
+proc call*(call_564803: Call_InvoiceSectionsListByCreateSubscriptionPermission_564797;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Lists all invoiceSections with create subscription permission for a user.
   ## 
-  let valid = call_575703.validator(path, query, header, formData, body)
-  let scheme = call_575703.pickScheme
+  let valid = call_564803.validator(path, query, header, formData, body)
+  let scheme = call_564803.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575703.url(scheme.get, call_575703.host, call_575703.base,
-                         call_575703.route, valid.getOrDefault("path"),
+  let url = call_564803.url(scheme.get, call_564803.host, call_564803.base,
+                         call_564803.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575703, url, valid)
+  result = hook(call_564803, url, valid)
 
-proc call*(call_575704: Call_InvoiceSectionsListByCreateSubscriptionPermission_575697;
+proc call*(call_564804: Call_InvoiceSectionsListByCreateSubscriptionPermission_564797;
           apiVersion: string; billingAccountName: string; Expand: string = ""): Recallable =
   ## invoiceSectionsListByCreateSubscriptionPermission
   ## Lists all invoiceSections with create subscription permission for a user.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request. The current version is 2018-11-01-preview.
-  ##   Expand: string
-  ##         : May be used to expand the billingProfiles.
   ##   billingAccountName: string (required)
   ##                     : Billing Account Id.
-  var path_575705 = newJObject()
-  var query_575706 = newJObject()
-  add(query_575706, "api-version", newJString(apiVersion))
-  add(query_575706, "$expand", newJString(Expand))
-  add(path_575705, "billingAccountName", newJString(billingAccountName))
-  result = call_575704.call(path_575705, query_575706, nil, nil, nil)
+  ##   Expand: string
+  ##         : May be used to expand the billingProfiles.
+  var path_564805 = newJObject()
+  var query_564806 = newJObject()
+  add(query_564806, "api-version", newJString(apiVersion))
+  add(path_564805, "billingAccountName", newJString(billingAccountName))
+  add(query_564806, "$expand", newJString(Expand))
+  result = call_564804.call(path_564805, query_564806, nil, nil, nil)
 
-var invoiceSectionsListByCreateSubscriptionPermission* = Call_InvoiceSectionsListByCreateSubscriptionPermission_575697(
+var invoiceSectionsListByCreateSubscriptionPermission* = Call_InvoiceSectionsListByCreateSubscriptionPermission_564797(
     name: "invoiceSectionsListByCreateSubscriptionPermission",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/providers/Microsoft.Billing/billingAccounts/{billingAccountName}/listInvoiceSectionsWithCreateSubscriptionPermission",
-    validator: validate_InvoiceSectionsListByCreateSubscriptionPermission_575698,
-    base: "", url: url_InvoiceSectionsListByCreateSubscriptionPermission_575699,
+    validator: validate_InvoiceSectionsListByCreateSubscriptionPermission_564798,
+    base: "", url: url_InvoiceSectionsListByCreateSubscriptionPermission_564799,
     schemes: {Scheme.Https})
 type
-  Call_PaymentMethodsListByBillingAccountName_575707 = ref object of OpenApiRestCall_574467
-proc url_PaymentMethodsListByBillingAccountName_575709(protocol: Scheme;
+  Call_PaymentMethodsListByBillingAccountName_564807 = ref object of OpenApiRestCall_563565
+proc url_PaymentMethodsListByBillingAccountName_564809(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -7344,7 +7353,7 @@ proc url_PaymentMethodsListByBillingAccountName_575709(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_PaymentMethodsListByBillingAccountName_575708(path: JsonNode;
+proc validate_PaymentMethodsListByBillingAccountName_564808(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists the Payment Methods by billing account Id.
   ## 
@@ -7357,11 +7366,11 @@ proc validate_PaymentMethodsListByBillingAccountName_575708(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `billingAccountName` field"
-  var valid_575710 = path.getOrDefault("billingAccountName")
-  valid_575710 = validateParameter(valid_575710, JString, required = true,
+  var valid_564810 = path.getOrDefault("billingAccountName")
+  valid_564810 = validateParameter(valid_564810, JString, required = true,
                                  default = nil)
-  if valid_575710 != nil:
-    section.add "billingAccountName", valid_575710
+  if valid_564810 != nil:
+    section.add "billingAccountName", valid_564810
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -7369,11 +7378,11 @@ proc validate_PaymentMethodsListByBillingAccountName_575708(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575711 = query.getOrDefault("api-version")
-  valid_575711 = validateParameter(valid_575711, JString, required = true,
+  var valid_564811 = query.getOrDefault("api-version")
+  valid_564811 = validateParameter(valid_564811, JString, required = true,
                                  default = nil)
-  if valid_575711 != nil:
-    section.add "api-version", valid_575711
+  if valid_564811 != nil:
+    section.add "api-version", valid_564811
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -7382,22 +7391,22 @@ proc validate_PaymentMethodsListByBillingAccountName_575708(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_575712: Call_PaymentMethodsListByBillingAccountName_575707;
+proc call*(call_564812: Call_PaymentMethodsListByBillingAccountName_564807;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Lists the Payment Methods by billing account Id.
   ## 
   ## https://docs.microsoft.com/en-us/rest/api/billing/2018-11-01-preview/paymentmethods
-  let valid = call_575712.validator(path, query, header, formData, body)
-  let scheme = call_575712.pickScheme
+  let valid = call_564812.validator(path, query, header, formData, body)
+  let scheme = call_564812.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575712.url(scheme.get, call_575712.host, call_575712.base,
-                         call_575712.route, valid.getOrDefault("path"),
+  let url = call_564812.url(scheme.get, call_564812.host, call_564812.base,
+                         call_564812.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575712, url, valid)
+  result = hook(call_564812, url, valid)
 
-proc call*(call_575713: Call_PaymentMethodsListByBillingAccountName_575707;
+proc call*(call_564813: Call_PaymentMethodsListByBillingAccountName_564807;
           apiVersion: string; billingAccountName: string): Recallable =
   ## paymentMethodsListByBillingAccountName
   ## Lists the Payment Methods by billing account Id.
@@ -7406,21 +7415,21 @@ proc call*(call_575713: Call_PaymentMethodsListByBillingAccountName_575707;
   ##             : Version of the API to be used with the client request. The current version is 2018-11-01-preview.
   ##   billingAccountName: string (required)
   ##                     : Billing Account Id.
-  var path_575714 = newJObject()
-  var query_575715 = newJObject()
-  add(query_575715, "api-version", newJString(apiVersion))
-  add(path_575714, "billingAccountName", newJString(billingAccountName))
-  result = call_575713.call(path_575714, query_575715, nil, nil, nil)
+  var path_564814 = newJObject()
+  var query_564815 = newJObject()
+  add(query_564815, "api-version", newJString(apiVersion))
+  add(path_564814, "billingAccountName", newJString(billingAccountName))
+  result = call_564813.call(path_564814, query_564815, nil, nil, nil)
 
-var paymentMethodsListByBillingAccountName* = Call_PaymentMethodsListByBillingAccountName_575707(
+var paymentMethodsListByBillingAccountName* = Call_PaymentMethodsListByBillingAccountName_564807(
     name: "paymentMethodsListByBillingAccountName", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/providers/Microsoft.Billing/billingAccounts/{billingAccountName}/paymentMethods",
-    validator: validate_PaymentMethodsListByBillingAccountName_575708, base: "",
-    url: url_PaymentMethodsListByBillingAccountName_575709,
+    validator: validate_PaymentMethodsListByBillingAccountName_564808, base: "",
+    url: url_PaymentMethodsListByBillingAccountName_564809,
     schemes: {Scheme.Https})
 type
-  Call_ProductsListByBillingAccountName_575716 = ref object of OpenApiRestCall_574467
-proc url_ProductsListByBillingAccountName_575718(protocol: Scheme; host: string;
+  Call_ProductsListByBillingAccountName_564816 = ref object of OpenApiRestCall_563565
+proc url_ProductsListByBillingAccountName_564818(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -7438,7 +7447,7 @@ proc url_ProductsListByBillingAccountName_575718(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ProductsListByBillingAccountName_575717(path: JsonNode;
+proc validate_ProductsListByBillingAccountName_564817(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists products by billing account name.
   ## 
@@ -7451,11 +7460,11 @@ proc validate_ProductsListByBillingAccountName_575717(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `billingAccountName` field"
-  var valid_575719 = path.getOrDefault("billingAccountName")
-  valid_575719 = validateParameter(valid_575719, JString, required = true,
+  var valid_564819 = path.getOrDefault("billingAccountName")
+  valid_564819 = validateParameter(valid_564819, JString, required = true,
                                  default = nil)
-  if valid_575719 != nil:
-    section.add "billingAccountName", valid_575719
+  if valid_564819 != nil:
+    section.add "billingAccountName", valid_564819
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -7465,16 +7474,16 @@ proc validate_ProductsListByBillingAccountName_575717(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575720 = query.getOrDefault("api-version")
-  valid_575720 = validateParameter(valid_575720, JString, required = true,
+  var valid_564820 = query.getOrDefault("api-version")
+  valid_564820 = validateParameter(valid_564820, JString, required = true,
                                  default = nil)
-  if valid_575720 != nil:
-    section.add "api-version", valid_575720
-  var valid_575721 = query.getOrDefault("$filter")
-  valid_575721 = validateParameter(valid_575721, JString, required = false,
+  if valid_564820 != nil:
+    section.add "api-version", valid_564820
+  var valid_564821 = query.getOrDefault("$filter")
+  valid_564821 = validateParameter(valid_564821, JString, required = false,
                                  default = nil)
-  if valid_575721 != nil:
-    section.add "$filter", valid_575721
+  if valid_564821 != nil:
+    section.add "$filter", valid_564821
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -7483,22 +7492,22 @@ proc validate_ProductsListByBillingAccountName_575717(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_575722: Call_ProductsListByBillingAccountName_575716;
+proc call*(call_564822: Call_ProductsListByBillingAccountName_564816;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Lists products by billing account name.
   ## 
   ## https://docs.microsoft.com/en-us/rest/api/consumption/
-  let valid = call_575722.validator(path, query, header, formData, body)
-  let scheme = call_575722.pickScheme
+  let valid = call_564822.validator(path, query, header, formData, body)
+  let scheme = call_564822.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575722.url(scheme.get, call_575722.host, call_575722.base,
-                         call_575722.route, valid.getOrDefault("path"),
+  let url = call_564822.url(scheme.get, call_564822.host, call_564822.base,
+                         call_564822.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575722, url, valid)
+  result = hook(call_564822, url, valid)
 
-proc call*(call_575723: Call_ProductsListByBillingAccountName_575716;
+proc call*(call_564823: Call_ProductsListByBillingAccountName_564816;
           apiVersion: string; billingAccountName: string; Filter: string = ""): Recallable =
   ## productsListByBillingAccountName
   ## Lists products by billing account name.
@@ -7509,21 +7518,21 @@ proc call*(call_575723: Call_ProductsListByBillingAccountName_575716;
   ##                     : Billing Account Id.
   ##   Filter: string
   ##         : May be used to filter by product type. The filter supports 'eq', 'lt', 'gt', 'le', 'ge', and 'and'. It does not currently support 'ne', 'or', or 'not'. Tag filter is a key value pair string where key and value is separated by a colon (:).
-  var path_575724 = newJObject()
-  var query_575725 = newJObject()
-  add(query_575725, "api-version", newJString(apiVersion))
-  add(path_575724, "billingAccountName", newJString(billingAccountName))
-  add(query_575725, "$filter", newJString(Filter))
-  result = call_575723.call(path_575724, query_575725, nil, nil, nil)
+  var path_564824 = newJObject()
+  var query_564825 = newJObject()
+  add(query_564825, "api-version", newJString(apiVersion))
+  add(path_564824, "billingAccountName", newJString(billingAccountName))
+  add(query_564825, "$filter", newJString(Filter))
+  result = call_564823.call(path_564824, query_564825, nil, nil, nil)
 
-var productsListByBillingAccountName* = Call_ProductsListByBillingAccountName_575716(
+var productsListByBillingAccountName* = Call_ProductsListByBillingAccountName_564816(
     name: "productsListByBillingAccountName", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/providers/Microsoft.Billing/billingAccounts/{billingAccountName}/products",
-    validator: validate_ProductsListByBillingAccountName_575717, base: "",
-    url: url_ProductsListByBillingAccountName_575718, schemes: {Scheme.Https})
+    validator: validate_ProductsListByBillingAccountName_564817, base: "",
+    url: url_ProductsListByBillingAccountName_564818, schemes: {Scheme.Https})
 type
-  Call_ProductsUpdateAutoRenewByBillingAccountName_575726 = ref object of OpenApiRestCall_574467
-proc url_ProductsUpdateAutoRenewByBillingAccountName_575728(protocol: Scheme;
+  Call_ProductsUpdateAutoRenewByBillingAccountName_564826 = ref object of OpenApiRestCall_563565
+proc url_ProductsUpdateAutoRenewByBillingAccountName_564828(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -7544,30 +7553,30 @@ proc url_ProductsUpdateAutoRenewByBillingAccountName_575728(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ProductsUpdateAutoRenewByBillingAccountName_575727(path: JsonNode;
+proc validate_ProductsUpdateAutoRenewByBillingAccountName_564827(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Cancel auto renew for product by product id and billing account name
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   productName: JString (required)
-  ##              : Invoice Id.
   ##   billingAccountName: JString (required)
   ##                     : Billing Account Id.
+  ##   productName: JString (required)
+  ##              : Invoice Id.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `productName` field"
-  var valid_575729 = path.getOrDefault("productName")
-  valid_575729 = validateParameter(valid_575729, JString, required = true,
+        "path argument is necessary due to required `billingAccountName` field"
+  var valid_564829 = path.getOrDefault("billingAccountName")
+  valid_564829 = validateParameter(valid_564829, JString, required = true,
                                  default = nil)
-  if valid_575729 != nil:
-    section.add "productName", valid_575729
-  var valid_575730 = path.getOrDefault("billingAccountName")
-  valid_575730 = validateParameter(valid_575730, JString, required = true,
+  if valid_564829 != nil:
+    section.add "billingAccountName", valid_564829
+  var valid_564830 = path.getOrDefault("productName")
+  valid_564830 = validateParameter(valid_564830, JString, required = true,
                                  default = nil)
-  if valid_575730 != nil:
-    section.add "billingAccountName", valid_575730
+  if valid_564830 != nil:
+    section.add "productName", valid_564830
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -7575,11 +7584,11 @@ proc validate_ProductsUpdateAutoRenewByBillingAccountName_575727(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575731 = query.getOrDefault("api-version")
-  valid_575731 = validateParameter(valid_575731, JString, required = true,
+  var valid_564831 = query.getOrDefault("api-version")
+  valid_564831 = validateParameter(valid_564831, JString, required = true,
                                  default = nil)
-  if valid_575731 != nil:
-    section.add "api-version", valid_575731
+  if valid_564831 != nil:
+    section.add "api-version", valid_564831
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -7593,52 +7602,52 @@ proc validate_ProductsUpdateAutoRenewByBillingAccountName_575727(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_575733: Call_ProductsUpdateAutoRenewByBillingAccountName_575726;
+proc call*(call_564833: Call_ProductsUpdateAutoRenewByBillingAccountName_564826;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Cancel auto renew for product by product id and billing account name
   ## 
-  let valid = call_575733.validator(path, query, header, formData, body)
-  let scheme = call_575733.pickScheme
+  let valid = call_564833.validator(path, query, header, formData, body)
+  let scheme = call_564833.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575733.url(scheme.get, call_575733.host, call_575733.base,
-                         call_575733.route, valid.getOrDefault("path"),
+  let url = call_564833.url(scheme.get, call_564833.host, call_564833.base,
+                         call_564833.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575733, url, valid)
+  result = hook(call_564833, url, valid)
 
-proc call*(call_575734: Call_ProductsUpdateAutoRenewByBillingAccountName_575726;
-          productName: string; apiVersion: string; billingAccountName: string;
+proc call*(call_564834: Call_ProductsUpdateAutoRenewByBillingAccountName_564826;
+          apiVersion: string; billingAccountName: string; productName: string;
           body: JsonNode): Recallable =
   ## productsUpdateAutoRenewByBillingAccountName
   ## Cancel auto renew for product by product id and billing account name
-  ##   productName: string (required)
-  ##              : Invoice Id.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request. The current version is 2018-11-01-preview.
   ##   billingAccountName: string (required)
   ##                     : Billing Account Id.
+  ##   productName: string (required)
+  ##              : Invoice Id.
   ##   body: JObject (required)
   ##       : Update auto renew request parameters.
-  var path_575735 = newJObject()
-  var query_575736 = newJObject()
-  var body_575737 = newJObject()
-  add(path_575735, "productName", newJString(productName))
-  add(query_575736, "api-version", newJString(apiVersion))
-  add(path_575735, "billingAccountName", newJString(billingAccountName))
+  var path_564835 = newJObject()
+  var query_564836 = newJObject()
+  var body_564837 = newJObject()
+  add(query_564836, "api-version", newJString(apiVersion))
+  add(path_564835, "billingAccountName", newJString(billingAccountName))
+  add(path_564835, "productName", newJString(productName))
   if body != nil:
-    body_575737 = body
-  result = call_575734.call(path_575735, query_575736, nil, nil, body_575737)
+    body_564837 = body
+  result = call_564834.call(path_564835, query_564836, nil, nil, body_564837)
 
-var productsUpdateAutoRenewByBillingAccountName* = Call_ProductsUpdateAutoRenewByBillingAccountName_575726(
+var productsUpdateAutoRenewByBillingAccountName* = Call_ProductsUpdateAutoRenewByBillingAccountName_564826(
     name: "productsUpdateAutoRenewByBillingAccountName",
     meth: HttpMethod.HttpPost, host: "management.azure.com", route: "/providers/Microsoft.Billing/billingAccounts/{billingAccountName}/products/{productName}/updateAutoRenew",
-    validator: validate_ProductsUpdateAutoRenewByBillingAccountName_575727,
-    base: "", url: url_ProductsUpdateAutoRenewByBillingAccountName_575728,
+    validator: validate_ProductsUpdateAutoRenewByBillingAccountName_564827,
+    base: "", url: url_ProductsUpdateAutoRenewByBillingAccountName_564828,
     schemes: {Scheme.Https})
 type
-  Call_BillingPermissionsListByBillingAccount_575738 = ref object of OpenApiRestCall_574467
-proc url_BillingPermissionsListByBillingAccount_575740(protocol: Scheme;
+  Call_BillingPermissionsListByBillingAccount_564838 = ref object of OpenApiRestCall_563565
+proc url_BillingPermissionsListByBillingAccount_564840(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -7657,7 +7666,7 @@ proc url_BillingPermissionsListByBillingAccount_575740(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_BillingPermissionsListByBillingAccount_575739(path: JsonNode;
+proc validate_BillingPermissionsListByBillingAccount_564839(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists all billing permissions for the caller under a billing account.
   ## 
@@ -7669,11 +7678,11 @@ proc validate_BillingPermissionsListByBillingAccount_575739(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `billingAccountName` field"
-  var valid_575741 = path.getOrDefault("billingAccountName")
-  valid_575741 = validateParameter(valid_575741, JString, required = true,
+  var valid_564841 = path.getOrDefault("billingAccountName")
+  valid_564841 = validateParameter(valid_564841, JString, required = true,
                                  default = nil)
-  if valid_575741 != nil:
-    section.add "billingAccountName", valid_575741
+  if valid_564841 != nil:
+    section.add "billingAccountName", valid_564841
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -7681,11 +7690,11 @@ proc validate_BillingPermissionsListByBillingAccount_575739(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575742 = query.getOrDefault("api-version")
-  valid_575742 = validateParameter(valid_575742, JString, required = true,
+  var valid_564842 = query.getOrDefault("api-version")
+  valid_564842 = validateParameter(valid_564842, JString, required = true,
                                  default = nil)
-  if valid_575742 != nil:
-    section.add "api-version", valid_575742
+  if valid_564842 != nil:
+    section.add "api-version", valid_564842
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -7694,21 +7703,21 @@ proc validate_BillingPermissionsListByBillingAccount_575739(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_575743: Call_BillingPermissionsListByBillingAccount_575738;
+proc call*(call_564843: Call_BillingPermissionsListByBillingAccount_564838;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Lists all billing permissions for the caller under a billing account.
   ## 
-  let valid = call_575743.validator(path, query, header, formData, body)
-  let scheme = call_575743.pickScheme
+  let valid = call_564843.validator(path, query, header, formData, body)
+  let scheme = call_564843.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575743.url(scheme.get, call_575743.host, call_575743.base,
-                         call_575743.route, valid.getOrDefault("path"),
+  let url = call_564843.url(scheme.get, call_564843.host, call_564843.base,
+                         call_564843.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575743, url, valid)
+  result = hook(call_564843, url, valid)
 
-proc call*(call_575744: Call_BillingPermissionsListByBillingAccount_575738;
+proc call*(call_564844: Call_BillingPermissionsListByBillingAccount_564838;
           apiVersion: string; billingAccountName: string): Recallable =
   ## billingPermissionsListByBillingAccount
   ## Lists all billing permissions for the caller under a billing account.
@@ -7716,21 +7725,21 @@ proc call*(call_575744: Call_BillingPermissionsListByBillingAccount_575738;
   ##             : Version of the API to be used with the client request. The current version is 2018-11-01-preview.
   ##   billingAccountName: string (required)
   ##                     : Billing Account Id.
-  var path_575745 = newJObject()
-  var query_575746 = newJObject()
-  add(query_575746, "api-version", newJString(apiVersion))
-  add(path_575745, "billingAccountName", newJString(billingAccountName))
-  result = call_575744.call(path_575745, query_575746, nil, nil, nil)
+  var path_564845 = newJObject()
+  var query_564846 = newJObject()
+  add(query_564846, "api-version", newJString(apiVersion))
+  add(path_564845, "billingAccountName", newJString(billingAccountName))
+  result = call_564844.call(path_564845, query_564846, nil, nil, nil)
 
-var billingPermissionsListByBillingAccount* = Call_BillingPermissionsListByBillingAccount_575738(
+var billingPermissionsListByBillingAccount* = Call_BillingPermissionsListByBillingAccount_564838(
     name: "billingPermissionsListByBillingAccount", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/providers/Microsoft.Billing/billingAccounts/{billingAccountName}/providers/Microsoft.Billing/billingPermissions",
-    validator: validate_BillingPermissionsListByBillingAccount_575739, base: "",
-    url: url_BillingPermissionsListByBillingAccount_575740,
+    validator: validate_BillingPermissionsListByBillingAccount_564839, base: "",
+    url: url_BillingPermissionsListByBillingAccount_564840,
     schemes: {Scheme.Https})
 type
-  Call_BillingRoleAssignmentsListByBillingAccountName_575747 = ref object of OpenApiRestCall_574467
-proc url_BillingRoleAssignmentsListByBillingAccountName_575749(protocol: Scheme;
+  Call_BillingRoleAssignmentsListByBillingAccountName_564847 = ref object of OpenApiRestCall_563565
+proc url_BillingRoleAssignmentsListByBillingAccountName_564849(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -7749,7 +7758,7 @@ proc url_BillingRoleAssignmentsListByBillingAccountName_575749(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_BillingRoleAssignmentsListByBillingAccountName_575748(
+proc validate_BillingRoleAssignmentsListByBillingAccountName_564848(
     path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
     body: JsonNode): JsonNode =
   ## Get the role assignments on the Billing Account
@@ -7762,11 +7771,11 @@ proc validate_BillingRoleAssignmentsListByBillingAccountName_575748(
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `billingAccountName` field"
-  var valid_575750 = path.getOrDefault("billingAccountName")
-  valid_575750 = validateParameter(valid_575750, JString, required = true,
+  var valid_564850 = path.getOrDefault("billingAccountName")
+  valid_564850 = validateParameter(valid_564850, JString, required = true,
                                  default = nil)
-  if valid_575750 != nil:
-    section.add "billingAccountName", valid_575750
+  if valid_564850 != nil:
+    section.add "billingAccountName", valid_564850
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -7774,11 +7783,11 @@ proc validate_BillingRoleAssignmentsListByBillingAccountName_575748(
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575751 = query.getOrDefault("api-version")
-  valid_575751 = validateParameter(valid_575751, JString, required = true,
+  var valid_564851 = query.getOrDefault("api-version")
+  valid_564851 = validateParameter(valid_564851, JString, required = true,
                                  default = nil)
-  if valid_575751 != nil:
-    section.add "api-version", valid_575751
+  if valid_564851 != nil:
+    section.add "api-version", valid_564851
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -7787,21 +7796,21 @@ proc validate_BillingRoleAssignmentsListByBillingAccountName_575748(
   if body != nil:
     result.add "body", body
 
-proc call*(call_575752: Call_BillingRoleAssignmentsListByBillingAccountName_575747;
+proc call*(call_564852: Call_BillingRoleAssignmentsListByBillingAccountName_564847;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Get the role assignments on the Billing Account
   ## 
-  let valid = call_575752.validator(path, query, header, formData, body)
-  let scheme = call_575752.pickScheme
+  let valid = call_564852.validator(path, query, header, formData, body)
+  let scheme = call_564852.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575752.url(scheme.get, call_575752.host, call_575752.base,
-                         call_575752.route, valid.getOrDefault("path"),
+  let url = call_564852.url(scheme.get, call_564852.host, call_564852.base,
+                         call_564852.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575752, url, valid)
+  result = hook(call_564852, url, valid)
 
-proc call*(call_575753: Call_BillingRoleAssignmentsListByBillingAccountName_575747;
+proc call*(call_564853: Call_BillingRoleAssignmentsListByBillingAccountName_564847;
           apiVersion: string; billingAccountName: string): Recallable =
   ## billingRoleAssignmentsListByBillingAccountName
   ## Get the role assignments on the Billing Account
@@ -7809,21 +7818,21 @@ proc call*(call_575753: Call_BillingRoleAssignmentsListByBillingAccountName_5757
   ##             : Version of the API to be used with the client request. The current version is 2018-11-01-preview.
   ##   billingAccountName: string (required)
   ##                     : Billing Account Id.
-  var path_575754 = newJObject()
-  var query_575755 = newJObject()
-  add(query_575755, "api-version", newJString(apiVersion))
-  add(path_575754, "billingAccountName", newJString(billingAccountName))
-  result = call_575753.call(path_575754, query_575755, nil, nil, nil)
+  var path_564854 = newJObject()
+  var query_564855 = newJObject()
+  add(query_564855, "api-version", newJString(apiVersion))
+  add(path_564854, "billingAccountName", newJString(billingAccountName))
+  result = call_564853.call(path_564854, query_564855, nil, nil, nil)
 
-var billingRoleAssignmentsListByBillingAccountName* = Call_BillingRoleAssignmentsListByBillingAccountName_575747(
+var billingRoleAssignmentsListByBillingAccountName* = Call_BillingRoleAssignmentsListByBillingAccountName_564847(
     name: "billingRoleAssignmentsListByBillingAccountName",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/providers/Microsoft.Billing/billingAccounts/{billingAccountName}/providers/Microsoft.Billing/billingRoleAssignments",
-    validator: validate_BillingRoleAssignmentsListByBillingAccountName_575748,
-    base: "", url: url_BillingRoleAssignmentsListByBillingAccountName_575749,
+    validator: validate_BillingRoleAssignmentsListByBillingAccountName_564848,
+    base: "", url: url_BillingRoleAssignmentsListByBillingAccountName_564849,
     schemes: {Scheme.Https})
 type
-  Call_BillingRoleAssignmentsGetByBillingAccount_575756 = ref object of OpenApiRestCall_574467
-proc url_BillingRoleAssignmentsGetByBillingAccount_575758(protocol: Scheme;
+  Call_BillingRoleAssignmentsGetByBillingAccount_564856 = ref object of OpenApiRestCall_563565
+proc url_BillingRoleAssignmentsGetByBillingAccount_564858(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -7845,29 +7854,30 @@ proc url_BillingRoleAssignmentsGetByBillingAccount_575758(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_BillingRoleAssignmentsGetByBillingAccount_575757(path: JsonNode;
+proc validate_BillingRoleAssignmentsGetByBillingAccount_564857(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Get the role assignment for the caller
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   billingRoleAssignmentName: JString (required)
-  ##                            : role assignment id.
   ##   billingAccountName: JString (required)
   ##                     : Billing Account Id.
+  ##   billingRoleAssignmentName: JString (required)
+  ##                            : role assignment id.
   section = newJObject()
-  assert path != nil, "path argument is necessary due to required `billingRoleAssignmentName` field"
-  var valid_575759 = path.getOrDefault("billingRoleAssignmentName")
-  valid_575759 = validateParameter(valid_575759, JString, required = true,
+  assert path != nil,
+        "path argument is necessary due to required `billingAccountName` field"
+  var valid_564859 = path.getOrDefault("billingAccountName")
+  valid_564859 = validateParameter(valid_564859, JString, required = true,
                                  default = nil)
-  if valid_575759 != nil:
-    section.add "billingRoleAssignmentName", valid_575759
-  var valid_575760 = path.getOrDefault("billingAccountName")
-  valid_575760 = validateParameter(valid_575760, JString, required = true,
+  if valid_564859 != nil:
+    section.add "billingAccountName", valid_564859
+  var valid_564860 = path.getOrDefault("billingRoleAssignmentName")
+  valid_564860 = validateParameter(valid_564860, JString, required = true,
                                  default = nil)
-  if valid_575760 != nil:
-    section.add "billingAccountName", valid_575760
+  if valid_564860 != nil:
+    section.add "billingRoleAssignmentName", valid_564860
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -7875,11 +7885,11 @@ proc validate_BillingRoleAssignmentsGetByBillingAccount_575757(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575761 = query.getOrDefault("api-version")
-  valid_575761 = validateParameter(valid_575761, JString, required = true,
+  var valid_564861 = query.getOrDefault("api-version")
+  valid_564861 = validateParameter(valid_564861, JString, required = true,
                                  default = nil)
-  if valid_575761 != nil:
-    section.add "api-version", valid_575761
+  if valid_564861 != nil:
+    section.add "api-version", valid_564861
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -7888,48 +7898,48 @@ proc validate_BillingRoleAssignmentsGetByBillingAccount_575757(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_575762: Call_BillingRoleAssignmentsGetByBillingAccount_575756;
+proc call*(call_564862: Call_BillingRoleAssignmentsGetByBillingAccount_564856;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Get the role assignment for the caller
   ## 
-  let valid = call_575762.validator(path, query, header, formData, body)
-  let scheme = call_575762.pickScheme
+  let valid = call_564862.validator(path, query, header, formData, body)
+  let scheme = call_564862.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575762.url(scheme.get, call_575762.host, call_575762.base,
-                         call_575762.route, valid.getOrDefault("path"),
+  let url = call_564862.url(scheme.get, call_564862.host, call_564862.base,
+                         call_564862.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575762, url, valid)
+  result = hook(call_564862, url, valid)
 
-proc call*(call_575763: Call_BillingRoleAssignmentsGetByBillingAccount_575756;
-          apiVersion: string; billingRoleAssignmentName: string;
-          billingAccountName: string): Recallable =
+proc call*(call_564863: Call_BillingRoleAssignmentsGetByBillingAccount_564856;
+          apiVersion: string; billingAccountName: string;
+          billingRoleAssignmentName: string): Recallable =
   ## billingRoleAssignmentsGetByBillingAccount
   ## Get the role assignment for the caller
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request. The current version is 2018-11-01-preview.
-  ##   billingRoleAssignmentName: string (required)
-  ##                            : role assignment id.
   ##   billingAccountName: string (required)
   ##                     : Billing Account Id.
-  var path_575764 = newJObject()
-  var query_575765 = newJObject()
-  add(query_575765, "api-version", newJString(apiVersion))
-  add(path_575764, "billingRoleAssignmentName",
+  ##   billingRoleAssignmentName: string (required)
+  ##                            : role assignment id.
+  var path_564864 = newJObject()
+  var query_564865 = newJObject()
+  add(query_564865, "api-version", newJString(apiVersion))
+  add(path_564864, "billingAccountName", newJString(billingAccountName))
+  add(path_564864, "billingRoleAssignmentName",
       newJString(billingRoleAssignmentName))
-  add(path_575764, "billingAccountName", newJString(billingAccountName))
-  result = call_575763.call(path_575764, query_575765, nil, nil, nil)
+  result = call_564863.call(path_564864, query_564865, nil, nil, nil)
 
-var billingRoleAssignmentsGetByBillingAccount* = Call_BillingRoleAssignmentsGetByBillingAccount_575756(
+var billingRoleAssignmentsGetByBillingAccount* = Call_BillingRoleAssignmentsGetByBillingAccount_564856(
     name: "billingRoleAssignmentsGetByBillingAccount", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/providers/Microsoft.Billing/billingAccounts/{billingAccountName}/providers/Microsoft.Billing/billingRoleAssignments/{billingRoleAssignmentName}",
-    validator: validate_BillingRoleAssignmentsGetByBillingAccount_575757,
-    base: "", url: url_BillingRoleAssignmentsGetByBillingAccount_575758,
+    validator: validate_BillingRoleAssignmentsGetByBillingAccount_564857,
+    base: "", url: url_BillingRoleAssignmentsGetByBillingAccount_564858,
     schemes: {Scheme.Https})
 type
-  Call_BillingRoleAssignmentsDeleteByBillingAccountName_575766 = ref object of OpenApiRestCall_574467
-proc url_BillingRoleAssignmentsDeleteByBillingAccountName_575768(
+  Call_BillingRoleAssignmentsDeleteByBillingAccountName_564866 = ref object of OpenApiRestCall_563565
+proc url_BillingRoleAssignmentsDeleteByBillingAccountName_564868(
     protocol: Scheme; host: string; base: string; route: string; path: JsonNode;
     query: JsonNode): Uri =
   result.scheme = $protocol
@@ -7952,7 +7962,7 @@ proc url_BillingRoleAssignmentsDeleteByBillingAccountName_575768(
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_BillingRoleAssignmentsDeleteByBillingAccountName_575767(
+proc validate_BillingRoleAssignmentsDeleteByBillingAccountName_564867(
     path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
     body: JsonNode): JsonNode =
   ## Delete the role assignment on this billing account
@@ -7960,22 +7970,23 @@ proc validate_BillingRoleAssignmentsDeleteByBillingAccountName_575767(
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   billingRoleAssignmentName: JString (required)
-  ##                            : role assignment id.
   ##   billingAccountName: JString (required)
   ##                     : Billing Account Id.
+  ##   billingRoleAssignmentName: JString (required)
+  ##                            : role assignment id.
   section = newJObject()
-  assert path != nil, "path argument is necessary due to required `billingRoleAssignmentName` field"
-  var valid_575769 = path.getOrDefault("billingRoleAssignmentName")
-  valid_575769 = validateParameter(valid_575769, JString, required = true,
+  assert path != nil,
+        "path argument is necessary due to required `billingAccountName` field"
+  var valid_564869 = path.getOrDefault("billingAccountName")
+  valid_564869 = validateParameter(valid_564869, JString, required = true,
                                  default = nil)
-  if valid_575769 != nil:
-    section.add "billingRoleAssignmentName", valid_575769
-  var valid_575770 = path.getOrDefault("billingAccountName")
-  valid_575770 = validateParameter(valid_575770, JString, required = true,
+  if valid_564869 != nil:
+    section.add "billingAccountName", valid_564869
+  var valid_564870 = path.getOrDefault("billingRoleAssignmentName")
+  valid_564870 = validateParameter(valid_564870, JString, required = true,
                                  default = nil)
-  if valid_575770 != nil:
-    section.add "billingAccountName", valid_575770
+  if valid_564870 != nil:
+    section.add "billingRoleAssignmentName", valid_564870
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -7983,11 +7994,11 @@ proc validate_BillingRoleAssignmentsDeleteByBillingAccountName_575767(
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575771 = query.getOrDefault("api-version")
-  valid_575771 = validateParameter(valid_575771, JString, required = true,
+  var valid_564871 = query.getOrDefault("api-version")
+  valid_564871 = validateParameter(valid_564871, JString, required = true,
                                  default = nil)
-  if valid_575771 != nil:
-    section.add "api-version", valid_575771
+  if valid_564871 != nil:
+    section.add "api-version", valid_564871
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -7996,48 +8007,48 @@ proc validate_BillingRoleAssignmentsDeleteByBillingAccountName_575767(
   if body != nil:
     result.add "body", body
 
-proc call*(call_575772: Call_BillingRoleAssignmentsDeleteByBillingAccountName_575766;
+proc call*(call_564872: Call_BillingRoleAssignmentsDeleteByBillingAccountName_564866;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Delete the role assignment on this billing account
   ## 
-  let valid = call_575772.validator(path, query, header, formData, body)
-  let scheme = call_575772.pickScheme
+  let valid = call_564872.validator(path, query, header, formData, body)
+  let scheme = call_564872.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575772.url(scheme.get, call_575772.host, call_575772.base,
-                         call_575772.route, valid.getOrDefault("path"),
+  let url = call_564872.url(scheme.get, call_564872.host, call_564872.base,
+                         call_564872.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575772, url, valid)
+  result = hook(call_564872, url, valid)
 
-proc call*(call_575773: Call_BillingRoleAssignmentsDeleteByBillingAccountName_575766;
-          apiVersion: string; billingRoleAssignmentName: string;
-          billingAccountName: string): Recallable =
+proc call*(call_564873: Call_BillingRoleAssignmentsDeleteByBillingAccountName_564866;
+          apiVersion: string; billingAccountName: string;
+          billingRoleAssignmentName: string): Recallable =
   ## billingRoleAssignmentsDeleteByBillingAccountName
   ## Delete the role assignment on this billing account
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request. The current version is 2018-11-01-preview.
-  ##   billingRoleAssignmentName: string (required)
-  ##                            : role assignment id.
   ##   billingAccountName: string (required)
   ##                     : Billing Account Id.
-  var path_575774 = newJObject()
-  var query_575775 = newJObject()
-  add(query_575775, "api-version", newJString(apiVersion))
-  add(path_575774, "billingRoleAssignmentName",
+  ##   billingRoleAssignmentName: string (required)
+  ##                            : role assignment id.
+  var path_564874 = newJObject()
+  var query_564875 = newJObject()
+  add(query_564875, "api-version", newJString(apiVersion))
+  add(path_564874, "billingAccountName", newJString(billingAccountName))
+  add(path_564874, "billingRoleAssignmentName",
       newJString(billingRoleAssignmentName))
-  add(path_575774, "billingAccountName", newJString(billingAccountName))
-  result = call_575773.call(path_575774, query_575775, nil, nil, nil)
+  result = call_564873.call(path_564874, query_564875, nil, nil, nil)
 
-var billingRoleAssignmentsDeleteByBillingAccountName* = Call_BillingRoleAssignmentsDeleteByBillingAccountName_575766(
+var billingRoleAssignmentsDeleteByBillingAccountName* = Call_BillingRoleAssignmentsDeleteByBillingAccountName_564866(
     name: "billingRoleAssignmentsDeleteByBillingAccountName",
     meth: HttpMethod.HttpDelete, host: "management.azure.com", route: "/providers/Microsoft.Billing/billingAccounts/{billingAccountName}/providers/Microsoft.Billing/billingRoleAssignments/{billingRoleAssignmentName}",
-    validator: validate_BillingRoleAssignmentsDeleteByBillingAccountName_575767,
-    base: "", url: url_BillingRoleAssignmentsDeleteByBillingAccountName_575768,
+    validator: validate_BillingRoleAssignmentsDeleteByBillingAccountName_564867,
+    base: "", url: url_BillingRoleAssignmentsDeleteByBillingAccountName_564868,
     schemes: {Scheme.Https})
 type
-  Call_BillingRoleDefinitionsListByBillingAccountName_575776 = ref object of OpenApiRestCall_574467
-proc url_BillingRoleDefinitionsListByBillingAccountName_575778(protocol: Scheme;
+  Call_BillingRoleDefinitionsListByBillingAccountName_564876 = ref object of OpenApiRestCall_563565
+proc url_BillingRoleDefinitionsListByBillingAccountName_564878(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -8056,7 +8067,7 @@ proc url_BillingRoleDefinitionsListByBillingAccountName_575778(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_BillingRoleDefinitionsListByBillingAccountName_575777(
+proc validate_BillingRoleDefinitionsListByBillingAccountName_564877(
     path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
     body: JsonNode): JsonNode =
   ## Lists the role definition for a billing account
@@ -8069,11 +8080,11 @@ proc validate_BillingRoleDefinitionsListByBillingAccountName_575777(
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `billingAccountName` field"
-  var valid_575779 = path.getOrDefault("billingAccountName")
-  valid_575779 = validateParameter(valid_575779, JString, required = true,
+  var valid_564879 = path.getOrDefault("billingAccountName")
+  valid_564879 = validateParameter(valid_564879, JString, required = true,
                                  default = nil)
-  if valid_575779 != nil:
-    section.add "billingAccountName", valid_575779
+  if valid_564879 != nil:
+    section.add "billingAccountName", valid_564879
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -8081,11 +8092,11 @@ proc validate_BillingRoleDefinitionsListByBillingAccountName_575777(
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575780 = query.getOrDefault("api-version")
-  valid_575780 = validateParameter(valid_575780, JString, required = true,
+  var valid_564880 = query.getOrDefault("api-version")
+  valid_564880 = validateParameter(valid_564880, JString, required = true,
                                  default = nil)
-  if valid_575780 != nil:
-    section.add "api-version", valid_575780
+  if valid_564880 != nil:
+    section.add "api-version", valid_564880
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -8094,21 +8105,21 @@ proc validate_BillingRoleDefinitionsListByBillingAccountName_575777(
   if body != nil:
     result.add "body", body
 
-proc call*(call_575781: Call_BillingRoleDefinitionsListByBillingAccountName_575776;
+proc call*(call_564881: Call_BillingRoleDefinitionsListByBillingAccountName_564876;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Lists the role definition for a billing account
   ## 
-  let valid = call_575781.validator(path, query, header, formData, body)
-  let scheme = call_575781.pickScheme
+  let valid = call_564881.validator(path, query, header, formData, body)
+  let scheme = call_564881.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575781.url(scheme.get, call_575781.host, call_575781.base,
-                         call_575781.route, valid.getOrDefault("path"),
+  let url = call_564881.url(scheme.get, call_564881.host, call_564881.base,
+                         call_564881.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575781, url, valid)
+  result = hook(call_564881, url, valid)
 
-proc call*(call_575782: Call_BillingRoleDefinitionsListByBillingAccountName_575776;
+proc call*(call_564882: Call_BillingRoleDefinitionsListByBillingAccountName_564876;
           apiVersion: string; billingAccountName: string): Recallable =
   ## billingRoleDefinitionsListByBillingAccountName
   ## Lists the role definition for a billing account
@@ -8116,21 +8127,21 @@ proc call*(call_575782: Call_BillingRoleDefinitionsListByBillingAccountName_5757
   ##             : Version of the API to be used with the client request. The current version is 2018-11-01-preview.
   ##   billingAccountName: string (required)
   ##                     : Billing Account Id.
-  var path_575783 = newJObject()
-  var query_575784 = newJObject()
-  add(query_575784, "api-version", newJString(apiVersion))
-  add(path_575783, "billingAccountName", newJString(billingAccountName))
-  result = call_575782.call(path_575783, query_575784, nil, nil, nil)
+  var path_564883 = newJObject()
+  var query_564884 = newJObject()
+  add(query_564884, "api-version", newJString(apiVersion))
+  add(path_564883, "billingAccountName", newJString(billingAccountName))
+  result = call_564882.call(path_564883, query_564884, nil, nil, nil)
 
-var billingRoleDefinitionsListByBillingAccountName* = Call_BillingRoleDefinitionsListByBillingAccountName_575776(
+var billingRoleDefinitionsListByBillingAccountName* = Call_BillingRoleDefinitionsListByBillingAccountName_564876(
     name: "billingRoleDefinitionsListByBillingAccountName",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/providers/Microsoft.Billing/billingAccounts/{billingAccountName}/providers/Microsoft.Billing/billingRoleDefinitions",
-    validator: validate_BillingRoleDefinitionsListByBillingAccountName_575777,
-    base: "", url: url_BillingRoleDefinitionsListByBillingAccountName_575778,
+    validator: validate_BillingRoleDefinitionsListByBillingAccountName_564877,
+    base: "", url: url_BillingRoleDefinitionsListByBillingAccountName_564878,
     schemes: {Scheme.Https})
 type
-  Call_BillingRoleDefinitionsGetByBillingAccountName_575785 = ref object of OpenApiRestCall_574467
-proc url_BillingRoleDefinitionsGetByBillingAccountName_575787(protocol: Scheme;
+  Call_BillingRoleDefinitionsGetByBillingAccountName_564885 = ref object of OpenApiRestCall_563565
+proc url_BillingRoleDefinitionsGetByBillingAccountName_564887(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -8152,7 +8163,7 @@ proc url_BillingRoleDefinitionsGetByBillingAccountName_575787(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_BillingRoleDefinitionsGetByBillingAccountName_575786(
+proc validate_BillingRoleDefinitionsGetByBillingAccountName_564886(
     path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
     body: JsonNode): JsonNode =
   ## Gets the role definition for a role
@@ -8167,16 +8178,16 @@ proc validate_BillingRoleDefinitionsGetByBillingAccountName_575786(
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `billingAccountName` field"
-  var valid_575788 = path.getOrDefault("billingAccountName")
-  valid_575788 = validateParameter(valid_575788, JString, required = true,
+  var valid_564888 = path.getOrDefault("billingAccountName")
+  valid_564888 = validateParameter(valid_564888, JString, required = true,
                                  default = nil)
-  if valid_575788 != nil:
-    section.add "billingAccountName", valid_575788
-  var valid_575789 = path.getOrDefault("billingRoleDefinitionName")
-  valid_575789 = validateParameter(valid_575789, JString, required = true,
+  if valid_564888 != nil:
+    section.add "billingAccountName", valid_564888
+  var valid_564889 = path.getOrDefault("billingRoleDefinitionName")
+  valid_564889 = validateParameter(valid_564889, JString, required = true,
                                  default = nil)
-  if valid_575789 != nil:
-    section.add "billingRoleDefinitionName", valid_575789
+  if valid_564889 != nil:
+    section.add "billingRoleDefinitionName", valid_564889
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -8184,11 +8195,11 @@ proc validate_BillingRoleDefinitionsGetByBillingAccountName_575786(
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575790 = query.getOrDefault("api-version")
-  valid_575790 = validateParameter(valid_575790, JString, required = true,
+  var valid_564890 = query.getOrDefault("api-version")
+  valid_564890 = validateParameter(valid_564890, JString, required = true,
                                  default = nil)
-  if valid_575790 != nil:
-    section.add "api-version", valid_575790
+  if valid_564890 != nil:
+    section.add "api-version", valid_564890
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -8197,21 +8208,21 @@ proc validate_BillingRoleDefinitionsGetByBillingAccountName_575786(
   if body != nil:
     result.add "body", body
 
-proc call*(call_575791: Call_BillingRoleDefinitionsGetByBillingAccountName_575785;
+proc call*(call_564891: Call_BillingRoleDefinitionsGetByBillingAccountName_564885;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Gets the role definition for a role
   ## 
-  let valid = call_575791.validator(path, query, header, formData, body)
-  let scheme = call_575791.pickScheme
+  let valid = call_564891.validator(path, query, header, formData, body)
+  let scheme = call_564891.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575791.url(scheme.get, call_575791.host, call_575791.base,
-                         call_575791.route, valid.getOrDefault("path"),
+  let url = call_564891.url(scheme.get, call_564891.host, call_564891.base,
+                         call_564891.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575791, url, valid)
+  result = hook(call_564891, url, valid)
 
-proc call*(call_575792: Call_BillingRoleDefinitionsGetByBillingAccountName_575785;
+proc call*(call_564892: Call_BillingRoleDefinitionsGetByBillingAccountName_564885;
           apiVersion: string; billingAccountName: string;
           billingRoleDefinitionName: string): Recallable =
   ## billingRoleDefinitionsGetByBillingAccountName
@@ -8222,23 +8233,23 @@ proc call*(call_575792: Call_BillingRoleDefinitionsGetByBillingAccountName_57578
   ##                     : Billing Account Id.
   ##   billingRoleDefinitionName: string (required)
   ##                            : role definition id.
-  var path_575793 = newJObject()
-  var query_575794 = newJObject()
-  add(query_575794, "api-version", newJString(apiVersion))
-  add(path_575793, "billingAccountName", newJString(billingAccountName))
-  add(path_575793, "billingRoleDefinitionName",
+  var path_564893 = newJObject()
+  var query_564894 = newJObject()
+  add(query_564894, "api-version", newJString(apiVersion))
+  add(path_564893, "billingAccountName", newJString(billingAccountName))
+  add(path_564893, "billingRoleDefinitionName",
       newJString(billingRoleDefinitionName))
-  result = call_575792.call(path_575793, query_575794, nil, nil, nil)
+  result = call_564892.call(path_564893, query_564894, nil, nil, nil)
 
-var billingRoleDefinitionsGetByBillingAccountName* = Call_BillingRoleDefinitionsGetByBillingAccountName_575785(
+var billingRoleDefinitionsGetByBillingAccountName* = Call_BillingRoleDefinitionsGetByBillingAccountName_564885(
     name: "billingRoleDefinitionsGetByBillingAccountName",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/providers/Microsoft.Billing/billingAccounts/{billingAccountName}/providers/Microsoft.Billing/billingRoleDefinitions/{billingRoleDefinitionName}",
-    validator: validate_BillingRoleDefinitionsGetByBillingAccountName_575786,
-    base: "", url: url_BillingRoleDefinitionsGetByBillingAccountName_575787,
+    validator: validate_BillingRoleDefinitionsGetByBillingAccountName_564886,
+    base: "", url: url_BillingRoleDefinitionsGetByBillingAccountName_564887,
     schemes: {Scheme.Https})
 type
-  Call_BillingRoleAssignmentsAddByBillingAccountName_575795 = ref object of OpenApiRestCall_574467
-proc url_BillingRoleAssignmentsAddByBillingAccountName_575797(protocol: Scheme;
+  Call_BillingRoleAssignmentsAddByBillingAccountName_564895 = ref object of OpenApiRestCall_563565
+proc url_BillingRoleAssignmentsAddByBillingAccountName_564897(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -8257,7 +8268,7 @@ proc url_BillingRoleAssignmentsAddByBillingAccountName_575797(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_BillingRoleAssignmentsAddByBillingAccountName_575796(
+proc validate_BillingRoleAssignmentsAddByBillingAccountName_564896(
     path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
     body: JsonNode): JsonNode =
   ## The operation to add a role assignment to a billing account.
@@ -8270,11 +8281,11 @@ proc validate_BillingRoleAssignmentsAddByBillingAccountName_575796(
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `billingAccountName` field"
-  var valid_575798 = path.getOrDefault("billingAccountName")
-  valid_575798 = validateParameter(valid_575798, JString, required = true,
+  var valid_564898 = path.getOrDefault("billingAccountName")
+  valid_564898 = validateParameter(valid_564898, JString, required = true,
                                  default = nil)
-  if valid_575798 != nil:
-    section.add "billingAccountName", valid_575798
+  if valid_564898 != nil:
+    section.add "billingAccountName", valid_564898
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -8282,11 +8293,11 @@ proc validate_BillingRoleAssignmentsAddByBillingAccountName_575796(
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575799 = query.getOrDefault("api-version")
-  valid_575799 = validateParameter(valid_575799, JString, required = true,
+  var valid_564899 = query.getOrDefault("api-version")
+  valid_564899 = validateParameter(valid_564899, JString, required = true,
                                  default = nil)
-  if valid_575799 != nil:
-    section.add "api-version", valid_575799
+  if valid_564899 != nil:
+    section.add "api-version", valid_564899
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -8300,21 +8311,21 @@ proc validate_BillingRoleAssignmentsAddByBillingAccountName_575796(
   if body != nil:
     result.add "body", body
 
-proc call*(call_575801: Call_BillingRoleAssignmentsAddByBillingAccountName_575795;
+proc call*(call_564901: Call_BillingRoleAssignmentsAddByBillingAccountName_564895;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## The operation to add a role assignment to a billing account.
   ## 
-  let valid = call_575801.validator(path, query, header, formData, body)
-  let scheme = call_575801.pickScheme
+  let valid = call_564901.validator(path, query, header, formData, body)
+  let scheme = call_564901.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575801.url(scheme.get, call_575801.host, call_575801.base,
-                         call_575801.route, valid.getOrDefault("path"),
+  let url = call_564901.url(scheme.get, call_564901.host, call_564901.base,
+                         call_564901.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575801, url, valid)
+  result = hook(call_564901, url, valid)
 
-proc call*(call_575802: Call_BillingRoleAssignmentsAddByBillingAccountName_575795;
+proc call*(call_564902: Call_BillingRoleAssignmentsAddByBillingAccountName_564895;
           apiVersion: string; billingAccountName: string; parameters: JsonNode): Recallable =
   ## billingRoleAssignmentsAddByBillingAccountName
   ## The operation to add a role assignment to a billing account.
@@ -8324,24 +8335,24 @@ proc call*(call_575802: Call_BillingRoleAssignmentsAddByBillingAccountName_57579
   ##                     : Billing Account Id.
   ##   parameters: JObject (required)
   ##             : Parameters supplied to add a role assignment.
-  var path_575803 = newJObject()
-  var query_575804 = newJObject()
-  var body_575805 = newJObject()
-  add(query_575804, "api-version", newJString(apiVersion))
-  add(path_575803, "billingAccountName", newJString(billingAccountName))
+  var path_564903 = newJObject()
+  var query_564904 = newJObject()
+  var body_564905 = newJObject()
+  add(query_564904, "api-version", newJString(apiVersion))
+  add(path_564903, "billingAccountName", newJString(billingAccountName))
   if parameters != nil:
-    body_575805 = parameters
-  result = call_575802.call(path_575803, query_575804, nil, nil, body_575805)
+    body_564905 = parameters
+  result = call_564902.call(path_564903, query_564904, nil, nil, body_564905)
 
-var billingRoleAssignmentsAddByBillingAccountName* = Call_BillingRoleAssignmentsAddByBillingAccountName_575795(
+var billingRoleAssignmentsAddByBillingAccountName* = Call_BillingRoleAssignmentsAddByBillingAccountName_564895(
     name: "billingRoleAssignmentsAddByBillingAccountName",
     meth: HttpMethod.HttpPost, host: "management.azure.com", route: "/providers/Microsoft.Billing/billingAccounts/{billingAccountName}/providers/Microsoft.Billing/createBillingRoleAssignment",
-    validator: validate_BillingRoleAssignmentsAddByBillingAccountName_575796,
-    base: "", url: url_BillingRoleAssignmentsAddByBillingAccountName_575797,
+    validator: validate_BillingRoleAssignmentsAddByBillingAccountName_564896,
+    base: "", url: url_BillingRoleAssignmentsAddByBillingAccountName_564897,
     schemes: {Scheme.Https})
 type
-  Call_TransactionsListByBillingAccountName_575806 = ref object of OpenApiRestCall_574467
-proc url_TransactionsListByBillingAccountName_575808(protocol: Scheme;
+  Call_TransactionsListByBillingAccountName_564906 = ref object of OpenApiRestCall_563565
+proc url_TransactionsListByBillingAccountName_564908(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -8359,7 +8370,7 @@ proc url_TransactionsListByBillingAccountName_575808(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_TransactionsListByBillingAccountName_575807(path: JsonNode;
+proc validate_TransactionsListByBillingAccountName_564907(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists the transactions by billing account name for given start and end date.
   ## 
@@ -8372,44 +8383,44 @@ proc validate_TransactionsListByBillingAccountName_575807(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `billingAccountName` field"
-  var valid_575809 = path.getOrDefault("billingAccountName")
-  valid_575809 = validateParameter(valid_575809, JString, required = true,
+  var valid_564909 = path.getOrDefault("billingAccountName")
+  valid_564909 = validateParameter(valid_564909, JString, required = true,
                                  default = nil)
-  if valid_575809 != nil:
-    section.add "billingAccountName", valid_575809
+  if valid_564909 != nil:
+    section.add "billingAccountName", valid_564909
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
   ##              : Version of the API to be used with the client request. The current version is 2018-11-01-preview.
   ##   endDate: JString (required)
   ##          : End date
-  ##   startDate: JString (required)
-  ##            : Start date
   ##   $filter: JString
   ##          : May be used to filter by transaction kind. The filter supports 'eq', 'lt', 'gt', 'le', 'ge', and 'and'. It does not currently support 'ne', 'or', or 'not'. Tag filter is a key value pair string where key and value is separated by a colon (:).
+  ##   startDate: JString (required)
+  ##            : Start date
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575810 = query.getOrDefault("api-version")
-  valid_575810 = validateParameter(valid_575810, JString, required = true,
+  var valid_564910 = query.getOrDefault("api-version")
+  valid_564910 = validateParameter(valid_564910, JString, required = true,
                                  default = nil)
-  if valid_575810 != nil:
-    section.add "api-version", valid_575810
-  var valid_575811 = query.getOrDefault("endDate")
-  valid_575811 = validateParameter(valid_575811, JString, required = true,
+  if valid_564910 != nil:
+    section.add "api-version", valid_564910
+  var valid_564911 = query.getOrDefault("endDate")
+  valid_564911 = validateParameter(valid_564911, JString, required = true,
                                  default = nil)
-  if valid_575811 != nil:
-    section.add "endDate", valid_575811
-  var valid_575812 = query.getOrDefault("startDate")
-  valid_575812 = validateParameter(valid_575812, JString, required = true,
+  if valid_564911 != nil:
+    section.add "endDate", valid_564911
+  var valid_564912 = query.getOrDefault("$filter")
+  valid_564912 = validateParameter(valid_564912, JString, required = false,
                                  default = nil)
-  if valid_575812 != nil:
-    section.add "startDate", valid_575812
-  var valid_575813 = query.getOrDefault("$filter")
-  valid_575813 = validateParameter(valid_575813, JString, required = false,
+  if valid_564912 != nil:
+    section.add "$filter", valid_564912
+  var valid_564913 = query.getOrDefault("startDate")
+  valid_564913 = validateParameter(valid_564913, JString, required = true,
                                  default = nil)
-  if valid_575813 != nil:
-    section.add "$filter", valid_575813
+  if valid_564913 != nil:
+    section.add "startDate", valid_564913
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -8418,61 +8429,61 @@ proc validate_TransactionsListByBillingAccountName_575807(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_575814: Call_TransactionsListByBillingAccountName_575806;
+proc call*(call_564914: Call_TransactionsListByBillingAccountName_564906;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Lists the transactions by billing account name for given start and end date.
   ## 
   ## https://docs.microsoft.com/en-us/rest/api/consumption/
-  let valid = call_575814.validator(path, query, header, formData, body)
-  let scheme = call_575814.pickScheme
+  let valid = call_564914.validator(path, query, header, formData, body)
+  let scheme = call_564914.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575814.url(scheme.get, call_575814.host, call_575814.base,
-                         call_575814.route, valid.getOrDefault("path"),
+  let url = call_564914.url(scheme.get, call_564914.host, call_564914.base,
+                         call_564914.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575814, url, valid)
+  result = hook(call_564914, url, valid)
 
-proc call*(call_575815: Call_TransactionsListByBillingAccountName_575806;
-          apiVersion: string; endDate: string; billingAccountName: string;
+proc call*(call_564915: Call_TransactionsListByBillingAccountName_564906;
+          apiVersion: string; billingAccountName: string; endDate: string;
           startDate: string; Filter: string = ""): Recallable =
   ## transactionsListByBillingAccountName
   ## Lists the transactions by billing account name for given start and end date.
   ## https://docs.microsoft.com/en-us/rest/api/consumption/
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request. The current version is 2018-11-01-preview.
-  ##   endDate: string (required)
-  ##          : End date
   ##   billingAccountName: string (required)
   ##                     : Billing Account Id.
-  ##   startDate: string (required)
-  ##            : Start date
+  ##   endDate: string (required)
+  ##          : End date
   ##   Filter: string
   ##         : May be used to filter by transaction kind. The filter supports 'eq', 'lt', 'gt', 'le', 'ge', and 'and'. It does not currently support 'ne', 'or', or 'not'. Tag filter is a key value pair string where key and value is separated by a colon (:).
-  var path_575816 = newJObject()
-  var query_575817 = newJObject()
-  add(query_575817, "api-version", newJString(apiVersion))
-  add(query_575817, "endDate", newJString(endDate))
-  add(path_575816, "billingAccountName", newJString(billingAccountName))
-  add(query_575817, "startDate", newJString(startDate))
-  add(query_575817, "$filter", newJString(Filter))
-  result = call_575815.call(path_575816, query_575817, nil, nil, nil)
+  ##   startDate: string (required)
+  ##            : Start date
+  var path_564916 = newJObject()
+  var query_564917 = newJObject()
+  add(query_564917, "api-version", newJString(apiVersion))
+  add(path_564916, "billingAccountName", newJString(billingAccountName))
+  add(query_564917, "endDate", newJString(endDate))
+  add(query_564917, "$filter", newJString(Filter))
+  add(query_564917, "startDate", newJString(startDate))
+  result = call_564915.call(path_564916, query_564917, nil, nil, nil)
 
-var transactionsListByBillingAccountName* = Call_TransactionsListByBillingAccountName_575806(
+var transactionsListByBillingAccountName* = Call_TransactionsListByBillingAccountName_564906(
     name: "transactionsListByBillingAccountName", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/providers/Microsoft.Billing/billingAccounts/{billingAccountName}/transactions",
-    validator: validate_TransactionsListByBillingAccountName_575807, base: "",
-    url: url_TransactionsListByBillingAccountName_575808, schemes: {Scheme.Https})
+    validator: validate_TransactionsListByBillingAccountName_564907, base: "",
+    url: url_TransactionsListByBillingAccountName_564908, schemes: {Scheme.Https})
 type
-  Call_OperationsList_575818 = ref object of OpenApiRestCall_574467
-proc url_OperationsList_575820(protocol: Scheme; host: string; base: string;
+  Call_OperationsList_564918 = ref object of OpenApiRestCall_563565
+proc url_OperationsList_564920(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_OperationsList_575819(path: JsonNode; query: JsonNode;
+proc validate_OperationsList_564919(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## Lists all of the available billing REST API operations.
@@ -8487,11 +8498,11 @@ proc validate_OperationsList_575819(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575821 = query.getOrDefault("api-version")
-  valid_575821 = validateParameter(valid_575821, JString, required = true,
+  var valid_564921 = query.getOrDefault("api-version")
+  valid_564921 = validateParameter(valid_564921, JString, required = true,
                                  default = nil)
-  if valid_575821 != nil:
-    section.add "api-version", valid_575821
+  if valid_564921 != nil:
+    section.add "api-version", valid_564921
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -8500,43 +8511,43 @@ proc validate_OperationsList_575819(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_575822: Call_OperationsList_575818; path: JsonNode; query: JsonNode;
+proc call*(call_564922: Call_OperationsList_564918; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists all of the available billing REST API operations.
   ## 
-  let valid = call_575822.validator(path, query, header, formData, body)
-  let scheme = call_575822.pickScheme
+  let valid = call_564922.validator(path, query, header, formData, body)
+  let scheme = call_564922.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575822.url(scheme.get, call_575822.host, call_575822.base,
-                         call_575822.route, valid.getOrDefault("path"),
+  let url = call_564922.url(scheme.get, call_564922.host, call_564922.base,
+                         call_564922.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575822, url, valid)
+  result = hook(call_564922, url, valid)
 
-proc call*(call_575823: Call_OperationsList_575818; apiVersion: string): Recallable =
+proc call*(call_564923: Call_OperationsList_564918; apiVersion: string): Recallable =
   ## operationsList
   ## Lists all of the available billing REST API operations.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request. The current version is 2018-11-01-preview.
-  var query_575824 = newJObject()
-  add(query_575824, "api-version", newJString(apiVersion))
-  result = call_575823.call(nil, query_575824, nil, nil, nil)
+  var query_564924 = newJObject()
+  add(query_564924, "api-version", newJString(apiVersion))
+  result = call_564923.call(nil, query_564924, nil, nil, nil)
 
-var operationsList* = Call_OperationsList_575818(name: "operationsList",
+var operationsList* = Call_OperationsList_564918(name: "operationsList",
     meth: HttpMethod.HttpGet, host: "management.azure.com",
     route: "/providers/Microsoft.Billing/operations",
-    validator: validate_OperationsList_575819, base: "", url: url_OperationsList_575820,
+    validator: validate_OperationsList_564919, base: "", url: url_OperationsList_564920,
     schemes: {Scheme.Https})
 type
-  Call_RecipientTransfersList_575825 = ref object of OpenApiRestCall_574467
-proc url_RecipientTransfersList_575827(protocol: Scheme; host: string; base: string;
+  Call_RecipientTransfersList_564925 = ref object of OpenApiRestCall_563565
+proc url_RecipientTransfersList_564927(protocol: Scheme; host: string; base: string;
                                       route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_RecipientTransfersList_575826(path: JsonNode; query: JsonNode;
+proc validate_RecipientTransfersList_564926(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   var section: JsonNode
   result = newJObject()
@@ -8551,29 +8562,29 @@ proc validate_RecipientTransfersList_575826(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_575828: Call_RecipientTransfersList_575825; path: JsonNode;
+proc call*(call_564928: Call_RecipientTransfersList_564925; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
-  let valid = call_575828.validator(path, query, header, formData, body)
-  let scheme = call_575828.pickScheme
+  let valid = call_564928.validator(path, query, header, formData, body)
+  let scheme = call_564928.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575828.url(scheme.get, call_575828.host, call_575828.base,
-                         call_575828.route, valid.getOrDefault("path"),
+  let url = call_564928.url(scheme.get, call_564928.host, call_564928.base,
+                         call_564928.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575828, url, valid)
+  result = hook(call_564928, url, valid)
 
-proc call*(call_575829: Call_RecipientTransfersList_575825): Recallable =
+proc call*(call_564929: Call_RecipientTransfersList_564925): Recallable =
   ## recipientTransfersList
-  result = call_575829.call(nil, nil, nil, nil, nil)
+  result = call_564929.call(nil, nil, nil, nil, nil)
 
-var recipientTransfersList* = Call_RecipientTransfersList_575825(
+var recipientTransfersList* = Call_RecipientTransfersList_564925(
     name: "recipientTransfersList", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/providers/Microsoft.Billing/transfers",
-    validator: validate_RecipientTransfersList_575826, base: "",
-    url: url_RecipientTransfersList_575827, schemes: {Scheme.Https})
+    validator: validate_RecipientTransfersList_564926, base: "",
+    url: url_RecipientTransfersList_564927, schemes: {Scheme.Https})
 type
-  Call_RecipientTransfersGet_575830 = ref object of OpenApiRestCall_574467
-proc url_RecipientTransfersGet_575832(protocol: Scheme; host: string; base: string;
+  Call_RecipientTransfersGet_564930 = ref object of OpenApiRestCall_563565
+proc url_RecipientTransfersGet_564932(protocol: Scheme; host: string; base: string;
                                      route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -8590,7 +8601,7 @@ proc url_RecipientTransfersGet_575832(protocol: Scheme; host: string; base: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_RecipientTransfersGet_575831(path: JsonNode; query: JsonNode;
+proc validate_RecipientTransfersGet_564931(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   var section: JsonNode
   result = newJObject()
@@ -8600,11 +8611,11 @@ proc validate_RecipientTransfersGet_575831(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `transferName` field"
-  var valid_575833 = path.getOrDefault("transferName")
-  valid_575833 = validateParameter(valid_575833, JString, required = true,
+  var valid_564933 = path.getOrDefault("transferName")
+  valid_564933 = validateParameter(valid_564933, JString, required = true,
                                  default = nil)
-  if valid_575833 != nil:
-    section.add "transferName", valid_575833
+  if valid_564933 != nil:
+    section.add "transferName", valid_564933
   result.add "path", section
   section = newJObject()
   result.add "query", section
@@ -8615,34 +8626,34 @@ proc validate_RecipientTransfersGet_575831(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_575834: Call_RecipientTransfersGet_575830; path: JsonNode;
+proc call*(call_564934: Call_RecipientTransfersGet_564930; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
-  let valid = call_575834.validator(path, query, header, formData, body)
-  let scheme = call_575834.pickScheme
+  let valid = call_564934.validator(path, query, header, formData, body)
+  let scheme = call_564934.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575834.url(scheme.get, call_575834.host, call_575834.base,
-                         call_575834.route, valid.getOrDefault("path"),
+  let url = call_564934.url(scheme.get, call_564934.host, call_564934.base,
+                         call_564934.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575834, url, valid)
+  result = hook(call_564934, url, valid)
 
-proc call*(call_575835: Call_RecipientTransfersGet_575830; transferName: string): Recallable =
+proc call*(call_564935: Call_RecipientTransfersGet_564930; transferName: string): Recallable =
   ## recipientTransfersGet
   ##   transferName: string (required)
   ##               : Transfer Name.
-  var path_575836 = newJObject()
-  add(path_575836, "transferName", newJString(transferName))
-  result = call_575835.call(path_575836, nil, nil, nil, nil)
+  var path_564936 = newJObject()
+  add(path_564936, "transferName", newJString(transferName))
+  result = call_564935.call(path_564936, nil, nil, nil, nil)
 
-var recipientTransfersGet* = Call_RecipientTransfersGet_575830(
+var recipientTransfersGet* = Call_RecipientTransfersGet_564930(
     name: "recipientTransfersGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com",
     route: "/providers/Microsoft.Billing/transfers/{transferName}/",
-    validator: validate_RecipientTransfersGet_575831, base: "",
-    url: url_RecipientTransfersGet_575832, schemes: {Scheme.Https})
+    validator: validate_RecipientTransfersGet_564931, base: "",
+    url: url_RecipientTransfersGet_564932, schemes: {Scheme.Https})
 type
-  Call_RecipientTransfersAccept_575837 = ref object of OpenApiRestCall_574467
-proc url_RecipientTransfersAccept_575839(protocol: Scheme; host: string;
+  Call_RecipientTransfersAccept_564937 = ref object of OpenApiRestCall_563565
+proc url_RecipientTransfersAccept_564939(protocol: Scheme; host: string;
                                         base: string; route: string; path: JsonNode;
                                         query: JsonNode): Uri =
   result.scheme = $protocol
@@ -8660,7 +8671,7 @@ proc url_RecipientTransfersAccept_575839(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_RecipientTransfersAccept_575838(path: JsonNode; query: JsonNode;
+proc validate_RecipientTransfersAccept_564938(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   var section: JsonNode
   result = newJObject()
@@ -8670,11 +8681,11 @@ proc validate_RecipientTransfersAccept_575838(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `transferName` field"
-  var valid_575840 = path.getOrDefault("transferName")
-  valid_575840 = validateParameter(valid_575840, JString, required = true,
+  var valid_564940 = path.getOrDefault("transferName")
+  valid_564940 = validateParameter(valid_564940, JString, required = true,
                                  default = nil)
-  if valid_575840 != nil:
-    section.add "transferName", valid_575840
+  if valid_564940 != nil:
+    section.add "transferName", valid_564940
   result.add "path", section
   section = newJObject()
   result.add "query", section
@@ -8690,39 +8701,39 @@ proc validate_RecipientTransfersAccept_575838(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_575842: Call_RecipientTransfersAccept_575837; path: JsonNode;
+proc call*(call_564942: Call_RecipientTransfersAccept_564937; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
-  let valid = call_575842.validator(path, query, header, formData, body)
-  let scheme = call_575842.pickScheme
+  let valid = call_564942.validator(path, query, header, formData, body)
+  let scheme = call_564942.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575842.url(scheme.get, call_575842.host, call_575842.base,
-                         call_575842.route, valid.getOrDefault("path"),
+  let url = call_564942.url(scheme.get, call_564942.host, call_564942.base,
+                         call_564942.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575842, url, valid)
+  result = hook(call_564942, url, valid)
 
-proc call*(call_575843: Call_RecipientTransfersAccept_575837; body: JsonNode;
-          transferName: string): Recallable =
+proc call*(call_564943: Call_RecipientTransfersAccept_564937; transferName: string;
+          body: JsonNode): Recallable =
   ## recipientTransfersAccept
-  ##   body: JObject (required)
-  ##       : Accept transfer parameters.
   ##   transferName: string (required)
   ##               : Transfer Name.
-  var path_575844 = newJObject()
-  var body_575845 = newJObject()
+  ##   body: JObject (required)
+  ##       : Accept transfer parameters.
+  var path_564944 = newJObject()
+  var body_564945 = newJObject()
+  add(path_564944, "transferName", newJString(transferName))
   if body != nil:
-    body_575845 = body
-  add(path_575844, "transferName", newJString(transferName))
-  result = call_575843.call(path_575844, nil, nil, nil, body_575845)
+    body_564945 = body
+  result = call_564943.call(path_564944, nil, nil, nil, body_564945)
 
-var recipientTransfersAccept* = Call_RecipientTransfersAccept_575837(
+var recipientTransfersAccept* = Call_RecipientTransfersAccept_564937(
     name: "recipientTransfersAccept", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/providers/Microsoft.Billing/transfers/{transferName}/acceptTransfer",
-    validator: validate_RecipientTransfersAccept_575838, base: "",
-    url: url_RecipientTransfersAccept_575839, schemes: {Scheme.Https})
+    validator: validate_RecipientTransfersAccept_564938, base: "",
+    url: url_RecipientTransfersAccept_564939, schemes: {Scheme.Https})
 type
-  Call_RecipientTransfersDecline_575846 = ref object of OpenApiRestCall_574467
-proc url_RecipientTransfersDecline_575848(protocol: Scheme; host: string;
+  Call_RecipientTransfersDecline_564946 = ref object of OpenApiRestCall_563565
+proc url_RecipientTransfersDecline_564948(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -8739,7 +8750,7 @@ proc url_RecipientTransfersDecline_575848(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_RecipientTransfersDecline_575847(path: JsonNode; query: JsonNode;
+proc validate_RecipientTransfersDecline_564947(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   var section: JsonNode
   result = newJObject()
@@ -8749,11 +8760,11 @@ proc validate_RecipientTransfersDecline_575847(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `transferName` field"
-  var valid_575849 = path.getOrDefault("transferName")
-  valid_575849 = validateParameter(valid_575849, JString, required = true,
+  var valid_564949 = path.getOrDefault("transferName")
+  valid_564949 = validateParameter(valid_564949, JString, required = true,
                                  default = nil)
-  if valid_575849 != nil:
-    section.add "transferName", valid_575849
+  if valid_564949 != nil:
+    section.add "transferName", valid_564949
   result.add "path", section
   section = newJObject()
   result.add "query", section
@@ -8764,40 +8775,40 @@ proc validate_RecipientTransfersDecline_575847(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_575850: Call_RecipientTransfersDecline_575846; path: JsonNode;
+proc call*(call_564950: Call_RecipientTransfersDecline_564946; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
-  let valid = call_575850.validator(path, query, header, formData, body)
-  let scheme = call_575850.pickScheme
+  let valid = call_564950.validator(path, query, header, formData, body)
+  let scheme = call_564950.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575850.url(scheme.get, call_575850.host, call_575850.base,
-                         call_575850.route, valid.getOrDefault("path"),
+  let url = call_564950.url(scheme.get, call_564950.host, call_564950.base,
+                         call_564950.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575850, url, valid)
+  result = hook(call_564950, url, valid)
 
-proc call*(call_575851: Call_RecipientTransfersDecline_575846; transferName: string): Recallable =
+proc call*(call_564951: Call_RecipientTransfersDecline_564946; transferName: string): Recallable =
   ## recipientTransfersDecline
   ##   transferName: string (required)
   ##               : Transfer Name.
-  var path_575852 = newJObject()
-  add(path_575852, "transferName", newJString(transferName))
-  result = call_575851.call(path_575852, nil, nil, nil, nil)
+  var path_564952 = newJObject()
+  add(path_564952, "transferName", newJString(transferName))
+  result = call_564951.call(path_564952, nil, nil, nil, nil)
 
-var recipientTransfersDecline* = Call_RecipientTransfersDecline_575846(
+var recipientTransfersDecline* = Call_RecipientTransfersDecline_564946(
     name: "recipientTransfersDecline", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/providers/Microsoft.Billing/transfers/{transferName}/declineTransfer",
-    validator: validate_RecipientTransfersDecline_575847, base: "",
-    url: url_RecipientTransfersDecline_575848, schemes: {Scheme.Https})
+    validator: validate_RecipientTransfersDecline_564947, base: "",
+    url: url_RecipientTransfersDecline_564948, schemes: {Scheme.Https})
 type
-  Call_AddressesValidate_575853 = ref object of OpenApiRestCall_574467
-proc url_AddressesValidate_575855(protocol: Scheme; host: string; base: string;
+  Call_AddressesValidate_564953 = ref object of OpenApiRestCall_563565
+proc url_AddressesValidate_564955(protocol: Scheme; host: string; base: string;
                                  route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_AddressesValidate_575854(path: JsonNode; query: JsonNode;
+proc validate_AddressesValidate_564954(path: JsonNode; query: JsonNode;
                                       header: JsonNode; formData: JsonNode;
                                       body: JsonNode): JsonNode =
   ## Validates the address.
@@ -8812,11 +8823,11 @@ proc validate_AddressesValidate_575854(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575856 = query.getOrDefault("api-version")
-  valid_575856 = validateParameter(valid_575856, JString, required = true,
+  var valid_564956 = query.getOrDefault("api-version")
+  valid_564956 = validateParameter(valid_564956, JString, required = true,
                                  default = nil)
-  if valid_575856 != nil:
-    section.add "api-version", valid_575856
+  if valid_564956 != nil:
+    section.add "api-version", valid_564956
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -8829,41 +8840,41 @@ proc validate_AddressesValidate_575854(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_575858: Call_AddressesValidate_575853; path: JsonNode;
+proc call*(call_564958: Call_AddressesValidate_564953; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Validates the address.
   ## 
-  let valid = call_575858.validator(path, query, header, formData, body)
-  let scheme = call_575858.pickScheme
+  let valid = call_564958.validator(path, query, header, formData, body)
+  let scheme = call_564958.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575858.url(scheme.get, call_575858.host, call_575858.base,
-                         call_575858.route, valid.getOrDefault("path"),
+  let url = call_564958.url(scheme.get, call_564958.host, call_564958.base,
+                         call_564958.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575858, url, valid)
+  result = hook(call_564958, url, valid)
 
-proc call*(call_575859: Call_AddressesValidate_575853; apiVersion: string;
+proc call*(call_564959: Call_AddressesValidate_564953; apiVersion: string;
           address: JsonNode): Recallable =
   ## addressesValidate
   ## Validates the address.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request. The current version is 2018-11-01-preview.
   ##   address: JObject (required)
-  var query_575860 = newJObject()
-  var body_575861 = newJObject()
-  add(query_575860, "api-version", newJString(apiVersion))
+  var query_564960 = newJObject()
+  var body_564961 = newJObject()
+  add(query_564960, "api-version", newJString(apiVersion))
   if address != nil:
-    body_575861 = address
-  result = call_575859.call(nil, query_575860, nil, nil, body_575861)
+    body_564961 = address
+  result = call_564959.call(nil, query_564960, nil, nil, body_564961)
 
-var addressesValidate* = Call_AddressesValidate_575853(name: "addressesValidate",
+var addressesValidate* = Call_AddressesValidate_564953(name: "addressesValidate",
     meth: HttpMethod.HttpPost, host: "management.azure.com",
     route: "/providers/Microsoft.Billing/validateAddress",
-    validator: validate_AddressesValidate_575854, base: "",
-    url: url_AddressesValidate_575855, schemes: {Scheme.Https})
+    validator: validate_AddressesValidate_564954, base: "",
+    url: url_AddressesValidate_564955, schemes: {Scheme.Https})
 type
-  Call_LineOfCreditsUpdate_575871 = ref object of OpenApiRestCall_574467
-proc url_LineOfCreditsUpdate_575873(protocol: Scheme; host: string; base: string;
+  Call_LineOfCreditsUpdate_564971 = ref object of OpenApiRestCall_563565
+proc url_LineOfCreditsUpdate_564973(protocol: Scheme; host: string; base: string;
                                    route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -8879,7 +8890,7 @@ proc url_LineOfCreditsUpdate_575873(protocol: Scheme; host: string; base: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_LineOfCreditsUpdate_575872(path: JsonNode; query: JsonNode;
+proc validate_LineOfCreditsUpdate_564972(path: JsonNode; query: JsonNode;
                                         header: JsonNode; formData: JsonNode;
                                         body: JsonNode): JsonNode =
   ## Increase the current line of credit.
@@ -8892,11 +8903,11 @@ proc validate_LineOfCreditsUpdate_575872(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_575874 = path.getOrDefault("subscriptionId")
-  valid_575874 = validateParameter(valid_575874, JString, required = true,
+  var valid_564974 = path.getOrDefault("subscriptionId")
+  valid_564974 = validateParameter(valid_564974, JString, required = true,
                                  default = nil)
-  if valid_575874 != nil:
-    section.add "subscriptionId", valid_575874
+  if valid_564974 != nil:
+    section.add "subscriptionId", valid_564974
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -8904,11 +8915,11 @@ proc validate_LineOfCreditsUpdate_575872(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575875 = query.getOrDefault("api-version")
-  valid_575875 = validateParameter(valid_575875, JString, required = true,
+  var valid_564975 = query.getOrDefault("api-version")
+  valid_564975 = validateParameter(valid_564975, JString, required = true,
                                  default = nil)
-  if valid_575875 != nil:
-    section.add "api-version", valid_575875
+  if valid_564975 != nil:
+    section.add "api-version", valid_564975
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -8922,20 +8933,20 @@ proc validate_LineOfCreditsUpdate_575872(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_575877: Call_LineOfCreditsUpdate_575871; path: JsonNode;
+proc call*(call_564977: Call_LineOfCreditsUpdate_564971; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Increase the current line of credit.
   ## 
-  let valid = call_575877.validator(path, query, header, formData, body)
-  let scheme = call_575877.pickScheme
+  let valid = call_564977.validator(path, query, header, formData, body)
+  let scheme = call_564977.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575877.url(scheme.get, call_575877.host, call_575877.base,
-                         call_575877.route, valid.getOrDefault("path"),
+  let url = call_564977.url(scheme.get, call_564977.host, call_564977.base,
+                         call_564977.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575877, url, valid)
+  result = hook(call_564977, url, valid)
 
-proc call*(call_575878: Call_LineOfCreditsUpdate_575871; apiVersion: string;
+proc call*(call_564978: Call_LineOfCreditsUpdate_564971; apiVersion: string;
           subscriptionId: string; parameters: JsonNode): Recallable =
   ## lineOfCreditsUpdate
   ## Increase the current line of credit.
@@ -8945,23 +8956,23 @@ proc call*(call_575878: Call_LineOfCreditsUpdate_575871; apiVersion: string;
   ##                 : Azure Subscription Id.
   ##   parameters: JObject (required)
   ##             : Parameters supplied to the increase line of credit operation.
-  var path_575879 = newJObject()
-  var query_575880 = newJObject()
-  var body_575881 = newJObject()
-  add(query_575880, "api-version", newJString(apiVersion))
-  add(path_575879, "subscriptionId", newJString(subscriptionId))
+  var path_564979 = newJObject()
+  var query_564980 = newJObject()
+  var body_564981 = newJObject()
+  add(query_564980, "api-version", newJString(apiVersion))
+  add(path_564979, "subscriptionId", newJString(subscriptionId))
   if parameters != nil:
-    body_575881 = parameters
-  result = call_575878.call(path_575879, query_575880, nil, nil, body_575881)
+    body_564981 = parameters
+  result = call_564978.call(path_564979, query_564980, nil, nil, body_564981)
 
-var lineOfCreditsUpdate* = Call_LineOfCreditsUpdate_575871(
+var lineOfCreditsUpdate* = Call_LineOfCreditsUpdate_564971(
     name: "lineOfCreditsUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Billing/billingAccounts/default/lineOfCredit/default",
-    validator: validate_LineOfCreditsUpdate_575872, base: "",
-    url: url_LineOfCreditsUpdate_575873, schemes: {Scheme.Https})
+    validator: validate_LineOfCreditsUpdate_564972, base: "",
+    url: url_LineOfCreditsUpdate_564973, schemes: {Scheme.Https})
 type
-  Call_LineOfCreditsGet_575862 = ref object of OpenApiRestCall_574467
-proc url_LineOfCreditsGet_575864(protocol: Scheme; host: string; base: string;
+  Call_LineOfCreditsGet_564962 = ref object of OpenApiRestCall_563565
+proc url_LineOfCreditsGet_564964(protocol: Scheme; host: string; base: string;
                                 route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -8977,7 +8988,7 @@ proc url_LineOfCreditsGet_575864(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_LineOfCreditsGet_575863(path: JsonNode; query: JsonNode;
+proc validate_LineOfCreditsGet_564963(path: JsonNode; query: JsonNode;
                                      header: JsonNode; formData: JsonNode;
                                      body: JsonNode): JsonNode =
   ## Get the current line of credit.
@@ -8990,11 +9001,11 @@ proc validate_LineOfCreditsGet_575863(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_575865 = path.getOrDefault("subscriptionId")
-  valid_575865 = validateParameter(valid_575865, JString, required = true,
+  var valid_564965 = path.getOrDefault("subscriptionId")
+  valid_564965 = validateParameter(valid_564965, JString, required = true,
                                  default = nil)
-  if valid_575865 != nil:
-    section.add "subscriptionId", valid_575865
+  if valid_564965 != nil:
+    section.add "subscriptionId", valid_564965
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -9002,11 +9013,11 @@ proc validate_LineOfCreditsGet_575863(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575866 = query.getOrDefault("api-version")
-  valid_575866 = validateParameter(valid_575866, JString, required = true,
+  var valid_564966 = query.getOrDefault("api-version")
+  valid_564966 = validateParameter(valid_564966, JString, required = true,
                                  default = nil)
-  if valid_575866 != nil:
-    section.add "api-version", valid_575866
+  if valid_564966 != nil:
+    section.add "api-version", valid_564966
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -9015,20 +9026,20 @@ proc validate_LineOfCreditsGet_575863(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_575867: Call_LineOfCreditsGet_575862; path: JsonNode;
+proc call*(call_564967: Call_LineOfCreditsGet_564962; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get the current line of credit.
   ## 
-  let valid = call_575867.validator(path, query, header, formData, body)
-  let scheme = call_575867.pickScheme
+  let valid = call_564967.validator(path, query, header, formData, body)
+  let scheme = call_564967.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575867.url(scheme.get, call_575867.host, call_575867.base,
-                         call_575867.route, valid.getOrDefault("path"),
+  let url = call_564967.url(scheme.get, call_564967.host, call_564967.base,
+                         call_564967.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575867, url, valid)
+  result = hook(call_564967, url, valid)
 
-proc call*(call_575868: Call_LineOfCreditsGet_575862; apiVersion: string;
+proc call*(call_564968: Call_LineOfCreditsGet_564962; apiVersion: string;
           subscriptionId: string): Recallable =
   ## lineOfCreditsGet
   ## Get the current line of credit.
@@ -9036,19 +9047,19 @@ proc call*(call_575868: Call_LineOfCreditsGet_575862; apiVersion: string;
   ##             : Version of the API to be used with the client request. The current version is 2018-11-01-preview.
   ##   subscriptionId: string (required)
   ##                 : Azure Subscription Id.
-  var path_575869 = newJObject()
-  var query_575870 = newJObject()
-  add(query_575870, "api-version", newJString(apiVersion))
-  add(path_575869, "subscriptionId", newJString(subscriptionId))
-  result = call_575868.call(path_575869, query_575870, nil, nil, nil)
+  var path_564969 = newJObject()
+  var query_564970 = newJObject()
+  add(query_564970, "api-version", newJString(apiVersion))
+  add(path_564969, "subscriptionId", newJString(subscriptionId))
+  result = call_564968.call(path_564969, query_564970, nil, nil, nil)
 
-var lineOfCreditsGet* = Call_LineOfCreditsGet_575862(name: "lineOfCreditsGet",
+var lineOfCreditsGet* = Call_LineOfCreditsGet_564962(name: "lineOfCreditsGet",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Billing/billingAccounts/default/lineOfCredit/default",
-    validator: validate_LineOfCreditsGet_575863, base: "",
-    url: url_LineOfCreditsGet_575864, schemes: {Scheme.Https})
+    validator: validate_LineOfCreditsGet_564963, base: "",
+    url: url_LineOfCreditsGet_564964, schemes: {Scheme.Https})
 type
-  Call_BillingPropertyGet_575882 = ref object of OpenApiRestCall_574467
-proc url_BillingPropertyGet_575884(protocol: Scheme; host: string; base: string;
+  Call_BillingPropertyGet_564982 = ref object of OpenApiRestCall_563565
+proc url_BillingPropertyGet_564984(protocol: Scheme; host: string; base: string;
                                   route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -9065,7 +9076,7 @@ proc url_BillingPropertyGet_575884(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_BillingPropertyGet_575883(path: JsonNode; query: JsonNode;
+proc validate_BillingPropertyGet_564983(path: JsonNode; query: JsonNode;
                                        header: JsonNode; formData: JsonNode;
                                        body: JsonNode): JsonNode =
   ## Get billing property by subscription Id.
@@ -9079,11 +9090,11 @@ proc validate_BillingPropertyGet_575883(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_575885 = path.getOrDefault("subscriptionId")
-  valid_575885 = validateParameter(valid_575885, JString, required = true,
+  var valid_564985 = path.getOrDefault("subscriptionId")
+  valid_564985 = validateParameter(valid_564985, JString, required = true,
                                  default = nil)
-  if valid_575885 != nil:
-    section.add "subscriptionId", valid_575885
+  if valid_564985 != nil:
+    section.add "subscriptionId", valid_564985
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -9091,11 +9102,11 @@ proc validate_BillingPropertyGet_575883(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575886 = query.getOrDefault("api-version")
-  valid_575886 = validateParameter(valid_575886, JString, required = true,
+  var valid_564986 = query.getOrDefault("api-version")
+  valid_564986 = validateParameter(valid_564986, JString, required = true,
                                  default = nil)
-  if valid_575886 != nil:
-    section.add "api-version", valid_575886
+  if valid_564986 != nil:
+    section.add "api-version", valid_564986
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -9104,21 +9115,21 @@ proc validate_BillingPropertyGet_575883(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_575887: Call_BillingPropertyGet_575882; path: JsonNode;
+proc call*(call_564987: Call_BillingPropertyGet_564982; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get billing property by subscription Id.
   ## 
   ## https://docs.microsoft.com/en-us/rest/api/consumption/
-  let valid = call_575887.validator(path, query, header, formData, body)
-  let scheme = call_575887.pickScheme
+  let valid = call_564987.validator(path, query, header, formData, body)
+  let scheme = call_564987.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575887.url(scheme.get, call_575887.host, call_575887.base,
-                         call_575887.route, valid.getOrDefault("path"),
+  let url = call_564987.url(scheme.get, call_564987.host, call_564987.base,
+                         call_564987.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575887, url, valid)
+  result = hook(call_564987, url, valid)
 
-proc call*(call_575888: Call_BillingPropertyGet_575882; apiVersion: string;
+proc call*(call_564988: Call_BillingPropertyGet_564982; apiVersion: string;
           subscriptionId: string): Recallable =
   ## billingPropertyGet
   ## Get billing property by subscription Id.
@@ -9127,17 +9138,17 @@ proc call*(call_575888: Call_BillingPropertyGet_575882; apiVersion: string;
   ##             : Version of the API to be used with the client request. The current version is 2018-11-01-preview.
   ##   subscriptionId: string (required)
   ##                 : Azure Subscription Id.
-  var path_575889 = newJObject()
-  var query_575890 = newJObject()
-  add(query_575890, "api-version", newJString(apiVersion))
-  add(path_575889, "subscriptionId", newJString(subscriptionId))
-  result = call_575888.call(path_575889, query_575890, nil, nil, nil)
+  var path_564989 = newJObject()
+  var query_564990 = newJObject()
+  add(query_564990, "api-version", newJString(apiVersion))
+  add(path_564989, "subscriptionId", newJString(subscriptionId))
+  result = call_564988.call(path_564989, query_564990, nil, nil, nil)
 
-var billingPropertyGet* = Call_BillingPropertyGet_575882(
+var billingPropertyGet* = Call_BillingPropertyGet_564982(
     name: "billingPropertyGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Billing/billingProperty",
-    validator: validate_BillingPropertyGet_575883, base: "",
-    url: url_BillingPropertyGet_575884, schemes: {Scheme.Https})
+    validator: validate_BillingPropertyGet_564983, base: "",
+    url: url_BillingPropertyGet_564984, schemes: {Scheme.Https})
 export
   rest
 

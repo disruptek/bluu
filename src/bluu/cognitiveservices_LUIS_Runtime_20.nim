@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, httpcore
 
 ## auto-generated via openapi macro
 ## title: LUIS Runtime Client
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_567658 = ref object of OpenApiRestCall
+  OpenApiRestCall_563556 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_567658](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563556](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_567658): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563556): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,8 +107,8 @@ const
   macServiceName = "cognitiveservices-LUIS-Runtime"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_PredictionResolve_568189 = ref object of OpenApiRestCall_567658
-proc url_PredictionResolve_568191(protocol: Scheme; host: string; base: string;
+  Call_PredictionResolve_564089 = ref object of OpenApiRestCall_563556
+proc url_PredictionResolve_564091(protocol: Scheme; host: string; base: string;
                                  route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -119,7 +123,7 @@ proc url_PredictionResolve_568191(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_PredictionResolve_568190(path: JsonNode; query: JsonNode;
+proc validate_PredictionResolve_564090(path: JsonNode; query: JsonNode;
                                       header: JsonNode; formData: JsonNode;
                                       body: JsonNode): JsonNode =
   ## Gets predictions for a given utterance, in the form of intents and entities. The current maximum query size is 500 characters.
@@ -131,52 +135,52 @@ proc validate_PredictionResolve_568190(path: JsonNode; query: JsonNode;
   ##        : The LUIS application ID (Guid).
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `appId` field"
-  var valid_568201 = path.getOrDefault("appId")
-  valid_568201 = validateParameter(valid_568201, JString, required = true,
+  var valid_564101 = path.getOrDefault("appId")
+  valid_564101 = validateParameter(valid_564101, JString, required = true,
                                  default = nil)
-  if valid_568201 != nil:
-    section.add "appId", valid_568201
+  if valid_564101 != nil:
+    section.add "appId", valid_564101
   result.add "path", section
   ## parameters in `query` object:
-  ##   verbose: JBool
-  ##          : If true, return all intents instead of just the top scoring intent.
-  ##   staging: JBool
-  ##          : Use the staging endpoint slot.
-  ##   log: JBool
-  ##      : Log query (default is true)
-  ##   spellCheck: JBool
-  ##             : Enable spell checking.
   ##   bing-spell-check-subscription-key: JString
   ##                                    : The subscription key to use when enabling Bing spell check
+  ##   verbose: JBool
+  ##          : If true, return all intents instead of just the top scoring intent.
+  ##   log: JBool
+  ##      : Log query (default is true)
+  ##   staging: JBool
+  ##          : Use the staging endpoint slot.
+  ##   spellCheck: JBool
+  ##             : Enable spell checking.
   ##   timezoneOffset: JFloat
   ##                 : The timezone offset for the location of the request.
   section = newJObject()
-  var valid_568202 = query.getOrDefault("verbose")
-  valid_568202 = validateParameter(valid_568202, JBool, required = false, default = nil)
-  if valid_568202 != nil:
-    section.add "verbose", valid_568202
-  var valid_568203 = query.getOrDefault("staging")
-  valid_568203 = validateParameter(valid_568203, JBool, required = false, default = nil)
-  if valid_568203 != nil:
-    section.add "staging", valid_568203
-  var valid_568204 = query.getOrDefault("log")
-  valid_568204 = validateParameter(valid_568204, JBool, required = false, default = nil)
-  if valid_568204 != nil:
-    section.add "log", valid_568204
-  var valid_568205 = query.getOrDefault("spellCheck")
-  valid_568205 = validateParameter(valid_568205, JBool, required = false, default = nil)
-  if valid_568205 != nil:
-    section.add "spellCheck", valid_568205
-  var valid_568206 = query.getOrDefault("bing-spell-check-subscription-key")
-  valid_568206 = validateParameter(valid_568206, JString, required = false,
+  var valid_564102 = query.getOrDefault("bing-spell-check-subscription-key")
+  valid_564102 = validateParameter(valid_564102, JString, required = false,
                                  default = nil)
-  if valid_568206 != nil:
-    section.add "bing-spell-check-subscription-key", valid_568206
-  var valid_568207 = query.getOrDefault("timezoneOffset")
-  valid_568207 = validateParameter(valid_568207, JFloat, required = false,
+  if valid_564102 != nil:
+    section.add "bing-spell-check-subscription-key", valid_564102
+  var valid_564103 = query.getOrDefault("verbose")
+  valid_564103 = validateParameter(valid_564103, JBool, required = false, default = nil)
+  if valid_564103 != nil:
+    section.add "verbose", valid_564103
+  var valid_564104 = query.getOrDefault("log")
+  valid_564104 = validateParameter(valid_564104, JBool, required = false, default = nil)
+  if valid_564104 != nil:
+    section.add "log", valid_564104
+  var valid_564105 = query.getOrDefault("staging")
+  valid_564105 = validateParameter(valid_564105, JBool, required = false, default = nil)
+  if valid_564105 != nil:
+    section.add "staging", valid_564105
+  var valid_564106 = query.getOrDefault("spellCheck")
+  valid_564106 = validateParameter(valid_564106, JBool, required = false, default = nil)
+  if valid_564106 != nil:
+    section.add "spellCheck", valid_564106
+  var valid_564107 = query.getOrDefault("timezoneOffset")
+  valid_564107 = validateParameter(valid_564107, JFloat, required = false,
                                  default = nil)
-  if valid_568207 != nil:
-    section.add "timezoneOffset", valid_568207
+  if valid_564107 != nil:
+    section.add "timezoneOffset", valid_564107
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -190,63 +194,63 @@ proc validate_PredictionResolve_568190(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568209: Call_PredictionResolve_568189; path: JsonNode;
+proc call*(call_564109: Call_PredictionResolve_564089; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets predictions for a given utterance, in the form of intents and entities. The current maximum query size is 500 characters.
   ## 
-  let valid = call_568209.validator(path, query, header, formData, body)
-  let scheme = call_568209.pickScheme
+  let valid = call_564109.validator(path, query, header, formData, body)
+  let scheme = call_564109.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568209.url(scheme.get, call_568209.host, call_568209.base,
-                         call_568209.route, valid.getOrDefault("path"),
+  let url = call_564109.url(scheme.get, call_564109.host, call_564109.base,
+                         call_564109.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568209, url, valid)
+  result = hook(call_564109, url, valid)
 
-proc call*(call_568210: Call_PredictionResolve_568189; appId: string; q: JsonNode;
-          verbose: bool = false; staging: bool = false; log: bool = false;
-          spellCheck: bool = false; bingSpellCheckSubscriptionKey: string = "";
+proc call*(call_564110: Call_PredictionResolve_564089; q: JsonNode; appId: string;
+          bingSpellCheckSubscriptionKey: string = ""; verbose: bool = false;
+          log: bool = false; staging: bool = false; spellCheck: bool = false;
           timezoneOffset: float = 0.0): Recallable =
   ## predictionResolve
   ## Gets predictions for a given utterance, in the form of intents and entities. The current maximum query size is 500 characters.
-  ##   verbose: bool
-  ##          : If true, return all intents instead of just the top scoring intent.
-  ##   appId: string (required)
-  ##        : The LUIS application ID (Guid).
-  ##   staging: bool
-  ##          : Use the staging endpoint slot.
-  ##   log: bool
-  ##      : Log query (default is true)
-  ##   q: JString (required)
-  ##    : The utterance to predict.
-  ##   spellCheck: bool
-  ##             : Enable spell checking.
   ##   bingSpellCheckSubscriptionKey: string
   ##                                : The subscription key to use when enabling Bing spell check
+  ##   verbose: bool
+  ##          : If true, return all intents instead of just the top scoring intent.
+  ##   q: JString (required)
+  ##    : The utterance to predict.
+  ##   log: bool
+  ##      : Log query (default is true)
+  ##   staging: bool
+  ##          : Use the staging endpoint slot.
+  ##   appId: string (required)
+  ##        : The LUIS application ID (Guid).
+  ##   spellCheck: bool
+  ##             : Enable spell checking.
   ##   timezoneOffset: float
   ##                 : The timezone offset for the location of the request.
-  var path_568211 = newJObject()
-  var query_568212 = newJObject()
-  var body_568213 = newJObject()
-  add(query_568212, "verbose", newJBool(verbose))
-  add(path_568211, "appId", newJString(appId))
-  add(query_568212, "staging", newJBool(staging))
-  add(query_568212, "log", newJBool(log))
-  if q != nil:
-    body_568213 = q
-  add(query_568212, "spellCheck", newJBool(spellCheck))
-  add(query_568212, "bing-spell-check-subscription-key",
+  var path_564111 = newJObject()
+  var query_564112 = newJObject()
+  var body_564113 = newJObject()
+  add(query_564112, "bing-spell-check-subscription-key",
       newJString(bingSpellCheckSubscriptionKey))
-  add(query_568212, "timezoneOffset", newJFloat(timezoneOffset))
-  result = call_568210.call(path_568211, query_568212, nil, nil, body_568213)
+  add(query_564112, "verbose", newJBool(verbose))
+  if q != nil:
+    body_564113 = q
+  add(query_564112, "log", newJBool(log))
+  add(query_564112, "staging", newJBool(staging))
+  add(path_564111, "appId", newJString(appId))
+  add(query_564112, "spellCheck", newJBool(spellCheck))
+  add(query_564112, "timezoneOffset", newJFloat(timezoneOffset))
+  result = call_564110.call(path_564111, query_564112, nil, nil, body_564113)
 
-var predictionResolve* = Call_PredictionResolve_568189(name: "predictionResolve",
+var predictionResolve* = Call_PredictionResolve_564089(name: "predictionResolve",
     meth: HttpMethod.HttpPost, host: "azure.local", route: "/apps/{appId}",
-    validator: validate_PredictionResolve_568190, base: "",
-    url: url_PredictionResolve_568191, schemes: {Scheme.Https})
+    validator: validate_PredictionResolve_564090, base: "",
+    url: url_PredictionResolve_564091, schemes: {Scheme.Https})
 type
-  Call_PredictionResolve2_567880 = ref object of OpenApiRestCall_567658
-proc url_PredictionResolve2_567882(protocol: Scheme; host: string; base: string;
+  Call_PredictionResolve2_563778 = ref object of OpenApiRestCall_563556
+proc url_PredictionResolve2_563780(protocol: Scheme; host: string; base: string;
                                   route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -261,7 +265,7 @@ proc url_PredictionResolve2_567882(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_PredictionResolve2_567881(path: JsonNode; query: JsonNode;
+proc validate_PredictionResolve2_563779(path: JsonNode; query: JsonNode;
                                        header: JsonNode; formData: JsonNode;
                                        body: JsonNode): JsonNode =
   ## Gets predictions for a given utterance, in the form of intents and entities. The current maximum query size is 500 characters.
@@ -273,60 +277,60 @@ proc validate_PredictionResolve2_567881(path: JsonNode; query: JsonNode;
   ##        : The LUIS application ID (guid).
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `appId` field"
-  var valid_568042 = path.getOrDefault("appId")
-  valid_568042 = validateParameter(valid_568042, JString, required = true,
+  var valid_563942 = path.getOrDefault("appId")
+  valid_563942 = validateParameter(valid_563942, JString, required = true,
                                  default = nil)
-  if valid_568042 != nil:
-    section.add "appId", valid_568042
+  if valid_563942 != nil:
+    section.add "appId", valid_563942
   result.add "path", section
   ## parameters in `query` object:
-  ##   verbose: JBool
-  ##          : If true, return all intents instead of just the top scoring intent.
-  ##   staging: JBool
-  ##          : Use the staging endpoint slot.
-  ##   log: JBool
-  ##      : Log query (default is true)
   ##   q: JString (required)
   ##    : The utterance to predict.
-  ##   spellCheck: JBool
-  ##             : Enable spell checking.
   ##   bing-spell-check-subscription-key: JString
   ##                                    : The subscription key to use when enabling Bing spell check
+  ##   verbose: JBool
+  ##          : If true, return all intents instead of just the top scoring intent.
+  ##   log: JBool
+  ##      : Log query (default is true)
+  ##   staging: JBool
+  ##          : Use the staging endpoint slot.
+  ##   spellCheck: JBool
+  ##             : Enable spell checking.
   ##   timezoneOffset: JFloat
   ##                 : The timezone offset for the location of the request.
   section = newJObject()
-  var valid_568043 = query.getOrDefault("verbose")
-  valid_568043 = validateParameter(valid_568043, JBool, required = false, default = nil)
-  if valid_568043 != nil:
-    section.add "verbose", valid_568043
-  var valid_568044 = query.getOrDefault("staging")
-  valid_568044 = validateParameter(valid_568044, JBool, required = false, default = nil)
-  if valid_568044 != nil:
-    section.add "staging", valid_568044
-  var valid_568045 = query.getOrDefault("log")
-  valid_568045 = validateParameter(valid_568045, JBool, required = false, default = nil)
-  if valid_568045 != nil:
-    section.add "log", valid_568045
   assert query != nil, "query argument is necessary due to required `q` field"
-  var valid_568046 = query.getOrDefault("q")
-  valid_568046 = validateParameter(valid_568046, JString, required = true,
+  var valid_563943 = query.getOrDefault("q")
+  valid_563943 = validateParameter(valid_563943, JString, required = true,
                                  default = nil)
-  if valid_568046 != nil:
-    section.add "q", valid_568046
-  var valid_568047 = query.getOrDefault("spellCheck")
-  valid_568047 = validateParameter(valid_568047, JBool, required = false, default = nil)
-  if valid_568047 != nil:
-    section.add "spellCheck", valid_568047
-  var valid_568048 = query.getOrDefault("bing-spell-check-subscription-key")
-  valid_568048 = validateParameter(valid_568048, JString, required = false,
+  if valid_563943 != nil:
+    section.add "q", valid_563943
+  var valid_563944 = query.getOrDefault("bing-spell-check-subscription-key")
+  valid_563944 = validateParameter(valid_563944, JString, required = false,
                                  default = nil)
-  if valid_568048 != nil:
-    section.add "bing-spell-check-subscription-key", valid_568048
-  var valid_568049 = query.getOrDefault("timezoneOffset")
-  valid_568049 = validateParameter(valid_568049, JFloat, required = false,
+  if valid_563944 != nil:
+    section.add "bing-spell-check-subscription-key", valid_563944
+  var valid_563945 = query.getOrDefault("verbose")
+  valid_563945 = validateParameter(valid_563945, JBool, required = false, default = nil)
+  if valid_563945 != nil:
+    section.add "verbose", valid_563945
+  var valid_563946 = query.getOrDefault("log")
+  valid_563946 = validateParameter(valid_563946, JBool, required = false, default = nil)
+  if valid_563946 != nil:
+    section.add "log", valid_563946
+  var valid_563947 = query.getOrDefault("staging")
+  valid_563947 = validateParameter(valid_563947, JBool, required = false, default = nil)
+  if valid_563947 != nil:
+    section.add "staging", valid_563947
+  var valid_563948 = query.getOrDefault("spellCheck")
+  valid_563948 = validateParameter(valid_563948, JBool, required = false, default = nil)
+  if valid_563948 != nil:
+    section.add "spellCheck", valid_563948
+  var valid_563949 = query.getOrDefault("timezoneOffset")
+  valid_563949 = validateParameter(valid_563949, JFloat, required = false,
                                  default = nil)
-  if valid_568049 != nil:
-    section.add "timezoneOffset", valid_568049
+  if valid_563949 != nil:
+    section.add "timezoneOffset", valid_563949
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -335,58 +339,58 @@ proc validate_PredictionResolve2_567881(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568076: Call_PredictionResolve2_567880; path: JsonNode;
+proc call*(call_563976: Call_PredictionResolve2_563778; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets predictions for a given utterance, in the form of intents and entities. The current maximum query size is 500 characters.
   ## 
-  let valid = call_568076.validator(path, query, header, formData, body)
-  let scheme = call_568076.pickScheme
+  let valid = call_563976.validator(path, query, header, formData, body)
+  let scheme = call_563976.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568076.url(scheme.get, call_568076.host, call_568076.base,
-                         call_568076.route, valid.getOrDefault("path"),
+  let url = call_563976.url(scheme.get, call_563976.host, call_563976.base,
+                         call_563976.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568076, url, valid)
+  result = hook(call_563976, url, valid)
 
-proc call*(call_568147: Call_PredictionResolve2_567880; appId: string; q: string;
-          verbose: bool = false; staging: bool = false; log: bool = false;
-          spellCheck: bool = false; bingSpellCheckSubscriptionKey: string = "";
+proc call*(call_564047: Call_PredictionResolve2_563778; q: string; appId: string;
+          bingSpellCheckSubscriptionKey: string = ""; verbose: bool = false;
+          log: bool = false; staging: bool = false; spellCheck: bool = false;
           timezoneOffset: float = 0.0): Recallable =
   ## predictionResolve2
   ## Gets predictions for a given utterance, in the form of intents and entities. The current maximum query size is 500 characters.
-  ##   verbose: bool
-  ##          : If true, return all intents instead of just the top scoring intent.
-  ##   appId: string (required)
-  ##        : The LUIS application ID (guid).
-  ##   staging: bool
-  ##          : Use the staging endpoint slot.
-  ##   log: bool
-  ##      : Log query (default is true)
   ##   q: string (required)
   ##    : The utterance to predict.
-  ##   spellCheck: bool
-  ##             : Enable spell checking.
   ##   bingSpellCheckSubscriptionKey: string
   ##                                : The subscription key to use when enabling Bing spell check
+  ##   verbose: bool
+  ##          : If true, return all intents instead of just the top scoring intent.
+  ##   log: bool
+  ##      : Log query (default is true)
+  ##   staging: bool
+  ##          : Use the staging endpoint slot.
+  ##   appId: string (required)
+  ##        : The LUIS application ID (guid).
+  ##   spellCheck: bool
+  ##             : Enable spell checking.
   ##   timezoneOffset: float
   ##                 : The timezone offset for the location of the request.
-  var path_568148 = newJObject()
-  var query_568150 = newJObject()
-  add(query_568150, "verbose", newJBool(verbose))
-  add(path_568148, "appId", newJString(appId))
-  add(query_568150, "staging", newJBool(staging))
-  add(query_568150, "log", newJBool(log))
-  add(query_568150, "q", newJString(q))
-  add(query_568150, "spellCheck", newJBool(spellCheck))
-  add(query_568150, "bing-spell-check-subscription-key",
+  var path_564048 = newJObject()
+  var query_564050 = newJObject()
+  add(query_564050, "q", newJString(q))
+  add(query_564050, "bing-spell-check-subscription-key",
       newJString(bingSpellCheckSubscriptionKey))
-  add(query_568150, "timezoneOffset", newJFloat(timezoneOffset))
-  result = call_568147.call(path_568148, query_568150, nil, nil, nil)
+  add(query_564050, "verbose", newJBool(verbose))
+  add(query_564050, "log", newJBool(log))
+  add(query_564050, "staging", newJBool(staging))
+  add(path_564048, "appId", newJString(appId))
+  add(query_564050, "spellCheck", newJBool(spellCheck))
+  add(query_564050, "timezoneOffset", newJFloat(timezoneOffset))
+  result = call_564047.call(path_564048, query_564050, nil, nil, nil)
 
-var predictionResolve2* = Call_PredictionResolve2_567880(
+var predictionResolve2* = Call_PredictionResolve2_563778(
     name: "predictionResolve2", meth: HttpMethod.HttpGet, host: "azure.local",
-    route: "/apps/{appId}", validator: validate_PredictionResolve2_567881, base: "",
-    url: url_PredictionResolve2_567882, schemes: {Scheme.Https})
+    route: "/apps/{appId}", validator: validate_PredictionResolve2_563779, base: "",
+    url: url_PredictionResolve2_563780, schemes: {Scheme.Https})
 export
   rest
 

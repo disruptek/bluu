@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, httpcore
 
 ## auto-generated via openapi macro
 ## title: ApiManagementClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_593425 = ref object of OpenApiRestCall
+  OpenApiRestCall_563556 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_593425](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563556](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_593425): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563556): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,8 +107,8 @@ const
   macServiceName = "apimanagement-apimloggers"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_LoggerListByService_593647 = ref object of OpenApiRestCall_593425
-proc url_LoggerListByService_593649(protocol: Scheme; host: string; base: string;
+  Call_LoggerListByService_563778 = ref object of OpenApiRestCall_563556
+proc url_LoggerListByService_563780(protocol: Scheme; host: string; base: string;
                                    route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -128,7 +132,7 @@ proc url_LoggerListByService_593649(protocol: Scheme; host: string; base: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_LoggerListByService_593648(path: JsonNode; query: JsonNode;
+proc validate_LoggerListByService_563779(path: JsonNode; query: JsonNode;
                                         header: JsonNode; formData: JsonNode;
                                         body: JsonNode): JsonNode =
   ## Lists a collection of loggers in the specified service instance.
@@ -137,36 +141,36 @@ proc validate_LoggerListByService_593648(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
-  ##   subscriptionId: JString (required)
-  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   serviceName: JString (required)
   ##              : The name of the API Management service.
+  ##   subscriptionId: JString (required)
+  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593810 = path.getOrDefault("resourceGroupName")
-  valid_593810 = validateParameter(valid_593810, JString, required = true,
+        "path argument is necessary due to required `serviceName` field"
+  var valid_563943 = path.getOrDefault("serviceName")
+  valid_563943 = validateParameter(valid_563943, JString, required = true,
                                  default = nil)
-  if valid_593810 != nil:
-    section.add "resourceGroupName", valid_593810
-  var valid_593811 = path.getOrDefault("subscriptionId")
-  valid_593811 = validateParameter(valid_593811, JString, required = true,
+  if valid_563943 != nil:
+    section.add "serviceName", valid_563943
+  var valid_563944 = path.getOrDefault("subscriptionId")
+  valid_563944 = validateParameter(valid_563944, JString, required = true,
                                  default = nil)
-  if valid_593811 != nil:
-    section.add "subscriptionId", valid_593811
-  var valid_593812 = path.getOrDefault("serviceName")
-  valid_593812 = validateParameter(valid_593812, JString, required = true,
+  if valid_563944 != nil:
+    section.add "subscriptionId", valid_563944
+  var valid_563945 = path.getOrDefault("resourceGroupName")
+  valid_563945 = validateParameter(valid_563945, JString, required = true,
                                  default = nil)
-  if valid_593812 != nil:
-    section.add "serviceName", valid_593812
+  if valid_563945 != nil:
+    section.add "resourceGroupName", valid_563945
   result.add "path", section
   ## parameters in `query` object:
-  ##   api-version: JString (required)
-  ##              : Version of the API to be used with the client request.
   ##   $top: JInt
   ##       : Number of records to return.
+  ##   api-version: JString (required)
+  ##              : Version of the API to be used with the client request.
   ##   $skip: JInt
   ##        : Number of records to skip.
   ##   $filter: JString
@@ -179,26 +183,26 @@ proc validate_LoggerListByService_593648(path: JsonNode; query: JsonNode;
   ## |resourceId | ge, le, eq, ne, gt, lt | substringof, contains, startswith, endswith|
   ## 
   section = newJObject()
+  var valid_563946 = query.getOrDefault("$top")
+  valid_563946 = validateParameter(valid_563946, JInt, required = false, default = nil)
+  if valid_563946 != nil:
+    section.add "$top", valid_563946
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593813 = query.getOrDefault("api-version")
-  valid_593813 = validateParameter(valid_593813, JString, required = true,
+  var valid_563947 = query.getOrDefault("api-version")
+  valid_563947 = validateParameter(valid_563947, JString, required = true,
                                  default = nil)
-  if valid_593813 != nil:
-    section.add "api-version", valid_593813
-  var valid_593814 = query.getOrDefault("$top")
-  valid_593814 = validateParameter(valid_593814, JInt, required = false, default = nil)
-  if valid_593814 != nil:
-    section.add "$top", valid_593814
-  var valid_593815 = query.getOrDefault("$skip")
-  valid_593815 = validateParameter(valid_593815, JInt, required = false, default = nil)
-  if valid_593815 != nil:
-    section.add "$skip", valid_593815
-  var valid_593816 = query.getOrDefault("$filter")
-  valid_593816 = validateParameter(valid_593816, JString, required = false,
+  if valid_563947 != nil:
+    section.add "api-version", valid_563947
+  var valid_563948 = query.getOrDefault("$skip")
+  valid_563948 = validateParameter(valid_563948, JInt, required = false, default = nil)
+  if valid_563948 != nil:
+    section.add "$skip", valid_563948
+  var valid_563949 = query.getOrDefault("$filter")
+  valid_563949 = validateParameter(valid_563949, JString, required = false,
                                  default = nil)
-  if valid_593816 != nil:
-    section.add "$filter", valid_593816
+  if valid_563949 != nil:
+    section.add "$filter", valid_563949
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -207,38 +211,38 @@ proc validate_LoggerListByService_593648(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593843: Call_LoggerListByService_593647; path: JsonNode;
+proc call*(call_563976: Call_LoggerListByService_563778; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists a collection of loggers in the specified service instance.
   ## 
   ## https://docs.microsoft.com/en-us/azure/api-management/api-management-howto-log-event-hubs
-  let valid = call_593843.validator(path, query, header, formData, body)
-  let scheme = call_593843.pickScheme
+  let valid = call_563976.validator(path, query, header, formData, body)
+  let scheme = call_563976.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593843.url(scheme.get, call_593843.host, call_593843.base,
-                         call_593843.route, valid.getOrDefault("path"),
+  let url = call_563976.url(scheme.get, call_563976.host, call_563976.base,
+                         call_563976.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593843, url, valid)
+  result = hook(call_563976, url, valid)
 
-proc call*(call_593914: Call_LoggerListByService_593647; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; serviceName: string;
+proc call*(call_564047: Call_LoggerListByService_563778; serviceName: string;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string;
           Top: int = 0; Skip: int = 0; Filter: string = ""): Recallable =
   ## loggerListByService
   ## Lists a collection of loggers in the specified service instance.
   ## https://docs.microsoft.com/en-us/azure/api-management/api-management-howto-log-event-hubs
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   serviceName: string (required)
+  ##              : The name of the API Management service.
+  ##   Top: int
+  ##      : Number of records to return.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   Top: int
-  ##      : Number of records to return.
   ##   Skip: int
   ##       : Number of records to skip.
-  ##   serviceName: string (required)
-  ##              : The name of the API Management service.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   Filter: string
   ##         : | Field       | Supported operators    | Supported functions               |
   ## |-------------|------------------------|-----------------------------------|
@@ -248,25 +252,25 @@ proc call*(call_593914: Call_LoggerListByService_593647; resourceGroupName: stri
   ## |loggerType | eq |    |
   ## |resourceId | ge, le, eq, ne, gt, lt | substringof, contains, startswith, endswith|
   ## 
-  var path_593915 = newJObject()
-  var query_593917 = newJObject()
-  add(path_593915, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593917, "api-version", newJString(apiVersion))
-  add(path_593915, "subscriptionId", newJString(subscriptionId))
-  add(query_593917, "$top", newJInt(Top))
-  add(query_593917, "$skip", newJInt(Skip))
-  add(path_593915, "serviceName", newJString(serviceName))
-  add(query_593917, "$filter", newJString(Filter))
-  result = call_593914.call(path_593915, query_593917, nil, nil, nil)
+  var path_564048 = newJObject()
+  var query_564050 = newJObject()
+  add(path_564048, "serviceName", newJString(serviceName))
+  add(query_564050, "$top", newJInt(Top))
+  add(query_564050, "api-version", newJString(apiVersion))
+  add(path_564048, "subscriptionId", newJString(subscriptionId))
+  add(query_564050, "$skip", newJInt(Skip))
+  add(path_564048, "resourceGroupName", newJString(resourceGroupName))
+  add(query_564050, "$filter", newJString(Filter))
+  result = call_564047.call(path_564048, query_564050, nil, nil, nil)
 
-var loggerListByService* = Call_LoggerListByService_593647(
+var loggerListByService* = Call_LoggerListByService_563778(
     name: "loggerListByService", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ApiManagement/service/{serviceName}/loggers",
-    validator: validate_LoggerListByService_593648, base: "",
-    url: url_LoggerListByService_593649, schemes: {Scheme.Https})
+    validator: validate_LoggerListByService_563779, base: "",
+    url: url_LoggerListByService_563780, schemes: {Scheme.Https})
 type
-  Call_LoggerCreateOrUpdate_593968 = ref object of OpenApiRestCall_593425
-proc url_LoggerCreateOrUpdate_593970(protocol: Scheme; host: string; base: string;
+  Call_LoggerCreateOrUpdate_564101 = ref object of OpenApiRestCall_563556
+proc url_LoggerCreateOrUpdate_564103(protocol: Scheme; host: string; base: string;
                                     route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -292,44 +296,44 @@ proc url_LoggerCreateOrUpdate_593970(protocol: Scheme; host: string; base: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_LoggerCreateOrUpdate_593969(path: JsonNode; query: JsonNode;
+proc validate_LoggerCreateOrUpdate_564102(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Creates or Updates a logger.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
+  ##   serviceName: JString (required)
+  ##              : The name of the API Management service.
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   loggerId: JString (required)
   ##           : Logger identifier. Must be unique in the API Management service instance.
-  ##   serviceName: JString (required)
-  ##              : The name of the API Management service.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593998 = path.getOrDefault("resourceGroupName")
-  valid_593998 = validateParameter(valid_593998, JString, required = true,
+        "path argument is necessary due to required `serviceName` field"
+  var valid_564131 = path.getOrDefault("serviceName")
+  valid_564131 = validateParameter(valid_564131, JString, required = true,
                                  default = nil)
-  if valid_593998 != nil:
-    section.add "resourceGroupName", valid_593998
-  var valid_593999 = path.getOrDefault("subscriptionId")
-  valid_593999 = validateParameter(valid_593999, JString, required = true,
+  if valid_564131 != nil:
+    section.add "serviceName", valid_564131
+  var valid_564132 = path.getOrDefault("subscriptionId")
+  valid_564132 = validateParameter(valid_564132, JString, required = true,
                                  default = nil)
-  if valid_593999 != nil:
-    section.add "subscriptionId", valid_593999
-  var valid_594000 = path.getOrDefault("loggerId")
-  valid_594000 = validateParameter(valid_594000, JString, required = true,
+  if valid_564132 != nil:
+    section.add "subscriptionId", valid_564132
+  var valid_564133 = path.getOrDefault("loggerId")
+  valid_564133 = validateParameter(valid_564133, JString, required = true,
                                  default = nil)
-  if valid_594000 != nil:
-    section.add "loggerId", valid_594000
-  var valid_594001 = path.getOrDefault("serviceName")
-  valid_594001 = validateParameter(valid_594001, JString, required = true,
+  if valid_564133 != nil:
+    section.add "loggerId", valid_564133
+  var valid_564134 = path.getOrDefault("resourceGroupName")
+  valid_564134 = validateParameter(valid_564134, JString, required = true,
                                  default = nil)
-  if valid_594001 != nil:
-    section.add "serviceName", valid_594001
+  if valid_564134 != nil:
+    section.add "resourceGroupName", valid_564134
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -337,21 +341,21 @@ proc validate_LoggerCreateOrUpdate_593969(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594002 = query.getOrDefault("api-version")
-  valid_594002 = validateParameter(valid_594002, JString, required = true,
+  var valid_564135 = query.getOrDefault("api-version")
+  valid_564135 = validateParameter(valid_564135, JString, required = true,
                                  default = nil)
-  if valid_594002 != nil:
-    section.add "api-version", valid_594002
+  if valid_564135 != nil:
+    section.add "api-version", valid_564135
   result.add "query", section
   ## parameters in `header` object:
   ##   If-Match: JString
   ##           : ETag of the Entity. Not required when creating an entity, but required when updating an entity.
   section = newJObject()
-  var valid_594003 = header.getOrDefault("If-Match")
-  valid_594003 = validateParameter(valid_594003, JString, required = false,
+  var valid_564136 = header.getOrDefault("If-Match")
+  valid_564136 = validateParameter(valid_564136, JString, required = false,
                                  default = nil)
-  if valid_594003 != nil:
-    section.add "If-Match", valid_594003
+  if valid_564136 != nil:
+    section.add "If-Match", valid_564136
   result.add "header", section
   section = newJObject()
   result.add "formData", section
@@ -363,56 +367,56 @@ proc validate_LoggerCreateOrUpdate_593969(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594005: Call_LoggerCreateOrUpdate_593968; path: JsonNode;
+proc call*(call_564138: Call_LoggerCreateOrUpdate_564101; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Creates or Updates a logger.
   ## 
-  let valid = call_594005.validator(path, query, header, formData, body)
-  let scheme = call_594005.pickScheme
+  let valid = call_564138.validator(path, query, header, formData, body)
+  let scheme = call_564138.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594005.url(scheme.get, call_594005.host, call_594005.base,
-                         call_594005.route, valid.getOrDefault("path"),
+  let url = call_564138.url(scheme.get, call_564138.host, call_564138.base,
+                         call_564138.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594005, url, valid)
+  result = hook(call_564138, url, valid)
 
-proc call*(call_594006: Call_LoggerCreateOrUpdate_593968;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          loggerId: string; parameters: JsonNode; serviceName: string): Recallable =
+proc call*(call_564139: Call_LoggerCreateOrUpdate_564101; serviceName: string;
+          apiVersion: string; subscriptionId: string; loggerId: string;
+          resourceGroupName: string; parameters: JsonNode): Recallable =
   ## loggerCreateOrUpdate
   ## Creates or Updates a logger.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   serviceName: string (required)
+  ##              : The name of the API Management service.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   loggerId: string (required)
   ##           : Logger identifier. Must be unique in the API Management service instance.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   parameters: JObject (required)
   ##             : Create parameters.
-  ##   serviceName: string (required)
-  ##              : The name of the API Management service.
-  var path_594007 = newJObject()
-  var query_594008 = newJObject()
-  var body_594009 = newJObject()
-  add(path_594007, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594008, "api-version", newJString(apiVersion))
-  add(path_594007, "subscriptionId", newJString(subscriptionId))
-  add(path_594007, "loggerId", newJString(loggerId))
+  var path_564140 = newJObject()
+  var query_564141 = newJObject()
+  var body_564142 = newJObject()
+  add(path_564140, "serviceName", newJString(serviceName))
+  add(query_564141, "api-version", newJString(apiVersion))
+  add(path_564140, "subscriptionId", newJString(subscriptionId))
+  add(path_564140, "loggerId", newJString(loggerId))
+  add(path_564140, "resourceGroupName", newJString(resourceGroupName))
   if parameters != nil:
-    body_594009 = parameters
-  add(path_594007, "serviceName", newJString(serviceName))
-  result = call_594006.call(path_594007, query_594008, nil, nil, body_594009)
+    body_564142 = parameters
+  result = call_564139.call(path_564140, query_564141, nil, nil, body_564142)
 
-var loggerCreateOrUpdate* = Call_LoggerCreateOrUpdate_593968(
+var loggerCreateOrUpdate* = Call_LoggerCreateOrUpdate_564101(
     name: "loggerCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ApiManagement/service/{serviceName}/loggers/{loggerId}",
-    validator: validate_LoggerCreateOrUpdate_593969, base: "",
-    url: url_LoggerCreateOrUpdate_593970, schemes: {Scheme.Https})
+    validator: validate_LoggerCreateOrUpdate_564102, base: "",
+    url: url_LoggerCreateOrUpdate_564103, schemes: {Scheme.Https})
 type
-  Call_LoggerGetEntityTag_594024 = ref object of OpenApiRestCall_593425
-proc url_LoggerGetEntityTag_594026(protocol: Scheme; host: string; base: string;
+  Call_LoggerGetEntityTag_564157 = ref object of OpenApiRestCall_563556
+proc url_LoggerGetEntityTag_564159(protocol: Scheme; host: string; base: string;
                                   route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -438,7 +442,7 @@ proc url_LoggerGetEntityTag_594026(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_LoggerGetEntityTag_594025(path: JsonNode; query: JsonNode;
+proc validate_LoggerGetEntityTag_564158(path: JsonNode; query: JsonNode;
                                        header: JsonNode; formData: JsonNode;
                                        body: JsonNode): JsonNode =
   ## Gets the entity state (Etag) version of the logger specified by its identifier.
@@ -446,37 +450,37 @@ proc validate_LoggerGetEntityTag_594025(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
+  ##   serviceName: JString (required)
+  ##              : The name of the API Management service.
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   loggerId: JString (required)
   ##           : Logger identifier. Must be unique in the API Management service instance.
-  ##   serviceName: JString (required)
-  ##              : The name of the API Management service.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594027 = path.getOrDefault("resourceGroupName")
-  valid_594027 = validateParameter(valid_594027, JString, required = true,
+        "path argument is necessary due to required `serviceName` field"
+  var valid_564160 = path.getOrDefault("serviceName")
+  valid_564160 = validateParameter(valid_564160, JString, required = true,
                                  default = nil)
-  if valid_594027 != nil:
-    section.add "resourceGroupName", valid_594027
-  var valid_594028 = path.getOrDefault("subscriptionId")
-  valid_594028 = validateParameter(valid_594028, JString, required = true,
+  if valid_564160 != nil:
+    section.add "serviceName", valid_564160
+  var valid_564161 = path.getOrDefault("subscriptionId")
+  valid_564161 = validateParameter(valid_564161, JString, required = true,
                                  default = nil)
-  if valid_594028 != nil:
-    section.add "subscriptionId", valid_594028
-  var valid_594029 = path.getOrDefault("loggerId")
-  valid_594029 = validateParameter(valid_594029, JString, required = true,
+  if valid_564161 != nil:
+    section.add "subscriptionId", valid_564161
+  var valid_564162 = path.getOrDefault("loggerId")
+  valid_564162 = validateParameter(valid_564162, JString, required = true,
                                  default = nil)
-  if valid_594029 != nil:
-    section.add "loggerId", valid_594029
-  var valid_594030 = path.getOrDefault("serviceName")
-  valid_594030 = validateParameter(valid_594030, JString, required = true,
+  if valid_564162 != nil:
+    section.add "loggerId", valid_564162
+  var valid_564163 = path.getOrDefault("resourceGroupName")
+  valid_564163 = validateParameter(valid_564163, JString, required = true,
                                  default = nil)
-  if valid_594030 != nil:
-    section.add "serviceName", valid_594030
+  if valid_564163 != nil:
+    section.add "resourceGroupName", valid_564163
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -484,11 +488,11 @@ proc validate_LoggerGetEntityTag_594025(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594031 = query.getOrDefault("api-version")
-  valid_594031 = validateParameter(valid_594031, JString, required = true,
+  var valid_564164 = query.getOrDefault("api-version")
+  valid_564164 = validateParameter(valid_564164, JString, required = true,
                                  default = nil)
-  if valid_594031 != nil:
-    section.add "api-version", valid_594031
+  if valid_564164 != nil:
+    section.add "api-version", valid_564164
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -497,51 +501,51 @@ proc validate_LoggerGetEntityTag_594025(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594032: Call_LoggerGetEntityTag_594024; path: JsonNode;
+proc call*(call_564165: Call_LoggerGetEntityTag_564157; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the entity state (Etag) version of the logger specified by its identifier.
   ## 
-  let valid = call_594032.validator(path, query, header, formData, body)
-  let scheme = call_594032.pickScheme
+  let valid = call_564165.validator(path, query, header, formData, body)
+  let scheme = call_564165.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594032.url(scheme.get, call_594032.host, call_594032.base,
-                         call_594032.route, valid.getOrDefault("path"),
+  let url = call_564165.url(scheme.get, call_564165.host, call_564165.base,
+                         call_564165.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594032, url, valid)
+  result = hook(call_564165, url, valid)
 
-proc call*(call_594033: Call_LoggerGetEntityTag_594024; resourceGroupName: string;
+proc call*(call_564166: Call_LoggerGetEntityTag_564157; serviceName: string;
           apiVersion: string; subscriptionId: string; loggerId: string;
-          serviceName: string): Recallable =
+          resourceGroupName: string): Recallable =
   ## loggerGetEntityTag
   ## Gets the entity state (Etag) version of the logger specified by its identifier.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   serviceName: string (required)
+  ##              : The name of the API Management service.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   loggerId: string (required)
   ##           : Logger identifier. Must be unique in the API Management service instance.
-  ##   serviceName: string (required)
-  ##              : The name of the API Management service.
-  var path_594034 = newJObject()
-  var query_594035 = newJObject()
-  add(path_594034, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594035, "api-version", newJString(apiVersion))
-  add(path_594034, "subscriptionId", newJString(subscriptionId))
-  add(path_594034, "loggerId", newJString(loggerId))
-  add(path_594034, "serviceName", newJString(serviceName))
-  result = call_594033.call(path_594034, query_594035, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564167 = newJObject()
+  var query_564168 = newJObject()
+  add(path_564167, "serviceName", newJString(serviceName))
+  add(query_564168, "api-version", newJString(apiVersion))
+  add(path_564167, "subscriptionId", newJString(subscriptionId))
+  add(path_564167, "loggerId", newJString(loggerId))
+  add(path_564167, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564166.call(path_564167, query_564168, nil, nil, nil)
 
-var loggerGetEntityTag* = Call_LoggerGetEntityTag_594024(
+var loggerGetEntityTag* = Call_LoggerGetEntityTag_564157(
     name: "loggerGetEntityTag", meth: HttpMethod.HttpHead,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ApiManagement/service/{serviceName}/loggers/{loggerId}",
-    validator: validate_LoggerGetEntityTag_594025, base: "",
-    url: url_LoggerGetEntityTag_594026, schemes: {Scheme.Https})
+    validator: validate_LoggerGetEntityTag_564158, base: "",
+    url: url_LoggerGetEntityTag_564159, schemes: {Scheme.Https})
 type
-  Call_LoggerGet_593956 = ref object of OpenApiRestCall_593425
-proc url_LoggerGet_593958(protocol: Scheme; host: string; base: string; route: string;
+  Call_LoggerGet_564089 = ref object of OpenApiRestCall_563556
+proc url_LoggerGet_564091(protocol: Scheme; host: string; base: string; route: string;
                          path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -567,44 +571,44 @@ proc url_LoggerGet_593958(protocol: Scheme; host: string; base: string; route: s
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_LoggerGet_593957(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_LoggerGet_564090(path: JsonNode; query: JsonNode; header: JsonNode;
                               formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the details of the logger specified by its identifier.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
+  ##   serviceName: JString (required)
+  ##              : The name of the API Management service.
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   loggerId: JString (required)
   ##           : Logger identifier. Must be unique in the API Management service instance.
-  ##   serviceName: JString (required)
-  ##              : The name of the API Management service.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593959 = path.getOrDefault("resourceGroupName")
-  valid_593959 = validateParameter(valid_593959, JString, required = true,
+        "path argument is necessary due to required `serviceName` field"
+  var valid_564092 = path.getOrDefault("serviceName")
+  valid_564092 = validateParameter(valid_564092, JString, required = true,
                                  default = nil)
-  if valid_593959 != nil:
-    section.add "resourceGroupName", valid_593959
-  var valid_593960 = path.getOrDefault("subscriptionId")
-  valid_593960 = validateParameter(valid_593960, JString, required = true,
+  if valid_564092 != nil:
+    section.add "serviceName", valid_564092
+  var valid_564093 = path.getOrDefault("subscriptionId")
+  valid_564093 = validateParameter(valid_564093, JString, required = true,
                                  default = nil)
-  if valid_593960 != nil:
-    section.add "subscriptionId", valid_593960
-  var valid_593961 = path.getOrDefault("loggerId")
-  valid_593961 = validateParameter(valid_593961, JString, required = true,
+  if valid_564093 != nil:
+    section.add "subscriptionId", valid_564093
+  var valid_564094 = path.getOrDefault("loggerId")
+  valid_564094 = validateParameter(valid_564094, JString, required = true,
                                  default = nil)
-  if valid_593961 != nil:
-    section.add "loggerId", valid_593961
-  var valid_593962 = path.getOrDefault("serviceName")
-  valid_593962 = validateParameter(valid_593962, JString, required = true,
+  if valid_564094 != nil:
+    section.add "loggerId", valid_564094
+  var valid_564095 = path.getOrDefault("resourceGroupName")
+  valid_564095 = validateParameter(valid_564095, JString, required = true,
                                  default = nil)
-  if valid_593962 != nil:
-    section.add "serviceName", valid_593962
+  if valid_564095 != nil:
+    section.add "resourceGroupName", valid_564095
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -612,11 +616,11 @@ proc validate_LoggerGet_593957(path: JsonNode; query: JsonNode; header: JsonNode
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593963 = query.getOrDefault("api-version")
-  valid_593963 = validateParameter(valid_593963, JString, required = true,
+  var valid_564096 = query.getOrDefault("api-version")
+  valid_564096 = validateParameter(valid_564096, JString, required = true,
                                  default = nil)
-  if valid_593963 != nil:
-    section.add "api-version", valid_593963
+  if valid_564096 != nil:
+    section.add "api-version", valid_564096
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -625,51 +629,51 @@ proc validate_LoggerGet_593957(path: JsonNode; query: JsonNode; header: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_593964: Call_LoggerGet_593956; path: JsonNode; query: JsonNode;
+proc call*(call_564097: Call_LoggerGet_564089; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the details of the logger specified by its identifier.
   ## 
-  let valid = call_593964.validator(path, query, header, formData, body)
-  let scheme = call_593964.pickScheme
+  let valid = call_564097.validator(path, query, header, formData, body)
+  let scheme = call_564097.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593964.url(scheme.get, call_593964.host, call_593964.base,
-                         call_593964.route, valid.getOrDefault("path"),
+  let url = call_564097.url(scheme.get, call_564097.host, call_564097.base,
+                         call_564097.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593964, url, valid)
+  result = hook(call_564097, url, valid)
 
-proc call*(call_593965: Call_LoggerGet_593956; resourceGroupName: string;
+proc call*(call_564098: Call_LoggerGet_564089; serviceName: string;
           apiVersion: string; subscriptionId: string; loggerId: string;
-          serviceName: string): Recallable =
+          resourceGroupName: string): Recallable =
   ## loggerGet
   ## Gets the details of the logger specified by its identifier.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   serviceName: string (required)
+  ##              : The name of the API Management service.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   loggerId: string (required)
   ##           : Logger identifier. Must be unique in the API Management service instance.
-  ##   serviceName: string (required)
-  ##              : The name of the API Management service.
-  var path_593966 = newJObject()
-  var query_593967 = newJObject()
-  add(path_593966, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593967, "api-version", newJString(apiVersion))
-  add(path_593966, "subscriptionId", newJString(subscriptionId))
-  add(path_593966, "loggerId", newJString(loggerId))
-  add(path_593966, "serviceName", newJString(serviceName))
-  result = call_593965.call(path_593966, query_593967, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564099 = newJObject()
+  var query_564100 = newJObject()
+  add(path_564099, "serviceName", newJString(serviceName))
+  add(query_564100, "api-version", newJString(apiVersion))
+  add(path_564099, "subscriptionId", newJString(subscriptionId))
+  add(path_564099, "loggerId", newJString(loggerId))
+  add(path_564099, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564098.call(path_564099, query_564100, nil, nil, nil)
 
-var loggerGet* = Call_LoggerGet_593956(name: "loggerGet", meth: HttpMethod.HttpGet,
+var loggerGet* = Call_LoggerGet_564089(name: "loggerGet", meth: HttpMethod.HttpGet,
                                     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ApiManagement/service/{serviceName}/loggers/{loggerId}",
-                                    validator: validate_LoggerGet_593957,
-                                    base: "", url: url_LoggerGet_593958,
+                                    validator: validate_LoggerGet_564090,
+                                    base: "", url: url_LoggerGet_564091,
                                     schemes: {Scheme.Https})
 type
-  Call_LoggerUpdate_594036 = ref object of OpenApiRestCall_593425
-proc url_LoggerUpdate_594038(protocol: Scheme; host: string; base: string;
+  Call_LoggerUpdate_564169 = ref object of OpenApiRestCall_563556
+proc url_LoggerUpdate_564171(protocol: Scheme; host: string; base: string;
                             route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -695,44 +699,44 @@ proc url_LoggerUpdate_594038(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_LoggerUpdate_594037(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_LoggerUpdate_564170(path: JsonNode; query: JsonNode; header: JsonNode;
                                  formData: JsonNode; body: JsonNode): JsonNode =
   ## Updates an existing logger.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
+  ##   serviceName: JString (required)
+  ##              : The name of the API Management service.
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   loggerId: JString (required)
   ##           : Logger identifier. Must be unique in the API Management service instance.
-  ##   serviceName: JString (required)
-  ##              : The name of the API Management service.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594039 = path.getOrDefault("resourceGroupName")
-  valid_594039 = validateParameter(valid_594039, JString, required = true,
+        "path argument is necessary due to required `serviceName` field"
+  var valid_564172 = path.getOrDefault("serviceName")
+  valid_564172 = validateParameter(valid_564172, JString, required = true,
                                  default = nil)
-  if valid_594039 != nil:
-    section.add "resourceGroupName", valid_594039
-  var valid_594040 = path.getOrDefault("subscriptionId")
-  valid_594040 = validateParameter(valid_594040, JString, required = true,
+  if valid_564172 != nil:
+    section.add "serviceName", valid_564172
+  var valid_564173 = path.getOrDefault("subscriptionId")
+  valid_564173 = validateParameter(valid_564173, JString, required = true,
                                  default = nil)
-  if valid_594040 != nil:
-    section.add "subscriptionId", valid_594040
-  var valid_594041 = path.getOrDefault("loggerId")
-  valid_594041 = validateParameter(valid_594041, JString, required = true,
+  if valid_564173 != nil:
+    section.add "subscriptionId", valid_564173
+  var valid_564174 = path.getOrDefault("loggerId")
+  valid_564174 = validateParameter(valid_564174, JString, required = true,
                                  default = nil)
-  if valid_594041 != nil:
-    section.add "loggerId", valid_594041
-  var valid_594042 = path.getOrDefault("serviceName")
-  valid_594042 = validateParameter(valid_594042, JString, required = true,
+  if valid_564174 != nil:
+    section.add "loggerId", valid_564174
+  var valid_564175 = path.getOrDefault("resourceGroupName")
+  valid_564175 = validateParameter(valid_564175, JString, required = true,
                                  default = nil)
-  if valid_594042 != nil:
-    section.add "serviceName", valid_594042
+  if valid_564175 != nil:
+    section.add "resourceGroupName", valid_564175
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -740,11 +744,11 @@ proc validate_LoggerUpdate_594037(path: JsonNode; query: JsonNode; header: JsonN
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594043 = query.getOrDefault("api-version")
-  valid_594043 = validateParameter(valid_594043, JString, required = true,
+  var valid_564176 = query.getOrDefault("api-version")
+  valid_564176 = validateParameter(valid_564176, JString, required = true,
                                  default = nil)
-  if valid_594043 != nil:
-    section.add "api-version", valid_594043
+  if valid_564176 != nil:
+    section.add "api-version", valid_564176
   result.add "query", section
   ## parameters in `header` object:
   ##   If-Match: JString (required)
@@ -752,11 +756,11 @@ proc validate_LoggerUpdate_594037(path: JsonNode; query: JsonNode; header: JsonN
   section = newJObject()
   assert header != nil,
         "header argument is necessary due to required `If-Match` field"
-  var valid_594044 = header.getOrDefault("If-Match")
-  valid_594044 = validateParameter(valid_594044, JString, required = true,
+  var valid_564177 = header.getOrDefault("If-Match")
+  valid_564177 = validateParameter(valid_564177, JString, required = true,
                                  default = nil)
-  if valid_594044 != nil:
-    section.add "If-Match", valid_594044
+  if valid_564177 != nil:
+    section.add "If-Match", valid_564177
   result.add "header", section
   section = newJObject()
   result.add "formData", section
@@ -768,55 +772,55 @@ proc validate_LoggerUpdate_594037(path: JsonNode; query: JsonNode; header: JsonN
   if body != nil:
     result.add "body", body
 
-proc call*(call_594046: Call_LoggerUpdate_594036; path: JsonNode; query: JsonNode;
+proc call*(call_564179: Call_LoggerUpdate_564169; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Updates an existing logger.
   ## 
-  let valid = call_594046.validator(path, query, header, formData, body)
-  let scheme = call_594046.pickScheme
+  let valid = call_564179.validator(path, query, header, formData, body)
+  let scheme = call_564179.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594046.url(scheme.get, call_594046.host, call_594046.base,
-                         call_594046.route, valid.getOrDefault("path"),
+  let url = call_564179.url(scheme.get, call_564179.host, call_564179.base,
+                         call_564179.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594046, url, valid)
+  result = hook(call_564179, url, valid)
 
-proc call*(call_594047: Call_LoggerUpdate_594036; resourceGroupName: string;
+proc call*(call_564180: Call_LoggerUpdate_564169; serviceName: string;
           apiVersion: string; subscriptionId: string; loggerId: string;
-          parameters: JsonNode; serviceName: string): Recallable =
+          resourceGroupName: string; parameters: JsonNode): Recallable =
   ## loggerUpdate
   ## Updates an existing logger.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   serviceName: string (required)
+  ##              : The name of the API Management service.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   loggerId: string (required)
   ##           : Logger identifier. Must be unique in the API Management service instance.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   parameters: JObject (required)
   ##             : Update parameters.
-  ##   serviceName: string (required)
-  ##              : The name of the API Management service.
-  var path_594048 = newJObject()
-  var query_594049 = newJObject()
-  var body_594050 = newJObject()
-  add(path_594048, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594049, "api-version", newJString(apiVersion))
-  add(path_594048, "subscriptionId", newJString(subscriptionId))
-  add(path_594048, "loggerId", newJString(loggerId))
+  var path_564181 = newJObject()
+  var query_564182 = newJObject()
+  var body_564183 = newJObject()
+  add(path_564181, "serviceName", newJString(serviceName))
+  add(query_564182, "api-version", newJString(apiVersion))
+  add(path_564181, "subscriptionId", newJString(subscriptionId))
+  add(path_564181, "loggerId", newJString(loggerId))
+  add(path_564181, "resourceGroupName", newJString(resourceGroupName))
   if parameters != nil:
-    body_594050 = parameters
-  add(path_594048, "serviceName", newJString(serviceName))
-  result = call_594047.call(path_594048, query_594049, nil, nil, body_594050)
+    body_564183 = parameters
+  result = call_564180.call(path_564181, query_564182, nil, nil, body_564183)
 
-var loggerUpdate* = Call_LoggerUpdate_594036(name: "loggerUpdate",
+var loggerUpdate* = Call_LoggerUpdate_564169(name: "loggerUpdate",
     meth: HttpMethod.HttpPatch, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ApiManagement/service/{serviceName}/loggers/{loggerId}",
-    validator: validate_LoggerUpdate_594037, base: "", url: url_LoggerUpdate_594038,
+    validator: validate_LoggerUpdate_564170, base: "", url: url_LoggerUpdate_564171,
     schemes: {Scheme.Https})
 type
-  Call_LoggerDelete_594010 = ref object of OpenApiRestCall_593425
-proc url_LoggerDelete_594012(protocol: Scheme; host: string; base: string;
+  Call_LoggerDelete_564143 = ref object of OpenApiRestCall_563556
+proc url_LoggerDelete_564145(protocol: Scheme; host: string; base: string;
                             route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -842,62 +846,62 @@ proc url_LoggerDelete_594012(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_LoggerDelete_594011(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_LoggerDelete_564144(path: JsonNode; query: JsonNode; header: JsonNode;
                                  formData: JsonNode; body: JsonNode): JsonNode =
   ## Deletes the specified logger.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
+  ##   serviceName: JString (required)
+  ##              : The name of the API Management service.
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   loggerId: JString (required)
   ##           : Logger identifier. Must be unique in the API Management service instance.
-  ##   serviceName: JString (required)
-  ##              : The name of the API Management service.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594013 = path.getOrDefault("resourceGroupName")
-  valid_594013 = validateParameter(valid_594013, JString, required = true,
+        "path argument is necessary due to required `serviceName` field"
+  var valid_564146 = path.getOrDefault("serviceName")
+  valid_564146 = validateParameter(valid_564146, JString, required = true,
                                  default = nil)
-  if valid_594013 != nil:
-    section.add "resourceGroupName", valid_594013
-  var valid_594014 = path.getOrDefault("subscriptionId")
-  valid_594014 = validateParameter(valid_594014, JString, required = true,
+  if valid_564146 != nil:
+    section.add "serviceName", valid_564146
+  var valid_564147 = path.getOrDefault("subscriptionId")
+  valid_564147 = validateParameter(valid_564147, JString, required = true,
                                  default = nil)
-  if valid_594014 != nil:
-    section.add "subscriptionId", valid_594014
-  var valid_594015 = path.getOrDefault("loggerId")
-  valid_594015 = validateParameter(valid_594015, JString, required = true,
+  if valid_564147 != nil:
+    section.add "subscriptionId", valid_564147
+  var valid_564148 = path.getOrDefault("loggerId")
+  valid_564148 = validateParameter(valid_564148, JString, required = true,
                                  default = nil)
-  if valid_594015 != nil:
-    section.add "loggerId", valid_594015
-  var valid_594016 = path.getOrDefault("serviceName")
-  valid_594016 = validateParameter(valid_594016, JString, required = true,
+  if valid_564148 != nil:
+    section.add "loggerId", valid_564148
+  var valid_564149 = path.getOrDefault("resourceGroupName")
+  valid_564149 = validateParameter(valid_564149, JString, required = true,
                                  default = nil)
-  if valid_594016 != nil:
-    section.add "serviceName", valid_594016
+  if valid_564149 != nil:
+    section.add "resourceGroupName", valid_564149
   result.add "path", section
   ## parameters in `query` object:
-  ##   force: JBool
-  ##        : Force deletion even if diagnostic is attached.
   ##   api-version: JString (required)
   ##              : Version of the API to be used with the client request.
+  ##   force: JBool
+  ##        : Force deletion even if diagnostic is attached.
   section = newJObject()
-  var valid_594017 = query.getOrDefault("force")
-  valid_594017 = validateParameter(valid_594017, JBool, required = false, default = nil)
-  if valid_594017 != nil:
-    section.add "force", valid_594017
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594018 = query.getOrDefault("api-version")
-  valid_594018 = validateParameter(valid_594018, JString, required = true,
+  var valid_564150 = query.getOrDefault("api-version")
+  valid_564150 = validateParameter(valid_564150, JString, required = true,
                                  default = nil)
-  if valid_594018 != nil:
-    section.add "api-version", valid_594018
+  if valid_564150 != nil:
+    section.add "api-version", valid_564150
+  var valid_564151 = query.getOrDefault("force")
+  valid_564151 = validateParameter(valid_564151, JBool, required = false, default = nil)
+  if valid_564151 != nil:
+    section.add "force", valid_564151
   result.add "query", section
   ## parameters in `header` object:
   ##   If-Match: JString (required)
@@ -905,60 +909,60 @@ proc validate_LoggerDelete_594011(path: JsonNode; query: JsonNode; header: JsonN
   section = newJObject()
   assert header != nil,
         "header argument is necessary due to required `If-Match` field"
-  var valid_594019 = header.getOrDefault("If-Match")
-  valid_594019 = validateParameter(valid_594019, JString, required = true,
+  var valid_564152 = header.getOrDefault("If-Match")
+  valid_564152 = validateParameter(valid_564152, JString, required = true,
                                  default = nil)
-  if valid_594019 != nil:
-    section.add "If-Match", valid_594019
+  if valid_564152 != nil:
+    section.add "If-Match", valid_564152
   result.add "header", section
   section = newJObject()
   result.add "formData", section
   if body != nil:
     result.add "body", body
 
-proc call*(call_594020: Call_LoggerDelete_594010; path: JsonNode; query: JsonNode;
+proc call*(call_564153: Call_LoggerDelete_564143; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes the specified logger.
   ## 
-  let valid = call_594020.validator(path, query, header, formData, body)
-  let scheme = call_594020.pickScheme
+  let valid = call_564153.validator(path, query, header, formData, body)
+  let scheme = call_564153.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594020.url(scheme.get, call_594020.host, call_594020.base,
-                         call_594020.route, valid.getOrDefault("path"),
+  let url = call_564153.url(scheme.get, call_564153.host, call_564153.base,
+                         call_564153.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594020, url, valid)
+  result = hook(call_564153, url, valid)
 
-proc call*(call_594021: Call_LoggerDelete_594010; resourceGroupName: string;
+proc call*(call_564154: Call_LoggerDelete_564143; serviceName: string;
           apiVersion: string; subscriptionId: string; loggerId: string;
-          serviceName: string; force: bool = false): Recallable =
+          resourceGroupName: string; force: bool = false): Recallable =
   ## loggerDelete
   ## Deletes the specified logger.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
-  ##   force: bool
-  ##        : Force deletion even if diagnostic is attached.
+  ##   serviceName: string (required)
+  ##              : The name of the API Management service.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   loggerId: string (required)
   ##           : Logger identifier. Must be unique in the API Management service instance.
-  ##   serviceName: string (required)
-  ##              : The name of the API Management service.
-  var path_594022 = newJObject()
-  var query_594023 = newJObject()
-  add(path_594022, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594023, "force", newJBool(force))
-  add(query_594023, "api-version", newJString(apiVersion))
-  add(path_594022, "subscriptionId", newJString(subscriptionId))
-  add(path_594022, "loggerId", newJString(loggerId))
-  add(path_594022, "serviceName", newJString(serviceName))
-  result = call_594021.call(path_594022, query_594023, nil, nil, nil)
+  ##   force: bool
+  ##        : Force deletion even if diagnostic is attached.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564155 = newJObject()
+  var query_564156 = newJObject()
+  add(path_564155, "serviceName", newJString(serviceName))
+  add(query_564156, "api-version", newJString(apiVersion))
+  add(path_564155, "subscriptionId", newJString(subscriptionId))
+  add(path_564155, "loggerId", newJString(loggerId))
+  add(query_564156, "force", newJBool(force))
+  add(path_564155, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564154.call(path_564155, query_564156, nil, nil, nil)
 
-var loggerDelete* = Call_LoggerDelete_594010(name: "loggerDelete",
+var loggerDelete* = Call_LoggerDelete_564143(name: "loggerDelete",
     meth: HttpMethod.HttpDelete, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ApiManagement/service/{serviceName}/loggers/{loggerId}",
-    validator: validate_LoggerDelete_594011, base: "", url: url_LoggerDelete_594012,
+    validator: validate_LoggerDelete_564144, base: "", url: url_LoggerDelete_564145,
     schemes: {Scheme.Https})
 export
   rest

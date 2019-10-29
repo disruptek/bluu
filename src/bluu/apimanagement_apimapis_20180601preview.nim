@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, httpcore
 
 ## auto-generated via openapi macro
 ## title: ApiManagementClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_593425 = ref object of OpenApiRestCall
+  OpenApiRestCall_563556 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_593425](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563556](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_593425): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563556): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,8 +107,8 @@ const
   macServiceName = "apimanagement-apimapis"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_ApiListByService_593647 = ref object of OpenApiRestCall_593425
-proc url_ApiListByService_593649(protocol: Scheme; host: string; base: string;
+  Call_ApiListByService_563778 = ref object of OpenApiRestCall_563556
+proc url_ApiListByService_563780(protocol: Scheme; host: string; base: string;
                                 route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -128,7 +132,7 @@ proc url_ApiListByService_593649(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ApiListByService_593648(path: JsonNode; query: JsonNode;
+proc validate_ApiListByService_563779(path: JsonNode; query: JsonNode;
                                      header: JsonNode; formData: JsonNode;
                                      body: JsonNode): JsonNode =
   ## Lists all APIs of the API Management service instance.
@@ -137,42 +141,42 @@ proc validate_ApiListByService_593648(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
-  ##   subscriptionId: JString (required)
-  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   serviceName: JString (required)
   ##              : The name of the API Management service.
+  ##   subscriptionId: JString (required)
+  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593810 = path.getOrDefault("resourceGroupName")
-  valid_593810 = validateParameter(valid_593810, JString, required = true,
+        "path argument is necessary due to required `serviceName` field"
+  var valid_563943 = path.getOrDefault("serviceName")
+  valid_563943 = validateParameter(valid_563943, JString, required = true,
                                  default = nil)
-  if valid_593810 != nil:
-    section.add "resourceGroupName", valid_593810
-  var valid_593811 = path.getOrDefault("subscriptionId")
-  valid_593811 = validateParameter(valid_593811, JString, required = true,
+  if valid_563943 != nil:
+    section.add "serviceName", valid_563943
+  var valid_563944 = path.getOrDefault("subscriptionId")
+  valid_563944 = validateParameter(valid_563944, JString, required = true,
                                  default = nil)
-  if valid_593811 != nil:
-    section.add "subscriptionId", valid_593811
-  var valid_593812 = path.getOrDefault("serviceName")
-  valid_593812 = validateParameter(valid_593812, JString, required = true,
+  if valid_563944 != nil:
+    section.add "subscriptionId", valid_563944
+  var valid_563945 = path.getOrDefault("resourceGroupName")
+  valid_563945 = validateParameter(valid_563945, JString, required = true,
                                  default = nil)
-  if valid_593812 != nil:
-    section.add "serviceName", valid_593812
+  if valid_563945 != nil:
+    section.add "resourceGroupName", valid_563945
   result.add "path", section
   ## parameters in `query` object:
-  ##   api-version: JString (required)
-  ##              : Version of the API to be used with the client request.
-  ##   expandApiVersionSet: JBool
-  ##                      : Include full ApiVersionSet resource in response
-  ##   $top: JInt
-  ##       : Number of records to return.
-  ##   $skip: JInt
-  ##        : Number of records to skip.
   ##   tags: JString
   ##       : Include tags in the response.
+  ##   $top: JInt
+  ##       : Number of records to return.
+  ##   api-version: JString (required)
+  ##              : Version of the API to be used with the client request.
+  ##   $skip: JInt
+  ##        : Number of records to skip.
+  ##   expandApiVersionSet: JBool
+  ##                      : Include full ApiVersionSet resource in response
   ##   $filter: JString
   ##          : | Field       | Supported operators    | Supported functions               |
   ## |-------------|------------------------|-----------------------------------|
@@ -184,35 +188,35 @@ proc validate_ApiListByService_593648(path: JsonNode; query: JsonNode;
   ## |path | ge, le, eq, ne, gt, lt | substringof, contains, startswith, endswith|
   ## 
   section = newJObject()
+  var valid_563946 = query.getOrDefault("tags")
+  valid_563946 = validateParameter(valid_563946, JString, required = false,
+                                 default = nil)
+  if valid_563946 != nil:
+    section.add "tags", valid_563946
+  var valid_563947 = query.getOrDefault("$top")
+  valid_563947 = validateParameter(valid_563947, JInt, required = false, default = nil)
+  if valid_563947 != nil:
+    section.add "$top", valid_563947
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593813 = query.getOrDefault("api-version")
-  valid_593813 = validateParameter(valid_593813, JString, required = true,
+  var valid_563948 = query.getOrDefault("api-version")
+  valid_563948 = validateParameter(valid_563948, JString, required = true,
                                  default = nil)
-  if valid_593813 != nil:
-    section.add "api-version", valid_593813
-  var valid_593814 = query.getOrDefault("expandApiVersionSet")
-  valid_593814 = validateParameter(valid_593814, JBool, required = false, default = nil)
-  if valid_593814 != nil:
-    section.add "expandApiVersionSet", valid_593814
-  var valid_593815 = query.getOrDefault("$top")
-  valid_593815 = validateParameter(valid_593815, JInt, required = false, default = nil)
-  if valid_593815 != nil:
-    section.add "$top", valid_593815
-  var valid_593816 = query.getOrDefault("$skip")
-  valid_593816 = validateParameter(valid_593816, JInt, required = false, default = nil)
-  if valid_593816 != nil:
-    section.add "$skip", valid_593816
-  var valid_593817 = query.getOrDefault("tags")
-  valid_593817 = validateParameter(valid_593817, JString, required = false,
+  if valid_563948 != nil:
+    section.add "api-version", valid_563948
+  var valid_563949 = query.getOrDefault("$skip")
+  valid_563949 = validateParameter(valid_563949, JInt, required = false, default = nil)
+  if valid_563949 != nil:
+    section.add "$skip", valid_563949
+  var valid_563950 = query.getOrDefault("expandApiVersionSet")
+  valid_563950 = validateParameter(valid_563950, JBool, required = false, default = nil)
+  if valid_563950 != nil:
+    section.add "expandApiVersionSet", valid_563950
+  var valid_563951 = query.getOrDefault("$filter")
+  valid_563951 = validateParameter(valid_563951, JString, required = false,
                                  default = nil)
-  if valid_593817 != nil:
-    section.add "tags", valid_593817
-  var valid_593818 = query.getOrDefault("$filter")
-  valid_593818 = validateParameter(valid_593818, JString, required = false,
-                                 default = nil)
-  if valid_593818 != nil:
-    section.add "$filter", valid_593818
+  if valid_563951 != nil:
+    section.add "$filter", valid_563951
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -221,43 +225,43 @@ proc validate_ApiListByService_593648(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593845: Call_ApiListByService_593647; path: JsonNode;
+proc call*(call_563978: Call_ApiListByService_563778; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists all APIs of the API Management service instance.
   ## 
   ## https://docs.microsoft.com/en-us/azure/api-management/api-management-howto-create-apis
-  let valid = call_593845.validator(path, query, header, formData, body)
-  let scheme = call_593845.pickScheme
+  let valid = call_563978.validator(path, query, header, formData, body)
+  let scheme = call_563978.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593845.url(scheme.get, call_593845.host, call_593845.base,
-                         call_593845.route, valid.getOrDefault("path"),
+  let url = call_563978.url(scheme.get, call_563978.host, call_563978.base,
+                         call_563978.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593845, url, valid)
+  result = hook(call_563978, url, valid)
 
-proc call*(call_593916: Call_ApiListByService_593647; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; serviceName: string;
-          expandApiVersionSet: bool = false; Top: int = 0; Skip: int = 0; tags: string = "";
+proc call*(call_564049: Call_ApiListByService_563778; serviceName: string;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string;
+          tags: string = ""; Top: int = 0; Skip: int = 0; expandApiVersionSet: bool = false;
           Filter: string = ""): Recallable =
   ## apiListByService
   ## Lists all APIs of the API Management service instance.
   ## https://docs.microsoft.com/en-us/azure/api-management/api-management-howto-create-apis
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
-  ##   apiVersion: string (required)
-  ##             : Version of the API to be used with the client request.
-  ##   subscriptionId: string (required)
-  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   expandApiVersionSet: bool
-  ##                      : Include full ApiVersionSet resource in response
-  ##   Top: int
-  ##      : Number of records to return.
-  ##   Skip: int
-  ##       : Number of records to skip.
   ##   tags: string
   ##       : Include tags in the response.
   ##   serviceName: string (required)
   ##              : The name of the API Management service.
+  ##   Top: int
+  ##      : Number of records to return.
+  ##   apiVersion: string (required)
+  ##             : Version of the API to be used with the client request.
+  ##   subscriptionId: string (required)
+  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   Skip: int
+  ##       : Number of records to skip.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  ##   expandApiVersionSet: bool
+  ##                      : Include full ApiVersionSet resource in response
   ##   Filter: string
   ##         : | Field       | Supported operators    | Supported functions               |
   ## |-------------|------------------------|-----------------------------------|
@@ -268,26 +272,26 @@ proc call*(call_593916: Call_ApiListByService_593647; resourceGroupName: string;
   ## |serviceUrl | ge, le, eq, ne, gt, lt | substringof, contains, startswith, endswith|
   ## |path | ge, le, eq, ne, gt, lt | substringof, contains, startswith, endswith|
   ## 
-  var path_593917 = newJObject()
-  var query_593919 = newJObject()
-  add(path_593917, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593919, "api-version", newJString(apiVersion))
-  add(path_593917, "subscriptionId", newJString(subscriptionId))
-  add(query_593919, "expandApiVersionSet", newJBool(expandApiVersionSet))
-  add(query_593919, "$top", newJInt(Top))
-  add(query_593919, "$skip", newJInt(Skip))
-  add(query_593919, "tags", newJString(tags))
-  add(path_593917, "serviceName", newJString(serviceName))
-  add(query_593919, "$filter", newJString(Filter))
-  result = call_593916.call(path_593917, query_593919, nil, nil, nil)
+  var path_564050 = newJObject()
+  var query_564052 = newJObject()
+  add(query_564052, "tags", newJString(tags))
+  add(path_564050, "serviceName", newJString(serviceName))
+  add(query_564052, "$top", newJInt(Top))
+  add(query_564052, "api-version", newJString(apiVersion))
+  add(path_564050, "subscriptionId", newJString(subscriptionId))
+  add(query_564052, "$skip", newJInt(Skip))
+  add(path_564050, "resourceGroupName", newJString(resourceGroupName))
+  add(query_564052, "expandApiVersionSet", newJBool(expandApiVersionSet))
+  add(query_564052, "$filter", newJString(Filter))
+  result = call_564049.call(path_564050, query_564052, nil, nil, nil)
 
-var apiListByService* = Call_ApiListByService_593647(name: "apiListByService",
+var apiListByService* = Call_ApiListByService_563778(name: "apiListByService",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ApiManagement/service/{serviceName}/apis",
-    validator: validate_ApiListByService_593648, base: "",
-    url: url_ApiListByService_593649, schemes: {Scheme.Https})
+    validator: validate_ApiListByService_563779, base: "",
+    url: url_ApiListByService_563780, schemes: {Scheme.Https})
 type
-  Call_ApiCreateOrUpdate_593970 = ref object of OpenApiRestCall_593425
-proc url_ApiCreateOrUpdate_593972(protocol: Scheme; host: string; base: string;
+  Call_ApiCreateOrUpdate_564103 = ref object of OpenApiRestCall_563556
+proc url_ApiCreateOrUpdate_564105(protocol: Scheme; host: string; base: string;
                                  route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -313,7 +317,7 @@ proc url_ApiCreateOrUpdate_593972(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ApiCreateOrUpdate_593971(path: JsonNode; query: JsonNode;
+proc validate_ApiCreateOrUpdate_564104(path: JsonNode; query: JsonNode;
                                       header: JsonNode; formData: JsonNode;
                                       body: JsonNode): JsonNode =
   ## Creates new or updates existing specified API of the API Management service instance.
@@ -321,37 +325,37 @@ proc validate_ApiCreateOrUpdate_593971(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
+  ##   serviceName: JString (required)
+  ##              : The name of the API Management service.
   ##   apiId: JString (required)
   ##        : API revision identifier. Must be unique in the current API Management service instance. Non-current revision has ;rev=n as a suffix where n is the revision number.
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   serviceName: JString (required)
-  ##              : The name of the API Management service.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594000 = path.getOrDefault("resourceGroupName")
-  valid_594000 = validateParameter(valid_594000, JString, required = true,
+        "path argument is necessary due to required `serviceName` field"
+  var valid_564133 = path.getOrDefault("serviceName")
+  valid_564133 = validateParameter(valid_564133, JString, required = true,
                                  default = nil)
-  if valid_594000 != nil:
-    section.add "resourceGroupName", valid_594000
-  var valid_594001 = path.getOrDefault("apiId")
-  valid_594001 = validateParameter(valid_594001, JString, required = true,
+  if valid_564133 != nil:
+    section.add "serviceName", valid_564133
+  var valid_564134 = path.getOrDefault("apiId")
+  valid_564134 = validateParameter(valid_564134, JString, required = true,
                                  default = nil)
-  if valid_594001 != nil:
-    section.add "apiId", valid_594001
-  var valid_594002 = path.getOrDefault("subscriptionId")
-  valid_594002 = validateParameter(valid_594002, JString, required = true,
+  if valid_564134 != nil:
+    section.add "apiId", valid_564134
+  var valid_564135 = path.getOrDefault("subscriptionId")
+  valid_564135 = validateParameter(valid_564135, JString, required = true,
                                  default = nil)
-  if valid_594002 != nil:
-    section.add "subscriptionId", valid_594002
-  var valid_594003 = path.getOrDefault("serviceName")
-  valid_594003 = validateParameter(valid_594003, JString, required = true,
+  if valid_564135 != nil:
+    section.add "subscriptionId", valid_564135
+  var valid_564136 = path.getOrDefault("resourceGroupName")
+  valid_564136 = validateParameter(valid_564136, JString, required = true,
                                  default = nil)
-  if valid_594003 != nil:
-    section.add "serviceName", valid_594003
+  if valid_564136 != nil:
+    section.add "resourceGroupName", valid_564136
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -359,21 +363,21 @@ proc validate_ApiCreateOrUpdate_593971(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594004 = query.getOrDefault("api-version")
-  valid_594004 = validateParameter(valid_594004, JString, required = true,
+  var valid_564137 = query.getOrDefault("api-version")
+  valid_564137 = validateParameter(valid_564137, JString, required = true,
                                  default = nil)
-  if valid_594004 != nil:
-    section.add "api-version", valid_594004
+  if valid_564137 != nil:
+    section.add "api-version", valid_564137
   result.add "query", section
   ## parameters in `header` object:
   ##   If-Match: JString
   ##           : ETag of the Entity. Not required when creating an entity, but required when updating an entity.
   section = newJObject()
-  var valid_594005 = header.getOrDefault("If-Match")
-  valid_594005 = validateParameter(valid_594005, JString, required = false,
+  var valid_564138 = header.getOrDefault("If-Match")
+  valid_564138 = validateParameter(valid_564138, JString, required = false,
                                  default = nil)
-  if valid_594005 != nil:
-    section.add "If-Match", valid_594005
+  if valid_564138 != nil:
+    section.add "If-Match", valid_564138
   result.add "header", section
   section = newJObject()
   result.add "formData", section
@@ -385,55 +389,55 @@ proc validate_ApiCreateOrUpdate_593971(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594007: Call_ApiCreateOrUpdate_593970; path: JsonNode;
+proc call*(call_564140: Call_ApiCreateOrUpdate_564103; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Creates new or updates existing specified API of the API Management service instance.
   ## 
-  let valid = call_594007.validator(path, query, header, formData, body)
-  let scheme = call_594007.pickScheme
+  let valid = call_564140.validator(path, query, header, formData, body)
+  let scheme = call_564140.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594007.url(scheme.get, call_594007.host, call_594007.base,
-                         call_594007.route, valid.getOrDefault("path"),
+  let url = call_564140.url(scheme.get, call_564140.host, call_564140.base,
+                         call_564140.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594007, url, valid)
+  result = hook(call_564140, url, valid)
 
-proc call*(call_594008: Call_ApiCreateOrUpdate_593970; resourceGroupName: string;
+proc call*(call_564141: Call_ApiCreateOrUpdate_564103; serviceName: string;
           apiVersion: string; apiId: string; subscriptionId: string;
-          parameters: JsonNode; serviceName: string): Recallable =
+          resourceGroupName: string; parameters: JsonNode): Recallable =
   ## apiCreateOrUpdate
   ## Creates new or updates existing specified API of the API Management service instance.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   serviceName: string (required)
+  ##              : The name of the API Management service.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
   ##   apiId: string (required)
   ##        : API revision identifier. Must be unique in the current API Management service instance. Non-current revision has ;rev=n as a suffix where n is the revision number.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   parameters: JObject (required)
   ##             : Create or update parameters.
-  ##   serviceName: string (required)
-  ##              : The name of the API Management service.
-  var path_594009 = newJObject()
-  var query_594010 = newJObject()
-  var body_594011 = newJObject()
-  add(path_594009, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594010, "api-version", newJString(apiVersion))
-  add(path_594009, "apiId", newJString(apiId))
-  add(path_594009, "subscriptionId", newJString(subscriptionId))
+  var path_564142 = newJObject()
+  var query_564143 = newJObject()
+  var body_564144 = newJObject()
+  add(path_564142, "serviceName", newJString(serviceName))
+  add(query_564143, "api-version", newJString(apiVersion))
+  add(path_564142, "apiId", newJString(apiId))
+  add(path_564142, "subscriptionId", newJString(subscriptionId))
+  add(path_564142, "resourceGroupName", newJString(resourceGroupName))
   if parameters != nil:
-    body_594011 = parameters
-  add(path_594009, "serviceName", newJString(serviceName))
-  result = call_594008.call(path_594009, query_594010, nil, nil, body_594011)
+    body_564144 = parameters
+  result = call_564141.call(path_564142, query_564143, nil, nil, body_564144)
 
-var apiCreateOrUpdate* = Call_ApiCreateOrUpdate_593970(name: "apiCreateOrUpdate",
+var apiCreateOrUpdate* = Call_ApiCreateOrUpdate_564103(name: "apiCreateOrUpdate",
     meth: HttpMethod.HttpPut, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ApiManagement/service/{serviceName}/apis/{apiId}",
-    validator: validate_ApiCreateOrUpdate_593971, base: "",
-    url: url_ApiCreateOrUpdate_593972, schemes: {Scheme.Https})
+    validator: validate_ApiCreateOrUpdate_564104, base: "",
+    url: url_ApiCreateOrUpdate_564105, schemes: {Scheme.Https})
 type
-  Call_ApiGetEntityTag_594026 = ref object of OpenApiRestCall_593425
-proc url_ApiGetEntityTag_594028(protocol: Scheme; host: string; base: string;
+  Call_ApiGetEntityTag_564159 = ref object of OpenApiRestCall_563556
+proc url_ApiGetEntityTag_564161(protocol: Scheme; host: string; base: string;
                                route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -459,7 +463,7 @@ proc url_ApiGetEntityTag_594028(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ApiGetEntityTag_594027(path: JsonNode; query: JsonNode;
+proc validate_ApiGetEntityTag_564160(path: JsonNode; query: JsonNode;
                                     header: JsonNode; formData: JsonNode;
                                     body: JsonNode): JsonNode =
   ## Gets the entity state (Etag) version of the API specified by its identifier.
@@ -467,37 +471,37 @@ proc validate_ApiGetEntityTag_594027(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
+  ##   serviceName: JString (required)
+  ##              : The name of the API Management service.
   ##   apiId: JString (required)
   ##        : API revision identifier. Must be unique in the current API Management service instance. Non-current revision has ;rev=n as a suffix where n is the revision number.
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   serviceName: JString (required)
-  ##              : The name of the API Management service.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594029 = path.getOrDefault("resourceGroupName")
-  valid_594029 = validateParameter(valid_594029, JString, required = true,
+        "path argument is necessary due to required `serviceName` field"
+  var valid_564162 = path.getOrDefault("serviceName")
+  valid_564162 = validateParameter(valid_564162, JString, required = true,
                                  default = nil)
-  if valid_594029 != nil:
-    section.add "resourceGroupName", valid_594029
-  var valid_594030 = path.getOrDefault("apiId")
-  valid_594030 = validateParameter(valid_594030, JString, required = true,
+  if valid_564162 != nil:
+    section.add "serviceName", valid_564162
+  var valid_564163 = path.getOrDefault("apiId")
+  valid_564163 = validateParameter(valid_564163, JString, required = true,
                                  default = nil)
-  if valid_594030 != nil:
-    section.add "apiId", valid_594030
-  var valid_594031 = path.getOrDefault("subscriptionId")
-  valid_594031 = validateParameter(valid_594031, JString, required = true,
+  if valid_564163 != nil:
+    section.add "apiId", valid_564163
+  var valid_564164 = path.getOrDefault("subscriptionId")
+  valid_564164 = validateParameter(valid_564164, JString, required = true,
                                  default = nil)
-  if valid_594031 != nil:
-    section.add "subscriptionId", valid_594031
-  var valid_594032 = path.getOrDefault("serviceName")
-  valid_594032 = validateParameter(valid_594032, JString, required = true,
+  if valid_564164 != nil:
+    section.add "subscriptionId", valid_564164
+  var valid_564165 = path.getOrDefault("resourceGroupName")
+  valid_564165 = validateParameter(valid_564165, JString, required = true,
                                  default = nil)
-  if valid_594032 != nil:
-    section.add "serviceName", valid_594032
+  if valid_564165 != nil:
+    section.add "resourceGroupName", valid_564165
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -505,11 +509,11 @@ proc validate_ApiGetEntityTag_594027(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594033 = query.getOrDefault("api-version")
-  valid_594033 = validateParameter(valid_594033, JString, required = true,
+  var valid_564166 = query.getOrDefault("api-version")
+  valid_564166 = validateParameter(valid_564166, JString, required = true,
                                  default = nil)
-  if valid_594033 != nil:
-    section.add "api-version", valid_594033
+  if valid_564166 != nil:
+    section.add "api-version", valid_564166
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -518,50 +522,50 @@ proc validate_ApiGetEntityTag_594027(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594034: Call_ApiGetEntityTag_594026; path: JsonNode; query: JsonNode;
+proc call*(call_564167: Call_ApiGetEntityTag_564159; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the entity state (Etag) version of the API specified by its identifier.
   ## 
-  let valid = call_594034.validator(path, query, header, formData, body)
-  let scheme = call_594034.pickScheme
+  let valid = call_564167.validator(path, query, header, formData, body)
+  let scheme = call_564167.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594034.url(scheme.get, call_594034.host, call_594034.base,
-                         call_594034.route, valid.getOrDefault("path"),
+  let url = call_564167.url(scheme.get, call_564167.host, call_564167.base,
+                         call_564167.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594034, url, valid)
+  result = hook(call_564167, url, valid)
 
-proc call*(call_594035: Call_ApiGetEntityTag_594026; resourceGroupName: string;
+proc call*(call_564168: Call_ApiGetEntityTag_564159; serviceName: string;
           apiVersion: string; apiId: string; subscriptionId: string;
-          serviceName: string): Recallable =
+          resourceGroupName: string): Recallable =
   ## apiGetEntityTag
   ## Gets the entity state (Etag) version of the API specified by its identifier.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   serviceName: string (required)
+  ##              : The name of the API Management service.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
   ##   apiId: string (required)
   ##        : API revision identifier. Must be unique in the current API Management service instance. Non-current revision has ;rev=n as a suffix where n is the revision number.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   serviceName: string (required)
-  ##              : The name of the API Management service.
-  var path_594036 = newJObject()
-  var query_594037 = newJObject()
-  add(path_594036, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594037, "api-version", newJString(apiVersion))
-  add(path_594036, "apiId", newJString(apiId))
-  add(path_594036, "subscriptionId", newJString(subscriptionId))
-  add(path_594036, "serviceName", newJString(serviceName))
-  result = call_594035.call(path_594036, query_594037, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564169 = newJObject()
+  var query_564170 = newJObject()
+  add(path_564169, "serviceName", newJString(serviceName))
+  add(query_564170, "api-version", newJString(apiVersion))
+  add(path_564169, "apiId", newJString(apiId))
+  add(path_564169, "subscriptionId", newJString(subscriptionId))
+  add(path_564169, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564168.call(path_564169, query_564170, nil, nil, nil)
 
-var apiGetEntityTag* = Call_ApiGetEntityTag_594026(name: "apiGetEntityTag",
+var apiGetEntityTag* = Call_ApiGetEntityTag_564159(name: "apiGetEntityTag",
     meth: HttpMethod.HttpHead, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ApiManagement/service/{serviceName}/apis/{apiId}",
-    validator: validate_ApiGetEntityTag_594027, base: "", url: url_ApiGetEntityTag_594028,
+    validator: validate_ApiGetEntityTag_564160, base: "", url: url_ApiGetEntityTag_564161,
     schemes: {Scheme.Https})
 type
-  Call_ApiGet_593958 = ref object of OpenApiRestCall_593425
-proc url_ApiGet_593960(protocol: Scheme; host: string; base: string; route: string;
+  Call_ApiGet_564091 = ref object of OpenApiRestCall_563556
+proc url_ApiGet_564093(protocol: Scheme; host: string; base: string; route: string;
                       path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -587,44 +591,44 @@ proc url_ApiGet_593960(protocol: Scheme; host: string; base: string; route: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ApiGet_593959(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_ApiGet_564092(path: JsonNode; query: JsonNode; header: JsonNode;
                            formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the details of the API specified by its identifier.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
+  ##   serviceName: JString (required)
+  ##              : The name of the API Management service.
   ##   apiId: JString (required)
   ##        : API revision identifier. Must be unique in the current API Management service instance. Non-current revision has ;rev=n as a suffix where n is the revision number.
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   serviceName: JString (required)
-  ##              : The name of the API Management service.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593961 = path.getOrDefault("resourceGroupName")
-  valid_593961 = validateParameter(valid_593961, JString, required = true,
+        "path argument is necessary due to required `serviceName` field"
+  var valid_564094 = path.getOrDefault("serviceName")
+  valid_564094 = validateParameter(valid_564094, JString, required = true,
                                  default = nil)
-  if valid_593961 != nil:
-    section.add "resourceGroupName", valid_593961
-  var valid_593962 = path.getOrDefault("apiId")
-  valid_593962 = validateParameter(valid_593962, JString, required = true,
+  if valid_564094 != nil:
+    section.add "serviceName", valid_564094
+  var valid_564095 = path.getOrDefault("apiId")
+  valid_564095 = validateParameter(valid_564095, JString, required = true,
                                  default = nil)
-  if valid_593962 != nil:
-    section.add "apiId", valid_593962
-  var valid_593963 = path.getOrDefault("subscriptionId")
-  valid_593963 = validateParameter(valid_593963, JString, required = true,
+  if valid_564095 != nil:
+    section.add "apiId", valid_564095
+  var valid_564096 = path.getOrDefault("subscriptionId")
+  valid_564096 = validateParameter(valid_564096, JString, required = true,
                                  default = nil)
-  if valid_593963 != nil:
-    section.add "subscriptionId", valid_593963
-  var valid_593964 = path.getOrDefault("serviceName")
-  valid_593964 = validateParameter(valid_593964, JString, required = true,
+  if valid_564096 != nil:
+    section.add "subscriptionId", valid_564096
+  var valid_564097 = path.getOrDefault("resourceGroupName")
+  valid_564097 = validateParameter(valid_564097, JString, required = true,
                                  default = nil)
-  if valid_593964 != nil:
-    section.add "serviceName", valid_593964
+  if valid_564097 != nil:
+    section.add "resourceGroupName", valid_564097
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -632,11 +636,11 @@ proc validate_ApiGet_593959(path: JsonNode; query: JsonNode; header: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593965 = query.getOrDefault("api-version")
-  valid_593965 = validateParameter(valid_593965, JString, required = true,
+  var valid_564098 = query.getOrDefault("api-version")
+  valid_564098 = validateParameter(valid_564098, JString, required = true,
                                  default = nil)
-  if valid_593965 != nil:
-    section.add "api-version", valid_593965
+  if valid_564098 != nil:
+    section.add "api-version", valid_564098
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -645,50 +649,49 @@ proc validate_ApiGet_593959(path: JsonNode; query: JsonNode; header: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593966: Call_ApiGet_593958; path: JsonNode; query: JsonNode;
+proc call*(call_564099: Call_ApiGet_564091; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the details of the API specified by its identifier.
   ## 
-  let valid = call_593966.validator(path, query, header, formData, body)
-  let scheme = call_593966.pickScheme
+  let valid = call_564099.validator(path, query, header, formData, body)
+  let scheme = call_564099.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593966.url(scheme.get, call_593966.host, call_593966.base,
-                         call_593966.route, valid.getOrDefault("path"),
+  let url = call_564099.url(scheme.get, call_564099.host, call_564099.base,
+                         call_564099.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593966, url, valid)
+  result = hook(call_564099, url, valid)
 
-proc call*(call_593967: Call_ApiGet_593958; resourceGroupName: string;
-          apiVersion: string; apiId: string; subscriptionId: string;
-          serviceName: string): Recallable =
+proc call*(call_564100: Call_ApiGet_564091; serviceName: string; apiVersion: string;
+          apiId: string; subscriptionId: string; resourceGroupName: string): Recallable =
   ## apiGet
   ## Gets the details of the API specified by its identifier.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   serviceName: string (required)
+  ##              : The name of the API Management service.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
   ##   apiId: string (required)
   ##        : API revision identifier. Must be unique in the current API Management service instance. Non-current revision has ;rev=n as a suffix where n is the revision number.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   serviceName: string (required)
-  ##              : The name of the API Management service.
-  var path_593968 = newJObject()
-  var query_593969 = newJObject()
-  add(path_593968, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593969, "api-version", newJString(apiVersion))
-  add(path_593968, "apiId", newJString(apiId))
-  add(path_593968, "subscriptionId", newJString(subscriptionId))
-  add(path_593968, "serviceName", newJString(serviceName))
-  result = call_593967.call(path_593968, query_593969, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564101 = newJObject()
+  var query_564102 = newJObject()
+  add(path_564101, "serviceName", newJString(serviceName))
+  add(query_564102, "api-version", newJString(apiVersion))
+  add(path_564101, "apiId", newJString(apiId))
+  add(path_564101, "subscriptionId", newJString(subscriptionId))
+  add(path_564101, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564100.call(path_564101, query_564102, nil, nil, nil)
 
-var apiGet* = Call_ApiGet_593958(name: "apiGet", meth: HttpMethod.HttpGet,
+var apiGet* = Call_ApiGet_564091(name: "apiGet", meth: HttpMethod.HttpGet,
                               host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ApiManagement/service/{serviceName}/apis/{apiId}",
-                              validator: validate_ApiGet_593959, base: "",
-                              url: url_ApiGet_593960, schemes: {Scheme.Https})
+                              validator: validate_ApiGet_564092, base: "",
+                              url: url_ApiGet_564093, schemes: {Scheme.Https})
 type
-  Call_ApiUpdate_594038 = ref object of OpenApiRestCall_593425
-proc url_ApiUpdate_594040(protocol: Scheme; host: string; base: string; route: string;
+  Call_ApiUpdate_564171 = ref object of OpenApiRestCall_563556
+proc url_ApiUpdate_564173(protocol: Scheme; host: string; base: string; route: string;
                          path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -714,44 +717,44 @@ proc url_ApiUpdate_594040(protocol: Scheme; host: string; base: string; route: s
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ApiUpdate_594039(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_ApiUpdate_564172(path: JsonNode; query: JsonNode; header: JsonNode;
                               formData: JsonNode; body: JsonNode): JsonNode =
   ## Updates the specified API of the API Management service instance.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
+  ##   serviceName: JString (required)
+  ##              : The name of the API Management service.
   ##   apiId: JString (required)
   ##        : API revision identifier. Must be unique in the current API Management service instance. Non-current revision has ;rev=n as a suffix where n is the revision number.
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   serviceName: JString (required)
-  ##              : The name of the API Management service.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594041 = path.getOrDefault("resourceGroupName")
-  valid_594041 = validateParameter(valid_594041, JString, required = true,
+        "path argument is necessary due to required `serviceName` field"
+  var valid_564174 = path.getOrDefault("serviceName")
+  valid_564174 = validateParameter(valid_564174, JString, required = true,
                                  default = nil)
-  if valid_594041 != nil:
-    section.add "resourceGroupName", valid_594041
-  var valid_594042 = path.getOrDefault("apiId")
-  valid_594042 = validateParameter(valid_594042, JString, required = true,
+  if valid_564174 != nil:
+    section.add "serviceName", valid_564174
+  var valid_564175 = path.getOrDefault("apiId")
+  valid_564175 = validateParameter(valid_564175, JString, required = true,
                                  default = nil)
-  if valid_594042 != nil:
-    section.add "apiId", valid_594042
-  var valid_594043 = path.getOrDefault("subscriptionId")
-  valid_594043 = validateParameter(valid_594043, JString, required = true,
+  if valid_564175 != nil:
+    section.add "apiId", valid_564175
+  var valid_564176 = path.getOrDefault("subscriptionId")
+  valid_564176 = validateParameter(valid_564176, JString, required = true,
                                  default = nil)
-  if valid_594043 != nil:
-    section.add "subscriptionId", valid_594043
-  var valid_594044 = path.getOrDefault("serviceName")
-  valid_594044 = validateParameter(valid_594044, JString, required = true,
+  if valid_564176 != nil:
+    section.add "subscriptionId", valid_564176
+  var valid_564177 = path.getOrDefault("resourceGroupName")
+  valid_564177 = validateParameter(valid_564177, JString, required = true,
                                  default = nil)
-  if valid_594044 != nil:
-    section.add "serviceName", valid_594044
+  if valid_564177 != nil:
+    section.add "resourceGroupName", valid_564177
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -759,11 +762,11 @@ proc validate_ApiUpdate_594039(path: JsonNode; query: JsonNode; header: JsonNode
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594045 = query.getOrDefault("api-version")
-  valid_594045 = validateParameter(valid_594045, JString, required = true,
+  var valid_564178 = query.getOrDefault("api-version")
+  valid_564178 = validateParameter(valid_564178, JString, required = true,
                                  default = nil)
-  if valid_594045 != nil:
-    section.add "api-version", valid_594045
+  if valid_564178 != nil:
+    section.add "api-version", valid_564178
   result.add "query", section
   ## parameters in `header` object:
   ##   If-Match: JString (required)
@@ -771,11 +774,11 @@ proc validate_ApiUpdate_594039(path: JsonNode; query: JsonNode; header: JsonNode
   section = newJObject()
   assert header != nil,
         "header argument is necessary due to required `If-Match` field"
-  var valid_594046 = header.getOrDefault("If-Match")
-  valid_594046 = validateParameter(valid_594046, JString, required = true,
+  var valid_564179 = header.getOrDefault("If-Match")
+  valid_564179 = validateParameter(valid_564179, JString, required = true,
                                  default = nil)
-  if valid_594046 != nil:
-    section.add "If-Match", valid_594046
+  if valid_564179 != nil:
+    section.add "If-Match", valid_564179
   result.add "header", section
   section = newJObject()
   result.add "formData", section
@@ -787,56 +790,56 @@ proc validate_ApiUpdate_594039(path: JsonNode; query: JsonNode; header: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_594048: Call_ApiUpdate_594038; path: JsonNode; query: JsonNode;
+proc call*(call_564181: Call_ApiUpdate_564171; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Updates the specified API of the API Management service instance.
   ## 
-  let valid = call_594048.validator(path, query, header, formData, body)
-  let scheme = call_594048.pickScheme
+  let valid = call_564181.validator(path, query, header, formData, body)
+  let scheme = call_564181.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594048.url(scheme.get, call_594048.host, call_594048.base,
-                         call_594048.route, valid.getOrDefault("path"),
+  let url = call_564181.url(scheme.get, call_564181.host, call_564181.base,
+                         call_564181.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594048, url, valid)
+  result = hook(call_564181, url, valid)
 
-proc call*(call_594049: Call_ApiUpdate_594038; resourceGroupName: string;
+proc call*(call_564182: Call_ApiUpdate_564171; serviceName: string;
           apiVersion: string; apiId: string; subscriptionId: string;
-          parameters: JsonNode; serviceName: string): Recallable =
+          resourceGroupName: string; parameters: JsonNode): Recallable =
   ## apiUpdate
   ## Updates the specified API of the API Management service instance.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   serviceName: string (required)
+  ##              : The name of the API Management service.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
   ##   apiId: string (required)
   ##        : API revision identifier. Must be unique in the current API Management service instance. Non-current revision has ;rev=n as a suffix where n is the revision number.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   parameters: JObject (required)
   ##             : API Update Contract parameters.
-  ##   serviceName: string (required)
-  ##              : The name of the API Management service.
-  var path_594050 = newJObject()
-  var query_594051 = newJObject()
-  var body_594052 = newJObject()
-  add(path_594050, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594051, "api-version", newJString(apiVersion))
-  add(path_594050, "apiId", newJString(apiId))
-  add(path_594050, "subscriptionId", newJString(subscriptionId))
+  var path_564183 = newJObject()
+  var query_564184 = newJObject()
+  var body_564185 = newJObject()
+  add(path_564183, "serviceName", newJString(serviceName))
+  add(query_564184, "api-version", newJString(apiVersion))
+  add(path_564183, "apiId", newJString(apiId))
+  add(path_564183, "subscriptionId", newJString(subscriptionId))
+  add(path_564183, "resourceGroupName", newJString(resourceGroupName))
   if parameters != nil:
-    body_594052 = parameters
-  add(path_594050, "serviceName", newJString(serviceName))
-  result = call_594049.call(path_594050, query_594051, nil, nil, body_594052)
+    body_564185 = parameters
+  result = call_564182.call(path_564183, query_564184, nil, nil, body_564185)
 
-var apiUpdate* = Call_ApiUpdate_594038(name: "apiUpdate", meth: HttpMethod.HttpPatch,
+var apiUpdate* = Call_ApiUpdate_564171(name: "apiUpdate", meth: HttpMethod.HttpPatch,
                                     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ApiManagement/service/{serviceName}/apis/{apiId}",
-                                    validator: validate_ApiUpdate_594039,
-                                    base: "", url: url_ApiUpdate_594040,
+                                    validator: validate_ApiUpdate_564172,
+                                    base: "", url: url_ApiUpdate_564173,
                                     schemes: {Scheme.Https})
 type
-  Call_ApiDelete_594012 = ref object of OpenApiRestCall_593425
-proc url_ApiDelete_594014(protocol: Scheme; host: string; base: string; route: string;
+  Call_ApiDelete_564145 = ref object of OpenApiRestCall_563556
+proc url_ApiDelete_564147(protocol: Scheme; host: string; base: string; route: string;
                          path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -862,44 +865,44 @@ proc url_ApiDelete_594014(protocol: Scheme; host: string; base: string; route: s
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ApiDelete_594013(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_ApiDelete_564146(path: JsonNode; query: JsonNode; header: JsonNode;
                               formData: JsonNode; body: JsonNode): JsonNode =
   ## Deletes the specified API of the API Management service instance.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
+  ##   serviceName: JString (required)
+  ##              : The name of the API Management service.
   ##   apiId: JString (required)
   ##        : API revision identifier. Must be unique in the current API Management service instance. Non-current revision has ;rev=n as a suffix where n is the revision number.
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   serviceName: JString (required)
-  ##              : The name of the API Management service.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594015 = path.getOrDefault("resourceGroupName")
-  valid_594015 = validateParameter(valid_594015, JString, required = true,
+        "path argument is necessary due to required `serviceName` field"
+  var valid_564148 = path.getOrDefault("serviceName")
+  valid_564148 = validateParameter(valid_564148, JString, required = true,
                                  default = nil)
-  if valid_594015 != nil:
-    section.add "resourceGroupName", valid_594015
-  var valid_594016 = path.getOrDefault("apiId")
-  valid_594016 = validateParameter(valid_594016, JString, required = true,
+  if valid_564148 != nil:
+    section.add "serviceName", valid_564148
+  var valid_564149 = path.getOrDefault("apiId")
+  valid_564149 = validateParameter(valid_564149, JString, required = true,
                                  default = nil)
-  if valid_594016 != nil:
-    section.add "apiId", valid_594016
-  var valid_594017 = path.getOrDefault("subscriptionId")
-  valid_594017 = validateParameter(valid_594017, JString, required = true,
+  if valid_564149 != nil:
+    section.add "apiId", valid_564149
+  var valid_564150 = path.getOrDefault("subscriptionId")
+  valid_564150 = validateParameter(valid_564150, JString, required = true,
                                  default = nil)
-  if valid_594017 != nil:
-    section.add "subscriptionId", valid_594017
-  var valid_594018 = path.getOrDefault("serviceName")
-  valid_594018 = validateParameter(valid_594018, JString, required = true,
+  if valid_564150 != nil:
+    section.add "subscriptionId", valid_564150
+  var valid_564151 = path.getOrDefault("resourceGroupName")
+  valid_564151 = validateParameter(valid_564151, JString, required = true,
                                  default = nil)
-  if valid_594018 != nil:
-    section.add "serviceName", valid_594018
+  if valid_564151 != nil:
+    section.add "resourceGroupName", valid_564151
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -909,15 +912,15 @@ proc validate_ApiDelete_594013(path: JsonNode; query: JsonNode; header: JsonNode
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594019 = query.getOrDefault("api-version")
-  valid_594019 = validateParameter(valid_594019, JString, required = true,
+  var valid_564152 = query.getOrDefault("api-version")
+  valid_564152 = validateParameter(valid_564152, JString, required = true,
                                  default = nil)
-  if valid_594019 != nil:
-    section.add "api-version", valid_594019
-  var valid_594020 = query.getOrDefault("deleteRevisions")
-  valid_594020 = validateParameter(valid_594020, JBool, required = false, default = nil)
-  if valid_594020 != nil:
-    section.add "deleteRevisions", valid_594020
+  if valid_564152 != nil:
+    section.add "api-version", valid_564152
+  var valid_564153 = query.getOrDefault("deleteRevisions")
+  valid_564153 = validateParameter(valid_564153, JBool, required = false, default = nil)
+  if valid_564153 != nil:
+    section.add "deleteRevisions", valid_564153
   result.add "query", section
   ## parameters in `header` object:
   ##   If-Match: JString (required)
@@ -925,66 +928,66 @@ proc validate_ApiDelete_594013(path: JsonNode; query: JsonNode; header: JsonNode
   section = newJObject()
   assert header != nil,
         "header argument is necessary due to required `If-Match` field"
-  var valid_594021 = header.getOrDefault("If-Match")
-  valid_594021 = validateParameter(valid_594021, JString, required = true,
+  var valid_564154 = header.getOrDefault("If-Match")
+  valid_564154 = validateParameter(valid_564154, JString, required = true,
                                  default = nil)
-  if valid_594021 != nil:
-    section.add "If-Match", valid_594021
+  if valid_564154 != nil:
+    section.add "If-Match", valid_564154
   result.add "header", section
   section = newJObject()
   result.add "formData", section
   if body != nil:
     result.add "body", body
 
-proc call*(call_594022: Call_ApiDelete_594012; path: JsonNode; query: JsonNode;
+proc call*(call_564155: Call_ApiDelete_564145; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes the specified API of the API Management service instance.
   ## 
-  let valid = call_594022.validator(path, query, header, formData, body)
-  let scheme = call_594022.pickScheme
+  let valid = call_564155.validator(path, query, header, formData, body)
+  let scheme = call_564155.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594022.url(scheme.get, call_594022.host, call_594022.base,
-                         call_594022.route, valid.getOrDefault("path"),
+  let url = call_564155.url(scheme.get, call_564155.host, call_564155.base,
+                         call_564155.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594022, url, valid)
+  result = hook(call_564155, url, valid)
 
-proc call*(call_594023: Call_ApiDelete_594012; resourceGroupName: string;
+proc call*(call_564156: Call_ApiDelete_564145; serviceName: string;
           apiVersion: string; apiId: string; subscriptionId: string;
-          serviceName: string; deleteRevisions: bool = false): Recallable =
+          resourceGroupName: string; deleteRevisions: bool = false): Recallable =
   ## apiDelete
   ## Deletes the specified API of the API Management service instance.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   serviceName: string (required)
+  ##              : The name of the API Management service.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
   ##   apiId: string (required)
   ##        : API revision identifier. Must be unique in the current API Management service instance. Non-current revision has ;rev=n as a suffix where n is the revision number.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   deleteRevisions: bool
   ##                  : Delete all revisions of the Api.
-  ##   serviceName: string (required)
-  ##              : The name of the API Management service.
-  var path_594024 = newJObject()
-  var query_594025 = newJObject()
-  add(path_594024, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594025, "api-version", newJString(apiVersion))
-  add(path_594024, "apiId", newJString(apiId))
-  add(path_594024, "subscriptionId", newJString(subscriptionId))
-  add(query_594025, "deleteRevisions", newJBool(deleteRevisions))
-  add(path_594024, "serviceName", newJString(serviceName))
-  result = call_594023.call(path_594024, query_594025, nil, nil, nil)
+  var path_564157 = newJObject()
+  var query_564158 = newJObject()
+  add(path_564157, "serviceName", newJString(serviceName))
+  add(query_564158, "api-version", newJString(apiVersion))
+  add(path_564157, "apiId", newJString(apiId))
+  add(path_564157, "subscriptionId", newJString(subscriptionId))
+  add(path_564157, "resourceGroupName", newJString(resourceGroupName))
+  add(query_564158, "deleteRevisions", newJBool(deleteRevisions))
+  result = call_564156.call(path_564157, query_564158, nil, nil, nil)
 
-var apiDelete* = Call_ApiDelete_594012(name: "apiDelete",
+var apiDelete* = Call_ApiDelete_564145(name: "apiDelete",
                                     meth: HttpMethod.HttpDelete,
                                     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ApiManagement/service/{serviceName}/apis/{apiId}",
-                                    validator: validate_ApiDelete_594013,
-                                    base: "", url: url_ApiDelete_594014,
+                                    validator: validate_ApiDelete_564146,
+                                    base: "", url: url_ApiDelete_564147,
                                     schemes: {Scheme.Https})
 type
-  Call_ApiDiagnosticListByService_594053 = ref object of OpenApiRestCall_593425
-proc url_ApiDiagnosticListByService_594055(protocol: Scheme; host: string;
+  Call_ApiDiagnosticListByService_564186 = ref object of OpenApiRestCall_563556
+proc url_ApiDiagnosticListByService_564188(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1011,50 +1014,50 @@ proc url_ApiDiagnosticListByService_594055(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ApiDiagnosticListByService_594054(path: JsonNode; query: JsonNode;
+proc validate_ApiDiagnosticListByService_564187(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists all diagnostics of an API.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
+  ##   serviceName: JString (required)
+  ##              : The name of the API Management service.
   ##   apiId: JString (required)
   ##        : API identifier. Must be unique in the current API Management service instance.
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   serviceName: JString (required)
-  ##              : The name of the API Management service.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594056 = path.getOrDefault("resourceGroupName")
-  valid_594056 = validateParameter(valid_594056, JString, required = true,
+        "path argument is necessary due to required `serviceName` field"
+  var valid_564189 = path.getOrDefault("serviceName")
+  valid_564189 = validateParameter(valid_564189, JString, required = true,
                                  default = nil)
-  if valid_594056 != nil:
-    section.add "resourceGroupName", valid_594056
-  var valid_594057 = path.getOrDefault("apiId")
-  valid_594057 = validateParameter(valid_594057, JString, required = true,
+  if valid_564189 != nil:
+    section.add "serviceName", valid_564189
+  var valid_564190 = path.getOrDefault("apiId")
+  valid_564190 = validateParameter(valid_564190, JString, required = true,
                                  default = nil)
-  if valid_594057 != nil:
-    section.add "apiId", valid_594057
-  var valid_594058 = path.getOrDefault("subscriptionId")
-  valid_594058 = validateParameter(valid_594058, JString, required = true,
+  if valid_564190 != nil:
+    section.add "apiId", valid_564190
+  var valid_564191 = path.getOrDefault("subscriptionId")
+  valid_564191 = validateParameter(valid_564191, JString, required = true,
                                  default = nil)
-  if valid_594058 != nil:
-    section.add "subscriptionId", valid_594058
-  var valid_594059 = path.getOrDefault("serviceName")
-  valid_594059 = validateParameter(valid_594059, JString, required = true,
+  if valid_564191 != nil:
+    section.add "subscriptionId", valid_564191
+  var valid_564192 = path.getOrDefault("resourceGroupName")
+  valid_564192 = validateParameter(valid_564192, JString, required = true,
                                  default = nil)
-  if valid_594059 != nil:
-    section.add "serviceName", valid_594059
+  if valid_564192 != nil:
+    section.add "resourceGroupName", valid_564192
   result.add "path", section
   ## parameters in `query` object:
-  ##   api-version: JString (required)
-  ##              : Version of the API to be used with the client request.
   ##   $top: JInt
   ##       : Number of records to return.
+  ##   api-version: JString (required)
+  ##              : Version of the API to be used with the client request.
   ##   $skip: JInt
   ##        : Number of records to skip.
   ##   $filter: JString
@@ -1064,26 +1067,26 @@ proc validate_ApiDiagnosticListByService_594054(path: JsonNode; query: JsonNode;
   ## |name | ge, le, eq, ne, gt, lt | substringof, contains, startswith, endswith|
   ## 
   section = newJObject()
+  var valid_564193 = query.getOrDefault("$top")
+  valid_564193 = validateParameter(valid_564193, JInt, required = false, default = nil)
+  if valid_564193 != nil:
+    section.add "$top", valid_564193
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594060 = query.getOrDefault("api-version")
-  valid_594060 = validateParameter(valid_594060, JString, required = true,
+  var valid_564194 = query.getOrDefault("api-version")
+  valid_564194 = validateParameter(valid_564194, JString, required = true,
                                  default = nil)
-  if valid_594060 != nil:
-    section.add "api-version", valid_594060
-  var valid_594061 = query.getOrDefault("$top")
-  valid_594061 = validateParameter(valid_594061, JInt, required = false, default = nil)
-  if valid_594061 != nil:
-    section.add "$top", valid_594061
-  var valid_594062 = query.getOrDefault("$skip")
-  valid_594062 = validateParameter(valid_594062, JInt, required = false, default = nil)
-  if valid_594062 != nil:
-    section.add "$skip", valid_594062
-  var valid_594063 = query.getOrDefault("$filter")
-  valid_594063 = validateParameter(valid_594063, JString, required = false,
+  if valid_564194 != nil:
+    section.add "api-version", valid_564194
+  var valid_564195 = query.getOrDefault("$skip")
+  valid_564195 = validateParameter(valid_564195, JInt, required = false, default = nil)
+  if valid_564195 != nil:
+    section.add "$skip", valid_564195
+  var valid_564196 = query.getOrDefault("$filter")
+  valid_564196 = validateParameter(valid_564196, JString, required = false,
                                  default = nil)
-  if valid_594063 != nil:
-    section.add "$filter", valid_594063
+  if valid_564196 != nil:
+    section.add "$filter", valid_564196
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1092,65 +1095,65 @@ proc validate_ApiDiagnosticListByService_594054(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594064: Call_ApiDiagnosticListByService_594053; path: JsonNode;
+proc call*(call_564197: Call_ApiDiagnosticListByService_564186; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists all diagnostics of an API.
   ## 
-  let valid = call_594064.validator(path, query, header, formData, body)
-  let scheme = call_594064.pickScheme
+  let valid = call_564197.validator(path, query, header, formData, body)
+  let scheme = call_564197.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594064.url(scheme.get, call_594064.host, call_594064.base,
-                         call_594064.route, valid.getOrDefault("path"),
+  let url = call_564197.url(scheme.get, call_564197.host, call_564197.base,
+                         call_564197.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594064, url, valid)
+  result = hook(call_564197, url, valid)
 
-proc call*(call_594065: Call_ApiDiagnosticListByService_594053;
-          resourceGroupName: string; apiVersion: string; apiId: string;
-          subscriptionId: string; serviceName: string; Top: int = 0; Skip: int = 0;
-          Filter: string = ""): Recallable =
+proc call*(call_564198: Call_ApiDiagnosticListByService_564186;
+          serviceName: string; apiVersion: string; apiId: string;
+          subscriptionId: string; resourceGroupName: string; Top: int = 0;
+          Skip: int = 0; Filter: string = ""): Recallable =
   ## apiDiagnosticListByService
   ## Lists all diagnostics of an API.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   serviceName: string (required)
+  ##              : The name of the API Management service.
+  ##   Top: int
+  ##      : Number of records to return.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
   ##   apiId: string (required)
   ##        : API identifier. Must be unique in the current API Management service instance.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   Top: int
-  ##      : Number of records to return.
   ##   Skip: int
   ##       : Number of records to skip.
-  ##   serviceName: string (required)
-  ##              : The name of the API Management service.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   Filter: string
   ##         : | Field       | Supported operators    | Supported functions               |
   ## |-------------|------------------------|-----------------------------------|
   ## 
   ## |name | ge, le, eq, ne, gt, lt | substringof, contains, startswith, endswith|
   ## 
-  var path_594066 = newJObject()
-  var query_594067 = newJObject()
-  add(path_594066, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594067, "api-version", newJString(apiVersion))
-  add(path_594066, "apiId", newJString(apiId))
-  add(path_594066, "subscriptionId", newJString(subscriptionId))
-  add(query_594067, "$top", newJInt(Top))
-  add(query_594067, "$skip", newJInt(Skip))
-  add(path_594066, "serviceName", newJString(serviceName))
-  add(query_594067, "$filter", newJString(Filter))
-  result = call_594065.call(path_594066, query_594067, nil, nil, nil)
+  var path_564199 = newJObject()
+  var query_564200 = newJObject()
+  add(path_564199, "serviceName", newJString(serviceName))
+  add(query_564200, "$top", newJInt(Top))
+  add(query_564200, "api-version", newJString(apiVersion))
+  add(path_564199, "apiId", newJString(apiId))
+  add(path_564199, "subscriptionId", newJString(subscriptionId))
+  add(query_564200, "$skip", newJInt(Skip))
+  add(path_564199, "resourceGroupName", newJString(resourceGroupName))
+  add(query_564200, "$filter", newJString(Filter))
+  result = call_564198.call(path_564199, query_564200, nil, nil, nil)
 
-var apiDiagnosticListByService* = Call_ApiDiagnosticListByService_594053(
+var apiDiagnosticListByService* = Call_ApiDiagnosticListByService_564186(
     name: "apiDiagnosticListByService", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ApiManagement/service/{serviceName}/apis/{apiId}/diagnostics",
-    validator: validate_ApiDiagnosticListByService_594054, base: "",
-    url: url_ApiDiagnosticListByService_594055, schemes: {Scheme.Https})
+    validator: validate_ApiDiagnosticListByService_564187, base: "",
+    url: url_ApiDiagnosticListByService_564188, schemes: {Scheme.Https})
 type
-  Call_ApiDiagnosticCreateOrUpdate_594081 = ref object of OpenApiRestCall_593425
-proc url_ApiDiagnosticCreateOrUpdate_594083(protocol: Scheme; host: string;
+  Call_ApiDiagnosticCreateOrUpdate_564214 = ref object of OpenApiRestCall_563556
+proc url_ApiDiagnosticCreateOrUpdate_564216(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1179,51 +1182,51 @@ proc url_ApiDiagnosticCreateOrUpdate_594083(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ApiDiagnosticCreateOrUpdate_594082(path: JsonNode; query: JsonNode;
+proc validate_ApiDiagnosticCreateOrUpdate_564215(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Creates a new Diagnostic for an API or updates an existing one.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
+  ##   serviceName: JString (required)
+  ##              : The name of the API Management service.
   ##   apiId: JString (required)
   ##        : API identifier. Must be unique in the current API Management service instance.
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   diagnosticId: JString (required)
   ##               : Diagnostic identifier. Must be unique in the current API Management service instance.
-  ##   serviceName: JString (required)
-  ##              : The name of the API Management service.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594084 = path.getOrDefault("resourceGroupName")
-  valid_594084 = validateParameter(valid_594084, JString, required = true,
+        "path argument is necessary due to required `serviceName` field"
+  var valid_564217 = path.getOrDefault("serviceName")
+  valid_564217 = validateParameter(valid_564217, JString, required = true,
                                  default = nil)
-  if valid_594084 != nil:
-    section.add "resourceGroupName", valid_594084
-  var valid_594085 = path.getOrDefault("apiId")
-  valid_594085 = validateParameter(valid_594085, JString, required = true,
+  if valid_564217 != nil:
+    section.add "serviceName", valid_564217
+  var valid_564218 = path.getOrDefault("apiId")
+  valid_564218 = validateParameter(valid_564218, JString, required = true,
                                  default = nil)
-  if valid_594085 != nil:
-    section.add "apiId", valid_594085
-  var valid_594086 = path.getOrDefault("subscriptionId")
-  valid_594086 = validateParameter(valid_594086, JString, required = true,
+  if valid_564218 != nil:
+    section.add "apiId", valid_564218
+  var valid_564219 = path.getOrDefault("subscriptionId")
+  valid_564219 = validateParameter(valid_564219, JString, required = true,
                                  default = nil)
-  if valid_594086 != nil:
-    section.add "subscriptionId", valid_594086
-  var valid_594087 = path.getOrDefault("diagnosticId")
-  valid_594087 = validateParameter(valid_594087, JString, required = true,
+  if valid_564219 != nil:
+    section.add "subscriptionId", valid_564219
+  var valid_564220 = path.getOrDefault("diagnosticId")
+  valid_564220 = validateParameter(valid_564220, JString, required = true,
                                  default = nil)
-  if valid_594087 != nil:
-    section.add "diagnosticId", valid_594087
-  var valid_594088 = path.getOrDefault("serviceName")
-  valid_594088 = validateParameter(valid_594088, JString, required = true,
+  if valid_564220 != nil:
+    section.add "diagnosticId", valid_564220
+  var valid_564221 = path.getOrDefault("resourceGroupName")
+  valid_564221 = validateParameter(valid_564221, JString, required = true,
                                  default = nil)
-  if valid_594088 != nil:
-    section.add "serviceName", valid_594088
+  if valid_564221 != nil:
+    section.add "resourceGroupName", valid_564221
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1231,21 +1234,21 @@ proc validate_ApiDiagnosticCreateOrUpdate_594082(path: JsonNode; query: JsonNode
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594089 = query.getOrDefault("api-version")
-  valid_594089 = validateParameter(valid_594089, JString, required = true,
+  var valid_564222 = query.getOrDefault("api-version")
+  valid_564222 = validateParameter(valid_564222, JString, required = true,
                                  default = nil)
-  if valid_594089 != nil:
-    section.add "api-version", valid_594089
+  if valid_564222 != nil:
+    section.add "api-version", valid_564222
   result.add "query", section
   ## parameters in `header` object:
   ##   If-Match: JString
   ##           : ETag of the Entity. Not required when creating an entity, but required when updating an entity.
   section = newJObject()
-  var valid_594090 = header.getOrDefault("If-Match")
-  valid_594090 = validateParameter(valid_594090, JString, required = false,
+  var valid_564223 = header.getOrDefault("If-Match")
+  valid_564223 = validateParameter(valid_564223, JString, required = false,
                                  default = nil)
-  if valid_594090 != nil:
-    section.add "If-Match", valid_594090
+  if valid_564223 != nil:
+    section.add "If-Match", valid_564223
   result.add "header", section
   section = newJObject()
   result.add "formData", section
@@ -1257,27 +1260,27 @@ proc validate_ApiDiagnosticCreateOrUpdate_594082(path: JsonNode; query: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_594092: Call_ApiDiagnosticCreateOrUpdate_594081; path: JsonNode;
+proc call*(call_564225: Call_ApiDiagnosticCreateOrUpdate_564214; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Creates a new Diagnostic for an API or updates an existing one.
   ## 
-  let valid = call_594092.validator(path, query, header, formData, body)
-  let scheme = call_594092.pickScheme
+  let valid = call_564225.validator(path, query, header, formData, body)
+  let scheme = call_564225.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594092.url(scheme.get, call_594092.host, call_594092.base,
-                         call_594092.route, valid.getOrDefault("path"),
+  let url = call_564225.url(scheme.get, call_564225.host, call_564225.base,
+                         call_564225.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594092, url, valid)
+  result = hook(call_564225, url, valid)
 
-proc call*(call_594093: Call_ApiDiagnosticCreateOrUpdate_594081;
-          resourceGroupName: string; apiVersion: string; apiId: string;
-          subscriptionId: string; diagnosticId: string; parameters: JsonNode;
-          serviceName: string): Recallable =
+proc call*(call_564226: Call_ApiDiagnosticCreateOrUpdate_564214;
+          serviceName: string; apiVersion: string; apiId: string;
+          subscriptionId: string; diagnosticId: string; resourceGroupName: string;
+          parameters: JsonNode): Recallable =
   ## apiDiagnosticCreateOrUpdate
   ## Creates a new Diagnostic for an API or updates an existing one.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   serviceName: string (required)
+  ##              : The name of the API Management service.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
   ##   apiId: string (required)
@@ -1286,31 +1289,31 @@ proc call*(call_594093: Call_ApiDiagnosticCreateOrUpdate_594081;
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   diagnosticId: string (required)
   ##               : Diagnostic identifier. Must be unique in the current API Management service instance.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   parameters: JObject (required)
   ##             : Create parameters.
-  ##   serviceName: string (required)
-  ##              : The name of the API Management service.
-  var path_594094 = newJObject()
-  var query_594095 = newJObject()
-  var body_594096 = newJObject()
-  add(path_594094, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594095, "api-version", newJString(apiVersion))
-  add(path_594094, "apiId", newJString(apiId))
-  add(path_594094, "subscriptionId", newJString(subscriptionId))
-  add(path_594094, "diagnosticId", newJString(diagnosticId))
+  var path_564227 = newJObject()
+  var query_564228 = newJObject()
+  var body_564229 = newJObject()
+  add(path_564227, "serviceName", newJString(serviceName))
+  add(query_564228, "api-version", newJString(apiVersion))
+  add(path_564227, "apiId", newJString(apiId))
+  add(path_564227, "subscriptionId", newJString(subscriptionId))
+  add(path_564227, "diagnosticId", newJString(diagnosticId))
+  add(path_564227, "resourceGroupName", newJString(resourceGroupName))
   if parameters != nil:
-    body_594096 = parameters
-  add(path_594094, "serviceName", newJString(serviceName))
-  result = call_594093.call(path_594094, query_594095, nil, nil, body_594096)
+    body_564229 = parameters
+  result = call_564226.call(path_564227, query_564228, nil, nil, body_564229)
 
-var apiDiagnosticCreateOrUpdate* = Call_ApiDiagnosticCreateOrUpdate_594081(
+var apiDiagnosticCreateOrUpdate* = Call_ApiDiagnosticCreateOrUpdate_564214(
     name: "apiDiagnosticCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ApiManagement/service/{serviceName}/apis/{apiId}/diagnostics/{diagnosticId}",
-    validator: validate_ApiDiagnosticCreateOrUpdate_594082, base: "",
-    url: url_ApiDiagnosticCreateOrUpdate_594083, schemes: {Scheme.Https})
+    validator: validate_ApiDiagnosticCreateOrUpdate_564215, base: "",
+    url: url_ApiDiagnosticCreateOrUpdate_564216, schemes: {Scheme.Https})
 type
-  Call_ApiDiagnosticGetEntityTag_594111 = ref object of OpenApiRestCall_593425
-proc url_ApiDiagnosticGetEntityTag_594113(protocol: Scheme; host: string;
+  Call_ApiDiagnosticGetEntityTag_564244 = ref object of OpenApiRestCall_563556
+proc url_ApiDiagnosticGetEntityTag_564246(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1339,51 +1342,51 @@ proc url_ApiDiagnosticGetEntityTag_594113(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ApiDiagnosticGetEntityTag_594112(path: JsonNode; query: JsonNode;
+proc validate_ApiDiagnosticGetEntityTag_564245(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the entity state (Etag) version of the Diagnostic for an API specified by its identifier.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
+  ##   serviceName: JString (required)
+  ##              : The name of the API Management service.
   ##   apiId: JString (required)
   ##        : API identifier. Must be unique in the current API Management service instance.
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   diagnosticId: JString (required)
   ##               : Diagnostic identifier. Must be unique in the current API Management service instance.
-  ##   serviceName: JString (required)
-  ##              : The name of the API Management service.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594114 = path.getOrDefault("resourceGroupName")
-  valid_594114 = validateParameter(valid_594114, JString, required = true,
+        "path argument is necessary due to required `serviceName` field"
+  var valid_564247 = path.getOrDefault("serviceName")
+  valid_564247 = validateParameter(valid_564247, JString, required = true,
                                  default = nil)
-  if valid_594114 != nil:
-    section.add "resourceGroupName", valid_594114
-  var valid_594115 = path.getOrDefault("apiId")
-  valid_594115 = validateParameter(valid_594115, JString, required = true,
+  if valid_564247 != nil:
+    section.add "serviceName", valid_564247
+  var valid_564248 = path.getOrDefault("apiId")
+  valid_564248 = validateParameter(valid_564248, JString, required = true,
                                  default = nil)
-  if valid_594115 != nil:
-    section.add "apiId", valid_594115
-  var valid_594116 = path.getOrDefault("subscriptionId")
-  valid_594116 = validateParameter(valid_594116, JString, required = true,
+  if valid_564248 != nil:
+    section.add "apiId", valid_564248
+  var valid_564249 = path.getOrDefault("subscriptionId")
+  valid_564249 = validateParameter(valid_564249, JString, required = true,
                                  default = nil)
-  if valid_594116 != nil:
-    section.add "subscriptionId", valid_594116
-  var valid_594117 = path.getOrDefault("diagnosticId")
-  valid_594117 = validateParameter(valid_594117, JString, required = true,
+  if valid_564249 != nil:
+    section.add "subscriptionId", valid_564249
+  var valid_564250 = path.getOrDefault("diagnosticId")
+  valid_564250 = validateParameter(valid_564250, JString, required = true,
                                  default = nil)
-  if valid_594117 != nil:
-    section.add "diagnosticId", valid_594117
-  var valid_594118 = path.getOrDefault("serviceName")
-  valid_594118 = validateParameter(valid_594118, JString, required = true,
+  if valid_564250 != nil:
+    section.add "diagnosticId", valid_564250
+  var valid_564251 = path.getOrDefault("resourceGroupName")
+  valid_564251 = validateParameter(valid_564251, JString, required = true,
                                  default = nil)
-  if valid_594118 != nil:
-    section.add "serviceName", valid_594118
+  if valid_564251 != nil:
+    section.add "resourceGroupName", valid_564251
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1391,11 +1394,11 @@ proc validate_ApiDiagnosticGetEntityTag_594112(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594119 = query.getOrDefault("api-version")
-  valid_594119 = validateParameter(valid_594119, JString, required = true,
+  var valid_564252 = query.getOrDefault("api-version")
+  valid_564252 = validateParameter(valid_564252, JString, required = true,
                                  default = nil)
-  if valid_594119 != nil:
-    section.add "api-version", valid_594119
+  if valid_564252 != nil:
+    section.add "api-version", valid_564252
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1404,26 +1407,26 @@ proc validate_ApiDiagnosticGetEntityTag_594112(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594120: Call_ApiDiagnosticGetEntityTag_594111; path: JsonNode;
+proc call*(call_564253: Call_ApiDiagnosticGetEntityTag_564244; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the entity state (Etag) version of the Diagnostic for an API specified by its identifier.
   ## 
-  let valid = call_594120.validator(path, query, header, formData, body)
-  let scheme = call_594120.pickScheme
+  let valid = call_564253.validator(path, query, header, formData, body)
+  let scheme = call_564253.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594120.url(scheme.get, call_594120.host, call_594120.base,
-                         call_594120.route, valid.getOrDefault("path"),
+  let url = call_564253.url(scheme.get, call_564253.host, call_564253.base,
+                         call_564253.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594120, url, valid)
+  result = hook(call_564253, url, valid)
 
-proc call*(call_594121: Call_ApiDiagnosticGetEntityTag_594111;
-          resourceGroupName: string; apiVersion: string; apiId: string;
-          subscriptionId: string; diagnosticId: string; serviceName: string): Recallable =
+proc call*(call_564254: Call_ApiDiagnosticGetEntityTag_564244; serviceName: string;
+          apiVersion: string; apiId: string; subscriptionId: string;
+          diagnosticId: string; resourceGroupName: string): Recallable =
   ## apiDiagnosticGetEntityTag
   ## Gets the entity state (Etag) version of the Diagnostic for an API specified by its identifier.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   serviceName: string (required)
+  ##              : The name of the API Management service.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
   ##   apiId: string (required)
@@ -1432,26 +1435,26 @@ proc call*(call_594121: Call_ApiDiagnosticGetEntityTag_594111;
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   diagnosticId: string (required)
   ##               : Diagnostic identifier. Must be unique in the current API Management service instance.
-  ##   serviceName: string (required)
-  ##              : The name of the API Management service.
-  var path_594122 = newJObject()
-  var query_594123 = newJObject()
-  add(path_594122, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594123, "api-version", newJString(apiVersion))
-  add(path_594122, "apiId", newJString(apiId))
-  add(path_594122, "subscriptionId", newJString(subscriptionId))
-  add(path_594122, "diagnosticId", newJString(diagnosticId))
-  add(path_594122, "serviceName", newJString(serviceName))
-  result = call_594121.call(path_594122, query_594123, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564255 = newJObject()
+  var query_564256 = newJObject()
+  add(path_564255, "serviceName", newJString(serviceName))
+  add(query_564256, "api-version", newJString(apiVersion))
+  add(path_564255, "apiId", newJString(apiId))
+  add(path_564255, "subscriptionId", newJString(subscriptionId))
+  add(path_564255, "diagnosticId", newJString(diagnosticId))
+  add(path_564255, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564254.call(path_564255, query_564256, nil, nil, nil)
 
-var apiDiagnosticGetEntityTag* = Call_ApiDiagnosticGetEntityTag_594111(
+var apiDiagnosticGetEntityTag* = Call_ApiDiagnosticGetEntityTag_564244(
     name: "apiDiagnosticGetEntityTag", meth: HttpMethod.HttpHead,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ApiManagement/service/{serviceName}/apis/{apiId}/diagnostics/{diagnosticId}",
-    validator: validate_ApiDiagnosticGetEntityTag_594112, base: "",
-    url: url_ApiDiagnosticGetEntityTag_594113, schemes: {Scheme.Https})
+    validator: validate_ApiDiagnosticGetEntityTag_564245, base: "",
+    url: url_ApiDiagnosticGetEntityTag_564246, schemes: {Scheme.Https})
 type
-  Call_ApiDiagnosticGet_594068 = ref object of OpenApiRestCall_593425
-proc url_ApiDiagnosticGet_594070(protocol: Scheme; host: string; base: string;
+  Call_ApiDiagnosticGet_564201 = ref object of OpenApiRestCall_563556
+proc url_ApiDiagnosticGet_564203(protocol: Scheme; host: string; base: string;
                                 route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1480,7 +1483,7 @@ proc url_ApiDiagnosticGet_594070(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ApiDiagnosticGet_594069(path: JsonNode; query: JsonNode;
+proc validate_ApiDiagnosticGet_564202(path: JsonNode; query: JsonNode;
                                      header: JsonNode; formData: JsonNode;
                                      body: JsonNode): JsonNode =
   ## Gets the details of the Diagnostic for an API specified by its identifier.
@@ -1488,44 +1491,44 @@ proc validate_ApiDiagnosticGet_594069(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
+  ##   serviceName: JString (required)
+  ##              : The name of the API Management service.
   ##   apiId: JString (required)
   ##        : API identifier. Must be unique in the current API Management service instance.
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   diagnosticId: JString (required)
   ##               : Diagnostic identifier. Must be unique in the current API Management service instance.
-  ##   serviceName: JString (required)
-  ##              : The name of the API Management service.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594071 = path.getOrDefault("resourceGroupName")
-  valid_594071 = validateParameter(valid_594071, JString, required = true,
+        "path argument is necessary due to required `serviceName` field"
+  var valid_564204 = path.getOrDefault("serviceName")
+  valid_564204 = validateParameter(valid_564204, JString, required = true,
                                  default = nil)
-  if valid_594071 != nil:
-    section.add "resourceGroupName", valid_594071
-  var valid_594072 = path.getOrDefault("apiId")
-  valid_594072 = validateParameter(valid_594072, JString, required = true,
+  if valid_564204 != nil:
+    section.add "serviceName", valid_564204
+  var valid_564205 = path.getOrDefault("apiId")
+  valid_564205 = validateParameter(valid_564205, JString, required = true,
                                  default = nil)
-  if valid_594072 != nil:
-    section.add "apiId", valid_594072
-  var valid_594073 = path.getOrDefault("subscriptionId")
-  valid_594073 = validateParameter(valid_594073, JString, required = true,
+  if valid_564205 != nil:
+    section.add "apiId", valid_564205
+  var valid_564206 = path.getOrDefault("subscriptionId")
+  valid_564206 = validateParameter(valid_564206, JString, required = true,
                                  default = nil)
-  if valid_594073 != nil:
-    section.add "subscriptionId", valid_594073
-  var valid_594074 = path.getOrDefault("diagnosticId")
-  valid_594074 = validateParameter(valid_594074, JString, required = true,
+  if valid_564206 != nil:
+    section.add "subscriptionId", valid_564206
+  var valid_564207 = path.getOrDefault("diagnosticId")
+  valid_564207 = validateParameter(valid_564207, JString, required = true,
                                  default = nil)
-  if valid_594074 != nil:
-    section.add "diagnosticId", valid_594074
-  var valid_594075 = path.getOrDefault("serviceName")
-  valid_594075 = validateParameter(valid_594075, JString, required = true,
+  if valid_564207 != nil:
+    section.add "diagnosticId", valid_564207
+  var valid_564208 = path.getOrDefault("resourceGroupName")
+  valid_564208 = validateParameter(valid_564208, JString, required = true,
                                  default = nil)
-  if valid_594075 != nil:
-    section.add "serviceName", valid_594075
+  if valid_564208 != nil:
+    section.add "resourceGroupName", valid_564208
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1533,11 +1536,11 @@ proc validate_ApiDiagnosticGet_594069(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594076 = query.getOrDefault("api-version")
-  valid_594076 = validateParameter(valid_594076, JString, required = true,
+  var valid_564209 = query.getOrDefault("api-version")
+  valid_564209 = validateParameter(valid_564209, JString, required = true,
                                  default = nil)
-  if valid_594076 != nil:
-    section.add "api-version", valid_594076
+  if valid_564209 != nil:
+    section.add "api-version", valid_564209
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1546,26 +1549,26 @@ proc validate_ApiDiagnosticGet_594069(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594077: Call_ApiDiagnosticGet_594068; path: JsonNode;
+proc call*(call_564210: Call_ApiDiagnosticGet_564201; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the details of the Diagnostic for an API specified by its identifier.
   ## 
-  let valid = call_594077.validator(path, query, header, formData, body)
-  let scheme = call_594077.pickScheme
+  let valid = call_564210.validator(path, query, header, formData, body)
+  let scheme = call_564210.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594077.url(scheme.get, call_594077.host, call_594077.base,
-                         call_594077.route, valid.getOrDefault("path"),
+  let url = call_564210.url(scheme.get, call_564210.host, call_564210.base,
+                         call_564210.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594077, url, valid)
+  result = hook(call_564210, url, valid)
 
-proc call*(call_594078: Call_ApiDiagnosticGet_594068; resourceGroupName: string;
+proc call*(call_564211: Call_ApiDiagnosticGet_564201; serviceName: string;
           apiVersion: string; apiId: string; subscriptionId: string;
-          diagnosticId: string; serviceName: string): Recallable =
+          diagnosticId: string; resourceGroupName: string): Recallable =
   ## apiDiagnosticGet
   ## Gets the details of the Diagnostic for an API specified by its identifier.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   serviceName: string (required)
+  ##              : The name of the API Management service.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
   ##   apiId: string (required)
@@ -1574,25 +1577,25 @@ proc call*(call_594078: Call_ApiDiagnosticGet_594068; resourceGroupName: string;
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   diagnosticId: string (required)
   ##               : Diagnostic identifier. Must be unique in the current API Management service instance.
-  ##   serviceName: string (required)
-  ##              : The name of the API Management service.
-  var path_594079 = newJObject()
-  var query_594080 = newJObject()
-  add(path_594079, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594080, "api-version", newJString(apiVersion))
-  add(path_594079, "apiId", newJString(apiId))
-  add(path_594079, "subscriptionId", newJString(subscriptionId))
-  add(path_594079, "diagnosticId", newJString(diagnosticId))
-  add(path_594079, "serviceName", newJString(serviceName))
-  result = call_594078.call(path_594079, query_594080, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564212 = newJObject()
+  var query_564213 = newJObject()
+  add(path_564212, "serviceName", newJString(serviceName))
+  add(query_564213, "api-version", newJString(apiVersion))
+  add(path_564212, "apiId", newJString(apiId))
+  add(path_564212, "subscriptionId", newJString(subscriptionId))
+  add(path_564212, "diagnosticId", newJString(diagnosticId))
+  add(path_564212, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564211.call(path_564212, query_564213, nil, nil, nil)
 
-var apiDiagnosticGet* = Call_ApiDiagnosticGet_594068(name: "apiDiagnosticGet",
+var apiDiagnosticGet* = Call_ApiDiagnosticGet_564201(name: "apiDiagnosticGet",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ApiManagement/service/{serviceName}/apis/{apiId}/diagnostics/{diagnosticId}",
-    validator: validate_ApiDiagnosticGet_594069, base: "",
-    url: url_ApiDiagnosticGet_594070, schemes: {Scheme.Https})
+    validator: validate_ApiDiagnosticGet_564202, base: "",
+    url: url_ApiDiagnosticGet_564203, schemes: {Scheme.Https})
 type
-  Call_ApiDiagnosticUpdate_594124 = ref object of OpenApiRestCall_593425
-proc url_ApiDiagnosticUpdate_594126(protocol: Scheme; host: string; base: string;
+  Call_ApiDiagnosticUpdate_564257 = ref object of OpenApiRestCall_563556
+proc url_ApiDiagnosticUpdate_564259(protocol: Scheme; host: string; base: string;
                                    route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1621,7 +1624,7 @@ proc url_ApiDiagnosticUpdate_594126(protocol: Scheme; host: string; base: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ApiDiagnosticUpdate_594125(path: JsonNode; query: JsonNode;
+proc validate_ApiDiagnosticUpdate_564258(path: JsonNode; query: JsonNode;
                                         header: JsonNode; formData: JsonNode;
                                         body: JsonNode): JsonNode =
   ## Updates the details of the Diagnostic for an API specified by its identifier.
@@ -1629,44 +1632,44 @@ proc validate_ApiDiagnosticUpdate_594125(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
+  ##   serviceName: JString (required)
+  ##              : The name of the API Management service.
   ##   apiId: JString (required)
   ##        : API identifier. Must be unique in the current API Management service instance.
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   diagnosticId: JString (required)
   ##               : Diagnostic identifier. Must be unique in the current API Management service instance.
-  ##   serviceName: JString (required)
-  ##              : The name of the API Management service.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594127 = path.getOrDefault("resourceGroupName")
-  valid_594127 = validateParameter(valid_594127, JString, required = true,
+        "path argument is necessary due to required `serviceName` field"
+  var valid_564260 = path.getOrDefault("serviceName")
+  valid_564260 = validateParameter(valid_564260, JString, required = true,
                                  default = nil)
-  if valid_594127 != nil:
-    section.add "resourceGroupName", valid_594127
-  var valid_594128 = path.getOrDefault("apiId")
-  valid_594128 = validateParameter(valid_594128, JString, required = true,
+  if valid_564260 != nil:
+    section.add "serviceName", valid_564260
+  var valid_564261 = path.getOrDefault("apiId")
+  valid_564261 = validateParameter(valid_564261, JString, required = true,
                                  default = nil)
-  if valid_594128 != nil:
-    section.add "apiId", valid_594128
-  var valid_594129 = path.getOrDefault("subscriptionId")
-  valid_594129 = validateParameter(valid_594129, JString, required = true,
+  if valid_564261 != nil:
+    section.add "apiId", valid_564261
+  var valid_564262 = path.getOrDefault("subscriptionId")
+  valid_564262 = validateParameter(valid_564262, JString, required = true,
                                  default = nil)
-  if valid_594129 != nil:
-    section.add "subscriptionId", valid_594129
-  var valid_594130 = path.getOrDefault("diagnosticId")
-  valid_594130 = validateParameter(valid_594130, JString, required = true,
+  if valid_564262 != nil:
+    section.add "subscriptionId", valid_564262
+  var valid_564263 = path.getOrDefault("diagnosticId")
+  valid_564263 = validateParameter(valid_564263, JString, required = true,
                                  default = nil)
-  if valid_594130 != nil:
-    section.add "diagnosticId", valid_594130
-  var valid_594131 = path.getOrDefault("serviceName")
-  valid_594131 = validateParameter(valid_594131, JString, required = true,
+  if valid_564263 != nil:
+    section.add "diagnosticId", valid_564263
+  var valid_564264 = path.getOrDefault("resourceGroupName")
+  valid_564264 = validateParameter(valid_564264, JString, required = true,
                                  default = nil)
-  if valid_594131 != nil:
-    section.add "serviceName", valid_594131
+  if valid_564264 != nil:
+    section.add "resourceGroupName", valid_564264
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1674,11 +1677,11 @@ proc validate_ApiDiagnosticUpdate_594125(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594132 = query.getOrDefault("api-version")
-  valid_594132 = validateParameter(valid_594132, JString, required = true,
+  var valid_564265 = query.getOrDefault("api-version")
+  valid_564265 = validateParameter(valid_564265, JString, required = true,
                                  default = nil)
-  if valid_594132 != nil:
-    section.add "api-version", valid_594132
+  if valid_564265 != nil:
+    section.add "api-version", valid_564265
   result.add "query", section
   ## parameters in `header` object:
   ##   If-Match: JString (required)
@@ -1686,11 +1689,11 @@ proc validate_ApiDiagnosticUpdate_594125(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert header != nil,
         "header argument is necessary due to required `If-Match` field"
-  var valid_594133 = header.getOrDefault("If-Match")
-  valid_594133 = validateParameter(valid_594133, JString, required = true,
+  var valid_564266 = header.getOrDefault("If-Match")
+  valid_564266 = validateParameter(valid_564266, JString, required = true,
                                  default = nil)
-  if valid_594133 != nil:
-    section.add "If-Match", valid_594133
+  if valid_564266 != nil:
+    section.add "If-Match", valid_564266
   result.add "header", section
   section = newJObject()
   result.add "formData", section
@@ -1702,26 +1705,26 @@ proc validate_ApiDiagnosticUpdate_594125(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594135: Call_ApiDiagnosticUpdate_594124; path: JsonNode;
+proc call*(call_564268: Call_ApiDiagnosticUpdate_564257; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Updates the details of the Diagnostic for an API specified by its identifier.
   ## 
-  let valid = call_594135.validator(path, query, header, formData, body)
-  let scheme = call_594135.pickScheme
+  let valid = call_564268.validator(path, query, header, formData, body)
+  let scheme = call_564268.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594135.url(scheme.get, call_594135.host, call_594135.base,
-                         call_594135.route, valid.getOrDefault("path"),
+  let url = call_564268.url(scheme.get, call_564268.host, call_564268.base,
+                         call_564268.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594135, url, valid)
+  result = hook(call_564268, url, valid)
 
-proc call*(call_594136: Call_ApiDiagnosticUpdate_594124; resourceGroupName: string;
+proc call*(call_564269: Call_ApiDiagnosticUpdate_564257; serviceName: string;
           apiVersion: string; apiId: string; subscriptionId: string;
-          diagnosticId: string; parameters: JsonNode; serviceName: string): Recallable =
+          diagnosticId: string; resourceGroupName: string; parameters: JsonNode): Recallable =
   ## apiDiagnosticUpdate
   ## Updates the details of the Diagnostic for an API specified by its identifier.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   serviceName: string (required)
+  ##              : The name of the API Management service.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
   ##   apiId: string (required)
@@ -1730,31 +1733,31 @@ proc call*(call_594136: Call_ApiDiagnosticUpdate_594124; resourceGroupName: stri
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   diagnosticId: string (required)
   ##               : Diagnostic identifier. Must be unique in the current API Management service instance.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   parameters: JObject (required)
   ##             : Diagnostic Update parameters.
-  ##   serviceName: string (required)
-  ##              : The name of the API Management service.
-  var path_594137 = newJObject()
-  var query_594138 = newJObject()
-  var body_594139 = newJObject()
-  add(path_594137, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594138, "api-version", newJString(apiVersion))
-  add(path_594137, "apiId", newJString(apiId))
-  add(path_594137, "subscriptionId", newJString(subscriptionId))
-  add(path_594137, "diagnosticId", newJString(diagnosticId))
+  var path_564270 = newJObject()
+  var query_564271 = newJObject()
+  var body_564272 = newJObject()
+  add(path_564270, "serviceName", newJString(serviceName))
+  add(query_564271, "api-version", newJString(apiVersion))
+  add(path_564270, "apiId", newJString(apiId))
+  add(path_564270, "subscriptionId", newJString(subscriptionId))
+  add(path_564270, "diagnosticId", newJString(diagnosticId))
+  add(path_564270, "resourceGroupName", newJString(resourceGroupName))
   if parameters != nil:
-    body_594139 = parameters
-  add(path_594137, "serviceName", newJString(serviceName))
-  result = call_594136.call(path_594137, query_594138, nil, nil, body_594139)
+    body_564272 = parameters
+  result = call_564269.call(path_564270, query_564271, nil, nil, body_564272)
 
-var apiDiagnosticUpdate* = Call_ApiDiagnosticUpdate_594124(
+var apiDiagnosticUpdate* = Call_ApiDiagnosticUpdate_564257(
     name: "apiDiagnosticUpdate", meth: HttpMethod.HttpPatch,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ApiManagement/service/{serviceName}/apis/{apiId}/diagnostics/{diagnosticId}",
-    validator: validate_ApiDiagnosticUpdate_594125, base: "",
-    url: url_ApiDiagnosticUpdate_594126, schemes: {Scheme.Https})
+    validator: validate_ApiDiagnosticUpdate_564258, base: "",
+    url: url_ApiDiagnosticUpdate_564259, schemes: {Scheme.Https})
 type
-  Call_ApiDiagnosticDelete_594097 = ref object of OpenApiRestCall_593425
-proc url_ApiDiagnosticDelete_594099(protocol: Scheme; host: string; base: string;
+  Call_ApiDiagnosticDelete_564230 = ref object of OpenApiRestCall_563556
+proc url_ApiDiagnosticDelete_564232(protocol: Scheme; host: string; base: string;
                                    route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1783,7 +1786,7 @@ proc url_ApiDiagnosticDelete_594099(protocol: Scheme; host: string; base: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ApiDiagnosticDelete_594098(path: JsonNode; query: JsonNode;
+proc validate_ApiDiagnosticDelete_564231(path: JsonNode; query: JsonNode;
                                         header: JsonNode; formData: JsonNode;
                                         body: JsonNode): JsonNode =
   ## Deletes the specified Diagnostic from an API.
@@ -1791,44 +1794,44 @@ proc validate_ApiDiagnosticDelete_594098(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
+  ##   serviceName: JString (required)
+  ##              : The name of the API Management service.
   ##   apiId: JString (required)
   ##        : API identifier. Must be unique in the current API Management service instance.
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   diagnosticId: JString (required)
   ##               : Diagnostic identifier. Must be unique in the current API Management service instance.
-  ##   serviceName: JString (required)
-  ##              : The name of the API Management service.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594100 = path.getOrDefault("resourceGroupName")
-  valid_594100 = validateParameter(valid_594100, JString, required = true,
+        "path argument is necessary due to required `serviceName` field"
+  var valid_564233 = path.getOrDefault("serviceName")
+  valid_564233 = validateParameter(valid_564233, JString, required = true,
                                  default = nil)
-  if valid_594100 != nil:
-    section.add "resourceGroupName", valid_594100
-  var valid_594101 = path.getOrDefault("apiId")
-  valid_594101 = validateParameter(valid_594101, JString, required = true,
+  if valid_564233 != nil:
+    section.add "serviceName", valid_564233
+  var valid_564234 = path.getOrDefault("apiId")
+  valid_564234 = validateParameter(valid_564234, JString, required = true,
                                  default = nil)
-  if valid_594101 != nil:
-    section.add "apiId", valid_594101
-  var valid_594102 = path.getOrDefault("subscriptionId")
-  valid_594102 = validateParameter(valid_594102, JString, required = true,
+  if valid_564234 != nil:
+    section.add "apiId", valid_564234
+  var valid_564235 = path.getOrDefault("subscriptionId")
+  valid_564235 = validateParameter(valid_564235, JString, required = true,
                                  default = nil)
-  if valid_594102 != nil:
-    section.add "subscriptionId", valid_594102
-  var valid_594103 = path.getOrDefault("diagnosticId")
-  valid_594103 = validateParameter(valid_594103, JString, required = true,
+  if valid_564235 != nil:
+    section.add "subscriptionId", valid_564235
+  var valid_564236 = path.getOrDefault("diagnosticId")
+  valid_564236 = validateParameter(valid_564236, JString, required = true,
                                  default = nil)
-  if valid_594103 != nil:
-    section.add "diagnosticId", valid_594103
-  var valid_594104 = path.getOrDefault("serviceName")
-  valid_594104 = validateParameter(valid_594104, JString, required = true,
+  if valid_564236 != nil:
+    section.add "diagnosticId", valid_564236
+  var valid_564237 = path.getOrDefault("resourceGroupName")
+  valid_564237 = validateParameter(valid_564237, JString, required = true,
                                  default = nil)
-  if valid_594104 != nil:
-    section.add "serviceName", valid_594104
+  if valid_564237 != nil:
+    section.add "resourceGroupName", valid_564237
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1836,11 +1839,11 @@ proc validate_ApiDiagnosticDelete_594098(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594105 = query.getOrDefault("api-version")
-  valid_594105 = validateParameter(valid_594105, JString, required = true,
+  var valid_564238 = query.getOrDefault("api-version")
+  valid_564238 = validateParameter(valid_564238, JString, required = true,
                                  default = nil)
-  if valid_594105 != nil:
-    section.add "api-version", valid_594105
+  if valid_564238 != nil:
+    section.add "api-version", valid_564238
   result.add "query", section
   ## parameters in `header` object:
   ##   If-Match: JString (required)
@@ -1848,37 +1851,37 @@ proc validate_ApiDiagnosticDelete_594098(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert header != nil,
         "header argument is necessary due to required `If-Match` field"
-  var valid_594106 = header.getOrDefault("If-Match")
-  valid_594106 = validateParameter(valid_594106, JString, required = true,
+  var valid_564239 = header.getOrDefault("If-Match")
+  valid_564239 = validateParameter(valid_564239, JString, required = true,
                                  default = nil)
-  if valid_594106 != nil:
-    section.add "If-Match", valid_594106
+  if valid_564239 != nil:
+    section.add "If-Match", valid_564239
   result.add "header", section
   section = newJObject()
   result.add "formData", section
   if body != nil:
     result.add "body", body
 
-proc call*(call_594107: Call_ApiDiagnosticDelete_594097; path: JsonNode;
+proc call*(call_564240: Call_ApiDiagnosticDelete_564230; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes the specified Diagnostic from an API.
   ## 
-  let valid = call_594107.validator(path, query, header, formData, body)
-  let scheme = call_594107.pickScheme
+  let valid = call_564240.validator(path, query, header, formData, body)
+  let scheme = call_564240.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594107.url(scheme.get, call_594107.host, call_594107.base,
-                         call_594107.route, valid.getOrDefault("path"),
+  let url = call_564240.url(scheme.get, call_564240.host, call_564240.base,
+                         call_564240.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594107, url, valid)
+  result = hook(call_564240, url, valid)
 
-proc call*(call_594108: Call_ApiDiagnosticDelete_594097; resourceGroupName: string;
+proc call*(call_564241: Call_ApiDiagnosticDelete_564230; serviceName: string;
           apiVersion: string; apiId: string; subscriptionId: string;
-          diagnosticId: string; serviceName: string): Recallable =
+          diagnosticId: string; resourceGroupName: string): Recallable =
   ## apiDiagnosticDelete
   ## Deletes the specified Diagnostic from an API.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   serviceName: string (required)
+  ##              : The name of the API Management service.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
   ##   apiId: string (required)
@@ -1887,26 +1890,26 @@ proc call*(call_594108: Call_ApiDiagnosticDelete_594097; resourceGroupName: stri
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   diagnosticId: string (required)
   ##               : Diagnostic identifier. Must be unique in the current API Management service instance.
-  ##   serviceName: string (required)
-  ##              : The name of the API Management service.
-  var path_594109 = newJObject()
-  var query_594110 = newJObject()
-  add(path_594109, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594110, "api-version", newJString(apiVersion))
-  add(path_594109, "apiId", newJString(apiId))
-  add(path_594109, "subscriptionId", newJString(subscriptionId))
-  add(path_594109, "diagnosticId", newJString(diagnosticId))
-  add(path_594109, "serviceName", newJString(serviceName))
-  result = call_594108.call(path_594109, query_594110, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564242 = newJObject()
+  var query_564243 = newJObject()
+  add(path_564242, "serviceName", newJString(serviceName))
+  add(query_564243, "api-version", newJString(apiVersion))
+  add(path_564242, "apiId", newJString(apiId))
+  add(path_564242, "subscriptionId", newJString(subscriptionId))
+  add(path_564242, "diagnosticId", newJString(diagnosticId))
+  add(path_564242, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564241.call(path_564242, query_564243, nil, nil, nil)
 
-var apiDiagnosticDelete* = Call_ApiDiagnosticDelete_594097(
+var apiDiagnosticDelete* = Call_ApiDiagnosticDelete_564230(
     name: "apiDiagnosticDelete", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ApiManagement/service/{serviceName}/apis/{apiId}/diagnostics/{diagnosticId}",
-    validator: validate_ApiDiagnosticDelete_594098, base: "",
-    url: url_ApiDiagnosticDelete_594099, schemes: {Scheme.Https})
+    validator: validate_ApiDiagnosticDelete_564231, base: "",
+    url: url_ApiDiagnosticDelete_564232, schemes: {Scheme.Https})
 type
-  Call_ApiIssueListByService_594140 = ref object of OpenApiRestCall_593425
-proc url_ApiIssueListByService_594142(protocol: Scheme; host: string; base: string;
+  Call_ApiIssueListByService_564273 = ref object of OpenApiRestCall_563556
+proc url_ApiIssueListByService_564275(protocol: Scheme; host: string; base: string;
                                      route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1933,52 +1936,50 @@ proc url_ApiIssueListByService_594142(protocol: Scheme; host: string; base: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ApiIssueListByService_594141(path: JsonNode; query: JsonNode;
+proc validate_ApiIssueListByService_564274(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists all issues associated with the specified API.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
+  ##   serviceName: JString (required)
+  ##              : The name of the API Management service.
   ##   apiId: JString (required)
   ##        : API identifier. Must be unique in the current API Management service instance.
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   serviceName: JString (required)
-  ##              : The name of the API Management service.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594143 = path.getOrDefault("resourceGroupName")
-  valid_594143 = validateParameter(valid_594143, JString, required = true,
+        "path argument is necessary due to required `serviceName` field"
+  var valid_564276 = path.getOrDefault("serviceName")
+  valid_564276 = validateParameter(valid_564276, JString, required = true,
                                  default = nil)
-  if valid_594143 != nil:
-    section.add "resourceGroupName", valid_594143
-  var valid_594144 = path.getOrDefault("apiId")
-  valid_594144 = validateParameter(valid_594144, JString, required = true,
+  if valid_564276 != nil:
+    section.add "serviceName", valid_564276
+  var valid_564277 = path.getOrDefault("apiId")
+  valid_564277 = validateParameter(valid_564277, JString, required = true,
                                  default = nil)
-  if valid_594144 != nil:
-    section.add "apiId", valid_594144
-  var valid_594145 = path.getOrDefault("subscriptionId")
-  valid_594145 = validateParameter(valid_594145, JString, required = true,
+  if valid_564277 != nil:
+    section.add "apiId", valid_564277
+  var valid_564278 = path.getOrDefault("subscriptionId")
+  valid_564278 = validateParameter(valid_564278, JString, required = true,
                                  default = nil)
-  if valid_594145 != nil:
-    section.add "subscriptionId", valid_594145
-  var valid_594146 = path.getOrDefault("serviceName")
-  valid_594146 = validateParameter(valid_594146, JString, required = true,
+  if valid_564278 != nil:
+    section.add "subscriptionId", valid_564278
+  var valid_564279 = path.getOrDefault("resourceGroupName")
+  valid_564279 = validateParameter(valid_564279, JString, required = true,
                                  default = nil)
-  if valid_594146 != nil:
-    section.add "serviceName", valid_594146
+  if valid_564279 != nil:
+    section.add "resourceGroupName", valid_564279
   result.add "path", section
   ## parameters in `query` object:
-  ##   expandCommentsAttachments: JBool
-  ##                            : Expand the comment attachments. 
-  ##   api-version: JString (required)
-  ##              : Version of the API to be used with the client request.
   ##   $top: JInt
   ##       : Number of records to return.
+  ##   api-version: JString (required)
+  ##              : Version of the API to be used with the client request.
   ##   $skip: JInt
   ##        : Number of records to skip.
   ##   $filter: JString
@@ -1989,31 +1990,33 @@ proc validate_ApiIssueListByService_594141(path: JsonNode; query: JsonNode;
   ## |userId | ge, le, eq, ne, gt, lt | substringof, contains, startswith, endswith|
   ## |state | eq |    |
   ## 
+  ##   expandCommentsAttachments: JBool
+  ##                            : Expand the comment attachments. 
   section = newJObject()
-  var valid_594147 = query.getOrDefault("expandCommentsAttachments")
-  valid_594147 = validateParameter(valid_594147, JBool, required = false, default = nil)
-  if valid_594147 != nil:
-    section.add "expandCommentsAttachments", valid_594147
+  var valid_564280 = query.getOrDefault("$top")
+  valid_564280 = validateParameter(valid_564280, JInt, required = false, default = nil)
+  if valid_564280 != nil:
+    section.add "$top", valid_564280
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594148 = query.getOrDefault("api-version")
-  valid_594148 = validateParameter(valid_594148, JString, required = true,
+  var valid_564281 = query.getOrDefault("api-version")
+  valid_564281 = validateParameter(valid_564281, JString, required = true,
                                  default = nil)
-  if valid_594148 != nil:
-    section.add "api-version", valid_594148
-  var valid_594149 = query.getOrDefault("$top")
-  valid_594149 = validateParameter(valid_594149, JInt, required = false, default = nil)
-  if valid_594149 != nil:
-    section.add "$top", valid_594149
-  var valid_594150 = query.getOrDefault("$skip")
-  valid_594150 = validateParameter(valid_594150, JInt, required = false, default = nil)
-  if valid_594150 != nil:
-    section.add "$skip", valid_594150
-  var valid_594151 = query.getOrDefault("$filter")
-  valid_594151 = validateParameter(valid_594151, JString, required = false,
+  if valid_564281 != nil:
+    section.add "api-version", valid_564281
+  var valid_564282 = query.getOrDefault("$skip")
+  valid_564282 = validateParameter(valid_564282, JInt, required = false, default = nil)
+  if valid_564282 != nil:
+    section.add "$skip", valid_564282
+  var valid_564283 = query.getOrDefault("$filter")
+  valid_564283 = validateParameter(valid_564283, JString, required = false,
                                  default = nil)
-  if valid_594151 != nil:
-    section.add "$filter", valid_594151
+  if valid_564283 != nil:
+    section.add "$filter", valid_564283
+  var valid_564284 = query.getOrDefault("expandCommentsAttachments")
+  valid_564284 = validateParameter(valid_564284, JBool, required = false, default = nil)
+  if valid_564284 != nil:
+    section.add "expandCommentsAttachments", valid_564284
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2022,42 +2025,39 @@ proc validate_ApiIssueListByService_594141(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594152: Call_ApiIssueListByService_594140; path: JsonNode;
+proc call*(call_564285: Call_ApiIssueListByService_564273; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists all issues associated with the specified API.
   ## 
-  let valid = call_594152.validator(path, query, header, formData, body)
-  let scheme = call_594152.pickScheme
+  let valid = call_564285.validator(path, query, header, formData, body)
+  let scheme = call_564285.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594152.url(scheme.get, call_594152.host, call_594152.base,
-                         call_594152.route, valid.getOrDefault("path"),
+  let url = call_564285.url(scheme.get, call_564285.host, call_564285.base,
+                         call_564285.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594152, url, valid)
+  result = hook(call_564285, url, valid)
 
-proc call*(call_594153: Call_ApiIssueListByService_594140;
-          resourceGroupName: string; apiVersion: string; apiId: string;
-          subscriptionId: string; serviceName: string;
-          expandCommentsAttachments: bool = false; Top: int = 0; Skip: int = 0;
-          Filter: string = ""): Recallable =
+proc call*(call_564286: Call_ApiIssueListByService_564273; serviceName: string;
+          apiVersion: string; apiId: string; subscriptionId: string;
+          resourceGroupName: string; Top: int = 0; Skip: int = 0; Filter: string = "";
+          expandCommentsAttachments: bool = false): Recallable =
   ## apiIssueListByService
   ## Lists all issues associated with the specified API.
-  ##   expandCommentsAttachments: bool
-  ##                            : Expand the comment attachments. 
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   serviceName: string (required)
+  ##              : The name of the API Management service.
+  ##   Top: int
+  ##      : Number of records to return.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
   ##   apiId: string (required)
   ##        : API identifier. Must be unique in the current API Management service instance.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   Top: int
-  ##      : Number of records to return.
   ##   Skip: int
   ##       : Number of records to skip.
-  ##   serviceName: string (required)
-  ##              : The name of the API Management service.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   Filter: string
   ##         : | Field       | Supported operators    | Supported functions               |
   ## |-------------|------------------------|-----------------------------------|
@@ -2066,28 +2066,30 @@ proc call*(call_594153: Call_ApiIssueListByService_594140;
   ## |userId | ge, le, eq, ne, gt, lt | substringof, contains, startswith, endswith|
   ## |state | eq |    |
   ## 
-  var path_594154 = newJObject()
-  var query_594155 = newJObject()
-  add(query_594155, "expandCommentsAttachments",
+  ##   expandCommentsAttachments: bool
+  ##                            : Expand the comment attachments. 
+  var path_564287 = newJObject()
+  var query_564288 = newJObject()
+  add(path_564287, "serviceName", newJString(serviceName))
+  add(query_564288, "$top", newJInt(Top))
+  add(query_564288, "api-version", newJString(apiVersion))
+  add(path_564287, "apiId", newJString(apiId))
+  add(path_564287, "subscriptionId", newJString(subscriptionId))
+  add(query_564288, "$skip", newJInt(Skip))
+  add(path_564287, "resourceGroupName", newJString(resourceGroupName))
+  add(query_564288, "$filter", newJString(Filter))
+  add(query_564288, "expandCommentsAttachments",
       newJBool(expandCommentsAttachments))
-  add(path_594154, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594155, "api-version", newJString(apiVersion))
-  add(path_594154, "apiId", newJString(apiId))
-  add(path_594154, "subscriptionId", newJString(subscriptionId))
-  add(query_594155, "$top", newJInt(Top))
-  add(query_594155, "$skip", newJInt(Skip))
-  add(path_594154, "serviceName", newJString(serviceName))
-  add(query_594155, "$filter", newJString(Filter))
-  result = call_594153.call(path_594154, query_594155, nil, nil, nil)
+  result = call_564286.call(path_564287, query_564288, nil, nil, nil)
 
-var apiIssueListByService* = Call_ApiIssueListByService_594140(
+var apiIssueListByService* = Call_ApiIssueListByService_564273(
     name: "apiIssueListByService", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ApiManagement/service/{serviceName}/apis/{apiId}/issues",
-    validator: validate_ApiIssueListByService_594141, base: "",
-    url: url_ApiIssueListByService_594142, schemes: {Scheme.Https})
+    validator: validate_ApiIssueListByService_564274, base: "",
+    url: url_ApiIssueListByService_564275, schemes: {Scheme.Https})
 type
-  Call_ApiIssueCreateOrUpdate_594170 = ref object of OpenApiRestCall_593425
-proc url_ApiIssueCreateOrUpdate_594172(protocol: Scheme; host: string; base: string;
+  Call_ApiIssueCreateOrUpdate_564303 = ref object of OpenApiRestCall_563556
+proc url_ApiIssueCreateOrUpdate_564305(protocol: Scheme; host: string; base: string;
                                       route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2116,51 +2118,51 @@ proc url_ApiIssueCreateOrUpdate_594172(protocol: Scheme; host: string; base: str
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ApiIssueCreateOrUpdate_594171(path: JsonNode; query: JsonNode;
+proc validate_ApiIssueCreateOrUpdate_564304(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Creates a new Issue for an API or updates an existing one.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
+  ##   serviceName: JString (required)
+  ##              : The name of the API Management service.
   ##   apiId: JString (required)
   ##        : API identifier. Must be unique in the current API Management service instance.
   ##   issueId: JString (required)
   ##          : Issue identifier. Must be unique in the current API Management service instance.
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   serviceName: JString (required)
-  ##              : The name of the API Management service.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594173 = path.getOrDefault("resourceGroupName")
-  valid_594173 = validateParameter(valid_594173, JString, required = true,
+        "path argument is necessary due to required `serviceName` field"
+  var valid_564306 = path.getOrDefault("serviceName")
+  valid_564306 = validateParameter(valid_564306, JString, required = true,
                                  default = nil)
-  if valid_594173 != nil:
-    section.add "resourceGroupName", valid_594173
-  var valid_594174 = path.getOrDefault("apiId")
-  valid_594174 = validateParameter(valid_594174, JString, required = true,
+  if valid_564306 != nil:
+    section.add "serviceName", valid_564306
+  var valid_564307 = path.getOrDefault("apiId")
+  valid_564307 = validateParameter(valid_564307, JString, required = true,
                                  default = nil)
-  if valid_594174 != nil:
-    section.add "apiId", valid_594174
-  var valid_594175 = path.getOrDefault("issueId")
-  valid_594175 = validateParameter(valid_594175, JString, required = true,
+  if valid_564307 != nil:
+    section.add "apiId", valid_564307
+  var valid_564308 = path.getOrDefault("issueId")
+  valid_564308 = validateParameter(valid_564308, JString, required = true,
                                  default = nil)
-  if valid_594175 != nil:
-    section.add "issueId", valid_594175
-  var valid_594176 = path.getOrDefault("subscriptionId")
-  valid_594176 = validateParameter(valid_594176, JString, required = true,
+  if valid_564308 != nil:
+    section.add "issueId", valid_564308
+  var valid_564309 = path.getOrDefault("subscriptionId")
+  valid_564309 = validateParameter(valid_564309, JString, required = true,
                                  default = nil)
-  if valid_594176 != nil:
-    section.add "subscriptionId", valid_594176
-  var valid_594177 = path.getOrDefault("serviceName")
-  valid_594177 = validateParameter(valid_594177, JString, required = true,
+  if valid_564309 != nil:
+    section.add "subscriptionId", valid_564309
+  var valid_564310 = path.getOrDefault("resourceGroupName")
+  valid_564310 = validateParameter(valid_564310, JString, required = true,
                                  default = nil)
-  if valid_594177 != nil:
-    section.add "serviceName", valid_594177
+  if valid_564310 != nil:
+    section.add "resourceGroupName", valid_564310
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2168,21 +2170,21 @@ proc validate_ApiIssueCreateOrUpdate_594171(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594178 = query.getOrDefault("api-version")
-  valid_594178 = validateParameter(valid_594178, JString, required = true,
+  var valid_564311 = query.getOrDefault("api-version")
+  valid_564311 = validateParameter(valid_564311, JString, required = true,
                                  default = nil)
-  if valid_594178 != nil:
-    section.add "api-version", valid_594178
+  if valid_564311 != nil:
+    section.add "api-version", valid_564311
   result.add "query", section
   ## parameters in `header` object:
   ##   If-Match: JString
   ##           : ETag of the Entity. Not required when creating an entity, but required when updating an entity.
   section = newJObject()
-  var valid_594179 = header.getOrDefault("If-Match")
-  valid_594179 = validateParameter(valid_594179, JString, required = false,
+  var valid_564312 = header.getOrDefault("If-Match")
+  valid_564312 = validateParameter(valid_564312, JString, required = false,
                                  default = nil)
-  if valid_594179 != nil:
-    section.add "If-Match", valid_594179
+  if valid_564312 != nil:
+    section.add "If-Match", valid_564312
   result.add "header", section
   section = newJObject()
   result.add "formData", section
@@ -2194,27 +2196,26 @@ proc validate_ApiIssueCreateOrUpdate_594171(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594181: Call_ApiIssueCreateOrUpdate_594170; path: JsonNode;
+proc call*(call_564314: Call_ApiIssueCreateOrUpdate_564303; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Creates a new Issue for an API or updates an existing one.
   ## 
-  let valid = call_594181.validator(path, query, header, formData, body)
-  let scheme = call_594181.pickScheme
+  let valid = call_564314.validator(path, query, header, formData, body)
+  let scheme = call_564314.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594181.url(scheme.get, call_594181.host, call_594181.base,
-                         call_594181.route, valid.getOrDefault("path"),
+  let url = call_564314.url(scheme.get, call_564314.host, call_564314.base,
+                         call_564314.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594181, url, valid)
+  result = hook(call_564314, url, valid)
 
-proc call*(call_594182: Call_ApiIssueCreateOrUpdate_594170;
-          resourceGroupName: string; apiVersion: string; apiId: string;
-          issueId: string; subscriptionId: string; parameters: JsonNode;
-          serviceName: string): Recallable =
+proc call*(call_564315: Call_ApiIssueCreateOrUpdate_564303; serviceName: string;
+          apiVersion: string; apiId: string; issueId: string; subscriptionId: string;
+          resourceGroupName: string; parameters: JsonNode): Recallable =
   ## apiIssueCreateOrUpdate
   ## Creates a new Issue for an API or updates an existing one.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   serviceName: string (required)
+  ##              : The name of the API Management service.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
   ##   apiId: string (required)
@@ -2223,31 +2224,31 @@ proc call*(call_594182: Call_ApiIssueCreateOrUpdate_594170;
   ##          : Issue identifier. Must be unique in the current API Management service instance.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   parameters: JObject (required)
   ##             : Create parameters.
-  ##   serviceName: string (required)
-  ##              : The name of the API Management service.
-  var path_594183 = newJObject()
-  var query_594184 = newJObject()
-  var body_594185 = newJObject()
-  add(path_594183, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594184, "api-version", newJString(apiVersion))
-  add(path_594183, "apiId", newJString(apiId))
-  add(path_594183, "issueId", newJString(issueId))
-  add(path_594183, "subscriptionId", newJString(subscriptionId))
+  var path_564316 = newJObject()
+  var query_564317 = newJObject()
+  var body_564318 = newJObject()
+  add(path_564316, "serviceName", newJString(serviceName))
+  add(query_564317, "api-version", newJString(apiVersion))
+  add(path_564316, "apiId", newJString(apiId))
+  add(path_564316, "issueId", newJString(issueId))
+  add(path_564316, "subscriptionId", newJString(subscriptionId))
+  add(path_564316, "resourceGroupName", newJString(resourceGroupName))
   if parameters != nil:
-    body_594185 = parameters
-  add(path_594183, "serviceName", newJString(serviceName))
-  result = call_594182.call(path_594183, query_594184, nil, nil, body_594185)
+    body_564318 = parameters
+  result = call_564315.call(path_564316, query_564317, nil, nil, body_564318)
 
-var apiIssueCreateOrUpdate* = Call_ApiIssueCreateOrUpdate_594170(
+var apiIssueCreateOrUpdate* = Call_ApiIssueCreateOrUpdate_564303(
     name: "apiIssueCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ApiManagement/service/{serviceName}/apis/{apiId}/issues/{issueId}",
-    validator: validate_ApiIssueCreateOrUpdate_594171, base: "",
-    url: url_ApiIssueCreateOrUpdate_594172, schemes: {Scheme.Https})
+    validator: validate_ApiIssueCreateOrUpdate_564304, base: "",
+    url: url_ApiIssueCreateOrUpdate_564305, schemes: {Scheme.Https})
 type
-  Call_ApiIssueGetEntityTag_594200 = ref object of OpenApiRestCall_593425
-proc url_ApiIssueGetEntityTag_594202(protocol: Scheme; host: string; base: string;
+  Call_ApiIssueGetEntityTag_564333 = ref object of OpenApiRestCall_563556
+proc url_ApiIssueGetEntityTag_564335(protocol: Scheme; host: string; base: string;
                                     route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2276,51 +2277,51 @@ proc url_ApiIssueGetEntityTag_594202(protocol: Scheme; host: string; base: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ApiIssueGetEntityTag_594201(path: JsonNode; query: JsonNode;
+proc validate_ApiIssueGetEntityTag_564334(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the entity state (Etag) version of the Issue for an API specified by its identifier.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
+  ##   serviceName: JString (required)
+  ##              : The name of the API Management service.
   ##   apiId: JString (required)
   ##        : API identifier. Must be unique in the current API Management service instance.
   ##   issueId: JString (required)
   ##          : Issue identifier. Must be unique in the current API Management service instance.
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   serviceName: JString (required)
-  ##              : The name of the API Management service.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594203 = path.getOrDefault("resourceGroupName")
-  valid_594203 = validateParameter(valid_594203, JString, required = true,
+        "path argument is necessary due to required `serviceName` field"
+  var valid_564336 = path.getOrDefault("serviceName")
+  valid_564336 = validateParameter(valid_564336, JString, required = true,
                                  default = nil)
-  if valid_594203 != nil:
-    section.add "resourceGroupName", valid_594203
-  var valid_594204 = path.getOrDefault("apiId")
-  valid_594204 = validateParameter(valid_594204, JString, required = true,
+  if valid_564336 != nil:
+    section.add "serviceName", valid_564336
+  var valid_564337 = path.getOrDefault("apiId")
+  valid_564337 = validateParameter(valid_564337, JString, required = true,
                                  default = nil)
-  if valid_594204 != nil:
-    section.add "apiId", valid_594204
-  var valid_594205 = path.getOrDefault("issueId")
-  valid_594205 = validateParameter(valid_594205, JString, required = true,
+  if valid_564337 != nil:
+    section.add "apiId", valid_564337
+  var valid_564338 = path.getOrDefault("issueId")
+  valid_564338 = validateParameter(valid_564338, JString, required = true,
                                  default = nil)
-  if valid_594205 != nil:
-    section.add "issueId", valid_594205
-  var valid_594206 = path.getOrDefault("subscriptionId")
-  valid_594206 = validateParameter(valid_594206, JString, required = true,
+  if valid_564338 != nil:
+    section.add "issueId", valid_564338
+  var valid_564339 = path.getOrDefault("subscriptionId")
+  valid_564339 = validateParameter(valid_564339, JString, required = true,
                                  default = nil)
-  if valid_594206 != nil:
-    section.add "subscriptionId", valid_594206
-  var valid_594207 = path.getOrDefault("serviceName")
-  valid_594207 = validateParameter(valid_594207, JString, required = true,
+  if valid_564339 != nil:
+    section.add "subscriptionId", valid_564339
+  var valid_564340 = path.getOrDefault("resourceGroupName")
+  valid_564340 = validateParameter(valid_564340, JString, required = true,
                                  default = nil)
-  if valid_594207 != nil:
-    section.add "serviceName", valid_594207
+  if valid_564340 != nil:
+    section.add "resourceGroupName", valid_564340
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2328,11 +2329,11 @@ proc validate_ApiIssueGetEntityTag_594201(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594208 = query.getOrDefault("api-version")
-  valid_594208 = validateParameter(valid_594208, JString, required = true,
+  var valid_564341 = query.getOrDefault("api-version")
+  valid_564341 = validateParameter(valid_564341, JString, required = true,
                                  default = nil)
-  if valid_594208 != nil:
-    section.add "api-version", valid_594208
+  if valid_564341 != nil:
+    section.add "api-version", valid_564341
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2341,26 +2342,26 @@ proc validate_ApiIssueGetEntityTag_594201(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594209: Call_ApiIssueGetEntityTag_594200; path: JsonNode;
+proc call*(call_564342: Call_ApiIssueGetEntityTag_564333; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the entity state (Etag) version of the Issue for an API specified by its identifier.
   ## 
-  let valid = call_594209.validator(path, query, header, formData, body)
-  let scheme = call_594209.pickScheme
+  let valid = call_564342.validator(path, query, header, formData, body)
+  let scheme = call_564342.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594209.url(scheme.get, call_594209.host, call_594209.base,
-                         call_594209.route, valid.getOrDefault("path"),
+  let url = call_564342.url(scheme.get, call_564342.host, call_564342.base,
+                         call_564342.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594209, url, valid)
+  result = hook(call_564342, url, valid)
 
-proc call*(call_594210: Call_ApiIssueGetEntityTag_594200;
-          resourceGroupName: string; apiVersion: string; apiId: string;
-          issueId: string; subscriptionId: string; serviceName: string): Recallable =
+proc call*(call_564343: Call_ApiIssueGetEntityTag_564333; serviceName: string;
+          apiVersion: string; apiId: string; issueId: string; subscriptionId: string;
+          resourceGroupName: string): Recallable =
   ## apiIssueGetEntityTag
   ## Gets the entity state (Etag) version of the Issue for an API specified by its identifier.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   serviceName: string (required)
+  ##              : The name of the API Management service.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
   ##   apiId: string (required)
@@ -2369,26 +2370,26 @@ proc call*(call_594210: Call_ApiIssueGetEntityTag_594200;
   ##          : Issue identifier. Must be unique in the current API Management service instance.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   serviceName: string (required)
-  ##              : The name of the API Management service.
-  var path_594211 = newJObject()
-  var query_594212 = newJObject()
-  add(path_594211, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594212, "api-version", newJString(apiVersion))
-  add(path_594211, "apiId", newJString(apiId))
-  add(path_594211, "issueId", newJString(issueId))
-  add(path_594211, "subscriptionId", newJString(subscriptionId))
-  add(path_594211, "serviceName", newJString(serviceName))
-  result = call_594210.call(path_594211, query_594212, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564344 = newJObject()
+  var query_564345 = newJObject()
+  add(path_564344, "serviceName", newJString(serviceName))
+  add(query_564345, "api-version", newJString(apiVersion))
+  add(path_564344, "apiId", newJString(apiId))
+  add(path_564344, "issueId", newJString(issueId))
+  add(path_564344, "subscriptionId", newJString(subscriptionId))
+  add(path_564344, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564343.call(path_564344, query_564345, nil, nil, nil)
 
-var apiIssueGetEntityTag* = Call_ApiIssueGetEntityTag_594200(
+var apiIssueGetEntityTag* = Call_ApiIssueGetEntityTag_564333(
     name: "apiIssueGetEntityTag", meth: HttpMethod.HttpHead,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ApiManagement/service/{serviceName}/apis/{apiId}/issues/{issueId}",
-    validator: validate_ApiIssueGetEntityTag_594201, base: "",
-    url: url_ApiIssueGetEntityTag_594202, schemes: {Scheme.Https})
+    validator: validate_ApiIssueGetEntityTag_564334, base: "",
+    url: url_ApiIssueGetEntityTag_564335, schemes: {Scheme.Https})
 type
-  Call_ApiIssueGet_594156 = ref object of OpenApiRestCall_593425
-proc url_ApiIssueGet_594158(protocol: Scheme; host: string; base: string;
+  Call_ApiIssueGet_564289 = ref object of OpenApiRestCall_563556
+proc url_ApiIssueGet_564291(protocol: Scheme; host: string; base: string;
                            route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2417,69 +2418,69 @@ proc url_ApiIssueGet_594158(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ApiIssueGet_594157(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_ApiIssueGet_564290(path: JsonNode; query: JsonNode; header: JsonNode;
                                 formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the details of the Issue for an API specified by its identifier.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
+  ##   serviceName: JString (required)
+  ##              : The name of the API Management service.
   ##   apiId: JString (required)
   ##        : API identifier. Must be unique in the current API Management service instance.
   ##   issueId: JString (required)
   ##          : Issue identifier. Must be unique in the current API Management service instance.
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   serviceName: JString (required)
-  ##              : The name of the API Management service.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594159 = path.getOrDefault("resourceGroupName")
-  valid_594159 = validateParameter(valid_594159, JString, required = true,
+        "path argument is necessary due to required `serviceName` field"
+  var valid_564292 = path.getOrDefault("serviceName")
+  valid_564292 = validateParameter(valid_564292, JString, required = true,
                                  default = nil)
-  if valid_594159 != nil:
-    section.add "resourceGroupName", valid_594159
-  var valid_594160 = path.getOrDefault("apiId")
-  valid_594160 = validateParameter(valid_594160, JString, required = true,
+  if valid_564292 != nil:
+    section.add "serviceName", valid_564292
+  var valid_564293 = path.getOrDefault("apiId")
+  valid_564293 = validateParameter(valid_564293, JString, required = true,
                                  default = nil)
-  if valid_594160 != nil:
-    section.add "apiId", valid_594160
-  var valid_594161 = path.getOrDefault("issueId")
-  valid_594161 = validateParameter(valid_594161, JString, required = true,
+  if valid_564293 != nil:
+    section.add "apiId", valid_564293
+  var valid_564294 = path.getOrDefault("issueId")
+  valid_564294 = validateParameter(valid_564294, JString, required = true,
                                  default = nil)
-  if valid_594161 != nil:
-    section.add "issueId", valid_594161
-  var valid_594162 = path.getOrDefault("subscriptionId")
-  valid_594162 = validateParameter(valid_594162, JString, required = true,
+  if valid_564294 != nil:
+    section.add "issueId", valid_564294
+  var valid_564295 = path.getOrDefault("subscriptionId")
+  valid_564295 = validateParameter(valid_564295, JString, required = true,
                                  default = nil)
-  if valid_594162 != nil:
-    section.add "subscriptionId", valid_594162
-  var valid_594163 = path.getOrDefault("serviceName")
-  valid_594163 = validateParameter(valid_594163, JString, required = true,
+  if valid_564295 != nil:
+    section.add "subscriptionId", valid_564295
+  var valid_564296 = path.getOrDefault("resourceGroupName")
+  valid_564296 = validateParameter(valid_564296, JString, required = true,
                                  default = nil)
-  if valid_594163 != nil:
-    section.add "serviceName", valid_594163
+  if valid_564296 != nil:
+    section.add "resourceGroupName", valid_564296
   result.add "path", section
   ## parameters in `query` object:
-  ##   expandCommentsAttachments: JBool
-  ##                            : Expand the comment attachments. 
   ##   api-version: JString (required)
   ##              : Version of the API to be used with the client request.
+  ##   expandCommentsAttachments: JBool
+  ##                            : Expand the comment attachments. 
   section = newJObject()
-  var valid_594164 = query.getOrDefault("expandCommentsAttachments")
-  valid_594164 = validateParameter(valid_594164, JBool, required = false, default = nil)
-  if valid_594164 != nil:
-    section.add "expandCommentsAttachments", valid_594164
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594165 = query.getOrDefault("api-version")
-  valid_594165 = validateParameter(valid_594165, JString, required = true,
+  var valid_564297 = query.getOrDefault("api-version")
+  valid_564297 = validateParameter(valid_564297, JString, required = true,
                                  default = nil)
-  if valid_594165 != nil:
-    section.add "api-version", valid_594165
+  if valid_564297 != nil:
+    section.add "api-version", valid_564297
+  var valid_564298 = query.getOrDefault("expandCommentsAttachments")
+  valid_564298 = validateParameter(valid_564298, JBool, required = false, default = nil)
+  if valid_564298 != nil:
+    section.add "expandCommentsAttachments", valid_564298
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2488,28 +2489,26 @@ proc validate_ApiIssueGet_594157(path: JsonNode; query: JsonNode; header: JsonNo
   if body != nil:
     result.add "body", body
 
-proc call*(call_594166: Call_ApiIssueGet_594156; path: JsonNode; query: JsonNode;
+proc call*(call_564299: Call_ApiIssueGet_564289; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the details of the Issue for an API specified by its identifier.
   ## 
-  let valid = call_594166.validator(path, query, header, formData, body)
-  let scheme = call_594166.pickScheme
+  let valid = call_564299.validator(path, query, header, formData, body)
+  let scheme = call_564299.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594166.url(scheme.get, call_594166.host, call_594166.base,
-                         call_594166.route, valid.getOrDefault("path"),
+  let url = call_564299.url(scheme.get, call_564299.host, call_564299.base,
+                         call_564299.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594166, url, valid)
+  result = hook(call_564299, url, valid)
 
-proc call*(call_594167: Call_ApiIssueGet_594156; resourceGroupName: string;
+proc call*(call_564300: Call_ApiIssueGet_564289; serviceName: string;
           apiVersion: string; apiId: string; issueId: string; subscriptionId: string;
-          serviceName: string; expandCommentsAttachments: bool = false): Recallable =
+          resourceGroupName: string; expandCommentsAttachments: bool = false): Recallable =
   ## apiIssueGet
   ## Gets the details of the Issue for an API specified by its identifier.
-  ##   expandCommentsAttachments: bool
-  ##                            : Expand the comment attachments. 
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   serviceName: string (required)
+  ##              : The name of the API Management service.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
   ##   apiId: string (required)
@@ -2518,29 +2517,31 @@ proc call*(call_594167: Call_ApiIssueGet_594156; resourceGroupName: string;
   ##          : Issue identifier. Must be unique in the current API Management service instance.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   serviceName: string (required)
-  ##              : The name of the API Management service.
-  var path_594168 = newJObject()
-  var query_594169 = newJObject()
-  add(query_594169, "expandCommentsAttachments",
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  ##   expandCommentsAttachments: bool
+  ##                            : Expand the comment attachments. 
+  var path_564301 = newJObject()
+  var query_564302 = newJObject()
+  add(path_564301, "serviceName", newJString(serviceName))
+  add(query_564302, "api-version", newJString(apiVersion))
+  add(path_564301, "apiId", newJString(apiId))
+  add(path_564301, "issueId", newJString(issueId))
+  add(path_564301, "subscriptionId", newJString(subscriptionId))
+  add(path_564301, "resourceGroupName", newJString(resourceGroupName))
+  add(query_564302, "expandCommentsAttachments",
       newJBool(expandCommentsAttachments))
-  add(path_594168, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594169, "api-version", newJString(apiVersion))
-  add(path_594168, "apiId", newJString(apiId))
-  add(path_594168, "issueId", newJString(issueId))
-  add(path_594168, "subscriptionId", newJString(subscriptionId))
-  add(path_594168, "serviceName", newJString(serviceName))
-  result = call_594167.call(path_594168, query_594169, nil, nil, nil)
+  result = call_564300.call(path_564301, query_564302, nil, nil, nil)
 
-var apiIssueGet* = Call_ApiIssueGet_594156(name: "apiIssueGet",
+var apiIssueGet* = Call_ApiIssueGet_564289(name: "apiIssueGet",
                                         meth: HttpMethod.HttpGet,
                                         host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ApiManagement/service/{serviceName}/apis/{apiId}/issues/{issueId}",
-                                        validator: validate_ApiIssueGet_594157,
-                                        base: "", url: url_ApiIssueGet_594158,
+                                        validator: validate_ApiIssueGet_564290,
+                                        base: "", url: url_ApiIssueGet_564291,
                                         schemes: {Scheme.Https})
 type
-  Call_ApiIssueUpdate_594213 = ref object of OpenApiRestCall_593425
-proc url_ApiIssueUpdate_594215(protocol: Scheme; host: string; base: string;
+  Call_ApiIssueUpdate_564346 = ref object of OpenApiRestCall_563556
+proc url_ApiIssueUpdate_564348(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2569,7 +2570,7 @@ proc url_ApiIssueUpdate_594215(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ApiIssueUpdate_594214(path: JsonNode; query: JsonNode;
+proc validate_ApiIssueUpdate_564347(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## Updates an existing issue for an API.
@@ -2577,44 +2578,44 @@ proc validate_ApiIssueUpdate_594214(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
+  ##   serviceName: JString (required)
+  ##              : The name of the API Management service.
   ##   apiId: JString (required)
   ##        : API identifier. Must be unique in the current API Management service instance.
   ##   issueId: JString (required)
   ##          : Issue identifier. Must be unique in the current API Management service instance.
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   serviceName: JString (required)
-  ##              : The name of the API Management service.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594216 = path.getOrDefault("resourceGroupName")
-  valid_594216 = validateParameter(valid_594216, JString, required = true,
+        "path argument is necessary due to required `serviceName` field"
+  var valid_564349 = path.getOrDefault("serviceName")
+  valid_564349 = validateParameter(valid_564349, JString, required = true,
                                  default = nil)
-  if valid_594216 != nil:
-    section.add "resourceGroupName", valid_594216
-  var valid_594217 = path.getOrDefault("apiId")
-  valid_594217 = validateParameter(valid_594217, JString, required = true,
+  if valid_564349 != nil:
+    section.add "serviceName", valid_564349
+  var valid_564350 = path.getOrDefault("apiId")
+  valid_564350 = validateParameter(valid_564350, JString, required = true,
                                  default = nil)
-  if valid_594217 != nil:
-    section.add "apiId", valid_594217
-  var valid_594218 = path.getOrDefault("issueId")
-  valid_594218 = validateParameter(valid_594218, JString, required = true,
+  if valid_564350 != nil:
+    section.add "apiId", valid_564350
+  var valid_564351 = path.getOrDefault("issueId")
+  valid_564351 = validateParameter(valid_564351, JString, required = true,
                                  default = nil)
-  if valid_594218 != nil:
-    section.add "issueId", valid_594218
-  var valid_594219 = path.getOrDefault("subscriptionId")
-  valid_594219 = validateParameter(valid_594219, JString, required = true,
+  if valid_564351 != nil:
+    section.add "issueId", valid_564351
+  var valid_564352 = path.getOrDefault("subscriptionId")
+  valid_564352 = validateParameter(valid_564352, JString, required = true,
                                  default = nil)
-  if valid_594219 != nil:
-    section.add "subscriptionId", valid_594219
-  var valid_594220 = path.getOrDefault("serviceName")
-  valid_594220 = validateParameter(valid_594220, JString, required = true,
+  if valid_564352 != nil:
+    section.add "subscriptionId", valid_564352
+  var valid_564353 = path.getOrDefault("resourceGroupName")
+  valid_564353 = validateParameter(valid_564353, JString, required = true,
                                  default = nil)
-  if valid_594220 != nil:
-    section.add "serviceName", valid_594220
+  if valid_564353 != nil:
+    section.add "resourceGroupName", valid_564353
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2622,11 +2623,11 @@ proc validate_ApiIssueUpdate_594214(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594221 = query.getOrDefault("api-version")
-  valid_594221 = validateParameter(valid_594221, JString, required = true,
+  var valid_564354 = query.getOrDefault("api-version")
+  valid_564354 = validateParameter(valid_564354, JString, required = true,
                                  default = nil)
-  if valid_594221 != nil:
-    section.add "api-version", valid_594221
+  if valid_564354 != nil:
+    section.add "api-version", valid_564354
   result.add "query", section
   ## parameters in `header` object:
   ##   If-Match: JString (required)
@@ -2634,11 +2635,11 @@ proc validate_ApiIssueUpdate_594214(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert header != nil,
         "header argument is necessary due to required `If-Match` field"
-  var valid_594222 = header.getOrDefault("If-Match")
-  valid_594222 = validateParameter(valid_594222, JString, required = true,
+  var valid_564355 = header.getOrDefault("If-Match")
+  valid_564355 = validateParameter(valid_564355, JString, required = true,
                                  default = nil)
-  if valid_594222 != nil:
-    section.add "If-Match", valid_594222
+  if valid_564355 != nil:
+    section.add "If-Match", valid_564355
   result.add "header", section
   section = newJObject()
   result.add "formData", section
@@ -2650,26 +2651,26 @@ proc validate_ApiIssueUpdate_594214(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594224: Call_ApiIssueUpdate_594213; path: JsonNode; query: JsonNode;
+proc call*(call_564357: Call_ApiIssueUpdate_564346; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Updates an existing issue for an API.
   ## 
-  let valid = call_594224.validator(path, query, header, formData, body)
-  let scheme = call_594224.pickScheme
+  let valid = call_564357.validator(path, query, header, formData, body)
+  let scheme = call_564357.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594224.url(scheme.get, call_594224.host, call_594224.base,
-                         call_594224.route, valid.getOrDefault("path"),
+  let url = call_564357.url(scheme.get, call_564357.host, call_564357.base,
+                         call_564357.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594224, url, valid)
+  result = hook(call_564357, url, valid)
 
-proc call*(call_594225: Call_ApiIssueUpdate_594213; resourceGroupName: string;
+proc call*(call_564358: Call_ApiIssueUpdate_564346; serviceName: string;
           apiVersion: string; apiId: string; issueId: string; subscriptionId: string;
-          parameters: JsonNode; serviceName: string): Recallable =
+          resourceGroupName: string; parameters: JsonNode): Recallable =
   ## apiIssueUpdate
   ## Updates an existing issue for an API.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   serviceName: string (required)
+  ##              : The name of the API Management service.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
   ##   apiId: string (required)
@@ -2678,30 +2679,30 @@ proc call*(call_594225: Call_ApiIssueUpdate_594213; resourceGroupName: string;
   ##          : Issue identifier. Must be unique in the current API Management service instance.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   parameters: JObject (required)
   ##             : Update parameters.
-  ##   serviceName: string (required)
-  ##              : The name of the API Management service.
-  var path_594226 = newJObject()
-  var query_594227 = newJObject()
-  var body_594228 = newJObject()
-  add(path_594226, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594227, "api-version", newJString(apiVersion))
-  add(path_594226, "apiId", newJString(apiId))
-  add(path_594226, "issueId", newJString(issueId))
-  add(path_594226, "subscriptionId", newJString(subscriptionId))
+  var path_564359 = newJObject()
+  var query_564360 = newJObject()
+  var body_564361 = newJObject()
+  add(path_564359, "serviceName", newJString(serviceName))
+  add(query_564360, "api-version", newJString(apiVersion))
+  add(path_564359, "apiId", newJString(apiId))
+  add(path_564359, "issueId", newJString(issueId))
+  add(path_564359, "subscriptionId", newJString(subscriptionId))
+  add(path_564359, "resourceGroupName", newJString(resourceGroupName))
   if parameters != nil:
-    body_594228 = parameters
-  add(path_594226, "serviceName", newJString(serviceName))
-  result = call_594225.call(path_594226, query_594227, nil, nil, body_594228)
+    body_564361 = parameters
+  result = call_564358.call(path_564359, query_564360, nil, nil, body_564361)
 
-var apiIssueUpdate* = Call_ApiIssueUpdate_594213(name: "apiIssueUpdate",
+var apiIssueUpdate* = Call_ApiIssueUpdate_564346(name: "apiIssueUpdate",
     meth: HttpMethod.HttpPatch, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ApiManagement/service/{serviceName}/apis/{apiId}/issues/{issueId}",
-    validator: validate_ApiIssueUpdate_594214, base: "", url: url_ApiIssueUpdate_594215,
+    validator: validate_ApiIssueUpdate_564347, base: "", url: url_ApiIssueUpdate_564348,
     schemes: {Scheme.Https})
 type
-  Call_ApiIssueDelete_594186 = ref object of OpenApiRestCall_593425
-proc url_ApiIssueDelete_594188(protocol: Scheme; host: string; base: string;
+  Call_ApiIssueDelete_564319 = ref object of OpenApiRestCall_563556
+proc url_ApiIssueDelete_564321(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2730,7 +2731,7 @@ proc url_ApiIssueDelete_594188(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ApiIssueDelete_594187(path: JsonNode; query: JsonNode;
+proc validate_ApiIssueDelete_564320(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## Deletes the specified Issue from an API.
@@ -2738,44 +2739,44 @@ proc validate_ApiIssueDelete_594187(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
+  ##   serviceName: JString (required)
+  ##              : The name of the API Management service.
   ##   apiId: JString (required)
   ##        : API identifier. Must be unique in the current API Management service instance.
   ##   issueId: JString (required)
   ##          : Issue identifier. Must be unique in the current API Management service instance.
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   serviceName: JString (required)
-  ##              : The name of the API Management service.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594189 = path.getOrDefault("resourceGroupName")
-  valid_594189 = validateParameter(valid_594189, JString, required = true,
+        "path argument is necessary due to required `serviceName` field"
+  var valid_564322 = path.getOrDefault("serviceName")
+  valid_564322 = validateParameter(valid_564322, JString, required = true,
                                  default = nil)
-  if valid_594189 != nil:
-    section.add "resourceGroupName", valid_594189
-  var valid_594190 = path.getOrDefault("apiId")
-  valid_594190 = validateParameter(valid_594190, JString, required = true,
+  if valid_564322 != nil:
+    section.add "serviceName", valid_564322
+  var valid_564323 = path.getOrDefault("apiId")
+  valid_564323 = validateParameter(valid_564323, JString, required = true,
                                  default = nil)
-  if valid_594190 != nil:
-    section.add "apiId", valid_594190
-  var valid_594191 = path.getOrDefault("issueId")
-  valid_594191 = validateParameter(valid_594191, JString, required = true,
+  if valid_564323 != nil:
+    section.add "apiId", valid_564323
+  var valid_564324 = path.getOrDefault("issueId")
+  valid_564324 = validateParameter(valid_564324, JString, required = true,
                                  default = nil)
-  if valid_594191 != nil:
-    section.add "issueId", valid_594191
-  var valid_594192 = path.getOrDefault("subscriptionId")
-  valid_594192 = validateParameter(valid_594192, JString, required = true,
+  if valid_564324 != nil:
+    section.add "issueId", valid_564324
+  var valid_564325 = path.getOrDefault("subscriptionId")
+  valid_564325 = validateParameter(valid_564325, JString, required = true,
                                  default = nil)
-  if valid_594192 != nil:
-    section.add "subscriptionId", valid_594192
-  var valid_594193 = path.getOrDefault("serviceName")
-  valid_594193 = validateParameter(valid_594193, JString, required = true,
+  if valid_564325 != nil:
+    section.add "subscriptionId", valid_564325
+  var valid_564326 = path.getOrDefault("resourceGroupName")
+  valid_564326 = validateParameter(valid_564326, JString, required = true,
                                  default = nil)
-  if valid_594193 != nil:
-    section.add "serviceName", valid_594193
+  if valid_564326 != nil:
+    section.add "resourceGroupName", valid_564326
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2783,11 +2784,11 @@ proc validate_ApiIssueDelete_594187(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594194 = query.getOrDefault("api-version")
-  valid_594194 = validateParameter(valid_594194, JString, required = true,
+  var valid_564327 = query.getOrDefault("api-version")
+  valid_564327 = validateParameter(valid_564327, JString, required = true,
                                  default = nil)
-  if valid_594194 != nil:
-    section.add "api-version", valid_594194
+  if valid_564327 != nil:
+    section.add "api-version", valid_564327
   result.add "query", section
   ## parameters in `header` object:
   ##   If-Match: JString (required)
@@ -2795,37 +2796,37 @@ proc validate_ApiIssueDelete_594187(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert header != nil,
         "header argument is necessary due to required `If-Match` field"
-  var valid_594195 = header.getOrDefault("If-Match")
-  valid_594195 = validateParameter(valid_594195, JString, required = true,
+  var valid_564328 = header.getOrDefault("If-Match")
+  valid_564328 = validateParameter(valid_564328, JString, required = true,
                                  default = nil)
-  if valid_594195 != nil:
-    section.add "If-Match", valid_594195
+  if valid_564328 != nil:
+    section.add "If-Match", valid_564328
   result.add "header", section
   section = newJObject()
   result.add "formData", section
   if body != nil:
     result.add "body", body
 
-proc call*(call_594196: Call_ApiIssueDelete_594186; path: JsonNode; query: JsonNode;
+proc call*(call_564329: Call_ApiIssueDelete_564319; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes the specified Issue from an API.
   ## 
-  let valid = call_594196.validator(path, query, header, formData, body)
-  let scheme = call_594196.pickScheme
+  let valid = call_564329.validator(path, query, header, formData, body)
+  let scheme = call_564329.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594196.url(scheme.get, call_594196.host, call_594196.base,
-                         call_594196.route, valid.getOrDefault("path"),
+  let url = call_564329.url(scheme.get, call_564329.host, call_564329.base,
+                         call_564329.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594196, url, valid)
+  result = hook(call_564329, url, valid)
 
-proc call*(call_594197: Call_ApiIssueDelete_594186; resourceGroupName: string;
+proc call*(call_564330: Call_ApiIssueDelete_564319; serviceName: string;
           apiVersion: string; apiId: string; issueId: string; subscriptionId: string;
-          serviceName: string): Recallable =
+          resourceGroupName: string): Recallable =
   ## apiIssueDelete
   ## Deletes the specified Issue from an API.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   serviceName: string (required)
+  ##              : The name of the API Management service.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
   ##   apiId: string (required)
@@ -2834,25 +2835,25 @@ proc call*(call_594197: Call_ApiIssueDelete_594186; resourceGroupName: string;
   ##          : Issue identifier. Must be unique in the current API Management service instance.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   serviceName: string (required)
-  ##              : The name of the API Management service.
-  var path_594198 = newJObject()
-  var query_594199 = newJObject()
-  add(path_594198, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594199, "api-version", newJString(apiVersion))
-  add(path_594198, "apiId", newJString(apiId))
-  add(path_594198, "issueId", newJString(issueId))
-  add(path_594198, "subscriptionId", newJString(subscriptionId))
-  add(path_594198, "serviceName", newJString(serviceName))
-  result = call_594197.call(path_594198, query_594199, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564331 = newJObject()
+  var query_564332 = newJObject()
+  add(path_564331, "serviceName", newJString(serviceName))
+  add(query_564332, "api-version", newJString(apiVersion))
+  add(path_564331, "apiId", newJString(apiId))
+  add(path_564331, "issueId", newJString(issueId))
+  add(path_564331, "subscriptionId", newJString(subscriptionId))
+  add(path_564331, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564330.call(path_564331, query_564332, nil, nil, nil)
 
-var apiIssueDelete* = Call_ApiIssueDelete_594186(name: "apiIssueDelete",
+var apiIssueDelete* = Call_ApiIssueDelete_564319(name: "apiIssueDelete",
     meth: HttpMethod.HttpDelete, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ApiManagement/service/{serviceName}/apis/{apiId}/issues/{issueId}",
-    validator: validate_ApiIssueDelete_594187, base: "", url: url_ApiIssueDelete_594188,
+    validator: validate_ApiIssueDelete_564320, base: "", url: url_ApiIssueDelete_564321,
     schemes: {Scheme.Https})
 type
-  Call_ApiIssueAttachmentListByService_594229 = ref object of OpenApiRestCall_593425
-proc url_ApiIssueAttachmentListByService_594231(protocol: Scheme; host: string;
+  Call_ApiIssueAttachmentListByService_564362 = ref object of OpenApiRestCall_563556
+proc url_ApiIssueAttachmentListByService_564364(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2882,57 +2883,57 @@ proc url_ApiIssueAttachmentListByService_594231(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ApiIssueAttachmentListByService_594230(path: JsonNode;
+proc validate_ApiIssueAttachmentListByService_564363(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists all attachments for the Issue associated with the specified API.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
+  ##   serviceName: JString (required)
+  ##              : The name of the API Management service.
   ##   apiId: JString (required)
   ##        : API identifier. Must be unique in the current API Management service instance.
   ##   issueId: JString (required)
   ##          : Issue identifier. Must be unique in the current API Management service instance.
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   serviceName: JString (required)
-  ##              : The name of the API Management service.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594232 = path.getOrDefault("resourceGroupName")
-  valid_594232 = validateParameter(valid_594232, JString, required = true,
+        "path argument is necessary due to required `serviceName` field"
+  var valid_564365 = path.getOrDefault("serviceName")
+  valid_564365 = validateParameter(valid_564365, JString, required = true,
                                  default = nil)
-  if valid_594232 != nil:
-    section.add "resourceGroupName", valid_594232
-  var valid_594233 = path.getOrDefault("apiId")
-  valid_594233 = validateParameter(valid_594233, JString, required = true,
+  if valid_564365 != nil:
+    section.add "serviceName", valid_564365
+  var valid_564366 = path.getOrDefault("apiId")
+  valid_564366 = validateParameter(valid_564366, JString, required = true,
                                  default = nil)
-  if valid_594233 != nil:
-    section.add "apiId", valid_594233
-  var valid_594234 = path.getOrDefault("issueId")
-  valid_594234 = validateParameter(valid_594234, JString, required = true,
+  if valid_564366 != nil:
+    section.add "apiId", valid_564366
+  var valid_564367 = path.getOrDefault("issueId")
+  valid_564367 = validateParameter(valid_564367, JString, required = true,
                                  default = nil)
-  if valid_594234 != nil:
-    section.add "issueId", valid_594234
-  var valid_594235 = path.getOrDefault("subscriptionId")
-  valid_594235 = validateParameter(valid_594235, JString, required = true,
+  if valid_564367 != nil:
+    section.add "issueId", valid_564367
+  var valid_564368 = path.getOrDefault("subscriptionId")
+  valid_564368 = validateParameter(valid_564368, JString, required = true,
                                  default = nil)
-  if valid_594235 != nil:
-    section.add "subscriptionId", valid_594235
-  var valid_594236 = path.getOrDefault("serviceName")
-  valid_594236 = validateParameter(valid_594236, JString, required = true,
+  if valid_564368 != nil:
+    section.add "subscriptionId", valid_564368
+  var valid_564369 = path.getOrDefault("resourceGroupName")
+  valid_564369 = validateParameter(valid_564369, JString, required = true,
                                  default = nil)
-  if valid_594236 != nil:
-    section.add "serviceName", valid_594236
+  if valid_564369 != nil:
+    section.add "resourceGroupName", valid_564369
   result.add "path", section
   ## parameters in `query` object:
-  ##   api-version: JString (required)
-  ##              : Version of the API to be used with the client request.
   ##   $top: JInt
   ##       : Number of records to return.
+  ##   api-version: JString (required)
+  ##              : Version of the API to be used with the client request.
   ##   $skip: JInt
   ##        : Number of records to skip.
   ##   $filter: JString
@@ -2943,26 +2944,26 @@ proc validate_ApiIssueAttachmentListByService_594230(path: JsonNode;
   ## |userId | ge, le, eq, ne, gt, lt | substringof, contains, startswith, endswith|
   ## 
   section = newJObject()
+  var valid_564370 = query.getOrDefault("$top")
+  valid_564370 = validateParameter(valid_564370, JInt, required = false, default = nil)
+  if valid_564370 != nil:
+    section.add "$top", valid_564370
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594237 = query.getOrDefault("api-version")
-  valid_594237 = validateParameter(valid_594237, JString, required = true,
+  var valid_564371 = query.getOrDefault("api-version")
+  valid_564371 = validateParameter(valid_564371, JString, required = true,
                                  default = nil)
-  if valid_594237 != nil:
-    section.add "api-version", valid_594237
-  var valid_594238 = query.getOrDefault("$top")
-  valid_594238 = validateParameter(valid_594238, JInt, required = false, default = nil)
-  if valid_594238 != nil:
-    section.add "$top", valid_594238
-  var valid_594239 = query.getOrDefault("$skip")
-  valid_594239 = validateParameter(valid_594239, JInt, required = false, default = nil)
-  if valid_594239 != nil:
-    section.add "$skip", valid_594239
-  var valid_594240 = query.getOrDefault("$filter")
-  valid_594240 = validateParameter(valid_594240, JString, required = false,
+  if valid_564371 != nil:
+    section.add "api-version", valid_564371
+  var valid_564372 = query.getOrDefault("$skip")
+  valid_564372 = validateParameter(valid_564372, JInt, required = false, default = nil)
+  if valid_564372 != nil:
+    section.add "$skip", valid_564372
+  var valid_564373 = query.getOrDefault("$filter")
+  valid_564373 = validateParameter(valid_564373, JString, required = false,
                                  default = nil)
-  if valid_594240 != nil:
-    section.add "$filter", valid_594240
+  if valid_564373 != nil:
+    section.add "$filter", valid_564373
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2971,28 +2972,30 @@ proc validate_ApiIssueAttachmentListByService_594230(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594241: Call_ApiIssueAttachmentListByService_594229;
+proc call*(call_564374: Call_ApiIssueAttachmentListByService_564362;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Lists all attachments for the Issue associated with the specified API.
   ## 
-  let valid = call_594241.validator(path, query, header, formData, body)
-  let scheme = call_594241.pickScheme
+  let valid = call_564374.validator(path, query, header, formData, body)
+  let scheme = call_564374.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594241.url(scheme.get, call_594241.host, call_594241.base,
-                         call_594241.route, valid.getOrDefault("path"),
+  let url = call_564374.url(scheme.get, call_564374.host, call_564374.base,
+                         call_564374.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594241, url, valid)
+  result = hook(call_564374, url, valid)
 
-proc call*(call_594242: Call_ApiIssueAttachmentListByService_594229;
-          resourceGroupName: string; apiVersion: string; apiId: string;
-          issueId: string; subscriptionId: string; serviceName: string; Top: int = 0;
+proc call*(call_564375: Call_ApiIssueAttachmentListByService_564362;
+          serviceName: string; apiVersion: string; apiId: string; issueId: string;
+          subscriptionId: string; resourceGroupName: string; Top: int = 0;
           Skip: int = 0; Filter: string = ""): Recallable =
   ## apiIssueAttachmentListByService
   ## Lists all attachments for the Issue associated with the specified API.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   serviceName: string (required)
+  ##              : The name of the API Management service.
+  ##   Top: int
+  ##      : Number of records to return.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
   ##   apiId: string (required)
@@ -3001,12 +3004,10 @@ proc call*(call_594242: Call_ApiIssueAttachmentListByService_594229;
   ##          : Issue identifier. Must be unique in the current API Management service instance.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   Top: int
-  ##      : Number of records to return.
   ##   Skip: int
   ##       : Number of records to skip.
-  ##   serviceName: string (required)
-  ##              : The name of the API Management service.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   Filter: string
   ##         : | Field       | Supported operators    | Supported functions               |
   ## |-------------|------------------------|-----------------------------------|
@@ -3014,27 +3015,27 @@ proc call*(call_594242: Call_ApiIssueAttachmentListByService_594229;
   ## |name | ge, le, eq, ne, gt, lt | substringof, contains, startswith, endswith|
   ## |userId | ge, le, eq, ne, gt, lt | substringof, contains, startswith, endswith|
   ## 
-  var path_594243 = newJObject()
-  var query_594244 = newJObject()
-  add(path_594243, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594244, "api-version", newJString(apiVersion))
-  add(path_594243, "apiId", newJString(apiId))
-  add(path_594243, "issueId", newJString(issueId))
-  add(path_594243, "subscriptionId", newJString(subscriptionId))
-  add(query_594244, "$top", newJInt(Top))
-  add(query_594244, "$skip", newJInt(Skip))
-  add(path_594243, "serviceName", newJString(serviceName))
-  add(query_594244, "$filter", newJString(Filter))
-  result = call_594242.call(path_594243, query_594244, nil, nil, nil)
+  var path_564376 = newJObject()
+  var query_564377 = newJObject()
+  add(path_564376, "serviceName", newJString(serviceName))
+  add(query_564377, "$top", newJInt(Top))
+  add(query_564377, "api-version", newJString(apiVersion))
+  add(path_564376, "apiId", newJString(apiId))
+  add(path_564376, "issueId", newJString(issueId))
+  add(path_564376, "subscriptionId", newJString(subscriptionId))
+  add(query_564377, "$skip", newJInt(Skip))
+  add(path_564376, "resourceGroupName", newJString(resourceGroupName))
+  add(query_564377, "$filter", newJString(Filter))
+  result = call_564375.call(path_564376, query_564377, nil, nil, nil)
 
-var apiIssueAttachmentListByService* = Call_ApiIssueAttachmentListByService_594229(
+var apiIssueAttachmentListByService* = Call_ApiIssueAttachmentListByService_564362(
     name: "apiIssueAttachmentListByService", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ApiManagement/service/{serviceName}/apis/{apiId}/issues/{issueId}/attachments",
-    validator: validate_ApiIssueAttachmentListByService_594230, base: "",
-    url: url_ApiIssueAttachmentListByService_594231, schemes: {Scheme.Https})
+    validator: validate_ApiIssueAttachmentListByService_564363, base: "",
+    url: url_ApiIssueAttachmentListByService_564364, schemes: {Scheme.Https})
 type
-  Call_ApiIssueAttachmentCreateOrUpdate_594259 = ref object of OpenApiRestCall_593425
-proc url_ApiIssueAttachmentCreateOrUpdate_594261(protocol: Scheme; host: string;
+  Call_ApiIssueAttachmentCreateOrUpdate_564392 = ref object of OpenApiRestCall_563556
+proc url_ApiIssueAttachmentCreateOrUpdate_564394(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -3066,58 +3067,58 @@ proc url_ApiIssueAttachmentCreateOrUpdate_594261(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ApiIssueAttachmentCreateOrUpdate_594260(path: JsonNode;
+proc validate_ApiIssueAttachmentCreateOrUpdate_564393(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Creates a new Attachment for the Issue in an API or updates an existing one.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
+  ##   attachmentId: JString (required)
+  ##               : Attachment identifier within an Issue. Must be unique in the current Issue.
+  ##   serviceName: JString (required)
+  ##              : The name of the API Management service.
   ##   apiId: JString (required)
   ##        : API identifier. Must be unique in the current API Management service instance.
   ##   issueId: JString (required)
   ##          : Issue identifier. Must be unique in the current API Management service instance.
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   attachmentId: JString (required)
-  ##               : Attachment identifier within an Issue. Must be unique in the current Issue.
-  ##   serviceName: JString (required)
-  ##              : The name of the API Management service.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594262 = path.getOrDefault("resourceGroupName")
-  valid_594262 = validateParameter(valid_594262, JString, required = true,
+        "path argument is necessary due to required `attachmentId` field"
+  var valid_564395 = path.getOrDefault("attachmentId")
+  valid_564395 = validateParameter(valid_564395, JString, required = true,
                                  default = nil)
-  if valid_594262 != nil:
-    section.add "resourceGroupName", valid_594262
-  var valid_594263 = path.getOrDefault("apiId")
-  valid_594263 = validateParameter(valid_594263, JString, required = true,
+  if valid_564395 != nil:
+    section.add "attachmentId", valid_564395
+  var valid_564396 = path.getOrDefault("serviceName")
+  valid_564396 = validateParameter(valid_564396, JString, required = true,
                                  default = nil)
-  if valid_594263 != nil:
-    section.add "apiId", valid_594263
-  var valid_594264 = path.getOrDefault("issueId")
-  valid_594264 = validateParameter(valid_594264, JString, required = true,
+  if valid_564396 != nil:
+    section.add "serviceName", valid_564396
+  var valid_564397 = path.getOrDefault("apiId")
+  valid_564397 = validateParameter(valid_564397, JString, required = true,
                                  default = nil)
-  if valid_594264 != nil:
-    section.add "issueId", valid_594264
-  var valid_594265 = path.getOrDefault("subscriptionId")
-  valid_594265 = validateParameter(valid_594265, JString, required = true,
+  if valid_564397 != nil:
+    section.add "apiId", valid_564397
+  var valid_564398 = path.getOrDefault("issueId")
+  valid_564398 = validateParameter(valid_564398, JString, required = true,
                                  default = nil)
-  if valid_594265 != nil:
-    section.add "subscriptionId", valid_594265
-  var valid_594266 = path.getOrDefault("attachmentId")
-  valid_594266 = validateParameter(valid_594266, JString, required = true,
+  if valid_564398 != nil:
+    section.add "issueId", valid_564398
+  var valid_564399 = path.getOrDefault("subscriptionId")
+  valid_564399 = validateParameter(valid_564399, JString, required = true,
                                  default = nil)
-  if valid_594266 != nil:
-    section.add "attachmentId", valid_594266
-  var valid_594267 = path.getOrDefault("serviceName")
-  valid_594267 = validateParameter(valid_594267, JString, required = true,
+  if valid_564399 != nil:
+    section.add "subscriptionId", valid_564399
+  var valid_564400 = path.getOrDefault("resourceGroupName")
+  valid_564400 = validateParameter(valid_564400, JString, required = true,
                                  default = nil)
-  if valid_594267 != nil:
-    section.add "serviceName", valid_594267
+  if valid_564400 != nil:
+    section.add "resourceGroupName", valid_564400
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -3125,21 +3126,21 @@ proc validate_ApiIssueAttachmentCreateOrUpdate_594260(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594268 = query.getOrDefault("api-version")
-  valid_594268 = validateParameter(valid_594268, JString, required = true,
+  var valid_564401 = query.getOrDefault("api-version")
+  valid_564401 = validateParameter(valid_564401, JString, required = true,
                                  default = nil)
-  if valid_594268 != nil:
-    section.add "api-version", valid_594268
+  if valid_564401 != nil:
+    section.add "api-version", valid_564401
   result.add "query", section
   ## parameters in `header` object:
   ##   If-Match: JString
   ##           : ETag of the Entity. Not required when creating an entity, but required when updating an entity.
   section = newJObject()
-  var valid_594269 = header.getOrDefault("If-Match")
-  valid_594269 = validateParameter(valid_594269, JString, required = false,
+  var valid_564402 = header.getOrDefault("If-Match")
+  valid_564402 = validateParameter(valid_564402, JString, required = false,
                                  default = nil)
-  if valid_594269 != nil:
-    section.add "If-Match", valid_594269
+  if valid_564402 != nil:
+    section.add "If-Match", valid_564402
   result.add "header", section
   section = newJObject()
   result.add "formData", section
@@ -3151,28 +3152,30 @@ proc validate_ApiIssueAttachmentCreateOrUpdate_594260(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594271: Call_ApiIssueAttachmentCreateOrUpdate_594259;
+proc call*(call_564404: Call_ApiIssueAttachmentCreateOrUpdate_564392;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Creates a new Attachment for the Issue in an API or updates an existing one.
   ## 
-  let valid = call_594271.validator(path, query, header, formData, body)
-  let scheme = call_594271.pickScheme
+  let valid = call_564404.validator(path, query, header, formData, body)
+  let scheme = call_564404.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594271.url(scheme.get, call_594271.host, call_594271.base,
-                         call_594271.route, valid.getOrDefault("path"),
+  let url = call_564404.url(scheme.get, call_564404.host, call_564404.base,
+                         call_564404.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594271, url, valid)
+  result = hook(call_564404, url, valid)
 
-proc call*(call_594272: Call_ApiIssueAttachmentCreateOrUpdate_594259;
-          resourceGroupName: string; apiVersion: string; apiId: string;
-          issueId: string; subscriptionId: string; attachmentId: string;
-          parameters: JsonNode; serviceName: string): Recallable =
+proc call*(call_564405: Call_ApiIssueAttachmentCreateOrUpdate_564392;
+          attachmentId: string; serviceName: string; apiVersion: string;
+          apiId: string; issueId: string; subscriptionId: string;
+          resourceGroupName: string; parameters: JsonNode): Recallable =
   ## apiIssueAttachmentCreateOrUpdate
   ## Creates a new Attachment for the Issue in an API or updates an existing one.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   attachmentId: string (required)
+  ##               : Attachment identifier within an Issue. Must be unique in the current Issue.
+  ##   serviceName: string (required)
+  ##              : The name of the API Management service.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
   ##   apiId: string (required)
@@ -3181,34 +3184,32 @@ proc call*(call_594272: Call_ApiIssueAttachmentCreateOrUpdate_594259;
   ##          : Issue identifier. Must be unique in the current API Management service instance.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   attachmentId: string (required)
-  ##               : Attachment identifier within an Issue. Must be unique in the current Issue.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   parameters: JObject (required)
   ##             : Create parameters.
-  ##   serviceName: string (required)
-  ##              : The name of the API Management service.
-  var path_594273 = newJObject()
-  var query_594274 = newJObject()
-  var body_594275 = newJObject()
-  add(path_594273, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594274, "api-version", newJString(apiVersion))
-  add(path_594273, "apiId", newJString(apiId))
-  add(path_594273, "issueId", newJString(issueId))
-  add(path_594273, "subscriptionId", newJString(subscriptionId))
-  add(path_594273, "attachmentId", newJString(attachmentId))
+  var path_564406 = newJObject()
+  var query_564407 = newJObject()
+  var body_564408 = newJObject()
+  add(path_564406, "attachmentId", newJString(attachmentId))
+  add(path_564406, "serviceName", newJString(serviceName))
+  add(query_564407, "api-version", newJString(apiVersion))
+  add(path_564406, "apiId", newJString(apiId))
+  add(path_564406, "issueId", newJString(issueId))
+  add(path_564406, "subscriptionId", newJString(subscriptionId))
+  add(path_564406, "resourceGroupName", newJString(resourceGroupName))
   if parameters != nil:
-    body_594275 = parameters
-  add(path_594273, "serviceName", newJString(serviceName))
-  result = call_594272.call(path_594273, query_594274, nil, nil, body_594275)
+    body_564408 = parameters
+  result = call_564405.call(path_564406, query_564407, nil, nil, body_564408)
 
-var apiIssueAttachmentCreateOrUpdate* = Call_ApiIssueAttachmentCreateOrUpdate_594259(
+var apiIssueAttachmentCreateOrUpdate* = Call_ApiIssueAttachmentCreateOrUpdate_564392(
     name: "apiIssueAttachmentCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ApiManagement/service/{serviceName}/apis/{apiId}/issues/{issueId}/attachments/{attachmentId}",
-    validator: validate_ApiIssueAttachmentCreateOrUpdate_594260, base: "",
-    url: url_ApiIssueAttachmentCreateOrUpdate_594261, schemes: {Scheme.Https})
+    validator: validate_ApiIssueAttachmentCreateOrUpdate_564393, base: "",
+    url: url_ApiIssueAttachmentCreateOrUpdate_564394, schemes: {Scheme.Https})
 type
-  Call_ApiIssueAttachmentGetEntityTag_594291 = ref object of OpenApiRestCall_593425
-proc url_ApiIssueAttachmentGetEntityTag_594293(protocol: Scheme; host: string;
+  Call_ApiIssueAttachmentGetEntityTag_564424 = ref object of OpenApiRestCall_563556
+proc url_ApiIssueAttachmentGetEntityTag_564426(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -3240,58 +3241,58 @@ proc url_ApiIssueAttachmentGetEntityTag_594293(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ApiIssueAttachmentGetEntityTag_594292(path: JsonNode;
+proc validate_ApiIssueAttachmentGetEntityTag_564425(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the entity state (Etag) version of the issue Attachment for an API specified by its identifier.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
+  ##   attachmentId: JString (required)
+  ##               : Attachment identifier within an Issue. Must be unique in the current Issue.
+  ##   serviceName: JString (required)
+  ##              : The name of the API Management service.
   ##   apiId: JString (required)
   ##        : API identifier. Must be unique in the current API Management service instance.
   ##   issueId: JString (required)
   ##          : Issue identifier. Must be unique in the current API Management service instance.
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   attachmentId: JString (required)
-  ##               : Attachment identifier within an Issue. Must be unique in the current Issue.
-  ##   serviceName: JString (required)
-  ##              : The name of the API Management service.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594294 = path.getOrDefault("resourceGroupName")
-  valid_594294 = validateParameter(valid_594294, JString, required = true,
+        "path argument is necessary due to required `attachmentId` field"
+  var valid_564427 = path.getOrDefault("attachmentId")
+  valid_564427 = validateParameter(valid_564427, JString, required = true,
                                  default = nil)
-  if valid_594294 != nil:
-    section.add "resourceGroupName", valid_594294
-  var valid_594295 = path.getOrDefault("apiId")
-  valid_594295 = validateParameter(valid_594295, JString, required = true,
+  if valid_564427 != nil:
+    section.add "attachmentId", valid_564427
+  var valid_564428 = path.getOrDefault("serviceName")
+  valid_564428 = validateParameter(valid_564428, JString, required = true,
                                  default = nil)
-  if valid_594295 != nil:
-    section.add "apiId", valid_594295
-  var valid_594296 = path.getOrDefault("issueId")
-  valid_594296 = validateParameter(valid_594296, JString, required = true,
+  if valid_564428 != nil:
+    section.add "serviceName", valid_564428
+  var valid_564429 = path.getOrDefault("apiId")
+  valid_564429 = validateParameter(valid_564429, JString, required = true,
                                  default = nil)
-  if valid_594296 != nil:
-    section.add "issueId", valid_594296
-  var valid_594297 = path.getOrDefault("subscriptionId")
-  valid_594297 = validateParameter(valid_594297, JString, required = true,
+  if valid_564429 != nil:
+    section.add "apiId", valid_564429
+  var valid_564430 = path.getOrDefault("issueId")
+  valid_564430 = validateParameter(valid_564430, JString, required = true,
                                  default = nil)
-  if valid_594297 != nil:
-    section.add "subscriptionId", valid_594297
-  var valid_594298 = path.getOrDefault("attachmentId")
-  valid_594298 = validateParameter(valid_594298, JString, required = true,
+  if valid_564430 != nil:
+    section.add "issueId", valid_564430
+  var valid_564431 = path.getOrDefault("subscriptionId")
+  valid_564431 = validateParameter(valid_564431, JString, required = true,
                                  default = nil)
-  if valid_594298 != nil:
-    section.add "attachmentId", valid_594298
-  var valid_594299 = path.getOrDefault("serviceName")
-  valid_594299 = validateParameter(valid_594299, JString, required = true,
+  if valid_564431 != nil:
+    section.add "subscriptionId", valid_564431
+  var valid_564432 = path.getOrDefault("resourceGroupName")
+  valid_564432 = validateParameter(valid_564432, JString, required = true,
                                  default = nil)
-  if valid_594299 != nil:
-    section.add "serviceName", valid_594299
+  if valid_564432 != nil:
+    section.add "resourceGroupName", valid_564432
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -3299,11 +3300,11 @@ proc validate_ApiIssueAttachmentGetEntityTag_594292(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594300 = query.getOrDefault("api-version")
-  valid_594300 = validateParameter(valid_594300, JString, required = true,
+  var valid_564433 = query.getOrDefault("api-version")
+  valid_564433 = validateParameter(valid_564433, JString, required = true,
                                  default = nil)
-  if valid_594300 != nil:
-    section.add "api-version", valid_594300
+  if valid_564433 != nil:
+    section.add "api-version", valid_564433
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3312,27 +3313,29 @@ proc validate_ApiIssueAttachmentGetEntityTag_594292(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594301: Call_ApiIssueAttachmentGetEntityTag_594291; path: JsonNode;
+proc call*(call_564434: Call_ApiIssueAttachmentGetEntityTag_564424; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the entity state (Etag) version of the issue Attachment for an API specified by its identifier.
   ## 
-  let valid = call_594301.validator(path, query, header, formData, body)
-  let scheme = call_594301.pickScheme
+  let valid = call_564434.validator(path, query, header, formData, body)
+  let scheme = call_564434.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594301.url(scheme.get, call_594301.host, call_594301.base,
-                         call_594301.route, valid.getOrDefault("path"),
+  let url = call_564434.url(scheme.get, call_564434.host, call_564434.base,
+                         call_564434.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594301, url, valid)
+  result = hook(call_564434, url, valid)
 
-proc call*(call_594302: Call_ApiIssueAttachmentGetEntityTag_594291;
-          resourceGroupName: string; apiVersion: string; apiId: string;
-          issueId: string; subscriptionId: string; attachmentId: string;
-          serviceName: string): Recallable =
+proc call*(call_564435: Call_ApiIssueAttachmentGetEntityTag_564424;
+          attachmentId: string; serviceName: string; apiVersion: string;
+          apiId: string; issueId: string; subscriptionId: string;
+          resourceGroupName: string): Recallable =
   ## apiIssueAttachmentGetEntityTag
   ## Gets the entity state (Etag) version of the issue Attachment for an API specified by its identifier.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   attachmentId: string (required)
+  ##               : Attachment identifier within an Issue. Must be unique in the current Issue.
+  ##   serviceName: string (required)
+  ##              : The name of the API Management service.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
   ##   apiId: string (required)
@@ -3341,29 +3344,27 @@ proc call*(call_594302: Call_ApiIssueAttachmentGetEntityTag_594291;
   ##          : Issue identifier. Must be unique in the current API Management service instance.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   attachmentId: string (required)
-  ##               : Attachment identifier within an Issue. Must be unique in the current Issue.
-  ##   serviceName: string (required)
-  ##              : The name of the API Management service.
-  var path_594303 = newJObject()
-  var query_594304 = newJObject()
-  add(path_594303, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594304, "api-version", newJString(apiVersion))
-  add(path_594303, "apiId", newJString(apiId))
-  add(path_594303, "issueId", newJString(issueId))
-  add(path_594303, "subscriptionId", newJString(subscriptionId))
-  add(path_594303, "attachmentId", newJString(attachmentId))
-  add(path_594303, "serviceName", newJString(serviceName))
-  result = call_594302.call(path_594303, query_594304, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564436 = newJObject()
+  var query_564437 = newJObject()
+  add(path_564436, "attachmentId", newJString(attachmentId))
+  add(path_564436, "serviceName", newJString(serviceName))
+  add(query_564437, "api-version", newJString(apiVersion))
+  add(path_564436, "apiId", newJString(apiId))
+  add(path_564436, "issueId", newJString(issueId))
+  add(path_564436, "subscriptionId", newJString(subscriptionId))
+  add(path_564436, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564435.call(path_564436, query_564437, nil, nil, nil)
 
-var apiIssueAttachmentGetEntityTag* = Call_ApiIssueAttachmentGetEntityTag_594291(
+var apiIssueAttachmentGetEntityTag* = Call_ApiIssueAttachmentGetEntityTag_564424(
     name: "apiIssueAttachmentGetEntityTag", meth: HttpMethod.HttpHead,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ApiManagement/service/{serviceName}/apis/{apiId}/issues/{issueId}/attachments/{attachmentId}",
-    validator: validate_ApiIssueAttachmentGetEntityTag_594292, base: "",
-    url: url_ApiIssueAttachmentGetEntityTag_594293, schemes: {Scheme.Https})
+    validator: validate_ApiIssueAttachmentGetEntityTag_564425, base: "",
+    url: url_ApiIssueAttachmentGetEntityTag_564426, schemes: {Scheme.Https})
 type
-  Call_ApiIssueAttachmentGet_594245 = ref object of OpenApiRestCall_593425
-proc url_ApiIssueAttachmentGet_594247(protocol: Scheme; host: string; base: string;
+  Call_ApiIssueAttachmentGet_564378 = ref object of OpenApiRestCall_563556
+proc url_ApiIssueAttachmentGet_564380(protocol: Scheme; host: string; base: string;
                                      route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -3395,58 +3396,58 @@ proc url_ApiIssueAttachmentGet_594247(protocol: Scheme; host: string; base: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ApiIssueAttachmentGet_594246(path: JsonNode; query: JsonNode;
+proc validate_ApiIssueAttachmentGet_564379(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the details of the issue Attachment for an API specified by its identifier.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
+  ##   attachmentId: JString (required)
+  ##               : Attachment identifier within an Issue. Must be unique in the current Issue.
+  ##   serviceName: JString (required)
+  ##              : The name of the API Management service.
   ##   apiId: JString (required)
   ##        : API identifier. Must be unique in the current API Management service instance.
   ##   issueId: JString (required)
   ##          : Issue identifier. Must be unique in the current API Management service instance.
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   attachmentId: JString (required)
-  ##               : Attachment identifier within an Issue. Must be unique in the current Issue.
-  ##   serviceName: JString (required)
-  ##              : The name of the API Management service.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594248 = path.getOrDefault("resourceGroupName")
-  valid_594248 = validateParameter(valid_594248, JString, required = true,
+        "path argument is necessary due to required `attachmentId` field"
+  var valid_564381 = path.getOrDefault("attachmentId")
+  valid_564381 = validateParameter(valid_564381, JString, required = true,
                                  default = nil)
-  if valid_594248 != nil:
-    section.add "resourceGroupName", valid_594248
-  var valid_594249 = path.getOrDefault("apiId")
-  valid_594249 = validateParameter(valid_594249, JString, required = true,
+  if valid_564381 != nil:
+    section.add "attachmentId", valid_564381
+  var valid_564382 = path.getOrDefault("serviceName")
+  valid_564382 = validateParameter(valid_564382, JString, required = true,
                                  default = nil)
-  if valid_594249 != nil:
-    section.add "apiId", valid_594249
-  var valid_594250 = path.getOrDefault("issueId")
-  valid_594250 = validateParameter(valid_594250, JString, required = true,
+  if valid_564382 != nil:
+    section.add "serviceName", valid_564382
+  var valid_564383 = path.getOrDefault("apiId")
+  valid_564383 = validateParameter(valid_564383, JString, required = true,
                                  default = nil)
-  if valid_594250 != nil:
-    section.add "issueId", valid_594250
-  var valid_594251 = path.getOrDefault("subscriptionId")
-  valid_594251 = validateParameter(valid_594251, JString, required = true,
+  if valid_564383 != nil:
+    section.add "apiId", valid_564383
+  var valid_564384 = path.getOrDefault("issueId")
+  valid_564384 = validateParameter(valid_564384, JString, required = true,
                                  default = nil)
-  if valid_594251 != nil:
-    section.add "subscriptionId", valid_594251
-  var valid_594252 = path.getOrDefault("attachmentId")
-  valid_594252 = validateParameter(valid_594252, JString, required = true,
+  if valid_564384 != nil:
+    section.add "issueId", valid_564384
+  var valid_564385 = path.getOrDefault("subscriptionId")
+  valid_564385 = validateParameter(valid_564385, JString, required = true,
                                  default = nil)
-  if valid_594252 != nil:
-    section.add "attachmentId", valid_594252
-  var valid_594253 = path.getOrDefault("serviceName")
-  valid_594253 = validateParameter(valid_594253, JString, required = true,
+  if valid_564385 != nil:
+    section.add "subscriptionId", valid_564385
+  var valid_564386 = path.getOrDefault("resourceGroupName")
+  valid_564386 = validateParameter(valid_564386, JString, required = true,
                                  default = nil)
-  if valid_594253 != nil:
-    section.add "serviceName", valid_594253
+  if valid_564386 != nil:
+    section.add "resourceGroupName", valid_564386
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -3454,11 +3455,11 @@ proc validate_ApiIssueAttachmentGet_594246(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594254 = query.getOrDefault("api-version")
-  valid_594254 = validateParameter(valid_594254, JString, required = true,
+  var valid_564387 = query.getOrDefault("api-version")
+  valid_564387 = validateParameter(valid_564387, JString, required = true,
                                  default = nil)
-  if valid_594254 != nil:
-    section.add "api-version", valid_594254
+  if valid_564387 != nil:
+    section.add "api-version", valid_564387
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3467,27 +3468,28 @@ proc validate_ApiIssueAttachmentGet_594246(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594255: Call_ApiIssueAttachmentGet_594245; path: JsonNode;
+proc call*(call_564388: Call_ApiIssueAttachmentGet_564378; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the details of the issue Attachment for an API specified by its identifier.
   ## 
-  let valid = call_594255.validator(path, query, header, formData, body)
-  let scheme = call_594255.pickScheme
+  let valid = call_564388.validator(path, query, header, formData, body)
+  let scheme = call_564388.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594255.url(scheme.get, call_594255.host, call_594255.base,
-                         call_594255.route, valid.getOrDefault("path"),
+  let url = call_564388.url(scheme.get, call_564388.host, call_564388.base,
+                         call_564388.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594255, url, valid)
+  result = hook(call_564388, url, valid)
 
-proc call*(call_594256: Call_ApiIssueAttachmentGet_594245;
-          resourceGroupName: string; apiVersion: string; apiId: string;
-          issueId: string; subscriptionId: string; attachmentId: string;
-          serviceName: string): Recallable =
+proc call*(call_564389: Call_ApiIssueAttachmentGet_564378; attachmentId: string;
+          serviceName: string; apiVersion: string; apiId: string; issueId: string;
+          subscriptionId: string; resourceGroupName: string): Recallable =
   ## apiIssueAttachmentGet
   ## Gets the details of the issue Attachment for an API specified by its identifier.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   attachmentId: string (required)
+  ##               : Attachment identifier within an Issue. Must be unique in the current Issue.
+  ##   serviceName: string (required)
+  ##              : The name of the API Management service.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
   ##   apiId: string (required)
@@ -3496,29 +3498,27 @@ proc call*(call_594256: Call_ApiIssueAttachmentGet_594245;
   ##          : Issue identifier. Must be unique in the current API Management service instance.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   attachmentId: string (required)
-  ##               : Attachment identifier within an Issue. Must be unique in the current Issue.
-  ##   serviceName: string (required)
-  ##              : The name of the API Management service.
-  var path_594257 = newJObject()
-  var query_594258 = newJObject()
-  add(path_594257, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594258, "api-version", newJString(apiVersion))
-  add(path_594257, "apiId", newJString(apiId))
-  add(path_594257, "issueId", newJString(issueId))
-  add(path_594257, "subscriptionId", newJString(subscriptionId))
-  add(path_594257, "attachmentId", newJString(attachmentId))
-  add(path_594257, "serviceName", newJString(serviceName))
-  result = call_594256.call(path_594257, query_594258, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564390 = newJObject()
+  var query_564391 = newJObject()
+  add(path_564390, "attachmentId", newJString(attachmentId))
+  add(path_564390, "serviceName", newJString(serviceName))
+  add(query_564391, "api-version", newJString(apiVersion))
+  add(path_564390, "apiId", newJString(apiId))
+  add(path_564390, "issueId", newJString(issueId))
+  add(path_564390, "subscriptionId", newJString(subscriptionId))
+  add(path_564390, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564389.call(path_564390, query_564391, nil, nil, nil)
 
-var apiIssueAttachmentGet* = Call_ApiIssueAttachmentGet_594245(
+var apiIssueAttachmentGet* = Call_ApiIssueAttachmentGet_564378(
     name: "apiIssueAttachmentGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ApiManagement/service/{serviceName}/apis/{apiId}/issues/{issueId}/attachments/{attachmentId}",
-    validator: validate_ApiIssueAttachmentGet_594246, base: "",
-    url: url_ApiIssueAttachmentGet_594247, schemes: {Scheme.Https})
+    validator: validate_ApiIssueAttachmentGet_564379, base: "",
+    url: url_ApiIssueAttachmentGet_564380, schemes: {Scheme.Https})
 type
-  Call_ApiIssueAttachmentDelete_594276 = ref object of OpenApiRestCall_593425
-proc url_ApiIssueAttachmentDelete_594278(protocol: Scheme; host: string;
+  Call_ApiIssueAttachmentDelete_564409 = ref object of OpenApiRestCall_563556
+proc url_ApiIssueAttachmentDelete_564411(protocol: Scheme; host: string;
                                         base: string; route: string; path: JsonNode;
                                         query: JsonNode): Uri =
   result.scheme = $protocol
@@ -3551,58 +3551,58 @@ proc url_ApiIssueAttachmentDelete_594278(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ApiIssueAttachmentDelete_594277(path: JsonNode; query: JsonNode;
+proc validate_ApiIssueAttachmentDelete_564410(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Deletes the specified comment from an Issue.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
+  ##   attachmentId: JString (required)
+  ##               : Attachment identifier within an Issue. Must be unique in the current Issue.
+  ##   serviceName: JString (required)
+  ##              : The name of the API Management service.
   ##   apiId: JString (required)
   ##        : API identifier. Must be unique in the current API Management service instance.
   ##   issueId: JString (required)
   ##          : Issue identifier. Must be unique in the current API Management service instance.
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   attachmentId: JString (required)
-  ##               : Attachment identifier within an Issue. Must be unique in the current Issue.
-  ##   serviceName: JString (required)
-  ##              : The name of the API Management service.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594279 = path.getOrDefault("resourceGroupName")
-  valid_594279 = validateParameter(valid_594279, JString, required = true,
+        "path argument is necessary due to required `attachmentId` field"
+  var valid_564412 = path.getOrDefault("attachmentId")
+  valid_564412 = validateParameter(valid_564412, JString, required = true,
                                  default = nil)
-  if valid_594279 != nil:
-    section.add "resourceGroupName", valid_594279
-  var valid_594280 = path.getOrDefault("apiId")
-  valid_594280 = validateParameter(valid_594280, JString, required = true,
+  if valid_564412 != nil:
+    section.add "attachmentId", valid_564412
+  var valid_564413 = path.getOrDefault("serviceName")
+  valid_564413 = validateParameter(valid_564413, JString, required = true,
                                  default = nil)
-  if valid_594280 != nil:
-    section.add "apiId", valid_594280
-  var valid_594281 = path.getOrDefault("issueId")
-  valid_594281 = validateParameter(valid_594281, JString, required = true,
+  if valid_564413 != nil:
+    section.add "serviceName", valid_564413
+  var valid_564414 = path.getOrDefault("apiId")
+  valid_564414 = validateParameter(valid_564414, JString, required = true,
                                  default = nil)
-  if valid_594281 != nil:
-    section.add "issueId", valid_594281
-  var valid_594282 = path.getOrDefault("subscriptionId")
-  valid_594282 = validateParameter(valid_594282, JString, required = true,
+  if valid_564414 != nil:
+    section.add "apiId", valid_564414
+  var valid_564415 = path.getOrDefault("issueId")
+  valid_564415 = validateParameter(valid_564415, JString, required = true,
                                  default = nil)
-  if valid_594282 != nil:
-    section.add "subscriptionId", valid_594282
-  var valid_594283 = path.getOrDefault("attachmentId")
-  valid_594283 = validateParameter(valid_594283, JString, required = true,
+  if valid_564415 != nil:
+    section.add "issueId", valid_564415
+  var valid_564416 = path.getOrDefault("subscriptionId")
+  valid_564416 = validateParameter(valid_564416, JString, required = true,
                                  default = nil)
-  if valid_594283 != nil:
-    section.add "attachmentId", valid_594283
-  var valid_594284 = path.getOrDefault("serviceName")
-  valid_594284 = validateParameter(valid_594284, JString, required = true,
+  if valid_564416 != nil:
+    section.add "subscriptionId", valid_564416
+  var valid_564417 = path.getOrDefault("resourceGroupName")
+  valid_564417 = validateParameter(valid_564417, JString, required = true,
                                  default = nil)
-  if valid_594284 != nil:
-    section.add "serviceName", valid_594284
+  if valid_564417 != nil:
+    section.add "resourceGroupName", valid_564417
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -3610,11 +3610,11 @@ proc validate_ApiIssueAttachmentDelete_594277(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594285 = query.getOrDefault("api-version")
-  valid_594285 = validateParameter(valid_594285, JString, required = true,
+  var valid_564418 = query.getOrDefault("api-version")
+  valid_564418 = validateParameter(valid_564418, JString, required = true,
                                  default = nil)
-  if valid_594285 != nil:
-    section.add "api-version", valid_594285
+  if valid_564418 != nil:
+    section.add "api-version", valid_564418
   result.add "query", section
   ## parameters in `header` object:
   ##   If-Match: JString (required)
@@ -3622,38 +3622,39 @@ proc validate_ApiIssueAttachmentDelete_594277(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert header != nil,
         "header argument is necessary due to required `If-Match` field"
-  var valid_594286 = header.getOrDefault("If-Match")
-  valid_594286 = validateParameter(valid_594286, JString, required = true,
+  var valid_564419 = header.getOrDefault("If-Match")
+  valid_564419 = validateParameter(valid_564419, JString, required = true,
                                  default = nil)
-  if valid_594286 != nil:
-    section.add "If-Match", valid_594286
+  if valid_564419 != nil:
+    section.add "If-Match", valid_564419
   result.add "header", section
   section = newJObject()
   result.add "formData", section
   if body != nil:
     result.add "body", body
 
-proc call*(call_594287: Call_ApiIssueAttachmentDelete_594276; path: JsonNode;
+proc call*(call_564420: Call_ApiIssueAttachmentDelete_564409; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes the specified comment from an Issue.
   ## 
-  let valid = call_594287.validator(path, query, header, formData, body)
-  let scheme = call_594287.pickScheme
+  let valid = call_564420.validator(path, query, header, formData, body)
+  let scheme = call_564420.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594287.url(scheme.get, call_594287.host, call_594287.base,
-                         call_594287.route, valid.getOrDefault("path"),
+  let url = call_564420.url(scheme.get, call_564420.host, call_564420.base,
+                         call_564420.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594287, url, valid)
+  result = hook(call_564420, url, valid)
 
-proc call*(call_594288: Call_ApiIssueAttachmentDelete_594276;
-          resourceGroupName: string; apiVersion: string; apiId: string;
-          issueId: string; subscriptionId: string; attachmentId: string;
-          serviceName: string): Recallable =
+proc call*(call_564421: Call_ApiIssueAttachmentDelete_564409; attachmentId: string;
+          serviceName: string; apiVersion: string; apiId: string; issueId: string;
+          subscriptionId: string; resourceGroupName: string): Recallable =
   ## apiIssueAttachmentDelete
   ## Deletes the specified comment from an Issue.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   attachmentId: string (required)
+  ##               : Attachment identifier within an Issue. Must be unique in the current Issue.
+  ##   serviceName: string (required)
+  ##              : The name of the API Management service.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
   ##   apiId: string (required)
@@ -3662,29 +3663,27 @@ proc call*(call_594288: Call_ApiIssueAttachmentDelete_594276;
   ##          : Issue identifier. Must be unique in the current API Management service instance.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   attachmentId: string (required)
-  ##               : Attachment identifier within an Issue. Must be unique in the current Issue.
-  ##   serviceName: string (required)
-  ##              : The name of the API Management service.
-  var path_594289 = newJObject()
-  var query_594290 = newJObject()
-  add(path_594289, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594290, "api-version", newJString(apiVersion))
-  add(path_594289, "apiId", newJString(apiId))
-  add(path_594289, "issueId", newJString(issueId))
-  add(path_594289, "subscriptionId", newJString(subscriptionId))
-  add(path_594289, "attachmentId", newJString(attachmentId))
-  add(path_594289, "serviceName", newJString(serviceName))
-  result = call_594288.call(path_594289, query_594290, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564422 = newJObject()
+  var query_564423 = newJObject()
+  add(path_564422, "attachmentId", newJString(attachmentId))
+  add(path_564422, "serviceName", newJString(serviceName))
+  add(query_564423, "api-version", newJString(apiVersion))
+  add(path_564422, "apiId", newJString(apiId))
+  add(path_564422, "issueId", newJString(issueId))
+  add(path_564422, "subscriptionId", newJString(subscriptionId))
+  add(path_564422, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564421.call(path_564422, query_564423, nil, nil, nil)
 
-var apiIssueAttachmentDelete* = Call_ApiIssueAttachmentDelete_594276(
+var apiIssueAttachmentDelete* = Call_ApiIssueAttachmentDelete_564409(
     name: "apiIssueAttachmentDelete", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ApiManagement/service/{serviceName}/apis/{apiId}/issues/{issueId}/attachments/{attachmentId}",
-    validator: validate_ApiIssueAttachmentDelete_594277, base: "",
-    url: url_ApiIssueAttachmentDelete_594278, schemes: {Scheme.Https})
+    validator: validate_ApiIssueAttachmentDelete_564410, base: "",
+    url: url_ApiIssueAttachmentDelete_564411, schemes: {Scheme.Https})
 type
-  Call_ApiIssueCommentListByService_594305 = ref object of OpenApiRestCall_593425
-proc url_ApiIssueCommentListByService_594307(protocol: Scheme; host: string;
+  Call_ApiIssueCommentListByService_564438 = ref object of OpenApiRestCall_563556
+proc url_ApiIssueCommentListByService_564440(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -3714,57 +3713,57 @@ proc url_ApiIssueCommentListByService_594307(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ApiIssueCommentListByService_594306(path: JsonNode; query: JsonNode;
+proc validate_ApiIssueCommentListByService_564439(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists all comments for the Issue associated with the specified API.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
+  ##   serviceName: JString (required)
+  ##              : The name of the API Management service.
   ##   apiId: JString (required)
   ##        : API identifier. Must be unique in the current API Management service instance.
   ##   issueId: JString (required)
   ##          : Issue identifier. Must be unique in the current API Management service instance.
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   serviceName: JString (required)
-  ##              : The name of the API Management service.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594308 = path.getOrDefault("resourceGroupName")
-  valid_594308 = validateParameter(valid_594308, JString, required = true,
+        "path argument is necessary due to required `serviceName` field"
+  var valid_564441 = path.getOrDefault("serviceName")
+  valid_564441 = validateParameter(valid_564441, JString, required = true,
                                  default = nil)
-  if valid_594308 != nil:
-    section.add "resourceGroupName", valid_594308
-  var valid_594309 = path.getOrDefault("apiId")
-  valid_594309 = validateParameter(valid_594309, JString, required = true,
+  if valid_564441 != nil:
+    section.add "serviceName", valid_564441
+  var valid_564442 = path.getOrDefault("apiId")
+  valid_564442 = validateParameter(valid_564442, JString, required = true,
                                  default = nil)
-  if valid_594309 != nil:
-    section.add "apiId", valid_594309
-  var valid_594310 = path.getOrDefault("issueId")
-  valid_594310 = validateParameter(valid_594310, JString, required = true,
+  if valid_564442 != nil:
+    section.add "apiId", valid_564442
+  var valid_564443 = path.getOrDefault("issueId")
+  valid_564443 = validateParameter(valid_564443, JString, required = true,
                                  default = nil)
-  if valid_594310 != nil:
-    section.add "issueId", valid_594310
-  var valid_594311 = path.getOrDefault("subscriptionId")
-  valid_594311 = validateParameter(valid_594311, JString, required = true,
+  if valid_564443 != nil:
+    section.add "issueId", valid_564443
+  var valid_564444 = path.getOrDefault("subscriptionId")
+  valid_564444 = validateParameter(valid_564444, JString, required = true,
                                  default = nil)
-  if valid_594311 != nil:
-    section.add "subscriptionId", valid_594311
-  var valid_594312 = path.getOrDefault("serviceName")
-  valid_594312 = validateParameter(valid_594312, JString, required = true,
+  if valid_564444 != nil:
+    section.add "subscriptionId", valid_564444
+  var valid_564445 = path.getOrDefault("resourceGroupName")
+  valid_564445 = validateParameter(valid_564445, JString, required = true,
                                  default = nil)
-  if valid_594312 != nil:
-    section.add "serviceName", valid_594312
+  if valid_564445 != nil:
+    section.add "resourceGroupName", valid_564445
   result.add "path", section
   ## parameters in `query` object:
-  ##   api-version: JString (required)
-  ##              : Version of the API to be used with the client request.
   ##   $top: JInt
   ##       : Number of records to return.
+  ##   api-version: JString (required)
+  ##              : Version of the API to be used with the client request.
   ##   $skip: JInt
   ##        : Number of records to skip.
   ##   $filter: JString
@@ -3775,26 +3774,26 @@ proc validate_ApiIssueCommentListByService_594306(path: JsonNode; query: JsonNod
   ## |userId | ge, le, eq, ne, gt, lt | substringof, contains, startswith, endswith|
   ## 
   section = newJObject()
+  var valid_564446 = query.getOrDefault("$top")
+  valid_564446 = validateParameter(valid_564446, JInt, required = false, default = nil)
+  if valid_564446 != nil:
+    section.add "$top", valid_564446
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594313 = query.getOrDefault("api-version")
-  valid_594313 = validateParameter(valid_594313, JString, required = true,
+  var valid_564447 = query.getOrDefault("api-version")
+  valid_564447 = validateParameter(valid_564447, JString, required = true,
                                  default = nil)
-  if valid_594313 != nil:
-    section.add "api-version", valid_594313
-  var valid_594314 = query.getOrDefault("$top")
-  valid_594314 = validateParameter(valid_594314, JInt, required = false, default = nil)
-  if valid_594314 != nil:
-    section.add "$top", valid_594314
-  var valid_594315 = query.getOrDefault("$skip")
-  valid_594315 = validateParameter(valid_594315, JInt, required = false, default = nil)
-  if valid_594315 != nil:
-    section.add "$skip", valid_594315
-  var valid_594316 = query.getOrDefault("$filter")
-  valid_594316 = validateParameter(valid_594316, JString, required = false,
+  if valid_564447 != nil:
+    section.add "api-version", valid_564447
+  var valid_564448 = query.getOrDefault("$skip")
+  valid_564448 = validateParameter(valid_564448, JInt, required = false, default = nil)
+  if valid_564448 != nil:
+    section.add "$skip", valid_564448
+  var valid_564449 = query.getOrDefault("$filter")
+  valid_564449 = validateParameter(valid_564449, JString, required = false,
                                  default = nil)
-  if valid_594316 != nil:
-    section.add "$filter", valid_594316
+  if valid_564449 != nil:
+    section.add "$filter", valid_564449
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3803,27 +3802,29 @@ proc validate_ApiIssueCommentListByService_594306(path: JsonNode; query: JsonNod
   if body != nil:
     result.add "body", body
 
-proc call*(call_594317: Call_ApiIssueCommentListByService_594305; path: JsonNode;
+proc call*(call_564450: Call_ApiIssueCommentListByService_564438; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists all comments for the Issue associated with the specified API.
   ## 
-  let valid = call_594317.validator(path, query, header, formData, body)
-  let scheme = call_594317.pickScheme
+  let valid = call_564450.validator(path, query, header, formData, body)
+  let scheme = call_564450.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594317.url(scheme.get, call_594317.host, call_594317.base,
-                         call_594317.route, valid.getOrDefault("path"),
+  let url = call_564450.url(scheme.get, call_564450.host, call_564450.base,
+                         call_564450.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594317, url, valid)
+  result = hook(call_564450, url, valid)
 
-proc call*(call_594318: Call_ApiIssueCommentListByService_594305;
-          resourceGroupName: string; apiVersion: string; apiId: string;
-          issueId: string; subscriptionId: string; serviceName: string; Top: int = 0;
+proc call*(call_564451: Call_ApiIssueCommentListByService_564438;
+          serviceName: string; apiVersion: string; apiId: string; issueId: string;
+          subscriptionId: string; resourceGroupName: string; Top: int = 0;
           Skip: int = 0; Filter: string = ""): Recallable =
   ## apiIssueCommentListByService
   ## Lists all comments for the Issue associated with the specified API.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   serviceName: string (required)
+  ##              : The name of the API Management service.
+  ##   Top: int
+  ##      : Number of records to return.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
   ##   apiId: string (required)
@@ -3832,12 +3833,10 @@ proc call*(call_594318: Call_ApiIssueCommentListByService_594305;
   ##          : Issue identifier. Must be unique in the current API Management service instance.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   Top: int
-  ##      : Number of records to return.
   ##   Skip: int
   ##       : Number of records to skip.
-  ##   serviceName: string (required)
-  ##              : The name of the API Management service.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   Filter: string
   ##         : | Field       | Supported operators    | Supported functions               |
   ## |-------------|------------------------|-----------------------------------|
@@ -3845,27 +3844,27 @@ proc call*(call_594318: Call_ApiIssueCommentListByService_594305;
   ## |name | ge, le, eq, ne, gt, lt | substringof, contains, startswith, endswith|
   ## |userId | ge, le, eq, ne, gt, lt | substringof, contains, startswith, endswith|
   ## 
-  var path_594319 = newJObject()
-  var query_594320 = newJObject()
-  add(path_594319, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594320, "api-version", newJString(apiVersion))
-  add(path_594319, "apiId", newJString(apiId))
-  add(path_594319, "issueId", newJString(issueId))
-  add(path_594319, "subscriptionId", newJString(subscriptionId))
-  add(query_594320, "$top", newJInt(Top))
-  add(query_594320, "$skip", newJInt(Skip))
-  add(path_594319, "serviceName", newJString(serviceName))
-  add(query_594320, "$filter", newJString(Filter))
-  result = call_594318.call(path_594319, query_594320, nil, nil, nil)
+  var path_564452 = newJObject()
+  var query_564453 = newJObject()
+  add(path_564452, "serviceName", newJString(serviceName))
+  add(query_564453, "$top", newJInt(Top))
+  add(query_564453, "api-version", newJString(apiVersion))
+  add(path_564452, "apiId", newJString(apiId))
+  add(path_564452, "issueId", newJString(issueId))
+  add(path_564452, "subscriptionId", newJString(subscriptionId))
+  add(query_564453, "$skip", newJInt(Skip))
+  add(path_564452, "resourceGroupName", newJString(resourceGroupName))
+  add(query_564453, "$filter", newJString(Filter))
+  result = call_564451.call(path_564452, query_564453, nil, nil, nil)
 
-var apiIssueCommentListByService* = Call_ApiIssueCommentListByService_594305(
+var apiIssueCommentListByService* = Call_ApiIssueCommentListByService_564438(
     name: "apiIssueCommentListByService", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ApiManagement/service/{serviceName}/apis/{apiId}/issues/{issueId}/comments",
-    validator: validate_ApiIssueCommentListByService_594306, base: "",
-    url: url_ApiIssueCommentListByService_594307, schemes: {Scheme.Https})
+    validator: validate_ApiIssueCommentListByService_564439, base: "",
+    url: url_ApiIssueCommentListByService_564440, schemes: {Scheme.Https})
 type
-  Call_ApiIssueCommentCreateOrUpdate_594335 = ref object of OpenApiRestCall_593425
-proc url_ApiIssueCommentCreateOrUpdate_594337(protocol: Scheme; host: string;
+  Call_ApiIssueCommentCreateOrUpdate_564468 = ref object of OpenApiRestCall_563556
+proc url_ApiIssueCommentCreateOrUpdate_564470(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -3897,15 +3896,15 @@ proc url_ApiIssueCommentCreateOrUpdate_594337(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ApiIssueCommentCreateOrUpdate_594336(path: JsonNode; query: JsonNode;
+proc validate_ApiIssueCommentCreateOrUpdate_564469(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Creates a new Comment for the Issue in an API or updates an existing one.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
+  ##   serviceName: JString (required)
+  ##              : The name of the API Management service.
   ##   apiId: JString (required)
   ##        : API identifier. Must be unique in the current API Management service instance.
   ##   issueId: JString (required)
@@ -3914,41 +3913,41 @@ proc validate_ApiIssueCommentCreateOrUpdate_594336(path: JsonNode; query: JsonNo
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   commentId: JString (required)
   ##            : Comment identifier within an Issue. Must be unique in the current Issue.
-  ##   serviceName: JString (required)
-  ##              : The name of the API Management service.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594338 = path.getOrDefault("resourceGroupName")
-  valid_594338 = validateParameter(valid_594338, JString, required = true,
+        "path argument is necessary due to required `serviceName` field"
+  var valid_564471 = path.getOrDefault("serviceName")
+  valid_564471 = validateParameter(valid_564471, JString, required = true,
                                  default = nil)
-  if valid_594338 != nil:
-    section.add "resourceGroupName", valid_594338
-  var valid_594339 = path.getOrDefault("apiId")
-  valid_594339 = validateParameter(valid_594339, JString, required = true,
+  if valid_564471 != nil:
+    section.add "serviceName", valid_564471
+  var valid_564472 = path.getOrDefault("apiId")
+  valid_564472 = validateParameter(valid_564472, JString, required = true,
                                  default = nil)
-  if valid_594339 != nil:
-    section.add "apiId", valid_594339
-  var valid_594340 = path.getOrDefault("issueId")
-  valid_594340 = validateParameter(valid_594340, JString, required = true,
+  if valid_564472 != nil:
+    section.add "apiId", valid_564472
+  var valid_564473 = path.getOrDefault("issueId")
+  valid_564473 = validateParameter(valid_564473, JString, required = true,
                                  default = nil)
-  if valid_594340 != nil:
-    section.add "issueId", valid_594340
-  var valid_594341 = path.getOrDefault("subscriptionId")
-  valid_594341 = validateParameter(valid_594341, JString, required = true,
+  if valid_564473 != nil:
+    section.add "issueId", valid_564473
+  var valid_564474 = path.getOrDefault("subscriptionId")
+  valid_564474 = validateParameter(valid_564474, JString, required = true,
                                  default = nil)
-  if valid_594341 != nil:
-    section.add "subscriptionId", valid_594341
-  var valid_594342 = path.getOrDefault("commentId")
-  valid_594342 = validateParameter(valid_594342, JString, required = true,
+  if valid_564474 != nil:
+    section.add "subscriptionId", valid_564474
+  var valid_564475 = path.getOrDefault("commentId")
+  valid_564475 = validateParameter(valid_564475, JString, required = true,
                                  default = nil)
-  if valid_594342 != nil:
-    section.add "commentId", valid_594342
-  var valid_594343 = path.getOrDefault("serviceName")
-  valid_594343 = validateParameter(valid_594343, JString, required = true,
+  if valid_564475 != nil:
+    section.add "commentId", valid_564475
+  var valid_564476 = path.getOrDefault("resourceGroupName")
+  valid_564476 = validateParameter(valid_564476, JString, required = true,
                                  default = nil)
-  if valid_594343 != nil:
-    section.add "serviceName", valid_594343
+  if valid_564476 != nil:
+    section.add "resourceGroupName", valid_564476
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -3956,21 +3955,21 @@ proc validate_ApiIssueCommentCreateOrUpdate_594336(path: JsonNode; query: JsonNo
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594344 = query.getOrDefault("api-version")
-  valid_594344 = validateParameter(valid_594344, JString, required = true,
+  var valid_564477 = query.getOrDefault("api-version")
+  valid_564477 = validateParameter(valid_564477, JString, required = true,
                                  default = nil)
-  if valid_594344 != nil:
-    section.add "api-version", valid_594344
+  if valid_564477 != nil:
+    section.add "api-version", valid_564477
   result.add "query", section
   ## parameters in `header` object:
   ##   If-Match: JString
   ##           : ETag of the Entity. Not required when creating an entity, but required when updating an entity.
   section = newJObject()
-  var valid_594345 = header.getOrDefault("If-Match")
-  valid_594345 = validateParameter(valid_594345, JString, required = false,
+  var valid_564478 = header.getOrDefault("If-Match")
+  valid_564478 = validateParameter(valid_564478, JString, required = false,
                                  default = nil)
-  if valid_594345 != nil:
-    section.add "If-Match", valid_594345
+  if valid_564478 != nil:
+    section.add "If-Match", valid_564478
   result.add "header", section
   section = newJObject()
   result.add "formData", section
@@ -3982,27 +3981,27 @@ proc validate_ApiIssueCommentCreateOrUpdate_594336(path: JsonNode; query: JsonNo
   if body != nil:
     result.add "body", body
 
-proc call*(call_594347: Call_ApiIssueCommentCreateOrUpdate_594335; path: JsonNode;
+proc call*(call_564480: Call_ApiIssueCommentCreateOrUpdate_564468; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Creates a new Comment for the Issue in an API or updates an existing one.
   ## 
-  let valid = call_594347.validator(path, query, header, formData, body)
-  let scheme = call_594347.pickScheme
+  let valid = call_564480.validator(path, query, header, formData, body)
+  let scheme = call_564480.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594347.url(scheme.get, call_594347.host, call_594347.base,
-                         call_594347.route, valid.getOrDefault("path"),
+  let url = call_564480.url(scheme.get, call_564480.host, call_564480.base,
+                         call_564480.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594347, url, valid)
+  result = hook(call_564480, url, valid)
 
-proc call*(call_594348: Call_ApiIssueCommentCreateOrUpdate_594335;
-          resourceGroupName: string; apiVersion: string; apiId: string;
-          issueId: string; subscriptionId: string; commentId: string;
-          parameters: JsonNode; serviceName: string): Recallable =
+proc call*(call_564481: Call_ApiIssueCommentCreateOrUpdate_564468;
+          serviceName: string; apiVersion: string; apiId: string; issueId: string;
+          subscriptionId: string; commentId: string; resourceGroupName: string;
+          parameters: JsonNode): Recallable =
   ## apiIssueCommentCreateOrUpdate
   ## Creates a new Comment for the Issue in an API or updates an existing one.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   serviceName: string (required)
+  ##              : The name of the API Management service.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
   ##   apiId: string (required)
@@ -4013,32 +4012,32 @@ proc call*(call_594348: Call_ApiIssueCommentCreateOrUpdate_594335;
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   commentId: string (required)
   ##            : Comment identifier within an Issue. Must be unique in the current Issue.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   parameters: JObject (required)
   ##             : Create parameters.
-  ##   serviceName: string (required)
-  ##              : The name of the API Management service.
-  var path_594349 = newJObject()
-  var query_594350 = newJObject()
-  var body_594351 = newJObject()
-  add(path_594349, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594350, "api-version", newJString(apiVersion))
-  add(path_594349, "apiId", newJString(apiId))
-  add(path_594349, "issueId", newJString(issueId))
-  add(path_594349, "subscriptionId", newJString(subscriptionId))
-  add(path_594349, "commentId", newJString(commentId))
+  var path_564482 = newJObject()
+  var query_564483 = newJObject()
+  var body_564484 = newJObject()
+  add(path_564482, "serviceName", newJString(serviceName))
+  add(query_564483, "api-version", newJString(apiVersion))
+  add(path_564482, "apiId", newJString(apiId))
+  add(path_564482, "issueId", newJString(issueId))
+  add(path_564482, "subscriptionId", newJString(subscriptionId))
+  add(path_564482, "commentId", newJString(commentId))
+  add(path_564482, "resourceGroupName", newJString(resourceGroupName))
   if parameters != nil:
-    body_594351 = parameters
-  add(path_594349, "serviceName", newJString(serviceName))
-  result = call_594348.call(path_594349, query_594350, nil, nil, body_594351)
+    body_564484 = parameters
+  result = call_564481.call(path_564482, query_564483, nil, nil, body_564484)
 
-var apiIssueCommentCreateOrUpdate* = Call_ApiIssueCommentCreateOrUpdate_594335(
+var apiIssueCommentCreateOrUpdate* = Call_ApiIssueCommentCreateOrUpdate_564468(
     name: "apiIssueCommentCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ApiManagement/service/{serviceName}/apis/{apiId}/issues/{issueId}/comments/{commentId}",
-    validator: validate_ApiIssueCommentCreateOrUpdate_594336, base: "",
-    url: url_ApiIssueCommentCreateOrUpdate_594337, schemes: {Scheme.Https})
+    validator: validate_ApiIssueCommentCreateOrUpdate_564469, base: "",
+    url: url_ApiIssueCommentCreateOrUpdate_564470, schemes: {Scheme.Https})
 type
-  Call_ApiIssueCommentGetEntityTag_594367 = ref object of OpenApiRestCall_593425
-proc url_ApiIssueCommentGetEntityTag_594369(protocol: Scheme; host: string;
+  Call_ApiIssueCommentGetEntityTag_564500 = ref object of OpenApiRestCall_563556
+proc url_ApiIssueCommentGetEntityTag_564502(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -4070,15 +4069,15 @@ proc url_ApiIssueCommentGetEntityTag_594369(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ApiIssueCommentGetEntityTag_594368(path: JsonNode; query: JsonNode;
+proc validate_ApiIssueCommentGetEntityTag_564501(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the entity state (Etag) version of the issue Comment for an API specified by its identifier.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
+  ##   serviceName: JString (required)
+  ##              : The name of the API Management service.
   ##   apiId: JString (required)
   ##        : API identifier. Must be unique in the current API Management service instance.
   ##   issueId: JString (required)
@@ -4087,41 +4086,41 @@ proc validate_ApiIssueCommentGetEntityTag_594368(path: JsonNode; query: JsonNode
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   commentId: JString (required)
   ##            : Comment identifier within an Issue. Must be unique in the current Issue.
-  ##   serviceName: JString (required)
-  ##              : The name of the API Management service.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594370 = path.getOrDefault("resourceGroupName")
-  valid_594370 = validateParameter(valid_594370, JString, required = true,
+        "path argument is necessary due to required `serviceName` field"
+  var valid_564503 = path.getOrDefault("serviceName")
+  valid_564503 = validateParameter(valid_564503, JString, required = true,
                                  default = nil)
-  if valid_594370 != nil:
-    section.add "resourceGroupName", valid_594370
-  var valid_594371 = path.getOrDefault("apiId")
-  valid_594371 = validateParameter(valid_594371, JString, required = true,
+  if valid_564503 != nil:
+    section.add "serviceName", valid_564503
+  var valid_564504 = path.getOrDefault("apiId")
+  valid_564504 = validateParameter(valid_564504, JString, required = true,
                                  default = nil)
-  if valid_594371 != nil:
-    section.add "apiId", valid_594371
-  var valid_594372 = path.getOrDefault("issueId")
-  valid_594372 = validateParameter(valid_594372, JString, required = true,
+  if valid_564504 != nil:
+    section.add "apiId", valid_564504
+  var valid_564505 = path.getOrDefault("issueId")
+  valid_564505 = validateParameter(valid_564505, JString, required = true,
                                  default = nil)
-  if valid_594372 != nil:
-    section.add "issueId", valid_594372
-  var valid_594373 = path.getOrDefault("subscriptionId")
-  valid_594373 = validateParameter(valid_594373, JString, required = true,
+  if valid_564505 != nil:
+    section.add "issueId", valid_564505
+  var valid_564506 = path.getOrDefault("subscriptionId")
+  valid_564506 = validateParameter(valid_564506, JString, required = true,
                                  default = nil)
-  if valid_594373 != nil:
-    section.add "subscriptionId", valid_594373
-  var valid_594374 = path.getOrDefault("commentId")
-  valid_594374 = validateParameter(valid_594374, JString, required = true,
+  if valid_564506 != nil:
+    section.add "subscriptionId", valid_564506
+  var valid_564507 = path.getOrDefault("commentId")
+  valid_564507 = validateParameter(valid_564507, JString, required = true,
                                  default = nil)
-  if valid_594374 != nil:
-    section.add "commentId", valid_594374
-  var valid_594375 = path.getOrDefault("serviceName")
-  valid_594375 = validateParameter(valid_594375, JString, required = true,
+  if valid_564507 != nil:
+    section.add "commentId", valid_564507
+  var valid_564508 = path.getOrDefault("resourceGroupName")
+  valid_564508 = validateParameter(valid_564508, JString, required = true,
                                  default = nil)
-  if valid_594375 != nil:
-    section.add "serviceName", valid_594375
+  if valid_564508 != nil:
+    section.add "resourceGroupName", valid_564508
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -4129,11 +4128,11 @@ proc validate_ApiIssueCommentGetEntityTag_594368(path: JsonNode; query: JsonNode
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594376 = query.getOrDefault("api-version")
-  valid_594376 = validateParameter(valid_594376, JString, required = true,
+  var valid_564509 = query.getOrDefault("api-version")
+  valid_564509 = validateParameter(valid_564509, JString, required = true,
                                  default = nil)
-  if valid_594376 != nil:
-    section.add "api-version", valid_594376
+  if valid_564509 != nil:
+    section.add "api-version", valid_564509
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -4142,27 +4141,26 @@ proc validate_ApiIssueCommentGetEntityTag_594368(path: JsonNode; query: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_594377: Call_ApiIssueCommentGetEntityTag_594367; path: JsonNode;
+proc call*(call_564510: Call_ApiIssueCommentGetEntityTag_564500; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the entity state (Etag) version of the issue Comment for an API specified by its identifier.
   ## 
-  let valid = call_594377.validator(path, query, header, formData, body)
-  let scheme = call_594377.pickScheme
+  let valid = call_564510.validator(path, query, header, formData, body)
+  let scheme = call_564510.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594377.url(scheme.get, call_594377.host, call_594377.base,
-                         call_594377.route, valid.getOrDefault("path"),
+  let url = call_564510.url(scheme.get, call_564510.host, call_564510.base,
+                         call_564510.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594377, url, valid)
+  result = hook(call_564510, url, valid)
 
-proc call*(call_594378: Call_ApiIssueCommentGetEntityTag_594367;
-          resourceGroupName: string; apiVersion: string; apiId: string;
-          issueId: string; subscriptionId: string; commentId: string;
-          serviceName: string): Recallable =
+proc call*(call_564511: Call_ApiIssueCommentGetEntityTag_564500;
+          serviceName: string; apiVersion: string; apiId: string; issueId: string;
+          subscriptionId: string; commentId: string; resourceGroupName: string): Recallable =
   ## apiIssueCommentGetEntityTag
   ## Gets the entity state (Etag) version of the issue Comment for an API specified by its identifier.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   serviceName: string (required)
+  ##              : The name of the API Management service.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
   ##   apiId: string (required)
@@ -4173,27 +4171,27 @@ proc call*(call_594378: Call_ApiIssueCommentGetEntityTag_594367;
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   commentId: string (required)
   ##            : Comment identifier within an Issue. Must be unique in the current Issue.
-  ##   serviceName: string (required)
-  ##              : The name of the API Management service.
-  var path_594379 = newJObject()
-  var query_594380 = newJObject()
-  add(path_594379, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594380, "api-version", newJString(apiVersion))
-  add(path_594379, "apiId", newJString(apiId))
-  add(path_594379, "issueId", newJString(issueId))
-  add(path_594379, "subscriptionId", newJString(subscriptionId))
-  add(path_594379, "commentId", newJString(commentId))
-  add(path_594379, "serviceName", newJString(serviceName))
-  result = call_594378.call(path_594379, query_594380, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564512 = newJObject()
+  var query_564513 = newJObject()
+  add(path_564512, "serviceName", newJString(serviceName))
+  add(query_564513, "api-version", newJString(apiVersion))
+  add(path_564512, "apiId", newJString(apiId))
+  add(path_564512, "issueId", newJString(issueId))
+  add(path_564512, "subscriptionId", newJString(subscriptionId))
+  add(path_564512, "commentId", newJString(commentId))
+  add(path_564512, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564511.call(path_564512, query_564513, nil, nil, nil)
 
-var apiIssueCommentGetEntityTag* = Call_ApiIssueCommentGetEntityTag_594367(
+var apiIssueCommentGetEntityTag* = Call_ApiIssueCommentGetEntityTag_564500(
     name: "apiIssueCommentGetEntityTag", meth: HttpMethod.HttpHead,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ApiManagement/service/{serviceName}/apis/{apiId}/issues/{issueId}/comments/{commentId}",
-    validator: validate_ApiIssueCommentGetEntityTag_594368, base: "",
-    url: url_ApiIssueCommentGetEntityTag_594369, schemes: {Scheme.Https})
+    validator: validate_ApiIssueCommentGetEntityTag_564501, base: "",
+    url: url_ApiIssueCommentGetEntityTag_564502, schemes: {Scheme.Https})
 type
-  Call_ApiIssueCommentGet_594321 = ref object of OpenApiRestCall_593425
-proc url_ApiIssueCommentGet_594323(protocol: Scheme; host: string; base: string;
+  Call_ApiIssueCommentGet_564454 = ref object of OpenApiRestCall_563556
+proc url_ApiIssueCommentGet_564456(protocol: Scheme; host: string; base: string;
                                   route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -4225,7 +4223,7 @@ proc url_ApiIssueCommentGet_594323(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ApiIssueCommentGet_594322(path: JsonNode; query: JsonNode;
+proc validate_ApiIssueCommentGet_564455(path: JsonNode; query: JsonNode;
                                        header: JsonNode; formData: JsonNode;
                                        body: JsonNode): JsonNode =
   ## Gets the details of the issue Comment for an API specified by its identifier.
@@ -4233,8 +4231,8 @@ proc validate_ApiIssueCommentGet_594322(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
+  ##   serviceName: JString (required)
+  ##              : The name of the API Management service.
   ##   apiId: JString (required)
   ##        : API identifier. Must be unique in the current API Management service instance.
   ##   issueId: JString (required)
@@ -4243,41 +4241,41 @@ proc validate_ApiIssueCommentGet_594322(path: JsonNode; query: JsonNode;
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   commentId: JString (required)
   ##            : Comment identifier within an Issue. Must be unique in the current Issue.
-  ##   serviceName: JString (required)
-  ##              : The name of the API Management service.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594324 = path.getOrDefault("resourceGroupName")
-  valid_594324 = validateParameter(valid_594324, JString, required = true,
+        "path argument is necessary due to required `serviceName` field"
+  var valid_564457 = path.getOrDefault("serviceName")
+  valid_564457 = validateParameter(valid_564457, JString, required = true,
                                  default = nil)
-  if valid_594324 != nil:
-    section.add "resourceGroupName", valid_594324
-  var valid_594325 = path.getOrDefault("apiId")
-  valid_594325 = validateParameter(valid_594325, JString, required = true,
+  if valid_564457 != nil:
+    section.add "serviceName", valid_564457
+  var valid_564458 = path.getOrDefault("apiId")
+  valid_564458 = validateParameter(valid_564458, JString, required = true,
                                  default = nil)
-  if valid_594325 != nil:
-    section.add "apiId", valid_594325
-  var valid_594326 = path.getOrDefault("issueId")
-  valid_594326 = validateParameter(valid_594326, JString, required = true,
+  if valid_564458 != nil:
+    section.add "apiId", valid_564458
+  var valid_564459 = path.getOrDefault("issueId")
+  valid_564459 = validateParameter(valid_564459, JString, required = true,
                                  default = nil)
-  if valid_594326 != nil:
-    section.add "issueId", valid_594326
-  var valid_594327 = path.getOrDefault("subscriptionId")
-  valid_594327 = validateParameter(valid_594327, JString, required = true,
+  if valid_564459 != nil:
+    section.add "issueId", valid_564459
+  var valid_564460 = path.getOrDefault("subscriptionId")
+  valid_564460 = validateParameter(valid_564460, JString, required = true,
                                  default = nil)
-  if valid_594327 != nil:
-    section.add "subscriptionId", valid_594327
-  var valid_594328 = path.getOrDefault("commentId")
-  valid_594328 = validateParameter(valid_594328, JString, required = true,
+  if valid_564460 != nil:
+    section.add "subscriptionId", valid_564460
+  var valid_564461 = path.getOrDefault("commentId")
+  valid_564461 = validateParameter(valid_564461, JString, required = true,
                                  default = nil)
-  if valid_594328 != nil:
-    section.add "commentId", valid_594328
-  var valid_594329 = path.getOrDefault("serviceName")
-  valid_594329 = validateParameter(valid_594329, JString, required = true,
+  if valid_564461 != nil:
+    section.add "commentId", valid_564461
+  var valid_564462 = path.getOrDefault("resourceGroupName")
+  valid_564462 = validateParameter(valid_564462, JString, required = true,
                                  default = nil)
-  if valid_594329 != nil:
-    section.add "serviceName", valid_594329
+  if valid_564462 != nil:
+    section.add "resourceGroupName", valid_564462
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -4285,11 +4283,11 @@ proc validate_ApiIssueCommentGet_594322(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594330 = query.getOrDefault("api-version")
-  valid_594330 = validateParameter(valid_594330, JString, required = true,
+  var valid_564463 = query.getOrDefault("api-version")
+  valid_564463 = validateParameter(valid_564463, JString, required = true,
                                  default = nil)
-  if valid_594330 != nil:
-    section.add "api-version", valid_594330
+  if valid_564463 != nil:
+    section.add "api-version", valid_564463
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -4298,26 +4296,26 @@ proc validate_ApiIssueCommentGet_594322(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594331: Call_ApiIssueCommentGet_594321; path: JsonNode;
+proc call*(call_564464: Call_ApiIssueCommentGet_564454; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the details of the issue Comment for an API specified by its identifier.
   ## 
-  let valid = call_594331.validator(path, query, header, formData, body)
-  let scheme = call_594331.pickScheme
+  let valid = call_564464.validator(path, query, header, formData, body)
+  let scheme = call_564464.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594331.url(scheme.get, call_594331.host, call_594331.base,
-                         call_594331.route, valid.getOrDefault("path"),
+  let url = call_564464.url(scheme.get, call_564464.host, call_564464.base,
+                         call_564464.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594331, url, valid)
+  result = hook(call_564464, url, valid)
 
-proc call*(call_594332: Call_ApiIssueCommentGet_594321; resourceGroupName: string;
+proc call*(call_564465: Call_ApiIssueCommentGet_564454; serviceName: string;
           apiVersion: string; apiId: string; issueId: string; subscriptionId: string;
-          commentId: string; serviceName: string): Recallable =
+          commentId: string; resourceGroupName: string): Recallable =
   ## apiIssueCommentGet
   ## Gets the details of the issue Comment for an API specified by its identifier.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   serviceName: string (required)
+  ##              : The name of the API Management service.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
   ##   apiId: string (required)
@@ -4328,27 +4326,27 @@ proc call*(call_594332: Call_ApiIssueCommentGet_594321; resourceGroupName: strin
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   commentId: string (required)
   ##            : Comment identifier within an Issue. Must be unique in the current Issue.
-  ##   serviceName: string (required)
-  ##              : The name of the API Management service.
-  var path_594333 = newJObject()
-  var query_594334 = newJObject()
-  add(path_594333, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594334, "api-version", newJString(apiVersion))
-  add(path_594333, "apiId", newJString(apiId))
-  add(path_594333, "issueId", newJString(issueId))
-  add(path_594333, "subscriptionId", newJString(subscriptionId))
-  add(path_594333, "commentId", newJString(commentId))
-  add(path_594333, "serviceName", newJString(serviceName))
-  result = call_594332.call(path_594333, query_594334, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564466 = newJObject()
+  var query_564467 = newJObject()
+  add(path_564466, "serviceName", newJString(serviceName))
+  add(query_564467, "api-version", newJString(apiVersion))
+  add(path_564466, "apiId", newJString(apiId))
+  add(path_564466, "issueId", newJString(issueId))
+  add(path_564466, "subscriptionId", newJString(subscriptionId))
+  add(path_564466, "commentId", newJString(commentId))
+  add(path_564466, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564465.call(path_564466, query_564467, nil, nil, nil)
 
-var apiIssueCommentGet* = Call_ApiIssueCommentGet_594321(
+var apiIssueCommentGet* = Call_ApiIssueCommentGet_564454(
     name: "apiIssueCommentGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ApiManagement/service/{serviceName}/apis/{apiId}/issues/{issueId}/comments/{commentId}",
-    validator: validate_ApiIssueCommentGet_594322, base: "",
-    url: url_ApiIssueCommentGet_594323, schemes: {Scheme.Https})
+    validator: validate_ApiIssueCommentGet_564455, base: "",
+    url: url_ApiIssueCommentGet_564456, schemes: {Scheme.Https})
 type
-  Call_ApiIssueCommentDelete_594352 = ref object of OpenApiRestCall_593425
-proc url_ApiIssueCommentDelete_594354(protocol: Scheme; host: string; base: string;
+  Call_ApiIssueCommentDelete_564485 = ref object of OpenApiRestCall_563556
+proc url_ApiIssueCommentDelete_564487(protocol: Scheme; host: string; base: string;
                                      route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -4380,15 +4378,15 @@ proc url_ApiIssueCommentDelete_594354(protocol: Scheme; host: string; base: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ApiIssueCommentDelete_594353(path: JsonNode; query: JsonNode;
+proc validate_ApiIssueCommentDelete_564486(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Deletes the specified comment from an Issue.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
+  ##   serviceName: JString (required)
+  ##              : The name of the API Management service.
   ##   apiId: JString (required)
   ##        : API identifier. Must be unique in the current API Management service instance.
   ##   issueId: JString (required)
@@ -4397,41 +4395,41 @@ proc validate_ApiIssueCommentDelete_594353(path: JsonNode; query: JsonNode;
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   commentId: JString (required)
   ##            : Comment identifier within an Issue. Must be unique in the current Issue.
-  ##   serviceName: JString (required)
-  ##              : The name of the API Management service.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594355 = path.getOrDefault("resourceGroupName")
-  valid_594355 = validateParameter(valid_594355, JString, required = true,
+        "path argument is necessary due to required `serviceName` field"
+  var valid_564488 = path.getOrDefault("serviceName")
+  valid_564488 = validateParameter(valid_564488, JString, required = true,
                                  default = nil)
-  if valid_594355 != nil:
-    section.add "resourceGroupName", valid_594355
-  var valid_594356 = path.getOrDefault("apiId")
-  valid_594356 = validateParameter(valid_594356, JString, required = true,
+  if valid_564488 != nil:
+    section.add "serviceName", valid_564488
+  var valid_564489 = path.getOrDefault("apiId")
+  valid_564489 = validateParameter(valid_564489, JString, required = true,
                                  default = nil)
-  if valid_594356 != nil:
-    section.add "apiId", valid_594356
-  var valid_594357 = path.getOrDefault("issueId")
-  valid_594357 = validateParameter(valid_594357, JString, required = true,
+  if valid_564489 != nil:
+    section.add "apiId", valid_564489
+  var valid_564490 = path.getOrDefault("issueId")
+  valid_564490 = validateParameter(valid_564490, JString, required = true,
                                  default = nil)
-  if valid_594357 != nil:
-    section.add "issueId", valid_594357
-  var valid_594358 = path.getOrDefault("subscriptionId")
-  valid_594358 = validateParameter(valid_594358, JString, required = true,
+  if valid_564490 != nil:
+    section.add "issueId", valid_564490
+  var valid_564491 = path.getOrDefault("subscriptionId")
+  valid_564491 = validateParameter(valid_564491, JString, required = true,
                                  default = nil)
-  if valid_594358 != nil:
-    section.add "subscriptionId", valid_594358
-  var valid_594359 = path.getOrDefault("commentId")
-  valid_594359 = validateParameter(valid_594359, JString, required = true,
+  if valid_564491 != nil:
+    section.add "subscriptionId", valid_564491
+  var valid_564492 = path.getOrDefault("commentId")
+  valid_564492 = validateParameter(valid_564492, JString, required = true,
                                  default = nil)
-  if valid_594359 != nil:
-    section.add "commentId", valid_594359
-  var valid_594360 = path.getOrDefault("serviceName")
-  valid_594360 = validateParameter(valid_594360, JString, required = true,
+  if valid_564492 != nil:
+    section.add "commentId", valid_564492
+  var valid_564493 = path.getOrDefault("resourceGroupName")
+  valid_564493 = validateParameter(valid_564493, JString, required = true,
                                  default = nil)
-  if valid_594360 != nil:
-    section.add "serviceName", valid_594360
+  if valid_564493 != nil:
+    section.add "resourceGroupName", valid_564493
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -4439,11 +4437,11 @@ proc validate_ApiIssueCommentDelete_594353(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594361 = query.getOrDefault("api-version")
-  valid_594361 = validateParameter(valid_594361, JString, required = true,
+  var valid_564494 = query.getOrDefault("api-version")
+  valid_564494 = validateParameter(valid_564494, JString, required = true,
                                  default = nil)
-  if valid_594361 != nil:
-    section.add "api-version", valid_594361
+  if valid_564494 != nil:
+    section.add "api-version", valid_564494
   result.add "query", section
   ## parameters in `header` object:
   ##   If-Match: JString (required)
@@ -4451,38 +4449,37 @@ proc validate_ApiIssueCommentDelete_594353(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert header != nil,
         "header argument is necessary due to required `If-Match` field"
-  var valid_594362 = header.getOrDefault("If-Match")
-  valid_594362 = validateParameter(valid_594362, JString, required = true,
+  var valid_564495 = header.getOrDefault("If-Match")
+  valid_564495 = validateParameter(valid_564495, JString, required = true,
                                  default = nil)
-  if valid_594362 != nil:
-    section.add "If-Match", valid_594362
+  if valid_564495 != nil:
+    section.add "If-Match", valid_564495
   result.add "header", section
   section = newJObject()
   result.add "formData", section
   if body != nil:
     result.add "body", body
 
-proc call*(call_594363: Call_ApiIssueCommentDelete_594352; path: JsonNode;
+proc call*(call_564496: Call_ApiIssueCommentDelete_564485; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes the specified comment from an Issue.
   ## 
-  let valid = call_594363.validator(path, query, header, formData, body)
-  let scheme = call_594363.pickScheme
+  let valid = call_564496.validator(path, query, header, formData, body)
+  let scheme = call_564496.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594363.url(scheme.get, call_594363.host, call_594363.base,
-                         call_594363.route, valid.getOrDefault("path"),
+  let url = call_564496.url(scheme.get, call_564496.host, call_564496.base,
+                         call_564496.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594363, url, valid)
+  result = hook(call_564496, url, valid)
 
-proc call*(call_594364: Call_ApiIssueCommentDelete_594352;
-          resourceGroupName: string; apiVersion: string; apiId: string;
-          issueId: string; subscriptionId: string; commentId: string;
-          serviceName: string): Recallable =
+proc call*(call_564497: Call_ApiIssueCommentDelete_564485; serviceName: string;
+          apiVersion: string; apiId: string; issueId: string; subscriptionId: string;
+          commentId: string; resourceGroupName: string): Recallable =
   ## apiIssueCommentDelete
   ## Deletes the specified comment from an Issue.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   serviceName: string (required)
+  ##              : The name of the API Management service.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
   ##   apiId: string (required)
@@ -4493,27 +4490,27 @@ proc call*(call_594364: Call_ApiIssueCommentDelete_594352;
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   commentId: string (required)
   ##            : Comment identifier within an Issue. Must be unique in the current Issue.
-  ##   serviceName: string (required)
-  ##              : The name of the API Management service.
-  var path_594365 = newJObject()
-  var query_594366 = newJObject()
-  add(path_594365, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594366, "api-version", newJString(apiVersion))
-  add(path_594365, "apiId", newJString(apiId))
-  add(path_594365, "issueId", newJString(issueId))
-  add(path_594365, "subscriptionId", newJString(subscriptionId))
-  add(path_594365, "commentId", newJString(commentId))
-  add(path_594365, "serviceName", newJString(serviceName))
-  result = call_594364.call(path_594365, query_594366, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564498 = newJObject()
+  var query_564499 = newJObject()
+  add(path_564498, "serviceName", newJString(serviceName))
+  add(query_564499, "api-version", newJString(apiVersion))
+  add(path_564498, "apiId", newJString(apiId))
+  add(path_564498, "issueId", newJString(issueId))
+  add(path_564498, "subscriptionId", newJString(subscriptionId))
+  add(path_564498, "commentId", newJString(commentId))
+  add(path_564498, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564497.call(path_564498, query_564499, nil, nil, nil)
 
-var apiIssueCommentDelete* = Call_ApiIssueCommentDelete_594352(
+var apiIssueCommentDelete* = Call_ApiIssueCommentDelete_564485(
     name: "apiIssueCommentDelete", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ApiManagement/service/{serviceName}/apis/{apiId}/issues/{issueId}/comments/{commentId}",
-    validator: validate_ApiIssueCommentDelete_594353, base: "",
-    url: url_ApiIssueCommentDelete_594354, schemes: {Scheme.Https})
+    validator: validate_ApiIssueCommentDelete_564486, base: "",
+    url: url_ApiIssueCommentDelete_564487, schemes: {Scheme.Https})
 type
-  Call_ApiOperationListByApi_594381 = ref object of OpenApiRestCall_593425
-proc url_ApiOperationListByApi_594383(protocol: Scheme; host: string; base: string;
+  Call_ApiOperationListByApi_564514 = ref object of OpenApiRestCall_563556
+proc url_ApiOperationListByApi_564516(protocol: Scheme; host: string; base: string;
                                      route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -4540,53 +4537,53 @@ proc url_ApiOperationListByApi_594383(protocol: Scheme; host: string; base: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ApiOperationListByApi_594382(path: JsonNode; query: JsonNode;
+proc validate_ApiOperationListByApi_564515(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists a collection of the operations for the specified API.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
+  ##   serviceName: JString (required)
+  ##              : The name of the API Management service.
   ##   apiId: JString (required)
   ##        : API revision identifier. Must be unique in the current API Management service instance. Non-current revision has ;rev=n as a suffix where n is the revision number.
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   serviceName: JString (required)
-  ##              : The name of the API Management service.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594384 = path.getOrDefault("resourceGroupName")
-  valid_594384 = validateParameter(valid_594384, JString, required = true,
+        "path argument is necessary due to required `serviceName` field"
+  var valid_564517 = path.getOrDefault("serviceName")
+  valid_564517 = validateParameter(valid_564517, JString, required = true,
                                  default = nil)
-  if valid_594384 != nil:
-    section.add "resourceGroupName", valid_594384
-  var valid_594385 = path.getOrDefault("apiId")
-  valid_594385 = validateParameter(valid_594385, JString, required = true,
+  if valid_564517 != nil:
+    section.add "serviceName", valid_564517
+  var valid_564518 = path.getOrDefault("apiId")
+  valid_564518 = validateParameter(valid_564518, JString, required = true,
                                  default = nil)
-  if valid_594385 != nil:
-    section.add "apiId", valid_594385
-  var valid_594386 = path.getOrDefault("subscriptionId")
-  valid_594386 = validateParameter(valid_594386, JString, required = true,
+  if valid_564518 != nil:
+    section.add "apiId", valid_564518
+  var valid_564519 = path.getOrDefault("subscriptionId")
+  valid_564519 = validateParameter(valid_564519, JString, required = true,
                                  default = nil)
-  if valid_594386 != nil:
-    section.add "subscriptionId", valid_594386
-  var valid_594387 = path.getOrDefault("serviceName")
-  valid_594387 = validateParameter(valid_594387, JString, required = true,
+  if valid_564519 != nil:
+    section.add "subscriptionId", valid_564519
+  var valid_564520 = path.getOrDefault("resourceGroupName")
+  valid_564520 = validateParameter(valid_564520, JString, required = true,
                                  default = nil)
-  if valid_594387 != nil:
-    section.add "serviceName", valid_594387
+  if valid_564520 != nil:
+    section.add "resourceGroupName", valid_564520
   result.add "path", section
   ## parameters in `query` object:
-  ##   api-version: JString (required)
-  ##              : Version of the API to be used with the client request.
+  ##   tags: JString
   ##   $top: JInt
   ##       : Number of records to return.
+  ##   api-version: JString (required)
+  ##              : Version of the API to be used with the client request.
   ##   $skip: JInt
   ##        : Number of records to skip.
-  ##   tags: JString
   ##   $filter: JString
   ##          : | Field       | Supported operators    | Supported functions               |
   ## |-------------|------------------------|-----------------------------------|
@@ -4598,31 +4595,31 @@ proc validate_ApiOperationListByApi_594382(path: JsonNode; query: JsonNode;
   ## |urlTemplate | ge, le, eq, ne, gt, lt | substringof, contains, startswith, endswith|
   ## 
   section = newJObject()
+  var valid_564521 = query.getOrDefault("tags")
+  valid_564521 = validateParameter(valid_564521, JString, required = false,
+                                 default = nil)
+  if valid_564521 != nil:
+    section.add "tags", valid_564521
+  var valid_564522 = query.getOrDefault("$top")
+  valid_564522 = validateParameter(valid_564522, JInt, required = false, default = nil)
+  if valid_564522 != nil:
+    section.add "$top", valid_564522
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594388 = query.getOrDefault("api-version")
-  valid_594388 = validateParameter(valid_594388, JString, required = true,
+  var valid_564523 = query.getOrDefault("api-version")
+  valid_564523 = validateParameter(valid_564523, JString, required = true,
                                  default = nil)
-  if valid_594388 != nil:
-    section.add "api-version", valid_594388
-  var valid_594389 = query.getOrDefault("$top")
-  valid_594389 = validateParameter(valid_594389, JInt, required = false, default = nil)
-  if valid_594389 != nil:
-    section.add "$top", valid_594389
-  var valid_594390 = query.getOrDefault("$skip")
-  valid_594390 = validateParameter(valid_594390, JInt, required = false, default = nil)
-  if valid_594390 != nil:
-    section.add "$skip", valid_594390
-  var valid_594391 = query.getOrDefault("tags")
-  valid_594391 = validateParameter(valid_594391, JString, required = false,
+  if valid_564523 != nil:
+    section.add "api-version", valid_564523
+  var valid_564524 = query.getOrDefault("$skip")
+  valid_564524 = validateParameter(valid_564524, JInt, required = false, default = nil)
+  if valid_564524 != nil:
+    section.add "$skip", valid_564524
+  var valid_564525 = query.getOrDefault("$filter")
+  valid_564525 = validateParameter(valid_564525, JString, required = false,
                                  default = nil)
-  if valid_594391 != nil:
-    section.add "tags", valid_594391
-  var valid_594392 = query.getOrDefault("$filter")
-  valid_594392 = validateParameter(valid_594392, JString, required = false,
-                                 default = nil)
-  if valid_594392 != nil:
-    section.add "$filter", valid_594392
+  if valid_564525 != nil:
+    section.add "$filter", valid_564525
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -4631,40 +4628,40 @@ proc validate_ApiOperationListByApi_594382(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594393: Call_ApiOperationListByApi_594381; path: JsonNode;
+proc call*(call_564526: Call_ApiOperationListByApi_564514; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists a collection of the operations for the specified API.
   ## 
-  let valid = call_594393.validator(path, query, header, formData, body)
-  let scheme = call_594393.pickScheme
+  let valid = call_564526.validator(path, query, header, formData, body)
+  let scheme = call_564526.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594393.url(scheme.get, call_594393.host, call_594393.base,
-                         call_594393.route, valid.getOrDefault("path"),
+  let url = call_564526.url(scheme.get, call_564526.host, call_564526.base,
+                         call_564526.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594393, url, valid)
+  result = hook(call_564526, url, valid)
 
-proc call*(call_594394: Call_ApiOperationListByApi_594381;
-          resourceGroupName: string; apiVersion: string; apiId: string;
-          subscriptionId: string; serviceName: string; Top: int = 0; Skip: int = 0;
-          tags: string = ""; Filter: string = ""): Recallable =
+proc call*(call_564527: Call_ApiOperationListByApi_564514; serviceName: string;
+          apiVersion: string; apiId: string; subscriptionId: string;
+          resourceGroupName: string; tags: string = ""; Top: int = 0; Skip: int = 0;
+          Filter: string = ""): Recallable =
   ## apiOperationListByApi
   ## Lists a collection of the operations for the specified API.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   tags: string
+  ##   serviceName: string (required)
+  ##              : The name of the API Management service.
+  ##   Top: int
+  ##      : Number of records to return.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
   ##   apiId: string (required)
   ##        : API revision identifier. Must be unique in the current API Management service instance. Non-current revision has ;rev=n as a suffix where n is the revision number.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   Top: int
-  ##      : Number of records to return.
   ##   Skip: int
   ##       : Number of records to skip.
-  ##   tags: string
-  ##   serviceName: string (required)
-  ##              : The name of the API Management service.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   Filter: string
   ##         : | Field       | Supported operators    | Supported functions               |
   ## |-------------|------------------------|-----------------------------------|
@@ -4675,27 +4672,27 @@ proc call*(call_594394: Call_ApiOperationListByApi_594381;
   ## |description | ge, le, eq, ne, gt, lt | substringof, contains, startswith, endswith|
   ## |urlTemplate | ge, le, eq, ne, gt, lt | substringof, contains, startswith, endswith|
   ## 
-  var path_594395 = newJObject()
-  var query_594396 = newJObject()
-  add(path_594395, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594396, "api-version", newJString(apiVersion))
-  add(path_594395, "apiId", newJString(apiId))
-  add(path_594395, "subscriptionId", newJString(subscriptionId))
-  add(query_594396, "$top", newJInt(Top))
-  add(query_594396, "$skip", newJInt(Skip))
-  add(query_594396, "tags", newJString(tags))
-  add(path_594395, "serviceName", newJString(serviceName))
-  add(query_594396, "$filter", newJString(Filter))
-  result = call_594394.call(path_594395, query_594396, nil, nil, nil)
+  var path_564528 = newJObject()
+  var query_564529 = newJObject()
+  add(query_564529, "tags", newJString(tags))
+  add(path_564528, "serviceName", newJString(serviceName))
+  add(query_564529, "$top", newJInt(Top))
+  add(query_564529, "api-version", newJString(apiVersion))
+  add(path_564528, "apiId", newJString(apiId))
+  add(path_564528, "subscriptionId", newJString(subscriptionId))
+  add(query_564529, "$skip", newJInt(Skip))
+  add(path_564528, "resourceGroupName", newJString(resourceGroupName))
+  add(query_564529, "$filter", newJString(Filter))
+  result = call_564527.call(path_564528, query_564529, nil, nil, nil)
 
-var apiOperationListByApi* = Call_ApiOperationListByApi_594381(
+var apiOperationListByApi* = Call_ApiOperationListByApi_564514(
     name: "apiOperationListByApi", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ApiManagement/service/{serviceName}/apis/{apiId}/operations",
-    validator: validate_ApiOperationListByApi_594382, base: "",
-    url: url_ApiOperationListByApi_594383, schemes: {Scheme.Https})
+    validator: validate_ApiOperationListByApi_564515, base: "",
+    url: url_ApiOperationListByApi_564516, schemes: {Scheme.Https})
 type
-  Call_ApiOperationCreateOrUpdate_594410 = ref object of OpenApiRestCall_593425
-proc url_ApiOperationCreateOrUpdate_594412(protocol: Scheme; host: string;
+  Call_ApiOperationCreateOrUpdate_564543 = ref object of OpenApiRestCall_563556
+proc url_ApiOperationCreateOrUpdate_564545(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -4724,51 +4721,51 @@ proc url_ApiOperationCreateOrUpdate_594412(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ApiOperationCreateOrUpdate_594411(path: JsonNode; query: JsonNode;
+proc validate_ApiOperationCreateOrUpdate_564544(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Creates a new operation in the API or updates an existing one.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
-  ##   apiId: JString (required)
-  ##        : API revision identifier. Must be unique in the current API Management service instance. Non-current revision has ;rev=n as a suffix where n is the revision number.
-  ##   subscriptionId: JString (required)
-  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   serviceName: JString (required)
   ##              : The name of the API Management service.
   ##   operationId: JString (required)
   ##              : Operation identifier within an API. Must be unique in the current API Management service instance.
+  ##   apiId: JString (required)
+  ##        : API revision identifier. Must be unique in the current API Management service instance. Non-current revision has ;rev=n as a suffix where n is the revision number.
+  ##   subscriptionId: JString (required)
+  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594413 = path.getOrDefault("resourceGroupName")
-  valid_594413 = validateParameter(valid_594413, JString, required = true,
+        "path argument is necessary due to required `serviceName` field"
+  var valid_564546 = path.getOrDefault("serviceName")
+  valid_564546 = validateParameter(valid_564546, JString, required = true,
                                  default = nil)
-  if valid_594413 != nil:
-    section.add "resourceGroupName", valid_594413
-  var valid_594414 = path.getOrDefault("apiId")
-  valid_594414 = validateParameter(valid_594414, JString, required = true,
+  if valid_564546 != nil:
+    section.add "serviceName", valid_564546
+  var valid_564547 = path.getOrDefault("operationId")
+  valid_564547 = validateParameter(valid_564547, JString, required = true,
                                  default = nil)
-  if valid_594414 != nil:
-    section.add "apiId", valid_594414
-  var valid_594415 = path.getOrDefault("subscriptionId")
-  valid_594415 = validateParameter(valid_594415, JString, required = true,
+  if valid_564547 != nil:
+    section.add "operationId", valid_564547
+  var valid_564548 = path.getOrDefault("apiId")
+  valid_564548 = validateParameter(valid_564548, JString, required = true,
                                  default = nil)
-  if valid_594415 != nil:
-    section.add "subscriptionId", valid_594415
-  var valid_594416 = path.getOrDefault("serviceName")
-  valid_594416 = validateParameter(valid_594416, JString, required = true,
+  if valid_564548 != nil:
+    section.add "apiId", valid_564548
+  var valid_564549 = path.getOrDefault("subscriptionId")
+  valid_564549 = validateParameter(valid_564549, JString, required = true,
                                  default = nil)
-  if valid_594416 != nil:
-    section.add "serviceName", valid_594416
-  var valid_594417 = path.getOrDefault("operationId")
-  valid_594417 = validateParameter(valid_594417, JString, required = true,
+  if valid_564549 != nil:
+    section.add "subscriptionId", valid_564549
+  var valid_564550 = path.getOrDefault("resourceGroupName")
+  valid_564550 = validateParameter(valid_564550, JString, required = true,
                                  default = nil)
-  if valid_594417 != nil:
-    section.add "operationId", valid_594417
+  if valid_564550 != nil:
+    section.add "resourceGroupName", valid_564550
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -4776,21 +4773,21 @@ proc validate_ApiOperationCreateOrUpdate_594411(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594418 = query.getOrDefault("api-version")
-  valid_594418 = validateParameter(valid_594418, JString, required = true,
+  var valid_564551 = query.getOrDefault("api-version")
+  valid_564551 = validateParameter(valid_564551, JString, required = true,
                                  default = nil)
-  if valid_594418 != nil:
-    section.add "api-version", valid_594418
+  if valid_564551 != nil:
+    section.add "api-version", valid_564551
   result.add "query", section
   ## parameters in `header` object:
   ##   If-Match: JString
   ##           : ETag of the Entity. Not required when creating an entity, but required when updating an entity.
   section = newJObject()
-  var valid_594419 = header.getOrDefault("If-Match")
-  valid_594419 = validateParameter(valid_594419, JString, required = false,
+  var valid_564552 = header.getOrDefault("If-Match")
+  valid_564552 = validateParameter(valid_564552, JString, required = false,
                                  default = nil)
-  if valid_594419 != nil:
-    section.add "If-Match", valid_594419
+  if valid_564552 != nil:
+    section.add "If-Match", valid_564552
   result.add "header", section
   section = newJObject()
   result.add "formData", section
@@ -4802,60 +4799,59 @@ proc validate_ApiOperationCreateOrUpdate_594411(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594421: Call_ApiOperationCreateOrUpdate_594410; path: JsonNode;
+proc call*(call_564554: Call_ApiOperationCreateOrUpdate_564543; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Creates a new operation in the API or updates an existing one.
   ## 
-  let valid = call_594421.validator(path, query, header, formData, body)
-  let scheme = call_594421.pickScheme
+  let valid = call_564554.validator(path, query, header, formData, body)
+  let scheme = call_564554.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594421.url(scheme.get, call_594421.host, call_594421.base,
-                         call_594421.route, valid.getOrDefault("path"),
+  let url = call_564554.url(scheme.get, call_564554.host, call_564554.base,
+                         call_564554.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594421, url, valid)
+  result = hook(call_564554, url, valid)
 
-proc call*(call_594422: Call_ApiOperationCreateOrUpdate_594410;
-          resourceGroupName: string; apiVersion: string; apiId: string;
-          subscriptionId: string; parameters: JsonNode; serviceName: string;
-          operationId: string): Recallable =
+proc call*(call_564555: Call_ApiOperationCreateOrUpdate_564543;
+          serviceName: string; apiVersion: string; operationId: string; apiId: string;
+          subscriptionId: string; resourceGroupName: string; parameters: JsonNode): Recallable =
   ## apiOperationCreateOrUpdate
   ## Creates a new operation in the API or updates an existing one.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   serviceName: string (required)
+  ##              : The name of the API Management service.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
+  ##   operationId: string (required)
+  ##              : Operation identifier within an API. Must be unique in the current API Management service instance.
   ##   apiId: string (required)
   ##        : API revision identifier. Must be unique in the current API Management service instance. Non-current revision has ;rev=n as a suffix where n is the revision number.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   parameters: JObject (required)
   ##             : Create parameters.
-  ##   serviceName: string (required)
-  ##              : The name of the API Management service.
-  ##   operationId: string (required)
-  ##              : Operation identifier within an API. Must be unique in the current API Management service instance.
-  var path_594423 = newJObject()
-  var query_594424 = newJObject()
-  var body_594425 = newJObject()
-  add(path_594423, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594424, "api-version", newJString(apiVersion))
-  add(path_594423, "apiId", newJString(apiId))
-  add(path_594423, "subscriptionId", newJString(subscriptionId))
+  var path_564556 = newJObject()
+  var query_564557 = newJObject()
+  var body_564558 = newJObject()
+  add(path_564556, "serviceName", newJString(serviceName))
+  add(query_564557, "api-version", newJString(apiVersion))
+  add(path_564556, "operationId", newJString(operationId))
+  add(path_564556, "apiId", newJString(apiId))
+  add(path_564556, "subscriptionId", newJString(subscriptionId))
+  add(path_564556, "resourceGroupName", newJString(resourceGroupName))
   if parameters != nil:
-    body_594425 = parameters
-  add(path_594423, "serviceName", newJString(serviceName))
-  add(path_594423, "operationId", newJString(operationId))
-  result = call_594422.call(path_594423, query_594424, nil, nil, body_594425)
+    body_564558 = parameters
+  result = call_564555.call(path_564556, query_564557, nil, nil, body_564558)
 
-var apiOperationCreateOrUpdate* = Call_ApiOperationCreateOrUpdate_594410(
+var apiOperationCreateOrUpdate* = Call_ApiOperationCreateOrUpdate_564543(
     name: "apiOperationCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ApiManagement/service/{serviceName}/apis/{apiId}/operations/{operationId}",
-    validator: validate_ApiOperationCreateOrUpdate_594411, base: "",
-    url: url_ApiOperationCreateOrUpdate_594412, schemes: {Scheme.Https})
+    validator: validate_ApiOperationCreateOrUpdate_564544, base: "",
+    url: url_ApiOperationCreateOrUpdate_564545, schemes: {Scheme.Https})
 type
-  Call_ApiOperationGetEntityTag_594440 = ref object of OpenApiRestCall_593425
-proc url_ApiOperationGetEntityTag_594442(protocol: Scheme; host: string;
+  Call_ApiOperationGetEntityTag_564573 = ref object of OpenApiRestCall_563556
+proc url_ApiOperationGetEntityTag_564575(protocol: Scheme; host: string;
                                         base: string; route: string; path: JsonNode;
                                         query: JsonNode): Uri =
   result.scheme = $protocol
@@ -4885,51 +4881,51 @@ proc url_ApiOperationGetEntityTag_594442(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ApiOperationGetEntityTag_594441(path: JsonNode; query: JsonNode;
+proc validate_ApiOperationGetEntityTag_564574(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the entity state (Etag) version of the API operation specified by its identifier.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
-  ##   apiId: JString (required)
-  ##        : API revision identifier. Must be unique in the current API Management service instance. Non-current revision has ;rev=n as a suffix where n is the revision number.
-  ##   subscriptionId: JString (required)
-  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   serviceName: JString (required)
   ##              : The name of the API Management service.
   ##   operationId: JString (required)
   ##              : Operation identifier within an API. Must be unique in the current API Management service instance.
+  ##   apiId: JString (required)
+  ##        : API revision identifier. Must be unique in the current API Management service instance. Non-current revision has ;rev=n as a suffix where n is the revision number.
+  ##   subscriptionId: JString (required)
+  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594443 = path.getOrDefault("resourceGroupName")
-  valid_594443 = validateParameter(valid_594443, JString, required = true,
+        "path argument is necessary due to required `serviceName` field"
+  var valid_564576 = path.getOrDefault("serviceName")
+  valid_564576 = validateParameter(valid_564576, JString, required = true,
                                  default = nil)
-  if valid_594443 != nil:
-    section.add "resourceGroupName", valid_594443
-  var valid_594444 = path.getOrDefault("apiId")
-  valid_594444 = validateParameter(valid_594444, JString, required = true,
+  if valid_564576 != nil:
+    section.add "serviceName", valid_564576
+  var valid_564577 = path.getOrDefault("operationId")
+  valid_564577 = validateParameter(valid_564577, JString, required = true,
                                  default = nil)
-  if valid_594444 != nil:
-    section.add "apiId", valid_594444
-  var valid_594445 = path.getOrDefault("subscriptionId")
-  valid_594445 = validateParameter(valid_594445, JString, required = true,
+  if valid_564577 != nil:
+    section.add "operationId", valid_564577
+  var valid_564578 = path.getOrDefault("apiId")
+  valid_564578 = validateParameter(valid_564578, JString, required = true,
                                  default = nil)
-  if valid_594445 != nil:
-    section.add "subscriptionId", valid_594445
-  var valid_594446 = path.getOrDefault("serviceName")
-  valid_594446 = validateParameter(valid_594446, JString, required = true,
+  if valid_564578 != nil:
+    section.add "apiId", valid_564578
+  var valid_564579 = path.getOrDefault("subscriptionId")
+  valid_564579 = validateParameter(valid_564579, JString, required = true,
                                  default = nil)
-  if valid_594446 != nil:
-    section.add "serviceName", valid_594446
-  var valid_594447 = path.getOrDefault("operationId")
-  valid_594447 = validateParameter(valid_594447, JString, required = true,
+  if valid_564579 != nil:
+    section.add "subscriptionId", valid_564579
+  var valid_564580 = path.getOrDefault("resourceGroupName")
+  valid_564580 = validateParameter(valid_564580, JString, required = true,
                                  default = nil)
-  if valid_594447 != nil:
-    section.add "operationId", valid_594447
+  if valid_564580 != nil:
+    section.add "resourceGroupName", valid_564580
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -4937,11 +4933,11 @@ proc validate_ApiOperationGetEntityTag_594441(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594448 = query.getOrDefault("api-version")
-  valid_594448 = validateParameter(valid_594448, JString, required = true,
+  var valid_564581 = query.getOrDefault("api-version")
+  valid_564581 = validateParameter(valid_564581, JString, required = true,
                                  default = nil)
-  if valid_594448 != nil:
-    section.add "api-version", valid_594448
+  if valid_564581 != nil:
+    section.add "api-version", valid_564581
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -4950,54 +4946,54 @@ proc validate_ApiOperationGetEntityTag_594441(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594449: Call_ApiOperationGetEntityTag_594440; path: JsonNode;
+proc call*(call_564582: Call_ApiOperationGetEntityTag_564573; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the entity state (Etag) version of the API operation specified by its identifier.
   ## 
-  let valid = call_594449.validator(path, query, header, formData, body)
-  let scheme = call_594449.pickScheme
+  let valid = call_564582.validator(path, query, header, formData, body)
+  let scheme = call_564582.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594449.url(scheme.get, call_594449.host, call_594449.base,
-                         call_594449.route, valid.getOrDefault("path"),
+  let url = call_564582.url(scheme.get, call_564582.host, call_564582.base,
+                         call_564582.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594449, url, valid)
+  result = hook(call_564582, url, valid)
 
-proc call*(call_594450: Call_ApiOperationGetEntityTag_594440;
-          resourceGroupName: string; apiVersion: string; apiId: string;
-          subscriptionId: string; serviceName: string; operationId: string): Recallable =
+proc call*(call_564583: Call_ApiOperationGetEntityTag_564573; serviceName: string;
+          apiVersion: string; operationId: string; apiId: string;
+          subscriptionId: string; resourceGroupName: string): Recallable =
   ## apiOperationGetEntityTag
   ## Gets the entity state (Etag) version of the API operation specified by its identifier.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   serviceName: string (required)
+  ##              : The name of the API Management service.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
+  ##   operationId: string (required)
+  ##              : Operation identifier within an API. Must be unique in the current API Management service instance.
   ##   apiId: string (required)
   ##        : API revision identifier. Must be unique in the current API Management service instance. Non-current revision has ;rev=n as a suffix where n is the revision number.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   serviceName: string (required)
-  ##              : The name of the API Management service.
-  ##   operationId: string (required)
-  ##              : Operation identifier within an API. Must be unique in the current API Management service instance.
-  var path_594451 = newJObject()
-  var query_594452 = newJObject()
-  add(path_594451, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594452, "api-version", newJString(apiVersion))
-  add(path_594451, "apiId", newJString(apiId))
-  add(path_594451, "subscriptionId", newJString(subscriptionId))
-  add(path_594451, "serviceName", newJString(serviceName))
-  add(path_594451, "operationId", newJString(operationId))
-  result = call_594450.call(path_594451, query_594452, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564584 = newJObject()
+  var query_564585 = newJObject()
+  add(path_564584, "serviceName", newJString(serviceName))
+  add(query_564585, "api-version", newJString(apiVersion))
+  add(path_564584, "operationId", newJString(operationId))
+  add(path_564584, "apiId", newJString(apiId))
+  add(path_564584, "subscriptionId", newJString(subscriptionId))
+  add(path_564584, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564583.call(path_564584, query_564585, nil, nil, nil)
 
-var apiOperationGetEntityTag* = Call_ApiOperationGetEntityTag_594440(
+var apiOperationGetEntityTag* = Call_ApiOperationGetEntityTag_564573(
     name: "apiOperationGetEntityTag", meth: HttpMethod.HttpHead,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ApiManagement/service/{serviceName}/apis/{apiId}/operations/{operationId}",
-    validator: validate_ApiOperationGetEntityTag_594441, base: "",
-    url: url_ApiOperationGetEntityTag_594442, schemes: {Scheme.Https})
+    validator: validate_ApiOperationGetEntityTag_564574, base: "",
+    url: url_ApiOperationGetEntityTag_564575, schemes: {Scheme.Https})
 type
-  Call_ApiOperationGet_594397 = ref object of OpenApiRestCall_593425
-proc url_ApiOperationGet_594399(protocol: Scheme; host: string; base: string;
+  Call_ApiOperationGet_564530 = ref object of OpenApiRestCall_563556
+proc url_ApiOperationGet_564532(protocol: Scheme; host: string; base: string;
                                route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -5026,7 +5022,7 @@ proc url_ApiOperationGet_594399(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ApiOperationGet_594398(path: JsonNode; query: JsonNode;
+proc validate_ApiOperationGet_564531(path: JsonNode; query: JsonNode;
                                     header: JsonNode; formData: JsonNode;
                                     body: JsonNode): JsonNode =
   ## Gets the details of the API Operation specified by its identifier.
@@ -5034,44 +5030,44 @@ proc validate_ApiOperationGet_594398(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
-  ##   apiId: JString (required)
-  ##        : API revision identifier. Must be unique in the current API Management service instance. Non-current revision has ;rev=n as a suffix where n is the revision number.
-  ##   subscriptionId: JString (required)
-  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   serviceName: JString (required)
   ##              : The name of the API Management service.
   ##   operationId: JString (required)
   ##              : Operation identifier within an API. Must be unique in the current API Management service instance.
+  ##   apiId: JString (required)
+  ##        : API revision identifier. Must be unique in the current API Management service instance. Non-current revision has ;rev=n as a suffix where n is the revision number.
+  ##   subscriptionId: JString (required)
+  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594400 = path.getOrDefault("resourceGroupName")
-  valid_594400 = validateParameter(valid_594400, JString, required = true,
+        "path argument is necessary due to required `serviceName` field"
+  var valid_564533 = path.getOrDefault("serviceName")
+  valid_564533 = validateParameter(valid_564533, JString, required = true,
                                  default = nil)
-  if valid_594400 != nil:
-    section.add "resourceGroupName", valid_594400
-  var valid_594401 = path.getOrDefault("apiId")
-  valid_594401 = validateParameter(valid_594401, JString, required = true,
+  if valid_564533 != nil:
+    section.add "serviceName", valid_564533
+  var valid_564534 = path.getOrDefault("operationId")
+  valid_564534 = validateParameter(valid_564534, JString, required = true,
                                  default = nil)
-  if valid_594401 != nil:
-    section.add "apiId", valid_594401
-  var valid_594402 = path.getOrDefault("subscriptionId")
-  valid_594402 = validateParameter(valid_594402, JString, required = true,
+  if valid_564534 != nil:
+    section.add "operationId", valid_564534
+  var valid_564535 = path.getOrDefault("apiId")
+  valid_564535 = validateParameter(valid_564535, JString, required = true,
                                  default = nil)
-  if valid_594402 != nil:
-    section.add "subscriptionId", valid_594402
-  var valid_594403 = path.getOrDefault("serviceName")
-  valid_594403 = validateParameter(valid_594403, JString, required = true,
+  if valid_564535 != nil:
+    section.add "apiId", valid_564535
+  var valid_564536 = path.getOrDefault("subscriptionId")
+  valid_564536 = validateParameter(valid_564536, JString, required = true,
                                  default = nil)
-  if valid_594403 != nil:
-    section.add "serviceName", valid_594403
-  var valid_594404 = path.getOrDefault("operationId")
-  valid_594404 = validateParameter(valid_594404, JString, required = true,
+  if valid_564536 != nil:
+    section.add "subscriptionId", valid_564536
+  var valid_564537 = path.getOrDefault("resourceGroupName")
+  valid_564537 = validateParameter(valid_564537, JString, required = true,
                                  default = nil)
-  if valid_594404 != nil:
-    section.add "operationId", valid_594404
+  if valid_564537 != nil:
+    section.add "resourceGroupName", valid_564537
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -5079,11 +5075,11 @@ proc validate_ApiOperationGet_594398(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594405 = query.getOrDefault("api-version")
-  valid_594405 = validateParameter(valid_594405, JString, required = true,
+  var valid_564538 = query.getOrDefault("api-version")
+  valid_564538 = validateParameter(valid_564538, JString, required = true,
                                  default = nil)
-  if valid_594405 != nil:
-    section.add "api-version", valid_594405
+  if valid_564538 != nil:
+    section.add "api-version", valid_564538
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -5092,53 +5088,53 @@ proc validate_ApiOperationGet_594398(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594406: Call_ApiOperationGet_594397; path: JsonNode; query: JsonNode;
+proc call*(call_564539: Call_ApiOperationGet_564530; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the details of the API Operation specified by its identifier.
   ## 
-  let valid = call_594406.validator(path, query, header, formData, body)
-  let scheme = call_594406.pickScheme
+  let valid = call_564539.validator(path, query, header, formData, body)
+  let scheme = call_564539.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594406.url(scheme.get, call_594406.host, call_594406.base,
-                         call_594406.route, valid.getOrDefault("path"),
+  let url = call_564539.url(scheme.get, call_564539.host, call_564539.base,
+                         call_564539.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594406, url, valid)
+  result = hook(call_564539, url, valid)
 
-proc call*(call_594407: Call_ApiOperationGet_594397; resourceGroupName: string;
-          apiVersion: string; apiId: string; subscriptionId: string;
-          serviceName: string; operationId: string): Recallable =
+proc call*(call_564540: Call_ApiOperationGet_564530; serviceName: string;
+          apiVersion: string; operationId: string; apiId: string;
+          subscriptionId: string; resourceGroupName: string): Recallable =
   ## apiOperationGet
   ## Gets the details of the API Operation specified by its identifier.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   serviceName: string (required)
+  ##              : The name of the API Management service.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
+  ##   operationId: string (required)
+  ##              : Operation identifier within an API. Must be unique in the current API Management service instance.
   ##   apiId: string (required)
   ##        : API revision identifier. Must be unique in the current API Management service instance. Non-current revision has ;rev=n as a suffix where n is the revision number.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   serviceName: string (required)
-  ##              : The name of the API Management service.
-  ##   operationId: string (required)
-  ##              : Operation identifier within an API. Must be unique in the current API Management service instance.
-  var path_594408 = newJObject()
-  var query_594409 = newJObject()
-  add(path_594408, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594409, "api-version", newJString(apiVersion))
-  add(path_594408, "apiId", newJString(apiId))
-  add(path_594408, "subscriptionId", newJString(subscriptionId))
-  add(path_594408, "serviceName", newJString(serviceName))
-  add(path_594408, "operationId", newJString(operationId))
-  result = call_594407.call(path_594408, query_594409, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564541 = newJObject()
+  var query_564542 = newJObject()
+  add(path_564541, "serviceName", newJString(serviceName))
+  add(query_564542, "api-version", newJString(apiVersion))
+  add(path_564541, "operationId", newJString(operationId))
+  add(path_564541, "apiId", newJString(apiId))
+  add(path_564541, "subscriptionId", newJString(subscriptionId))
+  add(path_564541, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564540.call(path_564541, query_564542, nil, nil, nil)
 
-var apiOperationGet* = Call_ApiOperationGet_594397(name: "apiOperationGet",
+var apiOperationGet* = Call_ApiOperationGet_564530(name: "apiOperationGet",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ApiManagement/service/{serviceName}/apis/{apiId}/operations/{operationId}",
-    validator: validate_ApiOperationGet_594398, base: "", url: url_ApiOperationGet_594399,
+    validator: validate_ApiOperationGet_564531, base: "", url: url_ApiOperationGet_564532,
     schemes: {Scheme.Https})
 type
-  Call_ApiOperationUpdate_594453 = ref object of OpenApiRestCall_593425
-proc url_ApiOperationUpdate_594455(protocol: Scheme; host: string; base: string;
+  Call_ApiOperationUpdate_564586 = ref object of OpenApiRestCall_563556
+proc url_ApiOperationUpdate_564588(protocol: Scheme; host: string; base: string;
                                   route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -5167,7 +5163,7 @@ proc url_ApiOperationUpdate_594455(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ApiOperationUpdate_594454(path: JsonNode; query: JsonNode;
+proc validate_ApiOperationUpdate_564587(path: JsonNode; query: JsonNode;
                                        header: JsonNode; formData: JsonNode;
                                        body: JsonNode): JsonNode =
   ## Updates the details of the operation in the API specified by its identifier.
@@ -5175,44 +5171,44 @@ proc validate_ApiOperationUpdate_594454(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
-  ##   apiId: JString (required)
-  ##        : API revision identifier. Must be unique in the current API Management service instance. Non-current revision has ;rev=n as a suffix where n is the revision number.
-  ##   subscriptionId: JString (required)
-  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   serviceName: JString (required)
   ##              : The name of the API Management service.
   ##   operationId: JString (required)
   ##              : Operation identifier within an API. Must be unique in the current API Management service instance.
+  ##   apiId: JString (required)
+  ##        : API revision identifier. Must be unique in the current API Management service instance. Non-current revision has ;rev=n as a suffix where n is the revision number.
+  ##   subscriptionId: JString (required)
+  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594456 = path.getOrDefault("resourceGroupName")
-  valid_594456 = validateParameter(valid_594456, JString, required = true,
+        "path argument is necessary due to required `serviceName` field"
+  var valid_564589 = path.getOrDefault("serviceName")
+  valid_564589 = validateParameter(valid_564589, JString, required = true,
                                  default = nil)
-  if valid_594456 != nil:
-    section.add "resourceGroupName", valid_594456
-  var valid_594457 = path.getOrDefault("apiId")
-  valid_594457 = validateParameter(valid_594457, JString, required = true,
+  if valid_564589 != nil:
+    section.add "serviceName", valid_564589
+  var valid_564590 = path.getOrDefault("operationId")
+  valid_564590 = validateParameter(valid_564590, JString, required = true,
                                  default = nil)
-  if valid_594457 != nil:
-    section.add "apiId", valid_594457
-  var valid_594458 = path.getOrDefault("subscriptionId")
-  valid_594458 = validateParameter(valid_594458, JString, required = true,
+  if valid_564590 != nil:
+    section.add "operationId", valid_564590
+  var valid_564591 = path.getOrDefault("apiId")
+  valid_564591 = validateParameter(valid_564591, JString, required = true,
                                  default = nil)
-  if valid_594458 != nil:
-    section.add "subscriptionId", valid_594458
-  var valid_594459 = path.getOrDefault("serviceName")
-  valid_594459 = validateParameter(valid_594459, JString, required = true,
+  if valid_564591 != nil:
+    section.add "apiId", valid_564591
+  var valid_564592 = path.getOrDefault("subscriptionId")
+  valid_564592 = validateParameter(valid_564592, JString, required = true,
                                  default = nil)
-  if valid_594459 != nil:
-    section.add "serviceName", valid_594459
-  var valid_594460 = path.getOrDefault("operationId")
-  valid_594460 = validateParameter(valid_594460, JString, required = true,
+  if valid_564592 != nil:
+    section.add "subscriptionId", valid_564592
+  var valid_564593 = path.getOrDefault("resourceGroupName")
+  valid_564593 = validateParameter(valid_564593, JString, required = true,
                                  default = nil)
-  if valid_594460 != nil:
-    section.add "operationId", valid_594460
+  if valid_564593 != nil:
+    section.add "resourceGroupName", valid_564593
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -5220,11 +5216,11 @@ proc validate_ApiOperationUpdate_594454(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594461 = query.getOrDefault("api-version")
-  valid_594461 = validateParameter(valid_594461, JString, required = true,
+  var valid_564594 = query.getOrDefault("api-version")
+  valid_564594 = validateParameter(valid_564594, JString, required = true,
                                  default = nil)
-  if valid_594461 != nil:
-    section.add "api-version", valid_594461
+  if valid_564594 != nil:
+    section.add "api-version", valid_564594
   result.add "query", section
   ## parameters in `header` object:
   ##   If-Match: JString (required)
@@ -5232,11 +5228,11 @@ proc validate_ApiOperationUpdate_594454(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert header != nil,
         "header argument is necessary due to required `If-Match` field"
-  var valid_594462 = header.getOrDefault("If-Match")
-  valid_594462 = validateParameter(valid_594462, JString, required = true,
+  var valid_564595 = header.getOrDefault("If-Match")
+  valid_564595 = validateParameter(valid_564595, JString, required = true,
                                  default = nil)
-  if valid_594462 != nil:
-    section.add "If-Match", valid_594462
+  if valid_564595 != nil:
+    section.add "If-Match", valid_564595
   result.add "header", section
   section = newJObject()
   result.add "formData", section
@@ -5248,59 +5244,59 @@ proc validate_ApiOperationUpdate_594454(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594464: Call_ApiOperationUpdate_594453; path: JsonNode;
+proc call*(call_564597: Call_ApiOperationUpdate_564586; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Updates the details of the operation in the API specified by its identifier.
   ## 
-  let valid = call_594464.validator(path, query, header, formData, body)
-  let scheme = call_594464.pickScheme
+  let valid = call_564597.validator(path, query, header, formData, body)
+  let scheme = call_564597.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594464.url(scheme.get, call_594464.host, call_594464.base,
-                         call_594464.route, valid.getOrDefault("path"),
+  let url = call_564597.url(scheme.get, call_564597.host, call_564597.base,
+                         call_564597.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594464, url, valid)
+  result = hook(call_564597, url, valid)
 
-proc call*(call_594465: Call_ApiOperationUpdate_594453; resourceGroupName: string;
-          apiVersion: string; apiId: string; subscriptionId: string;
-          parameters: JsonNode; serviceName: string; operationId: string): Recallable =
+proc call*(call_564598: Call_ApiOperationUpdate_564586; serviceName: string;
+          apiVersion: string; operationId: string; apiId: string;
+          subscriptionId: string; resourceGroupName: string; parameters: JsonNode): Recallable =
   ## apiOperationUpdate
   ## Updates the details of the operation in the API specified by its identifier.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   serviceName: string (required)
+  ##              : The name of the API Management service.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
+  ##   operationId: string (required)
+  ##              : Operation identifier within an API. Must be unique in the current API Management service instance.
   ##   apiId: string (required)
   ##        : API revision identifier. Must be unique in the current API Management service instance. Non-current revision has ;rev=n as a suffix where n is the revision number.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   parameters: JObject (required)
   ##             : API Operation Update parameters.
-  ##   serviceName: string (required)
-  ##              : The name of the API Management service.
-  ##   operationId: string (required)
-  ##              : Operation identifier within an API. Must be unique in the current API Management service instance.
-  var path_594466 = newJObject()
-  var query_594467 = newJObject()
-  var body_594468 = newJObject()
-  add(path_594466, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594467, "api-version", newJString(apiVersion))
-  add(path_594466, "apiId", newJString(apiId))
-  add(path_594466, "subscriptionId", newJString(subscriptionId))
+  var path_564599 = newJObject()
+  var query_564600 = newJObject()
+  var body_564601 = newJObject()
+  add(path_564599, "serviceName", newJString(serviceName))
+  add(query_564600, "api-version", newJString(apiVersion))
+  add(path_564599, "operationId", newJString(operationId))
+  add(path_564599, "apiId", newJString(apiId))
+  add(path_564599, "subscriptionId", newJString(subscriptionId))
+  add(path_564599, "resourceGroupName", newJString(resourceGroupName))
   if parameters != nil:
-    body_594468 = parameters
-  add(path_594466, "serviceName", newJString(serviceName))
-  add(path_594466, "operationId", newJString(operationId))
-  result = call_594465.call(path_594466, query_594467, nil, nil, body_594468)
+    body_564601 = parameters
+  result = call_564598.call(path_564599, query_564600, nil, nil, body_564601)
 
-var apiOperationUpdate* = Call_ApiOperationUpdate_594453(
+var apiOperationUpdate* = Call_ApiOperationUpdate_564586(
     name: "apiOperationUpdate", meth: HttpMethod.HttpPatch,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ApiManagement/service/{serviceName}/apis/{apiId}/operations/{operationId}",
-    validator: validate_ApiOperationUpdate_594454, base: "",
-    url: url_ApiOperationUpdate_594455, schemes: {Scheme.Https})
+    validator: validate_ApiOperationUpdate_564587, base: "",
+    url: url_ApiOperationUpdate_564588, schemes: {Scheme.Https})
 type
-  Call_ApiOperationDelete_594426 = ref object of OpenApiRestCall_593425
-proc url_ApiOperationDelete_594428(protocol: Scheme; host: string; base: string;
+  Call_ApiOperationDelete_564559 = ref object of OpenApiRestCall_563556
+proc url_ApiOperationDelete_564561(protocol: Scheme; host: string; base: string;
                                   route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -5329,7 +5325,7 @@ proc url_ApiOperationDelete_594428(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ApiOperationDelete_594427(path: JsonNode; query: JsonNode;
+proc validate_ApiOperationDelete_564560(path: JsonNode; query: JsonNode;
                                        header: JsonNode; formData: JsonNode;
                                        body: JsonNode): JsonNode =
   ## Deletes the specified operation in the API.
@@ -5337,44 +5333,44 @@ proc validate_ApiOperationDelete_594427(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
-  ##   apiId: JString (required)
-  ##        : API revision identifier. Must be unique in the current API Management service instance. Non-current revision has ;rev=n as a suffix where n is the revision number.
-  ##   subscriptionId: JString (required)
-  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   serviceName: JString (required)
   ##              : The name of the API Management service.
   ##   operationId: JString (required)
   ##              : Operation identifier within an API. Must be unique in the current API Management service instance.
+  ##   apiId: JString (required)
+  ##        : API revision identifier. Must be unique in the current API Management service instance. Non-current revision has ;rev=n as a suffix where n is the revision number.
+  ##   subscriptionId: JString (required)
+  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594429 = path.getOrDefault("resourceGroupName")
-  valid_594429 = validateParameter(valid_594429, JString, required = true,
+        "path argument is necessary due to required `serviceName` field"
+  var valid_564562 = path.getOrDefault("serviceName")
+  valid_564562 = validateParameter(valid_564562, JString, required = true,
                                  default = nil)
-  if valid_594429 != nil:
-    section.add "resourceGroupName", valid_594429
-  var valid_594430 = path.getOrDefault("apiId")
-  valid_594430 = validateParameter(valid_594430, JString, required = true,
+  if valid_564562 != nil:
+    section.add "serviceName", valid_564562
+  var valid_564563 = path.getOrDefault("operationId")
+  valid_564563 = validateParameter(valid_564563, JString, required = true,
                                  default = nil)
-  if valid_594430 != nil:
-    section.add "apiId", valid_594430
-  var valid_594431 = path.getOrDefault("subscriptionId")
-  valid_594431 = validateParameter(valid_594431, JString, required = true,
+  if valid_564563 != nil:
+    section.add "operationId", valid_564563
+  var valid_564564 = path.getOrDefault("apiId")
+  valid_564564 = validateParameter(valid_564564, JString, required = true,
                                  default = nil)
-  if valid_594431 != nil:
-    section.add "subscriptionId", valid_594431
-  var valid_594432 = path.getOrDefault("serviceName")
-  valid_594432 = validateParameter(valid_594432, JString, required = true,
+  if valid_564564 != nil:
+    section.add "apiId", valid_564564
+  var valid_564565 = path.getOrDefault("subscriptionId")
+  valid_564565 = validateParameter(valid_564565, JString, required = true,
                                  default = nil)
-  if valid_594432 != nil:
-    section.add "serviceName", valid_594432
-  var valid_594433 = path.getOrDefault("operationId")
-  valid_594433 = validateParameter(valid_594433, JString, required = true,
+  if valid_564565 != nil:
+    section.add "subscriptionId", valid_564565
+  var valid_564566 = path.getOrDefault("resourceGroupName")
+  valid_564566 = validateParameter(valid_564566, JString, required = true,
                                  default = nil)
-  if valid_594433 != nil:
-    section.add "operationId", valid_594433
+  if valid_564566 != nil:
+    section.add "resourceGroupName", valid_564566
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -5382,11 +5378,11 @@ proc validate_ApiOperationDelete_594427(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594434 = query.getOrDefault("api-version")
-  valid_594434 = validateParameter(valid_594434, JString, required = true,
+  var valid_564567 = query.getOrDefault("api-version")
+  valid_564567 = validateParameter(valid_564567, JString, required = true,
                                  default = nil)
-  if valid_594434 != nil:
-    section.add "api-version", valid_594434
+  if valid_564567 != nil:
+    section.add "api-version", valid_564567
   result.add "query", section
   ## parameters in `header` object:
   ##   If-Match: JString (required)
@@ -5394,65 +5390,65 @@ proc validate_ApiOperationDelete_594427(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert header != nil,
         "header argument is necessary due to required `If-Match` field"
-  var valid_594435 = header.getOrDefault("If-Match")
-  valid_594435 = validateParameter(valid_594435, JString, required = true,
+  var valid_564568 = header.getOrDefault("If-Match")
+  valid_564568 = validateParameter(valid_564568, JString, required = true,
                                  default = nil)
-  if valid_594435 != nil:
-    section.add "If-Match", valid_594435
+  if valid_564568 != nil:
+    section.add "If-Match", valid_564568
   result.add "header", section
   section = newJObject()
   result.add "formData", section
   if body != nil:
     result.add "body", body
 
-proc call*(call_594436: Call_ApiOperationDelete_594426; path: JsonNode;
+proc call*(call_564569: Call_ApiOperationDelete_564559; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes the specified operation in the API.
   ## 
-  let valid = call_594436.validator(path, query, header, formData, body)
-  let scheme = call_594436.pickScheme
+  let valid = call_564569.validator(path, query, header, formData, body)
+  let scheme = call_564569.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594436.url(scheme.get, call_594436.host, call_594436.base,
-                         call_594436.route, valid.getOrDefault("path"),
+  let url = call_564569.url(scheme.get, call_564569.host, call_564569.base,
+                         call_564569.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594436, url, valid)
+  result = hook(call_564569, url, valid)
 
-proc call*(call_594437: Call_ApiOperationDelete_594426; resourceGroupName: string;
-          apiVersion: string; apiId: string; subscriptionId: string;
-          serviceName: string; operationId: string): Recallable =
+proc call*(call_564570: Call_ApiOperationDelete_564559; serviceName: string;
+          apiVersion: string; operationId: string; apiId: string;
+          subscriptionId: string; resourceGroupName: string): Recallable =
   ## apiOperationDelete
   ## Deletes the specified operation in the API.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   serviceName: string (required)
+  ##              : The name of the API Management service.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
+  ##   operationId: string (required)
+  ##              : Operation identifier within an API. Must be unique in the current API Management service instance.
   ##   apiId: string (required)
   ##        : API revision identifier. Must be unique in the current API Management service instance. Non-current revision has ;rev=n as a suffix where n is the revision number.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   serviceName: string (required)
-  ##              : The name of the API Management service.
-  ##   operationId: string (required)
-  ##              : Operation identifier within an API. Must be unique in the current API Management service instance.
-  var path_594438 = newJObject()
-  var query_594439 = newJObject()
-  add(path_594438, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594439, "api-version", newJString(apiVersion))
-  add(path_594438, "apiId", newJString(apiId))
-  add(path_594438, "subscriptionId", newJString(subscriptionId))
-  add(path_594438, "serviceName", newJString(serviceName))
-  add(path_594438, "operationId", newJString(operationId))
-  result = call_594437.call(path_594438, query_594439, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564571 = newJObject()
+  var query_564572 = newJObject()
+  add(path_564571, "serviceName", newJString(serviceName))
+  add(query_564572, "api-version", newJString(apiVersion))
+  add(path_564571, "operationId", newJString(operationId))
+  add(path_564571, "apiId", newJString(apiId))
+  add(path_564571, "subscriptionId", newJString(subscriptionId))
+  add(path_564571, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564570.call(path_564571, query_564572, nil, nil, nil)
 
-var apiOperationDelete* = Call_ApiOperationDelete_594426(
+var apiOperationDelete* = Call_ApiOperationDelete_564559(
     name: "apiOperationDelete", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ApiManagement/service/{serviceName}/apis/{apiId}/operations/{operationId}",
-    validator: validate_ApiOperationDelete_594427, base: "",
-    url: url_ApiOperationDelete_594428, schemes: {Scheme.Https})
+    validator: validate_ApiOperationDelete_564560, base: "",
+    url: url_ApiOperationDelete_564561, schemes: {Scheme.Https})
 type
-  Call_ApiOperationPolicyListByOperation_594469 = ref object of OpenApiRestCall_593425
-proc url_ApiOperationPolicyListByOperation_594471(protocol: Scheme; host: string;
+  Call_ApiOperationPolicyListByOperation_564602 = ref object of OpenApiRestCall_563556
+proc url_ApiOperationPolicyListByOperation_564604(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -5482,51 +5478,51 @@ proc url_ApiOperationPolicyListByOperation_594471(protocol: Scheme; host: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ApiOperationPolicyListByOperation_594470(path: JsonNode;
+proc validate_ApiOperationPolicyListByOperation_564603(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Get the list of policy configuration at the API Operation level.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
-  ##   apiId: JString (required)
-  ##        : API revision identifier. Must be unique in the current API Management service instance. Non-current revision has ;rev=n as a suffix where n is the revision number.
-  ##   subscriptionId: JString (required)
-  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   serviceName: JString (required)
   ##              : The name of the API Management service.
   ##   operationId: JString (required)
   ##              : Operation identifier within an API. Must be unique in the current API Management service instance.
+  ##   apiId: JString (required)
+  ##        : API revision identifier. Must be unique in the current API Management service instance. Non-current revision has ;rev=n as a suffix where n is the revision number.
+  ##   subscriptionId: JString (required)
+  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594472 = path.getOrDefault("resourceGroupName")
-  valid_594472 = validateParameter(valid_594472, JString, required = true,
+        "path argument is necessary due to required `serviceName` field"
+  var valid_564605 = path.getOrDefault("serviceName")
+  valid_564605 = validateParameter(valid_564605, JString, required = true,
                                  default = nil)
-  if valid_594472 != nil:
-    section.add "resourceGroupName", valid_594472
-  var valid_594473 = path.getOrDefault("apiId")
-  valid_594473 = validateParameter(valid_594473, JString, required = true,
+  if valid_564605 != nil:
+    section.add "serviceName", valid_564605
+  var valid_564606 = path.getOrDefault("operationId")
+  valid_564606 = validateParameter(valid_564606, JString, required = true,
                                  default = nil)
-  if valid_594473 != nil:
-    section.add "apiId", valid_594473
-  var valid_594474 = path.getOrDefault("subscriptionId")
-  valid_594474 = validateParameter(valid_594474, JString, required = true,
+  if valid_564606 != nil:
+    section.add "operationId", valid_564606
+  var valid_564607 = path.getOrDefault("apiId")
+  valid_564607 = validateParameter(valid_564607, JString, required = true,
                                  default = nil)
-  if valid_594474 != nil:
-    section.add "subscriptionId", valid_594474
-  var valid_594475 = path.getOrDefault("serviceName")
-  valid_594475 = validateParameter(valid_594475, JString, required = true,
+  if valid_564607 != nil:
+    section.add "apiId", valid_564607
+  var valid_564608 = path.getOrDefault("subscriptionId")
+  valid_564608 = validateParameter(valid_564608, JString, required = true,
                                  default = nil)
-  if valid_594475 != nil:
-    section.add "serviceName", valid_594475
-  var valid_594476 = path.getOrDefault("operationId")
-  valid_594476 = validateParameter(valid_594476, JString, required = true,
+  if valid_564608 != nil:
+    section.add "subscriptionId", valid_564608
+  var valid_564609 = path.getOrDefault("resourceGroupName")
+  valid_564609 = validateParameter(valid_564609, JString, required = true,
                                  default = nil)
-  if valid_594476 != nil:
-    section.add "operationId", valid_594476
+  if valid_564609 != nil:
+    section.add "resourceGroupName", valid_564609
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -5534,11 +5530,11 @@ proc validate_ApiOperationPolicyListByOperation_594470(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594477 = query.getOrDefault("api-version")
-  valid_594477 = validateParameter(valid_594477, JString, required = true,
+  var valid_564610 = query.getOrDefault("api-version")
+  valid_564610 = validateParameter(valid_564610, JString, required = true,
                                  default = nil)
-  if valid_594477 != nil:
-    section.add "api-version", valid_594477
+  if valid_564610 != nil:
+    section.add "api-version", valid_564610
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -5547,55 +5543,55 @@ proc validate_ApiOperationPolicyListByOperation_594470(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594478: Call_ApiOperationPolicyListByOperation_594469;
+proc call*(call_564611: Call_ApiOperationPolicyListByOperation_564602;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Get the list of policy configuration at the API Operation level.
   ## 
-  let valid = call_594478.validator(path, query, header, formData, body)
-  let scheme = call_594478.pickScheme
+  let valid = call_564611.validator(path, query, header, formData, body)
+  let scheme = call_564611.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594478.url(scheme.get, call_594478.host, call_594478.base,
-                         call_594478.route, valid.getOrDefault("path"),
+  let url = call_564611.url(scheme.get, call_564611.host, call_564611.base,
+                         call_564611.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594478, url, valid)
+  result = hook(call_564611, url, valid)
 
-proc call*(call_594479: Call_ApiOperationPolicyListByOperation_594469;
-          resourceGroupName: string; apiVersion: string; apiId: string;
-          subscriptionId: string; serviceName: string; operationId: string): Recallable =
+proc call*(call_564612: Call_ApiOperationPolicyListByOperation_564602;
+          serviceName: string; apiVersion: string; operationId: string; apiId: string;
+          subscriptionId: string; resourceGroupName: string): Recallable =
   ## apiOperationPolicyListByOperation
   ## Get the list of policy configuration at the API Operation level.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   serviceName: string (required)
+  ##              : The name of the API Management service.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
+  ##   operationId: string (required)
+  ##              : Operation identifier within an API. Must be unique in the current API Management service instance.
   ##   apiId: string (required)
   ##        : API revision identifier. Must be unique in the current API Management service instance. Non-current revision has ;rev=n as a suffix where n is the revision number.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   serviceName: string (required)
-  ##              : The name of the API Management service.
-  ##   operationId: string (required)
-  ##              : Operation identifier within an API. Must be unique in the current API Management service instance.
-  var path_594480 = newJObject()
-  var query_594481 = newJObject()
-  add(path_594480, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594481, "api-version", newJString(apiVersion))
-  add(path_594480, "apiId", newJString(apiId))
-  add(path_594480, "subscriptionId", newJString(subscriptionId))
-  add(path_594480, "serviceName", newJString(serviceName))
-  add(path_594480, "operationId", newJString(operationId))
-  result = call_594479.call(path_594480, query_594481, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564613 = newJObject()
+  var query_564614 = newJObject()
+  add(path_564613, "serviceName", newJString(serviceName))
+  add(query_564614, "api-version", newJString(apiVersion))
+  add(path_564613, "operationId", newJString(operationId))
+  add(path_564613, "apiId", newJString(apiId))
+  add(path_564613, "subscriptionId", newJString(subscriptionId))
+  add(path_564613, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564612.call(path_564613, query_564614, nil, nil, nil)
 
-var apiOperationPolicyListByOperation* = Call_ApiOperationPolicyListByOperation_594469(
+var apiOperationPolicyListByOperation* = Call_ApiOperationPolicyListByOperation_564602(
     name: "apiOperationPolicyListByOperation", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ApiManagement/service/{serviceName}/apis/{apiId}/operations/{operationId}/policies",
-    validator: validate_ApiOperationPolicyListByOperation_594470, base: "",
-    url: url_ApiOperationPolicyListByOperation_594471, schemes: {Scheme.Https})
+    validator: validate_ApiOperationPolicyListByOperation_564603, base: "",
+    url: url_ApiOperationPolicyListByOperation_564604, schemes: {Scheme.Https})
 type
-  Call_ApiOperationPolicyCreateOrUpdate_594509 = ref object of OpenApiRestCall_593425
-proc url_ApiOperationPolicyCreateOrUpdate_594511(protocol: Scheme; host: string;
+  Call_ApiOperationPolicyCreateOrUpdate_564642 = ref object of OpenApiRestCall_563556
+proc url_ApiOperationPolicyCreateOrUpdate_564644(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -5627,58 +5623,58 @@ proc url_ApiOperationPolicyCreateOrUpdate_594511(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ApiOperationPolicyCreateOrUpdate_594510(path: JsonNode;
+proc validate_ApiOperationPolicyCreateOrUpdate_564643(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Creates or updates policy configuration for the API Operation level.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
+  ##   serviceName: JString (required)
+  ##              : The name of the API Management service.
+  ##   operationId: JString (required)
+  ##              : Operation identifier within an API. Must be unique in the current API Management service instance.
   ##   apiId: JString (required)
   ##        : API revision identifier. Must be unique in the current API Management service instance. Non-current revision has ;rev=n as a suffix where n is the revision number.
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   policyId: JString (required)
   ##           : The identifier of the Policy.
-  ##   serviceName: JString (required)
-  ##              : The name of the API Management service.
-  ##   operationId: JString (required)
-  ##              : Operation identifier within an API. Must be unique in the current API Management service instance.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594512 = path.getOrDefault("resourceGroupName")
-  valid_594512 = validateParameter(valid_594512, JString, required = true,
+        "path argument is necessary due to required `serviceName` field"
+  var valid_564645 = path.getOrDefault("serviceName")
+  valid_564645 = validateParameter(valid_564645, JString, required = true,
                                  default = nil)
-  if valid_594512 != nil:
-    section.add "resourceGroupName", valid_594512
-  var valid_594513 = path.getOrDefault("apiId")
-  valid_594513 = validateParameter(valid_594513, JString, required = true,
+  if valid_564645 != nil:
+    section.add "serviceName", valid_564645
+  var valid_564646 = path.getOrDefault("operationId")
+  valid_564646 = validateParameter(valid_564646, JString, required = true,
                                  default = nil)
-  if valid_594513 != nil:
-    section.add "apiId", valid_594513
-  var valid_594514 = path.getOrDefault("subscriptionId")
-  valid_594514 = validateParameter(valid_594514, JString, required = true,
+  if valid_564646 != nil:
+    section.add "operationId", valid_564646
+  var valid_564647 = path.getOrDefault("apiId")
+  valid_564647 = validateParameter(valid_564647, JString, required = true,
                                  default = nil)
-  if valid_594514 != nil:
-    section.add "subscriptionId", valid_594514
-  var valid_594515 = path.getOrDefault("policyId")
-  valid_594515 = validateParameter(valid_594515, JString, required = true,
+  if valid_564647 != nil:
+    section.add "apiId", valid_564647
+  var valid_564648 = path.getOrDefault("subscriptionId")
+  valid_564648 = validateParameter(valid_564648, JString, required = true,
+                                 default = nil)
+  if valid_564648 != nil:
+    section.add "subscriptionId", valid_564648
+  var valid_564649 = path.getOrDefault("policyId")
+  valid_564649 = validateParameter(valid_564649, JString, required = true,
                                  default = newJString("policy"))
-  if valid_594515 != nil:
-    section.add "policyId", valid_594515
-  var valid_594516 = path.getOrDefault("serviceName")
-  valid_594516 = validateParameter(valid_594516, JString, required = true,
+  if valid_564649 != nil:
+    section.add "policyId", valid_564649
+  var valid_564650 = path.getOrDefault("resourceGroupName")
+  valid_564650 = validateParameter(valid_564650, JString, required = true,
                                  default = nil)
-  if valid_594516 != nil:
-    section.add "serviceName", valid_594516
-  var valid_594517 = path.getOrDefault("operationId")
-  valid_594517 = validateParameter(valid_594517, JString, required = true,
-                                 default = nil)
-  if valid_594517 != nil:
-    section.add "operationId", valid_594517
+  if valid_564650 != nil:
+    section.add "resourceGroupName", valid_564650
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -5686,21 +5682,21 @@ proc validate_ApiOperationPolicyCreateOrUpdate_594510(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594518 = query.getOrDefault("api-version")
-  valid_594518 = validateParameter(valid_594518, JString, required = true,
+  var valid_564651 = query.getOrDefault("api-version")
+  valid_564651 = validateParameter(valid_564651, JString, required = true,
                                  default = nil)
-  if valid_594518 != nil:
-    section.add "api-version", valid_594518
+  if valid_564651 != nil:
+    section.add "api-version", valid_564651
   result.add "query", section
   ## parameters in `header` object:
   ##   If-Match: JString
   ##           : ETag of the Entity. Not required when creating an entity, but required when updating an entity.
   section = newJObject()
-  var valid_594519 = header.getOrDefault("If-Match")
-  valid_594519 = validateParameter(valid_594519, JString, required = false,
+  var valid_564652 = header.getOrDefault("If-Match")
+  valid_564652 = validateParameter(valid_564652, JString, required = false,
                                  default = nil)
-  if valid_594519 != nil:
-    section.add "If-Match", valid_594519
+  if valid_564652 != nil:
+    section.add "If-Match", valid_564652
   result.add "header", section
   section = newJObject()
   result.add "formData", section
@@ -5712,64 +5708,64 @@ proc validate_ApiOperationPolicyCreateOrUpdate_594510(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594521: Call_ApiOperationPolicyCreateOrUpdate_594509;
+proc call*(call_564654: Call_ApiOperationPolicyCreateOrUpdate_564642;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Creates or updates policy configuration for the API Operation level.
   ## 
-  let valid = call_594521.validator(path, query, header, formData, body)
-  let scheme = call_594521.pickScheme
+  let valid = call_564654.validator(path, query, header, formData, body)
+  let scheme = call_564654.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594521.url(scheme.get, call_594521.host, call_594521.base,
-                         call_594521.route, valid.getOrDefault("path"),
+  let url = call_564654.url(scheme.get, call_564654.host, call_564654.base,
+                         call_564654.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594521, url, valid)
+  result = hook(call_564654, url, valid)
 
-proc call*(call_594522: Call_ApiOperationPolicyCreateOrUpdate_594509;
-          resourceGroupName: string; apiVersion: string; apiId: string;
-          subscriptionId: string; parameters: JsonNode; serviceName: string;
-          operationId: string; policyId: string = "policy"): Recallable =
+proc call*(call_564655: Call_ApiOperationPolicyCreateOrUpdate_564642;
+          serviceName: string; apiVersion: string; operationId: string; apiId: string;
+          subscriptionId: string; resourceGroupName: string; parameters: JsonNode;
+          policyId: string = "policy"): Recallable =
   ## apiOperationPolicyCreateOrUpdate
   ## Creates or updates policy configuration for the API Operation level.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   serviceName: string (required)
+  ##              : The name of the API Management service.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
+  ##   operationId: string (required)
+  ##              : Operation identifier within an API. Must be unique in the current API Management service instance.
   ##   apiId: string (required)
   ##        : API revision identifier. Must be unique in the current API Management service instance. Non-current revision has ;rev=n as a suffix where n is the revision number.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   policyId: string (required)
   ##           : The identifier of the Policy.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   parameters: JObject (required)
   ##             : The policy contents to apply.
-  ##   serviceName: string (required)
-  ##              : The name of the API Management service.
-  ##   operationId: string (required)
-  ##              : Operation identifier within an API. Must be unique in the current API Management service instance.
-  var path_594523 = newJObject()
-  var query_594524 = newJObject()
-  var body_594525 = newJObject()
-  add(path_594523, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594524, "api-version", newJString(apiVersion))
-  add(path_594523, "apiId", newJString(apiId))
-  add(path_594523, "subscriptionId", newJString(subscriptionId))
-  add(path_594523, "policyId", newJString(policyId))
+  var path_564656 = newJObject()
+  var query_564657 = newJObject()
+  var body_564658 = newJObject()
+  add(path_564656, "serviceName", newJString(serviceName))
+  add(query_564657, "api-version", newJString(apiVersion))
+  add(path_564656, "operationId", newJString(operationId))
+  add(path_564656, "apiId", newJString(apiId))
+  add(path_564656, "subscriptionId", newJString(subscriptionId))
+  add(path_564656, "policyId", newJString(policyId))
+  add(path_564656, "resourceGroupName", newJString(resourceGroupName))
   if parameters != nil:
-    body_594525 = parameters
-  add(path_594523, "serviceName", newJString(serviceName))
-  add(path_594523, "operationId", newJString(operationId))
-  result = call_594522.call(path_594523, query_594524, nil, nil, body_594525)
+    body_564658 = parameters
+  result = call_564655.call(path_564656, query_564657, nil, nil, body_564658)
 
-var apiOperationPolicyCreateOrUpdate* = Call_ApiOperationPolicyCreateOrUpdate_594509(
+var apiOperationPolicyCreateOrUpdate* = Call_ApiOperationPolicyCreateOrUpdate_564642(
     name: "apiOperationPolicyCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ApiManagement/service/{serviceName}/apis/{apiId}/operations/{operationId}/policies/{policyId}",
-    validator: validate_ApiOperationPolicyCreateOrUpdate_594510, base: "",
-    url: url_ApiOperationPolicyCreateOrUpdate_594511, schemes: {Scheme.Https})
+    validator: validate_ApiOperationPolicyCreateOrUpdate_564643, base: "",
+    url: url_ApiOperationPolicyCreateOrUpdate_564644, schemes: {Scheme.Https})
 type
-  Call_ApiOperationPolicyGetEntityTag_594541 = ref object of OpenApiRestCall_593425
-proc url_ApiOperationPolicyGetEntityTag_594543(protocol: Scheme; host: string;
+  Call_ApiOperationPolicyGetEntityTag_564674 = ref object of OpenApiRestCall_563556
+proc url_ApiOperationPolicyGetEntityTag_564676(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -5801,58 +5797,58 @@ proc url_ApiOperationPolicyGetEntityTag_594543(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ApiOperationPolicyGetEntityTag_594542(path: JsonNode;
+proc validate_ApiOperationPolicyGetEntityTag_564675(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the entity state (Etag) version of the API operation policy specified by its identifier.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
+  ##   serviceName: JString (required)
+  ##              : The name of the API Management service.
+  ##   operationId: JString (required)
+  ##              : Operation identifier within an API. Must be unique in the current API Management service instance.
   ##   apiId: JString (required)
   ##        : API revision identifier. Must be unique in the current API Management service instance. Non-current revision has ;rev=n as a suffix where n is the revision number.
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   policyId: JString (required)
   ##           : The identifier of the Policy.
-  ##   serviceName: JString (required)
-  ##              : The name of the API Management service.
-  ##   operationId: JString (required)
-  ##              : Operation identifier within an API. Must be unique in the current API Management service instance.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594544 = path.getOrDefault("resourceGroupName")
-  valid_594544 = validateParameter(valid_594544, JString, required = true,
+        "path argument is necessary due to required `serviceName` field"
+  var valid_564677 = path.getOrDefault("serviceName")
+  valid_564677 = validateParameter(valid_564677, JString, required = true,
                                  default = nil)
-  if valid_594544 != nil:
-    section.add "resourceGroupName", valid_594544
-  var valid_594545 = path.getOrDefault("apiId")
-  valid_594545 = validateParameter(valid_594545, JString, required = true,
+  if valid_564677 != nil:
+    section.add "serviceName", valid_564677
+  var valid_564678 = path.getOrDefault("operationId")
+  valid_564678 = validateParameter(valid_564678, JString, required = true,
                                  default = nil)
-  if valid_594545 != nil:
-    section.add "apiId", valid_594545
-  var valid_594546 = path.getOrDefault("subscriptionId")
-  valid_594546 = validateParameter(valid_594546, JString, required = true,
+  if valid_564678 != nil:
+    section.add "operationId", valid_564678
+  var valid_564679 = path.getOrDefault("apiId")
+  valid_564679 = validateParameter(valid_564679, JString, required = true,
                                  default = nil)
-  if valid_594546 != nil:
-    section.add "subscriptionId", valid_594546
-  var valid_594547 = path.getOrDefault("policyId")
-  valid_594547 = validateParameter(valid_594547, JString, required = true,
+  if valid_564679 != nil:
+    section.add "apiId", valid_564679
+  var valid_564680 = path.getOrDefault("subscriptionId")
+  valid_564680 = validateParameter(valid_564680, JString, required = true,
+                                 default = nil)
+  if valid_564680 != nil:
+    section.add "subscriptionId", valid_564680
+  var valid_564681 = path.getOrDefault("policyId")
+  valid_564681 = validateParameter(valid_564681, JString, required = true,
                                  default = newJString("policy"))
-  if valid_594547 != nil:
-    section.add "policyId", valid_594547
-  var valid_594548 = path.getOrDefault("serviceName")
-  valid_594548 = validateParameter(valid_594548, JString, required = true,
+  if valid_564681 != nil:
+    section.add "policyId", valid_564681
+  var valid_564682 = path.getOrDefault("resourceGroupName")
+  valid_564682 = validateParameter(valid_564682, JString, required = true,
                                  default = nil)
-  if valid_594548 != nil:
-    section.add "serviceName", valid_594548
-  var valid_594549 = path.getOrDefault("operationId")
-  valid_594549 = validateParameter(valid_594549, JString, required = true,
-                                 default = nil)
-  if valid_594549 != nil:
-    section.add "operationId", valid_594549
+  if valid_564682 != nil:
+    section.add "resourceGroupName", valid_564682
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -5860,11 +5856,11 @@ proc validate_ApiOperationPolicyGetEntityTag_594542(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594550 = query.getOrDefault("api-version")
-  valid_594550 = validateParameter(valid_594550, JString, required = true,
+  var valid_564683 = query.getOrDefault("api-version")
+  valid_564683 = validateParameter(valid_564683, JString, required = true,
                                  default = nil)
-  if valid_594550 != nil:
-    section.add "api-version", valid_594550
+  if valid_564683 != nil:
+    section.add "api-version", valid_564683
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -5873,58 +5869,58 @@ proc validate_ApiOperationPolicyGetEntityTag_594542(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594551: Call_ApiOperationPolicyGetEntityTag_594541; path: JsonNode;
+proc call*(call_564684: Call_ApiOperationPolicyGetEntityTag_564674; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the entity state (Etag) version of the API operation policy specified by its identifier.
   ## 
-  let valid = call_594551.validator(path, query, header, formData, body)
-  let scheme = call_594551.pickScheme
+  let valid = call_564684.validator(path, query, header, formData, body)
+  let scheme = call_564684.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594551.url(scheme.get, call_594551.host, call_594551.base,
-                         call_594551.route, valid.getOrDefault("path"),
+  let url = call_564684.url(scheme.get, call_564684.host, call_564684.base,
+                         call_564684.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594551, url, valid)
+  result = hook(call_564684, url, valid)
 
-proc call*(call_594552: Call_ApiOperationPolicyGetEntityTag_594541;
-          resourceGroupName: string; apiVersion: string; apiId: string;
-          subscriptionId: string; serviceName: string; operationId: string;
+proc call*(call_564685: Call_ApiOperationPolicyGetEntityTag_564674;
+          serviceName: string; apiVersion: string; operationId: string; apiId: string;
+          subscriptionId: string; resourceGroupName: string;
           policyId: string = "policy"): Recallable =
   ## apiOperationPolicyGetEntityTag
   ## Gets the entity state (Etag) version of the API operation policy specified by its identifier.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   serviceName: string (required)
+  ##              : The name of the API Management service.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
+  ##   operationId: string (required)
+  ##              : Operation identifier within an API. Must be unique in the current API Management service instance.
   ##   apiId: string (required)
   ##        : API revision identifier. Must be unique in the current API Management service instance. Non-current revision has ;rev=n as a suffix where n is the revision number.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   policyId: string (required)
   ##           : The identifier of the Policy.
-  ##   serviceName: string (required)
-  ##              : The name of the API Management service.
-  ##   operationId: string (required)
-  ##              : Operation identifier within an API. Must be unique in the current API Management service instance.
-  var path_594553 = newJObject()
-  var query_594554 = newJObject()
-  add(path_594553, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594554, "api-version", newJString(apiVersion))
-  add(path_594553, "apiId", newJString(apiId))
-  add(path_594553, "subscriptionId", newJString(subscriptionId))
-  add(path_594553, "policyId", newJString(policyId))
-  add(path_594553, "serviceName", newJString(serviceName))
-  add(path_594553, "operationId", newJString(operationId))
-  result = call_594552.call(path_594553, query_594554, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564686 = newJObject()
+  var query_564687 = newJObject()
+  add(path_564686, "serviceName", newJString(serviceName))
+  add(query_564687, "api-version", newJString(apiVersion))
+  add(path_564686, "operationId", newJString(operationId))
+  add(path_564686, "apiId", newJString(apiId))
+  add(path_564686, "subscriptionId", newJString(subscriptionId))
+  add(path_564686, "policyId", newJString(policyId))
+  add(path_564686, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564685.call(path_564686, query_564687, nil, nil, nil)
 
-var apiOperationPolicyGetEntityTag* = Call_ApiOperationPolicyGetEntityTag_594541(
+var apiOperationPolicyGetEntityTag* = Call_ApiOperationPolicyGetEntityTag_564674(
     name: "apiOperationPolicyGetEntityTag", meth: HttpMethod.HttpHead,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ApiManagement/service/{serviceName}/apis/{apiId}/operations/{operationId}/policies/{policyId}",
-    validator: validate_ApiOperationPolicyGetEntityTag_594542, base: "",
-    url: url_ApiOperationPolicyGetEntityTag_594543, schemes: {Scheme.Https})
+    validator: validate_ApiOperationPolicyGetEntityTag_564675, base: "",
+    url: url_ApiOperationPolicyGetEntityTag_564676, schemes: {Scheme.Https})
 type
-  Call_ApiOperationPolicyGet_594482 = ref object of OpenApiRestCall_593425
-proc url_ApiOperationPolicyGet_594484(protocol: Scheme; host: string; base: string;
+  Call_ApiOperationPolicyGet_564615 = ref object of OpenApiRestCall_563556
+proc url_ApiOperationPolicyGet_564617(protocol: Scheme; host: string; base: string;
                                      route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -5956,58 +5952,58 @@ proc url_ApiOperationPolicyGet_594484(protocol: Scheme; host: string; base: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ApiOperationPolicyGet_594483(path: JsonNode; query: JsonNode;
+proc validate_ApiOperationPolicyGet_564616(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Get the policy configuration at the API Operation level.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
+  ##   serviceName: JString (required)
+  ##              : The name of the API Management service.
+  ##   operationId: JString (required)
+  ##              : Operation identifier within an API. Must be unique in the current API Management service instance.
   ##   apiId: JString (required)
   ##        : API revision identifier. Must be unique in the current API Management service instance. Non-current revision has ;rev=n as a suffix where n is the revision number.
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   policyId: JString (required)
   ##           : The identifier of the Policy.
-  ##   serviceName: JString (required)
-  ##              : The name of the API Management service.
-  ##   operationId: JString (required)
-  ##              : Operation identifier within an API. Must be unique in the current API Management service instance.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594485 = path.getOrDefault("resourceGroupName")
-  valid_594485 = validateParameter(valid_594485, JString, required = true,
+        "path argument is necessary due to required `serviceName` field"
+  var valid_564618 = path.getOrDefault("serviceName")
+  valid_564618 = validateParameter(valid_564618, JString, required = true,
                                  default = nil)
-  if valid_594485 != nil:
-    section.add "resourceGroupName", valid_594485
-  var valid_594486 = path.getOrDefault("apiId")
-  valid_594486 = validateParameter(valid_594486, JString, required = true,
+  if valid_564618 != nil:
+    section.add "serviceName", valid_564618
+  var valid_564619 = path.getOrDefault("operationId")
+  valid_564619 = validateParameter(valid_564619, JString, required = true,
                                  default = nil)
-  if valid_594486 != nil:
-    section.add "apiId", valid_594486
-  var valid_594487 = path.getOrDefault("subscriptionId")
-  valid_594487 = validateParameter(valid_594487, JString, required = true,
+  if valid_564619 != nil:
+    section.add "operationId", valid_564619
+  var valid_564620 = path.getOrDefault("apiId")
+  valid_564620 = validateParameter(valid_564620, JString, required = true,
                                  default = nil)
-  if valid_594487 != nil:
-    section.add "subscriptionId", valid_594487
-  var valid_594501 = path.getOrDefault("policyId")
-  valid_594501 = validateParameter(valid_594501, JString, required = true,
+  if valid_564620 != nil:
+    section.add "apiId", valid_564620
+  var valid_564621 = path.getOrDefault("subscriptionId")
+  valid_564621 = validateParameter(valid_564621, JString, required = true,
+                                 default = nil)
+  if valid_564621 != nil:
+    section.add "subscriptionId", valid_564621
+  var valid_564635 = path.getOrDefault("policyId")
+  valid_564635 = validateParameter(valid_564635, JString, required = true,
                                  default = newJString("policy"))
-  if valid_594501 != nil:
-    section.add "policyId", valid_594501
-  var valid_594502 = path.getOrDefault("serviceName")
-  valid_594502 = validateParameter(valid_594502, JString, required = true,
+  if valid_564635 != nil:
+    section.add "policyId", valid_564635
+  var valid_564636 = path.getOrDefault("resourceGroupName")
+  valid_564636 = validateParameter(valid_564636, JString, required = true,
                                  default = nil)
-  if valid_594502 != nil:
-    section.add "serviceName", valid_594502
-  var valid_594503 = path.getOrDefault("operationId")
-  valid_594503 = validateParameter(valid_594503, JString, required = true,
-                                 default = nil)
-  if valid_594503 != nil:
-    section.add "operationId", valid_594503
+  if valid_564636 != nil:
+    section.add "resourceGroupName", valid_564636
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -6015,11 +6011,11 @@ proc validate_ApiOperationPolicyGet_594483(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594504 = query.getOrDefault("api-version")
-  valid_594504 = validateParameter(valid_594504, JString, required = true,
+  var valid_564637 = query.getOrDefault("api-version")
+  valid_564637 = validateParameter(valid_564637, JString, required = true,
                                  default = nil)
-  if valid_594504 != nil:
-    section.add "api-version", valid_594504
+  if valid_564637 != nil:
+    section.add "api-version", valid_564637
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -6028,58 +6024,58 @@ proc validate_ApiOperationPolicyGet_594483(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594505: Call_ApiOperationPolicyGet_594482; path: JsonNode;
+proc call*(call_564638: Call_ApiOperationPolicyGet_564615; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get the policy configuration at the API Operation level.
   ## 
-  let valid = call_594505.validator(path, query, header, formData, body)
-  let scheme = call_594505.pickScheme
+  let valid = call_564638.validator(path, query, header, formData, body)
+  let scheme = call_564638.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594505.url(scheme.get, call_594505.host, call_594505.base,
-                         call_594505.route, valid.getOrDefault("path"),
+  let url = call_564638.url(scheme.get, call_564638.host, call_564638.base,
+                         call_564638.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594505, url, valid)
+  result = hook(call_564638, url, valid)
 
-proc call*(call_594506: Call_ApiOperationPolicyGet_594482;
-          resourceGroupName: string; apiVersion: string; apiId: string;
-          subscriptionId: string; serviceName: string; operationId: string;
+proc call*(call_564639: Call_ApiOperationPolicyGet_564615; serviceName: string;
+          apiVersion: string; operationId: string; apiId: string;
+          subscriptionId: string; resourceGroupName: string;
           policyId: string = "policy"): Recallable =
   ## apiOperationPolicyGet
   ## Get the policy configuration at the API Operation level.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   serviceName: string (required)
+  ##              : The name of the API Management service.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
+  ##   operationId: string (required)
+  ##              : Operation identifier within an API. Must be unique in the current API Management service instance.
   ##   apiId: string (required)
   ##        : API revision identifier. Must be unique in the current API Management service instance. Non-current revision has ;rev=n as a suffix where n is the revision number.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   policyId: string (required)
   ##           : The identifier of the Policy.
-  ##   serviceName: string (required)
-  ##              : The name of the API Management service.
-  ##   operationId: string (required)
-  ##              : Operation identifier within an API. Must be unique in the current API Management service instance.
-  var path_594507 = newJObject()
-  var query_594508 = newJObject()
-  add(path_594507, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594508, "api-version", newJString(apiVersion))
-  add(path_594507, "apiId", newJString(apiId))
-  add(path_594507, "subscriptionId", newJString(subscriptionId))
-  add(path_594507, "policyId", newJString(policyId))
-  add(path_594507, "serviceName", newJString(serviceName))
-  add(path_594507, "operationId", newJString(operationId))
-  result = call_594506.call(path_594507, query_594508, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564640 = newJObject()
+  var query_564641 = newJObject()
+  add(path_564640, "serviceName", newJString(serviceName))
+  add(query_564641, "api-version", newJString(apiVersion))
+  add(path_564640, "operationId", newJString(operationId))
+  add(path_564640, "apiId", newJString(apiId))
+  add(path_564640, "subscriptionId", newJString(subscriptionId))
+  add(path_564640, "policyId", newJString(policyId))
+  add(path_564640, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564639.call(path_564640, query_564641, nil, nil, nil)
 
-var apiOperationPolicyGet* = Call_ApiOperationPolicyGet_594482(
+var apiOperationPolicyGet* = Call_ApiOperationPolicyGet_564615(
     name: "apiOperationPolicyGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ApiManagement/service/{serviceName}/apis/{apiId}/operations/{operationId}/policies/{policyId}",
-    validator: validate_ApiOperationPolicyGet_594483, base: "",
-    url: url_ApiOperationPolicyGet_594484, schemes: {Scheme.Https})
+    validator: validate_ApiOperationPolicyGet_564616, base: "",
+    url: url_ApiOperationPolicyGet_564617, schemes: {Scheme.Https})
 type
-  Call_ApiOperationPolicyDelete_594526 = ref object of OpenApiRestCall_593425
-proc url_ApiOperationPolicyDelete_594528(protocol: Scheme; host: string;
+  Call_ApiOperationPolicyDelete_564659 = ref object of OpenApiRestCall_563556
+proc url_ApiOperationPolicyDelete_564661(protocol: Scheme; host: string;
                                         base: string; route: string; path: JsonNode;
                                         query: JsonNode): Uri =
   result.scheme = $protocol
@@ -6112,58 +6108,58 @@ proc url_ApiOperationPolicyDelete_594528(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ApiOperationPolicyDelete_594527(path: JsonNode; query: JsonNode;
+proc validate_ApiOperationPolicyDelete_564660(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Deletes the policy configuration at the Api Operation.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
+  ##   serviceName: JString (required)
+  ##              : The name of the API Management service.
+  ##   operationId: JString (required)
+  ##              : Operation identifier within an API. Must be unique in the current API Management service instance.
   ##   apiId: JString (required)
   ##        : API revision identifier. Must be unique in the current API Management service instance. Non-current revision has ;rev=n as a suffix where n is the revision number.
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   policyId: JString (required)
   ##           : The identifier of the Policy.
-  ##   serviceName: JString (required)
-  ##              : The name of the API Management service.
-  ##   operationId: JString (required)
-  ##              : Operation identifier within an API. Must be unique in the current API Management service instance.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594529 = path.getOrDefault("resourceGroupName")
-  valid_594529 = validateParameter(valid_594529, JString, required = true,
+        "path argument is necessary due to required `serviceName` field"
+  var valid_564662 = path.getOrDefault("serviceName")
+  valid_564662 = validateParameter(valid_564662, JString, required = true,
                                  default = nil)
-  if valid_594529 != nil:
-    section.add "resourceGroupName", valid_594529
-  var valid_594530 = path.getOrDefault("apiId")
-  valid_594530 = validateParameter(valid_594530, JString, required = true,
+  if valid_564662 != nil:
+    section.add "serviceName", valid_564662
+  var valid_564663 = path.getOrDefault("operationId")
+  valid_564663 = validateParameter(valid_564663, JString, required = true,
                                  default = nil)
-  if valid_594530 != nil:
-    section.add "apiId", valid_594530
-  var valid_594531 = path.getOrDefault("subscriptionId")
-  valid_594531 = validateParameter(valid_594531, JString, required = true,
+  if valid_564663 != nil:
+    section.add "operationId", valid_564663
+  var valid_564664 = path.getOrDefault("apiId")
+  valid_564664 = validateParameter(valid_564664, JString, required = true,
                                  default = nil)
-  if valid_594531 != nil:
-    section.add "subscriptionId", valid_594531
-  var valid_594532 = path.getOrDefault("policyId")
-  valid_594532 = validateParameter(valid_594532, JString, required = true,
+  if valid_564664 != nil:
+    section.add "apiId", valid_564664
+  var valid_564665 = path.getOrDefault("subscriptionId")
+  valid_564665 = validateParameter(valid_564665, JString, required = true,
+                                 default = nil)
+  if valid_564665 != nil:
+    section.add "subscriptionId", valid_564665
+  var valid_564666 = path.getOrDefault("policyId")
+  valid_564666 = validateParameter(valid_564666, JString, required = true,
                                  default = newJString("policy"))
-  if valid_594532 != nil:
-    section.add "policyId", valid_594532
-  var valid_594533 = path.getOrDefault("serviceName")
-  valid_594533 = validateParameter(valid_594533, JString, required = true,
+  if valid_564666 != nil:
+    section.add "policyId", valid_564666
+  var valid_564667 = path.getOrDefault("resourceGroupName")
+  valid_564667 = validateParameter(valid_564667, JString, required = true,
                                  default = nil)
-  if valid_594533 != nil:
-    section.add "serviceName", valid_594533
-  var valid_594534 = path.getOrDefault("operationId")
-  valid_594534 = validateParameter(valid_594534, JString, required = true,
-                                 default = nil)
-  if valid_594534 != nil:
-    section.add "operationId", valid_594534
+  if valid_564667 != nil:
+    section.add "resourceGroupName", valid_564667
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -6171,11 +6167,11 @@ proc validate_ApiOperationPolicyDelete_594527(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594535 = query.getOrDefault("api-version")
-  valid_594535 = validateParameter(valid_594535, JString, required = true,
+  var valid_564668 = query.getOrDefault("api-version")
+  valid_564668 = validateParameter(valid_564668, JString, required = true,
                                  default = nil)
-  if valid_594535 != nil:
-    section.add "api-version", valid_594535
+  if valid_564668 != nil:
+    section.add "api-version", valid_564668
   result.add "query", section
   ## parameters in `header` object:
   ##   If-Match: JString (required)
@@ -6183,69 +6179,69 @@ proc validate_ApiOperationPolicyDelete_594527(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert header != nil,
         "header argument is necessary due to required `If-Match` field"
-  var valid_594536 = header.getOrDefault("If-Match")
-  valid_594536 = validateParameter(valid_594536, JString, required = true,
+  var valid_564669 = header.getOrDefault("If-Match")
+  valid_564669 = validateParameter(valid_564669, JString, required = true,
                                  default = nil)
-  if valid_594536 != nil:
-    section.add "If-Match", valid_594536
+  if valid_564669 != nil:
+    section.add "If-Match", valid_564669
   result.add "header", section
   section = newJObject()
   result.add "formData", section
   if body != nil:
     result.add "body", body
 
-proc call*(call_594537: Call_ApiOperationPolicyDelete_594526; path: JsonNode;
+proc call*(call_564670: Call_ApiOperationPolicyDelete_564659; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes the policy configuration at the Api Operation.
   ## 
-  let valid = call_594537.validator(path, query, header, formData, body)
-  let scheme = call_594537.pickScheme
+  let valid = call_564670.validator(path, query, header, formData, body)
+  let scheme = call_564670.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594537.url(scheme.get, call_594537.host, call_594537.base,
-                         call_594537.route, valid.getOrDefault("path"),
+  let url = call_564670.url(scheme.get, call_564670.host, call_564670.base,
+                         call_564670.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594537, url, valid)
+  result = hook(call_564670, url, valid)
 
-proc call*(call_594538: Call_ApiOperationPolicyDelete_594526;
-          resourceGroupName: string; apiVersion: string; apiId: string;
-          subscriptionId: string; serviceName: string; operationId: string;
+proc call*(call_564671: Call_ApiOperationPolicyDelete_564659; serviceName: string;
+          apiVersion: string; operationId: string; apiId: string;
+          subscriptionId: string; resourceGroupName: string;
           policyId: string = "policy"): Recallable =
   ## apiOperationPolicyDelete
   ## Deletes the policy configuration at the Api Operation.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   serviceName: string (required)
+  ##              : The name of the API Management service.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
+  ##   operationId: string (required)
+  ##              : Operation identifier within an API. Must be unique in the current API Management service instance.
   ##   apiId: string (required)
   ##        : API revision identifier. Must be unique in the current API Management service instance. Non-current revision has ;rev=n as a suffix where n is the revision number.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   policyId: string (required)
   ##           : The identifier of the Policy.
-  ##   serviceName: string (required)
-  ##              : The name of the API Management service.
-  ##   operationId: string (required)
-  ##              : Operation identifier within an API. Must be unique in the current API Management service instance.
-  var path_594539 = newJObject()
-  var query_594540 = newJObject()
-  add(path_594539, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594540, "api-version", newJString(apiVersion))
-  add(path_594539, "apiId", newJString(apiId))
-  add(path_594539, "subscriptionId", newJString(subscriptionId))
-  add(path_594539, "policyId", newJString(policyId))
-  add(path_594539, "serviceName", newJString(serviceName))
-  add(path_594539, "operationId", newJString(operationId))
-  result = call_594538.call(path_594539, query_594540, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564672 = newJObject()
+  var query_564673 = newJObject()
+  add(path_564672, "serviceName", newJString(serviceName))
+  add(query_564673, "api-version", newJString(apiVersion))
+  add(path_564672, "operationId", newJString(operationId))
+  add(path_564672, "apiId", newJString(apiId))
+  add(path_564672, "subscriptionId", newJString(subscriptionId))
+  add(path_564672, "policyId", newJString(policyId))
+  add(path_564672, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564671.call(path_564672, query_564673, nil, nil, nil)
 
-var apiOperationPolicyDelete* = Call_ApiOperationPolicyDelete_594526(
+var apiOperationPolicyDelete* = Call_ApiOperationPolicyDelete_564659(
     name: "apiOperationPolicyDelete", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ApiManagement/service/{serviceName}/apis/{apiId}/operations/{operationId}/policies/{policyId}",
-    validator: validate_ApiOperationPolicyDelete_594527, base: "",
-    url: url_ApiOperationPolicyDelete_594528, schemes: {Scheme.Https})
+    validator: validate_ApiOperationPolicyDelete_564660, base: "",
+    url: url_ApiOperationPolicyDelete_564661, schemes: {Scheme.Https})
 type
-  Call_TagListByOperation_594555 = ref object of OpenApiRestCall_593425
-proc url_TagListByOperation_594557(protocol: Scheme; host: string; base: string;
+  Call_TagListByOperation_564688 = ref object of OpenApiRestCall_563556
+proc url_TagListByOperation_564690(protocol: Scheme; host: string; base: string;
                                   route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -6275,7 +6271,7 @@ proc url_TagListByOperation_594557(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_TagListByOperation_594556(path: JsonNode; query: JsonNode;
+proc validate_TagListByOperation_564689(path: JsonNode; query: JsonNode;
                                        header: JsonNode; formData: JsonNode;
                                        body: JsonNode): JsonNode =
   ## Lists all Tags associated with the Operation.
@@ -6283,50 +6279,50 @@ proc validate_TagListByOperation_594556(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
-  ##   apiId: JString (required)
-  ##        : API revision identifier. Must be unique in the current API Management service instance. Non-current revision has ;rev=n as a suffix where n is the revision number.
-  ##   subscriptionId: JString (required)
-  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   serviceName: JString (required)
   ##              : The name of the API Management service.
   ##   operationId: JString (required)
   ##              : Operation identifier within an API. Must be unique in the current API Management service instance.
+  ##   apiId: JString (required)
+  ##        : API revision identifier. Must be unique in the current API Management service instance. Non-current revision has ;rev=n as a suffix where n is the revision number.
+  ##   subscriptionId: JString (required)
+  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594558 = path.getOrDefault("resourceGroupName")
-  valid_594558 = validateParameter(valid_594558, JString, required = true,
+        "path argument is necessary due to required `serviceName` field"
+  var valid_564691 = path.getOrDefault("serviceName")
+  valid_564691 = validateParameter(valid_564691, JString, required = true,
                                  default = nil)
-  if valid_594558 != nil:
-    section.add "resourceGroupName", valid_594558
-  var valid_594559 = path.getOrDefault("apiId")
-  valid_594559 = validateParameter(valid_594559, JString, required = true,
+  if valid_564691 != nil:
+    section.add "serviceName", valid_564691
+  var valid_564692 = path.getOrDefault("operationId")
+  valid_564692 = validateParameter(valid_564692, JString, required = true,
                                  default = nil)
-  if valid_594559 != nil:
-    section.add "apiId", valid_594559
-  var valid_594560 = path.getOrDefault("subscriptionId")
-  valid_594560 = validateParameter(valid_594560, JString, required = true,
+  if valid_564692 != nil:
+    section.add "operationId", valid_564692
+  var valid_564693 = path.getOrDefault("apiId")
+  valid_564693 = validateParameter(valid_564693, JString, required = true,
                                  default = nil)
-  if valid_594560 != nil:
-    section.add "subscriptionId", valid_594560
-  var valid_594561 = path.getOrDefault("serviceName")
-  valid_594561 = validateParameter(valid_594561, JString, required = true,
+  if valid_564693 != nil:
+    section.add "apiId", valid_564693
+  var valid_564694 = path.getOrDefault("subscriptionId")
+  valid_564694 = validateParameter(valid_564694, JString, required = true,
                                  default = nil)
-  if valid_594561 != nil:
-    section.add "serviceName", valid_594561
-  var valid_594562 = path.getOrDefault("operationId")
-  valid_594562 = validateParameter(valid_594562, JString, required = true,
+  if valid_564694 != nil:
+    section.add "subscriptionId", valid_564694
+  var valid_564695 = path.getOrDefault("resourceGroupName")
+  valid_564695 = validateParameter(valid_564695, JString, required = true,
                                  default = nil)
-  if valid_594562 != nil:
-    section.add "operationId", valid_594562
+  if valid_564695 != nil:
+    section.add "resourceGroupName", valid_564695
   result.add "path", section
   ## parameters in `query` object:
-  ##   api-version: JString (required)
-  ##              : Version of the API to be used with the client request.
   ##   $top: JInt
   ##       : Number of records to return.
+  ##   api-version: JString (required)
+  ##              : Version of the API to be used with the client request.
   ##   $skip: JInt
   ##        : Number of records to skip.
   ##   $filter: JString
@@ -6337,26 +6333,26 @@ proc validate_TagListByOperation_594556(path: JsonNode; query: JsonNode;
   ## |name | ge, le, eq, ne, gt, lt | substringof, contains, startswith, endswith|
   ## 
   section = newJObject()
+  var valid_564696 = query.getOrDefault("$top")
+  valid_564696 = validateParameter(valid_564696, JInt, required = false, default = nil)
+  if valid_564696 != nil:
+    section.add "$top", valid_564696
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594563 = query.getOrDefault("api-version")
-  valid_594563 = validateParameter(valid_594563, JString, required = true,
+  var valid_564697 = query.getOrDefault("api-version")
+  valid_564697 = validateParameter(valid_564697, JString, required = true,
                                  default = nil)
-  if valid_594563 != nil:
-    section.add "api-version", valid_594563
-  var valid_594564 = query.getOrDefault("$top")
-  valid_594564 = validateParameter(valid_594564, JInt, required = false, default = nil)
-  if valid_594564 != nil:
-    section.add "$top", valid_594564
-  var valid_594565 = query.getOrDefault("$skip")
-  valid_594565 = validateParameter(valid_594565, JInt, required = false, default = nil)
-  if valid_594565 != nil:
-    section.add "$skip", valid_594565
-  var valid_594566 = query.getOrDefault("$filter")
-  valid_594566 = validateParameter(valid_594566, JString, required = false,
+  if valid_564697 != nil:
+    section.add "api-version", valid_564697
+  var valid_564698 = query.getOrDefault("$skip")
+  valid_564698 = validateParameter(valid_564698, JInt, required = false, default = nil)
+  if valid_564698 != nil:
+    section.add "$skip", valid_564698
+  var valid_564699 = query.getOrDefault("$filter")
+  valid_564699 = validateParameter(valid_564699, JString, required = false,
                                  default = nil)
-  if valid_594566 != nil:
-    section.add "$filter", valid_594566
+  if valid_564699 != nil:
+    section.add "$filter", valid_564699
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -6365,41 +6361,41 @@ proc validate_TagListByOperation_594556(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594567: Call_TagListByOperation_594555; path: JsonNode;
+proc call*(call_564700: Call_TagListByOperation_564688; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists all Tags associated with the Operation.
   ## 
-  let valid = call_594567.validator(path, query, header, formData, body)
-  let scheme = call_594567.pickScheme
+  let valid = call_564700.validator(path, query, header, formData, body)
+  let scheme = call_564700.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594567.url(scheme.get, call_594567.host, call_594567.base,
-                         call_594567.route, valid.getOrDefault("path"),
+  let url = call_564700.url(scheme.get, call_564700.host, call_564700.base,
+                         call_564700.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594567, url, valid)
+  result = hook(call_564700, url, valid)
 
-proc call*(call_594568: Call_TagListByOperation_594555; resourceGroupName: string;
-          apiVersion: string; apiId: string; subscriptionId: string;
-          serviceName: string; operationId: string; Top: int = 0; Skip: int = 0;
-          Filter: string = ""): Recallable =
+proc call*(call_564701: Call_TagListByOperation_564688; serviceName: string;
+          apiVersion: string; operationId: string; apiId: string;
+          subscriptionId: string; resourceGroupName: string; Top: int = 0;
+          Skip: int = 0; Filter: string = ""): Recallable =
   ## tagListByOperation
   ## Lists all Tags associated with the Operation.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   serviceName: string (required)
+  ##              : The name of the API Management service.
+  ##   Top: int
+  ##      : Number of records to return.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
+  ##   operationId: string (required)
+  ##              : Operation identifier within an API. Must be unique in the current API Management service instance.
   ##   apiId: string (required)
   ##        : API revision identifier. Must be unique in the current API Management service instance. Non-current revision has ;rev=n as a suffix where n is the revision number.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   Top: int
-  ##      : Number of records to return.
   ##   Skip: int
   ##       : Number of records to skip.
-  ##   serviceName: string (required)
-  ##              : The name of the API Management service.
-  ##   operationId: string (required)
-  ##              : Operation identifier within an API. Must be unique in the current API Management service instance.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   Filter: string
   ##         : | Field       | Supported operators    | Supported functions               |
   ## |-------------|------------------------|-----------------------------------|
@@ -6407,27 +6403,27 @@ proc call*(call_594568: Call_TagListByOperation_594555; resourceGroupName: strin
   ## |displayName | ge, le, eq, ne, gt, lt | substringof, contains, startswith, endswith|
   ## |name | ge, le, eq, ne, gt, lt | substringof, contains, startswith, endswith|
   ## 
-  var path_594569 = newJObject()
-  var query_594570 = newJObject()
-  add(path_594569, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594570, "api-version", newJString(apiVersion))
-  add(path_594569, "apiId", newJString(apiId))
-  add(path_594569, "subscriptionId", newJString(subscriptionId))
-  add(query_594570, "$top", newJInt(Top))
-  add(query_594570, "$skip", newJInt(Skip))
-  add(path_594569, "serviceName", newJString(serviceName))
-  add(path_594569, "operationId", newJString(operationId))
-  add(query_594570, "$filter", newJString(Filter))
-  result = call_594568.call(path_594569, query_594570, nil, nil, nil)
+  var path_564702 = newJObject()
+  var query_564703 = newJObject()
+  add(path_564702, "serviceName", newJString(serviceName))
+  add(query_564703, "$top", newJInt(Top))
+  add(query_564703, "api-version", newJString(apiVersion))
+  add(path_564702, "operationId", newJString(operationId))
+  add(path_564702, "apiId", newJString(apiId))
+  add(path_564702, "subscriptionId", newJString(subscriptionId))
+  add(query_564703, "$skip", newJInt(Skip))
+  add(path_564702, "resourceGroupName", newJString(resourceGroupName))
+  add(query_564703, "$filter", newJString(Filter))
+  result = call_564701.call(path_564702, query_564703, nil, nil, nil)
 
-var tagListByOperation* = Call_TagListByOperation_594555(
+var tagListByOperation* = Call_TagListByOperation_564688(
     name: "tagListByOperation", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ApiManagement/service/{serviceName}/apis/{apiId}/operations/{operationId}/tags",
-    validator: validate_TagListByOperation_594556, base: "",
-    url: url_TagListByOperation_594557, schemes: {Scheme.Https})
+    validator: validate_TagListByOperation_564689, base: "",
+    url: url_TagListByOperation_564690, schemes: {Scheme.Https})
 type
-  Call_TagAssignToOperation_594585 = ref object of OpenApiRestCall_593425
-proc url_TagAssignToOperation_594587(protocol: Scheme; host: string; base: string;
+  Call_TagAssignToOperation_564718 = ref object of OpenApiRestCall_563556
+proc url_TagAssignToOperation_564720(protocol: Scheme; host: string; base: string;
                                     route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -6459,57 +6455,58 @@ proc url_TagAssignToOperation_594587(protocol: Scheme; host: string; base: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_TagAssignToOperation_594586(path: JsonNode; query: JsonNode;
+proc validate_TagAssignToOperation_564719(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Assign tag to the Operation.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   tagId: JString (required)
-  ##        : Tag identifier. Must be unique in the current API Management service instance.
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
-  ##   apiId: JString (required)
-  ##        : API revision identifier. Must be unique in the current API Management service instance. Non-current revision has ;rev=n as a suffix where n is the revision number.
-  ##   subscriptionId: JString (required)
-  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   serviceName: JString (required)
   ##              : The name of the API Management service.
   ##   operationId: JString (required)
   ##              : Operation identifier within an API. Must be unique in the current API Management service instance.
+  ##   tagId: JString (required)
+  ##        : Tag identifier. Must be unique in the current API Management service instance.
+  ##   apiId: JString (required)
+  ##        : API revision identifier. Must be unique in the current API Management service instance. Non-current revision has ;rev=n as a suffix where n is the revision number.
+  ##   subscriptionId: JString (required)
+  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
-  assert path != nil, "path argument is necessary due to required `tagId` field"
-  var valid_594588 = path.getOrDefault("tagId")
-  valid_594588 = validateParameter(valid_594588, JString, required = true,
+  assert path != nil,
+        "path argument is necessary due to required `serviceName` field"
+  var valid_564721 = path.getOrDefault("serviceName")
+  valid_564721 = validateParameter(valid_564721, JString, required = true,
                                  default = nil)
-  if valid_594588 != nil:
-    section.add "tagId", valid_594588
-  var valid_594589 = path.getOrDefault("resourceGroupName")
-  valid_594589 = validateParameter(valid_594589, JString, required = true,
+  if valid_564721 != nil:
+    section.add "serviceName", valid_564721
+  var valid_564722 = path.getOrDefault("operationId")
+  valid_564722 = validateParameter(valid_564722, JString, required = true,
                                  default = nil)
-  if valid_594589 != nil:
-    section.add "resourceGroupName", valid_594589
-  var valid_594590 = path.getOrDefault("apiId")
-  valid_594590 = validateParameter(valid_594590, JString, required = true,
+  if valid_564722 != nil:
+    section.add "operationId", valid_564722
+  var valid_564723 = path.getOrDefault("tagId")
+  valid_564723 = validateParameter(valid_564723, JString, required = true,
                                  default = nil)
-  if valid_594590 != nil:
-    section.add "apiId", valid_594590
-  var valid_594591 = path.getOrDefault("subscriptionId")
-  valid_594591 = validateParameter(valid_594591, JString, required = true,
+  if valid_564723 != nil:
+    section.add "tagId", valid_564723
+  var valid_564724 = path.getOrDefault("apiId")
+  valid_564724 = validateParameter(valid_564724, JString, required = true,
                                  default = nil)
-  if valid_594591 != nil:
-    section.add "subscriptionId", valid_594591
-  var valid_594592 = path.getOrDefault("serviceName")
-  valid_594592 = validateParameter(valid_594592, JString, required = true,
+  if valid_564724 != nil:
+    section.add "apiId", valid_564724
+  var valid_564725 = path.getOrDefault("subscriptionId")
+  valid_564725 = validateParameter(valid_564725, JString, required = true,
                                  default = nil)
-  if valid_594592 != nil:
-    section.add "serviceName", valid_594592
-  var valid_594593 = path.getOrDefault("operationId")
-  valid_594593 = validateParameter(valid_594593, JString, required = true,
+  if valid_564725 != nil:
+    section.add "subscriptionId", valid_564725
+  var valid_564726 = path.getOrDefault("resourceGroupName")
+  valid_564726 = validateParameter(valid_564726, JString, required = true,
                                  default = nil)
-  if valid_594593 != nil:
-    section.add "operationId", valid_594593
+  if valid_564726 != nil:
+    section.add "resourceGroupName", valid_564726
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -6517,11 +6514,11 @@ proc validate_TagAssignToOperation_594586(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594594 = query.getOrDefault("api-version")
-  valid_594594 = validateParameter(valid_594594, JString, required = true,
+  var valid_564727 = query.getOrDefault("api-version")
+  valid_564727 = validateParameter(valid_564727, JString, required = true,
                                  default = nil)
-  if valid_594594 != nil:
-    section.add "api-version", valid_594594
+  if valid_564727 != nil:
+    section.add "api-version", valid_564727
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -6530,57 +6527,57 @@ proc validate_TagAssignToOperation_594586(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594595: Call_TagAssignToOperation_594585; path: JsonNode;
+proc call*(call_564728: Call_TagAssignToOperation_564718; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Assign tag to the Operation.
   ## 
-  let valid = call_594595.validator(path, query, header, formData, body)
-  let scheme = call_594595.pickScheme
+  let valid = call_564728.validator(path, query, header, formData, body)
+  let scheme = call_564728.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594595.url(scheme.get, call_594595.host, call_594595.base,
-                         call_594595.route, valid.getOrDefault("path"),
+  let url = call_564728.url(scheme.get, call_564728.host, call_564728.base,
+                         call_564728.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594595, url, valid)
+  result = hook(call_564728, url, valid)
 
-proc call*(call_594596: Call_TagAssignToOperation_594585; tagId: string;
-          resourceGroupName: string; apiVersion: string; apiId: string;
-          subscriptionId: string; serviceName: string; operationId: string): Recallable =
+proc call*(call_564729: Call_TagAssignToOperation_564718; serviceName: string;
+          apiVersion: string; operationId: string; tagId: string; apiId: string;
+          subscriptionId: string; resourceGroupName: string): Recallable =
   ## tagAssignToOperation
   ## Assign tag to the Operation.
-  ##   tagId: string (required)
-  ##        : Tag identifier. Must be unique in the current API Management service instance.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   serviceName: string (required)
+  ##              : The name of the API Management service.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
+  ##   operationId: string (required)
+  ##              : Operation identifier within an API. Must be unique in the current API Management service instance.
+  ##   tagId: string (required)
+  ##        : Tag identifier. Must be unique in the current API Management service instance.
   ##   apiId: string (required)
   ##        : API revision identifier. Must be unique in the current API Management service instance. Non-current revision has ;rev=n as a suffix where n is the revision number.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   serviceName: string (required)
-  ##              : The name of the API Management service.
-  ##   operationId: string (required)
-  ##              : Operation identifier within an API. Must be unique in the current API Management service instance.
-  var path_594597 = newJObject()
-  var query_594598 = newJObject()
-  add(path_594597, "tagId", newJString(tagId))
-  add(path_594597, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594598, "api-version", newJString(apiVersion))
-  add(path_594597, "apiId", newJString(apiId))
-  add(path_594597, "subscriptionId", newJString(subscriptionId))
-  add(path_594597, "serviceName", newJString(serviceName))
-  add(path_594597, "operationId", newJString(operationId))
-  result = call_594596.call(path_594597, query_594598, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564730 = newJObject()
+  var query_564731 = newJObject()
+  add(path_564730, "serviceName", newJString(serviceName))
+  add(query_564731, "api-version", newJString(apiVersion))
+  add(path_564730, "operationId", newJString(operationId))
+  add(path_564730, "tagId", newJString(tagId))
+  add(path_564730, "apiId", newJString(apiId))
+  add(path_564730, "subscriptionId", newJString(subscriptionId))
+  add(path_564730, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564729.call(path_564730, query_564731, nil, nil, nil)
 
-var tagAssignToOperation* = Call_TagAssignToOperation_594585(
+var tagAssignToOperation* = Call_TagAssignToOperation_564718(
     name: "tagAssignToOperation", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ApiManagement/service/{serviceName}/apis/{apiId}/operations/{operationId}/tags/{tagId}",
-    validator: validate_TagAssignToOperation_594586, base: "",
-    url: url_TagAssignToOperation_594587, schemes: {Scheme.Https})
+    validator: validate_TagAssignToOperation_564719, base: "",
+    url: url_TagAssignToOperation_564720, schemes: {Scheme.Https})
 type
-  Call_TagGetEntityStateByOperation_594613 = ref object of OpenApiRestCall_593425
-proc url_TagGetEntityStateByOperation_594615(protocol: Scheme; host: string;
+  Call_TagGetEntityStateByOperation_564746 = ref object of OpenApiRestCall_563556
+proc url_TagGetEntityStateByOperation_564748(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -6612,57 +6609,58 @@ proc url_TagGetEntityStateByOperation_594615(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_TagGetEntityStateByOperation_594614(path: JsonNode; query: JsonNode;
+proc validate_TagGetEntityStateByOperation_564747(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the entity state version of the tag specified by its identifier.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   tagId: JString (required)
-  ##        : Tag identifier. Must be unique in the current API Management service instance.
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
-  ##   apiId: JString (required)
-  ##        : API revision identifier. Must be unique in the current API Management service instance. Non-current revision has ;rev=n as a suffix where n is the revision number.
-  ##   subscriptionId: JString (required)
-  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   serviceName: JString (required)
   ##              : The name of the API Management service.
   ##   operationId: JString (required)
   ##              : Operation identifier within an API. Must be unique in the current API Management service instance.
+  ##   tagId: JString (required)
+  ##        : Tag identifier. Must be unique in the current API Management service instance.
+  ##   apiId: JString (required)
+  ##        : API revision identifier. Must be unique in the current API Management service instance. Non-current revision has ;rev=n as a suffix where n is the revision number.
+  ##   subscriptionId: JString (required)
+  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
-  assert path != nil, "path argument is necessary due to required `tagId` field"
-  var valid_594616 = path.getOrDefault("tagId")
-  valid_594616 = validateParameter(valid_594616, JString, required = true,
+  assert path != nil,
+        "path argument is necessary due to required `serviceName` field"
+  var valid_564749 = path.getOrDefault("serviceName")
+  valid_564749 = validateParameter(valid_564749, JString, required = true,
                                  default = nil)
-  if valid_594616 != nil:
-    section.add "tagId", valid_594616
-  var valid_594617 = path.getOrDefault("resourceGroupName")
-  valid_594617 = validateParameter(valid_594617, JString, required = true,
+  if valid_564749 != nil:
+    section.add "serviceName", valid_564749
+  var valid_564750 = path.getOrDefault("operationId")
+  valid_564750 = validateParameter(valid_564750, JString, required = true,
                                  default = nil)
-  if valid_594617 != nil:
-    section.add "resourceGroupName", valid_594617
-  var valid_594618 = path.getOrDefault("apiId")
-  valid_594618 = validateParameter(valid_594618, JString, required = true,
+  if valid_564750 != nil:
+    section.add "operationId", valid_564750
+  var valid_564751 = path.getOrDefault("tagId")
+  valid_564751 = validateParameter(valid_564751, JString, required = true,
                                  default = nil)
-  if valid_594618 != nil:
-    section.add "apiId", valid_594618
-  var valid_594619 = path.getOrDefault("subscriptionId")
-  valid_594619 = validateParameter(valid_594619, JString, required = true,
+  if valid_564751 != nil:
+    section.add "tagId", valid_564751
+  var valid_564752 = path.getOrDefault("apiId")
+  valid_564752 = validateParameter(valid_564752, JString, required = true,
                                  default = nil)
-  if valid_594619 != nil:
-    section.add "subscriptionId", valid_594619
-  var valid_594620 = path.getOrDefault("serviceName")
-  valid_594620 = validateParameter(valid_594620, JString, required = true,
+  if valid_564752 != nil:
+    section.add "apiId", valid_564752
+  var valid_564753 = path.getOrDefault("subscriptionId")
+  valid_564753 = validateParameter(valid_564753, JString, required = true,
                                  default = nil)
-  if valid_594620 != nil:
-    section.add "serviceName", valid_594620
-  var valid_594621 = path.getOrDefault("operationId")
-  valid_594621 = validateParameter(valid_594621, JString, required = true,
+  if valid_564753 != nil:
+    section.add "subscriptionId", valid_564753
+  var valid_564754 = path.getOrDefault("resourceGroupName")
+  valid_564754 = validateParameter(valid_564754, JString, required = true,
                                  default = nil)
-  if valid_594621 != nil:
-    section.add "operationId", valid_594621
+  if valid_564754 != nil:
+    section.add "resourceGroupName", valid_564754
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -6670,11 +6668,11 @@ proc validate_TagGetEntityStateByOperation_594614(path: JsonNode; query: JsonNod
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594622 = query.getOrDefault("api-version")
-  valid_594622 = validateParameter(valid_594622, JString, required = true,
+  var valid_564755 = query.getOrDefault("api-version")
+  valid_564755 = validateParameter(valid_564755, JString, required = true,
                                  default = nil)
-  if valid_594622 != nil:
-    section.add "api-version", valid_594622
+  if valid_564755 != nil:
+    section.add "api-version", valid_564755
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -6683,57 +6681,57 @@ proc validate_TagGetEntityStateByOperation_594614(path: JsonNode; query: JsonNod
   if body != nil:
     result.add "body", body
 
-proc call*(call_594623: Call_TagGetEntityStateByOperation_594613; path: JsonNode;
+proc call*(call_564756: Call_TagGetEntityStateByOperation_564746; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the entity state version of the tag specified by its identifier.
   ## 
-  let valid = call_594623.validator(path, query, header, formData, body)
-  let scheme = call_594623.pickScheme
+  let valid = call_564756.validator(path, query, header, formData, body)
+  let scheme = call_564756.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594623.url(scheme.get, call_594623.host, call_594623.base,
-                         call_594623.route, valid.getOrDefault("path"),
+  let url = call_564756.url(scheme.get, call_564756.host, call_564756.base,
+                         call_564756.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594623, url, valid)
+  result = hook(call_564756, url, valid)
 
-proc call*(call_594624: Call_TagGetEntityStateByOperation_594613; tagId: string;
-          resourceGroupName: string; apiVersion: string; apiId: string;
-          subscriptionId: string; serviceName: string; operationId: string): Recallable =
+proc call*(call_564757: Call_TagGetEntityStateByOperation_564746;
+          serviceName: string; apiVersion: string; operationId: string; tagId: string;
+          apiId: string; subscriptionId: string; resourceGroupName: string): Recallable =
   ## tagGetEntityStateByOperation
   ## Gets the entity state version of the tag specified by its identifier.
-  ##   tagId: string (required)
-  ##        : Tag identifier. Must be unique in the current API Management service instance.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   serviceName: string (required)
+  ##              : The name of the API Management service.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
+  ##   operationId: string (required)
+  ##              : Operation identifier within an API. Must be unique in the current API Management service instance.
+  ##   tagId: string (required)
+  ##        : Tag identifier. Must be unique in the current API Management service instance.
   ##   apiId: string (required)
   ##        : API revision identifier. Must be unique in the current API Management service instance. Non-current revision has ;rev=n as a suffix where n is the revision number.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   serviceName: string (required)
-  ##              : The name of the API Management service.
-  ##   operationId: string (required)
-  ##              : Operation identifier within an API. Must be unique in the current API Management service instance.
-  var path_594625 = newJObject()
-  var query_594626 = newJObject()
-  add(path_594625, "tagId", newJString(tagId))
-  add(path_594625, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594626, "api-version", newJString(apiVersion))
-  add(path_594625, "apiId", newJString(apiId))
-  add(path_594625, "subscriptionId", newJString(subscriptionId))
-  add(path_594625, "serviceName", newJString(serviceName))
-  add(path_594625, "operationId", newJString(operationId))
-  result = call_594624.call(path_594625, query_594626, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564758 = newJObject()
+  var query_564759 = newJObject()
+  add(path_564758, "serviceName", newJString(serviceName))
+  add(query_564759, "api-version", newJString(apiVersion))
+  add(path_564758, "operationId", newJString(operationId))
+  add(path_564758, "tagId", newJString(tagId))
+  add(path_564758, "apiId", newJString(apiId))
+  add(path_564758, "subscriptionId", newJString(subscriptionId))
+  add(path_564758, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564757.call(path_564758, query_564759, nil, nil, nil)
 
-var tagGetEntityStateByOperation* = Call_TagGetEntityStateByOperation_594613(
+var tagGetEntityStateByOperation* = Call_TagGetEntityStateByOperation_564746(
     name: "tagGetEntityStateByOperation", meth: HttpMethod.HttpHead,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ApiManagement/service/{serviceName}/apis/{apiId}/operations/{operationId}/tags/{tagId}",
-    validator: validate_TagGetEntityStateByOperation_594614, base: "",
-    url: url_TagGetEntityStateByOperation_594615, schemes: {Scheme.Https})
+    validator: validate_TagGetEntityStateByOperation_564747, base: "",
+    url: url_TagGetEntityStateByOperation_564748, schemes: {Scheme.Https})
 type
-  Call_TagGetByOperation_594571 = ref object of OpenApiRestCall_593425
-proc url_TagGetByOperation_594573(protocol: Scheme; host: string; base: string;
+  Call_TagGetByOperation_564704 = ref object of OpenApiRestCall_563556
+proc url_TagGetByOperation_564706(protocol: Scheme; host: string; base: string;
                                  route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -6765,7 +6763,7 @@ proc url_TagGetByOperation_594573(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_TagGetByOperation_594572(path: JsonNode; query: JsonNode;
+proc validate_TagGetByOperation_564705(path: JsonNode; query: JsonNode;
                                       header: JsonNode; formData: JsonNode;
                                       body: JsonNode): JsonNode =
   ## Get tag associated with the Operation.
@@ -6773,50 +6771,51 @@ proc validate_TagGetByOperation_594572(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   tagId: JString (required)
-  ##        : Tag identifier. Must be unique in the current API Management service instance.
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
-  ##   apiId: JString (required)
-  ##        : API revision identifier. Must be unique in the current API Management service instance. Non-current revision has ;rev=n as a suffix where n is the revision number.
-  ##   subscriptionId: JString (required)
-  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   serviceName: JString (required)
   ##              : The name of the API Management service.
   ##   operationId: JString (required)
   ##              : Operation identifier within an API. Must be unique in the current API Management service instance.
+  ##   tagId: JString (required)
+  ##        : Tag identifier. Must be unique in the current API Management service instance.
+  ##   apiId: JString (required)
+  ##        : API revision identifier. Must be unique in the current API Management service instance. Non-current revision has ;rev=n as a suffix where n is the revision number.
+  ##   subscriptionId: JString (required)
+  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
-  assert path != nil, "path argument is necessary due to required `tagId` field"
-  var valid_594574 = path.getOrDefault("tagId")
-  valid_594574 = validateParameter(valid_594574, JString, required = true,
+  assert path != nil,
+        "path argument is necessary due to required `serviceName` field"
+  var valid_564707 = path.getOrDefault("serviceName")
+  valid_564707 = validateParameter(valid_564707, JString, required = true,
                                  default = nil)
-  if valid_594574 != nil:
-    section.add "tagId", valid_594574
-  var valid_594575 = path.getOrDefault("resourceGroupName")
-  valid_594575 = validateParameter(valid_594575, JString, required = true,
+  if valid_564707 != nil:
+    section.add "serviceName", valid_564707
+  var valid_564708 = path.getOrDefault("operationId")
+  valid_564708 = validateParameter(valid_564708, JString, required = true,
                                  default = nil)
-  if valid_594575 != nil:
-    section.add "resourceGroupName", valid_594575
-  var valid_594576 = path.getOrDefault("apiId")
-  valid_594576 = validateParameter(valid_594576, JString, required = true,
+  if valid_564708 != nil:
+    section.add "operationId", valid_564708
+  var valid_564709 = path.getOrDefault("tagId")
+  valid_564709 = validateParameter(valid_564709, JString, required = true,
                                  default = nil)
-  if valid_594576 != nil:
-    section.add "apiId", valid_594576
-  var valid_594577 = path.getOrDefault("subscriptionId")
-  valid_594577 = validateParameter(valid_594577, JString, required = true,
+  if valid_564709 != nil:
+    section.add "tagId", valid_564709
+  var valid_564710 = path.getOrDefault("apiId")
+  valid_564710 = validateParameter(valid_564710, JString, required = true,
                                  default = nil)
-  if valid_594577 != nil:
-    section.add "subscriptionId", valid_594577
-  var valid_594578 = path.getOrDefault("serviceName")
-  valid_594578 = validateParameter(valid_594578, JString, required = true,
+  if valid_564710 != nil:
+    section.add "apiId", valid_564710
+  var valid_564711 = path.getOrDefault("subscriptionId")
+  valid_564711 = validateParameter(valid_564711, JString, required = true,
                                  default = nil)
-  if valid_594578 != nil:
-    section.add "serviceName", valid_594578
-  var valid_594579 = path.getOrDefault("operationId")
-  valid_594579 = validateParameter(valid_594579, JString, required = true,
+  if valid_564711 != nil:
+    section.add "subscriptionId", valid_564711
+  var valid_564712 = path.getOrDefault("resourceGroupName")
+  valid_564712 = validateParameter(valid_564712, JString, required = true,
                                  default = nil)
-  if valid_594579 != nil:
-    section.add "operationId", valid_594579
+  if valid_564712 != nil:
+    section.add "resourceGroupName", valid_564712
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -6824,11 +6823,11 @@ proc validate_TagGetByOperation_594572(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594580 = query.getOrDefault("api-version")
-  valid_594580 = validateParameter(valid_594580, JString, required = true,
+  var valid_564713 = query.getOrDefault("api-version")
+  valid_564713 = validateParameter(valid_564713, JString, required = true,
                                  default = nil)
-  if valid_594580 != nil:
-    section.add "api-version", valid_594580
+  if valid_564713 != nil:
+    section.add "api-version", valid_564713
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -6837,56 +6836,56 @@ proc validate_TagGetByOperation_594572(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594581: Call_TagGetByOperation_594571; path: JsonNode;
+proc call*(call_564714: Call_TagGetByOperation_564704; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get tag associated with the Operation.
   ## 
-  let valid = call_594581.validator(path, query, header, formData, body)
-  let scheme = call_594581.pickScheme
+  let valid = call_564714.validator(path, query, header, formData, body)
+  let scheme = call_564714.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594581.url(scheme.get, call_594581.host, call_594581.base,
-                         call_594581.route, valid.getOrDefault("path"),
+  let url = call_564714.url(scheme.get, call_564714.host, call_564714.base,
+                         call_564714.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594581, url, valid)
+  result = hook(call_564714, url, valid)
 
-proc call*(call_594582: Call_TagGetByOperation_594571; tagId: string;
-          resourceGroupName: string; apiVersion: string; apiId: string;
-          subscriptionId: string; serviceName: string; operationId: string): Recallable =
+proc call*(call_564715: Call_TagGetByOperation_564704; serviceName: string;
+          apiVersion: string; operationId: string; tagId: string; apiId: string;
+          subscriptionId: string; resourceGroupName: string): Recallable =
   ## tagGetByOperation
   ## Get tag associated with the Operation.
-  ##   tagId: string (required)
-  ##        : Tag identifier. Must be unique in the current API Management service instance.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   serviceName: string (required)
+  ##              : The name of the API Management service.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
+  ##   operationId: string (required)
+  ##              : Operation identifier within an API. Must be unique in the current API Management service instance.
+  ##   tagId: string (required)
+  ##        : Tag identifier. Must be unique in the current API Management service instance.
   ##   apiId: string (required)
   ##        : API revision identifier. Must be unique in the current API Management service instance. Non-current revision has ;rev=n as a suffix where n is the revision number.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   serviceName: string (required)
-  ##              : The name of the API Management service.
-  ##   operationId: string (required)
-  ##              : Operation identifier within an API. Must be unique in the current API Management service instance.
-  var path_594583 = newJObject()
-  var query_594584 = newJObject()
-  add(path_594583, "tagId", newJString(tagId))
-  add(path_594583, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594584, "api-version", newJString(apiVersion))
-  add(path_594583, "apiId", newJString(apiId))
-  add(path_594583, "subscriptionId", newJString(subscriptionId))
-  add(path_594583, "serviceName", newJString(serviceName))
-  add(path_594583, "operationId", newJString(operationId))
-  result = call_594582.call(path_594583, query_594584, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564716 = newJObject()
+  var query_564717 = newJObject()
+  add(path_564716, "serviceName", newJString(serviceName))
+  add(query_564717, "api-version", newJString(apiVersion))
+  add(path_564716, "operationId", newJString(operationId))
+  add(path_564716, "tagId", newJString(tagId))
+  add(path_564716, "apiId", newJString(apiId))
+  add(path_564716, "subscriptionId", newJString(subscriptionId))
+  add(path_564716, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564715.call(path_564716, query_564717, nil, nil, nil)
 
-var tagGetByOperation* = Call_TagGetByOperation_594571(name: "tagGetByOperation",
+var tagGetByOperation* = Call_TagGetByOperation_564704(name: "tagGetByOperation",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ApiManagement/service/{serviceName}/apis/{apiId}/operations/{operationId}/tags/{tagId}",
-    validator: validate_TagGetByOperation_594572, base: "",
-    url: url_TagGetByOperation_594573, schemes: {Scheme.Https})
+    validator: validate_TagGetByOperation_564705, base: "",
+    url: url_TagGetByOperation_564706, schemes: {Scheme.Https})
 type
-  Call_TagDetachFromOperation_594599 = ref object of OpenApiRestCall_593425
-proc url_TagDetachFromOperation_594601(protocol: Scheme; host: string; base: string;
+  Call_TagDetachFromOperation_564732 = ref object of OpenApiRestCall_563556
+proc url_TagDetachFromOperation_564734(protocol: Scheme; host: string; base: string;
                                       route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -6918,57 +6917,58 @@ proc url_TagDetachFromOperation_594601(protocol: Scheme; host: string; base: str
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_TagDetachFromOperation_594600(path: JsonNode; query: JsonNode;
+proc validate_TagDetachFromOperation_564733(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Detach the tag from the Operation.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   tagId: JString (required)
-  ##        : Tag identifier. Must be unique in the current API Management service instance.
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
-  ##   apiId: JString (required)
-  ##        : API revision identifier. Must be unique in the current API Management service instance. Non-current revision has ;rev=n as a suffix where n is the revision number.
-  ##   subscriptionId: JString (required)
-  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   serviceName: JString (required)
   ##              : The name of the API Management service.
   ##   operationId: JString (required)
   ##              : Operation identifier within an API. Must be unique in the current API Management service instance.
+  ##   tagId: JString (required)
+  ##        : Tag identifier. Must be unique in the current API Management service instance.
+  ##   apiId: JString (required)
+  ##        : API revision identifier. Must be unique in the current API Management service instance. Non-current revision has ;rev=n as a suffix where n is the revision number.
+  ##   subscriptionId: JString (required)
+  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
-  assert path != nil, "path argument is necessary due to required `tagId` field"
-  var valid_594602 = path.getOrDefault("tagId")
-  valid_594602 = validateParameter(valid_594602, JString, required = true,
+  assert path != nil,
+        "path argument is necessary due to required `serviceName` field"
+  var valid_564735 = path.getOrDefault("serviceName")
+  valid_564735 = validateParameter(valid_564735, JString, required = true,
                                  default = nil)
-  if valid_594602 != nil:
-    section.add "tagId", valid_594602
-  var valid_594603 = path.getOrDefault("resourceGroupName")
-  valid_594603 = validateParameter(valid_594603, JString, required = true,
+  if valid_564735 != nil:
+    section.add "serviceName", valid_564735
+  var valid_564736 = path.getOrDefault("operationId")
+  valid_564736 = validateParameter(valid_564736, JString, required = true,
                                  default = nil)
-  if valid_594603 != nil:
-    section.add "resourceGroupName", valid_594603
-  var valid_594604 = path.getOrDefault("apiId")
-  valid_594604 = validateParameter(valid_594604, JString, required = true,
+  if valid_564736 != nil:
+    section.add "operationId", valid_564736
+  var valid_564737 = path.getOrDefault("tagId")
+  valid_564737 = validateParameter(valid_564737, JString, required = true,
                                  default = nil)
-  if valid_594604 != nil:
-    section.add "apiId", valid_594604
-  var valid_594605 = path.getOrDefault("subscriptionId")
-  valid_594605 = validateParameter(valid_594605, JString, required = true,
+  if valid_564737 != nil:
+    section.add "tagId", valid_564737
+  var valid_564738 = path.getOrDefault("apiId")
+  valid_564738 = validateParameter(valid_564738, JString, required = true,
                                  default = nil)
-  if valid_594605 != nil:
-    section.add "subscriptionId", valid_594605
-  var valid_594606 = path.getOrDefault("serviceName")
-  valid_594606 = validateParameter(valid_594606, JString, required = true,
+  if valid_564738 != nil:
+    section.add "apiId", valid_564738
+  var valid_564739 = path.getOrDefault("subscriptionId")
+  valid_564739 = validateParameter(valid_564739, JString, required = true,
                                  default = nil)
-  if valid_594606 != nil:
-    section.add "serviceName", valid_594606
-  var valid_594607 = path.getOrDefault("operationId")
-  valid_594607 = validateParameter(valid_594607, JString, required = true,
+  if valid_564739 != nil:
+    section.add "subscriptionId", valid_564739
+  var valid_564740 = path.getOrDefault("resourceGroupName")
+  valid_564740 = validateParameter(valid_564740, JString, required = true,
                                  default = nil)
-  if valid_594607 != nil:
-    section.add "operationId", valid_594607
+  if valid_564740 != nil:
+    section.add "resourceGroupName", valid_564740
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -6976,11 +6976,11 @@ proc validate_TagDetachFromOperation_594600(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594608 = query.getOrDefault("api-version")
-  valid_594608 = validateParameter(valid_594608, JString, required = true,
+  var valid_564741 = query.getOrDefault("api-version")
+  valid_564741 = validateParameter(valid_564741, JString, required = true,
                                  default = nil)
-  if valid_594608 != nil:
-    section.add "api-version", valid_594608
+  if valid_564741 != nil:
+    section.add "api-version", valid_564741
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -6989,57 +6989,57 @@ proc validate_TagDetachFromOperation_594600(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594609: Call_TagDetachFromOperation_594599; path: JsonNode;
+proc call*(call_564742: Call_TagDetachFromOperation_564732; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Detach the tag from the Operation.
   ## 
-  let valid = call_594609.validator(path, query, header, formData, body)
-  let scheme = call_594609.pickScheme
+  let valid = call_564742.validator(path, query, header, formData, body)
+  let scheme = call_564742.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594609.url(scheme.get, call_594609.host, call_594609.base,
-                         call_594609.route, valid.getOrDefault("path"),
+  let url = call_564742.url(scheme.get, call_564742.host, call_564742.base,
+                         call_564742.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594609, url, valid)
+  result = hook(call_564742, url, valid)
 
-proc call*(call_594610: Call_TagDetachFromOperation_594599; tagId: string;
-          resourceGroupName: string; apiVersion: string; apiId: string;
-          subscriptionId: string; serviceName: string; operationId: string): Recallable =
+proc call*(call_564743: Call_TagDetachFromOperation_564732; serviceName: string;
+          apiVersion: string; operationId: string; tagId: string; apiId: string;
+          subscriptionId: string; resourceGroupName: string): Recallable =
   ## tagDetachFromOperation
   ## Detach the tag from the Operation.
-  ##   tagId: string (required)
-  ##        : Tag identifier. Must be unique in the current API Management service instance.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   serviceName: string (required)
+  ##              : The name of the API Management service.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
+  ##   operationId: string (required)
+  ##              : Operation identifier within an API. Must be unique in the current API Management service instance.
+  ##   tagId: string (required)
+  ##        : Tag identifier. Must be unique in the current API Management service instance.
   ##   apiId: string (required)
   ##        : API revision identifier. Must be unique in the current API Management service instance. Non-current revision has ;rev=n as a suffix where n is the revision number.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   serviceName: string (required)
-  ##              : The name of the API Management service.
-  ##   operationId: string (required)
-  ##              : Operation identifier within an API. Must be unique in the current API Management service instance.
-  var path_594611 = newJObject()
-  var query_594612 = newJObject()
-  add(path_594611, "tagId", newJString(tagId))
-  add(path_594611, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594612, "api-version", newJString(apiVersion))
-  add(path_594611, "apiId", newJString(apiId))
-  add(path_594611, "subscriptionId", newJString(subscriptionId))
-  add(path_594611, "serviceName", newJString(serviceName))
-  add(path_594611, "operationId", newJString(operationId))
-  result = call_594610.call(path_594611, query_594612, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564744 = newJObject()
+  var query_564745 = newJObject()
+  add(path_564744, "serviceName", newJString(serviceName))
+  add(query_564745, "api-version", newJString(apiVersion))
+  add(path_564744, "operationId", newJString(operationId))
+  add(path_564744, "tagId", newJString(tagId))
+  add(path_564744, "apiId", newJString(apiId))
+  add(path_564744, "subscriptionId", newJString(subscriptionId))
+  add(path_564744, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564743.call(path_564744, query_564745, nil, nil, nil)
 
-var tagDetachFromOperation* = Call_TagDetachFromOperation_594599(
+var tagDetachFromOperation* = Call_TagDetachFromOperation_564732(
     name: "tagDetachFromOperation", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ApiManagement/service/{serviceName}/apis/{apiId}/operations/{operationId}/tags/{tagId}",
-    validator: validate_TagDetachFromOperation_594600, base: "",
-    url: url_TagDetachFromOperation_594601, schemes: {Scheme.Https})
+    validator: validate_TagDetachFromOperation_564733, base: "",
+    url: url_TagDetachFromOperation_564734, schemes: {Scheme.Https})
 type
-  Call_OperationListByTags_594627 = ref object of OpenApiRestCall_593425
-proc url_OperationListByTags_594629(protocol: Scheme; host: string; base: string;
+  Call_OperationListByTags_564760 = ref object of OpenApiRestCall_563556
+proc url_OperationListByTags_564762(protocol: Scheme; host: string; base: string;
                                    route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -7066,7 +7066,7 @@ proc url_OperationListByTags_594629(protocol: Scheme; host: string; base: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_OperationListByTags_594628(path: JsonNode; query: JsonNode;
+proc validate_OperationListByTags_564761(path: JsonNode; query: JsonNode;
                                         header: JsonNode; formData: JsonNode;
                                         body: JsonNode): JsonNode =
   ## Lists a collection of operations associated with tags.
@@ -7074,45 +7074,45 @@ proc validate_OperationListByTags_594628(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
+  ##   serviceName: JString (required)
+  ##              : The name of the API Management service.
   ##   apiId: JString (required)
   ##        : API revision identifier. Must be unique in the current API Management service instance. Non-current revision has ;rev=n as a suffix where n is the revision number.
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   serviceName: JString (required)
-  ##              : The name of the API Management service.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594630 = path.getOrDefault("resourceGroupName")
-  valid_594630 = validateParameter(valid_594630, JString, required = true,
+        "path argument is necessary due to required `serviceName` field"
+  var valid_564763 = path.getOrDefault("serviceName")
+  valid_564763 = validateParameter(valid_564763, JString, required = true,
                                  default = nil)
-  if valid_594630 != nil:
-    section.add "resourceGroupName", valid_594630
-  var valid_594631 = path.getOrDefault("apiId")
-  valid_594631 = validateParameter(valid_594631, JString, required = true,
+  if valid_564763 != nil:
+    section.add "serviceName", valid_564763
+  var valid_564764 = path.getOrDefault("apiId")
+  valid_564764 = validateParameter(valid_564764, JString, required = true,
                                  default = nil)
-  if valid_594631 != nil:
-    section.add "apiId", valid_594631
-  var valid_594632 = path.getOrDefault("subscriptionId")
-  valid_594632 = validateParameter(valid_594632, JString, required = true,
+  if valid_564764 != nil:
+    section.add "apiId", valid_564764
+  var valid_564765 = path.getOrDefault("subscriptionId")
+  valid_564765 = validateParameter(valid_564765, JString, required = true,
                                  default = nil)
-  if valid_594632 != nil:
-    section.add "subscriptionId", valid_594632
-  var valid_594633 = path.getOrDefault("serviceName")
-  valid_594633 = validateParameter(valid_594633, JString, required = true,
+  if valid_564765 != nil:
+    section.add "subscriptionId", valid_564765
+  var valid_564766 = path.getOrDefault("resourceGroupName")
+  valid_564766 = validateParameter(valid_564766, JString, required = true,
                                  default = nil)
-  if valid_594633 != nil:
-    section.add "serviceName", valid_594633
+  if valid_564766 != nil:
+    section.add "resourceGroupName", valid_564766
   result.add "path", section
   ## parameters in `query` object:
+  ##   $top: JInt
+  ##       : Number of records to return.
   ##   includeNotTaggedOperations: JBool
   ##                             : Include not tagged Operations.
   ##   api-version: JString (required)
   ##              : Version of the API to be used with the client request.
-  ##   $top: JInt
-  ##       : Number of records to return.
   ##   $skip: JInt
   ##        : Number of records to skip.
   ##   $filter: JString
@@ -7127,30 +7127,30 @@ proc validate_OperationListByTags_594628(path: JsonNode; query: JsonNode;
   ## |urlTemplate | ge, le, eq, ne, gt, lt | substringof, contains, startswith, endswith|
   ## 
   section = newJObject()
-  var valid_594634 = query.getOrDefault("includeNotTaggedOperations")
-  valid_594634 = validateParameter(valid_594634, JBool, required = false, default = nil)
-  if valid_594634 != nil:
-    section.add "includeNotTaggedOperations", valid_594634
+  var valid_564767 = query.getOrDefault("$top")
+  valid_564767 = validateParameter(valid_564767, JInt, required = false, default = nil)
+  if valid_564767 != nil:
+    section.add "$top", valid_564767
+  var valid_564768 = query.getOrDefault("includeNotTaggedOperations")
+  valid_564768 = validateParameter(valid_564768, JBool, required = false, default = nil)
+  if valid_564768 != nil:
+    section.add "includeNotTaggedOperations", valid_564768
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594635 = query.getOrDefault("api-version")
-  valid_594635 = validateParameter(valid_594635, JString, required = true,
+  var valid_564769 = query.getOrDefault("api-version")
+  valid_564769 = validateParameter(valid_564769, JString, required = true,
                                  default = nil)
-  if valid_594635 != nil:
-    section.add "api-version", valid_594635
-  var valid_594636 = query.getOrDefault("$top")
-  valid_594636 = validateParameter(valid_594636, JInt, required = false, default = nil)
-  if valid_594636 != nil:
-    section.add "$top", valid_594636
-  var valid_594637 = query.getOrDefault("$skip")
-  valid_594637 = validateParameter(valid_594637, JInt, required = false, default = nil)
-  if valid_594637 != nil:
-    section.add "$skip", valid_594637
-  var valid_594638 = query.getOrDefault("$filter")
-  valid_594638 = validateParameter(valid_594638, JString, required = false,
+  if valid_564769 != nil:
+    section.add "api-version", valid_564769
+  var valid_564770 = query.getOrDefault("$skip")
+  valid_564770 = validateParameter(valid_564770, JInt, required = false, default = nil)
+  if valid_564770 != nil:
+    section.add "$skip", valid_564770
+  var valid_564771 = query.getOrDefault("$filter")
+  valid_564771 = validateParameter(valid_564771, JString, required = false,
                                  default = nil)
-  if valid_594638 != nil:
-    section.add "$filter", valid_594638
+  if valid_564771 != nil:
+    section.add "$filter", valid_564771
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -7159,41 +7159,41 @@ proc validate_OperationListByTags_594628(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594639: Call_OperationListByTags_594627; path: JsonNode;
+proc call*(call_564772: Call_OperationListByTags_564760; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists a collection of operations associated with tags.
   ## 
-  let valid = call_594639.validator(path, query, header, formData, body)
-  let scheme = call_594639.pickScheme
+  let valid = call_564772.validator(path, query, header, formData, body)
+  let scheme = call_564772.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594639.url(scheme.get, call_594639.host, call_594639.base,
-                         call_594639.route, valid.getOrDefault("path"),
+  let url = call_564772.url(scheme.get, call_564772.host, call_564772.base,
+                         call_564772.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594639, url, valid)
+  result = hook(call_564772, url, valid)
 
-proc call*(call_594640: Call_OperationListByTags_594627; resourceGroupName: string;
+proc call*(call_564773: Call_OperationListByTags_564760; serviceName: string;
           apiVersion: string; apiId: string; subscriptionId: string;
-          serviceName: string; includeNotTaggedOperations: bool = false; Top: int = 0;
-          Skip: int = 0; Filter: string = ""): Recallable =
+          resourceGroupName: string; Top: int = 0;
+          includeNotTaggedOperations: bool = false; Skip: int = 0; Filter: string = ""): Recallable =
   ## operationListByTags
   ## Lists a collection of operations associated with tags.
+  ##   serviceName: string (required)
+  ##              : The name of the API Management service.
+  ##   Top: int
+  ##      : Number of records to return.
   ##   includeNotTaggedOperations: bool
   ##                             : Include not tagged Operations.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
   ##   apiId: string (required)
   ##        : API revision identifier. Must be unique in the current API Management service instance. Non-current revision has ;rev=n as a suffix where n is the revision number.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   Top: int
-  ##      : Number of records to return.
   ##   Skip: int
   ##       : Number of records to skip.
-  ##   serviceName: string (required)
-  ##              : The name of the API Management service.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   Filter: string
   ##         : | Field       | Supported operators    | Supported functions               |
   ## |-------------|------------------------|-----------------------------------|
@@ -7205,28 +7205,28 @@ proc call*(call_594640: Call_OperationListByTags_594627; resourceGroupName: stri
   ## |method | ge, le, eq, ne, gt, lt | substringof, contains, startswith, endswith|
   ## |urlTemplate | ge, le, eq, ne, gt, lt | substringof, contains, startswith, endswith|
   ## 
-  var path_594641 = newJObject()
-  var query_594642 = newJObject()
-  add(query_594642, "includeNotTaggedOperations",
+  var path_564774 = newJObject()
+  var query_564775 = newJObject()
+  add(path_564774, "serviceName", newJString(serviceName))
+  add(query_564775, "$top", newJInt(Top))
+  add(query_564775, "includeNotTaggedOperations",
       newJBool(includeNotTaggedOperations))
-  add(path_594641, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594642, "api-version", newJString(apiVersion))
-  add(path_594641, "apiId", newJString(apiId))
-  add(path_594641, "subscriptionId", newJString(subscriptionId))
-  add(query_594642, "$top", newJInt(Top))
-  add(query_594642, "$skip", newJInt(Skip))
-  add(path_594641, "serviceName", newJString(serviceName))
-  add(query_594642, "$filter", newJString(Filter))
-  result = call_594640.call(path_594641, query_594642, nil, nil, nil)
+  add(query_564775, "api-version", newJString(apiVersion))
+  add(path_564774, "apiId", newJString(apiId))
+  add(path_564774, "subscriptionId", newJString(subscriptionId))
+  add(query_564775, "$skip", newJInt(Skip))
+  add(path_564774, "resourceGroupName", newJString(resourceGroupName))
+  add(query_564775, "$filter", newJString(Filter))
+  result = call_564773.call(path_564774, query_564775, nil, nil, nil)
 
-var operationListByTags* = Call_OperationListByTags_594627(
+var operationListByTags* = Call_OperationListByTags_564760(
     name: "operationListByTags", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ApiManagement/service/{serviceName}/apis/{apiId}/operationsByTags",
-    validator: validate_OperationListByTags_594628, base: "",
-    url: url_OperationListByTags_594629, schemes: {Scheme.Https})
+    validator: validate_OperationListByTags_564761, base: "",
+    url: url_OperationListByTags_564762, schemes: {Scheme.Https})
 type
-  Call_ApiPolicyListByApi_594643 = ref object of OpenApiRestCall_593425
-proc url_ApiPolicyListByApi_594645(protocol: Scheme; host: string; base: string;
+  Call_ApiPolicyListByApi_564776 = ref object of OpenApiRestCall_563556
+proc url_ApiPolicyListByApi_564778(protocol: Scheme; host: string; base: string;
                                   route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -7253,7 +7253,7 @@ proc url_ApiPolicyListByApi_594645(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ApiPolicyListByApi_594644(path: JsonNode; query: JsonNode;
+proc validate_ApiPolicyListByApi_564777(path: JsonNode; query: JsonNode;
                                        header: JsonNode; formData: JsonNode;
                                        body: JsonNode): JsonNode =
   ## Get the policy configuration at the API level.
@@ -7261,37 +7261,37 @@ proc validate_ApiPolicyListByApi_594644(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
+  ##   serviceName: JString (required)
+  ##              : The name of the API Management service.
   ##   apiId: JString (required)
   ##        : API revision identifier. Must be unique in the current API Management service instance. Non-current revision has ;rev=n as a suffix where n is the revision number.
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   serviceName: JString (required)
-  ##              : The name of the API Management service.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594646 = path.getOrDefault("resourceGroupName")
-  valid_594646 = validateParameter(valid_594646, JString, required = true,
+        "path argument is necessary due to required `serviceName` field"
+  var valid_564779 = path.getOrDefault("serviceName")
+  valid_564779 = validateParameter(valid_564779, JString, required = true,
                                  default = nil)
-  if valid_594646 != nil:
-    section.add "resourceGroupName", valid_594646
-  var valid_594647 = path.getOrDefault("apiId")
-  valid_594647 = validateParameter(valid_594647, JString, required = true,
+  if valid_564779 != nil:
+    section.add "serviceName", valid_564779
+  var valid_564780 = path.getOrDefault("apiId")
+  valid_564780 = validateParameter(valid_564780, JString, required = true,
                                  default = nil)
-  if valid_594647 != nil:
-    section.add "apiId", valid_594647
-  var valid_594648 = path.getOrDefault("subscriptionId")
-  valid_594648 = validateParameter(valid_594648, JString, required = true,
+  if valid_564780 != nil:
+    section.add "apiId", valid_564780
+  var valid_564781 = path.getOrDefault("subscriptionId")
+  valid_564781 = validateParameter(valid_564781, JString, required = true,
                                  default = nil)
-  if valid_594648 != nil:
-    section.add "subscriptionId", valid_594648
-  var valid_594649 = path.getOrDefault("serviceName")
-  valid_594649 = validateParameter(valid_594649, JString, required = true,
+  if valid_564781 != nil:
+    section.add "subscriptionId", valid_564781
+  var valid_564782 = path.getOrDefault("resourceGroupName")
+  valid_564782 = validateParameter(valid_564782, JString, required = true,
                                  default = nil)
-  if valid_594649 != nil:
-    section.add "serviceName", valid_594649
+  if valid_564782 != nil:
+    section.add "resourceGroupName", valid_564782
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -7299,11 +7299,11 @@ proc validate_ApiPolicyListByApi_594644(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594650 = query.getOrDefault("api-version")
-  valid_594650 = validateParameter(valid_594650, JString, required = true,
+  var valid_564783 = query.getOrDefault("api-version")
+  valid_564783 = validateParameter(valid_564783, JString, required = true,
                                  default = nil)
-  if valid_594650 != nil:
-    section.add "api-version", valid_594650
+  if valid_564783 != nil:
+    section.add "api-version", valid_564783
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -7312,51 +7312,51 @@ proc validate_ApiPolicyListByApi_594644(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594651: Call_ApiPolicyListByApi_594643; path: JsonNode;
+proc call*(call_564784: Call_ApiPolicyListByApi_564776; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get the policy configuration at the API level.
   ## 
-  let valid = call_594651.validator(path, query, header, formData, body)
-  let scheme = call_594651.pickScheme
+  let valid = call_564784.validator(path, query, header, formData, body)
+  let scheme = call_564784.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594651.url(scheme.get, call_594651.host, call_594651.base,
-                         call_594651.route, valid.getOrDefault("path"),
+  let url = call_564784.url(scheme.get, call_564784.host, call_564784.base,
+                         call_564784.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594651, url, valid)
+  result = hook(call_564784, url, valid)
 
-proc call*(call_594652: Call_ApiPolicyListByApi_594643; resourceGroupName: string;
+proc call*(call_564785: Call_ApiPolicyListByApi_564776; serviceName: string;
           apiVersion: string; apiId: string; subscriptionId: string;
-          serviceName: string): Recallable =
+          resourceGroupName: string): Recallable =
   ## apiPolicyListByApi
   ## Get the policy configuration at the API level.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   serviceName: string (required)
+  ##              : The name of the API Management service.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
   ##   apiId: string (required)
   ##        : API revision identifier. Must be unique in the current API Management service instance. Non-current revision has ;rev=n as a suffix where n is the revision number.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   serviceName: string (required)
-  ##              : The name of the API Management service.
-  var path_594653 = newJObject()
-  var query_594654 = newJObject()
-  add(path_594653, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594654, "api-version", newJString(apiVersion))
-  add(path_594653, "apiId", newJString(apiId))
-  add(path_594653, "subscriptionId", newJString(subscriptionId))
-  add(path_594653, "serviceName", newJString(serviceName))
-  result = call_594652.call(path_594653, query_594654, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564786 = newJObject()
+  var query_564787 = newJObject()
+  add(path_564786, "serviceName", newJString(serviceName))
+  add(query_564787, "api-version", newJString(apiVersion))
+  add(path_564786, "apiId", newJString(apiId))
+  add(path_564786, "subscriptionId", newJString(subscriptionId))
+  add(path_564786, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564785.call(path_564786, query_564787, nil, nil, nil)
 
-var apiPolicyListByApi* = Call_ApiPolicyListByApi_594643(
+var apiPolicyListByApi* = Call_ApiPolicyListByApi_564776(
     name: "apiPolicyListByApi", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ApiManagement/service/{serviceName}/apis/{apiId}/policies",
-    validator: validate_ApiPolicyListByApi_594644, base: "",
-    url: url_ApiPolicyListByApi_594645, schemes: {Scheme.Https})
+    validator: validate_ApiPolicyListByApi_564777, base: "",
+    url: url_ApiPolicyListByApi_564778, schemes: {Scheme.Https})
 type
-  Call_ApiPolicyCreateOrUpdate_594668 = ref object of OpenApiRestCall_593425
-proc url_ApiPolicyCreateOrUpdate_594670(protocol: Scheme; host: string; base: string;
+  Call_ApiPolicyCreateOrUpdate_564801 = ref object of OpenApiRestCall_563556
+proc url_ApiPolicyCreateOrUpdate_564803(protocol: Scheme; host: string; base: string;
                                        route: string; path: JsonNode;
                                        query: JsonNode): Uri =
   result.scheme = $protocol
@@ -7386,51 +7386,51 @@ proc url_ApiPolicyCreateOrUpdate_594670(protocol: Scheme; host: string; base: st
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ApiPolicyCreateOrUpdate_594669(path: JsonNode; query: JsonNode;
+proc validate_ApiPolicyCreateOrUpdate_564802(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Creates or updates policy configuration for the API.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
+  ##   serviceName: JString (required)
+  ##              : The name of the API Management service.
   ##   apiId: JString (required)
   ##        : API revision identifier. Must be unique in the current API Management service instance. Non-current revision has ;rev=n as a suffix where n is the revision number.
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   policyId: JString (required)
   ##           : The identifier of the Policy.
-  ##   serviceName: JString (required)
-  ##              : The name of the API Management service.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594671 = path.getOrDefault("resourceGroupName")
-  valid_594671 = validateParameter(valid_594671, JString, required = true,
+        "path argument is necessary due to required `serviceName` field"
+  var valid_564804 = path.getOrDefault("serviceName")
+  valid_564804 = validateParameter(valid_564804, JString, required = true,
                                  default = nil)
-  if valid_594671 != nil:
-    section.add "resourceGroupName", valid_594671
-  var valid_594672 = path.getOrDefault("apiId")
-  valid_594672 = validateParameter(valid_594672, JString, required = true,
+  if valid_564804 != nil:
+    section.add "serviceName", valid_564804
+  var valid_564805 = path.getOrDefault("apiId")
+  valid_564805 = validateParameter(valid_564805, JString, required = true,
                                  default = nil)
-  if valid_594672 != nil:
-    section.add "apiId", valid_594672
-  var valid_594673 = path.getOrDefault("subscriptionId")
-  valid_594673 = validateParameter(valid_594673, JString, required = true,
+  if valid_564805 != nil:
+    section.add "apiId", valid_564805
+  var valid_564806 = path.getOrDefault("subscriptionId")
+  valid_564806 = validateParameter(valid_564806, JString, required = true,
                                  default = nil)
-  if valid_594673 != nil:
-    section.add "subscriptionId", valid_594673
-  var valid_594674 = path.getOrDefault("policyId")
-  valid_594674 = validateParameter(valid_594674, JString, required = true,
+  if valid_564806 != nil:
+    section.add "subscriptionId", valid_564806
+  var valid_564807 = path.getOrDefault("policyId")
+  valid_564807 = validateParameter(valid_564807, JString, required = true,
                                  default = newJString("policy"))
-  if valid_594674 != nil:
-    section.add "policyId", valid_594674
-  var valid_594675 = path.getOrDefault("serviceName")
-  valid_594675 = validateParameter(valid_594675, JString, required = true,
+  if valid_564807 != nil:
+    section.add "policyId", valid_564807
+  var valid_564808 = path.getOrDefault("resourceGroupName")
+  valid_564808 = validateParameter(valid_564808, JString, required = true,
                                  default = nil)
-  if valid_594675 != nil:
-    section.add "serviceName", valid_594675
+  if valid_564808 != nil:
+    section.add "resourceGroupName", valid_564808
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -7438,21 +7438,21 @@ proc validate_ApiPolicyCreateOrUpdate_594669(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594676 = query.getOrDefault("api-version")
-  valid_594676 = validateParameter(valid_594676, JString, required = true,
+  var valid_564809 = query.getOrDefault("api-version")
+  valid_564809 = validateParameter(valid_564809, JString, required = true,
                                  default = nil)
-  if valid_594676 != nil:
-    section.add "api-version", valid_594676
+  if valid_564809 != nil:
+    section.add "api-version", valid_564809
   result.add "query", section
   ## parameters in `header` object:
   ##   If-Match: JString
   ##           : ETag of the Entity. Not required when creating an entity, but required when updating an entity.
   section = newJObject()
-  var valid_594677 = header.getOrDefault("If-Match")
-  valid_594677 = validateParameter(valid_594677, JString, required = false,
+  var valid_564810 = header.getOrDefault("If-Match")
+  valid_564810 = validateParameter(valid_564810, JString, required = false,
                                  default = nil)
-  if valid_594677 != nil:
-    section.add "If-Match", valid_594677
+  if valid_564810 != nil:
+    section.add "If-Match", valid_564810
   result.add "header", section
   section = newJObject()
   result.add "formData", section
@@ -7464,27 +7464,27 @@ proc validate_ApiPolicyCreateOrUpdate_594669(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594679: Call_ApiPolicyCreateOrUpdate_594668; path: JsonNode;
+proc call*(call_564812: Call_ApiPolicyCreateOrUpdate_564801; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Creates or updates policy configuration for the API.
   ## 
-  let valid = call_594679.validator(path, query, header, formData, body)
-  let scheme = call_594679.pickScheme
+  let valid = call_564812.validator(path, query, header, formData, body)
+  let scheme = call_564812.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594679.url(scheme.get, call_594679.host, call_594679.base,
-                         call_594679.route, valid.getOrDefault("path"),
+  let url = call_564812.url(scheme.get, call_564812.host, call_564812.base,
+                         call_564812.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594679, url, valid)
+  result = hook(call_564812, url, valid)
 
-proc call*(call_594680: Call_ApiPolicyCreateOrUpdate_594668;
-          resourceGroupName: string; apiVersion: string; apiId: string;
-          subscriptionId: string; parameters: JsonNode; serviceName: string;
+proc call*(call_564813: Call_ApiPolicyCreateOrUpdate_564801; serviceName: string;
+          apiVersion: string; apiId: string; subscriptionId: string;
+          resourceGroupName: string; parameters: JsonNode;
           policyId: string = "policy"): Recallable =
   ## apiPolicyCreateOrUpdate
   ## Creates or updates policy configuration for the API.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   serviceName: string (required)
+  ##              : The name of the API Management service.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
   ##   apiId: string (required)
@@ -7493,31 +7493,31 @@ proc call*(call_594680: Call_ApiPolicyCreateOrUpdate_594668;
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   policyId: string (required)
   ##           : The identifier of the Policy.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   parameters: JObject (required)
   ##             : The policy contents to apply.
-  ##   serviceName: string (required)
-  ##              : The name of the API Management service.
-  var path_594681 = newJObject()
-  var query_594682 = newJObject()
-  var body_594683 = newJObject()
-  add(path_594681, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594682, "api-version", newJString(apiVersion))
-  add(path_594681, "apiId", newJString(apiId))
-  add(path_594681, "subscriptionId", newJString(subscriptionId))
-  add(path_594681, "policyId", newJString(policyId))
+  var path_564814 = newJObject()
+  var query_564815 = newJObject()
+  var body_564816 = newJObject()
+  add(path_564814, "serviceName", newJString(serviceName))
+  add(query_564815, "api-version", newJString(apiVersion))
+  add(path_564814, "apiId", newJString(apiId))
+  add(path_564814, "subscriptionId", newJString(subscriptionId))
+  add(path_564814, "policyId", newJString(policyId))
+  add(path_564814, "resourceGroupName", newJString(resourceGroupName))
   if parameters != nil:
-    body_594683 = parameters
-  add(path_594681, "serviceName", newJString(serviceName))
-  result = call_594680.call(path_594681, query_594682, nil, nil, body_594683)
+    body_564816 = parameters
+  result = call_564813.call(path_564814, query_564815, nil, nil, body_564816)
 
-var apiPolicyCreateOrUpdate* = Call_ApiPolicyCreateOrUpdate_594668(
+var apiPolicyCreateOrUpdate* = Call_ApiPolicyCreateOrUpdate_564801(
     name: "apiPolicyCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ApiManagement/service/{serviceName}/apis/{apiId}/policies/{policyId}",
-    validator: validate_ApiPolicyCreateOrUpdate_594669, base: "",
-    url: url_ApiPolicyCreateOrUpdate_594670, schemes: {Scheme.Https})
+    validator: validate_ApiPolicyCreateOrUpdate_564802, base: "",
+    url: url_ApiPolicyCreateOrUpdate_564803, schemes: {Scheme.Https})
 type
-  Call_ApiPolicyGetEntityTag_594698 = ref object of OpenApiRestCall_593425
-proc url_ApiPolicyGetEntityTag_594700(protocol: Scheme; host: string; base: string;
+  Call_ApiPolicyGetEntityTag_564831 = ref object of OpenApiRestCall_563556
+proc url_ApiPolicyGetEntityTag_564833(protocol: Scheme; host: string; base: string;
                                      route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -7546,51 +7546,51 @@ proc url_ApiPolicyGetEntityTag_594700(protocol: Scheme; host: string; base: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ApiPolicyGetEntityTag_594699(path: JsonNode; query: JsonNode;
+proc validate_ApiPolicyGetEntityTag_564832(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the entity state (Etag) version of the API policy specified by its identifier.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
+  ##   serviceName: JString (required)
+  ##              : The name of the API Management service.
   ##   apiId: JString (required)
   ##        : API revision identifier. Must be unique in the current API Management service instance. Non-current revision has ;rev=n as a suffix where n is the revision number.
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   policyId: JString (required)
   ##           : The identifier of the Policy.
-  ##   serviceName: JString (required)
-  ##              : The name of the API Management service.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594701 = path.getOrDefault("resourceGroupName")
-  valid_594701 = validateParameter(valid_594701, JString, required = true,
+        "path argument is necessary due to required `serviceName` field"
+  var valid_564834 = path.getOrDefault("serviceName")
+  valid_564834 = validateParameter(valid_564834, JString, required = true,
                                  default = nil)
-  if valid_594701 != nil:
-    section.add "resourceGroupName", valid_594701
-  var valid_594702 = path.getOrDefault("apiId")
-  valid_594702 = validateParameter(valid_594702, JString, required = true,
+  if valid_564834 != nil:
+    section.add "serviceName", valid_564834
+  var valid_564835 = path.getOrDefault("apiId")
+  valid_564835 = validateParameter(valid_564835, JString, required = true,
                                  default = nil)
-  if valid_594702 != nil:
-    section.add "apiId", valid_594702
-  var valid_594703 = path.getOrDefault("subscriptionId")
-  valid_594703 = validateParameter(valid_594703, JString, required = true,
+  if valid_564835 != nil:
+    section.add "apiId", valid_564835
+  var valid_564836 = path.getOrDefault("subscriptionId")
+  valid_564836 = validateParameter(valid_564836, JString, required = true,
                                  default = nil)
-  if valid_594703 != nil:
-    section.add "subscriptionId", valid_594703
-  var valid_594704 = path.getOrDefault("policyId")
-  valid_594704 = validateParameter(valid_594704, JString, required = true,
+  if valid_564836 != nil:
+    section.add "subscriptionId", valid_564836
+  var valid_564837 = path.getOrDefault("policyId")
+  valid_564837 = validateParameter(valid_564837, JString, required = true,
                                  default = newJString("policy"))
-  if valid_594704 != nil:
-    section.add "policyId", valid_594704
-  var valid_594705 = path.getOrDefault("serviceName")
-  valid_594705 = validateParameter(valid_594705, JString, required = true,
+  if valid_564837 != nil:
+    section.add "policyId", valid_564837
+  var valid_564838 = path.getOrDefault("resourceGroupName")
+  valid_564838 = validateParameter(valid_564838, JString, required = true,
                                  default = nil)
-  if valid_594705 != nil:
-    section.add "serviceName", valid_594705
+  if valid_564838 != nil:
+    section.add "resourceGroupName", valid_564838
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -7598,11 +7598,11 @@ proc validate_ApiPolicyGetEntityTag_594699(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594706 = query.getOrDefault("api-version")
-  valid_594706 = validateParameter(valid_594706, JString, required = true,
+  var valid_564839 = query.getOrDefault("api-version")
+  valid_564839 = validateParameter(valid_564839, JString, required = true,
                                  default = nil)
-  if valid_594706 != nil:
-    section.add "api-version", valid_594706
+  if valid_564839 != nil:
+    section.add "api-version", valid_564839
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -7611,26 +7611,26 @@ proc validate_ApiPolicyGetEntityTag_594699(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594707: Call_ApiPolicyGetEntityTag_594698; path: JsonNode;
+proc call*(call_564840: Call_ApiPolicyGetEntityTag_564831; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the entity state (Etag) version of the API policy specified by its identifier.
   ## 
-  let valid = call_594707.validator(path, query, header, formData, body)
-  let scheme = call_594707.pickScheme
+  let valid = call_564840.validator(path, query, header, formData, body)
+  let scheme = call_564840.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594707.url(scheme.get, call_594707.host, call_594707.base,
-                         call_594707.route, valid.getOrDefault("path"),
+  let url = call_564840.url(scheme.get, call_564840.host, call_564840.base,
+                         call_564840.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594707, url, valid)
+  result = hook(call_564840, url, valid)
 
-proc call*(call_594708: Call_ApiPolicyGetEntityTag_594698;
-          resourceGroupName: string; apiVersion: string; apiId: string;
-          subscriptionId: string; serviceName: string; policyId: string = "policy"): Recallable =
+proc call*(call_564841: Call_ApiPolicyGetEntityTag_564831; serviceName: string;
+          apiVersion: string; apiId: string; subscriptionId: string;
+          resourceGroupName: string; policyId: string = "policy"): Recallable =
   ## apiPolicyGetEntityTag
   ## Gets the entity state (Etag) version of the API policy specified by its identifier.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   serviceName: string (required)
+  ##              : The name of the API Management service.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
   ##   apiId: string (required)
@@ -7639,26 +7639,26 @@ proc call*(call_594708: Call_ApiPolicyGetEntityTag_594698;
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   policyId: string (required)
   ##           : The identifier of the Policy.
-  ##   serviceName: string (required)
-  ##              : The name of the API Management service.
-  var path_594709 = newJObject()
-  var query_594710 = newJObject()
-  add(path_594709, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594710, "api-version", newJString(apiVersion))
-  add(path_594709, "apiId", newJString(apiId))
-  add(path_594709, "subscriptionId", newJString(subscriptionId))
-  add(path_594709, "policyId", newJString(policyId))
-  add(path_594709, "serviceName", newJString(serviceName))
-  result = call_594708.call(path_594709, query_594710, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564842 = newJObject()
+  var query_564843 = newJObject()
+  add(path_564842, "serviceName", newJString(serviceName))
+  add(query_564843, "api-version", newJString(apiVersion))
+  add(path_564842, "apiId", newJString(apiId))
+  add(path_564842, "subscriptionId", newJString(subscriptionId))
+  add(path_564842, "policyId", newJString(policyId))
+  add(path_564842, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564841.call(path_564842, query_564843, nil, nil, nil)
 
-var apiPolicyGetEntityTag* = Call_ApiPolicyGetEntityTag_594698(
+var apiPolicyGetEntityTag* = Call_ApiPolicyGetEntityTag_564831(
     name: "apiPolicyGetEntityTag", meth: HttpMethod.HttpHead,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ApiManagement/service/{serviceName}/apis/{apiId}/policies/{policyId}",
-    validator: validate_ApiPolicyGetEntityTag_594699, base: "",
-    url: url_ApiPolicyGetEntityTag_594700, schemes: {Scheme.Https})
+    validator: validate_ApiPolicyGetEntityTag_564832, base: "",
+    url: url_ApiPolicyGetEntityTag_564833, schemes: {Scheme.Https})
 type
-  Call_ApiPolicyGet_594655 = ref object of OpenApiRestCall_593425
-proc url_ApiPolicyGet_594657(protocol: Scheme; host: string; base: string;
+  Call_ApiPolicyGet_564788 = ref object of OpenApiRestCall_563556
+proc url_ApiPolicyGet_564790(protocol: Scheme; host: string; base: string;
                             route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -7687,51 +7687,51 @@ proc url_ApiPolicyGet_594657(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ApiPolicyGet_594656(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_ApiPolicyGet_564789(path: JsonNode; query: JsonNode; header: JsonNode;
                                  formData: JsonNode; body: JsonNode): JsonNode =
   ## Get the policy configuration at the API level.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
+  ##   serviceName: JString (required)
+  ##              : The name of the API Management service.
   ##   apiId: JString (required)
   ##        : API revision identifier. Must be unique in the current API Management service instance. Non-current revision has ;rev=n as a suffix where n is the revision number.
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   policyId: JString (required)
   ##           : The identifier of the Policy.
-  ##   serviceName: JString (required)
-  ##              : The name of the API Management service.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594658 = path.getOrDefault("resourceGroupName")
-  valid_594658 = validateParameter(valid_594658, JString, required = true,
+        "path argument is necessary due to required `serviceName` field"
+  var valid_564791 = path.getOrDefault("serviceName")
+  valid_564791 = validateParameter(valid_564791, JString, required = true,
                                  default = nil)
-  if valid_594658 != nil:
-    section.add "resourceGroupName", valid_594658
-  var valid_594659 = path.getOrDefault("apiId")
-  valid_594659 = validateParameter(valid_594659, JString, required = true,
+  if valid_564791 != nil:
+    section.add "serviceName", valid_564791
+  var valid_564792 = path.getOrDefault("apiId")
+  valid_564792 = validateParameter(valid_564792, JString, required = true,
                                  default = nil)
-  if valid_594659 != nil:
-    section.add "apiId", valid_594659
-  var valid_594660 = path.getOrDefault("subscriptionId")
-  valid_594660 = validateParameter(valid_594660, JString, required = true,
+  if valid_564792 != nil:
+    section.add "apiId", valid_564792
+  var valid_564793 = path.getOrDefault("subscriptionId")
+  valid_564793 = validateParameter(valid_564793, JString, required = true,
                                  default = nil)
-  if valid_594660 != nil:
-    section.add "subscriptionId", valid_594660
-  var valid_594661 = path.getOrDefault("policyId")
-  valid_594661 = validateParameter(valid_594661, JString, required = true,
+  if valid_564793 != nil:
+    section.add "subscriptionId", valid_564793
+  var valid_564794 = path.getOrDefault("policyId")
+  valid_564794 = validateParameter(valid_564794, JString, required = true,
                                  default = newJString("policy"))
-  if valid_594661 != nil:
-    section.add "policyId", valid_594661
-  var valid_594662 = path.getOrDefault("serviceName")
-  valid_594662 = validateParameter(valid_594662, JString, required = true,
+  if valid_564794 != nil:
+    section.add "policyId", valid_564794
+  var valid_564795 = path.getOrDefault("resourceGroupName")
+  valid_564795 = validateParameter(valid_564795, JString, required = true,
                                  default = nil)
-  if valid_594662 != nil:
-    section.add "serviceName", valid_594662
+  if valid_564795 != nil:
+    section.add "resourceGroupName", valid_564795
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -7739,11 +7739,11 @@ proc validate_ApiPolicyGet_594656(path: JsonNode; query: JsonNode; header: JsonN
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594663 = query.getOrDefault("api-version")
-  valid_594663 = validateParameter(valid_594663, JString, required = true,
+  var valid_564796 = query.getOrDefault("api-version")
+  valid_564796 = validateParameter(valid_564796, JString, required = true,
                                  default = nil)
-  if valid_594663 != nil:
-    section.add "api-version", valid_594663
+  if valid_564796 != nil:
+    section.add "api-version", valid_564796
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -7752,26 +7752,26 @@ proc validate_ApiPolicyGet_594656(path: JsonNode; query: JsonNode; header: JsonN
   if body != nil:
     result.add "body", body
 
-proc call*(call_594664: Call_ApiPolicyGet_594655; path: JsonNode; query: JsonNode;
+proc call*(call_564797: Call_ApiPolicyGet_564788; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get the policy configuration at the API level.
   ## 
-  let valid = call_594664.validator(path, query, header, formData, body)
-  let scheme = call_594664.pickScheme
+  let valid = call_564797.validator(path, query, header, formData, body)
+  let scheme = call_564797.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594664.url(scheme.get, call_594664.host, call_594664.base,
-                         call_594664.route, valid.getOrDefault("path"),
+  let url = call_564797.url(scheme.get, call_564797.host, call_564797.base,
+                         call_564797.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594664, url, valid)
+  result = hook(call_564797, url, valid)
 
-proc call*(call_594665: Call_ApiPolicyGet_594655; resourceGroupName: string;
+proc call*(call_564798: Call_ApiPolicyGet_564788; serviceName: string;
           apiVersion: string; apiId: string; subscriptionId: string;
-          serviceName: string; policyId: string = "policy"): Recallable =
+          resourceGroupName: string; policyId: string = "policy"): Recallable =
   ## apiPolicyGet
   ## Get the policy configuration at the API level.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   serviceName: string (required)
+  ##              : The name of the API Management service.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
   ##   apiId: string (required)
@@ -7780,25 +7780,25 @@ proc call*(call_594665: Call_ApiPolicyGet_594655; resourceGroupName: string;
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   policyId: string (required)
   ##           : The identifier of the Policy.
-  ##   serviceName: string (required)
-  ##              : The name of the API Management service.
-  var path_594666 = newJObject()
-  var query_594667 = newJObject()
-  add(path_594666, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594667, "api-version", newJString(apiVersion))
-  add(path_594666, "apiId", newJString(apiId))
-  add(path_594666, "subscriptionId", newJString(subscriptionId))
-  add(path_594666, "policyId", newJString(policyId))
-  add(path_594666, "serviceName", newJString(serviceName))
-  result = call_594665.call(path_594666, query_594667, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564799 = newJObject()
+  var query_564800 = newJObject()
+  add(path_564799, "serviceName", newJString(serviceName))
+  add(query_564800, "api-version", newJString(apiVersion))
+  add(path_564799, "apiId", newJString(apiId))
+  add(path_564799, "subscriptionId", newJString(subscriptionId))
+  add(path_564799, "policyId", newJString(policyId))
+  add(path_564799, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564798.call(path_564799, query_564800, nil, nil, nil)
 
-var apiPolicyGet* = Call_ApiPolicyGet_594655(name: "apiPolicyGet",
+var apiPolicyGet* = Call_ApiPolicyGet_564788(name: "apiPolicyGet",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ApiManagement/service/{serviceName}/apis/{apiId}/policies/{policyId}",
-    validator: validate_ApiPolicyGet_594656, base: "", url: url_ApiPolicyGet_594657,
+    validator: validate_ApiPolicyGet_564789, base: "", url: url_ApiPolicyGet_564790,
     schemes: {Scheme.Https})
 type
-  Call_ApiPolicyDelete_594684 = ref object of OpenApiRestCall_593425
-proc url_ApiPolicyDelete_594686(protocol: Scheme; host: string; base: string;
+  Call_ApiPolicyDelete_564817 = ref object of OpenApiRestCall_563556
+proc url_ApiPolicyDelete_564819(protocol: Scheme; host: string; base: string;
                                route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -7827,7 +7827,7 @@ proc url_ApiPolicyDelete_594686(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ApiPolicyDelete_594685(path: JsonNode; query: JsonNode;
+proc validate_ApiPolicyDelete_564818(path: JsonNode; query: JsonNode;
                                     header: JsonNode; formData: JsonNode;
                                     body: JsonNode): JsonNode =
   ## Deletes the policy configuration at the Api.
@@ -7835,44 +7835,44 @@ proc validate_ApiPolicyDelete_594685(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
+  ##   serviceName: JString (required)
+  ##              : The name of the API Management service.
   ##   apiId: JString (required)
   ##        : API revision identifier. Must be unique in the current API Management service instance. Non-current revision has ;rev=n as a suffix where n is the revision number.
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   policyId: JString (required)
   ##           : The identifier of the Policy.
-  ##   serviceName: JString (required)
-  ##              : The name of the API Management service.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594687 = path.getOrDefault("resourceGroupName")
-  valid_594687 = validateParameter(valid_594687, JString, required = true,
+        "path argument is necessary due to required `serviceName` field"
+  var valid_564820 = path.getOrDefault("serviceName")
+  valid_564820 = validateParameter(valid_564820, JString, required = true,
                                  default = nil)
-  if valid_594687 != nil:
-    section.add "resourceGroupName", valid_594687
-  var valid_594688 = path.getOrDefault("apiId")
-  valid_594688 = validateParameter(valid_594688, JString, required = true,
+  if valid_564820 != nil:
+    section.add "serviceName", valid_564820
+  var valid_564821 = path.getOrDefault("apiId")
+  valid_564821 = validateParameter(valid_564821, JString, required = true,
                                  default = nil)
-  if valid_594688 != nil:
-    section.add "apiId", valid_594688
-  var valid_594689 = path.getOrDefault("subscriptionId")
-  valid_594689 = validateParameter(valid_594689, JString, required = true,
+  if valid_564821 != nil:
+    section.add "apiId", valid_564821
+  var valid_564822 = path.getOrDefault("subscriptionId")
+  valid_564822 = validateParameter(valid_564822, JString, required = true,
                                  default = nil)
-  if valid_594689 != nil:
-    section.add "subscriptionId", valid_594689
-  var valid_594690 = path.getOrDefault("policyId")
-  valid_594690 = validateParameter(valid_594690, JString, required = true,
+  if valid_564822 != nil:
+    section.add "subscriptionId", valid_564822
+  var valid_564823 = path.getOrDefault("policyId")
+  valid_564823 = validateParameter(valid_564823, JString, required = true,
                                  default = newJString("policy"))
-  if valid_594690 != nil:
-    section.add "policyId", valid_594690
-  var valid_594691 = path.getOrDefault("serviceName")
-  valid_594691 = validateParameter(valid_594691, JString, required = true,
+  if valid_564823 != nil:
+    section.add "policyId", valid_564823
+  var valid_564824 = path.getOrDefault("resourceGroupName")
+  valid_564824 = validateParameter(valid_564824, JString, required = true,
                                  default = nil)
-  if valid_594691 != nil:
-    section.add "serviceName", valid_594691
+  if valid_564824 != nil:
+    section.add "resourceGroupName", valid_564824
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -7880,11 +7880,11 @@ proc validate_ApiPolicyDelete_594685(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594692 = query.getOrDefault("api-version")
-  valid_594692 = validateParameter(valid_594692, JString, required = true,
+  var valid_564825 = query.getOrDefault("api-version")
+  valid_564825 = validateParameter(valid_564825, JString, required = true,
                                  default = nil)
-  if valid_594692 != nil:
-    section.add "api-version", valid_594692
+  if valid_564825 != nil:
+    section.add "api-version", valid_564825
   result.add "query", section
   ## parameters in `header` object:
   ##   If-Match: JString (required)
@@ -7892,37 +7892,37 @@ proc validate_ApiPolicyDelete_594685(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert header != nil,
         "header argument is necessary due to required `If-Match` field"
-  var valid_594693 = header.getOrDefault("If-Match")
-  valid_594693 = validateParameter(valid_594693, JString, required = true,
+  var valid_564826 = header.getOrDefault("If-Match")
+  valid_564826 = validateParameter(valid_564826, JString, required = true,
                                  default = nil)
-  if valid_594693 != nil:
-    section.add "If-Match", valid_594693
+  if valid_564826 != nil:
+    section.add "If-Match", valid_564826
   result.add "header", section
   section = newJObject()
   result.add "formData", section
   if body != nil:
     result.add "body", body
 
-proc call*(call_594694: Call_ApiPolicyDelete_594684; path: JsonNode; query: JsonNode;
+proc call*(call_564827: Call_ApiPolicyDelete_564817; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes the policy configuration at the Api.
   ## 
-  let valid = call_594694.validator(path, query, header, formData, body)
-  let scheme = call_594694.pickScheme
+  let valid = call_564827.validator(path, query, header, formData, body)
+  let scheme = call_564827.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594694.url(scheme.get, call_594694.host, call_594694.base,
-                         call_594694.route, valid.getOrDefault("path"),
+  let url = call_564827.url(scheme.get, call_564827.host, call_564827.base,
+                         call_564827.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594694, url, valid)
+  result = hook(call_564827, url, valid)
 
-proc call*(call_594695: Call_ApiPolicyDelete_594684; resourceGroupName: string;
+proc call*(call_564828: Call_ApiPolicyDelete_564817; serviceName: string;
           apiVersion: string; apiId: string; subscriptionId: string;
-          serviceName: string; policyId: string = "policy"): Recallable =
+          resourceGroupName: string; policyId: string = "policy"): Recallable =
   ## apiPolicyDelete
   ## Deletes the policy configuration at the Api.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   serviceName: string (required)
+  ##              : The name of the API Management service.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
   ##   apiId: string (required)
@@ -7931,25 +7931,25 @@ proc call*(call_594695: Call_ApiPolicyDelete_594684; resourceGroupName: string;
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   policyId: string (required)
   ##           : The identifier of the Policy.
-  ##   serviceName: string (required)
-  ##              : The name of the API Management service.
-  var path_594696 = newJObject()
-  var query_594697 = newJObject()
-  add(path_594696, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594697, "api-version", newJString(apiVersion))
-  add(path_594696, "apiId", newJString(apiId))
-  add(path_594696, "subscriptionId", newJString(subscriptionId))
-  add(path_594696, "policyId", newJString(policyId))
-  add(path_594696, "serviceName", newJString(serviceName))
-  result = call_594695.call(path_594696, query_594697, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564829 = newJObject()
+  var query_564830 = newJObject()
+  add(path_564829, "serviceName", newJString(serviceName))
+  add(query_564830, "api-version", newJString(apiVersion))
+  add(path_564829, "apiId", newJString(apiId))
+  add(path_564829, "subscriptionId", newJString(subscriptionId))
+  add(path_564829, "policyId", newJString(policyId))
+  add(path_564829, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564828.call(path_564829, query_564830, nil, nil, nil)
 
-var apiPolicyDelete* = Call_ApiPolicyDelete_594684(name: "apiPolicyDelete",
+var apiPolicyDelete* = Call_ApiPolicyDelete_564817(name: "apiPolicyDelete",
     meth: HttpMethod.HttpDelete, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ApiManagement/service/{serviceName}/apis/{apiId}/policies/{policyId}",
-    validator: validate_ApiPolicyDelete_594685, base: "", url: url_ApiPolicyDelete_594686,
+    validator: validate_ApiPolicyDelete_564818, base: "", url: url_ApiPolicyDelete_564819,
     schemes: {Scheme.Https})
 type
-  Call_ApiProductListByApis_594711 = ref object of OpenApiRestCall_593425
-proc url_ApiProductListByApis_594713(protocol: Scheme; host: string; base: string;
+  Call_ApiProductListByApis_564844 = ref object of OpenApiRestCall_563556
+proc url_ApiProductListByApis_564846(protocol: Scheme; host: string; base: string;
                                     route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -7976,50 +7976,50 @@ proc url_ApiProductListByApis_594713(protocol: Scheme; host: string; base: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ApiProductListByApis_594712(path: JsonNode; query: JsonNode;
+proc validate_ApiProductListByApis_564845(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists all Products, which the API is part of.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
+  ##   serviceName: JString (required)
+  ##              : The name of the API Management service.
   ##   apiId: JString (required)
   ##        : API identifier. Must be unique in the current API Management service instance.
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   serviceName: JString (required)
-  ##              : The name of the API Management service.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594714 = path.getOrDefault("resourceGroupName")
-  valid_594714 = validateParameter(valid_594714, JString, required = true,
+        "path argument is necessary due to required `serviceName` field"
+  var valid_564847 = path.getOrDefault("serviceName")
+  valid_564847 = validateParameter(valid_564847, JString, required = true,
                                  default = nil)
-  if valid_594714 != nil:
-    section.add "resourceGroupName", valid_594714
-  var valid_594715 = path.getOrDefault("apiId")
-  valid_594715 = validateParameter(valid_594715, JString, required = true,
+  if valid_564847 != nil:
+    section.add "serviceName", valid_564847
+  var valid_564848 = path.getOrDefault("apiId")
+  valid_564848 = validateParameter(valid_564848, JString, required = true,
                                  default = nil)
-  if valid_594715 != nil:
-    section.add "apiId", valid_594715
-  var valid_594716 = path.getOrDefault("subscriptionId")
-  valid_594716 = validateParameter(valid_594716, JString, required = true,
+  if valid_564848 != nil:
+    section.add "apiId", valid_564848
+  var valid_564849 = path.getOrDefault("subscriptionId")
+  valid_564849 = validateParameter(valid_564849, JString, required = true,
                                  default = nil)
-  if valid_594716 != nil:
-    section.add "subscriptionId", valid_594716
-  var valid_594717 = path.getOrDefault("serviceName")
-  valid_594717 = validateParameter(valid_594717, JString, required = true,
+  if valid_564849 != nil:
+    section.add "subscriptionId", valid_564849
+  var valid_564850 = path.getOrDefault("resourceGroupName")
+  valid_564850 = validateParameter(valid_564850, JString, required = true,
                                  default = nil)
-  if valid_594717 != nil:
-    section.add "serviceName", valid_594717
+  if valid_564850 != nil:
+    section.add "resourceGroupName", valid_564850
   result.add "path", section
   ## parameters in `query` object:
-  ##   api-version: JString (required)
-  ##              : Version of the API to be used with the client request.
   ##   $top: JInt
   ##       : Number of records to return.
+  ##   api-version: JString (required)
+  ##              : Version of the API to be used with the client request.
   ##   $skip: JInt
   ##        : Number of records to skip.
   ##   $filter: JString
@@ -8029,26 +8029,26 @@ proc validate_ApiProductListByApis_594712(path: JsonNode; query: JsonNode;
   ## |displayName | ge, le, eq, ne, gt, lt | substringof, contains, startswith, endswith|
   ## 
   section = newJObject()
+  var valid_564851 = query.getOrDefault("$top")
+  valid_564851 = validateParameter(valid_564851, JInt, required = false, default = nil)
+  if valid_564851 != nil:
+    section.add "$top", valid_564851
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594718 = query.getOrDefault("api-version")
-  valid_594718 = validateParameter(valid_594718, JString, required = true,
+  var valid_564852 = query.getOrDefault("api-version")
+  valid_564852 = validateParameter(valid_564852, JString, required = true,
                                  default = nil)
-  if valid_594718 != nil:
-    section.add "api-version", valid_594718
-  var valid_594719 = query.getOrDefault("$top")
-  valid_594719 = validateParameter(valid_594719, JInt, required = false, default = nil)
-  if valid_594719 != nil:
-    section.add "$top", valid_594719
-  var valid_594720 = query.getOrDefault("$skip")
-  valid_594720 = validateParameter(valid_594720, JInt, required = false, default = nil)
-  if valid_594720 != nil:
-    section.add "$skip", valid_594720
-  var valid_594721 = query.getOrDefault("$filter")
-  valid_594721 = validateParameter(valid_594721, JString, required = false,
+  if valid_564852 != nil:
+    section.add "api-version", valid_564852
+  var valid_564853 = query.getOrDefault("$skip")
+  valid_564853 = validateParameter(valid_564853, JInt, required = false, default = nil)
+  if valid_564853 != nil:
+    section.add "$skip", valid_564853
+  var valid_564854 = query.getOrDefault("$filter")
+  valid_564854 = validateParameter(valid_564854, JString, required = false,
                                  default = nil)
-  if valid_594721 != nil:
-    section.add "$filter", valid_594721
+  if valid_564854 != nil:
+    section.add "$filter", valid_564854
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -8057,65 +8057,64 @@ proc validate_ApiProductListByApis_594712(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594722: Call_ApiProductListByApis_594711; path: JsonNode;
+proc call*(call_564855: Call_ApiProductListByApis_564844; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists all Products, which the API is part of.
   ## 
-  let valid = call_594722.validator(path, query, header, formData, body)
-  let scheme = call_594722.pickScheme
+  let valid = call_564855.validator(path, query, header, formData, body)
+  let scheme = call_564855.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594722.url(scheme.get, call_594722.host, call_594722.base,
-                         call_594722.route, valid.getOrDefault("path"),
+  let url = call_564855.url(scheme.get, call_564855.host, call_564855.base,
+                         call_564855.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594722, url, valid)
+  result = hook(call_564855, url, valid)
 
-proc call*(call_594723: Call_ApiProductListByApis_594711;
-          resourceGroupName: string; apiVersion: string; apiId: string;
-          subscriptionId: string; serviceName: string; Top: int = 0; Skip: int = 0;
-          Filter: string = ""): Recallable =
+proc call*(call_564856: Call_ApiProductListByApis_564844; serviceName: string;
+          apiVersion: string; apiId: string; subscriptionId: string;
+          resourceGroupName: string; Top: int = 0; Skip: int = 0; Filter: string = ""): Recallable =
   ## apiProductListByApis
   ## Lists all Products, which the API is part of.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   serviceName: string (required)
+  ##              : The name of the API Management service.
+  ##   Top: int
+  ##      : Number of records to return.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
   ##   apiId: string (required)
   ##        : API identifier. Must be unique in the current API Management service instance.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   Top: int
-  ##      : Number of records to return.
   ##   Skip: int
   ##       : Number of records to skip.
-  ##   serviceName: string (required)
-  ##              : The name of the API Management service.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   Filter: string
   ##         : | Field       | Supported operators    | Supported functions               |
   ## |-------------|------------------------|-----------------------------------|
   ## 
   ## |displayName | ge, le, eq, ne, gt, lt | substringof, contains, startswith, endswith|
   ## 
-  var path_594724 = newJObject()
-  var query_594725 = newJObject()
-  add(path_594724, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594725, "api-version", newJString(apiVersion))
-  add(path_594724, "apiId", newJString(apiId))
-  add(path_594724, "subscriptionId", newJString(subscriptionId))
-  add(query_594725, "$top", newJInt(Top))
-  add(query_594725, "$skip", newJInt(Skip))
-  add(path_594724, "serviceName", newJString(serviceName))
-  add(query_594725, "$filter", newJString(Filter))
-  result = call_594723.call(path_594724, query_594725, nil, nil, nil)
+  var path_564857 = newJObject()
+  var query_564858 = newJObject()
+  add(path_564857, "serviceName", newJString(serviceName))
+  add(query_564858, "$top", newJInt(Top))
+  add(query_564858, "api-version", newJString(apiVersion))
+  add(path_564857, "apiId", newJString(apiId))
+  add(path_564857, "subscriptionId", newJString(subscriptionId))
+  add(query_564858, "$skip", newJInt(Skip))
+  add(path_564857, "resourceGroupName", newJString(resourceGroupName))
+  add(query_564858, "$filter", newJString(Filter))
+  result = call_564856.call(path_564857, query_564858, nil, nil, nil)
 
-var apiProductListByApis* = Call_ApiProductListByApis_594711(
+var apiProductListByApis* = Call_ApiProductListByApis_564844(
     name: "apiProductListByApis", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ApiManagement/service/{serviceName}/apis/{apiId}/products",
-    validator: validate_ApiProductListByApis_594712, base: "",
-    url: url_ApiProductListByApis_594713, schemes: {Scheme.Https})
+    validator: validate_ApiProductListByApis_564845, base: "",
+    url: url_ApiProductListByApis_564846, schemes: {Scheme.Https})
 type
-  Call_ApiReleaseList_594726 = ref object of OpenApiRestCall_593425
-proc url_ApiReleaseList_594728(protocol: Scheme; host: string; base: string;
+  Call_ApiReleaseList_564859 = ref object of OpenApiRestCall_563556
+proc url_ApiReleaseList_564861(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -8142,7 +8141,7 @@ proc url_ApiReleaseList_594728(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ApiReleaseList_594727(path: JsonNode; query: JsonNode;
+proc validate_ApiReleaseList_564860(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## Lists all releases of an API. An API release is created when making an API Revision current. Releases are also used to rollback to previous revisions. Results will be paged and can be constrained by the $top and $skip parameters.
@@ -8150,43 +8149,43 @@ proc validate_ApiReleaseList_594727(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
+  ##   serviceName: JString (required)
+  ##              : The name of the API Management service.
   ##   apiId: JString (required)
   ##        : API identifier. Must be unique in the current API Management service instance.
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   serviceName: JString (required)
-  ##              : The name of the API Management service.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594729 = path.getOrDefault("resourceGroupName")
-  valid_594729 = validateParameter(valid_594729, JString, required = true,
+        "path argument is necessary due to required `serviceName` field"
+  var valid_564862 = path.getOrDefault("serviceName")
+  valid_564862 = validateParameter(valid_564862, JString, required = true,
                                  default = nil)
-  if valid_594729 != nil:
-    section.add "resourceGroupName", valid_594729
-  var valid_594730 = path.getOrDefault("apiId")
-  valid_594730 = validateParameter(valid_594730, JString, required = true,
+  if valid_564862 != nil:
+    section.add "serviceName", valid_564862
+  var valid_564863 = path.getOrDefault("apiId")
+  valid_564863 = validateParameter(valid_564863, JString, required = true,
                                  default = nil)
-  if valid_594730 != nil:
-    section.add "apiId", valid_594730
-  var valid_594731 = path.getOrDefault("subscriptionId")
-  valid_594731 = validateParameter(valid_594731, JString, required = true,
+  if valid_564863 != nil:
+    section.add "apiId", valid_564863
+  var valid_564864 = path.getOrDefault("subscriptionId")
+  valid_564864 = validateParameter(valid_564864, JString, required = true,
                                  default = nil)
-  if valid_594731 != nil:
-    section.add "subscriptionId", valid_594731
-  var valid_594732 = path.getOrDefault("serviceName")
-  valid_594732 = validateParameter(valid_594732, JString, required = true,
+  if valid_564864 != nil:
+    section.add "subscriptionId", valid_564864
+  var valid_564865 = path.getOrDefault("resourceGroupName")
+  valid_564865 = validateParameter(valid_564865, JString, required = true,
                                  default = nil)
-  if valid_594732 != nil:
-    section.add "serviceName", valid_594732
+  if valid_564865 != nil:
+    section.add "resourceGroupName", valid_564865
   result.add "path", section
   ## parameters in `query` object:
-  ##   api-version: JString (required)
-  ##              : Version of the API to be used with the client request.
   ##   $top: JInt
   ##       : Number of records to return.
+  ##   api-version: JString (required)
+  ##              : Version of the API to be used with the client request.
   ##   $skip: JInt
   ##        : Number of records to skip.
   ##   $filter: JString
@@ -8196,26 +8195,26 @@ proc validate_ApiReleaseList_594727(path: JsonNode; query: JsonNode;
   ## |notes | ge, le, eq, ne, gt, lt | substringof, contains, startswith, endswith|
   ## 
   section = newJObject()
+  var valid_564866 = query.getOrDefault("$top")
+  valid_564866 = validateParameter(valid_564866, JInt, required = false, default = nil)
+  if valid_564866 != nil:
+    section.add "$top", valid_564866
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594733 = query.getOrDefault("api-version")
-  valid_594733 = validateParameter(valid_594733, JString, required = true,
+  var valid_564867 = query.getOrDefault("api-version")
+  valid_564867 = validateParameter(valid_564867, JString, required = true,
                                  default = nil)
-  if valid_594733 != nil:
-    section.add "api-version", valid_594733
-  var valid_594734 = query.getOrDefault("$top")
-  valid_594734 = validateParameter(valid_594734, JInt, required = false, default = nil)
-  if valid_594734 != nil:
-    section.add "$top", valid_594734
-  var valid_594735 = query.getOrDefault("$skip")
-  valid_594735 = validateParameter(valid_594735, JInt, required = false, default = nil)
-  if valid_594735 != nil:
-    section.add "$skip", valid_594735
-  var valid_594736 = query.getOrDefault("$filter")
-  valid_594736 = validateParameter(valid_594736, JString, required = false,
+  if valid_564867 != nil:
+    section.add "api-version", valid_564867
+  var valid_564868 = query.getOrDefault("$skip")
+  valid_564868 = validateParameter(valid_564868, JInt, required = false, default = nil)
+  if valid_564868 != nil:
+    section.add "$skip", valid_564868
+  var valid_564869 = query.getOrDefault("$filter")
+  valid_564869 = validateParameter(valid_564869, JString, required = false,
                                  default = nil)
-  if valid_594736 != nil:
-    section.add "$filter", valid_594736
+  if valid_564869 != nil:
+    section.add "$filter", valid_564869
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -8224,63 +8223,63 @@ proc validate_ApiReleaseList_594727(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594737: Call_ApiReleaseList_594726; path: JsonNode; query: JsonNode;
+proc call*(call_564870: Call_ApiReleaseList_564859; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists all releases of an API. An API release is created when making an API Revision current. Releases are also used to rollback to previous revisions. Results will be paged and can be constrained by the $top and $skip parameters.
   ## 
-  let valid = call_594737.validator(path, query, header, formData, body)
-  let scheme = call_594737.pickScheme
+  let valid = call_564870.validator(path, query, header, formData, body)
+  let scheme = call_564870.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594737.url(scheme.get, call_594737.host, call_594737.base,
-                         call_594737.route, valid.getOrDefault("path"),
+  let url = call_564870.url(scheme.get, call_564870.host, call_564870.base,
+                         call_564870.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594737, url, valid)
+  result = hook(call_564870, url, valid)
 
-proc call*(call_594738: Call_ApiReleaseList_594726; resourceGroupName: string;
+proc call*(call_564871: Call_ApiReleaseList_564859; serviceName: string;
           apiVersion: string; apiId: string; subscriptionId: string;
-          serviceName: string; Top: int = 0; Skip: int = 0; Filter: string = ""): Recallable =
+          resourceGroupName: string; Top: int = 0; Skip: int = 0; Filter: string = ""): Recallable =
   ## apiReleaseList
   ## Lists all releases of an API. An API release is created when making an API Revision current. Releases are also used to rollback to previous revisions. Results will be paged and can be constrained by the $top and $skip parameters.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   serviceName: string (required)
+  ##              : The name of the API Management service.
+  ##   Top: int
+  ##      : Number of records to return.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
   ##   apiId: string (required)
   ##        : API identifier. Must be unique in the current API Management service instance.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   Top: int
-  ##      : Number of records to return.
   ##   Skip: int
   ##       : Number of records to skip.
-  ##   serviceName: string (required)
-  ##              : The name of the API Management service.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   Filter: string
   ##         : | Field       | Supported operators    | Supported functions               |
   ## |-------------|------------------------|-----------------------------------|
   ## 
   ## |notes | ge, le, eq, ne, gt, lt | substringof, contains, startswith, endswith|
   ## 
-  var path_594739 = newJObject()
-  var query_594740 = newJObject()
-  add(path_594739, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594740, "api-version", newJString(apiVersion))
-  add(path_594739, "apiId", newJString(apiId))
-  add(path_594739, "subscriptionId", newJString(subscriptionId))
-  add(query_594740, "$top", newJInt(Top))
-  add(query_594740, "$skip", newJInt(Skip))
-  add(path_594739, "serviceName", newJString(serviceName))
-  add(query_594740, "$filter", newJString(Filter))
-  result = call_594738.call(path_594739, query_594740, nil, nil, nil)
+  var path_564872 = newJObject()
+  var query_564873 = newJObject()
+  add(path_564872, "serviceName", newJString(serviceName))
+  add(query_564873, "$top", newJInt(Top))
+  add(query_564873, "api-version", newJString(apiVersion))
+  add(path_564872, "apiId", newJString(apiId))
+  add(path_564872, "subscriptionId", newJString(subscriptionId))
+  add(query_564873, "$skip", newJInt(Skip))
+  add(path_564872, "resourceGroupName", newJString(resourceGroupName))
+  add(query_564873, "$filter", newJString(Filter))
+  result = call_564871.call(path_564872, query_564873, nil, nil, nil)
 
-var apiReleaseList* = Call_ApiReleaseList_594726(name: "apiReleaseList",
+var apiReleaseList* = Call_ApiReleaseList_564859(name: "apiReleaseList",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ApiManagement/service/{serviceName}/apis/{apiId}/releases",
-    validator: validate_ApiReleaseList_594727, base: "", url: url_ApiReleaseList_594728,
+    validator: validate_ApiReleaseList_564860, base: "", url: url_ApiReleaseList_564861,
     schemes: {Scheme.Https})
 type
-  Call_ApiReleaseCreate_594754 = ref object of OpenApiRestCall_593425
-proc url_ApiReleaseCreate_594756(protocol: Scheme; host: string; base: string;
+  Call_ApiReleaseCreate_564887 = ref object of OpenApiRestCall_563556
+proc url_ApiReleaseCreate_564889(protocol: Scheme; host: string; base: string;
                                 route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -8309,7 +8308,7 @@ proc url_ApiReleaseCreate_594756(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ApiReleaseCreate_594755(path: JsonNode; query: JsonNode;
+proc validate_ApiReleaseCreate_564888(path: JsonNode; query: JsonNode;
                                      header: JsonNode; formData: JsonNode;
                                      body: JsonNode): JsonNode =
   ## Creates a new Release for the API.
@@ -8317,44 +8316,43 @@ proc validate_ApiReleaseCreate_594755(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
-  ##   apiId: JString (required)
-  ##        : API identifier. Must be unique in the current API Management service instance.
-  ##   subscriptionId: JString (required)
-  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   releaseId: JString (required)
   ##            : Release identifier within an API. Must be unique in the current API Management service instance.
   ##   serviceName: JString (required)
   ##              : The name of the API Management service.
+  ##   apiId: JString (required)
+  ##        : API identifier. Must be unique in the current API Management service instance.
+  ##   subscriptionId: JString (required)
+  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594757 = path.getOrDefault("resourceGroupName")
-  valid_594757 = validateParameter(valid_594757, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `releaseId` field"
+  var valid_564890 = path.getOrDefault("releaseId")
+  valid_564890 = validateParameter(valid_564890, JString, required = true,
                                  default = nil)
-  if valid_594757 != nil:
-    section.add "resourceGroupName", valid_594757
-  var valid_594758 = path.getOrDefault("apiId")
-  valid_594758 = validateParameter(valid_594758, JString, required = true,
+  if valid_564890 != nil:
+    section.add "releaseId", valid_564890
+  var valid_564891 = path.getOrDefault("serviceName")
+  valid_564891 = validateParameter(valid_564891, JString, required = true,
                                  default = nil)
-  if valid_594758 != nil:
-    section.add "apiId", valid_594758
-  var valid_594759 = path.getOrDefault("subscriptionId")
-  valid_594759 = validateParameter(valid_594759, JString, required = true,
+  if valid_564891 != nil:
+    section.add "serviceName", valid_564891
+  var valid_564892 = path.getOrDefault("apiId")
+  valid_564892 = validateParameter(valid_564892, JString, required = true,
                                  default = nil)
-  if valid_594759 != nil:
-    section.add "subscriptionId", valid_594759
-  var valid_594760 = path.getOrDefault("releaseId")
-  valid_594760 = validateParameter(valid_594760, JString, required = true,
+  if valid_564892 != nil:
+    section.add "apiId", valid_564892
+  var valid_564893 = path.getOrDefault("subscriptionId")
+  valid_564893 = validateParameter(valid_564893, JString, required = true,
                                  default = nil)
-  if valid_594760 != nil:
-    section.add "releaseId", valid_594760
-  var valid_594761 = path.getOrDefault("serviceName")
-  valid_594761 = validateParameter(valid_594761, JString, required = true,
+  if valid_564893 != nil:
+    section.add "subscriptionId", valid_564893
+  var valid_564894 = path.getOrDefault("resourceGroupName")
+  valid_564894 = validateParameter(valid_564894, JString, required = true,
                                  default = nil)
-  if valid_594761 != nil:
-    section.add "serviceName", valid_594761
+  if valid_564894 != nil:
+    section.add "resourceGroupName", valid_564894
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -8362,21 +8360,21 @@ proc validate_ApiReleaseCreate_594755(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594762 = query.getOrDefault("api-version")
-  valid_594762 = validateParameter(valid_594762, JString, required = true,
+  var valid_564895 = query.getOrDefault("api-version")
+  valid_564895 = validateParameter(valid_564895, JString, required = true,
                                  default = nil)
-  if valid_594762 != nil:
-    section.add "api-version", valid_594762
+  if valid_564895 != nil:
+    section.add "api-version", valid_564895
   result.add "query", section
   ## parameters in `header` object:
   ##   If-Match: JString
   ##           : ETag of the Entity. Not required when creating an entity, but required when updating an entity.
   section = newJObject()
-  var valid_594763 = header.getOrDefault("If-Match")
-  valid_594763 = validateParameter(valid_594763, JString, required = false,
+  var valid_564896 = header.getOrDefault("If-Match")
+  valid_564896 = validateParameter(valid_564896, JString, required = false,
                                  default = nil)
-  if valid_594763 != nil:
-    section.add "If-Match", valid_594763
+  if valid_564896 != nil:
+    section.add "If-Match", valid_564896
   result.add "header", section
   section = newJObject()
   result.add "formData", section
@@ -8388,58 +8386,58 @@ proc validate_ApiReleaseCreate_594755(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594765: Call_ApiReleaseCreate_594754; path: JsonNode;
+proc call*(call_564898: Call_ApiReleaseCreate_564887; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Creates a new Release for the API.
   ## 
-  let valid = call_594765.validator(path, query, header, formData, body)
-  let scheme = call_594765.pickScheme
+  let valid = call_564898.validator(path, query, header, formData, body)
+  let scheme = call_564898.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594765.url(scheme.get, call_594765.host, call_594765.base,
-                         call_594765.route, valid.getOrDefault("path"),
+  let url = call_564898.url(scheme.get, call_564898.host, call_564898.base,
+                         call_564898.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594765, url, valid)
+  result = hook(call_564898, url, valid)
 
-proc call*(call_594766: Call_ApiReleaseCreate_594754; resourceGroupName: string;
-          apiVersion: string; apiId: string; subscriptionId: string;
-          releaseId: string; parameters: JsonNode; serviceName: string): Recallable =
+proc call*(call_564899: Call_ApiReleaseCreate_564887; releaseId: string;
+          serviceName: string; apiVersion: string; apiId: string;
+          subscriptionId: string; resourceGroupName: string; parameters: JsonNode): Recallable =
   ## apiReleaseCreate
   ## Creates a new Release for the API.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   releaseId: string (required)
+  ##            : Release identifier within an API. Must be unique in the current API Management service instance.
+  ##   serviceName: string (required)
+  ##              : The name of the API Management service.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
   ##   apiId: string (required)
   ##        : API identifier. Must be unique in the current API Management service instance.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   releaseId: string (required)
-  ##            : Release identifier within an API. Must be unique in the current API Management service instance.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   parameters: JObject (required)
   ##             : Create parameters.
-  ##   serviceName: string (required)
-  ##              : The name of the API Management service.
-  var path_594767 = newJObject()
-  var query_594768 = newJObject()
-  var body_594769 = newJObject()
-  add(path_594767, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594768, "api-version", newJString(apiVersion))
-  add(path_594767, "apiId", newJString(apiId))
-  add(path_594767, "subscriptionId", newJString(subscriptionId))
-  add(path_594767, "releaseId", newJString(releaseId))
+  var path_564900 = newJObject()
+  var query_564901 = newJObject()
+  var body_564902 = newJObject()
+  add(path_564900, "releaseId", newJString(releaseId))
+  add(path_564900, "serviceName", newJString(serviceName))
+  add(query_564901, "api-version", newJString(apiVersion))
+  add(path_564900, "apiId", newJString(apiId))
+  add(path_564900, "subscriptionId", newJString(subscriptionId))
+  add(path_564900, "resourceGroupName", newJString(resourceGroupName))
   if parameters != nil:
-    body_594769 = parameters
-  add(path_594767, "serviceName", newJString(serviceName))
-  result = call_594766.call(path_594767, query_594768, nil, nil, body_594769)
+    body_564902 = parameters
+  result = call_564899.call(path_564900, query_564901, nil, nil, body_564902)
 
-var apiReleaseCreate* = Call_ApiReleaseCreate_594754(name: "apiReleaseCreate",
+var apiReleaseCreate* = Call_ApiReleaseCreate_564887(name: "apiReleaseCreate",
     meth: HttpMethod.HttpPut, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ApiManagement/service/{serviceName}/apis/{apiId}/releases/{releaseId}",
-    validator: validate_ApiReleaseCreate_594755, base: "",
-    url: url_ApiReleaseCreate_594756, schemes: {Scheme.Https})
+    validator: validate_ApiReleaseCreate_564888, base: "",
+    url: url_ApiReleaseCreate_564889, schemes: {Scheme.Https})
 type
-  Call_ApiReleaseGetEntityTag_594784 = ref object of OpenApiRestCall_593425
-proc url_ApiReleaseGetEntityTag_594786(protocol: Scheme; host: string; base: string;
+  Call_ApiReleaseGetEntityTag_564917 = ref object of OpenApiRestCall_563556
+proc url_ApiReleaseGetEntityTag_564919(protocol: Scheme; host: string; base: string;
                                       route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -8468,51 +8466,50 @@ proc url_ApiReleaseGetEntityTag_594786(protocol: Scheme; host: string; base: str
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ApiReleaseGetEntityTag_594785(path: JsonNode; query: JsonNode;
+proc validate_ApiReleaseGetEntityTag_564918(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Returns the etag of an API release.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
-  ##   apiId: JString (required)
-  ##        : API identifier. Must be unique in the current API Management service instance.
-  ##   subscriptionId: JString (required)
-  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   releaseId: JString (required)
   ##            : Release identifier within an API. Must be unique in the current API Management service instance.
   ##   serviceName: JString (required)
   ##              : The name of the API Management service.
+  ##   apiId: JString (required)
+  ##        : API identifier. Must be unique in the current API Management service instance.
+  ##   subscriptionId: JString (required)
+  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594787 = path.getOrDefault("resourceGroupName")
-  valid_594787 = validateParameter(valid_594787, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `releaseId` field"
+  var valid_564920 = path.getOrDefault("releaseId")
+  valid_564920 = validateParameter(valid_564920, JString, required = true,
                                  default = nil)
-  if valid_594787 != nil:
-    section.add "resourceGroupName", valid_594787
-  var valid_594788 = path.getOrDefault("apiId")
-  valid_594788 = validateParameter(valid_594788, JString, required = true,
+  if valid_564920 != nil:
+    section.add "releaseId", valid_564920
+  var valid_564921 = path.getOrDefault("serviceName")
+  valid_564921 = validateParameter(valid_564921, JString, required = true,
                                  default = nil)
-  if valid_594788 != nil:
-    section.add "apiId", valid_594788
-  var valid_594789 = path.getOrDefault("subscriptionId")
-  valid_594789 = validateParameter(valid_594789, JString, required = true,
+  if valid_564921 != nil:
+    section.add "serviceName", valid_564921
+  var valid_564922 = path.getOrDefault("apiId")
+  valid_564922 = validateParameter(valid_564922, JString, required = true,
                                  default = nil)
-  if valid_594789 != nil:
-    section.add "subscriptionId", valid_594789
-  var valid_594790 = path.getOrDefault("releaseId")
-  valid_594790 = validateParameter(valid_594790, JString, required = true,
+  if valid_564922 != nil:
+    section.add "apiId", valid_564922
+  var valid_564923 = path.getOrDefault("subscriptionId")
+  valid_564923 = validateParameter(valid_564923, JString, required = true,
                                  default = nil)
-  if valid_594790 != nil:
-    section.add "releaseId", valid_594790
-  var valid_594791 = path.getOrDefault("serviceName")
-  valid_594791 = validateParameter(valid_594791, JString, required = true,
+  if valid_564923 != nil:
+    section.add "subscriptionId", valid_564923
+  var valid_564924 = path.getOrDefault("resourceGroupName")
+  valid_564924 = validateParameter(valid_564924, JString, required = true,
                                  default = nil)
-  if valid_594791 != nil:
-    section.add "serviceName", valid_594791
+  if valid_564924 != nil:
+    section.add "resourceGroupName", valid_564924
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -8520,11 +8517,11 @@ proc validate_ApiReleaseGetEntityTag_594785(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594792 = query.getOrDefault("api-version")
-  valid_594792 = validateParameter(valid_594792, JString, required = true,
+  var valid_564925 = query.getOrDefault("api-version")
+  valid_564925 = validateParameter(valid_564925, JString, required = true,
                                  default = nil)
-  if valid_594792 != nil:
-    section.add "api-version", valid_594792
+  if valid_564925 != nil:
+    section.add "api-version", valid_564925
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -8533,54 +8530,54 @@ proc validate_ApiReleaseGetEntityTag_594785(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594793: Call_ApiReleaseGetEntityTag_594784; path: JsonNode;
+proc call*(call_564926: Call_ApiReleaseGetEntityTag_564917; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Returns the etag of an API release.
   ## 
-  let valid = call_594793.validator(path, query, header, formData, body)
-  let scheme = call_594793.pickScheme
+  let valid = call_564926.validator(path, query, header, formData, body)
+  let scheme = call_564926.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594793.url(scheme.get, call_594793.host, call_594793.base,
-                         call_594793.route, valid.getOrDefault("path"),
+  let url = call_564926.url(scheme.get, call_564926.host, call_564926.base,
+                         call_564926.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594793, url, valid)
+  result = hook(call_564926, url, valid)
 
-proc call*(call_594794: Call_ApiReleaseGetEntityTag_594784;
-          resourceGroupName: string; apiVersion: string; apiId: string;
-          subscriptionId: string; releaseId: string; serviceName: string): Recallable =
+proc call*(call_564927: Call_ApiReleaseGetEntityTag_564917; releaseId: string;
+          serviceName: string; apiVersion: string; apiId: string;
+          subscriptionId: string; resourceGroupName: string): Recallable =
   ## apiReleaseGetEntityTag
   ## Returns the etag of an API release.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   releaseId: string (required)
+  ##            : Release identifier within an API. Must be unique in the current API Management service instance.
+  ##   serviceName: string (required)
+  ##              : The name of the API Management service.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
   ##   apiId: string (required)
   ##        : API identifier. Must be unique in the current API Management service instance.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   releaseId: string (required)
-  ##            : Release identifier within an API. Must be unique in the current API Management service instance.
-  ##   serviceName: string (required)
-  ##              : The name of the API Management service.
-  var path_594795 = newJObject()
-  var query_594796 = newJObject()
-  add(path_594795, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594796, "api-version", newJString(apiVersion))
-  add(path_594795, "apiId", newJString(apiId))
-  add(path_594795, "subscriptionId", newJString(subscriptionId))
-  add(path_594795, "releaseId", newJString(releaseId))
-  add(path_594795, "serviceName", newJString(serviceName))
-  result = call_594794.call(path_594795, query_594796, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564928 = newJObject()
+  var query_564929 = newJObject()
+  add(path_564928, "releaseId", newJString(releaseId))
+  add(path_564928, "serviceName", newJString(serviceName))
+  add(query_564929, "api-version", newJString(apiVersion))
+  add(path_564928, "apiId", newJString(apiId))
+  add(path_564928, "subscriptionId", newJString(subscriptionId))
+  add(path_564928, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564927.call(path_564928, query_564929, nil, nil, nil)
 
-var apiReleaseGetEntityTag* = Call_ApiReleaseGetEntityTag_594784(
+var apiReleaseGetEntityTag* = Call_ApiReleaseGetEntityTag_564917(
     name: "apiReleaseGetEntityTag", meth: HttpMethod.HttpHead,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ApiManagement/service/{serviceName}/apis/{apiId}/releases/{releaseId}",
-    validator: validate_ApiReleaseGetEntityTag_594785, base: "",
-    url: url_ApiReleaseGetEntityTag_594786, schemes: {Scheme.Https})
+    validator: validate_ApiReleaseGetEntityTag_564918, base: "",
+    url: url_ApiReleaseGetEntityTag_564919, schemes: {Scheme.Https})
 type
-  Call_ApiReleaseGet_594741 = ref object of OpenApiRestCall_593425
-proc url_ApiReleaseGet_594743(protocol: Scheme; host: string; base: string;
+  Call_ApiReleaseGet_564874 = ref object of OpenApiRestCall_563556
+proc url_ApiReleaseGet_564876(protocol: Scheme; host: string; base: string;
                              route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -8609,51 +8606,50 @@ proc url_ApiReleaseGet_594743(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ApiReleaseGet_594742(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_ApiReleaseGet_564875(path: JsonNode; query: JsonNode; header: JsonNode;
                                   formData: JsonNode; body: JsonNode): JsonNode =
   ## Returns the details of an API release.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
-  ##   apiId: JString (required)
-  ##        : API identifier. Must be unique in the current API Management service instance.
-  ##   subscriptionId: JString (required)
-  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   releaseId: JString (required)
   ##            : Release identifier within an API. Must be unique in the current API Management service instance.
   ##   serviceName: JString (required)
   ##              : The name of the API Management service.
+  ##   apiId: JString (required)
+  ##        : API identifier. Must be unique in the current API Management service instance.
+  ##   subscriptionId: JString (required)
+  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594744 = path.getOrDefault("resourceGroupName")
-  valid_594744 = validateParameter(valid_594744, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `releaseId` field"
+  var valid_564877 = path.getOrDefault("releaseId")
+  valid_564877 = validateParameter(valid_564877, JString, required = true,
                                  default = nil)
-  if valid_594744 != nil:
-    section.add "resourceGroupName", valid_594744
-  var valid_594745 = path.getOrDefault("apiId")
-  valid_594745 = validateParameter(valid_594745, JString, required = true,
+  if valid_564877 != nil:
+    section.add "releaseId", valid_564877
+  var valid_564878 = path.getOrDefault("serviceName")
+  valid_564878 = validateParameter(valid_564878, JString, required = true,
                                  default = nil)
-  if valid_594745 != nil:
-    section.add "apiId", valid_594745
-  var valid_594746 = path.getOrDefault("subscriptionId")
-  valid_594746 = validateParameter(valid_594746, JString, required = true,
+  if valid_564878 != nil:
+    section.add "serviceName", valid_564878
+  var valid_564879 = path.getOrDefault("apiId")
+  valid_564879 = validateParameter(valid_564879, JString, required = true,
                                  default = nil)
-  if valid_594746 != nil:
-    section.add "subscriptionId", valid_594746
-  var valid_594747 = path.getOrDefault("releaseId")
-  valid_594747 = validateParameter(valid_594747, JString, required = true,
+  if valid_564879 != nil:
+    section.add "apiId", valid_564879
+  var valid_564880 = path.getOrDefault("subscriptionId")
+  valid_564880 = validateParameter(valid_564880, JString, required = true,
                                  default = nil)
-  if valid_594747 != nil:
-    section.add "releaseId", valid_594747
-  var valid_594748 = path.getOrDefault("serviceName")
-  valid_594748 = validateParameter(valid_594748, JString, required = true,
+  if valid_564880 != nil:
+    section.add "subscriptionId", valid_564880
+  var valid_564881 = path.getOrDefault("resourceGroupName")
+  valid_564881 = validateParameter(valid_564881, JString, required = true,
                                  default = nil)
-  if valid_594748 != nil:
-    section.add "serviceName", valid_594748
+  if valid_564881 != nil:
+    section.add "resourceGroupName", valid_564881
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -8661,11 +8657,11 @@ proc validate_ApiReleaseGet_594742(path: JsonNode; query: JsonNode; header: Json
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594749 = query.getOrDefault("api-version")
-  valid_594749 = validateParameter(valid_594749, JString, required = true,
+  var valid_564882 = query.getOrDefault("api-version")
+  valid_564882 = validateParameter(valid_564882, JString, required = true,
                                  default = nil)
-  if valid_594749 != nil:
-    section.add "api-version", valid_594749
+  if valid_564882 != nil:
+    section.add "api-version", valid_564882
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -8674,53 +8670,53 @@ proc validate_ApiReleaseGet_594742(path: JsonNode; query: JsonNode; header: Json
   if body != nil:
     result.add "body", body
 
-proc call*(call_594750: Call_ApiReleaseGet_594741; path: JsonNode; query: JsonNode;
+proc call*(call_564883: Call_ApiReleaseGet_564874; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Returns the details of an API release.
   ## 
-  let valid = call_594750.validator(path, query, header, formData, body)
-  let scheme = call_594750.pickScheme
+  let valid = call_564883.validator(path, query, header, formData, body)
+  let scheme = call_564883.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594750.url(scheme.get, call_594750.host, call_594750.base,
-                         call_594750.route, valid.getOrDefault("path"),
+  let url = call_564883.url(scheme.get, call_564883.host, call_564883.base,
+                         call_564883.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594750, url, valid)
+  result = hook(call_564883, url, valid)
 
-proc call*(call_594751: Call_ApiReleaseGet_594741; resourceGroupName: string;
-          apiVersion: string; apiId: string; subscriptionId: string;
-          releaseId: string; serviceName: string): Recallable =
+proc call*(call_564884: Call_ApiReleaseGet_564874; releaseId: string;
+          serviceName: string; apiVersion: string; apiId: string;
+          subscriptionId: string; resourceGroupName: string): Recallable =
   ## apiReleaseGet
   ## Returns the details of an API release.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   releaseId: string (required)
+  ##            : Release identifier within an API. Must be unique in the current API Management service instance.
+  ##   serviceName: string (required)
+  ##              : The name of the API Management service.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
   ##   apiId: string (required)
   ##        : API identifier. Must be unique in the current API Management service instance.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   releaseId: string (required)
-  ##            : Release identifier within an API. Must be unique in the current API Management service instance.
-  ##   serviceName: string (required)
-  ##              : The name of the API Management service.
-  var path_594752 = newJObject()
-  var query_594753 = newJObject()
-  add(path_594752, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594753, "api-version", newJString(apiVersion))
-  add(path_594752, "apiId", newJString(apiId))
-  add(path_594752, "subscriptionId", newJString(subscriptionId))
-  add(path_594752, "releaseId", newJString(releaseId))
-  add(path_594752, "serviceName", newJString(serviceName))
-  result = call_594751.call(path_594752, query_594753, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564885 = newJObject()
+  var query_564886 = newJObject()
+  add(path_564885, "releaseId", newJString(releaseId))
+  add(path_564885, "serviceName", newJString(serviceName))
+  add(query_564886, "api-version", newJString(apiVersion))
+  add(path_564885, "apiId", newJString(apiId))
+  add(path_564885, "subscriptionId", newJString(subscriptionId))
+  add(path_564885, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564884.call(path_564885, query_564886, nil, nil, nil)
 
-var apiReleaseGet* = Call_ApiReleaseGet_594741(name: "apiReleaseGet",
+var apiReleaseGet* = Call_ApiReleaseGet_564874(name: "apiReleaseGet",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ApiManagement/service/{serviceName}/apis/{apiId}/releases/{releaseId}",
-    validator: validate_ApiReleaseGet_594742, base: "", url: url_ApiReleaseGet_594743,
+    validator: validate_ApiReleaseGet_564875, base: "", url: url_ApiReleaseGet_564876,
     schemes: {Scheme.Https})
 type
-  Call_ApiReleaseUpdate_594797 = ref object of OpenApiRestCall_593425
-proc url_ApiReleaseUpdate_594799(protocol: Scheme; host: string; base: string;
+  Call_ApiReleaseUpdate_564930 = ref object of OpenApiRestCall_563556
+proc url_ApiReleaseUpdate_564932(protocol: Scheme; host: string; base: string;
                                 route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -8749,7 +8745,7 @@ proc url_ApiReleaseUpdate_594799(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ApiReleaseUpdate_594798(path: JsonNode; query: JsonNode;
+proc validate_ApiReleaseUpdate_564931(path: JsonNode; query: JsonNode;
                                      header: JsonNode; formData: JsonNode;
                                      body: JsonNode): JsonNode =
   ## Updates the details of the release of the API specified by its identifier.
@@ -8757,44 +8753,43 @@ proc validate_ApiReleaseUpdate_594798(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
-  ##   apiId: JString (required)
-  ##        : API identifier. Must be unique in the current API Management service instance.
-  ##   subscriptionId: JString (required)
-  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   releaseId: JString (required)
   ##            : Release identifier within an API. Must be unique in the current API Management service instance.
   ##   serviceName: JString (required)
   ##              : The name of the API Management service.
+  ##   apiId: JString (required)
+  ##        : API identifier. Must be unique in the current API Management service instance.
+  ##   subscriptionId: JString (required)
+  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594800 = path.getOrDefault("resourceGroupName")
-  valid_594800 = validateParameter(valid_594800, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `releaseId` field"
+  var valid_564933 = path.getOrDefault("releaseId")
+  valid_564933 = validateParameter(valid_564933, JString, required = true,
                                  default = nil)
-  if valid_594800 != nil:
-    section.add "resourceGroupName", valid_594800
-  var valid_594801 = path.getOrDefault("apiId")
-  valid_594801 = validateParameter(valid_594801, JString, required = true,
+  if valid_564933 != nil:
+    section.add "releaseId", valid_564933
+  var valid_564934 = path.getOrDefault("serviceName")
+  valid_564934 = validateParameter(valid_564934, JString, required = true,
                                  default = nil)
-  if valid_594801 != nil:
-    section.add "apiId", valid_594801
-  var valid_594802 = path.getOrDefault("subscriptionId")
-  valid_594802 = validateParameter(valid_594802, JString, required = true,
+  if valid_564934 != nil:
+    section.add "serviceName", valid_564934
+  var valid_564935 = path.getOrDefault("apiId")
+  valid_564935 = validateParameter(valid_564935, JString, required = true,
                                  default = nil)
-  if valid_594802 != nil:
-    section.add "subscriptionId", valid_594802
-  var valid_594803 = path.getOrDefault("releaseId")
-  valid_594803 = validateParameter(valid_594803, JString, required = true,
+  if valid_564935 != nil:
+    section.add "apiId", valid_564935
+  var valid_564936 = path.getOrDefault("subscriptionId")
+  valid_564936 = validateParameter(valid_564936, JString, required = true,
                                  default = nil)
-  if valid_594803 != nil:
-    section.add "releaseId", valid_594803
-  var valid_594804 = path.getOrDefault("serviceName")
-  valid_594804 = validateParameter(valid_594804, JString, required = true,
+  if valid_564936 != nil:
+    section.add "subscriptionId", valid_564936
+  var valid_564937 = path.getOrDefault("resourceGroupName")
+  valid_564937 = validateParameter(valid_564937, JString, required = true,
                                  default = nil)
-  if valid_594804 != nil:
-    section.add "serviceName", valid_594804
+  if valid_564937 != nil:
+    section.add "resourceGroupName", valid_564937
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -8802,11 +8797,11 @@ proc validate_ApiReleaseUpdate_594798(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594805 = query.getOrDefault("api-version")
-  valid_594805 = validateParameter(valid_594805, JString, required = true,
+  var valid_564938 = query.getOrDefault("api-version")
+  valid_564938 = validateParameter(valid_564938, JString, required = true,
                                  default = nil)
-  if valid_594805 != nil:
-    section.add "api-version", valid_594805
+  if valid_564938 != nil:
+    section.add "api-version", valid_564938
   result.add "query", section
   ## parameters in `header` object:
   ##   If-Match: JString (required)
@@ -8814,11 +8809,11 @@ proc validate_ApiReleaseUpdate_594798(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert header != nil,
         "header argument is necessary due to required `If-Match` field"
-  var valid_594806 = header.getOrDefault("If-Match")
-  valid_594806 = validateParameter(valid_594806, JString, required = true,
+  var valid_564939 = header.getOrDefault("If-Match")
+  valid_564939 = validateParameter(valid_564939, JString, required = true,
                                  default = nil)
-  if valid_594806 != nil:
-    section.add "If-Match", valid_594806
+  if valid_564939 != nil:
+    section.add "If-Match", valid_564939
   result.add "header", section
   section = newJObject()
   result.add "formData", section
@@ -8830,58 +8825,58 @@ proc validate_ApiReleaseUpdate_594798(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594808: Call_ApiReleaseUpdate_594797; path: JsonNode;
+proc call*(call_564941: Call_ApiReleaseUpdate_564930; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Updates the details of the release of the API specified by its identifier.
   ## 
-  let valid = call_594808.validator(path, query, header, formData, body)
-  let scheme = call_594808.pickScheme
+  let valid = call_564941.validator(path, query, header, formData, body)
+  let scheme = call_564941.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594808.url(scheme.get, call_594808.host, call_594808.base,
-                         call_594808.route, valid.getOrDefault("path"),
+  let url = call_564941.url(scheme.get, call_564941.host, call_564941.base,
+                         call_564941.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594808, url, valid)
+  result = hook(call_564941, url, valid)
 
-proc call*(call_594809: Call_ApiReleaseUpdate_594797; resourceGroupName: string;
-          apiVersion: string; apiId: string; subscriptionId: string;
-          releaseId: string; parameters: JsonNode; serviceName: string): Recallable =
+proc call*(call_564942: Call_ApiReleaseUpdate_564930; releaseId: string;
+          serviceName: string; apiVersion: string; apiId: string;
+          subscriptionId: string; resourceGroupName: string; parameters: JsonNode): Recallable =
   ## apiReleaseUpdate
   ## Updates the details of the release of the API specified by its identifier.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   releaseId: string (required)
+  ##            : Release identifier within an API. Must be unique in the current API Management service instance.
+  ##   serviceName: string (required)
+  ##              : The name of the API Management service.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
   ##   apiId: string (required)
   ##        : API identifier. Must be unique in the current API Management service instance.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   releaseId: string (required)
-  ##            : Release identifier within an API. Must be unique in the current API Management service instance.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   parameters: JObject (required)
   ##             : API Release Update parameters.
-  ##   serviceName: string (required)
-  ##              : The name of the API Management service.
-  var path_594810 = newJObject()
-  var query_594811 = newJObject()
-  var body_594812 = newJObject()
-  add(path_594810, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594811, "api-version", newJString(apiVersion))
-  add(path_594810, "apiId", newJString(apiId))
-  add(path_594810, "subscriptionId", newJString(subscriptionId))
-  add(path_594810, "releaseId", newJString(releaseId))
+  var path_564943 = newJObject()
+  var query_564944 = newJObject()
+  var body_564945 = newJObject()
+  add(path_564943, "releaseId", newJString(releaseId))
+  add(path_564943, "serviceName", newJString(serviceName))
+  add(query_564944, "api-version", newJString(apiVersion))
+  add(path_564943, "apiId", newJString(apiId))
+  add(path_564943, "subscriptionId", newJString(subscriptionId))
+  add(path_564943, "resourceGroupName", newJString(resourceGroupName))
   if parameters != nil:
-    body_594812 = parameters
-  add(path_594810, "serviceName", newJString(serviceName))
-  result = call_594809.call(path_594810, query_594811, nil, nil, body_594812)
+    body_564945 = parameters
+  result = call_564942.call(path_564943, query_564944, nil, nil, body_564945)
 
-var apiReleaseUpdate* = Call_ApiReleaseUpdate_594797(name: "apiReleaseUpdate",
+var apiReleaseUpdate* = Call_ApiReleaseUpdate_564930(name: "apiReleaseUpdate",
     meth: HttpMethod.HttpPatch, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ApiManagement/service/{serviceName}/apis/{apiId}/releases/{releaseId}",
-    validator: validate_ApiReleaseUpdate_594798, base: "",
-    url: url_ApiReleaseUpdate_594799, schemes: {Scheme.Https})
+    validator: validate_ApiReleaseUpdate_564931, base: "",
+    url: url_ApiReleaseUpdate_564932, schemes: {Scheme.Https})
 type
-  Call_ApiReleaseDelete_594770 = ref object of OpenApiRestCall_593425
-proc url_ApiReleaseDelete_594772(protocol: Scheme; host: string; base: string;
+  Call_ApiReleaseDelete_564903 = ref object of OpenApiRestCall_563556
+proc url_ApiReleaseDelete_564905(protocol: Scheme; host: string; base: string;
                                 route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -8910,7 +8905,7 @@ proc url_ApiReleaseDelete_594772(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ApiReleaseDelete_594771(path: JsonNode; query: JsonNode;
+proc validate_ApiReleaseDelete_564904(path: JsonNode; query: JsonNode;
                                      header: JsonNode; formData: JsonNode;
                                      body: JsonNode): JsonNode =
   ## Deletes the specified release in the API.
@@ -8918,44 +8913,43 @@ proc validate_ApiReleaseDelete_594771(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
-  ##   apiId: JString (required)
-  ##        : API identifier. Must be unique in the current API Management service instance.
-  ##   subscriptionId: JString (required)
-  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   releaseId: JString (required)
   ##            : Release identifier within an API. Must be unique in the current API Management service instance.
   ##   serviceName: JString (required)
   ##              : The name of the API Management service.
+  ##   apiId: JString (required)
+  ##        : API identifier. Must be unique in the current API Management service instance.
+  ##   subscriptionId: JString (required)
+  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594773 = path.getOrDefault("resourceGroupName")
-  valid_594773 = validateParameter(valid_594773, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `releaseId` field"
+  var valid_564906 = path.getOrDefault("releaseId")
+  valid_564906 = validateParameter(valid_564906, JString, required = true,
                                  default = nil)
-  if valid_594773 != nil:
-    section.add "resourceGroupName", valid_594773
-  var valid_594774 = path.getOrDefault("apiId")
-  valid_594774 = validateParameter(valid_594774, JString, required = true,
+  if valid_564906 != nil:
+    section.add "releaseId", valid_564906
+  var valid_564907 = path.getOrDefault("serviceName")
+  valid_564907 = validateParameter(valid_564907, JString, required = true,
                                  default = nil)
-  if valid_594774 != nil:
-    section.add "apiId", valid_594774
-  var valid_594775 = path.getOrDefault("subscriptionId")
-  valid_594775 = validateParameter(valid_594775, JString, required = true,
+  if valid_564907 != nil:
+    section.add "serviceName", valid_564907
+  var valid_564908 = path.getOrDefault("apiId")
+  valid_564908 = validateParameter(valid_564908, JString, required = true,
                                  default = nil)
-  if valid_594775 != nil:
-    section.add "subscriptionId", valid_594775
-  var valid_594776 = path.getOrDefault("releaseId")
-  valid_594776 = validateParameter(valid_594776, JString, required = true,
+  if valid_564908 != nil:
+    section.add "apiId", valid_564908
+  var valid_564909 = path.getOrDefault("subscriptionId")
+  valid_564909 = validateParameter(valid_564909, JString, required = true,
                                  default = nil)
-  if valid_594776 != nil:
-    section.add "releaseId", valid_594776
-  var valid_594777 = path.getOrDefault("serviceName")
-  valid_594777 = validateParameter(valid_594777, JString, required = true,
+  if valid_564909 != nil:
+    section.add "subscriptionId", valid_564909
+  var valid_564910 = path.getOrDefault("resourceGroupName")
+  valid_564910 = validateParameter(valid_564910, JString, required = true,
                                  default = nil)
-  if valid_594777 != nil:
-    section.add "serviceName", valid_594777
+  if valid_564910 != nil:
+    section.add "resourceGroupName", valid_564910
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -8963,11 +8957,11 @@ proc validate_ApiReleaseDelete_594771(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594778 = query.getOrDefault("api-version")
-  valid_594778 = validateParameter(valid_594778, JString, required = true,
+  var valid_564911 = query.getOrDefault("api-version")
+  valid_564911 = validateParameter(valid_564911, JString, required = true,
                                  default = nil)
-  if valid_594778 != nil:
-    section.add "api-version", valid_594778
+  if valid_564911 != nil:
+    section.add "api-version", valid_564911
   result.add "query", section
   ## parameters in `header` object:
   ##   If-Match: JString (required)
@@ -8975,64 +8969,64 @@ proc validate_ApiReleaseDelete_594771(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert header != nil,
         "header argument is necessary due to required `If-Match` field"
-  var valid_594779 = header.getOrDefault("If-Match")
-  valid_594779 = validateParameter(valid_594779, JString, required = true,
+  var valid_564912 = header.getOrDefault("If-Match")
+  valid_564912 = validateParameter(valid_564912, JString, required = true,
                                  default = nil)
-  if valid_594779 != nil:
-    section.add "If-Match", valid_594779
+  if valid_564912 != nil:
+    section.add "If-Match", valid_564912
   result.add "header", section
   section = newJObject()
   result.add "formData", section
   if body != nil:
     result.add "body", body
 
-proc call*(call_594780: Call_ApiReleaseDelete_594770; path: JsonNode;
+proc call*(call_564913: Call_ApiReleaseDelete_564903; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes the specified release in the API.
   ## 
-  let valid = call_594780.validator(path, query, header, formData, body)
-  let scheme = call_594780.pickScheme
+  let valid = call_564913.validator(path, query, header, formData, body)
+  let scheme = call_564913.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594780.url(scheme.get, call_594780.host, call_594780.base,
-                         call_594780.route, valid.getOrDefault("path"),
+  let url = call_564913.url(scheme.get, call_564913.host, call_564913.base,
+                         call_564913.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594780, url, valid)
+  result = hook(call_564913, url, valid)
 
-proc call*(call_594781: Call_ApiReleaseDelete_594770; resourceGroupName: string;
-          apiVersion: string; apiId: string; subscriptionId: string;
-          releaseId: string; serviceName: string): Recallable =
+proc call*(call_564914: Call_ApiReleaseDelete_564903; releaseId: string;
+          serviceName: string; apiVersion: string; apiId: string;
+          subscriptionId: string; resourceGroupName: string): Recallable =
   ## apiReleaseDelete
   ## Deletes the specified release in the API.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   releaseId: string (required)
+  ##            : Release identifier within an API. Must be unique in the current API Management service instance.
+  ##   serviceName: string (required)
+  ##              : The name of the API Management service.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
   ##   apiId: string (required)
   ##        : API identifier. Must be unique in the current API Management service instance.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   releaseId: string (required)
-  ##            : Release identifier within an API. Must be unique in the current API Management service instance.
-  ##   serviceName: string (required)
-  ##              : The name of the API Management service.
-  var path_594782 = newJObject()
-  var query_594783 = newJObject()
-  add(path_594782, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594783, "api-version", newJString(apiVersion))
-  add(path_594782, "apiId", newJString(apiId))
-  add(path_594782, "subscriptionId", newJString(subscriptionId))
-  add(path_594782, "releaseId", newJString(releaseId))
-  add(path_594782, "serviceName", newJString(serviceName))
-  result = call_594781.call(path_594782, query_594783, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564915 = newJObject()
+  var query_564916 = newJObject()
+  add(path_564915, "releaseId", newJString(releaseId))
+  add(path_564915, "serviceName", newJString(serviceName))
+  add(query_564916, "api-version", newJString(apiVersion))
+  add(path_564915, "apiId", newJString(apiId))
+  add(path_564915, "subscriptionId", newJString(subscriptionId))
+  add(path_564915, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564914.call(path_564915, query_564916, nil, nil, nil)
 
-var apiReleaseDelete* = Call_ApiReleaseDelete_594770(name: "apiReleaseDelete",
+var apiReleaseDelete* = Call_ApiReleaseDelete_564903(name: "apiReleaseDelete",
     meth: HttpMethod.HttpDelete, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ApiManagement/service/{serviceName}/apis/{apiId}/releases/{releaseId}",
-    validator: validate_ApiReleaseDelete_594771, base: "",
-    url: url_ApiReleaseDelete_594772, schemes: {Scheme.Https})
+    validator: validate_ApiReleaseDelete_564904, base: "",
+    url: url_ApiReleaseDelete_564905, schemes: {Scheme.Https})
 type
-  Call_ApiRevisionsList_594813 = ref object of OpenApiRestCall_593425
-proc url_ApiRevisionsList_594815(protocol: Scheme; host: string; base: string;
+  Call_ApiRevisionsList_564946 = ref object of OpenApiRestCall_563556
+proc url_ApiRevisionsList_564948(protocol: Scheme; host: string; base: string;
                                 route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -9059,7 +9053,7 @@ proc url_ApiRevisionsList_594815(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ApiRevisionsList_594814(path: JsonNode; query: JsonNode;
+proc validate_ApiRevisionsList_564947(path: JsonNode; query: JsonNode;
                                      header: JsonNode; formData: JsonNode;
                                      body: JsonNode): JsonNode =
   ## Lists all revisions of an API.
@@ -9067,43 +9061,43 @@ proc validate_ApiRevisionsList_594814(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
+  ##   serviceName: JString (required)
+  ##              : The name of the API Management service.
   ##   apiId: JString (required)
   ##        : API identifier. Must be unique in the current API Management service instance.
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   serviceName: JString (required)
-  ##              : The name of the API Management service.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594816 = path.getOrDefault("resourceGroupName")
-  valid_594816 = validateParameter(valid_594816, JString, required = true,
+        "path argument is necessary due to required `serviceName` field"
+  var valid_564949 = path.getOrDefault("serviceName")
+  valid_564949 = validateParameter(valid_564949, JString, required = true,
                                  default = nil)
-  if valid_594816 != nil:
-    section.add "resourceGroupName", valid_594816
-  var valid_594817 = path.getOrDefault("apiId")
-  valid_594817 = validateParameter(valid_594817, JString, required = true,
+  if valid_564949 != nil:
+    section.add "serviceName", valid_564949
+  var valid_564950 = path.getOrDefault("apiId")
+  valid_564950 = validateParameter(valid_564950, JString, required = true,
                                  default = nil)
-  if valid_594817 != nil:
-    section.add "apiId", valid_594817
-  var valid_594818 = path.getOrDefault("subscriptionId")
-  valid_594818 = validateParameter(valid_594818, JString, required = true,
+  if valid_564950 != nil:
+    section.add "apiId", valid_564950
+  var valid_564951 = path.getOrDefault("subscriptionId")
+  valid_564951 = validateParameter(valid_564951, JString, required = true,
                                  default = nil)
-  if valid_594818 != nil:
-    section.add "subscriptionId", valid_594818
-  var valid_594819 = path.getOrDefault("serviceName")
-  valid_594819 = validateParameter(valid_594819, JString, required = true,
+  if valid_564951 != nil:
+    section.add "subscriptionId", valid_564951
+  var valid_564952 = path.getOrDefault("resourceGroupName")
+  valid_564952 = validateParameter(valid_564952, JString, required = true,
                                  default = nil)
-  if valid_594819 != nil:
-    section.add "serviceName", valid_594819
+  if valid_564952 != nil:
+    section.add "resourceGroupName", valid_564952
   result.add "path", section
   ## parameters in `query` object:
-  ##   api-version: JString (required)
-  ##              : Version of the API to be used with the client request.
   ##   $top: JInt
   ##       : Number of records to return.
+  ##   api-version: JString (required)
+  ##              : Version of the API to be used with the client request.
   ##   $skip: JInt
   ##        : Number of records to skip.
   ##   $filter: JString
@@ -9113,26 +9107,26 @@ proc validate_ApiRevisionsList_594814(path: JsonNode; query: JsonNode;
   ## |apiRevision | ge, le, eq, ne, gt, lt | substringof, contains, startswith, endswith|
   ## 
   section = newJObject()
+  var valid_564953 = query.getOrDefault("$top")
+  valid_564953 = validateParameter(valid_564953, JInt, required = false, default = nil)
+  if valid_564953 != nil:
+    section.add "$top", valid_564953
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594820 = query.getOrDefault("api-version")
-  valid_594820 = validateParameter(valid_594820, JString, required = true,
+  var valid_564954 = query.getOrDefault("api-version")
+  valid_564954 = validateParameter(valid_564954, JString, required = true,
                                  default = nil)
-  if valid_594820 != nil:
-    section.add "api-version", valid_594820
-  var valid_594821 = query.getOrDefault("$top")
-  valid_594821 = validateParameter(valid_594821, JInt, required = false, default = nil)
-  if valid_594821 != nil:
-    section.add "$top", valid_594821
-  var valid_594822 = query.getOrDefault("$skip")
-  valid_594822 = validateParameter(valid_594822, JInt, required = false, default = nil)
-  if valid_594822 != nil:
-    section.add "$skip", valid_594822
-  var valid_594823 = query.getOrDefault("$filter")
-  valid_594823 = validateParameter(valid_594823, JString, required = false,
+  if valid_564954 != nil:
+    section.add "api-version", valid_564954
+  var valid_564955 = query.getOrDefault("$skip")
+  valid_564955 = validateParameter(valid_564955, JInt, required = false, default = nil)
+  if valid_564955 != nil:
+    section.add "$skip", valid_564955
+  var valid_564956 = query.getOrDefault("$filter")
+  valid_564956 = validateParameter(valid_564956, JString, required = false,
                                  default = nil)
-  if valid_594823 != nil:
-    section.add "$filter", valid_594823
+  if valid_564956 != nil:
+    section.add "$filter", valid_564956
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -9141,63 +9135,63 @@ proc validate_ApiRevisionsList_594814(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594824: Call_ApiRevisionsList_594813; path: JsonNode;
+proc call*(call_564957: Call_ApiRevisionsList_564946; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists all revisions of an API.
   ## 
-  let valid = call_594824.validator(path, query, header, formData, body)
-  let scheme = call_594824.pickScheme
+  let valid = call_564957.validator(path, query, header, formData, body)
+  let scheme = call_564957.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594824.url(scheme.get, call_594824.host, call_594824.base,
-                         call_594824.route, valid.getOrDefault("path"),
+  let url = call_564957.url(scheme.get, call_564957.host, call_564957.base,
+                         call_564957.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594824, url, valid)
+  result = hook(call_564957, url, valid)
 
-proc call*(call_594825: Call_ApiRevisionsList_594813; resourceGroupName: string;
+proc call*(call_564958: Call_ApiRevisionsList_564946; serviceName: string;
           apiVersion: string; apiId: string; subscriptionId: string;
-          serviceName: string; Top: int = 0; Skip: int = 0; Filter: string = ""): Recallable =
+          resourceGroupName: string; Top: int = 0; Skip: int = 0; Filter: string = ""): Recallable =
   ## apiRevisionsList
   ## Lists all revisions of an API.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   serviceName: string (required)
+  ##              : The name of the API Management service.
+  ##   Top: int
+  ##      : Number of records to return.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
   ##   apiId: string (required)
   ##        : API identifier. Must be unique in the current API Management service instance.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   Top: int
-  ##      : Number of records to return.
   ##   Skip: int
   ##       : Number of records to skip.
-  ##   serviceName: string (required)
-  ##              : The name of the API Management service.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   Filter: string
   ##         : | Field       | Supported operators    | Supported functions               |
   ## |-------------|------------------------|-----------------------------------|
   ## 
   ## |apiRevision | ge, le, eq, ne, gt, lt | substringof, contains, startswith, endswith|
   ## 
-  var path_594826 = newJObject()
-  var query_594827 = newJObject()
-  add(path_594826, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594827, "api-version", newJString(apiVersion))
-  add(path_594826, "apiId", newJString(apiId))
-  add(path_594826, "subscriptionId", newJString(subscriptionId))
-  add(query_594827, "$top", newJInt(Top))
-  add(query_594827, "$skip", newJInt(Skip))
-  add(path_594826, "serviceName", newJString(serviceName))
-  add(query_594827, "$filter", newJString(Filter))
-  result = call_594825.call(path_594826, query_594827, nil, nil, nil)
+  var path_564959 = newJObject()
+  var query_564960 = newJObject()
+  add(path_564959, "serviceName", newJString(serviceName))
+  add(query_564960, "$top", newJInt(Top))
+  add(query_564960, "api-version", newJString(apiVersion))
+  add(path_564959, "apiId", newJString(apiId))
+  add(path_564959, "subscriptionId", newJString(subscriptionId))
+  add(query_564960, "$skip", newJInt(Skip))
+  add(path_564959, "resourceGroupName", newJString(resourceGroupName))
+  add(query_564960, "$filter", newJString(Filter))
+  result = call_564958.call(path_564959, query_564960, nil, nil, nil)
 
-var apiRevisionsList* = Call_ApiRevisionsList_594813(name: "apiRevisionsList",
+var apiRevisionsList* = Call_ApiRevisionsList_564946(name: "apiRevisionsList",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ApiManagement/service/{serviceName}/apis/{apiId}/revisions",
-    validator: validate_ApiRevisionsList_594814, base: "",
-    url: url_ApiRevisionsList_594815, schemes: {Scheme.Https})
+    validator: validate_ApiRevisionsList_564947, base: "",
+    url: url_ApiRevisionsList_564948, schemes: {Scheme.Https})
 type
-  Call_ApiSchemaListByApi_594828 = ref object of OpenApiRestCall_593425
-proc url_ApiSchemaListByApi_594830(protocol: Scheme; host: string; base: string;
+  Call_ApiSchemaListByApi_564961 = ref object of OpenApiRestCall_563556
+proc url_ApiSchemaListByApi_564963(protocol: Scheme; host: string; base: string;
                                   route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -9224,7 +9218,7 @@ proc url_ApiSchemaListByApi_594830(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ApiSchemaListByApi_594829(path: JsonNode; query: JsonNode;
+proc validate_ApiSchemaListByApi_564962(path: JsonNode; query: JsonNode;
                                        header: JsonNode; formData: JsonNode;
                                        body: JsonNode): JsonNode =
   ## Get the schema configuration at the API level.
@@ -9232,43 +9226,43 @@ proc validate_ApiSchemaListByApi_594829(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
+  ##   serviceName: JString (required)
+  ##              : The name of the API Management service.
   ##   apiId: JString (required)
   ##        : API revision identifier. Must be unique in the current API Management service instance. Non-current revision has ;rev=n as a suffix where n is the revision number.
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   serviceName: JString (required)
-  ##              : The name of the API Management service.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594831 = path.getOrDefault("resourceGroupName")
-  valid_594831 = validateParameter(valid_594831, JString, required = true,
+        "path argument is necessary due to required `serviceName` field"
+  var valid_564964 = path.getOrDefault("serviceName")
+  valid_564964 = validateParameter(valid_564964, JString, required = true,
                                  default = nil)
-  if valid_594831 != nil:
-    section.add "resourceGroupName", valid_594831
-  var valid_594832 = path.getOrDefault("apiId")
-  valid_594832 = validateParameter(valid_594832, JString, required = true,
+  if valid_564964 != nil:
+    section.add "serviceName", valid_564964
+  var valid_564965 = path.getOrDefault("apiId")
+  valid_564965 = validateParameter(valid_564965, JString, required = true,
                                  default = nil)
-  if valid_594832 != nil:
-    section.add "apiId", valid_594832
-  var valid_594833 = path.getOrDefault("subscriptionId")
-  valid_594833 = validateParameter(valid_594833, JString, required = true,
+  if valid_564965 != nil:
+    section.add "apiId", valid_564965
+  var valid_564966 = path.getOrDefault("subscriptionId")
+  valid_564966 = validateParameter(valid_564966, JString, required = true,
                                  default = nil)
-  if valid_594833 != nil:
-    section.add "subscriptionId", valid_594833
-  var valid_594834 = path.getOrDefault("serviceName")
-  valid_594834 = validateParameter(valid_594834, JString, required = true,
+  if valid_564966 != nil:
+    section.add "subscriptionId", valid_564966
+  var valid_564967 = path.getOrDefault("resourceGroupName")
+  valid_564967 = validateParameter(valid_564967, JString, required = true,
                                  default = nil)
-  if valid_594834 != nil:
-    section.add "serviceName", valid_594834
+  if valid_564967 != nil:
+    section.add "resourceGroupName", valid_564967
   result.add "path", section
   ## parameters in `query` object:
-  ##   api-version: JString (required)
-  ##              : Version of the API to be used with the client request.
   ##   $top: JInt
   ##       : Number of records to return.
+  ##   api-version: JString (required)
+  ##              : Version of the API to be used with the client request.
   ##   $skip: JInt
   ##        : Number of records to skip.
   ##   $filter: JString
@@ -9278,26 +9272,26 @@ proc validate_ApiSchemaListByApi_594829(path: JsonNode; query: JsonNode;
   ## |contentType | ge, le, eq, ne, gt, lt | substringof, contains, startswith, endswith|
   ## 
   section = newJObject()
+  var valid_564968 = query.getOrDefault("$top")
+  valid_564968 = validateParameter(valid_564968, JInt, required = false, default = nil)
+  if valid_564968 != nil:
+    section.add "$top", valid_564968
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594835 = query.getOrDefault("api-version")
-  valid_594835 = validateParameter(valid_594835, JString, required = true,
+  var valid_564969 = query.getOrDefault("api-version")
+  valid_564969 = validateParameter(valid_564969, JString, required = true,
                                  default = nil)
-  if valid_594835 != nil:
-    section.add "api-version", valid_594835
-  var valid_594836 = query.getOrDefault("$top")
-  valid_594836 = validateParameter(valid_594836, JInt, required = false, default = nil)
-  if valid_594836 != nil:
-    section.add "$top", valid_594836
-  var valid_594837 = query.getOrDefault("$skip")
-  valid_594837 = validateParameter(valid_594837, JInt, required = false, default = nil)
-  if valid_594837 != nil:
-    section.add "$skip", valid_594837
-  var valid_594838 = query.getOrDefault("$filter")
-  valid_594838 = validateParameter(valid_594838, JString, required = false,
+  if valid_564969 != nil:
+    section.add "api-version", valid_564969
+  var valid_564970 = query.getOrDefault("$skip")
+  valid_564970 = validateParameter(valid_564970, JInt, required = false, default = nil)
+  if valid_564970 != nil:
+    section.add "$skip", valid_564970
+  var valid_564971 = query.getOrDefault("$filter")
+  valid_564971 = validateParameter(valid_564971, JString, required = false,
                                  default = nil)
-  if valid_594838 != nil:
-    section.add "$filter", valid_594838
+  if valid_564971 != nil:
+    section.add "$filter", valid_564971
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -9306,64 +9300,64 @@ proc validate_ApiSchemaListByApi_594829(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594839: Call_ApiSchemaListByApi_594828; path: JsonNode;
+proc call*(call_564972: Call_ApiSchemaListByApi_564961; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get the schema configuration at the API level.
   ## 
-  let valid = call_594839.validator(path, query, header, formData, body)
-  let scheme = call_594839.pickScheme
+  let valid = call_564972.validator(path, query, header, formData, body)
+  let scheme = call_564972.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594839.url(scheme.get, call_594839.host, call_594839.base,
-                         call_594839.route, valid.getOrDefault("path"),
+  let url = call_564972.url(scheme.get, call_564972.host, call_564972.base,
+                         call_564972.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594839, url, valid)
+  result = hook(call_564972, url, valid)
 
-proc call*(call_594840: Call_ApiSchemaListByApi_594828; resourceGroupName: string;
+proc call*(call_564973: Call_ApiSchemaListByApi_564961; serviceName: string;
           apiVersion: string; apiId: string; subscriptionId: string;
-          serviceName: string; Top: int = 0; Skip: int = 0; Filter: string = ""): Recallable =
+          resourceGroupName: string; Top: int = 0; Skip: int = 0; Filter: string = ""): Recallable =
   ## apiSchemaListByApi
   ## Get the schema configuration at the API level.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   serviceName: string (required)
+  ##              : The name of the API Management service.
+  ##   Top: int
+  ##      : Number of records to return.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
   ##   apiId: string (required)
   ##        : API revision identifier. Must be unique in the current API Management service instance. Non-current revision has ;rev=n as a suffix where n is the revision number.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   Top: int
-  ##      : Number of records to return.
   ##   Skip: int
   ##       : Number of records to skip.
-  ##   serviceName: string (required)
-  ##              : The name of the API Management service.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   Filter: string
   ##         : | Field       | Supported operators    | Supported functions               |
   ## |-------------|------------------------|-----------------------------------|
   ## 
   ## |contentType | ge, le, eq, ne, gt, lt | substringof, contains, startswith, endswith|
   ## 
-  var path_594841 = newJObject()
-  var query_594842 = newJObject()
-  add(path_594841, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594842, "api-version", newJString(apiVersion))
-  add(path_594841, "apiId", newJString(apiId))
-  add(path_594841, "subscriptionId", newJString(subscriptionId))
-  add(query_594842, "$top", newJInt(Top))
-  add(query_594842, "$skip", newJInt(Skip))
-  add(path_594841, "serviceName", newJString(serviceName))
-  add(query_594842, "$filter", newJString(Filter))
-  result = call_594840.call(path_594841, query_594842, nil, nil, nil)
+  var path_564974 = newJObject()
+  var query_564975 = newJObject()
+  add(path_564974, "serviceName", newJString(serviceName))
+  add(query_564975, "$top", newJInt(Top))
+  add(query_564975, "api-version", newJString(apiVersion))
+  add(path_564974, "apiId", newJString(apiId))
+  add(path_564974, "subscriptionId", newJString(subscriptionId))
+  add(query_564975, "$skip", newJInt(Skip))
+  add(path_564974, "resourceGroupName", newJString(resourceGroupName))
+  add(query_564975, "$filter", newJString(Filter))
+  result = call_564973.call(path_564974, query_564975, nil, nil, nil)
 
-var apiSchemaListByApi* = Call_ApiSchemaListByApi_594828(
+var apiSchemaListByApi* = Call_ApiSchemaListByApi_564961(
     name: "apiSchemaListByApi", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ApiManagement/service/{serviceName}/apis/{apiId}/schemas",
-    validator: validate_ApiSchemaListByApi_594829, base: "",
-    url: url_ApiSchemaListByApi_594830, schemes: {Scheme.Https})
+    validator: validate_ApiSchemaListByApi_564962, base: "",
+    url: url_ApiSchemaListByApi_564963, schemes: {Scheme.Https})
 type
-  Call_ApiSchemaCreateOrUpdate_594856 = ref object of OpenApiRestCall_593425
-proc url_ApiSchemaCreateOrUpdate_594858(protocol: Scheme; host: string; base: string;
+  Call_ApiSchemaCreateOrUpdate_564989 = ref object of OpenApiRestCall_563556
+proc url_ApiSchemaCreateOrUpdate_564991(protocol: Scheme; host: string; base: string;
                                        route: string; path: JsonNode;
                                        query: JsonNode): Uri =
   result.scheme = $protocol
@@ -9393,51 +9387,51 @@ proc url_ApiSchemaCreateOrUpdate_594858(protocol: Scheme; host: string; base: st
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ApiSchemaCreateOrUpdate_594857(path: JsonNode; query: JsonNode;
+proc validate_ApiSchemaCreateOrUpdate_564990(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Creates or updates schema configuration for the API.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
+  ##   serviceName: JString (required)
+  ##              : The name of the API Management service.
   ##   apiId: JString (required)
   ##        : API revision identifier. Must be unique in the current API Management service instance. Non-current revision has ;rev=n as a suffix where n is the revision number.
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   schemaId: JString (required)
   ##           : Schema identifier within an API. Must be unique in the current API Management service instance.
-  ##   serviceName: JString (required)
-  ##              : The name of the API Management service.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594859 = path.getOrDefault("resourceGroupName")
-  valid_594859 = validateParameter(valid_594859, JString, required = true,
+        "path argument is necessary due to required `serviceName` field"
+  var valid_564992 = path.getOrDefault("serviceName")
+  valid_564992 = validateParameter(valid_564992, JString, required = true,
                                  default = nil)
-  if valid_594859 != nil:
-    section.add "resourceGroupName", valid_594859
-  var valid_594860 = path.getOrDefault("apiId")
-  valid_594860 = validateParameter(valid_594860, JString, required = true,
+  if valid_564992 != nil:
+    section.add "serviceName", valid_564992
+  var valid_564993 = path.getOrDefault("apiId")
+  valid_564993 = validateParameter(valid_564993, JString, required = true,
                                  default = nil)
-  if valid_594860 != nil:
-    section.add "apiId", valid_594860
-  var valid_594861 = path.getOrDefault("subscriptionId")
-  valid_594861 = validateParameter(valid_594861, JString, required = true,
+  if valid_564993 != nil:
+    section.add "apiId", valid_564993
+  var valid_564994 = path.getOrDefault("subscriptionId")
+  valid_564994 = validateParameter(valid_564994, JString, required = true,
                                  default = nil)
-  if valid_594861 != nil:
-    section.add "subscriptionId", valid_594861
-  var valid_594862 = path.getOrDefault("schemaId")
-  valid_594862 = validateParameter(valid_594862, JString, required = true,
+  if valid_564994 != nil:
+    section.add "subscriptionId", valid_564994
+  var valid_564995 = path.getOrDefault("schemaId")
+  valid_564995 = validateParameter(valid_564995, JString, required = true,
                                  default = nil)
-  if valid_594862 != nil:
-    section.add "schemaId", valid_594862
-  var valid_594863 = path.getOrDefault("serviceName")
-  valid_594863 = validateParameter(valid_594863, JString, required = true,
+  if valid_564995 != nil:
+    section.add "schemaId", valid_564995
+  var valid_564996 = path.getOrDefault("resourceGroupName")
+  valid_564996 = validateParameter(valid_564996, JString, required = true,
                                  default = nil)
-  if valid_594863 != nil:
-    section.add "serviceName", valid_594863
+  if valid_564996 != nil:
+    section.add "resourceGroupName", valid_564996
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -9445,21 +9439,21 @@ proc validate_ApiSchemaCreateOrUpdate_594857(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594864 = query.getOrDefault("api-version")
-  valid_594864 = validateParameter(valid_594864, JString, required = true,
+  var valid_564997 = query.getOrDefault("api-version")
+  valid_564997 = validateParameter(valid_564997, JString, required = true,
                                  default = nil)
-  if valid_594864 != nil:
-    section.add "api-version", valid_594864
+  if valid_564997 != nil:
+    section.add "api-version", valid_564997
   result.add "query", section
   ## parameters in `header` object:
   ##   If-Match: JString
   ##           : ETag of the Entity. Not required when creating an entity, but required when updating an entity.
   section = newJObject()
-  var valid_594865 = header.getOrDefault("If-Match")
-  valid_594865 = validateParameter(valid_594865, JString, required = false,
+  var valid_564998 = header.getOrDefault("If-Match")
+  valid_564998 = validateParameter(valid_564998, JString, required = false,
                                  default = nil)
-  if valid_594865 != nil:
-    section.add "If-Match", valid_594865
+  if valid_564998 != nil:
+    section.add "If-Match", valid_564998
   result.add "header", section
   section = newJObject()
   result.add "formData", section
@@ -9471,27 +9465,26 @@ proc validate_ApiSchemaCreateOrUpdate_594857(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594867: Call_ApiSchemaCreateOrUpdate_594856; path: JsonNode;
+proc call*(call_565000: Call_ApiSchemaCreateOrUpdate_564989; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Creates or updates schema configuration for the API.
   ## 
-  let valid = call_594867.validator(path, query, header, formData, body)
-  let scheme = call_594867.pickScheme
+  let valid = call_565000.validator(path, query, header, formData, body)
+  let scheme = call_565000.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594867.url(scheme.get, call_594867.host, call_594867.base,
-                         call_594867.route, valid.getOrDefault("path"),
+  let url = call_565000.url(scheme.get, call_565000.host, call_565000.base,
+                         call_565000.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594867, url, valid)
+  result = hook(call_565000, url, valid)
 
-proc call*(call_594868: Call_ApiSchemaCreateOrUpdate_594856;
-          resourceGroupName: string; apiVersion: string; apiId: string;
-          subscriptionId: string; schemaId: string; parameters: JsonNode;
-          serviceName: string): Recallable =
+proc call*(call_565001: Call_ApiSchemaCreateOrUpdate_564989; serviceName: string;
+          apiVersion: string; apiId: string; subscriptionId: string; schemaId: string;
+          resourceGroupName: string; parameters: JsonNode): Recallable =
   ## apiSchemaCreateOrUpdate
   ## Creates or updates schema configuration for the API.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   serviceName: string (required)
+  ##              : The name of the API Management service.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
   ##   apiId: string (required)
@@ -9500,31 +9493,31 @@ proc call*(call_594868: Call_ApiSchemaCreateOrUpdate_594856;
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   schemaId: string (required)
   ##           : Schema identifier within an API. Must be unique in the current API Management service instance.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   parameters: JObject (required)
   ##             : The schema contents to apply.
-  ##   serviceName: string (required)
-  ##              : The name of the API Management service.
-  var path_594869 = newJObject()
-  var query_594870 = newJObject()
-  var body_594871 = newJObject()
-  add(path_594869, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594870, "api-version", newJString(apiVersion))
-  add(path_594869, "apiId", newJString(apiId))
-  add(path_594869, "subscriptionId", newJString(subscriptionId))
-  add(path_594869, "schemaId", newJString(schemaId))
+  var path_565002 = newJObject()
+  var query_565003 = newJObject()
+  var body_565004 = newJObject()
+  add(path_565002, "serviceName", newJString(serviceName))
+  add(query_565003, "api-version", newJString(apiVersion))
+  add(path_565002, "apiId", newJString(apiId))
+  add(path_565002, "subscriptionId", newJString(subscriptionId))
+  add(path_565002, "schemaId", newJString(schemaId))
+  add(path_565002, "resourceGroupName", newJString(resourceGroupName))
   if parameters != nil:
-    body_594871 = parameters
-  add(path_594869, "serviceName", newJString(serviceName))
-  result = call_594868.call(path_594869, query_594870, nil, nil, body_594871)
+    body_565004 = parameters
+  result = call_565001.call(path_565002, query_565003, nil, nil, body_565004)
 
-var apiSchemaCreateOrUpdate* = Call_ApiSchemaCreateOrUpdate_594856(
+var apiSchemaCreateOrUpdate* = Call_ApiSchemaCreateOrUpdate_564989(
     name: "apiSchemaCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ApiManagement/service/{serviceName}/apis/{apiId}/schemas/{schemaId}",
-    validator: validate_ApiSchemaCreateOrUpdate_594857, base: "",
-    url: url_ApiSchemaCreateOrUpdate_594858, schemes: {Scheme.Https})
+    validator: validate_ApiSchemaCreateOrUpdate_564990, base: "",
+    url: url_ApiSchemaCreateOrUpdate_564991, schemes: {Scheme.Https})
 type
-  Call_ApiSchemaGetEntityTag_594887 = ref object of OpenApiRestCall_593425
-proc url_ApiSchemaGetEntityTag_594889(protocol: Scheme; host: string; base: string;
+  Call_ApiSchemaGetEntityTag_565020 = ref object of OpenApiRestCall_563556
+proc url_ApiSchemaGetEntityTag_565022(protocol: Scheme; host: string; base: string;
                                      route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -9553,51 +9546,51 @@ proc url_ApiSchemaGetEntityTag_594889(protocol: Scheme; host: string; base: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ApiSchemaGetEntityTag_594888(path: JsonNode; query: JsonNode;
+proc validate_ApiSchemaGetEntityTag_565021(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the entity state (Etag) version of the schema specified by its identifier.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
+  ##   serviceName: JString (required)
+  ##              : The name of the API Management service.
   ##   apiId: JString (required)
   ##        : API revision identifier. Must be unique in the current API Management service instance. Non-current revision has ;rev=n as a suffix where n is the revision number.
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   schemaId: JString (required)
   ##           : Schema identifier within an API. Must be unique in the current API Management service instance.
-  ##   serviceName: JString (required)
-  ##              : The name of the API Management service.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594890 = path.getOrDefault("resourceGroupName")
-  valid_594890 = validateParameter(valid_594890, JString, required = true,
+        "path argument is necessary due to required `serviceName` field"
+  var valid_565023 = path.getOrDefault("serviceName")
+  valid_565023 = validateParameter(valid_565023, JString, required = true,
                                  default = nil)
-  if valid_594890 != nil:
-    section.add "resourceGroupName", valid_594890
-  var valid_594891 = path.getOrDefault("apiId")
-  valid_594891 = validateParameter(valid_594891, JString, required = true,
+  if valid_565023 != nil:
+    section.add "serviceName", valid_565023
+  var valid_565024 = path.getOrDefault("apiId")
+  valid_565024 = validateParameter(valid_565024, JString, required = true,
                                  default = nil)
-  if valid_594891 != nil:
-    section.add "apiId", valid_594891
-  var valid_594892 = path.getOrDefault("subscriptionId")
-  valid_594892 = validateParameter(valid_594892, JString, required = true,
+  if valid_565024 != nil:
+    section.add "apiId", valid_565024
+  var valid_565025 = path.getOrDefault("subscriptionId")
+  valid_565025 = validateParameter(valid_565025, JString, required = true,
                                  default = nil)
-  if valid_594892 != nil:
-    section.add "subscriptionId", valid_594892
-  var valid_594893 = path.getOrDefault("schemaId")
-  valid_594893 = validateParameter(valid_594893, JString, required = true,
+  if valid_565025 != nil:
+    section.add "subscriptionId", valid_565025
+  var valid_565026 = path.getOrDefault("schemaId")
+  valid_565026 = validateParameter(valid_565026, JString, required = true,
                                  default = nil)
-  if valid_594893 != nil:
-    section.add "schemaId", valid_594893
-  var valid_594894 = path.getOrDefault("serviceName")
-  valid_594894 = validateParameter(valid_594894, JString, required = true,
+  if valid_565026 != nil:
+    section.add "schemaId", valid_565026
+  var valid_565027 = path.getOrDefault("resourceGroupName")
+  valid_565027 = validateParameter(valid_565027, JString, required = true,
                                  default = nil)
-  if valid_594894 != nil:
-    section.add "serviceName", valid_594894
+  if valid_565027 != nil:
+    section.add "resourceGroupName", valid_565027
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -9605,11 +9598,11 @@ proc validate_ApiSchemaGetEntityTag_594888(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594895 = query.getOrDefault("api-version")
-  valid_594895 = validateParameter(valid_594895, JString, required = true,
+  var valid_565028 = query.getOrDefault("api-version")
+  valid_565028 = validateParameter(valid_565028, JString, required = true,
                                  default = nil)
-  if valid_594895 != nil:
-    section.add "api-version", valid_594895
+  if valid_565028 != nil:
+    section.add "api-version", valid_565028
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -9618,26 +9611,26 @@ proc validate_ApiSchemaGetEntityTag_594888(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594896: Call_ApiSchemaGetEntityTag_594887; path: JsonNode;
+proc call*(call_565029: Call_ApiSchemaGetEntityTag_565020; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the entity state (Etag) version of the schema specified by its identifier.
   ## 
-  let valid = call_594896.validator(path, query, header, formData, body)
-  let scheme = call_594896.pickScheme
+  let valid = call_565029.validator(path, query, header, formData, body)
+  let scheme = call_565029.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594896.url(scheme.get, call_594896.host, call_594896.base,
-                         call_594896.route, valid.getOrDefault("path"),
+  let url = call_565029.url(scheme.get, call_565029.host, call_565029.base,
+                         call_565029.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594896, url, valid)
+  result = hook(call_565029, url, valid)
 
-proc call*(call_594897: Call_ApiSchemaGetEntityTag_594887;
-          resourceGroupName: string; apiVersion: string; apiId: string;
-          subscriptionId: string; schemaId: string; serviceName: string): Recallable =
+proc call*(call_565030: Call_ApiSchemaGetEntityTag_565020; serviceName: string;
+          apiVersion: string; apiId: string; subscriptionId: string; schemaId: string;
+          resourceGroupName: string): Recallable =
   ## apiSchemaGetEntityTag
   ## Gets the entity state (Etag) version of the schema specified by its identifier.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   serviceName: string (required)
+  ##              : The name of the API Management service.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
   ##   apiId: string (required)
@@ -9646,26 +9639,26 @@ proc call*(call_594897: Call_ApiSchemaGetEntityTag_594887;
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   schemaId: string (required)
   ##           : Schema identifier within an API. Must be unique in the current API Management service instance.
-  ##   serviceName: string (required)
-  ##              : The name of the API Management service.
-  var path_594898 = newJObject()
-  var query_594899 = newJObject()
-  add(path_594898, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594899, "api-version", newJString(apiVersion))
-  add(path_594898, "apiId", newJString(apiId))
-  add(path_594898, "subscriptionId", newJString(subscriptionId))
-  add(path_594898, "schemaId", newJString(schemaId))
-  add(path_594898, "serviceName", newJString(serviceName))
-  result = call_594897.call(path_594898, query_594899, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_565031 = newJObject()
+  var query_565032 = newJObject()
+  add(path_565031, "serviceName", newJString(serviceName))
+  add(query_565032, "api-version", newJString(apiVersion))
+  add(path_565031, "apiId", newJString(apiId))
+  add(path_565031, "subscriptionId", newJString(subscriptionId))
+  add(path_565031, "schemaId", newJString(schemaId))
+  add(path_565031, "resourceGroupName", newJString(resourceGroupName))
+  result = call_565030.call(path_565031, query_565032, nil, nil, nil)
 
-var apiSchemaGetEntityTag* = Call_ApiSchemaGetEntityTag_594887(
+var apiSchemaGetEntityTag* = Call_ApiSchemaGetEntityTag_565020(
     name: "apiSchemaGetEntityTag", meth: HttpMethod.HttpHead,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ApiManagement/service/{serviceName}/apis/{apiId}/schemas/{schemaId}",
-    validator: validate_ApiSchemaGetEntityTag_594888, base: "",
-    url: url_ApiSchemaGetEntityTag_594889, schemes: {Scheme.Https})
+    validator: validate_ApiSchemaGetEntityTag_565021, base: "",
+    url: url_ApiSchemaGetEntityTag_565022, schemes: {Scheme.Https})
 type
-  Call_ApiSchemaGet_594843 = ref object of OpenApiRestCall_593425
-proc url_ApiSchemaGet_594845(protocol: Scheme; host: string; base: string;
+  Call_ApiSchemaGet_564976 = ref object of OpenApiRestCall_563556
+proc url_ApiSchemaGet_564978(protocol: Scheme; host: string; base: string;
                             route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -9694,51 +9687,51 @@ proc url_ApiSchemaGet_594845(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ApiSchemaGet_594844(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_ApiSchemaGet_564977(path: JsonNode; query: JsonNode; header: JsonNode;
                                  formData: JsonNode; body: JsonNode): JsonNode =
   ## Get the schema configuration at the API level.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
+  ##   serviceName: JString (required)
+  ##              : The name of the API Management service.
   ##   apiId: JString (required)
   ##        : API revision identifier. Must be unique in the current API Management service instance. Non-current revision has ;rev=n as a suffix where n is the revision number.
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   schemaId: JString (required)
   ##           : Schema identifier within an API. Must be unique in the current API Management service instance.
-  ##   serviceName: JString (required)
-  ##              : The name of the API Management service.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594846 = path.getOrDefault("resourceGroupName")
-  valid_594846 = validateParameter(valid_594846, JString, required = true,
+        "path argument is necessary due to required `serviceName` field"
+  var valid_564979 = path.getOrDefault("serviceName")
+  valid_564979 = validateParameter(valid_564979, JString, required = true,
                                  default = nil)
-  if valid_594846 != nil:
-    section.add "resourceGroupName", valid_594846
-  var valid_594847 = path.getOrDefault("apiId")
-  valid_594847 = validateParameter(valid_594847, JString, required = true,
+  if valid_564979 != nil:
+    section.add "serviceName", valid_564979
+  var valid_564980 = path.getOrDefault("apiId")
+  valid_564980 = validateParameter(valid_564980, JString, required = true,
                                  default = nil)
-  if valid_594847 != nil:
-    section.add "apiId", valid_594847
-  var valid_594848 = path.getOrDefault("subscriptionId")
-  valid_594848 = validateParameter(valid_594848, JString, required = true,
+  if valid_564980 != nil:
+    section.add "apiId", valid_564980
+  var valid_564981 = path.getOrDefault("subscriptionId")
+  valid_564981 = validateParameter(valid_564981, JString, required = true,
                                  default = nil)
-  if valid_594848 != nil:
-    section.add "subscriptionId", valid_594848
-  var valid_594849 = path.getOrDefault("schemaId")
-  valid_594849 = validateParameter(valid_594849, JString, required = true,
+  if valid_564981 != nil:
+    section.add "subscriptionId", valid_564981
+  var valid_564982 = path.getOrDefault("schemaId")
+  valid_564982 = validateParameter(valid_564982, JString, required = true,
                                  default = nil)
-  if valid_594849 != nil:
-    section.add "schemaId", valid_594849
-  var valid_594850 = path.getOrDefault("serviceName")
-  valid_594850 = validateParameter(valid_594850, JString, required = true,
+  if valid_564982 != nil:
+    section.add "schemaId", valid_564982
+  var valid_564983 = path.getOrDefault("resourceGroupName")
+  valid_564983 = validateParameter(valid_564983, JString, required = true,
                                  default = nil)
-  if valid_594850 != nil:
-    section.add "serviceName", valid_594850
+  if valid_564983 != nil:
+    section.add "resourceGroupName", valid_564983
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -9746,11 +9739,11 @@ proc validate_ApiSchemaGet_594844(path: JsonNode; query: JsonNode; header: JsonN
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594851 = query.getOrDefault("api-version")
-  valid_594851 = validateParameter(valid_594851, JString, required = true,
+  var valid_564984 = query.getOrDefault("api-version")
+  valid_564984 = validateParameter(valid_564984, JString, required = true,
                                  default = nil)
-  if valid_594851 != nil:
-    section.add "api-version", valid_594851
+  if valid_564984 != nil:
+    section.add "api-version", valid_564984
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -9759,26 +9752,26 @@ proc validate_ApiSchemaGet_594844(path: JsonNode; query: JsonNode; header: JsonN
   if body != nil:
     result.add "body", body
 
-proc call*(call_594852: Call_ApiSchemaGet_594843; path: JsonNode; query: JsonNode;
+proc call*(call_564985: Call_ApiSchemaGet_564976; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get the schema configuration at the API level.
   ## 
-  let valid = call_594852.validator(path, query, header, formData, body)
-  let scheme = call_594852.pickScheme
+  let valid = call_564985.validator(path, query, header, formData, body)
+  let scheme = call_564985.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594852.url(scheme.get, call_594852.host, call_594852.base,
-                         call_594852.route, valid.getOrDefault("path"),
+  let url = call_564985.url(scheme.get, call_564985.host, call_564985.base,
+                         call_564985.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594852, url, valid)
+  result = hook(call_564985, url, valid)
 
-proc call*(call_594853: Call_ApiSchemaGet_594843; resourceGroupName: string;
+proc call*(call_564986: Call_ApiSchemaGet_564976; serviceName: string;
           apiVersion: string; apiId: string; subscriptionId: string; schemaId: string;
-          serviceName: string): Recallable =
+          resourceGroupName: string): Recallable =
   ## apiSchemaGet
   ## Get the schema configuration at the API level.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   serviceName: string (required)
+  ##              : The name of the API Management service.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
   ##   apiId: string (required)
@@ -9787,25 +9780,25 @@ proc call*(call_594853: Call_ApiSchemaGet_594843; resourceGroupName: string;
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   schemaId: string (required)
   ##           : Schema identifier within an API. Must be unique in the current API Management service instance.
-  ##   serviceName: string (required)
-  ##              : The name of the API Management service.
-  var path_594854 = newJObject()
-  var query_594855 = newJObject()
-  add(path_594854, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594855, "api-version", newJString(apiVersion))
-  add(path_594854, "apiId", newJString(apiId))
-  add(path_594854, "subscriptionId", newJString(subscriptionId))
-  add(path_594854, "schemaId", newJString(schemaId))
-  add(path_594854, "serviceName", newJString(serviceName))
-  result = call_594853.call(path_594854, query_594855, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564987 = newJObject()
+  var query_564988 = newJObject()
+  add(path_564987, "serviceName", newJString(serviceName))
+  add(query_564988, "api-version", newJString(apiVersion))
+  add(path_564987, "apiId", newJString(apiId))
+  add(path_564987, "subscriptionId", newJString(subscriptionId))
+  add(path_564987, "schemaId", newJString(schemaId))
+  add(path_564987, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564986.call(path_564987, query_564988, nil, nil, nil)
 
-var apiSchemaGet* = Call_ApiSchemaGet_594843(name: "apiSchemaGet",
+var apiSchemaGet* = Call_ApiSchemaGet_564976(name: "apiSchemaGet",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ApiManagement/service/{serviceName}/apis/{apiId}/schemas/{schemaId}",
-    validator: validate_ApiSchemaGet_594844, base: "", url: url_ApiSchemaGet_594845,
+    validator: validate_ApiSchemaGet_564977, base: "", url: url_ApiSchemaGet_564978,
     schemes: {Scheme.Https})
 type
-  Call_ApiSchemaDelete_594872 = ref object of OpenApiRestCall_593425
-proc url_ApiSchemaDelete_594874(protocol: Scheme; host: string; base: string;
+  Call_ApiSchemaDelete_565005 = ref object of OpenApiRestCall_563556
+proc url_ApiSchemaDelete_565007(protocol: Scheme; host: string; base: string;
                                route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -9834,7 +9827,7 @@ proc url_ApiSchemaDelete_594874(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ApiSchemaDelete_594873(path: JsonNode; query: JsonNode;
+proc validate_ApiSchemaDelete_565006(path: JsonNode; query: JsonNode;
                                     header: JsonNode; formData: JsonNode;
                                     body: JsonNode): JsonNode =
   ## Deletes the schema configuration at the Api.
@@ -9842,62 +9835,62 @@ proc validate_ApiSchemaDelete_594873(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
+  ##   serviceName: JString (required)
+  ##              : The name of the API Management service.
   ##   apiId: JString (required)
   ##        : API revision identifier. Must be unique in the current API Management service instance. Non-current revision has ;rev=n as a suffix where n is the revision number.
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   schemaId: JString (required)
   ##           : Schema identifier within an API. Must be unique in the current API Management service instance.
-  ##   serviceName: JString (required)
-  ##              : The name of the API Management service.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594875 = path.getOrDefault("resourceGroupName")
-  valid_594875 = validateParameter(valid_594875, JString, required = true,
+        "path argument is necessary due to required `serviceName` field"
+  var valid_565008 = path.getOrDefault("serviceName")
+  valid_565008 = validateParameter(valid_565008, JString, required = true,
                                  default = nil)
-  if valid_594875 != nil:
-    section.add "resourceGroupName", valid_594875
-  var valid_594876 = path.getOrDefault("apiId")
-  valid_594876 = validateParameter(valid_594876, JString, required = true,
+  if valid_565008 != nil:
+    section.add "serviceName", valid_565008
+  var valid_565009 = path.getOrDefault("apiId")
+  valid_565009 = validateParameter(valid_565009, JString, required = true,
                                  default = nil)
-  if valid_594876 != nil:
-    section.add "apiId", valid_594876
-  var valid_594877 = path.getOrDefault("subscriptionId")
-  valid_594877 = validateParameter(valid_594877, JString, required = true,
+  if valid_565009 != nil:
+    section.add "apiId", valid_565009
+  var valid_565010 = path.getOrDefault("subscriptionId")
+  valid_565010 = validateParameter(valid_565010, JString, required = true,
                                  default = nil)
-  if valid_594877 != nil:
-    section.add "subscriptionId", valid_594877
-  var valid_594878 = path.getOrDefault("schemaId")
-  valid_594878 = validateParameter(valid_594878, JString, required = true,
+  if valid_565010 != nil:
+    section.add "subscriptionId", valid_565010
+  var valid_565011 = path.getOrDefault("schemaId")
+  valid_565011 = validateParameter(valid_565011, JString, required = true,
                                  default = nil)
-  if valid_594878 != nil:
-    section.add "schemaId", valid_594878
-  var valid_594879 = path.getOrDefault("serviceName")
-  valid_594879 = validateParameter(valid_594879, JString, required = true,
+  if valid_565011 != nil:
+    section.add "schemaId", valid_565011
+  var valid_565012 = path.getOrDefault("resourceGroupName")
+  valid_565012 = validateParameter(valid_565012, JString, required = true,
                                  default = nil)
-  if valid_594879 != nil:
-    section.add "serviceName", valid_594879
+  if valid_565012 != nil:
+    section.add "resourceGroupName", valid_565012
   result.add "path", section
   ## parameters in `query` object:
-  ##   force: JBool
-  ##        : If true removes all references to the schema before deleting it.
   ##   api-version: JString (required)
   ##              : Version of the API to be used with the client request.
+  ##   force: JBool
+  ##        : If true removes all references to the schema before deleting it.
   section = newJObject()
-  var valid_594880 = query.getOrDefault("force")
-  valid_594880 = validateParameter(valid_594880, JBool, required = false, default = nil)
-  if valid_594880 != nil:
-    section.add "force", valid_594880
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594881 = query.getOrDefault("api-version")
-  valid_594881 = validateParameter(valid_594881, JString, required = true,
+  var valid_565013 = query.getOrDefault("api-version")
+  valid_565013 = validateParameter(valid_565013, JString, required = true,
                                  default = nil)
-  if valid_594881 != nil:
-    section.add "api-version", valid_594881
+  if valid_565013 != nil:
+    section.add "api-version", valid_565013
+  var valid_565014 = query.getOrDefault("force")
+  valid_565014 = validateParameter(valid_565014, JBool, required = false, default = nil)
+  if valid_565014 != nil:
+    section.add "force", valid_565014
   result.add "query", section
   ## parameters in `header` object:
   ##   If-Match: JString (required)
@@ -9905,67 +9898,67 @@ proc validate_ApiSchemaDelete_594873(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert header != nil,
         "header argument is necessary due to required `If-Match` field"
-  var valid_594882 = header.getOrDefault("If-Match")
-  valid_594882 = validateParameter(valid_594882, JString, required = true,
+  var valid_565015 = header.getOrDefault("If-Match")
+  valid_565015 = validateParameter(valid_565015, JString, required = true,
                                  default = nil)
-  if valid_594882 != nil:
-    section.add "If-Match", valid_594882
+  if valid_565015 != nil:
+    section.add "If-Match", valid_565015
   result.add "header", section
   section = newJObject()
   result.add "formData", section
   if body != nil:
     result.add "body", body
 
-proc call*(call_594883: Call_ApiSchemaDelete_594872; path: JsonNode; query: JsonNode;
+proc call*(call_565016: Call_ApiSchemaDelete_565005; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes the schema configuration at the Api.
   ## 
-  let valid = call_594883.validator(path, query, header, formData, body)
-  let scheme = call_594883.pickScheme
+  let valid = call_565016.validator(path, query, header, formData, body)
+  let scheme = call_565016.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594883.url(scheme.get, call_594883.host, call_594883.base,
-                         call_594883.route, valid.getOrDefault("path"),
+  let url = call_565016.url(scheme.get, call_565016.host, call_565016.base,
+                         call_565016.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594883, url, valid)
+  result = hook(call_565016, url, valid)
 
-proc call*(call_594884: Call_ApiSchemaDelete_594872; resourceGroupName: string;
+proc call*(call_565017: Call_ApiSchemaDelete_565005; serviceName: string;
           apiVersion: string; apiId: string; subscriptionId: string; schemaId: string;
-          serviceName: string; force: bool = false): Recallable =
+          resourceGroupName: string; force: bool = false): Recallable =
   ## apiSchemaDelete
   ## Deletes the schema configuration at the Api.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
-  ##   force: bool
-  ##        : If true removes all references to the schema before deleting it.
+  ##   serviceName: string (required)
+  ##              : The name of the API Management service.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
   ##   apiId: string (required)
   ##        : API revision identifier. Must be unique in the current API Management service instance. Non-current revision has ;rev=n as a suffix where n is the revision number.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   force: bool
+  ##        : If true removes all references to the schema before deleting it.
   ##   schemaId: string (required)
   ##           : Schema identifier within an API. Must be unique in the current API Management service instance.
-  ##   serviceName: string (required)
-  ##              : The name of the API Management service.
-  var path_594885 = newJObject()
-  var query_594886 = newJObject()
-  add(path_594885, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594886, "force", newJBool(force))
-  add(query_594886, "api-version", newJString(apiVersion))
-  add(path_594885, "apiId", newJString(apiId))
-  add(path_594885, "subscriptionId", newJString(subscriptionId))
-  add(path_594885, "schemaId", newJString(schemaId))
-  add(path_594885, "serviceName", newJString(serviceName))
-  result = call_594884.call(path_594885, query_594886, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_565018 = newJObject()
+  var query_565019 = newJObject()
+  add(path_565018, "serviceName", newJString(serviceName))
+  add(query_565019, "api-version", newJString(apiVersion))
+  add(path_565018, "apiId", newJString(apiId))
+  add(path_565018, "subscriptionId", newJString(subscriptionId))
+  add(query_565019, "force", newJBool(force))
+  add(path_565018, "schemaId", newJString(schemaId))
+  add(path_565018, "resourceGroupName", newJString(resourceGroupName))
+  result = call_565017.call(path_565018, query_565019, nil, nil, nil)
 
-var apiSchemaDelete* = Call_ApiSchemaDelete_594872(name: "apiSchemaDelete",
+var apiSchemaDelete* = Call_ApiSchemaDelete_565005(name: "apiSchemaDelete",
     meth: HttpMethod.HttpDelete, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ApiManagement/service/{serviceName}/apis/{apiId}/schemas/{schemaId}",
-    validator: validate_ApiSchemaDelete_594873, base: "", url: url_ApiSchemaDelete_594874,
+    validator: validate_ApiSchemaDelete_565006, base: "", url: url_ApiSchemaDelete_565007,
     schemes: {Scheme.Https})
 type
-  Call_TagDescriptionListByApi_594900 = ref object of OpenApiRestCall_593425
-proc url_TagDescriptionListByApi_594902(protocol: Scheme; host: string; base: string;
+  Call_TagDescriptionListByApi_565033 = ref object of OpenApiRestCall_563556
+proc url_TagDescriptionListByApi_565035(protocol: Scheme; host: string; base: string;
                                        route: string; path: JsonNode;
                                        query: JsonNode): Uri =
   result.scheme = $protocol
@@ -9993,50 +9986,50 @@ proc url_TagDescriptionListByApi_594902(protocol: Scheme; host: string; base: st
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_TagDescriptionListByApi_594901(path: JsonNode; query: JsonNode;
+proc validate_TagDescriptionListByApi_565034(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists all Tags descriptions in scope of API. Model similar to swagger - tagDescription is defined on API level but tag may be assigned to the Operations
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
+  ##   serviceName: JString (required)
+  ##              : The name of the API Management service.
   ##   apiId: JString (required)
   ##        : API revision identifier. Must be unique in the current API Management service instance. Non-current revision has ;rev=n as a suffix where n is the revision number.
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   serviceName: JString (required)
-  ##              : The name of the API Management service.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594903 = path.getOrDefault("resourceGroupName")
-  valid_594903 = validateParameter(valid_594903, JString, required = true,
+        "path argument is necessary due to required `serviceName` field"
+  var valid_565036 = path.getOrDefault("serviceName")
+  valid_565036 = validateParameter(valid_565036, JString, required = true,
                                  default = nil)
-  if valid_594903 != nil:
-    section.add "resourceGroupName", valid_594903
-  var valid_594904 = path.getOrDefault("apiId")
-  valid_594904 = validateParameter(valid_594904, JString, required = true,
+  if valid_565036 != nil:
+    section.add "serviceName", valid_565036
+  var valid_565037 = path.getOrDefault("apiId")
+  valid_565037 = validateParameter(valid_565037, JString, required = true,
                                  default = nil)
-  if valid_594904 != nil:
-    section.add "apiId", valid_594904
-  var valid_594905 = path.getOrDefault("subscriptionId")
-  valid_594905 = validateParameter(valid_594905, JString, required = true,
+  if valid_565037 != nil:
+    section.add "apiId", valid_565037
+  var valid_565038 = path.getOrDefault("subscriptionId")
+  valid_565038 = validateParameter(valid_565038, JString, required = true,
                                  default = nil)
-  if valid_594905 != nil:
-    section.add "subscriptionId", valid_594905
-  var valid_594906 = path.getOrDefault("serviceName")
-  valid_594906 = validateParameter(valid_594906, JString, required = true,
+  if valid_565038 != nil:
+    section.add "subscriptionId", valid_565038
+  var valid_565039 = path.getOrDefault("resourceGroupName")
+  valid_565039 = validateParameter(valid_565039, JString, required = true,
                                  default = nil)
-  if valid_594906 != nil:
-    section.add "serviceName", valid_594906
+  if valid_565039 != nil:
+    section.add "resourceGroupName", valid_565039
   result.add "path", section
   ## parameters in `query` object:
-  ##   api-version: JString (required)
-  ##              : Version of the API to be used with the client request.
   ##   $top: JInt
   ##       : Number of records to return.
+  ##   api-version: JString (required)
+  ##              : Version of the API to be used with the client request.
   ##   $skip: JInt
   ##        : Number of records to skip.
   ##   $filter: JString
@@ -10047,26 +10040,26 @@ proc validate_TagDescriptionListByApi_594901(path: JsonNode; query: JsonNode;
   ## |name | ge, le, eq, ne, gt, lt | substringof, contains, startswith, endswith|
   ## 
   section = newJObject()
+  var valid_565040 = query.getOrDefault("$top")
+  valid_565040 = validateParameter(valid_565040, JInt, required = false, default = nil)
+  if valid_565040 != nil:
+    section.add "$top", valid_565040
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594907 = query.getOrDefault("api-version")
-  valid_594907 = validateParameter(valid_594907, JString, required = true,
+  var valid_565041 = query.getOrDefault("api-version")
+  valid_565041 = validateParameter(valid_565041, JString, required = true,
                                  default = nil)
-  if valid_594907 != nil:
-    section.add "api-version", valid_594907
-  var valid_594908 = query.getOrDefault("$top")
-  valid_594908 = validateParameter(valid_594908, JInt, required = false, default = nil)
-  if valid_594908 != nil:
-    section.add "$top", valid_594908
-  var valid_594909 = query.getOrDefault("$skip")
-  valid_594909 = validateParameter(valid_594909, JInt, required = false, default = nil)
-  if valid_594909 != nil:
-    section.add "$skip", valid_594909
-  var valid_594910 = query.getOrDefault("$filter")
-  valid_594910 = validateParameter(valid_594910, JString, required = false,
+  if valid_565041 != nil:
+    section.add "api-version", valid_565041
+  var valid_565042 = query.getOrDefault("$skip")
+  valid_565042 = validateParameter(valid_565042, JInt, required = false, default = nil)
+  if valid_565042 != nil:
+    section.add "$skip", valid_565042
+  var valid_565043 = query.getOrDefault("$filter")
+  valid_565043 = validateParameter(valid_565043, JString, required = false,
                                  default = nil)
-  if valid_594910 != nil:
-    section.add "$filter", valid_594910
+  if valid_565043 != nil:
+    section.add "$filter", valid_565043
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -10075,39 +10068,38 @@ proc validate_TagDescriptionListByApi_594901(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594911: Call_TagDescriptionListByApi_594900; path: JsonNode;
+proc call*(call_565044: Call_TagDescriptionListByApi_565033; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists all Tags descriptions in scope of API. Model similar to swagger - tagDescription is defined on API level but tag may be assigned to the Operations
   ## 
-  let valid = call_594911.validator(path, query, header, formData, body)
-  let scheme = call_594911.pickScheme
+  let valid = call_565044.validator(path, query, header, formData, body)
+  let scheme = call_565044.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594911.url(scheme.get, call_594911.host, call_594911.base,
-                         call_594911.route, valid.getOrDefault("path"),
+  let url = call_565044.url(scheme.get, call_565044.host, call_565044.base,
+                         call_565044.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594911, url, valid)
+  result = hook(call_565044, url, valid)
 
-proc call*(call_594912: Call_TagDescriptionListByApi_594900;
-          resourceGroupName: string; apiVersion: string; apiId: string;
-          subscriptionId: string; serviceName: string; Top: int = 0; Skip: int = 0;
-          Filter: string = ""): Recallable =
+proc call*(call_565045: Call_TagDescriptionListByApi_565033; serviceName: string;
+          apiVersion: string; apiId: string; subscriptionId: string;
+          resourceGroupName: string; Top: int = 0; Skip: int = 0; Filter: string = ""): Recallable =
   ## tagDescriptionListByApi
   ## Lists all Tags descriptions in scope of API. Model similar to swagger - tagDescription is defined on API level but tag may be assigned to the Operations
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   serviceName: string (required)
+  ##              : The name of the API Management service.
+  ##   Top: int
+  ##      : Number of records to return.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
   ##   apiId: string (required)
   ##        : API revision identifier. Must be unique in the current API Management service instance. Non-current revision has ;rev=n as a suffix where n is the revision number.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   Top: int
-  ##      : Number of records to return.
   ##   Skip: int
   ##       : Number of records to skip.
-  ##   serviceName: string (required)
-  ##              : The name of the API Management service.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   Filter: string
   ##         : | Field       | Supported operators    | Supported functions               |
   ## |-------------|------------------------|-----------------------------------|
@@ -10115,26 +10107,26 @@ proc call*(call_594912: Call_TagDescriptionListByApi_594900;
   ## |displayName | ge, le, eq, ne, gt, lt | substringof, contains, startswith, endswith|
   ## |name | ge, le, eq, ne, gt, lt | substringof, contains, startswith, endswith|
   ## 
-  var path_594913 = newJObject()
-  var query_594914 = newJObject()
-  add(path_594913, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594914, "api-version", newJString(apiVersion))
-  add(path_594913, "apiId", newJString(apiId))
-  add(path_594913, "subscriptionId", newJString(subscriptionId))
-  add(query_594914, "$top", newJInt(Top))
-  add(query_594914, "$skip", newJInt(Skip))
-  add(path_594913, "serviceName", newJString(serviceName))
-  add(query_594914, "$filter", newJString(Filter))
-  result = call_594912.call(path_594913, query_594914, nil, nil, nil)
+  var path_565046 = newJObject()
+  var query_565047 = newJObject()
+  add(path_565046, "serviceName", newJString(serviceName))
+  add(query_565047, "$top", newJInt(Top))
+  add(query_565047, "api-version", newJString(apiVersion))
+  add(path_565046, "apiId", newJString(apiId))
+  add(path_565046, "subscriptionId", newJString(subscriptionId))
+  add(query_565047, "$skip", newJInt(Skip))
+  add(path_565046, "resourceGroupName", newJString(resourceGroupName))
+  add(query_565047, "$filter", newJString(Filter))
+  result = call_565045.call(path_565046, query_565047, nil, nil, nil)
 
-var tagDescriptionListByApi* = Call_TagDescriptionListByApi_594900(
+var tagDescriptionListByApi* = Call_TagDescriptionListByApi_565033(
     name: "tagDescriptionListByApi", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ApiManagement/service/{serviceName}/apis/{apiId}/tagDescriptions",
-    validator: validate_TagDescriptionListByApi_594901, base: "",
-    url: url_TagDescriptionListByApi_594902, schemes: {Scheme.Https})
+    validator: validate_TagDescriptionListByApi_565034, base: "",
+    url: url_TagDescriptionListByApi_565035, schemes: {Scheme.Https})
 type
-  Call_TagDescriptionCreateOrUpdate_594928 = ref object of OpenApiRestCall_593425
-proc url_TagDescriptionCreateOrUpdate_594930(protocol: Scheme; host: string;
+  Call_TagDescriptionCreateOrUpdate_565061 = ref object of OpenApiRestCall_563556
+proc url_TagDescriptionCreateOrUpdate_565063(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -10163,50 +10155,51 @@ proc url_TagDescriptionCreateOrUpdate_594930(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_TagDescriptionCreateOrUpdate_594929(path: JsonNode; query: JsonNode;
+proc validate_TagDescriptionCreateOrUpdate_565062(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Create/Update tag description in scope of the Api.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
+  ##   serviceName: JString (required)
+  ##              : The name of the API Management service.
   ##   tagId: JString (required)
   ##        : Tag identifier. Must be unique in the current API Management service instance.
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   apiId: JString (required)
   ##        : API revision identifier. Must be unique in the current API Management service instance. Non-current revision has ;rev=n as a suffix where n is the revision number.
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   serviceName: JString (required)
-  ##              : The name of the API Management service.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
-  assert path != nil, "path argument is necessary due to required `tagId` field"
-  var valid_594931 = path.getOrDefault("tagId")
-  valid_594931 = validateParameter(valid_594931, JString, required = true,
+  assert path != nil,
+        "path argument is necessary due to required `serviceName` field"
+  var valid_565064 = path.getOrDefault("serviceName")
+  valid_565064 = validateParameter(valid_565064, JString, required = true,
                                  default = nil)
-  if valid_594931 != nil:
-    section.add "tagId", valid_594931
-  var valid_594932 = path.getOrDefault("resourceGroupName")
-  valid_594932 = validateParameter(valid_594932, JString, required = true,
+  if valid_565064 != nil:
+    section.add "serviceName", valid_565064
+  var valid_565065 = path.getOrDefault("tagId")
+  valid_565065 = validateParameter(valid_565065, JString, required = true,
                                  default = nil)
-  if valid_594932 != nil:
-    section.add "resourceGroupName", valid_594932
-  var valid_594933 = path.getOrDefault("apiId")
-  valid_594933 = validateParameter(valid_594933, JString, required = true,
+  if valid_565065 != nil:
+    section.add "tagId", valid_565065
+  var valid_565066 = path.getOrDefault("apiId")
+  valid_565066 = validateParameter(valid_565066, JString, required = true,
                                  default = nil)
-  if valid_594933 != nil:
-    section.add "apiId", valid_594933
-  var valid_594934 = path.getOrDefault("subscriptionId")
-  valid_594934 = validateParameter(valid_594934, JString, required = true,
+  if valid_565066 != nil:
+    section.add "apiId", valid_565066
+  var valid_565067 = path.getOrDefault("subscriptionId")
+  valid_565067 = validateParameter(valid_565067, JString, required = true,
                                  default = nil)
-  if valid_594934 != nil:
-    section.add "subscriptionId", valid_594934
-  var valid_594935 = path.getOrDefault("serviceName")
-  valid_594935 = validateParameter(valid_594935, JString, required = true,
+  if valid_565067 != nil:
+    section.add "subscriptionId", valid_565067
+  var valid_565068 = path.getOrDefault("resourceGroupName")
+  valid_565068 = validateParameter(valid_565068, JString, required = true,
                                  default = nil)
-  if valid_594935 != nil:
-    section.add "serviceName", valid_594935
+  if valid_565068 != nil:
+    section.add "resourceGroupName", valid_565068
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -10214,21 +10207,21 @@ proc validate_TagDescriptionCreateOrUpdate_594929(path: JsonNode; query: JsonNod
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594936 = query.getOrDefault("api-version")
-  valid_594936 = validateParameter(valid_594936, JString, required = true,
+  var valid_565069 = query.getOrDefault("api-version")
+  valid_565069 = validateParameter(valid_565069, JString, required = true,
                                  default = nil)
-  if valid_594936 != nil:
-    section.add "api-version", valid_594936
+  if valid_565069 != nil:
+    section.add "api-version", valid_565069
   result.add "query", section
   ## parameters in `header` object:
   ##   If-Match: JString
   ##           : ETag of the Entity. Not required when creating an entity, but required when updating an entity.
   section = newJObject()
-  var valid_594937 = header.getOrDefault("If-Match")
-  valid_594937 = validateParameter(valid_594937, JString, required = false,
+  var valid_565070 = header.getOrDefault("If-Match")
+  valid_565070 = validateParameter(valid_565070, JString, required = false,
                                  default = nil)
-  if valid_594937 != nil:
-    section.add "If-Match", valid_594937
+  if valid_565070 != nil:
+    section.add "If-Match", valid_565070
   result.add "header", section
   section = newJObject()
   result.add "formData", section
@@ -10240,59 +10233,59 @@ proc validate_TagDescriptionCreateOrUpdate_594929(path: JsonNode; query: JsonNod
   if body != nil:
     result.add "body", body
 
-proc call*(call_594939: Call_TagDescriptionCreateOrUpdate_594928; path: JsonNode;
+proc call*(call_565072: Call_TagDescriptionCreateOrUpdate_565061; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Create/Update tag description in scope of the Api.
   ## 
-  let valid = call_594939.validator(path, query, header, formData, body)
-  let scheme = call_594939.pickScheme
+  let valid = call_565072.validator(path, query, header, formData, body)
+  let scheme = call_565072.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594939.url(scheme.get, call_594939.host, call_594939.base,
-                         call_594939.route, valid.getOrDefault("path"),
+  let url = call_565072.url(scheme.get, call_565072.host, call_565072.base,
+                         call_565072.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594939, url, valid)
+  result = hook(call_565072, url, valid)
 
-proc call*(call_594940: Call_TagDescriptionCreateOrUpdate_594928; tagId: string;
-          resourceGroupName: string; apiVersion: string; apiId: string;
-          subscriptionId: string; parameters: JsonNode; serviceName: string): Recallable =
+proc call*(call_565073: Call_TagDescriptionCreateOrUpdate_565061;
+          serviceName: string; apiVersion: string; tagId: string; apiId: string;
+          subscriptionId: string; resourceGroupName: string; parameters: JsonNode): Recallable =
   ## tagDescriptionCreateOrUpdate
   ## Create/Update tag description in scope of the Api.
-  ##   tagId: string (required)
-  ##        : Tag identifier. Must be unique in the current API Management service instance.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   serviceName: string (required)
+  ##              : The name of the API Management service.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
+  ##   tagId: string (required)
+  ##        : Tag identifier. Must be unique in the current API Management service instance.
   ##   apiId: string (required)
   ##        : API revision identifier. Must be unique in the current API Management service instance. Non-current revision has ;rev=n as a suffix where n is the revision number.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   parameters: JObject (required)
   ##             : Create parameters.
-  ##   serviceName: string (required)
-  ##              : The name of the API Management service.
-  var path_594941 = newJObject()
-  var query_594942 = newJObject()
-  var body_594943 = newJObject()
-  add(path_594941, "tagId", newJString(tagId))
-  add(path_594941, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594942, "api-version", newJString(apiVersion))
-  add(path_594941, "apiId", newJString(apiId))
-  add(path_594941, "subscriptionId", newJString(subscriptionId))
+  var path_565074 = newJObject()
+  var query_565075 = newJObject()
+  var body_565076 = newJObject()
+  add(path_565074, "serviceName", newJString(serviceName))
+  add(query_565075, "api-version", newJString(apiVersion))
+  add(path_565074, "tagId", newJString(tagId))
+  add(path_565074, "apiId", newJString(apiId))
+  add(path_565074, "subscriptionId", newJString(subscriptionId))
+  add(path_565074, "resourceGroupName", newJString(resourceGroupName))
   if parameters != nil:
-    body_594943 = parameters
-  add(path_594941, "serviceName", newJString(serviceName))
-  result = call_594940.call(path_594941, query_594942, nil, nil, body_594943)
+    body_565076 = parameters
+  result = call_565073.call(path_565074, query_565075, nil, nil, body_565076)
 
-var tagDescriptionCreateOrUpdate* = Call_TagDescriptionCreateOrUpdate_594928(
+var tagDescriptionCreateOrUpdate* = Call_TagDescriptionCreateOrUpdate_565061(
     name: "tagDescriptionCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ApiManagement/service/{serviceName}/apis/{apiId}/tagDescriptions/{tagId}",
-    validator: validate_TagDescriptionCreateOrUpdate_594929, base: "",
-    url: url_TagDescriptionCreateOrUpdate_594930, schemes: {Scheme.Https})
+    validator: validate_TagDescriptionCreateOrUpdate_565062, base: "",
+    url: url_TagDescriptionCreateOrUpdate_565063, schemes: {Scheme.Https})
 type
-  Call_TagDescriptionGetEntityState_594958 = ref object of OpenApiRestCall_593425
-proc url_TagDescriptionGetEntityState_594960(protocol: Scheme; host: string;
+  Call_TagDescriptionGetEntityState_565091 = ref object of OpenApiRestCall_563556
+proc url_TagDescriptionGetEntityState_565093(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -10321,50 +10314,51 @@ proc url_TagDescriptionGetEntityState_594960(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_TagDescriptionGetEntityState_594959(path: JsonNode; query: JsonNode;
+proc validate_TagDescriptionGetEntityState_565092(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the entity state version of the tag specified by its identifier.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
+  ##   serviceName: JString (required)
+  ##              : The name of the API Management service.
   ##   tagId: JString (required)
   ##        : Tag identifier. Must be unique in the current API Management service instance.
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   apiId: JString (required)
   ##        : API revision identifier. Must be unique in the current API Management service instance. Non-current revision has ;rev=n as a suffix where n is the revision number.
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   serviceName: JString (required)
-  ##              : The name of the API Management service.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
-  assert path != nil, "path argument is necessary due to required `tagId` field"
-  var valid_594961 = path.getOrDefault("tagId")
-  valid_594961 = validateParameter(valid_594961, JString, required = true,
+  assert path != nil,
+        "path argument is necessary due to required `serviceName` field"
+  var valid_565094 = path.getOrDefault("serviceName")
+  valid_565094 = validateParameter(valid_565094, JString, required = true,
                                  default = nil)
-  if valid_594961 != nil:
-    section.add "tagId", valid_594961
-  var valid_594962 = path.getOrDefault("resourceGroupName")
-  valid_594962 = validateParameter(valid_594962, JString, required = true,
+  if valid_565094 != nil:
+    section.add "serviceName", valid_565094
+  var valid_565095 = path.getOrDefault("tagId")
+  valid_565095 = validateParameter(valid_565095, JString, required = true,
                                  default = nil)
-  if valid_594962 != nil:
-    section.add "resourceGroupName", valid_594962
-  var valid_594963 = path.getOrDefault("apiId")
-  valid_594963 = validateParameter(valid_594963, JString, required = true,
+  if valid_565095 != nil:
+    section.add "tagId", valid_565095
+  var valid_565096 = path.getOrDefault("apiId")
+  valid_565096 = validateParameter(valid_565096, JString, required = true,
                                  default = nil)
-  if valid_594963 != nil:
-    section.add "apiId", valid_594963
-  var valid_594964 = path.getOrDefault("subscriptionId")
-  valid_594964 = validateParameter(valid_594964, JString, required = true,
+  if valid_565096 != nil:
+    section.add "apiId", valid_565096
+  var valid_565097 = path.getOrDefault("subscriptionId")
+  valid_565097 = validateParameter(valid_565097, JString, required = true,
                                  default = nil)
-  if valid_594964 != nil:
-    section.add "subscriptionId", valid_594964
-  var valid_594965 = path.getOrDefault("serviceName")
-  valid_594965 = validateParameter(valid_594965, JString, required = true,
+  if valid_565097 != nil:
+    section.add "subscriptionId", valid_565097
+  var valid_565098 = path.getOrDefault("resourceGroupName")
+  valid_565098 = validateParameter(valid_565098, JString, required = true,
                                  default = nil)
-  if valid_594965 != nil:
-    section.add "serviceName", valid_594965
+  if valid_565098 != nil:
+    section.add "resourceGroupName", valid_565098
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -10372,11 +10366,11 @@ proc validate_TagDescriptionGetEntityState_594959(path: JsonNode; query: JsonNod
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594966 = query.getOrDefault("api-version")
-  valid_594966 = validateParameter(valid_594966, JString, required = true,
+  var valid_565099 = query.getOrDefault("api-version")
+  valid_565099 = validateParameter(valid_565099, JString, required = true,
                                  default = nil)
-  if valid_594966 != nil:
-    section.add "api-version", valid_594966
+  if valid_565099 != nil:
+    section.add "api-version", valid_565099
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -10385,54 +10379,54 @@ proc validate_TagDescriptionGetEntityState_594959(path: JsonNode; query: JsonNod
   if body != nil:
     result.add "body", body
 
-proc call*(call_594967: Call_TagDescriptionGetEntityState_594958; path: JsonNode;
+proc call*(call_565100: Call_TagDescriptionGetEntityState_565091; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the entity state version of the tag specified by its identifier.
   ## 
-  let valid = call_594967.validator(path, query, header, formData, body)
-  let scheme = call_594967.pickScheme
+  let valid = call_565100.validator(path, query, header, formData, body)
+  let scheme = call_565100.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594967.url(scheme.get, call_594967.host, call_594967.base,
-                         call_594967.route, valid.getOrDefault("path"),
+  let url = call_565100.url(scheme.get, call_565100.host, call_565100.base,
+                         call_565100.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594967, url, valid)
+  result = hook(call_565100, url, valid)
 
-proc call*(call_594968: Call_TagDescriptionGetEntityState_594958; tagId: string;
-          resourceGroupName: string; apiVersion: string; apiId: string;
-          subscriptionId: string; serviceName: string): Recallable =
+proc call*(call_565101: Call_TagDescriptionGetEntityState_565091;
+          serviceName: string; apiVersion: string; tagId: string; apiId: string;
+          subscriptionId: string; resourceGroupName: string): Recallable =
   ## tagDescriptionGetEntityState
   ## Gets the entity state version of the tag specified by its identifier.
-  ##   tagId: string (required)
-  ##        : Tag identifier. Must be unique in the current API Management service instance.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   serviceName: string (required)
+  ##              : The name of the API Management service.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
+  ##   tagId: string (required)
+  ##        : Tag identifier. Must be unique in the current API Management service instance.
   ##   apiId: string (required)
   ##        : API revision identifier. Must be unique in the current API Management service instance. Non-current revision has ;rev=n as a suffix where n is the revision number.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   serviceName: string (required)
-  ##              : The name of the API Management service.
-  var path_594969 = newJObject()
-  var query_594970 = newJObject()
-  add(path_594969, "tagId", newJString(tagId))
-  add(path_594969, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594970, "api-version", newJString(apiVersion))
-  add(path_594969, "apiId", newJString(apiId))
-  add(path_594969, "subscriptionId", newJString(subscriptionId))
-  add(path_594969, "serviceName", newJString(serviceName))
-  result = call_594968.call(path_594969, query_594970, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_565102 = newJObject()
+  var query_565103 = newJObject()
+  add(path_565102, "serviceName", newJString(serviceName))
+  add(query_565103, "api-version", newJString(apiVersion))
+  add(path_565102, "tagId", newJString(tagId))
+  add(path_565102, "apiId", newJString(apiId))
+  add(path_565102, "subscriptionId", newJString(subscriptionId))
+  add(path_565102, "resourceGroupName", newJString(resourceGroupName))
+  result = call_565101.call(path_565102, query_565103, nil, nil, nil)
 
-var tagDescriptionGetEntityState* = Call_TagDescriptionGetEntityState_594958(
+var tagDescriptionGetEntityState* = Call_TagDescriptionGetEntityState_565091(
     name: "tagDescriptionGetEntityState", meth: HttpMethod.HttpHead,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ApiManagement/service/{serviceName}/apis/{apiId}/tagDescriptions/{tagId}",
-    validator: validate_TagDescriptionGetEntityState_594959, base: "",
-    url: url_TagDescriptionGetEntityState_594960, schemes: {Scheme.Https})
+    validator: validate_TagDescriptionGetEntityState_565092, base: "",
+    url: url_TagDescriptionGetEntityState_565093, schemes: {Scheme.Https})
 type
-  Call_TagDescriptionGet_594915 = ref object of OpenApiRestCall_593425
-proc url_TagDescriptionGet_594917(protocol: Scheme; host: string; base: string;
+  Call_TagDescriptionGet_565048 = ref object of OpenApiRestCall_563556
+proc url_TagDescriptionGet_565050(protocol: Scheme; host: string; base: string;
                                  route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -10461,7 +10455,7 @@ proc url_TagDescriptionGet_594917(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_TagDescriptionGet_594916(path: JsonNode; query: JsonNode;
+proc validate_TagDescriptionGet_565049(path: JsonNode; query: JsonNode;
                                       header: JsonNode; formData: JsonNode;
                                       body: JsonNode): JsonNode =
   ## Get Tag description in scope of API
@@ -10469,43 +10463,44 @@ proc validate_TagDescriptionGet_594916(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
+  ##   serviceName: JString (required)
+  ##              : The name of the API Management service.
   ##   tagId: JString (required)
   ##        : Tag identifier. Must be unique in the current API Management service instance.
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   apiId: JString (required)
   ##        : API revision identifier. Must be unique in the current API Management service instance. Non-current revision has ;rev=n as a suffix where n is the revision number.
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   serviceName: JString (required)
-  ##              : The name of the API Management service.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
-  assert path != nil, "path argument is necessary due to required `tagId` field"
-  var valid_594918 = path.getOrDefault("tagId")
-  valid_594918 = validateParameter(valid_594918, JString, required = true,
+  assert path != nil,
+        "path argument is necessary due to required `serviceName` field"
+  var valid_565051 = path.getOrDefault("serviceName")
+  valid_565051 = validateParameter(valid_565051, JString, required = true,
                                  default = nil)
-  if valid_594918 != nil:
-    section.add "tagId", valid_594918
-  var valid_594919 = path.getOrDefault("resourceGroupName")
-  valid_594919 = validateParameter(valid_594919, JString, required = true,
+  if valid_565051 != nil:
+    section.add "serviceName", valid_565051
+  var valid_565052 = path.getOrDefault("tagId")
+  valid_565052 = validateParameter(valid_565052, JString, required = true,
                                  default = nil)
-  if valid_594919 != nil:
-    section.add "resourceGroupName", valid_594919
-  var valid_594920 = path.getOrDefault("apiId")
-  valid_594920 = validateParameter(valid_594920, JString, required = true,
+  if valid_565052 != nil:
+    section.add "tagId", valid_565052
+  var valid_565053 = path.getOrDefault("apiId")
+  valid_565053 = validateParameter(valid_565053, JString, required = true,
                                  default = nil)
-  if valid_594920 != nil:
-    section.add "apiId", valid_594920
-  var valid_594921 = path.getOrDefault("subscriptionId")
-  valid_594921 = validateParameter(valid_594921, JString, required = true,
+  if valid_565053 != nil:
+    section.add "apiId", valid_565053
+  var valid_565054 = path.getOrDefault("subscriptionId")
+  valid_565054 = validateParameter(valid_565054, JString, required = true,
                                  default = nil)
-  if valid_594921 != nil:
-    section.add "subscriptionId", valid_594921
-  var valid_594922 = path.getOrDefault("serviceName")
-  valid_594922 = validateParameter(valid_594922, JString, required = true,
+  if valid_565054 != nil:
+    section.add "subscriptionId", valid_565054
+  var valid_565055 = path.getOrDefault("resourceGroupName")
+  valid_565055 = validateParameter(valid_565055, JString, required = true,
                                  default = nil)
-  if valid_594922 != nil:
-    section.add "serviceName", valid_594922
+  if valid_565055 != nil:
+    section.add "resourceGroupName", valid_565055
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -10513,11 +10508,11 @@ proc validate_TagDescriptionGet_594916(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594923 = query.getOrDefault("api-version")
-  valid_594923 = validateParameter(valid_594923, JString, required = true,
+  var valid_565056 = query.getOrDefault("api-version")
+  valid_565056 = validateParameter(valid_565056, JString, required = true,
                                  default = nil)
-  if valid_594923 != nil:
-    section.add "api-version", valid_594923
+  if valid_565056 != nil:
+    section.add "api-version", valid_565056
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -10526,53 +10521,53 @@ proc validate_TagDescriptionGet_594916(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594924: Call_TagDescriptionGet_594915; path: JsonNode;
+proc call*(call_565057: Call_TagDescriptionGet_565048; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get Tag description in scope of API
   ## 
-  let valid = call_594924.validator(path, query, header, formData, body)
-  let scheme = call_594924.pickScheme
+  let valid = call_565057.validator(path, query, header, formData, body)
+  let scheme = call_565057.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594924.url(scheme.get, call_594924.host, call_594924.base,
-                         call_594924.route, valid.getOrDefault("path"),
+  let url = call_565057.url(scheme.get, call_565057.host, call_565057.base,
+                         call_565057.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594924, url, valid)
+  result = hook(call_565057, url, valid)
 
-proc call*(call_594925: Call_TagDescriptionGet_594915; tagId: string;
-          resourceGroupName: string; apiVersion: string; apiId: string;
-          subscriptionId: string; serviceName: string): Recallable =
+proc call*(call_565058: Call_TagDescriptionGet_565048; serviceName: string;
+          apiVersion: string; tagId: string; apiId: string; subscriptionId: string;
+          resourceGroupName: string): Recallable =
   ## tagDescriptionGet
   ## Get Tag description in scope of API
-  ##   tagId: string (required)
-  ##        : Tag identifier. Must be unique in the current API Management service instance.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   serviceName: string (required)
+  ##              : The name of the API Management service.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
+  ##   tagId: string (required)
+  ##        : Tag identifier. Must be unique in the current API Management service instance.
   ##   apiId: string (required)
   ##        : API revision identifier. Must be unique in the current API Management service instance. Non-current revision has ;rev=n as a suffix where n is the revision number.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   serviceName: string (required)
-  ##              : The name of the API Management service.
-  var path_594926 = newJObject()
-  var query_594927 = newJObject()
-  add(path_594926, "tagId", newJString(tagId))
-  add(path_594926, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594927, "api-version", newJString(apiVersion))
-  add(path_594926, "apiId", newJString(apiId))
-  add(path_594926, "subscriptionId", newJString(subscriptionId))
-  add(path_594926, "serviceName", newJString(serviceName))
-  result = call_594925.call(path_594926, query_594927, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_565059 = newJObject()
+  var query_565060 = newJObject()
+  add(path_565059, "serviceName", newJString(serviceName))
+  add(query_565060, "api-version", newJString(apiVersion))
+  add(path_565059, "tagId", newJString(tagId))
+  add(path_565059, "apiId", newJString(apiId))
+  add(path_565059, "subscriptionId", newJString(subscriptionId))
+  add(path_565059, "resourceGroupName", newJString(resourceGroupName))
+  result = call_565058.call(path_565059, query_565060, nil, nil, nil)
 
-var tagDescriptionGet* = Call_TagDescriptionGet_594915(name: "tagDescriptionGet",
+var tagDescriptionGet* = Call_TagDescriptionGet_565048(name: "tagDescriptionGet",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ApiManagement/service/{serviceName}/apis/{apiId}/tagDescriptions/{tagId}",
-    validator: validate_TagDescriptionGet_594916, base: "",
-    url: url_TagDescriptionGet_594917, schemes: {Scheme.Https})
+    validator: validate_TagDescriptionGet_565049, base: "",
+    url: url_TagDescriptionGet_565050, schemes: {Scheme.Https})
 type
-  Call_TagDescriptionDelete_594944 = ref object of OpenApiRestCall_593425
-proc url_TagDescriptionDelete_594946(protocol: Scheme; host: string; base: string;
+  Call_TagDescriptionDelete_565077 = ref object of OpenApiRestCall_563556
+proc url_TagDescriptionDelete_565079(protocol: Scheme; host: string; base: string;
                                     route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -10601,50 +10596,51 @@ proc url_TagDescriptionDelete_594946(protocol: Scheme; host: string; base: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_TagDescriptionDelete_594945(path: JsonNode; query: JsonNode;
+proc validate_TagDescriptionDelete_565078(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Delete tag description for the Api.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
+  ##   serviceName: JString (required)
+  ##              : The name of the API Management service.
   ##   tagId: JString (required)
   ##        : Tag identifier. Must be unique in the current API Management service instance.
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   apiId: JString (required)
   ##        : API revision identifier. Must be unique in the current API Management service instance. Non-current revision has ;rev=n as a suffix where n is the revision number.
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   serviceName: JString (required)
-  ##              : The name of the API Management service.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
-  assert path != nil, "path argument is necessary due to required `tagId` field"
-  var valid_594947 = path.getOrDefault("tagId")
-  valid_594947 = validateParameter(valid_594947, JString, required = true,
+  assert path != nil,
+        "path argument is necessary due to required `serviceName` field"
+  var valid_565080 = path.getOrDefault("serviceName")
+  valid_565080 = validateParameter(valid_565080, JString, required = true,
                                  default = nil)
-  if valid_594947 != nil:
-    section.add "tagId", valid_594947
-  var valid_594948 = path.getOrDefault("resourceGroupName")
-  valid_594948 = validateParameter(valid_594948, JString, required = true,
+  if valid_565080 != nil:
+    section.add "serviceName", valid_565080
+  var valid_565081 = path.getOrDefault("tagId")
+  valid_565081 = validateParameter(valid_565081, JString, required = true,
                                  default = nil)
-  if valid_594948 != nil:
-    section.add "resourceGroupName", valid_594948
-  var valid_594949 = path.getOrDefault("apiId")
-  valid_594949 = validateParameter(valid_594949, JString, required = true,
+  if valid_565081 != nil:
+    section.add "tagId", valid_565081
+  var valid_565082 = path.getOrDefault("apiId")
+  valid_565082 = validateParameter(valid_565082, JString, required = true,
                                  default = nil)
-  if valid_594949 != nil:
-    section.add "apiId", valid_594949
-  var valid_594950 = path.getOrDefault("subscriptionId")
-  valid_594950 = validateParameter(valid_594950, JString, required = true,
+  if valid_565082 != nil:
+    section.add "apiId", valid_565082
+  var valid_565083 = path.getOrDefault("subscriptionId")
+  valid_565083 = validateParameter(valid_565083, JString, required = true,
                                  default = nil)
-  if valid_594950 != nil:
-    section.add "subscriptionId", valid_594950
-  var valid_594951 = path.getOrDefault("serviceName")
-  valid_594951 = validateParameter(valid_594951, JString, required = true,
+  if valid_565083 != nil:
+    section.add "subscriptionId", valid_565083
+  var valid_565084 = path.getOrDefault("resourceGroupName")
+  valid_565084 = validateParameter(valid_565084, JString, required = true,
                                  default = nil)
-  if valid_594951 != nil:
-    section.add "serviceName", valid_594951
+  if valid_565084 != nil:
+    section.add "resourceGroupName", valid_565084
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -10652,11 +10648,11 @@ proc validate_TagDescriptionDelete_594945(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594952 = query.getOrDefault("api-version")
-  valid_594952 = validateParameter(valid_594952, JString, required = true,
+  var valid_565085 = query.getOrDefault("api-version")
+  valid_565085 = validateParameter(valid_565085, JString, required = true,
                                  default = nil)
-  if valid_594952 != nil:
-    section.add "api-version", valid_594952
+  if valid_565085 != nil:
+    section.add "api-version", valid_565085
   result.add "query", section
   ## parameters in `header` object:
   ##   If-Match: JString (required)
@@ -10664,65 +10660,65 @@ proc validate_TagDescriptionDelete_594945(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert header != nil,
         "header argument is necessary due to required `If-Match` field"
-  var valid_594953 = header.getOrDefault("If-Match")
-  valid_594953 = validateParameter(valid_594953, JString, required = true,
+  var valid_565086 = header.getOrDefault("If-Match")
+  valid_565086 = validateParameter(valid_565086, JString, required = true,
                                  default = nil)
-  if valid_594953 != nil:
-    section.add "If-Match", valid_594953
+  if valid_565086 != nil:
+    section.add "If-Match", valid_565086
   result.add "header", section
   section = newJObject()
   result.add "formData", section
   if body != nil:
     result.add "body", body
 
-proc call*(call_594954: Call_TagDescriptionDelete_594944; path: JsonNode;
+proc call*(call_565087: Call_TagDescriptionDelete_565077; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Delete tag description for the Api.
   ## 
-  let valid = call_594954.validator(path, query, header, formData, body)
-  let scheme = call_594954.pickScheme
+  let valid = call_565087.validator(path, query, header, formData, body)
+  let scheme = call_565087.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594954.url(scheme.get, call_594954.host, call_594954.base,
-                         call_594954.route, valid.getOrDefault("path"),
+  let url = call_565087.url(scheme.get, call_565087.host, call_565087.base,
+                         call_565087.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594954, url, valid)
+  result = hook(call_565087, url, valid)
 
-proc call*(call_594955: Call_TagDescriptionDelete_594944; tagId: string;
-          resourceGroupName: string; apiVersion: string; apiId: string;
-          subscriptionId: string; serviceName: string): Recallable =
+proc call*(call_565088: Call_TagDescriptionDelete_565077; serviceName: string;
+          apiVersion: string; tagId: string; apiId: string; subscriptionId: string;
+          resourceGroupName: string): Recallable =
   ## tagDescriptionDelete
   ## Delete tag description for the Api.
-  ##   tagId: string (required)
-  ##        : Tag identifier. Must be unique in the current API Management service instance.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   serviceName: string (required)
+  ##              : The name of the API Management service.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
+  ##   tagId: string (required)
+  ##        : Tag identifier. Must be unique in the current API Management service instance.
   ##   apiId: string (required)
   ##        : API revision identifier. Must be unique in the current API Management service instance. Non-current revision has ;rev=n as a suffix where n is the revision number.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   serviceName: string (required)
-  ##              : The name of the API Management service.
-  var path_594956 = newJObject()
-  var query_594957 = newJObject()
-  add(path_594956, "tagId", newJString(tagId))
-  add(path_594956, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594957, "api-version", newJString(apiVersion))
-  add(path_594956, "apiId", newJString(apiId))
-  add(path_594956, "subscriptionId", newJString(subscriptionId))
-  add(path_594956, "serviceName", newJString(serviceName))
-  result = call_594955.call(path_594956, query_594957, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_565089 = newJObject()
+  var query_565090 = newJObject()
+  add(path_565089, "serviceName", newJString(serviceName))
+  add(query_565090, "api-version", newJString(apiVersion))
+  add(path_565089, "tagId", newJString(tagId))
+  add(path_565089, "apiId", newJString(apiId))
+  add(path_565089, "subscriptionId", newJString(subscriptionId))
+  add(path_565089, "resourceGroupName", newJString(resourceGroupName))
+  result = call_565088.call(path_565089, query_565090, nil, nil, nil)
 
-var tagDescriptionDelete* = Call_TagDescriptionDelete_594944(
+var tagDescriptionDelete* = Call_TagDescriptionDelete_565077(
     name: "tagDescriptionDelete", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ApiManagement/service/{serviceName}/apis/{apiId}/tagDescriptions/{tagId}",
-    validator: validate_TagDescriptionDelete_594945, base: "",
-    url: url_TagDescriptionDelete_594946, schemes: {Scheme.Https})
+    validator: validate_TagDescriptionDelete_565078, base: "",
+    url: url_TagDescriptionDelete_565079, schemes: {Scheme.Https})
 type
-  Call_TagListByApi_594971 = ref object of OpenApiRestCall_593425
-proc url_TagListByApi_594973(protocol: Scheme; host: string; base: string;
+  Call_TagListByApi_565104 = ref object of OpenApiRestCall_563556
+proc url_TagListByApi_565106(protocol: Scheme; host: string; base: string;
                             route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -10749,50 +10745,50 @@ proc url_TagListByApi_594973(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_TagListByApi_594972(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_TagListByApi_565105(path: JsonNode; query: JsonNode; header: JsonNode;
                                  formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists all Tags associated with the API.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
+  ##   serviceName: JString (required)
+  ##              : The name of the API Management service.
   ##   apiId: JString (required)
   ##        : API revision identifier. Must be unique in the current API Management service instance. Non-current revision has ;rev=n as a suffix where n is the revision number.
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   serviceName: JString (required)
-  ##              : The name of the API Management service.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594974 = path.getOrDefault("resourceGroupName")
-  valid_594974 = validateParameter(valid_594974, JString, required = true,
+        "path argument is necessary due to required `serviceName` field"
+  var valid_565107 = path.getOrDefault("serviceName")
+  valid_565107 = validateParameter(valid_565107, JString, required = true,
                                  default = nil)
-  if valid_594974 != nil:
-    section.add "resourceGroupName", valid_594974
-  var valid_594975 = path.getOrDefault("apiId")
-  valid_594975 = validateParameter(valid_594975, JString, required = true,
+  if valid_565107 != nil:
+    section.add "serviceName", valid_565107
+  var valid_565108 = path.getOrDefault("apiId")
+  valid_565108 = validateParameter(valid_565108, JString, required = true,
                                  default = nil)
-  if valid_594975 != nil:
-    section.add "apiId", valid_594975
-  var valid_594976 = path.getOrDefault("subscriptionId")
-  valid_594976 = validateParameter(valid_594976, JString, required = true,
+  if valid_565108 != nil:
+    section.add "apiId", valid_565108
+  var valid_565109 = path.getOrDefault("subscriptionId")
+  valid_565109 = validateParameter(valid_565109, JString, required = true,
                                  default = nil)
-  if valid_594976 != nil:
-    section.add "subscriptionId", valid_594976
-  var valid_594977 = path.getOrDefault("serviceName")
-  valid_594977 = validateParameter(valid_594977, JString, required = true,
+  if valid_565109 != nil:
+    section.add "subscriptionId", valid_565109
+  var valid_565110 = path.getOrDefault("resourceGroupName")
+  valid_565110 = validateParameter(valid_565110, JString, required = true,
                                  default = nil)
-  if valid_594977 != nil:
-    section.add "serviceName", valid_594977
+  if valid_565110 != nil:
+    section.add "resourceGroupName", valid_565110
   result.add "path", section
   ## parameters in `query` object:
-  ##   api-version: JString (required)
-  ##              : Version of the API to be used with the client request.
   ##   $top: JInt
   ##       : Number of records to return.
+  ##   api-version: JString (required)
+  ##              : Version of the API to be used with the client request.
   ##   $skip: JInt
   ##        : Number of records to skip.
   ##   $filter: JString
@@ -10803,26 +10799,26 @@ proc validate_TagListByApi_594972(path: JsonNode; query: JsonNode; header: JsonN
   ## |name | ge, le, eq, ne, gt, lt | substringof, contains, startswith, endswith|
   ## 
   section = newJObject()
+  var valid_565111 = query.getOrDefault("$top")
+  valid_565111 = validateParameter(valid_565111, JInt, required = false, default = nil)
+  if valid_565111 != nil:
+    section.add "$top", valid_565111
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594978 = query.getOrDefault("api-version")
-  valid_594978 = validateParameter(valid_594978, JString, required = true,
+  var valid_565112 = query.getOrDefault("api-version")
+  valid_565112 = validateParameter(valid_565112, JString, required = true,
                                  default = nil)
-  if valid_594978 != nil:
-    section.add "api-version", valid_594978
-  var valid_594979 = query.getOrDefault("$top")
-  valid_594979 = validateParameter(valid_594979, JInt, required = false, default = nil)
-  if valid_594979 != nil:
-    section.add "$top", valid_594979
-  var valid_594980 = query.getOrDefault("$skip")
-  valid_594980 = validateParameter(valid_594980, JInt, required = false, default = nil)
-  if valid_594980 != nil:
-    section.add "$skip", valid_594980
-  var valid_594981 = query.getOrDefault("$filter")
-  valid_594981 = validateParameter(valid_594981, JString, required = false,
+  if valid_565112 != nil:
+    section.add "api-version", valid_565112
+  var valid_565113 = query.getOrDefault("$skip")
+  valid_565113 = validateParameter(valid_565113, JInt, required = false, default = nil)
+  if valid_565113 != nil:
+    section.add "$skip", valid_565113
+  var valid_565114 = query.getOrDefault("$filter")
+  valid_565114 = validateParameter(valid_565114, JString, required = false,
                                  default = nil)
-  if valid_594981 != nil:
-    section.add "$filter", valid_594981
+  if valid_565114 != nil:
+    section.add "$filter", valid_565114
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -10831,38 +10827,38 @@ proc validate_TagListByApi_594972(path: JsonNode; query: JsonNode; header: JsonN
   if body != nil:
     result.add "body", body
 
-proc call*(call_594982: Call_TagListByApi_594971; path: JsonNode; query: JsonNode;
+proc call*(call_565115: Call_TagListByApi_565104; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists all Tags associated with the API.
   ## 
-  let valid = call_594982.validator(path, query, header, formData, body)
-  let scheme = call_594982.pickScheme
+  let valid = call_565115.validator(path, query, header, formData, body)
+  let scheme = call_565115.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594982.url(scheme.get, call_594982.host, call_594982.base,
-                         call_594982.route, valid.getOrDefault("path"),
+  let url = call_565115.url(scheme.get, call_565115.host, call_565115.base,
+                         call_565115.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594982, url, valid)
+  result = hook(call_565115, url, valid)
 
-proc call*(call_594983: Call_TagListByApi_594971; resourceGroupName: string;
+proc call*(call_565116: Call_TagListByApi_565104; serviceName: string;
           apiVersion: string; apiId: string; subscriptionId: string;
-          serviceName: string; Top: int = 0; Skip: int = 0; Filter: string = ""): Recallable =
+          resourceGroupName: string; Top: int = 0; Skip: int = 0; Filter: string = ""): Recallable =
   ## tagListByApi
   ## Lists all Tags associated with the API.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   serviceName: string (required)
+  ##              : The name of the API Management service.
+  ##   Top: int
+  ##      : Number of records to return.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
   ##   apiId: string (required)
   ##        : API revision identifier. Must be unique in the current API Management service instance. Non-current revision has ;rev=n as a suffix where n is the revision number.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   Top: int
-  ##      : Number of records to return.
   ##   Skip: int
   ##       : Number of records to skip.
-  ##   serviceName: string (required)
-  ##              : The name of the API Management service.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   Filter: string
   ##         : | Field       | Supported operators    | Supported functions               |
   ## |-------------|------------------------|-----------------------------------|
@@ -10870,25 +10866,25 @@ proc call*(call_594983: Call_TagListByApi_594971; resourceGroupName: string;
   ## |displayName | ge, le, eq, ne, gt, lt | substringof, contains, startswith, endswith|
   ## |name | ge, le, eq, ne, gt, lt | substringof, contains, startswith, endswith|
   ## 
-  var path_594984 = newJObject()
-  var query_594985 = newJObject()
-  add(path_594984, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594985, "api-version", newJString(apiVersion))
-  add(path_594984, "apiId", newJString(apiId))
-  add(path_594984, "subscriptionId", newJString(subscriptionId))
-  add(query_594985, "$top", newJInt(Top))
-  add(query_594985, "$skip", newJInt(Skip))
-  add(path_594984, "serviceName", newJString(serviceName))
-  add(query_594985, "$filter", newJString(Filter))
-  result = call_594983.call(path_594984, query_594985, nil, nil, nil)
+  var path_565117 = newJObject()
+  var query_565118 = newJObject()
+  add(path_565117, "serviceName", newJString(serviceName))
+  add(query_565118, "$top", newJInt(Top))
+  add(query_565118, "api-version", newJString(apiVersion))
+  add(path_565117, "apiId", newJString(apiId))
+  add(path_565117, "subscriptionId", newJString(subscriptionId))
+  add(query_565118, "$skip", newJInt(Skip))
+  add(path_565117, "resourceGroupName", newJString(resourceGroupName))
+  add(query_565118, "$filter", newJString(Filter))
+  result = call_565116.call(path_565117, query_565118, nil, nil, nil)
 
-var tagListByApi* = Call_TagListByApi_594971(name: "tagListByApi",
+var tagListByApi* = Call_TagListByApi_565104(name: "tagListByApi",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ApiManagement/service/{serviceName}/apis/{apiId}/tags",
-    validator: validate_TagListByApi_594972, base: "", url: url_TagListByApi_594973,
+    validator: validate_TagListByApi_565105, base: "", url: url_TagListByApi_565106,
     schemes: {Scheme.Https})
 type
-  Call_TagAssignToApi_594999 = ref object of OpenApiRestCall_593425
-proc url_TagAssignToApi_595001(protocol: Scheme; host: string; base: string;
+  Call_TagAssignToApi_565132 = ref object of OpenApiRestCall_563556
+proc url_TagAssignToApi_565134(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -10917,7 +10913,7 @@ proc url_TagAssignToApi_595001(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_TagAssignToApi_595000(path: JsonNode; query: JsonNode;
+proc validate_TagAssignToApi_565133(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## Assign tag to the Api.
@@ -10925,43 +10921,44 @@ proc validate_TagAssignToApi_595000(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
+  ##   serviceName: JString (required)
+  ##              : The name of the API Management service.
   ##   tagId: JString (required)
   ##        : Tag identifier. Must be unique in the current API Management service instance.
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   apiId: JString (required)
   ##        : API revision identifier. Must be unique in the current API Management service instance. Non-current revision has ;rev=n as a suffix where n is the revision number.
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   serviceName: JString (required)
-  ##              : The name of the API Management service.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
-  assert path != nil, "path argument is necessary due to required `tagId` field"
-  var valid_595002 = path.getOrDefault("tagId")
-  valid_595002 = validateParameter(valid_595002, JString, required = true,
+  assert path != nil,
+        "path argument is necessary due to required `serviceName` field"
+  var valid_565135 = path.getOrDefault("serviceName")
+  valid_565135 = validateParameter(valid_565135, JString, required = true,
                                  default = nil)
-  if valid_595002 != nil:
-    section.add "tagId", valid_595002
-  var valid_595003 = path.getOrDefault("resourceGroupName")
-  valid_595003 = validateParameter(valid_595003, JString, required = true,
+  if valid_565135 != nil:
+    section.add "serviceName", valid_565135
+  var valid_565136 = path.getOrDefault("tagId")
+  valid_565136 = validateParameter(valid_565136, JString, required = true,
                                  default = nil)
-  if valid_595003 != nil:
-    section.add "resourceGroupName", valid_595003
-  var valid_595004 = path.getOrDefault("apiId")
-  valid_595004 = validateParameter(valid_595004, JString, required = true,
+  if valid_565136 != nil:
+    section.add "tagId", valid_565136
+  var valid_565137 = path.getOrDefault("apiId")
+  valid_565137 = validateParameter(valid_565137, JString, required = true,
                                  default = nil)
-  if valid_595004 != nil:
-    section.add "apiId", valid_595004
-  var valid_595005 = path.getOrDefault("subscriptionId")
-  valid_595005 = validateParameter(valid_595005, JString, required = true,
+  if valid_565137 != nil:
+    section.add "apiId", valid_565137
+  var valid_565138 = path.getOrDefault("subscriptionId")
+  valid_565138 = validateParameter(valid_565138, JString, required = true,
                                  default = nil)
-  if valid_595005 != nil:
-    section.add "subscriptionId", valid_595005
-  var valid_595006 = path.getOrDefault("serviceName")
-  valid_595006 = validateParameter(valid_595006, JString, required = true,
+  if valid_565138 != nil:
+    section.add "subscriptionId", valid_565138
+  var valid_565139 = path.getOrDefault("resourceGroupName")
+  valid_565139 = validateParameter(valid_565139, JString, required = true,
                                  default = nil)
-  if valid_595006 != nil:
-    section.add "serviceName", valid_595006
+  if valid_565139 != nil:
+    section.add "resourceGroupName", valid_565139
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -10969,11 +10966,11 @@ proc validate_TagAssignToApi_595000(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_595007 = query.getOrDefault("api-version")
-  valid_595007 = validateParameter(valid_595007, JString, required = true,
+  var valid_565140 = query.getOrDefault("api-version")
+  valid_565140 = validateParameter(valid_565140, JString, required = true,
                                  default = nil)
-  if valid_595007 != nil:
-    section.add "api-version", valid_595007
+  if valid_565140 != nil:
+    section.add "api-version", valid_565140
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -10982,53 +10979,53 @@ proc validate_TagAssignToApi_595000(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_595008: Call_TagAssignToApi_594999; path: JsonNode; query: JsonNode;
+proc call*(call_565141: Call_TagAssignToApi_565132; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Assign tag to the Api.
   ## 
-  let valid = call_595008.validator(path, query, header, formData, body)
-  let scheme = call_595008.pickScheme
+  let valid = call_565141.validator(path, query, header, formData, body)
+  let scheme = call_565141.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_595008.url(scheme.get, call_595008.host, call_595008.base,
-                         call_595008.route, valid.getOrDefault("path"),
+  let url = call_565141.url(scheme.get, call_565141.host, call_565141.base,
+                         call_565141.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_595008, url, valid)
+  result = hook(call_565141, url, valid)
 
-proc call*(call_595009: Call_TagAssignToApi_594999; tagId: string;
-          resourceGroupName: string; apiVersion: string; apiId: string;
-          subscriptionId: string; serviceName: string): Recallable =
+proc call*(call_565142: Call_TagAssignToApi_565132; serviceName: string;
+          apiVersion: string; tagId: string; apiId: string; subscriptionId: string;
+          resourceGroupName: string): Recallable =
   ## tagAssignToApi
   ## Assign tag to the Api.
-  ##   tagId: string (required)
-  ##        : Tag identifier. Must be unique in the current API Management service instance.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   serviceName: string (required)
+  ##              : The name of the API Management service.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
+  ##   tagId: string (required)
+  ##        : Tag identifier. Must be unique in the current API Management service instance.
   ##   apiId: string (required)
   ##        : API revision identifier. Must be unique in the current API Management service instance. Non-current revision has ;rev=n as a suffix where n is the revision number.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   serviceName: string (required)
-  ##              : The name of the API Management service.
-  var path_595010 = newJObject()
-  var query_595011 = newJObject()
-  add(path_595010, "tagId", newJString(tagId))
-  add(path_595010, "resourceGroupName", newJString(resourceGroupName))
-  add(query_595011, "api-version", newJString(apiVersion))
-  add(path_595010, "apiId", newJString(apiId))
-  add(path_595010, "subscriptionId", newJString(subscriptionId))
-  add(path_595010, "serviceName", newJString(serviceName))
-  result = call_595009.call(path_595010, query_595011, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_565143 = newJObject()
+  var query_565144 = newJObject()
+  add(path_565143, "serviceName", newJString(serviceName))
+  add(query_565144, "api-version", newJString(apiVersion))
+  add(path_565143, "tagId", newJString(tagId))
+  add(path_565143, "apiId", newJString(apiId))
+  add(path_565143, "subscriptionId", newJString(subscriptionId))
+  add(path_565143, "resourceGroupName", newJString(resourceGroupName))
+  result = call_565142.call(path_565143, query_565144, nil, nil, nil)
 
-var tagAssignToApi* = Call_TagAssignToApi_594999(name: "tagAssignToApi",
+var tagAssignToApi* = Call_TagAssignToApi_565132(name: "tagAssignToApi",
     meth: HttpMethod.HttpPut, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ApiManagement/service/{serviceName}/apis/{apiId}/tags/{tagId}",
-    validator: validate_TagAssignToApi_595000, base: "", url: url_TagAssignToApi_595001,
+    validator: validate_TagAssignToApi_565133, base: "", url: url_TagAssignToApi_565134,
     schemes: {Scheme.Https})
 type
-  Call_TagGetEntityStateByApi_595025 = ref object of OpenApiRestCall_593425
-proc url_TagGetEntityStateByApi_595027(protocol: Scheme; host: string; base: string;
+  Call_TagGetEntityStateByApi_565158 = ref object of OpenApiRestCall_563556
+proc url_TagGetEntityStateByApi_565160(protocol: Scheme; host: string; base: string;
                                       route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -11057,50 +11054,51 @@ proc url_TagGetEntityStateByApi_595027(protocol: Scheme; host: string; base: str
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_TagGetEntityStateByApi_595026(path: JsonNode; query: JsonNode;
+proc validate_TagGetEntityStateByApi_565159(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the entity state version of the tag specified by its identifier.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
+  ##   serviceName: JString (required)
+  ##              : The name of the API Management service.
   ##   tagId: JString (required)
   ##        : Tag identifier. Must be unique in the current API Management service instance.
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   apiId: JString (required)
   ##        : API revision identifier. Must be unique in the current API Management service instance. Non-current revision has ;rev=n as a suffix where n is the revision number.
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   serviceName: JString (required)
-  ##              : The name of the API Management service.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
-  assert path != nil, "path argument is necessary due to required `tagId` field"
-  var valid_595028 = path.getOrDefault("tagId")
-  valid_595028 = validateParameter(valid_595028, JString, required = true,
+  assert path != nil,
+        "path argument is necessary due to required `serviceName` field"
+  var valid_565161 = path.getOrDefault("serviceName")
+  valid_565161 = validateParameter(valid_565161, JString, required = true,
                                  default = nil)
-  if valid_595028 != nil:
-    section.add "tagId", valid_595028
-  var valid_595029 = path.getOrDefault("resourceGroupName")
-  valid_595029 = validateParameter(valid_595029, JString, required = true,
+  if valid_565161 != nil:
+    section.add "serviceName", valid_565161
+  var valid_565162 = path.getOrDefault("tagId")
+  valid_565162 = validateParameter(valid_565162, JString, required = true,
                                  default = nil)
-  if valid_595029 != nil:
-    section.add "resourceGroupName", valid_595029
-  var valid_595030 = path.getOrDefault("apiId")
-  valid_595030 = validateParameter(valid_595030, JString, required = true,
+  if valid_565162 != nil:
+    section.add "tagId", valid_565162
+  var valid_565163 = path.getOrDefault("apiId")
+  valid_565163 = validateParameter(valid_565163, JString, required = true,
                                  default = nil)
-  if valid_595030 != nil:
-    section.add "apiId", valid_595030
-  var valid_595031 = path.getOrDefault("subscriptionId")
-  valid_595031 = validateParameter(valid_595031, JString, required = true,
+  if valid_565163 != nil:
+    section.add "apiId", valid_565163
+  var valid_565164 = path.getOrDefault("subscriptionId")
+  valid_565164 = validateParameter(valid_565164, JString, required = true,
                                  default = nil)
-  if valid_595031 != nil:
-    section.add "subscriptionId", valid_595031
-  var valid_595032 = path.getOrDefault("serviceName")
-  valid_595032 = validateParameter(valid_595032, JString, required = true,
+  if valid_565164 != nil:
+    section.add "subscriptionId", valid_565164
+  var valid_565165 = path.getOrDefault("resourceGroupName")
+  valid_565165 = validateParameter(valid_565165, JString, required = true,
                                  default = nil)
-  if valid_595032 != nil:
-    section.add "serviceName", valid_595032
+  if valid_565165 != nil:
+    section.add "resourceGroupName", valid_565165
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -11108,11 +11106,11 @@ proc validate_TagGetEntityStateByApi_595026(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_595033 = query.getOrDefault("api-version")
-  valid_595033 = validateParameter(valid_595033, JString, required = true,
+  var valid_565166 = query.getOrDefault("api-version")
+  valid_565166 = validateParameter(valid_565166, JString, required = true,
                                  default = nil)
-  if valid_595033 != nil:
-    section.add "api-version", valid_595033
+  if valid_565166 != nil:
+    section.add "api-version", valid_565166
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -11121,54 +11119,54 @@ proc validate_TagGetEntityStateByApi_595026(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_595034: Call_TagGetEntityStateByApi_595025; path: JsonNode;
+proc call*(call_565167: Call_TagGetEntityStateByApi_565158; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the entity state version of the tag specified by its identifier.
   ## 
-  let valid = call_595034.validator(path, query, header, formData, body)
-  let scheme = call_595034.pickScheme
+  let valid = call_565167.validator(path, query, header, formData, body)
+  let scheme = call_565167.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_595034.url(scheme.get, call_595034.host, call_595034.base,
-                         call_595034.route, valid.getOrDefault("path"),
+  let url = call_565167.url(scheme.get, call_565167.host, call_565167.base,
+                         call_565167.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_595034, url, valid)
+  result = hook(call_565167, url, valid)
 
-proc call*(call_595035: Call_TagGetEntityStateByApi_595025; tagId: string;
-          resourceGroupName: string; apiVersion: string; apiId: string;
-          subscriptionId: string; serviceName: string): Recallable =
+proc call*(call_565168: Call_TagGetEntityStateByApi_565158; serviceName: string;
+          apiVersion: string; tagId: string; apiId: string; subscriptionId: string;
+          resourceGroupName: string): Recallable =
   ## tagGetEntityStateByApi
   ## Gets the entity state version of the tag specified by its identifier.
-  ##   tagId: string (required)
-  ##        : Tag identifier. Must be unique in the current API Management service instance.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   serviceName: string (required)
+  ##              : The name of the API Management service.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
+  ##   tagId: string (required)
+  ##        : Tag identifier. Must be unique in the current API Management service instance.
   ##   apiId: string (required)
   ##        : API revision identifier. Must be unique in the current API Management service instance. Non-current revision has ;rev=n as a suffix where n is the revision number.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   serviceName: string (required)
-  ##              : The name of the API Management service.
-  var path_595036 = newJObject()
-  var query_595037 = newJObject()
-  add(path_595036, "tagId", newJString(tagId))
-  add(path_595036, "resourceGroupName", newJString(resourceGroupName))
-  add(query_595037, "api-version", newJString(apiVersion))
-  add(path_595036, "apiId", newJString(apiId))
-  add(path_595036, "subscriptionId", newJString(subscriptionId))
-  add(path_595036, "serviceName", newJString(serviceName))
-  result = call_595035.call(path_595036, query_595037, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_565169 = newJObject()
+  var query_565170 = newJObject()
+  add(path_565169, "serviceName", newJString(serviceName))
+  add(query_565170, "api-version", newJString(apiVersion))
+  add(path_565169, "tagId", newJString(tagId))
+  add(path_565169, "apiId", newJString(apiId))
+  add(path_565169, "subscriptionId", newJString(subscriptionId))
+  add(path_565169, "resourceGroupName", newJString(resourceGroupName))
+  result = call_565168.call(path_565169, query_565170, nil, nil, nil)
 
-var tagGetEntityStateByApi* = Call_TagGetEntityStateByApi_595025(
+var tagGetEntityStateByApi* = Call_TagGetEntityStateByApi_565158(
     name: "tagGetEntityStateByApi", meth: HttpMethod.HttpHead,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ApiManagement/service/{serviceName}/apis/{apiId}/tags/{tagId}",
-    validator: validate_TagGetEntityStateByApi_595026, base: "",
-    url: url_TagGetEntityStateByApi_595027, schemes: {Scheme.Https})
+    validator: validate_TagGetEntityStateByApi_565159, base: "",
+    url: url_TagGetEntityStateByApi_565160, schemes: {Scheme.Https})
 type
-  Call_TagGetByApi_594986 = ref object of OpenApiRestCall_593425
-proc url_TagGetByApi_594988(protocol: Scheme; host: string; base: string;
+  Call_TagGetByApi_565119 = ref object of OpenApiRestCall_563556
+proc url_TagGetByApi_565121(protocol: Scheme; host: string; base: string;
                            route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -11197,50 +11195,51 @@ proc url_TagGetByApi_594988(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_TagGetByApi_594987(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_TagGetByApi_565120(path: JsonNode; query: JsonNode; header: JsonNode;
                                 formData: JsonNode; body: JsonNode): JsonNode =
   ## Get tag associated with the API.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
+  ##   serviceName: JString (required)
+  ##              : The name of the API Management service.
   ##   tagId: JString (required)
   ##        : Tag identifier. Must be unique in the current API Management service instance.
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   apiId: JString (required)
   ##        : API revision identifier. Must be unique in the current API Management service instance. Non-current revision has ;rev=n as a suffix where n is the revision number.
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   serviceName: JString (required)
-  ##              : The name of the API Management service.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
-  assert path != nil, "path argument is necessary due to required `tagId` field"
-  var valid_594989 = path.getOrDefault("tagId")
-  valid_594989 = validateParameter(valid_594989, JString, required = true,
+  assert path != nil,
+        "path argument is necessary due to required `serviceName` field"
+  var valid_565122 = path.getOrDefault("serviceName")
+  valid_565122 = validateParameter(valid_565122, JString, required = true,
                                  default = nil)
-  if valid_594989 != nil:
-    section.add "tagId", valid_594989
-  var valid_594990 = path.getOrDefault("resourceGroupName")
-  valid_594990 = validateParameter(valid_594990, JString, required = true,
+  if valid_565122 != nil:
+    section.add "serviceName", valid_565122
+  var valid_565123 = path.getOrDefault("tagId")
+  valid_565123 = validateParameter(valid_565123, JString, required = true,
                                  default = nil)
-  if valid_594990 != nil:
-    section.add "resourceGroupName", valid_594990
-  var valid_594991 = path.getOrDefault("apiId")
-  valid_594991 = validateParameter(valid_594991, JString, required = true,
+  if valid_565123 != nil:
+    section.add "tagId", valid_565123
+  var valid_565124 = path.getOrDefault("apiId")
+  valid_565124 = validateParameter(valid_565124, JString, required = true,
                                  default = nil)
-  if valid_594991 != nil:
-    section.add "apiId", valid_594991
-  var valid_594992 = path.getOrDefault("subscriptionId")
-  valid_594992 = validateParameter(valid_594992, JString, required = true,
+  if valid_565124 != nil:
+    section.add "apiId", valid_565124
+  var valid_565125 = path.getOrDefault("subscriptionId")
+  valid_565125 = validateParameter(valid_565125, JString, required = true,
                                  default = nil)
-  if valid_594992 != nil:
-    section.add "subscriptionId", valid_594992
-  var valid_594993 = path.getOrDefault("serviceName")
-  valid_594993 = validateParameter(valid_594993, JString, required = true,
+  if valid_565125 != nil:
+    section.add "subscriptionId", valid_565125
+  var valid_565126 = path.getOrDefault("resourceGroupName")
+  valid_565126 = validateParameter(valid_565126, JString, required = true,
                                  default = nil)
-  if valid_594993 != nil:
-    section.add "serviceName", valid_594993
+  if valid_565126 != nil:
+    section.add "resourceGroupName", valid_565126
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -11248,11 +11247,11 @@ proc validate_TagGetByApi_594987(path: JsonNode; query: JsonNode; header: JsonNo
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594994 = query.getOrDefault("api-version")
-  valid_594994 = validateParameter(valid_594994, JString, required = true,
+  var valid_565127 = query.getOrDefault("api-version")
+  valid_565127 = validateParameter(valid_565127, JString, required = true,
                                  default = nil)
-  if valid_594994 != nil:
-    section.add "api-version", valid_594994
+  if valid_565127 != nil:
+    section.add "api-version", valid_565127
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -11261,55 +11260,55 @@ proc validate_TagGetByApi_594987(path: JsonNode; query: JsonNode; header: JsonNo
   if body != nil:
     result.add "body", body
 
-proc call*(call_594995: Call_TagGetByApi_594986; path: JsonNode; query: JsonNode;
+proc call*(call_565128: Call_TagGetByApi_565119; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get tag associated with the API.
   ## 
-  let valid = call_594995.validator(path, query, header, formData, body)
-  let scheme = call_594995.pickScheme
+  let valid = call_565128.validator(path, query, header, formData, body)
+  let scheme = call_565128.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594995.url(scheme.get, call_594995.host, call_594995.base,
-                         call_594995.route, valid.getOrDefault("path"),
+  let url = call_565128.url(scheme.get, call_565128.host, call_565128.base,
+                         call_565128.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594995, url, valid)
+  result = hook(call_565128, url, valid)
 
-proc call*(call_594996: Call_TagGetByApi_594986; tagId: string;
-          resourceGroupName: string; apiVersion: string; apiId: string;
-          subscriptionId: string; serviceName: string): Recallable =
+proc call*(call_565129: Call_TagGetByApi_565119; serviceName: string;
+          apiVersion: string; tagId: string; apiId: string; subscriptionId: string;
+          resourceGroupName: string): Recallable =
   ## tagGetByApi
   ## Get tag associated with the API.
-  ##   tagId: string (required)
-  ##        : Tag identifier. Must be unique in the current API Management service instance.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   serviceName: string (required)
+  ##              : The name of the API Management service.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
+  ##   tagId: string (required)
+  ##        : Tag identifier. Must be unique in the current API Management service instance.
   ##   apiId: string (required)
   ##        : API revision identifier. Must be unique in the current API Management service instance. Non-current revision has ;rev=n as a suffix where n is the revision number.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   serviceName: string (required)
-  ##              : The name of the API Management service.
-  var path_594997 = newJObject()
-  var query_594998 = newJObject()
-  add(path_594997, "tagId", newJString(tagId))
-  add(path_594997, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594998, "api-version", newJString(apiVersion))
-  add(path_594997, "apiId", newJString(apiId))
-  add(path_594997, "subscriptionId", newJString(subscriptionId))
-  add(path_594997, "serviceName", newJString(serviceName))
-  result = call_594996.call(path_594997, query_594998, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_565130 = newJObject()
+  var query_565131 = newJObject()
+  add(path_565130, "serviceName", newJString(serviceName))
+  add(query_565131, "api-version", newJString(apiVersion))
+  add(path_565130, "tagId", newJString(tagId))
+  add(path_565130, "apiId", newJString(apiId))
+  add(path_565130, "subscriptionId", newJString(subscriptionId))
+  add(path_565130, "resourceGroupName", newJString(resourceGroupName))
+  result = call_565129.call(path_565130, query_565131, nil, nil, nil)
 
-var tagGetByApi* = Call_TagGetByApi_594986(name: "tagGetByApi",
+var tagGetByApi* = Call_TagGetByApi_565119(name: "tagGetByApi",
                                         meth: HttpMethod.HttpGet,
                                         host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ApiManagement/service/{serviceName}/apis/{apiId}/tags/{tagId}",
-                                        validator: validate_TagGetByApi_594987,
-                                        base: "", url: url_TagGetByApi_594988,
+                                        validator: validate_TagGetByApi_565120,
+                                        base: "", url: url_TagGetByApi_565121,
                                         schemes: {Scheme.Https})
 type
-  Call_TagDetachFromApi_595012 = ref object of OpenApiRestCall_593425
-proc url_TagDetachFromApi_595014(protocol: Scheme; host: string; base: string;
+  Call_TagDetachFromApi_565145 = ref object of OpenApiRestCall_563556
+proc url_TagDetachFromApi_565147(protocol: Scheme; host: string; base: string;
                                 route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -11338,7 +11337,7 @@ proc url_TagDetachFromApi_595014(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_TagDetachFromApi_595013(path: JsonNode; query: JsonNode;
+proc validate_TagDetachFromApi_565146(path: JsonNode; query: JsonNode;
                                      header: JsonNode; formData: JsonNode;
                                      body: JsonNode): JsonNode =
   ## Detach the tag from the Api.
@@ -11346,43 +11345,44 @@ proc validate_TagDetachFromApi_595013(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
+  ##   serviceName: JString (required)
+  ##              : The name of the API Management service.
   ##   tagId: JString (required)
   ##        : Tag identifier. Must be unique in the current API Management service instance.
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   apiId: JString (required)
   ##        : API revision identifier. Must be unique in the current API Management service instance. Non-current revision has ;rev=n as a suffix where n is the revision number.
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   serviceName: JString (required)
-  ##              : The name of the API Management service.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
-  assert path != nil, "path argument is necessary due to required `tagId` field"
-  var valid_595015 = path.getOrDefault("tagId")
-  valid_595015 = validateParameter(valid_595015, JString, required = true,
+  assert path != nil,
+        "path argument is necessary due to required `serviceName` field"
+  var valid_565148 = path.getOrDefault("serviceName")
+  valid_565148 = validateParameter(valid_565148, JString, required = true,
                                  default = nil)
-  if valid_595015 != nil:
-    section.add "tagId", valid_595015
-  var valid_595016 = path.getOrDefault("resourceGroupName")
-  valid_595016 = validateParameter(valid_595016, JString, required = true,
+  if valid_565148 != nil:
+    section.add "serviceName", valid_565148
+  var valid_565149 = path.getOrDefault("tagId")
+  valid_565149 = validateParameter(valid_565149, JString, required = true,
                                  default = nil)
-  if valid_595016 != nil:
-    section.add "resourceGroupName", valid_595016
-  var valid_595017 = path.getOrDefault("apiId")
-  valid_595017 = validateParameter(valid_595017, JString, required = true,
+  if valid_565149 != nil:
+    section.add "tagId", valid_565149
+  var valid_565150 = path.getOrDefault("apiId")
+  valid_565150 = validateParameter(valid_565150, JString, required = true,
                                  default = nil)
-  if valid_595017 != nil:
-    section.add "apiId", valid_595017
-  var valid_595018 = path.getOrDefault("subscriptionId")
-  valid_595018 = validateParameter(valid_595018, JString, required = true,
+  if valid_565150 != nil:
+    section.add "apiId", valid_565150
+  var valid_565151 = path.getOrDefault("subscriptionId")
+  valid_565151 = validateParameter(valid_565151, JString, required = true,
                                  default = nil)
-  if valid_595018 != nil:
-    section.add "subscriptionId", valid_595018
-  var valid_595019 = path.getOrDefault("serviceName")
-  valid_595019 = validateParameter(valid_595019, JString, required = true,
+  if valid_565151 != nil:
+    section.add "subscriptionId", valid_565151
+  var valid_565152 = path.getOrDefault("resourceGroupName")
+  valid_565152 = validateParameter(valid_565152, JString, required = true,
                                  default = nil)
-  if valid_595019 != nil:
-    section.add "serviceName", valid_595019
+  if valid_565152 != nil:
+    section.add "resourceGroupName", valid_565152
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -11390,11 +11390,11 @@ proc validate_TagDetachFromApi_595013(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_595020 = query.getOrDefault("api-version")
-  valid_595020 = validateParameter(valid_595020, JString, required = true,
+  var valid_565153 = query.getOrDefault("api-version")
+  valid_565153 = validateParameter(valid_565153, JString, required = true,
                                  default = nil)
-  if valid_595020 != nil:
-    section.add "api-version", valid_595020
+  if valid_565153 != nil:
+    section.add "api-version", valid_565153
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -11403,50 +11403,50 @@ proc validate_TagDetachFromApi_595013(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_595021: Call_TagDetachFromApi_595012; path: JsonNode;
+proc call*(call_565154: Call_TagDetachFromApi_565145; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Detach the tag from the Api.
   ## 
-  let valid = call_595021.validator(path, query, header, formData, body)
-  let scheme = call_595021.pickScheme
+  let valid = call_565154.validator(path, query, header, formData, body)
+  let scheme = call_565154.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_595021.url(scheme.get, call_595021.host, call_595021.base,
-                         call_595021.route, valid.getOrDefault("path"),
+  let url = call_565154.url(scheme.get, call_565154.host, call_565154.base,
+                         call_565154.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_595021, url, valid)
+  result = hook(call_565154, url, valid)
 
-proc call*(call_595022: Call_TagDetachFromApi_595012; tagId: string;
-          resourceGroupName: string; apiVersion: string; apiId: string;
-          subscriptionId: string; serviceName: string): Recallable =
+proc call*(call_565155: Call_TagDetachFromApi_565145; serviceName: string;
+          apiVersion: string; tagId: string; apiId: string; subscriptionId: string;
+          resourceGroupName: string): Recallable =
   ## tagDetachFromApi
   ## Detach the tag from the Api.
-  ##   tagId: string (required)
-  ##        : Tag identifier. Must be unique in the current API Management service instance.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   serviceName: string (required)
+  ##              : The name of the API Management service.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
+  ##   tagId: string (required)
+  ##        : Tag identifier. Must be unique in the current API Management service instance.
   ##   apiId: string (required)
   ##        : API revision identifier. Must be unique in the current API Management service instance. Non-current revision has ;rev=n as a suffix where n is the revision number.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   serviceName: string (required)
-  ##              : The name of the API Management service.
-  var path_595023 = newJObject()
-  var query_595024 = newJObject()
-  add(path_595023, "tagId", newJString(tagId))
-  add(path_595023, "resourceGroupName", newJString(resourceGroupName))
-  add(query_595024, "api-version", newJString(apiVersion))
-  add(path_595023, "apiId", newJString(apiId))
-  add(path_595023, "subscriptionId", newJString(subscriptionId))
-  add(path_595023, "serviceName", newJString(serviceName))
-  result = call_595022.call(path_595023, query_595024, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_565156 = newJObject()
+  var query_565157 = newJObject()
+  add(path_565156, "serviceName", newJString(serviceName))
+  add(query_565157, "api-version", newJString(apiVersion))
+  add(path_565156, "tagId", newJString(tagId))
+  add(path_565156, "apiId", newJString(apiId))
+  add(path_565156, "subscriptionId", newJString(subscriptionId))
+  add(path_565156, "resourceGroupName", newJString(resourceGroupName))
+  result = call_565155.call(path_565156, query_565157, nil, nil, nil)
 
-var tagDetachFromApi* = Call_TagDetachFromApi_595012(name: "tagDetachFromApi",
+var tagDetachFromApi* = Call_TagDetachFromApi_565145(name: "tagDetachFromApi",
     meth: HttpMethod.HttpDelete, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ApiManagement/service/{serviceName}/apis/{apiId}/tags/{tagId}",
-    validator: validate_TagDetachFromApi_595013, base: "",
-    url: url_TagDetachFromApi_595014, schemes: {Scheme.Https})
+    validator: validate_TagDetachFromApi_565146, base: "",
+    url: url_TagDetachFromApi_565147, schemes: {Scheme.Https})
 export
   rest
 

@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_573657 = ref object of OpenApiRestCall
+  OpenApiRestCall_563555 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_573657](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563555](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_573657): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563555): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,8 +107,8 @@ const
   macServiceName = "operationalinsights-Clusters"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_ClustersList_573879 = ref object of OpenApiRestCall_573657
-proc url_ClustersList_573881(protocol: Scheme; host: string; base: string;
+  Call_ClustersList_563777 = ref object of OpenApiRestCall_563555
+proc url_ClustersList_563779(protocol: Scheme; host: string; base: string;
                             route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -121,7 +125,7 @@ proc url_ClustersList_573881(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ClustersList_573880(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_ClustersList_563778(path: JsonNode; query: JsonNode; header: JsonNode;
                                  formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the Log Analytics clusters in a subscription.
   ## 
@@ -133,11 +137,11 @@ proc validate_ClustersList_573880(path: JsonNode; query: JsonNode; header: JsonN
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_574054 = path.getOrDefault("subscriptionId")
-  valid_574054 = validateParameter(valid_574054, JString, required = true,
+  var valid_563954 = path.getOrDefault("subscriptionId")
+  valid_563954 = validateParameter(valid_563954, JString, required = true,
                                  default = nil)
-  if valid_574054 != nil:
-    section.add "subscriptionId", valid_574054
+  if valid_563954 != nil:
+    section.add "subscriptionId", valid_563954
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -145,11 +149,11 @@ proc validate_ClustersList_573880(path: JsonNode; query: JsonNode; header: JsonN
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574055 = query.getOrDefault("api-version")
-  valid_574055 = validateParameter(valid_574055, JString, required = true,
+  var valid_563955 = query.getOrDefault("api-version")
+  valid_563955 = validateParameter(valid_563955, JString, required = true,
                                  default = nil)
-  if valid_574055 != nil:
-    section.add "api-version", valid_574055
+  if valid_563955 != nil:
+    section.add "api-version", valid_563955
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -158,20 +162,20 @@ proc validate_ClustersList_573880(path: JsonNode; query: JsonNode; header: JsonN
   if body != nil:
     result.add "body", body
 
-proc call*(call_574078: Call_ClustersList_573879; path: JsonNode; query: JsonNode;
+proc call*(call_563978: Call_ClustersList_563777; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the Log Analytics clusters in a subscription.
   ## 
-  let valid = call_574078.validator(path, query, header, formData, body)
-  let scheme = call_574078.pickScheme
+  let valid = call_563978.validator(path, query, header, formData, body)
+  let scheme = call_563978.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574078.url(scheme.get, call_574078.host, call_574078.base,
-                         call_574078.route, valid.getOrDefault("path"),
+  let url = call_563978.url(scheme.get, call_563978.host, call_563978.base,
+                         call_563978.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574078, url, valid)
+  result = hook(call_563978, url, valid)
 
-proc call*(call_574149: Call_ClustersList_573879; apiVersion: string;
+proc call*(call_564049: Call_ClustersList_563777; apiVersion: string;
           subscriptionId: string): Recallable =
   ## clustersList
   ## Gets the Log Analytics clusters in a subscription.
@@ -179,19 +183,19 @@ proc call*(call_574149: Call_ClustersList_573879; apiVersion: string;
   ##             : Client Api Version.
   ##   subscriptionId: string (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_574150 = newJObject()
-  var query_574152 = newJObject()
-  add(query_574152, "api-version", newJString(apiVersion))
-  add(path_574150, "subscriptionId", newJString(subscriptionId))
-  result = call_574149.call(path_574150, query_574152, nil, nil, nil)
+  var path_564050 = newJObject()
+  var query_564052 = newJObject()
+  add(query_564052, "api-version", newJString(apiVersion))
+  add(path_564050, "subscriptionId", newJString(subscriptionId))
+  result = call_564049.call(path_564050, query_564052, nil, nil, nil)
 
-var clustersList* = Call_ClustersList_573879(name: "clustersList",
+var clustersList* = Call_ClustersList_563777(name: "clustersList",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.OperationalInsights/clusters",
-    validator: validate_ClustersList_573880, base: "", url: url_ClustersList_573881,
+    validator: validate_ClustersList_563778, base: "", url: url_ClustersList_563779,
     schemes: {Scheme.Https})
 type
-  Call_ClustersListByResourceGroup_574191 = ref object of OpenApiRestCall_573657
-proc url_ClustersListByResourceGroup_574193(protocol: Scheme; host: string;
+  Call_ClustersListByResourceGroup_564091 = ref object of OpenApiRestCall_563555
+proc url_ClustersListByResourceGroup_564093(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -212,30 +216,30 @@ proc url_ClustersListByResourceGroup_574193(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ClustersListByResourceGroup_574192(path: JsonNode; query: JsonNode;
+proc validate_ClustersListByResourceGroup_564092(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets Log Analytics clusters in a resource group.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group to get. The name is case insensitive.
   ##   subscriptionId: JString (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group to get. The name is case insensitive.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_574194 = path.getOrDefault("resourceGroupName")
-  valid_574194 = validateParameter(valid_574194, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564094 = path.getOrDefault("subscriptionId")
+  valid_564094 = validateParameter(valid_564094, JString, required = true,
                                  default = nil)
-  if valid_574194 != nil:
-    section.add "resourceGroupName", valid_574194
-  var valid_574195 = path.getOrDefault("subscriptionId")
-  valid_574195 = validateParameter(valid_574195, JString, required = true,
+  if valid_564094 != nil:
+    section.add "subscriptionId", valid_564094
+  var valid_564095 = path.getOrDefault("resourceGroupName")
+  valid_564095 = validateParameter(valid_564095, JString, required = true,
                                  default = nil)
-  if valid_574195 != nil:
-    section.add "subscriptionId", valid_574195
+  if valid_564095 != nil:
+    section.add "resourceGroupName", valid_564095
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -243,11 +247,11 @@ proc validate_ClustersListByResourceGroup_574192(path: JsonNode; query: JsonNode
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574196 = query.getOrDefault("api-version")
-  valid_574196 = validateParameter(valid_574196, JString, required = true,
+  var valid_564096 = query.getOrDefault("api-version")
+  valid_564096 = validateParameter(valid_564096, JString, required = true,
                                  default = nil)
-  if valid_574196 != nil:
-    section.add "api-version", valid_574196
+  if valid_564096 != nil:
+    section.add "api-version", valid_564096
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -256,44 +260,44 @@ proc validate_ClustersListByResourceGroup_574192(path: JsonNode; query: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_574197: Call_ClustersListByResourceGroup_574191; path: JsonNode;
+proc call*(call_564097: Call_ClustersListByResourceGroup_564091; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets Log Analytics clusters in a resource group.
   ## 
-  let valid = call_574197.validator(path, query, header, formData, body)
-  let scheme = call_574197.pickScheme
+  let valid = call_564097.validator(path, query, header, formData, body)
+  let scheme = call_564097.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574197.url(scheme.get, call_574197.host, call_574197.base,
-                         call_574197.route, valid.getOrDefault("path"),
+  let url = call_564097.url(scheme.get, call_564097.host, call_564097.base,
+                         call_564097.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574197, url, valid)
+  result = hook(call_564097, url, valid)
 
-proc call*(call_574198: Call_ClustersListByResourceGroup_574191;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string): Recallable =
+proc call*(call_564098: Call_ClustersListByResourceGroup_564091;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string): Recallable =
   ## clustersListByResourceGroup
   ## Gets Log Analytics clusters in a resource group.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group to get. The name is case insensitive.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
   ##   subscriptionId: string (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_574199 = newJObject()
-  var query_574200 = newJObject()
-  add(path_574199, "resourceGroupName", newJString(resourceGroupName))
-  add(query_574200, "api-version", newJString(apiVersion))
-  add(path_574199, "subscriptionId", newJString(subscriptionId))
-  result = call_574198.call(path_574199, query_574200, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group to get. The name is case insensitive.
+  var path_564099 = newJObject()
+  var query_564100 = newJObject()
+  add(query_564100, "api-version", newJString(apiVersion))
+  add(path_564099, "subscriptionId", newJString(subscriptionId))
+  add(path_564099, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564098.call(path_564099, query_564100, nil, nil, nil)
 
-var clustersListByResourceGroup* = Call_ClustersListByResourceGroup_574191(
+var clustersListByResourceGroup* = Call_ClustersListByResourceGroup_564091(
     name: "clustersListByResourceGroup", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.OperationalInsights/clusters",
-    validator: validate_ClustersListByResourceGroup_574192, base: "",
-    url: url_ClustersListByResourceGroup_574193, schemes: {Scheme.Https})
+    validator: validate_ClustersListByResourceGroup_564092, base: "",
+    url: url_ClustersListByResourceGroup_564093, schemes: {Scheme.Https})
 type
-  Call_ClustersCreateOrUpdate_574212 = ref object of OpenApiRestCall_573657
-proc url_ClustersCreateOrUpdate_574214(protocol: Scheme; host: string; base: string;
+  Call_ClustersCreateOrUpdate_564112 = ref object of OpenApiRestCall_563555
+proc url_ClustersCreateOrUpdate_564114(protocol: Scheme; host: string; base: string;
                                       route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -316,7 +320,7 @@ proc url_ClustersCreateOrUpdate_574214(protocol: Scheme; host: string; base: str
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ClustersCreateOrUpdate_574213(path: JsonNode; query: JsonNode;
+proc validate_ClustersCreateOrUpdate_564113(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Create or update a Log Analytics cluster.
   ## 
@@ -325,28 +329,28 @@ proc validate_ClustersCreateOrUpdate_574213(path: JsonNode; query: JsonNode;
   ## parameters in `path` object:
   ##   clusterName: JString (required)
   ##              : The name of the Log Analytics cluster.
-  ##   resourceGroupName: JString (required)
-  ##                    : The resource group name of the Log Analytics cluster.
   ##   subscriptionId: JString (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The resource group name of the Log Analytics cluster.
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `clusterName` field"
-  var valid_574232 = path.getOrDefault("clusterName")
-  valid_574232 = validateParameter(valid_574232, JString, required = true,
+  var valid_564132 = path.getOrDefault("clusterName")
+  valid_564132 = validateParameter(valid_564132, JString, required = true,
                                  default = nil)
-  if valid_574232 != nil:
-    section.add "clusterName", valid_574232
-  var valid_574233 = path.getOrDefault("resourceGroupName")
-  valid_574233 = validateParameter(valid_574233, JString, required = true,
+  if valid_564132 != nil:
+    section.add "clusterName", valid_564132
+  var valid_564133 = path.getOrDefault("subscriptionId")
+  valid_564133 = validateParameter(valid_564133, JString, required = true,
                                  default = nil)
-  if valid_574233 != nil:
-    section.add "resourceGroupName", valid_574233
-  var valid_574234 = path.getOrDefault("subscriptionId")
-  valid_574234 = validateParameter(valid_574234, JString, required = true,
+  if valid_564133 != nil:
+    section.add "subscriptionId", valid_564133
+  var valid_564134 = path.getOrDefault("resourceGroupName")
+  valid_564134 = validateParameter(valid_564134, JString, required = true,
                                  default = nil)
-  if valid_574234 != nil:
-    section.add "subscriptionId", valid_574234
+  if valid_564134 != nil:
+    section.add "resourceGroupName", valid_564134
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -354,11 +358,11 @@ proc validate_ClustersCreateOrUpdate_574213(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574235 = query.getOrDefault("api-version")
-  valid_574235 = validateParameter(valid_574235, JString, required = true,
+  var valid_564135 = query.getOrDefault("api-version")
+  valid_564135 = validateParameter(valid_564135, JString, required = true,
                                  default = nil)
-  if valid_574235 != nil:
-    section.add "api-version", valid_574235
+  if valid_564135 != nil:
+    section.add "api-version", valid_564135
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -372,53 +376,53 @@ proc validate_ClustersCreateOrUpdate_574213(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574237: Call_ClustersCreateOrUpdate_574212; path: JsonNode;
+proc call*(call_564137: Call_ClustersCreateOrUpdate_564112; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Create or update a Log Analytics cluster.
   ## 
-  let valid = call_574237.validator(path, query, header, formData, body)
-  let scheme = call_574237.pickScheme
+  let valid = call_564137.validator(path, query, header, formData, body)
+  let scheme = call_564137.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574237.url(scheme.get, call_574237.host, call_574237.base,
-                         call_574237.route, valid.getOrDefault("path"),
+  let url = call_564137.url(scheme.get, call_564137.host, call_564137.base,
+                         call_564137.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574237, url, valid)
+  result = hook(call_564137, url, valid)
 
-proc call*(call_574238: Call_ClustersCreateOrUpdate_574212; clusterName: string;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
+proc call*(call_564138: Call_ClustersCreateOrUpdate_564112; clusterName: string;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string;
           parameters: JsonNode): Recallable =
   ## clustersCreateOrUpdate
   ## Create or update a Log Analytics cluster.
   ##   clusterName: string (required)
   ##              : The name of the Log Analytics cluster.
-  ##   resourceGroupName: string (required)
-  ##                    : The resource group name of the Log Analytics cluster.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
   ##   subscriptionId: string (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The resource group name of the Log Analytics cluster.
   ##   parameters: JObject (required)
   ##             : The parameters required to create or update a Log Analytics cluster.
-  var path_574239 = newJObject()
-  var query_574240 = newJObject()
-  var body_574241 = newJObject()
-  add(path_574239, "clusterName", newJString(clusterName))
-  add(path_574239, "resourceGroupName", newJString(resourceGroupName))
-  add(query_574240, "api-version", newJString(apiVersion))
-  add(path_574239, "subscriptionId", newJString(subscriptionId))
+  var path_564139 = newJObject()
+  var query_564140 = newJObject()
+  var body_564141 = newJObject()
+  add(path_564139, "clusterName", newJString(clusterName))
+  add(query_564140, "api-version", newJString(apiVersion))
+  add(path_564139, "subscriptionId", newJString(subscriptionId))
+  add(path_564139, "resourceGroupName", newJString(resourceGroupName))
   if parameters != nil:
-    body_574241 = parameters
-  result = call_574238.call(path_574239, query_574240, nil, nil, body_574241)
+    body_564141 = parameters
+  result = call_564138.call(path_564139, query_564140, nil, nil, body_564141)
 
-var clustersCreateOrUpdate* = Call_ClustersCreateOrUpdate_574212(
+var clustersCreateOrUpdate* = Call_ClustersCreateOrUpdate_564112(
     name: "clustersCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.OperationalInsights/clusters/{clusterName}",
-    validator: validate_ClustersCreateOrUpdate_574213, base: "",
-    url: url_ClustersCreateOrUpdate_574214, schemes: {Scheme.Https})
+    validator: validate_ClustersCreateOrUpdate_564113, base: "",
+    url: url_ClustersCreateOrUpdate_564114, schemes: {Scheme.Https})
 type
-  Call_ClustersGet_574201 = ref object of OpenApiRestCall_573657
-proc url_ClustersGet_574203(protocol: Scheme; host: string; base: string;
+  Call_ClustersGet_564101 = ref object of OpenApiRestCall_563555
+proc url_ClustersGet_564103(protocol: Scheme; host: string; base: string;
                            route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -441,7 +445,7 @@ proc url_ClustersGet_574203(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ClustersGet_574202(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_ClustersGet_564102(path: JsonNode; query: JsonNode; header: JsonNode;
                                 formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets a Log Analytics cluster instance.
   ## 
@@ -450,28 +454,28 @@ proc validate_ClustersGet_574202(path: JsonNode; query: JsonNode; header: JsonNo
   ## parameters in `path` object:
   ##   clusterName: JString (required)
   ##              : Name of the Log Analytics Cluster.
-  ##   resourceGroupName: JString (required)
-  ##                    : The resource group name of the Log Analytics cluster.
   ##   subscriptionId: JString (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The resource group name of the Log Analytics cluster.
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `clusterName` field"
-  var valid_574204 = path.getOrDefault("clusterName")
-  valid_574204 = validateParameter(valid_574204, JString, required = true,
+  var valid_564104 = path.getOrDefault("clusterName")
+  valid_564104 = validateParameter(valid_564104, JString, required = true,
                                  default = nil)
-  if valid_574204 != nil:
-    section.add "clusterName", valid_574204
-  var valid_574205 = path.getOrDefault("resourceGroupName")
-  valid_574205 = validateParameter(valid_574205, JString, required = true,
+  if valid_564104 != nil:
+    section.add "clusterName", valid_564104
+  var valid_564105 = path.getOrDefault("subscriptionId")
+  valid_564105 = validateParameter(valid_564105, JString, required = true,
                                  default = nil)
-  if valid_574205 != nil:
-    section.add "resourceGroupName", valid_574205
-  var valid_574206 = path.getOrDefault("subscriptionId")
-  valid_574206 = validateParameter(valid_574206, JString, required = true,
+  if valid_564105 != nil:
+    section.add "subscriptionId", valid_564105
+  var valid_564106 = path.getOrDefault("resourceGroupName")
+  valid_564106 = validateParameter(valid_564106, JString, required = true,
                                  default = nil)
-  if valid_574206 != nil:
-    section.add "subscriptionId", valid_574206
+  if valid_564106 != nil:
+    section.add "resourceGroupName", valid_564106
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -479,11 +483,11 @@ proc validate_ClustersGet_574202(path: JsonNode; query: JsonNode; header: JsonNo
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574207 = query.getOrDefault("api-version")
-  valid_574207 = validateParameter(valid_574207, JString, required = true,
+  var valid_564107 = query.getOrDefault("api-version")
+  valid_564107 = validateParameter(valid_564107, JString, required = true,
                                  default = nil)
-  if valid_574207 != nil:
-    section.add "api-version", valid_574207
+  if valid_564107 != nil:
+    section.add "api-version", valid_564107
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -492,48 +496,48 @@ proc validate_ClustersGet_574202(path: JsonNode; query: JsonNode; header: JsonNo
   if body != nil:
     result.add "body", body
 
-proc call*(call_574208: Call_ClustersGet_574201; path: JsonNode; query: JsonNode;
+proc call*(call_564108: Call_ClustersGet_564101; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets a Log Analytics cluster instance.
   ## 
-  let valid = call_574208.validator(path, query, header, formData, body)
-  let scheme = call_574208.pickScheme
+  let valid = call_564108.validator(path, query, header, formData, body)
+  let scheme = call_564108.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574208.url(scheme.get, call_574208.host, call_574208.base,
-                         call_574208.route, valid.getOrDefault("path"),
+  let url = call_564108.url(scheme.get, call_564108.host, call_564108.base,
+                         call_564108.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574208, url, valid)
+  result = hook(call_564108, url, valid)
 
-proc call*(call_574209: Call_ClustersGet_574201; clusterName: string;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string): Recallable =
+proc call*(call_564109: Call_ClustersGet_564101; clusterName: string;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string): Recallable =
   ## clustersGet
   ## Gets a Log Analytics cluster instance.
   ##   clusterName: string (required)
   ##              : Name of the Log Analytics Cluster.
-  ##   resourceGroupName: string (required)
-  ##                    : The resource group name of the Log Analytics cluster.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
   ##   subscriptionId: string (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_574210 = newJObject()
-  var query_574211 = newJObject()
-  add(path_574210, "clusterName", newJString(clusterName))
-  add(path_574210, "resourceGroupName", newJString(resourceGroupName))
-  add(query_574211, "api-version", newJString(apiVersion))
-  add(path_574210, "subscriptionId", newJString(subscriptionId))
-  result = call_574209.call(path_574210, query_574211, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The resource group name of the Log Analytics cluster.
+  var path_564110 = newJObject()
+  var query_564111 = newJObject()
+  add(path_564110, "clusterName", newJString(clusterName))
+  add(query_564111, "api-version", newJString(apiVersion))
+  add(path_564110, "subscriptionId", newJString(subscriptionId))
+  add(path_564110, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564109.call(path_564110, query_564111, nil, nil, nil)
 
-var clustersGet* = Call_ClustersGet_574201(name: "clustersGet",
+var clustersGet* = Call_ClustersGet_564101(name: "clustersGet",
                                         meth: HttpMethod.HttpGet,
                                         host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.OperationalInsights/clusters/{clusterName}",
-                                        validator: validate_ClustersGet_574202,
-                                        base: "", url: url_ClustersGet_574203,
+                                        validator: validate_ClustersGet_564102,
+                                        base: "", url: url_ClustersGet_564103,
                                         schemes: {Scheme.Https})
 type
-  Call_ClustersUpdate_574253 = ref object of OpenApiRestCall_573657
-proc url_ClustersUpdate_574255(protocol: Scheme; host: string; base: string;
+  Call_ClustersUpdate_564153 = ref object of OpenApiRestCall_563555
+proc url_ClustersUpdate_564155(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -556,7 +560,7 @@ proc url_ClustersUpdate_574255(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ClustersUpdate_574254(path: JsonNode; query: JsonNode;
+proc validate_ClustersUpdate_564154(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## Updates a Log Analytics cluster.
@@ -566,28 +570,28 @@ proc validate_ClustersUpdate_574254(path: JsonNode; query: JsonNode;
   ## parameters in `path` object:
   ##   clusterName: JString (required)
   ##              : The name of the cluster.
-  ##   resourceGroupName: JString (required)
-  ##                    : The resource group name of the cluster.
   ##   subscriptionId: JString (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The resource group name of the cluster.
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `clusterName` field"
-  var valid_574256 = path.getOrDefault("clusterName")
-  valid_574256 = validateParameter(valid_574256, JString, required = true,
+  var valid_564156 = path.getOrDefault("clusterName")
+  valid_564156 = validateParameter(valid_564156, JString, required = true,
                                  default = nil)
-  if valid_574256 != nil:
-    section.add "clusterName", valid_574256
-  var valid_574257 = path.getOrDefault("resourceGroupName")
-  valid_574257 = validateParameter(valid_574257, JString, required = true,
+  if valid_564156 != nil:
+    section.add "clusterName", valid_564156
+  var valid_564157 = path.getOrDefault("subscriptionId")
+  valid_564157 = validateParameter(valid_564157, JString, required = true,
                                  default = nil)
-  if valid_574257 != nil:
-    section.add "resourceGroupName", valid_574257
-  var valid_574258 = path.getOrDefault("subscriptionId")
-  valid_574258 = validateParameter(valid_574258, JString, required = true,
+  if valid_564157 != nil:
+    section.add "subscriptionId", valid_564157
+  var valid_564158 = path.getOrDefault("resourceGroupName")
+  valid_564158 = validateParameter(valid_564158, JString, required = true,
                                  default = nil)
-  if valid_574258 != nil:
-    section.add "subscriptionId", valid_574258
+  if valid_564158 != nil:
+    section.add "resourceGroupName", valid_564158
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -595,11 +599,11 @@ proc validate_ClustersUpdate_574254(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574259 = query.getOrDefault("api-version")
-  valid_574259 = validateParameter(valid_574259, JString, required = true,
+  var valid_564159 = query.getOrDefault("api-version")
+  valid_564159 = validateParameter(valid_564159, JString, required = true,
                                  default = nil)
-  if valid_574259 != nil:
-    section.add "api-version", valid_574259
+  if valid_564159 != nil:
+    section.add "api-version", valid_564159
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -613,52 +617,52 @@ proc validate_ClustersUpdate_574254(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574261: Call_ClustersUpdate_574253; path: JsonNode; query: JsonNode;
+proc call*(call_564161: Call_ClustersUpdate_564153; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Updates a Log Analytics cluster.
   ## 
-  let valid = call_574261.validator(path, query, header, formData, body)
-  let scheme = call_574261.pickScheme
+  let valid = call_564161.validator(path, query, header, formData, body)
+  let scheme = call_564161.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574261.url(scheme.get, call_574261.host, call_574261.base,
-                         call_574261.route, valid.getOrDefault("path"),
+  let url = call_564161.url(scheme.get, call_564161.host, call_564161.base,
+                         call_564161.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574261, url, valid)
+  result = hook(call_564161, url, valid)
 
-proc call*(call_574262: Call_ClustersUpdate_574253; clusterName: string;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
+proc call*(call_564162: Call_ClustersUpdate_564153; clusterName: string;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string;
           parameters: JsonNode): Recallable =
   ## clustersUpdate
   ## Updates a Log Analytics cluster.
   ##   clusterName: string (required)
   ##              : The name of the cluster.
-  ##   resourceGroupName: string (required)
-  ##                    : The resource group name of the cluster.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
   ##   subscriptionId: string (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The resource group name of the cluster.
   ##   parameters: JObject (required)
   ##             : The parameters required to patch a Log Analytics cluster.
-  var path_574263 = newJObject()
-  var query_574264 = newJObject()
-  var body_574265 = newJObject()
-  add(path_574263, "clusterName", newJString(clusterName))
-  add(path_574263, "resourceGroupName", newJString(resourceGroupName))
-  add(query_574264, "api-version", newJString(apiVersion))
-  add(path_574263, "subscriptionId", newJString(subscriptionId))
+  var path_564163 = newJObject()
+  var query_564164 = newJObject()
+  var body_564165 = newJObject()
+  add(path_564163, "clusterName", newJString(clusterName))
+  add(query_564164, "api-version", newJString(apiVersion))
+  add(path_564163, "subscriptionId", newJString(subscriptionId))
+  add(path_564163, "resourceGroupName", newJString(resourceGroupName))
   if parameters != nil:
-    body_574265 = parameters
-  result = call_574262.call(path_574263, query_574264, nil, nil, body_574265)
+    body_564165 = parameters
+  result = call_564162.call(path_564163, query_564164, nil, nil, body_564165)
 
-var clustersUpdate* = Call_ClustersUpdate_574253(name: "clustersUpdate",
+var clustersUpdate* = Call_ClustersUpdate_564153(name: "clustersUpdate",
     meth: HttpMethod.HttpPatch, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.OperationalInsights/clusters/{clusterName}",
-    validator: validate_ClustersUpdate_574254, base: "", url: url_ClustersUpdate_574255,
+    validator: validate_ClustersUpdate_564154, base: "", url: url_ClustersUpdate_564155,
     schemes: {Scheme.Https})
 type
-  Call_ClustersDelete_574242 = ref object of OpenApiRestCall_573657
-proc url_ClustersDelete_574244(protocol: Scheme; host: string; base: string;
+  Call_ClustersDelete_564142 = ref object of OpenApiRestCall_563555
+proc url_ClustersDelete_564144(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -681,7 +685,7 @@ proc url_ClustersDelete_574244(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ClustersDelete_574243(path: JsonNode; query: JsonNode;
+proc validate_ClustersDelete_564143(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## Deletes a cluster instance.
@@ -691,28 +695,28 @@ proc validate_ClustersDelete_574243(path: JsonNode; query: JsonNode;
   ## parameters in `path` object:
   ##   clusterName: JString (required)
   ##              : Name of the Log Analytics Cluster.
-  ##   resourceGroupName: JString (required)
-  ##                    : The resource group name of the Log Analytics cluster.
   ##   subscriptionId: JString (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The resource group name of the Log Analytics cluster.
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `clusterName` field"
-  var valid_574245 = path.getOrDefault("clusterName")
-  valid_574245 = validateParameter(valid_574245, JString, required = true,
+  var valid_564145 = path.getOrDefault("clusterName")
+  valid_564145 = validateParameter(valid_564145, JString, required = true,
                                  default = nil)
-  if valid_574245 != nil:
-    section.add "clusterName", valid_574245
-  var valid_574246 = path.getOrDefault("resourceGroupName")
-  valid_574246 = validateParameter(valid_574246, JString, required = true,
+  if valid_564145 != nil:
+    section.add "clusterName", valid_564145
+  var valid_564146 = path.getOrDefault("subscriptionId")
+  valid_564146 = validateParameter(valid_564146, JString, required = true,
                                  default = nil)
-  if valid_574246 != nil:
-    section.add "resourceGroupName", valid_574246
-  var valid_574247 = path.getOrDefault("subscriptionId")
-  valid_574247 = validateParameter(valid_574247, JString, required = true,
+  if valid_564146 != nil:
+    section.add "subscriptionId", valid_564146
+  var valid_564147 = path.getOrDefault("resourceGroupName")
+  valid_564147 = validateParameter(valid_564147, JString, required = true,
                                  default = nil)
-  if valid_574247 != nil:
-    section.add "subscriptionId", valid_574247
+  if valid_564147 != nil:
+    section.add "resourceGroupName", valid_564147
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -720,11 +724,11 @@ proc validate_ClustersDelete_574243(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574248 = query.getOrDefault("api-version")
-  valid_574248 = validateParameter(valid_574248, JString, required = true,
+  var valid_564148 = query.getOrDefault("api-version")
+  valid_564148 = validateParameter(valid_564148, JString, required = true,
                                  default = nil)
-  if valid_574248 != nil:
-    section.add "api-version", valid_574248
+  if valid_564148 != nil:
+    section.add "api-version", valid_564148
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -733,42 +737,42 @@ proc validate_ClustersDelete_574243(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574249: Call_ClustersDelete_574242; path: JsonNode; query: JsonNode;
+proc call*(call_564149: Call_ClustersDelete_564142; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes a cluster instance.
   ## 
-  let valid = call_574249.validator(path, query, header, formData, body)
-  let scheme = call_574249.pickScheme
+  let valid = call_564149.validator(path, query, header, formData, body)
+  let scheme = call_564149.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574249.url(scheme.get, call_574249.host, call_574249.base,
-                         call_574249.route, valid.getOrDefault("path"),
+  let url = call_564149.url(scheme.get, call_564149.host, call_564149.base,
+                         call_564149.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574249, url, valid)
+  result = hook(call_564149, url, valid)
 
-proc call*(call_574250: Call_ClustersDelete_574242; clusterName: string;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string): Recallable =
+proc call*(call_564150: Call_ClustersDelete_564142; clusterName: string;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string): Recallable =
   ## clustersDelete
   ## Deletes a cluster instance.
   ##   clusterName: string (required)
   ##              : Name of the Log Analytics Cluster.
-  ##   resourceGroupName: string (required)
-  ##                    : The resource group name of the Log Analytics cluster.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
   ##   subscriptionId: string (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_574251 = newJObject()
-  var query_574252 = newJObject()
-  add(path_574251, "clusterName", newJString(clusterName))
-  add(path_574251, "resourceGroupName", newJString(resourceGroupName))
-  add(query_574252, "api-version", newJString(apiVersion))
-  add(path_574251, "subscriptionId", newJString(subscriptionId))
-  result = call_574250.call(path_574251, query_574252, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The resource group name of the Log Analytics cluster.
+  var path_564151 = newJObject()
+  var query_564152 = newJObject()
+  add(path_564151, "clusterName", newJString(clusterName))
+  add(query_564152, "api-version", newJString(apiVersion))
+  add(path_564151, "subscriptionId", newJString(subscriptionId))
+  add(path_564151, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564150.call(path_564151, query_564152, nil, nil, nil)
 
-var clustersDelete* = Call_ClustersDelete_574242(name: "clustersDelete",
+var clustersDelete* = Call_ClustersDelete_564142(name: "clustersDelete",
     meth: HttpMethod.HttpDelete, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.OperationalInsights/clusters/{clusterName}",
-    validator: validate_ClustersDelete_574243, base: "", url: url_ClustersDelete_574244,
+    validator: validate_ClustersDelete_564143, base: "", url: url_ClustersDelete_564144,
     schemes: {Scheme.Https})
 export
   rest

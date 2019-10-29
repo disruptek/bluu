@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, httpcore
 
 ## auto-generated via openapi macro
 ## title: Azure Log Analytics
@@ -27,15 +27,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_567658 = ref object of OpenApiRestCall
+  OpenApiRestCall_563556 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_567658](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563556](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_567658): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563556): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -93,9 +93,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -105,8 +109,8 @@ const
   macServiceName = "operationalinsights-swagger"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_QueryExecute_568209 = ref object of OpenApiRestCall_567658
-proc url_QueryExecute_568211(protocol: Scheme; host: string; base: string;
+  Call_QueryExecute_564109 = ref object of OpenApiRestCall_563556
+proc url_QueryExecute_564111(protocol: Scheme; host: string; base: string;
                             route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -130,37 +134,37 @@ proc url_QueryExecute_568211(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_QueryExecute_568210(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_QueryExecute_564110(path: JsonNode; query: JsonNode; header: JsonNode;
                                  formData: JsonNode; body: JsonNode): JsonNode =
   ## Executes an Analytics query for data. [Here](https://dev.loganalytics.io/documentation/Using-the-API) is an example for using POST with an Analytics query.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group to get. The name is case insensitive.
   ##   subscriptionId: JString (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group to get. The name is case insensitive.
   ##   workspaceName: JString (required)
   ##                : Name of the Log Analytics workspace.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568212 = path.getOrDefault("resourceGroupName")
-  valid_568212 = validateParameter(valid_568212, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564112 = path.getOrDefault("subscriptionId")
+  valid_564112 = validateParameter(valid_564112, JString, required = true,
                                  default = nil)
-  if valid_568212 != nil:
-    section.add "resourceGroupName", valid_568212
-  var valid_568213 = path.getOrDefault("subscriptionId")
-  valid_568213 = validateParameter(valid_568213, JString, required = true,
+  if valid_564112 != nil:
+    section.add "subscriptionId", valid_564112
+  var valid_564113 = path.getOrDefault("resourceGroupName")
+  valid_564113 = validateParameter(valid_564113, JString, required = true,
                                  default = nil)
-  if valid_568213 != nil:
-    section.add "subscriptionId", valid_568213
-  var valid_568214 = path.getOrDefault("workspaceName")
-  valid_568214 = validateParameter(valid_568214, JString, required = true,
+  if valid_564113 != nil:
+    section.add "resourceGroupName", valid_564113
+  var valid_564114 = path.getOrDefault("workspaceName")
+  valid_564114 = validateParameter(valid_564114, JString, required = true,
                                  default = nil)
-  if valid_568214 != nil:
-    section.add "workspaceName", valid_568214
+  if valid_564114 != nil:
+    section.add "workspaceName", valid_564114
   result.add "path", section
   ## parameters in `query` object:
   ##   apiVersion: JString (required)
@@ -168,11 +172,11 @@ proc validate_QueryExecute_568210(path: JsonNode; query: JsonNode; header: JsonN
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `apiVersion` field"
-  var valid_568215 = query.getOrDefault("apiVersion")
-  valid_568215 = validateParameter(valid_568215, JString, required = true,
+  var valid_564115 = query.getOrDefault("apiVersion")
+  valid_564115 = validateParameter(valid_564115, JString, required = true,
                                  default = newJString("2017-10-01"))
-  if valid_568215 != nil:
-    section.add "apiVersion", valid_568215
+  if valid_564115 != nil:
+    section.add "apiVersion", valid_564115
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -187,53 +191,53 @@ proc validate_QueryExecute_568210(path: JsonNode; query: JsonNode; header: JsonN
   if body != nil:
     result.add "body", body
 
-proc call*(call_568217: Call_QueryExecute_568209; path: JsonNode; query: JsonNode;
+proc call*(call_564117: Call_QueryExecute_564109; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Executes an Analytics query for data. [Here](https://dev.loganalytics.io/documentation/Using-the-API) is an example for using POST with an Analytics query.
   ## 
-  let valid = call_568217.validator(path, query, header, formData, body)
-  let scheme = call_568217.pickScheme
+  let valid = call_564117.validator(path, query, header, formData, body)
+  let scheme = call_564117.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568217.url(scheme.get, call_568217.host, call_568217.base,
-                         call_568217.route, valid.getOrDefault("path"),
+  let url = call_564117.url(scheme.get, call_564117.host, call_564117.base,
+                         call_564117.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568217, url, valid)
+  result = hook(call_564117, url, valid)
 
-proc call*(call_568218: Call_QueryExecute_568209; resourceGroupName: string;
-          subscriptionId: string; body: JsonNode; workspaceName: string;
+proc call*(call_564118: Call_QueryExecute_564109; subscriptionId: string;
+          resourceGroupName: string; body: JsonNode; workspaceName: string;
           apiVersion: string = "2017-10-01"): Recallable =
   ## queryExecute
   ## Executes an Analytics query for data. [Here](https://dev.loganalytics.io/documentation/Using-the-API) is an example for using POST with an Analytics query.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group to get. The name is case insensitive.
   ##   subscriptionId: string (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group to get. The name is case insensitive.
   ##   body: JObject (required)
   ##       : The Analytics query. Learn more about the [Analytics query 
   ## syntax](https://azure.microsoft.com/documentation/articles/app-insights-analytics-reference/)
-  ##   workspaceName: string (required)
-  ##                : Name of the Log Analytics workspace.
   ##   apiVersion: string (required)
   ##             : Client API version.
-  var path_568219 = newJObject()
-  var query_568220 = newJObject()
-  var body_568221 = newJObject()
-  add(path_568219, "resourceGroupName", newJString(resourceGroupName))
-  add(path_568219, "subscriptionId", newJString(subscriptionId))
+  ##   workspaceName: string (required)
+  ##                : Name of the Log Analytics workspace.
+  var path_564119 = newJObject()
+  var query_564120 = newJObject()
+  var body_564121 = newJObject()
+  add(path_564119, "subscriptionId", newJString(subscriptionId))
+  add(path_564119, "resourceGroupName", newJString(resourceGroupName))
   if body != nil:
-    body_568221 = body
-  add(path_568219, "workspaceName", newJString(workspaceName))
-  add(query_568220, "apiVersion", newJString(apiVersion))
-  result = call_568218.call(path_568219, query_568220, nil, nil, body_568221)
+    body_564121 = body
+  add(query_564120, "apiVersion", newJString(apiVersion))
+  add(path_564119, "workspaceName", newJString(workspaceName))
+  result = call_564118.call(path_564119, query_564120, nil, nil, body_564121)
 
-var queryExecute* = Call_QueryExecute_568209(name: "queryExecute",
+var queryExecute* = Call_QueryExecute_564109(name: "queryExecute",
     meth: HttpMethod.HttpPost, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.OperationalInsights/workspaces/{workspaceName}/query",
-    validator: validate_QueryExecute_568210, base: "", url: url_QueryExecute_568211,
+    validator: validate_QueryExecute_564110, base: "", url: url_QueryExecute_564111,
     schemes: {Scheme.Https})
 type
-  Call_QueryGet_567880 = ref object of OpenApiRestCall_567658
-proc url_QueryGet_567882(protocol: Scheme; host: string; base: string; route: string;
+  Call_QueryGet_563778 = ref object of OpenApiRestCall_563556
+proc url_QueryGet_563780(protocol: Scheme; host: string; base: string; route: string;
                         path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -257,63 +261,63 @@ proc url_QueryGet_567882(protocol: Scheme; host: string; base: string; route: st
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_QueryGet_567881(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_QueryGet_563779(path: JsonNode; query: JsonNode; header: JsonNode;
                              formData: JsonNode; body: JsonNode): JsonNode =
   ## Executes an Analytics query for data
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group to get. The name is case insensitive.
   ##   subscriptionId: JString (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group to get. The name is case insensitive.
   ##   workspaceName: JString (required)
   ##                : Name of the Log Analytics workspace.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568055 = path.getOrDefault("resourceGroupName")
-  valid_568055 = validateParameter(valid_568055, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_563955 = path.getOrDefault("subscriptionId")
+  valid_563955 = validateParameter(valid_563955, JString, required = true,
                                  default = nil)
-  if valid_568055 != nil:
-    section.add "resourceGroupName", valid_568055
-  var valid_568056 = path.getOrDefault("subscriptionId")
-  valid_568056 = validateParameter(valid_568056, JString, required = true,
+  if valid_563955 != nil:
+    section.add "subscriptionId", valid_563955
+  var valid_563956 = path.getOrDefault("resourceGroupName")
+  valid_563956 = validateParameter(valid_563956, JString, required = true,
                                  default = nil)
-  if valid_568056 != nil:
-    section.add "subscriptionId", valid_568056
-  var valid_568057 = path.getOrDefault("workspaceName")
-  valid_568057 = validateParameter(valid_568057, JString, required = true,
+  if valid_563956 != nil:
+    section.add "resourceGroupName", valid_563956
+  var valid_563957 = path.getOrDefault("workspaceName")
+  valid_563957 = validateParameter(valid_563957, JString, required = true,
                                  default = nil)
-  if valid_568057 != nil:
-    section.add "workspaceName", valid_568057
+  if valid_563957 != nil:
+    section.add "workspaceName", valid_563957
   result.add "path", section
   ## parameters in `query` object:
+  ##   timespan: JString
+  ##           : Optional. The timespan over which to query data. This is an ISO8601 time period value.  This timespan is applied in addition to any that are specified in the query expression.
   ##   query: JString (required)
   ##        : The Analytics query. Learn more about the [Analytics query 
   ## syntax](https://azure.microsoft.com/documentation/articles/app-insights-analytics-reference/)
-  ##   timespan: JString
-  ##           : Optional. The timespan over which to query data. This is an ISO8601 time period value.  This timespan is applied in addition to any that are specified in the query expression.
   ##   apiVersion: JString (required)
   ##             : Client API version.
   section = newJObject()
+  var valid_563958 = query.getOrDefault("timespan")
+  valid_563958 = validateParameter(valid_563958, JString, required = false,
+                                 default = nil)
+  if valid_563958 != nil:
+    section.add "timespan", valid_563958
   assert query != nil, "query argument is necessary due to required `query` field"
-  var valid_568058 = query.getOrDefault("query")
-  valid_568058 = validateParameter(valid_568058, JString, required = true,
+  var valid_563959 = query.getOrDefault("query")
+  valid_563959 = validateParameter(valid_563959, JString, required = true,
                                  default = nil)
-  if valid_568058 != nil:
-    section.add "query", valid_568058
-  var valid_568059 = query.getOrDefault("timespan")
-  valid_568059 = validateParameter(valid_568059, JString, required = false,
-                                 default = nil)
-  if valid_568059 != nil:
-    section.add "timespan", valid_568059
-  var valid_568073 = query.getOrDefault("apiVersion")
-  valid_568073 = validateParameter(valid_568073, JString, required = true,
+  if valid_563959 != nil:
+    section.add "query", valid_563959
+  var valid_563973 = query.getOrDefault("apiVersion")
+  valid_563973 = validateParameter(valid_563973, JString, required = true,
                                  default = newJString("2017-10-01"))
-  if valid_568073 != nil:
-    section.add "apiVersion", valid_568073
+  if valid_563973 != nil:
+    section.add "apiVersion", valid_563973
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -322,51 +326,51 @@ proc validate_QueryGet_567881(path: JsonNode; query: JsonNode; header: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568096: Call_QueryGet_567880; path: JsonNode; query: JsonNode;
+proc call*(call_563996: Call_QueryGet_563778; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Executes an Analytics query for data
   ## 
-  let valid = call_568096.validator(path, query, header, formData, body)
-  let scheme = call_568096.pickScheme
+  let valid = call_563996.validator(path, query, header, formData, body)
+  let scheme = call_563996.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568096.url(scheme.get, call_568096.host, call_568096.base,
-                         call_568096.route, valid.getOrDefault("path"),
+  let url = call_563996.url(scheme.get, call_563996.host, call_563996.base,
+                         call_563996.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568096, url, valid)
+  result = hook(call_563996, url, valid)
 
-proc call*(call_568167: Call_QueryGet_567880; resourceGroupName: string;
-          query: string; subscriptionId: string; workspaceName: string;
+proc call*(call_564067: Call_QueryGet_563778; subscriptionId: string;
+          resourceGroupName: string; query: string; workspaceName: string;
           timespan: string = ""; apiVersion: string = "2017-10-01"): Recallable =
   ## queryGet
   ## Executes an Analytics query for data
+  ##   timespan: string
+  ##           : Optional. The timespan over which to query data. This is an ISO8601 time period value.  This timespan is applied in addition to any that are specified in the query expression.
+  ##   subscriptionId: string (required)
+  ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   resourceGroupName: string (required)
   ##                    : The name of the resource group to get. The name is case insensitive.
   ##   query: string (required)
   ##        : The Analytics query. Learn more about the [Analytics query 
   ## syntax](https://azure.microsoft.com/documentation/articles/app-insights-analytics-reference/)
-  ##   timespan: string
-  ##           : Optional. The timespan over which to query data. This is an ISO8601 time period value.  This timespan is applied in addition to any that are specified in the query expression.
-  ##   subscriptionId: string (required)
-  ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   workspaceName: string (required)
-  ##                : Name of the Log Analytics workspace.
   ##   apiVersion: string (required)
   ##             : Client API version.
-  var path_568168 = newJObject()
-  var query_568170 = newJObject()
-  add(path_568168, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568170, "query", newJString(query))
-  add(query_568170, "timespan", newJString(timespan))
-  add(path_568168, "subscriptionId", newJString(subscriptionId))
-  add(path_568168, "workspaceName", newJString(workspaceName))
-  add(query_568170, "apiVersion", newJString(apiVersion))
-  result = call_568167.call(path_568168, query_568170, nil, nil, nil)
+  ##   workspaceName: string (required)
+  ##                : Name of the Log Analytics workspace.
+  var path_564068 = newJObject()
+  var query_564070 = newJObject()
+  add(query_564070, "timespan", newJString(timespan))
+  add(path_564068, "subscriptionId", newJString(subscriptionId))
+  add(path_564068, "resourceGroupName", newJString(resourceGroupName))
+  add(query_564070, "query", newJString(query))
+  add(query_564070, "apiVersion", newJString(apiVersion))
+  add(path_564068, "workspaceName", newJString(workspaceName))
+  result = call_564067.call(path_564068, query_564070, nil, nil, nil)
 
-var queryGet* = Call_QueryGet_567880(name: "queryGet", meth: HttpMethod.HttpGet,
+var queryGet* = Call_QueryGet_563778(name: "queryGet", meth: HttpMethod.HttpGet,
                                   host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.OperationalInsights/workspaces/{workspaceName}/query",
-                                  validator: validate_QueryGet_567881, base: "",
-                                  url: url_QueryGet_567882,
+                                  validator: validate_QueryGet_563779, base: "",
+                                  url: url_QueryGet_563780,
                                   schemes: {Scheme.Https})
 export
   rest

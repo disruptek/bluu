@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, httpcore
 
 ## auto-generated via openapi macro
 ## title: MonitorManagementClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_567642 = ref object of OpenApiRestCall
+  OpenApiRestCall_563540 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_567642](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563540](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_567642): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563540): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,15 +107,15 @@ const
   macServiceName = "monitor-eventCategories_API"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_EventCategoriesList_567864 = ref object of OpenApiRestCall_567642
-proc url_EventCategoriesList_567866(protocol: Scheme; host: string; base: string;
+  Call_EventCategoriesList_563762 = ref object of OpenApiRestCall_563540
+proc url_EventCategoriesList_563764(protocol: Scheme; host: string; base: string;
                                    route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_EventCategoriesList_567865(path: JsonNode; query: JsonNode;
+proc validate_EventCategoriesList_563763(path: JsonNode; query: JsonNode;
                                         header: JsonNode; formData: JsonNode;
                                         body: JsonNode): JsonNode =
   ## Get the list of available event categories supported in the Activity Logs Service.<br>The current list includes the following: Administrative, Security, ServiceHealth, Alert, Recommendation, Policy.
@@ -126,11 +130,11 @@ proc validate_EventCategoriesList_567865(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568025 = query.getOrDefault("api-version")
-  valid_568025 = validateParameter(valid_568025, JString, required = true,
+  var valid_563925 = query.getOrDefault("api-version")
+  valid_563925 = validateParameter(valid_563925, JString, required = true,
                                  default = nil)
-  if valid_568025 != nil:
-    section.add "api-version", valid_568025
+  if valid_563925 != nil:
+    section.add "api-version", valid_563925
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -139,34 +143,34 @@ proc validate_EventCategoriesList_567865(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568048: Call_EventCategoriesList_567864; path: JsonNode;
+proc call*(call_563948: Call_EventCategoriesList_563762; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get the list of available event categories supported in the Activity Logs Service.<br>The current list includes the following: Administrative, Security, ServiceHealth, Alert, Recommendation, Policy.
   ## 
-  let valid = call_568048.validator(path, query, header, formData, body)
-  let scheme = call_568048.pickScheme
+  let valid = call_563948.validator(path, query, header, formData, body)
+  let scheme = call_563948.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568048.url(scheme.get, call_568048.host, call_568048.base,
-                         call_568048.route, valid.getOrDefault("path"),
+  let url = call_563948.url(scheme.get, call_563948.host, call_563948.base,
+                         call_563948.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568048, url, valid)
+  result = hook(call_563948, url, valid)
 
-proc call*(call_568119: Call_EventCategoriesList_567864; apiVersion: string): Recallable =
+proc call*(call_564019: Call_EventCategoriesList_563762; apiVersion: string): Recallable =
   ## eventCategoriesList
   ## Get the list of available event categories supported in the Activity Logs Service.<br>The current list includes the following: Administrative, Security, ServiceHealth, Alert, Recommendation, Policy.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
-  var query_568120 = newJObject()
-  add(query_568120, "api-version", newJString(apiVersion))
-  result = call_568119.call(nil, query_568120, nil, nil, nil)
+  var query_564020 = newJObject()
+  add(query_564020, "api-version", newJString(apiVersion))
+  result = call_564019.call(nil, query_564020, nil, nil, nil)
 
-var eventCategoriesList* = Call_EventCategoriesList_567864(
+var eventCategoriesList* = Call_EventCategoriesList_563762(
     name: "eventCategoriesList", meth: HttpMethod.HttpGet,
     host: "management.azure.com",
     route: "/providers/microsoft.insights/eventcategories",
-    validator: validate_EventCategoriesList_567865, base: "",
-    url: url_EventCategoriesList_567866, schemes: {Scheme.Https})
+    validator: validate_EventCategoriesList_563763, base: "",
+    url: url_EventCategoriesList_563764, schemes: {Scheme.Https})
 export
   rest
 

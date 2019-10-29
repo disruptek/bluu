@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, httpcore
 
 ## auto-generated via openapi macro
 ## title: SubscriptionClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_567657 = ref object of OpenApiRestCall
+  OpenApiRestCall_563555 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_567657](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563555](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_567657): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563555): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,8 +107,8 @@ const
   macServiceName = "subscription-subscriptions"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_SubscriptionFactoryCreateSubscription_567879 = ref object of OpenApiRestCall_567657
-proc url_SubscriptionFactoryCreateSubscription_567881(protocol: Scheme;
+  Call_SubscriptionFactoryCreateSubscription_563777 = ref object of OpenApiRestCall_563555
+proc url_SubscriptionFactoryCreateSubscription_563779(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -127,7 +131,7 @@ proc url_SubscriptionFactoryCreateSubscription_567881(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_SubscriptionFactoryCreateSubscription_567880(path: JsonNode;
+proc validate_SubscriptionFactoryCreateSubscription_563778(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## The operation to create a new Azure subscription
   ## 
@@ -141,16 +145,16 @@ proc validate_SubscriptionFactoryCreateSubscription_567880(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `billingAccountName` field"
-  var valid_568071 = path.getOrDefault("billingAccountName")
-  valid_568071 = validateParameter(valid_568071, JString, required = true,
+  var valid_563971 = path.getOrDefault("billingAccountName")
+  valid_563971 = validateParameter(valid_563971, JString, required = true,
                                  default = nil)
-  if valid_568071 != nil:
-    section.add "billingAccountName", valid_568071
-  var valid_568072 = path.getOrDefault("invoiceSectionName")
-  valid_568072 = validateParameter(valid_568072, JString, required = true,
+  if valid_563971 != nil:
+    section.add "billingAccountName", valid_563971
+  var valid_563972 = path.getOrDefault("invoiceSectionName")
+  valid_563972 = validateParameter(valid_563972, JString, required = true,
                                  default = nil)
-  if valid_568072 != nil:
-    section.add "invoiceSectionName", valid_568072
+  if valid_563972 != nil:
+    section.add "invoiceSectionName", valid_563972
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -158,11 +162,11 @@ proc validate_SubscriptionFactoryCreateSubscription_567880(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568073 = query.getOrDefault("api-version")
-  valid_568073 = validateParameter(valid_568073, JString, required = true,
+  var valid_563973 = query.getOrDefault("api-version")
+  valid_563973 = validateParameter(valid_563973, JString, required = true,
                                  default = nil)
-  if valid_568073 != nil:
-    section.add "api-version", valid_568073
+  if valid_563973 != nil:
+    section.add "api-version", valid_563973
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -176,51 +180,51 @@ proc validate_SubscriptionFactoryCreateSubscription_567880(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568097: Call_SubscriptionFactoryCreateSubscription_567879;
+proc call*(call_563997: Call_SubscriptionFactoryCreateSubscription_563777;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## The operation to create a new Azure subscription
   ## 
-  let valid = call_568097.validator(path, query, header, formData, body)
-  let scheme = call_568097.pickScheme
+  let valid = call_563997.validator(path, query, header, formData, body)
+  let scheme = call_563997.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568097.url(scheme.get, call_568097.host, call_568097.base,
-                         call_568097.route, valid.getOrDefault("path"),
+  let url = call_563997.url(scheme.get, call_563997.host, call_563997.base,
+                         call_563997.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568097, url, valid)
+  result = hook(call_563997, url, valid)
 
-proc call*(call_568168: Call_SubscriptionFactoryCreateSubscription_567879;
-          apiVersion: string; billingAccountName: string;
-          invoiceSectionName: string; body: JsonNode): Recallable =
+proc call*(call_564068: Call_SubscriptionFactoryCreateSubscription_563777;
+          apiVersion: string; billingAccountName: string; body: JsonNode;
+          invoiceSectionName: string): Recallable =
   ## subscriptionFactoryCreateSubscription
   ## The operation to create a new Azure subscription
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request. Current version is 2018-11-01-preview
   ##   billingAccountName: string (required)
   ##                     : The name of the Microsoft Customer Agreement billing account for which you want to create the subscription.
-  ##   invoiceSectionName: string (required)
-  ##                     : The name of the invoice section in the billing account for which you want to create the subscription.
   ##   body: JObject (required)
   ##       : The subscription creation parameters.
-  var path_568169 = newJObject()
-  var query_568171 = newJObject()
-  var body_568172 = newJObject()
-  add(query_568171, "api-version", newJString(apiVersion))
-  add(path_568169, "billingAccountName", newJString(billingAccountName))
-  add(path_568169, "invoiceSectionName", newJString(invoiceSectionName))
+  ##   invoiceSectionName: string (required)
+  ##                     : The name of the invoice section in the billing account for which you want to create the subscription.
+  var path_564069 = newJObject()
+  var query_564071 = newJObject()
+  var body_564072 = newJObject()
+  add(query_564071, "api-version", newJString(apiVersion))
+  add(path_564069, "billingAccountName", newJString(billingAccountName))
   if body != nil:
-    body_568172 = body
-  result = call_568168.call(path_568169, query_568171, nil, nil, body_568172)
+    body_564072 = body
+  add(path_564069, "invoiceSectionName", newJString(invoiceSectionName))
+  result = call_564068.call(path_564069, query_564071, nil, nil, body_564072)
 
-var subscriptionFactoryCreateSubscription* = Call_SubscriptionFactoryCreateSubscription_567879(
+var subscriptionFactoryCreateSubscription* = Call_SubscriptionFactoryCreateSubscription_563777(
     name: "subscriptionFactoryCreateSubscription", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/providers/Microsoft.Billing/billingAccounts/{billingAccountName}/invoiceSections/{invoiceSectionName}/providers/Microsoft.Subscription/createSubscription",
-    validator: validate_SubscriptionFactoryCreateSubscription_567880, base: "",
-    url: url_SubscriptionFactoryCreateSubscription_567881, schemes: {Scheme.Https})
+    validator: validate_SubscriptionFactoryCreateSubscription_563778, base: "",
+    url: url_SubscriptionFactoryCreateSubscription_563779, schemes: {Scheme.Https})
 type
-  Call_SubscriptionOperationGet_568211 = ref object of OpenApiRestCall_567657
-proc url_SubscriptionOperationGet_568213(protocol: Scheme; host: string;
+  Call_SubscriptionOperationGet_564111 = ref object of OpenApiRestCall_563555
+proc url_SubscriptionOperationGet_564113(protocol: Scheme; host: string;
                                         base: string; route: string; path: JsonNode;
                                         query: JsonNode): Uri =
   result.scheme = $protocol
@@ -236,7 +240,7 @@ proc url_SubscriptionOperationGet_568213(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_SubscriptionOperationGet_568212(path: JsonNode; query: JsonNode;
+proc validate_SubscriptionOperationGet_564112(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Get the status of the pending Microsoft.Subscription API operations.
   ## 
@@ -248,11 +252,11 @@ proc validate_SubscriptionOperationGet_568212(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `operationId` field"
-  var valid_568214 = path.getOrDefault("operationId")
-  valid_568214 = validateParameter(valid_568214, JString, required = true,
+  var valid_564114 = path.getOrDefault("operationId")
+  valid_564114 = validateParameter(valid_564114, JString, required = true,
                                  default = nil)
-  if valid_568214 != nil:
-    section.add "operationId", valid_568214
+  if valid_564114 != nil:
+    section.add "operationId", valid_564114
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -260,11 +264,11 @@ proc validate_SubscriptionOperationGet_568212(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568215 = query.getOrDefault("api-version")
-  valid_568215 = validateParameter(valid_568215, JString, required = true,
+  var valid_564115 = query.getOrDefault("api-version")
+  valid_564115 = validateParameter(valid_564115, JString, required = true,
                                  default = nil)
-  if valid_568215 != nil:
-    section.add "api-version", valid_568215
+  if valid_564115 != nil:
+    section.add "api-version", valid_564115
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -273,20 +277,20 @@ proc validate_SubscriptionOperationGet_568212(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568216: Call_SubscriptionOperationGet_568211; path: JsonNode;
+proc call*(call_564116: Call_SubscriptionOperationGet_564111; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get the status of the pending Microsoft.Subscription API operations.
   ## 
-  let valid = call_568216.validator(path, query, header, formData, body)
-  let scheme = call_568216.pickScheme
+  let valid = call_564116.validator(path, query, header, formData, body)
+  let scheme = call_564116.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568216.url(scheme.get, call_568216.host, call_568216.base,
-                         call_568216.route, valid.getOrDefault("path"),
+  let url = call_564116.url(scheme.get, call_564116.host, call_564116.base,
+                         call_564116.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568216, url, valid)
+  result = hook(call_564116, url, valid)
 
-proc call*(call_568217: Call_SubscriptionOperationGet_568211; apiVersion: string;
+proc call*(call_564117: Call_SubscriptionOperationGet_564111; apiVersion: string;
           operationId: string): Recallable =
   ## subscriptionOperationGet
   ## Get the status of the pending Microsoft.Subscription API operations.
@@ -294,17 +298,17 @@ proc call*(call_568217: Call_SubscriptionOperationGet_568211; apiVersion: string
   ##             : Version of the API to be used with the client request. Current version is 2018-11-01-preview
   ##   operationId: string (required)
   ##              : The operation ID, which can be found from the Location field in the generate recommendation response header.
-  var path_568218 = newJObject()
-  var query_568219 = newJObject()
-  add(query_568219, "api-version", newJString(apiVersion))
-  add(path_568218, "operationId", newJString(operationId))
-  result = call_568217.call(path_568218, query_568219, nil, nil, nil)
+  var path_564118 = newJObject()
+  var query_564119 = newJObject()
+  add(query_564119, "api-version", newJString(apiVersion))
+  add(path_564118, "operationId", newJString(operationId))
+  result = call_564117.call(path_564118, query_564119, nil, nil, nil)
 
-var subscriptionOperationGet* = Call_SubscriptionOperationGet_568211(
+var subscriptionOperationGet* = Call_SubscriptionOperationGet_564111(
     name: "subscriptionOperationGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/providers/Microsoft.Subscription/subscriptionOperations/{operationId}",
-    validator: validate_SubscriptionOperationGet_568212, base: "",
-    url: url_SubscriptionOperationGet_568213, schemes: {Scheme.Https})
+    validator: validate_SubscriptionOperationGet_564112, base: "",
+    url: url_SubscriptionOperationGet_564113, schemes: {Scheme.Https})
 export
   rest
 

@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, httpcore
 
 ## auto-generated via openapi macro
 ## title: Azure Bot Service
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_574466 = ref object of OpenApiRestCall
+  OpenApiRestCall_563564 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_574466](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563564](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_574466): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563564): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,15 +107,15 @@ const
   macServiceName = "botservice"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_EnterpriseChannelsCheckNameAvailability_574688 = ref object of OpenApiRestCall_574466
-proc url_EnterpriseChannelsCheckNameAvailability_574690(protocol: Scheme;
+  Call_EnterpriseChannelsCheckNameAvailability_563786 = ref object of OpenApiRestCall_563564
+proc url_EnterpriseChannelsCheckNameAvailability_563788(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_EnterpriseChannelsCheckNameAvailability_574689(path: JsonNode;
+proc validate_EnterpriseChannelsCheckNameAvailability_563787(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Check whether an Enterprise Channel name is available.
   ## 
@@ -125,11 +129,11 @@ proc validate_EnterpriseChannelsCheckNameAvailability_574689(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574849 = query.getOrDefault("api-version")
-  valid_574849 = validateParameter(valid_574849, JString, required = true,
+  var valid_563949 = query.getOrDefault("api-version")
+  valid_563949 = validateParameter(valid_563949, JString, required = true,
                                  default = nil)
-  if valid_574849 != nil:
-    section.add "api-version", valid_574849
+  if valid_563949 != nil:
+    section.add "api-version", valid_563949
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -143,21 +147,21 @@ proc validate_EnterpriseChannelsCheckNameAvailability_574689(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574873: Call_EnterpriseChannelsCheckNameAvailability_574688;
+proc call*(call_563973: Call_EnterpriseChannelsCheckNameAvailability_563786;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Check whether an Enterprise Channel name is available.
   ## 
-  let valid = call_574873.validator(path, query, header, formData, body)
-  let scheme = call_574873.pickScheme
+  let valid = call_563973.validator(path, query, header, formData, body)
+  let scheme = call_563973.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574873.url(scheme.get, call_574873.host, call_574873.base,
-                         call_574873.route, valid.getOrDefault("path"),
+  let url = call_563973.url(scheme.get, call_563973.host, call_563973.base,
+                         call_563973.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574873, url, valid)
+  result = hook(call_563973, url, valid)
 
-proc call*(call_574944: Call_EnterpriseChannelsCheckNameAvailability_574688;
+proc call*(call_564044: Call_EnterpriseChannelsCheckNameAvailability_563786;
           apiVersion: string; parameters: JsonNode): Recallable =
   ## enterpriseChannelsCheckNameAvailability
   ## Check whether an Enterprise Channel name is available.
@@ -165,29 +169,29 @@ proc call*(call_574944: Call_EnterpriseChannelsCheckNameAvailability_574688;
   ##             : Version of the API to be used with the client request.
   ##   parameters: JObject (required)
   ##             : The parameters to provide for the Enterprise Channel check name availability request.
-  var query_574945 = newJObject()
-  var body_574947 = newJObject()
-  add(query_574945, "api-version", newJString(apiVersion))
+  var query_564045 = newJObject()
+  var body_564047 = newJObject()
+  add(query_564045, "api-version", newJString(apiVersion))
   if parameters != nil:
-    body_574947 = parameters
-  result = call_574944.call(nil, query_574945, nil, nil, body_574947)
+    body_564047 = parameters
+  result = call_564044.call(nil, query_564045, nil, nil, body_564047)
 
-var enterpriseChannelsCheckNameAvailability* = Call_EnterpriseChannelsCheckNameAvailability_574688(
+var enterpriseChannelsCheckNameAvailability* = Call_EnterpriseChannelsCheckNameAvailability_563786(
     name: "enterpriseChannelsCheckNameAvailability", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/providers/Microsoft.BotService/checkEnterpriseChannelNameAvailability",
-    validator: validate_EnterpriseChannelsCheckNameAvailability_574689, base: "",
-    url: url_EnterpriseChannelsCheckNameAvailability_574690,
+    validator: validate_EnterpriseChannelsCheckNameAvailability_563787, base: "",
+    url: url_EnterpriseChannelsCheckNameAvailability_563788,
     schemes: {Scheme.Https})
 type
-  Call_BotsGetCheckNameAvailability_574986 = ref object of OpenApiRestCall_574466
-proc url_BotsGetCheckNameAvailability_574988(protocol: Scheme; host: string;
+  Call_BotsGetCheckNameAvailability_564086 = ref object of OpenApiRestCall_563564
+proc url_BotsGetCheckNameAvailability_564088(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_BotsGetCheckNameAvailability_574987(path: JsonNode; query: JsonNode;
+proc validate_BotsGetCheckNameAvailability_564087(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Check whether a bot name is available.
   ## 
@@ -201,11 +205,11 @@ proc validate_BotsGetCheckNameAvailability_574987(path: JsonNode; query: JsonNod
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574989 = query.getOrDefault("api-version")
-  valid_574989 = validateParameter(valid_574989, JString, required = true,
+  var valid_564089 = query.getOrDefault("api-version")
+  valid_564089 = validateParameter(valid_564089, JString, required = true,
                                  default = nil)
-  if valid_574989 != nil:
-    section.add "api-version", valid_574989
+  if valid_564089 != nil:
+    section.add "api-version", valid_564089
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -219,20 +223,20 @@ proc validate_BotsGetCheckNameAvailability_574987(path: JsonNode; query: JsonNod
   if body != nil:
     result.add "body", body
 
-proc call*(call_574991: Call_BotsGetCheckNameAvailability_574986; path: JsonNode;
+proc call*(call_564091: Call_BotsGetCheckNameAvailability_564086; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Check whether a bot name is available.
   ## 
-  let valid = call_574991.validator(path, query, header, formData, body)
-  let scheme = call_574991.pickScheme
+  let valid = call_564091.validator(path, query, header, formData, body)
+  let scheme = call_564091.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574991.url(scheme.get, call_574991.host, call_574991.base,
-                         call_574991.route, valid.getOrDefault("path"),
+  let url = call_564091.url(scheme.get, call_564091.host, call_564091.base,
+                         call_564091.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574991, url, valid)
+  result = hook(call_564091, url, valid)
 
-proc call*(call_574992: Call_BotsGetCheckNameAvailability_574986;
+proc call*(call_564092: Call_BotsGetCheckNameAvailability_564086;
           apiVersion: string; parameters: JsonNode): Recallable =
   ## botsGetCheckNameAvailability
   ## Check whether a bot name is available.
@@ -240,29 +244,29 @@ proc call*(call_574992: Call_BotsGetCheckNameAvailability_574986;
   ##             : Version of the API to be used with the client request.
   ##   parameters: JObject (required)
   ##             : The request body parameters to provide for the check name availability request
-  var query_574993 = newJObject()
-  var body_574994 = newJObject()
-  add(query_574993, "api-version", newJString(apiVersion))
+  var query_564093 = newJObject()
+  var body_564094 = newJObject()
+  add(query_564093, "api-version", newJString(apiVersion))
   if parameters != nil:
-    body_574994 = parameters
-  result = call_574992.call(nil, query_574993, nil, nil, body_574994)
+    body_564094 = parameters
+  result = call_564092.call(nil, query_564093, nil, nil, body_564094)
 
-var botsGetCheckNameAvailability* = Call_BotsGetCheckNameAvailability_574986(
+var botsGetCheckNameAvailability* = Call_BotsGetCheckNameAvailability_564086(
     name: "botsGetCheckNameAvailability", meth: HttpMethod.HttpPost,
     host: "management.azure.com",
     route: "/providers/Microsoft.BotService/checkNameAvailability",
-    validator: validate_BotsGetCheckNameAvailability_574987, base: "",
-    url: url_BotsGetCheckNameAvailability_574988, schemes: {Scheme.Https})
+    validator: validate_BotsGetCheckNameAvailability_564087, base: "",
+    url: url_BotsGetCheckNameAvailability_564088, schemes: {Scheme.Https})
 type
-  Call_OperationsList_574995 = ref object of OpenApiRestCall_574466
-proc url_OperationsList_574997(protocol: Scheme; host: string; base: string;
+  Call_OperationsList_564095 = ref object of OpenApiRestCall_563564
+proc url_OperationsList_564097(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_OperationsList_574996(path: JsonNode; query: JsonNode;
+proc validate_OperationsList_564096(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## Lists all the available BotService operations.
@@ -277,11 +281,11 @@ proc validate_OperationsList_574996(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574998 = query.getOrDefault("api-version")
-  valid_574998 = validateParameter(valid_574998, JString, required = true,
+  var valid_564098 = query.getOrDefault("api-version")
+  valid_564098 = validateParameter(valid_564098, JString, required = true,
                                  default = nil)
-  if valid_574998 != nil:
-    section.add "api-version", valid_574998
+  if valid_564098 != nil:
+    section.add "api-version", valid_564098
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -290,36 +294,36 @@ proc validate_OperationsList_574996(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574999: Call_OperationsList_574995; path: JsonNode; query: JsonNode;
+proc call*(call_564099: Call_OperationsList_564095; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists all the available BotService operations.
   ## 
-  let valid = call_574999.validator(path, query, header, formData, body)
-  let scheme = call_574999.pickScheme
+  let valid = call_564099.validator(path, query, header, formData, body)
+  let scheme = call_564099.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574999.url(scheme.get, call_574999.host, call_574999.base,
-                         call_574999.route, valid.getOrDefault("path"),
+  let url = call_564099.url(scheme.get, call_564099.host, call_564099.base,
+                         call_564099.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574999, url, valid)
+  result = hook(call_564099, url, valid)
 
-proc call*(call_575000: Call_OperationsList_574995; apiVersion: string): Recallable =
+proc call*(call_564100: Call_OperationsList_564095; apiVersion: string): Recallable =
   ## operationsList
   ## Lists all the available BotService operations.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
-  var query_575001 = newJObject()
-  add(query_575001, "api-version", newJString(apiVersion))
-  result = call_575000.call(nil, query_575001, nil, nil, nil)
+  var query_564101 = newJObject()
+  add(query_564101, "api-version", newJString(apiVersion))
+  result = call_564100.call(nil, query_564101, nil, nil, nil)
 
-var operationsList* = Call_OperationsList_574995(name: "operationsList",
+var operationsList* = Call_OperationsList_564095(name: "operationsList",
     meth: HttpMethod.HttpGet, host: "management.azure.com",
     route: "/providers/Microsoft.BotService/operations",
-    validator: validate_OperationsList_574996, base: "", url: url_OperationsList_574997,
+    validator: validate_OperationsList_564096, base: "", url: url_OperationsList_564097,
     schemes: {Scheme.Https})
 type
-  Call_BotsList_575002 = ref object of OpenApiRestCall_574466
-proc url_BotsList_575004(protocol: Scheme; host: string; base: string; route: string;
+  Call_BotsList_564102 = ref object of OpenApiRestCall_563564
+proc url_BotsList_564104(protocol: Scheme; host: string; base: string; route: string;
                         path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -336,7 +340,7 @@ proc url_BotsList_575004(protocol: Scheme; host: string; base: string; route: st
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_BotsList_575003(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_BotsList_564103(path: JsonNode; query: JsonNode; header: JsonNode;
                              formData: JsonNode; body: JsonNode): JsonNode =
   ## Returns all the resources of a particular type belonging to a subscription.
   ## 
@@ -348,11 +352,11 @@ proc validate_BotsList_575003(path: JsonNode; query: JsonNode; header: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_575019 = path.getOrDefault("subscriptionId")
-  valid_575019 = validateParameter(valid_575019, JString, required = true,
+  var valid_564119 = path.getOrDefault("subscriptionId")
+  valid_564119 = validateParameter(valid_564119, JString, required = true,
                                  default = nil)
-  if valid_575019 != nil:
-    section.add "subscriptionId", valid_575019
+  if valid_564119 != nil:
+    section.add "subscriptionId", valid_564119
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -360,11 +364,11 @@ proc validate_BotsList_575003(path: JsonNode; query: JsonNode; header: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575020 = query.getOrDefault("api-version")
-  valid_575020 = validateParameter(valid_575020, JString, required = true,
+  var valid_564120 = query.getOrDefault("api-version")
+  valid_564120 = validateParameter(valid_564120, JString, required = true,
                                  default = nil)
-  if valid_575020 != nil:
-    section.add "api-version", valid_575020
+  if valid_564120 != nil:
+    section.add "api-version", valid_564120
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -373,20 +377,20 @@ proc validate_BotsList_575003(path: JsonNode; query: JsonNode; header: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_575021: Call_BotsList_575002; path: JsonNode; query: JsonNode;
+proc call*(call_564121: Call_BotsList_564102; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Returns all the resources of a particular type belonging to a subscription.
   ## 
-  let valid = call_575021.validator(path, query, header, formData, body)
-  let scheme = call_575021.pickScheme
+  let valid = call_564121.validator(path, query, header, formData, body)
+  let scheme = call_564121.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575021.url(scheme.get, call_575021.host, call_575021.base,
-                         call_575021.route, valid.getOrDefault("path"),
+  let url = call_564121.url(scheme.get, call_564121.host, call_564121.base,
+                         call_564121.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575021, url, valid)
+  result = hook(call_564121, url, valid)
 
-proc call*(call_575022: Call_BotsList_575002; apiVersion: string;
+proc call*(call_564122: Call_BotsList_564102; apiVersion: string;
           subscriptionId: string): Recallable =
   ## botsList
   ## Returns all the resources of a particular type belonging to a subscription.
@@ -394,20 +398,20 @@ proc call*(call_575022: Call_BotsList_575002; apiVersion: string;
   ##             : Version of the API to be used with the client request.
   ##   subscriptionId: string (required)
   ##                 : Azure Subscription ID.
-  var path_575023 = newJObject()
-  var query_575024 = newJObject()
-  add(query_575024, "api-version", newJString(apiVersion))
-  add(path_575023, "subscriptionId", newJString(subscriptionId))
-  result = call_575022.call(path_575023, query_575024, nil, nil, nil)
+  var path_564123 = newJObject()
+  var query_564124 = newJObject()
+  add(query_564124, "api-version", newJString(apiVersion))
+  add(path_564123, "subscriptionId", newJString(subscriptionId))
+  result = call_564122.call(path_564123, query_564124, nil, nil, nil)
 
-var botsList* = Call_BotsList_575002(name: "botsList", meth: HttpMethod.HttpGet,
+var botsList* = Call_BotsList_564102(name: "botsList", meth: HttpMethod.HttpGet,
                                   host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.BotService/botServices",
-                                  validator: validate_BotsList_575003, base: "",
-                                  url: url_BotsList_575004,
+                                  validator: validate_BotsList_564103, base: "",
+                                  url: url_BotsList_564104,
                                   schemes: {Scheme.Https})
 type
-  Call_BotConnectionListServiceProviders_575025 = ref object of OpenApiRestCall_574466
-proc url_BotConnectionListServiceProviders_575027(protocol: Scheme; host: string;
+  Call_BotConnectionListServiceProviders_564125 = ref object of OpenApiRestCall_563564
+proc url_BotConnectionListServiceProviders_564127(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -424,7 +428,7 @@ proc url_BotConnectionListServiceProviders_575027(protocol: Scheme; host: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_BotConnectionListServiceProviders_575026(path: JsonNode;
+proc validate_BotConnectionListServiceProviders_564126(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists the available Service Providers for creating Connection Settings
   ## 
@@ -436,11 +440,11 @@ proc validate_BotConnectionListServiceProviders_575026(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_575028 = path.getOrDefault("subscriptionId")
-  valid_575028 = validateParameter(valid_575028, JString, required = true,
+  var valid_564128 = path.getOrDefault("subscriptionId")
+  valid_564128 = validateParameter(valid_564128, JString, required = true,
                                  default = nil)
-  if valid_575028 != nil:
-    section.add "subscriptionId", valid_575028
+  if valid_564128 != nil:
+    section.add "subscriptionId", valid_564128
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -448,11 +452,11 @@ proc validate_BotConnectionListServiceProviders_575026(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575029 = query.getOrDefault("api-version")
-  valid_575029 = validateParameter(valid_575029, JString, required = true,
+  var valid_564129 = query.getOrDefault("api-version")
+  valid_564129 = validateParameter(valid_564129, JString, required = true,
                                  default = nil)
-  if valid_575029 != nil:
-    section.add "api-version", valid_575029
+  if valid_564129 != nil:
+    section.add "api-version", valid_564129
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -461,21 +465,21 @@ proc validate_BotConnectionListServiceProviders_575026(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_575030: Call_BotConnectionListServiceProviders_575025;
+proc call*(call_564130: Call_BotConnectionListServiceProviders_564125;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Lists the available Service Providers for creating Connection Settings
   ## 
-  let valid = call_575030.validator(path, query, header, formData, body)
-  let scheme = call_575030.pickScheme
+  let valid = call_564130.validator(path, query, header, formData, body)
+  let scheme = call_564130.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575030.url(scheme.get, call_575030.host, call_575030.base,
-                         call_575030.route, valid.getOrDefault("path"),
+  let url = call_564130.url(scheme.get, call_564130.host, call_564130.base,
+                         call_564130.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575030, url, valid)
+  result = hook(call_564130, url, valid)
 
-proc call*(call_575031: Call_BotConnectionListServiceProviders_575025;
+proc call*(call_564131: Call_BotConnectionListServiceProviders_564125;
           apiVersion: string; subscriptionId: string): Recallable =
   ## botConnectionListServiceProviders
   ## Lists the available Service Providers for creating Connection Settings
@@ -483,20 +487,20 @@ proc call*(call_575031: Call_BotConnectionListServiceProviders_575025;
   ##             : Version of the API to be used with the client request.
   ##   subscriptionId: string (required)
   ##                 : Azure Subscription ID.
-  var path_575032 = newJObject()
-  var query_575033 = newJObject()
-  add(query_575033, "api-version", newJString(apiVersion))
-  add(path_575032, "subscriptionId", newJString(subscriptionId))
-  result = call_575031.call(path_575032, query_575033, nil, nil, nil)
+  var path_564132 = newJObject()
+  var query_564133 = newJObject()
+  add(query_564133, "api-version", newJString(apiVersion))
+  add(path_564132, "subscriptionId", newJString(subscriptionId))
+  result = call_564131.call(path_564132, query_564133, nil, nil, nil)
 
-var botConnectionListServiceProviders* = Call_BotConnectionListServiceProviders_575025(
+var botConnectionListServiceProviders* = Call_BotConnectionListServiceProviders_564125(
     name: "botConnectionListServiceProviders", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.BotService/listAuthServiceProviders",
-    validator: validate_BotConnectionListServiceProviders_575026, base: "",
-    url: url_BotConnectionListServiceProviders_575027, schemes: {Scheme.Https})
+    validator: validate_BotConnectionListServiceProviders_564126, base: "",
+    url: url_BotConnectionListServiceProviders_564127, schemes: {Scheme.Https})
 type
-  Call_BotsListByResourceGroup_575034 = ref object of OpenApiRestCall_574466
-proc url_BotsListByResourceGroup_575036(protocol: Scheme; host: string; base: string;
+  Call_BotsListByResourceGroup_564134 = ref object of OpenApiRestCall_563564
+proc url_BotsListByResourceGroup_564136(protocol: Scheme; host: string; base: string;
                                        route: string; path: JsonNode;
                                        query: JsonNode): Uri =
   result.scheme = $protocol
@@ -518,30 +522,30 @@ proc url_BotsListByResourceGroup_575036(protocol: Scheme; host: string; base: st
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_BotsListByResourceGroup_575035(path: JsonNode; query: JsonNode;
+proc validate_BotsListByResourceGroup_564135(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Returns all the resources of a particular type belonging to a resource group
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the Bot resource group in the user subscription.
   ##   subscriptionId: JString (required)
   ##                 : Azure Subscription ID.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the Bot resource group in the user subscription.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_575037 = path.getOrDefault("resourceGroupName")
-  valid_575037 = validateParameter(valid_575037, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564137 = path.getOrDefault("subscriptionId")
+  valid_564137 = validateParameter(valid_564137, JString, required = true,
                                  default = nil)
-  if valid_575037 != nil:
-    section.add "resourceGroupName", valid_575037
-  var valid_575038 = path.getOrDefault("subscriptionId")
-  valid_575038 = validateParameter(valid_575038, JString, required = true,
+  if valid_564137 != nil:
+    section.add "subscriptionId", valid_564137
+  var valid_564138 = path.getOrDefault("resourceGroupName")
+  valid_564138 = validateParameter(valid_564138, JString, required = true,
                                  default = nil)
-  if valid_575038 != nil:
-    section.add "subscriptionId", valid_575038
+  if valid_564138 != nil:
+    section.add "resourceGroupName", valid_564138
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -549,11 +553,11 @@ proc validate_BotsListByResourceGroup_575035(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575039 = query.getOrDefault("api-version")
-  valid_575039 = validateParameter(valid_575039, JString, required = true,
+  var valid_564139 = query.getOrDefault("api-version")
+  valid_564139 = validateParameter(valid_564139, JString, required = true,
                                  default = nil)
-  if valid_575039 != nil:
-    section.add "api-version", valid_575039
+  if valid_564139 != nil:
+    section.add "api-version", valid_564139
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -562,44 +566,44 @@ proc validate_BotsListByResourceGroup_575035(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_575040: Call_BotsListByResourceGroup_575034; path: JsonNode;
+proc call*(call_564140: Call_BotsListByResourceGroup_564134; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Returns all the resources of a particular type belonging to a resource group
   ## 
-  let valid = call_575040.validator(path, query, header, formData, body)
-  let scheme = call_575040.pickScheme
+  let valid = call_564140.validator(path, query, header, formData, body)
+  let scheme = call_564140.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575040.url(scheme.get, call_575040.host, call_575040.base,
-                         call_575040.route, valid.getOrDefault("path"),
+  let url = call_564140.url(scheme.get, call_564140.host, call_564140.base,
+                         call_564140.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575040, url, valid)
+  result = hook(call_564140, url, valid)
 
-proc call*(call_575041: Call_BotsListByResourceGroup_575034;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string): Recallable =
+proc call*(call_564141: Call_BotsListByResourceGroup_564134; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string): Recallable =
   ## botsListByResourceGroup
   ## Returns all the resources of a particular type belonging to a resource group
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the Bot resource group in the user subscription.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
   ##   subscriptionId: string (required)
   ##                 : Azure Subscription ID.
-  var path_575042 = newJObject()
-  var query_575043 = newJObject()
-  add(path_575042, "resourceGroupName", newJString(resourceGroupName))
-  add(query_575043, "api-version", newJString(apiVersion))
-  add(path_575042, "subscriptionId", newJString(subscriptionId))
-  result = call_575041.call(path_575042, query_575043, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the Bot resource group in the user subscription.
+  var path_564142 = newJObject()
+  var query_564143 = newJObject()
+  add(query_564143, "api-version", newJString(apiVersion))
+  add(path_564142, "subscriptionId", newJString(subscriptionId))
+  add(path_564142, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564141.call(path_564142, query_564143, nil, nil, nil)
 
-var botsListByResourceGroup* = Call_BotsListByResourceGroup_575034(
+var botsListByResourceGroup* = Call_BotsListByResourceGroup_564134(
     name: "botsListByResourceGroup", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.BotService/botServices",
-    validator: validate_BotsListByResourceGroup_575035, base: "",
-    url: url_BotsListByResourceGroup_575036, schemes: {Scheme.Https})
+    validator: validate_BotsListByResourceGroup_564135, base: "",
+    url: url_BotsListByResourceGroup_564136, schemes: {Scheme.Https})
 type
-  Call_BotsCreate_575055 = ref object of OpenApiRestCall_574466
-proc url_BotsCreate_575057(protocol: Scheme; host: string; base: string; route: string;
+  Call_BotsCreate_564155 = ref object of OpenApiRestCall_563564
+proc url_BotsCreate_564157(protocol: Scheme; host: string; base: string; route: string;
                           path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -622,37 +626,37 @@ proc url_BotsCreate_575057(protocol: Scheme; host: string; base: string; route: 
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_BotsCreate_575056(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_BotsCreate_564156(path: JsonNode; query: JsonNode; header: JsonNode;
                                formData: JsonNode; body: JsonNode): JsonNode =
   ## Creates a Bot Service. Bot Service is a resource group wide resource type.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the Bot resource group in the user subscription.
   ##   subscriptionId: JString (required)
   ##                 : Azure Subscription ID.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the Bot resource group in the user subscription.
   ##   resourceName: JString (required)
   ##               : The name of the Bot resource.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_575058 = path.getOrDefault("resourceGroupName")
-  valid_575058 = validateParameter(valid_575058, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564158 = path.getOrDefault("subscriptionId")
+  valid_564158 = validateParameter(valid_564158, JString, required = true,
                                  default = nil)
-  if valid_575058 != nil:
-    section.add "resourceGroupName", valid_575058
-  var valid_575059 = path.getOrDefault("subscriptionId")
-  valid_575059 = validateParameter(valid_575059, JString, required = true,
+  if valid_564158 != nil:
+    section.add "subscriptionId", valid_564158
+  var valid_564159 = path.getOrDefault("resourceGroupName")
+  valid_564159 = validateParameter(valid_564159, JString, required = true,
                                  default = nil)
-  if valid_575059 != nil:
-    section.add "subscriptionId", valid_575059
-  var valid_575060 = path.getOrDefault("resourceName")
-  valid_575060 = validateParameter(valid_575060, JString, required = true,
+  if valid_564159 != nil:
+    section.add "resourceGroupName", valid_564159
+  var valid_564160 = path.getOrDefault("resourceName")
+  valid_564160 = validateParameter(valid_564160, JString, required = true,
                                  default = nil)
-  if valid_575060 != nil:
-    section.add "resourceName", valid_575060
+  if valid_564160 != nil:
+    section.add "resourceName", valid_564160
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -660,11 +664,11 @@ proc validate_BotsCreate_575056(path: JsonNode; query: JsonNode; header: JsonNod
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575061 = query.getOrDefault("api-version")
-  valid_575061 = validateParameter(valid_575061, JString, required = true,
+  var valid_564161 = query.getOrDefault("api-version")
+  valid_564161 = validateParameter(valid_564161, JString, required = true,
                                  default = nil)
-  if valid_575061 != nil:
-    section.add "api-version", valid_575061
+  if valid_564161 != nil:
+    section.add "api-version", valid_564161
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -678,54 +682,54 @@ proc validate_BotsCreate_575056(path: JsonNode; query: JsonNode; header: JsonNod
   if body != nil:
     result.add "body", body
 
-proc call*(call_575063: Call_BotsCreate_575055; path: JsonNode; query: JsonNode;
+proc call*(call_564163: Call_BotsCreate_564155; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Creates a Bot Service. Bot Service is a resource group wide resource type.
   ## 
-  let valid = call_575063.validator(path, query, header, formData, body)
-  let scheme = call_575063.pickScheme
+  let valid = call_564163.validator(path, query, header, formData, body)
+  let scheme = call_564163.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575063.url(scheme.get, call_575063.host, call_575063.base,
-                         call_575063.route, valid.getOrDefault("path"),
+  let url = call_564163.url(scheme.get, call_564163.host, call_564163.base,
+                         call_564163.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575063, url, valid)
+  result = hook(call_564163, url, valid)
 
-proc call*(call_575064: Call_BotsCreate_575055; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; resourceName: string;
+proc call*(call_564164: Call_BotsCreate_564155; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string; resourceName: string;
           parameters: JsonNode): Recallable =
   ## botsCreate
   ## Creates a Bot Service. Bot Service is a resource group wide resource type.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the Bot resource group in the user subscription.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
   ##   subscriptionId: string (required)
   ##                 : Azure Subscription ID.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the Bot resource group in the user subscription.
   ##   resourceName: string (required)
   ##               : The name of the Bot resource.
   ##   parameters: JObject (required)
   ##             : The parameters to provide for the created bot.
-  var path_575065 = newJObject()
-  var query_575066 = newJObject()
-  var body_575067 = newJObject()
-  add(path_575065, "resourceGroupName", newJString(resourceGroupName))
-  add(query_575066, "api-version", newJString(apiVersion))
-  add(path_575065, "subscriptionId", newJString(subscriptionId))
-  add(path_575065, "resourceName", newJString(resourceName))
+  var path_564165 = newJObject()
+  var query_564166 = newJObject()
+  var body_564167 = newJObject()
+  add(query_564166, "api-version", newJString(apiVersion))
+  add(path_564165, "subscriptionId", newJString(subscriptionId))
+  add(path_564165, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564165, "resourceName", newJString(resourceName))
   if parameters != nil:
-    body_575067 = parameters
-  result = call_575064.call(path_575065, query_575066, nil, nil, body_575067)
+    body_564167 = parameters
+  result = call_564164.call(path_564165, query_564166, nil, nil, body_564167)
 
-var botsCreate* = Call_BotsCreate_575055(name: "botsCreate",
+var botsCreate* = Call_BotsCreate_564155(name: "botsCreate",
                                       meth: HttpMethod.HttpPut,
                                       host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.BotService/botServices/{resourceName}",
-                                      validator: validate_BotsCreate_575056,
-                                      base: "", url: url_BotsCreate_575057,
+                                      validator: validate_BotsCreate_564156,
+                                      base: "", url: url_BotsCreate_564157,
                                       schemes: {Scheme.Https})
 type
-  Call_BotsGet_575044 = ref object of OpenApiRestCall_574466
-proc url_BotsGet_575046(protocol: Scheme; host: string; base: string; route: string;
+  Call_BotsGet_564144 = ref object of OpenApiRestCall_563564
+proc url_BotsGet_564146(protocol: Scheme; host: string; base: string; route: string;
                        path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -748,37 +752,37 @@ proc url_BotsGet_575046(protocol: Scheme; host: string; base: string; route: str
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_BotsGet_575045(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_BotsGet_564145(path: JsonNode; query: JsonNode; header: JsonNode;
                             formData: JsonNode; body: JsonNode): JsonNode =
   ## Returns a BotService specified by the parameters.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the Bot resource group in the user subscription.
   ##   subscriptionId: JString (required)
   ##                 : Azure Subscription ID.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the Bot resource group in the user subscription.
   ##   resourceName: JString (required)
   ##               : The name of the Bot resource.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_575047 = path.getOrDefault("resourceGroupName")
-  valid_575047 = validateParameter(valid_575047, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564147 = path.getOrDefault("subscriptionId")
+  valid_564147 = validateParameter(valid_564147, JString, required = true,
                                  default = nil)
-  if valid_575047 != nil:
-    section.add "resourceGroupName", valid_575047
-  var valid_575048 = path.getOrDefault("subscriptionId")
-  valid_575048 = validateParameter(valid_575048, JString, required = true,
+  if valid_564147 != nil:
+    section.add "subscriptionId", valid_564147
+  var valid_564148 = path.getOrDefault("resourceGroupName")
+  valid_564148 = validateParameter(valid_564148, JString, required = true,
                                  default = nil)
-  if valid_575048 != nil:
-    section.add "subscriptionId", valid_575048
-  var valid_575049 = path.getOrDefault("resourceName")
-  valid_575049 = validateParameter(valid_575049, JString, required = true,
+  if valid_564148 != nil:
+    section.add "resourceGroupName", valid_564148
+  var valid_564149 = path.getOrDefault("resourceName")
+  valid_564149 = validateParameter(valid_564149, JString, required = true,
                                  default = nil)
-  if valid_575049 != nil:
-    section.add "resourceName", valid_575049
+  if valid_564149 != nil:
+    section.add "resourceName", valid_564149
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -786,11 +790,11 @@ proc validate_BotsGet_575045(path: JsonNode; query: JsonNode; header: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575050 = query.getOrDefault("api-version")
-  valid_575050 = validateParameter(valid_575050, JString, required = true,
+  var valid_564150 = query.getOrDefault("api-version")
+  valid_564150 = validateParameter(valid_564150, JString, required = true,
                                  default = nil)
-  if valid_575050 != nil:
-    section.add "api-version", valid_575050
+  if valid_564150 != nil:
+    section.add "api-version", valid_564150
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -799,46 +803,46 @@ proc validate_BotsGet_575045(path: JsonNode; query: JsonNode; header: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_575051: Call_BotsGet_575044; path: JsonNode; query: JsonNode;
+proc call*(call_564151: Call_BotsGet_564144; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Returns a BotService specified by the parameters.
   ## 
-  let valid = call_575051.validator(path, query, header, formData, body)
-  let scheme = call_575051.pickScheme
+  let valid = call_564151.validator(path, query, header, formData, body)
+  let scheme = call_564151.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575051.url(scheme.get, call_575051.host, call_575051.base,
-                         call_575051.route, valid.getOrDefault("path"),
+  let url = call_564151.url(scheme.get, call_564151.host, call_564151.base,
+                         call_564151.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575051, url, valid)
+  result = hook(call_564151, url, valid)
 
-proc call*(call_575052: Call_BotsGet_575044; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; resourceName: string): Recallable =
+proc call*(call_564152: Call_BotsGet_564144; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string; resourceName: string): Recallable =
   ## botsGet
   ## Returns a BotService specified by the parameters.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the Bot resource group in the user subscription.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
   ##   subscriptionId: string (required)
   ##                 : Azure Subscription ID.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the Bot resource group in the user subscription.
   ##   resourceName: string (required)
   ##               : The name of the Bot resource.
-  var path_575053 = newJObject()
-  var query_575054 = newJObject()
-  add(path_575053, "resourceGroupName", newJString(resourceGroupName))
-  add(query_575054, "api-version", newJString(apiVersion))
-  add(path_575053, "subscriptionId", newJString(subscriptionId))
-  add(path_575053, "resourceName", newJString(resourceName))
-  result = call_575052.call(path_575053, query_575054, nil, nil, nil)
+  var path_564153 = newJObject()
+  var query_564154 = newJObject()
+  add(query_564154, "api-version", newJString(apiVersion))
+  add(path_564153, "subscriptionId", newJString(subscriptionId))
+  add(path_564153, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564153, "resourceName", newJString(resourceName))
+  result = call_564152.call(path_564153, query_564154, nil, nil, nil)
 
-var botsGet* = Call_BotsGet_575044(name: "botsGet", meth: HttpMethod.HttpGet,
+var botsGet* = Call_BotsGet_564144(name: "botsGet", meth: HttpMethod.HttpGet,
                                 host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.BotService/botServices/{resourceName}",
-                                validator: validate_BotsGet_575045, base: "",
-                                url: url_BotsGet_575046, schemes: {Scheme.Https})
+                                validator: validate_BotsGet_564145, base: "",
+                                url: url_BotsGet_564146, schemes: {Scheme.Https})
 type
-  Call_BotsUpdate_575079 = ref object of OpenApiRestCall_574466
-proc url_BotsUpdate_575081(protocol: Scheme; host: string; base: string; route: string;
+  Call_BotsUpdate_564179 = ref object of OpenApiRestCall_563564
+proc url_BotsUpdate_564181(protocol: Scheme; host: string; base: string; route: string;
                           path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -861,37 +865,37 @@ proc url_BotsUpdate_575081(protocol: Scheme; host: string; base: string; route: 
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_BotsUpdate_575080(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_BotsUpdate_564180(path: JsonNode; query: JsonNode; header: JsonNode;
                                formData: JsonNode; body: JsonNode): JsonNode =
   ## Updates a Bot Service
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the Bot resource group in the user subscription.
   ##   subscriptionId: JString (required)
   ##                 : Azure Subscription ID.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the Bot resource group in the user subscription.
   ##   resourceName: JString (required)
   ##               : The name of the Bot resource.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_575082 = path.getOrDefault("resourceGroupName")
-  valid_575082 = validateParameter(valid_575082, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564182 = path.getOrDefault("subscriptionId")
+  valid_564182 = validateParameter(valid_564182, JString, required = true,
                                  default = nil)
-  if valid_575082 != nil:
-    section.add "resourceGroupName", valid_575082
-  var valid_575083 = path.getOrDefault("subscriptionId")
-  valid_575083 = validateParameter(valid_575083, JString, required = true,
+  if valid_564182 != nil:
+    section.add "subscriptionId", valid_564182
+  var valid_564183 = path.getOrDefault("resourceGroupName")
+  valid_564183 = validateParameter(valid_564183, JString, required = true,
                                  default = nil)
-  if valid_575083 != nil:
-    section.add "subscriptionId", valid_575083
-  var valid_575084 = path.getOrDefault("resourceName")
-  valid_575084 = validateParameter(valid_575084, JString, required = true,
+  if valid_564183 != nil:
+    section.add "resourceGroupName", valid_564183
+  var valid_564184 = path.getOrDefault("resourceName")
+  valid_564184 = validateParameter(valid_564184, JString, required = true,
                                  default = nil)
-  if valid_575084 != nil:
-    section.add "resourceName", valid_575084
+  if valid_564184 != nil:
+    section.add "resourceName", valid_564184
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -899,11 +903,11 @@ proc validate_BotsUpdate_575080(path: JsonNode; query: JsonNode; header: JsonNod
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575085 = query.getOrDefault("api-version")
-  valid_575085 = validateParameter(valid_575085, JString, required = true,
+  var valid_564185 = query.getOrDefault("api-version")
+  valid_564185 = validateParameter(valid_564185, JString, required = true,
                                  default = nil)
-  if valid_575085 != nil:
-    section.add "api-version", valid_575085
+  if valid_564185 != nil:
+    section.add "api-version", valid_564185
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -917,54 +921,54 @@ proc validate_BotsUpdate_575080(path: JsonNode; query: JsonNode; header: JsonNod
   if body != nil:
     result.add "body", body
 
-proc call*(call_575087: Call_BotsUpdate_575079; path: JsonNode; query: JsonNode;
+proc call*(call_564187: Call_BotsUpdate_564179; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Updates a Bot Service
   ## 
-  let valid = call_575087.validator(path, query, header, formData, body)
-  let scheme = call_575087.pickScheme
+  let valid = call_564187.validator(path, query, header, formData, body)
+  let scheme = call_564187.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575087.url(scheme.get, call_575087.host, call_575087.base,
-                         call_575087.route, valid.getOrDefault("path"),
+  let url = call_564187.url(scheme.get, call_564187.host, call_564187.base,
+                         call_564187.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575087, url, valid)
+  result = hook(call_564187, url, valid)
 
-proc call*(call_575088: Call_BotsUpdate_575079; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; resourceName: string;
+proc call*(call_564188: Call_BotsUpdate_564179; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string; resourceName: string;
           parameters: JsonNode): Recallable =
   ## botsUpdate
   ## Updates a Bot Service
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the Bot resource group in the user subscription.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
   ##   subscriptionId: string (required)
   ##                 : Azure Subscription ID.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the Bot resource group in the user subscription.
   ##   resourceName: string (required)
   ##               : The name of the Bot resource.
   ##   parameters: JObject (required)
   ##             : The parameters to provide for the created bot.
-  var path_575089 = newJObject()
-  var query_575090 = newJObject()
-  var body_575091 = newJObject()
-  add(path_575089, "resourceGroupName", newJString(resourceGroupName))
-  add(query_575090, "api-version", newJString(apiVersion))
-  add(path_575089, "subscriptionId", newJString(subscriptionId))
-  add(path_575089, "resourceName", newJString(resourceName))
+  var path_564189 = newJObject()
+  var query_564190 = newJObject()
+  var body_564191 = newJObject()
+  add(query_564190, "api-version", newJString(apiVersion))
+  add(path_564189, "subscriptionId", newJString(subscriptionId))
+  add(path_564189, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564189, "resourceName", newJString(resourceName))
   if parameters != nil:
-    body_575091 = parameters
-  result = call_575088.call(path_575089, query_575090, nil, nil, body_575091)
+    body_564191 = parameters
+  result = call_564188.call(path_564189, query_564190, nil, nil, body_564191)
 
-var botsUpdate* = Call_BotsUpdate_575079(name: "botsUpdate",
+var botsUpdate* = Call_BotsUpdate_564179(name: "botsUpdate",
                                       meth: HttpMethod.HttpPatch,
                                       host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.BotService/botServices/{resourceName}",
-                                      validator: validate_BotsUpdate_575080,
-                                      base: "", url: url_BotsUpdate_575081,
+                                      validator: validate_BotsUpdate_564180,
+                                      base: "", url: url_BotsUpdate_564181,
                                       schemes: {Scheme.Https})
 type
-  Call_BotsDelete_575068 = ref object of OpenApiRestCall_574466
-proc url_BotsDelete_575070(protocol: Scheme; host: string; base: string; route: string;
+  Call_BotsDelete_564168 = ref object of OpenApiRestCall_563564
+proc url_BotsDelete_564170(protocol: Scheme; host: string; base: string; route: string;
                           path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -987,37 +991,37 @@ proc url_BotsDelete_575070(protocol: Scheme; host: string; base: string; route: 
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_BotsDelete_575069(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_BotsDelete_564169(path: JsonNode; query: JsonNode; header: JsonNode;
                                formData: JsonNode; body: JsonNode): JsonNode =
   ## Deletes a Bot Service from the resource group. 
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the Bot resource group in the user subscription.
   ##   subscriptionId: JString (required)
   ##                 : Azure Subscription ID.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the Bot resource group in the user subscription.
   ##   resourceName: JString (required)
   ##               : The name of the Bot resource.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_575071 = path.getOrDefault("resourceGroupName")
-  valid_575071 = validateParameter(valid_575071, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564171 = path.getOrDefault("subscriptionId")
+  valid_564171 = validateParameter(valid_564171, JString, required = true,
                                  default = nil)
-  if valid_575071 != nil:
-    section.add "resourceGroupName", valid_575071
-  var valid_575072 = path.getOrDefault("subscriptionId")
-  valid_575072 = validateParameter(valid_575072, JString, required = true,
+  if valid_564171 != nil:
+    section.add "subscriptionId", valid_564171
+  var valid_564172 = path.getOrDefault("resourceGroupName")
+  valid_564172 = validateParameter(valid_564172, JString, required = true,
                                  default = nil)
-  if valid_575072 != nil:
-    section.add "subscriptionId", valid_575072
-  var valid_575073 = path.getOrDefault("resourceName")
-  valid_575073 = validateParameter(valid_575073, JString, required = true,
+  if valid_564172 != nil:
+    section.add "resourceGroupName", valid_564172
+  var valid_564173 = path.getOrDefault("resourceName")
+  valid_564173 = validateParameter(valid_564173, JString, required = true,
                                  default = nil)
-  if valid_575073 != nil:
-    section.add "resourceName", valid_575073
+  if valid_564173 != nil:
+    section.add "resourceName", valid_564173
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1025,11 +1029,11 @@ proc validate_BotsDelete_575069(path: JsonNode; query: JsonNode; header: JsonNod
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575074 = query.getOrDefault("api-version")
-  valid_575074 = validateParameter(valid_575074, JString, required = true,
+  var valid_564174 = query.getOrDefault("api-version")
+  valid_564174 = validateParameter(valid_564174, JString, required = true,
                                  default = nil)
-  if valid_575074 != nil:
-    section.add "api-version", valid_575074
+  if valid_564174 != nil:
+    section.add "api-version", valid_564174
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1038,48 +1042,48 @@ proc validate_BotsDelete_575069(path: JsonNode; query: JsonNode; header: JsonNod
   if body != nil:
     result.add "body", body
 
-proc call*(call_575075: Call_BotsDelete_575068; path: JsonNode; query: JsonNode;
+proc call*(call_564175: Call_BotsDelete_564168; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes a Bot Service from the resource group. 
   ## 
-  let valid = call_575075.validator(path, query, header, formData, body)
-  let scheme = call_575075.pickScheme
+  let valid = call_564175.validator(path, query, header, formData, body)
+  let scheme = call_564175.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575075.url(scheme.get, call_575075.host, call_575075.base,
-                         call_575075.route, valid.getOrDefault("path"),
+  let url = call_564175.url(scheme.get, call_564175.host, call_564175.base,
+                         call_564175.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575075, url, valid)
+  result = hook(call_564175, url, valid)
 
-proc call*(call_575076: Call_BotsDelete_575068; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; resourceName: string): Recallable =
+proc call*(call_564176: Call_BotsDelete_564168; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string; resourceName: string): Recallable =
   ## botsDelete
   ## Deletes a Bot Service from the resource group. 
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the Bot resource group in the user subscription.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
   ##   subscriptionId: string (required)
   ##                 : Azure Subscription ID.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the Bot resource group in the user subscription.
   ##   resourceName: string (required)
   ##               : The name of the Bot resource.
-  var path_575077 = newJObject()
-  var query_575078 = newJObject()
-  add(path_575077, "resourceGroupName", newJString(resourceGroupName))
-  add(query_575078, "api-version", newJString(apiVersion))
-  add(path_575077, "subscriptionId", newJString(subscriptionId))
-  add(path_575077, "resourceName", newJString(resourceName))
-  result = call_575076.call(path_575077, query_575078, nil, nil, nil)
+  var path_564177 = newJObject()
+  var query_564178 = newJObject()
+  add(query_564178, "api-version", newJString(apiVersion))
+  add(path_564177, "subscriptionId", newJString(subscriptionId))
+  add(path_564177, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564177, "resourceName", newJString(resourceName))
+  result = call_564176.call(path_564177, query_564178, nil, nil, nil)
 
-var botsDelete* = Call_BotsDelete_575068(name: "botsDelete",
+var botsDelete* = Call_BotsDelete_564168(name: "botsDelete",
                                       meth: HttpMethod.HttpDelete,
                                       host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.BotService/botServices/{resourceName}",
-                                      validator: validate_BotsDelete_575069,
-                                      base: "", url: url_BotsDelete_575070,
+                                      validator: validate_BotsDelete_564169,
+                                      base: "", url: url_BotsDelete_564170,
                                       schemes: {Scheme.Https})
 type
-  Call_BotConnectionCreate_575104 = ref object of OpenApiRestCall_574466
-proc url_BotConnectionCreate_575106(protocol: Scheme; host: string; base: string;
+  Call_BotConnectionCreate_564204 = ref object of OpenApiRestCall_563564
+proc url_BotConnectionCreate_564206(protocol: Scheme; host: string; base: string;
                                    route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1105,7 +1109,7 @@ proc url_BotConnectionCreate_575106(protocol: Scheme; host: string; base: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_BotConnectionCreate_575105(path: JsonNode; query: JsonNode;
+proc validate_BotConnectionCreate_564205(path: JsonNode; query: JsonNode;
                                         header: JsonNode; formData: JsonNode;
                                         body: JsonNode): JsonNode =
   ## Register a new Auth Connection for a Bot Service
@@ -1113,37 +1117,37 @@ proc validate_BotConnectionCreate_575105(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the Bot resource group in the user subscription.
   ##   subscriptionId: JString (required)
   ##                 : Azure Subscription ID.
-  ##   resourceName: JString (required)
-  ##               : The name of the Bot resource.
   ##   connectionName: JString (required)
   ##                 : The name of the Bot Service Connection Setting resource
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the Bot resource group in the user subscription.
+  ##   resourceName: JString (required)
+  ##               : The name of the Bot resource.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_575107 = path.getOrDefault("resourceGroupName")
-  valid_575107 = validateParameter(valid_575107, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564207 = path.getOrDefault("subscriptionId")
+  valid_564207 = validateParameter(valid_564207, JString, required = true,
                                  default = nil)
-  if valid_575107 != nil:
-    section.add "resourceGroupName", valid_575107
-  var valid_575108 = path.getOrDefault("subscriptionId")
-  valid_575108 = validateParameter(valid_575108, JString, required = true,
+  if valid_564207 != nil:
+    section.add "subscriptionId", valid_564207
+  var valid_564208 = path.getOrDefault("connectionName")
+  valid_564208 = validateParameter(valid_564208, JString, required = true,
                                  default = nil)
-  if valid_575108 != nil:
-    section.add "subscriptionId", valid_575108
-  var valid_575109 = path.getOrDefault("resourceName")
-  valid_575109 = validateParameter(valid_575109, JString, required = true,
+  if valid_564208 != nil:
+    section.add "connectionName", valid_564208
+  var valid_564209 = path.getOrDefault("resourceGroupName")
+  valid_564209 = validateParameter(valid_564209, JString, required = true,
                                  default = nil)
-  if valid_575109 != nil:
-    section.add "resourceName", valid_575109
-  var valid_575110 = path.getOrDefault("connectionName")
-  valid_575110 = validateParameter(valid_575110, JString, required = true,
+  if valid_564209 != nil:
+    section.add "resourceGroupName", valid_564209
+  var valid_564210 = path.getOrDefault("resourceName")
+  valid_564210 = validateParameter(valid_564210, JString, required = true,
                                  default = nil)
-  if valid_575110 != nil:
-    section.add "connectionName", valid_575110
+  if valid_564210 != nil:
+    section.add "resourceName", valid_564210
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1151,11 +1155,11 @@ proc validate_BotConnectionCreate_575105(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575111 = query.getOrDefault("api-version")
-  valid_575111 = validateParameter(valid_575111, JString, required = true,
+  var valid_564211 = query.getOrDefault("api-version")
+  valid_564211 = validateParameter(valid_564211, JString, required = true,
                                  default = nil)
-  if valid_575111 != nil:
-    section.add "api-version", valid_575111
+  if valid_564211 != nil:
+    section.add "api-version", valid_564211
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1169,56 +1173,56 @@ proc validate_BotConnectionCreate_575105(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_575113: Call_BotConnectionCreate_575104; path: JsonNode;
+proc call*(call_564213: Call_BotConnectionCreate_564204; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Register a new Auth Connection for a Bot Service
   ## 
-  let valid = call_575113.validator(path, query, header, formData, body)
-  let scheme = call_575113.pickScheme
+  let valid = call_564213.validator(path, query, header, formData, body)
+  let scheme = call_564213.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575113.url(scheme.get, call_575113.host, call_575113.base,
-                         call_575113.route, valid.getOrDefault("path"),
+  let url = call_564213.url(scheme.get, call_564213.host, call_564213.base,
+                         call_564213.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575113, url, valid)
+  result = hook(call_564213, url, valid)
 
-proc call*(call_575114: Call_BotConnectionCreate_575104; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; resourceName: string;
-          parameters: JsonNode; connectionName: string): Recallable =
+proc call*(call_564214: Call_BotConnectionCreate_564204; apiVersion: string;
+          subscriptionId: string; connectionName: string; resourceGroupName: string;
+          resourceName: string; parameters: JsonNode): Recallable =
   ## botConnectionCreate
   ## Register a new Auth Connection for a Bot Service
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the Bot resource group in the user subscription.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
   ##   subscriptionId: string (required)
   ##                 : Azure Subscription ID.
+  ##   connectionName: string (required)
+  ##                 : The name of the Bot Service Connection Setting resource
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the Bot resource group in the user subscription.
   ##   resourceName: string (required)
   ##               : The name of the Bot resource.
   ##   parameters: JObject (required)
   ##             : The parameters to provide for creating the Connection Setting.
-  ##   connectionName: string (required)
-  ##                 : The name of the Bot Service Connection Setting resource
-  var path_575115 = newJObject()
-  var query_575116 = newJObject()
-  var body_575117 = newJObject()
-  add(path_575115, "resourceGroupName", newJString(resourceGroupName))
-  add(query_575116, "api-version", newJString(apiVersion))
-  add(path_575115, "subscriptionId", newJString(subscriptionId))
-  add(path_575115, "resourceName", newJString(resourceName))
+  var path_564215 = newJObject()
+  var query_564216 = newJObject()
+  var body_564217 = newJObject()
+  add(query_564216, "api-version", newJString(apiVersion))
+  add(path_564215, "subscriptionId", newJString(subscriptionId))
+  add(path_564215, "connectionName", newJString(connectionName))
+  add(path_564215, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564215, "resourceName", newJString(resourceName))
   if parameters != nil:
-    body_575117 = parameters
-  add(path_575115, "connectionName", newJString(connectionName))
-  result = call_575114.call(path_575115, query_575116, nil, nil, body_575117)
+    body_564217 = parameters
+  result = call_564214.call(path_564215, query_564216, nil, nil, body_564217)
 
-var botConnectionCreate* = Call_BotConnectionCreate_575104(
+var botConnectionCreate* = Call_BotConnectionCreate_564204(
     name: "botConnectionCreate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.BotService/botServices/{resourceName}/Connections/{connectionName}",
-    validator: validate_BotConnectionCreate_575105, base: "",
-    url: url_BotConnectionCreate_575106, schemes: {Scheme.Https})
+    validator: validate_BotConnectionCreate_564205, base: "",
+    url: url_BotConnectionCreate_564206, schemes: {Scheme.Https})
 type
-  Call_BotConnectionGet_575092 = ref object of OpenApiRestCall_574466
-proc url_BotConnectionGet_575094(protocol: Scheme; host: string; base: string;
+  Call_BotConnectionGet_564192 = ref object of OpenApiRestCall_563564
+proc url_BotConnectionGet_564194(protocol: Scheme; host: string; base: string;
                                 route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1244,7 +1248,7 @@ proc url_BotConnectionGet_575094(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_BotConnectionGet_575093(path: JsonNode; query: JsonNode;
+proc validate_BotConnectionGet_564193(path: JsonNode; query: JsonNode;
                                      header: JsonNode; formData: JsonNode;
                                      body: JsonNode): JsonNode =
   ## Get a Connection Setting registration for a Bot Service
@@ -1252,37 +1256,37 @@ proc validate_BotConnectionGet_575093(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the Bot resource group in the user subscription.
   ##   subscriptionId: JString (required)
   ##                 : Azure Subscription ID.
-  ##   resourceName: JString (required)
-  ##               : The name of the Bot resource.
   ##   connectionName: JString (required)
   ##                 : The name of the Bot Service Connection Setting resource
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the Bot resource group in the user subscription.
+  ##   resourceName: JString (required)
+  ##               : The name of the Bot resource.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_575095 = path.getOrDefault("resourceGroupName")
-  valid_575095 = validateParameter(valid_575095, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564195 = path.getOrDefault("subscriptionId")
+  valid_564195 = validateParameter(valid_564195, JString, required = true,
                                  default = nil)
-  if valid_575095 != nil:
-    section.add "resourceGroupName", valid_575095
-  var valid_575096 = path.getOrDefault("subscriptionId")
-  valid_575096 = validateParameter(valid_575096, JString, required = true,
+  if valid_564195 != nil:
+    section.add "subscriptionId", valid_564195
+  var valid_564196 = path.getOrDefault("connectionName")
+  valid_564196 = validateParameter(valid_564196, JString, required = true,
                                  default = nil)
-  if valid_575096 != nil:
-    section.add "subscriptionId", valid_575096
-  var valid_575097 = path.getOrDefault("resourceName")
-  valid_575097 = validateParameter(valid_575097, JString, required = true,
+  if valid_564196 != nil:
+    section.add "connectionName", valid_564196
+  var valid_564197 = path.getOrDefault("resourceGroupName")
+  valid_564197 = validateParameter(valid_564197, JString, required = true,
                                  default = nil)
-  if valid_575097 != nil:
-    section.add "resourceName", valid_575097
-  var valid_575098 = path.getOrDefault("connectionName")
-  valid_575098 = validateParameter(valid_575098, JString, required = true,
+  if valid_564197 != nil:
+    section.add "resourceGroupName", valid_564197
+  var valid_564198 = path.getOrDefault("resourceName")
+  valid_564198 = validateParameter(valid_564198, JString, required = true,
                                  default = nil)
-  if valid_575098 != nil:
-    section.add "connectionName", valid_575098
+  if valid_564198 != nil:
+    section.add "resourceName", valid_564198
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1290,11 +1294,11 @@ proc validate_BotConnectionGet_575093(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575099 = query.getOrDefault("api-version")
-  valid_575099 = validateParameter(valid_575099, JString, required = true,
+  var valid_564199 = query.getOrDefault("api-version")
+  valid_564199 = validateParameter(valid_564199, JString, required = true,
                                  default = nil)
-  if valid_575099 != nil:
-    section.add "api-version", valid_575099
+  if valid_564199 != nil:
+    section.add "api-version", valid_564199
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1303,50 +1307,50 @@ proc validate_BotConnectionGet_575093(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_575100: Call_BotConnectionGet_575092; path: JsonNode;
+proc call*(call_564200: Call_BotConnectionGet_564192; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get a Connection Setting registration for a Bot Service
   ## 
-  let valid = call_575100.validator(path, query, header, formData, body)
-  let scheme = call_575100.pickScheme
+  let valid = call_564200.validator(path, query, header, formData, body)
+  let scheme = call_564200.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575100.url(scheme.get, call_575100.host, call_575100.base,
-                         call_575100.route, valid.getOrDefault("path"),
+  let url = call_564200.url(scheme.get, call_564200.host, call_564200.base,
+                         call_564200.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575100, url, valid)
+  result = hook(call_564200, url, valid)
 
-proc call*(call_575101: Call_BotConnectionGet_575092; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; resourceName: string;
-          connectionName: string): Recallable =
+proc call*(call_564201: Call_BotConnectionGet_564192; apiVersion: string;
+          subscriptionId: string; connectionName: string; resourceGroupName: string;
+          resourceName: string): Recallable =
   ## botConnectionGet
   ## Get a Connection Setting registration for a Bot Service
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the Bot resource group in the user subscription.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
   ##   subscriptionId: string (required)
   ##                 : Azure Subscription ID.
-  ##   resourceName: string (required)
-  ##               : The name of the Bot resource.
   ##   connectionName: string (required)
   ##                 : The name of the Bot Service Connection Setting resource
-  var path_575102 = newJObject()
-  var query_575103 = newJObject()
-  add(path_575102, "resourceGroupName", newJString(resourceGroupName))
-  add(query_575103, "api-version", newJString(apiVersion))
-  add(path_575102, "subscriptionId", newJString(subscriptionId))
-  add(path_575102, "resourceName", newJString(resourceName))
-  add(path_575102, "connectionName", newJString(connectionName))
-  result = call_575101.call(path_575102, query_575103, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the Bot resource group in the user subscription.
+  ##   resourceName: string (required)
+  ##               : The name of the Bot resource.
+  var path_564202 = newJObject()
+  var query_564203 = newJObject()
+  add(query_564203, "api-version", newJString(apiVersion))
+  add(path_564202, "subscriptionId", newJString(subscriptionId))
+  add(path_564202, "connectionName", newJString(connectionName))
+  add(path_564202, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564202, "resourceName", newJString(resourceName))
+  result = call_564201.call(path_564202, query_564203, nil, nil, nil)
 
-var botConnectionGet* = Call_BotConnectionGet_575092(name: "botConnectionGet",
+var botConnectionGet* = Call_BotConnectionGet_564192(name: "botConnectionGet",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.BotService/botServices/{resourceName}/Connections/{connectionName}",
-    validator: validate_BotConnectionGet_575093, base: "",
-    url: url_BotConnectionGet_575094, schemes: {Scheme.Https})
+    validator: validate_BotConnectionGet_564193, base: "",
+    url: url_BotConnectionGet_564194, schemes: {Scheme.Https})
 type
-  Call_BotConnectionUpdate_575130 = ref object of OpenApiRestCall_574466
-proc url_BotConnectionUpdate_575132(protocol: Scheme; host: string; base: string;
+  Call_BotConnectionUpdate_564230 = ref object of OpenApiRestCall_563564
+proc url_BotConnectionUpdate_564232(protocol: Scheme; host: string; base: string;
                                    route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1372,7 +1376,7 @@ proc url_BotConnectionUpdate_575132(protocol: Scheme; host: string; base: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_BotConnectionUpdate_575131(path: JsonNode; query: JsonNode;
+proc validate_BotConnectionUpdate_564231(path: JsonNode; query: JsonNode;
                                         header: JsonNode; formData: JsonNode;
                                         body: JsonNode): JsonNode =
   ## Updates a Connection Setting registration for a Bot Service
@@ -1380,37 +1384,37 @@ proc validate_BotConnectionUpdate_575131(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the Bot resource group in the user subscription.
   ##   subscriptionId: JString (required)
   ##                 : Azure Subscription ID.
-  ##   resourceName: JString (required)
-  ##               : The name of the Bot resource.
   ##   connectionName: JString (required)
   ##                 : The name of the Bot Service Connection Setting resource
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the Bot resource group in the user subscription.
+  ##   resourceName: JString (required)
+  ##               : The name of the Bot resource.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_575133 = path.getOrDefault("resourceGroupName")
-  valid_575133 = validateParameter(valid_575133, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564233 = path.getOrDefault("subscriptionId")
+  valid_564233 = validateParameter(valid_564233, JString, required = true,
                                  default = nil)
-  if valid_575133 != nil:
-    section.add "resourceGroupName", valid_575133
-  var valid_575134 = path.getOrDefault("subscriptionId")
-  valid_575134 = validateParameter(valid_575134, JString, required = true,
+  if valid_564233 != nil:
+    section.add "subscriptionId", valid_564233
+  var valid_564234 = path.getOrDefault("connectionName")
+  valid_564234 = validateParameter(valid_564234, JString, required = true,
                                  default = nil)
-  if valid_575134 != nil:
-    section.add "subscriptionId", valid_575134
-  var valid_575135 = path.getOrDefault("resourceName")
-  valid_575135 = validateParameter(valid_575135, JString, required = true,
+  if valid_564234 != nil:
+    section.add "connectionName", valid_564234
+  var valid_564235 = path.getOrDefault("resourceGroupName")
+  valid_564235 = validateParameter(valid_564235, JString, required = true,
                                  default = nil)
-  if valid_575135 != nil:
-    section.add "resourceName", valid_575135
-  var valid_575136 = path.getOrDefault("connectionName")
-  valid_575136 = validateParameter(valid_575136, JString, required = true,
+  if valid_564235 != nil:
+    section.add "resourceGroupName", valid_564235
+  var valid_564236 = path.getOrDefault("resourceName")
+  valid_564236 = validateParameter(valid_564236, JString, required = true,
                                  default = nil)
-  if valid_575136 != nil:
-    section.add "connectionName", valid_575136
+  if valid_564236 != nil:
+    section.add "resourceName", valid_564236
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1418,11 +1422,11 @@ proc validate_BotConnectionUpdate_575131(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575137 = query.getOrDefault("api-version")
-  valid_575137 = validateParameter(valid_575137, JString, required = true,
+  var valid_564237 = query.getOrDefault("api-version")
+  valid_564237 = validateParameter(valid_564237, JString, required = true,
                                  default = nil)
-  if valid_575137 != nil:
-    section.add "api-version", valid_575137
+  if valid_564237 != nil:
+    section.add "api-version", valid_564237
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1436,56 +1440,56 @@ proc validate_BotConnectionUpdate_575131(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_575139: Call_BotConnectionUpdate_575130; path: JsonNode;
+proc call*(call_564239: Call_BotConnectionUpdate_564230; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Updates a Connection Setting registration for a Bot Service
   ## 
-  let valid = call_575139.validator(path, query, header, formData, body)
-  let scheme = call_575139.pickScheme
+  let valid = call_564239.validator(path, query, header, formData, body)
+  let scheme = call_564239.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575139.url(scheme.get, call_575139.host, call_575139.base,
-                         call_575139.route, valid.getOrDefault("path"),
+  let url = call_564239.url(scheme.get, call_564239.host, call_564239.base,
+                         call_564239.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575139, url, valid)
+  result = hook(call_564239, url, valid)
 
-proc call*(call_575140: Call_BotConnectionUpdate_575130; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; resourceName: string;
-          parameters: JsonNode; connectionName: string): Recallable =
+proc call*(call_564240: Call_BotConnectionUpdate_564230; apiVersion: string;
+          subscriptionId: string; connectionName: string; resourceGroupName: string;
+          resourceName: string; parameters: JsonNode): Recallable =
   ## botConnectionUpdate
   ## Updates a Connection Setting registration for a Bot Service
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the Bot resource group in the user subscription.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
   ##   subscriptionId: string (required)
   ##                 : Azure Subscription ID.
+  ##   connectionName: string (required)
+  ##                 : The name of the Bot Service Connection Setting resource
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the Bot resource group in the user subscription.
   ##   resourceName: string (required)
   ##               : The name of the Bot resource.
   ##   parameters: JObject (required)
   ##             : The parameters to provide for updating the Connection Setting.
-  ##   connectionName: string (required)
-  ##                 : The name of the Bot Service Connection Setting resource
-  var path_575141 = newJObject()
-  var query_575142 = newJObject()
-  var body_575143 = newJObject()
-  add(path_575141, "resourceGroupName", newJString(resourceGroupName))
-  add(query_575142, "api-version", newJString(apiVersion))
-  add(path_575141, "subscriptionId", newJString(subscriptionId))
-  add(path_575141, "resourceName", newJString(resourceName))
+  var path_564241 = newJObject()
+  var query_564242 = newJObject()
+  var body_564243 = newJObject()
+  add(query_564242, "api-version", newJString(apiVersion))
+  add(path_564241, "subscriptionId", newJString(subscriptionId))
+  add(path_564241, "connectionName", newJString(connectionName))
+  add(path_564241, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564241, "resourceName", newJString(resourceName))
   if parameters != nil:
-    body_575143 = parameters
-  add(path_575141, "connectionName", newJString(connectionName))
-  result = call_575140.call(path_575141, query_575142, nil, nil, body_575143)
+    body_564243 = parameters
+  result = call_564240.call(path_564241, query_564242, nil, nil, body_564243)
 
-var botConnectionUpdate* = Call_BotConnectionUpdate_575130(
+var botConnectionUpdate* = Call_BotConnectionUpdate_564230(
     name: "botConnectionUpdate", meth: HttpMethod.HttpPatch,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.BotService/botServices/{resourceName}/Connections/{connectionName}",
-    validator: validate_BotConnectionUpdate_575131, base: "",
-    url: url_BotConnectionUpdate_575132, schemes: {Scheme.Https})
+    validator: validate_BotConnectionUpdate_564231, base: "",
+    url: url_BotConnectionUpdate_564232, schemes: {Scheme.Https})
 type
-  Call_BotConnectionDelete_575118 = ref object of OpenApiRestCall_574466
-proc url_BotConnectionDelete_575120(protocol: Scheme; host: string; base: string;
+  Call_BotConnectionDelete_564218 = ref object of OpenApiRestCall_563564
+proc url_BotConnectionDelete_564220(protocol: Scheme; host: string; base: string;
                                    route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1511,7 +1515,7 @@ proc url_BotConnectionDelete_575120(protocol: Scheme; host: string; base: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_BotConnectionDelete_575119(path: JsonNode; query: JsonNode;
+proc validate_BotConnectionDelete_564219(path: JsonNode; query: JsonNode;
                                         header: JsonNode; formData: JsonNode;
                                         body: JsonNode): JsonNode =
   ## Deletes a Connection Setting registration for a Bot Service
@@ -1519,37 +1523,37 @@ proc validate_BotConnectionDelete_575119(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the Bot resource group in the user subscription.
   ##   subscriptionId: JString (required)
   ##                 : Azure Subscription ID.
-  ##   resourceName: JString (required)
-  ##               : The name of the Bot resource.
   ##   connectionName: JString (required)
   ##                 : The name of the Bot Service Connection Setting resource
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the Bot resource group in the user subscription.
+  ##   resourceName: JString (required)
+  ##               : The name of the Bot resource.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_575121 = path.getOrDefault("resourceGroupName")
-  valid_575121 = validateParameter(valid_575121, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564221 = path.getOrDefault("subscriptionId")
+  valid_564221 = validateParameter(valid_564221, JString, required = true,
                                  default = nil)
-  if valid_575121 != nil:
-    section.add "resourceGroupName", valid_575121
-  var valid_575122 = path.getOrDefault("subscriptionId")
-  valid_575122 = validateParameter(valid_575122, JString, required = true,
+  if valid_564221 != nil:
+    section.add "subscriptionId", valid_564221
+  var valid_564222 = path.getOrDefault("connectionName")
+  valid_564222 = validateParameter(valid_564222, JString, required = true,
                                  default = nil)
-  if valid_575122 != nil:
-    section.add "subscriptionId", valid_575122
-  var valid_575123 = path.getOrDefault("resourceName")
-  valid_575123 = validateParameter(valid_575123, JString, required = true,
+  if valid_564222 != nil:
+    section.add "connectionName", valid_564222
+  var valid_564223 = path.getOrDefault("resourceGroupName")
+  valid_564223 = validateParameter(valid_564223, JString, required = true,
                                  default = nil)
-  if valid_575123 != nil:
-    section.add "resourceName", valid_575123
-  var valid_575124 = path.getOrDefault("connectionName")
-  valid_575124 = validateParameter(valid_575124, JString, required = true,
+  if valid_564223 != nil:
+    section.add "resourceGroupName", valid_564223
+  var valid_564224 = path.getOrDefault("resourceName")
+  valid_564224 = validateParameter(valid_564224, JString, required = true,
                                  default = nil)
-  if valid_575124 != nil:
-    section.add "connectionName", valid_575124
+  if valid_564224 != nil:
+    section.add "resourceName", valid_564224
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1557,11 +1561,11 @@ proc validate_BotConnectionDelete_575119(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575125 = query.getOrDefault("api-version")
-  valid_575125 = validateParameter(valid_575125, JString, required = true,
+  var valid_564225 = query.getOrDefault("api-version")
+  valid_564225 = validateParameter(valid_564225, JString, required = true,
                                  default = nil)
-  if valid_575125 != nil:
-    section.add "api-version", valid_575125
+  if valid_564225 != nil:
+    section.add "api-version", valid_564225
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1570,51 +1574,51 @@ proc validate_BotConnectionDelete_575119(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_575126: Call_BotConnectionDelete_575118; path: JsonNode;
+proc call*(call_564226: Call_BotConnectionDelete_564218; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes a Connection Setting registration for a Bot Service
   ## 
-  let valid = call_575126.validator(path, query, header, formData, body)
-  let scheme = call_575126.pickScheme
+  let valid = call_564226.validator(path, query, header, formData, body)
+  let scheme = call_564226.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575126.url(scheme.get, call_575126.host, call_575126.base,
-                         call_575126.route, valid.getOrDefault("path"),
+  let url = call_564226.url(scheme.get, call_564226.host, call_564226.base,
+                         call_564226.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575126, url, valid)
+  result = hook(call_564226, url, valid)
 
-proc call*(call_575127: Call_BotConnectionDelete_575118; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; resourceName: string;
-          connectionName: string): Recallable =
+proc call*(call_564227: Call_BotConnectionDelete_564218; apiVersion: string;
+          subscriptionId: string; connectionName: string; resourceGroupName: string;
+          resourceName: string): Recallable =
   ## botConnectionDelete
   ## Deletes a Connection Setting registration for a Bot Service
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the Bot resource group in the user subscription.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
   ##   subscriptionId: string (required)
   ##                 : Azure Subscription ID.
-  ##   resourceName: string (required)
-  ##               : The name of the Bot resource.
   ##   connectionName: string (required)
   ##                 : The name of the Bot Service Connection Setting resource
-  var path_575128 = newJObject()
-  var query_575129 = newJObject()
-  add(path_575128, "resourceGroupName", newJString(resourceGroupName))
-  add(query_575129, "api-version", newJString(apiVersion))
-  add(path_575128, "subscriptionId", newJString(subscriptionId))
-  add(path_575128, "resourceName", newJString(resourceName))
-  add(path_575128, "connectionName", newJString(connectionName))
-  result = call_575127.call(path_575128, query_575129, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the Bot resource group in the user subscription.
+  ##   resourceName: string (required)
+  ##               : The name of the Bot resource.
+  var path_564228 = newJObject()
+  var query_564229 = newJObject()
+  add(query_564229, "api-version", newJString(apiVersion))
+  add(path_564228, "subscriptionId", newJString(subscriptionId))
+  add(path_564228, "connectionName", newJString(connectionName))
+  add(path_564228, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564228, "resourceName", newJString(resourceName))
+  result = call_564227.call(path_564228, query_564229, nil, nil, nil)
 
-var botConnectionDelete* = Call_BotConnectionDelete_575118(
+var botConnectionDelete* = Call_BotConnectionDelete_564218(
     name: "botConnectionDelete", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.BotService/botServices/{resourceName}/Connections/{connectionName}",
-    validator: validate_BotConnectionDelete_575119, base: "",
-    url: url_BotConnectionDelete_575120, schemes: {Scheme.Https})
+    validator: validate_BotConnectionDelete_564219, base: "",
+    url: url_BotConnectionDelete_564220, schemes: {Scheme.Https})
 type
-  Call_BotConnectionListWithSecrets_575144 = ref object of OpenApiRestCall_574466
-proc url_BotConnectionListWithSecrets_575146(protocol: Scheme; host: string;
+  Call_BotConnectionListWithSecrets_564244 = ref object of OpenApiRestCall_563564
+proc url_BotConnectionListWithSecrets_564246(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1641,44 +1645,44 @@ proc url_BotConnectionListWithSecrets_575146(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_BotConnectionListWithSecrets_575145(path: JsonNode; query: JsonNode;
+proc validate_BotConnectionListWithSecrets_564245(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Get a Connection Setting registration for a Bot Service
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the Bot resource group in the user subscription.
   ##   subscriptionId: JString (required)
   ##                 : Azure Subscription ID.
-  ##   resourceName: JString (required)
-  ##               : The name of the Bot resource.
   ##   connectionName: JString (required)
   ##                 : The name of the Bot Service Connection Setting resource
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the Bot resource group in the user subscription.
+  ##   resourceName: JString (required)
+  ##               : The name of the Bot resource.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_575147 = path.getOrDefault("resourceGroupName")
-  valid_575147 = validateParameter(valid_575147, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564247 = path.getOrDefault("subscriptionId")
+  valid_564247 = validateParameter(valid_564247, JString, required = true,
                                  default = nil)
-  if valid_575147 != nil:
-    section.add "resourceGroupName", valid_575147
-  var valid_575148 = path.getOrDefault("subscriptionId")
-  valid_575148 = validateParameter(valid_575148, JString, required = true,
+  if valid_564247 != nil:
+    section.add "subscriptionId", valid_564247
+  var valid_564248 = path.getOrDefault("connectionName")
+  valid_564248 = validateParameter(valid_564248, JString, required = true,
                                  default = nil)
-  if valid_575148 != nil:
-    section.add "subscriptionId", valid_575148
-  var valid_575149 = path.getOrDefault("resourceName")
-  valid_575149 = validateParameter(valid_575149, JString, required = true,
+  if valid_564248 != nil:
+    section.add "connectionName", valid_564248
+  var valid_564249 = path.getOrDefault("resourceGroupName")
+  valid_564249 = validateParameter(valid_564249, JString, required = true,
                                  default = nil)
-  if valid_575149 != nil:
-    section.add "resourceName", valid_575149
-  var valid_575150 = path.getOrDefault("connectionName")
-  valid_575150 = validateParameter(valid_575150, JString, required = true,
+  if valid_564249 != nil:
+    section.add "resourceGroupName", valid_564249
+  var valid_564250 = path.getOrDefault("resourceName")
+  valid_564250 = validateParameter(valid_564250, JString, required = true,
                                  default = nil)
-  if valid_575150 != nil:
-    section.add "connectionName", valid_575150
+  if valid_564250 != nil:
+    section.add "resourceName", valid_564250
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1686,11 +1690,11 @@ proc validate_BotConnectionListWithSecrets_575145(path: JsonNode; query: JsonNod
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575151 = query.getOrDefault("api-version")
-  valid_575151 = validateParameter(valid_575151, JString, required = true,
+  var valid_564251 = query.getOrDefault("api-version")
+  valid_564251 = validateParameter(valid_564251, JString, required = true,
                                  default = nil)
-  if valid_575151 != nil:
-    section.add "api-version", valid_575151
+  if valid_564251 != nil:
+    section.add "api-version", valid_564251
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1699,51 +1703,51 @@ proc validate_BotConnectionListWithSecrets_575145(path: JsonNode; query: JsonNod
   if body != nil:
     result.add "body", body
 
-proc call*(call_575152: Call_BotConnectionListWithSecrets_575144; path: JsonNode;
+proc call*(call_564252: Call_BotConnectionListWithSecrets_564244; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get a Connection Setting registration for a Bot Service
   ## 
-  let valid = call_575152.validator(path, query, header, formData, body)
-  let scheme = call_575152.pickScheme
+  let valid = call_564252.validator(path, query, header, formData, body)
+  let scheme = call_564252.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575152.url(scheme.get, call_575152.host, call_575152.base,
-                         call_575152.route, valid.getOrDefault("path"),
+  let url = call_564252.url(scheme.get, call_564252.host, call_564252.base,
+                         call_564252.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575152, url, valid)
+  result = hook(call_564252, url, valid)
 
-proc call*(call_575153: Call_BotConnectionListWithSecrets_575144;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          resourceName: string; connectionName: string): Recallable =
+proc call*(call_564253: Call_BotConnectionListWithSecrets_564244;
+          apiVersion: string; subscriptionId: string; connectionName: string;
+          resourceGroupName: string; resourceName: string): Recallable =
   ## botConnectionListWithSecrets
   ## Get a Connection Setting registration for a Bot Service
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the Bot resource group in the user subscription.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
   ##   subscriptionId: string (required)
   ##                 : Azure Subscription ID.
-  ##   resourceName: string (required)
-  ##               : The name of the Bot resource.
   ##   connectionName: string (required)
   ##                 : The name of the Bot Service Connection Setting resource
-  var path_575154 = newJObject()
-  var query_575155 = newJObject()
-  add(path_575154, "resourceGroupName", newJString(resourceGroupName))
-  add(query_575155, "api-version", newJString(apiVersion))
-  add(path_575154, "subscriptionId", newJString(subscriptionId))
-  add(path_575154, "resourceName", newJString(resourceName))
-  add(path_575154, "connectionName", newJString(connectionName))
-  result = call_575153.call(path_575154, query_575155, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the Bot resource group in the user subscription.
+  ##   resourceName: string (required)
+  ##               : The name of the Bot resource.
+  var path_564254 = newJObject()
+  var query_564255 = newJObject()
+  add(query_564255, "api-version", newJString(apiVersion))
+  add(path_564254, "subscriptionId", newJString(subscriptionId))
+  add(path_564254, "connectionName", newJString(connectionName))
+  add(path_564254, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564254, "resourceName", newJString(resourceName))
+  result = call_564253.call(path_564254, query_564255, nil, nil, nil)
 
-var botConnectionListWithSecrets* = Call_BotConnectionListWithSecrets_575144(
+var botConnectionListWithSecrets* = Call_BotConnectionListWithSecrets_564244(
     name: "botConnectionListWithSecrets", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.BotService/botServices/{resourceName}/Connections/{connectionName}/listWithSecrets",
-    validator: validate_BotConnectionListWithSecrets_575145, base: "",
-    url: url_BotConnectionListWithSecrets_575146, schemes: {Scheme.Https})
+    validator: validate_BotConnectionListWithSecrets_564245, base: "",
+    url: url_BotConnectionListWithSecrets_564246, schemes: {Scheme.Https})
 type
-  Call_ChannelsListByResourceGroup_575156 = ref object of OpenApiRestCall_574466
-proc url_ChannelsListByResourceGroup_575158(protocol: Scheme; host: string;
+  Call_ChannelsListByResourceGroup_564256 = ref object of OpenApiRestCall_563564
+proc url_ChannelsListByResourceGroup_564258(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1767,37 +1771,37 @@ proc url_ChannelsListByResourceGroup_575158(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ChannelsListByResourceGroup_575157(path: JsonNode; query: JsonNode;
+proc validate_ChannelsListByResourceGroup_564257(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Returns all the Channel registrations of a particular BotService resource
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the Bot resource group in the user subscription.
   ##   subscriptionId: JString (required)
   ##                 : Azure Subscription ID.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the Bot resource group in the user subscription.
   ##   resourceName: JString (required)
   ##               : The name of the Bot resource.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_575159 = path.getOrDefault("resourceGroupName")
-  valid_575159 = validateParameter(valid_575159, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564259 = path.getOrDefault("subscriptionId")
+  valid_564259 = validateParameter(valid_564259, JString, required = true,
                                  default = nil)
-  if valid_575159 != nil:
-    section.add "resourceGroupName", valid_575159
-  var valid_575160 = path.getOrDefault("subscriptionId")
-  valid_575160 = validateParameter(valid_575160, JString, required = true,
+  if valid_564259 != nil:
+    section.add "subscriptionId", valid_564259
+  var valid_564260 = path.getOrDefault("resourceGroupName")
+  valid_564260 = validateParameter(valid_564260, JString, required = true,
                                  default = nil)
-  if valid_575160 != nil:
-    section.add "subscriptionId", valid_575160
-  var valid_575161 = path.getOrDefault("resourceName")
-  valid_575161 = validateParameter(valid_575161, JString, required = true,
+  if valid_564260 != nil:
+    section.add "resourceGroupName", valid_564260
+  var valid_564261 = path.getOrDefault("resourceName")
+  valid_564261 = validateParameter(valid_564261, JString, required = true,
                                  default = nil)
-  if valid_575161 != nil:
-    section.add "resourceName", valid_575161
+  if valid_564261 != nil:
+    section.add "resourceName", valid_564261
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1805,11 +1809,11 @@ proc validate_ChannelsListByResourceGroup_575157(path: JsonNode; query: JsonNode
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575162 = query.getOrDefault("api-version")
-  valid_575162 = validateParameter(valid_575162, JString, required = true,
+  var valid_564262 = query.getOrDefault("api-version")
+  valid_564262 = validateParameter(valid_564262, JString, required = true,
                                  default = nil)
-  if valid_575162 != nil:
-    section.add "api-version", valid_575162
+  if valid_564262 != nil:
+    section.add "api-version", valid_564262
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1818,48 +1822,48 @@ proc validate_ChannelsListByResourceGroup_575157(path: JsonNode; query: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_575163: Call_ChannelsListByResourceGroup_575156; path: JsonNode;
+proc call*(call_564263: Call_ChannelsListByResourceGroup_564256; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Returns all the Channel registrations of a particular BotService resource
   ## 
-  let valid = call_575163.validator(path, query, header, formData, body)
-  let scheme = call_575163.pickScheme
+  let valid = call_564263.validator(path, query, header, formData, body)
+  let scheme = call_564263.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575163.url(scheme.get, call_575163.host, call_575163.base,
-                         call_575163.route, valid.getOrDefault("path"),
+  let url = call_564263.url(scheme.get, call_564263.host, call_564263.base,
+                         call_564263.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575163, url, valid)
+  result = hook(call_564263, url, valid)
 
-proc call*(call_575164: Call_ChannelsListByResourceGroup_575156;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
+proc call*(call_564264: Call_ChannelsListByResourceGroup_564256;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string;
           resourceName: string): Recallable =
   ## channelsListByResourceGroup
   ## Returns all the Channel registrations of a particular BotService resource
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the Bot resource group in the user subscription.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
   ##   subscriptionId: string (required)
   ##                 : Azure Subscription ID.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the Bot resource group in the user subscription.
   ##   resourceName: string (required)
   ##               : The name of the Bot resource.
-  var path_575165 = newJObject()
-  var query_575166 = newJObject()
-  add(path_575165, "resourceGroupName", newJString(resourceGroupName))
-  add(query_575166, "api-version", newJString(apiVersion))
-  add(path_575165, "subscriptionId", newJString(subscriptionId))
-  add(path_575165, "resourceName", newJString(resourceName))
-  result = call_575164.call(path_575165, query_575166, nil, nil, nil)
+  var path_564265 = newJObject()
+  var query_564266 = newJObject()
+  add(query_564266, "api-version", newJString(apiVersion))
+  add(path_564265, "subscriptionId", newJString(subscriptionId))
+  add(path_564265, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564265, "resourceName", newJString(resourceName))
+  result = call_564264.call(path_564265, query_564266, nil, nil, nil)
 
-var channelsListByResourceGroup* = Call_ChannelsListByResourceGroup_575156(
+var channelsListByResourceGroup* = Call_ChannelsListByResourceGroup_564256(
     name: "channelsListByResourceGroup", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.BotService/botServices/{resourceName}/channels",
-    validator: validate_ChannelsListByResourceGroup_575157, base: "",
-    url: url_ChannelsListByResourceGroup_575158, schemes: {Scheme.Https})
+    validator: validate_ChannelsListByResourceGroup_564257, base: "",
+    url: url_ChannelsListByResourceGroup_564258, schemes: {Scheme.Https})
 type
-  Call_ChannelsCreate_575179 = ref object of OpenApiRestCall_574466
-proc url_ChannelsCreate_575181(protocol: Scheme; host: string; base: string;
+  Call_ChannelsCreate_564279 = ref object of OpenApiRestCall_563564
+proc url_ChannelsCreate_564281(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1885,7 +1889,7 @@ proc url_ChannelsCreate_575181(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ChannelsCreate_575180(path: JsonNode; query: JsonNode;
+proc validate_ChannelsCreate_564280(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## Creates a Channel registration for a Bot Service
@@ -1893,37 +1897,37 @@ proc validate_ChannelsCreate_575180(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the Bot resource group in the user subscription.
   ##   subscriptionId: JString (required)
   ##                 : Azure Subscription ID.
   ##   channelName: JString (required)
   ##              : The name of the Channel resource.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the Bot resource group in the user subscription.
   ##   resourceName: JString (required)
   ##               : The name of the Bot resource.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_575182 = path.getOrDefault("resourceGroupName")
-  valid_575182 = validateParameter(valid_575182, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564282 = path.getOrDefault("subscriptionId")
+  valid_564282 = validateParameter(valid_564282, JString, required = true,
                                  default = nil)
-  if valid_575182 != nil:
-    section.add "resourceGroupName", valid_575182
-  var valid_575183 = path.getOrDefault("subscriptionId")
-  valid_575183 = validateParameter(valid_575183, JString, required = true,
-                                 default = nil)
-  if valid_575183 != nil:
-    section.add "subscriptionId", valid_575183
-  var valid_575197 = path.getOrDefault("channelName")
-  valid_575197 = validateParameter(valid_575197, JString, required = true,
+  if valid_564282 != nil:
+    section.add "subscriptionId", valid_564282
+  var valid_564296 = path.getOrDefault("channelName")
+  valid_564296 = validateParameter(valid_564296, JString, required = true,
                                  default = newJString("FacebookChannel"))
-  if valid_575197 != nil:
-    section.add "channelName", valid_575197
-  var valid_575198 = path.getOrDefault("resourceName")
-  valid_575198 = validateParameter(valid_575198, JString, required = true,
+  if valid_564296 != nil:
+    section.add "channelName", valid_564296
+  var valid_564297 = path.getOrDefault("resourceGroupName")
+  valid_564297 = validateParameter(valid_564297, JString, required = true,
                                  default = nil)
-  if valid_575198 != nil:
-    section.add "resourceName", valid_575198
+  if valid_564297 != nil:
+    section.add "resourceGroupName", valid_564297
+  var valid_564298 = path.getOrDefault("resourceName")
+  valid_564298 = validateParameter(valid_564298, JString, required = true,
+                                 default = nil)
+  if valid_564298 != nil:
+    section.add "resourceName", valid_564298
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1931,11 +1935,11 @@ proc validate_ChannelsCreate_575180(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575199 = query.getOrDefault("api-version")
-  valid_575199 = validateParameter(valid_575199, JString, required = true,
+  var valid_564299 = query.getOrDefault("api-version")
+  valid_564299 = validateParameter(valid_564299, JString, required = true,
                                  default = nil)
-  if valid_575199 != nil:
-    section.add "api-version", valid_575199
+  if valid_564299 != nil:
+    section.add "api-version", valid_564299
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1949,55 +1953,55 @@ proc validate_ChannelsCreate_575180(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_575201: Call_ChannelsCreate_575179; path: JsonNode; query: JsonNode;
+proc call*(call_564301: Call_ChannelsCreate_564279; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Creates a Channel registration for a Bot Service
   ## 
-  let valid = call_575201.validator(path, query, header, formData, body)
-  let scheme = call_575201.pickScheme
+  let valid = call_564301.validator(path, query, header, formData, body)
+  let scheme = call_564301.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575201.url(scheme.get, call_575201.host, call_575201.base,
-                         call_575201.route, valid.getOrDefault("path"),
+  let url = call_564301.url(scheme.get, call_564301.host, call_564301.base,
+                         call_564301.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575201, url, valid)
+  result = hook(call_564301, url, valid)
 
-proc call*(call_575202: Call_ChannelsCreate_575179; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; resourceName: string;
+proc call*(call_564302: Call_ChannelsCreate_564279; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string; resourceName: string;
           parameters: JsonNode; channelName: string = "FacebookChannel"): Recallable =
   ## channelsCreate
   ## Creates a Channel registration for a Bot Service
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the Bot resource group in the user subscription.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
   ##   subscriptionId: string (required)
   ##                 : Azure Subscription ID.
   ##   channelName: string (required)
   ##              : The name of the Channel resource.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the Bot resource group in the user subscription.
   ##   resourceName: string (required)
   ##               : The name of the Bot resource.
   ##   parameters: JObject (required)
   ##             : The parameters to provide for the created bot.
-  var path_575203 = newJObject()
-  var query_575204 = newJObject()
-  var body_575205 = newJObject()
-  add(path_575203, "resourceGroupName", newJString(resourceGroupName))
-  add(query_575204, "api-version", newJString(apiVersion))
-  add(path_575203, "subscriptionId", newJString(subscriptionId))
-  add(path_575203, "channelName", newJString(channelName))
-  add(path_575203, "resourceName", newJString(resourceName))
+  var path_564303 = newJObject()
+  var query_564304 = newJObject()
+  var body_564305 = newJObject()
+  add(query_564304, "api-version", newJString(apiVersion))
+  add(path_564303, "subscriptionId", newJString(subscriptionId))
+  add(path_564303, "channelName", newJString(channelName))
+  add(path_564303, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564303, "resourceName", newJString(resourceName))
   if parameters != nil:
-    body_575205 = parameters
-  result = call_575202.call(path_575203, query_575204, nil, nil, body_575205)
+    body_564305 = parameters
+  result = call_564302.call(path_564303, query_564304, nil, nil, body_564305)
 
-var channelsCreate* = Call_ChannelsCreate_575179(name: "channelsCreate",
+var channelsCreate* = Call_ChannelsCreate_564279(name: "channelsCreate",
     meth: HttpMethod.HttpPut, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.BotService/botServices/{resourceName}/channels/{channelName}",
-    validator: validate_ChannelsCreate_575180, base: "", url: url_ChannelsCreate_575181,
+    validator: validate_ChannelsCreate_564280, base: "", url: url_ChannelsCreate_564281,
     schemes: {Scheme.Https})
 type
-  Call_ChannelsGet_575167 = ref object of OpenApiRestCall_574466
-proc url_ChannelsGet_575169(protocol: Scheme; host: string; base: string;
+  Call_ChannelsGet_564267 = ref object of OpenApiRestCall_563564
+proc url_ChannelsGet_564269(protocol: Scheme; host: string; base: string;
                            route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2023,44 +2027,44 @@ proc url_ChannelsGet_575169(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ChannelsGet_575168(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_ChannelsGet_564268(path: JsonNode; query: JsonNode; header: JsonNode;
                                 formData: JsonNode; body: JsonNode): JsonNode =
   ## Returns a BotService Channel registration specified by the parameters.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the Bot resource group in the user subscription.
   ##   subscriptionId: JString (required)
   ##                 : Azure Subscription ID.
   ##   channelName: JString (required)
   ##              : The name of the Bot resource.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the Bot resource group in the user subscription.
   ##   resourceName: JString (required)
   ##               : The name of the Bot resource.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_575170 = path.getOrDefault("resourceGroupName")
-  valid_575170 = validateParameter(valid_575170, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564270 = path.getOrDefault("subscriptionId")
+  valid_564270 = validateParameter(valid_564270, JString, required = true,
                                  default = nil)
-  if valid_575170 != nil:
-    section.add "resourceGroupName", valid_575170
-  var valid_575171 = path.getOrDefault("subscriptionId")
-  valid_575171 = validateParameter(valid_575171, JString, required = true,
+  if valid_564270 != nil:
+    section.add "subscriptionId", valid_564270
+  var valid_564271 = path.getOrDefault("channelName")
+  valid_564271 = validateParameter(valid_564271, JString, required = true,
                                  default = nil)
-  if valid_575171 != nil:
-    section.add "subscriptionId", valid_575171
-  var valid_575172 = path.getOrDefault("channelName")
-  valid_575172 = validateParameter(valid_575172, JString, required = true,
+  if valid_564271 != nil:
+    section.add "channelName", valid_564271
+  var valid_564272 = path.getOrDefault("resourceGroupName")
+  valid_564272 = validateParameter(valid_564272, JString, required = true,
                                  default = nil)
-  if valid_575172 != nil:
-    section.add "channelName", valid_575172
-  var valid_575173 = path.getOrDefault("resourceName")
-  valid_575173 = validateParameter(valid_575173, JString, required = true,
+  if valid_564272 != nil:
+    section.add "resourceGroupName", valid_564272
+  var valid_564273 = path.getOrDefault("resourceName")
+  valid_564273 = validateParameter(valid_564273, JString, required = true,
                                  default = nil)
-  if valid_575173 != nil:
-    section.add "resourceName", valid_575173
+  if valid_564273 != nil:
+    section.add "resourceName", valid_564273
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2068,11 +2072,11 @@ proc validate_ChannelsGet_575168(path: JsonNode; query: JsonNode; header: JsonNo
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575174 = query.getOrDefault("api-version")
-  valid_575174 = validateParameter(valid_575174, JString, required = true,
+  var valid_564274 = query.getOrDefault("api-version")
+  valid_564274 = validateParameter(valid_564274, JString, required = true,
                                  default = nil)
-  if valid_575174 != nil:
-    section.add "api-version", valid_575174
+  if valid_564274 != nil:
+    section.add "api-version", valid_564274
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2081,52 +2085,52 @@ proc validate_ChannelsGet_575168(path: JsonNode; query: JsonNode; header: JsonNo
   if body != nil:
     result.add "body", body
 
-proc call*(call_575175: Call_ChannelsGet_575167; path: JsonNode; query: JsonNode;
+proc call*(call_564275: Call_ChannelsGet_564267; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Returns a BotService Channel registration specified by the parameters.
   ## 
-  let valid = call_575175.validator(path, query, header, formData, body)
-  let scheme = call_575175.pickScheme
+  let valid = call_564275.validator(path, query, header, formData, body)
+  let scheme = call_564275.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575175.url(scheme.get, call_575175.host, call_575175.base,
-                         call_575175.route, valid.getOrDefault("path"),
+  let url = call_564275.url(scheme.get, call_564275.host, call_564275.base,
+                         call_564275.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575175, url, valid)
+  result = hook(call_564275, url, valid)
 
-proc call*(call_575176: Call_ChannelsGet_575167; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; channelName: string;
+proc call*(call_564276: Call_ChannelsGet_564267; apiVersion: string;
+          subscriptionId: string; channelName: string; resourceGroupName: string;
           resourceName: string): Recallable =
   ## channelsGet
   ## Returns a BotService Channel registration specified by the parameters.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the Bot resource group in the user subscription.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
   ##   subscriptionId: string (required)
   ##                 : Azure Subscription ID.
   ##   channelName: string (required)
   ##              : The name of the Bot resource.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the Bot resource group in the user subscription.
   ##   resourceName: string (required)
   ##               : The name of the Bot resource.
-  var path_575177 = newJObject()
-  var query_575178 = newJObject()
-  add(path_575177, "resourceGroupName", newJString(resourceGroupName))
-  add(query_575178, "api-version", newJString(apiVersion))
-  add(path_575177, "subscriptionId", newJString(subscriptionId))
-  add(path_575177, "channelName", newJString(channelName))
-  add(path_575177, "resourceName", newJString(resourceName))
-  result = call_575176.call(path_575177, query_575178, nil, nil, nil)
+  var path_564277 = newJObject()
+  var query_564278 = newJObject()
+  add(query_564278, "api-version", newJString(apiVersion))
+  add(path_564277, "subscriptionId", newJString(subscriptionId))
+  add(path_564277, "channelName", newJString(channelName))
+  add(path_564277, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564277, "resourceName", newJString(resourceName))
+  result = call_564276.call(path_564277, query_564278, nil, nil, nil)
 
-var channelsGet* = Call_ChannelsGet_575167(name: "channelsGet",
+var channelsGet* = Call_ChannelsGet_564267(name: "channelsGet",
                                         meth: HttpMethod.HttpGet,
                                         host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.BotService/botServices/{resourceName}/channels/{channelName}",
-                                        validator: validate_ChannelsGet_575168,
-                                        base: "", url: url_ChannelsGet_575169,
+                                        validator: validate_ChannelsGet_564268,
+                                        base: "", url: url_ChannelsGet_564269,
                                         schemes: {Scheme.Https})
 type
-  Call_ChannelsUpdate_575218 = ref object of OpenApiRestCall_574466
-proc url_ChannelsUpdate_575220(protocol: Scheme; host: string; base: string;
+  Call_ChannelsUpdate_564318 = ref object of OpenApiRestCall_563564
+proc url_ChannelsUpdate_564320(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2152,7 +2156,7 @@ proc url_ChannelsUpdate_575220(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ChannelsUpdate_575219(path: JsonNode; query: JsonNode;
+proc validate_ChannelsUpdate_564319(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## Updates a Channel registration for a Bot Service
@@ -2160,37 +2164,37 @@ proc validate_ChannelsUpdate_575219(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the Bot resource group in the user subscription.
   ##   subscriptionId: JString (required)
   ##                 : Azure Subscription ID.
   ##   channelName: JString (required)
   ##              : The name of the Channel resource.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the Bot resource group in the user subscription.
   ##   resourceName: JString (required)
   ##               : The name of the Bot resource.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_575221 = path.getOrDefault("resourceGroupName")
-  valid_575221 = validateParameter(valid_575221, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564321 = path.getOrDefault("subscriptionId")
+  valid_564321 = validateParameter(valid_564321, JString, required = true,
                                  default = nil)
-  if valid_575221 != nil:
-    section.add "resourceGroupName", valid_575221
-  var valid_575222 = path.getOrDefault("subscriptionId")
-  valid_575222 = validateParameter(valid_575222, JString, required = true,
-                                 default = nil)
-  if valid_575222 != nil:
-    section.add "subscriptionId", valid_575222
-  var valid_575223 = path.getOrDefault("channelName")
-  valid_575223 = validateParameter(valid_575223, JString, required = true,
+  if valid_564321 != nil:
+    section.add "subscriptionId", valid_564321
+  var valid_564322 = path.getOrDefault("channelName")
+  valid_564322 = validateParameter(valid_564322, JString, required = true,
                                  default = newJString("FacebookChannel"))
-  if valid_575223 != nil:
-    section.add "channelName", valid_575223
-  var valid_575224 = path.getOrDefault("resourceName")
-  valid_575224 = validateParameter(valid_575224, JString, required = true,
+  if valid_564322 != nil:
+    section.add "channelName", valid_564322
+  var valid_564323 = path.getOrDefault("resourceGroupName")
+  valid_564323 = validateParameter(valid_564323, JString, required = true,
                                  default = nil)
-  if valid_575224 != nil:
-    section.add "resourceName", valid_575224
+  if valid_564323 != nil:
+    section.add "resourceGroupName", valid_564323
+  var valid_564324 = path.getOrDefault("resourceName")
+  valid_564324 = validateParameter(valid_564324, JString, required = true,
+                                 default = nil)
+  if valid_564324 != nil:
+    section.add "resourceName", valid_564324
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2198,11 +2202,11 @@ proc validate_ChannelsUpdate_575219(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575225 = query.getOrDefault("api-version")
-  valid_575225 = validateParameter(valid_575225, JString, required = true,
+  var valid_564325 = query.getOrDefault("api-version")
+  valid_564325 = validateParameter(valid_564325, JString, required = true,
                                  default = nil)
-  if valid_575225 != nil:
-    section.add "api-version", valid_575225
+  if valid_564325 != nil:
+    section.add "api-version", valid_564325
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2216,55 +2220,55 @@ proc validate_ChannelsUpdate_575219(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_575227: Call_ChannelsUpdate_575218; path: JsonNode; query: JsonNode;
+proc call*(call_564327: Call_ChannelsUpdate_564318; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Updates a Channel registration for a Bot Service
   ## 
-  let valid = call_575227.validator(path, query, header, formData, body)
-  let scheme = call_575227.pickScheme
+  let valid = call_564327.validator(path, query, header, formData, body)
+  let scheme = call_564327.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575227.url(scheme.get, call_575227.host, call_575227.base,
-                         call_575227.route, valid.getOrDefault("path"),
+  let url = call_564327.url(scheme.get, call_564327.host, call_564327.base,
+                         call_564327.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575227, url, valid)
+  result = hook(call_564327, url, valid)
 
-proc call*(call_575228: Call_ChannelsUpdate_575218; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; resourceName: string;
+proc call*(call_564328: Call_ChannelsUpdate_564318; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string; resourceName: string;
           parameters: JsonNode; channelName: string = "FacebookChannel"): Recallable =
   ## channelsUpdate
   ## Updates a Channel registration for a Bot Service
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the Bot resource group in the user subscription.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
   ##   subscriptionId: string (required)
   ##                 : Azure Subscription ID.
   ##   channelName: string (required)
   ##              : The name of the Channel resource.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the Bot resource group in the user subscription.
   ##   resourceName: string (required)
   ##               : The name of the Bot resource.
   ##   parameters: JObject (required)
   ##             : The parameters to provide for the created bot.
-  var path_575229 = newJObject()
-  var query_575230 = newJObject()
-  var body_575231 = newJObject()
-  add(path_575229, "resourceGroupName", newJString(resourceGroupName))
-  add(query_575230, "api-version", newJString(apiVersion))
-  add(path_575229, "subscriptionId", newJString(subscriptionId))
-  add(path_575229, "channelName", newJString(channelName))
-  add(path_575229, "resourceName", newJString(resourceName))
+  var path_564329 = newJObject()
+  var query_564330 = newJObject()
+  var body_564331 = newJObject()
+  add(query_564330, "api-version", newJString(apiVersion))
+  add(path_564329, "subscriptionId", newJString(subscriptionId))
+  add(path_564329, "channelName", newJString(channelName))
+  add(path_564329, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564329, "resourceName", newJString(resourceName))
   if parameters != nil:
-    body_575231 = parameters
-  result = call_575228.call(path_575229, query_575230, nil, nil, body_575231)
+    body_564331 = parameters
+  result = call_564328.call(path_564329, query_564330, nil, nil, body_564331)
 
-var channelsUpdate* = Call_ChannelsUpdate_575218(name: "channelsUpdate",
+var channelsUpdate* = Call_ChannelsUpdate_564318(name: "channelsUpdate",
     meth: HttpMethod.HttpPatch, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.BotService/botServices/{resourceName}/channels/{channelName}",
-    validator: validate_ChannelsUpdate_575219, base: "", url: url_ChannelsUpdate_575220,
+    validator: validate_ChannelsUpdate_564319, base: "", url: url_ChannelsUpdate_564320,
     schemes: {Scheme.Https})
 type
-  Call_ChannelsDelete_575206 = ref object of OpenApiRestCall_574466
-proc url_ChannelsDelete_575208(protocol: Scheme; host: string; base: string;
+  Call_ChannelsDelete_564306 = ref object of OpenApiRestCall_563564
+proc url_ChannelsDelete_564308(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2290,7 +2294,7 @@ proc url_ChannelsDelete_575208(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ChannelsDelete_575207(path: JsonNode; query: JsonNode;
+proc validate_ChannelsDelete_564307(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## Deletes a Channel registration from a Bot Service
@@ -2298,37 +2302,37 @@ proc validate_ChannelsDelete_575207(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the Bot resource group in the user subscription.
   ##   subscriptionId: JString (required)
   ##                 : Azure Subscription ID.
   ##   channelName: JString (required)
   ##              : The name of the Bot resource.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the Bot resource group in the user subscription.
   ##   resourceName: JString (required)
   ##               : The name of the Bot resource.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_575209 = path.getOrDefault("resourceGroupName")
-  valid_575209 = validateParameter(valid_575209, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564309 = path.getOrDefault("subscriptionId")
+  valid_564309 = validateParameter(valid_564309, JString, required = true,
                                  default = nil)
-  if valid_575209 != nil:
-    section.add "resourceGroupName", valid_575209
-  var valid_575210 = path.getOrDefault("subscriptionId")
-  valid_575210 = validateParameter(valid_575210, JString, required = true,
+  if valid_564309 != nil:
+    section.add "subscriptionId", valid_564309
+  var valid_564310 = path.getOrDefault("channelName")
+  valid_564310 = validateParameter(valid_564310, JString, required = true,
                                  default = nil)
-  if valid_575210 != nil:
-    section.add "subscriptionId", valid_575210
-  var valid_575211 = path.getOrDefault("channelName")
-  valid_575211 = validateParameter(valid_575211, JString, required = true,
+  if valid_564310 != nil:
+    section.add "channelName", valid_564310
+  var valid_564311 = path.getOrDefault("resourceGroupName")
+  valid_564311 = validateParameter(valid_564311, JString, required = true,
                                  default = nil)
-  if valid_575211 != nil:
-    section.add "channelName", valid_575211
-  var valid_575212 = path.getOrDefault("resourceName")
-  valid_575212 = validateParameter(valid_575212, JString, required = true,
+  if valid_564311 != nil:
+    section.add "resourceGroupName", valid_564311
+  var valid_564312 = path.getOrDefault("resourceName")
+  valid_564312 = validateParameter(valid_564312, JString, required = true,
                                  default = nil)
-  if valid_575212 != nil:
-    section.add "resourceName", valid_575212
+  if valid_564312 != nil:
+    section.add "resourceName", valid_564312
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2336,11 +2340,11 @@ proc validate_ChannelsDelete_575207(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575213 = query.getOrDefault("api-version")
-  valid_575213 = validateParameter(valid_575213, JString, required = true,
+  var valid_564313 = query.getOrDefault("api-version")
+  valid_564313 = validateParameter(valid_564313, JString, required = true,
                                  default = nil)
-  if valid_575213 != nil:
-    section.add "api-version", valid_575213
+  if valid_564313 != nil:
+    section.add "api-version", valid_564313
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2349,50 +2353,50 @@ proc validate_ChannelsDelete_575207(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_575214: Call_ChannelsDelete_575206; path: JsonNode; query: JsonNode;
+proc call*(call_564314: Call_ChannelsDelete_564306; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes a Channel registration from a Bot Service
   ## 
-  let valid = call_575214.validator(path, query, header, formData, body)
-  let scheme = call_575214.pickScheme
+  let valid = call_564314.validator(path, query, header, formData, body)
+  let scheme = call_564314.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575214.url(scheme.get, call_575214.host, call_575214.base,
-                         call_575214.route, valid.getOrDefault("path"),
+  let url = call_564314.url(scheme.get, call_564314.host, call_564314.base,
+                         call_564314.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575214, url, valid)
+  result = hook(call_564314, url, valid)
 
-proc call*(call_575215: Call_ChannelsDelete_575206; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; channelName: string;
+proc call*(call_564315: Call_ChannelsDelete_564306; apiVersion: string;
+          subscriptionId: string; channelName: string; resourceGroupName: string;
           resourceName: string): Recallable =
   ## channelsDelete
   ## Deletes a Channel registration from a Bot Service
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the Bot resource group in the user subscription.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
   ##   subscriptionId: string (required)
   ##                 : Azure Subscription ID.
   ##   channelName: string (required)
   ##              : The name of the Bot resource.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the Bot resource group in the user subscription.
   ##   resourceName: string (required)
   ##               : The name of the Bot resource.
-  var path_575216 = newJObject()
-  var query_575217 = newJObject()
-  add(path_575216, "resourceGroupName", newJString(resourceGroupName))
-  add(query_575217, "api-version", newJString(apiVersion))
-  add(path_575216, "subscriptionId", newJString(subscriptionId))
-  add(path_575216, "channelName", newJString(channelName))
-  add(path_575216, "resourceName", newJString(resourceName))
-  result = call_575215.call(path_575216, query_575217, nil, nil, nil)
+  var path_564316 = newJObject()
+  var query_564317 = newJObject()
+  add(query_564317, "api-version", newJString(apiVersion))
+  add(path_564316, "subscriptionId", newJString(subscriptionId))
+  add(path_564316, "channelName", newJString(channelName))
+  add(path_564316, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564316, "resourceName", newJString(resourceName))
+  result = call_564315.call(path_564316, query_564317, nil, nil, nil)
 
-var channelsDelete* = Call_ChannelsDelete_575206(name: "channelsDelete",
+var channelsDelete* = Call_ChannelsDelete_564306(name: "channelsDelete",
     meth: HttpMethod.HttpDelete, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.BotService/botServices/{resourceName}/channels/{channelName}",
-    validator: validate_ChannelsDelete_575207, base: "", url: url_ChannelsDelete_575208,
+    validator: validate_ChannelsDelete_564307, base: "", url: url_ChannelsDelete_564308,
     schemes: {Scheme.Https})
 type
-  Call_ChannelsListWithKeys_575232 = ref object of OpenApiRestCall_574466
-proc url_ChannelsListWithKeys_575234(protocol: Scheme; host: string; base: string;
+  Call_ChannelsListWithKeys_564332 = ref object of OpenApiRestCall_563564
+proc url_ChannelsListWithKeys_564334(protocol: Scheme; host: string; base: string;
                                     route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2419,44 +2423,44 @@ proc url_ChannelsListWithKeys_575234(protocol: Scheme; host: string; base: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ChannelsListWithKeys_575233(path: JsonNode; query: JsonNode;
+proc validate_ChannelsListWithKeys_564333(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists a Channel registration for a Bot Service including secrets
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the Bot resource group in the user subscription.
   ##   subscriptionId: JString (required)
   ##                 : Azure Subscription ID.
   ##   channelName: JString (required)
   ##              : The name of the Channel resource.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the Bot resource group in the user subscription.
   ##   resourceName: JString (required)
   ##               : The name of the Bot resource.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_575235 = path.getOrDefault("resourceGroupName")
-  valid_575235 = validateParameter(valid_575235, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564335 = path.getOrDefault("subscriptionId")
+  valid_564335 = validateParameter(valid_564335, JString, required = true,
                                  default = nil)
-  if valid_575235 != nil:
-    section.add "resourceGroupName", valid_575235
-  var valid_575236 = path.getOrDefault("subscriptionId")
-  valid_575236 = validateParameter(valid_575236, JString, required = true,
-                                 default = nil)
-  if valid_575236 != nil:
-    section.add "subscriptionId", valid_575236
-  var valid_575237 = path.getOrDefault("channelName")
-  valid_575237 = validateParameter(valid_575237, JString, required = true,
+  if valid_564335 != nil:
+    section.add "subscriptionId", valid_564335
+  var valid_564336 = path.getOrDefault("channelName")
+  valid_564336 = validateParameter(valid_564336, JString, required = true,
                                  default = newJString("FacebookChannel"))
-  if valid_575237 != nil:
-    section.add "channelName", valid_575237
-  var valid_575238 = path.getOrDefault("resourceName")
-  valid_575238 = validateParameter(valid_575238, JString, required = true,
+  if valid_564336 != nil:
+    section.add "channelName", valid_564336
+  var valid_564337 = path.getOrDefault("resourceGroupName")
+  valid_564337 = validateParameter(valid_564337, JString, required = true,
                                  default = nil)
-  if valid_575238 != nil:
-    section.add "resourceName", valid_575238
+  if valid_564337 != nil:
+    section.add "resourceGroupName", valid_564337
+  var valid_564338 = path.getOrDefault("resourceName")
+  valid_564338 = validateParameter(valid_564338, JString, required = true,
+                                 default = nil)
+  if valid_564338 != nil:
+    section.add "resourceName", valid_564338
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2464,11 +2468,11 @@ proc validate_ChannelsListWithKeys_575233(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575239 = query.getOrDefault("api-version")
-  valid_575239 = validateParameter(valid_575239, JString, required = true,
+  var valid_564339 = query.getOrDefault("api-version")
+  valid_564339 = validateParameter(valid_564339, JString, required = true,
                                  default = nil)
-  if valid_575239 != nil:
-    section.add "api-version", valid_575239
+  if valid_564339 != nil:
+    section.add "api-version", valid_564339
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2477,51 +2481,51 @@ proc validate_ChannelsListWithKeys_575233(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_575240: Call_ChannelsListWithKeys_575232; path: JsonNode;
+proc call*(call_564340: Call_ChannelsListWithKeys_564332; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists a Channel registration for a Bot Service including secrets
   ## 
-  let valid = call_575240.validator(path, query, header, formData, body)
-  let scheme = call_575240.pickScheme
+  let valid = call_564340.validator(path, query, header, formData, body)
+  let scheme = call_564340.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575240.url(scheme.get, call_575240.host, call_575240.base,
-                         call_575240.route, valid.getOrDefault("path"),
+  let url = call_564340.url(scheme.get, call_564340.host, call_564340.base,
+                         call_564340.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575240, url, valid)
+  result = hook(call_564340, url, valid)
 
-proc call*(call_575241: Call_ChannelsListWithKeys_575232;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          resourceName: string; channelName: string = "FacebookChannel"): Recallable =
+proc call*(call_564341: Call_ChannelsListWithKeys_564332; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string; resourceName: string;
+          channelName: string = "FacebookChannel"): Recallable =
   ## channelsListWithKeys
   ## Lists a Channel registration for a Bot Service including secrets
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the Bot resource group in the user subscription.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
   ##   subscriptionId: string (required)
   ##                 : Azure Subscription ID.
   ##   channelName: string (required)
   ##              : The name of the Channel resource.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the Bot resource group in the user subscription.
   ##   resourceName: string (required)
   ##               : The name of the Bot resource.
-  var path_575242 = newJObject()
-  var query_575243 = newJObject()
-  add(path_575242, "resourceGroupName", newJString(resourceGroupName))
-  add(query_575243, "api-version", newJString(apiVersion))
-  add(path_575242, "subscriptionId", newJString(subscriptionId))
-  add(path_575242, "channelName", newJString(channelName))
-  add(path_575242, "resourceName", newJString(resourceName))
-  result = call_575241.call(path_575242, query_575243, nil, nil, nil)
+  var path_564342 = newJObject()
+  var query_564343 = newJObject()
+  add(query_564343, "api-version", newJString(apiVersion))
+  add(path_564342, "subscriptionId", newJString(subscriptionId))
+  add(path_564342, "channelName", newJString(channelName))
+  add(path_564342, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564342, "resourceName", newJString(resourceName))
+  result = call_564341.call(path_564342, query_564343, nil, nil, nil)
 
-var channelsListWithKeys* = Call_ChannelsListWithKeys_575232(
+var channelsListWithKeys* = Call_ChannelsListWithKeys_564332(
     name: "channelsListWithKeys", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.BotService/botServices/{resourceName}/channels/{channelName}/listChannelWithKeys",
-    validator: validate_ChannelsListWithKeys_575233, base: "",
-    url: url_ChannelsListWithKeys_575234, schemes: {Scheme.Https})
+    validator: validate_ChannelsListWithKeys_564333, base: "",
+    url: url_ChannelsListWithKeys_564334, schemes: {Scheme.Https})
 type
-  Call_BotConnectionListByBotService_575244 = ref object of OpenApiRestCall_574466
-proc url_BotConnectionListByBotService_575246(protocol: Scheme; host: string;
+  Call_BotConnectionListByBotService_564344 = ref object of OpenApiRestCall_563564
+proc url_BotConnectionListByBotService_564346(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2545,37 +2549,37 @@ proc url_BotConnectionListByBotService_575246(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_BotConnectionListByBotService_575245(path: JsonNode; query: JsonNode;
+proc validate_BotConnectionListByBotService_564345(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Returns all the Connection Settings registered to a particular BotService resource
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the Bot resource group in the user subscription.
   ##   subscriptionId: JString (required)
   ##                 : Azure Subscription ID.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the Bot resource group in the user subscription.
   ##   resourceName: JString (required)
   ##               : The name of the Bot resource.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_575247 = path.getOrDefault("resourceGroupName")
-  valid_575247 = validateParameter(valid_575247, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564347 = path.getOrDefault("subscriptionId")
+  valid_564347 = validateParameter(valid_564347, JString, required = true,
                                  default = nil)
-  if valid_575247 != nil:
-    section.add "resourceGroupName", valid_575247
-  var valid_575248 = path.getOrDefault("subscriptionId")
-  valid_575248 = validateParameter(valid_575248, JString, required = true,
+  if valid_564347 != nil:
+    section.add "subscriptionId", valid_564347
+  var valid_564348 = path.getOrDefault("resourceGroupName")
+  valid_564348 = validateParameter(valid_564348, JString, required = true,
                                  default = nil)
-  if valid_575248 != nil:
-    section.add "subscriptionId", valid_575248
-  var valid_575249 = path.getOrDefault("resourceName")
-  valid_575249 = validateParameter(valid_575249, JString, required = true,
+  if valid_564348 != nil:
+    section.add "resourceGroupName", valid_564348
+  var valid_564349 = path.getOrDefault("resourceName")
+  valid_564349 = validateParameter(valid_564349, JString, required = true,
                                  default = nil)
-  if valid_575249 != nil:
-    section.add "resourceName", valid_575249
+  if valid_564349 != nil:
+    section.add "resourceName", valid_564349
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2583,11 +2587,11 @@ proc validate_BotConnectionListByBotService_575245(path: JsonNode; query: JsonNo
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575250 = query.getOrDefault("api-version")
-  valid_575250 = validateParameter(valid_575250, JString, required = true,
+  var valid_564350 = query.getOrDefault("api-version")
+  valid_564350 = validateParameter(valid_564350, JString, required = true,
                                  default = nil)
-  if valid_575250 != nil:
-    section.add "api-version", valid_575250
+  if valid_564350 != nil:
+    section.add "api-version", valid_564350
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2596,48 +2600,48 @@ proc validate_BotConnectionListByBotService_575245(path: JsonNode; query: JsonNo
   if body != nil:
     result.add "body", body
 
-proc call*(call_575251: Call_BotConnectionListByBotService_575244; path: JsonNode;
+proc call*(call_564351: Call_BotConnectionListByBotService_564344; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Returns all the Connection Settings registered to a particular BotService resource
   ## 
-  let valid = call_575251.validator(path, query, header, formData, body)
-  let scheme = call_575251.pickScheme
+  let valid = call_564351.validator(path, query, header, formData, body)
+  let scheme = call_564351.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575251.url(scheme.get, call_575251.host, call_575251.base,
-                         call_575251.route, valid.getOrDefault("path"),
+  let url = call_564351.url(scheme.get, call_564351.host, call_564351.base,
+                         call_564351.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575251, url, valid)
+  result = hook(call_564351, url, valid)
 
-proc call*(call_575252: Call_BotConnectionListByBotService_575244;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
+proc call*(call_564352: Call_BotConnectionListByBotService_564344;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string;
           resourceName: string): Recallable =
   ## botConnectionListByBotService
   ## Returns all the Connection Settings registered to a particular BotService resource
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the Bot resource group in the user subscription.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
   ##   subscriptionId: string (required)
   ##                 : Azure Subscription ID.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the Bot resource group in the user subscription.
   ##   resourceName: string (required)
   ##               : The name of the Bot resource.
-  var path_575253 = newJObject()
-  var query_575254 = newJObject()
-  add(path_575253, "resourceGroupName", newJString(resourceGroupName))
-  add(query_575254, "api-version", newJString(apiVersion))
-  add(path_575253, "subscriptionId", newJString(subscriptionId))
-  add(path_575253, "resourceName", newJString(resourceName))
-  result = call_575252.call(path_575253, query_575254, nil, nil, nil)
+  var path_564353 = newJObject()
+  var query_564354 = newJObject()
+  add(query_564354, "api-version", newJString(apiVersion))
+  add(path_564353, "subscriptionId", newJString(subscriptionId))
+  add(path_564353, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564353, "resourceName", newJString(resourceName))
+  result = call_564352.call(path_564353, query_564354, nil, nil, nil)
 
-var botConnectionListByBotService* = Call_BotConnectionListByBotService_575244(
+var botConnectionListByBotService* = Call_BotConnectionListByBotService_564344(
     name: "botConnectionListByBotService", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.BotService/botServices/{resourceName}/connections",
-    validator: validate_BotConnectionListByBotService_575245, base: "",
-    url: url_BotConnectionListByBotService_575246, schemes: {Scheme.Https})
+    validator: validate_BotConnectionListByBotService_564345, base: "",
+    url: url_BotConnectionListByBotService_564346, schemes: {Scheme.Https})
 type
-  Call_EnterpriseChannelsListByResourceGroup_575255 = ref object of OpenApiRestCall_574466
-proc url_EnterpriseChannelsListByResourceGroup_575257(protocol: Scheme;
+  Call_EnterpriseChannelsListByResourceGroup_564355 = ref object of OpenApiRestCall_563564
+proc url_EnterpriseChannelsListByResourceGroup_564357(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2658,30 +2662,30 @@ proc url_EnterpriseChannelsListByResourceGroup_575257(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_EnterpriseChannelsListByResourceGroup_575256(path: JsonNode;
+proc validate_EnterpriseChannelsListByResourceGroup_564356(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Returns all the resources of a particular type belonging to a resource group.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the Bot resource group in the user subscription.
   ##   subscriptionId: JString (required)
   ##                 : Azure Subscription ID.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the Bot resource group in the user subscription.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_575258 = path.getOrDefault("resourceGroupName")
-  valid_575258 = validateParameter(valid_575258, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564358 = path.getOrDefault("subscriptionId")
+  valid_564358 = validateParameter(valid_564358, JString, required = true,
                                  default = nil)
-  if valid_575258 != nil:
-    section.add "resourceGroupName", valid_575258
-  var valid_575259 = path.getOrDefault("subscriptionId")
-  valid_575259 = validateParameter(valid_575259, JString, required = true,
+  if valid_564358 != nil:
+    section.add "subscriptionId", valid_564358
+  var valid_564359 = path.getOrDefault("resourceGroupName")
+  valid_564359 = validateParameter(valid_564359, JString, required = true,
                                  default = nil)
-  if valid_575259 != nil:
-    section.add "subscriptionId", valid_575259
+  if valid_564359 != nil:
+    section.add "resourceGroupName", valid_564359
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2689,11 +2693,11 @@ proc validate_EnterpriseChannelsListByResourceGroup_575256(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575260 = query.getOrDefault("api-version")
-  valid_575260 = validateParameter(valid_575260, JString, required = true,
+  var valid_564360 = query.getOrDefault("api-version")
+  valid_564360 = validateParameter(valid_564360, JString, required = true,
                                  default = nil)
-  if valid_575260 != nil:
-    section.add "api-version", valid_575260
+  if valid_564360 != nil:
+    section.add "api-version", valid_564360
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2702,45 +2706,45 @@ proc validate_EnterpriseChannelsListByResourceGroup_575256(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_575261: Call_EnterpriseChannelsListByResourceGroup_575255;
+proc call*(call_564361: Call_EnterpriseChannelsListByResourceGroup_564355;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Returns all the resources of a particular type belonging to a resource group.
   ## 
-  let valid = call_575261.validator(path, query, header, formData, body)
-  let scheme = call_575261.pickScheme
+  let valid = call_564361.validator(path, query, header, formData, body)
+  let scheme = call_564361.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575261.url(scheme.get, call_575261.host, call_575261.base,
-                         call_575261.route, valid.getOrDefault("path"),
+  let url = call_564361.url(scheme.get, call_564361.host, call_564361.base,
+                         call_564361.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575261, url, valid)
+  result = hook(call_564361, url, valid)
 
-proc call*(call_575262: Call_EnterpriseChannelsListByResourceGroup_575255;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string): Recallable =
+proc call*(call_564362: Call_EnterpriseChannelsListByResourceGroup_564355;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string): Recallable =
   ## enterpriseChannelsListByResourceGroup
   ## Returns all the resources of a particular type belonging to a resource group.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the Bot resource group in the user subscription.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
   ##   subscriptionId: string (required)
   ##                 : Azure Subscription ID.
-  var path_575263 = newJObject()
-  var query_575264 = newJObject()
-  add(path_575263, "resourceGroupName", newJString(resourceGroupName))
-  add(query_575264, "api-version", newJString(apiVersion))
-  add(path_575263, "subscriptionId", newJString(subscriptionId))
-  result = call_575262.call(path_575263, query_575264, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the Bot resource group in the user subscription.
+  var path_564363 = newJObject()
+  var query_564364 = newJObject()
+  add(query_564364, "api-version", newJString(apiVersion))
+  add(path_564363, "subscriptionId", newJString(subscriptionId))
+  add(path_564363, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564362.call(path_564363, query_564364, nil, nil, nil)
 
-var enterpriseChannelsListByResourceGroup* = Call_EnterpriseChannelsListByResourceGroup_575255(
+var enterpriseChannelsListByResourceGroup* = Call_EnterpriseChannelsListByResourceGroup_564355(
     name: "enterpriseChannelsListByResourceGroup", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.BotService/enterpriseChannels",
-    validator: validate_EnterpriseChannelsListByResourceGroup_575256, base: "",
-    url: url_EnterpriseChannelsListByResourceGroup_575257, schemes: {Scheme.Https})
+    validator: validate_EnterpriseChannelsListByResourceGroup_564356, base: "",
+    url: url_EnterpriseChannelsListByResourceGroup_564357, schemes: {Scheme.Https})
 type
-  Call_EnterpriseChannelsCreate_575276 = ref object of OpenApiRestCall_574466
-proc url_EnterpriseChannelsCreate_575278(protocol: Scheme; host: string;
+  Call_EnterpriseChannelsCreate_564376 = ref object of OpenApiRestCall_563564
+proc url_EnterpriseChannelsCreate_564378(protocol: Scheme; host: string;
                                         base: string; route: string; path: JsonNode;
                                         query: JsonNode): Uri =
   result.scheme = $protocol
@@ -2764,37 +2768,37 @@ proc url_EnterpriseChannelsCreate_575278(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_EnterpriseChannelsCreate_575277(path: JsonNode; query: JsonNode;
+proc validate_EnterpriseChannelsCreate_564377(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Creates an Enterprise Channel.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the Bot resource group in the user subscription.
   ##   subscriptionId: JString (required)
   ##                 : Azure Subscription ID.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the Bot resource group in the user subscription.
   ##   resourceName: JString (required)
   ##               : The name of the Bot resource.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_575279 = path.getOrDefault("resourceGroupName")
-  valid_575279 = validateParameter(valid_575279, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564379 = path.getOrDefault("subscriptionId")
+  valid_564379 = validateParameter(valid_564379, JString, required = true,
                                  default = nil)
-  if valid_575279 != nil:
-    section.add "resourceGroupName", valid_575279
-  var valid_575280 = path.getOrDefault("subscriptionId")
-  valid_575280 = validateParameter(valid_575280, JString, required = true,
+  if valid_564379 != nil:
+    section.add "subscriptionId", valid_564379
+  var valid_564380 = path.getOrDefault("resourceGroupName")
+  valid_564380 = validateParameter(valid_564380, JString, required = true,
                                  default = nil)
-  if valid_575280 != nil:
-    section.add "subscriptionId", valid_575280
-  var valid_575281 = path.getOrDefault("resourceName")
-  valid_575281 = validateParameter(valid_575281, JString, required = true,
+  if valid_564380 != nil:
+    section.add "resourceGroupName", valid_564380
+  var valid_564381 = path.getOrDefault("resourceName")
+  valid_564381 = validateParameter(valid_564381, JString, required = true,
                                  default = nil)
-  if valid_575281 != nil:
-    section.add "resourceName", valid_575281
+  if valid_564381 != nil:
+    section.add "resourceName", valid_564381
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2802,11 +2806,11 @@ proc validate_EnterpriseChannelsCreate_575277(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575282 = query.getOrDefault("api-version")
-  valid_575282 = validateParameter(valid_575282, JString, required = true,
+  var valid_564382 = query.getOrDefault("api-version")
+  valid_564382 = validateParameter(valid_564382, JString, required = true,
                                  default = nil)
-  if valid_575282 != nil:
-    section.add "api-version", valid_575282
+  if valid_564382 != nil:
+    section.add "api-version", valid_564382
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2820,53 +2824,53 @@ proc validate_EnterpriseChannelsCreate_575277(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_575284: Call_EnterpriseChannelsCreate_575276; path: JsonNode;
+proc call*(call_564384: Call_EnterpriseChannelsCreate_564376; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Creates an Enterprise Channel.
   ## 
-  let valid = call_575284.validator(path, query, header, formData, body)
-  let scheme = call_575284.pickScheme
+  let valid = call_564384.validator(path, query, header, formData, body)
+  let scheme = call_564384.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575284.url(scheme.get, call_575284.host, call_575284.base,
-                         call_575284.route, valid.getOrDefault("path"),
+  let url = call_564384.url(scheme.get, call_564384.host, call_564384.base,
+                         call_564384.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575284, url, valid)
+  result = hook(call_564384, url, valid)
 
-proc call*(call_575285: Call_EnterpriseChannelsCreate_575276;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          resourceName: string; parameters: JsonNode): Recallable =
+proc call*(call_564385: Call_EnterpriseChannelsCreate_564376; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string; resourceName: string;
+          parameters: JsonNode): Recallable =
   ## enterpriseChannelsCreate
   ## Creates an Enterprise Channel.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the Bot resource group in the user subscription.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
   ##   subscriptionId: string (required)
   ##                 : Azure Subscription ID.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the Bot resource group in the user subscription.
   ##   resourceName: string (required)
   ##               : The name of the Bot resource.
   ##   parameters: JObject (required)
   ##             : The parameters to provide for the new Enterprise Channel.
-  var path_575286 = newJObject()
-  var query_575287 = newJObject()
-  var body_575288 = newJObject()
-  add(path_575286, "resourceGroupName", newJString(resourceGroupName))
-  add(query_575287, "api-version", newJString(apiVersion))
-  add(path_575286, "subscriptionId", newJString(subscriptionId))
-  add(path_575286, "resourceName", newJString(resourceName))
+  var path_564386 = newJObject()
+  var query_564387 = newJObject()
+  var body_564388 = newJObject()
+  add(query_564387, "api-version", newJString(apiVersion))
+  add(path_564386, "subscriptionId", newJString(subscriptionId))
+  add(path_564386, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564386, "resourceName", newJString(resourceName))
   if parameters != nil:
-    body_575288 = parameters
-  result = call_575285.call(path_575286, query_575287, nil, nil, body_575288)
+    body_564388 = parameters
+  result = call_564385.call(path_564386, query_564387, nil, nil, body_564388)
 
-var enterpriseChannelsCreate* = Call_EnterpriseChannelsCreate_575276(
+var enterpriseChannelsCreate* = Call_EnterpriseChannelsCreate_564376(
     name: "enterpriseChannelsCreate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.BotService/enterpriseChannels/{resourceName}",
-    validator: validate_EnterpriseChannelsCreate_575277, base: "",
-    url: url_EnterpriseChannelsCreate_575278, schemes: {Scheme.Https})
+    validator: validate_EnterpriseChannelsCreate_564377, base: "",
+    url: url_EnterpriseChannelsCreate_564378, schemes: {Scheme.Https})
 type
-  Call_EnterpriseChannelsGet_575265 = ref object of OpenApiRestCall_574466
-proc url_EnterpriseChannelsGet_575267(protocol: Scheme; host: string; base: string;
+  Call_EnterpriseChannelsGet_564365 = ref object of OpenApiRestCall_563564
+proc url_EnterpriseChannelsGet_564367(protocol: Scheme; host: string; base: string;
                                      route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2889,37 +2893,37 @@ proc url_EnterpriseChannelsGet_575267(protocol: Scheme; host: string; base: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_EnterpriseChannelsGet_575266(path: JsonNode; query: JsonNode;
+proc validate_EnterpriseChannelsGet_564366(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Returns an Enterprise Channel specified by the parameters.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the Bot resource group in the user subscription.
   ##   subscriptionId: JString (required)
   ##                 : Azure Subscription ID.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the Bot resource group in the user subscription.
   ##   resourceName: JString (required)
   ##               : The name of the Bot resource.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_575268 = path.getOrDefault("resourceGroupName")
-  valid_575268 = validateParameter(valid_575268, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564368 = path.getOrDefault("subscriptionId")
+  valid_564368 = validateParameter(valid_564368, JString, required = true,
                                  default = nil)
-  if valid_575268 != nil:
-    section.add "resourceGroupName", valid_575268
-  var valid_575269 = path.getOrDefault("subscriptionId")
-  valid_575269 = validateParameter(valid_575269, JString, required = true,
+  if valid_564368 != nil:
+    section.add "subscriptionId", valid_564368
+  var valid_564369 = path.getOrDefault("resourceGroupName")
+  valid_564369 = validateParameter(valid_564369, JString, required = true,
                                  default = nil)
-  if valid_575269 != nil:
-    section.add "subscriptionId", valid_575269
-  var valid_575270 = path.getOrDefault("resourceName")
-  valid_575270 = validateParameter(valid_575270, JString, required = true,
+  if valid_564369 != nil:
+    section.add "resourceGroupName", valid_564369
+  var valid_564370 = path.getOrDefault("resourceName")
+  valid_564370 = validateParameter(valid_564370, JString, required = true,
                                  default = nil)
-  if valid_575270 != nil:
-    section.add "resourceName", valid_575270
+  if valid_564370 != nil:
+    section.add "resourceName", valid_564370
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2927,11 +2931,11 @@ proc validate_EnterpriseChannelsGet_575266(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575271 = query.getOrDefault("api-version")
-  valid_575271 = validateParameter(valid_575271, JString, required = true,
+  var valid_564371 = query.getOrDefault("api-version")
+  valid_564371 = validateParameter(valid_564371, JString, required = true,
                                  default = nil)
-  if valid_575271 != nil:
-    section.add "api-version", valid_575271
+  if valid_564371 != nil:
+    section.add "api-version", valid_564371
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2940,48 +2944,47 @@ proc validate_EnterpriseChannelsGet_575266(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_575272: Call_EnterpriseChannelsGet_575265; path: JsonNode;
+proc call*(call_564372: Call_EnterpriseChannelsGet_564365; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Returns an Enterprise Channel specified by the parameters.
   ## 
-  let valid = call_575272.validator(path, query, header, formData, body)
-  let scheme = call_575272.pickScheme
+  let valid = call_564372.validator(path, query, header, formData, body)
+  let scheme = call_564372.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575272.url(scheme.get, call_575272.host, call_575272.base,
-                         call_575272.route, valid.getOrDefault("path"),
+  let url = call_564372.url(scheme.get, call_564372.host, call_564372.base,
+                         call_564372.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575272, url, valid)
+  result = hook(call_564372, url, valid)
 
-proc call*(call_575273: Call_EnterpriseChannelsGet_575265;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          resourceName: string): Recallable =
+proc call*(call_564373: Call_EnterpriseChannelsGet_564365; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string; resourceName: string): Recallable =
   ## enterpriseChannelsGet
   ## Returns an Enterprise Channel specified by the parameters.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the Bot resource group in the user subscription.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
   ##   subscriptionId: string (required)
   ##                 : Azure Subscription ID.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the Bot resource group in the user subscription.
   ##   resourceName: string (required)
   ##               : The name of the Bot resource.
-  var path_575274 = newJObject()
-  var query_575275 = newJObject()
-  add(path_575274, "resourceGroupName", newJString(resourceGroupName))
-  add(query_575275, "api-version", newJString(apiVersion))
-  add(path_575274, "subscriptionId", newJString(subscriptionId))
-  add(path_575274, "resourceName", newJString(resourceName))
-  result = call_575273.call(path_575274, query_575275, nil, nil, nil)
+  var path_564374 = newJObject()
+  var query_564375 = newJObject()
+  add(query_564375, "api-version", newJString(apiVersion))
+  add(path_564374, "subscriptionId", newJString(subscriptionId))
+  add(path_564374, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564374, "resourceName", newJString(resourceName))
+  result = call_564373.call(path_564374, query_564375, nil, nil, nil)
 
-var enterpriseChannelsGet* = Call_EnterpriseChannelsGet_575265(
+var enterpriseChannelsGet* = Call_EnterpriseChannelsGet_564365(
     name: "enterpriseChannelsGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.BotService/enterpriseChannels/{resourceName}",
-    validator: validate_EnterpriseChannelsGet_575266, base: "",
-    url: url_EnterpriseChannelsGet_575267, schemes: {Scheme.Https})
+    validator: validate_EnterpriseChannelsGet_564366, base: "",
+    url: url_EnterpriseChannelsGet_564367, schemes: {Scheme.Https})
 type
-  Call_EnterpriseChannelsUpdate_575300 = ref object of OpenApiRestCall_574466
-proc url_EnterpriseChannelsUpdate_575302(protocol: Scheme; host: string;
+  Call_EnterpriseChannelsUpdate_564400 = ref object of OpenApiRestCall_563564
+proc url_EnterpriseChannelsUpdate_564402(protocol: Scheme; host: string;
                                         base: string; route: string; path: JsonNode;
                                         query: JsonNode): Uri =
   result.scheme = $protocol
@@ -3005,37 +3008,37 @@ proc url_EnterpriseChannelsUpdate_575302(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_EnterpriseChannelsUpdate_575301(path: JsonNode; query: JsonNode;
+proc validate_EnterpriseChannelsUpdate_564401(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Updates an Enterprise Channel.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the Bot resource group in the user subscription.
   ##   subscriptionId: JString (required)
   ##                 : Azure Subscription ID.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the Bot resource group in the user subscription.
   ##   resourceName: JString (required)
   ##               : The name of the Bot resource.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_575303 = path.getOrDefault("resourceGroupName")
-  valid_575303 = validateParameter(valid_575303, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564403 = path.getOrDefault("subscriptionId")
+  valid_564403 = validateParameter(valid_564403, JString, required = true,
                                  default = nil)
-  if valid_575303 != nil:
-    section.add "resourceGroupName", valid_575303
-  var valid_575304 = path.getOrDefault("subscriptionId")
-  valid_575304 = validateParameter(valid_575304, JString, required = true,
+  if valid_564403 != nil:
+    section.add "subscriptionId", valid_564403
+  var valid_564404 = path.getOrDefault("resourceGroupName")
+  valid_564404 = validateParameter(valid_564404, JString, required = true,
                                  default = nil)
-  if valid_575304 != nil:
-    section.add "subscriptionId", valid_575304
-  var valid_575305 = path.getOrDefault("resourceName")
-  valid_575305 = validateParameter(valid_575305, JString, required = true,
+  if valid_564404 != nil:
+    section.add "resourceGroupName", valid_564404
+  var valid_564405 = path.getOrDefault("resourceName")
+  valid_564405 = validateParameter(valid_564405, JString, required = true,
                                  default = nil)
-  if valid_575305 != nil:
-    section.add "resourceName", valid_575305
+  if valid_564405 != nil:
+    section.add "resourceName", valid_564405
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -3043,11 +3046,11 @@ proc validate_EnterpriseChannelsUpdate_575301(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575306 = query.getOrDefault("api-version")
-  valid_575306 = validateParameter(valid_575306, JString, required = true,
+  var valid_564406 = query.getOrDefault("api-version")
+  valid_564406 = validateParameter(valid_564406, JString, required = true,
                                  default = nil)
-  if valid_575306 != nil:
-    section.add "api-version", valid_575306
+  if valid_564406 != nil:
+    section.add "api-version", valid_564406
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3061,53 +3064,53 @@ proc validate_EnterpriseChannelsUpdate_575301(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_575308: Call_EnterpriseChannelsUpdate_575300; path: JsonNode;
+proc call*(call_564408: Call_EnterpriseChannelsUpdate_564400; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Updates an Enterprise Channel.
   ## 
-  let valid = call_575308.validator(path, query, header, formData, body)
-  let scheme = call_575308.pickScheme
+  let valid = call_564408.validator(path, query, header, formData, body)
+  let scheme = call_564408.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575308.url(scheme.get, call_575308.host, call_575308.base,
-                         call_575308.route, valid.getOrDefault("path"),
+  let url = call_564408.url(scheme.get, call_564408.host, call_564408.base,
+                         call_564408.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575308, url, valid)
+  result = hook(call_564408, url, valid)
 
-proc call*(call_575309: Call_EnterpriseChannelsUpdate_575300;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          resourceName: string; parameters: JsonNode): Recallable =
+proc call*(call_564409: Call_EnterpriseChannelsUpdate_564400; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string; resourceName: string;
+          parameters: JsonNode): Recallable =
   ## enterpriseChannelsUpdate
   ## Updates an Enterprise Channel.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the Bot resource group in the user subscription.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
   ##   subscriptionId: string (required)
   ##                 : Azure Subscription ID.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the Bot resource group in the user subscription.
   ##   resourceName: string (required)
   ##               : The name of the Bot resource.
   ##   parameters: JObject (required)
   ##             : The parameters to provide to update the Enterprise Channel.
-  var path_575310 = newJObject()
-  var query_575311 = newJObject()
-  var body_575312 = newJObject()
-  add(path_575310, "resourceGroupName", newJString(resourceGroupName))
-  add(query_575311, "api-version", newJString(apiVersion))
-  add(path_575310, "subscriptionId", newJString(subscriptionId))
-  add(path_575310, "resourceName", newJString(resourceName))
+  var path_564410 = newJObject()
+  var query_564411 = newJObject()
+  var body_564412 = newJObject()
+  add(query_564411, "api-version", newJString(apiVersion))
+  add(path_564410, "subscriptionId", newJString(subscriptionId))
+  add(path_564410, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564410, "resourceName", newJString(resourceName))
   if parameters != nil:
-    body_575312 = parameters
-  result = call_575309.call(path_575310, query_575311, nil, nil, body_575312)
+    body_564412 = parameters
+  result = call_564409.call(path_564410, query_564411, nil, nil, body_564412)
 
-var enterpriseChannelsUpdate* = Call_EnterpriseChannelsUpdate_575300(
+var enterpriseChannelsUpdate* = Call_EnterpriseChannelsUpdate_564400(
     name: "enterpriseChannelsUpdate", meth: HttpMethod.HttpPatch,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.BotService/enterpriseChannels/{resourceName}",
-    validator: validate_EnterpriseChannelsUpdate_575301, base: "",
-    url: url_EnterpriseChannelsUpdate_575302, schemes: {Scheme.Https})
+    validator: validate_EnterpriseChannelsUpdate_564401, base: "",
+    url: url_EnterpriseChannelsUpdate_564402, schemes: {Scheme.Https})
 type
-  Call_EnterpriseChannelsDelete_575289 = ref object of OpenApiRestCall_574466
-proc url_EnterpriseChannelsDelete_575291(protocol: Scheme; host: string;
+  Call_EnterpriseChannelsDelete_564389 = ref object of OpenApiRestCall_563564
+proc url_EnterpriseChannelsDelete_564391(protocol: Scheme; host: string;
                                         base: string; route: string; path: JsonNode;
                                         query: JsonNode): Uri =
   result.scheme = $protocol
@@ -3131,37 +3134,37 @@ proc url_EnterpriseChannelsDelete_575291(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_EnterpriseChannelsDelete_575290(path: JsonNode; query: JsonNode;
+proc validate_EnterpriseChannelsDelete_564390(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Deletes an Enterprise Channel from the resource group
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the Bot resource group in the user subscription.
   ##   subscriptionId: JString (required)
   ##                 : Azure Subscription ID.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the Bot resource group in the user subscription.
   ##   resourceName: JString (required)
   ##               : The name of the Bot resource.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_575292 = path.getOrDefault("resourceGroupName")
-  valid_575292 = validateParameter(valid_575292, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564392 = path.getOrDefault("subscriptionId")
+  valid_564392 = validateParameter(valid_564392, JString, required = true,
                                  default = nil)
-  if valid_575292 != nil:
-    section.add "resourceGroupName", valid_575292
-  var valid_575293 = path.getOrDefault("subscriptionId")
-  valid_575293 = validateParameter(valid_575293, JString, required = true,
+  if valid_564392 != nil:
+    section.add "subscriptionId", valid_564392
+  var valid_564393 = path.getOrDefault("resourceGroupName")
+  valid_564393 = validateParameter(valid_564393, JString, required = true,
                                  default = nil)
-  if valid_575293 != nil:
-    section.add "subscriptionId", valid_575293
-  var valid_575294 = path.getOrDefault("resourceName")
-  valid_575294 = validateParameter(valid_575294, JString, required = true,
+  if valid_564393 != nil:
+    section.add "resourceGroupName", valid_564393
+  var valid_564394 = path.getOrDefault("resourceName")
+  valid_564394 = validateParameter(valid_564394, JString, required = true,
                                  default = nil)
-  if valid_575294 != nil:
-    section.add "resourceName", valid_575294
+  if valid_564394 != nil:
+    section.add "resourceName", valid_564394
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -3169,11 +3172,11 @@ proc validate_EnterpriseChannelsDelete_575290(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575295 = query.getOrDefault("api-version")
-  valid_575295 = validateParameter(valid_575295, JString, required = true,
+  var valid_564395 = query.getOrDefault("api-version")
+  valid_564395 = validateParameter(valid_564395, JString, required = true,
                                  default = nil)
-  if valid_575295 != nil:
-    section.add "api-version", valid_575295
+  if valid_564395 != nil:
+    section.add "api-version", valid_564395
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3182,45 +3185,44 @@ proc validate_EnterpriseChannelsDelete_575290(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_575296: Call_EnterpriseChannelsDelete_575289; path: JsonNode;
+proc call*(call_564396: Call_EnterpriseChannelsDelete_564389; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes an Enterprise Channel from the resource group
   ## 
-  let valid = call_575296.validator(path, query, header, formData, body)
-  let scheme = call_575296.pickScheme
+  let valid = call_564396.validator(path, query, header, formData, body)
+  let scheme = call_564396.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575296.url(scheme.get, call_575296.host, call_575296.base,
-                         call_575296.route, valid.getOrDefault("path"),
+  let url = call_564396.url(scheme.get, call_564396.host, call_564396.base,
+                         call_564396.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575296, url, valid)
+  result = hook(call_564396, url, valid)
 
-proc call*(call_575297: Call_EnterpriseChannelsDelete_575289;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          resourceName: string): Recallable =
+proc call*(call_564397: Call_EnterpriseChannelsDelete_564389; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string; resourceName: string): Recallable =
   ## enterpriseChannelsDelete
   ## Deletes an Enterprise Channel from the resource group
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the Bot resource group in the user subscription.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
   ##   subscriptionId: string (required)
   ##                 : Azure Subscription ID.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the Bot resource group in the user subscription.
   ##   resourceName: string (required)
   ##               : The name of the Bot resource.
-  var path_575298 = newJObject()
-  var query_575299 = newJObject()
-  add(path_575298, "resourceGroupName", newJString(resourceGroupName))
-  add(query_575299, "api-version", newJString(apiVersion))
-  add(path_575298, "subscriptionId", newJString(subscriptionId))
-  add(path_575298, "resourceName", newJString(resourceName))
-  result = call_575297.call(path_575298, query_575299, nil, nil, nil)
+  var path_564398 = newJObject()
+  var query_564399 = newJObject()
+  add(query_564399, "api-version", newJString(apiVersion))
+  add(path_564398, "subscriptionId", newJString(subscriptionId))
+  add(path_564398, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564398, "resourceName", newJString(resourceName))
+  result = call_564397.call(path_564398, query_564399, nil, nil, nil)
 
-var enterpriseChannelsDelete* = Call_EnterpriseChannelsDelete_575289(
+var enterpriseChannelsDelete* = Call_EnterpriseChannelsDelete_564389(
     name: "enterpriseChannelsDelete", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.BotService/enterpriseChannels/{resourceName}",
-    validator: validate_EnterpriseChannelsDelete_575290, base: "",
-    url: url_EnterpriseChannelsDelete_575291, schemes: {Scheme.Https})
+    validator: validate_EnterpriseChannelsDelete_564390, base: "",
+    url: url_EnterpriseChannelsDelete_564391, schemes: {Scheme.Https})
 export
   rest
 

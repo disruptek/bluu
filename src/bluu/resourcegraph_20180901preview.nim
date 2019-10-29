@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, httpcore
 
 ## auto-generated via openapi macro
 ## title: Azure Resource Graph
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_567657 = ref object of OpenApiRestCall
+  OpenApiRestCall_563555 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_567657](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563555](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_567657): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563555): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,15 +107,15 @@ const
   macServiceName = "resourcegraph"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_OperationsList_567879 = ref object of OpenApiRestCall_567657
-proc url_OperationsList_567881(protocol: Scheme; host: string; base: string;
+  Call_OperationsList_563777 = ref object of OpenApiRestCall_563555
+proc url_OperationsList_563779(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_OperationsList_567880(path: JsonNode; query: JsonNode;
+proc validate_OperationsList_563778(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## Lists all of the available REST API operations.
@@ -126,11 +130,11 @@ proc validate_OperationsList_567880(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568040 = query.getOrDefault("api-version")
-  valid_568040 = validateParameter(valid_568040, JString, required = true,
+  var valid_563940 = query.getOrDefault("api-version")
+  valid_563940 = validateParameter(valid_563940, JString, required = true,
                                  default = nil)
-  if valid_568040 != nil:
-    section.add "api-version", valid_568040
+  if valid_563940 != nil:
+    section.add "api-version", valid_563940
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -139,43 +143,43 @@ proc validate_OperationsList_567880(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568063: Call_OperationsList_567879; path: JsonNode; query: JsonNode;
+proc call*(call_563963: Call_OperationsList_563777; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists all of the available REST API operations.
   ## 
-  let valid = call_568063.validator(path, query, header, formData, body)
-  let scheme = call_568063.pickScheme
+  let valid = call_563963.validator(path, query, header, formData, body)
+  let scheme = call_563963.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568063.url(scheme.get, call_568063.host, call_568063.base,
-                         call_568063.route, valid.getOrDefault("path"),
+  let url = call_563963.url(scheme.get, call_563963.host, call_563963.base,
+                         call_563963.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568063, url, valid)
+  result = hook(call_563963, url, valid)
 
-proc call*(call_568134: Call_OperationsList_567879; apiVersion: string): Recallable =
+proc call*(call_564034: Call_OperationsList_563777; apiVersion: string): Recallable =
   ## operationsList
   ## Lists all of the available REST API operations.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
-  var query_568135 = newJObject()
-  add(query_568135, "api-version", newJString(apiVersion))
-  result = call_568134.call(nil, query_568135, nil, nil, nil)
+  var query_564035 = newJObject()
+  add(query_564035, "api-version", newJString(apiVersion))
+  result = call_564034.call(nil, query_564035, nil, nil, nil)
 
-var operationsList* = Call_OperationsList_567879(name: "operationsList",
+var operationsList* = Call_OperationsList_563777(name: "operationsList",
     meth: HttpMethod.HttpGet, host: "management.azure.com",
     route: "/providers/Microsoft.ResourceGraph/operations",
-    validator: validate_OperationsList_567880, base: "", url: url_OperationsList_567881,
+    validator: validate_OperationsList_563778, base: "", url: url_OperationsList_563779,
     schemes: {Scheme.Https})
 type
-  Call_ResourceChangeDetails_568175 = ref object of OpenApiRestCall_567657
-proc url_ResourceChangeDetails_568177(protocol: Scheme; host: string; base: string;
+  Call_ResourceChangeDetails_564075 = ref object of OpenApiRestCall_563555
+proc url_ResourceChangeDetails_564077(protocol: Scheme; host: string; base: string;
                                      route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_ResourceChangeDetails_568176(path: JsonNode; query: JsonNode;
+proc validate_ResourceChangeDetails_564076(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Get resource change details.
   ## 
@@ -189,11 +193,11 @@ proc validate_ResourceChangeDetails_568176(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568178 = query.getOrDefault("api-version")
-  valid_568178 = validateParameter(valid_568178, JString, required = true,
+  var valid_564078 = query.getOrDefault("api-version")
+  valid_564078 = validateParameter(valid_564078, JString, required = true,
                                  default = nil)
-  if valid_568178 != nil:
-    section.add "api-version", valid_568178
+  if valid_564078 != nil:
+    section.add "api-version", valid_564078
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -207,20 +211,20 @@ proc validate_ResourceChangeDetails_568176(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568180: Call_ResourceChangeDetails_568175; path: JsonNode;
+proc call*(call_564080: Call_ResourceChangeDetails_564075; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get resource change details.
   ## 
-  let valid = call_568180.validator(path, query, header, formData, body)
-  let scheme = call_568180.pickScheme
+  let valid = call_564080.validator(path, query, header, formData, body)
+  let scheme = call_564080.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568180.url(scheme.get, call_568180.host, call_568180.base,
-                         call_568180.route, valid.getOrDefault("path"),
+  let url = call_564080.url(scheme.get, call_564080.host, call_564080.base,
+                         call_564080.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568180, url, valid)
+  result = hook(call_564080, url, valid)
 
-proc call*(call_568181: Call_ResourceChangeDetails_568175; apiVersion: string;
+proc call*(call_564081: Call_ResourceChangeDetails_564075; apiVersion: string;
           parameters: JsonNode): Recallable =
   ## resourceChangeDetails
   ## Get resource change details.
@@ -228,29 +232,29 @@ proc call*(call_568181: Call_ResourceChangeDetails_568175; apiVersion: string;
   ##             : Client Api Version.
   ##   parameters: JObject (required)
   ##             : The parameters for this request for resource change details.
-  var query_568182 = newJObject()
-  var body_568183 = newJObject()
-  add(query_568182, "api-version", newJString(apiVersion))
+  var query_564082 = newJObject()
+  var body_564083 = newJObject()
+  add(query_564082, "api-version", newJString(apiVersion))
   if parameters != nil:
-    body_568183 = parameters
-  result = call_568181.call(nil, query_568182, nil, nil, body_568183)
+    body_564083 = parameters
+  result = call_564081.call(nil, query_564082, nil, nil, body_564083)
 
-var resourceChangeDetails* = Call_ResourceChangeDetails_568175(
+var resourceChangeDetails* = Call_ResourceChangeDetails_564075(
     name: "resourceChangeDetails", meth: HttpMethod.HttpPost,
     host: "management.azure.com",
     route: "/providers/Microsoft.ResourceGraph/resourceChangeDetails",
-    validator: validate_ResourceChangeDetails_568176, base: "",
-    url: url_ResourceChangeDetails_568177, schemes: {Scheme.Https})
+    validator: validate_ResourceChangeDetails_564076, base: "",
+    url: url_ResourceChangeDetails_564077, schemes: {Scheme.Https})
 type
-  Call_ResourceChanges_568184 = ref object of OpenApiRestCall_567657
-proc url_ResourceChanges_568186(protocol: Scheme; host: string; base: string;
+  Call_ResourceChanges_564084 = ref object of OpenApiRestCall_563555
+proc url_ResourceChanges_564086(protocol: Scheme; host: string; base: string;
                                route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_ResourceChanges_568185(path: JsonNode; query: JsonNode;
+proc validate_ResourceChanges_564085(path: JsonNode; query: JsonNode;
                                     header: JsonNode; formData: JsonNode;
                                     body: JsonNode): JsonNode =
   ## List changes to a resource for a given time interval.
@@ -265,11 +269,11 @@ proc validate_ResourceChanges_568185(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568187 = query.getOrDefault("api-version")
-  valid_568187 = validateParameter(valid_568187, JString, required = true,
+  var valid_564087 = query.getOrDefault("api-version")
+  valid_564087 = validateParameter(valid_564087, JString, required = true,
                                  default = nil)
-  if valid_568187 != nil:
-    section.add "api-version", valid_568187
+  if valid_564087 != nil:
+    section.add "api-version", valid_564087
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -283,20 +287,20 @@ proc validate_ResourceChanges_568185(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568189: Call_ResourceChanges_568184; path: JsonNode; query: JsonNode;
+proc call*(call_564089: Call_ResourceChanges_564084; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## List changes to a resource for a given time interval.
   ## 
-  let valid = call_568189.validator(path, query, header, formData, body)
-  let scheme = call_568189.pickScheme
+  let valid = call_564089.validator(path, query, header, formData, body)
+  let scheme = call_564089.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568189.url(scheme.get, call_568189.host, call_568189.base,
-                         call_568189.route, valid.getOrDefault("path"),
+  let url = call_564089.url(scheme.get, call_564089.host, call_564089.base,
+                         call_564089.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568189, url, valid)
+  result = hook(call_564089, url, valid)
 
-proc call*(call_568190: Call_ResourceChanges_568184; apiVersion: string;
+proc call*(call_564090: Call_ResourceChanges_564084; apiVersion: string;
           parameters: JsonNode): Recallable =
   ## resourceChanges
   ## List changes to a resource for a given time interval.
@@ -304,28 +308,28 @@ proc call*(call_568190: Call_ResourceChanges_568184; apiVersion: string;
   ##             : Client Api Version.
   ##   parameters: JObject (required)
   ##             : the parameters for this request for changes.
-  var query_568191 = newJObject()
-  var body_568192 = newJObject()
-  add(query_568191, "api-version", newJString(apiVersion))
+  var query_564091 = newJObject()
+  var body_564092 = newJObject()
+  add(query_564091, "api-version", newJString(apiVersion))
   if parameters != nil:
-    body_568192 = parameters
-  result = call_568190.call(nil, query_568191, nil, nil, body_568192)
+    body_564092 = parameters
+  result = call_564090.call(nil, query_564091, nil, nil, body_564092)
 
-var resourceChanges* = Call_ResourceChanges_568184(name: "resourceChanges",
+var resourceChanges* = Call_ResourceChanges_564084(name: "resourceChanges",
     meth: HttpMethod.HttpPost, host: "management.azure.com",
     route: "/providers/Microsoft.ResourceGraph/resourceChanges",
-    validator: validate_ResourceChanges_568185, base: "", url: url_ResourceChanges_568186,
+    validator: validate_ResourceChanges_564085, base: "", url: url_ResourceChanges_564086,
     schemes: {Scheme.Https})
 type
-  Call_Resources_568193 = ref object of OpenApiRestCall_567657
-proc url_Resources_568195(protocol: Scheme; host: string; base: string; route: string;
+  Call_Resources_564093 = ref object of OpenApiRestCall_563555
+proc url_Resources_564095(protocol: Scheme; host: string; base: string; route: string;
                          path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_Resources_568194(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_Resources_564094(path: JsonNode; query: JsonNode; header: JsonNode;
                               formData: JsonNode; body: JsonNode): JsonNode =
   ## Queries the resources managed by Azure Resource Manager for all subscriptions specified in the request.
   ## 
@@ -341,11 +345,11 @@ proc validate_Resources_568194(path: JsonNode; query: JsonNode; header: JsonNode
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568196 = query.getOrDefault("api-version")
-  valid_568196 = validateParameter(valid_568196, JString, required = true,
+  var valid_564096 = query.getOrDefault("api-version")
+  valid_564096 = validateParameter(valid_564096, JString, required = true,
                                  default = nil)
-  if valid_568196 != nil:
-    section.add "api-version", valid_568196
+  if valid_564096 != nil:
+    section.add "api-version", valid_564096
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -359,22 +363,22 @@ proc validate_Resources_568194(path: JsonNode; query: JsonNode; header: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_568198: Call_Resources_568193; path: JsonNode; query: JsonNode;
+proc call*(call_564098: Call_Resources_564093; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Queries the resources managed by Azure Resource Manager for all subscriptions specified in the request.
   ## 
   ## Learn more about the query syntax here
   ## https://aka.ms/resource-graph/learntoquery
-  let valid = call_568198.validator(path, query, header, formData, body)
-  let scheme = call_568198.pickScheme
+  let valid = call_564098.validator(path, query, header, formData, body)
+  let scheme = call_564098.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568198.url(scheme.get, call_568198.host, call_568198.base,
-                         call_568198.route, valid.getOrDefault("path"),
+  let url = call_564098.url(scheme.get, call_564098.host, call_564098.base,
+                         call_564098.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568198, url, valid)
+  result = hook(call_564098, url, valid)
 
-proc call*(call_568199: Call_Resources_568193; apiVersion: string; query: JsonNode): Recallable =
+proc call*(call_564099: Call_Resources_564093; apiVersion: string; query: JsonNode): Recallable =
   ## resources
   ## Queries the resources managed by Azure Resource Manager for all subscriptions specified in the request.
   ## Learn more about the query syntax here
@@ -383,17 +387,17 @@ proc call*(call_568199: Call_Resources_568193; apiVersion: string; query: JsonNo
   ##             : Client Api Version.
   ##   query: JObject (required)
   ##        : Request specifying query and its options.
-  var query_568200 = newJObject()
-  var body_568201 = newJObject()
-  add(query_568200, "api-version", newJString(apiVersion))
+  var query_564100 = newJObject()
+  var body_564101 = newJObject()
+  add(query_564100, "api-version", newJString(apiVersion))
   if query != nil:
-    body_568201 = query
-  result = call_568199.call(nil, query_568200, nil, nil, body_568201)
+    body_564101 = query
+  result = call_564099.call(nil, query_564100, nil, nil, body_564101)
 
-var resources* = Call_Resources_568193(name: "resources", meth: HttpMethod.HttpPost,
+var resources* = Call_Resources_564093(name: "resources", meth: HttpMethod.HttpPost,
                                     host: "management.azure.com", route: "/providers/Microsoft.ResourceGraph/resources",
-                                    validator: validate_Resources_568194,
-                                    base: "", url: url_Resources_568195,
+                                    validator: validate_Resources_564094,
+                                    base: "", url: url_Resources_564095,
                                     schemes: {Scheme.Https})
 export
   rest

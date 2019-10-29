@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, httpcore
 
 ## auto-generated via openapi macro
 ## title: azureactivedirectory
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_567657 = ref object of OpenApiRestCall
+  OpenApiRestCall_563555 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_567657](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563555](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_567657): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563555): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,15 +107,15 @@ const
   macServiceName = "azureactivedirectory"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_DiagnosticSettingsList_567879 = ref object of OpenApiRestCall_567657
-proc url_DiagnosticSettingsList_567881(protocol: Scheme; host: string; base: string;
+  Call_DiagnosticSettingsList_563777 = ref object of OpenApiRestCall_563555
+proc url_DiagnosticSettingsList_563779(protocol: Scheme; host: string; base: string;
                                       route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_DiagnosticSettingsList_567880(path: JsonNode; query: JsonNode;
+proc validate_DiagnosticSettingsList_563778(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the active diagnostic settings list for AadIam.
   ## 
@@ -125,11 +129,11 @@ proc validate_DiagnosticSettingsList_567880(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568040 = query.getOrDefault("api-version")
-  valid_568040 = validateParameter(valid_568040, JString, required = true,
+  var valid_563940 = query.getOrDefault("api-version")
+  valid_563940 = validateParameter(valid_563940, JString, required = true,
                                  default = nil)
-  if valid_568040 != nil:
-    section.add "api-version", valid_568040
+  if valid_563940 != nil:
+    section.add "api-version", valid_563940
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -138,37 +142,37 @@ proc validate_DiagnosticSettingsList_567880(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568063: Call_DiagnosticSettingsList_567879; path: JsonNode;
+proc call*(call_563963: Call_DiagnosticSettingsList_563777; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the active diagnostic settings list for AadIam.
   ## 
-  let valid = call_568063.validator(path, query, header, formData, body)
-  let scheme = call_568063.pickScheme
+  let valid = call_563963.validator(path, query, header, formData, body)
+  let scheme = call_563963.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568063.url(scheme.get, call_568063.host, call_568063.base,
-                         call_568063.route, valid.getOrDefault("path"),
+  let url = call_563963.url(scheme.get, call_563963.host, call_563963.base,
+                         call_563963.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568063, url, valid)
+  result = hook(call_563963, url, valid)
 
-proc call*(call_568134: Call_DiagnosticSettingsList_567879; apiVersion: string): Recallable =
+proc call*(call_564034: Call_DiagnosticSettingsList_563777; apiVersion: string): Recallable =
   ## diagnosticSettingsList
   ## Gets the active diagnostic settings list for AadIam.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
-  var query_568135 = newJObject()
-  add(query_568135, "api-version", newJString(apiVersion))
-  result = call_568134.call(nil, query_568135, nil, nil, nil)
+  var query_564035 = newJObject()
+  add(query_564035, "api-version", newJString(apiVersion))
+  result = call_564034.call(nil, query_564035, nil, nil, nil)
 
-var diagnosticSettingsList* = Call_DiagnosticSettingsList_567879(
+var diagnosticSettingsList* = Call_DiagnosticSettingsList_563777(
     name: "diagnosticSettingsList", meth: HttpMethod.HttpGet,
     host: "management.azure.com",
     route: "/providers/microsoft.aadiam/diagnosticSettings",
-    validator: validate_DiagnosticSettingsList_567880, base: "",
-    url: url_DiagnosticSettingsList_567881, schemes: {Scheme.Https})
+    validator: validate_DiagnosticSettingsList_563778, base: "",
+    url: url_DiagnosticSettingsList_563779, schemes: {Scheme.Https})
 type
-  Call_DiagnosticSettingsCreateOrUpdate_568198 = ref object of OpenApiRestCall_567657
-proc url_DiagnosticSettingsCreateOrUpdate_568200(protocol: Scheme; host: string;
+  Call_DiagnosticSettingsCreateOrUpdate_564098 = ref object of OpenApiRestCall_563555
+proc url_DiagnosticSettingsCreateOrUpdate_564100(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -184,7 +188,7 @@ proc url_DiagnosticSettingsCreateOrUpdate_568200(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DiagnosticSettingsCreateOrUpdate_568199(path: JsonNode;
+proc validate_DiagnosticSettingsCreateOrUpdate_564099(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Creates or updates diagnostic settings for AadIam.
   ## 
@@ -195,11 +199,11 @@ proc validate_DiagnosticSettingsCreateOrUpdate_568199(path: JsonNode;
   ##       : The name of the diagnostic setting.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `name` field"
-  var valid_568201 = path.getOrDefault("name")
-  valid_568201 = validateParameter(valid_568201, JString, required = true,
+  var valid_564101 = path.getOrDefault("name")
+  valid_564101 = validateParameter(valid_564101, JString, required = true,
                                  default = nil)
-  if valid_568201 != nil:
-    section.add "name", valid_568201
+  if valid_564101 != nil:
+    section.add "name", valid_564101
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -207,11 +211,11 @@ proc validate_DiagnosticSettingsCreateOrUpdate_568199(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568202 = query.getOrDefault("api-version")
-  valid_568202 = validateParameter(valid_568202, JString, required = true,
+  var valid_564102 = query.getOrDefault("api-version")
+  valid_564102 = validateParameter(valid_564102, JString, required = true,
                                  default = nil)
-  if valid_568202 != nil:
-    section.add "api-version", valid_568202
+  if valid_564102 != nil:
+    section.add "api-version", valid_564102
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -225,21 +229,21 @@ proc validate_DiagnosticSettingsCreateOrUpdate_568199(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568204: Call_DiagnosticSettingsCreateOrUpdate_568198;
+proc call*(call_564104: Call_DiagnosticSettingsCreateOrUpdate_564098;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Creates or updates diagnostic settings for AadIam.
   ## 
-  let valid = call_568204.validator(path, query, header, formData, body)
-  let scheme = call_568204.pickScheme
+  let valid = call_564104.validator(path, query, header, formData, body)
+  let scheme = call_564104.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568204.url(scheme.get, call_568204.host, call_568204.base,
-                         call_568204.route, valid.getOrDefault("path"),
+  let url = call_564104.url(scheme.get, call_564104.host, call_564104.base,
+                         call_564104.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568204, url, valid)
+  result = hook(call_564104, url, valid)
 
-proc call*(call_568205: Call_DiagnosticSettingsCreateOrUpdate_568198;
+proc call*(call_564105: Call_DiagnosticSettingsCreateOrUpdate_564098;
           apiVersion: string; name: string; parameters: JsonNode): Recallable =
   ## diagnosticSettingsCreateOrUpdate
   ## Creates or updates diagnostic settings for AadIam.
@@ -249,24 +253,24 @@ proc call*(call_568205: Call_DiagnosticSettingsCreateOrUpdate_568198;
   ##       : The name of the diagnostic setting.
   ##   parameters: JObject (required)
   ##             : Parameters supplied to the operation.
-  var path_568206 = newJObject()
-  var query_568207 = newJObject()
-  var body_568208 = newJObject()
-  add(query_568207, "api-version", newJString(apiVersion))
-  add(path_568206, "name", newJString(name))
+  var path_564106 = newJObject()
+  var query_564107 = newJObject()
+  var body_564108 = newJObject()
+  add(query_564107, "api-version", newJString(apiVersion))
+  add(path_564106, "name", newJString(name))
   if parameters != nil:
-    body_568208 = parameters
-  result = call_568205.call(path_568206, query_568207, nil, nil, body_568208)
+    body_564108 = parameters
+  result = call_564105.call(path_564106, query_564107, nil, nil, body_564108)
 
-var diagnosticSettingsCreateOrUpdate* = Call_DiagnosticSettingsCreateOrUpdate_568198(
+var diagnosticSettingsCreateOrUpdate* = Call_DiagnosticSettingsCreateOrUpdate_564098(
     name: "diagnosticSettingsCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com",
     route: "/providers/microsoft.aadiam/diagnosticSettings/{name}",
-    validator: validate_DiagnosticSettingsCreateOrUpdate_568199, base: "",
-    url: url_DiagnosticSettingsCreateOrUpdate_568200, schemes: {Scheme.Https})
+    validator: validate_DiagnosticSettingsCreateOrUpdate_564099, base: "",
+    url: url_DiagnosticSettingsCreateOrUpdate_564100, schemes: {Scheme.Https})
 type
-  Call_DiagnosticSettingsGet_568175 = ref object of OpenApiRestCall_567657
-proc url_DiagnosticSettingsGet_568177(protocol: Scheme; host: string; base: string;
+  Call_DiagnosticSettingsGet_564075 = ref object of OpenApiRestCall_563555
+proc url_DiagnosticSettingsGet_564077(protocol: Scheme; host: string; base: string;
                                      route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -282,7 +286,7 @@ proc url_DiagnosticSettingsGet_568177(protocol: Scheme; host: string; base: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DiagnosticSettingsGet_568176(path: JsonNode; query: JsonNode;
+proc validate_DiagnosticSettingsGet_564076(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the active diagnostic setting for AadIam.
   ## 
@@ -293,11 +297,11 @@ proc validate_DiagnosticSettingsGet_568176(path: JsonNode; query: JsonNode;
   ##       : The name of the diagnostic setting.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `name` field"
-  var valid_568192 = path.getOrDefault("name")
-  valid_568192 = validateParameter(valid_568192, JString, required = true,
+  var valid_564092 = path.getOrDefault("name")
+  valid_564092 = validateParameter(valid_564092, JString, required = true,
                                  default = nil)
-  if valid_568192 != nil:
-    section.add "name", valid_568192
+  if valid_564092 != nil:
+    section.add "name", valid_564092
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -305,11 +309,11 @@ proc validate_DiagnosticSettingsGet_568176(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568193 = query.getOrDefault("api-version")
-  valid_568193 = validateParameter(valid_568193, JString, required = true,
+  var valid_564093 = query.getOrDefault("api-version")
+  valid_564093 = validateParameter(valid_564093, JString, required = true,
                                  default = nil)
-  if valid_568193 != nil:
-    section.add "api-version", valid_568193
+  if valid_564093 != nil:
+    section.add "api-version", valid_564093
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -318,20 +322,20 @@ proc validate_DiagnosticSettingsGet_568176(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568194: Call_DiagnosticSettingsGet_568175; path: JsonNode;
+proc call*(call_564094: Call_DiagnosticSettingsGet_564075; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the active diagnostic setting for AadIam.
   ## 
-  let valid = call_568194.validator(path, query, header, formData, body)
-  let scheme = call_568194.pickScheme
+  let valid = call_564094.validator(path, query, header, formData, body)
+  let scheme = call_564094.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568194.url(scheme.get, call_568194.host, call_568194.base,
-                         call_568194.route, valid.getOrDefault("path"),
+  let url = call_564094.url(scheme.get, call_564094.host, call_564094.base,
+                         call_564094.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568194, url, valid)
+  result = hook(call_564094, url, valid)
 
-proc call*(call_568195: Call_DiagnosticSettingsGet_568175; apiVersion: string;
+proc call*(call_564095: Call_DiagnosticSettingsGet_564075; apiVersion: string;
           name: string): Recallable =
   ## diagnosticSettingsGet
   ## Gets the active diagnostic setting for AadIam.
@@ -339,21 +343,21 @@ proc call*(call_568195: Call_DiagnosticSettingsGet_568175; apiVersion: string;
   ##             : Client Api Version.
   ##   name: string (required)
   ##       : The name of the diagnostic setting.
-  var path_568196 = newJObject()
-  var query_568197 = newJObject()
-  add(query_568197, "api-version", newJString(apiVersion))
-  add(path_568196, "name", newJString(name))
-  result = call_568195.call(path_568196, query_568197, nil, nil, nil)
+  var path_564096 = newJObject()
+  var query_564097 = newJObject()
+  add(query_564097, "api-version", newJString(apiVersion))
+  add(path_564096, "name", newJString(name))
+  result = call_564095.call(path_564096, query_564097, nil, nil, nil)
 
-var diagnosticSettingsGet* = Call_DiagnosticSettingsGet_568175(
+var diagnosticSettingsGet* = Call_DiagnosticSettingsGet_564075(
     name: "diagnosticSettingsGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com",
     route: "/providers/microsoft.aadiam/diagnosticSettings/{name}",
-    validator: validate_DiagnosticSettingsGet_568176, base: "",
-    url: url_DiagnosticSettingsGet_568177, schemes: {Scheme.Https})
+    validator: validate_DiagnosticSettingsGet_564076, base: "",
+    url: url_DiagnosticSettingsGet_564077, schemes: {Scheme.Https})
 type
-  Call_DiagnosticSettingsDelete_568209 = ref object of OpenApiRestCall_567657
-proc url_DiagnosticSettingsDelete_568211(protocol: Scheme; host: string;
+  Call_DiagnosticSettingsDelete_564109 = ref object of OpenApiRestCall_563555
+proc url_DiagnosticSettingsDelete_564111(protocol: Scheme; host: string;
                                         base: string; route: string; path: JsonNode;
                                         query: JsonNode): Uri =
   result.scheme = $protocol
@@ -370,7 +374,7 @@ proc url_DiagnosticSettingsDelete_568211(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DiagnosticSettingsDelete_568210(path: JsonNode; query: JsonNode;
+proc validate_DiagnosticSettingsDelete_564110(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Deletes existing diagnostic setting for AadIam.
   ## 
@@ -381,11 +385,11 @@ proc validate_DiagnosticSettingsDelete_568210(path: JsonNode; query: JsonNode;
   ##       : The name of the diagnostic setting.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `name` field"
-  var valid_568212 = path.getOrDefault("name")
-  valid_568212 = validateParameter(valid_568212, JString, required = true,
+  var valid_564112 = path.getOrDefault("name")
+  valid_564112 = validateParameter(valid_564112, JString, required = true,
                                  default = nil)
-  if valid_568212 != nil:
-    section.add "name", valid_568212
+  if valid_564112 != nil:
+    section.add "name", valid_564112
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -393,11 +397,11 @@ proc validate_DiagnosticSettingsDelete_568210(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568213 = query.getOrDefault("api-version")
-  valid_568213 = validateParameter(valid_568213, JString, required = true,
+  var valid_564113 = query.getOrDefault("api-version")
+  valid_564113 = validateParameter(valid_564113, JString, required = true,
                                  default = nil)
-  if valid_568213 != nil:
-    section.add "api-version", valid_568213
+  if valid_564113 != nil:
+    section.add "api-version", valid_564113
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -406,20 +410,20 @@ proc validate_DiagnosticSettingsDelete_568210(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568214: Call_DiagnosticSettingsDelete_568209; path: JsonNode;
+proc call*(call_564114: Call_DiagnosticSettingsDelete_564109; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes existing diagnostic setting for AadIam.
   ## 
-  let valid = call_568214.validator(path, query, header, formData, body)
-  let scheme = call_568214.pickScheme
+  let valid = call_564114.validator(path, query, header, formData, body)
+  let scheme = call_564114.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568214.url(scheme.get, call_568214.host, call_568214.base,
-                         call_568214.route, valid.getOrDefault("path"),
+  let url = call_564114.url(scheme.get, call_564114.host, call_564114.base,
+                         call_564114.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568214, url, valid)
+  result = hook(call_564114, url, valid)
 
-proc call*(call_568215: Call_DiagnosticSettingsDelete_568209; apiVersion: string;
+proc call*(call_564115: Call_DiagnosticSettingsDelete_564109; apiVersion: string;
           name: string): Recallable =
   ## diagnosticSettingsDelete
   ## Deletes existing diagnostic setting for AadIam.
@@ -427,28 +431,28 @@ proc call*(call_568215: Call_DiagnosticSettingsDelete_568209; apiVersion: string
   ##             : Client Api Version.
   ##   name: string (required)
   ##       : The name of the diagnostic setting.
-  var path_568216 = newJObject()
-  var query_568217 = newJObject()
-  add(query_568217, "api-version", newJString(apiVersion))
-  add(path_568216, "name", newJString(name))
-  result = call_568215.call(path_568216, query_568217, nil, nil, nil)
+  var path_564116 = newJObject()
+  var query_564117 = newJObject()
+  add(query_564117, "api-version", newJString(apiVersion))
+  add(path_564116, "name", newJString(name))
+  result = call_564115.call(path_564116, query_564117, nil, nil, nil)
 
-var diagnosticSettingsDelete* = Call_DiagnosticSettingsDelete_568209(
+var diagnosticSettingsDelete* = Call_DiagnosticSettingsDelete_564109(
     name: "diagnosticSettingsDelete", meth: HttpMethod.HttpDelete,
     host: "management.azure.com",
     route: "/providers/microsoft.aadiam/diagnosticSettings/{name}",
-    validator: validate_DiagnosticSettingsDelete_568210, base: "",
-    url: url_DiagnosticSettingsDelete_568211, schemes: {Scheme.Https})
+    validator: validate_DiagnosticSettingsDelete_564110, base: "",
+    url: url_DiagnosticSettingsDelete_564111, schemes: {Scheme.Https})
 type
-  Call_DiagnosticSettingsCategoryList_568218 = ref object of OpenApiRestCall_567657
-proc url_DiagnosticSettingsCategoryList_568220(protocol: Scheme; host: string;
+  Call_DiagnosticSettingsCategoryList_564118 = ref object of OpenApiRestCall_563555
+proc url_DiagnosticSettingsCategoryList_564120(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_DiagnosticSettingsCategoryList_568219(path: JsonNode;
+proc validate_DiagnosticSettingsCategoryList_564119(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists the diagnostic settings categories for AadIam.
   ## 
@@ -462,11 +466,11 @@ proc validate_DiagnosticSettingsCategoryList_568219(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568221 = query.getOrDefault("api-version")
-  valid_568221 = validateParameter(valid_568221, JString, required = true,
+  var valid_564121 = query.getOrDefault("api-version")
+  valid_564121 = validateParameter(valid_564121, JString, required = true,
                                  default = nil)
-  if valid_568221 != nil:
-    section.add "api-version", valid_568221
+  if valid_564121 != nil:
+    section.add "api-version", valid_564121
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -475,45 +479,45 @@ proc validate_DiagnosticSettingsCategoryList_568219(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568222: Call_DiagnosticSettingsCategoryList_568218; path: JsonNode;
+proc call*(call_564122: Call_DiagnosticSettingsCategoryList_564118; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists the diagnostic settings categories for AadIam.
   ## 
-  let valid = call_568222.validator(path, query, header, formData, body)
-  let scheme = call_568222.pickScheme
+  let valid = call_564122.validator(path, query, header, formData, body)
+  let scheme = call_564122.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568222.url(scheme.get, call_568222.host, call_568222.base,
-                         call_568222.route, valid.getOrDefault("path"),
+  let url = call_564122.url(scheme.get, call_564122.host, call_564122.base,
+                         call_564122.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568222, url, valid)
+  result = hook(call_564122, url, valid)
 
-proc call*(call_568223: Call_DiagnosticSettingsCategoryList_568218;
+proc call*(call_564123: Call_DiagnosticSettingsCategoryList_564118;
           apiVersion: string): Recallable =
   ## diagnosticSettingsCategoryList
   ## Lists the diagnostic settings categories for AadIam.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
-  var query_568224 = newJObject()
-  add(query_568224, "api-version", newJString(apiVersion))
-  result = call_568223.call(nil, query_568224, nil, nil, nil)
+  var query_564124 = newJObject()
+  add(query_564124, "api-version", newJString(apiVersion))
+  result = call_564123.call(nil, query_564124, nil, nil, nil)
 
-var diagnosticSettingsCategoryList* = Call_DiagnosticSettingsCategoryList_568218(
+var diagnosticSettingsCategoryList* = Call_DiagnosticSettingsCategoryList_564118(
     name: "diagnosticSettingsCategoryList", meth: HttpMethod.HttpGet,
     host: "management.azure.com",
     route: "/providers/microsoft.aadiam/diagnosticSettingsCategories",
-    validator: validate_DiagnosticSettingsCategoryList_568219, base: "",
-    url: url_DiagnosticSettingsCategoryList_568220, schemes: {Scheme.Https})
+    validator: validate_DiagnosticSettingsCategoryList_564119, base: "",
+    url: url_DiagnosticSettingsCategoryList_564120, schemes: {Scheme.Https})
 type
-  Call_OperationsList_568225 = ref object of OpenApiRestCall_567657
-proc url_OperationsList_568227(protocol: Scheme; host: string; base: string;
+  Call_OperationsList_564125 = ref object of OpenApiRestCall_563555
+proc url_OperationsList_564127(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_OperationsList_568226(path: JsonNode; query: JsonNode;
+proc validate_OperationsList_564126(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## Operation to return the list of available operations.
@@ -528,11 +532,11 @@ proc validate_OperationsList_568226(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568228 = query.getOrDefault("api-version")
-  valid_568228 = validateParameter(valid_568228, JString, required = true,
+  var valid_564128 = query.getOrDefault("api-version")
+  valid_564128 = validateParameter(valid_564128, JString, required = true,
                                  default = nil)
-  if valid_568228 != nil:
-    section.add "api-version", valid_568228
+  if valid_564128 != nil:
+    section.add "api-version", valid_564128
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -541,32 +545,32 @@ proc validate_OperationsList_568226(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568229: Call_OperationsList_568225; path: JsonNode; query: JsonNode;
+proc call*(call_564129: Call_OperationsList_564125; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Operation to return the list of available operations.
   ## 
-  let valid = call_568229.validator(path, query, header, formData, body)
-  let scheme = call_568229.pickScheme
+  let valid = call_564129.validator(path, query, header, formData, body)
+  let scheme = call_564129.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568229.url(scheme.get, call_568229.host, call_568229.base,
-                         call_568229.route, valid.getOrDefault("path"),
+  let url = call_564129.url(scheme.get, call_564129.host, call_564129.base,
+                         call_564129.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568229, url, valid)
+  result = hook(call_564129, url, valid)
 
-proc call*(call_568230: Call_OperationsList_568225; apiVersion: string): Recallable =
+proc call*(call_564130: Call_OperationsList_564125; apiVersion: string): Recallable =
   ## operationsList
   ## Operation to return the list of available operations.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
-  var query_568231 = newJObject()
-  add(query_568231, "api-version", newJString(apiVersion))
-  result = call_568230.call(nil, query_568231, nil, nil, nil)
+  var query_564131 = newJObject()
+  add(query_564131, "api-version", newJString(apiVersion))
+  result = call_564130.call(nil, query_564131, nil, nil, nil)
 
-var operationsList* = Call_OperationsList_568225(name: "operationsList",
+var operationsList* = Call_OperationsList_564125(name: "operationsList",
     meth: HttpMethod.HttpGet, host: "management.azure.com",
     route: "/providers/microsoft.aadiam/operations",
-    validator: validate_OperationsList_568226, base: "", url: url_OperationsList_568227,
+    validator: validate_OperationsList_564126, base: "", url: url_OperationsList_564127,
     schemes: {Scheme.Https})
 export
   rest

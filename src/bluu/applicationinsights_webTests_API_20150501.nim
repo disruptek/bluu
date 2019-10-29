@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, httpcore
 
 ## auto-generated via openapi macro
 ## title: ApplicationInsightsManagementClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_596458 = ref object of OpenApiRestCall
+  OpenApiRestCall_563556 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_596458](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563556](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_596458): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563556): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,8 +107,8 @@ const
   macServiceName = "applicationinsights-webTests_API"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_WebTestsList_596680 = ref object of OpenApiRestCall_596458
-proc url_WebTestsList_596682(protocol: Scheme; host: string; base: string;
+  Call_WebTestsList_563778 = ref object of OpenApiRestCall_563556
+proc url_WebTestsList_563780(protocol: Scheme; host: string; base: string;
                             route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -120,7 +124,7 @@ proc url_WebTestsList_596682(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_WebTestsList_596681(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_WebTestsList_563779(path: JsonNode; query: JsonNode; header: JsonNode;
                                  formData: JsonNode; body: JsonNode): JsonNode =
   ## Get all Application Insights web test alerts definitions within a subscription.
   ## 
@@ -132,11 +136,11 @@ proc validate_WebTestsList_596681(path: JsonNode; query: JsonNode; header: JsonN
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_596842 = path.getOrDefault("subscriptionId")
-  valid_596842 = validateParameter(valid_596842, JString, required = true,
+  var valid_563942 = path.getOrDefault("subscriptionId")
+  valid_563942 = validateParameter(valid_563942, JString, required = true,
                                  default = nil)
-  if valid_596842 != nil:
-    section.add "subscriptionId", valid_596842
+  if valid_563942 != nil:
+    section.add "subscriptionId", valid_563942
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -144,11 +148,11 @@ proc validate_WebTestsList_596681(path: JsonNode; query: JsonNode; header: JsonN
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_596843 = query.getOrDefault("api-version")
-  valid_596843 = validateParameter(valid_596843, JString, required = true,
+  var valid_563943 = query.getOrDefault("api-version")
+  valid_563943 = validateParameter(valid_563943, JString, required = true,
                                  default = nil)
-  if valid_596843 != nil:
-    section.add "api-version", valid_596843
+  if valid_563943 != nil:
+    section.add "api-version", valid_563943
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -157,20 +161,20 @@ proc validate_WebTestsList_596681(path: JsonNode; query: JsonNode; header: JsonN
   if body != nil:
     result.add "body", body
 
-proc call*(call_596870: Call_WebTestsList_596680; path: JsonNode; query: JsonNode;
+proc call*(call_563970: Call_WebTestsList_563778; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get all Application Insights web test alerts definitions within a subscription.
   ## 
-  let valid = call_596870.validator(path, query, header, formData, body)
-  let scheme = call_596870.pickScheme
+  let valid = call_563970.validator(path, query, header, formData, body)
+  let scheme = call_563970.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_596870.url(scheme.get, call_596870.host, call_596870.base,
-                         call_596870.route, valid.getOrDefault("path"),
+  let url = call_563970.url(scheme.get, call_563970.host, call_563970.base,
+                         call_563970.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_596870, url, valid)
+  result = hook(call_563970, url, valid)
 
-proc call*(call_596941: Call_WebTestsList_596680; apiVersion: string;
+proc call*(call_564041: Call_WebTestsList_563778; apiVersion: string;
           subscriptionId: string): Recallable =
   ## webTestsList
   ## Get all Application Insights web test alerts definitions within a subscription.
@@ -178,19 +182,19 @@ proc call*(call_596941: Call_WebTestsList_596680; apiVersion: string;
   ##             : The API version to use for this operation.
   ##   subscriptionId: string (required)
   ##                 : The ID of the target subscription.
-  var path_596942 = newJObject()
-  var query_596944 = newJObject()
-  add(query_596944, "api-version", newJString(apiVersion))
-  add(path_596942, "subscriptionId", newJString(subscriptionId))
-  result = call_596941.call(path_596942, query_596944, nil, nil, nil)
+  var path_564042 = newJObject()
+  var query_564044 = newJObject()
+  add(query_564044, "api-version", newJString(apiVersion))
+  add(path_564042, "subscriptionId", newJString(subscriptionId))
+  result = call_564041.call(path_564042, query_564044, nil, nil, nil)
 
-var webTestsList* = Call_WebTestsList_596680(name: "webTestsList",
+var webTestsList* = Call_WebTestsList_563778(name: "webTestsList",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Insights/webtests",
-    validator: validate_WebTestsList_596681, base: "", url: url_WebTestsList_596682,
+    validator: validate_WebTestsList_563779, base: "", url: url_WebTestsList_563780,
     schemes: {Scheme.Https})
 type
-  Call_WebTestsListByComponent_596983 = ref object of OpenApiRestCall_596458
-proc url_WebTestsListByComponent_596985(protocol: Scheme; host: string; base: string;
+  Call_WebTestsListByComponent_564083 = ref object of OpenApiRestCall_563556
+proc url_WebTestsListByComponent_564085(protocol: Scheme; host: string; base: string;
                                        route: string; path: JsonNode;
                                        query: JsonNode): Uri =
   result.scheme = $protocol
@@ -214,37 +218,37 @@ proc url_WebTestsListByComponent_596985(protocol: Scheme; host: string; base: st
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_WebTestsListByComponent_596984(path: JsonNode; query: JsonNode;
+proc validate_WebTestsListByComponent_564084(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Get all Application Insights web tests defined for the specified component.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group. The name is case insensitive.
-  ##   subscriptionId: JString (required)
-  ##                 : The ID of the target subscription.
   ##   componentName: JString (required)
   ##                : The name of the Application Insights component resource.
+  ##   subscriptionId: JString (required)
+  ##                 : The ID of the target subscription.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group. The name is case insensitive.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_596995 = path.getOrDefault("resourceGroupName")
-  valid_596995 = validateParameter(valid_596995, JString, required = true,
+        "path argument is necessary due to required `componentName` field"
+  var valid_564095 = path.getOrDefault("componentName")
+  valid_564095 = validateParameter(valid_564095, JString, required = true,
                                  default = nil)
-  if valid_596995 != nil:
-    section.add "resourceGroupName", valid_596995
-  var valid_596996 = path.getOrDefault("subscriptionId")
-  valid_596996 = validateParameter(valid_596996, JString, required = true,
+  if valid_564095 != nil:
+    section.add "componentName", valid_564095
+  var valid_564096 = path.getOrDefault("subscriptionId")
+  valid_564096 = validateParameter(valid_564096, JString, required = true,
                                  default = nil)
-  if valid_596996 != nil:
-    section.add "subscriptionId", valid_596996
-  var valid_596997 = path.getOrDefault("componentName")
-  valid_596997 = validateParameter(valid_596997, JString, required = true,
+  if valid_564096 != nil:
+    section.add "subscriptionId", valid_564096
+  var valid_564097 = path.getOrDefault("resourceGroupName")
+  valid_564097 = validateParameter(valid_564097, JString, required = true,
                                  default = nil)
-  if valid_596997 != nil:
-    section.add "componentName", valid_596997
+  if valid_564097 != nil:
+    section.add "resourceGroupName", valid_564097
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -252,11 +256,11 @@ proc validate_WebTestsListByComponent_596984(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_596998 = query.getOrDefault("api-version")
-  valid_596998 = validateParameter(valid_596998, JString, required = true,
+  var valid_564098 = query.getOrDefault("api-version")
+  valid_564098 = validateParameter(valid_564098, JString, required = true,
                                  default = nil)
-  if valid_596998 != nil:
-    section.add "api-version", valid_596998
+  if valid_564098 != nil:
+    section.add "api-version", valid_564098
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -265,48 +269,47 @@ proc validate_WebTestsListByComponent_596984(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_596999: Call_WebTestsListByComponent_596983; path: JsonNode;
+proc call*(call_564099: Call_WebTestsListByComponent_564083; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get all Application Insights web tests defined for the specified component.
   ## 
-  let valid = call_596999.validator(path, query, header, formData, body)
-  let scheme = call_596999.pickScheme
+  let valid = call_564099.validator(path, query, header, formData, body)
+  let scheme = call_564099.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_596999.url(scheme.get, call_596999.host, call_596999.base,
-                         call_596999.route, valid.getOrDefault("path"),
+  let url = call_564099.url(scheme.get, call_564099.host, call_564099.base,
+                         call_564099.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_596999, url, valid)
+  result = hook(call_564099, url, valid)
 
-proc call*(call_597000: Call_WebTestsListByComponent_596983;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          componentName: string): Recallable =
+proc call*(call_564100: Call_WebTestsListByComponent_564083; componentName: string;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string): Recallable =
   ## webTestsListByComponent
   ## Get all Application Insights web tests defined for the specified component.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group. The name is case insensitive.
+  ##   componentName: string (required)
+  ##                : The name of the Application Insights component resource.
   ##   apiVersion: string (required)
   ##             : The API version to use for this operation.
   ##   subscriptionId: string (required)
   ##                 : The ID of the target subscription.
-  ##   componentName: string (required)
-  ##                : The name of the Application Insights component resource.
-  var path_597001 = newJObject()
-  var query_597002 = newJObject()
-  add(path_597001, "resourceGroupName", newJString(resourceGroupName))
-  add(query_597002, "api-version", newJString(apiVersion))
-  add(path_597001, "subscriptionId", newJString(subscriptionId))
-  add(path_597001, "componentName", newJString(componentName))
-  result = call_597000.call(path_597001, query_597002, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group. The name is case insensitive.
+  var path_564101 = newJObject()
+  var query_564102 = newJObject()
+  add(path_564101, "componentName", newJString(componentName))
+  add(query_564102, "api-version", newJString(apiVersion))
+  add(path_564101, "subscriptionId", newJString(subscriptionId))
+  add(path_564101, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564100.call(path_564101, query_564102, nil, nil, nil)
 
-var webTestsListByComponent* = Call_WebTestsListByComponent_596983(
+var webTestsListByComponent* = Call_WebTestsListByComponent_564083(
     name: "webTestsListByComponent", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Insights/components/{componentName}/webtests",
-    validator: validate_WebTestsListByComponent_596984, base: "",
-    url: url_WebTestsListByComponent_596985, schemes: {Scheme.Https})
+    validator: validate_WebTestsListByComponent_564084, base: "",
+    url: url_WebTestsListByComponent_564085, schemes: {Scheme.Https})
 type
-  Call_WebTestsListByResourceGroup_597003 = ref object of OpenApiRestCall_596458
-proc url_WebTestsListByResourceGroup_597005(protocol: Scheme; host: string;
+  Call_WebTestsListByResourceGroup_564103 = ref object of OpenApiRestCall_563556
+proc url_WebTestsListByResourceGroup_564105(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -326,30 +329,30 @@ proc url_WebTestsListByResourceGroup_597005(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_WebTestsListByResourceGroup_597004(path: JsonNode; query: JsonNode;
+proc validate_WebTestsListByResourceGroup_564104(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Get all Application Insights web tests defined within a specified resource group.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group. The name is case insensitive.
   ##   subscriptionId: JString (required)
   ##                 : The ID of the target subscription.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group. The name is case insensitive.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_597006 = path.getOrDefault("resourceGroupName")
-  valid_597006 = validateParameter(valid_597006, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564106 = path.getOrDefault("subscriptionId")
+  valid_564106 = validateParameter(valid_564106, JString, required = true,
                                  default = nil)
-  if valid_597006 != nil:
-    section.add "resourceGroupName", valid_597006
-  var valid_597007 = path.getOrDefault("subscriptionId")
-  valid_597007 = validateParameter(valid_597007, JString, required = true,
+  if valid_564106 != nil:
+    section.add "subscriptionId", valid_564106
+  var valid_564107 = path.getOrDefault("resourceGroupName")
+  valid_564107 = validateParameter(valid_564107, JString, required = true,
                                  default = nil)
-  if valid_597007 != nil:
-    section.add "subscriptionId", valid_597007
+  if valid_564107 != nil:
+    section.add "resourceGroupName", valid_564107
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -357,11 +360,11 @@ proc validate_WebTestsListByResourceGroup_597004(path: JsonNode; query: JsonNode
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_597008 = query.getOrDefault("api-version")
-  valid_597008 = validateParameter(valid_597008, JString, required = true,
+  var valid_564108 = query.getOrDefault("api-version")
+  valid_564108 = validateParameter(valid_564108, JString, required = true,
                                  default = nil)
-  if valid_597008 != nil:
-    section.add "api-version", valid_597008
+  if valid_564108 != nil:
+    section.add "api-version", valid_564108
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -370,44 +373,44 @@ proc validate_WebTestsListByResourceGroup_597004(path: JsonNode; query: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_597009: Call_WebTestsListByResourceGroup_597003; path: JsonNode;
+proc call*(call_564109: Call_WebTestsListByResourceGroup_564103; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get all Application Insights web tests defined within a specified resource group.
   ## 
-  let valid = call_597009.validator(path, query, header, formData, body)
-  let scheme = call_597009.pickScheme
+  let valid = call_564109.validator(path, query, header, formData, body)
+  let scheme = call_564109.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_597009.url(scheme.get, call_597009.host, call_597009.base,
-                         call_597009.route, valid.getOrDefault("path"),
+  let url = call_564109.url(scheme.get, call_564109.host, call_564109.base,
+                         call_564109.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_597009, url, valid)
+  result = hook(call_564109, url, valid)
 
-proc call*(call_597010: Call_WebTestsListByResourceGroup_597003;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string): Recallable =
+proc call*(call_564110: Call_WebTestsListByResourceGroup_564103;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string): Recallable =
   ## webTestsListByResourceGroup
   ## Get all Application Insights web tests defined within a specified resource group.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group. The name is case insensitive.
   ##   apiVersion: string (required)
   ##             : The API version to use for this operation.
   ##   subscriptionId: string (required)
   ##                 : The ID of the target subscription.
-  var path_597011 = newJObject()
-  var query_597012 = newJObject()
-  add(path_597011, "resourceGroupName", newJString(resourceGroupName))
-  add(query_597012, "api-version", newJString(apiVersion))
-  add(path_597011, "subscriptionId", newJString(subscriptionId))
-  result = call_597010.call(path_597011, query_597012, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group. The name is case insensitive.
+  var path_564111 = newJObject()
+  var query_564112 = newJObject()
+  add(query_564112, "api-version", newJString(apiVersion))
+  add(path_564111, "subscriptionId", newJString(subscriptionId))
+  add(path_564111, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564110.call(path_564111, query_564112, nil, nil, nil)
 
-var webTestsListByResourceGroup* = Call_WebTestsListByResourceGroup_597003(
+var webTestsListByResourceGroup* = Call_WebTestsListByResourceGroup_564103(
     name: "webTestsListByResourceGroup", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Insights/webtests",
-    validator: validate_WebTestsListByResourceGroup_597004, base: "",
-    url: url_WebTestsListByResourceGroup_597005, schemes: {Scheme.Https})
+    validator: validate_WebTestsListByResourceGroup_564104, base: "",
+    url: url_WebTestsListByResourceGroup_564105, schemes: {Scheme.Https})
 type
-  Call_WebTestsCreateOrUpdate_597024 = ref object of OpenApiRestCall_596458
-proc url_WebTestsCreateOrUpdate_597026(protocol: Scheme; host: string; base: string;
+  Call_WebTestsCreateOrUpdate_564124 = ref object of OpenApiRestCall_563556
+proc url_WebTestsCreateOrUpdate_564126(protocol: Scheme; host: string; base: string;
                                       route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -429,37 +432,37 @@ proc url_WebTestsCreateOrUpdate_597026(protocol: Scheme; host: string; base: str
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_WebTestsCreateOrUpdate_597025(path: JsonNode; query: JsonNode;
+proc validate_WebTestsCreateOrUpdate_564125(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Creates or updates an Application Insights web test definition.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group. The name is case insensitive.
-  ##   webTestName: JString (required)
-  ##              : The name of the Application Insights webtest resource.
   ##   subscriptionId: JString (required)
   ##                 : The ID of the target subscription.
+  ##   webTestName: JString (required)
+  ##              : The name of the Application Insights webtest resource.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group. The name is case insensitive.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_597044 = path.getOrDefault("resourceGroupName")
-  valid_597044 = validateParameter(valid_597044, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564144 = path.getOrDefault("subscriptionId")
+  valid_564144 = validateParameter(valid_564144, JString, required = true,
                                  default = nil)
-  if valid_597044 != nil:
-    section.add "resourceGroupName", valid_597044
-  var valid_597045 = path.getOrDefault("webTestName")
-  valid_597045 = validateParameter(valid_597045, JString, required = true,
+  if valid_564144 != nil:
+    section.add "subscriptionId", valid_564144
+  var valid_564145 = path.getOrDefault("webTestName")
+  valid_564145 = validateParameter(valid_564145, JString, required = true,
                                  default = nil)
-  if valid_597045 != nil:
-    section.add "webTestName", valid_597045
-  var valid_597046 = path.getOrDefault("subscriptionId")
-  valid_597046 = validateParameter(valid_597046, JString, required = true,
+  if valid_564145 != nil:
+    section.add "webTestName", valid_564145
+  var valid_564146 = path.getOrDefault("resourceGroupName")
+  valid_564146 = validateParameter(valid_564146, JString, required = true,
                                  default = nil)
-  if valid_597046 != nil:
-    section.add "subscriptionId", valid_597046
+  if valid_564146 != nil:
+    section.add "resourceGroupName", valid_564146
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -467,11 +470,11 @@ proc validate_WebTestsCreateOrUpdate_597025(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_597047 = query.getOrDefault("api-version")
-  valid_597047 = validateParameter(valid_597047, JString, required = true,
+  var valid_564147 = query.getOrDefault("api-version")
+  valid_564147 = validateParameter(valid_564147, JString, required = true,
                                  default = nil)
-  if valid_597047 != nil:
-    section.add "api-version", valid_597047
+  if valid_564147 != nil:
+    section.add "api-version", valid_564147
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -485,53 +488,53 @@ proc validate_WebTestsCreateOrUpdate_597025(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_597049: Call_WebTestsCreateOrUpdate_597024; path: JsonNode;
+proc call*(call_564149: Call_WebTestsCreateOrUpdate_564124; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Creates or updates an Application Insights web test definition.
   ## 
-  let valid = call_597049.validator(path, query, header, formData, body)
-  let scheme = call_597049.pickScheme
+  let valid = call_564149.validator(path, query, header, formData, body)
+  let scheme = call_564149.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_597049.url(scheme.get, call_597049.host, call_597049.base,
-                         call_597049.route, valid.getOrDefault("path"),
+  let url = call_564149.url(scheme.get, call_564149.host, call_564149.base,
+                         call_564149.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_597049, url, valid)
+  result = hook(call_564149, url, valid)
 
-proc call*(call_597050: Call_WebTestsCreateOrUpdate_597024;
-          resourceGroupName: string; apiVersion: string; webTestName: string;
-          subscriptionId: string; WebTestDefinition: JsonNode): Recallable =
+proc call*(call_564150: Call_WebTestsCreateOrUpdate_564124;
+          WebTestDefinition: JsonNode; apiVersion: string; subscriptionId: string;
+          webTestName: string; resourceGroupName: string): Recallable =
   ## webTestsCreateOrUpdate
   ## Creates or updates an Application Insights web test definition.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group. The name is case insensitive.
-  ##   apiVersion: string (required)
-  ##             : The API version to use for this operation.
-  ##   webTestName: string (required)
-  ##              : The name of the Application Insights webtest resource.
-  ##   subscriptionId: string (required)
-  ##                 : The ID of the target subscription.
   ##   WebTestDefinition: JObject (required)
   ##                    : Properties that need to be specified to create or update an Application Insights web test definition.
-  var path_597051 = newJObject()
-  var query_597052 = newJObject()
-  var body_597053 = newJObject()
-  add(path_597051, "resourceGroupName", newJString(resourceGroupName))
-  add(query_597052, "api-version", newJString(apiVersion))
-  add(path_597051, "webTestName", newJString(webTestName))
-  add(path_597051, "subscriptionId", newJString(subscriptionId))
+  ##   apiVersion: string (required)
+  ##             : The API version to use for this operation.
+  ##   subscriptionId: string (required)
+  ##                 : The ID of the target subscription.
+  ##   webTestName: string (required)
+  ##              : The name of the Application Insights webtest resource.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group. The name is case insensitive.
+  var path_564151 = newJObject()
+  var query_564152 = newJObject()
+  var body_564153 = newJObject()
   if WebTestDefinition != nil:
-    body_597053 = WebTestDefinition
-  result = call_597050.call(path_597051, query_597052, nil, nil, body_597053)
+    body_564153 = WebTestDefinition
+  add(query_564152, "api-version", newJString(apiVersion))
+  add(path_564151, "subscriptionId", newJString(subscriptionId))
+  add(path_564151, "webTestName", newJString(webTestName))
+  add(path_564151, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564150.call(path_564151, query_564152, nil, nil, body_564153)
 
-var webTestsCreateOrUpdate* = Call_WebTestsCreateOrUpdate_597024(
+var webTestsCreateOrUpdate* = Call_WebTestsCreateOrUpdate_564124(
     name: "webTestsCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Insights/webtests/{webTestName}",
-    validator: validate_WebTestsCreateOrUpdate_597025, base: "",
-    url: url_WebTestsCreateOrUpdate_597026, schemes: {Scheme.Https})
+    validator: validate_WebTestsCreateOrUpdate_564125, base: "",
+    url: url_WebTestsCreateOrUpdate_564126, schemes: {Scheme.Https})
 type
-  Call_WebTestsGet_597013 = ref object of OpenApiRestCall_596458
-proc url_WebTestsGet_597015(protocol: Scheme; host: string; base: string;
+  Call_WebTestsGet_564113 = ref object of OpenApiRestCall_563556
+proc url_WebTestsGet_564115(protocol: Scheme; host: string; base: string;
                            route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -553,37 +556,37 @@ proc url_WebTestsGet_597015(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_WebTestsGet_597014(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_WebTestsGet_564114(path: JsonNode; query: JsonNode; header: JsonNode;
                                 formData: JsonNode; body: JsonNode): JsonNode =
   ## Get a specific Application Insights web test definition.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group. The name is case insensitive.
-  ##   webTestName: JString (required)
-  ##              : The name of the Application Insights webtest resource.
   ##   subscriptionId: JString (required)
   ##                 : The ID of the target subscription.
+  ##   webTestName: JString (required)
+  ##              : The name of the Application Insights webtest resource.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group. The name is case insensitive.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_597016 = path.getOrDefault("resourceGroupName")
-  valid_597016 = validateParameter(valid_597016, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564116 = path.getOrDefault("subscriptionId")
+  valid_564116 = validateParameter(valid_564116, JString, required = true,
                                  default = nil)
-  if valid_597016 != nil:
-    section.add "resourceGroupName", valid_597016
-  var valid_597017 = path.getOrDefault("webTestName")
-  valid_597017 = validateParameter(valid_597017, JString, required = true,
+  if valid_564116 != nil:
+    section.add "subscriptionId", valid_564116
+  var valid_564117 = path.getOrDefault("webTestName")
+  valid_564117 = validateParameter(valid_564117, JString, required = true,
                                  default = nil)
-  if valid_597017 != nil:
-    section.add "webTestName", valid_597017
-  var valid_597018 = path.getOrDefault("subscriptionId")
-  valid_597018 = validateParameter(valid_597018, JString, required = true,
+  if valid_564117 != nil:
+    section.add "webTestName", valid_564117
+  var valid_564118 = path.getOrDefault("resourceGroupName")
+  valid_564118 = validateParameter(valid_564118, JString, required = true,
                                  default = nil)
-  if valid_597018 != nil:
-    section.add "subscriptionId", valid_597018
+  if valid_564118 != nil:
+    section.add "resourceGroupName", valid_564118
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -591,11 +594,11 @@ proc validate_WebTestsGet_597014(path: JsonNode; query: JsonNode; header: JsonNo
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_597019 = query.getOrDefault("api-version")
-  valid_597019 = validateParameter(valid_597019, JString, required = true,
+  var valid_564119 = query.getOrDefault("api-version")
+  valid_564119 = validateParameter(valid_564119, JString, required = true,
                                  default = nil)
-  if valid_597019 != nil:
-    section.add "api-version", valid_597019
+  if valid_564119 != nil:
+    section.add "api-version", valid_564119
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -604,48 +607,48 @@ proc validate_WebTestsGet_597014(path: JsonNode; query: JsonNode; header: JsonNo
   if body != nil:
     result.add "body", body
 
-proc call*(call_597020: Call_WebTestsGet_597013; path: JsonNode; query: JsonNode;
+proc call*(call_564120: Call_WebTestsGet_564113; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get a specific Application Insights web test definition.
   ## 
-  let valid = call_597020.validator(path, query, header, formData, body)
-  let scheme = call_597020.pickScheme
+  let valid = call_564120.validator(path, query, header, formData, body)
+  let scheme = call_564120.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_597020.url(scheme.get, call_597020.host, call_597020.base,
-                         call_597020.route, valid.getOrDefault("path"),
+  let url = call_564120.url(scheme.get, call_564120.host, call_564120.base,
+                         call_564120.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_597020, url, valid)
+  result = hook(call_564120, url, valid)
 
-proc call*(call_597021: Call_WebTestsGet_597013; resourceGroupName: string;
-          apiVersion: string; webTestName: string; subscriptionId: string): Recallable =
+proc call*(call_564121: Call_WebTestsGet_564113; apiVersion: string;
+          subscriptionId: string; webTestName: string; resourceGroupName: string): Recallable =
   ## webTestsGet
   ## Get a specific Application Insights web test definition.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group. The name is case insensitive.
   ##   apiVersion: string (required)
   ##             : The API version to use for this operation.
-  ##   webTestName: string (required)
-  ##              : The name of the Application Insights webtest resource.
   ##   subscriptionId: string (required)
   ##                 : The ID of the target subscription.
-  var path_597022 = newJObject()
-  var query_597023 = newJObject()
-  add(path_597022, "resourceGroupName", newJString(resourceGroupName))
-  add(query_597023, "api-version", newJString(apiVersion))
-  add(path_597022, "webTestName", newJString(webTestName))
-  add(path_597022, "subscriptionId", newJString(subscriptionId))
-  result = call_597021.call(path_597022, query_597023, nil, nil, nil)
+  ##   webTestName: string (required)
+  ##              : The name of the Application Insights webtest resource.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group. The name is case insensitive.
+  var path_564122 = newJObject()
+  var query_564123 = newJObject()
+  add(query_564123, "api-version", newJString(apiVersion))
+  add(path_564122, "subscriptionId", newJString(subscriptionId))
+  add(path_564122, "webTestName", newJString(webTestName))
+  add(path_564122, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564121.call(path_564122, query_564123, nil, nil, nil)
 
-var webTestsGet* = Call_WebTestsGet_597013(name: "webTestsGet",
+var webTestsGet* = Call_WebTestsGet_564113(name: "webTestsGet",
                                         meth: HttpMethod.HttpGet,
                                         host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Insights/webtests/{webTestName}",
-                                        validator: validate_WebTestsGet_597014,
-                                        base: "", url: url_WebTestsGet_597015,
+                                        validator: validate_WebTestsGet_564114,
+                                        base: "", url: url_WebTestsGet_564115,
                                         schemes: {Scheme.Https})
 type
-  Call_WebTestsUpdateTags_597065 = ref object of OpenApiRestCall_596458
-proc url_WebTestsUpdateTags_597067(protocol: Scheme; host: string; base: string;
+  Call_WebTestsUpdateTags_564165 = ref object of OpenApiRestCall_563556
+proc url_WebTestsUpdateTags_564167(protocol: Scheme; host: string; base: string;
                                   route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -667,7 +670,7 @@ proc url_WebTestsUpdateTags_597067(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_WebTestsUpdateTags_597066(path: JsonNode; query: JsonNode;
+proc validate_WebTestsUpdateTags_564166(path: JsonNode; query: JsonNode;
                                        header: JsonNode; formData: JsonNode;
                                        body: JsonNode): JsonNode =
   ## Creates or updates an Application Insights web test definition.
@@ -675,30 +678,30 @@ proc validate_WebTestsUpdateTags_597066(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group. The name is case insensitive.
-  ##   webTestName: JString (required)
-  ##              : The name of the Application Insights webtest resource.
   ##   subscriptionId: JString (required)
   ##                 : The ID of the target subscription.
+  ##   webTestName: JString (required)
+  ##              : The name of the Application Insights webtest resource.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group. The name is case insensitive.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_597068 = path.getOrDefault("resourceGroupName")
-  valid_597068 = validateParameter(valid_597068, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564168 = path.getOrDefault("subscriptionId")
+  valid_564168 = validateParameter(valid_564168, JString, required = true,
                                  default = nil)
-  if valid_597068 != nil:
-    section.add "resourceGroupName", valid_597068
-  var valid_597069 = path.getOrDefault("webTestName")
-  valid_597069 = validateParameter(valid_597069, JString, required = true,
+  if valid_564168 != nil:
+    section.add "subscriptionId", valid_564168
+  var valid_564169 = path.getOrDefault("webTestName")
+  valid_564169 = validateParameter(valid_564169, JString, required = true,
                                  default = nil)
-  if valid_597069 != nil:
-    section.add "webTestName", valid_597069
-  var valid_597070 = path.getOrDefault("subscriptionId")
-  valid_597070 = validateParameter(valid_597070, JString, required = true,
+  if valid_564169 != nil:
+    section.add "webTestName", valid_564169
+  var valid_564170 = path.getOrDefault("resourceGroupName")
+  valid_564170 = validateParameter(valid_564170, JString, required = true,
                                  default = nil)
-  if valid_597070 != nil:
-    section.add "subscriptionId", valid_597070
+  if valid_564170 != nil:
+    section.add "resourceGroupName", valid_564170
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -706,11 +709,11 @@ proc validate_WebTestsUpdateTags_597066(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_597071 = query.getOrDefault("api-version")
-  valid_597071 = validateParameter(valid_597071, JString, required = true,
+  var valid_564171 = query.getOrDefault("api-version")
+  valid_564171 = validateParameter(valid_564171, JString, required = true,
                                  default = nil)
-  if valid_597071 != nil:
-    section.add "api-version", valid_597071
+  if valid_564171 != nil:
+    section.add "api-version", valid_564171
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -724,53 +727,53 @@ proc validate_WebTestsUpdateTags_597066(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_597073: Call_WebTestsUpdateTags_597065; path: JsonNode;
+proc call*(call_564173: Call_WebTestsUpdateTags_564165; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Creates or updates an Application Insights web test definition.
   ## 
-  let valid = call_597073.validator(path, query, header, formData, body)
-  let scheme = call_597073.pickScheme
+  let valid = call_564173.validator(path, query, header, formData, body)
+  let scheme = call_564173.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_597073.url(scheme.get, call_597073.host, call_597073.base,
-                         call_597073.route, valid.getOrDefault("path"),
+  let url = call_564173.url(scheme.get, call_564173.host, call_564173.base,
+                         call_564173.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_597073, url, valid)
+  result = hook(call_564173, url, valid)
 
-proc call*(call_597074: Call_WebTestsUpdateTags_597065; resourceGroupName: string;
-          apiVersion: string; webTestName: string; subscriptionId: string;
+proc call*(call_564174: Call_WebTestsUpdateTags_564165; apiVersion: string;
+          subscriptionId: string; webTestName: string; resourceGroupName: string;
           WebTestTags: JsonNode): Recallable =
   ## webTestsUpdateTags
   ## Creates or updates an Application Insights web test definition.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group. The name is case insensitive.
   ##   apiVersion: string (required)
   ##             : The API version to use for this operation.
-  ##   webTestName: string (required)
-  ##              : The name of the Application Insights webtest resource.
   ##   subscriptionId: string (required)
   ##                 : The ID of the target subscription.
+  ##   webTestName: string (required)
+  ##              : The name of the Application Insights webtest resource.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group. The name is case insensitive.
   ##   WebTestTags: JObject (required)
   ##              : Updated tag information to set into the web test instance.
-  var path_597075 = newJObject()
-  var query_597076 = newJObject()
-  var body_597077 = newJObject()
-  add(path_597075, "resourceGroupName", newJString(resourceGroupName))
-  add(query_597076, "api-version", newJString(apiVersion))
-  add(path_597075, "webTestName", newJString(webTestName))
-  add(path_597075, "subscriptionId", newJString(subscriptionId))
+  var path_564175 = newJObject()
+  var query_564176 = newJObject()
+  var body_564177 = newJObject()
+  add(query_564176, "api-version", newJString(apiVersion))
+  add(path_564175, "subscriptionId", newJString(subscriptionId))
+  add(path_564175, "webTestName", newJString(webTestName))
+  add(path_564175, "resourceGroupName", newJString(resourceGroupName))
   if WebTestTags != nil:
-    body_597077 = WebTestTags
-  result = call_597074.call(path_597075, query_597076, nil, nil, body_597077)
+    body_564177 = WebTestTags
+  result = call_564174.call(path_564175, query_564176, nil, nil, body_564177)
 
-var webTestsUpdateTags* = Call_WebTestsUpdateTags_597065(
+var webTestsUpdateTags* = Call_WebTestsUpdateTags_564165(
     name: "webTestsUpdateTags", meth: HttpMethod.HttpPatch,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Insights/webtests/{webTestName}",
-    validator: validate_WebTestsUpdateTags_597066, base: "",
-    url: url_WebTestsUpdateTags_597067, schemes: {Scheme.Https})
+    validator: validate_WebTestsUpdateTags_564166, base: "",
+    url: url_WebTestsUpdateTags_564167, schemes: {Scheme.Https})
 type
-  Call_WebTestsDelete_597054 = ref object of OpenApiRestCall_596458
-proc url_WebTestsDelete_597056(protocol: Scheme; host: string; base: string;
+  Call_WebTestsDelete_564154 = ref object of OpenApiRestCall_563556
+proc url_WebTestsDelete_564156(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -792,7 +795,7 @@ proc url_WebTestsDelete_597056(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_WebTestsDelete_597055(path: JsonNode; query: JsonNode;
+proc validate_WebTestsDelete_564155(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## Deletes an Application Insights web test.
@@ -800,30 +803,30 @@ proc validate_WebTestsDelete_597055(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group. The name is case insensitive.
-  ##   webTestName: JString (required)
-  ##              : The name of the Application Insights webtest resource.
   ##   subscriptionId: JString (required)
   ##                 : The ID of the target subscription.
+  ##   webTestName: JString (required)
+  ##              : The name of the Application Insights webtest resource.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group. The name is case insensitive.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_597057 = path.getOrDefault("resourceGroupName")
-  valid_597057 = validateParameter(valid_597057, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564157 = path.getOrDefault("subscriptionId")
+  valid_564157 = validateParameter(valid_564157, JString, required = true,
                                  default = nil)
-  if valid_597057 != nil:
-    section.add "resourceGroupName", valid_597057
-  var valid_597058 = path.getOrDefault("webTestName")
-  valid_597058 = validateParameter(valid_597058, JString, required = true,
+  if valid_564157 != nil:
+    section.add "subscriptionId", valid_564157
+  var valid_564158 = path.getOrDefault("webTestName")
+  valid_564158 = validateParameter(valid_564158, JString, required = true,
                                  default = nil)
-  if valid_597058 != nil:
-    section.add "webTestName", valid_597058
-  var valid_597059 = path.getOrDefault("subscriptionId")
-  valid_597059 = validateParameter(valid_597059, JString, required = true,
+  if valid_564158 != nil:
+    section.add "webTestName", valid_564158
+  var valid_564159 = path.getOrDefault("resourceGroupName")
+  valid_564159 = validateParameter(valid_564159, JString, required = true,
                                  default = nil)
-  if valid_597059 != nil:
-    section.add "subscriptionId", valid_597059
+  if valid_564159 != nil:
+    section.add "resourceGroupName", valid_564159
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -831,11 +834,11 @@ proc validate_WebTestsDelete_597055(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_597060 = query.getOrDefault("api-version")
-  valid_597060 = validateParameter(valid_597060, JString, required = true,
+  var valid_564160 = query.getOrDefault("api-version")
+  valid_564160 = validateParameter(valid_564160, JString, required = true,
                                  default = nil)
-  if valid_597060 != nil:
-    section.add "api-version", valid_597060
+  if valid_564160 != nil:
+    section.add "api-version", valid_564160
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -844,42 +847,42 @@ proc validate_WebTestsDelete_597055(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_597061: Call_WebTestsDelete_597054; path: JsonNode; query: JsonNode;
+proc call*(call_564161: Call_WebTestsDelete_564154; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes an Application Insights web test.
   ## 
-  let valid = call_597061.validator(path, query, header, formData, body)
-  let scheme = call_597061.pickScheme
+  let valid = call_564161.validator(path, query, header, formData, body)
+  let scheme = call_564161.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_597061.url(scheme.get, call_597061.host, call_597061.base,
-                         call_597061.route, valid.getOrDefault("path"),
+  let url = call_564161.url(scheme.get, call_564161.host, call_564161.base,
+                         call_564161.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_597061, url, valid)
+  result = hook(call_564161, url, valid)
 
-proc call*(call_597062: Call_WebTestsDelete_597054; resourceGroupName: string;
-          apiVersion: string; webTestName: string; subscriptionId: string): Recallable =
+proc call*(call_564162: Call_WebTestsDelete_564154; apiVersion: string;
+          subscriptionId: string; webTestName: string; resourceGroupName: string): Recallable =
   ## webTestsDelete
   ## Deletes an Application Insights web test.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group. The name is case insensitive.
   ##   apiVersion: string (required)
   ##             : The API version to use for this operation.
-  ##   webTestName: string (required)
-  ##              : The name of the Application Insights webtest resource.
   ##   subscriptionId: string (required)
   ##                 : The ID of the target subscription.
-  var path_597063 = newJObject()
-  var query_597064 = newJObject()
-  add(path_597063, "resourceGroupName", newJString(resourceGroupName))
-  add(query_597064, "api-version", newJString(apiVersion))
-  add(path_597063, "webTestName", newJString(webTestName))
-  add(path_597063, "subscriptionId", newJString(subscriptionId))
-  result = call_597062.call(path_597063, query_597064, nil, nil, nil)
+  ##   webTestName: string (required)
+  ##              : The name of the Application Insights webtest resource.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group. The name is case insensitive.
+  var path_564163 = newJObject()
+  var query_564164 = newJObject()
+  add(query_564164, "api-version", newJString(apiVersion))
+  add(path_564163, "subscriptionId", newJString(subscriptionId))
+  add(path_564163, "webTestName", newJString(webTestName))
+  add(path_564163, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564162.call(path_564163, query_564164, nil, nil, nil)
 
-var webTestsDelete* = Call_WebTestsDelete_597054(name: "webTestsDelete",
+var webTestsDelete* = Call_WebTestsDelete_564154(name: "webTestsDelete",
     meth: HttpMethod.HttpDelete, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Insights/webtests/{webTestName}",
-    validator: validate_WebTestsDelete_597055, base: "", url: url_WebTestsDelete_597056,
+    validator: validate_WebTestsDelete_564155, base: "", url: url_WebTestsDelete_564156,
     schemes: {Scheme.Https})
 export
   rest

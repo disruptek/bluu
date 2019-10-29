@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, httpcore
 
 ## auto-generated via openapi macro
 ## title: AuthorizationManagementClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_596441 = ref object of OpenApiRestCall
+  OpenApiRestCall_563539 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_596441](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563539](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_596441): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563539): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,8 +107,8 @@ const
   macServiceName = "authorization-authorization-RACalls"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_RoleAssignmentsList_596663 = ref object of OpenApiRestCall_596441
-proc url_RoleAssignmentsList_596665(protocol: Scheme; host: string; base: string;
+  Call_RoleAssignmentsList_563761 = ref object of OpenApiRestCall_563539
+proc url_RoleAssignmentsList_563763(protocol: Scheme; host: string; base: string;
                                    route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -121,7 +125,7 @@ proc url_RoleAssignmentsList_596665(protocol: Scheme; host: string; base: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_RoleAssignmentsList_596664(path: JsonNode; query: JsonNode;
+proc validate_RoleAssignmentsList_563762(path: JsonNode; query: JsonNode;
                                         header: JsonNode; formData: JsonNode;
                                         body: JsonNode): JsonNode =
   ## Gets all role assignments for the subscription.
@@ -134,11 +138,11 @@ proc validate_RoleAssignmentsList_596664(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_596839 = path.getOrDefault("subscriptionId")
-  valid_596839 = validateParameter(valid_596839, JString, required = true,
+  var valid_563939 = path.getOrDefault("subscriptionId")
+  valid_563939 = validateParameter(valid_563939, JString, required = true,
                                  default = nil)
-  if valid_596839 != nil:
-    section.add "subscriptionId", valid_596839
+  if valid_563939 != nil:
+    section.add "subscriptionId", valid_563939
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -148,16 +152,16 @@ proc validate_RoleAssignmentsList_596664(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_596840 = query.getOrDefault("api-version")
-  valid_596840 = validateParameter(valid_596840, JString, required = true,
+  var valid_563940 = query.getOrDefault("api-version")
+  valid_563940 = validateParameter(valid_563940, JString, required = true,
                                  default = nil)
-  if valid_596840 != nil:
-    section.add "api-version", valid_596840
-  var valid_596841 = query.getOrDefault("$filter")
-  valid_596841 = validateParameter(valid_596841, JString, required = false,
+  if valid_563940 != nil:
+    section.add "api-version", valid_563940
+  var valid_563941 = query.getOrDefault("$filter")
+  valid_563941 = validateParameter(valid_563941, JString, required = false,
                                  default = nil)
-  if valid_596841 != nil:
-    section.add "$filter", valid_596841
+  if valid_563941 != nil:
+    section.add "$filter", valid_563941
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -166,20 +170,20 @@ proc validate_RoleAssignmentsList_596664(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_596864: Call_RoleAssignmentsList_596663; path: JsonNode;
+proc call*(call_563964: Call_RoleAssignmentsList_563761; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets all role assignments for the subscription.
   ## 
-  let valid = call_596864.validator(path, query, header, formData, body)
-  let scheme = call_596864.pickScheme
+  let valid = call_563964.validator(path, query, header, formData, body)
+  let scheme = call_563964.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_596864.url(scheme.get, call_596864.host, call_596864.base,
-                         call_596864.route, valid.getOrDefault("path"),
+  let url = call_563964.url(scheme.get, call_563964.host, call_563964.base,
+                         call_563964.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_596864, url, valid)
+  result = hook(call_563964, url, valid)
 
-proc call*(call_596935: Call_RoleAssignmentsList_596663; apiVersion: string;
+proc call*(call_564035: Call_RoleAssignmentsList_563761; apiVersion: string;
           subscriptionId: string; Filter: string = ""): Recallable =
   ## roleAssignmentsList
   ## Gets all role assignments for the subscription.
@@ -189,21 +193,21 @@ proc call*(call_596935: Call_RoleAssignmentsList_596663; apiVersion: string;
   ##                 : The ID of the target subscription.
   ##   Filter: string
   ##         : The filter to apply on the operation. Use $filter=atScope() to return all role assignments at or above the scope. Use $filter=principalId eq {id} to return all role assignments at, above or below the scope for the specified principal.
-  var path_596936 = newJObject()
-  var query_596938 = newJObject()
-  add(query_596938, "api-version", newJString(apiVersion))
-  add(path_596936, "subscriptionId", newJString(subscriptionId))
-  add(query_596938, "$filter", newJString(Filter))
-  result = call_596935.call(path_596936, query_596938, nil, nil, nil)
+  var path_564036 = newJObject()
+  var query_564038 = newJObject()
+  add(query_564038, "api-version", newJString(apiVersion))
+  add(path_564036, "subscriptionId", newJString(subscriptionId))
+  add(query_564038, "$filter", newJString(Filter))
+  result = call_564035.call(path_564036, query_564038, nil, nil, nil)
 
-var roleAssignmentsList* = Call_RoleAssignmentsList_596663(
+var roleAssignmentsList* = Call_RoleAssignmentsList_563761(
     name: "roleAssignmentsList", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Authorization/roleAssignments",
-    validator: validate_RoleAssignmentsList_596664, base: "",
-    url: url_RoleAssignmentsList_596665, schemes: {Scheme.Https})
+    validator: validate_RoleAssignmentsList_563762, base: "",
+    url: url_RoleAssignmentsList_563763, schemes: {Scheme.Https})
 type
-  Call_RoleAssignmentsListForResourceGroup_596977 = ref object of OpenApiRestCall_596441
-proc url_RoleAssignmentsListForResourceGroup_596979(protocol: Scheme; host: string;
+  Call_RoleAssignmentsListForResourceGroup_564077 = ref object of OpenApiRestCall_563539
+proc url_RoleAssignmentsListForResourceGroup_564079(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -224,30 +228,30 @@ proc url_RoleAssignmentsListForResourceGroup_596979(protocol: Scheme; host: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_RoleAssignmentsListForResourceGroup_596978(path: JsonNode;
+proc validate_RoleAssignmentsListForResourceGroup_564078(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets role assignments for a resource group.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   subscriptionId: JString (required)
   ##                 : The ID of the target subscription.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_596980 = path.getOrDefault("resourceGroupName")
-  valid_596980 = validateParameter(valid_596980, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564080 = path.getOrDefault("subscriptionId")
+  valid_564080 = validateParameter(valid_564080, JString, required = true,
                                  default = nil)
-  if valid_596980 != nil:
-    section.add "resourceGroupName", valid_596980
-  var valid_596981 = path.getOrDefault("subscriptionId")
-  valid_596981 = validateParameter(valid_596981, JString, required = true,
+  if valid_564080 != nil:
+    section.add "subscriptionId", valid_564080
+  var valid_564081 = path.getOrDefault("resourceGroupName")
+  valid_564081 = validateParameter(valid_564081, JString, required = true,
                                  default = nil)
-  if valid_596981 != nil:
-    section.add "subscriptionId", valid_596981
+  if valid_564081 != nil:
+    section.add "resourceGroupName", valid_564081
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -257,16 +261,16 @@ proc validate_RoleAssignmentsListForResourceGroup_596978(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_596982 = query.getOrDefault("api-version")
-  valid_596982 = validateParameter(valid_596982, JString, required = true,
+  var valid_564082 = query.getOrDefault("api-version")
+  valid_564082 = validateParameter(valid_564082, JString, required = true,
                                  default = nil)
-  if valid_596982 != nil:
-    section.add "api-version", valid_596982
-  var valid_596983 = query.getOrDefault("$filter")
-  valid_596983 = validateParameter(valid_596983, JString, required = false,
+  if valid_564082 != nil:
+    section.add "api-version", valid_564082
+  var valid_564083 = query.getOrDefault("$filter")
+  valid_564083 = validateParameter(valid_564083, JString, required = false,
                                  default = nil)
-  if valid_596983 != nil:
-    section.add "$filter", valid_596983
+  if valid_564083 != nil:
+    section.add "$filter", valid_564083
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -275,49 +279,49 @@ proc validate_RoleAssignmentsListForResourceGroup_596978(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_596984: Call_RoleAssignmentsListForResourceGroup_596977;
+proc call*(call_564084: Call_RoleAssignmentsListForResourceGroup_564077;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Gets role assignments for a resource group.
   ## 
-  let valid = call_596984.validator(path, query, header, formData, body)
-  let scheme = call_596984.pickScheme
+  let valid = call_564084.validator(path, query, header, formData, body)
+  let scheme = call_564084.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_596984.url(scheme.get, call_596984.host, call_596984.base,
-                         call_596984.route, valid.getOrDefault("path"),
+  let url = call_564084.url(scheme.get, call_564084.host, call_564084.base,
+                         call_564084.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_596984, url, valid)
+  result = hook(call_564084, url, valid)
 
-proc call*(call_596985: Call_RoleAssignmentsListForResourceGroup_596977;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
+proc call*(call_564085: Call_RoleAssignmentsListForResourceGroup_564077;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string;
           Filter: string = ""): Recallable =
   ## roleAssignmentsListForResourceGroup
   ## Gets role assignments for a resource group.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : The API version to use for this operation.
   ##   subscriptionId: string (required)
   ##                 : The ID of the target subscription.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   Filter: string
   ##         : The filter to apply on the operation. Use $filter=atScope() to return all role assignments at or above the scope. Use $filter=principalId eq {id} to return all role assignments at, above or below the scope for the specified principal.
-  var path_596986 = newJObject()
-  var query_596987 = newJObject()
-  add(path_596986, "resourceGroupName", newJString(resourceGroupName))
-  add(query_596987, "api-version", newJString(apiVersion))
-  add(path_596986, "subscriptionId", newJString(subscriptionId))
-  add(query_596987, "$filter", newJString(Filter))
-  result = call_596985.call(path_596986, query_596987, nil, nil, nil)
+  var path_564086 = newJObject()
+  var query_564087 = newJObject()
+  add(query_564087, "api-version", newJString(apiVersion))
+  add(path_564086, "subscriptionId", newJString(subscriptionId))
+  add(path_564086, "resourceGroupName", newJString(resourceGroupName))
+  add(query_564087, "$filter", newJString(Filter))
+  result = call_564085.call(path_564086, query_564087, nil, nil, nil)
 
-var roleAssignmentsListForResourceGroup* = Call_RoleAssignmentsListForResourceGroup_596977(
+var roleAssignmentsListForResourceGroup* = Call_RoleAssignmentsListForResourceGroup_564077(
     name: "roleAssignmentsListForResourceGroup", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Authorization/roleAssignments",
-    validator: validate_RoleAssignmentsListForResourceGroup_596978, base: "",
-    url: url_RoleAssignmentsListForResourceGroup_596979, schemes: {Scheme.Https})
+    validator: validate_RoleAssignmentsListForResourceGroup_564078, base: "",
+    url: url_RoleAssignmentsListForResourceGroup_564079, schemes: {Scheme.Https})
 type
-  Call_RoleAssignmentsListForResource_596988 = ref object of OpenApiRestCall_596441
-proc url_RoleAssignmentsListForResource_596990(protocol: Scheme; host: string;
+  Call_RoleAssignmentsListForResource_564088 = ref object of OpenApiRestCall_563539
+proc url_RoleAssignmentsListForResource_564090(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -352,7 +356,7 @@ proc url_RoleAssignmentsListForResource_596990(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_RoleAssignmentsListForResource_596989(path: JsonNode;
+proc validate_RoleAssignmentsListForResource_564089(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets role assignments for a resource.
   ## 
@@ -361,49 +365,49 @@ proc validate_RoleAssignmentsListForResource_596989(path: JsonNode;
   ## parameters in `path` object:
   ##   resourceType: JString (required)
   ##               : The resource type of the resource.
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
-  ##   subscriptionId: JString (required)
-  ##                 : The ID of the target subscription.
-  ##   resourceName: JString (required)
-  ##               : The name of the resource to get role assignments for.
   ##   resourceProviderNamespace: JString (required)
   ##                            : The namespace of the resource provider.
+  ##   subscriptionId: JString (required)
+  ##                 : The ID of the target subscription.
   ##   parentResourcePath: JString (required)
   ##                     : The parent resource identity.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
+  ##   resourceName: JString (required)
+  ##               : The name of the resource to get role assignments for.
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `resourceType` field"
-  var valid_596991 = path.getOrDefault("resourceType")
-  valid_596991 = validateParameter(valid_596991, JString, required = true,
+  var valid_564091 = path.getOrDefault("resourceType")
+  valid_564091 = validateParameter(valid_564091, JString, required = true,
                                  default = nil)
-  if valid_596991 != nil:
-    section.add "resourceType", valid_596991
-  var valid_596992 = path.getOrDefault("resourceGroupName")
-  valid_596992 = validateParameter(valid_596992, JString, required = true,
+  if valid_564091 != nil:
+    section.add "resourceType", valid_564091
+  var valid_564092 = path.getOrDefault("resourceProviderNamespace")
+  valid_564092 = validateParameter(valid_564092, JString, required = true,
                                  default = nil)
-  if valid_596992 != nil:
-    section.add "resourceGroupName", valid_596992
-  var valid_596993 = path.getOrDefault("subscriptionId")
-  valid_596993 = validateParameter(valid_596993, JString, required = true,
+  if valid_564092 != nil:
+    section.add "resourceProviderNamespace", valid_564092
+  var valid_564093 = path.getOrDefault("subscriptionId")
+  valid_564093 = validateParameter(valid_564093, JString, required = true,
                                  default = nil)
-  if valid_596993 != nil:
-    section.add "subscriptionId", valid_596993
-  var valid_596994 = path.getOrDefault("resourceName")
-  valid_596994 = validateParameter(valid_596994, JString, required = true,
+  if valid_564093 != nil:
+    section.add "subscriptionId", valid_564093
+  var valid_564094 = path.getOrDefault("parentResourcePath")
+  valid_564094 = validateParameter(valid_564094, JString, required = true,
                                  default = nil)
-  if valid_596994 != nil:
-    section.add "resourceName", valid_596994
-  var valid_596995 = path.getOrDefault("resourceProviderNamespace")
-  valid_596995 = validateParameter(valid_596995, JString, required = true,
+  if valid_564094 != nil:
+    section.add "parentResourcePath", valid_564094
+  var valid_564095 = path.getOrDefault("resourceGroupName")
+  valid_564095 = validateParameter(valid_564095, JString, required = true,
                                  default = nil)
-  if valid_596995 != nil:
-    section.add "resourceProviderNamespace", valid_596995
-  var valid_596996 = path.getOrDefault("parentResourcePath")
-  valid_596996 = validateParameter(valid_596996, JString, required = true,
+  if valid_564095 != nil:
+    section.add "resourceGroupName", valid_564095
+  var valid_564096 = path.getOrDefault("resourceName")
+  valid_564096 = validateParameter(valid_564096, JString, required = true,
                                  default = nil)
-  if valid_596996 != nil:
-    section.add "parentResourcePath", valid_596996
+  if valid_564096 != nil:
+    section.add "resourceName", valid_564096
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -413,16 +417,16 @@ proc validate_RoleAssignmentsListForResource_596989(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_596997 = query.getOrDefault("api-version")
-  valid_596997 = validateParameter(valid_596997, JString, required = true,
+  var valid_564097 = query.getOrDefault("api-version")
+  valid_564097 = validateParameter(valid_564097, JString, required = true,
                                  default = nil)
-  if valid_596997 != nil:
-    section.add "api-version", valid_596997
-  var valid_596998 = query.getOrDefault("$filter")
-  valid_596998 = validateParameter(valid_596998, JString, required = false,
+  if valid_564097 != nil:
+    section.add "api-version", valid_564097
+  var valid_564098 = query.getOrDefault("$filter")
+  valid_564098 = validateParameter(valid_564098, JString, required = false,
                                  default = nil)
-  if valid_596998 != nil:
-    section.add "$filter", valid_596998
+  if valid_564098 != nil:
+    section.add "$filter", valid_564098
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -431,63 +435,63 @@ proc validate_RoleAssignmentsListForResource_596989(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_596999: Call_RoleAssignmentsListForResource_596988; path: JsonNode;
+proc call*(call_564099: Call_RoleAssignmentsListForResource_564088; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets role assignments for a resource.
   ## 
-  let valid = call_596999.validator(path, query, header, formData, body)
-  let scheme = call_596999.pickScheme
+  let valid = call_564099.validator(path, query, header, formData, body)
+  let scheme = call_564099.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_596999.url(scheme.get, call_596999.host, call_596999.base,
-                         call_596999.route, valid.getOrDefault("path"),
+  let url = call_564099.url(scheme.get, call_564099.host, call_564099.base,
+                         call_564099.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_596999, url, valid)
+  result = hook(call_564099, url, valid)
 
-proc call*(call_597000: Call_RoleAssignmentsListForResource_596988;
-          resourceType: string; resourceGroupName: string; apiVersion: string;
-          subscriptionId: string; resourceName: string;
-          resourceProviderNamespace: string; parentResourcePath: string;
-          Filter: string = ""): Recallable =
+proc call*(call_564100: Call_RoleAssignmentsListForResource_564088;
+          apiVersion: string; resourceType: string;
+          resourceProviderNamespace: string; subscriptionId: string;
+          parentResourcePath: string; resourceGroupName: string;
+          resourceName: string; Filter: string = ""): Recallable =
   ## roleAssignmentsListForResource
   ## Gets role assignments for a resource.
-  ##   resourceType: string (required)
-  ##               : The resource type of the resource.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : The API version to use for this operation.
-  ##   subscriptionId: string (required)
-  ##                 : The ID of the target subscription.
-  ##   resourceName: string (required)
-  ##               : The name of the resource to get role assignments for.
+  ##   resourceType: string (required)
+  ##               : The resource type of the resource.
   ##   resourceProviderNamespace: string (required)
   ##                            : The namespace of the resource provider.
+  ##   subscriptionId: string (required)
+  ##                 : The ID of the target subscription.
   ##   parentResourcePath: string (required)
   ##                     : The parent resource identity.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   Filter: string
   ##         : The filter to apply on the operation. Use $filter=atScope() to return all role assignments at or above the scope. Use $filter=principalId eq {id} to return all role assignments at, above or below the scope for the specified principal.
-  var path_597001 = newJObject()
-  var query_597002 = newJObject()
-  add(path_597001, "resourceType", newJString(resourceType))
-  add(path_597001, "resourceGroupName", newJString(resourceGroupName))
-  add(query_597002, "api-version", newJString(apiVersion))
-  add(path_597001, "subscriptionId", newJString(subscriptionId))
-  add(path_597001, "resourceName", newJString(resourceName))
-  add(path_597001, "resourceProviderNamespace",
+  ##   resourceName: string (required)
+  ##               : The name of the resource to get role assignments for.
+  var path_564101 = newJObject()
+  var query_564102 = newJObject()
+  add(query_564102, "api-version", newJString(apiVersion))
+  add(path_564101, "resourceType", newJString(resourceType))
+  add(path_564101, "resourceProviderNamespace",
       newJString(resourceProviderNamespace))
-  add(path_597001, "parentResourcePath", newJString(parentResourcePath))
-  add(query_597002, "$filter", newJString(Filter))
-  result = call_597000.call(path_597001, query_597002, nil, nil, nil)
+  add(path_564101, "subscriptionId", newJString(subscriptionId))
+  add(path_564101, "parentResourcePath", newJString(parentResourcePath))
+  add(path_564101, "resourceGroupName", newJString(resourceGroupName))
+  add(query_564102, "$filter", newJString(Filter))
+  add(path_564101, "resourceName", newJString(resourceName))
+  result = call_564100.call(path_564101, query_564102, nil, nil, nil)
 
-var roleAssignmentsListForResource* = Call_RoleAssignmentsListForResource_596988(
+var roleAssignmentsListForResource* = Call_RoleAssignmentsListForResource_564088(
     name: "roleAssignmentsListForResource", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/{resourceProviderNamespace}/{parentResourcePath}/{resourceType}/{resourceName}/providers/Microsoft.Authorization/roleAssignments",
-    validator: validate_RoleAssignmentsListForResource_596989, base: "",
-    url: url_RoleAssignmentsListForResource_596990, schemes: {Scheme.Https})
+    validator: validate_RoleAssignmentsListForResource_564089, base: "",
+    url: url_RoleAssignmentsListForResource_564090, schemes: {Scheme.Https})
 type
-  Call_RoleAssignmentsCreateById_597012 = ref object of OpenApiRestCall_596441
-proc url_RoleAssignmentsCreateById_597014(protocol: Scheme; host: string;
+  Call_RoleAssignmentsCreateById_564112 = ref object of OpenApiRestCall_563539
+proc url_RoleAssignmentsCreateById_564114(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -503,7 +507,7 @@ proc url_RoleAssignmentsCreateById_597014(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_RoleAssignmentsCreateById_597013(path: JsonNode; query: JsonNode;
+proc validate_RoleAssignmentsCreateById_564113(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Creates a role assignment by ID.
   ## 
@@ -515,11 +519,11 @@ proc validate_RoleAssignmentsCreateById_597013(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `roleAssignmentId` field"
-  var valid_597032 = path.getOrDefault("roleAssignmentId")
-  valid_597032 = validateParameter(valid_597032, JString, required = true,
+  var valid_564132 = path.getOrDefault("roleAssignmentId")
+  valid_564132 = validateParameter(valid_564132, JString, required = true,
                                  default = nil)
-  if valid_597032 != nil:
-    section.add "roleAssignmentId", valid_597032
+  if valid_564132 != nil:
+    section.add "roleAssignmentId", valid_564132
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -527,11 +531,11 @@ proc validate_RoleAssignmentsCreateById_597013(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_597033 = query.getOrDefault("api-version")
-  valid_597033 = validateParameter(valid_597033, JString, required = true,
+  var valid_564133 = query.getOrDefault("api-version")
+  valid_564133 = validateParameter(valid_564133, JString, required = true,
                                  default = nil)
-  if valid_597033 != nil:
-    section.add "api-version", valid_597033
+  if valid_564133 != nil:
+    section.add "api-version", valid_564133
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -545,46 +549,46 @@ proc validate_RoleAssignmentsCreateById_597013(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_597035: Call_RoleAssignmentsCreateById_597012; path: JsonNode;
+proc call*(call_564135: Call_RoleAssignmentsCreateById_564112; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Creates a role assignment by ID.
   ## 
-  let valid = call_597035.validator(path, query, header, formData, body)
-  let scheme = call_597035.pickScheme
+  let valid = call_564135.validator(path, query, header, formData, body)
+  let scheme = call_564135.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_597035.url(scheme.get, call_597035.host, call_597035.base,
-                         call_597035.route, valid.getOrDefault("path"),
+  let url = call_564135.url(scheme.get, call_564135.host, call_564135.base,
+                         call_564135.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_597035, url, valid)
+  result = hook(call_564135, url, valid)
 
-proc call*(call_597036: Call_RoleAssignmentsCreateById_597012; apiVersion: string;
-          parameters: JsonNode; roleAssignmentId: string): Recallable =
+proc call*(call_564136: Call_RoleAssignmentsCreateById_564112; apiVersion: string;
+          roleAssignmentId: string; parameters: JsonNode): Recallable =
   ## roleAssignmentsCreateById
   ## Creates a role assignment by ID.
   ##   apiVersion: string (required)
   ##             : The API version to use for this operation.
-  ##   parameters: JObject (required)
-  ##             : Parameters for the role assignment.
   ##   roleAssignmentId: string (required)
   ##                   : The ID of the role assignment to create.
-  var path_597037 = newJObject()
-  var query_597038 = newJObject()
-  var body_597039 = newJObject()
-  add(query_597038, "api-version", newJString(apiVersion))
+  ##   parameters: JObject (required)
+  ##             : Parameters for the role assignment.
+  var path_564137 = newJObject()
+  var query_564138 = newJObject()
+  var body_564139 = newJObject()
+  add(query_564138, "api-version", newJString(apiVersion))
+  add(path_564137, "roleAssignmentId", newJString(roleAssignmentId))
   if parameters != nil:
-    body_597039 = parameters
-  add(path_597037, "roleAssignmentId", newJString(roleAssignmentId))
-  result = call_597036.call(path_597037, query_597038, nil, nil, body_597039)
+    body_564139 = parameters
+  result = call_564136.call(path_564137, query_564138, nil, nil, body_564139)
 
-var roleAssignmentsCreateById* = Call_RoleAssignmentsCreateById_597012(
+var roleAssignmentsCreateById* = Call_RoleAssignmentsCreateById_564112(
     name: "roleAssignmentsCreateById", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/{roleAssignmentId}",
-    validator: validate_RoleAssignmentsCreateById_597013, base: "",
-    url: url_RoleAssignmentsCreateById_597014, schemes: {Scheme.Https})
+    validator: validate_RoleAssignmentsCreateById_564113, base: "",
+    url: url_RoleAssignmentsCreateById_564114, schemes: {Scheme.Https})
 type
-  Call_RoleAssignmentsGetById_597003 = ref object of OpenApiRestCall_596441
-proc url_RoleAssignmentsGetById_597005(protocol: Scheme; host: string; base: string;
+  Call_RoleAssignmentsGetById_564103 = ref object of OpenApiRestCall_563539
+proc url_RoleAssignmentsGetById_564105(protocol: Scheme; host: string; base: string;
                                       route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -600,7 +604,7 @@ proc url_RoleAssignmentsGetById_597005(protocol: Scheme; host: string; base: str
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_RoleAssignmentsGetById_597004(path: JsonNode; query: JsonNode;
+proc validate_RoleAssignmentsGetById_564104(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets a role assignment by ID.
   ## 
@@ -612,11 +616,11 @@ proc validate_RoleAssignmentsGetById_597004(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `roleAssignmentId` field"
-  var valid_597006 = path.getOrDefault("roleAssignmentId")
-  valid_597006 = validateParameter(valid_597006, JString, required = true,
+  var valid_564106 = path.getOrDefault("roleAssignmentId")
+  valid_564106 = validateParameter(valid_564106, JString, required = true,
                                  default = nil)
-  if valid_597006 != nil:
-    section.add "roleAssignmentId", valid_597006
+  if valid_564106 != nil:
+    section.add "roleAssignmentId", valid_564106
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -624,11 +628,11 @@ proc validate_RoleAssignmentsGetById_597004(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_597007 = query.getOrDefault("api-version")
-  valid_597007 = validateParameter(valid_597007, JString, required = true,
+  var valid_564107 = query.getOrDefault("api-version")
+  valid_564107 = validateParameter(valid_564107, JString, required = true,
                                  default = nil)
-  if valid_597007 != nil:
-    section.add "api-version", valid_597007
+  if valid_564107 != nil:
+    section.add "api-version", valid_564107
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -637,20 +641,20 @@ proc validate_RoleAssignmentsGetById_597004(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_597008: Call_RoleAssignmentsGetById_597003; path: JsonNode;
+proc call*(call_564108: Call_RoleAssignmentsGetById_564103; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets a role assignment by ID.
   ## 
-  let valid = call_597008.validator(path, query, header, formData, body)
-  let scheme = call_597008.pickScheme
+  let valid = call_564108.validator(path, query, header, formData, body)
+  let scheme = call_564108.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_597008.url(scheme.get, call_597008.host, call_597008.base,
-                         call_597008.route, valid.getOrDefault("path"),
+  let url = call_564108.url(scheme.get, call_564108.host, call_564108.base,
+                         call_564108.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_597008, url, valid)
+  result = hook(call_564108, url, valid)
 
-proc call*(call_597009: Call_RoleAssignmentsGetById_597003; apiVersion: string;
+proc call*(call_564109: Call_RoleAssignmentsGetById_564103; apiVersion: string;
           roleAssignmentId: string): Recallable =
   ## roleAssignmentsGetById
   ## Gets a role assignment by ID.
@@ -658,20 +662,20 @@ proc call*(call_597009: Call_RoleAssignmentsGetById_597003; apiVersion: string;
   ##             : The API version to use for this operation.
   ##   roleAssignmentId: string (required)
   ##                   : The ID of the role assignment to get.
-  var path_597010 = newJObject()
-  var query_597011 = newJObject()
-  add(query_597011, "api-version", newJString(apiVersion))
-  add(path_597010, "roleAssignmentId", newJString(roleAssignmentId))
-  result = call_597009.call(path_597010, query_597011, nil, nil, nil)
+  var path_564110 = newJObject()
+  var query_564111 = newJObject()
+  add(query_564111, "api-version", newJString(apiVersion))
+  add(path_564110, "roleAssignmentId", newJString(roleAssignmentId))
+  result = call_564109.call(path_564110, query_564111, nil, nil, nil)
 
-var roleAssignmentsGetById* = Call_RoleAssignmentsGetById_597003(
+var roleAssignmentsGetById* = Call_RoleAssignmentsGetById_564103(
     name: "roleAssignmentsGetById", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/{roleAssignmentId}",
-    validator: validate_RoleAssignmentsGetById_597004, base: "",
-    url: url_RoleAssignmentsGetById_597005, schemes: {Scheme.Https})
+    validator: validate_RoleAssignmentsGetById_564104, base: "",
+    url: url_RoleAssignmentsGetById_564105, schemes: {Scheme.Https})
 type
-  Call_RoleAssignmentsDeleteById_597040 = ref object of OpenApiRestCall_596441
-proc url_RoleAssignmentsDeleteById_597042(protocol: Scheme; host: string;
+  Call_RoleAssignmentsDeleteById_564140 = ref object of OpenApiRestCall_563539
+proc url_RoleAssignmentsDeleteById_564142(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -687,7 +691,7 @@ proc url_RoleAssignmentsDeleteById_597042(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_RoleAssignmentsDeleteById_597041(path: JsonNode; query: JsonNode;
+proc validate_RoleAssignmentsDeleteById_564141(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Deletes a role assignment.
   ## 
@@ -699,11 +703,11 @@ proc validate_RoleAssignmentsDeleteById_597041(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `roleAssignmentId` field"
-  var valid_597043 = path.getOrDefault("roleAssignmentId")
-  valid_597043 = validateParameter(valid_597043, JString, required = true,
+  var valid_564143 = path.getOrDefault("roleAssignmentId")
+  valid_564143 = validateParameter(valid_564143, JString, required = true,
                                  default = nil)
-  if valid_597043 != nil:
-    section.add "roleAssignmentId", valid_597043
+  if valid_564143 != nil:
+    section.add "roleAssignmentId", valid_564143
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -711,11 +715,11 @@ proc validate_RoleAssignmentsDeleteById_597041(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_597044 = query.getOrDefault("api-version")
-  valid_597044 = validateParameter(valid_597044, JString, required = true,
+  var valid_564144 = query.getOrDefault("api-version")
+  valid_564144 = validateParameter(valid_564144, JString, required = true,
                                  default = nil)
-  if valid_597044 != nil:
-    section.add "api-version", valid_597044
+  if valid_564144 != nil:
+    section.add "api-version", valid_564144
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -724,20 +728,20 @@ proc validate_RoleAssignmentsDeleteById_597041(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_597045: Call_RoleAssignmentsDeleteById_597040; path: JsonNode;
+proc call*(call_564145: Call_RoleAssignmentsDeleteById_564140; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes a role assignment.
   ## 
-  let valid = call_597045.validator(path, query, header, formData, body)
-  let scheme = call_597045.pickScheme
+  let valid = call_564145.validator(path, query, header, formData, body)
+  let scheme = call_564145.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_597045.url(scheme.get, call_597045.host, call_597045.base,
-                         call_597045.route, valid.getOrDefault("path"),
+  let url = call_564145.url(scheme.get, call_564145.host, call_564145.base,
+                         call_564145.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_597045, url, valid)
+  result = hook(call_564145, url, valid)
 
-proc call*(call_597046: Call_RoleAssignmentsDeleteById_597040; apiVersion: string;
+proc call*(call_564146: Call_RoleAssignmentsDeleteById_564140; apiVersion: string;
           roleAssignmentId: string): Recallable =
   ## roleAssignmentsDeleteById
   ## Deletes a role assignment.
@@ -745,20 +749,20 @@ proc call*(call_597046: Call_RoleAssignmentsDeleteById_597040; apiVersion: strin
   ##             : The API version to use for this operation.
   ##   roleAssignmentId: string (required)
   ##                   : The ID of the role assignment to delete.
-  var path_597047 = newJObject()
-  var query_597048 = newJObject()
-  add(query_597048, "api-version", newJString(apiVersion))
-  add(path_597047, "roleAssignmentId", newJString(roleAssignmentId))
-  result = call_597046.call(path_597047, query_597048, nil, nil, nil)
+  var path_564147 = newJObject()
+  var query_564148 = newJObject()
+  add(query_564148, "api-version", newJString(apiVersion))
+  add(path_564147, "roleAssignmentId", newJString(roleAssignmentId))
+  result = call_564146.call(path_564147, query_564148, nil, nil, nil)
 
-var roleAssignmentsDeleteById* = Call_RoleAssignmentsDeleteById_597040(
+var roleAssignmentsDeleteById* = Call_RoleAssignmentsDeleteById_564140(
     name: "roleAssignmentsDeleteById", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/{roleAssignmentId}",
-    validator: validate_RoleAssignmentsDeleteById_597041, base: "",
-    url: url_RoleAssignmentsDeleteById_597042, schemes: {Scheme.Https})
+    validator: validate_RoleAssignmentsDeleteById_564141, base: "",
+    url: url_RoleAssignmentsDeleteById_564142, schemes: {Scheme.Https})
 type
-  Call_RoleAssignmentsListForScope_597049 = ref object of OpenApiRestCall_596441
-proc url_RoleAssignmentsListForScope_597051(protocol: Scheme; host: string;
+  Call_RoleAssignmentsListForScope_564149 = ref object of OpenApiRestCall_563539
+proc url_RoleAssignmentsListForScope_564151(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -774,7 +778,7 @@ proc url_RoleAssignmentsListForScope_597051(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_RoleAssignmentsListForScope_597050(path: JsonNode; query: JsonNode;
+proc validate_RoleAssignmentsListForScope_564150(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets role assignments for a scope.
   ## 
@@ -785,11 +789,11 @@ proc validate_RoleAssignmentsListForScope_597050(path: JsonNode; query: JsonNode
   ##        : The scope of the role assignments.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `scope` field"
-  var valid_597052 = path.getOrDefault("scope")
-  valid_597052 = validateParameter(valid_597052, JString, required = true,
+  var valid_564152 = path.getOrDefault("scope")
+  valid_564152 = validateParameter(valid_564152, JString, required = true,
                                  default = nil)
-  if valid_597052 != nil:
-    section.add "scope", valid_597052
+  if valid_564152 != nil:
+    section.add "scope", valid_564152
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -799,16 +803,16 @@ proc validate_RoleAssignmentsListForScope_597050(path: JsonNode; query: JsonNode
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_597053 = query.getOrDefault("api-version")
-  valid_597053 = validateParameter(valid_597053, JString, required = true,
+  var valid_564153 = query.getOrDefault("api-version")
+  valid_564153 = validateParameter(valid_564153, JString, required = true,
                                  default = nil)
-  if valid_597053 != nil:
-    section.add "api-version", valid_597053
-  var valid_597054 = query.getOrDefault("$filter")
-  valid_597054 = validateParameter(valid_597054, JString, required = false,
+  if valid_564153 != nil:
+    section.add "api-version", valid_564153
+  var valid_564154 = query.getOrDefault("$filter")
+  valid_564154 = validateParameter(valid_564154, JString, required = false,
                                  default = nil)
-  if valid_597054 != nil:
-    section.add "$filter", valid_597054
+  if valid_564154 != nil:
+    section.add "$filter", valid_564154
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -817,45 +821,45 @@ proc validate_RoleAssignmentsListForScope_597050(path: JsonNode; query: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_597055: Call_RoleAssignmentsListForScope_597049; path: JsonNode;
+proc call*(call_564155: Call_RoleAssignmentsListForScope_564149; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets role assignments for a scope.
   ## 
-  let valid = call_597055.validator(path, query, header, formData, body)
-  let scheme = call_597055.pickScheme
+  let valid = call_564155.validator(path, query, header, formData, body)
+  let scheme = call_564155.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_597055.url(scheme.get, call_597055.host, call_597055.base,
-                         call_597055.route, valid.getOrDefault("path"),
+  let url = call_564155.url(scheme.get, call_564155.host, call_564155.base,
+                         call_564155.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_597055, url, valid)
+  result = hook(call_564155, url, valid)
 
-proc call*(call_597056: Call_RoleAssignmentsListForScope_597049;
+proc call*(call_564156: Call_RoleAssignmentsListForScope_564149;
           apiVersion: string; scope: string; Filter: string = ""): Recallable =
   ## roleAssignmentsListForScope
   ## Gets role assignments for a scope.
   ##   apiVersion: string (required)
   ##             : The API version to use for this operation.
-  ##   scope: string (required)
-  ##        : The scope of the role assignments.
   ##   Filter: string
   ##         : The filter to apply on the operation. Use $filter=atScope() to return all role assignments at or above the scope. Use $filter=principalId eq {id} to return all role assignments at, above or below the scope for the specified principal.
-  var path_597057 = newJObject()
-  var query_597058 = newJObject()
-  add(query_597058, "api-version", newJString(apiVersion))
-  add(path_597057, "scope", newJString(scope))
-  add(query_597058, "$filter", newJString(Filter))
-  result = call_597056.call(path_597057, query_597058, nil, nil, nil)
+  ##   scope: string (required)
+  ##        : The scope of the role assignments.
+  var path_564157 = newJObject()
+  var query_564158 = newJObject()
+  add(query_564158, "api-version", newJString(apiVersion))
+  add(query_564158, "$filter", newJString(Filter))
+  add(path_564157, "scope", newJString(scope))
+  result = call_564156.call(path_564157, query_564158, nil, nil, nil)
 
-var roleAssignmentsListForScope* = Call_RoleAssignmentsListForScope_597049(
+var roleAssignmentsListForScope* = Call_RoleAssignmentsListForScope_564149(
     name: "roleAssignmentsListForScope", meth: HttpMethod.HttpGet,
     host: "management.azure.com",
     route: "/{scope}/providers/Microsoft.Authorization/roleAssignments",
-    validator: validate_RoleAssignmentsListForScope_597050, base: "",
-    url: url_RoleAssignmentsListForScope_597051, schemes: {Scheme.Https})
+    validator: validate_RoleAssignmentsListForScope_564150, base: "",
+    url: url_RoleAssignmentsListForScope_564151, schemes: {Scheme.Https})
 type
-  Call_RoleAssignmentsCreate_597069 = ref object of OpenApiRestCall_596441
-proc url_RoleAssignmentsCreate_597071(protocol: Scheme; host: string; base: string;
+  Call_RoleAssignmentsCreate_564169 = ref object of OpenApiRestCall_563539
+proc url_RoleAssignmentsCreate_564171(protocol: Scheme; host: string; base: string;
                                      route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -874,30 +878,31 @@ proc url_RoleAssignmentsCreate_597071(protocol: Scheme; host: string; base: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_RoleAssignmentsCreate_597070(path: JsonNode; query: JsonNode;
+proc validate_RoleAssignmentsCreate_564170(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Creates a role assignment.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
+  ##   roleAssignmentName: JString (required)
+  ##                     : The name of the role assignment to create. It can be any valid GUID.
   ##   scope: JString (required)
   ##        : The scope of the role assignment to create. The scope can be any REST resource instance. For example, use '/subscriptions/{subscription-id}/' for a subscription, '/subscriptions/{subscription-id}/resourceGroups/{resource-group-name}' for a resource group, and 
   ## '/subscriptions/{subscription-id}/resourceGroups/{resource-group-name}/providers/{resource-provider}/{resource-type}/{resource-name}' for a resource.
-  ##   roleAssignmentName: JString (required)
-  ##                     : The name of the role assignment to create. It can be any valid GUID.
   section = newJObject()
-  assert path != nil, "path argument is necessary due to required `scope` field"
-  var valid_597072 = path.getOrDefault("scope")
-  valid_597072 = validateParameter(valid_597072, JString, required = true,
+  assert path != nil,
+        "path argument is necessary due to required `roleAssignmentName` field"
+  var valid_564172 = path.getOrDefault("roleAssignmentName")
+  valid_564172 = validateParameter(valid_564172, JString, required = true,
                                  default = nil)
-  if valid_597072 != nil:
-    section.add "scope", valid_597072
-  var valid_597073 = path.getOrDefault("roleAssignmentName")
-  valid_597073 = validateParameter(valid_597073, JString, required = true,
+  if valid_564172 != nil:
+    section.add "roleAssignmentName", valid_564172
+  var valid_564173 = path.getOrDefault("scope")
+  valid_564173 = validateParameter(valid_564173, JString, required = true,
                                  default = nil)
-  if valid_597073 != nil:
-    section.add "roleAssignmentName", valid_597073
+  if valid_564173 != nil:
+    section.add "scope", valid_564173
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -905,11 +910,11 @@ proc validate_RoleAssignmentsCreate_597070(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_597074 = query.getOrDefault("api-version")
-  valid_597074 = validateParameter(valid_597074, JString, required = true,
+  var valid_564174 = query.getOrDefault("api-version")
+  valid_564174 = validateParameter(valid_564174, JString, required = true,
                                  default = nil)
-  if valid_597074 != nil:
-    section.add "api-version", valid_597074
+  if valid_564174 != nil:
+    section.add "api-version", valid_564174
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -923,23 +928,26 @@ proc validate_RoleAssignmentsCreate_597070(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_597076: Call_RoleAssignmentsCreate_597069; path: JsonNode;
+proc call*(call_564176: Call_RoleAssignmentsCreate_564169; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Creates a role assignment.
   ## 
-  let valid = call_597076.validator(path, query, header, formData, body)
-  let scheme = call_597076.pickScheme
+  let valid = call_564176.validator(path, query, header, formData, body)
+  let scheme = call_564176.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_597076.url(scheme.get, call_597076.host, call_597076.base,
-                         call_597076.route, valid.getOrDefault("path"),
+  let url = call_564176.url(scheme.get, call_564176.host, call_564176.base,
+                         call_564176.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_597076, url, valid)
+  result = hook(call_564176, url, valid)
 
-proc call*(call_597077: Call_RoleAssignmentsCreate_597069; apiVersion: string;
-          parameters: JsonNode; scope: string; roleAssignmentName: string): Recallable =
+proc call*(call_564177: Call_RoleAssignmentsCreate_564169;
+          roleAssignmentName: string; apiVersion: string; parameters: JsonNode;
+          scope: string): Recallable =
   ## roleAssignmentsCreate
   ## Creates a role assignment.
+  ##   roleAssignmentName: string (required)
+  ##                     : The name of the role assignment to create. It can be any valid GUID.
   ##   apiVersion: string (required)
   ##             : The API version to use for this operation.
   ##   parameters: JObject (required)
@@ -947,26 +955,24 @@ proc call*(call_597077: Call_RoleAssignmentsCreate_597069; apiVersion: string;
   ##   scope: string (required)
   ##        : The scope of the role assignment to create. The scope can be any REST resource instance. For example, use '/subscriptions/{subscription-id}/' for a subscription, '/subscriptions/{subscription-id}/resourceGroups/{resource-group-name}' for a resource group, and 
   ## '/subscriptions/{subscription-id}/resourceGroups/{resource-group-name}/providers/{resource-provider}/{resource-type}/{resource-name}' for a resource.
-  ##   roleAssignmentName: string (required)
-  ##                     : The name of the role assignment to create. It can be any valid GUID.
-  var path_597078 = newJObject()
-  var query_597079 = newJObject()
-  var body_597080 = newJObject()
-  add(query_597079, "api-version", newJString(apiVersion))
+  var path_564178 = newJObject()
+  var query_564179 = newJObject()
+  var body_564180 = newJObject()
+  add(path_564178, "roleAssignmentName", newJString(roleAssignmentName))
+  add(query_564179, "api-version", newJString(apiVersion))
   if parameters != nil:
-    body_597080 = parameters
-  add(path_597078, "scope", newJString(scope))
-  add(path_597078, "roleAssignmentName", newJString(roleAssignmentName))
-  result = call_597077.call(path_597078, query_597079, nil, nil, body_597080)
+    body_564180 = parameters
+  add(path_564178, "scope", newJString(scope))
+  result = call_564177.call(path_564178, query_564179, nil, nil, body_564180)
 
-var roleAssignmentsCreate* = Call_RoleAssignmentsCreate_597069(
+var roleAssignmentsCreate* = Call_RoleAssignmentsCreate_564169(
     name: "roleAssignmentsCreate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/{scope}/providers/Microsoft.Authorization/roleAssignments/{roleAssignmentName}",
-    validator: validate_RoleAssignmentsCreate_597070, base: "",
-    url: url_RoleAssignmentsCreate_597071, schemes: {Scheme.Https})
+    validator: validate_RoleAssignmentsCreate_564170, base: "",
+    url: url_RoleAssignmentsCreate_564171, schemes: {Scheme.Https})
 type
-  Call_RoleAssignmentsGet_597059 = ref object of OpenApiRestCall_596441
-proc url_RoleAssignmentsGet_597061(protocol: Scheme; host: string; base: string;
+  Call_RoleAssignmentsGet_564159 = ref object of OpenApiRestCall_563539
+proc url_RoleAssignmentsGet_564161(protocol: Scheme; host: string; base: string;
                                   route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -985,7 +991,7 @@ proc url_RoleAssignmentsGet_597061(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_RoleAssignmentsGet_597060(path: JsonNode; query: JsonNode;
+proc validate_RoleAssignmentsGet_564160(path: JsonNode; query: JsonNode;
                                        header: JsonNode; formData: JsonNode;
                                        body: JsonNode): JsonNode =
   ## Get the specified role assignment.
@@ -993,22 +999,23 @@ proc validate_RoleAssignmentsGet_597060(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   scope: JString (required)
-  ##        : The scope of the role assignment.
   ##   roleAssignmentName: JString (required)
   ##                     : The name of the role assignment to get.
+  ##   scope: JString (required)
+  ##        : The scope of the role assignment.
   section = newJObject()
-  assert path != nil, "path argument is necessary due to required `scope` field"
-  var valid_597062 = path.getOrDefault("scope")
-  valid_597062 = validateParameter(valid_597062, JString, required = true,
+  assert path != nil,
+        "path argument is necessary due to required `roleAssignmentName` field"
+  var valid_564162 = path.getOrDefault("roleAssignmentName")
+  valid_564162 = validateParameter(valid_564162, JString, required = true,
                                  default = nil)
-  if valid_597062 != nil:
-    section.add "scope", valid_597062
-  var valid_597063 = path.getOrDefault("roleAssignmentName")
-  valid_597063 = validateParameter(valid_597063, JString, required = true,
+  if valid_564162 != nil:
+    section.add "roleAssignmentName", valid_564162
+  var valid_564163 = path.getOrDefault("scope")
+  valid_564163 = validateParameter(valid_564163, JString, required = true,
                                  default = nil)
-  if valid_597063 != nil:
-    section.add "roleAssignmentName", valid_597063
+  if valid_564163 != nil:
+    section.add "scope", valid_564163
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1016,11 +1023,11 @@ proc validate_RoleAssignmentsGet_597060(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_597064 = query.getOrDefault("api-version")
-  valid_597064 = validateParameter(valid_597064, JString, required = true,
+  var valid_564164 = query.getOrDefault("api-version")
+  valid_564164 = validateParameter(valid_564164, JString, required = true,
                                  default = nil)
-  if valid_597064 != nil:
-    section.add "api-version", valid_597064
+  if valid_564164 != nil:
+    section.add "api-version", valid_564164
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1029,44 +1036,44 @@ proc validate_RoleAssignmentsGet_597060(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_597065: Call_RoleAssignmentsGet_597059; path: JsonNode;
+proc call*(call_564165: Call_RoleAssignmentsGet_564159; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get the specified role assignment.
   ## 
-  let valid = call_597065.validator(path, query, header, formData, body)
-  let scheme = call_597065.pickScheme
+  let valid = call_564165.validator(path, query, header, formData, body)
+  let scheme = call_564165.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_597065.url(scheme.get, call_597065.host, call_597065.base,
-                         call_597065.route, valid.getOrDefault("path"),
+  let url = call_564165.url(scheme.get, call_564165.host, call_564165.base,
+                         call_564165.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_597065, url, valid)
+  result = hook(call_564165, url, valid)
 
-proc call*(call_597066: Call_RoleAssignmentsGet_597059; apiVersion: string;
-          scope: string; roleAssignmentName: string): Recallable =
+proc call*(call_564166: Call_RoleAssignmentsGet_564159; roleAssignmentName: string;
+          apiVersion: string; scope: string): Recallable =
   ## roleAssignmentsGet
   ## Get the specified role assignment.
+  ##   roleAssignmentName: string (required)
+  ##                     : The name of the role assignment to get.
   ##   apiVersion: string (required)
   ##             : The API version to use for this operation.
   ##   scope: string (required)
   ##        : The scope of the role assignment.
-  ##   roleAssignmentName: string (required)
-  ##                     : The name of the role assignment to get.
-  var path_597067 = newJObject()
-  var query_597068 = newJObject()
-  add(query_597068, "api-version", newJString(apiVersion))
-  add(path_597067, "scope", newJString(scope))
-  add(path_597067, "roleAssignmentName", newJString(roleAssignmentName))
-  result = call_597066.call(path_597067, query_597068, nil, nil, nil)
+  var path_564167 = newJObject()
+  var query_564168 = newJObject()
+  add(path_564167, "roleAssignmentName", newJString(roleAssignmentName))
+  add(query_564168, "api-version", newJString(apiVersion))
+  add(path_564167, "scope", newJString(scope))
+  result = call_564166.call(path_564167, query_564168, nil, nil, nil)
 
-var roleAssignmentsGet* = Call_RoleAssignmentsGet_597059(
+var roleAssignmentsGet* = Call_RoleAssignmentsGet_564159(
     name: "roleAssignmentsGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/{scope}/providers/Microsoft.Authorization/roleAssignments/{roleAssignmentName}",
-    validator: validate_RoleAssignmentsGet_597060, base: "",
-    url: url_RoleAssignmentsGet_597061, schemes: {Scheme.Https})
+    validator: validate_RoleAssignmentsGet_564160, base: "",
+    url: url_RoleAssignmentsGet_564161, schemes: {Scheme.Https})
 type
-  Call_RoleAssignmentsDelete_597081 = ref object of OpenApiRestCall_596441
-proc url_RoleAssignmentsDelete_597083(protocol: Scheme; host: string; base: string;
+  Call_RoleAssignmentsDelete_564181 = ref object of OpenApiRestCall_563539
+proc url_RoleAssignmentsDelete_564183(protocol: Scheme; host: string; base: string;
                                      route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1085,29 +1092,30 @@ proc url_RoleAssignmentsDelete_597083(protocol: Scheme; host: string; base: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_RoleAssignmentsDelete_597082(path: JsonNode; query: JsonNode;
+proc validate_RoleAssignmentsDelete_564182(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Deletes a role assignment.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   scope: JString (required)
-  ##        : The scope of the role assignment to delete.
   ##   roleAssignmentName: JString (required)
   ##                     : The name of the role assignment to delete.
+  ##   scope: JString (required)
+  ##        : The scope of the role assignment to delete.
   section = newJObject()
-  assert path != nil, "path argument is necessary due to required `scope` field"
-  var valid_597084 = path.getOrDefault("scope")
-  valid_597084 = validateParameter(valid_597084, JString, required = true,
+  assert path != nil,
+        "path argument is necessary due to required `roleAssignmentName` field"
+  var valid_564184 = path.getOrDefault("roleAssignmentName")
+  valid_564184 = validateParameter(valid_564184, JString, required = true,
                                  default = nil)
-  if valid_597084 != nil:
-    section.add "scope", valid_597084
-  var valid_597085 = path.getOrDefault("roleAssignmentName")
-  valid_597085 = validateParameter(valid_597085, JString, required = true,
+  if valid_564184 != nil:
+    section.add "roleAssignmentName", valid_564184
+  var valid_564185 = path.getOrDefault("scope")
+  valid_564185 = validateParameter(valid_564185, JString, required = true,
                                  default = nil)
-  if valid_597085 != nil:
-    section.add "roleAssignmentName", valid_597085
+  if valid_564185 != nil:
+    section.add "scope", valid_564185
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1115,11 +1123,11 @@ proc validate_RoleAssignmentsDelete_597082(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_597086 = query.getOrDefault("api-version")
-  valid_597086 = validateParameter(valid_597086, JString, required = true,
+  var valid_564186 = query.getOrDefault("api-version")
+  valid_564186 = validateParameter(valid_564186, JString, required = true,
                                  default = nil)
-  if valid_597086 != nil:
-    section.add "api-version", valid_597086
+  if valid_564186 != nil:
+    section.add "api-version", valid_564186
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1128,41 +1136,41 @@ proc validate_RoleAssignmentsDelete_597082(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_597087: Call_RoleAssignmentsDelete_597081; path: JsonNode;
+proc call*(call_564187: Call_RoleAssignmentsDelete_564181; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes a role assignment.
   ## 
-  let valid = call_597087.validator(path, query, header, formData, body)
-  let scheme = call_597087.pickScheme
+  let valid = call_564187.validator(path, query, header, formData, body)
+  let scheme = call_564187.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_597087.url(scheme.get, call_597087.host, call_597087.base,
-                         call_597087.route, valid.getOrDefault("path"),
+  let url = call_564187.url(scheme.get, call_564187.host, call_564187.base,
+                         call_564187.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_597087, url, valid)
+  result = hook(call_564187, url, valid)
 
-proc call*(call_597088: Call_RoleAssignmentsDelete_597081; apiVersion: string;
-          scope: string; roleAssignmentName: string): Recallable =
+proc call*(call_564188: Call_RoleAssignmentsDelete_564181;
+          roleAssignmentName: string; apiVersion: string; scope: string): Recallable =
   ## roleAssignmentsDelete
   ## Deletes a role assignment.
+  ##   roleAssignmentName: string (required)
+  ##                     : The name of the role assignment to delete.
   ##   apiVersion: string (required)
   ##             : The API version to use for this operation.
   ##   scope: string (required)
   ##        : The scope of the role assignment to delete.
-  ##   roleAssignmentName: string (required)
-  ##                     : The name of the role assignment to delete.
-  var path_597089 = newJObject()
-  var query_597090 = newJObject()
-  add(query_597090, "api-version", newJString(apiVersion))
-  add(path_597089, "scope", newJString(scope))
-  add(path_597089, "roleAssignmentName", newJString(roleAssignmentName))
-  result = call_597088.call(path_597089, query_597090, nil, nil, nil)
+  var path_564189 = newJObject()
+  var query_564190 = newJObject()
+  add(path_564189, "roleAssignmentName", newJString(roleAssignmentName))
+  add(query_564190, "api-version", newJString(apiVersion))
+  add(path_564189, "scope", newJString(scope))
+  result = call_564188.call(path_564189, query_564190, nil, nil, nil)
 
-var roleAssignmentsDelete* = Call_RoleAssignmentsDelete_597081(
+var roleAssignmentsDelete* = Call_RoleAssignmentsDelete_564181(
     name: "roleAssignmentsDelete", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/{scope}/providers/Microsoft.Authorization/roleAssignments/{roleAssignmentName}",
-    validator: validate_RoleAssignmentsDelete_597082, base: "",
-    url: url_RoleAssignmentsDelete_597083, schemes: {Scheme.Https})
+    validator: validate_RoleAssignmentsDelete_564182, base: "",
+    url: url_RoleAssignmentsDelete_564183, schemes: {Scheme.Https})
 export
   rest
 

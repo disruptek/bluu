@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, httpcore
 
 ## auto-generated via openapi macro
 ## title: Azure Alerts Management Service Resource Provider
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_593425 = ref object of OpenApiRestCall
+  OpenApiRestCall_563556 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_593425](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563556](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_593425): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563556): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,15 +107,15 @@ const
   macServiceName = "alertsmanagement-AlertsManagement"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_OperationsList_593647 = ref object of OpenApiRestCall_593425
-proc url_OperationsList_593649(protocol: Scheme; host: string; base: string;
+  Call_OperationsList_563778 = ref object of OpenApiRestCall_563556
+proc url_OperationsList_563780(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_OperationsList_593648(path: JsonNode; query: JsonNode;
+proc validate_OperationsList_563779(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## List all operations available through Azure Alerts Management Resource Provider.
@@ -126,11 +130,11 @@ proc validate_OperationsList_593648(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593821 = query.getOrDefault("api-version")
-  valid_593821 = validateParameter(valid_593821, JString, required = true,
+  var valid_563954 = query.getOrDefault("api-version")
+  valid_563954 = validateParameter(valid_563954, JString, required = true,
                                  default = newJString("2018-05-05"))
-  if valid_593821 != nil:
-    section.add "api-version", valid_593821
+  if valid_563954 != nil:
+    section.add "api-version", valid_563954
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -139,37 +143,37 @@ proc validate_OperationsList_593648(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593844: Call_OperationsList_593647; path: JsonNode; query: JsonNode;
+proc call*(call_563977: Call_OperationsList_563778; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## List all operations available through Azure Alerts Management Resource Provider.
   ## 
-  let valid = call_593844.validator(path, query, header, formData, body)
-  let scheme = call_593844.pickScheme
+  let valid = call_563977.validator(path, query, header, formData, body)
+  let scheme = call_563977.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593844.url(scheme.get, call_593844.host, call_593844.base,
-                         call_593844.route, valid.getOrDefault("path"),
+  let url = call_563977.url(scheme.get, call_563977.host, call_563977.base,
+                         call_563977.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593844, url, valid)
+  result = hook(call_563977, url, valid)
 
-proc call*(call_593915: Call_OperationsList_593647;
+proc call*(call_564048: Call_OperationsList_563778;
           apiVersion: string = "2018-05-05"): Recallable =
   ## operationsList
   ## List all operations available through Azure Alerts Management Resource Provider.
   ##   apiVersion: string (required)
   ##             : API version.
-  var query_593916 = newJObject()
-  add(query_593916, "api-version", newJString(apiVersion))
-  result = call_593915.call(nil, query_593916, nil, nil, nil)
+  var query_564049 = newJObject()
+  add(query_564049, "api-version", newJString(apiVersion))
+  result = call_564048.call(nil, query_564049, nil, nil, nil)
 
-var operationsList* = Call_OperationsList_593647(name: "operationsList",
+var operationsList* = Call_OperationsList_563778(name: "operationsList",
     meth: HttpMethod.HttpGet, host: "management.azure.com",
     route: "/providers/Microsoft.AlertsManagement/operations",
-    validator: validate_OperationsList_593648, base: "", url: url_OperationsList_593649,
+    validator: validate_OperationsList_563779, base: "", url: url_OperationsList_563780,
     schemes: {Scheme.Https})
 type
-  Call_AlertsGetAll_593956 = ref object of OpenApiRestCall_593425
-proc url_AlertsGetAll_593958(protocol: Scheme; host: string; base: string;
+  Call_AlertsGetAll_564089 = ref object of OpenApiRestCall_563556
+proc url_AlertsGetAll_564091(protocol: Scheme; host: string; base: string;
                             route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -186,7 +190,7 @@ proc url_AlertsGetAll_593958(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AlertsGetAll_593957(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_AlertsGetAll_564090(path: JsonNode; query: JsonNode; header: JsonNode;
                                  formData: JsonNode; body: JsonNode): JsonNode =
   ## List all existing alerts, where the results can be filtered on the basis of multiple parameters (e.g. time range). The results can then be sorted on the basis specific fields, with the default being lastModifiedDateTime. 
   ## 
@@ -198,139 +202,139 @@ proc validate_AlertsGetAll_593957(path: JsonNode; query: JsonNode; header: JsonN
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_593973 = path.getOrDefault("subscriptionId")
-  valid_593973 = validateParameter(valid_593973, JString, required = true,
+  var valid_564106 = path.getOrDefault("subscriptionId")
+  valid_564106 = validateParameter(valid_564106, JString, required = true,
                                  default = nil)
-  if valid_593973 != nil:
-    section.add "subscriptionId", valid_593973
+  if valid_564106 != nil:
+    section.add "subscriptionId", valid_564106
   result.add "path", section
   ## parameters in `query` object:
-  ##   timeRange: JString
-  ##            : Filter by time range by below listed values. Default value is 1 day.
-  ##   api-version: JString (required)
-  ##              : API version.
-  ##   includeContext: JBool
-  ##                 : Include context which has contextual data specific to the monitor service. Default value is false'
-  ##   targetResource: JString
-  ##                 : Filter by target resource( which is full ARM ID) Default value is select all.
-  ##   select: JString
-  ##         : This filter allows to selection of the fields(comma separated) which would  be part of the essential section. This would allow to project only the  required fields rather than getting entire content.  Default is to fetch all the fields in the essentials section.
-  ##   customTimeRange: JString
-  ##                  : Filter by custom time range in the format <start-time>/<end-time>  where time is in (ISO-8601 format)'. Permissible values is within 30 days from  query time. Either timeRange or customTimeRange could be used but not both. Default is none.
-  ##   targetResourceGroup: JString
-  ##                      : Filter by target resource group name. Default value is select all.
-  ##   sortBy: JString
-  ##         : Sort the query results by input field,  Default value is 'lastModifiedDateTime'.
-  ##   severity: JString
-  ##           : Filter by severity.  Default value is select all.
   ##   monitorCondition: JString
   ##                   : Filter by monitor condition which is either 'Fired' or 'Resolved'. Default value is to select all.
-  ##   targetResourceType: JString
-  ##                     : Filter by target resource type. Default value is select all.
-  ##   monitorService: JString
-  ##                 : Filter by monitor service which generates the alert instance. Default value is select all.
-  ##   alertRule: JString
-  ##            : Filter by specific alert rule.  Default value is to select all.
-  ##   smartGroupId: JString
-  ##               : Filter the alerts list by the Smart Group Id. Default value is none.
-  ##   sortOrder: JString
-  ##            : Sort the query results order in either ascending or descending.  Default value is 'desc' for time fields and 'asc' for others.
-  ##   pageCount: JInt
-  ##            : Determines number of alerts returned per page in response. Permissible value is between 1 to 250. When the "includeContent"  filter is selected, maximum value allowed is 25. Default value is 25.
-  ##   alertState: JString
-  ##             : Filter by state of the alert instance. Default value is to select all.
   ##   includeEgressConfig: JBool
   ##                      : Include egress config which would be used for displaying the content in portal.  Default value is 'false'.
+  ##   sortBy: JString
+  ##         : Sort the query results by input field,  Default value is 'lastModifiedDateTime'.
+  ##   api-version: JString (required)
+  ##              : API version.
+  ##   pageCount: JInt
+  ##            : Determines number of alerts returned per page in response. Permissible value is between 1 to 250. When the "includeContent"  filter is selected, maximum value allowed is 25. Default value is 25.
+  ##   monitorService: JString
+  ##                 : Filter by monitor service which generates the alert instance. Default value is select all.
+  ##   select: JString
+  ##         : This filter allows to selection of the fields(comma separated) which would  be part of the essential section. This would allow to project only the  required fields rather than getting entire content.  Default is to fetch all the fields in the essentials section.
+  ##   alertRule: JString
+  ##            : Filter by specific alert rule.  Default value is to select all.
+  ##   alertState: JString
+  ##             : Filter by state of the alert instance. Default value is to select all.
+  ##   targetResource: JString
+  ##                 : Filter by target resource( which is full ARM ID) Default value is select all.
+  ##   customTimeRange: JString
+  ##                  : Filter by custom time range in the format <start-time>/<end-time>  where time is in (ISO-8601 format)'. Permissible values is within 30 days from  query time. Either timeRange or customTimeRange could be used but not both. Default is none.
+  ##   includeContext: JBool
+  ##                 : Include context which has contextual data specific to the monitor service. Default value is false'
+  ##   targetResourceType: JString
+  ##                     : Filter by target resource type. Default value is select all.
+  ##   sortOrder: JString
+  ##            : Sort the query results order in either ascending or descending.  Default value is 'desc' for time fields and 'asc' for others.
+  ##   timeRange: JString
+  ##            : Filter by time range by below listed values. Default value is 1 day.
+  ##   severity: JString
+  ##           : Filter by severity.  Default value is select all.
+  ##   smartGroupId: JString
+  ##               : Filter the alerts list by the Smart Group Id. Default value is none.
+  ##   targetResourceGroup: JString
+  ##                      : Filter by target resource group name. Default value is select all.
   section = newJObject()
-  var valid_593974 = query.getOrDefault("timeRange")
-  valid_593974 = validateParameter(valid_593974, JString, required = false,
-                                 default = newJString("1h"))
-  if valid_593974 != nil:
-    section.add "timeRange", valid_593974
+  var valid_564107 = query.getOrDefault("monitorCondition")
+  valid_564107 = validateParameter(valid_564107, JString, required = false,
+                                 default = newJString("Fired"))
+  if valid_564107 != nil:
+    section.add "monitorCondition", valid_564107
+  var valid_564108 = query.getOrDefault("includeEgressConfig")
+  valid_564108 = validateParameter(valid_564108, JBool, required = false, default = nil)
+  if valid_564108 != nil:
+    section.add "includeEgressConfig", valid_564108
+  var valid_564109 = query.getOrDefault("sortBy")
+  valid_564109 = validateParameter(valid_564109, JString, required = false,
+                                 default = newJString("name"))
+  if valid_564109 != nil:
+    section.add "sortBy", valid_564109
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593975 = query.getOrDefault("api-version")
-  valid_593975 = validateParameter(valid_593975, JString, required = true,
+  var valid_564110 = query.getOrDefault("api-version")
+  valid_564110 = validateParameter(valid_564110, JString, required = true,
                                  default = newJString("2018-05-05"))
-  if valid_593975 != nil:
-    section.add "api-version", valid_593975
-  var valid_593976 = query.getOrDefault("includeContext")
-  valid_593976 = validateParameter(valid_593976, JBool, required = false, default = nil)
-  if valid_593976 != nil:
-    section.add "includeContext", valid_593976
-  var valid_593977 = query.getOrDefault("targetResource")
-  valid_593977 = validateParameter(valid_593977, JString, required = false,
-                                 default = nil)
-  if valid_593977 != nil:
-    section.add "targetResource", valid_593977
-  var valid_593978 = query.getOrDefault("select")
-  valid_593978 = validateParameter(valid_593978, JString, required = false,
-                                 default = nil)
-  if valid_593978 != nil:
-    section.add "select", valid_593978
-  var valid_593979 = query.getOrDefault("customTimeRange")
-  valid_593979 = validateParameter(valid_593979, JString, required = false,
-                                 default = nil)
-  if valid_593979 != nil:
-    section.add "customTimeRange", valid_593979
-  var valid_593980 = query.getOrDefault("targetResourceGroup")
-  valid_593980 = validateParameter(valid_593980, JString, required = false,
-                                 default = nil)
-  if valid_593980 != nil:
-    section.add "targetResourceGroup", valid_593980
-  var valid_593981 = query.getOrDefault("sortBy")
-  valid_593981 = validateParameter(valid_593981, JString, required = false,
-                                 default = newJString("name"))
-  if valid_593981 != nil:
-    section.add "sortBy", valid_593981
-  var valid_593982 = query.getOrDefault("severity")
-  valid_593982 = validateParameter(valid_593982, JString, required = false,
-                                 default = newJString("Sev0"))
-  if valid_593982 != nil:
-    section.add "severity", valid_593982
-  var valid_593983 = query.getOrDefault("monitorCondition")
-  valid_593983 = validateParameter(valid_593983, JString, required = false,
-                                 default = newJString("Fired"))
-  if valid_593983 != nil:
-    section.add "monitorCondition", valid_593983
-  var valid_593984 = query.getOrDefault("targetResourceType")
-  valid_593984 = validateParameter(valid_593984, JString, required = false,
-                                 default = nil)
-  if valid_593984 != nil:
-    section.add "targetResourceType", valid_593984
-  var valid_593985 = query.getOrDefault("monitorService")
-  valid_593985 = validateParameter(valid_593985, JString, required = false,
+  if valid_564110 != nil:
+    section.add "api-version", valid_564110
+  var valid_564111 = query.getOrDefault("pageCount")
+  valid_564111 = validateParameter(valid_564111, JInt, required = false, default = nil)
+  if valid_564111 != nil:
+    section.add "pageCount", valid_564111
+  var valid_564112 = query.getOrDefault("monitorService")
+  valid_564112 = validateParameter(valid_564112, JString, required = false,
                                  default = newJString("Application Insights"))
-  if valid_593985 != nil:
-    section.add "monitorService", valid_593985
-  var valid_593986 = query.getOrDefault("alertRule")
-  valid_593986 = validateParameter(valid_593986, JString, required = false,
+  if valid_564112 != nil:
+    section.add "monitorService", valid_564112
+  var valid_564113 = query.getOrDefault("select")
+  valid_564113 = validateParameter(valid_564113, JString, required = false,
                                  default = nil)
-  if valid_593986 != nil:
-    section.add "alertRule", valid_593986
-  var valid_593987 = query.getOrDefault("smartGroupId")
-  valid_593987 = validateParameter(valid_593987, JString, required = false,
+  if valid_564113 != nil:
+    section.add "select", valid_564113
+  var valid_564114 = query.getOrDefault("alertRule")
+  valid_564114 = validateParameter(valid_564114, JString, required = false,
                                  default = nil)
-  if valid_593987 != nil:
-    section.add "smartGroupId", valid_593987
-  var valid_593988 = query.getOrDefault("sortOrder")
-  valid_593988 = validateParameter(valid_593988, JString, required = false,
-                                 default = newJString("asc"))
-  if valid_593988 != nil:
-    section.add "sortOrder", valid_593988
-  var valid_593989 = query.getOrDefault("pageCount")
-  valid_593989 = validateParameter(valid_593989, JInt, required = false, default = nil)
-  if valid_593989 != nil:
-    section.add "pageCount", valid_593989
-  var valid_593990 = query.getOrDefault("alertState")
-  valid_593990 = validateParameter(valid_593990, JString, required = false,
+  if valid_564114 != nil:
+    section.add "alertRule", valid_564114
+  var valid_564115 = query.getOrDefault("alertState")
+  valid_564115 = validateParameter(valid_564115, JString, required = false,
                                  default = newJString("New"))
-  if valid_593990 != nil:
-    section.add "alertState", valid_593990
-  var valid_593991 = query.getOrDefault("includeEgressConfig")
-  valid_593991 = validateParameter(valid_593991, JBool, required = false, default = nil)
-  if valid_593991 != nil:
-    section.add "includeEgressConfig", valid_593991
+  if valid_564115 != nil:
+    section.add "alertState", valid_564115
+  var valid_564116 = query.getOrDefault("targetResource")
+  valid_564116 = validateParameter(valid_564116, JString, required = false,
+                                 default = nil)
+  if valid_564116 != nil:
+    section.add "targetResource", valid_564116
+  var valid_564117 = query.getOrDefault("customTimeRange")
+  valid_564117 = validateParameter(valid_564117, JString, required = false,
+                                 default = nil)
+  if valid_564117 != nil:
+    section.add "customTimeRange", valid_564117
+  var valid_564118 = query.getOrDefault("includeContext")
+  valid_564118 = validateParameter(valid_564118, JBool, required = false, default = nil)
+  if valid_564118 != nil:
+    section.add "includeContext", valid_564118
+  var valid_564119 = query.getOrDefault("targetResourceType")
+  valid_564119 = validateParameter(valid_564119, JString, required = false,
+                                 default = nil)
+  if valid_564119 != nil:
+    section.add "targetResourceType", valid_564119
+  var valid_564120 = query.getOrDefault("sortOrder")
+  valid_564120 = validateParameter(valid_564120, JString, required = false,
+                                 default = newJString("asc"))
+  if valid_564120 != nil:
+    section.add "sortOrder", valid_564120
+  var valid_564121 = query.getOrDefault("timeRange")
+  valid_564121 = validateParameter(valid_564121, JString, required = false,
+                                 default = newJString("1h"))
+  if valid_564121 != nil:
+    section.add "timeRange", valid_564121
+  var valid_564122 = query.getOrDefault("severity")
+  valid_564122 = validateParameter(valid_564122, JString, required = false,
+                                 default = newJString("Sev0"))
+  if valid_564122 != nil:
+    section.add "severity", valid_564122
+  var valid_564123 = query.getOrDefault("smartGroupId")
+  valid_564123 = validateParameter(valid_564123, JString, required = false,
+                                 default = nil)
+  if valid_564123 != nil:
+    section.add "smartGroupId", valid_564123
+  var valid_564124 = query.getOrDefault("targetResourceGroup")
+  valid_564124 = validateParameter(valid_564124, JString, required = false,
+                                 default = nil)
+  if valid_564124 != nil:
+    section.add "targetResourceGroup", valid_564124
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -339,99 +343,99 @@ proc validate_AlertsGetAll_593957(path: JsonNode; query: JsonNode; header: JsonN
   if body != nil:
     result.add "body", body
 
-proc call*(call_593992: Call_AlertsGetAll_593956; path: JsonNode; query: JsonNode;
+proc call*(call_564125: Call_AlertsGetAll_564089; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## List all existing alerts, where the results can be filtered on the basis of multiple parameters (e.g. time range). The results can then be sorted on the basis specific fields, with the default being lastModifiedDateTime. 
   ## 
-  let valid = call_593992.validator(path, query, header, formData, body)
-  let scheme = call_593992.pickScheme
+  let valid = call_564125.validator(path, query, header, formData, body)
+  let scheme = call_564125.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593992.url(scheme.get, call_593992.host, call_593992.base,
-                         call_593992.route, valid.getOrDefault("path"),
+  let url = call_564125.url(scheme.get, call_564125.host, call_564125.base,
+                         call_564125.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593992, url, valid)
+  result = hook(call_564125, url, valid)
 
-proc call*(call_593993: Call_AlertsGetAll_593956; subscriptionId: string;
-          timeRange: string = "1h"; apiVersion: string = "2018-05-05";
-          includeContext: bool = false; targetResource: string = "";
-          select: string = ""; customTimeRange: string = "";
-          targetResourceGroup: string = ""; sortBy: string = "name";
-          severity: string = "Sev0"; monitorCondition: string = "Fired";
-          targetResourceType: string = "";
-          monitorService: string = "Application Insights"; alertRule: string = "";
-          smartGroupId: string = ""; sortOrder: string = "asc"; pageCount: int = 0;
-          alertState: string = "New"; includeEgressConfig: bool = false): Recallable =
+proc call*(call_564126: Call_AlertsGetAll_564089; subscriptionId: string;
+          monitorCondition: string = "Fired"; includeEgressConfig: bool = false;
+          sortBy: string = "name"; apiVersion: string = "2018-05-05";
+          pageCount: int = 0; monitorService: string = "Application Insights";
+          select: string = ""; alertRule: string = ""; alertState: string = "New";
+          targetResource: string = ""; customTimeRange: string = "";
+          includeContext: bool = false; targetResourceType: string = "";
+          sortOrder: string = "asc"; timeRange: string = "1h";
+          severity: string = "Sev0"; smartGroupId: string = "";
+          targetResourceGroup: string = ""): Recallable =
   ## alertsGetAll
   ## List all existing alerts, where the results can be filtered on the basis of multiple parameters (e.g. time range). The results can then be sorted on the basis specific fields, with the default being lastModifiedDateTime. 
-  ##   timeRange: string
-  ##            : Filter by time range by below listed values. Default value is 1 day.
-  ##   apiVersion: string (required)
-  ##             : API version.
-  ##   includeContext: bool
-  ##                 : Include context which has contextual data specific to the monitor service. Default value is false'
-  ##   targetResource: string
-  ##                 : Filter by target resource( which is full ARM ID) Default value is select all.
-  ##   select: string
-  ##         : This filter allows to selection of the fields(comma separated) which would  be part of the essential section. This would allow to project only the  required fields rather than getting entire content.  Default is to fetch all the fields in the essentials section.
-  ##   subscriptionId: string (required)
-  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   customTimeRange: string
-  ##                  : Filter by custom time range in the format <start-time>/<end-time>  where time is in (ISO-8601 format)'. Permissible values is within 30 days from  query time. Either timeRange or customTimeRange could be used but not both. Default is none.
-  ##   targetResourceGroup: string
-  ##                      : Filter by target resource group name. Default value is select all.
-  ##   sortBy: string
-  ##         : Sort the query results by input field,  Default value is 'lastModifiedDateTime'.
-  ##   severity: string
-  ##           : Filter by severity.  Default value is select all.
   ##   monitorCondition: string
   ##                   : Filter by monitor condition which is either 'Fired' or 'Resolved'. Default value is to select all.
-  ##   targetResourceType: string
-  ##                     : Filter by target resource type. Default value is select all.
-  ##   monitorService: string
-  ##                 : Filter by monitor service which generates the alert instance. Default value is select all.
-  ##   alertRule: string
-  ##            : Filter by specific alert rule.  Default value is to select all.
-  ##   smartGroupId: string
-  ##               : Filter the alerts list by the Smart Group Id. Default value is none.
-  ##   sortOrder: string
-  ##            : Sort the query results order in either ascending or descending.  Default value is 'desc' for time fields and 'asc' for others.
-  ##   pageCount: int
-  ##            : Determines number of alerts returned per page in response. Permissible value is between 1 to 250. When the "includeContent"  filter is selected, maximum value allowed is 25. Default value is 25.
-  ##   alertState: string
-  ##             : Filter by state of the alert instance. Default value is to select all.
   ##   includeEgressConfig: bool
   ##                      : Include egress config which would be used for displaying the content in portal.  Default value is 'false'.
-  var path_593994 = newJObject()
-  var query_593995 = newJObject()
-  add(query_593995, "timeRange", newJString(timeRange))
-  add(query_593995, "api-version", newJString(apiVersion))
-  add(query_593995, "includeContext", newJBool(includeContext))
-  add(query_593995, "targetResource", newJString(targetResource))
-  add(query_593995, "select", newJString(select))
-  add(path_593994, "subscriptionId", newJString(subscriptionId))
-  add(query_593995, "customTimeRange", newJString(customTimeRange))
-  add(query_593995, "targetResourceGroup", newJString(targetResourceGroup))
-  add(query_593995, "sortBy", newJString(sortBy))
-  add(query_593995, "severity", newJString(severity))
-  add(query_593995, "monitorCondition", newJString(monitorCondition))
-  add(query_593995, "targetResourceType", newJString(targetResourceType))
-  add(query_593995, "monitorService", newJString(monitorService))
-  add(query_593995, "alertRule", newJString(alertRule))
-  add(query_593995, "smartGroupId", newJString(smartGroupId))
-  add(query_593995, "sortOrder", newJString(sortOrder))
-  add(query_593995, "pageCount", newJInt(pageCount))
-  add(query_593995, "alertState", newJString(alertState))
-  add(query_593995, "includeEgressConfig", newJBool(includeEgressConfig))
-  result = call_593993.call(path_593994, query_593995, nil, nil, nil)
+  ##   sortBy: string
+  ##         : Sort the query results by input field,  Default value is 'lastModifiedDateTime'.
+  ##   apiVersion: string (required)
+  ##             : API version.
+  ##   pageCount: int
+  ##            : Determines number of alerts returned per page in response. Permissible value is between 1 to 250. When the "includeContent"  filter is selected, maximum value allowed is 25. Default value is 25.
+  ##   monitorService: string
+  ##                 : Filter by monitor service which generates the alert instance. Default value is select all.
+  ##   select: string
+  ##         : This filter allows to selection of the fields(comma separated) which would  be part of the essential section. This would allow to project only the  required fields rather than getting entire content.  Default is to fetch all the fields in the essentials section.
+  ##   alertRule: string
+  ##            : Filter by specific alert rule.  Default value is to select all.
+  ##   alertState: string
+  ##             : Filter by state of the alert instance. Default value is to select all.
+  ##   targetResource: string
+  ##                 : Filter by target resource( which is full ARM ID) Default value is select all.
+  ##   customTimeRange: string
+  ##                  : Filter by custom time range in the format <start-time>/<end-time>  where time is in (ISO-8601 format)'. Permissible values is within 30 days from  query time. Either timeRange or customTimeRange could be used but not both. Default is none.
+  ##   includeContext: bool
+  ##                 : Include context which has contextual data specific to the monitor service. Default value is false'
+  ##   subscriptionId: string (required)
+  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   targetResourceType: string
+  ##                     : Filter by target resource type. Default value is select all.
+  ##   sortOrder: string
+  ##            : Sort the query results order in either ascending or descending.  Default value is 'desc' for time fields and 'asc' for others.
+  ##   timeRange: string
+  ##            : Filter by time range by below listed values. Default value is 1 day.
+  ##   severity: string
+  ##           : Filter by severity.  Default value is select all.
+  ##   smartGroupId: string
+  ##               : Filter the alerts list by the Smart Group Id. Default value is none.
+  ##   targetResourceGroup: string
+  ##                      : Filter by target resource group name. Default value is select all.
+  var path_564127 = newJObject()
+  var query_564128 = newJObject()
+  add(query_564128, "monitorCondition", newJString(monitorCondition))
+  add(query_564128, "includeEgressConfig", newJBool(includeEgressConfig))
+  add(query_564128, "sortBy", newJString(sortBy))
+  add(query_564128, "api-version", newJString(apiVersion))
+  add(query_564128, "pageCount", newJInt(pageCount))
+  add(query_564128, "monitorService", newJString(monitorService))
+  add(query_564128, "select", newJString(select))
+  add(query_564128, "alertRule", newJString(alertRule))
+  add(query_564128, "alertState", newJString(alertState))
+  add(query_564128, "targetResource", newJString(targetResource))
+  add(query_564128, "customTimeRange", newJString(customTimeRange))
+  add(query_564128, "includeContext", newJBool(includeContext))
+  add(path_564127, "subscriptionId", newJString(subscriptionId))
+  add(query_564128, "targetResourceType", newJString(targetResourceType))
+  add(query_564128, "sortOrder", newJString(sortOrder))
+  add(query_564128, "timeRange", newJString(timeRange))
+  add(query_564128, "severity", newJString(severity))
+  add(query_564128, "smartGroupId", newJString(smartGroupId))
+  add(query_564128, "targetResourceGroup", newJString(targetResourceGroup))
+  result = call_564126.call(path_564127, query_564128, nil, nil, nil)
 
-var alertsGetAll* = Call_AlertsGetAll_593956(name: "alertsGetAll",
+var alertsGetAll* = Call_AlertsGetAll_564089(name: "alertsGetAll",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.AlertsManagement/alerts",
-    validator: validate_AlertsGetAll_593957, base: "", url: url_AlertsGetAll_593958,
+    validator: validate_AlertsGetAll_564090, base: "", url: url_AlertsGetAll_564091,
     schemes: {Scheme.Https})
 type
-  Call_AlertsGetById_593996 = ref object of OpenApiRestCall_593425
-proc url_AlertsGetById_593998(protocol: Scheme; host: string; base: string;
+  Call_AlertsGetById_564129 = ref object of OpenApiRestCall_563556
+proc url_AlertsGetById_564131(protocol: Scheme; host: string; base: string;
                              route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -450,30 +454,29 @@ proc url_AlertsGetById_593998(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AlertsGetById_593997(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_AlertsGetById_564130(path: JsonNode; query: JsonNode; header: JsonNode;
                                   formData: JsonNode; body: JsonNode): JsonNode =
   ## Get information related to a specific alert
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   subscriptionId: JString (required)
-  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   alertId: JString (required)
   ##          : Unique ID of an alert instance.
+  ##   subscriptionId: JString (required)
+  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `subscriptionId` field"
-  var valid_593999 = path.getOrDefault("subscriptionId")
-  valid_593999 = validateParameter(valid_593999, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `alertId` field"
+  var valid_564132 = path.getOrDefault("alertId")
+  valid_564132 = validateParameter(valid_564132, JString, required = true,
                                  default = nil)
-  if valid_593999 != nil:
-    section.add "subscriptionId", valid_593999
-  var valid_594000 = path.getOrDefault("alertId")
-  valid_594000 = validateParameter(valid_594000, JString, required = true,
+  if valid_564132 != nil:
+    section.add "alertId", valid_564132
+  var valid_564133 = path.getOrDefault("subscriptionId")
+  valid_564133 = validateParameter(valid_564133, JString, required = true,
                                  default = nil)
-  if valid_594000 != nil:
-    section.add "alertId", valid_594000
+  if valid_564133 != nil:
+    section.add "subscriptionId", valid_564133
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -481,11 +484,11 @@ proc validate_AlertsGetById_593997(path: JsonNode; query: JsonNode; header: Json
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594001 = query.getOrDefault("api-version")
-  valid_594001 = validateParameter(valid_594001, JString, required = true,
+  var valid_564134 = query.getOrDefault("api-version")
+  valid_564134 = validateParameter(valid_564134, JString, required = true,
                                  default = newJString("2018-05-05"))
-  if valid_594001 != nil:
-    section.add "api-version", valid_594001
+  if valid_564134 != nil:
+    section.add "api-version", valid_564134
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -494,43 +497,43 @@ proc validate_AlertsGetById_593997(path: JsonNode; query: JsonNode; header: Json
   if body != nil:
     result.add "body", body
 
-proc call*(call_594002: Call_AlertsGetById_593996; path: JsonNode; query: JsonNode;
+proc call*(call_564135: Call_AlertsGetById_564129; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get information related to a specific alert
   ## 
-  let valid = call_594002.validator(path, query, header, formData, body)
-  let scheme = call_594002.pickScheme
+  let valid = call_564135.validator(path, query, header, formData, body)
+  let scheme = call_564135.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594002.url(scheme.get, call_594002.host, call_594002.base,
-                         call_594002.route, valid.getOrDefault("path"),
+  let url = call_564135.url(scheme.get, call_564135.host, call_564135.base,
+                         call_564135.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594002, url, valid)
+  result = hook(call_564135, url, valid)
 
-proc call*(call_594003: Call_AlertsGetById_593996; subscriptionId: string;
-          alertId: string; apiVersion: string = "2018-05-05"): Recallable =
+proc call*(call_564136: Call_AlertsGetById_564129; alertId: string;
+          subscriptionId: string; apiVersion: string = "2018-05-05"): Recallable =
   ## alertsGetById
   ## Get information related to a specific alert
+  ##   alertId: string (required)
+  ##          : Unique ID of an alert instance.
   ##   apiVersion: string (required)
   ##             : API version.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   alertId: string (required)
-  ##          : Unique ID of an alert instance.
-  var path_594004 = newJObject()
-  var query_594005 = newJObject()
-  add(query_594005, "api-version", newJString(apiVersion))
-  add(path_594004, "subscriptionId", newJString(subscriptionId))
-  add(path_594004, "alertId", newJString(alertId))
-  result = call_594003.call(path_594004, query_594005, nil, nil, nil)
+  var path_564137 = newJObject()
+  var query_564138 = newJObject()
+  add(path_564137, "alertId", newJString(alertId))
+  add(query_564138, "api-version", newJString(apiVersion))
+  add(path_564137, "subscriptionId", newJString(subscriptionId))
+  result = call_564136.call(path_564137, query_564138, nil, nil, nil)
 
-var alertsGetById* = Call_AlertsGetById_593996(name: "alertsGetById",
+var alertsGetById* = Call_AlertsGetById_564129(name: "alertsGetById",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.AlertsManagement/alerts/{alertId}",
-    validator: validate_AlertsGetById_593997, base: "", url: url_AlertsGetById_593998,
+    validator: validate_AlertsGetById_564130, base: "", url: url_AlertsGetById_564131,
     schemes: {Scheme.Https})
 type
-  Call_AlertsChangeState_594006 = ref object of OpenApiRestCall_593425
-proc url_AlertsChangeState_594008(protocol: Scheme; host: string; base: string;
+  Call_AlertsChangeState_564139 = ref object of OpenApiRestCall_563556
+proc url_AlertsChangeState_564141(protocol: Scheme; host: string; base: string;
                                  route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -550,7 +553,7 @@ proc url_AlertsChangeState_594008(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AlertsChangeState_594007(path: JsonNode; query: JsonNode;
+proc validate_AlertsChangeState_564140(path: JsonNode; query: JsonNode;
                                       header: JsonNode; formData: JsonNode;
                                       body: JsonNode): JsonNode =
   ## Change the state of an alert.
@@ -558,23 +561,22 @@ proc validate_AlertsChangeState_594007(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   subscriptionId: JString (required)
-  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   alertId: JString (required)
   ##          : Unique ID of an alert instance.
+  ##   subscriptionId: JString (required)
+  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `subscriptionId` field"
-  var valid_594009 = path.getOrDefault("subscriptionId")
-  valid_594009 = validateParameter(valid_594009, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `alertId` field"
+  var valid_564142 = path.getOrDefault("alertId")
+  valid_564142 = validateParameter(valid_564142, JString, required = true,
                                  default = nil)
-  if valid_594009 != nil:
-    section.add "subscriptionId", valid_594009
-  var valid_594010 = path.getOrDefault("alertId")
-  valid_594010 = validateParameter(valid_594010, JString, required = true,
+  if valid_564142 != nil:
+    section.add "alertId", valid_564142
+  var valid_564143 = path.getOrDefault("subscriptionId")
+  valid_564143 = validateParameter(valid_564143, JString, required = true,
                                  default = nil)
-  if valid_594010 != nil:
-    section.add "alertId", valid_594010
+  if valid_564143 != nil:
+    section.add "subscriptionId", valid_564143
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -584,16 +586,16 @@ proc validate_AlertsChangeState_594007(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594011 = query.getOrDefault("api-version")
-  valid_594011 = validateParameter(valid_594011, JString, required = true,
+  var valid_564144 = query.getOrDefault("api-version")
+  valid_564144 = validateParameter(valid_564144, JString, required = true,
                                  default = newJString("2018-05-05"))
-  if valid_594011 != nil:
-    section.add "api-version", valid_594011
-  var valid_594012 = query.getOrDefault("newState")
-  valid_594012 = validateParameter(valid_594012, JString, required = true,
+  if valid_564144 != nil:
+    section.add "api-version", valid_564144
+  var valid_564145 = query.getOrDefault("newState")
+  valid_564145 = validateParameter(valid_564145, JString, required = true,
                                  default = newJString("New"))
-  if valid_594012 != nil:
-    section.add "newState", valid_594012
+  if valid_564145 != nil:
+    section.add "newState", valid_564145
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -602,46 +604,47 @@ proc validate_AlertsChangeState_594007(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594013: Call_AlertsChangeState_594006; path: JsonNode;
+proc call*(call_564146: Call_AlertsChangeState_564139; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Change the state of an alert.
   ## 
-  let valid = call_594013.validator(path, query, header, formData, body)
-  let scheme = call_594013.pickScheme
+  let valid = call_564146.validator(path, query, header, formData, body)
+  let scheme = call_564146.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594013.url(scheme.get, call_594013.host, call_594013.base,
-                         call_594013.route, valid.getOrDefault("path"),
+  let url = call_564146.url(scheme.get, call_564146.host, call_564146.base,
+                         call_564146.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594013, url, valid)
+  result = hook(call_564146, url, valid)
 
-proc call*(call_594014: Call_AlertsChangeState_594006; subscriptionId: string;
-          alertId: string; apiVersion: string = "2018-05-05"; newState: string = "New"): Recallable =
+proc call*(call_564147: Call_AlertsChangeState_564139; alertId: string;
+          subscriptionId: string; apiVersion: string = "2018-05-05";
+          newState: string = "New"): Recallable =
   ## alertsChangeState
   ## Change the state of an alert.
+  ##   alertId: string (required)
+  ##          : Unique ID of an alert instance.
   ##   apiVersion: string (required)
   ##             : API version.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   newState: string (required)
   ##           : New state of the alert.
-  ##   alertId: string (required)
-  ##          : Unique ID of an alert instance.
-  var path_594015 = newJObject()
-  var query_594016 = newJObject()
-  add(query_594016, "api-version", newJString(apiVersion))
-  add(path_594015, "subscriptionId", newJString(subscriptionId))
-  add(query_594016, "newState", newJString(newState))
-  add(path_594015, "alertId", newJString(alertId))
-  result = call_594014.call(path_594015, query_594016, nil, nil, nil)
+  var path_564148 = newJObject()
+  var query_564149 = newJObject()
+  add(path_564148, "alertId", newJString(alertId))
+  add(query_564149, "api-version", newJString(apiVersion))
+  add(path_564148, "subscriptionId", newJString(subscriptionId))
+  add(query_564149, "newState", newJString(newState))
+  result = call_564147.call(path_564148, query_564149, nil, nil, nil)
 
-var alertsChangeState* = Call_AlertsChangeState_594006(name: "alertsChangeState",
+var alertsChangeState* = Call_AlertsChangeState_564139(name: "alertsChangeState",
     meth: HttpMethod.HttpPost, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.AlertsManagement/alerts/{alertId}/changestate",
-    validator: validate_AlertsChangeState_594007, base: "",
-    url: url_AlertsChangeState_594008, schemes: {Scheme.Https})
+    validator: validate_AlertsChangeState_564140, base: "",
+    url: url_AlertsChangeState_564141, schemes: {Scheme.Https})
 type
-  Call_AlertsGetHistory_594017 = ref object of OpenApiRestCall_593425
-proc url_AlertsGetHistory_594019(protocol: Scheme; host: string; base: string;
+  Call_AlertsGetHistory_564150 = ref object of OpenApiRestCall_563556
+proc url_AlertsGetHistory_564152(protocol: Scheme; host: string; base: string;
                                 route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -661,7 +664,7 @@ proc url_AlertsGetHistory_594019(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AlertsGetHistory_594018(path: JsonNode; query: JsonNode;
+proc validate_AlertsGetHistory_564151(path: JsonNode; query: JsonNode;
                                      header: JsonNode; formData: JsonNode;
                                      body: JsonNode): JsonNode =
   ## Get the history of an alert, which captures any monitor condition changes (Fired/Resolved) and alert state changes (New/Acknowledged/Closed).
@@ -669,23 +672,22 @@ proc validate_AlertsGetHistory_594018(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   subscriptionId: JString (required)
-  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   alertId: JString (required)
   ##          : Unique ID of an alert instance.
+  ##   subscriptionId: JString (required)
+  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `subscriptionId` field"
-  var valid_594020 = path.getOrDefault("subscriptionId")
-  valid_594020 = validateParameter(valid_594020, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `alertId` field"
+  var valid_564153 = path.getOrDefault("alertId")
+  valid_564153 = validateParameter(valid_564153, JString, required = true,
                                  default = nil)
-  if valid_594020 != nil:
-    section.add "subscriptionId", valid_594020
-  var valid_594021 = path.getOrDefault("alertId")
-  valid_594021 = validateParameter(valid_594021, JString, required = true,
+  if valid_564153 != nil:
+    section.add "alertId", valid_564153
+  var valid_564154 = path.getOrDefault("subscriptionId")
+  valid_564154 = validateParameter(valid_564154, JString, required = true,
                                  default = nil)
-  if valid_594021 != nil:
-    section.add "alertId", valid_594021
+  if valid_564154 != nil:
+    section.add "subscriptionId", valid_564154
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -693,11 +695,11 @@ proc validate_AlertsGetHistory_594018(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594022 = query.getOrDefault("api-version")
-  valid_594022 = validateParameter(valid_594022, JString, required = true,
+  var valid_564155 = query.getOrDefault("api-version")
+  valid_564155 = validateParameter(valid_564155, JString, required = true,
                                  default = newJString("2018-05-05"))
-  if valid_594022 != nil:
-    section.add "api-version", valid_594022
+  if valid_564155 != nil:
+    section.add "api-version", valid_564155
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -706,43 +708,43 @@ proc validate_AlertsGetHistory_594018(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594023: Call_AlertsGetHistory_594017; path: JsonNode;
+proc call*(call_564156: Call_AlertsGetHistory_564150; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get the history of an alert, which captures any monitor condition changes (Fired/Resolved) and alert state changes (New/Acknowledged/Closed).
   ## 
-  let valid = call_594023.validator(path, query, header, formData, body)
-  let scheme = call_594023.pickScheme
+  let valid = call_564156.validator(path, query, header, formData, body)
+  let scheme = call_564156.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594023.url(scheme.get, call_594023.host, call_594023.base,
-                         call_594023.route, valid.getOrDefault("path"),
+  let url = call_564156.url(scheme.get, call_564156.host, call_564156.base,
+                         call_564156.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594023, url, valid)
+  result = hook(call_564156, url, valid)
 
-proc call*(call_594024: Call_AlertsGetHistory_594017; subscriptionId: string;
-          alertId: string; apiVersion: string = "2018-05-05"): Recallable =
+proc call*(call_564157: Call_AlertsGetHistory_564150; alertId: string;
+          subscriptionId: string; apiVersion: string = "2018-05-05"): Recallable =
   ## alertsGetHistory
   ## Get the history of an alert, which captures any monitor condition changes (Fired/Resolved) and alert state changes (New/Acknowledged/Closed).
+  ##   alertId: string (required)
+  ##          : Unique ID of an alert instance.
   ##   apiVersion: string (required)
   ##             : API version.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   alertId: string (required)
-  ##          : Unique ID of an alert instance.
-  var path_594025 = newJObject()
-  var query_594026 = newJObject()
-  add(query_594026, "api-version", newJString(apiVersion))
-  add(path_594025, "subscriptionId", newJString(subscriptionId))
-  add(path_594025, "alertId", newJString(alertId))
-  result = call_594024.call(path_594025, query_594026, nil, nil, nil)
+  var path_564158 = newJObject()
+  var query_564159 = newJObject()
+  add(path_564158, "alertId", newJString(alertId))
+  add(query_564159, "api-version", newJString(apiVersion))
+  add(path_564158, "subscriptionId", newJString(subscriptionId))
+  result = call_564157.call(path_564158, query_564159, nil, nil, nil)
 
-var alertsGetHistory* = Call_AlertsGetHistory_594017(name: "alertsGetHistory",
+var alertsGetHistory* = Call_AlertsGetHistory_564150(name: "alertsGetHistory",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.AlertsManagement/alerts/{alertId}/history",
-    validator: validate_AlertsGetHistory_594018, base: "",
-    url: url_AlertsGetHistory_594019, schemes: {Scheme.Https})
+    validator: validate_AlertsGetHistory_564151, base: "",
+    url: url_AlertsGetHistory_564152, schemes: {Scheme.Https})
 type
-  Call_AlertsGetSummary_594027 = ref object of OpenApiRestCall_593425
-proc url_AlertsGetSummary_594029(protocol: Scheme; host: string; base: string;
+  Call_AlertsGetSummary_564160 = ref object of OpenApiRestCall_563556
+proc url_AlertsGetSummary_564162(protocol: Scheme; host: string; base: string;
                                 route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -759,7 +761,7 @@ proc url_AlertsGetSummary_594029(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AlertsGetSummary_594028(path: JsonNode; query: JsonNode;
+proc validate_AlertsGetSummary_564161(path: JsonNode; query: JsonNode;
                                      header: JsonNode; formData: JsonNode;
                                      body: JsonNode): JsonNode =
   ## Get a summarized count of your alerts grouped by various parameters (e.g. grouping by 'Severity' returns the count of alerts for each severity).
@@ -772,106 +774,106 @@ proc validate_AlertsGetSummary_594028(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_594030 = path.getOrDefault("subscriptionId")
-  valid_594030 = validateParameter(valid_594030, JString, required = true,
+  var valid_564163 = path.getOrDefault("subscriptionId")
+  valid_564163 = validateParameter(valid_564163, JString, required = true,
                                  default = nil)
-  if valid_594030 != nil:
-    section.add "subscriptionId", valid_594030
+  if valid_564163 != nil:
+    section.add "subscriptionId", valid_564163
   result.add "path", section
   ## parameters in `query` object:
-  ##   timeRange: JString
-  ##            : Filter by time range by below listed values. Default value is 1 day.
-  ##   api-version: JString (required)
-  ##              : API version.
-  ##   targetResource: JString
-  ##                 : Filter by target resource( which is full ARM ID) Default value is select all.
-  ##   customTimeRange: JString
-  ##                  : Filter by custom time range in the format <start-time>/<end-time>  where time is in (ISO-8601 format)'. Permissible values is within 30 days from  query time. Either timeRange or customTimeRange could be used but not both. Default is none.
-  ##   targetResourceGroup: JString
-  ##                      : Filter by target resource group name. Default value is select all.
-  ##   severity: JString
-  ##           : Filter by severity.  Default value is select all.
-  ##   includeSmartGroupsCount: JBool
-  ##                          : Include count of the SmartGroups as part of the summary. Default value is 'false'.
   ##   monitorCondition: JString
   ##                   : Filter by monitor condition which is either 'Fired' or 'Resolved'. Default value is to select all.
-  ##   targetResourceType: JString
-  ##                     : Filter by target resource type. Default value is select all.
-  ##   groupby: JString (required)
-  ##          : This parameter allows the result set to be grouped by input fields. For example, groupby=severity,alertstate.
+  ##   includeSmartGroupsCount: JBool
+  ##                          : Include count of the SmartGroups as part of the summary. Default value is 'false'.
+  ##   api-version: JString (required)
+  ##              : API version.
   ##   monitorService: JString
   ##                 : Filter by monitor service which generates the alert instance. Default value is select all.
   ##   alertRule: JString
   ##            : Filter by specific alert rule.  Default value is to select all.
   ##   alertState: JString
   ##             : Filter by state of the alert instance. Default value is to select all.
+  ##   targetResource: JString
+  ##                 : Filter by target resource( which is full ARM ID) Default value is select all.
+  ##   customTimeRange: JString
+  ##                  : Filter by custom time range in the format <start-time>/<end-time>  where time is in (ISO-8601 format)'. Permissible values is within 30 days from  query time. Either timeRange or customTimeRange could be used but not both. Default is none.
+  ##   targetResourceType: JString
+  ##                     : Filter by target resource type. Default value is select all.
+  ##   timeRange: JString
+  ##            : Filter by time range by below listed values. Default value is 1 day.
+  ##   severity: JString
+  ##           : Filter by severity.  Default value is select all.
+  ##   groupby: JString (required)
+  ##          : This parameter allows the result set to be grouped by input fields. For example, groupby=severity,alertstate.
+  ##   targetResourceGroup: JString
+  ##                      : Filter by target resource group name. Default value is select all.
   section = newJObject()
-  var valid_594031 = query.getOrDefault("timeRange")
-  valid_594031 = validateParameter(valid_594031, JString, required = false,
-                                 default = newJString("1h"))
-  if valid_594031 != nil:
-    section.add "timeRange", valid_594031
+  var valid_564164 = query.getOrDefault("monitorCondition")
+  valid_564164 = validateParameter(valid_564164, JString, required = false,
+                                 default = newJString("Fired"))
+  if valid_564164 != nil:
+    section.add "monitorCondition", valid_564164
+  var valid_564165 = query.getOrDefault("includeSmartGroupsCount")
+  valid_564165 = validateParameter(valid_564165, JBool, required = false, default = nil)
+  if valid_564165 != nil:
+    section.add "includeSmartGroupsCount", valid_564165
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594032 = query.getOrDefault("api-version")
-  valid_594032 = validateParameter(valid_594032, JString, required = true,
+  var valid_564166 = query.getOrDefault("api-version")
+  valid_564166 = validateParameter(valid_564166, JString, required = true,
                                  default = newJString("2018-05-05"))
-  if valid_594032 != nil:
-    section.add "api-version", valid_594032
-  var valid_594033 = query.getOrDefault("targetResource")
-  valid_594033 = validateParameter(valid_594033, JString, required = false,
-                                 default = nil)
-  if valid_594033 != nil:
-    section.add "targetResource", valid_594033
-  var valid_594034 = query.getOrDefault("customTimeRange")
-  valid_594034 = validateParameter(valid_594034, JString, required = false,
-                                 default = nil)
-  if valid_594034 != nil:
-    section.add "customTimeRange", valid_594034
-  var valid_594035 = query.getOrDefault("targetResourceGroup")
-  valid_594035 = validateParameter(valid_594035, JString, required = false,
-                                 default = nil)
-  if valid_594035 != nil:
-    section.add "targetResourceGroup", valid_594035
-  var valid_594036 = query.getOrDefault("severity")
-  valid_594036 = validateParameter(valid_594036, JString, required = false,
-                                 default = newJString("Sev0"))
-  if valid_594036 != nil:
-    section.add "severity", valid_594036
-  var valid_594037 = query.getOrDefault("includeSmartGroupsCount")
-  valid_594037 = validateParameter(valid_594037, JBool, required = false, default = nil)
-  if valid_594037 != nil:
-    section.add "includeSmartGroupsCount", valid_594037
-  var valid_594038 = query.getOrDefault("monitorCondition")
-  valid_594038 = validateParameter(valid_594038, JString, required = false,
-                                 default = newJString("Fired"))
-  if valid_594038 != nil:
-    section.add "monitorCondition", valid_594038
-  var valid_594039 = query.getOrDefault("targetResourceType")
-  valid_594039 = validateParameter(valid_594039, JString, required = false,
-                                 default = nil)
-  if valid_594039 != nil:
-    section.add "targetResourceType", valid_594039
-  var valid_594040 = query.getOrDefault("groupby")
-  valid_594040 = validateParameter(valid_594040, JString, required = true,
-                                 default = newJString("severity"))
-  if valid_594040 != nil:
-    section.add "groupby", valid_594040
-  var valid_594041 = query.getOrDefault("monitorService")
-  valid_594041 = validateParameter(valid_594041, JString, required = false,
+  if valid_564166 != nil:
+    section.add "api-version", valid_564166
+  var valid_564167 = query.getOrDefault("monitorService")
+  valid_564167 = validateParameter(valid_564167, JString, required = false,
                                  default = newJString("Application Insights"))
-  if valid_594041 != nil:
-    section.add "monitorService", valid_594041
-  var valid_594042 = query.getOrDefault("alertRule")
-  valid_594042 = validateParameter(valid_594042, JString, required = false,
+  if valid_564167 != nil:
+    section.add "monitorService", valid_564167
+  var valid_564168 = query.getOrDefault("alertRule")
+  valid_564168 = validateParameter(valid_564168, JString, required = false,
                                  default = nil)
-  if valid_594042 != nil:
-    section.add "alertRule", valid_594042
-  var valid_594043 = query.getOrDefault("alertState")
-  valid_594043 = validateParameter(valid_594043, JString, required = false,
+  if valid_564168 != nil:
+    section.add "alertRule", valid_564168
+  var valid_564169 = query.getOrDefault("alertState")
+  valid_564169 = validateParameter(valid_564169, JString, required = false,
                                  default = newJString("New"))
-  if valid_594043 != nil:
-    section.add "alertState", valid_594043
+  if valid_564169 != nil:
+    section.add "alertState", valid_564169
+  var valid_564170 = query.getOrDefault("targetResource")
+  valid_564170 = validateParameter(valid_564170, JString, required = false,
+                                 default = nil)
+  if valid_564170 != nil:
+    section.add "targetResource", valid_564170
+  var valid_564171 = query.getOrDefault("customTimeRange")
+  valid_564171 = validateParameter(valid_564171, JString, required = false,
+                                 default = nil)
+  if valid_564171 != nil:
+    section.add "customTimeRange", valid_564171
+  var valid_564172 = query.getOrDefault("targetResourceType")
+  valid_564172 = validateParameter(valid_564172, JString, required = false,
+                                 default = nil)
+  if valid_564172 != nil:
+    section.add "targetResourceType", valid_564172
+  var valid_564173 = query.getOrDefault("timeRange")
+  valid_564173 = validateParameter(valid_564173, JString, required = false,
+                                 default = newJString("1h"))
+  if valid_564173 != nil:
+    section.add "timeRange", valid_564173
+  var valid_564174 = query.getOrDefault("severity")
+  valid_564174 = validateParameter(valid_564174, JString, required = false,
+                                 default = newJString("Sev0"))
+  if valid_564174 != nil:
+    section.add "severity", valid_564174
+  var valid_564175 = query.getOrDefault("groupby")
+  valid_564175 = validateParameter(valid_564175, JString, required = true,
+                                 default = newJString("severity"))
+  if valid_564175 != nil:
+    section.add "groupby", valid_564175
+  var valid_564176 = query.getOrDefault("targetResourceGroup")
+  valid_564176 = validateParameter(valid_564176, JString, required = false,
+                                 default = nil)
+  if valid_564176 != nil:
+    section.add "targetResourceGroup", valid_564176
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -880,82 +882,82 @@ proc validate_AlertsGetSummary_594028(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594044: Call_AlertsGetSummary_594027; path: JsonNode;
+proc call*(call_564177: Call_AlertsGetSummary_564160; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get a summarized count of your alerts grouped by various parameters (e.g. grouping by 'Severity' returns the count of alerts for each severity).
   ## 
-  let valid = call_594044.validator(path, query, header, formData, body)
-  let scheme = call_594044.pickScheme
+  let valid = call_564177.validator(path, query, header, formData, body)
+  let scheme = call_564177.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594044.url(scheme.get, call_594044.host, call_594044.base,
-                         call_594044.route, valid.getOrDefault("path"),
+  let url = call_564177.url(scheme.get, call_564177.host, call_564177.base,
+                         call_564177.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594044, url, valid)
+  result = hook(call_564177, url, valid)
 
-proc call*(call_594045: Call_AlertsGetSummary_594027; subscriptionId: string;
-          timeRange: string = "1h"; apiVersion: string = "2018-05-05";
-          targetResource: string = ""; customTimeRange: string = "";
-          targetResourceGroup: string = ""; severity: string = "Sev0";
-          includeSmartGroupsCount: bool = false; monitorCondition: string = "Fired";
-          targetResourceType: string = ""; groupby: string = "severity";
+proc call*(call_564178: Call_AlertsGetSummary_564160; subscriptionId: string;
+          monitorCondition: string = "Fired"; includeSmartGroupsCount: bool = false;
+          apiVersion: string = "2018-05-05";
           monitorService: string = "Application Insights"; alertRule: string = "";
-          alertState: string = "New"): Recallable =
+          alertState: string = "New"; targetResource: string = "";
+          customTimeRange: string = ""; targetResourceType: string = "";
+          timeRange: string = "1h"; severity: string = "Sev0";
+          groupby: string = "severity"; targetResourceGroup: string = ""): Recallable =
   ## alertsGetSummary
   ## Get a summarized count of your alerts grouped by various parameters (e.g. grouping by 'Severity' returns the count of alerts for each severity).
-  ##   timeRange: string
-  ##            : Filter by time range by below listed values. Default value is 1 day.
-  ##   apiVersion: string (required)
-  ##             : API version.
-  ##   targetResource: string
-  ##                 : Filter by target resource( which is full ARM ID) Default value is select all.
-  ##   subscriptionId: string (required)
-  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   customTimeRange: string
-  ##                  : Filter by custom time range in the format <start-time>/<end-time>  where time is in (ISO-8601 format)'. Permissible values is within 30 days from  query time. Either timeRange or customTimeRange could be used but not both. Default is none.
-  ##   targetResourceGroup: string
-  ##                      : Filter by target resource group name. Default value is select all.
-  ##   severity: string
-  ##           : Filter by severity.  Default value is select all.
-  ##   includeSmartGroupsCount: bool
-  ##                          : Include count of the SmartGroups as part of the summary. Default value is 'false'.
   ##   monitorCondition: string
   ##                   : Filter by monitor condition which is either 'Fired' or 'Resolved'. Default value is to select all.
-  ##   targetResourceType: string
-  ##                     : Filter by target resource type. Default value is select all.
-  ##   groupby: string (required)
-  ##          : This parameter allows the result set to be grouped by input fields. For example, groupby=severity,alertstate.
+  ##   includeSmartGroupsCount: bool
+  ##                          : Include count of the SmartGroups as part of the summary. Default value is 'false'.
+  ##   apiVersion: string (required)
+  ##             : API version.
   ##   monitorService: string
   ##                 : Filter by monitor service which generates the alert instance. Default value is select all.
   ##   alertRule: string
   ##            : Filter by specific alert rule.  Default value is to select all.
   ##   alertState: string
   ##             : Filter by state of the alert instance. Default value is to select all.
-  var path_594046 = newJObject()
-  var query_594047 = newJObject()
-  add(query_594047, "timeRange", newJString(timeRange))
-  add(query_594047, "api-version", newJString(apiVersion))
-  add(query_594047, "targetResource", newJString(targetResource))
-  add(path_594046, "subscriptionId", newJString(subscriptionId))
-  add(query_594047, "customTimeRange", newJString(customTimeRange))
-  add(query_594047, "targetResourceGroup", newJString(targetResourceGroup))
-  add(query_594047, "severity", newJString(severity))
-  add(query_594047, "includeSmartGroupsCount", newJBool(includeSmartGroupsCount))
-  add(query_594047, "monitorCondition", newJString(monitorCondition))
-  add(query_594047, "targetResourceType", newJString(targetResourceType))
-  add(query_594047, "groupby", newJString(groupby))
-  add(query_594047, "monitorService", newJString(monitorService))
-  add(query_594047, "alertRule", newJString(alertRule))
-  add(query_594047, "alertState", newJString(alertState))
-  result = call_594045.call(path_594046, query_594047, nil, nil, nil)
+  ##   targetResource: string
+  ##                 : Filter by target resource( which is full ARM ID) Default value is select all.
+  ##   customTimeRange: string
+  ##                  : Filter by custom time range in the format <start-time>/<end-time>  where time is in (ISO-8601 format)'. Permissible values is within 30 days from  query time. Either timeRange or customTimeRange could be used but not both. Default is none.
+  ##   subscriptionId: string (required)
+  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   targetResourceType: string
+  ##                     : Filter by target resource type. Default value is select all.
+  ##   timeRange: string
+  ##            : Filter by time range by below listed values. Default value is 1 day.
+  ##   severity: string
+  ##           : Filter by severity.  Default value is select all.
+  ##   groupby: string (required)
+  ##          : This parameter allows the result set to be grouped by input fields. For example, groupby=severity,alertstate.
+  ##   targetResourceGroup: string
+  ##                      : Filter by target resource group name. Default value is select all.
+  var path_564179 = newJObject()
+  var query_564180 = newJObject()
+  add(query_564180, "monitorCondition", newJString(monitorCondition))
+  add(query_564180, "includeSmartGroupsCount", newJBool(includeSmartGroupsCount))
+  add(query_564180, "api-version", newJString(apiVersion))
+  add(query_564180, "monitorService", newJString(monitorService))
+  add(query_564180, "alertRule", newJString(alertRule))
+  add(query_564180, "alertState", newJString(alertState))
+  add(query_564180, "targetResource", newJString(targetResource))
+  add(query_564180, "customTimeRange", newJString(customTimeRange))
+  add(path_564179, "subscriptionId", newJString(subscriptionId))
+  add(query_564180, "targetResourceType", newJString(targetResourceType))
+  add(query_564180, "timeRange", newJString(timeRange))
+  add(query_564180, "severity", newJString(severity))
+  add(query_564180, "groupby", newJString(groupby))
+  add(query_564180, "targetResourceGroup", newJString(targetResourceGroup))
+  result = call_564178.call(path_564179, query_564180, nil, nil, nil)
 
-var alertsGetSummary* = Call_AlertsGetSummary_594027(name: "alertsGetSummary",
+var alertsGetSummary* = Call_AlertsGetSummary_564160(name: "alertsGetSummary",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.AlertsManagement/alertsSummary",
-    validator: validate_AlertsGetSummary_594028, base: "",
-    url: url_AlertsGetSummary_594029, schemes: {Scheme.Https})
+    validator: validate_AlertsGetSummary_564161, base: "",
+    url: url_AlertsGetSummary_564162, schemes: {Scheme.Https})
 type
-  Call_SmartGroupsGetAll_594048 = ref object of OpenApiRestCall_593425
-proc url_SmartGroupsGetAll_594050(protocol: Scheme; host: string; base: string;
+  Call_SmartGroupsGetAll_564181 = ref object of OpenApiRestCall_563556
+proc url_SmartGroupsGetAll_564183(protocol: Scheme; host: string; base: string;
                                  route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -972,7 +974,7 @@ proc url_SmartGroupsGetAll_594050(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_SmartGroupsGetAll_594049(path: JsonNode; query: JsonNode;
+proc validate_SmartGroupsGetAll_564182(path: JsonNode; query: JsonNode;
                                       header: JsonNode; formData: JsonNode;
                                       body: JsonNode): JsonNode =
   ## List all the Smart Groups within a specified subscription. 
@@ -985,99 +987,99 @@ proc validate_SmartGroupsGetAll_594049(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_594051 = path.getOrDefault("subscriptionId")
-  valid_594051 = validateParameter(valid_594051, JString, required = true,
+  var valid_564184 = path.getOrDefault("subscriptionId")
+  valid_564184 = validateParameter(valid_564184, JString, required = true,
                                  default = nil)
-  if valid_594051 != nil:
-    section.add "subscriptionId", valid_594051
+  if valid_564184 != nil:
+    section.add "subscriptionId", valid_564184
   result.add "path", section
   ## parameters in `query` object:
-  ##   timeRange: JString
-  ##            : Filter by time range by below listed values. Default value is 1 day.
-  ##   api-version: JString (required)
-  ##              : API version.
-  ##   targetResource: JString
-  ##                 : Filter by target resource( which is full ARM ID) Default value is select all.
-  ##   targetResourceGroup: JString
-  ##                      : Filter by target resource group name. Default value is select all.
-  ##   sortBy: JString
-  ##         : Sort the query results by input field. Default value is sort by 'lastModifiedDateTime'.
-  ##   severity: JString
-  ##           : Filter by severity.  Default value is select all.
   ##   monitorCondition: JString
   ##                   : Filter by monitor condition which is either 'Fired' or 'Resolved'. Default value is to select all.
-  ##   smartGroupState: JString
-  ##                  : Filter by state of the smart group. Default value is to select all.
-  ##   targetResourceType: JString
-  ##                     : Filter by target resource type. Default value is select all.
-  ##   monitorService: JString
-  ##                 : Filter by monitor service which generates the alert instance. Default value is select all.
-  ##   sortOrder: JString
-  ##            : Sort the query results order in either ascending or descending.  Default value is 'desc' for time fields and 'asc' for others.
+  ##   sortBy: JString
+  ##         : Sort the query results by input field. Default value is sort by 'lastModifiedDateTime'.
+  ##   api-version: JString (required)
+  ##              : API version.
   ##   pageCount: JInt
   ##            : Determines number of alerts returned per page in response. Permissible value is between 1 to 250. When the "includeContent"  filter is selected, maximum value allowed is 25. Default value is 25.
+  ##   monitorService: JString
+  ##                 : Filter by monitor service which generates the alert instance. Default value is select all.
+  ##   smartGroupState: JString
+  ##                  : Filter by state of the smart group. Default value is to select all.
+  ##   targetResource: JString
+  ##                 : Filter by target resource( which is full ARM ID) Default value is select all.
+  ##   targetResourceType: JString
+  ##                     : Filter by target resource type. Default value is select all.
+  ##   sortOrder: JString
+  ##            : Sort the query results order in either ascending or descending.  Default value is 'desc' for time fields and 'asc' for others.
+  ##   timeRange: JString
+  ##            : Filter by time range by below listed values. Default value is 1 day.
+  ##   severity: JString
+  ##           : Filter by severity.  Default value is select all.
+  ##   targetResourceGroup: JString
+  ##                      : Filter by target resource group name. Default value is select all.
   section = newJObject()
-  var valid_594052 = query.getOrDefault("timeRange")
-  valid_594052 = validateParameter(valid_594052, JString, required = false,
-                                 default = newJString("1h"))
-  if valid_594052 != nil:
-    section.add "timeRange", valid_594052
+  var valid_564185 = query.getOrDefault("monitorCondition")
+  valid_564185 = validateParameter(valid_564185, JString, required = false,
+                                 default = newJString("Fired"))
+  if valid_564185 != nil:
+    section.add "monitorCondition", valid_564185
+  var valid_564186 = query.getOrDefault("sortBy")
+  valid_564186 = validateParameter(valid_564186, JString, required = false,
+                                 default = newJString("alertsCount"))
+  if valid_564186 != nil:
+    section.add "sortBy", valid_564186
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594053 = query.getOrDefault("api-version")
-  valid_594053 = validateParameter(valid_594053, JString, required = true,
+  var valid_564187 = query.getOrDefault("api-version")
+  valid_564187 = validateParameter(valid_564187, JString, required = true,
                                  default = newJString("2018-05-05"))
-  if valid_594053 != nil:
-    section.add "api-version", valid_594053
-  var valid_594054 = query.getOrDefault("targetResource")
-  valid_594054 = validateParameter(valid_594054, JString, required = false,
-                                 default = nil)
-  if valid_594054 != nil:
-    section.add "targetResource", valid_594054
-  var valid_594055 = query.getOrDefault("targetResourceGroup")
-  valid_594055 = validateParameter(valid_594055, JString, required = false,
-                                 default = nil)
-  if valid_594055 != nil:
-    section.add "targetResourceGroup", valid_594055
-  var valid_594056 = query.getOrDefault("sortBy")
-  valid_594056 = validateParameter(valid_594056, JString, required = false,
-                                 default = newJString("alertsCount"))
-  if valid_594056 != nil:
-    section.add "sortBy", valid_594056
-  var valid_594057 = query.getOrDefault("severity")
-  valid_594057 = validateParameter(valid_594057, JString, required = false,
-                                 default = newJString("Sev0"))
-  if valid_594057 != nil:
-    section.add "severity", valid_594057
-  var valid_594058 = query.getOrDefault("monitorCondition")
-  valid_594058 = validateParameter(valid_594058, JString, required = false,
-                                 default = newJString("Fired"))
-  if valid_594058 != nil:
-    section.add "monitorCondition", valid_594058
-  var valid_594059 = query.getOrDefault("smartGroupState")
-  valid_594059 = validateParameter(valid_594059, JString, required = false,
-                                 default = newJString("New"))
-  if valid_594059 != nil:
-    section.add "smartGroupState", valid_594059
-  var valid_594060 = query.getOrDefault("targetResourceType")
-  valid_594060 = validateParameter(valid_594060, JString, required = false,
-                                 default = nil)
-  if valid_594060 != nil:
-    section.add "targetResourceType", valid_594060
-  var valid_594061 = query.getOrDefault("monitorService")
-  valid_594061 = validateParameter(valid_594061, JString, required = false,
+  if valid_564187 != nil:
+    section.add "api-version", valid_564187
+  var valid_564188 = query.getOrDefault("pageCount")
+  valid_564188 = validateParameter(valid_564188, JInt, required = false, default = nil)
+  if valid_564188 != nil:
+    section.add "pageCount", valid_564188
+  var valid_564189 = query.getOrDefault("monitorService")
+  valid_564189 = validateParameter(valid_564189, JString, required = false,
                                  default = newJString("Application Insights"))
-  if valid_594061 != nil:
-    section.add "monitorService", valid_594061
-  var valid_594062 = query.getOrDefault("sortOrder")
-  valid_594062 = validateParameter(valid_594062, JString, required = false,
+  if valid_564189 != nil:
+    section.add "monitorService", valid_564189
+  var valid_564190 = query.getOrDefault("smartGroupState")
+  valid_564190 = validateParameter(valid_564190, JString, required = false,
+                                 default = newJString("New"))
+  if valid_564190 != nil:
+    section.add "smartGroupState", valid_564190
+  var valid_564191 = query.getOrDefault("targetResource")
+  valid_564191 = validateParameter(valid_564191, JString, required = false,
+                                 default = nil)
+  if valid_564191 != nil:
+    section.add "targetResource", valid_564191
+  var valid_564192 = query.getOrDefault("targetResourceType")
+  valid_564192 = validateParameter(valid_564192, JString, required = false,
+                                 default = nil)
+  if valid_564192 != nil:
+    section.add "targetResourceType", valid_564192
+  var valid_564193 = query.getOrDefault("sortOrder")
+  valid_564193 = validateParameter(valid_564193, JString, required = false,
                                  default = newJString("asc"))
-  if valid_594062 != nil:
-    section.add "sortOrder", valid_594062
-  var valid_594063 = query.getOrDefault("pageCount")
-  valid_594063 = validateParameter(valid_594063, JInt, required = false, default = nil)
-  if valid_594063 != nil:
-    section.add "pageCount", valid_594063
+  if valid_564193 != nil:
+    section.add "sortOrder", valid_564193
+  var valid_564194 = query.getOrDefault("timeRange")
+  valid_564194 = validateParameter(valid_564194, JString, required = false,
+                                 default = newJString("1h"))
+  if valid_564194 != nil:
+    section.add "timeRange", valid_564194
+  var valid_564195 = query.getOrDefault("severity")
+  valid_564195 = validateParameter(valid_564195, JString, required = false,
+                                 default = newJString("Sev0"))
+  if valid_564195 != nil:
+    section.add "severity", valid_564195
+  var valid_564196 = query.getOrDefault("targetResourceGroup")
+  valid_564196 = validateParameter(valid_564196, JString, required = false,
+                                 default = nil)
+  if valid_564196 != nil:
+    section.add "targetResourceGroup", valid_564196
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1086,79 +1088,79 @@ proc validate_SmartGroupsGetAll_594049(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594064: Call_SmartGroupsGetAll_594048; path: JsonNode;
+proc call*(call_564197: Call_SmartGroupsGetAll_564181; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## List all the Smart Groups within a specified subscription. 
   ## 
-  let valid = call_594064.validator(path, query, header, formData, body)
-  let scheme = call_594064.pickScheme
+  let valid = call_564197.validator(path, query, header, formData, body)
+  let scheme = call_564197.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594064.url(scheme.get, call_594064.host, call_594064.base,
-                         call_594064.route, valid.getOrDefault("path"),
+  let url = call_564197.url(scheme.get, call_564197.host, call_564197.base,
+                         call_564197.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594064, url, valid)
+  result = hook(call_564197, url, valid)
 
-proc call*(call_594065: Call_SmartGroupsGetAll_594048; subscriptionId: string;
-          timeRange: string = "1h"; apiVersion: string = "2018-05-05";
-          targetResource: string = ""; targetResourceGroup: string = "";
-          sortBy: string = "alertsCount"; severity: string = "Sev0";
-          monitorCondition: string = "Fired"; smartGroupState: string = "New";
-          targetResourceType: string = "";
+proc call*(call_564198: Call_SmartGroupsGetAll_564181; subscriptionId: string;
+          monitorCondition: string = "Fired"; sortBy: string = "alertsCount";
+          apiVersion: string = "2018-05-05"; pageCount: int = 0;
           monitorService: string = "Application Insights";
-          sortOrder: string = "asc"; pageCount: int = 0): Recallable =
+          smartGroupState: string = "New"; targetResource: string = "";
+          targetResourceType: string = ""; sortOrder: string = "asc";
+          timeRange: string = "1h"; severity: string = "Sev0";
+          targetResourceGroup: string = ""): Recallable =
   ## smartGroupsGetAll
   ## List all the Smart Groups within a specified subscription. 
-  ##   timeRange: string
-  ##            : Filter by time range by below listed values. Default value is 1 day.
+  ##   monitorCondition: string
+  ##                   : Filter by monitor condition which is either 'Fired' or 'Resolved'. Default value is to select all.
+  ##   sortBy: string
+  ##         : Sort the query results by input field. Default value is sort by 'lastModifiedDateTime'.
   ##   apiVersion: string (required)
   ##             : API version.
+  ##   pageCount: int
+  ##            : Determines number of alerts returned per page in response. Permissible value is between 1 to 250. When the "includeContent"  filter is selected, maximum value allowed is 25. Default value is 25.
+  ##   monitorService: string
+  ##                 : Filter by monitor service which generates the alert instance. Default value is select all.
+  ##   smartGroupState: string
+  ##                  : Filter by state of the smart group. Default value is to select all.
   ##   targetResource: string
   ##                 : Filter by target resource( which is full ARM ID) Default value is select all.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   targetResourceGroup: string
-  ##                      : Filter by target resource group name. Default value is select all.
-  ##   sortBy: string
-  ##         : Sort the query results by input field. Default value is sort by 'lastModifiedDateTime'.
-  ##   severity: string
-  ##           : Filter by severity.  Default value is select all.
-  ##   monitorCondition: string
-  ##                   : Filter by monitor condition which is either 'Fired' or 'Resolved'. Default value is to select all.
-  ##   smartGroupState: string
-  ##                  : Filter by state of the smart group. Default value is to select all.
   ##   targetResourceType: string
   ##                     : Filter by target resource type. Default value is select all.
-  ##   monitorService: string
-  ##                 : Filter by monitor service which generates the alert instance. Default value is select all.
   ##   sortOrder: string
   ##            : Sort the query results order in either ascending or descending.  Default value is 'desc' for time fields and 'asc' for others.
-  ##   pageCount: int
-  ##            : Determines number of alerts returned per page in response. Permissible value is between 1 to 250. When the "includeContent"  filter is selected, maximum value allowed is 25. Default value is 25.
-  var path_594066 = newJObject()
-  var query_594067 = newJObject()
-  add(query_594067, "timeRange", newJString(timeRange))
-  add(query_594067, "api-version", newJString(apiVersion))
-  add(query_594067, "targetResource", newJString(targetResource))
-  add(path_594066, "subscriptionId", newJString(subscriptionId))
-  add(query_594067, "targetResourceGroup", newJString(targetResourceGroup))
-  add(query_594067, "sortBy", newJString(sortBy))
-  add(query_594067, "severity", newJString(severity))
-  add(query_594067, "monitorCondition", newJString(monitorCondition))
-  add(query_594067, "smartGroupState", newJString(smartGroupState))
-  add(query_594067, "targetResourceType", newJString(targetResourceType))
-  add(query_594067, "monitorService", newJString(monitorService))
-  add(query_594067, "sortOrder", newJString(sortOrder))
-  add(query_594067, "pageCount", newJInt(pageCount))
-  result = call_594065.call(path_594066, query_594067, nil, nil, nil)
+  ##   timeRange: string
+  ##            : Filter by time range by below listed values. Default value is 1 day.
+  ##   severity: string
+  ##           : Filter by severity.  Default value is select all.
+  ##   targetResourceGroup: string
+  ##                      : Filter by target resource group name. Default value is select all.
+  var path_564199 = newJObject()
+  var query_564200 = newJObject()
+  add(query_564200, "monitorCondition", newJString(monitorCondition))
+  add(query_564200, "sortBy", newJString(sortBy))
+  add(query_564200, "api-version", newJString(apiVersion))
+  add(query_564200, "pageCount", newJInt(pageCount))
+  add(query_564200, "monitorService", newJString(monitorService))
+  add(query_564200, "smartGroupState", newJString(smartGroupState))
+  add(query_564200, "targetResource", newJString(targetResource))
+  add(path_564199, "subscriptionId", newJString(subscriptionId))
+  add(query_564200, "targetResourceType", newJString(targetResourceType))
+  add(query_564200, "sortOrder", newJString(sortOrder))
+  add(query_564200, "timeRange", newJString(timeRange))
+  add(query_564200, "severity", newJString(severity))
+  add(query_564200, "targetResourceGroup", newJString(targetResourceGroup))
+  result = call_564198.call(path_564199, query_564200, nil, nil, nil)
 
-var smartGroupsGetAll* = Call_SmartGroupsGetAll_594048(name: "smartGroupsGetAll",
+var smartGroupsGetAll* = Call_SmartGroupsGetAll_564181(name: "smartGroupsGetAll",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.AlertsManagement/smartGroups",
-    validator: validate_SmartGroupsGetAll_594049, base: "",
-    url: url_SmartGroupsGetAll_594050, schemes: {Scheme.Https})
+    validator: validate_SmartGroupsGetAll_564182, base: "",
+    url: url_SmartGroupsGetAll_564183, schemes: {Scheme.Https})
 type
-  Call_SmartGroupsGetById_594068 = ref object of OpenApiRestCall_593425
-proc url_SmartGroupsGetById_594070(protocol: Scheme; host: string; base: string;
+  Call_SmartGroupsGetById_564201 = ref object of OpenApiRestCall_563556
+proc url_SmartGroupsGetById_564203(protocol: Scheme; host: string; base: string;
                                   route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1177,7 +1179,7 @@ proc url_SmartGroupsGetById_594070(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_SmartGroupsGetById_594069(path: JsonNode; query: JsonNode;
+proc validate_SmartGroupsGetById_564202(path: JsonNode; query: JsonNode;
                                        header: JsonNode; formData: JsonNode;
                                        body: JsonNode): JsonNode =
   ## Get information related to a specific Smart Group.
@@ -1192,16 +1194,16 @@ proc validate_SmartGroupsGetById_594069(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_594071 = path.getOrDefault("subscriptionId")
-  valid_594071 = validateParameter(valid_594071, JString, required = true,
+  var valid_564204 = path.getOrDefault("subscriptionId")
+  valid_564204 = validateParameter(valid_564204, JString, required = true,
                                  default = nil)
-  if valid_594071 != nil:
-    section.add "subscriptionId", valid_594071
-  var valid_594072 = path.getOrDefault("smartGroupId")
-  valid_594072 = validateParameter(valid_594072, JString, required = true,
+  if valid_564204 != nil:
+    section.add "subscriptionId", valid_564204
+  var valid_564205 = path.getOrDefault("smartGroupId")
+  valid_564205 = validateParameter(valid_564205, JString, required = true,
                                  default = nil)
-  if valid_594072 != nil:
-    section.add "smartGroupId", valid_594072
+  if valid_564205 != nil:
+    section.add "smartGroupId", valid_564205
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1209,11 +1211,11 @@ proc validate_SmartGroupsGetById_594069(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594073 = query.getOrDefault("api-version")
-  valid_594073 = validateParameter(valid_594073, JString, required = true,
+  var valid_564206 = query.getOrDefault("api-version")
+  valid_564206 = validateParameter(valid_564206, JString, required = true,
                                  default = newJString("2018-05-05"))
-  if valid_594073 != nil:
-    section.add "api-version", valid_594073
+  if valid_564206 != nil:
+    section.add "api-version", valid_564206
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1222,20 +1224,20 @@ proc validate_SmartGroupsGetById_594069(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594074: Call_SmartGroupsGetById_594068; path: JsonNode;
+proc call*(call_564207: Call_SmartGroupsGetById_564201; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get information related to a specific Smart Group.
   ## 
-  let valid = call_594074.validator(path, query, header, formData, body)
-  let scheme = call_594074.pickScheme
+  let valid = call_564207.validator(path, query, header, formData, body)
+  let scheme = call_564207.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594074.url(scheme.get, call_594074.host, call_594074.base,
-                         call_594074.route, valid.getOrDefault("path"),
+  let url = call_564207.url(scheme.get, call_564207.host, call_564207.base,
+                         call_564207.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594074, url, valid)
+  result = hook(call_564207, url, valid)
 
-proc call*(call_594075: Call_SmartGroupsGetById_594068; subscriptionId: string;
+proc call*(call_564208: Call_SmartGroupsGetById_564201; subscriptionId: string;
           smartGroupId: string; apiVersion: string = "2018-05-05"): Recallable =
   ## smartGroupsGetById
   ## Get information related to a specific Smart Group.
@@ -1245,21 +1247,21 @@ proc call*(call_594075: Call_SmartGroupsGetById_594068; subscriptionId: string;
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   smartGroupId: string (required)
   ##               : Smart group unique id. 
-  var path_594076 = newJObject()
-  var query_594077 = newJObject()
-  add(query_594077, "api-version", newJString(apiVersion))
-  add(path_594076, "subscriptionId", newJString(subscriptionId))
-  add(path_594076, "smartGroupId", newJString(smartGroupId))
-  result = call_594075.call(path_594076, query_594077, nil, nil, nil)
+  var path_564209 = newJObject()
+  var query_564210 = newJObject()
+  add(query_564210, "api-version", newJString(apiVersion))
+  add(path_564209, "subscriptionId", newJString(subscriptionId))
+  add(path_564209, "smartGroupId", newJString(smartGroupId))
+  result = call_564208.call(path_564209, query_564210, nil, nil, nil)
 
-var smartGroupsGetById* = Call_SmartGroupsGetById_594068(
+var smartGroupsGetById* = Call_SmartGroupsGetById_564201(
     name: "smartGroupsGetById", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.AlertsManagement/smartGroups/{smartGroupId}",
-    validator: validate_SmartGroupsGetById_594069, base: "",
-    url: url_SmartGroupsGetById_594070, schemes: {Scheme.Https})
+    validator: validate_SmartGroupsGetById_564202, base: "",
+    url: url_SmartGroupsGetById_564203, schemes: {Scheme.Https})
 type
-  Call_SmartGroupsChangeState_594078 = ref object of OpenApiRestCall_593425
-proc url_SmartGroupsChangeState_594080(protocol: Scheme; host: string; base: string;
+  Call_SmartGroupsChangeState_564211 = ref object of OpenApiRestCall_563556
+proc url_SmartGroupsChangeState_564213(protocol: Scheme; host: string; base: string;
                                       route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1279,7 +1281,7 @@ proc url_SmartGroupsChangeState_594080(protocol: Scheme; host: string; base: str
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_SmartGroupsChangeState_594079(path: JsonNode; query: JsonNode;
+proc validate_SmartGroupsChangeState_564212(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Change the state of a Smart Group.
   ## 
@@ -1293,16 +1295,16 @@ proc validate_SmartGroupsChangeState_594079(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_594081 = path.getOrDefault("subscriptionId")
-  valid_594081 = validateParameter(valid_594081, JString, required = true,
+  var valid_564214 = path.getOrDefault("subscriptionId")
+  valid_564214 = validateParameter(valid_564214, JString, required = true,
                                  default = nil)
-  if valid_594081 != nil:
-    section.add "subscriptionId", valid_594081
-  var valid_594082 = path.getOrDefault("smartGroupId")
-  valid_594082 = validateParameter(valid_594082, JString, required = true,
+  if valid_564214 != nil:
+    section.add "subscriptionId", valid_564214
+  var valid_564215 = path.getOrDefault("smartGroupId")
+  valid_564215 = validateParameter(valid_564215, JString, required = true,
                                  default = nil)
-  if valid_594082 != nil:
-    section.add "smartGroupId", valid_594082
+  if valid_564215 != nil:
+    section.add "smartGroupId", valid_564215
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1312,16 +1314,16 @@ proc validate_SmartGroupsChangeState_594079(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594083 = query.getOrDefault("api-version")
-  valid_594083 = validateParameter(valid_594083, JString, required = true,
+  var valid_564216 = query.getOrDefault("api-version")
+  valid_564216 = validateParameter(valid_564216, JString, required = true,
                                  default = newJString("2018-05-05"))
-  if valid_594083 != nil:
-    section.add "api-version", valid_594083
-  var valid_594084 = query.getOrDefault("newState")
-  valid_594084 = validateParameter(valid_594084, JString, required = true,
+  if valid_564216 != nil:
+    section.add "api-version", valid_564216
+  var valid_564217 = query.getOrDefault("newState")
+  valid_564217 = validateParameter(valid_564217, JString, required = true,
                                  default = newJString("New"))
-  if valid_594084 != nil:
-    section.add "newState", valid_594084
+  if valid_564217 != nil:
+    section.add "newState", valid_564217
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1330,20 +1332,20 @@ proc validate_SmartGroupsChangeState_594079(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594085: Call_SmartGroupsChangeState_594078; path: JsonNode;
+proc call*(call_564218: Call_SmartGroupsChangeState_564211; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Change the state of a Smart Group.
   ## 
-  let valid = call_594085.validator(path, query, header, formData, body)
-  let scheme = call_594085.pickScheme
+  let valid = call_564218.validator(path, query, header, formData, body)
+  let scheme = call_564218.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594085.url(scheme.get, call_594085.host, call_594085.base,
-                         call_594085.route, valid.getOrDefault("path"),
+  let url = call_564218.url(scheme.get, call_564218.host, call_564218.base,
+                         call_564218.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594085, url, valid)
+  result = hook(call_564218, url, valid)
 
-proc call*(call_594086: Call_SmartGroupsChangeState_594078; subscriptionId: string;
+proc call*(call_564219: Call_SmartGroupsChangeState_564211; subscriptionId: string;
           smartGroupId: string; apiVersion: string = "2018-05-05";
           newState: string = "New"): Recallable =
   ## smartGroupsChangeState
@@ -1356,22 +1358,22 @@ proc call*(call_594086: Call_SmartGroupsChangeState_594078; subscriptionId: stri
   ##               : Smart group unique id. 
   ##   newState: string (required)
   ##           : New state of the alert.
-  var path_594087 = newJObject()
-  var query_594088 = newJObject()
-  add(query_594088, "api-version", newJString(apiVersion))
-  add(path_594087, "subscriptionId", newJString(subscriptionId))
-  add(path_594087, "smartGroupId", newJString(smartGroupId))
-  add(query_594088, "newState", newJString(newState))
-  result = call_594086.call(path_594087, query_594088, nil, nil, nil)
+  var path_564220 = newJObject()
+  var query_564221 = newJObject()
+  add(query_564221, "api-version", newJString(apiVersion))
+  add(path_564220, "subscriptionId", newJString(subscriptionId))
+  add(path_564220, "smartGroupId", newJString(smartGroupId))
+  add(query_564221, "newState", newJString(newState))
+  result = call_564219.call(path_564220, query_564221, nil, nil, nil)
 
-var smartGroupsChangeState* = Call_SmartGroupsChangeState_594078(
+var smartGroupsChangeState* = Call_SmartGroupsChangeState_564211(
     name: "smartGroupsChangeState", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.AlertsManagement/smartGroups/{smartGroupId}/changeState",
-    validator: validate_SmartGroupsChangeState_594079, base: "",
-    url: url_SmartGroupsChangeState_594080, schemes: {Scheme.Https})
+    validator: validate_SmartGroupsChangeState_564212, base: "",
+    url: url_SmartGroupsChangeState_564213, schemes: {Scheme.Https})
 type
-  Call_SmartGroupsGetHistory_594089 = ref object of OpenApiRestCall_593425
-proc url_SmartGroupsGetHistory_594091(protocol: Scheme; host: string; base: string;
+  Call_SmartGroupsGetHistory_564222 = ref object of OpenApiRestCall_563556
+proc url_SmartGroupsGetHistory_564224(protocol: Scheme; host: string; base: string;
                                      route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1391,7 +1393,7 @@ proc url_SmartGroupsGetHistory_594091(protocol: Scheme; host: string; base: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_SmartGroupsGetHistory_594090(path: JsonNode; query: JsonNode;
+proc validate_SmartGroupsGetHistory_564223(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Get the history a smart group, which captures any Smart Group state changes (New/Acknowledged/Closed) .
   ## 
@@ -1405,16 +1407,16 @@ proc validate_SmartGroupsGetHistory_594090(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_594092 = path.getOrDefault("subscriptionId")
-  valid_594092 = validateParameter(valid_594092, JString, required = true,
+  var valid_564225 = path.getOrDefault("subscriptionId")
+  valid_564225 = validateParameter(valid_564225, JString, required = true,
                                  default = nil)
-  if valid_594092 != nil:
-    section.add "subscriptionId", valid_594092
-  var valid_594093 = path.getOrDefault("smartGroupId")
-  valid_594093 = validateParameter(valid_594093, JString, required = true,
+  if valid_564225 != nil:
+    section.add "subscriptionId", valid_564225
+  var valid_564226 = path.getOrDefault("smartGroupId")
+  valid_564226 = validateParameter(valid_564226, JString, required = true,
                                  default = nil)
-  if valid_594093 != nil:
-    section.add "smartGroupId", valid_594093
+  if valid_564226 != nil:
+    section.add "smartGroupId", valid_564226
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1422,11 +1424,11 @@ proc validate_SmartGroupsGetHistory_594090(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594094 = query.getOrDefault("api-version")
-  valid_594094 = validateParameter(valid_594094, JString, required = true,
+  var valid_564227 = query.getOrDefault("api-version")
+  valid_564227 = validateParameter(valid_564227, JString, required = true,
                                  default = newJString("2018-05-05"))
-  if valid_594094 != nil:
-    section.add "api-version", valid_594094
+  if valid_564227 != nil:
+    section.add "api-version", valid_564227
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1435,20 +1437,20 @@ proc validate_SmartGroupsGetHistory_594090(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594095: Call_SmartGroupsGetHistory_594089; path: JsonNode;
+proc call*(call_564228: Call_SmartGroupsGetHistory_564222; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get the history a smart group, which captures any Smart Group state changes (New/Acknowledged/Closed) .
   ## 
-  let valid = call_594095.validator(path, query, header, formData, body)
-  let scheme = call_594095.pickScheme
+  let valid = call_564228.validator(path, query, header, formData, body)
+  let scheme = call_564228.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594095.url(scheme.get, call_594095.host, call_594095.base,
-                         call_594095.route, valid.getOrDefault("path"),
+  let url = call_564228.url(scheme.get, call_564228.host, call_564228.base,
+                         call_564228.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594095, url, valid)
+  result = hook(call_564228, url, valid)
 
-proc call*(call_594096: Call_SmartGroupsGetHistory_594089; subscriptionId: string;
+proc call*(call_564229: Call_SmartGroupsGetHistory_564222; subscriptionId: string;
           smartGroupId: string; apiVersion: string = "2018-05-05"): Recallable =
   ## smartGroupsGetHistory
   ## Get the history a smart group, which captures any Smart Group state changes (New/Acknowledged/Closed) .
@@ -1458,18 +1460,18 @@ proc call*(call_594096: Call_SmartGroupsGetHistory_594089; subscriptionId: strin
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   smartGroupId: string (required)
   ##               : Smart group unique id. 
-  var path_594097 = newJObject()
-  var query_594098 = newJObject()
-  add(query_594098, "api-version", newJString(apiVersion))
-  add(path_594097, "subscriptionId", newJString(subscriptionId))
-  add(path_594097, "smartGroupId", newJString(smartGroupId))
-  result = call_594096.call(path_594097, query_594098, nil, nil, nil)
+  var path_564230 = newJObject()
+  var query_564231 = newJObject()
+  add(query_564231, "api-version", newJString(apiVersion))
+  add(path_564230, "subscriptionId", newJString(subscriptionId))
+  add(path_564230, "smartGroupId", newJString(smartGroupId))
+  result = call_564229.call(path_564230, query_564231, nil, nil, nil)
 
-var smartGroupsGetHistory* = Call_SmartGroupsGetHistory_594089(
+var smartGroupsGetHistory* = Call_SmartGroupsGetHistory_564222(
     name: "smartGroupsGetHistory", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.AlertsManagement/smartGroups/{smartGroupId}/history",
-    validator: validate_SmartGroupsGetHistory_594090, base: "",
-    url: url_SmartGroupsGetHistory_594091, schemes: {Scheme.Https})
+    validator: validate_SmartGroupsGetHistory_564223, base: "",
+    url: url_SmartGroupsGetHistory_564224, schemes: {Scheme.Https})
 export
   rest
 

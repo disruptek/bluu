@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, httpcore
 
 ## auto-generated via openapi macro
 ## title: Recommendations API Client
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_567657 = ref object of OpenApiRestCall
+  OpenApiRestCall_563555 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_567657](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563555](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_567657): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563555): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,8 +107,8 @@ const
   macServiceName = "web-Recommendations"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_RecommendationsList_567879 = ref object of OpenApiRestCall_567657
-proc url_RecommendationsList_567881(protocol: Scheme; host: string; base: string;
+  Call_RecommendationsList_563777 = ref object of OpenApiRestCall_563555
+proc url_RecommendationsList_563779(protocol: Scheme; host: string; base: string;
                                    route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -120,7 +124,7 @@ proc url_RecommendationsList_567881(protocol: Scheme; host: string; base: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_RecommendationsList_567880(path: JsonNode; query: JsonNode;
+proc validate_RecommendationsList_563778(path: JsonNode; query: JsonNode;
                                         header: JsonNode; formData: JsonNode;
                                         body: JsonNode): JsonNode =
   ## List all recommendations for a subscription.
@@ -133,11 +137,11 @@ proc validate_RecommendationsList_567880(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_568055 = path.getOrDefault("subscriptionId")
-  valid_568055 = validateParameter(valid_568055, JString, required = true,
+  var valid_563955 = path.getOrDefault("subscriptionId")
+  valid_563955 = validateParameter(valid_563955, JString, required = true,
                                  default = nil)
-  if valid_568055 != nil:
-    section.add "subscriptionId", valid_568055
+  if valid_563955 != nil:
+    section.add "subscriptionId", valid_563955
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -149,20 +153,20 @@ proc validate_RecommendationsList_567880(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568056 = query.getOrDefault("api-version")
-  valid_568056 = validateParameter(valid_568056, JString, required = true,
+  var valid_563956 = query.getOrDefault("api-version")
+  valid_563956 = validateParameter(valid_563956, JString, required = true,
                                  default = nil)
-  if valid_568056 != nil:
-    section.add "api-version", valid_568056
-  var valid_568057 = query.getOrDefault("featured")
-  valid_568057 = validateParameter(valid_568057, JBool, required = false, default = nil)
-  if valid_568057 != nil:
-    section.add "featured", valid_568057
-  var valid_568058 = query.getOrDefault("$filter")
-  valid_568058 = validateParameter(valid_568058, JString, required = false,
+  if valid_563956 != nil:
+    section.add "api-version", valid_563956
+  var valid_563957 = query.getOrDefault("featured")
+  valid_563957 = validateParameter(valid_563957, JBool, required = false, default = nil)
+  if valid_563957 != nil:
+    section.add "featured", valid_563957
+  var valid_563958 = query.getOrDefault("$filter")
+  valid_563958 = validateParameter(valid_563958, JString, required = false,
                                  default = nil)
-  if valid_568058 != nil:
-    section.add "$filter", valid_568058
+  if valid_563958 != nil:
+    section.add "$filter", valid_563958
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -171,47 +175,47 @@ proc validate_RecommendationsList_567880(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568081: Call_RecommendationsList_567879; path: JsonNode;
+proc call*(call_563981: Call_RecommendationsList_563777; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## List all recommendations for a subscription.
   ## 
-  let valid = call_568081.validator(path, query, header, formData, body)
-  let scheme = call_568081.pickScheme
+  let valid = call_563981.validator(path, query, header, formData, body)
+  let scheme = call_563981.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568081.url(scheme.get, call_568081.host, call_568081.base,
-                         call_568081.route, valid.getOrDefault("path"),
+  let url = call_563981.url(scheme.get, call_563981.host, call_563981.base,
+                         call_563981.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568081, url, valid)
+  result = hook(call_563981, url, valid)
 
-proc call*(call_568152: Call_RecommendationsList_567879; apiVersion: string;
+proc call*(call_564052: Call_RecommendationsList_563777; apiVersion: string;
           subscriptionId: string; featured: bool = false; Filter: string = ""): Recallable =
   ## recommendationsList
   ## List all recommendations for a subscription.
   ##   apiVersion: string (required)
   ##             : API Version
-  ##   featured: bool
-  ##           : Specify <code>true</code> to return only the most critical recommendations. The default is <code>false</code>, which returns all recommendations.
   ##   subscriptionId: string (required)
   ##                 : Your Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
+  ##   featured: bool
+  ##           : Specify <code>true</code> to return only the most critical recommendations. The default is <code>false</code>, which returns all recommendations.
   ##   Filter: string
   ##         : Filter is specified by using OData syntax. Example: $filter=channels eq 'Api' or channel eq 'Notification' and startTime eq '2014-01-01T00:00:00Z' and endTime eq '2014-12-31T23:59:59Z' and timeGrain eq duration'[PT1H|PT1M|P1D]
-  var path_568153 = newJObject()
-  var query_568155 = newJObject()
-  add(query_568155, "api-version", newJString(apiVersion))
-  add(query_568155, "featured", newJBool(featured))
-  add(path_568153, "subscriptionId", newJString(subscriptionId))
-  add(query_568155, "$filter", newJString(Filter))
-  result = call_568152.call(path_568153, query_568155, nil, nil, nil)
+  var path_564053 = newJObject()
+  var query_564055 = newJObject()
+  add(query_564055, "api-version", newJString(apiVersion))
+  add(path_564053, "subscriptionId", newJString(subscriptionId))
+  add(query_564055, "featured", newJBool(featured))
+  add(query_564055, "$filter", newJString(Filter))
+  result = call_564052.call(path_564053, query_564055, nil, nil, nil)
 
-var recommendationsList* = Call_RecommendationsList_567879(
+var recommendationsList* = Call_RecommendationsList_563777(
     name: "recommendationsList", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Web/recommendations",
-    validator: validate_RecommendationsList_567880, base: "",
-    url: url_RecommendationsList_567881, schemes: {Scheme.Https})
+    validator: validate_RecommendationsList_563778, base: "",
+    url: url_RecommendationsList_563779, schemes: {Scheme.Https})
 type
-  Call_RecommendationsResetAllFilters_568194 = ref object of OpenApiRestCall_567657
-proc url_RecommendationsResetAllFilters_568196(protocol: Scheme; host: string;
+  Call_RecommendationsResetAllFilters_564094 = ref object of OpenApiRestCall_563555
+proc url_RecommendationsResetAllFilters_564096(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -228,7 +232,7 @@ proc url_RecommendationsResetAllFilters_568196(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_RecommendationsResetAllFilters_568195(path: JsonNode;
+proc validate_RecommendationsResetAllFilters_564095(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Reset all recommendation opt-out settings for a subscription.
   ## 
@@ -240,11 +244,11 @@ proc validate_RecommendationsResetAllFilters_568195(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_568197 = path.getOrDefault("subscriptionId")
-  valid_568197 = validateParameter(valid_568197, JString, required = true,
+  var valid_564097 = path.getOrDefault("subscriptionId")
+  valid_564097 = validateParameter(valid_564097, JString, required = true,
                                  default = nil)
-  if valid_568197 != nil:
-    section.add "subscriptionId", valid_568197
+  if valid_564097 != nil:
+    section.add "subscriptionId", valid_564097
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -252,11 +256,11 @@ proc validate_RecommendationsResetAllFilters_568195(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568198 = query.getOrDefault("api-version")
-  valid_568198 = validateParameter(valid_568198, JString, required = true,
+  var valid_564098 = query.getOrDefault("api-version")
+  valid_564098 = validateParameter(valid_564098, JString, required = true,
                                  default = nil)
-  if valid_568198 != nil:
-    section.add "api-version", valid_568198
+  if valid_564098 != nil:
+    section.add "api-version", valid_564098
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -265,20 +269,20 @@ proc validate_RecommendationsResetAllFilters_568195(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568199: Call_RecommendationsResetAllFilters_568194; path: JsonNode;
+proc call*(call_564099: Call_RecommendationsResetAllFilters_564094; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Reset all recommendation opt-out settings for a subscription.
   ## 
-  let valid = call_568199.validator(path, query, header, formData, body)
-  let scheme = call_568199.pickScheme
+  let valid = call_564099.validator(path, query, header, formData, body)
+  let scheme = call_564099.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568199.url(scheme.get, call_568199.host, call_568199.base,
-                         call_568199.route, valid.getOrDefault("path"),
+  let url = call_564099.url(scheme.get, call_564099.host, call_564099.base,
+                         call_564099.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568199, url, valid)
+  result = hook(call_564099, url, valid)
 
-proc call*(call_568200: Call_RecommendationsResetAllFilters_568194;
+proc call*(call_564100: Call_RecommendationsResetAllFilters_564094;
           apiVersion: string; subscriptionId: string): Recallable =
   ## recommendationsResetAllFilters
   ## Reset all recommendation opt-out settings for a subscription.
@@ -286,20 +290,20 @@ proc call*(call_568200: Call_RecommendationsResetAllFilters_568194;
   ##             : API Version
   ##   subscriptionId: string (required)
   ##                 : Your Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
-  var path_568201 = newJObject()
-  var query_568202 = newJObject()
-  add(query_568202, "api-version", newJString(apiVersion))
-  add(path_568201, "subscriptionId", newJString(subscriptionId))
-  result = call_568200.call(path_568201, query_568202, nil, nil, nil)
+  var path_564101 = newJObject()
+  var query_564102 = newJObject()
+  add(query_564102, "api-version", newJString(apiVersion))
+  add(path_564101, "subscriptionId", newJString(subscriptionId))
+  result = call_564100.call(path_564101, query_564102, nil, nil, nil)
 
-var recommendationsResetAllFilters* = Call_RecommendationsResetAllFilters_568194(
+var recommendationsResetAllFilters* = Call_RecommendationsResetAllFilters_564094(
     name: "recommendationsResetAllFilters", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Web/recommendations/reset",
-    validator: validate_RecommendationsResetAllFilters_568195, base: "",
-    url: url_RecommendationsResetAllFilters_568196, schemes: {Scheme.Https})
+    validator: validate_RecommendationsResetAllFilters_564095, base: "",
+    url: url_RecommendationsResetAllFilters_564096, schemes: {Scheme.Https})
 type
-  Call_RecommendationsDisableRecommendationForSubscription_568203 = ref object of OpenApiRestCall_567657
-proc url_RecommendationsDisableRecommendationForSubscription_568205(
+  Call_RecommendationsDisableRecommendationForSubscription_564103 = ref object of OpenApiRestCall_563555
+proc url_RecommendationsDisableRecommendationForSubscription_564105(
     protocol: Scheme; host: string; base: string; route: string; path: JsonNode;
     query: JsonNode): Uri =
   result.scheme = $protocol
@@ -319,7 +323,7 @@ proc url_RecommendationsDisableRecommendationForSubscription_568205(
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_RecommendationsDisableRecommendationForSubscription_568204(
+proc validate_RecommendationsDisableRecommendationForSubscription_564104(
     path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
     body: JsonNode): JsonNode =
   ## Disables the specified rule so it will not apply to a subscription in the future.
@@ -333,16 +337,16 @@ proc validate_RecommendationsDisableRecommendationForSubscription_568204(
   ##                 : Your Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `name` field"
-  var valid_568206 = path.getOrDefault("name")
-  valid_568206 = validateParameter(valid_568206, JString, required = true,
+  var valid_564106 = path.getOrDefault("name")
+  valid_564106 = validateParameter(valid_564106, JString, required = true,
                                  default = nil)
-  if valid_568206 != nil:
-    section.add "name", valid_568206
-  var valid_568207 = path.getOrDefault("subscriptionId")
-  valid_568207 = validateParameter(valid_568207, JString, required = true,
+  if valid_564106 != nil:
+    section.add "name", valid_564106
+  var valid_564107 = path.getOrDefault("subscriptionId")
+  valid_564107 = validateParameter(valid_564107, JString, required = true,
                                  default = nil)
-  if valid_568207 != nil:
-    section.add "subscriptionId", valid_568207
+  if valid_564107 != nil:
+    section.add "subscriptionId", valid_564107
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -350,11 +354,11 @@ proc validate_RecommendationsDisableRecommendationForSubscription_568204(
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568208 = query.getOrDefault("api-version")
-  valid_568208 = validateParameter(valid_568208, JString, required = true,
+  var valid_564108 = query.getOrDefault("api-version")
+  valid_564108 = validateParameter(valid_564108, JString, required = true,
                                  default = nil)
-  if valid_568208 != nil:
-    section.add "api-version", valid_568208
+  if valid_564108 != nil:
+    section.add "api-version", valid_564108
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -363,21 +367,21 @@ proc validate_RecommendationsDisableRecommendationForSubscription_568204(
   if body != nil:
     result.add "body", body
 
-proc call*(call_568209: Call_RecommendationsDisableRecommendationForSubscription_568203;
+proc call*(call_564109: Call_RecommendationsDisableRecommendationForSubscription_564103;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Disables the specified rule so it will not apply to a subscription in the future.
   ## 
-  let valid = call_568209.validator(path, query, header, formData, body)
-  let scheme = call_568209.pickScheme
+  let valid = call_564109.validator(path, query, header, formData, body)
+  let scheme = call_564109.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568209.url(scheme.get, call_568209.host, call_568209.base,
-                         call_568209.route, valid.getOrDefault("path"),
+  let url = call_564109.url(scheme.get, call_564109.host, call_564109.base,
+                         call_564109.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568209, url, valid)
+  result = hook(call_564109, url, valid)
 
-proc call*(call_568210: Call_RecommendationsDisableRecommendationForSubscription_568203;
+proc call*(call_564110: Call_RecommendationsDisableRecommendationForSubscription_564103;
           apiVersion: string; name: string; subscriptionId: string): Recallable =
   ## recommendationsDisableRecommendationForSubscription
   ## Disables the specified rule so it will not apply to a subscription in the future.
@@ -387,22 +391,22 @@ proc call*(call_568210: Call_RecommendationsDisableRecommendationForSubscription
   ##       : Rule name
   ##   subscriptionId: string (required)
   ##                 : Your Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
-  var path_568211 = newJObject()
-  var query_568212 = newJObject()
-  add(query_568212, "api-version", newJString(apiVersion))
-  add(path_568211, "name", newJString(name))
-  add(path_568211, "subscriptionId", newJString(subscriptionId))
-  result = call_568210.call(path_568211, query_568212, nil, nil, nil)
+  var path_564111 = newJObject()
+  var query_564112 = newJObject()
+  add(query_564112, "api-version", newJString(apiVersion))
+  add(path_564111, "name", newJString(name))
+  add(path_564111, "subscriptionId", newJString(subscriptionId))
+  result = call_564110.call(path_564111, query_564112, nil, nil, nil)
 
-var recommendationsDisableRecommendationForSubscription* = Call_RecommendationsDisableRecommendationForSubscription_568203(
+var recommendationsDisableRecommendationForSubscription* = Call_RecommendationsDisableRecommendationForSubscription_564103(
     name: "recommendationsDisableRecommendationForSubscription",
     meth: HttpMethod.HttpPost, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Web/recommendations/{name}/disable",
-    validator: validate_RecommendationsDisableRecommendationForSubscription_568204,
-    base: "", url: url_RecommendationsDisableRecommendationForSubscription_568205,
+    validator: validate_RecommendationsDisableRecommendationForSubscription_564104,
+    base: "", url: url_RecommendationsDisableRecommendationForSubscription_564105,
     schemes: {Scheme.Https})
 type
-  Call_RecommendationsListHistoryForWebApp_568213 = ref object of OpenApiRestCall_567657
-proc url_RecommendationsListHistoryForWebApp_568215(protocol: Scheme; host: string;
+  Call_RecommendationsListHistoryForWebApp_564113 = ref object of OpenApiRestCall_563555
+proc url_RecommendationsListHistoryForWebApp_564115(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -425,37 +429,36 @@ proc url_RecommendationsListHistoryForWebApp_568215(protocol: Scheme; host: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_RecommendationsListHistoryForWebApp_568214(path: JsonNode;
+proc validate_RecommendationsListHistoryForWebApp_564114(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Get past recommendations for an app, optionally specified by the time range.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : Name of the resource group to which the resource belongs.
   ##   siteName: JString (required)
   ##           : Name of the app.
   ##   subscriptionId: JString (required)
   ##                 : Your Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
+  ##   resourceGroupName: JString (required)
+  ##                    : Name of the resource group to which the resource belongs.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568216 = path.getOrDefault("resourceGroupName")
-  valid_568216 = validateParameter(valid_568216, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `siteName` field"
+  var valid_564116 = path.getOrDefault("siteName")
+  valid_564116 = validateParameter(valid_564116, JString, required = true,
                                  default = nil)
-  if valid_568216 != nil:
-    section.add "resourceGroupName", valid_568216
-  var valid_568217 = path.getOrDefault("siteName")
-  valid_568217 = validateParameter(valid_568217, JString, required = true,
+  if valid_564116 != nil:
+    section.add "siteName", valid_564116
+  var valid_564117 = path.getOrDefault("subscriptionId")
+  valid_564117 = validateParameter(valid_564117, JString, required = true,
                                  default = nil)
-  if valid_568217 != nil:
-    section.add "siteName", valid_568217
-  var valid_568218 = path.getOrDefault("subscriptionId")
-  valid_568218 = validateParameter(valid_568218, JString, required = true,
+  if valid_564117 != nil:
+    section.add "subscriptionId", valid_564117
+  var valid_564118 = path.getOrDefault("resourceGroupName")
+  valid_564118 = validateParameter(valid_564118, JString, required = true,
                                  default = nil)
-  if valid_568218 != nil:
-    section.add "subscriptionId", valid_568218
+  if valid_564118 != nil:
+    section.add "resourceGroupName", valid_564118
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -465,16 +468,16 @@ proc validate_RecommendationsListHistoryForWebApp_568214(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568219 = query.getOrDefault("api-version")
-  valid_568219 = validateParameter(valid_568219, JString, required = true,
+  var valid_564119 = query.getOrDefault("api-version")
+  valid_564119 = validateParameter(valid_564119, JString, required = true,
                                  default = nil)
-  if valid_568219 != nil:
-    section.add "api-version", valid_568219
-  var valid_568220 = query.getOrDefault("$filter")
-  valid_568220 = validateParameter(valid_568220, JString, required = false,
+  if valid_564119 != nil:
+    section.add "api-version", valid_564119
+  var valid_564120 = query.getOrDefault("$filter")
+  valid_564120 = validateParameter(valid_564120, JString, required = false,
                                  default = nil)
-  if valid_568220 != nil:
-    section.add "$filter", valid_568220
+  if valid_564120 != nil:
+    section.add "$filter", valid_564120
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -483,52 +486,52 @@ proc validate_RecommendationsListHistoryForWebApp_568214(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568221: Call_RecommendationsListHistoryForWebApp_568213;
+proc call*(call_564121: Call_RecommendationsListHistoryForWebApp_564113;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Get past recommendations for an app, optionally specified by the time range.
   ## 
-  let valid = call_568221.validator(path, query, header, formData, body)
-  let scheme = call_568221.pickScheme
+  let valid = call_564121.validator(path, query, header, formData, body)
+  let scheme = call_564121.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568221.url(scheme.get, call_568221.host, call_568221.base,
-                         call_568221.route, valid.getOrDefault("path"),
+  let url = call_564121.url(scheme.get, call_564121.host, call_564121.base,
+                         call_564121.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568221, url, valid)
+  result = hook(call_564121, url, valid)
 
-proc call*(call_568222: Call_RecommendationsListHistoryForWebApp_568213;
-          resourceGroupName: string; apiVersion: string; siteName: string;
-          subscriptionId: string; Filter: string = ""): Recallable =
+proc call*(call_564122: Call_RecommendationsListHistoryForWebApp_564113;
+          siteName: string; apiVersion: string; subscriptionId: string;
+          resourceGroupName: string; Filter: string = ""): Recallable =
   ## recommendationsListHistoryForWebApp
   ## Get past recommendations for an app, optionally specified by the time range.
-  ##   resourceGroupName: string (required)
-  ##                    : Name of the resource group to which the resource belongs.
-  ##   apiVersion: string (required)
-  ##             : API Version
   ##   siteName: string (required)
   ##           : Name of the app.
+  ##   apiVersion: string (required)
+  ##             : API Version
   ##   subscriptionId: string (required)
   ##                 : Your Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
+  ##   resourceGroupName: string (required)
+  ##                    : Name of the resource group to which the resource belongs.
   ##   Filter: string
   ##         : Filter is specified by using OData syntax. Example: $filter=channels eq 'Api' or channel eq 'Notification' and startTime eq '2014-01-01T00:00:00Z' and endTime eq '2014-12-31T23:59:59Z' and timeGrain eq duration'[PT1H|PT1M|P1D]
-  var path_568223 = newJObject()
-  var query_568224 = newJObject()
-  add(path_568223, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568224, "api-version", newJString(apiVersion))
-  add(path_568223, "siteName", newJString(siteName))
-  add(path_568223, "subscriptionId", newJString(subscriptionId))
-  add(query_568224, "$filter", newJString(Filter))
-  result = call_568222.call(path_568223, query_568224, nil, nil, nil)
+  var path_564123 = newJObject()
+  var query_564124 = newJObject()
+  add(path_564123, "siteName", newJString(siteName))
+  add(query_564124, "api-version", newJString(apiVersion))
+  add(path_564123, "subscriptionId", newJString(subscriptionId))
+  add(path_564123, "resourceGroupName", newJString(resourceGroupName))
+  add(query_564124, "$filter", newJString(Filter))
+  result = call_564122.call(path_564123, query_564124, nil, nil, nil)
 
-var recommendationsListHistoryForWebApp* = Call_RecommendationsListHistoryForWebApp_568213(
+var recommendationsListHistoryForWebApp* = Call_RecommendationsListHistoryForWebApp_564113(
     name: "recommendationsListHistoryForWebApp", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Web/sites/{siteName}/recommendationHistory",
-    validator: validate_RecommendationsListHistoryForWebApp_568214, base: "",
-    url: url_RecommendationsListHistoryForWebApp_568215, schemes: {Scheme.Https})
+    validator: validate_RecommendationsListHistoryForWebApp_564114, base: "",
+    url: url_RecommendationsListHistoryForWebApp_564115, schemes: {Scheme.Https})
 type
-  Call_RecommendationsListRecommendedRulesForWebApp_568225 = ref object of OpenApiRestCall_567657
-proc url_RecommendationsListRecommendedRulesForWebApp_568227(protocol: Scheme;
+  Call_RecommendationsListRecommendedRulesForWebApp_564125 = ref object of OpenApiRestCall_563555
+proc url_RecommendationsListRecommendedRulesForWebApp_564127(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -551,37 +554,36 @@ proc url_RecommendationsListRecommendedRulesForWebApp_568227(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_RecommendationsListRecommendedRulesForWebApp_568226(path: JsonNode;
+proc validate_RecommendationsListRecommendedRulesForWebApp_564126(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Get all recommendations for an app.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : Name of the resource group to which the resource belongs.
   ##   siteName: JString (required)
   ##           : Name of the app.
   ##   subscriptionId: JString (required)
   ##                 : Your Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
+  ##   resourceGroupName: JString (required)
+  ##                    : Name of the resource group to which the resource belongs.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568228 = path.getOrDefault("resourceGroupName")
-  valid_568228 = validateParameter(valid_568228, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `siteName` field"
+  var valid_564128 = path.getOrDefault("siteName")
+  valid_564128 = validateParameter(valid_564128, JString, required = true,
                                  default = nil)
-  if valid_568228 != nil:
-    section.add "resourceGroupName", valid_568228
-  var valid_568229 = path.getOrDefault("siteName")
-  valid_568229 = validateParameter(valid_568229, JString, required = true,
+  if valid_564128 != nil:
+    section.add "siteName", valid_564128
+  var valid_564129 = path.getOrDefault("subscriptionId")
+  valid_564129 = validateParameter(valid_564129, JString, required = true,
                                  default = nil)
-  if valid_568229 != nil:
-    section.add "siteName", valid_568229
-  var valid_568230 = path.getOrDefault("subscriptionId")
-  valid_568230 = validateParameter(valid_568230, JString, required = true,
+  if valid_564129 != nil:
+    section.add "subscriptionId", valid_564129
+  var valid_564130 = path.getOrDefault("resourceGroupName")
+  valid_564130 = validateParameter(valid_564130, JString, required = true,
                                  default = nil)
-  if valid_568230 != nil:
-    section.add "subscriptionId", valid_568230
+  if valid_564130 != nil:
+    section.add "resourceGroupName", valid_564130
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -593,20 +595,20 @@ proc validate_RecommendationsListRecommendedRulesForWebApp_568226(path: JsonNode
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568231 = query.getOrDefault("api-version")
-  valid_568231 = validateParameter(valid_568231, JString, required = true,
+  var valid_564131 = query.getOrDefault("api-version")
+  valid_564131 = validateParameter(valid_564131, JString, required = true,
                                  default = nil)
-  if valid_568231 != nil:
-    section.add "api-version", valid_568231
-  var valid_568232 = query.getOrDefault("featured")
-  valid_568232 = validateParameter(valid_568232, JBool, required = false, default = nil)
-  if valid_568232 != nil:
-    section.add "featured", valid_568232
-  var valid_568233 = query.getOrDefault("$filter")
-  valid_568233 = validateParameter(valid_568233, JString, required = false,
+  if valid_564131 != nil:
+    section.add "api-version", valid_564131
+  var valid_564132 = query.getOrDefault("featured")
+  valid_564132 = validateParameter(valid_564132, JBool, required = false, default = nil)
+  if valid_564132 != nil:
+    section.add "featured", valid_564132
+  var valid_564133 = query.getOrDefault("$filter")
+  valid_564133 = validateParameter(valid_564133, JString, required = false,
                                  default = nil)
-  if valid_568233 != nil:
-    section.add "$filter", valid_568233
+  if valid_564133 != nil:
+    section.add "$filter", valid_564133
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -615,56 +617,56 @@ proc validate_RecommendationsListRecommendedRulesForWebApp_568226(path: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_568234: Call_RecommendationsListRecommendedRulesForWebApp_568225;
+proc call*(call_564134: Call_RecommendationsListRecommendedRulesForWebApp_564125;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Get all recommendations for an app.
   ## 
-  let valid = call_568234.validator(path, query, header, formData, body)
-  let scheme = call_568234.pickScheme
+  let valid = call_564134.validator(path, query, header, formData, body)
+  let scheme = call_564134.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568234.url(scheme.get, call_568234.host, call_568234.base,
-                         call_568234.route, valid.getOrDefault("path"),
+  let url = call_564134.url(scheme.get, call_564134.host, call_564134.base,
+                         call_564134.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568234, url, valid)
+  result = hook(call_564134, url, valid)
 
-proc call*(call_568235: Call_RecommendationsListRecommendedRulesForWebApp_568225;
-          resourceGroupName: string; apiVersion: string; siteName: string;
-          subscriptionId: string; featured: bool = false; Filter: string = ""): Recallable =
+proc call*(call_564135: Call_RecommendationsListRecommendedRulesForWebApp_564125;
+          siteName: string; apiVersion: string; subscriptionId: string;
+          resourceGroupName: string; featured: bool = false; Filter: string = ""): Recallable =
   ## recommendationsListRecommendedRulesForWebApp
   ## Get all recommendations for an app.
-  ##   resourceGroupName: string (required)
-  ##                    : Name of the resource group to which the resource belongs.
-  ##   apiVersion: string (required)
-  ##             : API Version
-  ##   featured: bool
-  ##           : Specify <code>true</code> to return only the most critical recommendations. The default is <code>false</code>, which returns all recommendations.
   ##   siteName: string (required)
   ##           : Name of the app.
+  ##   apiVersion: string (required)
+  ##             : API Version
   ##   subscriptionId: string (required)
   ##                 : Your Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
+  ##   featured: bool
+  ##           : Specify <code>true</code> to return only the most critical recommendations. The default is <code>false</code>, which returns all recommendations.
+  ##   resourceGroupName: string (required)
+  ##                    : Name of the resource group to which the resource belongs.
   ##   Filter: string
   ##         : Return only channels specified in the filter. Filter is specified by using OData syntax. Example: $filter=channels eq 'Api' or channel eq 'Notification'
-  var path_568236 = newJObject()
-  var query_568237 = newJObject()
-  add(path_568236, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568237, "api-version", newJString(apiVersion))
-  add(query_568237, "featured", newJBool(featured))
-  add(path_568236, "siteName", newJString(siteName))
-  add(path_568236, "subscriptionId", newJString(subscriptionId))
-  add(query_568237, "$filter", newJString(Filter))
-  result = call_568235.call(path_568236, query_568237, nil, nil, nil)
+  var path_564136 = newJObject()
+  var query_564137 = newJObject()
+  add(path_564136, "siteName", newJString(siteName))
+  add(query_564137, "api-version", newJString(apiVersion))
+  add(path_564136, "subscriptionId", newJString(subscriptionId))
+  add(query_564137, "featured", newJBool(featured))
+  add(path_564136, "resourceGroupName", newJString(resourceGroupName))
+  add(query_564137, "$filter", newJString(Filter))
+  result = call_564135.call(path_564136, query_564137, nil, nil, nil)
 
-var recommendationsListRecommendedRulesForWebApp* = Call_RecommendationsListRecommendedRulesForWebApp_568225(
+var recommendationsListRecommendedRulesForWebApp* = Call_RecommendationsListRecommendedRulesForWebApp_564125(
     name: "recommendationsListRecommendedRulesForWebApp",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Web/sites/{siteName}/recommendations",
-    validator: validate_RecommendationsListRecommendedRulesForWebApp_568226,
-    base: "", url: url_RecommendationsListRecommendedRulesForWebApp_568227,
+    validator: validate_RecommendationsListRecommendedRulesForWebApp_564126,
+    base: "", url: url_RecommendationsListRecommendedRulesForWebApp_564127,
     schemes: {Scheme.Https})
 type
-  Call_RecommendationsDisableAllForWebApp_568238 = ref object of OpenApiRestCall_567657
-proc url_RecommendationsDisableAllForWebApp_568240(protocol: Scheme; host: string;
+  Call_RecommendationsDisableAllForWebApp_564138 = ref object of OpenApiRestCall_563555
+proc url_RecommendationsDisableAllForWebApp_564140(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -687,37 +689,36 @@ proc url_RecommendationsDisableAllForWebApp_568240(protocol: Scheme; host: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_RecommendationsDisableAllForWebApp_568239(path: JsonNode;
+proc validate_RecommendationsDisableAllForWebApp_564139(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Disable all recommendations for an app.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : Name of the resource group to which the resource belongs.
   ##   siteName: JString (required)
   ##           : Name of the app.
   ##   subscriptionId: JString (required)
   ##                 : Your Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
+  ##   resourceGroupName: JString (required)
+  ##                    : Name of the resource group to which the resource belongs.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568241 = path.getOrDefault("resourceGroupName")
-  valid_568241 = validateParameter(valid_568241, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `siteName` field"
+  var valid_564141 = path.getOrDefault("siteName")
+  valid_564141 = validateParameter(valid_564141, JString, required = true,
                                  default = nil)
-  if valid_568241 != nil:
-    section.add "resourceGroupName", valid_568241
-  var valid_568242 = path.getOrDefault("siteName")
-  valid_568242 = validateParameter(valid_568242, JString, required = true,
+  if valid_564141 != nil:
+    section.add "siteName", valid_564141
+  var valid_564142 = path.getOrDefault("subscriptionId")
+  valid_564142 = validateParameter(valid_564142, JString, required = true,
                                  default = nil)
-  if valid_568242 != nil:
-    section.add "siteName", valid_568242
-  var valid_568243 = path.getOrDefault("subscriptionId")
-  valid_568243 = validateParameter(valid_568243, JString, required = true,
+  if valid_564142 != nil:
+    section.add "subscriptionId", valid_564142
+  var valid_564143 = path.getOrDefault("resourceGroupName")
+  valid_564143 = validateParameter(valid_564143, JString, required = true,
                                  default = nil)
-  if valid_568243 != nil:
-    section.add "subscriptionId", valid_568243
+  if valid_564143 != nil:
+    section.add "resourceGroupName", valid_564143
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -725,11 +726,11 @@ proc validate_RecommendationsDisableAllForWebApp_568239(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568244 = query.getOrDefault("api-version")
-  valid_568244 = validateParameter(valid_568244, JString, required = true,
+  var valid_564144 = query.getOrDefault("api-version")
+  valid_564144 = validateParameter(valid_564144, JString, required = true,
                                  default = nil)
-  if valid_568244 != nil:
-    section.add "api-version", valid_568244
+  if valid_564144 != nil:
+    section.add "api-version", valid_564144
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -738,49 +739,49 @@ proc validate_RecommendationsDisableAllForWebApp_568239(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568245: Call_RecommendationsDisableAllForWebApp_568238;
+proc call*(call_564145: Call_RecommendationsDisableAllForWebApp_564138;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Disable all recommendations for an app.
   ## 
-  let valid = call_568245.validator(path, query, header, formData, body)
-  let scheme = call_568245.pickScheme
+  let valid = call_564145.validator(path, query, header, formData, body)
+  let scheme = call_564145.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568245.url(scheme.get, call_568245.host, call_568245.base,
-                         call_568245.route, valid.getOrDefault("path"),
+  let url = call_564145.url(scheme.get, call_564145.host, call_564145.base,
+                         call_564145.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568245, url, valid)
+  result = hook(call_564145, url, valid)
 
-proc call*(call_568246: Call_RecommendationsDisableAllForWebApp_568238;
-          resourceGroupName: string; apiVersion: string; siteName: string;
-          subscriptionId: string): Recallable =
+proc call*(call_564146: Call_RecommendationsDisableAllForWebApp_564138;
+          siteName: string; apiVersion: string; subscriptionId: string;
+          resourceGroupName: string): Recallable =
   ## recommendationsDisableAllForWebApp
   ## Disable all recommendations for an app.
-  ##   resourceGroupName: string (required)
-  ##                    : Name of the resource group to which the resource belongs.
-  ##   apiVersion: string (required)
-  ##             : API Version
   ##   siteName: string (required)
   ##           : Name of the app.
+  ##   apiVersion: string (required)
+  ##             : API Version
   ##   subscriptionId: string (required)
   ##                 : Your Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
-  var path_568247 = newJObject()
-  var query_568248 = newJObject()
-  add(path_568247, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568248, "api-version", newJString(apiVersion))
-  add(path_568247, "siteName", newJString(siteName))
-  add(path_568247, "subscriptionId", newJString(subscriptionId))
-  result = call_568246.call(path_568247, query_568248, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : Name of the resource group to which the resource belongs.
+  var path_564147 = newJObject()
+  var query_564148 = newJObject()
+  add(path_564147, "siteName", newJString(siteName))
+  add(query_564148, "api-version", newJString(apiVersion))
+  add(path_564147, "subscriptionId", newJString(subscriptionId))
+  add(path_564147, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564146.call(path_564147, query_564148, nil, nil, nil)
 
-var recommendationsDisableAllForWebApp* = Call_RecommendationsDisableAllForWebApp_568238(
+var recommendationsDisableAllForWebApp* = Call_RecommendationsDisableAllForWebApp_564138(
     name: "recommendationsDisableAllForWebApp", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Web/sites/{siteName}/recommendations/disable",
-    validator: validate_RecommendationsDisableAllForWebApp_568239, base: "",
-    url: url_RecommendationsDisableAllForWebApp_568240, schemes: {Scheme.Https})
+    validator: validate_RecommendationsDisableAllForWebApp_564139, base: "",
+    url: url_RecommendationsDisableAllForWebApp_564140, schemes: {Scheme.Https})
 type
-  Call_RecommendationsResetAllFiltersForWebApp_568249 = ref object of OpenApiRestCall_567657
-proc url_RecommendationsResetAllFiltersForWebApp_568251(protocol: Scheme;
+  Call_RecommendationsResetAllFiltersForWebApp_564149 = ref object of OpenApiRestCall_563555
+proc url_RecommendationsResetAllFiltersForWebApp_564151(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -803,37 +804,36 @@ proc url_RecommendationsResetAllFiltersForWebApp_568251(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_RecommendationsResetAllFiltersForWebApp_568250(path: JsonNode;
+proc validate_RecommendationsResetAllFiltersForWebApp_564150(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Reset all recommendation opt-out settings for an app.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : Name of the resource group to which the resource belongs.
   ##   siteName: JString (required)
   ##           : Name of the app.
   ##   subscriptionId: JString (required)
   ##                 : Your Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
+  ##   resourceGroupName: JString (required)
+  ##                    : Name of the resource group to which the resource belongs.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568252 = path.getOrDefault("resourceGroupName")
-  valid_568252 = validateParameter(valid_568252, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `siteName` field"
+  var valid_564152 = path.getOrDefault("siteName")
+  valid_564152 = validateParameter(valid_564152, JString, required = true,
                                  default = nil)
-  if valid_568252 != nil:
-    section.add "resourceGroupName", valid_568252
-  var valid_568253 = path.getOrDefault("siteName")
-  valid_568253 = validateParameter(valid_568253, JString, required = true,
+  if valid_564152 != nil:
+    section.add "siteName", valid_564152
+  var valid_564153 = path.getOrDefault("subscriptionId")
+  valid_564153 = validateParameter(valid_564153, JString, required = true,
                                  default = nil)
-  if valid_568253 != nil:
-    section.add "siteName", valid_568253
-  var valid_568254 = path.getOrDefault("subscriptionId")
-  valid_568254 = validateParameter(valid_568254, JString, required = true,
+  if valid_564153 != nil:
+    section.add "subscriptionId", valid_564153
+  var valid_564154 = path.getOrDefault("resourceGroupName")
+  valid_564154 = validateParameter(valid_564154, JString, required = true,
                                  default = nil)
-  if valid_568254 != nil:
-    section.add "subscriptionId", valid_568254
+  if valid_564154 != nil:
+    section.add "resourceGroupName", valid_564154
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -841,11 +841,11 @@ proc validate_RecommendationsResetAllFiltersForWebApp_568250(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568255 = query.getOrDefault("api-version")
-  valid_568255 = validateParameter(valid_568255, JString, required = true,
+  var valid_564155 = query.getOrDefault("api-version")
+  valid_564155 = validateParameter(valid_564155, JString, required = true,
                                  default = nil)
-  if valid_568255 != nil:
-    section.add "api-version", valid_568255
+  if valid_564155 != nil:
+    section.add "api-version", valid_564155
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -854,50 +854,50 @@ proc validate_RecommendationsResetAllFiltersForWebApp_568250(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568256: Call_RecommendationsResetAllFiltersForWebApp_568249;
+proc call*(call_564156: Call_RecommendationsResetAllFiltersForWebApp_564149;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Reset all recommendation opt-out settings for an app.
   ## 
-  let valid = call_568256.validator(path, query, header, formData, body)
-  let scheme = call_568256.pickScheme
+  let valid = call_564156.validator(path, query, header, formData, body)
+  let scheme = call_564156.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568256.url(scheme.get, call_568256.host, call_568256.base,
-                         call_568256.route, valid.getOrDefault("path"),
+  let url = call_564156.url(scheme.get, call_564156.host, call_564156.base,
+                         call_564156.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568256, url, valid)
+  result = hook(call_564156, url, valid)
 
-proc call*(call_568257: Call_RecommendationsResetAllFiltersForWebApp_568249;
-          resourceGroupName: string; apiVersion: string; siteName: string;
-          subscriptionId: string): Recallable =
+proc call*(call_564157: Call_RecommendationsResetAllFiltersForWebApp_564149;
+          siteName: string; apiVersion: string; subscriptionId: string;
+          resourceGroupName: string): Recallable =
   ## recommendationsResetAllFiltersForWebApp
   ## Reset all recommendation opt-out settings for an app.
-  ##   resourceGroupName: string (required)
-  ##                    : Name of the resource group to which the resource belongs.
-  ##   apiVersion: string (required)
-  ##             : API Version
   ##   siteName: string (required)
   ##           : Name of the app.
+  ##   apiVersion: string (required)
+  ##             : API Version
   ##   subscriptionId: string (required)
   ##                 : Your Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
-  var path_568258 = newJObject()
-  var query_568259 = newJObject()
-  add(path_568258, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568259, "api-version", newJString(apiVersion))
-  add(path_568258, "siteName", newJString(siteName))
-  add(path_568258, "subscriptionId", newJString(subscriptionId))
-  result = call_568257.call(path_568258, query_568259, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : Name of the resource group to which the resource belongs.
+  var path_564158 = newJObject()
+  var query_564159 = newJObject()
+  add(path_564158, "siteName", newJString(siteName))
+  add(query_564159, "api-version", newJString(apiVersion))
+  add(path_564158, "subscriptionId", newJString(subscriptionId))
+  add(path_564158, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564157.call(path_564158, query_564159, nil, nil, nil)
 
-var recommendationsResetAllFiltersForWebApp* = Call_RecommendationsResetAllFiltersForWebApp_568249(
+var recommendationsResetAllFiltersForWebApp* = Call_RecommendationsResetAllFiltersForWebApp_564149(
     name: "recommendationsResetAllFiltersForWebApp", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Web/sites/{siteName}/recommendations/reset",
-    validator: validate_RecommendationsResetAllFiltersForWebApp_568250, base: "",
-    url: url_RecommendationsResetAllFiltersForWebApp_568251,
+    validator: validate_RecommendationsResetAllFiltersForWebApp_564150, base: "",
+    url: url_RecommendationsResetAllFiltersForWebApp_564151,
     schemes: {Scheme.Https})
 type
-  Call_RecommendationsGetRuleDetailsByWebApp_568260 = ref object of OpenApiRestCall_567657
-proc url_RecommendationsGetRuleDetailsByWebApp_568262(protocol: Scheme;
+  Call_RecommendationsGetRuleDetailsByWebApp_564160 = ref object of OpenApiRestCall_563555
+proc url_RecommendationsGetRuleDetailsByWebApp_564162(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -922,69 +922,68 @@ proc url_RecommendationsGetRuleDetailsByWebApp_568262(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_RecommendationsGetRuleDetailsByWebApp_568261(path: JsonNode;
+proc validate_RecommendationsGetRuleDetailsByWebApp_564161(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Get a recommendation rule for an app.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : Name of the resource group to which the resource belongs.
-  ##   name: JString (required)
-  ##       : Name of the recommendation.
   ##   siteName: JString (required)
   ##           : Name of the app.
+  ##   name: JString (required)
+  ##       : Name of the recommendation.
   ##   subscriptionId: JString (required)
   ##                 : Your Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
+  ##   resourceGroupName: JString (required)
+  ##                    : Name of the resource group to which the resource belongs.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568263 = path.getOrDefault("resourceGroupName")
-  valid_568263 = validateParameter(valid_568263, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `siteName` field"
+  var valid_564163 = path.getOrDefault("siteName")
+  valid_564163 = validateParameter(valid_564163, JString, required = true,
                                  default = nil)
-  if valid_568263 != nil:
-    section.add "resourceGroupName", valid_568263
-  var valid_568264 = path.getOrDefault("name")
-  valid_568264 = validateParameter(valid_568264, JString, required = true,
+  if valid_564163 != nil:
+    section.add "siteName", valid_564163
+  var valid_564164 = path.getOrDefault("name")
+  valid_564164 = validateParameter(valid_564164, JString, required = true,
                                  default = nil)
-  if valid_568264 != nil:
-    section.add "name", valid_568264
-  var valid_568265 = path.getOrDefault("siteName")
-  valid_568265 = validateParameter(valid_568265, JString, required = true,
+  if valid_564164 != nil:
+    section.add "name", valid_564164
+  var valid_564165 = path.getOrDefault("subscriptionId")
+  valid_564165 = validateParameter(valid_564165, JString, required = true,
                                  default = nil)
-  if valid_568265 != nil:
-    section.add "siteName", valid_568265
-  var valid_568266 = path.getOrDefault("subscriptionId")
-  valid_568266 = validateParameter(valid_568266, JString, required = true,
+  if valid_564165 != nil:
+    section.add "subscriptionId", valid_564165
+  var valid_564166 = path.getOrDefault("resourceGroupName")
+  valid_564166 = validateParameter(valid_564166, JString, required = true,
                                  default = nil)
-  if valid_568266 != nil:
-    section.add "subscriptionId", valid_568266
+  if valid_564166 != nil:
+    section.add "resourceGroupName", valid_564166
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
   ##              : API Version
-  ##   updateSeen: JBool
-  ##             : Specify <code>true</code> to update the last-seen timestamp of the recommendation object.
   ##   recommendationId: JString
   ##                   : The GUID of the recommendation object if you query an expired one. You don't need to specify it to query an active entry.
+  ##   updateSeen: JBool
+  ##             : Specify <code>true</code> to update the last-seen timestamp of the recommendation object.
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568267 = query.getOrDefault("api-version")
-  valid_568267 = validateParameter(valid_568267, JString, required = true,
+  var valid_564167 = query.getOrDefault("api-version")
+  valid_564167 = validateParameter(valid_564167, JString, required = true,
                                  default = nil)
-  if valid_568267 != nil:
-    section.add "api-version", valid_568267
-  var valid_568268 = query.getOrDefault("updateSeen")
-  valid_568268 = validateParameter(valid_568268, JBool, required = false, default = nil)
-  if valid_568268 != nil:
-    section.add "updateSeen", valid_568268
-  var valid_568269 = query.getOrDefault("recommendationId")
-  valid_568269 = validateParameter(valid_568269, JString, required = false,
+  if valid_564167 != nil:
+    section.add "api-version", valid_564167
+  var valid_564168 = query.getOrDefault("recommendationId")
+  valid_564168 = validateParameter(valid_564168, JString, required = false,
                                  default = nil)
-  if valid_568269 != nil:
-    section.add "recommendationId", valid_568269
+  if valid_564168 != nil:
+    section.add "recommendationId", valid_564168
+  var valid_564169 = query.getOrDefault("updateSeen")
+  valid_564169 = validateParameter(valid_564169, JBool, required = false, default = nil)
+  if valid_564169 != nil:
+    section.add "updateSeen", valid_564169
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -993,59 +992,59 @@ proc validate_RecommendationsGetRuleDetailsByWebApp_568261(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568270: Call_RecommendationsGetRuleDetailsByWebApp_568260;
+proc call*(call_564170: Call_RecommendationsGetRuleDetailsByWebApp_564160;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Get a recommendation rule for an app.
   ## 
-  let valid = call_568270.validator(path, query, header, formData, body)
-  let scheme = call_568270.pickScheme
+  let valid = call_564170.validator(path, query, header, formData, body)
+  let scheme = call_564170.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568270.url(scheme.get, call_568270.host, call_568270.base,
-                         call_568270.route, valid.getOrDefault("path"),
+  let url = call_564170.url(scheme.get, call_564170.host, call_564170.base,
+                         call_564170.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568270, url, valid)
+  result = hook(call_564170, url, valid)
 
-proc call*(call_568271: Call_RecommendationsGetRuleDetailsByWebApp_568260;
-          resourceGroupName: string; apiVersion: string; name: string;
-          siteName: string; subscriptionId: string; updateSeen: bool = false;
-          recommendationId: string = ""): Recallable =
+proc call*(call_564171: Call_RecommendationsGetRuleDetailsByWebApp_564160;
+          siteName: string; apiVersion: string; name: string; subscriptionId: string;
+          resourceGroupName: string; recommendationId: string = "";
+          updateSeen: bool = false): Recallable =
   ## recommendationsGetRuleDetailsByWebApp
   ## Get a recommendation rule for an app.
-  ##   resourceGroupName: string (required)
-  ##                    : Name of the resource group to which the resource belongs.
+  ##   siteName: string (required)
+  ##           : Name of the app.
   ##   apiVersion: string (required)
   ##             : API Version
+  ##   recommendationId: string
+  ##                   : The GUID of the recommendation object if you query an expired one. You don't need to specify it to query an active entry.
   ##   name: string (required)
   ##       : Name of the recommendation.
   ##   updateSeen: bool
   ##             : Specify <code>true</code> to update the last-seen timestamp of the recommendation object.
-  ##   siteName: string (required)
-  ##           : Name of the app.
   ##   subscriptionId: string (required)
   ##                 : Your Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
-  ##   recommendationId: string
-  ##                   : The GUID of the recommendation object if you query an expired one. You don't need to specify it to query an active entry.
-  var path_568272 = newJObject()
-  var query_568273 = newJObject()
-  add(path_568272, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568273, "api-version", newJString(apiVersion))
-  add(path_568272, "name", newJString(name))
-  add(query_568273, "updateSeen", newJBool(updateSeen))
-  add(path_568272, "siteName", newJString(siteName))
-  add(path_568272, "subscriptionId", newJString(subscriptionId))
-  add(query_568273, "recommendationId", newJString(recommendationId))
-  result = call_568271.call(path_568272, query_568273, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : Name of the resource group to which the resource belongs.
+  var path_564172 = newJObject()
+  var query_564173 = newJObject()
+  add(path_564172, "siteName", newJString(siteName))
+  add(query_564173, "api-version", newJString(apiVersion))
+  add(query_564173, "recommendationId", newJString(recommendationId))
+  add(path_564172, "name", newJString(name))
+  add(query_564173, "updateSeen", newJBool(updateSeen))
+  add(path_564172, "subscriptionId", newJString(subscriptionId))
+  add(path_564172, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564171.call(path_564172, query_564173, nil, nil, nil)
 
-var recommendationsGetRuleDetailsByWebApp* = Call_RecommendationsGetRuleDetailsByWebApp_568260(
+var recommendationsGetRuleDetailsByWebApp* = Call_RecommendationsGetRuleDetailsByWebApp_564160(
     name: "recommendationsGetRuleDetailsByWebApp", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Web/sites/{siteName}/recommendations/{name}",
-    validator: validate_RecommendationsGetRuleDetailsByWebApp_568261, base: "",
-    url: url_RecommendationsGetRuleDetailsByWebApp_568262, schemes: {Scheme.Https})
+    validator: validate_RecommendationsGetRuleDetailsByWebApp_564161, base: "",
+    url: url_RecommendationsGetRuleDetailsByWebApp_564162, schemes: {Scheme.Https})
 type
-  Call_RecommendationsDisableRecommendationForSite_568274 = ref object of OpenApiRestCall_567657
-proc url_RecommendationsDisableRecommendationForSite_568276(protocol: Scheme;
+  Call_RecommendationsDisableRecommendationForSite_564174 = ref object of OpenApiRestCall_563555
+proc url_RecommendationsDisableRecommendationForSite_564176(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1071,44 +1070,43 @@ proc url_RecommendationsDisableRecommendationForSite_568276(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_RecommendationsDisableRecommendationForSite_568275(path: JsonNode;
+proc validate_RecommendationsDisableRecommendationForSite_564175(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Disables the specific rule for a web site permanently.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : Name of the resource group to which the resource belongs.
-  ##   name: JString (required)
-  ##       : Rule name
   ##   siteName: JString (required)
   ##           : Site name
+  ##   name: JString (required)
+  ##       : Rule name
   ##   subscriptionId: JString (required)
   ##                 : Your Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
+  ##   resourceGroupName: JString (required)
+  ##                    : Name of the resource group to which the resource belongs.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568277 = path.getOrDefault("resourceGroupName")
-  valid_568277 = validateParameter(valid_568277, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `siteName` field"
+  var valid_564177 = path.getOrDefault("siteName")
+  valid_564177 = validateParameter(valid_564177, JString, required = true,
                                  default = nil)
-  if valid_568277 != nil:
-    section.add "resourceGroupName", valid_568277
-  var valid_568278 = path.getOrDefault("name")
-  valid_568278 = validateParameter(valid_568278, JString, required = true,
+  if valid_564177 != nil:
+    section.add "siteName", valid_564177
+  var valid_564178 = path.getOrDefault("name")
+  valid_564178 = validateParameter(valid_564178, JString, required = true,
                                  default = nil)
-  if valid_568278 != nil:
-    section.add "name", valid_568278
-  var valid_568279 = path.getOrDefault("siteName")
-  valid_568279 = validateParameter(valid_568279, JString, required = true,
+  if valid_564178 != nil:
+    section.add "name", valid_564178
+  var valid_564179 = path.getOrDefault("subscriptionId")
+  valid_564179 = validateParameter(valid_564179, JString, required = true,
                                  default = nil)
-  if valid_568279 != nil:
-    section.add "siteName", valid_568279
-  var valid_568280 = path.getOrDefault("subscriptionId")
-  valid_568280 = validateParameter(valid_568280, JString, required = true,
+  if valid_564179 != nil:
+    section.add "subscriptionId", valid_564179
+  var valid_564180 = path.getOrDefault("resourceGroupName")
+  valid_564180 = validateParameter(valid_564180, JString, required = true,
                                  default = nil)
-  if valid_568280 != nil:
-    section.add "subscriptionId", valid_568280
+  if valid_564180 != nil:
+    section.add "resourceGroupName", valid_564180
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1116,11 +1114,11 @@ proc validate_RecommendationsDisableRecommendationForSite_568275(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568281 = query.getOrDefault("api-version")
-  valid_568281 = validateParameter(valid_568281, JString, required = true,
+  var valid_564181 = query.getOrDefault("api-version")
+  valid_564181 = validateParameter(valid_564181, JString, required = true,
                                  default = nil)
-  if valid_568281 != nil:
-    section.add "api-version", valid_568281
+  if valid_564181 != nil:
+    section.add "api-version", valid_564181
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1129,49 +1127,49 @@ proc validate_RecommendationsDisableRecommendationForSite_568275(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568282: Call_RecommendationsDisableRecommendationForSite_568274;
+proc call*(call_564182: Call_RecommendationsDisableRecommendationForSite_564174;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Disables the specific rule for a web site permanently.
   ## 
-  let valid = call_568282.validator(path, query, header, formData, body)
-  let scheme = call_568282.pickScheme
+  let valid = call_564182.validator(path, query, header, formData, body)
+  let scheme = call_564182.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568282.url(scheme.get, call_568282.host, call_568282.base,
-                         call_568282.route, valid.getOrDefault("path"),
+  let url = call_564182.url(scheme.get, call_564182.host, call_564182.base,
+                         call_564182.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568282, url, valid)
+  result = hook(call_564182, url, valid)
 
-proc call*(call_568283: Call_RecommendationsDisableRecommendationForSite_568274;
-          resourceGroupName: string; apiVersion: string; name: string;
-          siteName: string; subscriptionId: string): Recallable =
+proc call*(call_564183: Call_RecommendationsDisableRecommendationForSite_564174;
+          siteName: string; apiVersion: string; name: string; subscriptionId: string;
+          resourceGroupName: string): Recallable =
   ## recommendationsDisableRecommendationForSite
   ## Disables the specific rule for a web site permanently.
-  ##   resourceGroupName: string (required)
-  ##                    : Name of the resource group to which the resource belongs.
+  ##   siteName: string (required)
+  ##           : Site name
   ##   apiVersion: string (required)
   ##             : API Version
   ##   name: string (required)
   ##       : Rule name
-  ##   siteName: string (required)
-  ##           : Site name
   ##   subscriptionId: string (required)
   ##                 : Your Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
-  var path_568284 = newJObject()
-  var query_568285 = newJObject()
-  add(path_568284, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568285, "api-version", newJString(apiVersion))
-  add(path_568284, "name", newJString(name))
-  add(path_568284, "siteName", newJString(siteName))
-  add(path_568284, "subscriptionId", newJString(subscriptionId))
-  result = call_568283.call(path_568284, query_568285, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : Name of the resource group to which the resource belongs.
+  var path_564184 = newJObject()
+  var query_564185 = newJObject()
+  add(path_564184, "siteName", newJString(siteName))
+  add(query_564185, "api-version", newJString(apiVersion))
+  add(path_564184, "name", newJString(name))
+  add(path_564184, "subscriptionId", newJString(subscriptionId))
+  add(path_564184, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564183.call(path_564184, query_564185, nil, nil, nil)
 
-var recommendationsDisableRecommendationForSite* = Call_RecommendationsDisableRecommendationForSite_568274(
+var recommendationsDisableRecommendationForSite* = Call_RecommendationsDisableRecommendationForSite_564174(
     name: "recommendationsDisableRecommendationForSite",
     meth: HttpMethod.HttpPost, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Web/sites/{siteName}/recommendations/{name}/disable",
-    validator: validate_RecommendationsDisableRecommendationForSite_568275,
-    base: "", url: url_RecommendationsDisableRecommendationForSite_568276,
+    validator: validate_RecommendationsDisableRecommendationForSite_564175,
+    base: "", url: url_RecommendationsDisableRecommendationForSite_564176,
     schemes: {Scheme.Https})
 export
   rest

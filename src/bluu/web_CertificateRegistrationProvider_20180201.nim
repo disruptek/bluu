@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, httpcore
 
 ## auto-generated via openapi macro
 ## title: CertificateRegistrationProvider API Client
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_567641 = ref object of OpenApiRestCall
+  OpenApiRestCall_563539 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_567641](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563539](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_567641): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563539): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,15 +107,15 @@ const
   macServiceName = "web-CertificateRegistrationProvider"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_CertificateRegistrationProviderListOperations_567863 = ref object of OpenApiRestCall_567641
-proc url_CertificateRegistrationProviderListOperations_567865(protocol: Scheme;
+  Call_CertificateRegistrationProviderListOperations_563761 = ref object of OpenApiRestCall_563539
+proc url_CertificateRegistrationProviderListOperations_563763(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_CertificateRegistrationProviderListOperations_567864(
+proc validate_CertificateRegistrationProviderListOperations_563762(
     path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
     body: JsonNode): JsonNode =
   ## Implements Csm operations Api to exposes the list of available Csm Apis under the resource provider
@@ -126,11 +130,11 @@ proc validate_CertificateRegistrationProviderListOperations_567864(
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568024 = query.getOrDefault("api-version")
-  valid_568024 = validateParameter(valid_568024, JString, required = true,
+  var valid_563924 = query.getOrDefault("api-version")
+  valid_563924 = validateParameter(valid_563924, JString, required = true,
                                  default = nil)
-  if valid_568024 != nil:
-    section.add "api-version", valid_568024
+  if valid_563924 != nil:
+    section.add "api-version", valid_563924
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -139,36 +143,36 @@ proc validate_CertificateRegistrationProviderListOperations_567864(
   if body != nil:
     result.add "body", body
 
-proc call*(call_568047: Call_CertificateRegistrationProviderListOperations_567863;
+proc call*(call_563947: Call_CertificateRegistrationProviderListOperations_563761;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Implements Csm operations Api to exposes the list of available Csm Apis under the resource provider
   ## 
-  let valid = call_568047.validator(path, query, header, formData, body)
-  let scheme = call_568047.pickScheme
+  let valid = call_563947.validator(path, query, header, formData, body)
+  let scheme = call_563947.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568047.url(scheme.get, call_568047.host, call_568047.base,
-                         call_568047.route, valid.getOrDefault("path"),
+  let url = call_563947.url(scheme.get, call_563947.host, call_563947.base,
+                         call_563947.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568047, url, valid)
+  result = hook(call_563947, url, valid)
 
-proc call*(call_568118: Call_CertificateRegistrationProviderListOperations_567863;
+proc call*(call_564018: Call_CertificateRegistrationProviderListOperations_563761;
           apiVersion: string): Recallable =
   ## certificateRegistrationProviderListOperations
   ## Implements Csm operations Api to exposes the list of available Csm Apis under the resource provider
   ##   apiVersion: string (required)
   ##             : API Version
-  var query_568119 = newJObject()
-  add(query_568119, "api-version", newJString(apiVersion))
-  result = call_568118.call(nil, query_568119, nil, nil, nil)
+  var query_564019 = newJObject()
+  add(query_564019, "api-version", newJString(apiVersion))
+  result = call_564018.call(nil, query_564019, nil, nil, nil)
 
-var certificateRegistrationProviderListOperations* = Call_CertificateRegistrationProviderListOperations_567863(
+var certificateRegistrationProviderListOperations* = Call_CertificateRegistrationProviderListOperations_563761(
     name: "certificateRegistrationProviderListOperations",
     meth: HttpMethod.HttpGet, host: "management.azure.com",
     route: "/providers/Microsoft.CertificateRegistration/operations",
-    validator: validate_CertificateRegistrationProviderListOperations_567864,
-    base: "", url: url_CertificateRegistrationProviderListOperations_567865,
+    validator: validate_CertificateRegistrationProviderListOperations_563762,
+    base: "", url: url_CertificateRegistrationProviderListOperations_563763,
     schemes: {Scheme.Https})
 export
   rest

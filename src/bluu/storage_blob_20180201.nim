@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, httpcore
 
 ## auto-generated via openapi macro
 ## title: StorageManagementClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_567658 = ref object of OpenApiRestCall
+  OpenApiRestCall_563556 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_567658](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563556](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_567658): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563556): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,8 +107,8 @@ const
   macServiceName = "storage-blob"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_BlobContainersList_567880 = ref object of OpenApiRestCall_567658
-proc url_BlobContainersList_567882(protocol: Scheme; host: string; base: string;
+  Call_BlobContainersList_563778 = ref object of OpenApiRestCall_563556
+proc url_BlobContainersList_563780(protocol: Scheme; host: string; base: string;
                                   route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -128,7 +132,7 @@ proc url_BlobContainersList_567882(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_BlobContainersList_567881(path: JsonNode; query: JsonNode;
+proc validate_BlobContainersList_563779(path: JsonNode; query: JsonNode;
                                        header: JsonNode; formData: JsonNode;
                                        body: JsonNode): JsonNode =
   ## Lists all containers and does not support a prefix like data plane. Also SRP today does not return continuation token.
@@ -136,30 +140,30 @@ proc validate_BlobContainersList_567881(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
   ##   subscriptionId: JString (required)
   ##                 : The ID of the target subscription.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
   ##   accountName: JString (required)
   ##              : The name of the storage account within the specified resource group. Storage account names must be between 3 and 24 characters in length and use numbers and lower-case letters only.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568055 = path.getOrDefault("resourceGroupName")
-  valid_568055 = validateParameter(valid_568055, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_563955 = path.getOrDefault("subscriptionId")
+  valid_563955 = validateParameter(valid_563955, JString, required = true,
                                  default = nil)
-  if valid_568055 != nil:
-    section.add "resourceGroupName", valid_568055
-  var valid_568056 = path.getOrDefault("subscriptionId")
-  valid_568056 = validateParameter(valid_568056, JString, required = true,
+  if valid_563955 != nil:
+    section.add "subscriptionId", valid_563955
+  var valid_563956 = path.getOrDefault("resourceGroupName")
+  valid_563956 = validateParameter(valid_563956, JString, required = true,
                                  default = nil)
-  if valid_568056 != nil:
-    section.add "subscriptionId", valid_568056
-  var valid_568057 = path.getOrDefault("accountName")
-  valid_568057 = validateParameter(valid_568057, JString, required = true,
+  if valid_563956 != nil:
+    section.add "resourceGroupName", valid_563956
+  var valid_563957 = path.getOrDefault("accountName")
+  valid_563957 = validateParameter(valid_563957, JString, required = true,
                                  default = nil)
-  if valid_568057 != nil:
-    section.add "accountName", valid_568057
+  if valid_563957 != nil:
+    section.add "accountName", valid_563957
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -167,11 +171,11 @@ proc validate_BlobContainersList_567881(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568058 = query.getOrDefault("api-version")
-  valid_568058 = validateParameter(valid_568058, JString, required = true,
+  var valid_563958 = query.getOrDefault("api-version")
+  valid_563958 = validateParameter(valid_563958, JString, required = true,
                                  default = nil)
-  if valid_568058 != nil:
-    section.add "api-version", valid_568058
+  if valid_563958 != nil:
+    section.add "api-version", valid_563958
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -180,47 +184,47 @@ proc validate_BlobContainersList_567881(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568081: Call_BlobContainersList_567880; path: JsonNode;
+proc call*(call_563981: Call_BlobContainersList_563778; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists all containers and does not support a prefix like data plane. Also SRP today does not return continuation token.
   ## 
-  let valid = call_568081.validator(path, query, header, formData, body)
-  let scheme = call_568081.pickScheme
+  let valid = call_563981.validator(path, query, header, formData, body)
+  let scheme = call_563981.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568081.url(scheme.get, call_568081.host, call_568081.base,
-                         call_568081.route, valid.getOrDefault("path"),
+  let url = call_563981.url(scheme.get, call_563981.host, call_563981.base,
+                         call_563981.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568081, url, valid)
+  result = hook(call_563981, url, valid)
 
-proc call*(call_568152: Call_BlobContainersList_567880; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; accountName: string): Recallable =
+proc call*(call_564052: Call_BlobContainersList_563778; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string; accountName: string): Recallable =
   ## blobContainersList
   ## Lists all containers and does not support a prefix like data plane. Also SRP today does not return continuation token.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
   ##   apiVersion: string (required)
   ##             : The API version to use for this operation.
   ##   subscriptionId: string (required)
   ##                 : The ID of the target subscription.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
   ##   accountName: string (required)
   ##              : The name of the storage account within the specified resource group. Storage account names must be between 3 and 24 characters in length and use numbers and lower-case letters only.
-  var path_568153 = newJObject()
-  var query_568155 = newJObject()
-  add(path_568153, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568155, "api-version", newJString(apiVersion))
-  add(path_568153, "subscriptionId", newJString(subscriptionId))
-  add(path_568153, "accountName", newJString(accountName))
-  result = call_568152.call(path_568153, query_568155, nil, nil, nil)
+  var path_564053 = newJObject()
+  var query_564055 = newJObject()
+  add(query_564055, "api-version", newJString(apiVersion))
+  add(path_564053, "subscriptionId", newJString(subscriptionId))
+  add(path_564053, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564053, "accountName", newJString(accountName))
+  result = call_564052.call(path_564053, query_564055, nil, nil, nil)
 
-var blobContainersList* = Call_BlobContainersList_567880(
+var blobContainersList* = Call_BlobContainersList_563778(
     name: "blobContainersList", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Storage/storageAccounts/{accountName}/blobServices/default/containers",
-    validator: validate_BlobContainersList_567881, base: "",
-    url: url_BlobContainersList_567882, schemes: {Scheme.Https})
+    validator: validate_BlobContainersList_563779, base: "",
+    url: url_BlobContainersList_563780, schemes: {Scheme.Https})
 type
-  Call_BlobContainersCreate_568206 = ref object of OpenApiRestCall_567658
-proc url_BlobContainersCreate_568208(protocol: Scheme; host: string; base: string;
+  Call_BlobContainersCreate_564106 = ref object of OpenApiRestCall_563556
+proc url_BlobContainersCreate_564108(protocol: Scheme; host: string; base: string;
                                     route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -246,44 +250,44 @@ proc url_BlobContainersCreate_568208(protocol: Scheme; host: string; base: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_BlobContainersCreate_568207(path: JsonNode; query: JsonNode;
+proc validate_BlobContainersCreate_564107(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Creates a new container under the specified account as described by request body. The container resource includes metadata and properties for that container. It does not include a list of the blobs contained by the container. 
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
+  ##   subscriptionId: JString (required)
+  ##                 : The ID of the target subscription.
   ##   resourceGroupName: JString (required)
   ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
   ##   containerName: JString (required)
   ##                : The name of the blob container within the specified storage account. Blob container names must be between 3 and 63 characters in length and use numbers, lower-case letters and dash (-) only. Every dash (-) character must be immediately preceded and followed by a letter or number.
-  ##   subscriptionId: JString (required)
-  ##                 : The ID of the target subscription.
   ##   accountName: JString (required)
   ##              : The name of the storage account within the specified resource group. Storage account names must be between 3 and 24 characters in length and use numbers and lower-case letters only.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568226 = path.getOrDefault("resourceGroupName")
-  valid_568226 = validateParameter(valid_568226, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564126 = path.getOrDefault("subscriptionId")
+  valid_564126 = validateParameter(valid_564126, JString, required = true,
                                  default = nil)
-  if valid_568226 != nil:
-    section.add "resourceGroupName", valid_568226
-  var valid_568227 = path.getOrDefault("containerName")
-  valid_568227 = validateParameter(valid_568227, JString, required = true,
+  if valid_564126 != nil:
+    section.add "subscriptionId", valid_564126
+  var valid_564127 = path.getOrDefault("resourceGroupName")
+  valid_564127 = validateParameter(valid_564127, JString, required = true,
                                  default = nil)
-  if valid_568227 != nil:
-    section.add "containerName", valid_568227
-  var valid_568228 = path.getOrDefault("subscriptionId")
-  valid_568228 = validateParameter(valid_568228, JString, required = true,
+  if valid_564127 != nil:
+    section.add "resourceGroupName", valid_564127
+  var valid_564128 = path.getOrDefault("containerName")
+  valid_564128 = validateParameter(valid_564128, JString, required = true,
                                  default = nil)
-  if valid_568228 != nil:
-    section.add "subscriptionId", valid_568228
-  var valid_568229 = path.getOrDefault("accountName")
-  valid_568229 = validateParameter(valid_568229, JString, required = true,
+  if valid_564128 != nil:
+    section.add "containerName", valid_564128
+  var valid_564129 = path.getOrDefault("accountName")
+  valid_564129 = validateParameter(valid_564129, JString, required = true,
                                  default = nil)
-  if valid_568229 != nil:
-    section.add "accountName", valid_568229
+  if valid_564129 != nil:
+    section.add "accountName", valid_564129
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -291,11 +295,11 @@ proc validate_BlobContainersCreate_568207(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568230 = query.getOrDefault("api-version")
-  valid_568230 = validateParameter(valid_568230, JString, required = true,
+  var valid_564130 = query.getOrDefault("api-version")
+  valid_564130 = validateParameter(valid_564130, JString, required = true,
                                  default = nil)
-  if valid_568230 != nil:
-    section.add "api-version", valid_568230
+  if valid_564130 != nil:
+    section.add "api-version", valid_564130
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -309,56 +313,56 @@ proc validate_BlobContainersCreate_568207(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568232: Call_BlobContainersCreate_568206; path: JsonNode;
+proc call*(call_564132: Call_BlobContainersCreate_564106; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Creates a new container under the specified account as described by request body. The container resource includes metadata and properties for that container. It does not include a list of the blobs contained by the container. 
   ## 
-  let valid = call_568232.validator(path, query, header, formData, body)
-  let scheme = call_568232.pickScheme
+  let valid = call_564132.validator(path, query, header, formData, body)
+  let scheme = call_564132.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568232.url(scheme.get, call_568232.host, call_568232.base,
-                         call_568232.route, valid.getOrDefault("path"),
+  let url = call_564132.url(scheme.get, call_564132.host, call_564132.base,
+                         call_564132.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568232, url, valid)
+  result = hook(call_564132, url, valid)
 
-proc call*(call_568233: Call_BlobContainersCreate_568206;
-          resourceGroupName: string; apiVersion: string; blobContainer: JsonNode;
-          containerName: string; subscriptionId: string; accountName: string): Recallable =
+proc call*(call_564133: Call_BlobContainersCreate_564106; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string; containerName: string;
+          blobContainer: JsonNode; accountName: string): Recallable =
   ## blobContainersCreate
   ## Creates a new container under the specified account as described by request body. The container resource includes metadata and properties for that container. It does not include a list of the blobs contained by the container. 
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
   ##   apiVersion: string (required)
   ##             : The API version to use for this operation.
-  ##   blobContainer: JObject (required)
-  ##                : Properties of the blob container to create.
-  ##   containerName: string (required)
-  ##                : The name of the blob container within the specified storage account. Blob container names must be between 3 and 63 characters in length and use numbers, lower-case letters and dash (-) only. Every dash (-) character must be immediately preceded and followed by a letter or number.
   ##   subscriptionId: string (required)
   ##                 : The ID of the target subscription.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
+  ##   containerName: string (required)
+  ##                : The name of the blob container within the specified storage account. Blob container names must be between 3 and 63 characters in length and use numbers, lower-case letters and dash (-) only. Every dash (-) character must be immediately preceded and followed by a letter or number.
+  ##   blobContainer: JObject (required)
+  ##                : Properties of the blob container to create.
   ##   accountName: string (required)
   ##              : The name of the storage account within the specified resource group. Storage account names must be between 3 and 24 characters in length and use numbers and lower-case letters only.
-  var path_568234 = newJObject()
-  var query_568235 = newJObject()
-  var body_568236 = newJObject()
-  add(path_568234, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568235, "api-version", newJString(apiVersion))
+  var path_564134 = newJObject()
+  var query_564135 = newJObject()
+  var body_564136 = newJObject()
+  add(query_564135, "api-version", newJString(apiVersion))
+  add(path_564134, "subscriptionId", newJString(subscriptionId))
+  add(path_564134, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564134, "containerName", newJString(containerName))
   if blobContainer != nil:
-    body_568236 = blobContainer
-  add(path_568234, "containerName", newJString(containerName))
-  add(path_568234, "subscriptionId", newJString(subscriptionId))
-  add(path_568234, "accountName", newJString(accountName))
-  result = call_568233.call(path_568234, query_568235, nil, nil, body_568236)
+    body_564136 = blobContainer
+  add(path_564134, "accountName", newJString(accountName))
+  result = call_564133.call(path_564134, query_564135, nil, nil, body_564136)
 
-var blobContainersCreate* = Call_BlobContainersCreate_568206(
+var blobContainersCreate* = Call_BlobContainersCreate_564106(
     name: "blobContainersCreate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Storage/storageAccounts/{accountName}/blobServices/default/containers/{containerName}",
-    validator: validate_BlobContainersCreate_568207, base: "",
-    url: url_BlobContainersCreate_568208, schemes: {Scheme.Https})
+    validator: validate_BlobContainersCreate_564107, base: "",
+    url: url_BlobContainersCreate_564108, schemes: {Scheme.Https})
 type
-  Call_BlobContainersGet_568194 = ref object of OpenApiRestCall_567658
-proc url_BlobContainersGet_568196(protocol: Scheme; host: string; base: string;
+  Call_BlobContainersGet_564094 = ref object of OpenApiRestCall_563556
+proc url_BlobContainersGet_564096(protocol: Scheme; host: string; base: string;
                                  route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -384,7 +388,7 @@ proc url_BlobContainersGet_568196(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_BlobContainersGet_568195(path: JsonNode; query: JsonNode;
+proc validate_BlobContainersGet_564095(path: JsonNode; query: JsonNode;
                                       header: JsonNode; formData: JsonNode;
                                       body: JsonNode): JsonNode =
   ## Gets properties of a specified container. 
@@ -392,37 +396,37 @@ proc validate_BlobContainersGet_568195(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
+  ##   subscriptionId: JString (required)
+  ##                 : The ID of the target subscription.
   ##   resourceGroupName: JString (required)
   ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
   ##   containerName: JString (required)
   ##                : The name of the blob container within the specified storage account. Blob container names must be between 3 and 63 characters in length and use numbers, lower-case letters and dash (-) only. Every dash (-) character must be immediately preceded and followed by a letter or number.
-  ##   subscriptionId: JString (required)
-  ##                 : The ID of the target subscription.
   ##   accountName: JString (required)
   ##              : The name of the storage account within the specified resource group. Storage account names must be between 3 and 24 characters in length and use numbers and lower-case letters only.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568197 = path.getOrDefault("resourceGroupName")
-  valid_568197 = validateParameter(valid_568197, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564097 = path.getOrDefault("subscriptionId")
+  valid_564097 = validateParameter(valid_564097, JString, required = true,
                                  default = nil)
-  if valid_568197 != nil:
-    section.add "resourceGroupName", valid_568197
-  var valid_568198 = path.getOrDefault("containerName")
-  valid_568198 = validateParameter(valid_568198, JString, required = true,
+  if valid_564097 != nil:
+    section.add "subscriptionId", valid_564097
+  var valid_564098 = path.getOrDefault("resourceGroupName")
+  valid_564098 = validateParameter(valid_564098, JString, required = true,
                                  default = nil)
-  if valid_568198 != nil:
-    section.add "containerName", valid_568198
-  var valid_568199 = path.getOrDefault("subscriptionId")
-  valid_568199 = validateParameter(valid_568199, JString, required = true,
+  if valid_564098 != nil:
+    section.add "resourceGroupName", valid_564098
+  var valid_564099 = path.getOrDefault("containerName")
+  valid_564099 = validateParameter(valid_564099, JString, required = true,
                                  default = nil)
-  if valid_568199 != nil:
-    section.add "subscriptionId", valid_568199
-  var valid_568200 = path.getOrDefault("accountName")
-  valid_568200 = validateParameter(valid_568200, JString, required = true,
+  if valid_564099 != nil:
+    section.add "containerName", valid_564099
+  var valid_564100 = path.getOrDefault("accountName")
+  valid_564100 = validateParameter(valid_564100, JString, required = true,
                                  default = nil)
-  if valid_568200 != nil:
-    section.add "accountName", valid_568200
+  if valid_564100 != nil:
+    section.add "accountName", valid_564100
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -430,11 +434,11 @@ proc validate_BlobContainersGet_568195(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568201 = query.getOrDefault("api-version")
-  valid_568201 = validateParameter(valid_568201, JString, required = true,
+  var valid_564101 = query.getOrDefault("api-version")
+  valid_564101 = validateParameter(valid_564101, JString, required = true,
                                  default = nil)
-  if valid_568201 != nil:
-    section.add "api-version", valid_568201
+  if valid_564101 != nil:
+    section.add "api-version", valid_564101
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -443,50 +447,50 @@ proc validate_BlobContainersGet_568195(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568202: Call_BlobContainersGet_568194; path: JsonNode;
+proc call*(call_564102: Call_BlobContainersGet_564094; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets properties of a specified container. 
   ## 
-  let valid = call_568202.validator(path, query, header, formData, body)
-  let scheme = call_568202.pickScheme
+  let valid = call_564102.validator(path, query, header, formData, body)
+  let scheme = call_564102.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568202.url(scheme.get, call_568202.host, call_568202.base,
-                         call_568202.route, valid.getOrDefault("path"),
+  let url = call_564102.url(scheme.get, call_564102.host, call_564102.base,
+                         call_564102.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568202, url, valid)
+  result = hook(call_564102, url, valid)
 
-proc call*(call_568203: Call_BlobContainersGet_568194; resourceGroupName: string;
-          apiVersion: string; containerName: string; subscriptionId: string;
+proc call*(call_564103: Call_BlobContainersGet_564094; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string; containerName: string;
           accountName: string): Recallable =
   ## blobContainersGet
   ## Gets properties of a specified container. 
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
   ##   apiVersion: string (required)
   ##             : The API version to use for this operation.
-  ##   containerName: string (required)
-  ##                : The name of the blob container within the specified storage account. Blob container names must be between 3 and 63 characters in length and use numbers, lower-case letters and dash (-) only. Every dash (-) character must be immediately preceded and followed by a letter or number.
   ##   subscriptionId: string (required)
   ##                 : The ID of the target subscription.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
+  ##   containerName: string (required)
+  ##                : The name of the blob container within the specified storage account. Blob container names must be between 3 and 63 characters in length and use numbers, lower-case letters and dash (-) only. Every dash (-) character must be immediately preceded and followed by a letter or number.
   ##   accountName: string (required)
   ##              : The name of the storage account within the specified resource group. Storage account names must be between 3 and 24 characters in length and use numbers and lower-case letters only.
-  var path_568204 = newJObject()
-  var query_568205 = newJObject()
-  add(path_568204, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568205, "api-version", newJString(apiVersion))
-  add(path_568204, "containerName", newJString(containerName))
-  add(path_568204, "subscriptionId", newJString(subscriptionId))
-  add(path_568204, "accountName", newJString(accountName))
-  result = call_568203.call(path_568204, query_568205, nil, nil, nil)
+  var path_564104 = newJObject()
+  var query_564105 = newJObject()
+  add(query_564105, "api-version", newJString(apiVersion))
+  add(path_564104, "subscriptionId", newJString(subscriptionId))
+  add(path_564104, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564104, "containerName", newJString(containerName))
+  add(path_564104, "accountName", newJString(accountName))
+  result = call_564103.call(path_564104, query_564105, nil, nil, nil)
 
-var blobContainersGet* = Call_BlobContainersGet_568194(name: "blobContainersGet",
+var blobContainersGet* = Call_BlobContainersGet_564094(name: "blobContainersGet",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Storage/storageAccounts/{accountName}/blobServices/default/containers/{containerName}",
-    validator: validate_BlobContainersGet_568195, base: "",
-    url: url_BlobContainersGet_568196, schemes: {Scheme.Https})
+    validator: validate_BlobContainersGet_564095, base: "",
+    url: url_BlobContainersGet_564096, schemes: {Scheme.Https})
 type
-  Call_BlobContainersUpdate_568249 = ref object of OpenApiRestCall_567658
-proc url_BlobContainersUpdate_568251(protocol: Scheme; host: string; base: string;
+  Call_BlobContainersUpdate_564149 = ref object of OpenApiRestCall_563556
+proc url_BlobContainersUpdate_564151(protocol: Scheme; host: string; base: string;
                                     route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -512,44 +516,44 @@ proc url_BlobContainersUpdate_568251(protocol: Scheme; host: string; base: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_BlobContainersUpdate_568250(path: JsonNode; query: JsonNode;
+proc validate_BlobContainersUpdate_564150(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Updates container properties as specified in request body. Properties not mentioned in the request will be unchanged. Update fails if the specified container doesn't already exist. 
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
+  ##   subscriptionId: JString (required)
+  ##                 : The ID of the target subscription.
   ##   resourceGroupName: JString (required)
   ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
   ##   containerName: JString (required)
   ##                : The name of the blob container within the specified storage account. Blob container names must be between 3 and 63 characters in length and use numbers, lower-case letters and dash (-) only. Every dash (-) character must be immediately preceded and followed by a letter or number.
-  ##   subscriptionId: JString (required)
-  ##                 : The ID of the target subscription.
   ##   accountName: JString (required)
   ##              : The name of the storage account within the specified resource group. Storage account names must be between 3 and 24 characters in length and use numbers and lower-case letters only.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568252 = path.getOrDefault("resourceGroupName")
-  valid_568252 = validateParameter(valid_568252, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564152 = path.getOrDefault("subscriptionId")
+  valid_564152 = validateParameter(valid_564152, JString, required = true,
                                  default = nil)
-  if valid_568252 != nil:
-    section.add "resourceGroupName", valid_568252
-  var valid_568253 = path.getOrDefault("containerName")
-  valid_568253 = validateParameter(valid_568253, JString, required = true,
+  if valid_564152 != nil:
+    section.add "subscriptionId", valid_564152
+  var valid_564153 = path.getOrDefault("resourceGroupName")
+  valid_564153 = validateParameter(valid_564153, JString, required = true,
                                  default = nil)
-  if valid_568253 != nil:
-    section.add "containerName", valid_568253
-  var valid_568254 = path.getOrDefault("subscriptionId")
-  valid_568254 = validateParameter(valid_568254, JString, required = true,
+  if valid_564153 != nil:
+    section.add "resourceGroupName", valid_564153
+  var valid_564154 = path.getOrDefault("containerName")
+  valid_564154 = validateParameter(valid_564154, JString, required = true,
                                  default = nil)
-  if valid_568254 != nil:
-    section.add "subscriptionId", valid_568254
-  var valid_568255 = path.getOrDefault("accountName")
-  valid_568255 = validateParameter(valid_568255, JString, required = true,
+  if valid_564154 != nil:
+    section.add "containerName", valid_564154
+  var valid_564155 = path.getOrDefault("accountName")
+  valid_564155 = validateParameter(valid_564155, JString, required = true,
                                  default = nil)
-  if valid_568255 != nil:
-    section.add "accountName", valid_568255
+  if valid_564155 != nil:
+    section.add "accountName", valid_564155
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -557,11 +561,11 @@ proc validate_BlobContainersUpdate_568250(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568256 = query.getOrDefault("api-version")
-  valid_568256 = validateParameter(valid_568256, JString, required = true,
+  var valid_564156 = query.getOrDefault("api-version")
+  valid_564156 = validateParameter(valid_564156, JString, required = true,
                                  default = nil)
-  if valid_568256 != nil:
-    section.add "api-version", valid_568256
+  if valid_564156 != nil:
+    section.add "api-version", valid_564156
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -575,56 +579,56 @@ proc validate_BlobContainersUpdate_568250(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568258: Call_BlobContainersUpdate_568249; path: JsonNode;
+proc call*(call_564158: Call_BlobContainersUpdate_564149; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Updates container properties as specified in request body. Properties not mentioned in the request will be unchanged. Update fails if the specified container doesn't already exist. 
   ## 
-  let valid = call_568258.validator(path, query, header, formData, body)
-  let scheme = call_568258.pickScheme
+  let valid = call_564158.validator(path, query, header, formData, body)
+  let scheme = call_564158.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568258.url(scheme.get, call_568258.host, call_568258.base,
-                         call_568258.route, valid.getOrDefault("path"),
+  let url = call_564158.url(scheme.get, call_564158.host, call_564158.base,
+                         call_564158.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568258, url, valid)
+  result = hook(call_564158, url, valid)
 
-proc call*(call_568259: Call_BlobContainersUpdate_568249;
-          resourceGroupName: string; apiVersion: string; blobContainer: JsonNode;
-          containerName: string; subscriptionId: string; accountName: string): Recallable =
+proc call*(call_564159: Call_BlobContainersUpdate_564149; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string; containerName: string;
+          blobContainer: JsonNode; accountName: string): Recallable =
   ## blobContainersUpdate
   ## Updates container properties as specified in request body. Properties not mentioned in the request will be unchanged. Update fails if the specified container doesn't already exist. 
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
   ##   apiVersion: string (required)
   ##             : The API version to use for this operation.
-  ##   blobContainer: JObject (required)
-  ##                : Properties to update for the blob container.
-  ##   containerName: string (required)
-  ##                : The name of the blob container within the specified storage account. Blob container names must be between 3 and 63 characters in length and use numbers, lower-case letters and dash (-) only. Every dash (-) character must be immediately preceded and followed by a letter or number.
   ##   subscriptionId: string (required)
   ##                 : The ID of the target subscription.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
+  ##   containerName: string (required)
+  ##                : The name of the blob container within the specified storage account. Blob container names must be between 3 and 63 characters in length and use numbers, lower-case letters and dash (-) only. Every dash (-) character must be immediately preceded and followed by a letter or number.
+  ##   blobContainer: JObject (required)
+  ##                : Properties to update for the blob container.
   ##   accountName: string (required)
   ##              : The name of the storage account within the specified resource group. Storage account names must be between 3 and 24 characters in length and use numbers and lower-case letters only.
-  var path_568260 = newJObject()
-  var query_568261 = newJObject()
-  var body_568262 = newJObject()
-  add(path_568260, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568261, "api-version", newJString(apiVersion))
+  var path_564160 = newJObject()
+  var query_564161 = newJObject()
+  var body_564162 = newJObject()
+  add(query_564161, "api-version", newJString(apiVersion))
+  add(path_564160, "subscriptionId", newJString(subscriptionId))
+  add(path_564160, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564160, "containerName", newJString(containerName))
   if blobContainer != nil:
-    body_568262 = blobContainer
-  add(path_568260, "containerName", newJString(containerName))
-  add(path_568260, "subscriptionId", newJString(subscriptionId))
-  add(path_568260, "accountName", newJString(accountName))
-  result = call_568259.call(path_568260, query_568261, nil, nil, body_568262)
+    body_564162 = blobContainer
+  add(path_564160, "accountName", newJString(accountName))
+  result = call_564159.call(path_564160, query_564161, nil, nil, body_564162)
 
-var blobContainersUpdate* = Call_BlobContainersUpdate_568249(
+var blobContainersUpdate* = Call_BlobContainersUpdate_564149(
     name: "blobContainersUpdate", meth: HttpMethod.HttpPatch,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Storage/storageAccounts/{accountName}/blobServices/default/containers/{containerName}",
-    validator: validate_BlobContainersUpdate_568250, base: "",
-    url: url_BlobContainersUpdate_568251, schemes: {Scheme.Https})
+    validator: validate_BlobContainersUpdate_564150, base: "",
+    url: url_BlobContainersUpdate_564151, schemes: {Scheme.Https})
 type
-  Call_BlobContainersDelete_568237 = ref object of OpenApiRestCall_567658
-proc url_BlobContainersDelete_568239(protocol: Scheme; host: string; base: string;
+  Call_BlobContainersDelete_564137 = ref object of OpenApiRestCall_563556
+proc url_BlobContainersDelete_564139(protocol: Scheme; host: string; base: string;
                                     route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -650,44 +654,44 @@ proc url_BlobContainersDelete_568239(protocol: Scheme; host: string; base: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_BlobContainersDelete_568238(path: JsonNode; query: JsonNode;
+proc validate_BlobContainersDelete_564138(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Deletes specified container under its account.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
+  ##   subscriptionId: JString (required)
+  ##                 : The ID of the target subscription.
   ##   resourceGroupName: JString (required)
   ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
   ##   containerName: JString (required)
   ##                : The name of the blob container within the specified storage account. Blob container names must be between 3 and 63 characters in length and use numbers, lower-case letters and dash (-) only. Every dash (-) character must be immediately preceded and followed by a letter or number.
-  ##   subscriptionId: JString (required)
-  ##                 : The ID of the target subscription.
   ##   accountName: JString (required)
   ##              : The name of the storage account within the specified resource group. Storage account names must be between 3 and 24 characters in length and use numbers and lower-case letters only.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568240 = path.getOrDefault("resourceGroupName")
-  valid_568240 = validateParameter(valid_568240, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564140 = path.getOrDefault("subscriptionId")
+  valid_564140 = validateParameter(valid_564140, JString, required = true,
                                  default = nil)
-  if valid_568240 != nil:
-    section.add "resourceGroupName", valid_568240
-  var valid_568241 = path.getOrDefault("containerName")
-  valid_568241 = validateParameter(valid_568241, JString, required = true,
+  if valid_564140 != nil:
+    section.add "subscriptionId", valid_564140
+  var valid_564141 = path.getOrDefault("resourceGroupName")
+  valid_564141 = validateParameter(valid_564141, JString, required = true,
                                  default = nil)
-  if valid_568241 != nil:
-    section.add "containerName", valid_568241
-  var valid_568242 = path.getOrDefault("subscriptionId")
-  valid_568242 = validateParameter(valid_568242, JString, required = true,
+  if valid_564141 != nil:
+    section.add "resourceGroupName", valid_564141
+  var valid_564142 = path.getOrDefault("containerName")
+  valid_564142 = validateParameter(valid_564142, JString, required = true,
                                  default = nil)
-  if valid_568242 != nil:
-    section.add "subscriptionId", valid_568242
-  var valid_568243 = path.getOrDefault("accountName")
-  valid_568243 = validateParameter(valid_568243, JString, required = true,
+  if valid_564142 != nil:
+    section.add "containerName", valid_564142
+  var valid_564143 = path.getOrDefault("accountName")
+  valid_564143 = validateParameter(valid_564143, JString, required = true,
                                  default = nil)
-  if valid_568243 != nil:
-    section.add "accountName", valid_568243
+  if valid_564143 != nil:
+    section.add "accountName", valid_564143
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -695,11 +699,11 @@ proc validate_BlobContainersDelete_568238(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568244 = query.getOrDefault("api-version")
-  valid_568244 = validateParameter(valid_568244, JString, required = true,
+  var valid_564144 = query.getOrDefault("api-version")
+  valid_564144 = validateParameter(valid_564144, JString, required = true,
                                  default = nil)
-  if valid_568244 != nil:
-    section.add "api-version", valid_568244
+  if valid_564144 != nil:
+    section.add "api-version", valid_564144
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -708,51 +712,51 @@ proc validate_BlobContainersDelete_568238(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568245: Call_BlobContainersDelete_568237; path: JsonNode;
+proc call*(call_564145: Call_BlobContainersDelete_564137; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes specified container under its account.
   ## 
-  let valid = call_568245.validator(path, query, header, formData, body)
-  let scheme = call_568245.pickScheme
+  let valid = call_564145.validator(path, query, header, formData, body)
+  let scheme = call_564145.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568245.url(scheme.get, call_568245.host, call_568245.base,
-                         call_568245.route, valid.getOrDefault("path"),
+  let url = call_564145.url(scheme.get, call_564145.host, call_564145.base,
+                         call_564145.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568245, url, valid)
+  result = hook(call_564145, url, valid)
 
-proc call*(call_568246: Call_BlobContainersDelete_568237;
-          resourceGroupName: string; apiVersion: string; containerName: string;
-          subscriptionId: string; accountName: string): Recallable =
+proc call*(call_564146: Call_BlobContainersDelete_564137; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string; containerName: string;
+          accountName: string): Recallable =
   ## blobContainersDelete
   ## Deletes specified container under its account.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
   ##   apiVersion: string (required)
   ##             : The API version to use for this operation.
-  ##   containerName: string (required)
-  ##                : The name of the blob container within the specified storage account. Blob container names must be between 3 and 63 characters in length and use numbers, lower-case letters and dash (-) only. Every dash (-) character must be immediately preceded and followed by a letter or number.
   ##   subscriptionId: string (required)
   ##                 : The ID of the target subscription.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
+  ##   containerName: string (required)
+  ##                : The name of the blob container within the specified storage account. Blob container names must be between 3 and 63 characters in length and use numbers, lower-case letters and dash (-) only. Every dash (-) character must be immediately preceded and followed by a letter or number.
   ##   accountName: string (required)
   ##              : The name of the storage account within the specified resource group. Storage account names must be between 3 and 24 characters in length and use numbers and lower-case letters only.
-  var path_568247 = newJObject()
-  var query_568248 = newJObject()
-  add(path_568247, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568248, "api-version", newJString(apiVersion))
-  add(path_568247, "containerName", newJString(containerName))
-  add(path_568247, "subscriptionId", newJString(subscriptionId))
-  add(path_568247, "accountName", newJString(accountName))
-  result = call_568246.call(path_568247, query_568248, nil, nil, nil)
+  var path_564147 = newJObject()
+  var query_564148 = newJObject()
+  add(query_564148, "api-version", newJString(apiVersion))
+  add(path_564147, "subscriptionId", newJString(subscriptionId))
+  add(path_564147, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564147, "containerName", newJString(containerName))
+  add(path_564147, "accountName", newJString(accountName))
+  result = call_564146.call(path_564147, query_564148, nil, nil, nil)
 
-var blobContainersDelete* = Call_BlobContainersDelete_568237(
+var blobContainersDelete* = Call_BlobContainersDelete_564137(
     name: "blobContainersDelete", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Storage/storageAccounts/{accountName}/blobServices/default/containers/{containerName}",
-    validator: validate_BlobContainersDelete_568238, base: "",
-    url: url_BlobContainersDelete_568239, schemes: {Scheme.Https})
+    validator: validate_BlobContainersDelete_564138, base: "",
+    url: url_BlobContainersDelete_564139, schemes: {Scheme.Https})
 type
-  Call_BlobContainersClearLegalHold_568263 = ref object of OpenApiRestCall_567658
-proc url_BlobContainersClearLegalHold_568265(protocol: Scheme; host: string;
+  Call_BlobContainersClearLegalHold_564163 = ref object of OpenApiRestCall_563556
+proc url_BlobContainersClearLegalHold_564165(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -779,44 +783,44 @@ proc url_BlobContainersClearLegalHold_568265(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_BlobContainersClearLegalHold_568264(path: JsonNode; query: JsonNode;
+proc validate_BlobContainersClearLegalHold_564164(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Clears legal hold tags. Clearing the same or non-existent tag results in an idempotent operation. ClearLegalHold clears out only the specified tags in the request.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
+  ##   subscriptionId: JString (required)
+  ##                 : The ID of the target subscription.
   ##   resourceGroupName: JString (required)
   ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
   ##   containerName: JString (required)
   ##                : The name of the blob container within the specified storage account. Blob container names must be between 3 and 63 characters in length and use numbers, lower-case letters and dash (-) only. Every dash (-) character must be immediately preceded and followed by a letter or number.
-  ##   subscriptionId: JString (required)
-  ##                 : The ID of the target subscription.
   ##   accountName: JString (required)
   ##              : The name of the storage account within the specified resource group. Storage account names must be between 3 and 24 characters in length and use numbers and lower-case letters only.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568276 = path.getOrDefault("resourceGroupName")
-  valid_568276 = validateParameter(valid_568276, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564176 = path.getOrDefault("subscriptionId")
+  valid_564176 = validateParameter(valid_564176, JString, required = true,
                                  default = nil)
-  if valid_568276 != nil:
-    section.add "resourceGroupName", valid_568276
-  var valid_568277 = path.getOrDefault("containerName")
-  valid_568277 = validateParameter(valid_568277, JString, required = true,
+  if valid_564176 != nil:
+    section.add "subscriptionId", valid_564176
+  var valid_564177 = path.getOrDefault("resourceGroupName")
+  valid_564177 = validateParameter(valid_564177, JString, required = true,
                                  default = nil)
-  if valid_568277 != nil:
-    section.add "containerName", valid_568277
-  var valid_568278 = path.getOrDefault("subscriptionId")
-  valid_568278 = validateParameter(valid_568278, JString, required = true,
+  if valid_564177 != nil:
+    section.add "resourceGroupName", valid_564177
+  var valid_564178 = path.getOrDefault("containerName")
+  valid_564178 = validateParameter(valid_564178, JString, required = true,
                                  default = nil)
-  if valid_568278 != nil:
-    section.add "subscriptionId", valid_568278
-  var valid_568279 = path.getOrDefault("accountName")
-  valid_568279 = validateParameter(valid_568279, JString, required = true,
+  if valid_564178 != nil:
+    section.add "containerName", valid_564178
+  var valid_564179 = path.getOrDefault("accountName")
+  valid_564179 = validateParameter(valid_564179, JString, required = true,
                                  default = nil)
-  if valid_568279 != nil:
-    section.add "accountName", valid_568279
+  if valid_564179 != nil:
+    section.add "accountName", valid_564179
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -824,11 +828,11 @@ proc validate_BlobContainersClearLegalHold_568264(path: JsonNode; query: JsonNod
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568280 = query.getOrDefault("api-version")
-  valid_568280 = validateParameter(valid_568280, JString, required = true,
+  var valid_564180 = query.getOrDefault("api-version")
+  valid_564180 = validateParameter(valid_564180, JString, required = true,
                                  default = nil)
-  if valid_568280 != nil:
-    section.add "api-version", valid_568280
+  if valid_564180 != nil:
+    section.add "api-version", valid_564180
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -842,56 +846,56 @@ proc validate_BlobContainersClearLegalHold_568264(path: JsonNode; query: JsonNod
   if body != nil:
     result.add "body", body
 
-proc call*(call_568282: Call_BlobContainersClearLegalHold_568263; path: JsonNode;
+proc call*(call_564182: Call_BlobContainersClearLegalHold_564163; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Clears legal hold tags. Clearing the same or non-existent tag results in an idempotent operation. ClearLegalHold clears out only the specified tags in the request.
   ## 
-  let valid = call_568282.validator(path, query, header, formData, body)
-  let scheme = call_568282.pickScheme
+  let valid = call_564182.validator(path, query, header, formData, body)
+  let scheme = call_564182.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568282.url(scheme.get, call_568282.host, call_568282.base,
-                         call_568282.route, valid.getOrDefault("path"),
+  let url = call_564182.url(scheme.get, call_564182.host, call_564182.base,
+                         call_564182.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568282, url, valid)
+  result = hook(call_564182, url, valid)
 
-proc call*(call_568283: Call_BlobContainersClearLegalHold_568263;
-          resourceGroupName: string; apiVersion: string; containerName: string;
-          LegalHold: JsonNode; subscriptionId: string; accountName: string): Recallable =
+proc call*(call_564183: Call_BlobContainersClearLegalHold_564163;
+          apiVersion: string; LegalHold: JsonNode; subscriptionId: string;
+          resourceGroupName: string; containerName: string; accountName: string): Recallable =
   ## blobContainersClearLegalHold
   ## Clears legal hold tags. Clearing the same or non-existent tag results in an idempotent operation. ClearLegalHold clears out only the specified tags in the request.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
   ##   apiVersion: string (required)
   ##             : The API version to use for this operation.
-  ##   containerName: string (required)
-  ##                : The name of the blob container within the specified storage account. Blob container names must be between 3 and 63 characters in length and use numbers, lower-case letters and dash (-) only. Every dash (-) character must be immediately preceded and followed by a letter or number.
   ##   LegalHold: JObject (required)
   ##            : The LegalHold property that will be clear from a blob container.
   ##   subscriptionId: string (required)
   ##                 : The ID of the target subscription.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
+  ##   containerName: string (required)
+  ##                : The name of the blob container within the specified storage account. Blob container names must be between 3 and 63 characters in length and use numbers, lower-case letters and dash (-) only. Every dash (-) character must be immediately preceded and followed by a letter or number.
   ##   accountName: string (required)
   ##              : The name of the storage account within the specified resource group. Storage account names must be between 3 and 24 characters in length and use numbers and lower-case letters only.
-  var path_568284 = newJObject()
-  var query_568285 = newJObject()
-  var body_568286 = newJObject()
-  add(path_568284, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568285, "api-version", newJString(apiVersion))
-  add(path_568284, "containerName", newJString(containerName))
+  var path_564184 = newJObject()
+  var query_564185 = newJObject()
+  var body_564186 = newJObject()
+  add(query_564185, "api-version", newJString(apiVersion))
   if LegalHold != nil:
-    body_568286 = LegalHold
-  add(path_568284, "subscriptionId", newJString(subscriptionId))
-  add(path_568284, "accountName", newJString(accountName))
-  result = call_568283.call(path_568284, query_568285, nil, nil, body_568286)
+    body_564186 = LegalHold
+  add(path_564184, "subscriptionId", newJString(subscriptionId))
+  add(path_564184, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564184, "containerName", newJString(containerName))
+  add(path_564184, "accountName", newJString(accountName))
+  result = call_564183.call(path_564184, query_564185, nil, nil, body_564186)
 
-var blobContainersClearLegalHold* = Call_BlobContainersClearLegalHold_568263(
+var blobContainersClearLegalHold* = Call_BlobContainersClearLegalHold_564163(
     name: "blobContainersClearLegalHold", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Storage/storageAccounts/{accountName}/blobServices/default/containers/{containerName}/clearLegalHold",
-    validator: validate_BlobContainersClearLegalHold_568264, base: "",
-    url: url_BlobContainersClearLegalHold_568265, schemes: {Scheme.Https})
+    validator: validate_BlobContainersClearLegalHold_564164, base: "",
+    url: url_BlobContainersClearLegalHold_564165, schemes: {Scheme.Https})
 type
-  Call_BlobContainersExtendImmutabilityPolicy_568287 = ref object of OpenApiRestCall_567658
-proc url_BlobContainersExtendImmutabilityPolicy_568289(protocol: Scheme;
+  Call_BlobContainersExtendImmutabilityPolicy_564187 = ref object of OpenApiRestCall_563556
+proc url_BlobContainersExtendImmutabilityPolicy_564189(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -918,44 +922,44 @@ proc url_BlobContainersExtendImmutabilityPolicy_568289(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_BlobContainersExtendImmutabilityPolicy_568288(path: JsonNode;
+proc validate_BlobContainersExtendImmutabilityPolicy_564188(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Extends the immutabilityPeriodSinceCreationInDays of a locked immutabilityPolicy. The only action allowed on a Locked policy will be this action. ETag in If-Match is required for this operation.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
+  ##   subscriptionId: JString (required)
+  ##                 : The ID of the target subscription.
   ##   resourceGroupName: JString (required)
   ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
   ##   containerName: JString (required)
   ##                : The name of the blob container within the specified storage account. Blob container names must be between 3 and 63 characters in length and use numbers, lower-case letters and dash (-) only. Every dash (-) character must be immediately preceded and followed by a letter or number.
-  ##   subscriptionId: JString (required)
-  ##                 : The ID of the target subscription.
   ##   accountName: JString (required)
   ##              : The name of the storage account within the specified resource group. Storage account names must be between 3 and 24 characters in length and use numbers and lower-case letters only.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568290 = path.getOrDefault("resourceGroupName")
-  valid_568290 = validateParameter(valid_568290, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564190 = path.getOrDefault("subscriptionId")
+  valid_564190 = validateParameter(valid_564190, JString, required = true,
                                  default = nil)
-  if valid_568290 != nil:
-    section.add "resourceGroupName", valid_568290
-  var valid_568291 = path.getOrDefault("containerName")
-  valid_568291 = validateParameter(valid_568291, JString, required = true,
+  if valid_564190 != nil:
+    section.add "subscriptionId", valid_564190
+  var valid_564191 = path.getOrDefault("resourceGroupName")
+  valid_564191 = validateParameter(valid_564191, JString, required = true,
                                  default = nil)
-  if valid_568291 != nil:
-    section.add "containerName", valid_568291
-  var valid_568292 = path.getOrDefault("subscriptionId")
-  valid_568292 = validateParameter(valid_568292, JString, required = true,
+  if valid_564191 != nil:
+    section.add "resourceGroupName", valid_564191
+  var valid_564192 = path.getOrDefault("containerName")
+  valid_564192 = validateParameter(valid_564192, JString, required = true,
                                  default = nil)
-  if valid_568292 != nil:
-    section.add "subscriptionId", valid_568292
-  var valid_568293 = path.getOrDefault("accountName")
-  valid_568293 = validateParameter(valid_568293, JString, required = true,
+  if valid_564192 != nil:
+    section.add "containerName", valid_564192
+  var valid_564193 = path.getOrDefault("accountName")
+  valid_564193 = validateParameter(valid_564193, JString, required = true,
                                  default = nil)
-  if valid_568293 != nil:
-    section.add "accountName", valid_568293
+  if valid_564193 != nil:
+    section.add "accountName", valid_564193
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -963,11 +967,11 @@ proc validate_BlobContainersExtendImmutabilityPolicy_568288(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568294 = query.getOrDefault("api-version")
-  valid_568294 = validateParameter(valid_568294, JString, required = true,
+  var valid_564194 = query.getOrDefault("api-version")
+  valid_564194 = validateParameter(valid_564194, JString, required = true,
                                  default = nil)
-  if valid_568294 != nil:
-    section.add "api-version", valid_568294
+  if valid_564194 != nil:
+    section.add "api-version", valid_564194
   result.add "query", section
   ## parameters in `header` object:
   ##   If-Match: JString (required)
@@ -975,11 +979,11 @@ proc validate_BlobContainersExtendImmutabilityPolicy_568288(path: JsonNode;
   section = newJObject()
   assert header != nil,
         "header argument is necessary due to required `If-Match` field"
-  var valid_568295 = header.getOrDefault("If-Match")
-  valid_568295 = validateParameter(valid_568295, JString, required = true,
+  var valid_564195 = header.getOrDefault("If-Match")
+  valid_564195 = validateParameter(valid_564195, JString, required = true,
                                  default = nil)
-  if valid_568295 != nil:
-    section.add "If-Match", valid_568295
+  if valid_564195 != nil:
+    section.add "If-Match", valid_564195
   result.add "header", section
   section = newJObject()
   result.add "formData", section
@@ -990,58 +994,58 @@ proc validate_BlobContainersExtendImmutabilityPolicy_568288(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568297: Call_BlobContainersExtendImmutabilityPolicy_568287;
+proc call*(call_564197: Call_BlobContainersExtendImmutabilityPolicy_564187;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Extends the immutabilityPeriodSinceCreationInDays of a locked immutabilityPolicy. The only action allowed on a Locked policy will be this action. ETag in If-Match is required for this operation.
   ## 
-  let valid = call_568297.validator(path, query, header, formData, body)
-  let scheme = call_568297.pickScheme
+  let valid = call_564197.validator(path, query, header, formData, body)
+  let scheme = call_564197.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568297.url(scheme.get, call_568297.host, call_568297.base,
-                         call_568297.route, valid.getOrDefault("path"),
+  let url = call_564197.url(scheme.get, call_564197.host, call_564197.base,
+                         call_564197.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568297, url, valid)
+  result = hook(call_564197, url, valid)
 
-proc call*(call_568298: Call_BlobContainersExtendImmutabilityPolicy_568287;
-          resourceGroupName: string; apiVersion: string; containerName: string;
-          subscriptionId: string; accountName: string; parameters: JsonNode = nil): Recallable =
+proc call*(call_564198: Call_BlobContainersExtendImmutabilityPolicy_564187;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string;
+          containerName: string; accountName: string; parameters: JsonNode = nil): Recallable =
   ## blobContainersExtendImmutabilityPolicy
   ## Extends the immutabilityPeriodSinceCreationInDays of a locked immutabilityPolicy. The only action allowed on a Locked policy will be this action. ETag in If-Match is required for this operation.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
   ##   apiVersion: string (required)
   ##             : The API version to use for this operation.
-  ##   containerName: string (required)
-  ##                : The name of the blob container within the specified storage account. Blob container names must be between 3 and 63 characters in length and use numbers, lower-case letters and dash (-) only. Every dash (-) character must be immediately preceded and followed by a letter or number.
   ##   subscriptionId: string (required)
   ##                 : The ID of the target subscription.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
+  ##   containerName: string (required)
+  ##                : The name of the blob container within the specified storage account. Blob container names must be between 3 and 63 characters in length and use numbers, lower-case letters and dash (-) only. Every dash (-) character must be immediately preceded and followed by a letter or number.
   ##   parameters: JObject
   ##             : The ImmutabilityPolicy Properties that will be extended for a blob container.
   ##   accountName: string (required)
   ##              : The name of the storage account within the specified resource group. Storage account names must be between 3 and 24 characters in length and use numbers and lower-case letters only.
-  var path_568299 = newJObject()
-  var query_568300 = newJObject()
-  var body_568301 = newJObject()
-  add(path_568299, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568300, "api-version", newJString(apiVersion))
-  add(path_568299, "containerName", newJString(containerName))
-  add(path_568299, "subscriptionId", newJString(subscriptionId))
+  var path_564199 = newJObject()
+  var query_564200 = newJObject()
+  var body_564201 = newJObject()
+  add(query_564200, "api-version", newJString(apiVersion))
+  add(path_564199, "subscriptionId", newJString(subscriptionId))
+  add(path_564199, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564199, "containerName", newJString(containerName))
   if parameters != nil:
-    body_568301 = parameters
-  add(path_568299, "accountName", newJString(accountName))
-  result = call_568298.call(path_568299, query_568300, nil, nil, body_568301)
+    body_564201 = parameters
+  add(path_564199, "accountName", newJString(accountName))
+  result = call_564198.call(path_564199, query_564200, nil, nil, body_564201)
 
-var blobContainersExtendImmutabilityPolicy* = Call_BlobContainersExtendImmutabilityPolicy_568287(
+var blobContainersExtendImmutabilityPolicy* = Call_BlobContainersExtendImmutabilityPolicy_564187(
     name: "blobContainersExtendImmutabilityPolicy", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Storage/storageAccounts/{accountName}/blobServices/default/containers/{containerName}/immutabilityPolicies/default/extend",
-    validator: validate_BlobContainersExtendImmutabilityPolicy_568288, base: "",
-    url: url_BlobContainersExtendImmutabilityPolicy_568289,
+    validator: validate_BlobContainersExtendImmutabilityPolicy_564188, base: "",
+    url: url_BlobContainersExtendImmutabilityPolicy_564189,
     schemes: {Scheme.Https})
 type
-  Call_BlobContainersLockImmutabilityPolicy_568302 = ref object of OpenApiRestCall_567658
-proc url_BlobContainersLockImmutabilityPolicy_568304(protocol: Scheme;
+  Call_BlobContainersLockImmutabilityPolicy_564202 = ref object of OpenApiRestCall_563556
+proc url_BlobContainersLockImmutabilityPolicy_564204(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1068,44 +1072,44 @@ proc url_BlobContainersLockImmutabilityPolicy_568304(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_BlobContainersLockImmutabilityPolicy_568303(path: JsonNode;
+proc validate_BlobContainersLockImmutabilityPolicy_564203(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Sets the ImmutabilityPolicy to Locked state. The only action allowed on a Locked policy is ExtendImmutabilityPolicy action. ETag in If-Match is required for this operation.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
+  ##   subscriptionId: JString (required)
+  ##                 : The ID of the target subscription.
   ##   resourceGroupName: JString (required)
   ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
   ##   containerName: JString (required)
   ##                : The name of the blob container within the specified storage account. Blob container names must be between 3 and 63 characters in length and use numbers, lower-case letters and dash (-) only. Every dash (-) character must be immediately preceded and followed by a letter or number.
-  ##   subscriptionId: JString (required)
-  ##                 : The ID of the target subscription.
   ##   accountName: JString (required)
   ##              : The name of the storage account within the specified resource group. Storage account names must be between 3 and 24 characters in length and use numbers and lower-case letters only.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568305 = path.getOrDefault("resourceGroupName")
-  valid_568305 = validateParameter(valid_568305, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564205 = path.getOrDefault("subscriptionId")
+  valid_564205 = validateParameter(valid_564205, JString, required = true,
                                  default = nil)
-  if valid_568305 != nil:
-    section.add "resourceGroupName", valid_568305
-  var valid_568306 = path.getOrDefault("containerName")
-  valid_568306 = validateParameter(valid_568306, JString, required = true,
+  if valid_564205 != nil:
+    section.add "subscriptionId", valid_564205
+  var valid_564206 = path.getOrDefault("resourceGroupName")
+  valid_564206 = validateParameter(valid_564206, JString, required = true,
                                  default = nil)
-  if valid_568306 != nil:
-    section.add "containerName", valid_568306
-  var valid_568307 = path.getOrDefault("subscriptionId")
-  valid_568307 = validateParameter(valid_568307, JString, required = true,
+  if valid_564206 != nil:
+    section.add "resourceGroupName", valid_564206
+  var valid_564207 = path.getOrDefault("containerName")
+  valid_564207 = validateParameter(valid_564207, JString, required = true,
                                  default = nil)
-  if valid_568307 != nil:
-    section.add "subscriptionId", valid_568307
-  var valid_568308 = path.getOrDefault("accountName")
-  valid_568308 = validateParameter(valid_568308, JString, required = true,
+  if valid_564207 != nil:
+    section.add "containerName", valid_564207
+  var valid_564208 = path.getOrDefault("accountName")
+  valid_564208 = validateParameter(valid_564208, JString, required = true,
                                  default = nil)
-  if valid_568308 != nil:
-    section.add "accountName", valid_568308
+  if valid_564208 != nil:
+    section.add "accountName", valid_564208
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1113,11 +1117,11 @@ proc validate_BlobContainersLockImmutabilityPolicy_568303(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568309 = query.getOrDefault("api-version")
-  valid_568309 = validateParameter(valid_568309, JString, required = true,
+  var valid_564209 = query.getOrDefault("api-version")
+  valid_564209 = validateParameter(valid_564209, JString, required = true,
                                  default = nil)
-  if valid_568309 != nil:
-    section.add "api-version", valid_568309
+  if valid_564209 != nil:
+    section.add "api-version", valid_564209
   result.add "query", section
   ## parameters in `header` object:
   ##   If-Match: JString (required)
@@ -1125,63 +1129,63 @@ proc validate_BlobContainersLockImmutabilityPolicy_568303(path: JsonNode;
   section = newJObject()
   assert header != nil,
         "header argument is necessary due to required `If-Match` field"
-  var valid_568310 = header.getOrDefault("If-Match")
-  valid_568310 = validateParameter(valid_568310, JString, required = true,
+  var valid_564210 = header.getOrDefault("If-Match")
+  valid_564210 = validateParameter(valid_564210, JString, required = true,
                                  default = nil)
-  if valid_568310 != nil:
-    section.add "If-Match", valid_568310
+  if valid_564210 != nil:
+    section.add "If-Match", valid_564210
   result.add "header", section
   section = newJObject()
   result.add "formData", section
   if body != nil:
     result.add "body", body
 
-proc call*(call_568311: Call_BlobContainersLockImmutabilityPolicy_568302;
+proc call*(call_564211: Call_BlobContainersLockImmutabilityPolicy_564202;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Sets the ImmutabilityPolicy to Locked state. The only action allowed on a Locked policy is ExtendImmutabilityPolicy action. ETag in If-Match is required for this operation.
   ## 
-  let valid = call_568311.validator(path, query, header, formData, body)
-  let scheme = call_568311.pickScheme
+  let valid = call_564211.validator(path, query, header, formData, body)
+  let scheme = call_564211.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568311.url(scheme.get, call_568311.host, call_568311.base,
-                         call_568311.route, valid.getOrDefault("path"),
+  let url = call_564211.url(scheme.get, call_564211.host, call_564211.base,
+                         call_564211.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568311, url, valid)
+  result = hook(call_564211, url, valid)
 
-proc call*(call_568312: Call_BlobContainersLockImmutabilityPolicy_568302;
-          resourceGroupName: string; apiVersion: string; containerName: string;
-          subscriptionId: string; accountName: string): Recallable =
+proc call*(call_564212: Call_BlobContainersLockImmutabilityPolicy_564202;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string;
+          containerName: string; accountName: string): Recallable =
   ## blobContainersLockImmutabilityPolicy
   ## Sets the ImmutabilityPolicy to Locked state. The only action allowed on a Locked policy is ExtendImmutabilityPolicy action. ETag in If-Match is required for this operation.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
   ##   apiVersion: string (required)
   ##             : The API version to use for this operation.
-  ##   containerName: string (required)
-  ##                : The name of the blob container within the specified storage account. Blob container names must be between 3 and 63 characters in length and use numbers, lower-case letters and dash (-) only. Every dash (-) character must be immediately preceded and followed by a letter or number.
   ##   subscriptionId: string (required)
   ##                 : The ID of the target subscription.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
+  ##   containerName: string (required)
+  ##                : The name of the blob container within the specified storage account. Blob container names must be between 3 and 63 characters in length and use numbers, lower-case letters and dash (-) only. Every dash (-) character must be immediately preceded and followed by a letter or number.
   ##   accountName: string (required)
   ##              : The name of the storage account within the specified resource group. Storage account names must be between 3 and 24 characters in length and use numbers and lower-case letters only.
-  var path_568313 = newJObject()
-  var query_568314 = newJObject()
-  add(path_568313, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568314, "api-version", newJString(apiVersion))
-  add(path_568313, "containerName", newJString(containerName))
-  add(path_568313, "subscriptionId", newJString(subscriptionId))
-  add(path_568313, "accountName", newJString(accountName))
-  result = call_568312.call(path_568313, query_568314, nil, nil, nil)
+  var path_564213 = newJObject()
+  var query_564214 = newJObject()
+  add(query_564214, "api-version", newJString(apiVersion))
+  add(path_564213, "subscriptionId", newJString(subscriptionId))
+  add(path_564213, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564213, "containerName", newJString(containerName))
+  add(path_564213, "accountName", newJString(accountName))
+  result = call_564212.call(path_564213, query_564214, nil, nil, nil)
 
-var blobContainersLockImmutabilityPolicy* = Call_BlobContainersLockImmutabilityPolicy_568302(
+var blobContainersLockImmutabilityPolicy* = Call_BlobContainersLockImmutabilityPolicy_564202(
     name: "blobContainersLockImmutabilityPolicy", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Storage/storageAccounts/{accountName}/blobServices/default/containers/{containerName}/immutabilityPolicies/default/lock",
-    validator: validate_BlobContainersLockImmutabilityPolicy_568303, base: "",
-    url: url_BlobContainersLockImmutabilityPolicy_568304, schemes: {Scheme.Https})
+    validator: validate_BlobContainersLockImmutabilityPolicy_564203, base: "",
+    url: url_BlobContainersLockImmutabilityPolicy_564204, schemes: {Scheme.Https})
 type
-  Call_BlobContainersCreateOrUpdateImmutabilityPolicy_568342 = ref object of OpenApiRestCall_567658
-proc url_BlobContainersCreateOrUpdateImmutabilityPolicy_568344(protocol: Scheme;
+  Call_BlobContainersCreateOrUpdateImmutabilityPolicy_564242 = ref object of OpenApiRestCall_563556
+proc url_BlobContainersCreateOrUpdateImmutabilityPolicy_564244(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1211,7 +1215,7 @@ proc url_BlobContainersCreateOrUpdateImmutabilityPolicy_568344(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_BlobContainersCreateOrUpdateImmutabilityPolicy_568343(
+proc validate_BlobContainersCreateOrUpdateImmutabilityPolicy_564243(
     path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
     body: JsonNode): JsonNode =
   ## Creates or updates an unlocked immutability policy. ETag in If-Match is honored if given but not required for this operation.
@@ -1219,44 +1223,44 @@ proc validate_BlobContainersCreateOrUpdateImmutabilityPolicy_568343(
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
+  ##   subscriptionId: JString (required)
+  ##                 : The ID of the target subscription.
   ##   resourceGroupName: JString (required)
   ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
   ##   containerName: JString (required)
   ##                : The name of the blob container within the specified storage account. Blob container names must be between 3 and 63 characters in length and use numbers, lower-case letters and dash (-) only. Every dash (-) character must be immediately preceded and followed by a letter or number.
-  ##   subscriptionId: JString (required)
-  ##                 : The ID of the target subscription.
   ##   immutabilityPolicyName: JString (required)
   ##                         : The name of the blob container immutabilityPolicy within the specified storage account. ImmutabilityPolicy Name must be 'default'
   ##   accountName: JString (required)
   ##              : The name of the storage account within the specified resource group. Storage account names must be between 3 and 24 characters in length and use numbers and lower-case letters only.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568345 = path.getOrDefault("resourceGroupName")
-  valid_568345 = validateParameter(valid_568345, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564245 = path.getOrDefault("subscriptionId")
+  valid_564245 = validateParameter(valid_564245, JString, required = true,
                                  default = nil)
-  if valid_568345 != nil:
-    section.add "resourceGroupName", valid_568345
-  var valid_568346 = path.getOrDefault("containerName")
-  valid_568346 = validateParameter(valid_568346, JString, required = true,
+  if valid_564245 != nil:
+    section.add "subscriptionId", valid_564245
+  var valid_564246 = path.getOrDefault("resourceGroupName")
+  valid_564246 = validateParameter(valid_564246, JString, required = true,
                                  default = nil)
-  if valid_568346 != nil:
-    section.add "containerName", valid_568346
-  var valid_568347 = path.getOrDefault("subscriptionId")
-  valid_568347 = validateParameter(valid_568347, JString, required = true,
+  if valid_564246 != nil:
+    section.add "resourceGroupName", valid_564246
+  var valid_564247 = path.getOrDefault("containerName")
+  valid_564247 = validateParameter(valid_564247, JString, required = true,
                                  default = nil)
-  if valid_568347 != nil:
-    section.add "subscriptionId", valid_568347
-  var valid_568348 = path.getOrDefault("immutabilityPolicyName")
-  valid_568348 = validateParameter(valid_568348, JString, required = true,
+  if valid_564247 != nil:
+    section.add "containerName", valid_564247
+  var valid_564248 = path.getOrDefault("immutabilityPolicyName")
+  valid_564248 = validateParameter(valid_564248, JString, required = true,
                                  default = newJString("default"))
-  if valid_568348 != nil:
-    section.add "immutabilityPolicyName", valid_568348
-  var valid_568349 = path.getOrDefault("accountName")
-  valid_568349 = validateParameter(valid_568349, JString, required = true,
+  if valid_564248 != nil:
+    section.add "immutabilityPolicyName", valid_564248
+  var valid_564249 = path.getOrDefault("accountName")
+  valid_564249 = validateParameter(valid_564249, JString, required = true,
                                  default = nil)
-  if valid_568349 != nil:
-    section.add "accountName", valid_568349
+  if valid_564249 != nil:
+    section.add "accountName", valid_564249
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1264,21 +1268,21 @@ proc validate_BlobContainersCreateOrUpdateImmutabilityPolicy_568343(
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568350 = query.getOrDefault("api-version")
-  valid_568350 = validateParameter(valid_568350, JString, required = true,
+  var valid_564250 = query.getOrDefault("api-version")
+  valid_564250 = validateParameter(valid_564250, JString, required = true,
                                  default = nil)
-  if valid_568350 != nil:
-    section.add "api-version", valid_568350
+  if valid_564250 != nil:
+    section.add "api-version", valid_564250
   result.add "query", section
   ## parameters in `header` object:
   ##   If-Match: JString
   ##           : The entity state (ETag) version of the immutability policy to update. A value of "*" can be used to apply the operation only if the immutability policy already exists. If omitted, this operation will always be applied.
   section = newJObject()
-  var valid_568351 = header.getOrDefault("If-Match")
-  valid_568351 = validateParameter(valid_568351, JString, required = false,
+  var valid_564251 = header.getOrDefault("If-Match")
+  valid_564251 = validateParameter(valid_564251, JString, required = false,
                                  default = nil)
-  if valid_568351 != nil:
-    section.add "If-Match", valid_568351
+  if valid_564251 != nil:
+    section.add "If-Match", valid_564251
   result.add "header", section
   section = newJObject()
   result.add "formData", section
@@ -1289,62 +1293,62 @@ proc validate_BlobContainersCreateOrUpdateImmutabilityPolicy_568343(
   if body != nil:
     result.add "body", body
 
-proc call*(call_568353: Call_BlobContainersCreateOrUpdateImmutabilityPolicy_568342;
+proc call*(call_564253: Call_BlobContainersCreateOrUpdateImmutabilityPolicy_564242;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Creates or updates an unlocked immutability policy. ETag in If-Match is honored if given but not required for this operation.
   ## 
-  let valid = call_568353.validator(path, query, header, formData, body)
-  let scheme = call_568353.pickScheme
+  let valid = call_564253.validator(path, query, header, formData, body)
+  let scheme = call_564253.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568353.url(scheme.get, call_568353.host, call_568353.base,
-                         call_568353.route, valid.getOrDefault("path"),
+  let url = call_564253.url(scheme.get, call_564253.host, call_564253.base,
+                         call_564253.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568353, url, valid)
+  result = hook(call_564253, url, valid)
 
-proc call*(call_568354: Call_BlobContainersCreateOrUpdateImmutabilityPolicy_568342;
-          resourceGroupName: string; apiVersion: string; containerName: string;
-          subscriptionId: string; accountName: string;
+proc call*(call_564254: Call_BlobContainersCreateOrUpdateImmutabilityPolicy_564242;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string;
+          containerName: string; accountName: string;
           immutabilityPolicyName: string = "default"; parameters: JsonNode = nil): Recallable =
   ## blobContainersCreateOrUpdateImmutabilityPolicy
   ## Creates or updates an unlocked immutability policy. ETag in If-Match is honored if given but not required for this operation.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
   ##   apiVersion: string (required)
   ##             : The API version to use for this operation.
-  ##   containerName: string (required)
-  ##                : The name of the blob container within the specified storage account. Blob container names must be between 3 and 63 characters in length and use numbers, lower-case letters and dash (-) only. Every dash (-) character must be immediately preceded and followed by a letter or number.
   ##   subscriptionId: string (required)
   ##                 : The ID of the target subscription.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
+  ##   containerName: string (required)
+  ##                : The name of the blob container within the specified storage account. Blob container names must be between 3 and 63 characters in length and use numbers, lower-case letters and dash (-) only. Every dash (-) character must be immediately preceded and followed by a letter or number.
   ##   immutabilityPolicyName: string (required)
   ##                         : The name of the blob container immutabilityPolicy within the specified storage account. ImmutabilityPolicy Name must be 'default'
   ##   parameters: JObject
   ##             : The ImmutabilityPolicy Properties that will be created or updated to a blob container.
   ##   accountName: string (required)
   ##              : The name of the storage account within the specified resource group. Storage account names must be between 3 and 24 characters in length and use numbers and lower-case letters only.
-  var path_568355 = newJObject()
-  var query_568356 = newJObject()
-  var body_568357 = newJObject()
-  add(path_568355, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568356, "api-version", newJString(apiVersion))
-  add(path_568355, "containerName", newJString(containerName))
-  add(path_568355, "subscriptionId", newJString(subscriptionId))
-  add(path_568355, "immutabilityPolicyName", newJString(immutabilityPolicyName))
+  var path_564255 = newJObject()
+  var query_564256 = newJObject()
+  var body_564257 = newJObject()
+  add(query_564256, "api-version", newJString(apiVersion))
+  add(path_564255, "subscriptionId", newJString(subscriptionId))
+  add(path_564255, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564255, "containerName", newJString(containerName))
+  add(path_564255, "immutabilityPolicyName", newJString(immutabilityPolicyName))
   if parameters != nil:
-    body_568357 = parameters
-  add(path_568355, "accountName", newJString(accountName))
-  result = call_568354.call(path_568355, query_568356, nil, nil, body_568357)
+    body_564257 = parameters
+  add(path_564255, "accountName", newJString(accountName))
+  result = call_564254.call(path_564255, query_564256, nil, nil, body_564257)
 
-var blobContainersCreateOrUpdateImmutabilityPolicy* = Call_BlobContainersCreateOrUpdateImmutabilityPolicy_568342(
+var blobContainersCreateOrUpdateImmutabilityPolicy* = Call_BlobContainersCreateOrUpdateImmutabilityPolicy_564242(
     name: "blobContainersCreateOrUpdateImmutabilityPolicy",
     meth: HttpMethod.HttpPut, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Storage/storageAccounts/{accountName}/blobServices/default/containers/{containerName}/immutabilityPolicies/{immutabilityPolicyName}",
-    validator: validate_BlobContainersCreateOrUpdateImmutabilityPolicy_568343,
-    base: "", url: url_BlobContainersCreateOrUpdateImmutabilityPolicy_568344,
+    validator: validate_BlobContainersCreateOrUpdateImmutabilityPolicy_564243,
+    base: "", url: url_BlobContainersCreateOrUpdateImmutabilityPolicy_564244,
     schemes: {Scheme.Https})
 type
-  Call_BlobContainersGetImmutabilityPolicy_568315 = ref object of OpenApiRestCall_567658
-proc url_BlobContainersGetImmutabilityPolicy_568317(protocol: Scheme; host: string;
+  Call_BlobContainersGetImmutabilityPolicy_564215 = ref object of OpenApiRestCall_563556
+proc url_BlobContainersGetImmutabilityPolicy_564217(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1374,51 +1378,51 @@ proc url_BlobContainersGetImmutabilityPolicy_568317(protocol: Scheme; host: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_BlobContainersGetImmutabilityPolicy_568316(path: JsonNode;
+proc validate_BlobContainersGetImmutabilityPolicy_564216(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the existing immutability policy along with the corresponding ETag in response headers and body.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
+  ##   subscriptionId: JString (required)
+  ##                 : The ID of the target subscription.
   ##   resourceGroupName: JString (required)
   ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
   ##   containerName: JString (required)
   ##                : The name of the blob container within the specified storage account. Blob container names must be between 3 and 63 characters in length and use numbers, lower-case letters and dash (-) only. Every dash (-) character must be immediately preceded and followed by a letter or number.
-  ##   subscriptionId: JString (required)
-  ##                 : The ID of the target subscription.
   ##   immutabilityPolicyName: JString (required)
   ##                         : The name of the blob container immutabilityPolicy within the specified storage account. ImmutabilityPolicy Name must be 'default'
   ##   accountName: JString (required)
   ##              : The name of the storage account within the specified resource group. Storage account names must be between 3 and 24 characters in length and use numbers and lower-case letters only.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568318 = path.getOrDefault("resourceGroupName")
-  valid_568318 = validateParameter(valid_568318, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564218 = path.getOrDefault("subscriptionId")
+  valid_564218 = validateParameter(valid_564218, JString, required = true,
                                  default = nil)
-  if valid_568318 != nil:
-    section.add "resourceGroupName", valid_568318
-  var valid_568319 = path.getOrDefault("containerName")
-  valid_568319 = validateParameter(valid_568319, JString, required = true,
+  if valid_564218 != nil:
+    section.add "subscriptionId", valid_564218
+  var valid_564219 = path.getOrDefault("resourceGroupName")
+  valid_564219 = validateParameter(valid_564219, JString, required = true,
                                  default = nil)
-  if valid_568319 != nil:
-    section.add "containerName", valid_568319
-  var valid_568320 = path.getOrDefault("subscriptionId")
-  valid_568320 = validateParameter(valid_568320, JString, required = true,
+  if valid_564219 != nil:
+    section.add "resourceGroupName", valid_564219
+  var valid_564220 = path.getOrDefault("containerName")
+  valid_564220 = validateParameter(valid_564220, JString, required = true,
                                  default = nil)
-  if valid_568320 != nil:
-    section.add "subscriptionId", valid_568320
-  var valid_568334 = path.getOrDefault("immutabilityPolicyName")
-  valid_568334 = validateParameter(valid_568334, JString, required = true,
+  if valid_564220 != nil:
+    section.add "containerName", valid_564220
+  var valid_564234 = path.getOrDefault("immutabilityPolicyName")
+  valid_564234 = validateParameter(valid_564234, JString, required = true,
                                  default = newJString("default"))
-  if valid_568334 != nil:
-    section.add "immutabilityPolicyName", valid_568334
-  var valid_568335 = path.getOrDefault("accountName")
-  valid_568335 = validateParameter(valid_568335, JString, required = true,
+  if valid_564234 != nil:
+    section.add "immutabilityPolicyName", valid_564234
+  var valid_564235 = path.getOrDefault("accountName")
+  valid_564235 = validateParameter(valid_564235, JString, required = true,
                                  default = nil)
-  if valid_568335 != nil:
-    section.add "accountName", valid_568335
+  if valid_564235 != nil:
+    section.add "accountName", valid_564235
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1426,77 +1430,77 @@ proc validate_BlobContainersGetImmutabilityPolicy_568316(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568336 = query.getOrDefault("api-version")
-  valid_568336 = validateParameter(valid_568336, JString, required = true,
+  var valid_564236 = query.getOrDefault("api-version")
+  valid_564236 = validateParameter(valid_564236, JString, required = true,
                                  default = nil)
-  if valid_568336 != nil:
-    section.add "api-version", valid_568336
+  if valid_564236 != nil:
+    section.add "api-version", valid_564236
   result.add "query", section
   ## parameters in `header` object:
   ##   If-Match: JString
   ##           : The entity state (ETag) version of the immutability policy to update. A value of "*" can be used to apply the operation only if the immutability policy already exists. If omitted, this operation will always be applied.
   section = newJObject()
-  var valid_568337 = header.getOrDefault("If-Match")
-  valid_568337 = validateParameter(valid_568337, JString, required = false,
+  var valid_564237 = header.getOrDefault("If-Match")
+  valid_564237 = validateParameter(valid_564237, JString, required = false,
                                  default = nil)
-  if valid_568337 != nil:
-    section.add "If-Match", valid_568337
+  if valid_564237 != nil:
+    section.add "If-Match", valid_564237
   result.add "header", section
   section = newJObject()
   result.add "formData", section
   if body != nil:
     result.add "body", body
 
-proc call*(call_568338: Call_BlobContainersGetImmutabilityPolicy_568315;
+proc call*(call_564238: Call_BlobContainersGetImmutabilityPolicy_564215;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Gets the existing immutability policy along with the corresponding ETag in response headers and body.
   ## 
-  let valid = call_568338.validator(path, query, header, formData, body)
-  let scheme = call_568338.pickScheme
+  let valid = call_564238.validator(path, query, header, formData, body)
+  let scheme = call_564238.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568338.url(scheme.get, call_568338.host, call_568338.base,
-                         call_568338.route, valid.getOrDefault("path"),
+  let url = call_564238.url(scheme.get, call_564238.host, call_564238.base,
+                         call_564238.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568338, url, valid)
+  result = hook(call_564238, url, valid)
 
-proc call*(call_568339: Call_BlobContainersGetImmutabilityPolicy_568315;
-          resourceGroupName: string; apiVersion: string; containerName: string;
-          subscriptionId: string; accountName: string;
+proc call*(call_564239: Call_BlobContainersGetImmutabilityPolicy_564215;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string;
+          containerName: string; accountName: string;
           immutabilityPolicyName: string = "default"): Recallable =
   ## blobContainersGetImmutabilityPolicy
   ## Gets the existing immutability policy along with the corresponding ETag in response headers and body.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
   ##   apiVersion: string (required)
   ##             : The API version to use for this operation.
-  ##   containerName: string (required)
-  ##                : The name of the blob container within the specified storage account. Blob container names must be between 3 and 63 characters in length and use numbers, lower-case letters and dash (-) only. Every dash (-) character must be immediately preceded and followed by a letter or number.
   ##   subscriptionId: string (required)
   ##                 : The ID of the target subscription.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
+  ##   containerName: string (required)
+  ##                : The name of the blob container within the specified storage account. Blob container names must be between 3 and 63 characters in length and use numbers, lower-case letters and dash (-) only. Every dash (-) character must be immediately preceded and followed by a letter or number.
   ##   immutabilityPolicyName: string (required)
   ##                         : The name of the blob container immutabilityPolicy within the specified storage account. ImmutabilityPolicy Name must be 'default'
   ##   accountName: string (required)
   ##              : The name of the storage account within the specified resource group. Storage account names must be between 3 and 24 characters in length and use numbers and lower-case letters only.
-  var path_568340 = newJObject()
-  var query_568341 = newJObject()
-  add(path_568340, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568341, "api-version", newJString(apiVersion))
-  add(path_568340, "containerName", newJString(containerName))
-  add(path_568340, "subscriptionId", newJString(subscriptionId))
-  add(path_568340, "immutabilityPolicyName", newJString(immutabilityPolicyName))
-  add(path_568340, "accountName", newJString(accountName))
-  result = call_568339.call(path_568340, query_568341, nil, nil, nil)
+  var path_564240 = newJObject()
+  var query_564241 = newJObject()
+  add(query_564241, "api-version", newJString(apiVersion))
+  add(path_564240, "subscriptionId", newJString(subscriptionId))
+  add(path_564240, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564240, "containerName", newJString(containerName))
+  add(path_564240, "immutabilityPolicyName", newJString(immutabilityPolicyName))
+  add(path_564240, "accountName", newJString(accountName))
+  result = call_564239.call(path_564240, query_564241, nil, nil, nil)
 
-var blobContainersGetImmutabilityPolicy* = Call_BlobContainersGetImmutabilityPolicy_568315(
+var blobContainersGetImmutabilityPolicy* = Call_BlobContainersGetImmutabilityPolicy_564215(
     name: "blobContainersGetImmutabilityPolicy", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Storage/storageAccounts/{accountName}/blobServices/default/containers/{containerName}/immutabilityPolicies/{immutabilityPolicyName}",
-    validator: validate_BlobContainersGetImmutabilityPolicy_568316, base: "",
-    url: url_BlobContainersGetImmutabilityPolicy_568317, schemes: {Scheme.Https})
+    validator: validate_BlobContainersGetImmutabilityPolicy_564216, base: "",
+    url: url_BlobContainersGetImmutabilityPolicy_564217, schemes: {Scheme.Https})
 type
-  Call_BlobContainersDeleteImmutabilityPolicy_568358 = ref object of OpenApiRestCall_567658
-proc url_BlobContainersDeleteImmutabilityPolicy_568360(protocol: Scheme;
+  Call_BlobContainersDeleteImmutabilityPolicy_564258 = ref object of OpenApiRestCall_563556
+proc url_BlobContainersDeleteImmutabilityPolicy_564260(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1526,51 +1530,51 @@ proc url_BlobContainersDeleteImmutabilityPolicy_568360(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_BlobContainersDeleteImmutabilityPolicy_568359(path: JsonNode;
+proc validate_BlobContainersDeleteImmutabilityPolicy_564259(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Aborts an unlocked immutability policy. The response of delete has immutabilityPeriodSinceCreationInDays set to 0. ETag in If-Match is required for this operation. Deleting a locked immutability policy is not allowed, only way is to delete the container after deleting all blobs inside the container.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
+  ##   subscriptionId: JString (required)
+  ##                 : The ID of the target subscription.
   ##   resourceGroupName: JString (required)
   ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
   ##   containerName: JString (required)
   ##                : The name of the blob container within the specified storage account. Blob container names must be between 3 and 63 characters in length and use numbers, lower-case letters and dash (-) only. Every dash (-) character must be immediately preceded and followed by a letter or number.
-  ##   subscriptionId: JString (required)
-  ##                 : The ID of the target subscription.
   ##   immutabilityPolicyName: JString (required)
   ##                         : The name of the blob container immutabilityPolicy within the specified storage account. ImmutabilityPolicy Name must be 'default'
   ##   accountName: JString (required)
   ##              : The name of the storage account within the specified resource group. Storage account names must be between 3 and 24 characters in length and use numbers and lower-case letters only.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568361 = path.getOrDefault("resourceGroupName")
-  valid_568361 = validateParameter(valid_568361, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564261 = path.getOrDefault("subscriptionId")
+  valid_564261 = validateParameter(valid_564261, JString, required = true,
                                  default = nil)
-  if valid_568361 != nil:
-    section.add "resourceGroupName", valid_568361
-  var valid_568362 = path.getOrDefault("containerName")
-  valid_568362 = validateParameter(valid_568362, JString, required = true,
+  if valid_564261 != nil:
+    section.add "subscriptionId", valid_564261
+  var valid_564262 = path.getOrDefault("resourceGroupName")
+  valid_564262 = validateParameter(valid_564262, JString, required = true,
                                  default = nil)
-  if valid_568362 != nil:
-    section.add "containerName", valid_568362
-  var valid_568363 = path.getOrDefault("subscriptionId")
-  valid_568363 = validateParameter(valid_568363, JString, required = true,
+  if valid_564262 != nil:
+    section.add "resourceGroupName", valid_564262
+  var valid_564263 = path.getOrDefault("containerName")
+  valid_564263 = validateParameter(valid_564263, JString, required = true,
                                  default = nil)
-  if valid_568363 != nil:
-    section.add "subscriptionId", valid_568363
-  var valid_568364 = path.getOrDefault("immutabilityPolicyName")
-  valid_568364 = validateParameter(valid_568364, JString, required = true,
+  if valid_564263 != nil:
+    section.add "containerName", valid_564263
+  var valid_564264 = path.getOrDefault("immutabilityPolicyName")
+  valid_564264 = validateParameter(valid_564264, JString, required = true,
                                  default = newJString("default"))
-  if valid_568364 != nil:
-    section.add "immutabilityPolicyName", valid_568364
-  var valid_568365 = path.getOrDefault("accountName")
-  valid_568365 = validateParameter(valid_568365, JString, required = true,
+  if valid_564264 != nil:
+    section.add "immutabilityPolicyName", valid_564264
+  var valid_564265 = path.getOrDefault("accountName")
+  valid_564265 = validateParameter(valid_564265, JString, required = true,
                                  default = nil)
-  if valid_568365 != nil:
-    section.add "accountName", valid_568365
+  if valid_564265 != nil:
+    section.add "accountName", valid_564265
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1578,11 +1582,11 @@ proc validate_BlobContainersDeleteImmutabilityPolicy_568359(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568366 = query.getOrDefault("api-version")
-  valid_568366 = validateParameter(valid_568366, JString, required = true,
+  var valid_564266 = query.getOrDefault("api-version")
+  valid_564266 = validateParameter(valid_564266, JString, required = true,
                                  default = nil)
-  if valid_568366 != nil:
-    section.add "api-version", valid_568366
+  if valid_564266 != nil:
+    section.add "api-version", valid_564266
   result.add "query", section
   ## parameters in `header` object:
   ##   If-Match: JString (required)
@@ -1590,68 +1594,68 @@ proc validate_BlobContainersDeleteImmutabilityPolicy_568359(path: JsonNode;
   section = newJObject()
   assert header != nil,
         "header argument is necessary due to required `If-Match` field"
-  var valid_568367 = header.getOrDefault("If-Match")
-  valid_568367 = validateParameter(valid_568367, JString, required = true,
+  var valid_564267 = header.getOrDefault("If-Match")
+  valid_564267 = validateParameter(valid_564267, JString, required = true,
                                  default = nil)
-  if valid_568367 != nil:
-    section.add "If-Match", valid_568367
+  if valid_564267 != nil:
+    section.add "If-Match", valid_564267
   result.add "header", section
   section = newJObject()
   result.add "formData", section
   if body != nil:
     result.add "body", body
 
-proc call*(call_568368: Call_BlobContainersDeleteImmutabilityPolicy_568358;
+proc call*(call_564268: Call_BlobContainersDeleteImmutabilityPolicy_564258;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Aborts an unlocked immutability policy. The response of delete has immutabilityPeriodSinceCreationInDays set to 0. ETag in If-Match is required for this operation. Deleting a locked immutability policy is not allowed, only way is to delete the container after deleting all blobs inside the container.
   ## 
-  let valid = call_568368.validator(path, query, header, formData, body)
-  let scheme = call_568368.pickScheme
+  let valid = call_564268.validator(path, query, header, formData, body)
+  let scheme = call_564268.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568368.url(scheme.get, call_568368.host, call_568368.base,
-                         call_568368.route, valid.getOrDefault("path"),
+  let url = call_564268.url(scheme.get, call_564268.host, call_564268.base,
+                         call_564268.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568368, url, valid)
+  result = hook(call_564268, url, valid)
 
-proc call*(call_568369: Call_BlobContainersDeleteImmutabilityPolicy_568358;
-          resourceGroupName: string; apiVersion: string; containerName: string;
-          subscriptionId: string; accountName: string;
+proc call*(call_564269: Call_BlobContainersDeleteImmutabilityPolicy_564258;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string;
+          containerName: string; accountName: string;
           immutabilityPolicyName: string = "default"): Recallable =
   ## blobContainersDeleteImmutabilityPolicy
   ## Aborts an unlocked immutability policy. The response of delete has immutabilityPeriodSinceCreationInDays set to 0. ETag in If-Match is required for this operation. Deleting a locked immutability policy is not allowed, only way is to delete the container after deleting all blobs inside the container.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
   ##   apiVersion: string (required)
   ##             : The API version to use for this operation.
-  ##   containerName: string (required)
-  ##                : The name of the blob container within the specified storage account. Blob container names must be between 3 and 63 characters in length and use numbers, lower-case letters and dash (-) only. Every dash (-) character must be immediately preceded and followed by a letter or number.
   ##   subscriptionId: string (required)
   ##                 : The ID of the target subscription.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
+  ##   containerName: string (required)
+  ##                : The name of the blob container within the specified storage account. Blob container names must be between 3 and 63 characters in length and use numbers, lower-case letters and dash (-) only. Every dash (-) character must be immediately preceded and followed by a letter or number.
   ##   immutabilityPolicyName: string (required)
   ##                         : The name of the blob container immutabilityPolicy within the specified storage account. ImmutabilityPolicy Name must be 'default'
   ##   accountName: string (required)
   ##              : The name of the storage account within the specified resource group. Storage account names must be between 3 and 24 characters in length and use numbers and lower-case letters only.
-  var path_568370 = newJObject()
-  var query_568371 = newJObject()
-  add(path_568370, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568371, "api-version", newJString(apiVersion))
-  add(path_568370, "containerName", newJString(containerName))
-  add(path_568370, "subscriptionId", newJString(subscriptionId))
-  add(path_568370, "immutabilityPolicyName", newJString(immutabilityPolicyName))
-  add(path_568370, "accountName", newJString(accountName))
-  result = call_568369.call(path_568370, query_568371, nil, nil, nil)
+  var path_564270 = newJObject()
+  var query_564271 = newJObject()
+  add(query_564271, "api-version", newJString(apiVersion))
+  add(path_564270, "subscriptionId", newJString(subscriptionId))
+  add(path_564270, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564270, "containerName", newJString(containerName))
+  add(path_564270, "immutabilityPolicyName", newJString(immutabilityPolicyName))
+  add(path_564270, "accountName", newJString(accountName))
+  result = call_564269.call(path_564270, query_564271, nil, nil, nil)
 
-var blobContainersDeleteImmutabilityPolicy* = Call_BlobContainersDeleteImmutabilityPolicy_568358(
+var blobContainersDeleteImmutabilityPolicy* = Call_BlobContainersDeleteImmutabilityPolicy_564258(
     name: "blobContainersDeleteImmutabilityPolicy", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Storage/storageAccounts/{accountName}/blobServices/default/containers/{containerName}/immutabilityPolicies/{immutabilityPolicyName}",
-    validator: validate_BlobContainersDeleteImmutabilityPolicy_568359, base: "",
-    url: url_BlobContainersDeleteImmutabilityPolicy_568360,
+    validator: validate_BlobContainersDeleteImmutabilityPolicy_564259, base: "",
+    url: url_BlobContainersDeleteImmutabilityPolicy_564260,
     schemes: {Scheme.Https})
 type
-  Call_BlobContainersSetLegalHold_568372 = ref object of OpenApiRestCall_567658
-proc url_BlobContainersSetLegalHold_568374(protocol: Scheme; host: string;
+  Call_BlobContainersSetLegalHold_564272 = ref object of OpenApiRestCall_563556
+proc url_BlobContainersSetLegalHold_564274(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1678,44 +1682,44 @@ proc url_BlobContainersSetLegalHold_568374(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_BlobContainersSetLegalHold_568373(path: JsonNode; query: JsonNode;
+proc validate_BlobContainersSetLegalHold_564273(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Sets legal hold tags. Setting the same tag results in an idempotent operation. SetLegalHold follows an append pattern and does not clear out the existing tags that are not specified in the request.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
+  ##   subscriptionId: JString (required)
+  ##                 : The ID of the target subscription.
   ##   resourceGroupName: JString (required)
   ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
   ##   containerName: JString (required)
   ##                : The name of the blob container within the specified storage account. Blob container names must be between 3 and 63 characters in length and use numbers, lower-case letters and dash (-) only. Every dash (-) character must be immediately preceded and followed by a letter or number.
-  ##   subscriptionId: JString (required)
-  ##                 : The ID of the target subscription.
   ##   accountName: JString (required)
   ##              : The name of the storage account within the specified resource group. Storage account names must be between 3 and 24 characters in length and use numbers and lower-case letters only.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568375 = path.getOrDefault("resourceGroupName")
-  valid_568375 = validateParameter(valid_568375, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564275 = path.getOrDefault("subscriptionId")
+  valid_564275 = validateParameter(valid_564275, JString, required = true,
                                  default = nil)
-  if valid_568375 != nil:
-    section.add "resourceGroupName", valid_568375
-  var valid_568376 = path.getOrDefault("containerName")
-  valid_568376 = validateParameter(valid_568376, JString, required = true,
+  if valid_564275 != nil:
+    section.add "subscriptionId", valid_564275
+  var valid_564276 = path.getOrDefault("resourceGroupName")
+  valid_564276 = validateParameter(valid_564276, JString, required = true,
                                  default = nil)
-  if valid_568376 != nil:
-    section.add "containerName", valid_568376
-  var valid_568377 = path.getOrDefault("subscriptionId")
-  valid_568377 = validateParameter(valid_568377, JString, required = true,
+  if valid_564276 != nil:
+    section.add "resourceGroupName", valid_564276
+  var valid_564277 = path.getOrDefault("containerName")
+  valid_564277 = validateParameter(valid_564277, JString, required = true,
                                  default = nil)
-  if valid_568377 != nil:
-    section.add "subscriptionId", valid_568377
-  var valid_568378 = path.getOrDefault("accountName")
-  valid_568378 = validateParameter(valid_568378, JString, required = true,
+  if valid_564277 != nil:
+    section.add "containerName", valid_564277
+  var valid_564278 = path.getOrDefault("accountName")
+  valid_564278 = validateParameter(valid_564278, JString, required = true,
                                  default = nil)
-  if valid_568378 != nil:
-    section.add "accountName", valid_568378
+  if valid_564278 != nil:
+    section.add "accountName", valid_564278
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1723,11 +1727,11 @@ proc validate_BlobContainersSetLegalHold_568373(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568379 = query.getOrDefault("api-version")
-  valid_568379 = validateParameter(valid_568379, JString, required = true,
+  var valid_564279 = query.getOrDefault("api-version")
+  valid_564279 = validateParameter(valid_564279, JString, required = true,
                                  default = nil)
-  if valid_568379 != nil:
-    section.add "api-version", valid_568379
+  if valid_564279 != nil:
+    section.add "api-version", valid_564279
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1741,56 +1745,56 @@ proc validate_BlobContainersSetLegalHold_568373(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568381: Call_BlobContainersSetLegalHold_568372; path: JsonNode;
+proc call*(call_564281: Call_BlobContainersSetLegalHold_564272; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Sets legal hold tags. Setting the same tag results in an idempotent operation. SetLegalHold follows an append pattern and does not clear out the existing tags that are not specified in the request.
   ## 
-  let valid = call_568381.validator(path, query, header, formData, body)
-  let scheme = call_568381.pickScheme
+  let valid = call_564281.validator(path, query, header, formData, body)
+  let scheme = call_564281.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568381.url(scheme.get, call_568381.host, call_568381.base,
-                         call_568381.route, valid.getOrDefault("path"),
+  let url = call_564281.url(scheme.get, call_564281.host, call_564281.base,
+                         call_564281.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568381, url, valid)
+  result = hook(call_564281, url, valid)
 
-proc call*(call_568382: Call_BlobContainersSetLegalHold_568372;
-          resourceGroupName: string; apiVersion: string; containerName: string;
-          LegalHold: JsonNode; subscriptionId: string; accountName: string): Recallable =
+proc call*(call_564282: Call_BlobContainersSetLegalHold_564272; apiVersion: string;
+          LegalHold: JsonNode; subscriptionId: string; resourceGroupName: string;
+          containerName: string; accountName: string): Recallable =
   ## blobContainersSetLegalHold
   ## Sets legal hold tags. Setting the same tag results in an idempotent operation. SetLegalHold follows an append pattern and does not clear out the existing tags that are not specified in the request.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
   ##   apiVersion: string (required)
   ##             : The API version to use for this operation.
-  ##   containerName: string (required)
-  ##                : The name of the blob container within the specified storage account. Blob container names must be between 3 and 63 characters in length and use numbers, lower-case letters and dash (-) only. Every dash (-) character must be immediately preceded and followed by a letter or number.
   ##   LegalHold: JObject (required)
   ##            : The LegalHold property that will be set to a blob container.
   ##   subscriptionId: string (required)
   ##                 : The ID of the target subscription.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
+  ##   containerName: string (required)
+  ##                : The name of the blob container within the specified storage account. Blob container names must be between 3 and 63 characters in length and use numbers, lower-case letters and dash (-) only. Every dash (-) character must be immediately preceded and followed by a letter or number.
   ##   accountName: string (required)
   ##              : The name of the storage account within the specified resource group. Storage account names must be between 3 and 24 characters in length and use numbers and lower-case letters only.
-  var path_568383 = newJObject()
-  var query_568384 = newJObject()
-  var body_568385 = newJObject()
-  add(path_568383, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568384, "api-version", newJString(apiVersion))
-  add(path_568383, "containerName", newJString(containerName))
+  var path_564283 = newJObject()
+  var query_564284 = newJObject()
+  var body_564285 = newJObject()
+  add(query_564284, "api-version", newJString(apiVersion))
   if LegalHold != nil:
-    body_568385 = LegalHold
-  add(path_568383, "subscriptionId", newJString(subscriptionId))
-  add(path_568383, "accountName", newJString(accountName))
-  result = call_568382.call(path_568383, query_568384, nil, nil, body_568385)
+    body_564285 = LegalHold
+  add(path_564283, "subscriptionId", newJString(subscriptionId))
+  add(path_564283, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564283, "containerName", newJString(containerName))
+  add(path_564283, "accountName", newJString(accountName))
+  result = call_564282.call(path_564283, query_564284, nil, nil, body_564285)
 
-var blobContainersSetLegalHold* = Call_BlobContainersSetLegalHold_568372(
+var blobContainersSetLegalHold* = Call_BlobContainersSetLegalHold_564272(
     name: "blobContainersSetLegalHold", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Storage/storageAccounts/{accountName}/blobServices/default/containers/{containerName}/setLegalHold",
-    validator: validate_BlobContainersSetLegalHold_568373, base: "",
-    url: url_BlobContainersSetLegalHold_568374, schemes: {Scheme.Https})
+    validator: validate_BlobContainersSetLegalHold_564273, base: "",
+    url: url_BlobContainersSetLegalHold_564274, schemes: {Scheme.Https})
 type
-  Call_BlobContainersLease_568386 = ref object of OpenApiRestCall_567658
-proc url_BlobContainersLease_568388(protocol: Scheme; host: string; base: string;
+  Call_BlobContainersLease_564286 = ref object of OpenApiRestCall_563556
+proc url_BlobContainersLease_564288(protocol: Scheme; host: string; base: string;
                                    route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1817,7 +1821,7 @@ proc url_BlobContainersLease_568388(protocol: Scheme; host: string; base: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_BlobContainersLease_568387(path: JsonNode; query: JsonNode;
+proc validate_BlobContainersLease_564287(path: JsonNode; query: JsonNode;
                                         header: JsonNode; formData: JsonNode;
                                         body: JsonNode): JsonNode =
   ## The Lease Container operation establishes and manages a lock on a container for delete operations. The lock duration can be 15 to 60 seconds, or can be infinite.
@@ -1825,37 +1829,37 @@ proc validate_BlobContainersLease_568387(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
+  ##   subscriptionId: JString (required)
+  ##                 : The ID of the target subscription.
   ##   resourceGroupName: JString (required)
   ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
   ##   containerName: JString (required)
   ##                : The name of the blob container within the specified storage account. Blob container names must be between 3 and 63 characters in length and use numbers, lower-case letters and dash (-) only. Every dash (-) character must be immediately preceded and followed by a letter or number.
-  ##   subscriptionId: JString (required)
-  ##                 : The ID of the target subscription.
   ##   accountName: JString (required)
   ##              : The name of the storage account within the specified resource group. Storage account names must be between 3 and 24 characters in length and use numbers and lower-case letters only.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568389 = path.getOrDefault("resourceGroupName")
-  valid_568389 = validateParameter(valid_568389, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564289 = path.getOrDefault("subscriptionId")
+  valid_564289 = validateParameter(valid_564289, JString, required = true,
                                  default = nil)
-  if valid_568389 != nil:
-    section.add "resourceGroupName", valid_568389
-  var valid_568390 = path.getOrDefault("containerName")
-  valid_568390 = validateParameter(valid_568390, JString, required = true,
+  if valid_564289 != nil:
+    section.add "subscriptionId", valid_564289
+  var valid_564290 = path.getOrDefault("resourceGroupName")
+  valid_564290 = validateParameter(valid_564290, JString, required = true,
                                  default = nil)
-  if valid_568390 != nil:
-    section.add "containerName", valid_568390
-  var valid_568391 = path.getOrDefault("subscriptionId")
-  valid_568391 = validateParameter(valid_568391, JString, required = true,
+  if valid_564290 != nil:
+    section.add "resourceGroupName", valid_564290
+  var valid_564291 = path.getOrDefault("containerName")
+  valid_564291 = validateParameter(valid_564291, JString, required = true,
                                  default = nil)
-  if valid_568391 != nil:
-    section.add "subscriptionId", valid_568391
-  var valid_568392 = path.getOrDefault("accountName")
-  valid_568392 = validateParameter(valid_568392, JString, required = true,
+  if valid_564291 != nil:
+    section.add "containerName", valid_564291
+  var valid_564292 = path.getOrDefault("accountName")
+  valid_564292 = validateParameter(valid_564292, JString, required = true,
                                  default = nil)
-  if valid_568392 != nil:
-    section.add "accountName", valid_568392
+  if valid_564292 != nil:
+    section.add "accountName", valid_564292
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1863,11 +1867,11 @@ proc validate_BlobContainersLease_568387(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568393 = query.getOrDefault("api-version")
-  valid_568393 = validateParameter(valid_568393, JString, required = true,
+  var valid_564293 = query.getOrDefault("api-version")
+  valid_564293 = validateParameter(valid_564293, JString, required = true,
                                  default = nil)
-  if valid_568393 != nil:
-    section.add "api-version", valid_568393
+  if valid_564293 != nil:
+    section.add "api-version", valid_564293
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1880,53 +1884,53 @@ proc validate_BlobContainersLease_568387(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568395: Call_BlobContainersLease_568386; path: JsonNode;
+proc call*(call_564295: Call_BlobContainersLease_564286; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## The Lease Container operation establishes and manages a lock on a container for delete operations. The lock duration can be 15 to 60 seconds, or can be infinite.
   ## 
-  let valid = call_568395.validator(path, query, header, formData, body)
-  let scheme = call_568395.pickScheme
+  let valid = call_564295.validator(path, query, header, formData, body)
+  let scheme = call_564295.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568395.url(scheme.get, call_568395.host, call_568395.base,
-                         call_568395.route, valid.getOrDefault("path"),
+  let url = call_564295.url(scheme.get, call_564295.host, call_564295.base,
+                         call_564295.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568395, url, valid)
+  result = hook(call_564295, url, valid)
 
-proc call*(call_568396: Call_BlobContainersLease_568386; resourceGroupName: string;
-          apiVersion: string; containerName: string; subscriptionId: string;
+proc call*(call_564296: Call_BlobContainersLease_564286; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string; containerName: string;
           accountName: string; parameters: JsonNode = nil): Recallable =
   ## blobContainersLease
   ## The Lease Container operation establishes and manages a lock on a container for delete operations. The lock duration can be 15 to 60 seconds, or can be infinite.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
   ##   apiVersion: string (required)
   ##             : The API version to use for this operation.
-  ##   containerName: string (required)
-  ##                : The name of the blob container within the specified storage account. Blob container names must be between 3 and 63 characters in length and use numbers, lower-case letters and dash (-) only. Every dash (-) character must be immediately preceded and followed by a letter or number.
   ##   subscriptionId: string (required)
   ##                 : The ID of the target subscription.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
+  ##   containerName: string (required)
+  ##                : The name of the blob container within the specified storage account. Blob container names must be between 3 and 63 characters in length and use numbers, lower-case letters and dash (-) only. Every dash (-) character must be immediately preceded and followed by a letter or number.
   ##   parameters: JObject
   ##             : Lease Container request body.
   ##   accountName: string (required)
   ##              : The name of the storage account within the specified resource group. Storage account names must be between 3 and 24 characters in length and use numbers and lower-case letters only.
-  var path_568397 = newJObject()
-  var query_568398 = newJObject()
-  var body_568399 = newJObject()
-  add(path_568397, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568398, "api-version", newJString(apiVersion))
-  add(path_568397, "containerName", newJString(containerName))
-  add(path_568397, "subscriptionId", newJString(subscriptionId))
+  var path_564297 = newJObject()
+  var query_564298 = newJObject()
+  var body_564299 = newJObject()
+  add(query_564298, "api-version", newJString(apiVersion))
+  add(path_564297, "subscriptionId", newJString(subscriptionId))
+  add(path_564297, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564297, "containerName", newJString(containerName))
   if parameters != nil:
-    body_568399 = parameters
-  add(path_568397, "accountName", newJString(accountName))
-  result = call_568396.call(path_568397, query_568398, nil, nil, body_568399)
+    body_564299 = parameters
+  add(path_564297, "accountName", newJString(accountName))
+  result = call_564296.call(path_564297, query_564298, nil, nil, body_564299)
 
-var blobContainersLease* = Call_BlobContainersLease_568386(
+var blobContainersLease* = Call_BlobContainersLease_564286(
     name: "blobContainersLease", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.Storage/storageAccounts/{accountName}/blobServices/default/containers/{containerName}/lease",
-    validator: validate_BlobContainersLease_568387, base: "",
-    url: url_BlobContainersLease_568388, schemes: {Scheme.Https})
+    validator: validate_BlobContainersLease_564287, base: "",
+    url: url_BlobContainersLease_564288, schemes: {Scheme.Https})
 export
   rest
 

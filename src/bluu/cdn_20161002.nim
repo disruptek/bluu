@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, httpcore
 
 ## auto-generated via openapi macro
 ## title: CdnManagementClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_574466 = ref object of OpenApiRestCall
+  OpenApiRestCall_563564 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_574466](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563564](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_574466): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563564): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,15 +107,15 @@ const
   macServiceName = "cdn"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_CheckNameAvailability_574688 = ref object of OpenApiRestCall_574466
-proc url_CheckNameAvailability_574690(protocol: Scheme; host: string; base: string;
+  Call_CheckNameAvailability_563786 = ref object of OpenApiRestCall_563564
+proc url_CheckNameAvailability_563788(protocol: Scheme; host: string; base: string;
                                      route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_CheckNameAvailability_574689(path: JsonNode; query: JsonNode;
+proc validate_CheckNameAvailability_563787(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Check the availability of a resource name. This is needed for resources where name is globally unique, such as a CDN endpoint.
   ## 
@@ -125,11 +129,11 @@ proc validate_CheckNameAvailability_574689(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574849 = query.getOrDefault("api-version")
-  valid_574849 = validateParameter(valid_574849, JString, required = true,
+  var valid_563949 = query.getOrDefault("api-version")
+  valid_563949 = validateParameter(valid_563949, JString, required = true,
                                  default = nil)
-  if valid_574849 != nil:
-    section.add "api-version", valid_574849
+  if valid_563949 != nil:
+    section.add "api-version", valid_563949
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -143,20 +147,20 @@ proc validate_CheckNameAvailability_574689(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574873: Call_CheckNameAvailability_574688; path: JsonNode;
+proc call*(call_563973: Call_CheckNameAvailability_563786; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Check the availability of a resource name. This is needed for resources where name is globally unique, such as a CDN endpoint.
   ## 
-  let valid = call_574873.validator(path, query, header, formData, body)
-  let scheme = call_574873.pickScheme
+  let valid = call_563973.validator(path, query, header, formData, body)
+  let scheme = call_563973.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574873.url(scheme.get, call_574873.host, call_574873.base,
-                         call_574873.route, valid.getOrDefault("path"),
+  let url = call_563973.url(scheme.get, call_563973.host, call_563973.base,
+                         call_563973.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574873, url, valid)
+  result = hook(call_563973, url, valid)
 
-proc call*(call_574944: Call_CheckNameAvailability_574688; apiVersion: string;
+proc call*(call_564044: Call_CheckNameAvailability_563786; apiVersion: string;
           checkNameAvailabilityInput: JsonNode): Recallable =
   ## checkNameAvailability
   ## Check the availability of a resource name. This is needed for resources where name is globally unique, such as a CDN endpoint.
@@ -164,29 +168,29 @@ proc call*(call_574944: Call_CheckNameAvailability_574688; apiVersion: string;
   ##             : Version of the API to be used with the client request. Current version is 2016-10-02.
   ##   checkNameAvailabilityInput: JObject (required)
   ##                             : Input to check.
-  var query_574945 = newJObject()
-  var body_574947 = newJObject()
-  add(query_574945, "api-version", newJString(apiVersion))
+  var query_564045 = newJObject()
+  var body_564047 = newJObject()
+  add(query_564045, "api-version", newJString(apiVersion))
   if checkNameAvailabilityInput != nil:
-    body_574947 = checkNameAvailabilityInput
-  result = call_574944.call(nil, query_574945, nil, nil, body_574947)
+    body_564047 = checkNameAvailabilityInput
+  result = call_564044.call(nil, query_564045, nil, nil, body_564047)
 
-var checkNameAvailability* = Call_CheckNameAvailability_574688(
+var checkNameAvailability* = Call_CheckNameAvailability_563786(
     name: "checkNameAvailability", meth: HttpMethod.HttpPost,
     host: "management.azure.com",
     route: "/providers/Microsoft.Cdn/checkNameAvailability",
-    validator: validate_CheckNameAvailability_574689, base: "",
-    url: url_CheckNameAvailability_574690, schemes: {Scheme.Https})
+    validator: validate_CheckNameAvailability_563787, base: "",
+    url: url_CheckNameAvailability_563788, schemes: {Scheme.Https})
 type
-  Call_EdgeNodesList_574986 = ref object of OpenApiRestCall_574466
-proc url_EdgeNodesList_574988(protocol: Scheme; host: string; base: string;
+  Call_EdgeNodesList_564086 = ref object of OpenApiRestCall_563564
+proc url_EdgeNodesList_564088(protocol: Scheme; host: string; base: string;
                              route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_EdgeNodesList_574987(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_EdgeNodesList_564087(path: JsonNode; query: JsonNode; header: JsonNode;
                                   formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists all the edge nodes of a CDN service.
   ## 
@@ -200,11 +204,11 @@ proc validate_EdgeNodesList_574987(path: JsonNode; query: JsonNode; header: Json
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574989 = query.getOrDefault("api-version")
-  valid_574989 = validateParameter(valid_574989, JString, required = true,
+  var valid_564089 = query.getOrDefault("api-version")
+  valid_564089 = validateParameter(valid_564089, JString, required = true,
                                  default = nil)
-  if valid_574989 != nil:
-    section.add "api-version", valid_574989
+  if valid_564089 != nil:
+    section.add "api-version", valid_564089
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -213,43 +217,43 @@ proc validate_EdgeNodesList_574987(path: JsonNode; query: JsonNode; header: Json
   if body != nil:
     result.add "body", body
 
-proc call*(call_574990: Call_EdgeNodesList_574986; path: JsonNode; query: JsonNode;
+proc call*(call_564090: Call_EdgeNodesList_564086; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists all the edge nodes of a CDN service.
   ## 
-  let valid = call_574990.validator(path, query, header, formData, body)
-  let scheme = call_574990.pickScheme
+  let valid = call_564090.validator(path, query, header, formData, body)
+  let scheme = call_564090.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574990.url(scheme.get, call_574990.host, call_574990.base,
-                         call_574990.route, valid.getOrDefault("path"),
+  let url = call_564090.url(scheme.get, call_564090.host, call_564090.base,
+                         call_564090.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574990, url, valid)
+  result = hook(call_564090, url, valid)
 
-proc call*(call_574991: Call_EdgeNodesList_574986; apiVersion: string): Recallable =
+proc call*(call_564091: Call_EdgeNodesList_564086; apiVersion: string): Recallable =
   ## edgeNodesList
   ## Lists all the edge nodes of a CDN service.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request. Current version is 2016-10-02.
-  var query_574992 = newJObject()
-  add(query_574992, "api-version", newJString(apiVersion))
-  result = call_574991.call(nil, query_574992, nil, nil, nil)
+  var query_564092 = newJObject()
+  add(query_564092, "api-version", newJString(apiVersion))
+  result = call_564091.call(nil, query_564092, nil, nil, nil)
 
-var edgeNodesList* = Call_EdgeNodesList_574986(name: "edgeNodesList",
+var edgeNodesList* = Call_EdgeNodesList_564086(name: "edgeNodesList",
     meth: HttpMethod.HttpGet, host: "management.azure.com",
     route: "/providers/Microsoft.Cdn/edgenodes",
-    validator: validate_EdgeNodesList_574987, base: "", url: url_EdgeNodesList_574988,
+    validator: validate_EdgeNodesList_564087, base: "", url: url_EdgeNodesList_564088,
     schemes: {Scheme.Https})
 type
-  Call_ListOperations_574993 = ref object of OpenApiRestCall_574466
-proc url_ListOperations_574995(protocol: Scheme; host: string; base: string;
+  Call_ListOperations_564093 = ref object of OpenApiRestCall_563564
+proc url_ListOperations_564095(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_ListOperations_574994(path: JsonNode; query: JsonNode;
+proc validate_ListOperations_564094(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## Lists all of the available CDN REST API operations.
@@ -264,11 +268,11 @@ proc validate_ListOperations_574994(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574996 = query.getOrDefault("api-version")
-  valid_574996 = validateParameter(valid_574996, JString, required = true,
+  var valid_564096 = query.getOrDefault("api-version")
+  valid_564096 = validateParameter(valid_564096, JString, required = true,
                                  default = nil)
-  if valid_574996 != nil:
-    section.add "api-version", valid_574996
+  if valid_564096 != nil:
+    section.add "api-version", valid_564096
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -277,36 +281,36 @@ proc validate_ListOperations_574994(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574997: Call_ListOperations_574993; path: JsonNode; query: JsonNode;
+proc call*(call_564097: Call_ListOperations_564093; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists all of the available CDN REST API operations.
   ## 
-  let valid = call_574997.validator(path, query, header, formData, body)
-  let scheme = call_574997.pickScheme
+  let valid = call_564097.validator(path, query, header, formData, body)
+  let scheme = call_564097.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574997.url(scheme.get, call_574997.host, call_574997.base,
-                         call_574997.route, valid.getOrDefault("path"),
+  let url = call_564097.url(scheme.get, call_564097.host, call_564097.base,
+                         call_564097.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574997, url, valid)
+  result = hook(call_564097, url, valid)
 
-proc call*(call_574998: Call_ListOperations_574993; apiVersion: string): Recallable =
+proc call*(call_564098: Call_ListOperations_564093; apiVersion: string): Recallable =
   ## listOperations
   ## Lists all of the available CDN REST API operations.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request. Current version is 2016-10-02.
-  var query_574999 = newJObject()
-  add(query_574999, "api-version", newJString(apiVersion))
-  result = call_574998.call(nil, query_574999, nil, nil, nil)
+  var query_564099 = newJObject()
+  add(query_564099, "api-version", newJString(apiVersion))
+  result = call_564098.call(nil, query_564099, nil, nil, nil)
 
-var listOperations* = Call_ListOperations_574993(name: "listOperations",
+var listOperations* = Call_ListOperations_564093(name: "listOperations",
     meth: HttpMethod.HttpGet, host: "management.azure.com",
     route: "/providers/Microsoft.Cdn/operations",
-    validator: validate_ListOperations_574994, base: "", url: url_ListOperations_574995,
+    validator: validate_ListOperations_564094, base: "", url: url_ListOperations_564095,
     schemes: {Scheme.Https})
 type
-  Call_ListResourceUsage_575000 = ref object of OpenApiRestCall_574466
-proc url_ListResourceUsage_575002(protocol: Scheme; host: string; base: string;
+  Call_ListResourceUsage_564100 = ref object of OpenApiRestCall_563564
+proc url_ListResourceUsage_564102(protocol: Scheme; host: string; base: string;
                                  route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -323,7 +327,7 @@ proc url_ListResourceUsage_575002(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ListResourceUsage_575001(path: JsonNode; query: JsonNode;
+proc validate_ListResourceUsage_564101(path: JsonNode; query: JsonNode;
                                       header: JsonNode; formData: JsonNode;
                                       body: JsonNode): JsonNode =
   ## Check the quota and actual usage of the CDN profiles under the given subscription.
@@ -336,11 +340,11 @@ proc validate_ListResourceUsage_575001(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_575017 = path.getOrDefault("subscriptionId")
-  valid_575017 = validateParameter(valid_575017, JString, required = true,
+  var valid_564117 = path.getOrDefault("subscriptionId")
+  valid_564117 = validateParameter(valid_564117, JString, required = true,
                                  default = nil)
-  if valid_575017 != nil:
-    section.add "subscriptionId", valid_575017
+  if valid_564117 != nil:
+    section.add "subscriptionId", valid_564117
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -348,11 +352,11 @@ proc validate_ListResourceUsage_575001(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575018 = query.getOrDefault("api-version")
-  valid_575018 = validateParameter(valid_575018, JString, required = true,
+  var valid_564118 = query.getOrDefault("api-version")
+  valid_564118 = validateParameter(valid_564118, JString, required = true,
                                  default = nil)
-  if valid_575018 != nil:
-    section.add "api-version", valid_575018
+  if valid_564118 != nil:
+    section.add "api-version", valid_564118
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -361,20 +365,20 @@ proc validate_ListResourceUsage_575001(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_575019: Call_ListResourceUsage_575000; path: JsonNode;
+proc call*(call_564119: Call_ListResourceUsage_564100; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Check the quota and actual usage of the CDN profiles under the given subscription.
   ## 
-  let valid = call_575019.validator(path, query, header, formData, body)
-  let scheme = call_575019.pickScheme
+  let valid = call_564119.validator(path, query, header, formData, body)
+  let scheme = call_564119.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575019.url(scheme.get, call_575019.host, call_575019.base,
-                         call_575019.route, valid.getOrDefault("path"),
+  let url = call_564119.url(scheme.get, call_564119.host, call_564119.base,
+                         call_564119.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575019, url, valid)
+  result = hook(call_564119, url, valid)
 
-proc call*(call_575020: Call_ListResourceUsage_575000; apiVersion: string;
+proc call*(call_564120: Call_ListResourceUsage_564100; apiVersion: string;
           subscriptionId: string): Recallable =
   ## listResourceUsage
   ## Check the quota and actual usage of the CDN profiles under the given subscription.
@@ -382,19 +386,19 @@ proc call*(call_575020: Call_ListResourceUsage_575000; apiVersion: string;
   ##             : Version of the API to be used with the client request. Current version is 2016-10-02.
   ##   subscriptionId: string (required)
   ##                 : Azure Subscription ID.
-  var path_575021 = newJObject()
-  var query_575022 = newJObject()
-  add(query_575022, "api-version", newJString(apiVersion))
-  add(path_575021, "subscriptionId", newJString(subscriptionId))
-  result = call_575020.call(path_575021, query_575022, nil, nil, nil)
+  var path_564121 = newJObject()
+  var query_564122 = newJObject()
+  add(query_564122, "api-version", newJString(apiVersion))
+  add(path_564121, "subscriptionId", newJString(subscriptionId))
+  result = call_564120.call(path_564121, query_564122, nil, nil, nil)
 
-var listResourceUsage* = Call_ListResourceUsage_575000(name: "listResourceUsage",
+var listResourceUsage* = Call_ListResourceUsage_564100(name: "listResourceUsage",
     meth: HttpMethod.HttpPost, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Cdn/checkResourceUsage",
-    validator: validate_ListResourceUsage_575001, base: "",
-    url: url_ListResourceUsage_575002, schemes: {Scheme.Https})
+    validator: validate_ListResourceUsage_564101, base: "",
+    url: url_ListResourceUsage_564102, schemes: {Scheme.Https})
 type
-  Call_ProfilesList_575023 = ref object of OpenApiRestCall_574466
-proc url_ProfilesList_575025(protocol: Scheme; host: string; base: string;
+  Call_ProfilesList_564123 = ref object of OpenApiRestCall_563564
+proc url_ProfilesList_564125(protocol: Scheme; host: string; base: string;
                             route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -410,7 +414,7 @@ proc url_ProfilesList_575025(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ProfilesList_575024(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_ProfilesList_564124(path: JsonNode; query: JsonNode; header: JsonNode;
                                  formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists all of the CDN profiles within an Azure subscription.
   ## 
@@ -422,11 +426,11 @@ proc validate_ProfilesList_575024(path: JsonNode; query: JsonNode; header: JsonN
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_575026 = path.getOrDefault("subscriptionId")
-  valid_575026 = validateParameter(valid_575026, JString, required = true,
+  var valid_564126 = path.getOrDefault("subscriptionId")
+  valid_564126 = validateParameter(valid_564126, JString, required = true,
                                  default = nil)
-  if valid_575026 != nil:
-    section.add "subscriptionId", valid_575026
+  if valid_564126 != nil:
+    section.add "subscriptionId", valid_564126
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -434,11 +438,11 @@ proc validate_ProfilesList_575024(path: JsonNode; query: JsonNode; header: JsonN
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575027 = query.getOrDefault("api-version")
-  valid_575027 = validateParameter(valid_575027, JString, required = true,
+  var valid_564127 = query.getOrDefault("api-version")
+  valid_564127 = validateParameter(valid_564127, JString, required = true,
                                  default = nil)
-  if valid_575027 != nil:
-    section.add "api-version", valid_575027
+  if valid_564127 != nil:
+    section.add "api-version", valid_564127
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -447,20 +451,20 @@ proc validate_ProfilesList_575024(path: JsonNode; query: JsonNode; header: JsonN
   if body != nil:
     result.add "body", body
 
-proc call*(call_575028: Call_ProfilesList_575023; path: JsonNode; query: JsonNode;
+proc call*(call_564128: Call_ProfilesList_564123; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists all of the CDN profiles within an Azure subscription.
   ## 
-  let valid = call_575028.validator(path, query, header, formData, body)
-  let scheme = call_575028.pickScheme
+  let valid = call_564128.validator(path, query, header, formData, body)
+  let scheme = call_564128.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575028.url(scheme.get, call_575028.host, call_575028.base,
-                         call_575028.route, valid.getOrDefault("path"),
+  let url = call_564128.url(scheme.get, call_564128.host, call_564128.base,
+                         call_564128.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575028, url, valid)
+  result = hook(call_564128, url, valid)
 
-proc call*(call_575029: Call_ProfilesList_575023; apiVersion: string;
+proc call*(call_564129: Call_ProfilesList_564123; apiVersion: string;
           subscriptionId: string): Recallable =
   ## profilesList
   ## Lists all of the CDN profiles within an Azure subscription.
@@ -468,20 +472,20 @@ proc call*(call_575029: Call_ProfilesList_575023; apiVersion: string;
   ##             : Version of the API to be used with the client request. Current version is 2016-10-02.
   ##   subscriptionId: string (required)
   ##                 : Azure Subscription ID.
-  var path_575030 = newJObject()
-  var query_575031 = newJObject()
-  add(query_575031, "api-version", newJString(apiVersion))
-  add(path_575030, "subscriptionId", newJString(subscriptionId))
-  result = call_575029.call(path_575030, query_575031, nil, nil, nil)
+  var path_564130 = newJObject()
+  var query_564131 = newJObject()
+  add(query_564131, "api-version", newJString(apiVersion))
+  add(path_564130, "subscriptionId", newJString(subscriptionId))
+  result = call_564129.call(path_564130, query_564131, nil, nil, nil)
 
-var profilesList* = Call_ProfilesList_575023(name: "profilesList",
+var profilesList* = Call_ProfilesList_564123(name: "profilesList",
     meth: HttpMethod.HttpGet, host: "management.azure.com",
     route: "/subscriptions/{subscriptionId}/providers/Microsoft.Cdn/profiles",
-    validator: validate_ProfilesList_575024, base: "", url: url_ProfilesList_575025,
+    validator: validate_ProfilesList_564124, base: "", url: url_ProfilesList_564125,
     schemes: {Scheme.Https})
 type
-  Call_ProfilesListByResourceGroup_575032 = ref object of OpenApiRestCall_574466
-proc url_ProfilesListByResourceGroup_575034(protocol: Scheme; host: string;
+  Call_ProfilesListByResourceGroup_564132 = ref object of OpenApiRestCall_563564
+proc url_ProfilesListByResourceGroup_564134(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -501,30 +505,30 @@ proc url_ProfilesListByResourceGroup_575034(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ProfilesListByResourceGroup_575033(path: JsonNode; query: JsonNode;
+proc validate_ProfilesListByResourceGroup_564133(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists all of the CDN profiles within a resource group.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : Name of the Resource group within the Azure subscription.
   ##   subscriptionId: JString (required)
   ##                 : Azure Subscription ID.
+  ##   resourceGroupName: JString (required)
+  ##                    : Name of the Resource group within the Azure subscription.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_575035 = path.getOrDefault("resourceGroupName")
-  valid_575035 = validateParameter(valid_575035, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564135 = path.getOrDefault("subscriptionId")
+  valid_564135 = validateParameter(valid_564135, JString, required = true,
                                  default = nil)
-  if valid_575035 != nil:
-    section.add "resourceGroupName", valid_575035
-  var valid_575036 = path.getOrDefault("subscriptionId")
-  valid_575036 = validateParameter(valid_575036, JString, required = true,
+  if valid_564135 != nil:
+    section.add "subscriptionId", valid_564135
+  var valid_564136 = path.getOrDefault("resourceGroupName")
+  valid_564136 = validateParameter(valid_564136, JString, required = true,
                                  default = nil)
-  if valid_575036 != nil:
-    section.add "subscriptionId", valid_575036
+  if valid_564136 != nil:
+    section.add "resourceGroupName", valid_564136
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -532,11 +536,11 @@ proc validate_ProfilesListByResourceGroup_575033(path: JsonNode; query: JsonNode
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575037 = query.getOrDefault("api-version")
-  valid_575037 = validateParameter(valid_575037, JString, required = true,
+  var valid_564137 = query.getOrDefault("api-version")
+  valid_564137 = validateParameter(valid_564137, JString, required = true,
                                  default = nil)
-  if valid_575037 != nil:
-    section.add "api-version", valid_575037
+  if valid_564137 != nil:
+    section.add "api-version", valid_564137
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -545,44 +549,44 @@ proc validate_ProfilesListByResourceGroup_575033(path: JsonNode; query: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_575038: Call_ProfilesListByResourceGroup_575032; path: JsonNode;
+proc call*(call_564138: Call_ProfilesListByResourceGroup_564132; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists all of the CDN profiles within a resource group.
   ## 
-  let valid = call_575038.validator(path, query, header, formData, body)
-  let scheme = call_575038.pickScheme
+  let valid = call_564138.validator(path, query, header, formData, body)
+  let scheme = call_564138.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575038.url(scheme.get, call_575038.host, call_575038.base,
-                         call_575038.route, valid.getOrDefault("path"),
+  let url = call_564138.url(scheme.get, call_564138.host, call_564138.base,
+                         call_564138.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575038, url, valid)
+  result = hook(call_564138, url, valid)
 
-proc call*(call_575039: Call_ProfilesListByResourceGroup_575032;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string): Recallable =
+proc call*(call_564139: Call_ProfilesListByResourceGroup_564132;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string): Recallable =
   ## profilesListByResourceGroup
   ## Lists all of the CDN profiles within a resource group.
-  ##   resourceGroupName: string (required)
-  ##                    : Name of the Resource group within the Azure subscription.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request. Current version is 2016-10-02.
   ##   subscriptionId: string (required)
   ##                 : Azure Subscription ID.
-  var path_575040 = newJObject()
-  var query_575041 = newJObject()
-  add(path_575040, "resourceGroupName", newJString(resourceGroupName))
-  add(query_575041, "api-version", newJString(apiVersion))
-  add(path_575040, "subscriptionId", newJString(subscriptionId))
-  result = call_575039.call(path_575040, query_575041, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : Name of the Resource group within the Azure subscription.
+  var path_564140 = newJObject()
+  var query_564141 = newJObject()
+  add(query_564141, "api-version", newJString(apiVersion))
+  add(path_564140, "subscriptionId", newJString(subscriptionId))
+  add(path_564140, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564139.call(path_564140, query_564141, nil, nil, nil)
 
-var profilesListByResourceGroup* = Call_ProfilesListByResourceGroup_575032(
+var profilesListByResourceGroup* = Call_ProfilesListByResourceGroup_564132(
     name: "profilesListByResourceGroup", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Cdn/profiles",
-    validator: validate_ProfilesListByResourceGroup_575033, base: "",
-    url: url_ProfilesListByResourceGroup_575034, schemes: {Scheme.Https})
+    validator: validate_ProfilesListByResourceGroup_564133, base: "",
+    url: url_ProfilesListByResourceGroup_564134, schemes: {Scheme.Https})
 type
-  Call_ProfilesCreate_575053 = ref object of OpenApiRestCall_574466
-proc url_ProfilesCreate_575055(protocol: Scheme; host: string; base: string;
+  Call_ProfilesCreate_564153 = ref object of OpenApiRestCall_563564
+proc url_ProfilesCreate_564155(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -604,7 +608,7 @@ proc url_ProfilesCreate_575055(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ProfilesCreate_575054(path: JsonNode; query: JsonNode;
+proc validate_ProfilesCreate_564154(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## Creates a new CDN profile with a profile name under the specified subscription and resource group.
@@ -612,30 +616,30 @@ proc validate_ProfilesCreate_575054(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : Name of the Resource group within the Azure subscription.
-  ##   subscriptionId: JString (required)
-  ##                 : Azure Subscription ID.
   ##   profileName: JString (required)
   ##              : Name of the CDN profile which is unique within the resource group.
+  ##   subscriptionId: JString (required)
+  ##                 : Azure Subscription ID.
+  ##   resourceGroupName: JString (required)
+  ##                    : Name of the Resource group within the Azure subscription.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_575056 = path.getOrDefault("resourceGroupName")
-  valid_575056 = validateParameter(valid_575056, JString, required = true,
+        "path argument is necessary due to required `profileName` field"
+  var valid_564156 = path.getOrDefault("profileName")
+  valid_564156 = validateParameter(valid_564156, JString, required = true,
                                  default = nil)
-  if valid_575056 != nil:
-    section.add "resourceGroupName", valid_575056
-  var valid_575057 = path.getOrDefault("subscriptionId")
-  valid_575057 = validateParameter(valid_575057, JString, required = true,
+  if valid_564156 != nil:
+    section.add "profileName", valid_564156
+  var valid_564157 = path.getOrDefault("subscriptionId")
+  valid_564157 = validateParameter(valid_564157, JString, required = true,
                                  default = nil)
-  if valid_575057 != nil:
-    section.add "subscriptionId", valid_575057
-  var valid_575058 = path.getOrDefault("profileName")
-  valid_575058 = validateParameter(valid_575058, JString, required = true,
+  if valid_564157 != nil:
+    section.add "subscriptionId", valid_564157
+  var valid_564158 = path.getOrDefault("resourceGroupName")
+  valid_564158 = validateParameter(valid_564158, JString, required = true,
                                  default = nil)
-  if valid_575058 != nil:
-    section.add "profileName", valid_575058
+  if valid_564158 != nil:
+    section.add "resourceGroupName", valid_564158
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -643,11 +647,11 @@ proc validate_ProfilesCreate_575054(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575059 = query.getOrDefault("api-version")
-  valid_575059 = validateParameter(valid_575059, JString, required = true,
+  var valid_564159 = query.getOrDefault("api-version")
+  valid_564159 = validateParameter(valid_564159, JString, required = true,
                                  default = nil)
-  if valid_575059 != nil:
-    section.add "api-version", valid_575059
+  if valid_564159 != nil:
+    section.add "api-version", valid_564159
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -661,52 +665,52 @@ proc validate_ProfilesCreate_575054(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_575061: Call_ProfilesCreate_575053; path: JsonNode; query: JsonNode;
+proc call*(call_564161: Call_ProfilesCreate_564153; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Creates a new CDN profile with a profile name under the specified subscription and resource group.
   ## 
-  let valid = call_575061.validator(path, query, header, formData, body)
-  let scheme = call_575061.pickScheme
+  let valid = call_564161.validator(path, query, header, formData, body)
+  let scheme = call_564161.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575061.url(scheme.get, call_575061.host, call_575061.base,
-                         call_575061.route, valid.getOrDefault("path"),
+  let url = call_564161.url(scheme.get, call_564161.host, call_564161.base,
+                         call_564161.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575061, url, valid)
+  result = hook(call_564161, url, valid)
 
-proc call*(call_575062: Call_ProfilesCreate_575053; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; profileName: string;
-          profile: JsonNode): Recallable =
+proc call*(call_564162: Call_ProfilesCreate_564153; profileName: string;
+          profile: JsonNode; apiVersion: string; subscriptionId: string;
+          resourceGroupName: string): Recallable =
   ## profilesCreate
   ## Creates a new CDN profile with a profile name under the specified subscription and resource group.
-  ##   resourceGroupName: string (required)
-  ##                    : Name of the Resource group within the Azure subscription.
-  ##   apiVersion: string (required)
-  ##             : Version of the API to be used with the client request. Current version is 2016-10-02.
-  ##   subscriptionId: string (required)
-  ##                 : Azure Subscription ID.
   ##   profileName: string (required)
   ##              : Name of the CDN profile which is unique within the resource group.
   ##   profile: JObject (required)
   ##          : Profile properties needed to create a new profile.
-  var path_575063 = newJObject()
-  var query_575064 = newJObject()
-  var body_575065 = newJObject()
-  add(path_575063, "resourceGroupName", newJString(resourceGroupName))
-  add(query_575064, "api-version", newJString(apiVersion))
-  add(path_575063, "subscriptionId", newJString(subscriptionId))
-  add(path_575063, "profileName", newJString(profileName))
+  ##   apiVersion: string (required)
+  ##             : Version of the API to be used with the client request. Current version is 2016-10-02.
+  ##   subscriptionId: string (required)
+  ##                 : Azure Subscription ID.
+  ##   resourceGroupName: string (required)
+  ##                    : Name of the Resource group within the Azure subscription.
+  var path_564163 = newJObject()
+  var query_564164 = newJObject()
+  var body_564165 = newJObject()
+  add(path_564163, "profileName", newJString(profileName))
   if profile != nil:
-    body_575065 = profile
-  result = call_575062.call(path_575063, query_575064, nil, nil, body_575065)
+    body_564165 = profile
+  add(query_564164, "api-version", newJString(apiVersion))
+  add(path_564163, "subscriptionId", newJString(subscriptionId))
+  add(path_564163, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564162.call(path_564163, query_564164, nil, nil, body_564165)
 
-var profilesCreate* = Call_ProfilesCreate_575053(name: "profilesCreate",
+var profilesCreate* = Call_ProfilesCreate_564153(name: "profilesCreate",
     meth: HttpMethod.HttpPut, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Cdn/profiles/{profileName}",
-    validator: validate_ProfilesCreate_575054, base: "", url: url_ProfilesCreate_575055,
+    validator: validate_ProfilesCreate_564154, base: "", url: url_ProfilesCreate_564155,
     schemes: {Scheme.Https})
 type
-  Call_ProfilesGet_575042 = ref object of OpenApiRestCall_574466
-proc url_ProfilesGet_575044(protocol: Scheme; host: string; base: string;
+  Call_ProfilesGet_564142 = ref object of OpenApiRestCall_563564
+proc url_ProfilesGet_564144(protocol: Scheme; host: string; base: string;
                            route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -728,37 +732,37 @@ proc url_ProfilesGet_575044(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ProfilesGet_575043(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_ProfilesGet_564143(path: JsonNode; query: JsonNode; header: JsonNode;
                                 formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets a CDN profile with the specified profile name under the specified subscription and resource group.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : Name of the Resource group within the Azure subscription.
-  ##   subscriptionId: JString (required)
-  ##                 : Azure Subscription ID.
   ##   profileName: JString (required)
   ##              : Name of the CDN profile which is unique within the resource group.
+  ##   subscriptionId: JString (required)
+  ##                 : Azure Subscription ID.
+  ##   resourceGroupName: JString (required)
+  ##                    : Name of the Resource group within the Azure subscription.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_575045 = path.getOrDefault("resourceGroupName")
-  valid_575045 = validateParameter(valid_575045, JString, required = true,
+        "path argument is necessary due to required `profileName` field"
+  var valid_564145 = path.getOrDefault("profileName")
+  valid_564145 = validateParameter(valid_564145, JString, required = true,
                                  default = nil)
-  if valid_575045 != nil:
-    section.add "resourceGroupName", valid_575045
-  var valid_575046 = path.getOrDefault("subscriptionId")
-  valid_575046 = validateParameter(valid_575046, JString, required = true,
+  if valid_564145 != nil:
+    section.add "profileName", valid_564145
+  var valid_564146 = path.getOrDefault("subscriptionId")
+  valid_564146 = validateParameter(valid_564146, JString, required = true,
                                  default = nil)
-  if valid_575046 != nil:
-    section.add "subscriptionId", valid_575046
-  var valid_575047 = path.getOrDefault("profileName")
-  valid_575047 = validateParameter(valid_575047, JString, required = true,
+  if valid_564146 != nil:
+    section.add "subscriptionId", valid_564146
+  var valid_564147 = path.getOrDefault("resourceGroupName")
+  valid_564147 = validateParameter(valid_564147, JString, required = true,
                                  default = nil)
-  if valid_575047 != nil:
-    section.add "profileName", valid_575047
+  if valid_564147 != nil:
+    section.add "resourceGroupName", valid_564147
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -766,11 +770,11 @@ proc validate_ProfilesGet_575043(path: JsonNode; query: JsonNode; header: JsonNo
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575048 = query.getOrDefault("api-version")
-  valid_575048 = validateParameter(valid_575048, JString, required = true,
+  var valid_564148 = query.getOrDefault("api-version")
+  valid_564148 = validateParameter(valid_564148, JString, required = true,
                                  default = nil)
-  if valid_575048 != nil:
-    section.add "api-version", valid_575048
+  if valid_564148 != nil:
+    section.add "api-version", valid_564148
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -779,48 +783,48 @@ proc validate_ProfilesGet_575043(path: JsonNode; query: JsonNode; header: JsonNo
   if body != nil:
     result.add "body", body
 
-proc call*(call_575049: Call_ProfilesGet_575042; path: JsonNode; query: JsonNode;
+proc call*(call_564149: Call_ProfilesGet_564142; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets a CDN profile with the specified profile name under the specified subscription and resource group.
   ## 
-  let valid = call_575049.validator(path, query, header, formData, body)
-  let scheme = call_575049.pickScheme
+  let valid = call_564149.validator(path, query, header, formData, body)
+  let scheme = call_564149.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575049.url(scheme.get, call_575049.host, call_575049.base,
-                         call_575049.route, valid.getOrDefault("path"),
+  let url = call_564149.url(scheme.get, call_564149.host, call_564149.base,
+                         call_564149.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575049, url, valid)
+  result = hook(call_564149, url, valid)
 
-proc call*(call_575050: Call_ProfilesGet_575042; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; profileName: string): Recallable =
+proc call*(call_564150: Call_ProfilesGet_564142; profileName: string;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string): Recallable =
   ## profilesGet
   ## Gets a CDN profile with the specified profile name under the specified subscription and resource group.
-  ##   resourceGroupName: string (required)
-  ##                    : Name of the Resource group within the Azure subscription.
+  ##   profileName: string (required)
+  ##              : Name of the CDN profile which is unique within the resource group.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request. Current version is 2016-10-02.
   ##   subscriptionId: string (required)
   ##                 : Azure Subscription ID.
-  ##   profileName: string (required)
-  ##              : Name of the CDN profile which is unique within the resource group.
-  var path_575051 = newJObject()
-  var query_575052 = newJObject()
-  add(path_575051, "resourceGroupName", newJString(resourceGroupName))
-  add(query_575052, "api-version", newJString(apiVersion))
-  add(path_575051, "subscriptionId", newJString(subscriptionId))
-  add(path_575051, "profileName", newJString(profileName))
-  result = call_575050.call(path_575051, query_575052, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : Name of the Resource group within the Azure subscription.
+  var path_564151 = newJObject()
+  var query_564152 = newJObject()
+  add(path_564151, "profileName", newJString(profileName))
+  add(query_564152, "api-version", newJString(apiVersion))
+  add(path_564151, "subscriptionId", newJString(subscriptionId))
+  add(path_564151, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564150.call(path_564151, query_564152, nil, nil, nil)
 
-var profilesGet* = Call_ProfilesGet_575042(name: "profilesGet",
+var profilesGet* = Call_ProfilesGet_564142(name: "profilesGet",
                                         meth: HttpMethod.HttpGet,
                                         host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Cdn/profiles/{profileName}",
-                                        validator: validate_ProfilesGet_575043,
-                                        base: "", url: url_ProfilesGet_575044,
+                                        validator: validate_ProfilesGet_564143,
+                                        base: "", url: url_ProfilesGet_564144,
                                         schemes: {Scheme.Https})
 type
-  Call_ProfilesUpdate_575077 = ref object of OpenApiRestCall_574466
-proc url_ProfilesUpdate_575079(protocol: Scheme; host: string; base: string;
+  Call_ProfilesUpdate_564177 = ref object of OpenApiRestCall_563564
+proc url_ProfilesUpdate_564179(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -842,7 +846,7 @@ proc url_ProfilesUpdate_575079(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ProfilesUpdate_575078(path: JsonNode; query: JsonNode;
+proc validate_ProfilesUpdate_564178(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## Updates an existing CDN profile with the specified profile name under the specified subscription and resource group.
@@ -850,30 +854,30 @@ proc validate_ProfilesUpdate_575078(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : Name of the Resource group within the Azure subscription.
-  ##   subscriptionId: JString (required)
-  ##                 : Azure Subscription ID.
   ##   profileName: JString (required)
   ##              : Name of the CDN profile which is unique within the resource group.
+  ##   subscriptionId: JString (required)
+  ##                 : Azure Subscription ID.
+  ##   resourceGroupName: JString (required)
+  ##                    : Name of the Resource group within the Azure subscription.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_575080 = path.getOrDefault("resourceGroupName")
-  valid_575080 = validateParameter(valid_575080, JString, required = true,
+        "path argument is necessary due to required `profileName` field"
+  var valid_564180 = path.getOrDefault("profileName")
+  valid_564180 = validateParameter(valid_564180, JString, required = true,
                                  default = nil)
-  if valid_575080 != nil:
-    section.add "resourceGroupName", valid_575080
-  var valid_575081 = path.getOrDefault("subscriptionId")
-  valid_575081 = validateParameter(valid_575081, JString, required = true,
+  if valid_564180 != nil:
+    section.add "profileName", valid_564180
+  var valid_564181 = path.getOrDefault("subscriptionId")
+  valid_564181 = validateParameter(valid_564181, JString, required = true,
                                  default = nil)
-  if valid_575081 != nil:
-    section.add "subscriptionId", valid_575081
-  var valid_575082 = path.getOrDefault("profileName")
-  valid_575082 = validateParameter(valid_575082, JString, required = true,
+  if valid_564181 != nil:
+    section.add "subscriptionId", valid_564181
+  var valid_564182 = path.getOrDefault("resourceGroupName")
+  valid_564182 = validateParameter(valid_564182, JString, required = true,
                                  default = nil)
-  if valid_575082 != nil:
-    section.add "profileName", valid_575082
+  if valid_564182 != nil:
+    section.add "resourceGroupName", valid_564182
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -881,11 +885,11 @@ proc validate_ProfilesUpdate_575078(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575083 = query.getOrDefault("api-version")
-  valid_575083 = validateParameter(valid_575083, JString, required = true,
+  var valid_564183 = query.getOrDefault("api-version")
+  valid_564183 = validateParameter(valid_564183, JString, required = true,
                                  default = nil)
-  if valid_575083 != nil:
-    section.add "api-version", valid_575083
+  if valid_564183 != nil:
+    section.add "api-version", valid_564183
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -899,52 +903,52 @@ proc validate_ProfilesUpdate_575078(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_575085: Call_ProfilesUpdate_575077; path: JsonNode; query: JsonNode;
+proc call*(call_564185: Call_ProfilesUpdate_564177; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Updates an existing CDN profile with the specified profile name under the specified subscription and resource group.
   ## 
-  let valid = call_575085.validator(path, query, header, formData, body)
-  let scheme = call_575085.pickScheme
+  let valid = call_564185.validator(path, query, header, formData, body)
+  let scheme = call_564185.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575085.url(scheme.get, call_575085.host, call_575085.base,
-                         call_575085.route, valid.getOrDefault("path"),
+  let url = call_564185.url(scheme.get, call_564185.host, call_564185.base,
+                         call_564185.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575085, url, valid)
+  result = hook(call_564185, url, valid)
 
-proc call*(call_575086: Call_ProfilesUpdate_575077; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; profileName: string;
+proc call*(call_564186: Call_ProfilesUpdate_564177; profileName: string;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string;
           profileUpdateParameters: JsonNode): Recallable =
   ## profilesUpdate
   ## Updates an existing CDN profile with the specified profile name under the specified subscription and resource group.
-  ##   resourceGroupName: string (required)
-  ##                    : Name of the Resource group within the Azure subscription.
+  ##   profileName: string (required)
+  ##              : Name of the CDN profile which is unique within the resource group.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request. Current version is 2016-10-02.
   ##   subscriptionId: string (required)
   ##                 : Azure Subscription ID.
-  ##   profileName: string (required)
-  ##              : Name of the CDN profile which is unique within the resource group.
+  ##   resourceGroupName: string (required)
+  ##                    : Name of the Resource group within the Azure subscription.
   ##   profileUpdateParameters: JObject (required)
   ##                          : Profile properties needed to update an existing profile.
-  var path_575087 = newJObject()
-  var query_575088 = newJObject()
-  var body_575089 = newJObject()
-  add(path_575087, "resourceGroupName", newJString(resourceGroupName))
-  add(query_575088, "api-version", newJString(apiVersion))
-  add(path_575087, "subscriptionId", newJString(subscriptionId))
-  add(path_575087, "profileName", newJString(profileName))
+  var path_564187 = newJObject()
+  var query_564188 = newJObject()
+  var body_564189 = newJObject()
+  add(path_564187, "profileName", newJString(profileName))
+  add(query_564188, "api-version", newJString(apiVersion))
+  add(path_564187, "subscriptionId", newJString(subscriptionId))
+  add(path_564187, "resourceGroupName", newJString(resourceGroupName))
   if profileUpdateParameters != nil:
-    body_575089 = profileUpdateParameters
-  result = call_575086.call(path_575087, query_575088, nil, nil, body_575089)
+    body_564189 = profileUpdateParameters
+  result = call_564186.call(path_564187, query_564188, nil, nil, body_564189)
 
-var profilesUpdate* = Call_ProfilesUpdate_575077(name: "profilesUpdate",
+var profilesUpdate* = Call_ProfilesUpdate_564177(name: "profilesUpdate",
     meth: HttpMethod.HttpPatch, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Cdn/profiles/{profileName}",
-    validator: validate_ProfilesUpdate_575078, base: "", url: url_ProfilesUpdate_575079,
+    validator: validate_ProfilesUpdate_564178, base: "", url: url_ProfilesUpdate_564179,
     schemes: {Scheme.Https})
 type
-  Call_ProfilesDelete_575066 = ref object of OpenApiRestCall_574466
-proc url_ProfilesDelete_575068(protocol: Scheme; host: string; base: string;
+  Call_ProfilesDelete_564166 = ref object of OpenApiRestCall_563564
+proc url_ProfilesDelete_564168(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -966,7 +970,7 @@ proc url_ProfilesDelete_575068(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ProfilesDelete_575067(path: JsonNode; query: JsonNode;
+proc validate_ProfilesDelete_564167(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## Deletes an existing CDN profile with the specified parameters. Deleting a profile will result in the deletion of all of the sub-resources including endpoints, origins and custom domains.
@@ -974,30 +978,30 @@ proc validate_ProfilesDelete_575067(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : Name of the Resource group within the Azure subscription.
-  ##   subscriptionId: JString (required)
-  ##                 : Azure Subscription ID.
   ##   profileName: JString (required)
   ##              : Name of the CDN profile which is unique within the resource group.
+  ##   subscriptionId: JString (required)
+  ##                 : Azure Subscription ID.
+  ##   resourceGroupName: JString (required)
+  ##                    : Name of the Resource group within the Azure subscription.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_575069 = path.getOrDefault("resourceGroupName")
-  valid_575069 = validateParameter(valid_575069, JString, required = true,
+        "path argument is necessary due to required `profileName` field"
+  var valid_564169 = path.getOrDefault("profileName")
+  valid_564169 = validateParameter(valid_564169, JString, required = true,
                                  default = nil)
-  if valid_575069 != nil:
-    section.add "resourceGroupName", valid_575069
-  var valid_575070 = path.getOrDefault("subscriptionId")
-  valid_575070 = validateParameter(valid_575070, JString, required = true,
+  if valid_564169 != nil:
+    section.add "profileName", valid_564169
+  var valid_564170 = path.getOrDefault("subscriptionId")
+  valid_564170 = validateParameter(valid_564170, JString, required = true,
                                  default = nil)
-  if valid_575070 != nil:
-    section.add "subscriptionId", valid_575070
-  var valid_575071 = path.getOrDefault("profileName")
-  valid_575071 = validateParameter(valid_575071, JString, required = true,
+  if valid_564170 != nil:
+    section.add "subscriptionId", valid_564170
+  var valid_564171 = path.getOrDefault("resourceGroupName")
+  valid_564171 = validateParameter(valid_564171, JString, required = true,
                                  default = nil)
-  if valid_575071 != nil:
-    section.add "profileName", valid_575071
+  if valid_564171 != nil:
+    section.add "resourceGroupName", valid_564171
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1005,11 +1009,11 @@ proc validate_ProfilesDelete_575067(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575072 = query.getOrDefault("api-version")
-  valid_575072 = validateParameter(valid_575072, JString, required = true,
+  var valid_564172 = query.getOrDefault("api-version")
+  valid_564172 = validateParameter(valid_564172, JString, required = true,
                                  default = nil)
-  if valid_575072 != nil:
-    section.add "api-version", valid_575072
+  if valid_564172 != nil:
+    section.add "api-version", valid_564172
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1018,46 +1022,46 @@ proc validate_ProfilesDelete_575067(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_575073: Call_ProfilesDelete_575066; path: JsonNode; query: JsonNode;
+proc call*(call_564173: Call_ProfilesDelete_564166; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes an existing CDN profile with the specified parameters. Deleting a profile will result in the deletion of all of the sub-resources including endpoints, origins and custom domains.
   ## 
-  let valid = call_575073.validator(path, query, header, formData, body)
-  let scheme = call_575073.pickScheme
+  let valid = call_564173.validator(path, query, header, formData, body)
+  let scheme = call_564173.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575073.url(scheme.get, call_575073.host, call_575073.base,
-                         call_575073.route, valid.getOrDefault("path"),
+  let url = call_564173.url(scheme.get, call_564173.host, call_564173.base,
+                         call_564173.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575073, url, valid)
+  result = hook(call_564173, url, valid)
 
-proc call*(call_575074: Call_ProfilesDelete_575066; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; profileName: string): Recallable =
+proc call*(call_564174: Call_ProfilesDelete_564166; profileName: string;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string): Recallable =
   ## profilesDelete
   ## Deletes an existing CDN profile with the specified parameters. Deleting a profile will result in the deletion of all of the sub-resources including endpoints, origins and custom domains.
-  ##   resourceGroupName: string (required)
-  ##                    : Name of the Resource group within the Azure subscription.
+  ##   profileName: string (required)
+  ##              : Name of the CDN profile which is unique within the resource group.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request. Current version is 2016-10-02.
   ##   subscriptionId: string (required)
   ##                 : Azure Subscription ID.
-  ##   profileName: string (required)
-  ##              : Name of the CDN profile which is unique within the resource group.
-  var path_575075 = newJObject()
-  var query_575076 = newJObject()
-  add(path_575075, "resourceGroupName", newJString(resourceGroupName))
-  add(query_575076, "api-version", newJString(apiVersion))
-  add(path_575075, "subscriptionId", newJString(subscriptionId))
-  add(path_575075, "profileName", newJString(profileName))
-  result = call_575074.call(path_575075, query_575076, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : Name of the Resource group within the Azure subscription.
+  var path_564175 = newJObject()
+  var query_564176 = newJObject()
+  add(path_564175, "profileName", newJString(profileName))
+  add(query_564176, "api-version", newJString(apiVersion))
+  add(path_564175, "subscriptionId", newJString(subscriptionId))
+  add(path_564175, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564174.call(path_564175, query_564176, nil, nil, nil)
 
-var profilesDelete* = Call_ProfilesDelete_575066(name: "profilesDelete",
+var profilesDelete* = Call_ProfilesDelete_564166(name: "profilesDelete",
     meth: HttpMethod.HttpDelete, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Cdn/profiles/{profileName}",
-    validator: validate_ProfilesDelete_575067, base: "", url: url_ProfilesDelete_575068,
+    validator: validate_ProfilesDelete_564167, base: "", url: url_ProfilesDelete_564168,
     schemes: {Scheme.Https})
 type
-  Call_ProfilesListResourceUsage_575090 = ref object of OpenApiRestCall_574466
-proc url_ProfilesListResourceUsage_575092(protocol: Scheme; host: string;
+  Call_ProfilesListResourceUsage_564190 = ref object of OpenApiRestCall_563564
+proc url_ProfilesListResourceUsage_564192(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1080,37 +1084,37 @@ proc url_ProfilesListResourceUsage_575092(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ProfilesListResourceUsage_575091(path: JsonNode; query: JsonNode;
+proc validate_ProfilesListResourceUsage_564191(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Checks the quota and actual usage of endpoints under the given CDN profile.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : Name of the Resource group within the Azure subscription.
-  ##   subscriptionId: JString (required)
-  ##                 : Azure Subscription ID.
   ##   profileName: JString (required)
   ##              : Name of the CDN profile which is unique within the resource group.
+  ##   subscriptionId: JString (required)
+  ##                 : Azure Subscription ID.
+  ##   resourceGroupName: JString (required)
+  ##                    : Name of the Resource group within the Azure subscription.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_575093 = path.getOrDefault("resourceGroupName")
-  valid_575093 = validateParameter(valid_575093, JString, required = true,
+        "path argument is necessary due to required `profileName` field"
+  var valid_564193 = path.getOrDefault("profileName")
+  valid_564193 = validateParameter(valid_564193, JString, required = true,
                                  default = nil)
-  if valid_575093 != nil:
-    section.add "resourceGroupName", valid_575093
-  var valid_575094 = path.getOrDefault("subscriptionId")
-  valid_575094 = validateParameter(valid_575094, JString, required = true,
+  if valid_564193 != nil:
+    section.add "profileName", valid_564193
+  var valid_564194 = path.getOrDefault("subscriptionId")
+  valid_564194 = validateParameter(valid_564194, JString, required = true,
                                  default = nil)
-  if valid_575094 != nil:
-    section.add "subscriptionId", valid_575094
-  var valid_575095 = path.getOrDefault("profileName")
-  valid_575095 = validateParameter(valid_575095, JString, required = true,
+  if valid_564194 != nil:
+    section.add "subscriptionId", valid_564194
+  var valid_564195 = path.getOrDefault("resourceGroupName")
+  valid_564195 = validateParameter(valid_564195, JString, required = true,
                                  default = nil)
-  if valid_575095 != nil:
-    section.add "profileName", valid_575095
+  if valid_564195 != nil:
+    section.add "resourceGroupName", valid_564195
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1118,11 +1122,11 @@ proc validate_ProfilesListResourceUsage_575091(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575096 = query.getOrDefault("api-version")
-  valid_575096 = validateParameter(valid_575096, JString, required = true,
+  var valid_564196 = query.getOrDefault("api-version")
+  valid_564196 = validateParameter(valid_564196, JString, required = true,
                                  default = nil)
-  if valid_575096 != nil:
-    section.add "api-version", valid_575096
+  if valid_564196 != nil:
+    section.add "api-version", valid_564196
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1131,48 +1135,47 @@ proc validate_ProfilesListResourceUsage_575091(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_575097: Call_ProfilesListResourceUsage_575090; path: JsonNode;
+proc call*(call_564197: Call_ProfilesListResourceUsage_564190; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Checks the quota and actual usage of endpoints under the given CDN profile.
   ## 
-  let valid = call_575097.validator(path, query, header, formData, body)
-  let scheme = call_575097.pickScheme
+  let valid = call_564197.validator(path, query, header, formData, body)
+  let scheme = call_564197.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575097.url(scheme.get, call_575097.host, call_575097.base,
-                         call_575097.route, valid.getOrDefault("path"),
+  let url = call_564197.url(scheme.get, call_564197.host, call_564197.base,
+                         call_564197.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575097, url, valid)
+  result = hook(call_564197, url, valid)
 
-proc call*(call_575098: Call_ProfilesListResourceUsage_575090;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          profileName: string): Recallable =
+proc call*(call_564198: Call_ProfilesListResourceUsage_564190; profileName: string;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string): Recallable =
   ## profilesListResourceUsage
   ## Checks the quota and actual usage of endpoints under the given CDN profile.
-  ##   resourceGroupName: string (required)
-  ##                    : Name of the Resource group within the Azure subscription.
+  ##   profileName: string (required)
+  ##              : Name of the CDN profile which is unique within the resource group.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request. Current version is 2016-10-02.
   ##   subscriptionId: string (required)
   ##                 : Azure Subscription ID.
-  ##   profileName: string (required)
-  ##              : Name of the CDN profile which is unique within the resource group.
-  var path_575099 = newJObject()
-  var query_575100 = newJObject()
-  add(path_575099, "resourceGroupName", newJString(resourceGroupName))
-  add(query_575100, "api-version", newJString(apiVersion))
-  add(path_575099, "subscriptionId", newJString(subscriptionId))
-  add(path_575099, "profileName", newJString(profileName))
-  result = call_575098.call(path_575099, query_575100, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : Name of the Resource group within the Azure subscription.
+  var path_564199 = newJObject()
+  var query_564200 = newJObject()
+  add(path_564199, "profileName", newJString(profileName))
+  add(query_564200, "api-version", newJString(apiVersion))
+  add(path_564199, "subscriptionId", newJString(subscriptionId))
+  add(path_564199, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564198.call(path_564199, query_564200, nil, nil, nil)
 
-var profilesListResourceUsage* = Call_ProfilesListResourceUsage_575090(
+var profilesListResourceUsage* = Call_ProfilesListResourceUsage_564190(
     name: "profilesListResourceUsage", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Cdn/profiles/{profileName}/checkResourceUsage",
-    validator: validate_ProfilesListResourceUsage_575091, base: "",
-    url: url_ProfilesListResourceUsage_575092, schemes: {Scheme.Https})
+    validator: validate_ProfilesListResourceUsage_564191, base: "",
+    url: url_ProfilesListResourceUsage_564192, schemes: {Scheme.Https})
 type
-  Call_EndpointsListByProfile_575101 = ref object of OpenApiRestCall_574466
-proc url_EndpointsListByProfile_575103(protocol: Scheme; host: string; base: string;
+  Call_EndpointsListByProfile_564201 = ref object of OpenApiRestCall_563564
+proc url_EndpointsListByProfile_564203(protocol: Scheme; host: string; base: string;
                                       route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1195,37 +1198,37 @@ proc url_EndpointsListByProfile_575103(protocol: Scheme; host: string; base: str
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_EndpointsListByProfile_575102(path: JsonNode; query: JsonNode;
+proc validate_EndpointsListByProfile_564202(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists existing CDN endpoints.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : Name of the Resource group within the Azure subscription.
-  ##   subscriptionId: JString (required)
-  ##                 : Azure Subscription ID.
   ##   profileName: JString (required)
   ##              : Name of the CDN profile which is unique within the resource group.
+  ##   subscriptionId: JString (required)
+  ##                 : Azure Subscription ID.
+  ##   resourceGroupName: JString (required)
+  ##                    : Name of the Resource group within the Azure subscription.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_575104 = path.getOrDefault("resourceGroupName")
-  valid_575104 = validateParameter(valid_575104, JString, required = true,
+        "path argument is necessary due to required `profileName` field"
+  var valid_564204 = path.getOrDefault("profileName")
+  valid_564204 = validateParameter(valid_564204, JString, required = true,
                                  default = nil)
-  if valid_575104 != nil:
-    section.add "resourceGroupName", valid_575104
-  var valid_575105 = path.getOrDefault("subscriptionId")
-  valid_575105 = validateParameter(valid_575105, JString, required = true,
+  if valid_564204 != nil:
+    section.add "profileName", valid_564204
+  var valid_564205 = path.getOrDefault("subscriptionId")
+  valid_564205 = validateParameter(valid_564205, JString, required = true,
                                  default = nil)
-  if valid_575105 != nil:
-    section.add "subscriptionId", valid_575105
-  var valid_575106 = path.getOrDefault("profileName")
-  valid_575106 = validateParameter(valid_575106, JString, required = true,
+  if valid_564205 != nil:
+    section.add "subscriptionId", valid_564205
+  var valid_564206 = path.getOrDefault("resourceGroupName")
+  valid_564206 = validateParameter(valid_564206, JString, required = true,
                                  default = nil)
-  if valid_575106 != nil:
-    section.add "profileName", valid_575106
+  if valid_564206 != nil:
+    section.add "resourceGroupName", valid_564206
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1233,11 +1236,11 @@ proc validate_EndpointsListByProfile_575102(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575107 = query.getOrDefault("api-version")
-  valid_575107 = validateParameter(valid_575107, JString, required = true,
+  var valid_564207 = query.getOrDefault("api-version")
+  valid_564207 = validateParameter(valid_564207, JString, required = true,
                                  default = nil)
-  if valid_575107 != nil:
-    section.add "api-version", valid_575107
+  if valid_564207 != nil:
+    section.add "api-version", valid_564207
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1246,48 +1249,47 @@ proc validate_EndpointsListByProfile_575102(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_575108: Call_EndpointsListByProfile_575101; path: JsonNode;
+proc call*(call_564208: Call_EndpointsListByProfile_564201; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists existing CDN endpoints.
   ## 
-  let valid = call_575108.validator(path, query, header, formData, body)
-  let scheme = call_575108.pickScheme
+  let valid = call_564208.validator(path, query, header, formData, body)
+  let scheme = call_564208.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575108.url(scheme.get, call_575108.host, call_575108.base,
-                         call_575108.route, valid.getOrDefault("path"),
+  let url = call_564208.url(scheme.get, call_564208.host, call_564208.base,
+                         call_564208.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575108, url, valid)
+  result = hook(call_564208, url, valid)
 
-proc call*(call_575109: Call_EndpointsListByProfile_575101;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          profileName: string): Recallable =
+proc call*(call_564209: Call_EndpointsListByProfile_564201; profileName: string;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string): Recallable =
   ## endpointsListByProfile
   ## Lists existing CDN endpoints.
-  ##   resourceGroupName: string (required)
-  ##                    : Name of the Resource group within the Azure subscription.
+  ##   profileName: string (required)
+  ##              : Name of the CDN profile which is unique within the resource group.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request. Current version is 2016-10-02.
   ##   subscriptionId: string (required)
   ##                 : Azure Subscription ID.
-  ##   profileName: string (required)
-  ##              : Name of the CDN profile which is unique within the resource group.
-  var path_575110 = newJObject()
-  var query_575111 = newJObject()
-  add(path_575110, "resourceGroupName", newJString(resourceGroupName))
-  add(query_575111, "api-version", newJString(apiVersion))
-  add(path_575110, "subscriptionId", newJString(subscriptionId))
-  add(path_575110, "profileName", newJString(profileName))
-  result = call_575109.call(path_575110, query_575111, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : Name of the Resource group within the Azure subscription.
+  var path_564210 = newJObject()
+  var query_564211 = newJObject()
+  add(path_564210, "profileName", newJString(profileName))
+  add(query_564211, "api-version", newJString(apiVersion))
+  add(path_564210, "subscriptionId", newJString(subscriptionId))
+  add(path_564210, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564209.call(path_564210, query_564211, nil, nil, nil)
 
-var endpointsListByProfile* = Call_EndpointsListByProfile_575101(
+var endpointsListByProfile* = Call_EndpointsListByProfile_564201(
     name: "endpointsListByProfile", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Cdn/profiles/{profileName}/endpoints",
-    validator: validate_EndpointsListByProfile_575102, base: "",
-    url: url_EndpointsListByProfile_575103, schemes: {Scheme.Https})
+    validator: validate_EndpointsListByProfile_564202, base: "",
+    url: url_EndpointsListByProfile_564203, schemes: {Scheme.Https})
 type
-  Call_EndpointsCreate_575124 = ref object of OpenApiRestCall_574466
-proc url_EndpointsCreate_575126(protocol: Scheme; host: string; base: string;
+  Call_EndpointsCreate_564224 = ref object of OpenApiRestCall_563564
+proc url_EndpointsCreate_564226(protocol: Scheme; host: string; base: string;
                                route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1312,7 +1314,7 @@ proc url_EndpointsCreate_575126(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_EndpointsCreate_575125(path: JsonNode; query: JsonNode;
+proc validate_EndpointsCreate_564225(path: JsonNode; query: JsonNode;
                                     header: JsonNode; formData: JsonNode;
                                     body: JsonNode): JsonNode =
   ## Creates a new CDN endpoint with the specified endpoint name under the specified subscription, resource group and profile.
@@ -1320,37 +1322,37 @@ proc validate_EndpointsCreate_575125(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : Name of the Resource group within the Azure subscription.
-  ##   subscriptionId: JString (required)
-  ##                 : Azure Subscription ID.
   ##   profileName: JString (required)
   ##              : Name of the CDN profile which is unique within the resource group.
+  ##   subscriptionId: JString (required)
+  ##                 : Azure Subscription ID.
+  ##   resourceGroupName: JString (required)
+  ##                    : Name of the Resource group within the Azure subscription.
   ##   endpointName: JString (required)
   ##               : Name of the endpoint under the profile which is unique globally.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_575127 = path.getOrDefault("resourceGroupName")
-  valid_575127 = validateParameter(valid_575127, JString, required = true,
+        "path argument is necessary due to required `profileName` field"
+  var valid_564227 = path.getOrDefault("profileName")
+  valid_564227 = validateParameter(valid_564227, JString, required = true,
                                  default = nil)
-  if valid_575127 != nil:
-    section.add "resourceGroupName", valid_575127
-  var valid_575128 = path.getOrDefault("subscriptionId")
-  valid_575128 = validateParameter(valid_575128, JString, required = true,
+  if valid_564227 != nil:
+    section.add "profileName", valid_564227
+  var valid_564228 = path.getOrDefault("subscriptionId")
+  valid_564228 = validateParameter(valid_564228, JString, required = true,
                                  default = nil)
-  if valid_575128 != nil:
-    section.add "subscriptionId", valid_575128
-  var valid_575129 = path.getOrDefault("profileName")
-  valid_575129 = validateParameter(valid_575129, JString, required = true,
+  if valid_564228 != nil:
+    section.add "subscriptionId", valid_564228
+  var valid_564229 = path.getOrDefault("resourceGroupName")
+  valid_564229 = validateParameter(valid_564229, JString, required = true,
                                  default = nil)
-  if valid_575129 != nil:
-    section.add "profileName", valid_575129
-  var valid_575130 = path.getOrDefault("endpointName")
-  valid_575130 = validateParameter(valid_575130, JString, required = true,
+  if valid_564229 != nil:
+    section.add "resourceGroupName", valid_564229
+  var valid_564230 = path.getOrDefault("endpointName")
+  valid_564230 = validateParameter(valid_564230, JString, required = true,
                                  default = nil)
-  if valid_575130 != nil:
-    section.add "endpointName", valid_575130
+  if valid_564230 != nil:
+    section.add "endpointName", valid_564230
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1358,11 +1360,11 @@ proc validate_EndpointsCreate_575125(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575131 = query.getOrDefault("api-version")
-  valid_575131 = validateParameter(valid_575131, JString, required = true,
+  var valid_564231 = query.getOrDefault("api-version")
+  valid_564231 = validateParameter(valid_564231, JString, required = true,
                                  default = nil)
-  if valid_575131 != nil:
-    section.add "api-version", valid_575131
+  if valid_564231 != nil:
+    section.add "api-version", valid_564231
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1376,55 +1378,55 @@ proc validate_EndpointsCreate_575125(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_575133: Call_EndpointsCreate_575124; path: JsonNode; query: JsonNode;
+proc call*(call_564233: Call_EndpointsCreate_564224; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Creates a new CDN endpoint with the specified endpoint name under the specified subscription, resource group and profile.
   ## 
-  let valid = call_575133.validator(path, query, header, formData, body)
-  let scheme = call_575133.pickScheme
+  let valid = call_564233.validator(path, query, header, formData, body)
+  let scheme = call_564233.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575133.url(scheme.get, call_575133.host, call_575133.base,
-                         call_575133.route, valid.getOrDefault("path"),
+  let url = call_564233.url(scheme.get, call_564233.host, call_564233.base,
+                         call_564233.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575133, url, valid)
+  result = hook(call_564233, url, valid)
 
-proc call*(call_575134: Call_EndpointsCreate_575124; resourceGroupName: string;
-          apiVersion: string; endpoint: JsonNode; subscriptionId: string;
-          profileName: string; endpointName: string): Recallable =
+proc call*(call_564234: Call_EndpointsCreate_564224; profileName: string;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string;
+          endpointName: string; endpoint: JsonNode): Recallable =
   ## endpointsCreate
   ## Creates a new CDN endpoint with the specified endpoint name under the specified subscription, resource group and profile.
-  ##   resourceGroupName: string (required)
-  ##                    : Name of the Resource group within the Azure subscription.
-  ##   apiVersion: string (required)
-  ##             : Version of the API to be used with the client request. Current version is 2016-10-02.
-  ##   endpoint: JObject (required)
-  ##           : Endpoint properties
-  ##   subscriptionId: string (required)
-  ##                 : Azure Subscription ID.
   ##   profileName: string (required)
   ##              : Name of the CDN profile which is unique within the resource group.
+  ##   apiVersion: string (required)
+  ##             : Version of the API to be used with the client request. Current version is 2016-10-02.
+  ##   subscriptionId: string (required)
+  ##                 : Azure Subscription ID.
+  ##   resourceGroupName: string (required)
+  ##                    : Name of the Resource group within the Azure subscription.
   ##   endpointName: string (required)
   ##               : Name of the endpoint under the profile which is unique globally.
-  var path_575135 = newJObject()
-  var query_575136 = newJObject()
-  var body_575137 = newJObject()
-  add(path_575135, "resourceGroupName", newJString(resourceGroupName))
-  add(query_575136, "api-version", newJString(apiVersion))
+  ##   endpoint: JObject (required)
+  ##           : Endpoint properties
+  var path_564235 = newJObject()
+  var query_564236 = newJObject()
+  var body_564237 = newJObject()
+  add(path_564235, "profileName", newJString(profileName))
+  add(query_564236, "api-version", newJString(apiVersion))
+  add(path_564235, "subscriptionId", newJString(subscriptionId))
+  add(path_564235, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564235, "endpointName", newJString(endpointName))
   if endpoint != nil:
-    body_575137 = endpoint
-  add(path_575135, "subscriptionId", newJString(subscriptionId))
-  add(path_575135, "profileName", newJString(profileName))
-  add(path_575135, "endpointName", newJString(endpointName))
-  result = call_575134.call(path_575135, query_575136, nil, nil, body_575137)
+    body_564237 = endpoint
+  result = call_564234.call(path_564235, query_564236, nil, nil, body_564237)
 
-var endpointsCreate* = Call_EndpointsCreate_575124(name: "endpointsCreate",
+var endpointsCreate* = Call_EndpointsCreate_564224(name: "endpointsCreate",
     meth: HttpMethod.HttpPut, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Cdn/profiles/{profileName}/endpoints/{endpointName}",
-    validator: validate_EndpointsCreate_575125, base: "", url: url_EndpointsCreate_575126,
+    validator: validate_EndpointsCreate_564225, base: "", url: url_EndpointsCreate_564226,
     schemes: {Scheme.Https})
 type
-  Call_EndpointsGet_575112 = ref object of OpenApiRestCall_574466
-proc url_EndpointsGet_575114(protocol: Scheme; host: string; base: string;
+  Call_EndpointsGet_564212 = ref object of OpenApiRestCall_563564
+proc url_EndpointsGet_564214(protocol: Scheme; host: string; base: string;
                             route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1449,44 +1451,44 @@ proc url_EndpointsGet_575114(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_EndpointsGet_575113(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_EndpointsGet_564213(path: JsonNode; query: JsonNode; header: JsonNode;
                                  formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets an existing CDN endpoint with the specified endpoint name under the specified subscription, resource group and profile.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : Name of the Resource group within the Azure subscription.
-  ##   subscriptionId: JString (required)
-  ##                 : Azure Subscription ID.
   ##   profileName: JString (required)
   ##              : Name of the CDN profile which is unique within the resource group.
+  ##   subscriptionId: JString (required)
+  ##                 : Azure Subscription ID.
+  ##   resourceGroupName: JString (required)
+  ##                    : Name of the Resource group within the Azure subscription.
   ##   endpointName: JString (required)
   ##               : Name of the endpoint under the profile which is unique globally.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_575115 = path.getOrDefault("resourceGroupName")
-  valid_575115 = validateParameter(valid_575115, JString, required = true,
+        "path argument is necessary due to required `profileName` field"
+  var valid_564215 = path.getOrDefault("profileName")
+  valid_564215 = validateParameter(valid_564215, JString, required = true,
                                  default = nil)
-  if valid_575115 != nil:
-    section.add "resourceGroupName", valid_575115
-  var valid_575116 = path.getOrDefault("subscriptionId")
-  valid_575116 = validateParameter(valid_575116, JString, required = true,
+  if valid_564215 != nil:
+    section.add "profileName", valid_564215
+  var valid_564216 = path.getOrDefault("subscriptionId")
+  valid_564216 = validateParameter(valid_564216, JString, required = true,
                                  default = nil)
-  if valid_575116 != nil:
-    section.add "subscriptionId", valid_575116
-  var valid_575117 = path.getOrDefault("profileName")
-  valid_575117 = validateParameter(valid_575117, JString, required = true,
+  if valid_564216 != nil:
+    section.add "subscriptionId", valid_564216
+  var valid_564217 = path.getOrDefault("resourceGroupName")
+  valid_564217 = validateParameter(valid_564217, JString, required = true,
                                  default = nil)
-  if valid_575117 != nil:
-    section.add "profileName", valid_575117
-  var valid_575118 = path.getOrDefault("endpointName")
-  valid_575118 = validateParameter(valid_575118, JString, required = true,
+  if valid_564217 != nil:
+    section.add "resourceGroupName", valid_564217
+  var valid_564218 = path.getOrDefault("endpointName")
+  valid_564218 = validateParameter(valid_564218, JString, required = true,
                                  default = nil)
-  if valid_575118 != nil:
-    section.add "endpointName", valid_575118
+  if valid_564218 != nil:
+    section.add "endpointName", valid_564218
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1494,11 +1496,11 @@ proc validate_EndpointsGet_575113(path: JsonNode; query: JsonNode; header: JsonN
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575119 = query.getOrDefault("api-version")
-  valid_575119 = validateParameter(valid_575119, JString, required = true,
+  var valid_564219 = query.getOrDefault("api-version")
+  valid_564219 = validateParameter(valid_564219, JString, required = true,
                                  default = nil)
-  if valid_575119 != nil:
-    section.add "api-version", valid_575119
+  if valid_564219 != nil:
+    section.add "api-version", valid_564219
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1507,50 +1509,50 @@ proc validate_EndpointsGet_575113(path: JsonNode; query: JsonNode; header: JsonN
   if body != nil:
     result.add "body", body
 
-proc call*(call_575120: Call_EndpointsGet_575112; path: JsonNode; query: JsonNode;
+proc call*(call_564220: Call_EndpointsGet_564212; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets an existing CDN endpoint with the specified endpoint name under the specified subscription, resource group and profile.
   ## 
-  let valid = call_575120.validator(path, query, header, formData, body)
-  let scheme = call_575120.pickScheme
+  let valid = call_564220.validator(path, query, header, formData, body)
+  let scheme = call_564220.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575120.url(scheme.get, call_575120.host, call_575120.base,
-                         call_575120.route, valid.getOrDefault("path"),
+  let url = call_564220.url(scheme.get, call_564220.host, call_564220.base,
+                         call_564220.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575120, url, valid)
+  result = hook(call_564220, url, valid)
 
-proc call*(call_575121: Call_EndpointsGet_575112; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; profileName: string;
+proc call*(call_564221: Call_EndpointsGet_564212; profileName: string;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string;
           endpointName: string): Recallable =
   ## endpointsGet
   ## Gets an existing CDN endpoint with the specified endpoint name under the specified subscription, resource group and profile.
-  ##   resourceGroupName: string (required)
-  ##                    : Name of the Resource group within the Azure subscription.
+  ##   profileName: string (required)
+  ##              : Name of the CDN profile which is unique within the resource group.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request. Current version is 2016-10-02.
   ##   subscriptionId: string (required)
   ##                 : Azure Subscription ID.
-  ##   profileName: string (required)
-  ##              : Name of the CDN profile which is unique within the resource group.
+  ##   resourceGroupName: string (required)
+  ##                    : Name of the Resource group within the Azure subscription.
   ##   endpointName: string (required)
   ##               : Name of the endpoint under the profile which is unique globally.
-  var path_575122 = newJObject()
-  var query_575123 = newJObject()
-  add(path_575122, "resourceGroupName", newJString(resourceGroupName))
-  add(query_575123, "api-version", newJString(apiVersion))
-  add(path_575122, "subscriptionId", newJString(subscriptionId))
-  add(path_575122, "profileName", newJString(profileName))
-  add(path_575122, "endpointName", newJString(endpointName))
-  result = call_575121.call(path_575122, query_575123, nil, nil, nil)
+  var path_564222 = newJObject()
+  var query_564223 = newJObject()
+  add(path_564222, "profileName", newJString(profileName))
+  add(query_564223, "api-version", newJString(apiVersion))
+  add(path_564222, "subscriptionId", newJString(subscriptionId))
+  add(path_564222, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564222, "endpointName", newJString(endpointName))
+  result = call_564221.call(path_564222, query_564223, nil, nil, nil)
 
-var endpointsGet* = Call_EndpointsGet_575112(name: "endpointsGet",
+var endpointsGet* = Call_EndpointsGet_564212(name: "endpointsGet",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Cdn/profiles/{profileName}/endpoints/{endpointName}",
-    validator: validate_EndpointsGet_575113, base: "", url: url_EndpointsGet_575114,
+    validator: validate_EndpointsGet_564213, base: "", url: url_EndpointsGet_564214,
     schemes: {Scheme.Https})
 type
-  Call_EndpointsUpdate_575150 = ref object of OpenApiRestCall_574466
-proc url_EndpointsUpdate_575152(protocol: Scheme; host: string; base: string;
+  Call_EndpointsUpdate_564250 = ref object of OpenApiRestCall_563564
+proc url_EndpointsUpdate_564252(protocol: Scheme; host: string; base: string;
                                route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1575,7 +1577,7 @@ proc url_EndpointsUpdate_575152(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_EndpointsUpdate_575151(path: JsonNode; query: JsonNode;
+proc validate_EndpointsUpdate_564251(path: JsonNode; query: JsonNode;
                                     header: JsonNode; formData: JsonNode;
                                     body: JsonNode): JsonNode =
   ## Updates an existing CDN endpoint with the specified endpoint name under the specified subscription, resource group and profile. Only tags and Origin HostHeader can be updated after creating an endpoint. To update origins, use the Update Origin operation. To update custom domains, use the Update Custom Domain operation.
@@ -1583,37 +1585,37 @@ proc validate_EndpointsUpdate_575151(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : Name of the Resource group within the Azure subscription.
-  ##   subscriptionId: JString (required)
-  ##                 : Azure Subscription ID.
   ##   profileName: JString (required)
   ##              : Name of the CDN profile which is unique within the resource group.
+  ##   subscriptionId: JString (required)
+  ##                 : Azure Subscription ID.
+  ##   resourceGroupName: JString (required)
+  ##                    : Name of the Resource group within the Azure subscription.
   ##   endpointName: JString (required)
   ##               : Name of the endpoint under the profile which is unique globally.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_575153 = path.getOrDefault("resourceGroupName")
-  valid_575153 = validateParameter(valid_575153, JString, required = true,
+        "path argument is necessary due to required `profileName` field"
+  var valid_564253 = path.getOrDefault("profileName")
+  valid_564253 = validateParameter(valid_564253, JString, required = true,
                                  default = nil)
-  if valid_575153 != nil:
-    section.add "resourceGroupName", valid_575153
-  var valid_575154 = path.getOrDefault("subscriptionId")
-  valid_575154 = validateParameter(valid_575154, JString, required = true,
+  if valid_564253 != nil:
+    section.add "profileName", valid_564253
+  var valid_564254 = path.getOrDefault("subscriptionId")
+  valid_564254 = validateParameter(valid_564254, JString, required = true,
                                  default = nil)
-  if valid_575154 != nil:
-    section.add "subscriptionId", valid_575154
-  var valid_575155 = path.getOrDefault("profileName")
-  valid_575155 = validateParameter(valid_575155, JString, required = true,
+  if valid_564254 != nil:
+    section.add "subscriptionId", valid_564254
+  var valid_564255 = path.getOrDefault("resourceGroupName")
+  valid_564255 = validateParameter(valid_564255, JString, required = true,
                                  default = nil)
-  if valid_575155 != nil:
-    section.add "profileName", valid_575155
-  var valid_575156 = path.getOrDefault("endpointName")
-  valid_575156 = validateParameter(valid_575156, JString, required = true,
+  if valid_564255 != nil:
+    section.add "resourceGroupName", valid_564255
+  var valid_564256 = path.getOrDefault("endpointName")
+  valid_564256 = validateParameter(valid_564256, JString, required = true,
                                  default = nil)
-  if valid_575156 != nil:
-    section.add "endpointName", valid_575156
+  if valid_564256 != nil:
+    section.add "endpointName", valid_564256
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1621,11 +1623,11 @@ proc validate_EndpointsUpdate_575151(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575157 = query.getOrDefault("api-version")
-  valid_575157 = validateParameter(valid_575157, JString, required = true,
+  var valid_564257 = query.getOrDefault("api-version")
+  valid_564257 = validateParameter(valid_564257, JString, required = true,
                                  default = nil)
-  if valid_575157 != nil:
-    section.add "api-version", valid_575157
+  if valid_564257 != nil:
+    section.add "api-version", valid_564257
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1639,55 +1641,55 @@ proc validate_EndpointsUpdate_575151(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_575159: Call_EndpointsUpdate_575150; path: JsonNode; query: JsonNode;
+proc call*(call_564259: Call_EndpointsUpdate_564250; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Updates an existing CDN endpoint with the specified endpoint name under the specified subscription, resource group and profile. Only tags and Origin HostHeader can be updated after creating an endpoint. To update origins, use the Update Origin operation. To update custom domains, use the Update Custom Domain operation.
   ## 
-  let valid = call_575159.validator(path, query, header, formData, body)
-  let scheme = call_575159.pickScheme
+  let valid = call_564259.validator(path, query, header, formData, body)
+  let scheme = call_564259.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575159.url(scheme.get, call_575159.host, call_575159.base,
-                         call_575159.route, valid.getOrDefault("path"),
+  let url = call_564259.url(scheme.get, call_564259.host, call_564259.base,
+                         call_564259.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575159, url, valid)
+  result = hook(call_564259, url, valid)
 
-proc call*(call_575160: Call_EndpointsUpdate_575150; resourceGroupName: string;
-          endpointUpdateProperties: JsonNode; apiVersion: string;
-          subscriptionId: string; profileName: string; endpointName: string): Recallable =
+proc call*(call_564260: Call_EndpointsUpdate_564250; profileName: string;
+          apiVersion: string; endpointUpdateProperties: JsonNode;
+          subscriptionId: string; resourceGroupName: string; endpointName: string): Recallable =
   ## endpointsUpdate
   ## Updates an existing CDN endpoint with the specified endpoint name under the specified subscription, resource group and profile. Only tags and Origin HostHeader can be updated after creating an endpoint. To update origins, use the Update Origin operation. To update custom domains, use the Update Custom Domain operation.
-  ##   resourceGroupName: string (required)
-  ##                    : Name of the Resource group within the Azure subscription.
-  ##   endpointUpdateProperties: JObject (required)
-  ##                           : Endpoint update properties
-  ##   apiVersion: string (required)
-  ##             : Version of the API to be used with the client request. Current version is 2016-10-02.
-  ##   subscriptionId: string (required)
-  ##                 : Azure Subscription ID.
   ##   profileName: string (required)
   ##              : Name of the CDN profile which is unique within the resource group.
+  ##   apiVersion: string (required)
+  ##             : Version of the API to be used with the client request. Current version is 2016-10-02.
+  ##   endpointUpdateProperties: JObject (required)
+  ##                           : Endpoint update properties
+  ##   subscriptionId: string (required)
+  ##                 : Azure Subscription ID.
+  ##   resourceGroupName: string (required)
+  ##                    : Name of the Resource group within the Azure subscription.
   ##   endpointName: string (required)
   ##               : Name of the endpoint under the profile which is unique globally.
-  var path_575161 = newJObject()
-  var query_575162 = newJObject()
-  var body_575163 = newJObject()
-  add(path_575161, "resourceGroupName", newJString(resourceGroupName))
+  var path_564261 = newJObject()
+  var query_564262 = newJObject()
+  var body_564263 = newJObject()
+  add(path_564261, "profileName", newJString(profileName))
+  add(query_564262, "api-version", newJString(apiVersion))
   if endpointUpdateProperties != nil:
-    body_575163 = endpointUpdateProperties
-  add(query_575162, "api-version", newJString(apiVersion))
-  add(path_575161, "subscriptionId", newJString(subscriptionId))
-  add(path_575161, "profileName", newJString(profileName))
-  add(path_575161, "endpointName", newJString(endpointName))
-  result = call_575160.call(path_575161, query_575162, nil, nil, body_575163)
+    body_564263 = endpointUpdateProperties
+  add(path_564261, "subscriptionId", newJString(subscriptionId))
+  add(path_564261, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564261, "endpointName", newJString(endpointName))
+  result = call_564260.call(path_564261, query_564262, nil, nil, body_564263)
 
-var endpointsUpdate* = Call_EndpointsUpdate_575150(name: "endpointsUpdate",
+var endpointsUpdate* = Call_EndpointsUpdate_564250(name: "endpointsUpdate",
     meth: HttpMethod.HttpPatch, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Cdn/profiles/{profileName}/endpoints/{endpointName}",
-    validator: validate_EndpointsUpdate_575151, base: "", url: url_EndpointsUpdate_575152,
+    validator: validate_EndpointsUpdate_564251, base: "", url: url_EndpointsUpdate_564252,
     schemes: {Scheme.Https})
 type
-  Call_EndpointsDelete_575138 = ref object of OpenApiRestCall_574466
-proc url_EndpointsDelete_575140(protocol: Scheme; host: string; base: string;
+  Call_EndpointsDelete_564238 = ref object of OpenApiRestCall_563564
+proc url_EndpointsDelete_564240(protocol: Scheme; host: string; base: string;
                                route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1712,7 +1714,7 @@ proc url_EndpointsDelete_575140(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_EndpointsDelete_575139(path: JsonNode; query: JsonNode;
+proc validate_EndpointsDelete_564239(path: JsonNode; query: JsonNode;
                                     header: JsonNode; formData: JsonNode;
                                     body: JsonNode): JsonNode =
   ## Deletes an existing CDN endpoint with the specified endpoint name under the specified subscription, resource group and profile.
@@ -1720,37 +1722,37 @@ proc validate_EndpointsDelete_575139(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : Name of the Resource group within the Azure subscription.
-  ##   subscriptionId: JString (required)
-  ##                 : Azure Subscription ID.
   ##   profileName: JString (required)
   ##              : Name of the CDN profile which is unique within the resource group.
+  ##   subscriptionId: JString (required)
+  ##                 : Azure Subscription ID.
+  ##   resourceGroupName: JString (required)
+  ##                    : Name of the Resource group within the Azure subscription.
   ##   endpointName: JString (required)
   ##               : Name of the endpoint under the profile which is unique globally.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_575141 = path.getOrDefault("resourceGroupName")
-  valid_575141 = validateParameter(valid_575141, JString, required = true,
+        "path argument is necessary due to required `profileName` field"
+  var valid_564241 = path.getOrDefault("profileName")
+  valid_564241 = validateParameter(valid_564241, JString, required = true,
                                  default = nil)
-  if valid_575141 != nil:
-    section.add "resourceGroupName", valid_575141
-  var valid_575142 = path.getOrDefault("subscriptionId")
-  valid_575142 = validateParameter(valid_575142, JString, required = true,
+  if valid_564241 != nil:
+    section.add "profileName", valid_564241
+  var valid_564242 = path.getOrDefault("subscriptionId")
+  valid_564242 = validateParameter(valid_564242, JString, required = true,
                                  default = nil)
-  if valid_575142 != nil:
-    section.add "subscriptionId", valid_575142
-  var valid_575143 = path.getOrDefault("profileName")
-  valid_575143 = validateParameter(valid_575143, JString, required = true,
+  if valid_564242 != nil:
+    section.add "subscriptionId", valid_564242
+  var valid_564243 = path.getOrDefault("resourceGroupName")
+  valid_564243 = validateParameter(valid_564243, JString, required = true,
                                  default = nil)
-  if valid_575143 != nil:
-    section.add "profileName", valid_575143
-  var valid_575144 = path.getOrDefault("endpointName")
-  valid_575144 = validateParameter(valid_575144, JString, required = true,
+  if valid_564243 != nil:
+    section.add "resourceGroupName", valid_564243
+  var valid_564244 = path.getOrDefault("endpointName")
+  valid_564244 = validateParameter(valid_564244, JString, required = true,
                                  default = nil)
-  if valid_575144 != nil:
-    section.add "endpointName", valid_575144
+  if valid_564244 != nil:
+    section.add "endpointName", valid_564244
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1758,11 +1760,11 @@ proc validate_EndpointsDelete_575139(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575145 = query.getOrDefault("api-version")
-  valid_575145 = validateParameter(valid_575145, JString, required = true,
+  var valid_564245 = query.getOrDefault("api-version")
+  valid_564245 = validateParameter(valid_564245, JString, required = true,
                                  default = nil)
-  if valid_575145 != nil:
-    section.add "api-version", valid_575145
+  if valid_564245 != nil:
+    section.add "api-version", valid_564245
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1771,50 +1773,50 @@ proc validate_EndpointsDelete_575139(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_575146: Call_EndpointsDelete_575138; path: JsonNode; query: JsonNode;
+proc call*(call_564246: Call_EndpointsDelete_564238; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes an existing CDN endpoint with the specified endpoint name under the specified subscription, resource group and profile.
   ## 
-  let valid = call_575146.validator(path, query, header, formData, body)
-  let scheme = call_575146.pickScheme
+  let valid = call_564246.validator(path, query, header, formData, body)
+  let scheme = call_564246.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575146.url(scheme.get, call_575146.host, call_575146.base,
-                         call_575146.route, valid.getOrDefault("path"),
+  let url = call_564246.url(scheme.get, call_564246.host, call_564246.base,
+                         call_564246.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575146, url, valid)
+  result = hook(call_564246, url, valid)
 
-proc call*(call_575147: Call_EndpointsDelete_575138; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; profileName: string;
+proc call*(call_564247: Call_EndpointsDelete_564238; profileName: string;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string;
           endpointName: string): Recallable =
   ## endpointsDelete
   ## Deletes an existing CDN endpoint with the specified endpoint name under the specified subscription, resource group and profile.
-  ##   resourceGroupName: string (required)
-  ##                    : Name of the Resource group within the Azure subscription.
+  ##   profileName: string (required)
+  ##              : Name of the CDN profile which is unique within the resource group.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request. Current version is 2016-10-02.
   ##   subscriptionId: string (required)
   ##                 : Azure Subscription ID.
-  ##   profileName: string (required)
-  ##              : Name of the CDN profile which is unique within the resource group.
+  ##   resourceGroupName: string (required)
+  ##                    : Name of the Resource group within the Azure subscription.
   ##   endpointName: string (required)
   ##               : Name of the endpoint under the profile which is unique globally.
-  var path_575148 = newJObject()
-  var query_575149 = newJObject()
-  add(path_575148, "resourceGroupName", newJString(resourceGroupName))
-  add(query_575149, "api-version", newJString(apiVersion))
-  add(path_575148, "subscriptionId", newJString(subscriptionId))
-  add(path_575148, "profileName", newJString(profileName))
-  add(path_575148, "endpointName", newJString(endpointName))
-  result = call_575147.call(path_575148, query_575149, nil, nil, nil)
+  var path_564248 = newJObject()
+  var query_564249 = newJObject()
+  add(path_564248, "profileName", newJString(profileName))
+  add(query_564249, "api-version", newJString(apiVersion))
+  add(path_564248, "subscriptionId", newJString(subscriptionId))
+  add(path_564248, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564248, "endpointName", newJString(endpointName))
+  result = call_564247.call(path_564248, query_564249, nil, nil, nil)
 
-var endpointsDelete* = Call_EndpointsDelete_575138(name: "endpointsDelete",
+var endpointsDelete* = Call_EndpointsDelete_564238(name: "endpointsDelete",
     meth: HttpMethod.HttpDelete, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Cdn/profiles/{profileName}/endpoints/{endpointName}",
-    validator: validate_EndpointsDelete_575139, base: "", url: url_EndpointsDelete_575140,
+    validator: validate_EndpointsDelete_564239, base: "", url: url_EndpointsDelete_564240,
     schemes: {Scheme.Https})
 type
-  Call_EndpointsListResourceUsage_575164 = ref object of OpenApiRestCall_574466
-proc url_EndpointsListResourceUsage_575166(protocol: Scheme; host: string;
+  Call_EndpointsListResourceUsage_564264 = ref object of OpenApiRestCall_563564
+proc url_EndpointsListResourceUsage_564266(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1840,44 +1842,44 @@ proc url_EndpointsListResourceUsage_575166(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_EndpointsListResourceUsage_575165(path: JsonNode; query: JsonNode;
+proc validate_EndpointsListResourceUsage_564265(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Checks the quota and usage of geo filters and custom domains under the given endpoint.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : Name of the Resource group within the Azure subscription.
-  ##   subscriptionId: JString (required)
-  ##                 : Azure Subscription ID.
   ##   profileName: JString (required)
   ##              : Name of the CDN profile which is unique within the resource group.
+  ##   subscriptionId: JString (required)
+  ##                 : Azure Subscription ID.
+  ##   resourceGroupName: JString (required)
+  ##                    : Name of the Resource group within the Azure subscription.
   ##   endpointName: JString (required)
   ##               : Name of the endpoint under the profile which is unique globally.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_575167 = path.getOrDefault("resourceGroupName")
-  valid_575167 = validateParameter(valid_575167, JString, required = true,
+        "path argument is necessary due to required `profileName` field"
+  var valid_564267 = path.getOrDefault("profileName")
+  valid_564267 = validateParameter(valid_564267, JString, required = true,
                                  default = nil)
-  if valid_575167 != nil:
-    section.add "resourceGroupName", valid_575167
-  var valid_575168 = path.getOrDefault("subscriptionId")
-  valid_575168 = validateParameter(valid_575168, JString, required = true,
+  if valid_564267 != nil:
+    section.add "profileName", valid_564267
+  var valid_564268 = path.getOrDefault("subscriptionId")
+  valid_564268 = validateParameter(valid_564268, JString, required = true,
                                  default = nil)
-  if valid_575168 != nil:
-    section.add "subscriptionId", valid_575168
-  var valid_575169 = path.getOrDefault("profileName")
-  valid_575169 = validateParameter(valid_575169, JString, required = true,
+  if valid_564268 != nil:
+    section.add "subscriptionId", valid_564268
+  var valid_564269 = path.getOrDefault("resourceGroupName")
+  valid_564269 = validateParameter(valid_564269, JString, required = true,
                                  default = nil)
-  if valid_575169 != nil:
-    section.add "profileName", valid_575169
-  var valid_575170 = path.getOrDefault("endpointName")
-  valid_575170 = validateParameter(valid_575170, JString, required = true,
+  if valid_564269 != nil:
+    section.add "resourceGroupName", valid_564269
+  var valid_564270 = path.getOrDefault("endpointName")
+  valid_564270 = validateParameter(valid_564270, JString, required = true,
                                  default = nil)
-  if valid_575170 != nil:
-    section.add "endpointName", valid_575170
+  if valid_564270 != nil:
+    section.add "endpointName", valid_564270
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1885,11 +1887,11 @@ proc validate_EndpointsListResourceUsage_575165(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575171 = query.getOrDefault("api-version")
-  valid_575171 = validateParameter(valid_575171, JString, required = true,
+  var valid_564271 = query.getOrDefault("api-version")
+  valid_564271 = validateParameter(valid_564271, JString, required = true,
                                  default = nil)
-  if valid_575171 != nil:
-    section.add "api-version", valid_575171
+  if valid_564271 != nil:
+    section.add "api-version", valid_564271
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1898,51 +1900,51 @@ proc validate_EndpointsListResourceUsage_575165(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_575172: Call_EndpointsListResourceUsage_575164; path: JsonNode;
+proc call*(call_564272: Call_EndpointsListResourceUsage_564264; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Checks the quota and usage of geo filters and custom domains under the given endpoint.
   ## 
-  let valid = call_575172.validator(path, query, header, formData, body)
-  let scheme = call_575172.pickScheme
+  let valid = call_564272.validator(path, query, header, formData, body)
+  let scheme = call_564272.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575172.url(scheme.get, call_575172.host, call_575172.base,
-                         call_575172.route, valid.getOrDefault("path"),
+  let url = call_564272.url(scheme.get, call_564272.host, call_564272.base,
+                         call_564272.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575172, url, valid)
+  result = hook(call_564272, url, valid)
 
-proc call*(call_575173: Call_EndpointsListResourceUsage_575164;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          profileName: string; endpointName: string): Recallable =
+proc call*(call_564273: Call_EndpointsListResourceUsage_564264;
+          profileName: string; apiVersion: string; subscriptionId: string;
+          resourceGroupName: string; endpointName: string): Recallable =
   ## endpointsListResourceUsage
   ## Checks the quota and usage of geo filters and custom domains under the given endpoint.
-  ##   resourceGroupName: string (required)
-  ##                    : Name of the Resource group within the Azure subscription.
+  ##   profileName: string (required)
+  ##              : Name of the CDN profile which is unique within the resource group.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request. Current version is 2016-10-02.
   ##   subscriptionId: string (required)
   ##                 : Azure Subscription ID.
-  ##   profileName: string (required)
-  ##              : Name of the CDN profile which is unique within the resource group.
+  ##   resourceGroupName: string (required)
+  ##                    : Name of the Resource group within the Azure subscription.
   ##   endpointName: string (required)
   ##               : Name of the endpoint under the profile which is unique globally.
-  var path_575174 = newJObject()
-  var query_575175 = newJObject()
-  add(path_575174, "resourceGroupName", newJString(resourceGroupName))
-  add(query_575175, "api-version", newJString(apiVersion))
-  add(path_575174, "subscriptionId", newJString(subscriptionId))
-  add(path_575174, "profileName", newJString(profileName))
-  add(path_575174, "endpointName", newJString(endpointName))
-  result = call_575173.call(path_575174, query_575175, nil, nil, nil)
+  var path_564274 = newJObject()
+  var query_564275 = newJObject()
+  add(path_564274, "profileName", newJString(profileName))
+  add(query_564275, "api-version", newJString(apiVersion))
+  add(path_564274, "subscriptionId", newJString(subscriptionId))
+  add(path_564274, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564274, "endpointName", newJString(endpointName))
+  result = call_564273.call(path_564274, query_564275, nil, nil, nil)
 
-var endpointsListResourceUsage* = Call_EndpointsListResourceUsage_575164(
+var endpointsListResourceUsage* = Call_EndpointsListResourceUsage_564264(
     name: "endpointsListResourceUsage", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Cdn/profiles/{profileName}/endpoints/{endpointName}/checkResourceUsage",
-    validator: validate_EndpointsListResourceUsage_575165, base: "",
-    url: url_EndpointsListResourceUsage_575166, schemes: {Scheme.Https})
+    validator: validate_EndpointsListResourceUsage_564265, base: "",
+    url: url_EndpointsListResourceUsage_564266, schemes: {Scheme.Https})
 type
-  Call_CustomDomainsListByEndpoint_575176 = ref object of OpenApiRestCall_574466
-proc url_CustomDomainsListByEndpoint_575178(protocol: Scheme; host: string;
+  Call_CustomDomainsListByEndpoint_564276 = ref object of OpenApiRestCall_563564
+proc url_CustomDomainsListByEndpoint_564278(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1968,44 +1970,44 @@ proc url_CustomDomainsListByEndpoint_575178(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_CustomDomainsListByEndpoint_575177(path: JsonNode; query: JsonNode;
+proc validate_CustomDomainsListByEndpoint_564277(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists all of the existing custom domains within an endpoint.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : Name of the Resource group within the Azure subscription.
-  ##   subscriptionId: JString (required)
-  ##                 : Azure Subscription ID.
   ##   profileName: JString (required)
   ##              : Name of the CDN profile which is unique within the resource group.
+  ##   subscriptionId: JString (required)
+  ##                 : Azure Subscription ID.
+  ##   resourceGroupName: JString (required)
+  ##                    : Name of the Resource group within the Azure subscription.
   ##   endpointName: JString (required)
   ##               : Name of the endpoint under the profile which is unique globally.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_575179 = path.getOrDefault("resourceGroupName")
-  valid_575179 = validateParameter(valid_575179, JString, required = true,
+        "path argument is necessary due to required `profileName` field"
+  var valid_564279 = path.getOrDefault("profileName")
+  valid_564279 = validateParameter(valid_564279, JString, required = true,
                                  default = nil)
-  if valid_575179 != nil:
-    section.add "resourceGroupName", valid_575179
-  var valid_575180 = path.getOrDefault("subscriptionId")
-  valid_575180 = validateParameter(valid_575180, JString, required = true,
+  if valid_564279 != nil:
+    section.add "profileName", valid_564279
+  var valid_564280 = path.getOrDefault("subscriptionId")
+  valid_564280 = validateParameter(valid_564280, JString, required = true,
                                  default = nil)
-  if valid_575180 != nil:
-    section.add "subscriptionId", valid_575180
-  var valid_575181 = path.getOrDefault("profileName")
-  valid_575181 = validateParameter(valid_575181, JString, required = true,
+  if valid_564280 != nil:
+    section.add "subscriptionId", valid_564280
+  var valid_564281 = path.getOrDefault("resourceGroupName")
+  valid_564281 = validateParameter(valid_564281, JString, required = true,
                                  default = nil)
-  if valid_575181 != nil:
-    section.add "profileName", valid_575181
-  var valid_575182 = path.getOrDefault("endpointName")
-  valid_575182 = validateParameter(valid_575182, JString, required = true,
+  if valid_564281 != nil:
+    section.add "resourceGroupName", valid_564281
+  var valid_564282 = path.getOrDefault("endpointName")
+  valid_564282 = validateParameter(valid_564282, JString, required = true,
                                  default = nil)
-  if valid_575182 != nil:
-    section.add "endpointName", valid_575182
+  if valid_564282 != nil:
+    section.add "endpointName", valid_564282
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2013,11 +2015,11 @@ proc validate_CustomDomainsListByEndpoint_575177(path: JsonNode; query: JsonNode
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575183 = query.getOrDefault("api-version")
-  valid_575183 = validateParameter(valid_575183, JString, required = true,
+  var valid_564283 = query.getOrDefault("api-version")
+  valid_564283 = validateParameter(valid_564283, JString, required = true,
                                  default = nil)
-  if valid_575183 != nil:
-    section.add "api-version", valid_575183
+  if valid_564283 != nil:
+    section.add "api-version", valid_564283
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2026,51 +2028,51 @@ proc validate_CustomDomainsListByEndpoint_575177(path: JsonNode; query: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_575184: Call_CustomDomainsListByEndpoint_575176; path: JsonNode;
+proc call*(call_564284: Call_CustomDomainsListByEndpoint_564276; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists all of the existing custom domains within an endpoint.
   ## 
-  let valid = call_575184.validator(path, query, header, formData, body)
-  let scheme = call_575184.pickScheme
+  let valid = call_564284.validator(path, query, header, formData, body)
+  let scheme = call_564284.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575184.url(scheme.get, call_575184.host, call_575184.base,
-                         call_575184.route, valid.getOrDefault("path"),
+  let url = call_564284.url(scheme.get, call_564284.host, call_564284.base,
+                         call_564284.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575184, url, valid)
+  result = hook(call_564284, url, valid)
 
-proc call*(call_575185: Call_CustomDomainsListByEndpoint_575176;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          profileName: string; endpointName: string): Recallable =
+proc call*(call_564285: Call_CustomDomainsListByEndpoint_564276;
+          profileName: string; apiVersion: string; subscriptionId: string;
+          resourceGroupName: string; endpointName: string): Recallable =
   ## customDomainsListByEndpoint
   ## Lists all of the existing custom domains within an endpoint.
-  ##   resourceGroupName: string (required)
-  ##                    : Name of the Resource group within the Azure subscription.
+  ##   profileName: string (required)
+  ##              : Name of the CDN profile which is unique within the resource group.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request. Current version is 2016-10-02.
   ##   subscriptionId: string (required)
   ##                 : Azure Subscription ID.
-  ##   profileName: string (required)
-  ##              : Name of the CDN profile which is unique within the resource group.
+  ##   resourceGroupName: string (required)
+  ##                    : Name of the Resource group within the Azure subscription.
   ##   endpointName: string (required)
   ##               : Name of the endpoint under the profile which is unique globally.
-  var path_575186 = newJObject()
-  var query_575187 = newJObject()
-  add(path_575186, "resourceGroupName", newJString(resourceGroupName))
-  add(query_575187, "api-version", newJString(apiVersion))
-  add(path_575186, "subscriptionId", newJString(subscriptionId))
-  add(path_575186, "profileName", newJString(profileName))
-  add(path_575186, "endpointName", newJString(endpointName))
-  result = call_575185.call(path_575186, query_575187, nil, nil, nil)
+  var path_564286 = newJObject()
+  var query_564287 = newJObject()
+  add(path_564286, "profileName", newJString(profileName))
+  add(query_564287, "api-version", newJString(apiVersion))
+  add(path_564286, "subscriptionId", newJString(subscriptionId))
+  add(path_564286, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564286, "endpointName", newJString(endpointName))
+  result = call_564285.call(path_564286, query_564287, nil, nil, nil)
 
-var customDomainsListByEndpoint* = Call_CustomDomainsListByEndpoint_575176(
+var customDomainsListByEndpoint* = Call_CustomDomainsListByEndpoint_564276(
     name: "customDomainsListByEndpoint", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Cdn/profiles/{profileName}/endpoints/{endpointName}/customDomains",
-    validator: validate_CustomDomainsListByEndpoint_575177, base: "",
-    url: url_CustomDomainsListByEndpoint_575178, schemes: {Scheme.Https})
+    validator: validate_CustomDomainsListByEndpoint_564277, base: "",
+    url: url_CustomDomainsListByEndpoint_564278, schemes: {Scheme.Https})
 type
-  Call_CustomDomainsCreate_575201 = ref object of OpenApiRestCall_574466
-proc url_CustomDomainsCreate_575203(protocol: Scheme; host: string; base: string;
+  Call_CustomDomainsCreate_564301 = ref object of OpenApiRestCall_563564
+proc url_CustomDomainsCreate_564303(protocol: Scheme; host: string; base: string;
                                    route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2099,7 +2101,7 @@ proc url_CustomDomainsCreate_575203(protocol: Scheme; host: string; base: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_CustomDomainsCreate_575202(path: JsonNode; query: JsonNode;
+proc validate_CustomDomainsCreate_564302(path: JsonNode; query: JsonNode;
                                         header: JsonNode; formData: JsonNode;
                                         body: JsonNode): JsonNode =
   ## Creates a new custom domain within an endpoint.
@@ -2107,44 +2109,44 @@ proc validate_CustomDomainsCreate_575202(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : Name of the Resource group within the Azure subscription.
-  ##   subscriptionId: JString (required)
-  ##                 : Azure Subscription ID.
   ##   customDomainName: JString (required)
   ##                   : Name of the custom domain within an endpoint.
   ##   profileName: JString (required)
   ##              : Name of the CDN profile which is unique within the resource group.
+  ##   subscriptionId: JString (required)
+  ##                 : Azure Subscription ID.
+  ##   resourceGroupName: JString (required)
+  ##                    : Name of the Resource group within the Azure subscription.
   ##   endpointName: JString (required)
   ##               : Name of the endpoint under the profile which is unique globally.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_575204 = path.getOrDefault("resourceGroupName")
-  valid_575204 = validateParameter(valid_575204, JString, required = true,
+        "path argument is necessary due to required `customDomainName` field"
+  var valid_564304 = path.getOrDefault("customDomainName")
+  valid_564304 = validateParameter(valid_564304, JString, required = true,
                                  default = nil)
-  if valid_575204 != nil:
-    section.add "resourceGroupName", valid_575204
-  var valid_575205 = path.getOrDefault("subscriptionId")
-  valid_575205 = validateParameter(valid_575205, JString, required = true,
+  if valid_564304 != nil:
+    section.add "customDomainName", valid_564304
+  var valid_564305 = path.getOrDefault("profileName")
+  valid_564305 = validateParameter(valid_564305, JString, required = true,
                                  default = nil)
-  if valid_575205 != nil:
-    section.add "subscriptionId", valid_575205
-  var valid_575206 = path.getOrDefault("customDomainName")
-  valid_575206 = validateParameter(valid_575206, JString, required = true,
+  if valid_564305 != nil:
+    section.add "profileName", valid_564305
+  var valid_564306 = path.getOrDefault("subscriptionId")
+  valid_564306 = validateParameter(valid_564306, JString, required = true,
                                  default = nil)
-  if valid_575206 != nil:
-    section.add "customDomainName", valid_575206
-  var valid_575207 = path.getOrDefault("profileName")
-  valid_575207 = validateParameter(valid_575207, JString, required = true,
+  if valid_564306 != nil:
+    section.add "subscriptionId", valid_564306
+  var valid_564307 = path.getOrDefault("resourceGroupName")
+  valid_564307 = validateParameter(valid_564307, JString, required = true,
                                  default = nil)
-  if valid_575207 != nil:
-    section.add "profileName", valid_575207
-  var valid_575208 = path.getOrDefault("endpointName")
-  valid_575208 = validateParameter(valid_575208, JString, required = true,
+  if valid_564307 != nil:
+    section.add "resourceGroupName", valid_564307
+  var valid_564308 = path.getOrDefault("endpointName")
+  valid_564308 = validateParameter(valid_564308, JString, required = true,
                                  default = nil)
-  if valid_575208 != nil:
-    section.add "endpointName", valid_575208
+  if valid_564308 != nil:
+    section.add "endpointName", valid_564308
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2152,11 +2154,11 @@ proc validate_CustomDomainsCreate_575202(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575209 = query.getOrDefault("api-version")
-  valid_575209 = validateParameter(valid_575209, JString, required = true,
+  var valid_564309 = query.getOrDefault("api-version")
+  valid_564309 = validateParameter(valid_564309, JString, required = true,
                                  default = nil)
-  if valid_575209 != nil:
-    section.add "api-version", valid_575209
+  if valid_564309 != nil:
+    section.add "api-version", valid_564309
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2170,60 +2172,59 @@ proc validate_CustomDomainsCreate_575202(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_575211: Call_CustomDomainsCreate_575201; path: JsonNode;
+proc call*(call_564311: Call_CustomDomainsCreate_564301; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Creates a new custom domain within an endpoint.
   ## 
-  let valid = call_575211.validator(path, query, header, formData, body)
-  let scheme = call_575211.pickScheme
+  let valid = call_564311.validator(path, query, header, formData, body)
+  let scheme = call_564311.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575211.url(scheme.get, call_575211.host, call_575211.base,
-                         call_575211.route, valid.getOrDefault("path"),
+  let url = call_564311.url(scheme.get, call_564311.host, call_564311.base,
+                         call_564311.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575211, url, valid)
+  result = hook(call_564311, url, valid)
 
-proc call*(call_575212: Call_CustomDomainsCreate_575201; resourceGroupName: string;
-          apiVersion: string; customDomainProperties: JsonNode;
-          subscriptionId: string; customDomainName: string; profileName: string;
-          endpointName: string): Recallable =
+proc call*(call_564312: Call_CustomDomainsCreate_564301; customDomainName: string;
+          profileName: string; apiVersion: string; customDomainProperties: JsonNode;
+          subscriptionId: string; resourceGroupName: string; endpointName: string): Recallable =
   ## customDomainsCreate
   ## Creates a new custom domain within an endpoint.
-  ##   resourceGroupName: string (required)
-  ##                    : Name of the Resource group within the Azure subscription.
+  ##   customDomainName: string (required)
+  ##                   : Name of the custom domain within an endpoint.
+  ##   profileName: string (required)
+  ##              : Name of the CDN profile which is unique within the resource group.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request. Current version is 2016-10-02.
   ##   customDomainProperties: JObject (required)
   ##                         : Properties required to create a new custom domain.
   ##   subscriptionId: string (required)
   ##                 : Azure Subscription ID.
-  ##   customDomainName: string (required)
-  ##                   : Name of the custom domain within an endpoint.
-  ##   profileName: string (required)
-  ##              : Name of the CDN profile which is unique within the resource group.
+  ##   resourceGroupName: string (required)
+  ##                    : Name of the Resource group within the Azure subscription.
   ##   endpointName: string (required)
   ##               : Name of the endpoint under the profile which is unique globally.
-  var path_575213 = newJObject()
-  var query_575214 = newJObject()
-  var body_575215 = newJObject()
-  add(path_575213, "resourceGroupName", newJString(resourceGroupName))
-  add(query_575214, "api-version", newJString(apiVersion))
+  var path_564313 = newJObject()
+  var query_564314 = newJObject()
+  var body_564315 = newJObject()
+  add(path_564313, "customDomainName", newJString(customDomainName))
+  add(path_564313, "profileName", newJString(profileName))
+  add(query_564314, "api-version", newJString(apiVersion))
   if customDomainProperties != nil:
-    body_575215 = customDomainProperties
-  add(path_575213, "subscriptionId", newJString(subscriptionId))
-  add(path_575213, "customDomainName", newJString(customDomainName))
-  add(path_575213, "profileName", newJString(profileName))
-  add(path_575213, "endpointName", newJString(endpointName))
-  result = call_575212.call(path_575213, query_575214, nil, nil, body_575215)
+    body_564315 = customDomainProperties
+  add(path_564313, "subscriptionId", newJString(subscriptionId))
+  add(path_564313, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564313, "endpointName", newJString(endpointName))
+  result = call_564312.call(path_564313, query_564314, nil, nil, body_564315)
 
-var customDomainsCreate* = Call_CustomDomainsCreate_575201(
+var customDomainsCreate* = Call_CustomDomainsCreate_564301(
     name: "customDomainsCreate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Cdn/profiles/{profileName}/endpoints/{endpointName}/customDomains/{customDomainName}",
-    validator: validate_CustomDomainsCreate_575202, base: "",
-    url: url_CustomDomainsCreate_575203, schemes: {Scheme.Https})
+    validator: validate_CustomDomainsCreate_564302, base: "",
+    url: url_CustomDomainsCreate_564303, schemes: {Scheme.Https})
 type
-  Call_CustomDomainsGet_575188 = ref object of OpenApiRestCall_574466
-proc url_CustomDomainsGet_575190(protocol: Scheme; host: string; base: string;
+  Call_CustomDomainsGet_564288 = ref object of OpenApiRestCall_563564
+proc url_CustomDomainsGet_564290(protocol: Scheme; host: string; base: string;
                                 route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2252,7 +2253,7 @@ proc url_CustomDomainsGet_575190(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_CustomDomainsGet_575189(path: JsonNode; query: JsonNode;
+proc validate_CustomDomainsGet_564289(path: JsonNode; query: JsonNode;
                                      header: JsonNode; formData: JsonNode;
                                      body: JsonNode): JsonNode =
   ## Gets an existing custom domain within an endpoint.
@@ -2260,44 +2261,44 @@ proc validate_CustomDomainsGet_575189(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : Name of the Resource group within the Azure subscription.
-  ##   subscriptionId: JString (required)
-  ##                 : Azure Subscription ID.
   ##   customDomainName: JString (required)
   ##                   : Name of the custom domain within an endpoint.
   ##   profileName: JString (required)
   ##              : Name of the CDN profile which is unique within the resource group.
+  ##   subscriptionId: JString (required)
+  ##                 : Azure Subscription ID.
+  ##   resourceGroupName: JString (required)
+  ##                    : Name of the Resource group within the Azure subscription.
   ##   endpointName: JString (required)
   ##               : Name of the endpoint under the profile which is unique globally.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_575191 = path.getOrDefault("resourceGroupName")
-  valid_575191 = validateParameter(valid_575191, JString, required = true,
+        "path argument is necessary due to required `customDomainName` field"
+  var valid_564291 = path.getOrDefault("customDomainName")
+  valid_564291 = validateParameter(valid_564291, JString, required = true,
                                  default = nil)
-  if valid_575191 != nil:
-    section.add "resourceGroupName", valid_575191
-  var valid_575192 = path.getOrDefault("subscriptionId")
-  valid_575192 = validateParameter(valid_575192, JString, required = true,
+  if valid_564291 != nil:
+    section.add "customDomainName", valid_564291
+  var valid_564292 = path.getOrDefault("profileName")
+  valid_564292 = validateParameter(valid_564292, JString, required = true,
                                  default = nil)
-  if valid_575192 != nil:
-    section.add "subscriptionId", valid_575192
-  var valid_575193 = path.getOrDefault("customDomainName")
-  valid_575193 = validateParameter(valid_575193, JString, required = true,
+  if valid_564292 != nil:
+    section.add "profileName", valid_564292
+  var valid_564293 = path.getOrDefault("subscriptionId")
+  valid_564293 = validateParameter(valid_564293, JString, required = true,
                                  default = nil)
-  if valid_575193 != nil:
-    section.add "customDomainName", valid_575193
-  var valid_575194 = path.getOrDefault("profileName")
-  valid_575194 = validateParameter(valid_575194, JString, required = true,
+  if valid_564293 != nil:
+    section.add "subscriptionId", valid_564293
+  var valid_564294 = path.getOrDefault("resourceGroupName")
+  valid_564294 = validateParameter(valid_564294, JString, required = true,
                                  default = nil)
-  if valid_575194 != nil:
-    section.add "profileName", valid_575194
-  var valid_575195 = path.getOrDefault("endpointName")
-  valid_575195 = validateParameter(valid_575195, JString, required = true,
+  if valid_564294 != nil:
+    section.add "resourceGroupName", valid_564294
+  var valid_564295 = path.getOrDefault("endpointName")
+  valid_564295 = validateParameter(valid_564295, JString, required = true,
                                  default = nil)
-  if valid_575195 != nil:
-    section.add "endpointName", valid_575195
+  if valid_564295 != nil:
+    section.add "endpointName", valid_564295
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2305,11 +2306,11 @@ proc validate_CustomDomainsGet_575189(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575196 = query.getOrDefault("api-version")
-  valid_575196 = validateParameter(valid_575196, JString, required = true,
+  var valid_564296 = query.getOrDefault("api-version")
+  valid_564296 = validateParameter(valid_564296, JString, required = true,
                                  default = nil)
-  if valid_575196 != nil:
-    section.add "api-version", valid_575196
+  if valid_564296 != nil:
+    section.add "api-version", valid_564296
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2318,53 +2319,53 @@ proc validate_CustomDomainsGet_575189(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_575197: Call_CustomDomainsGet_575188; path: JsonNode;
+proc call*(call_564297: Call_CustomDomainsGet_564288; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets an existing custom domain within an endpoint.
   ## 
-  let valid = call_575197.validator(path, query, header, formData, body)
-  let scheme = call_575197.pickScheme
+  let valid = call_564297.validator(path, query, header, formData, body)
+  let scheme = call_564297.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575197.url(scheme.get, call_575197.host, call_575197.base,
-                         call_575197.route, valid.getOrDefault("path"),
+  let url = call_564297.url(scheme.get, call_564297.host, call_564297.base,
+                         call_564297.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575197, url, valid)
+  result = hook(call_564297, url, valid)
 
-proc call*(call_575198: Call_CustomDomainsGet_575188; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; customDomainName: string;
-          profileName: string; endpointName: string): Recallable =
+proc call*(call_564298: Call_CustomDomainsGet_564288; customDomainName: string;
+          profileName: string; apiVersion: string; subscriptionId: string;
+          resourceGroupName: string; endpointName: string): Recallable =
   ## customDomainsGet
   ## Gets an existing custom domain within an endpoint.
-  ##   resourceGroupName: string (required)
-  ##                    : Name of the Resource group within the Azure subscription.
-  ##   apiVersion: string (required)
-  ##             : Version of the API to be used with the client request. Current version is 2016-10-02.
-  ##   subscriptionId: string (required)
-  ##                 : Azure Subscription ID.
   ##   customDomainName: string (required)
   ##                   : Name of the custom domain within an endpoint.
   ##   profileName: string (required)
   ##              : Name of the CDN profile which is unique within the resource group.
+  ##   apiVersion: string (required)
+  ##             : Version of the API to be used with the client request. Current version is 2016-10-02.
+  ##   subscriptionId: string (required)
+  ##                 : Azure Subscription ID.
+  ##   resourceGroupName: string (required)
+  ##                    : Name of the Resource group within the Azure subscription.
   ##   endpointName: string (required)
   ##               : Name of the endpoint under the profile which is unique globally.
-  var path_575199 = newJObject()
-  var query_575200 = newJObject()
-  add(path_575199, "resourceGroupName", newJString(resourceGroupName))
-  add(query_575200, "api-version", newJString(apiVersion))
-  add(path_575199, "subscriptionId", newJString(subscriptionId))
-  add(path_575199, "customDomainName", newJString(customDomainName))
-  add(path_575199, "profileName", newJString(profileName))
-  add(path_575199, "endpointName", newJString(endpointName))
-  result = call_575198.call(path_575199, query_575200, nil, nil, nil)
+  var path_564299 = newJObject()
+  var query_564300 = newJObject()
+  add(path_564299, "customDomainName", newJString(customDomainName))
+  add(path_564299, "profileName", newJString(profileName))
+  add(query_564300, "api-version", newJString(apiVersion))
+  add(path_564299, "subscriptionId", newJString(subscriptionId))
+  add(path_564299, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564299, "endpointName", newJString(endpointName))
+  result = call_564298.call(path_564299, query_564300, nil, nil, nil)
 
-var customDomainsGet* = Call_CustomDomainsGet_575188(name: "customDomainsGet",
+var customDomainsGet* = Call_CustomDomainsGet_564288(name: "customDomainsGet",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Cdn/profiles/{profileName}/endpoints/{endpointName}/customDomains/{customDomainName}",
-    validator: validate_CustomDomainsGet_575189, base: "",
-    url: url_CustomDomainsGet_575190, schemes: {Scheme.Https})
+    validator: validate_CustomDomainsGet_564289, base: "",
+    url: url_CustomDomainsGet_564290, schemes: {Scheme.Https})
 type
-  Call_CustomDomainsDelete_575216 = ref object of OpenApiRestCall_574466
-proc url_CustomDomainsDelete_575218(protocol: Scheme; host: string; base: string;
+  Call_CustomDomainsDelete_564316 = ref object of OpenApiRestCall_563564
+proc url_CustomDomainsDelete_564318(protocol: Scheme; host: string; base: string;
                                    route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2393,7 +2394,7 @@ proc url_CustomDomainsDelete_575218(protocol: Scheme; host: string; base: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_CustomDomainsDelete_575217(path: JsonNode; query: JsonNode;
+proc validate_CustomDomainsDelete_564317(path: JsonNode; query: JsonNode;
                                         header: JsonNode; formData: JsonNode;
                                         body: JsonNode): JsonNode =
   ## Deletes an existing custom domain within an endpoint.
@@ -2401,44 +2402,44 @@ proc validate_CustomDomainsDelete_575217(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : Name of the Resource group within the Azure subscription.
-  ##   subscriptionId: JString (required)
-  ##                 : Azure Subscription ID.
   ##   customDomainName: JString (required)
   ##                   : Name of the custom domain within an endpoint.
   ##   profileName: JString (required)
   ##              : Name of the CDN profile which is unique within the resource group.
+  ##   subscriptionId: JString (required)
+  ##                 : Azure Subscription ID.
+  ##   resourceGroupName: JString (required)
+  ##                    : Name of the Resource group within the Azure subscription.
   ##   endpointName: JString (required)
   ##               : Name of the endpoint under the profile which is unique globally.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_575219 = path.getOrDefault("resourceGroupName")
-  valid_575219 = validateParameter(valid_575219, JString, required = true,
+        "path argument is necessary due to required `customDomainName` field"
+  var valid_564319 = path.getOrDefault("customDomainName")
+  valid_564319 = validateParameter(valid_564319, JString, required = true,
                                  default = nil)
-  if valid_575219 != nil:
-    section.add "resourceGroupName", valid_575219
-  var valid_575220 = path.getOrDefault("subscriptionId")
-  valid_575220 = validateParameter(valid_575220, JString, required = true,
+  if valid_564319 != nil:
+    section.add "customDomainName", valid_564319
+  var valid_564320 = path.getOrDefault("profileName")
+  valid_564320 = validateParameter(valid_564320, JString, required = true,
                                  default = nil)
-  if valid_575220 != nil:
-    section.add "subscriptionId", valid_575220
-  var valid_575221 = path.getOrDefault("customDomainName")
-  valid_575221 = validateParameter(valid_575221, JString, required = true,
+  if valid_564320 != nil:
+    section.add "profileName", valid_564320
+  var valid_564321 = path.getOrDefault("subscriptionId")
+  valid_564321 = validateParameter(valid_564321, JString, required = true,
                                  default = nil)
-  if valid_575221 != nil:
-    section.add "customDomainName", valid_575221
-  var valid_575222 = path.getOrDefault("profileName")
-  valid_575222 = validateParameter(valid_575222, JString, required = true,
+  if valid_564321 != nil:
+    section.add "subscriptionId", valid_564321
+  var valid_564322 = path.getOrDefault("resourceGroupName")
+  valid_564322 = validateParameter(valid_564322, JString, required = true,
                                  default = nil)
-  if valid_575222 != nil:
-    section.add "profileName", valid_575222
-  var valid_575223 = path.getOrDefault("endpointName")
-  valid_575223 = validateParameter(valid_575223, JString, required = true,
+  if valid_564322 != nil:
+    section.add "resourceGroupName", valid_564322
+  var valid_564323 = path.getOrDefault("endpointName")
+  valid_564323 = validateParameter(valid_564323, JString, required = true,
                                  default = nil)
-  if valid_575223 != nil:
-    section.add "endpointName", valid_575223
+  if valid_564323 != nil:
+    section.add "endpointName", valid_564323
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2446,11 +2447,11 @@ proc validate_CustomDomainsDelete_575217(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575224 = query.getOrDefault("api-version")
-  valid_575224 = validateParameter(valid_575224, JString, required = true,
+  var valid_564324 = query.getOrDefault("api-version")
+  valid_564324 = validateParameter(valid_564324, JString, required = true,
                                  default = nil)
-  if valid_575224 != nil:
-    section.add "api-version", valid_575224
+  if valid_564324 != nil:
+    section.add "api-version", valid_564324
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2459,54 +2460,54 @@ proc validate_CustomDomainsDelete_575217(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_575225: Call_CustomDomainsDelete_575216; path: JsonNode;
+proc call*(call_564325: Call_CustomDomainsDelete_564316; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes an existing custom domain within an endpoint.
   ## 
-  let valid = call_575225.validator(path, query, header, formData, body)
-  let scheme = call_575225.pickScheme
+  let valid = call_564325.validator(path, query, header, formData, body)
+  let scheme = call_564325.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575225.url(scheme.get, call_575225.host, call_575225.base,
-                         call_575225.route, valid.getOrDefault("path"),
+  let url = call_564325.url(scheme.get, call_564325.host, call_564325.base,
+                         call_564325.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575225, url, valid)
+  result = hook(call_564325, url, valid)
 
-proc call*(call_575226: Call_CustomDomainsDelete_575216; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; customDomainName: string;
-          profileName: string; endpointName: string): Recallable =
+proc call*(call_564326: Call_CustomDomainsDelete_564316; customDomainName: string;
+          profileName: string; apiVersion: string; subscriptionId: string;
+          resourceGroupName: string; endpointName: string): Recallable =
   ## customDomainsDelete
   ## Deletes an existing custom domain within an endpoint.
-  ##   resourceGroupName: string (required)
-  ##                    : Name of the Resource group within the Azure subscription.
-  ##   apiVersion: string (required)
-  ##             : Version of the API to be used with the client request. Current version is 2016-10-02.
-  ##   subscriptionId: string (required)
-  ##                 : Azure Subscription ID.
   ##   customDomainName: string (required)
   ##                   : Name of the custom domain within an endpoint.
   ##   profileName: string (required)
   ##              : Name of the CDN profile which is unique within the resource group.
+  ##   apiVersion: string (required)
+  ##             : Version of the API to be used with the client request. Current version is 2016-10-02.
+  ##   subscriptionId: string (required)
+  ##                 : Azure Subscription ID.
+  ##   resourceGroupName: string (required)
+  ##                    : Name of the Resource group within the Azure subscription.
   ##   endpointName: string (required)
   ##               : Name of the endpoint under the profile which is unique globally.
-  var path_575227 = newJObject()
-  var query_575228 = newJObject()
-  add(path_575227, "resourceGroupName", newJString(resourceGroupName))
-  add(query_575228, "api-version", newJString(apiVersion))
-  add(path_575227, "subscriptionId", newJString(subscriptionId))
-  add(path_575227, "customDomainName", newJString(customDomainName))
-  add(path_575227, "profileName", newJString(profileName))
-  add(path_575227, "endpointName", newJString(endpointName))
-  result = call_575226.call(path_575227, query_575228, nil, nil, nil)
+  var path_564327 = newJObject()
+  var query_564328 = newJObject()
+  add(path_564327, "customDomainName", newJString(customDomainName))
+  add(path_564327, "profileName", newJString(profileName))
+  add(query_564328, "api-version", newJString(apiVersion))
+  add(path_564327, "subscriptionId", newJString(subscriptionId))
+  add(path_564327, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564327, "endpointName", newJString(endpointName))
+  result = call_564326.call(path_564327, query_564328, nil, nil, nil)
 
-var customDomainsDelete* = Call_CustomDomainsDelete_575216(
+var customDomainsDelete* = Call_CustomDomainsDelete_564316(
     name: "customDomainsDelete", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Cdn/profiles/{profileName}/endpoints/{endpointName}/customDomains/{customDomainName}",
-    validator: validate_CustomDomainsDelete_575217, base: "",
-    url: url_CustomDomainsDelete_575218, schemes: {Scheme.Https})
+    validator: validate_CustomDomainsDelete_564317, base: "",
+    url: url_CustomDomainsDelete_564318, schemes: {Scheme.Https})
 type
-  Call_CustomDomainsDisableCustomHttps_575229 = ref object of OpenApiRestCall_574466
-proc url_CustomDomainsDisableCustomHttps_575231(protocol: Scheme; host: string;
+  Call_CustomDomainsDisableCustomHttps_564329 = ref object of OpenApiRestCall_563564
+proc url_CustomDomainsDisableCustomHttps_564331(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2536,51 +2537,51 @@ proc url_CustomDomainsDisableCustomHttps_575231(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_CustomDomainsDisableCustomHttps_575230(path: JsonNode;
+proc validate_CustomDomainsDisableCustomHttps_564330(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Disable https delivery of the custom domain.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : Name of the Resource group within the Azure subscription.
-  ##   subscriptionId: JString (required)
-  ##                 : Azure Subscription ID.
   ##   customDomainName: JString (required)
   ##                   : Name of the custom domain within an endpoint.
   ##   profileName: JString (required)
   ##              : Name of the CDN profile which is unique within the resource group.
+  ##   subscriptionId: JString (required)
+  ##                 : Azure Subscription ID.
+  ##   resourceGroupName: JString (required)
+  ##                    : Name of the Resource group within the Azure subscription.
   ##   endpointName: JString (required)
   ##               : Name of the endpoint under the profile which is unique globally.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_575232 = path.getOrDefault("resourceGroupName")
-  valid_575232 = validateParameter(valid_575232, JString, required = true,
+        "path argument is necessary due to required `customDomainName` field"
+  var valid_564332 = path.getOrDefault("customDomainName")
+  valid_564332 = validateParameter(valid_564332, JString, required = true,
                                  default = nil)
-  if valid_575232 != nil:
-    section.add "resourceGroupName", valid_575232
-  var valid_575233 = path.getOrDefault("subscriptionId")
-  valid_575233 = validateParameter(valid_575233, JString, required = true,
+  if valid_564332 != nil:
+    section.add "customDomainName", valid_564332
+  var valid_564333 = path.getOrDefault("profileName")
+  valid_564333 = validateParameter(valid_564333, JString, required = true,
                                  default = nil)
-  if valid_575233 != nil:
-    section.add "subscriptionId", valid_575233
-  var valid_575234 = path.getOrDefault("customDomainName")
-  valid_575234 = validateParameter(valid_575234, JString, required = true,
+  if valid_564333 != nil:
+    section.add "profileName", valid_564333
+  var valid_564334 = path.getOrDefault("subscriptionId")
+  valid_564334 = validateParameter(valid_564334, JString, required = true,
                                  default = nil)
-  if valid_575234 != nil:
-    section.add "customDomainName", valid_575234
-  var valid_575235 = path.getOrDefault("profileName")
-  valid_575235 = validateParameter(valid_575235, JString, required = true,
+  if valid_564334 != nil:
+    section.add "subscriptionId", valid_564334
+  var valid_564335 = path.getOrDefault("resourceGroupName")
+  valid_564335 = validateParameter(valid_564335, JString, required = true,
                                  default = nil)
-  if valid_575235 != nil:
-    section.add "profileName", valid_575235
-  var valid_575236 = path.getOrDefault("endpointName")
-  valid_575236 = validateParameter(valid_575236, JString, required = true,
+  if valid_564335 != nil:
+    section.add "resourceGroupName", valid_564335
+  var valid_564336 = path.getOrDefault("endpointName")
+  valid_564336 = validateParameter(valid_564336, JString, required = true,
                                  default = nil)
-  if valid_575236 != nil:
-    section.add "endpointName", valid_575236
+  if valid_564336 != nil:
+    section.add "endpointName", valid_564336
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2588,11 +2589,11 @@ proc validate_CustomDomainsDisableCustomHttps_575230(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575237 = query.getOrDefault("api-version")
-  valid_575237 = validateParameter(valid_575237, JString, required = true,
+  var valid_564337 = query.getOrDefault("api-version")
+  valid_564337 = validateParameter(valid_564337, JString, required = true,
                                  default = nil)
-  if valid_575237 != nil:
-    section.add "api-version", valid_575237
+  if valid_564337 != nil:
+    section.add "api-version", valid_564337
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2601,55 +2602,55 @@ proc validate_CustomDomainsDisableCustomHttps_575230(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_575238: Call_CustomDomainsDisableCustomHttps_575229;
+proc call*(call_564338: Call_CustomDomainsDisableCustomHttps_564329;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Disable https delivery of the custom domain.
   ## 
-  let valid = call_575238.validator(path, query, header, formData, body)
-  let scheme = call_575238.pickScheme
+  let valid = call_564338.validator(path, query, header, formData, body)
+  let scheme = call_564338.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575238.url(scheme.get, call_575238.host, call_575238.base,
-                         call_575238.route, valid.getOrDefault("path"),
+  let url = call_564338.url(scheme.get, call_564338.host, call_564338.base,
+                         call_564338.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575238, url, valid)
+  result = hook(call_564338, url, valid)
 
-proc call*(call_575239: Call_CustomDomainsDisableCustomHttps_575229;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          customDomainName: string; profileName: string; endpointName: string): Recallable =
+proc call*(call_564339: Call_CustomDomainsDisableCustomHttps_564329;
+          customDomainName: string; profileName: string; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string; endpointName: string): Recallable =
   ## customDomainsDisableCustomHttps
   ## Disable https delivery of the custom domain.
-  ##   resourceGroupName: string (required)
-  ##                    : Name of the Resource group within the Azure subscription.
-  ##   apiVersion: string (required)
-  ##             : Version of the API to be used with the client request. Current version is 2016-10-02.
-  ##   subscriptionId: string (required)
-  ##                 : Azure Subscription ID.
   ##   customDomainName: string (required)
   ##                   : Name of the custom domain within an endpoint.
   ##   profileName: string (required)
   ##              : Name of the CDN profile which is unique within the resource group.
+  ##   apiVersion: string (required)
+  ##             : Version of the API to be used with the client request. Current version is 2016-10-02.
+  ##   subscriptionId: string (required)
+  ##                 : Azure Subscription ID.
+  ##   resourceGroupName: string (required)
+  ##                    : Name of the Resource group within the Azure subscription.
   ##   endpointName: string (required)
   ##               : Name of the endpoint under the profile which is unique globally.
-  var path_575240 = newJObject()
-  var query_575241 = newJObject()
-  add(path_575240, "resourceGroupName", newJString(resourceGroupName))
-  add(query_575241, "api-version", newJString(apiVersion))
-  add(path_575240, "subscriptionId", newJString(subscriptionId))
-  add(path_575240, "customDomainName", newJString(customDomainName))
-  add(path_575240, "profileName", newJString(profileName))
-  add(path_575240, "endpointName", newJString(endpointName))
-  result = call_575239.call(path_575240, query_575241, nil, nil, nil)
+  var path_564340 = newJObject()
+  var query_564341 = newJObject()
+  add(path_564340, "customDomainName", newJString(customDomainName))
+  add(path_564340, "profileName", newJString(profileName))
+  add(query_564341, "api-version", newJString(apiVersion))
+  add(path_564340, "subscriptionId", newJString(subscriptionId))
+  add(path_564340, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564340, "endpointName", newJString(endpointName))
+  result = call_564339.call(path_564340, query_564341, nil, nil, nil)
 
-var customDomainsDisableCustomHttps* = Call_CustomDomainsDisableCustomHttps_575229(
+var customDomainsDisableCustomHttps* = Call_CustomDomainsDisableCustomHttps_564329(
     name: "customDomainsDisableCustomHttps", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Cdn/profiles/{profileName}/endpoints/{endpointName}/customDomains/{customDomainName}/disableCustomHttps",
-    validator: validate_CustomDomainsDisableCustomHttps_575230, base: "",
-    url: url_CustomDomainsDisableCustomHttps_575231, schemes: {Scheme.Https})
+    validator: validate_CustomDomainsDisableCustomHttps_564330, base: "",
+    url: url_CustomDomainsDisableCustomHttps_564331, schemes: {Scheme.Https})
 type
-  Call_CustomDomainsEnableCustomHttps_575242 = ref object of OpenApiRestCall_574466
-proc url_CustomDomainsEnableCustomHttps_575244(protocol: Scheme; host: string;
+  Call_CustomDomainsEnableCustomHttps_564342 = ref object of OpenApiRestCall_563564
+proc url_CustomDomainsEnableCustomHttps_564344(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2679,51 +2680,51 @@ proc url_CustomDomainsEnableCustomHttps_575244(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_CustomDomainsEnableCustomHttps_575243(path: JsonNode;
+proc validate_CustomDomainsEnableCustomHttps_564343(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Enable https delivery of the custom domain.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : Name of the Resource group within the Azure subscription.
-  ##   subscriptionId: JString (required)
-  ##                 : Azure Subscription ID.
   ##   customDomainName: JString (required)
   ##                   : Name of the custom domain within an endpoint.
   ##   profileName: JString (required)
   ##              : Name of the CDN profile which is unique within the resource group.
+  ##   subscriptionId: JString (required)
+  ##                 : Azure Subscription ID.
+  ##   resourceGroupName: JString (required)
+  ##                    : Name of the Resource group within the Azure subscription.
   ##   endpointName: JString (required)
   ##               : Name of the endpoint under the profile which is unique globally.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_575245 = path.getOrDefault("resourceGroupName")
-  valid_575245 = validateParameter(valid_575245, JString, required = true,
+        "path argument is necessary due to required `customDomainName` field"
+  var valid_564345 = path.getOrDefault("customDomainName")
+  valid_564345 = validateParameter(valid_564345, JString, required = true,
                                  default = nil)
-  if valid_575245 != nil:
-    section.add "resourceGroupName", valid_575245
-  var valid_575246 = path.getOrDefault("subscriptionId")
-  valid_575246 = validateParameter(valid_575246, JString, required = true,
+  if valid_564345 != nil:
+    section.add "customDomainName", valid_564345
+  var valid_564346 = path.getOrDefault("profileName")
+  valid_564346 = validateParameter(valid_564346, JString, required = true,
                                  default = nil)
-  if valid_575246 != nil:
-    section.add "subscriptionId", valid_575246
-  var valid_575247 = path.getOrDefault("customDomainName")
-  valid_575247 = validateParameter(valid_575247, JString, required = true,
+  if valid_564346 != nil:
+    section.add "profileName", valid_564346
+  var valid_564347 = path.getOrDefault("subscriptionId")
+  valid_564347 = validateParameter(valid_564347, JString, required = true,
                                  default = nil)
-  if valid_575247 != nil:
-    section.add "customDomainName", valid_575247
-  var valid_575248 = path.getOrDefault("profileName")
-  valid_575248 = validateParameter(valid_575248, JString, required = true,
+  if valid_564347 != nil:
+    section.add "subscriptionId", valid_564347
+  var valid_564348 = path.getOrDefault("resourceGroupName")
+  valid_564348 = validateParameter(valid_564348, JString, required = true,
                                  default = nil)
-  if valid_575248 != nil:
-    section.add "profileName", valid_575248
-  var valid_575249 = path.getOrDefault("endpointName")
-  valid_575249 = validateParameter(valid_575249, JString, required = true,
+  if valid_564348 != nil:
+    section.add "resourceGroupName", valid_564348
+  var valid_564349 = path.getOrDefault("endpointName")
+  valid_564349 = validateParameter(valid_564349, JString, required = true,
                                  default = nil)
-  if valid_575249 != nil:
-    section.add "endpointName", valid_575249
+  if valid_564349 != nil:
+    section.add "endpointName", valid_564349
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2731,11 +2732,11 @@ proc validate_CustomDomainsEnableCustomHttps_575243(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575250 = query.getOrDefault("api-version")
-  valid_575250 = validateParameter(valid_575250, JString, required = true,
+  var valid_564350 = query.getOrDefault("api-version")
+  valid_564350 = validateParameter(valid_564350, JString, required = true,
                                  default = nil)
-  if valid_575250 != nil:
-    section.add "api-version", valid_575250
+  if valid_564350 != nil:
+    section.add "api-version", valid_564350
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2744,54 +2745,54 @@ proc validate_CustomDomainsEnableCustomHttps_575243(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_575251: Call_CustomDomainsEnableCustomHttps_575242; path: JsonNode;
+proc call*(call_564351: Call_CustomDomainsEnableCustomHttps_564342; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Enable https delivery of the custom domain.
   ## 
-  let valid = call_575251.validator(path, query, header, formData, body)
-  let scheme = call_575251.pickScheme
+  let valid = call_564351.validator(path, query, header, formData, body)
+  let scheme = call_564351.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575251.url(scheme.get, call_575251.host, call_575251.base,
-                         call_575251.route, valid.getOrDefault("path"),
+  let url = call_564351.url(scheme.get, call_564351.host, call_564351.base,
+                         call_564351.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575251, url, valid)
+  result = hook(call_564351, url, valid)
 
-proc call*(call_575252: Call_CustomDomainsEnableCustomHttps_575242;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          customDomainName: string; profileName: string; endpointName: string): Recallable =
+proc call*(call_564352: Call_CustomDomainsEnableCustomHttps_564342;
+          customDomainName: string; profileName: string; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string; endpointName: string): Recallable =
   ## customDomainsEnableCustomHttps
   ## Enable https delivery of the custom domain.
-  ##   resourceGroupName: string (required)
-  ##                    : Name of the Resource group within the Azure subscription.
-  ##   apiVersion: string (required)
-  ##             : Version of the API to be used with the client request. Current version is 2016-10-02.
-  ##   subscriptionId: string (required)
-  ##                 : Azure Subscription ID.
   ##   customDomainName: string (required)
   ##                   : Name of the custom domain within an endpoint.
   ##   profileName: string (required)
   ##              : Name of the CDN profile which is unique within the resource group.
+  ##   apiVersion: string (required)
+  ##             : Version of the API to be used with the client request. Current version is 2016-10-02.
+  ##   subscriptionId: string (required)
+  ##                 : Azure Subscription ID.
+  ##   resourceGroupName: string (required)
+  ##                    : Name of the Resource group within the Azure subscription.
   ##   endpointName: string (required)
   ##               : Name of the endpoint under the profile which is unique globally.
-  var path_575253 = newJObject()
-  var query_575254 = newJObject()
-  add(path_575253, "resourceGroupName", newJString(resourceGroupName))
-  add(query_575254, "api-version", newJString(apiVersion))
-  add(path_575253, "subscriptionId", newJString(subscriptionId))
-  add(path_575253, "customDomainName", newJString(customDomainName))
-  add(path_575253, "profileName", newJString(profileName))
-  add(path_575253, "endpointName", newJString(endpointName))
-  result = call_575252.call(path_575253, query_575254, nil, nil, nil)
+  var path_564353 = newJObject()
+  var query_564354 = newJObject()
+  add(path_564353, "customDomainName", newJString(customDomainName))
+  add(path_564353, "profileName", newJString(profileName))
+  add(query_564354, "api-version", newJString(apiVersion))
+  add(path_564353, "subscriptionId", newJString(subscriptionId))
+  add(path_564353, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564353, "endpointName", newJString(endpointName))
+  result = call_564352.call(path_564353, query_564354, nil, nil, nil)
 
-var customDomainsEnableCustomHttps* = Call_CustomDomainsEnableCustomHttps_575242(
+var customDomainsEnableCustomHttps* = Call_CustomDomainsEnableCustomHttps_564342(
     name: "customDomainsEnableCustomHttps", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Cdn/profiles/{profileName}/endpoints/{endpointName}/customDomains/{customDomainName}/enableCustomHttps",
-    validator: validate_CustomDomainsEnableCustomHttps_575243, base: "",
-    url: url_CustomDomainsEnableCustomHttps_575244, schemes: {Scheme.Https})
+    validator: validate_CustomDomainsEnableCustomHttps_564343, base: "",
+    url: url_CustomDomainsEnableCustomHttps_564344, schemes: {Scheme.Https})
 type
-  Call_EndpointsLoadContent_575255 = ref object of OpenApiRestCall_574466
-proc url_EndpointsLoadContent_575257(protocol: Scheme; host: string; base: string;
+  Call_EndpointsLoadContent_564355 = ref object of OpenApiRestCall_563564
+proc url_EndpointsLoadContent_564357(protocol: Scheme; host: string; base: string;
                                     route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2817,44 +2818,44 @@ proc url_EndpointsLoadContent_575257(protocol: Scheme; host: string; base: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_EndpointsLoadContent_575256(path: JsonNode; query: JsonNode;
+proc validate_EndpointsLoadContent_564356(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Pre-loads a content to CDN. Available for Verizon Profiles.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : Name of the Resource group within the Azure subscription.
-  ##   subscriptionId: JString (required)
-  ##                 : Azure Subscription ID.
   ##   profileName: JString (required)
   ##              : Name of the CDN profile which is unique within the resource group.
+  ##   subscriptionId: JString (required)
+  ##                 : Azure Subscription ID.
+  ##   resourceGroupName: JString (required)
+  ##                    : Name of the Resource group within the Azure subscription.
   ##   endpointName: JString (required)
   ##               : Name of the endpoint under the profile which is unique globally.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_575258 = path.getOrDefault("resourceGroupName")
-  valid_575258 = validateParameter(valid_575258, JString, required = true,
+        "path argument is necessary due to required `profileName` field"
+  var valid_564358 = path.getOrDefault("profileName")
+  valid_564358 = validateParameter(valid_564358, JString, required = true,
                                  default = nil)
-  if valid_575258 != nil:
-    section.add "resourceGroupName", valid_575258
-  var valid_575259 = path.getOrDefault("subscriptionId")
-  valid_575259 = validateParameter(valid_575259, JString, required = true,
+  if valid_564358 != nil:
+    section.add "profileName", valid_564358
+  var valid_564359 = path.getOrDefault("subscriptionId")
+  valid_564359 = validateParameter(valid_564359, JString, required = true,
                                  default = nil)
-  if valid_575259 != nil:
-    section.add "subscriptionId", valid_575259
-  var valid_575260 = path.getOrDefault("profileName")
-  valid_575260 = validateParameter(valid_575260, JString, required = true,
+  if valid_564359 != nil:
+    section.add "subscriptionId", valid_564359
+  var valid_564360 = path.getOrDefault("resourceGroupName")
+  valid_564360 = validateParameter(valid_564360, JString, required = true,
                                  default = nil)
-  if valid_575260 != nil:
-    section.add "profileName", valid_575260
-  var valid_575261 = path.getOrDefault("endpointName")
-  valid_575261 = validateParameter(valid_575261, JString, required = true,
+  if valid_564360 != nil:
+    section.add "resourceGroupName", valid_564360
+  var valid_564361 = path.getOrDefault("endpointName")
+  valid_564361 = validateParameter(valid_564361, JString, required = true,
                                  default = nil)
-  if valid_575261 != nil:
-    section.add "endpointName", valid_575261
+  if valid_564361 != nil:
+    section.add "endpointName", valid_564361
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2862,11 +2863,11 @@ proc validate_EndpointsLoadContent_575256(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575262 = query.getOrDefault("api-version")
-  valid_575262 = validateParameter(valid_575262, JString, required = true,
+  var valid_564362 = query.getOrDefault("api-version")
+  valid_564362 = validateParameter(valid_564362, JString, required = true,
                                  default = nil)
-  if valid_575262 != nil:
-    section.add "api-version", valid_575262
+  if valid_564362 != nil:
+    section.add "api-version", valid_564362
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2880,56 +2881,56 @@ proc validate_EndpointsLoadContent_575256(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_575264: Call_EndpointsLoadContent_575255; path: JsonNode;
+proc call*(call_564364: Call_EndpointsLoadContent_564355; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Pre-loads a content to CDN. Available for Verizon Profiles.
   ## 
-  let valid = call_575264.validator(path, query, header, formData, body)
-  let scheme = call_575264.pickScheme
+  let valid = call_564364.validator(path, query, header, formData, body)
+  let scheme = call_564364.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575264.url(scheme.get, call_575264.host, call_575264.base,
-                         call_575264.route, valid.getOrDefault("path"),
+  let url = call_564364.url(scheme.get, call_564364.host, call_564364.base,
+                         call_564364.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575264, url, valid)
+  result = hook(call_564364, url, valid)
 
-proc call*(call_575265: Call_EndpointsLoadContent_575255;
-          resourceGroupName: string; contentFilePaths: JsonNode; apiVersion: string;
-          subscriptionId: string; profileName: string; endpointName: string): Recallable =
+proc call*(call_564365: Call_EndpointsLoadContent_564355;
+          contentFilePaths: JsonNode; profileName: string; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string; endpointName: string): Recallable =
   ## endpointsLoadContent
   ## Pre-loads a content to CDN. Available for Verizon Profiles.
-  ##   resourceGroupName: string (required)
-  ##                    : Name of the Resource group within the Azure subscription.
   ##   contentFilePaths: JObject (required)
   ##                   : The path to the content to be loaded. Path should be a full URL, e.g. ‘/pictures/city.png' which loads a single file 
+  ##   profileName: string (required)
+  ##              : Name of the CDN profile which is unique within the resource group.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request. Current version is 2016-10-02.
   ##   subscriptionId: string (required)
   ##                 : Azure Subscription ID.
-  ##   profileName: string (required)
-  ##              : Name of the CDN profile which is unique within the resource group.
+  ##   resourceGroupName: string (required)
+  ##                    : Name of the Resource group within the Azure subscription.
   ##   endpointName: string (required)
   ##               : Name of the endpoint under the profile which is unique globally.
-  var path_575266 = newJObject()
-  var query_575267 = newJObject()
-  var body_575268 = newJObject()
-  add(path_575266, "resourceGroupName", newJString(resourceGroupName))
+  var path_564366 = newJObject()
+  var query_564367 = newJObject()
+  var body_564368 = newJObject()
   if contentFilePaths != nil:
-    body_575268 = contentFilePaths
-  add(query_575267, "api-version", newJString(apiVersion))
-  add(path_575266, "subscriptionId", newJString(subscriptionId))
-  add(path_575266, "profileName", newJString(profileName))
-  add(path_575266, "endpointName", newJString(endpointName))
-  result = call_575265.call(path_575266, query_575267, nil, nil, body_575268)
+    body_564368 = contentFilePaths
+  add(path_564366, "profileName", newJString(profileName))
+  add(query_564367, "api-version", newJString(apiVersion))
+  add(path_564366, "subscriptionId", newJString(subscriptionId))
+  add(path_564366, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564366, "endpointName", newJString(endpointName))
+  result = call_564365.call(path_564366, query_564367, nil, nil, body_564368)
 
-var endpointsLoadContent* = Call_EndpointsLoadContent_575255(
+var endpointsLoadContent* = Call_EndpointsLoadContent_564355(
     name: "endpointsLoadContent", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Cdn/profiles/{profileName}/endpoints/{endpointName}/load",
-    validator: validate_EndpointsLoadContent_575256, base: "",
-    url: url_EndpointsLoadContent_575257, schemes: {Scheme.Https})
+    validator: validate_EndpointsLoadContent_564356, base: "",
+    url: url_EndpointsLoadContent_564357, schemes: {Scheme.Https})
 type
-  Call_OriginsListByEndpoint_575269 = ref object of OpenApiRestCall_574466
-proc url_OriginsListByEndpoint_575271(protocol: Scheme; host: string; base: string;
+  Call_OriginsListByEndpoint_564369 = ref object of OpenApiRestCall_563564
+proc url_OriginsListByEndpoint_564371(protocol: Scheme; host: string; base: string;
                                      route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2955,44 +2956,44 @@ proc url_OriginsListByEndpoint_575271(protocol: Scheme; host: string; base: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_OriginsListByEndpoint_575270(path: JsonNode; query: JsonNode;
+proc validate_OriginsListByEndpoint_564370(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists all of the existing origins within an endpoint.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : Name of the Resource group within the Azure subscription.
-  ##   subscriptionId: JString (required)
-  ##                 : Azure Subscription ID.
   ##   profileName: JString (required)
   ##              : Name of the CDN profile which is unique within the resource group.
+  ##   subscriptionId: JString (required)
+  ##                 : Azure Subscription ID.
+  ##   resourceGroupName: JString (required)
+  ##                    : Name of the Resource group within the Azure subscription.
   ##   endpointName: JString (required)
   ##               : Name of the endpoint under the profile which is unique globally.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_575272 = path.getOrDefault("resourceGroupName")
-  valid_575272 = validateParameter(valid_575272, JString, required = true,
+        "path argument is necessary due to required `profileName` field"
+  var valid_564372 = path.getOrDefault("profileName")
+  valid_564372 = validateParameter(valid_564372, JString, required = true,
                                  default = nil)
-  if valid_575272 != nil:
-    section.add "resourceGroupName", valid_575272
-  var valid_575273 = path.getOrDefault("subscriptionId")
-  valid_575273 = validateParameter(valid_575273, JString, required = true,
+  if valid_564372 != nil:
+    section.add "profileName", valid_564372
+  var valid_564373 = path.getOrDefault("subscriptionId")
+  valid_564373 = validateParameter(valid_564373, JString, required = true,
                                  default = nil)
-  if valid_575273 != nil:
-    section.add "subscriptionId", valid_575273
-  var valid_575274 = path.getOrDefault("profileName")
-  valid_575274 = validateParameter(valid_575274, JString, required = true,
+  if valid_564373 != nil:
+    section.add "subscriptionId", valid_564373
+  var valid_564374 = path.getOrDefault("resourceGroupName")
+  valid_564374 = validateParameter(valid_564374, JString, required = true,
                                  default = nil)
-  if valid_575274 != nil:
-    section.add "profileName", valid_575274
-  var valid_575275 = path.getOrDefault("endpointName")
-  valid_575275 = validateParameter(valid_575275, JString, required = true,
+  if valid_564374 != nil:
+    section.add "resourceGroupName", valid_564374
+  var valid_564375 = path.getOrDefault("endpointName")
+  valid_564375 = validateParameter(valid_564375, JString, required = true,
                                  default = nil)
-  if valid_575275 != nil:
-    section.add "endpointName", valid_575275
+  if valid_564375 != nil:
+    section.add "endpointName", valid_564375
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -3000,11 +3001,11 @@ proc validate_OriginsListByEndpoint_575270(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575276 = query.getOrDefault("api-version")
-  valid_575276 = validateParameter(valid_575276, JString, required = true,
+  var valid_564376 = query.getOrDefault("api-version")
+  valid_564376 = validateParameter(valid_564376, JString, required = true,
                                  default = nil)
-  if valid_575276 != nil:
-    section.add "api-version", valid_575276
+  if valid_564376 != nil:
+    section.add "api-version", valid_564376
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3013,51 +3014,51 @@ proc validate_OriginsListByEndpoint_575270(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_575277: Call_OriginsListByEndpoint_575269; path: JsonNode;
+proc call*(call_564377: Call_OriginsListByEndpoint_564369; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists all of the existing origins within an endpoint.
   ## 
-  let valid = call_575277.validator(path, query, header, formData, body)
-  let scheme = call_575277.pickScheme
+  let valid = call_564377.validator(path, query, header, formData, body)
+  let scheme = call_564377.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575277.url(scheme.get, call_575277.host, call_575277.base,
-                         call_575277.route, valid.getOrDefault("path"),
+  let url = call_564377.url(scheme.get, call_564377.host, call_564377.base,
+                         call_564377.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575277, url, valid)
+  result = hook(call_564377, url, valid)
 
-proc call*(call_575278: Call_OriginsListByEndpoint_575269;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          profileName: string; endpointName: string): Recallable =
+proc call*(call_564378: Call_OriginsListByEndpoint_564369; profileName: string;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string;
+          endpointName: string): Recallable =
   ## originsListByEndpoint
   ## Lists all of the existing origins within an endpoint.
-  ##   resourceGroupName: string (required)
-  ##                    : Name of the Resource group within the Azure subscription.
+  ##   profileName: string (required)
+  ##              : Name of the CDN profile which is unique within the resource group.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request. Current version is 2016-10-02.
   ##   subscriptionId: string (required)
   ##                 : Azure Subscription ID.
-  ##   profileName: string (required)
-  ##              : Name of the CDN profile which is unique within the resource group.
+  ##   resourceGroupName: string (required)
+  ##                    : Name of the Resource group within the Azure subscription.
   ##   endpointName: string (required)
   ##               : Name of the endpoint under the profile which is unique globally.
-  var path_575279 = newJObject()
-  var query_575280 = newJObject()
-  add(path_575279, "resourceGroupName", newJString(resourceGroupName))
-  add(query_575280, "api-version", newJString(apiVersion))
-  add(path_575279, "subscriptionId", newJString(subscriptionId))
-  add(path_575279, "profileName", newJString(profileName))
-  add(path_575279, "endpointName", newJString(endpointName))
-  result = call_575278.call(path_575279, query_575280, nil, nil, nil)
+  var path_564379 = newJObject()
+  var query_564380 = newJObject()
+  add(path_564379, "profileName", newJString(profileName))
+  add(query_564380, "api-version", newJString(apiVersion))
+  add(path_564379, "subscriptionId", newJString(subscriptionId))
+  add(path_564379, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564379, "endpointName", newJString(endpointName))
+  result = call_564378.call(path_564379, query_564380, nil, nil, nil)
 
-var originsListByEndpoint* = Call_OriginsListByEndpoint_575269(
+var originsListByEndpoint* = Call_OriginsListByEndpoint_564369(
     name: "originsListByEndpoint", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Cdn/profiles/{profileName}/endpoints/{endpointName}/origins",
-    validator: validate_OriginsListByEndpoint_575270, base: "",
-    url: url_OriginsListByEndpoint_575271, schemes: {Scheme.Https})
+    validator: validate_OriginsListByEndpoint_564370, base: "",
+    url: url_OriginsListByEndpoint_564371, schemes: {Scheme.Https})
 type
-  Call_OriginsGet_575281 = ref object of OpenApiRestCall_574466
-proc url_OriginsGet_575283(protocol: Scheme; host: string; base: string; route: string;
+  Call_OriginsGet_564381 = ref object of OpenApiRestCall_563564
+proc url_OriginsGet_564383(protocol: Scheme; host: string; base: string; route: string;
                           path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -3085,51 +3086,51 @@ proc url_OriginsGet_575283(protocol: Scheme; host: string; base: string; route: 
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_OriginsGet_575282(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_OriginsGet_564382(path: JsonNode; query: JsonNode; header: JsonNode;
                                formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets an existing origin within an endpoint.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
+  ##   profileName: JString (required)
+  ##              : Name of the CDN profile which is unique within the resource group.
+  ##   subscriptionId: JString (required)
+  ##                 : Azure Subscription ID.
   ##   resourceGroupName: JString (required)
   ##                    : Name of the Resource group within the Azure subscription.
   ##   originName: JString (required)
   ##             : Name of the origin which is unique within the endpoint.
-  ##   subscriptionId: JString (required)
-  ##                 : Azure Subscription ID.
-  ##   profileName: JString (required)
-  ##              : Name of the CDN profile which is unique within the resource group.
   ##   endpointName: JString (required)
   ##               : Name of the endpoint under the profile which is unique globally.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_575284 = path.getOrDefault("resourceGroupName")
-  valid_575284 = validateParameter(valid_575284, JString, required = true,
+        "path argument is necessary due to required `profileName` field"
+  var valid_564384 = path.getOrDefault("profileName")
+  valid_564384 = validateParameter(valid_564384, JString, required = true,
                                  default = nil)
-  if valid_575284 != nil:
-    section.add "resourceGroupName", valid_575284
-  var valid_575285 = path.getOrDefault("originName")
-  valid_575285 = validateParameter(valid_575285, JString, required = true,
+  if valid_564384 != nil:
+    section.add "profileName", valid_564384
+  var valid_564385 = path.getOrDefault("subscriptionId")
+  valid_564385 = validateParameter(valid_564385, JString, required = true,
                                  default = nil)
-  if valid_575285 != nil:
-    section.add "originName", valid_575285
-  var valid_575286 = path.getOrDefault("subscriptionId")
-  valid_575286 = validateParameter(valid_575286, JString, required = true,
+  if valid_564385 != nil:
+    section.add "subscriptionId", valid_564385
+  var valid_564386 = path.getOrDefault("resourceGroupName")
+  valid_564386 = validateParameter(valid_564386, JString, required = true,
                                  default = nil)
-  if valid_575286 != nil:
-    section.add "subscriptionId", valid_575286
-  var valid_575287 = path.getOrDefault("profileName")
-  valid_575287 = validateParameter(valid_575287, JString, required = true,
+  if valid_564386 != nil:
+    section.add "resourceGroupName", valid_564386
+  var valid_564387 = path.getOrDefault("originName")
+  valid_564387 = validateParameter(valid_564387, JString, required = true,
                                  default = nil)
-  if valid_575287 != nil:
-    section.add "profileName", valid_575287
-  var valid_575288 = path.getOrDefault("endpointName")
-  valid_575288 = validateParameter(valid_575288, JString, required = true,
+  if valid_564387 != nil:
+    section.add "originName", valid_564387
+  var valid_564388 = path.getOrDefault("endpointName")
+  valid_564388 = validateParameter(valid_564388, JString, required = true,
                                  default = nil)
-  if valid_575288 != nil:
-    section.add "endpointName", valid_575288
+  if valid_564388 != nil:
+    section.add "endpointName", valid_564388
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -3137,11 +3138,11 @@ proc validate_OriginsGet_575282(path: JsonNode; query: JsonNode; header: JsonNod
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575289 = query.getOrDefault("api-version")
-  valid_575289 = validateParameter(valid_575289, JString, required = true,
+  var valid_564389 = query.getOrDefault("api-version")
+  valid_564389 = validateParameter(valid_564389, JString, required = true,
                                  default = nil)
-  if valid_575289 != nil:
-    section.add "api-version", valid_575289
+  if valid_564389 != nil:
+    section.add "api-version", valid_564389
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3150,55 +3151,55 @@ proc validate_OriginsGet_575282(path: JsonNode; query: JsonNode; header: JsonNod
   if body != nil:
     result.add "body", body
 
-proc call*(call_575290: Call_OriginsGet_575281; path: JsonNode; query: JsonNode;
+proc call*(call_564390: Call_OriginsGet_564381; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets an existing origin within an endpoint.
   ## 
-  let valid = call_575290.validator(path, query, header, formData, body)
-  let scheme = call_575290.pickScheme
+  let valid = call_564390.validator(path, query, header, formData, body)
+  let scheme = call_564390.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575290.url(scheme.get, call_575290.host, call_575290.base,
-                         call_575290.route, valid.getOrDefault("path"),
+  let url = call_564390.url(scheme.get, call_564390.host, call_564390.base,
+                         call_564390.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575290, url, valid)
+  result = hook(call_564390, url, valid)
 
-proc call*(call_575291: Call_OriginsGet_575281; resourceGroupName: string;
-          apiVersion: string; originName: string; subscriptionId: string;
-          profileName: string; endpointName: string): Recallable =
+proc call*(call_564391: Call_OriginsGet_564381; profileName: string;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string;
+          originName: string; endpointName: string): Recallable =
   ## originsGet
   ## Gets an existing origin within an endpoint.
-  ##   resourceGroupName: string (required)
-  ##                    : Name of the Resource group within the Azure subscription.
-  ##   apiVersion: string (required)
-  ##             : Version of the API to be used with the client request. Current version is 2016-10-02.
-  ##   originName: string (required)
-  ##             : Name of the origin which is unique within the endpoint.
-  ##   subscriptionId: string (required)
-  ##                 : Azure Subscription ID.
   ##   profileName: string (required)
   ##              : Name of the CDN profile which is unique within the resource group.
+  ##   apiVersion: string (required)
+  ##             : Version of the API to be used with the client request. Current version is 2016-10-02.
+  ##   subscriptionId: string (required)
+  ##                 : Azure Subscription ID.
+  ##   resourceGroupName: string (required)
+  ##                    : Name of the Resource group within the Azure subscription.
+  ##   originName: string (required)
+  ##             : Name of the origin which is unique within the endpoint.
   ##   endpointName: string (required)
   ##               : Name of the endpoint under the profile which is unique globally.
-  var path_575292 = newJObject()
-  var query_575293 = newJObject()
-  add(path_575292, "resourceGroupName", newJString(resourceGroupName))
-  add(query_575293, "api-version", newJString(apiVersion))
-  add(path_575292, "originName", newJString(originName))
-  add(path_575292, "subscriptionId", newJString(subscriptionId))
-  add(path_575292, "profileName", newJString(profileName))
-  add(path_575292, "endpointName", newJString(endpointName))
-  result = call_575291.call(path_575292, query_575293, nil, nil, nil)
+  var path_564392 = newJObject()
+  var query_564393 = newJObject()
+  add(path_564392, "profileName", newJString(profileName))
+  add(query_564393, "api-version", newJString(apiVersion))
+  add(path_564392, "subscriptionId", newJString(subscriptionId))
+  add(path_564392, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564392, "originName", newJString(originName))
+  add(path_564392, "endpointName", newJString(endpointName))
+  result = call_564391.call(path_564392, query_564393, nil, nil, nil)
 
-var originsGet* = Call_OriginsGet_575281(name: "originsGet",
+var originsGet* = Call_OriginsGet_564381(name: "originsGet",
                                       meth: HttpMethod.HttpGet,
                                       host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Cdn/profiles/{profileName}/endpoints/{endpointName}/origins/{originName}",
-                                      validator: validate_OriginsGet_575282,
-                                      base: "", url: url_OriginsGet_575283,
+                                      validator: validate_OriginsGet_564382,
+                                      base: "", url: url_OriginsGet_564383,
                                       schemes: {Scheme.Https})
 type
-  Call_OriginsUpdate_575294 = ref object of OpenApiRestCall_574466
-proc url_OriginsUpdate_575296(protocol: Scheme; host: string; base: string;
+  Call_OriginsUpdate_564394 = ref object of OpenApiRestCall_563564
+proc url_OriginsUpdate_564396(protocol: Scheme; host: string; base: string;
                              route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -3226,51 +3227,51 @@ proc url_OriginsUpdate_575296(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_OriginsUpdate_575295(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_OriginsUpdate_564395(path: JsonNode; query: JsonNode; header: JsonNode;
                                   formData: JsonNode; body: JsonNode): JsonNode =
   ## Updates an existing origin within an endpoint.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
+  ##   profileName: JString (required)
+  ##              : Name of the CDN profile which is unique within the resource group.
+  ##   subscriptionId: JString (required)
+  ##                 : Azure Subscription ID.
   ##   resourceGroupName: JString (required)
   ##                    : Name of the Resource group within the Azure subscription.
   ##   originName: JString (required)
   ##             : Name of the origin which is unique within the endpoint.
-  ##   subscriptionId: JString (required)
-  ##                 : Azure Subscription ID.
-  ##   profileName: JString (required)
-  ##              : Name of the CDN profile which is unique within the resource group.
   ##   endpointName: JString (required)
   ##               : Name of the endpoint under the profile which is unique globally.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_575297 = path.getOrDefault("resourceGroupName")
-  valid_575297 = validateParameter(valid_575297, JString, required = true,
+        "path argument is necessary due to required `profileName` field"
+  var valid_564397 = path.getOrDefault("profileName")
+  valid_564397 = validateParameter(valid_564397, JString, required = true,
                                  default = nil)
-  if valid_575297 != nil:
-    section.add "resourceGroupName", valid_575297
-  var valid_575298 = path.getOrDefault("originName")
-  valid_575298 = validateParameter(valid_575298, JString, required = true,
+  if valid_564397 != nil:
+    section.add "profileName", valid_564397
+  var valid_564398 = path.getOrDefault("subscriptionId")
+  valid_564398 = validateParameter(valid_564398, JString, required = true,
                                  default = nil)
-  if valid_575298 != nil:
-    section.add "originName", valid_575298
-  var valid_575299 = path.getOrDefault("subscriptionId")
-  valid_575299 = validateParameter(valid_575299, JString, required = true,
+  if valid_564398 != nil:
+    section.add "subscriptionId", valid_564398
+  var valid_564399 = path.getOrDefault("resourceGroupName")
+  valid_564399 = validateParameter(valid_564399, JString, required = true,
                                  default = nil)
-  if valid_575299 != nil:
-    section.add "subscriptionId", valid_575299
-  var valid_575300 = path.getOrDefault("profileName")
-  valid_575300 = validateParameter(valid_575300, JString, required = true,
+  if valid_564399 != nil:
+    section.add "resourceGroupName", valid_564399
+  var valid_564400 = path.getOrDefault("originName")
+  valid_564400 = validateParameter(valid_564400, JString, required = true,
                                  default = nil)
-  if valid_575300 != nil:
-    section.add "profileName", valid_575300
-  var valid_575301 = path.getOrDefault("endpointName")
-  valid_575301 = validateParameter(valid_575301, JString, required = true,
+  if valid_564400 != nil:
+    section.add "originName", valid_564400
+  var valid_564401 = path.getOrDefault("endpointName")
+  valid_564401 = validateParameter(valid_564401, JString, required = true,
                                  default = nil)
-  if valid_575301 != nil:
-    section.add "endpointName", valid_575301
+  if valid_564401 != nil:
+    section.add "endpointName", valid_564401
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -3278,11 +3279,11 @@ proc validate_OriginsUpdate_575295(path: JsonNode; query: JsonNode; header: Json
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575302 = query.getOrDefault("api-version")
-  valid_575302 = validateParameter(valid_575302, JString, required = true,
+  var valid_564402 = query.getOrDefault("api-version")
+  valid_564402 = validateParameter(valid_564402, JString, required = true,
                                  default = nil)
-  if valid_575302 != nil:
-    section.add "api-version", valid_575302
+  if valid_564402 != nil:
+    section.add "api-version", valid_564402
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3296,59 +3297,58 @@ proc validate_OriginsUpdate_575295(path: JsonNode; query: JsonNode; header: Json
   if body != nil:
     result.add "body", body
 
-proc call*(call_575304: Call_OriginsUpdate_575294; path: JsonNode; query: JsonNode;
+proc call*(call_564404: Call_OriginsUpdate_564394; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Updates an existing origin within an endpoint.
   ## 
-  let valid = call_575304.validator(path, query, header, formData, body)
-  let scheme = call_575304.pickScheme
+  let valid = call_564404.validator(path, query, header, formData, body)
+  let scheme = call_564404.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575304.url(scheme.get, call_575304.host, call_575304.base,
-                         call_575304.route, valid.getOrDefault("path"),
+  let url = call_564404.url(scheme.get, call_564404.host, call_564404.base,
+                         call_564404.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575304, url, valid)
+  result = hook(call_564404, url, valid)
 
-proc call*(call_575305: Call_OriginsUpdate_575294;
-          originUpdateProperties: JsonNode; resourceGroupName: string;
-          apiVersion: string; originName: string; subscriptionId: string;
-          profileName: string; endpointName: string): Recallable =
+proc call*(call_564405: Call_OriginsUpdate_564394; profileName: string;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string;
+          originName: string; originUpdateProperties: JsonNode; endpointName: string): Recallable =
   ## originsUpdate
   ## Updates an existing origin within an endpoint.
-  ##   originUpdateProperties: JObject (required)
-  ##                         : Origin properties
-  ##   resourceGroupName: string (required)
-  ##                    : Name of the Resource group within the Azure subscription.
-  ##   apiVersion: string (required)
-  ##             : Version of the API to be used with the client request. Current version is 2016-10-02.
-  ##   originName: string (required)
-  ##             : Name of the origin which is unique within the endpoint.
-  ##   subscriptionId: string (required)
-  ##                 : Azure Subscription ID.
   ##   profileName: string (required)
   ##              : Name of the CDN profile which is unique within the resource group.
+  ##   apiVersion: string (required)
+  ##             : Version of the API to be used with the client request. Current version is 2016-10-02.
+  ##   subscriptionId: string (required)
+  ##                 : Azure Subscription ID.
+  ##   resourceGroupName: string (required)
+  ##                    : Name of the Resource group within the Azure subscription.
+  ##   originName: string (required)
+  ##             : Name of the origin which is unique within the endpoint.
+  ##   originUpdateProperties: JObject (required)
+  ##                         : Origin properties
   ##   endpointName: string (required)
   ##               : Name of the endpoint under the profile which is unique globally.
-  var path_575306 = newJObject()
-  var query_575307 = newJObject()
-  var body_575308 = newJObject()
+  var path_564406 = newJObject()
+  var query_564407 = newJObject()
+  var body_564408 = newJObject()
+  add(path_564406, "profileName", newJString(profileName))
+  add(query_564407, "api-version", newJString(apiVersion))
+  add(path_564406, "subscriptionId", newJString(subscriptionId))
+  add(path_564406, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564406, "originName", newJString(originName))
   if originUpdateProperties != nil:
-    body_575308 = originUpdateProperties
-  add(path_575306, "resourceGroupName", newJString(resourceGroupName))
-  add(query_575307, "api-version", newJString(apiVersion))
-  add(path_575306, "originName", newJString(originName))
-  add(path_575306, "subscriptionId", newJString(subscriptionId))
-  add(path_575306, "profileName", newJString(profileName))
-  add(path_575306, "endpointName", newJString(endpointName))
-  result = call_575305.call(path_575306, query_575307, nil, nil, body_575308)
+    body_564408 = originUpdateProperties
+  add(path_564406, "endpointName", newJString(endpointName))
+  result = call_564405.call(path_564406, query_564407, nil, nil, body_564408)
 
-var originsUpdate* = Call_OriginsUpdate_575294(name: "originsUpdate",
+var originsUpdate* = Call_OriginsUpdate_564394(name: "originsUpdate",
     meth: HttpMethod.HttpPatch, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Cdn/profiles/{profileName}/endpoints/{endpointName}/origins/{originName}",
-    validator: validate_OriginsUpdate_575295, base: "", url: url_OriginsUpdate_575296,
+    validator: validate_OriginsUpdate_564395, base: "", url: url_OriginsUpdate_564396,
     schemes: {Scheme.Https})
 type
-  Call_EndpointsPurgeContent_575309 = ref object of OpenApiRestCall_574466
-proc url_EndpointsPurgeContent_575311(protocol: Scheme; host: string; base: string;
+  Call_EndpointsPurgeContent_564409 = ref object of OpenApiRestCall_563564
+proc url_EndpointsPurgeContent_564411(protocol: Scheme; host: string; base: string;
                                      route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -3374,44 +3374,44 @@ proc url_EndpointsPurgeContent_575311(protocol: Scheme; host: string; base: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_EndpointsPurgeContent_575310(path: JsonNode; query: JsonNode;
+proc validate_EndpointsPurgeContent_564410(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Removes a content from CDN.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : Name of the Resource group within the Azure subscription.
-  ##   subscriptionId: JString (required)
-  ##                 : Azure Subscription ID.
   ##   profileName: JString (required)
   ##              : Name of the CDN profile which is unique within the resource group.
+  ##   subscriptionId: JString (required)
+  ##                 : Azure Subscription ID.
+  ##   resourceGroupName: JString (required)
+  ##                    : Name of the Resource group within the Azure subscription.
   ##   endpointName: JString (required)
   ##               : Name of the endpoint under the profile which is unique globally.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_575312 = path.getOrDefault("resourceGroupName")
-  valid_575312 = validateParameter(valid_575312, JString, required = true,
+        "path argument is necessary due to required `profileName` field"
+  var valid_564412 = path.getOrDefault("profileName")
+  valid_564412 = validateParameter(valid_564412, JString, required = true,
                                  default = nil)
-  if valid_575312 != nil:
-    section.add "resourceGroupName", valid_575312
-  var valid_575313 = path.getOrDefault("subscriptionId")
-  valid_575313 = validateParameter(valid_575313, JString, required = true,
+  if valid_564412 != nil:
+    section.add "profileName", valid_564412
+  var valid_564413 = path.getOrDefault("subscriptionId")
+  valid_564413 = validateParameter(valid_564413, JString, required = true,
                                  default = nil)
-  if valid_575313 != nil:
-    section.add "subscriptionId", valid_575313
-  var valid_575314 = path.getOrDefault("profileName")
-  valid_575314 = validateParameter(valid_575314, JString, required = true,
+  if valid_564413 != nil:
+    section.add "subscriptionId", valid_564413
+  var valid_564414 = path.getOrDefault("resourceGroupName")
+  valid_564414 = validateParameter(valid_564414, JString, required = true,
                                  default = nil)
-  if valid_575314 != nil:
-    section.add "profileName", valid_575314
-  var valid_575315 = path.getOrDefault("endpointName")
-  valid_575315 = validateParameter(valid_575315, JString, required = true,
+  if valid_564414 != nil:
+    section.add "resourceGroupName", valid_564414
+  var valid_564415 = path.getOrDefault("endpointName")
+  valid_564415 = validateParameter(valid_564415, JString, required = true,
                                  default = nil)
-  if valid_575315 != nil:
-    section.add "endpointName", valid_575315
+  if valid_564415 != nil:
+    section.add "endpointName", valid_564415
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -3419,11 +3419,11 @@ proc validate_EndpointsPurgeContent_575310(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575316 = query.getOrDefault("api-version")
-  valid_575316 = validateParameter(valid_575316, JString, required = true,
+  var valid_564416 = query.getOrDefault("api-version")
+  valid_564416 = validateParameter(valid_564416, JString, required = true,
                                  default = nil)
-  if valid_575316 != nil:
-    section.add "api-version", valid_575316
+  if valid_564416 != nil:
+    section.add "api-version", valid_564416
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3437,56 +3437,56 @@ proc validate_EndpointsPurgeContent_575310(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_575318: Call_EndpointsPurgeContent_575309; path: JsonNode;
+proc call*(call_564418: Call_EndpointsPurgeContent_564409; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Removes a content from CDN.
   ## 
-  let valid = call_575318.validator(path, query, header, formData, body)
-  let scheme = call_575318.pickScheme
+  let valid = call_564418.validator(path, query, header, formData, body)
+  let scheme = call_564418.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575318.url(scheme.get, call_575318.host, call_575318.base,
-                         call_575318.route, valid.getOrDefault("path"),
+  let url = call_564418.url(scheme.get, call_564418.host, call_564418.base,
+                         call_564418.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575318, url, valid)
+  result = hook(call_564418, url, valid)
 
-proc call*(call_575319: Call_EndpointsPurgeContent_575309;
-          resourceGroupName: string; contentFilePaths: JsonNode; apiVersion: string;
-          subscriptionId: string; profileName: string; endpointName: string): Recallable =
+proc call*(call_564419: Call_EndpointsPurgeContent_564409;
+          contentFilePaths: JsonNode; profileName: string; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string; endpointName: string): Recallable =
   ## endpointsPurgeContent
   ## Removes a content from CDN.
-  ##   resourceGroupName: string (required)
-  ##                    : Name of the Resource group within the Azure subscription.
   ##   contentFilePaths: JObject (required)
   ##                   : The path to the content to be purged. Path can be a full URL, e.g. '/pictures/city.png' which removes a single file, or a directory with a wildcard, e.g. '/pictures/*' which removes all folders and files in the directory.
+  ##   profileName: string (required)
+  ##              : Name of the CDN profile which is unique within the resource group.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request. Current version is 2016-10-02.
   ##   subscriptionId: string (required)
   ##                 : Azure Subscription ID.
-  ##   profileName: string (required)
-  ##              : Name of the CDN profile which is unique within the resource group.
+  ##   resourceGroupName: string (required)
+  ##                    : Name of the Resource group within the Azure subscription.
   ##   endpointName: string (required)
   ##               : Name of the endpoint under the profile which is unique globally.
-  var path_575320 = newJObject()
-  var query_575321 = newJObject()
-  var body_575322 = newJObject()
-  add(path_575320, "resourceGroupName", newJString(resourceGroupName))
+  var path_564420 = newJObject()
+  var query_564421 = newJObject()
+  var body_564422 = newJObject()
   if contentFilePaths != nil:
-    body_575322 = contentFilePaths
-  add(query_575321, "api-version", newJString(apiVersion))
-  add(path_575320, "subscriptionId", newJString(subscriptionId))
-  add(path_575320, "profileName", newJString(profileName))
-  add(path_575320, "endpointName", newJString(endpointName))
-  result = call_575319.call(path_575320, query_575321, nil, nil, body_575322)
+    body_564422 = contentFilePaths
+  add(path_564420, "profileName", newJString(profileName))
+  add(query_564421, "api-version", newJString(apiVersion))
+  add(path_564420, "subscriptionId", newJString(subscriptionId))
+  add(path_564420, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564420, "endpointName", newJString(endpointName))
+  result = call_564419.call(path_564420, query_564421, nil, nil, body_564422)
 
-var endpointsPurgeContent* = Call_EndpointsPurgeContent_575309(
+var endpointsPurgeContent* = Call_EndpointsPurgeContent_564409(
     name: "endpointsPurgeContent", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Cdn/profiles/{profileName}/endpoints/{endpointName}/purge",
-    validator: validate_EndpointsPurgeContent_575310, base: "",
-    url: url_EndpointsPurgeContent_575311, schemes: {Scheme.Https})
+    validator: validate_EndpointsPurgeContent_564410, base: "",
+    url: url_EndpointsPurgeContent_564411, schemes: {Scheme.Https})
 type
-  Call_EndpointsStart_575323 = ref object of OpenApiRestCall_574466
-proc url_EndpointsStart_575325(protocol: Scheme; host: string; base: string;
+  Call_EndpointsStart_564423 = ref object of OpenApiRestCall_563564
+proc url_EndpointsStart_564425(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -3512,7 +3512,7 @@ proc url_EndpointsStart_575325(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_EndpointsStart_575324(path: JsonNode; query: JsonNode;
+proc validate_EndpointsStart_564424(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## Starts an existing CDN endpoint that is on a stopped state.
@@ -3520,37 +3520,37 @@ proc validate_EndpointsStart_575324(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : Name of the Resource group within the Azure subscription.
-  ##   subscriptionId: JString (required)
-  ##                 : Azure Subscription ID.
   ##   profileName: JString (required)
   ##              : Name of the CDN profile which is unique within the resource group.
+  ##   subscriptionId: JString (required)
+  ##                 : Azure Subscription ID.
+  ##   resourceGroupName: JString (required)
+  ##                    : Name of the Resource group within the Azure subscription.
   ##   endpointName: JString (required)
   ##               : Name of the endpoint under the profile which is unique globally.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_575326 = path.getOrDefault("resourceGroupName")
-  valid_575326 = validateParameter(valid_575326, JString, required = true,
+        "path argument is necessary due to required `profileName` field"
+  var valid_564426 = path.getOrDefault("profileName")
+  valid_564426 = validateParameter(valid_564426, JString, required = true,
                                  default = nil)
-  if valid_575326 != nil:
-    section.add "resourceGroupName", valid_575326
-  var valid_575327 = path.getOrDefault("subscriptionId")
-  valid_575327 = validateParameter(valid_575327, JString, required = true,
+  if valid_564426 != nil:
+    section.add "profileName", valid_564426
+  var valid_564427 = path.getOrDefault("subscriptionId")
+  valid_564427 = validateParameter(valid_564427, JString, required = true,
                                  default = nil)
-  if valid_575327 != nil:
-    section.add "subscriptionId", valid_575327
-  var valid_575328 = path.getOrDefault("profileName")
-  valid_575328 = validateParameter(valid_575328, JString, required = true,
+  if valid_564427 != nil:
+    section.add "subscriptionId", valid_564427
+  var valid_564428 = path.getOrDefault("resourceGroupName")
+  valid_564428 = validateParameter(valid_564428, JString, required = true,
                                  default = nil)
-  if valid_575328 != nil:
-    section.add "profileName", valid_575328
-  var valid_575329 = path.getOrDefault("endpointName")
-  valid_575329 = validateParameter(valid_575329, JString, required = true,
+  if valid_564428 != nil:
+    section.add "resourceGroupName", valid_564428
+  var valid_564429 = path.getOrDefault("endpointName")
+  valid_564429 = validateParameter(valid_564429, JString, required = true,
                                  default = nil)
-  if valid_575329 != nil:
-    section.add "endpointName", valid_575329
+  if valid_564429 != nil:
+    section.add "endpointName", valid_564429
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -3558,11 +3558,11 @@ proc validate_EndpointsStart_575324(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575330 = query.getOrDefault("api-version")
-  valid_575330 = validateParameter(valid_575330, JString, required = true,
+  var valid_564430 = query.getOrDefault("api-version")
+  valid_564430 = validateParameter(valid_564430, JString, required = true,
                                  default = nil)
-  if valid_575330 != nil:
-    section.add "api-version", valid_575330
+  if valid_564430 != nil:
+    section.add "api-version", valid_564430
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3571,50 +3571,50 @@ proc validate_EndpointsStart_575324(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_575331: Call_EndpointsStart_575323; path: JsonNode; query: JsonNode;
+proc call*(call_564431: Call_EndpointsStart_564423; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Starts an existing CDN endpoint that is on a stopped state.
   ## 
-  let valid = call_575331.validator(path, query, header, formData, body)
-  let scheme = call_575331.pickScheme
+  let valid = call_564431.validator(path, query, header, formData, body)
+  let scheme = call_564431.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575331.url(scheme.get, call_575331.host, call_575331.base,
-                         call_575331.route, valid.getOrDefault("path"),
+  let url = call_564431.url(scheme.get, call_564431.host, call_564431.base,
+                         call_564431.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575331, url, valid)
+  result = hook(call_564431, url, valid)
 
-proc call*(call_575332: Call_EndpointsStart_575323; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; profileName: string;
+proc call*(call_564432: Call_EndpointsStart_564423; profileName: string;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string;
           endpointName: string): Recallable =
   ## endpointsStart
   ## Starts an existing CDN endpoint that is on a stopped state.
-  ##   resourceGroupName: string (required)
-  ##                    : Name of the Resource group within the Azure subscription.
+  ##   profileName: string (required)
+  ##              : Name of the CDN profile which is unique within the resource group.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request. Current version is 2016-10-02.
   ##   subscriptionId: string (required)
   ##                 : Azure Subscription ID.
-  ##   profileName: string (required)
-  ##              : Name of the CDN profile which is unique within the resource group.
+  ##   resourceGroupName: string (required)
+  ##                    : Name of the Resource group within the Azure subscription.
   ##   endpointName: string (required)
   ##               : Name of the endpoint under the profile which is unique globally.
-  var path_575333 = newJObject()
-  var query_575334 = newJObject()
-  add(path_575333, "resourceGroupName", newJString(resourceGroupName))
-  add(query_575334, "api-version", newJString(apiVersion))
-  add(path_575333, "subscriptionId", newJString(subscriptionId))
-  add(path_575333, "profileName", newJString(profileName))
-  add(path_575333, "endpointName", newJString(endpointName))
-  result = call_575332.call(path_575333, query_575334, nil, nil, nil)
+  var path_564433 = newJObject()
+  var query_564434 = newJObject()
+  add(path_564433, "profileName", newJString(profileName))
+  add(query_564434, "api-version", newJString(apiVersion))
+  add(path_564433, "subscriptionId", newJString(subscriptionId))
+  add(path_564433, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564433, "endpointName", newJString(endpointName))
+  result = call_564432.call(path_564433, query_564434, nil, nil, nil)
 
-var endpointsStart* = Call_EndpointsStart_575323(name: "endpointsStart",
+var endpointsStart* = Call_EndpointsStart_564423(name: "endpointsStart",
     meth: HttpMethod.HttpPost, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Cdn/profiles/{profileName}/endpoints/{endpointName}/start",
-    validator: validate_EndpointsStart_575324, base: "", url: url_EndpointsStart_575325,
+    validator: validate_EndpointsStart_564424, base: "", url: url_EndpointsStart_564425,
     schemes: {Scheme.Https})
 type
-  Call_EndpointsStop_575335 = ref object of OpenApiRestCall_574466
-proc url_EndpointsStop_575337(protocol: Scheme; host: string; base: string;
+  Call_EndpointsStop_564435 = ref object of OpenApiRestCall_563564
+proc url_EndpointsStop_564437(protocol: Scheme; host: string; base: string;
                              route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -3640,44 +3640,44 @@ proc url_EndpointsStop_575337(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_EndpointsStop_575336(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_EndpointsStop_564436(path: JsonNode; query: JsonNode; header: JsonNode;
                                   formData: JsonNode; body: JsonNode): JsonNode =
   ## Stops an existing running CDN endpoint.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : Name of the Resource group within the Azure subscription.
-  ##   subscriptionId: JString (required)
-  ##                 : Azure Subscription ID.
   ##   profileName: JString (required)
   ##              : Name of the CDN profile which is unique within the resource group.
+  ##   subscriptionId: JString (required)
+  ##                 : Azure Subscription ID.
+  ##   resourceGroupName: JString (required)
+  ##                    : Name of the Resource group within the Azure subscription.
   ##   endpointName: JString (required)
   ##               : Name of the endpoint under the profile which is unique globally.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_575338 = path.getOrDefault("resourceGroupName")
-  valid_575338 = validateParameter(valid_575338, JString, required = true,
+        "path argument is necessary due to required `profileName` field"
+  var valid_564438 = path.getOrDefault("profileName")
+  valid_564438 = validateParameter(valid_564438, JString, required = true,
                                  default = nil)
-  if valid_575338 != nil:
-    section.add "resourceGroupName", valid_575338
-  var valid_575339 = path.getOrDefault("subscriptionId")
-  valid_575339 = validateParameter(valid_575339, JString, required = true,
+  if valid_564438 != nil:
+    section.add "profileName", valid_564438
+  var valid_564439 = path.getOrDefault("subscriptionId")
+  valid_564439 = validateParameter(valid_564439, JString, required = true,
                                  default = nil)
-  if valid_575339 != nil:
-    section.add "subscriptionId", valid_575339
-  var valid_575340 = path.getOrDefault("profileName")
-  valid_575340 = validateParameter(valid_575340, JString, required = true,
+  if valid_564439 != nil:
+    section.add "subscriptionId", valid_564439
+  var valid_564440 = path.getOrDefault("resourceGroupName")
+  valid_564440 = validateParameter(valid_564440, JString, required = true,
                                  default = nil)
-  if valid_575340 != nil:
-    section.add "profileName", valid_575340
-  var valid_575341 = path.getOrDefault("endpointName")
-  valid_575341 = validateParameter(valid_575341, JString, required = true,
+  if valid_564440 != nil:
+    section.add "resourceGroupName", valid_564440
+  var valid_564441 = path.getOrDefault("endpointName")
+  valid_564441 = validateParameter(valid_564441, JString, required = true,
                                  default = nil)
-  if valid_575341 != nil:
-    section.add "endpointName", valid_575341
+  if valid_564441 != nil:
+    section.add "endpointName", valid_564441
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -3685,11 +3685,11 @@ proc validate_EndpointsStop_575336(path: JsonNode; query: JsonNode; header: Json
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575342 = query.getOrDefault("api-version")
-  valid_575342 = validateParameter(valid_575342, JString, required = true,
+  var valid_564442 = query.getOrDefault("api-version")
+  valid_564442 = validateParameter(valid_564442, JString, required = true,
                                  default = nil)
-  if valid_575342 != nil:
-    section.add "api-version", valid_575342
+  if valid_564442 != nil:
+    section.add "api-version", valid_564442
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3698,50 +3698,50 @@ proc validate_EndpointsStop_575336(path: JsonNode; query: JsonNode; header: Json
   if body != nil:
     result.add "body", body
 
-proc call*(call_575343: Call_EndpointsStop_575335; path: JsonNode; query: JsonNode;
+proc call*(call_564443: Call_EndpointsStop_564435; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Stops an existing running CDN endpoint.
   ## 
-  let valid = call_575343.validator(path, query, header, formData, body)
-  let scheme = call_575343.pickScheme
+  let valid = call_564443.validator(path, query, header, formData, body)
+  let scheme = call_564443.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575343.url(scheme.get, call_575343.host, call_575343.base,
-                         call_575343.route, valid.getOrDefault("path"),
+  let url = call_564443.url(scheme.get, call_564443.host, call_564443.base,
+                         call_564443.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575343, url, valid)
+  result = hook(call_564443, url, valid)
 
-proc call*(call_575344: Call_EndpointsStop_575335; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; profileName: string;
+proc call*(call_564444: Call_EndpointsStop_564435; profileName: string;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string;
           endpointName: string): Recallable =
   ## endpointsStop
   ## Stops an existing running CDN endpoint.
-  ##   resourceGroupName: string (required)
-  ##                    : Name of the Resource group within the Azure subscription.
+  ##   profileName: string (required)
+  ##              : Name of the CDN profile which is unique within the resource group.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request. Current version is 2016-10-02.
   ##   subscriptionId: string (required)
   ##                 : Azure Subscription ID.
-  ##   profileName: string (required)
-  ##              : Name of the CDN profile which is unique within the resource group.
+  ##   resourceGroupName: string (required)
+  ##                    : Name of the Resource group within the Azure subscription.
   ##   endpointName: string (required)
   ##               : Name of the endpoint under the profile which is unique globally.
-  var path_575345 = newJObject()
-  var query_575346 = newJObject()
-  add(path_575345, "resourceGroupName", newJString(resourceGroupName))
-  add(query_575346, "api-version", newJString(apiVersion))
-  add(path_575345, "subscriptionId", newJString(subscriptionId))
-  add(path_575345, "profileName", newJString(profileName))
-  add(path_575345, "endpointName", newJString(endpointName))
-  result = call_575344.call(path_575345, query_575346, nil, nil, nil)
+  var path_564445 = newJObject()
+  var query_564446 = newJObject()
+  add(path_564445, "profileName", newJString(profileName))
+  add(query_564446, "api-version", newJString(apiVersion))
+  add(path_564445, "subscriptionId", newJString(subscriptionId))
+  add(path_564445, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564445, "endpointName", newJString(endpointName))
+  result = call_564444.call(path_564445, query_564446, nil, nil, nil)
 
-var endpointsStop* = Call_EndpointsStop_575335(name: "endpointsStop",
+var endpointsStop* = Call_EndpointsStop_564435(name: "endpointsStop",
     meth: HttpMethod.HttpPost, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Cdn/profiles/{profileName}/endpoints/{endpointName}/stop",
-    validator: validate_EndpointsStop_575336, base: "", url: url_EndpointsStop_575337,
+    validator: validate_EndpointsStop_564436, base: "", url: url_EndpointsStop_564437,
     schemes: {Scheme.Https})
 type
-  Call_EndpointsValidateCustomDomain_575347 = ref object of OpenApiRestCall_574466
-proc url_EndpointsValidateCustomDomain_575349(protocol: Scheme; host: string;
+  Call_EndpointsValidateCustomDomain_564447 = ref object of OpenApiRestCall_563564
+proc url_EndpointsValidateCustomDomain_564449(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -3767,44 +3767,44 @@ proc url_EndpointsValidateCustomDomain_575349(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_EndpointsValidateCustomDomain_575348(path: JsonNode; query: JsonNode;
+proc validate_EndpointsValidateCustomDomain_564448(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Validates the custom domain mapping to ensure it maps to the correct CDN endpoint in DNS.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : Name of the Resource group within the Azure subscription.
-  ##   subscriptionId: JString (required)
-  ##                 : Azure Subscription ID.
   ##   profileName: JString (required)
   ##              : Name of the CDN profile which is unique within the resource group.
+  ##   subscriptionId: JString (required)
+  ##                 : Azure Subscription ID.
+  ##   resourceGroupName: JString (required)
+  ##                    : Name of the Resource group within the Azure subscription.
   ##   endpointName: JString (required)
   ##               : Name of the endpoint under the profile which is unique globally.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_575350 = path.getOrDefault("resourceGroupName")
-  valid_575350 = validateParameter(valid_575350, JString, required = true,
+        "path argument is necessary due to required `profileName` field"
+  var valid_564450 = path.getOrDefault("profileName")
+  valid_564450 = validateParameter(valid_564450, JString, required = true,
                                  default = nil)
-  if valid_575350 != nil:
-    section.add "resourceGroupName", valid_575350
-  var valid_575351 = path.getOrDefault("subscriptionId")
-  valid_575351 = validateParameter(valid_575351, JString, required = true,
+  if valid_564450 != nil:
+    section.add "profileName", valid_564450
+  var valid_564451 = path.getOrDefault("subscriptionId")
+  valid_564451 = validateParameter(valid_564451, JString, required = true,
                                  default = nil)
-  if valid_575351 != nil:
-    section.add "subscriptionId", valid_575351
-  var valid_575352 = path.getOrDefault("profileName")
-  valid_575352 = validateParameter(valid_575352, JString, required = true,
+  if valid_564451 != nil:
+    section.add "subscriptionId", valid_564451
+  var valid_564452 = path.getOrDefault("resourceGroupName")
+  valid_564452 = validateParameter(valid_564452, JString, required = true,
                                  default = nil)
-  if valid_575352 != nil:
-    section.add "profileName", valid_575352
-  var valid_575353 = path.getOrDefault("endpointName")
-  valid_575353 = validateParameter(valid_575353, JString, required = true,
+  if valid_564452 != nil:
+    section.add "resourceGroupName", valid_564452
+  var valid_564453 = path.getOrDefault("endpointName")
+  valid_564453 = validateParameter(valid_564453, JString, required = true,
                                  default = nil)
-  if valid_575353 != nil:
-    section.add "endpointName", valid_575353
+  if valid_564453 != nil:
+    section.add "endpointName", valid_564453
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -3812,11 +3812,11 @@ proc validate_EndpointsValidateCustomDomain_575348(path: JsonNode; query: JsonNo
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575354 = query.getOrDefault("api-version")
-  valid_575354 = validateParameter(valid_575354, JString, required = true,
+  var valid_564454 = query.getOrDefault("api-version")
+  valid_564454 = validateParameter(valid_564454, JString, required = true,
                                  default = nil)
-  if valid_575354 != nil:
-    section.add "api-version", valid_575354
+  if valid_564454 != nil:
+    section.add "api-version", valid_564454
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3830,57 +3830,56 @@ proc validate_EndpointsValidateCustomDomain_575348(path: JsonNode; query: JsonNo
   if body != nil:
     result.add "body", body
 
-proc call*(call_575356: Call_EndpointsValidateCustomDomain_575347; path: JsonNode;
+proc call*(call_564456: Call_EndpointsValidateCustomDomain_564447; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Validates the custom domain mapping to ensure it maps to the correct CDN endpoint in DNS.
   ## 
-  let valid = call_575356.validator(path, query, header, formData, body)
-  let scheme = call_575356.pickScheme
+  let valid = call_564456.validator(path, query, header, formData, body)
+  let scheme = call_564456.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575356.url(scheme.get, call_575356.host, call_575356.base,
-                         call_575356.route, valid.getOrDefault("path"),
+  let url = call_564456.url(scheme.get, call_564456.host, call_564456.base,
+                         call_564456.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575356, url, valid)
+  result = hook(call_564456, url, valid)
 
-proc call*(call_575357: Call_EndpointsValidateCustomDomain_575347;
-          resourceGroupName: string; apiVersion: string;
-          customDomainProperties: JsonNode; subscriptionId: string;
-          profileName: string; endpointName: string): Recallable =
+proc call*(call_564457: Call_EndpointsValidateCustomDomain_564447;
+          profileName: string; apiVersion: string; customDomainProperties: JsonNode;
+          subscriptionId: string; resourceGroupName: string; endpointName: string): Recallable =
   ## endpointsValidateCustomDomain
   ## Validates the custom domain mapping to ensure it maps to the correct CDN endpoint in DNS.
-  ##   resourceGroupName: string (required)
-  ##                    : Name of the Resource group within the Azure subscription.
+  ##   profileName: string (required)
+  ##              : Name of the CDN profile which is unique within the resource group.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request. Current version is 2016-10-02.
   ##   customDomainProperties: JObject (required)
   ##                         : Custom domain to be validated.
   ##   subscriptionId: string (required)
   ##                 : Azure Subscription ID.
-  ##   profileName: string (required)
-  ##              : Name of the CDN profile which is unique within the resource group.
+  ##   resourceGroupName: string (required)
+  ##                    : Name of the Resource group within the Azure subscription.
   ##   endpointName: string (required)
   ##               : Name of the endpoint under the profile which is unique globally.
-  var path_575358 = newJObject()
-  var query_575359 = newJObject()
-  var body_575360 = newJObject()
-  add(path_575358, "resourceGroupName", newJString(resourceGroupName))
-  add(query_575359, "api-version", newJString(apiVersion))
+  var path_564458 = newJObject()
+  var query_564459 = newJObject()
+  var body_564460 = newJObject()
+  add(path_564458, "profileName", newJString(profileName))
+  add(query_564459, "api-version", newJString(apiVersion))
   if customDomainProperties != nil:
-    body_575360 = customDomainProperties
-  add(path_575358, "subscriptionId", newJString(subscriptionId))
-  add(path_575358, "profileName", newJString(profileName))
-  add(path_575358, "endpointName", newJString(endpointName))
-  result = call_575357.call(path_575358, query_575359, nil, nil, body_575360)
+    body_564460 = customDomainProperties
+  add(path_564458, "subscriptionId", newJString(subscriptionId))
+  add(path_564458, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564458, "endpointName", newJString(endpointName))
+  result = call_564457.call(path_564458, query_564459, nil, nil, body_564460)
 
-var endpointsValidateCustomDomain* = Call_EndpointsValidateCustomDomain_575347(
+var endpointsValidateCustomDomain* = Call_EndpointsValidateCustomDomain_564447(
     name: "endpointsValidateCustomDomain", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Cdn/profiles/{profileName}/endpoints/{endpointName}/validateCustomDomain",
-    validator: validate_EndpointsValidateCustomDomain_575348, base: "",
-    url: url_EndpointsValidateCustomDomain_575349, schemes: {Scheme.Https})
+    validator: validate_EndpointsValidateCustomDomain_564448, base: "",
+    url: url_EndpointsValidateCustomDomain_564449, schemes: {Scheme.Https})
 type
-  Call_ProfilesGenerateSsoUri_575361 = ref object of OpenApiRestCall_574466
-proc url_ProfilesGenerateSsoUri_575363(protocol: Scheme; host: string; base: string;
+  Call_ProfilesGenerateSsoUri_564461 = ref object of OpenApiRestCall_563564
+proc url_ProfilesGenerateSsoUri_564463(protocol: Scheme; host: string; base: string;
                                       route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -3903,37 +3902,37 @@ proc url_ProfilesGenerateSsoUri_575363(protocol: Scheme; host: string; base: str
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ProfilesGenerateSsoUri_575362(path: JsonNode; query: JsonNode;
+proc validate_ProfilesGenerateSsoUri_564462(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Generates a dynamic SSO URI used to sign in to the CDN supplemental portal. Supplemental portal is used to configure advanced feature capabilities that are not yet available in the Azure portal, such as core reports in a standard profile; rules engine, advanced HTTP reports, and real-time stats and alerts in a premium profile. The SSO URI changes approximately every 10 minutes.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : Name of the Resource group within the Azure subscription.
-  ##   subscriptionId: JString (required)
-  ##                 : Azure Subscription ID.
   ##   profileName: JString (required)
   ##              : Name of the CDN profile which is unique within the resource group.
+  ##   subscriptionId: JString (required)
+  ##                 : Azure Subscription ID.
+  ##   resourceGroupName: JString (required)
+  ##                    : Name of the Resource group within the Azure subscription.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_575364 = path.getOrDefault("resourceGroupName")
-  valid_575364 = validateParameter(valid_575364, JString, required = true,
+        "path argument is necessary due to required `profileName` field"
+  var valid_564464 = path.getOrDefault("profileName")
+  valid_564464 = validateParameter(valid_564464, JString, required = true,
                                  default = nil)
-  if valid_575364 != nil:
-    section.add "resourceGroupName", valid_575364
-  var valid_575365 = path.getOrDefault("subscriptionId")
-  valid_575365 = validateParameter(valid_575365, JString, required = true,
+  if valid_564464 != nil:
+    section.add "profileName", valid_564464
+  var valid_564465 = path.getOrDefault("subscriptionId")
+  valid_564465 = validateParameter(valid_564465, JString, required = true,
                                  default = nil)
-  if valid_575365 != nil:
-    section.add "subscriptionId", valid_575365
-  var valid_575366 = path.getOrDefault("profileName")
-  valid_575366 = validateParameter(valid_575366, JString, required = true,
+  if valid_564465 != nil:
+    section.add "subscriptionId", valid_564465
+  var valid_564466 = path.getOrDefault("resourceGroupName")
+  valid_564466 = validateParameter(valid_564466, JString, required = true,
                                  default = nil)
-  if valid_575366 != nil:
-    section.add "profileName", valid_575366
+  if valid_564466 != nil:
+    section.add "resourceGroupName", valid_564466
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -3941,11 +3940,11 @@ proc validate_ProfilesGenerateSsoUri_575362(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575367 = query.getOrDefault("api-version")
-  valid_575367 = validateParameter(valid_575367, JString, required = true,
+  var valid_564467 = query.getOrDefault("api-version")
+  valid_564467 = validateParameter(valid_564467, JString, required = true,
                                  default = nil)
-  if valid_575367 != nil:
-    section.add "api-version", valid_575367
+  if valid_564467 != nil:
+    section.add "api-version", valid_564467
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3954,48 +3953,47 @@ proc validate_ProfilesGenerateSsoUri_575362(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_575368: Call_ProfilesGenerateSsoUri_575361; path: JsonNode;
+proc call*(call_564468: Call_ProfilesGenerateSsoUri_564461; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Generates a dynamic SSO URI used to sign in to the CDN supplemental portal. Supplemental portal is used to configure advanced feature capabilities that are not yet available in the Azure portal, such as core reports in a standard profile; rules engine, advanced HTTP reports, and real-time stats and alerts in a premium profile. The SSO URI changes approximately every 10 minutes.
   ## 
-  let valid = call_575368.validator(path, query, header, formData, body)
-  let scheme = call_575368.pickScheme
+  let valid = call_564468.validator(path, query, header, formData, body)
+  let scheme = call_564468.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575368.url(scheme.get, call_575368.host, call_575368.base,
-                         call_575368.route, valid.getOrDefault("path"),
+  let url = call_564468.url(scheme.get, call_564468.host, call_564468.base,
+                         call_564468.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575368, url, valid)
+  result = hook(call_564468, url, valid)
 
-proc call*(call_575369: Call_ProfilesGenerateSsoUri_575361;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          profileName: string): Recallable =
+proc call*(call_564469: Call_ProfilesGenerateSsoUri_564461; profileName: string;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string): Recallable =
   ## profilesGenerateSsoUri
   ## Generates a dynamic SSO URI used to sign in to the CDN supplemental portal. Supplemental portal is used to configure advanced feature capabilities that are not yet available in the Azure portal, such as core reports in a standard profile; rules engine, advanced HTTP reports, and real-time stats and alerts in a premium profile. The SSO URI changes approximately every 10 minutes.
-  ##   resourceGroupName: string (required)
-  ##                    : Name of the Resource group within the Azure subscription.
+  ##   profileName: string (required)
+  ##              : Name of the CDN profile which is unique within the resource group.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request. Current version is 2016-10-02.
   ##   subscriptionId: string (required)
   ##                 : Azure Subscription ID.
-  ##   profileName: string (required)
-  ##              : Name of the CDN profile which is unique within the resource group.
-  var path_575370 = newJObject()
-  var query_575371 = newJObject()
-  add(path_575370, "resourceGroupName", newJString(resourceGroupName))
-  add(query_575371, "api-version", newJString(apiVersion))
-  add(path_575370, "subscriptionId", newJString(subscriptionId))
-  add(path_575370, "profileName", newJString(profileName))
-  result = call_575369.call(path_575370, query_575371, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : Name of the Resource group within the Azure subscription.
+  var path_564470 = newJObject()
+  var query_564471 = newJObject()
+  add(path_564470, "profileName", newJString(profileName))
+  add(query_564471, "api-version", newJString(apiVersion))
+  add(path_564470, "subscriptionId", newJString(subscriptionId))
+  add(path_564470, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564469.call(path_564470, query_564471, nil, nil, nil)
 
-var profilesGenerateSsoUri* = Call_ProfilesGenerateSsoUri_575361(
+var profilesGenerateSsoUri* = Call_ProfilesGenerateSsoUri_564461(
     name: "profilesGenerateSsoUri", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Cdn/profiles/{profileName}/generateSsoUri",
-    validator: validate_ProfilesGenerateSsoUri_575362, base: "",
-    url: url_ProfilesGenerateSsoUri_575363, schemes: {Scheme.Https})
+    validator: validate_ProfilesGenerateSsoUri_564462, base: "",
+    url: url_ProfilesGenerateSsoUri_564463, schemes: {Scheme.Https})
 type
-  Call_ProfilesGetSupportedOptimizationTypes_575372 = ref object of OpenApiRestCall_574466
-proc url_ProfilesGetSupportedOptimizationTypes_575374(protocol: Scheme;
+  Call_ProfilesGetSupportedOptimizationTypes_564472 = ref object of OpenApiRestCall_563564
+proc url_ProfilesGetSupportedOptimizationTypes_564474(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -4018,37 +4016,37 @@ proc url_ProfilesGetSupportedOptimizationTypes_575374(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ProfilesGetSupportedOptimizationTypes_575373(path: JsonNode;
+proc validate_ProfilesGetSupportedOptimizationTypes_564473(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the supported optimization types for the current profile. A user can create an endpoint with an optimization type from the listed values.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : Name of the Resource group within the Azure subscription.
-  ##   subscriptionId: JString (required)
-  ##                 : Azure Subscription ID.
   ##   profileName: JString (required)
   ##              : Name of the CDN profile which is unique within the resource group.
+  ##   subscriptionId: JString (required)
+  ##                 : Azure Subscription ID.
+  ##   resourceGroupName: JString (required)
+  ##                    : Name of the Resource group within the Azure subscription.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_575375 = path.getOrDefault("resourceGroupName")
-  valid_575375 = validateParameter(valid_575375, JString, required = true,
+        "path argument is necessary due to required `profileName` field"
+  var valid_564475 = path.getOrDefault("profileName")
+  valid_564475 = validateParameter(valid_564475, JString, required = true,
                                  default = nil)
-  if valid_575375 != nil:
-    section.add "resourceGroupName", valid_575375
-  var valid_575376 = path.getOrDefault("subscriptionId")
-  valid_575376 = validateParameter(valid_575376, JString, required = true,
+  if valid_564475 != nil:
+    section.add "profileName", valid_564475
+  var valid_564476 = path.getOrDefault("subscriptionId")
+  valid_564476 = validateParameter(valid_564476, JString, required = true,
                                  default = nil)
-  if valid_575376 != nil:
-    section.add "subscriptionId", valid_575376
-  var valid_575377 = path.getOrDefault("profileName")
-  valid_575377 = validateParameter(valid_575377, JString, required = true,
+  if valid_564476 != nil:
+    section.add "subscriptionId", valid_564476
+  var valid_564477 = path.getOrDefault("resourceGroupName")
+  valid_564477 = validateParameter(valid_564477, JString, required = true,
                                  default = nil)
-  if valid_575377 != nil:
-    section.add "profileName", valid_575377
+  if valid_564477 != nil:
+    section.add "resourceGroupName", valid_564477
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -4056,11 +4054,11 @@ proc validate_ProfilesGetSupportedOptimizationTypes_575373(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575378 = query.getOrDefault("api-version")
-  valid_575378 = validateParameter(valid_575378, JString, required = true,
+  var valid_564478 = query.getOrDefault("api-version")
+  valid_564478 = validateParameter(valid_564478, JString, required = true,
                                  default = nil)
-  if valid_575378 != nil:
-    section.add "api-version", valid_575378
+  if valid_564478 != nil:
+    section.add "api-version", valid_564478
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -4069,46 +4067,46 @@ proc validate_ProfilesGetSupportedOptimizationTypes_575373(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_575379: Call_ProfilesGetSupportedOptimizationTypes_575372;
+proc call*(call_564479: Call_ProfilesGetSupportedOptimizationTypes_564472;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Gets the supported optimization types for the current profile. A user can create an endpoint with an optimization type from the listed values.
   ## 
-  let valid = call_575379.validator(path, query, header, formData, body)
-  let scheme = call_575379.pickScheme
+  let valid = call_564479.validator(path, query, header, formData, body)
+  let scheme = call_564479.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575379.url(scheme.get, call_575379.host, call_575379.base,
-                         call_575379.route, valid.getOrDefault("path"),
+  let url = call_564479.url(scheme.get, call_564479.host, call_564479.base,
+                         call_564479.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575379, url, valid)
+  result = hook(call_564479, url, valid)
 
-proc call*(call_575380: Call_ProfilesGetSupportedOptimizationTypes_575372;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          profileName: string): Recallable =
+proc call*(call_564480: Call_ProfilesGetSupportedOptimizationTypes_564472;
+          profileName: string; apiVersion: string; subscriptionId: string;
+          resourceGroupName: string): Recallable =
   ## profilesGetSupportedOptimizationTypes
   ## Gets the supported optimization types for the current profile. A user can create an endpoint with an optimization type from the listed values.
-  ##   resourceGroupName: string (required)
-  ##                    : Name of the Resource group within the Azure subscription.
+  ##   profileName: string (required)
+  ##              : Name of the CDN profile which is unique within the resource group.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request. Current version is 2016-10-02.
   ##   subscriptionId: string (required)
   ##                 : Azure Subscription ID.
-  ##   profileName: string (required)
-  ##              : Name of the CDN profile which is unique within the resource group.
-  var path_575381 = newJObject()
-  var query_575382 = newJObject()
-  add(path_575381, "resourceGroupName", newJString(resourceGroupName))
-  add(query_575382, "api-version", newJString(apiVersion))
-  add(path_575381, "subscriptionId", newJString(subscriptionId))
-  add(path_575381, "profileName", newJString(profileName))
-  result = call_575380.call(path_575381, query_575382, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : Name of the Resource group within the Azure subscription.
+  var path_564481 = newJObject()
+  var query_564482 = newJObject()
+  add(path_564481, "profileName", newJString(profileName))
+  add(query_564482, "api-version", newJString(apiVersion))
+  add(path_564481, "subscriptionId", newJString(subscriptionId))
+  add(path_564481, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564480.call(path_564481, query_564482, nil, nil, nil)
 
-var profilesGetSupportedOptimizationTypes* = Call_ProfilesGetSupportedOptimizationTypes_575372(
+var profilesGetSupportedOptimizationTypes* = Call_ProfilesGetSupportedOptimizationTypes_564472(
     name: "profilesGetSupportedOptimizationTypes", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Cdn/profiles/{profileName}/getSupportedOptimizationTypes",
-    validator: validate_ProfilesGetSupportedOptimizationTypes_575373, base: "",
-    url: url_ProfilesGetSupportedOptimizationTypes_575374, schemes: {Scheme.Https})
+    validator: validate_ProfilesGetSupportedOptimizationTypes_564473, base: "",
+    url: url_ProfilesGetSupportedOptimizationTypes_564474, schemes: {Scheme.Https})
 export
   rest
 

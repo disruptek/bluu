@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, httpcore
 
 ## auto-generated via openapi macro
 ## title: HDInsightManagementClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_567641 = ref object of OpenApiRestCall
+  OpenApiRestCall_563539 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_567641](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563539](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_567641): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563539): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,8 +107,8 @@ const
   macServiceName = "hdinsight-extensions"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_ExtensionsEnableMonitoring_568177 = ref object of OpenApiRestCall_567641
-proc url_ExtensionsEnableMonitoring_568179(protocol: Scheme; host: string;
+  Call_ExtensionsEnableMonitoring_564077 = ref object of OpenApiRestCall_563539
+proc url_ExtensionsEnableMonitoring_564079(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -127,7 +131,7 @@ proc url_ExtensionsEnableMonitoring_568179(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ExtensionsEnableMonitoring_568178(path: JsonNode; query: JsonNode;
+proc validate_ExtensionsEnableMonitoring_564078(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Enables the Operations Management Suite (OMS) on the HDInsight cluster.
   ## 
@@ -136,28 +140,28 @@ proc validate_ExtensionsEnableMonitoring_568178(path: JsonNode; query: JsonNode;
   ## parameters in `path` object:
   ##   clusterName: JString (required)
   ##              : The name of the cluster.
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   subscriptionId: JString (required)
   ##                 : The subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `clusterName` field"
-  var valid_568197 = path.getOrDefault("clusterName")
-  valid_568197 = validateParameter(valid_568197, JString, required = true,
+  var valid_564097 = path.getOrDefault("clusterName")
+  valid_564097 = validateParameter(valid_564097, JString, required = true,
                                  default = nil)
-  if valid_568197 != nil:
-    section.add "clusterName", valid_568197
-  var valid_568198 = path.getOrDefault("resourceGroupName")
-  valid_568198 = validateParameter(valid_568198, JString, required = true,
+  if valid_564097 != nil:
+    section.add "clusterName", valid_564097
+  var valid_564098 = path.getOrDefault("subscriptionId")
+  valid_564098 = validateParameter(valid_564098, JString, required = true,
                                  default = nil)
-  if valid_568198 != nil:
-    section.add "resourceGroupName", valid_568198
-  var valid_568199 = path.getOrDefault("subscriptionId")
-  valid_568199 = validateParameter(valid_568199, JString, required = true,
+  if valid_564098 != nil:
+    section.add "subscriptionId", valid_564098
+  var valid_564099 = path.getOrDefault("resourceGroupName")
+  valid_564099 = validateParameter(valid_564099, JString, required = true,
                                  default = nil)
-  if valid_568199 != nil:
-    section.add "subscriptionId", valid_568199
+  if valid_564099 != nil:
+    section.add "resourceGroupName", valid_564099
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -165,11 +169,11 @@ proc validate_ExtensionsEnableMonitoring_568178(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568200 = query.getOrDefault("api-version")
-  valid_568200 = validateParameter(valid_568200, JString, required = true,
+  var valid_564100 = query.getOrDefault("api-version")
+  valid_564100 = validateParameter(valid_564100, JString, required = true,
                                  default = nil)
-  if valid_568200 != nil:
-    section.add "api-version", valid_568200
+  if valid_564100 != nil:
+    section.add "api-version", valid_564100
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -183,53 +187,53 @@ proc validate_ExtensionsEnableMonitoring_568178(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568202: Call_ExtensionsEnableMonitoring_568177; path: JsonNode;
+proc call*(call_564102: Call_ExtensionsEnableMonitoring_564077; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Enables the Operations Management Suite (OMS) on the HDInsight cluster.
   ## 
-  let valid = call_568202.validator(path, query, header, formData, body)
-  let scheme = call_568202.pickScheme
+  let valid = call_564102.validator(path, query, header, formData, body)
+  let scheme = call_564102.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568202.url(scheme.get, call_568202.host, call_568202.base,
-                         call_568202.route, valid.getOrDefault("path"),
+  let url = call_564102.url(scheme.get, call_564102.host, call_564102.base,
+                         call_564102.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568202, url, valid)
+  result = hook(call_564102, url, valid)
 
-proc call*(call_568203: Call_ExtensionsEnableMonitoring_568177;
-          clusterName: string; resourceGroupName: string; apiVersion: string;
-          subscriptionId: string; parameters: JsonNode): Recallable =
+proc call*(call_564103: Call_ExtensionsEnableMonitoring_564077;
+          clusterName: string; apiVersion: string; subscriptionId: string;
+          resourceGroupName: string; parameters: JsonNode): Recallable =
   ## extensionsEnableMonitoring
   ## Enables the Operations Management Suite (OMS) on the HDInsight cluster.
   ##   clusterName: string (required)
   ##              : The name of the cluster.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : The HDInsight client API Version.
   ##   subscriptionId: string (required)
   ##                 : The subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   parameters: JObject (required)
   ##             : The Operations Management Suite (OMS) workspace parameters.
-  var path_568204 = newJObject()
-  var query_568205 = newJObject()
-  var body_568206 = newJObject()
-  add(path_568204, "clusterName", newJString(clusterName))
-  add(path_568204, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568205, "api-version", newJString(apiVersion))
-  add(path_568204, "subscriptionId", newJString(subscriptionId))
+  var path_564104 = newJObject()
+  var query_564105 = newJObject()
+  var body_564106 = newJObject()
+  add(path_564104, "clusterName", newJString(clusterName))
+  add(query_564105, "api-version", newJString(apiVersion))
+  add(path_564104, "subscriptionId", newJString(subscriptionId))
+  add(path_564104, "resourceGroupName", newJString(resourceGroupName))
   if parameters != nil:
-    body_568206 = parameters
-  result = call_568203.call(path_568204, query_568205, nil, nil, body_568206)
+    body_564106 = parameters
+  result = call_564103.call(path_564104, query_564105, nil, nil, body_564106)
 
-var extensionsEnableMonitoring* = Call_ExtensionsEnableMonitoring_568177(
+var extensionsEnableMonitoring* = Call_ExtensionsEnableMonitoring_564077(
     name: "extensionsEnableMonitoring", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.HDInsight/clusters/{clusterName}/extensions/clustermonitoring",
-    validator: validate_ExtensionsEnableMonitoring_568178, base: "",
-    url: url_ExtensionsEnableMonitoring_568179, schemes: {Scheme.Https})
+    validator: validate_ExtensionsEnableMonitoring_564078, base: "",
+    url: url_ExtensionsEnableMonitoring_564079, schemes: {Scheme.Https})
 type
-  Call_ExtensionsGetMonitoringStatus_567863 = ref object of OpenApiRestCall_567641
-proc url_ExtensionsGetMonitoringStatus_567865(protocol: Scheme; host: string;
+  Call_ExtensionsGetMonitoringStatus_563761 = ref object of OpenApiRestCall_563539
+proc url_ExtensionsGetMonitoringStatus_563763(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -252,7 +256,7 @@ proc url_ExtensionsGetMonitoringStatus_567865(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ExtensionsGetMonitoringStatus_567864(path: JsonNode; query: JsonNode;
+proc validate_ExtensionsGetMonitoringStatus_563762(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the status of Operations Management Suite (OMS) on the HDInsight cluster.
   ## 
@@ -261,28 +265,28 @@ proc validate_ExtensionsGetMonitoringStatus_567864(path: JsonNode; query: JsonNo
   ## parameters in `path` object:
   ##   clusterName: JString (required)
   ##              : The name of the cluster.
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   subscriptionId: JString (required)
   ##                 : The subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `clusterName` field"
-  var valid_568038 = path.getOrDefault("clusterName")
-  valid_568038 = validateParameter(valid_568038, JString, required = true,
+  var valid_563938 = path.getOrDefault("clusterName")
+  valid_563938 = validateParameter(valid_563938, JString, required = true,
                                  default = nil)
-  if valid_568038 != nil:
-    section.add "clusterName", valid_568038
-  var valid_568039 = path.getOrDefault("resourceGroupName")
-  valid_568039 = validateParameter(valid_568039, JString, required = true,
+  if valid_563938 != nil:
+    section.add "clusterName", valid_563938
+  var valid_563939 = path.getOrDefault("subscriptionId")
+  valid_563939 = validateParameter(valid_563939, JString, required = true,
                                  default = nil)
-  if valid_568039 != nil:
-    section.add "resourceGroupName", valid_568039
-  var valid_568040 = path.getOrDefault("subscriptionId")
-  valid_568040 = validateParameter(valid_568040, JString, required = true,
+  if valid_563939 != nil:
+    section.add "subscriptionId", valid_563939
+  var valid_563940 = path.getOrDefault("resourceGroupName")
+  valid_563940 = validateParameter(valid_563940, JString, required = true,
                                  default = nil)
-  if valid_568040 != nil:
-    section.add "subscriptionId", valid_568040
+  if valid_563940 != nil:
+    section.add "resourceGroupName", valid_563940
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -290,11 +294,11 @@ proc validate_ExtensionsGetMonitoringStatus_567864(path: JsonNode; query: JsonNo
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568041 = query.getOrDefault("api-version")
-  valid_568041 = validateParameter(valid_568041, JString, required = true,
+  var valid_563941 = query.getOrDefault("api-version")
+  valid_563941 = validateParameter(valid_563941, JString, required = true,
                                  default = nil)
-  if valid_568041 != nil:
-    section.add "api-version", valid_568041
+  if valid_563941 != nil:
+    section.add "api-version", valid_563941
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -303,48 +307,48 @@ proc validate_ExtensionsGetMonitoringStatus_567864(path: JsonNode; query: JsonNo
   if body != nil:
     result.add "body", body
 
-proc call*(call_568064: Call_ExtensionsGetMonitoringStatus_567863; path: JsonNode;
+proc call*(call_563964: Call_ExtensionsGetMonitoringStatus_563761; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the status of Operations Management Suite (OMS) on the HDInsight cluster.
   ## 
-  let valid = call_568064.validator(path, query, header, formData, body)
-  let scheme = call_568064.pickScheme
+  let valid = call_563964.validator(path, query, header, formData, body)
+  let scheme = call_563964.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568064.url(scheme.get, call_568064.host, call_568064.base,
-                         call_568064.route, valid.getOrDefault("path"),
+  let url = call_563964.url(scheme.get, call_563964.host, call_563964.base,
+                         call_563964.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568064, url, valid)
+  result = hook(call_563964, url, valid)
 
-proc call*(call_568135: Call_ExtensionsGetMonitoringStatus_567863;
-          clusterName: string; resourceGroupName: string; apiVersion: string;
-          subscriptionId: string): Recallable =
+proc call*(call_564035: Call_ExtensionsGetMonitoringStatus_563761;
+          clusterName: string; apiVersion: string; subscriptionId: string;
+          resourceGroupName: string): Recallable =
   ## extensionsGetMonitoringStatus
   ## Gets the status of Operations Management Suite (OMS) on the HDInsight cluster.
   ##   clusterName: string (required)
   ##              : The name of the cluster.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : The HDInsight client API Version.
   ##   subscriptionId: string (required)
   ##                 : The subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_568136 = newJObject()
-  var query_568138 = newJObject()
-  add(path_568136, "clusterName", newJString(clusterName))
-  add(path_568136, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568138, "api-version", newJString(apiVersion))
-  add(path_568136, "subscriptionId", newJString(subscriptionId))
-  result = call_568135.call(path_568136, query_568138, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564036 = newJObject()
+  var query_564038 = newJObject()
+  add(path_564036, "clusterName", newJString(clusterName))
+  add(query_564038, "api-version", newJString(apiVersion))
+  add(path_564036, "subscriptionId", newJString(subscriptionId))
+  add(path_564036, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564035.call(path_564036, query_564038, nil, nil, nil)
 
-var extensionsGetMonitoringStatus* = Call_ExtensionsGetMonitoringStatus_567863(
+var extensionsGetMonitoringStatus* = Call_ExtensionsGetMonitoringStatus_563761(
     name: "extensionsGetMonitoringStatus", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.HDInsight/clusters/{clusterName}/extensions/clustermonitoring",
-    validator: validate_ExtensionsGetMonitoringStatus_567864, base: "",
-    url: url_ExtensionsGetMonitoringStatus_567865, schemes: {Scheme.Https})
+    validator: validate_ExtensionsGetMonitoringStatus_563762, base: "",
+    url: url_ExtensionsGetMonitoringStatus_563763, schemes: {Scheme.Https})
 type
-  Call_ExtensionsDisableMonitoring_568207 = ref object of OpenApiRestCall_567641
-proc url_ExtensionsDisableMonitoring_568209(protocol: Scheme; host: string;
+  Call_ExtensionsDisableMonitoring_564107 = ref object of OpenApiRestCall_563539
+proc url_ExtensionsDisableMonitoring_564109(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -367,7 +371,7 @@ proc url_ExtensionsDisableMonitoring_568209(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ExtensionsDisableMonitoring_568208(path: JsonNode; query: JsonNode;
+proc validate_ExtensionsDisableMonitoring_564108(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Disables the Operations Management Suite (OMS) on the HDInsight cluster.
   ## 
@@ -376,28 +380,28 @@ proc validate_ExtensionsDisableMonitoring_568208(path: JsonNode; query: JsonNode
   ## parameters in `path` object:
   ##   clusterName: JString (required)
   ##              : The name of the cluster.
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   subscriptionId: JString (required)
   ##                 : The subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `clusterName` field"
-  var valid_568210 = path.getOrDefault("clusterName")
-  valid_568210 = validateParameter(valid_568210, JString, required = true,
+  var valid_564110 = path.getOrDefault("clusterName")
+  valid_564110 = validateParameter(valid_564110, JString, required = true,
                                  default = nil)
-  if valid_568210 != nil:
-    section.add "clusterName", valid_568210
-  var valid_568211 = path.getOrDefault("resourceGroupName")
-  valid_568211 = validateParameter(valid_568211, JString, required = true,
+  if valid_564110 != nil:
+    section.add "clusterName", valid_564110
+  var valid_564111 = path.getOrDefault("subscriptionId")
+  valid_564111 = validateParameter(valid_564111, JString, required = true,
                                  default = nil)
-  if valid_568211 != nil:
-    section.add "resourceGroupName", valid_568211
-  var valid_568212 = path.getOrDefault("subscriptionId")
-  valid_568212 = validateParameter(valid_568212, JString, required = true,
+  if valid_564111 != nil:
+    section.add "subscriptionId", valid_564111
+  var valid_564112 = path.getOrDefault("resourceGroupName")
+  valid_564112 = validateParameter(valid_564112, JString, required = true,
                                  default = nil)
-  if valid_568212 != nil:
-    section.add "subscriptionId", valid_568212
+  if valid_564112 != nil:
+    section.add "resourceGroupName", valid_564112
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -405,11 +409,11 @@ proc validate_ExtensionsDisableMonitoring_568208(path: JsonNode; query: JsonNode
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568213 = query.getOrDefault("api-version")
-  valid_568213 = validateParameter(valid_568213, JString, required = true,
+  var valid_564113 = query.getOrDefault("api-version")
+  valid_564113 = validateParameter(valid_564113, JString, required = true,
                                  default = nil)
-  if valid_568213 != nil:
-    section.add "api-version", valid_568213
+  if valid_564113 != nil:
+    section.add "api-version", valid_564113
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -418,48 +422,48 @@ proc validate_ExtensionsDisableMonitoring_568208(path: JsonNode; query: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_568214: Call_ExtensionsDisableMonitoring_568207; path: JsonNode;
+proc call*(call_564114: Call_ExtensionsDisableMonitoring_564107; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Disables the Operations Management Suite (OMS) on the HDInsight cluster.
   ## 
-  let valid = call_568214.validator(path, query, header, formData, body)
-  let scheme = call_568214.pickScheme
+  let valid = call_564114.validator(path, query, header, formData, body)
+  let scheme = call_564114.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568214.url(scheme.get, call_568214.host, call_568214.base,
-                         call_568214.route, valid.getOrDefault("path"),
+  let url = call_564114.url(scheme.get, call_564114.host, call_564114.base,
+                         call_564114.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568214, url, valid)
+  result = hook(call_564114, url, valid)
 
-proc call*(call_568215: Call_ExtensionsDisableMonitoring_568207;
-          clusterName: string; resourceGroupName: string; apiVersion: string;
-          subscriptionId: string): Recallable =
+proc call*(call_564115: Call_ExtensionsDisableMonitoring_564107;
+          clusterName: string; apiVersion: string; subscriptionId: string;
+          resourceGroupName: string): Recallable =
   ## extensionsDisableMonitoring
   ## Disables the Operations Management Suite (OMS) on the HDInsight cluster.
   ##   clusterName: string (required)
   ##              : The name of the cluster.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : The HDInsight client API Version.
   ##   subscriptionId: string (required)
   ##                 : The subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_568216 = newJObject()
-  var query_568217 = newJObject()
-  add(path_568216, "clusterName", newJString(clusterName))
-  add(path_568216, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568217, "api-version", newJString(apiVersion))
-  add(path_568216, "subscriptionId", newJString(subscriptionId))
-  result = call_568215.call(path_568216, query_568217, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564116 = newJObject()
+  var query_564117 = newJObject()
+  add(path_564116, "clusterName", newJString(clusterName))
+  add(query_564117, "api-version", newJString(apiVersion))
+  add(path_564116, "subscriptionId", newJString(subscriptionId))
+  add(path_564116, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564115.call(path_564116, query_564117, nil, nil, nil)
 
-var extensionsDisableMonitoring* = Call_ExtensionsDisableMonitoring_568207(
+var extensionsDisableMonitoring* = Call_ExtensionsDisableMonitoring_564107(
     name: "extensionsDisableMonitoring", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.HDInsight/clusters/{clusterName}/extensions/clustermonitoring",
-    validator: validate_ExtensionsDisableMonitoring_568208, base: "",
-    url: url_ExtensionsDisableMonitoring_568209, schemes: {Scheme.Https})
+    validator: validate_ExtensionsDisableMonitoring_564108, base: "",
+    url: url_ExtensionsDisableMonitoring_564109, schemes: {Scheme.Https})
 type
-  Call_ExtensionsCreate_568230 = ref object of OpenApiRestCall_567641
-proc url_ExtensionsCreate_568232(protocol: Scheme; host: string; base: string;
+  Call_ExtensionsCreate_564130 = ref object of OpenApiRestCall_563539
+proc url_ExtensionsCreate_564132(protocol: Scheme; host: string; base: string;
                                 route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -484,7 +488,7 @@ proc url_ExtensionsCreate_568232(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ExtensionsCreate_568231(path: JsonNode; query: JsonNode;
+proc validate_ExtensionsCreate_564131(path: JsonNode; query: JsonNode;
                                      header: JsonNode; formData: JsonNode;
                                      body: JsonNode): JsonNode =
   ## Creates an HDInsight cluster extension.
@@ -494,35 +498,35 @@ proc validate_ExtensionsCreate_568231(path: JsonNode; query: JsonNode;
   ## parameters in `path` object:
   ##   clusterName: JString (required)
   ##              : The name of the cluster.
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   extensionName: JString (required)
   ##                : The name of the cluster extension.
   ##   subscriptionId: JString (required)
   ##                 : The subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `clusterName` field"
-  var valid_568233 = path.getOrDefault("clusterName")
-  valid_568233 = validateParameter(valid_568233, JString, required = true,
+  var valid_564133 = path.getOrDefault("clusterName")
+  valid_564133 = validateParameter(valid_564133, JString, required = true,
                                  default = nil)
-  if valid_568233 != nil:
-    section.add "clusterName", valid_568233
-  var valid_568234 = path.getOrDefault("resourceGroupName")
-  valid_568234 = validateParameter(valid_568234, JString, required = true,
+  if valid_564133 != nil:
+    section.add "clusterName", valid_564133
+  var valid_564134 = path.getOrDefault("extensionName")
+  valid_564134 = validateParameter(valid_564134, JString, required = true,
                                  default = nil)
-  if valid_568234 != nil:
-    section.add "resourceGroupName", valid_568234
-  var valid_568235 = path.getOrDefault("extensionName")
-  valid_568235 = validateParameter(valid_568235, JString, required = true,
+  if valid_564134 != nil:
+    section.add "extensionName", valid_564134
+  var valid_564135 = path.getOrDefault("subscriptionId")
+  valid_564135 = validateParameter(valid_564135, JString, required = true,
                                  default = nil)
-  if valid_568235 != nil:
-    section.add "extensionName", valid_568235
-  var valid_568236 = path.getOrDefault("subscriptionId")
-  valid_568236 = validateParameter(valid_568236, JString, required = true,
+  if valid_564135 != nil:
+    section.add "subscriptionId", valid_564135
+  var valid_564136 = path.getOrDefault("resourceGroupName")
+  valid_564136 = validateParameter(valid_564136, JString, required = true,
                                  default = nil)
-  if valid_568236 != nil:
-    section.add "subscriptionId", valid_568236
+  if valid_564136 != nil:
+    section.add "resourceGroupName", valid_564136
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -530,11 +534,11 @@ proc validate_ExtensionsCreate_568231(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568237 = query.getOrDefault("api-version")
-  valid_568237 = validateParameter(valid_568237, JString, required = true,
+  var valid_564137 = query.getOrDefault("api-version")
+  valid_564137 = validateParameter(valid_564137, JString, required = true,
                                  default = nil)
-  if valid_568237 != nil:
-    section.add "api-version", valid_568237
+  if valid_564137 != nil:
+    section.add "api-version", valid_564137
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -548,55 +552,55 @@ proc validate_ExtensionsCreate_568231(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568239: Call_ExtensionsCreate_568230; path: JsonNode;
+proc call*(call_564139: Call_ExtensionsCreate_564130; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Creates an HDInsight cluster extension.
   ## 
-  let valid = call_568239.validator(path, query, header, formData, body)
-  let scheme = call_568239.pickScheme
+  let valid = call_564139.validator(path, query, header, formData, body)
+  let scheme = call_564139.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568239.url(scheme.get, call_568239.host, call_568239.base,
-                         call_568239.route, valid.getOrDefault("path"),
+  let url = call_564139.url(scheme.get, call_564139.host, call_564139.base,
+                         call_564139.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568239, url, valid)
+  result = hook(call_564139, url, valid)
 
-proc call*(call_568240: Call_ExtensionsCreate_568230; clusterName: string;
-          resourceGroupName: string; extensionName: string; apiVersion: string;
-          subscriptionId: string; parameters: JsonNode): Recallable =
+proc call*(call_564140: Call_ExtensionsCreate_564130; clusterName: string;
+          apiVersion: string; extensionName: string; subscriptionId: string;
+          resourceGroupName: string; parameters: JsonNode): Recallable =
   ## extensionsCreate
   ## Creates an HDInsight cluster extension.
   ##   clusterName: string (required)
   ##              : The name of the cluster.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
-  ##   extensionName: string (required)
-  ##                : The name of the cluster extension.
   ##   apiVersion: string (required)
   ##             : The HDInsight client API Version.
+  ##   extensionName: string (required)
+  ##                : The name of the cluster extension.
   ##   subscriptionId: string (required)
   ##                 : The subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   parameters: JObject (required)
   ##             : The cluster extensions create request.
-  var path_568241 = newJObject()
-  var query_568242 = newJObject()
-  var body_568243 = newJObject()
-  add(path_568241, "clusterName", newJString(clusterName))
-  add(path_568241, "resourceGroupName", newJString(resourceGroupName))
-  add(path_568241, "extensionName", newJString(extensionName))
-  add(query_568242, "api-version", newJString(apiVersion))
-  add(path_568241, "subscriptionId", newJString(subscriptionId))
+  var path_564141 = newJObject()
+  var query_564142 = newJObject()
+  var body_564143 = newJObject()
+  add(path_564141, "clusterName", newJString(clusterName))
+  add(query_564142, "api-version", newJString(apiVersion))
+  add(path_564141, "extensionName", newJString(extensionName))
+  add(path_564141, "subscriptionId", newJString(subscriptionId))
+  add(path_564141, "resourceGroupName", newJString(resourceGroupName))
   if parameters != nil:
-    body_568243 = parameters
-  result = call_568240.call(path_568241, query_568242, nil, nil, body_568243)
+    body_564143 = parameters
+  result = call_564140.call(path_564141, query_564142, nil, nil, body_564143)
 
-var extensionsCreate* = Call_ExtensionsCreate_568230(name: "extensionsCreate",
+var extensionsCreate* = Call_ExtensionsCreate_564130(name: "extensionsCreate",
     meth: HttpMethod.HttpPut, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.HDInsight/clusters/{clusterName}/extensions/{extensionName}",
-    validator: validate_ExtensionsCreate_568231, base: "",
-    url: url_ExtensionsCreate_568232, schemes: {Scheme.Https})
+    validator: validate_ExtensionsCreate_564131, base: "",
+    url: url_ExtensionsCreate_564132, schemes: {Scheme.Https})
 type
-  Call_ExtensionsGet_568218 = ref object of OpenApiRestCall_567641
-proc url_ExtensionsGet_568220(protocol: Scheme; host: string; base: string;
+  Call_ExtensionsGet_564118 = ref object of OpenApiRestCall_563539
+proc url_ExtensionsGet_564120(protocol: Scheme; host: string; base: string;
                              route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -621,7 +625,7 @@ proc url_ExtensionsGet_568220(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ExtensionsGet_568219(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_ExtensionsGet_564119(path: JsonNode; query: JsonNode; header: JsonNode;
                                   formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the extension properties for the specified HDInsight cluster extension.
   ## 
@@ -630,35 +634,35 @@ proc validate_ExtensionsGet_568219(path: JsonNode; query: JsonNode; header: Json
   ## parameters in `path` object:
   ##   clusterName: JString (required)
   ##              : The name of the cluster.
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   extensionName: JString (required)
   ##                : The name of the cluster extension.
   ##   subscriptionId: JString (required)
   ##                 : The subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `clusterName` field"
-  var valid_568221 = path.getOrDefault("clusterName")
-  valid_568221 = validateParameter(valid_568221, JString, required = true,
+  var valid_564121 = path.getOrDefault("clusterName")
+  valid_564121 = validateParameter(valid_564121, JString, required = true,
                                  default = nil)
-  if valid_568221 != nil:
-    section.add "clusterName", valid_568221
-  var valid_568222 = path.getOrDefault("resourceGroupName")
-  valid_568222 = validateParameter(valid_568222, JString, required = true,
+  if valid_564121 != nil:
+    section.add "clusterName", valid_564121
+  var valid_564122 = path.getOrDefault("extensionName")
+  valid_564122 = validateParameter(valid_564122, JString, required = true,
                                  default = nil)
-  if valid_568222 != nil:
-    section.add "resourceGroupName", valid_568222
-  var valid_568223 = path.getOrDefault("extensionName")
-  valid_568223 = validateParameter(valid_568223, JString, required = true,
+  if valid_564122 != nil:
+    section.add "extensionName", valid_564122
+  var valid_564123 = path.getOrDefault("subscriptionId")
+  valid_564123 = validateParameter(valid_564123, JString, required = true,
                                  default = nil)
-  if valid_568223 != nil:
-    section.add "extensionName", valid_568223
-  var valid_568224 = path.getOrDefault("subscriptionId")
-  valid_568224 = validateParameter(valid_568224, JString, required = true,
+  if valid_564123 != nil:
+    section.add "subscriptionId", valid_564123
+  var valid_564124 = path.getOrDefault("resourceGroupName")
+  valid_564124 = validateParameter(valid_564124, JString, required = true,
                                  default = nil)
-  if valid_568224 != nil:
-    section.add "subscriptionId", valid_568224
+  if valid_564124 != nil:
+    section.add "resourceGroupName", valid_564124
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -666,11 +670,11 @@ proc validate_ExtensionsGet_568219(path: JsonNode; query: JsonNode; header: Json
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568225 = query.getOrDefault("api-version")
-  valid_568225 = validateParameter(valid_568225, JString, required = true,
+  var valid_564125 = query.getOrDefault("api-version")
+  valid_564125 = validateParameter(valid_564125, JString, required = true,
                                  default = nil)
-  if valid_568225 != nil:
-    section.add "api-version", valid_568225
+  if valid_564125 != nil:
+    section.add "api-version", valid_564125
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -679,50 +683,50 @@ proc validate_ExtensionsGet_568219(path: JsonNode; query: JsonNode; header: Json
   if body != nil:
     result.add "body", body
 
-proc call*(call_568226: Call_ExtensionsGet_568218; path: JsonNode; query: JsonNode;
+proc call*(call_564126: Call_ExtensionsGet_564118; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the extension properties for the specified HDInsight cluster extension.
   ## 
-  let valid = call_568226.validator(path, query, header, formData, body)
-  let scheme = call_568226.pickScheme
+  let valid = call_564126.validator(path, query, header, formData, body)
+  let scheme = call_564126.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568226.url(scheme.get, call_568226.host, call_568226.base,
-                         call_568226.route, valid.getOrDefault("path"),
+  let url = call_564126.url(scheme.get, call_564126.host, call_564126.base,
+                         call_564126.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568226, url, valid)
+  result = hook(call_564126, url, valid)
 
-proc call*(call_568227: Call_ExtensionsGet_568218; clusterName: string;
-          resourceGroupName: string; extensionName: string; apiVersion: string;
-          subscriptionId: string): Recallable =
+proc call*(call_564127: Call_ExtensionsGet_564118; clusterName: string;
+          apiVersion: string; extensionName: string; subscriptionId: string;
+          resourceGroupName: string): Recallable =
   ## extensionsGet
   ## Gets the extension properties for the specified HDInsight cluster extension.
   ##   clusterName: string (required)
   ##              : The name of the cluster.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
-  ##   extensionName: string (required)
-  ##                : The name of the cluster extension.
   ##   apiVersion: string (required)
   ##             : The HDInsight client API Version.
+  ##   extensionName: string (required)
+  ##                : The name of the cluster extension.
   ##   subscriptionId: string (required)
   ##                 : The subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_568228 = newJObject()
-  var query_568229 = newJObject()
-  add(path_568228, "clusterName", newJString(clusterName))
-  add(path_568228, "resourceGroupName", newJString(resourceGroupName))
-  add(path_568228, "extensionName", newJString(extensionName))
-  add(query_568229, "api-version", newJString(apiVersion))
-  add(path_568228, "subscriptionId", newJString(subscriptionId))
-  result = call_568227.call(path_568228, query_568229, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564128 = newJObject()
+  var query_564129 = newJObject()
+  add(path_564128, "clusterName", newJString(clusterName))
+  add(query_564129, "api-version", newJString(apiVersion))
+  add(path_564128, "extensionName", newJString(extensionName))
+  add(path_564128, "subscriptionId", newJString(subscriptionId))
+  add(path_564128, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564127.call(path_564128, query_564129, nil, nil, nil)
 
-var extensionsGet* = Call_ExtensionsGet_568218(name: "extensionsGet",
+var extensionsGet* = Call_ExtensionsGet_564118(name: "extensionsGet",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.HDInsight/clusters/{clusterName}/extensions/{extensionName}",
-    validator: validate_ExtensionsGet_568219, base: "", url: url_ExtensionsGet_568220,
+    validator: validate_ExtensionsGet_564119, base: "", url: url_ExtensionsGet_564120,
     schemes: {Scheme.Https})
 type
-  Call_ExtensionsDelete_568244 = ref object of OpenApiRestCall_567641
-proc url_ExtensionsDelete_568246(protocol: Scheme; host: string; base: string;
+  Call_ExtensionsDelete_564144 = ref object of OpenApiRestCall_563539
+proc url_ExtensionsDelete_564146(protocol: Scheme; host: string; base: string;
                                 route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -747,7 +751,7 @@ proc url_ExtensionsDelete_568246(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ExtensionsDelete_568245(path: JsonNode; query: JsonNode;
+proc validate_ExtensionsDelete_564145(path: JsonNode; query: JsonNode;
                                      header: JsonNode; formData: JsonNode;
                                      body: JsonNode): JsonNode =
   ## Deletes the specified extension for HDInsight cluster.
@@ -757,35 +761,35 @@ proc validate_ExtensionsDelete_568245(path: JsonNode; query: JsonNode;
   ## parameters in `path` object:
   ##   clusterName: JString (required)
   ##              : The name of the cluster.
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   extensionName: JString (required)
   ##                : The name of the cluster extension.
   ##   subscriptionId: JString (required)
   ##                 : The subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `clusterName` field"
-  var valid_568247 = path.getOrDefault("clusterName")
-  valid_568247 = validateParameter(valid_568247, JString, required = true,
+  var valid_564147 = path.getOrDefault("clusterName")
+  valid_564147 = validateParameter(valid_564147, JString, required = true,
                                  default = nil)
-  if valid_568247 != nil:
-    section.add "clusterName", valid_568247
-  var valid_568248 = path.getOrDefault("resourceGroupName")
-  valid_568248 = validateParameter(valid_568248, JString, required = true,
+  if valid_564147 != nil:
+    section.add "clusterName", valid_564147
+  var valid_564148 = path.getOrDefault("extensionName")
+  valid_564148 = validateParameter(valid_564148, JString, required = true,
                                  default = nil)
-  if valid_568248 != nil:
-    section.add "resourceGroupName", valid_568248
-  var valid_568249 = path.getOrDefault("extensionName")
-  valid_568249 = validateParameter(valid_568249, JString, required = true,
+  if valid_564148 != nil:
+    section.add "extensionName", valid_564148
+  var valid_564149 = path.getOrDefault("subscriptionId")
+  valid_564149 = validateParameter(valid_564149, JString, required = true,
                                  default = nil)
-  if valid_568249 != nil:
-    section.add "extensionName", valid_568249
-  var valid_568250 = path.getOrDefault("subscriptionId")
-  valid_568250 = validateParameter(valid_568250, JString, required = true,
+  if valid_564149 != nil:
+    section.add "subscriptionId", valid_564149
+  var valid_564150 = path.getOrDefault("resourceGroupName")
+  valid_564150 = validateParameter(valid_564150, JString, required = true,
                                  default = nil)
-  if valid_568250 != nil:
-    section.add "subscriptionId", valid_568250
+  if valid_564150 != nil:
+    section.add "resourceGroupName", valid_564150
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -793,11 +797,11 @@ proc validate_ExtensionsDelete_568245(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568251 = query.getOrDefault("api-version")
-  valid_568251 = validateParameter(valid_568251, JString, required = true,
+  var valid_564151 = query.getOrDefault("api-version")
+  valid_564151 = validateParameter(valid_564151, JString, required = true,
                                  default = nil)
-  if valid_568251 != nil:
-    section.add "api-version", valid_568251
+  if valid_564151 != nil:
+    section.add "api-version", valid_564151
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -806,47 +810,47 @@ proc validate_ExtensionsDelete_568245(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568252: Call_ExtensionsDelete_568244; path: JsonNode;
+proc call*(call_564152: Call_ExtensionsDelete_564144; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes the specified extension for HDInsight cluster.
   ## 
-  let valid = call_568252.validator(path, query, header, formData, body)
-  let scheme = call_568252.pickScheme
+  let valid = call_564152.validator(path, query, header, formData, body)
+  let scheme = call_564152.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568252.url(scheme.get, call_568252.host, call_568252.base,
-                         call_568252.route, valid.getOrDefault("path"),
+  let url = call_564152.url(scheme.get, call_564152.host, call_564152.base,
+                         call_564152.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568252, url, valid)
+  result = hook(call_564152, url, valid)
 
-proc call*(call_568253: Call_ExtensionsDelete_568244; clusterName: string;
-          resourceGroupName: string; extensionName: string; apiVersion: string;
-          subscriptionId: string): Recallable =
+proc call*(call_564153: Call_ExtensionsDelete_564144; clusterName: string;
+          apiVersion: string; extensionName: string; subscriptionId: string;
+          resourceGroupName: string): Recallable =
   ## extensionsDelete
   ## Deletes the specified extension for HDInsight cluster.
   ##   clusterName: string (required)
   ##              : The name of the cluster.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
-  ##   extensionName: string (required)
-  ##                : The name of the cluster extension.
   ##   apiVersion: string (required)
   ##             : The HDInsight client API Version.
+  ##   extensionName: string (required)
+  ##                : The name of the cluster extension.
   ##   subscriptionId: string (required)
   ##                 : The subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_568254 = newJObject()
-  var query_568255 = newJObject()
-  add(path_568254, "clusterName", newJString(clusterName))
-  add(path_568254, "resourceGroupName", newJString(resourceGroupName))
-  add(path_568254, "extensionName", newJString(extensionName))
-  add(query_568255, "api-version", newJString(apiVersion))
-  add(path_568254, "subscriptionId", newJString(subscriptionId))
-  result = call_568253.call(path_568254, query_568255, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564154 = newJObject()
+  var query_564155 = newJObject()
+  add(path_564154, "clusterName", newJString(clusterName))
+  add(query_564155, "api-version", newJString(apiVersion))
+  add(path_564154, "extensionName", newJString(extensionName))
+  add(path_564154, "subscriptionId", newJString(subscriptionId))
+  add(path_564154, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564153.call(path_564154, query_564155, nil, nil, nil)
 
-var extensionsDelete* = Call_ExtensionsDelete_568244(name: "extensionsDelete",
+var extensionsDelete* = Call_ExtensionsDelete_564144(name: "extensionsDelete",
     meth: HttpMethod.HttpDelete, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.HDInsight/clusters/{clusterName}/extensions/{extensionName}",
-    validator: validate_ExtensionsDelete_568245, base: "",
-    url: url_ExtensionsDelete_568246, schemes: {Scheme.Https})
+    validator: validate_ExtensionsDelete_564145, base: "",
+    url: url_ExtensionsDelete_564146, schemes: {Scheme.Https})
 export
   rest
 

@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, httpcore
 
 ## auto-generated via openapi macro
 ## title: Azure SQL Database
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_567642 = ref object of OpenApiRestCall
+  OpenApiRestCall_563540 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_567642](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563540](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_567642): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563540): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,8 +107,8 @@ const
   macServiceName = "sql-deprecated"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_ExtensionsListByDatabase_567864 = ref object of OpenApiRestCall_567642
-proc url_ExtensionsListByDatabase_567866(protocol: Scheme; host: string;
+  Call_ExtensionsListByDatabase_563762 = ref object of OpenApiRestCall_563540
+proc url_ExtensionsListByDatabase_563764(protocol: Scheme; host: string;
                                         base: string; route: string; path: JsonNode;
                                         query: JsonNode): Uri =
   result.scheme = $protocol
@@ -131,44 +135,44 @@ proc url_ExtensionsListByDatabase_567866(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ExtensionsListByDatabase_567865(path: JsonNode; query: JsonNode;
+proc validate_ExtensionsListByDatabase_563763(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets database extensions. This API is deprecated and should not be used.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   ##   serverName: JString (required)
   ##             : The name of the server.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID that identifies an Azure subscription.
   ##   databaseName: JString (required)
   ##               : The name of the database to import into
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568039 = path.getOrDefault("resourceGroupName")
-  valid_568039 = validateParameter(valid_568039, JString, required = true,
+        "path argument is necessary due to required `serverName` field"
+  var valid_563939 = path.getOrDefault("serverName")
+  valid_563939 = validateParameter(valid_563939, JString, required = true,
                                  default = nil)
-  if valid_568039 != nil:
-    section.add "resourceGroupName", valid_568039
-  var valid_568040 = path.getOrDefault("serverName")
-  valid_568040 = validateParameter(valid_568040, JString, required = true,
+  if valid_563939 != nil:
+    section.add "serverName", valid_563939
+  var valid_563940 = path.getOrDefault("subscriptionId")
+  valid_563940 = validateParameter(valid_563940, JString, required = true,
                                  default = nil)
-  if valid_568040 != nil:
-    section.add "serverName", valid_568040
-  var valid_568041 = path.getOrDefault("subscriptionId")
-  valid_568041 = validateParameter(valid_568041, JString, required = true,
+  if valid_563940 != nil:
+    section.add "subscriptionId", valid_563940
+  var valid_563941 = path.getOrDefault("databaseName")
+  valid_563941 = validateParameter(valid_563941, JString, required = true,
                                  default = nil)
-  if valid_568041 != nil:
-    section.add "subscriptionId", valid_568041
-  var valid_568042 = path.getOrDefault("databaseName")
-  valid_568042 = validateParameter(valid_568042, JString, required = true,
+  if valid_563941 != nil:
+    section.add "databaseName", valid_563941
+  var valid_563942 = path.getOrDefault("resourceGroupName")
+  valid_563942 = validateParameter(valid_563942, JString, required = true,
                                  default = nil)
-  if valid_568042 != nil:
-    section.add "databaseName", valid_568042
+  if valid_563942 != nil:
+    section.add "resourceGroupName", valid_563942
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -176,11 +180,11 @@ proc validate_ExtensionsListByDatabase_567865(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568043 = query.getOrDefault("api-version")
-  valid_568043 = validateParameter(valid_568043, JString, required = true,
+  var valid_563943 = query.getOrDefault("api-version")
+  valid_563943 = validateParameter(valid_563943, JString, required = true,
                                  default = nil)
-  if valid_568043 != nil:
-    section.add "api-version", valid_568043
+  if valid_563943 != nil:
+    section.add "api-version", valid_563943
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -189,26 +193,24 @@ proc validate_ExtensionsListByDatabase_567865(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568066: Call_ExtensionsListByDatabase_567864; path: JsonNode;
+proc call*(call_563966: Call_ExtensionsListByDatabase_563762; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets database extensions. This API is deprecated and should not be used.
   ## 
-  let valid = call_568066.validator(path, query, header, formData, body)
-  let scheme = call_568066.pickScheme
+  let valid = call_563966.validator(path, query, header, formData, body)
+  let scheme = call_563966.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568066.url(scheme.get, call_568066.host, call_568066.base,
-                         call_568066.route, valid.getOrDefault("path"),
+  let url = call_563966.url(scheme.get, call_563966.host, call_563966.base,
+                         call_563966.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568066, url, valid)
+  result = hook(call_563966, url, valid)
 
-proc call*(call_568137: Call_ExtensionsListByDatabase_567864;
-          resourceGroupName: string; apiVersion: string; serverName: string;
-          subscriptionId: string; databaseName: string): Recallable =
+proc call*(call_564037: Call_ExtensionsListByDatabase_563762; apiVersion: string;
+          serverName: string; subscriptionId: string; databaseName: string;
+          resourceGroupName: string): Recallable =
   ## extensionsListByDatabase
   ## Gets database extensions. This API is deprecated and should not be used.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   ##   apiVersion: string (required)
   ##             : The API version to use for the request.
   ##   serverName: string (required)
@@ -217,23 +219,25 @@ proc call*(call_568137: Call_ExtensionsListByDatabase_567864;
   ##                 : The subscription ID that identifies an Azure subscription.
   ##   databaseName: string (required)
   ##               : The name of the database to import into
-  var path_568138 = newJObject()
-  var query_568140 = newJObject()
-  add(path_568138, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568140, "api-version", newJString(apiVersion))
-  add(path_568138, "serverName", newJString(serverName))
-  add(path_568138, "subscriptionId", newJString(subscriptionId))
-  add(path_568138, "databaseName", newJString(databaseName))
-  result = call_568137.call(path_568138, query_568140, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
+  var path_564038 = newJObject()
+  var query_564040 = newJObject()
+  add(query_564040, "api-version", newJString(apiVersion))
+  add(path_564038, "serverName", newJString(serverName))
+  add(path_564038, "subscriptionId", newJString(subscriptionId))
+  add(path_564038, "databaseName", newJString(databaseName))
+  add(path_564038, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564037.call(path_564038, query_564040, nil, nil, nil)
 
-var extensionsListByDatabase* = Call_ExtensionsListByDatabase_567864(
+var extensionsListByDatabase* = Call_ExtensionsListByDatabase_563762(
     name: "extensionsListByDatabase", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/servers/{serverName}/databases/{databaseName}/extensions",
-    validator: validate_ExtensionsListByDatabase_567865, base: "",
-    url: url_ExtensionsListByDatabase_567866, schemes: {Scheme.Https})
+    validator: validate_ExtensionsListByDatabase_563763, base: "",
+    url: url_ExtensionsListByDatabase_563764, schemes: {Scheme.Https})
 type
-  Call_ExtensionsGet_568179 = ref object of OpenApiRestCall_567642
-proc url_ExtensionsGet_568181(protocol: Scheme; host: string; base: string;
+  Call_ExtensionsGet_564079 = ref object of OpenApiRestCall_563540
+proc url_ExtensionsGet_564081(protocol: Scheme; host: string; base: string;
                              route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -261,15 +265,13 @@ proc url_ExtensionsGet_568181(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ExtensionsGet_568180(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_ExtensionsGet_564080(path: JsonNode; query: JsonNode; header: JsonNode;
                                   formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets a database extension. This API is deprecated and should not be used.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   ##   extensionName: JString (required)
   ##                : The name of the extension to get
   ##   serverName: JString (required)
@@ -278,34 +280,36 @@ proc validate_ExtensionsGet_568180(path: JsonNode; query: JsonNode; header: Json
   ##                 : The subscription ID that identifies an Azure subscription.
   ##   databaseName: JString (required)
   ##               : The name of the database to import into
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568182 = path.getOrDefault("resourceGroupName")
-  valid_568182 = validateParameter(valid_568182, JString, required = true,
-                                 default = nil)
-  if valid_568182 != nil:
-    section.add "resourceGroupName", valid_568182
-  var valid_568196 = path.getOrDefault("extensionName")
-  valid_568196 = validateParameter(valid_568196, JString, required = true,
+        "path argument is necessary due to required `extensionName` field"
+  var valid_564095 = path.getOrDefault("extensionName")
+  valid_564095 = validateParameter(valid_564095, JString, required = true,
                                  default = newJString("import"))
-  if valid_568196 != nil:
-    section.add "extensionName", valid_568196
-  var valid_568197 = path.getOrDefault("serverName")
-  valid_568197 = validateParameter(valid_568197, JString, required = true,
+  if valid_564095 != nil:
+    section.add "extensionName", valid_564095
+  var valid_564096 = path.getOrDefault("serverName")
+  valid_564096 = validateParameter(valid_564096, JString, required = true,
                                  default = nil)
-  if valid_568197 != nil:
-    section.add "serverName", valid_568197
-  var valid_568198 = path.getOrDefault("subscriptionId")
-  valid_568198 = validateParameter(valid_568198, JString, required = true,
+  if valid_564096 != nil:
+    section.add "serverName", valid_564096
+  var valid_564097 = path.getOrDefault("subscriptionId")
+  valid_564097 = validateParameter(valid_564097, JString, required = true,
                                  default = nil)
-  if valid_568198 != nil:
-    section.add "subscriptionId", valid_568198
-  var valid_568199 = path.getOrDefault("databaseName")
-  valid_568199 = validateParameter(valid_568199, JString, required = true,
+  if valid_564097 != nil:
+    section.add "subscriptionId", valid_564097
+  var valid_564098 = path.getOrDefault("databaseName")
+  valid_564098 = validateParameter(valid_564098, JString, required = true,
                                  default = nil)
-  if valid_568199 != nil:
-    section.add "databaseName", valid_568199
+  if valid_564098 != nil:
+    section.add "databaseName", valid_564098
+  var valid_564099 = path.getOrDefault("resourceGroupName")
+  valid_564099 = validateParameter(valid_564099, JString, required = true,
+                                 default = nil)
+  if valid_564099 != nil:
+    section.add "resourceGroupName", valid_564099
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -313,11 +317,11 @@ proc validate_ExtensionsGet_568180(path: JsonNode; query: JsonNode; header: Json
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568200 = query.getOrDefault("api-version")
-  valid_568200 = validateParameter(valid_568200, JString, required = true,
+  var valid_564100 = query.getOrDefault("api-version")
+  valid_564100 = validateParameter(valid_564100, JString, required = true,
                                  default = nil)
-  if valid_568200 != nil:
-    section.add "api-version", valid_568200
+  if valid_564100 != nil:
+    section.add "api-version", valid_564100
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -326,26 +330,24 @@ proc validate_ExtensionsGet_568180(path: JsonNode; query: JsonNode; header: Json
   if body != nil:
     result.add "body", body
 
-proc call*(call_568201: Call_ExtensionsGet_568179; path: JsonNode; query: JsonNode;
+proc call*(call_564101: Call_ExtensionsGet_564079; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets a database extension. This API is deprecated and should not be used.
   ## 
-  let valid = call_568201.validator(path, query, header, formData, body)
-  let scheme = call_568201.pickScheme
+  let valid = call_564101.validator(path, query, header, formData, body)
+  let scheme = call_564101.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568201.url(scheme.get, call_568201.host, call_568201.base,
-                         call_568201.route, valid.getOrDefault("path"),
+  let url = call_564101.url(scheme.get, call_564101.host, call_564101.base,
+                         call_564101.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568201, url, valid)
+  result = hook(call_564101, url, valid)
 
-proc call*(call_568202: Call_ExtensionsGet_568179; resourceGroupName: string;
-          apiVersion: string; serverName: string; subscriptionId: string;
-          databaseName: string; extensionName: string = "import"): Recallable =
+proc call*(call_564102: Call_ExtensionsGet_564079; apiVersion: string;
+          serverName: string; subscriptionId: string; databaseName: string;
+          resourceGroupName: string; extensionName: string = "import"): Recallable =
   ## extensionsGet
   ## Gets a database extension. This API is deprecated and should not be used.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   ##   apiVersion: string (required)
   ##             : The API version to use for the request.
   ##   extensionName: string (required)
@@ -356,23 +358,25 @@ proc call*(call_568202: Call_ExtensionsGet_568179; resourceGroupName: string;
   ##                 : The subscription ID that identifies an Azure subscription.
   ##   databaseName: string (required)
   ##               : The name of the database to import into
-  var path_568203 = newJObject()
-  var query_568204 = newJObject()
-  add(path_568203, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568204, "api-version", newJString(apiVersion))
-  add(path_568203, "extensionName", newJString(extensionName))
-  add(path_568203, "serverName", newJString(serverName))
-  add(path_568203, "subscriptionId", newJString(subscriptionId))
-  add(path_568203, "databaseName", newJString(databaseName))
-  result = call_568202.call(path_568203, query_568204, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
+  var path_564103 = newJObject()
+  var query_564104 = newJObject()
+  add(query_564104, "api-version", newJString(apiVersion))
+  add(path_564103, "extensionName", newJString(extensionName))
+  add(path_564103, "serverName", newJString(serverName))
+  add(path_564103, "subscriptionId", newJString(subscriptionId))
+  add(path_564103, "databaseName", newJString(databaseName))
+  add(path_564103, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564102.call(path_564103, query_564104, nil, nil, nil)
 
-var extensionsGet* = Call_ExtensionsGet_568179(name: "extensionsGet",
+var extensionsGet* = Call_ExtensionsGet_564079(name: "extensionsGet",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/servers/{serverName}/databases/{databaseName}/extensions/{extensionName}",
-    validator: validate_ExtensionsGet_568180, base: "", url: url_ExtensionsGet_568181,
+    validator: validate_ExtensionsGet_564080, base: "", url: url_ExtensionsGet_564081,
     schemes: {Scheme.Https})
 type
-  Call_TransparentDataEncryptionConfigurationsListByDatabase_568205 = ref object of OpenApiRestCall_567642
-proc url_TransparentDataEncryptionConfigurationsListByDatabase_568207(
+  Call_TransparentDataEncryptionConfigurationsListByDatabase_564105 = ref object of OpenApiRestCall_563540
+proc url_TransparentDataEncryptionConfigurationsListByDatabase_564107(
     protocol: Scheme; host: string; base: string; route: string; path: JsonNode;
     query: JsonNode): Uri =
   result.scheme = $protocol
@@ -399,7 +403,7 @@ proc url_TransparentDataEncryptionConfigurationsListByDatabase_568207(
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_TransparentDataEncryptionConfigurationsListByDatabase_568206(
+proc validate_TransparentDataEncryptionConfigurationsListByDatabase_564106(
     path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
     body: JsonNode): JsonNode =
   ## Gets a list of a database's transparent data encryption configurations. There is only ever one element, named 'current', so GetTransparentDataEncryptionConfiguration should be used instead.
@@ -407,37 +411,37 @@ proc validate_TransparentDataEncryptionConfigurationsListByDatabase_568206(
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   ##   serverName: JString (required)
   ##             : The name of the server.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID that identifies an Azure subscription.
   ##   databaseName: JString (required)
   ##               : The name of the database for which the transparent data encryption applies.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568208 = path.getOrDefault("resourceGroupName")
-  valid_568208 = validateParameter(valid_568208, JString, required = true,
+        "path argument is necessary due to required `serverName` field"
+  var valid_564108 = path.getOrDefault("serverName")
+  valid_564108 = validateParameter(valid_564108, JString, required = true,
                                  default = nil)
-  if valid_568208 != nil:
-    section.add "resourceGroupName", valid_568208
-  var valid_568209 = path.getOrDefault("serverName")
-  valid_568209 = validateParameter(valid_568209, JString, required = true,
+  if valid_564108 != nil:
+    section.add "serverName", valid_564108
+  var valid_564109 = path.getOrDefault("subscriptionId")
+  valid_564109 = validateParameter(valid_564109, JString, required = true,
                                  default = nil)
-  if valid_568209 != nil:
-    section.add "serverName", valid_568209
-  var valid_568210 = path.getOrDefault("subscriptionId")
-  valid_568210 = validateParameter(valid_568210, JString, required = true,
+  if valid_564109 != nil:
+    section.add "subscriptionId", valid_564109
+  var valid_564110 = path.getOrDefault("databaseName")
+  valid_564110 = validateParameter(valid_564110, JString, required = true,
                                  default = nil)
-  if valid_568210 != nil:
-    section.add "subscriptionId", valid_568210
-  var valid_568211 = path.getOrDefault("databaseName")
-  valid_568211 = validateParameter(valid_568211, JString, required = true,
+  if valid_564110 != nil:
+    section.add "databaseName", valid_564110
+  var valid_564111 = path.getOrDefault("resourceGroupName")
+  valid_564111 = validateParameter(valid_564111, JString, required = true,
                                  default = nil)
-  if valid_568211 != nil:
-    section.add "databaseName", valid_568211
+  if valid_564111 != nil:
+    section.add "resourceGroupName", valid_564111
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -445,11 +449,11 @@ proc validate_TransparentDataEncryptionConfigurationsListByDatabase_568206(
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568212 = query.getOrDefault("api-version")
-  valid_568212 = validateParameter(valid_568212, JString, required = true,
+  var valid_564112 = query.getOrDefault("api-version")
+  valid_564112 = validateParameter(valid_564112, JString, required = true,
                                  default = nil)
-  if valid_568212 != nil:
-    section.add "api-version", valid_568212
+  if valid_564112 != nil:
+    section.add "api-version", valid_564112
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -458,27 +462,25 @@ proc validate_TransparentDataEncryptionConfigurationsListByDatabase_568206(
   if body != nil:
     result.add "body", body
 
-proc call*(call_568213: Call_TransparentDataEncryptionConfigurationsListByDatabase_568205;
+proc call*(call_564113: Call_TransparentDataEncryptionConfigurationsListByDatabase_564105;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Gets a list of a database's transparent data encryption configurations. There is only ever one element, named 'current', so GetTransparentDataEncryptionConfiguration should be used instead.
   ## 
-  let valid = call_568213.validator(path, query, header, formData, body)
-  let scheme = call_568213.pickScheme
+  let valid = call_564113.validator(path, query, header, formData, body)
+  let scheme = call_564113.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568213.url(scheme.get, call_568213.host, call_568213.base,
-                         call_568213.route, valid.getOrDefault("path"),
+  let url = call_564113.url(scheme.get, call_564113.host, call_564113.base,
+                         call_564113.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568213, url, valid)
+  result = hook(call_564113, url, valid)
 
-proc call*(call_568214: Call_TransparentDataEncryptionConfigurationsListByDatabase_568205;
-          resourceGroupName: string; apiVersion: string; serverName: string;
-          subscriptionId: string; databaseName: string): Recallable =
+proc call*(call_564114: Call_TransparentDataEncryptionConfigurationsListByDatabase_564105;
+          apiVersion: string; serverName: string; subscriptionId: string;
+          databaseName: string; resourceGroupName: string): Recallable =
   ## transparentDataEncryptionConfigurationsListByDatabase
   ## Gets a list of a database's transparent data encryption configurations. There is only ever one element, named 'current', so GetTransparentDataEncryptionConfiguration should be used instead.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   ##   apiVersion: string (required)
   ##             : The API version to use for the request.
   ##   serverName: string (required)
@@ -487,20 +489,22 @@ proc call*(call_568214: Call_TransparentDataEncryptionConfigurationsListByDataba
   ##                 : The subscription ID that identifies an Azure subscription.
   ##   databaseName: string (required)
   ##               : The name of the database for which the transparent data encryption applies.
-  var path_568215 = newJObject()
-  var query_568216 = newJObject()
-  add(path_568215, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568216, "api-version", newJString(apiVersion))
-  add(path_568215, "serverName", newJString(serverName))
-  add(path_568215, "subscriptionId", newJString(subscriptionId))
-  add(path_568215, "databaseName", newJString(databaseName))
-  result = call_568214.call(path_568215, query_568216, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
+  var path_564115 = newJObject()
+  var query_564116 = newJObject()
+  add(query_564116, "api-version", newJString(apiVersion))
+  add(path_564115, "serverName", newJString(serverName))
+  add(path_564115, "subscriptionId", newJString(subscriptionId))
+  add(path_564115, "databaseName", newJString(databaseName))
+  add(path_564115, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564114.call(path_564115, query_564116, nil, nil, nil)
 
-var transparentDataEncryptionConfigurationsListByDatabase* = Call_TransparentDataEncryptionConfigurationsListByDatabase_568205(
+var transparentDataEncryptionConfigurationsListByDatabase* = Call_TransparentDataEncryptionConfigurationsListByDatabase_564105(
     name: "transparentDataEncryptionConfigurationsListByDatabase",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/servers/{serverName}/databases/{databaseName}/transparentDataEncryption",
-    validator: validate_TransparentDataEncryptionConfigurationsListByDatabase_568206,
-    base: "", url: url_TransparentDataEncryptionConfigurationsListByDatabase_568207,
+    validator: validate_TransparentDataEncryptionConfigurationsListByDatabase_564106,
+    base: "", url: url_TransparentDataEncryptionConfigurationsListByDatabase_564107,
     schemes: {Scheme.Https})
 export
   rest

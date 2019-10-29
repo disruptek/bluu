@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, httpcore
 
 ## auto-generated via openapi macro
 ## title: AutomationManagement
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_596458 = ref object of OpenApiRestCall
+  OpenApiRestCall_563556 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_596458](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563556](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_596458): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563556): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,8 +107,8 @@ const
   macServiceName = "automation-module"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_ModuleListByAutomationAccount_596680 = ref object of OpenApiRestCall_596458
-proc url_ModuleListByAutomationAccount_596682(protocol: Scheme; host: string;
+  Call_ModuleListByAutomationAccount_563778 = ref object of OpenApiRestCall_563556
+proc url_ModuleListByAutomationAccount_563780(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -129,7 +133,7 @@ proc url_ModuleListByAutomationAccount_596682(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ModuleListByAutomationAccount_596681(path: JsonNode; query: JsonNode;
+proc validate_ModuleListByAutomationAccount_563779(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Retrieve a list of modules.
   ## 
@@ -139,27 +143,27 @@ proc validate_ModuleListByAutomationAccount_596681(path: JsonNode; query: JsonNo
   ## parameters in `path` object:
   ##   automationAccountName: JString (required)
   ##                        : The name of the automation account.
-  ##   resourceGroupName: JString (required)
-  ##                    : Name of an Azure Resource group.
   ##   subscriptionId: JString (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : Name of an Azure Resource group.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `automationAccountName` field"
-  var valid_596842 = path.getOrDefault("automationAccountName")
-  valid_596842 = validateParameter(valid_596842, JString, required = true,
+  var valid_563942 = path.getOrDefault("automationAccountName")
+  valid_563942 = validateParameter(valid_563942, JString, required = true,
                                  default = nil)
-  if valid_596842 != nil:
-    section.add "automationAccountName", valid_596842
-  var valid_596843 = path.getOrDefault("resourceGroupName")
-  valid_596843 = validateParameter(valid_596843, JString, required = true,
+  if valid_563942 != nil:
+    section.add "automationAccountName", valid_563942
+  var valid_563943 = path.getOrDefault("subscriptionId")
+  valid_563943 = validateParameter(valid_563943, JString, required = true,
                                  default = nil)
-  if valid_596843 != nil:
-    section.add "resourceGroupName", valid_596843
-  var valid_596844 = path.getOrDefault("subscriptionId")
-  valid_596844 = validateParameter(valid_596844, JString, required = true,
+  if valid_563943 != nil:
+    section.add "subscriptionId", valid_563943
+  var valid_563944 = path.getOrDefault("resourceGroupName")
+  valid_563944 = validateParameter(valid_563944, JString, required = true,
                                  default = nil)
-  if valid_596844 != nil:
-    section.add "subscriptionId", valid_596844
+  if valid_563944 != nil:
+    section.add "resourceGroupName", valid_563944
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -167,11 +171,11 @@ proc validate_ModuleListByAutomationAccount_596681(path: JsonNode; query: JsonNo
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_596845 = query.getOrDefault("api-version")
-  valid_596845 = validateParameter(valid_596845, JString, required = true,
+  var valid_563945 = query.getOrDefault("api-version")
+  valid_563945 = validateParameter(valid_563945, JString, required = true,
                                  default = nil)
-  if valid_596845 != nil:
-    section.add "api-version", valid_596845
+  if valid_563945 != nil:
+    section.add "api-version", valid_563945
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -180,50 +184,50 @@ proc validate_ModuleListByAutomationAccount_596681(path: JsonNode; query: JsonNo
   if body != nil:
     result.add "body", body
 
-proc call*(call_596872: Call_ModuleListByAutomationAccount_596680; path: JsonNode;
+proc call*(call_563972: Call_ModuleListByAutomationAccount_563778; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Retrieve a list of modules.
   ## 
   ## http://aka.ms/azureautomationsdk/moduleoperations
-  let valid = call_596872.validator(path, query, header, formData, body)
-  let scheme = call_596872.pickScheme
+  let valid = call_563972.validator(path, query, header, formData, body)
+  let scheme = call_563972.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_596872.url(scheme.get, call_596872.host, call_596872.base,
-                         call_596872.route, valid.getOrDefault("path"),
+  let url = call_563972.url(scheme.get, call_563972.host, call_563972.base,
+                         call_563972.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_596872, url, valid)
+  result = hook(call_563972, url, valid)
 
-proc call*(call_596943: Call_ModuleListByAutomationAccount_596680;
-          automationAccountName: string; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string): Recallable =
+proc call*(call_564043: Call_ModuleListByAutomationAccount_563778;
+          apiVersion: string; automationAccountName: string; subscriptionId: string;
+          resourceGroupName: string): Recallable =
   ## moduleListByAutomationAccount
   ## Retrieve a list of modules.
   ## http://aka.ms/azureautomationsdk/moduleoperations
-  ##   automationAccountName: string (required)
-  ##                        : The name of the automation account.
-  ##   resourceGroupName: string (required)
-  ##                    : Name of an Azure Resource group.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
+  ##   automationAccountName: string (required)
+  ##                        : The name of the automation account.
   ##   subscriptionId: string (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_596944 = newJObject()
-  var query_596946 = newJObject()
-  add(path_596944, "automationAccountName", newJString(automationAccountName))
-  add(path_596944, "resourceGroupName", newJString(resourceGroupName))
-  add(query_596946, "api-version", newJString(apiVersion))
-  add(path_596944, "subscriptionId", newJString(subscriptionId))
-  result = call_596943.call(path_596944, query_596946, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : Name of an Azure Resource group.
+  var path_564044 = newJObject()
+  var query_564046 = newJObject()
+  add(query_564046, "api-version", newJString(apiVersion))
+  add(path_564044, "automationAccountName", newJString(automationAccountName))
+  add(path_564044, "subscriptionId", newJString(subscriptionId))
+  add(path_564044, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564043.call(path_564044, query_564046, nil, nil, nil)
 
-var moduleListByAutomationAccount* = Call_ModuleListByAutomationAccount_596680(
+var moduleListByAutomationAccount* = Call_ModuleListByAutomationAccount_563778(
     name: "moduleListByAutomationAccount", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Automation/automationAccounts/{automationAccountName}/modules",
-    validator: validate_ModuleListByAutomationAccount_596681, base: "",
-    url: url_ModuleListByAutomationAccount_596682, schemes: {Scheme.Https})
+    validator: validate_ModuleListByAutomationAccount_563779, base: "",
+    url: url_ModuleListByAutomationAccount_563780, schemes: {Scheme.Https})
 type
-  Call_ModuleCreateOrUpdate_596997 = ref object of OpenApiRestCall_596458
-proc url_ModuleCreateOrUpdate_596999(protocol: Scheme; host: string; base: string;
+  Call_ModuleCreateOrUpdate_564097 = ref object of OpenApiRestCall_563556
+proc url_ModuleCreateOrUpdate_564099(protocol: Scheme; host: string; base: string;
                                     route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -250,7 +254,7 @@ proc url_ModuleCreateOrUpdate_596999(protocol: Scheme; host: string; base: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ModuleCreateOrUpdate_596998(path: JsonNode; query: JsonNode;
+proc validate_ModuleCreateOrUpdate_564098(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Create or Update the module identified by module name.
   ## 
@@ -258,36 +262,37 @@ proc validate_ModuleCreateOrUpdate_596998(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   automationAccountName: JString (required)
-  ##                        : The name of the automation account.
-  ##   resourceGroupName: JString (required)
-  ##                    : Name of an Azure Resource group.
-  ##   subscriptionId: JString (required)
-  ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   moduleName: JString (required)
   ##             : The name of module.
+  ##   automationAccountName: JString (required)
+  ##                        : The name of the automation account.
+  ##   subscriptionId: JString (required)
+  ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : Name of an Azure Resource group.
   section = newJObject()
-  assert path != nil, "path argument is necessary due to required `automationAccountName` field"
-  var valid_597026 = path.getOrDefault("automationAccountName")
-  valid_597026 = validateParameter(valid_597026, JString, required = true,
+  assert path != nil,
+        "path argument is necessary due to required `moduleName` field"
+  var valid_564126 = path.getOrDefault("moduleName")
+  valid_564126 = validateParameter(valid_564126, JString, required = true,
                                  default = nil)
-  if valid_597026 != nil:
-    section.add "automationAccountName", valid_597026
-  var valid_597027 = path.getOrDefault("resourceGroupName")
-  valid_597027 = validateParameter(valid_597027, JString, required = true,
+  if valid_564126 != nil:
+    section.add "moduleName", valid_564126
+  var valid_564127 = path.getOrDefault("automationAccountName")
+  valid_564127 = validateParameter(valid_564127, JString, required = true,
                                  default = nil)
-  if valid_597027 != nil:
-    section.add "resourceGroupName", valid_597027
-  var valid_597028 = path.getOrDefault("subscriptionId")
-  valid_597028 = validateParameter(valid_597028, JString, required = true,
+  if valid_564127 != nil:
+    section.add "automationAccountName", valid_564127
+  var valid_564128 = path.getOrDefault("subscriptionId")
+  valid_564128 = validateParameter(valid_564128, JString, required = true,
                                  default = nil)
-  if valid_597028 != nil:
-    section.add "subscriptionId", valid_597028
-  var valid_597029 = path.getOrDefault("moduleName")
-  valid_597029 = validateParameter(valid_597029, JString, required = true,
+  if valid_564128 != nil:
+    section.add "subscriptionId", valid_564128
+  var valid_564129 = path.getOrDefault("resourceGroupName")
+  valid_564129 = validateParameter(valid_564129, JString, required = true,
                                  default = nil)
-  if valid_597029 != nil:
-    section.add "moduleName", valid_597029
+  if valid_564129 != nil:
+    section.add "resourceGroupName", valid_564129
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -295,11 +300,11 @@ proc validate_ModuleCreateOrUpdate_596998(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_597030 = query.getOrDefault("api-version")
-  valid_597030 = validateParameter(valid_597030, JString, required = true,
+  var valid_564130 = query.getOrDefault("api-version")
+  valid_564130 = validateParameter(valid_564130, JString, required = true,
                                  default = nil)
-  if valid_597030 != nil:
-    section.add "api-version", valid_597030
+  if valid_564130 != nil:
+    section.add "api-version", valid_564130
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -313,59 +318,58 @@ proc validate_ModuleCreateOrUpdate_596998(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_597032: Call_ModuleCreateOrUpdate_596997; path: JsonNode;
+proc call*(call_564132: Call_ModuleCreateOrUpdate_564097; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Create or Update the module identified by module name.
   ## 
   ## http://aka.ms/azureautomationsdk/moduleoperations
-  let valid = call_597032.validator(path, query, header, formData, body)
-  let scheme = call_597032.pickScheme
+  let valid = call_564132.validator(path, query, header, formData, body)
+  let scheme = call_564132.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_597032.url(scheme.get, call_597032.host, call_597032.base,
-                         call_597032.route, valid.getOrDefault("path"),
+  let url = call_564132.url(scheme.get, call_564132.host, call_564132.base,
+                         call_564132.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_597032, url, valid)
+  result = hook(call_564132, url, valid)
 
-proc call*(call_597033: Call_ModuleCreateOrUpdate_596997;
-          automationAccountName: string; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; moduleName: string;
-          parameters: JsonNode): Recallable =
+proc call*(call_564133: Call_ModuleCreateOrUpdate_564097; moduleName: string;
+          apiVersion: string; automationAccountName: string; subscriptionId: string;
+          resourceGroupName: string; parameters: JsonNode): Recallable =
   ## moduleCreateOrUpdate
   ## Create or Update the module identified by module name.
   ## http://aka.ms/azureautomationsdk/moduleoperations
-  ##   automationAccountName: string (required)
-  ##                        : The name of the automation account.
-  ##   resourceGroupName: string (required)
-  ##                    : Name of an Azure Resource group.
-  ##   apiVersion: string (required)
-  ##             : Client Api Version.
-  ##   subscriptionId: string (required)
-  ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   moduleName: string (required)
   ##             : The name of module.
+  ##   apiVersion: string (required)
+  ##             : Client Api Version.
+  ##   automationAccountName: string (required)
+  ##                        : The name of the automation account.
+  ##   subscriptionId: string (required)
+  ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : Name of an Azure Resource group.
   ##   parameters: JObject (required)
   ##             : The create or update parameters for module.
-  var path_597034 = newJObject()
-  var query_597035 = newJObject()
-  var body_597036 = newJObject()
-  add(path_597034, "automationAccountName", newJString(automationAccountName))
-  add(path_597034, "resourceGroupName", newJString(resourceGroupName))
-  add(query_597035, "api-version", newJString(apiVersion))
-  add(path_597034, "subscriptionId", newJString(subscriptionId))
-  add(path_597034, "moduleName", newJString(moduleName))
+  var path_564134 = newJObject()
+  var query_564135 = newJObject()
+  var body_564136 = newJObject()
+  add(path_564134, "moduleName", newJString(moduleName))
+  add(query_564135, "api-version", newJString(apiVersion))
+  add(path_564134, "automationAccountName", newJString(automationAccountName))
+  add(path_564134, "subscriptionId", newJString(subscriptionId))
+  add(path_564134, "resourceGroupName", newJString(resourceGroupName))
   if parameters != nil:
-    body_597036 = parameters
-  result = call_597033.call(path_597034, query_597035, nil, nil, body_597036)
+    body_564136 = parameters
+  result = call_564133.call(path_564134, query_564135, nil, nil, body_564136)
 
-var moduleCreateOrUpdate* = Call_ModuleCreateOrUpdate_596997(
+var moduleCreateOrUpdate* = Call_ModuleCreateOrUpdate_564097(
     name: "moduleCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Automation/automationAccounts/{automationAccountName}/modules/{moduleName}",
-    validator: validate_ModuleCreateOrUpdate_596998, base: "",
-    url: url_ModuleCreateOrUpdate_596999, schemes: {Scheme.Https})
+    validator: validate_ModuleCreateOrUpdate_564098, base: "",
+    url: url_ModuleCreateOrUpdate_564099, schemes: {Scheme.Https})
 type
-  Call_ModuleGet_596985 = ref object of OpenApiRestCall_596458
-proc url_ModuleGet_596987(protocol: Scheme; host: string; base: string; route: string;
+  Call_ModuleGet_564085 = ref object of OpenApiRestCall_563556
+proc url_ModuleGet_564087(protocol: Scheme; host: string; base: string; route: string;
                          path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -392,7 +396,7 @@ proc url_ModuleGet_596987(protocol: Scheme; host: string; base: string; route: s
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ModuleGet_596986(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_ModuleGet_564086(path: JsonNode; query: JsonNode; header: JsonNode;
                               formData: JsonNode; body: JsonNode): JsonNode =
   ## Retrieve the module identified by module name.
   ## 
@@ -400,36 +404,37 @@ proc validate_ModuleGet_596986(path: JsonNode; query: JsonNode; header: JsonNode
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   automationAccountName: JString (required)
-  ##                        : The name of the automation account.
-  ##   resourceGroupName: JString (required)
-  ##                    : Name of an Azure Resource group.
-  ##   subscriptionId: JString (required)
-  ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   moduleName: JString (required)
   ##             : The module name.
+  ##   automationAccountName: JString (required)
+  ##                        : The name of the automation account.
+  ##   subscriptionId: JString (required)
+  ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : Name of an Azure Resource group.
   section = newJObject()
-  assert path != nil, "path argument is necessary due to required `automationAccountName` field"
-  var valid_596988 = path.getOrDefault("automationAccountName")
-  valid_596988 = validateParameter(valid_596988, JString, required = true,
+  assert path != nil,
+        "path argument is necessary due to required `moduleName` field"
+  var valid_564088 = path.getOrDefault("moduleName")
+  valid_564088 = validateParameter(valid_564088, JString, required = true,
                                  default = nil)
-  if valid_596988 != nil:
-    section.add "automationAccountName", valid_596988
-  var valid_596989 = path.getOrDefault("resourceGroupName")
-  valid_596989 = validateParameter(valid_596989, JString, required = true,
+  if valid_564088 != nil:
+    section.add "moduleName", valid_564088
+  var valid_564089 = path.getOrDefault("automationAccountName")
+  valid_564089 = validateParameter(valid_564089, JString, required = true,
                                  default = nil)
-  if valid_596989 != nil:
-    section.add "resourceGroupName", valid_596989
-  var valid_596990 = path.getOrDefault("subscriptionId")
-  valid_596990 = validateParameter(valid_596990, JString, required = true,
+  if valid_564089 != nil:
+    section.add "automationAccountName", valid_564089
+  var valid_564090 = path.getOrDefault("subscriptionId")
+  valid_564090 = validateParameter(valid_564090, JString, required = true,
                                  default = nil)
-  if valid_596990 != nil:
-    section.add "subscriptionId", valid_596990
-  var valid_596991 = path.getOrDefault("moduleName")
-  valid_596991 = validateParameter(valid_596991, JString, required = true,
+  if valid_564090 != nil:
+    section.add "subscriptionId", valid_564090
+  var valid_564091 = path.getOrDefault("resourceGroupName")
+  valid_564091 = validateParameter(valid_564091, JString, required = true,
                                  default = nil)
-  if valid_596991 != nil:
-    section.add "moduleName", valid_596991
+  if valid_564091 != nil:
+    section.add "resourceGroupName", valid_564091
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -437,11 +442,11 @@ proc validate_ModuleGet_596986(path: JsonNode; query: JsonNode; header: JsonNode
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_596992 = query.getOrDefault("api-version")
-  valid_596992 = validateParameter(valid_596992, JString, required = true,
+  var valid_564092 = query.getOrDefault("api-version")
+  valid_564092 = validateParameter(valid_564092, JString, required = true,
                                  default = nil)
-  if valid_596992 != nil:
-    section.add "api-version", valid_596992
+  if valid_564092 != nil:
+    section.add "api-version", valid_564092
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -450,53 +455,53 @@ proc validate_ModuleGet_596986(path: JsonNode; query: JsonNode; header: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_596993: Call_ModuleGet_596985; path: JsonNode; query: JsonNode;
+proc call*(call_564093: Call_ModuleGet_564085; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Retrieve the module identified by module name.
   ## 
   ## http://aka.ms/azureautomationsdk/moduleoperations
-  let valid = call_596993.validator(path, query, header, formData, body)
-  let scheme = call_596993.pickScheme
+  let valid = call_564093.validator(path, query, header, formData, body)
+  let scheme = call_564093.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_596993.url(scheme.get, call_596993.host, call_596993.base,
-                         call_596993.route, valid.getOrDefault("path"),
+  let url = call_564093.url(scheme.get, call_564093.host, call_564093.base,
+                         call_564093.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_596993, url, valid)
+  result = hook(call_564093, url, valid)
 
-proc call*(call_596994: Call_ModuleGet_596985; automationAccountName: string;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          moduleName: string): Recallable =
+proc call*(call_564094: Call_ModuleGet_564085; moduleName: string;
+          apiVersion: string; automationAccountName: string; subscriptionId: string;
+          resourceGroupName: string): Recallable =
   ## moduleGet
   ## Retrieve the module identified by module name.
   ## http://aka.ms/azureautomationsdk/moduleoperations
-  ##   automationAccountName: string (required)
-  ##                        : The name of the automation account.
-  ##   resourceGroupName: string (required)
-  ##                    : Name of an Azure Resource group.
-  ##   apiVersion: string (required)
-  ##             : Client Api Version.
-  ##   subscriptionId: string (required)
-  ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   moduleName: string (required)
   ##             : The module name.
-  var path_596995 = newJObject()
-  var query_596996 = newJObject()
-  add(path_596995, "automationAccountName", newJString(automationAccountName))
-  add(path_596995, "resourceGroupName", newJString(resourceGroupName))
-  add(query_596996, "api-version", newJString(apiVersion))
-  add(path_596995, "subscriptionId", newJString(subscriptionId))
-  add(path_596995, "moduleName", newJString(moduleName))
-  result = call_596994.call(path_596995, query_596996, nil, nil, nil)
+  ##   apiVersion: string (required)
+  ##             : Client Api Version.
+  ##   automationAccountName: string (required)
+  ##                        : The name of the automation account.
+  ##   subscriptionId: string (required)
+  ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : Name of an Azure Resource group.
+  var path_564095 = newJObject()
+  var query_564096 = newJObject()
+  add(path_564095, "moduleName", newJString(moduleName))
+  add(query_564096, "api-version", newJString(apiVersion))
+  add(path_564095, "automationAccountName", newJString(automationAccountName))
+  add(path_564095, "subscriptionId", newJString(subscriptionId))
+  add(path_564095, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564094.call(path_564095, query_564096, nil, nil, nil)
 
-var moduleGet* = Call_ModuleGet_596985(name: "moduleGet", meth: HttpMethod.HttpGet,
+var moduleGet* = Call_ModuleGet_564085(name: "moduleGet", meth: HttpMethod.HttpGet,
                                     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Automation/automationAccounts/{automationAccountName}/modules/{moduleName}",
-                                    validator: validate_ModuleGet_596986,
-                                    base: "", url: url_ModuleGet_596987,
+                                    validator: validate_ModuleGet_564086,
+                                    base: "", url: url_ModuleGet_564087,
                                     schemes: {Scheme.Https})
 type
-  Call_ModuleUpdate_597049 = ref object of OpenApiRestCall_596458
-proc url_ModuleUpdate_597051(protocol: Scheme; host: string; base: string;
+  Call_ModuleUpdate_564149 = ref object of OpenApiRestCall_563556
+proc url_ModuleUpdate_564151(protocol: Scheme; host: string; base: string;
                             route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -523,7 +528,7 @@ proc url_ModuleUpdate_597051(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ModuleUpdate_597050(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_ModuleUpdate_564150(path: JsonNode; query: JsonNode; header: JsonNode;
                                  formData: JsonNode; body: JsonNode): JsonNode =
   ## Update the module identified by module name.
   ## 
@@ -531,36 +536,37 @@ proc validate_ModuleUpdate_597050(path: JsonNode; query: JsonNode; header: JsonN
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   automationAccountName: JString (required)
-  ##                        : The name of the automation account.
-  ##   resourceGroupName: JString (required)
-  ##                    : Name of an Azure Resource group.
-  ##   subscriptionId: JString (required)
-  ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   moduleName: JString (required)
   ##             : The name of module.
+  ##   automationAccountName: JString (required)
+  ##                        : The name of the automation account.
+  ##   subscriptionId: JString (required)
+  ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : Name of an Azure Resource group.
   section = newJObject()
-  assert path != nil, "path argument is necessary due to required `automationAccountName` field"
-  var valid_597052 = path.getOrDefault("automationAccountName")
-  valid_597052 = validateParameter(valid_597052, JString, required = true,
+  assert path != nil,
+        "path argument is necessary due to required `moduleName` field"
+  var valid_564152 = path.getOrDefault("moduleName")
+  valid_564152 = validateParameter(valid_564152, JString, required = true,
                                  default = nil)
-  if valid_597052 != nil:
-    section.add "automationAccountName", valid_597052
-  var valid_597053 = path.getOrDefault("resourceGroupName")
-  valid_597053 = validateParameter(valid_597053, JString, required = true,
+  if valid_564152 != nil:
+    section.add "moduleName", valid_564152
+  var valid_564153 = path.getOrDefault("automationAccountName")
+  valid_564153 = validateParameter(valid_564153, JString, required = true,
                                  default = nil)
-  if valid_597053 != nil:
-    section.add "resourceGroupName", valid_597053
-  var valid_597054 = path.getOrDefault("subscriptionId")
-  valid_597054 = validateParameter(valid_597054, JString, required = true,
+  if valid_564153 != nil:
+    section.add "automationAccountName", valid_564153
+  var valid_564154 = path.getOrDefault("subscriptionId")
+  valid_564154 = validateParameter(valid_564154, JString, required = true,
                                  default = nil)
-  if valid_597054 != nil:
-    section.add "subscriptionId", valid_597054
-  var valid_597055 = path.getOrDefault("moduleName")
-  valid_597055 = validateParameter(valid_597055, JString, required = true,
+  if valid_564154 != nil:
+    section.add "subscriptionId", valid_564154
+  var valid_564155 = path.getOrDefault("resourceGroupName")
+  valid_564155 = validateParameter(valid_564155, JString, required = true,
                                  default = nil)
-  if valid_597055 != nil:
-    section.add "moduleName", valid_597055
+  if valid_564155 != nil:
+    section.add "resourceGroupName", valid_564155
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -568,11 +574,11 @@ proc validate_ModuleUpdate_597050(path: JsonNode; query: JsonNode; header: JsonN
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_597056 = query.getOrDefault("api-version")
-  valid_597056 = validateParameter(valid_597056, JString, required = true,
+  var valid_564156 = query.getOrDefault("api-version")
+  valid_564156 = validateParameter(valid_564156, JString, required = true,
                                  default = nil)
-  if valid_597056 != nil:
-    section.add "api-version", valid_597056
+  if valid_564156 != nil:
+    section.add "api-version", valid_564156
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -586,57 +592,57 @@ proc validate_ModuleUpdate_597050(path: JsonNode; query: JsonNode; header: JsonN
   if body != nil:
     result.add "body", body
 
-proc call*(call_597058: Call_ModuleUpdate_597049; path: JsonNode; query: JsonNode;
+proc call*(call_564158: Call_ModuleUpdate_564149; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Update the module identified by module name.
   ## 
   ## http://aka.ms/azureautomationsdk/moduleoperations
-  let valid = call_597058.validator(path, query, header, formData, body)
-  let scheme = call_597058.pickScheme
+  let valid = call_564158.validator(path, query, header, formData, body)
+  let scheme = call_564158.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_597058.url(scheme.get, call_597058.host, call_597058.base,
-                         call_597058.route, valid.getOrDefault("path"),
+  let url = call_564158.url(scheme.get, call_564158.host, call_564158.base,
+                         call_564158.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_597058, url, valid)
+  result = hook(call_564158, url, valid)
 
-proc call*(call_597059: Call_ModuleUpdate_597049; automationAccountName: string;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          moduleName: string; parameters: JsonNode): Recallable =
+proc call*(call_564159: Call_ModuleUpdate_564149; moduleName: string;
+          apiVersion: string; automationAccountName: string; subscriptionId: string;
+          resourceGroupName: string; parameters: JsonNode): Recallable =
   ## moduleUpdate
   ## Update the module identified by module name.
   ## http://aka.ms/azureautomationsdk/moduleoperations
-  ##   automationAccountName: string (required)
-  ##                        : The name of the automation account.
-  ##   resourceGroupName: string (required)
-  ##                    : Name of an Azure Resource group.
-  ##   apiVersion: string (required)
-  ##             : Client Api Version.
-  ##   subscriptionId: string (required)
-  ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   moduleName: string (required)
   ##             : The name of module.
+  ##   apiVersion: string (required)
+  ##             : Client Api Version.
+  ##   automationAccountName: string (required)
+  ##                        : The name of the automation account.
+  ##   subscriptionId: string (required)
+  ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : Name of an Azure Resource group.
   ##   parameters: JObject (required)
   ##             : The update parameters for module.
-  var path_597060 = newJObject()
-  var query_597061 = newJObject()
-  var body_597062 = newJObject()
-  add(path_597060, "automationAccountName", newJString(automationAccountName))
-  add(path_597060, "resourceGroupName", newJString(resourceGroupName))
-  add(query_597061, "api-version", newJString(apiVersion))
-  add(path_597060, "subscriptionId", newJString(subscriptionId))
-  add(path_597060, "moduleName", newJString(moduleName))
+  var path_564160 = newJObject()
+  var query_564161 = newJObject()
+  var body_564162 = newJObject()
+  add(path_564160, "moduleName", newJString(moduleName))
+  add(query_564161, "api-version", newJString(apiVersion))
+  add(path_564160, "automationAccountName", newJString(automationAccountName))
+  add(path_564160, "subscriptionId", newJString(subscriptionId))
+  add(path_564160, "resourceGroupName", newJString(resourceGroupName))
   if parameters != nil:
-    body_597062 = parameters
-  result = call_597059.call(path_597060, query_597061, nil, nil, body_597062)
+    body_564162 = parameters
+  result = call_564159.call(path_564160, query_564161, nil, nil, body_564162)
 
-var moduleUpdate* = Call_ModuleUpdate_597049(name: "moduleUpdate",
+var moduleUpdate* = Call_ModuleUpdate_564149(name: "moduleUpdate",
     meth: HttpMethod.HttpPatch, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Automation/automationAccounts/{automationAccountName}/modules/{moduleName}",
-    validator: validate_ModuleUpdate_597050, base: "", url: url_ModuleUpdate_597051,
+    validator: validate_ModuleUpdate_564150, base: "", url: url_ModuleUpdate_564151,
     schemes: {Scheme.Https})
 type
-  Call_ModuleDelete_597037 = ref object of OpenApiRestCall_596458
-proc url_ModuleDelete_597039(protocol: Scheme; host: string; base: string;
+  Call_ModuleDelete_564137 = ref object of OpenApiRestCall_563556
+proc url_ModuleDelete_564139(protocol: Scheme; host: string; base: string;
                             route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -663,7 +669,7 @@ proc url_ModuleDelete_597039(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ModuleDelete_597038(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_ModuleDelete_564138(path: JsonNode; query: JsonNode; header: JsonNode;
                                  formData: JsonNode; body: JsonNode): JsonNode =
   ## Delete the module by name.
   ## 
@@ -671,36 +677,37 @@ proc validate_ModuleDelete_597038(path: JsonNode; query: JsonNode; header: JsonN
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   automationAccountName: JString (required)
-  ##                        : The name of the automation account.
-  ##   resourceGroupName: JString (required)
-  ##                    : Name of an Azure Resource group.
-  ##   subscriptionId: JString (required)
-  ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   moduleName: JString (required)
   ##             : The module name.
+  ##   automationAccountName: JString (required)
+  ##                        : The name of the automation account.
+  ##   subscriptionId: JString (required)
+  ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : Name of an Azure Resource group.
   section = newJObject()
-  assert path != nil, "path argument is necessary due to required `automationAccountName` field"
-  var valid_597040 = path.getOrDefault("automationAccountName")
-  valid_597040 = validateParameter(valid_597040, JString, required = true,
+  assert path != nil,
+        "path argument is necessary due to required `moduleName` field"
+  var valid_564140 = path.getOrDefault("moduleName")
+  valid_564140 = validateParameter(valid_564140, JString, required = true,
                                  default = nil)
-  if valid_597040 != nil:
-    section.add "automationAccountName", valid_597040
-  var valid_597041 = path.getOrDefault("resourceGroupName")
-  valid_597041 = validateParameter(valid_597041, JString, required = true,
+  if valid_564140 != nil:
+    section.add "moduleName", valid_564140
+  var valid_564141 = path.getOrDefault("automationAccountName")
+  valid_564141 = validateParameter(valid_564141, JString, required = true,
                                  default = nil)
-  if valid_597041 != nil:
-    section.add "resourceGroupName", valid_597041
-  var valid_597042 = path.getOrDefault("subscriptionId")
-  valid_597042 = validateParameter(valid_597042, JString, required = true,
+  if valid_564141 != nil:
+    section.add "automationAccountName", valid_564141
+  var valid_564142 = path.getOrDefault("subscriptionId")
+  valid_564142 = validateParameter(valid_564142, JString, required = true,
                                  default = nil)
-  if valid_597042 != nil:
-    section.add "subscriptionId", valid_597042
-  var valid_597043 = path.getOrDefault("moduleName")
-  valid_597043 = validateParameter(valid_597043, JString, required = true,
+  if valid_564142 != nil:
+    section.add "subscriptionId", valid_564142
+  var valid_564143 = path.getOrDefault("resourceGroupName")
+  valid_564143 = validateParameter(valid_564143, JString, required = true,
                                  default = nil)
-  if valid_597043 != nil:
-    section.add "moduleName", valid_597043
+  if valid_564143 != nil:
+    section.add "resourceGroupName", valid_564143
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -708,11 +715,11 @@ proc validate_ModuleDelete_597038(path: JsonNode; query: JsonNode; header: JsonN
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_597044 = query.getOrDefault("api-version")
-  valid_597044 = validateParameter(valid_597044, JString, required = true,
+  var valid_564144 = query.getOrDefault("api-version")
+  valid_564144 = validateParameter(valid_564144, JString, required = true,
                                  default = nil)
-  if valid_597044 != nil:
-    section.add "api-version", valid_597044
+  if valid_564144 != nil:
+    section.add "api-version", valid_564144
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -721,52 +728,52 @@ proc validate_ModuleDelete_597038(path: JsonNode; query: JsonNode; header: JsonN
   if body != nil:
     result.add "body", body
 
-proc call*(call_597045: Call_ModuleDelete_597037; path: JsonNode; query: JsonNode;
+proc call*(call_564145: Call_ModuleDelete_564137; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Delete the module by name.
   ## 
   ## http://aka.ms/azureautomationsdk/moduleoperations
-  let valid = call_597045.validator(path, query, header, formData, body)
-  let scheme = call_597045.pickScheme
+  let valid = call_564145.validator(path, query, header, formData, body)
+  let scheme = call_564145.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_597045.url(scheme.get, call_597045.host, call_597045.base,
-                         call_597045.route, valid.getOrDefault("path"),
+  let url = call_564145.url(scheme.get, call_564145.host, call_564145.base,
+                         call_564145.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_597045, url, valid)
+  result = hook(call_564145, url, valid)
 
-proc call*(call_597046: Call_ModuleDelete_597037; automationAccountName: string;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          moduleName: string): Recallable =
+proc call*(call_564146: Call_ModuleDelete_564137; moduleName: string;
+          apiVersion: string; automationAccountName: string; subscriptionId: string;
+          resourceGroupName: string): Recallable =
   ## moduleDelete
   ## Delete the module by name.
   ## http://aka.ms/azureautomationsdk/moduleoperations
-  ##   automationAccountName: string (required)
-  ##                        : The name of the automation account.
-  ##   resourceGroupName: string (required)
-  ##                    : Name of an Azure Resource group.
-  ##   apiVersion: string (required)
-  ##             : Client Api Version.
-  ##   subscriptionId: string (required)
-  ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   moduleName: string (required)
   ##             : The module name.
-  var path_597047 = newJObject()
-  var query_597048 = newJObject()
-  add(path_597047, "automationAccountName", newJString(automationAccountName))
-  add(path_597047, "resourceGroupName", newJString(resourceGroupName))
-  add(query_597048, "api-version", newJString(apiVersion))
-  add(path_597047, "subscriptionId", newJString(subscriptionId))
-  add(path_597047, "moduleName", newJString(moduleName))
-  result = call_597046.call(path_597047, query_597048, nil, nil, nil)
+  ##   apiVersion: string (required)
+  ##             : Client Api Version.
+  ##   automationAccountName: string (required)
+  ##                        : The name of the automation account.
+  ##   subscriptionId: string (required)
+  ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : Name of an Azure Resource group.
+  var path_564147 = newJObject()
+  var query_564148 = newJObject()
+  add(path_564147, "moduleName", newJString(moduleName))
+  add(query_564148, "api-version", newJString(apiVersion))
+  add(path_564147, "automationAccountName", newJString(automationAccountName))
+  add(path_564147, "subscriptionId", newJString(subscriptionId))
+  add(path_564147, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564146.call(path_564147, query_564148, nil, nil, nil)
 
-var moduleDelete* = Call_ModuleDelete_597037(name: "moduleDelete",
+var moduleDelete* = Call_ModuleDelete_564137(name: "moduleDelete",
     meth: HttpMethod.HttpDelete, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Automation/automationAccounts/{automationAccountName}/modules/{moduleName}",
-    validator: validate_ModuleDelete_597038, base: "", url: url_ModuleDelete_597039,
+    validator: validate_ModuleDelete_564138, base: "", url: url_ModuleDelete_564139,
     schemes: {Scheme.Https})
 type
-  Call_ActivityListByModule_597063 = ref object of OpenApiRestCall_596458
-proc url_ActivityListByModule_597065(protocol: Scheme; host: string; base: string;
+  Call_ActivityListByModule_564163 = ref object of OpenApiRestCall_563556
+proc url_ActivityListByModule_564165(protocol: Scheme; host: string; base: string;
                                     route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -794,7 +801,7 @@ proc url_ActivityListByModule_597065(protocol: Scheme; host: string; base: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ActivityListByModule_597064(path: JsonNode; query: JsonNode;
+proc validate_ActivityListByModule_564164(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Retrieve a list of activities in the module identified by module name.
   ## 
@@ -802,36 +809,37 @@ proc validate_ActivityListByModule_597064(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   automationAccountName: JString (required)
-  ##                        : The name of the automation account.
-  ##   resourceGroupName: JString (required)
-  ##                    : Name of an Azure Resource group.
-  ##   subscriptionId: JString (required)
-  ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   moduleName: JString (required)
   ##             : The name of module.
+  ##   automationAccountName: JString (required)
+  ##                        : The name of the automation account.
+  ##   subscriptionId: JString (required)
+  ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : Name of an Azure Resource group.
   section = newJObject()
-  assert path != nil, "path argument is necessary due to required `automationAccountName` field"
-  var valid_597066 = path.getOrDefault("automationAccountName")
-  valid_597066 = validateParameter(valid_597066, JString, required = true,
+  assert path != nil,
+        "path argument is necessary due to required `moduleName` field"
+  var valid_564166 = path.getOrDefault("moduleName")
+  valid_564166 = validateParameter(valid_564166, JString, required = true,
                                  default = nil)
-  if valid_597066 != nil:
-    section.add "automationAccountName", valid_597066
-  var valid_597067 = path.getOrDefault("resourceGroupName")
-  valid_597067 = validateParameter(valid_597067, JString, required = true,
+  if valid_564166 != nil:
+    section.add "moduleName", valid_564166
+  var valid_564167 = path.getOrDefault("automationAccountName")
+  valid_564167 = validateParameter(valid_564167, JString, required = true,
                                  default = nil)
-  if valid_597067 != nil:
-    section.add "resourceGroupName", valid_597067
-  var valid_597068 = path.getOrDefault("subscriptionId")
-  valid_597068 = validateParameter(valid_597068, JString, required = true,
+  if valid_564167 != nil:
+    section.add "automationAccountName", valid_564167
+  var valid_564168 = path.getOrDefault("subscriptionId")
+  valid_564168 = validateParameter(valid_564168, JString, required = true,
                                  default = nil)
-  if valid_597068 != nil:
-    section.add "subscriptionId", valid_597068
-  var valid_597069 = path.getOrDefault("moduleName")
-  valid_597069 = validateParameter(valid_597069, JString, required = true,
+  if valid_564168 != nil:
+    section.add "subscriptionId", valid_564168
+  var valid_564169 = path.getOrDefault("resourceGroupName")
+  valid_564169 = validateParameter(valid_564169, JString, required = true,
                                  default = nil)
-  if valid_597069 != nil:
-    section.add "moduleName", valid_597069
+  if valid_564169 != nil:
+    section.add "resourceGroupName", valid_564169
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -839,11 +847,11 @@ proc validate_ActivityListByModule_597064(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_597070 = query.getOrDefault("api-version")
-  valid_597070 = validateParameter(valid_597070, JString, required = true,
+  var valid_564170 = query.getOrDefault("api-version")
+  valid_564170 = validateParameter(valid_564170, JString, required = true,
                                  default = nil)
-  if valid_597070 != nil:
-    section.add "api-version", valid_597070
+  if valid_564170 != nil:
+    section.add "api-version", valid_564170
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -852,53 +860,53 @@ proc validate_ActivityListByModule_597064(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_597071: Call_ActivityListByModule_597063; path: JsonNode;
+proc call*(call_564171: Call_ActivityListByModule_564163; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Retrieve a list of activities in the module identified by module name.
   ## 
   ## http://aka.ms/azureautomationsdk/activityoperations
-  let valid = call_597071.validator(path, query, header, formData, body)
-  let scheme = call_597071.pickScheme
+  let valid = call_564171.validator(path, query, header, formData, body)
+  let scheme = call_564171.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_597071.url(scheme.get, call_597071.host, call_597071.base,
-                         call_597071.route, valid.getOrDefault("path"),
+  let url = call_564171.url(scheme.get, call_564171.host, call_564171.base,
+                         call_564171.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_597071, url, valid)
+  result = hook(call_564171, url, valid)
 
-proc call*(call_597072: Call_ActivityListByModule_597063;
-          automationAccountName: string; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; moduleName: string): Recallable =
+proc call*(call_564172: Call_ActivityListByModule_564163; moduleName: string;
+          apiVersion: string; automationAccountName: string; subscriptionId: string;
+          resourceGroupName: string): Recallable =
   ## activityListByModule
   ## Retrieve a list of activities in the module identified by module name.
   ## http://aka.ms/azureautomationsdk/activityoperations
-  ##   automationAccountName: string (required)
-  ##                        : The name of the automation account.
-  ##   resourceGroupName: string (required)
-  ##                    : Name of an Azure Resource group.
-  ##   apiVersion: string (required)
-  ##             : Client Api Version.
-  ##   subscriptionId: string (required)
-  ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   moduleName: string (required)
   ##             : The name of module.
-  var path_597073 = newJObject()
-  var query_597074 = newJObject()
-  add(path_597073, "automationAccountName", newJString(automationAccountName))
-  add(path_597073, "resourceGroupName", newJString(resourceGroupName))
-  add(query_597074, "api-version", newJString(apiVersion))
-  add(path_597073, "subscriptionId", newJString(subscriptionId))
-  add(path_597073, "moduleName", newJString(moduleName))
-  result = call_597072.call(path_597073, query_597074, nil, nil, nil)
+  ##   apiVersion: string (required)
+  ##             : Client Api Version.
+  ##   automationAccountName: string (required)
+  ##                        : The name of the automation account.
+  ##   subscriptionId: string (required)
+  ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : Name of an Azure Resource group.
+  var path_564173 = newJObject()
+  var query_564174 = newJObject()
+  add(path_564173, "moduleName", newJString(moduleName))
+  add(query_564174, "api-version", newJString(apiVersion))
+  add(path_564173, "automationAccountName", newJString(automationAccountName))
+  add(path_564173, "subscriptionId", newJString(subscriptionId))
+  add(path_564173, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564172.call(path_564173, query_564174, nil, nil, nil)
 
-var activityListByModule* = Call_ActivityListByModule_597063(
+var activityListByModule* = Call_ActivityListByModule_564163(
     name: "activityListByModule", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Automation/automationAccounts/{automationAccountName}/modules/{moduleName}/activities",
-    validator: validate_ActivityListByModule_597064, base: "",
-    url: url_ActivityListByModule_597065, schemes: {Scheme.Https})
+    validator: validate_ActivityListByModule_564164, base: "",
+    url: url_ActivityListByModule_564165, schemes: {Scheme.Https})
 type
-  Call_ActivityGet_597075 = ref object of OpenApiRestCall_596458
-proc url_ActivityGet_597077(protocol: Scheme; host: string; base: string;
+  Call_ActivityGet_564175 = ref object of OpenApiRestCall_563556
+proc url_ActivityGet_564177(protocol: Scheme; host: string; base: string;
                            route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -928,7 +936,7 @@ proc url_ActivityGet_597077(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ActivityGet_597076(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_ActivityGet_564176(path: JsonNode; query: JsonNode; header: JsonNode;
                                 formData: JsonNode; body: JsonNode): JsonNode =
   ## Retrieve the activity in the module identified by module name and activity name.
   ## 
@@ -936,43 +944,44 @@ proc validate_ActivityGet_597076(path: JsonNode; query: JsonNode; header: JsonNo
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   automationAccountName: JString (required)
-  ##                        : The name of the automation account.
-  ##   resourceGroupName: JString (required)
-  ##                    : Name of an Azure Resource group.
-  ##   subscriptionId: JString (required)
-  ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   activityName: JString (required)
-  ##               : The name of activity.
   ##   moduleName: JString (required)
   ##             : The name of module.
+  ##   automationAccountName: JString (required)
+  ##                        : The name of the automation account.
+  ##   subscriptionId: JString (required)
+  ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : Name of an Azure Resource group.
+  ##   activityName: JString (required)
+  ##               : The name of activity.
   section = newJObject()
-  assert path != nil, "path argument is necessary due to required `automationAccountName` field"
-  var valid_597078 = path.getOrDefault("automationAccountName")
-  valid_597078 = validateParameter(valid_597078, JString, required = true,
+  assert path != nil,
+        "path argument is necessary due to required `moduleName` field"
+  var valid_564178 = path.getOrDefault("moduleName")
+  valid_564178 = validateParameter(valid_564178, JString, required = true,
                                  default = nil)
-  if valid_597078 != nil:
-    section.add "automationAccountName", valid_597078
-  var valid_597079 = path.getOrDefault("resourceGroupName")
-  valid_597079 = validateParameter(valid_597079, JString, required = true,
+  if valid_564178 != nil:
+    section.add "moduleName", valid_564178
+  var valid_564179 = path.getOrDefault("automationAccountName")
+  valid_564179 = validateParameter(valid_564179, JString, required = true,
                                  default = nil)
-  if valid_597079 != nil:
-    section.add "resourceGroupName", valid_597079
-  var valid_597080 = path.getOrDefault("subscriptionId")
-  valid_597080 = validateParameter(valid_597080, JString, required = true,
+  if valid_564179 != nil:
+    section.add "automationAccountName", valid_564179
+  var valid_564180 = path.getOrDefault("subscriptionId")
+  valid_564180 = validateParameter(valid_564180, JString, required = true,
                                  default = nil)
-  if valid_597080 != nil:
-    section.add "subscriptionId", valid_597080
-  var valid_597081 = path.getOrDefault("activityName")
-  valid_597081 = validateParameter(valid_597081, JString, required = true,
+  if valid_564180 != nil:
+    section.add "subscriptionId", valid_564180
+  var valid_564181 = path.getOrDefault("resourceGroupName")
+  valid_564181 = validateParameter(valid_564181, JString, required = true,
                                  default = nil)
-  if valid_597081 != nil:
-    section.add "activityName", valid_597081
-  var valid_597082 = path.getOrDefault("moduleName")
-  valid_597082 = validateParameter(valid_597082, JString, required = true,
+  if valid_564181 != nil:
+    section.add "resourceGroupName", valid_564181
+  var valid_564182 = path.getOrDefault("activityName")
+  valid_564182 = validateParameter(valid_564182, JString, required = true,
                                  default = nil)
-  if valid_597082 != nil:
-    section.add "moduleName", valid_597082
+  if valid_564182 != nil:
+    section.add "activityName", valid_564182
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -980,11 +989,11 @@ proc validate_ActivityGet_597076(path: JsonNode; query: JsonNode; header: JsonNo
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_597083 = query.getOrDefault("api-version")
-  valid_597083 = validateParameter(valid_597083, JString, required = true,
+  var valid_564183 = query.getOrDefault("api-version")
+  valid_564183 = validateParameter(valid_564183, JString, required = true,
                                  default = nil)
-  if valid_597083 != nil:
-    section.add "api-version", valid_597083
+  if valid_564183 != nil:
+    section.add "api-version", valid_564183
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -993,57 +1002,57 @@ proc validate_ActivityGet_597076(path: JsonNode; query: JsonNode; header: JsonNo
   if body != nil:
     result.add "body", body
 
-proc call*(call_597084: Call_ActivityGet_597075; path: JsonNode; query: JsonNode;
+proc call*(call_564184: Call_ActivityGet_564175; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Retrieve the activity in the module identified by module name and activity name.
   ## 
   ## http://aka.ms/azureautomationsdk/activityoperations
-  let valid = call_597084.validator(path, query, header, formData, body)
-  let scheme = call_597084.pickScheme
+  let valid = call_564184.validator(path, query, header, formData, body)
+  let scheme = call_564184.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_597084.url(scheme.get, call_597084.host, call_597084.base,
-                         call_597084.route, valid.getOrDefault("path"),
+  let url = call_564184.url(scheme.get, call_564184.host, call_564184.base,
+                         call_564184.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_597084, url, valid)
+  result = hook(call_564184, url, valid)
 
-proc call*(call_597085: Call_ActivityGet_597075; automationAccountName: string;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          activityName: string; moduleName: string): Recallable =
+proc call*(call_564185: Call_ActivityGet_564175; moduleName: string;
+          apiVersion: string; automationAccountName: string; subscriptionId: string;
+          resourceGroupName: string; activityName: string): Recallable =
   ## activityGet
   ## Retrieve the activity in the module identified by module name and activity name.
   ## http://aka.ms/azureautomationsdk/activityoperations
-  ##   automationAccountName: string (required)
-  ##                        : The name of the automation account.
-  ##   resourceGroupName: string (required)
-  ##                    : Name of an Azure Resource group.
-  ##   apiVersion: string (required)
-  ##             : Client Api Version.
-  ##   subscriptionId: string (required)
-  ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   activityName: string (required)
-  ##               : The name of activity.
   ##   moduleName: string (required)
   ##             : The name of module.
-  var path_597086 = newJObject()
-  var query_597087 = newJObject()
-  add(path_597086, "automationAccountName", newJString(automationAccountName))
-  add(path_597086, "resourceGroupName", newJString(resourceGroupName))
-  add(query_597087, "api-version", newJString(apiVersion))
-  add(path_597086, "subscriptionId", newJString(subscriptionId))
-  add(path_597086, "activityName", newJString(activityName))
-  add(path_597086, "moduleName", newJString(moduleName))
-  result = call_597085.call(path_597086, query_597087, nil, nil, nil)
+  ##   apiVersion: string (required)
+  ##             : Client Api Version.
+  ##   automationAccountName: string (required)
+  ##                        : The name of the automation account.
+  ##   subscriptionId: string (required)
+  ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : Name of an Azure Resource group.
+  ##   activityName: string (required)
+  ##               : The name of activity.
+  var path_564186 = newJObject()
+  var query_564187 = newJObject()
+  add(path_564186, "moduleName", newJString(moduleName))
+  add(query_564187, "api-version", newJString(apiVersion))
+  add(path_564186, "automationAccountName", newJString(automationAccountName))
+  add(path_564186, "subscriptionId", newJString(subscriptionId))
+  add(path_564186, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564186, "activityName", newJString(activityName))
+  result = call_564185.call(path_564186, query_564187, nil, nil, nil)
 
-var activityGet* = Call_ActivityGet_597075(name: "activityGet",
+var activityGet* = Call_ActivityGet_564175(name: "activityGet",
                                         meth: HttpMethod.HttpGet,
                                         host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Automation/automationAccounts/{automationAccountName}/modules/{moduleName}/activities/{activityName}",
-                                        validator: validate_ActivityGet_597076,
-                                        base: "", url: url_ActivityGet_597077,
+                                        validator: validate_ActivityGet_564176,
+                                        base: "", url: url_ActivityGet_564177,
                                         schemes: {Scheme.Https})
 type
-  Call_ObjectDataTypesListFieldsByModuleAndType_597088 = ref object of OpenApiRestCall_596458
-proc url_ObjectDataTypesListFieldsByModuleAndType_597090(protocol: Scheme;
+  Call_ObjectDataTypesListFieldsByModuleAndType_564188 = ref object of OpenApiRestCall_563556
+proc url_ObjectDataTypesListFieldsByModuleAndType_564190(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1074,7 +1083,7 @@ proc url_ObjectDataTypesListFieldsByModuleAndType_597090(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ObjectDataTypesListFieldsByModuleAndType_597089(path: JsonNode;
+proc validate_ObjectDataTypesListFieldsByModuleAndType_564189(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Retrieve a list of fields of a given type identified by module name.
   ## 
@@ -1082,43 +1091,44 @@ proc validate_ObjectDataTypesListFieldsByModuleAndType_597089(path: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
+  ##   moduleName: JString (required)
+  ##             : The name of module.
   ##   automationAccountName: JString (required)
   ##                        : The name of the automation account.
-  ##   resourceGroupName: JString (required)
-  ##                    : Name of an Azure Resource group.
   ##   typeName: JString (required)
   ##           : The name of type.
   ##   subscriptionId: JString (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   moduleName: JString (required)
-  ##             : The name of module.
+  ##   resourceGroupName: JString (required)
+  ##                    : Name of an Azure Resource group.
   section = newJObject()
-  assert path != nil, "path argument is necessary due to required `automationAccountName` field"
-  var valid_597091 = path.getOrDefault("automationAccountName")
-  valid_597091 = validateParameter(valid_597091, JString, required = true,
+  assert path != nil,
+        "path argument is necessary due to required `moduleName` field"
+  var valid_564191 = path.getOrDefault("moduleName")
+  valid_564191 = validateParameter(valid_564191, JString, required = true,
                                  default = nil)
-  if valid_597091 != nil:
-    section.add "automationAccountName", valid_597091
-  var valid_597092 = path.getOrDefault("resourceGroupName")
-  valid_597092 = validateParameter(valid_597092, JString, required = true,
+  if valid_564191 != nil:
+    section.add "moduleName", valid_564191
+  var valid_564192 = path.getOrDefault("automationAccountName")
+  valid_564192 = validateParameter(valid_564192, JString, required = true,
                                  default = nil)
-  if valid_597092 != nil:
-    section.add "resourceGroupName", valid_597092
-  var valid_597093 = path.getOrDefault("typeName")
-  valid_597093 = validateParameter(valid_597093, JString, required = true,
+  if valid_564192 != nil:
+    section.add "automationAccountName", valid_564192
+  var valid_564193 = path.getOrDefault("typeName")
+  valid_564193 = validateParameter(valid_564193, JString, required = true,
                                  default = nil)
-  if valid_597093 != nil:
-    section.add "typeName", valid_597093
-  var valid_597094 = path.getOrDefault("subscriptionId")
-  valid_597094 = validateParameter(valid_597094, JString, required = true,
+  if valid_564193 != nil:
+    section.add "typeName", valid_564193
+  var valid_564194 = path.getOrDefault("subscriptionId")
+  valid_564194 = validateParameter(valid_564194, JString, required = true,
                                  default = nil)
-  if valid_597094 != nil:
-    section.add "subscriptionId", valid_597094
-  var valid_597095 = path.getOrDefault("moduleName")
-  valid_597095 = validateParameter(valid_597095, JString, required = true,
+  if valid_564194 != nil:
+    section.add "subscriptionId", valid_564194
+  var valid_564195 = path.getOrDefault("resourceGroupName")
+  valid_564195 = validateParameter(valid_564195, JString, required = true,
                                  default = nil)
-  if valid_597095 != nil:
-    section.add "moduleName", valid_597095
+  if valid_564195 != nil:
+    section.add "resourceGroupName", valid_564195
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1126,11 +1136,11 @@ proc validate_ObjectDataTypesListFieldsByModuleAndType_597089(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_597096 = query.getOrDefault("api-version")
-  valid_597096 = validateParameter(valid_597096, JString, required = true,
+  var valid_564196 = query.getOrDefault("api-version")
+  valid_564196 = validateParameter(valid_564196, JString, required = true,
                                  default = nil)
-  if valid_597096 != nil:
-    section.add "api-version", valid_597096
+  if valid_564196 != nil:
+    section.add "api-version", valid_564196
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1139,59 +1149,58 @@ proc validate_ObjectDataTypesListFieldsByModuleAndType_597089(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_597097: Call_ObjectDataTypesListFieldsByModuleAndType_597088;
+proc call*(call_564197: Call_ObjectDataTypesListFieldsByModuleAndType_564188;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Retrieve a list of fields of a given type identified by module name.
   ## 
   ## http://aka.ms/azureautomationsdk/objectdatatypeoperations
-  let valid = call_597097.validator(path, query, header, formData, body)
-  let scheme = call_597097.pickScheme
+  let valid = call_564197.validator(path, query, header, formData, body)
+  let scheme = call_564197.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_597097.url(scheme.get, call_597097.host, call_597097.base,
-                         call_597097.route, valid.getOrDefault("path"),
+  let url = call_564197.url(scheme.get, call_564197.host, call_564197.base,
+                         call_564197.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_597097, url, valid)
+  result = hook(call_564197, url, valid)
 
-proc call*(call_597098: Call_ObjectDataTypesListFieldsByModuleAndType_597088;
-          automationAccountName: string; resourceGroupName: string;
-          apiVersion: string; typeName: string; subscriptionId: string;
-          moduleName: string): Recallable =
+proc call*(call_564198: Call_ObjectDataTypesListFieldsByModuleAndType_564188;
+          moduleName: string; apiVersion: string; automationAccountName: string;
+          typeName: string; subscriptionId: string; resourceGroupName: string): Recallable =
   ## objectDataTypesListFieldsByModuleAndType
   ## Retrieve a list of fields of a given type identified by module name.
   ## http://aka.ms/azureautomationsdk/objectdatatypeoperations
-  ##   automationAccountName: string (required)
-  ##                        : The name of the automation account.
-  ##   resourceGroupName: string (required)
-  ##                    : Name of an Azure Resource group.
+  ##   moduleName: string (required)
+  ##             : The name of module.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
+  ##   automationAccountName: string (required)
+  ##                        : The name of the automation account.
   ##   typeName: string (required)
   ##           : The name of type.
   ##   subscriptionId: string (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   moduleName: string (required)
-  ##             : The name of module.
-  var path_597099 = newJObject()
-  var query_597100 = newJObject()
-  add(path_597099, "automationAccountName", newJString(automationAccountName))
-  add(path_597099, "resourceGroupName", newJString(resourceGroupName))
-  add(query_597100, "api-version", newJString(apiVersion))
-  add(path_597099, "typeName", newJString(typeName))
-  add(path_597099, "subscriptionId", newJString(subscriptionId))
-  add(path_597099, "moduleName", newJString(moduleName))
-  result = call_597098.call(path_597099, query_597100, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : Name of an Azure Resource group.
+  var path_564199 = newJObject()
+  var query_564200 = newJObject()
+  add(path_564199, "moduleName", newJString(moduleName))
+  add(query_564200, "api-version", newJString(apiVersion))
+  add(path_564199, "automationAccountName", newJString(automationAccountName))
+  add(path_564199, "typeName", newJString(typeName))
+  add(path_564199, "subscriptionId", newJString(subscriptionId))
+  add(path_564199, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564198.call(path_564199, query_564200, nil, nil, nil)
 
-var objectDataTypesListFieldsByModuleAndType* = Call_ObjectDataTypesListFieldsByModuleAndType_597088(
+var objectDataTypesListFieldsByModuleAndType* = Call_ObjectDataTypesListFieldsByModuleAndType_564188(
     name: "objectDataTypesListFieldsByModuleAndType", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Automation/automationAccounts/{automationAccountName}/modules/{moduleName}/objectDataTypes/{typeName}/fields",
-    validator: validate_ObjectDataTypesListFieldsByModuleAndType_597089, base: "",
-    url: url_ObjectDataTypesListFieldsByModuleAndType_597090,
+    validator: validate_ObjectDataTypesListFieldsByModuleAndType_564189, base: "",
+    url: url_ObjectDataTypesListFieldsByModuleAndType_564190,
     schemes: {Scheme.Https})
 type
-  Call_FieldsListByType_597101 = ref object of OpenApiRestCall_596458
-proc url_FieldsListByType_597103(protocol: Scheme; host: string; base: string;
+  Call_FieldsListByType_564201 = ref object of OpenApiRestCall_563556
+proc url_FieldsListByType_564203(protocol: Scheme; host: string; base: string;
                                 route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1222,7 +1231,7 @@ proc url_FieldsListByType_597103(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_FieldsListByType_597102(path: JsonNode; query: JsonNode;
+proc validate_FieldsListByType_564202(path: JsonNode; query: JsonNode;
                                      header: JsonNode; formData: JsonNode;
                                      body: JsonNode): JsonNode =
   ## Retrieve a list of fields of a given type identified by module name.
@@ -1231,43 +1240,44 @@ proc validate_FieldsListByType_597102(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
+  ##   moduleName: JString (required)
+  ##             : The name of module.
   ##   automationAccountName: JString (required)
   ##                        : The name of the automation account.
-  ##   resourceGroupName: JString (required)
-  ##                    : Name of an Azure Resource group.
   ##   typeName: JString (required)
   ##           : The name of type.
   ##   subscriptionId: JString (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   moduleName: JString (required)
-  ##             : The name of module.
+  ##   resourceGroupName: JString (required)
+  ##                    : Name of an Azure Resource group.
   section = newJObject()
-  assert path != nil, "path argument is necessary due to required `automationAccountName` field"
-  var valid_597104 = path.getOrDefault("automationAccountName")
-  valid_597104 = validateParameter(valid_597104, JString, required = true,
+  assert path != nil,
+        "path argument is necessary due to required `moduleName` field"
+  var valid_564204 = path.getOrDefault("moduleName")
+  valid_564204 = validateParameter(valid_564204, JString, required = true,
                                  default = nil)
-  if valid_597104 != nil:
-    section.add "automationAccountName", valid_597104
-  var valid_597105 = path.getOrDefault("resourceGroupName")
-  valid_597105 = validateParameter(valid_597105, JString, required = true,
+  if valid_564204 != nil:
+    section.add "moduleName", valid_564204
+  var valid_564205 = path.getOrDefault("automationAccountName")
+  valid_564205 = validateParameter(valid_564205, JString, required = true,
                                  default = nil)
-  if valid_597105 != nil:
-    section.add "resourceGroupName", valid_597105
-  var valid_597106 = path.getOrDefault("typeName")
-  valid_597106 = validateParameter(valid_597106, JString, required = true,
+  if valid_564205 != nil:
+    section.add "automationAccountName", valid_564205
+  var valid_564206 = path.getOrDefault("typeName")
+  valid_564206 = validateParameter(valid_564206, JString, required = true,
                                  default = nil)
-  if valid_597106 != nil:
-    section.add "typeName", valid_597106
-  var valid_597107 = path.getOrDefault("subscriptionId")
-  valid_597107 = validateParameter(valid_597107, JString, required = true,
+  if valid_564206 != nil:
+    section.add "typeName", valid_564206
+  var valid_564207 = path.getOrDefault("subscriptionId")
+  valid_564207 = validateParameter(valid_564207, JString, required = true,
                                  default = nil)
-  if valid_597107 != nil:
-    section.add "subscriptionId", valid_597107
-  var valid_597108 = path.getOrDefault("moduleName")
-  valid_597108 = validateParameter(valid_597108, JString, required = true,
+  if valid_564207 != nil:
+    section.add "subscriptionId", valid_564207
+  var valid_564208 = path.getOrDefault("resourceGroupName")
+  valid_564208 = validateParameter(valid_564208, JString, required = true,
                                  default = nil)
-  if valid_597108 != nil:
-    section.add "moduleName", valid_597108
+  if valid_564208 != nil:
+    section.add "resourceGroupName", valid_564208
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1275,11 +1285,11 @@ proc validate_FieldsListByType_597102(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_597109 = query.getOrDefault("api-version")
-  valid_597109 = validateParameter(valid_597109, JString, required = true,
+  var valid_564209 = query.getOrDefault("api-version")
+  valid_564209 = validateParameter(valid_564209, JString, required = true,
                                  default = nil)
-  if valid_597109 != nil:
-    section.add "api-version", valid_597109
+  if valid_564209 != nil:
+    section.add "api-version", valid_564209
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1288,56 +1298,55 @@ proc validate_FieldsListByType_597102(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_597110: Call_FieldsListByType_597101; path: JsonNode;
+proc call*(call_564210: Call_FieldsListByType_564201; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Retrieve a list of fields of a given type identified by module name.
   ## 
   ## http://aka.ms/azureautomationsdk/typefieldoperations
-  let valid = call_597110.validator(path, query, header, formData, body)
-  let scheme = call_597110.pickScheme
+  let valid = call_564210.validator(path, query, header, formData, body)
+  let scheme = call_564210.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_597110.url(scheme.get, call_597110.host, call_597110.base,
-                         call_597110.route, valid.getOrDefault("path"),
+  let url = call_564210.url(scheme.get, call_564210.host, call_564210.base,
+                         call_564210.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_597110, url, valid)
+  result = hook(call_564210, url, valid)
 
-proc call*(call_597111: Call_FieldsListByType_597101;
-          automationAccountName: string; resourceGroupName: string;
-          apiVersion: string; typeName: string; subscriptionId: string;
-          moduleName: string): Recallable =
+proc call*(call_564211: Call_FieldsListByType_564201; moduleName: string;
+          apiVersion: string; automationAccountName: string; typeName: string;
+          subscriptionId: string; resourceGroupName: string): Recallable =
   ## fieldsListByType
   ## Retrieve a list of fields of a given type identified by module name.
   ## http://aka.ms/azureautomationsdk/typefieldoperations
-  ##   automationAccountName: string (required)
-  ##                        : The name of the automation account.
-  ##   resourceGroupName: string (required)
-  ##                    : Name of an Azure Resource group.
+  ##   moduleName: string (required)
+  ##             : The name of module.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
+  ##   automationAccountName: string (required)
+  ##                        : The name of the automation account.
   ##   typeName: string (required)
   ##           : The name of type.
   ##   subscriptionId: string (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   moduleName: string (required)
-  ##             : The name of module.
-  var path_597112 = newJObject()
-  var query_597113 = newJObject()
-  add(path_597112, "automationAccountName", newJString(automationAccountName))
-  add(path_597112, "resourceGroupName", newJString(resourceGroupName))
-  add(query_597113, "api-version", newJString(apiVersion))
-  add(path_597112, "typeName", newJString(typeName))
-  add(path_597112, "subscriptionId", newJString(subscriptionId))
-  add(path_597112, "moduleName", newJString(moduleName))
-  result = call_597111.call(path_597112, query_597113, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : Name of an Azure Resource group.
+  var path_564212 = newJObject()
+  var query_564213 = newJObject()
+  add(path_564212, "moduleName", newJString(moduleName))
+  add(query_564213, "api-version", newJString(apiVersion))
+  add(path_564212, "automationAccountName", newJString(automationAccountName))
+  add(path_564212, "typeName", newJString(typeName))
+  add(path_564212, "subscriptionId", newJString(subscriptionId))
+  add(path_564212, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564211.call(path_564212, query_564213, nil, nil, nil)
 
-var fieldsListByType* = Call_FieldsListByType_597101(name: "fieldsListByType",
+var fieldsListByType* = Call_FieldsListByType_564201(name: "fieldsListByType",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Automation/automationAccounts/{automationAccountName}/modules/{moduleName}/types/{typeName}/fields",
-    validator: validate_FieldsListByType_597102, base: "",
-    url: url_FieldsListByType_597103, schemes: {Scheme.Https})
+    validator: validate_FieldsListByType_564202, base: "",
+    url: url_FieldsListByType_564203, schemes: {Scheme.Https})
 type
-  Call_ObjectDataTypesListFieldsByType_597114 = ref object of OpenApiRestCall_596458
-proc url_ObjectDataTypesListFieldsByType_597116(protocol: Scheme; host: string;
+  Call_ObjectDataTypesListFieldsByType_564214 = ref object of OpenApiRestCall_563556
+proc url_ObjectDataTypesListFieldsByType_564216(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1365,7 +1374,7 @@ proc url_ObjectDataTypesListFieldsByType_597116(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ObjectDataTypesListFieldsByType_597115(path: JsonNode;
+proc validate_ObjectDataTypesListFieldsByType_564215(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Retrieve a list of fields of a given type across all accessible modules.
   ## 
@@ -1375,34 +1384,34 @@ proc validate_ObjectDataTypesListFieldsByType_597115(path: JsonNode;
   ## parameters in `path` object:
   ##   automationAccountName: JString (required)
   ##                        : The name of the automation account.
-  ##   resourceGroupName: JString (required)
-  ##                    : Name of an Azure Resource group.
   ##   typeName: JString (required)
   ##           : The name of type.
   ##   subscriptionId: JString (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : Name of an Azure Resource group.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `automationAccountName` field"
-  var valid_597117 = path.getOrDefault("automationAccountName")
-  valid_597117 = validateParameter(valid_597117, JString, required = true,
+  var valid_564217 = path.getOrDefault("automationAccountName")
+  valid_564217 = validateParameter(valid_564217, JString, required = true,
                                  default = nil)
-  if valid_597117 != nil:
-    section.add "automationAccountName", valid_597117
-  var valid_597118 = path.getOrDefault("resourceGroupName")
-  valid_597118 = validateParameter(valid_597118, JString, required = true,
+  if valid_564217 != nil:
+    section.add "automationAccountName", valid_564217
+  var valid_564218 = path.getOrDefault("typeName")
+  valid_564218 = validateParameter(valid_564218, JString, required = true,
                                  default = nil)
-  if valid_597118 != nil:
-    section.add "resourceGroupName", valid_597118
-  var valid_597119 = path.getOrDefault("typeName")
-  valid_597119 = validateParameter(valid_597119, JString, required = true,
+  if valid_564218 != nil:
+    section.add "typeName", valid_564218
+  var valid_564219 = path.getOrDefault("subscriptionId")
+  valid_564219 = validateParameter(valid_564219, JString, required = true,
                                  default = nil)
-  if valid_597119 != nil:
-    section.add "typeName", valid_597119
-  var valid_597120 = path.getOrDefault("subscriptionId")
-  valid_597120 = validateParameter(valid_597120, JString, required = true,
+  if valid_564219 != nil:
+    section.add "subscriptionId", valid_564219
+  var valid_564220 = path.getOrDefault("resourceGroupName")
+  valid_564220 = validateParameter(valid_564220, JString, required = true,
                                  default = nil)
-  if valid_597120 != nil:
-    section.add "subscriptionId", valid_597120
+  if valid_564220 != nil:
+    section.add "resourceGroupName", valid_564220
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1410,11 +1419,11 @@ proc validate_ObjectDataTypesListFieldsByType_597115(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_597121 = query.getOrDefault("api-version")
-  valid_597121 = validateParameter(valid_597121, JString, required = true,
+  var valid_564221 = query.getOrDefault("api-version")
+  valid_564221 = validateParameter(valid_564221, JString, required = true,
                                  default = nil)
-  if valid_597121 != nil:
-    section.add "api-version", valid_597121
+  if valid_564221 != nil:
+    section.add "api-version", valid_564221
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1423,51 +1432,51 @@ proc validate_ObjectDataTypesListFieldsByType_597115(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_597122: Call_ObjectDataTypesListFieldsByType_597114;
+proc call*(call_564222: Call_ObjectDataTypesListFieldsByType_564214;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Retrieve a list of fields of a given type across all accessible modules.
   ## 
   ## http://aka.ms/azureautomationsdk/objectdatatypeoperations
-  let valid = call_597122.validator(path, query, header, formData, body)
-  let scheme = call_597122.pickScheme
+  let valid = call_564222.validator(path, query, header, formData, body)
+  let scheme = call_564222.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_597122.url(scheme.get, call_597122.host, call_597122.base,
-                         call_597122.route, valid.getOrDefault("path"),
+  let url = call_564222.url(scheme.get, call_564222.host, call_564222.base,
+                         call_564222.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_597122, url, valid)
+  result = hook(call_564222, url, valid)
 
-proc call*(call_597123: Call_ObjectDataTypesListFieldsByType_597114;
-          automationAccountName: string; resourceGroupName: string;
-          apiVersion: string; typeName: string; subscriptionId: string): Recallable =
+proc call*(call_564223: Call_ObjectDataTypesListFieldsByType_564214;
+          apiVersion: string; automationAccountName: string; typeName: string;
+          subscriptionId: string; resourceGroupName: string): Recallable =
   ## objectDataTypesListFieldsByType
   ## Retrieve a list of fields of a given type across all accessible modules.
   ## http://aka.ms/azureautomationsdk/objectdatatypeoperations
-  ##   automationAccountName: string (required)
-  ##                        : The name of the automation account.
-  ##   resourceGroupName: string (required)
-  ##                    : Name of an Azure Resource group.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
+  ##   automationAccountName: string (required)
+  ##                        : The name of the automation account.
   ##   typeName: string (required)
   ##           : The name of type.
   ##   subscriptionId: string (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_597124 = newJObject()
-  var query_597125 = newJObject()
-  add(path_597124, "automationAccountName", newJString(automationAccountName))
-  add(path_597124, "resourceGroupName", newJString(resourceGroupName))
-  add(query_597125, "api-version", newJString(apiVersion))
-  add(path_597124, "typeName", newJString(typeName))
-  add(path_597124, "subscriptionId", newJString(subscriptionId))
-  result = call_597123.call(path_597124, query_597125, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : Name of an Azure Resource group.
+  var path_564224 = newJObject()
+  var query_564225 = newJObject()
+  add(query_564225, "api-version", newJString(apiVersion))
+  add(path_564224, "automationAccountName", newJString(automationAccountName))
+  add(path_564224, "typeName", newJString(typeName))
+  add(path_564224, "subscriptionId", newJString(subscriptionId))
+  add(path_564224, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564223.call(path_564224, query_564225, nil, nil, nil)
 
-var objectDataTypesListFieldsByType* = Call_ObjectDataTypesListFieldsByType_597114(
+var objectDataTypesListFieldsByType* = Call_ObjectDataTypesListFieldsByType_564214(
     name: "objectDataTypesListFieldsByType", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Automation/automationAccounts/{automationAccountName}/objectDataTypes/{typeName}/fields",
-    validator: validate_ObjectDataTypesListFieldsByType_597115, base: "",
-    url: url_ObjectDataTypesListFieldsByType_597116, schemes: {Scheme.Https})
+    validator: validate_ObjectDataTypesListFieldsByType_564215, base: "",
+    url: url_ObjectDataTypesListFieldsByType_564216, schemes: {Scheme.Https})
 export
   rest
 

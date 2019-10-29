@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_573641 = ref object of OpenApiRestCall
+  OpenApiRestCall_563539 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_573641](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563539](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_573641): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563539): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,8 +107,8 @@ const
   macServiceName = "network-serviceEndpointPolicy"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_ServiceEndpointPoliciesList_573863 = ref object of OpenApiRestCall_573641
-proc url_ServiceEndpointPoliciesList_573865(protocol: Scheme; host: string;
+  Call_ServiceEndpointPoliciesList_563761 = ref object of OpenApiRestCall_563539
+proc url_ServiceEndpointPoliciesList_563763(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -121,7 +125,7 @@ proc url_ServiceEndpointPoliciesList_573865(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ServiceEndpointPoliciesList_573864(path: JsonNode; query: JsonNode;
+proc validate_ServiceEndpointPoliciesList_563762(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets all the service endpoint policies in a subscription.
   ## 
@@ -133,11 +137,11 @@ proc validate_ServiceEndpointPoliciesList_573864(path: JsonNode; query: JsonNode
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_574025 = path.getOrDefault("subscriptionId")
-  valid_574025 = validateParameter(valid_574025, JString, required = true,
+  var valid_563925 = path.getOrDefault("subscriptionId")
+  valid_563925 = validateParameter(valid_563925, JString, required = true,
                                  default = nil)
-  if valid_574025 != nil:
-    section.add "subscriptionId", valid_574025
+  if valid_563925 != nil:
+    section.add "subscriptionId", valid_563925
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -145,11 +149,11 @@ proc validate_ServiceEndpointPoliciesList_573864(path: JsonNode; query: JsonNode
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574026 = query.getOrDefault("api-version")
-  valid_574026 = validateParameter(valid_574026, JString, required = true,
+  var valid_563926 = query.getOrDefault("api-version")
+  valid_563926 = validateParameter(valid_563926, JString, required = true,
                                  default = nil)
-  if valid_574026 != nil:
-    section.add "api-version", valid_574026
+  if valid_563926 != nil:
+    section.add "api-version", valid_563926
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -158,20 +162,20 @@ proc validate_ServiceEndpointPoliciesList_573864(path: JsonNode; query: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_574053: Call_ServiceEndpointPoliciesList_573863; path: JsonNode;
+proc call*(call_563953: Call_ServiceEndpointPoliciesList_563761; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets all the service endpoint policies in a subscription.
   ## 
-  let valid = call_574053.validator(path, query, header, formData, body)
-  let scheme = call_574053.pickScheme
+  let valid = call_563953.validator(path, query, header, formData, body)
+  let scheme = call_563953.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574053.url(scheme.get, call_574053.host, call_574053.base,
-                         call_574053.route, valid.getOrDefault("path"),
+  let url = call_563953.url(scheme.get, call_563953.host, call_563953.base,
+                         call_563953.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574053, url, valid)
+  result = hook(call_563953, url, valid)
 
-proc call*(call_574124: Call_ServiceEndpointPoliciesList_573863;
+proc call*(call_564024: Call_ServiceEndpointPoliciesList_563761;
           apiVersion: string; subscriptionId: string): Recallable =
   ## serviceEndpointPoliciesList
   ## Gets all the service endpoint policies in a subscription.
@@ -179,20 +183,20 @@ proc call*(call_574124: Call_ServiceEndpointPoliciesList_573863;
   ##             : Client API version.
   ##   subscriptionId: string (required)
   ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_574125 = newJObject()
-  var query_574127 = newJObject()
-  add(query_574127, "api-version", newJString(apiVersion))
-  add(path_574125, "subscriptionId", newJString(subscriptionId))
-  result = call_574124.call(path_574125, query_574127, nil, nil, nil)
+  var path_564025 = newJObject()
+  var query_564027 = newJObject()
+  add(query_564027, "api-version", newJString(apiVersion))
+  add(path_564025, "subscriptionId", newJString(subscriptionId))
+  result = call_564024.call(path_564025, query_564027, nil, nil, nil)
 
-var serviceEndpointPoliciesList* = Call_ServiceEndpointPoliciesList_573863(
+var serviceEndpointPoliciesList* = Call_ServiceEndpointPoliciesList_563761(
     name: "serviceEndpointPoliciesList", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Network/ServiceEndpointPolicies",
-    validator: validate_ServiceEndpointPoliciesList_573864, base: "",
-    url: url_ServiceEndpointPoliciesList_573865, schemes: {Scheme.Https})
+    validator: validate_ServiceEndpointPoliciesList_563762, base: "",
+    url: url_ServiceEndpointPoliciesList_563763, schemes: {Scheme.Https})
 type
-  Call_ServiceEndpointPoliciesListByResourceGroup_574166 = ref object of OpenApiRestCall_573641
-proc url_ServiceEndpointPoliciesListByResourceGroup_574168(protocol: Scheme;
+  Call_ServiceEndpointPoliciesListByResourceGroup_564066 = ref object of OpenApiRestCall_563539
+proc url_ServiceEndpointPoliciesListByResourceGroup_564068(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -213,30 +217,30 @@ proc url_ServiceEndpointPoliciesListByResourceGroup_574168(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ServiceEndpointPoliciesListByResourceGroup_574167(path: JsonNode;
+proc validate_ServiceEndpointPoliciesListByResourceGroup_564067(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets all service endpoint Policies in a resource group.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   subscriptionId: JString (required)
   ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_574169 = path.getOrDefault("resourceGroupName")
-  valid_574169 = validateParameter(valid_574169, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564069 = path.getOrDefault("subscriptionId")
+  valid_564069 = validateParameter(valid_564069, JString, required = true,
                                  default = nil)
-  if valid_574169 != nil:
-    section.add "resourceGroupName", valid_574169
-  var valid_574170 = path.getOrDefault("subscriptionId")
-  valid_574170 = validateParameter(valid_574170, JString, required = true,
+  if valid_564069 != nil:
+    section.add "subscriptionId", valid_564069
+  var valid_564070 = path.getOrDefault("resourceGroupName")
+  valid_564070 = validateParameter(valid_564070, JString, required = true,
                                  default = nil)
-  if valid_574170 != nil:
-    section.add "subscriptionId", valid_574170
+  if valid_564070 != nil:
+    section.add "resourceGroupName", valid_564070
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -244,11 +248,11 @@ proc validate_ServiceEndpointPoliciesListByResourceGroup_574167(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574171 = query.getOrDefault("api-version")
-  valid_574171 = validateParameter(valid_574171, JString, required = true,
+  var valid_564071 = query.getOrDefault("api-version")
+  valid_564071 = validateParameter(valid_564071, JString, required = true,
                                  default = nil)
-  if valid_574171 != nil:
-    section.add "api-version", valid_574171
+  if valid_564071 != nil:
+    section.add "api-version", valid_564071
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -257,46 +261,46 @@ proc validate_ServiceEndpointPoliciesListByResourceGroup_574167(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574172: Call_ServiceEndpointPoliciesListByResourceGroup_574166;
+proc call*(call_564072: Call_ServiceEndpointPoliciesListByResourceGroup_564066;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Gets all service endpoint Policies in a resource group.
   ## 
-  let valid = call_574172.validator(path, query, header, formData, body)
-  let scheme = call_574172.pickScheme
+  let valid = call_564072.validator(path, query, header, formData, body)
+  let scheme = call_564072.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574172.url(scheme.get, call_574172.host, call_574172.base,
-                         call_574172.route, valid.getOrDefault("path"),
+  let url = call_564072.url(scheme.get, call_564072.host, call_564072.base,
+                         call_564072.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574172, url, valid)
+  result = hook(call_564072, url, valid)
 
-proc call*(call_574173: Call_ServiceEndpointPoliciesListByResourceGroup_574166;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string): Recallable =
+proc call*(call_564073: Call_ServiceEndpointPoliciesListByResourceGroup_564066;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string): Recallable =
   ## serviceEndpointPoliciesListByResourceGroup
   ## Gets all service endpoint Policies in a resource group.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client API version.
   ##   subscriptionId: string (required)
   ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_574174 = newJObject()
-  var query_574175 = newJObject()
-  add(path_574174, "resourceGroupName", newJString(resourceGroupName))
-  add(query_574175, "api-version", newJString(apiVersion))
-  add(path_574174, "subscriptionId", newJString(subscriptionId))
-  result = call_574173.call(path_574174, query_574175, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564074 = newJObject()
+  var query_564075 = newJObject()
+  add(query_564075, "api-version", newJString(apiVersion))
+  add(path_564074, "subscriptionId", newJString(subscriptionId))
+  add(path_564074, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564073.call(path_564074, query_564075, nil, nil, nil)
 
-var serviceEndpointPoliciesListByResourceGroup* = Call_ServiceEndpointPoliciesListByResourceGroup_574166(
+var serviceEndpointPoliciesListByResourceGroup* = Call_ServiceEndpointPoliciesListByResourceGroup_564066(
     name: "serviceEndpointPoliciesListByResourceGroup", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/serviceEndpointPolicies",
-    validator: validate_ServiceEndpointPoliciesListByResourceGroup_574167,
-    base: "", url: url_ServiceEndpointPoliciesListByResourceGroup_574168,
+    validator: validate_ServiceEndpointPoliciesListByResourceGroup_564067,
+    base: "", url: url_ServiceEndpointPoliciesListByResourceGroup_564068,
     schemes: {Scheme.Https})
 type
-  Call_ServiceEndpointPoliciesCreateOrUpdate_574189 = ref object of OpenApiRestCall_573641
-proc url_ServiceEndpointPoliciesCreateOrUpdate_574191(protocol: Scheme;
+  Call_ServiceEndpointPoliciesCreateOrUpdate_564089 = ref object of OpenApiRestCall_563539
+proc url_ServiceEndpointPoliciesCreateOrUpdate_564091(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -320,37 +324,37 @@ proc url_ServiceEndpointPoliciesCreateOrUpdate_574191(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ServiceEndpointPoliciesCreateOrUpdate_574190(path: JsonNode;
+proc validate_ServiceEndpointPoliciesCreateOrUpdate_564090(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Creates or updates a service Endpoint Policies.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   subscriptionId: JString (required)
   ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   ##   serviceEndpointPolicyName: JString (required)
   ##                            : The name of the service endpoint policy.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_574218 = path.getOrDefault("resourceGroupName")
-  valid_574218 = validateParameter(valid_574218, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564118 = path.getOrDefault("subscriptionId")
+  valid_564118 = validateParameter(valid_564118, JString, required = true,
                                  default = nil)
-  if valid_574218 != nil:
-    section.add "resourceGroupName", valid_574218
-  var valid_574219 = path.getOrDefault("subscriptionId")
-  valid_574219 = validateParameter(valid_574219, JString, required = true,
+  if valid_564118 != nil:
+    section.add "subscriptionId", valid_564118
+  var valid_564119 = path.getOrDefault("resourceGroupName")
+  valid_564119 = validateParameter(valid_564119, JString, required = true,
                                  default = nil)
-  if valid_574219 != nil:
-    section.add "subscriptionId", valid_574219
-  var valid_574220 = path.getOrDefault("serviceEndpointPolicyName")
-  valid_574220 = validateParameter(valid_574220, JString, required = true,
+  if valid_564119 != nil:
+    section.add "resourceGroupName", valid_564119
+  var valid_564120 = path.getOrDefault("serviceEndpointPolicyName")
+  valid_564120 = validateParameter(valid_564120, JString, required = true,
                                  default = nil)
-  if valid_574220 != nil:
-    section.add "serviceEndpointPolicyName", valid_574220
+  if valid_564120 != nil:
+    section.add "serviceEndpointPolicyName", valid_564120
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -358,11 +362,11 @@ proc validate_ServiceEndpointPoliciesCreateOrUpdate_574190(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574221 = query.getOrDefault("api-version")
-  valid_574221 = validateParameter(valid_574221, JString, required = true,
+  var valid_564121 = query.getOrDefault("api-version")
+  valid_564121 = validateParameter(valid_564121, JString, required = true,
                                  default = nil)
-  if valid_574221 != nil:
-    section.add "api-version", valid_574221
+  if valid_564121 != nil:
+    section.add "api-version", valid_564121
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -376,55 +380,55 @@ proc validate_ServiceEndpointPoliciesCreateOrUpdate_574190(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574223: Call_ServiceEndpointPoliciesCreateOrUpdate_574189;
+proc call*(call_564123: Call_ServiceEndpointPoliciesCreateOrUpdate_564089;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Creates or updates a service Endpoint Policies.
   ## 
-  let valid = call_574223.validator(path, query, header, formData, body)
-  let scheme = call_574223.pickScheme
+  let valid = call_564123.validator(path, query, header, formData, body)
+  let scheme = call_564123.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574223.url(scheme.get, call_574223.host, call_574223.base,
-                         call_574223.route, valid.getOrDefault("path"),
+  let url = call_564123.url(scheme.get, call_564123.host, call_564123.base,
+                         call_564123.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574223, url, valid)
+  result = hook(call_564123, url, valid)
 
-proc call*(call_574224: Call_ServiceEndpointPoliciesCreateOrUpdate_574189;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
+proc call*(call_564124: Call_ServiceEndpointPoliciesCreateOrUpdate_564089;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string;
           serviceEndpointPolicyName: string; parameters: JsonNode): Recallable =
   ## serviceEndpointPoliciesCreateOrUpdate
   ## Creates or updates a service Endpoint Policies.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client API version.
   ##   subscriptionId: string (required)
   ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   serviceEndpointPolicyName: string (required)
   ##                            : The name of the service endpoint policy.
   ##   parameters: JObject (required)
   ##             : Parameters supplied to the create or update service endpoint policy operation.
-  var path_574225 = newJObject()
-  var query_574226 = newJObject()
-  var body_574227 = newJObject()
-  add(path_574225, "resourceGroupName", newJString(resourceGroupName))
-  add(query_574226, "api-version", newJString(apiVersion))
-  add(path_574225, "subscriptionId", newJString(subscriptionId))
-  add(path_574225, "serviceEndpointPolicyName",
+  var path_564125 = newJObject()
+  var query_564126 = newJObject()
+  var body_564127 = newJObject()
+  add(query_564126, "api-version", newJString(apiVersion))
+  add(path_564125, "subscriptionId", newJString(subscriptionId))
+  add(path_564125, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564125, "serviceEndpointPolicyName",
       newJString(serviceEndpointPolicyName))
   if parameters != nil:
-    body_574227 = parameters
-  result = call_574224.call(path_574225, query_574226, nil, nil, body_574227)
+    body_564127 = parameters
+  result = call_564124.call(path_564125, query_564126, nil, nil, body_564127)
 
-var serviceEndpointPoliciesCreateOrUpdate* = Call_ServiceEndpointPoliciesCreateOrUpdate_574189(
+var serviceEndpointPoliciesCreateOrUpdate* = Call_ServiceEndpointPoliciesCreateOrUpdate_564089(
     name: "serviceEndpointPoliciesCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/serviceEndpointPolicies/{serviceEndpointPolicyName}",
-    validator: validate_ServiceEndpointPoliciesCreateOrUpdate_574190, base: "",
-    url: url_ServiceEndpointPoliciesCreateOrUpdate_574191, schemes: {Scheme.Https})
+    validator: validate_ServiceEndpointPoliciesCreateOrUpdate_564090, base: "",
+    url: url_ServiceEndpointPoliciesCreateOrUpdate_564091, schemes: {Scheme.Https})
 type
-  Call_ServiceEndpointPoliciesGet_574176 = ref object of OpenApiRestCall_573641
-proc url_ServiceEndpointPoliciesGet_574178(protocol: Scheme; host: string;
+  Call_ServiceEndpointPoliciesGet_564076 = ref object of OpenApiRestCall_563539
+proc url_ServiceEndpointPoliciesGet_564078(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -448,37 +452,37 @@ proc url_ServiceEndpointPoliciesGet_574178(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ServiceEndpointPoliciesGet_574177(path: JsonNode; query: JsonNode;
+proc validate_ServiceEndpointPoliciesGet_564077(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the specified service Endpoint Policies in a specified resource group.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   subscriptionId: JString (required)
   ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   ##   serviceEndpointPolicyName: JString (required)
   ##                            : The name of the service endpoint policy.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_574180 = path.getOrDefault("resourceGroupName")
-  valid_574180 = validateParameter(valid_574180, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564080 = path.getOrDefault("subscriptionId")
+  valid_564080 = validateParameter(valid_564080, JString, required = true,
                                  default = nil)
-  if valid_574180 != nil:
-    section.add "resourceGroupName", valid_574180
-  var valid_574181 = path.getOrDefault("subscriptionId")
-  valid_574181 = validateParameter(valid_574181, JString, required = true,
+  if valid_564080 != nil:
+    section.add "subscriptionId", valid_564080
+  var valid_564081 = path.getOrDefault("resourceGroupName")
+  valid_564081 = validateParameter(valid_564081, JString, required = true,
                                  default = nil)
-  if valid_574181 != nil:
-    section.add "subscriptionId", valid_574181
-  var valid_574182 = path.getOrDefault("serviceEndpointPolicyName")
-  valid_574182 = validateParameter(valid_574182, JString, required = true,
+  if valid_564081 != nil:
+    section.add "resourceGroupName", valid_564081
+  var valid_564082 = path.getOrDefault("serviceEndpointPolicyName")
+  valid_564082 = validateParameter(valid_564082, JString, required = true,
                                  default = nil)
-  if valid_574182 != nil:
-    section.add "serviceEndpointPolicyName", valid_574182
+  if valid_564082 != nil:
+    section.add "serviceEndpointPolicyName", valid_564082
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -488,16 +492,16 @@ proc validate_ServiceEndpointPoliciesGet_574177(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574183 = query.getOrDefault("api-version")
-  valid_574183 = validateParameter(valid_574183, JString, required = true,
+  var valid_564083 = query.getOrDefault("api-version")
+  valid_564083 = validateParameter(valid_564083, JString, required = true,
                                  default = nil)
-  if valid_574183 != nil:
-    section.add "api-version", valid_574183
-  var valid_574184 = query.getOrDefault("$expand")
-  valid_574184 = validateParameter(valid_574184, JString, required = false,
+  if valid_564083 != nil:
+    section.add "api-version", valid_564083
+  var valid_564084 = query.getOrDefault("$expand")
+  valid_564084 = validateParameter(valid_564084, JString, required = false,
                                  default = nil)
-  if valid_574184 != nil:
-    section.add "$expand", valid_574184
+  if valid_564084 != nil:
+    section.add "$expand", valid_564084
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -506,52 +510,52 @@ proc validate_ServiceEndpointPoliciesGet_574177(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574185: Call_ServiceEndpointPoliciesGet_574176; path: JsonNode;
+proc call*(call_564085: Call_ServiceEndpointPoliciesGet_564076; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the specified service Endpoint Policies in a specified resource group.
   ## 
-  let valid = call_574185.validator(path, query, header, formData, body)
-  let scheme = call_574185.pickScheme
+  let valid = call_564085.validator(path, query, header, formData, body)
+  let scheme = call_564085.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574185.url(scheme.get, call_574185.host, call_574185.base,
-                         call_574185.route, valid.getOrDefault("path"),
+  let url = call_564085.url(scheme.get, call_564085.host, call_564085.base,
+                         call_564085.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574185, url, valid)
+  result = hook(call_564085, url, valid)
 
-proc call*(call_574186: Call_ServiceEndpointPoliciesGet_574176;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
+proc call*(call_564086: Call_ServiceEndpointPoliciesGet_564076; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string;
           serviceEndpointPolicyName: string; Expand: string = ""): Recallable =
   ## serviceEndpointPoliciesGet
   ## Gets the specified service Endpoint Policies in a specified resource group.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client API version.
   ##   Expand: string
   ##         : Expands referenced resources.
   ##   subscriptionId: string (required)
   ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   serviceEndpointPolicyName: string (required)
   ##                            : The name of the service endpoint policy.
-  var path_574187 = newJObject()
-  var query_574188 = newJObject()
-  add(path_574187, "resourceGroupName", newJString(resourceGroupName))
-  add(query_574188, "api-version", newJString(apiVersion))
-  add(query_574188, "$expand", newJString(Expand))
-  add(path_574187, "subscriptionId", newJString(subscriptionId))
-  add(path_574187, "serviceEndpointPolicyName",
+  var path_564087 = newJObject()
+  var query_564088 = newJObject()
+  add(query_564088, "api-version", newJString(apiVersion))
+  add(query_564088, "$expand", newJString(Expand))
+  add(path_564087, "subscriptionId", newJString(subscriptionId))
+  add(path_564087, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564087, "serviceEndpointPolicyName",
       newJString(serviceEndpointPolicyName))
-  result = call_574186.call(path_574187, query_574188, nil, nil, nil)
+  result = call_564086.call(path_564087, query_564088, nil, nil, nil)
 
-var serviceEndpointPoliciesGet* = Call_ServiceEndpointPoliciesGet_574176(
+var serviceEndpointPoliciesGet* = Call_ServiceEndpointPoliciesGet_564076(
     name: "serviceEndpointPoliciesGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/serviceEndpointPolicies/{serviceEndpointPolicyName}",
-    validator: validate_ServiceEndpointPoliciesGet_574177, base: "",
-    url: url_ServiceEndpointPoliciesGet_574178, schemes: {Scheme.Https})
+    validator: validate_ServiceEndpointPoliciesGet_564077, base: "",
+    url: url_ServiceEndpointPoliciesGet_564078, schemes: {Scheme.Https})
 type
-  Call_ServiceEndpointPoliciesUpdate_574239 = ref object of OpenApiRestCall_573641
-proc url_ServiceEndpointPoliciesUpdate_574241(protocol: Scheme; host: string;
+  Call_ServiceEndpointPoliciesUpdate_564139 = ref object of OpenApiRestCall_563539
+proc url_ServiceEndpointPoliciesUpdate_564141(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -575,37 +579,37 @@ proc url_ServiceEndpointPoliciesUpdate_574241(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ServiceEndpointPoliciesUpdate_574240(path: JsonNode; query: JsonNode;
+proc validate_ServiceEndpointPoliciesUpdate_564140(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Updates service Endpoint Policies.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   subscriptionId: JString (required)
   ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   ##   serviceEndpointPolicyName: JString (required)
   ##                            : The name of the service endpoint policy.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_574242 = path.getOrDefault("resourceGroupName")
-  valid_574242 = validateParameter(valid_574242, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564142 = path.getOrDefault("subscriptionId")
+  valid_564142 = validateParameter(valid_564142, JString, required = true,
                                  default = nil)
-  if valid_574242 != nil:
-    section.add "resourceGroupName", valid_574242
-  var valid_574243 = path.getOrDefault("subscriptionId")
-  valid_574243 = validateParameter(valid_574243, JString, required = true,
+  if valid_564142 != nil:
+    section.add "subscriptionId", valid_564142
+  var valid_564143 = path.getOrDefault("resourceGroupName")
+  valid_564143 = validateParameter(valid_564143, JString, required = true,
                                  default = nil)
-  if valid_574243 != nil:
-    section.add "subscriptionId", valid_574243
-  var valid_574244 = path.getOrDefault("serviceEndpointPolicyName")
-  valid_574244 = validateParameter(valid_574244, JString, required = true,
+  if valid_564143 != nil:
+    section.add "resourceGroupName", valid_564143
+  var valid_564144 = path.getOrDefault("serviceEndpointPolicyName")
+  valid_564144 = validateParameter(valid_564144, JString, required = true,
                                  default = nil)
-  if valid_574244 != nil:
-    section.add "serviceEndpointPolicyName", valid_574244
+  if valid_564144 != nil:
+    section.add "serviceEndpointPolicyName", valid_564144
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -613,11 +617,11 @@ proc validate_ServiceEndpointPoliciesUpdate_574240(path: JsonNode; query: JsonNo
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574245 = query.getOrDefault("api-version")
-  valid_574245 = validateParameter(valid_574245, JString, required = true,
+  var valid_564145 = query.getOrDefault("api-version")
+  valid_564145 = validateParameter(valid_564145, JString, required = true,
                                  default = nil)
-  if valid_574245 != nil:
-    section.add "api-version", valid_574245
+  if valid_564145 != nil:
+    section.add "api-version", valid_564145
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -631,54 +635,54 @@ proc validate_ServiceEndpointPoliciesUpdate_574240(path: JsonNode; query: JsonNo
   if body != nil:
     result.add "body", body
 
-proc call*(call_574247: Call_ServiceEndpointPoliciesUpdate_574239; path: JsonNode;
+proc call*(call_564147: Call_ServiceEndpointPoliciesUpdate_564139; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Updates service Endpoint Policies.
   ## 
-  let valid = call_574247.validator(path, query, header, formData, body)
-  let scheme = call_574247.pickScheme
+  let valid = call_564147.validator(path, query, header, formData, body)
+  let scheme = call_564147.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574247.url(scheme.get, call_574247.host, call_574247.base,
-                         call_574247.route, valid.getOrDefault("path"),
+  let url = call_564147.url(scheme.get, call_564147.host, call_564147.base,
+                         call_564147.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574247, url, valid)
+  result = hook(call_564147, url, valid)
 
-proc call*(call_574248: Call_ServiceEndpointPoliciesUpdate_574239;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
+proc call*(call_564148: Call_ServiceEndpointPoliciesUpdate_564139;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string;
           serviceEndpointPolicyName: string; parameters: JsonNode): Recallable =
   ## serviceEndpointPoliciesUpdate
   ## Updates service Endpoint Policies.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client API version.
   ##   subscriptionId: string (required)
   ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   serviceEndpointPolicyName: string (required)
   ##                            : The name of the service endpoint policy.
   ##   parameters: JObject (required)
   ##             : Parameters supplied to update service endpoint policy tags.
-  var path_574249 = newJObject()
-  var query_574250 = newJObject()
-  var body_574251 = newJObject()
-  add(path_574249, "resourceGroupName", newJString(resourceGroupName))
-  add(query_574250, "api-version", newJString(apiVersion))
-  add(path_574249, "subscriptionId", newJString(subscriptionId))
-  add(path_574249, "serviceEndpointPolicyName",
+  var path_564149 = newJObject()
+  var query_564150 = newJObject()
+  var body_564151 = newJObject()
+  add(query_564150, "api-version", newJString(apiVersion))
+  add(path_564149, "subscriptionId", newJString(subscriptionId))
+  add(path_564149, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564149, "serviceEndpointPolicyName",
       newJString(serviceEndpointPolicyName))
   if parameters != nil:
-    body_574251 = parameters
-  result = call_574248.call(path_574249, query_574250, nil, nil, body_574251)
+    body_564151 = parameters
+  result = call_564148.call(path_564149, query_564150, nil, nil, body_564151)
 
-var serviceEndpointPoliciesUpdate* = Call_ServiceEndpointPoliciesUpdate_574239(
+var serviceEndpointPoliciesUpdate* = Call_ServiceEndpointPoliciesUpdate_564139(
     name: "serviceEndpointPoliciesUpdate", meth: HttpMethod.HttpPatch,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/serviceEndpointPolicies/{serviceEndpointPolicyName}",
-    validator: validate_ServiceEndpointPoliciesUpdate_574240, base: "",
-    url: url_ServiceEndpointPoliciesUpdate_574241, schemes: {Scheme.Https})
+    validator: validate_ServiceEndpointPoliciesUpdate_564140, base: "",
+    url: url_ServiceEndpointPoliciesUpdate_564141, schemes: {Scheme.Https})
 type
-  Call_ServiceEndpointPoliciesDelete_574228 = ref object of OpenApiRestCall_573641
-proc url_ServiceEndpointPoliciesDelete_574230(protocol: Scheme; host: string;
+  Call_ServiceEndpointPoliciesDelete_564128 = ref object of OpenApiRestCall_563539
+proc url_ServiceEndpointPoliciesDelete_564130(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -702,37 +706,37 @@ proc url_ServiceEndpointPoliciesDelete_574230(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ServiceEndpointPoliciesDelete_574229(path: JsonNode; query: JsonNode;
+proc validate_ServiceEndpointPoliciesDelete_564129(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Deletes the specified service endpoint policy.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   subscriptionId: JString (required)
   ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   ##   serviceEndpointPolicyName: JString (required)
   ##                            : The name of the service endpoint policy.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_574231 = path.getOrDefault("resourceGroupName")
-  valid_574231 = validateParameter(valid_574231, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564131 = path.getOrDefault("subscriptionId")
+  valid_564131 = validateParameter(valid_564131, JString, required = true,
                                  default = nil)
-  if valid_574231 != nil:
-    section.add "resourceGroupName", valid_574231
-  var valid_574232 = path.getOrDefault("subscriptionId")
-  valid_574232 = validateParameter(valid_574232, JString, required = true,
+  if valid_564131 != nil:
+    section.add "subscriptionId", valid_564131
+  var valid_564132 = path.getOrDefault("resourceGroupName")
+  valid_564132 = validateParameter(valid_564132, JString, required = true,
                                  default = nil)
-  if valid_574232 != nil:
-    section.add "subscriptionId", valid_574232
-  var valid_574233 = path.getOrDefault("serviceEndpointPolicyName")
-  valid_574233 = validateParameter(valid_574233, JString, required = true,
+  if valid_564132 != nil:
+    section.add "resourceGroupName", valid_564132
+  var valid_564133 = path.getOrDefault("serviceEndpointPolicyName")
+  valid_564133 = validateParameter(valid_564133, JString, required = true,
                                  default = nil)
-  if valid_574233 != nil:
-    section.add "serviceEndpointPolicyName", valid_574233
+  if valid_564133 != nil:
+    section.add "serviceEndpointPolicyName", valid_564133
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -740,11 +744,11 @@ proc validate_ServiceEndpointPoliciesDelete_574229(path: JsonNode; query: JsonNo
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574234 = query.getOrDefault("api-version")
-  valid_574234 = validateParameter(valid_574234, JString, required = true,
+  var valid_564134 = query.getOrDefault("api-version")
+  valid_564134 = validateParameter(valid_564134, JString, required = true,
                                  default = nil)
-  if valid_574234 != nil:
-    section.add "api-version", valid_574234
+  if valid_564134 != nil:
+    section.add "api-version", valid_564134
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -753,49 +757,49 @@ proc validate_ServiceEndpointPoliciesDelete_574229(path: JsonNode; query: JsonNo
   if body != nil:
     result.add "body", body
 
-proc call*(call_574235: Call_ServiceEndpointPoliciesDelete_574228; path: JsonNode;
+proc call*(call_564135: Call_ServiceEndpointPoliciesDelete_564128; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes the specified service endpoint policy.
   ## 
-  let valid = call_574235.validator(path, query, header, formData, body)
-  let scheme = call_574235.pickScheme
+  let valid = call_564135.validator(path, query, header, formData, body)
+  let scheme = call_564135.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574235.url(scheme.get, call_574235.host, call_574235.base,
-                         call_574235.route, valid.getOrDefault("path"),
+  let url = call_564135.url(scheme.get, call_564135.host, call_564135.base,
+                         call_564135.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574235, url, valid)
+  result = hook(call_564135, url, valid)
 
-proc call*(call_574236: Call_ServiceEndpointPoliciesDelete_574228;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
+proc call*(call_564136: Call_ServiceEndpointPoliciesDelete_564128;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string;
           serviceEndpointPolicyName: string): Recallable =
   ## serviceEndpointPoliciesDelete
   ## Deletes the specified service endpoint policy.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client API version.
   ##   subscriptionId: string (required)
   ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   serviceEndpointPolicyName: string (required)
   ##                            : The name of the service endpoint policy.
-  var path_574237 = newJObject()
-  var query_574238 = newJObject()
-  add(path_574237, "resourceGroupName", newJString(resourceGroupName))
-  add(query_574238, "api-version", newJString(apiVersion))
-  add(path_574237, "subscriptionId", newJString(subscriptionId))
-  add(path_574237, "serviceEndpointPolicyName",
+  var path_564137 = newJObject()
+  var query_564138 = newJObject()
+  add(query_564138, "api-version", newJString(apiVersion))
+  add(path_564137, "subscriptionId", newJString(subscriptionId))
+  add(path_564137, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564137, "serviceEndpointPolicyName",
       newJString(serviceEndpointPolicyName))
-  result = call_574236.call(path_574237, query_574238, nil, nil, nil)
+  result = call_564136.call(path_564137, query_564138, nil, nil, nil)
 
-var serviceEndpointPoliciesDelete* = Call_ServiceEndpointPoliciesDelete_574228(
+var serviceEndpointPoliciesDelete* = Call_ServiceEndpointPoliciesDelete_564128(
     name: "serviceEndpointPoliciesDelete", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/serviceEndpointPolicies/{serviceEndpointPolicyName}",
-    validator: validate_ServiceEndpointPoliciesDelete_574229, base: "",
-    url: url_ServiceEndpointPoliciesDelete_574230, schemes: {Scheme.Https})
+    validator: validate_ServiceEndpointPoliciesDelete_564129, base: "",
+    url: url_ServiceEndpointPoliciesDelete_564130, schemes: {Scheme.Https})
 type
-  Call_ServiceEndpointPolicyDefinitionsListByResourceGroup_574252 = ref object of OpenApiRestCall_573641
-proc url_ServiceEndpointPolicyDefinitionsListByResourceGroup_574254(
+  Call_ServiceEndpointPolicyDefinitionsListByResourceGroup_564152 = ref object of OpenApiRestCall_563539
+proc url_ServiceEndpointPolicyDefinitionsListByResourceGroup_564154(
     protocol: Scheme; host: string; base: string; route: string; path: JsonNode;
     query: JsonNode): Uri =
   result.scheme = $protocol
@@ -821,7 +825,7 @@ proc url_ServiceEndpointPolicyDefinitionsListByResourceGroup_574254(
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ServiceEndpointPolicyDefinitionsListByResourceGroup_574253(
+proc validate_ServiceEndpointPolicyDefinitionsListByResourceGroup_564153(
     path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
     body: JsonNode): JsonNode =
   ## Gets all service endpoint policy definitions in a service end point policy.
@@ -829,30 +833,30 @@ proc validate_ServiceEndpointPolicyDefinitionsListByResourceGroup_574253(
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   subscriptionId: JString (required)
   ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   ##   serviceEndpointPolicyName: JString (required)
   ##                            : The name of the service endpoint policy name.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_574255 = path.getOrDefault("resourceGroupName")
-  valid_574255 = validateParameter(valid_574255, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564155 = path.getOrDefault("subscriptionId")
+  valid_564155 = validateParameter(valid_564155, JString, required = true,
                                  default = nil)
-  if valid_574255 != nil:
-    section.add "resourceGroupName", valid_574255
-  var valid_574256 = path.getOrDefault("subscriptionId")
-  valid_574256 = validateParameter(valid_574256, JString, required = true,
+  if valid_564155 != nil:
+    section.add "subscriptionId", valid_564155
+  var valid_564156 = path.getOrDefault("resourceGroupName")
+  valid_564156 = validateParameter(valid_564156, JString, required = true,
                                  default = nil)
-  if valid_574256 != nil:
-    section.add "subscriptionId", valid_574256
-  var valid_574257 = path.getOrDefault("serviceEndpointPolicyName")
-  valid_574257 = validateParameter(valid_574257, JString, required = true,
+  if valid_564156 != nil:
+    section.add "resourceGroupName", valid_564156
+  var valid_564157 = path.getOrDefault("serviceEndpointPolicyName")
+  valid_564157 = validateParameter(valid_564157, JString, required = true,
                                  default = nil)
-  if valid_574257 != nil:
-    section.add "serviceEndpointPolicyName", valid_574257
+  if valid_564157 != nil:
+    section.add "serviceEndpointPolicyName", valid_564157
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -860,11 +864,11 @@ proc validate_ServiceEndpointPolicyDefinitionsListByResourceGroup_574253(
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574258 = query.getOrDefault("api-version")
-  valid_574258 = validateParameter(valid_574258, JString, required = true,
+  var valid_564158 = query.getOrDefault("api-version")
+  valid_564158 = validateParameter(valid_564158, JString, required = true,
                                  default = nil)
-  if valid_574258 != nil:
-    section.add "api-version", valid_574258
+  if valid_564158 != nil:
+    section.add "api-version", valid_564158
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -873,51 +877,51 @@ proc validate_ServiceEndpointPolicyDefinitionsListByResourceGroup_574253(
   if body != nil:
     result.add "body", body
 
-proc call*(call_574259: Call_ServiceEndpointPolicyDefinitionsListByResourceGroup_574252;
+proc call*(call_564159: Call_ServiceEndpointPolicyDefinitionsListByResourceGroup_564152;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Gets all service endpoint policy definitions in a service end point policy.
   ## 
-  let valid = call_574259.validator(path, query, header, formData, body)
-  let scheme = call_574259.pickScheme
+  let valid = call_564159.validator(path, query, header, formData, body)
+  let scheme = call_564159.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574259.url(scheme.get, call_574259.host, call_574259.base,
-                         call_574259.route, valid.getOrDefault("path"),
+  let url = call_564159.url(scheme.get, call_564159.host, call_564159.base,
+                         call_564159.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574259, url, valid)
+  result = hook(call_564159, url, valid)
 
-proc call*(call_574260: Call_ServiceEndpointPolicyDefinitionsListByResourceGroup_574252;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
+proc call*(call_564160: Call_ServiceEndpointPolicyDefinitionsListByResourceGroup_564152;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string;
           serviceEndpointPolicyName: string): Recallable =
   ## serviceEndpointPolicyDefinitionsListByResourceGroup
   ## Gets all service endpoint policy definitions in a service end point policy.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client API version.
   ##   subscriptionId: string (required)
   ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   serviceEndpointPolicyName: string (required)
   ##                            : The name of the service endpoint policy name.
-  var path_574261 = newJObject()
-  var query_574262 = newJObject()
-  add(path_574261, "resourceGroupName", newJString(resourceGroupName))
-  add(query_574262, "api-version", newJString(apiVersion))
-  add(path_574261, "subscriptionId", newJString(subscriptionId))
-  add(path_574261, "serviceEndpointPolicyName",
+  var path_564161 = newJObject()
+  var query_564162 = newJObject()
+  add(query_564162, "api-version", newJString(apiVersion))
+  add(path_564161, "subscriptionId", newJString(subscriptionId))
+  add(path_564161, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564161, "serviceEndpointPolicyName",
       newJString(serviceEndpointPolicyName))
-  result = call_574260.call(path_574261, query_574262, nil, nil, nil)
+  result = call_564160.call(path_564161, query_564162, nil, nil, nil)
 
-var serviceEndpointPolicyDefinitionsListByResourceGroup* = Call_ServiceEndpointPolicyDefinitionsListByResourceGroup_574252(
+var serviceEndpointPolicyDefinitionsListByResourceGroup* = Call_ServiceEndpointPolicyDefinitionsListByResourceGroup_564152(
     name: "serviceEndpointPolicyDefinitionsListByResourceGroup",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/serviceEndpointPolicies/{serviceEndpointPolicyName}/serviceEndpointPolicyDefinitions",
-    validator: validate_ServiceEndpointPolicyDefinitionsListByResourceGroup_574253,
-    base: "", url: url_ServiceEndpointPolicyDefinitionsListByResourceGroup_574254,
+    validator: validate_ServiceEndpointPolicyDefinitionsListByResourceGroup_564153,
+    base: "", url: url_ServiceEndpointPolicyDefinitionsListByResourceGroup_564154,
     schemes: {Scheme.Https})
 type
-  Call_ServiceEndpointPolicyDefinitionsCreateOrUpdate_574275 = ref object of OpenApiRestCall_573641
-proc url_ServiceEndpointPolicyDefinitionsCreateOrUpdate_574277(protocol: Scheme;
+  Call_ServiceEndpointPolicyDefinitionsCreateOrUpdate_564175 = ref object of OpenApiRestCall_563539
+proc url_ServiceEndpointPolicyDefinitionsCreateOrUpdate_564177(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -945,7 +949,7 @@ proc url_ServiceEndpointPolicyDefinitionsCreateOrUpdate_574277(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ServiceEndpointPolicyDefinitionsCreateOrUpdate_574276(
+proc validate_ServiceEndpointPolicyDefinitionsCreateOrUpdate_564176(
     path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
     body: JsonNode): JsonNode =
   ## Creates or updates a service endpoint policy definition in the specified service endpoint policy.
@@ -953,37 +957,36 @@ proc validate_ServiceEndpointPolicyDefinitionsCreateOrUpdate_574276(
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   serviceEndpointPolicyDefinitionName: JString (required)
   ##                                      : The name of the service endpoint policy definition name.
   ##   subscriptionId: JString (required)
   ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   ##   serviceEndpointPolicyName: JString (required)
   ##                            : The name of the service endpoint policy.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_574278 = path.getOrDefault("resourceGroupName")
-  valid_574278 = validateParameter(valid_574278, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `serviceEndpointPolicyDefinitionName` field"
+  var valid_564178 = path.getOrDefault("serviceEndpointPolicyDefinitionName")
+  valid_564178 = validateParameter(valid_564178, JString, required = true,
                                  default = nil)
-  if valid_574278 != nil:
-    section.add "resourceGroupName", valid_574278
-  var valid_574279 = path.getOrDefault("serviceEndpointPolicyDefinitionName")
-  valid_574279 = validateParameter(valid_574279, JString, required = true,
+  if valid_564178 != nil:
+    section.add "serviceEndpointPolicyDefinitionName", valid_564178
+  var valid_564179 = path.getOrDefault("subscriptionId")
+  valid_564179 = validateParameter(valid_564179, JString, required = true,
                                  default = nil)
-  if valid_574279 != nil:
-    section.add "serviceEndpointPolicyDefinitionName", valid_574279
-  var valid_574280 = path.getOrDefault("subscriptionId")
-  valid_574280 = validateParameter(valid_574280, JString, required = true,
+  if valid_564179 != nil:
+    section.add "subscriptionId", valid_564179
+  var valid_564180 = path.getOrDefault("resourceGroupName")
+  valid_564180 = validateParameter(valid_564180, JString, required = true,
                                  default = nil)
-  if valid_574280 != nil:
-    section.add "subscriptionId", valid_574280
-  var valid_574281 = path.getOrDefault("serviceEndpointPolicyName")
-  valid_574281 = validateParameter(valid_574281, JString, required = true,
+  if valid_564180 != nil:
+    section.add "resourceGroupName", valid_564180
+  var valid_564181 = path.getOrDefault("serviceEndpointPolicyName")
+  valid_564181 = validateParameter(valid_564181, JString, required = true,
                                  default = nil)
-  if valid_574281 != nil:
-    section.add "serviceEndpointPolicyName", valid_574281
+  if valid_564181 != nil:
+    section.add "serviceEndpointPolicyName", valid_564181
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -991,11 +994,11 @@ proc validate_ServiceEndpointPolicyDefinitionsCreateOrUpdate_574276(
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574282 = query.getOrDefault("api-version")
-  valid_574282 = validateParameter(valid_574282, JString, required = true,
+  var valid_564182 = query.getOrDefault("api-version")
+  valid_564182 = validateParameter(valid_564182, JString, required = true,
                                  default = nil)
-  if valid_574282 != nil:
-    section.add "api-version", valid_574282
+  if valid_564182 != nil:
+    section.add "api-version", valid_564182
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1009,62 +1012,61 @@ proc validate_ServiceEndpointPolicyDefinitionsCreateOrUpdate_574276(
   if body != nil:
     result.add "body", body
 
-proc call*(call_574284: Call_ServiceEndpointPolicyDefinitionsCreateOrUpdate_574275;
+proc call*(call_564184: Call_ServiceEndpointPolicyDefinitionsCreateOrUpdate_564175;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Creates or updates a service endpoint policy definition in the specified service endpoint policy.
   ## 
-  let valid = call_574284.validator(path, query, header, formData, body)
-  let scheme = call_574284.pickScheme
+  let valid = call_564184.validator(path, query, header, formData, body)
+  let scheme = call_564184.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574284.url(scheme.get, call_574284.host, call_574284.base,
-                         call_574284.route, valid.getOrDefault("path"),
+  let url = call_564184.url(scheme.get, call_564184.host, call_564184.base,
+                         call_564184.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574284, url, valid)
+  result = hook(call_564184, url, valid)
 
-proc call*(call_574285: Call_ServiceEndpointPolicyDefinitionsCreateOrUpdate_574275;
-          resourceGroupName: string; apiVersion: string;
-          serviceEndpointPolicyDefinitionName: string; subscriptionId: string;
-          ServiceEndpointPolicyDefinitions: JsonNode;
-          serviceEndpointPolicyName: string): Recallable =
+proc call*(call_564185: Call_ServiceEndpointPolicyDefinitionsCreateOrUpdate_564175;
+          serviceEndpointPolicyDefinitionName: string; apiVersion: string;
+          ServiceEndpointPolicyDefinitions: JsonNode; subscriptionId: string;
+          resourceGroupName: string; serviceEndpointPolicyName: string): Recallable =
   ## serviceEndpointPolicyDefinitionsCreateOrUpdate
   ## Creates or updates a service endpoint policy definition in the specified service endpoint policy.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
-  ##   apiVersion: string (required)
-  ##             : Client API version.
   ##   serviceEndpointPolicyDefinitionName: string (required)
   ##                                      : The name of the service endpoint policy definition name.
-  ##   subscriptionId: string (required)
-  ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   apiVersion: string (required)
+  ##             : Client API version.
   ##   ServiceEndpointPolicyDefinitions: JObject (required)
   ##                                   : Parameters supplied to the create or update service endpoint policy operation.
+  ##   subscriptionId: string (required)
+  ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   serviceEndpointPolicyName: string (required)
   ##                            : The name of the service endpoint policy.
-  var path_574286 = newJObject()
-  var query_574287 = newJObject()
-  var body_574288 = newJObject()
-  add(path_574286, "resourceGroupName", newJString(resourceGroupName))
-  add(query_574287, "api-version", newJString(apiVersion))
-  add(path_574286, "serviceEndpointPolicyDefinitionName",
+  var path_564186 = newJObject()
+  var query_564187 = newJObject()
+  var body_564188 = newJObject()
+  add(path_564186, "serviceEndpointPolicyDefinitionName",
       newJString(serviceEndpointPolicyDefinitionName))
-  add(path_574286, "subscriptionId", newJString(subscriptionId))
+  add(query_564187, "api-version", newJString(apiVersion))
   if ServiceEndpointPolicyDefinitions != nil:
-    body_574288 = ServiceEndpointPolicyDefinitions
-  add(path_574286, "serviceEndpointPolicyName",
+    body_564188 = ServiceEndpointPolicyDefinitions
+  add(path_564186, "subscriptionId", newJString(subscriptionId))
+  add(path_564186, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564186, "serviceEndpointPolicyName",
       newJString(serviceEndpointPolicyName))
-  result = call_574285.call(path_574286, query_574287, nil, nil, body_574288)
+  result = call_564185.call(path_564186, query_564187, nil, nil, body_564188)
 
-var serviceEndpointPolicyDefinitionsCreateOrUpdate* = Call_ServiceEndpointPolicyDefinitionsCreateOrUpdate_574275(
+var serviceEndpointPolicyDefinitionsCreateOrUpdate* = Call_ServiceEndpointPolicyDefinitionsCreateOrUpdate_564175(
     name: "serviceEndpointPolicyDefinitionsCreateOrUpdate",
     meth: HttpMethod.HttpPut, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/serviceEndpointPolicies/{serviceEndpointPolicyName}/serviceEndpointPolicyDefinitions/{serviceEndpointPolicyDefinitionName}",
-    validator: validate_ServiceEndpointPolicyDefinitionsCreateOrUpdate_574276,
-    base: "", url: url_ServiceEndpointPolicyDefinitionsCreateOrUpdate_574277,
+    validator: validate_ServiceEndpointPolicyDefinitionsCreateOrUpdate_564176,
+    base: "", url: url_ServiceEndpointPolicyDefinitionsCreateOrUpdate_564177,
     schemes: {Scheme.Https})
 type
-  Call_ServiceEndpointPolicyDefinitionsGet_574263 = ref object of OpenApiRestCall_573641
-proc url_ServiceEndpointPolicyDefinitionsGet_574265(protocol: Scheme; host: string;
+  Call_ServiceEndpointPolicyDefinitionsGet_564163 = ref object of OpenApiRestCall_563539
+proc url_ServiceEndpointPolicyDefinitionsGet_564165(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1092,44 +1094,43 @@ proc url_ServiceEndpointPolicyDefinitionsGet_574265(protocol: Scheme; host: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ServiceEndpointPolicyDefinitionsGet_574264(path: JsonNode;
+proc validate_ServiceEndpointPolicyDefinitionsGet_564164(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Get the specified service endpoint policy definitions from service endpoint policy.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   serviceEndpointPolicyDefinitionName: JString (required)
   ##                                      : The name of the service endpoint policy definition name.
   ##   subscriptionId: JString (required)
   ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   ##   serviceEndpointPolicyName: JString (required)
   ##                            : The name of the service endpoint policy name.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_574266 = path.getOrDefault("resourceGroupName")
-  valid_574266 = validateParameter(valid_574266, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `serviceEndpointPolicyDefinitionName` field"
+  var valid_564166 = path.getOrDefault("serviceEndpointPolicyDefinitionName")
+  valid_564166 = validateParameter(valid_564166, JString, required = true,
                                  default = nil)
-  if valid_574266 != nil:
-    section.add "resourceGroupName", valid_574266
-  var valid_574267 = path.getOrDefault("serviceEndpointPolicyDefinitionName")
-  valid_574267 = validateParameter(valid_574267, JString, required = true,
+  if valid_564166 != nil:
+    section.add "serviceEndpointPolicyDefinitionName", valid_564166
+  var valid_564167 = path.getOrDefault("subscriptionId")
+  valid_564167 = validateParameter(valid_564167, JString, required = true,
                                  default = nil)
-  if valid_574267 != nil:
-    section.add "serviceEndpointPolicyDefinitionName", valid_574267
-  var valid_574268 = path.getOrDefault("subscriptionId")
-  valid_574268 = validateParameter(valid_574268, JString, required = true,
+  if valid_564167 != nil:
+    section.add "subscriptionId", valid_564167
+  var valid_564168 = path.getOrDefault("resourceGroupName")
+  valid_564168 = validateParameter(valid_564168, JString, required = true,
                                  default = nil)
-  if valid_574268 != nil:
-    section.add "subscriptionId", valid_574268
-  var valid_574269 = path.getOrDefault("serviceEndpointPolicyName")
-  valid_574269 = validateParameter(valid_574269, JString, required = true,
+  if valid_564168 != nil:
+    section.add "resourceGroupName", valid_564168
+  var valid_564169 = path.getOrDefault("serviceEndpointPolicyName")
+  valid_564169 = validateParameter(valid_564169, JString, required = true,
                                  default = nil)
-  if valid_574269 != nil:
-    section.add "serviceEndpointPolicyName", valid_574269
+  if valid_564169 != nil:
+    section.add "serviceEndpointPolicyName", valid_564169
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1137,11 +1138,11 @@ proc validate_ServiceEndpointPolicyDefinitionsGet_574264(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574270 = query.getOrDefault("api-version")
-  valid_574270 = validateParameter(valid_574270, JString, required = true,
+  var valid_564170 = query.getOrDefault("api-version")
+  valid_564170 = validateParameter(valid_564170, JString, required = true,
                                  default = nil)
-  if valid_574270 != nil:
-    section.add "api-version", valid_574270
+  if valid_564170 != nil:
+    section.add "api-version", valid_564170
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1150,55 +1151,55 @@ proc validate_ServiceEndpointPolicyDefinitionsGet_574264(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574271: Call_ServiceEndpointPolicyDefinitionsGet_574263;
+proc call*(call_564171: Call_ServiceEndpointPolicyDefinitionsGet_564163;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Get the specified service endpoint policy definitions from service endpoint policy.
   ## 
-  let valid = call_574271.validator(path, query, header, formData, body)
-  let scheme = call_574271.pickScheme
+  let valid = call_564171.validator(path, query, header, formData, body)
+  let scheme = call_564171.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574271.url(scheme.get, call_574271.host, call_574271.base,
-                         call_574271.route, valid.getOrDefault("path"),
+  let url = call_564171.url(scheme.get, call_564171.host, call_564171.base,
+                         call_564171.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574271, url, valid)
+  result = hook(call_564171, url, valid)
 
-proc call*(call_574272: Call_ServiceEndpointPolicyDefinitionsGet_574263;
-          resourceGroupName: string; apiVersion: string;
-          serviceEndpointPolicyDefinitionName: string; subscriptionId: string;
+proc call*(call_564172: Call_ServiceEndpointPolicyDefinitionsGet_564163;
+          serviceEndpointPolicyDefinitionName: string; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string;
           serviceEndpointPolicyName: string): Recallable =
   ## serviceEndpointPolicyDefinitionsGet
   ## Get the specified service endpoint policy definitions from service endpoint policy.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
-  ##   apiVersion: string (required)
-  ##             : Client API version.
   ##   serviceEndpointPolicyDefinitionName: string (required)
   ##                                      : The name of the service endpoint policy definition name.
+  ##   apiVersion: string (required)
+  ##             : Client API version.
   ##   subscriptionId: string (required)
   ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   serviceEndpointPolicyName: string (required)
   ##                            : The name of the service endpoint policy name.
-  var path_574273 = newJObject()
-  var query_574274 = newJObject()
-  add(path_574273, "resourceGroupName", newJString(resourceGroupName))
-  add(query_574274, "api-version", newJString(apiVersion))
-  add(path_574273, "serviceEndpointPolicyDefinitionName",
+  var path_564173 = newJObject()
+  var query_564174 = newJObject()
+  add(path_564173, "serviceEndpointPolicyDefinitionName",
       newJString(serviceEndpointPolicyDefinitionName))
-  add(path_574273, "subscriptionId", newJString(subscriptionId))
-  add(path_574273, "serviceEndpointPolicyName",
+  add(query_564174, "api-version", newJString(apiVersion))
+  add(path_564173, "subscriptionId", newJString(subscriptionId))
+  add(path_564173, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564173, "serviceEndpointPolicyName",
       newJString(serviceEndpointPolicyName))
-  result = call_574272.call(path_574273, query_574274, nil, nil, nil)
+  result = call_564172.call(path_564173, query_564174, nil, nil, nil)
 
-var serviceEndpointPolicyDefinitionsGet* = Call_ServiceEndpointPolicyDefinitionsGet_574263(
+var serviceEndpointPolicyDefinitionsGet* = Call_ServiceEndpointPolicyDefinitionsGet_564163(
     name: "serviceEndpointPolicyDefinitionsGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/serviceEndpointPolicies/{serviceEndpointPolicyName}/serviceEndpointPolicyDefinitions/{serviceEndpointPolicyDefinitionName}",
-    validator: validate_ServiceEndpointPolicyDefinitionsGet_574264, base: "",
-    url: url_ServiceEndpointPolicyDefinitionsGet_574265, schemes: {Scheme.Https})
+    validator: validate_ServiceEndpointPolicyDefinitionsGet_564164, base: "",
+    url: url_ServiceEndpointPolicyDefinitionsGet_564165, schemes: {Scheme.Https})
 type
-  Call_ServiceEndpointPolicyDefinitionsDelete_574289 = ref object of OpenApiRestCall_573641
-proc url_ServiceEndpointPolicyDefinitionsDelete_574291(protocol: Scheme;
+  Call_ServiceEndpointPolicyDefinitionsDelete_564189 = ref object of OpenApiRestCall_563539
+proc url_ServiceEndpointPolicyDefinitionsDelete_564191(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1226,44 +1227,43 @@ proc url_ServiceEndpointPolicyDefinitionsDelete_574291(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ServiceEndpointPolicyDefinitionsDelete_574290(path: JsonNode;
+proc validate_ServiceEndpointPolicyDefinitionsDelete_564190(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Deletes the specified ServiceEndpoint policy definitions.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   serviceEndpointPolicyDefinitionName: JString (required)
   ##                                      : The name of the service endpoint policy definition.
   ##   subscriptionId: JString (required)
   ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   ##   serviceEndpointPolicyName: JString (required)
   ##                            : The name of the Service Endpoint Policy.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_574292 = path.getOrDefault("resourceGroupName")
-  valid_574292 = validateParameter(valid_574292, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `serviceEndpointPolicyDefinitionName` field"
+  var valid_564192 = path.getOrDefault("serviceEndpointPolicyDefinitionName")
+  valid_564192 = validateParameter(valid_564192, JString, required = true,
                                  default = nil)
-  if valid_574292 != nil:
-    section.add "resourceGroupName", valid_574292
-  var valid_574293 = path.getOrDefault("serviceEndpointPolicyDefinitionName")
-  valid_574293 = validateParameter(valid_574293, JString, required = true,
+  if valid_564192 != nil:
+    section.add "serviceEndpointPolicyDefinitionName", valid_564192
+  var valid_564193 = path.getOrDefault("subscriptionId")
+  valid_564193 = validateParameter(valid_564193, JString, required = true,
                                  default = nil)
-  if valid_574293 != nil:
-    section.add "serviceEndpointPolicyDefinitionName", valid_574293
-  var valid_574294 = path.getOrDefault("subscriptionId")
-  valid_574294 = validateParameter(valid_574294, JString, required = true,
+  if valid_564193 != nil:
+    section.add "subscriptionId", valid_564193
+  var valid_564194 = path.getOrDefault("resourceGroupName")
+  valid_564194 = validateParameter(valid_564194, JString, required = true,
                                  default = nil)
-  if valid_574294 != nil:
-    section.add "subscriptionId", valid_574294
-  var valid_574295 = path.getOrDefault("serviceEndpointPolicyName")
-  valid_574295 = validateParameter(valid_574295, JString, required = true,
+  if valid_564194 != nil:
+    section.add "resourceGroupName", valid_564194
+  var valid_564195 = path.getOrDefault("serviceEndpointPolicyName")
+  valid_564195 = validateParameter(valid_564195, JString, required = true,
                                  default = nil)
-  if valid_574295 != nil:
-    section.add "serviceEndpointPolicyName", valid_574295
+  if valid_564195 != nil:
+    section.add "serviceEndpointPolicyName", valid_564195
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1271,11 +1271,11 @@ proc validate_ServiceEndpointPolicyDefinitionsDelete_574290(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574296 = query.getOrDefault("api-version")
-  valid_574296 = validateParameter(valid_574296, JString, required = true,
+  var valid_564196 = query.getOrDefault("api-version")
+  valid_564196 = validateParameter(valid_564196, JString, required = true,
                                  default = nil)
-  if valid_574296 != nil:
-    section.add "api-version", valid_574296
+  if valid_564196 != nil:
+    section.add "api-version", valid_564196
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1284,52 +1284,52 @@ proc validate_ServiceEndpointPolicyDefinitionsDelete_574290(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574297: Call_ServiceEndpointPolicyDefinitionsDelete_574289;
+proc call*(call_564197: Call_ServiceEndpointPolicyDefinitionsDelete_564189;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Deletes the specified ServiceEndpoint policy definitions.
   ## 
-  let valid = call_574297.validator(path, query, header, formData, body)
-  let scheme = call_574297.pickScheme
+  let valid = call_564197.validator(path, query, header, formData, body)
+  let scheme = call_564197.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574297.url(scheme.get, call_574297.host, call_574297.base,
-                         call_574297.route, valid.getOrDefault("path"),
+  let url = call_564197.url(scheme.get, call_564197.host, call_564197.base,
+                         call_564197.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574297, url, valid)
+  result = hook(call_564197, url, valid)
 
-proc call*(call_574298: Call_ServiceEndpointPolicyDefinitionsDelete_574289;
-          resourceGroupName: string; apiVersion: string;
-          serviceEndpointPolicyDefinitionName: string; subscriptionId: string;
+proc call*(call_564198: Call_ServiceEndpointPolicyDefinitionsDelete_564189;
+          serviceEndpointPolicyDefinitionName: string; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string;
           serviceEndpointPolicyName: string): Recallable =
   ## serviceEndpointPolicyDefinitionsDelete
   ## Deletes the specified ServiceEndpoint policy definitions.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
-  ##   apiVersion: string (required)
-  ##             : Client API version.
   ##   serviceEndpointPolicyDefinitionName: string (required)
   ##                                      : The name of the service endpoint policy definition.
+  ##   apiVersion: string (required)
+  ##             : Client API version.
   ##   subscriptionId: string (required)
   ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   serviceEndpointPolicyName: string (required)
   ##                            : The name of the Service Endpoint Policy.
-  var path_574299 = newJObject()
-  var query_574300 = newJObject()
-  add(path_574299, "resourceGroupName", newJString(resourceGroupName))
-  add(query_574300, "api-version", newJString(apiVersion))
-  add(path_574299, "serviceEndpointPolicyDefinitionName",
+  var path_564199 = newJObject()
+  var query_564200 = newJObject()
+  add(path_564199, "serviceEndpointPolicyDefinitionName",
       newJString(serviceEndpointPolicyDefinitionName))
-  add(path_574299, "subscriptionId", newJString(subscriptionId))
-  add(path_574299, "serviceEndpointPolicyName",
+  add(query_564200, "api-version", newJString(apiVersion))
+  add(path_564199, "subscriptionId", newJString(subscriptionId))
+  add(path_564199, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564199, "serviceEndpointPolicyName",
       newJString(serviceEndpointPolicyName))
-  result = call_574298.call(path_574299, query_574300, nil, nil, nil)
+  result = call_564198.call(path_564199, query_564200, nil, nil, nil)
 
-var serviceEndpointPolicyDefinitionsDelete* = Call_ServiceEndpointPolicyDefinitionsDelete_574289(
+var serviceEndpointPolicyDefinitionsDelete* = Call_ServiceEndpointPolicyDefinitionsDelete_564189(
     name: "serviceEndpointPolicyDefinitionsDelete", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/serviceEndpointPolicies/{serviceEndpointPolicyName}/serviceEndpointPolicyDefinitions/{serviceEndpointPolicyDefinitionName}",
-    validator: validate_ServiceEndpointPolicyDefinitionsDelete_574290, base: "",
-    url: url_ServiceEndpointPolicyDefinitionsDelete_574291,
+    validator: validate_ServiceEndpointPolicyDefinitionsDelete_564190, base: "",
+    url: url_ServiceEndpointPolicyDefinitionsDelete_564191,
     schemes: {Scheme.Https})
 export
   rest

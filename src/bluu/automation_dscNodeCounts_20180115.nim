@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, httpcore
 
 ## auto-generated via openapi macro
 ## title: AutomationManagement
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_596457 = ref object of OpenApiRestCall
+  OpenApiRestCall_563555 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_596457](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563555](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_596457): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563555): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,8 +107,8 @@ const
   macServiceName = "automation-dscNodeCounts"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_NodeCountInformationGet_596679 = ref object of OpenApiRestCall_596457
-proc url_NodeCountInformationGet_596681(protocol: Scheme; host: string; base: string;
+  Call_NodeCountInformationGet_563777 = ref object of OpenApiRestCall_563555
+proc url_NodeCountInformationGet_563779(protocol: Scheme; host: string; base: string;
                                        route: string; path: JsonNode;
                                        query: JsonNode): Uri =
   result.scheme = $protocol
@@ -132,7 +136,7 @@ proc url_NodeCountInformationGet_596681(protocol: Scheme; host: string; base: st
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_NodeCountInformationGet_596680(path: JsonNode; query: JsonNode;
+proc validate_NodeCountInformationGet_563778(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Retrieve counts for Dsc Nodes.
   ## 
@@ -142,34 +146,34 @@ proc validate_NodeCountInformationGet_596680(path: JsonNode; query: JsonNode;
   ## parameters in `path` object:
   ##   automationAccountName: JString (required)
   ##                        : The name of the automation account.
-  ##   resourceGroupName: JString (required)
-  ##                    : Name of an Azure Resource group.
-  ##   subscriptionId: JString (required)
-  ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   countType: JString (required)
   ##            : The type of counts to retrieve
+  ##   subscriptionId: JString (required)
+  ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : Name of an Azure Resource group.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `automationAccountName` field"
-  var valid_596854 = path.getOrDefault("automationAccountName")
-  valid_596854 = validateParameter(valid_596854, JString, required = true,
+  var valid_563954 = path.getOrDefault("automationAccountName")
+  valid_563954 = validateParameter(valid_563954, JString, required = true,
                                  default = nil)
-  if valid_596854 != nil:
-    section.add "automationAccountName", valid_596854
-  var valid_596855 = path.getOrDefault("resourceGroupName")
-  valid_596855 = validateParameter(valid_596855, JString, required = true,
-                                 default = nil)
-  if valid_596855 != nil:
-    section.add "resourceGroupName", valid_596855
-  var valid_596856 = path.getOrDefault("subscriptionId")
-  valid_596856 = validateParameter(valid_596856, JString, required = true,
-                                 default = nil)
-  if valid_596856 != nil:
-    section.add "subscriptionId", valid_596856
-  var valid_596870 = path.getOrDefault("countType")
-  valid_596870 = validateParameter(valid_596870, JString, required = true,
+  if valid_563954 != nil:
+    section.add "automationAccountName", valid_563954
+  var valid_563968 = path.getOrDefault("countType")
+  valid_563968 = validateParameter(valid_563968, JString, required = true,
                                  default = newJString("status"))
-  if valid_596870 != nil:
-    section.add "countType", valid_596870
+  if valid_563968 != nil:
+    section.add "countType", valid_563968
+  var valid_563969 = path.getOrDefault("subscriptionId")
+  valid_563969 = validateParameter(valid_563969, JString, required = true,
+                                 default = nil)
+  if valid_563969 != nil:
+    section.add "subscriptionId", valid_563969
+  var valid_563970 = path.getOrDefault("resourceGroupName")
+  valid_563970 = validateParameter(valid_563970, JString, required = true,
+                                 default = nil)
+  if valid_563970 != nil:
+    section.add "resourceGroupName", valid_563970
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -177,11 +181,11 @@ proc validate_NodeCountInformationGet_596680(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_596871 = query.getOrDefault("api-version")
-  valid_596871 = validateParameter(valid_596871, JString, required = true,
+  var valid_563971 = query.getOrDefault("api-version")
+  valid_563971 = validateParameter(valid_563971, JString, required = true,
                                  default = nil)
-  if valid_596871 != nil:
-    section.add "api-version", valid_596871
+  if valid_563971 != nil:
+    section.add "api-version", valid_563971
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -190,50 +194,50 @@ proc validate_NodeCountInformationGet_596680(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_596894: Call_NodeCountInformationGet_596679; path: JsonNode;
+proc call*(call_563994: Call_NodeCountInformationGet_563777; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Retrieve counts for Dsc Nodes.
   ## 
   ## http://aka.ms/azureautomationsdk/nodecounts
-  let valid = call_596894.validator(path, query, header, formData, body)
-  let scheme = call_596894.pickScheme
+  let valid = call_563994.validator(path, query, header, formData, body)
+  let scheme = call_563994.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_596894.url(scheme.get, call_596894.host, call_596894.base,
-                         call_596894.route, valid.getOrDefault("path"),
+  let url = call_563994.url(scheme.get, call_563994.host, call_563994.base,
+                         call_563994.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_596894, url, valid)
+  result = hook(call_563994, url, valid)
 
-proc call*(call_596965: Call_NodeCountInformationGet_596679;
-          automationAccountName: string; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; countType: string = "status"): Recallable =
+proc call*(call_564065: Call_NodeCountInformationGet_563777; apiVersion: string;
+          automationAccountName: string; subscriptionId: string;
+          resourceGroupName: string; countType: string = "status"): Recallable =
   ## nodeCountInformationGet
   ## Retrieve counts for Dsc Nodes.
   ## http://aka.ms/azureautomationsdk/nodecounts
-  ##   automationAccountName: string (required)
-  ##                        : The name of the automation account.
-  ##   resourceGroupName: string (required)
-  ##                    : Name of an Azure Resource group.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
-  ##   subscriptionId: string (required)
-  ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   automationAccountName: string (required)
+  ##                        : The name of the automation account.
   ##   countType: string (required)
   ##            : The type of counts to retrieve
-  var path_596966 = newJObject()
-  var query_596968 = newJObject()
-  add(path_596966, "automationAccountName", newJString(automationAccountName))
-  add(path_596966, "resourceGroupName", newJString(resourceGroupName))
-  add(query_596968, "api-version", newJString(apiVersion))
-  add(path_596966, "subscriptionId", newJString(subscriptionId))
-  add(path_596966, "countType", newJString(countType))
-  result = call_596965.call(path_596966, query_596968, nil, nil, nil)
+  ##   subscriptionId: string (required)
+  ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : Name of an Azure Resource group.
+  var path_564066 = newJObject()
+  var query_564068 = newJObject()
+  add(query_564068, "api-version", newJString(apiVersion))
+  add(path_564066, "automationAccountName", newJString(automationAccountName))
+  add(path_564066, "countType", newJString(countType))
+  add(path_564066, "subscriptionId", newJString(subscriptionId))
+  add(path_564066, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564065.call(path_564066, query_564068, nil, nil, nil)
 
-var nodeCountInformationGet* = Call_NodeCountInformationGet_596679(
+var nodeCountInformationGet* = Call_NodeCountInformationGet_563777(
     name: "nodeCountInformationGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Automation/automationAccounts/{automationAccountName}/nodecounts/{countType}",
-    validator: validate_NodeCountInformationGet_596680, base: "",
-    url: url_NodeCountInformationGet_596681, schemes: {Scheme.Https})
+    validator: validate_NodeCountInformationGet_563778, base: "",
+    url: url_NodeCountInformationGet_563779, schemes: {Scheme.Https})
 export
   rest
 

@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, httpcore
 
 ## auto-generated via openapi macro
 ## title: NetworkManagementClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_567641 = ref object of OpenApiRestCall
+  OpenApiRestCall_563539 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_567641](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563539](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_567641): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563539): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,8 +107,8 @@ const
   macServiceName = "network-virtualNetwork"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_VirtualNetworksListAll_567863 = ref object of OpenApiRestCall_567641
-proc url_VirtualNetworksListAll_567865(protocol: Scheme; host: string; base: string;
+  Call_VirtualNetworksListAll_563761 = ref object of OpenApiRestCall_563539
+proc url_VirtualNetworksListAll_563763(protocol: Scheme; host: string; base: string;
                                       route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -121,7 +125,7 @@ proc url_VirtualNetworksListAll_567865(protocol: Scheme; host: string; base: str
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_VirtualNetworksListAll_567864(path: JsonNode; query: JsonNode;
+proc validate_VirtualNetworksListAll_563762(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets all virtual networks in a subscription.
   ## 
@@ -133,11 +137,11 @@ proc validate_VirtualNetworksListAll_567864(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_568038 = path.getOrDefault("subscriptionId")
-  valid_568038 = validateParameter(valid_568038, JString, required = true,
+  var valid_563938 = path.getOrDefault("subscriptionId")
+  valid_563938 = validateParameter(valid_563938, JString, required = true,
                                  default = nil)
-  if valid_568038 != nil:
-    section.add "subscriptionId", valid_568038
+  if valid_563938 != nil:
+    section.add "subscriptionId", valid_563938
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -145,11 +149,11 @@ proc validate_VirtualNetworksListAll_567864(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568039 = query.getOrDefault("api-version")
-  valid_568039 = validateParameter(valid_568039, JString, required = true,
+  var valid_563939 = query.getOrDefault("api-version")
+  valid_563939 = validateParameter(valid_563939, JString, required = true,
                                  default = nil)
-  if valid_568039 != nil:
-    section.add "api-version", valid_568039
+  if valid_563939 != nil:
+    section.add "api-version", valid_563939
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -158,20 +162,20 @@ proc validate_VirtualNetworksListAll_567864(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568062: Call_VirtualNetworksListAll_567863; path: JsonNode;
+proc call*(call_563962: Call_VirtualNetworksListAll_563761; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets all virtual networks in a subscription.
   ## 
-  let valid = call_568062.validator(path, query, header, formData, body)
-  let scheme = call_568062.pickScheme
+  let valid = call_563962.validator(path, query, header, formData, body)
+  let scheme = call_563962.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568062.url(scheme.get, call_568062.host, call_568062.base,
-                         call_568062.route, valid.getOrDefault("path"),
+  let url = call_563962.url(scheme.get, call_563962.host, call_563962.base,
+                         call_563962.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568062, url, valid)
+  result = hook(call_563962, url, valid)
 
-proc call*(call_568133: Call_VirtualNetworksListAll_567863; apiVersion: string;
+proc call*(call_564033: Call_VirtualNetworksListAll_563761; apiVersion: string;
           subscriptionId: string): Recallable =
   ## virtualNetworksListAll
   ## Gets all virtual networks in a subscription.
@@ -179,20 +183,20 @@ proc call*(call_568133: Call_VirtualNetworksListAll_567863; apiVersion: string;
   ##             : Client API version.
   ##   subscriptionId: string (required)
   ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_568134 = newJObject()
-  var query_568136 = newJObject()
-  add(query_568136, "api-version", newJString(apiVersion))
-  add(path_568134, "subscriptionId", newJString(subscriptionId))
-  result = call_568133.call(path_568134, query_568136, nil, nil, nil)
+  var path_564034 = newJObject()
+  var query_564036 = newJObject()
+  add(query_564036, "api-version", newJString(apiVersion))
+  add(path_564034, "subscriptionId", newJString(subscriptionId))
+  result = call_564033.call(path_564034, query_564036, nil, nil, nil)
 
-var virtualNetworksListAll* = Call_VirtualNetworksListAll_567863(
+var virtualNetworksListAll* = Call_VirtualNetworksListAll_563761(
     name: "virtualNetworksListAll", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Network/virtualnetworks",
-    validator: validate_VirtualNetworksListAll_567864, base: "",
-    url: url_VirtualNetworksListAll_567865, schemes: {Scheme.Https})
+    validator: validate_VirtualNetworksListAll_563762, base: "",
+    url: url_VirtualNetworksListAll_563763, schemes: {Scheme.Https})
 type
-  Call_VirtualNetworksCreateOrUpdate_568188 = ref object of OpenApiRestCall_567641
-proc url_VirtualNetworksCreateOrUpdate_568190(protocol: Scheme; host: string;
+  Call_VirtualNetworksCreateOrUpdate_564088 = ref object of OpenApiRestCall_563539
+proc url_VirtualNetworksCreateOrUpdate_564090(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -216,37 +220,37 @@ proc url_VirtualNetworksCreateOrUpdate_568190(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_VirtualNetworksCreateOrUpdate_568189(path: JsonNode; query: JsonNode;
+proc validate_VirtualNetworksCreateOrUpdate_564089(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Creates or updates a virtual network in the specified resource group.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   subscriptionId: JString (required)
   ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   ##   virtualNetworkName: JString (required)
   ##                     : The name of the virtual network.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568208 = path.getOrDefault("resourceGroupName")
-  valid_568208 = validateParameter(valid_568208, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564108 = path.getOrDefault("subscriptionId")
+  valid_564108 = validateParameter(valid_564108, JString, required = true,
                                  default = nil)
-  if valid_568208 != nil:
-    section.add "resourceGroupName", valid_568208
-  var valid_568209 = path.getOrDefault("subscriptionId")
-  valid_568209 = validateParameter(valid_568209, JString, required = true,
+  if valid_564108 != nil:
+    section.add "subscriptionId", valid_564108
+  var valid_564109 = path.getOrDefault("resourceGroupName")
+  valid_564109 = validateParameter(valid_564109, JString, required = true,
                                  default = nil)
-  if valid_568209 != nil:
-    section.add "subscriptionId", valid_568209
-  var valid_568210 = path.getOrDefault("virtualNetworkName")
-  valid_568210 = validateParameter(valid_568210, JString, required = true,
+  if valid_564109 != nil:
+    section.add "resourceGroupName", valid_564109
+  var valid_564110 = path.getOrDefault("virtualNetworkName")
+  valid_564110 = validateParameter(valid_564110, JString, required = true,
                                  default = nil)
-  if valid_568210 != nil:
-    section.add "virtualNetworkName", valid_568210
+  if valid_564110 != nil:
+    section.add "virtualNetworkName", valid_564110
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -254,11 +258,11 @@ proc validate_VirtualNetworksCreateOrUpdate_568189(path: JsonNode; query: JsonNo
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568211 = query.getOrDefault("api-version")
-  valid_568211 = validateParameter(valid_568211, JString, required = true,
+  var valid_564111 = query.getOrDefault("api-version")
+  valid_564111 = validateParameter(valid_564111, JString, required = true,
                                  default = nil)
-  if valid_568211 != nil:
-    section.add "api-version", valid_568211
+  if valid_564111 != nil:
+    section.add "api-version", valid_564111
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -272,53 +276,53 @@ proc validate_VirtualNetworksCreateOrUpdate_568189(path: JsonNode; query: JsonNo
   if body != nil:
     result.add "body", body
 
-proc call*(call_568213: Call_VirtualNetworksCreateOrUpdate_568188; path: JsonNode;
+proc call*(call_564113: Call_VirtualNetworksCreateOrUpdate_564088; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Creates or updates a virtual network in the specified resource group.
   ## 
-  let valid = call_568213.validator(path, query, header, formData, body)
-  let scheme = call_568213.pickScheme
+  let valid = call_564113.validator(path, query, header, formData, body)
+  let scheme = call_564113.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568213.url(scheme.get, call_568213.host, call_568213.base,
-                         call_568213.route, valid.getOrDefault("path"),
+  let url = call_564113.url(scheme.get, call_564113.host, call_564113.base,
+                         call_564113.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568213, url, valid)
+  result = hook(call_564113, url, valid)
 
-proc call*(call_568214: Call_VirtualNetworksCreateOrUpdate_568188;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
+proc call*(call_564114: Call_VirtualNetworksCreateOrUpdate_564088;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string;
           virtualNetworkName: string; parameters: JsonNode): Recallable =
   ## virtualNetworksCreateOrUpdate
   ## Creates or updates a virtual network in the specified resource group.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client API version.
   ##   subscriptionId: string (required)
   ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   virtualNetworkName: string (required)
   ##                     : The name of the virtual network.
   ##   parameters: JObject (required)
   ##             : Parameters supplied to the create or update virtual network operation
-  var path_568215 = newJObject()
-  var query_568216 = newJObject()
-  var body_568217 = newJObject()
-  add(path_568215, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568216, "api-version", newJString(apiVersion))
-  add(path_568215, "subscriptionId", newJString(subscriptionId))
-  add(path_568215, "virtualNetworkName", newJString(virtualNetworkName))
+  var path_564115 = newJObject()
+  var query_564116 = newJObject()
+  var body_564117 = newJObject()
+  add(query_564116, "api-version", newJString(apiVersion))
+  add(path_564115, "subscriptionId", newJString(subscriptionId))
+  add(path_564115, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564115, "virtualNetworkName", newJString(virtualNetworkName))
   if parameters != nil:
-    body_568217 = parameters
-  result = call_568214.call(path_568215, query_568216, nil, nil, body_568217)
+    body_564117 = parameters
+  result = call_564114.call(path_564115, query_564116, nil, nil, body_564117)
 
-var virtualNetworksCreateOrUpdate* = Call_VirtualNetworksCreateOrUpdate_568188(
+var virtualNetworksCreateOrUpdate* = Call_VirtualNetworksCreateOrUpdate_564088(
     name: "virtualNetworksCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/virtualNetworks/{virtualNetworkName}",
-    validator: validate_VirtualNetworksCreateOrUpdate_568189, base: "",
-    url: url_VirtualNetworksCreateOrUpdate_568190, schemes: {Scheme.Https})
+    validator: validate_VirtualNetworksCreateOrUpdate_564089, base: "",
+    url: url_VirtualNetworksCreateOrUpdate_564090, schemes: {Scheme.Https})
 type
-  Call_VirtualNetworksGet_568175 = ref object of OpenApiRestCall_567641
-proc url_VirtualNetworksGet_568177(protocol: Scheme; host: string; base: string;
+  Call_VirtualNetworksGet_564075 = ref object of OpenApiRestCall_563539
+proc url_VirtualNetworksGet_564077(protocol: Scheme; host: string; base: string;
                                   route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -342,7 +346,7 @@ proc url_VirtualNetworksGet_568177(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_VirtualNetworksGet_568176(path: JsonNode; query: JsonNode;
+proc validate_VirtualNetworksGet_564076(path: JsonNode; query: JsonNode;
                                        header: JsonNode; formData: JsonNode;
                                        body: JsonNode): JsonNode =
   ## Gets the specified virtual network by resource group.
@@ -350,30 +354,30 @@ proc validate_VirtualNetworksGet_568176(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   subscriptionId: JString (required)
   ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   ##   virtualNetworkName: JString (required)
   ##                     : The name of the virtual network.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568179 = path.getOrDefault("resourceGroupName")
-  valid_568179 = validateParameter(valid_568179, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564079 = path.getOrDefault("subscriptionId")
+  valid_564079 = validateParameter(valid_564079, JString, required = true,
                                  default = nil)
-  if valid_568179 != nil:
-    section.add "resourceGroupName", valid_568179
-  var valid_568180 = path.getOrDefault("subscriptionId")
-  valid_568180 = validateParameter(valid_568180, JString, required = true,
+  if valid_564079 != nil:
+    section.add "subscriptionId", valid_564079
+  var valid_564080 = path.getOrDefault("resourceGroupName")
+  valid_564080 = validateParameter(valid_564080, JString, required = true,
                                  default = nil)
-  if valid_568180 != nil:
-    section.add "subscriptionId", valid_568180
-  var valid_568181 = path.getOrDefault("virtualNetworkName")
-  valid_568181 = validateParameter(valid_568181, JString, required = true,
+  if valid_564080 != nil:
+    section.add "resourceGroupName", valid_564080
+  var valid_564081 = path.getOrDefault("virtualNetworkName")
+  valid_564081 = validateParameter(valid_564081, JString, required = true,
                                  default = nil)
-  if valid_568181 != nil:
-    section.add "virtualNetworkName", valid_568181
+  if valid_564081 != nil:
+    section.add "virtualNetworkName", valid_564081
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -383,16 +387,16 @@ proc validate_VirtualNetworksGet_568176(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568182 = query.getOrDefault("api-version")
-  valid_568182 = validateParameter(valid_568182, JString, required = true,
+  var valid_564082 = query.getOrDefault("api-version")
+  valid_564082 = validateParameter(valid_564082, JString, required = true,
                                  default = nil)
-  if valid_568182 != nil:
-    section.add "api-version", valid_568182
-  var valid_568183 = query.getOrDefault("$expand")
-  valid_568183 = validateParameter(valid_568183, JString, required = false,
+  if valid_564082 != nil:
+    section.add "api-version", valid_564082
+  var valid_564083 = query.getOrDefault("$expand")
+  valid_564083 = validateParameter(valid_564083, JString, required = false,
                                  default = nil)
-  if valid_568183 != nil:
-    section.add "$expand", valid_568183
+  if valid_564083 != nil:
+    section.add "$expand", valid_564083
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -401,51 +405,51 @@ proc validate_VirtualNetworksGet_568176(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568184: Call_VirtualNetworksGet_568175; path: JsonNode;
+proc call*(call_564084: Call_VirtualNetworksGet_564075; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the specified virtual network by resource group.
   ## 
-  let valid = call_568184.validator(path, query, header, formData, body)
-  let scheme = call_568184.pickScheme
+  let valid = call_564084.validator(path, query, header, formData, body)
+  let scheme = call_564084.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568184.url(scheme.get, call_568184.host, call_568184.base,
-                         call_568184.route, valid.getOrDefault("path"),
+  let url = call_564084.url(scheme.get, call_564084.host, call_564084.base,
+                         call_564084.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568184, url, valid)
+  result = hook(call_564084, url, valid)
 
-proc call*(call_568185: Call_VirtualNetworksGet_568175; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; virtualNetworkName: string;
-          Expand: string = ""): Recallable =
+proc call*(call_564085: Call_VirtualNetworksGet_564075; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string;
+          virtualNetworkName: string; Expand: string = ""): Recallable =
   ## virtualNetworksGet
   ## Gets the specified virtual network by resource group.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client API version.
   ##   Expand: string
   ##         : Expands referenced resources.
   ##   subscriptionId: string (required)
   ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   virtualNetworkName: string (required)
   ##                     : The name of the virtual network.
-  var path_568186 = newJObject()
-  var query_568187 = newJObject()
-  add(path_568186, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568187, "api-version", newJString(apiVersion))
-  add(query_568187, "$expand", newJString(Expand))
-  add(path_568186, "subscriptionId", newJString(subscriptionId))
-  add(path_568186, "virtualNetworkName", newJString(virtualNetworkName))
-  result = call_568185.call(path_568186, query_568187, nil, nil, nil)
+  var path_564086 = newJObject()
+  var query_564087 = newJObject()
+  add(query_564087, "api-version", newJString(apiVersion))
+  add(query_564087, "$expand", newJString(Expand))
+  add(path_564086, "subscriptionId", newJString(subscriptionId))
+  add(path_564086, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564086, "virtualNetworkName", newJString(virtualNetworkName))
+  result = call_564085.call(path_564086, query_564087, nil, nil, nil)
 
-var virtualNetworksGet* = Call_VirtualNetworksGet_568175(
+var virtualNetworksGet* = Call_VirtualNetworksGet_564075(
     name: "virtualNetworksGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/virtualNetworks/{virtualNetworkName}",
-    validator: validate_VirtualNetworksGet_568176, base: "",
-    url: url_VirtualNetworksGet_568177, schemes: {Scheme.Https})
+    validator: validate_VirtualNetworksGet_564076, base: "",
+    url: url_VirtualNetworksGet_564077, schemes: {Scheme.Https})
 type
-  Call_VirtualNetworksDelete_568218 = ref object of OpenApiRestCall_567641
-proc url_VirtualNetworksDelete_568220(protocol: Scheme; host: string; base: string;
+  Call_VirtualNetworksDelete_564118 = ref object of OpenApiRestCall_563539
+proc url_VirtualNetworksDelete_564120(protocol: Scheme; host: string; base: string;
                                      route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -469,37 +473,37 @@ proc url_VirtualNetworksDelete_568220(protocol: Scheme; host: string; base: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_VirtualNetworksDelete_568219(path: JsonNode; query: JsonNode;
+proc validate_VirtualNetworksDelete_564119(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Deletes the specified virtual network.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   subscriptionId: JString (required)
   ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   ##   virtualNetworkName: JString (required)
   ##                     : The name of the virtual network.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568221 = path.getOrDefault("resourceGroupName")
-  valid_568221 = validateParameter(valid_568221, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564121 = path.getOrDefault("subscriptionId")
+  valid_564121 = validateParameter(valid_564121, JString, required = true,
                                  default = nil)
-  if valid_568221 != nil:
-    section.add "resourceGroupName", valid_568221
-  var valid_568222 = path.getOrDefault("subscriptionId")
-  valid_568222 = validateParameter(valid_568222, JString, required = true,
+  if valid_564121 != nil:
+    section.add "subscriptionId", valid_564121
+  var valid_564122 = path.getOrDefault("resourceGroupName")
+  valid_564122 = validateParameter(valid_564122, JString, required = true,
                                  default = nil)
-  if valid_568222 != nil:
-    section.add "subscriptionId", valid_568222
-  var valid_568223 = path.getOrDefault("virtualNetworkName")
-  valid_568223 = validateParameter(valid_568223, JString, required = true,
+  if valid_564122 != nil:
+    section.add "resourceGroupName", valid_564122
+  var valid_564123 = path.getOrDefault("virtualNetworkName")
+  valid_564123 = validateParameter(valid_564123, JString, required = true,
                                  default = nil)
-  if valid_568223 != nil:
-    section.add "virtualNetworkName", valid_568223
+  if valid_564123 != nil:
+    section.add "virtualNetworkName", valid_564123
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -507,11 +511,11 @@ proc validate_VirtualNetworksDelete_568219(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568224 = query.getOrDefault("api-version")
-  valid_568224 = validateParameter(valid_568224, JString, required = true,
+  var valid_564124 = query.getOrDefault("api-version")
+  valid_564124 = validateParameter(valid_564124, JString, required = true,
                                  default = nil)
-  if valid_568224 != nil:
-    section.add "api-version", valid_568224
+  if valid_564124 != nil:
+    section.add "api-version", valid_564124
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -520,48 +524,48 @@ proc validate_VirtualNetworksDelete_568219(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568225: Call_VirtualNetworksDelete_568218; path: JsonNode;
+proc call*(call_564125: Call_VirtualNetworksDelete_564118; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes the specified virtual network.
   ## 
-  let valid = call_568225.validator(path, query, header, formData, body)
-  let scheme = call_568225.pickScheme
+  let valid = call_564125.validator(path, query, header, formData, body)
+  let scheme = call_564125.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568225.url(scheme.get, call_568225.host, call_568225.base,
-                         call_568225.route, valid.getOrDefault("path"),
+  let url = call_564125.url(scheme.get, call_564125.host, call_564125.base,
+                         call_564125.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568225, url, valid)
+  result = hook(call_564125, url, valid)
 
-proc call*(call_568226: Call_VirtualNetworksDelete_568218;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
+proc call*(call_564126: Call_VirtualNetworksDelete_564118; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string;
           virtualNetworkName: string): Recallable =
   ## virtualNetworksDelete
   ## Deletes the specified virtual network.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client API version.
   ##   subscriptionId: string (required)
   ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   virtualNetworkName: string (required)
   ##                     : The name of the virtual network.
-  var path_568227 = newJObject()
-  var query_568228 = newJObject()
-  add(path_568227, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568228, "api-version", newJString(apiVersion))
-  add(path_568227, "subscriptionId", newJString(subscriptionId))
-  add(path_568227, "virtualNetworkName", newJString(virtualNetworkName))
-  result = call_568226.call(path_568227, query_568228, nil, nil, nil)
+  var path_564127 = newJObject()
+  var query_564128 = newJObject()
+  add(query_564128, "api-version", newJString(apiVersion))
+  add(path_564127, "subscriptionId", newJString(subscriptionId))
+  add(path_564127, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564127, "virtualNetworkName", newJString(virtualNetworkName))
+  result = call_564126.call(path_564127, query_564128, nil, nil, nil)
 
-var virtualNetworksDelete* = Call_VirtualNetworksDelete_568218(
+var virtualNetworksDelete* = Call_VirtualNetworksDelete_564118(
     name: "virtualNetworksDelete", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/virtualNetworks/{virtualNetworkName}",
-    validator: validate_VirtualNetworksDelete_568219, base: "",
-    url: url_VirtualNetworksDelete_568220, schemes: {Scheme.Https})
+    validator: validate_VirtualNetworksDelete_564119, base: "",
+    url: url_VirtualNetworksDelete_564120, schemes: {Scheme.Https})
 type
-  Call_VirtualNetworksList_568229 = ref object of OpenApiRestCall_567641
-proc url_VirtualNetworksList_568231(protocol: Scheme; host: string; base: string;
+  Call_VirtualNetworksList_564129 = ref object of OpenApiRestCall_563539
+proc url_VirtualNetworksList_564131(protocol: Scheme; host: string; base: string;
                                    route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -582,7 +586,7 @@ proc url_VirtualNetworksList_568231(protocol: Scheme; host: string; base: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_VirtualNetworksList_568230(path: JsonNode; query: JsonNode;
+proc validate_VirtualNetworksList_564130(path: JsonNode; query: JsonNode;
                                         header: JsonNode; formData: JsonNode;
                                         body: JsonNode): JsonNode =
   ## Gets all virtual networks in a resource group.
@@ -590,23 +594,23 @@ proc validate_VirtualNetworksList_568230(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   subscriptionId: JString (required)
   ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568232 = path.getOrDefault("resourceGroupName")
-  valid_568232 = validateParameter(valid_568232, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564132 = path.getOrDefault("subscriptionId")
+  valid_564132 = validateParameter(valid_564132, JString, required = true,
                                  default = nil)
-  if valid_568232 != nil:
-    section.add "resourceGroupName", valid_568232
-  var valid_568233 = path.getOrDefault("subscriptionId")
-  valid_568233 = validateParameter(valid_568233, JString, required = true,
+  if valid_564132 != nil:
+    section.add "subscriptionId", valid_564132
+  var valid_564133 = path.getOrDefault("resourceGroupName")
+  valid_564133 = validateParameter(valid_564133, JString, required = true,
                                  default = nil)
-  if valid_568233 != nil:
-    section.add "subscriptionId", valid_568233
+  if valid_564133 != nil:
+    section.add "resourceGroupName", valid_564133
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -614,11 +618,11 @@ proc validate_VirtualNetworksList_568230(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568234 = query.getOrDefault("api-version")
-  valid_568234 = validateParameter(valid_568234, JString, required = true,
+  var valid_564134 = query.getOrDefault("api-version")
+  valid_564134 = validateParameter(valid_564134, JString, required = true,
                                  default = nil)
-  if valid_568234 != nil:
-    section.add "api-version", valid_568234
+  if valid_564134 != nil:
+    section.add "api-version", valid_564134
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -627,44 +631,44 @@ proc validate_VirtualNetworksList_568230(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568235: Call_VirtualNetworksList_568229; path: JsonNode;
+proc call*(call_564135: Call_VirtualNetworksList_564129; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets all virtual networks in a resource group.
   ## 
-  let valid = call_568235.validator(path, query, header, formData, body)
-  let scheme = call_568235.pickScheme
+  let valid = call_564135.validator(path, query, header, formData, body)
+  let scheme = call_564135.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568235.url(scheme.get, call_568235.host, call_568235.base,
-                         call_568235.route, valid.getOrDefault("path"),
+  let url = call_564135.url(scheme.get, call_564135.host, call_564135.base,
+                         call_564135.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568235, url, valid)
+  result = hook(call_564135, url, valid)
 
-proc call*(call_568236: Call_VirtualNetworksList_568229; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string): Recallable =
+proc call*(call_564136: Call_VirtualNetworksList_564129; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string): Recallable =
   ## virtualNetworksList
   ## Gets all virtual networks in a resource group.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client API version.
   ##   subscriptionId: string (required)
   ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_568237 = newJObject()
-  var query_568238 = newJObject()
-  add(path_568237, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568238, "api-version", newJString(apiVersion))
-  add(path_568237, "subscriptionId", newJString(subscriptionId))
-  result = call_568236.call(path_568237, query_568238, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564137 = newJObject()
+  var query_564138 = newJObject()
+  add(query_564138, "api-version", newJString(apiVersion))
+  add(path_564137, "subscriptionId", newJString(subscriptionId))
+  add(path_564137, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564136.call(path_564137, query_564138, nil, nil, nil)
 
-var virtualNetworksList* = Call_VirtualNetworksList_568229(
+var virtualNetworksList* = Call_VirtualNetworksList_564129(
     name: "virtualNetworksList", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/virtualnetworks",
-    validator: validate_VirtualNetworksList_568230, base: "",
-    url: url_VirtualNetworksList_568231, schemes: {Scheme.Https})
+    validator: validate_VirtualNetworksList_564130, base: "",
+    url: url_VirtualNetworksList_564131, schemes: {Scheme.Https})
 type
-  Call_SubnetsList_568239 = ref object of OpenApiRestCall_567641
-proc url_SubnetsList_568241(protocol: Scheme; host: string; base: string;
+  Call_SubnetsList_564139 = ref object of OpenApiRestCall_563539
+proc url_SubnetsList_564141(protocol: Scheme; host: string; base: string;
                            route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -689,37 +693,37 @@ proc url_SubnetsList_568241(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_SubnetsList_568240(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_SubnetsList_564140(path: JsonNode; query: JsonNode; header: JsonNode;
                                 formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets all subnets in a virtual network.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   subscriptionId: JString (required)
   ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   ##   virtualNetworkName: JString (required)
   ##                     : The name of the virtual network.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568242 = path.getOrDefault("resourceGroupName")
-  valid_568242 = validateParameter(valid_568242, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564142 = path.getOrDefault("subscriptionId")
+  valid_564142 = validateParameter(valid_564142, JString, required = true,
                                  default = nil)
-  if valid_568242 != nil:
-    section.add "resourceGroupName", valid_568242
-  var valid_568243 = path.getOrDefault("subscriptionId")
-  valid_568243 = validateParameter(valid_568243, JString, required = true,
+  if valid_564142 != nil:
+    section.add "subscriptionId", valid_564142
+  var valid_564143 = path.getOrDefault("resourceGroupName")
+  valid_564143 = validateParameter(valid_564143, JString, required = true,
                                  default = nil)
-  if valid_568243 != nil:
-    section.add "subscriptionId", valid_568243
-  var valid_568244 = path.getOrDefault("virtualNetworkName")
-  valid_568244 = validateParameter(valid_568244, JString, required = true,
+  if valid_564143 != nil:
+    section.add "resourceGroupName", valid_564143
+  var valid_564144 = path.getOrDefault("virtualNetworkName")
+  valid_564144 = validateParameter(valid_564144, JString, required = true,
                                  default = nil)
-  if valid_568244 != nil:
-    section.add "virtualNetworkName", valid_568244
+  if valid_564144 != nil:
+    section.add "virtualNetworkName", valid_564144
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -727,11 +731,11 @@ proc validate_SubnetsList_568240(path: JsonNode; query: JsonNode; header: JsonNo
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568245 = query.getOrDefault("api-version")
-  valid_568245 = validateParameter(valid_568245, JString, required = true,
+  var valid_564145 = query.getOrDefault("api-version")
+  valid_564145 = validateParameter(valid_564145, JString, required = true,
                                  default = nil)
-  if valid_568245 != nil:
-    section.add "api-version", valid_568245
+  if valid_564145 != nil:
+    section.add "api-version", valid_564145
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -740,48 +744,49 @@ proc validate_SubnetsList_568240(path: JsonNode; query: JsonNode; header: JsonNo
   if body != nil:
     result.add "body", body
 
-proc call*(call_568246: Call_SubnetsList_568239; path: JsonNode; query: JsonNode;
+proc call*(call_564146: Call_SubnetsList_564139; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets all subnets in a virtual network.
   ## 
-  let valid = call_568246.validator(path, query, header, formData, body)
-  let scheme = call_568246.pickScheme
+  let valid = call_564146.validator(path, query, header, formData, body)
+  let scheme = call_564146.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568246.url(scheme.get, call_568246.host, call_568246.base,
-                         call_568246.route, valid.getOrDefault("path"),
+  let url = call_564146.url(scheme.get, call_564146.host, call_564146.base,
+                         call_564146.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568246, url, valid)
+  result = hook(call_564146, url, valid)
 
-proc call*(call_568247: Call_SubnetsList_568239; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; virtualNetworkName: string): Recallable =
+proc call*(call_564147: Call_SubnetsList_564139; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string;
+          virtualNetworkName: string): Recallable =
   ## subnetsList
   ## Gets all subnets in a virtual network.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client API version.
   ##   subscriptionId: string (required)
   ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   virtualNetworkName: string (required)
   ##                     : The name of the virtual network.
-  var path_568248 = newJObject()
-  var query_568249 = newJObject()
-  add(path_568248, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568249, "api-version", newJString(apiVersion))
-  add(path_568248, "subscriptionId", newJString(subscriptionId))
-  add(path_568248, "virtualNetworkName", newJString(virtualNetworkName))
-  result = call_568247.call(path_568248, query_568249, nil, nil, nil)
+  var path_564148 = newJObject()
+  var query_564149 = newJObject()
+  add(query_564149, "api-version", newJString(apiVersion))
+  add(path_564148, "subscriptionId", newJString(subscriptionId))
+  add(path_564148, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564148, "virtualNetworkName", newJString(virtualNetworkName))
+  result = call_564147.call(path_564148, query_564149, nil, nil, nil)
 
-var subnetsList* = Call_SubnetsList_568239(name: "subnetsList",
+var subnetsList* = Call_SubnetsList_564139(name: "subnetsList",
                                         meth: HttpMethod.HttpGet,
                                         host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/virtualnetworks/{virtualNetworkName}/subnets",
-                                        validator: validate_SubnetsList_568240,
-                                        base: "", url: url_SubnetsList_568241,
+                                        validator: validate_SubnetsList_564140,
+                                        base: "", url: url_SubnetsList_564141,
                                         schemes: {Scheme.Https})
 type
-  Call_SubnetsCreateOrUpdate_568263 = ref object of OpenApiRestCall_567641
-proc url_SubnetsCreateOrUpdate_568265(protocol: Scheme; host: string; base: string;
+  Call_SubnetsCreateOrUpdate_564163 = ref object of OpenApiRestCall_563539
+proc url_SubnetsCreateOrUpdate_564165(protocol: Scheme; host: string; base: string;
                                      route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -808,44 +813,44 @@ proc url_SubnetsCreateOrUpdate_568265(protocol: Scheme; host: string; base: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_SubnetsCreateOrUpdate_568264(path: JsonNode; query: JsonNode;
+proc validate_SubnetsCreateOrUpdate_564164(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Creates or updates a subnet in the specified virtual network.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
+  ##   subscriptionId: JString (required)
+  ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   resourceGroupName: JString (required)
   ##                    : The name of the resource group.
   ##   subnetName: JString (required)
   ##             : The name of the subnet.
-  ##   subscriptionId: JString (required)
-  ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   virtualNetworkName: JString (required)
   ##                     : The name of the virtual network.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568266 = path.getOrDefault("resourceGroupName")
-  valid_568266 = validateParameter(valid_568266, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564166 = path.getOrDefault("subscriptionId")
+  valid_564166 = validateParameter(valid_564166, JString, required = true,
                                  default = nil)
-  if valid_568266 != nil:
-    section.add "resourceGroupName", valid_568266
-  var valid_568267 = path.getOrDefault("subnetName")
-  valid_568267 = validateParameter(valid_568267, JString, required = true,
+  if valid_564166 != nil:
+    section.add "subscriptionId", valid_564166
+  var valid_564167 = path.getOrDefault("resourceGroupName")
+  valid_564167 = validateParameter(valid_564167, JString, required = true,
                                  default = nil)
-  if valid_568267 != nil:
-    section.add "subnetName", valid_568267
-  var valid_568268 = path.getOrDefault("subscriptionId")
-  valid_568268 = validateParameter(valid_568268, JString, required = true,
+  if valid_564167 != nil:
+    section.add "resourceGroupName", valid_564167
+  var valid_564168 = path.getOrDefault("subnetName")
+  valid_564168 = validateParameter(valid_564168, JString, required = true,
                                  default = nil)
-  if valid_568268 != nil:
-    section.add "subscriptionId", valid_568268
-  var valid_568269 = path.getOrDefault("virtualNetworkName")
-  valid_568269 = validateParameter(valid_568269, JString, required = true,
+  if valid_564168 != nil:
+    section.add "subnetName", valid_564168
+  var valid_564169 = path.getOrDefault("virtualNetworkName")
+  valid_564169 = validateParameter(valid_564169, JString, required = true,
                                  default = nil)
-  if valid_568269 != nil:
-    section.add "virtualNetworkName", valid_568269
+  if valid_564169 != nil:
+    section.add "virtualNetworkName", valid_564169
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -853,11 +858,11 @@ proc validate_SubnetsCreateOrUpdate_568264(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568270 = query.getOrDefault("api-version")
-  valid_568270 = validateParameter(valid_568270, JString, required = true,
+  var valid_564170 = query.getOrDefault("api-version")
+  valid_564170 = validateParameter(valid_564170, JString, required = true,
                                  default = nil)
-  if valid_568270 != nil:
-    section.add "api-version", valid_568270
+  if valid_564170 != nil:
+    section.add "api-version", valid_564170
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -871,57 +876,56 @@ proc validate_SubnetsCreateOrUpdate_568264(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568272: Call_SubnetsCreateOrUpdate_568263; path: JsonNode;
+proc call*(call_564172: Call_SubnetsCreateOrUpdate_564163; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Creates or updates a subnet in the specified virtual network.
   ## 
-  let valid = call_568272.validator(path, query, header, formData, body)
-  let scheme = call_568272.pickScheme
+  let valid = call_564172.validator(path, query, header, formData, body)
+  let scheme = call_564172.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568272.url(scheme.get, call_568272.host, call_568272.base,
-                         call_568272.route, valid.getOrDefault("path"),
+  let url = call_564172.url(scheme.get, call_564172.host, call_564172.base,
+                         call_564172.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568272, url, valid)
+  result = hook(call_564172, url, valid)
 
-proc call*(call_568273: Call_SubnetsCreateOrUpdate_568263;
-          resourceGroupName: string; subnetName: string; apiVersion: string;
-          subscriptionId: string; virtualNetworkName: string;
-          subnetParameters: JsonNode): Recallable =
+proc call*(call_564173: Call_SubnetsCreateOrUpdate_564163; apiVersion: string;
+          subnetParameters: JsonNode; subscriptionId: string;
+          resourceGroupName: string; subnetName: string; virtualNetworkName: string): Recallable =
   ## subnetsCreateOrUpdate
   ## Creates or updates a subnet in the specified virtual network.
+  ##   apiVersion: string (required)
+  ##             : Client API version.
+  ##   subnetParameters: JObject (required)
+  ##                   : Parameters supplied to the create or update subnet operation.
+  ##   subscriptionId: string (required)
+  ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   resourceGroupName: string (required)
   ##                    : The name of the resource group.
   ##   subnetName: string (required)
   ##             : The name of the subnet.
-  ##   apiVersion: string (required)
-  ##             : Client API version.
-  ##   subscriptionId: string (required)
-  ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   virtualNetworkName: string (required)
   ##                     : The name of the virtual network.
-  ##   subnetParameters: JObject (required)
-  ##                   : Parameters supplied to the create or update subnet operation.
-  var path_568274 = newJObject()
-  var query_568275 = newJObject()
-  var body_568276 = newJObject()
-  add(path_568274, "resourceGroupName", newJString(resourceGroupName))
-  add(path_568274, "subnetName", newJString(subnetName))
-  add(query_568275, "api-version", newJString(apiVersion))
-  add(path_568274, "subscriptionId", newJString(subscriptionId))
-  add(path_568274, "virtualNetworkName", newJString(virtualNetworkName))
+  var path_564174 = newJObject()
+  var query_564175 = newJObject()
+  var body_564176 = newJObject()
+  add(query_564175, "api-version", newJString(apiVersion))
   if subnetParameters != nil:
-    body_568276 = subnetParameters
-  result = call_568273.call(path_568274, query_568275, nil, nil, body_568276)
+    body_564176 = subnetParameters
+  add(path_564174, "subscriptionId", newJString(subscriptionId))
+  add(path_564174, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564174, "subnetName", newJString(subnetName))
+  add(path_564174, "virtualNetworkName", newJString(virtualNetworkName))
+  result = call_564173.call(path_564174, query_564175, nil, nil, body_564176)
 
-var subnetsCreateOrUpdate* = Call_SubnetsCreateOrUpdate_568263(
+var subnetsCreateOrUpdate* = Call_SubnetsCreateOrUpdate_564163(
     name: "subnetsCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/virtualnetworks/{virtualNetworkName}/subnets/{subnetName}",
-    validator: validate_SubnetsCreateOrUpdate_568264, base: "",
-    url: url_SubnetsCreateOrUpdate_568265, schemes: {Scheme.Https})
+    validator: validate_SubnetsCreateOrUpdate_564164, base: "",
+    url: url_SubnetsCreateOrUpdate_564165, schemes: {Scheme.Https})
 type
-  Call_SubnetsGet_568250 = ref object of OpenApiRestCall_567641
-proc url_SubnetsGet_568252(protocol: Scheme; host: string; base: string; route: string;
+  Call_SubnetsGet_564150 = ref object of OpenApiRestCall_563539
+proc url_SubnetsGet_564152(protocol: Scheme; host: string; base: string; route: string;
                           path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -948,44 +952,44 @@ proc url_SubnetsGet_568252(protocol: Scheme; host: string; base: string; route: 
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_SubnetsGet_568251(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_SubnetsGet_564151(path: JsonNode; query: JsonNode; header: JsonNode;
                                formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the specified subnet by virtual network and resource group.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
+  ##   subscriptionId: JString (required)
+  ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   resourceGroupName: JString (required)
   ##                    : The name of the resource group.
   ##   subnetName: JString (required)
   ##             : The name of the subnet.
-  ##   subscriptionId: JString (required)
-  ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   virtualNetworkName: JString (required)
   ##                     : The name of the virtual network.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568253 = path.getOrDefault("resourceGroupName")
-  valid_568253 = validateParameter(valid_568253, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564153 = path.getOrDefault("subscriptionId")
+  valid_564153 = validateParameter(valid_564153, JString, required = true,
                                  default = nil)
-  if valid_568253 != nil:
-    section.add "resourceGroupName", valid_568253
-  var valid_568254 = path.getOrDefault("subnetName")
-  valid_568254 = validateParameter(valid_568254, JString, required = true,
+  if valid_564153 != nil:
+    section.add "subscriptionId", valid_564153
+  var valid_564154 = path.getOrDefault("resourceGroupName")
+  valid_564154 = validateParameter(valid_564154, JString, required = true,
                                  default = nil)
-  if valid_568254 != nil:
-    section.add "subnetName", valid_568254
-  var valid_568255 = path.getOrDefault("subscriptionId")
-  valid_568255 = validateParameter(valid_568255, JString, required = true,
+  if valid_564154 != nil:
+    section.add "resourceGroupName", valid_564154
+  var valid_564155 = path.getOrDefault("subnetName")
+  valid_564155 = validateParameter(valid_564155, JString, required = true,
                                  default = nil)
-  if valid_568255 != nil:
-    section.add "subscriptionId", valid_568255
-  var valid_568256 = path.getOrDefault("virtualNetworkName")
-  valid_568256 = validateParameter(valid_568256, JString, required = true,
+  if valid_564155 != nil:
+    section.add "subnetName", valid_564155
+  var valid_564156 = path.getOrDefault("virtualNetworkName")
+  valid_564156 = validateParameter(valid_564156, JString, required = true,
                                  default = nil)
-  if valid_568256 != nil:
-    section.add "virtualNetworkName", valid_568256
+  if valid_564156 != nil:
+    section.add "virtualNetworkName", valid_564156
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -995,16 +999,16 @@ proc validate_SubnetsGet_568251(path: JsonNode; query: JsonNode; header: JsonNod
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568257 = query.getOrDefault("api-version")
-  valid_568257 = validateParameter(valid_568257, JString, required = true,
+  var valid_564157 = query.getOrDefault("api-version")
+  valid_564157 = validateParameter(valid_564157, JString, required = true,
                                  default = nil)
-  if valid_568257 != nil:
-    section.add "api-version", valid_568257
-  var valid_568258 = query.getOrDefault("$expand")
-  valid_568258 = validateParameter(valid_568258, JString, required = false,
+  if valid_564157 != nil:
+    section.add "api-version", valid_564157
+  var valid_564158 = query.getOrDefault("$expand")
+  valid_564158 = validateParameter(valid_564158, JString, required = false,
                                  default = nil)
-  if valid_568258 != nil:
-    section.add "$expand", valid_568258
+  if valid_564158 != nil:
+    section.add "$expand", valid_564158
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1013,55 +1017,55 @@ proc validate_SubnetsGet_568251(path: JsonNode; query: JsonNode; header: JsonNod
   if body != nil:
     result.add "body", body
 
-proc call*(call_568259: Call_SubnetsGet_568250; path: JsonNode; query: JsonNode;
+proc call*(call_564159: Call_SubnetsGet_564150; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the specified subnet by virtual network and resource group.
   ## 
-  let valid = call_568259.validator(path, query, header, formData, body)
-  let scheme = call_568259.pickScheme
+  let valid = call_564159.validator(path, query, header, formData, body)
+  let scheme = call_564159.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568259.url(scheme.get, call_568259.host, call_568259.base,
-                         call_568259.route, valid.getOrDefault("path"),
+  let url = call_564159.url(scheme.get, call_564159.host, call_564159.base,
+                         call_564159.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568259, url, valid)
+  result = hook(call_564159, url, valid)
 
-proc call*(call_568260: Call_SubnetsGet_568250; resourceGroupName: string;
-          subnetName: string; apiVersion: string; subscriptionId: string;
+proc call*(call_564160: Call_SubnetsGet_564150; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string; subnetName: string;
           virtualNetworkName: string; Expand: string = ""): Recallable =
   ## subnetsGet
   ## Gets the specified subnet by virtual network and resource group.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
-  ##   subnetName: string (required)
-  ##             : The name of the subnet.
   ##   apiVersion: string (required)
   ##             : Client API version.
   ##   Expand: string
   ##         : Expands referenced resources.
   ##   subscriptionId: string (required)
   ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  ##   subnetName: string (required)
+  ##             : The name of the subnet.
   ##   virtualNetworkName: string (required)
   ##                     : The name of the virtual network.
-  var path_568261 = newJObject()
-  var query_568262 = newJObject()
-  add(path_568261, "resourceGroupName", newJString(resourceGroupName))
-  add(path_568261, "subnetName", newJString(subnetName))
-  add(query_568262, "api-version", newJString(apiVersion))
-  add(query_568262, "$expand", newJString(Expand))
-  add(path_568261, "subscriptionId", newJString(subscriptionId))
-  add(path_568261, "virtualNetworkName", newJString(virtualNetworkName))
-  result = call_568260.call(path_568261, query_568262, nil, nil, nil)
+  var path_564161 = newJObject()
+  var query_564162 = newJObject()
+  add(query_564162, "api-version", newJString(apiVersion))
+  add(query_564162, "$expand", newJString(Expand))
+  add(path_564161, "subscriptionId", newJString(subscriptionId))
+  add(path_564161, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564161, "subnetName", newJString(subnetName))
+  add(path_564161, "virtualNetworkName", newJString(virtualNetworkName))
+  result = call_564160.call(path_564161, query_564162, nil, nil, nil)
 
-var subnetsGet* = Call_SubnetsGet_568250(name: "subnetsGet",
+var subnetsGet* = Call_SubnetsGet_564150(name: "subnetsGet",
                                       meth: HttpMethod.HttpGet,
                                       host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/virtualnetworks/{virtualNetworkName}/subnets/{subnetName}",
-                                      validator: validate_SubnetsGet_568251,
-                                      base: "", url: url_SubnetsGet_568252,
+                                      validator: validate_SubnetsGet_564151,
+                                      base: "", url: url_SubnetsGet_564152,
                                       schemes: {Scheme.Https})
 type
-  Call_SubnetsDelete_568277 = ref object of OpenApiRestCall_567641
-proc url_SubnetsDelete_568279(protocol: Scheme; host: string; base: string;
+  Call_SubnetsDelete_564177 = ref object of OpenApiRestCall_563539
+proc url_SubnetsDelete_564179(protocol: Scheme; host: string; base: string;
                              route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1088,44 +1092,44 @@ proc url_SubnetsDelete_568279(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_SubnetsDelete_568278(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_SubnetsDelete_564178(path: JsonNode; query: JsonNode; header: JsonNode;
                                   formData: JsonNode; body: JsonNode): JsonNode =
   ## Deletes the specified subnet.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
+  ##   subscriptionId: JString (required)
+  ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   resourceGroupName: JString (required)
   ##                    : The name of the resource group.
   ##   subnetName: JString (required)
   ##             : The name of the subnet.
-  ##   subscriptionId: JString (required)
-  ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   virtualNetworkName: JString (required)
   ##                     : The name of the virtual network.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568280 = path.getOrDefault("resourceGroupName")
-  valid_568280 = validateParameter(valid_568280, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564180 = path.getOrDefault("subscriptionId")
+  valid_564180 = validateParameter(valid_564180, JString, required = true,
                                  default = nil)
-  if valid_568280 != nil:
-    section.add "resourceGroupName", valid_568280
-  var valid_568281 = path.getOrDefault("subnetName")
-  valid_568281 = validateParameter(valid_568281, JString, required = true,
+  if valid_564180 != nil:
+    section.add "subscriptionId", valid_564180
+  var valid_564181 = path.getOrDefault("resourceGroupName")
+  valid_564181 = validateParameter(valid_564181, JString, required = true,
                                  default = nil)
-  if valid_568281 != nil:
-    section.add "subnetName", valid_568281
-  var valid_568282 = path.getOrDefault("subscriptionId")
-  valid_568282 = validateParameter(valid_568282, JString, required = true,
+  if valid_564181 != nil:
+    section.add "resourceGroupName", valid_564181
+  var valid_564182 = path.getOrDefault("subnetName")
+  valid_564182 = validateParameter(valid_564182, JString, required = true,
                                  default = nil)
-  if valid_568282 != nil:
-    section.add "subscriptionId", valid_568282
-  var valid_568283 = path.getOrDefault("virtualNetworkName")
-  valid_568283 = validateParameter(valid_568283, JString, required = true,
+  if valid_564182 != nil:
+    section.add "subnetName", valid_564182
+  var valid_564183 = path.getOrDefault("virtualNetworkName")
+  valid_564183 = validateParameter(valid_564183, JString, required = true,
                                  default = nil)
-  if valid_568283 != nil:
-    section.add "virtualNetworkName", valid_568283
+  if valid_564183 != nil:
+    section.add "virtualNetworkName", valid_564183
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1133,11 +1137,11 @@ proc validate_SubnetsDelete_568278(path: JsonNode; query: JsonNode; header: Json
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568284 = query.getOrDefault("api-version")
-  valid_568284 = validateParameter(valid_568284, JString, required = true,
+  var valid_564184 = query.getOrDefault("api-version")
+  valid_564184 = validateParameter(valid_564184, JString, required = true,
                                  default = nil)
-  if valid_568284 != nil:
-    section.add "api-version", valid_568284
+  if valid_564184 != nil:
+    section.add "api-version", valid_564184
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1146,46 +1150,46 @@ proc validate_SubnetsDelete_568278(path: JsonNode; query: JsonNode; header: Json
   if body != nil:
     result.add "body", body
 
-proc call*(call_568285: Call_SubnetsDelete_568277; path: JsonNode; query: JsonNode;
+proc call*(call_564185: Call_SubnetsDelete_564177; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes the specified subnet.
   ## 
-  let valid = call_568285.validator(path, query, header, formData, body)
-  let scheme = call_568285.pickScheme
+  let valid = call_564185.validator(path, query, header, formData, body)
+  let scheme = call_564185.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568285.url(scheme.get, call_568285.host, call_568285.base,
-                         call_568285.route, valid.getOrDefault("path"),
+  let url = call_564185.url(scheme.get, call_564185.host, call_564185.base,
+                         call_564185.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568285, url, valid)
+  result = hook(call_564185, url, valid)
 
-proc call*(call_568286: Call_SubnetsDelete_568277; resourceGroupName: string;
-          subnetName: string; apiVersion: string; subscriptionId: string;
+proc call*(call_564186: Call_SubnetsDelete_564177; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string; subnetName: string;
           virtualNetworkName: string): Recallable =
   ## subnetsDelete
   ## Deletes the specified subnet.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
-  ##   subnetName: string (required)
-  ##             : The name of the subnet.
   ##   apiVersion: string (required)
   ##             : Client API version.
   ##   subscriptionId: string (required)
   ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  ##   subnetName: string (required)
+  ##             : The name of the subnet.
   ##   virtualNetworkName: string (required)
   ##                     : The name of the virtual network.
-  var path_568287 = newJObject()
-  var query_568288 = newJObject()
-  add(path_568287, "resourceGroupName", newJString(resourceGroupName))
-  add(path_568287, "subnetName", newJString(subnetName))
-  add(query_568288, "api-version", newJString(apiVersion))
-  add(path_568287, "subscriptionId", newJString(subscriptionId))
-  add(path_568287, "virtualNetworkName", newJString(virtualNetworkName))
-  result = call_568286.call(path_568287, query_568288, nil, nil, nil)
+  var path_564187 = newJObject()
+  var query_564188 = newJObject()
+  add(query_564188, "api-version", newJString(apiVersion))
+  add(path_564187, "subscriptionId", newJString(subscriptionId))
+  add(path_564187, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564187, "subnetName", newJString(subnetName))
+  add(path_564187, "virtualNetworkName", newJString(virtualNetworkName))
+  result = call_564186.call(path_564187, query_564188, nil, nil, nil)
 
-var subnetsDelete* = Call_SubnetsDelete_568277(name: "subnetsDelete",
+var subnetsDelete* = Call_SubnetsDelete_564177(name: "subnetsDelete",
     meth: HttpMethod.HttpDelete, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/virtualnetworks/{virtualNetworkName}/subnets/{subnetName}",
-    validator: validate_SubnetsDelete_568278, base: "", url: url_SubnetsDelete_568279,
+    validator: validate_SubnetsDelete_564178, base: "", url: url_SubnetsDelete_564179,
     schemes: {Scheme.Https})
 export
   rest

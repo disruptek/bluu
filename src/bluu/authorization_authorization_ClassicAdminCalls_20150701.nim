@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, httpcore
 
 ## auto-generated via openapi macro
 ## title: AuthorizationManagementClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_596441 = ref object of OpenApiRestCall
+  OpenApiRestCall_563539 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_596441](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563539](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_596441): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563539): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,8 +107,8 @@ const
   macServiceName = "authorization-authorization-ClassicAdminCalls"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_ClassicAdministratorsList_596663 = ref object of OpenApiRestCall_596441
-proc url_ClassicAdministratorsList_596665(protocol: Scheme; host: string;
+  Call_ClassicAdministratorsList_563761 = ref object of OpenApiRestCall_563539
+proc url_ClassicAdministratorsList_563763(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -121,7 +125,7 @@ proc url_ClassicAdministratorsList_596665(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ClassicAdministratorsList_596664(path: JsonNode; query: JsonNode;
+proc validate_ClassicAdministratorsList_563762(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets service administrator, account administrator, and co-administrators for the subscription.
   ## 
@@ -133,11 +137,11 @@ proc validate_ClassicAdministratorsList_596664(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_596838 = path.getOrDefault("subscriptionId")
-  valid_596838 = validateParameter(valid_596838, JString, required = true,
+  var valid_563938 = path.getOrDefault("subscriptionId")
+  valid_563938 = validateParameter(valid_563938, JString, required = true,
                                  default = nil)
-  if valid_596838 != nil:
-    section.add "subscriptionId", valid_596838
+  if valid_563938 != nil:
+    section.add "subscriptionId", valid_563938
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -145,11 +149,11 @@ proc validate_ClassicAdministratorsList_596664(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_596839 = query.getOrDefault("api-version")
-  valid_596839 = validateParameter(valid_596839, JString, required = true,
+  var valid_563939 = query.getOrDefault("api-version")
+  valid_563939 = validateParameter(valid_563939, JString, required = true,
                                  default = nil)
-  if valid_596839 != nil:
-    section.add "api-version", valid_596839
+  if valid_563939 != nil:
+    section.add "api-version", valid_563939
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -158,20 +162,20 @@ proc validate_ClassicAdministratorsList_596664(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_596862: Call_ClassicAdministratorsList_596663; path: JsonNode;
+proc call*(call_563962: Call_ClassicAdministratorsList_563761; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets service administrator, account administrator, and co-administrators for the subscription.
   ## 
-  let valid = call_596862.validator(path, query, header, formData, body)
-  let scheme = call_596862.pickScheme
+  let valid = call_563962.validator(path, query, header, formData, body)
+  let scheme = call_563962.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_596862.url(scheme.get, call_596862.host, call_596862.base,
-                         call_596862.route, valid.getOrDefault("path"),
+  let url = call_563962.url(scheme.get, call_563962.host, call_563962.base,
+                         call_563962.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_596862, url, valid)
+  result = hook(call_563962, url, valid)
 
-proc call*(call_596933: Call_ClassicAdministratorsList_596663; apiVersion: string;
+proc call*(call_564033: Call_ClassicAdministratorsList_563761; apiVersion: string;
           subscriptionId: string): Recallable =
   ## classicAdministratorsList
   ## Gets service administrator, account administrator, and co-administrators for the subscription.
@@ -179,17 +183,17 @@ proc call*(call_596933: Call_ClassicAdministratorsList_596663; apiVersion: strin
   ##             : The API version to use for this operation.
   ##   subscriptionId: string (required)
   ##                 : The ID of the target subscription.
-  var path_596934 = newJObject()
-  var query_596936 = newJObject()
-  add(query_596936, "api-version", newJString(apiVersion))
-  add(path_596934, "subscriptionId", newJString(subscriptionId))
-  result = call_596933.call(path_596934, query_596936, nil, nil, nil)
+  var path_564034 = newJObject()
+  var query_564036 = newJObject()
+  add(query_564036, "api-version", newJString(apiVersion))
+  add(path_564034, "subscriptionId", newJString(subscriptionId))
+  result = call_564033.call(path_564034, query_564036, nil, nil, nil)
 
-var classicAdministratorsList* = Call_ClassicAdministratorsList_596663(
+var classicAdministratorsList* = Call_ClassicAdministratorsList_563761(
     name: "classicAdministratorsList", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Authorization/classicAdministrators",
-    validator: validate_ClassicAdministratorsList_596664, base: "",
-    url: url_ClassicAdministratorsList_596665, schemes: {Scheme.Https})
+    validator: validate_ClassicAdministratorsList_563762, base: "",
+    url: url_ClassicAdministratorsList_563763, schemes: {Scheme.Https})
 export
   rest
 

@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, httpcore
 
 ## auto-generated via openapi macro
 ## title: Domain Services Resource Provider
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_567657 = ref object of OpenApiRestCall
+  OpenApiRestCall_563555 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_567657](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563555](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_567657): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563555): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,15 +107,15 @@ const
   macServiceName = "domainservices"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_DomainServiceOperationsList_567879 = ref object of OpenApiRestCall_567657
-proc url_DomainServiceOperationsList_567881(protocol: Scheme; host: string;
+  Call_DomainServiceOperationsList_563777 = ref object of OpenApiRestCall_563555
+proc url_DomainServiceOperationsList_563779(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_DomainServiceOperationsList_567880(path: JsonNode; query: JsonNode;
+proc validate_DomainServiceOperationsList_563778(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists all the available Domain Services operations.
   ## 
@@ -125,11 +129,11 @@ proc validate_DomainServiceOperationsList_567880(path: JsonNode; query: JsonNode
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568040 = query.getOrDefault("api-version")
-  valid_568040 = validateParameter(valid_568040, JString, required = true,
+  var valid_563940 = query.getOrDefault("api-version")
+  valid_563940 = validateParameter(valid_563940, JString, required = true,
                                  default = nil)
-  if valid_568040 != nil:
-    section.add "api-version", valid_568040
+  if valid_563940 != nil:
+    section.add "api-version", valid_563940
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -138,36 +142,36 @@ proc validate_DomainServiceOperationsList_567880(path: JsonNode; query: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_568063: Call_DomainServiceOperationsList_567879; path: JsonNode;
+proc call*(call_563963: Call_DomainServiceOperationsList_563777; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists all the available Domain Services operations.
   ## 
-  let valid = call_568063.validator(path, query, header, formData, body)
-  let scheme = call_568063.pickScheme
+  let valid = call_563963.validator(path, query, header, formData, body)
+  let scheme = call_563963.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568063.url(scheme.get, call_568063.host, call_568063.base,
-                         call_568063.route, valid.getOrDefault("path"),
+  let url = call_563963.url(scheme.get, call_563963.host, call_563963.base,
+                         call_563963.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568063, url, valid)
+  result = hook(call_563963, url, valid)
 
-proc call*(call_568134: Call_DomainServiceOperationsList_567879; apiVersion: string): Recallable =
+proc call*(call_564034: Call_DomainServiceOperationsList_563777; apiVersion: string): Recallable =
   ## domainServiceOperationsList
   ## Lists all the available Domain Services operations.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
-  var query_568135 = newJObject()
-  add(query_568135, "api-version", newJString(apiVersion))
-  result = call_568134.call(nil, query_568135, nil, nil, nil)
+  var query_564035 = newJObject()
+  add(query_564035, "api-version", newJString(apiVersion))
+  result = call_564034.call(nil, query_564035, nil, nil, nil)
 
-var domainServiceOperationsList* = Call_DomainServiceOperationsList_567879(
+var domainServiceOperationsList* = Call_DomainServiceOperationsList_563777(
     name: "domainServiceOperationsList", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/providers/Microsoft.AAD/operations",
-    validator: validate_DomainServiceOperationsList_567880, base: "",
-    url: url_DomainServiceOperationsList_567881, schemes: {Scheme.Https})
+    validator: validate_DomainServiceOperationsList_563778, base: "",
+    url: url_DomainServiceOperationsList_563779, schemes: {Scheme.Https})
 type
-  Call_DomainServicesList_568175 = ref object of OpenApiRestCall_567657
-proc url_DomainServicesList_568177(protocol: Scheme; host: string; base: string;
+  Call_DomainServicesList_564075 = ref object of OpenApiRestCall_563555
+proc url_DomainServicesList_564077(protocol: Scheme; host: string; base: string;
                                   route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -183,7 +187,7 @@ proc url_DomainServicesList_568177(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DomainServicesList_568176(path: JsonNode; query: JsonNode;
+proc validate_DomainServicesList_564076(path: JsonNode; query: JsonNode;
                                        header: JsonNode; formData: JsonNode;
                                        body: JsonNode): JsonNode =
   ## The List Domain Services in Subscription operation lists all the domain services available under the given subscription (and across all resource groups within that subscription).
@@ -196,11 +200,11 @@ proc validate_DomainServicesList_568176(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_568192 = path.getOrDefault("subscriptionId")
-  valid_568192 = validateParameter(valid_568192, JString, required = true,
+  var valid_564092 = path.getOrDefault("subscriptionId")
+  valid_564092 = validateParameter(valid_564092, JString, required = true,
                                  default = nil)
-  if valid_568192 != nil:
-    section.add "subscriptionId", valid_568192
+  if valid_564092 != nil:
+    section.add "subscriptionId", valid_564092
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -208,11 +212,11 @@ proc validate_DomainServicesList_568176(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568193 = query.getOrDefault("api-version")
-  valid_568193 = validateParameter(valid_568193, JString, required = true,
+  var valid_564093 = query.getOrDefault("api-version")
+  valid_564093 = validateParameter(valid_564093, JString, required = true,
                                  default = nil)
-  if valid_568193 != nil:
-    section.add "api-version", valid_568193
+  if valid_564093 != nil:
+    section.add "api-version", valid_564093
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -221,20 +225,20 @@ proc validate_DomainServicesList_568176(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568194: Call_DomainServicesList_568175; path: JsonNode;
+proc call*(call_564094: Call_DomainServicesList_564075; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## The List Domain Services in Subscription operation lists all the domain services available under the given subscription (and across all resource groups within that subscription).
   ## 
-  let valid = call_568194.validator(path, query, header, formData, body)
-  let scheme = call_568194.pickScheme
+  let valid = call_564094.validator(path, query, header, formData, body)
+  let scheme = call_564094.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568194.url(scheme.get, call_568194.host, call_568194.base,
-                         call_568194.route, valid.getOrDefault("path"),
+  let url = call_564094.url(scheme.get, call_564094.host, call_564094.base,
+                         call_564094.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568194, url, valid)
+  result = hook(call_564094, url, valid)
 
-proc call*(call_568195: Call_DomainServicesList_568175; apiVersion: string;
+proc call*(call_564095: Call_DomainServicesList_564075; apiVersion: string;
           subscriptionId: string): Recallable =
   ## domainServicesList
   ## The List Domain Services in Subscription operation lists all the domain services available under the given subscription (and across all resource groups within that subscription).
@@ -242,20 +246,20 @@ proc call*(call_568195: Call_DomainServicesList_568175; apiVersion: string;
   ##             : Client Api Version.
   ##   subscriptionId: string (required)
   ##                 : Gets subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_568196 = newJObject()
-  var query_568197 = newJObject()
-  add(query_568197, "api-version", newJString(apiVersion))
-  add(path_568196, "subscriptionId", newJString(subscriptionId))
-  result = call_568195.call(path_568196, query_568197, nil, nil, nil)
+  var path_564096 = newJObject()
+  var query_564097 = newJObject()
+  add(query_564097, "api-version", newJString(apiVersion))
+  add(path_564096, "subscriptionId", newJString(subscriptionId))
+  result = call_564095.call(path_564096, query_564097, nil, nil, nil)
 
-var domainServicesList* = Call_DomainServicesList_568175(
+var domainServicesList* = Call_DomainServicesList_564075(
     name: "domainServicesList", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.AAD/domainServices",
-    validator: validate_DomainServicesList_568176, base: "",
-    url: url_DomainServicesList_568177, schemes: {Scheme.Https})
+    validator: validate_DomainServicesList_564076, base: "",
+    url: url_DomainServicesList_564077, schemes: {Scheme.Https})
 type
-  Call_DomainServicesListByResourceGroup_568198 = ref object of OpenApiRestCall_567657
-proc url_DomainServicesListByResourceGroup_568200(protocol: Scheme; host: string;
+  Call_DomainServicesListByResourceGroup_564098 = ref object of OpenApiRestCall_563555
+proc url_DomainServicesListByResourceGroup_564100(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -275,30 +279,30 @@ proc url_DomainServicesListByResourceGroup_568200(protocol: Scheme; host: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DomainServicesListByResourceGroup_568199(path: JsonNode;
+proc validate_DomainServicesListByResourceGroup_564099(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## The List Domain Services in Resource Group operation lists all the domain services available under the given resource group.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
   ##   subscriptionId: JString (required)
   ##                 : Gets subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568201 = path.getOrDefault("resourceGroupName")
-  valid_568201 = validateParameter(valid_568201, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564101 = path.getOrDefault("subscriptionId")
+  valid_564101 = validateParameter(valid_564101, JString, required = true,
                                  default = nil)
-  if valid_568201 != nil:
-    section.add "resourceGroupName", valid_568201
-  var valid_568202 = path.getOrDefault("subscriptionId")
-  valid_568202 = validateParameter(valid_568202, JString, required = true,
+  if valid_564101 != nil:
+    section.add "subscriptionId", valid_564101
+  var valid_564102 = path.getOrDefault("resourceGroupName")
+  valid_564102 = validateParameter(valid_564102, JString, required = true,
                                  default = nil)
-  if valid_568202 != nil:
-    section.add "subscriptionId", valid_568202
+  if valid_564102 != nil:
+    section.add "resourceGroupName", valid_564102
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -306,11 +310,11 @@ proc validate_DomainServicesListByResourceGroup_568199(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568203 = query.getOrDefault("api-version")
-  valid_568203 = validateParameter(valid_568203, JString, required = true,
+  var valid_564103 = query.getOrDefault("api-version")
+  valid_564103 = validateParameter(valid_564103, JString, required = true,
                                  default = nil)
-  if valid_568203 != nil:
-    section.add "api-version", valid_568203
+  if valid_564103 != nil:
+    section.add "api-version", valid_564103
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -319,45 +323,45 @@ proc validate_DomainServicesListByResourceGroup_568199(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568204: Call_DomainServicesListByResourceGroup_568198;
+proc call*(call_564104: Call_DomainServicesListByResourceGroup_564098;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## The List Domain Services in Resource Group operation lists all the domain services available under the given resource group.
   ## 
-  let valid = call_568204.validator(path, query, header, formData, body)
-  let scheme = call_568204.pickScheme
+  let valid = call_564104.validator(path, query, header, formData, body)
+  let scheme = call_564104.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568204.url(scheme.get, call_568204.host, call_568204.base,
-                         call_568204.route, valid.getOrDefault("path"),
+  let url = call_564104.url(scheme.get, call_564104.host, call_564104.base,
+                         call_564104.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568204, url, valid)
+  result = hook(call_564104, url, valid)
 
-proc call*(call_568205: Call_DomainServicesListByResourceGroup_568198;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string): Recallable =
+proc call*(call_564105: Call_DomainServicesListByResourceGroup_564098;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string): Recallable =
   ## domainServicesListByResourceGroup
   ## The List Domain Services in Resource Group operation lists all the domain services available under the given resource group.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
   ##   subscriptionId: string (required)
   ##                 : Gets subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_568206 = newJObject()
-  var query_568207 = newJObject()
-  add(path_568206, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568207, "api-version", newJString(apiVersion))
-  add(path_568206, "subscriptionId", newJString(subscriptionId))
-  result = call_568205.call(path_568206, query_568207, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
+  var path_564106 = newJObject()
+  var query_564107 = newJObject()
+  add(query_564107, "api-version", newJString(apiVersion))
+  add(path_564106, "subscriptionId", newJString(subscriptionId))
+  add(path_564106, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564105.call(path_564106, query_564107, nil, nil, nil)
 
-var domainServicesListByResourceGroup* = Call_DomainServicesListByResourceGroup_568198(
+var domainServicesListByResourceGroup* = Call_DomainServicesListByResourceGroup_564098(
     name: "domainServicesListByResourceGroup", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.AAD/domainServices",
-    validator: validate_DomainServicesListByResourceGroup_568199, base: "",
-    url: url_DomainServicesListByResourceGroup_568200, schemes: {Scheme.Https})
+    validator: validate_DomainServicesListByResourceGroup_564099, base: "",
+    url: url_DomainServicesListByResourceGroup_564100, schemes: {Scheme.Https})
 type
-  Call_DomainServicesCreateOrUpdate_568219 = ref object of OpenApiRestCall_567657
-proc url_DomainServicesCreateOrUpdate_568221(protocol: Scheme; host: string;
+  Call_DomainServicesCreateOrUpdate_564119 = ref object of OpenApiRestCall_563555
+proc url_DomainServicesCreateOrUpdate_564121(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -380,37 +384,37 @@ proc url_DomainServicesCreateOrUpdate_568221(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DomainServicesCreateOrUpdate_568220(path: JsonNode; query: JsonNode;
+proc validate_DomainServicesCreateOrUpdate_564120(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## The Create Domain Service operation creates a new domain service with the specified parameters. If the specific service already exists, then any patchable properties will be updated and any immutable properties will remain unchanged.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
-  ##   subscriptionId: JString (required)
-  ##                 : Gets subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   domainServiceName: JString (required)
   ##                    : The name of the domain service.
+  ##   subscriptionId: JString (required)
+  ##                 : Gets subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568239 = path.getOrDefault("resourceGroupName")
-  valid_568239 = validateParameter(valid_568239, JString, required = true,
+        "path argument is necessary due to required `domainServiceName` field"
+  var valid_564139 = path.getOrDefault("domainServiceName")
+  valid_564139 = validateParameter(valid_564139, JString, required = true,
                                  default = nil)
-  if valid_568239 != nil:
-    section.add "resourceGroupName", valid_568239
-  var valid_568240 = path.getOrDefault("subscriptionId")
-  valid_568240 = validateParameter(valid_568240, JString, required = true,
+  if valid_564139 != nil:
+    section.add "domainServiceName", valid_564139
+  var valid_564140 = path.getOrDefault("subscriptionId")
+  valid_564140 = validateParameter(valid_564140, JString, required = true,
                                  default = nil)
-  if valid_568240 != nil:
-    section.add "subscriptionId", valid_568240
-  var valid_568241 = path.getOrDefault("domainServiceName")
-  valid_568241 = validateParameter(valid_568241, JString, required = true,
+  if valid_564140 != nil:
+    section.add "subscriptionId", valid_564140
+  var valid_564141 = path.getOrDefault("resourceGroupName")
+  valid_564141 = validateParameter(valid_564141, JString, required = true,
                                  default = nil)
-  if valid_568241 != nil:
-    section.add "domainServiceName", valid_568241
+  if valid_564141 != nil:
+    section.add "resourceGroupName", valid_564141
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -418,11 +422,11 @@ proc validate_DomainServicesCreateOrUpdate_568220(path: JsonNode; query: JsonNod
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568242 = query.getOrDefault("api-version")
-  valid_568242 = validateParameter(valid_568242, JString, required = true,
+  var valid_564142 = query.getOrDefault("api-version")
+  valid_564142 = validateParameter(valid_564142, JString, required = true,
                                  default = nil)
-  if valid_568242 != nil:
-    section.add "api-version", valid_568242
+  if valid_564142 != nil:
+    section.add "api-version", valid_564142
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -436,53 +440,53 @@ proc validate_DomainServicesCreateOrUpdate_568220(path: JsonNode; query: JsonNod
   if body != nil:
     result.add "body", body
 
-proc call*(call_568244: Call_DomainServicesCreateOrUpdate_568219; path: JsonNode;
+proc call*(call_564144: Call_DomainServicesCreateOrUpdate_564119; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## The Create Domain Service operation creates a new domain service with the specified parameters. If the specific service already exists, then any patchable properties will be updated and any immutable properties will remain unchanged.
   ## 
-  let valid = call_568244.validator(path, query, header, formData, body)
-  let scheme = call_568244.pickScheme
+  let valid = call_564144.validator(path, query, header, formData, body)
+  let scheme = call_564144.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568244.url(scheme.get, call_568244.host, call_568244.base,
-                         call_568244.route, valid.getOrDefault("path"),
+  let url = call_564144.url(scheme.get, call_564144.host, call_564144.base,
+                         call_564144.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568244, url, valid)
+  result = hook(call_564144, url, valid)
 
-proc call*(call_568245: Call_DomainServicesCreateOrUpdate_568219;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          domainServiceName: string; domainService: JsonNode): Recallable =
+proc call*(call_564145: Call_DomainServicesCreateOrUpdate_564119;
+          apiVersion: string; domainServiceName: string; subscriptionId: string;
+          resourceGroupName: string; domainService: JsonNode): Recallable =
   ## domainServicesCreateOrUpdate
   ## The Create Domain Service operation creates a new domain service with the specified parameters. If the specific service already exists, then any patchable properties will be updated and any immutable properties will remain unchanged.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
-  ##   subscriptionId: string (required)
-  ##                 : Gets subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   domainServiceName: string (required)
   ##                    : The name of the domain service.
+  ##   subscriptionId: string (required)
+  ##                 : Gets subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
   ##   domainService: JObject (required)
   ##                : Properties supplied to the Create or Update a Domain Service operation.
-  var path_568246 = newJObject()
-  var query_568247 = newJObject()
-  var body_568248 = newJObject()
-  add(path_568246, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568247, "api-version", newJString(apiVersion))
-  add(path_568246, "subscriptionId", newJString(subscriptionId))
-  add(path_568246, "domainServiceName", newJString(domainServiceName))
+  var path_564146 = newJObject()
+  var query_564147 = newJObject()
+  var body_564148 = newJObject()
+  add(query_564147, "api-version", newJString(apiVersion))
+  add(path_564146, "domainServiceName", newJString(domainServiceName))
+  add(path_564146, "subscriptionId", newJString(subscriptionId))
+  add(path_564146, "resourceGroupName", newJString(resourceGroupName))
   if domainService != nil:
-    body_568248 = domainService
-  result = call_568245.call(path_568246, query_568247, nil, nil, body_568248)
+    body_564148 = domainService
+  result = call_564145.call(path_564146, query_564147, nil, nil, body_564148)
 
-var domainServicesCreateOrUpdate* = Call_DomainServicesCreateOrUpdate_568219(
+var domainServicesCreateOrUpdate* = Call_DomainServicesCreateOrUpdate_564119(
     name: "domainServicesCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.AAD/domainServices/{domainServiceName}",
-    validator: validate_DomainServicesCreateOrUpdate_568220, base: "",
-    url: url_DomainServicesCreateOrUpdate_568221, schemes: {Scheme.Https})
+    validator: validate_DomainServicesCreateOrUpdate_564120, base: "",
+    url: url_DomainServicesCreateOrUpdate_564121, schemes: {Scheme.Https})
 type
-  Call_DomainServicesGet_568208 = ref object of OpenApiRestCall_567657
-proc url_DomainServicesGet_568210(protocol: Scheme; host: string; base: string;
+  Call_DomainServicesGet_564108 = ref object of OpenApiRestCall_563555
+proc url_DomainServicesGet_564110(protocol: Scheme; host: string; base: string;
                                  route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -505,7 +509,7 @@ proc url_DomainServicesGet_568210(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DomainServicesGet_568209(path: JsonNode; query: JsonNode;
+proc validate_DomainServicesGet_564109(path: JsonNode; query: JsonNode;
                                       header: JsonNode; formData: JsonNode;
                                       body: JsonNode): JsonNode =
   ## The Get Domain Service operation retrieves a json representation of the Domain Service.
@@ -513,30 +517,30 @@ proc validate_DomainServicesGet_568209(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
-  ##   subscriptionId: JString (required)
-  ##                 : Gets subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   domainServiceName: JString (required)
   ##                    : The name of the domain service.
+  ##   subscriptionId: JString (required)
+  ##                 : Gets subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568211 = path.getOrDefault("resourceGroupName")
-  valid_568211 = validateParameter(valid_568211, JString, required = true,
+        "path argument is necessary due to required `domainServiceName` field"
+  var valid_564111 = path.getOrDefault("domainServiceName")
+  valid_564111 = validateParameter(valid_564111, JString, required = true,
                                  default = nil)
-  if valid_568211 != nil:
-    section.add "resourceGroupName", valid_568211
-  var valid_568212 = path.getOrDefault("subscriptionId")
-  valid_568212 = validateParameter(valid_568212, JString, required = true,
+  if valid_564111 != nil:
+    section.add "domainServiceName", valid_564111
+  var valid_564112 = path.getOrDefault("subscriptionId")
+  valid_564112 = validateParameter(valid_564112, JString, required = true,
                                  default = nil)
-  if valid_568212 != nil:
-    section.add "subscriptionId", valid_568212
-  var valid_568213 = path.getOrDefault("domainServiceName")
-  valid_568213 = validateParameter(valid_568213, JString, required = true,
+  if valid_564112 != nil:
+    section.add "subscriptionId", valid_564112
+  var valid_564113 = path.getOrDefault("resourceGroupName")
+  valid_564113 = validateParameter(valid_564113, JString, required = true,
                                  default = nil)
-  if valid_568213 != nil:
-    section.add "domainServiceName", valid_568213
+  if valid_564113 != nil:
+    section.add "resourceGroupName", valid_564113
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -544,11 +548,11 @@ proc validate_DomainServicesGet_568209(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568214 = query.getOrDefault("api-version")
-  valid_568214 = validateParameter(valid_568214, JString, required = true,
+  var valid_564114 = query.getOrDefault("api-version")
+  valid_564114 = validateParameter(valid_564114, JString, required = true,
                                  default = nil)
-  if valid_568214 != nil:
-    section.add "api-version", valid_568214
+  if valid_564114 != nil:
+    section.add "api-version", valid_564114
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -557,46 +561,47 @@ proc validate_DomainServicesGet_568209(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568215: Call_DomainServicesGet_568208; path: JsonNode;
+proc call*(call_564115: Call_DomainServicesGet_564108; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## The Get Domain Service operation retrieves a json representation of the Domain Service.
   ## 
-  let valid = call_568215.validator(path, query, header, formData, body)
-  let scheme = call_568215.pickScheme
+  let valid = call_564115.validator(path, query, header, formData, body)
+  let scheme = call_564115.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568215.url(scheme.get, call_568215.host, call_568215.base,
-                         call_568215.route, valid.getOrDefault("path"),
+  let url = call_564115.url(scheme.get, call_564115.host, call_564115.base,
+                         call_564115.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568215, url, valid)
+  result = hook(call_564115, url, valid)
 
-proc call*(call_568216: Call_DomainServicesGet_568208; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; domainServiceName: string): Recallable =
+proc call*(call_564116: Call_DomainServicesGet_564108; apiVersion: string;
+          domainServiceName: string; subscriptionId: string;
+          resourceGroupName: string): Recallable =
   ## domainServicesGet
   ## The Get Domain Service operation retrieves a json representation of the Domain Service.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
-  ##   subscriptionId: string (required)
-  ##                 : Gets subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   domainServiceName: string (required)
   ##                    : The name of the domain service.
-  var path_568217 = newJObject()
-  var query_568218 = newJObject()
-  add(path_568217, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568218, "api-version", newJString(apiVersion))
-  add(path_568217, "subscriptionId", newJString(subscriptionId))
-  add(path_568217, "domainServiceName", newJString(domainServiceName))
-  result = call_568216.call(path_568217, query_568218, nil, nil, nil)
+  ##   subscriptionId: string (required)
+  ##                 : Gets subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
+  var path_564117 = newJObject()
+  var query_564118 = newJObject()
+  add(query_564118, "api-version", newJString(apiVersion))
+  add(path_564117, "domainServiceName", newJString(domainServiceName))
+  add(path_564117, "subscriptionId", newJString(subscriptionId))
+  add(path_564117, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564116.call(path_564117, query_564118, nil, nil, nil)
 
-var domainServicesGet* = Call_DomainServicesGet_568208(name: "domainServicesGet",
+var domainServicesGet* = Call_DomainServicesGet_564108(name: "domainServicesGet",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.AAD/domainServices/{domainServiceName}",
-    validator: validate_DomainServicesGet_568209, base: "",
-    url: url_DomainServicesGet_568210, schemes: {Scheme.Https})
+    validator: validate_DomainServicesGet_564109, base: "",
+    url: url_DomainServicesGet_564110, schemes: {Scheme.Https})
 type
-  Call_DomainServicesUpdate_568260 = ref object of OpenApiRestCall_567657
-proc url_DomainServicesUpdate_568262(protocol: Scheme; host: string; base: string;
+  Call_DomainServicesUpdate_564160 = ref object of OpenApiRestCall_563555
+proc url_DomainServicesUpdate_564162(protocol: Scheme; host: string; base: string;
                                     route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -619,37 +624,37 @@ proc url_DomainServicesUpdate_568262(protocol: Scheme; host: string; base: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DomainServicesUpdate_568261(path: JsonNode; query: JsonNode;
+proc validate_DomainServicesUpdate_564161(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## The Update Domain Service operation can be used to update the existing deployment. The update call only supports the properties listed in the PATCH body.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
-  ##   subscriptionId: JString (required)
-  ##                 : Gets subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   domainServiceName: JString (required)
   ##                    : The name of the domain service.
+  ##   subscriptionId: JString (required)
+  ##                 : Gets subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568263 = path.getOrDefault("resourceGroupName")
-  valid_568263 = validateParameter(valid_568263, JString, required = true,
+        "path argument is necessary due to required `domainServiceName` field"
+  var valid_564163 = path.getOrDefault("domainServiceName")
+  valid_564163 = validateParameter(valid_564163, JString, required = true,
                                  default = nil)
-  if valid_568263 != nil:
-    section.add "resourceGroupName", valid_568263
-  var valid_568264 = path.getOrDefault("subscriptionId")
-  valid_568264 = validateParameter(valid_568264, JString, required = true,
+  if valid_564163 != nil:
+    section.add "domainServiceName", valid_564163
+  var valid_564164 = path.getOrDefault("subscriptionId")
+  valid_564164 = validateParameter(valid_564164, JString, required = true,
                                  default = nil)
-  if valid_568264 != nil:
-    section.add "subscriptionId", valid_568264
-  var valid_568265 = path.getOrDefault("domainServiceName")
-  valid_568265 = validateParameter(valid_568265, JString, required = true,
+  if valid_564164 != nil:
+    section.add "subscriptionId", valid_564164
+  var valid_564165 = path.getOrDefault("resourceGroupName")
+  valid_564165 = validateParameter(valid_564165, JString, required = true,
                                  default = nil)
-  if valid_568265 != nil:
-    section.add "domainServiceName", valid_568265
+  if valid_564165 != nil:
+    section.add "resourceGroupName", valid_564165
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -657,11 +662,11 @@ proc validate_DomainServicesUpdate_568261(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568266 = query.getOrDefault("api-version")
-  valid_568266 = validateParameter(valid_568266, JString, required = true,
+  var valid_564166 = query.getOrDefault("api-version")
+  valid_564166 = validateParameter(valid_564166, JString, required = true,
                                  default = nil)
-  if valid_568266 != nil:
-    section.add "api-version", valid_568266
+  if valid_564166 != nil:
+    section.add "api-version", valid_564166
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -675,53 +680,53 @@ proc validate_DomainServicesUpdate_568261(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568268: Call_DomainServicesUpdate_568260; path: JsonNode;
+proc call*(call_564168: Call_DomainServicesUpdate_564160; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## The Update Domain Service operation can be used to update the existing deployment. The update call only supports the properties listed in the PATCH body.
   ## 
-  let valid = call_568268.validator(path, query, header, formData, body)
-  let scheme = call_568268.pickScheme
+  let valid = call_564168.validator(path, query, header, formData, body)
+  let scheme = call_564168.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568268.url(scheme.get, call_568268.host, call_568268.base,
-                         call_568268.route, valid.getOrDefault("path"),
+  let url = call_564168.url(scheme.get, call_564168.host, call_564168.base,
+                         call_564168.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568268, url, valid)
+  result = hook(call_564168, url, valid)
 
-proc call*(call_568269: Call_DomainServicesUpdate_568260;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          domainServiceName: string; domainService: JsonNode): Recallable =
+proc call*(call_564169: Call_DomainServicesUpdate_564160; apiVersion: string;
+          domainServiceName: string; subscriptionId: string;
+          resourceGroupName: string; domainService: JsonNode): Recallable =
   ## domainServicesUpdate
   ## The Update Domain Service operation can be used to update the existing deployment. The update call only supports the properties listed in the PATCH body.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
-  ##   subscriptionId: string (required)
-  ##                 : Gets subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   domainServiceName: string (required)
   ##                    : The name of the domain service.
+  ##   subscriptionId: string (required)
+  ##                 : Gets subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
   ##   domainService: JObject (required)
   ##                : Properties supplied to the Update a Domain Service operation.
-  var path_568270 = newJObject()
-  var query_568271 = newJObject()
-  var body_568272 = newJObject()
-  add(path_568270, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568271, "api-version", newJString(apiVersion))
-  add(path_568270, "subscriptionId", newJString(subscriptionId))
-  add(path_568270, "domainServiceName", newJString(domainServiceName))
+  var path_564170 = newJObject()
+  var query_564171 = newJObject()
+  var body_564172 = newJObject()
+  add(query_564171, "api-version", newJString(apiVersion))
+  add(path_564170, "domainServiceName", newJString(domainServiceName))
+  add(path_564170, "subscriptionId", newJString(subscriptionId))
+  add(path_564170, "resourceGroupName", newJString(resourceGroupName))
   if domainService != nil:
-    body_568272 = domainService
-  result = call_568269.call(path_568270, query_568271, nil, nil, body_568272)
+    body_564172 = domainService
+  result = call_564169.call(path_564170, query_564171, nil, nil, body_564172)
 
-var domainServicesUpdate* = Call_DomainServicesUpdate_568260(
+var domainServicesUpdate* = Call_DomainServicesUpdate_564160(
     name: "domainServicesUpdate", meth: HttpMethod.HttpPatch,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.AAD/domainServices/{domainServiceName}",
-    validator: validate_DomainServicesUpdate_568261, base: "",
-    url: url_DomainServicesUpdate_568262, schemes: {Scheme.Https})
+    validator: validate_DomainServicesUpdate_564161, base: "",
+    url: url_DomainServicesUpdate_564162, schemes: {Scheme.Https})
 type
-  Call_DomainServicesDelete_568249 = ref object of OpenApiRestCall_567657
-proc url_DomainServicesDelete_568251(protocol: Scheme; host: string; base: string;
+  Call_DomainServicesDelete_564149 = ref object of OpenApiRestCall_563555
+proc url_DomainServicesDelete_564151(protocol: Scheme; host: string; base: string;
                                     route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -744,37 +749,37 @@ proc url_DomainServicesDelete_568251(protocol: Scheme; host: string; base: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DomainServicesDelete_568250(path: JsonNode; query: JsonNode;
+proc validate_DomainServicesDelete_564150(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## The Delete Domain Service operation deletes an existing Domain Service.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
-  ##   subscriptionId: JString (required)
-  ##                 : Gets subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   domainServiceName: JString (required)
   ##                    : The name of the domain service.
+  ##   subscriptionId: JString (required)
+  ##                 : Gets subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568252 = path.getOrDefault("resourceGroupName")
-  valid_568252 = validateParameter(valid_568252, JString, required = true,
+        "path argument is necessary due to required `domainServiceName` field"
+  var valid_564152 = path.getOrDefault("domainServiceName")
+  valid_564152 = validateParameter(valid_564152, JString, required = true,
                                  default = nil)
-  if valid_568252 != nil:
-    section.add "resourceGroupName", valid_568252
-  var valid_568253 = path.getOrDefault("subscriptionId")
-  valid_568253 = validateParameter(valid_568253, JString, required = true,
+  if valid_564152 != nil:
+    section.add "domainServiceName", valid_564152
+  var valid_564153 = path.getOrDefault("subscriptionId")
+  valid_564153 = validateParameter(valid_564153, JString, required = true,
                                  default = nil)
-  if valid_568253 != nil:
-    section.add "subscriptionId", valid_568253
-  var valid_568254 = path.getOrDefault("domainServiceName")
-  valid_568254 = validateParameter(valid_568254, JString, required = true,
+  if valid_564153 != nil:
+    section.add "subscriptionId", valid_564153
+  var valid_564154 = path.getOrDefault("resourceGroupName")
+  valid_564154 = validateParameter(valid_564154, JString, required = true,
                                  default = nil)
-  if valid_568254 != nil:
-    section.add "domainServiceName", valid_568254
+  if valid_564154 != nil:
+    section.add "resourceGroupName", valid_564154
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -782,11 +787,11 @@ proc validate_DomainServicesDelete_568250(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568255 = query.getOrDefault("api-version")
-  valid_568255 = validateParameter(valid_568255, JString, required = true,
+  var valid_564155 = query.getOrDefault("api-version")
+  valid_564155 = validateParameter(valid_564155, JString, required = true,
                                  default = nil)
-  if valid_568255 != nil:
-    section.add "api-version", valid_568255
+  if valid_564155 != nil:
+    section.add "api-version", valid_564155
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -795,48 +800,48 @@ proc validate_DomainServicesDelete_568250(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568256: Call_DomainServicesDelete_568249; path: JsonNode;
+proc call*(call_564156: Call_DomainServicesDelete_564149; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## The Delete Domain Service operation deletes an existing Domain Service.
   ## 
-  let valid = call_568256.validator(path, query, header, formData, body)
-  let scheme = call_568256.pickScheme
+  let valid = call_564156.validator(path, query, header, formData, body)
+  let scheme = call_564156.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568256.url(scheme.get, call_568256.host, call_568256.base,
-                         call_568256.route, valid.getOrDefault("path"),
+  let url = call_564156.url(scheme.get, call_564156.host, call_564156.base,
+                         call_564156.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568256, url, valid)
+  result = hook(call_564156, url, valid)
 
-proc call*(call_568257: Call_DomainServicesDelete_568249;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          domainServiceName: string): Recallable =
+proc call*(call_564157: Call_DomainServicesDelete_564149; apiVersion: string;
+          domainServiceName: string; subscriptionId: string;
+          resourceGroupName: string): Recallable =
   ## domainServicesDelete
   ## The Delete Domain Service operation deletes an existing Domain Service.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
-  ##   subscriptionId: string (required)
-  ##                 : Gets subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   domainServiceName: string (required)
   ##                    : The name of the domain service.
-  var path_568258 = newJObject()
-  var query_568259 = newJObject()
-  add(path_568258, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568259, "api-version", newJString(apiVersion))
-  add(path_568258, "subscriptionId", newJString(subscriptionId))
-  add(path_568258, "domainServiceName", newJString(domainServiceName))
-  result = call_568257.call(path_568258, query_568259, nil, nil, nil)
+  ##   subscriptionId: string (required)
+  ##                 : Gets subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
+  var path_564158 = newJObject()
+  var query_564159 = newJObject()
+  add(query_564159, "api-version", newJString(apiVersion))
+  add(path_564158, "domainServiceName", newJString(domainServiceName))
+  add(path_564158, "subscriptionId", newJString(subscriptionId))
+  add(path_564158, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564157.call(path_564158, query_564159, nil, nil, nil)
 
-var domainServicesDelete* = Call_DomainServicesDelete_568249(
+var domainServicesDelete* = Call_DomainServicesDelete_564149(
     name: "domainServicesDelete", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.AAD/domainServices/{domainServiceName}",
-    validator: validate_DomainServicesDelete_568250, base: "",
-    url: url_DomainServicesDelete_568251, schemes: {Scheme.Https})
+    validator: validate_DomainServicesDelete_564150, base: "",
+    url: url_DomainServicesDelete_564151, schemes: {Scheme.Https})
 type
-  Call_ReplicaSetsListByResourceGroup_568273 = ref object of OpenApiRestCall_567657
-proc url_ReplicaSetsListByResourceGroup_568275(protocol: Scheme; host: string;
+  Call_ReplicaSetsListByResourceGroup_564173 = ref object of OpenApiRestCall_563555
+proc url_ReplicaSetsListByResourceGroup_564175(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -860,37 +865,37 @@ proc url_ReplicaSetsListByResourceGroup_568275(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ReplicaSetsListByResourceGroup_568274(path: JsonNode;
+proc validate_ReplicaSetsListByResourceGroup_564174(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## The List ReplicaSets in Resource Group operation lists all the domain services available under the given resource group.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
-  ##   subscriptionId: JString (required)
-  ##                 : Gets subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   domainServiceName: JString (required)
   ##                    : The name of the domain service.
+  ##   subscriptionId: JString (required)
+  ##                 : Gets subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568276 = path.getOrDefault("resourceGroupName")
-  valid_568276 = validateParameter(valid_568276, JString, required = true,
+        "path argument is necessary due to required `domainServiceName` field"
+  var valid_564176 = path.getOrDefault("domainServiceName")
+  valid_564176 = validateParameter(valid_564176, JString, required = true,
                                  default = nil)
-  if valid_568276 != nil:
-    section.add "resourceGroupName", valid_568276
-  var valid_568277 = path.getOrDefault("subscriptionId")
-  valid_568277 = validateParameter(valid_568277, JString, required = true,
+  if valid_564176 != nil:
+    section.add "domainServiceName", valid_564176
+  var valid_564177 = path.getOrDefault("subscriptionId")
+  valid_564177 = validateParameter(valid_564177, JString, required = true,
                                  default = nil)
-  if valid_568277 != nil:
-    section.add "subscriptionId", valid_568277
-  var valid_568278 = path.getOrDefault("domainServiceName")
-  valid_568278 = validateParameter(valid_568278, JString, required = true,
+  if valid_564177 != nil:
+    section.add "subscriptionId", valid_564177
+  var valid_564178 = path.getOrDefault("resourceGroupName")
+  valid_564178 = validateParameter(valid_564178, JString, required = true,
                                  default = nil)
-  if valid_568278 != nil:
-    section.add "domainServiceName", valid_568278
+  if valid_564178 != nil:
+    section.add "resourceGroupName", valid_564178
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -898,11 +903,11 @@ proc validate_ReplicaSetsListByResourceGroup_568274(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568279 = query.getOrDefault("api-version")
-  valid_568279 = validateParameter(valid_568279, JString, required = true,
+  var valid_564179 = query.getOrDefault("api-version")
+  valid_564179 = validateParameter(valid_564179, JString, required = true,
                                  default = nil)
-  if valid_568279 != nil:
-    section.add "api-version", valid_568279
+  if valid_564179 != nil:
+    section.add "api-version", valid_564179
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -911,48 +916,48 @@ proc validate_ReplicaSetsListByResourceGroup_568274(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568280: Call_ReplicaSetsListByResourceGroup_568273; path: JsonNode;
+proc call*(call_564180: Call_ReplicaSetsListByResourceGroup_564173; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## The List ReplicaSets in Resource Group operation lists all the domain services available under the given resource group.
   ## 
-  let valid = call_568280.validator(path, query, header, formData, body)
-  let scheme = call_568280.pickScheme
+  let valid = call_564180.validator(path, query, header, formData, body)
+  let scheme = call_564180.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568280.url(scheme.get, call_568280.host, call_568280.base,
-                         call_568280.route, valid.getOrDefault("path"),
+  let url = call_564180.url(scheme.get, call_564180.host, call_564180.base,
+                         call_564180.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568280, url, valid)
+  result = hook(call_564180, url, valid)
 
-proc call*(call_568281: Call_ReplicaSetsListByResourceGroup_568273;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          domainServiceName: string): Recallable =
+proc call*(call_564181: Call_ReplicaSetsListByResourceGroup_564173;
+          apiVersion: string; domainServiceName: string; subscriptionId: string;
+          resourceGroupName: string): Recallable =
   ## replicaSetsListByResourceGroup
   ## The List ReplicaSets in Resource Group operation lists all the domain services available under the given resource group.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
-  ##   subscriptionId: string (required)
-  ##                 : Gets subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   domainServiceName: string (required)
   ##                    : The name of the domain service.
-  var path_568282 = newJObject()
-  var query_568283 = newJObject()
-  add(path_568282, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568283, "api-version", newJString(apiVersion))
-  add(path_568282, "subscriptionId", newJString(subscriptionId))
-  add(path_568282, "domainServiceName", newJString(domainServiceName))
-  result = call_568281.call(path_568282, query_568283, nil, nil, nil)
+  ##   subscriptionId: string (required)
+  ##                 : Gets subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
+  var path_564182 = newJObject()
+  var query_564183 = newJObject()
+  add(query_564183, "api-version", newJString(apiVersion))
+  add(path_564182, "domainServiceName", newJString(domainServiceName))
+  add(path_564182, "subscriptionId", newJString(subscriptionId))
+  add(path_564182, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564181.call(path_564182, query_564183, nil, nil, nil)
 
-var replicaSetsListByResourceGroup* = Call_ReplicaSetsListByResourceGroup_568273(
+var replicaSetsListByResourceGroup* = Call_ReplicaSetsListByResourceGroup_564173(
     name: "replicaSetsListByResourceGroup", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.AAD/domainServices/{domainServiceName}/replicaSets",
-    validator: validate_ReplicaSetsListByResourceGroup_568274, base: "",
-    url: url_ReplicaSetsListByResourceGroup_568275, schemes: {Scheme.Https})
+    validator: validate_ReplicaSetsListByResourceGroup_564174, base: "",
+    url: url_ReplicaSetsListByResourceGroup_564175, schemes: {Scheme.Https})
 type
-  Call_ReplicaSetsCreateOrUpdate_568296 = ref object of OpenApiRestCall_567657
-proc url_ReplicaSetsCreateOrUpdate_568298(protocol: Scheme; host: string;
+  Call_ReplicaSetsCreateOrUpdate_564196 = ref object of OpenApiRestCall_563555
+proc url_ReplicaSetsCreateOrUpdate_564198(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -978,44 +983,44 @@ proc url_ReplicaSetsCreateOrUpdate_568298(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ReplicaSetsCreateOrUpdate_568297(path: JsonNode; query: JsonNode;
+proc validate_ReplicaSetsCreateOrUpdate_564197(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## The Create ReplicaSet operation creates a new domain service with the specified parameters.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
-  ##   subscriptionId: JString (required)
-  ##                 : Gets subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   replicaSetName: JString (required)
-  ##                 : The name of the replica set.
   ##   domainServiceName: JString (required)
   ##                    : The name of the domain service.
+  ##   subscriptionId: JString (required)
+  ##                 : Gets subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
+  ##   replicaSetName: JString (required)
+  ##                 : The name of the replica set.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568299 = path.getOrDefault("resourceGroupName")
-  valid_568299 = validateParameter(valid_568299, JString, required = true,
+        "path argument is necessary due to required `domainServiceName` field"
+  var valid_564199 = path.getOrDefault("domainServiceName")
+  valid_564199 = validateParameter(valid_564199, JString, required = true,
                                  default = nil)
-  if valid_568299 != nil:
-    section.add "resourceGroupName", valid_568299
-  var valid_568300 = path.getOrDefault("subscriptionId")
-  valid_568300 = validateParameter(valid_568300, JString, required = true,
+  if valid_564199 != nil:
+    section.add "domainServiceName", valid_564199
+  var valid_564200 = path.getOrDefault("subscriptionId")
+  valid_564200 = validateParameter(valid_564200, JString, required = true,
                                  default = nil)
-  if valid_568300 != nil:
-    section.add "subscriptionId", valid_568300
-  var valid_568301 = path.getOrDefault("replicaSetName")
-  valid_568301 = validateParameter(valid_568301, JString, required = true,
+  if valid_564200 != nil:
+    section.add "subscriptionId", valid_564200
+  var valid_564201 = path.getOrDefault("resourceGroupName")
+  valid_564201 = validateParameter(valid_564201, JString, required = true,
                                  default = nil)
-  if valid_568301 != nil:
-    section.add "replicaSetName", valid_568301
-  var valid_568302 = path.getOrDefault("domainServiceName")
-  valid_568302 = validateParameter(valid_568302, JString, required = true,
+  if valid_564201 != nil:
+    section.add "resourceGroupName", valid_564201
+  var valid_564202 = path.getOrDefault("replicaSetName")
+  valid_564202 = validateParameter(valid_564202, JString, required = true,
                                  default = nil)
-  if valid_568302 != nil:
-    section.add "domainServiceName", valid_568302
+  if valid_564202 != nil:
+    section.add "replicaSetName", valid_564202
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1023,11 +1028,11 @@ proc validate_ReplicaSetsCreateOrUpdate_568297(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568303 = query.getOrDefault("api-version")
-  valid_568303 = validateParameter(valid_568303, JString, required = true,
+  var valid_564203 = query.getOrDefault("api-version")
+  valid_564203 = validateParameter(valid_564203, JString, required = true,
                                  default = nil)
-  if valid_568303 != nil:
-    section.add "api-version", valid_568303
+  if valid_564203 != nil:
+    section.add "api-version", valid_564203
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1041,56 +1046,56 @@ proc validate_ReplicaSetsCreateOrUpdate_568297(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568305: Call_ReplicaSetsCreateOrUpdate_568296; path: JsonNode;
+proc call*(call_564205: Call_ReplicaSetsCreateOrUpdate_564196; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## The Create ReplicaSet operation creates a new domain service with the specified parameters.
   ## 
-  let valid = call_568305.validator(path, query, header, formData, body)
-  let scheme = call_568305.pickScheme
+  let valid = call_564205.validator(path, query, header, formData, body)
+  let scheme = call_564205.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568305.url(scheme.get, call_568305.host, call_568305.base,
-                         call_568305.route, valid.getOrDefault("path"),
+  let url = call_564205.url(scheme.get, call_564205.host, call_564205.base,
+                         call_564205.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568305, url, valid)
+  result = hook(call_564205, url, valid)
 
-proc call*(call_568306: Call_ReplicaSetsCreateOrUpdate_568296;
-          resourceGroupName: string; apiVersion: string; replicaSet: JsonNode;
-          subscriptionId: string; replicaSetName: string; domainServiceName: string): Recallable =
+proc call*(call_564206: Call_ReplicaSetsCreateOrUpdate_564196;
+          replicaSet: JsonNode; apiVersion: string; domainServiceName: string;
+          subscriptionId: string; resourceGroupName: string; replicaSetName: string): Recallable =
   ## replicaSetsCreateOrUpdate
   ## The Create ReplicaSet operation creates a new domain service with the specified parameters.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
-  ##   apiVersion: string (required)
-  ##             : Client Api Version.
   ##   replicaSet: JObject (required)
   ##             : Properties supplied to the Create ReplicaSet operation.
-  ##   subscriptionId: string (required)
-  ##                 : Gets subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   replicaSetName: string (required)
-  ##                 : The name of the replica set.
+  ##   apiVersion: string (required)
+  ##             : Client Api Version.
   ##   domainServiceName: string (required)
   ##                    : The name of the domain service.
-  var path_568307 = newJObject()
-  var query_568308 = newJObject()
-  var body_568309 = newJObject()
-  add(path_568307, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568308, "api-version", newJString(apiVersion))
+  ##   subscriptionId: string (required)
+  ##                 : Gets subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
+  ##   replicaSetName: string (required)
+  ##                 : The name of the replica set.
+  var path_564207 = newJObject()
+  var query_564208 = newJObject()
+  var body_564209 = newJObject()
   if replicaSet != nil:
-    body_568309 = replicaSet
-  add(path_568307, "subscriptionId", newJString(subscriptionId))
-  add(path_568307, "replicaSetName", newJString(replicaSetName))
-  add(path_568307, "domainServiceName", newJString(domainServiceName))
-  result = call_568306.call(path_568307, query_568308, nil, nil, body_568309)
+    body_564209 = replicaSet
+  add(query_564208, "api-version", newJString(apiVersion))
+  add(path_564207, "domainServiceName", newJString(domainServiceName))
+  add(path_564207, "subscriptionId", newJString(subscriptionId))
+  add(path_564207, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564207, "replicaSetName", newJString(replicaSetName))
+  result = call_564206.call(path_564207, query_564208, nil, nil, body_564209)
 
-var replicaSetsCreateOrUpdate* = Call_ReplicaSetsCreateOrUpdate_568296(
+var replicaSetsCreateOrUpdate* = Call_ReplicaSetsCreateOrUpdate_564196(
     name: "replicaSetsCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.AAD/domainServices/{domainServiceName}/replicaSets/{replicaSetName}",
-    validator: validate_ReplicaSetsCreateOrUpdate_568297, base: "",
-    url: url_ReplicaSetsCreateOrUpdate_568298, schemes: {Scheme.Https})
+    validator: validate_ReplicaSetsCreateOrUpdate_564197, base: "",
+    url: url_ReplicaSetsCreateOrUpdate_564198, schemes: {Scheme.Https})
 type
-  Call_ReplicaSetsGet_568284 = ref object of OpenApiRestCall_567657
-proc url_ReplicaSetsGet_568286(protocol: Scheme; host: string; base: string;
+  Call_ReplicaSetsGet_564184 = ref object of OpenApiRestCall_563555
+proc url_ReplicaSetsGet_564186(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1116,7 +1121,7 @@ proc url_ReplicaSetsGet_568286(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ReplicaSetsGet_568285(path: JsonNode; query: JsonNode;
+proc validate_ReplicaSetsGet_564185(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## The Get ReplicaSet operation retrieves a json representation of the ReplicaSet.
@@ -1124,37 +1129,37 @@ proc validate_ReplicaSetsGet_568285(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
-  ##   subscriptionId: JString (required)
-  ##                 : Gets subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   replicaSetName: JString (required)
-  ##                 : The name of the replica set.
   ##   domainServiceName: JString (required)
   ##                    : The name of the domain service.
+  ##   subscriptionId: JString (required)
+  ##                 : Gets subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
+  ##   replicaSetName: JString (required)
+  ##                 : The name of the replica set.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568287 = path.getOrDefault("resourceGroupName")
-  valid_568287 = validateParameter(valid_568287, JString, required = true,
+        "path argument is necessary due to required `domainServiceName` field"
+  var valid_564187 = path.getOrDefault("domainServiceName")
+  valid_564187 = validateParameter(valid_564187, JString, required = true,
                                  default = nil)
-  if valid_568287 != nil:
-    section.add "resourceGroupName", valid_568287
-  var valid_568288 = path.getOrDefault("subscriptionId")
-  valid_568288 = validateParameter(valid_568288, JString, required = true,
+  if valid_564187 != nil:
+    section.add "domainServiceName", valid_564187
+  var valid_564188 = path.getOrDefault("subscriptionId")
+  valid_564188 = validateParameter(valid_564188, JString, required = true,
                                  default = nil)
-  if valid_568288 != nil:
-    section.add "subscriptionId", valid_568288
-  var valid_568289 = path.getOrDefault("replicaSetName")
-  valid_568289 = validateParameter(valid_568289, JString, required = true,
+  if valid_564188 != nil:
+    section.add "subscriptionId", valid_564188
+  var valid_564189 = path.getOrDefault("resourceGroupName")
+  valid_564189 = validateParameter(valid_564189, JString, required = true,
                                  default = nil)
-  if valid_568289 != nil:
-    section.add "replicaSetName", valid_568289
-  var valid_568290 = path.getOrDefault("domainServiceName")
-  valid_568290 = validateParameter(valid_568290, JString, required = true,
+  if valid_564189 != nil:
+    section.add "resourceGroupName", valid_564189
+  var valid_564190 = path.getOrDefault("replicaSetName")
+  valid_564190 = validateParameter(valid_564190, JString, required = true,
                                  default = nil)
-  if valid_568290 != nil:
-    section.add "domainServiceName", valid_568290
+  if valid_564190 != nil:
+    section.add "replicaSetName", valid_564190
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1162,11 +1167,11 @@ proc validate_ReplicaSetsGet_568285(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568291 = query.getOrDefault("api-version")
-  valid_568291 = validateParameter(valid_568291, JString, required = true,
+  var valid_564191 = query.getOrDefault("api-version")
+  valid_564191 = validateParameter(valid_564191, JString, required = true,
                                  default = nil)
-  if valid_568291 != nil:
-    section.add "api-version", valid_568291
+  if valid_564191 != nil:
+    section.add "api-version", valid_564191
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1175,50 +1180,50 @@ proc validate_ReplicaSetsGet_568285(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568292: Call_ReplicaSetsGet_568284; path: JsonNode; query: JsonNode;
+proc call*(call_564192: Call_ReplicaSetsGet_564184; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## The Get ReplicaSet operation retrieves a json representation of the ReplicaSet.
   ## 
-  let valid = call_568292.validator(path, query, header, formData, body)
-  let scheme = call_568292.pickScheme
+  let valid = call_564192.validator(path, query, header, formData, body)
+  let scheme = call_564192.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568292.url(scheme.get, call_568292.host, call_568292.base,
-                         call_568292.route, valid.getOrDefault("path"),
+  let url = call_564192.url(scheme.get, call_564192.host, call_564192.base,
+                         call_564192.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568292, url, valid)
+  result = hook(call_564192, url, valid)
 
-proc call*(call_568293: Call_ReplicaSetsGet_568284; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; replicaSetName: string;
-          domainServiceName: string): Recallable =
+proc call*(call_564193: Call_ReplicaSetsGet_564184; apiVersion: string;
+          domainServiceName: string; subscriptionId: string;
+          resourceGroupName: string; replicaSetName: string): Recallable =
   ## replicaSetsGet
   ## The Get ReplicaSet operation retrieves a json representation of the ReplicaSet.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
-  ##   subscriptionId: string (required)
-  ##                 : Gets subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   replicaSetName: string (required)
-  ##                 : The name of the replica set.
   ##   domainServiceName: string (required)
   ##                    : The name of the domain service.
-  var path_568294 = newJObject()
-  var query_568295 = newJObject()
-  add(path_568294, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568295, "api-version", newJString(apiVersion))
-  add(path_568294, "subscriptionId", newJString(subscriptionId))
-  add(path_568294, "replicaSetName", newJString(replicaSetName))
-  add(path_568294, "domainServiceName", newJString(domainServiceName))
-  result = call_568293.call(path_568294, query_568295, nil, nil, nil)
+  ##   subscriptionId: string (required)
+  ##                 : Gets subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
+  ##   replicaSetName: string (required)
+  ##                 : The name of the replica set.
+  var path_564194 = newJObject()
+  var query_564195 = newJObject()
+  add(query_564195, "api-version", newJString(apiVersion))
+  add(path_564194, "domainServiceName", newJString(domainServiceName))
+  add(path_564194, "subscriptionId", newJString(subscriptionId))
+  add(path_564194, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564194, "replicaSetName", newJString(replicaSetName))
+  result = call_564193.call(path_564194, query_564195, nil, nil, nil)
 
-var replicaSetsGet* = Call_ReplicaSetsGet_568284(name: "replicaSetsGet",
+var replicaSetsGet* = Call_ReplicaSetsGet_564184(name: "replicaSetsGet",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.AAD/domainServices/{domainServiceName}/replicaSets/{replicaSetName}",
-    validator: validate_ReplicaSetsGet_568285, base: "", url: url_ReplicaSetsGet_568286,
+    validator: validate_ReplicaSetsGet_564185, base: "", url: url_ReplicaSetsGet_564186,
     schemes: {Scheme.Https})
 type
-  Call_ReplicaSetsUpdate_568322 = ref object of OpenApiRestCall_567657
-proc url_ReplicaSetsUpdate_568324(protocol: Scheme; host: string; base: string;
+  Call_ReplicaSetsUpdate_564222 = ref object of OpenApiRestCall_563555
+proc url_ReplicaSetsUpdate_564224(protocol: Scheme; host: string; base: string;
                                  route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1244,7 +1249,7 @@ proc url_ReplicaSetsUpdate_568324(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ReplicaSetsUpdate_568323(path: JsonNode; query: JsonNode;
+proc validate_ReplicaSetsUpdate_564223(path: JsonNode; query: JsonNode;
                                       header: JsonNode; formData: JsonNode;
                                       body: JsonNode): JsonNode =
   ## The Update ReplicaSet operation can be used to update the existing deployment. The update call only supports the properties listed in the PATCH body.
@@ -1252,37 +1257,37 @@ proc validate_ReplicaSetsUpdate_568323(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
-  ##   subscriptionId: JString (required)
-  ##                 : Gets subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   replicaSetName: JString (required)
-  ##                 : The name of the replica set.
   ##   domainServiceName: JString (required)
   ##                    : The name of the domain service.
+  ##   subscriptionId: JString (required)
+  ##                 : Gets subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
+  ##   replicaSetName: JString (required)
+  ##                 : The name of the replica set.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568325 = path.getOrDefault("resourceGroupName")
-  valid_568325 = validateParameter(valid_568325, JString, required = true,
+        "path argument is necessary due to required `domainServiceName` field"
+  var valid_564225 = path.getOrDefault("domainServiceName")
+  valid_564225 = validateParameter(valid_564225, JString, required = true,
                                  default = nil)
-  if valid_568325 != nil:
-    section.add "resourceGroupName", valid_568325
-  var valid_568326 = path.getOrDefault("subscriptionId")
-  valid_568326 = validateParameter(valid_568326, JString, required = true,
+  if valid_564225 != nil:
+    section.add "domainServiceName", valid_564225
+  var valid_564226 = path.getOrDefault("subscriptionId")
+  valid_564226 = validateParameter(valid_564226, JString, required = true,
                                  default = nil)
-  if valid_568326 != nil:
-    section.add "subscriptionId", valid_568326
-  var valid_568327 = path.getOrDefault("replicaSetName")
-  valid_568327 = validateParameter(valid_568327, JString, required = true,
+  if valid_564226 != nil:
+    section.add "subscriptionId", valid_564226
+  var valid_564227 = path.getOrDefault("resourceGroupName")
+  valid_564227 = validateParameter(valid_564227, JString, required = true,
                                  default = nil)
-  if valid_568327 != nil:
-    section.add "replicaSetName", valid_568327
-  var valid_568328 = path.getOrDefault("domainServiceName")
-  valid_568328 = validateParameter(valid_568328, JString, required = true,
+  if valid_564227 != nil:
+    section.add "resourceGroupName", valid_564227
+  var valid_564228 = path.getOrDefault("replicaSetName")
+  valid_564228 = validateParameter(valid_564228, JString, required = true,
                                  default = nil)
-  if valid_568328 != nil:
-    section.add "domainServiceName", valid_568328
+  if valid_564228 != nil:
+    section.add "replicaSetName", valid_564228
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1290,11 +1295,11 @@ proc validate_ReplicaSetsUpdate_568323(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568329 = query.getOrDefault("api-version")
-  valid_568329 = validateParameter(valid_568329, JString, required = true,
+  var valid_564229 = query.getOrDefault("api-version")
+  valid_564229 = validateParameter(valid_564229, JString, required = true,
                                  default = nil)
-  if valid_568329 != nil:
-    section.add "api-version", valid_568329
+  if valid_564229 != nil:
+    section.add "api-version", valid_564229
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1308,55 +1313,55 @@ proc validate_ReplicaSetsUpdate_568323(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568331: Call_ReplicaSetsUpdate_568322; path: JsonNode;
+proc call*(call_564231: Call_ReplicaSetsUpdate_564222; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## The Update ReplicaSet operation can be used to update the existing deployment. The update call only supports the properties listed in the PATCH body.
   ## 
-  let valid = call_568331.validator(path, query, header, formData, body)
-  let scheme = call_568331.pickScheme
+  let valid = call_564231.validator(path, query, header, formData, body)
+  let scheme = call_564231.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568331.url(scheme.get, call_568331.host, call_568331.base,
-                         call_568331.route, valid.getOrDefault("path"),
+  let url = call_564231.url(scheme.get, call_564231.host, call_564231.base,
+                         call_564231.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568331, url, valid)
+  result = hook(call_564231, url, valid)
 
-proc call*(call_568332: Call_ReplicaSetsUpdate_568322; resourceGroupName: string;
-          apiVersion: string; replicaSet: JsonNode; subscriptionId: string;
-          replicaSetName: string; domainServiceName: string): Recallable =
+proc call*(call_564232: Call_ReplicaSetsUpdate_564222; replicaSet: JsonNode;
+          apiVersion: string; domainServiceName: string; subscriptionId: string;
+          resourceGroupName: string; replicaSetName: string): Recallable =
   ## replicaSetsUpdate
   ## The Update ReplicaSet operation can be used to update the existing deployment. The update call only supports the properties listed in the PATCH body.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
-  ##   apiVersion: string (required)
-  ##             : Client Api Version.
   ##   replicaSet: JObject (required)
   ##             : Properties supplied to the Update a ReplicaSet operation.
-  ##   subscriptionId: string (required)
-  ##                 : Gets subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   replicaSetName: string (required)
-  ##                 : The name of the replica set.
+  ##   apiVersion: string (required)
+  ##             : Client Api Version.
   ##   domainServiceName: string (required)
   ##                    : The name of the domain service.
-  var path_568333 = newJObject()
-  var query_568334 = newJObject()
-  var body_568335 = newJObject()
-  add(path_568333, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568334, "api-version", newJString(apiVersion))
+  ##   subscriptionId: string (required)
+  ##                 : Gets subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
+  ##   replicaSetName: string (required)
+  ##                 : The name of the replica set.
+  var path_564233 = newJObject()
+  var query_564234 = newJObject()
+  var body_564235 = newJObject()
   if replicaSet != nil:
-    body_568335 = replicaSet
-  add(path_568333, "subscriptionId", newJString(subscriptionId))
-  add(path_568333, "replicaSetName", newJString(replicaSetName))
-  add(path_568333, "domainServiceName", newJString(domainServiceName))
-  result = call_568332.call(path_568333, query_568334, nil, nil, body_568335)
+    body_564235 = replicaSet
+  add(query_564234, "api-version", newJString(apiVersion))
+  add(path_564233, "domainServiceName", newJString(domainServiceName))
+  add(path_564233, "subscriptionId", newJString(subscriptionId))
+  add(path_564233, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564233, "replicaSetName", newJString(replicaSetName))
+  result = call_564232.call(path_564233, query_564234, nil, nil, body_564235)
 
-var replicaSetsUpdate* = Call_ReplicaSetsUpdate_568322(name: "replicaSetsUpdate",
+var replicaSetsUpdate* = Call_ReplicaSetsUpdate_564222(name: "replicaSetsUpdate",
     meth: HttpMethod.HttpPatch, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.AAD/domainServices/{domainServiceName}/replicaSets/{replicaSetName}",
-    validator: validate_ReplicaSetsUpdate_568323, base: "",
-    url: url_ReplicaSetsUpdate_568324, schemes: {Scheme.Https})
+    validator: validate_ReplicaSetsUpdate_564223, base: "",
+    url: url_ReplicaSetsUpdate_564224, schemes: {Scheme.Https})
 type
-  Call_ReplicaSetsDelete_568310 = ref object of OpenApiRestCall_567657
-proc url_ReplicaSetsDelete_568312(protocol: Scheme; host: string; base: string;
+  Call_ReplicaSetsDelete_564210 = ref object of OpenApiRestCall_563555
+proc url_ReplicaSetsDelete_564212(protocol: Scheme; host: string; base: string;
                                  route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1382,7 +1387,7 @@ proc url_ReplicaSetsDelete_568312(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ReplicaSetsDelete_568311(path: JsonNode; query: JsonNode;
+proc validate_ReplicaSetsDelete_564211(path: JsonNode; query: JsonNode;
                                       header: JsonNode; formData: JsonNode;
                                       body: JsonNode): JsonNode =
   ## The Delete ReplicaSet operation deletes an existing ReplicaSet.
@@ -1390,37 +1395,37 @@ proc validate_ReplicaSetsDelete_568311(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
-  ##   subscriptionId: JString (required)
-  ##                 : Gets subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   replicaSetName: JString (required)
-  ##                 : The name of the replica set.
   ##   domainServiceName: JString (required)
   ##                    : The name of the domain service.
+  ##   subscriptionId: JString (required)
+  ##                 : Gets subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
+  ##   replicaSetName: JString (required)
+  ##                 : The name of the replica set.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568313 = path.getOrDefault("resourceGroupName")
-  valid_568313 = validateParameter(valid_568313, JString, required = true,
+        "path argument is necessary due to required `domainServiceName` field"
+  var valid_564213 = path.getOrDefault("domainServiceName")
+  valid_564213 = validateParameter(valid_564213, JString, required = true,
                                  default = nil)
-  if valid_568313 != nil:
-    section.add "resourceGroupName", valid_568313
-  var valid_568314 = path.getOrDefault("subscriptionId")
-  valid_568314 = validateParameter(valid_568314, JString, required = true,
+  if valid_564213 != nil:
+    section.add "domainServiceName", valid_564213
+  var valid_564214 = path.getOrDefault("subscriptionId")
+  valid_564214 = validateParameter(valid_564214, JString, required = true,
                                  default = nil)
-  if valid_568314 != nil:
-    section.add "subscriptionId", valid_568314
-  var valid_568315 = path.getOrDefault("replicaSetName")
-  valid_568315 = validateParameter(valid_568315, JString, required = true,
+  if valid_564214 != nil:
+    section.add "subscriptionId", valid_564214
+  var valid_564215 = path.getOrDefault("resourceGroupName")
+  valid_564215 = validateParameter(valid_564215, JString, required = true,
                                  default = nil)
-  if valid_568315 != nil:
-    section.add "replicaSetName", valid_568315
-  var valid_568316 = path.getOrDefault("domainServiceName")
-  valid_568316 = validateParameter(valid_568316, JString, required = true,
+  if valid_564215 != nil:
+    section.add "resourceGroupName", valid_564215
+  var valid_564216 = path.getOrDefault("replicaSetName")
+  valid_564216 = validateParameter(valid_564216, JString, required = true,
                                  default = nil)
-  if valid_568316 != nil:
-    section.add "domainServiceName", valid_568316
+  if valid_564216 != nil:
+    section.add "replicaSetName", valid_564216
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1428,11 +1433,11 @@ proc validate_ReplicaSetsDelete_568311(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568317 = query.getOrDefault("api-version")
-  valid_568317 = validateParameter(valid_568317, JString, required = true,
+  var valid_564217 = query.getOrDefault("api-version")
+  valid_564217 = validateParameter(valid_564217, JString, required = true,
                                  default = nil)
-  if valid_568317 != nil:
-    section.add "api-version", valid_568317
+  if valid_564217 != nil:
+    section.add "api-version", valid_564217
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1441,47 +1446,47 @@ proc validate_ReplicaSetsDelete_568311(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568318: Call_ReplicaSetsDelete_568310; path: JsonNode;
+proc call*(call_564218: Call_ReplicaSetsDelete_564210; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## The Delete ReplicaSet operation deletes an existing ReplicaSet.
   ## 
-  let valid = call_568318.validator(path, query, header, formData, body)
-  let scheme = call_568318.pickScheme
+  let valid = call_564218.validator(path, query, header, formData, body)
+  let scheme = call_564218.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568318.url(scheme.get, call_568318.host, call_568318.base,
-                         call_568318.route, valid.getOrDefault("path"),
+  let url = call_564218.url(scheme.get, call_564218.host, call_564218.base,
+                         call_564218.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568318, url, valid)
+  result = hook(call_564218, url, valid)
 
-proc call*(call_568319: Call_ReplicaSetsDelete_568310; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; replicaSetName: string;
-          domainServiceName: string): Recallable =
+proc call*(call_564219: Call_ReplicaSetsDelete_564210; apiVersion: string;
+          domainServiceName: string; subscriptionId: string;
+          resourceGroupName: string; replicaSetName: string): Recallable =
   ## replicaSetsDelete
   ## The Delete ReplicaSet operation deletes an existing ReplicaSet.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
-  ##   subscriptionId: string (required)
-  ##                 : Gets subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   replicaSetName: string (required)
-  ##                 : The name of the replica set.
   ##   domainServiceName: string (required)
   ##                    : The name of the domain service.
-  var path_568320 = newJObject()
-  var query_568321 = newJObject()
-  add(path_568320, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568321, "api-version", newJString(apiVersion))
-  add(path_568320, "subscriptionId", newJString(subscriptionId))
-  add(path_568320, "replicaSetName", newJString(replicaSetName))
-  add(path_568320, "domainServiceName", newJString(domainServiceName))
-  result = call_568319.call(path_568320, query_568321, nil, nil, nil)
+  ##   subscriptionId: string (required)
+  ##                 : Gets subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
+  ##   replicaSetName: string (required)
+  ##                 : The name of the replica set.
+  var path_564220 = newJObject()
+  var query_564221 = newJObject()
+  add(query_564221, "api-version", newJString(apiVersion))
+  add(path_564220, "domainServiceName", newJString(domainServiceName))
+  add(path_564220, "subscriptionId", newJString(subscriptionId))
+  add(path_564220, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564220, "replicaSetName", newJString(replicaSetName))
+  result = call_564219.call(path_564220, query_564221, nil, nil, nil)
 
-var replicaSetsDelete* = Call_ReplicaSetsDelete_568310(name: "replicaSetsDelete",
+var replicaSetsDelete* = Call_ReplicaSetsDelete_564210(name: "replicaSetsDelete",
     meth: HttpMethod.HttpDelete, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.AAD/domainServices/{domainServiceName}/replicaSets/{replicaSetName}",
-    validator: validate_ReplicaSetsDelete_568311, base: "",
-    url: url_ReplicaSetsDelete_568312, schemes: {Scheme.Https})
+    validator: validate_ReplicaSetsDelete_564211, base: "",
+    url: url_ReplicaSetsDelete_564212, schemes: {Scheme.Https})
 export
   rest
 

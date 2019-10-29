@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, httpcore
 
 ## auto-generated via openapi macro
 ## title: TrafficManagerManagementClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_567642 = ref object of OpenApiRestCall
+  OpenApiRestCall_563540 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_567642](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563540](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_567642): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563540): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,8 +107,8 @@ const
   macServiceName = "trafficmanager"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_ProfilesCheckTrafficManagerRelativeDnsNameAvailability_567864 = ref object of OpenApiRestCall_567642
-proc url_ProfilesCheckTrafficManagerRelativeDnsNameAvailability_567866(
+  Call_ProfilesCheckTrafficManagerRelativeDnsNameAvailability_563762 = ref object of OpenApiRestCall_563540
+proc url_ProfilesCheckTrafficManagerRelativeDnsNameAvailability_563764(
     protocol: Scheme; host: string; base: string; route: string; path: JsonNode;
     query: JsonNode): Uri =
   result.scheme = $protocol
@@ -112,7 +116,7 @@ proc url_ProfilesCheckTrafficManagerRelativeDnsNameAvailability_567866(
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_ProfilesCheckTrafficManagerRelativeDnsNameAvailability_567865(
+proc validate_ProfilesCheckTrafficManagerRelativeDnsNameAvailability_563763(
     path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
     body: JsonNode): JsonNode =
   ## Checks the availability of a Traffic Manager Relative DNS name.
@@ -127,11 +131,11 @@ proc validate_ProfilesCheckTrafficManagerRelativeDnsNameAvailability_567865(
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568042 = query.getOrDefault("api-version")
-  valid_568042 = validateParameter(valid_568042, JString, required = true,
+  var valid_563942 = query.getOrDefault("api-version")
+  valid_563942 = validateParameter(valid_563942, JString, required = true,
                                  default = nil)
-  if valid_568042 != nil:
-    section.add "api-version", valid_568042
+  if valid_563942 != nil:
+    section.add "api-version", valid_563942
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -145,21 +149,21 @@ proc validate_ProfilesCheckTrafficManagerRelativeDnsNameAvailability_567865(
   if body != nil:
     result.add "body", body
 
-proc call*(call_568066: Call_ProfilesCheckTrafficManagerRelativeDnsNameAvailability_567864;
+proc call*(call_563966: Call_ProfilesCheckTrafficManagerRelativeDnsNameAvailability_563762;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Checks the availability of a Traffic Manager Relative DNS name.
   ## 
-  let valid = call_568066.validator(path, query, header, formData, body)
-  let scheme = call_568066.pickScheme
+  let valid = call_563966.validator(path, query, header, formData, body)
+  let scheme = call_563966.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568066.url(scheme.get, call_568066.host, call_568066.base,
-                         call_568066.route, valid.getOrDefault("path"),
+  let url = call_563966.url(scheme.get, call_563966.host, call_563966.base,
+                         call_563966.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568066, url, valid)
+  result = hook(call_563966, url, valid)
 
-proc call*(call_568137: Call_ProfilesCheckTrafficManagerRelativeDnsNameAvailability_567864;
+proc call*(call_564037: Call_ProfilesCheckTrafficManagerRelativeDnsNameAvailability_563762;
           apiVersion: string; parameters: JsonNode): Recallable =
   ## profilesCheckTrafficManagerRelativeDnsNameAvailability
   ## Checks the availability of a Traffic Manager Relative DNS name.
@@ -167,23 +171,23 @@ proc call*(call_568137: Call_ProfilesCheckTrafficManagerRelativeDnsNameAvailabil
   ##             : Client Api Version.
   ##   parameters: JObject (required)
   ##             : The Traffic Manager name parameters supplied to the CheckTrafficManagerNameAvailability operation.
-  var query_568138 = newJObject()
-  var body_568140 = newJObject()
-  add(query_568138, "api-version", newJString(apiVersion))
+  var query_564038 = newJObject()
+  var body_564040 = newJObject()
+  add(query_564038, "api-version", newJString(apiVersion))
   if parameters != nil:
-    body_568140 = parameters
-  result = call_568137.call(nil, query_568138, nil, nil, body_568140)
+    body_564040 = parameters
+  result = call_564037.call(nil, query_564038, nil, nil, body_564040)
 
-var profilesCheckTrafficManagerRelativeDnsNameAvailability* = Call_ProfilesCheckTrafficManagerRelativeDnsNameAvailability_567864(
+var profilesCheckTrafficManagerRelativeDnsNameAvailability* = Call_ProfilesCheckTrafficManagerRelativeDnsNameAvailability_563762(
     name: "profilesCheckTrafficManagerRelativeDnsNameAvailability",
     meth: HttpMethod.HttpPost, host: "management.azure.com",
     route: "/providers/Microsoft.Network/checkTrafficManagerNameAvailability",
-    validator: validate_ProfilesCheckTrafficManagerRelativeDnsNameAvailability_567865,
-    base: "", url: url_ProfilesCheckTrafficManagerRelativeDnsNameAvailability_567866,
+    validator: validate_ProfilesCheckTrafficManagerRelativeDnsNameAvailability_563763,
+    base: "", url: url_ProfilesCheckTrafficManagerRelativeDnsNameAvailability_563764,
     schemes: {Scheme.Https})
 type
-  Call_ProfilesListAll_568179 = ref object of OpenApiRestCall_567642
-proc url_ProfilesListAll_568181(protocol: Scheme; host: string; base: string;
+  Call_ProfilesListAll_564079 = ref object of OpenApiRestCall_563540
+proc url_ProfilesListAll_564081(protocol: Scheme; host: string; base: string;
                                route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -200,7 +204,7 @@ proc url_ProfilesListAll_568181(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ProfilesListAll_568180(path: JsonNode; query: JsonNode;
+proc validate_ProfilesListAll_564080(path: JsonNode; query: JsonNode;
                                     header: JsonNode; formData: JsonNode;
                                     body: JsonNode): JsonNode =
   ## Lists all Traffic Manager profiles within a subscription.
@@ -213,11 +217,11 @@ proc validate_ProfilesListAll_568180(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_568196 = path.getOrDefault("subscriptionId")
-  valid_568196 = validateParameter(valid_568196, JString, required = true,
+  var valid_564096 = path.getOrDefault("subscriptionId")
+  valid_564096 = validateParameter(valid_564096, JString, required = true,
                                  default = nil)
-  if valid_568196 != nil:
-    section.add "subscriptionId", valid_568196
+  if valid_564096 != nil:
+    section.add "subscriptionId", valid_564096
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -225,11 +229,11 @@ proc validate_ProfilesListAll_568180(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568197 = query.getOrDefault("api-version")
-  valid_568197 = validateParameter(valid_568197, JString, required = true,
+  var valid_564097 = query.getOrDefault("api-version")
+  valid_564097 = validateParameter(valid_564097, JString, required = true,
                                  default = nil)
-  if valid_568197 != nil:
-    section.add "api-version", valid_568197
+  if valid_564097 != nil:
+    section.add "api-version", valid_564097
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -238,20 +242,20 @@ proc validate_ProfilesListAll_568180(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568198: Call_ProfilesListAll_568179; path: JsonNode; query: JsonNode;
+proc call*(call_564098: Call_ProfilesListAll_564079; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists all Traffic Manager profiles within a subscription.
   ## 
-  let valid = call_568198.validator(path, query, header, formData, body)
-  let scheme = call_568198.pickScheme
+  let valid = call_564098.validator(path, query, header, formData, body)
+  let scheme = call_564098.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568198.url(scheme.get, call_568198.host, call_568198.base,
-                         call_568198.route, valid.getOrDefault("path"),
+  let url = call_564098.url(scheme.get, call_564098.host, call_564098.base,
+                         call_564098.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568198, url, valid)
+  result = hook(call_564098, url, valid)
 
-proc call*(call_568199: Call_ProfilesListAll_568179; apiVersion: string;
+proc call*(call_564099: Call_ProfilesListAll_564079; apiVersion: string;
           subscriptionId: string): Recallable =
   ## profilesListAll
   ## Lists all Traffic Manager profiles within a subscription.
@@ -259,19 +263,19 @@ proc call*(call_568199: Call_ProfilesListAll_568179; apiVersion: string;
   ##             : Client Api Version.
   ##   subscriptionId: string (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_568200 = newJObject()
-  var query_568201 = newJObject()
-  add(query_568201, "api-version", newJString(apiVersion))
-  add(path_568200, "subscriptionId", newJString(subscriptionId))
-  result = call_568199.call(path_568200, query_568201, nil, nil, nil)
+  var path_564100 = newJObject()
+  var query_564101 = newJObject()
+  add(query_564101, "api-version", newJString(apiVersion))
+  add(path_564100, "subscriptionId", newJString(subscriptionId))
+  result = call_564099.call(path_564100, query_564101, nil, nil, nil)
 
-var profilesListAll* = Call_ProfilesListAll_568179(name: "profilesListAll",
+var profilesListAll* = Call_ProfilesListAll_564079(name: "profilesListAll",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Network/trafficmanagerprofiles",
-    validator: validate_ProfilesListAll_568180, base: "", url: url_ProfilesListAll_568181,
+    validator: validate_ProfilesListAll_564080, base: "", url: url_ProfilesListAll_564081,
     schemes: {Scheme.Https})
 type
-  Call_ProfilesListAllInResourceGroup_568202 = ref object of OpenApiRestCall_567642
-proc url_ProfilesListAllInResourceGroup_568204(protocol: Scheme; host: string;
+  Call_ProfilesListAllInResourceGroup_564102 = ref object of OpenApiRestCall_563540
+proc url_ProfilesListAllInResourceGroup_564104(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -292,30 +296,30 @@ proc url_ProfilesListAllInResourceGroup_568204(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ProfilesListAllInResourceGroup_568203(path: JsonNode;
+proc validate_ProfilesListAllInResourceGroup_564103(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists all Traffic Manager profiles within a resource group.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group containing the Traffic Manager profiles to be listed.
   ##   subscriptionId: JString (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group containing the Traffic Manager profiles to be listed.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568205 = path.getOrDefault("resourceGroupName")
-  valid_568205 = validateParameter(valid_568205, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564105 = path.getOrDefault("subscriptionId")
+  valid_564105 = validateParameter(valid_564105, JString, required = true,
                                  default = nil)
-  if valid_568205 != nil:
-    section.add "resourceGroupName", valid_568205
-  var valid_568206 = path.getOrDefault("subscriptionId")
-  valid_568206 = validateParameter(valid_568206, JString, required = true,
+  if valid_564105 != nil:
+    section.add "subscriptionId", valid_564105
+  var valid_564106 = path.getOrDefault("resourceGroupName")
+  valid_564106 = validateParameter(valid_564106, JString, required = true,
                                  default = nil)
-  if valid_568206 != nil:
-    section.add "subscriptionId", valid_568206
+  if valid_564106 != nil:
+    section.add "resourceGroupName", valid_564106
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -323,11 +327,11 @@ proc validate_ProfilesListAllInResourceGroup_568203(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568207 = query.getOrDefault("api-version")
-  valid_568207 = validateParameter(valid_568207, JString, required = true,
+  var valid_564107 = query.getOrDefault("api-version")
+  valid_564107 = validateParameter(valid_564107, JString, required = true,
                                  default = nil)
-  if valid_568207 != nil:
-    section.add "api-version", valid_568207
+  if valid_564107 != nil:
+    section.add "api-version", valid_564107
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -336,44 +340,44 @@ proc validate_ProfilesListAllInResourceGroup_568203(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568208: Call_ProfilesListAllInResourceGroup_568202; path: JsonNode;
+proc call*(call_564108: Call_ProfilesListAllInResourceGroup_564102; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists all Traffic Manager profiles within a resource group.
   ## 
-  let valid = call_568208.validator(path, query, header, formData, body)
-  let scheme = call_568208.pickScheme
+  let valid = call_564108.validator(path, query, header, formData, body)
+  let scheme = call_564108.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568208.url(scheme.get, call_568208.host, call_568208.base,
-                         call_568208.route, valid.getOrDefault("path"),
+  let url = call_564108.url(scheme.get, call_564108.host, call_564108.base,
+                         call_564108.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568208, url, valid)
+  result = hook(call_564108, url, valid)
 
-proc call*(call_568209: Call_ProfilesListAllInResourceGroup_568202;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string): Recallable =
+proc call*(call_564109: Call_ProfilesListAllInResourceGroup_564102;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string): Recallable =
   ## profilesListAllInResourceGroup
   ## Lists all Traffic Manager profiles within a resource group.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group containing the Traffic Manager profiles to be listed.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
   ##   subscriptionId: string (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_568210 = newJObject()
-  var query_568211 = newJObject()
-  add(path_568210, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568211, "api-version", newJString(apiVersion))
-  add(path_568210, "subscriptionId", newJString(subscriptionId))
-  result = call_568209.call(path_568210, query_568211, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group containing the Traffic Manager profiles to be listed.
+  var path_564110 = newJObject()
+  var query_564111 = newJObject()
+  add(query_564111, "api-version", newJString(apiVersion))
+  add(path_564110, "subscriptionId", newJString(subscriptionId))
+  add(path_564110, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564109.call(path_564110, query_564111, nil, nil, nil)
 
-var profilesListAllInResourceGroup* = Call_ProfilesListAllInResourceGroup_568202(
+var profilesListAllInResourceGroup* = Call_ProfilesListAllInResourceGroup_564102(
     name: "profilesListAllInResourceGroup", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/trafficmanagerprofiles",
-    validator: validate_ProfilesListAllInResourceGroup_568203, base: "",
-    url: url_ProfilesListAllInResourceGroup_568204, schemes: {Scheme.Https})
+    validator: validate_ProfilesListAllInResourceGroup_564103, base: "",
+    url: url_ProfilesListAllInResourceGroup_564104, schemes: {Scheme.Https})
 type
-  Call_ProfilesCreateOrUpdate_568223 = ref object of OpenApiRestCall_567642
-proc url_ProfilesCreateOrUpdate_568225(protocol: Scheme; host: string; base: string;
+  Call_ProfilesCreateOrUpdate_564123 = ref object of OpenApiRestCall_563540
+proc url_ProfilesCreateOrUpdate_564125(protocol: Scheme; host: string; base: string;
                                       route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -396,37 +400,37 @@ proc url_ProfilesCreateOrUpdate_568225(protocol: Scheme; host: string; base: str
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ProfilesCreateOrUpdate_568224(path: JsonNode; query: JsonNode;
+proc validate_ProfilesCreateOrUpdate_564124(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Create or update a Traffic Manager profile.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group containing the Traffic Manager profile.
-  ##   subscriptionId: JString (required)
-  ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   profileName: JString (required)
   ##              : The name of the Traffic Manager profile.
+  ##   subscriptionId: JString (required)
+  ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group containing the Traffic Manager profile.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568226 = path.getOrDefault("resourceGroupName")
-  valid_568226 = validateParameter(valid_568226, JString, required = true,
+        "path argument is necessary due to required `profileName` field"
+  var valid_564126 = path.getOrDefault("profileName")
+  valid_564126 = validateParameter(valid_564126, JString, required = true,
                                  default = nil)
-  if valid_568226 != nil:
-    section.add "resourceGroupName", valid_568226
-  var valid_568227 = path.getOrDefault("subscriptionId")
-  valid_568227 = validateParameter(valid_568227, JString, required = true,
+  if valid_564126 != nil:
+    section.add "profileName", valid_564126
+  var valid_564127 = path.getOrDefault("subscriptionId")
+  valid_564127 = validateParameter(valid_564127, JString, required = true,
                                  default = nil)
-  if valid_568227 != nil:
-    section.add "subscriptionId", valid_568227
-  var valid_568228 = path.getOrDefault("profileName")
-  valid_568228 = validateParameter(valid_568228, JString, required = true,
+  if valid_564127 != nil:
+    section.add "subscriptionId", valid_564127
+  var valid_564128 = path.getOrDefault("resourceGroupName")
+  valid_564128 = validateParameter(valid_564128, JString, required = true,
                                  default = nil)
-  if valid_568228 != nil:
-    section.add "profileName", valid_568228
+  if valid_564128 != nil:
+    section.add "resourceGroupName", valid_564128
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -434,11 +438,11 @@ proc validate_ProfilesCreateOrUpdate_568224(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568229 = query.getOrDefault("api-version")
-  valid_568229 = validateParameter(valid_568229, JString, required = true,
+  var valid_564129 = query.getOrDefault("api-version")
+  valid_564129 = validateParameter(valid_564129, JString, required = true,
                                  default = nil)
-  if valid_568229 != nil:
-    section.add "api-version", valid_568229
+  if valid_564129 != nil:
+    section.add "api-version", valid_564129
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -452,53 +456,53 @@ proc validate_ProfilesCreateOrUpdate_568224(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568231: Call_ProfilesCreateOrUpdate_568223; path: JsonNode;
+proc call*(call_564131: Call_ProfilesCreateOrUpdate_564123; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Create or update a Traffic Manager profile.
   ## 
-  let valid = call_568231.validator(path, query, header, formData, body)
-  let scheme = call_568231.pickScheme
+  let valid = call_564131.validator(path, query, header, formData, body)
+  let scheme = call_564131.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568231.url(scheme.get, call_568231.host, call_568231.base,
-                         call_568231.route, valid.getOrDefault("path"),
+  let url = call_564131.url(scheme.get, call_564131.host, call_564131.base,
+                         call_564131.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568231, url, valid)
+  result = hook(call_564131, url, valid)
 
-proc call*(call_568232: Call_ProfilesCreateOrUpdate_568223;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          profileName: string; parameters: JsonNode): Recallable =
+proc call*(call_564132: Call_ProfilesCreateOrUpdate_564123; profileName: string;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string;
+          parameters: JsonNode): Recallable =
   ## profilesCreateOrUpdate
   ## Create or update a Traffic Manager profile.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group containing the Traffic Manager profile.
+  ##   profileName: string (required)
+  ##              : The name of the Traffic Manager profile.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
   ##   subscriptionId: string (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   profileName: string (required)
-  ##              : The name of the Traffic Manager profile.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group containing the Traffic Manager profile.
   ##   parameters: JObject (required)
   ##             : The Traffic Manager profile parameters supplied to the CreateOrUpdate operation.
-  var path_568233 = newJObject()
-  var query_568234 = newJObject()
-  var body_568235 = newJObject()
-  add(path_568233, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568234, "api-version", newJString(apiVersion))
-  add(path_568233, "subscriptionId", newJString(subscriptionId))
-  add(path_568233, "profileName", newJString(profileName))
+  var path_564133 = newJObject()
+  var query_564134 = newJObject()
+  var body_564135 = newJObject()
+  add(path_564133, "profileName", newJString(profileName))
+  add(query_564134, "api-version", newJString(apiVersion))
+  add(path_564133, "subscriptionId", newJString(subscriptionId))
+  add(path_564133, "resourceGroupName", newJString(resourceGroupName))
   if parameters != nil:
-    body_568235 = parameters
-  result = call_568232.call(path_568233, query_568234, nil, nil, body_568235)
+    body_564135 = parameters
+  result = call_564132.call(path_564133, query_564134, nil, nil, body_564135)
 
-var profilesCreateOrUpdate* = Call_ProfilesCreateOrUpdate_568223(
+var profilesCreateOrUpdate* = Call_ProfilesCreateOrUpdate_564123(
     name: "profilesCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/trafficmanagerprofiles/{profileName}",
-    validator: validate_ProfilesCreateOrUpdate_568224, base: "",
-    url: url_ProfilesCreateOrUpdate_568225, schemes: {Scheme.Https})
+    validator: validate_ProfilesCreateOrUpdate_564124, base: "",
+    url: url_ProfilesCreateOrUpdate_564125, schemes: {Scheme.Https})
 type
-  Call_ProfilesGet_568212 = ref object of OpenApiRestCall_567642
-proc url_ProfilesGet_568214(protocol: Scheme; host: string; base: string;
+  Call_ProfilesGet_564112 = ref object of OpenApiRestCall_563540
+proc url_ProfilesGet_564114(protocol: Scheme; host: string; base: string;
                            route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -521,37 +525,37 @@ proc url_ProfilesGet_568214(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ProfilesGet_568213(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_ProfilesGet_564113(path: JsonNode; query: JsonNode; header: JsonNode;
                                 formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets a Traffic Manager profile.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group containing the Traffic Manager profile.
-  ##   subscriptionId: JString (required)
-  ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   profileName: JString (required)
   ##              : The name of the Traffic Manager profile.
+  ##   subscriptionId: JString (required)
+  ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group containing the Traffic Manager profile.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568215 = path.getOrDefault("resourceGroupName")
-  valid_568215 = validateParameter(valid_568215, JString, required = true,
+        "path argument is necessary due to required `profileName` field"
+  var valid_564115 = path.getOrDefault("profileName")
+  valid_564115 = validateParameter(valid_564115, JString, required = true,
                                  default = nil)
-  if valid_568215 != nil:
-    section.add "resourceGroupName", valid_568215
-  var valid_568216 = path.getOrDefault("subscriptionId")
-  valid_568216 = validateParameter(valid_568216, JString, required = true,
+  if valid_564115 != nil:
+    section.add "profileName", valid_564115
+  var valid_564116 = path.getOrDefault("subscriptionId")
+  valid_564116 = validateParameter(valid_564116, JString, required = true,
                                  default = nil)
-  if valid_568216 != nil:
-    section.add "subscriptionId", valid_568216
-  var valid_568217 = path.getOrDefault("profileName")
-  valid_568217 = validateParameter(valid_568217, JString, required = true,
+  if valid_564116 != nil:
+    section.add "subscriptionId", valid_564116
+  var valid_564117 = path.getOrDefault("resourceGroupName")
+  valid_564117 = validateParameter(valid_564117, JString, required = true,
                                  default = nil)
-  if valid_568217 != nil:
-    section.add "profileName", valid_568217
+  if valid_564117 != nil:
+    section.add "resourceGroupName", valid_564117
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -559,11 +563,11 @@ proc validate_ProfilesGet_568213(path: JsonNode; query: JsonNode; header: JsonNo
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568218 = query.getOrDefault("api-version")
-  valid_568218 = validateParameter(valid_568218, JString, required = true,
+  var valid_564118 = query.getOrDefault("api-version")
+  valid_564118 = validateParameter(valid_564118, JString, required = true,
                                  default = nil)
-  if valid_568218 != nil:
-    section.add "api-version", valid_568218
+  if valid_564118 != nil:
+    section.add "api-version", valid_564118
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -572,48 +576,48 @@ proc validate_ProfilesGet_568213(path: JsonNode; query: JsonNode; header: JsonNo
   if body != nil:
     result.add "body", body
 
-proc call*(call_568219: Call_ProfilesGet_568212; path: JsonNode; query: JsonNode;
+proc call*(call_564119: Call_ProfilesGet_564112; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets a Traffic Manager profile.
   ## 
-  let valid = call_568219.validator(path, query, header, formData, body)
-  let scheme = call_568219.pickScheme
+  let valid = call_564119.validator(path, query, header, formData, body)
+  let scheme = call_564119.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568219.url(scheme.get, call_568219.host, call_568219.base,
-                         call_568219.route, valid.getOrDefault("path"),
+  let url = call_564119.url(scheme.get, call_564119.host, call_564119.base,
+                         call_564119.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568219, url, valid)
+  result = hook(call_564119, url, valid)
 
-proc call*(call_568220: Call_ProfilesGet_568212; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; profileName: string): Recallable =
+proc call*(call_564120: Call_ProfilesGet_564112; profileName: string;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string): Recallable =
   ## profilesGet
   ## Gets a Traffic Manager profile.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group containing the Traffic Manager profile.
+  ##   profileName: string (required)
+  ##              : The name of the Traffic Manager profile.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
   ##   subscriptionId: string (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   profileName: string (required)
-  ##              : The name of the Traffic Manager profile.
-  var path_568221 = newJObject()
-  var query_568222 = newJObject()
-  add(path_568221, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568222, "api-version", newJString(apiVersion))
-  add(path_568221, "subscriptionId", newJString(subscriptionId))
-  add(path_568221, "profileName", newJString(profileName))
-  result = call_568220.call(path_568221, query_568222, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group containing the Traffic Manager profile.
+  var path_564121 = newJObject()
+  var query_564122 = newJObject()
+  add(path_564121, "profileName", newJString(profileName))
+  add(query_564122, "api-version", newJString(apiVersion))
+  add(path_564121, "subscriptionId", newJString(subscriptionId))
+  add(path_564121, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564120.call(path_564121, query_564122, nil, nil, nil)
 
-var profilesGet* = Call_ProfilesGet_568212(name: "profilesGet",
+var profilesGet* = Call_ProfilesGet_564112(name: "profilesGet",
                                         meth: HttpMethod.HttpGet,
                                         host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/trafficmanagerprofiles/{profileName}",
-                                        validator: validate_ProfilesGet_568213,
-                                        base: "", url: url_ProfilesGet_568214,
+                                        validator: validate_ProfilesGet_564113,
+                                        base: "", url: url_ProfilesGet_564114,
                                         schemes: {Scheme.Https})
 type
-  Call_ProfilesUpdate_568247 = ref object of OpenApiRestCall_567642
-proc url_ProfilesUpdate_568249(protocol: Scheme; host: string; base: string;
+  Call_ProfilesUpdate_564147 = ref object of OpenApiRestCall_563540
+proc url_ProfilesUpdate_564149(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -636,7 +640,7 @@ proc url_ProfilesUpdate_568249(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ProfilesUpdate_568248(path: JsonNode; query: JsonNode;
+proc validate_ProfilesUpdate_564148(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## Update a Traffic Manager profile.
@@ -644,30 +648,30 @@ proc validate_ProfilesUpdate_568248(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group containing the Traffic Manager profile.
-  ##   subscriptionId: JString (required)
-  ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   profileName: JString (required)
   ##              : The name of the Traffic Manager profile.
+  ##   subscriptionId: JString (required)
+  ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group containing the Traffic Manager profile.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568250 = path.getOrDefault("resourceGroupName")
-  valid_568250 = validateParameter(valid_568250, JString, required = true,
+        "path argument is necessary due to required `profileName` field"
+  var valid_564150 = path.getOrDefault("profileName")
+  valid_564150 = validateParameter(valid_564150, JString, required = true,
                                  default = nil)
-  if valid_568250 != nil:
-    section.add "resourceGroupName", valid_568250
-  var valid_568251 = path.getOrDefault("subscriptionId")
-  valid_568251 = validateParameter(valid_568251, JString, required = true,
+  if valid_564150 != nil:
+    section.add "profileName", valid_564150
+  var valid_564151 = path.getOrDefault("subscriptionId")
+  valid_564151 = validateParameter(valid_564151, JString, required = true,
                                  default = nil)
-  if valid_568251 != nil:
-    section.add "subscriptionId", valid_568251
-  var valid_568252 = path.getOrDefault("profileName")
-  valid_568252 = validateParameter(valid_568252, JString, required = true,
+  if valid_564151 != nil:
+    section.add "subscriptionId", valid_564151
+  var valid_564152 = path.getOrDefault("resourceGroupName")
+  valid_564152 = validateParameter(valid_564152, JString, required = true,
                                  default = nil)
-  if valid_568252 != nil:
-    section.add "profileName", valid_568252
+  if valid_564152 != nil:
+    section.add "resourceGroupName", valid_564152
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -675,11 +679,11 @@ proc validate_ProfilesUpdate_568248(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568253 = query.getOrDefault("api-version")
-  valid_568253 = validateParameter(valid_568253, JString, required = true,
+  var valid_564153 = query.getOrDefault("api-version")
+  valid_564153 = validateParameter(valid_564153, JString, required = true,
                                  default = nil)
-  if valid_568253 != nil:
-    section.add "api-version", valid_568253
+  if valid_564153 != nil:
+    section.add "api-version", valid_564153
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -693,52 +697,52 @@ proc validate_ProfilesUpdate_568248(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568255: Call_ProfilesUpdate_568247; path: JsonNode; query: JsonNode;
+proc call*(call_564155: Call_ProfilesUpdate_564147; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Update a Traffic Manager profile.
   ## 
-  let valid = call_568255.validator(path, query, header, formData, body)
-  let scheme = call_568255.pickScheme
+  let valid = call_564155.validator(path, query, header, formData, body)
+  let scheme = call_564155.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568255.url(scheme.get, call_568255.host, call_568255.base,
-                         call_568255.route, valid.getOrDefault("path"),
+  let url = call_564155.url(scheme.get, call_564155.host, call_564155.base,
+                         call_564155.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568255, url, valid)
+  result = hook(call_564155, url, valid)
 
-proc call*(call_568256: Call_ProfilesUpdate_568247; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; profileName: string;
+proc call*(call_564156: Call_ProfilesUpdate_564147; profileName: string;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string;
           parameters: JsonNode): Recallable =
   ## profilesUpdate
   ## Update a Traffic Manager profile.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group containing the Traffic Manager profile.
+  ##   profileName: string (required)
+  ##              : The name of the Traffic Manager profile.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
   ##   subscriptionId: string (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   profileName: string (required)
-  ##              : The name of the Traffic Manager profile.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group containing the Traffic Manager profile.
   ##   parameters: JObject (required)
   ##             : The Traffic Manager profile parameters supplied to the Update operation.
-  var path_568257 = newJObject()
-  var query_568258 = newJObject()
-  var body_568259 = newJObject()
-  add(path_568257, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568258, "api-version", newJString(apiVersion))
-  add(path_568257, "subscriptionId", newJString(subscriptionId))
-  add(path_568257, "profileName", newJString(profileName))
+  var path_564157 = newJObject()
+  var query_564158 = newJObject()
+  var body_564159 = newJObject()
+  add(path_564157, "profileName", newJString(profileName))
+  add(query_564158, "api-version", newJString(apiVersion))
+  add(path_564157, "subscriptionId", newJString(subscriptionId))
+  add(path_564157, "resourceGroupName", newJString(resourceGroupName))
   if parameters != nil:
-    body_568259 = parameters
-  result = call_568256.call(path_568257, query_568258, nil, nil, body_568259)
+    body_564159 = parameters
+  result = call_564156.call(path_564157, query_564158, nil, nil, body_564159)
 
-var profilesUpdate* = Call_ProfilesUpdate_568247(name: "profilesUpdate",
+var profilesUpdate* = Call_ProfilesUpdate_564147(name: "profilesUpdate",
     meth: HttpMethod.HttpPatch, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/trafficmanagerprofiles/{profileName}",
-    validator: validate_ProfilesUpdate_568248, base: "", url: url_ProfilesUpdate_568249,
+    validator: validate_ProfilesUpdate_564148, base: "", url: url_ProfilesUpdate_564149,
     schemes: {Scheme.Https})
 type
-  Call_ProfilesDelete_568236 = ref object of OpenApiRestCall_567642
-proc url_ProfilesDelete_568238(protocol: Scheme; host: string; base: string;
+  Call_ProfilesDelete_564136 = ref object of OpenApiRestCall_563540
+proc url_ProfilesDelete_564138(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -761,7 +765,7 @@ proc url_ProfilesDelete_568238(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ProfilesDelete_568237(path: JsonNode; query: JsonNode;
+proc validate_ProfilesDelete_564137(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## Deletes a Traffic Manager profile.
@@ -769,30 +773,30 @@ proc validate_ProfilesDelete_568237(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group containing the Traffic Manager profile to be deleted.
-  ##   subscriptionId: JString (required)
-  ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   profileName: JString (required)
   ##              : The name of the Traffic Manager profile to be deleted.
+  ##   subscriptionId: JString (required)
+  ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group containing the Traffic Manager profile to be deleted.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568239 = path.getOrDefault("resourceGroupName")
-  valid_568239 = validateParameter(valid_568239, JString, required = true,
+        "path argument is necessary due to required `profileName` field"
+  var valid_564139 = path.getOrDefault("profileName")
+  valid_564139 = validateParameter(valid_564139, JString, required = true,
                                  default = nil)
-  if valid_568239 != nil:
-    section.add "resourceGroupName", valid_568239
-  var valid_568240 = path.getOrDefault("subscriptionId")
-  valid_568240 = validateParameter(valid_568240, JString, required = true,
+  if valid_564139 != nil:
+    section.add "profileName", valid_564139
+  var valid_564140 = path.getOrDefault("subscriptionId")
+  valid_564140 = validateParameter(valid_564140, JString, required = true,
                                  default = nil)
-  if valid_568240 != nil:
-    section.add "subscriptionId", valid_568240
-  var valid_568241 = path.getOrDefault("profileName")
-  valid_568241 = validateParameter(valid_568241, JString, required = true,
+  if valid_564140 != nil:
+    section.add "subscriptionId", valid_564140
+  var valid_564141 = path.getOrDefault("resourceGroupName")
+  valid_564141 = validateParameter(valid_564141, JString, required = true,
                                  default = nil)
-  if valid_568241 != nil:
-    section.add "profileName", valid_568241
+  if valid_564141 != nil:
+    section.add "resourceGroupName", valid_564141
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -800,11 +804,11 @@ proc validate_ProfilesDelete_568237(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568242 = query.getOrDefault("api-version")
-  valid_568242 = validateParameter(valid_568242, JString, required = true,
+  var valid_564142 = query.getOrDefault("api-version")
+  valid_564142 = validateParameter(valid_564142, JString, required = true,
                                  default = nil)
-  if valid_568242 != nil:
-    section.add "api-version", valid_568242
+  if valid_564142 != nil:
+    section.add "api-version", valid_564142
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -813,46 +817,46 @@ proc validate_ProfilesDelete_568237(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568243: Call_ProfilesDelete_568236; path: JsonNode; query: JsonNode;
+proc call*(call_564143: Call_ProfilesDelete_564136; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes a Traffic Manager profile.
   ## 
-  let valid = call_568243.validator(path, query, header, formData, body)
-  let scheme = call_568243.pickScheme
+  let valid = call_564143.validator(path, query, header, formData, body)
+  let scheme = call_564143.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568243.url(scheme.get, call_568243.host, call_568243.base,
-                         call_568243.route, valid.getOrDefault("path"),
+  let url = call_564143.url(scheme.get, call_564143.host, call_564143.base,
+                         call_564143.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568243, url, valid)
+  result = hook(call_564143, url, valid)
 
-proc call*(call_568244: Call_ProfilesDelete_568236; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; profileName: string): Recallable =
+proc call*(call_564144: Call_ProfilesDelete_564136; profileName: string;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string): Recallable =
   ## profilesDelete
   ## Deletes a Traffic Manager profile.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group containing the Traffic Manager profile to be deleted.
+  ##   profileName: string (required)
+  ##              : The name of the Traffic Manager profile to be deleted.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
   ##   subscriptionId: string (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   profileName: string (required)
-  ##              : The name of the Traffic Manager profile to be deleted.
-  var path_568245 = newJObject()
-  var query_568246 = newJObject()
-  add(path_568245, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568246, "api-version", newJString(apiVersion))
-  add(path_568245, "subscriptionId", newJString(subscriptionId))
-  add(path_568245, "profileName", newJString(profileName))
-  result = call_568244.call(path_568245, query_568246, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group containing the Traffic Manager profile to be deleted.
+  var path_564145 = newJObject()
+  var query_564146 = newJObject()
+  add(path_564145, "profileName", newJString(profileName))
+  add(query_564146, "api-version", newJString(apiVersion))
+  add(path_564145, "subscriptionId", newJString(subscriptionId))
+  add(path_564145, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564144.call(path_564145, query_564146, nil, nil, nil)
 
-var profilesDelete* = Call_ProfilesDelete_568236(name: "profilesDelete",
+var profilesDelete* = Call_ProfilesDelete_564136(name: "profilesDelete",
     meth: HttpMethod.HttpDelete, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/trafficmanagerprofiles/{profileName}",
-    validator: validate_ProfilesDelete_568237, base: "", url: url_ProfilesDelete_568238,
+    validator: validate_ProfilesDelete_564137, base: "", url: url_ProfilesDelete_564138,
     schemes: {Scheme.Https})
 type
-  Call_EndpointsCreateOrUpdate_568273 = ref object of OpenApiRestCall_567642
-proc url_EndpointsCreateOrUpdate_568275(protocol: Scheme; host: string; base: string;
+  Call_EndpointsCreateOrUpdate_564173 = ref object of OpenApiRestCall_563540
+proc url_EndpointsCreateOrUpdate_564175(protocol: Scheme; host: string; base: string;
                                        route: string; path: JsonNode;
                                        query: JsonNode): Uri =
   result.scheme = $protocol
@@ -882,51 +886,51 @@ proc url_EndpointsCreateOrUpdate_568275(protocol: Scheme; host: string; base: st
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_EndpointsCreateOrUpdate_568274(path: JsonNode; query: JsonNode;
+proc validate_EndpointsCreateOrUpdate_564174(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Create or update a Traffic Manager endpoint.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group containing the Traffic Manager endpoint to be created or updated.
-  ##   endpointType: JString (required)
-  ##               : The type of the Traffic Manager endpoint to be created or updated.
-  ##   subscriptionId: JString (required)
-  ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   profileName: JString (required)
   ##              : The name of the Traffic Manager profile.
+  ##   subscriptionId: JString (required)
+  ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group containing the Traffic Manager endpoint to be created or updated.
   ##   endpointName: JString (required)
   ##               : The name of the Traffic Manager endpoint to be created or updated.
+  ##   endpointType: JString (required)
+  ##               : The type of the Traffic Manager endpoint to be created or updated.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568276 = path.getOrDefault("resourceGroupName")
-  valid_568276 = validateParameter(valid_568276, JString, required = true,
+        "path argument is necessary due to required `profileName` field"
+  var valid_564176 = path.getOrDefault("profileName")
+  valid_564176 = validateParameter(valid_564176, JString, required = true,
                                  default = nil)
-  if valid_568276 != nil:
-    section.add "resourceGroupName", valid_568276
-  var valid_568277 = path.getOrDefault("endpointType")
-  valid_568277 = validateParameter(valid_568277, JString, required = true,
+  if valid_564176 != nil:
+    section.add "profileName", valid_564176
+  var valid_564177 = path.getOrDefault("subscriptionId")
+  valid_564177 = validateParameter(valid_564177, JString, required = true,
                                  default = nil)
-  if valid_568277 != nil:
-    section.add "endpointType", valid_568277
-  var valid_568278 = path.getOrDefault("subscriptionId")
-  valid_568278 = validateParameter(valid_568278, JString, required = true,
+  if valid_564177 != nil:
+    section.add "subscriptionId", valid_564177
+  var valid_564178 = path.getOrDefault("resourceGroupName")
+  valid_564178 = validateParameter(valid_564178, JString, required = true,
                                  default = nil)
-  if valid_568278 != nil:
-    section.add "subscriptionId", valid_568278
-  var valid_568279 = path.getOrDefault("profileName")
-  valid_568279 = validateParameter(valid_568279, JString, required = true,
+  if valid_564178 != nil:
+    section.add "resourceGroupName", valid_564178
+  var valid_564179 = path.getOrDefault("endpointName")
+  valid_564179 = validateParameter(valid_564179, JString, required = true,
                                  default = nil)
-  if valid_568279 != nil:
-    section.add "profileName", valid_568279
-  var valid_568280 = path.getOrDefault("endpointName")
-  valid_568280 = validateParameter(valid_568280, JString, required = true,
+  if valid_564179 != nil:
+    section.add "endpointName", valid_564179
+  var valid_564180 = path.getOrDefault("endpointType")
+  valid_564180 = validateParameter(valid_564180, JString, required = true,
                                  default = nil)
-  if valid_568280 != nil:
-    section.add "endpointName", valid_568280
+  if valid_564180 != nil:
+    section.add "endpointType", valid_564180
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -934,11 +938,11 @@ proc validate_EndpointsCreateOrUpdate_568274(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568281 = query.getOrDefault("api-version")
-  valid_568281 = validateParameter(valid_568281, JString, required = true,
+  var valid_564181 = query.getOrDefault("api-version")
+  valid_564181 = validateParameter(valid_564181, JString, required = true,
                                  default = nil)
-  if valid_568281 != nil:
-    section.add "api-version", valid_568281
+  if valid_564181 != nil:
+    section.add "api-version", valid_564181
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -952,60 +956,59 @@ proc validate_EndpointsCreateOrUpdate_568274(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568283: Call_EndpointsCreateOrUpdate_568273; path: JsonNode;
+proc call*(call_564183: Call_EndpointsCreateOrUpdate_564173; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Create or update a Traffic Manager endpoint.
   ## 
-  let valid = call_568283.validator(path, query, header, formData, body)
-  let scheme = call_568283.pickScheme
+  let valid = call_564183.validator(path, query, header, formData, body)
+  let scheme = call_564183.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568283.url(scheme.get, call_568283.host, call_568283.base,
-                         call_568283.route, valid.getOrDefault("path"),
+  let url = call_564183.url(scheme.get, call_564183.host, call_564183.base,
+                         call_564183.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568283, url, valid)
+  result = hook(call_564183, url, valid)
 
-proc call*(call_568284: Call_EndpointsCreateOrUpdate_568273;
-          resourceGroupName: string; apiVersion: string; endpointType: string;
-          subscriptionId: string; profileName: string; parameters: JsonNode;
-          endpointName: string): Recallable =
+proc call*(call_564184: Call_EndpointsCreateOrUpdate_564173; profileName: string;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string;
+          endpointName: string; endpointType: string; parameters: JsonNode): Recallable =
   ## endpointsCreateOrUpdate
   ## Create or update a Traffic Manager endpoint.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group containing the Traffic Manager endpoint to be created or updated.
-  ##   apiVersion: string (required)
-  ##             : Client Api Version.
-  ##   endpointType: string (required)
-  ##               : The type of the Traffic Manager endpoint to be created or updated.
-  ##   subscriptionId: string (required)
-  ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   profileName: string (required)
   ##              : The name of the Traffic Manager profile.
-  ##   parameters: JObject (required)
-  ##             : The Traffic Manager endpoint parameters supplied to the CreateOrUpdate operation.
+  ##   apiVersion: string (required)
+  ##             : Client Api Version.
+  ##   subscriptionId: string (required)
+  ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group containing the Traffic Manager endpoint to be created or updated.
   ##   endpointName: string (required)
   ##               : The name of the Traffic Manager endpoint to be created or updated.
-  var path_568285 = newJObject()
-  var query_568286 = newJObject()
-  var body_568287 = newJObject()
-  add(path_568285, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568286, "api-version", newJString(apiVersion))
-  add(path_568285, "endpointType", newJString(endpointType))
-  add(path_568285, "subscriptionId", newJString(subscriptionId))
-  add(path_568285, "profileName", newJString(profileName))
+  ##   endpointType: string (required)
+  ##               : The type of the Traffic Manager endpoint to be created or updated.
+  ##   parameters: JObject (required)
+  ##             : The Traffic Manager endpoint parameters supplied to the CreateOrUpdate operation.
+  var path_564185 = newJObject()
+  var query_564186 = newJObject()
+  var body_564187 = newJObject()
+  add(path_564185, "profileName", newJString(profileName))
+  add(query_564186, "api-version", newJString(apiVersion))
+  add(path_564185, "subscriptionId", newJString(subscriptionId))
+  add(path_564185, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564185, "endpointName", newJString(endpointName))
+  add(path_564185, "endpointType", newJString(endpointType))
   if parameters != nil:
-    body_568287 = parameters
-  add(path_568285, "endpointName", newJString(endpointName))
-  result = call_568284.call(path_568285, query_568286, nil, nil, body_568287)
+    body_564187 = parameters
+  result = call_564184.call(path_564185, query_564186, nil, nil, body_564187)
 
-var endpointsCreateOrUpdate* = Call_EndpointsCreateOrUpdate_568273(
+var endpointsCreateOrUpdate* = Call_EndpointsCreateOrUpdate_564173(
     name: "endpointsCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/trafficmanagerprofiles/{profileName}/{endpointType}/{endpointName}",
-    validator: validate_EndpointsCreateOrUpdate_568274, base: "",
-    url: url_EndpointsCreateOrUpdate_568275, schemes: {Scheme.Https})
+    validator: validate_EndpointsCreateOrUpdate_564174, base: "",
+    url: url_EndpointsCreateOrUpdate_564175, schemes: {Scheme.Https})
 type
-  Call_EndpointsGet_568260 = ref object of OpenApiRestCall_567642
-proc url_EndpointsGet_568262(protocol: Scheme; host: string; base: string;
+  Call_EndpointsGet_564160 = ref object of OpenApiRestCall_563540
+proc url_EndpointsGet_564162(protocol: Scheme; host: string; base: string;
                             route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1034,51 +1037,51 @@ proc url_EndpointsGet_568262(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_EndpointsGet_568261(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_EndpointsGet_564161(path: JsonNode; query: JsonNode; header: JsonNode;
                                  formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets a Traffic Manager endpoint.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group containing the Traffic Manager endpoint.
-  ##   endpointType: JString (required)
-  ##               : The type of the Traffic Manager endpoint.
-  ##   subscriptionId: JString (required)
-  ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   profileName: JString (required)
   ##              : The name of the Traffic Manager profile.
+  ##   subscriptionId: JString (required)
+  ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group containing the Traffic Manager endpoint.
   ##   endpointName: JString (required)
   ##               : The name of the Traffic Manager endpoint.
+  ##   endpointType: JString (required)
+  ##               : The type of the Traffic Manager endpoint.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568263 = path.getOrDefault("resourceGroupName")
-  valid_568263 = validateParameter(valid_568263, JString, required = true,
+        "path argument is necessary due to required `profileName` field"
+  var valid_564163 = path.getOrDefault("profileName")
+  valid_564163 = validateParameter(valid_564163, JString, required = true,
                                  default = nil)
-  if valid_568263 != nil:
-    section.add "resourceGroupName", valid_568263
-  var valid_568264 = path.getOrDefault("endpointType")
-  valid_568264 = validateParameter(valid_568264, JString, required = true,
+  if valid_564163 != nil:
+    section.add "profileName", valid_564163
+  var valid_564164 = path.getOrDefault("subscriptionId")
+  valid_564164 = validateParameter(valid_564164, JString, required = true,
                                  default = nil)
-  if valid_568264 != nil:
-    section.add "endpointType", valid_568264
-  var valid_568265 = path.getOrDefault("subscriptionId")
-  valid_568265 = validateParameter(valid_568265, JString, required = true,
+  if valid_564164 != nil:
+    section.add "subscriptionId", valid_564164
+  var valid_564165 = path.getOrDefault("resourceGroupName")
+  valid_564165 = validateParameter(valid_564165, JString, required = true,
                                  default = nil)
-  if valid_568265 != nil:
-    section.add "subscriptionId", valid_568265
-  var valid_568266 = path.getOrDefault("profileName")
-  valid_568266 = validateParameter(valid_568266, JString, required = true,
+  if valid_564165 != nil:
+    section.add "resourceGroupName", valid_564165
+  var valid_564166 = path.getOrDefault("endpointName")
+  valid_564166 = validateParameter(valid_564166, JString, required = true,
                                  default = nil)
-  if valid_568266 != nil:
-    section.add "profileName", valid_568266
-  var valid_568267 = path.getOrDefault("endpointName")
-  valid_568267 = validateParameter(valid_568267, JString, required = true,
+  if valid_564166 != nil:
+    section.add "endpointName", valid_564166
+  var valid_564167 = path.getOrDefault("endpointType")
+  valid_564167 = validateParameter(valid_564167, JString, required = true,
                                  default = nil)
-  if valid_568267 != nil:
-    section.add "endpointName", valid_568267
+  if valid_564167 != nil:
+    section.add "endpointType", valid_564167
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1086,11 +1089,11 @@ proc validate_EndpointsGet_568261(path: JsonNode; query: JsonNode; header: JsonN
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568268 = query.getOrDefault("api-version")
-  valid_568268 = validateParameter(valid_568268, JString, required = true,
+  var valid_564168 = query.getOrDefault("api-version")
+  valid_564168 = validateParameter(valid_564168, JString, required = true,
                                  default = nil)
-  if valid_568268 != nil:
-    section.add "api-version", valid_568268
+  if valid_564168 != nil:
+    section.add "api-version", valid_564168
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1099,53 +1102,53 @@ proc validate_EndpointsGet_568261(path: JsonNode; query: JsonNode; header: JsonN
   if body != nil:
     result.add "body", body
 
-proc call*(call_568269: Call_EndpointsGet_568260; path: JsonNode; query: JsonNode;
+proc call*(call_564169: Call_EndpointsGet_564160; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets a Traffic Manager endpoint.
   ## 
-  let valid = call_568269.validator(path, query, header, formData, body)
-  let scheme = call_568269.pickScheme
+  let valid = call_564169.validator(path, query, header, formData, body)
+  let scheme = call_564169.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568269.url(scheme.get, call_568269.host, call_568269.base,
-                         call_568269.route, valid.getOrDefault("path"),
+  let url = call_564169.url(scheme.get, call_564169.host, call_564169.base,
+                         call_564169.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568269, url, valid)
+  result = hook(call_564169, url, valid)
 
-proc call*(call_568270: Call_EndpointsGet_568260; resourceGroupName: string;
-          apiVersion: string; endpointType: string; subscriptionId: string;
-          profileName: string; endpointName: string): Recallable =
+proc call*(call_564170: Call_EndpointsGet_564160; profileName: string;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string;
+          endpointName: string; endpointType: string): Recallable =
   ## endpointsGet
   ## Gets a Traffic Manager endpoint.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group containing the Traffic Manager endpoint.
-  ##   apiVersion: string (required)
-  ##             : Client Api Version.
-  ##   endpointType: string (required)
-  ##               : The type of the Traffic Manager endpoint.
-  ##   subscriptionId: string (required)
-  ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   profileName: string (required)
   ##              : The name of the Traffic Manager profile.
+  ##   apiVersion: string (required)
+  ##             : Client Api Version.
+  ##   subscriptionId: string (required)
+  ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group containing the Traffic Manager endpoint.
   ##   endpointName: string (required)
   ##               : The name of the Traffic Manager endpoint.
-  var path_568271 = newJObject()
-  var query_568272 = newJObject()
-  add(path_568271, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568272, "api-version", newJString(apiVersion))
-  add(path_568271, "endpointType", newJString(endpointType))
-  add(path_568271, "subscriptionId", newJString(subscriptionId))
-  add(path_568271, "profileName", newJString(profileName))
-  add(path_568271, "endpointName", newJString(endpointName))
-  result = call_568270.call(path_568271, query_568272, nil, nil, nil)
+  ##   endpointType: string (required)
+  ##               : The type of the Traffic Manager endpoint.
+  var path_564171 = newJObject()
+  var query_564172 = newJObject()
+  add(path_564171, "profileName", newJString(profileName))
+  add(query_564172, "api-version", newJString(apiVersion))
+  add(path_564171, "subscriptionId", newJString(subscriptionId))
+  add(path_564171, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564171, "endpointName", newJString(endpointName))
+  add(path_564171, "endpointType", newJString(endpointType))
+  result = call_564170.call(path_564171, query_564172, nil, nil, nil)
 
-var endpointsGet* = Call_EndpointsGet_568260(name: "endpointsGet",
+var endpointsGet* = Call_EndpointsGet_564160(name: "endpointsGet",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/trafficmanagerprofiles/{profileName}/{endpointType}/{endpointName}",
-    validator: validate_EndpointsGet_568261, base: "", url: url_EndpointsGet_568262,
+    validator: validate_EndpointsGet_564161, base: "", url: url_EndpointsGet_564162,
     schemes: {Scheme.Https})
 type
-  Call_EndpointsUpdate_568301 = ref object of OpenApiRestCall_567642
-proc url_EndpointsUpdate_568303(protocol: Scheme; host: string; base: string;
+  Call_EndpointsUpdate_564201 = ref object of OpenApiRestCall_563540
+proc url_EndpointsUpdate_564203(protocol: Scheme; host: string; base: string;
                                route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1174,7 +1177,7 @@ proc url_EndpointsUpdate_568303(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_EndpointsUpdate_568302(path: JsonNode; query: JsonNode;
+proc validate_EndpointsUpdate_564202(path: JsonNode; query: JsonNode;
                                     header: JsonNode; formData: JsonNode;
                                     body: JsonNode): JsonNode =
   ## Update a Traffic Manager endpoint.
@@ -1182,44 +1185,44 @@ proc validate_EndpointsUpdate_568302(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group containing the Traffic Manager endpoint to be updated.
-  ##   endpointType: JString (required)
-  ##               : The type of the Traffic Manager endpoint to be updated.
-  ##   subscriptionId: JString (required)
-  ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   profileName: JString (required)
   ##              : The name of the Traffic Manager profile.
+  ##   subscriptionId: JString (required)
+  ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group containing the Traffic Manager endpoint to be updated.
   ##   endpointName: JString (required)
   ##               : The name of the Traffic Manager endpoint to be updated.
+  ##   endpointType: JString (required)
+  ##               : The type of the Traffic Manager endpoint to be updated.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568304 = path.getOrDefault("resourceGroupName")
-  valid_568304 = validateParameter(valid_568304, JString, required = true,
+        "path argument is necessary due to required `profileName` field"
+  var valid_564204 = path.getOrDefault("profileName")
+  valid_564204 = validateParameter(valid_564204, JString, required = true,
                                  default = nil)
-  if valid_568304 != nil:
-    section.add "resourceGroupName", valid_568304
-  var valid_568305 = path.getOrDefault("endpointType")
-  valid_568305 = validateParameter(valid_568305, JString, required = true,
+  if valid_564204 != nil:
+    section.add "profileName", valid_564204
+  var valid_564205 = path.getOrDefault("subscriptionId")
+  valid_564205 = validateParameter(valid_564205, JString, required = true,
                                  default = nil)
-  if valid_568305 != nil:
-    section.add "endpointType", valid_568305
-  var valid_568306 = path.getOrDefault("subscriptionId")
-  valid_568306 = validateParameter(valid_568306, JString, required = true,
+  if valid_564205 != nil:
+    section.add "subscriptionId", valid_564205
+  var valid_564206 = path.getOrDefault("resourceGroupName")
+  valid_564206 = validateParameter(valid_564206, JString, required = true,
                                  default = nil)
-  if valid_568306 != nil:
-    section.add "subscriptionId", valid_568306
-  var valid_568307 = path.getOrDefault("profileName")
-  valid_568307 = validateParameter(valid_568307, JString, required = true,
+  if valid_564206 != nil:
+    section.add "resourceGroupName", valid_564206
+  var valid_564207 = path.getOrDefault("endpointName")
+  valid_564207 = validateParameter(valid_564207, JString, required = true,
                                  default = nil)
-  if valid_568307 != nil:
-    section.add "profileName", valid_568307
-  var valid_568308 = path.getOrDefault("endpointName")
-  valid_568308 = validateParameter(valid_568308, JString, required = true,
+  if valid_564207 != nil:
+    section.add "endpointName", valid_564207
+  var valid_564208 = path.getOrDefault("endpointType")
+  valid_564208 = validateParameter(valid_564208, JString, required = true,
                                  default = nil)
-  if valid_568308 != nil:
-    section.add "endpointName", valid_568308
+  if valid_564208 != nil:
+    section.add "endpointType", valid_564208
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1227,11 +1230,11 @@ proc validate_EndpointsUpdate_568302(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568309 = query.getOrDefault("api-version")
-  valid_568309 = validateParameter(valid_568309, JString, required = true,
+  var valid_564209 = query.getOrDefault("api-version")
+  valid_564209 = validateParameter(valid_564209, JString, required = true,
                                  default = nil)
-  if valid_568309 != nil:
-    section.add "api-version", valid_568309
+  if valid_564209 != nil:
+    section.add "api-version", valid_564209
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1245,58 +1248,58 @@ proc validate_EndpointsUpdate_568302(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568311: Call_EndpointsUpdate_568301; path: JsonNode; query: JsonNode;
+proc call*(call_564211: Call_EndpointsUpdate_564201; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Update a Traffic Manager endpoint.
   ## 
-  let valid = call_568311.validator(path, query, header, formData, body)
-  let scheme = call_568311.pickScheme
+  let valid = call_564211.validator(path, query, header, formData, body)
+  let scheme = call_564211.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568311.url(scheme.get, call_568311.host, call_568311.base,
-                         call_568311.route, valid.getOrDefault("path"),
+  let url = call_564211.url(scheme.get, call_564211.host, call_564211.base,
+                         call_564211.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568311, url, valid)
+  result = hook(call_564211, url, valid)
 
-proc call*(call_568312: Call_EndpointsUpdate_568301; resourceGroupName: string;
-          apiVersion: string; endpointType: string; subscriptionId: string;
-          profileName: string; parameters: JsonNode; endpointName: string): Recallable =
+proc call*(call_564212: Call_EndpointsUpdate_564201; profileName: string;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string;
+          endpointName: string; endpointType: string; parameters: JsonNode): Recallable =
   ## endpointsUpdate
   ## Update a Traffic Manager endpoint.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group containing the Traffic Manager endpoint to be updated.
-  ##   apiVersion: string (required)
-  ##             : Client Api Version.
-  ##   endpointType: string (required)
-  ##               : The type of the Traffic Manager endpoint to be updated.
-  ##   subscriptionId: string (required)
-  ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   profileName: string (required)
   ##              : The name of the Traffic Manager profile.
-  ##   parameters: JObject (required)
-  ##             : The Traffic Manager endpoint parameters supplied to the Update operation.
+  ##   apiVersion: string (required)
+  ##             : Client Api Version.
+  ##   subscriptionId: string (required)
+  ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group containing the Traffic Manager endpoint to be updated.
   ##   endpointName: string (required)
   ##               : The name of the Traffic Manager endpoint to be updated.
-  var path_568313 = newJObject()
-  var query_568314 = newJObject()
-  var body_568315 = newJObject()
-  add(path_568313, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568314, "api-version", newJString(apiVersion))
-  add(path_568313, "endpointType", newJString(endpointType))
-  add(path_568313, "subscriptionId", newJString(subscriptionId))
-  add(path_568313, "profileName", newJString(profileName))
+  ##   endpointType: string (required)
+  ##               : The type of the Traffic Manager endpoint to be updated.
+  ##   parameters: JObject (required)
+  ##             : The Traffic Manager endpoint parameters supplied to the Update operation.
+  var path_564213 = newJObject()
+  var query_564214 = newJObject()
+  var body_564215 = newJObject()
+  add(path_564213, "profileName", newJString(profileName))
+  add(query_564214, "api-version", newJString(apiVersion))
+  add(path_564213, "subscriptionId", newJString(subscriptionId))
+  add(path_564213, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564213, "endpointName", newJString(endpointName))
+  add(path_564213, "endpointType", newJString(endpointType))
   if parameters != nil:
-    body_568315 = parameters
-  add(path_568313, "endpointName", newJString(endpointName))
-  result = call_568312.call(path_568313, query_568314, nil, nil, body_568315)
+    body_564215 = parameters
+  result = call_564212.call(path_564213, query_564214, nil, nil, body_564215)
 
-var endpointsUpdate* = Call_EndpointsUpdate_568301(name: "endpointsUpdate",
+var endpointsUpdate* = Call_EndpointsUpdate_564201(name: "endpointsUpdate",
     meth: HttpMethod.HttpPatch, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/trafficmanagerprofiles/{profileName}/{endpointType}/{endpointName}",
-    validator: validate_EndpointsUpdate_568302, base: "", url: url_EndpointsUpdate_568303,
+    validator: validate_EndpointsUpdate_564202, base: "", url: url_EndpointsUpdate_564203,
     schemes: {Scheme.Https})
 type
-  Call_EndpointsDelete_568288 = ref object of OpenApiRestCall_567642
-proc url_EndpointsDelete_568290(protocol: Scheme; host: string; base: string;
+  Call_EndpointsDelete_564188 = ref object of OpenApiRestCall_563540
+proc url_EndpointsDelete_564190(protocol: Scheme; host: string; base: string;
                                route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1325,7 +1328,7 @@ proc url_EndpointsDelete_568290(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_EndpointsDelete_568289(path: JsonNode; query: JsonNode;
+proc validate_EndpointsDelete_564189(path: JsonNode; query: JsonNode;
                                     header: JsonNode; formData: JsonNode;
                                     body: JsonNode): JsonNode =
   ## Deletes a Traffic Manager endpoint.
@@ -1333,44 +1336,44 @@ proc validate_EndpointsDelete_568289(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group containing the Traffic Manager endpoint to be deleted.
-  ##   endpointType: JString (required)
-  ##               : The type of the Traffic Manager endpoint to be deleted.
-  ##   subscriptionId: JString (required)
-  ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   profileName: JString (required)
   ##              : The name of the Traffic Manager profile.
+  ##   subscriptionId: JString (required)
+  ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group containing the Traffic Manager endpoint to be deleted.
   ##   endpointName: JString (required)
   ##               : The name of the Traffic Manager endpoint to be deleted.
+  ##   endpointType: JString (required)
+  ##               : The type of the Traffic Manager endpoint to be deleted.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568291 = path.getOrDefault("resourceGroupName")
-  valid_568291 = validateParameter(valid_568291, JString, required = true,
+        "path argument is necessary due to required `profileName` field"
+  var valid_564191 = path.getOrDefault("profileName")
+  valid_564191 = validateParameter(valid_564191, JString, required = true,
                                  default = nil)
-  if valid_568291 != nil:
-    section.add "resourceGroupName", valid_568291
-  var valid_568292 = path.getOrDefault("endpointType")
-  valid_568292 = validateParameter(valid_568292, JString, required = true,
+  if valid_564191 != nil:
+    section.add "profileName", valid_564191
+  var valid_564192 = path.getOrDefault("subscriptionId")
+  valid_564192 = validateParameter(valid_564192, JString, required = true,
                                  default = nil)
-  if valid_568292 != nil:
-    section.add "endpointType", valid_568292
-  var valid_568293 = path.getOrDefault("subscriptionId")
-  valid_568293 = validateParameter(valid_568293, JString, required = true,
+  if valid_564192 != nil:
+    section.add "subscriptionId", valid_564192
+  var valid_564193 = path.getOrDefault("resourceGroupName")
+  valid_564193 = validateParameter(valid_564193, JString, required = true,
                                  default = nil)
-  if valid_568293 != nil:
-    section.add "subscriptionId", valid_568293
-  var valid_568294 = path.getOrDefault("profileName")
-  valid_568294 = validateParameter(valid_568294, JString, required = true,
+  if valid_564193 != nil:
+    section.add "resourceGroupName", valid_564193
+  var valid_564194 = path.getOrDefault("endpointName")
+  valid_564194 = validateParameter(valid_564194, JString, required = true,
                                  default = nil)
-  if valid_568294 != nil:
-    section.add "profileName", valid_568294
-  var valid_568295 = path.getOrDefault("endpointName")
-  valid_568295 = validateParameter(valid_568295, JString, required = true,
+  if valid_564194 != nil:
+    section.add "endpointName", valid_564194
+  var valid_564195 = path.getOrDefault("endpointType")
+  valid_564195 = validateParameter(valid_564195, JString, required = true,
                                  default = nil)
-  if valid_568295 != nil:
-    section.add "endpointName", valid_568295
+  if valid_564195 != nil:
+    section.add "endpointType", valid_564195
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1378,11 +1381,11 @@ proc validate_EndpointsDelete_568289(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568296 = query.getOrDefault("api-version")
-  valid_568296 = validateParameter(valid_568296, JString, required = true,
+  var valid_564196 = query.getOrDefault("api-version")
+  valid_564196 = validateParameter(valid_564196, JString, required = true,
                                  default = nil)
-  if valid_568296 != nil:
-    section.add "api-version", valid_568296
+  if valid_564196 != nil:
+    section.add "api-version", valid_564196
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1391,49 +1394,49 @@ proc validate_EndpointsDelete_568289(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568297: Call_EndpointsDelete_568288; path: JsonNode; query: JsonNode;
+proc call*(call_564197: Call_EndpointsDelete_564188; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes a Traffic Manager endpoint.
   ## 
-  let valid = call_568297.validator(path, query, header, formData, body)
-  let scheme = call_568297.pickScheme
+  let valid = call_564197.validator(path, query, header, formData, body)
+  let scheme = call_564197.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568297.url(scheme.get, call_568297.host, call_568297.base,
-                         call_568297.route, valid.getOrDefault("path"),
+  let url = call_564197.url(scheme.get, call_564197.host, call_564197.base,
+                         call_564197.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568297, url, valid)
+  result = hook(call_564197, url, valid)
 
-proc call*(call_568298: Call_EndpointsDelete_568288; resourceGroupName: string;
-          apiVersion: string; endpointType: string; subscriptionId: string;
-          profileName: string; endpointName: string): Recallable =
+proc call*(call_564198: Call_EndpointsDelete_564188; profileName: string;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string;
+          endpointName: string; endpointType: string): Recallable =
   ## endpointsDelete
   ## Deletes a Traffic Manager endpoint.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group containing the Traffic Manager endpoint to be deleted.
-  ##   apiVersion: string (required)
-  ##             : Client Api Version.
-  ##   endpointType: string (required)
-  ##               : The type of the Traffic Manager endpoint to be deleted.
-  ##   subscriptionId: string (required)
-  ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   profileName: string (required)
   ##              : The name of the Traffic Manager profile.
+  ##   apiVersion: string (required)
+  ##             : Client Api Version.
+  ##   subscriptionId: string (required)
+  ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group containing the Traffic Manager endpoint to be deleted.
   ##   endpointName: string (required)
   ##               : The name of the Traffic Manager endpoint to be deleted.
-  var path_568299 = newJObject()
-  var query_568300 = newJObject()
-  add(path_568299, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568300, "api-version", newJString(apiVersion))
-  add(path_568299, "endpointType", newJString(endpointType))
-  add(path_568299, "subscriptionId", newJString(subscriptionId))
-  add(path_568299, "profileName", newJString(profileName))
-  add(path_568299, "endpointName", newJString(endpointName))
-  result = call_568298.call(path_568299, query_568300, nil, nil, nil)
+  ##   endpointType: string (required)
+  ##               : The type of the Traffic Manager endpoint to be deleted.
+  var path_564199 = newJObject()
+  var query_564200 = newJObject()
+  add(path_564199, "profileName", newJString(profileName))
+  add(query_564200, "api-version", newJString(apiVersion))
+  add(path_564199, "subscriptionId", newJString(subscriptionId))
+  add(path_564199, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564199, "endpointName", newJString(endpointName))
+  add(path_564199, "endpointType", newJString(endpointType))
+  result = call_564198.call(path_564199, query_564200, nil, nil, nil)
 
-var endpointsDelete* = Call_EndpointsDelete_568288(name: "endpointsDelete",
+var endpointsDelete* = Call_EndpointsDelete_564188(name: "endpointsDelete",
     meth: HttpMethod.HttpDelete, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/trafficmanagerprofiles/{profileName}/{endpointType}/{endpointName}",
-    validator: validate_EndpointsDelete_568289, base: "", url: url_EndpointsDelete_568290,
+    validator: validate_EndpointsDelete_564189, base: "", url: url_EndpointsDelete_564190,
     schemes: {Scheme.Https})
 export
   rest

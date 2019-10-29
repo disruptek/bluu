@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, httpcore
 
 ## auto-generated via openapi macro
 ## title: ApiManagementClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_593424 = ref object of OpenApiRestCall
+  OpenApiRestCall_563555 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_593424](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563555](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_593424): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563555): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,8 +107,8 @@ const
   macServiceName = "apimanagement-apimgroups"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_GroupsListByService_593646 = ref object of OpenApiRestCall_593424
-proc url_GroupsListByService_593648(protocol: Scheme; host: string; base: string;
+  Call_GroupsListByService_563777 = ref object of OpenApiRestCall_563555
+proc url_GroupsListByService_563779(protocol: Scheme; host: string; base: string;
                                    route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -128,7 +132,7 @@ proc url_GroupsListByService_593648(protocol: Scheme; host: string; base: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_GroupsListByService_593647(path: JsonNode; query: JsonNode;
+proc validate_GroupsListByService_563778(path: JsonNode; query: JsonNode;
                                         header: JsonNode; formData: JsonNode;
                                         body: JsonNode): JsonNode =
   ## Lists a collection of groups defined within a service instance.
@@ -137,36 +141,36 @@ proc validate_GroupsListByService_593647(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
-  ##   subscriptionId: JString (required)
-  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   serviceName: JString (required)
   ##              : The name of the API Management service.
+  ##   subscriptionId: JString (required)
+  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593809 = path.getOrDefault("resourceGroupName")
-  valid_593809 = validateParameter(valid_593809, JString, required = true,
+        "path argument is necessary due to required `serviceName` field"
+  var valid_563942 = path.getOrDefault("serviceName")
+  valid_563942 = validateParameter(valid_563942, JString, required = true,
                                  default = nil)
-  if valid_593809 != nil:
-    section.add "resourceGroupName", valid_593809
-  var valid_593810 = path.getOrDefault("subscriptionId")
-  valid_593810 = validateParameter(valid_593810, JString, required = true,
+  if valid_563942 != nil:
+    section.add "serviceName", valid_563942
+  var valid_563943 = path.getOrDefault("subscriptionId")
+  valid_563943 = validateParameter(valid_563943, JString, required = true,
                                  default = nil)
-  if valid_593810 != nil:
-    section.add "subscriptionId", valid_593810
-  var valid_593811 = path.getOrDefault("serviceName")
-  valid_593811 = validateParameter(valid_593811, JString, required = true,
+  if valid_563943 != nil:
+    section.add "subscriptionId", valid_563943
+  var valid_563944 = path.getOrDefault("resourceGroupName")
+  valid_563944 = validateParameter(valid_563944, JString, required = true,
                                  default = nil)
-  if valid_593811 != nil:
-    section.add "serviceName", valid_593811
+  if valid_563944 != nil:
+    section.add "resourceGroupName", valid_563944
   result.add "path", section
   ## parameters in `query` object:
-  ##   api-version: JString (required)
-  ##              : Version of the API to be used with the client request.
   ##   $top: JInt
   ##       : Number of records to return.
+  ##   api-version: JString (required)
+  ##              : Version of the API to be used with the client request.
   ##   $skip: JInt
   ##        : Number of records to skip.
   ##   $filter: JString
@@ -178,26 +182,26 @@ proc validate_GroupsListByService_593647(path: JsonNode; query: JsonNode;
   ## | description | ge, le, eq, ne, gt, lt | substringof, contains, startswith, endswith |
   ## | type        | eq, ne                 | N/A                                         |
   section = newJObject()
+  var valid_563945 = query.getOrDefault("$top")
+  valid_563945 = validateParameter(valid_563945, JInt, required = false, default = nil)
+  if valid_563945 != nil:
+    section.add "$top", valid_563945
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593812 = query.getOrDefault("api-version")
-  valid_593812 = validateParameter(valid_593812, JString, required = true,
+  var valid_563946 = query.getOrDefault("api-version")
+  valid_563946 = validateParameter(valid_563946, JString, required = true,
                                  default = nil)
-  if valid_593812 != nil:
-    section.add "api-version", valid_593812
-  var valid_593813 = query.getOrDefault("$top")
-  valid_593813 = validateParameter(valid_593813, JInt, required = false, default = nil)
-  if valid_593813 != nil:
-    section.add "$top", valid_593813
-  var valid_593814 = query.getOrDefault("$skip")
-  valid_593814 = validateParameter(valid_593814, JInt, required = false, default = nil)
-  if valid_593814 != nil:
-    section.add "$skip", valid_593814
-  var valid_593815 = query.getOrDefault("$filter")
-  valid_593815 = validateParameter(valid_593815, JString, required = false,
+  if valid_563946 != nil:
+    section.add "api-version", valid_563946
+  var valid_563947 = query.getOrDefault("$skip")
+  valid_563947 = validateParameter(valid_563947, JInt, required = false, default = nil)
+  if valid_563947 != nil:
+    section.add "$skip", valid_563947
+  var valid_563948 = query.getOrDefault("$filter")
+  valid_563948 = validateParameter(valid_563948, JString, required = false,
                                  default = nil)
-  if valid_593815 != nil:
-    section.add "$filter", valid_593815
+  if valid_563948 != nil:
+    section.add "$filter", valid_563948
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -206,38 +210,38 @@ proc validate_GroupsListByService_593647(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593842: Call_GroupsListByService_593646; path: JsonNode;
+proc call*(call_563975: Call_GroupsListByService_563777; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists a collection of groups defined within a service instance.
   ## 
   ## https://msdn.microsoft.com/en-us/library/azure/dn776329.aspx
-  let valid = call_593842.validator(path, query, header, formData, body)
-  let scheme = call_593842.pickScheme
+  let valid = call_563975.validator(path, query, header, formData, body)
+  let scheme = call_563975.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593842.url(scheme.get, call_593842.host, call_593842.base,
-                         call_593842.route, valid.getOrDefault("path"),
+  let url = call_563975.url(scheme.get, call_563975.host, call_563975.base,
+                         call_563975.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593842, url, valid)
+  result = hook(call_563975, url, valid)
 
-proc call*(call_593913: Call_GroupsListByService_593646; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; serviceName: string;
+proc call*(call_564046: Call_GroupsListByService_563777; serviceName: string;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string;
           Top: int = 0; Skip: int = 0; Filter: string = ""): Recallable =
   ## groupsListByService
   ## Lists a collection of groups defined within a service instance.
   ## https://msdn.microsoft.com/en-us/library/azure/dn776329.aspx
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   serviceName: string (required)
+  ##              : The name of the API Management service.
+  ##   Top: int
+  ##      : Number of records to return.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   Top: int
-  ##      : Number of records to return.
   ##   Skip: int
   ##       : Number of records to skip.
-  ##   serviceName: string (required)
-  ##              : The name of the API Management service.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   Filter: string
   ##         : | Field       | Supported operators    | Supported functions                         |
   ## 
@@ -246,25 +250,25 @@ proc call*(call_593913: Call_GroupsListByService_593646; resourceGroupName: stri
   ## | name        | ge, le, eq, ne, gt, lt | substringof, contains, startswith, endswith |
   ## | description | ge, le, eq, ne, gt, lt | substringof, contains, startswith, endswith |
   ## | type        | eq, ne                 | N/A                                         |
-  var path_593914 = newJObject()
-  var query_593916 = newJObject()
-  add(path_593914, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593916, "api-version", newJString(apiVersion))
-  add(path_593914, "subscriptionId", newJString(subscriptionId))
-  add(query_593916, "$top", newJInt(Top))
-  add(query_593916, "$skip", newJInt(Skip))
-  add(path_593914, "serviceName", newJString(serviceName))
-  add(query_593916, "$filter", newJString(Filter))
-  result = call_593913.call(path_593914, query_593916, nil, nil, nil)
+  var path_564047 = newJObject()
+  var query_564049 = newJObject()
+  add(path_564047, "serviceName", newJString(serviceName))
+  add(query_564049, "$top", newJInt(Top))
+  add(query_564049, "api-version", newJString(apiVersion))
+  add(path_564047, "subscriptionId", newJString(subscriptionId))
+  add(query_564049, "$skip", newJInt(Skip))
+  add(path_564047, "resourceGroupName", newJString(resourceGroupName))
+  add(query_564049, "$filter", newJString(Filter))
+  result = call_564046.call(path_564047, query_564049, nil, nil, nil)
 
-var groupsListByService* = Call_GroupsListByService_593646(
+var groupsListByService* = Call_GroupsListByService_563777(
     name: "groupsListByService", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ApiManagement/service/{serviceName}/groups",
-    validator: validate_GroupsListByService_593647, base: "",
-    url: url_GroupsListByService_593648, schemes: {Scheme.Https})
+    validator: validate_GroupsListByService_563778, base: "",
+    url: url_GroupsListByService_563779, schemes: {Scheme.Https})
 type
-  Call_GroupsCreateOrUpdate_593976 = ref object of OpenApiRestCall_593424
-proc url_GroupsCreateOrUpdate_593978(protocol: Scheme; host: string; base: string;
+  Call_GroupsCreateOrUpdate_564109 = ref object of OpenApiRestCall_563555
+proc url_GroupsCreateOrUpdate_564111(protocol: Scheme; host: string; base: string;
                                     route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -290,43 +294,44 @@ proc url_GroupsCreateOrUpdate_593978(protocol: Scheme; host: string; base: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_GroupsCreateOrUpdate_593977(path: JsonNode; query: JsonNode;
+proc validate_GroupsCreateOrUpdate_564110(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Creates or Updates a group.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   groupId: JString (required)
-  ##          : Group identifier. Must be unique in the current API Management service instance.
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
-  ##   subscriptionId: JString (required)
-  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   serviceName: JString (required)
   ##              : The name of the API Management service.
+  ##   groupId: JString (required)
+  ##          : Group identifier. Must be unique in the current API Management service instance.
+  ##   subscriptionId: JString (required)
+  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
-  assert path != nil, "path argument is necessary due to required `groupId` field"
-  var valid_594006 = path.getOrDefault("groupId")
-  valid_594006 = validateParameter(valid_594006, JString, required = true,
+  assert path != nil,
+        "path argument is necessary due to required `serviceName` field"
+  var valid_564139 = path.getOrDefault("serviceName")
+  valid_564139 = validateParameter(valid_564139, JString, required = true,
                                  default = nil)
-  if valid_594006 != nil:
-    section.add "groupId", valid_594006
-  var valid_594007 = path.getOrDefault("resourceGroupName")
-  valid_594007 = validateParameter(valid_594007, JString, required = true,
+  if valid_564139 != nil:
+    section.add "serviceName", valid_564139
+  var valid_564140 = path.getOrDefault("groupId")
+  valid_564140 = validateParameter(valid_564140, JString, required = true,
                                  default = nil)
-  if valid_594007 != nil:
-    section.add "resourceGroupName", valid_594007
-  var valid_594008 = path.getOrDefault("subscriptionId")
-  valid_594008 = validateParameter(valid_594008, JString, required = true,
+  if valid_564140 != nil:
+    section.add "groupId", valid_564140
+  var valid_564141 = path.getOrDefault("subscriptionId")
+  valid_564141 = validateParameter(valid_564141, JString, required = true,
                                  default = nil)
-  if valid_594008 != nil:
-    section.add "subscriptionId", valid_594008
-  var valid_594009 = path.getOrDefault("serviceName")
-  valid_594009 = validateParameter(valid_594009, JString, required = true,
+  if valid_564141 != nil:
+    section.add "subscriptionId", valid_564141
+  var valid_564142 = path.getOrDefault("resourceGroupName")
+  valid_564142 = validateParameter(valid_564142, JString, required = true,
                                  default = nil)
-  if valid_594009 != nil:
-    section.add "serviceName", valid_594009
+  if valid_564142 != nil:
+    section.add "resourceGroupName", valid_564142
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -334,11 +339,11 @@ proc validate_GroupsCreateOrUpdate_593977(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594010 = query.getOrDefault("api-version")
-  valid_594010 = validateParameter(valid_594010, JString, required = true,
+  var valid_564143 = query.getOrDefault("api-version")
+  valid_564143 = validateParameter(valid_564143, JString, required = true,
                                  default = nil)
-  if valid_594010 != nil:
-    section.add "api-version", valid_594010
+  if valid_564143 != nil:
+    section.add "api-version", valid_564143
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -352,56 +357,56 @@ proc validate_GroupsCreateOrUpdate_593977(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594012: Call_GroupsCreateOrUpdate_593976; path: JsonNode;
+proc call*(call_564145: Call_GroupsCreateOrUpdate_564109; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Creates or Updates a group.
   ## 
-  let valid = call_594012.validator(path, query, header, formData, body)
-  let scheme = call_594012.pickScheme
+  let valid = call_564145.validator(path, query, header, formData, body)
+  let scheme = call_564145.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594012.url(scheme.get, call_594012.host, call_594012.base,
-                         call_594012.route, valid.getOrDefault("path"),
+  let url = call_564145.url(scheme.get, call_564145.host, call_564145.base,
+                         call_564145.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594012, url, valid)
+  result = hook(call_564145, url, valid)
 
-proc call*(call_594013: Call_GroupsCreateOrUpdate_593976; groupId: string;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          parameters: JsonNode; serviceName: string): Recallable =
+proc call*(call_564146: Call_GroupsCreateOrUpdate_564109; serviceName: string;
+          apiVersion: string; groupId: string; subscriptionId: string;
+          resourceGroupName: string; parameters: JsonNode): Recallable =
   ## groupsCreateOrUpdate
   ## Creates or Updates a group.
-  ##   groupId: string (required)
-  ##          : Group identifier. Must be unique in the current API Management service instance.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
-  ##   apiVersion: string (required)
-  ##             : Version of the API to be used with the client request.
-  ##   subscriptionId: string (required)
-  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   parameters: JObject (required)
-  ##             : Create parameters.
   ##   serviceName: string (required)
   ##              : The name of the API Management service.
-  var path_594014 = newJObject()
-  var query_594015 = newJObject()
-  var body_594016 = newJObject()
-  add(path_594014, "groupId", newJString(groupId))
-  add(path_594014, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594015, "api-version", newJString(apiVersion))
-  add(path_594014, "subscriptionId", newJString(subscriptionId))
+  ##   apiVersion: string (required)
+  ##             : Version of the API to be used with the client request.
+  ##   groupId: string (required)
+  ##          : Group identifier. Must be unique in the current API Management service instance.
+  ##   subscriptionId: string (required)
+  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  ##   parameters: JObject (required)
+  ##             : Create parameters.
+  var path_564147 = newJObject()
+  var query_564148 = newJObject()
+  var body_564149 = newJObject()
+  add(path_564147, "serviceName", newJString(serviceName))
+  add(query_564148, "api-version", newJString(apiVersion))
+  add(path_564147, "groupId", newJString(groupId))
+  add(path_564147, "subscriptionId", newJString(subscriptionId))
+  add(path_564147, "resourceGroupName", newJString(resourceGroupName))
   if parameters != nil:
-    body_594016 = parameters
-  add(path_594014, "serviceName", newJString(serviceName))
-  result = call_594013.call(path_594014, query_594015, nil, nil, body_594016)
+    body_564149 = parameters
+  result = call_564146.call(path_564147, query_564148, nil, nil, body_564149)
 
-var groupsCreateOrUpdate* = Call_GroupsCreateOrUpdate_593976(
+var groupsCreateOrUpdate* = Call_GroupsCreateOrUpdate_564109(
     name: "groupsCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ApiManagement/service/{serviceName}/groups/{groupId}",
-    validator: validate_GroupsCreateOrUpdate_593977, base: "",
-    url: url_GroupsCreateOrUpdate_593978, schemes: {Scheme.Https})
+    validator: validate_GroupsCreateOrUpdate_564110, base: "",
+    url: url_GroupsCreateOrUpdate_564111, schemes: {Scheme.Https})
 type
-  Call_GroupsGet_593955 = ref object of OpenApiRestCall_593424
-proc url_GroupsGet_593957(protocol: Scheme; host: string; base: string; route: string;
+  Call_GroupsGet_564088 = ref object of OpenApiRestCall_563555
+proc url_GroupsGet_564090(protocol: Scheme; host: string; base: string; route: string;
                          path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -427,43 +432,44 @@ proc url_GroupsGet_593957(protocol: Scheme; host: string; base: string; route: s
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_GroupsGet_593956(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_GroupsGet_564089(path: JsonNode; query: JsonNode; header: JsonNode;
                               formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the details of the group specified by its identifier.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   groupId: JString (required)
-  ##          : Group identifier. Must be unique in the current API Management service instance.
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
-  ##   subscriptionId: JString (required)
-  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   serviceName: JString (required)
   ##              : The name of the API Management service.
+  ##   groupId: JString (required)
+  ##          : Group identifier. Must be unique in the current API Management service instance.
+  ##   subscriptionId: JString (required)
+  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
-  assert path != nil, "path argument is necessary due to required `groupId` field"
-  var valid_593967 = path.getOrDefault("groupId")
-  valid_593967 = validateParameter(valid_593967, JString, required = true,
+  assert path != nil,
+        "path argument is necessary due to required `serviceName` field"
+  var valid_564100 = path.getOrDefault("serviceName")
+  valid_564100 = validateParameter(valid_564100, JString, required = true,
                                  default = nil)
-  if valid_593967 != nil:
-    section.add "groupId", valid_593967
-  var valid_593968 = path.getOrDefault("resourceGroupName")
-  valid_593968 = validateParameter(valid_593968, JString, required = true,
+  if valid_564100 != nil:
+    section.add "serviceName", valid_564100
+  var valid_564101 = path.getOrDefault("groupId")
+  valid_564101 = validateParameter(valid_564101, JString, required = true,
                                  default = nil)
-  if valid_593968 != nil:
-    section.add "resourceGroupName", valid_593968
-  var valid_593969 = path.getOrDefault("subscriptionId")
-  valid_593969 = validateParameter(valid_593969, JString, required = true,
+  if valid_564101 != nil:
+    section.add "groupId", valid_564101
+  var valid_564102 = path.getOrDefault("subscriptionId")
+  valid_564102 = validateParameter(valid_564102, JString, required = true,
                                  default = nil)
-  if valid_593969 != nil:
-    section.add "subscriptionId", valid_593969
-  var valid_593970 = path.getOrDefault("serviceName")
-  valid_593970 = validateParameter(valid_593970, JString, required = true,
+  if valid_564102 != nil:
+    section.add "subscriptionId", valid_564102
+  var valid_564103 = path.getOrDefault("resourceGroupName")
+  valid_564103 = validateParameter(valid_564103, JString, required = true,
                                  default = nil)
-  if valid_593970 != nil:
-    section.add "serviceName", valid_593970
+  if valid_564103 != nil:
+    section.add "resourceGroupName", valid_564103
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -471,11 +477,11 @@ proc validate_GroupsGet_593956(path: JsonNode; query: JsonNode; header: JsonNode
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593971 = query.getOrDefault("api-version")
-  valid_593971 = validateParameter(valid_593971, JString, required = true,
+  var valid_564104 = query.getOrDefault("api-version")
+  valid_564104 = validateParameter(valid_564104, JString, required = true,
                                  default = nil)
-  if valid_593971 != nil:
-    section.add "api-version", valid_593971
+  if valid_564104 != nil:
+    section.add "api-version", valid_564104
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -484,51 +490,51 @@ proc validate_GroupsGet_593956(path: JsonNode; query: JsonNode; header: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_593972: Call_GroupsGet_593955; path: JsonNode; query: JsonNode;
+proc call*(call_564105: Call_GroupsGet_564088; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the details of the group specified by its identifier.
   ## 
-  let valid = call_593972.validator(path, query, header, formData, body)
-  let scheme = call_593972.pickScheme
+  let valid = call_564105.validator(path, query, header, formData, body)
+  let scheme = call_564105.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593972.url(scheme.get, call_593972.host, call_593972.base,
-                         call_593972.route, valid.getOrDefault("path"),
+  let url = call_564105.url(scheme.get, call_564105.host, call_564105.base,
+                         call_564105.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593972, url, valid)
+  result = hook(call_564105, url, valid)
 
-proc call*(call_593973: Call_GroupsGet_593955; groupId: string;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          serviceName: string): Recallable =
+proc call*(call_564106: Call_GroupsGet_564088; serviceName: string;
+          apiVersion: string; groupId: string; subscriptionId: string;
+          resourceGroupName: string): Recallable =
   ## groupsGet
   ## Gets the details of the group specified by its identifier.
-  ##   groupId: string (required)
-  ##          : Group identifier. Must be unique in the current API Management service instance.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
-  ##   apiVersion: string (required)
-  ##             : Version of the API to be used with the client request.
-  ##   subscriptionId: string (required)
-  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   serviceName: string (required)
   ##              : The name of the API Management service.
-  var path_593974 = newJObject()
-  var query_593975 = newJObject()
-  add(path_593974, "groupId", newJString(groupId))
-  add(path_593974, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593975, "api-version", newJString(apiVersion))
-  add(path_593974, "subscriptionId", newJString(subscriptionId))
-  add(path_593974, "serviceName", newJString(serviceName))
-  result = call_593973.call(path_593974, query_593975, nil, nil, nil)
+  ##   apiVersion: string (required)
+  ##             : Version of the API to be used with the client request.
+  ##   groupId: string (required)
+  ##          : Group identifier. Must be unique in the current API Management service instance.
+  ##   subscriptionId: string (required)
+  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564107 = newJObject()
+  var query_564108 = newJObject()
+  add(path_564107, "serviceName", newJString(serviceName))
+  add(query_564108, "api-version", newJString(apiVersion))
+  add(path_564107, "groupId", newJString(groupId))
+  add(path_564107, "subscriptionId", newJString(subscriptionId))
+  add(path_564107, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564106.call(path_564107, query_564108, nil, nil, nil)
 
-var groupsGet* = Call_GroupsGet_593955(name: "groupsGet", meth: HttpMethod.HttpGet,
+var groupsGet* = Call_GroupsGet_564088(name: "groupsGet", meth: HttpMethod.HttpGet,
                                     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ApiManagement/service/{serviceName}/groups/{groupId}",
-                                    validator: validate_GroupsGet_593956,
-                                    base: "", url: url_GroupsGet_593957,
+                                    validator: validate_GroupsGet_564089,
+                                    base: "", url: url_GroupsGet_564090,
                                     schemes: {Scheme.Https})
 type
-  Call_GroupsUpdate_594030 = ref object of OpenApiRestCall_593424
-proc url_GroupsUpdate_594032(protocol: Scheme; host: string; base: string;
+  Call_GroupsUpdate_564163 = ref object of OpenApiRestCall_563555
+proc url_GroupsUpdate_564165(protocol: Scheme; host: string; base: string;
                             route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -554,43 +560,44 @@ proc url_GroupsUpdate_594032(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_GroupsUpdate_594031(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_GroupsUpdate_564164(path: JsonNode; query: JsonNode; header: JsonNode;
                                  formData: JsonNode; body: JsonNode): JsonNode =
   ## Updates the details of the group specified by its identifier.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   groupId: JString (required)
-  ##          : Group identifier. Must be unique in the current API Management service instance.
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
-  ##   subscriptionId: JString (required)
-  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   serviceName: JString (required)
   ##              : The name of the API Management service.
+  ##   groupId: JString (required)
+  ##          : Group identifier. Must be unique in the current API Management service instance.
+  ##   subscriptionId: JString (required)
+  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
-  assert path != nil, "path argument is necessary due to required `groupId` field"
-  var valid_594033 = path.getOrDefault("groupId")
-  valid_594033 = validateParameter(valid_594033, JString, required = true,
+  assert path != nil,
+        "path argument is necessary due to required `serviceName` field"
+  var valid_564166 = path.getOrDefault("serviceName")
+  valid_564166 = validateParameter(valid_564166, JString, required = true,
                                  default = nil)
-  if valid_594033 != nil:
-    section.add "groupId", valid_594033
-  var valid_594034 = path.getOrDefault("resourceGroupName")
-  valid_594034 = validateParameter(valid_594034, JString, required = true,
+  if valid_564166 != nil:
+    section.add "serviceName", valid_564166
+  var valid_564167 = path.getOrDefault("groupId")
+  valid_564167 = validateParameter(valid_564167, JString, required = true,
                                  default = nil)
-  if valid_594034 != nil:
-    section.add "resourceGroupName", valid_594034
-  var valid_594035 = path.getOrDefault("subscriptionId")
-  valid_594035 = validateParameter(valid_594035, JString, required = true,
+  if valid_564167 != nil:
+    section.add "groupId", valid_564167
+  var valid_564168 = path.getOrDefault("subscriptionId")
+  valid_564168 = validateParameter(valid_564168, JString, required = true,
                                  default = nil)
-  if valid_594035 != nil:
-    section.add "subscriptionId", valid_594035
-  var valid_594036 = path.getOrDefault("serviceName")
-  valid_594036 = validateParameter(valid_594036, JString, required = true,
+  if valid_564168 != nil:
+    section.add "subscriptionId", valid_564168
+  var valid_564169 = path.getOrDefault("resourceGroupName")
+  valid_564169 = validateParameter(valid_564169, JString, required = true,
                                  default = nil)
-  if valid_594036 != nil:
-    section.add "serviceName", valid_594036
+  if valid_564169 != nil:
+    section.add "resourceGroupName", valid_564169
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -598,11 +605,11 @@ proc validate_GroupsUpdate_594031(path: JsonNode; query: JsonNode; header: JsonN
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594037 = query.getOrDefault("api-version")
-  valid_594037 = validateParameter(valid_594037, JString, required = true,
+  var valid_564170 = query.getOrDefault("api-version")
+  valid_564170 = validateParameter(valid_564170, JString, required = true,
                                  default = nil)
-  if valid_594037 != nil:
-    section.add "api-version", valid_594037
+  if valid_564170 != nil:
+    section.add "api-version", valid_564170
   result.add "query", section
   ## parameters in `header` object:
   ##   If-Match: JString (required)
@@ -610,11 +617,11 @@ proc validate_GroupsUpdate_594031(path: JsonNode; query: JsonNode; header: JsonN
   section = newJObject()
   assert header != nil,
         "header argument is necessary due to required `If-Match` field"
-  var valid_594038 = header.getOrDefault("If-Match")
-  valid_594038 = validateParameter(valid_594038, JString, required = true,
+  var valid_564171 = header.getOrDefault("If-Match")
+  valid_564171 = validateParameter(valid_564171, JString, required = true,
                                  default = nil)
-  if valid_594038 != nil:
-    section.add "If-Match", valid_594038
+  if valid_564171 != nil:
+    section.add "If-Match", valid_564171
   result.add "header", section
   section = newJObject()
   result.add "formData", section
@@ -626,55 +633,55 @@ proc validate_GroupsUpdate_594031(path: JsonNode; query: JsonNode; header: JsonN
   if body != nil:
     result.add "body", body
 
-proc call*(call_594040: Call_GroupsUpdate_594030; path: JsonNode; query: JsonNode;
+proc call*(call_564173: Call_GroupsUpdate_564163; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Updates the details of the group specified by its identifier.
   ## 
-  let valid = call_594040.validator(path, query, header, formData, body)
-  let scheme = call_594040.pickScheme
+  let valid = call_564173.validator(path, query, header, formData, body)
+  let scheme = call_564173.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594040.url(scheme.get, call_594040.host, call_594040.base,
-                         call_594040.route, valid.getOrDefault("path"),
+  let url = call_564173.url(scheme.get, call_564173.host, call_564173.base,
+                         call_564173.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594040, url, valid)
+  result = hook(call_564173, url, valid)
 
-proc call*(call_594041: Call_GroupsUpdate_594030; groupId: string;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          parameters: JsonNode; serviceName: string): Recallable =
+proc call*(call_564174: Call_GroupsUpdate_564163; serviceName: string;
+          apiVersion: string; groupId: string; subscriptionId: string;
+          resourceGroupName: string; parameters: JsonNode): Recallable =
   ## groupsUpdate
   ## Updates the details of the group specified by its identifier.
-  ##   groupId: string (required)
-  ##          : Group identifier. Must be unique in the current API Management service instance.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
-  ##   apiVersion: string (required)
-  ##             : Version of the API to be used with the client request.
-  ##   subscriptionId: string (required)
-  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   parameters: JObject (required)
-  ##             : Update parameters.
   ##   serviceName: string (required)
   ##              : The name of the API Management service.
-  var path_594042 = newJObject()
-  var query_594043 = newJObject()
-  var body_594044 = newJObject()
-  add(path_594042, "groupId", newJString(groupId))
-  add(path_594042, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594043, "api-version", newJString(apiVersion))
-  add(path_594042, "subscriptionId", newJString(subscriptionId))
+  ##   apiVersion: string (required)
+  ##             : Version of the API to be used with the client request.
+  ##   groupId: string (required)
+  ##          : Group identifier. Must be unique in the current API Management service instance.
+  ##   subscriptionId: string (required)
+  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  ##   parameters: JObject (required)
+  ##             : Update parameters.
+  var path_564175 = newJObject()
+  var query_564176 = newJObject()
+  var body_564177 = newJObject()
+  add(path_564175, "serviceName", newJString(serviceName))
+  add(query_564176, "api-version", newJString(apiVersion))
+  add(path_564175, "groupId", newJString(groupId))
+  add(path_564175, "subscriptionId", newJString(subscriptionId))
+  add(path_564175, "resourceGroupName", newJString(resourceGroupName))
   if parameters != nil:
-    body_594044 = parameters
-  add(path_594042, "serviceName", newJString(serviceName))
-  result = call_594041.call(path_594042, query_594043, nil, nil, body_594044)
+    body_564177 = parameters
+  result = call_564174.call(path_564175, query_564176, nil, nil, body_564177)
 
-var groupsUpdate* = Call_GroupsUpdate_594030(name: "groupsUpdate",
+var groupsUpdate* = Call_GroupsUpdate_564163(name: "groupsUpdate",
     meth: HttpMethod.HttpPatch, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ApiManagement/service/{serviceName}/groups/{groupId}",
-    validator: validate_GroupsUpdate_594031, base: "", url: url_GroupsUpdate_594032,
+    validator: validate_GroupsUpdate_564164, base: "", url: url_GroupsUpdate_564165,
     schemes: {Scheme.Https})
 type
-  Call_GroupsDelete_594017 = ref object of OpenApiRestCall_593424
-proc url_GroupsDelete_594019(protocol: Scheme; host: string; base: string;
+  Call_GroupsDelete_564150 = ref object of OpenApiRestCall_563555
+proc url_GroupsDelete_564152(protocol: Scheme; host: string; base: string;
                             route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -700,43 +707,44 @@ proc url_GroupsDelete_594019(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_GroupsDelete_594018(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_GroupsDelete_564151(path: JsonNode; query: JsonNode; header: JsonNode;
                                  formData: JsonNode; body: JsonNode): JsonNode =
   ## Deletes specific group of the API Management service instance.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   groupId: JString (required)
-  ##          : Group identifier. Must be unique in the current API Management service instance.
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
-  ##   subscriptionId: JString (required)
-  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   serviceName: JString (required)
   ##              : The name of the API Management service.
+  ##   groupId: JString (required)
+  ##          : Group identifier. Must be unique in the current API Management service instance.
+  ##   subscriptionId: JString (required)
+  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
-  assert path != nil, "path argument is necessary due to required `groupId` field"
-  var valid_594020 = path.getOrDefault("groupId")
-  valid_594020 = validateParameter(valid_594020, JString, required = true,
+  assert path != nil,
+        "path argument is necessary due to required `serviceName` field"
+  var valid_564153 = path.getOrDefault("serviceName")
+  valid_564153 = validateParameter(valid_564153, JString, required = true,
                                  default = nil)
-  if valid_594020 != nil:
-    section.add "groupId", valid_594020
-  var valid_594021 = path.getOrDefault("resourceGroupName")
-  valid_594021 = validateParameter(valid_594021, JString, required = true,
+  if valid_564153 != nil:
+    section.add "serviceName", valid_564153
+  var valid_564154 = path.getOrDefault("groupId")
+  valid_564154 = validateParameter(valid_564154, JString, required = true,
                                  default = nil)
-  if valid_594021 != nil:
-    section.add "resourceGroupName", valid_594021
-  var valid_594022 = path.getOrDefault("subscriptionId")
-  valid_594022 = validateParameter(valid_594022, JString, required = true,
+  if valid_564154 != nil:
+    section.add "groupId", valid_564154
+  var valid_564155 = path.getOrDefault("subscriptionId")
+  valid_564155 = validateParameter(valid_564155, JString, required = true,
                                  default = nil)
-  if valid_594022 != nil:
-    section.add "subscriptionId", valid_594022
-  var valid_594023 = path.getOrDefault("serviceName")
-  valid_594023 = validateParameter(valid_594023, JString, required = true,
+  if valid_564155 != nil:
+    section.add "subscriptionId", valid_564155
+  var valid_564156 = path.getOrDefault("resourceGroupName")
+  valid_564156 = validateParameter(valid_564156, JString, required = true,
                                  default = nil)
-  if valid_594023 != nil:
-    section.add "serviceName", valid_594023
+  if valid_564156 != nil:
+    section.add "resourceGroupName", valid_564156
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -744,11 +752,11 @@ proc validate_GroupsDelete_594018(path: JsonNode; query: JsonNode; header: JsonN
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594024 = query.getOrDefault("api-version")
-  valid_594024 = validateParameter(valid_594024, JString, required = true,
+  var valid_564157 = query.getOrDefault("api-version")
+  valid_564157 = validateParameter(valid_564157, JString, required = true,
                                  default = nil)
-  if valid_594024 != nil:
-    section.add "api-version", valid_594024
+  if valid_564157 != nil:
+    section.add "api-version", valid_564157
   result.add "query", section
   ## parameters in `header` object:
   ##   If-Match: JString (required)
@@ -756,61 +764,61 @@ proc validate_GroupsDelete_594018(path: JsonNode; query: JsonNode; header: JsonN
   section = newJObject()
   assert header != nil,
         "header argument is necessary due to required `If-Match` field"
-  var valid_594025 = header.getOrDefault("If-Match")
-  valid_594025 = validateParameter(valid_594025, JString, required = true,
+  var valid_564158 = header.getOrDefault("If-Match")
+  valid_564158 = validateParameter(valid_564158, JString, required = true,
                                  default = nil)
-  if valid_594025 != nil:
-    section.add "If-Match", valid_594025
+  if valid_564158 != nil:
+    section.add "If-Match", valid_564158
   result.add "header", section
   section = newJObject()
   result.add "formData", section
   if body != nil:
     result.add "body", body
 
-proc call*(call_594026: Call_GroupsDelete_594017; path: JsonNode; query: JsonNode;
+proc call*(call_564159: Call_GroupsDelete_564150; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes specific group of the API Management service instance.
   ## 
-  let valid = call_594026.validator(path, query, header, formData, body)
-  let scheme = call_594026.pickScheme
+  let valid = call_564159.validator(path, query, header, formData, body)
+  let scheme = call_564159.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594026.url(scheme.get, call_594026.host, call_594026.base,
-                         call_594026.route, valid.getOrDefault("path"),
+  let url = call_564159.url(scheme.get, call_564159.host, call_564159.base,
+                         call_564159.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594026, url, valid)
+  result = hook(call_564159, url, valid)
 
-proc call*(call_594027: Call_GroupsDelete_594017; groupId: string;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          serviceName: string): Recallable =
+proc call*(call_564160: Call_GroupsDelete_564150; serviceName: string;
+          apiVersion: string; groupId: string; subscriptionId: string;
+          resourceGroupName: string): Recallable =
   ## groupsDelete
   ## Deletes specific group of the API Management service instance.
-  ##   groupId: string (required)
-  ##          : Group identifier. Must be unique in the current API Management service instance.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
-  ##   apiVersion: string (required)
-  ##             : Version of the API to be used with the client request.
-  ##   subscriptionId: string (required)
-  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   serviceName: string (required)
   ##              : The name of the API Management service.
-  var path_594028 = newJObject()
-  var query_594029 = newJObject()
-  add(path_594028, "groupId", newJString(groupId))
-  add(path_594028, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594029, "api-version", newJString(apiVersion))
-  add(path_594028, "subscriptionId", newJString(subscriptionId))
-  add(path_594028, "serviceName", newJString(serviceName))
-  result = call_594027.call(path_594028, query_594029, nil, nil, nil)
+  ##   apiVersion: string (required)
+  ##             : Version of the API to be used with the client request.
+  ##   groupId: string (required)
+  ##          : Group identifier. Must be unique in the current API Management service instance.
+  ##   subscriptionId: string (required)
+  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564161 = newJObject()
+  var query_564162 = newJObject()
+  add(path_564161, "serviceName", newJString(serviceName))
+  add(query_564162, "api-version", newJString(apiVersion))
+  add(path_564161, "groupId", newJString(groupId))
+  add(path_564161, "subscriptionId", newJString(subscriptionId))
+  add(path_564161, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564160.call(path_564161, query_564162, nil, nil, nil)
 
-var groupsDelete* = Call_GroupsDelete_594017(name: "groupsDelete",
+var groupsDelete* = Call_GroupsDelete_564150(name: "groupsDelete",
     meth: HttpMethod.HttpDelete, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ApiManagement/service/{serviceName}/groups/{groupId}",
-    validator: validate_GroupsDelete_594018, base: "", url: url_GroupsDelete_594019,
+    validator: validate_GroupsDelete_564151, base: "", url: url_GroupsDelete_564152,
     schemes: {Scheme.Https})
 type
-  Call_GroupUsersListByGroups_594045 = ref object of OpenApiRestCall_593424
-proc url_GroupUsersListByGroups_594047(protocol: Scheme; host: string; base: string;
+  Call_GroupUsersListByGroups_564178 = ref object of OpenApiRestCall_563555
+proc url_GroupUsersListByGroups_564180(protocol: Scheme; host: string; base: string;
                                       route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -837,49 +845,50 @@ proc url_GroupUsersListByGroups_594047(protocol: Scheme; host: string; base: str
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_GroupUsersListByGroups_594046(path: JsonNode; query: JsonNode;
+proc validate_GroupUsersListByGroups_564179(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists a collection of the members of the group, specified by its identifier.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   groupId: JString (required)
-  ##          : Group identifier. Must be unique in the current API Management service instance.
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
-  ##   subscriptionId: JString (required)
-  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   serviceName: JString (required)
   ##              : The name of the API Management service.
+  ##   groupId: JString (required)
+  ##          : Group identifier. Must be unique in the current API Management service instance.
+  ##   subscriptionId: JString (required)
+  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
-  assert path != nil, "path argument is necessary due to required `groupId` field"
-  var valid_594048 = path.getOrDefault("groupId")
-  valid_594048 = validateParameter(valid_594048, JString, required = true,
+  assert path != nil,
+        "path argument is necessary due to required `serviceName` field"
+  var valid_564181 = path.getOrDefault("serviceName")
+  valid_564181 = validateParameter(valid_564181, JString, required = true,
                                  default = nil)
-  if valid_594048 != nil:
-    section.add "groupId", valid_594048
-  var valid_594049 = path.getOrDefault("resourceGroupName")
-  valid_594049 = validateParameter(valid_594049, JString, required = true,
+  if valid_564181 != nil:
+    section.add "serviceName", valid_564181
+  var valid_564182 = path.getOrDefault("groupId")
+  valid_564182 = validateParameter(valid_564182, JString, required = true,
                                  default = nil)
-  if valid_594049 != nil:
-    section.add "resourceGroupName", valid_594049
-  var valid_594050 = path.getOrDefault("subscriptionId")
-  valid_594050 = validateParameter(valid_594050, JString, required = true,
+  if valid_564182 != nil:
+    section.add "groupId", valid_564182
+  var valid_564183 = path.getOrDefault("subscriptionId")
+  valid_564183 = validateParameter(valid_564183, JString, required = true,
                                  default = nil)
-  if valid_594050 != nil:
-    section.add "subscriptionId", valid_594050
-  var valid_594051 = path.getOrDefault("serviceName")
-  valid_594051 = validateParameter(valid_594051, JString, required = true,
+  if valid_564183 != nil:
+    section.add "subscriptionId", valid_564183
+  var valid_564184 = path.getOrDefault("resourceGroupName")
+  valid_564184 = validateParameter(valid_564184, JString, required = true,
                                  default = nil)
-  if valid_594051 != nil:
-    section.add "serviceName", valid_594051
+  if valid_564184 != nil:
+    section.add "resourceGroupName", valid_564184
   result.add "path", section
   ## parameters in `query` object:
-  ##   api-version: JString (required)
-  ##              : Version of the API to be used with the client request.
   ##   $top: JInt
   ##       : Number of records to return.
+  ##   api-version: JString (required)
+  ##              : Version of the API to be used with the client request.
   ##   $skip: JInt
   ##        : Number of records to skip.
   ##   $filter: JString
@@ -894,26 +903,26 @@ proc validate_GroupUsersListByGroups_594046(path: JsonNode; query: JsonNode;
   ## | registrationDate | ge, le, eq, ne, gt, lt | N/A                               |
   ## | note             | ge, le, eq, ne, gt, lt | substringof, contains, startswith, endswith |
   section = newJObject()
+  var valid_564185 = query.getOrDefault("$top")
+  valid_564185 = validateParameter(valid_564185, JInt, required = false, default = nil)
+  if valid_564185 != nil:
+    section.add "$top", valid_564185
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594052 = query.getOrDefault("api-version")
-  valid_594052 = validateParameter(valid_594052, JString, required = true,
+  var valid_564186 = query.getOrDefault("api-version")
+  valid_564186 = validateParameter(valid_564186, JString, required = true,
                                  default = nil)
-  if valid_594052 != nil:
-    section.add "api-version", valid_594052
-  var valid_594053 = query.getOrDefault("$top")
-  valid_594053 = validateParameter(valid_594053, JInt, required = false, default = nil)
-  if valid_594053 != nil:
-    section.add "$top", valid_594053
-  var valid_594054 = query.getOrDefault("$skip")
-  valid_594054 = validateParameter(valid_594054, JInt, required = false, default = nil)
-  if valid_594054 != nil:
-    section.add "$skip", valid_594054
-  var valid_594055 = query.getOrDefault("$filter")
-  valid_594055 = validateParameter(valid_594055, JString, required = false,
+  if valid_564186 != nil:
+    section.add "api-version", valid_564186
+  var valid_564187 = query.getOrDefault("$skip")
+  valid_564187 = validateParameter(valid_564187, JInt, required = false, default = nil)
+  if valid_564187 != nil:
+    section.add "$skip", valid_564187
+  var valid_564188 = query.getOrDefault("$filter")
+  valid_564188 = validateParameter(valid_564188, JString, required = false,
                                  default = nil)
-  if valid_594055 != nil:
-    section.add "$filter", valid_594055
+  if valid_564188 != nil:
+    section.add "$filter", valid_564188
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -922,38 +931,38 @@ proc validate_GroupUsersListByGroups_594046(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594056: Call_GroupUsersListByGroups_594045; path: JsonNode;
+proc call*(call_564189: Call_GroupUsersListByGroups_564178; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists a collection of the members of the group, specified by its identifier.
   ## 
-  let valid = call_594056.validator(path, query, header, formData, body)
-  let scheme = call_594056.pickScheme
+  let valid = call_564189.validator(path, query, header, formData, body)
+  let scheme = call_564189.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594056.url(scheme.get, call_594056.host, call_594056.base,
-                         call_594056.route, valid.getOrDefault("path"),
+  let url = call_564189.url(scheme.get, call_564189.host, call_564189.base,
+                         call_564189.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594056, url, valid)
+  result = hook(call_564189, url, valid)
 
-proc call*(call_594057: Call_GroupUsersListByGroups_594045; groupId: string;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          serviceName: string; Top: int = 0; Skip: int = 0; Filter: string = ""): Recallable =
+proc call*(call_564190: Call_GroupUsersListByGroups_564178; serviceName: string;
+          groupId: string; apiVersion: string; subscriptionId: string;
+          resourceGroupName: string; Top: int = 0; Skip: int = 0; Filter: string = ""): Recallable =
   ## groupUsersListByGroups
   ## Lists a collection of the members of the group, specified by its identifier.
+  ##   serviceName: string (required)
+  ##              : The name of the API Management service.
+  ##   Top: int
+  ##      : Number of records to return.
   ##   groupId: string (required)
   ##          : Group identifier. Must be unique in the current API Management service instance.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   Top: int
-  ##      : Number of records to return.
   ##   Skip: int
   ##       : Number of records to skip.
-  ##   serviceName: string (required)
-  ##              : The name of the API Management service.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   Filter: string
   ##         : | Field            | Supported operators    | Supported functions               |
   ## 
@@ -965,26 +974,26 @@ proc call*(call_594057: Call_GroupUsersListByGroups_594045; groupId: string;
   ## | state            | eq                     | N/A                               |
   ## | registrationDate | ge, le, eq, ne, gt, lt | N/A                               |
   ## | note             | ge, le, eq, ne, gt, lt | substringof, contains, startswith, endswith |
-  var path_594058 = newJObject()
-  var query_594059 = newJObject()
-  add(path_594058, "groupId", newJString(groupId))
-  add(path_594058, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594059, "api-version", newJString(apiVersion))
-  add(path_594058, "subscriptionId", newJString(subscriptionId))
-  add(query_594059, "$top", newJInt(Top))
-  add(query_594059, "$skip", newJInt(Skip))
-  add(path_594058, "serviceName", newJString(serviceName))
-  add(query_594059, "$filter", newJString(Filter))
-  result = call_594057.call(path_594058, query_594059, nil, nil, nil)
+  var path_564191 = newJObject()
+  var query_564192 = newJObject()
+  add(path_564191, "serviceName", newJString(serviceName))
+  add(query_564192, "$top", newJInt(Top))
+  add(path_564191, "groupId", newJString(groupId))
+  add(query_564192, "api-version", newJString(apiVersion))
+  add(path_564191, "subscriptionId", newJString(subscriptionId))
+  add(query_564192, "$skip", newJInt(Skip))
+  add(path_564191, "resourceGroupName", newJString(resourceGroupName))
+  add(query_564192, "$filter", newJString(Filter))
+  result = call_564190.call(path_564191, query_564192, nil, nil, nil)
 
-var groupUsersListByGroups* = Call_GroupUsersListByGroups_594045(
+var groupUsersListByGroups* = Call_GroupUsersListByGroups_564178(
     name: "groupUsersListByGroups", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ApiManagement/service/{serviceName}/groups/{groupId}/users",
-    validator: validate_GroupUsersListByGroups_594046, base: "",
-    url: url_GroupUsersListByGroups_594047, schemes: {Scheme.Https})
+    validator: validate_GroupUsersListByGroups_564179, base: "",
+    url: url_GroupUsersListByGroups_564180, schemes: {Scheme.Https})
 type
-  Call_GroupUsersCreate_594060 = ref object of OpenApiRestCall_593424
-proc url_GroupUsersCreate_594062(protocol: Scheme; host: string; base: string;
+  Call_GroupUsersCreate_564193 = ref object of OpenApiRestCall_563555
+proc url_GroupUsersCreate_564195(protocol: Scheme; host: string; base: string;
                                 route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1013,7 +1022,7 @@ proc url_GroupUsersCreate_594062(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_GroupUsersCreate_594061(path: JsonNode; query: JsonNode;
+proc validate_GroupUsersCreate_564194(path: JsonNode; query: JsonNode;
                                      header: JsonNode; formData: JsonNode;
                                      body: JsonNode): JsonNode =
   ## Adds a user to the specified group.
@@ -1021,43 +1030,44 @@ proc validate_GroupUsersCreate_594061(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
+  ##   serviceName: JString (required)
+  ##              : The name of the API Management service.
   ##   groupId: JString (required)
   ##          : Group identifier. Must be unique in the current API Management service instance.
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   uid: JString (required)
   ##      : User identifier. Must be unique in the current API Management service instance.
-  ##   serviceName: JString (required)
-  ##              : The name of the API Management service.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
-  assert path != nil, "path argument is necessary due to required `groupId` field"
-  var valid_594063 = path.getOrDefault("groupId")
-  valid_594063 = validateParameter(valid_594063, JString, required = true,
+  assert path != nil,
+        "path argument is necessary due to required `serviceName` field"
+  var valid_564196 = path.getOrDefault("serviceName")
+  valid_564196 = validateParameter(valid_564196, JString, required = true,
                                  default = nil)
-  if valid_594063 != nil:
-    section.add "groupId", valid_594063
-  var valid_594064 = path.getOrDefault("resourceGroupName")
-  valid_594064 = validateParameter(valid_594064, JString, required = true,
+  if valid_564196 != nil:
+    section.add "serviceName", valid_564196
+  var valid_564197 = path.getOrDefault("groupId")
+  valid_564197 = validateParameter(valid_564197, JString, required = true,
                                  default = nil)
-  if valid_594064 != nil:
-    section.add "resourceGroupName", valid_594064
-  var valid_594065 = path.getOrDefault("subscriptionId")
-  valid_594065 = validateParameter(valid_594065, JString, required = true,
+  if valid_564197 != nil:
+    section.add "groupId", valid_564197
+  var valid_564198 = path.getOrDefault("subscriptionId")
+  valid_564198 = validateParameter(valid_564198, JString, required = true,
                                  default = nil)
-  if valid_594065 != nil:
-    section.add "subscriptionId", valid_594065
-  var valid_594066 = path.getOrDefault("uid")
-  valid_594066 = validateParameter(valid_594066, JString, required = true,
+  if valid_564198 != nil:
+    section.add "subscriptionId", valid_564198
+  var valid_564199 = path.getOrDefault("uid")
+  valid_564199 = validateParameter(valid_564199, JString, required = true,
                                  default = nil)
-  if valid_594066 != nil:
-    section.add "uid", valid_594066
-  var valid_594067 = path.getOrDefault("serviceName")
-  valid_594067 = validateParameter(valid_594067, JString, required = true,
+  if valid_564199 != nil:
+    section.add "uid", valid_564199
+  var valid_564200 = path.getOrDefault("resourceGroupName")
+  valid_564200 = validateParameter(valid_564200, JString, required = true,
                                  default = nil)
-  if valid_594067 != nil:
-    section.add "serviceName", valid_594067
+  if valid_564200 != nil:
+    section.add "resourceGroupName", valid_564200
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1065,11 +1075,11 @@ proc validate_GroupUsersCreate_594061(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594068 = query.getOrDefault("api-version")
-  valid_594068 = validateParameter(valid_594068, JString, required = true,
+  var valid_564201 = query.getOrDefault("api-version")
+  valid_564201 = validateParameter(valid_564201, JString, required = true,
                                  default = nil)
-  if valid_594068 != nil:
-    section.add "api-version", valid_594068
+  if valid_564201 != nil:
+    section.add "api-version", valid_564201
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1078,53 +1088,53 @@ proc validate_GroupUsersCreate_594061(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594069: Call_GroupUsersCreate_594060; path: JsonNode;
+proc call*(call_564202: Call_GroupUsersCreate_564193; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Adds a user to the specified group.
   ## 
-  let valid = call_594069.validator(path, query, header, formData, body)
-  let scheme = call_594069.pickScheme
+  let valid = call_564202.validator(path, query, header, formData, body)
+  let scheme = call_564202.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594069.url(scheme.get, call_594069.host, call_594069.base,
-                         call_594069.route, valid.getOrDefault("path"),
+  let url = call_564202.url(scheme.get, call_564202.host, call_564202.base,
+                         call_564202.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594069, url, valid)
+  result = hook(call_564202, url, valid)
 
-proc call*(call_594070: Call_GroupUsersCreate_594060; groupId: string;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          uid: string; serviceName: string): Recallable =
+proc call*(call_564203: Call_GroupUsersCreate_564193; serviceName: string;
+          apiVersion: string; groupId: string; subscriptionId: string; uid: string;
+          resourceGroupName: string): Recallable =
   ## groupUsersCreate
   ## Adds a user to the specified group.
-  ##   groupId: string (required)
-  ##          : Group identifier. Must be unique in the current API Management service instance.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   serviceName: string (required)
+  ##              : The name of the API Management service.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
+  ##   groupId: string (required)
+  ##          : Group identifier. Must be unique in the current API Management service instance.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   uid: string (required)
   ##      : User identifier. Must be unique in the current API Management service instance.
-  ##   serviceName: string (required)
-  ##              : The name of the API Management service.
-  var path_594071 = newJObject()
-  var query_594072 = newJObject()
-  add(path_594071, "groupId", newJString(groupId))
-  add(path_594071, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594072, "api-version", newJString(apiVersion))
-  add(path_594071, "subscriptionId", newJString(subscriptionId))
-  add(path_594071, "uid", newJString(uid))
-  add(path_594071, "serviceName", newJString(serviceName))
-  result = call_594070.call(path_594071, query_594072, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564204 = newJObject()
+  var query_564205 = newJObject()
+  add(path_564204, "serviceName", newJString(serviceName))
+  add(query_564205, "api-version", newJString(apiVersion))
+  add(path_564204, "groupId", newJString(groupId))
+  add(path_564204, "subscriptionId", newJString(subscriptionId))
+  add(path_564204, "uid", newJString(uid))
+  add(path_564204, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564203.call(path_564204, query_564205, nil, nil, nil)
 
-var groupUsersCreate* = Call_GroupUsersCreate_594060(name: "groupUsersCreate",
+var groupUsersCreate* = Call_GroupUsersCreate_564193(name: "groupUsersCreate",
     meth: HttpMethod.HttpPut, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ApiManagement/service/{serviceName}/groups/{groupId}/users/{uid}",
-    validator: validate_GroupUsersCreate_594061, base: "",
-    url: url_GroupUsersCreate_594062, schemes: {Scheme.Https})
+    validator: validate_GroupUsersCreate_564194, base: "",
+    url: url_GroupUsersCreate_564195, schemes: {Scheme.Https})
 type
-  Call_GroupUsersDelete_594073 = ref object of OpenApiRestCall_593424
-proc url_GroupUsersDelete_594075(protocol: Scheme; host: string; base: string;
+  Call_GroupUsersDelete_564206 = ref object of OpenApiRestCall_563555
+proc url_GroupUsersDelete_564208(protocol: Scheme; host: string; base: string;
                                 route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1153,7 +1163,7 @@ proc url_GroupUsersDelete_594075(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_GroupUsersDelete_594074(path: JsonNode; query: JsonNode;
+proc validate_GroupUsersDelete_564207(path: JsonNode; query: JsonNode;
                                      header: JsonNode; formData: JsonNode;
                                      body: JsonNode): JsonNode =
   ## Remove existing user from existing group.
@@ -1161,43 +1171,44 @@ proc validate_GroupUsersDelete_594074(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
+  ##   serviceName: JString (required)
+  ##              : The name of the API Management service.
   ##   groupId: JString (required)
   ##          : Group identifier. Must be unique in the current API Management service instance.
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   uid: JString (required)
   ##      : User identifier. Must be unique in the current API Management service instance.
-  ##   serviceName: JString (required)
-  ##              : The name of the API Management service.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
-  assert path != nil, "path argument is necessary due to required `groupId` field"
-  var valid_594076 = path.getOrDefault("groupId")
-  valid_594076 = validateParameter(valid_594076, JString, required = true,
+  assert path != nil,
+        "path argument is necessary due to required `serviceName` field"
+  var valid_564209 = path.getOrDefault("serviceName")
+  valid_564209 = validateParameter(valid_564209, JString, required = true,
                                  default = nil)
-  if valid_594076 != nil:
-    section.add "groupId", valid_594076
-  var valid_594077 = path.getOrDefault("resourceGroupName")
-  valid_594077 = validateParameter(valid_594077, JString, required = true,
+  if valid_564209 != nil:
+    section.add "serviceName", valid_564209
+  var valid_564210 = path.getOrDefault("groupId")
+  valid_564210 = validateParameter(valid_564210, JString, required = true,
                                  default = nil)
-  if valid_594077 != nil:
-    section.add "resourceGroupName", valid_594077
-  var valid_594078 = path.getOrDefault("subscriptionId")
-  valid_594078 = validateParameter(valid_594078, JString, required = true,
+  if valid_564210 != nil:
+    section.add "groupId", valid_564210
+  var valid_564211 = path.getOrDefault("subscriptionId")
+  valid_564211 = validateParameter(valid_564211, JString, required = true,
                                  default = nil)
-  if valid_594078 != nil:
-    section.add "subscriptionId", valid_594078
-  var valid_594079 = path.getOrDefault("uid")
-  valid_594079 = validateParameter(valid_594079, JString, required = true,
+  if valid_564211 != nil:
+    section.add "subscriptionId", valid_564211
+  var valid_564212 = path.getOrDefault("uid")
+  valid_564212 = validateParameter(valid_564212, JString, required = true,
                                  default = nil)
-  if valid_594079 != nil:
-    section.add "uid", valid_594079
-  var valid_594080 = path.getOrDefault("serviceName")
-  valid_594080 = validateParameter(valid_594080, JString, required = true,
+  if valid_564212 != nil:
+    section.add "uid", valid_564212
+  var valid_564213 = path.getOrDefault("resourceGroupName")
+  valid_564213 = validateParameter(valid_564213, JString, required = true,
                                  default = nil)
-  if valid_594080 != nil:
-    section.add "serviceName", valid_594080
+  if valid_564213 != nil:
+    section.add "resourceGroupName", valid_564213
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1205,11 +1216,11 @@ proc validate_GroupUsersDelete_594074(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594081 = query.getOrDefault("api-version")
-  valid_594081 = validateParameter(valid_594081, JString, required = true,
+  var valid_564214 = query.getOrDefault("api-version")
+  valid_564214 = validateParameter(valid_564214, JString, required = true,
                                  default = nil)
-  if valid_594081 != nil:
-    section.add "api-version", valid_594081
+  if valid_564214 != nil:
+    section.add "api-version", valid_564214
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1218,50 +1229,50 @@ proc validate_GroupUsersDelete_594074(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594082: Call_GroupUsersDelete_594073; path: JsonNode;
+proc call*(call_564215: Call_GroupUsersDelete_564206; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Remove existing user from existing group.
   ## 
-  let valid = call_594082.validator(path, query, header, formData, body)
-  let scheme = call_594082.pickScheme
+  let valid = call_564215.validator(path, query, header, formData, body)
+  let scheme = call_564215.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594082.url(scheme.get, call_594082.host, call_594082.base,
-                         call_594082.route, valid.getOrDefault("path"),
+  let url = call_564215.url(scheme.get, call_564215.host, call_564215.base,
+                         call_564215.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594082, url, valid)
+  result = hook(call_564215, url, valid)
 
-proc call*(call_594083: Call_GroupUsersDelete_594073; groupId: string;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          uid: string; serviceName: string): Recallable =
+proc call*(call_564216: Call_GroupUsersDelete_564206; serviceName: string;
+          apiVersion: string; groupId: string; subscriptionId: string; uid: string;
+          resourceGroupName: string): Recallable =
   ## groupUsersDelete
   ## Remove existing user from existing group.
-  ##   groupId: string (required)
-  ##          : Group identifier. Must be unique in the current API Management service instance.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   serviceName: string (required)
+  ##              : The name of the API Management service.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
+  ##   groupId: string (required)
+  ##          : Group identifier. Must be unique in the current API Management service instance.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   uid: string (required)
   ##      : User identifier. Must be unique in the current API Management service instance.
-  ##   serviceName: string (required)
-  ##              : The name of the API Management service.
-  var path_594084 = newJObject()
-  var query_594085 = newJObject()
-  add(path_594084, "groupId", newJString(groupId))
-  add(path_594084, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594085, "api-version", newJString(apiVersion))
-  add(path_594084, "subscriptionId", newJString(subscriptionId))
-  add(path_594084, "uid", newJString(uid))
-  add(path_594084, "serviceName", newJString(serviceName))
-  result = call_594083.call(path_594084, query_594085, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564217 = newJObject()
+  var query_564218 = newJObject()
+  add(path_564217, "serviceName", newJString(serviceName))
+  add(query_564218, "api-version", newJString(apiVersion))
+  add(path_564217, "groupId", newJString(groupId))
+  add(path_564217, "subscriptionId", newJString(subscriptionId))
+  add(path_564217, "uid", newJString(uid))
+  add(path_564217, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564216.call(path_564217, query_564218, nil, nil, nil)
 
-var groupUsersDelete* = Call_GroupUsersDelete_594073(name: "groupUsersDelete",
+var groupUsersDelete* = Call_GroupUsersDelete_564206(name: "groupUsersDelete",
     meth: HttpMethod.HttpDelete, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ApiManagement/service/{serviceName}/groups/{groupId}/users/{uid}",
-    validator: validate_GroupUsersDelete_594074, base: "",
-    url: url_GroupUsersDelete_594075, schemes: {Scheme.Https})
+    validator: validate_GroupUsersDelete_564207, base: "",
+    url: url_GroupUsersDelete_564208, schemes: {Scheme.Https})
 export
   rest
 

@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, httpcore
 
 ## auto-generated via openapi macro
 ## title: DiskResourceProviderClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_567657 = ref object of OpenApiRestCall
+  OpenApiRestCall_563555 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_567657](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563555](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_567657): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563555): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,8 +107,8 @@ const
   macServiceName = "compute-disk"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_DisksList_567879 = ref object of OpenApiRestCall_567657
-proc url_DisksList_567881(protocol: Scheme; host: string; base: string; route: string;
+  Call_DisksList_563777 = ref object of OpenApiRestCall_563555
+proc url_DisksList_563779(protocol: Scheme; host: string; base: string; route: string;
                          path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -120,7 +124,7 @@ proc url_DisksList_567881(protocol: Scheme; host: string; base: string; route: s
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DisksList_567880(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_DisksList_563778(path: JsonNode; query: JsonNode; header: JsonNode;
                               formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists all the disks under a subscription.
   ## 
@@ -132,11 +136,11 @@ proc validate_DisksList_567880(path: JsonNode; query: JsonNode; header: JsonNode
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_568054 = path.getOrDefault("subscriptionId")
-  valid_568054 = validateParameter(valid_568054, JString, required = true,
+  var valid_563954 = path.getOrDefault("subscriptionId")
+  valid_563954 = validateParameter(valid_563954, JString, required = true,
                                  default = nil)
-  if valid_568054 != nil:
-    section.add "subscriptionId", valid_568054
+  if valid_563954 != nil:
+    section.add "subscriptionId", valid_563954
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -144,11 +148,11 @@ proc validate_DisksList_567880(path: JsonNode; query: JsonNode; header: JsonNode
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568055 = query.getOrDefault("api-version")
-  valid_568055 = validateParameter(valid_568055, JString, required = true,
+  var valid_563955 = query.getOrDefault("api-version")
+  valid_563955 = validateParameter(valid_563955, JString, required = true,
                                  default = nil)
-  if valid_568055 != nil:
-    section.add "api-version", valid_568055
+  if valid_563955 != nil:
+    section.add "api-version", valid_563955
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -157,20 +161,20 @@ proc validate_DisksList_567880(path: JsonNode; query: JsonNode; header: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_568078: Call_DisksList_567879; path: JsonNode; query: JsonNode;
+proc call*(call_563978: Call_DisksList_563777; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists all the disks under a subscription.
   ## 
-  let valid = call_568078.validator(path, query, header, formData, body)
-  let scheme = call_568078.pickScheme
+  let valid = call_563978.validator(path, query, header, formData, body)
+  let scheme = call_563978.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568078.url(scheme.get, call_568078.host, call_568078.base,
-                         call_568078.route, valid.getOrDefault("path"),
+  let url = call_563978.url(scheme.get, call_563978.host, call_563978.base,
+                         call_563978.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568078, url, valid)
+  result = hook(call_563978, url, valid)
 
-proc call*(call_568149: Call_DisksList_567879; apiVersion: string;
+proc call*(call_564049: Call_DisksList_563777; apiVersion: string;
           subscriptionId: string): Recallable =
   ## disksList
   ## Lists all the disks under a subscription.
@@ -178,20 +182,20 @@ proc call*(call_568149: Call_DisksList_567879; apiVersion: string;
   ##             : Client Api Version.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_568150 = newJObject()
-  var query_568152 = newJObject()
-  add(query_568152, "api-version", newJString(apiVersion))
-  add(path_568150, "subscriptionId", newJString(subscriptionId))
-  result = call_568149.call(path_568150, query_568152, nil, nil, nil)
+  var path_564050 = newJObject()
+  var query_564052 = newJObject()
+  add(query_564052, "api-version", newJString(apiVersion))
+  add(path_564050, "subscriptionId", newJString(subscriptionId))
+  result = call_564049.call(path_564050, query_564052, nil, nil, nil)
 
-var disksList* = Call_DisksList_567879(name: "disksList", meth: HttpMethod.HttpGet,
+var disksList* = Call_DisksList_563777(name: "disksList", meth: HttpMethod.HttpGet,
                                     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Compute/disks",
-                                    validator: validate_DisksList_567880,
-                                    base: "", url: url_DisksList_567881,
+                                    validator: validate_DisksList_563778,
+                                    base: "", url: url_DisksList_563779,
                                     schemes: {Scheme.Https})
 type
-  Call_SnapshotsList_568191 = ref object of OpenApiRestCall_567657
-proc url_SnapshotsList_568193(protocol: Scheme; host: string; base: string;
+  Call_SnapshotsList_564091 = ref object of OpenApiRestCall_563555
+proc url_SnapshotsList_564093(protocol: Scheme; host: string; base: string;
                              route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -207,7 +211,7 @@ proc url_SnapshotsList_568193(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_SnapshotsList_568192(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_SnapshotsList_564092(path: JsonNode; query: JsonNode; header: JsonNode;
                                   formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists snapshots under a subscription.
   ## 
@@ -219,11 +223,11 @@ proc validate_SnapshotsList_568192(path: JsonNode; query: JsonNode; header: Json
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_568194 = path.getOrDefault("subscriptionId")
-  valid_568194 = validateParameter(valid_568194, JString, required = true,
+  var valid_564094 = path.getOrDefault("subscriptionId")
+  valid_564094 = validateParameter(valid_564094, JString, required = true,
                                  default = nil)
-  if valid_568194 != nil:
-    section.add "subscriptionId", valid_568194
+  if valid_564094 != nil:
+    section.add "subscriptionId", valid_564094
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -231,11 +235,11 @@ proc validate_SnapshotsList_568192(path: JsonNode; query: JsonNode; header: Json
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568195 = query.getOrDefault("api-version")
-  valid_568195 = validateParameter(valid_568195, JString, required = true,
+  var valid_564095 = query.getOrDefault("api-version")
+  valid_564095 = validateParameter(valid_564095, JString, required = true,
                                  default = nil)
-  if valid_568195 != nil:
-    section.add "api-version", valid_568195
+  if valid_564095 != nil:
+    section.add "api-version", valid_564095
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -244,20 +248,20 @@ proc validate_SnapshotsList_568192(path: JsonNode; query: JsonNode; header: Json
   if body != nil:
     result.add "body", body
 
-proc call*(call_568196: Call_SnapshotsList_568191; path: JsonNode; query: JsonNode;
+proc call*(call_564096: Call_SnapshotsList_564091; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists snapshots under a subscription.
   ## 
-  let valid = call_568196.validator(path, query, header, formData, body)
-  let scheme = call_568196.pickScheme
+  let valid = call_564096.validator(path, query, header, formData, body)
+  let scheme = call_564096.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568196.url(scheme.get, call_568196.host, call_568196.base,
-                         call_568196.route, valid.getOrDefault("path"),
+  let url = call_564096.url(scheme.get, call_564096.host, call_564096.base,
+                         call_564096.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568196, url, valid)
+  result = hook(call_564096, url, valid)
 
-proc call*(call_568197: Call_SnapshotsList_568191; apiVersion: string;
+proc call*(call_564097: Call_SnapshotsList_564091; apiVersion: string;
           subscriptionId: string): Recallable =
   ## snapshotsList
   ## Lists snapshots under a subscription.
@@ -265,19 +269,19 @@ proc call*(call_568197: Call_SnapshotsList_568191; apiVersion: string;
   ##             : Client Api Version.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_568198 = newJObject()
-  var query_568199 = newJObject()
-  add(query_568199, "api-version", newJString(apiVersion))
-  add(path_568198, "subscriptionId", newJString(subscriptionId))
-  result = call_568197.call(path_568198, query_568199, nil, nil, nil)
+  var path_564098 = newJObject()
+  var query_564099 = newJObject()
+  add(query_564099, "api-version", newJString(apiVersion))
+  add(path_564098, "subscriptionId", newJString(subscriptionId))
+  result = call_564097.call(path_564098, query_564099, nil, nil, nil)
 
-var snapshotsList* = Call_SnapshotsList_568191(name: "snapshotsList",
+var snapshotsList* = Call_SnapshotsList_564091(name: "snapshotsList",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Compute/snapshots",
-    validator: validate_SnapshotsList_568192, base: "", url: url_SnapshotsList_568193,
+    validator: validate_SnapshotsList_564092, base: "", url: url_SnapshotsList_564093,
     schemes: {Scheme.Https})
 type
-  Call_DisksListByResourceGroup_568200 = ref object of OpenApiRestCall_567657
-proc url_DisksListByResourceGroup_568202(protocol: Scheme; host: string;
+  Call_DisksListByResourceGroup_564100 = ref object of OpenApiRestCall_563555
+proc url_DisksListByResourceGroup_564102(protocol: Scheme; host: string;
                                         base: string; route: string; path: JsonNode;
                                         query: JsonNode): Uri =
   result.scheme = $protocol
@@ -298,30 +302,30 @@ proc url_DisksListByResourceGroup_568202(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DisksListByResourceGroup_568201(path: JsonNode; query: JsonNode;
+proc validate_DisksListByResourceGroup_564101(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists all the disks under a resource group.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568203 = path.getOrDefault("resourceGroupName")
-  valid_568203 = validateParameter(valid_568203, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564103 = path.getOrDefault("subscriptionId")
+  valid_564103 = validateParameter(valid_564103, JString, required = true,
                                  default = nil)
-  if valid_568203 != nil:
-    section.add "resourceGroupName", valid_568203
-  var valid_568204 = path.getOrDefault("subscriptionId")
-  valid_568204 = validateParameter(valid_568204, JString, required = true,
+  if valid_564103 != nil:
+    section.add "subscriptionId", valid_564103
+  var valid_564104 = path.getOrDefault("resourceGroupName")
+  valid_564104 = validateParameter(valid_564104, JString, required = true,
                                  default = nil)
-  if valid_568204 != nil:
-    section.add "subscriptionId", valid_568204
+  if valid_564104 != nil:
+    section.add "resourceGroupName", valid_564104
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -329,11 +333,11 @@ proc validate_DisksListByResourceGroup_568201(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568205 = query.getOrDefault("api-version")
-  valid_568205 = validateParameter(valid_568205, JString, required = true,
+  var valid_564105 = query.getOrDefault("api-version")
+  valid_564105 = validateParameter(valid_564105, JString, required = true,
                                  default = nil)
-  if valid_568205 != nil:
-    section.add "api-version", valid_568205
+  if valid_564105 != nil:
+    section.add "api-version", valid_564105
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -342,44 +346,44 @@ proc validate_DisksListByResourceGroup_568201(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568206: Call_DisksListByResourceGroup_568200; path: JsonNode;
+proc call*(call_564106: Call_DisksListByResourceGroup_564100; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists all the disks under a resource group.
   ## 
-  let valid = call_568206.validator(path, query, header, formData, body)
-  let scheme = call_568206.pickScheme
+  let valid = call_564106.validator(path, query, header, formData, body)
+  let scheme = call_564106.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568206.url(scheme.get, call_568206.host, call_568206.base,
-                         call_568206.route, valid.getOrDefault("path"),
+  let url = call_564106.url(scheme.get, call_564106.host, call_564106.base,
+                         call_564106.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568206, url, valid)
+  result = hook(call_564106, url, valid)
 
-proc call*(call_568207: Call_DisksListByResourceGroup_568200;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string): Recallable =
+proc call*(call_564107: Call_DisksListByResourceGroup_564100; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string): Recallable =
   ## disksListByResourceGroup
   ## Lists all the disks under a resource group.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_568208 = newJObject()
-  var query_568209 = newJObject()
-  add(path_568208, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568209, "api-version", newJString(apiVersion))
-  add(path_568208, "subscriptionId", newJString(subscriptionId))
-  result = call_568207.call(path_568208, query_568209, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564108 = newJObject()
+  var query_564109 = newJObject()
+  add(query_564109, "api-version", newJString(apiVersion))
+  add(path_564108, "subscriptionId", newJString(subscriptionId))
+  add(path_564108, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564107.call(path_564108, query_564109, nil, nil, nil)
 
-var disksListByResourceGroup* = Call_DisksListByResourceGroup_568200(
+var disksListByResourceGroup* = Call_DisksListByResourceGroup_564100(
     name: "disksListByResourceGroup", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/disks",
-    validator: validate_DisksListByResourceGroup_568201, base: "",
-    url: url_DisksListByResourceGroup_568202, schemes: {Scheme.Https})
+    validator: validate_DisksListByResourceGroup_564101, base: "",
+    url: url_DisksListByResourceGroup_564102, schemes: {Scheme.Https})
 type
-  Call_DisksCreateOrUpdate_568221 = ref object of OpenApiRestCall_567657
-proc url_DisksCreateOrUpdate_568223(protocol: Scheme; host: string; base: string;
+  Call_DisksCreateOrUpdate_564121 = ref object of OpenApiRestCall_563555
+proc url_DisksCreateOrUpdate_564123(protocol: Scheme; host: string; base: string;
                                    route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -401,7 +405,7 @@ proc url_DisksCreateOrUpdate_568223(protocol: Scheme; host: string; base: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DisksCreateOrUpdate_568222(path: JsonNode; query: JsonNode;
+proc validate_DisksCreateOrUpdate_564122(path: JsonNode; query: JsonNode;
                                         header: JsonNode; formData: JsonNode;
                                         body: JsonNode): JsonNode =
   ## Creates or updates a disk.
@@ -409,30 +413,29 @@ proc validate_DisksCreateOrUpdate_568222(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
-  ##   subscriptionId: JString (required)
-  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   diskName: JString (required)
   ##           : The name of the managed disk that is being created. The name can't be changed after the disk is created. Supported characters for the name are a-z, A-Z, 0-9 and _. The maximum name length is 80 characters.
+  ##   subscriptionId: JString (required)
+  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568241 = path.getOrDefault("resourceGroupName")
-  valid_568241 = validateParameter(valid_568241, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `diskName` field"
+  var valid_564141 = path.getOrDefault("diskName")
+  valid_564141 = validateParameter(valid_564141, JString, required = true,
                                  default = nil)
-  if valid_568241 != nil:
-    section.add "resourceGroupName", valid_568241
-  var valid_568242 = path.getOrDefault("subscriptionId")
-  valid_568242 = validateParameter(valid_568242, JString, required = true,
+  if valid_564141 != nil:
+    section.add "diskName", valid_564141
+  var valid_564142 = path.getOrDefault("subscriptionId")
+  valid_564142 = validateParameter(valid_564142, JString, required = true,
                                  default = nil)
-  if valid_568242 != nil:
-    section.add "subscriptionId", valid_568242
-  var valid_568243 = path.getOrDefault("diskName")
-  valid_568243 = validateParameter(valid_568243, JString, required = true,
+  if valid_564142 != nil:
+    section.add "subscriptionId", valid_564142
+  var valid_564143 = path.getOrDefault("resourceGroupName")
+  valid_564143 = validateParameter(valid_564143, JString, required = true,
                                  default = nil)
-  if valid_568243 != nil:
-    section.add "diskName", valid_568243
+  if valid_564143 != nil:
+    section.add "resourceGroupName", valid_564143
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -440,11 +443,11 @@ proc validate_DisksCreateOrUpdate_568222(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568244 = query.getOrDefault("api-version")
-  valid_568244 = validateParameter(valid_568244, JString, required = true,
+  var valid_564144 = query.getOrDefault("api-version")
+  valid_564144 = validateParameter(valid_564144, JString, required = true,
                                  default = nil)
-  if valid_568244 != nil:
-    section.add "api-version", valid_568244
+  if valid_564144 != nil:
+    section.add "api-version", valid_564144
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -458,52 +461,53 @@ proc validate_DisksCreateOrUpdate_568222(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568246: Call_DisksCreateOrUpdate_568221; path: JsonNode;
+proc call*(call_564146: Call_DisksCreateOrUpdate_564121; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Creates or updates a disk.
   ## 
-  let valid = call_568246.validator(path, query, header, formData, body)
-  let scheme = call_568246.pickScheme
+  let valid = call_564146.validator(path, query, header, formData, body)
+  let scheme = call_564146.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568246.url(scheme.get, call_568246.host, call_568246.base,
-                         call_568246.route, valid.getOrDefault("path"),
+  let url = call_564146.url(scheme.get, call_564146.host, call_564146.base,
+                         call_564146.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568246, url, valid)
+  result = hook(call_564146, url, valid)
 
-proc call*(call_568247: Call_DisksCreateOrUpdate_568221; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; disk: JsonNode; diskName: string): Recallable =
+proc call*(call_564147: Call_DisksCreateOrUpdate_564121; diskName: string;
+          apiVersion: string; disk: JsonNode; subscriptionId: string;
+          resourceGroupName: string): Recallable =
   ## disksCreateOrUpdate
   ## Creates or updates a disk.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
-  ##   apiVersion: string (required)
-  ##             : Client Api Version.
-  ##   subscriptionId: string (required)
-  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   disk: JObject (required)
-  ##       : Disk object supplied in the body of the Put disk operation.
   ##   diskName: string (required)
   ##           : The name of the managed disk that is being created. The name can't be changed after the disk is created. Supported characters for the name are a-z, A-Z, 0-9 and _. The maximum name length is 80 characters.
-  var path_568248 = newJObject()
-  var query_568249 = newJObject()
-  var body_568250 = newJObject()
-  add(path_568248, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568249, "api-version", newJString(apiVersion))
-  add(path_568248, "subscriptionId", newJString(subscriptionId))
+  ##   apiVersion: string (required)
+  ##             : Client Api Version.
+  ##   disk: JObject (required)
+  ##       : Disk object supplied in the body of the Put disk operation.
+  ##   subscriptionId: string (required)
+  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564148 = newJObject()
+  var query_564149 = newJObject()
+  var body_564150 = newJObject()
+  add(path_564148, "diskName", newJString(diskName))
+  add(query_564149, "api-version", newJString(apiVersion))
   if disk != nil:
-    body_568250 = disk
-  add(path_568248, "diskName", newJString(diskName))
-  result = call_568247.call(path_568248, query_568249, nil, nil, body_568250)
+    body_564150 = disk
+  add(path_564148, "subscriptionId", newJString(subscriptionId))
+  add(path_564148, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564147.call(path_564148, query_564149, nil, nil, body_564150)
 
-var disksCreateOrUpdate* = Call_DisksCreateOrUpdate_568221(
+var disksCreateOrUpdate* = Call_DisksCreateOrUpdate_564121(
     name: "disksCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/disks/{diskName}",
-    validator: validate_DisksCreateOrUpdate_568222, base: "",
-    url: url_DisksCreateOrUpdate_568223, schemes: {Scheme.Https})
+    validator: validate_DisksCreateOrUpdate_564122, base: "",
+    url: url_DisksCreateOrUpdate_564123, schemes: {Scheme.Https})
 type
-  Call_DisksGet_568210 = ref object of OpenApiRestCall_567657
-proc url_DisksGet_568212(protocol: Scheme; host: string; base: string; route: string;
+  Call_DisksGet_564110 = ref object of OpenApiRestCall_563555
+proc url_DisksGet_564112(protocol: Scheme; host: string; base: string; route: string;
                         path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -525,37 +529,36 @@ proc url_DisksGet_568212(protocol: Scheme; host: string; base: string; route: st
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DisksGet_568211(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_DisksGet_564111(path: JsonNode; query: JsonNode; header: JsonNode;
                              formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets information about a disk.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
-  ##   subscriptionId: JString (required)
-  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   diskName: JString (required)
   ##           : The name of the managed disk that is being created. The name can't be changed after the disk is created. Supported characters for the name are a-z, A-Z, 0-9 and _. The maximum name length is 80 characters.
+  ##   subscriptionId: JString (required)
+  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568213 = path.getOrDefault("resourceGroupName")
-  valid_568213 = validateParameter(valid_568213, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `diskName` field"
+  var valid_564113 = path.getOrDefault("diskName")
+  valid_564113 = validateParameter(valid_564113, JString, required = true,
                                  default = nil)
-  if valid_568213 != nil:
-    section.add "resourceGroupName", valid_568213
-  var valid_568214 = path.getOrDefault("subscriptionId")
-  valid_568214 = validateParameter(valid_568214, JString, required = true,
+  if valid_564113 != nil:
+    section.add "diskName", valid_564113
+  var valid_564114 = path.getOrDefault("subscriptionId")
+  valid_564114 = validateParameter(valid_564114, JString, required = true,
                                  default = nil)
-  if valid_568214 != nil:
-    section.add "subscriptionId", valid_568214
-  var valid_568215 = path.getOrDefault("diskName")
-  valid_568215 = validateParameter(valid_568215, JString, required = true,
+  if valid_564114 != nil:
+    section.add "subscriptionId", valid_564114
+  var valid_564115 = path.getOrDefault("resourceGroupName")
+  valid_564115 = validateParameter(valid_564115, JString, required = true,
                                  default = nil)
-  if valid_568215 != nil:
-    section.add "diskName", valid_568215
+  if valid_564115 != nil:
+    section.add "resourceGroupName", valid_564115
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -563,11 +566,11 @@ proc validate_DisksGet_568211(path: JsonNode; query: JsonNode; header: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568216 = query.getOrDefault("api-version")
-  valid_568216 = validateParameter(valid_568216, JString, required = true,
+  var valid_564116 = query.getOrDefault("api-version")
+  valid_564116 = validateParameter(valid_564116, JString, required = true,
                                  default = nil)
-  if valid_568216 != nil:
-    section.add "api-version", valid_568216
+  if valid_564116 != nil:
+    section.add "api-version", valid_564116
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -576,47 +579,47 @@ proc validate_DisksGet_568211(path: JsonNode; query: JsonNode; header: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568217: Call_DisksGet_568210; path: JsonNode; query: JsonNode;
+proc call*(call_564117: Call_DisksGet_564110; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets information about a disk.
   ## 
-  let valid = call_568217.validator(path, query, header, formData, body)
-  let scheme = call_568217.pickScheme
+  let valid = call_564117.validator(path, query, header, formData, body)
+  let scheme = call_564117.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568217.url(scheme.get, call_568217.host, call_568217.base,
-                         call_568217.route, valid.getOrDefault("path"),
+  let url = call_564117.url(scheme.get, call_564117.host, call_564117.base,
+                         call_564117.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568217, url, valid)
+  result = hook(call_564117, url, valid)
 
-proc call*(call_568218: Call_DisksGet_568210; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; diskName: string): Recallable =
+proc call*(call_564118: Call_DisksGet_564110; diskName: string; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string): Recallable =
   ## disksGet
   ## Gets information about a disk.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   diskName: string (required)
+  ##           : The name of the managed disk that is being created. The name can't be changed after the disk is created. Supported characters for the name are a-z, A-Z, 0-9 and _. The maximum name length is 80 characters.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   diskName: string (required)
-  ##           : The name of the managed disk that is being created. The name can't be changed after the disk is created. Supported characters for the name are a-z, A-Z, 0-9 and _. The maximum name length is 80 characters.
-  var path_568219 = newJObject()
-  var query_568220 = newJObject()
-  add(path_568219, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568220, "api-version", newJString(apiVersion))
-  add(path_568219, "subscriptionId", newJString(subscriptionId))
-  add(path_568219, "diskName", newJString(diskName))
-  result = call_568218.call(path_568219, query_568220, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564119 = newJObject()
+  var query_564120 = newJObject()
+  add(path_564119, "diskName", newJString(diskName))
+  add(query_564120, "api-version", newJString(apiVersion))
+  add(path_564119, "subscriptionId", newJString(subscriptionId))
+  add(path_564119, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564118.call(path_564119, query_564120, nil, nil, nil)
 
-var disksGet* = Call_DisksGet_568210(name: "disksGet", meth: HttpMethod.HttpGet,
+var disksGet* = Call_DisksGet_564110(name: "disksGet", meth: HttpMethod.HttpGet,
                                   host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/disks/{diskName}",
-                                  validator: validate_DisksGet_568211, base: "",
-                                  url: url_DisksGet_568212,
+                                  validator: validate_DisksGet_564111, base: "",
+                                  url: url_DisksGet_564112,
                                   schemes: {Scheme.Https})
 type
-  Call_DisksUpdate_568262 = ref object of OpenApiRestCall_567657
-proc url_DisksUpdate_568264(protocol: Scheme; host: string; base: string;
+  Call_DisksUpdate_564162 = ref object of OpenApiRestCall_563555
+proc url_DisksUpdate_564164(protocol: Scheme; host: string; base: string;
                            route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -638,37 +641,36 @@ proc url_DisksUpdate_568264(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DisksUpdate_568263(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_DisksUpdate_564163(path: JsonNode; query: JsonNode; header: JsonNode;
                                 formData: JsonNode; body: JsonNode): JsonNode =
   ## Updates (patches) a disk.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
-  ##   subscriptionId: JString (required)
-  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   diskName: JString (required)
   ##           : The name of the managed disk that is being created. The name can't be changed after the disk is created. Supported characters for the name are a-z, A-Z, 0-9 and _. The maximum name length is 80 characters.
+  ##   subscriptionId: JString (required)
+  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568265 = path.getOrDefault("resourceGroupName")
-  valid_568265 = validateParameter(valid_568265, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `diskName` field"
+  var valid_564165 = path.getOrDefault("diskName")
+  valid_564165 = validateParameter(valid_564165, JString, required = true,
                                  default = nil)
-  if valid_568265 != nil:
-    section.add "resourceGroupName", valid_568265
-  var valid_568266 = path.getOrDefault("subscriptionId")
-  valid_568266 = validateParameter(valid_568266, JString, required = true,
+  if valid_564165 != nil:
+    section.add "diskName", valid_564165
+  var valid_564166 = path.getOrDefault("subscriptionId")
+  valid_564166 = validateParameter(valid_564166, JString, required = true,
                                  default = nil)
-  if valid_568266 != nil:
-    section.add "subscriptionId", valid_568266
-  var valid_568267 = path.getOrDefault("diskName")
-  valid_568267 = validateParameter(valid_568267, JString, required = true,
+  if valid_564166 != nil:
+    section.add "subscriptionId", valid_564166
+  var valid_564167 = path.getOrDefault("resourceGroupName")
+  valid_564167 = validateParameter(valid_564167, JString, required = true,
                                  default = nil)
-  if valid_568267 != nil:
-    section.add "diskName", valid_568267
+  if valid_564167 != nil:
+    section.add "resourceGroupName", valid_564167
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -676,11 +678,11 @@ proc validate_DisksUpdate_568263(path: JsonNode; query: JsonNode; header: JsonNo
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568268 = query.getOrDefault("api-version")
-  valid_568268 = validateParameter(valid_568268, JString, required = true,
+  var valid_564168 = query.getOrDefault("api-version")
+  valid_564168 = validateParameter(valid_564168, JString, required = true,
                                  default = nil)
-  if valid_568268 != nil:
-    section.add "api-version", valid_568268
+  if valid_564168 != nil:
+    section.add "api-version", valid_564168
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -694,53 +696,54 @@ proc validate_DisksUpdate_568263(path: JsonNode; query: JsonNode; header: JsonNo
   if body != nil:
     result.add "body", body
 
-proc call*(call_568270: Call_DisksUpdate_568262; path: JsonNode; query: JsonNode;
+proc call*(call_564170: Call_DisksUpdate_564162; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Updates (patches) a disk.
   ## 
-  let valid = call_568270.validator(path, query, header, formData, body)
-  let scheme = call_568270.pickScheme
+  let valid = call_564170.validator(path, query, header, formData, body)
+  let scheme = call_564170.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568270.url(scheme.get, call_568270.host, call_568270.base,
-                         call_568270.route, valid.getOrDefault("path"),
+  let url = call_564170.url(scheme.get, call_564170.host, call_564170.base,
+                         call_564170.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568270, url, valid)
+  result = hook(call_564170, url, valid)
 
-proc call*(call_568271: Call_DisksUpdate_568262; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; disk: JsonNode; diskName: string): Recallable =
+proc call*(call_564171: Call_DisksUpdate_564162; diskName: string;
+          apiVersion: string; disk: JsonNode; subscriptionId: string;
+          resourceGroupName: string): Recallable =
   ## disksUpdate
   ## Updates (patches) a disk.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
-  ##   apiVersion: string (required)
-  ##             : Client Api Version.
-  ##   subscriptionId: string (required)
-  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   disk: JObject (required)
-  ##       : Disk object supplied in the body of the Patch disk operation.
   ##   diskName: string (required)
   ##           : The name of the managed disk that is being created. The name can't be changed after the disk is created. Supported characters for the name are a-z, A-Z, 0-9 and _. The maximum name length is 80 characters.
-  var path_568272 = newJObject()
-  var query_568273 = newJObject()
-  var body_568274 = newJObject()
-  add(path_568272, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568273, "api-version", newJString(apiVersion))
-  add(path_568272, "subscriptionId", newJString(subscriptionId))
+  ##   apiVersion: string (required)
+  ##             : Client Api Version.
+  ##   disk: JObject (required)
+  ##       : Disk object supplied in the body of the Patch disk operation.
+  ##   subscriptionId: string (required)
+  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564172 = newJObject()
+  var query_564173 = newJObject()
+  var body_564174 = newJObject()
+  add(path_564172, "diskName", newJString(diskName))
+  add(query_564173, "api-version", newJString(apiVersion))
   if disk != nil:
-    body_568274 = disk
-  add(path_568272, "diskName", newJString(diskName))
-  result = call_568271.call(path_568272, query_568273, nil, nil, body_568274)
+    body_564174 = disk
+  add(path_564172, "subscriptionId", newJString(subscriptionId))
+  add(path_564172, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564171.call(path_564172, query_564173, nil, nil, body_564174)
 
-var disksUpdate* = Call_DisksUpdate_568262(name: "disksUpdate",
+var disksUpdate* = Call_DisksUpdate_564162(name: "disksUpdate",
                                         meth: HttpMethod.HttpPatch,
                                         host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/disks/{diskName}",
-                                        validator: validate_DisksUpdate_568263,
-                                        base: "", url: url_DisksUpdate_568264,
+                                        validator: validate_DisksUpdate_564163,
+                                        base: "", url: url_DisksUpdate_564164,
                                         schemes: {Scheme.Https})
 type
-  Call_DisksDelete_568251 = ref object of OpenApiRestCall_567657
-proc url_DisksDelete_568253(protocol: Scheme; host: string; base: string;
+  Call_DisksDelete_564151 = ref object of OpenApiRestCall_563555
+proc url_DisksDelete_564153(protocol: Scheme; host: string; base: string;
                            route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -762,37 +765,36 @@ proc url_DisksDelete_568253(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DisksDelete_568252(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_DisksDelete_564152(path: JsonNode; query: JsonNode; header: JsonNode;
                                 formData: JsonNode; body: JsonNode): JsonNode =
   ## Deletes a disk.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
-  ##   subscriptionId: JString (required)
-  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   diskName: JString (required)
   ##           : The name of the managed disk that is being created. The name can't be changed after the disk is created. Supported characters for the name are a-z, A-Z, 0-9 and _. The maximum name length is 80 characters.
+  ##   subscriptionId: JString (required)
+  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568254 = path.getOrDefault("resourceGroupName")
-  valid_568254 = validateParameter(valid_568254, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `diskName` field"
+  var valid_564154 = path.getOrDefault("diskName")
+  valid_564154 = validateParameter(valid_564154, JString, required = true,
                                  default = nil)
-  if valid_568254 != nil:
-    section.add "resourceGroupName", valid_568254
-  var valid_568255 = path.getOrDefault("subscriptionId")
-  valid_568255 = validateParameter(valid_568255, JString, required = true,
+  if valid_564154 != nil:
+    section.add "diskName", valid_564154
+  var valid_564155 = path.getOrDefault("subscriptionId")
+  valid_564155 = validateParameter(valid_564155, JString, required = true,
                                  default = nil)
-  if valid_568255 != nil:
-    section.add "subscriptionId", valid_568255
-  var valid_568256 = path.getOrDefault("diskName")
-  valid_568256 = validateParameter(valid_568256, JString, required = true,
+  if valid_564155 != nil:
+    section.add "subscriptionId", valid_564155
+  var valid_564156 = path.getOrDefault("resourceGroupName")
+  valid_564156 = validateParameter(valid_564156, JString, required = true,
                                  default = nil)
-  if valid_568256 != nil:
-    section.add "diskName", valid_568256
+  if valid_564156 != nil:
+    section.add "resourceGroupName", valid_564156
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -800,11 +802,11 @@ proc validate_DisksDelete_568252(path: JsonNode; query: JsonNode; header: JsonNo
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568257 = query.getOrDefault("api-version")
-  valid_568257 = validateParameter(valid_568257, JString, required = true,
+  var valid_564157 = query.getOrDefault("api-version")
+  valid_564157 = validateParameter(valid_564157, JString, required = true,
                                  default = nil)
-  if valid_568257 != nil:
-    section.add "api-version", valid_568257
+  if valid_564157 != nil:
+    section.add "api-version", valid_564157
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -813,48 +815,48 @@ proc validate_DisksDelete_568252(path: JsonNode; query: JsonNode; header: JsonNo
   if body != nil:
     result.add "body", body
 
-proc call*(call_568258: Call_DisksDelete_568251; path: JsonNode; query: JsonNode;
+proc call*(call_564158: Call_DisksDelete_564151; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes a disk.
   ## 
-  let valid = call_568258.validator(path, query, header, formData, body)
-  let scheme = call_568258.pickScheme
+  let valid = call_564158.validator(path, query, header, formData, body)
+  let scheme = call_564158.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568258.url(scheme.get, call_568258.host, call_568258.base,
-                         call_568258.route, valid.getOrDefault("path"),
+  let url = call_564158.url(scheme.get, call_564158.host, call_564158.base,
+                         call_564158.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568258, url, valid)
+  result = hook(call_564158, url, valid)
 
-proc call*(call_568259: Call_DisksDelete_568251; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; diskName: string): Recallable =
+proc call*(call_564159: Call_DisksDelete_564151; diskName: string;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string): Recallable =
   ## disksDelete
   ## Deletes a disk.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   diskName: string (required)
+  ##           : The name of the managed disk that is being created. The name can't be changed after the disk is created. Supported characters for the name are a-z, A-Z, 0-9 and _. The maximum name length is 80 characters.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   diskName: string (required)
-  ##           : The name of the managed disk that is being created. The name can't be changed after the disk is created. Supported characters for the name are a-z, A-Z, 0-9 and _. The maximum name length is 80 characters.
-  var path_568260 = newJObject()
-  var query_568261 = newJObject()
-  add(path_568260, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568261, "api-version", newJString(apiVersion))
-  add(path_568260, "subscriptionId", newJString(subscriptionId))
-  add(path_568260, "diskName", newJString(diskName))
-  result = call_568259.call(path_568260, query_568261, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564160 = newJObject()
+  var query_564161 = newJObject()
+  add(path_564160, "diskName", newJString(diskName))
+  add(query_564161, "api-version", newJString(apiVersion))
+  add(path_564160, "subscriptionId", newJString(subscriptionId))
+  add(path_564160, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564159.call(path_564160, query_564161, nil, nil, nil)
 
-var disksDelete* = Call_DisksDelete_568251(name: "disksDelete",
+var disksDelete* = Call_DisksDelete_564151(name: "disksDelete",
                                         meth: HttpMethod.HttpDelete,
                                         host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/disks/{diskName}",
-                                        validator: validate_DisksDelete_568252,
-                                        base: "", url: url_DisksDelete_568253,
+                                        validator: validate_DisksDelete_564152,
+                                        base: "", url: url_DisksDelete_564153,
                                         schemes: {Scheme.Https})
 type
-  Call_DisksGrantAccess_568275 = ref object of OpenApiRestCall_567657
-proc url_DisksGrantAccess_568277(protocol: Scheme; host: string; base: string;
+  Call_DisksGrantAccess_564175 = ref object of OpenApiRestCall_563555
+proc url_DisksGrantAccess_564177(protocol: Scheme; host: string; base: string;
                                 route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -877,7 +879,7 @@ proc url_DisksGrantAccess_568277(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DisksGrantAccess_568276(path: JsonNode; query: JsonNode;
+proc validate_DisksGrantAccess_564176(path: JsonNode; query: JsonNode;
                                      header: JsonNode; formData: JsonNode;
                                      body: JsonNode): JsonNode =
   ## Grants access to a disk.
@@ -885,30 +887,29 @@ proc validate_DisksGrantAccess_568276(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
-  ##   subscriptionId: JString (required)
-  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   diskName: JString (required)
   ##           : The name of the managed disk that is being created. The name can't be changed after the disk is created. Supported characters for the name are a-z, A-Z, 0-9 and _. The maximum name length is 80 characters.
+  ##   subscriptionId: JString (required)
+  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568278 = path.getOrDefault("resourceGroupName")
-  valid_568278 = validateParameter(valid_568278, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `diskName` field"
+  var valid_564178 = path.getOrDefault("diskName")
+  valid_564178 = validateParameter(valid_564178, JString, required = true,
                                  default = nil)
-  if valid_568278 != nil:
-    section.add "resourceGroupName", valid_568278
-  var valid_568279 = path.getOrDefault("subscriptionId")
-  valid_568279 = validateParameter(valid_568279, JString, required = true,
+  if valid_564178 != nil:
+    section.add "diskName", valid_564178
+  var valid_564179 = path.getOrDefault("subscriptionId")
+  valid_564179 = validateParameter(valid_564179, JString, required = true,
                                  default = nil)
-  if valid_568279 != nil:
-    section.add "subscriptionId", valid_568279
-  var valid_568280 = path.getOrDefault("diskName")
-  valid_568280 = validateParameter(valid_568280, JString, required = true,
+  if valid_564179 != nil:
+    section.add "subscriptionId", valid_564179
+  var valid_564180 = path.getOrDefault("resourceGroupName")
+  valid_564180 = validateParameter(valid_564180, JString, required = true,
                                  default = nil)
-  if valid_568280 != nil:
-    section.add "diskName", valid_568280
+  if valid_564180 != nil:
+    section.add "resourceGroupName", valid_564180
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -916,11 +917,11 @@ proc validate_DisksGrantAccess_568276(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568281 = query.getOrDefault("api-version")
-  valid_568281 = validateParameter(valid_568281, JString, required = true,
+  var valid_564181 = query.getOrDefault("api-version")
+  valid_564181 = validateParameter(valid_564181, JString, required = true,
                                  default = nil)
-  if valid_568281 != nil:
-    section.add "api-version", valid_568281
+  if valid_564181 != nil:
+    section.add "api-version", valid_564181
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -934,52 +935,52 @@ proc validate_DisksGrantAccess_568276(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568283: Call_DisksGrantAccess_568275; path: JsonNode;
+proc call*(call_564183: Call_DisksGrantAccess_564175; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Grants access to a disk.
   ## 
-  let valid = call_568283.validator(path, query, header, formData, body)
-  let scheme = call_568283.pickScheme
+  let valid = call_564183.validator(path, query, header, formData, body)
+  let scheme = call_564183.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568283.url(scheme.get, call_568283.host, call_568283.base,
-                         call_568283.route, valid.getOrDefault("path"),
+  let url = call_564183.url(scheme.get, call_564183.host, call_564183.base,
+                         call_564183.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568283, url, valid)
+  result = hook(call_564183, url, valid)
 
-proc call*(call_568284: Call_DisksGrantAccess_568275; resourceGroupName: string;
+proc call*(call_564184: Call_DisksGrantAccess_564175; diskName: string;
           grantAccessData: JsonNode; apiVersion: string; subscriptionId: string;
-          diskName: string): Recallable =
+          resourceGroupName: string): Recallable =
   ## disksGrantAccess
   ## Grants access to a disk.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   diskName: string (required)
+  ##           : The name of the managed disk that is being created. The name can't be changed after the disk is created. Supported characters for the name are a-z, A-Z, 0-9 and _. The maximum name length is 80 characters.
   ##   grantAccessData: JObject (required)
   ##                  : Access data object supplied in the body of the get disk access operation.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   diskName: string (required)
-  ##           : The name of the managed disk that is being created. The name can't be changed after the disk is created. Supported characters for the name are a-z, A-Z, 0-9 and _. The maximum name length is 80 characters.
-  var path_568285 = newJObject()
-  var query_568286 = newJObject()
-  var body_568287 = newJObject()
-  add(path_568285, "resourceGroupName", newJString(resourceGroupName))
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564185 = newJObject()
+  var query_564186 = newJObject()
+  var body_564187 = newJObject()
+  add(path_564185, "diskName", newJString(diskName))
   if grantAccessData != nil:
-    body_568287 = grantAccessData
-  add(query_568286, "api-version", newJString(apiVersion))
-  add(path_568285, "subscriptionId", newJString(subscriptionId))
-  add(path_568285, "diskName", newJString(diskName))
-  result = call_568284.call(path_568285, query_568286, nil, nil, body_568287)
+    body_564187 = grantAccessData
+  add(query_564186, "api-version", newJString(apiVersion))
+  add(path_564185, "subscriptionId", newJString(subscriptionId))
+  add(path_564185, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564184.call(path_564185, query_564186, nil, nil, body_564187)
 
-var disksGrantAccess* = Call_DisksGrantAccess_568275(name: "disksGrantAccess",
+var disksGrantAccess* = Call_DisksGrantAccess_564175(name: "disksGrantAccess",
     meth: HttpMethod.HttpPost, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/disks/{diskName}/beginGetAccess",
-    validator: validate_DisksGrantAccess_568276, base: "",
-    url: url_DisksGrantAccess_568277, schemes: {Scheme.Https})
+    validator: validate_DisksGrantAccess_564176, base: "",
+    url: url_DisksGrantAccess_564177, schemes: {Scheme.Https})
 type
-  Call_DisksRevokeAccess_568288 = ref object of OpenApiRestCall_567657
-proc url_DisksRevokeAccess_568290(protocol: Scheme; host: string; base: string;
+  Call_DisksRevokeAccess_564188 = ref object of OpenApiRestCall_563555
+proc url_DisksRevokeAccess_564190(protocol: Scheme; host: string; base: string;
                                  route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1002,7 +1003,7 @@ proc url_DisksRevokeAccess_568290(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DisksRevokeAccess_568289(path: JsonNode; query: JsonNode;
+proc validate_DisksRevokeAccess_564189(path: JsonNode; query: JsonNode;
                                       header: JsonNode; formData: JsonNode;
                                       body: JsonNode): JsonNode =
   ## Revokes access to a disk.
@@ -1010,30 +1011,29 @@ proc validate_DisksRevokeAccess_568289(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
-  ##   subscriptionId: JString (required)
-  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   diskName: JString (required)
   ##           : The name of the managed disk that is being created. The name can't be changed after the disk is created. Supported characters for the name are a-z, A-Z, 0-9 and _. The maximum name length is 80 characters.
+  ##   subscriptionId: JString (required)
+  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568291 = path.getOrDefault("resourceGroupName")
-  valid_568291 = validateParameter(valid_568291, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `diskName` field"
+  var valid_564191 = path.getOrDefault("diskName")
+  valid_564191 = validateParameter(valid_564191, JString, required = true,
                                  default = nil)
-  if valid_568291 != nil:
-    section.add "resourceGroupName", valid_568291
-  var valid_568292 = path.getOrDefault("subscriptionId")
-  valid_568292 = validateParameter(valid_568292, JString, required = true,
+  if valid_564191 != nil:
+    section.add "diskName", valid_564191
+  var valid_564192 = path.getOrDefault("subscriptionId")
+  valid_564192 = validateParameter(valid_564192, JString, required = true,
                                  default = nil)
-  if valid_568292 != nil:
-    section.add "subscriptionId", valid_568292
-  var valid_568293 = path.getOrDefault("diskName")
-  valid_568293 = validateParameter(valid_568293, JString, required = true,
+  if valid_564192 != nil:
+    section.add "subscriptionId", valid_564192
+  var valid_564193 = path.getOrDefault("resourceGroupName")
+  valid_564193 = validateParameter(valid_564193, JString, required = true,
                                  default = nil)
-  if valid_568293 != nil:
-    section.add "diskName", valid_568293
+  if valid_564193 != nil:
+    section.add "resourceGroupName", valid_564193
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1041,11 +1041,11 @@ proc validate_DisksRevokeAccess_568289(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568294 = query.getOrDefault("api-version")
-  valid_568294 = validateParameter(valid_568294, JString, required = true,
+  var valid_564194 = query.getOrDefault("api-version")
+  valid_564194 = validateParameter(valid_564194, JString, required = true,
                                  default = nil)
-  if valid_568294 != nil:
-    section.add "api-version", valid_568294
+  if valid_564194 != nil:
+    section.add "api-version", valid_564194
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1054,46 +1054,46 @@ proc validate_DisksRevokeAccess_568289(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568295: Call_DisksRevokeAccess_568288; path: JsonNode;
+proc call*(call_564195: Call_DisksRevokeAccess_564188; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Revokes access to a disk.
   ## 
-  let valid = call_568295.validator(path, query, header, formData, body)
-  let scheme = call_568295.pickScheme
+  let valid = call_564195.validator(path, query, header, formData, body)
+  let scheme = call_564195.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568295.url(scheme.get, call_568295.host, call_568295.base,
-                         call_568295.route, valid.getOrDefault("path"),
+  let url = call_564195.url(scheme.get, call_564195.host, call_564195.base,
+                         call_564195.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568295, url, valid)
+  result = hook(call_564195, url, valid)
 
-proc call*(call_568296: Call_DisksRevokeAccess_568288; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; diskName: string): Recallable =
+proc call*(call_564196: Call_DisksRevokeAccess_564188; diskName: string;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string): Recallable =
   ## disksRevokeAccess
   ## Revokes access to a disk.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   diskName: string (required)
+  ##           : The name of the managed disk that is being created. The name can't be changed after the disk is created. Supported characters for the name are a-z, A-Z, 0-9 and _. The maximum name length is 80 characters.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   diskName: string (required)
-  ##           : The name of the managed disk that is being created. The name can't be changed after the disk is created. Supported characters for the name are a-z, A-Z, 0-9 and _. The maximum name length is 80 characters.
-  var path_568297 = newJObject()
-  var query_568298 = newJObject()
-  add(path_568297, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568298, "api-version", newJString(apiVersion))
-  add(path_568297, "subscriptionId", newJString(subscriptionId))
-  add(path_568297, "diskName", newJString(diskName))
-  result = call_568296.call(path_568297, query_568298, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564197 = newJObject()
+  var query_564198 = newJObject()
+  add(path_564197, "diskName", newJString(diskName))
+  add(query_564198, "api-version", newJString(apiVersion))
+  add(path_564197, "subscriptionId", newJString(subscriptionId))
+  add(path_564197, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564196.call(path_564197, query_564198, nil, nil, nil)
 
-var disksRevokeAccess* = Call_DisksRevokeAccess_568288(name: "disksRevokeAccess",
+var disksRevokeAccess* = Call_DisksRevokeAccess_564188(name: "disksRevokeAccess",
     meth: HttpMethod.HttpPost, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/disks/{diskName}/endGetAccess",
-    validator: validate_DisksRevokeAccess_568289, base: "",
-    url: url_DisksRevokeAccess_568290, schemes: {Scheme.Https})
+    validator: validate_DisksRevokeAccess_564189, base: "",
+    url: url_DisksRevokeAccess_564190, schemes: {Scheme.Https})
 type
-  Call_SnapshotsListByResourceGroup_568299 = ref object of OpenApiRestCall_567657
-proc url_SnapshotsListByResourceGroup_568301(protocol: Scheme; host: string;
+  Call_SnapshotsListByResourceGroup_564199 = ref object of OpenApiRestCall_563555
+proc url_SnapshotsListByResourceGroup_564201(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1113,30 +1113,30 @@ proc url_SnapshotsListByResourceGroup_568301(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_SnapshotsListByResourceGroup_568300(path: JsonNode; query: JsonNode;
+proc validate_SnapshotsListByResourceGroup_564200(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists snapshots under a resource group.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568302 = path.getOrDefault("resourceGroupName")
-  valid_568302 = validateParameter(valid_568302, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564202 = path.getOrDefault("subscriptionId")
+  valid_564202 = validateParameter(valid_564202, JString, required = true,
                                  default = nil)
-  if valid_568302 != nil:
-    section.add "resourceGroupName", valid_568302
-  var valid_568303 = path.getOrDefault("subscriptionId")
-  valid_568303 = validateParameter(valid_568303, JString, required = true,
+  if valid_564202 != nil:
+    section.add "subscriptionId", valid_564202
+  var valid_564203 = path.getOrDefault("resourceGroupName")
+  valid_564203 = validateParameter(valid_564203, JString, required = true,
                                  default = nil)
-  if valid_568303 != nil:
-    section.add "subscriptionId", valid_568303
+  if valid_564203 != nil:
+    section.add "resourceGroupName", valid_564203
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1144,11 +1144,11 @@ proc validate_SnapshotsListByResourceGroup_568300(path: JsonNode; query: JsonNod
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568304 = query.getOrDefault("api-version")
-  valid_568304 = validateParameter(valid_568304, JString, required = true,
+  var valid_564204 = query.getOrDefault("api-version")
+  valid_564204 = validateParameter(valid_564204, JString, required = true,
                                  default = nil)
-  if valid_568304 != nil:
-    section.add "api-version", valid_568304
+  if valid_564204 != nil:
+    section.add "api-version", valid_564204
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1157,44 +1157,44 @@ proc validate_SnapshotsListByResourceGroup_568300(path: JsonNode; query: JsonNod
   if body != nil:
     result.add "body", body
 
-proc call*(call_568305: Call_SnapshotsListByResourceGroup_568299; path: JsonNode;
+proc call*(call_564205: Call_SnapshotsListByResourceGroup_564199; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists snapshots under a resource group.
   ## 
-  let valid = call_568305.validator(path, query, header, formData, body)
-  let scheme = call_568305.pickScheme
+  let valid = call_564205.validator(path, query, header, formData, body)
+  let scheme = call_564205.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568305.url(scheme.get, call_568305.host, call_568305.base,
-                         call_568305.route, valid.getOrDefault("path"),
+  let url = call_564205.url(scheme.get, call_564205.host, call_564205.base,
+                         call_564205.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568305, url, valid)
+  result = hook(call_564205, url, valid)
 
-proc call*(call_568306: Call_SnapshotsListByResourceGroup_568299;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string): Recallable =
+proc call*(call_564206: Call_SnapshotsListByResourceGroup_564199;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string): Recallable =
   ## snapshotsListByResourceGroup
   ## Lists snapshots under a resource group.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_568307 = newJObject()
-  var query_568308 = newJObject()
-  add(path_568307, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568308, "api-version", newJString(apiVersion))
-  add(path_568307, "subscriptionId", newJString(subscriptionId))
-  result = call_568306.call(path_568307, query_568308, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564207 = newJObject()
+  var query_564208 = newJObject()
+  add(query_564208, "api-version", newJString(apiVersion))
+  add(path_564207, "subscriptionId", newJString(subscriptionId))
+  add(path_564207, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564206.call(path_564207, query_564208, nil, nil, nil)
 
-var snapshotsListByResourceGroup* = Call_SnapshotsListByResourceGroup_568299(
+var snapshotsListByResourceGroup* = Call_SnapshotsListByResourceGroup_564199(
     name: "snapshotsListByResourceGroup", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/snapshots",
-    validator: validate_SnapshotsListByResourceGroup_568300, base: "",
-    url: url_SnapshotsListByResourceGroup_568301, schemes: {Scheme.Https})
+    validator: validate_SnapshotsListByResourceGroup_564200, base: "",
+    url: url_SnapshotsListByResourceGroup_564201, schemes: {Scheme.Https})
 type
-  Call_SnapshotsCreateOrUpdate_568320 = ref object of OpenApiRestCall_567657
-proc url_SnapshotsCreateOrUpdate_568322(protocol: Scheme; host: string; base: string;
+  Call_SnapshotsCreateOrUpdate_564220 = ref object of OpenApiRestCall_563555
+proc url_SnapshotsCreateOrUpdate_564222(protocol: Scheme; host: string; base: string;
                                        route: string; path: JsonNode;
                                        query: JsonNode): Uri =
   result.scheme = $protocol
@@ -1217,37 +1217,37 @@ proc url_SnapshotsCreateOrUpdate_568322(protocol: Scheme; host: string; base: st
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_SnapshotsCreateOrUpdate_568321(path: JsonNode; query: JsonNode;
+proc validate_SnapshotsCreateOrUpdate_564221(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Creates or updates a snapshot.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   ##   snapshotName: JString (required)
   ##               : The name of the snapshot that is being created. The name can't be changed after the snapshot is created. Supported characters for the name are a-z, A-Z, 0-9 and _. The max name length is 80 characters.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568323 = path.getOrDefault("resourceGroupName")
-  valid_568323 = validateParameter(valid_568323, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564223 = path.getOrDefault("subscriptionId")
+  valid_564223 = validateParameter(valid_564223, JString, required = true,
                                  default = nil)
-  if valid_568323 != nil:
-    section.add "resourceGroupName", valid_568323
-  var valid_568324 = path.getOrDefault("subscriptionId")
-  valid_568324 = validateParameter(valid_568324, JString, required = true,
+  if valid_564223 != nil:
+    section.add "subscriptionId", valid_564223
+  var valid_564224 = path.getOrDefault("resourceGroupName")
+  valid_564224 = validateParameter(valid_564224, JString, required = true,
                                  default = nil)
-  if valid_568324 != nil:
-    section.add "subscriptionId", valid_568324
-  var valid_568325 = path.getOrDefault("snapshotName")
-  valid_568325 = validateParameter(valid_568325, JString, required = true,
+  if valid_564224 != nil:
+    section.add "resourceGroupName", valid_564224
+  var valid_564225 = path.getOrDefault("snapshotName")
+  valid_564225 = validateParameter(valid_564225, JString, required = true,
                                  default = nil)
-  if valid_568325 != nil:
-    section.add "snapshotName", valid_568325
+  if valid_564225 != nil:
+    section.add "snapshotName", valid_564225
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1255,11 +1255,11 @@ proc validate_SnapshotsCreateOrUpdate_568321(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568326 = query.getOrDefault("api-version")
-  valid_568326 = validateParameter(valid_568326, JString, required = true,
+  var valid_564226 = query.getOrDefault("api-version")
+  valid_564226 = validateParameter(valid_564226, JString, required = true,
                                  default = nil)
-  if valid_568326 != nil:
-    section.add "api-version", valid_568326
+  if valid_564226 != nil:
+    section.add "api-version", valid_564226
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1273,53 +1273,53 @@ proc validate_SnapshotsCreateOrUpdate_568321(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568328: Call_SnapshotsCreateOrUpdate_568320; path: JsonNode;
+proc call*(call_564228: Call_SnapshotsCreateOrUpdate_564220; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Creates or updates a snapshot.
   ## 
-  let valid = call_568328.validator(path, query, header, formData, body)
-  let scheme = call_568328.pickScheme
+  let valid = call_564228.validator(path, query, header, formData, body)
+  let scheme = call_564228.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568328.url(scheme.get, call_568328.host, call_568328.base,
-                         call_568328.route, valid.getOrDefault("path"),
+  let url = call_564228.url(scheme.get, call_564228.host, call_564228.base,
+                         call_564228.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568328, url, valid)
+  result = hook(call_564228, url, valid)
 
-proc call*(call_568329: Call_SnapshotsCreateOrUpdate_568320;
-          resourceGroupName: string; apiVersion: string; snapshot: JsonNode;
-          subscriptionId: string; snapshotName: string): Recallable =
+proc call*(call_564229: Call_SnapshotsCreateOrUpdate_564220; apiVersion: string;
+          snapshot: JsonNode; subscriptionId: string; resourceGroupName: string;
+          snapshotName: string): Recallable =
   ## snapshotsCreateOrUpdate
   ## Creates or updates a snapshot.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
   ##   snapshot: JObject (required)
   ##           : Snapshot object supplied in the body of the Put disk operation.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   snapshotName: string (required)
   ##               : The name of the snapshot that is being created. The name can't be changed after the snapshot is created. Supported characters for the name are a-z, A-Z, 0-9 and _. The max name length is 80 characters.
-  var path_568330 = newJObject()
-  var query_568331 = newJObject()
-  var body_568332 = newJObject()
-  add(path_568330, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568331, "api-version", newJString(apiVersion))
+  var path_564230 = newJObject()
+  var query_564231 = newJObject()
+  var body_564232 = newJObject()
+  add(query_564231, "api-version", newJString(apiVersion))
   if snapshot != nil:
-    body_568332 = snapshot
-  add(path_568330, "subscriptionId", newJString(subscriptionId))
-  add(path_568330, "snapshotName", newJString(snapshotName))
-  result = call_568329.call(path_568330, query_568331, nil, nil, body_568332)
+    body_564232 = snapshot
+  add(path_564230, "subscriptionId", newJString(subscriptionId))
+  add(path_564230, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564230, "snapshotName", newJString(snapshotName))
+  result = call_564229.call(path_564230, query_564231, nil, nil, body_564232)
 
-var snapshotsCreateOrUpdate* = Call_SnapshotsCreateOrUpdate_568320(
+var snapshotsCreateOrUpdate* = Call_SnapshotsCreateOrUpdate_564220(
     name: "snapshotsCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/snapshots/{snapshotName}",
-    validator: validate_SnapshotsCreateOrUpdate_568321, base: "",
-    url: url_SnapshotsCreateOrUpdate_568322, schemes: {Scheme.Https})
+    validator: validate_SnapshotsCreateOrUpdate_564221, base: "",
+    url: url_SnapshotsCreateOrUpdate_564222, schemes: {Scheme.Https})
 type
-  Call_SnapshotsGet_568309 = ref object of OpenApiRestCall_567657
-proc url_SnapshotsGet_568311(protocol: Scheme; host: string; base: string;
+  Call_SnapshotsGet_564209 = ref object of OpenApiRestCall_563555
+proc url_SnapshotsGet_564211(protocol: Scheme; host: string; base: string;
                             route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1341,37 +1341,37 @@ proc url_SnapshotsGet_568311(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_SnapshotsGet_568310(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_SnapshotsGet_564210(path: JsonNode; query: JsonNode; header: JsonNode;
                                  formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets information about a snapshot.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   ##   snapshotName: JString (required)
   ##               : The name of the snapshot that is being created. The name can't be changed after the snapshot is created. Supported characters for the name are a-z, A-Z, 0-9 and _. The max name length is 80 characters.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568312 = path.getOrDefault("resourceGroupName")
-  valid_568312 = validateParameter(valid_568312, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564212 = path.getOrDefault("subscriptionId")
+  valid_564212 = validateParameter(valid_564212, JString, required = true,
                                  default = nil)
-  if valid_568312 != nil:
-    section.add "resourceGroupName", valid_568312
-  var valid_568313 = path.getOrDefault("subscriptionId")
-  valid_568313 = validateParameter(valid_568313, JString, required = true,
+  if valid_564212 != nil:
+    section.add "subscriptionId", valid_564212
+  var valid_564213 = path.getOrDefault("resourceGroupName")
+  valid_564213 = validateParameter(valid_564213, JString, required = true,
                                  default = nil)
-  if valid_568313 != nil:
-    section.add "subscriptionId", valid_568313
-  var valid_568314 = path.getOrDefault("snapshotName")
-  valid_568314 = validateParameter(valid_568314, JString, required = true,
+  if valid_564213 != nil:
+    section.add "resourceGroupName", valid_564213
+  var valid_564214 = path.getOrDefault("snapshotName")
+  valid_564214 = validateParameter(valid_564214, JString, required = true,
                                  default = nil)
-  if valid_568314 != nil:
-    section.add "snapshotName", valid_568314
+  if valid_564214 != nil:
+    section.add "snapshotName", valid_564214
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1379,11 +1379,11 @@ proc validate_SnapshotsGet_568310(path: JsonNode; query: JsonNode; header: JsonN
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568315 = query.getOrDefault("api-version")
-  valid_568315 = validateParameter(valid_568315, JString, required = true,
+  var valid_564215 = query.getOrDefault("api-version")
+  valid_564215 = validateParameter(valid_564215, JString, required = true,
                                  default = nil)
-  if valid_568315 != nil:
-    section.add "api-version", valid_568315
+  if valid_564215 != nil:
+    section.add "api-version", valid_564215
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1392,46 +1392,46 @@ proc validate_SnapshotsGet_568310(path: JsonNode; query: JsonNode; header: JsonN
   if body != nil:
     result.add "body", body
 
-proc call*(call_568316: Call_SnapshotsGet_568309; path: JsonNode; query: JsonNode;
+proc call*(call_564216: Call_SnapshotsGet_564209; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets information about a snapshot.
   ## 
-  let valid = call_568316.validator(path, query, header, formData, body)
-  let scheme = call_568316.pickScheme
+  let valid = call_564216.validator(path, query, header, formData, body)
+  let scheme = call_564216.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568316.url(scheme.get, call_568316.host, call_568316.base,
-                         call_568316.route, valid.getOrDefault("path"),
+  let url = call_564216.url(scheme.get, call_564216.host, call_564216.base,
+                         call_564216.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568316, url, valid)
+  result = hook(call_564216, url, valid)
 
-proc call*(call_568317: Call_SnapshotsGet_568309; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; snapshotName: string): Recallable =
+proc call*(call_564217: Call_SnapshotsGet_564209; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string; snapshotName: string): Recallable =
   ## snapshotsGet
   ## Gets information about a snapshot.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   snapshotName: string (required)
   ##               : The name of the snapshot that is being created. The name can't be changed after the snapshot is created. Supported characters for the name are a-z, A-Z, 0-9 and _. The max name length is 80 characters.
-  var path_568318 = newJObject()
-  var query_568319 = newJObject()
-  add(path_568318, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568319, "api-version", newJString(apiVersion))
-  add(path_568318, "subscriptionId", newJString(subscriptionId))
-  add(path_568318, "snapshotName", newJString(snapshotName))
-  result = call_568317.call(path_568318, query_568319, nil, nil, nil)
+  var path_564218 = newJObject()
+  var query_564219 = newJObject()
+  add(query_564219, "api-version", newJString(apiVersion))
+  add(path_564218, "subscriptionId", newJString(subscriptionId))
+  add(path_564218, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564218, "snapshotName", newJString(snapshotName))
+  result = call_564217.call(path_564218, query_564219, nil, nil, nil)
 
-var snapshotsGet* = Call_SnapshotsGet_568309(name: "snapshotsGet",
+var snapshotsGet* = Call_SnapshotsGet_564209(name: "snapshotsGet",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/snapshots/{snapshotName}",
-    validator: validate_SnapshotsGet_568310, base: "", url: url_SnapshotsGet_568311,
+    validator: validate_SnapshotsGet_564210, base: "", url: url_SnapshotsGet_564211,
     schemes: {Scheme.Https})
 type
-  Call_SnapshotsUpdate_568344 = ref object of OpenApiRestCall_567657
-proc url_SnapshotsUpdate_568346(protocol: Scheme; host: string; base: string;
+  Call_SnapshotsUpdate_564244 = ref object of OpenApiRestCall_563555
+proc url_SnapshotsUpdate_564246(protocol: Scheme; host: string; base: string;
                                route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1453,7 +1453,7 @@ proc url_SnapshotsUpdate_568346(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_SnapshotsUpdate_568345(path: JsonNode; query: JsonNode;
+proc validate_SnapshotsUpdate_564245(path: JsonNode; query: JsonNode;
                                     header: JsonNode; formData: JsonNode;
                                     body: JsonNode): JsonNode =
   ## Updates (patches) a snapshot.
@@ -1461,30 +1461,30 @@ proc validate_SnapshotsUpdate_568345(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   ##   snapshotName: JString (required)
   ##               : The name of the snapshot that is being created. The name can't be changed after the snapshot is created. Supported characters for the name are a-z, A-Z, 0-9 and _. The max name length is 80 characters.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568347 = path.getOrDefault("resourceGroupName")
-  valid_568347 = validateParameter(valid_568347, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564247 = path.getOrDefault("subscriptionId")
+  valid_564247 = validateParameter(valid_564247, JString, required = true,
                                  default = nil)
-  if valid_568347 != nil:
-    section.add "resourceGroupName", valid_568347
-  var valid_568348 = path.getOrDefault("subscriptionId")
-  valid_568348 = validateParameter(valid_568348, JString, required = true,
+  if valid_564247 != nil:
+    section.add "subscriptionId", valid_564247
+  var valid_564248 = path.getOrDefault("resourceGroupName")
+  valid_564248 = validateParameter(valid_564248, JString, required = true,
                                  default = nil)
-  if valid_568348 != nil:
-    section.add "subscriptionId", valid_568348
-  var valid_568349 = path.getOrDefault("snapshotName")
-  valid_568349 = validateParameter(valid_568349, JString, required = true,
+  if valid_564248 != nil:
+    section.add "resourceGroupName", valid_564248
+  var valid_564249 = path.getOrDefault("snapshotName")
+  valid_564249 = validateParameter(valid_564249, JString, required = true,
                                  default = nil)
-  if valid_568349 != nil:
-    section.add "snapshotName", valid_568349
+  if valid_564249 != nil:
+    section.add "snapshotName", valid_564249
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1492,11 +1492,11 @@ proc validate_SnapshotsUpdate_568345(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568350 = query.getOrDefault("api-version")
-  valid_568350 = validateParameter(valid_568350, JString, required = true,
+  var valid_564250 = query.getOrDefault("api-version")
+  valid_564250 = validateParameter(valid_564250, JString, required = true,
                                  default = nil)
-  if valid_568350 != nil:
-    section.add "api-version", valid_568350
+  if valid_564250 != nil:
+    section.add "api-version", valid_564250
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1510,52 +1510,52 @@ proc validate_SnapshotsUpdate_568345(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568352: Call_SnapshotsUpdate_568344; path: JsonNode; query: JsonNode;
+proc call*(call_564252: Call_SnapshotsUpdate_564244; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Updates (patches) a snapshot.
   ## 
-  let valid = call_568352.validator(path, query, header, formData, body)
-  let scheme = call_568352.pickScheme
+  let valid = call_564252.validator(path, query, header, formData, body)
+  let scheme = call_564252.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568352.url(scheme.get, call_568352.host, call_568352.base,
-                         call_568352.route, valid.getOrDefault("path"),
+  let url = call_564252.url(scheme.get, call_564252.host, call_564252.base,
+                         call_564252.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568352, url, valid)
+  result = hook(call_564252, url, valid)
 
-proc call*(call_568353: Call_SnapshotsUpdate_568344; resourceGroupName: string;
-          apiVersion: string; snapshot: JsonNode; subscriptionId: string;
+proc call*(call_564253: Call_SnapshotsUpdate_564244; apiVersion: string;
+          snapshot: JsonNode; subscriptionId: string; resourceGroupName: string;
           snapshotName: string): Recallable =
   ## snapshotsUpdate
   ## Updates (patches) a snapshot.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
   ##   snapshot: JObject (required)
   ##           : Snapshot object supplied in the body of the Patch snapshot operation.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   snapshotName: string (required)
   ##               : The name of the snapshot that is being created. The name can't be changed after the snapshot is created. Supported characters for the name are a-z, A-Z, 0-9 and _. The max name length is 80 characters.
-  var path_568354 = newJObject()
-  var query_568355 = newJObject()
-  var body_568356 = newJObject()
-  add(path_568354, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568355, "api-version", newJString(apiVersion))
+  var path_564254 = newJObject()
+  var query_564255 = newJObject()
+  var body_564256 = newJObject()
+  add(query_564255, "api-version", newJString(apiVersion))
   if snapshot != nil:
-    body_568356 = snapshot
-  add(path_568354, "subscriptionId", newJString(subscriptionId))
-  add(path_568354, "snapshotName", newJString(snapshotName))
-  result = call_568353.call(path_568354, query_568355, nil, nil, body_568356)
+    body_564256 = snapshot
+  add(path_564254, "subscriptionId", newJString(subscriptionId))
+  add(path_564254, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564254, "snapshotName", newJString(snapshotName))
+  result = call_564253.call(path_564254, query_564255, nil, nil, body_564256)
 
-var snapshotsUpdate* = Call_SnapshotsUpdate_568344(name: "snapshotsUpdate",
+var snapshotsUpdate* = Call_SnapshotsUpdate_564244(name: "snapshotsUpdate",
     meth: HttpMethod.HttpPatch, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/snapshots/{snapshotName}",
-    validator: validate_SnapshotsUpdate_568345, base: "", url: url_SnapshotsUpdate_568346,
+    validator: validate_SnapshotsUpdate_564245, base: "", url: url_SnapshotsUpdate_564246,
     schemes: {Scheme.Https})
 type
-  Call_SnapshotsDelete_568333 = ref object of OpenApiRestCall_567657
-proc url_SnapshotsDelete_568335(protocol: Scheme; host: string; base: string;
+  Call_SnapshotsDelete_564233 = ref object of OpenApiRestCall_563555
+proc url_SnapshotsDelete_564235(protocol: Scheme; host: string; base: string;
                                route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1577,7 +1577,7 @@ proc url_SnapshotsDelete_568335(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_SnapshotsDelete_568334(path: JsonNode; query: JsonNode;
+proc validate_SnapshotsDelete_564234(path: JsonNode; query: JsonNode;
                                     header: JsonNode; formData: JsonNode;
                                     body: JsonNode): JsonNode =
   ## Deletes a snapshot.
@@ -1585,30 +1585,30 @@ proc validate_SnapshotsDelete_568334(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   ##   snapshotName: JString (required)
   ##               : The name of the snapshot that is being created. The name can't be changed after the snapshot is created. Supported characters for the name are a-z, A-Z, 0-9 and _. The max name length is 80 characters.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568336 = path.getOrDefault("resourceGroupName")
-  valid_568336 = validateParameter(valid_568336, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564236 = path.getOrDefault("subscriptionId")
+  valid_564236 = validateParameter(valid_564236, JString, required = true,
                                  default = nil)
-  if valid_568336 != nil:
-    section.add "resourceGroupName", valid_568336
-  var valid_568337 = path.getOrDefault("subscriptionId")
-  valid_568337 = validateParameter(valid_568337, JString, required = true,
+  if valid_564236 != nil:
+    section.add "subscriptionId", valid_564236
+  var valid_564237 = path.getOrDefault("resourceGroupName")
+  valid_564237 = validateParameter(valid_564237, JString, required = true,
                                  default = nil)
-  if valid_568337 != nil:
-    section.add "subscriptionId", valid_568337
-  var valid_568338 = path.getOrDefault("snapshotName")
-  valid_568338 = validateParameter(valid_568338, JString, required = true,
+  if valid_564237 != nil:
+    section.add "resourceGroupName", valid_564237
+  var valid_564238 = path.getOrDefault("snapshotName")
+  valid_564238 = validateParameter(valid_564238, JString, required = true,
                                  default = nil)
-  if valid_568338 != nil:
-    section.add "snapshotName", valid_568338
+  if valid_564238 != nil:
+    section.add "snapshotName", valid_564238
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1616,11 +1616,11 @@ proc validate_SnapshotsDelete_568334(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568339 = query.getOrDefault("api-version")
-  valid_568339 = validateParameter(valid_568339, JString, required = true,
+  var valid_564239 = query.getOrDefault("api-version")
+  valid_564239 = validateParameter(valid_564239, JString, required = true,
                                  default = nil)
-  if valid_568339 != nil:
-    section.add "api-version", valid_568339
+  if valid_564239 != nil:
+    section.add "api-version", valid_564239
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1629,46 +1629,46 @@ proc validate_SnapshotsDelete_568334(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568340: Call_SnapshotsDelete_568333; path: JsonNode; query: JsonNode;
+proc call*(call_564240: Call_SnapshotsDelete_564233; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes a snapshot.
   ## 
-  let valid = call_568340.validator(path, query, header, formData, body)
-  let scheme = call_568340.pickScheme
+  let valid = call_564240.validator(path, query, header, formData, body)
+  let scheme = call_564240.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568340.url(scheme.get, call_568340.host, call_568340.base,
-                         call_568340.route, valid.getOrDefault("path"),
+  let url = call_564240.url(scheme.get, call_564240.host, call_564240.base,
+                         call_564240.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568340, url, valid)
+  result = hook(call_564240, url, valid)
 
-proc call*(call_568341: Call_SnapshotsDelete_568333; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; snapshotName: string): Recallable =
+proc call*(call_564241: Call_SnapshotsDelete_564233; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string; snapshotName: string): Recallable =
   ## snapshotsDelete
   ## Deletes a snapshot.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   snapshotName: string (required)
   ##               : The name of the snapshot that is being created. The name can't be changed after the snapshot is created. Supported characters for the name are a-z, A-Z, 0-9 and _. The max name length is 80 characters.
-  var path_568342 = newJObject()
-  var query_568343 = newJObject()
-  add(path_568342, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568343, "api-version", newJString(apiVersion))
-  add(path_568342, "subscriptionId", newJString(subscriptionId))
-  add(path_568342, "snapshotName", newJString(snapshotName))
-  result = call_568341.call(path_568342, query_568343, nil, nil, nil)
+  var path_564242 = newJObject()
+  var query_564243 = newJObject()
+  add(query_564243, "api-version", newJString(apiVersion))
+  add(path_564242, "subscriptionId", newJString(subscriptionId))
+  add(path_564242, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564242, "snapshotName", newJString(snapshotName))
+  result = call_564241.call(path_564242, query_564243, nil, nil, nil)
 
-var snapshotsDelete* = Call_SnapshotsDelete_568333(name: "snapshotsDelete",
+var snapshotsDelete* = Call_SnapshotsDelete_564233(name: "snapshotsDelete",
     meth: HttpMethod.HttpDelete, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/snapshots/{snapshotName}",
-    validator: validate_SnapshotsDelete_568334, base: "", url: url_SnapshotsDelete_568335,
+    validator: validate_SnapshotsDelete_564234, base: "", url: url_SnapshotsDelete_564235,
     schemes: {Scheme.Https})
 type
-  Call_SnapshotsGrantAccess_568357 = ref object of OpenApiRestCall_567657
-proc url_SnapshotsGrantAccess_568359(protocol: Scheme; host: string; base: string;
+  Call_SnapshotsGrantAccess_564257 = ref object of OpenApiRestCall_563555
+proc url_SnapshotsGrantAccess_564259(protocol: Scheme; host: string; base: string;
                                     route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1691,37 +1691,37 @@ proc url_SnapshotsGrantAccess_568359(protocol: Scheme; host: string; base: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_SnapshotsGrantAccess_568358(path: JsonNode; query: JsonNode;
+proc validate_SnapshotsGrantAccess_564258(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Grants access to a snapshot.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   ##   snapshotName: JString (required)
   ##               : The name of the snapshot that is being created. The name can't be changed after the snapshot is created. Supported characters for the name are a-z, A-Z, 0-9 and _. The max name length is 80 characters.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568360 = path.getOrDefault("resourceGroupName")
-  valid_568360 = validateParameter(valid_568360, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564260 = path.getOrDefault("subscriptionId")
+  valid_564260 = validateParameter(valid_564260, JString, required = true,
                                  default = nil)
-  if valid_568360 != nil:
-    section.add "resourceGroupName", valid_568360
-  var valid_568361 = path.getOrDefault("subscriptionId")
-  valid_568361 = validateParameter(valid_568361, JString, required = true,
+  if valid_564260 != nil:
+    section.add "subscriptionId", valid_564260
+  var valid_564261 = path.getOrDefault("resourceGroupName")
+  valid_564261 = validateParameter(valid_564261, JString, required = true,
                                  default = nil)
-  if valid_568361 != nil:
-    section.add "subscriptionId", valid_568361
-  var valid_568362 = path.getOrDefault("snapshotName")
-  valid_568362 = validateParameter(valid_568362, JString, required = true,
+  if valid_564261 != nil:
+    section.add "resourceGroupName", valid_564261
+  var valid_564262 = path.getOrDefault("snapshotName")
+  valid_564262 = validateParameter(valid_564262, JString, required = true,
                                  default = nil)
-  if valid_568362 != nil:
-    section.add "snapshotName", valid_568362
+  if valid_564262 != nil:
+    section.add "snapshotName", valid_564262
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1729,11 +1729,11 @@ proc validate_SnapshotsGrantAccess_568358(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568363 = query.getOrDefault("api-version")
-  valid_568363 = validateParameter(valid_568363, JString, required = true,
+  var valid_564263 = query.getOrDefault("api-version")
+  valid_564263 = validateParameter(valid_564263, JString, required = true,
                                  default = nil)
-  if valid_568363 != nil:
-    section.add "api-version", valid_568363
+  if valid_564263 != nil:
+    section.add "api-version", valid_564263
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1747,53 +1747,53 @@ proc validate_SnapshotsGrantAccess_568358(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568365: Call_SnapshotsGrantAccess_568357; path: JsonNode;
+proc call*(call_564265: Call_SnapshotsGrantAccess_564257; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Grants access to a snapshot.
   ## 
-  let valid = call_568365.validator(path, query, header, formData, body)
-  let scheme = call_568365.pickScheme
+  let valid = call_564265.validator(path, query, header, formData, body)
+  let scheme = call_564265.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568365.url(scheme.get, call_568365.host, call_568365.base,
-                         call_568365.route, valid.getOrDefault("path"),
+  let url = call_564265.url(scheme.get, call_564265.host, call_564265.base,
+                         call_564265.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568365, url, valid)
+  result = hook(call_564265, url, valid)
 
-proc call*(call_568366: Call_SnapshotsGrantAccess_568357;
-          resourceGroupName: string; grantAccessData: JsonNode; apiVersion: string;
-          subscriptionId: string; snapshotName: string): Recallable =
+proc call*(call_564266: Call_SnapshotsGrantAccess_564257;
+          grantAccessData: JsonNode; apiVersion: string; subscriptionId: string;
+          resourceGroupName: string; snapshotName: string): Recallable =
   ## snapshotsGrantAccess
   ## Grants access to a snapshot.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   grantAccessData: JObject (required)
   ##                  : Access data object supplied in the body of the get snapshot access operation.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   snapshotName: string (required)
   ##               : The name of the snapshot that is being created. The name can't be changed after the snapshot is created. Supported characters for the name are a-z, A-Z, 0-9 and _. The max name length is 80 characters.
-  var path_568367 = newJObject()
-  var query_568368 = newJObject()
-  var body_568369 = newJObject()
-  add(path_568367, "resourceGroupName", newJString(resourceGroupName))
+  var path_564267 = newJObject()
+  var query_564268 = newJObject()
+  var body_564269 = newJObject()
   if grantAccessData != nil:
-    body_568369 = grantAccessData
-  add(query_568368, "api-version", newJString(apiVersion))
-  add(path_568367, "subscriptionId", newJString(subscriptionId))
-  add(path_568367, "snapshotName", newJString(snapshotName))
-  result = call_568366.call(path_568367, query_568368, nil, nil, body_568369)
+    body_564269 = grantAccessData
+  add(query_564268, "api-version", newJString(apiVersion))
+  add(path_564267, "subscriptionId", newJString(subscriptionId))
+  add(path_564267, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564267, "snapshotName", newJString(snapshotName))
+  result = call_564266.call(path_564267, query_564268, nil, nil, body_564269)
 
-var snapshotsGrantAccess* = Call_SnapshotsGrantAccess_568357(
+var snapshotsGrantAccess* = Call_SnapshotsGrantAccess_564257(
     name: "snapshotsGrantAccess", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/snapshots/{snapshotName}/beginGetAccess",
-    validator: validate_SnapshotsGrantAccess_568358, base: "",
-    url: url_SnapshotsGrantAccess_568359, schemes: {Scheme.Https})
+    validator: validate_SnapshotsGrantAccess_564258, base: "",
+    url: url_SnapshotsGrantAccess_564259, schemes: {Scheme.Https})
 type
-  Call_SnapshotsRevokeAccess_568370 = ref object of OpenApiRestCall_567657
-proc url_SnapshotsRevokeAccess_568372(protocol: Scheme; host: string; base: string;
+  Call_SnapshotsRevokeAccess_564270 = ref object of OpenApiRestCall_563555
+proc url_SnapshotsRevokeAccess_564272(protocol: Scheme; host: string; base: string;
                                      route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1816,37 +1816,37 @@ proc url_SnapshotsRevokeAccess_568372(protocol: Scheme; host: string; base: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_SnapshotsRevokeAccess_568371(path: JsonNode; query: JsonNode;
+proc validate_SnapshotsRevokeAccess_564271(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Revokes access to a snapshot.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   ##   snapshotName: JString (required)
   ##               : The name of the snapshot that is being created. The name can't be changed after the snapshot is created. Supported characters for the name are a-z, A-Z, 0-9 and _. The max name length is 80 characters.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568373 = path.getOrDefault("resourceGroupName")
-  valid_568373 = validateParameter(valid_568373, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564273 = path.getOrDefault("subscriptionId")
+  valid_564273 = validateParameter(valid_564273, JString, required = true,
                                  default = nil)
-  if valid_568373 != nil:
-    section.add "resourceGroupName", valid_568373
-  var valid_568374 = path.getOrDefault("subscriptionId")
-  valid_568374 = validateParameter(valid_568374, JString, required = true,
+  if valid_564273 != nil:
+    section.add "subscriptionId", valid_564273
+  var valid_564274 = path.getOrDefault("resourceGroupName")
+  valid_564274 = validateParameter(valid_564274, JString, required = true,
                                  default = nil)
-  if valid_568374 != nil:
-    section.add "subscriptionId", valid_568374
-  var valid_568375 = path.getOrDefault("snapshotName")
-  valid_568375 = validateParameter(valid_568375, JString, required = true,
+  if valid_564274 != nil:
+    section.add "resourceGroupName", valid_564274
+  var valid_564275 = path.getOrDefault("snapshotName")
+  valid_564275 = validateParameter(valid_564275, JString, required = true,
                                  default = nil)
-  if valid_568375 != nil:
-    section.add "snapshotName", valid_568375
+  if valid_564275 != nil:
+    section.add "snapshotName", valid_564275
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1854,11 +1854,11 @@ proc validate_SnapshotsRevokeAccess_568371(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568376 = query.getOrDefault("api-version")
-  valid_568376 = validateParameter(valid_568376, JString, required = true,
+  var valid_564276 = query.getOrDefault("api-version")
+  valid_564276 = validateParameter(valid_564276, JString, required = true,
                                  default = nil)
-  if valid_568376 != nil:
-    section.add "api-version", valid_568376
+  if valid_564276 != nil:
+    section.add "api-version", valid_564276
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1867,45 +1867,44 @@ proc validate_SnapshotsRevokeAccess_568371(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568377: Call_SnapshotsRevokeAccess_568370; path: JsonNode;
+proc call*(call_564277: Call_SnapshotsRevokeAccess_564270; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Revokes access to a snapshot.
   ## 
-  let valid = call_568377.validator(path, query, header, formData, body)
-  let scheme = call_568377.pickScheme
+  let valid = call_564277.validator(path, query, header, formData, body)
+  let scheme = call_564277.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568377.url(scheme.get, call_568377.host, call_568377.base,
-                         call_568377.route, valid.getOrDefault("path"),
+  let url = call_564277.url(scheme.get, call_564277.host, call_564277.base,
+                         call_564277.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568377, url, valid)
+  result = hook(call_564277, url, valid)
 
-proc call*(call_568378: Call_SnapshotsRevokeAccess_568370;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          snapshotName: string): Recallable =
+proc call*(call_564278: Call_SnapshotsRevokeAccess_564270; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string; snapshotName: string): Recallable =
   ## snapshotsRevokeAccess
   ## Revokes access to a snapshot.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   snapshotName: string (required)
   ##               : The name of the snapshot that is being created. The name can't be changed after the snapshot is created. Supported characters for the name are a-z, A-Z, 0-9 and _. The max name length is 80 characters.
-  var path_568379 = newJObject()
-  var query_568380 = newJObject()
-  add(path_568379, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568380, "api-version", newJString(apiVersion))
-  add(path_568379, "subscriptionId", newJString(subscriptionId))
-  add(path_568379, "snapshotName", newJString(snapshotName))
-  result = call_568378.call(path_568379, query_568380, nil, nil, nil)
+  var path_564279 = newJObject()
+  var query_564280 = newJObject()
+  add(query_564280, "api-version", newJString(apiVersion))
+  add(path_564279, "subscriptionId", newJString(subscriptionId))
+  add(path_564279, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564279, "snapshotName", newJString(snapshotName))
+  result = call_564278.call(path_564279, query_564280, nil, nil, nil)
 
-var snapshotsRevokeAccess* = Call_SnapshotsRevokeAccess_568370(
+var snapshotsRevokeAccess* = Call_SnapshotsRevokeAccess_564270(
     name: "snapshotsRevokeAccess", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/snapshots/{snapshotName}/endGetAccess",
-    validator: validate_SnapshotsRevokeAccess_568371, base: "",
-    url: url_SnapshotsRevokeAccess_568372, schemes: {Scheme.Https})
+    validator: validate_SnapshotsRevokeAccess_564271, base: "",
+    url: url_SnapshotsRevokeAccess_564272, schemes: {Scheme.Https})
 export
   rest
 

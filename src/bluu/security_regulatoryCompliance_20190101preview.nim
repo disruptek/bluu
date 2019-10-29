@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, httpcore
 
 ## auto-generated via openapi macro
 ## title: Security Center
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_567657 = ref object of OpenApiRestCall
+  OpenApiRestCall_563555 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_567657](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563555](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_567657): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563555): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,8 +107,8 @@ const
   macServiceName = "security-regulatoryCompliance"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_RegulatoryComplianceStandardsList_567879 = ref object of OpenApiRestCall_567657
-proc url_RegulatoryComplianceStandardsList_567881(protocol: Scheme; host: string;
+  Call_RegulatoryComplianceStandardsList_563777 = ref object of OpenApiRestCall_563555
+proc url_RegulatoryComplianceStandardsList_563779(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -121,7 +125,7 @@ proc url_RegulatoryComplianceStandardsList_567881(protocol: Scheme; host: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_RegulatoryComplianceStandardsList_567880(path: JsonNode;
+proc validate_RegulatoryComplianceStandardsList_563778(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Supported regulatory compliance standards details and state
   ## 
@@ -133,11 +137,11 @@ proc validate_RegulatoryComplianceStandardsList_567880(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_568042 = path.getOrDefault("subscriptionId")
-  valid_568042 = validateParameter(valid_568042, JString, required = true,
+  var valid_563942 = path.getOrDefault("subscriptionId")
+  valid_563942 = validateParameter(valid_563942, JString, required = true,
                                  default = nil)
-  if valid_568042 != nil:
-    section.add "subscriptionId", valid_568042
+  if valid_563942 != nil:
+    section.add "subscriptionId", valid_563942
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -147,16 +151,16 @@ proc validate_RegulatoryComplianceStandardsList_567880(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568043 = query.getOrDefault("api-version")
-  valid_568043 = validateParameter(valid_568043, JString, required = true,
+  var valid_563943 = query.getOrDefault("api-version")
+  valid_563943 = validateParameter(valid_563943, JString, required = true,
                                  default = nil)
-  if valid_568043 != nil:
-    section.add "api-version", valid_568043
-  var valid_568044 = query.getOrDefault("$filter")
-  valid_568044 = validateParameter(valid_568044, JString, required = false,
+  if valid_563943 != nil:
+    section.add "api-version", valid_563943
+  var valid_563944 = query.getOrDefault("$filter")
+  valid_563944 = validateParameter(valid_563944, JString, required = false,
                                  default = nil)
-  if valid_568044 != nil:
-    section.add "$filter", valid_568044
+  if valid_563944 != nil:
+    section.add "$filter", valid_563944
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -165,21 +169,21 @@ proc validate_RegulatoryComplianceStandardsList_567880(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568071: Call_RegulatoryComplianceStandardsList_567879;
+proc call*(call_563971: Call_RegulatoryComplianceStandardsList_563777;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Supported regulatory compliance standards details and state
   ## 
-  let valid = call_568071.validator(path, query, header, formData, body)
-  let scheme = call_568071.pickScheme
+  let valid = call_563971.validator(path, query, header, formData, body)
+  let scheme = call_563971.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568071.url(scheme.get, call_568071.host, call_568071.base,
-                         call_568071.route, valid.getOrDefault("path"),
+  let url = call_563971.url(scheme.get, call_563971.host, call_563971.base,
+                         call_563971.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568071, url, valid)
+  result = hook(call_563971, url, valid)
 
-proc call*(call_568142: Call_RegulatoryComplianceStandardsList_567879;
+proc call*(call_564042: Call_RegulatoryComplianceStandardsList_563777;
           apiVersion: string; subscriptionId: string; Filter: string = ""): Recallable =
   ## regulatoryComplianceStandardsList
   ## Supported regulatory compliance standards details and state
@@ -189,21 +193,21 @@ proc call*(call_568142: Call_RegulatoryComplianceStandardsList_567879;
   ##                 : Azure subscription ID
   ##   Filter: string
   ##         : OData filter. Optional.
-  var path_568143 = newJObject()
-  var query_568145 = newJObject()
-  add(query_568145, "api-version", newJString(apiVersion))
-  add(path_568143, "subscriptionId", newJString(subscriptionId))
-  add(query_568145, "$filter", newJString(Filter))
-  result = call_568142.call(path_568143, query_568145, nil, nil, nil)
+  var path_564043 = newJObject()
+  var query_564045 = newJObject()
+  add(query_564045, "api-version", newJString(apiVersion))
+  add(path_564043, "subscriptionId", newJString(subscriptionId))
+  add(query_564045, "$filter", newJString(Filter))
+  result = call_564042.call(path_564043, query_564045, nil, nil, nil)
 
-var regulatoryComplianceStandardsList* = Call_RegulatoryComplianceStandardsList_567879(
+var regulatoryComplianceStandardsList* = Call_RegulatoryComplianceStandardsList_563777(
     name: "regulatoryComplianceStandardsList", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Security/regulatoryComplianceStandards",
-    validator: validate_RegulatoryComplianceStandardsList_567880, base: "",
-    url: url_RegulatoryComplianceStandardsList_567881, schemes: {Scheme.Https})
+    validator: validate_RegulatoryComplianceStandardsList_563778, base: "",
+    url: url_RegulatoryComplianceStandardsList_563779, schemes: {Scheme.Https})
 type
-  Call_RegulatoryComplianceStandardsGet_568184 = ref object of OpenApiRestCall_567657
-proc url_RegulatoryComplianceStandardsGet_568186(protocol: Scheme; host: string;
+  Call_RegulatoryComplianceStandardsGet_564084 = ref object of OpenApiRestCall_563555
+proc url_RegulatoryComplianceStandardsGet_564086(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -223,7 +227,7 @@ proc url_RegulatoryComplianceStandardsGet_568186(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_RegulatoryComplianceStandardsGet_568185(path: JsonNode;
+proc validate_RegulatoryComplianceStandardsGet_564085(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Supported regulatory compliance details state for selected standard
   ## 
@@ -236,16 +240,16 @@ proc validate_RegulatoryComplianceStandardsGet_568185(path: JsonNode;
   ##                 : Azure subscription ID
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `regulatoryComplianceStandardName` field"
-  var valid_568196 = path.getOrDefault("regulatoryComplianceStandardName")
-  valid_568196 = validateParameter(valid_568196, JString, required = true,
+  var valid_564096 = path.getOrDefault("regulatoryComplianceStandardName")
+  valid_564096 = validateParameter(valid_564096, JString, required = true,
                                  default = nil)
-  if valid_568196 != nil:
-    section.add "regulatoryComplianceStandardName", valid_568196
-  var valid_568197 = path.getOrDefault("subscriptionId")
-  valid_568197 = validateParameter(valid_568197, JString, required = true,
+  if valid_564096 != nil:
+    section.add "regulatoryComplianceStandardName", valid_564096
+  var valid_564097 = path.getOrDefault("subscriptionId")
+  valid_564097 = validateParameter(valid_564097, JString, required = true,
                                  default = nil)
-  if valid_568197 != nil:
-    section.add "subscriptionId", valid_568197
+  if valid_564097 != nil:
+    section.add "subscriptionId", valid_564097
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -253,11 +257,11 @@ proc validate_RegulatoryComplianceStandardsGet_568185(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568198 = query.getOrDefault("api-version")
-  valid_568198 = validateParameter(valid_568198, JString, required = true,
+  var valid_564098 = query.getOrDefault("api-version")
+  valid_564098 = validateParameter(valid_564098, JString, required = true,
                                  default = nil)
-  if valid_568198 != nil:
-    section.add "api-version", valid_568198
+  if valid_564098 != nil:
+    section.add "api-version", valid_564098
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -266,47 +270,47 @@ proc validate_RegulatoryComplianceStandardsGet_568185(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568199: Call_RegulatoryComplianceStandardsGet_568184;
+proc call*(call_564099: Call_RegulatoryComplianceStandardsGet_564084;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Supported regulatory compliance details state for selected standard
   ## 
-  let valid = call_568199.validator(path, query, header, formData, body)
-  let scheme = call_568199.pickScheme
+  let valid = call_564099.validator(path, query, header, formData, body)
+  let scheme = call_564099.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568199.url(scheme.get, call_568199.host, call_568199.base,
-                         call_568199.route, valid.getOrDefault("path"),
+  let url = call_564099.url(scheme.get, call_564099.host, call_564099.base,
+                         call_564099.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568199, url, valid)
+  result = hook(call_564099, url, valid)
 
-proc call*(call_568200: Call_RegulatoryComplianceStandardsGet_568184;
-          apiVersion: string; regulatoryComplianceStandardName: string;
+proc call*(call_564100: Call_RegulatoryComplianceStandardsGet_564084;
+          regulatoryComplianceStandardName: string; apiVersion: string;
           subscriptionId: string): Recallable =
   ## regulatoryComplianceStandardsGet
   ## Supported regulatory compliance details state for selected standard
-  ##   apiVersion: string (required)
-  ##             : API version for the operation
   ##   regulatoryComplianceStandardName: string (required)
   ##                                   : Name of the regulatory compliance standard object
+  ##   apiVersion: string (required)
+  ##             : API version for the operation
   ##   subscriptionId: string (required)
   ##                 : Azure subscription ID
-  var path_568201 = newJObject()
-  var query_568202 = newJObject()
-  add(query_568202, "api-version", newJString(apiVersion))
-  add(path_568201, "regulatoryComplianceStandardName",
+  var path_564101 = newJObject()
+  var query_564102 = newJObject()
+  add(path_564101, "regulatoryComplianceStandardName",
       newJString(regulatoryComplianceStandardName))
-  add(path_568201, "subscriptionId", newJString(subscriptionId))
-  result = call_568200.call(path_568201, query_568202, nil, nil, nil)
+  add(query_564102, "api-version", newJString(apiVersion))
+  add(path_564101, "subscriptionId", newJString(subscriptionId))
+  result = call_564100.call(path_564101, query_564102, nil, nil, nil)
 
-var regulatoryComplianceStandardsGet* = Call_RegulatoryComplianceStandardsGet_568184(
+var regulatoryComplianceStandardsGet* = Call_RegulatoryComplianceStandardsGet_564084(
     name: "regulatoryComplianceStandardsGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Security/regulatoryComplianceStandards/{regulatoryComplianceStandardName}",
-    validator: validate_RegulatoryComplianceStandardsGet_568185, base: "",
-    url: url_RegulatoryComplianceStandardsGet_568186, schemes: {Scheme.Https})
+    validator: validate_RegulatoryComplianceStandardsGet_564085, base: "",
+    url: url_RegulatoryComplianceStandardsGet_564086, schemes: {Scheme.Https})
 type
-  Call_RegulatoryComplianceControlsList_568203 = ref object of OpenApiRestCall_567657
-proc url_RegulatoryComplianceControlsList_568205(protocol: Scheme; host: string;
+  Call_RegulatoryComplianceControlsList_564103 = ref object of OpenApiRestCall_563555
+proc url_RegulatoryComplianceControlsList_564105(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -327,7 +331,7 @@ proc url_RegulatoryComplianceControlsList_568205(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_RegulatoryComplianceControlsList_568204(path: JsonNode;
+proc validate_RegulatoryComplianceControlsList_564104(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## All supported regulatory compliance controls details and state for selected standard
   ## 
@@ -340,16 +344,16 @@ proc validate_RegulatoryComplianceControlsList_568204(path: JsonNode;
   ##                 : Azure subscription ID
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `regulatoryComplianceStandardName` field"
-  var valid_568206 = path.getOrDefault("regulatoryComplianceStandardName")
-  valid_568206 = validateParameter(valid_568206, JString, required = true,
+  var valid_564106 = path.getOrDefault("regulatoryComplianceStandardName")
+  valid_564106 = validateParameter(valid_564106, JString, required = true,
                                  default = nil)
-  if valid_568206 != nil:
-    section.add "regulatoryComplianceStandardName", valid_568206
-  var valid_568207 = path.getOrDefault("subscriptionId")
-  valid_568207 = validateParameter(valid_568207, JString, required = true,
+  if valid_564106 != nil:
+    section.add "regulatoryComplianceStandardName", valid_564106
+  var valid_564107 = path.getOrDefault("subscriptionId")
+  valid_564107 = validateParameter(valid_564107, JString, required = true,
                                  default = nil)
-  if valid_568207 != nil:
-    section.add "subscriptionId", valid_568207
+  if valid_564107 != nil:
+    section.add "subscriptionId", valid_564107
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -359,16 +363,16 @@ proc validate_RegulatoryComplianceControlsList_568204(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568208 = query.getOrDefault("api-version")
-  valid_568208 = validateParameter(valid_568208, JString, required = true,
+  var valid_564108 = query.getOrDefault("api-version")
+  valid_564108 = validateParameter(valid_564108, JString, required = true,
                                  default = nil)
-  if valid_568208 != nil:
-    section.add "api-version", valid_568208
-  var valid_568209 = query.getOrDefault("$filter")
-  valid_568209 = validateParameter(valid_568209, JString, required = false,
+  if valid_564108 != nil:
+    section.add "api-version", valid_564108
+  var valid_564109 = query.getOrDefault("$filter")
+  valid_564109 = validateParameter(valid_564109, JString, required = false,
                                  default = nil)
-  if valid_568209 != nil:
-    section.add "$filter", valid_568209
+  if valid_564109 != nil:
+    section.add "$filter", valid_564109
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -377,50 +381,50 @@ proc validate_RegulatoryComplianceControlsList_568204(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568210: Call_RegulatoryComplianceControlsList_568203;
+proc call*(call_564110: Call_RegulatoryComplianceControlsList_564103;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## All supported regulatory compliance controls details and state for selected standard
   ## 
-  let valid = call_568210.validator(path, query, header, formData, body)
-  let scheme = call_568210.pickScheme
+  let valid = call_564110.validator(path, query, header, formData, body)
+  let scheme = call_564110.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568210.url(scheme.get, call_568210.host, call_568210.base,
-                         call_568210.route, valid.getOrDefault("path"),
+  let url = call_564110.url(scheme.get, call_564110.host, call_564110.base,
+                         call_564110.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568210, url, valid)
+  result = hook(call_564110, url, valid)
 
-proc call*(call_568211: Call_RegulatoryComplianceControlsList_568203;
-          apiVersion: string; regulatoryComplianceStandardName: string;
+proc call*(call_564111: Call_RegulatoryComplianceControlsList_564103;
+          regulatoryComplianceStandardName: string; apiVersion: string;
           subscriptionId: string; Filter: string = ""): Recallable =
   ## regulatoryComplianceControlsList
   ## All supported regulatory compliance controls details and state for selected standard
-  ##   apiVersion: string (required)
-  ##             : API version for the operation
   ##   regulatoryComplianceStandardName: string (required)
   ##                                   : Name of the regulatory compliance standard object
+  ##   apiVersion: string (required)
+  ##             : API version for the operation
   ##   subscriptionId: string (required)
   ##                 : Azure subscription ID
   ##   Filter: string
   ##         : OData filter. Optional.
-  var path_568212 = newJObject()
-  var query_568213 = newJObject()
-  add(query_568213, "api-version", newJString(apiVersion))
-  add(path_568212, "regulatoryComplianceStandardName",
+  var path_564112 = newJObject()
+  var query_564113 = newJObject()
+  add(path_564112, "regulatoryComplianceStandardName",
       newJString(regulatoryComplianceStandardName))
-  add(path_568212, "subscriptionId", newJString(subscriptionId))
-  add(query_568213, "$filter", newJString(Filter))
-  result = call_568211.call(path_568212, query_568213, nil, nil, nil)
+  add(query_564113, "api-version", newJString(apiVersion))
+  add(path_564112, "subscriptionId", newJString(subscriptionId))
+  add(query_564113, "$filter", newJString(Filter))
+  result = call_564111.call(path_564112, query_564113, nil, nil, nil)
 
-var regulatoryComplianceControlsList* = Call_RegulatoryComplianceControlsList_568203(
+var regulatoryComplianceControlsList* = Call_RegulatoryComplianceControlsList_564103(
     name: "regulatoryComplianceControlsList", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Security/regulatoryComplianceStandards/{regulatoryComplianceStandardName}/regulatoryComplianceControls",
-    validator: validate_RegulatoryComplianceControlsList_568204, base: "",
-    url: url_RegulatoryComplianceControlsList_568205, schemes: {Scheme.Https})
+    validator: validate_RegulatoryComplianceControlsList_564104, base: "",
+    url: url_RegulatoryComplianceControlsList_564105, schemes: {Scheme.Https})
 type
-  Call_RegulatoryComplianceControlsGet_568214 = ref object of OpenApiRestCall_567657
-proc url_RegulatoryComplianceControlsGet_568216(protocol: Scheme; host: string;
+  Call_RegulatoryComplianceControlsGet_564114 = ref object of OpenApiRestCall_563555
+proc url_RegulatoryComplianceControlsGet_564116(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -444,7 +448,7 @@ proc url_RegulatoryComplianceControlsGet_568216(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_RegulatoryComplianceControlsGet_568215(path: JsonNode;
+proc validate_RegulatoryComplianceControlsGet_564115(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Selected regulatory compliance control details and state
   ## 
@@ -453,27 +457,27 @@ proc validate_RegulatoryComplianceControlsGet_568215(path: JsonNode;
   ## parameters in `path` object:
   ##   regulatoryComplianceStandardName: JString (required)
   ##                                   : Name of the regulatory compliance standard object
-  ##   subscriptionId: JString (required)
-  ##                 : Azure subscription ID
   ##   regulatoryComplianceControlName: JString (required)
   ##                                  : Name of the regulatory compliance control object
+  ##   subscriptionId: JString (required)
+  ##                 : Azure subscription ID
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `regulatoryComplianceStandardName` field"
-  var valid_568217 = path.getOrDefault("regulatoryComplianceStandardName")
-  valid_568217 = validateParameter(valid_568217, JString, required = true,
+  var valid_564117 = path.getOrDefault("regulatoryComplianceStandardName")
+  valid_564117 = validateParameter(valid_564117, JString, required = true,
                                  default = nil)
-  if valid_568217 != nil:
-    section.add "regulatoryComplianceStandardName", valid_568217
-  var valid_568218 = path.getOrDefault("subscriptionId")
-  valid_568218 = validateParameter(valid_568218, JString, required = true,
+  if valid_564117 != nil:
+    section.add "regulatoryComplianceStandardName", valid_564117
+  var valid_564118 = path.getOrDefault("regulatoryComplianceControlName")
+  valid_564118 = validateParameter(valid_564118, JString, required = true,
                                  default = nil)
-  if valid_568218 != nil:
-    section.add "subscriptionId", valid_568218
-  var valid_568219 = path.getOrDefault("regulatoryComplianceControlName")
-  valid_568219 = validateParameter(valid_568219, JString, required = true,
+  if valid_564118 != nil:
+    section.add "regulatoryComplianceControlName", valid_564118
+  var valid_564119 = path.getOrDefault("subscriptionId")
+  valid_564119 = validateParameter(valid_564119, JString, required = true,
                                  default = nil)
-  if valid_568219 != nil:
-    section.add "regulatoryComplianceControlName", valid_568219
+  if valid_564119 != nil:
+    section.add "subscriptionId", valid_564119
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -481,11 +485,11 @@ proc validate_RegulatoryComplianceControlsGet_568215(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568220 = query.getOrDefault("api-version")
-  valid_568220 = validateParameter(valid_568220, JString, required = true,
+  var valid_564120 = query.getOrDefault("api-version")
+  valid_564120 = validateParameter(valid_564120, JString, required = true,
                                  default = nil)
-  if valid_568220 != nil:
-    section.add "api-version", valid_568220
+  if valid_564120 != nil:
+    section.add "api-version", valid_564120
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -494,51 +498,51 @@ proc validate_RegulatoryComplianceControlsGet_568215(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568221: Call_RegulatoryComplianceControlsGet_568214;
+proc call*(call_564121: Call_RegulatoryComplianceControlsGet_564114;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Selected regulatory compliance control details and state
   ## 
-  let valid = call_568221.validator(path, query, header, formData, body)
-  let scheme = call_568221.pickScheme
+  let valid = call_564121.validator(path, query, header, formData, body)
+  let scheme = call_564121.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568221.url(scheme.get, call_568221.host, call_568221.base,
-                         call_568221.route, valid.getOrDefault("path"),
+  let url = call_564121.url(scheme.get, call_564121.host, call_564121.base,
+                         call_564121.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568221, url, valid)
+  result = hook(call_564121, url, valid)
 
-proc call*(call_568222: Call_RegulatoryComplianceControlsGet_568214;
-          apiVersion: string; regulatoryComplianceStandardName: string;
-          subscriptionId: string; regulatoryComplianceControlName: string): Recallable =
+proc call*(call_564122: Call_RegulatoryComplianceControlsGet_564114;
+          regulatoryComplianceStandardName: string; apiVersion: string;
+          regulatoryComplianceControlName: string; subscriptionId: string): Recallable =
   ## regulatoryComplianceControlsGet
   ## Selected regulatory compliance control details and state
-  ##   apiVersion: string (required)
-  ##             : API version for the operation
   ##   regulatoryComplianceStandardName: string (required)
   ##                                   : Name of the regulatory compliance standard object
-  ##   subscriptionId: string (required)
-  ##                 : Azure subscription ID
+  ##   apiVersion: string (required)
+  ##             : API version for the operation
   ##   regulatoryComplianceControlName: string (required)
   ##                                  : Name of the regulatory compliance control object
-  var path_568223 = newJObject()
-  var query_568224 = newJObject()
-  add(query_568224, "api-version", newJString(apiVersion))
-  add(path_568223, "regulatoryComplianceStandardName",
+  ##   subscriptionId: string (required)
+  ##                 : Azure subscription ID
+  var path_564123 = newJObject()
+  var query_564124 = newJObject()
+  add(path_564123, "regulatoryComplianceStandardName",
       newJString(regulatoryComplianceStandardName))
-  add(path_568223, "subscriptionId", newJString(subscriptionId))
-  add(path_568223, "regulatoryComplianceControlName",
+  add(query_564124, "api-version", newJString(apiVersion))
+  add(path_564123, "regulatoryComplianceControlName",
       newJString(regulatoryComplianceControlName))
-  result = call_568222.call(path_568223, query_568224, nil, nil, nil)
+  add(path_564123, "subscriptionId", newJString(subscriptionId))
+  result = call_564122.call(path_564123, query_564124, nil, nil, nil)
 
-var regulatoryComplianceControlsGet* = Call_RegulatoryComplianceControlsGet_568214(
+var regulatoryComplianceControlsGet* = Call_RegulatoryComplianceControlsGet_564114(
     name: "regulatoryComplianceControlsGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Security/regulatoryComplianceStandards/{regulatoryComplianceStandardName}/regulatoryComplianceControls/{regulatoryComplianceControlName}",
-    validator: validate_RegulatoryComplianceControlsGet_568215, base: "",
-    url: url_RegulatoryComplianceControlsGet_568216, schemes: {Scheme.Https})
+    validator: validate_RegulatoryComplianceControlsGet_564115, base: "",
+    url: url_RegulatoryComplianceControlsGet_564116, schemes: {Scheme.Https})
 type
-  Call_RegulatoryComplianceAssessmentsList_568225 = ref object of OpenApiRestCall_567657
-proc url_RegulatoryComplianceAssessmentsList_568227(protocol: Scheme; host: string;
+  Call_RegulatoryComplianceAssessmentsList_564125 = ref object of OpenApiRestCall_563555
+proc url_RegulatoryComplianceAssessmentsList_564127(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -563,7 +567,7 @@ proc url_RegulatoryComplianceAssessmentsList_568227(protocol: Scheme; host: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_RegulatoryComplianceAssessmentsList_568226(path: JsonNode;
+proc validate_RegulatoryComplianceAssessmentsList_564126(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Details and state of assessments mapped to selected regulatory compliance control
   ## 
@@ -572,27 +576,27 @@ proc validate_RegulatoryComplianceAssessmentsList_568226(path: JsonNode;
   ## parameters in `path` object:
   ##   regulatoryComplianceStandardName: JString (required)
   ##                                   : Name of the regulatory compliance standard object
-  ##   subscriptionId: JString (required)
-  ##                 : Azure subscription ID
   ##   regulatoryComplianceControlName: JString (required)
   ##                                  : Name of the regulatory compliance control object
+  ##   subscriptionId: JString (required)
+  ##                 : Azure subscription ID
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `regulatoryComplianceStandardName` field"
-  var valid_568228 = path.getOrDefault("regulatoryComplianceStandardName")
-  valid_568228 = validateParameter(valid_568228, JString, required = true,
+  var valid_564128 = path.getOrDefault("regulatoryComplianceStandardName")
+  valid_564128 = validateParameter(valid_564128, JString, required = true,
                                  default = nil)
-  if valid_568228 != nil:
-    section.add "regulatoryComplianceStandardName", valid_568228
-  var valid_568229 = path.getOrDefault("subscriptionId")
-  valid_568229 = validateParameter(valid_568229, JString, required = true,
+  if valid_564128 != nil:
+    section.add "regulatoryComplianceStandardName", valid_564128
+  var valid_564129 = path.getOrDefault("regulatoryComplianceControlName")
+  valid_564129 = validateParameter(valid_564129, JString, required = true,
                                  default = nil)
-  if valid_568229 != nil:
-    section.add "subscriptionId", valid_568229
-  var valid_568230 = path.getOrDefault("regulatoryComplianceControlName")
-  valid_568230 = validateParameter(valid_568230, JString, required = true,
+  if valid_564129 != nil:
+    section.add "regulatoryComplianceControlName", valid_564129
+  var valid_564130 = path.getOrDefault("subscriptionId")
+  valid_564130 = validateParameter(valid_564130, JString, required = true,
                                  default = nil)
-  if valid_568230 != nil:
-    section.add "regulatoryComplianceControlName", valid_568230
+  if valid_564130 != nil:
+    section.add "subscriptionId", valid_564130
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -602,16 +606,16 @@ proc validate_RegulatoryComplianceAssessmentsList_568226(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568231 = query.getOrDefault("api-version")
-  valid_568231 = validateParameter(valid_568231, JString, required = true,
+  var valid_564131 = query.getOrDefault("api-version")
+  valid_564131 = validateParameter(valid_564131, JString, required = true,
                                  default = nil)
-  if valid_568231 != nil:
-    section.add "api-version", valid_568231
-  var valid_568232 = query.getOrDefault("$filter")
-  valid_568232 = validateParameter(valid_568232, JString, required = false,
+  if valid_564131 != nil:
+    section.add "api-version", valid_564131
+  var valid_564132 = query.getOrDefault("$filter")
+  valid_564132 = validateParameter(valid_564132, JString, required = false,
                                  default = nil)
-  if valid_568232 != nil:
-    section.add "$filter", valid_568232
+  if valid_564132 != nil:
+    section.add "$filter", valid_564132
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -620,55 +624,55 @@ proc validate_RegulatoryComplianceAssessmentsList_568226(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568233: Call_RegulatoryComplianceAssessmentsList_568225;
+proc call*(call_564133: Call_RegulatoryComplianceAssessmentsList_564125;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Details and state of assessments mapped to selected regulatory compliance control
   ## 
-  let valid = call_568233.validator(path, query, header, formData, body)
-  let scheme = call_568233.pickScheme
+  let valid = call_564133.validator(path, query, header, formData, body)
+  let scheme = call_564133.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568233.url(scheme.get, call_568233.host, call_568233.base,
-                         call_568233.route, valid.getOrDefault("path"),
+  let url = call_564133.url(scheme.get, call_564133.host, call_564133.base,
+                         call_564133.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568233, url, valid)
+  result = hook(call_564133, url, valid)
 
-proc call*(call_568234: Call_RegulatoryComplianceAssessmentsList_568225;
-          apiVersion: string; regulatoryComplianceStandardName: string;
-          subscriptionId: string; regulatoryComplianceControlName: string;
+proc call*(call_564134: Call_RegulatoryComplianceAssessmentsList_564125;
+          regulatoryComplianceStandardName: string; apiVersion: string;
+          regulatoryComplianceControlName: string; subscriptionId: string;
           Filter: string = ""): Recallable =
   ## regulatoryComplianceAssessmentsList
   ## Details and state of assessments mapped to selected regulatory compliance control
-  ##   apiVersion: string (required)
-  ##             : API version for the operation
   ##   regulatoryComplianceStandardName: string (required)
   ##                                   : Name of the regulatory compliance standard object
-  ##   subscriptionId: string (required)
-  ##                 : Azure subscription ID
+  ##   apiVersion: string (required)
+  ##             : API version for the operation
   ##   regulatoryComplianceControlName: string (required)
   ##                                  : Name of the regulatory compliance control object
+  ##   subscriptionId: string (required)
+  ##                 : Azure subscription ID
   ##   Filter: string
   ##         : OData filter. Optional.
-  var path_568235 = newJObject()
-  var query_568236 = newJObject()
-  add(query_568236, "api-version", newJString(apiVersion))
-  add(path_568235, "regulatoryComplianceStandardName",
+  var path_564135 = newJObject()
+  var query_564136 = newJObject()
+  add(path_564135, "regulatoryComplianceStandardName",
       newJString(regulatoryComplianceStandardName))
-  add(path_568235, "subscriptionId", newJString(subscriptionId))
-  add(path_568235, "regulatoryComplianceControlName",
+  add(query_564136, "api-version", newJString(apiVersion))
+  add(path_564135, "regulatoryComplianceControlName",
       newJString(regulatoryComplianceControlName))
-  add(query_568236, "$filter", newJString(Filter))
-  result = call_568234.call(path_568235, query_568236, nil, nil, nil)
+  add(path_564135, "subscriptionId", newJString(subscriptionId))
+  add(query_564136, "$filter", newJString(Filter))
+  result = call_564134.call(path_564135, query_564136, nil, nil, nil)
 
-var regulatoryComplianceAssessmentsList* = Call_RegulatoryComplianceAssessmentsList_568225(
+var regulatoryComplianceAssessmentsList* = Call_RegulatoryComplianceAssessmentsList_564125(
     name: "regulatoryComplianceAssessmentsList", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Security/regulatoryComplianceStandards/{regulatoryComplianceStandardName}/regulatoryComplianceControls/{regulatoryComplianceControlName}/regulatoryComplianceAssessments",
-    validator: validate_RegulatoryComplianceAssessmentsList_568226, base: "",
-    url: url_RegulatoryComplianceAssessmentsList_568227, schemes: {Scheme.Https})
+    validator: validate_RegulatoryComplianceAssessmentsList_564126, base: "",
+    url: url_RegulatoryComplianceAssessmentsList_564127, schemes: {Scheme.Https})
 type
-  Call_RegulatoryComplianceAssessmentsGet_568237 = ref object of OpenApiRestCall_567657
-proc url_RegulatoryComplianceAssessmentsGet_568239(protocol: Scheme; host: string;
+  Call_RegulatoryComplianceAssessmentsGet_564137 = ref object of OpenApiRestCall_563555
+proc url_RegulatoryComplianceAssessmentsGet_564139(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -696,7 +700,7 @@ proc url_RegulatoryComplianceAssessmentsGet_568239(protocol: Scheme; host: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_RegulatoryComplianceAssessmentsGet_568238(path: JsonNode;
+proc validate_RegulatoryComplianceAssessmentsGet_564138(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Supported regulatory compliance details and state for selected assessment
   ## 
@@ -705,34 +709,34 @@ proc validate_RegulatoryComplianceAssessmentsGet_568238(path: JsonNode;
   ## parameters in `path` object:
   ##   regulatoryComplianceStandardName: JString (required)
   ##                                   : Name of the regulatory compliance standard object
-  ##   subscriptionId: JString (required)
-  ##                 : Azure subscription ID
   ##   regulatoryComplianceAssessmentName: JString (required)
   ##                                     : Name of the regulatory compliance assessment object
   ##   regulatoryComplianceControlName: JString (required)
   ##                                  : Name of the regulatory compliance control object
+  ##   subscriptionId: JString (required)
+  ##                 : Azure subscription ID
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `regulatoryComplianceStandardName` field"
-  var valid_568240 = path.getOrDefault("regulatoryComplianceStandardName")
-  valid_568240 = validateParameter(valid_568240, JString, required = true,
+  var valid_564140 = path.getOrDefault("regulatoryComplianceStandardName")
+  valid_564140 = validateParameter(valid_564140, JString, required = true,
                                  default = nil)
-  if valid_568240 != nil:
-    section.add "regulatoryComplianceStandardName", valid_568240
-  var valid_568241 = path.getOrDefault("subscriptionId")
-  valid_568241 = validateParameter(valid_568241, JString, required = true,
+  if valid_564140 != nil:
+    section.add "regulatoryComplianceStandardName", valid_564140
+  var valid_564141 = path.getOrDefault("regulatoryComplianceAssessmentName")
+  valid_564141 = validateParameter(valid_564141, JString, required = true,
                                  default = nil)
-  if valid_568241 != nil:
-    section.add "subscriptionId", valid_568241
-  var valid_568242 = path.getOrDefault("regulatoryComplianceAssessmentName")
-  valid_568242 = validateParameter(valid_568242, JString, required = true,
+  if valid_564141 != nil:
+    section.add "regulatoryComplianceAssessmentName", valid_564141
+  var valid_564142 = path.getOrDefault("regulatoryComplianceControlName")
+  valid_564142 = validateParameter(valid_564142, JString, required = true,
                                  default = nil)
-  if valid_568242 != nil:
-    section.add "regulatoryComplianceAssessmentName", valid_568242
-  var valid_568243 = path.getOrDefault("regulatoryComplianceControlName")
-  valid_568243 = validateParameter(valid_568243, JString, required = true,
+  if valid_564142 != nil:
+    section.add "regulatoryComplianceControlName", valid_564142
+  var valid_564143 = path.getOrDefault("subscriptionId")
+  valid_564143 = validateParameter(valid_564143, JString, required = true,
                                  default = nil)
-  if valid_568243 != nil:
-    section.add "regulatoryComplianceControlName", valid_568243
+  if valid_564143 != nil:
+    section.add "subscriptionId", valid_564143
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -740,11 +744,11 @@ proc validate_RegulatoryComplianceAssessmentsGet_568238(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568244 = query.getOrDefault("api-version")
-  valid_568244 = validateParameter(valid_568244, JString, required = true,
+  var valid_564144 = query.getOrDefault("api-version")
+  valid_564144 = validateParameter(valid_564144, JString, required = true,
                                  default = nil)
-  if valid_568244 != nil:
-    section.add "api-version", valid_568244
+  if valid_564144 != nil:
+    section.add "api-version", valid_564144
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -753,53 +757,53 @@ proc validate_RegulatoryComplianceAssessmentsGet_568238(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568245: Call_RegulatoryComplianceAssessmentsGet_568237;
+proc call*(call_564145: Call_RegulatoryComplianceAssessmentsGet_564137;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Supported regulatory compliance details and state for selected assessment
   ## 
-  let valid = call_568245.validator(path, query, header, formData, body)
-  let scheme = call_568245.pickScheme
+  let valid = call_564145.validator(path, query, header, formData, body)
+  let scheme = call_564145.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568245.url(scheme.get, call_568245.host, call_568245.base,
-                         call_568245.route, valid.getOrDefault("path"),
+  let url = call_564145.url(scheme.get, call_564145.host, call_564145.base,
+                         call_564145.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568245, url, valid)
+  result = hook(call_564145, url, valid)
 
-proc call*(call_568246: Call_RegulatoryComplianceAssessmentsGet_568237;
-          apiVersion: string; regulatoryComplianceStandardName: string;
-          subscriptionId: string; regulatoryComplianceAssessmentName: string;
-          regulatoryComplianceControlName: string): Recallable =
+proc call*(call_564146: Call_RegulatoryComplianceAssessmentsGet_564137;
+          regulatoryComplianceStandardName: string; apiVersion: string;
+          regulatoryComplianceAssessmentName: string;
+          regulatoryComplianceControlName: string; subscriptionId: string): Recallable =
   ## regulatoryComplianceAssessmentsGet
   ## Supported regulatory compliance details and state for selected assessment
-  ##   apiVersion: string (required)
-  ##             : API version for the operation
   ##   regulatoryComplianceStandardName: string (required)
   ##                                   : Name of the regulatory compliance standard object
-  ##   subscriptionId: string (required)
-  ##                 : Azure subscription ID
+  ##   apiVersion: string (required)
+  ##             : API version for the operation
   ##   regulatoryComplianceAssessmentName: string (required)
   ##                                     : Name of the regulatory compliance assessment object
   ##   regulatoryComplianceControlName: string (required)
   ##                                  : Name of the regulatory compliance control object
-  var path_568247 = newJObject()
-  var query_568248 = newJObject()
-  add(query_568248, "api-version", newJString(apiVersion))
-  add(path_568247, "regulatoryComplianceStandardName",
+  ##   subscriptionId: string (required)
+  ##                 : Azure subscription ID
+  var path_564147 = newJObject()
+  var query_564148 = newJObject()
+  add(path_564147, "regulatoryComplianceStandardName",
       newJString(regulatoryComplianceStandardName))
-  add(path_568247, "subscriptionId", newJString(subscriptionId))
-  add(path_568247, "regulatoryComplianceAssessmentName",
+  add(query_564148, "api-version", newJString(apiVersion))
+  add(path_564147, "regulatoryComplianceAssessmentName",
       newJString(regulatoryComplianceAssessmentName))
-  add(path_568247, "regulatoryComplianceControlName",
+  add(path_564147, "regulatoryComplianceControlName",
       newJString(regulatoryComplianceControlName))
-  result = call_568246.call(path_568247, query_568248, nil, nil, nil)
+  add(path_564147, "subscriptionId", newJString(subscriptionId))
+  result = call_564146.call(path_564147, query_564148, nil, nil, nil)
 
-var regulatoryComplianceAssessmentsGet* = Call_RegulatoryComplianceAssessmentsGet_568237(
+var regulatoryComplianceAssessmentsGet* = Call_RegulatoryComplianceAssessmentsGet_564137(
     name: "regulatoryComplianceAssessmentsGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Security/regulatoryComplianceStandards/{regulatoryComplianceStandardName}/regulatoryComplianceControls/{regulatoryComplianceControlName}/regulatoryComplianceAssessments/{regulatoryComplianceAssessmentName}",
-    validator: validate_RegulatoryComplianceAssessmentsGet_568238, base: "",
-    url: url_RegulatoryComplianceAssessmentsGet_568239, schemes: {Scheme.Https})
+    validator: validate_RegulatoryComplianceAssessmentsGet_564138, base: "",
+    url: url_RegulatoryComplianceAssessmentsGet_564139, schemes: {Scheme.Https})
 export
   rest
 

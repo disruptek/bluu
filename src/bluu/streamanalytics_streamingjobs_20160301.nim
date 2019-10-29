@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, httpcore
 
 ## auto-generated via openapi macro
 ## title: StreamAnalyticsManagementClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_567657 = ref object of OpenApiRestCall
+  OpenApiRestCall_563555 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_567657](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563555](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_567657): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563555): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,15 +107,15 @@ const
   macServiceName = "streamanalytics-streamingjobs"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_OperationsList_567879 = ref object of OpenApiRestCall_567657
-proc url_OperationsList_567881(protocol: Scheme; host: string; base: string;
+  Call_OperationsList_563777 = ref object of OpenApiRestCall_563555
+proc url_OperationsList_563779(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_OperationsList_567880(path: JsonNode; query: JsonNode;
+proc validate_OperationsList_563778(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## Lists all of the available Stream Analytics related operations.
@@ -126,11 +130,11 @@ proc validate_OperationsList_567880(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568040 = query.getOrDefault("api-version")
-  valid_568040 = validateParameter(valid_568040, JString, required = true,
+  var valid_563940 = query.getOrDefault("api-version")
+  valid_563940 = validateParameter(valid_563940, JString, required = true,
                                  default = nil)
-  if valid_568040 != nil:
-    section.add "api-version", valid_568040
+  if valid_563940 != nil:
+    section.add "api-version", valid_563940
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -139,36 +143,36 @@ proc validate_OperationsList_567880(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568063: Call_OperationsList_567879; path: JsonNode; query: JsonNode;
+proc call*(call_563963: Call_OperationsList_563777; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists all of the available Stream Analytics related operations.
   ## 
-  let valid = call_568063.validator(path, query, header, formData, body)
-  let scheme = call_568063.pickScheme
+  let valid = call_563963.validator(path, query, header, formData, body)
+  let scheme = call_563963.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568063.url(scheme.get, call_568063.host, call_568063.base,
-                         call_568063.route, valid.getOrDefault("path"),
+  let url = call_563963.url(scheme.get, call_563963.host, call_563963.base,
+                         call_563963.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568063, url, valid)
+  result = hook(call_563963, url, valid)
 
-proc call*(call_568134: Call_OperationsList_567879; apiVersion: string): Recallable =
+proc call*(call_564034: Call_OperationsList_563777; apiVersion: string): Recallable =
   ## operationsList
   ## Lists all of the available Stream Analytics related operations.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
-  var query_568135 = newJObject()
-  add(query_568135, "api-version", newJString(apiVersion))
-  result = call_568134.call(nil, query_568135, nil, nil, nil)
+  var query_564035 = newJObject()
+  add(query_564035, "api-version", newJString(apiVersion))
+  result = call_564034.call(nil, query_564035, nil, nil, nil)
 
-var operationsList* = Call_OperationsList_567879(name: "operationsList",
+var operationsList* = Call_OperationsList_563777(name: "operationsList",
     meth: HttpMethod.HttpGet, host: "management.azure.com",
     route: "/providers/Microsoft.StreamAnalytics/operations",
-    validator: validate_OperationsList_567880, base: "", url: url_OperationsList_567881,
+    validator: validate_OperationsList_563778, base: "", url: url_OperationsList_563779,
     schemes: {Scheme.Https})
 type
-  Call_StreamingJobsList_568175 = ref object of OpenApiRestCall_567657
-proc url_StreamingJobsList_568177(protocol: Scheme; host: string; base: string;
+  Call_StreamingJobsList_564075 = ref object of OpenApiRestCall_563555
+proc url_StreamingJobsList_564077(protocol: Scheme; host: string; base: string;
                                  route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -185,7 +189,7 @@ proc url_StreamingJobsList_568177(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_StreamingJobsList_568176(path: JsonNode; query: JsonNode;
+proc validate_StreamingJobsList_564076(path: JsonNode; query: JsonNode;
                                       header: JsonNode; formData: JsonNode;
                                       body: JsonNode): JsonNode =
   ## Lists all of the streaming jobs in the given subscription.
@@ -198,30 +202,30 @@ proc validate_StreamingJobsList_568176(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_568193 = path.getOrDefault("subscriptionId")
-  valid_568193 = validateParameter(valid_568193, JString, required = true,
+  var valid_564093 = path.getOrDefault("subscriptionId")
+  valid_564093 = validateParameter(valid_564093, JString, required = true,
                                  default = nil)
-  if valid_568193 != nil:
-    section.add "subscriptionId", valid_568193
+  if valid_564093 != nil:
+    section.add "subscriptionId", valid_564093
   result.add "path", section
   ## parameters in `query` object:
-  ##   $expand: JString
-  ##          : The $expand OData query parameter. This is a comma-separated list of additional streaming job properties to include in the response, beyond the default set returned when this parameter is absent. The default set is all streaming job properties other than 'inputs', 'transformation', 'outputs', and 'functions'.
   ##   api-version: JString (required)
   ##              : Client Api Version.
+  ##   $expand: JString
+  ##          : The $expand OData query parameter. This is a comma-separated list of additional streaming job properties to include in the response, beyond the default set returned when this parameter is absent. The default set is all streaming job properties other than 'inputs', 'transformation', 'outputs', and 'functions'.
   section = newJObject()
-  var valid_568194 = query.getOrDefault("$expand")
-  valid_568194 = validateParameter(valid_568194, JString, required = false,
-                                 default = nil)
-  if valid_568194 != nil:
-    section.add "$expand", valid_568194
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568195 = query.getOrDefault("api-version")
-  valid_568195 = validateParameter(valid_568195, JString, required = true,
+  var valid_564094 = query.getOrDefault("api-version")
+  valid_564094 = validateParameter(valid_564094, JString, required = true,
                                  default = nil)
-  if valid_568195 != nil:
-    section.add "api-version", valid_568195
+  if valid_564094 != nil:
+    section.add "api-version", valid_564094
+  var valid_564095 = query.getOrDefault("$expand")
+  valid_564095 = validateParameter(valid_564095, JString, required = false,
+                                 default = nil)
+  if valid_564095 != nil:
+    section.add "$expand", valid_564095
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -230,43 +234,43 @@ proc validate_StreamingJobsList_568176(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568196: Call_StreamingJobsList_568175; path: JsonNode;
+proc call*(call_564096: Call_StreamingJobsList_564075; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists all of the streaming jobs in the given subscription.
   ## 
-  let valid = call_568196.validator(path, query, header, formData, body)
-  let scheme = call_568196.pickScheme
+  let valid = call_564096.validator(path, query, header, formData, body)
+  let scheme = call_564096.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568196.url(scheme.get, call_568196.host, call_568196.base,
-                         call_568196.route, valid.getOrDefault("path"),
+  let url = call_564096.url(scheme.get, call_564096.host, call_564096.base,
+                         call_564096.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568196, url, valid)
+  result = hook(call_564096, url, valid)
 
-proc call*(call_568197: Call_StreamingJobsList_568175; apiVersion: string;
+proc call*(call_564097: Call_StreamingJobsList_564075; apiVersion: string;
           subscriptionId: string; Expand: string = ""): Recallable =
   ## streamingJobsList
   ## Lists all of the streaming jobs in the given subscription.
-  ##   Expand: string
-  ##         : The $expand OData query parameter. This is a comma-separated list of additional streaming job properties to include in the response, beyond the default set returned when this parameter is absent. The default set is all streaming job properties other than 'inputs', 'transformation', 'outputs', and 'functions'.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
+  ##   Expand: string
+  ##         : The $expand OData query parameter. This is a comma-separated list of additional streaming job properties to include in the response, beyond the default set returned when this parameter is absent. The default set is all streaming job properties other than 'inputs', 'transformation', 'outputs', and 'functions'.
   ##   subscriptionId: string (required)
   ##                 : GUID which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_568198 = newJObject()
-  var query_568199 = newJObject()
-  add(query_568199, "$expand", newJString(Expand))
-  add(query_568199, "api-version", newJString(apiVersion))
-  add(path_568198, "subscriptionId", newJString(subscriptionId))
-  result = call_568197.call(path_568198, query_568199, nil, nil, nil)
+  var path_564098 = newJObject()
+  var query_564099 = newJObject()
+  add(query_564099, "api-version", newJString(apiVersion))
+  add(query_564099, "$expand", newJString(Expand))
+  add(path_564098, "subscriptionId", newJString(subscriptionId))
+  result = call_564097.call(path_564098, query_564099, nil, nil, nil)
 
-var streamingJobsList* = Call_StreamingJobsList_568175(name: "streamingJobsList",
+var streamingJobsList* = Call_StreamingJobsList_564075(name: "streamingJobsList",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.StreamAnalytics/streamingjobs",
-    validator: validate_StreamingJobsList_568176, base: "",
-    url: url_StreamingJobsList_568177, schemes: {Scheme.Https})
+    validator: validate_StreamingJobsList_564076, base: "",
+    url: url_StreamingJobsList_564077, schemes: {Scheme.Https})
 type
-  Call_StreamingJobsListByResourceGroup_568200 = ref object of OpenApiRestCall_567657
-proc url_StreamingJobsListByResourceGroup_568202(protocol: Scheme; host: string;
+  Call_StreamingJobsListByResourceGroup_564100 = ref object of OpenApiRestCall_563555
+proc url_StreamingJobsListByResourceGroup_564102(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -287,49 +291,49 @@ proc url_StreamingJobsListByResourceGroup_568202(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_StreamingJobsListByResourceGroup_568201(path: JsonNode;
+proc validate_StreamingJobsListByResourceGroup_564101(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists all of the streaming jobs in the specified resource group.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   ##   subscriptionId: JString (required)
   ##                 : GUID which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568203 = path.getOrDefault("resourceGroupName")
-  valid_568203 = validateParameter(valid_568203, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564103 = path.getOrDefault("subscriptionId")
+  valid_564103 = validateParameter(valid_564103, JString, required = true,
                                  default = nil)
-  if valid_568203 != nil:
-    section.add "resourceGroupName", valid_568203
-  var valid_568204 = path.getOrDefault("subscriptionId")
-  valid_568204 = validateParameter(valid_568204, JString, required = true,
+  if valid_564103 != nil:
+    section.add "subscriptionId", valid_564103
+  var valid_564104 = path.getOrDefault("resourceGroupName")
+  valid_564104 = validateParameter(valid_564104, JString, required = true,
                                  default = nil)
-  if valid_568204 != nil:
-    section.add "subscriptionId", valid_568204
+  if valid_564104 != nil:
+    section.add "resourceGroupName", valid_564104
   result.add "path", section
   ## parameters in `query` object:
-  ##   $expand: JString
-  ##          : The $expand OData query parameter. This is a comma-separated list of additional streaming job properties to include in the response, beyond the default set returned when this parameter is absent. The default set is all streaming job properties other than 'inputs', 'transformation', 'outputs', and 'functions'.
   ##   api-version: JString (required)
   ##              : Client Api Version.
+  ##   $expand: JString
+  ##          : The $expand OData query parameter. This is a comma-separated list of additional streaming job properties to include in the response, beyond the default set returned when this parameter is absent. The default set is all streaming job properties other than 'inputs', 'transformation', 'outputs', and 'functions'.
   section = newJObject()
-  var valid_568205 = query.getOrDefault("$expand")
-  valid_568205 = validateParameter(valid_568205, JString, required = false,
-                                 default = nil)
-  if valid_568205 != nil:
-    section.add "$expand", valid_568205
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568206 = query.getOrDefault("api-version")
-  valid_568206 = validateParameter(valid_568206, JString, required = true,
+  var valid_564105 = query.getOrDefault("api-version")
+  valid_564105 = validateParameter(valid_564105, JString, required = true,
                                  default = nil)
-  if valid_568206 != nil:
-    section.add "api-version", valid_568206
+  if valid_564105 != nil:
+    section.add "api-version", valid_564105
+  var valid_564106 = query.getOrDefault("$expand")
+  valid_564106 = validateParameter(valid_564106, JString, required = false,
+                                 default = nil)
+  if valid_564106 != nil:
+    section.add "$expand", valid_564106
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -338,49 +342,49 @@ proc validate_StreamingJobsListByResourceGroup_568201(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568207: Call_StreamingJobsListByResourceGroup_568200;
+proc call*(call_564107: Call_StreamingJobsListByResourceGroup_564100;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Lists all of the streaming jobs in the specified resource group.
   ## 
-  let valid = call_568207.validator(path, query, header, formData, body)
-  let scheme = call_568207.pickScheme
+  let valid = call_564107.validator(path, query, header, formData, body)
+  let scheme = call_564107.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568207.url(scheme.get, call_568207.host, call_568207.base,
-                         call_568207.route, valid.getOrDefault("path"),
+  let url = call_564107.url(scheme.get, call_564107.host, call_564107.base,
+                         call_564107.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568207, url, valid)
+  result = hook(call_564107, url, valid)
 
-proc call*(call_568208: Call_StreamingJobsListByResourceGroup_568200;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
+proc call*(call_564108: Call_StreamingJobsListByResourceGroup_564100;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string;
           Expand: string = ""): Recallable =
   ## streamingJobsListByResourceGroup
   ## Lists all of the streaming jobs in the specified resource group.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
-  ##   Expand: string
-  ##         : The $expand OData query parameter. This is a comma-separated list of additional streaming job properties to include in the response, beyond the default set returned when this parameter is absent. The default set is all streaming job properties other than 'inputs', 'transformation', 'outputs', and 'functions'.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
+  ##   Expand: string
+  ##         : The $expand OData query parameter. This is a comma-separated list of additional streaming job properties to include in the response, beyond the default set returned when this parameter is absent. The default set is all streaming job properties other than 'inputs', 'transformation', 'outputs', and 'functions'.
   ##   subscriptionId: string (required)
   ##                 : GUID which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_568209 = newJObject()
-  var query_568210 = newJObject()
-  add(path_568209, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568210, "$expand", newJString(Expand))
-  add(query_568210, "api-version", newJString(apiVersion))
-  add(path_568209, "subscriptionId", newJString(subscriptionId))
-  result = call_568208.call(path_568209, query_568210, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
+  var path_564109 = newJObject()
+  var query_564110 = newJObject()
+  add(query_564110, "api-version", newJString(apiVersion))
+  add(query_564110, "$expand", newJString(Expand))
+  add(path_564109, "subscriptionId", newJString(subscriptionId))
+  add(path_564109, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564108.call(path_564109, query_564110, nil, nil, nil)
 
-var streamingJobsListByResourceGroup* = Call_StreamingJobsListByResourceGroup_568200(
+var streamingJobsListByResourceGroup* = Call_StreamingJobsListByResourceGroup_564100(
     name: "streamingJobsListByResourceGroup", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.StreamAnalytics/streamingjobs",
-    validator: validate_StreamingJobsListByResourceGroup_568201, base: "",
-    url: url_StreamingJobsListByResourceGroup_568202, schemes: {Scheme.Https})
+    validator: validate_StreamingJobsListByResourceGroup_564101, base: "",
+    url: url_StreamingJobsListByResourceGroup_564102, schemes: {Scheme.Https})
 type
-  Call_StreamingJobsCreateOrReplace_568223 = ref object of OpenApiRestCall_567657
-proc url_StreamingJobsCreateOrReplace_568225(protocol: Scheme; host: string;
+  Call_StreamingJobsCreateOrReplace_564123 = ref object of OpenApiRestCall_563555
+proc url_StreamingJobsCreateOrReplace_564125(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -403,37 +407,37 @@ proc url_StreamingJobsCreateOrReplace_568225(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_StreamingJobsCreateOrReplace_568224(path: JsonNode; query: JsonNode;
+proc validate_StreamingJobsCreateOrReplace_564124(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Creates a streaming job or replaces an already existing streaming job.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   ##   subscriptionId: JString (required)
   ##                 : GUID which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   ##   jobName: JString (required)
   ##          : The name of the streaming job.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568243 = path.getOrDefault("resourceGroupName")
-  valid_568243 = validateParameter(valid_568243, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564143 = path.getOrDefault("subscriptionId")
+  valid_564143 = validateParameter(valid_564143, JString, required = true,
                                  default = nil)
-  if valid_568243 != nil:
-    section.add "resourceGroupName", valid_568243
-  var valid_568244 = path.getOrDefault("subscriptionId")
-  valid_568244 = validateParameter(valid_568244, JString, required = true,
+  if valid_564143 != nil:
+    section.add "subscriptionId", valid_564143
+  var valid_564144 = path.getOrDefault("resourceGroupName")
+  valid_564144 = validateParameter(valid_564144, JString, required = true,
                                  default = nil)
-  if valid_568244 != nil:
-    section.add "subscriptionId", valid_568244
-  var valid_568245 = path.getOrDefault("jobName")
-  valid_568245 = validateParameter(valid_568245, JString, required = true,
+  if valid_564144 != nil:
+    section.add "resourceGroupName", valid_564144
+  var valid_564145 = path.getOrDefault("jobName")
+  valid_564145 = validateParameter(valid_564145, JString, required = true,
                                  default = nil)
-  if valid_568245 != nil:
-    section.add "jobName", valid_568245
+  if valid_564145 != nil:
+    section.add "jobName", valid_564145
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -441,28 +445,28 @@ proc validate_StreamingJobsCreateOrReplace_568224(path: JsonNode; query: JsonNod
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568246 = query.getOrDefault("api-version")
-  valid_568246 = validateParameter(valid_568246, JString, required = true,
+  var valid_564146 = query.getOrDefault("api-version")
+  valid_564146 = validateParameter(valid_564146, JString, required = true,
                                  default = nil)
-  if valid_568246 != nil:
-    section.add "api-version", valid_568246
+  if valid_564146 != nil:
+    section.add "api-version", valid_564146
   result.add "query", section
   ## parameters in `header` object:
-  ##   If-Match: JString
-  ##           : The ETag of the streaming job. Omit this value to always overwrite the current record set. Specify the last-seen ETag value to prevent accidentally overwriting concurrent changes.
   ##   If-None-Match: JString
   ##                : Set to '*' to allow a new streaming job to be created, but to prevent updating an existing record set. Other values will result in a 412 Pre-condition Failed response.
+  ##   If-Match: JString
+  ##           : The ETag of the streaming job. Omit this value to always overwrite the current record set. Specify the last-seen ETag value to prevent accidentally overwriting concurrent changes.
   section = newJObject()
-  var valid_568247 = header.getOrDefault("If-Match")
-  valid_568247 = validateParameter(valid_568247, JString, required = false,
+  var valid_564147 = header.getOrDefault("If-None-Match")
+  valid_564147 = validateParameter(valid_564147, JString, required = false,
                                  default = nil)
-  if valid_568247 != nil:
-    section.add "If-Match", valid_568247
-  var valid_568248 = header.getOrDefault("If-None-Match")
-  valid_568248 = validateParameter(valid_568248, JString, required = false,
+  if valid_564147 != nil:
+    section.add "If-None-Match", valid_564147
+  var valid_564148 = header.getOrDefault("If-Match")
+  valid_564148 = validateParameter(valid_564148, JString, required = false,
                                  default = nil)
-  if valid_568248 != nil:
-    section.add "If-None-Match", valid_568248
+  if valid_564148 != nil:
+    section.add "If-Match", valid_564148
   result.add "header", section
   section = newJObject()
   result.add "formData", section
@@ -474,53 +478,53 @@ proc validate_StreamingJobsCreateOrReplace_568224(path: JsonNode; query: JsonNod
   if body != nil:
     result.add "body", body
 
-proc call*(call_568250: Call_StreamingJobsCreateOrReplace_568223; path: JsonNode;
+proc call*(call_564150: Call_StreamingJobsCreateOrReplace_564123; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Creates a streaming job or replaces an already existing streaming job.
   ## 
-  let valid = call_568250.validator(path, query, header, formData, body)
-  let scheme = call_568250.pickScheme
+  let valid = call_564150.validator(path, query, header, formData, body)
+  let scheme = call_564150.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568250.url(scheme.get, call_568250.host, call_568250.base,
-                         call_568250.route, valid.getOrDefault("path"),
+  let url = call_564150.url(scheme.get, call_564150.host, call_564150.base,
+                         call_564150.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568250, url, valid)
+  result = hook(call_564150, url, valid)
 
-proc call*(call_568251: Call_StreamingJobsCreateOrReplace_568223;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          jobName: string; streamingJob: JsonNode): Recallable =
+proc call*(call_564151: Call_StreamingJobsCreateOrReplace_564123;
+          apiVersion: string; streamingJob: JsonNode; subscriptionId: string;
+          resourceGroupName: string; jobName: string): Recallable =
   ## streamingJobsCreateOrReplace
   ## Creates a streaming job or replaces an already existing streaming job.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
-  ##   subscriptionId: string (required)
-  ##                 : GUID which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   jobName: string (required)
-  ##          : The name of the streaming job.
   ##   streamingJob: JObject (required)
   ##               : The definition of the streaming job that will be used to create a new streaming job or replace the existing one.
-  var path_568252 = newJObject()
-  var query_568253 = newJObject()
-  var body_568254 = newJObject()
-  add(path_568252, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568253, "api-version", newJString(apiVersion))
-  add(path_568252, "subscriptionId", newJString(subscriptionId))
-  add(path_568252, "jobName", newJString(jobName))
+  ##   subscriptionId: string (required)
+  ##                 : GUID which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
+  ##   jobName: string (required)
+  ##          : The name of the streaming job.
+  var path_564152 = newJObject()
+  var query_564153 = newJObject()
+  var body_564154 = newJObject()
+  add(query_564153, "api-version", newJString(apiVersion))
   if streamingJob != nil:
-    body_568254 = streamingJob
-  result = call_568251.call(path_568252, query_568253, nil, nil, body_568254)
+    body_564154 = streamingJob
+  add(path_564152, "subscriptionId", newJString(subscriptionId))
+  add(path_564152, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564152, "jobName", newJString(jobName))
+  result = call_564151.call(path_564152, query_564153, nil, nil, body_564154)
 
-var streamingJobsCreateOrReplace* = Call_StreamingJobsCreateOrReplace_568223(
+var streamingJobsCreateOrReplace* = Call_StreamingJobsCreateOrReplace_564123(
     name: "streamingJobsCreateOrReplace", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.StreamAnalytics/streamingjobs/{jobName}",
-    validator: validate_StreamingJobsCreateOrReplace_568224, base: "",
-    url: url_StreamingJobsCreateOrReplace_568225, schemes: {Scheme.Https})
+    validator: validate_StreamingJobsCreateOrReplace_564124, base: "",
+    url: url_StreamingJobsCreateOrReplace_564125, schemes: {Scheme.Https})
 type
-  Call_StreamingJobsGet_568211 = ref object of OpenApiRestCall_567657
-proc url_StreamingJobsGet_568213(protocol: Scheme; host: string; base: string;
+  Call_StreamingJobsGet_564111 = ref object of OpenApiRestCall_563555
+proc url_StreamingJobsGet_564113(protocol: Scheme; host: string; base: string;
                                 route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -543,7 +547,7 @@ proc url_StreamingJobsGet_568213(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_StreamingJobsGet_568212(path: JsonNode; query: JsonNode;
+proc validate_StreamingJobsGet_564112(path: JsonNode; query: JsonNode;
                                      header: JsonNode; formData: JsonNode;
                                      body: JsonNode): JsonNode =
   ## Gets details about the specified streaming job.
@@ -551,49 +555,49 @@ proc validate_StreamingJobsGet_568212(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   ##   subscriptionId: JString (required)
   ##                 : GUID which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   ##   jobName: JString (required)
   ##          : The name of the streaming job.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568214 = path.getOrDefault("resourceGroupName")
-  valid_568214 = validateParameter(valid_568214, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564114 = path.getOrDefault("subscriptionId")
+  valid_564114 = validateParameter(valid_564114, JString, required = true,
                                  default = nil)
-  if valid_568214 != nil:
-    section.add "resourceGroupName", valid_568214
-  var valid_568215 = path.getOrDefault("subscriptionId")
-  valid_568215 = validateParameter(valid_568215, JString, required = true,
+  if valid_564114 != nil:
+    section.add "subscriptionId", valid_564114
+  var valid_564115 = path.getOrDefault("resourceGroupName")
+  valid_564115 = validateParameter(valid_564115, JString, required = true,
                                  default = nil)
-  if valid_568215 != nil:
-    section.add "subscriptionId", valid_568215
-  var valid_568216 = path.getOrDefault("jobName")
-  valid_568216 = validateParameter(valid_568216, JString, required = true,
+  if valid_564115 != nil:
+    section.add "resourceGroupName", valid_564115
+  var valid_564116 = path.getOrDefault("jobName")
+  valid_564116 = validateParameter(valid_564116, JString, required = true,
                                  default = nil)
-  if valid_568216 != nil:
-    section.add "jobName", valid_568216
+  if valid_564116 != nil:
+    section.add "jobName", valid_564116
   result.add "path", section
   ## parameters in `query` object:
-  ##   $expand: JString
-  ##          : The $expand OData query parameter. This is a comma-separated list of additional streaming job properties to include in the response, beyond the default set returned when this parameter is absent. The default set is all streaming job properties other than 'inputs', 'transformation', 'outputs', and 'functions'.
   ##   api-version: JString (required)
   ##              : Client Api Version.
+  ##   $expand: JString
+  ##          : The $expand OData query parameter. This is a comma-separated list of additional streaming job properties to include in the response, beyond the default set returned when this parameter is absent. The default set is all streaming job properties other than 'inputs', 'transformation', 'outputs', and 'functions'.
   section = newJObject()
-  var valid_568217 = query.getOrDefault("$expand")
-  valid_568217 = validateParameter(valid_568217, JString, required = false,
-                                 default = nil)
-  if valid_568217 != nil:
-    section.add "$expand", valid_568217
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568218 = query.getOrDefault("api-version")
-  valid_568218 = validateParameter(valid_568218, JString, required = true,
+  var valid_564117 = query.getOrDefault("api-version")
+  valid_564117 = validateParameter(valid_564117, JString, required = true,
                                  default = nil)
-  if valid_568218 != nil:
-    section.add "api-version", valid_568218
+  if valid_564117 != nil:
+    section.add "api-version", valid_564117
+  var valid_564118 = query.getOrDefault("$expand")
+  valid_564118 = validateParameter(valid_564118, JString, required = false,
+                                 default = nil)
+  if valid_564118 != nil:
+    section.add "$expand", valid_564118
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -602,50 +606,50 @@ proc validate_StreamingJobsGet_568212(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568219: Call_StreamingJobsGet_568211; path: JsonNode;
+proc call*(call_564119: Call_StreamingJobsGet_564111; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets details about the specified streaming job.
   ## 
-  let valid = call_568219.validator(path, query, header, formData, body)
-  let scheme = call_568219.pickScheme
+  let valid = call_564119.validator(path, query, header, formData, body)
+  let scheme = call_564119.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568219.url(scheme.get, call_568219.host, call_568219.base,
-                         call_568219.route, valid.getOrDefault("path"),
+  let url = call_564119.url(scheme.get, call_564119.host, call_564119.base,
+                         call_564119.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568219, url, valid)
+  result = hook(call_564119, url, valid)
 
-proc call*(call_568220: Call_StreamingJobsGet_568211; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; jobName: string;
+proc call*(call_564120: Call_StreamingJobsGet_564111; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string; jobName: string;
           Expand: string = ""): Recallable =
   ## streamingJobsGet
   ## Gets details about the specified streaming job.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
-  ##   Expand: string
-  ##         : The $expand OData query parameter. This is a comma-separated list of additional streaming job properties to include in the response, beyond the default set returned when this parameter is absent. The default set is all streaming job properties other than 'inputs', 'transformation', 'outputs', and 'functions'.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
+  ##   Expand: string
+  ##         : The $expand OData query parameter. This is a comma-separated list of additional streaming job properties to include in the response, beyond the default set returned when this parameter is absent. The default set is all streaming job properties other than 'inputs', 'transformation', 'outputs', and 'functions'.
   ##   subscriptionId: string (required)
   ##                 : GUID which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   ##   jobName: string (required)
   ##          : The name of the streaming job.
-  var path_568221 = newJObject()
-  var query_568222 = newJObject()
-  add(path_568221, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568222, "$expand", newJString(Expand))
-  add(query_568222, "api-version", newJString(apiVersion))
-  add(path_568221, "subscriptionId", newJString(subscriptionId))
-  add(path_568221, "jobName", newJString(jobName))
-  result = call_568220.call(path_568221, query_568222, nil, nil, nil)
+  var path_564121 = newJObject()
+  var query_564122 = newJObject()
+  add(query_564122, "api-version", newJString(apiVersion))
+  add(query_564122, "$expand", newJString(Expand))
+  add(path_564121, "subscriptionId", newJString(subscriptionId))
+  add(path_564121, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564121, "jobName", newJString(jobName))
+  result = call_564120.call(path_564121, query_564122, nil, nil, nil)
 
-var streamingJobsGet* = Call_StreamingJobsGet_568211(name: "streamingJobsGet",
+var streamingJobsGet* = Call_StreamingJobsGet_564111(name: "streamingJobsGet",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.StreamAnalytics/streamingjobs/{jobName}",
-    validator: validate_StreamingJobsGet_568212, base: "",
-    url: url_StreamingJobsGet_568213, schemes: {Scheme.Https})
+    validator: validate_StreamingJobsGet_564112, base: "",
+    url: url_StreamingJobsGet_564113, schemes: {Scheme.Https})
 type
-  Call_StreamingJobsUpdate_568266 = ref object of OpenApiRestCall_567657
-proc url_StreamingJobsUpdate_568268(protocol: Scheme; host: string; base: string;
+  Call_StreamingJobsUpdate_564166 = ref object of OpenApiRestCall_563555
+proc url_StreamingJobsUpdate_564168(protocol: Scheme; host: string; base: string;
                                    route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -668,7 +672,7 @@ proc url_StreamingJobsUpdate_568268(protocol: Scheme; host: string; base: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_StreamingJobsUpdate_568267(path: JsonNode; query: JsonNode;
+proc validate_StreamingJobsUpdate_564167(path: JsonNode; query: JsonNode;
                                         header: JsonNode; formData: JsonNode;
                                         body: JsonNode): JsonNode =
   ## Updates an existing streaming job. This can be used to partially update (ie. update one or two properties) a streaming job without affecting the rest the job definition.
@@ -676,30 +680,30 @@ proc validate_StreamingJobsUpdate_568267(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   ##   subscriptionId: JString (required)
   ##                 : GUID which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   ##   jobName: JString (required)
   ##          : The name of the streaming job.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568269 = path.getOrDefault("resourceGroupName")
-  valid_568269 = validateParameter(valid_568269, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564169 = path.getOrDefault("subscriptionId")
+  valid_564169 = validateParameter(valid_564169, JString, required = true,
                                  default = nil)
-  if valid_568269 != nil:
-    section.add "resourceGroupName", valid_568269
-  var valid_568270 = path.getOrDefault("subscriptionId")
-  valid_568270 = validateParameter(valid_568270, JString, required = true,
+  if valid_564169 != nil:
+    section.add "subscriptionId", valid_564169
+  var valid_564170 = path.getOrDefault("resourceGroupName")
+  valid_564170 = validateParameter(valid_564170, JString, required = true,
                                  default = nil)
-  if valid_568270 != nil:
-    section.add "subscriptionId", valid_568270
-  var valid_568271 = path.getOrDefault("jobName")
-  valid_568271 = validateParameter(valid_568271, JString, required = true,
+  if valid_564170 != nil:
+    section.add "resourceGroupName", valid_564170
+  var valid_564171 = path.getOrDefault("jobName")
+  valid_564171 = validateParameter(valid_564171, JString, required = true,
                                  default = nil)
-  if valid_568271 != nil:
-    section.add "jobName", valid_568271
+  if valid_564171 != nil:
+    section.add "jobName", valid_564171
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -707,21 +711,21 @@ proc validate_StreamingJobsUpdate_568267(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568272 = query.getOrDefault("api-version")
-  valid_568272 = validateParameter(valid_568272, JString, required = true,
+  var valid_564172 = query.getOrDefault("api-version")
+  valid_564172 = validateParameter(valid_564172, JString, required = true,
                                  default = nil)
-  if valid_568272 != nil:
-    section.add "api-version", valid_568272
+  if valid_564172 != nil:
+    section.add "api-version", valid_564172
   result.add "query", section
   ## parameters in `header` object:
   ##   If-Match: JString
   ##           : The ETag of the streaming job. Omit this value to always overwrite the current record set. Specify the last-seen ETag value to prevent accidentally overwriting concurrent changes.
   section = newJObject()
-  var valid_568273 = header.getOrDefault("If-Match")
-  valid_568273 = validateParameter(valid_568273, JString, required = false,
+  var valid_564173 = header.getOrDefault("If-Match")
+  valid_564173 = validateParameter(valid_564173, JString, required = false,
                                  default = nil)
-  if valid_568273 != nil:
-    section.add "If-Match", valid_568273
+  if valid_564173 != nil:
+    section.add "If-Match", valid_564173
   result.add "header", section
   section = newJObject()
   result.add "formData", section
@@ -733,53 +737,53 @@ proc validate_StreamingJobsUpdate_568267(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568275: Call_StreamingJobsUpdate_568266; path: JsonNode;
+proc call*(call_564175: Call_StreamingJobsUpdate_564166; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Updates an existing streaming job. This can be used to partially update (ie. update one or two properties) a streaming job without affecting the rest the job definition.
   ## 
-  let valid = call_568275.validator(path, query, header, formData, body)
-  let scheme = call_568275.pickScheme
+  let valid = call_564175.validator(path, query, header, formData, body)
+  let scheme = call_564175.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568275.url(scheme.get, call_568275.host, call_568275.base,
-                         call_568275.route, valid.getOrDefault("path"),
+  let url = call_564175.url(scheme.get, call_564175.host, call_564175.base,
+                         call_564175.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568275, url, valid)
+  result = hook(call_564175, url, valid)
 
-proc call*(call_568276: Call_StreamingJobsUpdate_568266; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; jobName: string;
-          streamingJob: JsonNode): Recallable =
+proc call*(call_564176: Call_StreamingJobsUpdate_564166; apiVersion: string;
+          streamingJob: JsonNode; subscriptionId: string; resourceGroupName: string;
+          jobName: string): Recallable =
   ## streamingJobsUpdate
   ## Updates an existing streaming job. This can be used to partially update (ie. update one or two properties) a streaming job without affecting the rest the job definition.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
-  ##   subscriptionId: string (required)
-  ##                 : GUID which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   jobName: string (required)
-  ##          : The name of the streaming job.
   ##   streamingJob: JObject (required)
   ##               : A streaming job object. The properties specified here will overwrite the corresponding properties in the existing streaming job (ie. Those properties will be updated). Any properties that are set to null here will mean that the corresponding property in the existing input will remain the same and not change as a result of this PATCH operation.
-  var path_568277 = newJObject()
-  var query_568278 = newJObject()
-  var body_568279 = newJObject()
-  add(path_568277, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568278, "api-version", newJString(apiVersion))
-  add(path_568277, "subscriptionId", newJString(subscriptionId))
-  add(path_568277, "jobName", newJString(jobName))
+  ##   subscriptionId: string (required)
+  ##                 : GUID which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
+  ##   jobName: string (required)
+  ##          : The name of the streaming job.
+  var path_564177 = newJObject()
+  var query_564178 = newJObject()
+  var body_564179 = newJObject()
+  add(query_564178, "api-version", newJString(apiVersion))
   if streamingJob != nil:
-    body_568279 = streamingJob
-  result = call_568276.call(path_568277, query_568278, nil, nil, body_568279)
+    body_564179 = streamingJob
+  add(path_564177, "subscriptionId", newJString(subscriptionId))
+  add(path_564177, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564177, "jobName", newJString(jobName))
+  result = call_564176.call(path_564177, query_564178, nil, nil, body_564179)
 
-var streamingJobsUpdate* = Call_StreamingJobsUpdate_568266(
+var streamingJobsUpdate* = Call_StreamingJobsUpdate_564166(
     name: "streamingJobsUpdate", meth: HttpMethod.HttpPatch,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.StreamAnalytics/streamingjobs/{jobName}",
-    validator: validate_StreamingJobsUpdate_568267, base: "",
-    url: url_StreamingJobsUpdate_568268, schemes: {Scheme.Https})
+    validator: validate_StreamingJobsUpdate_564167, base: "",
+    url: url_StreamingJobsUpdate_564168, schemes: {Scheme.Https})
 type
-  Call_StreamingJobsDelete_568255 = ref object of OpenApiRestCall_567657
-proc url_StreamingJobsDelete_568257(protocol: Scheme; host: string; base: string;
+  Call_StreamingJobsDelete_564155 = ref object of OpenApiRestCall_563555
+proc url_StreamingJobsDelete_564157(protocol: Scheme; host: string; base: string;
                                    route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -802,7 +806,7 @@ proc url_StreamingJobsDelete_568257(protocol: Scheme; host: string; base: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_StreamingJobsDelete_568256(path: JsonNode; query: JsonNode;
+proc validate_StreamingJobsDelete_564156(path: JsonNode; query: JsonNode;
                                         header: JsonNode; formData: JsonNode;
                                         body: JsonNode): JsonNode =
   ## Deletes a streaming job.
@@ -810,30 +814,30 @@ proc validate_StreamingJobsDelete_568256(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   ##   subscriptionId: JString (required)
   ##                 : GUID which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   ##   jobName: JString (required)
   ##          : The name of the streaming job.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568258 = path.getOrDefault("resourceGroupName")
-  valid_568258 = validateParameter(valid_568258, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564158 = path.getOrDefault("subscriptionId")
+  valid_564158 = validateParameter(valid_564158, JString, required = true,
                                  default = nil)
-  if valid_568258 != nil:
-    section.add "resourceGroupName", valid_568258
-  var valid_568259 = path.getOrDefault("subscriptionId")
-  valid_568259 = validateParameter(valid_568259, JString, required = true,
+  if valid_564158 != nil:
+    section.add "subscriptionId", valid_564158
+  var valid_564159 = path.getOrDefault("resourceGroupName")
+  valid_564159 = validateParameter(valid_564159, JString, required = true,
                                  default = nil)
-  if valid_568259 != nil:
-    section.add "subscriptionId", valid_568259
-  var valid_568260 = path.getOrDefault("jobName")
-  valid_568260 = validateParameter(valid_568260, JString, required = true,
+  if valid_564159 != nil:
+    section.add "resourceGroupName", valid_564159
+  var valid_564160 = path.getOrDefault("jobName")
+  valid_564160 = validateParameter(valid_564160, JString, required = true,
                                  default = nil)
-  if valid_568260 != nil:
-    section.add "jobName", valid_568260
+  if valid_564160 != nil:
+    section.add "jobName", valid_564160
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -841,11 +845,11 @@ proc validate_StreamingJobsDelete_568256(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568261 = query.getOrDefault("api-version")
-  valid_568261 = validateParameter(valid_568261, JString, required = true,
+  var valid_564161 = query.getOrDefault("api-version")
+  valid_564161 = validateParameter(valid_564161, JString, required = true,
                                  default = nil)
-  if valid_568261 != nil:
-    section.add "api-version", valid_568261
+  if valid_564161 != nil:
+    section.add "api-version", valid_564161
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -854,47 +858,47 @@ proc validate_StreamingJobsDelete_568256(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568262: Call_StreamingJobsDelete_568255; path: JsonNode;
+proc call*(call_564162: Call_StreamingJobsDelete_564155; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes a streaming job.
   ## 
-  let valid = call_568262.validator(path, query, header, formData, body)
-  let scheme = call_568262.pickScheme
+  let valid = call_564162.validator(path, query, header, formData, body)
+  let scheme = call_564162.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568262.url(scheme.get, call_568262.host, call_568262.base,
-                         call_568262.route, valid.getOrDefault("path"),
+  let url = call_564162.url(scheme.get, call_564162.host, call_564162.base,
+                         call_564162.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568262, url, valid)
+  result = hook(call_564162, url, valid)
 
-proc call*(call_568263: Call_StreamingJobsDelete_568255; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; jobName: string): Recallable =
+proc call*(call_564163: Call_StreamingJobsDelete_564155; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string; jobName: string): Recallable =
   ## streamingJobsDelete
   ## Deletes a streaming job.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
   ##   subscriptionId: string (required)
   ##                 : GUID which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   ##   jobName: string (required)
   ##          : The name of the streaming job.
-  var path_568264 = newJObject()
-  var query_568265 = newJObject()
-  add(path_568264, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568265, "api-version", newJString(apiVersion))
-  add(path_568264, "subscriptionId", newJString(subscriptionId))
-  add(path_568264, "jobName", newJString(jobName))
-  result = call_568263.call(path_568264, query_568265, nil, nil, nil)
+  var path_564164 = newJObject()
+  var query_564165 = newJObject()
+  add(query_564165, "api-version", newJString(apiVersion))
+  add(path_564164, "subscriptionId", newJString(subscriptionId))
+  add(path_564164, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564164, "jobName", newJString(jobName))
+  result = call_564163.call(path_564164, query_564165, nil, nil, nil)
 
-var streamingJobsDelete* = Call_StreamingJobsDelete_568255(
+var streamingJobsDelete* = Call_StreamingJobsDelete_564155(
     name: "streamingJobsDelete", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.StreamAnalytics/streamingjobs/{jobName}",
-    validator: validate_StreamingJobsDelete_568256, base: "",
-    url: url_StreamingJobsDelete_568257, schemes: {Scheme.Https})
+    validator: validate_StreamingJobsDelete_564156, base: "",
+    url: url_StreamingJobsDelete_564157, schemes: {Scheme.Https})
 type
-  Call_StreamingJobsStart_568280 = ref object of OpenApiRestCall_567657
-proc url_StreamingJobsStart_568282(protocol: Scheme; host: string; base: string;
+  Call_StreamingJobsStart_564180 = ref object of OpenApiRestCall_563555
+proc url_StreamingJobsStart_564182(protocol: Scheme; host: string; base: string;
                                   route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -918,7 +922,7 @@ proc url_StreamingJobsStart_568282(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_StreamingJobsStart_568281(path: JsonNode; query: JsonNode;
+proc validate_StreamingJobsStart_564181(path: JsonNode; query: JsonNode;
                                        header: JsonNode; formData: JsonNode;
                                        body: JsonNode): JsonNode =
   ## Starts a streaming job. Once a job is started it will start processing input events and produce output.
@@ -926,30 +930,30 @@ proc validate_StreamingJobsStart_568281(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   ##   subscriptionId: JString (required)
   ##                 : GUID which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   ##   jobName: JString (required)
   ##          : The name of the streaming job.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568283 = path.getOrDefault("resourceGroupName")
-  valid_568283 = validateParameter(valid_568283, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564183 = path.getOrDefault("subscriptionId")
+  valid_564183 = validateParameter(valid_564183, JString, required = true,
                                  default = nil)
-  if valid_568283 != nil:
-    section.add "resourceGroupName", valid_568283
-  var valid_568284 = path.getOrDefault("subscriptionId")
-  valid_568284 = validateParameter(valid_568284, JString, required = true,
+  if valid_564183 != nil:
+    section.add "subscriptionId", valid_564183
+  var valid_564184 = path.getOrDefault("resourceGroupName")
+  valid_564184 = validateParameter(valid_564184, JString, required = true,
                                  default = nil)
-  if valid_568284 != nil:
-    section.add "subscriptionId", valid_568284
-  var valid_568285 = path.getOrDefault("jobName")
-  valid_568285 = validateParameter(valid_568285, JString, required = true,
+  if valid_564184 != nil:
+    section.add "resourceGroupName", valid_564184
+  var valid_564185 = path.getOrDefault("jobName")
+  valid_564185 = validateParameter(valid_564185, JString, required = true,
                                  default = nil)
-  if valid_568285 != nil:
-    section.add "jobName", valid_568285
+  if valid_564185 != nil:
+    section.add "jobName", valid_564185
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -957,11 +961,11 @@ proc validate_StreamingJobsStart_568281(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568286 = query.getOrDefault("api-version")
-  valid_568286 = validateParameter(valid_568286, JString, required = true,
+  var valid_564186 = query.getOrDefault("api-version")
+  valid_564186 = validateParameter(valid_564186, JString, required = true,
                                  default = nil)
-  if valid_568286 != nil:
-    section.add "api-version", valid_568286
+  if valid_564186 != nil:
+    section.add "api-version", valid_564186
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -974,53 +978,53 @@ proc validate_StreamingJobsStart_568281(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568288: Call_StreamingJobsStart_568280; path: JsonNode;
+proc call*(call_564188: Call_StreamingJobsStart_564180; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Starts a streaming job. Once a job is started it will start processing input events and produce output.
   ## 
-  let valid = call_568288.validator(path, query, header, formData, body)
-  let scheme = call_568288.pickScheme
+  let valid = call_564188.validator(path, query, header, formData, body)
+  let scheme = call_564188.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568288.url(scheme.get, call_568288.host, call_568288.base,
-                         call_568288.route, valid.getOrDefault("path"),
+  let url = call_564188.url(scheme.get, call_564188.host, call_564188.base,
+                         call_564188.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568288, url, valid)
+  result = hook(call_564188, url, valid)
 
-proc call*(call_568289: Call_StreamingJobsStart_568280; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; jobName: string;
+proc call*(call_564189: Call_StreamingJobsStart_564180; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string; jobName: string;
           startJobParameters: JsonNode = nil): Recallable =
   ## streamingJobsStart
   ## Starts a streaming job. Once a job is started it will start processing input events and produce output.
   ##   startJobParameters: JObject
   ##                     : Parameters applicable to a start streaming job operation.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
   ##   subscriptionId: string (required)
   ##                 : GUID which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   ##   jobName: string (required)
   ##          : The name of the streaming job.
-  var path_568290 = newJObject()
-  var query_568291 = newJObject()
-  var body_568292 = newJObject()
+  var path_564190 = newJObject()
+  var query_564191 = newJObject()
+  var body_564192 = newJObject()
   if startJobParameters != nil:
-    body_568292 = startJobParameters
-  add(path_568290, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568291, "api-version", newJString(apiVersion))
-  add(path_568290, "subscriptionId", newJString(subscriptionId))
-  add(path_568290, "jobName", newJString(jobName))
-  result = call_568289.call(path_568290, query_568291, nil, nil, body_568292)
+    body_564192 = startJobParameters
+  add(query_564191, "api-version", newJString(apiVersion))
+  add(path_564190, "subscriptionId", newJString(subscriptionId))
+  add(path_564190, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564190, "jobName", newJString(jobName))
+  result = call_564189.call(path_564190, query_564191, nil, nil, body_564192)
 
-var streamingJobsStart* = Call_StreamingJobsStart_568280(
+var streamingJobsStart* = Call_StreamingJobsStart_564180(
     name: "streamingJobsStart", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.StreamAnalytics/streamingjobs/{jobName}/start",
-    validator: validate_StreamingJobsStart_568281, base: "",
-    url: url_StreamingJobsStart_568282, schemes: {Scheme.Https})
+    validator: validate_StreamingJobsStart_564181, base: "",
+    url: url_StreamingJobsStart_564182, schemes: {Scheme.Https})
 type
-  Call_StreamingJobsStop_568293 = ref object of OpenApiRestCall_567657
-proc url_StreamingJobsStop_568295(protocol: Scheme; host: string; base: string;
+  Call_StreamingJobsStop_564193 = ref object of OpenApiRestCall_563555
+proc url_StreamingJobsStop_564195(protocol: Scheme; host: string; base: string;
                                  route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1044,7 +1048,7 @@ proc url_StreamingJobsStop_568295(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_StreamingJobsStop_568294(path: JsonNode; query: JsonNode;
+proc validate_StreamingJobsStop_564194(path: JsonNode; query: JsonNode;
                                       header: JsonNode; formData: JsonNode;
                                       body: JsonNode): JsonNode =
   ## Stops a running streaming job. This will cause a running streaming job to stop processing input events and producing output.
@@ -1052,30 +1056,30 @@ proc validate_StreamingJobsStop_568294(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   ##   subscriptionId: JString (required)
   ##                 : GUID which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   ##   jobName: JString (required)
   ##          : The name of the streaming job.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568296 = path.getOrDefault("resourceGroupName")
-  valid_568296 = validateParameter(valid_568296, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564196 = path.getOrDefault("subscriptionId")
+  valid_564196 = validateParameter(valid_564196, JString, required = true,
                                  default = nil)
-  if valid_568296 != nil:
-    section.add "resourceGroupName", valid_568296
-  var valid_568297 = path.getOrDefault("subscriptionId")
-  valid_568297 = validateParameter(valid_568297, JString, required = true,
+  if valid_564196 != nil:
+    section.add "subscriptionId", valid_564196
+  var valid_564197 = path.getOrDefault("resourceGroupName")
+  valid_564197 = validateParameter(valid_564197, JString, required = true,
                                  default = nil)
-  if valid_568297 != nil:
-    section.add "subscriptionId", valid_568297
-  var valid_568298 = path.getOrDefault("jobName")
-  valid_568298 = validateParameter(valid_568298, JString, required = true,
+  if valid_564197 != nil:
+    section.add "resourceGroupName", valid_564197
+  var valid_564198 = path.getOrDefault("jobName")
+  valid_564198 = validateParameter(valid_564198, JString, required = true,
                                  default = nil)
-  if valid_568298 != nil:
-    section.add "jobName", valid_568298
+  if valid_564198 != nil:
+    section.add "jobName", valid_564198
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1083,11 +1087,11 @@ proc validate_StreamingJobsStop_568294(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568299 = query.getOrDefault("api-version")
-  valid_568299 = validateParameter(valid_568299, JString, required = true,
+  var valid_564199 = query.getOrDefault("api-version")
+  valid_564199 = validateParameter(valid_564199, JString, required = true,
                                  default = nil)
-  if valid_568299 != nil:
-    section.add "api-version", valid_568299
+  if valid_564199 != nil:
+    section.add "api-version", valid_564199
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1096,43 +1100,43 @@ proc validate_StreamingJobsStop_568294(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568300: Call_StreamingJobsStop_568293; path: JsonNode;
+proc call*(call_564200: Call_StreamingJobsStop_564193; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Stops a running streaming job. This will cause a running streaming job to stop processing input events and producing output.
   ## 
-  let valid = call_568300.validator(path, query, header, formData, body)
-  let scheme = call_568300.pickScheme
+  let valid = call_564200.validator(path, query, header, formData, body)
+  let scheme = call_564200.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568300.url(scheme.get, call_568300.host, call_568300.base,
-                         call_568300.route, valid.getOrDefault("path"),
+  let url = call_564200.url(scheme.get, call_564200.host, call_564200.base,
+                         call_564200.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568300, url, valid)
+  result = hook(call_564200, url, valid)
 
-proc call*(call_568301: Call_StreamingJobsStop_568293; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; jobName: string): Recallable =
+proc call*(call_564201: Call_StreamingJobsStop_564193; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string; jobName: string): Recallable =
   ## streamingJobsStop
   ## Stops a running streaming job. This will cause a running streaming job to stop processing input events and producing output.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
   ##   subscriptionId: string (required)
   ##                 : GUID which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   ##   jobName: string (required)
   ##          : The name of the streaming job.
-  var path_568302 = newJObject()
-  var query_568303 = newJObject()
-  add(path_568302, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568303, "api-version", newJString(apiVersion))
-  add(path_568302, "subscriptionId", newJString(subscriptionId))
-  add(path_568302, "jobName", newJString(jobName))
-  result = call_568301.call(path_568302, query_568303, nil, nil, nil)
+  var path_564202 = newJObject()
+  var query_564203 = newJObject()
+  add(query_564203, "api-version", newJString(apiVersion))
+  add(path_564202, "subscriptionId", newJString(subscriptionId))
+  add(path_564202, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564202, "jobName", newJString(jobName))
+  result = call_564201.call(path_564202, query_564203, nil, nil, nil)
 
-var streamingJobsStop* = Call_StreamingJobsStop_568293(name: "streamingJobsStop",
+var streamingJobsStop* = Call_StreamingJobsStop_564193(name: "streamingJobsStop",
     meth: HttpMethod.HttpPost, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.StreamAnalytics/streamingjobs/{jobName}/stop",
-    validator: validate_StreamingJobsStop_568294, base: "",
-    url: url_StreamingJobsStop_568295, schemes: {Scheme.Https})
+    validator: validate_StreamingJobsStop_564194, base: "",
+    url: url_StreamingJobsStop_564195, schemes: {Scheme.Https})
 export
   rest
 

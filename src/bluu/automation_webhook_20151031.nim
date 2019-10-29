@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, httpcore
 
 ## auto-generated via openapi macro
 ## title: AutomationManagementClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_582458 = ref object of OpenApiRestCall
+  OpenApiRestCall_563556 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_582458](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563556](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_582458): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563556): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,8 +107,8 @@ const
   macServiceName = "automation-webhook"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_WebhookListByAutomationAccount_582680 = ref object of OpenApiRestCall_582458
-proc url_WebhookListByAutomationAccount_582682(protocol: Scheme; host: string;
+  Call_WebhookListByAutomationAccount_563778 = ref object of OpenApiRestCall_563556
+proc url_WebhookListByAutomationAccount_563780(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -129,7 +133,7 @@ proc url_WebhookListByAutomationAccount_582682(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_WebhookListByAutomationAccount_582681(path: JsonNode;
+proc validate_WebhookListByAutomationAccount_563779(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Retrieve a list of webhooks.
   ## 
@@ -139,27 +143,27 @@ proc validate_WebhookListByAutomationAccount_582681(path: JsonNode;
   ## parameters in `path` object:
   ##   automationAccountName: JString (required)
   ##                        : The name of the automation account.
-  ##   resourceGroupName: JString (required)
-  ##                    : Name of an Azure Resource group.
   ##   subscriptionId: JString (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : Name of an Azure Resource group.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `automationAccountName` field"
-  var valid_582843 = path.getOrDefault("automationAccountName")
-  valid_582843 = validateParameter(valid_582843, JString, required = true,
+  var valid_563943 = path.getOrDefault("automationAccountName")
+  valid_563943 = validateParameter(valid_563943, JString, required = true,
                                  default = nil)
-  if valid_582843 != nil:
-    section.add "automationAccountName", valid_582843
-  var valid_582844 = path.getOrDefault("resourceGroupName")
-  valid_582844 = validateParameter(valid_582844, JString, required = true,
+  if valid_563943 != nil:
+    section.add "automationAccountName", valid_563943
+  var valid_563944 = path.getOrDefault("subscriptionId")
+  valid_563944 = validateParameter(valid_563944, JString, required = true,
                                  default = nil)
-  if valid_582844 != nil:
-    section.add "resourceGroupName", valid_582844
-  var valid_582845 = path.getOrDefault("subscriptionId")
-  valid_582845 = validateParameter(valid_582845, JString, required = true,
+  if valid_563944 != nil:
+    section.add "subscriptionId", valid_563944
+  var valid_563945 = path.getOrDefault("resourceGroupName")
+  valid_563945 = validateParameter(valid_563945, JString, required = true,
                                  default = nil)
-  if valid_582845 != nil:
-    section.add "subscriptionId", valid_582845
+  if valid_563945 != nil:
+    section.add "resourceGroupName", valid_563945
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -169,16 +173,16 @@ proc validate_WebhookListByAutomationAccount_582681(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_582846 = query.getOrDefault("api-version")
-  valid_582846 = validateParameter(valid_582846, JString, required = true,
+  var valid_563946 = query.getOrDefault("api-version")
+  valid_563946 = validateParameter(valid_563946, JString, required = true,
                                  default = nil)
-  if valid_582846 != nil:
-    section.add "api-version", valid_582846
-  var valid_582847 = query.getOrDefault("$filter")
-  valid_582847 = validateParameter(valid_582847, JString, required = false,
+  if valid_563946 != nil:
+    section.add "api-version", valid_563946
+  var valid_563947 = query.getOrDefault("$filter")
+  valid_563947 = validateParameter(valid_563947, JString, required = false,
                                  default = nil)
-  if valid_582847 != nil:
-    section.add "$filter", valid_582847
+  if valid_563947 != nil:
+    section.add "$filter", valid_563947
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -187,53 +191,53 @@ proc validate_WebhookListByAutomationAccount_582681(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_582874: Call_WebhookListByAutomationAccount_582680; path: JsonNode;
+proc call*(call_563974: Call_WebhookListByAutomationAccount_563778; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Retrieve a list of webhooks.
   ## 
   ## http://aka.ms/azureautomationsdk/webhookoperations
-  let valid = call_582874.validator(path, query, header, formData, body)
-  let scheme = call_582874.pickScheme
+  let valid = call_563974.validator(path, query, header, formData, body)
+  let scheme = call_563974.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_582874.url(scheme.get, call_582874.host, call_582874.base,
-                         call_582874.route, valid.getOrDefault("path"),
+  let url = call_563974.url(scheme.get, call_563974.host, call_563974.base,
+                         call_563974.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_582874, url, valid)
+  result = hook(call_563974, url, valid)
 
-proc call*(call_582945: Call_WebhookListByAutomationAccount_582680;
-          automationAccountName: string; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; Filter: string = ""): Recallable =
+proc call*(call_564045: Call_WebhookListByAutomationAccount_563778;
+          apiVersion: string; automationAccountName: string; subscriptionId: string;
+          resourceGroupName: string; Filter: string = ""): Recallable =
   ## webhookListByAutomationAccount
   ## Retrieve a list of webhooks.
   ## http://aka.ms/azureautomationsdk/webhookoperations
-  ##   automationAccountName: string (required)
-  ##                        : The name of the automation account.
-  ##   resourceGroupName: string (required)
-  ##                    : Name of an Azure Resource group.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
+  ##   automationAccountName: string (required)
+  ##                        : The name of the automation account.
   ##   subscriptionId: string (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : Name of an Azure Resource group.
   ##   Filter: string
   ##         : The filter to apply on the operation.
-  var path_582946 = newJObject()
-  var query_582948 = newJObject()
-  add(path_582946, "automationAccountName", newJString(automationAccountName))
-  add(path_582946, "resourceGroupName", newJString(resourceGroupName))
-  add(query_582948, "api-version", newJString(apiVersion))
-  add(path_582946, "subscriptionId", newJString(subscriptionId))
-  add(query_582948, "$filter", newJString(Filter))
-  result = call_582945.call(path_582946, query_582948, nil, nil, nil)
+  var path_564046 = newJObject()
+  var query_564048 = newJObject()
+  add(query_564048, "api-version", newJString(apiVersion))
+  add(path_564046, "automationAccountName", newJString(automationAccountName))
+  add(path_564046, "subscriptionId", newJString(subscriptionId))
+  add(path_564046, "resourceGroupName", newJString(resourceGroupName))
+  add(query_564048, "$filter", newJString(Filter))
+  result = call_564045.call(path_564046, query_564048, nil, nil, nil)
 
-var webhookListByAutomationAccount* = Call_WebhookListByAutomationAccount_582680(
+var webhookListByAutomationAccount* = Call_WebhookListByAutomationAccount_563778(
     name: "webhookListByAutomationAccount", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Automation/automationAccounts/{automationAccountName}/webhooks",
-    validator: validate_WebhookListByAutomationAccount_582681, base: "",
-    url: url_WebhookListByAutomationAccount_582682, schemes: {Scheme.Https})
+    validator: validate_WebhookListByAutomationAccount_563779, base: "",
+    url: url_WebhookListByAutomationAccount_563780, schemes: {Scheme.Https})
 type
-  Call_WebhookGenerateUri_582987 = ref object of OpenApiRestCall_582458
-proc url_WebhookGenerateUri_582989(protocol: Scheme; host: string; base: string;
+  Call_WebhookGenerateUri_564087 = ref object of OpenApiRestCall_563556
+proc url_WebhookGenerateUri_564089(protocol: Scheme; host: string; base: string;
                                   route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -258,7 +262,7 @@ proc url_WebhookGenerateUri_582989(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_WebhookGenerateUri_582988(path: JsonNode; query: JsonNode;
+proc validate_WebhookGenerateUri_564088(path: JsonNode; query: JsonNode;
                                        header: JsonNode; formData: JsonNode;
                                        body: JsonNode): JsonNode =
   ## Generates a Uri for use in creating a webhook.
@@ -269,27 +273,27 @@ proc validate_WebhookGenerateUri_582988(path: JsonNode; query: JsonNode;
   ## parameters in `path` object:
   ##   automationAccountName: JString (required)
   ##                        : The name of the automation account.
-  ##   resourceGroupName: JString (required)
-  ##                    : Name of an Azure Resource group.
   ##   subscriptionId: JString (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : Name of an Azure Resource group.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `automationAccountName` field"
-  var valid_582990 = path.getOrDefault("automationAccountName")
-  valid_582990 = validateParameter(valid_582990, JString, required = true,
+  var valid_564090 = path.getOrDefault("automationAccountName")
+  valid_564090 = validateParameter(valid_564090, JString, required = true,
                                  default = nil)
-  if valid_582990 != nil:
-    section.add "automationAccountName", valid_582990
-  var valid_582991 = path.getOrDefault("resourceGroupName")
-  valid_582991 = validateParameter(valid_582991, JString, required = true,
+  if valid_564090 != nil:
+    section.add "automationAccountName", valid_564090
+  var valid_564091 = path.getOrDefault("subscriptionId")
+  valid_564091 = validateParameter(valid_564091, JString, required = true,
                                  default = nil)
-  if valid_582991 != nil:
-    section.add "resourceGroupName", valid_582991
-  var valid_582992 = path.getOrDefault("subscriptionId")
-  valid_582992 = validateParameter(valid_582992, JString, required = true,
+  if valid_564091 != nil:
+    section.add "subscriptionId", valid_564091
+  var valid_564092 = path.getOrDefault("resourceGroupName")
+  valid_564092 = validateParameter(valid_564092, JString, required = true,
                                  default = nil)
-  if valid_582992 != nil:
-    section.add "subscriptionId", valid_582992
+  if valid_564092 != nil:
+    section.add "resourceGroupName", valid_564092
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -297,11 +301,11 @@ proc validate_WebhookGenerateUri_582988(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_582993 = query.getOrDefault("api-version")
-  valid_582993 = validateParameter(valid_582993, JString, required = true,
+  var valid_564093 = query.getOrDefault("api-version")
+  valid_564093 = validateParameter(valid_564093, JString, required = true,
                                  default = nil)
-  if valid_582993 != nil:
-    section.add "api-version", valid_582993
+  if valid_564093 != nil:
+    section.add "api-version", valid_564093
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -310,50 +314,50 @@ proc validate_WebhookGenerateUri_582988(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_582994: Call_WebhookGenerateUri_582987; path: JsonNode;
+proc call*(call_564094: Call_WebhookGenerateUri_564087; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Generates a Uri for use in creating a webhook.
   ## 
   ## http://aka.ms/azureautomationsdk/webhookoperations
-  let valid = call_582994.validator(path, query, header, formData, body)
-  let scheme = call_582994.pickScheme
+  let valid = call_564094.validator(path, query, header, formData, body)
+  let scheme = call_564094.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_582994.url(scheme.get, call_582994.host, call_582994.base,
-                         call_582994.route, valid.getOrDefault("path"),
+  let url = call_564094.url(scheme.get, call_564094.host, call_564094.base,
+                         call_564094.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_582994, url, valid)
+  result = hook(call_564094, url, valid)
 
-proc call*(call_582995: Call_WebhookGenerateUri_582987;
-          automationAccountName: string; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string): Recallable =
+proc call*(call_564095: Call_WebhookGenerateUri_564087; apiVersion: string;
+          automationAccountName: string; subscriptionId: string;
+          resourceGroupName: string): Recallable =
   ## webhookGenerateUri
   ## Generates a Uri for use in creating a webhook.
   ## http://aka.ms/azureautomationsdk/webhookoperations
-  ##   automationAccountName: string (required)
-  ##                        : The name of the automation account.
-  ##   resourceGroupName: string (required)
-  ##                    : Name of an Azure Resource group.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
+  ##   automationAccountName: string (required)
+  ##                        : The name of the automation account.
   ##   subscriptionId: string (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_582996 = newJObject()
-  var query_582997 = newJObject()
-  add(path_582996, "automationAccountName", newJString(automationAccountName))
-  add(path_582996, "resourceGroupName", newJString(resourceGroupName))
-  add(query_582997, "api-version", newJString(apiVersion))
-  add(path_582996, "subscriptionId", newJString(subscriptionId))
-  result = call_582995.call(path_582996, query_582997, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : Name of an Azure Resource group.
+  var path_564096 = newJObject()
+  var query_564097 = newJObject()
+  add(query_564097, "api-version", newJString(apiVersion))
+  add(path_564096, "automationAccountName", newJString(automationAccountName))
+  add(path_564096, "subscriptionId", newJString(subscriptionId))
+  add(path_564096, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564095.call(path_564096, query_564097, nil, nil, nil)
 
-var webhookGenerateUri* = Call_WebhookGenerateUri_582987(
+var webhookGenerateUri* = Call_WebhookGenerateUri_564087(
     name: "webhookGenerateUri", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Automation/automationAccounts/{automationAccountName}/webhooks/generateUri",
-    validator: validate_WebhookGenerateUri_582988, base: "",
-    url: url_WebhookGenerateUri_582989, schemes: {Scheme.Https})
+    validator: validate_WebhookGenerateUri_564088, base: "",
+    url: url_WebhookGenerateUri_564089, schemes: {Scheme.Https})
 type
-  Call_WebhookCreateOrUpdate_583010 = ref object of OpenApiRestCall_582458
-proc url_WebhookCreateOrUpdate_583012(protocol: Scheme; host: string; base: string;
+  Call_WebhookCreateOrUpdate_564110 = ref object of OpenApiRestCall_563556
+proc url_WebhookCreateOrUpdate_564112(protocol: Scheme; host: string; base: string;
                                      route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -380,7 +384,7 @@ proc url_WebhookCreateOrUpdate_583012(protocol: Scheme; host: string; base: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_WebhookCreateOrUpdate_583011(path: JsonNode; query: JsonNode;
+proc validate_WebhookCreateOrUpdate_564111(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Create the webhook identified by webhook name.
   ## 
@@ -390,34 +394,34 @@ proc validate_WebhookCreateOrUpdate_583011(path: JsonNode; query: JsonNode;
   ## parameters in `path` object:
   ##   automationAccountName: JString (required)
   ##                        : The name of the automation account.
+  ##   subscriptionId: JString (required)
+  ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   resourceGroupName: JString (required)
   ##                    : Name of an Azure Resource group.
   ##   webhookName: JString (required)
   ##              : The webhook name.
-  ##   subscriptionId: JString (required)
-  ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `automationAccountName` field"
-  var valid_583039 = path.getOrDefault("automationAccountName")
-  valid_583039 = validateParameter(valid_583039, JString, required = true,
+  var valid_564139 = path.getOrDefault("automationAccountName")
+  valid_564139 = validateParameter(valid_564139, JString, required = true,
                                  default = nil)
-  if valid_583039 != nil:
-    section.add "automationAccountName", valid_583039
-  var valid_583040 = path.getOrDefault("resourceGroupName")
-  valid_583040 = validateParameter(valid_583040, JString, required = true,
+  if valid_564139 != nil:
+    section.add "automationAccountName", valid_564139
+  var valid_564140 = path.getOrDefault("subscriptionId")
+  valid_564140 = validateParameter(valid_564140, JString, required = true,
                                  default = nil)
-  if valid_583040 != nil:
-    section.add "resourceGroupName", valid_583040
-  var valid_583041 = path.getOrDefault("webhookName")
-  valid_583041 = validateParameter(valid_583041, JString, required = true,
+  if valid_564140 != nil:
+    section.add "subscriptionId", valid_564140
+  var valid_564141 = path.getOrDefault("resourceGroupName")
+  valid_564141 = validateParameter(valid_564141, JString, required = true,
                                  default = nil)
-  if valid_583041 != nil:
-    section.add "webhookName", valid_583041
-  var valid_583042 = path.getOrDefault("subscriptionId")
-  valid_583042 = validateParameter(valid_583042, JString, required = true,
+  if valid_564141 != nil:
+    section.add "resourceGroupName", valid_564141
+  var valid_564142 = path.getOrDefault("webhookName")
+  valid_564142 = validateParameter(valid_564142, JString, required = true,
                                  default = nil)
-  if valid_583042 != nil:
-    section.add "subscriptionId", valid_583042
+  if valid_564142 != nil:
+    section.add "webhookName", valid_564142
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -425,11 +429,11 @@ proc validate_WebhookCreateOrUpdate_583011(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_583043 = query.getOrDefault("api-version")
-  valid_583043 = validateParameter(valid_583043, JString, required = true,
+  var valid_564143 = query.getOrDefault("api-version")
+  valid_564143 = validateParameter(valid_564143, JString, required = true,
                                  default = nil)
-  if valid_583043 != nil:
-    section.add "api-version", valid_583043
+  if valid_564143 != nil:
+    section.add "api-version", valid_564143
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -443,59 +447,58 @@ proc validate_WebhookCreateOrUpdate_583011(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_583045: Call_WebhookCreateOrUpdate_583010; path: JsonNode;
+proc call*(call_564145: Call_WebhookCreateOrUpdate_564110; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Create the webhook identified by webhook name.
   ## 
   ## http://aka.ms/azureautomationsdk/webhookoperations
-  let valid = call_583045.validator(path, query, header, formData, body)
-  let scheme = call_583045.pickScheme
+  let valid = call_564145.validator(path, query, header, formData, body)
+  let scheme = call_564145.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_583045.url(scheme.get, call_583045.host, call_583045.base,
-                         call_583045.route, valid.getOrDefault("path"),
+  let url = call_564145.url(scheme.get, call_564145.host, call_564145.base,
+                         call_564145.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_583045, url, valid)
+  result = hook(call_564145, url, valid)
 
-proc call*(call_583046: Call_WebhookCreateOrUpdate_583010;
-          automationAccountName: string; resourceGroupName: string;
-          apiVersion: string; webhookName: string; subscriptionId: string;
-          parameters: JsonNode): Recallable =
+proc call*(call_564146: Call_WebhookCreateOrUpdate_564110; apiVersion: string;
+          automationAccountName: string; subscriptionId: string;
+          resourceGroupName: string; parameters: JsonNode; webhookName: string): Recallable =
   ## webhookCreateOrUpdate
   ## Create the webhook identified by webhook name.
   ## http://aka.ms/azureautomationsdk/webhookoperations
-  ##   automationAccountName: string (required)
-  ##                        : The name of the automation account.
-  ##   resourceGroupName: string (required)
-  ##                    : Name of an Azure Resource group.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
-  ##   webhookName: string (required)
-  ##              : The webhook name.
+  ##   automationAccountName: string (required)
+  ##                        : The name of the automation account.
   ##   subscriptionId: string (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : Name of an Azure Resource group.
   ##   parameters: JObject (required)
   ##             : The create or update parameters for webhook.
-  var path_583047 = newJObject()
-  var query_583048 = newJObject()
-  var body_583049 = newJObject()
-  add(path_583047, "automationAccountName", newJString(automationAccountName))
-  add(path_583047, "resourceGroupName", newJString(resourceGroupName))
-  add(query_583048, "api-version", newJString(apiVersion))
-  add(path_583047, "webhookName", newJString(webhookName))
-  add(path_583047, "subscriptionId", newJString(subscriptionId))
+  ##   webhookName: string (required)
+  ##              : The webhook name.
+  var path_564147 = newJObject()
+  var query_564148 = newJObject()
+  var body_564149 = newJObject()
+  add(query_564148, "api-version", newJString(apiVersion))
+  add(path_564147, "automationAccountName", newJString(automationAccountName))
+  add(path_564147, "subscriptionId", newJString(subscriptionId))
+  add(path_564147, "resourceGroupName", newJString(resourceGroupName))
   if parameters != nil:
-    body_583049 = parameters
-  result = call_583046.call(path_583047, query_583048, nil, nil, body_583049)
+    body_564149 = parameters
+  add(path_564147, "webhookName", newJString(webhookName))
+  result = call_564146.call(path_564147, query_564148, nil, nil, body_564149)
 
-var webhookCreateOrUpdate* = Call_WebhookCreateOrUpdate_583010(
+var webhookCreateOrUpdate* = Call_WebhookCreateOrUpdate_564110(
     name: "webhookCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Automation/automationAccounts/{automationAccountName}/webhooks/{webhookName}",
-    validator: validate_WebhookCreateOrUpdate_583011, base: "",
-    url: url_WebhookCreateOrUpdate_583012, schemes: {Scheme.Https})
+    validator: validate_WebhookCreateOrUpdate_564111, base: "",
+    url: url_WebhookCreateOrUpdate_564112, schemes: {Scheme.Https})
 type
-  Call_WebhookGet_582998 = ref object of OpenApiRestCall_582458
-proc url_WebhookGet_583000(protocol: Scheme; host: string; base: string; route: string;
+  Call_WebhookGet_564098 = ref object of OpenApiRestCall_563556
+proc url_WebhookGet_564100(protocol: Scheme; host: string; base: string; route: string;
                           path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -522,7 +525,7 @@ proc url_WebhookGet_583000(protocol: Scheme; host: string; base: string; route: 
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_WebhookGet_582999(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_WebhookGet_564099(path: JsonNode; query: JsonNode; header: JsonNode;
                                formData: JsonNode; body: JsonNode): JsonNode =
   ## Retrieve the webhook identified by webhook name.
   ## 
@@ -532,34 +535,34 @@ proc validate_WebhookGet_582999(path: JsonNode; query: JsonNode; header: JsonNod
   ## parameters in `path` object:
   ##   automationAccountName: JString (required)
   ##                        : The name of the automation account.
+  ##   subscriptionId: JString (required)
+  ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   resourceGroupName: JString (required)
   ##                    : Name of an Azure Resource group.
   ##   webhookName: JString (required)
   ##              : The webhook name.
-  ##   subscriptionId: JString (required)
-  ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `automationAccountName` field"
-  var valid_583001 = path.getOrDefault("automationAccountName")
-  valid_583001 = validateParameter(valid_583001, JString, required = true,
+  var valid_564101 = path.getOrDefault("automationAccountName")
+  valid_564101 = validateParameter(valid_564101, JString, required = true,
                                  default = nil)
-  if valid_583001 != nil:
-    section.add "automationAccountName", valid_583001
-  var valid_583002 = path.getOrDefault("resourceGroupName")
-  valid_583002 = validateParameter(valid_583002, JString, required = true,
+  if valid_564101 != nil:
+    section.add "automationAccountName", valid_564101
+  var valid_564102 = path.getOrDefault("subscriptionId")
+  valid_564102 = validateParameter(valid_564102, JString, required = true,
                                  default = nil)
-  if valid_583002 != nil:
-    section.add "resourceGroupName", valid_583002
-  var valid_583003 = path.getOrDefault("webhookName")
-  valid_583003 = validateParameter(valid_583003, JString, required = true,
+  if valid_564102 != nil:
+    section.add "subscriptionId", valid_564102
+  var valid_564103 = path.getOrDefault("resourceGroupName")
+  valid_564103 = validateParameter(valid_564103, JString, required = true,
                                  default = nil)
-  if valid_583003 != nil:
-    section.add "webhookName", valid_583003
-  var valid_583004 = path.getOrDefault("subscriptionId")
-  valid_583004 = validateParameter(valid_583004, JString, required = true,
+  if valid_564103 != nil:
+    section.add "resourceGroupName", valid_564103
+  var valid_564104 = path.getOrDefault("webhookName")
+  valid_564104 = validateParameter(valid_564104, JString, required = true,
                                  default = nil)
-  if valid_583004 != nil:
-    section.add "subscriptionId", valid_583004
+  if valid_564104 != nil:
+    section.add "webhookName", valid_564104
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -567,11 +570,11 @@ proc validate_WebhookGet_582999(path: JsonNode; query: JsonNode; header: JsonNod
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_583005 = query.getOrDefault("api-version")
-  valid_583005 = validateParameter(valid_583005, JString, required = true,
+  var valid_564105 = query.getOrDefault("api-version")
+  valid_564105 = validateParameter(valid_564105, JString, required = true,
                                  default = nil)
-  if valid_583005 != nil:
-    section.add "api-version", valid_583005
+  if valid_564105 != nil:
+    section.add "api-version", valid_564105
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -580,54 +583,54 @@ proc validate_WebhookGet_582999(path: JsonNode; query: JsonNode; header: JsonNod
   if body != nil:
     result.add "body", body
 
-proc call*(call_583006: Call_WebhookGet_582998; path: JsonNode; query: JsonNode;
+proc call*(call_564106: Call_WebhookGet_564098; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Retrieve the webhook identified by webhook name.
   ## 
   ## http://aka.ms/azureautomationsdk/webhookoperations
-  let valid = call_583006.validator(path, query, header, formData, body)
-  let scheme = call_583006.pickScheme
+  let valid = call_564106.validator(path, query, header, formData, body)
+  let scheme = call_564106.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_583006.url(scheme.get, call_583006.host, call_583006.base,
-                         call_583006.route, valid.getOrDefault("path"),
+  let url = call_564106.url(scheme.get, call_564106.host, call_564106.base,
+                         call_564106.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_583006, url, valid)
+  result = hook(call_564106, url, valid)
 
-proc call*(call_583007: Call_WebhookGet_582998; automationAccountName: string;
-          resourceGroupName: string; apiVersion: string; webhookName: string;
-          subscriptionId: string): Recallable =
+proc call*(call_564107: Call_WebhookGet_564098; apiVersion: string;
+          automationAccountName: string; subscriptionId: string;
+          resourceGroupName: string; webhookName: string): Recallable =
   ## webhookGet
   ## Retrieve the webhook identified by webhook name.
   ## http://aka.ms/azureautomationsdk/webhookoperations
-  ##   automationAccountName: string (required)
-  ##                        : The name of the automation account.
-  ##   resourceGroupName: string (required)
-  ##                    : Name of an Azure Resource group.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
-  ##   webhookName: string (required)
-  ##              : The webhook name.
+  ##   automationAccountName: string (required)
+  ##                        : The name of the automation account.
   ##   subscriptionId: string (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_583008 = newJObject()
-  var query_583009 = newJObject()
-  add(path_583008, "automationAccountName", newJString(automationAccountName))
-  add(path_583008, "resourceGroupName", newJString(resourceGroupName))
-  add(query_583009, "api-version", newJString(apiVersion))
-  add(path_583008, "webhookName", newJString(webhookName))
-  add(path_583008, "subscriptionId", newJString(subscriptionId))
-  result = call_583007.call(path_583008, query_583009, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : Name of an Azure Resource group.
+  ##   webhookName: string (required)
+  ##              : The webhook name.
+  var path_564108 = newJObject()
+  var query_564109 = newJObject()
+  add(query_564109, "api-version", newJString(apiVersion))
+  add(path_564108, "automationAccountName", newJString(automationAccountName))
+  add(path_564108, "subscriptionId", newJString(subscriptionId))
+  add(path_564108, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564108, "webhookName", newJString(webhookName))
+  result = call_564107.call(path_564108, query_564109, nil, nil, nil)
 
-var webhookGet* = Call_WebhookGet_582998(name: "webhookGet",
+var webhookGet* = Call_WebhookGet_564098(name: "webhookGet",
                                       meth: HttpMethod.HttpGet,
                                       host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Automation/automationAccounts/{automationAccountName}/webhooks/{webhookName}",
-                                      validator: validate_WebhookGet_582999,
-                                      base: "", url: url_WebhookGet_583000,
+                                      validator: validate_WebhookGet_564099,
+                                      base: "", url: url_WebhookGet_564100,
                                       schemes: {Scheme.Https})
 type
-  Call_WebhookUpdate_583062 = ref object of OpenApiRestCall_582458
-proc url_WebhookUpdate_583064(protocol: Scheme; host: string; base: string;
+  Call_WebhookUpdate_564162 = ref object of OpenApiRestCall_563556
+proc url_WebhookUpdate_564164(protocol: Scheme; host: string; base: string;
                              route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -654,7 +657,7 @@ proc url_WebhookUpdate_583064(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_WebhookUpdate_583063(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_WebhookUpdate_564163(path: JsonNode; query: JsonNode; header: JsonNode;
                                   formData: JsonNode; body: JsonNode): JsonNode =
   ## Update the webhook identified by webhook name.
   ## 
@@ -664,34 +667,34 @@ proc validate_WebhookUpdate_583063(path: JsonNode; query: JsonNode; header: Json
   ## parameters in `path` object:
   ##   automationAccountName: JString (required)
   ##                        : The name of the automation account.
+  ##   subscriptionId: JString (required)
+  ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   resourceGroupName: JString (required)
   ##                    : Name of an Azure Resource group.
   ##   webhookName: JString (required)
   ##              : The webhook name.
-  ##   subscriptionId: JString (required)
-  ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `automationAccountName` field"
-  var valid_583065 = path.getOrDefault("automationAccountName")
-  valid_583065 = validateParameter(valid_583065, JString, required = true,
+  var valid_564165 = path.getOrDefault("automationAccountName")
+  valid_564165 = validateParameter(valid_564165, JString, required = true,
                                  default = nil)
-  if valid_583065 != nil:
-    section.add "automationAccountName", valid_583065
-  var valid_583066 = path.getOrDefault("resourceGroupName")
-  valid_583066 = validateParameter(valid_583066, JString, required = true,
+  if valid_564165 != nil:
+    section.add "automationAccountName", valid_564165
+  var valid_564166 = path.getOrDefault("subscriptionId")
+  valid_564166 = validateParameter(valid_564166, JString, required = true,
                                  default = nil)
-  if valid_583066 != nil:
-    section.add "resourceGroupName", valid_583066
-  var valid_583067 = path.getOrDefault("webhookName")
-  valid_583067 = validateParameter(valid_583067, JString, required = true,
+  if valid_564166 != nil:
+    section.add "subscriptionId", valid_564166
+  var valid_564167 = path.getOrDefault("resourceGroupName")
+  valid_564167 = validateParameter(valid_564167, JString, required = true,
                                  default = nil)
-  if valid_583067 != nil:
-    section.add "webhookName", valid_583067
-  var valid_583068 = path.getOrDefault("subscriptionId")
-  valid_583068 = validateParameter(valid_583068, JString, required = true,
+  if valid_564167 != nil:
+    section.add "resourceGroupName", valid_564167
+  var valid_564168 = path.getOrDefault("webhookName")
+  valid_564168 = validateParameter(valid_564168, JString, required = true,
                                  default = nil)
-  if valid_583068 != nil:
-    section.add "subscriptionId", valid_583068
+  if valid_564168 != nil:
+    section.add "webhookName", valid_564168
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -699,11 +702,11 @@ proc validate_WebhookUpdate_583063(path: JsonNode; query: JsonNode; header: Json
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_583069 = query.getOrDefault("api-version")
-  valid_583069 = validateParameter(valid_583069, JString, required = true,
+  var valid_564169 = query.getOrDefault("api-version")
+  valid_564169 = validateParameter(valid_564169, JString, required = true,
                                  default = nil)
-  if valid_583069 != nil:
-    section.add "api-version", valid_583069
+  if valid_564169 != nil:
+    section.add "api-version", valid_564169
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -717,57 +720,57 @@ proc validate_WebhookUpdate_583063(path: JsonNode; query: JsonNode; header: Json
   if body != nil:
     result.add "body", body
 
-proc call*(call_583071: Call_WebhookUpdate_583062; path: JsonNode; query: JsonNode;
+proc call*(call_564171: Call_WebhookUpdate_564162; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Update the webhook identified by webhook name.
   ## 
   ## http://aka.ms/azureautomationsdk/webhookoperations
-  let valid = call_583071.validator(path, query, header, formData, body)
-  let scheme = call_583071.pickScheme
+  let valid = call_564171.validator(path, query, header, formData, body)
+  let scheme = call_564171.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_583071.url(scheme.get, call_583071.host, call_583071.base,
-                         call_583071.route, valid.getOrDefault("path"),
+  let url = call_564171.url(scheme.get, call_564171.host, call_564171.base,
+                         call_564171.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_583071, url, valid)
+  result = hook(call_564171, url, valid)
 
-proc call*(call_583072: Call_WebhookUpdate_583062; automationAccountName: string;
-          resourceGroupName: string; apiVersion: string; webhookName: string;
-          subscriptionId: string; parameters: JsonNode): Recallable =
+proc call*(call_564172: Call_WebhookUpdate_564162; apiVersion: string;
+          automationAccountName: string; subscriptionId: string;
+          resourceGroupName: string; parameters: JsonNode; webhookName: string): Recallable =
   ## webhookUpdate
   ## Update the webhook identified by webhook name.
   ## http://aka.ms/azureautomationsdk/webhookoperations
-  ##   automationAccountName: string (required)
-  ##                        : The name of the automation account.
-  ##   resourceGroupName: string (required)
-  ##                    : Name of an Azure Resource group.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
-  ##   webhookName: string (required)
-  ##              : The webhook name.
+  ##   automationAccountName: string (required)
+  ##                        : The name of the automation account.
   ##   subscriptionId: string (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : Name of an Azure Resource group.
   ##   parameters: JObject (required)
   ##             : The update parameters for webhook.
-  var path_583073 = newJObject()
-  var query_583074 = newJObject()
-  var body_583075 = newJObject()
-  add(path_583073, "automationAccountName", newJString(automationAccountName))
-  add(path_583073, "resourceGroupName", newJString(resourceGroupName))
-  add(query_583074, "api-version", newJString(apiVersion))
-  add(path_583073, "webhookName", newJString(webhookName))
-  add(path_583073, "subscriptionId", newJString(subscriptionId))
+  ##   webhookName: string (required)
+  ##              : The webhook name.
+  var path_564173 = newJObject()
+  var query_564174 = newJObject()
+  var body_564175 = newJObject()
+  add(query_564174, "api-version", newJString(apiVersion))
+  add(path_564173, "automationAccountName", newJString(automationAccountName))
+  add(path_564173, "subscriptionId", newJString(subscriptionId))
+  add(path_564173, "resourceGroupName", newJString(resourceGroupName))
   if parameters != nil:
-    body_583075 = parameters
-  result = call_583072.call(path_583073, query_583074, nil, nil, body_583075)
+    body_564175 = parameters
+  add(path_564173, "webhookName", newJString(webhookName))
+  result = call_564172.call(path_564173, query_564174, nil, nil, body_564175)
 
-var webhookUpdate* = Call_WebhookUpdate_583062(name: "webhookUpdate",
+var webhookUpdate* = Call_WebhookUpdate_564162(name: "webhookUpdate",
     meth: HttpMethod.HttpPatch, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Automation/automationAccounts/{automationAccountName}/webhooks/{webhookName}",
-    validator: validate_WebhookUpdate_583063, base: "", url: url_WebhookUpdate_583064,
+    validator: validate_WebhookUpdate_564163, base: "", url: url_WebhookUpdate_564164,
     schemes: {Scheme.Https})
 type
-  Call_WebhookDelete_583050 = ref object of OpenApiRestCall_582458
-proc url_WebhookDelete_583052(protocol: Scheme; host: string; base: string;
+  Call_WebhookDelete_564150 = ref object of OpenApiRestCall_563556
+proc url_WebhookDelete_564152(protocol: Scheme; host: string; base: string;
                              route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -794,7 +797,7 @@ proc url_WebhookDelete_583052(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_WebhookDelete_583051(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_WebhookDelete_564151(path: JsonNode; query: JsonNode; header: JsonNode;
                                   formData: JsonNode; body: JsonNode): JsonNode =
   ## Delete the webhook by name.
   ## 
@@ -804,34 +807,34 @@ proc validate_WebhookDelete_583051(path: JsonNode; query: JsonNode; header: Json
   ## parameters in `path` object:
   ##   automationAccountName: JString (required)
   ##                        : The name of the automation account.
+  ##   subscriptionId: JString (required)
+  ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   resourceGroupName: JString (required)
   ##                    : Name of an Azure Resource group.
   ##   webhookName: JString (required)
   ##              : The webhook name.
-  ##   subscriptionId: JString (required)
-  ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `automationAccountName` field"
-  var valid_583053 = path.getOrDefault("automationAccountName")
-  valid_583053 = validateParameter(valid_583053, JString, required = true,
+  var valid_564153 = path.getOrDefault("automationAccountName")
+  valid_564153 = validateParameter(valid_564153, JString, required = true,
                                  default = nil)
-  if valid_583053 != nil:
-    section.add "automationAccountName", valid_583053
-  var valid_583054 = path.getOrDefault("resourceGroupName")
-  valid_583054 = validateParameter(valid_583054, JString, required = true,
+  if valid_564153 != nil:
+    section.add "automationAccountName", valid_564153
+  var valid_564154 = path.getOrDefault("subscriptionId")
+  valid_564154 = validateParameter(valid_564154, JString, required = true,
                                  default = nil)
-  if valid_583054 != nil:
-    section.add "resourceGroupName", valid_583054
-  var valid_583055 = path.getOrDefault("webhookName")
-  valid_583055 = validateParameter(valid_583055, JString, required = true,
+  if valid_564154 != nil:
+    section.add "subscriptionId", valid_564154
+  var valid_564155 = path.getOrDefault("resourceGroupName")
+  valid_564155 = validateParameter(valid_564155, JString, required = true,
                                  default = nil)
-  if valid_583055 != nil:
-    section.add "webhookName", valid_583055
-  var valid_583056 = path.getOrDefault("subscriptionId")
-  valid_583056 = validateParameter(valid_583056, JString, required = true,
+  if valid_564155 != nil:
+    section.add "resourceGroupName", valid_564155
+  var valid_564156 = path.getOrDefault("webhookName")
+  valid_564156 = validateParameter(valid_564156, JString, required = true,
                                  default = nil)
-  if valid_583056 != nil:
-    section.add "subscriptionId", valid_583056
+  if valid_564156 != nil:
+    section.add "webhookName", valid_564156
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -839,11 +842,11 @@ proc validate_WebhookDelete_583051(path: JsonNode; query: JsonNode; header: Json
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_583057 = query.getOrDefault("api-version")
-  valid_583057 = validateParameter(valid_583057, JString, required = true,
+  var valid_564157 = query.getOrDefault("api-version")
+  valid_564157 = validateParameter(valid_564157, JString, required = true,
                                  default = nil)
-  if valid_583057 != nil:
-    section.add "api-version", valid_583057
+  if valid_564157 != nil:
+    section.add "api-version", valid_564157
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -852,48 +855,48 @@ proc validate_WebhookDelete_583051(path: JsonNode; query: JsonNode; header: Json
   if body != nil:
     result.add "body", body
 
-proc call*(call_583058: Call_WebhookDelete_583050; path: JsonNode; query: JsonNode;
+proc call*(call_564158: Call_WebhookDelete_564150; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Delete the webhook by name.
   ## 
   ## http://aka.ms/azureautomationsdk/webhookoperations
-  let valid = call_583058.validator(path, query, header, formData, body)
-  let scheme = call_583058.pickScheme
+  let valid = call_564158.validator(path, query, header, formData, body)
+  let scheme = call_564158.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_583058.url(scheme.get, call_583058.host, call_583058.base,
-                         call_583058.route, valid.getOrDefault("path"),
+  let url = call_564158.url(scheme.get, call_564158.host, call_564158.base,
+                         call_564158.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_583058, url, valid)
+  result = hook(call_564158, url, valid)
 
-proc call*(call_583059: Call_WebhookDelete_583050; automationAccountName: string;
-          resourceGroupName: string; apiVersion: string; webhookName: string;
-          subscriptionId: string): Recallable =
+proc call*(call_564159: Call_WebhookDelete_564150; apiVersion: string;
+          automationAccountName: string; subscriptionId: string;
+          resourceGroupName: string; webhookName: string): Recallable =
   ## webhookDelete
   ## Delete the webhook by name.
   ## http://aka.ms/azureautomationsdk/webhookoperations
-  ##   automationAccountName: string (required)
-  ##                        : The name of the automation account.
-  ##   resourceGroupName: string (required)
-  ##                    : Name of an Azure Resource group.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
-  ##   webhookName: string (required)
-  ##              : The webhook name.
+  ##   automationAccountName: string (required)
+  ##                        : The name of the automation account.
   ##   subscriptionId: string (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_583060 = newJObject()
-  var query_583061 = newJObject()
-  add(path_583060, "automationAccountName", newJString(automationAccountName))
-  add(path_583060, "resourceGroupName", newJString(resourceGroupName))
-  add(query_583061, "api-version", newJString(apiVersion))
-  add(path_583060, "webhookName", newJString(webhookName))
-  add(path_583060, "subscriptionId", newJString(subscriptionId))
-  result = call_583059.call(path_583060, query_583061, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : Name of an Azure Resource group.
+  ##   webhookName: string (required)
+  ##              : The webhook name.
+  var path_564160 = newJObject()
+  var query_564161 = newJObject()
+  add(query_564161, "api-version", newJString(apiVersion))
+  add(path_564160, "automationAccountName", newJString(automationAccountName))
+  add(path_564160, "subscriptionId", newJString(subscriptionId))
+  add(path_564160, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564160, "webhookName", newJString(webhookName))
+  result = call_564159.call(path_564160, query_564161, nil, nil, nil)
 
-var webhookDelete* = Call_WebhookDelete_583050(name: "webhookDelete",
+var webhookDelete* = Call_WebhookDelete_564150(name: "webhookDelete",
     meth: HttpMethod.HttpDelete, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Automation/automationAccounts/{automationAccountName}/webhooks/{webhookName}",
-    validator: validate_WebhookDelete_583051, base: "", url: url_WebhookDelete_583052,
+    validator: validate_WebhookDelete_564151, base: "", url: url_WebhookDelete_564152,
     schemes: {Scheme.Https})
 export
   rest

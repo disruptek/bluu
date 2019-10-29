@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, httpcore
 
 ## auto-generated via openapi macro
 ## title: Compute Admin Client
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_574441 = ref object of OpenApiRestCall
+  OpenApiRestCall_563539 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_574441](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563539](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_574441): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563539): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,8 +107,8 @@ const
   macServiceName = "azsadmin-VMExtensions"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_VmextensionsList_574663 = ref object of OpenApiRestCall_574441
-proc url_VmextensionsList_574665(protocol: Scheme; host: string; base: string;
+  Call_VmextensionsList_563761 = ref object of OpenApiRestCall_563539
+proc url_VmextensionsList_563763(protocol: Scheme; host: string; base: string;
                                 route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -124,7 +128,7 @@ proc url_VmextensionsList_574665(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_VmextensionsList_574664(path: JsonNode; query: JsonNode;
+proc validate_VmextensionsList_563762(path: JsonNode; query: JsonNode;
                                      header: JsonNode; formData: JsonNode;
                                      body: JsonNode): JsonNode =
   ## List of all Virtual Machine Extension Images for the current location are returned.
@@ -139,16 +143,16 @@ proc validate_VmextensionsList_574664(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_574825 = path.getOrDefault("subscriptionId")
-  valid_574825 = validateParameter(valid_574825, JString, required = true,
+  var valid_563925 = path.getOrDefault("subscriptionId")
+  valid_563925 = validateParameter(valid_563925, JString, required = true,
                                  default = nil)
-  if valid_574825 != nil:
-    section.add "subscriptionId", valid_574825
-  var valid_574826 = path.getOrDefault("location")
-  valid_574826 = validateParameter(valid_574826, JString, required = true,
+  if valid_563925 != nil:
+    section.add "subscriptionId", valid_563925
+  var valid_563926 = path.getOrDefault("location")
+  valid_563926 = validateParameter(valid_563926, JString, required = true,
                                  default = nil)
-  if valid_574826 != nil:
-    section.add "location", valid_574826
+  if valid_563926 != nil:
+    section.add "location", valid_563926
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -156,11 +160,11 @@ proc validate_VmextensionsList_574664(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574840 = query.getOrDefault("api-version")
-  valid_574840 = validateParameter(valid_574840, JString, required = true,
+  var valid_563940 = query.getOrDefault("api-version")
+  valid_563940 = validateParameter(valid_563940, JString, required = true,
                                  default = newJString("2015-12-01-preview"))
-  if valid_574840 != nil:
-    section.add "api-version", valid_574840
+  if valid_563940 != nil:
+    section.add "api-version", valid_563940
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -169,20 +173,20 @@ proc validate_VmextensionsList_574664(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574867: Call_VmextensionsList_574663; path: JsonNode;
+proc call*(call_563967: Call_VmextensionsList_563761; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## List of all Virtual Machine Extension Images for the current location are returned.
   ## 
-  let valid = call_574867.validator(path, query, header, formData, body)
-  let scheme = call_574867.pickScheme
+  let valid = call_563967.validator(path, query, header, formData, body)
+  let scheme = call_563967.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574867.url(scheme.get, call_574867.host, call_574867.base,
-                         call_574867.route, valid.getOrDefault("path"),
+  let url = call_563967.url(scheme.get, call_563967.host, call_563967.base,
+                         call_563967.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574867, url, valid)
+  result = hook(call_563967, url, valid)
 
-proc call*(call_574938: Call_VmextensionsList_574663; subscriptionId: string;
+proc call*(call_564038: Call_VmextensionsList_563761; subscriptionId: string;
           location: string; apiVersion: string = "2015-12-01-preview"): Recallable =
   ## vmextensionsList
   ## List of all Virtual Machine Extension Images for the current location are returned.
@@ -192,20 +196,20 @@ proc call*(call_574938: Call_VmextensionsList_574663; subscriptionId: string;
   ##                 : Subscription credentials that uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   location: string (required)
   ##           : Location of the resource.
-  var path_574939 = newJObject()
-  var query_574941 = newJObject()
-  add(query_574941, "api-version", newJString(apiVersion))
-  add(path_574939, "subscriptionId", newJString(subscriptionId))
-  add(path_574939, "location", newJString(location))
-  result = call_574938.call(path_574939, query_574941, nil, nil, nil)
+  var path_564039 = newJObject()
+  var query_564041 = newJObject()
+  add(query_564041, "api-version", newJString(apiVersion))
+  add(path_564039, "subscriptionId", newJString(subscriptionId))
+  add(path_564039, "location", newJString(location))
+  result = call_564038.call(path_564039, query_564041, nil, nil, nil)
 
-var vmextensionsList* = Call_VmextensionsList_574663(name: "vmextensionsList",
+var vmextensionsList* = Call_VmextensionsList_563761(name: "vmextensionsList",
     meth: HttpMethod.HttpGet, host: "adminmanagement.local.azurestack.external", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Compute.Admin/locations/{location}/artifactTypes/VMExtension",
-    validator: validate_VmextensionsList_574664, base: "",
-    url: url_VmextensionsList_574665, schemes: {Scheme.Https})
+    validator: validate_VmextensionsList_563762, base: "",
+    url: url_VmextensionsList_563763, schemes: {Scheme.Https})
 type
-  Call_VmextensionsCreate_575002 = ref object of OpenApiRestCall_574441
-proc url_VmextensionsCreate_575004(protocol: Scheme; host: string; base: string;
+  Call_VmextensionsCreate_564102 = ref object of OpenApiRestCall_563539
+proc url_VmextensionsCreate_564104(protocol: Scheme; host: string; base: string;
                                   route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -233,7 +237,7 @@ proc url_VmextensionsCreate_575004(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_VmextensionsCreate_575003(path: JsonNode; query: JsonNode;
+proc validate_VmextensionsCreate_564103(path: JsonNode; query: JsonNode;
                                        header: JsonNode; formData: JsonNode;
                                        body: JsonNode): JsonNode =
   ## Create a Virtual Machine Extension Image with publisher, version.
@@ -241,43 +245,43 @@ proc validate_VmextensionsCreate_575003(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
+  ##   version: JString (required)
+  ##          : The version of the resource.
   ##   type: JString (required)
   ##       : Type of extension.
   ##   publisher: JString (required)
   ##            : Name of the publisher.
-  ##   version: JString (required)
-  ##          : The version of the resource.
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials that uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   location: JString (required)
   ##           : Location of the resource.
   section = newJObject()
-  assert path != nil, "path argument is necessary due to required `type` field"
-  var valid_575005 = path.getOrDefault("type")
-  valid_575005 = validateParameter(valid_575005, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `version` field"
+  var valid_564105 = path.getOrDefault("version")
+  valid_564105 = validateParameter(valid_564105, JString, required = true,
                                  default = nil)
-  if valid_575005 != nil:
-    section.add "type", valid_575005
-  var valid_575006 = path.getOrDefault("publisher")
-  valid_575006 = validateParameter(valid_575006, JString, required = true,
+  if valid_564105 != nil:
+    section.add "version", valid_564105
+  var valid_564106 = path.getOrDefault("type")
+  valid_564106 = validateParameter(valid_564106, JString, required = true,
                                  default = nil)
-  if valid_575006 != nil:
-    section.add "publisher", valid_575006
-  var valid_575007 = path.getOrDefault("version")
-  valid_575007 = validateParameter(valid_575007, JString, required = true,
+  if valid_564106 != nil:
+    section.add "type", valid_564106
+  var valid_564107 = path.getOrDefault("publisher")
+  valid_564107 = validateParameter(valid_564107, JString, required = true,
                                  default = nil)
-  if valid_575007 != nil:
-    section.add "version", valid_575007
-  var valid_575008 = path.getOrDefault("subscriptionId")
-  valid_575008 = validateParameter(valid_575008, JString, required = true,
+  if valid_564107 != nil:
+    section.add "publisher", valid_564107
+  var valid_564108 = path.getOrDefault("subscriptionId")
+  valid_564108 = validateParameter(valid_564108, JString, required = true,
                                  default = nil)
-  if valid_575008 != nil:
-    section.add "subscriptionId", valid_575008
-  var valid_575009 = path.getOrDefault("location")
-  valid_575009 = validateParameter(valid_575009, JString, required = true,
+  if valid_564108 != nil:
+    section.add "subscriptionId", valid_564108
+  var valid_564109 = path.getOrDefault("location")
+  valid_564109 = validateParameter(valid_564109, JString, required = true,
                                  default = nil)
-  if valid_575009 != nil:
-    section.add "location", valid_575009
+  if valid_564109 != nil:
+    section.add "location", valid_564109
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -285,11 +289,11 @@ proc validate_VmextensionsCreate_575003(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575010 = query.getOrDefault("api-version")
-  valid_575010 = validateParameter(valid_575010, JString, required = true,
+  var valid_564110 = query.getOrDefault("api-version")
+  valid_564110 = validateParameter(valid_564110, JString, required = true,
                                  default = newJString("2015-12-01-preview"))
-  if valid_575010 != nil:
-    section.add "api-version", valid_575010
+  if valid_564110 != nil:
+    section.add "api-version", valid_564110
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -303,60 +307,60 @@ proc validate_VmextensionsCreate_575003(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_575012: Call_VmextensionsCreate_575002; path: JsonNode;
+proc call*(call_564112: Call_VmextensionsCreate_564102; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Create a Virtual Machine Extension Image with publisher, version.
   ## 
-  let valid = call_575012.validator(path, query, header, formData, body)
-  let scheme = call_575012.pickScheme
+  let valid = call_564112.validator(path, query, header, formData, body)
+  let scheme = call_564112.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575012.url(scheme.get, call_575012.host, call_575012.base,
-                         call_575012.route, valid.getOrDefault("path"),
+  let url = call_564112.url(scheme.get, call_564112.host, call_564112.base,
+                         call_564112.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575012, url, valid)
+  result = hook(call_564112, url, valid)
 
-proc call*(call_575013: Call_VmextensionsCreate_575002; `type`: string;
-          publisher: string; version: string; subscriptionId: string;
+proc call*(call_564113: Call_VmextensionsCreate_564102; version: string;
+          `type`: string; publisher: string; subscriptionId: string;
           extension: JsonNode; location: string;
           apiVersion: string = "2015-12-01-preview"): Recallable =
   ## vmextensionsCreate
   ## Create a Virtual Machine Extension Image with publisher, version.
-  ##   type: string (required)
-  ##       : Type of extension.
-  ##   apiVersion: string (required)
-  ##             : Client API Version.
-  ##   publisher: string (required)
-  ##            : Name of the publisher.
   ##   version: string (required)
   ##          : The version of the resource.
+  ##   apiVersion: string (required)
+  ##             : Client API Version.
+  ##   type: string (required)
+  ##       : Type of extension.
+  ##   publisher: string (required)
+  ##            : Name of the publisher.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials that uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   extension: JObject (required)
   ##            : Virtual Machine Extension Image creation properties.
   ##   location: string (required)
   ##           : Location of the resource.
-  var path_575014 = newJObject()
-  var query_575015 = newJObject()
-  var body_575016 = newJObject()
-  add(path_575014, "type", newJString(`type`))
-  add(query_575015, "api-version", newJString(apiVersion))
-  add(path_575014, "publisher", newJString(publisher))
-  add(path_575014, "version", newJString(version))
-  add(path_575014, "subscriptionId", newJString(subscriptionId))
+  var path_564114 = newJObject()
+  var query_564115 = newJObject()
+  var body_564116 = newJObject()
+  add(path_564114, "version", newJString(version))
+  add(query_564115, "api-version", newJString(apiVersion))
+  add(path_564114, "type", newJString(`type`))
+  add(path_564114, "publisher", newJString(publisher))
+  add(path_564114, "subscriptionId", newJString(subscriptionId))
   if extension != nil:
-    body_575016 = extension
-  add(path_575014, "location", newJString(location))
-  result = call_575013.call(path_575014, query_575015, nil, nil, body_575016)
+    body_564116 = extension
+  add(path_564114, "location", newJString(location))
+  result = call_564113.call(path_564114, query_564115, nil, nil, body_564116)
 
-var vmextensionsCreate* = Call_VmextensionsCreate_575002(
+var vmextensionsCreate* = Call_VmextensionsCreate_564102(
     name: "vmextensionsCreate", meth: HttpMethod.HttpPut,
     host: "adminmanagement.local.azurestack.external", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Compute.Admin/locations/{location}/artifactTypes/VMExtension/publishers/{publisher}/types/{type}/versions/{version}",
-    validator: validate_VmextensionsCreate_575003, base: "",
-    url: url_VmextensionsCreate_575004, schemes: {Scheme.Https})
+    validator: validate_VmextensionsCreate_564103, base: "",
+    url: url_VmextensionsCreate_564104, schemes: {Scheme.Https})
 type
-  Call_VmextensionsGet_574980 = ref object of OpenApiRestCall_574441
-proc url_VmextensionsGet_574982(protocol: Scheme; host: string; base: string;
+  Call_VmextensionsGet_564080 = ref object of OpenApiRestCall_563539
+proc url_VmextensionsGet_564082(protocol: Scheme; host: string; base: string;
                                route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -384,7 +388,7 @@ proc url_VmextensionsGet_574982(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_VmextensionsGet_574981(path: JsonNode; query: JsonNode;
+proc validate_VmextensionsGet_564081(path: JsonNode; query: JsonNode;
                                     header: JsonNode; formData: JsonNode;
                                     body: JsonNode): JsonNode =
   ## Returns requested Virtual Machine Extension Image matching publisher, type, version.
@@ -392,43 +396,43 @@ proc validate_VmextensionsGet_574981(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
+  ##   version: JString (required)
+  ##          : The version of the resource.
   ##   type: JString (required)
   ##       : Type of extension.
   ##   publisher: JString (required)
   ##            : Name of the publisher.
-  ##   version: JString (required)
-  ##          : The version of the resource.
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials that uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   location: JString (required)
   ##           : Location of the resource.
   section = newJObject()
-  assert path != nil, "path argument is necessary due to required `type` field"
-  var valid_574992 = path.getOrDefault("type")
-  valid_574992 = validateParameter(valid_574992, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `version` field"
+  var valid_564092 = path.getOrDefault("version")
+  valid_564092 = validateParameter(valid_564092, JString, required = true,
                                  default = nil)
-  if valid_574992 != nil:
-    section.add "type", valid_574992
-  var valid_574993 = path.getOrDefault("publisher")
-  valid_574993 = validateParameter(valid_574993, JString, required = true,
+  if valid_564092 != nil:
+    section.add "version", valid_564092
+  var valid_564093 = path.getOrDefault("type")
+  valid_564093 = validateParameter(valid_564093, JString, required = true,
                                  default = nil)
-  if valid_574993 != nil:
-    section.add "publisher", valid_574993
-  var valid_574994 = path.getOrDefault("version")
-  valid_574994 = validateParameter(valid_574994, JString, required = true,
+  if valid_564093 != nil:
+    section.add "type", valid_564093
+  var valid_564094 = path.getOrDefault("publisher")
+  valid_564094 = validateParameter(valid_564094, JString, required = true,
                                  default = nil)
-  if valid_574994 != nil:
-    section.add "version", valid_574994
-  var valid_574995 = path.getOrDefault("subscriptionId")
-  valid_574995 = validateParameter(valid_574995, JString, required = true,
+  if valid_564094 != nil:
+    section.add "publisher", valid_564094
+  var valid_564095 = path.getOrDefault("subscriptionId")
+  valid_564095 = validateParameter(valid_564095, JString, required = true,
                                  default = nil)
-  if valid_574995 != nil:
-    section.add "subscriptionId", valid_574995
-  var valid_574996 = path.getOrDefault("location")
-  valid_574996 = validateParameter(valid_574996, JString, required = true,
+  if valid_564095 != nil:
+    section.add "subscriptionId", valid_564095
+  var valid_564096 = path.getOrDefault("location")
+  valid_564096 = validateParameter(valid_564096, JString, required = true,
                                  default = nil)
-  if valid_574996 != nil:
-    section.add "location", valid_574996
+  if valid_564096 != nil:
+    section.add "location", valid_564096
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -436,11 +440,11 @@ proc validate_VmextensionsGet_574981(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574997 = query.getOrDefault("api-version")
-  valid_574997 = validateParameter(valid_574997, JString, required = true,
+  var valid_564097 = query.getOrDefault("api-version")
+  valid_564097 = validateParameter(valid_564097, JString, required = true,
                                  default = newJString("2015-12-01-preview"))
-  if valid_574997 != nil:
-    section.add "api-version", valid_574997
+  if valid_564097 != nil:
+    section.add "api-version", valid_564097
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -449,53 +453,53 @@ proc validate_VmextensionsGet_574981(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574998: Call_VmextensionsGet_574980; path: JsonNode; query: JsonNode;
+proc call*(call_564098: Call_VmextensionsGet_564080; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Returns requested Virtual Machine Extension Image matching publisher, type, version.
   ## 
-  let valid = call_574998.validator(path, query, header, formData, body)
-  let scheme = call_574998.pickScheme
+  let valid = call_564098.validator(path, query, header, formData, body)
+  let scheme = call_564098.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574998.url(scheme.get, call_574998.host, call_574998.base,
-                         call_574998.route, valid.getOrDefault("path"),
+  let url = call_564098.url(scheme.get, call_564098.host, call_564098.base,
+                         call_564098.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574998, url, valid)
+  result = hook(call_564098, url, valid)
 
-proc call*(call_574999: Call_VmextensionsGet_574980; `type`: string;
-          publisher: string; version: string; subscriptionId: string;
-          location: string; apiVersion: string = "2015-12-01-preview"): Recallable =
+proc call*(call_564099: Call_VmextensionsGet_564080; version: string; `type`: string;
+          publisher: string; subscriptionId: string; location: string;
+          apiVersion: string = "2015-12-01-preview"): Recallable =
   ## vmextensionsGet
   ## Returns requested Virtual Machine Extension Image matching publisher, type, version.
-  ##   type: string (required)
-  ##       : Type of extension.
-  ##   apiVersion: string (required)
-  ##             : Client API Version.
-  ##   publisher: string (required)
-  ##            : Name of the publisher.
   ##   version: string (required)
   ##          : The version of the resource.
+  ##   apiVersion: string (required)
+  ##             : Client API Version.
+  ##   type: string (required)
+  ##       : Type of extension.
+  ##   publisher: string (required)
+  ##            : Name of the publisher.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials that uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   location: string (required)
   ##           : Location of the resource.
-  var path_575000 = newJObject()
-  var query_575001 = newJObject()
-  add(path_575000, "type", newJString(`type`))
-  add(query_575001, "api-version", newJString(apiVersion))
-  add(path_575000, "publisher", newJString(publisher))
-  add(path_575000, "version", newJString(version))
-  add(path_575000, "subscriptionId", newJString(subscriptionId))
-  add(path_575000, "location", newJString(location))
-  result = call_574999.call(path_575000, query_575001, nil, nil, nil)
+  var path_564100 = newJObject()
+  var query_564101 = newJObject()
+  add(path_564100, "version", newJString(version))
+  add(query_564101, "api-version", newJString(apiVersion))
+  add(path_564100, "type", newJString(`type`))
+  add(path_564100, "publisher", newJString(publisher))
+  add(path_564100, "subscriptionId", newJString(subscriptionId))
+  add(path_564100, "location", newJString(location))
+  result = call_564099.call(path_564100, query_564101, nil, nil, nil)
 
-var vmextensionsGet* = Call_VmextensionsGet_574980(name: "vmextensionsGet",
+var vmextensionsGet* = Call_VmextensionsGet_564080(name: "vmextensionsGet",
     meth: HttpMethod.HttpGet, host: "adminmanagement.local.azurestack.external", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Compute.Admin/locations/{location}/artifactTypes/VMExtension/publishers/{publisher}/types/{type}/versions/{version}",
-    validator: validate_VmextensionsGet_574981, base: "", url: url_VmextensionsGet_574982,
+    validator: validate_VmextensionsGet_564081, base: "", url: url_VmextensionsGet_564082,
     schemes: {Scheme.Https})
 type
-  Call_VmextensionsDelete_575017 = ref object of OpenApiRestCall_574441
-proc url_VmextensionsDelete_575019(protocol: Scheme; host: string; base: string;
+  Call_VmextensionsDelete_564117 = ref object of OpenApiRestCall_563539
+proc url_VmextensionsDelete_564119(protocol: Scheme; host: string; base: string;
                                   route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -523,7 +527,7 @@ proc url_VmextensionsDelete_575019(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_VmextensionsDelete_575018(path: JsonNode; query: JsonNode;
+proc validate_VmextensionsDelete_564118(path: JsonNode; query: JsonNode;
                                        header: JsonNode; formData: JsonNode;
                                        body: JsonNode): JsonNode =
   ## Deletes specified Virtual Machine Extension Image.
@@ -531,43 +535,43 @@ proc validate_VmextensionsDelete_575018(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
+  ##   version: JString (required)
+  ##          : The version of the resource.
   ##   type: JString (required)
   ##       : Type of extension.
   ##   publisher: JString (required)
   ##            : Name of the publisher.
-  ##   version: JString (required)
-  ##          : The version of the resource.
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials that uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   location: JString (required)
   ##           : Location of the resource.
   section = newJObject()
-  assert path != nil, "path argument is necessary due to required `type` field"
-  var valid_575020 = path.getOrDefault("type")
-  valid_575020 = validateParameter(valid_575020, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `version` field"
+  var valid_564120 = path.getOrDefault("version")
+  valid_564120 = validateParameter(valid_564120, JString, required = true,
                                  default = nil)
-  if valid_575020 != nil:
-    section.add "type", valid_575020
-  var valid_575021 = path.getOrDefault("publisher")
-  valid_575021 = validateParameter(valid_575021, JString, required = true,
+  if valid_564120 != nil:
+    section.add "version", valid_564120
+  var valid_564121 = path.getOrDefault("type")
+  valid_564121 = validateParameter(valid_564121, JString, required = true,
                                  default = nil)
-  if valid_575021 != nil:
-    section.add "publisher", valid_575021
-  var valid_575022 = path.getOrDefault("version")
-  valid_575022 = validateParameter(valid_575022, JString, required = true,
+  if valid_564121 != nil:
+    section.add "type", valid_564121
+  var valid_564122 = path.getOrDefault("publisher")
+  valid_564122 = validateParameter(valid_564122, JString, required = true,
                                  default = nil)
-  if valid_575022 != nil:
-    section.add "version", valid_575022
-  var valid_575023 = path.getOrDefault("subscriptionId")
-  valid_575023 = validateParameter(valid_575023, JString, required = true,
+  if valid_564122 != nil:
+    section.add "publisher", valid_564122
+  var valid_564123 = path.getOrDefault("subscriptionId")
+  valid_564123 = validateParameter(valid_564123, JString, required = true,
                                  default = nil)
-  if valid_575023 != nil:
-    section.add "subscriptionId", valid_575023
-  var valid_575024 = path.getOrDefault("location")
-  valid_575024 = validateParameter(valid_575024, JString, required = true,
+  if valid_564123 != nil:
+    section.add "subscriptionId", valid_564123
+  var valid_564124 = path.getOrDefault("location")
+  valid_564124 = validateParameter(valid_564124, JString, required = true,
                                  default = nil)
-  if valid_575024 != nil:
-    section.add "location", valid_575024
+  if valid_564124 != nil:
+    section.add "location", valid_564124
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -575,11 +579,11 @@ proc validate_VmextensionsDelete_575018(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575025 = query.getOrDefault("api-version")
-  valid_575025 = validateParameter(valid_575025, JString, required = true,
+  var valid_564125 = query.getOrDefault("api-version")
+  valid_564125 = validateParameter(valid_564125, JString, required = true,
                                  default = newJString("2015-12-01-preview"))
-  if valid_575025 != nil:
-    section.add "api-version", valid_575025
+  if valid_564125 != nil:
+    section.add "api-version", valid_564125
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -588,51 +592,51 @@ proc validate_VmextensionsDelete_575018(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_575026: Call_VmextensionsDelete_575017; path: JsonNode;
+proc call*(call_564126: Call_VmextensionsDelete_564117; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes specified Virtual Machine Extension Image.
   ## 
-  let valid = call_575026.validator(path, query, header, formData, body)
-  let scheme = call_575026.pickScheme
+  let valid = call_564126.validator(path, query, header, formData, body)
+  let scheme = call_564126.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575026.url(scheme.get, call_575026.host, call_575026.base,
-                         call_575026.route, valid.getOrDefault("path"),
+  let url = call_564126.url(scheme.get, call_564126.host, call_564126.base,
+                         call_564126.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575026, url, valid)
+  result = hook(call_564126, url, valid)
 
-proc call*(call_575027: Call_VmextensionsDelete_575017; `type`: string;
-          publisher: string; version: string; subscriptionId: string;
-          location: string; apiVersion: string = "2015-12-01-preview"): Recallable =
+proc call*(call_564127: Call_VmextensionsDelete_564117; version: string;
+          `type`: string; publisher: string; subscriptionId: string; location: string;
+          apiVersion: string = "2015-12-01-preview"): Recallable =
   ## vmextensionsDelete
   ## Deletes specified Virtual Machine Extension Image.
-  ##   type: string (required)
-  ##       : Type of extension.
-  ##   apiVersion: string (required)
-  ##             : Client API Version.
-  ##   publisher: string (required)
-  ##            : Name of the publisher.
   ##   version: string (required)
   ##          : The version of the resource.
+  ##   apiVersion: string (required)
+  ##             : Client API Version.
+  ##   type: string (required)
+  ##       : Type of extension.
+  ##   publisher: string (required)
+  ##            : Name of the publisher.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials that uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   location: string (required)
   ##           : Location of the resource.
-  var path_575028 = newJObject()
-  var query_575029 = newJObject()
-  add(path_575028, "type", newJString(`type`))
-  add(query_575029, "api-version", newJString(apiVersion))
-  add(path_575028, "publisher", newJString(publisher))
-  add(path_575028, "version", newJString(version))
-  add(path_575028, "subscriptionId", newJString(subscriptionId))
-  add(path_575028, "location", newJString(location))
-  result = call_575027.call(path_575028, query_575029, nil, nil, nil)
+  var path_564128 = newJObject()
+  var query_564129 = newJObject()
+  add(path_564128, "version", newJString(version))
+  add(query_564129, "api-version", newJString(apiVersion))
+  add(path_564128, "type", newJString(`type`))
+  add(path_564128, "publisher", newJString(publisher))
+  add(path_564128, "subscriptionId", newJString(subscriptionId))
+  add(path_564128, "location", newJString(location))
+  result = call_564127.call(path_564128, query_564129, nil, nil, nil)
 
-var vmextensionsDelete* = Call_VmextensionsDelete_575017(
+var vmextensionsDelete* = Call_VmextensionsDelete_564117(
     name: "vmextensionsDelete", meth: HttpMethod.HttpDelete,
     host: "adminmanagement.local.azurestack.external", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Compute.Admin/locations/{location}/artifactTypes/VMExtension/publishers/{publisher}/types/{type}/versions/{version}",
-    validator: validate_VmextensionsDelete_575018, base: "",
-    url: url_VmextensionsDelete_575019, schemes: {Scheme.Https})
+    validator: validate_VmextensionsDelete_564118, base: "",
+    url: url_VmextensionsDelete_564119, schemes: {Scheme.Https})
 export
   rest
 

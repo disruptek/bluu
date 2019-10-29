@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, httpcore
 
 ## auto-generated via openapi macro
 ## title: NetworkManagementClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_567641 = ref object of OpenApiRestCall
+  OpenApiRestCall_563539 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_567641](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563539](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_567641): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563539): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,8 +107,8 @@ const
   macServiceName = "network-publicIpAddress"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_PublicIPAddressesListAll_567863 = ref object of OpenApiRestCall_567641
-proc url_PublicIPAddressesListAll_567865(protocol: Scheme; host: string;
+  Call_PublicIPAddressesListAll_563761 = ref object of OpenApiRestCall_563539
+proc url_PublicIPAddressesListAll_563763(protocol: Scheme; host: string;
                                         base: string; route: string; path: JsonNode;
                                         query: JsonNode): Uri =
   result.scheme = $protocol
@@ -122,7 +126,7 @@ proc url_PublicIPAddressesListAll_567865(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_PublicIPAddressesListAll_567864(path: JsonNode; query: JsonNode;
+proc validate_PublicIPAddressesListAll_563762(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets all the public IP addresses in a subscription.
   ## 
@@ -134,11 +138,11 @@ proc validate_PublicIPAddressesListAll_567864(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_568038 = path.getOrDefault("subscriptionId")
-  valid_568038 = validateParameter(valid_568038, JString, required = true,
+  var valid_563938 = path.getOrDefault("subscriptionId")
+  valid_563938 = validateParameter(valid_563938, JString, required = true,
                                  default = nil)
-  if valid_568038 != nil:
-    section.add "subscriptionId", valid_568038
+  if valid_563938 != nil:
+    section.add "subscriptionId", valid_563938
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -146,11 +150,11 @@ proc validate_PublicIPAddressesListAll_567864(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568039 = query.getOrDefault("api-version")
-  valid_568039 = validateParameter(valid_568039, JString, required = true,
+  var valid_563939 = query.getOrDefault("api-version")
+  valid_563939 = validateParameter(valid_563939, JString, required = true,
                                  default = nil)
-  if valid_568039 != nil:
-    section.add "api-version", valid_568039
+  if valid_563939 != nil:
+    section.add "api-version", valid_563939
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -159,20 +163,20 @@ proc validate_PublicIPAddressesListAll_567864(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568062: Call_PublicIPAddressesListAll_567863; path: JsonNode;
+proc call*(call_563962: Call_PublicIPAddressesListAll_563761; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets all the public IP addresses in a subscription.
   ## 
-  let valid = call_568062.validator(path, query, header, formData, body)
-  let scheme = call_568062.pickScheme
+  let valid = call_563962.validator(path, query, header, formData, body)
+  let scheme = call_563962.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568062.url(scheme.get, call_568062.host, call_568062.base,
-                         call_568062.route, valid.getOrDefault("path"),
+  let url = call_563962.url(scheme.get, call_563962.host, call_563962.base,
+                         call_563962.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568062, url, valid)
+  result = hook(call_563962, url, valid)
 
-proc call*(call_568133: Call_PublicIPAddressesListAll_567863; apiVersion: string;
+proc call*(call_564033: Call_PublicIPAddressesListAll_563761; apiVersion: string;
           subscriptionId: string): Recallable =
   ## publicIPAddressesListAll
   ## Gets all the public IP addresses in a subscription.
@@ -180,20 +184,20 @@ proc call*(call_568133: Call_PublicIPAddressesListAll_567863; apiVersion: string
   ##             : Client API version.
   ##   subscriptionId: string (required)
   ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_568134 = newJObject()
-  var query_568136 = newJObject()
-  add(query_568136, "api-version", newJString(apiVersion))
-  add(path_568134, "subscriptionId", newJString(subscriptionId))
-  result = call_568133.call(path_568134, query_568136, nil, nil, nil)
+  var path_564034 = newJObject()
+  var query_564036 = newJObject()
+  add(query_564036, "api-version", newJString(apiVersion))
+  add(path_564034, "subscriptionId", newJString(subscriptionId))
+  result = call_564033.call(path_564034, query_564036, nil, nil, nil)
 
-var publicIPAddressesListAll* = Call_PublicIPAddressesListAll_567863(
+var publicIPAddressesListAll* = Call_PublicIPAddressesListAll_563761(
     name: "publicIPAddressesListAll", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Network/publicIPAddresses",
-    validator: validate_PublicIPAddressesListAll_567864, base: "",
-    url: url_PublicIPAddressesListAll_567865, schemes: {Scheme.Https})
+    validator: validate_PublicIPAddressesListAll_563762, base: "",
+    url: url_PublicIPAddressesListAll_563763, schemes: {Scheme.Https})
 type
-  Call_PublicIPAddressesList_568175 = ref object of OpenApiRestCall_567641
-proc url_PublicIPAddressesList_568177(protocol: Scheme; host: string; base: string;
+  Call_PublicIPAddressesList_564075 = ref object of OpenApiRestCall_563539
+proc url_PublicIPAddressesList_564077(protocol: Scheme; host: string; base: string;
                                      route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -214,30 +218,30 @@ proc url_PublicIPAddressesList_568177(protocol: Scheme; host: string; base: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_PublicIPAddressesList_568176(path: JsonNode; query: JsonNode;
+proc validate_PublicIPAddressesList_564076(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets all public IP addresses in a resource group.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   subscriptionId: JString (required)
   ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568178 = path.getOrDefault("resourceGroupName")
-  valid_568178 = validateParameter(valid_568178, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564078 = path.getOrDefault("subscriptionId")
+  valid_564078 = validateParameter(valid_564078, JString, required = true,
                                  default = nil)
-  if valid_568178 != nil:
-    section.add "resourceGroupName", valid_568178
-  var valid_568179 = path.getOrDefault("subscriptionId")
-  valid_568179 = validateParameter(valid_568179, JString, required = true,
+  if valid_564078 != nil:
+    section.add "subscriptionId", valid_564078
+  var valid_564079 = path.getOrDefault("resourceGroupName")
+  valid_564079 = validateParameter(valid_564079, JString, required = true,
                                  default = nil)
-  if valid_568179 != nil:
-    section.add "subscriptionId", valid_568179
+  if valid_564079 != nil:
+    section.add "resourceGroupName", valid_564079
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -245,11 +249,11 @@ proc validate_PublicIPAddressesList_568176(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568180 = query.getOrDefault("api-version")
-  valid_568180 = validateParameter(valid_568180, JString, required = true,
+  var valid_564080 = query.getOrDefault("api-version")
+  valid_564080 = validateParameter(valid_564080, JString, required = true,
                                  default = nil)
-  if valid_568180 != nil:
-    section.add "api-version", valid_568180
+  if valid_564080 != nil:
+    section.add "api-version", valid_564080
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -258,44 +262,44 @@ proc validate_PublicIPAddressesList_568176(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568181: Call_PublicIPAddressesList_568175; path: JsonNode;
+proc call*(call_564081: Call_PublicIPAddressesList_564075; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets all public IP addresses in a resource group.
   ## 
-  let valid = call_568181.validator(path, query, header, formData, body)
-  let scheme = call_568181.pickScheme
+  let valid = call_564081.validator(path, query, header, formData, body)
+  let scheme = call_564081.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568181.url(scheme.get, call_568181.host, call_568181.base,
-                         call_568181.route, valid.getOrDefault("path"),
+  let url = call_564081.url(scheme.get, call_564081.host, call_564081.base,
+                         call_564081.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568181, url, valid)
+  result = hook(call_564081, url, valid)
 
-proc call*(call_568182: Call_PublicIPAddressesList_568175;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string): Recallable =
+proc call*(call_564082: Call_PublicIPAddressesList_564075; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string): Recallable =
   ## publicIPAddressesList
   ## Gets all public IP addresses in a resource group.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client API version.
   ##   subscriptionId: string (required)
   ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_568183 = newJObject()
-  var query_568184 = newJObject()
-  add(path_568183, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568184, "api-version", newJString(apiVersion))
-  add(path_568183, "subscriptionId", newJString(subscriptionId))
-  result = call_568182.call(path_568183, query_568184, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564083 = newJObject()
+  var query_564084 = newJObject()
+  add(query_564084, "api-version", newJString(apiVersion))
+  add(path_564083, "subscriptionId", newJString(subscriptionId))
+  add(path_564083, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564082.call(path_564083, query_564084, nil, nil, nil)
 
-var publicIPAddressesList* = Call_PublicIPAddressesList_568175(
+var publicIPAddressesList* = Call_PublicIPAddressesList_564075(
     name: "publicIPAddressesList", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/publicIPAddresses",
-    validator: validate_PublicIPAddressesList_568176, base: "",
-    url: url_PublicIPAddressesList_568177, schemes: {Scheme.Https})
+    validator: validate_PublicIPAddressesList_564076, base: "",
+    url: url_PublicIPAddressesList_564077, schemes: {Scheme.Https})
 type
-  Call_PublicIPAddressesCreateOrUpdate_568198 = ref object of OpenApiRestCall_567641
-proc url_PublicIPAddressesCreateOrUpdate_568200(protocol: Scheme; host: string;
+  Call_PublicIPAddressesCreateOrUpdate_564098 = ref object of OpenApiRestCall_563539
+proc url_PublicIPAddressesCreateOrUpdate_564100(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -319,37 +323,37 @@ proc url_PublicIPAddressesCreateOrUpdate_568200(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_PublicIPAddressesCreateOrUpdate_568199(path: JsonNode;
+proc validate_PublicIPAddressesCreateOrUpdate_564099(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Creates or updates a static or dynamic public IP address.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
+  ##   subscriptionId: JString (required)
+  ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   resourceGroupName: JString (required)
   ##                    : The name of the resource group.
   ##   publicIpAddressName: JString (required)
   ##                      : The name of the public IP address.
-  ##   subscriptionId: JString (required)
-  ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568218 = path.getOrDefault("resourceGroupName")
-  valid_568218 = validateParameter(valid_568218, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564118 = path.getOrDefault("subscriptionId")
+  valid_564118 = validateParameter(valid_564118, JString, required = true,
                                  default = nil)
-  if valid_568218 != nil:
-    section.add "resourceGroupName", valid_568218
-  var valid_568219 = path.getOrDefault("publicIpAddressName")
-  valid_568219 = validateParameter(valid_568219, JString, required = true,
+  if valid_564118 != nil:
+    section.add "subscriptionId", valid_564118
+  var valid_564119 = path.getOrDefault("resourceGroupName")
+  valid_564119 = validateParameter(valid_564119, JString, required = true,
                                  default = nil)
-  if valid_568219 != nil:
-    section.add "publicIpAddressName", valid_568219
-  var valid_568220 = path.getOrDefault("subscriptionId")
-  valid_568220 = validateParameter(valid_568220, JString, required = true,
+  if valid_564119 != nil:
+    section.add "resourceGroupName", valid_564119
+  var valid_564120 = path.getOrDefault("publicIpAddressName")
+  valid_564120 = validateParameter(valid_564120, JString, required = true,
                                  default = nil)
-  if valid_568220 != nil:
-    section.add "subscriptionId", valid_568220
+  if valid_564120 != nil:
+    section.add "publicIpAddressName", valid_564120
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -357,11 +361,11 @@ proc validate_PublicIPAddressesCreateOrUpdate_568199(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568221 = query.getOrDefault("api-version")
-  valid_568221 = validateParameter(valid_568221, JString, required = true,
+  var valid_564121 = query.getOrDefault("api-version")
+  valid_564121 = validateParameter(valid_564121, JString, required = true,
                                  default = nil)
-  if valid_568221 != nil:
-    section.add "api-version", valid_568221
+  if valid_564121 != nil:
+    section.add "api-version", valid_564121
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -375,54 +379,54 @@ proc validate_PublicIPAddressesCreateOrUpdate_568199(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568223: Call_PublicIPAddressesCreateOrUpdate_568198;
+proc call*(call_564123: Call_PublicIPAddressesCreateOrUpdate_564098;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Creates or updates a static or dynamic public IP address.
   ## 
-  let valid = call_568223.validator(path, query, header, formData, body)
-  let scheme = call_568223.pickScheme
+  let valid = call_564123.validator(path, query, header, formData, body)
+  let scheme = call_564123.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568223.url(scheme.get, call_568223.host, call_568223.base,
-                         call_568223.route, valid.getOrDefault("path"),
+  let url = call_564123.url(scheme.get, call_564123.host, call_564123.base,
+                         call_564123.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568223, url, valid)
+  result = hook(call_564123, url, valid)
 
-proc call*(call_568224: Call_PublicIPAddressesCreateOrUpdate_568198;
-          resourceGroupName: string; apiVersion: string;
-          publicIpAddressName: string; subscriptionId: string; parameters: JsonNode): Recallable =
+proc call*(call_564124: Call_PublicIPAddressesCreateOrUpdate_564098;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string;
+          parameters: JsonNode; publicIpAddressName: string): Recallable =
   ## publicIPAddressesCreateOrUpdate
   ## Creates or updates a static or dynamic public IP address.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client API version.
-  ##   publicIpAddressName: string (required)
-  ##                      : The name of the public IP address.
   ##   subscriptionId: string (required)
   ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   parameters: JObject (required)
   ##             : Parameters supplied to the create or update public IP address operation.
-  var path_568225 = newJObject()
-  var query_568226 = newJObject()
-  var body_568227 = newJObject()
-  add(path_568225, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568226, "api-version", newJString(apiVersion))
-  add(path_568225, "publicIpAddressName", newJString(publicIpAddressName))
-  add(path_568225, "subscriptionId", newJString(subscriptionId))
+  ##   publicIpAddressName: string (required)
+  ##                      : The name of the public IP address.
+  var path_564125 = newJObject()
+  var query_564126 = newJObject()
+  var body_564127 = newJObject()
+  add(query_564126, "api-version", newJString(apiVersion))
+  add(path_564125, "subscriptionId", newJString(subscriptionId))
+  add(path_564125, "resourceGroupName", newJString(resourceGroupName))
   if parameters != nil:
-    body_568227 = parameters
-  result = call_568224.call(path_568225, query_568226, nil, nil, body_568227)
+    body_564127 = parameters
+  add(path_564125, "publicIpAddressName", newJString(publicIpAddressName))
+  result = call_564124.call(path_564125, query_564126, nil, nil, body_564127)
 
-var publicIPAddressesCreateOrUpdate* = Call_PublicIPAddressesCreateOrUpdate_568198(
+var publicIPAddressesCreateOrUpdate* = Call_PublicIPAddressesCreateOrUpdate_564098(
     name: "publicIPAddressesCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/publicIPAddresses/{publicIpAddressName}",
-    validator: validate_PublicIPAddressesCreateOrUpdate_568199, base: "",
-    url: url_PublicIPAddressesCreateOrUpdate_568200, schemes: {Scheme.Https})
+    validator: validate_PublicIPAddressesCreateOrUpdate_564099, base: "",
+    url: url_PublicIPAddressesCreateOrUpdate_564100, schemes: {Scheme.Https})
 type
-  Call_PublicIPAddressesGet_568185 = ref object of OpenApiRestCall_567641
-proc url_PublicIPAddressesGet_568187(protocol: Scheme; host: string; base: string;
+  Call_PublicIPAddressesGet_564085 = ref object of OpenApiRestCall_563539
+proc url_PublicIPAddressesGet_564087(protocol: Scheme; host: string; base: string;
                                     route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -446,37 +450,37 @@ proc url_PublicIPAddressesGet_568187(protocol: Scheme; host: string; base: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_PublicIPAddressesGet_568186(path: JsonNode; query: JsonNode;
+proc validate_PublicIPAddressesGet_564086(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the specified public IP address in a specified resource group.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
+  ##   subscriptionId: JString (required)
+  ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   resourceGroupName: JString (required)
   ##                    : The name of the resource group.
   ##   publicIpAddressName: JString (required)
   ##                      : The name of the subnet.
-  ##   subscriptionId: JString (required)
-  ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568189 = path.getOrDefault("resourceGroupName")
-  valid_568189 = validateParameter(valid_568189, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564089 = path.getOrDefault("subscriptionId")
+  valid_564089 = validateParameter(valid_564089, JString, required = true,
                                  default = nil)
-  if valid_568189 != nil:
-    section.add "resourceGroupName", valid_568189
-  var valid_568190 = path.getOrDefault("publicIpAddressName")
-  valid_568190 = validateParameter(valid_568190, JString, required = true,
+  if valid_564089 != nil:
+    section.add "subscriptionId", valid_564089
+  var valid_564090 = path.getOrDefault("resourceGroupName")
+  valid_564090 = validateParameter(valid_564090, JString, required = true,
                                  default = nil)
-  if valid_568190 != nil:
-    section.add "publicIpAddressName", valid_568190
-  var valid_568191 = path.getOrDefault("subscriptionId")
-  valid_568191 = validateParameter(valid_568191, JString, required = true,
+  if valid_564090 != nil:
+    section.add "resourceGroupName", valid_564090
+  var valid_564091 = path.getOrDefault("publicIpAddressName")
+  valid_564091 = validateParameter(valid_564091, JString, required = true,
                                  default = nil)
-  if valid_568191 != nil:
-    section.add "subscriptionId", valid_568191
+  if valid_564091 != nil:
+    section.add "publicIpAddressName", valid_564091
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -486,16 +490,16 @@ proc validate_PublicIPAddressesGet_568186(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568192 = query.getOrDefault("api-version")
-  valid_568192 = validateParameter(valid_568192, JString, required = true,
+  var valid_564092 = query.getOrDefault("api-version")
+  valid_564092 = validateParameter(valid_564092, JString, required = true,
                                  default = nil)
-  if valid_568192 != nil:
-    section.add "api-version", valid_568192
-  var valid_568193 = query.getOrDefault("$expand")
-  valid_568193 = validateParameter(valid_568193, JString, required = false,
+  if valid_564092 != nil:
+    section.add "api-version", valid_564092
+  var valid_564093 = query.getOrDefault("$expand")
+  valid_564093 = validateParameter(valid_564093, JString, required = false,
                                  default = nil)
-  if valid_568193 != nil:
-    section.add "$expand", valid_568193
+  if valid_564093 != nil:
+    section.add "$expand", valid_564093
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -504,51 +508,51 @@ proc validate_PublicIPAddressesGet_568186(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568194: Call_PublicIPAddressesGet_568185; path: JsonNode;
+proc call*(call_564094: Call_PublicIPAddressesGet_564085; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the specified public IP address in a specified resource group.
   ## 
-  let valid = call_568194.validator(path, query, header, formData, body)
-  let scheme = call_568194.pickScheme
+  let valid = call_564094.validator(path, query, header, formData, body)
+  let scheme = call_564094.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568194.url(scheme.get, call_568194.host, call_568194.base,
-                         call_568194.route, valid.getOrDefault("path"),
+  let url = call_564094.url(scheme.get, call_564094.host, call_564094.base,
+                         call_564094.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568194, url, valid)
+  result = hook(call_564094, url, valid)
 
-proc call*(call_568195: Call_PublicIPAddressesGet_568185;
-          resourceGroupName: string; apiVersion: string;
-          publicIpAddressName: string; subscriptionId: string; Expand: string = ""): Recallable =
+proc call*(call_564095: Call_PublicIPAddressesGet_564085; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string;
+          publicIpAddressName: string; Expand: string = ""): Recallable =
   ## publicIPAddressesGet
   ## Gets the specified public IP address in a specified resource group.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client API version.
   ##   Expand: string
   ##         : Expands referenced resources.
-  ##   publicIpAddressName: string (required)
-  ##                      : The name of the subnet.
   ##   subscriptionId: string (required)
   ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_568196 = newJObject()
-  var query_568197 = newJObject()
-  add(path_568196, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568197, "api-version", newJString(apiVersion))
-  add(query_568197, "$expand", newJString(Expand))
-  add(path_568196, "publicIpAddressName", newJString(publicIpAddressName))
-  add(path_568196, "subscriptionId", newJString(subscriptionId))
-  result = call_568195.call(path_568196, query_568197, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  ##   publicIpAddressName: string (required)
+  ##                      : The name of the subnet.
+  var path_564096 = newJObject()
+  var query_564097 = newJObject()
+  add(query_564097, "api-version", newJString(apiVersion))
+  add(query_564097, "$expand", newJString(Expand))
+  add(path_564096, "subscriptionId", newJString(subscriptionId))
+  add(path_564096, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564096, "publicIpAddressName", newJString(publicIpAddressName))
+  result = call_564095.call(path_564096, query_564097, nil, nil, nil)
 
-var publicIPAddressesGet* = Call_PublicIPAddressesGet_568185(
+var publicIPAddressesGet* = Call_PublicIPAddressesGet_564085(
     name: "publicIPAddressesGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/publicIPAddresses/{publicIpAddressName}",
-    validator: validate_PublicIPAddressesGet_568186, base: "",
-    url: url_PublicIPAddressesGet_568187, schemes: {Scheme.Https})
+    validator: validate_PublicIPAddressesGet_564086, base: "",
+    url: url_PublicIPAddressesGet_564087, schemes: {Scheme.Https})
 type
-  Call_PublicIPAddressesDelete_568228 = ref object of OpenApiRestCall_567641
-proc url_PublicIPAddressesDelete_568230(protocol: Scheme; host: string; base: string;
+  Call_PublicIPAddressesDelete_564128 = ref object of OpenApiRestCall_563539
+proc url_PublicIPAddressesDelete_564130(protocol: Scheme; host: string; base: string;
                                        route: string; path: JsonNode;
                                        query: JsonNode): Uri =
   result.scheme = $protocol
@@ -573,37 +577,37 @@ proc url_PublicIPAddressesDelete_568230(protocol: Scheme; host: string; base: st
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_PublicIPAddressesDelete_568229(path: JsonNode; query: JsonNode;
+proc validate_PublicIPAddressesDelete_564129(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Deletes the specified public IP address.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
+  ##   subscriptionId: JString (required)
+  ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   resourceGroupName: JString (required)
   ##                    : The name of the resource group.
   ##   publicIpAddressName: JString (required)
   ##                      : The name of the subnet.
-  ##   subscriptionId: JString (required)
-  ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568231 = path.getOrDefault("resourceGroupName")
-  valid_568231 = validateParameter(valid_568231, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564131 = path.getOrDefault("subscriptionId")
+  valid_564131 = validateParameter(valid_564131, JString, required = true,
                                  default = nil)
-  if valid_568231 != nil:
-    section.add "resourceGroupName", valid_568231
-  var valid_568232 = path.getOrDefault("publicIpAddressName")
-  valid_568232 = validateParameter(valid_568232, JString, required = true,
+  if valid_564131 != nil:
+    section.add "subscriptionId", valid_564131
+  var valid_564132 = path.getOrDefault("resourceGroupName")
+  valid_564132 = validateParameter(valid_564132, JString, required = true,
                                  default = nil)
-  if valid_568232 != nil:
-    section.add "publicIpAddressName", valid_568232
-  var valid_568233 = path.getOrDefault("subscriptionId")
-  valid_568233 = validateParameter(valid_568233, JString, required = true,
+  if valid_564132 != nil:
+    section.add "resourceGroupName", valid_564132
+  var valid_564133 = path.getOrDefault("publicIpAddressName")
+  valid_564133 = validateParameter(valid_564133, JString, required = true,
                                  default = nil)
-  if valid_568233 != nil:
-    section.add "subscriptionId", valid_568233
+  if valid_564133 != nil:
+    section.add "publicIpAddressName", valid_564133
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -611,11 +615,11 @@ proc validate_PublicIPAddressesDelete_568229(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568234 = query.getOrDefault("api-version")
-  valid_568234 = validateParameter(valid_568234, JString, required = true,
+  var valid_564134 = query.getOrDefault("api-version")
+  valid_564134 = validateParameter(valid_564134, JString, required = true,
                                  default = nil)
-  if valid_568234 != nil:
-    section.add "api-version", valid_568234
+  if valid_564134 != nil:
+    section.add "api-version", valid_564134
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -624,45 +628,45 @@ proc validate_PublicIPAddressesDelete_568229(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568235: Call_PublicIPAddressesDelete_568228; path: JsonNode;
+proc call*(call_564135: Call_PublicIPAddressesDelete_564128; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes the specified public IP address.
   ## 
-  let valid = call_568235.validator(path, query, header, formData, body)
-  let scheme = call_568235.pickScheme
+  let valid = call_564135.validator(path, query, header, formData, body)
+  let scheme = call_564135.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568235.url(scheme.get, call_568235.host, call_568235.base,
-                         call_568235.route, valid.getOrDefault("path"),
+  let url = call_564135.url(scheme.get, call_564135.host, call_564135.base,
+                         call_564135.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568235, url, valid)
+  result = hook(call_564135, url, valid)
 
-proc call*(call_568236: Call_PublicIPAddressesDelete_568228;
-          resourceGroupName: string; apiVersion: string;
-          publicIpAddressName: string; subscriptionId: string): Recallable =
+proc call*(call_564136: Call_PublicIPAddressesDelete_564128; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string;
+          publicIpAddressName: string): Recallable =
   ## publicIPAddressesDelete
   ## Deletes the specified public IP address.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client API version.
-  ##   publicIpAddressName: string (required)
-  ##                      : The name of the subnet.
   ##   subscriptionId: string (required)
   ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_568237 = newJObject()
-  var query_568238 = newJObject()
-  add(path_568237, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568238, "api-version", newJString(apiVersion))
-  add(path_568237, "publicIpAddressName", newJString(publicIpAddressName))
-  add(path_568237, "subscriptionId", newJString(subscriptionId))
-  result = call_568236.call(path_568237, query_568238, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  ##   publicIpAddressName: string (required)
+  ##                      : The name of the subnet.
+  var path_564137 = newJObject()
+  var query_564138 = newJObject()
+  add(query_564138, "api-version", newJString(apiVersion))
+  add(path_564137, "subscriptionId", newJString(subscriptionId))
+  add(path_564137, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564137, "publicIpAddressName", newJString(publicIpAddressName))
+  result = call_564136.call(path_564137, query_564138, nil, nil, nil)
 
-var publicIPAddressesDelete* = Call_PublicIPAddressesDelete_568228(
+var publicIPAddressesDelete* = Call_PublicIPAddressesDelete_564128(
     name: "publicIPAddressesDelete", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/publicIPAddresses/{publicIpAddressName}",
-    validator: validate_PublicIPAddressesDelete_568229, base: "",
-    url: url_PublicIPAddressesDelete_568230, schemes: {Scheme.Https})
+    validator: validate_PublicIPAddressesDelete_564129, base: "",
+    url: url_PublicIPAddressesDelete_564130, schemes: {Scheme.Https})
 export
   rest
 

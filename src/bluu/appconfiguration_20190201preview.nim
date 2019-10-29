@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, httpcore
 
 ## auto-generated via openapi macro
 ## title: AppConfigurationManagementClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_567658 = ref object of OpenApiRestCall
+  OpenApiRestCall_563556 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_567658](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563556](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_567658): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563556): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,15 +107,15 @@ const
   macServiceName = "appconfiguration"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_OperationsList_567880 = ref object of OpenApiRestCall_567658
-proc url_OperationsList_567882(protocol: Scheme; host: string; base: string;
+  Call_OperationsList_563778 = ref object of OpenApiRestCall_563556
+proc url_OperationsList_563780(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_OperationsList_567881(path: JsonNode; query: JsonNode;
+proc validate_OperationsList_563779(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## Lists the operations available from this provider.
@@ -121,23 +125,23 @@ proc validate_OperationsList_567881(path: JsonNode; query: JsonNode;
   section = newJObject()
   result.add "path", section
   ## parameters in `query` object:
-  ##   api-version: JString (required)
-  ##              : The client API version.
   ##   $skipToken: JString
   ##             : A skip token is used to continue retrieving items after an operation returns a partial result. If a previous response contains a nextLink element, the value of the nextLink element will include a skipToken parameter that specifies a starting point to use for subsequent calls.
+  ##   api-version: JString (required)
+  ##              : The client API version.
   section = newJObject()
+  var valid_563942 = query.getOrDefault("$skipToken")
+  valid_563942 = validateParameter(valid_563942, JString, required = false,
+                                 default = nil)
+  if valid_563942 != nil:
+    section.add "$skipToken", valid_563942
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568042 = query.getOrDefault("api-version")
-  valid_568042 = validateParameter(valid_568042, JString, required = true,
+  var valid_563943 = query.getOrDefault("api-version")
+  valid_563943 = validateParameter(valid_563943, JString, required = true,
                                  default = nil)
-  if valid_568042 != nil:
-    section.add "api-version", valid_568042
-  var valid_568043 = query.getOrDefault("$skipToken")
-  valid_568043 = validateParameter(valid_568043, JString, required = false,
-                                 default = nil)
-  if valid_568043 != nil:
-    section.add "$skipToken", valid_568043
+  if valid_563943 != nil:
+    section.add "api-version", valid_563943
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -146,40 +150,40 @@ proc validate_OperationsList_567881(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568066: Call_OperationsList_567880; path: JsonNode; query: JsonNode;
+proc call*(call_563966: Call_OperationsList_563778; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists the operations available from this provider.
   ## 
-  let valid = call_568066.validator(path, query, header, formData, body)
-  let scheme = call_568066.pickScheme
+  let valid = call_563966.validator(path, query, header, formData, body)
+  let scheme = call_563966.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568066.url(scheme.get, call_568066.host, call_568066.base,
-                         call_568066.route, valid.getOrDefault("path"),
+  let url = call_563966.url(scheme.get, call_563966.host, call_563966.base,
+                         call_563966.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568066, url, valid)
+  result = hook(call_563966, url, valid)
 
-proc call*(call_568137: Call_OperationsList_567880; apiVersion: string;
+proc call*(call_564037: Call_OperationsList_563778; apiVersion: string;
           SkipToken: string = ""): Recallable =
   ## operationsList
   ## Lists the operations available from this provider.
-  ##   apiVersion: string (required)
-  ##             : The client API version.
   ##   SkipToken: string
   ##            : A skip token is used to continue retrieving items after an operation returns a partial result. If a previous response contains a nextLink element, the value of the nextLink element will include a skipToken parameter that specifies a starting point to use for subsequent calls.
-  var query_568138 = newJObject()
-  add(query_568138, "api-version", newJString(apiVersion))
-  add(query_568138, "$skipToken", newJString(SkipToken))
-  result = call_568137.call(nil, query_568138, nil, nil, nil)
+  ##   apiVersion: string (required)
+  ##             : The client API version.
+  var query_564038 = newJObject()
+  add(query_564038, "$skipToken", newJString(SkipToken))
+  add(query_564038, "api-version", newJString(apiVersion))
+  result = call_564037.call(nil, query_564038, nil, nil, nil)
 
-var operationsList* = Call_OperationsList_567880(name: "operationsList",
+var operationsList* = Call_OperationsList_563778(name: "operationsList",
     meth: HttpMethod.HttpGet, host: "management.azure.com",
     route: "/providers/Microsoft.AppConfiguration/operations",
-    validator: validate_OperationsList_567881, base: "", url: url_OperationsList_567882,
+    validator: validate_OperationsList_563779, base: "", url: url_OperationsList_563780,
     schemes: {Scheme.Https})
 type
-  Call_OperationsCheckNameAvailability_568178 = ref object of OpenApiRestCall_567658
-proc url_OperationsCheckNameAvailability_568180(protocol: Scheme; host: string;
+  Call_OperationsCheckNameAvailability_564078 = ref object of OpenApiRestCall_563556
+proc url_OperationsCheckNameAvailability_564080(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -196,7 +200,7 @@ proc url_OperationsCheckNameAvailability_568180(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_OperationsCheckNameAvailability_568179(path: JsonNode;
+proc validate_OperationsCheckNameAvailability_564079(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Checks whether the configuration store name is available for use.
   ## 
@@ -208,11 +212,11 @@ proc validate_OperationsCheckNameAvailability_568179(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_568195 = path.getOrDefault("subscriptionId")
-  valid_568195 = validateParameter(valid_568195, JString, required = true,
+  var valid_564095 = path.getOrDefault("subscriptionId")
+  valid_564095 = validateParameter(valid_564095, JString, required = true,
                                  default = nil)
-  if valid_568195 != nil:
-    section.add "subscriptionId", valid_568195
+  if valid_564095 != nil:
+    section.add "subscriptionId", valid_564095
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -220,11 +224,11 @@ proc validate_OperationsCheckNameAvailability_568179(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568196 = query.getOrDefault("api-version")
-  valid_568196 = validateParameter(valid_568196, JString, required = true,
+  var valid_564096 = query.getOrDefault("api-version")
+  valid_564096 = validateParameter(valid_564096, JString, required = true,
                                  default = nil)
-  if valid_568196 != nil:
-    section.add "api-version", valid_568196
+  if valid_564096 != nil:
+    section.add "api-version", valid_564096
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -238,48 +242,48 @@ proc validate_OperationsCheckNameAvailability_568179(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568198: Call_OperationsCheckNameAvailability_568178;
+proc call*(call_564098: Call_OperationsCheckNameAvailability_564078;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Checks whether the configuration store name is available for use.
   ## 
-  let valid = call_568198.validator(path, query, header, formData, body)
-  let scheme = call_568198.pickScheme
+  let valid = call_564098.validator(path, query, header, formData, body)
+  let scheme = call_564098.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568198.url(scheme.get, call_568198.host, call_568198.base,
-                         call_568198.route, valid.getOrDefault("path"),
+  let url = call_564098.url(scheme.get, call_564098.host, call_564098.base,
+                         call_564098.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568198, url, valid)
+  result = hook(call_564098, url, valid)
 
-proc call*(call_568199: Call_OperationsCheckNameAvailability_568178;
-          checkNameAvailabilityParameters: JsonNode; apiVersion: string;
-          subscriptionId: string): Recallable =
+proc call*(call_564099: Call_OperationsCheckNameAvailability_564078;
+          apiVersion: string; subscriptionId: string;
+          checkNameAvailabilityParameters: JsonNode): Recallable =
   ## operationsCheckNameAvailability
   ## Checks whether the configuration store name is available for use.
-  ##   checkNameAvailabilityParameters: JObject (required)
-  ##                                  : The object containing information for the availability request.
   ##   apiVersion: string (required)
   ##             : The client API version.
   ##   subscriptionId: string (required)
   ##                 : The Microsoft Azure subscription ID.
-  var path_568200 = newJObject()
-  var query_568201 = newJObject()
-  var body_568202 = newJObject()
+  ##   checkNameAvailabilityParameters: JObject (required)
+  ##                                  : The object containing information for the availability request.
+  var path_564100 = newJObject()
+  var query_564101 = newJObject()
+  var body_564102 = newJObject()
+  add(query_564101, "api-version", newJString(apiVersion))
+  add(path_564100, "subscriptionId", newJString(subscriptionId))
   if checkNameAvailabilityParameters != nil:
-    body_568202 = checkNameAvailabilityParameters
-  add(query_568201, "api-version", newJString(apiVersion))
-  add(path_568200, "subscriptionId", newJString(subscriptionId))
-  result = call_568199.call(path_568200, query_568201, nil, nil, body_568202)
+    body_564102 = checkNameAvailabilityParameters
+  result = call_564099.call(path_564100, query_564101, nil, nil, body_564102)
 
-var operationsCheckNameAvailability* = Call_OperationsCheckNameAvailability_568178(
+var operationsCheckNameAvailability* = Call_OperationsCheckNameAvailability_564078(
     name: "operationsCheckNameAvailability", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.AppConfiguration/checkNameAvailability",
-    validator: validate_OperationsCheckNameAvailability_568179, base: "",
-    url: url_OperationsCheckNameAvailability_568180, schemes: {Scheme.Https})
+    validator: validate_OperationsCheckNameAvailability_564079, base: "",
+    url: url_OperationsCheckNameAvailability_564080, schemes: {Scheme.Https})
 type
-  Call_ConfigurationStoresList_568203 = ref object of OpenApiRestCall_567658
-proc url_ConfigurationStoresList_568205(protocol: Scheme; host: string; base: string;
+  Call_ConfigurationStoresList_564103 = ref object of OpenApiRestCall_563556
+proc url_ConfigurationStoresList_564105(protocol: Scheme; host: string; base: string;
                                        route: string; path: JsonNode;
                                        query: JsonNode): Uri =
   result.scheme = $protocol
@@ -297,7 +301,7 @@ proc url_ConfigurationStoresList_568205(protocol: Scheme; host: string; base: st
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ConfigurationStoresList_568204(path: JsonNode; query: JsonNode;
+proc validate_ConfigurationStoresList_564104(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists the configuration stores for a given subscription.
   ## 
@@ -309,30 +313,30 @@ proc validate_ConfigurationStoresList_568204(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_568206 = path.getOrDefault("subscriptionId")
-  valid_568206 = validateParameter(valid_568206, JString, required = true,
+  var valid_564106 = path.getOrDefault("subscriptionId")
+  valid_564106 = validateParameter(valid_564106, JString, required = true,
                                  default = nil)
-  if valid_568206 != nil:
-    section.add "subscriptionId", valid_568206
+  if valid_564106 != nil:
+    section.add "subscriptionId", valid_564106
   result.add "path", section
   ## parameters in `query` object:
-  ##   api-version: JString (required)
-  ##              : The client API version.
   ##   $skipToken: JString
   ##             : A skip token is used to continue retrieving items after an operation returns a partial result. If a previous response contains a nextLink element, the value of the nextLink element will include a skipToken parameter that specifies a starting point to use for subsequent calls.
+  ##   api-version: JString (required)
+  ##              : The client API version.
   section = newJObject()
+  var valid_564107 = query.getOrDefault("$skipToken")
+  valid_564107 = validateParameter(valid_564107, JString, required = false,
+                                 default = nil)
+  if valid_564107 != nil:
+    section.add "$skipToken", valid_564107
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568207 = query.getOrDefault("api-version")
-  valid_568207 = validateParameter(valid_568207, JString, required = true,
+  var valid_564108 = query.getOrDefault("api-version")
+  valid_564108 = validateParameter(valid_564108, JString, required = true,
                                  default = nil)
-  if valid_568207 != nil:
-    section.add "api-version", valid_568207
-  var valid_568208 = query.getOrDefault("$skipToken")
-  valid_568208 = validateParameter(valid_568208, JString, required = false,
-                                 default = nil)
-  if valid_568208 != nil:
-    section.add "$skipToken", valid_568208
+  if valid_564108 != nil:
+    section.add "api-version", valid_564108
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -341,44 +345,44 @@ proc validate_ConfigurationStoresList_568204(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568209: Call_ConfigurationStoresList_568203; path: JsonNode;
+proc call*(call_564109: Call_ConfigurationStoresList_564103; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists the configuration stores for a given subscription.
   ## 
-  let valid = call_568209.validator(path, query, header, formData, body)
-  let scheme = call_568209.pickScheme
+  let valid = call_564109.validator(path, query, header, formData, body)
+  let scheme = call_564109.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568209.url(scheme.get, call_568209.host, call_568209.base,
-                         call_568209.route, valid.getOrDefault("path"),
+  let url = call_564109.url(scheme.get, call_564109.host, call_564109.base,
+                         call_564109.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568209, url, valid)
+  result = hook(call_564109, url, valid)
 
-proc call*(call_568210: Call_ConfigurationStoresList_568203; apiVersion: string;
+proc call*(call_564110: Call_ConfigurationStoresList_564103; apiVersion: string;
           subscriptionId: string; SkipToken: string = ""): Recallable =
   ## configurationStoresList
   ## Lists the configuration stores for a given subscription.
+  ##   SkipToken: string
+  ##            : A skip token is used to continue retrieving items after an operation returns a partial result. If a previous response contains a nextLink element, the value of the nextLink element will include a skipToken parameter that specifies a starting point to use for subsequent calls.
   ##   apiVersion: string (required)
   ##             : The client API version.
   ##   subscriptionId: string (required)
   ##                 : The Microsoft Azure subscription ID.
-  ##   SkipToken: string
-  ##            : A skip token is used to continue retrieving items after an operation returns a partial result. If a previous response contains a nextLink element, the value of the nextLink element will include a skipToken parameter that specifies a starting point to use for subsequent calls.
-  var path_568211 = newJObject()
-  var query_568212 = newJObject()
-  add(query_568212, "api-version", newJString(apiVersion))
-  add(path_568211, "subscriptionId", newJString(subscriptionId))
-  add(query_568212, "$skipToken", newJString(SkipToken))
-  result = call_568210.call(path_568211, query_568212, nil, nil, nil)
+  var path_564111 = newJObject()
+  var query_564112 = newJObject()
+  add(query_564112, "$skipToken", newJString(SkipToken))
+  add(query_564112, "api-version", newJString(apiVersion))
+  add(path_564111, "subscriptionId", newJString(subscriptionId))
+  result = call_564110.call(path_564111, query_564112, nil, nil, nil)
 
-var configurationStoresList* = Call_ConfigurationStoresList_568203(
+var configurationStoresList* = Call_ConfigurationStoresList_564103(
     name: "configurationStoresList", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.AppConfiguration/configurationStores",
-    validator: validate_ConfigurationStoresList_568204, base: "",
-    url: url_ConfigurationStoresList_568205, schemes: {Scheme.Https})
+    validator: validate_ConfigurationStoresList_564104, base: "",
+    url: url_ConfigurationStoresList_564105, schemes: {Scheme.Https})
 type
-  Call_ConfigurationStoresListByResourceGroup_568213 = ref object of OpenApiRestCall_567658
-proc url_ConfigurationStoresListByResourceGroup_568215(protocol: Scheme;
+  Call_ConfigurationStoresListByResourceGroup_564113 = ref object of OpenApiRestCall_563556
+proc url_ConfigurationStoresListByResourceGroup_564115(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -399,49 +403,49 @@ proc url_ConfigurationStoresListByResourceGroup_568215(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ConfigurationStoresListByResourceGroup_568214(path: JsonNode;
+proc validate_ConfigurationStoresListByResourceGroup_564114(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists the configuration stores for a given resource group.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group to which the container registry belongs.
   ##   subscriptionId: JString (required)
   ##                 : The Microsoft Azure subscription ID.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group to which the container registry belongs.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568216 = path.getOrDefault("resourceGroupName")
-  valid_568216 = validateParameter(valid_568216, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564116 = path.getOrDefault("subscriptionId")
+  valid_564116 = validateParameter(valid_564116, JString, required = true,
                                  default = nil)
-  if valid_568216 != nil:
-    section.add "resourceGroupName", valid_568216
-  var valid_568217 = path.getOrDefault("subscriptionId")
-  valid_568217 = validateParameter(valid_568217, JString, required = true,
+  if valid_564116 != nil:
+    section.add "subscriptionId", valid_564116
+  var valid_564117 = path.getOrDefault("resourceGroupName")
+  valid_564117 = validateParameter(valid_564117, JString, required = true,
                                  default = nil)
-  if valid_568217 != nil:
-    section.add "subscriptionId", valid_568217
+  if valid_564117 != nil:
+    section.add "resourceGroupName", valid_564117
   result.add "path", section
   ## parameters in `query` object:
-  ##   api-version: JString (required)
-  ##              : The client API version.
   ##   $skipToken: JString
   ##             : A skip token is used to continue retrieving items after an operation returns a partial result. If a previous response contains a nextLink element, the value of the nextLink element will include a skipToken parameter that specifies a starting point to use for subsequent calls.
+  ##   api-version: JString (required)
+  ##              : The client API version.
   section = newJObject()
+  var valid_564118 = query.getOrDefault("$skipToken")
+  valid_564118 = validateParameter(valid_564118, JString, required = false,
+                                 default = nil)
+  if valid_564118 != nil:
+    section.add "$skipToken", valid_564118
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568218 = query.getOrDefault("api-version")
-  valid_568218 = validateParameter(valid_568218, JString, required = true,
+  var valid_564119 = query.getOrDefault("api-version")
+  valid_564119 = validateParameter(valid_564119, JString, required = true,
                                  default = nil)
-  if valid_568218 != nil:
-    section.add "api-version", valid_568218
-  var valid_568219 = query.getOrDefault("$skipToken")
-  valid_568219 = validateParameter(valid_568219, JString, required = false,
-                                 default = nil)
-  if valid_568219 != nil:
-    section.add "$skipToken", valid_568219
+  if valid_564119 != nil:
+    section.add "api-version", valid_564119
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -450,50 +454,50 @@ proc validate_ConfigurationStoresListByResourceGroup_568214(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568220: Call_ConfigurationStoresListByResourceGroup_568213;
+proc call*(call_564120: Call_ConfigurationStoresListByResourceGroup_564113;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Lists the configuration stores for a given resource group.
   ## 
-  let valid = call_568220.validator(path, query, header, formData, body)
-  let scheme = call_568220.pickScheme
+  let valid = call_564120.validator(path, query, header, formData, body)
+  let scheme = call_564120.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568220.url(scheme.get, call_568220.host, call_568220.base,
-                         call_568220.route, valid.getOrDefault("path"),
+  let url = call_564120.url(scheme.get, call_564120.host, call_564120.base,
+                         call_564120.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568220, url, valid)
+  result = hook(call_564120, url, valid)
 
-proc call*(call_568221: Call_ConfigurationStoresListByResourceGroup_568213;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
+proc call*(call_564121: Call_ConfigurationStoresListByResourceGroup_564113;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string;
           SkipToken: string = ""): Recallable =
   ## configurationStoresListByResourceGroup
   ## Lists the configuration stores for a given resource group.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group to which the container registry belongs.
+  ##   SkipToken: string
+  ##            : A skip token is used to continue retrieving items after an operation returns a partial result. If a previous response contains a nextLink element, the value of the nextLink element will include a skipToken parameter that specifies a starting point to use for subsequent calls.
   ##   apiVersion: string (required)
   ##             : The client API version.
   ##   subscriptionId: string (required)
   ##                 : The Microsoft Azure subscription ID.
-  ##   SkipToken: string
-  ##            : A skip token is used to continue retrieving items after an operation returns a partial result. If a previous response contains a nextLink element, the value of the nextLink element will include a skipToken parameter that specifies a starting point to use for subsequent calls.
-  var path_568222 = newJObject()
-  var query_568223 = newJObject()
-  add(path_568222, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568223, "api-version", newJString(apiVersion))
-  add(path_568222, "subscriptionId", newJString(subscriptionId))
-  add(query_568223, "$skipToken", newJString(SkipToken))
-  result = call_568221.call(path_568222, query_568223, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group to which the container registry belongs.
+  var path_564122 = newJObject()
+  var query_564123 = newJObject()
+  add(query_564123, "$skipToken", newJString(SkipToken))
+  add(query_564123, "api-version", newJString(apiVersion))
+  add(path_564122, "subscriptionId", newJString(subscriptionId))
+  add(path_564122, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564121.call(path_564122, query_564123, nil, nil, nil)
 
-var configurationStoresListByResourceGroup* = Call_ConfigurationStoresListByResourceGroup_568213(
+var configurationStoresListByResourceGroup* = Call_ConfigurationStoresListByResourceGroup_564113(
     name: "configurationStoresListByResourceGroup", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.AppConfiguration/configurationStores",
-    validator: validate_ConfigurationStoresListByResourceGroup_568214, base: "",
-    url: url_ConfigurationStoresListByResourceGroup_568215,
+    validator: validate_ConfigurationStoresListByResourceGroup_564114, base: "",
+    url: url_ConfigurationStoresListByResourceGroup_564115,
     schemes: {Scheme.Https})
 type
-  Call_ConfigurationStoresCreate_568235 = ref object of OpenApiRestCall_567658
-proc url_ConfigurationStoresCreate_568237(protocol: Scheme; host: string;
+  Call_ConfigurationStoresCreate_564135 = ref object of OpenApiRestCall_563556
+proc url_ConfigurationStoresCreate_564137(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -516,37 +520,37 @@ proc url_ConfigurationStoresCreate_568237(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ConfigurationStoresCreate_568236(path: JsonNode; query: JsonNode;
+proc validate_ConfigurationStoresCreate_564136(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Creates a configuration store with the specified parameters.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group to which the container registry belongs.
-  ##   subscriptionId: JString (required)
-  ##                 : The Microsoft Azure subscription ID.
   ##   configStoreName: JString (required)
   ##                  : The name of the configuration store.
+  ##   subscriptionId: JString (required)
+  ##                 : The Microsoft Azure subscription ID.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group to which the container registry belongs.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568238 = path.getOrDefault("resourceGroupName")
-  valid_568238 = validateParameter(valid_568238, JString, required = true,
+        "path argument is necessary due to required `configStoreName` field"
+  var valid_564138 = path.getOrDefault("configStoreName")
+  valid_564138 = validateParameter(valid_564138, JString, required = true,
                                  default = nil)
-  if valid_568238 != nil:
-    section.add "resourceGroupName", valid_568238
-  var valid_568239 = path.getOrDefault("subscriptionId")
-  valid_568239 = validateParameter(valid_568239, JString, required = true,
+  if valid_564138 != nil:
+    section.add "configStoreName", valid_564138
+  var valid_564139 = path.getOrDefault("subscriptionId")
+  valid_564139 = validateParameter(valid_564139, JString, required = true,
                                  default = nil)
-  if valid_568239 != nil:
-    section.add "subscriptionId", valid_568239
-  var valid_568240 = path.getOrDefault("configStoreName")
-  valid_568240 = validateParameter(valid_568240, JString, required = true,
+  if valid_564139 != nil:
+    section.add "subscriptionId", valid_564139
+  var valid_564140 = path.getOrDefault("resourceGroupName")
+  valid_564140 = validateParameter(valid_564140, JString, required = true,
                                  default = nil)
-  if valid_568240 != nil:
-    section.add "configStoreName", valid_568240
+  if valid_564140 != nil:
+    section.add "resourceGroupName", valid_564140
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -554,11 +558,11 @@ proc validate_ConfigurationStoresCreate_568236(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568241 = query.getOrDefault("api-version")
-  valid_568241 = validateParameter(valid_568241, JString, required = true,
+  var valid_564141 = query.getOrDefault("api-version")
+  valid_564141 = validateParameter(valid_564141, JString, required = true,
                                  default = nil)
-  if valid_568241 != nil:
-    section.add "api-version", valid_568241
+  if valid_564141 != nil:
+    section.add "api-version", valid_564141
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -572,53 +576,54 @@ proc validate_ConfigurationStoresCreate_568236(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568243: Call_ConfigurationStoresCreate_568235; path: JsonNode;
+proc call*(call_564143: Call_ConfigurationStoresCreate_564135; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Creates a configuration store with the specified parameters.
   ## 
-  let valid = call_568243.validator(path, query, header, formData, body)
-  let scheme = call_568243.pickScheme
+  let valid = call_564143.validator(path, query, header, formData, body)
+  let scheme = call_564143.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568243.url(scheme.get, call_568243.host, call_568243.base,
-                         call_568243.route, valid.getOrDefault("path"),
+  let url = call_564143.url(scheme.get, call_564143.host, call_564143.base,
+                         call_564143.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568243, url, valid)
+  result = hook(call_564143, url, valid)
 
-proc call*(call_568244: Call_ConfigurationStoresCreate_568235;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          configStoreCreationParameters: JsonNode; configStoreName: string): Recallable =
+proc call*(call_564144: Call_ConfigurationStoresCreate_564135;
+          configStoreName: string; apiVersion: string;
+          configStoreCreationParameters: JsonNode; subscriptionId: string;
+          resourceGroupName: string): Recallable =
   ## configurationStoresCreate
   ## Creates a configuration store with the specified parameters.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group to which the container registry belongs.
-  ##   apiVersion: string (required)
-  ##             : The client API version.
-  ##   subscriptionId: string (required)
-  ##                 : The Microsoft Azure subscription ID.
-  ##   configStoreCreationParameters: JObject (required)
-  ##                                : The parameters for creating a configuration store.
   ##   configStoreName: string (required)
   ##                  : The name of the configuration store.
-  var path_568245 = newJObject()
-  var query_568246 = newJObject()
-  var body_568247 = newJObject()
-  add(path_568245, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568246, "api-version", newJString(apiVersion))
-  add(path_568245, "subscriptionId", newJString(subscriptionId))
+  ##   apiVersion: string (required)
+  ##             : The client API version.
+  ##   configStoreCreationParameters: JObject (required)
+  ##                                : The parameters for creating a configuration store.
+  ##   subscriptionId: string (required)
+  ##                 : The Microsoft Azure subscription ID.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group to which the container registry belongs.
+  var path_564145 = newJObject()
+  var query_564146 = newJObject()
+  var body_564147 = newJObject()
+  add(path_564145, "configStoreName", newJString(configStoreName))
+  add(query_564146, "api-version", newJString(apiVersion))
   if configStoreCreationParameters != nil:
-    body_568247 = configStoreCreationParameters
-  add(path_568245, "configStoreName", newJString(configStoreName))
-  result = call_568244.call(path_568245, query_568246, nil, nil, body_568247)
+    body_564147 = configStoreCreationParameters
+  add(path_564145, "subscriptionId", newJString(subscriptionId))
+  add(path_564145, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564144.call(path_564145, query_564146, nil, nil, body_564147)
 
-var configurationStoresCreate* = Call_ConfigurationStoresCreate_568235(
+var configurationStoresCreate* = Call_ConfigurationStoresCreate_564135(
     name: "configurationStoresCreate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.AppConfiguration/configurationStores/{configStoreName}",
-    validator: validate_ConfigurationStoresCreate_568236, base: "",
-    url: url_ConfigurationStoresCreate_568237, schemes: {Scheme.Https})
+    validator: validate_ConfigurationStoresCreate_564136, base: "",
+    url: url_ConfigurationStoresCreate_564137, schemes: {Scheme.Https})
 type
-  Call_ConfigurationStoresGet_568224 = ref object of OpenApiRestCall_567658
-proc url_ConfigurationStoresGet_568226(protocol: Scheme; host: string; base: string;
+  Call_ConfigurationStoresGet_564124 = ref object of OpenApiRestCall_563556
+proc url_ConfigurationStoresGet_564126(protocol: Scheme; host: string; base: string;
                                       route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -641,37 +646,37 @@ proc url_ConfigurationStoresGet_568226(protocol: Scheme; host: string; base: str
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ConfigurationStoresGet_568225(path: JsonNode; query: JsonNode;
+proc validate_ConfigurationStoresGet_564125(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the properties of the specified configuration store.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group to which the container registry belongs.
-  ##   subscriptionId: JString (required)
-  ##                 : The Microsoft Azure subscription ID.
   ##   configStoreName: JString (required)
   ##                  : The name of the configuration store.
+  ##   subscriptionId: JString (required)
+  ##                 : The Microsoft Azure subscription ID.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group to which the container registry belongs.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568227 = path.getOrDefault("resourceGroupName")
-  valid_568227 = validateParameter(valid_568227, JString, required = true,
+        "path argument is necessary due to required `configStoreName` field"
+  var valid_564127 = path.getOrDefault("configStoreName")
+  valid_564127 = validateParameter(valid_564127, JString, required = true,
                                  default = nil)
-  if valid_568227 != nil:
-    section.add "resourceGroupName", valid_568227
-  var valid_568228 = path.getOrDefault("subscriptionId")
-  valid_568228 = validateParameter(valid_568228, JString, required = true,
+  if valid_564127 != nil:
+    section.add "configStoreName", valid_564127
+  var valid_564128 = path.getOrDefault("subscriptionId")
+  valid_564128 = validateParameter(valid_564128, JString, required = true,
                                  default = nil)
-  if valid_568228 != nil:
-    section.add "subscriptionId", valid_568228
-  var valid_568229 = path.getOrDefault("configStoreName")
-  valid_568229 = validateParameter(valid_568229, JString, required = true,
+  if valid_564128 != nil:
+    section.add "subscriptionId", valid_564128
+  var valid_564129 = path.getOrDefault("resourceGroupName")
+  valid_564129 = validateParameter(valid_564129, JString, required = true,
                                  default = nil)
-  if valid_568229 != nil:
-    section.add "configStoreName", valid_568229
+  if valid_564129 != nil:
+    section.add "resourceGroupName", valid_564129
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -679,11 +684,11 @@ proc validate_ConfigurationStoresGet_568225(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568230 = query.getOrDefault("api-version")
-  valid_568230 = validateParameter(valid_568230, JString, required = true,
+  var valid_564130 = query.getOrDefault("api-version")
+  valid_564130 = validateParameter(valid_564130, JString, required = true,
                                  default = nil)
-  if valid_568230 != nil:
-    section.add "api-version", valid_568230
+  if valid_564130 != nil:
+    section.add "api-version", valid_564130
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -692,48 +697,48 @@ proc validate_ConfigurationStoresGet_568225(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568231: Call_ConfigurationStoresGet_568224; path: JsonNode;
+proc call*(call_564131: Call_ConfigurationStoresGet_564124; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the properties of the specified configuration store.
   ## 
-  let valid = call_568231.validator(path, query, header, formData, body)
-  let scheme = call_568231.pickScheme
+  let valid = call_564131.validator(path, query, header, formData, body)
+  let scheme = call_564131.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568231.url(scheme.get, call_568231.host, call_568231.base,
-                         call_568231.route, valid.getOrDefault("path"),
+  let url = call_564131.url(scheme.get, call_564131.host, call_564131.base,
+                         call_564131.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568231, url, valid)
+  result = hook(call_564131, url, valid)
 
-proc call*(call_568232: Call_ConfigurationStoresGet_568224;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          configStoreName: string): Recallable =
+proc call*(call_564132: Call_ConfigurationStoresGet_564124;
+          configStoreName: string; apiVersion: string; subscriptionId: string;
+          resourceGroupName: string): Recallable =
   ## configurationStoresGet
   ## Gets the properties of the specified configuration store.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group to which the container registry belongs.
+  ##   configStoreName: string (required)
+  ##                  : The name of the configuration store.
   ##   apiVersion: string (required)
   ##             : The client API version.
   ##   subscriptionId: string (required)
   ##                 : The Microsoft Azure subscription ID.
-  ##   configStoreName: string (required)
-  ##                  : The name of the configuration store.
-  var path_568233 = newJObject()
-  var query_568234 = newJObject()
-  add(path_568233, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568234, "api-version", newJString(apiVersion))
-  add(path_568233, "subscriptionId", newJString(subscriptionId))
-  add(path_568233, "configStoreName", newJString(configStoreName))
-  result = call_568232.call(path_568233, query_568234, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group to which the container registry belongs.
+  var path_564133 = newJObject()
+  var query_564134 = newJObject()
+  add(path_564133, "configStoreName", newJString(configStoreName))
+  add(query_564134, "api-version", newJString(apiVersion))
+  add(path_564133, "subscriptionId", newJString(subscriptionId))
+  add(path_564133, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564132.call(path_564133, query_564134, nil, nil, nil)
 
-var configurationStoresGet* = Call_ConfigurationStoresGet_568224(
+var configurationStoresGet* = Call_ConfigurationStoresGet_564124(
     name: "configurationStoresGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.AppConfiguration/configurationStores/{configStoreName}",
-    validator: validate_ConfigurationStoresGet_568225, base: "",
-    url: url_ConfigurationStoresGet_568226, schemes: {Scheme.Https})
+    validator: validate_ConfigurationStoresGet_564125, base: "",
+    url: url_ConfigurationStoresGet_564126, schemes: {Scheme.Https})
 type
-  Call_ConfigurationStoresUpdate_568259 = ref object of OpenApiRestCall_567658
-proc url_ConfigurationStoresUpdate_568261(protocol: Scheme; host: string;
+  Call_ConfigurationStoresUpdate_564159 = ref object of OpenApiRestCall_563556
+proc url_ConfigurationStoresUpdate_564161(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -756,37 +761,37 @@ proc url_ConfigurationStoresUpdate_568261(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ConfigurationStoresUpdate_568260(path: JsonNode; query: JsonNode;
+proc validate_ConfigurationStoresUpdate_564160(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Updates a configuration store with the specified parameters.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group to which the container registry belongs.
-  ##   subscriptionId: JString (required)
-  ##                 : The Microsoft Azure subscription ID.
   ##   configStoreName: JString (required)
   ##                  : The name of the configuration store.
+  ##   subscriptionId: JString (required)
+  ##                 : The Microsoft Azure subscription ID.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group to which the container registry belongs.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568262 = path.getOrDefault("resourceGroupName")
-  valid_568262 = validateParameter(valid_568262, JString, required = true,
+        "path argument is necessary due to required `configStoreName` field"
+  var valid_564162 = path.getOrDefault("configStoreName")
+  valid_564162 = validateParameter(valid_564162, JString, required = true,
                                  default = nil)
-  if valid_568262 != nil:
-    section.add "resourceGroupName", valid_568262
-  var valid_568263 = path.getOrDefault("subscriptionId")
-  valid_568263 = validateParameter(valid_568263, JString, required = true,
+  if valid_564162 != nil:
+    section.add "configStoreName", valid_564162
+  var valid_564163 = path.getOrDefault("subscriptionId")
+  valid_564163 = validateParameter(valid_564163, JString, required = true,
                                  default = nil)
-  if valid_568263 != nil:
-    section.add "subscriptionId", valid_568263
-  var valid_568264 = path.getOrDefault("configStoreName")
-  valid_568264 = validateParameter(valid_568264, JString, required = true,
+  if valid_564163 != nil:
+    section.add "subscriptionId", valid_564163
+  var valid_564164 = path.getOrDefault("resourceGroupName")
+  valid_564164 = validateParameter(valid_564164, JString, required = true,
                                  default = nil)
-  if valid_568264 != nil:
-    section.add "configStoreName", valid_568264
+  if valid_564164 != nil:
+    section.add "resourceGroupName", valid_564164
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -794,11 +799,11 @@ proc validate_ConfigurationStoresUpdate_568260(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568265 = query.getOrDefault("api-version")
-  valid_568265 = validateParameter(valid_568265, JString, required = true,
+  var valid_564165 = query.getOrDefault("api-version")
+  valid_564165 = validateParameter(valid_564165, JString, required = true,
                                  default = nil)
-  if valid_568265 != nil:
-    section.add "api-version", valid_568265
+  if valid_564165 != nil:
+    section.add "api-version", valid_564165
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -812,53 +817,53 @@ proc validate_ConfigurationStoresUpdate_568260(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568267: Call_ConfigurationStoresUpdate_568259; path: JsonNode;
+proc call*(call_564167: Call_ConfigurationStoresUpdate_564159; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Updates a configuration store with the specified parameters.
   ## 
-  let valid = call_568267.validator(path, query, header, formData, body)
-  let scheme = call_568267.pickScheme
+  let valid = call_564167.validator(path, query, header, formData, body)
+  let scheme = call_564167.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568267.url(scheme.get, call_568267.host, call_568267.base,
-                         call_568267.route, valid.getOrDefault("path"),
+  let url = call_564167.url(scheme.get, call_564167.host, call_564167.base,
+                         call_564167.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568267, url, valid)
+  result = hook(call_564167, url, valid)
 
-proc call*(call_568268: Call_ConfigurationStoresUpdate_568259;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          configStoreUpdateParameters: JsonNode; configStoreName: string): Recallable =
+proc call*(call_564168: Call_ConfigurationStoresUpdate_564159;
+          configStoreUpdateParameters: JsonNode; configStoreName: string;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string): Recallable =
   ## configurationStoresUpdate
   ## Updates a configuration store with the specified parameters.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group to which the container registry belongs.
-  ##   apiVersion: string (required)
-  ##             : The client API version.
-  ##   subscriptionId: string (required)
-  ##                 : The Microsoft Azure subscription ID.
   ##   configStoreUpdateParameters: JObject (required)
   ##                              : The parameters for updating a configuration store.
   ##   configStoreName: string (required)
   ##                  : The name of the configuration store.
-  var path_568269 = newJObject()
-  var query_568270 = newJObject()
-  var body_568271 = newJObject()
-  add(path_568269, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568270, "api-version", newJString(apiVersion))
-  add(path_568269, "subscriptionId", newJString(subscriptionId))
+  ##   apiVersion: string (required)
+  ##             : The client API version.
+  ##   subscriptionId: string (required)
+  ##                 : The Microsoft Azure subscription ID.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group to which the container registry belongs.
+  var path_564169 = newJObject()
+  var query_564170 = newJObject()
+  var body_564171 = newJObject()
   if configStoreUpdateParameters != nil:
-    body_568271 = configStoreUpdateParameters
-  add(path_568269, "configStoreName", newJString(configStoreName))
-  result = call_568268.call(path_568269, query_568270, nil, nil, body_568271)
+    body_564171 = configStoreUpdateParameters
+  add(path_564169, "configStoreName", newJString(configStoreName))
+  add(query_564170, "api-version", newJString(apiVersion))
+  add(path_564169, "subscriptionId", newJString(subscriptionId))
+  add(path_564169, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564168.call(path_564169, query_564170, nil, nil, body_564171)
 
-var configurationStoresUpdate* = Call_ConfigurationStoresUpdate_568259(
+var configurationStoresUpdate* = Call_ConfigurationStoresUpdate_564159(
     name: "configurationStoresUpdate", meth: HttpMethod.HttpPatch,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.AppConfiguration/configurationStores/{configStoreName}",
-    validator: validate_ConfigurationStoresUpdate_568260, base: "",
-    url: url_ConfigurationStoresUpdate_568261, schemes: {Scheme.Https})
+    validator: validate_ConfigurationStoresUpdate_564160, base: "",
+    url: url_ConfigurationStoresUpdate_564161, schemes: {Scheme.Https})
 type
-  Call_ConfigurationStoresDelete_568248 = ref object of OpenApiRestCall_567658
-proc url_ConfigurationStoresDelete_568250(protocol: Scheme; host: string;
+  Call_ConfigurationStoresDelete_564148 = ref object of OpenApiRestCall_563556
+proc url_ConfigurationStoresDelete_564150(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -881,37 +886,37 @@ proc url_ConfigurationStoresDelete_568250(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ConfigurationStoresDelete_568249(path: JsonNode; query: JsonNode;
+proc validate_ConfigurationStoresDelete_564149(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Deletes a configuration store.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group to which the container registry belongs.
-  ##   subscriptionId: JString (required)
-  ##                 : The Microsoft Azure subscription ID.
   ##   configStoreName: JString (required)
   ##                  : The name of the configuration store.
+  ##   subscriptionId: JString (required)
+  ##                 : The Microsoft Azure subscription ID.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group to which the container registry belongs.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568251 = path.getOrDefault("resourceGroupName")
-  valid_568251 = validateParameter(valid_568251, JString, required = true,
+        "path argument is necessary due to required `configStoreName` field"
+  var valid_564151 = path.getOrDefault("configStoreName")
+  valid_564151 = validateParameter(valid_564151, JString, required = true,
                                  default = nil)
-  if valid_568251 != nil:
-    section.add "resourceGroupName", valid_568251
-  var valid_568252 = path.getOrDefault("subscriptionId")
-  valid_568252 = validateParameter(valid_568252, JString, required = true,
+  if valid_564151 != nil:
+    section.add "configStoreName", valid_564151
+  var valid_564152 = path.getOrDefault("subscriptionId")
+  valid_564152 = validateParameter(valid_564152, JString, required = true,
                                  default = nil)
-  if valid_568252 != nil:
-    section.add "subscriptionId", valid_568252
-  var valid_568253 = path.getOrDefault("configStoreName")
-  valid_568253 = validateParameter(valid_568253, JString, required = true,
+  if valid_564152 != nil:
+    section.add "subscriptionId", valid_564152
+  var valid_564153 = path.getOrDefault("resourceGroupName")
+  valid_564153 = validateParameter(valid_564153, JString, required = true,
                                  default = nil)
-  if valid_568253 != nil:
-    section.add "configStoreName", valid_568253
+  if valid_564153 != nil:
+    section.add "resourceGroupName", valid_564153
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -919,11 +924,11 @@ proc validate_ConfigurationStoresDelete_568249(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568254 = query.getOrDefault("api-version")
-  valid_568254 = validateParameter(valid_568254, JString, required = true,
+  var valid_564154 = query.getOrDefault("api-version")
+  valid_564154 = validateParameter(valid_564154, JString, required = true,
                                  default = nil)
-  if valid_568254 != nil:
-    section.add "api-version", valid_568254
+  if valid_564154 != nil:
+    section.add "api-version", valid_564154
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -932,48 +937,48 @@ proc validate_ConfigurationStoresDelete_568249(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568255: Call_ConfigurationStoresDelete_568248; path: JsonNode;
+proc call*(call_564155: Call_ConfigurationStoresDelete_564148; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes a configuration store.
   ## 
-  let valid = call_568255.validator(path, query, header, formData, body)
-  let scheme = call_568255.pickScheme
+  let valid = call_564155.validator(path, query, header, formData, body)
+  let scheme = call_564155.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568255.url(scheme.get, call_568255.host, call_568255.base,
-                         call_568255.route, valid.getOrDefault("path"),
+  let url = call_564155.url(scheme.get, call_564155.host, call_564155.base,
+                         call_564155.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568255, url, valid)
+  result = hook(call_564155, url, valid)
 
-proc call*(call_568256: Call_ConfigurationStoresDelete_568248;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          configStoreName: string): Recallable =
+proc call*(call_564156: Call_ConfigurationStoresDelete_564148;
+          configStoreName: string; apiVersion: string; subscriptionId: string;
+          resourceGroupName: string): Recallable =
   ## configurationStoresDelete
   ## Deletes a configuration store.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group to which the container registry belongs.
+  ##   configStoreName: string (required)
+  ##                  : The name of the configuration store.
   ##   apiVersion: string (required)
   ##             : The client API version.
   ##   subscriptionId: string (required)
   ##                 : The Microsoft Azure subscription ID.
-  ##   configStoreName: string (required)
-  ##                  : The name of the configuration store.
-  var path_568257 = newJObject()
-  var query_568258 = newJObject()
-  add(path_568257, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568258, "api-version", newJString(apiVersion))
-  add(path_568257, "subscriptionId", newJString(subscriptionId))
-  add(path_568257, "configStoreName", newJString(configStoreName))
-  result = call_568256.call(path_568257, query_568258, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group to which the container registry belongs.
+  var path_564157 = newJObject()
+  var query_564158 = newJObject()
+  add(path_564157, "configStoreName", newJString(configStoreName))
+  add(query_564158, "api-version", newJString(apiVersion))
+  add(path_564157, "subscriptionId", newJString(subscriptionId))
+  add(path_564157, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564156.call(path_564157, query_564158, nil, nil, nil)
 
-var configurationStoresDelete* = Call_ConfigurationStoresDelete_568248(
+var configurationStoresDelete* = Call_ConfigurationStoresDelete_564148(
     name: "configurationStoresDelete", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.AppConfiguration/configurationStores/{configStoreName}",
-    validator: validate_ConfigurationStoresDelete_568249, base: "",
-    url: url_ConfigurationStoresDelete_568250, schemes: {Scheme.Https})
+    validator: validate_ConfigurationStoresDelete_564149, base: "",
+    url: url_ConfigurationStoresDelete_564150, schemes: {Scheme.Https})
 type
-  Call_ConfigurationStoresListKeys_568272 = ref object of OpenApiRestCall_567658
-proc url_ConfigurationStoresListKeys_568274(protocol: Scheme; host: string;
+  Call_ConfigurationStoresListKeys_564172 = ref object of OpenApiRestCall_563556
+proc url_ConfigurationStoresListKeys_564174(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -997,56 +1002,56 @@ proc url_ConfigurationStoresListKeys_568274(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ConfigurationStoresListKeys_568273(path: JsonNode; query: JsonNode;
+proc validate_ConfigurationStoresListKeys_564173(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists the access key for the specified configuration store.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group to which the container registry belongs.
-  ##   subscriptionId: JString (required)
-  ##                 : The Microsoft Azure subscription ID.
   ##   configStoreName: JString (required)
   ##                  : The name of the configuration store.
+  ##   subscriptionId: JString (required)
+  ##                 : The Microsoft Azure subscription ID.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group to which the container registry belongs.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568275 = path.getOrDefault("resourceGroupName")
-  valid_568275 = validateParameter(valid_568275, JString, required = true,
+        "path argument is necessary due to required `configStoreName` field"
+  var valid_564175 = path.getOrDefault("configStoreName")
+  valid_564175 = validateParameter(valid_564175, JString, required = true,
                                  default = nil)
-  if valid_568275 != nil:
-    section.add "resourceGroupName", valid_568275
-  var valid_568276 = path.getOrDefault("subscriptionId")
-  valid_568276 = validateParameter(valid_568276, JString, required = true,
+  if valid_564175 != nil:
+    section.add "configStoreName", valid_564175
+  var valid_564176 = path.getOrDefault("subscriptionId")
+  valid_564176 = validateParameter(valid_564176, JString, required = true,
                                  default = nil)
-  if valid_568276 != nil:
-    section.add "subscriptionId", valid_568276
-  var valid_568277 = path.getOrDefault("configStoreName")
-  valid_568277 = validateParameter(valid_568277, JString, required = true,
+  if valid_564176 != nil:
+    section.add "subscriptionId", valid_564176
+  var valid_564177 = path.getOrDefault("resourceGroupName")
+  valid_564177 = validateParameter(valid_564177, JString, required = true,
                                  default = nil)
-  if valid_568277 != nil:
-    section.add "configStoreName", valid_568277
+  if valid_564177 != nil:
+    section.add "resourceGroupName", valid_564177
   result.add "path", section
   ## parameters in `query` object:
-  ##   api-version: JString (required)
-  ##              : The client API version.
   ##   $skipToken: JString
   ##             : A skip token is used to continue retrieving items after an operation returns a partial result. If a previous response contains a nextLink element, the value of the nextLink element will include a skipToken parameter that specifies a starting point to use for subsequent calls.
+  ##   api-version: JString (required)
+  ##              : The client API version.
   section = newJObject()
+  var valid_564178 = query.getOrDefault("$skipToken")
+  valid_564178 = validateParameter(valid_564178, JString, required = false,
+                                 default = nil)
+  if valid_564178 != nil:
+    section.add "$skipToken", valid_564178
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568278 = query.getOrDefault("api-version")
-  valid_568278 = validateParameter(valid_568278, JString, required = true,
+  var valid_564179 = query.getOrDefault("api-version")
+  valid_564179 = validateParameter(valid_564179, JString, required = true,
                                  default = nil)
-  if valid_568278 != nil:
-    section.add "api-version", valid_568278
-  var valid_568279 = query.getOrDefault("$skipToken")
-  valid_568279 = validateParameter(valid_568279, JString, required = false,
-                                 default = nil)
-  if valid_568279 != nil:
-    section.add "$skipToken", valid_568279
+  if valid_564179 != nil:
+    section.add "api-version", valid_564179
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1055,51 +1060,51 @@ proc validate_ConfigurationStoresListKeys_568273(path: JsonNode; query: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_568280: Call_ConfigurationStoresListKeys_568272; path: JsonNode;
+proc call*(call_564180: Call_ConfigurationStoresListKeys_564172; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists the access key for the specified configuration store.
   ## 
-  let valid = call_568280.validator(path, query, header, formData, body)
-  let scheme = call_568280.pickScheme
+  let valid = call_564180.validator(path, query, header, formData, body)
+  let scheme = call_564180.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568280.url(scheme.get, call_568280.host, call_568280.base,
-                         call_568280.route, valid.getOrDefault("path"),
+  let url = call_564180.url(scheme.get, call_564180.host, call_564180.base,
+                         call_564180.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568280, url, valid)
+  result = hook(call_564180, url, valid)
 
-proc call*(call_568281: Call_ConfigurationStoresListKeys_568272;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          configStoreName: string; SkipToken: string = ""): Recallable =
+proc call*(call_564181: Call_ConfigurationStoresListKeys_564172;
+          configStoreName: string; apiVersion: string; subscriptionId: string;
+          resourceGroupName: string; SkipToken: string = ""): Recallable =
   ## configurationStoresListKeys
   ## Lists the access key for the specified configuration store.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group to which the container registry belongs.
+  ##   SkipToken: string
+  ##            : A skip token is used to continue retrieving items after an operation returns a partial result. If a previous response contains a nextLink element, the value of the nextLink element will include a skipToken parameter that specifies a starting point to use for subsequent calls.
+  ##   configStoreName: string (required)
+  ##                  : The name of the configuration store.
   ##   apiVersion: string (required)
   ##             : The client API version.
   ##   subscriptionId: string (required)
   ##                 : The Microsoft Azure subscription ID.
-  ##   configStoreName: string (required)
-  ##                  : The name of the configuration store.
-  ##   SkipToken: string
-  ##            : A skip token is used to continue retrieving items after an operation returns a partial result. If a previous response contains a nextLink element, the value of the nextLink element will include a skipToken parameter that specifies a starting point to use for subsequent calls.
-  var path_568282 = newJObject()
-  var query_568283 = newJObject()
-  add(path_568282, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568283, "api-version", newJString(apiVersion))
-  add(path_568282, "subscriptionId", newJString(subscriptionId))
-  add(path_568282, "configStoreName", newJString(configStoreName))
-  add(query_568283, "$skipToken", newJString(SkipToken))
-  result = call_568281.call(path_568282, query_568283, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group to which the container registry belongs.
+  var path_564182 = newJObject()
+  var query_564183 = newJObject()
+  add(query_564183, "$skipToken", newJString(SkipToken))
+  add(path_564182, "configStoreName", newJString(configStoreName))
+  add(query_564183, "api-version", newJString(apiVersion))
+  add(path_564182, "subscriptionId", newJString(subscriptionId))
+  add(path_564182, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564181.call(path_564182, query_564183, nil, nil, nil)
 
-var configurationStoresListKeys* = Call_ConfigurationStoresListKeys_568272(
+var configurationStoresListKeys* = Call_ConfigurationStoresListKeys_564172(
     name: "configurationStoresListKeys", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.AppConfiguration/configurationStores/{configStoreName}/ListKeys",
-    validator: validate_ConfigurationStoresListKeys_568273, base: "",
-    url: url_ConfigurationStoresListKeys_568274, schemes: {Scheme.Https})
+    validator: validate_ConfigurationStoresListKeys_564173, base: "",
+    url: url_ConfigurationStoresListKeys_564174, schemes: {Scheme.Https})
 type
-  Call_ConfigurationStoresRegenerateKey_568284 = ref object of OpenApiRestCall_567658
-proc url_ConfigurationStoresRegenerateKey_568286(protocol: Scheme; host: string;
+  Call_ConfigurationStoresRegenerateKey_564184 = ref object of OpenApiRestCall_563556
+proc url_ConfigurationStoresRegenerateKey_564186(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1123,37 +1128,37 @@ proc url_ConfigurationStoresRegenerateKey_568286(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ConfigurationStoresRegenerateKey_568285(path: JsonNode;
+proc validate_ConfigurationStoresRegenerateKey_564185(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Regenerates an access key for the specified configuration store.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group to which the container registry belongs.
-  ##   subscriptionId: JString (required)
-  ##                 : The Microsoft Azure subscription ID.
   ##   configStoreName: JString (required)
   ##                  : The name of the configuration store.
+  ##   subscriptionId: JString (required)
+  ##                 : The Microsoft Azure subscription ID.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group to which the container registry belongs.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568287 = path.getOrDefault("resourceGroupName")
-  valid_568287 = validateParameter(valid_568287, JString, required = true,
+        "path argument is necessary due to required `configStoreName` field"
+  var valid_564187 = path.getOrDefault("configStoreName")
+  valid_564187 = validateParameter(valid_564187, JString, required = true,
                                  default = nil)
-  if valid_568287 != nil:
-    section.add "resourceGroupName", valid_568287
-  var valid_568288 = path.getOrDefault("subscriptionId")
-  valid_568288 = validateParameter(valid_568288, JString, required = true,
+  if valid_564187 != nil:
+    section.add "configStoreName", valid_564187
+  var valid_564188 = path.getOrDefault("subscriptionId")
+  valid_564188 = validateParameter(valid_564188, JString, required = true,
                                  default = nil)
-  if valid_568288 != nil:
-    section.add "subscriptionId", valid_568288
-  var valid_568289 = path.getOrDefault("configStoreName")
-  valid_568289 = validateParameter(valid_568289, JString, required = true,
+  if valid_564188 != nil:
+    section.add "subscriptionId", valid_564188
+  var valid_564189 = path.getOrDefault("resourceGroupName")
+  valid_564189 = validateParameter(valid_564189, JString, required = true,
                                  default = nil)
-  if valid_568289 != nil:
-    section.add "configStoreName", valid_568289
+  if valid_564189 != nil:
+    section.add "resourceGroupName", valid_564189
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1161,11 +1166,11 @@ proc validate_ConfigurationStoresRegenerateKey_568285(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568290 = query.getOrDefault("api-version")
-  valid_568290 = validateParameter(valid_568290, JString, required = true,
+  var valid_564190 = query.getOrDefault("api-version")
+  valid_564190 = validateParameter(valid_564190, JString, required = true,
                                  default = nil)
-  if valid_568290 != nil:
-    section.add "api-version", valid_568290
+  if valid_564190 != nil:
+    section.add "api-version", valid_564190
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1179,55 +1184,54 @@ proc validate_ConfigurationStoresRegenerateKey_568285(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568292: Call_ConfigurationStoresRegenerateKey_568284;
+proc call*(call_564192: Call_ConfigurationStoresRegenerateKey_564184;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Regenerates an access key for the specified configuration store.
   ## 
-  let valid = call_568292.validator(path, query, header, formData, body)
-  let scheme = call_568292.pickScheme
+  let valid = call_564192.validator(path, query, header, formData, body)
+  let scheme = call_564192.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568292.url(scheme.get, call_568292.host, call_568292.base,
-                         call_568292.route, valid.getOrDefault("path"),
+  let url = call_564192.url(scheme.get, call_564192.host, call_564192.base,
+                         call_564192.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568292, url, valid)
+  result = hook(call_564192, url, valid)
 
-proc call*(call_568293: Call_ConfigurationStoresRegenerateKey_568284;
-          resourceGroupName: string; apiVersion: string;
-          regenerateKeyParameters: JsonNode; subscriptionId: string;
-          configStoreName: string): Recallable =
+proc call*(call_564193: Call_ConfigurationStoresRegenerateKey_564184;
+          configStoreName: string; apiVersion: string; subscriptionId: string;
+          regenerateKeyParameters: JsonNode; resourceGroupName: string): Recallable =
   ## configurationStoresRegenerateKey
   ## Regenerates an access key for the specified configuration store.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group to which the container registry belongs.
-  ##   apiVersion: string (required)
-  ##             : The client API version.
-  ##   regenerateKeyParameters: JObject (required)
-  ##                          : The parameters for regenerating an access key.
-  ##   subscriptionId: string (required)
-  ##                 : The Microsoft Azure subscription ID.
   ##   configStoreName: string (required)
   ##                  : The name of the configuration store.
-  var path_568294 = newJObject()
-  var query_568295 = newJObject()
-  var body_568296 = newJObject()
-  add(path_568294, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568295, "api-version", newJString(apiVersion))
+  ##   apiVersion: string (required)
+  ##             : The client API version.
+  ##   subscriptionId: string (required)
+  ##                 : The Microsoft Azure subscription ID.
+  ##   regenerateKeyParameters: JObject (required)
+  ##                          : The parameters for regenerating an access key.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group to which the container registry belongs.
+  var path_564194 = newJObject()
+  var query_564195 = newJObject()
+  var body_564196 = newJObject()
+  add(path_564194, "configStoreName", newJString(configStoreName))
+  add(query_564195, "api-version", newJString(apiVersion))
+  add(path_564194, "subscriptionId", newJString(subscriptionId))
   if regenerateKeyParameters != nil:
-    body_568296 = regenerateKeyParameters
-  add(path_568294, "subscriptionId", newJString(subscriptionId))
-  add(path_568294, "configStoreName", newJString(configStoreName))
-  result = call_568293.call(path_568294, query_568295, nil, nil, body_568296)
+    body_564196 = regenerateKeyParameters
+  add(path_564194, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564193.call(path_564194, query_564195, nil, nil, body_564196)
 
-var configurationStoresRegenerateKey* = Call_ConfigurationStoresRegenerateKey_568284(
+var configurationStoresRegenerateKey* = Call_ConfigurationStoresRegenerateKey_564184(
     name: "configurationStoresRegenerateKey", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.AppConfiguration/configurationStores/{configStoreName}/RegenerateKey",
-    validator: validate_ConfigurationStoresRegenerateKey_568285, base: "",
-    url: url_ConfigurationStoresRegenerateKey_568286, schemes: {Scheme.Https})
+    validator: validate_ConfigurationStoresRegenerateKey_564185, base: "",
+    url: url_ConfigurationStoresRegenerateKey_564186, schemes: {Scheme.Https})
 type
-  Call_ConfigurationStoresListKeyValue_568297 = ref object of OpenApiRestCall_567658
-proc url_ConfigurationStoresListKeyValue_568299(protocol: Scheme; host: string;
+  Call_ConfigurationStoresListKeyValue_564197 = ref object of OpenApiRestCall_563556
+proc url_ConfigurationStoresListKeyValue_564199(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1251,37 +1255,37 @@ proc url_ConfigurationStoresListKeyValue_568299(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ConfigurationStoresListKeyValue_568298(path: JsonNode;
+proc validate_ConfigurationStoresListKeyValue_564198(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists a configuration store key-value.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group to which the container registry belongs.
-  ##   subscriptionId: JString (required)
-  ##                 : The Microsoft Azure subscription ID.
   ##   configStoreName: JString (required)
   ##                  : The name of the configuration store.
+  ##   subscriptionId: JString (required)
+  ##                 : The Microsoft Azure subscription ID.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group to which the container registry belongs.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568300 = path.getOrDefault("resourceGroupName")
-  valid_568300 = validateParameter(valid_568300, JString, required = true,
+        "path argument is necessary due to required `configStoreName` field"
+  var valid_564200 = path.getOrDefault("configStoreName")
+  valid_564200 = validateParameter(valid_564200, JString, required = true,
                                  default = nil)
-  if valid_568300 != nil:
-    section.add "resourceGroupName", valid_568300
-  var valid_568301 = path.getOrDefault("subscriptionId")
-  valid_568301 = validateParameter(valid_568301, JString, required = true,
+  if valid_564200 != nil:
+    section.add "configStoreName", valid_564200
+  var valid_564201 = path.getOrDefault("subscriptionId")
+  valid_564201 = validateParameter(valid_564201, JString, required = true,
                                  default = nil)
-  if valid_568301 != nil:
-    section.add "subscriptionId", valid_568301
-  var valid_568302 = path.getOrDefault("configStoreName")
-  valid_568302 = validateParameter(valid_568302, JString, required = true,
+  if valid_564201 != nil:
+    section.add "subscriptionId", valid_564201
+  var valid_564202 = path.getOrDefault("resourceGroupName")
+  valid_564202 = validateParameter(valid_564202, JString, required = true,
                                  default = nil)
-  if valid_568302 != nil:
-    section.add "configStoreName", valid_568302
+  if valid_564202 != nil:
+    section.add "resourceGroupName", valid_564202
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1289,11 +1293,11 @@ proc validate_ConfigurationStoresListKeyValue_568298(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568303 = query.getOrDefault("api-version")
-  valid_568303 = validateParameter(valid_568303, JString, required = true,
+  var valid_564203 = query.getOrDefault("api-version")
+  valid_564203 = validateParameter(valid_564203, JString, required = true,
                                  default = nil)
-  if valid_568303 != nil:
-    section.add "api-version", valid_568303
+  if valid_564203 != nil:
+    section.add "api-version", valid_564203
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1307,51 +1311,51 @@ proc validate_ConfigurationStoresListKeyValue_568298(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568305: Call_ConfigurationStoresListKeyValue_568297;
+proc call*(call_564205: Call_ConfigurationStoresListKeyValue_564197;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Lists a configuration store key-value.
   ## 
-  let valid = call_568305.validator(path, query, header, formData, body)
-  let scheme = call_568305.pickScheme
+  let valid = call_564205.validator(path, query, header, formData, body)
+  let scheme = call_564205.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568305.url(scheme.get, call_568305.host, call_568305.base,
-                         call_568305.route, valid.getOrDefault("path"),
+  let url = call_564205.url(scheme.get, call_564205.host, call_564205.base,
+                         call_564205.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568305, url, valid)
+  result = hook(call_564205, url, valid)
 
-proc call*(call_568306: Call_ConfigurationStoresListKeyValue_568297;
-          resourceGroupName: string; listKeyValueParameters: JsonNode;
-          apiVersion: string; subscriptionId: string; configStoreName: string): Recallable =
+proc call*(call_564206: Call_ConfigurationStoresListKeyValue_564197;
+          configStoreName: string; apiVersion: string; subscriptionId: string;
+          resourceGroupName: string; listKeyValueParameters: JsonNode): Recallable =
   ## configurationStoresListKeyValue
   ## Lists a configuration store key-value.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group to which the container registry belongs.
-  ##   listKeyValueParameters: JObject (required)
-  ##                         : The parameters for retrieving a key-value.
+  ##   configStoreName: string (required)
+  ##                  : The name of the configuration store.
   ##   apiVersion: string (required)
   ##             : The client API version.
   ##   subscriptionId: string (required)
   ##                 : The Microsoft Azure subscription ID.
-  ##   configStoreName: string (required)
-  ##                  : The name of the configuration store.
-  var path_568307 = newJObject()
-  var query_568308 = newJObject()
-  var body_568309 = newJObject()
-  add(path_568307, "resourceGroupName", newJString(resourceGroupName))
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group to which the container registry belongs.
+  ##   listKeyValueParameters: JObject (required)
+  ##                         : The parameters for retrieving a key-value.
+  var path_564207 = newJObject()
+  var query_564208 = newJObject()
+  var body_564209 = newJObject()
+  add(path_564207, "configStoreName", newJString(configStoreName))
+  add(query_564208, "api-version", newJString(apiVersion))
+  add(path_564207, "subscriptionId", newJString(subscriptionId))
+  add(path_564207, "resourceGroupName", newJString(resourceGroupName))
   if listKeyValueParameters != nil:
-    body_568309 = listKeyValueParameters
-  add(query_568308, "api-version", newJString(apiVersion))
-  add(path_568307, "subscriptionId", newJString(subscriptionId))
-  add(path_568307, "configStoreName", newJString(configStoreName))
-  result = call_568306.call(path_568307, query_568308, nil, nil, body_568309)
+    body_564209 = listKeyValueParameters
+  result = call_564206.call(path_564207, query_564208, nil, nil, body_564209)
 
-var configurationStoresListKeyValue* = Call_ConfigurationStoresListKeyValue_568297(
+var configurationStoresListKeyValue* = Call_ConfigurationStoresListKeyValue_564197(
     name: "configurationStoresListKeyValue", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.AppConfiguration/configurationStores/{configStoreName}/listKeyValue",
-    validator: validate_ConfigurationStoresListKeyValue_568298, base: "",
-    url: url_ConfigurationStoresListKeyValue_568299, schemes: {Scheme.Https})
+    validator: validate_ConfigurationStoresListKeyValue_564198, base: "",
+    url: url_ConfigurationStoresListKeyValue_564199, schemes: {Scheme.Https})
 export
   rest
 

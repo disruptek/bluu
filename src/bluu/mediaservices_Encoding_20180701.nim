@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_573667 = ref object of OpenApiRestCall
+  OpenApiRestCall_563565 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_573667](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563565](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_573667): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563565): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,8 +107,8 @@ const
   macServiceName = "mediaservices-Encoding"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_TransformsList_573889 = ref object of OpenApiRestCall_573667
-proc url_TransformsList_573891(protocol: Scheme; host: string; base: string;
+  Call_TransformsList_563787 = ref object of OpenApiRestCall_563565
+proc url_TransformsList_563789(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -127,7 +131,7 @@ proc url_TransformsList_573891(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_TransformsList_573890(path: JsonNode; query: JsonNode;
+proc validate_TransformsList_563788(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## Lists the Transforms in the account.
@@ -135,56 +139,56 @@ proc validate_TransformsList_573890(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group within the Azure subscription.
   ##   subscriptionId: JString (required)
   ##                 : The unique identifier for a Microsoft Azure subscription.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group within the Azure subscription.
   ##   accountName: JString (required)
   ##              : The Media Services account name.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_574065 = path.getOrDefault("resourceGroupName")
-  valid_574065 = validateParameter(valid_574065, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_563965 = path.getOrDefault("subscriptionId")
+  valid_563965 = validateParameter(valid_563965, JString, required = true,
                                  default = nil)
-  if valid_574065 != nil:
-    section.add "resourceGroupName", valid_574065
-  var valid_574066 = path.getOrDefault("subscriptionId")
-  valid_574066 = validateParameter(valid_574066, JString, required = true,
+  if valid_563965 != nil:
+    section.add "subscriptionId", valid_563965
+  var valid_563966 = path.getOrDefault("resourceGroupName")
+  valid_563966 = validateParameter(valid_563966, JString, required = true,
                                  default = nil)
-  if valid_574066 != nil:
-    section.add "subscriptionId", valid_574066
-  var valid_574067 = path.getOrDefault("accountName")
-  valid_574067 = validateParameter(valid_574067, JString, required = true,
+  if valid_563966 != nil:
+    section.add "resourceGroupName", valid_563966
+  var valid_563967 = path.getOrDefault("accountName")
+  valid_563967 = validateParameter(valid_563967, JString, required = true,
                                  default = nil)
-  if valid_574067 != nil:
-    section.add "accountName", valid_574067
+  if valid_563967 != nil:
+    section.add "accountName", valid_563967
   result.add "path", section
   ## parameters in `query` object:
-  ##   $orderby: JString
-  ##           : Specifies the key by which the result collection should be ordered.
   ##   api-version: JString (required)
   ##              : The Version of the API to be used with the client request.
+  ##   $orderby: JString
+  ##           : Specifies the key by which the result collection should be ordered.
   ##   $filter: JString
   ##          : Restricts the set of items returned.
   section = newJObject()
-  var valid_574068 = query.getOrDefault("$orderby")
-  valid_574068 = validateParameter(valid_574068, JString, required = false,
-                                 default = nil)
-  if valid_574068 != nil:
-    section.add "$orderby", valid_574068
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574069 = query.getOrDefault("api-version")
-  valid_574069 = validateParameter(valid_574069, JString, required = true,
+  var valid_563968 = query.getOrDefault("api-version")
+  valid_563968 = validateParameter(valid_563968, JString, required = true,
                                  default = nil)
-  if valid_574069 != nil:
-    section.add "api-version", valid_574069
-  var valid_574070 = query.getOrDefault("$filter")
-  valid_574070 = validateParameter(valid_574070, JString, required = false,
+  if valid_563968 != nil:
+    section.add "api-version", valid_563968
+  var valid_563969 = query.getOrDefault("$orderby")
+  valid_563969 = validateParameter(valid_563969, JString, required = false,
                                  default = nil)
-  if valid_574070 != nil:
-    section.add "$filter", valid_574070
+  if valid_563969 != nil:
+    section.add "$orderby", valid_563969
+  var valid_563970 = query.getOrDefault("$filter")
+  valid_563970 = validateParameter(valid_563970, JString, required = false,
+                                 default = nil)
+  if valid_563970 != nil:
+    section.add "$filter", valid_563970
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -193,53 +197,53 @@ proc validate_TransformsList_573890(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574093: Call_TransformsList_573889; path: JsonNode; query: JsonNode;
+proc call*(call_563993: Call_TransformsList_563787; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists the Transforms in the account.
   ## 
-  let valid = call_574093.validator(path, query, header, formData, body)
-  let scheme = call_574093.pickScheme
+  let valid = call_563993.validator(path, query, header, formData, body)
+  let scheme = call_563993.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574093.url(scheme.get, call_574093.host, call_574093.base,
-                         call_574093.route, valid.getOrDefault("path"),
+  let url = call_563993.url(scheme.get, call_563993.host, call_563993.base,
+                         call_563993.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574093, url, valid)
+  result = hook(call_563993, url, valid)
 
-proc call*(call_574164: Call_TransformsList_573889; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; accountName: string;
+proc call*(call_564064: Call_TransformsList_563787; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string; accountName: string;
           Orderby: string = ""; Filter: string = ""): Recallable =
   ## transformsList
   ## Lists the Transforms in the account.
-  ##   Orderby: string
-  ##          : Specifies the key by which the result collection should be ordered.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group within the Azure subscription.
   ##   apiVersion: string (required)
   ##             : The Version of the API to be used with the client request.
   ##   subscriptionId: string (required)
   ##                 : The unique identifier for a Microsoft Azure subscription.
-  ##   accountName: string (required)
-  ##              : The Media Services account name.
+  ##   Orderby: string
+  ##          : Specifies the key by which the result collection should be ordered.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group within the Azure subscription.
   ##   Filter: string
   ##         : Restricts the set of items returned.
-  var path_574165 = newJObject()
-  var query_574167 = newJObject()
-  add(query_574167, "$orderby", newJString(Orderby))
-  add(path_574165, "resourceGroupName", newJString(resourceGroupName))
-  add(query_574167, "api-version", newJString(apiVersion))
-  add(path_574165, "subscriptionId", newJString(subscriptionId))
-  add(path_574165, "accountName", newJString(accountName))
-  add(query_574167, "$filter", newJString(Filter))
-  result = call_574164.call(path_574165, query_574167, nil, nil, nil)
+  ##   accountName: string (required)
+  ##              : The Media Services account name.
+  var path_564065 = newJObject()
+  var query_564067 = newJObject()
+  add(query_564067, "api-version", newJString(apiVersion))
+  add(path_564065, "subscriptionId", newJString(subscriptionId))
+  add(query_564067, "$orderby", newJString(Orderby))
+  add(path_564065, "resourceGroupName", newJString(resourceGroupName))
+  add(query_564067, "$filter", newJString(Filter))
+  add(path_564065, "accountName", newJString(accountName))
+  result = call_564064.call(path_564065, query_564067, nil, nil, nil)
 
-var transformsList* = Call_TransformsList_573889(name: "transformsList",
+var transformsList* = Call_TransformsList_563787(name: "transformsList",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Media/mediaServices/{accountName}/transforms",
-    validator: validate_TransformsList_573890, base: "", url: url_TransformsList_573891,
+    validator: validate_TransformsList_563788, base: "", url: url_TransformsList_563789,
     schemes: {Scheme.Https})
 type
-  Call_TransformsCreateOrUpdate_574218 = ref object of OpenApiRestCall_573667
-proc url_TransformsCreateOrUpdate_574220(protocol: Scheme; host: string;
+  Call_TransformsCreateOrUpdate_564118 = ref object of OpenApiRestCall_563565
+proc url_TransformsCreateOrUpdate_564120(protocol: Scheme; host: string;
                                         base: string; route: string; path: JsonNode;
                                         query: JsonNode): Uri =
   result.scheme = $protocol
@@ -265,44 +269,44 @@ proc url_TransformsCreateOrUpdate_574220(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_TransformsCreateOrUpdate_574219(path: JsonNode; query: JsonNode;
+proc validate_TransformsCreateOrUpdate_564119(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Creates or updates a new Transform.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group within the Azure subscription.
   ##   subscriptionId: JString (required)
   ##                 : The unique identifier for a Microsoft Azure subscription.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group within the Azure subscription.
   ##   transformName: JString (required)
   ##                : The Transform name.
   ##   accountName: JString (required)
   ##              : The Media Services account name.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_574221 = path.getOrDefault("resourceGroupName")
-  valid_574221 = validateParameter(valid_574221, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564121 = path.getOrDefault("subscriptionId")
+  valid_564121 = validateParameter(valid_564121, JString, required = true,
                                  default = nil)
-  if valid_574221 != nil:
-    section.add "resourceGroupName", valid_574221
-  var valid_574222 = path.getOrDefault("subscriptionId")
-  valid_574222 = validateParameter(valid_574222, JString, required = true,
+  if valid_564121 != nil:
+    section.add "subscriptionId", valid_564121
+  var valid_564122 = path.getOrDefault("resourceGroupName")
+  valid_564122 = validateParameter(valid_564122, JString, required = true,
                                  default = nil)
-  if valid_574222 != nil:
-    section.add "subscriptionId", valid_574222
-  var valid_574223 = path.getOrDefault("transformName")
-  valid_574223 = validateParameter(valid_574223, JString, required = true,
+  if valid_564122 != nil:
+    section.add "resourceGroupName", valid_564122
+  var valid_564123 = path.getOrDefault("transformName")
+  valid_564123 = validateParameter(valid_564123, JString, required = true,
                                  default = nil)
-  if valid_574223 != nil:
-    section.add "transformName", valid_574223
-  var valid_574224 = path.getOrDefault("accountName")
-  valid_574224 = validateParameter(valid_574224, JString, required = true,
+  if valid_564123 != nil:
+    section.add "transformName", valid_564123
+  var valid_564124 = path.getOrDefault("accountName")
+  valid_564124 = validateParameter(valid_564124, JString, required = true,
                                  default = nil)
-  if valid_574224 != nil:
-    section.add "accountName", valid_574224
+  if valid_564124 != nil:
+    section.add "accountName", valid_564124
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -310,11 +314,11 @@ proc validate_TransformsCreateOrUpdate_574219(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574225 = query.getOrDefault("api-version")
-  valid_574225 = validateParameter(valid_574225, JString, required = true,
+  var valid_564125 = query.getOrDefault("api-version")
+  valid_564125 = validateParameter(valid_564125, JString, required = true,
                                  default = nil)
-  if valid_574225 != nil:
-    section.add "api-version", valid_574225
+  if valid_564125 != nil:
+    section.add "api-version", valid_564125
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -328,56 +332,56 @@ proc validate_TransformsCreateOrUpdate_574219(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574227: Call_TransformsCreateOrUpdate_574218; path: JsonNode;
+proc call*(call_564127: Call_TransformsCreateOrUpdate_564118; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Creates or updates a new Transform.
   ## 
-  let valid = call_574227.validator(path, query, header, formData, body)
-  let scheme = call_574227.pickScheme
+  let valid = call_564127.validator(path, query, header, formData, body)
+  let scheme = call_564127.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574227.url(scheme.get, call_574227.host, call_574227.base,
-                         call_574227.route, valid.getOrDefault("path"),
+  let url = call_564127.url(scheme.get, call_564127.host, call_564127.base,
+                         call_564127.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574227, url, valid)
+  result = hook(call_564127, url, valid)
 
-proc call*(call_574228: Call_TransformsCreateOrUpdate_574218;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          transformName: string; parameters: JsonNode; accountName: string): Recallable =
+proc call*(call_564128: Call_TransformsCreateOrUpdate_564118; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string; transformName: string;
+          parameters: JsonNode; accountName: string): Recallable =
   ## transformsCreateOrUpdate
   ## Creates or updates a new Transform.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group within the Azure subscription.
   ##   apiVersion: string (required)
   ##             : The Version of the API to be used with the client request.
   ##   subscriptionId: string (required)
   ##                 : The unique identifier for a Microsoft Azure subscription.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group within the Azure subscription.
   ##   transformName: string (required)
   ##                : The Transform name.
   ##   parameters: JObject (required)
   ##             : The request parameters
   ##   accountName: string (required)
   ##              : The Media Services account name.
-  var path_574229 = newJObject()
-  var query_574230 = newJObject()
-  var body_574231 = newJObject()
-  add(path_574229, "resourceGroupName", newJString(resourceGroupName))
-  add(query_574230, "api-version", newJString(apiVersion))
-  add(path_574229, "subscriptionId", newJString(subscriptionId))
-  add(path_574229, "transformName", newJString(transformName))
+  var path_564129 = newJObject()
+  var query_564130 = newJObject()
+  var body_564131 = newJObject()
+  add(query_564130, "api-version", newJString(apiVersion))
+  add(path_564129, "subscriptionId", newJString(subscriptionId))
+  add(path_564129, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564129, "transformName", newJString(transformName))
   if parameters != nil:
-    body_574231 = parameters
-  add(path_574229, "accountName", newJString(accountName))
-  result = call_574228.call(path_574229, query_574230, nil, nil, body_574231)
+    body_564131 = parameters
+  add(path_564129, "accountName", newJString(accountName))
+  result = call_564128.call(path_564129, query_564130, nil, nil, body_564131)
 
-var transformsCreateOrUpdate* = Call_TransformsCreateOrUpdate_574218(
+var transformsCreateOrUpdate* = Call_TransformsCreateOrUpdate_564118(
     name: "transformsCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Media/mediaServices/{accountName}/transforms/{transformName}",
-    validator: validate_TransformsCreateOrUpdate_574219, base: "",
-    url: url_TransformsCreateOrUpdate_574220, schemes: {Scheme.Https})
+    validator: validate_TransformsCreateOrUpdate_564119, base: "",
+    url: url_TransformsCreateOrUpdate_564120, schemes: {Scheme.Https})
 type
-  Call_TransformsGet_574206 = ref object of OpenApiRestCall_573667
-proc url_TransformsGet_574208(protocol: Scheme; host: string; base: string;
+  Call_TransformsGet_564106 = ref object of OpenApiRestCall_563565
+proc url_TransformsGet_564108(protocol: Scheme; host: string; base: string;
                              route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -402,44 +406,44 @@ proc url_TransformsGet_574208(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_TransformsGet_574207(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_TransformsGet_564107(path: JsonNode; query: JsonNode; header: JsonNode;
                                   formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets a Transform.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group within the Azure subscription.
   ##   subscriptionId: JString (required)
   ##                 : The unique identifier for a Microsoft Azure subscription.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group within the Azure subscription.
   ##   transformName: JString (required)
   ##                : The Transform name.
   ##   accountName: JString (required)
   ##              : The Media Services account name.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_574209 = path.getOrDefault("resourceGroupName")
-  valid_574209 = validateParameter(valid_574209, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564109 = path.getOrDefault("subscriptionId")
+  valid_564109 = validateParameter(valid_564109, JString, required = true,
                                  default = nil)
-  if valid_574209 != nil:
-    section.add "resourceGroupName", valid_574209
-  var valid_574210 = path.getOrDefault("subscriptionId")
-  valid_574210 = validateParameter(valid_574210, JString, required = true,
+  if valid_564109 != nil:
+    section.add "subscriptionId", valid_564109
+  var valid_564110 = path.getOrDefault("resourceGroupName")
+  valid_564110 = validateParameter(valid_564110, JString, required = true,
                                  default = nil)
-  if valid_574210 != nil:
-    section.add "subscriptionId", valid_574210
-  var valid_574211 = path.getOrDefault("transformName")
-  valid_574211 = validateParameter(valid_574211, JString, required = true,
+  if valid_564110 != nil:
+    section.add "resourceGroupName", valid_564110
+  var valid_564111 = path.getOrDefault("transformName")
+  valid_564111 = validateParameter(valid_564111, JString, required = true,
                                  default = nil)
-  if valid_574211 != nil:
-    section.add "transformName", valid_574211
-  var valid_574212 = path.getOrDefault("accountName")
-  valid_574212 = validateParameter(valid_574212, JString, required = true,
+  if valid_564111 != nil:
+    section.add "transformName", valid_564111
+  var valid_564112 = path.getOrDefault("accountName")
+  valid_564112 = validateParameter(valid_564112, JString, required = true,
                                  default = nil)
-  if valid_574212 != nil:
-    section.add "accountName", valid_574212
+  if valid_564112 != nil:
+    section.add "accountName", valid_564112
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -447,11 +451,11 @@ proc validate_TransformsGet_574207(path: JsonNode; query: JsonNode; header: Json
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574213 = query.getOrDefault("api-version")
-  valid_574213 = validateParameter(valid_574213, JString, required = true,
+  var valid_564113 = query.getOrDefault("api-version")
+  valid_564113 = validateParameter(valid_564113, JString, required = true,
                                  default = nil)
-  if valid_574213 != nil:
-    section.add "api-version", valid_574213
+  if valid_564113 != nil:
+    section.add "api-version", valid_564113
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -460,50 +464,50 @@ proc validate_TransformsGet_574207(path: JsonNode; query: JsonNode; header: Json
   if body != nil:
     result.add "body", body
 
-proc call*(call_574214: Call_TransformsGet_574206; path: JsonNode; query: JsonNode;
+proc call*(call_564114: Call_TransformsGet_564106; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets a Transform.
   ## 
-  let valid = call_574214.validator(path, query, header, formData, body)
-  let scheme = call_574214.pickScheme
+  let valid = call_564114.validator(path, query, header, formData, body)
+  let scheme = call_564114.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574214.url(scheme.get, call_574214.host, call_574214.base,
-                         call_574214.route, valid.getOrDefault("path"),
+  let url = call_564114.url(scheme.get, call_564114.host, call_564114.base,
+                         call_564114.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574214, url, valid)
+  result = hook(call_564114, url, valid)
 
-proc call*(call_574215: Call_TransformsGet_574206; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; transformName: string;
+proc call*(call_564115: Call_TransformsGet_564106; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string; transformName: string;
           accountName: string): Recallable =
   ## transformsGet
   ## Gets a Transform.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group within the Azure subscription.
   ##   apiVersion: string (required)
   ##             : The Version of the API to be used with the client request.
   ##   subscriptionId: string (required)
   ##                 : The unique identifier for a Microsoft Azure subscription.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group within the Azure subscription.
   ##   transformName: string (required)
   ##                : The Transform name.
   ##   accountName: string (required)
   ##              : The Media Services account name.
-  var path_574216 = newJObject()
-  var query_574217 = newJObject()
-  add(path_574216, "resourceGroupName", newJString(resourceGroupName))
-  add(query_574217, "api-version", newJString(apiVersion))
-  add(path_574216, "subscriptionId", newJString(subscriptionId))
-  add(path_574216, "transformName", newJString(transformName))
-  add(path_574216, "accountName", newJString(accountName))
-  result = call_574215.call(path_574216, query_574217, nil, nil, nil)
+  var path_564116 = newJObject()
+  var query_564117 = newJObject()
+  add(query_564117, "api-version", newJString(apiVersion))
+  add(path_564116, "subscriptionId", newJString(subscriptionId))
+  add(path_564116, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564116, "transformName", newJString(transformName))
+  add(path_564116, "accountName", newJString(accountName))
+  result = call_564115.call(path_564116, query_564117, nil, nil, nil)
 
-var transformsGet* = Call_TransformsGet_574206(name: "transformsGet",
+var transformsGet* = Call_TransformsGet_564106(name: "transformsGet",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Media/mediaServices/{accountName}/transforms/{transformName}",
-    validator: validate_TransformsGet_574207, base: "", url: url_TransformsGet_574208,
+    validator: validate_TransformsGet_564107, base: "", url: url_TransformsGet_564108,
     schemes: {Scheme.Https})
 type
-  Call_TransformsUpdate_574244 = ref object of OpenApiRestCall_573667
-proc url_TransformsUpdate_574246(protocol: Scheme; host: string; base: string;
+  Call_TransformsUpdate_564144 = ref object of OpenApiRestCall_563565
+proc url_TransformsUpdate_564146(protocol: Scheme; host: string; base: string;
                                 route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -528,7 +532,7 @@ proc url_TransformsUpdate_574246(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_TransformsUpdate_574245(path: JsonNode; query: JsonNode;
+proc validate_TransformsUpdate_564145(path: JsonNode; query: JsonNode;
                                      header: JsonNode; formData: JsonNode;
                                      body: JsonNode): JsonNode =
   ## Updates a Transform.
@@ -536,37 +540,37 @@ proc validate_TransformsUpdate_574245(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group within the Azure subscription.
   ##   subscriptionId: JString (required)
   ##                 : The unique identifier for a Microsoft Azure subscription.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group within the Azure subscription.
   ##   transformName: JString (required)
   ##                : The Transform name.
   ##   accountName: JString (required)
   ##              : The Media Services account name.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_574247 = path.getOrDefault("resourceGroupName")
-  valid_574247 = validateParameter(valid_574247, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564147 = path.getOrDefault("subscriptionId")
+  valid_564147 = validateParameter(valid_564147, JString, required = true,
                                  default = nil)
-  if valid_574247 != nil:
-    section.add "resourceGroupName", valid_574247
-  var valid_574248 = path.getOrDefault("subscriptionId")
-  valid_574248 = validateParameter(valid_574248, JString, required = true,
+  if valid_564147 != nil:
+    section.add "subscriptionId", valid_564147
+  var valid_564148 = path.getOrDefault("resourceGroupName")
+  valid_564148 = validateParameter(valid_564148, JString, required = true,
                                  default = nil)
-  if valid_574248 != nil:
-    section.add "subscriptionId", valid_574248
-  var valid_574249 = path.getOrDefault("transformName")
-  valid_574249 = validateParameter(valid_574249, JString, required = true,
+  if valid_564148 != nil:
+    section.add "resourceGroupName", valid_564148
+  var valid_564149 = path.getOrDefault("transformName")
+  valid_564149 = validateParameter(valid_564149, JString, required = true,
                                  default = nil)
-  if valid_574249 != nil:
-    section.add "transformName", valid_574249
-  var valid_574250 = path.getOrDefault("accountName")
-  valid_574250 = validateParameter(valid_574250, JString, required = true,
+  if valid_564149 != nil:
+    section.add "transformName", valid_564149
+  var valid_564150 = path.getOrDefault("accountName")
+  valid_564150 = validateParameter(valid_564150, JString, required = true,
                                  default = nil)
-  if valid_574250 != nil:
-    section.add "accountName", valid_574250
+  if valid_564150 != nil:
+    section.add "accountName", valid_564150
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -574,11 +578,11 @@ proc validate_TransformsUpdate_574245(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574251 = query.getOrDefault("api-version")
-  valid_574251 = validateParameter(valid_574251, JString, required = true,
+  var valid_564151 = query.getOrDefault("api-version")
+  valid_564151 = validateParameter(valid_564151, JString, required = true,
                                  default = nil)
-  if valid_574251 != nil:
-    section.add "api-version", valid_574251
+  if valid_564151 != nil:
+    section.add "api-version", valid_564151
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -592,55 +596,55 @@ proc validate_TransformsUpdate_574245(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574253: Call_TransformsUpdate_574244; path: JsonNode;
+proc call*(call_564153: Call_TransformsUpdate_564144; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Updates a Transform.
   ## 
-  let valid = call_574253.validator(path, query, header, formData, body)
-  let scheme = call_574253.pickScheme
+  let valid = call_564153.validator(path, query, header, formData, body)
+  let scheme = call_564153.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574253.url(scheme.get, call_574253.host, call_574253.base,
-                         call_574253.route, valid.getOrDefault("path"),
+  let url = call_564153.url(scheme.get, call_564153.host, call_564153.base,
+                         call_564153.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574253, url, valid)
+  result = hook(call_564153, url, valid)
 
-proc call*(call_574254: Call_TransformsUpdate_574244; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; transformName: string;
+proc call*(call_564154: Call_TransformsUpdate_564144; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string; transformName: string;
           parameters: JsonNode; accountName: string): Recallable =
   ## transformsUpdate
   ## Updates a Transform.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group within the Azure subscription.
   ##   apiVersion: string (required)
   ##             : The Version of the API to be used with the client request.
   ##   subscriptionId: string (required)
   ##                 : The unique identifier for a Microsoft Azure subscription.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group within the Azure subscription.
   ##   transformName: string (required)
   ##                : The Transform name.
   ##   parameters: JObject (required)
   ##             : The request parameters
   ##   accountName: string (required)
   ##              : The Media Services account name.
-  var path_574255 = newJObject()
-  var query_574256 = newJObject()
-  var body_574257 = newJObject()
-  add(path_574255, "resourceGroupName", newJString(resourceGroupName))
-  add(query_574256, "api-version", newJString(apiVersion))
-  add(path_574255, "subscriptionId", newJString(subscriptionId))
-  add(path_574255, "transformName", newJString(transformName))
+  var path_564155 = newJObject()
+  var query_564156 = newJObject()
+  var body_564157 = newJObject()
+  add(query_564156, "api-version", newJString(apiVersion))
+  add(path_564155, "subscriptionId", newJString(subscriptionId))
+  add(path_564155, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564155, "transformName", newJString(transformName))
   if parameters != nil:
-    body_574257 = parameters
-  add(path_574255, "accountName", newJString(accountName))
-  result = call_574254.call(path_574255, query_574256, nil, nil, body_574257)
+    body_564157 = parameters
+  add(path_564155, "accountName", newJString(accountName))
+  result = call_564154.call(path_564155, query_564156, nil, nil, body_564157)
 
-var transformsUpdate* = Call_TransformsUpdate_574244(name: "transformsUpdate",
+var transformsUpdate* = Call_TransformsUpdate_564144(name: "transformsUpdate",
     meth: HttpMethod.HttpPatch, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Media/mediaServices/{accountName}/transforms/{transformName}",
-    validator: validate_TransformsUpdate_574245, base: "",
-    url: url_TransformsUpdate_574246, schemes: {Scheme.Https})
+    validator: validate_TransformsUpdate_564145, base: "",
+    url: url_TransformsUpdate_564146, schemes: {Scheme.Https})
 type
-  Call_TransformsDelete_574232 = ref object of OpenApiRestCall_573667
-proc url_TransformsDelete_574234(protocol: Scheme; host: string; base: string;
+  Call_TransformsDelete_564132 = ref object of OpenApiRestCall_563565
+proc url_TransformsDelete_564134(protocol: Scheme; host: string; base: string;
                                 route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -665,7 +669,7 @@ proc url_TransformsDelete_574234(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_TransformsDelete_574233(path: JsonNode; query: JsonNode;
+proc validate_TransformsDelete_564133(path: JsonNode; query: JsonNode;
                                      header: JsonNode; formData: JsonNode;
                                      body: JsonNode): JsonNode =
   ## Deletes a Transform.
@@ -673,37 +677,37 @@ proc validate_TransformsDelete_574233(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group within the Azure subscription.
   ##   subscriptionId: JString (required)
   ##                 : The unique identifier for a Microsoft Azure subscription.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group within the Azure subscription.
   ##   transformName: JString (required)
   ##                : The Transform name.
   ##   accountName: JString (required)
   ##              : The Media Services account name.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_574235 = path.getOrDefault("resourceGroupName")
-  valid_574235 = validateParameter(valid_574235, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564135 = path.getOrDefault("subscriptionId")
+  valid_564135 = validateParameter(valid_564135, JString, required = true,
                                  default = nil)
-  if valid_574235 != nil:
-    section.add "resourceGroupName", valid_574235
-  var valid_574236 = path.getOrDefault("subscriptionId")
-  valid_574236 = validateParameter(valid_574236, JString, required = true,
+  if valid_564135 != nil:
+    section.add "subscriptionId", valid_564135
+  var valid_564136 = path.getOrDefault("resourceGroupName")
+  valid_564136 = validateParameter(valid_564136, JString, required = true,
                                  default = nil)
-  if valid_574236 != nil:
-    section.add "subscriptionId", valid_574236
-  var valid_574237 = path.getOrDefault("transformName")
-  valid_574237 = validateParameter(valid_574237, JString, required = true,
+  if valid_564136 != nil:
+    section.add "resourceGroupName", valid_564136
+  var valid_564137 = path.getOrDefault("transformName")
+  valid_564137 = validateParameter(valid_564137, JString, required = true,
                                  default = nil)
-  if valid_574237 != nil:
-    section.add "transformName", valid_574237
-  var valid_574238 = path.getOrDefault("accountName")
-  valid_574238 = validateParameter(valid_574238, JString, required = true,
+  if valid_564137 != nil:
+    section.add "transformName", valid_564137
+  var valid_564138 = path.getOrDefault("accountName")
+  valid_564138 = validateParameter(valid_564138, JString, required = true,
                                  default = nil)
-  if valid_574238 != nil:
-    section.add "accountName", valid_574238
+  if valid_564138 != nil:
+    section.add "accountName", valid_564138
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -711,11 +715,11 @@ proc validate_TransformsDelete_574233(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574239 = query.getOrDefault("api-version")
-  valid_574239 = validateParameter(valid_574239, JString, required = true,
+  var valid_564139 = query.getOrDefault("api-version")
+  valid_564139 = validateParameter(valid_564139, JString, required = true,
                                  default = nil)
-  if valid_574239 != nil:
-    section.add "api-version", valid_574239
+  if valid_564139 != nil:
+    section.add "api-version", valid_564139
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -724,50 +728,50 @@ proc validate_TransformsDelete_574233(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574240: Call_TransformsDelete_574232; path: JsonNode;
+proc call*(call_564140: Call_TransformsDelete_564132; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes a Transform.
   ## 
-  let valid = call_574240.validator(path, query, header, formData, body)
-  let scheme = call_574240.pickScheme
+  let valid = call_564140.validator(path, query, header, formData, body)
+  let scheme = call_564140.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574240.url(scheme.get, call_574240.host, call_574240.base,
-                         call_574240.route, valid.getOrDefault("path"),
+  let url = call_564140.url(scheme.get, call_564140.host, call_564140.base,
+                         call_564140.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574240, url, valid)
+  result = hook(call_564140, url, valid)
 
-proc call*(call_574241: Call_TransformsDelete_574232; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; transformName: string;
+proc call*(call_564141: Call_TransformsDelete_564132; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string; transformName: string;
           accountName: string): Recallable =
   ## transformsDelete
   ## Deletes a Transform.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group within the Azure subscription.
   ##   apiVersion: string (required)
   ##             : The Version of the API to be used with the client request.
   ##   subscriptionId: string (required)
   ##                 : The unique identifier for a Microsoft Azure subscription.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group within the Azure subscription.
   ##   transformName: string (required)
   ##                : The Transform name.
   ##   accountName: string (required)
   ##              : The Media Services account name.
-  var path_574242 = newJObject()
-  var query_574243 = newJObject()
-  add(path_574242, "resourceGroupName", newJString(resourceGroupName))
-  add(query_574243, "api-version", newJString(apiVersion))
-  add(path_574242, "subscriptionId", newJString(subscriptionId))
-  add(path_574242, "transformName", newJString(transformName))
-  add(path_574242, "accountName", newJString(accountName))
-  result = call_574241.call(path_574242, query_574243, nil, nil, nil)
+  var path_564142 = newJObject()
+  var query_564143 = newJObject()
+  add(query_564143, "api-version", newJString(apiVersion))
+  add(path_564142, "subscriptionId", newJString(subscriptionId))
+  add(path_564142, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564142, "transformName", newJString(transformName))
+  add(path_564142, "accountName", newJString(accountName))
+  result = call_564141.call(path_564142, query_564143, nil, nil, nil)
 
-var transformsDelete* = Call_TransformsDelete_574232(name: "transformsDelete",
+var transformsDelete* = Call_TransformsDelete_564132(name: "transformsDelete",
     meth: HttpMethod.HttpDelete, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Media/mediaServices/{accountName}/transforms/{transformName}",
-    validator: validate_TransformsDelete_574233, base: "",
-    url: url_TransformsDelete_574234, schemes: {Scheme.Https})
+    validator: validate_TransformsDelete_564133, base: "",
+    url: url_TransformsDelete_564134, schemes: {Scheme.Https})
 type
-  Call_JobsList_574258 = ref object of OpenApiRestCall_573667
-proc url_JobsList_574260(protocol: Scheme; host: string; base: string; route: string;
+  Call_JobsList_564158 = ref object of OpenApiRestCall_563565
+proc url_JobsList_564160(protocol: Scheme; host: string; base: string; route: string;
                         path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -793,70 +797,70 @@ proc url_JobsList_574260(protocol: Scheme; host: string; base: string; route: st
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_JobsList_574259(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_JobsList_564159(path: JsonNode; query: JsonNode; header: JsonNode;
                              formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists all of the Jobs for the Transform.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group within the Azure subscription.
   ##   subscriptionId: JString (required)
   ##                 : The unique identifier for a Microsoft Azure subscription.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group within the Azure subscription.
   ##   transformName: JString (required)
   ##                : The Transform name.
   ##   accountName: JString (required)
   ##              : The Media Services account name.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_574261 = path.getOrDefault("resourceGroupName")
-  valid_574261 = validateParameter(valid_574261, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564161 = path.getOrDefault("subscriptionId")
+  valid_564161 = validateParameter(valid_564161, JString, required = true,
                                  default = nil)
-  if valid_574261 != nil:
-    section.add "resourceGroupName", valid_574261
-  var valid_574262 = path.getOrDefault("subscriptionId")
-  valid_574262 = validateParameter(valid_574262, JString, required = true,
+  if valid_564161 != nil:
+    section.add "subscriptionId", valid_564161
+  var valid_564162 = path.getOrDefault("resourceGroupName")
+  valid_564162 = validateParameter(valid_564162, JString, required = true,
                                  default = nil)
-  if valid_574262 != nil:
-    section.add "subscriptionId", valid_574262
-  var valid_574263 = path.getOrDefault("transformName")
-  valid_574263 = validateParameter(valid_574263, JString, required = true,
+  if valid_564162 != nil:
+    section.add "resourceGroupName", valid_564162
+  var valid_564163 = path.getOrDefault("transformName")
+  valid_564163 = validateParameter(valid_564163, JString, required = true,
                                  default = nil)
-  if valid_574263 != nil:
-    section.add "transformName", valid_574263
-  var valid_574264 = path.getOrDefault("accountName")
-  valid_574264 = validateParameter(valid_574264, JString, required = true,
+  if valid_564163 != nil:
+    section.add "transformName", valid_564163
+  var valid_564164 = path.getOrDefault("accountName")
+  valid_564164 = validateParameter(valid_564164, JString, required = true,
                                  default = nil)
-  if valid_574264 != nil:
-    section.add "accountName", valid_574264
+  if valid_564164 != nil:
+    section.add "accountName", valid_564164
   result.add "path", section
   ## parameters in `query` object:
-  ##   $orderby: JString
-  ##           : Specifies the key by which the result collection should be ordered.
   ##   api-version: JString (required)
   ##              : The Version of the API to be used with the client request.
+  ##   $orderby: JString
+  ##           : Specifies the key by which the result collection should be ordered.
   ##   $filter: JString
   ##          : Restricts the set of items returned.
   section = newJObject()
-  var valid_574265 = query.getOrDefault("$orderby")
-  valid_574265 = validateParameter(valid_574265, JString, required = false,
-                                 default = nil)
-  if valid_574265 != nil:
-    section.add "$orderby", valid_574265
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574266 = query.getOrDefault("api-version")
-  valid_574266 = validateParameter(valid_574266, JString, required = true,
+  var valid_564165 = query.getOrDefault("api-version")
+  valid_564165 = validateParameter(valid_564165, JString, required = true,
                                  default = nil)
-  if valid_574266 != nil:
-    section.add "api-version", valid_574266
-  var valid_574267 = query.getOrDefault("$filter")
-  valid_574267 = validateParameter(valid_574267, JString, required = false,
+  if valid_564165 != nil:
+    section.add "api-version", valid_564165
+  var valid_564166 = query.getOrDefault("$orderby")
+  valid_564166 = validateParameter(valid_564166, JString, required = false,
                                  default = nil)
-  if valid_574267 != nil:
-    section.add "$filter", valid_574267
+  if valid_564166 != nil:
+    section.add "$orderby", valid_564166
+  var valid_564167 = query.getOrDefault("$filter")
+  valid_564167 = validateParameter(valid_564167, JString, required = false,
+                                 default = nil)
+  if valid_564167 != nil:
+    section.add "$filter", valid_564167
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -865,57 +869,57 @@ proc validate_JobsList_574259(path: JsonNode; query: JsonNode; header: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574268: Call_JobsList_574258; path: JsonNode; query: JsonNode;
+proc call*(call_564168: Call_JobsList_564158; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists all of the Jobs for the Transform.
   ## 
-  let valid = call_574268.validator(path, query, header, formData, body)
-  let scheme = call_574268.pickScheme
+  let valid = call_564168.validator(path, query, header, formData, body)
+  let scheme = call_564168.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574268.url(scheme.get, call_574268.host, call_574268.base,
-                         call_574268.route, valid.getOrDefault("path"),
+  let url = call_564168.url(scheme.get, call_564168.host, call_564168.base,
+                         call_564168.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574268, url, valid)
+  result = hook(call_564168, url, valid)
 
-proc call*(call_574269: Call_JobsList_574258; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; transformName: string;
+proc call*(call_564169: Call_JobsList_564158; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string; transformName: string;
           accountName: string; Orderby: string = ""; Filter: string = ""): Recallable =
   ## jobsList
   ## Lists all of the Jobs for the Transform.
-  ##   Orderby: string
-  ##          : Specifies the key by which the result collection should be ordered.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group within the Azure subscription.
   ##   apiVersion: string (required)
   ##             : The Version of the API to be used with the client request.
   ##   subscriptionId: string (required)
   ##                 : The unique identifier for a Microsoft Azure subscription.
+  ##   Orderby: string
+  ##          : Specifies the key by which the result collection should be ordered.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group within the Azure subscription.
+  ##   Filter: string
+  ##         : Restricts the set of items returned.
   ##   transformName: string (required)
   ##                : The Transform name.
   ##   accountName: string (required)
   ##              : The Media Services account name.
-  ##   Filter: string
-  ##         : Restricts the set of items returned.
-  var path_574270 = newJObject()
-  var query_574271 = newJObject()
-  add(query_574271, "$orderby", newJString(Orderby))
-  add(path_574270, "resourceGroupName", newJString(resourceGroupName))
-  add(query_574271, "api-version", newJString(apiVersion))
-  add(path_574270, "subscriptionId", newJString(subscriptionId))
-  add(path_574270, "transformName", newJString(transformName))
-  add(path_574270, "accountName", newJString(accountName))
-  add(query_574271, "$filter", newJString(Filter))
-  result = call_574269.call(path_574270, query_574271, nil, nil, nil)
+  var path_564170 = newJObject()
+  var query_564171 = newJObject()
+  add(query_564171, "api-version", newJString(apiVersion))
+  add(path_564170, "subscriptionId", newJString(subscriptionId))
+  add(query_564171, "$orderby", newJString(Orderby))
+  add(path_564170, "resourceGroupName", newJString(resourceGroupName))
+  add(query_564171, "$filter", newJString(Filter))
+  add(path_564170, "transformName", newJString(transformName))
+  add(path_564170, "accountName", newJString(accountName))
+  result = call_564169.call(path_564170, query_564171, nil, nil, nil)
 
-var jobsList* = Call_JobsList_574258(name: "jobsList", meth: HttpMethod.HttpGet,
+var jobsList* = Call_JobsList_564158(name: "jobsList", meth: HttpMethod.HttpGet,
                                   host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Media/mediaServices/{accountName}/transforms/{transformName}/jobs",
-                                  validator: validate_JobsList_574259, base: "",
-                                  url: url_JobsList_574260,
+                                  validator: validate_JobsList_564159, base: "",
+                                  url: url_JobsList_564160,
                                   schemes: {Scheme.Https})
 type
-  Call_JobsCreate_574285 = ref object of OpenApiRestCall_573667
-proc url_JobsCreate_574287(protocol: Scheme; host: string; base: string; route: string;
+  Call_JobsCreate_564185 = ref object of OpenApiRestCall_563565
+proc url_JobsCreate_564187(protocol: Scheme; host: string; base: string; route: string;
                           path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -943,51 +947,51 @@ proc url_JobsCreate_574287(protocol: Scheme; host: string; base: string; route: 
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_JobsCreate_574286(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_JobsCreate_564186(path: JsonNode; query: JsonNode; header: JsonNode;
                                formData: JsonNode; body: JsonNode): JsonNode =
   ## Creates a Job.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group within the Azure subscription.
   ##   subscriptionId: JString (required)
   ##                 : The unique identifier for a Microsoft Azure subscription.
-  ##   jobName: JString (required)
-  ##          : The Job name.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group within the Azure subscription.
   ##   transformName: JString (required)
   ##                : The Transform name.
+  ##   jobName: JString (required)
+  ##          : The Job name.
   ##   accountName: JString (required)
   ##              : The Media Services account name.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_574288 = path.getOrDefault("resourceGroupName")
-  valid_574288 = validateParameter(valid_574288, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564188 = path.getOrDefault("subscriptionId")
+  valid_564188 = validateParameter(valid_564188, JString, required = true,
                                  default = nil)
-  if valid_574288 != nil:
-    section.add "resourceGroupName", valid_574288
-  var valid_574289 = path.getOrDefault("subscriptionId")
-  valid_574289 = validateParameter(valid_574289, JString, required = true,
+  if valid_564188 != nil:
+    section.add "subscriptionId", valid_564188
+  var valid_564189 = path.getOrDefault("resourceGroupName")
+  valid_564189 = validateParameter(valid_564189, JString, required = true,
                                  default = nil)
-  if valid_574289 != nil:
-    section.add "subscriptionId", valid_574289
-  var valid_574290 = path.getOrDefault("jobName")
-  valid_574290 = validateParameter(valid_574290, JString, required = true,
+  if valid_564189 != nil:
+    section.add "resourceGroupName", valid_564189
+  var valid_564190 = path.getOrDefault("transformName")
+  valid_564190 = validateParameter(valid_564190, JString, required = true,
                                  default = nil)
-  if valid_574290 != nil:
-    section.add "jobName", valid_574290
-  var valid_574291 = path.getOrDefault("transformName")
-  valid_574291 = validateParameter(valid_574291, JString, required = true,
+  if valid_564190 != nil:
+    section.add "transformName", valid_564190
+  var valid_564191 = path.getOrDefault("jobName")
+  valid_564191 = validateParameter(valid_564191, JString, required = true,
                                  default = nil)
-  if valid_574291 != nil:
-    section.add "transformName", valid_574291
-  var valid_574292 = path.getOrDefault("accountName")
-  valid_574292 = validateParameter(valid_574292, JString, required = true,
+  if valid_564191 != nil:
+    section.add "jobName", valid_564191
+  var valid_564192 = path.getOrDefault("accountName")
+  valid_564192 = validateParameter(valid_564192, JString, required = true,
                                  default = nil)
-  if valid_574292 != nil:
-    section.add "accountName", valid_574292
+  if valid_564192 != nil:
+    section.add "accountName", valid_564192
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -995,11 +999,11 @@ proc validate_JobsCreate_574286(path: JsonNode; query: JsonNode; header: JsonNod
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574293 = query.getOrDefault("api-version")
-  valid_574293 = validateParameter(valid_574293, JString, required = true,
+  var valid_564193 = query.getOrDefault("api-version")
+  valid_564193 = validateParameter(valid_564193, JString, required = true,
                                  default = nil)
-  if valid_574293 != nil:
-    section.add "api-version", valid_574293
+  if valid_564193 != nil:
+    section.add "api-version", valid_564193
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1013,60 +1017,60 @@ proc validate_JobsCreate_574286(path: JsonNode; query: JsonNode; header: JsonNod
   if body != nil:
     result.add "body", body
 
-proc call*(call_574295: Call_JobsCreate_574285; path: JsonNode; query: JsonNode;
+proc call*(call_564195: Call_JobsCreate_564185; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Creates a Job.
   ## 
-  let valid = call_574295.validator(path, query, header, formData, body)
-  let scheme = call_574295.pickScheme
+  let valid = call_564195.validator(path, query, header, formData, body)
+  let scheme = call_564195.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574295.url(scheme.get, call_574295.host, call_574295.base,
-                         call_574295.route, valid.getOrDefault("path"),
+  let url = call_564195.url(scheme.get, call_564195.host, call_564195.base,
+                         call_564195.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574295, url, valid)
+  result = hook(call_564195, url, valid)
 
-proc call*(call_574296: Call_JobsCreate_574285; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; jobName: string;
-          transformName: string; parameters: JsonNode; accountName: string): Recallable =
+proc call*(call_564196: Call_JobsCreate_564185; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string; transformName: string;
+          parameters: JsonNode; jobName: string; accountName: string): Recallable =
   ## jobsCreate
   ## Creates a Job.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group within the Azure subscription.
   ##   apiVersion: string (required)
   ##             : The Version of the API to be used with the client request.
   ##   subscriptionId: string (required)
   ##                 : The unique identifier for a Microsoft Azure subscription.
-  ##   jobName: string (required)
-  ##          : The Job name.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group within the Azure subscription.
   ##   transformName: string (required)
   ##                : The Transform name.
   ##   parameters: JObject (required)
   ##             : The request parameters
+  ##   jobName: string (required)
+  ##          : The Job name.
   ##   accountName: string (required)
   ##              : The Media Services account name.
-  var path_574297 = newJObject()
-  var query_574298 = newJObject()
-  var body_574299 = newJObject()
-  add(path_574297, "resourceGroupName", newJString(resourceGroupName))
-  add(query_574298, "api-version", newJString(apiVersion))
-  add(path_574297, "subscriptionId", newJString(subscriptionId))
-  add(path_574297, "jobName", newJString(jobName))
-  add(path_574297, "transformName", newJString(transformName))
+  var path_564197 = newJObject()
+  var query_564198 = newJObject()
+  var body_564199 = newJObject()
+  add(query_564198, "api-version", newJString(apiVersion))
+  add(path_564197, "subscriptionId", newJString(subscriptionId))
+  add(path_564197, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564197, "transformName", newJString(transformName))
   if parameters != nil:
-    body_574299 = parameters
-  add(path_574297, "accountName", newJString(accountName))
-  result = call_574296.call(path_574297, query_574298, nil, nil, body_574299)
+    body_564199 = parameters
+  add(path_564197, "jobName", newJString(jobName))
+  add(path_564197, "accountName", newJString(accountName))
+  result = call_564196.call(path_564197, query_564198, nil, nil, body_564199)
 
-var jobsCreate* = Call_JobsCreate_574285(name: "jobsCreate",
+var jobsCreate* = Call_JobsCreate_564185(name: "jobsCreate",
                                       meth: HttpMethod.HttpPut,
                                       host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Media/mediaServices/{accountName}/transforms/{transformName}/jobs/{jobName}",
-                                      validator: validate_JobsCreate_574286,
-                                      base: "", url: url_JobsCreate_574287,
+                                      validator: validate_JobsCreate_564186,
+                                      base: "", url: url_JobsCreate_564187,
                                       schemes: {Scheme.Https})
 type
-  Call_JobsGet_574272 = ref object of OpenApiRestCall_573667
-proc url_JobsGet_574274(protocol: Scheme; host: string; base: string; route: string;
+  Call_JobsGet_564172 = ref object of OpenApiRestCall_563565
+proc url_JobsGet_564174(protocol: Scheme; host: string; base: string; route: string;
                        path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1094,51 +1098,51 @@ proc url_JobsGet_574274(protocol: Scheme; host: string; base: string; route: str
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_JobsGet_574273(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_JobsGet_564173(path: JsonNode; query: JsonNode; header: JsonNode;
                             formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets a Job.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group within the Azure subscription.
   ##   subscriptionId: JString (required)
   ##                 : The unique identifier for a Microsoft Azure subscription.
-  ##   jobName: JString (required)
-  ##          : The Job name.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group within the Azure subscription.
   ##   transformName: JString (required)
   ##                : The Transform name.
+  ##   jobName: JString (required)
+  ##          : The Job name.
   ##   accountName: JString (required)
   ##              : The Media Services account name.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_574275 = path.getOrDefault("resourceGroupName")
-  valid_574275 = validateParameter(valid_574275, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564175 = path.getOrDefault("subscriptionId")
+  valid_564175 = validateParameter(valid_564175, JString, required = true,
                                  default = nil)
-  if valid_574275 != nil:
-    section.add "resourceGroupName", valid_574275
-  var valid_574276 = path.getOrDefault("subscriptionId")
-  valid_574276 = validateParameter(valid_574276, JString, required = true,
+  if valid_564175 != nil:
+    section.add "subscriptionId", valid_564175
+  var valid_564176 = path.getOrDefault("resourceGroupName")
+  valid_564176 = validateParameter(valid_564176, JString, required = true,
                                  default = nil)
-  if valid_574276 != nil:
-    section.add "subscriptionId", valid_574276
-  var valid_574277 = path.getOrDefault("jobName")
-  valid_574277 = validateParameter(valid_574277, JString, required = true,
+  if valid_564176 != nil:
+    section.add "resourceGroupName", valid_564176
+  var valid_564177 = path.getOrDefault("transformName")
+  valid_564177 = validateParameter(valid_564177, JString, required = true,
                                  default = nil)
-  if valid_574277 != nil:
-    section.add "jobName", valid_574277
-  var valid_574278 = path.getOrDefault("transformName")
-  valid_574278 = validateParameter(valid_574278, JString, required = true,
+  if valid_564177 != nil:
+    section.add "transformName", valid_564177
+  var valid_564178 = path.getOrDefault("jobName")
+  valid_564178 = validateParameter(valid_564178, JString, required = true,
                                  default = nil)
-  if valid_574278 != nil:
-    section.add "transformName", valid_574278
-  var valid_574279 = path.getOrDefault("accountName")
-  valid_574279 = validateParameter(valid_574279, JString, required = true,
+  if valid_564178 != nil:
+    section.add "jobName", valid_564178
+  var valid_564179 = path.getOrDefault("accountName")
+  valid_564179 = validateParameter(valid_564179, JString, required = true,
                                  default = nil)
-  if valid_574279 != nil:
-    section.add "accountName", valid_574279
+  if valid_564179 != nil:
+    section.add "accountName", valid_564179
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1146,11 +1150,11 @@ proc validate_JobsGet_574273(path: JsonNode; query: JsonNode; header: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574280 = query.getOrDefault("api-version")
-  valid_574280 = validateParameter(valid_574280, JString, required = true,
+  var valid_564180 = query.getOrDefault("api-version")
+  valid_564180 = validateParameter(valid_564180, JString, required = true,
                                  default = nil)
-  if valid_574280 != nil:
-    section.add "api-version", valid_574280
+  if valid_564180 != nil:
+    section.add "api-version", valid_564180
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1159,53 +1163,53 @@ proc validate_JobsGet_574273(path: JsonNode; query: JsonNode; header: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574281: Call_JobsGet_574272; path: JsonNode; query: JsonNode;
+proc call*(call_564181: Call_JobsGet_564172; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets a Job.
   ## 
-  let valid = call_574281.validator(path, query, header, formData, body)
-  let scheme = call_574281.pickScheme
+  let valid = call_564181.validator(path, query, header, formData, body)
+  let scheme = call_564181.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574281.url(scheme.get, call_574281.host, call_574281.base,
-                         call_574281.route, valid.getOrDefault("path"),
+  let url = call_564181.url(scheme.get, call_564181.host, call_564181.base,
+                         call_564181.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574281, url, valid)
+  result = hook(call_564181, url, valid)
 
-proc call*(call_574282: Call_JobsGet_574272; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; jobName: string;
-          transformName: string; accountName: string): Recallable =
+proc call*(call_564182: Call_JobsGet_564172; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string; transformName: string;
+          jobName: string; accountName: string): Recallable =
   ## jobsGet
   ## Gets a Job.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group within the Azure subscription.
   ##   apiVersion: string (required)
   ##             : The Version of the API to be used with the client request.
   ##   subscriptionId: string (required)
   ##                 : The unique identifier for a Microsoft Azure subscription.
-  ##   jobName: string (required)
-  ##          : The Job name.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group within the Azure subscription.
   ##   transformName: string (required)
   ##                : The Transform name.
+  ##   jobName: string (required)
+  ##          : The Job name.
   ##   accountName: string (required)
   ##              : The Media Services account name.
-  var path_574283 = newJObject()
-  var query_574284 = newJObject()
-  add(path_574283, "resourceGroupName", newJString(resourceGroupName))
-  add(query_574284, "api-version", newJString(apiVersion))
-  add(path_574283, "subscriptionId", newJString(subscriptionId))
-  add(path_574283, "jobName", newJString(jobName))
-  add(path_574283, "transformName", newJString(transformName))
-  add(path_574283, "accountName", newJString(accountName))
-  result = call_574282.call(path_574283, query_574284, nil, nil, nil)
+  var path_564183 = newJObject()
+  var query_564184 = newJObject()
+  add(query_564184, "api-version", newJString(apiVersion))
+  add(path_564183, "subscriptionId", newJString(subscriptionId))
+  add(path_564183, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564183, "transformName", newJString(transformName))
+  add(path_564183, "jobName", newJString(jobName))
+  add(path_564183, "accountName", newJString(accountName))
+  result = call_564182.call(path_564183, query_564184, nil, nil, nil)
 
-var jobsGet* = Call_JobsGet_574272(name: "jobsGet", meth: HttpMethod.HttpGet,
+var jobsGet* = Call_JobsGet_564172(name: "jobsGet", meth: HttpMethod.HttpGet,
                                 host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Media/mediaServices/{accountName}/transforms/{transformName}/jobs/{jobName}",
-                                validator: validate_JobsGet_574273, base: "",
-                                url: url_JobsGet_574274, schemes: {Scheme.Https})
+                                validator: validate_JobsGet_564173, base: "",
+                                url: url_JobsGet_564174, schemes: {Scheme.Https})
 type
-  Call_JobsUpdate_574313 = ref object of OpenApiRestCall_573667
-proc url_JobsUpdate_574315(protocol: Scheme; host: string; base: string; route: string;
+  Call_JobsUpdate_564213 = ref object of OpenApiRestCall_563565
+proc url_JobsUpdate_564215(protocol: Scheme; host: string; base: string; route: string;
                           path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1233,51 +1237,51 @@ proc url_JobsUpdate_574315(protocol: Scheme; host: string; base: string; route: 
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_JobsUpdate_574314(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_JobsUpdate_564214(path: JsonNode; query: JsonNode; header: JsonNode;
                                formData: JsonNode; body: JsonNode): JsonNode =
   ## Update is only supported for description and priority. Updating Priority will take effect when the Job state is Queued or Scheduled and depending on the timing the priority update may be ignored.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group within the Azure subscription.
   ##   subscriptionId: JString (required)
   ##                 : The unique identifier for a Microsoft Azure subscription.
-  ##   jobName: JString (required)
-  ##          : The Job name.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group within the Azure subscription.
   ##   transformName: JString (required)
   ##                : The Transform name.
+  ##   jobName: JString (required)
+  ##          : The Job name.
   ##   accountName: JString (required)
   ##              : The Media Services account name.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_574316 = path.getOrDefault("resourceGroupName")
-  valid_574316 = validateParameter(valid_574316, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564216 = path.getOrDefault("subscriptionId")
+  valid_564216 = validateParameter(valid_564216, JString, required = true,
                                  default = nil)
-  if valid_574316 != nil:
-    section.add "resourceGroupName", valid_574316
-  var valid_574317 = path.getOrDefault("subscriptionId")
-  valid_574317 = validateParameter(valid_574317, JString, required = true,
+  if valid_564216 != nil:
+    section.add "subscriptionId", valid_564216
+  var valid_564217 = path.getOrDefault("resourceGroupName")
+  valid_564217 = validateParameter(valid_564217, JString, required = true,
                                  default = nil)
-  if valid_574317 != nil:
-    section.add "subscriptionId", valid_574317
-  var valid_574318 = path.getOrDefault("jobName")
-  valid_574318 = validateParameter(valid_574318, JString, required = true,
+  if valid_564217 != nil:
+    section.add "resourceGroupName", valid_564217
+  var valid_564218 = path.getOrDefault("transformName")
+  valid_564218 = validateParameter(valid_564218, JString, required = true,
                                  default = nil)
-  if valid_574318 != nil:
-    section.add "jobName", valid_574318
-  var valid_574319 = path.getOrDefault("transformName")
-  valid_574319 = validateParameter(valid_574319, JString, required = true,
+  if valid_564218 != nil:
+    section.add "transformName", valid_564218
+  var valid_564219 = path.getOrDefault("jobName")
+  valid_564219 = validateParameter(valid_564219, JString, required = true,
                                  default = nil)
-  if valid_574319 != nil:
-    section.add "transformName", valid_574319
-  var valid_574320 = path.getOrDefault("accountName")
-  valid_574320 = validateParameter(valid_574320, JString, required = true,
+  if valid_564219 != nil:
+    section.add "jobName", valid_564219
+  var valid_564220 = path.getOrDefault("accountName")
+  valid_564220 = validateParameter(valid_564220, JString, required = true,
                                  default = nil)
-  if valid_574320 != nil:
-    section.add "accountName", valid_574320
+  if valid_564220 != nil:
+    section.add "accountName", valid_564220
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1285,11 +1289,11 @@ proc validate_JobsUpdate_574314(path: JsonNode; query: JsonNode; header: JsonNod
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574321 = query.getOrDefault("api-version")
-  valid_574321 = validateParameter(valid_574321, JString, required = true,
+  var valid_564221 = query.getOrDefault("api-version")
+  valid_564221 = validateParameter(valid_564221, JString, required = true,
                                  default = nil)
-  if valid_574321 != nil:
-    section.add "api-version", valid_574321
+  if valid_564221 != nil:
+    section.add "api-version", valid_564221
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1303,60 +1307,60 @@ proc validate_JobsUpdate_574314(path: JsonNode; query: JsonNode; header: JsonNod
   if body != nil:
     result.add "body", body
 
-proc call*(call_574323: Call_JobsUpdate_574313; path: JsonNode; query: JsonNode;
+proc call*(call_564223: Call_JobsUpdate_564213; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Update is only supported for description and priority. Updating Priority will take effect when the Job state is Queued or Scheduled and depending on the timing the priority update may be ignored.
   ## 
-  let valid = call_574323.validator(path, query, header, formData, body)
-  let scheme = call_574323.pickScheme
+  let valid = call_564223.validator(path, query, header, formData, body)
+  let scheme = call_564223.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574323.url(scheme.get, call_574323.host, call_574323.base,
-                         call_574323.route, valid.getOrDefault("path"),
+  let url = call_564223.url(scheme.get, call_564223.host, call_564223.base,
+                         call_564223.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574323, url, valid)
+  result = hook(call_564223, url, valid)
 
-proc call*(call_574324: Call_JobsUpdate_574313; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; jobName: string;
-          transformName: string; parameters: JsonNode; accountName: string): Recallable =
+proc call*(call_564224: Call_JobsUpdate_564213; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string; transformName: string;
+          parameters: JsonNode; jobName: string; accountName: string): Recallable =
   ## jobsUpdate
   ## Update is only supported for description and priority. Updating Priority will take effect when the Job state is Queued or Scheduled and depending on the timing the priority update may be ignored.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group within the Azure subscription.
   ##   apiVersion: string (required)
   ##             : The Version of the API to be used with the client request.
   ##   subscriptionId: string (required)
   ##                 : The unique identifier for a Microsoft Azure subscription.
-  ##   jobName: string (required)
-  ##          : The Job name.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group within the Azure subscription.
   ##   transformName: string (required)
   ##                : The Transform name.
   ##   parameters: JObject (required)
   ##             : The request parameters
+  ##   jobName: string (required)
+  ##          : The Job name.
   ##   accountName: string (required)
   ##              : The Media Services account name.
-  var path_574325 = newJObject()
-  var query_574326 = newJObject()
-  var body_574327 = newJObject()
-  add(path_574325, "resourceGroupName", newJString(resourceGroupName))
-  add(query_574326, "api-version", newJString(apiVersion))
-  add(path_574325, "subscriptionId", newJString(subscriptionId))
-  add(path_574325, "jobName", newJString(jobName))
-  add(path_574325, "transformName", newJString(transformName))
+  var path_564225 = newJObject()
+  var query_564226 = newJObject()
+  var body_564227 = newJObject()
+  add(query_564226, "api-version", newJString(apiVersion))
+  add(path_564225, "subscriptionId", newJString(subscriptionId))
+  add(path_564225, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564225, "transformName", newJString(transformName))
   if parameters != nil:
-    body_574327 = parameters
-  add(path_574325, "accountName", newJString(accountName))
-  result = call_574324.call(path_574325, query_574326, nil, nil, body_574327)
+    body_564227 = parameters
+  add(path_564225, "jobName", newJString(jobName))
+  add(path_564225, "accountName", newJString(accountName))
+  result = call_564224.call(path_564225, query_564226, nil, nil, body_564227)
 
-var jobsUpdate* = Call_JobsUpdate_574313(name: "jobsUpdate",
+var jobsUpdate* = Call_JobsUpdate_564213(name: "jobsUpdate",
                                       meth: HttpMethod.HttpPatch,
                                       host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Media/mediaServices/{accountName}/transforms/{transformName}/jobs/{jobName}",
-                                      validator: validate_JobsUpdate_574314,
-                                      base: "", url: url_JobsUpdate_574315,
+                                      validator: validate_JobsUpdate_564214,
+                                      base: "", url: url_JobsUpdate_564215,
                                       schemes: {Scheme.Https})
 type
-  Call_JobsDelete_574300 = ref object of OpenApiRestCall_573667
-proc url_JobsDelete_574302(protocol: Scheme; host: string; base: string; route: string;
+  Call_JobsDelete_564200 = ref object of OpenApiRestCall_563565
+proc url_JobsDelete_564202(protocol: Scheme; host: string; base: string; route: string;
                           path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1384,51 +1388,51 @@ proc url_JobsDelete_574302(protocol: Scheme; host: string; base: string; route: 
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_JobsDelete_574301(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_JobsDelete_564201(path: JsonNode; query: JsonNode; header: JsonNode;
                                formData: JsonNode; body: JsonNode): JsonNode =
   ## Deletes a Job.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group within the Azure subscription.
   ##   subscriptionId: JString (required)
   ##                 : The unique identifier for a Microsoft Azure subscription.
-  ##   jobName: JString (required)
-  ##          : The Job name.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group within the Azure subscription.
   ##   transformName: JString (required)
   ##                : The Transform name.
+  ##   jobName: JString (required)
+  ##          : The Job name.
   ##   accountName: JString (required)
   ##              : The Media Services account name.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_574303 = path.getOrDefault("resourceGroupName")
-  valid_574303 = validateParameter(valid_574303, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564203 = path.getOrDefault("subscriptionId")
+  valid_564203 = validateParameter(valid_564203, JString, required = true,
                                  default = nil)
-  if valid_574303 != nil:
-    section.add "resourceGroupName", valid_574303
-  var valid_574304 = path.getOrDefault("subscriptionId")
-  valid_574304 = validateParameter(valid_574304, JString, required = true,
+  if valid_564203 != nil:
+    section.add "subscriptionId", valid_564203
+  var valid_564204 = path.getOrDefault("resourceGroupName")
+  valid_564204 = validateParameter(valid_564204, JString, required = true,
                                  default = nil)
-  if valid_574304 != nil:
-    section.add "subscriptionId", valid_574304
-  var valid_574305 = path.getOrDefault("jobName")
-  valid_574305 = validateParameter(valid_574305, JString, required = true,
+  if valid_564204 != nil:
+    section.add "resourceGroupName", valid_564204
+  var valid_564205 = path.getOrDefault("transformName")
+  valid_564205 = validateParameter(valid_564205, JString, required = true,
                                  default = nil)
-  if valid_574305 != nil:
-    section.add "jobName", valid_574305
-  var valid_574306 = path.getOrDefault("transformName")
-  valid_574306 = validateParameter(valid_574306, JString, required = true,
+  if valid_564205 != nil:
+    section.add "transformName", valid_564205
+  var valid_564206 = path.getOrDefault("jobName")
+  valid_564206 = validateParameter(valid_564206, JString, required = true,
                                  default = nil)
-  if valid_574306 != nil:
-    section.add "transformName", valid_574306
-  var valid_574307 = path.getOrDefault("accountName")
-  valid_574307 = validateParameter(valid_574307, JString, required = true,
+  if valid_564206 != nil:
+    section.add "jobName", valid_564206
+  var valid_564207 = path.getOrDefault("accountName")
+  valid_564207 = validateParameter(valid_564207, JString, required = true,
                                  default = nil)
-  if valid_574307 != nil:
-    section.add "accountName", valid_574307
+  if valid_564207 != nil:
+    section.add "accountName", valid_564207
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1436,11 +1440,11 @@ proc validate_JobsDelete_574301(path: JsonNode; query: JsonNode; header: JsonNod
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574308 = query.getOrDefault("api-version")
-  valid_574308 = validateParameter(valid_574308, JString, required = true,
+  var valid_564208 = query.getOrDefault("api-version")
+  valid_564208 = validateParameter(valid_564208, JString, required = true,
                                  default = nil)
-  if valid_574308 != nil:
-    section.add "api-version", valid_574308
+  if valid_564208 != nil:
+    section.add "api-version", valid_564208
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1449,55 +1453,55 @@ proc validate_JobsDelete_574301(path: JsonNode; query: JsonNode; header: JsonNod
   if body != nil:
     result.add "body", body
 
-proc call*(call_574309: Call_JobsDelete_574300; path: JsonNode; query: JsonNode;
+proc call*(call_564209: Call_JobsDelete_564200; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes a Job.
   ## 
-  let valid = call_574309.validator(path, query, header, formData, body)
-  let scheme = call_574309.pickScheme
+  let valid = call_564209.validator(path, query, header, formData, body)
+  let scheme = call_564209.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574309.url(scheme.get, call_574309.host, call_574309.base,
-                         call_574309.route, valid.getOrDefault("path"),
+  let url = call_564209.url(scheme.get, call_564209.host, call_564209.base,
+                         call_564209.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574309, url, valid)
+  result = hook(call_564209, url, valid)
 
-proc call*(call_574310: Call_JobsDelete_574300; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; jobName: string;
-          transformName: string; accountName: string): Recallable =
+proc call*(call_564210: Call_JobsDelete_564200; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string; transformName: string;
+          jobName: string; accountName: string): Recallable =
   ## jobsDelete
   ## Deletes a Job.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group within the Azure subscription.
   ##   apiVersion: string (required)
   ##             : The Version of the API to be used with the client request.
   ##   subscriptionId: string (required)
   ##                 : The unique identifier for a Microsoft Azure subscription.
-  ##   jobName: string (required)
-  ##          : The Job name.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group within the Azure subscription.
   ##   transformName: string (required)
   ##                : The Transform name.
+  ##   jobName: string (required)
+  ##          : The Job name.
   ##   accountName: string (required)
   ##              : The Media Services account name.
-  var path_574311 = newJObject()
-  var query_574312 = newJObject()
-  add(path_574311, "resourceGroupName", newJString(resourceGroupName))
-  add(query_574312, "api-version", newJString(apiVersion))
-  add(path_574311, "subscriptionId", newJString(subscriptionId))
-  add(path_574311, "jobName", newJString(jobName))
-  add(path_574311, "transformName", newJString(transformName))
-  add(path_574311, "accountName", newJString(accountName))
-  result = call_574310.call(path_574311, query_574312, nil, nil, nil)
+  var path_564211 = newJObject()
+  var query_564212 = newJObject()
+  add(query_564212, "api-version", newJString(apiVersion))
+  add(path_564211, "subscriptionId", newJString(subscriptionId))
+  add(path_564211, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564211, "transformName", newJString(transformName))
+  add(path_564211, "jobName", newJString(jobName))
+  add(path_564211, "accountName", newJString(accountName))
+  result = call_564210.call(path_564211, query_564212, nil, nil, nil)
 
-var jobsDelete* = Call_JobsDelete_574300(name: "jobsDelete",
+var jobsDelete* = Call_JobsDelete_564200(name: "jobsDelete",
                                       meth: HttpMethod.HttpDelete,
                                       host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Media/mediaServices/{accountName}/transforms/{transformName}/jobs/{jobName}",
-                                      validator: validate_JobsDelete_574301,
-                                      base: "", url: url_JobsDelete_574302,
+                                      validator: validate_JobsDelete_564201,
+                                      base: "", url: url_JobsDelete_564202,
                                       schemes: {Scheme.Https})
 type
-  Call_JobsCancelJob_574328 = ref object of OpenApiRestCall_573667
-proc url_JobsCancelJob_574330(protocol: Scheme; host: string; base: string;
+  Call_JobsCancelJob_564228 = ref object of OpenApiRestCall_563565
+proc url_JobsCancelJob_564230(protocol: Scheme; host: string; base: string;
                              route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1526,51 +1530,51 @@ proc url_JobsCancelJob_574330(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_JobsCancelJob_574329(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_JobsCancelJob_564229(path: JsonNode; query: JsonNode; header: JsonNode;
                                   formData: JsonNode; body: JsonNode): JsonNode =
   ## Cancel a Job.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group within the Azure subscription.
   ##   subscriptionId: JString (required)
   ##                 : The unique identifier for a Microsoft Azure subscription.
-  ##   jobName: JString (required)
-  ##          : The Job name.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group within the Azure subscription.
   ##   transformName: JString (required)
   ##                : The Transform name.
+  ##   jobName: JString (required)
+  ##          : The Job name.
   ##   accountName: JString (required)
   ##              : The Media Services account name.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_574331 = path.getOrDefault("resourceGroupName")
-  valid_574331 = validateParameter(valid_574331, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564231 = path.getOrDefault("subscriptionId")
+  valid_564231 = validateParameter(valid_564231, JString, required = true,
                                  default = nil)
-  if valid_574331 != nil:
-    section.add "resourceGroupName", valid_574331
-  var valid_574332 = path.getOrDefault("subscriptionId")
-  valid_574332 = validateParameter(valid_574332, JString, required = true,
+  if valid_564231 != nil:
+    section.add "subscriptionId", valid_564231
+  var valid_564232 = path.getOrDefault("resourceGroupName")
+  valid_564232 = validateParameter(valid_564232, JString, required = true,
                                  default = nil)
-  if valid_574332 != nil:
-    section.add "subscriptionId", valid_574332
-  var valid_574333 = path.getOrDefault("jobName")
-  valid_574333 = validateParameter(valid_574333, JString, required = true,
+  if valid_564232 != nil:
+    section.add "resourceGroupName", valid_564232
+  var valid_564233 = path.getOrDefault("transformName")
+  valid_564233 = validateParameter(valid_564233, JString, required = true,
                                  default = nil)
-  if valid_574333 != nil:
-    section.add "jobName", valid_574333
-  var valid_574334 = path.getOrDefault("transformName")
-  valid_574334 = validateParameter(valid_574334, JString, required = true,
+  if valid_564233 != nil:
+    section.add "transformName", valid_564233
+  var valid_564234 = path.getOrDefault("jobName")
+  valid_564234 = validateParameter(valid_564234, JString, required = true,
                                  default = nil)
-  if valid_574334 != nil:
-    section.add "transformName", valid_574334
-  var valid_574335 = path.getOrDefault("accountName")
-  valid_574335 = validateParameter(valid_574335, JString, required = true,
+  if valid_564234 != nil:
+    section.add "jobName", valid_564234
+  var valid_564235 = path.getOrDefault("accountName")
+  valid_564235 = validateParameter(valid_564235, JString, required = true,
                                  default = nil)
-  if valid_574335 != nil:
-    section.add "accountName", valid_574335
+  if valid_564235 != nil:
+    section.add "accountName", valid_564235
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1578,11 +1582,11 @@ proc validate_JobsCancelJob_574329(path: JsonNode; query: JsonNode; header: Json
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574336 = query.getOrDefault("api-version")
-  valid_574336 = validateParameter(valid_574336, JString, required = true,
+  var valid_564236 = query.getOrDefault("api-version")
+  valid_564236 = validateParameter(valid_564236, JString, required = true,
                                  default = nil)
-  if valid_574336 != nil:
-    section.add "api-version", valid_574336
+  if valid_564236 != nil:
+    section.add "api-version", valid_564236
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1591,49 +1595,49 @@ proc validate_JobsCancelJob_574329(path: JsonNode; query: JsonNode; header: Json
   if body != nil:
     result.add "body", body
 
-proc call*(call_574337: Call_JobsCancelJob_574328; path: JsonNode; query: JsonNode;
+proc call*(call_564237: Call_JobsCancelJob_564228; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Cancel a Job.
   ## 
-  let valid = call_574337.validator(path, query, header, formData, body)
-  let scheme = call_574337.pickScheme
+  let valid = call_564237.validator(path, query, header, formData, body)
+  let scheme = call_564237.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574337.url(scheme.get, call_574337.host, call_574337.base,
-                         call_574337.route, valid.getOrDefault("path"),
+  let url = call_564237.url(scheme.get, call_564237.host, call_564237.base,
+                         call_564237.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574337, url, valid)
+  result = hook(call_564237, url, valid)
 
-proc call*(call_574338: Call_JobsCancelJob_574328; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; jobName: string;
-          transformName: string; accountName: string): Recallable =
+proc call*(call_564238: Call_JobsCancelJob_564228; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string; transformName: string;
+          jobName: string; accountName: string): Recallable =
   ## jobsCancelJob
   ## Cancel a Job.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group within the Azure subscription.
   ##   apiVersion: string (required)
   ##             : The Version of the API to be used with the client request.
   ##   subscriptionId: string (required)
   ##                 : The unique identifier for a Microsoft Azure subscription.
-  ##   jobName: string (required)
-  ##          : The Job name.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group within the Azure subscription.
   ##   transformName: string (required)
   ##                : The Transform name.
+  ##   jobName: string (required)
+  ##          : The Job name.
   ##   accountName: string (required)
   ##              : The Media Services account name.
-  var path_574339 = newJObject()
-  var query_574340 = newJObject()
-  add(path_574339, "resourceGroupName", newJString(resourceGroupName))
-  add(query_574340, "api-version", newJString(apiVersion))
-  add(path_574339, "subscriptionId", newJString(subscriptionId))
-  add(path_574339, "jobName", newJString(jobName))
-  add(path_574339, "transformName", newJString(transformName))
-  add(path_574339, "accountName", newJString(accountName))
-  result = call_574338.call(path_574339, query_574340, nil, nil, nil)
+  var path_564239 = newJObject()
+  var query_564240 = newJObject()
+  add(query_564240, "api-version", newJString(apiVersion))
+  add(path_564239, "subscriptionId", newJString(subscriptionId))
+  add(path_564239, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564239, "transformName", newJString(transformName))
+  add(path_564239, "jobName", newJString(jobName))
+  add(path_564239, "accountName", newJString(accountName))
+  result = call_564238.call(path_564239, query_564240, nil, nil, nil)
 
-var jobsCancelJob* = Call_JobsCancelJob_574328(name: "jobsCancelJob",
+var jobsCancelJob* = Call_JobsCancelJob_564228(name: "jobsCancelJob",
     meth: HttpMethod.HttpPost, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Media/mediaServices/{accountName}/transforms/{transformName}/jobs/{jobName}/cancelJob",
-    validator: validate_JobsCancelJob_574329, base: "", url: url_JobsCancelJob_574330,
+    validator: validate_JobsCancelJob_564229, base: "", url: url_JobsCancelJob_564230,
     schemes: {Scheme.Https})
 export
   rest

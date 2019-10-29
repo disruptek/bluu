@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_573641 = ref object of OpenApiRestCall
+  OpenApiRestCall_563539 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_573641](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563539](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_573641): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563539): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,8 +107,8 @@ const
   macServiceName = "azsadmin-acquisitions"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_AcquisitionsList_573863 = ref object of OpenApiRestCall_573641
-proc url_AcquisitionsList_573865(protocol: Scheme; host: string; base: string;
+  Call_AcquisitionsList_563761 = ref object of OpenApiRestCall_563539
+proc url_AcquisitionsList_563763(protocol: Scheme; host: string; base: string;
                                 route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -124,7 +128,7 @@ proc url_AcquisitionsList_573865(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AcquisitionsList_573864(path: JsonNode; query: JsonNode;
+proc validate_AcquisitionsList_563762(path: JsonNode; query: JsonNode;
                                      header: JsonNode; formData: JsonNode;
                                      body: JsonNode): JsonNode =
   ## Returns a list of BLOB acquisitions.
@@ -139,16 +143,16 @@ proc validate_AcquisitionsList_573864(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_574025 = path.getOrDefault("subscriptionId")
-  valid_574025 = validateParameter(valid_574025, JString, required = true,
+  var valid_563925 = path.getOrDefault("subscriptionId")
+  valid_563925 = validateParameter(valid_563925, JString, required = true,
                                  default = nil)
-  if valid_574025 != nil:
-    section.add "subscriptionId", valid_574025
-  var valid_574026 = path.getOrDefault("location")
-  valid_574026 = validateParameter(valid_574026, JString, required = true,
+  if valid_563925 != nil:
+    section.add "subscriptionId", valid_563925
+  var valid_563926 = path.getOrDefault("location")
+  valid_563926 = validateParameter(valid_563926, JString, required = true,
                                  default = nil)
-  if valid_574026 != nil:
-    section.add "location", valid_574026
+  if valid_563926 != nil:
+    section.add "location", valid_563926
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -156,11 +160,11 @@ proc validate_AcquisitionsList_573864(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574027 = query.getOrDefault("api-version")
-  valid_574027 = validateParameter(valid_574027, JString, required = true,
+  var valid_563927 = query.getOrDefault("api-version")
+  valid_563927 = validateParameter(valid_563927, JString, required = true,
                                  default = nil)
-  if valid_574027 != nil:
-    section.add "api-version", valid_574027
+  if valid_563927 != nil:
+    section.add "api-version", valid_563927
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -169,20 +173,20 @@ proc validate_AcquisitionsList_573864(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574054: Call_AcquisitionsList_573863; path: JsonNode;
+proc call*(call_563954: Call_AcquisitionsList_563761; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Returns a list of BLOB acquisitions.
   ## 
-  let valid = call_574054.validator(path, query, header, formData, body)
-  let scheme = call_574054.pickScheme
+  let valid = call_563954.validator(path, query, header, formData, body)
+  let scheme = call_563954.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574054.url(scheme.get, call_574054.host, call_574054.base,
-                         call_574054.route, valid.getOrDefault("path"),
+  let url = call_563954.url(scheme.get, call_563954.host, call_563954.base,
+                         call_563954.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574054, url, valid)
+  result = hook(call_563954, url, valid)
 
-proc call*(call_574125: Call_AcquisitionsList_573863; apiVersion: string;
+proc call*(call_564025: Call_AcquisitionsList_563761; apiVersion: string;
           subscriptionId: string; location: string): Recallable =
   ## acquisitionsList
   ## Returns a list of BLOB acquisitions.
@@ -192,17 +196,17 @@ proc call*(call_574125: Call_AcquisitionsList_573863; apiVersion: string;
   ##                 : Subscription Id.
   ##   location: string (required)
   ##           : Resource location.
-  var path_574126 = newJObject()
-  var query_574128 = newJObject()
-  add(query_574128, "api-version", newJString(apiVersion))
-  add(path_574126, "subscriptionId", newJString(subscriptionId))
-  add(path_574126, "location", newJString(location))
-  result = call_574125.call(path_574126, query_574128, nil, nil, nil)
+  var path_564026 = newJObject()
+  var query_564028 = newJObject()
+  add(query_564028, "api-version", newJString(apiVersion))
+  add(path_564026, "subscriptionId", newJString(subscriptionId))
+  add(path_564026, "location", newJString(location))
+  result = call_564025.call(path_564026, query_564028, nil, nil, nil)
 
-var acquisitionsList* = Call_AcquisitionsList_573863(name: "acquisitionsList",
+var acquisitionsList* = Call_AcquisitionsList_563761(name: "acquisitionsList",
     meth: HttpMethod.HttpGet, host: "adminmanagement.local.azurestack.external", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Storage.Admin/locations/{location}/acquisitions",
-    validator: validate_AcquisitionsList_573864, base: "",
-    url: url_AcquisitionsList_573865, schemes: {Scheme.Https})
+    validator: validate_AcquisitionsList_563762, base: "",
+    url: url_AcquisitionsList_563763, schemes: {Scheme.Https})
 export
   rest
 

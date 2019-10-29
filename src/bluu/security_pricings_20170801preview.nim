@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, httpcore
 
 ## auto-generated via openapi macro
 ## title: Security Center
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_567657 = ref object of OpenApiRestCall
+  OpenApiRestCall_563555 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_567657](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563555](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_567657): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563555): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,8 +107,8 @@ const
   macServiceName = "security-pricings"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_PricingsList_567879 = ref object of OpenApiRestCall_567657
-proc url_PricingsList_567881(protocol: Scheme; host: string; base: string;
+  Call_PricingsList_563777 = ref object of OpenApiRestCall_563555
+proc url_PricingsList_563779(protocol: Scheme; host: string; base: string;
                             route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -120,7 +124,7 @@ proc url_PricingsList_567881(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_PricingsList_567880(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_PricingsList_563778(path: JsonNode; query: JsonNode; header: JsonNode;
                                  formData: JsonNode; body: JsonNode): JsonNode =
   ## Security pricing configurations in the subscription
   ## 
@@ -132,11 +136,11 @@ proc validate_PricingsList_567880(path: JsonNode; query: JsonNode; header: JsonN
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_568041 = path.getOrDefault("subscriptionId")
-  valid_568041 = validateParameter(valid_568041, JString, required = true,
+  var valid_563941 = path.getOrDefault("subscriptionId")
+  valid_563941 = validateParameter(valid_563941, JString, required = true,
                                  default = nil)
-  if valid_568041 != nil:
-    section.add "subscriptionId", valid_568041
+  if valid_563941 != nil:
+    section.add "subscriptionId", valid_563941
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -144,11 +148,11 @@ proc validate_PricingsList_567880(path: JsonNode; query: JsonNode; header: JsonN
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568042 = query.getOrDefault("api-version")
-  valid_568042 = validateParameter(valid_568042, JString, required = true,
+  var valid_563942 = query.getOrDefault("api-version")
+  valid_563942 = validateParameter(valid_563942, JString, required = true,
                                  default = nil)
-  if valid_568042 != nil:
-    section.add "api-version", valid_568042
+  if valid_563942 != nil:
+    section.add "api-version", valid_563942
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -157,20 +161,20 @@ proc validate_PricingsList_567880(path: JsonNode; query: JsonNode; header: JsonN
   if body != nil:
     result.add "body", body
 
-proc call*(call_568069: Call_PricingsList_567879; path: JsonNode; query: JsonNode;
+proc call*(call_563969: Call_PricingsList_563777; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Security pricing configurations in the subscription
   ## 
-  let valid = call_568069.validator(path, query, header, formData, body)
-  let scheme = call_568069.pickScheme
+  let valid = call_563969.validator(path, query, header, formData, body)
+  let scheme = call_563969.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568069.url(scheme.get, call_568069.host, call_568069.base,
-                         call_568069.route, valid.getOrDefault("path"),
+  let url = call_563969.url(scheme.get, call_563969.host, call_563969.base,
+                         call_563969.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568069, url, valid)
+  result = hook(call_563969, url, valid)
 
-proc call*(call_568140: Call_PricingsList_567879; apiVersion: string;
+proc call*(call_564040: Call_PricingsList_563777; apiVersion: string;
           subscriptionId: string): Recallable =
   ## pricingsList
   ## Security pricing configurations in the subscription
@@ -178,19 +182,19 @@ proc call*(call_568140: Call_PricingsList_567879; apiVersion: string;
   ##             : API version for the operation
   ##   subscriptionId: string (required)
   ##                 : Azure subscription ID
-  var path_568141 = newJObject()
-  var query_568143 = newJObject()
-  add(query_568143, "api-version", newJString(apiVersion))
-  add(path_568141, "subscriptionId", newJString(subscriptionId))
-  result = call_568140.call(path_568141, query_568143, nil, nil, nil)
+  var path_564041 = newJObject()
+  var query_564043 = newJObject()
+  add(query_564043, "api-version", newJString(apiVersion))
+  add(path_564041, "subscriptionId", newJString(subscriptionId))
+  result = call_564040.call(path_564041, query_564043, nil, nil, nil)
 
-var pricingsList* = Call_PricingsList_567879(name: "pricingsList",
+var pricingsList* = Call_PricingsList_563777(name: "pricingsList",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Security/pricings",
-    validator: validate_PricingsList_567880, base: "", url: url_PricingsList_567881,
+    validator: validate_PricingsList_563778, base: "", url: url_PricingsList_563779,
     schemes: {Scheme.Https})
 type
-  Call_PricingsUpdateSubscriptionPricing_568201 = ref object of OpenApiRestCall_567657
-proc url_PricingsUpdateSubscriptionPricing_568203(protocol: Scheme; host: string;
+  Call_PricingsUpdateSubscriptionPricing_564101 = ref object of OpenApiRestCall_563555
+proc url_PricingsUpdateSubscriptionPricing_564103(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -208,7 +212,7 @@ proc url_PricingsUpdateSubscriptionPricing_568203(protocol: Scheme; host: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_PricingsUpdateSubscriptionPricing_568202(path: JsonNode;
+proc validate_PricingsUpdateSubscriptionPricing_564102(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Security pricing configuration in the subscription
   ## 
@@ -222,16 +226,16 @@ proc validate_PricingsUpdateSubscriptionPricing_568202(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_568204 = path.getOrDefault("subscriptionId")
-  valid_568204 = validateParameter(valid_568204, JString, required = true,
+  var valid_564104 = path.getOrDefault("subscriptionId")
+  valid_564104 = validateParameter(valid_564104, JString, required = true,
                                  default = nil)
-  if valid_568204 != nil:
-    section.add "subscriptionId", valid_568204
-  var valid_568205 = path.getOrDefault("pricingName")
-  valid_568205 = validateParameter(valid_568205, JString, required = true,
+  if valid_564104 != nil:
+    section.add "subscriptionId", valid_564104
+  var valid_564105 = path.getOrDefault("pricingName")
+  valid_564105 = validateParameter(valid_564105, JString, required = true,
                                  default = nil)
-  if valid_568205 != nil:
-    section.add "pricingName", valid_568205
+  if valid_564105 != nil:
+    section.add "pricingName", valid_564105
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -239,11 +243,11 @@ proc validate_PricingsUpdateSubscriptionPricing_568202(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568206 = query.getOrDefault("api-version")
-  valid_568206 = validateParameter(valid_568206, JString, required = true,
+  var valid_564106 = query.getOrDefault("api-version")
+  valid_564106 = validateParameter(valid_564106, JString, required = true,
                                  default = nil)
-  if valid_568206 != nil:
-    section.add "api-version", valid_568206
+  if valid_564106 != nil:
+    section.add "api-version", valid_564106
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -257,51 +261,51 @@ proc validate_PricingsUpdateSubscriptionPricing_568202(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568208: Call_PricingsUpdateSubscriptionPricing_568201;
+proc call*(call_564108: Call_PricingsUpdateSubscriptionPricing_564101;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Security pricing configuration in the subscription
   ## 
-  let valid = call_568208.validator(path, query, header, formData, body)
-  let scheme = call_568208.pickScheme
+  let valid = call_564108.validator(path, query, header, formData, body)
+  let scheme = call_564108.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568208.url(scheme.get, call_568208.host, call_568208.base,
-                         call_568208.route, valid.getOrDefault("path"),
+  let url = call_564108.url(scheme.get, call_564108.host, call_564108.base,
+                         call_564108.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568208, url, valid)
+  result = hook(call_564108, url, valid)
 
-proc call*(call_568209: Call_PricingsUpdateSubscriptionPricing_568201;
-          pricing: JsonNode; apiVersion: string; subscriptionId: string;
+proc call*(call_564109: Call_PricingsUpdateSubscriptionPricing_564101;
+          apiVersion: string; subscriptionId: string; pricing: JsonNode;
           pricingName: string): Recallable =
   ## pricingsUpdateSubscriptionPricing
   ## Security pricing configuration in the subscription
-  ##   pricing: JObject (required)
-  ##          : Pricing object
   ##   apiVersion: string (required)
   ##             : API version for the operation
   ##   subscriptionId: string (required)
   ##                 : Azure subscription ID
+  ##   pricing: JObject (required)
+  ##          : Pricing object
   ##   pricingName: string (required)
   ##              : name of the pricing configuration
-  var path_568210 = newJObject()
-  var query_568211 = newJObject()
-  var body_568212 = newJObject()
+  var path_564110 = newJObject()
+  var query_564111 = newJObject()
+  var body_564112 = newJObject()
+  add(query_564111, "api-version", newJString(apiVersion))
+  add(path_564110, "subscriptionId", newJString(subscriptionId))
   if pricing != nil:
-    body_568212 = pricing
-  add(query_568211, "api-version", newJString(apiVersion))
-  add(path_568210, "subscriptionId", newJString(subscriptionId))
-  add(path_568210, "pricingName", newJString(pricingName))
-  result = call_568209.call(path_568210, query_568211, nil, nil, body_568212)
+    body_564112 = pricing
+  add(path_564110, "pricingName", newJString(pricingName))
+  result = call_564109.call(path_564110, query_564111, nil, nil, body_564112)
 
-var pricingsUpdateSubscriptionPricing* = Call_PricingsUpdateSubscriptionPricing_568201(
+var pricingsUpdateSubscriptionPricing* = Call_PricingsUpdateSubscriptionPricing_564101(
     name: "pricingsUpdateSubscriptionPricing", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Security/pricings/{pricingName}",
-    validator: validate_PricingsUpdateSubscriptionPricing_568202, base: "",
-    url: url_PricingsUpdateSubscriptionPricing_568203, schemes: {Scheme.Https})
+    validator: validate_PricingsUpdateSubscriptionPricing_564102, base: "",
+    url: url_PricingsUpdateSubscriptionPricing_564103, schemes: {Scheme.Https})
 type
-  Call_PricingsGetSubscriptionPricing_568182 = ref object of OpenApiRestCall_567657
-proc url_PricingsGetSubscriptionPricing_568184(protocol: Scheme; host: string;
+  Call_PricingsGetSubscriptionPricing_564082 = ref object of OpenApiRestCall_563555
+proc url_PricingsGetSubscriptionPricing_564084(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -319,7 +323,7 @@ proc url_PricingsGetSubscriptionPricing_568184(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_PricingsGetSubscriptionPricing_568183(path: JsonNode;
+proc validate_PricingsGetSubscriptionPricing_564083(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Security pricing configuration in the subscriptionSecurity pricing configuration in the subscription
   ## 
@@ -333,16 +337,16 @@ proc validate_PricingsGetSubscriptionPricing_568183(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_568194 = path.getOrDefault("subscriptionId")
-  valid_568194 = validateParameter(valid_568194, JString, required = true,
+  var valid_564094 = path.getOrDefault("subscriptionId")
+  valid_564094 = validateParameter(valid_564094, JString, required = true,
                                  default = nil)
-  if valid_568194 != nil:
-    section.add "subscriptionId", valid_568194
-  var valid_568195 = path.getOrDefault("pricingName")
-  valid_568195 = validateParameter(valid_568195, JString, required = true,
+  if valid_564094 != nil:
+    section.add "subscriptionId", valid_564094
+  var valid_564095 = path.getOrDefault("pricingName")
+  valid_564095 = validateParameter(valid_564095, JString, required = true,
                                  default = nil)
-  if valid_568195 != nil:
-    section.add "pricingName", valid_568195
+  if valid_564095 != nil:
+    section.add "pricingName", valid_564095
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -350,11 +354,11 @@ proc validate_PricingsGetSubscriptionPricing_568183(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568196 = query.getOrDefault("api-version")
-  valid_568196 = validateParameter(valid_568196, JString, required = true,
+  var valid_564096 = query.getOrDefault("api-version")
+  valid_564096 = validateParameter(valid_564096, JString, required = true,
                                  default = nil)
-  if valid_568196 != nil:
-    section.add "api-version", valid_568196
+  if valid_564096 != nil:
+    section.add "api-version", valid_564096
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -363,20 +367,20 @@ proc validate_PricingsGetSubscriptionPricing_568183(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568197: Call_PricingsGetSubscriptionPricing_568182; path: JsonNode;
+proc call*(call_564097: Call_PricingsGetSubscriptionPricing_564082; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Security pricing configuration in the subscriptionSecurity pricing configuration in the subscription
   ## 
-  let valid = call_568197.validator(path, query, header, formData, body)
-  let scheme = call_568197.pickScheme
+  let valid = call_564097.validator(path, query, header, formData, body)
+  let scheme = call_564097.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568197.url(scheme.get, call_568197.host, call_568197.base,
-                         call_568197.route, valid.getOrDefault("path"),
+  let url = call_564097.url(scheme.get, call_564097.host, call_564097.base,
+                         call_564097.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568197, url, valid)
+  result = hook(call_564097, url, valid)
 
-proc call*(call_568198: Call_PricingsGetSubscriptionPricing_568182;
+proc call*(call_564098: Call_PricingsGetSubscriptionPricing_564082;
           apiVersion: string; subscriptionId: string; pricingName: string): Recallable =
   ## pricingsGetSubscriptionPricing
   ## Security pricing configuration in the subscriptionSecurity pricing configuration in the subscription
@@ -386,21 +390,21 @@ proc call*(call_568198: Call_PricingsGetSubscriptionPricing_568182;
   ##                 : Azure subscription ID
   ##   pricingName: string (required)
   ##              : name of the pricing configuration
-  var path_568199 = newJObject()
-  var query_568200 = newJObject()
-  add(query_568200, "api-version", newJString(apiVersion))
-  add(path_568199, "subscriptionId", newJString(subscriptionId))
-  add(path_568199, "pricingName", newJString(pricingName))
-  result = call_568198.call(path_568199, query_568200, nil, nil, nil)
+  var path_564099 = newJObject()
+  var query_564100 = newJObject()
+  add(query_564100, "api-version", newJString(apiVersion))
+  add(path_564099, "subscriptionId", newJString(subscriptionId))
+  add(path_564099, "pricingName", newJString(pricingName))
+  result = call_564098.call(path_564099, query_564100, nil, nil, nil)
 
-var pricingsGetSubscriptionPricing* = Call_PricingsGetSubscriptionPricing_568182(
+var pricingsGetSubscriptionPricing* = Call_PricingsGetSubscriptionPricing_564082(
     name: "pricingsGetSubscriptionPricing", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Security/pricings/{pricingName}",
-    validator: validate_PricingsGetSubscriptionPricing_568183, base: "",
-    url: url_PricingsGetSubscriptionPricing_568184, schemes: {Scheme.Https})
+    validator: validate_PricingsGetSubscriptionPricing_564083, base: "",
+    url: url_PricingsGetSubscriptionPricing_564084, schemes: {Scheme.Https})
 type
-  Call_PricingsListByResourceGroup_568213 = ref object of OpenApiRestCall_567657
-proc url_PricingsListByResourceGroup_568215(protocol: Scheme; host: string;
+  Call_PricingsListByResourceGroup_564113 = ref object of OpenApiRestCall_563555
+proc url_PricingsListByResourceGroup_564115(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -420,30 +424,30 @@ proc url_PricingsListByResourceGroup_568215(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_PricingsListByResourceGroup_568214(path: JsonNode; query: JsonNode;
+proc validate_PricingsListByResourceGroup_564114(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Security pricing configurations in the resource group
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
   ##   subscriptionId: JString (required)
   ##                 : Azure subscription ID
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568216 = path.getOrDefault("resourceGroupName")
-  valid_568216 = validateParameter(valid_568216, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564116 = path.getOrDefault("subscriptionId")
+  valid_564116 = validateParameter(valid_564116, JString, required = true,
                                  default = nil)
-  if valid_568216 != nil:
-    section.add "resourceGroupName", valid_568216
-  var valid_568217 = path.getOrDefault("subscriptionId")
-  valid_568217 = validateParameter(valid_568217, JString, required = true,
+  if valid_564116 != nil:
+    section.add "subscriptionId", valid_564116
+  var valid_564117 = path.getOrDefault("resourceGroupName")
+  valid_564117 = validateParameter(valid_564117, JString, required = true,
                                  default = nil)
-  if valid_568217 != nil:
-    section.add "subscriptionId", valid_568217
+  if valid_564117 != nil:
+    section.add "resourceGroupName", valid_564117
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -451,11 +455,11 @@ proc validate_PricingsListByResourceGroup_568214(path: JsonNode; query: JsonNode
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568218 = query.getOrDefault("api-version")
-  valid_568218 = validateParameter(valid_568218, JString, required = true,
+  var valid_564118 = query.getOrDefault("api-version")
+  valid_564118 = validateParameter(valid_564118, JString, required = true,
                                  default = nil)
-  if valid_568218 != nil:
-    section.add "api-version", valid_568218
+  if valid_564118 != nil:
+    section.add "api-version", valid_564118
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -464,44 +468,44 @@ proc validate_PricingsListByResourceGroup_568214(path: JsonNode; query: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_568219: Call_PricingsListByResourceGroup_568213; path: JsonNode;
+proc call*(call_564119: Call_PricingsListByResourceGroup_564113; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Security pricing configurations in the resource group
   ## 
-  let valid = call_568219.validator(path, query, header, formData, body)
-  let scheme = call_568219.pickScheme
+  let valid = call_564119.validator(path, query, header, formData, body)
+  let scheme = call_564119.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568219.url(scheme.get, call_568219.host, call_568219.base,
-                         call_568219.route, valid.getOrDefault("path"),
+  let url = call_564119.url(scheme.get, call_564119.host, call_564119.base,
+                         call_564119.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568219, url, valid)
+  result = hook(call_564119, url, valid)
 
-proc call*(call_568220: Call_PricingsListByResourceGroup_568213;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string): Recallable =
+proc call*(call_564120: Call_PricingsListByResourceGroup_564113;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string): Recallable =
   ## pricingsListByResourceGroup
   ## Security pricing configurations in the resource group
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
   ##   apiVersion: string (required)
   ##             : API version for the operation
   ##   subscriptionId: string (required)
   ##                 : Azure subscription ID
-  var path_568221 = newJObject()
-  var query_568222 = newJObject()
-  add(path_568221, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568222, "api-version", newJString(apiVersion))
-  add(path_568221, "subscriptionId", newJString(subscriptionId))
-  result = call_568220.call(path_568221, query_568222, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
+  var path_564121 = newJObject()
+  var query_564122 = newJObject()
+  add(query_564122, "api-version", newJString(apiVersion))
+  add(path_564121, "subscriptionId", newJString(subscriptionId))
+  add(path_564121, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564120.call(path_564121, query_564122, nil, nil, nil)
 
-var pricingsListByResourceGroup* = Call_PricingsListByResourceGroup_568213(
+var pricingsListByResourceGroup* = Call_PricingsListByResourceGroup_564113(
     name: "pricingsListByResourceGroup", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Security/pricings",
-    validator: validate_PricingsListByResourceGroup_568214, base: "",
-    url: url_PricingsListByResourceGroup_568215, schemes: {Scheme.Https})
+    validator: validate_PricingsListByResourceGroup_564114, base: "",
+    url: url_PricingsListByResourceGroup_564115, schemes: {Scheme.Https})
 type
-  Call_PricingsCreateOrUpdateResourceGroupPricing_568234 = ref object of OpenApiRestCall_567657
-proc url_PricingsCreateOrUpdateResourceGroupPricing_568236(protocol: Scheme;
+  Call_PricingsCreateOrUpdateResourceGroupPricing_564134 = ref object of OpenApiRestCall_563555
+proc url_PricingsCreateOrUpdateResourceGroupPricing_564136(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -523,37 +527,37 @@ proc url_PricingsCreateOrUpdateResourceGroupPricing_568236(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_PricingsCreateOrUpdateResourceGroupPricing_568235(path: JsonNode;
+proc validate_PricingsCreateOrUpdateResourceGroupPricing_564135(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Security pricing configuration in the resource group
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
   ##   subscriptionId: JString (required)
   ##                 : Azure subscription ID
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
   ##   pricingName: JString (required)
   ##              : name of the pricing configuration
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568237 = path.getOrDefault("resourceGroupName")
-  valid_568237 = validateParameter(valid_568237, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564137 = path.getOrDefault("subscriptionId")
+  valid_564137 = validateParameter(valid_564137, JString, required = true,
                                  default = nil)
-  if valid_568237 != nil:
-    section.add "resourceGroupName", valid_568237
-  var valid_568238 = path.getOrDefault("subscriptionId")
-  valid_568238 = validateParameter(valid_568238, JString, required = true,
+  if valid_564137 != nil:
+    section.add "subscriptionId", valid_564137
+  var valid_564138 = path.getOrDefault("resourceGroupName")
+  valid_564138 = validateParameter(valid_564138, JString, required = true,
                                  default = nil)
-  if valid_568238 != nil:
-    section.add "subscriptionId", valid_568238
-  var valid_568239 = path.getOrDefault("pricingName")
-  valid_568239 = validateParameter(valid_568239, JString, required = true,
+  if valid_564138 != nil:
+    section.add "resourceGroupName", valid_564138
+  var valid_564139 = path.getOrDefault("pricingName")
+  valid_564139 = validateParameter(valid_564139, JString, required = true,
                                  default = nil)
-  if valid_568239 != nil:
-    section.add "pricingName", valid_568239
+  if valid_564139 != nil:
+    section.add "pricingName", valid_564139
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -561,11 +565,11 @@ proc validate_PricingsCreateOrUpdateResourceGroupPricing_568235(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568240 = query.getOrDefault("api-version")
-  valid_568240 = validateParameter(valid_568240, JString, required = true,
+  var valid_564140 = query.getOrDefault("api-version")
+  valid_564140 = validateParameter(valid_564140, JString, required = true,
                                  default = nil)
-  if valid_568240 != nil:
-    section.add "api-version", valid_568240
+  if valid_564140 != nil:
+    section.add "api-version", valid_564140
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -579,55 +583,55 @@ proc validate_PricingsCreateOrUpdateResourceGroupPricing_568235(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568242: Call_PricingsCreateOrUpdateResourceGroupPricing_568234;
+proc call*(call_564142: Call_PricingsCreateOrUpdateResourceGroupPricing_564134;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Security pricing configuration in the resource group
   ## 
-  let valid = call_568242.validator(path, query, header, formData, body)
-  let scheme = call_568242.pickScheme
+  let valid = call_564142.validator(path, query, header, formData, body)
+  let scheme = call_564142.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568242.url(scheme.get, call_568242.host, call_568242.base,
-                         call_568242.route, valid.getOrDefault("path"),
+  let url = call_564142.url(scheme.get, call_564142.host, call_564142.base,
+                         call_564142.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568242, url, valid)
+  result = hook(call_564142, url, valid)
 
-proc call*(call_568243: Call_PricingsCreateOrUpdateResourceGroupPricing_568234;
-          pricing: JsonNode; resourceGroupName: string; apiVersion: string;
-          subscriptionId: string; pricingName: string): Recallable =
+proc call*(call_564143: Call_PricingsCreateOrUpdateResourceGroupPricing_564134;
+          apiVersion: string; subscriptionId: string; pricing: JsonNode;
+          resourceGroupName: string; pricingName: string): Recallable =
   ## pricingsCreateOrUpdateResourceGroupPricing
   ## Security pricing configuration in the resource group
-  ##   pricing: JObject (required)
-  ##          : Pricing object
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
   ##   apiVersion: string (required)
   ##             : API version for the operation
   ##   subscriptionId: string (required)
   ##                 : Azure subscription ID
+  ##   pricing: JObject (required)
+  ##          : Pricing object
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
   ##   pricingName: string (required)
   ##              : name of the pricing configuration
-  var path_568244 = newJObject()
-  var query_568245 = newJObject()
-  var body_568246 = newJObject()
+  var path_564144 = newJObject()
+  var query_564145 = newJObject()
+  var body_564146 = newJObject()
+  add(query_564145, "api-version", newJString(apiVersion))
+  add(path_564144, "subscriptionId", newJString(subscriptionId))
   if pricing != nil:
-    body_568246 = pricing
-  add(path_568244, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568245, "api-version", newJString(apiVersion))
-  add(path_568244, "subscriptionId", newJString(subscriptionId))
-  add(path_568244, "pricingName", newJString(pricingName))
-  result = call_568243.call(path_568244, query_568245, nil, nil, body_568246)
+    body_564146 = pricing
+  add(path_564144, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564144, "pricingName", newJString(pricingName))
+  result = call_564143.call(path_564144, query_564145, nil, nil, body_564146)
 
-var pricingsCreateOrUpdateResourceGroupPricing* = Call_PricingsCreateOrUpdateResourceGroupPricing_568234(
+var pricingsCreateOrUpdateResourceGroupPricing* = Call_PricingsCreateOrUpdateResourceGroupPricing_564134(
     name: "pricingsCreateOrUpdateResourceGroupPricing", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Security/pricings/{pricingName}",
-    validator: validate_PricingsCreateOrUpdateResourceGroupPricing_568235,
-    base: "", url: url_PricingsCreateOrUpdateResourceGroupPricing_568236,
+    validator: validate_PricingsCreateOrUpdateResourceGroupPricing_564135,
+    base: "", url: url_PricingsCreateOrUpdateResourceGroupPricing_564136,
     schemes: {Scheme.Https})
 type
-  Call_PricingsGetResourceGroupPricing_568223 = ref object of OpenApiRestCall_567657
-proc url_PricingsGetResourceGroupPricing_568225(protocol: Scheme; host: string;
+  Call_PricingsGetResourceGroupPricing_564123 = ref object of OpenApiRestCall_563555
+proc url_PricingsGetResourceGroupPricing_564125(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -649,37 +653,37 @@ proc url_PricingsGetResourceGroupPricing_568225(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_PricingsGetResourceGroupPricing_568224(path: JsonNode;
+proc validate_PricingsGetResourceGroupPricing_564124(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Security pricing configuration in the resource group
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
   ##   subscriptionId: JString (required)
   ##                 : Azure subscription ID
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
   ##   pricingName: JString (required)
   ##              : name of the pricing configuration
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568226 = path.getOrDefault("resourceGroupName")
-  valid_568226 = validateParameter(valid_568226, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564126 = path.getOrDefault("subscriptionId")
+  valid_564126 = validateParameter(valid_564126, JString, required = true,
                                  default = nil)
-  if valid_568226 != nil:
-    section.add "resourceGroupName", valid_568226
-  var valid_568227 = path.getOrDefault("subscriptionId")
-  valid_568227 = validateParameter(valid_568227, JString, required = true,
+  if valid_564126 != nil:
+    section.add "subscriptionId", valid_564126
+  var valid_564127 = path.getOrDefault("resourceGroupName")
+  valid_564127 = validateParameter(valid_564127, JString, required = true,
                                  default = nil)
-  if valid_568227 != nil:
-    section.add "subscriptionId", valid_568227
-  var valid_568228 = path.getOrDefault("pricingName")
-  valid_568228 = validateParameter(valid_568228, JString, required = true,
+  if valid_564127 != nil:
+    section.add "resourceGroupName", valid_564127
+  var valid_564128 = path.getOrDefault("pricingName")
+  valid_564128 = validateParameter(valid_564128, JString, required = true,
                                  default = nil)
-  if valid_568228 != nil:
-    section.add "pricingName", valid_568228
+  if valid_564128 != nil:
+    section.add "pricingName", valid_564128
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -687,11 +691,11 @@ proc validate_PricingsGetResourceGroupPricing_568224(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568229 = query.getOrDefault("api-version")
-  valid_568229 = validateParameter(valid_568229, JString, required = true,
+  var valid_564129 = query.getOrDefault("api-version")
+  valid_564129 = validateParameter(valid_564129, JString, required = true,
                                  default = nil)
-  if valid_568229 != nil:
-    section.add "api-version", valid_568229
+  if valid_564129 != nil:
+    section.add "api-version", valid_564129
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -700,46 +704,46 @@ proc validate_PricingsGetResourceGroupPricing_568224(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568230: Call_PricingsGetResourceGroupPricing_568223;
+proc call*(call_564130: Call_PricingsGetResourceGroupPricing_564123;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Security pricing configuration in the resource group
   ## 
-  let valid = call_568230.validator(path, query, header, formData, body)
-  let scheme = call_568230.pickScheme
+  let valid = call_564130.validator(path, query, header, formData, body)
+  let scheme = call_564130.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568230.url(scheme.get, call_568230.host, call_568230.base,
-                         call_568230.route, valid.getOrDefault("path"),
+  let url = call_564130.url(scheme.get, call_564130.host, call_564130.base,
+                         call_564130.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568230, url, valid)
+  result = hook(call_564130, url, valid)
 
-proc call*(call_568231: Call_PricingsGetResourceGroupPricing_568223;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
+proc call*(call_564131: Call_PricingsGetResourceGroupPricing_564123;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string;
           pricingName: string): Recallable =
   ## pricingsGetResourceGroupPricing
   ## Security pricing configuration in the resource group
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
   ##   apiVersion: string (required)
   ##             : API version for the operation
   ##   subscriptionId: string (required)
   ##                 : Azure subscription ID
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
   ##   pricingName: string (required)
   ##              : name of the pricing configuration
-  var path_568232 = newJObject()
-  var query_568233 = newJObject()
-  add(path_568232, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568233, "api-version", newJString(apiVersion))
-  add(path_568232, "subscriptionId", newJString(subscriptionId))
-  add(path_568232, "pricingName", newJString(pricingName))
-  result = call_568231.call(path_568232, query_568233, nil, nil, nil)
+  var path_564132 = newJObject()
+  var query_564133 = newJObject()
+  add(query_564133, "api-version", newJString(apiVersion))
+  add(path_564132, "subscriptionId", newJString(subscriptionId))
+  add(path_564132, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564132, "pricingName", newJString(pricingName))
+  result = call_564131.call(path_564132, query_564133, nil, nil, nil)
 
-var pricingsGetResourceGroupPricing* = Call_PricingsGetResourceGroupPricing_568223(
+var pricingsGetResourceGroupPricing* = Call_PricingsGetResourceGroupPricing_564123(
     name: "pricingsGetResourceGroupPricing", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Security/pricings/{pricingName}",
-    validator: validate_PricingsGetResourceGroupPricing_568224, base: "",
-    url: url_PricingsGetResourceGroupPricing_568225, schemes: {Scheme.Https})
+    validator: validate_PricingsGetResourceGroupPricing_564124, base: "",
+    url: url_PricingsGetResourceGroupPricing_564125, schemes: {Scheme.Https})
 export
   rest
 

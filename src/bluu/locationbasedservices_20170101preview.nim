@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, httpcore
 
 ## auto-generated via openapi macro
 ## title: Azure Location Based Services Resource Provider
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_567641 = ref object of OpenApiRestCall
+  OpenApiRestCall_563539 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_567641](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563539](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_567641): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563539): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,15 +107,15 @@ const
   macServiceName = "locationbasedservices"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_AccountsListOperations_567863 = ref object of OpenApiRestCall_567641
-proc url_AccountsListOperations_567865(protocol: Scheme; host: string; base: string;
+  Call_AccountsListOperations_563761 = ref object of OpenApiRestCall_563539
+proc url_AccountsListOperations_563763(protocol: Scheme; host: string; base: string;
                                       route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_AccountsListOperations_567864(path: JsonNode; query: JsonNode;
+proc validate_AccountsListOperations_563762(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## List operations available for the Location Based Services Resource Provider
   ## 
@@ -125,11 +129,11 @@ proc validate_AccountsListOperations_567864(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568024 = query.getOrDefault("api-version")
-  valid_568024 = validateParameter(valid_568024, JString, required = true,
+  var valid_563924 = query.getOrDefault("api-version")
+  valid_563924 = validateParameter(valid_563924, JString, required = true,
                                  default = nil)
-  if valid_568024 != nil:
-    section.add "api-version", valid_568024
+  if valid_563924 != nil:
+    section.add "api-version", valid_563924
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -138,37 +142,37 @@ proc validate_AccountsListOperations_567864(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568047: Call_AccountsListOperations_567863; path: JsonNode;
+proc call*(call_563947: Call_AccountsListOperations_563761; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## List operations available for the Location Based Services Resource Provider
   ## 
-  let valid = call_568047.validator(path, query, header, formData, body)
-  let scheme = call_568047.pickScheme
+  let valid = call_563947.validator(path, query, header, formData, body)
+  let scheme = call_563947.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568047.url(scheme.get, call_568047.host, call_568047.base,
-                         call_568047.route, valid.getOrDefault("path"),
+  let url = call_563947.url(scheme.get, call_563947.host, call_563947.base,
+                         call_563947.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568047, url, valid)
+  result = hook(call_563947, url, valid)
 
-proc call*(call_568118: Call_AccountsListOperations_567863; apiVersion: string): Recallable =
+proc call*(call_564018: Call_AccountsListOperations_563761; apiVersion: string): Recallable =
   ## accountsListOperations
   ## List operations available for the Location Based Services Resource Provider
   ##   apiVersion: string (required)
   ##             : Client Api Version.
-  var query_568119 = newJObject()
-  add(query_568119, "api-version", newJString(apiVersion))
-  result = call_568118.call(nil, query_568119, nil, nil, nil)
+  var query_564019 = newJObject()
+  add(query_564019, "api-version", newJString(apiVersion))
+  result = call_564018.call(nil, query_564019, nil, nil, nil)
 
-var accountsListOperations* = Call_AccountsListOperations_567863(
+var accountsListOperations* = Call_AccountsListOperations_563761(
     name: "accountsListOperations", meth: HttpMethod.HttpGet,
     host: "management.azure.com",
     route: "/providers/Microsoft.LocationBasedServices/operations",
-    validator: validate_AccountsListOperations_567864, base: "",
-    url: url_AccountsListOperations_567865, schemes: {Scheme.Https})
+    validator: validate_AccountsListOperations_563762, base: "",
+    url: url_AccountsListOperations_563763, schemes: {Scheme.Https})
 type
-  Call_AccountsListBySubscription_568159 = ref object of OpenApiRestCall_567641
-proc url_AccountsListBySubscription_568161(protocol: Scheme; host: string;
+  Call_AccountsListBySubscription_564059 = ref object of OpenApiRestCall_563539
+proc url_AccountsListBySubscription_564061(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -185,7 +189,7 @@ proc url_AccountsListBySubscription_568161(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AccountsListBySubscription_568160(path: JsonNode; query: JsonNode;
+proc validate_AccountsListBySubscription_564060(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Get all Location Based Services Accounts in a Subscription
   ## 
@@ -197,11 +201,11 @@ proc validate_AccountsListBySubscription_568160(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_568176 = path.getOrDefault("subscriptionId")
-  valid_568176 = validateParameter(valid_568176, JString, required = true,
+  var valid_564076 = path.getOrDefault("subscriptionId")
+  valid_564076 = validateParameter(valid_564076, JString, required = true,
                                  default = nil)
-  if valid_568176 != nil:
-    section.add "subscriptionId", valid_568176
+  if valid_564076 != nil:
+    section.add "subscriptionId", valid_564076
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -209,11 +213,11 @@ proc validate_AccountsListBySubscription_568160(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568177 = query.getOrDefault("api-version")
-  valid_568177 = validateParameter(valid_568177, JString, required = true,
+  var valid_564077 = query.getOrDefault("api-version")
+  valid_564077 = validateParameter(valid_564077, JString, required = true,
                                  default = nil)
-  if valid_568177 != nil:
-    section.add "api-version", valid_568177
+  if valid_564077 != nil:
+    section.add "api-version", valid_564077
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -222,20 +226,20 @@ proc validate_AccountsListBySubscription_568160(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568178: Call_AccountsListBySubscription_568159; path: JsonNode;
+proc call*(call_564078: Call_AccountsListBySubscription_564059; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get all Location Based Services Accounts in a Subscription
   ## 
-  let valid = call_568178.validator(path, query, header, formData, body)
-  let scheme = call_568178.pickScheme
+  let valid = call_564078.validator(path, query, header, formData, body)
+  let scheme = call_564078.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568178.url(scheme.get, call_568178.host, call_568178.base,
-                         call_568178.route, valid.getOrDefault("path"),
+  let url = call_564078.url(scheme.get, call_564078.host, call_564078.base,
+                         call_564078.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568178, url, valid)
+  result = hook(call_564078, url, valid)
 
-proc call*(call_568179: Call_AccountsListBySubscription_568159; apiVersion: string;
+proc call*(call_564079: Call_AccountsListBySubscription_564059; apiVersion: string;
           subscriptionId: string): Recallable =
   ## accountsListBySubscription
   ## Get all Location Based Services Accounts in a Subscription
@@ -243,20 +247,20 @@ proc call*(call_568179: Call_AccountsListBySubscription_568159; apiVersion: stri
   ##             : Client Api Version.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_568180 = newJObject()
-  var query_568181 = newJObject()
-  add(query_568181, "api-version", newJString(apiVersion))
-  add(path_568180, "subscriptionId", newJString(subscriptionId))
-  result = call_568179.call(path_568180, query_568181, nil, nil, nil)
+  var path_564080 = newJObject()
+  var query_564081 = newJObject()
+  add(query_564081, "api-version", newJString(apiVersion))
+  add(path_564080, "subscriptionId", newJString(subscriptionId))
+  result = call_564079.call(path_564080, query_564081, nil, nil, nil)
 
-var accountsListBySubscription* = Call_AccountsListBySubscription_568159(
+var accountsListBySubscription* = Call_AccountsListBySubscription_564059(
     name: "accountsListBySubscription", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.LocationBasedServices/accounts",
-    validator: validate_AccountsListBySubscription_568160, base: "",
-    url: url_AccountsListBySubscription_568161, schemes: {Scheme.Https})
+    validator: validate_AccountsListBySubscription_564060, base: "",
+    url: url_AccountsListBySubscription_564061, schemes: {Scheme.Https})
 type
-  Call_AccountsMove_568182 = ref object of OpenApiRestCall_567641
-proc url_AccountsMove_568184(protocol: Scheme; host: string; base: string;
+  Call_AccountsMove_564082 = ref object of OpenApiRestCall_563539
+proc url_AccountsMove_564084(protocol: Scheme; host: string; base: string;
                             route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -276,30 +280,30 @@ proc url_AccountsMove_568184(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AccountsMove_568183(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_AccountsMove_564083(path: JsonNode; query: JsonNode; header: JsonNode;
                                  formData: JsonNode; body: JsonNode): JsonNode =
   ## Moves Location Based Services Accounts from one ResourceGroup (or Subscription) to another
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group that contains Location Based Services Account to move.
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group that contains Location Based Services Account to move.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568185 = path.getOrDefault("resourceGroupName")
-  valid_568185 = validateParameter(valid_568185, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564085 = path.getOrDefault("subscriptionId")
+  valid_564085 = validateParameter(valid_564085, JString, required = true,
                                  default = nil)
-  if valid_568185 != nil:
-    section.add "resourceGroupName", valid_568185
-  var valid_568186 = path.getOrDefault("subscriptionId")
-  valid_568186 = validateParameter(valid_568186, JString, required = true,
+  if valid_564085 != nil:
+    section.add "subscriptionId", valid_564085
+  var valid_564086 = path.getOrDefault("resourceGroupName")
+  valid_564086 = validateParameter(valid_564086, JString, required = true,
                                  default = nil)
-  if valid_568186 != nil:
-    section.add "subscriptionId", valid_568186
+  if valid_564086 != nil:
+    section.add "resourceGroupName", valid_564086
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -307,11 +311,11 @@ proc validate_AccountsMove_568183(path: JsonNode; query: JsonNode; header: JsonN
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568187 = query.getOrDefault("api-version")
-  valid_568187 = validateParameter(valid_568187, JString, required = true,
+  var valid_564087 = query.getOrDefault("api-version")
+  valid_564087 = validateParameter(valid_564087, JString, required = true,
                                  default = nil)
-  if valid_568187 != nil:
-    section.add "api-version", valid_568187
+  if valid_564087 != nil:
+    section.add "api-version", valid_564087
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -325,48 +329,48 @@ proc validate_AccountsMove_568183(path: JsonNode; query: JsonNode; header: JsonN
   if body != nil:
     result.add "body", body
 
-proc call*(call_568189: Call_AccountsMove_568182; path: JsonNode; query: JsonNode;
+proc call*(call_564089: Call_AccountsMove_564082; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Moves Location Based Services Accounts from one ResourceGroup (or Subscription) to another
   ## 
-  let valid = call_568189.validator(path, query, header, formData, body)
-  let scheme = call_568189.pickScheme
+  let valid = call_564089.validator(path, query, header, formData, body)
+  let scheme = call_564089.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568189.url(scheme.get, call_568189.host, call_568189.base,
-                         call_568189.route, valid.getOrDefault("path"),
+  let url = call_564089.url(scheme.get, call_564089.host, call_564089.base,
+                         call_564089.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568189, url, valid)
+  result = hook(call_564089, url, valid)
 
-proc call*(call_568190: Call_AccountsMove_568182; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; moveRequest: JsonNode): Recallable =
+proc call*(call_564090: Call_AccountsMove_564082; apiVersion: string;
+          moveRequest: JsonNode; subscriptionId: string; resourceGroupName: string): Recallable =
   ## accountsMove
   ## Moves Location Based Services Accounts from one ResourceGroup (or Subscription) to another
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group that contains Location Based Services Account to move.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
-  ##   subscriptionId: string (required)
-  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   moveRequest: JObject (required)
   ##              : The details of the Location Based Services Account move.
-  var path_568191 = newJObject()
-  var query_568192 = newJObject()
-  var body_568193 = newJObject()
-  add(path_568191, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568192, "api-version", newJString(apiVersion))
-  add(path_568191, "subscriptionId", newJString(subscriptionId))
+  ##   subscriptionId: string (required)
+  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group that contains Location Based Services Account to move.
+  var path_564091 = newJObject()
+  var query_564092 = newJObject()
+  var body_564093 = newJObject()
+  add(query_564092, "api-version", newJString(apiVersion))
   if moveRequest != nil:
-    body_568193 = moveRequest
-  result = call_568190.call(path_568191, query_568192, nil, nil, body_568193)
+    body_564093 = moveRequest
+  add(path_564091, "subscriptionId", newJString(subscriptionId))
+  add(path_564091, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564090.call(path_564091, query_564092, nil, nil, body_564093)
 
-var accountsMove* = Call_AccountsMove_568182(name: "accountsMove",
+var accountsMove* = Call_AccountsMove_564082(name: "accountsMove",
     meth: HttpMethod.HttpPost, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/moveResources",
-    validator: validate_AccountsMove_568183, base: "", url: url_AccountsMove_568184,
+    validator: validate_AccountsMove_564083, base: "", url: url_AccountsMove_564084,
     schemes: {Scheme.Https})
 type
-  Call_AccountsListByResourceGroup_568194 = ref object of OpenApiRestCall_567641
-proc url_AccountsListByResourceGroup_568196(protocol: Scheme; host: string;
+  Call_AccountsListByResourceGroup_564094 = ref object of OpenApiRestCall_563539
+proc url_AccountsListByResourceGroup_564096(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -387,30 +391,30 @@ proc url_AccountsListByResourceGroup_568196(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AccountsListByResourceGroup_568195(path: JsonNode; query: JsonNode;
+proc validate_AccountsListByResourceGroup_564095(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Get all Location Based Services Accounts in a Resource Group
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the Azure Resource Group.
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the Azure Resource Group.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568197 = path.getOrDefault("resourceGroupName")
-  valid_568197 = validateParameter(valid_568197, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564097 = path.getOrDefault("subscriptionId")
+  valid_564097 = validateParameter(valid_564097, JString, required = true,
                                  default = nil)
-  if valid_568197 != nil:
-    section.add "resourceGroupName", valid_568197
-  var valid_568198 = path.getOrDefault("subscriptionId")
-  valid_568198 = validateParameter(valid_568198, JString, required = true,
+  if valid_564097 != nil:
+    section.add "subscriptionId", valid_564097
+  var valid_564098 = path.getOrDefault("resourceGroupName")
+  valid_564098 = validateParameter(valid_564098, JString, required = true,
                                  default = nil)
-  if valid_568198 != nil:
-    section.add "subscriptionId", valid_568198
+  if valid_564098 != nil:
+    section.add "resourceGroupName", valid_564098
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -418,11 +422,11 @@ proc validate_AccountsListByResourceGroup_568195(path: JsonNode; query: JsonNode
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568199 = query.getOrDefault("api-version")
-  valid_568199 = validateParameter(valid_568199, JString, required = true,
+  var valid_564099 = query.getOrDefault("api-version")
+  valid_564099 = validateParameter(valid_564099, JString, required = true,
                                  default = nil)
-  if valid_568199 != nil:
-    section.add "api-version", valid_568199
+  if valid_564099 != nil:
+    section.add "api-version", valid_564099
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -431,44 +435,44 @@ proc validate_AccountsListByResourceGroup_568195(path: JsonNode; query: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_568200: Call_AccountsListByResourceGroup_568194; path: JsonNode;
+proc call*(call_564100: Call_AccountsListByResourceGroup_564094; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get all Location Based Services Accounts in a Resource Group
   ## 
-  let valid = call_568200.validator(path, query, header, formData, body)
-  let scheme = call_568200.pickScheme
+  let valid = call_564100.validator(path, query, header, formData, body)
+  let scheme = call_564100.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568200.url(scheme.get, call_568200.host, call_568200.base,
-                         call_568200.route, valid.getOrDefault("path"),
+  let url = call_564100.url(scheme.get, call_564100.host, call_564100.base,
+                         call_564100.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568200, url, valid)
+  result = hook(call_564100, url, valid)
 
-proc call*(call_568201: Call_AccountsListByResourceGroup_568194;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string): Recallable =
+proc call*(call_564101: Call_AccountsListByResourceGroup_564094;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string): Recallable =
   ## accountsListByResourceGroup
   ## Get all Location Based Services Accounts in a Resource Group
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the Azure Resource Group.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_568202 = newJObject()
-  var query_568203 = newJObject()
-  add(path_568202, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568203, "api-version", newJString(apiVersion))
-  add(path_568202, "subscriptionId", newJString(subscriptionId))
-  result = call_568201.call(path_568202, query_568203, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the Azure Resource Group.
+  var path_564102 = newJObject()
+  var query_564103 = newJObject()
+  add(query_564103, "api-version", newJString(apiVersion))
+  add(path_564102, "subscriptionId", newJString(subscriptionId))
+  add(path_564102, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564101.call(path_564102, query_564103, nil, nil, nil)
 
-var accountsListByResourceGroup* = Call_AccountsListByResourceGroup_568194(
+var accountsListByResourceGroup* = Call_AccountsListByResourceGroup_564094(
     name: "accountsListByResourceGroup", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.LocationBasedServices/accounts",
-    validator: validate_AccountsListByResourceGroup_568195, base: "",
-    url: url_AccountsListByResourceGroup_568196, schemes: {Scheme.Https})
+    validator: validate_AccountsListByResourceGroup_564095, base: "",
+    url: url_AccountsListByResourceGroup_564096, schemes: {Scheme.Https})
 type
-  Call_AccountsCreateOrUpdate_568215 = ref object of OpenApiRestCall_567641
-proc url_AccountsCreateOrUpdate_568217(protocol: Scheme; host: string; base: string;
+  Call_AccountsCreateOrUpdate_564115 = ref object of OpenApiRestCall_563539
+proc url_AccountsCreateOrUpdate_564117(protocol: Scheme; host: string; base: string;
                                       route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -491,37 +495,37 @@ proc url_AccountsCreateOrUpdate_568217(protocol: Scheme; host: string; base: str
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AccountsCreateOrUpdate_568216(path: JsonNode; query: JsonNode;
+proc validate_AccountsCreateOrUpdate_564116(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Create or update a Location Based Services Account. A Location Based Services Account holds the keys which allow access to the Location Based Services REST APIs.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the Azure Resource Group.
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the Azure Resource Group.
   ##   accountName: JString (required)
   ##              : The name of the Location Based Services Account.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568218 = path.getOrDefault("resourceGroupName")
-  valid_568218 = validateParameter(valid_568218, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564118 = path.getOrDefault("subscriptionId")
+  valid_564118 = validateParameter(valid_564118, JString, required = true,
                                  default = nil)
-  if valid_568218 != nil:
-    section.add "resourceGroupName", valid_568218
-  var valid_568219 = path.getOrDefault("subscriptionId")
-  valid_568219 = validateParameter(valid_568219, JString, required = true,
+  if valid_564118 != nil:
+    section.add "subscriptionId", valid_564118
+  var valid_564119 = path.getOrDefault("resourceGroupName")
+  valid_564119 = validateParameter(valid_564119, JString, required = true,
                                  default = nil)
-  if valid_568219 != nil:
-    section.add "subscriptionId", valid_568219
-  var valid_568220 = path.getOrDefault("accountName")
-  valid_568220 = validateParameter(valid_568220, JString, required = true,
+  if valid_564119 != nil:
+    section.add "resourceGroupName", valid_564119
+  var valid_564120 = path.getOrDefault("accountName")
+  valid_564120 = validateParameter(valid_564120, JString, required = true,
                                  default = nil)
-  if valid_568220 != nil:
-    section.add "accountName", valid_568220
+  if valid_564120 != nil:
+    section.add "accountName", valid_564120
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -529,11 +533,11 @@ proc validate_AccountsCreateOrUpdate_568216(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568221 = query.getOrDefault("api-version")
-  valid_568221 = validateParameter(valid_568221, JString, required = true,
+  var valid_564121 = query.getOrDefault("api-version")
+  valid_564121 = validateParameter(valid_564121, JString, required = true,
                                  default = nil)
-  if valid_568221 != nil:
-    section.add "api-version", valid_568221
+  if valid_564121 != nil:
+    section.add "api-version", valid_564121
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -547,54 +551,54 @@ proc validate_AccountsCreateOrUpdate_568216(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568223: Call_AccountsCreateOrUpdate_568215; path: JsonNode;
+proc call*(call_564123: Call_AccountsCreateOrUpdate_564115; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Create or update a Location Based Services Account. A Location Based Services Account holds the keys which allow access to the Location Based Services REST APIs.
   ## 
-  let valid = call_568223.validator(path, query, header, formData, body)
-  let scheme = call_568223.pickScheme
+  let valid = call_564123.validator(path, query, header, formData, body)
+  let scheme = call_564123.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568223.url(scheme.get, call_568223.host, call_568223.base,
-                         call_568223.route, valid.getOrDefault("path"),
+  let url = call_564123.url(scheme.get, call_564123.host, call_564123.base,
+                         call_564123.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568223, url, valid)
+  result = hook(call_564123, url, valid)
 
-proc call*(call_568224: Call_AccountsCreateOrUpdate_568215;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          accountName: string;
-          LocationBasedServicesAccountCreateParameters: JsonNode): Recallable =
+proc call*(call_564124: Call_AccountsCreateOrUpdate_564115; apiVersion: string;
+          subscriptionId: string;
+          LocationBasedServicesAccountCreateParameters: JsonNode;
+          resourceGroupName: string; accountName: string): Recallable =
   ## accountsCreateOrUpdate
   ## Create or update a Location Based Services Account. A Location Based Services Account holds the keys which allow access to the Location Based Services REST APIs.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the Azure Resource Group.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   accountName: string (required)
-  ##              : The name of the Location Based Services Account.
   ##   LocationBasedServicesAccountCreateParameters: JObject (required)
   ##                                               : The new or updated parameters for the Location Based Services Account.
-  var path_568225 = newJObject()
-  var query_568226 = newJObject()
-  var body_568227 = newJObject()
-  add(path_568225, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568226, "api-version", newJString(apiVersion))
-  add(path_568225, "subscriptionId", newJString(subscriptionId))
-  add(path_568225, "accountName", newJString(accountName))
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the Azure Resource Group.
+  ##   accountName: string (required)
+  ##              : The name of the Location Based Services Account.
+  var path_564125 = newJObject()
+  var query_564126 = newJObject()
+  var body_564127 = newJObject()
+  add(query_564126, "api-version", newJString(apiVersion))
+  add(path_564125, "subscriptionId", newJString(subscriptionId))
   if LocationBasedServicesAccountCreateParameters != nil:
-    body_568227 = LocationBasedServicesAccountCreateParameters
-  result = call_568224.call(path_568225, query_568226, nil, nil, body_568227)
+    body_564127 = LocationBasedServicesAccountCreateParameters
+  add(path_564125, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564125, "accountName", newJString(accountName))
+  result = call_564124.call(path_564125, query_564126, nil, nil, body_564127)
 
-var accountsCreateOrUpdate* = Call_AccountsCreateOrUpdate_568215(
+var accountsCreateOrUpdate* = Call_AccountsCreateOrUpdate_564115(
     name: "accountsCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.LocationBasedServices/accounts/{accountName}",
-    validator: validate_AccountsCreateOrUpdate_568216, base: "",
-    url: url_AccountsCreateOrUpdate_568217, schemes: {Scheme.Https})
+    validator: validate_AccountsCreateOrUpdate_564116, base: "",
+    url: url_AccountsCreateOrUpdate_564117, schemes: {Scheme.Https})
 type
-  Call_AccountsGet_568204 = ref object of OpenApiRestCall_567641
-proc url_AccountsGet_568206(protocol: Scheme; host: string; base: string;
+  Call_AccountsGet_564104 = ref object of OpenApiRestCall_563539
+proc url_AccountsGet_564106(protocol: Scheme; host: string; base: string;
                            route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -617,37 +621,37 @@ proc url_AccountsGet_568206(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AccountsGet_568205(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_AccountsGet_564105(path: JsonNode; query: JsonNode; header: JsonNode;
                                 formData: JsonNode; body: JsonNode): JsonNode =
   ## Get a Location Based Services Account
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the Azure Resource Group.
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the Azure Resource Group.
   ##   accountName: JString (required)
   ##              : The name of the Location Based Services Account.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568207 = path.getOrDefault("resourceGroupName")
-  valid_568207 = validateParameter(valid_568207, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564107 = path.getOrDefault("subscriptionId")
+  valid_564107 = validateParameter(valid_564107, JString, required = true,
                                  default = nil)
-  if valid_568207 != nil:
-    section.add "resourceGroupName", valid_568207
-  var valid_568208 = path.getOrDefault("subscriptionId")
-  valid_568208 = validateParameter(valid_568208, JString, required = true,
+  if valid_564107 != nil:
+    section.add "subscriptionId", valid_564107
+  var valid_564108 = path.getOrDefault("resourceGroupName")
+  valid_564108 = validateParameter(valid_564108, JString, required = true,
                                  default = nil)
-  if valid_568208 != nil:
-    section.add "subscriptionId", valid_568208
-  var valid_568209 = path.getOrDefault("accountName")
-  valid_568209 = validateParameter(valid_568209, JString, required = true,
+  if valid_564108 != nil:
+    section.add "resourceGroupName", valid_564108
+  var valid_564109 = path.getOrDefault("accountName")
+  valid_564109 = validateParameter(valid_564109, JString, required = true,
                                  default = nil)
-  if valid_568209 != nil:
-    section.add "accountName", valid_568209
+  if valid_564109 != nil:
+    section.add "accountName", valid_564109
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -655,11 +659,11 @@ proc validate_AccountsGet_568205(path: JsonNode; query: JsonNode; header: JsonNo
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568210 = query.getOrDefault("api-version")
-  valid_568210 = validateParameter(valid_568210, JString, required = true,
+  var valid_564110 = query.getOrDefault("api-version")
+  valid_564110 = validateParameter(valid_564110, JString, required = true,
                                  default = nil)
-  if valid_568210 != nil:
-    section.add "api-version", valid_568210
+  if valid_564110 != nil:
+    section.add "api-version", valid_564110
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -668,48 +672,48 @@ proc validate_AccountsGet_568205(path: JsonNode; query: JsonNode; header: JsonNo
   if body != nil:
     result.add "body", body
 
-proc call*(call_568211: Call_AccountsGet_568204; path: JsonNode; query: JsonNode;
+proc call*(call_564111: Call_AccountsGet_564104; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get a Location Based Services Account
   ## 
-  let valid = call_568211.validator(path, query, header, formData, body)
-  let scheme = call_568211.pickScheme
+  let valid = call_564111.validator(path, query, header, formData, body)
+  let scheme = call_564111.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568211.url(scheme.get, call_568211.host, call_568211.base,
-                         call_568211.route, valid.getOrDefault("path"),
+  let url = call_564111.url(scheme.get, call_564111.host, call_564111.base,
+                         call_564111.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568211, url, valid)
+  result = hook(call_564111, url, valid)
 
-proc call*(call_568212: Call_AccountsGet_568204; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; accountName: string): Recallable =
+proc call*(call_564112: Call_AccountsGet_564104; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string; accountName: string): Recallable =
   ## accountsGet
   ## Get a Location Based Services Account
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the Azure Resource Group.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the Azure Resource Group.
   ##   accountName: string (required)
   ##              : The name of the Location Based Services Account.
-  var path_568213 = newJObject()
-  var query_568214 = newJObject()
-  add(path_568213, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568214, "api-version", newJString(apiVersion))
-  add(path_568213, "subscriptionId", newJString(subscriptionId))
-  add(path_568213, "accountName", newJString(accountName))
-  result = call_568212.call(path_568213, query_568214, nil, nil, nil)
+  var path_564113 = newJObject()
+  var query_564114 = newJObject()
+  add(query_564114, "api-version", newJString(apiVersion))
+  add(path_564113, "subscriptionId", newJString(subscriptionId))
+  add(path_564113, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564113, "accountName", newJString(accountName))
+  result = call_564112.call(path_564113, query_564114, nil, nil, nil)
 
-var accountsGet* = Call_AccountsGet_568204(name: "accountsGet",
+var accountsGet* = Call_AccountsGet_564104(name: "accountsGet",
                                         meth: HttpMethod.HttpGet,
                                         host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.LocationBasedServices/accounts/{accountName}",
-                                        validator: validate_AccountsGet_568205,
-                                        base: "", url: url_AccountsGet_568206,
+                                        validator: validate_AccountsGet_564105,
+                                        base: "", url: url_AccountsGet_564106,
                                         schemes: {Scheme.Https})
 type
-  Call_AccountsUpdate_568239 = ref object of OpenApiRestCall_567641
-proc url_AccountsUpdate_568241(protocol: Scheme; host: string; base: string;
+  Call_AccountsUpdate_564139 = ref object of OpenApiRestCall_563539
+proc url_AccountsUpdate_564141(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -732,7 +736,7 @@ proc url_AccountsUpdate_568241(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AccountsUpdate_568240(path: JsonNode; query: JsonNode;
+proc validate_AccountsUpdate_564140(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## Updates a Location Based Services Account. Only a subset of the parameters may be updated after creation, such as Sku and Tags.
@@ -740,30 +744,30 @@ proc validate_AccountsUpdate_568240(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the Azure Resource Group.
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the Azure Resource Group.
   ##   accountName: JString (required)
   ##              : The name of the Location Based Services Account.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568242 = path.getOrDefault("resourceGroupName")
-  valid_568242 = validateParameter(valid_568242, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564142 = path.getOrDefault("subscriptionId")
+  valid_564142 = validateParameter(valid_564142, JString, required = true,
                                  default = nil)
-  if valid_568242 != nil:
-    section.add "resourceGroupName", valid_568242
-  var valid_568243 = path.getOrDefault("subscriptionId")
-  valid_568243 = validateParameter(valid_568243, JString, required = true,
+  if valid_564142 != nil:
+    section.add "subscriptionId", valid_564142
+  var valid_564143 = path.getOrDefault("resourceGroupName")
+  valid_564143 = validateParameter(valid_564143, JString, required = true,
                                  default = nil)
-  if valid_568243 != nil:
-    section.add "subscriptionId", valid_568243
-  var valid_568244 = path.getOrDefault("accountName")
-  valid_568244 = validateParameter(valid_568244, JString, required = true,
+  if valid_564143 != nil:
+    section.add "resourceGroupName", valid_564143
+  var valid_564144 = path.getOrDefault("accountName")
+  valid_564144 = validateParameter(valid_564144, JString, required = true,
                                  default = nil)
-  if valid_568244 != nil:
-    section.add "accountName", valid_568244
+  if valid_564144 != nil:
+    section.add "accountName", valid_564144
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -771,11 +775,11 @@ proc validate_AccountsUpdate_568240(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568245 = query.getOrDefault("api-version")
-  valid_568245 = validateParameter(valid_568245, JString, required = true,
+  var valid_564145 = query.getOrDefault("api-version")
+  valid_564145 = validateParameter(valid_564145, JString, required = true,
                                  default = nil)
-  if valid_568245 != nil:
-    section.add "api-version", valid_568245
+  if valid_564145 != nil:
+    section.add "api-version", valid_564145
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -789,53 +793,53 @@ proc validate_AccountsUpdate_568240(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568247: Call_AccountsUpdate_568239; path: JsonNode; query: JsonNode;
+proc call*(call_564147: Call_AccountsUpdate_564139; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Updates a Location Based Services Account. Only a subset of the parameters may be updated after creation, such as Sku and Tags.
   ## 
-  let valid = call_568247.validator(path, query, header, formData, body)
-  let scheme = call_568247.pickScheme
+  let valid = call_564147.validator(path, query, header, formData, body)
+  let scheme = call_564147.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568247.url(scheme.get, call_568247.host, call_568247.base,
-                         call_568247.route, valid.getOrDefault("path"),
+  let url = call_564147.url(scheme.get, call_564147.host, call_564147.base,
+                         call_564147.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568247, url, valid)
+  result = hook(call_564147, url, valid)
 
-proc call*(call_568248: Call_AccountsUpdate_568239; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string;
+proc call*(call_564148: Call_AccountsUpdate_564139; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string;
           LocationBasedServicesAccountUpdateParameters: JsonNode;
           accountName: string): Recallable =
   ## accountsUpdate
   ## Updates a Location Based Services Account. Only a subset of the parameters may be updated after creation, such as Sku and Tags.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the Azure Resource Group.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the Azure Resource Group.
   ##   LocationBasedServicesAccountUpdateParameters: JObject (required)
   ##                                               : The updated parameters for the Location Based Services Account.
   ##   accountName: string (required)
   ##              : The name of the Location Based Services Account.
-  var path_568249 = newJObject()
-  var query_568250 = newJObject()
-  var body_568251 = newJObject()
-  add(path_568249, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568250, "api-version", newJString(apiVersion))
-  add(path_568249, "subscriptionId", newJString(subscriptionId))
+  var path_564149 = newJObject()
+  var query_564150 = newJObject()
+  var body_564151 = newJObject()
+  add(query_564150, "api-version", newJString(apiVersion))
+  add(path_564149, "subscriptionId", newJString(subscriptionId))
+  add(path_564149, "resourceGroupName", newJString(resourceGroupName))
   if LocationBasedServicesAccountUpdateParameters != nil:
-    body_568251 = LocationBasedServicesAccountUpdateParameters
-  add(path_568249, "accountName", newJString(accountName))
-  result = call_568248.call(path_568249, query_568250, nil, nil, body_568251)
+    body_564151 = LocationBasedServicesAccountUpdateParameters
+  add(path_564149, "accountName", newJString(accountName))
+  result = call_564148.call(path_564149, query_564150, nil, nil, body_564151)
 
-var accountsUpdate* = Call_AccountsUpdate_568239(name: "accountsUpdate",
+var accountsUpdate* = Call_AccountsUpdate_564139(name: "accountsUpdate",
     meth: HttpMethod.HttpPatch, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.LocationBasedServices/accounts/{accountName}",
-    validator: validate_AccountsUpdate_568240, base: "", url: url_AccountsUpdate_568241,
+    validator: validate_AccountsUpdate_564140, base: "", url: url_AccountsUpdate_564141,
     schemes: {Scheme.Https})
 type
-  Call_AccountsDelete_568228 = ref object of OpenApiRestCall_567641
-proc url_AccountsDelete_568230(protocol: Scheme; host: string; base: string;
+  Call_AccountsDelete_564128 = ref object of OpenApiRestCall_563539
+proc url_AccountsDelete_564130(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -858,7 +862,7 @@ proc url_AccountsDelete_568230(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AccountsDelete_568229(path: JsonNode; query: JsonNode;
+proc validate_AccountsDelete_564129(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## Delete a Location Based Services Account
@@ -866,30 +870,30 @@ proc validate_AccountsDelete_568229(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the Azure Resource Group.
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the Azure Resource Group.
   ##   accountName: JString (required)
   ##              : The name of the Location Based Services Account.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568231 = path.getOrDefault("resourceGroupName")
-  valid_568231 = validateParameter(valid_568231, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564131 = path.getOrDefault("subscriptionId")
+  valid_564131 = validateParameter(valid_564131, JString, required = true,
                                  default = nil)
-  if valid_568231 != nil:
-    section.add "resourceGroupName", valid_568231
-  var valid_568232 = path.getOrDefault("subscriptionId")
-  valid_568232 = validateParameter(valid_568232, JString, required = true,
+  if valid_564131 != nil:
+    section.add "subscriptionId", valid_564131
+  var valid_564132 = path.getOrDefault("resourceGroupName")
+  valid_564132 = validateParameter(valid_564132, JString, required = true,
                                  default = nil)
-  if valid_568232 != nil:
-    section.add "subscriptionId", valid_568232
-  var valid_568233 = path.getOrDefault("accountName")
-  valid_568233 = validateParameter(valid_568233, JString, required = true,
+  if valid_564132 != nil:
+    section.add "resourceGroupName", valid_564132
+  var valid_564133 = path.getOrDefault("accountName")
+  valid_564133 = validateParameter(valid_564133, JString, required = true,
                                  default = nil)
-  if valid_568233 != nil:
-    section.add "accountName", valid_568233
+  if valid_564133 != nil:
+    section.add "accountName", valid_564133
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -897,11 +901,11 @@ proc validate_AccountsDelete_568229(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568234 = query.getOrDefault("api-version")
-  valid_568234 = validateParameter(valid_568234, JString, required = true,
+  var valid_564134 = query.getOrDefault("api-version")
+  valid_564134 = validateParameter(valid_564134, JString, required = true,
                                  default = nil)
-  if valid_568234 != nil:
-    section.add "api-version", valid_568234
+  if valid_564134 != nil:
+    section.add "api-version", valid_564134
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -910,46 +914,46 @@ proc validate_AccountsDelete_568229(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568235: Call_AccountsDelete_568228; path: JsonNode; query: JsonNode;
+proc call*(call_564135: Call_AccountsDelete_564128; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Delete a Location Based Services Account
   ## 
-  let valid = call_568235.validator(path, query, header, formData, body)
-  let scheme = call_568235.pickScheme
+  let valid = call_564135.validator(path, query, header, formData, body)
+  let scheme = call_564135.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568235.url(scheme.get, call_568235.host, call_568235.base,
-                         call_568235.route, valid.getOrDefault("path"),
+  let url = call_564135.url(scheme.get, call_564135.host, call_564135.base,
+                         call_564135.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568235, url, valid)
+  result = hook(call_564135, url, valid)
 
-proc call*(call_568236: Call_AccountsDelete_568228; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; accountName: string): Recallable =
+proc call*(call_564136: Call_AccountsDelete_564128; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string; accountName: string): Recallable =
   ## accountsDelete
   ## Delete a Location Based Services Account
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the Azure Resource Group.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the Azure Resource Group.
   ##   accountName: string (required)
   ##              : The name of the Location Based Services Account.
-  var path_568237 = newJObject()
-  var query_568238 = newJObject()
-  add(path_568237, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568238, "api-version", newJString(apiVersion))
-  add(path_568237, "subscriptionId", newJString(subscriptionId))
-  add(path_568237, "accountName", newJString(accountName))
-  result = call_568236.call(path_568237, query_568238, nil, nil, nil)
+  var path_564137 = newJObject()
+  var query_564138 = newJObject()
+  add(query_564138, "api-version", newJString(apiVersion))
+  add(path_564137, "subscriptionId", newJString(subscriptionId))
+  add(path_564137, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564137, "accountName", newJString(accountName))
+  result = call_564136.call(path_564137, query_564138, nil, nil, nil)
 
-var accountsDelete* = Call_AccountsDelete_568228(name: "accountsDelete",
+var accountsDelete* = Call_AccountsDelete_564128(name: "accountsDelete",
     meth: HttpMethod.HttpDelete, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.LocationBasedServices/accounts/{accountName}",
-    validator: validate_AccountsDelete_568229, base: "", url: url_AccountsDelete_568230,
+    validator: validate_AccountsDelete_564129, base: "", url: url_AccountsDelete_564130,
     schemes: {Scheme.Https})
 type
-  Call_AccountsListKeys_568252 = ref object of OpenApiRestCall_567641
-proc url_AccountsListKeys_568254(protocol: Scheme; host: string; base: string;
+  Call_AccountsListKeys_564152 = ref object of OpenApiRestCall_563539
+proc url_AccountsListKeys_564154(protocol: Scheme; host: string; base: string;
                                 route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -973,7 +977,7 @@ proc url_AccountsListKeys_568254(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AccountsListKeys_568253(path: JsonNode; query: JsonNode;
+proc validate_AccountsListKeys_564153(path: JsonNode; query: JsonNode;
                                      header: JsonNode; formData: JsonNode;
                                      body: JsonNode): JsonNode =
   ## Get the keys to use with the Location Based Services APIs. A key is used to authenticate and authorize access to the Location Based Services REST APIs. Only one key is needed at a time; two are given to provide seamless key regeneration.
@@ -981,30 +985,30 @@ proc validate_AccountsListKeys_568253(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the Azure Resource Group.
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the Azure Resource Group.
   ##   accountName: JString (required)
   ##              : The name of the Location Based Services Account.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568255 = path.getOrDefault("resourceGroupName")
-  valid_568255 = validateParameter(valid_568255, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564155 = path.getOrDefault("subscriptionId")
+  valid_564155 = validateParameter(valid_564155, JString, required = true,
                                  default = nil)
-  if valid_568255 != nil:
-    section.add "resourceGroupName", valid_568255
-  var valid_568256 = path.getOrDefault("subscriptionId")
-  valid_568256 = validateParameter(valid_568256, JString, required = true,
+  if valid_564155 != nil:
+    section.add "subscriptionId", valid_564155
+  var valid_564156 = path.getOrDefault("resourceGroupName")
+  valid_564156 = validateParameter(valid_564156, JString, required = true,
                                  default = nil)
-  if valid_568256 != nil:
-    section.add "subscriptionId", valid_568256
-  var valid_568257 = path.getOrDefault("accountName")
-  valid_568257 = validateParameter(valid_568257, JString, required = true,
+  if valid_564156 != nil:
+    section.add "resourceGroupName", valid_564156
+  var valid_564157 = path.getOrDefault("accountName")
+  valid_564157 = validateParameter(valid_564157, JString, required = true,
                                  default = nil)
-  if valid_568257 != nil:
-    section.add "accountName", valid_568257
+  if valid_564157 != nil:
+    section.add "accountName", valid_564157
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1012,11 +1016,11 @@ proc validate_AccountsListKeys_568253(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568258 = query.getOrDefault("api-version")
-  valid_568258 = validateParameter(valid_568258, JString, required = true,
+  var valid_564158 = query.getOrDefault("api-version")
+  valid_564158 = validateParameter(valid_564158, JString, required = true,
                                  default = nil)
-  if valid_568258 != nil:
-    section.add "api-version", valid_568258
+  if valid_564158 != nil:
+    section.add "api-version", valid_564158
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1025,46 +1029,46 @@ proc validate_AccountsListKeys_568253(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568259: Call_AccountsListKeys_568252; path: JsonNode;
+proc call*(call_564159: Call_AccountsListKeys_564152; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get the keys to use with the Location Based Services APIs. A key is used to authenticate and authorize access to the Location Based Services REST APIs. Only one key is needed at a time; two are given to provide seamless key regeneration.
   ## 
-  let valid = call_568259.validator(path, query, header, formData, body)
-  let scheme = call_568259.pickScheme
+  let valid = call_564159.validator(path, query, header, formData, body)
+  let scheme = call_564159.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568259.url(scheme.get, call_568259.host, call_568259.base,
-                         call_568259.route, valid.getOrDefault("path"),
+  let url = call_564159.url(scheme.get, call_564159.host, call_564159.base,
+                         call_564159.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568259, url, valid)
+  result = hook(call_564159, url, valid)
 
-proc call*(call_568260: Call_AccountsListKeys_568252; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; accountName: string): Recallable =
+proc call*(call_564160: Call_AccountsListKeys_564152; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string; accountName: string): Recallable =
   ## accountsListKeys
   ## Get the keys to use with the Location Based Services APIs. A key is used to authenticate and authorize access to the Location Based Services REST APIs. Only one key is needed at a time; two are given to provide seamless key regeneration.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the Azure Resource Group.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the Azure Resource Group.
   ##   accountName: string (required)
   ##              : The name of the Location Based Services Account.
-  var path_568261 = newJObject()
-  var query_568262 = newJObject()
-  add(path_568261, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568262, "api-version", newJString(apiVersion))
-  add(path_568261, "subscriptionId", newJString(subscriptionId))
-  add(path_568261, "accountName", newJString(accountName))
-  result = call_568260.call(path_568261, query_568262, nil, nil, nil)
+  var path_564161 = newJObject()
+  var query_564162 = newJObject()
+  add(query_564162, "api-version", newJString(apiVersion))
+  add(path_564161, "subscriptionId", newJString(subscriptionId))
+  add(path_564161, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564161, "accountName", newJString(accountName))
+  result = call_564160.call(path_564161, query_564162, nil, nil, nil)
 
-var accountsListKeys* = Call_AccountsListKeys_568252(name: "accountsListKeys",
+var accountsListKeys* = Call_AccountsListKeys_564152(name: "accountsListKeys",
     meth: HttpMethod.HttpPost, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.LocationBasedServices/accounts/{accountName}/listKeys",
-    validator: validate_AccountsListKeys_568253, base: "",
-    url: url_AccountsListKeys_568254, schemes: {Scheme.Https})
+    validator: validate_AccountsListKeys_564153, base: "",
+    url: url_AccountsListKeys_564154, schemes: {Scheme.Https})
 type
-  Call_AccountsRegenerateKeys_568263 = ref object of OpenApiRestCall_567641
-proc url_AccountsRegenerateKeys_568265(protocol: Scheme; host: string; base: string;
+  Call_AccountsRegenerateKeys_564163 = ref object of OpenApiRestCall_563539
+proc url_AccountsRegenerateKeys_564165(protocol: Scheme; host: string; base: string;
                                       route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1088,37 +1092,37 @@ proc url_AccountsRegenerateKeys_568265(protocol: Scheme; host: string; base: str
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AccountsRegenerateKeys_568264(path: JsonNode; query: JsonNode;
+proc validate_AccountsRegenerateKeys_564164(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Regenerate either the primary or secondary key for use with the Location Based Services APIs. The old key will stop working immediately.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the Azure Resource Group.
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the Azure Resource Group.
   ##   accountName: JString (required)
   ##              : The name of the Location Based Services Account.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568266 = path.getOrDefault("resourceGroupName")
-  valid_568266 = validateParameter(valid_568266, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564166 = path.getOrDefault("subscriptionId")
+  valid_564166 = validateParameter(valid_564166, JString, required = true,
                                  default = nil)
-  if valid_568266 != nil:
-    section.add "resourceGroupName", valid_568266
-  var valid_568267 = path.getOrDefault("subscriptionId")
-  valid_568267 = validateParameter(valid_568267, JString, required = true,
+  if valid_564166 != nil:
+    section.add "subscriptionId", valid_564166
+  var valid_564167 = path.getOrDefault("resourceGroupName")
+  valid_564167 = validateParameter(valid_564167, JString, required = true,
                                  default = nil)
-  if valid_568267 != nil:
-    section.add "subscriptionId", valid_568267
-  var valid_568268 = path.getOrDefault("accountName")
-  valid_568268 = validateParameter(valid_568268, JString, required = true,
+  if valid_564167 != nil:
+    section.add "resourceGroupName", valid_564167
+  var valid_564168 = path.getOrDefault("accountName")
+  valid_564168 = validateParameter(valid_564168, JString, required = true,
                                  default = nil)
-  if valid_568268 != nil:
-    section.add "accountName", valid_568268
+  if valid_564168 != nil:
+    section.add "accountName", valid_564168
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1126,11 +1130,11 @@ proc validate_AccountsRegenerateKeys_568264(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568269 = query.getOrDefault("api-version")
-  valid_568269 = validateParameter(valid_568269, JString, required = true,
+  var valid_564169 = query.getOrDefault("api-version")
+  valid_564169 = validateParameter(valid_564169, JString, required = true,
                                  default = nil)
-  if valid_568269 != nil:
-    section.add "api-version", valid_568269
+  if valid_564169 != nil:
+    section.add "api-version", valid_564169
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1144,50 +1148,50 @@ proc validate_AccountsRegenerateKeys_568264(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568271: Call_AccountsRegenerateKeys_568263; path: JsonNode;
+proc call*(call_564171: Call_AccountsRegenerateKeys_564163; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Regenerate either the primary or secondary key for use with the Location Based Services APIs. The old key will stop working immediately.
   ## 
-  let valid = call_568271.validator(path, query, header, formData, body)
-  let scheme = call_568271.pickScheme
+  let valid = call_564171.validator(path, query, header, formData, body)
+  let scheme = call_564171.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568271.url(scheme.get, call_568271.host, call_568271.base,
-                         call_568271.route, valid.getOrDefault("path"),
+  let url = call_564171.url(scheme.get, call_564171.host, call_564171.base,
+                         call_564171.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568271, url, valid)
+  result = hook(call_564171, url, valid)
 
-proc call*(call_568272: Call_AccountsRegenerateKeys_568263;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          keySpecification: JsonNode; accountName: string): Recallable =
+proc call*(call_564172: Call_AccountsRegenerateKeys_564163; apiVersion: string;
+          keySpecification: JsonNode; subscriptionId: string;
+          resourceGroupName: string; accountName: string): Recallable =
   ## accountsRegenerateKeys
   ## Regenerate either the primary or secondary key for use with the Location Based Services APIs. The old key will stop working immediately.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the Azure Resource Group.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
-  ##   subscriptionId: string (required)
-  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   keySpecification: JObject (required)
   ##                   : Which key to regenerate:  primary or secondary.
+  ##   subscriptionId: string (required)
+  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the Azure Resource Group.
   ##   accountName: string (required)
   ##              : The name of the Location Based Services Account.
-  var path_568273 = newJObject()
-  var query_568274 = newJObject()
-  var body_568275 = newJObject()
-  add(path_568273, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568274, "api-version", newJString(apiVersion))
-  add(path_568273, "subscriptionId", newJString(subscriptionId))
+  var path_564173 = newJObject()
+  var query_564174 = newJObject()
+  var body_564175 = newJObject()
+  add(query_564174, "api-version", newJString(apiVersion))
   if keySpecification != nil:
-    body_568275 = keySpecification
-  add(path_568273, "accountName", newJString(accountName))
-  result = call_568272.call(path_568273, query_568274, nil, nil, body_568275)
+    body_564175 = keySpecification
+  add(path_564173, "subscriptionId", newJString(subscriptionId))
+  add(path_564173, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564173, "accountName", newJString(accountName))
+  result = call_564172.call(path_564173, query_564174, nil, nil, body_564175)
 
-var accountsRegenerateKeys* = Call_AccountsRegenerateKeys_568263(
+var accountsRegenerateKeys* = Call_AccountsRegenerateKeys_564163(
     name: "accountsRegenerateKeys", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.LocationBasedServices/accounts/{accountName}/regenerateKey",
-    validator: validate_AccountsRegenerateKeys_568264, base: "",
-    url: url_AccountsRegenerateKeys_568265, schemes: {Scheme.Https})
+    validator: validate_AccountsRegenerateKeys_564164, base: "",
+    url: url_AccountsRegenerateKeys_564165, schemes: {Scheme.Https})
 export
   rest
 

@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, httpcore
 
 ## auto-generated via openapi macro
 ## title: GalleryManagementClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_574442 = ref object of OpenApiRestCall
+  OpenApiRestCall_563540 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_574442](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563540](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_574442): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563540): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,8 +107,8 @@ const
   macServiceName = "azsadmin-GalleryItem"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_GalleryItemsCreate_574980 = ref object of OpenApiRestCall_574442
-proc url_GalleryItemsCreate_574982(protocol: Scheme; host: string; base: string;
+  Call_GalleryItemsCreate_564080 = ref object of OpenApiRestCall_563540
+proc url_GalleryItemsCreate_564082(protocol: Scheme; host: string; base: string;
                                   route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -121,7 +125,7 @@ proc url_GalleryItemsCreate_574982(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_GalleryItemsCreate_574981(path: JsonNode; query: JsonNode;
+proc validate_GalleryItemsCreate_564081(path: JsonNode; query: JsonNode;
                                        header: JsonNode; formData: JsonNode;
                                        body: JsonNode): JsonNode =
   var section: JsonNode
@@ -132,11 +136,11 @@ proc validate_GalleryItemsCreate_574981(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_574992 = path.getOrDefault("subscriptionId")
-  valid_574992 = validateParameter(valid_574992, JString, required = true,
+  var valid_564092 = path.getOrDefault("subscriptionId")
+  valid_564092 = validateParameter(valid_564092, JString, required = true,
                                  default = nil)
-  if valid_574992 != nil:
-    section.add "subscriptionId", valid_574992
+  if valid_564092 != nil:
+    section.add "subscriptionId", valid_564092
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -144,11 +148,11 @@ proc validate_GalleryItemsCreate_574981(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574993 = query.getOrDefault("api-version")
-  valid_574993 = validateParameter(valid_574993, JString, required = true,
+  var valid_564093 = query.getOrDefault("api-version")
+  valid_564093 = validateParameter(valid_564093, JString, required = true,
                                  default = newJString("2016-05-01"))
-  if valid_574993 != nil:
-    section.add "api-version", valid_574993
+  if valid_564093 != nil:
+    section.add "api-version", valid_564093
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -162,43 +166,43 @@ proc validate_GalleryItemsCreate_574981(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574995: Call_GalleryItemsCreate_574980; path: JsonNode;
+proc call*(call_564095: Call_GalleryItemsCreate_564080; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
-  let valid = call_574995.validator(path, query, header, formData, body)
-  let scheme = call_574995.pickScheme
+  let valid = call_564095.validator(path, query, header, formData, body)
+  let scheme = call_564095.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574995.url(scheme.get, call_574995.host, call_574995.base,
-                         call_574995.route, valid.getOrDefault("path"),
+  let url = call_564095.url(scheme.get, call_564095.host, call_564095.base,
+                         call_564095.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574995, url, valid)
+  result = hook(call_564095, url, valid)
 
-proc call*(call_574996: Call_GalleryItemsCreate_574980; subscriptionId: string;
-          galleryItemUri: JsonNode; apiVersion: string = "2016-05-01"): Recallable =
+proc call*(call_564096: Call_GalleryItemsCreate_564080; galleryItemUri: JsonNode;
+          subscriptionId: string; apiVersion: string = "2016-05-01"): Recallable =
   ## galleryItemsCreate
   ##   apiVersion: string (required)
   ##             : Client API Version.
-  ##   subscriptionId: string (required)
-  ##                 : Subscription credentials that uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   galleryItemUri: JObject (required)
   ##                 : The URI to the gallery item JSON file.
-  var path_574997 = newJObject()
-  var query_574998 = newJObject()
-  var body_574999 = newJObject()
-  add(query_574998, "api-version", newJString(apiVersion))
-  add(path_574997, "subscriptionId", newJString(subscriptionId))
+  ##   subscriptionId: string (required)
+  ##                 : Subscription credentials that uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  var path_564097 = newJObject()
+  var query_564098 = newJObject()
+  var body_564099 = newJObject()
+  add(query_564098, "api-version", newJString(apiVersion))
   if galleryItemUri != nil:
-    body_574999 = galleryItemUri
-  result = call_574996.call(path_574997, query_574998, nil, nil, body_574999)
+    body_564099 = galleryItemUri
+  add(path_564097, "subscriptionId", newJString(subscriptionId))
+  result = call_564096.call(path_564097, query_564098, nil, nil, body_564099)
 
-var galleryItemsCreate* = Call_GalleryItemsCreate_574980(
+var galleryItemsCreate* = Call_GalleryItemsCreate_564080(
     name: "galleryItemsCreate", meth: HttpMethod.HttpPost,
     host: "adminmanagement.local.azurestack.external", route: "/subscriptions/{subscriptionId}/providers/microsoft.gallery.admin/galleryItems",
-    validator: validate_GalleryItemsCreate_574981, base: "",
-    url: url_GalleryItemsCreate_574982, schemes: {Scheme.Https})
+    validator: validate_GalleryItemsCreate_564081, base: "",
+    url: url_GalleryItemsCreate_564082, schemes: {Scheme.Https})
 type
-  Call_GalleryItemsList_574664 = ref object of OpenApiRestCall_574442
-proc url_GalleryItemsList_574666(protocol: Scheme; host: string; base: string;
+  Call_GalleryItemsList_563762 = ref object of OpenApiRestCall_563540
+proc url_GalleryItemsList_563764(protocol: Scheme; host: string; base: string;
                                 route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -215,7 +219,7 @@ proc url_GalleryItemsList_574666(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_GalleryItemsList_574665(path: JsonNode; query: JsonNode;
+proc validate_GalleryItemsList_563763(path: JsonNode; query: JsonNode;
                                      header: JsonNode; formData: JsonNode;
                                      body: JsonNode): JsonNode =
   var section: JsonNode
@@ -226,11 +230,11 @@ proc validate_GalleryItemsList_574665(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_574826 = path.getOrDefault("subscriptionId")
-  valid_574826 = validateParameter(valid_574826, JString, required = true,
+  var valid_563926 = path.getOrDefault("subscriptionId")
+  valid_563926 = validateParameter(valid_563926, JString, required = true,
                                  default = nil)
-  if valid_574826 != nil:
-    section.add "subscriptionId", valid_574826
+  if valid_563926 != nil:
+    section.add "subscriptionId", valid_563926
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -238,11 +242,11 @@ proc validate_GalleryItemsList_574665(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574840 = query.getOrDefault("api-version")
-  valid_574840 = validateParameter(valid_574840, JString, required = true,
+  var valid_563940 = query.getOrDefault("api-version")
+  valid_563940 = validateParameter(valid_563940, JString, required = true,
                                  default = newJString("2016-05-01"))
-  if valid_574840 != nil:
-    section.add "api-version", valid_574840
+  if valid_563940 != nil:
+    section.add "api-version", valid_563940
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -251,37 +255,37 @@ proc validate_GalleryItemsList_574665(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574867: Call_GalleryItemsList_574664; path: JsonNode;
+proc call*(call_563967: Call_GalleryItemsList_563762; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
-  let valid = call_574867.validator(path, query, header, formData, body)
-  let scheme = call_574867.pickScheme
+  let valid = call_563967.validator(path, query, header, formData, body)
+  let scheme = call_563967.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574867.url(scheme.get, call_574867.host, call_574867.base,
-                         call_574867.route, valid.getOrDefault("path"),
+  let url = call_563967.url(scheme.get, call_563967.host, call_563967.base,
+                         call_563967.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574867, url, valid)
+  result = hook(call_563967, url, valid)
 
-proc call*(call_574938: Call_GalleryItemsList_574664; subscriptionId: string;
+proc call*(call_564038: Call_GalleryItemsList_563762; subscriptionId: string;
           apiVersion: string = "2016-05-01"): Recallable =
   ## galleryItemsList
   ##   apiVersion: string (required)
   ##             : Client API Version.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials that uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_574939 = newJObject()
-  var query_574941 = newJObject()
-  add(query_574941, "api-version", newJString(apiVersion))
-  add(path_574939, "subscriptionId", newJString(subscriptionId))
-  result = call_574938.call(path_574939, query_574941, nil, nil, nil)
+  var path_564039 = newJObject()
+  var query_564041 = newJObject()
+  add(query_564041, "api-version", newJString(apiVersion))
+  add(path_564039, "subscriptionId", newJString(subscriptionId))
+  result = call_564038.call(path_564039, query_564041, nil, nil, nil)
 
-var galleryItemsList* = Call_GalleryItemsList_574664(name: "galleryItemsList",
+var galleryItemsList* = Call_GalleryItemsList_563762(name: "galleryItemsList",
     meth: HttpMethod.HttpGet, host: "adminmanagement.local.azurestack.external", route: "/subscriptions/{subscriptionId}/providers/microsoft.gallery.admin/galleryItems",
-    validator: validate_GalleryItemsList_574665, base: "",
-    url: url_GalleryItemsList_574666, schemes: {Scheme.Https})
+    validator: validate_GalleryItemsList_563763, base: "",
+    url: url_GalleryItemsList_563764, schemes: {Scheme.Https})
 type
-  Call_GalleryItemsGet_575000 = ref object of OpenApiRestCall_574442
-proc url_GalleryItemsGet_575002(protocol: Scheme; host: string; base: string;
+  Call_GalleryItemsGet_564100 = ref object of OpenApiRestCall_563540
+proc url_GalleryItemsGet_564102(protocol: Scheme; host: string; base: string;
                                route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -300,7 +304,7 @@ proc url_GalleryItemsGet_575002(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_GalleryItemsGet_575001(path: JsonNode; query: JsonNode;
+proc validate_GalleryItemsGet_564101(path: JsonNode; query: JsonNode;
                                     header: JsonNode; formData: JsonNode;
                                     body: JsonNode): JsonNode =
   var section: JsonNode
@@ -313,16 +317,16 @@ proc validate_GalleryItemsGet_575001(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `galleryItemName` field"
-  var valid_575003 = path.getOrDefault("galleryItemName")
-  valid_575003 = validateParameter(valid_575003, JString, required = true,
+  var valid_564103 = path.getOrDefault("galleryItemName")
+  valid_564103 = validateParameter(valid_564103, JString, required = true,
                                  default = nil)
-  if valid_575003 != nil:
-    section.add "galleryItemName", valid_575003
-  var valid_575004 = path.getOrDefault("subscriptionId")
-  valid_575004 = validateParameter(valid_575004, JString, required = true,
+  if valid_564103 != nil:
+    section.add "galleryItemName", valid_564103
+  var valid_564104 = path.getOrDefault("subscriptionId")
+  valid_564104 = validateParameter(valid_564104, JString, required = true,
                                  default = nil)
-  if valid_575004 != nil:
-    section.add "subscriptionId", valid_575004
+  if valid_564104 != nil:
+    section.add "subscriptionId", valid_564104
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -330,11 +334,11 @@ proc validate_GalleryItemsGet_575001(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575005 = query.getOrDefault("api-version")
-  valid_575005 = validateParameter(valid_575005, JString, required = true,
+  var valid_564105 = query.getOrDefault("api-version")
+  valid_564105 = validateParameter(valid_564105, JString, required = true,
                                  default = newJString("2016-05-01"))
-  if valid_575005 != nil:
-    section.add "api-version", valid_575005
+  if valid_564105 != nil:
+    section.add "api-version", valid_564105
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -343,40 +347,40 @@ proc validate_GalleryItemsGet_575001(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_575006: Call_GalleryItemsGet_575000; path: JsonNode; query: JsonNode;
+proc call*(call_564106: Call_GalleryItemsGet_564100; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
-  let valid = call_575006.validator(path, query, header, formData, body)
-  let scheme = call_575006.pickScheme
+  let valid = call_564106.validator(path, query, header, formData, body)
+  let scheme = call_564106.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575006.url(scheme.get, call_575006.host, call_575006.base,
-                         call_575006.route, valid.getOrDefault("path"),
+  let url = call_564106.url(scheme.get, call_564106.host, call_564106.base,
+                         call_564106.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575006, url, valid)
+  result = hook(call_564106, url, valid)
 
-proc call*(call_575007: Call_GalleryItemsGet_575000; galleryItemName: string;
+proc call*(call_564107: Call_GalleryItemsGet_564100; galleryItemName: string;
           subscriptionId: string; apiVersion: string = "2016-05-01"): Recallable =
   ## galleryItemsGet
-  ##   galleryItemName: string (required)
-  ##                  : Identity of the gallery item. Includes publisher name, item name, and may include version separated by period character.
   ##   apiVersion: string (required)
   ##             : Client API Version.
+  ##   galleryItemName: string (required)
+  ##                  : Identity of the gallery item. Includes publisher name, item name, and may include version separated by period character.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials that uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_575008 = newJObject()
-  var query_575009 = newJObject()
-  add(path_575008, "galleryItemName", newJString(galleryItemName))
-  add(query_575009, "api-version", newJString(apiVersion))
-  add(path_575008, "subscriptionId", newJString(subscriptionId))
-  result = call_575007.call(path_575008, query_575009, nil, nil, nil)
+  var path_564108 = newJObject()
+  var query_564109 = newJObject()
+  add(query_564109, "api-version", newJString(apiVersion))
+  add(path_564108, "galleryItemName", newJString(galleryItemName))
+  add(path_564108, "subscriptionId", newJString(subscriptionId))
+  result = call_564107.call(path_564108, query_564109, nil, nil, nil)
 
-var galleryItemsGet* = Call_GalleryItemsGet_575000(name: "galleryItemsGet",
+var galleryItemsGet* = Call_GalleryItemsGet_564100(name: "galleryItemsGet",
     meth: HttpMethod.HttpGet, host: "adminmanagement.local.azurestack.external", route: "/subscriptions/{subscriptionId}/providers/microsoft.gallery.admin/galleryItems/{galleryItemName}",
-    validator: validate_GalleryItemsGet_575001, base: "", url: url_GalleryItemsGet_575002,
+    validator: validate_GalleryItemsGet_564101, base: "", url: url_GalleryItemsGet_564102,
     schemes: {Scheme.Https})
 type
-  Call_GalleryItemsDelete_575010 = ref object of OpenApiRestCall_574442
-proc url_GalleryItemsDelete_575012(protocol: Scheme; host: string; base: string;
+  Call_GalleryItemsDelete_564110 = ref object of OpenApiRestCall_563540
+proc url_GalleryItemsDelete_564112(protocol: Scheme; host: string; base: string;
                                   route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -395,7 +399,7 @@ proc url_GalleryItemsDelete_575012(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_GalleryItemsDelete_575011(path: JsonNode; query: JsonNode;
+proc validate_GalleryItemsDelete_564111(path: JsonNode; query: JsonNode;
                                        header: JsonNode; formData: JsonNode;
                                        body: JsonNode): JsonNode =
   var section: JsonNode
@@ -408,16 +412,16 @@ proc validate_GalleryItemsDelete_575011(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `galleryItemName` field"
-  var valid_575013 = path.getOrDefault("galleryItemName")
-  valid_575013 = validateParameter(valid_575013, JString, required = true,
+  var valid_564113 = path.getOrDefault("galleryItemName")
+  valid_564113 = validateParameter(valid_564113, JString, required = true,
                                  default = nil)
-  if valid_575013 != nil:
-    section.add "galleryItemName", valid_575013
-  var valid_575014 = path.getOrDefault("subscriptionId")
-  valid_575014 = validateParameter(valid_575014, JString, required = true,
+  if valid_564113 != nil:
+    section.add "galleryItemName", valid_564113
+  var valid_564114 = path.getOrDefault("subscriptionId")
+  valid_564114 = validateParameter(valid_564114, JString, required = true,
                                  default = nil)
-  if valid_575014 != nil:
-    section.add "subscriptionId", valid_575014
+  if valid_564114 != nil:
+    section.add "subscriptionId", valid_564114
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -425,11 +429,11 @@ proc validate_GalleryItemsDelete_575011(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575015 = query.getOrDefault("api-version")
-  valid_575015 = validateParameter(valid_575015, JString, required = true,
+  var valid_564115 = query.getOrDefault("api-version")
+  valid_564115 = validateParameter(valid_564115, JString, required = true,
                                  default = newJString("2016-05-01"))
-  if valid_575015 != nil:
-    section.add "api-version", valid_575015
+  if valid_564115 != nil:
+    section.add "api-version", valid_564115
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -438,38 +442,38 @@ proc validate_GalleryItemsDelete_575011(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_575016: Call_GalleryItemsDelete_575010; path: JsonNode;
+proc call*(call_564116: Call_GalleryItemsDelete_564110; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
-  let valid = call_575016.validator(path, query, header, formData, body)
-  let scheme = call_575016.pickScheme
+  let valid = call_564116.validator(path, query, header, formData, body)
+  let scheme = call_564116.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575016.url(scheme.get, call_575016.host, call_575016.base,
-                         call_575016.route, valid.getOrDefault("path"),
+  let url = call_564116.url(scheme.get, call_564116.host, call_564116.base,
+                         call_564116.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575016, url, valid)
+  result = hook(call_564116, url, valid)
 
-proc call*(call_575017: Call_GalleryItemsDelete_575010; galleryItemName: string;
+proc call*(call_564117: Call_GalleryItemsDelete_564110; galleryItemName: string;
           subscriptionId: string; apiVersion: string = "2016-05-01"): Recallable =
   ## galleryItemsDelete
-  ##   galleryItemName: string (required)
-  ##                  : Identity of the gallery item. Includes publisher name, item name, and may include version separated by period character.
   ##   apiVersion: string (required)
   ##             : Client API Version.
+  ##   galleryItemName: string (required)
+  ##                  : Identity of the gallery item. Includes publisher name, item name, and may include version separated by period character.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials that uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_575018 = newJObject()
-  var query_575019 = newJObject()
-  add(path_575018, "galleryItemName", newJString(galleryItemName))
-  add(query_575019, "api-version", newJString(apiVersion))
-  add(path_575018, "subscriptionId", newJString(subscriptionId))
-  result = call_575017.call(path_575018, query_575019, nil, nil, nil)
+  var path_564118 = newJObject()
+  var query_564119 = newJObject()
+  add(query_564119, "api-version", newJString(apiVersion))
+  add(path_564118, "galleryItemName", newJString(galleryItemName))
+  add(path_564118, "subscriptionId", newJString(subscriptionId))
+  result = call_564117.call(path_564118, query_564119, nil, nil, nil)
 
-var galleryItemsDelete* = Call_GalleryItemsDelete_575010(
+var galleryItemsDelete* = Call_GalleryItemsDelete_564110(
     name: "galleryItemsDelete", meth: HttpMethod.HttpDelete,
     host: "adminmanagement.local.azurestack.external", route: "/subscriptions/{subscriptionId}/providers/microsoft.gallery.admin/galleryItems/{galleryItemName}",
-    validator: validate_GalleryItemsDelete_575011, base: "",
-    url: url_GalleryItemsDelete_575012, schemes: {Scheme.Https})
+    validator: validate_GalleryItemsDelete_564111, base: "",
+    url: url_GalleryItemsDelete_564112, schemes: {Scheme.Https})
 export
   rest
 

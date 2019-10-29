@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, httpcore
 
 ## auto-generated via openapi macro
 ## title: IoTSpacesClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_567657 = ref object of OpenApiRestCall
+  OpenApiRestCall_563555 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_567657](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563555](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_567657): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563555): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,15 +107,15 @@ const
   macServiceName = "iotspaces"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_OperationsList_567879 = ref object of OpenApiRestCall_567657
-proc url_OperationsList_567881(protocol: Scheme; host: string; base: string;
+  Call_OperationsList_563777 = ref object of OpenApiRestCall_563555
+proc url_OperationsList_563779(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_OperationsList_567880(path: JsonNode; query: JsonNode;
+proc validate_OperationsList_563778(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## Lists all of the available IoTSpaces service REST API operations.
@@ -126,11 +130,11 @@ proc validate_OperationsList_567880(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568053 = query.getOrDefault("api-version")
-  valid_568053 = validateParameter(valid_568053, JString, required = true,
+  var valid_563953 = query.getOrDefault("api-version")
+  valid_563953 = validateParameter(valid_563953, JString, required = true,
                                  default = newJString("2017-10-01-preview"))
-  if valid_568053 != nil:
-    section.add "api-version", valid_568053
+  if valid_563953 != nil:
+    section.add "api-version", valid_563953
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -139,37 +143,37 @@ proc validate_OperationsList_567880(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568076: Call_OperationsList_567879; path: JsonNode; query: JsonNode;
+proc call*(call_563976: Call_OperationsList_563777; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists all of the available IoTSpaces service REST API operations.
   ## 
-  let valid = call_568076.validator(path, query, header, formData, body)
-  let scheme = call_568076.pickScheme
+  let valid = call_563976.validator(path, query, header, formData, body)
+  let scheme = call_563976.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568076.url(scheme.get, call_568076.host, call_568076.base,
-                         call_568076.route, valid.getOrDefault("path"),
+  let url = call_563976.url(scheme.get, call_563976.host, call_563976.base,
+                         call_563976.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568076, url, valid)
+  result = hook(call_563976, url, valid)
 
-proc call*(call_568147: Call_OperationsList_567879;
+proc call*(call_564047: Call_OperationsList_563777;
           apiVersion: string = "2017-10-01-preview"): Recallable =
   ## operationsList
   ## Lists all of the available IoTSpaces service REST API operations.
   ##   apiVersion: string (required)
   ##             : The version of the API.
-  var query_568148 = newJObject()
-  add(query_568148, "api-version", newJString(apiVersion))
-  result = call_568147.call(nil, query_568148, nil, nil, nil)
+  var query_564048 = newJObject()
+  add(query_564048, "api-version", newJString(apiVersion))
+  result = call_564047.call(nil, query_564048, nil, nil, nil)
 
-var operationsList* = Call_OperationsList_567879(name: "operationsList",
+var operationsList* = Call_OperationsList_563777(name: "operationsList",
     meth: HttpMethod.HttpGet, host: "management.azure.com",
     route: "/providers/Microsoft.IoTSpaces/operations",
-    validator: validate_OperationsList_567880, base: "", url: url_OperationsList_567881,
+    validator: validate_OperationsList_563778, base: "", url: url_OperationsList_563779,
     schemes: {Scheme.Https})
 type
-  Call_IoTSpacesList_568188 = ref object of OpenApiRestCall_567657
-proc url_IoTSpacesList_568190(protocol: Scheme; host: string; base: string;
+  Call_IoTSpacesList_564088 = ref object of OpenApiRestCall_563555
+proc url_IoTSpacesList_564090(protocol: Scheme; host: string; base: string;
                              route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -185,7 +189,7 @@ proc url_IoTSpacesList_568190(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_IoTSpacesList_568189(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_IoTSpacesList_564089(path: JsonNode; query: JsonNode; header: JsonNode;
                                   formData: JsonNode; body: JsonNode): JsonNode =
   ## Get all the IoTSpaces instances in a subscription.
   ## 
@@ -197,11 +201,11 @@ proc validate_IoTSpacesList_568189(path: JsonNode; query: JsonNode; header: Json
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_568205 = path.getOrDefault("subscriptionId")
-  valid_568205 = validateParameter(valid_568205, JString, required = true,
+  var valid_564105 = path.getOrDefault("subscriptionId")
+  valid_564105 = validateParameter(valid_564105, JString, required = true,
                                  default = nil)
-  if valid_568205 != nil:
-    section.add "subscriptionId", valid_568205
+  if valid_564105 != nil:
+    section.add "subscriptionId", valid_564105
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -209,11 +213,11 @@ proc validate_IoTSpacesList_568189(path: JsonNode; query: JsonNode; header: Json
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568206 = query.getOrDefault("api-version")
-  valid_568206 = validateParameter(valid_568206, JString, required = true,
+  var valid_564106 = query.getOrDefault("api-version")
+  valid_564106 = validateParameter(valid_564106, JString, required = true,
                                  default = newJString("2017-10-01-preview"))
-  if valid_568206 != nil:
-    section.add "api-version", valid_568206
+  if valid_564106 != nil:
+    section.add "api-version", valid_564106
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -222,20 +226,20 @@ proc validate_IoTSpacesList_568189(path: JsonNode; query: JsonNode; header: Json
   if body != nil:
     result.add "body", body
 
-proc call*(call_568207: Call_IoTSpacesList_568188; path: JsonNode; query: JsonNode;
+proc call*(call_564107: Call_IoTSpacesList_564088; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get all the IoTSpaces instances in a subscription.
   ## 
-  let valid = call_568207.validator(path, query, header, formData, body)
-  let scheme = call_568207.pickScheme
+  let valid = call_564107.validator(path, query, header, formData, body)
+  let scheme = call_564107.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568207.url(scheme.get, call_568207.host, call_568207.base,
-                         call_568207.route, valid.getOrDefault("path"),
+  let url = call_564107.url(scheme.get, call_564107.host, call_564107.base,
+                         call_564107.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568207, url, valid)
+  result = hook(call_564107, url, valid)
 
-proc call*(call_568208: Call_IoTSpacesList_568188; subscriptionId: string;
+proc call*(call_564108: Call_IoTSpacesList_564088; subscriptionId: string;
           apiVersion: string = "2017-10-01-preview"): Recallable =
   ## ioTSpacesList
   ## Get all the IoTSpaces instances in a subscription.
@@ -243,19 +247,19 @@ proc call*(call_568208: Call_IoTSpacesList_568188; subscriptionId: string;
   ##             : The version of the API.
   ##   subscriptionId: string (required)
   ##                 : The subscription identifier.
-  var path_568209 = newJObject()
-  var query_568210 = newJObject()
-  add(query_568210, "api-version", newJString(apiVersion))
-  add(path_568209, "subscriptionId", newJString(subscriptionId))
-  result = call_568208.call(path_568209, query_568210, nil, nil, nil)
+  var path_564109 = newJObject()
+  var query_564110 = newJObject()
+  add(query_564110, "api-version", newJString(apiVersion))
+  add(path_564109, "subscriptionId", newJString(subscriptionId))
+  result = call_564108.call(path_564109, query_564110, nil, nil, nil)
 
-var ioTSpacesList* = Call_IoTSpacesList_568188(name: "ioTSpacesList",
+var ioTSpacesList* = Call_IoTSpacesList_564088(name: "ioTSpacesList",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.IoTSpaces/Graph",
-    validator: validate_IoTSpacesList_568189, base: "", url: url_IoTSpacesList_568190,
+    validator: validate_IoTSpacesList_564089, base: "", url: url_IoTSpacesList_564090,
     schemes: {Scheme.Https})
 type
-  Call_IoTSpacesCheckNameAvailability_568211 = ref object of OpenApiRestCall_567657
-proc url_IoTSpacesCheckNameAvailability_568213(protocol: Scheme; host: string;
+  Call_IoTSpacesCheckNameAvailability_564111 = ref object of OpenApiRestCall_563555
+proc url_IoTSpacesCheckNameAvailability_564113(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -272,7 +276,7 @@ proc url_IoTSpacesCheckNameAvailability_568213(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_IoTSpacesCheckNameAvailability_568212(path: JsonNode;
+proc validate_IoTSpacesCheckNameAvailability_564112(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Check if an IoTSpaces instance name is available.
   ## 
@@ -284,11 +288,11 @@ proc validate_IoTSpacesCheckNameAvailability_568212(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_568214 = path.getOrDefault("subscriptionId")
-  valid_568214 = validateParameter(valid_568214, JString, required = true,
+  var valid_564114 = path.getOrDefault("subscriptionId")
+  valid_564114 = validateParameter(valid_564114, JString, required = true,
                                  default = nil)
-  if valid_568214 != nil:
-    section.add "subscriptionId", valid_568214
+  if valid_564114 != nil:
+    section.add "subscriptionId", valid_564114
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -296,11 +300,11 @@ proc validate_IoTSpacesCheckNameAvailability_568212(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568215 = query.getOrDefault("api-version")
-  valid_568215 = validateParameter(valid_568215, JString, required = true,
+  var valid_564115 = query.getOrDefault("api-version")
+  valid_564115 = validateParameter(valid_564115, JString, required = true,
                                  default = newJString("2017-10-01-preview"))
-  if valid_568215 != nil:
-    section.add "api-version", valid_568215
+  if valid_564115 != nil:
+    section.add "api-version", valid_564115
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -314,20 +318,20 @@ proc validate_IoTSpacesCheckNameAvailability_568212(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568217: Call_IoTSpacesCheckNameAvailability_568211; path: JsonNode;
+proc call*(call_564117: Call_IoTSpacesCheckNameAvailability_564111; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Check if an IoTSpaces instance name is available.
   ## 
-  let valid = call_568217.validator(path, query, header, formData, body)
-  let scheme = call_568217.pickScheme
+  let valid = call_564117.validator(path, query, header, formData, body)
+  let scheme = call_564117.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568217.url(scheme.get, call_568217.host, call_568217.base,
-                         call_568217.route, valid.getOrDefault("path"),
+  let url = call_564117.url(scheme.get, call_564117.host, call_564117.base,
+                         call_564117.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568217, url, valid)
+  result = hook(call_564117, url, valid)
 
-proc call*(call_568218: Call_IoTSpacesCheckNameAvailability_568211;
+proc call*(call_564118: Call_IoTSpacesCheckNameAvailability_564111;
           subscriptionId: string; operationInputs: JsonNode;
           apiVersion: string = "2017-10-01-preview"): Recallable =
   ## ioTSpacesCheckNameAvailability
@@ -338,23 +342,23 @@ proc call*(call_568218: Call_IoTSpacesCheckNameAvailability_568211;
   ##                 : The subscription identifier.
   ##   operationInputs: JObject (required)
   ##                  : Set the name parameter in the OperationInputs structure to the name of the IoTSpaces instance to check.
-  var path_568219 = newJObject()
-  var query_568220 = newJObject()
-  var body_568221 = newJObject()
-  add(query_568220, "api-version", newJString(apiVersion))
-  add(path_568219, "subscriptionId", newJString(subscriptionId))
+  var path_564119 = newJObject()
+  var query_564120 = newJObject()
+  var body_564121 = newJObject()
+  add(query_564120, "api-version", newJString(apiVersion))
+  add(path_564119, "subscriptionId", newJString(subscriptionId))
   if operationInputs != nil:
-    body_568221 = operationInputs
-  result = call_568218.call(path_568219, query_568220, nil, nil, body_568221)
+    body_564121 = operationInputs
+  result = call_564118.call(path_564119, query_564120, nil, nil, body_564121)
 
-var ioTSpacesCheckNameAvailability* = Call_IoTSpacesCheckNameAvailability_568211(
+var ioTSpacesCheckNameAvailability* = Call_IoTSpacesCheckNameAvailability_564111(
     name: "ioTSpacesCheckNameAvailability", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.IoTSpaces/checkNameAvailability",
-    validator: validate_IoTSpacesCheckNameAvailability_568212, base: "",
-    url: url_IoTSpacesCheckNameAvailability_568213, schemes: {Scheme.Https})
+    validator: validate_IoTSpacesCheckNameAvailability_564112, base: "",
+    url: url_IoTSpacesCheckNameAvailability_564113, schemes: {Scheme.Https})
 type
-  Call_IoTSpacesListByResourceGroup_568222 = ref object of OpenApiRestCall_567657
-proc url_IoTSpacesListByResourceGroup_568224(protocol: Scheme; host: string;
+  Call_IoTSpacesListByResourceGroup_564122 = ref object of OpenApiRestCall_563555
+proc url_IoTSpacesListByResourceGroup_564124(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -374,30 +378,30 @@ proc url_IoTSpacesListByResourceGroup_568224(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_IoTSpacesListByResourceGroup_568223(path: JsonNode; query: JsonNode;
+proc validate_IoTSpacesListByResourceGroup_564123(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Get all the IoTSpaces instances in a resource group.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group that contains the IoTSpaces instance.
   ##   subscriptionId: JString (required)
   ##                 : The subscription identifier.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group that contains the IoTSpaces instance.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568225 = path.getOrDefault("resourceGroupName")
-  valid_568225 = validateParameter(valid_568225, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564125 = path.getOrDefault("subscriptionId")
+  valid_564125 = validateParameter(valid_564125, JString, required = true,
                                  default = nil)
-  if valid_568225 != nil:
-    section.add "resourceGroupName", valid_568225
-  var valid_568226 = path.getOrDefault("subscriptionId")
-  valid_568226 = validateParameter(valid_568226, JString, required = true,
+  if valid_564125 != nil:
+    section.add "subscriptionId", valid_564125
+  var valid_564126 = path.getOrDefault("resourceGroupName")
+  valid_564126 = validateParameter(valid_564126, JString, required = true,
                                  default = nil)
-  if valid_568226 != nil:
-    section.add "subscriptionId", valid_568226
+  if valid_564126 != nil:
+    section.add "resourceGroupName", valid_564126
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -405,11 +409,11 @@ proc validate_IoTSpacesListByResourceGroup_568223(path: JsonNode; query: JsonNod
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568227 = query.getOrDefault("api-version")
-  valid_568227 = validateParameter(valid_568227, JString, required = true,
+  var valid_564127 = query.getOrDefault("api-version")
+  valid_564127 = validateParameter(valid_564127, JString, required = true,
                                  default = newJString("2017-10-01-preview"))
-  if valid_568227 != nil:
-    section.add "api-version", valid_568227
+  if valid_564127 != nil:
+    section.add "api-version", valid_564127
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -418,45 +422,45 @@ proc validate_IoTSpacesListByResourceGroup_568223(path: JsonNode; query: JsonNod
   if body != nil:
     result.add "body", body
 
-proc call*(call_568228: Call_IoTSpacesListByResourceGroup_568222; path: JsonNode;
+proc call*(call_564128: Call_IoTSpacesListByResourceGroup_564122; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get all the IoTSpaces instances in a resource group.
   ## 
-  let valid = call_568228.validator(path, query, header, formData, body)
-  let scheme = call_568228.pickScheme
+  let valid = call_564128.validator(path, query, header, formData, body)
+  let scheme = call_564128.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568228.url(scheme.get, call_568228.host, call_568228.base,
-                         call_568228.route, valid.getOrDefault("path"),
+  let url = call_564128.url(scheme.get, call_564128.host, call_564128.base,
+                         call_564128.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568228, url, valid)
+  result = hook(call_564128, url, valid)
 
-proc call*(call_568229: Call_IoTSpacesListByResourceGroup_568222;
-          resourceGroupName: string; subscriptionId: string;
+proc call*(call_564129: Call_IoTSpacesListByResourceGroup_564122;
+          subscriptionId: string; resourceGroupName: string;
           apiVersion: string = "2017-10-01-preview"): Recallable =
   ## ioTSpacesListByResourceGroup
   ## Get all the IoTSpaces instances in a resource group.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group that contains the IoTSpaces instance.
   ##   apiVersion: string (required)
   ##             : The version of the API.
   ##   subscriptionId: string (required)
   ##                 : The subscription identifier.
-  var path_568230 = newJObject()
-  var query_568231 = newJObject()
-  add(path_568230, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568231, "api-version", newJString(apiVersion))
-  add(path_568230, "subscriptionId", newJString(subscriptionId))
-  result = call_568229.call(path_568230, query_568231, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group that contains the IoTSpaces instance.
+  var path_564130 = newJObject()
+  var query_564131 = newJObject()
+  add(query_564131, "api-version", newJString(apiVersion))
+  add(path_564130, "subscriptionId", newJString(subscriptionId))
+  add(path_564130, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564129.call(path_564130, query_564131, nil, nil, nil)
 
-var ioTSpacesListByResourceGroup* = Call_IoTSpacesListByResourceGroup_568222(
+var ioTSpacesListByResourceGroup* = Call_IoTSpacesListByResourceGroup_564122(
     name: "ioTSpacesListByResourceGroup", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.IoTSpaces/Graph",
-    validator: validate_IoTSpacesListByResourceGroup_568223, base: "",
-    url: url_IoTSpacesListByResourceGroup_568224, schemes: {Scheme.Https})
+    validator: validate_IoTSpacesListByResourceGroup_564123, base: "",
+    url: url_IoTSpacesListByResourceGroup_564124, schemes: {Scheme.Https})
 type
-  Call_IoTSpacesCreateOrUpdate_568243 = ref object of OpenApiRestCall_567657
-proc url_IoTSpacesCreateOrUpdate_568245(protocol: Scheme; host: string; base: string;
+  Call_IoTSpacesCreateOrUpdate_564143 = ref object of OpenApiRestCall_563555
+proc url_IoTSpacesCreateOrUpdate_564145(protocol: Scheme; host: string; base: string;
                                        route: string; path: JsonNode;
                                        query: JsonNode): Uri =
   result.scheme = $protocol
@@ -479,37 +483,37 @@ proc url_IoTSpacesCreateOrUpdate_568245(protocol: Scheme; host: string; base: st
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_IoTSpacesCreateOrUpdate_568244(path: JsonNode; query: JsonNode;
+proc validate_IoTSpacesCreateOrUpdate_564144(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Create or update the metadata of an IoTSpaces instance. The usual pattern to modify a property is to retrieve the IoTSpaces instance metadata and security metadata, and then combine them with the modified values in a new body to update the IoTSpaces instance.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group that contains the IoTSpaces instance.
   ##   subscriptionId: JString (required)
   ##                 : The subscription identifier.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group that contains the IoTSpaces instance.
   ##   resourceName: JString (required)
   ##               : The name of the IoTSpaces instance.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568246 = path.getOrDefault("resourceGroupName")
-  valid_568246 = validateParameter(valid_568246, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564146 = path.getOrDefault("subscriptionId")
+  valid_564146 = validateParameter(valid_564146, JString, required = true,
                                  default = nil)
-  if valid_568246 != nil:
-    section.add "resourceGroupName", valid_568246
-  var valid_568247 = path.getOrDefault("subscriptionId")
-  valid_568247 = validateParameter(valid_568247, JString, required = true,
+  if valid_564146 != nil:
+    section.add "subscriptionId", valid_564146
+  var valid_564147 = path.getOrDefault("resourceGroupName")
+  valid_564147 = validateParameter(valid_564147, JString, required = true,
                                  default = nil)
-  if valid_568247 != nil:
-    section.add "subscriptionId", valid_568247
-  var valid_568248 = path.getOrDefault("resourceName")
-  valid_568248 = validateParameter(valid_568248, JString, required = true,
+  if valid_564147 != nil:
+    section.add "resourceGroupName", valid_564147
+  var valid_564148 = path.getOrDefault("resourceName")
+  valid_564148 = validateParameter(valid_564148, JString, required = true,
                                  default = nil)
-  if valid_568248 != nil:
-    section.add "resourceName", valid_568248
+  if valid_564148 != nil:
+    section.add "resourceName", valid_564148
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -517,11 +521,11 @@ proc validate_IoTSpacesCreateOrUpdate_568244(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568249 = query.getOrDefault("api-version")
-  valid_568249 = validateParameter(valid_568249, JString, required = true,
+  var valid_564149 = query.getOrDefault("api-version")
+  valid_564149 = validateParameter(valid_564149, JString, required = true,
                                  default = newJString("2017-10-01-preview"))
-  if valid_568249 != nil:
-    section.add "api-version", valid_568249
+  if valid_564149 != nil:
+    section.add "api-version", valid_564149
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -535,53 +539,54 @@ proc validate_IoTSpacesCreateOrUpdate_568244(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568251: Call_IoTSpacesCreateOrUpdate_568243; path: JsonNode;
+proc call*(call_564151: Call_IoTSpacesCreateOrUpdate_564143; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Create or update the metadata of an IoTSpaces instance. The usual pattern to modify a property is to retrieve the IoTSpaces instance metadata and security metadata, and then combine them with the modified values in a new body to update the IoTSpaces instance.
   ## 
-  let valid = call_568251.validator(path, query, header, formData, body)
-  let scheme = call_568251.pickScheme
+  let valid = call_564151.validator(path, query, header, formData, body)
+  let scheme = call_564151.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568251.url(scheme.get, call_568251.host, call_568251.base,
-                         call_568251.route, valid.getOrDefault("path"),
+  let url = call_564151.url(scheme.get, call_564151.host, call_564151.base,
+                         call_564151.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568251, url, valid)
+  result = hook(call_564151, url, valid)
 
-proc call*(call_568252: Call_IoTSpacesCreateOrUpdate_568243;
-          resourceGroupName: string; subscriptionId: string; resourceName: string;
-          iotSpaceDescription: JsonNode; apiVersion: string = "2017-10-01-preview"): Recallable =
+proc call*(call_564152: Call_IoTSpacesCreateOrUpdate_564143;
+          subscriptionId: string; iotSpaceDescription: JsonNode;
+          resourceGroupName: string; resourceName: string;
+          apiVersion: string = "2017-10-01-preview"): Recallable =
   ## ioTSpacesCreateOrUpdate
   ## Create or update the metadata of an IoTSpaces instance. The usual pattern to modify a property is to retrieve the IoTSpaces instance metadata and security metadata, and then combine them with the modified values in a new body to update the IoTSpaces instance.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group that contains the IoTSpaces instance.
   ##   apiVersion: string (required)
   ##             : The version of the API.
   ##   subscriptionId: string (required)
   ##                 : The subscription identifier.
-  ##   resourceName: string (required)
-  ##               : The name of the IoTSpaces instance.
   ##   iotSpaceDescription: JObject (required)
   ##                      : The IoTSpaces instance metadata and security metadata.
-  var path_568253 = newJObject()
-  var query_568254 = newJObject()
-  var body_568255 = newJObject()
-  add(path_568253, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568254, "api-version", newJString(apiVersion))
-  add(path_568253, "subscriptionId", newJString(subscriptionId))
-  add(path_568253, "resourceName", newJString(resourceName))
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group that contains the IoTSpaces instance.
+  ##   resourceName: string (required)
+  ##               : The name of the IoTSpaces instance.
+  var path_564153 = newJObject()
+  var query_564154 = newJObject()
+  var body_564155 = newJObject()
+  add(query_564154, "api-version", newJString(apiVersion))
+  add(path_564153, "subscriptionId", newJString(subscriptionId))
   if iotSpaceDescription != nil:
-    body_568255 = iotSpaceDescription
-  result = call_568252.call(path_568253, query_568254, nil, nil, body_568255)
+    body_564155 = iotSpaceDescription
+  add(path_564153, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564153, "resourceName", newJString(resourceName))
+  result = call_564152.call(path_564153, query_564154, nil, nil, body_564155)
 
-var ioTSpacesCreateOrUpdate* = Call_IoTSpacesCreateOrUpdate_568243(
+var ioTSpacesCreateOrUpdate* = Call_IoTSpacesCreateOrUpdate_564143(
     name: "ioTSpacesCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.IoTSpaces/Graph/{resourceName}",
-    validator: validate_IoTSpacesCreateOrUpdate_568244, base: "",
-    url: url_IoTSpacesCreateOrUpdate_568245, schemes: {Scheme.Https})
+    validator: validate_IoTSpacesCreateOrUpdate_564144, base: "",
+    url: url_IoTSpacesCreateOrUpdate_564145, schemes: {Scheme.Https})
 type
-  Call_IoTSpacesGet_568232 = ref object of OpenApiRestCall_567657
-proc url_IoTSpacesGet_568234(protocol: Scheme; host: string; base: string;
+  Call_IoTSpacesGet_564132 = ref object of OpenApiRestCall_563555
+proc url_IoTSpacesGet_564134(protocol: Scheme; host: string; base: string;
                             route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -603,37 +608,37 @@ proc url_IoTSpacesGet_568234(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_IoTSpacesGet_568233(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_IoTSpacesGet_564133(path: JsonNode; query: JsonNode; header: JsonNode;
                                  formData: JsonNode; body: JsonNode): JsonNode =
   ## Get the metadata of a IoTSpaces instance.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group that contains the IoTSpaces instance.
   ##   subscriptionId: JString (required)
   ##                 : The subscription identifier.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group that contains the IoTSpaces instance.
   ##   resourceName: JString (required)
   ##               : The name of the IoTSpaces instance.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568235 = path.getOrDefault("resourceGroupName")
-  valid_568235 = validateParameter(valid_568235, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564135 = path.getOrDefault("subscriptionId")
+  valid_564135 = validateParameter(valid_564135, JString, required = true,
                                  default = nil)
-  if valid_568235 != nil:
-    section.add "resourceGroupName", valid_568235
-  var valid_568236 = path.getOrDefault("subscriptionId")
-  valid_568236 = validateParameter(valid_568236, JString, required = true,
+  if valid_564135 != nil:
+    section.add "subscriptionId", valid_564135
+  var valid_564136 = path.getOrDefault("resourceGroupName")
+  valid_564136 = validateParameter(valid_564136, JString, required = true,
                                  default = nil)
-  if valid_568236 != nil:
-    section.add "subscriptionId", valid_568236
-  var valid_568237 = path.getOrDefault("resourceName")
-  valid_568237 = validateParameter(valid_568237, JString, required = true,
+  if valid_564136 != nil:
+    section.add "resourceGroupName", valid_564136
+  var valid_564137 = path.getOrDefault("resourceName")
+  valid_564137 = validateParameter(valid_564137, JString, required = true,
                                  default = nil)
-  if valid_568237 != nil:
-    section.add "resourceName", valid_568237
+  if valid_564137 != nil:
+    section.add "resourceName", valid_564137
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -641,11 +646,11 @@ proc validate_IoTSpacesGet_568233(path: JsonNode; query: JsonNode; header: JsonN
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568238 = query.getOrDefault("api-version")
-  valid_568238 = validateParameter(valid_568238, JString, required = true,
+  var valid_564138 = query.getOrDefault("api-version")
+  valid_564138 = validateParameter(valid_564138, JString, required = true,
                                  default = newJString("2017-10-01-preview"))
-  if valid_568238 != nil:
-    section.add "api-version", valid_568238
+  if valid_564138 != nil:
+    section.add "api-version", valid_564138
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -654,47 +659,47 @@ proc validate_IoTSpacesGet_568233(path: JsonNode; query: JsonNode; header: JsonN
   if body != nil:
     result.add "body", body
 
-proc call*(call_568239: Call_IoTSpacesGet_568232; path: JsonNode; query: JsonNode;
+proc call*(call_564139: Call_IoTSpacesGet_564132; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get the metadata of a IoTSpaces instance.
   ## 
-  let valid = call_568239.validator(path, query, header, formData, body)
-  let scheme = call_568239.pickScheme
+  let valid = call_564139.validator(path, query, header, formData, body)
+  let scheme = call_564139.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568239.url(scheme.get, call_568239.host, call_568239.base,
-                         call_568239.route, valid.getOrDefault("path"),
+  let url = call_564139.url(scheme.get, call_564139.host, call_564139.base,
+                         call_564139.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568239, url, valid)
+  result = hook(call_564139, url, valid)
 
-proc call*(call_568240: Call_IoTSpacesGet_568232; resourceGroupName: string;
-          subscriptionId: string; resourceName: string;
+proc call*(call_564140: Call_IoTSpacesGet_564132; subscriptionId: string;
+          resourceGroupName: string; resourceName: string;
           apiVersion: string = "2017-10-01-preview"): Recallable =
   ## ioTSpacesGet
   ## Get the metadata of a IoTSpaces instance.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group that contains the IoTSpaces instance.
   ##   apiVersion: string (required)
   ##             : The version of the API.
   ##   subscriptionId: string (required)
   ##                 : The subscription identifier.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group that contains the IoTSpaces instance.
   ##   resourceName: string (required)
   ##               : The name of the IoTSpaces instance.
-  var path_568241 = newJObject()
-  var query_568242 = newJObject()
-  add(path_568241, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568242, "api-version", newJString(apiVersion))
-  add(path_568241, "subscriptionId", newJString(subscriptionId))
-  add(path_568241, "resourceName", newJString(resourceName))
-  result = call_568240.call(path_568241, query_568242, nil, nil, nil)
+  var path_564141 = newJObject()
+  var query_564142 = newJObject()
+  add(query_564142, "api-version", newJString(apiVersion))
+  add(path_564141, "subscriptionId", newJString(subscriptionId))
+  add(path_564141, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564141, "resourceName", newJString(resourceName))
+  result = call_564140.call(path_564141, query_564142, nil, nil, nil)
 
-var ioTSpacesGet* = Call_IoTSpacesGet_568232(name: "ioTSpacesGet",
+var ioTSpacesGet* = Call_IoTSpacesGet_564132(name: "ioTSpacesGet",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.IoTSpaces/Graph/{resourceName}",
-    validator: validate_IoTSpacesGet_568233, base: "", url: url_IoTSpacesGet_568234,
+    validator: validate_IoTSpacesGet_564133, base: "", url: url_IoTSpacesGet_564134,
     schemes: {Scheme.Https})
 type
-  Call_IoTSpacesUpdate_568267 = ref object of OpenApiRestCall_567657
-proc url_IoTSpacesUpdate_568269(protocol: Scheme; host: string; base: string;
+  Call_IoTSpacesUpdate_564167 = ref object of OpenApiRestCall_563555
+proc url_IoTSpacesUpdate_564169(protocol: Scheme; host: string; base: string;
                                route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -716,7 +721,7 @@ proc url_IoTSpacesUpdate_568269(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_IoTSpacesUpdate_568268(path: JsonNode; query: JsonNode;
+proc validate_IoTSpacesUpdate_564168(path: JsonNode; query: JsonNode;
                                     header: JsonNode; formData: JsonNode;
                                     body: JsonNode): JsonNode =
   ## Update the metadata of a IoTSpaces instance.
@@ -724,30 +729,30 @@ proc validate_IoTSpacesUpdate_568268(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group that contains the IoTSpaces instance.
   ##   subscriptionId: JString (required)
   ##                 : The subscription identifier.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group that contains the IoTSpaces instance.
   ##   resourceName: JString (required)
   ##               : The name of the IoTSpaces instance.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568270 = path.getOrDefault("resourceGroupName")
-  valid_568270 = validateParameter(valid_568270, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564170 = path.getOrDefault("subscriptionId")
+  valid_564170 = validateParameter(valid_564170, JString, required = true,
                                  default = nil)
-  if valid_568270 != nil:
-    section.add "resourceGroupName", valid_568270
-  var valid_568271 = path.getOrDefault("subscriptionId")
-  valid_568271 = validateParameter(valid_568271, JString, required = true,
+  if valid_564170 != nil:
+    section.add "subscriptionId", valid_564170
+  var valid_564171 = path.getOrDefault("resourceGroupName")
+  valid_564171 = validateParameter(valid_564171, JString, required = true,
                                  default = nil)
-  if valid_568271 != nil:
-    section.add "subscriptionId", valid_568271
-  var valid_568272 = path.getOrDefault("resourceName")
-  valid_568272 = validateParameter(valid_568272, JString, required = true,
+  if valid_564171 != nil:
+    section.add "resourceGroupName", valid_564171
+  var valid_564172 = path.getOrDefault("resourceName")
+  valid_564172 = validateParameter(valid_564172, JString, required = true,
                                  default = nil)
-  if valid_568272 != nil:
-    section.add "resourceName", valid_568272
+  if valid_564172 != nil:
+    section.add "resourceName", valid_564172
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -755,11 +760,11 @@ proc validate_IoTSpacesUpdate_568268(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568273 = query.getOrDefault("api-version")
-  valid_568273 = validateParameter(valid_568273, JString, required = true,
+  var valid_564173 = query.getOrDefault("api-version")
+  valid_564173 = validateParameter(valid_564173, JString, required = true,
                                  default = newJString("2017-10-01-preview"))
-  if valid_568273 != nil:
-    section.add "api-version", valid_568273
+  if valid_564173 != nil:
+    section.add "api-version", valid_564173
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -773,53 +778,53 @@ proc validate_IoTSpacesUpdate_568268(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568275: Call_IoTSpacesUpdate_568267; path: JsonNode; query: JsonNode;
+proc call*(call_564175: Call_IoTSpacesUpdate_564167; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Update the metadata of a IoTSpaces instance.
   ## 
-  let valid = call_568275.validator(path, query, header, formData, body)
-  let scheme = call_568275.pickScheme
+  let valid = call_564175.validator(path, query, header, formData, body)
+  let scheme = call_564175.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568275.url(scheme.get, call_568275.host, call_568275.base,
-                         call_568275.route, valid.getOrDefault("path"),
+  let url = call_564175.url(scheme.get, call_564175.host, call_564175.base,
+                         call_564175.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568275, url, valid)
+  result = hook(call_564175, url, valid)
 
-proc call*(call_568276: Call_IoTSpacesUpdate_568267; resourceGroupName: string;
-          subscriptionId: string; resourceName: string;
+proc call*(call_564176: Call_IoTSpacesUpdate_564167; subscriptionId: string;
+          resourceGroupName: string; resourceName: string;
           iotSpacePatchDescription: JsonNode;
           apiVersion: string = "2017-10-01-preview"): Recallable =
   ## ioTSpacesUpdate
   ## Update the metadata of a IoTSpaces instance.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group that contains the IoTSpaces instance.
   ##   apiVersion: string (required)
   ##             : The version of the API.
   ##   subscriptionId: string (required)
   ##                 : The subscription identifier.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group that contains the IoTSpaces instance.
   ##   resourceName: string (required)
   ##               : The name of the IoTSpaces instance.
   ##   iotSpacePatchDescription: JObject (required)
   ##                           : The IoTSpaces instance metadata and security metadata.
-  var path_568277 = newJObject()
-  var query_568278 = newJObject()
-  var body_568279 = newJObject()
-  add(path_568277, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568278, "api-version", newJString(apiVersion))
-  add(path_568277, "subscriptionId", newJString(subscriptionId))
-  add(path_568277, "resourceName", newJString(resourceName))
+  var path_564177 = newJObject()
+  var query_564178 = newJObject()
+  var body_564179 = newJObject()
+  add(query_564178, "api-version", newJString(apiVersion))
+  add(path_564177, "subscriptionId", newJString(subscriptionId))
+  add(path_564177, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564177, "resourceName", newJString(resourceName))
   if iotSpacePatchDescription != nil:
-    body_568279 = iotSpacePatchDescription
-  result = call_568276.call(path_568277, query_568278, nil, nil, body_568279)
+    body_564179 = iotSpacePatchDescription
+  result = call_564176.call(path_564177, query_564178, nil, nil, body_564179)
 
-var ioTSpacesUpdate* = Call_IoTSpacesUpdate_568267(name: "ioTSpacesUpdate",
+var ioTSpacesUpdate* = Call_IoTSpacesUpdate_564167(name: "ioTSpacesUpdate",
     meth: HttpMethod.HttpPatch, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.IoTSpaces/Graph/{resourceName}",
-    validator: validate_IoTSpacesUpdate_568268, base: "", url: url_IoTSpacesUpdate_568269,
+    validator: validate_IoTSpacesUpdate_564168, base: "", url: url_IoTSpacesUpdate_564169,
     schemes: {Scheme.Https})
 type
-  Call_IoTSpacesDelete_568256 = ref object of OpenApiRestCall_567657
-proc url_IoTSpacesDelete_568258(protocol: Scheme; host: string; base: string;
+  Call_IoTSpacesDelete_564156 = ref object of OpenApiRestCall_563555
+proc url_IoTSpacesDelete_564158(protocol: Scheme; host: string; base: string;
                                route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -841,7 +846,7 @@ proc url_IoTSpacesDelete_568258(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_IoTSpacesDelete_568257(path: JsonNode; query: JsonNode;
+proc validate_IoTSpacesDelete_564157(path: JsonNode; query: JsonNode;
                                     header: JsonNode; formData: JsonNode;
                                     body: JsonNode): JsonNode =
   ## Delete an IoTSpaces instance.
@@ -849,30 +854,30 @@ proc validate_IoTSpacesDelete_568257(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group that contains the IoTSpaces instance.
   ##   subscriptionId: JString (required)
   ##                 : The subscription identifier.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group that contains the IoTSpaces instance.
   ##   resourceName: JString (required)
   ##               : The name of the IoTSpaces instance.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568259 = path.getOrDefault("resourceGroupName")
-  valid_568259 = validateParameter(valid_568259, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564159 = path.getOrDefault("subscriptionId")
+  valid_564159 = validateParameter(valid_564159, JString, required = true,
                                  default = nil)
-  if valid_568259 != nil:
-    section.add "resourceGroupName", valid_568259
-  var valid_568260 = path.getOrDefault("subscriptionId")
-  valid_568260 = validateParameter(valid_568260, JString, required = true,
+  if valid_564159 != nil:
+    section.add "subscriptionId", valid_564159
+  var valid_564160 = path.getOrDefault("resourceGroupName")
+  valid_564160 = validateParameter(valid_564160, JString, required = true,
                                  default = nil)
-  if valid_568260 != nil:
-    section.add "subscriptionId", valid_568260
-  var valid_568261 = path.getOrDefault("resourceName")
-  valid_568261 = validateParameter(valid_568261, JString, required = true,
+  if valid_564160 != nil:
+    section.add "resourceGroupName", valid_564160
+  var valid_564161 = path.getOrDefault("resourceName")
+  valid_564161 = validateParameter(valid_564161, JString, required = true,
                                  default = nil)
-  if valid_568261 != nil:
-    section.add "resourceName", valid_568261
+  if valid_564161 != nil:
+    section.add "resourceName", valid_564161
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -880,11 +885,11 @@ proc validate_IoTSpacesDelete_568257(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568262 = query.getOrDefault("api-version")
-  valid_568262 = validateParameter(valid_568262, JString, required = true,
+  var valid_564162 = query.getOrDefault("api-version")
+  valid_564162 = validateParameter(valid_564162, JString, required = true,
                                  default = newJString("2017-10-01-preview"))
-  if valid_568262 != nil:
-    section.add "api-version", valid_568262
+  if valid_564162 != nil:
+    section.add "api-version", valid_564162
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -893,43 +898,43 @@ proc validate_IoTSpacesDelete_568257(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568263: Call_IoTSpacesDelete_568256; path: JsonNode; query: JsonNode;
+proc call*(call_564163: Call_IoTSpacesDelete_564156; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Delete an IoTSpaces instance.
   ## 
-  let valid = call_568263.validator(path, query, header, formData, body)
-  let scheme = call_568263.pickScheme
+  let valid = call_564163.validator(path, query, header, formData, body)
+  let scheme = call_564163.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568263.url(scheme.get, call_568263.host, call_568263.base,
-                         call_568263.route, valid.getOrDefault("path"),
+  let url = call_564163.url(scheme.get, call_564163.host, call_564163.base,
+                         call_564163.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568263, url, valid)
+  result = hook(call_564163, url, valid)
 
-proc call*(call_568264: Call_IoTSpacesDelete_568256; resourceGroupName: string;
-          subscriptionId: string; resourceName: string;
+proc call*(call_564164: Call_IoTSpacesDelete_564156; subscriptionId: string;
+          resourceGroupName: string; resourceName: string;
           apiVersion: string = "2017-10-01-preview"): Recallable =
   ## ioTSpacesDelete
   ## Delete an IoTSpaces instance.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group that contains the IoTSpaces instance.
   ##   apiVersion: string (required)
   ##             : The version of the API.
   ##   subscriptionId: string (required)
   ##                 : The subscription identifier.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group that contains the IoTSpaces instance.
   ##   resourceName: string (required)
   ##               : The name of the IoTSpaces instance.
-  var path_568265 = newJObject()
-  var query_568266 = newJObject()
-  add(path_568265, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568266, "api-version", newJString(apiVersion))
-  add(path_568265, "subscriptionId", newJString(subscriptionId))
-  add(path_568265, "resourceName", newJString(resourceName))
-  result = call_568264.call(path_568265, query_568266, nil, nil, nil)
+  var path_564165 = newJObject()
+  var query_564166 = newJObject()
+  add(query_564166, "api-version", newJString(apiVersion))
+  add(path_564165, "subscriptionId", newJString(subscriptionId))
+  add(path_564165, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564165, "resourceName", newJString(resourceName))
+  result = call_564164.call(path_564165, query_564166, nil, nil, nil)
 
-var ioTSpacesDelete* = Call_IoTSpacesDelete_568256(name: "ioTSpacesDelete",
+var ioTSpacesDelete* = Call_IoTSpacesDelete_564156(name: "ioTSpacesDelete",
     meth: HttpMethod.HttpDelete, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.IoTSpaces/Graph/{resourceName}",
-    validator: validate_IoTSpacesDelete_568257, base: "", url: url_IoTSpacesDelete_568258,
+    validator: validate_IoTSpacesDelete_564157, base: "", url: url_IoTSpacesDelete_564158,
     schemes: {Scheme.Https})
 export
   rest

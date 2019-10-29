@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, httpcore
 
 ## auto-generated via openapi macro
 ## title: SharedImageGalleryServiceClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_567657 = ref object of OpenApiRestCall
+  OpenApiRestCall_563555 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_567657](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563555](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_567657): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563555): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,8 +107,8 @@ const
   macServiceName = "compute-gallery"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_GalleriesList_567879 = ref object of OpenApiRestCall_567657
-proc url_GalleriesList_567881(protocol: Scheme; host: string; base: string;
+  Call_GalleriesList_563777 = ref object of OpenApiRestCall_563555
+proc url_GalleriesList_563779(protocol: Scheme; host: string; base: string;
                              route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -120,7 +124,7 @@ proc url_GalleriesList_567881(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_GalleriesList_567880(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_GalleriesList_563778(path: JsonNode; query: JsonNode; header: JsonNode;
                                   formData: JsonNode; body: JsonNode): JsonNode =
   ## List galleries under a subscription.
   ## 
@@ -132,11 +136,11 @@ proc validate_GalleriesList_567880(path: JsonNode; query: JsonNode; header: Json
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_568054 = path.getOrDefault("subscriptionId")
-  valid_568054 = validateParameter(valid_568054, JString, required = true,
+  var valid_563954 = path.getOrDefault("subscriptionId")
+  valid_563954 = validateParameter(valid_563954, JString, required = true,
                                  default = nil)
-  if valid_568054 != nil:
-    section.add "subscriptionId", valid_568054
+  if valid_563954 != nil:
+    section.add "subscriptionId", valid_563954
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -144,11 +148,11 @@ proc validate_GalleriesList_567880(path: JsonNode; query: JsonNode; header: Json
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568055 = query.getOrDefault("api-version")
-  valid_568055 = validateParameter(valid_568055, JString, required = true,
+  var valid_563955 = query.getOrDefault("api-version")
+  valid_563955 = validateParameter(valid_563955, JString, required = true,
                                  default = nil)
-  if valid_568055 != nil:
-    section.add "api-version", valid_568055
+  if valid_563955 != nil:
+    section.add "api-version", valid_563955
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -157,20 +161,20 @@ proc validate_GalleriesList_567880(path: JsonNode; query: JsonNode; header: Json
   if body != nil:
     result.add "body", body
 
-proc call*(call_568078: Call_GalleriesList_567879; path: JsonNode; query: JsonNode;
+proc call*(call_563978: Call_GalleriesList_563777; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## List galleries under a subscription.
   ## 
-  let valid = call_568078.validator(path, query, header, formData, body)
-  let scheme = call_568078.pickScheme
+  let valid = call_563978.validator(path, query, header, formData, body)
+  let scheme = call_563978.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568078.url(scheme.get, call_568078.host, call_568078.base,
-                         call_568078.route, valid.getOrDefault("path"),
+  let url = call_563978.url(scheme.get, call_563978.host, call_563978.base,
+                         call_563978.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568078, url, valid)
+  result = hook(call_563978, url, valid)
 
-proc call*(call_568149: Call_GalleriesList_567879; apiVersion: string;
+proc call*(call_564049: Call_GalleriesList_563777; apiVersion: string;
           subscriptionId: string): Recallable =
   ## galleriesList
   ## List galleries under a subscription.
@@ -178,19 +182,19 @@ proc call*(call_568149: Call_GalleriesList_567879; apiVersion: string;
   ##             : Client Api Version.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_568150 = newJObject()
-  var query_568152 = newJObject()
-  add(query_568152, "api-version", newJString(apiVersion))
-  add(path_568150, "subscriptionId", newJString(subscriptionId))
-  result = call_568149.call(path_568150, query_568152, nil, nil, nil)
+  var path_564050 = newJObject()
+  var query_564052 = newJObject()
+  add(query_564052, "api-version", newJString(apiVersion))
+  add(path_564050, "subscriptionId", newJString(subscriptionId))
+  result = call_564049.call(path_564050, query_564052, nil, nil, nil)
 
-var galleriesList* = Call_GalleriesList_567879(name: "galleriesList",
+var galleriesList* = Call_GalleriesList_563777(name: "galleriesList",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Compute/galleries",
-    validator: validate_GalleriesList_567880, base: "", url: url_GalleriesList_567881,
+    validator: validate_GalleriesList_563778, base: "", url: url_GalleriesList_563779,
     schemes: {Scheme.Https})
 type
-  Call_GalleriesListByResourceGroup_568191 = ref object of OpenApiRestCall_567657
-proc url_GalleriesListByResourceGroup_568193(protocol: Scheme; host: string;
+  Call_GalleriesListByResourceGroup_564091 = ref object of OpenApiRestCall_563555
+proc url_GalleriesListByResourceGroup_564093(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -210,30 +214,30 @@ proc url_GalleriesListByResourceGroup_568193(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_GalleriesListByResourceGroup_568192(path: JsonNode; query: JsonNode;
+proc validate_GalleriesListByResourceGroup_564092(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## List galleries under a resource group.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568194 = path.getOrDefault("resourceGroupName")
-  valid_568194 = validateParameter(valid_568194, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564094 = path.getOrDefault("subscriptionId")
+  valid_564094 = validateParameter(valid_564094, JString, required = true,
                                  default = nil)
-  if valid_568194 != nil:
-    section.add "resourceGroupName", valid_568194
-  var valid_568195 = path.getOrDefault("subscriptionId")
-  valid_568195 = validateParameter(valid_568195, JString, required = true,
+  if valid_564094 != nil:
+    section.add "subscriptionId", valid_564094
+  var valid_564095 = path.getOrDefault("resourceGroupName")
+  valid_564095 = validateParameter(valid_564095, JString, required = true,
                                  default = nil)
-  if valid_568195 != nil:
-    section.add "subscriptionId", valid_568195
+  if valid_564095 != nil:
+    section.add "resourceGroupName", valid_564095
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -241,11 +245,11 @@ proc validate_GalleriesListByResourceGroup_568192(path: JsonNode; query: JsonNod
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568196 = query.getOrDefault("api-version")
-  valid_568196 = validateParameter(valid_568196, JString, required = true,
+  var valid_564096 = query.getOrDefault("api-version")
+  valid_564096 = validateParameter(valid_564096, JString, required = true,
                                  default = nil)
-  if valid_568196 != nil:
-    section.add "api-version", valid_568196
+  if valid_564096 != nil:
+    section.add "api-version", valid_564096
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -254,44 +258,44 @@ proc validate_GalleriesListByResourceGroup_568192(path: JsonNode; query: JsonNod
   if body != nil:
     result.add "body", body
 
-proc call*(call_568197: Call_GalleriesListByResourceGroup_568191; path: JsonNode;
+proc call*(call_564097: Call_GalleriesListByResourceGroup_564091; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## List galleries under a resource group.
   ## 
-  let valid = call_568197.validator(path, query, header, formData, body)
-  let scheme = call_568197.pickScheme
+  let valid = call_564097.validator(path, query, header, formData, body)
+  let scheme = call_564097.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568197.url(scheme.get, call_568197.host, call_568197.base,
-                         call_568197.route, valid.getOrDefault("path"),
+  let url = call_564097.url(scheme.get, call_564097.host, call_564097.base,
+                         call_564097.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568197, url, valid)
+  result = hook(call_564097, url, valid)
 
-proc call*(call_568198: Call_GalleriesListByResourceGroup_568191;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string): Recallable =
+proc call*(call_564098: Call_GalleriesListByResourceGroup_564091;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string): Recallable =
   ## galleriesListByResourceGroup
   ## List galleries under a resource group.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_568199 = newJObject()
-  var query_568200 = newJObject()
-  add(path_568199, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568200, "api-version", newJString(apiVersion))
-  add(path_568199, "subscriptionId", newJString(subscriptionId))
-  result = call_568198.call(path_568199, query_568200, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564099 = newJObject()
+  var query_564100 = newJObject()
+  add(query_564100, "api-version", newJString(apiVersion))
+  add(path_564099, "subscriptionId", newJString(subscriptionId))
+  add(path_564099, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564098.call(path_564099, query_564100, nil, nil, nil)
 
-var galleriesListByResourceGroup* = Call_GalleriesListByResourceGroup_568191(
+var galleriesListByResourceGroup* = Call_GalleriesListByResourceGroup_564091(
     name: "galleriesListByResourceGroup", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/galleries",
-    validator: validate_GalleriesListByResourceGroup_568192, base: "",
-    url: url_GalleriesListByResourceGroup_568193, schemes: {Scheme.Https})
+    validator: validate_GalleriesListByResourceGroup_564092, base: "",
+    url: url_GalleriesListByResourceGroup_564093, schemes: {Scheme.Https})
 type
-  Call_GalleriesCreateOrUpdate_568212 = ref object of OpenApiRestCall_567657
-proc url_GalleriesCreateOrUpdate_568214(protocol: Scheme; host: string; base: string;
+  Call_GalleriesCreateOrUpdate_564112 = ref object of OpenApiRestCall_563555
+proc url_GalleriesCreateOrUpdate_564114(protocol: Scheme; host: string; base: string;
                                        route: string; path: JsonNode;
                                        query: JsonNode): Uri =
   result.scheme = $protocol
@@ -314,37 +318,37 @@ proc url_GalleriesCreateOrUpdate_568214(protocol: Scheme; host: string; base: st
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_GalleriesCreateOrUpdate_568213(path: JsonNode; query: JsonNode;
+proc validate_GalleriesCreateOrUpdate_564113(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Create or update a Shared Image Gallery.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
-  ##   subscriptionId: JString (required)
-  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   galleryName: JString (required)
   ##              : The name of the Shared Image Gallery. The allowed characters are alphabets and numbers with dots and periods allowed in the middle. The maximum length is 80 characters.
+  ##   subscriptionId: JString (required)
+  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568232 = path.getOrDefault("resourceGroupName")
-  valid_568232 = validateParameter(valid_568232, JString, required = true,
+        "path argument is necessary due to required `galleryName` field"
+  var valid_564132 = path.getOrDefault("galleryName")
+  valid_564132 = validateParameter(valid_564132, JString, required = true,
                                  default = nil)
-  if valid_568232 != nil:
-    section.add "resourceGroupName", valid_568232
-  var valid_568233 = path.getOrDefault("subscriptionId")
-  valid_568233 = validateParameter(valid_568233, JString, required = true,
+  if valid_564132 != nil:
+    section.add "galleryName", valid_564132
+  var valid_564133 = path.getOrDefault("subscriptionId")
+  valid_564133 = validateParameter(valid_564133, JString, required = true,
                                  default = nil)
-  if valid_568233 != nil:
-    section.add "subscriptionId", valid_568233
-  var valid_568234 = path.getOrDefault("galleryName")
-  valid_568234 = validateParameter(valid_568234, JString, required = true,
+  if valid_564133 != nil:
+    section.add "subscriptionId", valid_564133
+  var valid_564134 = path.getOrDefault("resourceGroupName")
+  valid_564134 = validateParameter(valid_564134, JString, required = true,
                                  default = nil)
-  if valid_568234 != nil:
-    section.add "galleryName", valid_568234
+  if valid_564134 != nil:
+    section.add "resourceGroupName", valid_564134
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -352,11 +356,11 @@ proc validate_GalleriesCreateOrUpdate_568213(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568235 = query.getOrDefault("api-version")
-  valid_568235 = validateParameter(valid_568235, JString, required = true,
+  var valid_564135 = query.getOrDefault("api-version")
+  valid_564135 = validateParameter(valid_564135, JString, required = true,
                                  default = nil)
-  if valid_568235 != nil:
-    section.add "api-version", valid_568235
+  if valid_564135 != nil:
+    section.add "api-version", valid_564135
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -370,53 +374,53 @@ proc validate_GalleriesCreateOrUpdate_568213(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568237: Call_GalleriesCreateOrUpdate_568212; path: JsonNode;
+proc call*(call_564137: Call_GalleriesCreateOrUpdate_564112; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Create or update a Shared Image Gallery.
   ## 
-  let valid = call_568237.validator(path, query, header, formData, body)
-  let scheme = call_568237.pickScheme
+  let valid = call_564137.validator(path, query, header, formData, body)
+  let scheme = call_564137.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568237.url(scheme.get, call_568237.host, call_568237.base,
-                         call_568237.route, valid.getOrDefault("path"),
+  let url = call_564137.url(scheme.get, call_564137.host, call_564137.base,
+                         call_564137.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568237, url, valid)
+  result = hook(call_564137, url, valid)
 
-proc call*(call_568238: Call_GalleriesCreateOrUpdate_568212;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          gallery: JsonNode; galleryName: string): Recallable =
+proc call*(call_564138: Call_GalleriesCreateOrUpdate_564112; apiVersion: string;
+          galleryName: string; subscriptionId: string; resourceGroupName: string;
+          gallery: JsonNode): Recallable =
   ## galleriesCreateOrUpdate
   ## Create or update a Shared Image Gallery.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
-  ##   subscriptionId: string (required)
-  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   gallery: JObject (required)
-  ##          : Parameters supplied to the create or update Shared Image Gallery operation.
   ##   galleryName: string (required)
   ##              : The name of the Shared Image Gallery. The allowed characters are alphabets and numbers with dots and periods allowed in the middle. The maximum length is 80 characters.
-  var path_568239 = newJObject()
-  var query_568240 = newJObject()
-  var body_568241 = newJObject()
-  add(path_568239, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568240, "api-version", newJString(apiVersion))
-  add(path_568239, "subscriptionId", newJString(subscriptionId))
+  ##   subscriptionId: string (required)
+  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  ##   gallery: JObject (required)
+  ##          : Parameters supplied to the create or update Shared Image Gallery operation.
+  var path_564139 = newJObject()
+  var query_564140 = newJObject()
+  var body_564141 = newJObject()
+  add(query_564140, "api-version", newJString(apiVersion))
+  add(path_564139, "galleryName", newJString(galleryName))
+  add(path_564139, "subscriptionId", newJString(subscriptionId))
+  add(path_564139, "resourceGroupName", newJString(resourceGroupName))
   if gallery != nil:
-    body_568241 = gallery
-  add(path_568239, "galleryName", newJString(galleryName))
-  result = call_568238.call(path_568239, query_568240, nil, nil, body_568241)
+    body_564141 = gallery
+  result = call_564138.call(path_564139, query_564140, nil, nil, body_564141)
 
-var galleriesCreateOrUpdate* = Call_GalleriesCreateOrUpdate_568212(
+var galleriesCreateOrUpdate* = Call_GalleriesCreateOrUpdate_564112(
     name: "galleriesCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/galleries/{galleryName}",
-    validator: validate_GalleriesCreateOrUpdate_568213, base: "",
-    url: url_GalleriesCreateOrUpdate_568214, schemes: {Scheme.Https})
+    validator: validate_GalleriesCreateOrUpdate_564113, base: "",
+    url: url_GalleriesCreateOrUpdate_564114, schemes: {Scheme.Https})
 type
-  Call_GalleriesGet_568201 = ref object of OpenApiRestCall_567657
-proc url_GalleriesGet_568203(protocol: Scheme; host: string; base: string;
+  Call_GalleriesGet_564101 = ref object of OpenApiRestCall_563555
+proc url_GalleriesGet_564103(protocol: Scheme; host: string; base: string;
                             route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -438,37 +442,37 @@ proc url_GalleriesGet_568203(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_GalleriesGet_568202(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_GalleriesGet_564102(path: JsonNode; query: JsonNode; header: JsonNode;
                                  formData: JsonNode; body: JsonNode): JsonNode =
   ## Retrieves information about a Shared Image Gallery.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
-  ##   subscriptionId: JString (required)
-  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   galleryName: JString (required)
   ##              : The name of the Shared Image Gallery.
+  ##   subscriptionId: JString (required)
+  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568204 = path.getOrDefault("resourceGroupName")
-  valid_568204 = validateParameter(valid_568204, JString, required = true,
+        "path argument is necessary due to required `galleryName` field"
+  var valid_564104 = path.getOrDefault("galleryName")
+  valid_564104 = validateParameter(valid_564104, JString, required = true,
                                  default = nil)
-  if valid_568204 != nil:
-    section.add "resourceGroupName", valid_568204
-  var valid_568205 = path.getOrDefault("subscriptionId")
-  valid_568205 = validateParameter(valid_568205, JString, required = true,
+  if valid_564104 != nil:
+    section.add "galleryName", valid_564104
+  var valid_564105 = path.getOrDefault("subscriptionId")
+  valid_564105 = validateParameter(valid_564105, JString, required = true,
                                  default = nil)
-  if valid_568205 != nil:
-    section.add "subscriptionId", valid_568205
-  var valid_568206 = path.getOrDefault("galleryName")
-  valid_568206 = validateParameter(valid_568206, JString, required = true,
+  if valid_564105 != nil:
+    section.add "subscriptionId", valid_564105
+  var valid_564106 = path.getOrDefault("resourceGroupName")
+  valid_564106 = validateParameter(valid_564106, JString, required = true,
                                  default = nil)
-  if valid_568206 != nil:
-    section.add "galleryName", valid_568206
+  if valid_564106 != nil:
+    section.add "resourceGroupName", valid_564106
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -476,11 +480,11 @@ proc validate_GalleriesGet_568202(path: JsonNode; query: JsonNode; header: JsonN
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568207 = query.getOrDefault("api-version")
-  valid_568207 = validateParameter(valid_568207, JString, required = true,
+  var valid_564107 = query.getOrDefault("api-version")
+  valid_564107 = validateParameter(valid_564107, JString, required = true,
                                  default = nil)
-  if valid_568207 != nil:
-    section.add "api-version", valid_568207
+  if valid_564107 != nil:
+    section.add "api-version", valid_564107
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -489,46 +493,46 @@ proc validate_GalleriesGet_568202(path: JsonNode; query: JsonNode; header: JsonN
   if body != nil:
     result.add "body", body
 
-proc call*(call_568208: Call_GalleriesGet_568201; path: JsonNode; query: JsonNode;
+proc call*(call_564108: Call_GalleriesGet_564101; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Retrieves information about a Shared Image Gallery.
   ## 
-  let valid = call_568208.validator(path, query, header, formData, body)
-  let scheme = call_568208.pickScheme
+  let valid = call_564108.validator(path, query, header, formData, body)
+  let scheme = call_564108.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568208.url(scheme.get, call_568208.host, call_568208.base,
-                         call_568208.route, valid.getOrDefault("path"),
+  let url = call_564108.url(scheme.get, call_564108.host, call_564108.base,
+                         call_564108.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568208, url, valid)
+  result = hook(call_564108, url, valid)
 
-proc call*(call_568209: Call_GalleriesGet_568201; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; galleryName: string): Recallable =
+proc call*(call_564109: Call_GalleriesGet_564101; apiVersion: string;
+          galleryName: string; subscriptionId: string; resourceGroupName: string): Recallable =
   ## galleriesGet
   ## Retrieves information about a Shared Image Gallery.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
-  ##   subscriptionId: string (required)
-  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   galleryName: string (required)
   ##              : The name of the Shared Image Gallery.
-  var path_568210 = newJObject()
-  var query_568211 = newJObject()
-  add(path_568210, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568211, "api-version", newJString(apiVersion))
-  add(path_568210, "subscriptionId", newJString(subscriptionId))
-  add(path_568210, "galleryName", newJString(galleryName))
-  result = call_568209.call(path_568210, query_568211, nil, nil, nil)
+  ##   subscriptionId: string (required)
+  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564110 = newJObject()
+  var query_564111 = newJObject()
+  add(query_564111, "api-version", newJString(apiVersion))
+  add(path_564110, "galleryName", newJString(galleryName))
+  add(path_564110, "subscriptionId", newJString(subscriptionId))
+  add(path_564110, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564109.call(path_564110, query_564111, nil, nil, nil)
 
-var galleriesGet* = Call_GalleriesGet_568201(name: "galleriesGet",
+var galleriesGet* = Call_GalleriesGet_564101(name: "galleriesGet",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/galleries/{galleryName}",
-    validator: validate_GalleriesGet_568202, base: "", url: url_GalleriesGet_568203,
+    validator: validate_GalleriesGet_564102, base: "", url: url_GalleriesGet_564103,
     schemes: {Scheme.Https})
 type
-  Call_GalleriesDelete_568242 = ref object of OpenApiRestCall_567657
-proc url_GalleriesDelete_568244(protocol: Scheme; host: string; base: string;
+  Call_GalleriesDelete_564142 = ref object of OpenApiRestCall_563555
+proc url_GalleriesDelete_564144(protocol: Scheme; host: string; base: string;
                                route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -550,7 +554,7 @@ proc url_GalleriesDelete_568244(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_GalleriesDelete_568243(path: JsonNode; query: JsonNode;
+proc validate_GalleriesDelete_564143(path: JsonNode; query: JsonNode;
                                     header: JsonNode; formData: JsonNode;
                                     body: JsonNode): JsonNode =
   ## Delete a Shared Image Gallery.
@@ -558,30 +562,30 @@ proc validate_GalleriesDelete_568243(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
-  ##   subscriptionId: JString (required)
-  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   galleryName: JString (required)
   ##              : The name of the Shared Image Gallery to be deleted.
+  ##   subscriptionId: JString (required)
+  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568245 = path.getOrDefault("resourceGroupName")
-  valid_568245 = validateParameter(valid_568245, JString, required = true,
+        "path argument is necessary due to required `galleryName` field"
+  var valid_564145 = path.getOrDefault("galleryName")
+  valid_564145 = validateParameter(valid_564145, JString, required = true,
                                  default = nil)
-  if valid_568245 != nil:
-    section.add "resourceGroupName", valid_568245
-  var valid_568246 = path.getOrDefault("subscriptionId")
-  valid_568246 = validateParameter(valid_568246, JString, required = true,
+  if valid_564145 != nil:
+    section.add "galleryName", valid_564145
+  var valid_564146 = path.getOrDefault("subscriptionId")
+  valid_564146 = validateParameter(valid_564146, JString, required = true,
                                  default = nil)
-  if valid_568246 != nil:
-    section.add "subscriptionId", valid_568246
-  var valid_568247 = path.getOrDefault("galleryName")
-  valid_568247 = validateParameter(valid_568247, JString, required = true,
+  if valid_564146 != nil:
+    section.add "subscriptionId", valid_564146
+  var valid_564147 = path.getOrDefault("resourceGroupName")
+  valid_564147 = validateParameter(valid_564147, JString, required = true,
                                  default = nil)
-  if valid_568247 != nil:
-    section.add "galleryName", valid_568247
+  if valid_564147 != nil:
+    section.add "resourceGroupName", valid_564147
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -589,11 +593,11 @@ proc validate_GalleriesDelete_568243(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568248 = query.getOrDefault("api-version")
-  valid_568248 = validateParameter(valid_568248, JString, required = true,
+  var valid_564148 = query.getOrDefault("api-version")
+  valid_564148 = validateParameter(valid_564148, JString, required = true,
                                  default = nil)
-  if valid_568248 != nil:
-    section.add "api-version", valid_568248
+  if valid_564148 != nil:
+    section.add "api-version", valid_564148
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -602,46 +606,46 @@ proc validate_GalleriesDelete_568243(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568249: Call_GalleriesDelete_568242; path: JsonNode; query: JsonNode;
+proc call*(call_564149: Call_GalleriesDelete_564142; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Delete a Shared Image Gallery.
   ## 
-  let valid = call_568249.validator(path, query, header, formData, body)
-  let scheme = call_568249.pickScheme
+  let valid = call_564149.validator(path, query, header, formData, body)
+  let scheme = call_564149.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568249.url(scheme.get, call_568249.host, call_568249.base,
-                         call_568249.route, valid.getOrDefault("path"),
+  let url = call_564149.url(scheme.get, call_564149.host, call_564149.base,
+                         call_564149.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568249, url, valid)
+  result = hook(call_564149, url, valid)
 
-proc call*(call_568250: Call_GalleriesDelete_568242; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; galleryName: string): Recallable =
+proc call*(call_564150: Call_GalleriesDelete_564142; apiVersion: string;
+          galleryName: string; subscriptionId: string; resourceGroupName: string): Recallable =
   ## galleriesDelete
   ## Delete a Shared Image Gallery.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
-  ##   subscriptionId: string (required)
-  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   galleryName: string (required)
   ##              : The name of the Shared Image Gallery to be deleted.
-  var path_568251 = newJObject()
-  var query_568252 = newJObject()
-  add(path_568251, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568252, "api-version", newJString(apiVersion))
-  add(path_568251, "subscriptionId", newJString(subscriptionId))
-  add(path_568251, "galleryName", newJString(galleryName))
-  result = call_568250.call(path_568251, query_568252, nil, nil, nil)
+  ##   subscriptionId: string (required)
+  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564151 = newJObject()
+  var query_564152 = newJObject()
+  add(query_564152, "api-version", newJString(apiVersion))
+  add(path_564151, "galleryName", newJString(galleryName))
+  add(path_564151, "subscriptionId", newJString(subscriptionId))
+  add(path_564151, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564150.call(path_564151, query_564152, nil, nil, nil)
 
-var galleriesDelete* = Call_GalleriesDelete_568242(name: "galleriesDelete",
+var galleriesDelete* = Call_GalleriesDelete_564142(name: "galleriesDelete",
     meth: HttpMethod.HttpDelete, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/galleries/{galleryName}",
-    validator: validate_GalleriesDelete_568243, base: "", url: url_GalleriesDelete_568244,
+    validator: validate_GalleriesDelete_564143, base: "", url: url_GalleriesDelete_564144,
     schemes: {Scheme.Https})
 type
-  Call_GalleryImagesListByGallery_568253 = ref object of OpenApiRestCall_567657
-proc url_GalleryImagesListByGallery_568255(protocol: Scheme; host: string;
+  Call_GalleryImagesListByGallery_564153 = ref object of OpenApiRestCall_563555
+proc url_GalleryImagesListByGallery_564155(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -664,37 +668,37 @@ proc url_GalleryImagesListByGallery_568255(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_GalleryImagesListByGallery_568254(path: JsonNode; query: JsonNode;
+proc validate_GalleryImagesListByGallery_564154(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## List gallery Image Definitions in a gallery.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
-  ##   subscriptionId: JString (required)
-  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   galleryName: JString (required)
   ##              : The name of the Shared Image Gallery from which Image Definitions are to be listed.
+  ##   subscriptionId: JString (required)
+  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568256 = path.getOrDefault("resourceGroupName")
-  valid_568256 = validateParameter(valid_568256, JString, required = true,
+        "path argument is necessary due to required `galleryName` field"
+  var valid_564156 = path.getOrDefault("galleryName")
+  valid_564156 = validateParameter(valid_564156, JString, required = true,
                                  default = nil)
-  if valid_568256 != nil:
-    section.add "resourceGroupName", valid_568256
-  var valid_568257 = path.getOrDefault("subscriptionId")
-  valid_568257 = validateParameter(valid_568257, JString, required = true,
+  if valid_564156 != nil:
+    section.add "galleryName", valid_564156
+  var valid_564157 = path.getOrDefault("subscriptionId")
+  valid_564157 = validateParameter(valid_564157, JString, required = true,
                                  default = nil)
-  if valid_568257 != nil:
-    section.add "subscriptionId", valid_568257
-  var valid_568258 = path.getOrDefault("galleryName")
-  valid_568258 = validateParameter(valid_568258, JString, required = true,
+  if valid_564157 != nil:
+    section.add "subscriptionId", valid_564157
+  var valid_564158 = path.getOrDefault("resourceGroupName")
+  valid_564158 = validateParameter(valid_564158, JString, required = true,
                                  default = nil)
-  if valid_568258 != nil:
-    section.add "galleryName", valid_568258
+  if valid_564158 != nil:
+    section.add "resourceGroupName", valid_564158
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -702,11 +706,11 @@ proc validate_GalleryImagesListByGallery_568254(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568259 = query.getOrDefault("api-version")
-  valid_568259 = validateParameter(valid_568259, JString, required = true,
+  var valid_564159 = query.getOrDefault("api-version")
+  valid_564159 = validateParameter(valid_564159, JString, required = true,
                                  default = nil)
-  if valid_568259 != nil:
-    section.add "api-version", valid_568259
+  if valid_564159 != nil:
+    section.add "api-version", valid_564159
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -715,48 +719,47 @@ proc validate_GalleryImagesListByGallery_568254(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568260: Call_GalleryImagesListByGallery_568253; path: JsonNode;
+proc call*(call_564160: Call_GalleryImagesListByGallery_564153; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## List gallery Image Definitions in a gallery.
   ## 
-  let valid = call_568260.validator(path, query, header, formData, body)
-  let scheme = call_568260.pickScheme
+  let valid = call_564160.validator(path, query, header, formData, body)
+  let scheme = call_564160.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568260.url(scheme.get, call_568260.host, call_568260.base,
-                         call_568260.route, valid.getOrDefault("path"),
+  let url = call_564160.url(scheme.get, call_564160.host, call_564160.base,
+                         call_564160.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568260, url, valid)
+  result = hook(call_564160, url, valid)
 
-proc call*(call_568261: Call_GalleryImagesListByGallery_568253;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          galleryName: string): Recallable =
+proc call*(call_564161: Call_GalleryImagesListByGallery_564153; apiVersion: string;
+          galleryName: string; subscriptionId: string; resourceGroupName: string): Recallable =
   ## galleryImagesListByGallery
   ## List gallery Image Definitions in a gallery.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
-  ##   subscriptionId: string (required)
-  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   galleryName: string (required)
   ##              : The name of the Shared Image Gallery from which Image Definitions are to be listed.
-  var path_568262 = newJObject()
-  var query_568263 = newJObject()
-  add(path_568262, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568263, "api-version", newJString(apiVersion))
-  add(path_568262, "subscriptionId", newJString(subscriptionId))
-  add(path_568262, "galleryName", newJString(galleryName))
-  result = call_568261.call(path_568262, query_568263, nil, nil, nil)
+  ##   subscriptionId: string (required)
+  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564162 = newJObject()
+  var query_564163 = newJObject()
+  add(query_564163, "api-version", newJString(apiVersion))
+  add(path_564162, "galleryName", newJString(galleryName))
+  add(path_564162, "subscriptionId", newJString(subscriptionId))
+  add(path_564162, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564161.call(path_564162, query_564163, nil, nil, nil)
 
-var galleryImagesListByGallery* = Call_GalleryImagesListByGallery_568253(
+var galleryImagesListByGallery* = Call_GalleryImagesListByGallery_564153(
     name: "galleryImagesListByGallery", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/galleries/{galleryName}/images",
-    validator: validate_GalleryImagesListByGallery_568254, base: "",
-    url: url_GalleryImagesListByGallery_568255, schemes: {Scheme.Https})
+    validator: validate_GalleryImagesListByGallery_564154, base: "",
+    url: url_GalleryImagesListByGallery_564155, schemes: {Scheme.Https})
 type
-  Call_GalleryImagesCreateOrUpdate_568276 = ref object of OpenApiRestCall_567657
-proc url_GalleryImagesCreateOrUpdate_568278(protocol: Scheme; host: string;
+  Call_GalleryImagesCreateOrUpdate_564176 = ref object of OpenApiRestCall_563555
+proc url_GalleryImagesCreateOrUpdate_564178(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -782,44 +785,44 @@ proc url_GalleryImagesCreateOrUpdate_568278(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_GalleryImagesCreateOrUpdate_568277(path: JsonNode; query: JsonNode;
+proc validate_GalleryImagesCreateOrUpdate_564177(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Create or update a gallery Image Definition.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
-  ##   subscriptionId: JString (required)
-  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   galleryImageName: JString (required)
-  ##                   : The name of the gallery Image Definition to be created or updated. The allowed characters are alphabets and numbers with dots, dashes, and periods allowed in the middle. The maximum length is 80 characters.
   ##   galleryName: JString (required)
   ##              : The name of the Shared Image Gallery in which the Image Definition is to be created.
+  ##   subscriptionId: JString (required)
+  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
+  ##   galleryImageName: JString (required)
+  ##                   : The name of the gallery Image Definition to be created or updated. The allowed characters are alphabets and numbers with dots, dashes, and periods allowed in the middle. The maximum length is 80 characters.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568279 = path.getOrDefault("resourceGroupName")
-  valid_568279 = validateParameter(valid_568279, JString, required = true,
+        "path argument is necessary due to required `galleryName` field"
+  var valid_564179 = path.getOrDefault("galleryName")
+  valid_564179 = validateParameter(valid_564179, JString, required = true,
                                  default = nil)
-  if valid_568279 != nil:
-    section.add "resourceGroupName", valid_568279
-  var valid_568280 = path.getOrDefault("subscriptionId")
-  valid_568280 = validateParameter(valid_568280, JString, required = true,
+  if valid_564179 != nil:
+    section.add "galleryName", valid_564179
+  var valid_564180 = path.getOrDefault("subscriptionId")
+  valid_564180 = validateParameter(valid_564180, JString, required = true,
                                  default = nil)
-  if valid_568280 != nil:
-    section.add "subscriptionId", valid_568280
-  var valid_568281 = path.getOrDefault("galleryImageName")
-  valid_568281 = validateParameter(valid_568281, JString, required = true,
+  if valid_564180 != nil:
+    section.add "subscriptionId", valid_564180
+  var valid_564181 = path.getOrDefault("resourceGroupName")
+  valid_564181 = validateParameter(valid_564181, JString, required = true,
                                  default = nil)
-  if valid_568281 != nil:
-    section.add "galleryImageName", valid_568281
-  var valid_568282 = path.getOrDefault("galleryName")
-  valid_568282 = validateParameter(valid_568282, JString, required = true,
+  if valid_564181 != nil:
+    section.add "resourceGroupName", valid_564181
+  var valid_564182 = path.getOrDefault("galleryImageName")
+  valid_564182 = validateParameter(valid_564182, JString, required = true,
                                  default = nil)
-  if valid_568282 != nil:
-    section.add "galleryName", valid_568282
+  if valid_564182 != nil:
+    section.add "galleryImageName", valid_564182
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -827,11 +830,11 @@ proc validate_GalleryImagesCreateOrUpdate_568277(path: JsonNode; query: JsonNode
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568283 = query.getOrDefault("api-version")
-  valid_568283 = validateParameter(valid_568283, JString, required = true,
+  var valid_564183 = query.getOrDefault("api-version")
+  valid_564183 = validateParameter(valid_564183, JString, required = true,
                                  default = nil)
-  if valid_568283 != nil:
-    section.add "api-version", valid_568283
+  if valid_564183 != nil:
+    section.add "api-version", valid_564183
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -845,56 +848,57 @@ proc validate_GalleryImagesCreateOrUpdate_568277(path: JsonNode; query: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_568285: Call_GalleryImagesCreateOrUpdate_568276; path: JsonNode;
+proc call*(call_564185: Call_GalleryImagesCreateOrUpdate_564176; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Create or update a gallery Image Definition.
   ## 
-  let valid = call_568285.validator(path, query, header, formData, body)
-  let scheme = call_568285.pickScheme
+  let valid = call_564185.validator(path, query, header, formData, body)
+  let scheme = call_564185.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568285.url(scheme.get, call_568285.host, call_568285.base,
-                         call_568285.route, valid.getOrDefault("path"),
+  let url = call_564185.url(scheme.get, call_564185.host, call_564185.base,
+                         call_564185.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568285, url, valid)
+  result = hook(call_564185, url, valid)
 
-proc call*(call_568286: Call_GalleryImagesCreateOrUpdate_568276;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          galleryImageName: string; galleryImage: JsonNode; galleryName: string): Recallable =
+proc call*(call_564186: Call_GalleryImagesCreateOrUpdate_564176;
+          galleryImage: JsonNode; apiVersion: string; galleryName: string;
+          subscriptionId: string; resourceGroupName: string;
+          galleryImageName: string): Recallable =
   ## galleryImagesCreateOrUpdate
   ## Create or update a gallery Image Definition.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
-  ##   apiVersion: string (required)
-  ##             : Client Api Version.
-  ##   subscriptionId: string (required)
-  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   galleryImageName: string (required)
-  ##                   : The name of the gallery Image Definition to be created or updated. The allowed characters are alphabets and numbers with dots, dashes, and periods allowed in the middle. The maximum length is 80 characters.
   ##   galleryImage: JObject (required)
   ##               : Parameters supplied to the create or update gallery image operation.
+  ##   apiVersion: string (required)
+  ##             : Client Api Version.
   ##   galleryName: string (required)
   ##              : The name of the Shared Image Gallery in which the Image Definition is to be created.
-  var path_568287 = newJObject()
-  var query_568288 = newJObject()
-  var body_568289 = newJObject()
-  add(path_568287, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568288, "api-version", newJString(apiVersion))
-  add(path_568287, "subscriptionId", newJString(subscriptionId))
-  add(path_568287, "galleryImageName", newJString(galleryImageName))
+  ##   subscriptionId: string (required)
+  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  ##   galleryImageName: string (required)
+  ##                   : The name of the gallery Image Definition to be created or updated. The allowed characters are alphabets and numbers with dots, dashes, and periods allowed in the middle. The maximum length is 80 characters.
+  var path_564187 = newJObject()
+  var query_564188 = newJObject()
+  var body_564189 = newJObject()
   if galleryImage != nil:
-    body_568289 = galleryImage
-  add(path_568287, "galleryName", newJString(galleryName))
-  result = call_568286.call(path_568287, query_568288, nil, nil, body_568289)
+    body_564189 = galleryImage
+  add(query_564188, "api-version", newJString(apiVersion))
+  add(path_564187, "galleryName", newJString(galleryName))
+  add(path_564187, "subscriptionId", newJString(subscriptionId))
+  add(path_564187, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564187, "galleryImageName", newJString(galleryImageName))
+  result = call_564186.call(path_564187, query_564188, nil, nil, body_564189)
 
-var galleryImagesCreateOrUpdate* = Call_GalleryImagesCreateOrUpdate_568276(
+var galleryImagesCreateOrUpdate* = Call_GalleryImagesCreateOrUpdate_564176(
     name: "galleryImagesCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/galleries/{galleryName}/images/{galleryImageName}",
-    validator: validate_GalleryImagesCreateOrUpdate_568277, base: "",
-    url: url_GalleryImagesCreateOrUpdate_568278, schemes: {Scheme.Https})
+    validator: validate_GalleryImagesCreateOrUpdate_564177, base: "",
+    url: url_GalleryImagesCreateOrUpdate_564178, schemes: {Scheme.Https})
 type
-  Call_GalleryImagesGet_568264 = ref object of OpenApiRestCall_567657
-proc url_GalleryImagesGet_568266(protocol: Scheme; host: string; base: string;
+  Call_GalleryImagesGet_564164 = ref object of OpenApiRestCall_563555
+proc url_GalleryImagesGet_564166(protocol: Scheme; host: string; base: string;
                                 route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -920,7 +924,7 @@ proc url_GalleryImagesGet_568266(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_GalleryImagesGet_568265(path: JsonNode; query: JsonNode;
+proc validate_GalleryImagesGet_564165(path: JsonNode; query: JsonNode;
                                      header: JsonNode; formData: JsonNode;
                                      body: JsonNode): JsonNode =
   ## Retrieves information about a gallery Image Definition.
@@ -928,37 +932,37 @@ proc validate_GalleryImagesGet_568265(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
-  ##   subscriptionId: JString (required)
-  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   galleryImageName: JString (required)
-  ##                   : The name of the gallery Image Definition to be retrieved.
   ##   galleryName: JString (required)
   ##              : The name of the Shared Image Gallery from which the Image Definitions are to be retrieved.
+  ##   subscriptionId: JString (required)
+  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
+  ##   galleryImageName: JString (required)
+  ##                   : The name of the gallery Image Definition to be retrieved.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568267 = path.getOrDefault("resourceGroupName")
-  valid_568267 = validateParameter(valid_568267, JString, required = true,
+        "path argument is necessary due to required `galleryName` field"
+  var valid_564167 = path.getOrDefault("galleryName")
+  valid_564167 = validateParameter(valid_564167, JString, required = true,
                                  default = nil)
-  if valid_568267 != nil:
-    section.add "resourceGroupName", valid_568267
-  var valid_568268 = path.getOrDefault("subscriptionId")
-  valid_568268 = validateParameter(valid_568268, JString, required = true,
+  if valid_564167 != nil:
+    section.add "galleryName", valid_564167
+  var valid_564168 = path.getOrDefault("subscriptionId")
+  valid_564168 = validateParameter(valid_564168, JString, required = true,
                                  default = nil)
-  if valid_568268 != nil:
-    section.add "subscriptionId", valid_568268
-  var valid_568269 = path.getOrDefault("galleryImageName")
-  valid_568269 = validateParameter(valid_568269, JString, required = true,
+  if valid_564168 != nil:
+    section.add "subscriptionId", valid_564168
+  var valid_564169 = path.getOrDefault("resourceGroupName")
+  valid_564169 = validateParameter(valid_564169, JString, required = true,
                                  default = nil)
-  if valid_568269 != nil:
-    section.add "galleryImageName", valid_568269
-  var valid_568270 = path.getOrDefault("galleryName")
-  valid_568270 = validateParameter(valid_568270, JString, required = true,
+  if valid_564169 != nil:
+    section.add "resourceGroupName", valid_564169
+  var valid_564170 = path.getOrDefault("galleryImageName")
+  valid_564170 = validateParameter(valid_564170, JString, required = true,
                                  default = nil)
-  if valid_568270 != nil:
-    section.add "galleryName", valid_568270
+  if valid_564170 != nil:
+    section.add "galleryImageName", valid_564170
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -966,11 +970,11 @@ proc validate_GalleryImagesGet_568265(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568271 = query.getOrDefault("api-version")
-  valid_568271 = validateParameter(valid_568271, JString, required = true,
+  var valid_564171 = query.getOrDefault("api-version")
+  valid_564171 = validateParameter(valid_564171, JString, required = true,
                                  default = nil)
-  if valid_568271 != nil:
-    section.add "api-version", valid_568271
+  if valid_564171 != nil:
+    section.add "api-version", valid_564171
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -979,50 +983,50 @@ proc validate_GalleryImagesGet_568265(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568272: Call_GalleryImagesGet_568264; path: JsonNode;
+proc call*(call_564172: Call_GalleryImagesGet_564164; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Retrieves information about a gallery Image Definition.
   ## 
-  let valid = call_568272.validator(path, query, header, formData, body)
-  let scheme = call_568272.pickScheme
+  let valid = call_564172.validator(path, query, header, formData, body)
+  let scheme = call_564172.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568272.url(scheme.get, call_568272.host, call_568272.base,
-                         call_568272.route, valid.getOrDefault("path"),
+  let url = call_564172.url(scheme.get, call_564172.host, call_564172.base,
+                         call_564172.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568272, url, valid)
+  result = hook(call_564172, url, valid)
 
-proc call*(call_568273: Call_GalleryImagesGet_568264; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; galleryImageName: string;
-          galleryName: string): Recallable =
+proc call*(call_564173: Call_GalleryImagesGet_564164; apiVersion: string;
+          galleryName: string; subscriptionId: string; resourceGroupName: string;
+          galleryImageName: string): Recallable =
   ## galleryImagesGet
   ## Retrieves information about a gallery Image Definition.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
-  ##   subscriptionId: string (required)
-  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   galleryImageName: string (required)
-  ##                   : The name of the gallery Image Definition to be retrieved.
   ##   galleryName: string (required)
   ##              : The name of the Shared Image Gallery from which the Image Definitions are to be retrieved.
-  var path_568274 = newJObject()
-  var query_568275 = newJObject()
-  add(path_568274, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568275, "api-version", newJString(apiVersion))
-  add(path_568274, "subscriptionId", newJString(subscriptionId))
-  add(path_568274, "galleryImageName", newJString(galleryImageName))
-  add(path_568274, "galleryName", newJString(galleryName))
-  result = call_568273.call(path_568274, query_568275, nil, nil, nil)
+  ##   subscriptionId: string (required)
+  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  ##   galleryImageName: string (required)
+  ##                   : The name of the gallery Image Definition to be retrieved.
+  var path_564174 = newJObject()
+  var query_564175 = newJObject()
+  add(query_564175, "api-version", newJString(apiVersion))
+  add(path_564174, "galleryName", newJString(galleryName))
+  add(path_564174, "subscriptionId", newJString(subscriptionId))
+  add(path_564174, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564174, "galleryImageName", newJString(galleryImageName))
+  result = call_564173.call(path_564174, query_564175, nil, nil, nil)
 
-var galleryImagesGet* = Call_GalleryImagesGet_568264(name: "galleryImagesGet",
+var galleryImagesGet* = Call_GalleryImagesGet_564164(name: "galleryImagesGet",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/galleries/{galleryName}/images/{galleryImageName}",
-    validator: validate_GalleryImagesGet_568265, base: "",
-    url: url_GalleryImagesGet_568266, schemes: {Scheme.Https})
+    validator: validate_GalleryImagesGet_564165, base: "",
+    url: url_GalleryImagesGet_564166, schemes: {Scheme.Https})
 type
-  Call_GalleryImagesDelete_568290 = ref object of OpenApiRestCall_567657
-proc url_GalleryImagesDelete_568292(protocol: Scheme; host: string; base: string;
+  Call_GalleryImagesDelete_564190 = ref object of OpenApiRestCall_563555
+proc url_GalleryImagesDelete_564192(protocol: Scheme; host: string; base: string;
                                    route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1048,7 +1052,7 @@ proc url_GalleryImagesDelete_568292(protocol: Scheme; host: string; base: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_GalleryImagesDelete_568291(path: JsonNode; query: JsonNode;
+proc validate_GalleryImagesDelete_564191(path: JsonNode; query: JsonNode;
                                         header: JsonNode; formData: JsonNode;
                                         body: JsonNode): JsonNode =
   ## Delete a gallery image.
@@ -1056,37 +1060,37 @@ proc validate_GalleryImagesDelete_568291(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
-  ##   subscriptionId: JString (required)
-  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   galleryImageName: JString (required)
-  ##                   : The name of the gallery Image Definition to be deleted.
   ##   galleryName: JString (required)
   ##              : The name of the Shared Image Gallery in which the Image Definition is to be deleted.
+  ##   subscriptionId: JString (required)
+  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
+  ##   galleryImageName: JString (required)
+  ##                   : The name of the gallery Image Definition to be deleted.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568293 = path.getOrDefault("resourceGroupName")
-  valid_568293 = validateParameter(valid_568293, JString, required = true,
+        "path argument is necessary due to required `galleryName` field"
+  var valid_564193 = path.getOrDefault("galleryName")
+  valid_564193 = validateParameter(valid_564193, JString, required = true,
                                  default = nil)
-  if valid_568293 != nil:
-    section.add "resourceGroupName", valid_568293
-  var valid_568294 = path.getOrDefault("subscriptionId")
-  valid_568294 = validateParameter(valid_568294, JString, required = true,
+  if valid_564193 != nil:
+    section.add "galleryName", valid_564193
+  var valid_564194 = path.getOrDefault("subscriptionId")
+  valid_564194 = validateParameter(valid_564194, JString, required = true,
                                  default = nil)
-  if valid_568294 != nil:
-    section.add "subscriptionId", valid_568294
-  var valid_568295 = path.getOrDefault("galleryImageName")
-  valid_568295 = validateParameter(valid_568295, JString, required = true,
+  if valid_564194 != nil:
+    section.add "subscriptionId", valid_564194
+  var valid_564195 = path.getOrDefault("resourceGroupName")
+  valid_564195 = validateParameter(valid_564195, JString, required = true,
                                  default = nil)
-  if valid_568295 != nil:
-    section.add "galleryImageName", valid_568295
-  var valid_568296 = path.getOrDefault("galleryName")
-  valid_568296 = validateParameter(valid_568296, JString, required = true,
+  if valid_564195 != nil:
+    section.add "resourceGroupName", valid_564195
+  var valid_564196 = path.getOrDefault("galleryImageName")
+  valid_564196 = validateParameter(valid_564196, JString, required = true,
                                  default = nil)
-  if valid_568296 != nil:
-    section.add "galleryName", valid_568296
+  if valid_564196 != nil:
+    section.add "galleryImageName", valid_564196
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1094,11 +1098,11 @@ proc validate_GalleryImagesDelete_568291(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568297 = query.getOrDefault("api-version")
-  valid_568297 = validateParameter(valid_568297, JString, required = true,
+  var valid_564197 = query.getOrDefault("api-version")
+  valid_564197 = validateParameter(valid_564197, JString, required = true,
                                  default = nil)
-  if valid_568297 != nil:
-    section.add "api-version", valid_568297
+  if valid_564197 != nil:
+    section.add "api-version", valid_564197
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1107,51 +1111,51 @@ proc validate_GalleryImagesDelete_568291(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568298: Call_GalleryImagesDelete_568290; path: JsonNode;
+proc call*(call_564198: Call_GalleryImagesDelete_564190; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Delete a gallery image.
   ## 
-  let valid = call_568298.validator(path, query, header, formData, body)
-  let scheme = call_568298.pickScheme
+  let valid = call_564198.validator(path, query, header, formData, body)
+  let scheme = call_564198.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568298.url(scheme.get, call_568298.host, call_568298.base,
-                         call_568298.route, valid.getOrDefault("path"),
+  let url = call_564198.url(scheme.get, call_564198.host, call_564198.base,
+                         call_564198.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568298, url, valid)
+  result = hook(call_564198, url, valid)
 
-proc call*(call_568299: Call_GalleryImagesDelete_568290; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; galleryImageName: string;
-          galleryName: string): Recallable =
+proc call*(call_564199: Call_GalleryImagesDelete_564190; apiVersion: string;
+          galleryName: string; subscriptionId: string; resourceGroupName: string;
+          galleryImageName: string): Recallable =
   ## galleryImagesDelete
   ## Delete a gallery image.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
-  ##   subscriptionId: string (required)
-  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   galleryImageName: string (required)
-  ##                   : The name of the gallery Image Definition to be deleted.
   ##   galleryName: string (required)
   ##              : The name of the Shared Image Gallery in which the Image Definition is to be deleted.
-  var path_568300 = newJObject()
-  var query_568301 = newJObject()
-  add(path_568300, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568301, "api-version", newJString(apiVersion))
-  add(path_568300, "subscriptionId", newJString(subscriptionId))
-  add(path_568300, "galleryImageName", newJString(galleryImageName))
-  add(path_568300, "galleryName", newJString(galleryName))
-  result = call_568299.call(path_568300, query_568301, nil, nil, nil)
+  ##   subscriptionId: string (required)
+  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  ##   galleryImageName: string (required)
+  ##                   : The name of the gallery Image Definition to be deleted.
+  var path_564200 = newJObject()
+  var query_564201 = newJObject()
+  add(query_564201, "api-version", newJString(apiVersion))
+  add(path_564200, "galleryName", newJString(galleryName))
+  add(path_564200, "subscriptionId", newJString(subscriptionId))
+  add(path_564200, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564200, "galleryImageName", newJString(galleryImageName))
+  result = call_564199.call(path_564200, query_564201, nil, nil, nil)
 
-var galleryImagesDelete* = Call_GalleryImagesDelete_568290(
+var galleryImagesDelete* = Call_GalleryImagesDelete_564190(
     name: "galleryImagesDelete", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/galleries/{galleryName}/images/{galleryImageName}",
-    validator: validate_GalleryImagesDelete_568291, base: "",
-    url: url_GalleryImagesDelete_568292, schemes: {Scheme.Https})
+    validator: validate_GalleryImagesDelete_564191, base: "",
+    url: url_GalleryImagesDelete_564192, schemes: {Scheme.Https})
 type
-  Call_GalleryImageVersionsListByGalleryImage_568302 = ref object of OpenApiRestCall_567657
-proc url_GalleryImageVersionsListByGalleryImage_568304(protocol: Scheme;
+  Call_GalleryImageVersionsListByGalleryImage_564202 = ref object of OpenApiRestCall_563555
+proc url_GalleryImageVersionsListByGalleryImage_564204(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1178,44 +1182,44 @@ proc url_GalleryImageVersionsListByGalleryImage_568304(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_GalleryImageVersionsListByGalleryImage_568303(path: JsonNode;
+proc validate_GalleryImageVersionsListByGalleryImage_564203(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## List gallery Image Versions in a gallery Image Definition.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
-  ##   subscriptionId: JString (required)
-  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   galleryImageName: JString (required)
-  ##                   : The name of the Shared Image Gallery Image Definition from which the Image Versions are to be listed.
   ##   galleryName: JString (required)
   ##              : The name of the Shared Image Gallery in which the Image Definition resides.
+  ##   subscriptionId: JString (required)
+  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
+  ##   galleryImageName: JString (required)
+  ##                   : The name of the Shared Image Gallery Image Definition from which the Image Versions are to be listed.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568305 = path.getOrDefault("resourceGroupName")
-  valid_568305 = validateParameter(valid_568305, JString, required = true,
+        "path argument is necessary due to required `galleryName` field"
+  var valid_564205 = path.getOrDefault("galleryName")
+  valid_564205 = validateParameter(valid_564205, JString, required = true,
                                  default = nil)
-  if valid_568305 != nil:
-    section.add "resourceGroupName", valid_568305
-  var valid_568306 = path.getOrDefault("subscriptionId")
-  valid_568306 = validateParameter(valid_568306, JString, required = true,
+  if valid_564205 != nil:
+    section.add "galleryName", valid_564205
+  var valid_564206 = path.getOrDefault("subscriptionId")
+  valid_564206 = validateParameter(valid_564206, JString, required = true,
                                  default = nil)
-  if valid_568306 != nil:
-    section.add "subscriptionId", valid_568306
-  var valid_568307 = path.getOrDefault("galleryImageName")
-  valid_568307 = validateParameter(valid_568307, JString, required = true,
+  if valid_564206 != nil:
+    section.add "subscriptionId", valid_564206
+  var valid_564207 = path.getOrDefault("resourceGroupName")
+  valid_564207 = validateParameter(valid_564207, JString, required = true,
                                  default = nil)
-  if valid_568307 != nil:
-    section.add "galleryImageName", valid_568307
-  var valid_568308 = path.getOrDefault("galleryName")
-  valid_568308 = validateParameter(valid_568308, JString, required = true,
+  if valid_564207 != nil:
+    section.add "resourceGroupName", valid_564207
+  var valid_564208 = path.getOrDefault("galleryImageName")
+  valid_564208 = validateParameter(valid_564208, JString, required = true,
                                  default = nil)
-  if valid_568308 != nil:
-    section.add "galleryName", valid_568308
+  if valid_564208 != nil:
+    section.add "galleryImageName", valid_564208
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1223,11 +1227,11 @@ proc validate_GalleryImageVersionsListByGalleryImage_568303(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568309 = query.getOrDefault("api-version")
-  valid_568309 = validateParameter(valid_568309, JString, required = true,
+  var valid_564209 = query.getOrDefault("api-version")
+  valid_564209 = validateParameter(valid_564209, JString, required = true,
                                  default = nil)
-  if valid_568309 != nil:
-    section.add "api-version", valid_568309
+  if valid_564209 != nil:
+    section.add "api-version", valid_564209
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1236,53 +1240,53 @@ proc validate_GalleryImageVersionsListByGalleryImage_568303(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568310: Call_GalleryImageVersionsListByGalleryImage_568302;
+proc call*(call_564210: Call_GalleryImageVersionsListByGalleryImage_564202;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## List gallery Image Versions in a gallery Image Definition.
   ## 
-  let valid = call_568310.validator(path, query, header, formData, body)
-  let scheme = call_568310.pickScheme
+  let valid = call_564210.validator(path, query, header, formData, body)
+  let scheme = call_564210.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568310.url(scheme.get, call_568310.host, call_568310.base,
-                         call_568310.route, valid.getOrDefault("path"),
+  let url = call_564210.url(scheme.get, call_564210.host, call_564210.base,
+                         call_564210.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568310, url, valid)
+  result = hook(call_564210, url, valid)
 
-proc call*(call_568311: Call_GalleryImageVersionsListByGalleryImage_568302;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          galleryImageName: string; galleryName: string): Recallable =
+proc call*(call_564211: Call_GalleryImageVersionsListByGalleryImage_564202;
+          apiVersion: string; galleryName: string; subscriptionId: string;
+          resourceGroupName: string; galleryImageName: string): Recallable =
   ## galleryImageVersionsListByGalleryImage
   ## List gallery Image Versions in a gallery Image Definition.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
-  ##   subscriptionId: string (required)
-  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   galleryImageName: string (required)
-  ##                   : The name of the Shared Image Gallery Image Definition from which the Image Versions are to be listed.
   ##   galleryName: string (required)
   ##              : The name of the Shared Image Gallery in which the Image Definition resides.
-  var path_568312 = newJObject()
-  var query_568313 = newJObject()
-  add(path_568312, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568313, "api-version", newJString(apiVersion))
-  add(path_568312, "subscriptionId", newJString(subscriptionId))
-  add(path_568312, "galleryImageName", newJString(galleryImageName))
-  add(path_568312, "galleryName", newJString(galleryName))
-  result = call_568311.call(path_568312, query_568313, nil, nil, nil)
+  ##   subscriptionId: string (required)
+  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  ##   galleryImageName: string (required)
+  ##                   : The name of the Shared Image Gallery Image Definition from which the Image Versions are to be listed.
+  var path_564212 = newJObject()
+  var query_564213 = newJObject()
+  add(query_564213, "api-version", newJString(apiVersion))
+  add(path_564212, "galleryName", newJString(galleryName))
+  add(path_564212, "subscriptionId", newJString(subscriptionId))
+  add(path_564212, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564212, "galleryImageName", newJString(galleryImageName))
+  result = call_564211.call(path_564212, query_564213, nil, nil, nil)
 
-var galleryImageVersionsListByGalleryImage* = Call_GalleryImageVersionsListByGalleryImage_568302(
+var galleryImageVersionsListByGalleryImage* = Call_GalleryImageVersionsListByGalleryImage_564202(
     name: "galleryImageVersionsListByGalleryImage", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/galleries/{galleryName}/images/{galleryImageName}/versions",
-    validator: validate_GalleryImageVersionsListByGalleryImage_568303, base: "",
-    url: url_GalleryImageVersionsListByGalleryImage_568304,
+    validator: validate_GalleryImageVersionsListByGalleryImage_564203, base: "",
+    url: url_GalleryImageVersionsListByGalleryImage_564204,
     schemes: {Scheme.Https})
 type
-  Call_GalleryImageVersionsCreateOrUpdate_568342 = ref object of OpenApiRestCall_567657
-proc url_GalleryImageVersionsCreateOrUpdate_568344(protocol: Scheme; host: string;
+  Call_GalleryImageVersionsCreateOrUpdate_564242 = ref object of OpenApiRestCall_563555
+proc url_GalleryImageVersionsCreateOrUpdate_564244(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1312,51 +1316,50 @@ proc url_GalleryImageVersionsCreateOrUpdate_568344(protocol: Scheme; host: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_GalleryImageVersionsCreateOrUpdate_568343(path: JsonNode;
+proc validate_GalleryImageVersionsCreateOrUpdate_564243(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Create or update a gallery Image Version.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   galleryImageVersionName: JString (required)
   ##                          : The name of the gallery Image Version to be created. Needs to follow semantic version name pattern: The allowed characters are digit and period. Digits must be within the range of a 32-bit integer. Format: <MajorVersion>.<MinorVersion>.<Patch>
-  ##   subscriptionId: JString (required)
-  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   galleryImageName: JString (required)
-  ##                   : The name of the gallery Image Definition in which the Image Version is to be created.
   ##   galleryName: JString (required)
   ##              : The name of the Shared Image Gallery in which the Image Definition resides.
+  ##   subscriptionId: JString (required)
+  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
+  ##   galleryImageName: JString (required)
+  ##                   : The name of the gallery Image Definition in which the Image Version is to be created.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568345 = path.getOrDefault("resourceGroupName")
-  valid_568345 = validateParameter(valid_568345, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `galleryImageVersionName` field"
+  var valid_564245 = path.getOrDefault("galleryImageVersionName")
+  valid_564245 = validateParameter(valid_564245, JString, required = true,
                                  default = nil)
-  if valid_568345 != nil:
-    section.add "resourceGroupName", valid_568345
-  var valid_568346 = path.getOrDefault("galleryImageVersionName")
-  valid_568346 = validateParameter(valid_568346, JString, required = true,
+  if valid_564245 != nil:
+    section.add "galleryImageVersionName", valid_564245
+  var valid_564246 = path.getOrDefault("galleryName")
+  valid_564246 = validateParameter(valid_564246, JString, required = true,
                                  default = nil)
-  if valid_568346 != nil:
-    section.add "galleryImageVersionName", valid_568346
-  var valid_568347 = path.getOrDefault("subscriptionId")
-  valid_568347 = validateParameter(valid_568347, JString, required = true,
+  if valid_564246 != nil:
+    section.add "galleryName", valid_564246
+  var valid_564247 = path.getOrDefault("subscriptionId")
+  valid_564247 = validateParameter(valid_564247, JString, required = true,
                                  default = nil)
-  if valid_568347 != nil:
-    section.add "subscriptionId", valid_568347
-  var valid_568348 = path.getOrDefault("galleryImageName")
-  valid_568348 = validateParameter(valid_568348, JString, required = true,
+  if valid_564247 != nil:
+    section.add "subscriptionId", valid_564247
+  var valid_564248 = path.getOrDefault("resourceGroupName")
+  valid_564248 = validateParameter(valid_564248, JString, required = true,
                                  default = nil)
-  if valid_568348 != nil:
-    section.add "galleryImageName", valid_568348
-  var valid_568349 = path.getOrDefault("galleryName")
-  valid_568349 = validateParameter(valid_568349, JString, required = true,
+  if valid_564248 != nil:
+    section.add "resourceGroupName", valid_564248
+  var valid_564249 = path.getOrDefault("galleryImageName")
+  valid_564249 = validateParameter(valid_564249, JString, required = true,
                                  default = nil)
-  if valid_568349 != nil:
-    section.add "galleryName", valid_568349
+  if valid_564249 != nil:
+    section.add "galleryImageName", valid_564249
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1364,11 +1367,11 @@ proc validate_GalleryImageVersionsCreateOrUpdate_568343(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568350 = query.getOrDefault("api-version")
-  valid_568350 = validateParameter(valid_568350, JString, required = true,
+  var valid_564250 = query.getOrDefault("api-version")
+  valid_564250 = validateParameter(valid_564250, JString, required = true,
                                  default = nil)
-  if valid_568350 != nil:
-    section.add "api-version", valid_568350
+  if valid_564250 != nil:
+    section.add "api-version", valid_564250
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1382,61 +1385,61 @@ proc validate_GalleryImageVersionsCreateOrUpdate_568343(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568352: Call_GalleryImageVersionsCreateOrUpdate_568342;
+proc call*(call_564252: Call_GalleryImageVersionsCreateOrUpdate_564242;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Create or update a gallery Image Version.
   ## 
-  let valid = call_568352.validator(path, query, header, formData, body)
-  let scheme = call_568352.pickScheme
+  let valid = call_564252.validator(path, query, header, formData, body)
+  let scheme = call_564252.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568352.url(scheme.get, call_568352.host, call_568352.base,
-                         call_568352.route, valid.getOrDefault("path"),
+  let url = call_564252.url(scheme.get, call_564252.host, call_564252.base,
+                         call_564252.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568352, url, valid)
+  result = hook(call_564252, url, valid)
 
-proc call*(call_568353: Call_GalleryImageVersionsCreateOrUpdate_568342;
-          resourceGroupName: string; galleryImageVersionName: string;
-          apiVersion: string; subscriptionId: string; galleryImageName: string;
-          galleryImageVersion: JsonNode; galleryName: string): Recallable =
+proc call*(call_564253: Call_GalleryImageVersionsCreateOrUpdate_564242;
+          galleryImageVersionName: string; apiVersion: string; galleryName: string;
+          galleryImageVersion: JsonNode; subscriptionId: string;
+          resourceGroupName: string; galleryImageName: string): Recallable =
   ## galleryImageVersionsCreateOrUpdate
   ## Create or update a gallery Image Version.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   galleryImageVersionName: string (required)
   ##                          : The name of the gallery Image Version to be created. Needs to follow semantic version name pattern: The allowed characters are digit and period. Digits must be within the range of a 32-bit integer. Format: <MajorVersion>.<MinorVersion>.<Patch>
   ##   apiVersion: string (required)
   ##             : Client Api Version.
-  ##   subscriptionId: string (required)
-  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   galleryImageName: string (required)
-  ##                   : The name of the gallery Image Definition in which the Image Version is to be created.
-  ##   galleryImageVersion: JObject (required)
-  ##                      : Parameters supplied to the create or update gallery Image Version operation.
   ##   galleryName: string (required)
   ##              : The name of the Shared Image Gallery in which the Image Definition resides.
-  var path_568354 = newJObject()
-  var query_568355 = newJObject()
-  var body_568356 = newJObject()
-  add(path_568354, "resourceGroupName", newJString(resourceGroupName))
-  add(path_568354, "galleryImageVersionName", newJString(galleryImageVersionName))
-  add(query_568355, "api-version", newJString(apiVersion))
-  add(path_568354, "subscriptionId", newJString(subscriptionId))
-  add(path_568354, "galleryImageName", newJString(galleryImageName))
+  ##   galleryImageVersion: JObject (required)
+  ##                      : Parameters supplied to the create or update gallery Image Version operation.
+  ##   subscriptionId: string (required)
+  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  ##   galleryImageName: string (required)
+  ##                   : The name of the gallery Image Definition in which the Image Version is to be created.
+  var path_564254 = newJObject()
+  var query_564255 = newJObject()
+  var body_564256 = newJObject()
+  add(path_564254, "galleryImageVersionName", newJString(galleryImageVersionName))
+  add(query_564255, "api-version", newJString(apiVersion))
+  add(path_564254, "galleryName", newJString(galleryName))
   if galleryImageVersion != nil:
-    body_568356 = galleryImageVersion
-  add(path_568354, "galleryName", newJString(galleryName))
-  result = call_568353.call(path_568354, query_568355, nil, nil, body_568356)
+    body_564256 = galleryImageVersion
+  add(path_564254, "subscriptionId", newJString(subscriptionId))
+  add(path_564254, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564254, "galleryImageName", newJString(galleryImageName))
+  result = call_564253.call(path_564254, query_564255, nil, nil, body_564256)
 
-var galleryImageVersionsCreateOrUpdate* = Call_GalleryImageVersionsCreateOrUpdate_568342(
+var galleryImageVersionsCreateOrUpdate* = Call_GalleryImageVersionsCreateOrUpdate_564242(
     name: "galleryImageVersionsCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/galleries/{galleryName}/images/{galleryImageName}/versions/{galleryImageVersionName}",
-    validator: validate_GalleryImageVersionsCreateOrUpdate_568343, base: "",
-    url: url_GalleryImageVersionsCreateOrUpdate_568344, schemes: {Scheme.Https})
+    validator: validate_GalleryImageVersionsCreateOrUpdate_564243, base: "",
+    url: url_GalleryImageVersionsCreateOrUpdate_564244, schemes: {Scheme.Https})
 type
-  Call_GalleryImageVersionsGet_568314 = ref object of OpenApiRestCall_567657
-proc url_GalleryImageVersionsGet_568316(protocol: Scheme; host: string; base: string;
+  Call_GalleryImageVersionsGet_564214 = ref object of OpenApiRestCall_563555
+proc url_GalleryImageVersionsGet_564216(protocol: Scheme; host: string; base: string;
                                        route: string; path: JsonNode;
                                        query: JsonNode): Uri =
   result.scheme = $protocol
@@ -1467,70 +1470,69 @@ proc url_GalleryImageVersionsGet_568316(protocol: Scheme; host: string; base: st
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_GalleryImageVersionsGet_568315(path: JsonNode; query: JsonNode;
+proc validate_GalleryImageVersionsGet_564215(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Retrieves information about a gallery Image Version.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   galleryImageVersionName: JString (required)
   ##                          : The name of the gallery Image Version to be retrieved.
-  ##   subscriptionId: JString (required)
-  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   galleryImageName: JString (required)
-  ##                   : The name of the gallery Image Definition in which the Image Version resides.
   ##   galleryName: JString (required)
   ##              : The name of the Shared Image Gallery in which the Image Definition resides.
+  ##   subscriptionId: JString (required)
+  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
+  ##   galleryImageName: JString (required)
+  ##                   : The name of the gallery Image Definition in which the Image Version resides.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568318 = path.getOrDefault("resourceGroupName")
-  valid_568318 = validateParameter(valid_568318, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `galleryImageVersionName` field"
+  var valid_564218 = path.getOrDefault("galleryImageVersionName")
+  valid_564218 = validateParameter(valid_564218, JString, required = true,
                                  default = nil)
-  if valid_568318 != nil:
-    section.add "resourceGroupName", valid_568318
-  var valid_568319 = path.getOrDefault("galleryImageVersionName")
-  valid_568319 = validateParameter(valid_568319, JString, required = true,
+  if valid_564218 != nil:
+    section.add "galleryImageVersionName", valid_564218
+  var valid_564219 = path.getOrDefault("galleryName")
+  valid_564219 = validateParameter(valid_564219, JString, required = true,
                                  default = nil)
-  if valid_568319 != nil:
-    section.add "galleryImageVersionName", valid_568319
-  var valid_568320 = path.getOrDefault("subscriptionId")
-  valid_568320 = validateParameter(valid_568320, JString, required = true,
+  if valid_564219 != nil:
+    section.add "galleryName", valid_564219
+  var valid_564220 = path.getOrDefault("subscriptionId")
+  valid_564220 = validateParameter(valid_564220, JString, required = true,
                                  default = nil)
-  if valid_568320 != nil:
-    section.add "subscriptionId", valid_568320
-  var valid_568321 = path.getOrDefault("galleryImageName")
-  valid_568321 = validateParameter(valid_568321, JString, required = true,
+  if valid_564220 != nil:
+    section.add "subscriptionId", valid_564220
+  var valid_564221 = path.getOrDefault("resourceGroupName")
+  valid_564221 = validateParameter(valid_564221, JString, required = true,
                                  default = nil)
-  if valid_568321 != nil:
-    section.add "galleryImageName", valid_568321
-  var valid_568322 = path.getOrDefault("galleryName")
-  valid_568322 = validateParameter(valid_568322, JString, required = true,
+  if valid_564221 != nil:
+    section.add "resourceGroupName", valid_564221
+  var valid_564222 = path.getOrDefault("galleryImageName")
+  valid_564222 = validateParameter(valid_564222, JString, required = true,
                                  default = nil)
-  if valid_568322 != nil:
-    section.add "galleryName", valid_568322
+  if valid_564222 != nil:
+    section.add "galleryImageName", valid_564222
   result.add "path", section
   ## parameters in `query` object:
-  ##   $expand: JString
-  ##          : The expand expression to apply on the operation.
   ##   api-version: JString (required)
   ##              : Client Api Version.
+  ##   $expand: JString
+  ##          : The expand expression to apply on the operation.
   section = newJObject()
-  var valid_568336 = query.getOrDefault("$expand")
-  valid_568336 = validateParameter(valid_568336, JString, required = false,
-                                 default = newJString("ReplicationStatus"))
-  if valid_568336 != nil:
-    section.add "$expand", valid_568336
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568337 = query.getOrDefault("api-version")
-  valid_568337 = validateParameter(valid_568337, JString, required = true,
+  var valid_564223 = query.getOrDefault("api-version")
+  valid_564223 = validateParameter(valid_564223, JString, required = true,
                                  default = nil)
-  if valid_568337 != nil:
-    section.add "api-version", valid_568337
+  if valid_564223 != nil:
+    section.add "api-version", valid_564223
+  var valid_564237 = query.getOrDefault("$expand")
+  valid_564237 = validateParameter(valid_564237, JString, required = false,
+                                 default = newJString("ReplicationStatus"))
+  if valid_564237 != nil:
+    section.add "$expand", valid_564237
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1539,58 +1541,58 @@ proc validate_GalleryImageVersionsGet_568315(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568338: Call_GalleryImageVersionsGet_568314; path: JsonNode;
+proc call*(call_564238: Call_GalleryImageVersionsGet_564214; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Retrieves information about a gallery Image Version.
   ## 
-  let valid = call_568338.validator(path, query, header, formData, body)
-  let scheme = call_568338.pickScheme
+  let valid = call_564238.validator(path, query, header, formData, body)
+  let scheme = call_564238.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568338.url(scheme.get, call_568338.host, call_568338.base,
-                         call_568338.route, valid.getOrDefault("path"),
+  let url = call_564238.url(scheme.get, call_564238.host, call_564238.base,
+                         call_564238.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568338, url, valid)
+  result = hook(call_564238, url, valid)
 
-proc call*(call_568339: Call_GalleryImageVersionsGet_568314;
-          resourceGroupName: string; galleryImageVersionName: string;
-          apiVersion: string; subscriptionId: string; galleryImageName: string;
-          galleryName: string; Expand: string = "ReplicationStatus"): Recallable =
+proc call*(call_564239: Call_GalleryImageVersionsGet_564214;
+          galleryImageVersionName: string; apiVersion: string; galleryName: string;
+          subscriptionId: string; resourceGroupName: string;
+          galleryImageName: string; Expand: string = "ReplicationStatus"): Recallable =
   ## galleryImageVersionsGet
   ## Retrieves information about a gallery Image Version.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   galleryImageVersionName: string (required)
   ##                          : The name of the gallery Image Version to be retrieved.
-  ##   Expand: string
-  ##         : The expand expression to apply on the operation.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
-  ##   subscriptionId: string (required)
-  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   galleryImageName: string (required)
-  ##                   : The name of the gallery Image Definition in which the Image Version resides.
+  ##   Expand: string
+  ##         : The expand expression to apply on the operation.
   ##   galleryName: string (required)
   ##              : The name of the Shared Image Gallery in which the Image Definition resides.
-  var path_568340 = newJObject()
-  var query_568341 = newJObject()
-  add(path_568340, "resourceGroupName", newJString(resourceGroupName))
-  add(path_568340, "galleryImageVersionName", newJString(galleryImageVersionName))
-  add(query_568341, "$expand", newJString(Expand))
-  add(query_568341, "api-version", newJString(apiVersion))
-  add(path_568340, "subscriptionId", newJString(subscriptionId))
-  add(path_568340, "galleryImageName", newJString(galleryImageName))
-  add(path_568340, "galleryName", newJString(galleryName))
-  result = call_568339.call(path_568340, query_568341, nil, nil, nil)
+  ##   subscriptionId: string (required)
+  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  ##   galleryImageName: string (required)
+  ##                   : The name of the gallery Image Definition in which the Image Version resides.
+  var path_564240 = newJObject()
+  var query_564241 = newJObject()
+  add(path_564240, "galleryImageVersionName", newJString(galleryImageVersionName))
+  add(query_564241, "api-version", newJString(apiVersion))
+  add(query_564241, "$expand", newJString(Expand))
+  add(path_564240, "galleryName", newJString(galleryName))
+  add(path_564240, "subscriptionId", newJString(subscriptionId))
+  add(path_564240, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564240, "galleryImageName", newJString(galleryImageName))
+  result = call_564239.call(path_564240, query_564241, nil, nil, nil)
 
-var galleryImageVersionsGet* = Call_GalleryImageVersionsGet_568314(
+var galleryImageVersionsGet* = Call_GalleryImageVersionsGet_564214(
     name: "galleryImageVersionsGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/galleries/{galleryName}/images/{galleryImageName}/versions/{galleryImageVersionName}",
-    validator: validate_GalleryImageVersionsGet_568315, base: "",
-    url: url_GalleryImageVersionsGet_568316, schemes: {Scheme.Https})
+    validator: validate_GalleryImageVersionsGet_564215, base: "",
+    url: url_GalleryImageVersionsGet_564216, schemes: {Scheme.Https})
 type
-  Call_GalleryImageVersionsDelete_568357 = ref object of OpenApiRestCall_567657
-proc url_GalleryImageVersionsDelete_568359(protocol: Scheme; host: string;
+  Call_GalleryImageVersionsDelete_564257 = ref object of OpenApiRestCall_563555
+proc url_GalleryImageVersionsDelete_564259(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1620,51 +1622,50 @@ proc url_GalleryImageVersionsDelete_568359(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_GalleryImageVersionsDelete_568358(path: JsonNode; query: JsonNode;
+proc validate_GalleryImageVersionsDelete_564258(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Delete a gallery Image Version.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   galleryImageVersionName: JString (required)
   ##                          : The name of the gallery Image Version to be deleted.
-  ##   subscriptionId: JString (required)
-  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   galleryImageName: JString (required)
-  ##                   : The name of the gallery Image Definition in which the Image Version resides.
   ##   galleryName: JString (required)
   ##              : The name of the Shared Image Gallery in which the Image Definition resides.
+  ##   subscriptionId: JString (required)
+  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
+  ##   galleryImageName: JString (required)
+  ##                   : The name of the gallery Image Definition in which the Image Version resides.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568360 = path.getOrDefault("resourceGroupName")
-  valid_568360 = validateParameter(valid_568360, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `galleryImageVersionName` field"
+  var valid_564260 = path.getOrDefault("galleryImageVersionName")
+  valid_564260 = validateParameter(valid_564260, JString, required = true,
                                  default = nil)
-  if valid_568360 != nil:
-    section.add "resourceGroupName", valid_568360
-  var valid_568361 = path.getOrDefault("galleryImageVersionName")
-  valid_568361 = validateParameter(valid_568361, JString, required = true,
+  if valid_564260 != nil:
+    section.add "galleryImageVersionName", valid_564260
+  var valid_564261 = path.getOrDefault("galleryName")
+  valid_564261 = validateParameter(valid_564261, JString, required = true,
                                  default = nil)
-  if valid_568361 != nil:
-    section.add "galleryImageVersionName", valid_568361
-  var valid_568362 = path.getOrDefault("subscriptionId")
-  valid_568362 = validateParameter(valid_568362, JString, required = true,
+  if valid_564261 != nil:
+    section.add "galleryName", valid_564261
+  var valid_564262 = path.getOrDefault("subscriptionId")
+  valid_564262 = validateParameter(valid_564262, JString, required = true,
                                  default = nil)
-  if valid_568362 != nil:
-    section.add "subscriptionId", valid_568362
-  var valid_568363 = path.getOrDefault("galleryImageName")
-  valid_568363 = validateParameter(valid_568363, JString, required = true,
+  if valid_564262 != nil:
+    section.add "subscriptionId", valid_564262
+  var valid_564263 = path.getOrDefault("resourceGroupName")
+  valid_564263 = validateParameter(valid_564263, JString, required = true,
                                  default = nil)
-  if valid_568363 != nil:
-    section.add "galleryImageName", valid_568363
-  var valid_568364 = path.getOrDefault("galleryName")
-  valid_568364 = validateParameter(valid_568364, JString, required = true,
+  if valid_564263 != nil:
+    section.add "resourceGroupName", valid_564263
+  var valid_564264 = path.getOrDefault("galleryImageName")
+  valid_564264 = validateParameter(valid_564264, JString, required = true,
                                  default = nil)
-  if valid_568364 != nil:
-    section.add "galleryName", valid_568364
+  if valid_564264 != nil:
+    section.add "galleryImageName", valid_564264
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1672,11 +1673,11 @@ proc validate_GalleryImageVersionsDelete_568358(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568365 = query.getOrDefault("api-version")
-  valid_568365 = validateParameter(valid_568365, JString, required = true,
+  var valid_564265 = query.getOrDefault("api-version")
+  valid_564265 = validateParameter(valid_564265, JString, required = true,
                                  default = nil)
-  if valid_568365 != nil:
-    section.add "api-version", valid_568365
+  if valid_564265 != nil:
+    section.add "api-version", valid_564265
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1685,52 +1686,52 @@ proc validate_GalleryImageVersionsDelete_568358(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568366: Call_GalleryImageVersionsDelete_568357; path: JsonNode;
+proc call*(call_564266: Call_GalleryImageVersionsDelete_564257; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Delete a gallery Image Version.
   ## 
-  let valid = call_568366.validator(path, query, header, formData, body)
-  let scheme = call_568366.pickScheme
+  let valid = call_564266.validator(path, query, header, formData, body)
+  let scheme = call_564266.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568366.url(scheme.get, call_568366.host, call_568366.base,
-                         call_568366.route, valid.getOrDefault("path"),
+  let url = call_564266.url(scheme.get, call_564266.host, call_564266.base,
+                         call_564266.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568366, url, valid)
+  result = hook(call_564266, url, valid)
 
-proc call*(call_568367: Call_GalleryImageVersionsDelete_568357;
-          resourceGroupName: string; galleryImageVersionName: string;
-          apiVersion: string; subscriptionId: string; galleryImageName: string;
-          galleryName: string): Recallable =
+proc call*(call_564267: Call_GalleryImageVersionsDelete_564257;
+          galleryImageVersionName: string; apiVersion: string; galleryName: string;
+          subscriptionId: string; resourceGroupName: string;
+          galleryImageName: string): Recallable =
   ## galleryImageVersionsDelete
   ## Delete a gallery Image Version.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   galleryImageVersionName: string (required)
   ##                          : The name of the gallery Image Version to be deleted.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
-  ##   subscriptionId: string (required)
-  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   galleryImageName: string (required)
-  ##                   : The name of the gallery Image Definition in which the Image Version resides.
   ##   galleryName: string (required)
   ##              : The name of the Shared Image Gallery in which the Image Definition resides.
-  var path_568368 = newJObject()
-  var query_568369 = newJObject()
-  add(path_568368, "resourceGroupName", newJString(resourceGroupName))
-  add(path_568368, "galleryImageVersionName", newJString(galleryImageVersionName))
-  add(query_568369, "api-version", newJString(apiVersion))
-  add(path_568368, "subscriptionId", newJString(subscriptionId))
-  add(path_568368, "galleryImageName", newJString(galleryImageName))
-  add(path_568368, "galleryName", newJString(galleryName))
-  result = call_568367.call(path_568368, query_568369, nil, nil, nil)
+  ##   subscriptionId: string (required)
+  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  ##   galleryImageName: string (required)
+  ##                   : The name of the gallery Image Definition in which the Image Version resides.
+  var path_564268 = newJObject()
+  var query_564269 = newJObject()
+  add(path_564268, "galleryImageVersionName", newJString(galleryImageVersionName))
+  add(query_564269, "api-version", newJString(apiVersion))
+  add(path_564268, "galleryName", newJString(galleryName))
+  add(path_564268, "subscriptionId", newJString(subscriptionId))
+  add(path_564268, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564268, "galleryImageName", newJString(galleryImageName))
+  result = call_564267.call(path_564268, query_564269, nil, nil, nil)
 
-var galleryImageVersionsDelete* = Call_GalleryImageVersionsDelete_568357(
+var galleryImageVersionsDelete* = Call_GalleryImageVersionsDelete_564257(
     name: "galleryImageVersionsDelete", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/galleries/{galleryName}/images/{galleryImageName}/versions/{galleryImageVersionName}",
-    validator: validate_GalleryImageVersionsDelete_568358, base: "",
-    url: url_GalleryImageVersionsDelete_568359, schemes: {Scheme.Https})
+    validator: validate_GalleryImageVersionsDelete_564258, base: "",
+    url: url_GalleryImageVersionsDelete_564259, schemes: {Scheme.Https})
 export
   rest
 

@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, httpcore
 
 ## auto-generated via openapi macro
 ## title: EventGridManagementClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_567651 = ref object of OpenApiRestCall
+  OpenApiRestCall_563549 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_567651](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563549](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_567651): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563549): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,15 +107,15 @@ const
   macServiceName = "eventgrid-EventGrid"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_OperationsList_567873 = ref object of OpenApiRestCall_567651
-proc url_OperationsList_567875(protocol: Scheme; host: string; base: string;
+  Call_OperationsList_563771 = ref object of OpenApiRestCall_563549
+proc url_OperationsList_563773(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_OperationsList_567874(path: JsonNode; query: JsonNode;
+proc validate_OperationsList_563772(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## List the available operations supported by the Microsoft.EventGrid resource provider.
@@ -126,11 +130,11 @@ proc validate_OperationsList_567874(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568034 = query.getOrDefault("api-version")
-  valid_568034 = validateParameter(valid_568034, JString, required = true,
+  var valid_563934 = query.getOrDefault("api-version")
+  valid_563934 = validateParameter(valid_563934, JString, required = true,
                                  default = nil)
-  if valid_568034 != nil:
-    section.add "api-version", valid_568034
+  if valid_563934 != nil:
+    section.add "api-version", valid_563934
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -139,43 +143,43 @@ proc validate_OperationsList_567874(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568057: Call_OperationsList_567873; path: JsonNode; query: JsonNode;
+proc call*(call_563957: Call_OperationsList_563771; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## List the available operations supported by the Microsoft.EventGrid resource provider.
   ## 
-  let valid = call_568057.validator(path, query, header, formData, body)
-  let scheme = call_568057.pickScheme
+  let valid = call_563957.validator(path, query, header, formData, body)
+  let scheme = call_563957.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568057.url(scheme.get, call_568057.host, call_568057.base,
-                         call_568057.route, valid.getOrDefault("path"),
+  let url = call_563957.url(scheme.get, call_563957.host, call_563957.base,
+                         call_563957.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568057, url, valid)
+  result = hook(call_563957, url, valid)
 
-proc call*(call_568128: Call_OperationsList_567873; apiVersion: string): Recallable =
+proc call*(call_564028: Call_OperationsList_563771; apiVersion: string): Recallable =
   ## operationsList
   ## List the available operations supported by the Microsoft.EventGrid resource provider.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
-  var query_568129 = newJObject()
-  add(query_568129, "api-version", newJString(apiVersion))
-  result = call_568128.call(nil, query_568129, nil, nil, nil)
+  var query_564029 = newJObject()
+  add(query_564029, "api-version", newJString(apiVersion))
+  result = call_564028.call(nil, query_564029, nil, nil, nil)
 
-var operationsList* = Call_OperationsList_567873(name: "operationsList",
+var operationsList* = Call_OperationsList_563771(name: "operationsList",
     meth: HttpMethod.HttpGet, host: "management.azure.com",
     route: "/providers/Microsoft.EventGrid/operations",
-    validator: validate_OperationsList_567874, base: "", url: url_OperationsList_567875,
+    validator: validate_OperationsList_563772, base: "", url: url_OperationsList_563773,
     schemes: {Scheme.Https})
 type
-  Call_TopicTypesList_568169 = ref object of OpenApiRestCall_567651
-proc url_TopicTypesList_568171(protocol: Scheme; host: string; base: string;
+  Call_TopicTypesList_564069 = ref object of OpenApiRestCall_563549
+proc url_TopicTypesList_564071(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_TopicTypesList_568170(path: JsonNode; query: JsonNode;
+proc validate_TopicTypesList_564070(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## List all registered topic types.
@@ -190,11 +194,11 @@ proc validate_TopicTypesList_568170(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568172 = query.getOrDefault("api-version")
-  valid_568172 = validateParameter(valid_568172, JString, required = true,
+  var valid_564072 = query.getOrDefault("api-version")
+  valid_564072 = validateParameter(valid_564072, JString, required = true,
                                  default = nil)
-  if valid_568172 != nil:
-    section.add "api-version", valid_568172
+  if valid_564072 != nil:
+    section.add "api-version", valid_564072
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -203,36 +207,36 @@ proc validate_TopicTypesList_568170(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568173: Call_TopicTypesList_568169; path: JsonNode; query: JsonNode;
+proc call*(call_564073: Call_TopicTypesList_564069; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## List all registered topic types.
   ## 
-  let valid = call_568173.validator(path, query, header, formData, body)
-  let scheme = call_568173.pickScheme
+  let valid = call_564073.validator(path, query, header, formData, body)
+  let scheme = call_564073.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568173.url(scheme.get, call_568173.host, call_568173.base,
-                         call_568173.route, valid.getOrDefault("path"),
+  let url = call_564073.url(scheme.get, call_564073.host, call_564073.base,
+                         call_564073.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568173, url, valid)
+  result = hook(call_564073, url, valid)
 
-proc call*(call_568174: Call_TopicTypesList_568169; apiVersion: string): Recallable =
+proc call*(call_564074: Call_TopicTypesList_564069; apiVersion: string): Recallable =
   ## topicTypesList
   ## List all registered topic types.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
-  var query_568175 = newJObject()
-  add(query_568175, "api-version", newJString(apiVersion))
-  result = call_568174.call(nil, query_568175, nil, nil, nil)
+  var query_564075 = newJObject()
+  add(query_564075, "api-version", newJString(apiVersion))
+  result = call_564074.call(nil, query_564075, nil, nil, nil)
 
-var topicTypesList* = Call_TopicTypesList_568169(name: "topicTypesList",
+var topicTypesList* = Call_TopicTypesList_564069(name: "topicTypesList",
     meth: HttpMethod.HttpGet, host: "management.azure.com",
     route: "/providers/Microsoft.EventGrid/topicTypes",
-    validator: validate_TopicTypesList_568170, base: "", url: url_TopicTypesList_568171,
+    validator: validate_TopicTypesList_564070, base: "", url: url_TopicTypesList_564071,
     schemes: {Scheme.Https})
 type
-  Call_TopicTypesGet_568176 = ref object of OpenApiRestCall_567651
-proc url_TopicTypesGet_568178(protocol: Scheme; host: string; base: string;
+  Call_TopicTypesGet_564076 = ref object of OpenApiRestCall_563549
+proc url_TopicTypesGet_564078(protocol: Scheme; host: string; base: string;
                              route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -248,7 +252,7 @@ proc url_TopicTypesGet_568178(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_TopicTypesGet_568177(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_TopicTypesGet_564077(path: JsonNode; query: JsonNode; header: JsonNode;
                                   formData: JsonNode; body: JsonNode): JsonNode =
   ## Get information about a topic type.
   ## 
@@ -260,11 +264,11 @@ proc validate_TopicTypesGet_568177(path: JsonNode; query: JsonNode; header: Json
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `topicTypeName` field"
-  var valid_568193 = path.getOrDefault("topicTypeName")
-  valid_568193 = validateParameter(valid_568193, JString, required = true,
+  var valid_564093 = path.getOrDefault("topicTypeName")
+  valid_564093 = validateParameter(valid_564093, JString, required = true,
                                  default = nil)
-  if valid_568193 != nil:
-    section.add "topicTypeName", valid_568193
+  if valid_564093 != nil:
+    section.add "topicTypeName", valid_564093
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -272,11 +276,11 @@ proc validate_TopicTypesGet_568177(path: JsonNode; query: JsonNode; header: Json
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568194 = query.getOrDefault("api-version")
-  valid_568194 = validateParameter(valid_568194, JString, required = true,
+  var valid_564094 = query.getOrDefault("api-version")
+  valid_564094 = validateParameter(valid_564094, JString, required = true,
                                  default = nil)
-  if valid_568194 != nil:
-    section.add "api-version", valid_568194
+  if valid_564094 != nil:
+    section.add "api-version", valid_564094
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -285,41 +289,41 @@ proc validate_TopicTypesGet_568177(path: JsonNode; query: JsonNode; header: Json
   if body != nil:
     result.add "body", body
 
-proc call*(call_568195: Call_TopicTypesGet_568176; path: JsonNode; query: JsonNode;
+proc call*(call_564095: Call_TopicTypesGet_564076; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get information about a topic type.
   ## 
-  let valid = call_568195.validator(path, query, header, formData, body)
-  let scheme = call_568195.pickScheme
+  let valid = call_564095.validator(path, query, header, formData, body)
+  let scheme = call_564095.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568195.url(scheme.get, call_568195.host, call_568195.base,
-                         call_568195.route, valid.getOrDefault("path"),
+  let url = call_564095.url(scheme.get, call_564095.host, call_564095.base,
+                         call_564095.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568195, url, valid)
+  result = hook(call_564095, url, valid)
 
-proc call*(call_568196: Call_TopicTypesGet_568176; topicTypeName: string;
-          apiVersion: string): Recallable =
+proc call*(call_564096: Call_TopicTypesGet_564076; apiVersion: string;
+          topicTypeName: string): Recallable =
   ## topicTypesGet
   ## Get information about a topic type.
-  ##   topicTypeName: string (required)
-  ##                : Name of the topic type.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
-  var path_568197 = newJObject()
-  var query_568198 = newJObject()
-  add(path_568197, "topicTypeName", newJString(topicTypeName))
-  add(query_568198, "api-version", newJString(apiVersion))
-  result = call_568196.call(path_568197, query_568198, nil, nil, nil)
+  ##   topicTypeName: string (required)
+  ##                : Name of the topic type.
+  var path_564097 = newJObject()
+  var query_564098 = newJObject()
+  add(query_564098, "api-version", newJString(apiVersion))
+  add(path_564097, "topicTypeName", newJString(topicTypeName))
+  result = call_564096.call(path_564097, query_564098, nil, nil, nil)
 
-var topicTypesGet* = Call_TopicTypesGet_568176(name: "topicTypesGet",
+var topicTypesGet* = Call_TopicTypesGet_564076(name: "topicTypesGet",
     meth: HttpMethod.HttpGet, host: "management.azure.com",
     route: "/providers/Microsoft.EventGrid/topicTypes/{topicTypeName}",
-    validator: validate_TopicTypesGet_568177, base: "", url: url_TopicTypesGet_568178,
+    validator: validate_TopicTypesGet_564077, base: "", url: url_TopicTypesGet_564078,
     schemes: {Scheme.Https})
 type
-  Call_TopicTypesListEventTypes_568199 = ref object of OpenApiRestCall_567651
-proc url_TopicTypesListEventTypes_568201(protocol: Scheme; host: string;
+  Call_TopicTypesListEventTypes_564099 = ref object of OpenApiRestCall_563549
+proc url_TopicTypesListEventTypes_564101(protocol: Scheme; host: string;
                                         base: string; route: string; path: JsonNode;
                                         query: JsonNode): Uri =
   result.scheme = $protocol
@@ -337,7 +341,7 @@ proc url_TopicTypesListEventTypes_568201(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_TopicTypesListEventTypes_568200(path: JsonNode; query: JsonNode;
+proc validate_TopicTypesListEventTypes_564100(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## List event types for a topic type.
   ## 
@@ -349,11 +353,11 @@ proc validate_TopicTypesListEventTypes_568200(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `topicTypeName` field"
-  var valid_568202 = path.getOrDefault("topicTypeName")
-  valid_568202 = validateParameter(valid_568202, JString, required = true,
+  var valid_564102 = path.getOrDefault("topicTypeName")
+  valid_564102 = validateParameter(valid_564102, JString, required = true,
                                  default = nil)
-  if valid_568202 != nil:
-    section.add "topicTypeName", valid_568202
+  if valid_564102 != nil:
+    section.add "topicTypeName", valid_564102
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -361,11 +365,11 @@ proc validate_TopicTypesListEventTypes_568200(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568203 = query.getOrDefault("api-version")
-  valid_568203 = validateParameter(valid_568203, JString, required = true,
+  var valid_564103 = query.getOrDefault("api-version")
+  valid_564103 = validateParameter(valid_564103, JString, required = true,
                                  default = nil)
-  if valid_568203 != nil:
-    section.add "api-version", valid_568203
+  if valid_564103 != nil:
+    section.add "api-version", valid_564103
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -374,41 +378,41 @@ proc validate_TopicTypesListEventTypes_568200(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568204: Call_TopicTypesListEventTypes_568199; path: JsonNode;
+proc call*(call_564104: Call_TopicTypesListEventTypes_564099; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## List event types for a topic type.
   ## 
-  let valid = call_568204.validator(path, query, header, formData, body)
-  let scheme = call_568204.pickScheme
+  let valid = call_564104.validator(path, query, header, formData, body)
+  let scheme = call_564104.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568204.url(scheme.get, call_568204.host, call_568204.base,
-                         call_568204.route, valid.getOrDefault("path"),
+  let url = call_564104.url(scheme.get, call_564104.host, call_564104.base,
+                         call_564104.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568204, url, valid)
+  result = hook(call_564104, url, valid)
 
-proc call*(call_568205: Call_TopicTypesListEventTypes_568199;
-          topicTypeName: string; apiVersion: string): Recallable =
+proc call*(call_564105: Call_TopicTypesListEventTypes_564099; apiVersion: string;
+          topicTypeName: string): Recallable =
   ## topicTypesListEventTypes
   ## List event types for a topic type.
-  ##   topicTypeName: string (required)
-  ##                : Name of the topic type.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
-  var path_568206 = newJObject()
-  var query_568207 = newJObject()
-  add(path_568206, "topicTypeName", newJString(topicTypeName))
-  add(query_568207, "api-version", newJString(apiVersion))
-  result = call_568205.call(path_568206, query_568207, nil, nil, nil)
+  ##   topicTypeName: string (required)
+  ##                : Name of the topic type.
+  var path_564106 = newJObject()
+  var query_564107 = newJObject()
+  add(query_564107, "api-version", newJString(apiVersion))
+  add(path_564106, "topicTypeName", newJString(topicTypeName))
+  result = call_564105.call(path_564106, query_564107, nil, nil, nil)
 
-var topicTypesListEventTypes* = Call_TopicTypesListEventTypes_568199(
+var topicTypesListEventTypes* = Call_TopicTypesListEventTypes_564099(
     name: "topicTypesListEventTypes", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/providers/Microsoft.EventGrid/topicTypes/{topicTypeName}/eventTypes",
-    validator: validate_TopicTypesListEventTypes_568200, base: "",
-    url: url_TopicTypesListEventTypes_568201, schemes: {Scheme.Https})
+    validator: validate_TopicTypesListEventTypes_564100, base: "",
+    url: url_TopicTypesListEventTypes_564101, schemes: {Scheme.Https})
 type
-  Call_DomainsListBySubscription_568208 = ref object of OpenApiRestCall_567651
-proc url_DomainsListBySubscription_568210(protocol: Scheme; host: string;
+  Call_DomainsListBySubscription_564108 = ref object of OpenApiRestCall_563549
+proc url_DomainsListBySubscription_564110(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -424,7 +428,7 @@ proc url_DomainsListBySubscription_568210(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DomainsListBySubscription_568209(path: JsonNode; query: JsonNode;
+proc validate_DomainsListBySubscription_564109(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## List all the domains under an Azure subscription.
   ## 
@@ -436,11 +440,11 @@ proc validate_DomainsListBySubscription_568209(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_568212 = path.getOrDefault("subscriptionId")
-  valid_568212 = validateParameter(valid_568212, JString, required = true,
+  var valid_564112 = path.getOrDefault("subscriptionId")
+  valid_564112 = validateParameter(valid_564112, JString, required = true,
                                  default = nil)
-  if valid_568212 != nil:
-    section.add "subscriptionId", valid_568212
+  if valid_564112 != nil:
+    section.add "subscriptionId", valid_564112
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -452,20 +456,20 @@ proc validate_DomainsListBySubscription_568209(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568213 = query.getOrDefault("api-version")
-  valid_568213 = validateParameter(valid_568213, JString, required = true,
+  var valid_564113 = query.getOrDefault("api-version")
+  valid_564113 = validateParameter(valid_564113, JString, required = true,
                                  default = nil)
-  if valid_568213 != nil:
-    section.add "api-version", valid_568213
-  var valid_568214 = query.getOrDefault("$top")
-  valid_568214 = validateParameter(valid_568214, JInt, required = false, default = nil)
-  if valid_568214 != nil:
-    section.add "$top", valid_568214
-  var valid_568215 = query.getOrDefault("$filter")
-  valid_568215 = validateParameter(valid_568215, JString, required = false,
+  if valid_564113 != nil:
+    section.add "api-version", valid_564113
+  var valid_564114 = query.getOrDefault("$top")
+  valid_564114 = validateParameter(valid_564114, JInt, required = false, default = nil)
+  if valid_564114 != nil:
+    section.add "$top", valid_564114
+  var valid_564115 = query.getOrDefault("$filter")
+  valid_564115 = validateParameter(valid_564115, JString, required = false,
                                  default = nil)
-  if valid_568215 != nil:
-    section.add "$filter", valid_568215
+  if valid_564115 != nil:
+    section.add "$filter", valid_564115
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -474,47 +478,47 @@ proc validate_DomainsListBySubscription_568209(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568216: Call_DomainsListBySubscription_568208; path: JsonNode;
+proc call*(call_564116: Call_DomainsListBySubscription_564108; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## List all the domains under an Azure subscription.
   ## 
-  let valid = call_568216.validator(path, query, header, formData, body)
-  let scheme = call_568216.pickScheme
+  let valid = call_564116.validator(path, query, header, formData, body)
+  let scheme = call_564116.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568216.url(scheme.get, call_568216.host, call_568216.base,
-                         call_568216.route, valid.getOrDefault("path"),
+  let url = call_564116.url(scheme.get, call_564116.host, call_564116.base,
+                         call_564116.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568216, url, valid)
+  result = hook(call_564116, url, valid)
 
-proc call*(call_568217: Call_DomainsListBySubscription_568208; apiVersion: string;
+proc call*(call_564117: Call_DomainsListBySubscription_564108; apiVersion: string;
           subscriptionId: string; Top: int = 0; Filter: string = ""): Recallable =
   ## domainsListBySubscription
   ## List all the domains under an Azure subscription.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
-  ##   subscriptionId: string (required)
-  ##                 : Subscription credentials that uniquely identify a Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   Top: int
   ##      : The number of results to return per page for the list operation. Valid range for top parameter is 1 to 100. If not specified, the default number of results to be returned is 20 items per page.
+  ##   subscriptionId: string (required)
+  ##                 : Subscription credentials that uniquely identify a Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   Filter: string
   ##         : The query used to filter the search results using OData syntax. Filtering is permitted on the 'name' property only and with limited number of OData operations. These operations are: the 'contains' function as well as the following logical operations: not, and, or, eq (for equal), and ne (for not equal). No arithmetic operations are supported. The following is a valid filter example: $filter=contains(namE, 'PATTERN') and name ne 'PATTERN-1'. The following is not a valid filter example: $filter=location eq 'westus'.
-  var path_568218 = newJObject()
-  var query_568219 = newJObject()
-  add(query_568219, "api-version", newJString(apiVersion))
-  add(path_568218, "subscriptionId", newJString(subscriptionId))
-  add(query_568219, "$top", newJInt(Top))
-  add(query_568219, "$filter", newJString(Filter))
-  result = call_568217.call(path_568218, query_568219, nil, nil, nil)
+  var path_564118 = newJObject()
+  var query_564119 = newJObject()
+  add(query_564119, "api-version", newJString(apiVersion))
+  add(query_564119, "$top", newJInt(Top))
+  add(path_564118, "subscriptionId", newJString(subscriptionId))
+  add(query_564119, "$filter", newJString(Filter))
+  result = call_564117.call(path_564118, query_564119, nil, nil, nil)
 
-var domainsListBySubscription* = Call_DomainsListBySubscription_568208(
+var domainsListBySubscription* = Call_DomainsListBySubscription_564108(
     name: "domainsListBySubscription", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.EventGrid/domains",
-    validator: validate_DomainsListBySubscription_568209, base: "",
-    url: url_DomainsListBySubscription_568210, schemes: {Scheme.Https})
+    validator: validate_DomainsListBySubscription_564109, base: "",
+    url: url_DomainsListBySubscription_564110, schemes: {Scheme.Https})
 type
-  Call_EventSubscriptionsListGlobalBySubscription_568220 = ref object of OpenApiRestCall_567651
-proc url_EventSubscriptionsListGlobalBySubscription_568222(protocol: Scheme;
+  Call_EventSubscriptionsListGlobalBySubscription_564120 = ref object of OpenApiRestCall_563549
+proc url_EventSubscriptionsListGlobalBySubscription_564122(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -531,7 +535,7 @@ proc url_EventSubscriptionsListGlobalBySubscription_568222(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_EventSubscriptionsListGlobalBySubscription_568221(path: JsonNode;
+proc validate_EventSubscriptionsListGlobalBySubscription_564121(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## List all aggregated global event subscriptions under a specific Azure subscription.
   ## 
@@ -543,11 +547,11 @@ proc validate_EventSubscriptionsListGlobalBySubscription_568221(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_568223 = path.getOrDefault("subscriptionId")
-  valid_568223 = validateParameter(valid_568223, JString, required = true,
+  var valid_564123 = path.getOrDefault("subscriptionId")
+  valid_564123 = validateParameter(valid_564123, JString, required = true,
                                  default = nil)
-  if valid_568223 != nil:
-    section.add "subscriptionId", valid_568223
+  if valid_564123 != nil:
+    section.add "subscriptionId", valid_564123
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -559,20 +563,20 @@ proc validate_EventSubscriptionsListGlobalBySubscription_568221(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568224 = query.getOrDefault("api-version")
-  valid_568224 = validateParameter(valid_568224, JString, required = true,
+  var valid_564124 = query.getOrDefault("api-version")
+  valid_564124 = validateParameter(valid_564124, JString, required = true,
                                  default = nil)
-  if valid_568224 != nil:
-    section.add "api-version", valid_568224
-  var valid_568225 = query.getOrDefault("$top")
-  valid_568225 = validateParameter(valid_568225, JInt, required = false, default = nil)
-  if valid_568225 != nil:
-    section.add "$top", valid_568225
-  var valid_568226 = query.getOrDefault("$filter")
-  valid_568226 = validateParameter(valid_568226, JString, required = false,
+  if valid_564124 != nil:
+    section.add "api-version", valid_564124
+  var valid_564125 = query.getOrDefault("$top")
+  valid_564125 = validateParameter(valid_564125, JInt, required = false, default = nil)
+  if valid_564125 != nil:
+    section.add "$top", valid_564125
+  var valid_564126 = query.getOrDefault("$filter")
+  valid_564126 = validateParameter(valid_564126, JString, required = false,
                                  default = nil)
-  if valid_568226 != nil:
-    section.add "$filter", valid_568226
+  if valid_564126 != nil:
+    section.add "$filter", valid_564126
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -581,49 +585,49 @@ proc validate_EventSubscriptionsListGlobalBySubscription_568221(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568227: Call_EventSubscriptionsListGlobalBySubscription_568220;
+proc call*(call_564127: Call_EventSubscriptionsListGlobalBySubscription_564120;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## List all aggregated global event subscriptions under a specific Azure subscription.
   ## 
-  let valid = call_568227.validator(path, query, header, formData, body)
-  let scheme = call_568227.pickScheme
+  let valid = call_564127.validator(path, query, header, formData, body)
+  let scheme = call_564127.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568227.url(scheme.get, call_568227.host, call_568227.base,
-                         call_568227.route, valid.getOrDefault("path"),
+  let url = call_564127.url(scheme.get, call_564127.host, call_564127.base,
+                         call_564127.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568227, url, valid)
+  result = hook(call_564127, url, valid)
 
-proc call*(call_568228: Call_EventSubscriptionsListGlobalBySubscription_568220;
+proc call*(call_564128: Call_EventSubscriptionsListGlobalBySubscription_564120;
           apiVersion: string; subscriptionId: string; Top: int = 0; Filter: string = ""): Recallable =
   ## eventSubscriptionsListGlobalBySubscription
   ## List all aggregated global event subscriptions under a specific Azure subscription.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
-  ##   subscriptionId: string (required)
-  ##                 : Subscription credentials that uniquely identify a Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   Top: int
   ##      : The number of results to return per page for the list operation. Valid range for top parameter is 1 to 100. If not specified, the default number of results to be returned is 20 items per page.
+  ##   subscriptionId: string (required)
+  ##                 : Subscription credentials that uniquely identify a Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   Filter: string
   ##         : The query used to filter the search results using OData syntax. Filtering is permitted on the 'name' property only and with limited number of OData operations. These operations are: the 'contains' function as well as the following logical operations: not, and, or, eq (for equal), and ne (for not equal). No arithmetic operations are supported. The following is a valid filter example: $filter=contains(namE, 'PATTERN') and name ne 'PATTERN-1'. The following is not a valid filter example: $filter=location eq 'westus'.
-  var path_568229 = newJObject()
-  var query_568230 = newJObject()
-  add(query_568230, "api-version", newJString(apiVersion))
-  add(path_568229, "subscriptionId", newJString(subscriptionId))
-  add(query_568230, "$top", newJInt(Top))
-  add(query_568230, "$filter", newJString(Filter))
-  result = call_568228.call(path_568229, query_568230, nil, nil, nil)
+  var path_564129 = newJObject()
+  var query_564130 = newJObject()
+  add(query_564130, "api-version", newJString(apiVersion))
+  add(query_564130, "$top", newJInt(Top))
+  add(path_564129, "subscriptionId", newJString(subscriptionId))
+  add(query_564130, "$filter", newJString(Filter))
+  result = call_564128.call(path_564129, query_564130, nil, nil, nil)
 
-var eventSubscriptionsListGlobalBySubscription* = Call_EventSubscriptionsListGlobalBySubscription_568220(
+var eventSubscriptionsListGlobalBySubscription* = Call_EventSubscriptionsListGlobalBySubscription_564120(
     name: "eventSubscriptionsListGlobalBySubscription", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.EventGrid/eventSubscriptions",
-    validator: validate_EventSubscriptionsListGlobalBySubscription_568221,
-    base: "", url: url_EventSubscriptionsListGlobalBySubscription_568222,
+    validator: validate_EventSubscriptionsListGlobalBySubscription_564121,
+    base: "", url: url_EventSubscriptionsListGlobalBySubscription_564122,
     schemes: {Scheme.Https})
 type
-  Call_EventSubscriptionsListRegionalBySubscription_568231 = ref object of OpenApiRestCall_567651
-proc url_EventSubscriptionsListRegionalBySubscription_568233(protocol: Scheme;
+  Call_EventSubscriptionsListRegionalBySubscription_564131 = ref object of OpenApiRestCall_563549
+proc url_EventSubscriptionsListRegionalBySubscription_564133(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -642,7 +646,7 @@ proc url_EventSubscriptionsListRegionalBySubscription_568233(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_EventSubscriptionsListRegionalBySubscription_568232(path: JsonNode;
+proc validate_EventSubscriptionsListRegionalBySubscription_564132(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## List all event subscriptions from the given location under a specific Azure subscription.
   ## 
@@ -656,16 +660,16 @@ proc validate_EventSubscriptionsListRegionalBySubscription_568232(path: JsonNode
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_568234 = path.getOrDefault("subscriptionId")
-  valid_568234 = validateParameter(valid_568234, JString, required = true,
+  var valid_564134 = path.getOrDefault("subscriptionId")
+  valid_564134 = validateParameter(valid_564134, JString, required = true,
                                  default = nil)
-  if valid_568234 != nil:
-    section.add "subscriptionId", valid_568234
-  var valid_568235 = path.getOrDefault("location")
-  valid_568235 = validateParameter(valid_568235, JString, required = true,
+  if valid_564134 != nil:
+    section.add "subscriptionId", valid_564134
+  var valid_564135 = path.getOrDefault("location")
+  valid_564135 = validateParameter(valid_564135, JString, required = true,
                                  default = nil)
-  if valid_568235 != nil:
-    section.add "location", valid_568235
+  if valid_564135 != nil:
+    section.add "location", valid_564135
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -677,20 +681,20 @@ proc validate_EventSubscriptionsListRegionalBySubscription_568232(path: JsonNode
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568236 = query.getOrDefault("api-version")
-  valid_568236 = validateParameter(valid_568236, JString, required = true,
+  var valid_564136 = query.getOrDefault("api-version")
+  valid_564136 = validateParameter(valid_564136, JString, required = true,
                                  default = nil)
-  if valid_568236 != nil:
-    section.add "api-version", valid_568236
-  var valid_568237 = query.getOrDefault("$top")
-  valid_568237 = validateParameter(valid_568237, JInt, required = false, default = nil)
-  if valid_568237 != nil:
-    section.add "$top", valid_568237
-  var valid_568238 = query.getOrDefault("$filter")
-  valid_568238 = validateParameter(valid_568238, JString, required = false,
+  if valid_564136 != nil:
+    section.add "api-version", valid_564136
+  var valid_564137 = query.getOrDefault("$top")
+  valid_564137 = validateParameter(valid_564137, JInt, required = false, default = nil)
+  if valid_564137 != nil:
+    section.add "$top", valid_564137
+  var valid_564138 = query.getOrDefault("$filter")
+  valid_564138 = validateParameter(valid_564138, JString, required = false,
                                  default = nil)
-  if valid_568238 != nil:
-    section.add "$filter", valid_568238
+  if valid_564138 != nil:
+    section.add "$filter", valid_564138
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -699,53 +703,53 @@ proc validate_EventSubscriptionsListRegionalBySubscription_568232(path: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_568239: Call_EventSubscriptionsListRegionalBySubscription_568231;
+proc call*(call_564139: Call_EventSubscriptionsListRegionalBySubscription_564131;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## List all event subscriptions from the given location under a specific Azure subscription.
   ## 
-  let valid = call_568239.validator(path, query, header, formData, body)
-  let scheme = call_568239.pickScheme
+  let valid = call_564139.validator(path, query, header, formData, body)
+  let scheme = call_564139.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568239.url(scheme.get, call_568239.host, call_568239.base,
-                         call_568239.route, valid.getOrDefault("path"),
+  let url = call_564139.url(scheme.get, call_564139.host, call_564139.base,
+                         call_564139.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568239, url, valid)
+  result = hook(call_564139, url, valid)
 
-proc call*(call_568240: Call_EventSubscriptionsListRegionalBySubscription_568231;
+proc call*(call_564140: Call_EventSubscriptionsListRegionalBySubscription_564131;
           apiVersion: string; subscriptionId: string; location: string; Top: int = 0;
           Filter: string = ""): Recallable =
   ## eventSubscriptionsListRegionalBySubscription
   ## List all event subscriptions from the given location under a specific Azure subscription.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
-  ##   subscriptionId: string (required)
-  ##                 : Subscription credentials that uniquely identify a Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   Top: int
   ##      : The number of results to return per page for the list operation. Valid range for top parameter is 1 to 100. If not specified, the default number of results to be returned is 20 items per page.
+  ##   subscriptionId: string (required)
+  ##                 : Subscription credentials that uniquely identify a Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   location: string (required)
   ##           : Name of the location.
   ##   Filter: string
   ##         : The query used to filter the search results using OData syntax. Filtering is permitted on the 'name' property only and with limited number of OData operations. These operations are: the 'contains' function as well as the following logical operations: not, and, or, eq (for equal), and ne (for not equal). No arithmetic operations are supported. The following is a valid filter example: $filter=contains(namE, 'PATTERN') and name ne 'PATTERN-1'. The following is not a valid filter example: $filter=location eq 'westus'.
-  var path_568241 = newJObject()
-  var query_568242 = newJObject()
-  add(query_568242, "api-version", newJString(apiVersion))
-  add(path_568241, "subscriptionId", newJString(subscriptionId))
-  add(query_568242, "$top", newJInt(Top))
-  add(path_568241, "location", newJString(location))
-  add(query_568242, "$filter", newJString(Filter))
-  result = call_568240.call(path_568241, query_568242, nil, nil, nil)
+  var path_564141 = newJObject()
+  var query_564142 = newJObject()
+  add(query_564142, "api-version", newJString(apiVersion))
+  add(query_564142, "$top", newJInt(Top))
+  add(path_564141, "subscriptionId", newJString(subscriptionId))
+  add(path_564141, "location", newJString(location))
+  add(query_564142, "$filter", newJString(Filter))
+  result = call_564140.call(path_564141, query_564142, nil, nil, nil)
 
-var eventSubscriptionsListRegionalBySubscription* = Call_EventSubscriptionsListRegionalBySubscription_568231(
+var eventSubscriptionsListRegionalBySubscription* = Call_EventSubscriptionsListRegionalBySubscription_564131(
     name: "eventSubscriptionsListRegionalBySubscription",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.EventGrid/locations/{location}/eventSubscriptions",
-    validator: validate_EventSubscriptionsListRegionalBySubscription_568232,
-    base: "", url: url_EventSubscriptionsListRegionalBySubscription_568233,
+    validator: validate_EventSubscriptionsListRegionalBySubscription_564132,
+    base: "", url: url_EventSubscriptionsListRegionalBySubscription_564133,
     schemes: {Scheme.Https})
 type
-  Call_EventSubscriptionsListRegionalBySubscriptionForTopicType_568243 = ref object of OpenApiRestCall_567651
-proc url_EventSubscriptionsListRegionalBySubscriptionForTopicType_568245(
+  Call_EventSubscriptionsListRegionalBySubscriptionForTopicType_564143 = ref object of OpenApiRestCall_563549
+proc url_EventSubscriptionsListRegionalBySubscriptionForTopicType_564145(
     protocol: Scheme; host: string; base: string; route: string; path: JsonNode;
     query: JsonNode): Uri =
   result.scheme = $protocol
@@ -768,7 +772,7 @@ proc url_EventSubscriptionsListRegionalBySubscriptionForTopicType_568245(
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_EventSubscriptionsListRegionalBySubscriptionForTopicType_568244(
+proc validate_EventSubscriptionsListRegionalBySubscriptionForTopicType_564144(
     path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
     body: JsonNode): JsonNode =
   ## List all event subscriptions from the given location under a specific Azure subscription and topic type.
@@ -785,21 +789,21 @@ proc validate_EventSubscriptionsListRegionalBySubscriptionForTopicType_568244(
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `topicTypeName` field"
-  var valid_568246 = path.getOrDefault("topicTypeName")
-  valid_568246 = validateParameter(valid_568246, JString, required = true,
+  var valid_564146 = path.getOrDefault("topicTypeName")
+  valid_564146 = validateParameter(valid_564146, JString, required = true,
                                  default = nil)
-  if valid_568246 != nil:
-    section.add "topicTypeName", valid_568246
-  var valid_568247 = path.getOrDefault("subscriptionId")
-  valid_568247 = validateParameter(valid_568247, JString, required = true,
+  if valid_564146 != nil:
+    section.add "topicTypeName", valid_564146
+  var valid_564147 = path.getOrDefault("subscriptionId")
+  valid_564147 = validateParameter(valid_564147, JString, required = true,
                                  default = nil)
-  if valid_568247 != nil:
-    section.add "subscriptionId", valid_568247
-  var valid_568248 = path.getOrDefault("location")
-  valid_568248 = validateParameter(valid_568248, JString, required = true,
+  if valid_564147 != nil:
+    section.add "subscriptionId", valid_564147
+  var valid_564148 = path.getOrDefault("location")
+  valid_564148 = validateParameter(valid_564148, JString, required = true,
                                  default = nil)
-  if valid_568248 != nil:
-    section.add "location", valid_568248
+  if valid_564148 != nil:
+    section.add "location", valid_564148
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -811,20 +815,20 @@ proc validate_EventSubscriptionsListRegionalBySubscriptionForTopicType_568244(
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568249 = query.getOrDefault("api-version")
-  valid_568249 = validateParameter(valid_568249, JString, required = true,
+  var valid_564149 = query.getOrDefault("api-version")
+  valid_564149 = validateParameter(valid_564149, JString, required = true,
                                  default = nil)
-  if valid_568249 != nil:
-    section.add "api-version", valid_568249
-  var valid_568250 = query.getOrDefault("$top")
-  valid_568250 = validateParameter(valid_568250, JInt, required = false, default = nil)
-  if valid_568250 != nil:
-    section.add "$top", valid_568250
-  var valid_568251 = query.getOrDefault("$filter")
-  valid_568251 = validateParameter(valid_568251, JString, required = false,
+  if valid_564149 != nil:
+    section.add "api-version", valid_564149
+  var valid_564150 = query.getOrDefault("$top")
+  valid_564150 = validateParameter(valid_564150, JInt, required = false, default = nil)
+  if valid_564150 != nil:
+    section.add "$top", valid_564150
+  var valid_564151 = query.getOrDefault("$filter")
+  valid_564151 = validateParameter(valid_564151, JString, required = false,
                                  default = nil)
-  if valid_568251 != nil:
-    section.add "$filter", valid_568251
+  if valid_564151 != nil:
+    section.add "$filter", valid_564151
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -833,55 +837,55 @@ proc validate_EventSubscriptionsListRegionalBySubscriptionForTopicType_568244(
   if body != nil:
     result.add "body", body
 
-proc call*(call_568252: Call_EventSubscriptionsListRegionalBySubscriptionForTopicType_568243;
+proc call*(call_564152: Call_EventSubscriptionsListRegionalBySubscriptionForTopicType_564143;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## List all event subscriptions from the given location under a specific Azure subscription and topic type.
   ## 
-  let valid = call_568252.validator(path, query, header, formData, body)
-  let scheme = call_568252.pickScheme
+  let valid = call_564152.validator(path, query, header, formData, body)
+  let scheme = call_564152.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568252.url(scheme.get, call_568252.host, call_568252.base,
-                         call_568252.route, valid.getOrDefault("path"),
+  let url = call_564152.url(scheme.get, call_564152.host, call_564152.base,
+                         call_564152.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568252, url, valid)
+  result = hook(call_564152, url, valid)
 
-proc call*(call_568253: Call_EventSubscriptionsListRegionalBySubscriptionForTopicType_568243;
-          topicTypeName: string; apiVersion: string; subscriptionId: string;
+proc call*(call_564153: Call_EventSubscriptionsListRegionalBySubscriptionForTopicType_564143;
+          apiVersion: string; topicTypeName: string; subscriptionId: string;
           location: string; Top: int = 0; Filter: string = ""): Recallable =
   ## eventSubscriptionsListRegionalBySubscriptionForTopicType
   ## List all event subscriptions from the given location under a specific Azure subscription and topic type.
-  ##   topicTypeName: string (required)
-  ##                : Name of the topic type.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
-  ##   subscriptionId: string (required)
-  ##                 : Subscription credentials that uniquely identify a Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   topicTypeName: string (required)
+  ##                : Name of the topic type.
   ##   Top: int
   ##      : The number of results to return per page for the list operation. Valid range for top parameter is 1 to 100. If not specified, the default number of results to be returned is 20 items per page.
+  ##   subscriptionId: string (required)
+  ##                 : Subscription credentials that uniquely identify a Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   location: string (required)
   ##           : Name of the location.
   ##   Filter: string
   ##         : The query used to filter the search results using OData syntax. Filtering is permitted on the 'name' property only and with limited number of OData operations. These operations are: the 'contains' function as well as the following logical operations: not, and, or, eq (for equal), and ne (for not equal). No arithmetic operations are supported. The following is a valid filter example: $filter=contains(namE, 'PATTERN') and name ne 'PATTERN-1'. The following is not a valid filter example: $filter=location eq 'westus'.
-  var path_568254 = newJObject()
-  var query_568255 = newJObject()
-  add(path_568254, "topicTypeName", newJString(topicTypeName))
-  add(query_568255, "api-version", newJString(apiVersion))
-  add(path_568254, "subscriptionId", newJString(subscriptionId))
-  add(query_568255, "$top", newJInt(Top))
-  add(path_568254, "location", newJString(location))
-  add(query_568255, "$filter", newJString(Filter))
-  result = call_568253.call(path_568254, query_568255, nil, nil, nil)
+  var path_564154 = newJObject()
+  var query_564155 = newJObject()
+  add(query_564155, "api-version", newJString(apiVersion))
+  add(path_564154, "topicTypeName", newJString(topicTypeName))
+  add(query_564155, "$top", newJInt(Top))
+  add(path_564154, "subscriptionId", newJString(subscriptionId))
+  add(path_564154, "location", newJString(location))
+  add(query_564155, "$filter", newJString(Filter))
+  result = call_564153.call(path_564154, query_564155, nil, nil, nil)
 
-var eventSubscriptionsListRegionalBySubscriptionForTopicType* = Call_EventSubscriptionsListRegionalBySubscriptionForTopicType_568243(
+var eventSubscriptionsListRegionalBySubscriptionForTopicType* = Call_EventSubscriptionsListRegionalBySubscriptionForTopicType_564143(
     name: "eventSubscriptionsListRegionalBySubscriptionForTopicType",
-    meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.EventGrid/locations/{location}/topicTypes/{topicTypeName}/eventSubscriptions", validator: validate_EventSubscriptionsListRegionalBySubscriptionForTopicType_568244,
-    base: "", url: url_EventSubscriptionsListRegionalBySubscriptionForTopicType_568245,
+    meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.EventGrid/locations/{location}/topicTypes/{topicTypeName}/eventSubscriptions", validator: validate_EventSubscriptionsListRegionalBySubscriptionForTopicType_564144,
+    base: "", url: url_EventSubscriptionsListRegionalBySubscriptionForTopicType_564145,
     schemes: {Scheme.Https})
 type
-  Call_EventSubscriptionsListGlobalBySubscriptionForTopicType_568256 = ref object of OpenApiRestCall_567651
-proc url_EventSubscriptionsListGlobalBySubscriptionForTopicType_568258(
+  Call_EventSubscriptionsListGlobalBySubscriptionForTopicType_564156 = ref object of OpenApiRestCall_563549
+proc url_EventSubscriptionsListGlobalBySubscriptionForTopicType_564158(
     protocol: Scheme; host: string; base: string; route: string; path: JsonNode;
     query: JsonNode): Uri =
   result.scheme = $protocol
@@ -901,7 +905,7 @@ proc url_EventSubscriptionsListGlobalBySubscriptionForTopicType_568258(
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_EventSubscriptionsListGlobalBySubscriptionForTopicType_568257(
+proc validate_EventSubscriptionsListGlobalBySubscriptionForTopicType_564157(
     path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
     body: JsonNode): JsonNode =
   ## List all global event subscriptions under an Azure subscription for a topic type.
@@ -916,16 +920,16 @@ proc validate_EventSubscriptionsListGlobalBySubscriptionForTopicType_568257(
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `topicTypeName` field"
-  var valid_568259 = path.getOrDefault("topicTypeName")
-  valid_568259 = validateParameter(valid_568259, JString, required = true,
+  var valid_564159 = path.getOrDefault("topicTypeName")
+  valid_564159 = validateParameter(valid_564159, JString, required = true,
                                  default = nil)
-  if valid_568259 != nil:
-    section.add "topicTypeName", valid_568259
-  var valid_568260 = path.getOrDefault("subscriptionId")
-  valid_568260 = validateParameter(valid_568260, JString, required = true,
+  if valid_564159 != nil:
+    section.add "topicTypeName", valid_564159
+  var valid_564160 = path.getOrDefault("subscriptionId")
+  valid_564160 = validateParameter(valid_564160, JString, required = true,
                                  default = nil)
-  if valid_568260 != nil:
-    section.add "subscriptionId", valid_568260
+  if valid_564160 != nil:
+    section.add "subscriptionId", valid_564160
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -937,20 +941,20 @@ proc validate_EventSubscriptionsListGlobalBySubscriptionForTopicType_568257(
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568261 = query.getOrDefault("api-version")
-  valid_568261 = validateParameter(valid_568261, JString, required = true,
+  var valid_564161 = query.getOrDefault("api-version")
+  valid_564161 = validateParameter(valid_564161, JString, required = true,
                                  default = nil)
-  if valid_568261 != nil:
-    section.add "api-version", valid_568261
-  var valid_568262 = query.getOrDefault("$top")
-  valid_568262 = validateParameter(valid_568262, JInt, required = false, default = nil)
-  if valid_568262 != nil:
-    section.add "$top", valid_568262
-  var valid_568263 = query.getOrDefault("$filter")
-  valid_568263 = validateParameter(valid_568263, JString, required = false,
+  if valid_564161 != nil:
+    section.add "api-version", valid_564161
+  var valid_564162 = query.getOrDefault("$top")
+  valid_564162 = validateParameter(valid_564162, JInt, required = false, default = nil)
+  if valid_564162 != nil:
+    section.add "$top", valid_564162
+  var valid_564163 = query.getOrDefault("$filter")
+  valid_564163 = validateParameter(valid_564163, JString, required = false,
                                  default = nil)
-  if valid_568263 != nil:
-    section.add "$filter", valid_568263
+  if valid_564163 != nil:
+    section.add "$filter", valid_564163
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -959,53 +963,53 @@ proc validate_EventSubscriptionsListGlobalBySubscriptionForTopicType_568257(
   if body != nil:
     result.add "body", body
 
-proc call*(call_568264: Call_EventSubscriptionsListGlobalBySubscriptionForTopicType_568256;
+proc call*(call_564164: Call_EventSubscriptionsListGlobalBySubscriptionForTopicType_564156;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## List all global event subscriptions under an Azure subscription for a topic type.
   ## 
-  let valid = call_568264.validator(path, query, header, formData, body)
-  let scheme = call_568264.pickScheme
+  let valid = call_564164.validator(path, query, header, formData, body)
+  let scheme = call_564164.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568264.url(scheme.get, call_568264.host, call_568264.base,
-                         call_568264.route, valid.getOrDefault("path"),
+  let url = call_564164.url(scheme.get, call_564164.host, call_564164.base,
+                         call_564164.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568264, url, valid)
+  result = hook(call_564164, url, valid)
 
-proc call*(call_568265: Call_EventSubscriptionsListGlobalBySubscriptionForTopicType_568256;
-          topicTypeName: string; apiVersion: string; subscriptionId: string;
+proc call*(call_564165: Call_EventSubscriptionsListGlobalBySubscriptionForTopicType_564156;
+          apiVersion: string; topicTypeName: string; subscriptionId: string;
           Top: int = 0; Filter: string = ""): Recallable =
   ## eventSubscriptionsListGlobalBySubscriptionForTopicType
   ## List all global event subscriptions under an Azure subscription for a topic type.
-  ##   topicTypeName: string (required)
-  ##                : Name of the topic type.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
-  ##   subscriptionId: string (required)
-  ##                 : Subscription credentials that uniquely identify a Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   topicTypeName: string (required)
+  ##                : Name of the topic type.
   ##   Top: int
   ##      : The number of results to return per page for the list operation. Valid range for top parameter is 1 to 100. If not specified, the default number of results to be returned is 20 items per page.
+  ##   subscriptionId: string (required)
+  ##                 : Subscription credentials that uniquely identify a Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   Filter: string
   ##         : The query used to filter the search results using OData syntax. Filtering is permitted on the 'name' property only and with limited number of OData operations. These operations are: the 'contains' function as well as the following logical operations: not, and, or, eq (for equal), and ne (for not equal). No arithmetic operations are supported. The following is a valid filter example: $filter=contains(namE, 'PATTERN') and name ne 'PATTERN-1'. The following is not a valid filter example: $filter=location eq 'westus'.
-  var path_568266 = newJObject()
-  var query_568267 = newJObject()
-  add(path_568266, "topicTypeName", newJString(topicTypeName))
-  add(query_568267, "api-version", newJString(apiVersion))
-  add(path_568266, "subscriptionId", newJString(subscriptionId))
-  add(query_568267, "$top", newJInt(Top))
-  add(query_568267, "$filter", newJString(Filter))
-  result = call_568265.call(path_568266, query_568267, nil, nil, nil)
+  var path_564166 = newJObject()
+  var query_564167 = newJObject()
+  add(query_564167, "api-version", newJString(apiVersion))
+  add(path_564166, "topicTypeName", newJString(topicTypeName))
+  add(query_564167, "$top", newJInt(Top))
+  add(path_564166, "subscriptionId", newJString(subscriptionId))
+  add(query_564167, "$filter", newJString(Filter))
+  result = call_564165.call(path_564166, query_564167, nil, nil, nil)
 
-var eventSubscriptionsListGlobalBySubscriptionForTopicType* = Call_EventSubscriptionsListGlobalBySubscriptionForTopicType_568256(
+var eventSubscriptionsListGlobalBySubscriptionForTopicType* = Call_EventSubscriptionsListGlobalBySubscriptionForTopicType_564156(
     name: "eventSubscriptionsListGlobalBySubscriptionForTopicType",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.EventGrid/topicTypes/{topicTypeName}/eventSubscriptions",
-    validator: validate_EventSubscriptionsListGlobalBySubscriptionForTopicType_568257,
-    base: "", url: url_EventSubscriptionsListGlobalBySubscriptionForTopicType_568258,
+    validator: validate_EventSubscriptionsListGlobalBySubscriptionForTopicType_564157,
+    base: "", url: url_EventSubscriptionsListGlobalBySubscriptionForTopicType_564158,
     schemes: {Scheme.Https})
 type
-  Call_TopicsListBySubscription_568268 = ref object of OpenApiRestCall_567651
-proc url_TopicsListBySubscription_568270(protocol: Scheme; host: string;
+  Call_TopicsListBySubscription_564168 = ref object of OpenApiRestCall_563549
+proc url_TopicsListBySubscription_564170(protocol: Scheme; host: string;
                                         base: string; route: string; path: JsonNode;
                                         query: JsonNode): Uri =
   result.scheme = $protocol
@@ -1022,7 +1026,7 @@ proc url_TopicsListBySubscription_568270(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_TopicsListBySubscription_568269(path: JsonNode; query: JsonNode;
+proc validate_TopicsListBySubscription_564169(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## List all the topics under an Azure subscription.
   ## 
@@ -1034,11 +1038,11 @@ proc validate_TopicsListBySubscription_568269(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_568271 = path.getOrDefault("subscriptionId")
-  valid_568271 = validateParameter(valid_568271, JString, required = true,
+  var valid_564171 = path.getOrDefault("subscriptionId")
+  valid_564171 = validateParameter(valid_564171, JString, required = true,
                                  default = nil)
-  if valid_568271 != nil:
-    section.add "subscriptionId", valid_568271
+  if valid_564171 != nil:
+    section.add "subscriptionId", valid_564171
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1050,20 +1054,20 @@ proc validate_TopicsListBySubscription_568269(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568272 = query.getOrDefault("api-version")
-  valid_568272 = validateParameter(valid_568272, JString, required = true,
+  var valid_564172 = query.getOrDefault("api-version")
+  valid_564172 = validateParameter(valid_564172, JString, required = true,
                                  default = nil)
-  if valid_568272 != nil:
-    section.add "api-version", valid_568272
-  var valid_568273 = query.getOrDefault("$top")
-  valid_568273 = validateParameter(valid_568273, JInt, required = false, default = nil)
-  if valid_568273 != nil:
-    section.add "$top", valid_568273
-  var valid_568274 = query.getOrDefault("$filter")
-  valid_568274 = validateParameter(valid_568274, JString, required = false,
+  if valid_564172 != nil:
+    section.add "api-version", valid_564172
+  var valid_564173 = query.getOrDefault("$top")
+  valid_564173 = validateParameter(valid_564173, JInt, required = false, default = nil)
+  if valid_564173 != nil:
+    section.add "$top", valid_564173
+  var valid_564174 = query.getOrDefault("$filter")
+  valid_564174 = validateParameter(valid_564174, JString, required = false,
                                  default = nil)
-  if valid_568274 != nil:
-    section.add "$filter", valid_568274
+  if valid_564174 != nil:
+    section.add "$filter", valid_564174
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1072,47 +1076,47 @@ proc validate_TopicsListBySubscription_568269(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568275: Call_TopicsListBySubscription_568268; path: JsonNode;
+proc call*(call_564175: Call_TopicsListBySubscription_564168; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## List all the topics under an Azure subscription.
   ## 
-  let valid = call_568275.validator(path, query, header, formData, body)
-  let scheme = call_568275.pickScheme
+  let valid = call_564175.validator(path, query, header, formData, body)
+  let scheme = call_564175.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568275.url(scheme.get, call_568275.host, call_568275.base,
-                         call_568275.route, valid.getOrDefault("path"),
+  let url = call_564175.url(scheme.get, call_564175.host, call_564175.base,
+                         call_564175.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568275, url, valid)
+  result = hook(call_564175, url, valid)
 
-proc call*(call_568276: Call_TopicsListBySubscription_568268; apiVersion: string;
+proc call*(call_564176: Call_TopicsListBySubscription_564168; apiVersion: string;
           subscriptionId: string; Top: int = 0; Filter: string = ""): Recallable =
   ## topicsListBySubscription
   ## List all the topics under an Azure subscription.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
-  ##   subscriptionId: string (required)
-  ##                 : Subscription credentials that uniquely identify a Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   Top: int
   ##      : The number of results to return per page for the list operation. Valid range for top parameter is 1 to 100. If not specified, the default number of results to be returned is 20 items per page.
+  ##   subscriptionId: string (required)
+  ##                 : Subscription credentials that uniquely identify a Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   Filter: string
   ##         : The query used to filter the search results using OData syntax. Filtering is permitted on the 'name' property only and with limited number of OData operations. These operations are: the 'contains' function as well as the following logical operations: not, and, or, eq (for equal), and ne (for not equal). No arithmetic operations are supported. The following is a valid filter example: $filter=contains(namE, 'PATTERN') and name ne 'PATTERN-1'. The following is not a valid filter example: $filter=location eq 'westus'.
-  var path_568277 = newJObject()
-  var query_568278 = newJObject()
-  add(query_568278, "api-version", newJString(apiVersion))
-  add(path_568277, "subscriptionId", newJString(subscriptionId))
-  add(query_568278, "$top", newJInt(Top))
-  add(query_568278, "$filter", newJString(Filter))
-  result = call_568276.call(path_568277, query_568278, nil, nil, nil)
+  var path_564177 = newJObject()
+  var query_564178 = newJObject()
+  add(query_564178, "api-version", newJString(apiVersion))
+  add(query_564178, "$top", newJInt(Top))
+  add(path_564177, "subscriptionId", newJString(subscriptionId))
+  add(query_564178, "$filter", newJString(Filter))
+  result = call_564176.call(path_564177, query_564178, nil, nil, nil)
 
-var topicsListBySubscription* = Call_TopicsListBySubscription_568268(
+var topicsListBySubscription* = Call_TopicsListBySubscription_564168(
     name: "topicsListBySubscription", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.EventGrid/topics",
-    validator: validate_TopicsListBySubscription_568269, base: "",
-    url: url_TopicsListBySubscription_568270, schemes: {Scheme.Https})
+    validator: validate_TopicsListBySubscription_564169, base: "",
+    url: url_TopicsListBySubscription_564170, schemes: {Scheme.Https})
 type
-  Call_DomainsListByResourceGroup_568279 = ref object of OpenApiRestCall_567651
-proc url_DomainsListByResourceGroup_568281(protocol: Scheme; host: string;
+  Call_DomainsListByResourceGroup_564179 = ref object of OpenApiRestCall_563549
+proc url_DomainsListByResourceGroup_564181(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1132,30 +1136,30 @@ proc url_DomainsListByResourceGroup_568281(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DomainsListByResourceGroup_568280(path: JsonNode; query: JsonNode;
+proc validate_DomainsListByResourceGroup_564180(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## List all the domains under a resource group.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group within the user's subscription.
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials that uniquely identify a Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group within the user's subscription.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568282 = path.getOrDefault("resourceGroupName")
-  valid_568282 = validateParameter(valid_568282, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564182 = path.getOrDefault("subscriptionId")
+  valid_564182 = validateParameter(valid_564182, JString, required = true,
                                  default = nil)
-  if valid_568282 != nil:
-    section.add "resourceGroupName", valid_568282
-  var valid_568283 = path.getOrDefault("subscriptionId")
-  valid_568283 = validateParameter(valid_568283, JString, required = true,
+  if valid_564182 != nil:
+    section.add "subscriptionId", valid_564182
+  var valid_564183 = path.getOrDefault("resourceGroupName")
+  valid_564183 = validateParameter(valid_564183, JString, required = true,
                                  default = nil)
-  if valid_568283 != nil:
-    section.add "subscriptionId", valid_568283
+  if valid_564183 != nil:
+    section.add "resourceGroupName", valid_564183
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1167,20 +1171,20 @@ proc validate_DomainsListByResourceGroup_568280(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568284 = query.getOrDefault("api-version")
-  valid_568284 = validateParameter(valid_568284, JString, required = true,
+  var valid_564184 = query.getOrDefault("api-version")
+  valid_564184 = validateParameter(valid_564184, JString, required = true,
                                  default = nil)
-  if valid_568284 != nil:
-    section.add "api-version", valid_568284
-  var valid_568285 = query.getOrDefault("$top")
-  valid_568285 = validateParameter(valid_568285, JInt, required = false, default = nil)
-  if valid_568285 != nil:
-    section.add "$top", valid_568285
-  var valid_568286 = query.getOrDefault("$filter")
-  valid_568286 = validateParameter(valid_568286, JString, required = false,
+  if valid_564184 != nil:
+    section.add "api-version", valid_564184
+  var valid_564185 = query.getOrDefault("$top")
+  valid_564185 = validateParameter(valid_564185, JInt, required = false, default = nil)
+  if valid_564185 != nil:
+    section.add "$top", valid_564185
+  var valid_564186 = query.getOrDefault("$filter")
+  valid_564186 = validateParameter(valid_564186, JString, required = false,
                                  default = nil)
-  if valid_568286 != nil:
-    section.add "$filter", valid_568286
+  if valid_564186 != nil:
+    section.add "$filter", valid_564186
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1189,51 +1193,51 @@ proc validate_DomainsListByResourceGroup_568280(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568287: Call_DomainsListByResourceGroup_568279; path: JsonNode;
+proc call*(call_564187: Call_DomainsListByResourceGroup_564179; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## List all the domains under a resource group.
   ## 
-  let valid = call_568287.validator(path, query, header, formData, body)
-  let scheme = call_568287.pickScheme
+  let valid = call_564187.validator(path, query, header, formData, body)
+  let scheme = call_564187.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568287.url(scheme.get, call_568287.host, call_568287.base,
-                         call_568287.route, valid.getOrDefault("path"),
+  let url = call_564187.url(scheme.get, call_564187.host, call_564187.base,
+                         call_564187.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568287, url, valid)
+  result = hook(call_564187, url, valid)
 
-proc call*(call_568288: Call_DomainsListByResourceGroup_568279;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          Top: int = 0; Filter: string = ""): Recallable =
+proc call*(call_564188: Call_DomainsListByResourceGroup_564179; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string; Top: int = 0;
+          Filter: string = ""): Recallable =
   ## domainsListByResourceGroup
   ## List all the domains under a resource group.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group within the user's subscription.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
-  ##   subscriptionId: string (required)
-  ##                 : Subscription credentials that uniquely identify a Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   Top: int
   ##      : The number of results to return per page for the list operation. Valid range for top parameter is 1 to 100. If not specified, the default number of results to be returned is 20 items per page.
+  ##   subscriptionId: string (required)
+  ##                 : Subscription credentials that uniquely identify a Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group within the user's subscription.
   ##   Filter: string
   ##         : The query used to filter the search results using OData syntax. Filtering is permitted on the 'name' property only and with limited number of OData operations. These operations are: the 'contains' function as well as the following logical operations: not, and, or, eq (for equal), and ne (for not equal). No arithmetic operations are supported. The following is a valid filter example: $filter=contains(namE, 'PATTERN') and name ne 'PATTERN-1'. The following is not a valid filter example: $filter=location eq 'westus'.
-  var path_568289 = newJObject()
-  var query_568290 = newJObject()
-  add(path_568289, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568290, "api-version", newJString(apiVersion))
-  add(path_568289, "subscriptionId", newJString(subscriptionId))
-  add(query_568290, "$top", newJInt(Top))
-  add(query_568290, "$filter", newJString(Filter))
-  result = call_568288.call(path_568289, query_568290, nil, nil, nil)
+  var path_564189 = newJObject()
+  var query_564190 = newJObject()
+  add(query_564190, "api-version", newJString(apiVersion))
+  add(query_564190, "$top", newJInt(Top))
+  add(path_564189, "subscriptionId", newJString(subscriptionId))
+  add(path_564189, "resourceGroupName", newJString(resourceGroupName))
+  add(query_564190, "$filter", newJString(Filter))
+  result = call_564188.call(path_564189, query_564190, nil, nil, nil)
 
-var domainsListByResourceGroup* = Call_DomainsListByResourceGroup_568279(
+var domainsListByResourceGroup* = Call_DomainsListByResourceGroup_564179(
     name: "domainsListByResourceGroup", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.EventGrid/domains",
-    validator: validate_DomainsListByResourceGroup_568280, base: "",
-    url: url_DomainsListByResourceGroup_568281, schemes: {Scheme.Https})
+    validator: validate_DomainsListByResourceGroup_564180, base: "",
+    url: url_DomainsListByResourceGroup_564181, schemes: {Scheme.Https})
 type
-  Call_DomainsCreateOrUpdate_568302 = ref object of OpenApiRestCall_567651
-proc url_DomainsCreateOrUpdate_568304(protocol: Scheme; host: string; base: string;
+  Call_DomainsCreateOrUpdate_564202 = ref object of OpenApiRestCall_563549
+proc url_DomainsCreateOrUpdate_564204(protocol: Scheme; host: string; base: string;
                                      route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1255,37 +1259,37 @@ proc url_DomainsCreateOrUpdate_568304(protocol: Scheme; host: string; base: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DomainsCreateOrUpdate_568303(path: JsonNode; query: JsonNode;
+proc validate_DomainsCreateOrUpdate_564203(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Asynchronously creates or updates a new domain with the specified parameters.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group within the user's subscription.
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials that uniquely identify a Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group within the user's subscription.
   ##   domainName: JString (required)
   ##             : Name of the domain.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568305 = path.getOrDefault("resourceGroupName")
-  valid_568305 = validateParameter(valid_568305, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564205 = path.getOrDefault("subscriptionId")
+  valid_564205 = validateParameter(valid_564205, JString, required = true,
                                  default = nil)
-  if valid_568305 != nil:
-    section.add "resourceGroupName", valid_568305
-  var valid_568306 = path.getOrDefault("subscriptionId")
-  valid_568306 = validateParameter(valid_568306, JString, required = true,
+  if valid_564205 != nil:
+    section.add "subscriptionId", valid_564205
+  var valid_564206 = path.getOrDefault("resourceGroupName")
+  valid_564206 = validateParameter(valid_564206, JString, required = true,
                                  default = nil)
-  if valid_568306 != nil:
-    section.add "subscriptionId", valid_568306
-  var valid_568307 = path.getOrDefault("domainName")
-  valid_568307 = validateParameter(valid_568307, JString, required = true,
+  if valid_564206 != nil:
+    section.add "resourceGroupName", valid_564206
+  var valid_564207 = path.getOrDefault("domainName")
+  valid_564207 = validateParameter(valid_564207, JString, required = true,
                                  default = nil)
-  if valid_568307 != nil:
-    section.add "domainName", valid_568307
+  if valid_564207 != nil:
+    section.add "domainName", valid_564207
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1293,11 +1297,11 @@ proc validate_DomainsCreateOrUpdate_568303(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568308 = query.getOrDefault("api-version")
-  valid_568308 = validateParameter(valid_568308, JString, required = true,
+  var valid_564208 = query.getOrDefault("api-version")
+  valid_564208 = validateParameter(valid_564208, JString, required = true,
                                  default = nil)
-  if valid_568308 != nil:
-    section.add "api-version", valid_568308
+  if valid_564208 != nil:
+    section.add "api-version", valid_564208
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1311,53 +1315,53 @@ proc validate_DomainsCreateOrUpdate_568303(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568310: Call_DomainsCreateOrUpdate_568302; path: JsonNode;
+proc call*(call_564210: Call_DomainsCreateOrUpdate_564202; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Asynchronously creates or updates a new domain with the specified parameters.
   ## 
-  let valid = call_568310.validator(path, query, header, formData, body)
-  let scheme = call_568310.pickScheme
+  let valid = call_564210.validator(path, query, header, formData, body)
+  let scheme = call_564210.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568310.url(scheme.get, call_568310.host, call_568310.base,
-                         call_568310.route, valid.getOrDefault("path"),
+  let url = call_564210.url(scheme.get, call_564210.host, call_564210.base,
+                         call_564210.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568310, url, valid)
+  result = hook(call_564210, url, valid)
 
-proc call*(call_568311: Call_DomainsCreateOrUpdate_568302;
-          resourceGroupName: string; domainInfo: JsonNode; apiVersion: string;
-          subscriptionId: string; domainName: string): Recallable =
+proc call*(call_564211: Call_DomainsCreateOrUpdate_564202; apiVersion: string;
+          domainInfo: JsonNode; subscriptionId: string; resourceGroupName: string;
+          domainName: string): Recallable =
   ## domainsCreateOrUpdate
   ## Asynchronously creates or updates a new domain with the specified parameters.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group within the user's subscription.
-  ##   domainInfo: JObject (required)
-  ##             : Domain information.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
+  ##   domainInfo: JObject (required)
+  ##             : Domain information.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials that uniquely identify a Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group within the user's subscription.
   ##   domainName: string (required)
   ##             : Name of the domain.
-  var path_568312 = newJObject()
-  var query_568313 = newJObject()
-  var body_568314 = newJObject()
-  add(path_568312, "resourceGroupName", newJString(resourceGroupName))
+  var path_564212 = newJObject()
+  var query_564213 = newJObject()
+  var body_564214 = newJObject()
+  add(query_564213, "api-version", newJString(apiVersion))
   if domainInfo != nil:
-    body_568314 = domainInfo
-  add(query_568313, "api-version", newJString(apiVersion))
-  add(path_568312, "subscriptionId", newJString(subscriptionId))
-  add(path_568312, "domainName", newJString(domainName))
-  result = call_568311.call(path_568312, query_568313, nil, nil, body_568314)
+    body_564214 = domainInfo
+  add(path_564212, "subscriptionId", newJString(subscriptionId))
+  add(path_564212, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564212, "domainName", newJString(domainName))
+  result = call_564211.call(path_564212, query_564213, nil, nil, body_564214)
 
-var domainsCreateOrUpdate* = Call_DomainsCreateOrUpdate_568302(
+var domainsCreateOrUpdate* = Call_DomainsCreateOrUpdate_564202(
     name: "domainsCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.EventGrid/domains/{domainName}",
-    validator: validate_DomainsCreateOrUpdate_568303, base: "",
-    url: url_DomainsCreateOrUpdate_568304, schemes: {Scheme.Https})
+    validator: validate_DomainsCreateOrUpdate_564203, base: "",
+    url: url_DomainsCreateOrUpdate_564204, schemes: {Scheme.Https})
 type
-  Call_DomainsGet_568291 = ref object of OpenApiRestCall_567651
-proc url_DomainsGet_568293(protocol: Scheme; host: string; base: string; route: string;
+  Call_DomainsGet_564191 = ref object of OpenApiRestCall_563549
+proc url_DomainsGet_564193(protocol: Scheme; host: string; base: string; route: string;
                           path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1379,37 +1383,37 @@ proc url_DomainsGet_568293(protocol: Scheme; host: string; base: string; route: 
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DomainsGet_568292(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_DomainsGet_564192(path: JsonNode; query: JsonNode; header: JsonNode;
                                formData: JsonNode; body: JsonNode): JsonNode =
   ## Get properties of a domain.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group within the user's subscription.
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials that uniquely identify a Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group within the user's subscription.
   ##   domainName: JString (required)
   ##             : Name of the domain.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568294 = path.getOrDefault("resourceGroupName")
-  valid_568294 = validateParameter(valid_568294, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564194 = path.getOrDefault("subscriptionId")
+  valid_564194 = validateParameter(valid_564194, JString, required = true,
                                  default = nil)
-  if valid_568294 != nil:
-    section.add "resourceGroupName", valid_568294
-  var valid_568295 = path.getOrDefault("subscriptionId")
-  valid_568295 = validateParameter(valid_568295, JString, required = true,
+  if valid_564194 != nil:
+    section.add "subscriptionId", valid_564194
+  var valid_564195 = path.getOrDefault("resourceGroupName")
+  valid_564195 = validateParameter(valid_564195, JString, required = true,
                                  default = nil)
-  if valid_568295 != nil:
-    section.add "subscriptionId", valid_568295
-  var valid_568296 = path.getOrDefault("domainName")
-  valid_568296 = validateParameter(valid_568296, JString, required = true,
+  if valid_564195 != nil:
+    section.add "resourceGroupName", valid_564195
+  var valid_564196 = path.getOrDefault("domainName")
+  valid_564196 = validateParameter(valid_564196, JString, required = true,
                                  default = nil)
-  if valid_568296 != nil:
-    section.add "domainName", valid_568296
+  if valid_564196 != nil:
+    section.add "domainName", valid_564196
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1417,11 +1421,11 @@ proc validate_DomainsGet_568292(path: JsonNode; query: JsonNode; header: JsonNod
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568297 = query.getOrDefault("api-version")
-  valid_568297 = validateParameter(valid_568297, JString, required = true,
+  var valid_564197 = query.getOrDefault("api-version")
+  valid_564197 = validateParameter(valid_564197, JString, required = true,
                                  default = nil)
-  if valid_568297 != nil:
-    section.add "api-version", valid_568297
+  if valid_564197 != nil:
+    section.add "api-version", valid_564197
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1430,48 +1434,48 @@ proc validate_DomainsGet_568292(path: JsonNode; query: JsonNode; header: JsonNod
   if body != nil:
     result.add "body", body
 
-proc call*(call_568298: Call_DomainsGet_568291; path: JsonNode; query: JsonNode;
+proc call*(call_564198: Call_DomainsGet_564191; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get properties of a domain.
   ## 
-  let valid = call_568298.validator(path, query, header, formData, body)
-  let scheme = call_568298.pickScheme
+  let valid = call_564198.validator(path, query, header, formData, body)
+  let scheme = call_564198.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568298.url(scheme.get, call_568298.host, call_568298.base,
-                         call_568298.route, valid.getOrDefault("path"),
+  let url = call_564198.url(scheme.get, call_564198.host, call_564198.base,
+                         call_564198.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568298, url, valid)
+  result = hook(call_564198, url, valid)
 
-proc call*(call_568299: Call_DomainsGet_568291; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; domainName: string): Recallable =
+proc call*(call_564199: Call_DomainsGet_564191; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string; domainName: string): Recallable =
   ## domainsGet
   ## Get properties of a domain.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group within the user's subscription.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials that uniquely identify a Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group within the user's subscription.
   ##   domainName: string (required)
   ##             : Name of the domain.
-  var path_568300 = newJObject()
-  var query_568301 = newJObject()
-  add(path_568300, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568301, "api-version", newJString(apiVersion))
-  add(path_568300, "subscriptionId", newJString(subscriptionId))
-  add(path_568300, "domainName", newJString(domainName))
-  result = call_568299.call(path_568300, query_568301, nil, nil, nil)
+  var path_564200 = newJObject()
+  var query_564201 = newJObject()
+  add(query_564201, "api-version", newJString(apiVersion))
+  add(path_564200, "subscriptionId", newJString(subscriptionId))
+  add(path_564200, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564200, "domainName", newJString(domainName))
+  result = call_564199.call(path_564200, query_564201, nil, nil, nil)
 
-var domainsGet* = Call_DomainsGet_568291(name: "domainsGet",
+var domainsGet* = Call_DomainsGet_564191(name: "domainsGet",
                                       meth: HttpMethod.HttpGet,
                                       host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.EventGrid/domains/{domainName}",
-                                      validator: validate_DomainsGet_568292,
-                                      base: "", url: url_DomainsGet_568293,
+                                      validator: validate_DomainsGet_564192,
+                                      base: "", url: url_DomainsGet_564193,
                                       schemes: {Scheme.Https})
 type
-  Call_DomainsUpdate_568326 = ref object of OpenApiRestCall_567651
-proc url_DomainsUpdate_568328(protocol: Scheme; host: string; base: string;
+  Call_DomainsUpdate_564226 = ref object of OpenApiRestCall_563549
+proc url_DomainsUpdate_564228(protocol: Scheme; host: string; base: string;
                              route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1493,37 +1497,37 @@ proc url_DomainsUpdate_568328(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DomainsUpdate_568327(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_DomainsUpdate_564227(path: JsonNode; query: JsonNode; header: JsonNode;
                                   formData: JsonNode; body: JsonNode): JsonNode =
   ## Asynchronously updates a domain with the specified parameters.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group within the user's subscription.
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials that uniquely identify a Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group within the user's subscription.
   ##   domainName: JString (required)
   ##             : Name of the domain.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568329 = path.getOrDefault("resourceGroupName")
-  valid_568329 = validateParameter(valid_568329, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564229 = path.getOrDefault("subscriptionId")
+  valid_564229 = validateParameter(valid_564229, JString, required = true,
                                  default = nil)
-  if valid_568329 != nil:
-    section.add "resourceGroupName", valid_568329
-  var valid_568330 = path.getOrDefault("subscriptionId")
-  valid_568330 = validateParameter(valid_568330, JString, required = true,
+  if valid_564229 != nil:
+    section.add "subscriptionId", valid_564229
+  var valid_564230 = path.getOrDefault("resourceGroupName")
+  valid_564230 = validateParameter(valid_564230, JString, required = true,
                                  default = nil)
-  if valid_568330 != nil:
-    section.add "subscriptionId", valid_568330
-  var valid_568331 = path.getOrDefault("domainName")
-  valid_568331 = validateParameter(valid_568331, JString, required = true,
+  if valid_564230 != nil:
+    section.add "resourceGroupName", valid_564230
+  var valid_564231 = path.getOrDefault("domainName")
+  valid_564231 = validateParameter(valid_564231, JString, required = true,
                                  default = nil)
-  if valid_568331 != nil:
-    section.add "domainName", valid_568331
+  if valid_564231 != nil:
+    section.add "domainName", valid_564231
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1531,11 +1535,11 @@ proc validate_DomainsUpdate_568327(path: JsonNode; query: JsonNode; header: Json
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568332 = query.getOrDefault("api-version")
-  valid_568332 = validateParameter(valid_568332, JString, required = true,
+  var valid_564232 = query.getOrDefault("api-version")
+  valid_564232 = validateParameter(valid_564232, JString, required = true,
                                  default = nil)
-  if valid_568332 != nil:
-    section.add "api-version", valid_568332
+  if valid_564232 != nil:
+    section.add "api-version", valid_564232
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1549,52 +1553,52 @@ proc validate_DomainsUpdate_568327(path: JsonNode; query: JsonNode; header: Json
   if body != nil:
     result.add "body", body
 
-proc call*(call_568334: Call_DomainsUpdate_568326; path: JsonNode; query: JsonNode;
+proc call*(call_564234: Call_DomainsUpdate_564226; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Asynchronously updates a domain with the specified parameters.
   ## 
-  let valid = call_568334.validator(path, query, header, formData, body)
-  let scheme = call_568334.pickScheme
+  let valid = call_564234.validator(path, query, header, formData, body)
+  let scheme = call_564234.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568334.url(scheme.get, call_568334.host, call_568334.base,
-                         call_568334.route, valid.getOrDefault("path"),
+  let url = call_564234.url(scheme.get, call_564234.host, call_564234.base,
+                         call_564234.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568334, url, valid)
+  result = hook(call_564234, url, valid)
 
-proc call*(call_568335: Call_DomainsUpdate_568326; resourceGroupName: string;
-          apiVersion: string; domainUpdateParameters: JsonNode;
-          subscriptionId: string; domainName: string): Recallable =
+proc call*(call_564235: Call_DomainsUpdate_564226;
+          domainUpdateParameters: JsonNode; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string; domainName: string): Recallable =
   ## domainsUpdate
   ## Asynchronously updates a domain with the specified parameters.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group within the user's subscription.
-  ##   apiVersion: string (required)
-  ##             : Version of the API to be used with the client request.
   ##   domainUpdateParameters: JObject (required)
   ##                         : Domain update information.
+  ##   apiVersion: string (required)
+  ##             : Version of the API to be used with the client request.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials that uniquely identify a Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group within the user's subscription.
   ##   domainName: string (required)
   ##             : Name of the domain.
-  var path_568336 = newJObject()
-  var query_568337 = newJObject()
-  var body_568338 = newJObject()
-  add(path_568336, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568337, "api-version", newJString(apiVersion))
+  var path_564236 = newJObject()
+  var query_564237 = newJObject()
+  var body_564238 = newJObject()
   if domainUpdateParameters != nil:
-    body_568338 = domainUpdateParameters
-  add(path_568336, "subscriptionId", newJString(subscriptionId))
-  add(path_568336, "domainName", newJString(domainName))
-  result = call_568335.call(path_568336, query_568337, nil, nil, body_568338)
+    body_564238 = domainUpdateParameters
+  add(query_564237, "api-version", newJString(apiVersion))
+  add(path_564236, "subscriptionId", newJString(subscriptionId))
+  add(path_564236, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564236, "domainName", newJString(domainName))
+  result = call_564235.call(path_564236, query_564237, nil, nil, body_564238)
 
-var domainsUpdate* = Call_DomainsUpdate_568326(name: "domainsUpdate",
+var domainsUpdate* = Call_DomainsUpdate_564226(name: "domainsUpdate",
     meth: HttpMethod.HttpPatch, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.EventGrid/domains/{domainName}",
-    validator: validate_DomainsUpdate_568327, base: "", url: url_DomainsUpdate_568328,
+    validator: validate_DomainsUpdate_564227, base: "", url: url_DomainsUpdate_564228,
     schemes: {Scheme.Https})
 type
-  Call_DomainsDelete_568315 = ref object of OpenApiRestCall_567651
-proc url_DomainsDelete_568317(protocol: Scheme; host: string; base: string;
+  Call_DomainsDelete_564215 = ref object of OpenApiRestCall_563549
+proc url_DomainsDelete_564217(protocol: Scheme; host: string; base: string;
                              route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1616,37 +1620,37 @@ proc url_DomainsDelete_568317(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DomainsDelete_568316(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_DomainsDelete_564216(path: JsonNode; query: JsonNode; header: JsonNode;
                                   formData: JsonNode; body: JsonNode): JsonNode =
   ## Delete existing domain.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group within the user's subscription.
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials that uniquely identify a Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group within the user's subscription.
   ##   domainName: JString (required)
   ##             : Name of the domain.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568318 = path.getOrDefault("resourceGroupName")
-  valid_568318 = validateParameter(valid_568318, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564218 = path.getOrDefault("subscriptionId")
+  valid_564218 = validateParameter(valid_564218, JString, required = true,
                                  default = nil)
-  if valid_568318 != nil:
-    section.add "resourceGroupName", valid_568318
-  var valid_568319 = path.getOrDefault("subscriptionId")
-  valid_568319 = validateParameter(valid_568319, JString, required = true,
+  if valid_564218 != nil:
+    section.add "subscriptionId", valid_564218
+  var valid_564219 = path.getOrDefault("resourceGroupName")
+  valid_564219 = validateParameter(valid_564219, JString, required = true,
                                  default = nil)
-  if valid_568319 != nil:
-    section.add "subscriptionId", valid_568319
-  var valid_568320 = path.getOrDefault("domainName")
-  valid_568320 = validateParameter(valid_568320, JString, required = true,
+  if valid_564219 != nil:
+    section.add "resourceGroupName", valid_564219
+  var valid_564220 = path.getOrDefault("domainName")
+  valid_564220 = validateParameter(valid_564220, JString, required = true,
                                  default = nil)
-  if valid_568320 != nil:
-    section.add "domainName", valid_568320
+  if valid_564220 != nil:
+    section.add "domainName", valid_564220
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1654,11 +1658,11 @@ proc validate_DomainsDelete_568316(path: JsonNode; query: JsonNode; header: Json
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568321 = query.getOrDefault("api-version")
-  valid_568321 = validateParameter(valid_568321, JString, required = true,
+  var valid_564221 = query.getOrDefault("api-version")
+  valid_564221 = validateParameter(valid_564221, JString, required = true,
                                  default = nil)
-  if valid_568321 != nil:
-    section.add "api-version", valid_568321
+  if valid_564221 != nil:
+    section.add "api-version", valid_564221
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1667,46 +1671,46 @@ proc validate_DomainsDelete_568316(path: JsonNode; query: JsonNode; header: Json
   if body != nil:
     result.add "body", body
 
-proc call*(call_568322: Call_DomainsDelete_568315; path: JsonNode; query: JsonNode;
+proc call*(call_564222: Call_DomainsDelete_564215; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Delete existing domain.
   ## 
-  let valid = call_568322.validator(path, query, header, formData, body)
-  let scheme = call_568322.pickScheme
+  let valid = call_564222.validator(path, query, header, formData, body)
+  let scheme = call_564222.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568322.url(scheme.get, call_568322.host, call_568322.base,
-                         call_568322.route, valid.getOrDefault("path"),
+  let url = call_564222.url(scheme.get, call_564222.host, call_564222.base,
+                         call_564222.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568322, url, valid)
+  result = hook(call_564222, url, valid)
 
-proc call*(call_568323: Call_DomainsDelete_568315; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; domainName: string): Recallable =
+proc call*(call_564223: Call_DomainsDelete_564215; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string; domainName: string): Recallable =
   ## domainsDelete
   ## Delete existing domain.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group within the user's subscription.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials that uniquely identify a Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group within the user's subscription.
   ##   domainName: string (required)
   ##             : Name of the domain.
-  var path_568324 = newJObject()
-  var query_568325 = newJObject()
-  add(path_568324, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568325, "api-version", newJString(apiVersion))
-  add(path_568324, "subscriptionId", newJString(subscriptionId))
-  add(path_568324, "domainName", newJString(domainName))
-  result = call_568323.call(path_568324, query_568325, nil, nil, nil)
+  var path_564224 = newJObject()
+  var query_564225 = newJObject()
+  add(query_564225, "api-version", newJString(apiVersion))
+  add(path_564224, "subscriptionId", newJString(subscriptionId))
+  add(path_564224, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564224, "domainName", newJString(domainName))
+  result = call_564223.call(path_564224, query_564225, nil, nil, nil)
 
-var domainsDelete* = Call_DomainsDelete_568315(name: "domainsDelete",
+var domainsDelete* = Call_DomainsDelete_564215(name: "domainsDelete",
     meth: HttpMethod.HttpDelete, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.EventGrid/domains/{domainName}",
-    validator: validate_DomainsDelete_568316, base: "", url: url_DomainsDelete_568317,
+    validator: validate_DomainsDelete_564216, base: "", url: url_DomainsDelete_564217,
     schemes: {Scheme.Https})
 type
-  Call_DomainsListSharedAccessKeys_568339 = ref object of OpenApiRestCall_567651
-proc url_DomainsListSharedAccessKeys_568341(protocol: Scheme; host: string;
+  Call_DomainsListSharedAccessKeys_564239 = ref object of OpenApiRestCall_563549
+proc url_DomainsListSharedAccessKeys_564241(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1729,37 +1733,37 @@ proc url_DomainsListSharedAccessKeys_568341(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DomainsListSharedAccessKeys_568340(path: JsonNode; query: JsonNode;
+proc validate_DomainsListSharedAccessKeys_564240(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## List the two keys used to publish to a domain.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group within the user's subscription.
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials that uniquely identify a Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group within the user's subscription.
   ##   domainName: JString (required)
   ##             : Name of the domain.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568342 = path.getOrDefault("resourceGroupName")
-  valid_568342 = validateParameter(valid_568342, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564242 = path.getOrDefault("subscriptionId")
+  valid_564242 = validateParameter(valid_564242, JString, required = true,
                                  default = nil)
-  if valid_568342 != nil:
-    section.add "resourceGroupName", valid_568342
-  var valid_568343 = path.getOrDefault("subscriptionId")
-  valid_568343 = validateParameter(valid_568343, JString, required = true,
+  if valid_564242 != nil:
+    section.add "subscriptionId", valid_564242
+  var valid_564243 = path.getOrDefault("resourceGroupName")
+  valid_564243 = validateParameter(valid_564243, JString, required = true,
                                  default = nil)
-  if valid_568343 != nil:
-    section.add "subscriptionId", valid_568343
-  var valid_568344 = path.getOrDefault("domainName")
-  valid_568344 = validateParameter(valid_568344, JString, required = true,
+  if valid_564243 != nil:
+    section.add "resourceGroupName", valid_564243
+  var valid_564244 = path.getOrDefault("domainName")
+  valid_564244 = validateParameter(valid_564244, JString, required = true,
                                  default = nil)
-  if valid_568344 != nil:
-    section.add "domainName", valid_568344
+  if valid_564244 != nil:
+    section.add "domainName", valid_564244
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1767,11 +1771,11 @@ proc validate_DomainsListSharedAccessKeys_568340(path: JsonNode; query: JsonNode
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568345 = query.getOrDefault("api-version")
-  valid_568345 = validateParameter(valid_568345, JString, required = true,
+  var valid_564245 = query.getOrDefault("api-version")
+  valid_564245 = validateParameter(valid_564245, JString, required = true,
                                  default = nil)
-  if valid_568345 != nil:
-    section.add "api-version", valid_568345
+  if valid_564245 != nil:
+    section.add "api-version", valid_564245
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1780,48 +1784,48 @@ proc validate_DomainsListSharedAccessKeys_568340(path: JsonNode; query: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_568346: Call_DomainsListSharedAccessKeys_568339; path: JsonNode;
+proc call*(call_564246: Call_DomainsListSharedAccessKeys_564239; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## List the two keys used to publish to a domain.
   ## 
-  let valid = call_568346.validator(path, query, header, formData, body)
-  let scheme = call_568346.pickScheme
+  let valid = call_564246.validator(path, query, header, formData, body)
+  let scheme = call_564246.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568346.url(scheme.get, call_568346.host, call_568346.base,
-                         call_568346.route, valid.getOrDefault("path"),
+  let url = call_564246.url(scheme.get, call_564246.host, call_564246.base,
+                         call_564246.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568346, url, valid)
+  result = hook(call_564246, url, valid)
 
-proc call*(call_568347: Call_DomainsListSharedAccessKeys_568339;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
+proc call*(call_564247: Call_DomainsListSharedAccessKeys_564239;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string;
           domainName: string): Recallable =
   ## domainsListSharedAccessKeys
   ## List the two keys used to publish to a domain.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group within the user's subscription.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials that uniquely identify a Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group within the user's subscription.
   ##   domainName: string (required)
   ##             : Name of the domain.
-  var path_568348 = newJObject()
-  var query_568349 = newJObject()
-  add(path_568348, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568349, "api-version", newJString(apiVersion))
-  add(path_568348, "subscriptionId", newJString(subscriptionId))
-  add(path_568348, "domainName", newJString(domainName))
-  result = call_568347.call(path_568348, query_568349, nil, nil, nil)
+  var path_564248 = newJObject()
+  var query_564249 = newJObject()
+  add(query_564249, "api-version", newJString(apiVersion))
+  add(path_564248, "subscriptionId", newJString(subscriptionId))
+  add(path_564248, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564248, "domainName", newJString(domainName))
+  result = call_564247.call(path_564248, query_564249, nil, nil, nil)
 
-var domainsListSharedAccessKeys* = Call_DomainsListSharedAccessKeys_568339(
+var domainsListSharedAccessKeys* = Call_DomainsListSharedAccessKeys_564239(
     name: "domainsListSharedAccessKeys", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.EventGrid/domains/{domainName}/listKeys",
-    validator: validate_DomainsListSharedAccessKeys_568340, base: "",
-    url: url_DomainsListSharedAccessKeys_568341, schemes: {Scheme.Https})
+    validator: validate_DomainsListSharedAccessKeys_564240, base: "",
+    url: url_DomainsListSharedAccessKeys_564241, schemes: {Scheme.Https})
 type
-  Call_DomainsRegenerateKey_568350 = ref object of OpenApiRestCall_567651
-proc url_DomainsRegenerateKey_568352(protocol: Scheme; host: string; base: string;
+  Call_DomainsRegenerateKey_564250 = ref object of OpenApiRestCall_563549
+proc url_DomainsRegenerateKey_564252(protocol: Scheme; host: string; base: string;
                                     route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1844,37 +1848,37 @@ proc url_DomainsRegenerateKey_568352(protocol: Scheme; host: string; base: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DomainsRegenerateKey_568351(path: JsonNode; query: JsonNode;
+proc validate_DomainsRegenerateKey_564251(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Regenerate a shared access key for a domain.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group within the user's subscription.
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials that uniquely identify a Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group within the user's subscription.
   ##   domainName: JString (required)
   ##             : Name of the domain.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568353 = path.getOrDefault("resourceGroupName")
-  valid_568353 = validateParameter(valid_568353, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564253 = path.getOrDefault("subscriptionId")
+  valid_564253 = validateParameter(valid_564253, JString, required = true,
                                  default = nil)
-  if valid_568353 != nil:
-    section.add "resourceGroupName", valid_568353
-  var valid_568354 = path.getOrDefault("subscriptionId")
-  valid_568354 = validateParameter(valid_568354, JString, required = true,
+  if valid_564253 != nil:
+    section.add "subscriptionId", valid_564253
+  var valid_564254 = path.getOrDefault("resourceGroupName")
+  valid_564254 = validateParameter(valid_564254, JString, required = true,
                                  default = nil)
-  if valid_568354 != nil:
-    section.add "subscriptionId", valid_568354
-  var valid_568355 = path.getOrDefault("domainName")
-  valid_568355 = validateParameter(valid_568355, JString, required = true,
+  if valid_564254 != nil:
+    section.add "resourceGroupName", valid_564254
+  var valid_564255 = path.getOrDefault("domainName")
+  valid_564255 = validateParameter(valid_564255, JString, required = true,
                                  default = nil)
-  if valid_568355 != nil:
-    section.add "domainName", valid_568355
+  if valid_564255 != nil:
+    section.add "domainName", valid_564255
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1882,11 +1886,11 @@ proc validate_DomainsRegenerateKey_568351(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568356 = query.getOrDefault("api-version")
-  valid_568356 = validateParameter(valid_568356, JString, required = true,
+  var valid_564256 = query.getOrDefault("api-version")
+  valid_564256 = validateParameter(valid_564256, JString, required = true,
                                  default = nil)
-  if valid_568356 != nil:
-    section.add "api-version", valid_568356
+  if valid_564256 != nil:
+    section.add "api-version", valid_564256
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1900,53 +1904,53 @@ proc validate_DomainsRegenerateKey_568351(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568358: Call_DomainsRegenerateKey_568350; path: JsonNode;
+proc call*(call_564258: Call_DomainsRegenerateKey_564250; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Regenerate a shared access key for a domain.
   ## 
-  let valid = call_568358.validator(path, query, header, formData, body)
-  let scheme = call_568358.pickScheme
+  let valid = call_564258.validator(path, query, header, formData, body)
+  let scheme = call_564258.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568358.url(scheme.get, call_568358.host, call_568358.base,
-                         call_568358.route, valid.getOrDefault("path"),
+  let url = call_564258.url(scheme.get, call_564258.host, call_564258.base,
+                         call_564258.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568358, url, valid)
+  result = hook(call_564258, url, valid)
 
-proc call*(call_568359: Call_DomainsRegenerateKey_568350;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          domainName: string; regenerateKeyRequest: JsonNode): Recallable =
+proc call*(call_564259: Call_DomainsRegenerateKey_564250; apiVersion: string;
+          subscriptionId: string; regenerateKeyRequest: JsonNode;
+          resourceGroupName: string; domainName: string): Recallable =
   ## domainsRegenerateKey
   ## Regenerate a shared access key for a domain.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group within the user's subscription.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials that uniquely identify a Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   domainName: string (required)
-  ##             : Name of the domain.
   ##   regenerateKeyRequest: JObject (required)
   ##                       : Request body to regenerate key.
-  var path_568360 = newJObject()
-  var query_568361 = newJObject()
-  var body_568362 = newJObject()
-  add(path_568360, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568361, "api-version", newJString(apiVersion))
-  add(path_568360, "subscriptionId", newJString(subscriptionId))
-  add(path_568360, "domainName", newJString(domainName))
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group within the user's subscription.
+  ##   domainName: string (required)
+  ##             : Name of the domain.
+  var path_564260 = newJObject()
+  var query_564261 = newJObject()
+  var body_564262 = newJObject()
+  add(query_564261, "api-version", newJString(apiVersion))
+  add(path_564260, "subscriptionId", newJString(subscriptionId))
   if regenerateKeyRequest != nil:
-    body_568362 = regenerateKeyRequest
-  result = call_568359.call(path_568360, query_568361, nil, nil, body_568362)
+    body_564262 = regenerateKeyRequest
+  add(path_564260, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564260, "domainName", newJString(domainName))
+  result = call_564259.call(path_564260, query_564261, nil, nil, body_564262)
 
-var domainsRegenerateKey* = Call_DomainsRegenerateKey_568350(
+var domainsRegenerateKey* = Call_DomainsRegenerateKey_564250(
     name: "domainsRegenerateKey", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.EventGrid/domains/{domainName}/regenerateKey",
-    validator: validate_DomainsRegenerateKey_568351, base: "",
-    url: url_DomainsRegenerateKey_568352, schemes: {Scheme.Https})
+    validator: validate_DomainsRegenerateKey_564251, base: "",
+    url: url_DomainsRegenerateKey_564252, schemes: {Scheme.Https})
 type
-  Call_DomainTopicsListByDomain_568363 = ref object of OpenApiRestCall_567651
-proc url_DomainTopicsListByDomain_568365(protocol: Scheme; host: string;
+  Call_DomainTopicsListByDomain_564263 = ref object of OpenApiRestCall_563549
+proc url_DomainTopicsListByDomain_564265(protocol: Scheme; host: string;
                                         base: string; route: string; path: JsonNode;
                                         query: JsonNode): Uri =
   result.scheme = $protocol
@@ -1970,37 +1974,37 @@ proc url_DomainTopicsListByDomain_568365(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DomainTopicsListByDomain_568364(path: JsonNode; query: JsonNode;
+proc validate_DomainTopicsListByDomain_564264(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## List all the topics in a domain.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group within the user's subscription.
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials that uniquely identify a Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group within the user's subscription.
   ##   domainName: JString (required)
   ##             : Domain name.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568366 = path.getOrDefault("resourceGroupName")
-  valid_568366 = validateParameter(valid_568366, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564266 = path.getOrDefault("subscriptionId")
+  valid_564266 = validateParameter(valid_564266, JString, required = true,
                                  default = nil)
-  if valid_568366 != nil:
-    section.add "resourceGroupName", valid_568366
-  var valid_568367 = path.getOrDefault("subscriptionId")
-  valid_568367 = validateParameter(valid_568367, JString, required = true,
+  if valid_564266 != nil:
+    section.add "subscriptionId", valid_564266
+  var valid_564267 = path.getOrDefault("resourceGroupName")
+  valid_564267 = validateParameter(valid_564267, JString, required = true,
                                  default = nil)
-  if valid_568367 != nil:
-    section.add "subscriptionId", valid_568367
-  var valid_568368 = path.getOrDefault("domainName")
-  valid_568368 = validateParameter(valid_568368, JString, required = true,
+  if valid_564267 != nil:
+    section.add "resourceGroupName", valid_564267
+  var valid_564268 = path.getOrDefault("domainName")
+  valid_564268 = validateParameter(valid_564268, JString, required = true,
                                  default = nil)
-  if valid_568368 != nil:
-    section.add "domainName", valid_568368
+  if valid_564268 != nil:
+    section.add "domainName", valid_564268
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2012,20 +2016,20 @@ proc validate_DomainTopicsListByDomain_568364(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568369 = query.getOrDefault("api-version")
-  valid_568369 = validateParameter(valid_568369, JString, required = true,
+  var valid_564269 = query.getOrDefault("api-version")
+  valid_564269 = validateParameter(valid_564269, JString, required = true,
                                  default = nil)
-  if valid_568369 != nil:
-    section.add "api-version", valid_568369
-  var valid_568370 = query.getOrDefault("$top")
-  valid_568370 = validateParameter(valid_568370, JInt, required = false, default = nil)
-  if valid_568370 != nil:
-    section.add "$top", valid_568370
-  var valid_568371 = query.getOrDefault("$filter")
-  valid_568371 = validateParameter(valid_568371, JString, required = false,
+  if valid_564269 != nil:
+    section.add "api-version", valid_564269
+  var valid_564270 = query.getOrDefault("$top")
+  valid_564270 = validateParameter(valid_564270, JInt, required = false, default = nil)
+  if valid_564270 != nil:
+    section.add "$top", valid_564270
+  var valid_564271 = query.getOrDefault("$filter")
+  valid_564271 = validateParameter(valid_564271, JString, required = false,
                                  default = nil)
-  if valid_568371 != nil:
-    section.add "$filter", valid_568371
+  if valid_564271 != nil:
+    section.add "$filter", valid_564271
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2034,54 +2038,54 @@ proc validate_DomainTopicsListByDomain_568364(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568372: Call_DomainTopicsListByDomain_568363; path: JsonNode;
+proc call*(call_564272: Call_DomainTopicsListByDomain_564263; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## List all the topics in a domain.
   ## 
-  let valid = call_568372.validator(path, query, header, formData, body)
-  let scheme = call_568372.pickScheme
+  let valid = call_564272.validator(path, query, header, formData, body)
+  let scheme = call_564272.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568372.url(scheme.get, call_568372.host, call_568372.base,
-                         call_568372.route, valid.getOrDefault("path"),
+  let url = call_564272.url(scheme.get, call_564272.host, call_564272.base,
+                         call_564272.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568372, url, valid)
+  result = hook(call_564272, url, valid)
 
-proc call*(call_568373: Call_DomainTopicsListByDomain_568363;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          domainName: string; Top: int = 0; Filter: string = ""): Recallable =
+proc call*(call_564273: Call_DomainTopicsListByDomain_564263; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string; domainName: string;
+          Top: int = 0; Filter: string = ""): Recallable =
   ## domainTopicsListByDomain
   ## List all the topics in a domain.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group within the user's subscription.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
-  ##   subscriptionId: string (required)
-  ##                 : Subscription credentials that uniquely identify a Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   Top: int
   ##      : The number of results to return per page for the list operation. Valid range for top parameter is 1 to 100. If not specified, the default number of results to be returned is 20 items per page.
+  ##   subscriptionId: string (required)
+  ##                 : Subscription credentials that uniquely identify a Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group within the user's subscription.
   ##   domainName: string (required)
   ##             : Domain name.
   ##   Filter: string
   ##         : The query used to filter the search results using OData syntax. Filtering is permitted on the 'name' property only and with limited number of OData operations. These operations are: the 'contains' function as well as the following logical operations: not, and, or, eq (for equal), and ne (for not equal). No arithmetic operations are supported. The following is a valid filter example: $filter=contains(namE, 'PATTERN') and name ne 'PATTERN-1'. The following is not a valid filter example: $filter=location eq 'westus'.
-  var path_568374 = newJObject()
-  var query_568375 = newJObject()
-  add(path_568374, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568375, "api-version", newJString(apiVersion))
-  add(path_568374, "subscriptionId", newJString(subscriptionId))
-  add(query_568375, "$top", newJInt(Top))
-  add(path_568374, "domainName", newJString(domainName))
-  add(query_568375, "$filter", newJString(Filter))
-  result = call_568373.call(path_568374, query_568375, nil, nil, nil)
+  var path_564274 = newJObject()
+  var query_564275 = newJObject()
+  add(query_564275, "api-version", newJString(apiVersion))
+  add(query_564275, "$top", newJInt(Top))
+  add(path_564274, "subscriptionId", newJString(subscriptionId))
+  add(path_564274, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564274, "domainName", newJString(domainName))
+  add(query_564275, "$filter", newJString(Filter))
+  result = call_564273.call(path_564274, query_564275, nil, nil, nil)
 
-var domainTopicsListByDomain* = Call_DomainTopicsListByDomain_568363(
+var domainTopicsListByDomain* = Call_DomainTopicsListByDomain_564263(
     name: "domainTopicsListByDomain", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.EventGrid/domains/{domainName}/topics",
-    validator: validate_DomainTopicsListByDomain_568364, base: "",
-    url: url_DomainTopicsListByDomain_568365, schemes: {Scheme.Https})
+    validator: validate_DomainTopicsListByDomain_564264, base: "",
+    url: url_DomainTopicsListByDomain_564265, schemes: {Scheme.Https})
 type
-  Call_DomainTopicsCreateOrUpdate_568388 = ref object of OpenApiRestCall_567651
-proc url_DomainTopicsCreateOrUpdate_568390(protocol: Scheme; host: string;
+  Call_DomainTopicsCreateOrUpdate_564288 = ref object of OpenApiRestCall_563549
+proc url_DomainTopicsCreateOrUpdate_564290(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2106,44 +2110,44 @@ proc url_DomainTopicsCreateOrUpdate_568390(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DomainTopicsCreateOrUpdate_568389(path: JsonNode; query: JsonNode;
+proc validate_DomainTopicsCreateOrUpdate_564289(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Asynchronously creates or updates a new domain topic with the specified parameters.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group within the user's subscription.
-  ##   subscriptionId: JString (required)
-  ##                 : Subscription credentials that uniquely identify a Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   domainTopicName: JString (required)
   ##                  : Name of the domain topic.
+  ##   subscriptionId: JString (required)
+  ##                 : Subscription credentials that uniquely identify a Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group within the user's subscription.
   ##   domainName: JString (required)
   ##             : Name of the domain.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568391 = path.getOrDefault("resourceGroupName")
-  valid_568391 = validateParameter(valid_568391, JString, required = true,
+        "path argument is necessary due to required `domainTopicName` field"
+  var valid_564291 = path.getOrDefault("domainTopicName")
+  valid_564291 = validateParameter(valid_564291, JString, required = true,
                                  default = nil)
-  if valid_568391 != nil:
-    section.add "resourceGroupName", valid_568391
-  var valid_568392 = path.getOrDefault("subscriptionId")
-  valid_568392 = validateParameter(valid_568392, JString, required = true,
+  if valid_564291 != nil:
+    section.add "domainTopicName", valid_564291
+  var valid_564292 = path.getOrDefault("subscriptionId")
+  valid_564292 = validateParameter(valid_564292, JString, required = true,
                                  default = nil)
-  if valid_568392 != nil:
-    section.add "subscriptionId", valid_568392
-  var valid_568393 = path.getOrDefault("domainTopicName")
-  valid_568393 = validateParameter(valid_568393, JString, required = true,
+  if valid_564292 != nil:
+    section.add "subscriptionId", valid_564292
+  var valid_564293 = path.getOrDefault("resourceGroupName")
+  valid_564293 = validateParameter(valid_564293, JString, required = true,
                                  default = nil)
-  if valid_568393 != nil:
-    section.add "domainTopicName", valid_568393
-  var valid_568394 = path.getOrDefault("domainName")
-  valid_568394 = validateParameter(valid_568394, JString, required = true,
+  if valid_564293 != nil:
+    section.add "resourceGroupName", valid_564293
+  var valid_564294 = path.getOrDefault("domainName")
+  valid_564294 = validateParameter(valid_564294, JString, required = true,
                                  default = nil)
-  if valid_568394 != nil:
-    section.add "domainName", valid_568394
+  if valid_564294 != nil:
+    section.add "domainName", valid_564294
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2151,11 +2155,11 @@ proc validate_DomainTopicsCreateOrUpdate_568389(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568395 = query.getOrDefault("api-version")
-  valid_568395 = validateParameter(valid_568395, JString, required = true,
+  var valid_564295 = query.getOrDefault("api-version")
+  valid_564295 = validateParameter(valid_564295, JString, required = true,
                                  default = nil)
-  if valid_568395 != nil:
-    section.add "api-version", valid_568395
+  if valid_564295 != nil:
+    section.add "api-version", valid_564295
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2164,51 +2168,51 @@ proc validate_DomainTopicsCreateOrUpdate_568389(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568396: Call_DomainTopicsCreateOrUpdate_568388; path: JsonNode;
+proc call*(call_564296: Call_DomainTopicsCreateOrUpdate_564288; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Asynchronously creates or updates a new domain topic with the specified parameters.
   ## 
-  let valid = call_568396.validator(path, query, header, formData, body)
-  let scheme = call_568396.pickScheme
+  let valid = call_564296.validator(path, query, header, formData, body)
+  let scheme = call_564296.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568396.url(scheme.get, call_568396.host, call_568396.base,
-                         call_568396.route, valid.getOrDefault("path"),
+  let url = call_564296.url(scheme.get, call_564296.host, call_564296.base,
+                         call_564296.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568396, url, valid)
+  result = hook(call_564296, url, valid)
 
-proc call*(call_568397: Call_DomainTopicsCreateOrUpdate_568388;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          domainTopicName: string; domainName: string): Recallable =
+proc call*(call_564297: Call_DomainTopicsCreateOrUpdate_564288; apiVersion: string;
+          domainTopicName: string; subscriptionId: string;
+          resourceGroupName: string; domainName: string): Recallable =
   ## domainTopicsCreateOrUpdate
   ## Asynchronously creates or updates a new domain topic with the specified parameters.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group within the user's subscription.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
-  ##   subscriptionId: string (required)
-  ##                 : Subscription credentials that uniquely identify a Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   domainTopicName: string (required)
   ##                  : Name of the domain topic.
+  ##   subscriptionId: string (required)
+  ##                 : Subscription credentials that uniquely identify a Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group within the user's subscription.
   ##   domainName: string (required)
   ##             : Name of the domain.
-  var path_568398 = newJObject()
-  var query_568399 = newJObject()
-  add(path_568398, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568399, "api-version", newJString(apiVersion))
-  add(path_568398, "subscriptionId", newJString(subscriptionId))
-  add(path_568398, "domainTopicName", newJString(domainTopicName))
-  add(path_568398, "domainName", newJString(domainName))
-  result = call_568397.call(path_568398, query_568399, nil, nil, nil)
+  var path_564298 = newJObject()
+  var query_564299 = newJObject()
+  add(query_564299, "api-version", newJString(apiVersion))
+  add(path_564298, "domainTopicName", newJString(domainTopicName))
+  add(path_564298, "subscriptionId", newJString(subscriptionId))
+  add(path_564298, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564298, "domainName", newJString(domainName))
+  result = call_564297.call(path_564298, query_564299, nil, nil, nil)
 
-var domainTopicsCreateOrUpdate* = Call_DomainTopicsCreateOrUpdate_568388(
+var domainTopicsCreateOrUpdate* = Call_DomainTopicsCreateOrUpdate_564288(
     name: "domainTopicsCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.EventGrid/domains/{domainName}/topics/{domainTopicName}",
-    validator: validate_DomainTopicsCreateOrUpdate_568389, base: "",
-    url: url_DomainTopicsCreateOrUpdate_568390, schemes: {Scheme.Https})
+    validator: validate_DomainTopicsCreateOrUpdate_564289, base: "",
+    url: url_DomainTopicsCreateOrUpdate_564290, schemes: {Scheme.Https})
 type
-  Call_DomainTopicsGet_568376 = ref object of OpenApiRestCall_567651
-proc url_DomainTopicsGet_568378(protocol: Scheme; host: string; base: string;
+  Call_DomainTopicsGet_564276 = ref object of OpenApiRestCall_563549
+proc url_DomainTopicsGet_564278(protocol: Scheme; host: string; base: string;
                                route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2233,7 +2237,7 @@ proc url_DomainTopicsGet_568378(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DomainTopicsGet_568377(path: JsonNode; query: JsonNode;
+proc validate_DomainTopicsGet_564277(path: JsonNode; query: JsonNode;
                                     header: JsonNode; formData: JsonNode;
                                     body: JsonNode): JsonNode =
   ## Get properties of a domain topic.
@@ -2241,37 +2245,37 @@ proc validate_DomainTopicsGet_568377(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group within the user's subscription.
-  ##   subscriptionId: JString (required)
-  ##                 : Subscription credentials that uniquely identify a Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   domainTopicName: JString (required)
   ##                  : Name of the topic.
+  ##   subscriptionId: JString (required)
+  ##                 : Subscription credentials that uniquely identify a Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group within the user's subscription.
   ##   domainName: JString (required)
   ##             : Name of the domain.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568379 = path.getOrDefault("resourceGroupName")
-  valid_568379 = validateParameter(valid_568379, JString, required = true,
+        "path argument is necessary due to required `domainTopicName` field"
+  var valid_564279 = path.getOrDefault("domainTopicName")
+  valid_564279 = validateParameter(valid_564279, JString, required = true,
                                  default = nil)
-  if valid_568379 != nil:
-    section.add "resourceGroupName", valid_568379
-  var valid_568380 = path.getOrDefault("subscriptionId")
-  valid_568380 = validateParameter(valid_568380, JString, required = true,
+  if valid_564279 != nil:
+    section.add "domainTopicName", valid_564279
+  var valid_564280 = path.getOrDefault("subscriptionId")
+  valid_564280 = validateParameter(valid_564280, JString, required = true,
                                  default = nil)
-  if valid_568380 != nil:
-    section.add "subscriptionId", valid_568380
-  var valid_568381 = path.getOrDefault("domainTopicName")
-  valid_568381 = validateParameter(valid_568381, JString, required = true,
+  if valid_564280 != nil:
+    section.add "subscriptionId", valid_564280
+  var valid_564281 = path.getOrDefault("resourceGroupName")
+  valid_564281 = validateParameter(valid_564281, JString, required = true,
                                  default = nil)
-  if valid_568381 != nil:
-    section.add "domainTopicName", valid_568381
-  var valid_568382 = path.getOrDefault("domainName")
-  valid_568382 = validateParameter(valid_568382, JString, required = true,
+  if valid_564281 != nil:
+    section.add "resourceGroupName", valid_564281
+  var valid_564282 = path.getOrDefault("domainName")
+  valid_564282 = validateParameter(valid_564282, JString, required = true,
                                  default = nil)
-  if valid_568382 != nil:
-    section.add "domainName", valid_568382
+  if valid_564282 != nil:
+    section.add "domainName", valid_564282
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2279,11 +2283,11 @@ proc validate_DomainTopicsGet_568377(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568383 = query.getOrDefault("api-version")
-  valid_568383 = validateParameter(valid_568383, JString, required = true,
+  var valid_564283 = query.getOrDefault("api-version")
+  valid_564283 = validateParameter(valid_564283, JString, required = true,
                                  default = nil)
-  if valid_568383 != nil:
-    section.add "api-version", valid_568383
+  if valid_564283 != nil:
+    section.add "api-version", valid_564283
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2292,50 +2296,50 @@ proc validate_DomainTopicsGet_568377(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568384: Call_DomainTopicsGet_568376; path: JsonNode; query: JsonNode;
+proc call*(call_564284: Call_DomainTopicsGet_564276; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get properties of a domain topic.
   ## 
-  let valid = call_568384.validator(path, query, header, formData, body)
-  let scheme = call_568384.pickScheme
+  let valid = call_564284.validator(path, query, header, formData, body)
+  let scheme = call_564284.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568384.url(scheme.get, call_568384.host, call_568384.base,
-                         call_568384.route, valid.getOrDefault("path"),
+  let url = call_564284.url(scheme.get, call_564284.host, call_564284.base,
+                         call_564284.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568384, url, valid)
+  result = hook(call_564284, url, valid)
 
-proc call*(call_568385: Call_DomainTopicsGet_568376; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; domainTopicName: string;
-          domainName: string): Recallable =
+proc call*(call_564285: Call_DomainTopicsGet_564276; apiVersion: string;
+          domainTopicName: string; subscriptionId: string;
+          resourceGroupName: string; domainName: string): Recallable =
   ## domainTopicsGet
   ## Get properties of a domain topic.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group within the user's subscription.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
-  ##   subscriptionId: string (required)
-  ##                 : Subscription credentials that uniquely identify a Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   domainTopicName: string (required)
   ##                  : Name of the topic.
+  ##   subscriptionId: string (required)
+  ##                 : Subscription credentials that uniquely identify a Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group within the user's subscription.
   ##   domainName: string (required)
   ##             : Name of the domain.
-  var path_568386 = newJObject()
-  var query_568387 = newJObject()
-  add(path_568386, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568387, "api-version", newJString(apiVersion))
-  add(path_568386, "subscriptionId", newJString(subscriptionId))
-  add(path_568386, "domainTopicName", newJString(domainTopicName))
-  add(path_568386, "domainName", newJString(domainName))
-  result = call_568385.call(path_568386, query_568387, nil, nil, nil)
+  var path_564286 = newJObject()
+  var query_564287 = newJObject()
+  add(query_564287, "api-version", newJString(apiVersion))
+  add(path_564286, "domainTopicName", newJString(domainTopicName))
+  add(path_564286, "subscriptionId", newJString(subscriptionId))
+  add(path_564286, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564286, "domainName", newJString(domainName))
+  result = call_564285.call(path_564286, query_564287, nil, nil, nil)
 
-var domainTopicsGet* = Call_DomainTopicsGet_568376(name: "domainTopicsGet",
+var domainTopicsGet* = Call_DomainTopicsGet_564276(name: "domainTopicsGet",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.EventGrid/domains/{domainName}/topics/{domainTopicName}",
-    validator: validate_DomainTopicsGet_568377, base: "", url: url_DomainTopicsGet_568378,
+    validator: validate_DomainTopicsGet_564277, base: "", url: url_DomainTopicsGet_564278,
     schemes: {Scheme.Https})
 type
-  Call_DomainTopicsDelete_568400 = ref object of OpenApiRestCall_567651
-proc url_DomainTopicsDelete_568402(protocol: Scheme; host: string; base: string;
+  Call_DomainTopicsDelete_564300 = ref object of OpenApiRestCall_563549
+proc url_DomainTopicsDelete_564302(protocol: Scheme; host: string; base: string;
                                   route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2360,7 +2364,7 @@ proc url_DomainTopicsDelete_568402(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DomainTopicsDelete_568401(path: JsonNode; query: JsonNode;
+proc validate_DomainTopicsDelete_564301(path: JsonNode; query: JsonNode;
                                        header: JsonNode; formData: JsonNode;
                                        body: JsonNode): JsonNode =
   ## Delete existing domain topic.
@@ -2368,37 +2372,37 @@ proc validate_DomainTopicsDelete_568401(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group within the user's subscription.
-  ##   subscriptionId: JString (required)
-  ##                 : Subscription credentials that uniquely identify a Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   domainTopicName: JString (required)
   ##                  : Name of the domain topic.
+  ##   subscriptionId: JString (required)
+  ##                 : Subscription credentials that uniquely identify a Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group within the user's subscription.
   ##   domainName: JString (required)
   ##             : Name of the domain.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568403 = path.getOrDefault("resourceGroupName")
-  valid_568403 = validateParameter(valid_568403, JString, required = true,
+        "path argument is necessary due to required `domainTopicName` field"
+  var valid_564303 = path.getOrDefault("domainTopicName")
+  valid_564303 = validateParameter(valid_564303, JString, required = true,
                                  default = nil)
-  if valid_568403 != nil:
-    section.add "resourceGroupName", valid_568403
-  var valid_568404 = path.getOrDefault("subscriptionId")
-  valid_568404 = validateParameter(valid_568404, JString, required = true,
+  if valid_564303 != nil:
+    section.add "domainTopicName", valid_564303
+  var valid_564304 = path.getOrDefault("subscriptionId")
+  valid_564304 = validateParameter(valid_564304, JString, required = true,
                                  default = nil)
-  if valid_568404 != nil:
-    section.add "subscriptionId", valid_568404
-  var valid_568405 = path.getOrDefault("domainTopicName")
-  valid_568405 = validateParameter(valid_568405, JString, required = true,
+  if valid_564304 != nil:
+    section.add "subscriptionId", valid_564304
+  var valid_564305 = path.getOrDefault("resourceGroupName")
+  valid_564305 = validateParameter(valid_564305, JString, required = true,
                                  default = nil)
-  if valid_568405 != nil:
-    section.add "domainTopicName", valid_568405
-  var valid_568406 = path.getOrDefault("domainName")
-  valid_568406 = validateParameter(valid_568406, JString, required = true,
+  if valid_564305 != nil:
+    section.add "resourceGroupName", valid_564305
+  var valid_564306 = path.getOrDefault("domainName")
+  valid_564306 = validateParameter(valid_564306, JString, required = true,
                                  default = nil)
-  if valid_568406 != nil:
-    section.add "domainName", valid_568406
+  if valid_564306 != nil:
+    section.add "domainName", valid_564306
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2406,11 +2410,11 @@ proc validate_DomainTopicsDelete_568401(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568407 = query.getOrDefault("api-version")
-  valid_568407 = validateParameter(valid_568407, JString, required = true,
+  var valid_564307 = query.getOrDefault("api-version")
+  valid_564307 = validateParameter(valid_564307, JString, required = true,
                                  default = nil)
-  if valid_568407 != nil:
-    section.add "api-version", valid_568407
+  if valid_564307 != nil:
+    section.add "api-version", valid_564307
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2419,51 +2423,51 @@ proc validate_DomainTopicsDelete_568401(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568408: Call_DomainTopicsDelete_568400; path: JsonNode;
+proc call*(call_564308: Call_DomainTopicsDelete_564300; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Delete existing domain topic.
   ## 
-  let valid = call_568408.validator(path, query, header, formData, body)
-  let scheme = call_568408.pickScheme
+  let valid = call_564308.validator(path, query, header, formData, body)
+  let scheme = call_564308.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568408.url(scheme.get, call_568408.host, call_568408.base,
-                         call_568408.route, valid.getOrDefault("path"),
+  let url = call_564308.url(scheme.get, call_564308.host, call_564308.base,
+                         call_564308.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568408, url, valid)
+  result = hook(call_564308, url, valid)
 
-proc call*(call_568409: Call_DomainTopicsDelete_568400; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; domainTopicName: string;
-          domainName: string): Recallable =
+proc call*(call_564309: Call_DomainTopicsDelete_564300; apiVersion: string;
+          domainTopicName: string; subscriptionId: string;
+          resourceGroupName: string; domainName: string): Recallable =
   ## domainTopicsDelete
   ## Delete existing domain topic.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group within the user's subscription.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
-  ##   subscriptionId: string (required)
-  ##                 : Subscription credentials that uniquely identify a Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   domainTopicName: string (required)
   ##                  : Name of the domain topic.
+  ##   subscriptionId: string (required)
+  ##                 : Subscription credentials that uniquely identify a Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group within the user's subscription.
   ##   domainName: string (required)
   ##             : Name of the domain.
-  var path_568410 = newJObject()
-  var query_568411 = newJObject()
-  add(path_568410, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568411, "api-version", newJString(apiVersion))
-  add(path_568410, "subscriptionId", newJString(subscriptionId))
-  add(path_568410, "domainTopicName", newJString(domainTopicName))
-  add(path_568410, "domainName", newJString(domainName))
-  result = call_568409.call(path_568410, query_568411, nil, nil, nil)
+  var path_564310 = newJObject()
+  var query_564311 = newJObject()
+  add(query_564311, "api-version", newJString(apiVersion))
+  add(path_564310, "domainTopicName", newJString(domainTopicName))
+  add(path_564310, "subscriptionId", newJString(subscriptionId))
+  add(path_564310, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564310, "domainName", newJString(domainName))
+  result = call_564309.call(path_564310, query_564311, nil, nil, nil)
 
-var domainTopicsDelete* = Call_DomainTopicsDelete_568400(
+var domainTopicsDelete* = Call_DomainTopicsDelete_564300(
     name: "domainTopicsDelete", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.EventGrid/domains/{domainName}/topics/{domainTopicName}",
-    validator: validate_DomainTopicsDelete_568401, base: "",
-    url: url_DomainTopicsDelete_568402, schemes: {Scheme.Https})
+    validator: validate_DomainTopicsDelete_564301, base: "",
+    url: url_DomainTopicsDelete_564302, schemes: {Scheme.Https})
 type
-  Call_EventSubscriptionsListByDomainTopic_568412 = ref object of OpenApiRestCall_567651
-proc url_EventSubscriptionsListByDomainTopic_568414(protocol: Scheme; host: string;
+  Call_EventSubscriptionsListByDomainTopic_564312 = ref object of OpenApiRestCall_563549
+proc url_EventSubscriptionsListByDomainTopic_564314(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2489,44 +2493,43 @@ proc url_EventSubscriptionsListByDomainTopic_568414(protocol: Scheme; host: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_EventSubscriptionsListByDomainTopic_568413(path: JsonNode;
+proc validate_EventSubscriptionsListByDomainTopic_564313(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## List all event subscriptions that have been created for a specific domain topic.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group within the user's subscription.
   ##   topicName: JString (required)
   ##            : Name of the domain topic.
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials that uniquely identify a Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group within the user's subscription.
   ##   domainName: JString (required)
   ##             : Name of the top level domain.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568415 = path.getOrDefault("resourceGroupName")
-  valid_568415 = validateParameter(valid_568415, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `topicName` field"
+  var valid_564315 = path.getOrDefault("topicName")
+  valid_564315 = validateParameter(valid_564315, JString, required = true,
                                  default = nil)
-  if valid_568415 != nil:
-    section.add "resourceGroupName", valid_568415
-  var valid_568416 = path.getOrDefault("topicName")
-  valid_568416 = validateParameter(valid_568416, JString, required = true,
+  if valid_564315 != nil:
+    section.add "topicName", valid_564315
+  var valid_564316 = path.getOrDefault("subscriptionId")
+  valid_564316 = validateParameter(valid_564316, JString, required = true,
                                  default = nil)
-  if valid_568416 != nil:
-    section.add "topicName", valid_568416
-  var valid_568417 = path.getOrDefault("subscriptionId")
-  valid_568417 = validateParameter(valid_568417, JString, required = true,
+  if valid_564316 != nil:
+    section.add "subscriptionId", valid_564316
+  var valid_564317 = path.getOrDefault("resourceGroupName")
+  valid_564317 = validateParameter(valid_564317, JString, required = true,
                                  default = nil)
-  if valid_568417 != nil:
-    section.add "subscriptionId", valid_568417
-  var valid_568418 = path.getOrDefault("domainName")
-  valid_568418 = validateParameter(valid_568418, JString, required = true,
+  if valid_564317 != nil:
+    section.add "resourceGroupName", valid_564317
+  var valid_564318 = path.getOrDefault("domainName")
+  valid_564318 = validateParameter(valid_564318, JString, required = true,
                                  default = nil)
-  if valid_568418 != nil:
-    section.add "domainName", valid_568418
+  if valid_564318 != nil:
+    section.add "domainName", valid_564318
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2538,20 +2541,20 @@ proc validate_EventSubscriptionsListByDomainTopic_568413(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568419 = query.getOrDefault("api-version")
-  valid_568419 = validateParameter(valid_568419, JString, required = true,
+  var valid_564319 = query.getOrDefault("api-version")
+  valid_564319 = validateParameter(valid_564319, JString, required = true,
                                  default = nil)
-  if valid_568419 != nil:
-    section.add "api-version", valid_568419
-  var valid_568420 = query.getOrDefault("$top")
-  valid_568420 = validateParameter(valid_568420, JInt, required = false, default = nil)
-  if valid_568420 != nil:
-    section.add "$top", valid_568420
-  var valid_568421 = query.getOrDefault("$filter")
-  valid_568421 = validateParameter(valid_568421, JString, required = false,
+  if valid_564319 != nil:
+    section.add "api-version", valid_564319
+  var valid_564320 = query.getOrDefault("$top")
+  valid_564320 = validateParameter(valid_564320, JInt, required = false, default = nil)
+  if valid_564320 != nil:
+    section.add "$top", valid_564320
+  var valid_564321 = query.getOrDefault("$filter")
+  valid_564321 = validateParameter(valid_564321, JString, required = false,
                                  default = nil)
-  if valid_568421 != nil:
-    section.add "$filter", valid_568421
+  if valid_564321 != nil:
+    section.add "$filter", valid_564321
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2560,58 +2563,59 @@ proc validate_EventSubscriptionsListByDomainTopic_568413(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568422: Call_EventSubscriptionsListByDomainTopic_568412;
+proc call*(call_564322: Call_EventSubscriptionsListByDomainTopic_564312;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## List all event subscriptions that have been created for a specific domain topic.
   ## 
-  let valid = call_568422.validator(path, query, header, formData, body)
-  let scheme = call_568422.pickScheme
+  let valid = call_564322.validator(path, query, header, formData, body)
+  let scheme = call_564322.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568422.url(scheme.get, call_568422.host, call_568422.base,
-                         call_568422.route, valid.getOrDefault("path"),
+  let url = call_564322.url(scheme.get, call_564322.host, call_564322.base,
+                         call_564322.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568422, url, valid)
+  result = hook(call_564322, url, valid)
 
-proc call*(call_568423: Call_EventSubscriptionsListByDomainTopic_568412;
-          resourceGroupName: string; apiVersion: string; topicName: string;
-          subscriptionId: string; domainName: string; Top: int = 0; Filter: string = ""): Recallable =
+proc call*(call_564323: Call_EventSubscriptionsListByDomainTopic_564312;
+          apiVersion: string; topicName: string; subscriptionId: string;
+          resourceGroupName: string; domainName: string; Top: int = 0;
+          Filter: string = ""): Recallable =
   ## eventSubscriptionsListByDomainTopic
   ## List all event subscriptions that have been created for a specific domain topic.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group within the user's subscription.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
+  ##   Top: int
+  ##      : The number of results to return per page for the list operation. Valid range for top parameter is 1 to 100. If not specified, the default number of results to be returned is 20 items per page.
   ##   topicName: string (required)
   ##            : Name of the domain topic.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials that uniquely identify a Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   Top: int
-  ##      : The number of results to return per page for the list operation. Valid range for top parameter is 1 to 100. If not specified, the default number of results to be returned is 20 items per page.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group within the user's subscription.
   ##   domainName: string (required)
   ##             : Name of the top level domain.
   ##   Filter: string
   ##         : The query used to filter the search results using OData syntax. Filtering is permitted on the 'name' property only and with limited number of OData operations. These operations are: the 'contains' function as well as the following logical operations: not, and, or, eq (for equal), and ne (for not equal). No arithmetic operations are supported. The following is a valid filter example: $filter=contains(namE, 'PATTERN') and name ne 'PATTERN-1'. The following is not a valid filter example: $filter=location eq 'westus'.
-  var path_568424 = newJObject()
-  var query_568425 = newJObject()
-  add(path_568424, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568425, "api-version", newJString(apiVersion))
-  add(path_568424, "topicName", newJString(topicName))
-  add(path_568424, "subscriptionId", newJString(subscriptionId))
-  add(query_568425, "$top", newJInt(Top))
-  add(path_568424, "domainName", newJString(domainName))
-  add(query_568425, "$filter", newJString(Filter))
-  result = call_568423.call(path_568424, query_568425, nil, nil, nil)
+  var path_564324 = newJObject()
+  var query_564325 = newJObject()
+  add(query_564325, "api-version", newJString(apiVersion))
+  add(query_564325, "$top", newJInt(Top))
+  add(path_564324, "topicName", newJString(topicName))
+  add(path_564324, "subscriptionId", newJString(subscriptionId))
+  add(path_564324, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564324, "domainName", newJString(domainName))
+  add(query_564325, "$filter", newJString(Filter))
+  result = call_564323.call(path_564324, query_564325, nil, nil, nil)
 
-var eventSubscriptionsListByDomainTopic* = Call_EventSubscriptionsListByDomainTopic_568412(
+var eventSubscriptionsListByDomainTopic* = Call_EventSubscriptionsListByDomainTopic_564312(
     name: "eventSubscriptionsListByDomainTopic", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.EventGrid/domains/{domainName}/topics/{topicName}/providers/Microsoft.EventGrid/eventSubscriptions",
-    validator: validate_EventSubscriptionsListByDomainTopic_568413, base: "",
-    url: url_EventSubscriptionsListByDomainTopic_568414, schemes: {Scheme.Https})
+    validator: validate_EventSubscriptionsListByDomainTopic_564313, base: "",
+    url: url_EventSubscriptionsListByDomainTopic_564314, schemes: {Scheme.Https})
 type
-  Call_EventSubscriptionsListGlobalByResourceGroup_568426 = ref object of OpenApiRestCall_567651
-proc url_EventSubscriptionsListGlobalByResourceGroup_568428(protocol: Scheme;
+  Call_EventSubscriptionsListGlobalByResourceGroup_564326 = ref object of OpenApiRestCall_563549
+proc url_EventSubscriptionsListGlobalByResourceGroup_564328(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2632,30 +2636,30 @@ proc url_EventSubscriptionsListGlobalByResourceGroup_568428(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_EventSubscriptionsListGlobalByResourceGroup_568427(path: JsonNode;
+proc validate_EventSubscriptionsListGlobalByResourceGroup_564327(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## List all global event subscriptions under a specific Azure subscription and resource group.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group within the user's subscription.
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials that uniquely identify a Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group within the user's subscription.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568429 = path.getOrDefault("resourceGroupName")
-  valid_568429 = validateParameter(valid_568429, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564329 = path.getOrDefault("subscriptionId")
+  valid_564329 = validateParameter(valid_564329, JString, required = true,
                                  default = nil)
-  if valid_568429 != nil:
-    section.add "resourceGroupName", valid_568429
-  var valid_568430 = path.getOrDefault("subscriptionId")
-  valid_568430 = validateParameter(valid_568430, JString, required = true,
+  if valid_564329 != nil:
+    section.add "subscriptionId", valid_564329
+  var valid_564330 = path.getOrDefault("resourceGroupName")
+  valid_564330 = validateParameter(valid_564330, JString, required = true,
                                  default = nil)
-  if valid_568430 != nil:
-    section.add "subscriptionId", valid_568430
+  if valid_564330 != nil:
+    section.add "resourceGroupName", valid_564330
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2667,20 +2671,20 @@ proc validate_EventSubscriptionsListGlobalByResourceGroup_568427(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568431 = query.getOrDefault("api-version")
-  valid_568431 = validateParameter(valid_568431, JString, required = true,
+  var valid_564331 = query.getOrDefault("api-version")
+  valid_564331 = validateParameter(valid_564331, JString, required = true,
                                  default = nil)
-  if valid_568431 != nil:
-    section.add "api-version", valid_568431
-  var valid_568432 = query.getOrDefault("$top")
-  valid_568432 = validateParameter(valid_568432, JInt, required = false, default = nil)
-  if valid_568432 != nil:
-    section.add "$top", valid_568432
-  var valid_568433 = query.getOrDefault("$filter")
-  valid_568433 = validateParameter(valid_568433, JString, required = false,
+  if valid_564331 != nil:
+    section.add "api-version", valid_564331
+  var valid_564332 = query.getOrDefault("$top")
+  valid_564332 = validateParameter(valid_564332, JInt, required = false, default = nil)
+  if valid_564332 != nil:
+    section.add "$top", valid_564332
+  var valid_564333 = query.getOrDefault("$filter")
+  valid_564333 = validateParameter(valid_564333, JString, required = false,
                                  default = nil)
-  if valid_568433 != nil:
-    section.add "$filter", valid_568433
+  if valid_564333 != nil:
+    section.add "$filter", valid_564333
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2689,53 +2693,53 @@ proc validate_EventSubscriptionsListGlobalByResourceGroup_568427(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568434: Call_EventSubscriptionsListGlobalByResourceGroup_568426;
+proc call*(call_564334: Call_EventSubscriptionsListGlobalByResourceGroup_564326;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## List all global event subscriptions under a specific Azure subscription and resource group.
   ## 
-  let valid = call_568434.validator(path, query, header, formData, body)
-  let scheme = call_568434.pickScheme
+  let valid = call_564334.validator(path, query, header, formData, body)
+  let scheme = call_564334.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568434.url(scheme.get, call_568434.host, call_568434.base,
-                         call_568434.route, valid.getOrDefault("path"),
+  let url = call_564334.url(scheme.get, call_564334.host, call_564334.base,
+                         call_564334.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568434, url, valid)
+  result = hook(call_564334, url, valid)
 
-proc call*(call_568435: Call_EventSubscriptionsListGlobalByResourceGroup_568426;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
+proc call*(call_564335: Call_EventSubscriptionsListGlobalByResourceGroup_564326;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string;
           Top: int = 0; Filter: string = ""): Recallable =
   ## eventSubscriptionsListGlobalByResourceGroup
   ## List all global event subscriptions under a specific Azure subscription and resource group.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group within the user's subscription.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
-  ##   subscriptionId: string (required)
-  ##                 : Subscription credentials that uniquely identify a Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   Top: int
   ##      : The number of results to return per page for the list operation. Valid range for top parameter is 1 to 100. If not specified, the default number of results to be returned is 20 items per page.
+  ##   subscriptionId: string (required)
+  ##                 : Subscription credentials that uniquely identify a Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group within the user's subscription.
   ##   Filter: string
   ##         : The query used to filter the search results using OData syntax. Filtering is permitted on the 'name' property only and with limited number of OData operations. These operations are: the 'contains' function as well as the following logical operations: not, and, or, eq (for equal), and ne (for not equal). No arithmetic operations are supported. The following is a valid filter example: $filter=contains(namE, 'PATTERN') and name ne 'PATTERN-1'. The following is not a valid filter example: $filter=location eq 'westus'.
-  var path_568436 = newJObject()
-  var query_568437 = newJObject()
-  add(path_568436, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568437, "api-version", newJString(apiVersion))
-  add(path_568436, "subscriptionId", newJString(subscriptionId))
-  add(query_568437, "$top", newJInt(Top))
-  add(query_568437, "$filter", newJString(Filter))
-  result = call_568435.call(path_568436, query_568437, nil, nil, nil)
+  var path_564336 = newJObject()
+  var query_564337 = newJObject()
+  add(query_564337, "api-version", newJString(apiVersion))
+  add(query_564337, "$top", newJInt(Top))
+  add(path_564336, "subscriptionId", newJString(subscriptionId))
+  add(path_564336, "resourceGroupName", newJString(resourceGroupName))
+  add(query_564337, "$filter", newJString(Filter))
+  result = call_564335.call(path_564336, query_564337, nil, nil, nil)
 
-var eventSubscriptionsListGlobalByResourceGroup* = Call_EventSubscriptionsListGlobalByResourceGroup_568426(
+var eventSubscriptionsListGlobalByResourceGroup* = Call_EventSubscriptionsListGlobalByResourceGroup_564326(
     name: "eventSubscriptionsListGlobalByResourceGroup", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.EventGrid/eventSubscriptions",
-    validator: validate_EventSubscriptionsListGlobalByResourceGroup_568427,
-    base: "", url: url_EventSubscriptionsListGlobalByResourceGroup_568428,
+    validator: validate_EventSubscriptionsListGlobalByResourceGroup_564327,
+    base: "", url: url_EventSubscriptionsListGlobalByResourceGroup_564328,
     schemes: {Scheme.Https})
 type
-  Call_EventSubscriptionsListRegionalByResourceGroup_568438 = ref object of OpenApiRestCall_567651
-proc url_EventSubscriptionsListRegionalByResourceGroup_568440(protocol: Scheme;
+  Call_EventSubscriptionsListRegionalByResourceGroup_564338 = ref object of OpenApiRestCall_563549
+proc url_EventSubscriptionsListRegionalByResourceGroup_564340(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2758,7 +2762,7 @@ proc url_EventSubscriptionsListRegionalByResourceGroup_568440(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_EventSubscriptionsListRegionalByResourceGroup_568439(
+proc validate_EventSubscriptionsListRegionalByResourceGroup_564339(
     path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
     body: JsonNode): JsonNode =
   ## List all event subscriptions from the given location under a specific Azure subscription and resource group.
@@ -2766,30 +2770,30 @@ proc validate_EventSubscriptionsListRegionalByResourceGroup_568439(
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group within the user's subscription.
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials that uniquely identify a Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   location: JString (required)
   ##           : Name of the location.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group within the user's subscription.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568441 = path.getOrDefault("resourceGroupName")
-  valid_568441 = validateParameter(valid_568441, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564341 = path.getOrDefault("subscriptionId")
+  valid_564341 = validateParameter(valid_564341, JString, required = true,
                                  default = nil)
-  if valid_568441 != nil:
-    section.add "resourceGroupName", valid_568441
-  var valid_568442 = path.getOrDefault("subscriptionId")
-  valid_568442 = validateParameter(valid_568442, JString, required = true,
+  if valid_564341 != nil:
+    section.add "subscriptionId", valid_564341
+  var valid_564342 = path.getOrDefault("location")
+  valid_564342 = validateParameter(valid_564342, JString, required = true,
                                  default = nil)
-  if valid_568442 != nil:
-    section.add "subscriptionId", valid_568442
-  var valid_568443 = path.getOrDefault("location")
-  valid_568443 = validateParameter(valid_568443, JString, required = true,
+  if valid_564342 != nil:
+    section.add "location", valid_564342
+  var valid_564343 = path.getOrDefault("resourceGroupName")
+  valid_564343 = validateParameter(valid_564343, JString, required = true,
                                  default = nil)
-  if valid_568443 != nil:
-    section.add "location", valid_568443
+  if valid_564343 != nil:
+    section.add "resourceGroupName", valid_564343
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2801,20 +2805,20 @@ proc validate_EventSubscriptionsListRegionalByResourceGroup_568439(
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568444 = query.getOrDefault("api-version")
-  valid_568444 = validateParameter(valid_568444, JString, required = true,
+  var valid_564344 = query.getOrDefault("api-version")
+  valid_564344 = validateParameter(valid_564344, JString, required = true,
                                  default = nil)
-  if valid_568444 != nil:
-    section.add "api-version", valid_568444
-  var valid_568445 = query.getOrDefault("$top")
-  valid_568445 = validateParameter(valid_568445, JInt, required = false, default = nil)
-  if valid_568445 != nil:
-    section.add "$top", valid_568445
-  var valid_568446 = query.getOrDefault("$filter")
-  valid_568446 = validateParameter(valid_568446, JString, required = false,
+  if valid_564344 != nil:
+    section.add "api-version", valid_564344
+  var valid_564345 = query.getOrDefault("$top")
+  valid_564345 = validateParameter(valid_564345, JInt, required = false, default = nil)
+  if valid_564345 != nil:
+    section.add "$top", valid_564345
+  var valid_564346 = query.getOrDefault("$filter")
+  valid_564346 = validateParameter(valid_564346, JString, required = false,
                                  default = nil)
-  if valid_568446 != nil:
-    section.add "$filter", valid_568446
+  if valid_564346 != nil:
+    section.add "$filter", valid_564346
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2823,56 +2827,56 @@ proc validate_EventSubscriptionsListRegionalByResourceGroup_568439(
   if body != nil:
     result.add "body", body
 
-proc call*(call_568447: Call_EventSubscriptionsListRegionalByResourceGroup_568438;
+proc call*(call_564347: Call_EventSubscriptionsListRegionalByResourceGroup_564338;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## List all event subscriptions from the given location under a specific Azure subscription and resource group.
   ## 
-  let valid = call_568447.validator(path, query, header, formData, body)
-  let scheme = call_568447.pickScheme
+  let valid = call_564347.validator(path, query, header, formData, body)
+  let scheme = call_564347.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568447.url(scheme.get, call_568447.host, call_568447.base,
-                         call_568447.route, valid.getOrDefault("path"),
+  let url = call_564347.url(scheme.get, call_564347.host, call_564347.base,
+                         call_564347.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568447, url, valid)
+  result = hook(call_564347, url, valid)
 
-proc call*(call_568448: Call_EventSubscriptionsListRegionalByResourceGroup_568438;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          location: string; Top: int = 0; Filter: string = ""): Recallable =
+proc call*(call_564348: Call_EventSubscriptionsListRegionalByResourceGroup_564338;
+          apiVersion: string; subscriptionId: string; location: string;
+          resourceGroupName: string; Top: int = 0; Filter: string = ""): Recallable =
   ## eventSubscriptionsListRegionalByResourceGroup
   ## List all event subscriptions from the given location under a specific Azure subscription and resource group.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group within the user's subscription.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
-  ##   subscriptionId: string (required)
-  ##                 : Subscription credentials that uniquely identify a Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   Top: int
   ##      : The number of results to return per page for the list operation. Valid range for top parameter is 1 to 100. If not specified, the default number of results to be returned is 20 items per page.
+  ##   subscriptionId: string (required)
+  ##                 : Subscription credentials that uniquely identify a Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   location: string (required)
   ##           : Name of the location.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group within the user's subscription.
   ##   Filter: string
   ##         : The query used to filter the search results using OData syntax. Filtering is permitted on the 'name' property only and with limited number of OData operations. These operations are: the 'contains' function as well as the following logical operations: not, and, or, eq (for equal), and ne (for not equal). No arithmetic operations are supported. The following is a valid filter example: $filter=contains(namE, 'PATTERN') and name ne 'PATTERN-1'. The following is not a valid filter example: $filter=location eq 'westus'.
-  var path_568449 = newJObject()
-  var query_568450 = newJObject()
-  add(path_568449, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568450, "api-version", newJString(apiVersion))
-  add(path_568449, "subscriptionId", newJString(subscriptionId))
-  add(query_568450, "$top", newJInt(Top))
-  add(path_568449, "location", newJString(location))
-  add(query_568450, "$filter", newJString(Filter))
-  result = call_568448.call(path_568449, query_568450, nil, nil, nil)
+  var path_564349 = newJObject()
+  var query_564350 = newJObject()
+  add(query_564350, "api-version", newJString(apiVersion))
+  add(query_564350, "$top", newJInt(Top))
+  add(path_564349, "subscriptionId", newJString(subscriptionId))
+  add(path_564349, "location", newJString(location))
+  add(path_564349, "resourceGroupName", newJString(resourceGroupName))
+  add(query_564350, "$filter", newJString(Filter))
+  result = call_564348.call(path_564349, query_564350, nil, nil, nil)
 
-var eventSubscriptionsListRegionalByResourceGroup* = Call_EventSubscriptionsListRegionalByResourceGroup_568438(
+var eventSubscriptionsListRegionalByResourceGroup* = Call_EventSubscriptionsListRegionalByResourceGroup_564338(
     name: "eventSubscriptionsListRegionalByResourceGroup",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.EventGrid/locations/{location}/eventSubscriptions",
-    validator: validate_EventSubscriptionsListRegionalByResourceGroup_568439,
-    base: "", url: url_EventSubscriptionsListRegionalByResourceGroup_568440,
+    validator: validate_EventSubscriptionsListRegionalByResourceGroup_564339,
+    base: "", url: url_EventSubscriptionsListRegionalByResourceGroup_564340,
     schemes: {Scheme.Https})
 type
-  Call_EventSubscriptionsListRegionalByResourceGroupForTopicType_568451 = ref object of OpenApiRestCall_567651
-proc url_EventSubscriptionsListRegionalByResourceGroupForTopicType_568453(
+  Call_EventSubscriptionsListRegionalByResourceGroupForTopicType_564351 = ref object of OpenApiRestCall_563549
+proc url_EventSubscriptionsListRegionalByResourceGroupForTopicType_564353(
     protocol: Scheme; host: string; base: string; route: string; path: JsonNode;
     query: JsonNode): Uri =
   result.scheme = $protocol
@@ -2899,7 +2903,7 @@ proc url_EventSubscriptionsListRegionalByResourceGroupForTopicType_568453(
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_EventSubscriptionsListRegionalByResourceGroupForTopicType_568452(
+proc validate_EventSubscriptionsListRegionalByResourceGroupForTopicType_564352(
     path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
     body: JsonNode): JsonNode =
   ## List all event subscriptions from the given location under a specific Azure subscription and resource group and topic type.
@@ -2909,35 +2913,35 @@ proc validate_EventSubscriptionsListRegionalByResourceGroupForTopicType_568452(
   ## parameters in `path` object:
   ##   topicTypeName: JString (required)
   ##                : Name of the topic type.
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group within the user's subscription.
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials that uniquely identify a Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   location: JString (required)
   ##           : Name of the location.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group within the user's subscription.
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `topicTypeName` field"
-  var valid_568454 = path.getOrDefault("topicTypeName")
-  valid_568454 = validateParameter(valid_568454, JString, required = true,
+  var valid_564354 = path.getOrDefault("topicTypeName")
+  valid_564354 = validateParameter(valid_564354, JString, required = true,
                                  default = nil)
-  if valid_568454 != nil:
-    section.add "topicTypeName", valid_568454
-  var valid_568455 = path.getOrDefault("resourceGroupName")
-  valid_568455 = validateParameter(valid_568455, JString, required = true,
+  if valid_564354 != nil:
+    section.add "topicTypeName", valid_564354
+  var valid_564355 = path.getOrDefault("subscriptionId")
+  valid_564355 = validateParameter(valid_564355, JString, required = true,
                                  default = nil)
-  if valid_568455 != nil:
-    section.add "resourceGroupName", valid_568455
-  var valid_568456 = path.getOrDefault("subscriptionId")
-  valid_568456 = validateParameter(valid_568456, JString, required = true,
+  if valid_564355 != nil:
+    section.add "subscriptionId", valid_564355
+  var valid_564356 = path.getOrDefault("location")
+  valid_564356 = validateParameter(valid_564356, JString, required = true,
                                  default = nil)
-  if valid_568456 != nil:
-    section.add "subscriptionId", valid_568456
-  var valid_568457 = path.getOrDefault("location")
-  valid_568457 = validateParameter(valid_568457, JString, required = true,
+  if valid_564356 != nil:
+    section.add "location", valid_564356
+  var valid_564357 = path.getOrDefault("resourceGroupName")
+  valid_564357 = validateParameter(valid_564357, JString, required = true,
                                  default = nil)
-  if valid_568457 != nil:
-    section.add "location", valid_568457
+  if valid_564357 != nil:
+    section.add "resourceGroupName", valid_564357
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2949,20 +2953,20 @@ proc validate_EventSubscriptionsListRegionalByResourceGroupForTopicType_568452(
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568458 = query.getOrDefault("api-version")
-  valid_568458 = validateParameter(valid_568458, JString, required = true,
+  var valid_564358 = query.getOrDefault("api-version")
+  valid_564358 = validateParameter(valid_564358, JString, required = true,
                                  default = nil)
-  if valid_568458 != nil:
-    section.add "api-version", valid_568458
-  var valid_568459 = query.getOrDefault("$top")
-  valid_568459 = validateParameter(valid_568459, JInt, required = false, default = nil)
-  if valid_568459 != nil:
-    section.add "$top", valid_568459
-  var valid_568460 = query.getOrDefault("$filter")
-  valid_568460 = validateParameter(valid_568460, JString, required = false,
+  if valid_564358 != nil:
+    section.add "api-version", valid_564358
+  var valid_564359 = query.getOrDefault("$top")
+  valid_564359 = validateParameter(valid_564359, JInt, required = false, default = nil)
+  if valid_564359 != nil:
+    section.add "$top", valid_564359
+  var valid_564360 = query.getOrDefault("$filter")
+  valid_564360 = validateParameter(valid_564360, JString, required = false,
                                  default = nil)
-  if valid_568460 != nil:
-    section.add "$filter", valid_568460
+  if valid_564360 != nil:
+    section.add "$filter", valid_564360
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2971,58 +2975,58 @@ proc validate_EventSubscriptionsListRegionalByResourceGroupForTopicType_568452(
   if body != nil:
     result.add "body", body
 
-proc call*(call_568461: Call_EventSubscriptionsListRegionalByResourceGroupForTopicType_568451;
+proc call*(call_564361: Call_EventSubscriptionsListRegionalByResourceGroupForTopicType_564351;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## List all event subscriptions from the given location under a specific Azure subscription and resource group and topic type.
   ## 
-  let valid = call_568461.validator(path, query, header, formData, body)
-  let scheme = call_568461.pickScheme
+  let valid = call_564361.validator(path, query, header, formData, body)
+  let scheme = call_564361.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568461.url(scheme.get, call_568461.host, call_568461.base,
-                         call_568461.route, valid.getOrDefault("path"),
+  let url = call_564361.url(scheme.get, call_564361.host, call_564361.base,
+                         call_564361.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568461, url, valid)
+  result = hook(call_564361, url, valid)
 
-proc call*(call_568462: Call_EventSubscriptionsListRegionalByResourceGroupForTopicType_568451;
-          topicTypeName: string; resourceGroupName: string; apiVersion: string;
-          subscriptionId: string; location: string; Top: int = 0; Filter: string = ""): Recallable =
+proc call*(call_564362: Call_EventSubscriptionsListRegionalByResourceGroupForTopicType_564351;
+          apiVersion: string; topicTypeName: string; subscriptionId: string;
+          location: string; resourceGroupName: string; Top: int = 0; Filter: string = ""): Recallable =
   ## eventSubscriptionsListRegionalByResourceGroupForTopicType
   ## List all event subscriptions from the given location under a specific Azure subscription and resource group and topic type.
-  ##   topicTypeName: string (required)
-  ##                : Name of the topic type.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group within the user's subscription.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
-  ##   subscriptionId: string (required)
-  ##                 : Subscription credentials that uniquely identify a Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   topicTypeName: string (required)
+  ##                : Name of the topic type.
   ##   Top: int
   ##      : The number of results to return per page for the list operation. Valid range for top parameter is 1 to 100. If not specified, the default number of results to be returned is 20 items per page.
+  ##   subscriptionId: string (required)
+  ##                 : Subscription credentials that uniquely identify a Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   location: string (required)
   ##           : Name of the location.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group within the user's subscription.
   ##   Filter: string
   ##         : The query used to filter the search results using OData syntax. Filtering is permitted on the 'name' property only and with limited number of OData operations. These operations are: the 'contains' function as well as the following logical operations: not, and, or, eq (for equal), and ne (for not equal). No arithmetic operations are supported. The following is a valid filter example: $filter=contains(namE, 'PATTERN') and name ne 'PATTERN-1'. The following is not a valid filter example: $filter=location eq 'westus'.
-  var path_568463 = newJObject()
-  var query_568464 = newJObject()
-  add(path_568463, "topicTypeName", newJString(topicTypeName))
-  add(path_568463, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568464, "api-version", newJString(apiVersion))
-  add(path_568463, "subscriptionId", newJString(subscriptionId))
-  add(query_568464, "$top", newJInt(Top))
-  add(path_568463, "location", newJString(location))
-  add(query_568464, "$filter", newJString(Filter))
-  result = call_568462.call(path_568463, query_568464, nil, nil, nil)
+  var path_564363 = newJObject()
+  var query_564364 = newJObject()
+  add(query_564364, "api-version", newJString(apiVersion))
+  add(path_564363, "topicTypeName", newJString(topicTypeName))
+  add(query_564364, "$top", newJInt(Top))
+  add(path_564363, "subscriptionId", newJString(subscriptionId))
+  add(path_564363, "location", newJString(location))
+  add(path_564363, "resourceGroupName", newJString(resourceGroupName))
+  add(query_564364, "$filter", newJString(Filter))
+  result = call_564362.call(path_564363, query_564364, nil, nil, nil)
 
-var eventSubscriptionsListRegionalByResourceGroupForTopicType* = Call_EventSubscriptionsListRegionalByResourceGroupForTopicType_568451(
+var eventSubscriptionsListRegionalByResourceGroupForTopicType* = Call_EventSubscriptionsListRegionalByResourceGroupForTopicType_564351(
     name: "eventSubscriptionsListRegionalByResourceGroupForTopicType",
-    meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.EventGrid/locations/{location}/topicTypes/{topicTypeName}/eventSubscriptions", validator: validate_EventSubscriptionsListRegionalByResourceGroupForTopicType_568452,
-    base: "", url: url_EventSubscriptionsListRegionalByResourceGroupForTopicType_568453,
+    meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.EventGrid/locations/{location}/topicTypes/{topicTypeName}/eventSubscriptions", validator: validate_EventSubscriptionsListRegionalByResourceGroupForTopicType_564352,
+    base: "", url: url_EventSubscriptionsListRegionalByResourceGroupForTopicType_564353,
     schemes: {Scheme.Https})
 type
-  Call_EventSubscriptionsListGlobalByResourceGroupForTopicType_568465 = ref object of OpenApiRestCall_567651
-proc url_EventSubscriptionsListGlobalByResourceGroupForTopicType_568467(
+  Call_EventSubscriptionsListGlobalByResourceGroupForTopicType_564365 = ref object of OpenApiRestCall_563549
+proc url_EventSubscriptionsListGlobalByResourceGroupForTopicType_564367(
     protocol: Scheme; host: string; base: string; route: string; path: JsonNode;
     query: JsonNode): Uri =
   result.scheme = $protocol
@@ -3046,7 +3050,7 @@ proc url_EventSubscriptionsListGlobalByResourceGroupForTopicType_568467(
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_EventSubscriptionsListGlobalByResourceGroupForTopicType_568466(
+proc validate_EventSubscriptionsListGlobalByResourceGroupForTopicType_564366(
     path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
     body: JsonNode): JsonNode =
   ## List all global event subscriptions under a resource group for a specific topic type.
@@ -3056,28 +3060,28 @@ proc validate_EventSubscriptionsListGlobalByResourceGroupForTopicType_568466(
   ## parameters in `path` object:
   ##   topicTypeName: JString (required)
   ##                : Name of the topic type.
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group within the user's subscription.
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials that uniquely identify a Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group within the user's subscription.
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `topicTypeName` field"
-  var valid_568468 = path.getOrDefault("topicTypeName")
-  valid_568468 = validateParameter(valid_568468, JString, required = true,
+  var valid_564368 = path.getOrDefault("topicTypeName")
+  valid_564368 = validateParameter(valid_564368, JString, required = true,
                                  default = nil)
-  if valid_568468 != nil:
-    section.add "topicTypeName", valid_568468
-  var valid_568469 = path.getOrDefault("resourceGroupName")
-  valid_568469 = validateParameter(valid_568469, JString, required = true,
+  if valid_564368 != nil:
+    section.add "topicTypeName", valid_564368
+  var valid_564369 = path.getOrDefault("subscriptionId")
+  valid_564369 = validateParameter(valid_564369, JString, required = true,
                                  default = nil)
-  if valid_568469 != nil:
-    section.add "resourceGroupName", valid_568469
-  var valid_568470 = path.getOrDefault("subscriptionId")
-  valid_568470 = validateParameter(valid_568470, JString, required = true,
+  if valid_564369 != nil:
+    section.add "subscriptionId", valid_564369
+  var valid_564370 = path.getOrDefault("resourceGroupName")
+  valid_564370 = validateParameter(valid_564370, JString, required = true,
                                  default = nil)
-  if valid_568470 != nil:
-    section.add "subscriptionId", valid_568470
+  if valid_564370 != nil:
+    section.add "resourceGroupName", valid_564370
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -3089,20 +3093,20 @@ proc validate_EventSubscriptionsListGlobalByResourceGroupForTopicType_568466(
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568471 = query.getOrDefault("api-version")
-  valid_568471 = validateParameter(valid_568471, JString, required = true,
+  var valid_564371 = query.getOrDefault("api-version")
+  valid_564371 = validateParameter(valid_564371, JString, required = true,
                                  default = nil)
-  if valid_568471 != nil:
-    section.add "api-version", valid_568471
-  var valid_568472 = query.getOrDefault("$top")
-  valid_568472 = validateParameter(valid_568472, JInt, required = false, default = nil)
-  if valid_568472 != nil:
-    section.add "$top", valid_568472
-  var valid_568473 = query.getOrDefault("$filter")
-  valid_568473 = validateParameter(valid_568473, JString, required = false,
+  if valid_564371 != nil:
+    section.add "api-version", valid_564371
+  var valid_564372 = query.getOrDefault("$top")
+  valid_564372 = validateParameter(valid_564372, JInt, required = false, default = nil)
+  if valid_564372 != nil:
+    section.add "$top", valid_564372
+  var valid_564373 = query.getOrDefault("$filter")
+  valid_564373 = validateParameter(valid_564373, JString, required = false,
                                  default = nil)
-  if valid_568473 != nil:
-    section.add "$filter", valid_568473
+  if valid_564373 != nil:
+    section.add "$filter", valid_564373
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3111,55 +3115,55 @@ proc validate_EventSubscriptionsListGlobalByResourceGroupForTopicType_568466(
   if body != nil:
     result.add "body", body
 
-proc call*(call_568474: Call_EventSubscriptionsListGlobalByResourceGroupForTopicType_568465;
+proc call*(call_564374: Call_EventSubscriptionsListGlobalByResourceGroupForTopicType_564365;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## List all global event subscriptions under a resource group for a specific topic type.
   ## 
-  let valid = call_568474.validator(path, query, header, formData, body)
-  let scheme = call_568474.pickScheme
+  let valid = call_564374.validator(path, query, header, formData, body)
+  let scheme = call_564374.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568474.url(scheme.get, call_568474.host, call_568474.base,
-                         call_568474.route, valid.getOrDefault("path"),
+  let url = call_564374.url(scheme.get, call_564374.host, call_564374.base,
+                         call_564374.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568474, url, valid)
+  result = hook(call_564374, url, valid)
 
-proc call*(call_568475: Call_EventSubscriptionsListGlobalByResourceGroupForTopicType_568465;
-          topicTypeName: string; resourceGroupName: string; apiVersion: string;
-          subscriptionId: string; Top: int = 0; Filter: string = ""): Recallable =
+proc call*(call_564375: Call_EventSubscriptionsListGlobalByResourceGroupForTopicType_564365;
+          apiVersion: string; topicTypeName: string; subscriptionId: string;
+          resourceGroupName: string; Top: int = 0; Filter: string = ""): Recallable =
   ## eventSubscriptionsListGlobalByResourceGroupForTopicType
   ## List all global event subscriptions under a resource group for a specific topic type.
-  ##   topicTypeName: string (required)
-  ##                : Name of the topic type.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group within the user's subscription.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
-  ##   subscriptionId: string (required)
-  ##                 : Subscription credentials that uniquely identify a Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   topicTypeName: string (required)
+  ##                : Name of the topic type.
   ##   Top: int
   ##      : The number of results to return per page for the list operation. Valid range for top parameter is 1 to 100. If not specified, the default number of results to be returned is 20 items per page.
+  ##   subscriptionId: string (required)
+  ##                 : Subscription credentials that uniquely identify a Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group within the user's subscription.
   ##   Filter: string
   ##         : The query used to filter the search results using OData syntax. Filtering is permitted on the 'name' property only and with limited number of OData operations. These operations are: the 'contains' function as well as the following logical operations: not, and, or, eq (for equal), and ne (for not equal). No arithmetic operations are supported. The following is a valid filter example: $filter=contains(namE, 'PATTERN') and name ne 'PATTERN-1'. The following is not a valid filter example: $filter=location eq 'westus'.
-  var path_568476 = newJObject()
-  var query_568477 = newJObject()
-  add(path_568476, "topicTypeName", newJString(topicTypeName))
-  add(path_568476, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568477, "api-version", newJString(apiVersion))
-  add(path_568476, "subscriptionId", newJString(subscriptionId))
-  add(query_568477, "$top", newJInt(Top))
-  add(query_568477, "$filter", newJString(Filter))
-  result = call_568475.call(path_568476, query_568477, nil, nil, nil)
+  var path_564376 = newJObject()
+  var query_564377 = newJObject()
+  add(query_564377, "api-version", newJString(apiVersion))
+  add(path_564376, "topicTypeName", newJString(topicTypeName))
+  add(query_564377, "$top", newJInt(Top))
+  add(path_564376, "subscriptionId", newJString(subscriptionId))
+  add(path_564376, "resourceGroupName", newJString(resourceGroupName))
+  add(query_564377, "$filter", newJString(Filter))
+  result = call_564375.call(path_564376, query_564377, nil, nil, nil)
 
-var eventSubscriptionsListGlobalByResourceGroupForTopicType* = Call_EventSubscriptionsListGlobalByResourceGroupForTopicType_568465(
+var eventSubscriptionsListGlobalByResourceGroupForTopicType* = Call_EventSubscriptionsListGlobalByResourceGroupForTopicType_564365(
     name: "eventSubscriptionsListGlobalByResourceGroupForTopicType",
-    meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.EventGrid/topicTypes/{topicTypeName}/eventSubscriptions", validator: validate_EventSubscriptionsListGlobalByResourceGroupForTopicType_568466,
-    base: "", url: url_EventSubscriptionsListGlobalByResourceGroupForTopicType_568467,
+    meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.EventGrid/topicTypes/{topicTypeName}/eventSubscriptions", validator: validate_EventSubscriptionsListGlobalByResourceGroupForTopicType_564366,
+    base: "", url: url_EventSubscriptionsListGlobalByResourceGroupForTopicType_564367,
     schemes: {Scheme.Https})
 type
-  Call_TopicsListByResourceGroup_568478 = ref object of OpenApiRestCall_567651
-proc url_TopicsListByResourceGroup_568480(protocol: Scheme; host: string;
+  Call_TopicsListByResourceGroup_564378 = ref object of OpenApiRestCall_563549
+proc url_TopicsListByResourceGroup_564380(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -3179,30 +3183,30 @@ proc url_TopicsListByResourceGroup_568480(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_TopicsListByResourceGroup_568479(path: JsonNode; query: JsonNode;
+proc validate_TopicsListByResourceGroup_564379(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## List all the topics under a resource group.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group within the user's subscription.
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials that uniquely identify a Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group within the user's subscription.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568481 = path.getOrDefault("resourceGroupName")
-  valid_568481 = validateParameter(valid_568481, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564381 = path.getOrDefault("subscriptionId")
+  valid_564381 = validateParameter(valid_564381, JString, required = true,
                                  default = nil)
-  if valid_568481 != nil:
-    section.add "resourceGroupName", valid_568481
-  var valid_568482 = path.getOrDefault("subscriptionId")
-  valid_568482 = validateParameter(valid_568482, JString, required = true,
+  if valid_564381 != nil:
+    section.add "subscriptionId", valid_564381
+  var valid_564382 = path.getOrDefault("resourceGroupName")
+  valid_564382 = validateParameter(valid_564382, JString, required = true,
                                  default = nil)
-  if valid_568482 != nil:
-    section.add "subscriptionId", valid_568482
+  if valid_564382 != nil:
+    section.add "resourceGroupName", valid_564382
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -3214,20 +3218,20 @@ proc validate_TopicsListByResourceGroup_568479(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568483 = query.getOrDefault("api-version")
-  valid_568483 = validateParameter(valid_568483, JString, required = true,
+  var valid_564383 = query.getOrDefault("api-version")
+  valid_564383 = validateParameter(valid_564383, JString, required = true,
                                  default = nil)
-  if valid_568483 != nil:
-    section.add "api-version", valid_568483
-  var valid_568484 = query.getOrDefault("$top")
-  valid_568484 = validateParameter(valid_568484, JInt, required = false, default = nil)
-  if valid_568484 != nil:
-    section.add "$top", valid_568484
-  var valid_568485 = query.getOrDefault("$filter")
-  valid_568485 = validateParameter(valid_568485, JString, required = false,
+  if valid_564383 != nil:
+    section.add "api-version", valid_564383
+  var valid_564384 = query.getOrDefault("$top")
+  valid_564384 = validateParameter(valid_564384, JInt, required = false, default = nil)
+  if valid_564384 != nil:
+    section.add "$top", valid_564384
+  var valid_564385 = query.getOrDefault("$filter")
+  valid_564385 = validateParameter(valid_564385, JString, required = false,
                                  default = nil)
-  if valid_568485 != nil:
-    section.add "$filter", valid_568485
+  if valid_564385 != nil:
+    section.add "$filter", valid_564385
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3236,51 +3240,51 @@ proc validate_TopicsListByResourceGroup_568479(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568486: Call_TopicsListByResourceGroup_568478; path: JsonNode;
+proc call*(call_564386: Call_TopicsListByResourceGroup_564378; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## List all the topics under a resource group.
   ## 
-  let valid = call_568486.validator(path, query, header, formData, body)
-  let scheme = call_568486.pickScheme
+  let valid = call_564386.validator(path, query, header, formData, body)
+  let scheme = call_564386.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568486.url(scheme.get, call_568486.host, call_568486.base,
-                         call_568486.route, valid.getOrDefault("path"),
+  let url = call_564386.url(scheme.get, call_564386.host, call_564386.base,
+                         call_564386.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568486, url, valid)
+  result = hook(call_564386, url, valid)
 
-proc call*(call_568487: Call_TopicsListByResourceGroup_568478;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          Top: int = 0; Filter: string = ""): Recallable =
+proc call*(call_564387: Call_TopicsListByResourceGroup_564378; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string; Top: int = 0;
+          Filter: string = ""): Recallable =
   ## topicsListByResourceGroup
   ## List all the topics under a resource group.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group within the user's subscription.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
-  ##   subscriptionId: string (required)
-  ##                 : Subscription credentials that uniquely identify a Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   Top: int
   ##      : The number of results to return per page for the list operation. Valid range for top parameter is 1 to 100. If not specified, the default number of results to be returned is 20 items per page.
+  ##   subscriptionId: string (required)
+  ##                 : Subscription credentials that uniquely identify a Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group within the user's subscription.
   ##   Filter: string
   ##         : The query used to filter the search results using OData syntax. Filtering is permitted on the 'name' property only and with limited number of OData operations. These operations are: the 'contains' function as well as the following logical operations: not, and, or, eq (for equal), and ne (for not equal). No arithmetic operations are supported. The following is a valid filter example: $filter=contains(namE, 'PATTERN') and name ne 'PATTERN-1'. The following is not a valid filter example: $filter=location eq 'westus'.
-  var path_568488 = newJObject()
-  var query_568489 = newJObject()
-  add(path_568488, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568489, "api-version", newJString(apiVersion))
-  add(path_568488, "subscriptionId", newJString(subscriptionId))
-  add(query_568489, "$top", newJInt(Top))
-  add(query_568489, "$filter", newJString(Filter))
-  result = call_568487.call(path_568488, query_568489, nil, nil, nil)
+  var path_564388 = newJObject()
+  var query_564389 = newJObject()
+  add(query_564389, "api-version", newJString(apiVersion))
+  add(query_564389, "$top", newJInt(Top))
+  add(path_564388, "subscriptionId", newJString(subscriptionId))
+  add(path_564388, "resourceGroupName", newJString(resourceGroupName))
+  add(query_564389, "$filter", newJString(Filter))
+  result = call_564387.call(path_564388, query_564389, nil, nil, nil)
 
-var topicsListByResourceGroup* = Call_TopicsListByResourceGroup_568478(
+var topicsListByResourceGroup* = Call_TopicsListByResourceGroup_564378(
     name: "topicsListByResourceGroup", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.EventGrid/topics",
-    validator: validate_TopicsListByResourceGroup_568479, base: "",
-    url: url_TopicsListByResourceGroup_568480, schemes: {Scheme.Https})
+    validator: validate_TopicsListByResourceGroup_564379, base: "",
+    url: url_TopicsListByResourceGroup_564380, schemes: {Scheme.Https})
 type
-  Call_TopicsCreateOrUpdate_568501 = ref object of OpenApiRestCall_567651
-proc url_TopicsCreateOrUpdate_568503(protocol: Scheme; host: string; base: string;
+  Call_TopicsCreateOrUpdate_564401 = ref object of OpenApiRestCall_563549
+proc url_TopicsCreateOrUpdate_564403(protocol: Scheme; host: string; base: string;
                                     route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -3302,37 +3306,36 @@ proc url_TopicsCreateOrUpdate_568503(protocol: Scheme; host: string; base: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_TopicsCreateOrUpdate_568502(path: JsonNode; query: JsonNode;
+proc validate_TopicsCreateOrUpdate_564402(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Asynchronously creates a new topic with the specified parameters.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group within the user's subscription.
   ##   topicName: JString (required)
   ##            : Name of the topic.
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials that uniquely identify a Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group within the user's subscription.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568504 = path.getOrDefault("resourceGroupName")
-  valid_568504 = validateParameter(valid_568504, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `topicName` field"
+  var valid_564404 = path.getOrDefault("topicName")
+  valid_564404 = validateParameter(valid_564404, JString, required = true,
                                  default = nil)
-  if valid_568504 != nil:
-    section.add "resourceGroupName", valid_568504
-  var valid_568505 = path.getOrDefault("topicName")
-  valid_568505 = validateParameter(valid_568505, JString, required = true,
+  if valid_564404 != nil:
+    section.add "topicName", valid_564404
+  var valid_564405 = path.getOrDefault("subscriptionId")
+  valid_564405 = validateParameter(valid_564405, JString, required = true,
                                  default = nil)
-  if valid_568505 != nil:
-    section.add "topicName", valid_568505
-  var valid_568506 = path.getOrDefault("subscriptionId")
-  valid_568506 = validateParameter(valid_568506, JString, required = true,
+  if valid_564405 != nil:
+    section.add "subscriptionId", valid_564405
+  var valid_564406 = path.getOrDefault("resourceGroupName")
+  valid_564406 = validateParameter(valid_564406, JString, required = true,
                                  default = nil)
-  if valid_568506 != nil:
-    section.add "subscriptionId", valid_568506
+  if valid_564406 != nil:
+    section.add "resourceGroupName", valid_564406
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -3340,11 +3343,11 @@ proc validate_TopicsCreateOrUpdate_568502(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568507 = query.getOrDefault("api-version")
-  valid_568507 = validateParameter(valid_568507, JString, required = true,
+  var valid_564407 = query.getOrDefault("api-version")
+  valid_564407 = validateParameter(valid_564407, JString, required = true,
                                  default = nil)
-  if valid_568507 != nil:
-    section.add "api-version", valid_568507
+  if valid_564407 != nil:
+    section.add "api-version", valid_564407
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3358,53 +3361,53 @@ proc validate_TopicsCreateOrUpdate_568502(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568509: Call_TopicsCreateOrUpdate_568501; path: JsonNode;
+proc call*(call_564409: Call_TopicsCreateOrUpdate_564401; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Asynchronously creates a new topic with the specified parameters.
   ## 
-  let valid = call_568509.validator(path, query, header, formData, body)
-  let scheme = call_568509.pickScheme
+  let valid = call_564409.validator(path, query, header, formData, body)
+  let scheme = call_564409.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568509.url(scheme.get, call_568509.host, call_568509.base,
-                         call_568509.route, valid.getOrDefault("path"),
+  let url = call_564409.url(scheme.get, call_564409.host, call_564409.base,
+                         call_564409.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568509, url, valid)
+  result = hook(call_564409, url, valid)
 
-proc call*(call_568510: Call_TopicsCreateOrUpdate_568501;
-          resourceGroupName: string; apiVersion: string; topicName: string;
-          subscriptionId: string; topicInfo: JsonNode): Recallable =
+proc call*(call_564410: Call_TopicsCreateOrUpdate_564401; topicInfo: JsonNode;
+          apiVersion: string; topicName: string; subscriptionId: string;
+          resourceGroupName: string): Recallable =
   ## topicsCreateOrUpdate
   ## Asynchronously creates a new topic with the specified parameters.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group within the user's subscription.
+  ##   topicInfo: JObject (required)
+  ##            : Topic information.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
   ##   topicName: string (required)
   ##            : Name of the topic.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials that uniquely identify a Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   topicInfo: JObject (required)
-  ##            : Topic information.
-  var path_568511 = newJObject()
-  var query_568512 = newJObject()
-  var body_568513 = newJObject()
-  add(path_568511, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568512, "api-version", newJString(apiVersion))
-  add(path_568511, "topicName", newJString(topicName))
-  add(path_568511, "subscriptionId", newJString(subscriptionId))
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group within the user's subscription.
+  var path_564411 = newJObject()
+  var query_564412 = newJObject()
+  var body_564413 = newJObject()
   if topicInfo != nil:
-    body_568513 = topicInfo
-  result = call_568510.call(path_568511, query_568512, nil, nil, body_568513)
+    body_564413 = topicInfo
+  add(query_564412, "api-version", newJString(apiVersion))
+  add(path_564411, "topicName", newJString(topicName))
+  add(path_564411, "subscriptionId", newJString(subscriptionId))
+  add(path_564411, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564410.call(path_564411, query_564412, nil, nil, body_564413)
 
-var topicsCreateOrUpdate* = Call_TopicsCreateOrUpdate_568501(
+var topicsCreateOrUpdate* = Call_TopicsCreateOrUpdate_564401(
     name: "topicsCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.EventGrid/topics/{topicName}",
-    validator: validate_TopicsCreateOrUpdate_568502, base: "",
-    url: url_TopicsCreateOrUpdate_568503, schemes: {Scheme.Https})
+    validator: validate_TopicsCreateOrUpdate_564402, base: "",
+    url: url_TopicsCreateOrUpdate_564403, schemes: {Scheme.Https})
 type
-  Call_TopicsGet_568490 = ref object of OpenApiRestCall_567651
-proc url_TopicsGet_568492(protocol: Scheme; host: string; base: string; route: string;
+  Call_TopicsGet_564390 = ref object of OpenApiRestCall_563549
+proc url_TopicsGet_564392(protocol: Scheme; host: string; base: string; route: string;
                          path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -3426,37 +3429,36 @@ proc url_TopicsGet_568492(protocol: Scheme; host: string; base: string; route: s
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_TopicsGet_568491(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_TopicsGet_564391(path: JsonNode; query: JsonNode; header: JsonNode;
                               formData: JsonNode; body: JsonNode): JsonNode =
   ## Get properties of a topic.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group within the user's subscription.
   ##   topicName: JString (required)
   ##            : Name of the topic.
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials that uniquely identify a Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group within the user's subscription.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568493 = path.getOrDefault("resourceGroupName")
-  valid_568493 = validateParameter(valid_568493, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `topicName` field"
+  var valid_564393 = path.getOrDefault("topicName")
+  valid_564393 = validateParameter(valid_564393, JString, required = true,
                                  default = nil)
-  if valid_568493 != nil:
-    section.add "resourceGroupName", valid_568493
-  var valid_568494 = path.getOrDefault("topicName")
-  valid_568494 = validateParameter(valid_568494, JString, required = true,
+  if valid_564393 != nil:
+    section.add "topicName", valid_564393
+  var valid_564394 = path.getOrDefault("subscriptionId")
+  valid_564394 = validateParameter(valid_564394, JString, required = true,
                                  default = nil)
-  if valid_568494 != nil:
-    section.add "topicName", valid_568494
-  var valid_568495 = path.getOrDefault("subscriptionId")
-  valid_568495 = validateParameter(valid_568495, JString, required = true,
+  if valid_564394 != nil:
+    section.add "subscriptionId", valid_564394
+  var valid_564395 = path.getOrDefault("resourceGroupName")
+  valid_564395 = validateParameter(valid_564395, JString, required = true,
                                  default = nil)
-  if valid_568495 != nil:
-    section.add "subscriptionId", valid_568495
+  if valid_564395 != nil:
+    section.add "resourceGroupName", valid_564395
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -3464,11 +3466,11 @@ proc validate_TopicsGet_568491(path: JsonNode; query: JsonNode; header: JsonNode
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568496 = query.getOrDefault("api-version")
-  valid_568496 = validateParameter(valid_568496, JString, required = true,
+  var valid_564396 = query.getOrDefault("api-version")
+  valid_564396 = validateParameter(valid_564396, JString, required = true,
                                  default = nil)
-  if valid_568496 != nil:
-    section.add "api-version", valid_568496
+  if valid_564396 != nil:
+    section.add "api-version", valid_564396
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3477,47 +3479,47 @@ proc validate_TopicsGet_568491(path: JsonNode; query: JsonNode; header: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_568497: Call_TopicsGet_568490; path: JsonNode; query: JsonNode;
+proc call*(call_564397: Call_TopicsGet_564390; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get properties of a topic.
   ## 
-  let valid = call_568497.validator(path, query, header, formData, body)
-  let scheme = call_568497.pickScheme
+  let valid = call_564397.validator(path, query, header, formData, body)
+  let scheme = call_564397.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568497.url(scheme.get, call_568497.host, call_568497.base,
-                         call_568497.route, valid.getOrDefault("path"),
+  let url = call_564397.url(scheme.get, call_564397.host, call_564397.base,
+                         call_564397.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568497, url, valid)
+  result = hook(call_564397, url, valid)
 
-proc call*(call_568498: Call_TopicsGet_568490; resourceGroupName: string;
-          apiVersion: string; topicName: string; subscriptionId: string): Recallable =
+proc call*(call_564398: Call_TopicsGet_564390; apiVersion: string; topicName: string;
+          subscriptionId: string; resourceGroupName: string): Recallable =
   ## topicsGet
   ## Get properties of a topic.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group within the user's subscription.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
   ##   topicName: string (required)
   ##            : Name of the topic.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials that uniquely identify a Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_568499 = newJObject()
-  var query_568500 = newJObject()
-  add(path_568499, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568500, "api-version", newJString(apiVersion))
-  add(path_568499, "topicName", newJString(topicName))
-  add(path_568499, "subscriptionId", newJString(subscriptionId))
-  result = call_568498.call(path_568499, query_568500, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group within the user's subscription.
+  var path_564399 = newJObject()
+  var query_564400 = newJObject()
+  add(query_564400, "api-version", newJString(apiVersion))
+  add(path_564399, "topicName", newJString(topicName))
+  add(path_564399, "subscriptionId", newJString(subscriptionId))
+  add(path_564399, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564398.call(path_564399, query_564400, nil, nil, nil)
 
-var topicsGet* = Call_TopicsGet_568490(name: "topicsGet", meth: HttpMethod.HttpGet,
+var topicsGet* = Call_TopicsGet_564390(name: "topicsGet", meth: HttpMethod.HttpGet,
                                     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.EventGrid/topics/{topicName}",
-                                    validator: validate_TopicsGet_568491,
-                                    base: "", url: url_TopicsGet_568492,
+                                    validator: validate_TopicsGet_564391,
+                                    base: "", url: url_TopicsGet_564392,
                                     schemes: {Scheme.Https})
 type
-  Call_TopicsUpdate_568525 = ref object of OpenApiRestCall_567651
-proc url_TopicsUpdate_568527(protocol: Scheme; host: string; base: string;
+  Call_TopicsUpdate_564425 = ref object of OpenApiRestCall_563549
+proc url_TopicsUpdate_564427(protocol: Scheme; host: string; base: string;
                             route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -3539,37 +3541,36 @@ proc url_TopicsUpdate_568527(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_TopicsUpdate_568526(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_TopicsUpdate_564426(path: JsonNode; query: JsonNode; header: JsonNode;
                                  formData: JsonNode; body: JsonNode): JsonNode =
   ## Asynchronously updates a topic with the specified parameters.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group within the user's subscription.
   ##   topicName: JString (required)
   ##            : Name of the topic.
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials that uniquely identify a Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group within the user's subscription.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568528 = path.getOrDefault("resourceGroupName")
-  valid_568528 = validateParameter(valid_568528, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `topicName` field"
+  var valid_564428 = path.getOrDefault("topicName")
+  valid_564428 = validateParameter(valid_564428, JString, required = true,
                                  default = nil)
-  if valid_568528 != nil:
-    section.add "resourceGroupName", valid_568528
-  var valid_568529 = path.getOrDefault("topicName")
-  valid_568529 = validateParameter(valid_568529, JString, required = true,
+  if valid_564428 != nil:
+    section.add "topicName", valid_564428
+  var valid_564429 = path.getOrDefault("subscriptionId")
+  valid_564429 = validateParameter(valid_564429, JString, required = true,
                                  default = nil)
-  if valid_568529 != nil:
-    section.add "topicName", valid_568529
-  var valid_568530 = path.getOrDefault("subscriptionId")
-  valid_568530 = validateParameter(valid_568530, JString, required = true,
+  if valid_564429 != nil:
+    section.add "subscriptionId", valid_564429
+  var valid_564430 = path.getOrDefault("resourceGroupName")
+  valid_564430 = validateParameter(valid_564430, JString, required = true,
                                  default = nil)
-  if valid_568530 != nil:
-    section.add "subscriptionId", valid_568530
+  if valid_564430 != nil:
+    section.add "resourceGroupName", valid_564430
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -3577,11 +3578,11 @@ proc validate_TopicsUpdate_568526(path: JsonNode; query: JsonNode; header: JsonN
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568531 = query.getOrDefault("api-version")
-  valid_568531 = validateParameter(valid_568531, JString, required = true,
+  var valid_564431 = query.getOrDefault("api-version")
+  valid_564431 = validateParameter(valid_564431, JString, required = true,
                                  default = nil)
-  if valid_568531 != nil:
-    section.add "api-version", valid_568531
+  if valid_564431 != nil:
+    section.add "api-version", valid_564431
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3595,52 +3596,52 @@ proc validate_TopicsUpdate_568526(path: JsonNode; query: JsonNode; header: JsonN
   if body != nil:
     result.add "body", body
 
-proc call*(call_568533: Call_TopicsUpdate_568525; path: JsonNode; query: JsonNode;
+proc call*(call_564433: Call_TopicsUpdate_564425; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Asynchronously updates a topic with the specified parameters.
   ## 
-  let valid = call_568533.validator(path, query, header, formData, body)
-  let scheme = call_568533.pickScheme
+  let valid = call_564433.validator(path, query, header, formData, body)
+  let scheme = call_564433.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568533.url(scheme.get, call_568533.host, call_568533.base,
-                         call_568533.route, valid.getOrDefault("path"),
+  let url = call_564433.url(scheme.get, call_564433.host, call_564433.base,
+                         call_564433.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568533, url, valid)
+  result = hook(call_564433, url, valid)
 
-proc call*(call_568534: Call_TopicsUpdate_568525; resourceGroupName: string;
-          apiVersion: string; topicName: string; subscriptionId: string;
-          topicUpdateParameters: JsonNode): Recallable =
+proc call*(call_564434: Call_TopicsUpdate_564425; apiVersion: string;
+          topicName: string; topicUpdateParameters: JsonNode;
+          subscriptionId: string; resourceGroupName: string): Recallable =
   ## topicsUpdate
   ## Asynchronously updates a topic with the specified parameters.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group within the user's subscription.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
   ##   topicName: string (required)
   ##            : Name of the topic.
-  ##   subscriptionId: string (required)
-  ##                 : Subscription credentials that uniquely identify a Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   topicUpdateParameters: JObject (required)
   ##                        : Topic update information.
-  var path_568535 = newJObject()
-  var query_568536 = newJObject()
-  var body_568537 = newJObject()
-  add(path_568535, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568536, "api-version", newJString(apiVersion))
-  add(path_568535, "topicName", newJString(topicName))
-  add(path_568535, "subscriptionId", newJString(subscriptionId))
+  ##   subscriptionId: string (required)
+  ##                 : Subscription credentials that uniquely identify a Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group within the user's subscription.
+  var path_564435 = newJObject()
+  var query_564436 = newJObject()
+  var body_564437 = newJObject()
+  add(query_564436, "api-version", newJString(apiVersion))
+  add(path_564435, "topicName", newJString(topicName))
   if topicUpdateParameters != nil:
-    body_568537 = topicUpdateParameters
-  result = call_568534.call(path_568535, query_568536, nil, nil, body_568537)
+    body_564437 = topicUpdateParameters
+  add(path_564435, "subscriptionId", newJString(subscriptionId))
+  add(path_564435, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564434.call(path_564435, query_564436, nil, nil, body_564437)
 
-var topicsUpdate* = Call_TopicsUpdate_568525(name: "topicsUpdate",
+var topicsUpdate* = Call_TopicsUpdate_564425(name: "topicsUpdate",
     meth: HttpMethod.HttpPatch, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.EventGrid/topics/{topicName}",
-    validator: validate_TopicsUpdate_568526, base: "", url: url_TopicsUpdate_568527,
+    validator: validate_TopicsUpdate_564426, base: "", url: url_TopicsUpdate_564427,
     schemes: {Scheme.Https})
 type
-  Call_TopicsDelete_568514 = ref object of OpenApiRestCall_567651
-proc url_TopicsDelete_568516(protocol: Scheme; host: string; base: string;
+  Call_TopicsDelete_564414 = ref object of OpenApiRestCall_563549
+proc url_TopicsDelete_564416(protocol: Scheme; host: string; base: string;
                             route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -3662,37 +3663,36 @@ proc url_TopicsDelete_568516(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_TopicsDelete_568515(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_TopicsDelete_564415(path: JsonNode; query: JsonNode; header: JsonNode;
                                  formData: JsonNode; body: JsonNode): JsonNode =
   ## Delete existing topic.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group within the user's subscription.
   ##   topicName: JString (required)
   ##            : Name of the topic.
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials that uniquely identify a Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group within the user's subscription.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568517 = path.getOrDefault("resourceGroupName")
-  valid_568517 = validateParameter(valid_568517, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `topicName` field"
+  var valid_564417 = path.getOrDefault("topicName")
+  valid_564417 = validateParameter(valid_564417, JString, required = true,
                                  default = nil)
-  if valid_568517 != nil:
-    section.add "resourceGroupName", valid_568517
-  var valid_568518 = path.getOrDefault("topicName")
-  valid_568518 = validateParameter(valid_568518, JString, required = true,
+  if valid_564417 != nil:
+    section.add "topicName", valid_564417
+  var valid_564418 = path.getOrDefault("subscriptionId")
+  valid_564418 = validateParameter(valid_564418, JString, required = true,
                                  default = nil)
-  if valid_568518 != nil:
-    section.add "topicName", valid_568518
-  var valid_568519 = path.getOrDefault("subscriptionId")
-  valid_568519 = validateParameter(valid_568519, JString, required = true,
+  if valid_564418 != nil:
+    section.add "subscriptionId", valid_564418
+  var valid_564419 = path.getOrDefault("resourceGroupName")
+  valid_564419 = validateParameter(valid_564419, JString, required = true,
                                  default = nil)
-  if valid_568519 != nil:
-    section.add "subscriptionId", valid_568519
+  if valid_564419 != nil:
+    section.add "resourceGroupName", valid_564419
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -3700,11 +3700,11 @@ proc validate_TopicsDelete_568515(path: JsonNode; query: JsonNode; header: JsonN
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568520 = query.getOrDefault("api-version")
-  valid_568520 = validateParameter(valid_568520, JString, required = true,
+  var valid_564420 = query.getOrDefault("api-version")
+  valid_564420 = validateParameter(valid_564420, JString, required = true,
                                  default = nil)
-  if valid_568520 != nil:
-    section.add "api-version", valid_568520
+  if valid_564420 != nil:
+    section.add "api-version", valid_564420
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3713,46 +3713,46 @@ proc validate_TopicsDelete_568515(path: JsonNode; query: JsonNode; header: JsonN
   if body != nil:
     result.add "body", body
 
-proc call*(call_568521: Call_TopicsDelete_568514; path: JsonNode; query: JsonNode;
+proc call*(call_564421: Call_TopicsDelete_564414; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Delete existing topic.
   ## 
-  let valid = call_568521.validator(path, query, header, formData, body)
-  let scheme = call_568521.pickScheme
+  let valid = call_564421.validator(path, query, header, formData, body)
+  let scheme = call_564421.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568521.url(scheme.get, call_568521.host, call_568521.base,
-                         call_568521.route, valid.getOrDefault("path"),
+  let url = call_564421.url(scheme.get, call_564421.host, call_564421.base,
+                         call_564421.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568521, url, valid)
+  result = hook(call_564421, url, valid)
 
-proc call*(call_568522: Call_TopicsDelete_568514; resourceGroupName: string;
-          apiVersion: string; topicName: string; subscriptionId: string): Recallable =
+proc call*(call_564422: Call_TopicsDelete_564414; apiVersion: string;
+          topicName: string; subscriptionId: string; resourceGroupName: string): Recallable =
   ## topicsDelete
   ## Delete existing topic.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group within the user's subscription.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
   ##   topicName: string (required)
   ##            : Name of the topic.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials that uniquely identify a Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_568523 = newJObject()
-  var query_568524 = newJObject()
-  add(path_568523, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568524, "api-version", newJString(apiVersion))
-  add(path_568523, "topicName", newJString(topicName))
-  add(path_568523, "subscriptionId", newJString(subscriptionId))
-  result = call_568522.call(path_568523, query_568524, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group within the user's subscription.
+  var path_564423 = newJObject()
+  var query_564424 = newJObject()
+  add(query_564424, "api-version", newJString(apiVersion))
+  add(path_564423, "topicName", newJString(topicName))
+  add(path_564423, "subscriptionId", newJString(subscriptionId))
+  add(path_564423, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564422.call(path_564423, query_564424, nil, nil, nil)
 
-var topicsDelete* = Call_TopicsDelete_568514(name: "topicsDelete",
+var topicsDelete* = Call_TopicsDelete_564414(name: "topicsDelete",
     meth: HttpMethod.HttpDelete, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.EventGrid/topics/{topicName}",
-    validator: validate_TopicsDelete_568515, base: "", url: url_TopicsDelete_568516,
+    validator: validate_TopicsDelete_564415, base: "", url: url_TopicsDelete_564416,
     schemes: {Scheme.Https})
 type
-  Call_TopicsListSharedAccessKeys_568538 = ref object of OpenApiRestCall_567651
-proc url_TopicsListSharedAccessKeys_568540(protocol: Scheme; host: string;
+  Call_TopicsListSharedAccessKeys_564438 = ref object of OpenApiRestCall_563549
+proc url_TopicsListSharedAccessKeys_564440(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -3775,37 +3775,36 @@ proc url_TopicsListSharedAccessKeys_568540(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_TopicsListSharedAccessKeys_568539(path: JsonNode; query: JsonNode;
+proc validate_TopicsListSharedAccessKeys_564439(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## List the two keys used to publish to a topic.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group within the user's subscription.
   ##   topicName: JString (required)
   ##            : Name of the topic.
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials that uniquely identify a Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group within the user's subscription.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568541 = path.getOrDefault("resourceGroupName")
-  valid_568541 = validateParameter(valid_568541, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `topicName` field"
+  var valid_564441 = path.getOrDefault("topicName")
+  valid_564441 = validateParameter(valid_564441, JString, required = true,
                                  default = nil)
-  if valid_568541 != nil:
-    section.add "resourceGroupName", valid_568541
-  var valid_568542 = path.getOrDefault("topicName")
-  valid_568542 = validateParameter(valid_568542, JString, required = true,
+  if valid_564441 != nil:
+    section.add "topicName", valid_564441
+  var valid_564442 = path.getOrDefault("subscriptionId")
+  valid_564442 = validateParameter(valid_564442, JString, required = true,
                                  default = nil)
-  if valid_568542 != nil:
-    section.add "topicName", valid_568542
-  var valid_568543 = path.getOrDefault("subscriptionId")
-  valid_568543 = validateParameter(valid_568543, JString, required = true,
+  if valid_564442 != nil:
+    section.add "subscriptionId", valid_564442
+  var valid_564443 = path.getOrDefault("resourceGroupName")
+  valid_564443 = validateParameter(valid_564443, JString, required = true,
                                  default = nil)
-  if valid_568543 != nil:
-    section.add "subscriptionId", valid_568543
+  if valid_564443 != nil:
+    section.add "resourceGroupName", valid_564443
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -3813,11 +3812,11 @@ proc validate_TopicsListSharedAccessKeys_568539(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568544 = query.getOrDefault("api-version")
-  valid_568544 = validateParameter(valid_568544, JString, required = true,
+  var valid_564444 = query.getOrDefault("api-version")
+  valid_564444 = validateParameter(valid_564444, JString, required = true,
                                  default = nil)
-  if valid_568544 != nil:
-    section.add "api-version", valid_568544
+  if valid_564444 != nil:
+    section.add "api-version", valid_564444
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3826,48 +3825,47 @@ proc validate_TopicsListSharedAccessKeys_568539(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568545: Call_TopicsListSharedAccessKeys_568538; path: JsonNode;
+proc call*(call_564445: Call_TopicsListSharedAccessKeys_564438; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## List the two keys used to publish to a topic.
   ## 
-  let valid = call_568545.validator(path, query, header, formData, body)
-  let scheme = call_568545.pickScheme
+  let valid = call_564445.validator(path, query, header, formData, body)
+  let scheme = call_564445.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568545.url(scheme.get, call_568545.host, call_568545.base,
-                         call_568545.route, valid.getOrDefault("path"),
+  let url = call_564445.url(scheme.get, call_564445.host, call_564445.base,
+                         call_564445.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568545, url, valid)
+  result = hook(call_564445, url, valid)
 
-proc call*(call_568546: Call_TopicsListSharedAccessKeys_568538;
-          resourceGroupName: string; apiVersion: string; topicName: string;
-          subscriptionId: string): Recallable =
+proc call*(call_564446: Call_TopicsListSharedAccessKeys_564438; apiVersion: string;
+          topicName: string; subscriptionId: string; resourceGroupName: string): Recallable =
   ## topicsListSharedAccessKeys
   ## List the two keys used to publish to a topic.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group within the user's subscription.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
   ##   topicName: string (required)
   ##            : Name of the topic.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials that uniquely identify a Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_568547 = newJObject()
-  var query_568548 = newJObject()
-  add(path_568547, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568548, "api-version", newJString(apiVersion))
-  add(path_568547, "topicName", newJString(topicName))
-  add(path_568547, "subscriptionId", newJString(subscriptionId))
-  result = call_568546.call(path_568547, query_568548, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group within the user's subscription.
+  var path_564447 = newJObject()
+  var query_564448 = newJObject()
+  add(query_564448, "api-version", newJString(apiVersion))
+  add(path_564447, "topicName", newJString(topicName))
+  add(path_564447, "subscriptionId", newJString(subscriptionId))
+  add(path_564447, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564446.call(path_564447, query_564448, nil, nil, nil)
 
-var topicsListSharedAccessKeys* = Call_TopicsListSharedAccessKeys_568538(
+var topicsListSharedAccessKeys* = Call_TopicsListSharedAccessKeys_564438(
     name: "topicsListSharedAccessKeys", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.EventGrid/topics/{topicName}/listKeys",
-    validator: validate_TopicsListSharedAccessKeys_568539, base: "",
-    url: url_TopicsListSharedAccessKeys_568540, schemes: {Scheme.Https})
+    validator: validate_TopicsListSharedAccessKeys_564439, base: "",
+    url: url_TopicsListSharedAccessKeys_564440, schemes: {Scheme.Https})
 type
-  Call_TopicsRegenerateKey_568549 = ref object of OpenApiRestCall_567651
-proc url_TopicsRegenerateKey_568551(protocol: Scheme; host: string; base: string;
+  Call_TopicsRegenerateKey_564449 = ref object of OpenApiRestCall_563549
+proc url_TopicsRegenerateKey_564451(protocol: Scheme; host: string; base: string;
                                    route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -3890,7 +3888,7 @@ proc url_TopicsRegenerateKey_568551(protocol: Scheme; host: string; base: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_TopicsRegenerateKey_568550(path: JsonNode; query: JsonNode;
+proc validate_TopicsRegenerateKey_564450(path: JsonNode; query: JsonNode;
                                         header: JsonNode; formData: JsonNode;
                                         body: JsonNode): JsonNode =
   ## Regenerate a shared access key for a topic.
@@ -3898,30 +3896,29 @@ proc validate_TopicsRegenerateKey_568550(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group within the user's subscription.
   ##   topicName: JString (required)
   ##            : Name of the topic.
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials that uniquely identify a Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group within the user's subscription.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568552 = path.getOrDefault("resourceGroupName")
-  valid_568552 = validateParameter(valid_568552, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `topicName` field"
+  var valid_564452 = path.getOrDefault("topicName")
+  valid_564452 = validateParameter(valid_564452, JString, required = true,
                                  default = nil)
-  if valid_568552 != nil:
-    section.add "resourceGroupName", valid_568552
-  var valid_568553 = path.getOrDefault("topicName")
-  valid_568553 = validateParameter(valid_568553, JString, required = true,
+  if valid_564452 != nil:
+    section.add "topicName", valid_564452
+  var valid_564453 = path.getOrDefault("subscriptionId")
+  valid_564453 = validateParameter(valid_564453, JString, required = true,
                                  default = nil)
-  if valid_568553 != nil:
-    section.add "topicName", valid_568553
-  var valid_568554 = path.getOrDefault("subscriptionId")
-  valid_568554 = validateParameter(valid_568554, JString, required = true,
+  if valid_564453 != nil:
+    section.add "subscriptionId", valid_564453
+  var valid_564454 = path.getOrDefault("resourceGroupName")
+  valid_564454 = validateParameter(valid_564454, JString, required = true,
                                  default = nil)
-  if valid_568554 != nil:
-    section.add "subscriptionId", valid_568554
+  if valid_564454 != nil:
+    section.add "resourceGroupName", valid_564454
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -3929,11 +3926,11 @@ proc validate_TopicsRegenerateKey_568550(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568555 = query.getOrDefault("api-version")
-  valid_568555 = validateParameter(valid_568555, JString, required = true,
+  var valid_564455 = query.getOrDefault("api-version")
+  valid_564455 = validateParameter(valid_564455, JString, required = true,
                                  default = nil)
-  if valid_568555 != nil:
-    section.add "api-version", valid_568555
+  if valid_564455 != nil:
+    section.add "api-version", valid_564455
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3947,26 +3944,24 @@ proc validate_TopicsRegenerateKey_568550(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568557: Call_TopicsRegenerateKey_568549; path: JsonNode;
+proc call*(call_564457: Call_TopicsRegenerateKey_564449; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Regenerate a shared access key for a topic.
   ## 
-  let valid = call_568557.validator(path, query, header, formData, body)
-  let scheme = call_568557.pickScheme
+  let valid = call_564457.validator(path, query, header, formData, body)
+  let scheme = call_564457.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568557.url(scheme.get, call_568557.host, call_568557.base,
-                         call_568557.route, valid.getOrDefault("path"),
+  let url = call_564457.url(scheme.get, call_564457.host, call_564457.base,
+                         call_564457.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568557, url, valid)
+  result = hook(call_564457, url, valid)
 
-proc call*(call_568558: Call_TopicsRegenerateKey_568549; resourceGroupName: string;
-          apiVersion: string; topicName: string; subscriptionId: string;
-          regenerateKeyRequest: JsonNode): Recallable =
+proc call*(call_564458: Call_TopicsRegenerateKey_564449; apiVersion: string;
+          topicName: string; subscriptionId: string; regenerateKeyRequest: JsonNode;
+          resourceGroupName: string): Recallable =
   ## topicsRegenerateKey
   ## Regenerate a shared access key for a topic.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group within the user's subscription.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
   ##   topicName: string (required)
@@ -3975,25 +3970,27 @@ proc call*(call_568558: Call_TopicsRegenerateKey_568549; resourceGroupName: stri
   ##                 : Subscription credentials that uniquely identify a Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   regenerateKeyRequest: JObject (required)
   ##                       : Request body to regenerate key.
-  var path_568559 = newJObject()
-  var query_568560 = newJObject()
-  var body_568561 = newJObject()
-  add(path_568559, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568560, "api-version", newJString(apiVersion))
-  add(path_568559, "topicName", newJString(topicName))
-  add(path_568559, "subscriptionId", newJString(subscriptionId))
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group within the user's subscription.
+  var path_564459 = newJObject()
+  var query_564460 = newJObject()
+  var body_564461 = newJObject()
+  add(query_564460, "api-version", newJString(apiVersion))
+  add(path_564459, "topicName", newJString(topicName))
+  add(path_564459, "subscriptionId", newJString(subscriptionId))
   if regenerateKeyRequest != nil:
-    body_568561 = regenerateKeyRequest
-  result = call_568558.call(path_568559, query_568560, nil, nil, body_568561)
+    body_564461 = regenerateKeyRequest
+  add(path_564459, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564458.call(path_564459, query_564460, nil, nil, body_564461)
 
-var topicsRegenerateKey* = Call_TopicsRegenerateKey_568549(
+var topicsRegenerateKey* = Call_TopicsRegenerateKey_564449(
     name: "topicsRegenerateKey", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.EventGrid/topics/{topicName}/regenerateKey",
-    validator: validate_TopicsRegenerateKey_568550, base: "",
-    url: url_TopicsRegenerateKey_568551, schemes: {Scheme.Https})
+    validator: validate_TopicsRegenerateKey_564450, base: "",
+    url: url_TopicsRegenerateKey_564451, schemes: {Scheme.Https})
 type
-  Call_EventSubscriptionsListByResource_568562 = ref object of OpenApiRestCall_567651
-proc url_EventSubscriptionsListByResource_568564(protocol: Scheme; host: string;
+  Call_EventSubscriptionsListByResource_564462 = ref object of OpenApiRestCall_563549
+proc url_EventSubscriptionsListByResource_564464(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -4025,51 +4022,51 @@ proc url_EventSubscriptionsListByResource_568564(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_EventSubscriptionsListByResource_568563(path: JsonNode;
+proc validate_EventSubscriptionsListByResource_564463(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## List all event subscriptions that have been created for a specific topic.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   providerNamespace: JString (required)
-  ##                    : Namespace of the provider of the topic.
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group within the user's subscription.
-  ##   subscriptionId: JString (required)
-  ##                 : Subscription credentials that uniquely identify a Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   resourceName: JString (required)
-  ##               : Name of the resource.
   ##   resourceTypeName: JString (required)
   ##                   : Name of the resource type.
+  ##   providerNamespace: JString (required)
+  ##                    : Namespace of the provider of the topic.
+  ##   subscriptionId: JString (required)
+  ##                 : Subscription credentials that uniquely identify a Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group within the user's subscription.
+  ##   resourceName: JString (required)
+  ##               : Name of the resource.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `providerNamespace` field"
-  var valid_568565 = path.getOrDefault("providerNamespace")
-  valid_568565 = validateParameter(valid_568565, JString, required = true,
+        "path argument is necessary due to required `resourceTypeName` field"
+  var valid_564465 = path.getOrDefault("resourceTypeName")
+  valid_564465 = validateParameter(valid_564465, JString, required = true,
                                  default = nil)
-  if valid_568565 != nil:
-    section.add "providerNamespace", valid_568565
-  var valid_568566 = path.getOrDefault("resourceGroupName")
-  valid_568566 = validateParameter(valid_568566, JString, required = true,
+  if valid_564465 != nil:
+    section.add "resourceTypeName", valid_564465
+  var valid_564466 = path.getOrDefault("providerNamespace")
+  valid_564466 = validateParameter(valid_564466, JString, required = true,
                                  default = nil)
-  if valid_568566 != nil:
-    section.add "resourceGroupName", valid_568566
-  var valid_568567 = path.getOrDefault("subscriptionId")
-  valid_568567 = validateParameter(valid_568567, JString, required = true,
+  if valid_564466 != nil:
+    section.add "providerNamespace", valid_564466
+  var valid_564467 = path.getOrDefault("subscriptionId")
+  valid_564467 = validateParameter(valid_564467, JString, required = true,
                                  default = nil)
-  if valid_568567 != nil:
-    section.add "subscriptionId", valid_568567
-  var valid_568568 = path.getOrDefault("resourceName")
-  valid_568568 = validateParameter(valid_568568, JString, required = true,
+  if valid_564467 != nil:
+    section.add "subscriptionId", valid_564467
+  var valid_564468 = path.getOrDefault("resourceGroupName")
+  valid_564468 = validateParameter(valid_564468, JString, required = true,
                                  default = nil)
-  if valid_568568 != nil:
-    section.add "resourceName", valid_568568
-  var valid_568569 = path.getOrDefault("resourceTypeName")
-  valid_568569 = validateParameter(valid_568569, JString, required = true,
+  if valid_564468 != nil:
+    section.add "resourceGroupName", valid_564468
+  var valid_564469 = path.getOrDefault("resourceName")
+  valid_564469 = validateParameter(valid_564469, JString, required = true,
                                  default = nil)
-  if valid_568569 != nil:
-    section.add "resourceTypeName", valid_568569
+  if valid_564469 != nil:
+    section.add "resourceName", valid_564469
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -4081,20 +4078,20 @@ proc validate_EventSubscriptionsListByResource_568563(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568570 = query.getOrDefault("api-version")
-  valid_568570 = validateParameter(valid_568570, JString, required = true,
+  var valid_564470 = query.getOrDefault("api-version")
+  valid_564470 = validateParameter(valid_564470, JString, required = true,
                                  default = nil)
-  if valid_568570 != nil:
-    section.add "api-version", valid_568570
-  var valid_568571 = query.getOrDefault("$top")
-  valid_568571 = validateParameter(valid_568571, JInt, required = false, default = nil)
-  if valid_568571 != nil:
-    section.add "$top", valid_568571
-  var valid_568572 = query.getOrDefault("$filter")
-  valid_568572 = validateParameter(valid_568572, JString, required = false,
+  if valid_564470 != nil:
+    section.add "api-version", valid_564470
+  var valid_564471 = query.getOrDefault("$top")
+  valid_564471 = validateParameter(valid_564471, JInt, required = false, default = nil)
+  if valid_564471 != nil:
+    section.add "$top", valid_564471
+  var valid_564472 = query.getOrDefault("$filter")
+  valid_564472 = validateParameter(valid_564472, JString, required = false,
                                  default = nil)
-  if valid_568572 != nil:
-    section.add "$filter", valid_568572
+  if valid_564472 != nil:
+    section.add "$filter", valid_564472
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -4103,62 +4100,62 @@ proc validate_EventSubscriptionsListByResource_568563(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568573: Call_EventSubscriptionsListByResource_568562;
+proc call*(call_564473: Call_EventSubscriptionsListByResource_564462;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## List all event subscriptions that have been created for a specific topic.
   ## 
-  let valid = call_568573.validator(path, query, header, formData, body)
-  let scheme = call_568573.pickScheme
+  let valid = call_564473.validator(path, query, header, formData, body)
+  let scheme = call_564473.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568573.url(scheme.get, call_568573.host, call_568573.base,
-                         call_568573.route, valid.getOrDefault("path"),
+  let url = call_564473.url(scheme.get, call_564473.host, call_564473.base,
+                         call_564473.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568573, url, valid)
+  result = hook(call_564473, url, valid)
 
-proc call*(call_568574: Call_EventSubscriptionsListByResource_568562;
-          providerNamespace: string; resourceGroupName: string; apiVersion: string;
-          subscriptionId: string; resourceName: string; resourceTypeName: string;
+proc call*(call_564474: Call_EventSubscriptionsListByResource_564462;
+          apiVersion: string; resourceTypeName: string; providerNamespace: string;
+          subscriptionId: string; resourceGroupName: string; resourceName: string;
           Top: int = 0; Filter: string = ""): Recallable =
   ## eventSubscriptionsListByResource
   ## List all event subscriptions that have been created for a specific topic.
-  ##   providerNamespace: string (required)
-  ##                    : Namespace of the provider of the topic.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group within the user's subscription.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
-  ##   subscriptionId: string (required)
-  ##                 : Subscription credentials that uniquely identify a Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   Top: int
   ##      : The number of results to return per page for the list operation. Valid range for top parameter is 1 to 100. If not specified, the default number of results to be returned is 20 items per page.
-  ##   resourceName: string (required)
-  ##               : Name of the resource.
   ##   resourceTypeName: string (required)
   ##                   : Name of the resource type.
+  ##   providerNamespace: string (required)
+  ##                    : Namespace of the provider of the topic.
+  ##   subscriptionId: string (required)
+  ##                 : Subscription credentials that uniquely identify a Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group within the user's subscription.
   ##   Filter: string
   ##         : The query used to filter the search results using OData syntax. Filtering is permitted on the 'name' property only and with limited number of OData operations. These operations are: the 'contains' function as well as the following logical operations: not, and, or, eq (for equal), and ne (for not equal). No arithmetic operations are supported. The following is a valid filter example: $filter=contains(namE, 'PATTERN') and name ne 'PATTERN-1'. The following is not a valid filter example: $filter=location eq 'westus'.
-  var path_568575 = newJObject()
-  var query_568576 = newJObject()
-  add(path_568575, "providerNamespace", newJString(providerNamespace))
-  add(path_568575, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568576, "api-version", newJString(apiVersion))
-  add(path_568575, "subscriptionId", newJString(subscriptionId))
-  add(query_568576, "$top", newJInt(Top))
-  add(path_568575, "resourceName", newJString(resourceName))
-  add(path_568575, "resourceTypeName", newJString(resourceTypeName))
-  add(query_568576, "$filter", newJString(Filter))
-  result = call_568574.call(path_568575, query_568576, nil, nil, nil)
+  ##   resourceName: string (required)
+  ##               : Name of the resource.
+  var path_564475 = newJObject()
+  var query_564476 = newJObject()
+  add(query_564476, "api-version", newJString(apiVersion))
+  add(query_564476, "$top", newJInt(Top))
+  add(path_564475, "resourceTypeName", newJString(resourceTypeName))
+  add(path_564475, "providerNamespace", newJString(providerNamespace))
+  add(path_564475, "subscriptionId", newJString(subscriptionId))
+  add(path_564475, "resourceGroupName", newJString(resourceGroupName))
+  add(query_564476, "$filter", newJString(Filter))
+  add(path_564475, "resourceName", newJString(resourceName))
+  result = call_564474.call(path_564475, query_564476, nil, nil, nil)
 
-var eventSubscriptionsListByResource* = Call_EventSubscriptionsListByResource_568562(
+var eventSubscriptionsListByResource* = Call_EventSubscriptionsListByResource_564462(
     name: "eventSubscriptionsListByResource", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/{providerNamespace}/{resourceTypeName}/{resourceName}/providers/Microsoft.EventGrid/eventSubscriptions",
-    validator: validate_EventSubscriptionsListByResource_568563, base: "",
-    url: url_EventSubscriptionsListByResource_568564, schemes: {Scheme.Https})
+    validator: validate_EventSubscriptionsListByResource_564463, base: "",
+    url: url_EventSubscriptionsListByResource_564464, schemes: {Scheme.Https})
 type
-  Call_TopicsListEventTypes_568577 = ref object of OpenApiRestCall_567651
-proc url_TopicsListEventTypes_568579(protocol: Scheme; host: string; base: string;
+  Call_TopicsListEventTypes_564477 = ref object of OpenApiRestCall_563549
+proc url_TopicsListEventTypes_564479(protocol: Scheme; host: string; base: string;
                                     route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -4189,51 +4186,51 @@ proc url_TopicsListEventTypes_568579(protocol: Scheme; host: string; base: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_TopicsListEventTypes_568578(path: JsonNode; query: JsonNode;
+proc validate_TopicsListEventTypes_564478(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## List event types for a topic.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   providerNamespace: JString (required)
-  ##                    : Namespace of the provider of the topic.
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group within the user's subscription.
-  ##   subscriptionId: JString (required)
-  ##                 : Subscription credentials that uniquely identify a Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   resourceName: JString (required)
-  ##               : Name of the topic.
   ##   resourceTypeName: JString (required)
   ##                   : Name of the topic type.
+  ##   providerNamespace: JString (required)
+  ##                    : Namespace of the provider of the topic.
+  ##   subscriptionId: JString (required)
+  ##                 : Subscription credentials that uniquely identify a Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group within the user's subscription.
+  ##   resourceName: JString (required)
+  ##               : Name of the topic.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `providerNamespace` field"
-  var valid_568580 = path.getOrDefault("providerNamespace")
-  valid_568580 = validateParameter(valid_568580, JString, required = true,
+        "path argument is necessary due to required `resourceTypeName` field"
+  var valid_564480 = path.getOrDefault("resourceTypeName")
+  valid_564480 = validateParameter(valid_564480, JString, required = true,
                                  default = nil)
-  if valid_568580 != nil:
-    section.add "providerNamespace", valid_568580
-  var valid_568581 = path.getOrDefault("resourceGroupName")
-  valid_568581 = validateParameter(valid_568581, JString, required = true,
+  if valid_564480 != nil:
+    section.add "resourceTypeName", valid_564480
+  var valid_564481 = path.getOrDefault("providerNamespace")
+  valid_564481 = validateParameter(valid_564481, JString, required = true,
                                  default = nil)
-  if valid_568581 != nil:
-    section.add "resourceGroupName", valid_568581
-  var valid_568582 = path.getOrDefault("subscriptionId")
-  valid_568582 = validateParameter(valid_568582, JString, required = true,
+  if valid_564481 != nil:
+    section.add "providerNamespace", valid_564481
+  var valid_564482 = path.getOrDefault("subscriptionId")
+  valid_564482 = validateParameter(valid_564482, JString, required = true,
                                  default = nil)
-  if valid_568582 != nil:
-    section.add "subscriptionId", valid_568582
-  var valid_568583 = path.getOrDefault("resourceName")
-  valid_568583 = validateParameter(valid_568583, JString, required = true,
+  if valid_564482 != nil:
+    section.add "subscriptionId", valid_564482
+  var valid_564483 = path.getOrDefault("resourceGroupName")
+  valid_564483 = validateParameter(valid_564483, JString, required = true,
                                  default = nil)
-  if valid_568583 != nil:
-    section.add "resourceName", valid_568583
-  var valid_568584 = path.getOrDefault("resourceTypeName")
-  valid_568584 = validateParameter(valid_568584, JString, required = true,
+  if valid_564483 != nil:
+    section.add "resourceGroupName", valid_564483
+  var valid_564484 = path.getOrDefault("resourceName")
+  valid_564484 = validateParameter(valid_564484, JString, required = true,
                                  default = nil)
-  if valid_568584 != nil:
-    section.add "resourceTypeName", valid_568584
+  if valid_564484 != nil:
+    section.add "resourceName", valid_564484
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -4241,11 +4238,11 @@ proc validate_TopicsListEventTypes_568578(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568585 = query.getOrDefault("api-version")
-  valid_568585 = validateParameter(valid_568585, JString, required = true,
+  var valid_564485 = query.getOrDefault("api-version")
+  valid_564485 = validateParameter(valid_564485, JString, required = true,
                                  default = nil)
-  if valid_568585 != nil:
-    section.add "api-version", valid_568585
+  if valid_564485 != nil:
+    section.add "api-version", valid_564485
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -4254,54 +4251,54 @@ proc validate_TopicsListEventTypes_568578(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568586: Call_TopicsListEventTypes_568577; path: JsonNode;
+proc call*(call_564486: Call_TopicsListEventTypes_564477; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## List event types for a topic.
   ## 
-  let valid = call_568586.validator(path, query, header, formData, body)
-  let scheme = call_568586.pickScheme
+  let valid = call_564486.validator(path, query, header, formData, body)
+  let scheme = call_564486.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568586.url(scheme.get, call_568586.host, call_568586.base,
-                         call_568586.route, valid.getOrDefault("path"),
+  let url = call_564486.url(scheme.get, call_564486.host, call_564486.base,
+                         call_564486.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568586, url, valid)
+  result = hook(call_564486, url, valid)
 
-proc call*(call_568587: Call_TopicsListEventTypes_568577;
-          providerNamespace: string; resourceGroupName: string; apiVersion: string;
-          subscriptionId: string; resourceName: string; resourceTypeName: string): Recallable =
+proc call*(call_564487: Call_TopicsListEventTypes_564477; apiVersion: string;
+          resourceTypeName: string; providerNamespace: string;
+          subscriptionId: string; resourceGroupName: string; resourceName: string): Recallable =
   ## topicsListEventTypes
   ## List event types for a topic.
-  ##   providerNamespace: string (required)
-  ##                    : Namespace of the provider of the topic.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group within the user's subscription.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
-  ##   subscriptionId: string (required)
-  ##                 : Subscription credentials that uniquely identify a Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   resourceName: string (required)
-  ##               : Name of the topic.
   ##   resourceTypeName: string (required)
   ##                   : Name of the topic type.
-  var path_568588 = newJObject()
-  var query_568589 = newJObject()
-  add(path_568588, "providerNamespace", newJString(providerNamespace))
-  add(path_568588, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568589, "api-version", newJString(apiVersion))
-  add(path_568588, "subscriptionId", newJString(subscriptionId))
-  add(path_568588, "resourceName", newJString(resourceName))
-  add(path_568588, "resourceTypeName", newJString(resourceTypeName))
-  result = call_568587.call(path_568588, query_568589, nil, nil, nil)
+  ##   providerNamespace: string (required)
+  ##                    : Namespace of the provider of the topic.
+  ##   subscriptionId: string (required)
+  ##                 : Subscription credentials that uniquely identify a Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group within the user's subscription.
+  ##   resourceName: string (required)
+  ##               : Name of the topic.
+  var path_564488 = newJObject()
+  var query_564489 = newJObject()
+  add(query_564489, "api-version", newJString(apiVersion))
+  add(path_564488, "resourceTypeName", newJString(resourceTypeName))
+  add(path_564488, "providerNamespace", newJString(providerNamespace))
+  add(path_564488, "subscriptionId", newJString(subscriptionId))
+  add(path_564488, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564488, "resourceName", newJString(resourceName))
+  result = call_564487.call(path_564488, query_564489, nil, nil, nil)
 
-var topicsListEventTypes* = Call_TopicsListEventTypes_568577(
+var topicsListEventTypes* = Call_TopicsListEventTypes_564477(
     name: "topicsListEventTypes", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/{providerNamespace}/{resourceTypeName}/{resourceName}/providers/Microsoft.EventGrid/eventTypes",
-    validator: validate_TopicsListEventTypes_568578, base: "",
-    url: url_TopicsListEventTypes_568579, schemes: {Scheme.Https})
+    validator: validate_TopicsListEventTypes_564478, base: "",
+    url: url_TopicsListEventTypes_564479, schemes: {Scheme.Https})
 type
-  Call_EventSubscriptionsCreateOrUpdate_568600 = ref object of OpenApiRestCall_567651
-proc url_EventSubscriptionsCreateOrUpdate_568602(protocol: Scheme; host: string;
+  Call_EventSubscriptionsCreateOrUpdate_564500 = ref object of OpenApiRestCall_563549
+proc url_EventSubscriptionsCreateOrUpdate_564502(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -4320,7 +4317,7 @@ proc url_EventSubscriptionsCreateOrUpdate_568602(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_EventSubscriptionsCreateOrUpdate_568601(path: JsonNode;
+proc validate_EventSubscriptionsCreateOrUpdate_564501(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Asynchronously creates a new event subscription or updates an existing event subscription based on the specified scope.
   ## 
@@ -4335,16 +4332,16 @@ proc validate_EventSubscriptionsCreateOrUpdate_568601(path: JsonNode;
   ## '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.EventGrid/topics/{topicName}' for an EventGrid topic.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `eventSubscriptionName` field"
-  var valid_568603 = path.getOrDefault("eventSubscriptionName")
-  valid_568603 = validateParameter(valid_568603, JString, required = true,
+  var valid_564503 = path.getOrDefault("eventSubscriptionName")
+  valid_564503 = validateParameter(valid_564503, JString, required = true,
                                  default = nil)
-  if valid_568603 != nil:
-    section.add "eventSubscriptionName", valid_568603
-  var valid_568604 = path.getOrDefault("scope")
-  valid_568604 = validateParameter(valid_568604, JString, required = true,
+  if valid_564503 != nil:
+    section.add "eventSubscriptionName", valid_564503
+  var valid_564504 = path.getOrDefault("scope")
+  valid_564504 = validateParameter(valid_564504, JString, required = true,
                                  default = nil)
-  if valid_568604 != nil:
-    section.add "scope", valid_568604
+  if valid_564504 != nil:
+    section.add "scope", valid_564504
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -4352,11 +4349,11 @@ proc validate_EventSubscriptionsCreateOrUpdate_568601(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568605 = query.getOrDefault("api-version")
-  valid_568605 = validateParameter(valid_568605, JString, required = true,
+  var valid_564505 = query.getOrDefault("api-version")
+  valid_564505 = validateParameter(valid_564505, JString, required = true,
                                  default = nil)
-  if valid_568605 != nil:
-    section.add "api-version", valid_568605
+  if valid_564505 != nil:
+    section.add "api-version", valid_564505
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -4370,53 +4367,53 @@ proc validate_EventSubscriptionsCreateOrUpdate_568601(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568607: Call_EventSubscriptionsCreateOrUpdate_568600;
+proc call*(call_564507: Call_EventSubscriptionsCreateOrUpdate_564500;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Asynchronously creates a new event subscription or updates an existing event subscription based on the specified scope.
   ## 
-  let valid = call_568607.validator(path, query, header, formData, body)
-  let scheme = call_568607.pickScheme
+  let valid = call_564507.validator(path, query, header, formData, body)
+  let scheme = call_564507.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568607.url(scheme.get, call_568607.host, call_568607.base,
-                         call_568607.route, valid.getOrDefault("path"),
+  let url = call_564507.url(scheme.get, call_564507.host, call_564507.base,
+                         call_564507.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568607, url, valid)
+  result = hook(call_564507, url, valid)
 
-proc call*(call_568608: Call_EventSubscriptionsCreateOrUpdate_568600;
-          eventSubscriptionInfo: JsonNode; apiVersion: string;
-          eventSubscriptionName: string; scope: string): Recallable =
+proc call*(call_564508: Call_EventSubscriptionsCreateOrUpdate_564500;
+          apiVersion: string; eventSubscriptionName: string;
+          eventSubscriptionInfo: JsonNode; scope: string): Recallable =
   ## eventSubscriptionsCreateOrUpdate
   ## Asynchronously creates a new event subscription or updates an existing event subscription based on the specified scope.
-  ##   eventSubscriptionInfo: JObject (required)
-  ##                        : Event subscription properties containing the destination and filter information.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
   ##   eventSubscriptionName: string (required)
   ##                        : Name of the event subscription. Event subscription names must be between 3 and 64 characters in length and should use alphanumeric letters only.
+  ##   eventSubscriptionInfo: JObject (required)
+  ##                        : Event subscription properties containing the destination and filter information.
   ##   scope: string (required)
   ##        : The identifier of the resource to which the event subscription needs to be created or updated. The scope can be a subscription, or a resource group, or a top level resource belonging to a resource provider namespace, or an EventGrid topic. For example, use '/subscriptions/{subscriptionId}/' for a subscription, '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}' for a resource group, and 
   ## '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/{resourceProviderNamespace}/{resourceType}/{resourceName}' for a resource, and 
   ## '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.EventGrid/topics/{topicName}' for an EventGrid topic.
-  var path_568609 = newJObject()
-  var query_568610 = newJObject()
-  var body_568611 = newJObject()
+  var path_564509 = newJObject()
+  var query_564510 = newJObject()
+  var body_564511 = newJObject()
+  add(query_564510, "api-version", newJString(apiVersion))
+  add(path_564509, "eventSubscriptionName", newJString(eventSubscriptionName))
   if eventSubscriptionInfo != nil:
-    body_568611 = eventSubscriptionInfo
-  add(query_568610, "api-version", newJString(apiVersion))
-  add(path_568609, "eventSubscriptionName", newJString(eventSubscriptionName))
-  add(path_568609, "scope", newJString(scope))
-  result = call_568608.call(path_568609, query_568610, nil, nil, body_568611)
+    body_564511 = eventSubscriptionInfo
+  add(path_564509, "scope", newJString(scope))
+  result = call_564508.call(path_564509, query_564510, nil, nil, body_564511)
 
-var eventSubscriptionsCreateOrUpdate* = Call_EventSubscriptionsCreateOrUpdate_568600(
+var eventSubscriptionsCreateOrUpdate* = Call_EventSubscriptionsCreateOrUpdate_564500(
     name: "eventSubscriptionsCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/{scope}/providers/Microsoft.EventGrid/eventSubscriptions/{eventSubscriptionName}",
-    validator: validate_EventSubscriptionsCreateOrUpdate_568601, base: "",
-    url: url_EventSubscriptionsCreateOrUpdate_568602, schemes: {Scheme.Https})
+    validator: validate_EventSubscriptionsCreateOrUpdate_564501, base: "",
+    url: url_EventSubscriptionsCreateOrUpdate_564502, schemes: {Scheme.Https})
 type
-  Call_EventSubscriptionsGet_568590 = ref object of OpenApiRestCall_567651
-proc url_EventSubscriptionsGet_568592(protocol: Scheme; host: string; base: string;
+  Call_EventSubscriptionsGet_564490 = ref object of OpenApiRestCall_563549
+proc url_EventSubscriptionsGet_564492(protocol: Scheme; host: string; base: string;
                                      route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -4435,7 +4432,7 @@ proc url_EventSubscriptionsGet_568592(protocol: Scheme; host: string; base: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_EventSubscriptionsGet_568591(path: JsonNode; query: JsonNode;
+proc validate_EventSubscriptionsGet_564491(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Get properties of an event subscription.
   ## 
@@ -4450,16 +4447,16 @@ proc validate_EventSubscriptionsGet_568591(path: JsonNode; query: JsonNode;
   ## '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.EventGrid/topics/{topicName}' for an EventGrid topic.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `eventSubscriptionName` field"
-  var valid_568593 = path.getOrDefault("eventSubscriptionName")
-  valid_568593 = validateParameter(valid_568593, JString, required = true,
+  var valid_564493 = path.getOrDefault("eventSubscriptionName")
+  valid_564493 = validateParameter(valid_564493, JString, required = true,
                                  default = nil)
-  if valid_568593 != nil:
-    section.add "eventSubscriptionName", valid_568593
-  var valid_568594 = path.getOrDefault("scope")
-  valid_568594 = validateParameter(valid_568594, JString, required = true,
+  if valid_564493 != nil:
+    section.add "eventSubscriptionName", valid_564493
+  var valid_564494 = path.getOrDefault("scope")
+  valid_564494 = validateParameter(valid_564494, JString, required = true,
                                  default = nil)
-  if valid_568594 != nil:
-    section.add "scope", valid_568594
+  if valid_564494 != nil:
+    section.add "scope", valid_564494
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -4467,11 +4464,11 @@ proc validate_EventSubscriptionsGet_568591(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568595 = query.getOrDefault("api-version")
-  valid_568595 = validateParameter(valid_568595, JString, required = true,
+  var valid_564495 = query.getOrDefault("api-version")
+  valid_564495 = validateParameter(valid_564495, JString, required = true,
                                  default = nil)
-  if valid_568595 != nil:
-    section.add "api-version", valid_568595
+  if valid_564495 != nil:
+    section.add "api-version", valid_564495
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -4480,20 +4477,20 @@ proc validate_EventSubscriptionsGet_568591(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568596: Call_EventSubscriptionsGet_568590; path: JsonNode;
+proc call*(call_564496: Call_EventSubscriptionsGet_564490; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get properties of an event subscription.
   ## 
-  let valid = call_568596.validator(path, query, header, formData, body)
-  let scheme = call_568596.pickScheme
+  let valid = call_564496.validator(path, query, header, formData, body)
+  let scheme = call_564496.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568596.url(scheme.get, call_568596.host, call_568596.base,
-                         call_568596.route, valid.getOrDefault("path"),
+  let url = call_564496.url(scheme.get, call_564496.host, call_564496.base,
+                         call_564496.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568596, url, valid)
+  result = hook(call_564496, url, valid)
 
-proc call*(call_568597: Call_EventSubscriptionsGet_568590; apiVersion: string;
+proc call*(call_564497: Call_EventSubscriptionsGet_564490; apiVersion: string;
           eventSubscriptionName: string; scope: string): Recallable =
   ## eventSubscriptionsGet
   ## Get properties of an event subscription.
@@ -4505,21 +4502,21 @@ proc call*(call_568597: Call_EventSubscriptionsGet_568590; apiVersion: string;
   ##        : The scope of the event subscription. The scope can be a subscription, or a resource group, or a top level resource belonging to a resource provider namespace, or an EventGrid topic. For example, use '/subscriptions/{subscriptionId}/' for a subscription, '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}' for a resource group, and 
   ## '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/{resourceProviderNamespace}/{resourceType}/{resourceName}' for a resource, and 
   ## '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.EventGrid/topics/{topicName}' for an EventGrid topic.
-  var path_568598 = newJObject()
-  var query_568599 = newJObject()
-  add(query_568599, "api-version", newJString(apiVersion))
-  add(path_568598, "eventSubscriptionName", newJString(eventSubscriptionName))
-  add(path_568598, "scope", newJString(scope))
-  result = call_568597.call(path_568598, query_568599, nil, nil, nil)
+  var path_564498 = newJObject()
+  var query_564499 = newJObject()
+  add(query_564499, "api-version", newJString(apiVersion))
+  add(path_564498, "eventSubscriptionName", newJString(eventSubscriptionName))
+  add(path_564498, "scope", newJString(scope))
+  result = call_564497.call(path_564498, query_564499, nil, nil, nil)
 
-var eventSubscriptionsGet* = Call_EventSubscriptionsGet_568590(
+var eventSubscriptionsGet* = Call_EventSubscriptionsGet_564490(
     name: "eventSubscriptionsGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/{scope}/providers/Microsoft.EventGrid/eventSubscriptions/{eventSubscriptionName}",
-    validator: validate_EventSubscriptionsGet_568591, base: "",
-    url: url_EventSubscriptionsGet_568592, schemes: {Scheme.Https})
+    validator: validate_EventSubscriptionsGet_564491, base: "",
+    url: url_EventSubscriptionsGet_564492, schemes: {Scheme.Https})
 type
-  Call_EventSubscriptionsUpdate_568622 = ref object of OpenApiRestCall_567651
-proc url_EventSubscriptionsUpdate_568624(protocol: Scheme; host: string;
+  Call_EventSubscriptionsUpdate_564522 = ref object of OpenApiRestCall_563549
+proc url_EventSubscriptionsUpdate_564524(protocol: Scheme; host: string;
                                         base: string; route: string; path: JsonNode;
                                         query: JsonNode): Uri =
   result.scheme = $protocol
@@ -4539,7 +4536,7 @@ proc url_EventSubscriptionsUpdate_568624(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_EventSubscriptionsUpdate_568623(path: JsonNode; query: JsonNode;
+proc validate_EventSubscriptionsUpdate_564523(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Asynchronously updates an existing event subscription.
   ## 
@@ -4554,16 +4551,16 @@ proc validate_EventSubscriptionsUpdate_568623(path: JsonNode; query: JsonNode;
   ## '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.EventGrid/topics/{topicName}' for an EventGrid topic.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `eventSubscriptionName` field"
-  var valid_568625 = path.getOrDefault("eventSubscriptionName")
-  valid_568625 = validateParameter(valid_568625, JString, required = true,
+  var valid_564525 = path.getOrDefault("eventSubscriptionName")
+  valid_564525 = validateParameter(valid_564525, JString, required = true,
                                  default = nil)
-  if valid_568625 != nil:
-    section.add "eventSubscriptionName", valid_568625
-  var valid_568626 = path.getOrDefault("scope")
-  valid_568626 = validateParameter(valid_568626, JString, required = true,
+  if valid_564525 != nil:
+    section.add "eventSubscriptionName", valid_564525
+  var valid_564526 = path.getOrDefault("scope")
+  valid_564526 = validateParameter(valid_564526, JString, required = true,
                                  default = nil)
-  if valid_568626 != nil:
-    section.add "scope", valid_568626
+  if valid_564526 != nil:
+    section.add "scope", valid_564526
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -4571,11 +4568,11 @@ proc validate_EventSubscriptionsUpdate_568623(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568627 = query.getOrDefault("api-version")
-  valid_568627 = validateParameter(valid_568627, JString, required = true,
+  var valid_564527 = query.getOrDefault("api-version")
+  valid_564527 = validateParameter(valid_564527, JString, required = true,
                                  default = nil)
-  if valid_568627 != nil:
-    section.add "api-version", valid_568627
+  if valid_564527 != nil:
+    section.add "api-version", valid_564527
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -4589,52 +4586,52 @@ proc validate_EventSubscriptionsUpdate_568623(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568629: Call_EventSubscriptionsUpdate_568622; path: JsonNode;
+proc call*(call_564529: Call_EventSubscriptionsUpdate_564522; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Asynchronously updates an existing event subscription.
   ## 
-  let valid = call_568629.validator(path, query, header, formData, body)
-  let scheme = call_568629.pickScheme
+  let valid = call_564529.validator(path, query, header, formData, body)
+  let scheme = call_564529.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568629.url(scheme.get, call_568629.host, call_568629.base,
-                         call_568629.route, valid.getOrDefault("path"),
+  let url = call_564529.url(scheme.get, call_564529.host, call_564529.base,
+                         call_564529.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568629, url, valid)
+  result = hook(call_564529, url, valid)
 
-proc call*(call_568630: Call_EventSubscriptionsUpdate_568622; apiVersion: string;
-          eventSubscriptionName: string; scope: string;
-          eventSubscriptionUpdateParameters: JsonNode): Recallable =
+proc call*(call_564530: Call_EventSubscriptionsUpdate_564522; apiVersion: string;
+          eventSubscriptionName: string;
+          eventSubscriptionUpdateParameters: JsonNode; scope: string): Recallable =
   ## eventSubscriptionsUpdate
   ## Asynchronously updates an existing event subscription.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
   ##   eventSubscriptionName: string (required)
   ##                        : Name of the event subscription to be updated.
+  ##   eventSubscriptionUpdateParameters: JObject (required)
+  ##                                    : Updated event subscription information.
   ##   scope: string (required)
   ##        : The scope of existing event subscription. The scope can be a subscription, or a resource group, or a top level resource belonging to a resource provider namespace, or an EventGrid topic. For example, use '/subscriptions/{subscriptionId}/' for a subscription, '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}' for a resource group, and 
   ## '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/{resourceProviderNamespace}/{resourceType}/{resourceName}' for a resource, and 
   ## '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.EventGrid/topics/{topicName}' for an EventGrid topic.
-  ##   eventSubscriptionUpdateParameters: JObject (required)
-  ##                                    : Updated event subscription information.
-  var path_568631 = newJObject()
-  var query_568632 = newJObject()
-  var body_568633 = newJObject()
-  add(query_568632, "api-version", newJString(apiVersion))
-  add(path_568631, "eventSubscriptionName", newJString(eventSubscriptionName))
-  add(path_568631, "scope", newJString(scope))
+  var path_564531 = newJObject()
+  var query_564532 = newJObject()
+  var body_564533 = newJObject()
+  add(query_564532, "api-version", newJString(apiVersion))
+  add(path_564531, "eventSubscriptionName", newJString(eventSubscriptionName))
   if eventSubscriptionUpdateParameters != nil:
-    body_568633 = eventSubscriptionUpdateParameters
-  result = call_568630.call(path_568631, query_568632, nil, nil, body_568633)
+    body_564533 = eventSubscriptionUpdateParameters
+  add(path_564531, "scope", newJString(scope))
+  result = call_564530.call(path_564531, query_564532, nil, nil, body_564533)
 
-var eventSubscriptionsUpdate* = Call_EventSubscriptionsUpdate_568622(
+var eventSubscriptionsUpdate* = Call_EventSubscriptionsUpdate_564522(
     name: "eventSubscriptionsUpdate", meth: HttpMethod.HttpPatch,
     host: "management.azure.com", route: "/{scope}/providers/Microsoft.EventGrid/eventSubscriptions/{eventSubscriptionName}",
-    validator: validate_EventSubscriptionsUpdate_568623, base: "",
-    url: url_EventSubscriptionsUpdate_568624, schemes: {Scheme.Https})
+    validator: validate_EventSubscriptionsUpdate_564523, base: "",
+    url: url_EventSubscriptionsUpdate_564524, schemes: {Scheme.Https})
 type
-  Call_EventSubscriptionsDelete_568612 = ref object of OpenApiRestCall_567651
-proc url_EventSubscriptionsDelete_568614(protocol: Scheme; host: string;
+  Call_EventSubscriptionsDelete_564512 = ref object of OpenApiRestCall_563549
+proc url_EventSubscriptionsDelete_564514(protocol: Scheme; host: string;
                                         base: string; route: string; path: JsonNode;
                                         query: JsonNode): Uri =
   result.scheme = $protocol
@@ -4654,7 +4651,7 @@ proc url_EventSubscriptionsDelete_568614(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_EventSubscriptionsDelete_568613(path: JsonNode; query: JsonNode;
+proc validate_EventSubscriptionsDelete_564513(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Delete an existing event subscription.
   ## 
@@ -4669,16 +4666,16 @@ proc validate_EventSubscriptionsDelete_568613(path: JsonNode; query: JsonNode;
   ## '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.EventGrid/topics/{topicName}' for an EventGrid topic.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `eventSubscriptionName` field"
-  var valid_568615 = path.getOrDefault("eventSubscriptionName")
-  valid_568615 = validateParameter(valid_568615, JString, required = true,
+  var valid_564515 = path.getOrDefault("eventSubscriptionName")
+  valid_564515 = validateParameter(valid_564515, JString, required = true,
                                  default = nil)
-  if valid_568615 != nil:
-    section.add "eventSubscriptionName", valid_568615
-  var valid_568616 = path.getOrDefault("scope")
-  valid_568616 = validateParameter(valid_568616, JString, required = true,
+  if valid_564515 != nil:
+    section.add "eventSubscriptionName", valid_564515
+  var valid_564516 = path.getOrDefault("scope")
+  valid_564516 = validateParameter(valid_564516, JString, required = true,
                                  default = nil)
-  if valid_568616 != nil:
-    section.add "scope", valid_568616
+  if valid_564516 != nil:
+    section.add "scope", valid_564516
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -4686,11 +4683,11 @@ proc validate_EventSubscriptionsDelete_568613(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568617 = query.getOrDefault("api-version")
-  valid_568617 = validateParameter(valid_568617, JString, required = true,
+  var valid_564517 = query.getOrDefault("api-version")
+  valid_564517 = validateParameter(valid_564517, JString, required = true,
                                  default = nil)
-  if valid_568617 != nil:
-    section.add "api-version", valid_568617
+  if valid_564517 != nil:
+    section.add "api-version", valid_564517
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -4699,20 +4696,20 @@ proc validate_EventSubscriptionsDelete_568613(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568618: Call_EventSubscriptionsDelete_568612; path: JsonNode;
+proc call*(call_564518: Call_EventSubscriptionsDelete_564512; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Delete an existing event subscription.
   ## 
-  let valid = call_568618.validator(path, query, header, formData, body)
-  let scheme = call_568618.pickScheme
+  let valid = call_564518.validator(path, query, header, formData, body)
+  let scheme = call_564518.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568618.url(scheme.get, call_568618.host, call_568618.base,
-                         call_568618.route, valid.getOrDefault("path"),
+  let url = call_564518.url(scheme.get, call_564518.host, call_564518.base,
+                         call_564518.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568618, url, valid)
+  result = hook(call_564518, url, valid)
 
-proc call*(call_568619: Call_EventSubscriptionsDelete_568612; apiVersion: string;
+proc call*(call_564519: Call_EventSubscriptionsDelete_564512; apiVersion: string;
           eventSubscriptionName: string; scope: string): Recallable =
   ## eventSubscriptionsDelete
   ## Delete an existing event subscription.
@@ -4724,21 +4721,21 @@ proc call*(call_568619: Call_EventSubscriptionsDelete_568612; apiVersion: string
   ##        : The scope of the event subscription. The scope can be a subscription, or a resource group, or a top level resource belonging to a resource provider namespace, or an EventGrid topic. For example, use '/subscriptions/{subscriptionId}/' for a subscription, '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}' for a resource group, and 
   ## '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/{resourceProviderNamespace}/{resourceType}/{resourceName}' for a resource, and 
   ## '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.EventGrid/topics/{topicName}' for an EventGrid topic.
-  var path_568620 = newJObject()
-  var query_568621 = newJObject()
-  add(query_568621, "api-version", newJString(apiVersion))
-  add(path_568620, "eventSubscriptionName", newJString(eventSubscriptionName))
-  add(path_568620, "scope", newJString(scope))
-  result = call_568619.call(path_568620, query_568621, nil, nil, nil)
+  var path_564520 = newJObject()
+  var query_564521 = newJObject()
+  add(query_564521, "api-version", newJString(apiVersion))
+  add(path_564520, "eventSubscriptionName", newJString(eventSubscriptionName))
+  add(path_564520, "scope", newJString(scope))
+  result = call_564519.call(path_564520, query_564521, nil, nil, nil)
 
-var eventSubscriptionsDelete* = Call_EventSubscriptionsDelete_568612(
+var eventSubscriptionsDelete* = Call_EventSubscriptionsDelete_564512(
     name: "eventSubscriptionsDelete", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/{scope}/providers/Microsoft.EventGrid/eventSubscriptions/{eventSubscriptionName}",
-    validator: validate_EventSubscriptionsDelete_568613, base: "",
-    url: url_EventSubscriptionsDelete_568614, schemes: {Scheme.Https})
+    validator: validate_EventSubscriptionsDelete_564513, base: "",
+    url: url_EventSubscriptionsDelete_564514, schemes: {Scheme.Https})
 type
-  Call_EventSubscriptionsGetFullUrl_568634 = ref object of OpenApiRestCall_567651
-proc url_EventSubscriptionsGetFullUrl_568636(protocol: Scheme; host: string;
+  Call_EventSubscriptionsGetFullUrl_564534 = ref object of OpenApiRestCall_563549
+proc url_EventSubscriptionsGetFullUrl_564536(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -4758,7 +4755,7 @@ proc url_EventSubscriptionsGetFullUrl_568636(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_EventSubscriptionsGetFullUrl_568635(path: JsonNode; query: JsonNode;
+proc validate_EventSubscriptionsGetFullUrl_564535(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Get the full endpoint URL for an event subscription.
   ## 
@@ -4773,16 +4770,16 @@ proc validate_EventSubscriptionsGetFullUrl_568635(path: JsonNode; query: JsonNod
   ## '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.EventGrid/topics/{topicName}' for an EventGrid topic.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `eventSubscriptionName` field"
-  var valid_568637 = path.getOrDefault("eventSubscriptionName")
-  valid_568637 = validateParameter(valid_568637, JString, required = true,
+  var valid_564537 = path.getOrDefault("eventSubscriptionName")
+  valid_564537 = validateParameter(valid_564537, JString, required = true,
                                  default = nil)
-  if valid_568637 != nil:
-    section.add "eventSubscriptionName", valid_568637
-  var valid_568638 = path.getOrDefault("scope")
-  valid_568638 = validateParameter(valid_568638, JString, required = true,
+  if valid_564537 != nil:
+    section.add "eventSubscriptionName", valid_564537
+  var valid_564538 = path.getOrDefault("scope")
+  valid_564538 = validateParameter(valid_564538, JString, required = true,
                                  default = nil)
-  if valid_568638 != nil:
-    section.add "scope", valid_568638
+  if valid_564538 != nil:
+    section.add "scope", valid_564538
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -4790,11 +4787,11 @@ proc validate_EventSubscriptionsGetFullUrl_568635(path: JsonNode; query: JsonNod
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568639 = query.getOrDefault("api-version")
-  valid_568639 = validateParameter(valid_568639, JString, required = true,
+  var valid_564539 = query.getOrDefault("api-version")
+  valid_564539 = validateParameter(valid_564539, JString, required = true,
                                  default = nil)
-  if valid_568639 != nil:
-    section.add "api-version", valid_568639
+  if valid_564539 != nil:
+    section.add "api-version", valid_564539
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -4803,20 +4800,20 @@ proc validate_EventSubscriptionsGetFullUrl_568635(path: JsonNode; query: JsonNod
   if body != nil:
     result.add "body", body
 
-proc call*(call_568640: Call_EventSubscriptionsGetFullUrl_568634; path: JsonNode;
+proc call*(call_564540: Call_EventSubscriptionsGetFullUrl_564534; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get the full endpoint URL for an event subscription.
   ## 
-  let valid = call_568640.validator(path, query, header, formData, body)
-  let scheme = call_568640.pickScheme
+  let valid = call_564540.validator(path, query, header, formData, body)
+  let scheme = call_564540.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568640.url(scheme.get, call_568640.host, call_568640.base,
-                         call_568640.route, valid.getOrDefault("path"),
+  let url = call_564540.url(scheme.get, call_564540.host, call_564540.base,
+                         call_564540.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568640, url, valid)
+  result = hook(call_564540, url, valid)
 
-proc call*(call_568641: Call_EventSubscriptionsGetFullUrl_568634;
+proc call*(call_564541: Call_EventSubscriptionsGetFullUrl_564534;
           apiVersion: string; eventSubscriptionName: string; scope: string): Recallable =
   ## eventSubscriptionsGetFullUrl
   ## Get the full endpoint URL for an event subscription.
@@ -4828,18 +4825,18 @@ proc call*(call_568641: Call_EventSubscriptionsGetFullUrl_568634;
   ##        : The scope of the event subscription. The scope can be a subscription, or a resource group, or a top level resource belonging to a resource provider namespace, or an EventGrid topic. For example, use '/subscriptions/{subscriptionId}/' for a subscription, '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}' for a resource group, and 
   ## '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/{resourceProviderNamespace}/{resourceType}/{resourceName}' for a resource, and 
   ## '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.EventGrid/topics/{topicName}' for an EventGrid topic.
-  var path_568642 = newJObject()
-  var query_568643 = newJObject()
-  add(query_568643, "api-version", newJString(apiVersion))
-  add(path_568642, "eventSubscriptionName", newJString(eventSubscriptionName))
-  add(path_568642, "scope", newJString(scope))
-  result = call_568641.call(path_568642, query_568643, nil, nil, nil)
+  var path_564542 = newJObject()
+  var query_564543 = newJObject()
+  add(query_564543, "api-version", newJString(apiVersion))
+  add(path_564542, "eventSubscriptionName", newJString(eventSubscriptionName))
+  add(path_564542, "scope", newJString(scope))
+  result = call_564541.call(path_564542, query_564543, nil, nil, nil)
 
-var eventSubscriptionsGetFullUrl* = Call_EventSubscriptionsGetFullUrl_568634(
+var eventSubscriptionsGetFullUrl* = Call_EventSubscriptionsGetFullUrl_564534(
     name: "eventSubscriptionsGetFullUrl", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/{scope}/providers/Microsoft.EventGrid/eventSubscriptions/{eventSubscriptionName}/getFullUrl",
-    validator: validate_EventSubscriptionsGetFullUrl_568635, base: "",
-    url: url_EventSubscriptionsGetFullUrl_568636, schemes: {Scheme.Https})
+    validator: validate_EventSubscriptionsGetFullUrl_564535, base: "",
+    url: url_EventSubscriptionsGetFullUrl_564536, schemes: {Scheme.Https})
 export
   rest
 

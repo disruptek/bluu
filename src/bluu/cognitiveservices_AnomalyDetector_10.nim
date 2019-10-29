@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, httpcore
 
 ## auto-generated via openapi macro
 ## title: Anomaly Detector Client
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_567658 = ref object of OpenApiRestCall
+  OpenApiRestCall_563556 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_567658](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563556](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_567658): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563556): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,15 +107,15 @@ const
   macServiceName = "cognitiveservices-AnomalyDetector"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_EntireDetect_567880 = ref object of OpenApiRestCall_567658
-proc url_EntireDetect_567882(protocol: Scheme; host: string; base: string;
+  Call_EntireDetect_563778 = ref object of OpenApiRestCall_563556
+proc url_EntireDetect_563780(protocol: Scheme; host: string; base: string;
                             route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_EntireDetect_567881(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_EntireDetect_563779(path: JsonNode; query: JsonNode; header: JsonNode;
                                  formData: JsonNode; body: JsonNode): JsonNode =
   ## This operation generates a model using an entire series, each point is detected with the same model. With this method, points before and after a certain point are used to determine whether it is an anomaly. The entire detection can give user an overall status of the time series.
   ## 
@@ -133,43 +137,43 @@ proc validate_EntireDetect_567881(path: JsonNode; query: JsonNode; header: JsonN
   if body != nil:
     result.add "body", body
 
-proc call*(call_568064: Call_EntireDetect_567880; path: JsonNode; query: JsonNode;
+proc call*(call_563964: Call_EntireDetect_563778; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## This operation generates a model using an entire series, each point is detected with the same model. With this method, points before and after a certain point are used to determine whether it is an anomaly. The entire detection can give user an overall status of the time series.
   ## 
-  let valid = call_568064.validator(path, query, header, formData, body)
-  let scheme = call_568064.pickScheme
+  let valid = call_563964.validator(path, query, header, formData, body)
+  let scheme = call_563964.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568064.url(scheme.get, call_568064.host, call_568064.base,
-                         call_568064.route, valid.getOrDefault("path"),
+  let url = call_563964.url(scheme.get, call_563964.host, call_563964.base,
+                         call_563964.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568064, url, valid)
+  result = hook(call_563964, url, valid)
 
-proc call*(call_568135: Call_EntireDetect_567880; body: JsonNode): Recallable =
+proc call*(call_564035: Call_EntireDetect_563778; body: JsonNode): Recallable =
   ## entireDetect
   ## This operation generates a model using an entire series, each point is detected with the same model. With this method, points before and after a certain point are used to determine whether it is an anomaly. The entire detection can give user an overall status of the time series.
   ##   body: JObject (required)
   ##       : Time series points and period if needed. Advanced model parameters can also be set in the request.
-  var body_568136 = newJObject()
+  var body_564036 = newJObject()
   if body != nil:
-    body_568136 = body
-  result = call_568135.call(nil, nil, nil, nil, body_568136)
+    body_564036 = body
+  result = call_564035.call(nil, nil, nil, nil, body_564036)
 
-var entireDetect* = Call_EntireDetect_567880(name: "entireDetect",
+var entireDetect* = Call_EntireDetect_563778(name: "entireDetect",
     meth: HttpMethod.HttpPost, host: "azure.local",
-    route: "/timeseries/entire/detect", validator: validate_EntireDetect_567881,
-    base: "", url: url_EntireDetect_567882, schemes: {Scheme.Https})
+    route: "/timeseries/entire/detect", validator: validate_EntireDetect_563779,
+    base: "", url: url_EntireDetect_563780, schemes: {Scheme.Https})
 type
-  Call_LastDetect_568175 = ref object of OpenApiRestCall_567658
-proc url_LastDetect_568177(protocol: Scheme; host: string; base: string; route: string;
+  Call_LastDetect_564075 = ref object of OpenApiRestCall_563556
+proc url_LastDetect_564077(protocol: Scheme; host: string; base: string; route: string;
                           path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_LastDetect_568176(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_LastDetect_564076(path: JsonNode; query: JsonNode; header: JsonNode;
                                formData: JsonNode; body: JsonNode): JsonNode =
   ## This operation generates a model using points before the latest one. With this method, only historical points are used to determine whether the target point is an anomaly. The latest point detecting operation matches the scenario of real-time monitoring of business metrics.
   ## 
@@ -191,35 +195,35 @@ proc validate_LastDetect_568176(path: JsonNode; query: JsonNode; header: JsonNod
   if body != nil:
     result.add "body", body
 
-proc call*(call_568179: Call_LastDetect_568175; path: JsonNode; query: JsonNode;
+proc call*(call_564079: Call_LastDetect_564075; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## This operation generates a model using points before the latest one. With this method, only historical points are used to determine whether the target point is an anomaly. The latest point detecting operation matches the scenario of real-time monitoring of business metrics.
   ## 
-  let valid = call_568179.validator(path, query, header, formData, body)
-  let scheme = call_568179.pickScheme
+  let valid = call_564079.validator(path, query, header, formData, body)
+  let scheme = call_564079.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568179.url(scheme.get, call_568179.host, call_568179.base,
-                         call_568179.route, valid.getOrDefault("path"),
+  let url = call_564079.url(scheme.get, call_564079.host, call_564079.base,
+                         call_564079.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568179, url, valid)
+  result = hook(call_564079, url, valid)
 
-proc call*(call_568180: Call_LastDetect_568175; body: JsonNode): Recallable =
+proc call*(call_564080: Call_LastDetect_564075; body: JsonNode): Recallable =
   ## lastDetect
   ## This operation generates a model using points before the latest one. With this method, only historical points are used to determine whether the target point is an anomaly. The latest point detecting operation matches the scenario of real-time monitoring of business metrics.
   ##   body: JObject (required)
   ##       : Time series points and period if needed. Advanced model parameters can also be set in the request.
-  var body_568181 = newJObject()
+  var body_564081 = newJObject()
   if body != nil:
-    body_568181 = body
-  result = call_568180.call(nil, nil, nil, nil, body_568181)
+    body_564081 = body
+  result = call_564080.call(nil, nil, nil, nil, body_564081)
 
-var lastDetect* = Call_LastDetect_568175(name: "lastDetect",
+var lastDetect* = Call_LastDetect_564075(name: "lastDetect",
                                       meth: HttpMethod.HttpPost,
                                       host: "azure.local",
                                       route: "/timeseries/last/detect",
-                                      validator: validate_LastDetect_568176,
-                                      base: "", url: url_LastDetect_568177,
+                                      validator: validate_LastDetect_564076,
+                                      base: "", url: url_LastDetect_564077,
                                       schemes: {Scheme.Https})
 export
   rest

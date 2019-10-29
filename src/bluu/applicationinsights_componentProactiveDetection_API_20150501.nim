@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, httpcore
 
 ## auto-generated via openapi macro
 ## title: ApplicationInsightsManagementClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_596458 = ref object of OpenApiRestCall
+  OpenApiRestCall_563556 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_596458](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563556](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_596458): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563556): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,8 +107,8 @@ const
   macServiceName = "applicationinsights-componentProactiveDetection_API"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_ProactiveDetectionConfigurationsList_596680 = ref object of OpenApiRestCall_596458
-proc url_ProactiveDetectionConfigurationsList_596682(protocol: Scheme;
+  Call_ProactiveDetectionConfigurationsList_563778 = ref object of OpenApiRestCall_563556
+proc url_ProactiveDetectionConfigurationsList_563780(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -127,37 +131,37 @@ proc url_ProactiveDetectionConfigurationsList_596682(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ProactiveDetectionConfigurationsList_596681(path: JsonNode;
+proc validate_ProactiveDetectionConfigurationsList_563779(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets a list of ProactiveDetection configurations of an Application Insights component.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group. The name is case insensitive.
   ##   subscriptionId: JString (required)
   ##                 : The ID of the target subscription.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group. The name is case insensitive.
   ##   resourceName: JString (required)
   ##               : The name of the Application Insights component resource.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_596855 = path.getOrDefault("resourceGroupName")
-  valid_596855 = validateParameter(valid_596855, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_563955 = path.getOrDefault("subscriptionId")
+  valid_563955 = validateParameter(valid_563955, JString, required = true,
                                  default = nil)
-  if valid_596855 != nil:
-    section.add "resourceGroupName", valid_596855
-  var valid_596856 = path.getOrDefault("subscriptionId")
-  valid_596856 = validateParameter(valid_596856, JString, required = true,
+  if valid_563955 != nil:
+    section.add "subscriptionId", valid_563955
+  var valid_563956 = path.getOrDefault("resourceGroupName")
+  valid_563956 = validateParameter(valid_563956, JString, required = true,
                                  default = nil)
-  if valid_596856 != nil:
-    section.add "subscriptionId", valid_596856
-  var valid_596857 = path.getOrDefault("resourceName")
-  valid_596857 = validateParameter(valid_596857, JString, required = true,
+  if valid_563956 != nil:
+    section.add "resourceGroupName", valid_563956
+  var valid_563957 = path.getOrDefault("resourceName")
+  valid_563957 = validateParameter(valid_563957, JString, required = true,
                                  default = nil)
-  if valid_596857 != nil:
-    section.add "resourceName", valid_596857
+  if valid_563957 != nil:
+    section.add "resourceName", valid_563957
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -165,11 +169,11 @@ proc validate_ProactiveDetectionConfigurationsList_596681(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_596858 = query.getOrDefault("api-version")
-  valid_596858 = validateParameter(valid_596858, JString, required = true,
+  var valid_563958 = query.getOrDefault("api-version")
+  valid_563958 = validateParameter(valid_563958, JString, required = true,
                                  default = nil)
-  if valid_596858 != nil:
-    section.add "api-version", valid_596858
+  if valid_563958 != nil:
+    section.add "api-version", valid_563958
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -178,49 +182,49 @@ proc validate_ProactiveDetectionConfigurationsList_596681(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_596881: Call_ProactiveDetectionConfigurationsList_596680;
+proc call*(call_563981: Call_ProactiveDetectionConfigurationsList_563778;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Gets a list of ProactiveDetection configurations of an Application Insights component.
   ## 
-  let valid = call_596881.validator(path, query, header, formData, body)
-  let scheme = call_596881.pickScheme
+  let valid = call_563981.validator(path, query, header, formData, body)
+  let scheme = call_563981.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_596881.url(scheme.get, call_596881.host, call_596881.base,
-                         call_596881.route, valid.getOrDefault("path"),
+  let url = call_563981.url(scheme.get, call_563981.host, call_563981.base,
+                         call_563981.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_596881, url, valid)
+  result = hook(call_563981, url, valid)
 
-proc call*(call_596952: Call_ProactiveDetectionConfigurationsList_596680;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
+proc call*(call_564052: Call_ProactiveDetectionConfigurationsList_563778;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string;
           resourceName: string): Recallable =
   ## proactiveDetectionConfigurationsList
   ## Gets a list of ProactiveDetection configurations of an Application Insights component.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group. The name is case insensitive.
   ##   apiVersion: string (required)
   ##             : The API version to use for this operation.
   ##   subscriptionId: string (required)
   ##                 : The ID of the target subscription.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group. The name is case insensitive.
   ##   resourceName: string (required)
   ##               : The name of the Application Insights component resource.
-  var path_596953 = newJObject()
-  var query_596955 = newJObject()
-  add(path_596953, "resourceGroupName", newJString(resourceGroupName))
-  add(query_596955, "api-version", newJString(apiVersion))
-  add(path_596953, "subscriptionId", newJString(subscriptionId))
-  add(path_596953, "resourceName", newJString(resourceName))
-  result = call_596952.call(path_596953, query_596955, nil, nil, nil)
+  var path_564053 = newJObject()
+  var query_564055 = newJObject()
+  add(query_564055, "api-version", newJString(apiVersion))
+  add(path_564053, "subscriptionId", newJString(subscriptionId))
+  add(path_564053, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564053, "resourceName", newJString(resourceName))
+  result = call_564052.call(path_564053, query_564055, nil, nil, nil)
 
-var proactiveDetectionConfigurationsList* = Call_ProactiveDetectionConfigurationsList_596680(
+var proactiveDetectionConfigurationsList* = Call_ProactiveDetectionConfigurationsList_563778(
     name: "proactiveDetectionConfigurationsList", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Insights/components/{resourceName}/ProactiveDetectionConfigs",
-    validator: validate_ProactiveDetectionConfigurationsList_596681, base: "",
-    url: url_ProactiveDetectionConfigurationsList_596682, schemes: {Scheme.Https})
+    validator: validate_ProactiveDetectionConfigurationsList_563779, base: "",
+    url: url_ProactiveDetectionConfigurationsList_563780, schemes: {Scheme.Https})
 type
-  Call_ProactiveDetectionConfigurationsUpdate_597006 = ref object of OpenApiRestCall_596458
-proc url_ProactiveDetectionConfigurationsUpdate_597008(protocol: Scheme;
+  Call_ProactiveDetectionConfigurationsUpdate_564106 = ref object of OpenApiRestCall_563556
+proc url_ProactiveDetectionConfigurationsUpdate_564108(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -245,7 +249,7 @@ proc url_ProactiveDetectionConfigurationsUpdate_597008(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ProactiveDetectionConfigurationsUpdate_597007(path: JsonNode;
+proc validate_ProactiveDetectionConfigurationsUpdate_564107(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Update the ProactiveDetection configuration for this configuration id.
   ## 
@@ -254,35 +258,35 @@ proc validate_ProactiveDetectionConfigurationsUpdate_597007(path: JsonNode;
   ## parameters in `path` object:
   ##   ConfigurationId: JString (required)
   ##                  : The ProactiveDetection configuration ID. This is unique within a Application Insights component.
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group. The name is case insensitive.
   ##   subscriptionId: JString (required)
   ##                 : The ID of the target subscription.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group. The name is case insensitive.
   ##   resourceName: JString (required)
   ##               : The name of the Application Insights component resource.
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `ConfigurationId` field"
-  var valid_597009 = path.getOrDefault("ConfigurationId")
-  valid_597009 = validateParameter(valid_597009, JString, required = true,
+  var valid_564109 = path.getOrDefault("ConfigurationId")
+  valid_564109 = validateParameter(valid_564109, JString, required = true,
                                  default = nil)
-  if valid_597009 != nil:
-    section.add "ConfigurationId", valid_597009
-  var valid_597010 = path.getOrDefault("resourceGroupName")
-  valid_597010 = validateParameter(valid_597010, JString, required = true,
+  if valid_564109 != nil:
+    section.add "ConfigurationId", valid_564109
+  var valid_564110 = path.getOrDefault("subscriptionId")
+  valid_564110 = validateParameter(valid_564110, JString, required = true,
                                  default = nil)
-  if valid_597010 != nil:
-    section.add "resourceGroupName", valid_597010
-  var valid_597011 = path.getOrDefault("subscriptionId")
-  valid_597011 = validateParameter(valid_597011, JString, required = true,
+  if valid_564110 != nil:
+    section.add "subscriptionId", valid_564110
+  var valid_564111 = path.getOrDefault("resourceGroupName")
+  valid_564111 = validateParameter(valid_564111, JString, required = true,
                                  default = nil)
-  if valid_597011 != nil:
-    section.add "subscriptionId", valid_597011
-  var valid_597012 = path.getOrDefault("resourceName")
-  valid_597012 = validateParameter(valid_597012, JString, required = true,
+  if valid_564111 != nil:
+    section.add "resourceGroupName", valid_564111
+  var valid_564112 = path.getOrDefault("resourceName")
+  valid_564112 = validateParameter(valid_564112, JString, required = true,
                                  default = nil)
-  if valid_597012 != nil:
-    section.add "resourceName", valid_597012
+  if valid_564112 != nil:
+    section.add "resourceName", valid_564112
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -290,11 +294,11 @@ proc validate_ProactiveDetectionConfigurationsUpdate_597007(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_597013 = query.getOrDefault("api-version")
-  valid_597013 = validateParameter(valid_597013, JString, required = true,
+  var valid_564113 = query.getOrDefault("api-version")
+  valid_564113 = validateParameter(valid_564113, JString, required = true,
                                  default = nil)
-  if valid_597013 != nil:
-    section.add "api-version", valid_597013
+  if valid_564113 != nil:
+    section.add "api-version", valid_564113
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -308,59 +312,59 @@ proc validate_ProactiveDetectionConfigurationsUpdate_597007(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_597015: Call_ProactiveDetectionConfigurationsUpdate_597006;
+proc call*(call_564115: Call_ProactiveDetectionConfigurationsUpdate_564106;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Update the ProactiveDetection configuration for this configuration id.
   ## 
-  let valid = call_597015.validator(path, query, header, formData, body)
-  let scheme = call_597015.pickScheme
+  let valid = call_564115.validator(path, query, header, formData, body)
+  let scheme = call_564115.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_597015.url(scheme.get, call_597015.host, call_597015.base,
-                         call_597015.route, valid.getOrDefault("path"),
+  let url = call_564115.url(scheme.get, call_564115.host, call_564115.base,
+                         call_564115.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_597015, url, valid)
+  result = hook(call_564115, url, valid)
 
-proc call*(call_597016: Call_ProactiveDetectionConfigurationsUpdate_597006;
-          ConfigurationId: string; resourceGroupName: string; apiVersion: string;
-          subscriptionId: string; resourceName: string;
-          ProactiveDetectionProperties: JsonNode): Recallable =
+proc call*(call_564116: Call_ProactiveDetectionConfigurationsUpdate_564106;
+          ProactiveDetectionProperties: JsonNode; apiVersion: string;
+          ConfigurationId: string; subscriptionId: string;
+          resourceGroupName: string; resourceName: string): Recallable =
   ## proactiveDetectionConfigurationsUpdate
   ## Update the ProactiveDetection configuration for this configuration id.
-  ##   ConfigurationId: string (required)
-  ##                  : The ProactiveDetection configuration ID. This is unique within a Application Insights component.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group. The name is case insensitive.
-  ##   apiVersion: string (required)
-  ##             : The API version to use for this operation.
-  ##   subscriptionId: string (required)
-  ##                 : The ID of the target subscription.
-  ##   resourceName: string (required)
-  ##               : The name of the Application Insights component resource.
   ##   ProactiveDetectionProperties: JObject (required)
   ##                               : Properties that need to be specified to update the ProactiveDetection configuration.
-  var path_597017 = newJObject()
-  var query_597018 = newJObject()
-  var body_597019 = newJObject()
-  add(path_597017, "ConfigurationId", newJString(ConfigurationId))
-  add(path_597017, "resourceGroupName", newJString(resourceGroupName))
-  add(query_597018, "api-version", newJString(apiVersion))
-  add(path_597017, "subscriptionId", newJString(subscriptionId))
-  add(path_597017, "resourceName", newJString(resourceName))
+  ##   apiVersion: string (required)
+  ##             : The API version to use for this operation.
+  ##   ConfigurationId: string (required)
+  ##                  : The ProactiveDetection configuration ID. This is unique within a Application Insights component.
+  ##   subscriptionId: string (required)
+  ##                 : The ID of the target subscription.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group. The name is case insensitive.
+  ##   resourceName: string (required)
+  ##               : The name of the Application Insights component resource.
+  var path_564117 = newJObject()
+  var query_564118 = newJObject()
+  var body_564119 = newJObject()
   if ProactiveDetectionProperties != nil:
-    body_597019 = ProactiveDetectionProperties
-  result = call_597016.call(path_597017, query_597018, nil, nil, body_597019)
+    body_564119 = ProactiveDetectionProperties
+  add(query_564118, "api-version", newJString(apiVersion))
+  add(path_564117, "ConfigurationId", newJString(ConfigurationId))
+  add(path_564117, "subscriptionId", newJString(subscriptionId))
+  add(path_564117, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564117, "resourceName", newJString(resourceName))
+  result = call_564116.call(path_564117, query_564118, nil, nil, body_564119)
 
-var proactiveDetectionConfigurationsUpdate* = Call_ProactiveDetectionConfigurationsUpdate_597006(
+var proactiveDetectionConfigurationsUpdate* = Call_ProactiveDetectionConfigurationsUpdate_564106(
     name: "proactiveDetectionConfigurationsUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Insights/components/{resourceName}/ProactiveDetectionConfigs/{ConfigurationId}",
-    validator: validate_ProactiveDetectionConfigurationsUpdate_597007, base: "",
-    url: url_ProactiveDetectionConfigurationsUpdate_597008,
+    validator: validate_ProactiveDetectionConfigurationsUpdate_564107, base: "",
+    url: url_ProactiveDetectionConfigurationsUpdate_564108,
     schemes: {Scheme.Https})
 type
-  Call_ProactiveDetectionConfigurationsGet_596994 = ref object of OpenApiRestCall_596458
-proc url_ProactiveDetectionConfigurationsGet_596996(protocol: Scheme; host: string;
+  Call_ProactiveDetectionConfigurationsGet_564094 = ref object of OpenApiRestCall_563556
+proc url_ProactiveDetectionConfigurationsGet_564096(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -385,7 +389,7 @@ proc url_ProactiveDetectionConfigurationsGet_596996(protocol: Scheme; host: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ProactiveDetectionConfigurationsGet_596995(path: JsonNode;
+proc validate_ProactiveDetectionConfigurationsGet_564095(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Get the ProactiveDetection configuration for this configuration id.
   ## 
@@ -394,35 +398,35 @@ proc validate_ProactiveDetectionConfigurationsGet_596995(path: JsonNode;
   ## parameters in `path` object:
   ##   ConfigurationId: JString (required)
   ##                  : The ProactiveDetection configuration ID. This is unique within a Application Insights component.
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group. The name is case insensitive.
   ##   subscriptionId: JString (required)
   ##                 : The ID of the target subscription.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group. The name is case insensitive.
   ##   resourceName: JString (required)
   ##               : The name of the Application Insights component resource.
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `ConfigurationId` field"
-  var valid_596997 = path.getOrDefault("ConfigurationId")
-  valid_596997 = validateParameter(valid_596997, JString, required = true,
+  var valid_564097 = path.getOrDefault("ConfigurationId")
+  valid_564097 = validateParameter(valid_564097, JString, required = true,
                                  default = nil)
-  if valid_596997 != nil:
-    section.add "ConfigurationId", valid_596997
-  var valid_596998 = path.getOrDefault("resourceGroupName")
-  valid_596998 = validateParameter(valid_596998, JString, required = true,
+  if valid_564097 != nil:
+    section.add "ConfigurationId", valid_564097
+  var valid_564098 = path.getOrDefault("subscriptionId")
+  valid_564098 = validateParameter(valid_564098, JString, required = true,
                                  default = nil)
-  if valid_596998 != nil:
-    section.add "resourceGroupName", valid_596998
-  var valid_596999 = path.getOrDefault("subscriptionId")
-  valid_596999 = validateParameter(valid_596999, JString, required = true,
+  if valid_564098 != nil:
+    section.add "subscriptionId", valid_564098
+  var valid_564099 = path.getOrDefault("resourceGroupName")
+  valid_564099 = validateParameter(valid_564099, JString, required = true,
                                  default = nil)
-  if valid_596999 != nil:
-    section.add "subscriptionId", valid_596999
-  var valid_597000 = path.getOrDefault("resourceName")
-  valid_597000 = validateParameter(valid_597000, JString, required = true,
+  if valid_564099 != nil:
+    section.add "resourceGroupName", valid_564099
+  var valid_564100 = path.getOrDefault("resourceName")
+  valid_564100 = validateParameter(valid_564100, JString, required = true,
                                  default = nil)
-  if valid_597000 != nil:
-    section.add "resourceName", valid_597000
+  if valid_564100 != nil:
+    section.add "resourceName", valid_564100
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -430,11 +434,11 @@ proc validate_ProactiveDetectionConfigurationsGet_596995(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_597001 = query.getOrDefault("api-version")
-  valid_597001 = validateParameter(valid_597001, JString, required = true,
+  var valid_564101 = query.getOrDefault("api-version")
+  valid_564101 = validateParameter(valid_564101, JString, required = true,
                                  default = nil)
-  if valid_597001 != nil:
-    section.add "api-version", valid_597001
+  if valid_564101 != nil:
+    section.add "api-version", valid_564101
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -443,49 +447,49 @@ proc validate_ProactiveDetectionConfigurationsGet_596995(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_597002: Call_ProactiveDetectionConfigurationsGet_596994;
+proc call*(call_564102: Call_ProactiveDetectionConfigurationsGet_564094;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Get the ProactiveDetection configuration for this configuration id.
   ## 
-  let valid = call_597002.validator(path, query, header, formData, body)
-  let scheme = call_597002.pickScheme
+  let valid = call_564102.validator(path, query, header, formData, body)
+  let scheme = call_564102.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_597002.url(scheme.get, call_597002.host, call_597002.base,
-                         call_597002.route, valid.getOrDefault("path"),
+  let url = call_564102.url(scheme.get, call_564102.host, call_564102.base,
+                         call_564102.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_597002, url, valid)
+  result = hook(call_564102, url, valid)
 
-proc call*(call_597003: Call_ProactiveDetectionConfigurationsGet_596994;
-          ConfigurationId: string; resourceGroupName: string; apiVersion: string;
-          subscriptionId: string; resourceName: string): Recallable =
+proc call*(call_564103: Call_ProactiveDetectionConfigurationsGet_564094;
+          apiVersion: string; ConfigurationId: string; subscriptionId: string;
+          resourceGroupName: string; resourceName: string): Recallable =
   ## proactiveDetectionConfigurationsGet
   ## Get the ProactiveDetection configuration for this configuration id.
-  ##   ConfigurationId: string (required)
-  ##                  : The ProactiveDetection configuration ID. This is unique within a Application Insights component.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group. The name is case insensitive.
   ##   apiVersion: string (required)
   ##             : The API version to use for this operation.
+  ##   ConfigurationId: string (required)
+  ##                  : The ProactiveDetection configuration ID. This is unique within a Application Insights component.
   ##   subscriptionId: string (required)
   ##                 : The ID of the target subscription.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group. The name is case insensitive.
   ##   resourceName: string (required)
   ##               : The name of the Application Insights component resource.
-  var path_597004 = newJObject()
-  var query_597005 = newJObject()
-  add(path_597004, "ConfigurationId", newJString(ConfigurationId))
-  add(path_597004, "resourceGroupName", newJString(resourceGroupName))
-  add(query_597005, "api-version", newJString(apiVersion))
-  add(path_597004, "subscriptionId", newJString(subscriptionId))
-  add(path_597004, "resourceName", newJString(resourceName))
-  result = call_597003.call(path_597004, query_597005, nil, nil, nil)
+  var path_564104 = newJObject()
+  var query_564105 = newJObject()
+  add(query_564105, "api-version", newJString(apiVersion))
+  add(path_564104, "ConfigurationId", newJString(ConfigurationId))
+  add(path_564104, "subscriptionId", newJString(subscriptionId))
+  add(path_564104, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564104, "resourceName", newJString(resourceName))
+  result = call_564103.call(path_564104, query_564105, nil, nil, nil)
 
-var proactiveDetectionConfigurationsGet* = Call_ProactiveDetectionConfigurationsGet_596994(
+var proactiveDetectionConfigurationsGet* = Call_ProactiveDetectionConfigurationsGet_564094(
     name: "proactiveDetectionConfigurationsGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Insights/components/{resourceName}/ProactiveDetectionConfigs/{ConfigurationId}",
-    validator: validate_ProactiveDetectionConfigurationsGet_596995, base: "",
-    url: url_ProactiveDetectionConfigurationsGet_596996, schemes: {Scheme.Https})
+    validator: validate_ProactiveDetectionConfigurationsGet_564095, base: "",
+    url: url_ProactiveDetectionConfigurationsGet_564096, schemes: {Scheme.Https})
 export
   rest
 

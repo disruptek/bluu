@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, httpcore
 
 ## auto-generated via openapi macro
 ## title: IotCentralClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_567641 = ref object of OpenApiRestCall
+  OpenApiRestCall_563539 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_567641](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563539](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_567641): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563539): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,15 +107,15 @@ const
   macServiceName = "iotcentral"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_OperationsList_567863 = ref object of OpenApiRestCall_567641
-proc url_OperationsList_567865(protocol: Scheme; host: string; base: string;
+  Call_OperationsList_563761 = ref object of OpenApiRestCall_563539
+proc url_OperationsList_563763(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_OperationsList_567864(path: JsonNode; query: JsonNode;
+proc validate_OperationsList_563762(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## Lists all of the available IoT Central application REST API operations.
@@ -126,11 +130,11 @@ proc validate_OperationsList_567864(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568024 = query.getOrDefault("api-version")
-  valid_568024 = validateParameter(valid_568024, JString, required = true,
+  var valid_563924 = query.getOrDefault("api-version")
+  valid_563924 = validateParameter(valid_563924, JString, required = true,
                                  default = nil)
-  if valid_568024 != nil:
-    section.add "api-version", valid_568024
+  if valid_563924 != nil:
+    section.add "api-version", valid_563924
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -139,36 +143,36 @@ proc validate_OperationsList_567864(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568047: Call_OperationsList_567863; path: JsonNode; query: JsonNode;
+proc call*(call_563947: Call_OperationsList_563761; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists all of the available IoT Central application REST API operations.
   ## 
-  let valid = call_568047.validator(path, query, header, formData, body)
-  let scheme = call_568047.pickScheme
+  let valid = call_563947.validator(path, query, header, formData, body)
+  let scheme = call_563947.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568047.url(scheme.get, call_568047.host, call_568047.base,
-                         call_568047.route, valid.getOrDefault("path"),
+  let url = call_563947.url(scheme.get, call_563947.host, call_563947.base,
+                         call_563947.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568047, url, valid)
+  result = hook(call_563947, url, valid)
 
-proc call*(call_568118: Call_OperationsList_567863; apiVersion: string): Recallable =
+proc call*(call_564018: Call_OperationsList_563761; apiVersion: string): Recallable =
   ## operationsList
   ## Lists all of the available IoT Central application REST API operations.
   ##   apiVersion: string (required)
   ##             : The version of the API.
-  var query_568119 = newJObject()
-  add(query_568119, "api-version", newJString(apiVersion))
-  result = call_568118.call(nil, query_568119, nil, nil, nil)
+  var query_564019 = newJObject()
+  add(query_564019, "api-version", newJString(apiVersion))
+  result = call_564018.call(nil, query_564019, nil, nil, nil)
 
-var operationsList* = Call_OperationsList_567863(name: "operationsList",
+var operationsList* = Call_OperationsList_563761(name: "operationsList",
     meth: HttpMethod.HttpGet, host: "management.azure.com",
     route: "/providers/Microsoft.IoTCentral/operations",
-    validator: validate_OperationsList_567864, base: "", url: url_OperationsList_567865,
+    validator: validate_OperationsList_563762, base: "", url: url_OperationsList_563763,
     schemes: {Scheme.Https})
 type
-  Call_AppsListBySubscription_568159 = ref object of OpenApiRestCall_567641
-proc url_AppsListBySubscription_568161(protocol: Scheme; host: string; base: string;
+  Call_AppsListBySubscription_564059 = ref object of OpenApiRestCall_563539
+proc url_AppsListBySubscription_564061(protocol: Scheme; host: string; base: string;
                                       route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -184,7 +188,7 @@ proc url_AppsListBySubscription_568161(protocol: Scheme; host: string; base: str
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AppsListBySubscription_568160(path: JsonNode; query: JsonNode;
+proc validate_AppsListBySubscription_564060(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Get all IoT Central Applications in a subscription.
   ## 
@@ -196,11 +200,11 @@ proc validate_AppsListBySubscription_568160(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_568176 = path.getOrDefault("subscriptionId")
-  valid_568176 = validateParameter(valid_568176, JString, required = true,
+  var valid_564076 = path.getOrDefault("subscriptionId")
+  valid_564076 = validateParameter(valid_564076, JString, required = true,
                                  default = nil)
-  if valid_568176 != nil:
-    section.add "subscriptionId", valid_568176
+  if valid_564076 != nil:
+    section.add "subscriptionId", valid_564076
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -208,11 +212,11 @@ proc validate_AppsListBySubscription_568160(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568177 = query.getOrDefault("api-version")
-  valid_568177 = validateParameter(valid_568177, JString, required = true,
+  var valid_564077 = query.getOrDefault("api-version")
+  valid_564077 = validateParameter(valid_564077, JString, required = true,
                                  default = nil)
-  if valid_568177 != nil:
-    section.add "api-version", valid_568177
+  if valid_564077 != nil:
+    section.add "api-version", valid_564077
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -221,20 +225,20 @@ proc validate_AppsListBySubscription_568160(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568178: Call_AppsListBySubscription_568159; path: JsonNode;
+proc call*(call_564078: Call_AppsListBySubscription_564059; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get all IoT Central Applications in a subscription.
   ## 
-  let valid = call_568178.validator(path, query, header, formData, body)
-  let scheme = call_568178.pickScheme
+  let valid = call_564078.validator(path, query, header, formData, body)
+  let scheme = call_564078.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568178.url(scheme.get, call_568178.host, call_568178.base,
-                         call_568178.route, valid.getOrDefault("path"),
+  let url = call_564078.url(scheme.get, call_564078.host, call_564078.base,
+                         call_564078.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568178, url, valid)
+  result = hook(call_564078, url, valid)
 
-proc call*(call_568179: Call_AppsListBySubscription_568159; apiVersion: string;
+proc call*(call_564079: Call_AppsListBySubscription_564059; apiVersion: string;
           subscriptionId: string): Recallable =
   ## appsListBySubscription
   ## Get all IoT Central Applications in a subscription.
@@ -242,20 +246,20 @@ proc call*(call_568179: Call_AppsListBySubscription_568159; apiVersion: string;
   ##             : The version of the API.
   ##   subscriptionId: string (required)
   ##                 : The subscription identifier.
-  var path_568180 = newJObject()
-  var query_568181 = newJObject()
-  add(query_568181, "api-version", newJString(apiVersion))
-  add(path_568180, "subscriptionId", newJString(subscriptionId))
-  result = call_568179.call(path_568180, query_568181, nil, nil, nil)
+  var path_564080 = newJObject()
+  var query_564081 = newJObject()
+  add(query_564081, "api-version", newJString(apiVersion))
+  add(path_564080, "subscriptionId", newJString(subscriptionId))
+  result = call_564079.call(path_564080, query_564081, nil, nil, nil)
 
-var appsListBySubscription* = Call_AppsListBySubscription_568159(
+var appsListBySubscription* = Call_AppsListBySubscription_564059(
     name: "appsListBySubscription", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.IoTCentral/IoTApps",
-    validator: validate_AppsListBySubscription_568160, base: "",
-    url: url_AppsListBySubscription_568161, schemes: {Scheme.Https})
+    validator: validate_AppsListBySubscription_564060, base: "",
+    url: url_AppsListBySubscription_564061, schemes: {Scheme.Https})
 type
-  Call_AppsCheckNameAvailability_568182 = ref object of OpenApiRestCall_567641
-proc url_AppsCheckNameAvailability_568184(protocol: Scheme; host: string;
+  Call_AppsCheckNameAvailability_564082 = ref object of OpenApiRestCall_563539
+proc url_AppsCheckNameAvailability_564084(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -272,7 +276,7 @@ proc url_AppsCheckNameAvailability_568184(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AppsCheckNameAvailability_568183(path: JsonNode; query: JsonNode;
+proc validate_AppsCheckNameAvailability_564083(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Check if an IoT Central application name is available.
   ## 
@@ -284,11 +288,11 @@ proc validate_AppsCheckNameAvailability_568183(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_568185 = path.getOrDefault("subscriptionId")
-  valid_568185 = validateParameter(valid_568185, JString, required = true,
+  var valid_564085 = path.getOrDefault("subscriptionId")
+  valid_564085 = validateParameter(valid_564085, JString, required = true,
                                  default = nil)
-  if valid_568185 != nil:
-    section.add "subscriptionId", valid_568185
+  if valid_564085 != nil:
+    section.add "subscriptionId", valid_564085
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -296,11 +300,11 @@ proc validate_AppsCheckNameAvailability_568183(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568186 = query.getOrDefault("api-version")
-  valid_568186 = validateParameter(valid_568186, JString, required = true,
+  var valid_564086 = query.getOrDefault("api-version")
+  valid_564086 = validateParameter(valid_564086, JString, required = true,
                                  default = nil)
-  if valid_568186 != nil:
-    section.add "api-version", valid_568186
+  if valid_564086 != nil:
+    section.add "api-version", valid_564086
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -314,20 +318,20 @@ proc validate_AppsCheckNameAvailability_568183(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568188: Call_AppsCheckNameAvailability_568182; path: JsonNode;
+proc call*(call_564088: Call_AppsCheckNameAvailability_564082; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Check if an IoT Central application name is available.
   ## 
-  let valid = call_568188.validator(path, query, header, formData, body)
-  let scheme = call_568188.pickScheme
+  let valid = call_564088.validator(path, query, header, formData, body)
+  let scheme = call_564088.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568188.url(scheme.get, call_568188.host, call_568188.base,
-                         call_568188.route, valid.getOrDefault("path"),
+  let url = call_564088.url(scheme.get, call_564088.host, call_564088.base,
+                         call_564088.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568188, url, valid)
+  result = hook(call_564088, url, valid)
 
-proc call*(call_568189: Call_AppsCheckNameAvailability_568182; apiVersion: string;
+proc call*(call_564089: Call_AppsCheckNameAvailability_564082; apiVersion: string;
           subscriptionId: string; operationInputs: JsonNode): Recallable =
   ## appsCheckNameAvailability
   ## Check if an IoT Central application name is available.
@@ -337,23 +341,23 @@ proc call*(call_568189: Call_AppsCheckNameAvailability_568182; apiVersion: strin
   ##                 : The subscription identifier.
   ##   operationInputs: JObject (required)
   ##                  : Set the name parameter in the OperationInputs structure to the name of the IoT Central application to check.
-  var path_568190 = newJObject()
-  var query_568191 = newJObject()
-  var body_568192 = newJObject()
-  add(query_568191, "api-version", newJString(apiVersion))
-  add(path_568190, "subscriptionId", newJString(subscriptionId))
+  var path_564090 = newJObject()
+  var query_564091 = newJObject()
+  var body_564092 = newJObject()
+  add(query_564091, "api-version", newJString(apiVersion))
+  add(path_564090, "subscriptionId", newJString(subscriptionId))
   if operationInputs != nil:
-    body_568192 = operationInputs
-  result = call_568189.call(path_568190, query_568191, nil, nil, body_568192)
+    body_564092 = operationInputs
+  result = call_564089.call(path_564090, query_564091, nil, nil, body_564092)
 
-var appsCheckNameAvailability* = Call_AppsCheckNameAvailability_568182(
+var appsCheckNameAvailability* = Call_AppsCheckNameAvailability_564082(
     name: "appsCheckNameAvailability", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.IoTCentral/checkNameAvailability",
-    validator: validate_AppsCheckNameAvailability_568183, base: "",
-    url: url_AppsCheckNameAvailability_568184, schemes: {Scheme.Https})
+    validator: validate_AppsCheckNameAvailability_564083, base: "",
+    url: url_AppsCheckNameAvailability_564084, schemes: {Scheme.Https})
 type
-  Call_AppsListByResourceGroup_568193 = ref object of OpenApiRestCall_567641
-proc url_AppsListByResourceGroup_568195(protocol: Scheme; host: string; base: string;
+  Call_AppsListByResourceGroup_564093 = ref object of OpenApiRestCall_563539
+proc url_AppsListByResourceGroup_564095(protocol: Scheme; host: string; base: string;
                                        route: string; path: JsonNode;
                                        query: JsonNode): Uri =
   result.scheme = $protocol
@@ -374,30 +378,30 @@ proc url_AppsListByResourceGroup_568195(protocol: Scheme; host: string; base: st
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AppsListByResourceGroup_568194(path: JsonNode; query: JsonNode;
+proc validate_AppsListByResourceGroup_564094(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Get all the IoT Central Applications in a resource group.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group that contains the IoT Central application.
   ##   subscriptionId: JString (required)
   ##                 : The subscription identifier.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group that contains the IoT Central application.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568196 = path.getOrDefault("resourceGroupName")
-  valid_568196 = validateParameter(valid_568196, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564096 = path.getOrDefault("subscriptionId")
+  valid_564096 = validateParameter(valid_564096, JString, required = true,
                                  default = nil)
-  if valid_568196 != nil:
-    section.add "resourceGroupName", valid_568196
-  var valid_568197 = path.getOrDefault("subscriptionId")
-  valid_568197 = validateParameter(valid_568197, JString, required = true,
+  if valid_564096 != nil:
+    section.add "subscriptionId", valid_564096
+  var valid_564097 = path.getOrDefault("resourceGroupName")
+  valid_564097 = validateParameter(valid_564097, JString, required = true,
                                  default = nil)
-  if valid_568197 != nil:
-    section.add "subscriptionId", valid_568197
+  if valid_564097 != nil:
+    section.add "resourceGroupName", valid_564097
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -405,11 +409,11 @@ proc validate_AppsListByResourceGroup_568194(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568198 = query.getOrDefault("api-version")
-  valid_568198 = validateParameter(valid_568198, JString, required = true,
+  var valid_564098 = query.getOrDefault("api-version")
+  valid_564098 = validateParameter(valid_564098, JString, required = true,
                                  default = nil)
-  if valid_568198 != nil:
-    section.add "api-version", valid_568198
+  if valid_564098 != nil:
+    section.add "api-version", valid_564098
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -418,44 +422,44 @@ proc validate_AppsListByResourceGroup_568194(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568199: Call_AppsListByResourceGroup_568193; path: JsonNode;
+proc call*(call_564099: Call_AppsListByResourceGroup_564093; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get all the IoT Central Applications in a resource group.
   ## 
-  let valid = call_568199.validator(path, query, header, formData, body)
-  let scheme = call_568199.pickScheme
+  let valid = call_564099.validator(path, query, header, formData, body)
+  let scheme = call_564099.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568199.url(scheme.get, call_568199.host, call_568199.base,
-                         call_568199.route, valid.getOrDefault("path"),
+  let url = call_564099.url(scheme.get, call_564099.host, call_564099.base,
+                         call_564099.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568199, url, valid)
+  result = hook(call_564099, url, valid)
 
-proc call*(call_568200: Call_AppsListByResourceGroup_568193;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string): Recallable =
+proc call*(call_564100: Call_AppsListByResourceGroup_564093; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string): Recallable =
   ## appsListByResourceGroup
   ## Get all the IoT Central Applications in a resource group.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group that contains the IoT Central application.
   ##   apiVersion: string (required)
   ##             : The version of the API.
   ##   subscriptionId: string (required)
   ##                 : The subscription identifier.
-  var path_568201 = newJObject()
-  var query_568202 = newJObject()
-  add(path_568201, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568202, "api-version", newJString(apiVersion))
-  add(path_568201, "subscriptionId", newJString(subscriptionId))
-  result = call_568200.call(path_568201, query_568202, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group that contains the IoT Central application.
+  var path_564101 = newJObject()
+  var query_564102 = newJObject()
+  add(query_564102, "api-version", newJString(apiVersion))
+  add(path_564101, "subscriptionId", newJString(subscriptionId))
+  add(path_564101, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564100.call(path_564101, query_564102, nil, nil, nil)
 
-var appsListByResourceGroup* = Call_AppsListByResourceGroup_568193(
+var appsListByResourceGroup* = Call_AppsListByResourceGroup_564093(
     name: "appsListByResourceGroup", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.IoTCentral/IoTApps",
-    validator: validate_AppsListByResourceGroup_568194, base: "",
-    url: url_AppsListByResourceGroup_568195, schemes: {Scheme.Https})
+    validator: validate_AppsListByResourceGroup_564094, base: "",
+    url: url_AppsListByResourceGroup_564095, schemes: {Scheme.Https})
 type
-  Call_AppsCreateOrUpdate_568214 = ref object of OpenApiRestCall_567641
-proc url_AppsCreateOrUpdate_568216(protocol: Scheme; host: string; base: string;
+  Call_AppsCreateOrUpdate_564114 = ref object of OpenApiRestCall_563539
+proc url_AppsCreateOrUpdate_564116(protocol: Scheme; host: string; base: string;
                                   route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -477,7 +481,7 @@ proc url_AppsCreateOrUpdate_568216(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AppsCreateOrUpdate_568215(path: JsonNode; query: JsonNode;
+proc validate_AppsCreateOrUpdate_564115(path: JsonNode; query: JsonNode;
                                        header: JsonNode; formData: JsonNode;
                                        body: JsonNode): JsonNode =
   ## Create or update the metadata of an IoT Central application. The usual pattern to modify a property is to retrieve the IoT Central application metadata and security metadata, and then combine them with the modified values in a new body to update the IoT Central application.
@@ -485,30 +489,30 @@ proc validate_AppsCreateOrUpdate_568215(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group that contains the IoT Central application.
   ##   subscriptionId: JString (required)
   ##                 : The subscription identifier.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group that contains the IoT Central application.
   ##   resourceName: JString (required)
   ##               : The ARM resource name of the IoT Central application.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568217 = path.getOrDefault("resourceGroupName")
-  valid_568217 = validateParameter(valid_568217, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564117 = path.getOrDefault("subscriptionId")
+  valid_564117 = validateParameter(valid_564117, JString, required = true,
                                  default = nil)
-  if valid_568217 != nil:
-    section.add "resourceGroupName", valid_568217
-  var valid_568218 = path.getOrDefault("subscriptionId")
-  valid_568218 = validateParameter(valid_568218, JString, required = true,
+  if valid_564117 != nil:
+    section.add "subscriptionId", valid_564117
+  var valid_564118 = path.getOrDefault("resourceGroupName")
+  valid_564118 = validateParameter(valid_564118, JString, required = true,
                                  default = nil)
-  if valid_568218 != nil:
-    section.add "subscriptionId", valid_568218
-  var valid_568219 = path.getOrDefault("resourceName")
-  valid_568219 = validateParameter(valid_568219, JString, required = true,
+  if valid_564118 != nil:
+    section.add "resourceGroupName", valid_564118
+  var valid_564119 = path.getOrDefault("resourceName")
+  valid_564119 = validateParameter(valid_564119, JString, required = true,
                                  default = nil)
-  if valid_568219 != nil:
-    section.add "resourceName", valid_568219
+  if valid_564119 != nil:
+    section.add "resourceName", valid_564119
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -516,11 +520,11 @@ proc validate_AppsCreateOrUpdate_568215(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568220 = query.getOrDefault("api-version")
-  valid_568220 = validateParameter(valid_568220, JString, required = true,
+  var valid_564120 = query.getOrDefault("api-version")
+  valid_564120 = validateParameter(valid_564120, JString, required = true,
                                  default = nil)
-  if valid_568220 != nil:
-    section.add "api-version", valid_568220
+  if valid_564120 != nil:
+    section.add "api-version", valid_564120
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -534,53 +538,53 @@ proc validate_AppsCreateOrUpdate_568215(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568222: Call_AppsCreateOrUpdate_568214; path: JsonNode;
+proc call*(call_564122: Call_AppsCreateOrUpdate_564114; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Create or update the metadata of an IoT Central application. The usual pattern to modify a property is to retrieve the IoT Central application metadata and security metadata, and then combine them with the modified values in a new body to update the IoT Central application.
   ## 
-  let valid = call_568222.validator(path, query, header, formData, body)
-  let scheme = call_568222.pickScheme
+  let valid = call_564122.validator(path, query, header, formData, body)
+  let scheme = call_564122.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568222.url(scheme.get, call_568222.host, call_568222.base,
-                         call_568222.route, valid.getOrDefault("path"),
+  let url = call_564122.url(scheme.get, call_564122.host, call_564122.base,
+                         call_564122.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568222, url, valid)
+  result = hook(call_564122, url, valid)
 
-proc call*(call_568223: Call_AppsCreateOrUpdate_568214; resourceGroupName: string;
-          apiVersion: string; App: JsonNode; subscriptionId: string;
+proc call*(call_564123: Call_AppsCreateOrUpdate_564114; apiVersion: string;
+          App: JsonNode; subscriptionId: string; resourceGroupName: string;
           resourceName: string): Recallable =
   ## appsCreateOrUpdate
   ## Create or update the metadata of an IoT Central application. The usual pattern to modify a property is to retrieve the IoT Central application metadata and security metadata, and then combine them with the modified values in a new body to update the IoT Central application.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group that contains the IoT Central application.
   ##   apiVersion: string (required)
   ##             : The version of the API.
   ##   App: JObject (required)
   ##      : The IoT Central application metadata and security metadata.
   ##   subscriptionId: string (required)
   ##                 : The subscription identifier.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group that contains the IoT Central application.
   ##   resourceName: string (required)
   ##               : The ARM resource name of the IoT Central application.
-  var path_568224 = newJObject()
-  var query_568225 = newJObject()
-  var body_568226 = newJObject()
-  add(path_568224, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568225, "api-version", newJString(apiVersion))
+  var path_564124 = newJObject()
+  var query_564125 = newJObject()
+  var body_564126 = newJObject()
+  add(query_564125, "api-version", newJString(apiVersion))
   if App != nil:
-    body_568226 = App
-  add(path_568224, "subscriptionId", newJString(subscriptionId))
-  add(path_568224, "resourceName", newJString(resourceName))
-  result = call_568223.call(path_568224, query_568225, nil, nil, body_568226)
+    body_564126 = App
+  add(path_564124, "subscriptionId", newJString(subscriptionId))
+  add(path_564124, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564124, "resourceName", newJString(resourceName))
+  result = call_564123.call(path_564124, query_564125, nil, nil, body_564126)
 
-var appsCreateOrUpdate* = Call_AppsCreateOrUpdate_568214(
+var appsCreateOrUpdate* = Call_AppsCreateOrUpdate_564114(
     name: "appsCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.IoTCentral/IoTApps/{resourceName}",
-    validator: validate_AppsCreateOrUpdate_568215, base: "",
-    url: url_AppsCreateOrUpdate_568216, schemes: {Scheme.Https})
+    validator: validate_AppsCreateOrUpdate_564115, base: "",
+    url: url_AppsCreateOrUpdate_564116, schemes: {Scheme.Https})
 type
-  Call_AppsGet_568203 = ref object of OpenApiRestCall_567641
-proc url_AppsGet_568205(protocol: Scheme; host: string; base: string; route: string;
+  Call_AppsGet_564103 = ref object of OpenApiRestCall_563539
+proc url_AppsGet_564105(protocol: Scheme; host: string; base: string; route: string;
                        path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -602,37 +606,37 @@ proc url_AppsGet_568205(protocol: Scheme; host: string; base: string; route: str
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AppsGet_568204(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_AppsGet_564104(path: JsonNode; query: JsonNode; header: JsonNode;
                             formData: JsonNode; body: JsonNode): JsonNode =
   ## Get the metadata of an IoT Central application.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group that contains the IoT Central application.
   ##   subscriptionId: JString (required)
   ##                 : The subscription identifier.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group that contains the IoT Central application.
   ##   resourceName: JString (required)
   ##               : The ARM resource name of the IoT Central application.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568206 = path.getOrDefault("resourceGroupName")
-  valid_568206 = validateParameter(valid_568206, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564106 = path.getOrDefault("subscriptionId")
+  valid_564106 = validateParameter(valid_564106, JString, required = true,
                                  default = nil)
-  if valid_568206 != nil:
-    section.add "resourceGroupName", valid_568206
-  var valid_568207 = path.getOrDefault("subscriptionId")
-  valid_568207 = validateParameter(valid_568207, JString, required = true,
+  if valid_564106 != nil:
+    section.add "subscriptionId", valid_564106
+  var valid_564107 = path.getOrDefault("resourceGroupName")
+  valid_564107 = validateParameter(valid_564107, JString, required = true,
                                  default = nil)
-  if valid_568207 != nil:
-    section.add "subscriptionId", valid_568207
-  var valid_568208 = path.getOrDefault("resourceName")
-  valid_568208 = validateParameter(valid_568208, JString, required = true,
+  if valid_564107 != nil:
+    section.add "resourceGroupName", valid_564107
+  var valid_564108 = path.getOrDefault("resourceName")
+  valid_564108 = validateParameter(valid_564108, JString, required = true,
                                  default = nil)
-  if valid_568208 != nil:
-    section.add "resourceName", valid_568208
+  if valid_564108 != nil:
+    section.add "resourceName", valid_564108
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -640,11 +644,11 @@ proc validate_AppsGet_568204(path: JsonNode; query: JsonNode; header: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568209 = query.getOrDefault("api-version")
-  valid_568209 = validateParameter(valid_568209, JString, required = true,
+  var valid_564109 = query.getOrDefault("api-version")
+  valid_564109 = validateParameter(valid_564109, JString, required = true,
                                  default = nil)
-  if valid_568209 != nil:
-    section.add "api-version", valid_568209
+  if valid_564109 != nil:
+    section.add "api-version", valid_564109
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -653,46 +657,46 @@ proc validate_AppsGet_568204(path: JsonNode; query: JsonNode; header: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568210: Call_AppsGet_568203; path: JsonNode; query: JsonNode;
+proc call*(call_564110: Call_AppsGet_564103; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get the metadata of an IoT Central application.
   ## 
-  let valid = call_568210.validator(path, query, header, formData, body)
-  let scheme = call_568210.pickScheme
+  let valid = call_564110.validator(path, query, header, formData, body)
+  let scheme = call_564110.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568210.url(scheme.get, call_568210.host, call_568210.base,
-                         call_568210.route, valid.getOrDefault("path"),
+  let url = call_564110.url(scheme.get, call_564110.host, call_564110.base,
+                         call_564110.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568210, url, valid)
+  result = hook(call_564110, url, valid)
 
-proc call*(call_568211: Call_AppsGet_568203; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; resourceName: string): Recallable =
+proc call*(call_564111: Call_AppsGet_564103; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string; resourceName: string): Recallable =
   ## appsGet
   ## Get the metadata of an IoT Central application.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group that contains the IoT Central application.
   ##   apiVersion: string (required)
   ##             : The version of the API.
   ##   subscriptionId: string (required)
   ##                 : The subscription identifier.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group that contains the IoT Central application.
   ##   resourceName: string (required)
   ##               : The ARM resource name of the IoT Central application.
-  var path_568212 = newJObject()
-  var query_568213 = newJObject()
-  add(path_568212, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568213, "api-version", newJString(apiVersion))
-  add(path_568212, "subscriptionId", newJString(subscriptionId))
-  add(path_568212, "resourceName", newJString(resourceName))
-  result = call_568211.call(path_568212, query_568213, nil, nil, nil)
+  var path_564112 = newJObject()
+  var query_564113 = newJObject()
+  add(query_564113, "api-version", newJString(apiVersion))
+  add(path_564112, "subscriptionId", newJString(subscriptionId))
+  add(path_564112, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564112, "resourceName", newJString(resourceName))
+  result = call_564111.call(path_564112, query_564113, nil, nil, nil)
 
-var appsGet* = Call_AppsGet_568203(name: "appsGet", meth: HttpMethod.HttpGet,
+var appsGet* = Call_AppsGet_564103(name: "appsGet", meth: HttpMethod.HttpGet,
                                 host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.IoTCentral/IoTApps/{resourceName}",
-                                validator: validate_AppsGet_568204, base: "",
-                                url: url_AppsGet_568205, schemes: {Scheme.Https})
+                                validator: validate_AppsGet_564104, base: "",
+                                url: url_AppsGet_564105, schemes: {Scheme.Https})
 type
-  Call_AppsUpdate_568238 = ref object of OpenApiRestCall_567641
-proc url_AppsUpdate_568240(protocol: Scheme; host: string; base: string; route: string;
+  Call_AppsUpdate_564138 = ref object of OpenApiRestCall_563539
+proc url_AppsUpdate_564140(protocol: Scheme; host: string; base: string; route: string;
                           path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -714,37 +718,37 @@ proc url_AppsUpdate_568240(protocol: Scheme; host: string; base: string; route: 
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AppsUpdate_568239(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_AppsUpdate_564139(path: JsonNode; query: JsonNode; header: JsonNode;
                                formData: JsonNode; body: JsonNode): JsonNode =
   ## Update the metadata of an IoT Central application.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group that contains the IoT Central application.
   ##   subscriptionId: JString (required)
   ##                 : The subscription identifier.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group that contains the IoT Central application.
   ##   resourceName: JString (required)
   ##               : The ARM resource name of the IoT Central application.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568241 = path.getOrDefault("resourceGroupName")
-  valid_568241 = validateParameter(valid_568241, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564141 = path.getOrDefault("subscriptionId")
+  valid_564141 = validateParameter(valid_564141, JString, required = true,
                                  default = nil)
-  if valid_568241 != nil:
-    section.add "resourceGroupName", valid_568241
-  var valid_568242 = path.getOrDefault("subscriptionId")
-  valid_568242 = validateParameter(valid_568242, JString, required = true,
+  if valid_564141 != nil:
+    section.add "subscriptionId", valid_564141
+  var valid_564142 = path.getOrDefault("resourceGroupName")
+  valid_564142 = validateParameter(valid_564142, JString, required = true,
                                  default = nil)
-  if valid_568242 != nil:
-    section.add "subscriptionId", valid_568242
-  var valid_568243 = path.getOrDefault("resourceName")
-  valid_568243 = validateParameter(valid_568243, JString, required = true,
+  if valid_564142 != nil:
+    section.add "resourceGroupName", valid_564142
+  var valid_564143 = path.getOrDefault("resourceName")
+  valid_564143 = validateParameter(valid_564143, JString, required = true,
                                  default = nil)
-  if valid_568243 != nil:
-    section.add "resourceName", valid_568243
+  if valid_564143 != nil:
+    section.add "resourceName", valid_564143
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -752,11 +756,11 @@ proc validate_AppsUpdate_568239(path: JsonNode; query: JsonNode; header: JsonNod
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568244 = query.getOrDefault("api-version")
-  valid_568244 = validateParameter(valid_568244, JString, required = true,
+  var valid_564144 = query.getOrDefault("api-version")
+  valid_564144 = validateParameter(valid_564144, JString, required = true,
                                  default = nil)
-  if valid_568244 != nil:
-    section.add "api-version", valid_568244
+  if valid_564144 != nil:
+    section.add "api-version", valid_564144
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -770,54 +774,54 @@ proc validate_AppsUpdate_568239(path: JsonNode; query: JsonNode; header: JsonNod
   if body != nil:
     result.add "body", body
 
-proc call*(call_568246: Call_AppsUpdate_568238; path: JsonNode; query: JsonNode;
+proc call*(call_564146: Call_AppsUpdate_564138; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Update the metadata of an IoT Central application.
   ## 
-  let valid = call_568246.validator(path, query, header, formData, body)
-  let scheme = call_568246.pickScheme
+  let valid = call_564146.validator(path, query, header, formData, body)
+  let scheme = call_564146.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568246.url(scheme.get, call_568246.host, call_568246.base,
-                         call_568246.route, valid.getOrDefault("path"),
+  let url = call_564146.url(scheme.get, call_564146.host, call_564146.base,
+                         call_564146.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568246, url, valid)
+  result = hook(call_564146, url, valid)
 
-proc call*(call_568247: Call_AppsUpdate_568238; resourceGroupName: string;
-          apiVersion: string; AppPatch: JsonNode; subscriptionId: string;
+proc call*(call_564147: Call_AppsUpdate_564138; AppPatch: JsonNode;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string;
           resourceName: string): Recallable =
   ## appsUpdate
   ## Update the metadata of an IoT Central application.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group that contains the IoT Central application.
-  ##   apiVersion: string (required)
-  ##             : The version of the API.
   ##   AppPatch: JObject (required)
   ##           : The IoT Central application metadata and security metadata.
+  ##   apiVersion: string (required)
+  ##             : The version of the API.
   ##   subscriptionId: string (required)
   ##                 : The subscription identifier.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group that contains the IoT Central application.
   ##   resourceName: string (required)
   ##               : The ARM resource name of the IoT Central application.
-  var path_568248 = newJObject()
-  var query_568249 = newJObject()
-  var body_568250 = newJObject()
-  add(path_568248, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568249, "api-version", newJString(apiVersion))
+  var path_564148 = newJObject()
+  var query_564149 = newJObject()
+  var body_564150 = newJObject()
   if AppPatch != nil:
-    body_568250 = AppPatch
-  add(path_568248, "subscriptionId", newJString(subscriptionId))
-  add(path_568248, "resourceName", newJString(resourceName))
-  result = call_568247.call(path_568248, query_568249, nil, nil, body_568250)
+    body_564150 = AppPatch
+  add(query_564149, "api-version", newJString(apiVersion))
+  add(path_564148, "subscriptionId", newJString(subscriptionId))
+  add(path_564148, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564148, "resourceName", newJString(resourceName))
+  result = call_564147.call(path_564148, query_564149, nil, nil, body_564150)
 
-var appsUpdate* = Call_AppsUpdate_568238(name: "appsUpdate",
+var appsUpdate* = Call_AppsUpdate_564138(name: "appsUpdate",
                                       meth: HttpMethod.HttpPatch,
                                       host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.IoTCentral/IoTApps/{resourceName}",
-                                      validator: validate_AppsUpdate_568239,
-                                      base: "", url: url_AppsUpdate_568240,
+                                      validator: validate_AppsUpdate_564139,
+                                      base: "", url: url_AppsUpdate_564140,
                                       schemes: {Scheme.Https})
 type
-  Call_AppsDelete_568227 = ref object of OpenApiRestCall_567641
-proc url_AppsDelete_568229(protocol: Scheme; host: string; base: string; route: string;
+  Call_AppsDelete_564127 = ref object of OpenApiRestCall_563539
+proc url_AppsDelete_564129(protocol: Scheme; host: string; base: string; route: string;
                           path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -839,37 +843,37 @@ proc url_AppsDelete_568229(protocol: Scheme; host: string; base: string; route: 
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AppsDelete_568228(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_AppsDelete_564128(path: JsonNode; query: JsonNode; header: JsonNode;
                                formData: JsonNode; body: JsonNode): JsonNode =
   ## Delete an IoT Central application.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group that contains the IoT Central application.
   ##   subscriptionId: JString (required)
   ##                 : The subscription identifier.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group that contains the IoT Central application.
   ##   resourceName: JString (required)
   ##               : The ARM resource name of the IoT Central application.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568230 = path.getOrDefault("resourceGroupName")
-  valid_568230 = validateParameter(valid_568230, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564130 = path.getOrDefault("subscriptionId")
+  valid_564130 = validateParameter(valid_564130, JString, required = true,
                                  default = nil)
-  if valid_568230 != nil:
-    section.add "resourceGroupName", valid_568230
-  var valid_568231 = path.getOrDefault("subscriptionId")
-  valid_568231 = validateParameter(valid_568231, JString, required = true,
+  if valid_564130 != nil:
+    section.add "subscriptionId", valid_564130
+  var valid_564131 = path.getOrDefault("resourceGroupName")
+  valid_564131 = validateParameter(valid_564131, JString, required = true,
                                  default = nil)
-  if valid_568231 != nil:
-    section.add "subscriptionId", valid_568231
-  var valid_568232 = path.getOrDefault("resourceName")
-  valid_568232 = validateParameter(valid_568232, JString, required = true,
+  if valid_564131 != nil:
+    section.add "resourceGroupName", valid_564131
+  var valid_564132 = path.getOrDefault("resourceName")
+  valid_564132 = validateParameter(valid_564132, JString, required = true,
                                  default = nil)
-  if valid_568232 != nil:
-    section.add "resourceName", valid_568232
+  if valid_564132 != nil:
+    section.add "resourceName", valid_564132
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -877,11 +881,11 @@ proc validate_AppsDelete_568228(path: JsonNode; query: JsonNode; header: JsonNod
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568233 = query.getOrDefault("api-version")
-  valid_568233 = validateParameter(valid_568233, JString, required = true,
+  var valid_564133 = query.getOrDefault("api-version")
+  valid_564133 = validateParameter(valid_564133, JString, required = true,
                                  default = nil)
-  if valid_568233 != nil:
-    section.add "api-version", valid_568233
+  if valid_564133 != nil:
+    section.add "api-version", valid_564133
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -890,44 +894,44 @@ proc validate_AppsDelete_568228(path: JsonNode; query: JsonNode; header: JsonNod
   if body != nil:
     result.add "body", body
 
-proc call*(call_568234: Call_AppsDelete_568227; path: JsonNode; query: JsonNode;
+proc call*(call_564134: Call_AppsDelete_564127; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Delete an IoT Central application.
   ## 
-  let valid = call_568234.validator(path, query, header, formData, body)
-  let scheme = call_568234.pickScheme
+  let valid = call_564134.validator(path, query, header, formData, body)
+  let scheme = call_564134.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568234.url(scheme.get, call_568234.host, call_568234.base,
-                         call_568234.route, valid.getOrDefault("path"),
+  let url = call_564134.url(scheme.get, call_564134.host, call_564134.base,
+                         call_564134.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568234, url, valid)
+  result = hook(call_564134, url, valid)
 
-proc call*(call_568235: Call_AppsDelete_568227; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; resourceName: string): Recallable =
+proc call*(call_564135: Call_AppsDelete_564127; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string; resourceName: string): Recallable =
   ## appsDelete
   ## Delete an IoT Central application.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group that contains the IoT Central application.
   ##   apiVersion: string (required)
   ##             : The version of the API.
   ##   subscriptionId: string (required)
   ##                 : The subscription identifier.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group that contains the IoT Central application.
   ##   resourceName: string (required)
   ##               : The ARM resource name of the IoT Central application.
-  var path_568236 = newJObject()
-  var query_568237 = newJObject()
-  add(path_568236, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568237, "api-version", newJString(apiVersion))
-  add(path_568236, "subscriptionId", newJString(subscriptionId))
-  add(path_568236, "resourceName", newJString(resourceName))
-  result = call_568235.call(path_568236, query_568237, nil, nil, nil)
+  var path_564136 = newJObject()
+  var query_564137 = newJObject()
+  add(query_564137, "api-version", newJString(apiVersion))
+  add(path_564136, "subscriptionId", newJString(subscriptionId))
+  add(path_564136, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564136, "resourceName", newJString(resourceName))
+  result = call_564135.call(path_564136, query_564137, nil, nil, nil)
 
-var appsDelete* = Call_AppsDelete_568227(name: "appsDelete",
+var appsDelete* = Call_AppsDelete_564127(name: "appsDelete",
                                       meth: HttpMethod.HttpDelete,
                                       host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.IoTCentral/IoTApps/{resourceName}",
-                                      validator: validate_AppsDelete_568228,
-                                      base: "", url: url_AppsDelete_568229,
+                                      validator: validate_AppsDelete_564128,
+                                      base: "", url: url_AppsDelete_564129,
                                       schemes: {Scheme.Https})
 export
   rest

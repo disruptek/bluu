@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, httpcore
 
 ## auto-generated via openapi macro
 ## title: ApiManagementClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_593424 = ref object of OpenApiRestCall
+  OpenApiRestCall_563555 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_593424](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563555](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_593424): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563555): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,8 +107,8 @@ const
   macServiceName = "apimanagement-apimnotifications"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_NotificationListByService_593646 = ref object of OpenApiRestCall_593424
-proc url_NotificationListByService_593648(protocol: Scheme; host: string;
+  Call_NotificationListByService_563777 = ref object of OpenApiRestCall_563555
+proc url_NotificationListByService_563779(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -128,61 +132,61 @@ proc url_NotificationListByService_593648(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_NotificationListByService_593647(path: JsonNode; query: JsonNode;
+proc validate_NotificationListByService_563778(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists a collection of properties defined within a service instance.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
-  ##   subscriptionId: JString (required)
-  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   serviceName: JString (required)
   ##              : The name of the API Management service.
+  ##   subscriptionId: JString (required)
+  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593809 = path.getOrDefault("resourceGroupName")
-  valid_593809 = validateParameter(valid_593809, JString, required = true,
+        "path argument is necessary due to required `serviceName` field"
+  var valid_563942 = path.getOrDefault("serviceName")
+  valid_563942 = validateParameter(valid_563942, JString, required = true,
                                  default = nil)
-  if valid_593809 != nil:
-    section.add "resourceGroupName", valid_593809
-  var valid_593810 = path.getOrDefault("subscriptionId")
-  valid_593810 = validateParameter(valid_593810, JString, required = true,
+  if valid_563942 != nil:
+    section.add "serviceName", valid_563942
+  var valid_563943 = path.getOrDefault("subscriptionId")
+  valid_563943 = validateParameter(valid_563943, JString, required = true,
                                  default = nil)
-  if valid_593810 != nil:
-    section.add "subscriptionId", valid_593810
-  var valid_593811 = path.getOrDefault("serviceName")
-  valid_593811 = validateParameter(valid_593811, JString, required = true,
+  if valid_563943 != nil:
+    section.add "subscriptionId", valid_563943
+  var valid_563944 = path.getOrDefault("resourceGroupName")
+  valid_563944 = validateParameter(valid_563944, JString, required = true,
                                  default = nil)
-  if valid_593811 != nil:
-    section.add "serviceName", valid_593811
+  if valid_563944 != nil:
+    section.add "resourceGroupName", valid_563944
   result.add "path", section
   ## parameters in `query` object:
-  ##   api-version: JString (required)
-  ##              : Version of the API to be used with the client request.
   ##   $top: JInt
   ##       : Number of records to return.
+  ##   api-version: JString (required)
+  ##              : Version of the API to be used with the client request.
   ##   $skip: JInt
   ##        : Number of records to skip.
   section = newJObject()
+  var valid_563945 = query.getOrDefault("$top")
+  valid_563945 = validateParameter(valid_563945, JInt, required = false, default = nil)
+  if valid_563945 != nil:
+    section.add "$top", valid_563945
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593812 = query.getOrDefault("api-version")
-  valid_593812 = validateParameter(valid_593812, JString, required = true,
+  var valid_563946 = query.getOrDefault("api-version")
+  valid_563946 = validateParameter(valid_563946, JString, required = true,
                                  default = nil)
-  if valid_593812 != nil:
-    section.add "api-version", valid_593812
-  var valid_593813 = query.getOrDefault("$top")
-  valid_593813 = validateParameter(valid_593813, JInt, required = false, default = nil)
-  if valid_593813 != nil:
-    section.add "$top", valid_593813
-  var valid_593814 = query.getOrDefault("$skip")
-  valid_593814 = validateParameter(valid_593814, JInt, required = false, default = nil)
-  if valid_593814 != nil:
-    section.add "$skip", valid_593814
+  if valid_563946 != nil:
+    section.add "api-version", valid_563946
+  var valid_563947 = query.getOrDefault("$skip")
+  valid_563947 = validateParameter(valid_563947, JInt, required = false, default = nil)
+  if valid_563947 != nil:
+    section.add "$skip", valid_563947
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -191,54 +195,54 @@ proc validate_NotificationListByService_593647(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593841: Call_NotificationListByService_593646; path: JsonNode;
+proc call*(call_563974: Call_NotificationListByService_563777; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists a collection of properties defined within a service instance.
   ## 
-  let valid = call_593841.validator(path, query, header, formData, body)
-  let scheme = call_593841.pickScheme
+  let valid = call_563974.validator(path, query, header, formData, body)
+  let scheme = call_563974.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593841.url(scheme.get, call_593841.host, call_593841.base,
-                         call_593841.route, valid.getOrDefault("path"),
+  let url = call_563974.url(scheme.get, call_563974.host, call_563974.base,
+                         call_563974.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593841, url, valid)
+  result = hook(call_563974, url, valid)
 
-proc call*(call_593912: Call_NotificationListByService_593646;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          serviceName: string; Top: int = 0; Skip: int = 0): Recallable =
+proc call*(call_564045: Call_NotificationListByService_563777; serviceName: string;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string;
+          Top: int = 0; Skip: int = 0): Recallable =
   ## notificationListByService
   ## Lists a collection of properties defined within a service instance.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   serviceName: string (required)
+  ##              : The name of the API Management service.
+  ##   Top: int
+  ##      : Number of records to return.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   Top: int
-  ##      : Number of records to return.
   ##   Skip: int
   ##       : Number of records to skip.
-  ##   serviceName: string (required)
-  ##              : The name of the API Management service.
-  var path_593913 = newJObject()
-  var query_593915 = newJObject()
-  add(path_593913, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593915, "api-version", newJString(apiVersion))
-  add(path_593913, "subscriptionId", newJString(subscriptionId))
-  add(query_593915, "$top", newJInt(Top))
-  add(query_593915, "$skip", newJInt(Skip))
-  add(path_593913, "serviceName", newJString(serviceName))
-  result = call_593912.call(path_593913, query_593915, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564046 = newJObject()
+  var query_564048 = newJObject()
+  add(path_564046, "serviceName", newJString(serviceName))
+  add(query_564048, "$top", newJInt(Top))
+  add(query_564048, "api-version", newJString(apiVersion))
+  add(path_564046, "subscriptionId", newJString(subscriptionId))
+  add(query_564048, "$skip", newJInt(Skip))
+  add(path_564046, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564045.call(path_564046, query_564048, nil, nil, nil)
 
-var notificationListByService* = Call_NotificationListByService_593646(
+var notificationListByService* = Call_NotificationListByService_563777(
     name: "notificationListByService", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ApiManagement/service/{serviceName}/notifications",
-    validator: validate_NotificationListByService_593647, base: "",
-    url: url_NotificationListByService_593648, schemes: {Scheme.Https})
+    validator: validate_NotificationListByService_563778, base: "",
+    url: url_NotificationListByService_563779, schemes: {Scheme.Https})
 type
-  Call_NotificationCreateOrUpdate_593988 = ref object of OpenApiRestCall_593424
-proc url_NotificationCreateOrUpdate_593990(protocol: Scheme; host: string;
+  Call_NotificationCreateOrUpdate_564121 = ref object of OpenApiRestCall_563555
+proc url_NotificationCreateOrUpdate_564123(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -265,44 +269,44 @@ proc url_NotificationCreateOrUpdate_593990(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_NotificationCreateOrUpdate_593989(path: JsonNode; query: JsonNode;
+proc validate_NotificationCreateOrUpdate_564122(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Updates an Notification.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
-  ##   subscriptionId: JString (required)
-  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   notificationName: JString (required)
-  ##                   : Notification Name Identifier.
   ##   serviceName: JString (required)
   ##              : The name of the API Management service.
+  ##   subscriptionId: JString (required)
+  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
+  ##   notificationName: JString (required)
+  ##                   : Notification Name Identifier.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593991 = path.getOrDefault("resourceGroupName")
-  valid_593991 = validateParameter(valid_593991, JString, required = true,
+        "path argument is necessary due to required `serviceName` field"
+  var valid_564124 = path.getOrDefault("serviceName")
+  valid_564124 = validateParameter(valid_564124, JString, required = true,
                                  default = nil)
-  if valid_593991 != nil:
-    section.add "resourceGroupName", valid_593991
-  var valid_593992 = path.getOrDefault("subscriptionId")
-  valid_593992 = validateParameter(valid_593992, JString, required = true,
+  if valid_564124 != nil:
+    section.add "serviceName", valid_564124
+  var valid_564125 = path.getOrDefault("subscriptionId")
+  valid_564125 = validateParameter(valid_564125, JString, required = true,
                                  default = nil)
-  if valid_593992 != nil:
-    section.add "subscriptionId", valid_593992
-  var valid_593993 = path.getOrDefault("notificationName")
-  valid_593993 = validateParameter(valid_593993, JString, required = true, default = newJString(
+  if valid_564125 != nil:
+    section.add "subscriptionId", valid_564125
+  var valid_564126 = path.getOrDefault("resourceGroupName")
+  valid_564126 = validateParameter(valid_564126, JString, required = true,
+                                 default = nil)
+  if valid_564126 != nil:
+    section.add "resourceGroupName", valid_564126
+  var valid_564127 = path.getOrDefault("notificationName")
+  valid_564127 = validateParameter(valid_564127, JString, required = true, default = newJString(
       "RequestPublisherNotificationMessage"))
-  if valid_593993 != nil:
-    section.add "notificationName", valid_593993
-  var valid_593994 = path.getOrDefault("serviceName")
-  valid_593994 = validateParameter(valid_593994, JString, required = true,
-                                 default = nil)
-  if valid_593994 != nil:
-    section.add "serviceName", valid_593994
+  if valid_564127 != nil:
+    section.add "notificationName", valid_564127
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -310,11 +314,11 @@ proc validate_NotificationCreateOrUpdate_593989(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593995 = query.getOrDefault("api-version")
-  valid_593995 = validateParameter(valid_593995, JString, required = true,
+  var valid_564128 = query.getOrDefault("api-version")
+  valid_564128 = validateParameter(valid_564128, JString, required = true,
                                  default = nil)
-  if valid_593995 != nil:
-    section.add "api-version", valid_593995
+  if valid_564128 != nil:
+    section.add "api-version", valid_564128
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -323,52 +327,52 @@ proc validate_NotificationCreateOrUpdate_593989(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593996: Call_NotificationCreateOrUpdate_593988; path: JsonNode;
+proc call*(call_564129: Call_NotificationCreateOrUpdate_564121; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Updates an Notification.
   ## 
-  let valid = call_593996.validator(path, query, header, formData, body)
-  let scheme = call_593996.pickScheme
+  let valid = call_564129.validator(path, query, header, formData, body)
+  let scheme = call_564129.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593996.url(scheme.get, call_593996.host, call_593996.base,
-                         call_593996.route, valid.getOrDefault("path"),
+  let url = call_564129.url(scheme.get, call_564129.host, call_564129.base,
+                         call_564129.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593996, url, valid)
+  result = hook(call_564129, url, valid)
 
-proc call*(call_593997: Call_NotificationCreateOrUpdate_593988;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          serviceName: string;
+proc call*(call_564130: Call_NotificationCreateOrUpdate_564121;
+          serviceName: string; apiVersion: string; subscriptionId: string;
+          resourceGroupName: string;
           notificationName: string = "RequestPublisherNotificationMessage"): Recallable =
   ## notificationCreateOrUpdate
   ## Updates an Notification.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   serviceName: string (required)
+  ##              : The name of the API Management service.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   notificationName: string (required)
   ##                   : Notification Name Identifier.
-  ##   serviceName: string (required)
-  ##              : The name of the API Management service.
-  var path_593998 = newJObject()
-  var query_593999 = newJObject()
-  add(path_593998, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593999, "api-version", newJString(apiVersion))
-  add(path_593998, "subscriptionId", newJString(subscriptionId))
-  add(path_593998, "notificationName", newJString(notificationName))
-  add(path_593998, "serviceName", newJString(serviceName))
-  result = call_593997.call(path_593998, query_593999, nil, nil, nil)
+  var path_564131 = newJObject()
+  var query_564132 = newJObject()
+  add(path_564131, "serviceName", newJString(serviceName))
+  add(query_564132, "api-version", newJString(apiVersion))
+  add(path_564131, "subscriptionId", newJString(subscriptionId))
+  add(path_564131, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564131, "notificationName", newJString(notificationName))
+  result = call_564130.call(path_564131, query_564132, nil, nil, nil)
 
-var notificationCreateOrUpdate* = Call_NotificationCreateOrUpdate_593988(
+var notificationCreateOrUpdate* = Call_NotificationCreateOrUpdate_564121(
     name: "notificationCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ApiManagement/service/{serviceName}/notifications/{notificationName}",
-    validator: validate_NotificationCreateOrUpdate_593989, base: "",
-    url: url_NotificationCreateOrUpdate_593990, schemes: {Scheme.Https})
+    validator: validate_NotificationCreateOrUpdate_564122, base: "",
+    url: url_NotificationCreateOrUpdate_564123, schemes: {Scheme.Https})
 type
-  Call_NotificationGet_593954 = ref object of OpenApiRestCall_593424
-proc url_NotificationGet_593956(protocol: Scheme; host: string; base: string;
+  Call_NotificationGet_564087 = ref object of OpenApiRestCall_563555
+proc url_NotificationGet_564089(protocol: Scheme; host: string; base: string;
                                route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -395,7 +399,7 @@ proc url_NotificationGet_593956(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_NotificationGet_593955(path: JsonNode; query: JsonNode;
+proc validate_NotificationGet_564088(path: JsonNode; query: JsonNode;
                                     header: JsonNode; formData: JsonNode;
                                     body: JsonNode): JsonNode =
   ## Gets the details of the Notification specified by its identifier.
@@ -403,37 +407,37 @@ proc validate_NotificationGet_593955(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
-  ##   subscriptionId: JString (required)
-  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   notificationName: JString (required)
-  ##                   : Notification Name Identifier.
   ##   serviceName: JString (required)
   ##              : The name of the API Management service.
+  ##   subscriptionId: JString (required)
+  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
+  ##   notificationName: JString (required)
+  ##                   : Notification Name Identifier.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593966 = path.getOrDefault("resourceGroupName")
-  valid_593966 = validateParameter(valid_593966, JString, required = true,
+        "path argument is necessary due to required `serviceName` field"
+  var valid_564099 = path.getOrDefault("serviceName")
+  valid_564099 = validateParameter(valid_564099, JString, required = true,
                                  default = nil)
-  if valid_593966 != nil:
-    section.add "resourceGroupName", valid_593966
-  var valid_593967 = path.getOrDefault("subscriptionId")
-  valid_593967 = validateParameter(valid_593967, JString, required = true,
+  if valid_564099 != nil:
+    section.add "serviceName", valid_564099
+  var valid_564100 = path.getOrDefault("subscriptionId")
+  valid_564100 = validateParameter(valid_564100, JString, required = true,
                                  default = nil)
-  if valid_593967 != nil:
-    section.add "subscriptionId", valid_593967
-  var valid_593981 = path.getOrDefault("notificationName")
-  valid_593981 = validateParameter(valid_593981, JString, required = true, default = newJString(
+  if valid_564100 != nil:
+    section.add "subscriptionId", valid_564100
+  var valid_564101 = path.getOrDefault("resourceGroupName")
+  valid_564101 = validateParameter(valid_564101, JString, required = true,
+                                 default = nil)
+  if valid_564101 != nil:
+    section.add "resourceGroupName", valid_564101
+  var valid_564115 = path.getOrDefault("notificationName")
+  valid_564115 = validateParameter(valid_564115, JString, required = true, default = newJString(
       "RequestPublisherNotificationMessage"))
-  if valid_593981 != nil:
-    section.add "notificationName", valid_593981
-  var valid_593982 = path.getOrDefault("serviceName")
-  valid_593982 = validateParameter(valid_593982, JString, required = true,
-                                 default = nil)
-  if valid_593982 != nil:
-    section.add "serviceName", valid_593982
+  if valid_564115 != nil:
+    section.add "notificationName", valid_564115
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -441,11 +445,11 @@ proc validate_NotificationGet_593955(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593983 = query.getOrDefault("api-version")
-  valid_593983 = validateParameter(valid_593983, JString, required = true,
+  var valid_564116 = query.getOrDefault("api-version")
+  valid_564116 = validateParameter(valid_564116, JString, required = true,
                                  default = nil)
-  if valid_593983 != nil:
-    section.add "api-version", valid_593983
+  if valid_564116 != nil:
+    section.add "api-version", valid_564116
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -454,50 +458,50 @@ proc validate_NotificationGet_593955(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593984: Call_NotificationGet_593954; path: JsonNode; query: JsonNode;
+proc call*(call_564117: Call_NotificationGet_564087; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the details of the Notification specified by its identifier.
   ## 
-  let valid = call_593984.validator(path, query, header, formData, body)
-  let scheme = call_593984.pickScheme
+  let valid = call_564117.validator(path, query, header, formData, body)
+  let scheme = call_564117.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593984.url(scheme.get, call_593984.host, call_593984.base,
-                         call_593984.route, valid.getOrDefault("path"),
+  let url = call_564117.url(scheme.get, call_564117.host, call_564117.base,
+                         call_564117.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593984, url, valid)
+  result = hook(call_564117, url, valid)
 
-proc call*(call_593985: Call_NotificationGet_593954; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; serviceName: string;
+proc call*(call_564118: Call_NotificationGet_564087; serviceName: string;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string;
           notificationName: string = "RequestPublisherNotificationMessage"): Recallable =
   ## notificationGet
   ## Gets the details of the Notification specified by its identifier.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   serviceName: string (required)
+  ##              : The name of the API Management service.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   notificationName: string (required)
   ##                   : Notification Name Identifier.
-  ##   serviceName: string (required)
-  ##              : The name of the API Management service.
-  var path_593986 = newJObject()
-  var query_593987 = newJObject()
-  add(path_593986, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593987, "api-version", newJString(apiVersion))
-  add(path_593986, "subscriptionId", newJString(subscriptionId))
-  add(path_593986, "notificationName", newJString(notificationName))
-  add(path_593986, "serviceName", newJString(serviceName))
-  result = call_593985.call(path_593986, query_593987, nil, nil, nil)
+  var path_564119 = newJObject()
+  var query_564120 = newJObject()
+  add(path_564119, "serviceName", newJString(serviceName))
+  add(query_564120, "api-version", newJString(apiVersion))
+  add(path_564119, "subscriptionId", newJString(subscriptionId))
+  add(path_564119, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564119, "notificationName", newJString(notificationName))
+  result = call_564118.call(path_564119, query_564120, nil, nil, nil)
 
-var notificationGet* = Call_NotificationGet_593954(name: "notificationGet",
+var notificationGet* = Call_NotificationGet_564087(name: "notificationGet",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ApiManagement/service/{serviceName}/notifications/{notificationName}",
-    validator: validate_NotificationGet_593955, base: "", url: url_NotificationGet_593956,
+    validator: validate_NotificationGet_564088, base: "", url: url_NotificationGet_564089,
     schemes: {Scheme.Https})
 type
-  Call_NotificationRecipientEmailListByNotification_594000 = ref object of OpenApiRestCall_593424
-proc url_NotificationRecipientEmailListByNotification_594002(protocol: Scheme;
+  Call_NotificationRecipientEmailListByNotification_564133 = ref object of OpenApiRestCall_563555
+proc url_NotificationRecipientEmailListByNotification_564135(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -525,44 +529,44 @@ proc url_NotificationRecipientEmailListByNotification_594002(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_NotificationRecipientEmailListByNotification_594001(path: JsonNode;
+proc validate_NotificationRecipientEmailListByNotification_564134(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the list of the Notification Recipient Emails subscribed to a notification.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
-  ##   subscriptionId: JString (required)
-  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   notificationName: JString (required)
-  ##                   : Notification Name Identifier.
   ##   serviceName: JString (required)
   ##              : The name of the API Management service.
+  ##   subscriptionId: JString (required)
+  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
+  ##   notificationName: JString (required)
+  ##                   : Notification Name Identifier.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594003 = path.getOrDefault("resourceGroupName")
-  valid_594003 = validateParameter(valid_594003, JString, required = true,
+        "path argument is necessary due to required `serviceName` field"
+  var valid_564136 = path.getOrDefault("serviceName")
+  valid_564136 = validateParameter(valid_564136, JString, required = true,
                                  default = nil)
-  if valid_594003 != nil:
-    section.add "resourceGroupName", valid_594003
-  var valid_594004 = path.getOrDefault("subscriptionId")
-  valid_594004 = validateParameter(valid_594004, JString, required = true,
+  if valid_564136 != nil:
+    section.add "serviceName", valid_564136
+  var valid_564137 = path.getOrDefault("subscriptionId")
+  valid_564137 = validateParameter(valid_564137, JString, required = true,
                                  default = nil)
-  if valid_594004 != nil:
-    section.add "subscriptionId", valid_594004
-  var valid_594005 = path.getOrDefault("notificationName")
-  valid_594005 = validateParameter(valid_594005, JString, required = true, default = newJString(
+  if valid_564137 != nil:
+    section.add "subscriptionId", valid_564137
+  var valid_564138 = path.getOrDefault("resourceGroupName")
+  valid_564138 = validateParameter(valid_564138, JString, required = true,
+                                 default = nil)
+  if valid_564138 != nil:
+    section.add "resourceGroupName", valid_564138
+  var valid_564139 = path.getOrDefault("notificationName")
+  valid_564139 = validateParameter(valid_564139, JString, required = true, default = newJString(
       "RequestPublisherNotificationMessage"))
-  if valid_594005 != nil:
-    section.add "notificationName", valid_594005
-  var valid_594006 = path.getOrDefault("serviceName")
-  valid_594006 = validateParameter(valid_594006, JString, required = true,
-                                 default = nil)
-  if valid_594006 != nil:
-    section.add "serviceName", valid_594006
+  if valid_564139 != nil:
+    section.add "notificationName", valid_564139
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -570,11 +574,11 @@ proc validate_NotificationRecipientEmailListByNotification_594001(path: JsonNode
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594007 = query.getOrDefault("api-version")
-  valid_594007 = validateParameter(valid_594007, JString, required = true,
+  var valid_564140 = query.getOrDefault("api-version")
+  valid_564140 = validateParameter(valid_564140, JString, required = true,
                                  default = nil)
-  if valid_594007 != nil:
-    section.add "api-version", valid_594007
+  if valid_564140 != nil:
+    section.add "api-version", valid_564140
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -583,54 +587,54 @@ proc validate_NotificationRecipientEmailListByNotification_594001(path: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_594008: Call_NotificationRecipientEmailListByNotification_594000;
+proc call*(call_564141: Call_NotificationRecipientEmailListByNotification_564133;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Gets the list of the Notification Recipient Emails subscribed to a notification.
   ## 
-  let valid = call_594008.validator(path, query, header, formData, body)
-  let scheme = call_594008.pickScheme
+  let valid = call_564141.validator(path, query, header, formData, body)
+  let scheme = call_564141.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594008.url(scheme.get, call_594008.host, call_594008.base,
-                         call_594008.route, valid.getOrDefault("path"),
+  let url = call_564141.url(scheme.get, call_564141.host, call_564141.base,
+                         call_564141.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594008, url, valid)
+  result = hook(call_564141, url, valid)
 
-proc call*(call_594009: Call_NotificationRecipientEmailListByNotification_594000;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          serviceName: string;
+proc call*(call_564142: Call_NotificationRecipientEmailListByNotification_564133;
+          serviceName: string; apiVersion: string; subscriptionId: string;
+          resourceGroupName: string;
           notificationName: string = "RequestPublisherNotificationMessage"): Recallable =
   ## notificationRecipientEmailListByNotification
   ## Gets the list of the Notification Recipient Emails subscribed to a notification.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   serviceName: string (required)
+  ##              : The name of the API Management service.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   notificationName: string (required)
   ##                   : Notification Name Identifier.
-  ##   serviceName: string (required)
-  ##              : The name of the API Management service.
-  var path_594010 = newJObject()
-  var query_594011 = newJObject()
-  add(path_594010, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594011, "api-version", newJString(apiVersion))
-  add(path_594010, "subscriptionId", newJString(subscriptionId))
-  add(path_594010, "notificationName", newJString(notificationName))
-  add(path_594010, "serviceName", newJString(serviceName))
-  result = call_594009.call(path_594010, query_594011, nil, nil, nil)
+  var path_564143 = newJObject()
+  var query_564144 = newJObject()
+  add(path_564143, "serviceName", newJString(serviceName))
+  add(query_564144, "api-version", newJString(apiVersion))
+  add(path_564143, "subscriptionId", newJString(subscriptionId))
+  add(path_564143, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564143, "notificationName", newJString(notificationName))
+  result = call_564142.call(path_564143, query_564144, nil, nil, nil)
 
-var notificationRecipientEmailListByNotification* = Call_NotificationRecipientEmailListByNotification_594000(
+var notificationRecipientEmailListByNotification* = Call_NotificationRecipientEmailListByNotification_564133(
     name: "notificationRecipientEmailListByNotification",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ApiManagement/service/{serviceName}/notifications/{notificationName}/recipientEmails",
-    validator: validate_NotificationRecipientEmailListByNotification_594001,
-    base: "", url: url_NotificationRecipientEmailListByNotification_594002,
+    validator: validate_NotificationRecipientEmailListByNotification_564134,
+    base: "", url: url_NotificationRecipientEmailListByNotification_564135,
     schemes: {Scheme.Https})
 type
-  Call_NotificationRecipientEmailCreateOrUpdate_594012 = ref object of OpenApiRestCall_593424
-proc url_NotificationRecipientEmailCreateOrUpdate_594014(protocol: Scheme;
+  Call_NotificationRecipientEmailCreateOrUpdate_564145 = ref object of OpenApiRestCall_563555
+proc url_NotificationRecipientEmailCreateOrUpdate_564147(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -660,51 +664,51 @@ proc url_NotificationRecipientEmailCreateOrUpdate_594014(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_NotificationRecipientEmailCreateOrUpdate_594013(path: JsonNode;
+proc validate_NotificationRecipientEmailCreateOrUpdate_564146(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Adds the Email address to the list of Recipients for the Notification.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
+  ##   serviceName: JString (required)
+  ##              : The name of the API Management service.
   ##   email: JString (required)
   ##        : Email identifier.
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   ##   notificationName: JString (required)
   ##                   : Notification Name Identifier.
-  ##   serviceName: JString (required)
-  ##              : The name of the API Management service.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594015 = path.getOrDefault("resourceGroupName")
-  valid_594015 = validateParameter(valid_594015, JString, required = true,
+        "path argument is necessary due to required `serviceName` field"
+  var valid_564148 = path.getOrDefault("serviceName")
+  valid_564148 = validateParameter(valid_564148, JString, required = true,
                                  default = nil)
-  if valid_594015 != nil:
-    section.add "resourceGroupName", valid_594015
-  var valid_594016 = path.getOrDefault("email")
-  valid_594016 = validateParameter(valid_594016, JString, required = true,
+  if valid_564148 != nil:
+    section.add "serviceName", valid_564148
+  var valid_564149 = path.getOrDefault("email")
+  valid_564149 = validateParameter(valid_564149, JString, required = true,
                                  default = nil)
-  if valid_594016 != nil:
-    section.add "email", valid_594016
-  var valid_594017 = path.getOrDefault("subscriptionId")
-  valid_594017 = validateParameter(valid_594017, JString, required = true,
+  if valid_564149 != nil:
+    section.add "email", valid_564149
+  var valid_564150 = path.getOrDefault("subscriptionId")
+  valid_564150 = validateParameter(valid_564150, JString, required = true,
                                  default = nil)
-  if valid_594017 != nil:
-    section.add "subscriptionId", valid_594017
-  var valid_594018 = path.getOrDefault("notificationName")
-  valid_594018 = validateParameter(valid_594018, JString, required = true, default = newJString(
+  if valid_564150 != nil:
+    section.add "subscriptionId", valid_564150
+  var valid_564151 = path.getOrDefault("resourceGroupName")
+  valid_564151 = validateParameter(valid_564151, JString, required = true,
+                                 default = nil)
+  if valid_564151 != nil:
+    section.add "resourceGroupName", valid_564151
+  var valid_564152 = path.getOrDefault("notificationName")
+  valid_564152 = validateParameter(valid_564152, JString, required = true, default = newJString(
       "RequestPublisherNotificationMessage"))
-  if valid_594018 != nil:
-    section.add "notificationName", valid_594018
-  var valid_594019 = path.getOrDefault("serviceName")
-  valid_594019 = validateParameter(valid_594019, JString, required = true,
-                                 default = nil)
-  if valid_594019 != nil:
-    section.add "serviceName", valid_594019
+  if valid_564152 != nil:
+    section.add "notificationName", valid_564152
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -712,11 +716,11 @@ proc validate_NotificationRecipientEmailCreateOrUpdate_594013(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594020 = query.getOrDefault("api-version")
-  valid_594020 = validateParameter(valid_594020, JString, required = true,
+  var valid_564153 = query.getOrDefault("api-version")
+  valid_564153 = validateParameter(valid_564153, JString, required = true,
                                  default = nil)
-  if valid_594020 != nil:
-    section.add "api-version", valid_594020
+  if valid_564153 != nil:
+    section.add "api-version", valid_564153
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -725,57 +729,57 @@ proc validate_NotificationRecipientEmailCreateOrUpdate_594013(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594021: Call_NotificationRecipientEmailCreateOrUpdate_594012;
+proc call*(call_564154: Call_NotificationRecipientEmailCreateOrUpdate_564145;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Adds the Email address to the list of Recipients for the Notification.
   ## 
-  let valid = call_594021.validator(path, query, header, formData, body)
-  let scheme = call_594021.pickScheme
+  let valid = call_564154.validator(path, query, header, formData, body)
+  let scheme = call_564154.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594021.url(scheme.get, call_594021.host, call_594021.base,
-                         call_594021.route, valid.getOrDefault("path"),
+  let url = call_564154.url(scheme.get, call_564154.host, call_564154.base,
+                         call_564154.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594021, url, valid)
+  result = hook(call_564154, url, valid)
 
-proc call*(call_594022: Call_NotificationRecipientEmailCreateOrUpdate_594012;
-          resourceGroupName: string; apiVersion: string; email: string;
-          subscriptionId: string; serviceName: string;
+proc call*(call_564155: Call_NotificationRecipientEmailCreateOrUpdate_564145;
+          serviceName: string; apiVersion: string; email: string;
+          subscriptionId: string; resourceGroupName: string;
           notificationName: string = "RequestPublisherNotificationMessage"): Recallable =
   ## notificationRecipientEmailCreateOrUpdate
   ## Adds the Email address to the list of Recipients for the Notification.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   serviceName: string (required)
+  ##              : The name of the API Management service.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
   ##   email: string (required)
   ##        : Email identifier.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   notificationName: string (required)
   ##                   : Notification Name Identifier.
-  ##   serviceName: string (required)
-  ##              : The name of the API Management service.
-  var path_594023 = newJObject()
-  var query_594024 = newJObject()
-  add(path_594023, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594024, "api-version", newJString(apiVersion))
-  add(path_594023, "email", newJString(email))
-  add(path_594023, "subscriptionId", newJString(subscriptionId))
-  add(path_594023, "notificationName", newJString(notificationName))
-  add(path_594023, "serviceName", newJString(serviceName))
-  result = call_594022.call(path_594023, query_594024, nil, nil, nil)
+  var path_564156 = newJObject()
+  var query_564157 = newJObject()
+  add(path_564156, "serviceName", newJString(serviceName))
+  add(query_564157, "api-version", newJString(apiVersion))
+  add(path_564156, "email", newJString(email))
+  add(path_564156, "subscriptionId", newJString(subscriptionId))
+  add(path_564156, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564156, "notificationName", newJString(notificationName))
+  result = call_564155.call(path_564156, query_564157, nil, nil, nil)
 
-var notificationRecipientEmailCreateOrUpdate* = Call_NotificationRecipientEmailCreateOrUpdate_594012(
+var notificationRecipientEmailCreateOrUpdate* = Call_NotificationRecipientEmailCreateOrUpdate_564145(
     name: "notificationRecipientEmailCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ApiManagement/service/{serviceName}/notifications/{notificationName}/recipientEmails/{email}",
-    validator: validate_NotificationRecipientEmailCreateOrUpdate_594013, base: "",
-    url: url_NotificationRecipientEmailCreateOrUpdate_594014,
+    validator: validate_NotificationRecipientEmailCreateOrUpdate_564146, base: "",
+    url: url_NotificationRecipientEmailCreateOrUpdate_564147,
     schemes: {Scheme.Https})
 type
-  Call_NotificationRecipientEmailGet_594038 = ref object of OpenApiRestCall_593424
-proc url_NotificationRecipientEmailGet_594040(protocol: Scheme; host: string;
+  Call_NotificationRecipientEmailGet_564171 = ref object of OpenApiRestCall_563555
+proc url_NotificationRecipientEmailGet_564173(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -805,51 +809,51 @@ proc url_NotificationRecipientEmailGet_594040(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_NotificationRecipientEmailGet_594039(path: JsonNode; query: JsonNode;
+proc validate_NotificationRecipientEmailGet_564172(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Determine if Notification Recipient Email subscribed to the notification.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
+  ##   serviceName: JString (required)
+  ##              : The name of the API Management service.
   ##   email: JString (required)
   ##        : Email identifier.
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   ##   notificationName: JString (required)
   ##                   : Notification Name Identifier.
-  ##   serviceName: JString (required)
-  ##              : The name of the API Management service.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594041 = path.getOrDefault("resourceGroupName")
-  valid_594041 = validateParameter(valid_594041, JString, required = true,
+        "path argument is necessary due to required `serviceName` field"
+  var valid_564174 = path.getOrDefault("serviceName")
+  valid_564174 = validateParameter(valid_564174, JString, required = true,
                                  default = nil)
-  if valid_594041 != nil:
-    section.add "resourceGroupName", valid_594041
-  var valid_594042 = path.getOrDefault("email")
-  valid_594042 = validateParameter(valid_594042, JString, required = true,
+  if valid_564174 != nil:
+    section.add "serviceName", valid_564174
+  var valid_564175 = path.getOrDefault("email")
+  valid_564175 = validateParameter(valid_564175, JString, required = true,
                                  default = nil)
-  if valid_594042 != nil:
-    section.add "email", valid_594042
-  var valid_594043 = path.getOrDefault("subscriptionId")
-  valid_594043 = validateParameter(valid_594043, JString, required = true,
+  if valid_564175 != nil:
+    section.add "email", valid_564175
+  var valid_564176 = path.getOrDefault("subscriptionId")
+  valid_564176 = validateParameter(valid_564176, JString, required = true,
                                  default = nil)
-  if valid_594043 != nil:
-    section.add "subscriptionId", valid_594043
-  var valid_594044 = path.getOrDefault("notificationName")
-  valid_594044 = validateParameter(valid_594044, JString, required = true, default = newJString(
+  if valid_564176 != nil:
+    section.add "subscriptionId", valid_564176
+  var valid_564177 = path.getOrDefault("resourceGroupName")
+  valid_564177 = validateParameter(valid_564177, JString, required = true,
+                                 default = nil)
+  if valid_564177 != nil:
+    section.add "resourceGroupName", valid_564177
+  var valid_564178 = path.getOrDefault("notificationName")
+  valid_564178 = validateParameter(valid_564178, JString, required = true, default = newJString(
       "RequestPublisherNotificationMessage"))
-  if valid_594044 != nil:
-    section.add "notificationName", valid_594044
-  var valid_594045 = path.getOrDefault("serviceName")
-  valid_594045 = validateParameter(valid_594045, JString, required = true,
-                                 default = nil)
-  if valid_594045 != nil:
-    section.add "serviceName", valid_594045
+  if valid_564178 != nil:
+    section.add "notificationName", valid_564178
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -857,11 +861,11 @@ proc validate_NotificationRecipientEmailGet_594039(path: JsonNode; query: JsonNo
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594046 = query.getOrDefault("api-version")
-  valid_594046 = validateParameter(valid_594046, JString, required = true,
+  var valid_564179 = query.getOrDefault("api-version")
+  valid_564179 = validateParameter(valid_564179, JString, required = true,
                                  default = nil)
-  if valid_594046 != nil:
-    section.add "api-version", valid_594046
+  if valid_564179 != nil:
+    section.add "api-version", valid_564179
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -870,55 +874,55 @@ proc validate_NotificationRecipientEmailGet_594039(path: JsonNode; query: JsonNo
   if body != nil:
     result.add "body", body
 
-proc call*(call_594047: Call_NotificationRecipientEmailGet_594038; path: JsonNode;
+proc call*(call_564180: Call_NotificationRecipientEmailGet_564171; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Determine if Notification Recipient Email subscribed to the notification.
   ## 
-  let valid = call_594047.validator(path, query, header, formData, body)
-  let scheme = call_594047.pickScheme
+  let valid = call_564180.validator(path, query, header, formData, body)
+  let scheme = call_564180.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594047.url(scheme.get, call_594047.host, call_594047.base,
-                         call_594047.route, valid.getOrDefault("path"),
+  let url = call_564180.url(scheme.get, call_564180.host, call_564180.base,
+                         call_564180.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594047, url, valid)
+  result = hook(call_564180, url, valid)
 
-proc call*(call_594048: Call_NotificationRecipientEmailGet_594038;
-          resourceGroupName: string; apiVersion: string; email: string;
-          subscriptionId: string; serviceName: string;
+proc call*(call_564181: Call_NotificationRecipientEmailGet_564171;
+          serviceName: string; apiVersion: string; email: string;
+          subscriptionId: string; resourceGroupName: string;
           notificationName: string = "RequestPublisherNotificationMessage"): Recallable =
   ## notificationRecipientEmailGet
   ## Determine if Notification Recipient Email subscribed to the notification.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   serviceName: string (required)
+  ##              : The name of the API Management service.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
   ##   email: string (required)
   ##        : Email identifier.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   notificationName: string (required)
   ##                   : Notification Name Identifier.
-  ##   serviceName: string (required)
-  ##              : The name of the API Management service.
-  var path_594049 = newJObject()
-  var query_594050 = newJObject()
-  add(path_594049, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594050, "api-version", newJString(apiVersion))
-  add(path_594049, "email", newJString(email))
-  add(path_594049, "subscriptionId", newJString(subscriptionId))
-  add(path_594049, "notificationName", newJString(notificationName))
-  add(path_594049, "serviceName", newJString(serviceName))
-  result = call_594048.call(path_594049, query_594050, nil, nil, nil)
+  var path_564182 = newJObject()
+  var query_564183 = newJObject()
+  add(path_564182, "serviceName", newJString(serviceName))
+  add(query_564183, "api-version", newJString(apiVersion))
+  add(path_564182, "email", newJString(email))
+  add(path_564182, "subscriptionId", newJString(subscriptionId))
+  add(path_564182, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564182, "notificationName", newJString(notificationName))
+  result = call_564181.call(path_564182, query_564183, nil, nil, nil)
 
-var notificationRecipientEmailGet* = Call_NotificationRecipientEmailGet_594038(
+var notificationRecipientEmailGet* = Call_NotificationRecipientEmailGet_564171(
     name: "notificationRecipientEmailGet", meth: HttpMethod.HttpHead,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ApiManagement/service/{serviceName}/notifications/{notificationName}/recipientEmails/{email}",
-    validator: validate_NotificationRecipientEmailGet_594039, base: "",
-    url: url_NotificationRecipientEmailGet_594040, schemes: {Scheme.Https})
+    validator: validate_NotificationRecipientEmailGet_564172, base: "",
+    url: url_NotificationRecipientEmailGet_564173, schemes: {Scheme.Https})
 type
-  Call_NotificationRecipientEmailDelete_594025 = ref object of OpenApiRestCall_593424
-proc url_NotificationRecipientEmailDelete_594027(protocol: Scheme; host: string;
+  Call_NotificationRecipientEmailDelete_564158 = ref object of OpenApiRestCall_563555
+proc url_NotificationRecipientEmailDelete_564160(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -948,51 +952,51 @@ proc url_NotificationRecipientEmailDelete_594027(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_NotificationRecipientEmailDelete_594026(path: JsonNode;
+proc validate_NotificationRecipientEmailDelete_564159(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Removes the email from the list of Notification.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
+  ##   serviceName: JString (required)
+  ##              : The name of the API Management service.
   ##   email: JString (required)
   ##        : Email identifier.
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   ##   notificationName: JString (required)
   ##                   : Notification Name Identifier.
-  ##   serviceName: JString (required)
-  ##              : The name of the API Management service.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594028 = path.getOrDefault("resourceGroupName")
-  valid_594028 = validateParameter(valid_594028, JString, required = true,
+        "path argument is necessary due to required `serviceName` field"
+  var valid_564161 = path.getOrDefault("serviceName")
+  valid_564161 = validateParameter(valid_564161, JString, required = true,
                                  default = nil)
-  if valid_594028 != nil:
-    section.add "resourceGroupName", valid_594028
-  var valid_594029 = path.getOrDefault("email")
-  valid_594029 = validateParameter(valid_594029, JString, required = true,
+  if valid_564161 != nil:
+    section.add "serviceName", valid_564161
+  var valid_564162 = path.getOrDefault("email")
+  valid_564162 = validateParameter(valid_564162, JString, required = true,
                                  default = nil)
-  if valid_594029 != nil:
-    section.add "email", valid_594029
-  var valid_594030 = path.getOrDefault("subscriptionId")
-  valid_594030 = validateParameter(valid_594030, JString, required = true,
+  if valid_564162 != nil:
+    section.add "email", valid_564162
+  var valid_564163 = path.getOrDefault("subscriptionId")
+  valid_564163 = validateParameter(valid_564163, JString, required = true,
                                  default = nil)
-  if valid_594030 != nil:
-    section.add "subscriptionId", valid_594030
-  var valid_594031 = path.getOrDefault("notificationName")
-  valid_594031 = validateParameter(valid_594031, JString, required = true, default = newJString(
+  if valid_564163 != nil:
+    section.add "subscriptionId", valid_564163
+  var valid_564164 = path.getOrDefault("resourceGroupName")
+  valid_564164 = validateParameter(valid_564164, JString, required = true,
+                                 default = nil)
+  if valid_564164 != nil:
+    section.add "resourceGroupName", valid_564164
+  var valid_564165 = path.getOrDefault("notificationName")
+  valid_564165 = validateParameter(valid_564165, JString, required = true, default = newJString(
       "RequestPublisherNotificationMessage"))
-  if valid_594031 != nil:
-    section.add "notificationName", valid_594031
-  var valid_594032 = path.getOrDefault("serviceName")
-  valid_594032 = validateParameter(valid_594032, JString, required = true,
-                                 default = nil)
-  if valid_594032 != nil:
-    section.add "serviceName", valid_594032
+  if valid_564165 != nil:
+    section.add "notificationName", valid_564165
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1000,11 +1004,11 @@ proc validate_NotificationRecipientEmailDelete_594026(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594033 = query.getOrDefault("api-version")
-  valid_594033 = validateParameter(valid_594033, JString, required = true,
+  var valid_564166 = query.getOrDefault("api-version")
+  valid_564166 = validateParameter(valid_564166, JString, required = true,
                                  default = nil)
-  if valid_594033 != nil:
-    section.add "api-version", valid_594033
+  if valid_564166 != nil:
+    section.add "api-version", valid_564166
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1013,56 +1017,56 @@ proc validate_NotificationRecipientEmailDelete_594026(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594034: Call_NotificationRecipientEmailDelete_594025;
+proc call*(call_564167: Call_NotificationRecipientEmailDelete_564158;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Removes the email from the list of Notification.
   ## 
-  let valid = call_594034.validator(path, query, header, formData, body)
-  let scheme = call_594034.pickScheme
+  let valid = call_564167.validator(path, query, header, formData, body)
+  let scheme = call_564167.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594034.url(scheme.get, call_594034.host, call_594034.base,
-                         call_594034.route, valid.getOrDefault("path"),
+  let url = call_564167.url(scheme.get, call_564167.host, call_564167.base,
+                         call_564167.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594034, url, valid)
+  result = hook(call_564167, url, valid)
 
-proc call*(call_594035: Call_NotificationRecipientEmailDelete_594025;
-          resourceGroupName: string; apiVersion: string; email: string;
-          subscriptionId: string; serviceName: string;
+proc call*(call_564168: Call_NotificationRecipientEmailDelete_564158;
+          serviceName: string; apiVersion: string; email: string;
+          subscriptionId: string; resourceGroupName: string;
           notificationName: string = "RequestPublisherNotificationMessage"): Recallable =
   ## notificationRecipientEmailDelete
   ## Removes the email from the list of Notification.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   serviceName: string (required)
+  ##              : The name of the API Management service.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
   ##   email: string (required)
   ##        : Email identifier.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   notificationName: string (required)
   ##                   : Notification Name Identifier.
-  ##   serviceName: string (required)
-  ##              : The name of the API Management service.
-  var path_594036 = newJObject()
-  var query_594037 = newJObject()
-  add(path_594036, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594037, "api-version", newJString(apiVersion))
-  add(path_594036, "email", newJString(email))
-  add(path_594036, "subscriptionId", newJString(subscriptionId))
-  add(path_594036, "notificationName", newJString(notificationName))
-  add(path_594036, "serviceName", newJString(serviceName))
-  result = call_594035.call(path_594036, query_594037, nil, nil, nil)
+  var path_564169 = newJObject()
+  var query_564170 = newJObject()
+  add(path_564169, "serviceName", newJString(serviceName))
+  add(query_564170, "api-version", newJString(apiVersion))
+  add(path_564169, "email", newJString(email))
+  add(path_564169, "subscriptionId", newJString(subscriptionId))
+  add(path_564169, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564169, "notificationName", newJString(notificationName))
+  result = call_564168.call(path_564169, query_564170, nil, nil, nil)
 
-var notificationRecipientEmailDelete* = Call_NotificationRecipientEmailDelete_594025(
+var notificationRecipientEmailDelete* = Call_NotificationRecipientEmailDelete_564158(
     name: "notificationRecipientEmailDelete", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ApiManagement/service/{serviceName}/notifications/{notificationName}/recipientEmails/{email}",
-    validator: validate_NotificationRecipientEmailDelete_594026, base: "",
-    url: url_NotificationRecipientEmailDelete_594027, schemes: {Scheme.Https})
+    validator: validate_NotificationRecipientEmailDelete_564159, base: "",
+    url: url_NotificationRecipientEmailDelete_564160, schemes: {Scheme.Https})
 type
-  Call_NotificationRecipientUserListByNotification_594051 = ref object of OpenApiRestCall_593424
-proc url_NotificationRecipientUserListByNotification_594053(protocol: Scheme;
+  Call_NotificationRecipientUserListByNotification_564184 = ref object of OpenApiRestCall_563555
+proc url_NotificationRecipientUserListByNotification_564186(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1090,44 +1094,44 @@ proc url_NotificationRecipientUserListByNotification_594053(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_NotificationRecipientUserListByNotification_594052(path: JsonNode;
+proc validate_NotificationRecipientUserListByNotification_564185(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the list of the Notification Recipient User subscribed to the notification.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
-  ##   subscriptionId: JString (required)
-  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   notificationName: JString (required)
-  ##                   : Notification Name Identifier.
   ##   serviceName: JString (required)
   ##              : The name of the API Management service.
+  ##   subscriptionId: JString (required)
+  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
+  ##   notificationName: JString (required)
+  ##                   : Notification Name Identifier.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594054 = path.getOrDefault("resourceGroupName")
-  valid_594054 = validateParameter(valid_594054, JString, required = true,
+        "path argument is necessary due to required `serviceName` field"
+  var valid_564187 = path.getOrDefault("serviceName")
+  valid_564187 = validateParameter(valid_564187, JString, required = true,
                                  default = nil)
-  if valid_594054 != nil:
-    section.add "resourceGroupName", valid_594054
-  var valid_594055 = path.getOrDefault("subscriptionId")
-  valid_594055 = validateParameter(valid_594055, JString, required = true,
+  if valid_564187 != nil:
+    section.add "serviceName", valid_564187
+  var valid_564188 = path.getOrDefault("subscriptionId")
+  valid_564188 = validateParameter(valid_564188, JString, required = true,
                                  default = nil)
-  if valid_594055 != nil:
-    section.add "subscriptionId", valid_594055
-  var valid_594056 = path.getOrDefault("notificationName")
-  valid_594056 = validateParameter(valid_594056, JString, required = true, default = newJString(
+  if valid_564188 != nil:
+    section.add "subscriptionId", valid_564188
+  var valid_564189 = path.getOrDefault("resourceGroupName")
+  valid_564189 = validateParameter(valid_564189, JString, required = true,
+                                 default = nil)
+  if valid_564189 != nil:
+    section.add "resourceGroupName", valid_564189
+  var valid_564190 = path.getOrDefault("notificationName")
+  valid_564190 = validateParameter(valid_564190, JString, required = true, default = newJString(
       "RequestPublisherNotificationMessage"))
-  if valid_594056 != nil:
-    section.add "notificationName", valid_594056
-  var valid_594057 = path.getOrDefault("serviceName")
-  valid_594057 = validateParameter(valid_594057, JString, required = true,
-                                 default = nil)
-  if valid_594057 != nil:
-    section.add "serviceName", valid_594057
+  if valid_564190 != nil:
+    section.add "notificationName", valid_564190
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1135,11 +1139,11 @@ proc validate_NotificationRecipientUserListByNotification_594052(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594058 = query.getOrDefault("api-version")
-  valid_594058 = validateParameter(valid_594058, JString, required = true,
+  var valid_564191 = query.getOrDefault("api-version")
+  valid_564191 = validateParameter(valid_564191, JString, required = true,
                                  default = nil)
-  if valid_594058 != nil:
-    section.add "api-version", valid_594058
+  if valid_564191 != nil:
+    section.add "api-version", valid_564191
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1148,54 +1152,54 @@ proc validate_NotificationRecipientUserListByNotification_594052(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594059: Call_NotificationRecipientUserListByNotification_594051;
+proc call*(call_564192: Call_NotificationRecipientUserListByNotification_564184;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Gets the list of the Notification Recipient User subscribed to the notification.
   ## 
-  let valid = call_594059.validator(path, query, header, formData, body)
-  let scheme = call_594059.pickScheme
+  let valid = call_564192.validator(path, query, header, formData, body)
+  let scheme = call_564192.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594059.url(scheme.get, call_594059.host, call_594059.base,
-                         call_594059.route, valid.getOrDefault("path"),
+  let url = call_564192.url(scheme.get, call_564192.host, call_564192.base,
+                         call_564192.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594059, url, valid)
+  result = hook(call_564192, url, valid)
 
-proc call*(call_594060: Call_NotificationRecipientUserListByNotification_594051;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          serviceName: string;
+proc call*(call_564193: Call_NotificationRecipientUserListByNotification_564184;
+          serviceName: string; apiVersion: string; subscriptionId: string;
+          resourceGroupName: string;
           notificationName: string = "RequestPublisherNotificationMessage"): Recallable =
   ## notificationRecipientUserListByNotification
   ## Gets the list of the Notification Recipient User subscribed to the notification.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   serviceName: string (required)
+  ##              : The name of the API Management service.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   notificationName: string (required)
   ##                   : Notification Name Identifier.
-  ##   serviceName: string (required)
-  ##              : The name of the API Management service.
-  var path_594061 = newJObject()
-  var query_594062 = newJObject()
-  add(path_594061, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594062, "api-version", newJString(apiVersion))
-  add(path_594061, "subscriptionId", newJString(subscriptionId))
-  add(path_594061, "notificationName", newJString(notificationName))
-  add(path_594061, "serviceName", newJString(serviceName))
-  result = call_594060.call(path_594061, query_594062, nil, nil, nil)
+  var path_564194 = newJObject()
+  var query_564195 = newJObject()
+  add(path_564194, "serviceName", newJString(serviceName))
+  add(query_564195, "api-version", newJString(apiVersion))
+  add(path_564194, "subscriptionId", newJString(subscriptionId))
+  add(path_564194, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564194, "notificationName", newJString(notificationName))
+  result = call_564193.call(path_564194, query_564195, nil, nil, nil)
 
-var notificationRecipientUserListByNotification* = Call_NotificationRecipientUserListByNotification_594051(
+var notificationRecipientUserListByNotification* = Call_NotificationRecipientUserListByNotification_564184(
     name: "notificationRecipientUserListByNotification", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ApiManagement/service/{serviceName}/notifications/{notificationName}/recipientUsers",
-    validator: validate_NotificationRecipientUserListByNotification_594052,
-    base: "", url: url_NotificationRecipientUserListByNotification_594053,
+    validator: validate_NotificationRecipientUserListByNotification_564185,
+    base: "", url: url_NotificationRecipientUserListByNotification_564186,
     schemes: {Scheme.Https})
 type
-  Call_NotificationRecipientUserCreateOrUpdate_594063 = ref object of OpenApiRestCall_593424
-proc url_NotificationRecipientUserCreateOrUpdate_594065(protocol: Scheme;
+  Call_NotificationRecipientUserCreateOrUpdate_564196 = ref object of OpenApiRestCall_563555
+proc url_NotificationRecipientUserCreateOrUpdate_564198(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1225,51 +1229,51 @@ proc url_NotificationRecipientUserCreateOrUpdate_594065(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_NotificationRecipientUserCreateOrUpdate_594064(path: JsonNode;
+proc validate_NotificationRecipientUserCreateOrUpdate_564197(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Adds the API Management User to the list of Recipients for the Notification.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
-  ##   subscriptionId: JString (required)
-  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   notificationName: JString (required)
-  ##                   : Notification Name Identifier.
-  ##   uid: JString (required)
-  ##      : User identifier. Must be unique in the current API Management service instance.
   ##   serviceName: JString (required)
   ##              : The name of the API Management service.
+  ##   subscriptionId: JString (required)
+  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   uid: JString (required)
+  ##      : User identifier. Must be unique in the current API Management service instance.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
+  ##   notificationName: JString (required)
+  ##                   : Notification Name Identifier.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594066 = path.getOrDefault("resourceGroupName")
-  valid_594066 = validateParameter(valid_594066, JString, required = true,
+        "path argument is necessary due to required `serviceName` field"
+  var valid_564199 = path.getOrDefault("serviceName")
+  valid_564199 = validateParameter(valid_564199, JString, required = true,
                                  default = nil)
-  if valid_594066 != nil:
-    section.add "resourceGroupName", valid_594066
-  var valid_594067 = path.getOrDefault("subscriptionId")
-  valid_594067 = validateParameter(valid_594067, JString, required = true,
+  if valid_564199 != nil:
+    section.add "serviceName", valid_564199
+  var valid_564200 = path.getOrDefault("subscriptionId")
+  valid_564200 = validateParameter(valid_564200, JString, required = true,
                                  default = nil)
-  if valid_594067 != nil:
-    section.add "subscriptionId", valid_594067
-  var valid_594068 = path.getOrDefault("notificationName")
-  valid_594068 = validateParameter(valid_594068, JString, required = true, default = newJString(
+  if valid_564200 != nil:
+    section.add "subscriptionId", valid_564200
+  var valid_564201 = path.getOrDefault("uid")
+  valid_564201 = validateParameter(valid_564201, JString, required = true,
+                                 default = nil)
+  if valid_564201 != nil:
+    section.add "uid", valid_564201
+  var valid_564202 = path.getOrDefault("resourceGroupName")
+  valid_564202 = validateParameter(valid_564202, JString, required = true,
+                                 default = nil)
+  if valid_564202 != nil:
+    section.add "resourceGroupName", valid_564202
+  var valid_564203 = path.getOrDefault("notificationName")
+  valid_564203 = validateParameter(valid_564203, JString, required = true, default = newJString(
       "RequestPublisherNotificationMessage"))
-  if valid_594068 != nil:
-    section.add "notificationName", valid_594068
-  var valid_594069 = path.getOrDefault("uid")
-  valid_594069 = validateParameter(valid_594069, JString, required = true,
-                                 default = nil)
-  if valid_594069 != nil:
-    section.add "uid", valid_594069
-  var valid_594070 = path.getOrDefault("serviceName")
-  valid_594070 = validateParameter(valid_594070, JString, required = true,
-                                 default = nil)
-  if valid_594070 != nil:
-    section.add "serviceName", valid_594070
+  if valid_564203 != nil:
+    section.add "notificationName", valid_564203
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1277,11 +1281,11 @@ proc validate_NotificationRecipientUserCreateOrUpdate_594064(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594071 = query.getOrDefault("api-version")
-  valid_594071 = validateParameter(valid_594071, JString, required = true,
+  var valid_564204 = query.getOrDefault("api-version")
+  valid_564204 = validateParameter(valid_564204, JString, required = true,
                                  default = nil)
-  if valid_594071 != nil:
-    section.add "api-version", valid_594071
+  if valid_564204 != nil:
+    section.add "api-version", valid_564204
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1290,57 +1294,57 @@ proc validate_NotificationRecipientUserCreateOrUpdate_594064(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594072: Call_NotificationRecipientUserCreateOrUpdate_594063;
+proc call*(call_564205: Call_NotificationRecipientUserCreateOrUpdate_564196;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Adds the API Management User to the list of Recipients for the Notification.
   ## 
-  let valid = call_594072.validator(path, query, header, formData, body)
-  let scheme = call_594072.pickScheme
+  let valid = call_564205.validator(path, query, header, formData, body)
+  let scheme = call_564205.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594072.url(scheme.get, call_594072.host, call_594072.base,
-                         call_594072.route, valid.getOrDefault("path"),
+  let url = call_564205.url(scheme.get, call_564205.host, call_564205.base,
+                         call_564205.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594072, url, valid)
+  result = hook(call_564205, url, valid)
 
-proc call*(call_594073: Call_NotificationRecipientUserCreateOrUpdate_594063;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          uid: string; serviceName: string;
+proc call*(call_564206: Call_NotificationRecipientUserCreateOrUpdate_564196;
+          serviceName: string; apiVersion: string; subscriptionId: string;
+          uid: string; resourceGroupName: string;
           notificationName: string = "RequestPublisherNotificationMessage"): Recallable =
   ## notificationRecipientUserCreateOrUpdate
   ## Adds the API Management User to the list of Recipients for the Notification.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   serviceName: string (required)
+  ##              : The name of the API Management service.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   notificationName: string (required)
-  ##                   : Notification Name Identifier.
   ##   uid: string (required)
   ##      : User identifier. Must be unique in the current API Management service instance.
-  ##   serviceName: string (required)
-  ##              : The name of the API Management service.
-  var path_594074 = newJObject()
-  var query_594075 = newJObject()
-  add(path_594074, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594075, "api-version", newJString(apiVersion))
-  add(path_594074, "subscriptionId", newJString(subscriptionId))
-  add(path_594074, "notificationName", newJString(notificationName))
-  add(path_594074, "uid", newJString(uid))
-  add(path_594074, "serviceName", newJString(serviceName))
-  result = call_594073.call(path_594074, query_594075, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  ##   notificationName: string (required)
+  ##                   : Notification Name Identifier.
+  var path_564207 = newJObject()
+  var query_564208 = newJObject()
+  add(path_564207, "serviceName", newJString(serviceName))
+  add(query_564208, "api-version", newJString(apiVersion))
+  add(path_564207, "subscriptionId", newJString(subscriptionId))
+  add(path_564207, "uid", newJString(uid))
+  add(path_564207, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564207, "notificationName", newJString(notificationName))
+  result = call_564206.call(path_564207, query_564208, nil, nil, nil)
 
-var notificationRecipientUserCreateOrUpdate* = Call_NotificationRecipientUserCreateOrUpdate_594063(
+var notificationRecipientUserCreateOrUpdate* = Call_NotificationRecipientUserCreateOrUpdate_564196(
     name: "notificationRecipientUserCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ApiManagement/service/{serviceName}/notifications/{notificationName}/recipientUsers/{uid}",
-    validator: validate_NotificationRecipientUserCreateOrUpdate_594064, base: "",
-    url: url_NotificationRecipientUserCreateOrUpdate_594065,
+    validator: validate_NotificationRecipientUserCreateOrUpdate_564197, base: "",
+    url: url_NotificationRecipientUserCreateOrUpdate_564198,
     schemes: {Scheme.Https})
 type
-  Call_NotificationRecipientUserGet_594089 = ref object of OpenApiRestCall_593424
-proc url_NotificationRecipientUserGet_594091(protocol: Scheme; host: string;
+  Call_NotificationRecipientUserGet_564222 = ref object of OpenApiRestCall_563555
+proc url_NotificationRecipientUserGet_564224(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1370,51 +1374,51 @@ proc url_NotificationRecipientUserGet_594091(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_NotificationRecipientUserGet_594090(path: JsonNode; query: JsonNode;
+proc validate_NotificationRecipientUserGet_564223(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Determine if the Notification Recipient User is subscribed to the notification.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
-  ##   subscriptionId: JString (required)
-  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   notificationName: JString (required)
-  ##                   : Notification Name Identifier.
-  ##   uid: JString (required)
-  ##      : User identifier. Must be unique in the current API Management service instance.
   ##   serviceName: JString (required)
   ##              : The name of the API Management service.
+  ##   subscriptionId: JString (required)
+  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   uid: JString (required)
+  ##      : User identifier. Must be unique in the current API Management service instance.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
+  ##   notificationName: JString (required)
+  ##                   : Notification Name Identifier.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594092 = path.getOrDefault("resourceGroupName")
-  valid_594092 = validateParameter(valid_594092, JString, required = true,
+        "path argument is necessary due to required `serviceName` field"
+  var valid_564225 = path.getOrDefault("serviceName")
+  valid_564225 = validateParameter(valid_564225, JString, required = true,
                                  default = nil)
-  if valid_594092 != nil:
-    section.add "resourceGroupName", valid_594092
-  var valid_594093 = path.getOrDefault("subscriptionId")
-  valid_594093 = validateParameter(valid_594093, JString, required = true,
+  if valid_564225 != nil:
+    section.add "serviceName", valid_564225
+  var valid_564226 = path.getOrDefault("subscriptionId")
+  valid_564226 = validateParameter(valid_564226, JString, required = true,
                                  default = nil)
-  if valid_594093 != nil:
-    section.add "subscriptionId", valid_594093
-  var valid_594094 = path.getOrDefault("notificationName")
-  valid_594094 = validateParameter(valid_594094, JString, required = true, default = newJString(
+  if valid_564226 != nil:
+    section.add "subscriptionId", valid_564226
+  var valid_564227 = path.getOrDefault("uid")
+  valid_564227 = validateParameter(valid_564227, JString, required = true,
+                                 default = nil)
+  if valid_564227 != nil:
+    section.add "uid", valid_564227
+  var valid_564228 = path.getOrDefault("resourceGroupName")
+  valid_564228 = validateParameter(valid_564228, JString, required = true,
+                                 default = nil)
+  if valid_564228 != nil:
+    section.add "resourceGroupName", valid_564228
+  var valid_564229 = path.getOrDefault("notificationName")
+  valid_564229 = validateParameter(valid_564229, JString, required = true, default = newJString(
       "RequestPublisherNotificationMessage"))
-  if valid_594094 != nil:
-    section.add "notificationName", valid_594094
-  var valid_594095 = path.getOrDefault("uid")
-  valid_594095 = validateParameter(valid_594095, JString, required = true,
-                                 default = nil)
-  if valid_594095 != nil:
-    section.add "uid", valid_594095
-  var valid_594096 = path.getOrDefault("serviceName")
-  valid_594096 = validateParameter(valid_594096, JString, required = true,
-                                 default = nil)
-  if valid_594096 != nil:
-    section.add "serviceName", valid_594096
+  if valid_564229 != nil:
+    section.add "notificationName", valid_564229
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1422,11 +1426,11 @@ proc validate_NotificationRecipientUserGet_594090(path: JsonNode; query: JsonNod
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594097 = query.getOrDefault("api-version")
-  valid_594097 = validateParameter(valid_594097, JString, required = true,
+  var valid_564230 = query.getOrDefault("api-version")
+  valid_564230 = validateParameter(valid_564230, JString, required = true,
                                  default = nil)
-  if valid_594097 != nil:
-    section.add "api-version", valid_594097
+  if valid_564230 != nil:
+    section.add "api-version", valid_564230
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1435,55 +1439,55 @@ proc validate_NotificationRecipientUserGet_594090(path: JsonNode; query: JsonNod
   if body != nil:
     result.add "body", body
 
-proc call*(call_594098: Call_NotificationRecipientUserGet_594089; path: JsonNode;
+proc call*(call_564231: Call_NotificationRecipientUserGet_564222; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Determine if the Notification Recipient User is subscribed to the notification.
   ## 
-  let valid = call_594098.validator(path, query, header, formData, body)
-  let scheme = call_594098.pickScheme
+  let valid = call_564231.validator(path, query, header, formData, body)
+  let scheme = call_564231.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594098.url(scheme.get, call_594098.host, call_594098.base,
-                         call_594098.route, valid.getOrDefault("path"),
+  let url = call_564231.url(scheme.get, call_564231.host, call_564231.base,
+                         call_564231.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594098, url, valid)
+  result = hook(call_564231, url, valid)
 
-proc call*(call_594099: Call_NotificationRecipientUserGet_594089;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          uid: string; serviceName: string;
+proc call*(call_564232: Call_NotificationRecipientUserGet_564222;
+          serviceName: string; apiVersion: string; subscriptionId: string;
+          uid: string; resourceGroupName: string;
           notificationName: string = "RequestPublisherNotificationMessage"): Recallable =
   ## notificationRecipientUserGet
   ## Determine if the Notification Recipient User is subscribed to the notification.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   serviceName: string (required)
+  ##              : The name of the API Management service.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   notificationName: string (required)
-  ##                   : Notification Name Identifier.
   ##   uid: string (required)
   ##      : User identifier. Must be unique in the current API Management service instance.
-  ##   serviceName: string (required)
-  ##              : The name of the API Management service.
-  var path_594100 = newJObject()
-  var query_594101 = newJObject()
-  add(path_594100, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594101, "api-version", newJString(apiVersion))
-  add(path_594100, "subscriptionId", newJString(subscriptionId))
-  add(path_594100, "notificationName", newJString(notificationName))
-  add(path_594100, "uid", newJString(uid))
-  add(path_594100, "serviceName", newJString(serviceName))
-  result = call_594099.call(path_594100, query_594101, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  ##   notificationName: string (required)
+  ##                   : Notification Name Identifier.
+  var path_564233 = newJObject()
+  var query_564234 = newJObject()
+  add(path_564233, "serviceName", newJString(serviceName))
+  add(query_564234, "api-version", newJString(apiVersion))
+  add(path_564233, "subscriptionId", newJString(subscriptionId))
+  add(path_564233, "uid", newJString(uid))
+  add(path_564233, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564233, "notificationName", newJString(notificationName))
+  result = call_564232.call(path_564233, query_564234, nil, nil, nil)
 
-var notificationRecipientUserGet* = Call_NotificationRecipientUserGet_594089(
+var notificationRecipientUserGet* = Call_NotificationRecipientUserGet_564222(
     name: "notificationRecipientUserGet", meth: HttpMethod.HttpHead,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ApiManagement/service/{serviceName}/notifications/{notificationName}/recipientUsers/{uid}",
-    validator: validate_NotificationRecipientUserGet_594090, base: "",
-    url: url_NotificationRecipientUserGet_594091, schemes: {Scheme.Https})
+    validator: validate_NotificationRecipientUserGet_564223, base: "",
+    url: url_NotificationRecipientUserGet_564224, schemes: {Scheme.Https})
 type
-  Call_NotificationRecipientUserDelete_594076 = ref object of OpenApiRestCall_593424
-proc url_NotificationRecipientUserDelete_594078(protocol: Scheme; host: string;
+  Call_NotificationRecipientUserDelete_564209 = ref object of OpenApiRestCall_563555
+proc url_NotificationRecipientUserDelete_564211(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1513,51 +1517,51 @@ proc url_NotificationRecipientUserDelete_594078(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_NotificationRecipientUserDelete_594077(path: JsonNode;
+proc validate_NotificationRecipientUserDelete_564210(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Removes the API Management user from the list of Notification.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
-  ##   subscriptionId: JString (required)
-  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   notificationName: JString (required)
-  ##                   : Notification Name Identifier.
-  ##   uid: JString (required)
-  ##      : User identifier. Must be unique in the current API Management service instance.
   ##   serviceName: JString (required)
   ##              : The name of the API Management service.
+  ##   subscriptionId: JString (required)
+  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   uid: JString (required)
+  ##      : User identifier. Must be unique in the current API Management service instance.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
+  ##   notificationName: JString (required)
+  ##                   : Notification Name Identifier.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594079 = path.getOrDefault("resourceGroupName")
-  valid_594079 = validateParameter(valid_594079, JString, required = true,
+        "path argument is necessary due to required `serviceName` field"
+  var valid_564212 = path.getOrDefault("serviceName")
+  valid_564212 = validateParameter(valid_564212, JString, required = true,
                                  default = nil)
-  if valid_594079 != nil:
-    section.add "resourceGroupName", valid_594079
-  var valid_594080 = path.getOrDefault("subscriptionId")
-  valid_594080 = validateParameter(valid_594080, JString, required = true,
+  if valid_564212 != nil:
+    section.add "serviceName", valid_564212
+  var valid_564213 = path.getOrDefault("subscriptionId")
+  valid_564213 = validateParameter(valid_564213, JString, required = true,
                                  default = nil)
-  if valid_594080 != nil:
-    section.add "subscriptionId", valid_594080
-  var valid_594081 = path.getOrDefault("notificationName")
-  valid_594081 = validateParameter(valid_594081, JString, required = true, default = newJString(
+  if valid_564213 != nil:
+    section.add "subscriptionId", valid_564213
+  var valid_564214 = path.getOrDefault("uid")
+  valid_564214 = validateParameter(valid_564214, JString, required = true,
+                                 default = nil)
+  if valid_564214 != nil:
+    section.add "uid", valid_564214
+  var valid_564215 = path.getOrDefault("resourceGroupName")
+  valid_564215 = validateParameter(valid_564215, JString, required = true,
+                                 default = nil)
+  if valid_564215 != nil:
+    section.add "resourceGroupName", valid_564215
+  var valid_564216 = path.getOrDefault("notificationName")
+  valid_564216 = validateParameter(valid_564216, JString, required = true, default = newJString(
       "RequestPublisherNotificationMessage"))
-  if valid_594081 != nil:
-    section.add "notificationName", valid_594081
-  var valid_594082 = path.getOrDefault("uid")
-  valid_594082 = validateParameter(valid_594082, JString, required = true,
-                                 default = nil)
-  if valid_594082 != nil:
-    section.add "uid", valid_594082
-  var valid_594083 = path.getOrDefault("serviceName")
-  valid_594083 = validateParameter(valid_594083, JString, required = true,
-                                 default = nil)
-  if valid_594083 != nil:
-    section.add "serviceName", valid_594083
+  if valid_564216 != nil:
+    section.add "notificationName", valid_564216
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1565,11 +1569,11 @@ proc validate_NotificationRecipientUserDelete_594077(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594084 = query.getOrDefault("api-version")
-  valid_594084 = validateParameter(valid_594084, JString, required = true,
+  var valid_564217 = query.getOrDefault("api-version")
+  valid_564217 = validateParameter(valid_564217, JString, required = true,
                                  default = nil)
-  if valid_594084 != nil:
-    section.add "api-version", valid_594084
+  if valid_564217 != nil:
+    section.add "api-version", valid_564217
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1578,53 +1582,53 @@ proc validate_NotificationRecipientUserDelete_594077(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594085: Call_NotificationRecipientUserDelete_594076;
+proc call*(call_564218: Call_NotificationRecipientUserDelete_564209;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Removes the API Management user from the list of Notification.
   ## 
-  let valid = call_594085.validator(path, query, header, formData, body)
-  let scheme = call_594085.pickScheme
+  let valid = call_564218.validator(path, query, header, formData, body)
+  let scheme = call_564218.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594085.url(scheme.get, call_594085.host, call_594085.base,
-                         call_594085.route, valid.getOrDefault("path"),
+  let url = call_564218.url(scheme.get, call_564218.host, call_564218.base,
+                         call_564218.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594085, url, valid)
+  result = hook(call_564218, url, valid)
 
-proc call*(call_594086: Call_NotificationRecipientUserDelete_594076;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          uid: string; serviceName: string;
+proc call*(call_564219: Call_NotificationRecipientUserDelete_564209;
+          serviceName: string; apiVersion: string; subscriptionId: string;
+          uid: string; resourceGroupName: string;
           notificationName: string = "RequestPublisherNotificationMessage"): Recallable =
   ## notificationRecipientUserDelete
   ## Removes the API Management user from the list of Notification.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   serviceName: string (required)
+  ##              : The name of the API Management service.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   notificationName: string (required)
-  ##                   : Notification Name Identifier.
   ##   uid: string (required)
   ##      : User identifier. Must be unique in the current API Management service instance.
-  ##   serviceName: string (required)
-  ##              : The name of the API Management service.
-  var path_594087 = newJObject()
-  var query_594088 = newJObject()
-  add(path_594087, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594088, "api-version", newJString(apiVersion))
-  add(path_594087, "subscriptionId", newJString(subscriptionId))
-  add(path_594087, "notificationName", newJString(notificationName))
-  add(path_594087, "uid", newJString(uid))
-  add(path_594087, "serviceName", newJString(serviceName))
-  result = call_594086.call(path_594087, query_594088, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  ##   notificationName: string (required)
+  ##                   : Notification Name Identifier.
+  var path_564220 = newJObject()
+  var query_564221 = newJObject()
+  add(path_564220, "serviceName", newJString(serviceName))
+  add(query_564221, "api-version", newJString(apiVersion))
+  add(path_564220, "subscriptionId", newJString(subscriptionId))
+  add(path_564220, "uid", newJString(uid))
+  add(path_564220, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564220, "notificationName", newJString(notificationName))
+  result = call_564219.call(path_564220, query_564221, nil, nil, nil)
 
-var notificationRecipientUserDelete* = Call_NotificationRecipientUserDelete_594076(
+var notificationRecipientUserDelete* = Call_NotificationRecipientUserDelete_564209(
     name: "notificationRecipientUserDelete", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ApiManagement/service/{serviceName}/notifications/{notificationName}/recipientUsers/{uid}",
-    validator: validate_NotificationRecipientUserDelete_594077, base: "",
-    url: url_NotificationRecipientUserDelete_594078, schemes: {Scheme.Https})
+    validator: validate_NotificationRecipientUserDelete_564210, base: "",
+    url: url_NotificationRecipientUserDelete_564211, schemes: {Scheme.Https})
 export
   rest
 

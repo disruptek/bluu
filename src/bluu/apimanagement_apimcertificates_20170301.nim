@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_573657 = ref object of OpenApiRestCall
+  OpenApiRestCall_563555 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_573657](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563555](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_573657): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563555): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,15 +107,15 @@ const
   macServiceName = "apimanagement-apimcertificates"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_CertificateList_573879 = ref object of OpenApiRestCall_573657
-proc url_CertificateList_573881(protocol: Scheme; host: string; base: string;
+  Call_CertificateList_563777 = ref object of OpenApiRestCall_563555
+proc url_CertificateList_563779(protocol: Scheme; host: string; base: string;
                                route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_CertificateList_573880(path: JsonNode; query: JsonNode;
+proc validate_CertificateList_563778(path: JsonNode; query: JsonNode;
                                     header: JsonNode; formData: JsonNode;
                                     body: JsonNode): JsonNode =
   ## Lists a collection of all certificates in the specified service instance.
@@ -121,10 +125,10 @@ proc validate_CertificateList_573880(path: JsonNode; query: JsonNode;
   section = newJObject()
   result.add "path", section
   ## parameters in `query` object:
-  ##   api-version: JString (required)
-  ##              : Version of the API to be used with the client request.
   ##   $top: JInt
   ##       : Number of records to return.
+  ##   api-version: JString (required)
+  ##              : Version of the API to be used with the client request.
   ##   $skip: JInt
   ##        : Number of records to skip.
   ##   $filter: JString
@@ -136,26 +140,26 @@ proc validate_CertificateList_573880(path: JsonNode; query: JsonNode;
   ## | thumbprint     | ge, le, eq, ne, gt, lt | substringof, contains, startswith, endswith |
   ## | expirationDate | ge, le, eq, ne, gt, lt | N/A                                         |
   section = newJObject()
+  var valid_563928 = query.getOrDefault("$top")
+  valid_563928 = validateParameter(valid_563928, JInt, required = false, default = nil)
+  if valid_563928 != nil:
+    section.add "$top", valid_563928
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574028 = query.getOrDefault("api-version")
-  valid_574028 = validateParameter(valid_574028, JString, required = true,
+  var valid_563929 = query.getOrDefault("api-version")
+  valid_563929 = validateParameter(valid_563929, JString, required = true,
                                  default = nil)
-  if valid_574028 != nil:
-    section.add "api-version", valid_574028
-  var valid_574029 = query.getOrDefault("$top")
-  valid_574029 = validateParameter(valid_574029, JInt, required = false, default = nil)
-  if valid_574029 != nil:
-    section.add "$top", valid_574029
-  var valid_574030 = query.getOrDefault("$skip")
-  valid_574030 = validateParameter(valid_574030, JInt, required = false, default = nil)
-  if valid_574030 != nil:
-    section.add "$skip", valid_574030
-  var valid_574031 = query.getOrDefault("$filter")
-  valid_574031 = validateParameter(valid_574031, JString, required = false,
+  if valid_563929 != nil:
+    section.add "api-version", valid_563929
+  var valid_563930 = query.getOrDefault("$skip")
+  valid_563930 = validateParameter(valid_563930, JInt, required = false, default = nil)
+  if valid_563930 != nil:
+    section.add "$skip", valid_563930
+  var valid_563931 = query.getOrDefault("$filter")
+  valid_563931 = validateParameter(valid_563931, JString, required = false,
                                  default = nil)
-  if valid_574031 != nil:
-    section.add "$filter", valid_574031
+  if valid_563931 != nil:
+    section.add "$filter", valid_563931
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -164,27 +168,27 @@ proc validate_CertificateList_573880(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574058: Call_CertificateList_573879; path: JsonNode; query: JsonNode;
+proc call*(call_563958: Call_CertificateList_563777; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists a collection of all certificates in the specified service instance.
   ## 
-  let valid = call_574058.validator(path, query, header, formData, body)
-  let scheme = call_574058.pickScheme
+  let valid = call_563958.validator(path, query, header, formData, body)
+  let scheme = call_563958.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574058.url(scheme.get, call_574058.host, call_574058.base,
-                         call_574058.route, valid.getOrDefault("path"),
+  let url = call_563958.url(scheme.get, call_563958.host, call_563958.base,
+                         call_563958.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574058, url, valid)
+  result = hook(call_563958, url, valid)
 
-proc call*(call_574129: Call_CertificateList_573879; apiVersion: string;
+proc call*(call_564029: Call_CertificateList_563777; apiVersion: string;
           Top: int = 0; Skip: int = 0; Filter: string = ""): Recallable =
   ## certificateList
   ## Lists a collection of all certificates in the specified service instance.
-  ##   apiVersion: string (required)
-  ##             : Version of the API to be used with the client request.
   ##   Top: int
   ##      : Number of records to return.
+  ##   apiVersion: string (required)
+  ##             : Version of the API to be used with the client request.
   ##   Skip: int
   ##       : Number of records to skip.
   ##   Filter: string
@@ -195,20 +199,20 @@ proc call*(call_574129: Call_CertificateList_573879; apiVersion: string;
   ## | subject        | ge, le, eq, ne, gt, lt | substringof, contains, startswith, endswith |
   ## | thumbprint     | ge, le, eq, ne, gt, lt | substringof, contains, startswith, endswith |
   ## | expirationDate | ge, le, eq, ne, gt, lt | N/A                                         |
-  var query_574130 = newJObject()
-  add(query_574130, "api-version", newJString(apiVersion))
-  add(query_574130, "$top", newJInt(Top))
-  add(query_574130, "$skip", newJInt(Skip))
-  add(query_574130, "$filter", newJString(Filter))
-  result = call_574129.call(nil, query_574130, nil, nil, nil)
+  var query_564030 = newJObject()
+  add(query_564030, "$top", newJInt(Top))
+  add(query_564030, "api-version", newJString(apiVersion))
+  add(query_564030, "$skip", newJInt(Skip))
+  add(query_564030, "$filter", newJString(Filter))
+  result = call_564029.call(nil, query_564030, nil, nil, nil)
 
-var certificateList* = Call_CertificateList_573879(name: "certificateList",
+var certificateList* = Call_CertificateList_563777(name: "certificateList",
     meth: HttpMethod.HttpGet, host: "azure.local", route: "/certificates",
-    validator: validate_CertificateList_573880, base: "", url: url_CertificateList_573881,
+    validator: validate_CertificateList_563778, base: "", url: url_CertificateList_563779,
     schemes: {Scheme.Https})
 type
-  Call_CertificateCreateOrUpdate_574202 = ref object of OpenApiRestCall_573657
-proc url_CertificateCreateOrUpdate_574204(protocol: Scheme; host: string;
+  Call_CertificateCreateOrUpdate_564102 = ref object of OpenApiRestCall_563555
+proc url_CertificateCreateOrUpdate_564104(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -223,7 +227,7 @@ proc url_CertificateCreateOrUpdate_574204(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_CertificateCreateOrUpdate_574203(path: JsonNode; query: JsonNode;
+proc validate_CertificateCreateOrUpdate_564103(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Creates or updates the certificate being used for authentication with the backend.
   ## 
@@ -237,11 +241,11 @@ proc validate_CertificateCreateOrUpdate_574203(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `certificateId` field"
-  var valid_574222 = path.getOrDefault("certificateId")
-  valid_574222 = validateParameter(valid_574222, JString, required = true,
+  var valid_564122 = path.getOrDefault("certificateId")
+  valid_564122 = validateParameter(valid_564122, JString, required = true,
                                  default = nil)
-  if valid_574222 != nil:
-    section.add "certificateId", valid_574222
+  if valid_564122 != nil:
+    section.add "certificateId", valid_564122
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -249,21 +253,21 @@ proc validate_CertificateCreateOrUpdate_574203(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574223 = query.getOrDefault("api-version")
-  valid_574223 = validateParameter(valid_574223, JString, required = true,
+  var valid_564123 = query.getOrDefault("api-version")
+  valid_564123 = validateParameter(valid_564123, JString, required = true,
                                  default = nil)
-  if valid_574223 != nil:
-    section.add "api-version", valid_574223
+  if valid_564123 != nil:
+    section.add "api-version", valid_564123
   result.add "query", section
   ## parameters in `header` object:
   ##   If-Match: JString
   ##           : The entity state (Etag) version of the certificate to update. A value of "*" can be used for If-Match to unconditionally apply the operation..
   section = newJObject()
-  var valid_574224 = header.getOrDefault("If-Match")
-  valid_574224 = validateParameter(valid_574224, JString, required = false,
+  var valid_564124 = header.getOrDefault("If-Match")
+  valid_564124 = validateParameter(valid_564124, JString, required = false,
                                  default = nil)
-  if valid_574224 != nil:
-    section.add "If-Match", valid_574224
+  if valid_564124 != nil:
+    section.add "If-Match", valid_564124
   result.add "header", section
   section = newJObject()
   result.add "formData", section
@@ -275,50 +279,50 @@ proc validate_CertificateCreateOrUpdate_574203(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574226: Call_CertificateCreateOrUpdate_574202; path: JsonNode;
+proc call*(call_564126: Call_CertificateCreateOrUpdate_564102; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Creates or updates the certificate being used for authentication with the backend.
   ## 
   ## How to secure back-end services using client certificate authentication in Azure API Management
   ## https://azure.microsoft.com/en-us/documentation/articles/api-management-howto-mutual-certificates/
-  let valid = call_574226.validator(path, query, header, formData, body)
-  let scheme = call_574226.pickScheme
+  let valid = call_564126.validator(path, query, header, formData, body)
+  let scheme = call_564126.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574226.url(scheme.get, call_574226.host, call_574226.base,
-                         call_574226.route, valid.getOrDefault("path"),
+  let url = call_564126.url(scheme.get, call_564126.host, call_564126.base,
+                         call_564126.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574226, url, valid)
+  result = hook(call_564126, url, valid)
 
-proc call*(call_574227: Call_CertificateCreateOrUpdate_574202; apiVersion: string;
-          certificateId: string; parameters: JsonNode): Recallable =
+proc call*(call_564127: Call_CertificateCreateOrUpdate_564102; apiVersion: string;
+          parameters: JsonNode; certificateId: string): Recallable =
   ## certificateCreateOrUpdate
   ## Creates or updates the certificate being used for authentication with the backend.
   ## How to secure back-end services using client certificate authentication in Azure API Management
   ## https://azure.microsoft.com/en-us/documentation/articles/api-management-howto-mutual-certificates/
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
-  ##   certificateId: string (required)
-  ##                : Identifier of the certificate entity. Must be unique in the current API Management service instance.
   ##   parameters: JObject (required)
   ##             : Create or Update parameters.
-  var path_574228 = newJObject()
-  var query_574229 = newJObject()
-  var body_574230 = newJObject()
-  add(query_574229, "api-version", newJString(apiVersion))
-  add(path_574228, "certificateId", newJString(certificateId))
+  ##   certificateId: string (required)
+  ##                : Identifier of the certificate entity. Must be unique in the current API Management service instance.
+  var path_564128 = newJObject()
+  var query_564129 = newJObject()
+  var body_564130 = newJObject()
+  add(query_564129, "api-version", newJString(apiVersion))
   if parameters != nil:
-    body_574230 = parameters
-  result = call_574227.call(path_574228, query_574229, nil, nil, body_574230)
+    body_564130 = parameters
+  add(path_564128, "certificateId", newJString(certificateId))
+  result = call_564127.call(path_564128, query_564129, nil, nil, body_564130)
 
-var certificateCreateOrUpdate* = Call_CertificateCreateOrUpdate_574202(
+var certificateCreateOrUpdate* = Call_CertificateCreateOrUpdate_564102(
     name: "certificateCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "azure.local", route: "/certificates/{certificateId}",
-    validator: validate_CertificateCreateOrUpdate_574203, base: "",
-    url: url_CertificateCreateOrUpdate_574204, schemes: {Scheme.Https})
+    validator: validate_CertificateCreateOrUpdate_564103, base: "",
+    url: url_CertificateCreateOrUpdate_564104, schemes: {Scheme.Https})
 type
-  Call_CertificateGet_574170 = ref object of OpenApiRestCall_573657
-proc url_CertificateGet_574172(protocol: Scheme; host: string; base: string;
+  Call_CertificateGet_564070 = ref object of OpenApiRestCall_563555
+proc url_CertificateGet_564072(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -333,7 +337,7 @@ proc url_CertificateGet_574172(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_CertificateGet_574171(path: JsonNode; query: JsonNode;
+proc validate_CertificateGet_564071(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## Gets the details of the certificate specified by its identifier.
@@ -346,11 +350,11 @@ proc validate_CertificateGet_574171(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `certificateId` field"
-  var valid_574196 = path.getOrDefault("certificateId")
-  valid_574196 = validateParameter(valid_574196, JString, required = true,
+  var valid_564096 = path.getOrDefault("certificateId")
+  valid_564096 = validateParameter(valid_564096, JString, required = true,
                                  default = nil)
-  if valid_574196 != nil:
-    section.add "certificateId", valid_574196
+  if valid_564096 != nil:
+    section.add "certificateId", valid_564096
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -358,11 +362,11 @@ proc validate_CertificateGet_574171(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574197 = query.getOrDefault("api-version")
-  valid_574197 = validateParameter(valid_574197, JString, required = true,
+  var valid_564097 = query.getOrDefault("api-version")
+  valid_564097 = validateParameter(valid_564097, JString, required = true,
                                  default = nil)
-  if valid_574197 != nil:
-    section.add "api-version", valid_574197
+  if valid_564097 != nil:
+    section.add "api-version", valid_564097
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -371,20 +375,20 @@ proc validate_CertificateGet_574171(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574198: Call_CertificateGet_574170; path: JsonNode; query: JsonNode;
+proc call*(call_564098: Call_CertificateGet_564070; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the details of the certificate specified by its identifier.
   ## 
-  let valid = call_574198.validator(path, query, header, formData, body)
-  let scheme = call_574198.pickScheme
+  let valid = call_564098.validator(path, query, header, formData, body)
+  let scheme = call_564098.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574198.url(scheme.get, call_574198.host, call_574198.base,
-                         call_574198.route, valid.getOrDefault("path"),
+  let url = call_564098.url(scheme.get, call_564098.host, call_564098.base,
+                         call_564098.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574198, url, valid)
+  result = hook(call_564098, url, valid)
 
-proc call*(call_574199: Call_CertificateGet_574170; apiVersion: string;
+proc call*(call_564099: Call_CertificateGet_564070; apiVersion: string;
           certificateId: string): Recallable =
   ## certificateGet
   ## Gets the details of the certificate specified by its identifier.
@@ -392,19 +396,19 @@ proc call*(call_574199: Call_CertificateGet_574170; apiVersion: string;
   ##             : Version of the API to be used with the client request.
   ##   certificateId: string (required)
   ##                : Identifier of the certificate entity. Must be unique in the current API Management service instance.
-  var path_574200 = newJObject()
-  var query_574201 = newJObject()
-  add(query_574201, "api-version", newJString(apiVersion))
-  add(path_574200, "certificateId", newJString(certificateId))
-  result = call_574199.call(path_574200, query_574201, nil, nil, nil)
+  var path_564100 = newJObject()
+  var query_564101 = newJObject()
+  add(query_564101, "api-version", newJString(apiVersion))
+  add(path_564100, "certificateId", newJString(certificateId))
+  result = call_564099.call(path_564100, query_564101, nil, nil, nil)
 
-var certificateGet* = Call_CertificateGet_574170(name: "certificateGet",
+var certificateGet* = Call_CertificateGet_564070(name: "certificateGet",
     meth: HttpMethod.HttpGet, host: "azure.local",
-    route: "/certificates/{certificateId}", validator: validate_CertificateGet_574171,
-    base: "", url: url_CertificateGet_574172, schemes: {Scheme.Https})
+    route: "/certificates/{certificateId}", validator: validate_CertificateGet_564071,
+    base: "", url: url_CertificateGet_564072, schemes: {Scheme.Https})
 type
-  Call_CertificateDelete_574231 = ref object of OpenApiRestCall_573657
-proc url_CertificateDelete_574233(protocol: Scheme; host: string; base: string;
+  Call_CertificateDelete_564131 = ref object of OpenApiRestCall_563555
+proc url_CertificateDelete_564133(protocol: Scheme; host: string; base: string;
                                  route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -419,7 +423,7 @@ proc url_CertificateDelete_574233(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_CertificateDelete_574232(path: JsonNode; query: JsonNode;
+proc validate_CertificateDelete_564132(path: JsonNode; query: JsonNode;
                                       header: JsonNode; formData: JsonNode;
                                       body: JsonNode): JsonNode =
   ## Deletes specific certificate.
@@ -432,11 +436,11 @@ proc validate_CertificateDelete_574232(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `certificateId` field"
-  var valid_574234 = path.getOrDefault("certificateId")
-  valid_574234 = validateParameter(valid_574234, JString, required = true,
+  var valid_564134 = path.getOrDefault("certificateId")
+  valid_564134 = validateParameter(valid_564134, JString, required = true,
                                  default = nil)
-  if valid_574234 != nil:
-    section.add "certificateId", valid_574234
+  if valid_564134 != nil:
+    section.add "certificateId", valid_564134
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -444,11 +448,11 @@ proc validate_CertificateDelete_574232(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574235 = query.getOrDefault("api-version")
-  valid_574235 = validateParameter(valid_574235, JString, required = true,
+  var valid_564135 = query.getOrDefault("api-version")
+  valid_564135 = validateParameter(valid_564135, JString, required = true,
                                  default = nil)
-  if valid_574235 != nil:
-    section.add "api-version", valid_574235
+  if valid_564135 != nil:
+    section.add "api-version", valid_564135
   result.add "query", section
   ## parameters in `header` object:
   ##   If-Match: JString (required)
@@ -456,31 +460,31 @@ proc validate_CertificateDelete_574232(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert header != nil,
         "header argument is necessary due to required `If-Match` field"
-  var valid_574236 = header.getOrDefault("If-Match")
-  valid_574236 = validateParameter(valid_574236, JString, required = true,
+  var valid_564136 = header.getOrDefault("If-Match")
+  valid_564136 = validateParameter(valid_564136, JString, required = true,
                                  default = nil)
-  if valid_574236 != nil:
-    section.add "If-Match", valid_574236
+  if valid_564136 != nil:
+    section.add "If-Match", valid_564136
   result.add "header", section
   section = newJObject()
   result.add "formData", section
   if body != nil:
     result.add "body", body
 
-proc call*(call_574237: Call_CertificateDelete_574231; path: JsonNode;
+proc call*(call_564137: Call_CertificateDelete_564131; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes specific certificate.
   ## 
-  let valid = call_574237.validator(path, query, header, formData, body)
-  let scheme = call_574237.pickScheme
+  let valid = call_564137.validator(path, query, header, formData, body)
+  let scheme = call_564137.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574237.url(scheme.get, call_574237.host, call_574237.base,
-                         call_574237.route, valid.getOrDefault("path"),
+  let url = call_564137.url(scheme.get, call_564137.host, call_564137.base,
+                         call_564137.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574237, url, valid)
+  result = hook(call_564137, url, valid)
 
-proc call*(call_574238: Call_CertificateDelete_574231; apiVersion: string;
+proc call*(call_564138: Call_CertificateDelete_564131; apiVersion: string;
           certificateId: string): Recallable =
   ## certificateDelete
   ## Deletes specific certificate.
@@ -488,16 +492,16 @@ proc call*(call_574238: Call_CertificateDelete_574231; apiVersion: string;
   ##             : Version of the API to be used with the client request.
   ##   certificateId: string (required)
   ##                : Identifier of the certificate entity. Must be unique in the current API Management service instance.
-  var path_574239 = newJObject()
-  var query_574240 = newJObject()
-  add(query_574240, "api-version", newJString(apiVersion))
-  add(path_574239, "certificateId", newJString(certificateId))
-  result = call_574238.call(path_574239, query_574240, nil, nil, nil)
+  var path_564139 = newJObject()
+  var query_564140 = newJObject()
+  add(query_564140, "api-version", newJString(apiVersion))
+  add(path_564139, "certificateId", newJString(certificateId))
+  result = call_564138.call(path_564139, query_564140, nil, nil, nil)
 
-var certificateDelete* = Call_CertificateDelete_574231(name: "certificateDelete",
+var certificateDelete* = Call_CertificateDelete_564131(name: "certificateDelete",
     meth: HttpMethod.HttpDelete, host: "azure.local",
-    route: "/certificates/{certificateId}", validator: validate_CertificateDelete_574232,
-    base: "", url: url_CertificateDelete_574233, schemes: {Scheme.Https})
+    route: "/certificates/{certificateId}", validator: validate_CertificateDelete_564132,
+    base: "", url: url_CertificateDelete_564133, schemes: {Scheme.Https})
 export
   rest
 

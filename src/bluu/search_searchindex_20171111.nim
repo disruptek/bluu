@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, httpcore
 
 ## auto-generated via openapi macro
 ## title: SearchIndexClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_567657 = ref object of OpenApiRestCall
+  OpenApiRestCall_563555 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_567657](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563555](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_567657): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563555): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,15 +107,15 @@ const
   macServiceName = "search-searchindex"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_DocumentsProxyCount_567879 = ref object of OpenApiRestCall_567657
-proc url_DocumentsProxyCount_567881(protocol: Scheme; host: string; base: string;
+  Call_DocumentsProxyCount_563777 = ref object of OpenApiRestCall_563555
+proc url_DocumentsProxyCount_563779(protocol: Scheme; host: string; base: string;
                                    route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_DocumentsProxyCount_567880(path: JsonNode; query: JsonNode;
+proc validate_DocumentsProxyCount_563778(path: JsonNode; query: JsonNode;
                                         header: JsonNode; formData: JsonNode;
                                         body: JsonNode): JsonNode =
   ## Queries the number of documents in the Azure Search index.
@@ -127,55 +131,55 @@ proc validate_DocumentsProxyCount_567880(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568040 = query.getOrDefault("api-version")
-  valid_568040 = validateParameter(valid_568040, JString, required = true,
+  var valid_563940 = query.getOrDefault("api-version")
+  valid_563940 = validateParameter(valid_563940, JString, required = true,
                                  default = nil)
-  if valid_568040 != nil:
-    section.add "api-version", valid_568040
+  if valid_563940 != nil:
+    section.add "api-version", valid_563940
   result.add "query", section
   ## parameters in `header` object:
   ##   client-request-id: JString
   ##                    : The tracking ID sent with the request to help with debugging.
   section = newJObject()
-  var valid_568041 = header.getOrDefault("client-request-id")
-  valid_568041 = validateParameter(valid_568041, JString, required = false,
+  var valid_563941 = header.getOrDefault("client-request-id")
+  valid_563941 = validateParameter(valid_563941, JString, required = false,
                                  default = nil)
-  if valid_568041 != nil:
-    section.add "client-request-id", valid_568041
+  if valid_563941 != nil:
+    section.add "client-request-id", valid_563941
   result.add "header", section
   section = newJObject()
   result.add "formData", section
   if body != nil:
     result.add "body", body
 
-proc call*(call_568064: Call_DocumentsProxyCount_567879; path: JsonNode;
+proc call*(call_563964: Call_DocumentsProxyCount_563777; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Queries the number of documents in the Azure Search index.
   ## 
   ## https://docs.microsoft.com/rest/api/searchservice/Count-Documents
-  let valid = call_568064.validator(path, query, header, formData, body)
-  let scheme = call_568064.pickScheme
+  let valid = call_563964.validator(path, query, header, formData, body)
+  let scheme = call_563964.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568064.url(scheme.get, call_568064.host, call_568064.base,
-                         call_568064.route, valid.getOrDefault("path"),
+  let url = call_563964.url(scheme.get, call_563964.host, call_563964.base,
+                         call_563964.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568064, url, valid)
+  result = hook(call_563964, url, valid)
 
-proc call*(call_568135: Call_DocumentsProxyCount_567879; apiVersion: string): Recallable =
+proc call*(call_564035: Call_DocumentsProxyCount_563777; apiVersion: string): Recallable =
   ## documentsProxyCount
   ## Queries the number of documents in the Azure Search index.
   ## https://docs.microsoft.com/rest/api/searchservice/Count-Documents
   ##   apiVersion: string (required)
   ##             : Client Api Version.
-  var query_568136 = newJObject()
-  add(query_568136, "api-version", newJString(apiVersion))
-  result = call_568135.call(nil, query_568136, nil, nil, nil)
+  var query_564036 = newJObject()
+  add(query_564036, "api-version", newJString(apiVersion))
+  result = call_564035.call(nil, query_564036, nil, nil, nil)
 
-var documentsProxyCount* = Call_DocumentsProxyCount_567879(
+var documentsProxyCount* = Call_DocumentsProxyCount_563777(
     name: "documentsProxyCount", meth: HttpMethod.HttpGet, host: "azure.local",
-    route: "/docs/$count", validator: validate_DocumentsProxyCount_567880, base: "",
-    url: url_DocumentsProxyCount_567881, schemes: {Scheme.Https})
+    route: "/docs/$count", validator: validate_DocumentsProxyCount_563778, base: "",
+    url: url_DocumentsProxyCount_563779, schemes: {Scheme.Https})
 export
   rest
 

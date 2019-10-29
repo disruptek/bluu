@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, httpcore
 
 ## auto-generated via openapi macro
 ## title: SqlManagementClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_567657 = ref object of OpenApiRestCall
+  OpenApiRestCall_563555 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_567657](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563555](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_567657): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563555): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,8 +107,8 @@ const
   macServiceName = "sql-shortTermRetentionPolicies"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_BackupShortTermRetentionPoliciesListByDatabase_567879 = ref object of OpenApiRestCall_567657
-proc url_BackupShortTermRetentionPoliciesListByDatabase_567881(protocol: Scheme;
+  Call_BackupShortTermRetentionPoliciesListByDatabase_563777 = ref object of OpenApiRestCall_563555
+proc url_BackupShortTermRetentionPoliciesListByDatabase_563779(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -130,7 +134,7 @@ proc url_BackupShortTermRetentionPoliciesListByDatabase_567881(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_BackupShortTermRetentionPoliciesListByDatabase_567880(
+proc validate_BackupShortTermRetentionPoliciesListByDatabase_563778(
     path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
     body: JsonNode): JsonNode =
   ## Gets a database's short term retention policy.
@@ -138,37 +142,37 @@ proc validate_BackupShortTermRetentionPoliciesListByDatabase_567880(
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   ##   serverName: JString (required)
   ##             : The name of the server.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID that identifies an Azure subscription.
   ##   databaseName: JString (required)
   ##               : The name of the database.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568054 = path.getOrDefault("resourceGroupName")
-  valid_568054 = validateParameter(valid_568054, JString, required = true,
+        "path argument is necessary due to required `serverName` field"
+  var valid_563954 = path.getOrDefault("serverName")
+  valid_563954 = validateParameter(valid_563954, JString, required = true,
                                  default = nil)
-  if valid_568054 != nil:
-    section.add "resourceGroupName", valid_568054
-  var valid_568055 = path.getOrDefault("serverName")
-  valid_568055 = validateParameter(valid_568055, JString, required = true,
+  if valid_563954 != nil:
+    section.add "serverName", valid_563954
+  var valid_563955 = path.getOrDefault("subscriptionId")
+  valid_563955 = validateParameter(valid_563955, JString, required = true,
                                  default = nil)
-  if valid_568055 != nil:
-    section.add "serverName", valid_568055
-  var valid_568056 = path.getOrDefault("subscriptionId")
-  valid_568056 = validateParameter(valid_568056, JString, required = true,
+  if valid_563955 != nil:
+    section.add "subscriptionId", valid_563955
+  var valid_563956 = path.getOrDefault("databaseName")
+  valid_563956 = validateParameter(valid_563956, JString, required = true,
                                  default = nil)
-  if valid_568056 != nil:
-    section.add "subscriptionId", valid_568056
-  var valid_568057 = path.getOrDefault("databaseName")
-  valid_568057 = validateParameter(valid_568057, JString, required = true,
+  if valid_563956 != nil:
+    section.add "databaseName", valid_563956
+  var valid_563957 = path.getOrDefault("resourceGroupName")
+  valid_563957 = validateParameter(valid_563957, JString, required = true,
                                  default = nil)
-  if valid_568057 != nil:
-    section.add "databaseName", valid_568057
+  if valid_563957 != nil:
+    section.add "resourceGroupName", valid_563957
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -176,11 +180,11 @@ proc validate_BackupShortTermRetentionPoliciesListByDatabase_567880(
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568058 = query.getOrDefault("api-version")
-  valid_568058 = validateParameter(valid_568058, JString, required = true,
+  var valid_563958 = query.getOrDefault("api-version")
+  valid_563958 = validateParameter(valid_563958, JString, required = true,
                                  default = nil)
-  if valid_568058 != nil:
-    section.add "api-version", valid_568058
+  if valid_563958 != nil:
+    section.add "api-version", valid_563958
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -189,27 +193,25 @@ proc validate_BackupShortTermRetentionPoliciesListByDatabase_567880(
   if body != nil:
     result.add "body", body
 
-proc call*(call_568081: Call_BackupShortTermRetentionPoliciesListByDatabase_567879;
+proc call*(call_563981: Call_BackupShortTermRetentionPoliciesListByDatabase_563777;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Gets a database's short term retention policy.
   ## 
-  let valid = call_568081.validator(path, query, header, formData, body)
-  let scheme = call_568081.pickScheme
+  let valid = call_563981.validator(path, query, header, formData, body)
+  let scheme = call_563981.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568081.url(scheme.get, call_568081.host, call_568081.base,
-                         call_568081.route, valid.getOrDefault("path"),
+  let url = call_563981.url(scheme.get, call_563981.host, call_563981.base,
+                         call_563981.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568081, url, valid)
+  result = hook(call_563981, url, valid)
 
-proc call*(call_568152: Call_BackupShortTermRetentionPoliciesListByDatabase_567879;
-          resourceGroupName: string; apiVersion: string; serverName: string;
-          subscriptionId: string; databaseName: string): Recallable =
+proc call*(call_564052: Call_BackupShortTermRetentionPoliciesListByDatabase_563777;
+          apiVersion: string; serverName: string; subscriptionId: string;
+          databaseName: string; resourceGroupName: string): Recallable =
   ## backupShortTermRetentionPoliciesListByDatabase
   ## Gets a database's short term retention policy.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   ##   apiVersion: string (required)
   ##             : The API version to use for the request.
   ##   serverName: string (required)
@@ -218,24 +220,26 @@ proc call*(call_568152: Call_BackupShortTermRetentionPoliciesListByDatabase_5678
   ##                 : The subscription ID that identifies an Azure subscription.
   ##   databaseName: string (required)
   ##               : The name of the database.
-  var path_568153 = newJObject()
-  var query_568155 = newJObject()
-  add(path_568153, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568155, "api-version", newJString(apiVersion))
-  add(path_568153, "serverName", newJString(serverName))
-  add(path_568153, "subscriptionId", newJString(subscriptionId))
-  add(path_568153, "databaseName", newJString(databaseName))
-  result = call_568152.call(path_568153, query_568155, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
+  var path_564053 = newJObject()
+  var query_564055 = newJObject()
+  add(query_564055, "api-version", newJString(apiVersion))
+  add(path_564053, "serverName", newJString(serverName))
+  add(path_564053, "subscriptionId", newJString(subscriptionId))
+  add(path_564053, "databaseName", newJString(databaseName))
+  add(path_564053, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564052.call(path_564053, query_564055, nil, nil, nil)
 
-var backupShortTermRetentionPoliciesListByDatabase* = Call_BackupShortTermRetentionPoliciesListByDatabase_567879(
+var backupShortTermRetentionPoliciesListByDatabase* = Call_BackupShortTermRetentionPoliciesListByDatabase_563777(
     name: "backupShortTermRetentionPoliciesListByDatabase",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/servers/{serverName}/databases/{databaseName}/backupShortTermRetentionPolicies",
-    validator: validate_BackupShortTermRetentionPoliciesListByDatabase_567880,
-    base: "", url: url_BackupShortTermRetentionPoliciesListByDatabase_567881,
+    validator: validate_BackupShortTermRetentionPoliciesListByDatabase_563778,
+    base: "", url: url_BackupShortTermRetentionPoliciesListByDatabase_563779,
     schemes: {Scheme.Https})
 type
-  Call_BackupShortTermRetentionPoliciesCreateOrUpdate_568220 = ref object of OpenApiRestCall_567657
-proc url_BackupShortTermRetentionPoliciesCreateOrUpdate_568222(protocol: Scheme;
+  Call_BackupShortTermRetentionPoliciesCreateOrUpdate_564120 = ref object of OpenApiRestCall_563555
+proc url_BackupShortTermRetentionPoliciesCreateOrUpdate_564122(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -263,7 +267,7 @@ proc url_BackupShortTermRetentionPoliciesCreateOrUpdate_568222(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_BackupShortTermRetentionPoliciesCreateOrUpdate_568221(
+proc validate_BackupShortTermRetentionPoliciesCreateOrUpdate_564121(
     path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
     body: JsonNode): JsonNode =
   ## Updates a database's short term retention policy.
@@ -271,44 +275,44 @@ proc validate_BackupShortTermRetentionPoliciesCreateOrUpdate_568221(
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
+  ##   policyName: JString (required)
+  ##             : The policy name. Should always be "default".
   ##   serverName: JString (required)
   ##             : The name of the server.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID that identifies an Azure subscription.
   ##   databaseName: JString (required)
   ##               : The name of the database.
-  ##   policyName: JString (required)
-  ##             : The policy name. Should always be "default".
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568223 = path.getOrDefault("resourceGroupName")
-  valid_568223 = validateParameter(valid_568223, JString, required = true,
-                                 default = nil)
-  if valid_568223 != nil:
-    section.add "resourceGroupName", valid_568223
-  var valid_568224 = path.getOrDefault("serverName")
-  valid_568224 = validateParameter(valid_568224, JString, required = true,
-                                 default = nil)
-  if valid_568224 != nil:
-    section.add "serverName", valid_568224
-  var valid_568225 = path.getOrDefault("subscriptionId")
-  valid_568225 = validateParameter(valid_568225, JString, required = true,
-                                 default = nil)
-  if valid_568225 != nil:
-    section.add "subscriptionId", valid_568225
-  var valid_568226 = path.getOrDefault("databaseName")
-  valid_568226 = validateParameter(valid_568226, JString, required = true,
-                                 default = nil)
-  if valid_568226 != nil:
-    section.add "databaseName", valid_568226
-  var valid_568227 = path.getOrDefault("policyName")
-  valid_568227 = validateParameter(valid_568227, JString, required = true,
+        "path argument is necessary due to required `policyName` field"
+  var valid_564123 = path.getOrDefault("policyName")
+  valid_564123 = validateParameter(valid_564123, JString, required = true,
                                  default = newJString("default"))
-  if valid_568227 != nil:
-    section.add "policyName", valid_568227
+  if valid_564123 != nil:
+    section.add "policyName", valid_564123
+  var valid_564124 = path.getOrDefault("serverName")
+  valid_564124 = validateParameter(valid_564124, JString, required = true,
+                                 default = nil)
+  if valid_564124 != nil:
+    section.add "serverName", valid_564124
+  var valid_564125 = path.getOrDefault("subscriptionId")
+  valid_564125 = validateParameter(valid_564125, JString, required = true,
+                                 default = nil)
+  if valid_564125 != nil:
+    section.add "subscriptionId", valid_564125
+  var valid_564126 = path.getOrDefault("databaseName")
+  valid_564126 = validateParameter(valid_564126, JString, required = true,
+                                 default = nil)
+  if valid_564126 != nil:
+    section.add "databaseName", valid_564126
+  var valid_564127 = path.getOrDefault("resourceGroupName")
+  valid_564127 = validateParameter(valid_564127, JString, required = true,
+                                 default = nil)
+  if valid_564127 != nil:
+    section.add "resourceGroupName", valid_564127
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -316,11 +320,11 @@ proc validate_BackupShortTermRetentionPoliciesCreateOrUpdate_568221(
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568228 = query.getOrDefault("api-version")
-  valid_568228 = validateParameter(valid_568228, JString, required = true,
+  var valid_564128 = query.getOrDefault("api-version")
+  valid_564128 = validateParameter(valid_564128, JString, required = true,
                                  default = nil)
-  if valid_568228 != nil:
-    section.add "api-version", valid_568228
+  if valid_564128 != nil:
+    section.add "api-version", valid_564128
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -334,28 +338,28 @@ proc validate_BackupShortTermRetentionPoliciesCreateOrUpdate_568221(
   if body != nil:
     result.add "body", body
 
-proc call*(call_568230: Call_BackupShortTermRetentionPoliciesCreateOrUpdate_568220;
+proc call*(call_564130: Call_BackupShortTermRetentionPoliciesCreateOrUpdate_564120;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Updates a database's short term retention policy.
   ## 
-  let valid = call_568230.validator(path, query, header, formData, body)
-  let scheme = call_568230.pickScheme
+  let valid = call_564130.validator(path, query, header, formData, body)
+  let scheme = call_564130.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568230.url(scheme.get, call_568230.host, call_568230.base,
-                         call_568230.route, valid.getOrDefault("path"),
+  let url = call_564130.url(scheme.get, call_564130.host, call_564130.base,
+                         call_564130.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568230, url, valid)
+  result = hook(call_564130, url, valid)
 
-proc call*(call_568231: Call_BackupShortTermRetentionPoliciesCreateOrUpdate_568220;
-          resourceGroupName: string; apiVersion: string; serverName: string;
-          subscriptionId: string; databaseName: string; parameters: JsonNode;
+proc call*(call_564131: Call_BackupShortTermRetentionPoliciesCreateOrUpdate_564120;
+          apiVersion: string; serverName: string; subscriptionId: string;
+          databaseName: string; resourceGroupName: string; parameters: JsonNode;
           policyName: string = "default"): Recallable =
   ## backupShortTermRetentionPoliciesCreateOrUpdate
   ## Updates a database's short term retention policy.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
+  ##   policyName: string (required)
+  ##             : The policy name. Should always be "default".
   ##   apiVersion: string (required)
   ##             : The API version to use for the request.
   ##   serverName: string (required)
@@ -364,32 +368,32 @@ proc call*(call_568231: Call_BackupShortTermRetentionPoliciesCreateOrUpdate_5682
   ##                 : The subscription ID that identifies an Azure subscription.
   ##   databaseName: string (required)
   ##               : The name of the database.
-  ##   policyName: string (required)
-  ##             : The policy name. Should always be "default".
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   ##   parameters: JObject (required)
   ##             : The short term retention policy info.
-  var path_568232 = newJObject()
-  var query_568233 = newJObject()
-  var body_568234 = newJObject()
-  add(path_568232, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568233, "api-version", newJString(apiVersion))
-  add(path_568232, "serverName", newJString(serverName))
-  add(path_568232, "subscriptionId", newJString(subscriptionId))
-  add(path_568232, "databaseName", newJString(databaseName))
-  add(path_568232, "policyName", newJString(policyName))
+  var path_564132 = newJObject()
+  var query_564133 = newJObject()
+  var body_564134 = newJObject()
+  add(path_564132, "policyName", newJString(policyName))
+  add(query_564133, "api-version", newJString(apiVersion))
+  add(path_564132, "serverName", newJString(serverName))
+  add(path_564132, "subscriptionId", newJString(subscriptionId))
+  add(path_564132, "databaseName", newJString(databaseName))
+  add(path_564132, "resourceGroupName", newJString(resourceGroupName))
   if parameters != nil:
-    body_568234 = parameters
-  result = call_568231.call(path_568232, query_568233, nil, nil, body_568234)
+    body_564134 = parameters
+  result = call_564131.call(path_564132, query_564133, nil, nil, body_564134)
 
-var backupShortTermRetentionPoliciesCreateOrUpdate* = Call_BackupShortTermRetentionPoliciesCreateOrUpdate_568220(
+var backupShortTermRetentionPoliciesCreateOrUpdate* = Call_BackupShortTermRetentionPoliciesCreateOrUpdate_564120(
     name: "backupShortTermRetentionPoliciesCreateOrUpdate",
     meth: HttpMethod.HttpPut, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/servers/{serverName}/databases/{databaseName}/backupShortTermRetentionPolicies/{policyName}",
-    validator: validate_BackupShortTermRetentionPoliciesCreateOrUpdate_568221,
-    base: "", url: url_BackupShortTermRetentionPoliciesCreateOrUpdate_568222,
+    validator: validate_BackupShortTermRetentionPoliciesCreateOrUpdate_564121,
+    base: "", url: url_BackupShortTermRetentionPoliciesCreateOrUpdate_564122,
     schemes: {Scheme.Https})
 type
-  Call_BackupShortTermRetentionPoliciesGet_568194 = ref object of OpenApiRestCall_567657
-proc url_BackupShortTermRetentionPoliciesGet_568196(protocol: Scheme; host: string;
+  Call_BackupShortTermRetentionPoliciesGet_564094 = ref object of OpenApiRestCall_563555
+proc url_BackupShortTermRetentionPoliciesGet_564096(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -417,51 +421,51 @@ proc url_BackupShortTermRetentionPoliciesGet_568196(protocol: Scheme; host: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_BackupShortTermRetentionPoliciesGet_568195(path: JsonNode;
+proc validate_BackupShortTermRetentionPoliciesGet_564095(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets a database's short term retention policy.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
+  ##   policyName: JString (required)
+  ##             : The policy name. Should always be "default".
   ##   serverName: JString (required)
   ##             : The name of the server.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID that identifies an Azure subscription.
   ##   databaseName: JString (required)
   ##               : The name of the database.
-  ##   policyName: JString (required)
-  ##             : The policy name. Should always be "default".
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568197 = path.getOrDefault("resourceGroupName")
-  valid_568197 = validateParameter(valid_568197, JString, required = true,
-                                 default = nil)
-  if valid_568197 != nil:
-    section.add "resourceGroupName", valid_568197
-  var valid_568198 = path.getOrDefault("serverName")
-  valid_568198 = validateParameter(valid_568198, JString, required = true,
-                                 default = nil)
-  if valid_568198 != nil:
-    section.add "serverName", valid_568198
-  var valid_568199 = path.getOrDefault("subscriptionId")
-  valid_568199 = validateParameter(valid_568199, JString, required = true,
-                                 default = nil)
-  if valid_568199 != nil:
-    section.add "subscriptionId", valid_568199
-  var valid_568200 = path.getOrDefault("databaseName")
-  valid_568200 = validateParameter(valid_568200, JString, required = true,
-                                 default = nil)
-  if valid_568200 != nil:
-    section.add "databaseName", valid_568200
-  var valid_568214 = path.getOrDefault("policyName")
-  valid_568214 = validateParameter(valid_568214, JString, required = true,
+        "path argument is necessary due to required `policyName` field"
+  var valid_564110 = path.getOrDefault("policyName")
+  valid_564110 = validateParameter(valid_564110, JString, required = true,
                                  default = newJString("default"))
-  if valid_568214 != nil:
-    section.add "policyName", valid_568214
+  if valid_564110 != nil:
+    section.add "policyName", valid_564110
+  var valid_564111 = path.getOrDefault("serverName")
+  valid_564111 = validateParameter(valid_564111, JString, required = true,
+                                 default = nil)
+  if valid_564111 != nil:
+    section.add "serverName", valid_564111
+  var valid_564112 = path.getOrDefault("subscriptionId")
+  valid_564112 = validateParameter(valid_564112, JString, required = true,
+                                 default = nil)
+  if valid_564112 != nil:
+    section.add "subscriptionId", valid_564112
+  var valid_564113 = path.getOrDefault("databaseName")
+  valid_564113 = validateParameter(valid_564113, JString, required = true,
+                                 default = nil)
+  if valid_564113 != nil:
+    section.add "databaseName", valid_564113
+  var valid_564114 = path.getOrDefault("resourceGroupName")
+  valid_564114 = validateParameter(valid_564114, JString, required = true,
+                                 default = nil)
+  if valid_564114 != nil:
+    section.add "resourceGroupName", valid_564114
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -469,11 +473,11 @@ proc validate_BackupShortTermRetentionPoliciesGet_568195(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568215 = query.getOrDefault("api-version")
-  valid_568215 = validateParameter(valid_568215, JString, required = true,
+  var valid_564115 = query.getOrDefault("api-version")
+  valid_564115 = validateParameter(valid_564115, JString, required = true,
                                  default = nil)
-  if valid_568215 != nil:
-    section.add "api-version", valid_568215
+  if valid_564115 != nil:
+    section.add "api-version", valid_564115
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -482,28 +486,28 @@ proc validate_BackupShortTermRetentionPoliciesGet_568195(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568216: Call_BackupShortTermRetentionPoliciesGet_568194;
+proc call*(call_564116: Call_BackupShortTermRetentionPoliciesGet_564094;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Gets a database's short term retention policy.
   ## 
-  let valid = call_568216.validator(path, query, header, formData, body)
-  let scheme = call_568216.pickScheme
+  let valid = call_564116.validator(path, query, header, formData, body)
+  let scheme = call_564116.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568216.url(scheme.get, call_568216.host, call_568216.base,
-                         call_568216.route, valid.getOrDefault("path"),
+  let url = call_564116.url(scheme.get, call_564116.host, call_564116.base,
+                         call_564116.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568216, url, valid)
+  result = hook(call_564116, url, valid)
 
-proc call*(call_568217: Call_BackupShortTermRetentionPoliciesGet_568194;
-          resourceGroupName: string; apiVersion: string; serverName: string;
-          subscriptionId: string; databaseName: string;
+proc call*(call_564117: Call_BackupShortTermRetentionPoliciesGet_564094;
+          apiVersion: string; serverName: string; subscriptionId: string;
+          databaseName: string; resourceGroupName: string;
           policyName: string = "default"): Recallable =
   ## backupShortTermRetentionPoliciesGet
   ## Gets a database's short term retention policy.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
+  ##   policyName: string (required)
+  ##             : The policy name. Should always be "default".
   ##   apiVersion: string (required)
   ##             : The API version to use for the request.
   ##   serverName: string (required)
@@ -512,26 +516,26 @@ proc call*(call_568217: Call_BackupShortTermRetentionPoliciesGet_568194;
   ##                 : The subscription ID that identifies an Azure subscription.
   ##   databaseName: string (required)
   ##               : The name of the database.
-  ##   policyName: string (required)
-  ##             : The policy name. Should always be "default".
-  var path_568218 = newJObject()
-  var query_568219 = newJObject()
-  add(path_568218, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568219, "api-version", newJString(apiVersion))
-  add(path_568218, "serverName", newJString(serverName))
-  add(path_568218, "subscriptionId", newJString(subscriptionId))
-  add(path_568218, "databaseName", newJString(databaseName))
-  add(path_568218, "policyName", newJString(policyName))
-  result = call_568217.call(path_568218, query_568219, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
+  var path_564118 = newJObject()
+  var query_564119 = newJObject()
+  add(path_564118, "policyName", newJString(policyName))
+  add(query_564119, "api-version", newJString(apiVersion))
+  add(path_564118, "serverName", newJString(serverName))
+  add(path_564118, "subscriptionId", newJString(subscriptionId))
+  add(path_564118, "databaseName", newJString(databaseName))
+  add(path_564118, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564117.call(path_564118, query_564119, nil, nil, nil)
 
-var backupShortTermRetentionPoliciesGet* = Call_BackupShortTermRetentionPoliciesGet_568194(
+var backupShortTermRetentionPoliciesGet* = Call_BackupShortTermRetentionPoliciesGet_564094(
     name: "backupShortTermRetentionPoliciesGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/servers/{serverName}/databases/{databaseName}/backupShortTermRetentionPolicies/{policyName}",
-    validator: validate_BackupShortTermRetentionPoliciesGet_568195, base: "",
-    url: url_BackupShortTermRetentionPoliciesGet_568196, schemes: {Scheme.Https})
+    validator: validate_BackupShortTermRetentionPoliciesGet_564095, base: "",
+    url: url_BackupShortTermRetentionPoliciesGet_564096, schemes: {Scheme.Https})
 type
-  Call_BackupShortTermRetentionPoliciesUpdate_568235 = ref object of OpenApiRestCall_567657
-proc url_BackupShortTermRetentionPoliciesUpdate_568237(protocol: Scheme;
+  Call_BackupShortTermRetentionPoliciesUpdate_564135 = ref object of OpenApiRestCall_563555
+proc url_BackupShortTermRetentionPoliciesUpdate_564137(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -559,51 +563,51 @@ proc url_BackupShortTermRetentionPoliciesUpdate_568237(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_BackupShortTermRetentionPoliciesUpdate_568236(path: JsonNode;
+proc validate_BackupShortTermRetentionPoliciesUpdate_564136(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Updates a database's short term retention policy.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
+  ##   policyName: JString (required)
+  ##             : The policy name. Should always be "default".
   ##   serverName: JString (required)
   ##             : The name of the server.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID that identifies an Azure subscription.
   ##   databaseName: JString (required)
   ##               : The name of the database.
-  ##   policyName: JString (required)
-  ##             : The policy name. Should always be "default".
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568238 = path.getOrDefault("resourceGroupName")
-  valid_568238 = validateParameter(valid_568238, JString, required = true,
-                                 default = nil)
-  if valid_568238 != nil:
-    section.add "resourceGroupName", valid_568238
-  var valid_568239 = path.getOrDefault("serverName")
-  valid_568239 = validateParameter(valid_568239, JString, required = true,
-                                 default = nil)
-  if valid_568239 != nil:
-    section.add "serverName", valid_568239
-  var valid_568240 = path.getOrDefault("subscriptionId")
-  valid_568240 = validateParameter(valid_568240, JString, required = true,
-                                 default = nil)
-  if valid_568240 != nil:
-    section.add "subscriptionId", valid_568240
-  var valid_568241 = path.getOrDefault("databaseName")
-  valid_568241 = validateParameter(valid_568241, JString, required = true,
-                                 default = nil)
-  if valid_568241 != nil:
-    section.add "databaseName", valid_568241
-  var valid_568242 = path.getOrDefault("policyName")
-  valid_568242 = validateParameter(valid_568242, JString, required = true,
+        "path argument is necessary due to required `policyName` field"
+  var valid_564138 = path.getOrDefault("policyName")
+  valid_564138 = validateParameter(valid_564138, JString, required = true,
                                  default = newJString("default"))
-  if valid_568242 != nil:
-    section.add "policyName", valid_568242
+  if valid_564138 != nil:
+    section.add "policyName", valid_564138
+  var valid_564139 = path.getOrDefault("serverName")
+  valid_564139 = validateParameter(valid_564139, JString, required = true,
+                                 default = nil)
+  if valid_564139 != nil:
+    section.add "serverName", valid_564139
+  var valid_564140 = path.getOrDefault("subscriptionId")
+  valid_564140 = validateParameter(valid_564140, JString, required = true,
+                                 default = nil)
+  if valid_564140 != nil:
+    section.add "subscriptionId", valid_564140
+  var valid_564141 = path.getOrDefault("databaseName")
+  valid_564141 = validateParameter(valid_564141, JString, required = true,
+                                 default = nil)
+  if valid_564141 != nil:
+    section.add "databaseName", valid_564141
+  var valid_564142 = path.getOrDefault("resourceGroupName")
+  valid_564142 = validateParameter(valid_564142, JString, required = true,
+                                 default = nil)
+  if valid_564142 != nil:
+    section.add "resourceGroupName", valid_564142
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -611,11 +615,11 @@ proc validate_BackupShortTermRetentionPoliciesUpdate_568236(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568243 = query.getOrDefault("api-version")
-  valid_568243 = validateParameter(valid_568243, JString, required = true,
+  var valid_564143 = query.getOrDefault("api-version")
+  valid_564143 = validateParameter(valid_564143, JString, required = true,
                                  default = nil)
-  if valid_568243 != nil:
-    section.add "api-version", valid_568243
+  if valid_564143 != nil:
+    section.add "api-version", valid_564143
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -629,28 +633,28 @@ proc validate_BackupShortTermRetentionPoliciesUpdate_568236(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568245: Call_BackupShortTermRetentionPoliciesUpdate_568235;
+proc call*(call_564145: Call_BackupShortTermRetentionPoliciesUpdate_564135;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Updates a database's short term retention policy.
   ## 
-  let valid = call_568245.validator(path, query, header, formData, body)
-  let scheme = call_568245.pickScheme
+  let valid = call_564145.validator(path, query, header, formData, body)
+  let scheme = call_564145.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568245.url(scheme.get, call_568245.host, call_568245.base,
-                         call_568245.route, valid.getOrDefault("path"),
+  let url = call_564145.url(scheme.get, call_564145.host, call_564145.base,
+                         call_564145.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568245, url, valid)
+  result = hook(call_564145, url, valid)
 
-proc call*(call_568246: Call_BackupShortTermRetentionPoliciesUpdate_568235;
-          resourceGroupName: string; apiVersion: string; serverName: string;
-          subscriptionId: string; databaseName: string; parameters: JsonNode;
+proc call*(call_564146: Call_BackupShortTermRetentionPoliciesUpdate_564135;
+          apiVersion: string; serverName: string; subscriptionId: string;
+          databaseName: string; resourceGroupName: string; parameters: JsonNode;
           policyName: string = "default"): Recallable =
   ## backupShortTermRetentionPoliciesUpdate
   ## Updates a database's short term retention policy.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
+  ##   policyName: string (required)
+  ##             : The policy name. Should always be "default".
   ##   apiVersion: string (required)
   ##             : The API version to use for the request.
   ##   serverName: string (required)
@@ -659,28 +663,28 @@ proc call*(call_568246: Call_BackupShortTermRetentionPoliciesUpdate_568235;
   ##                 : The subscription ID that identifies an Azure subscription.
   ##   databaseName: string (required)
   ##               : The name of the database.
-  ##   policyName: string (required)
-  ##             : The policy name. Should always be "default".
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   ##   parameters: JObject (required)
   ##             : The short term retention policy info.
-  var path_568247 = newJObject()
-  var query_568248 = newJObject()
-  var body_568249 = newJObject()
-  add(path_568247, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568248, "api-version", newJString(apiVersion))
-  add(path_568247, "serverName", newJString(serverName))
-  add(path_568247, "subscriptionId", newJString(subscriptionId))
-  add(path_568247, "databaseName", newJString(databaseName))
-  add(path_568247, "policyName", newJString(policyName))
+  var path_564147 = newJObject()
+  var query_564148 = newJObject()
+  var body_564149 = newJObject()
+  add(path_564147, "policyName", newJString(policyName))
+  add(query_564148, "api-version", newJString(apiVersion))
+  add(path_564147, "serverName", newJString(serverName))
+  add(path_564147, "subscriptionId", newJString(subscriptionId))
+  add(path_564147, "databaseName", newJString(databaseName))
+  add(path_564147, "resourceGroupName", newJString(resourceGroupName))
   if parameters != nil:
-    body_568249 = parameters
-  result = call_568246.call(path_568247, query_568248, nil, nil, body_568249)
+    body_564149 = parameters
+  result = call_564146.call(path_564147, query_564148, nil, nil, body_564149)
 
-var backupShortTermRetentionPoliciesUpdate* = Call_BackupShortTermRetentionPoliciesUpdate_568235(
+var backupShortTermRetentionPoliciesUpdate* = Call_BackupShortTermRetentionPoliciesUpdate_564135(
     name: "backupShortTermRetentionPoliciesUpdate", meth: HttpMethod.HttpPatch,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/servers/{serverName}/databases/{databaseName}/backupShortTermRetentionPolicies/{policyName}",
-    validator: validate_BackupShortTermRetentionPoliciesUpdate_568236, base: "",
-    url: url_BackupShortTermRetentionPoliciesUpdate_568237,
+    validator: validate_BackupShortTermRetentionPoliciesUpdate_564136, base: "",
+    url: url_BackupShortTermRetentionPoliciesUpdate_564137,
     schemes: {Scheme.Https})
 export
   rest

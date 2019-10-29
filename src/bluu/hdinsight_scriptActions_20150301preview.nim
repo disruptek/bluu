@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, httpcore
 
 ## auto-generated via openapi macro
 ## title: HDInsightManagementClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_567657 = ref object of OpenApiRestCall
+  OpenApiRestCall_563555 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_567657](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563555](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_567657): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563555): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,8 +107,8 @@ const
   macServiceName = "hdinsight-scriptActions"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_ClustersExecuteScriptActions_567879 = ref object of OpenApiRestCall_567657
-proc url_ClustersExecuteScriptActions_567881(protocol: Scheme; host: string;
+  Call_ClustersExecuteScriptActions_563777 = ref object of OpenApiRestCall_563555
+proc url_ClustersExecuteScriptActions_563779(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -127,7 +131,7 @@ proc url_ClustersExecuteScriptActions_567881(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ClustersExecuteScriptActions_567880(path: JsonNode; query: JsonNode;
+proc validate_ClustersExecuteScriptActions_563778(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Executes script actions on the specified HDInsight cluster.
   ## 
@@ -136,28 +140,28 @@ proc validate_ClustersExecuteScriptActions_567880(path: JsonNode; query: JsonNod
   ## parameters in `path` object:
   ##   clusterName: JString (required)
   ##              : The name of the cluster.
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   subscriptionId: JString (required)
   ##                 : The subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `clusterName` field"
-  var valid_568071 = path.getOrDefault("clusterName")
-  valid_568071 = validateParameter(valid_568071, JString, required = true,
+  var valid_563971 = path.getOrDefault("clusterName")
+  valid_563971 = validateParameter(valid_563971, JString, required = true,
                                  default = nil)
-  if valid_568071 != nil:
-    section.add "clusterName", valid_568071
-  var valid_568072 = path.getOrDefault("resourceGroupName")
-  valid_568072 = validateParameter(valid_568072, JString, required = true,
+  if valid_563971 != nil:
+    section.add "clusterName", valid_563971
+  var valid_563972 = path.getOrDefault("subscriptionId")
+  valid_563972 = validateParameter(valid_563972, JString, required = true,
                                  default = nil)
-  if valid_568072 != nil:
-    section.add "resourceGroupName", valid_568072
-  var valid_568073 = path.getOrDefault("subscriptionId")
-  valid_568073 = validateParameter(valid_568073, JString, required = true,
+  if valid_563972 != nil:
+    section.add "subscriptionId", valid_563972
+  var valid_563973 = path.getOrDefault("resourceGroupName")
+  valid_563973 = validateParameter(valid_563973, JString, required = true,
                                  default = nil)
-  if valid_568073 != nil:
-    section.add "subscriptionId", valid_568073
+  if valid_563973 != nil:
+    section.add "resourceGroupName", valid_563973
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -165,11 +169,11 @@ proc validate_ClustersExecuteScriptActions_567880(path: JsonNode; query: JsonNod
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568074 = query.getOrDefault("api-version")
-  valid_568074 = validateParameter(valid_568074, JString, required = true,
+  var valid_563974 = query.getOrDefault("api-version")
+  valid_563974 = validateParameter(valid_563974, JString, required = true,
                                  default = nil)
-  if valid_568074 != nil:
-    section.add "api-version", valid_568074
+  if valid_563974 != nil:
+    section.add "api-version", valid_563974
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -183,53 +187,53 @@ proc validate_ClustersExecuteScriptActions_567880(path: JsonNode; query: JsonNod
   if body != nil:
     result.add "body", body
 
-proc call*(call_568098: Call_ClustersExecuteScriptActions_567879; path: JsonNode;
+proc call*(call_563998: Call_ClustersExecuteScriptActions_563777; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Executes script actions on the specified HDInsight cluster.
   ## 
-  let valid = call_568098.validator(path, query, header, formData, body)
-  let scheme = call_568098.pickScheme
+  let valid = call_563998.validator(path, query, header, formData, body)
+  let scheme = call_563998.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568098.url(scheme.get, call_568098.host, call_568098.base,
-                         call_568098.route, valid.getOrDefault("path"),
+  let url = call_563998.url(scheme.get, call_563998.host, call_563998.base,
+                         call_563998.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568098, url, valid)
+  result = hook(call_563998, url, valid)
 
-proc call*(call_568169: Call_ClustersExecuteScriptActions_567879;
-          clusterName: string; resourceGroupName: string; apiVersion: string;
-          subscriptionId: string; parameters: JsonNode): Recallable =
+proc call*(call_564069: Call_ClustersExecuteScriptActions_563777;
+          clusterName: string; apiVersion: string; subscriptionId: string;
+          resourceGroupName: string; parameters: JsonNode): Recallable =
   ## clustersExecuteScriptActions
   ## Executes script actions on the specified HDInsight cluster.
   ##   clusterName: string (required)
   ##              : The name of the cluster.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : The HDInsight client API Version.
   ##   subscriptionId: string (required)
   ##                 : The subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   parameters: JObject (required)
   ##             : The parameters for executing script actions.
-  var path_568170 = newJObject()
-  var query_568172 = newJObject()
-  var body_568173 = newJObject()
-  add(path_568170, "clusterName", newJString(clusterName))
-  add(path_568170, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568172, "api-version", newJString(apiVersion))
-  add(path_568170, "subscriptionId", newJString(subscriptionId))
+  var path_564070 = newJObject()
+  var query_564072 = newJObject()
+  var body_564073 = newJObject()
+  add(path_564070, "clusterName", newJString(clusterName))
+  add(query_564072, "api-version", newJString(apiVersion))
+  add(path_564070, "subscriptionId", newJString(subscriptionId))
+  add(path_564070, "resourceGroupName", newJString(resourceGroupName))
   if parameters != nil:
-    body_568173 = parameters
-  result = call_568169.call(path_568170, query_568172, nil, nil, body_568173)
+    body_564073 = parameters
+  result = call_564069.call(path_564070, query_564072, nil, nil, body_564073)
 
-var clustersExecuteScriptActions* = Call_ClustersExecuteScriptActions_567879(
+var clustersExecuteScriptActions* = Call_ClustersExecuteScriptActions_563777(
     name: "clustersExecuteScriptActions", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.HDInsight/clusters/{clusterName}/executeScriptActions",
-    validator: validate_ClustersExecuteScriptActions_567880, base: "",
-    url: url_ClustersExecuteScriptActions_567881, schemes: {Scheme.Https})
+    validator: validate_ClustersExecuteScriptActions_563778, base: "",
+    url: url_ClustersExecuteScriptActions_563779, schemes: {Scheme.Https})
 type
-  Call_ScriptActionsListPersistedScripts_568212 = ref object of OpenApiRestCall_567657
-proc url_ScriptActionsListPersistedScripts_568214(protocol: Scheme; host: string;
+  Call_ScriptActionsListPersistedScripts_564112 = ref object of OpenApiRestCall_563555
+proc url_ScriptActionsListPersistedScripts_564114(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -252,7 +256,7 @@ proc url_ScriptActionsListPersistedScripts_568214(protocol: Scheme; host: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ScriptActionsListPersistedScripts_568213(path: JsonNode;
+proc validate_ScriptActionsListPersistedScripts_564113(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists all the persisted script actions for the specified cluster.
   ## 
@@ -261,28 +265,28 @@ proc validate_ScriptActionsListPersistedScripts_568213(path: JsonNode;
   ## parameters in `path` object:
   ##   clusterName: JString (required)
   ##              : The name of the cluster.
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   subscriptionId: JString (required)
   ##                 : The subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `clusterName` field"
-  var valid_568215 = path.getOrDefault("clusterName")
-  valid_568215 = validateParameter(valid_568215, JString, required = true,
+  var valid_564115 = path.getOrDefault("clusterName")
+  valid_564115 = validateParameter(valid_564115, JString, required = true,
                                  default = nil)
-  if valid_568215 != nil:
-    section.add "clusterName", valid_568215
-  var valid_568216 = path.getOrDefault("resourceGroupName")
-  valid_568216 = validateParameter(valid_568216, JString, required = true,
+  if valid_564115 != nil:
+    section.add "clusterName", valid_564115
+  var valid_564116 = path.getOrDefault("subscriptionId")
+  valid_564116 = validateParameter(valid_564116, JString, required = true,
                                  default = nil)
-  if valid_568216 != nil:
-    section.add "resourceGroupName", valid_568216
-  var valid_568217 = path.getOrDefault("subscriptionId")
-  valid_568217 = validateParameter(valid_568217, JString, required = true,
+  if valid_564116 != nil:
+    section.add "subscriptionId", valid_564116
+  var valid_564117 = path.getOrDefault("resourceGroupName")
+  valid_564117 = validateParameter(valid_564117, JString, required = true,
                                  default = nil)
-  if valid_568217 != nil:
-    section.add "subscriptionId", valid_568217
+  if valid_564117 != nil:
+    section.add "resourceGroupName", valid_564117
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -290,11 +294,11 @@ proc validate_ScriptActionsListPersistedScripts_568213(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568218 = query.getOrDefault("api-version")
-  valid_568218 = validateParameter(valid_568218, JString, required = true,
+  var valid_564118 = query.getOrDefault("api-version")
+  valid_564118 = validateParameter(valid_564118, JString, required = true,
                                  default = nil)
-  if valid_568218 != nil:
-    section.add "api-version", valid_568218
+  if valid_564118 != nil:
+    section.add "api-version", valid_564118
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -303,49 +307,49 @@ proc validate_ScriptActionsListPersistedScripts_568213(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568219: Call_ScriptActionsListPersistedScripts_568212;
+proc call*(call_564119: Call_ScriptActionsListPersistedScripts_564112;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Lists all the persisted script actions for the specified cluster.
   ## 
-  let valid = call_568219.validator(path, query, header, formData, body)
-  let scheme = call_568219.pickScheme
+  let valid = call_564119.validator(path, query, header, formData, body)
+  let scheme = call_564119.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568219.url(scheme.get, call_568219.host, call_568219.base,
-                         call_568219.route, valid.getOrDefault("path"),
+  let url = call_564119.url(scheme.get, call_564119.host, call_564119.base,
+                         call_564119.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568219, url, valid)
+  result = hook(call_564119, url, valid)
 
-proc call*(call_568220: Call_ScriptActionsListPersistedScripts_568212;
-          clusterName: string; resourceGroupName: string; apiVersion: string;
-          subscriptionId: string): Recallable =
+proc call*(call_564120: Call_ScriptActionsListPersistedScripts_564112;
+          clusterName: string; apiVersion: string; subscriptionId: string;
+          resourceGroupName: string): Recallable =
   ## scriptActionsListPersistedScripts
   ## Lists all the persisted script actions for the specified cluster.
   ##   clusterName: string (required)
   ##              : The name of the cluster.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : The HDInsight client API Version.
   ##   subscriptionId: string (required)
   ##                 : The subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_568221 = newJObject()
-  var query_568222 = newJObject()
-  add(path_568221, "clusterName", newJString(clusterName))
-  add(path_568221, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568222, "api-version", newJString(apiVersion))
-  add(path_568221, "subscriptionId", newJString(subscriptionId))
-  result = call_568220.call(path_568221, query_568222, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564121 = newJObject()
+  var query_564122 = newJObject()
+  add(path_564121, "clusterName", newJString(clusterName))
+  add(query_564122, "api-version", newJString(apiVersion))
+  add(path_564121, "subscriptionId", newJString(subscriptionId))
+  add(path_564121, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564120.call(path_564121, query_564122, nil, nil, nil)
 
-var scriptActionsListPersistedScripts* = Call_ScriptActionsListPersistedScripts_568212(
+var scriptActionsListPersistedScripts* = Call_ScriptActionsListPersistedScripts_564112(
     name: "scriptActionsListPersistedScripts", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.HDInsight/clusters/{clusterName}/scriptActions",
-    validator: validate_ScriptActionsListPersistedScripts_568213, base: "",
-    url: url_ScriptActionsListPersistedScripts_568214, schemes: {Scheme.Https})
+    validator: validate_ScriptActionsListPersistedScripts_564113, base: "",
+    url: url_ScriptActionsListPersistedScripts_564114, schemes: {Scheme.Https})
 type
-  Call_ScriptActionsDelete_568223 = ref object of OpenApiRestCall_567657
-proc url_ScriptActionsDelete_568225(protocol: Scheme; host: string; base: string;
+  Call_ScriptActionsDelete_564123 = ref object of OpenApiRestCall_563555
+proc url_ScriptActionsDelete_564125(protocol: Scheme; host: string; base: string;
                                    route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -370,7 +374,7 @@ proc url_ScriptActionsDelete_568225(protocol: Scheme; host: string; base: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ScriptActionsDelete_568224(path: JsonNode; query: JsonNode;
+proc validate_ScriptActionsDelete_564124(path: JsonNode; query: JsonNode;
                                         header: JsonNode; formData: JsonNode;
                                         body: JsonNode): JsonNode =
   ## Deletes a specified persisted script action of the cluster.
@@ -380,35 +384,35 @@ proc validate_ScriptActionsDelete_568224(path: JsonNode; query: JsonNode;
   ## parameters in `path` object:
   ##   clusterName: JString (required)
   ##              : The name of the cluster.
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   subscriptionId: JString (required)
   ##                 : The subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   scriptName: JString (required)
   ##             : The name of the script.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `clusterName` field"
-  var valid_568226 = path.getOrDefault("clusterName")
-  valid_568226 = validateParameter(valid_568226, JString, required = true,
+  var valid_564126 = path.getOrDefault("clusterName")
+  valid_564126 = validateParameter(valid_564126, JString, required = true,
                                  default = nil)
-  if valid_568226 != nil:
-    section.add "clusterName", valid_568226
-  var valid_568227 = path.getOrDefault("resourceGroupName")
-  valid_568227 = validateParameter(valid_568227, JString, required = true,
+  if valid_564126 != nil:
+    section.add "clusterName", valid_564126
+  var valid_564127 = path.getOrDefault("subscriptionId")
+  valid_564127 = validateParameter(valid_564127, JString, required = true,
                                  default = nil)
-  if valid_568227 != nil:
-    section.add "resourceGroupName", valid_568227
-  var valid_568228 = path.getOrDefault("subscriptionId")
-  valid_568228 = validateParameter(valid_568228, JString, required = true,
+  if valid_564127 != nil:
+    section.add "subscriptionId", valid_564127
+  var valid_564128 = path.getOrDefault("scriptName")
+  valid_564128 = validateParameter(valid_564128, JString, required = true,
                                  default = nil)
-  if valid_568228 != nil:
-    section.add "subscriptionId", valid_568228
-  var valid_568229 = path.getOrDefault("scriptName")
-  valid_568229 = validateParameter(valid_568229, JString, required = true,
+  if valid_564128 != nil:
+    section.add "scriptName", valid_564128
+  var valid_564129 = path.getOrDefault("resourceGroupName")
+  valid_564129 = validateParameter(valid_564129, JString, required = true,
                                  default = nil)
-  if valid_568229 != nil:
-    section.add "scriptName", valid_568229
+  if valid_564129 != nil:
+    section.add "resourceGroupName", valid_564129
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -416,11 +420,11 @@ proc validate_ScriptActionsDelete_568224(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568230 = query.getOrDefault("api-version")
-  valid_568230 = validateParameter(valid_568230, JString, required = true,
+  var valid_564130 = query.getOrDefault("api-version")
+  valid_564130 = validateParameter(valid_564130, JString, required = true,
                                  default = nil)
-  if valid_568230 != nil:
-    section.add "api-version", valid_568230
+  if valid_564130 != nil:
+    section.add "api-version", valid_564130
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -429,51 +433,51 @@ proc validate_ScriptActionsDelete_568224(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568231: Call_ScriptActionsDelete_568223; path: JsonNode;
+proc call*(call_564131: Call_ScriptActionsDelete_564123; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes a specified persisted script action of the cluster.
   ## 
-  let valid = call_568231.validator(path, query, header, formData, body)
-  let scheme = call_568231.pickScheme
+  let valid = call_564131.validator(path, query, header, formData, body)
+  let scheme = call_564131.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568231.url(scheme.get, call_568231.host, call_568231.base,
-                         call_568231.route, valid.getOrDefault("path"),
+  let url = call_564131.url(scheme.get, call_564131.host, call_564131.base,
+                         call_564131.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568231, url, valid)
+  result = hook(call_564131, url, valid)
 
-proc call*(call_568232: Call_ScriptActionsDelete_568223; clusterName: string;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          scriptName: string): Recallable =
+proc call*(call_564132: Call_ScriptActionsDelete_564123; clusterName: string;
+          apiVersion: string; subscriptionId: string; scriptName: string;
+          resourceGroupName: string): Recallable =
   ## scriptActionsDelete
   ## Deletes a specified persisted script action of the cluster.
   ##   clusterName: string (required)
   ##              : The name of the cluster.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : The HDInsight client API Version.
   ##   subscriptionId: string (required)
   ##                 : The subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   scriptName: string (required)
   ##             : The name of the script.
-  var path_568233 = newJObject()
-  var query_568234 = newJObject()
-  add(path_568233, "clusterName", newJString(clusterName))
-  add(path_568233, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568234, "api-version", newJString(apiVersion))
-  add(path_568233, "subscriptionId", newJString(subscriptionId))
-  add(path_568233, "scriptName", newJString(scriptName))
-  result = call_568232.call(path_568233, query_568234, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564133 = newJObject()
+  var query_564134 = newJObject()
+  add(path_564133, "clusterName", newJString(clusterName))
+  add(query_564134, "api-version", newJString(apiVersion))
+  add(path_564133, "subscriptionId", newJString(subscriptionId))
+  add(path_564133, "scriptName", newJString(scriptName))
+  add(path_564133, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564132.call(path_564133, query_564134, nil, nil, nil)
 
-var scriptActionsDelete* = Call_ScriptActionsDelete_568223(
+var scriptActionsDelete* = Call_ScriptActionsDelete_564123(
     name: "scriptActionsDelete", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.HDInsight/clusters/{clusterName}/scriptActions/{scriptName}",
-    validator: validate_ScriptActionsDelete_568224, base: "",
-    url: url_ScriptActionsDelete_568225, schemes: {Scheme.Https})
+    validator: validate_ScriptActionsDelete_564124, base: "",
+    url: url_ScriptActionsDelete_564125, schemes: {Scheme.Https})
 type
-  Call_ScriptExecutionHistoryList_568235 = ref object of OpenApiRestCall_567657
-proc url_ScriptExecutionHistoryList_568237(protocol: Scheme; host: string;
+  Call_ScriptExecutionHistoryList_564135 = ref object of OpenApiRestCall_563555
+proc url_ScriptExecutionHistoryList_564137(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -496,7 +500,7 @@ proc url_ScriptExecutionHistoryList_568237(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ScriptExecutionHistoryList_568236(path: JsonNode; query: JsonNode;
+proc validate_ScriptExecutionHistoryList_564136(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists all scripts' execution history for the specified cluster.
   ## 
@@ -505,28 +509,28 @@ proc validate_ScriptExecutionHistoryList_568236(path: JsonNode; query: JsonNode;
   ## parameters in `path` object:
   ##   clusterName: JString (required)
   ##              : The name of the cluster.
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   subscriptionId: JString (required)
   ##                 : The subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `clusterName` field"
-  var valid_568238 = path.getOrDefault("clusterName")
-  valid_568238 = validateParameter(valid_568238, JString, required = true,
+  var valid_564138 = path.getOrDefault("clusterName")
+  valid_564138 = validateParameter(valid_564138, JString, required = true,
                                  default = nil)
-  if valid_568238 != nil:
-    section.add "clusterName", valid_568238
-  var valid_568239 = path.getOrDefault("resourceGroupName")
-  valid_568239 = validateParameter(valid_568239, JString, required = true,
+  if valid_564138 != nil:
+    section.add "clusterName", valid_564138
+  var valid_564139 = path.getOrDefault("subscriptionId")
+  valid_564139 = validateParameter(valid_564139, JString, required = true,
                                  default = nil)
-  if valid_568239 != nil:
-    section.add "resourceGroupName", valid_568239
-  var valid_568240 = path.getOrDefault("subscriptionId")
-  valid_568240 = validateParameter(valid_568240, JString, required = true,
+  if valid_564139 != nil:
+    section.add "subscriptionId", valid_564139
+  var valid_564140 = path.getOrDefault("resourceGroupName")
+  valid_564140 = validateParameter(valid_564140, JString, required = true,
                                  default = nil)
-  if valid_568240 != nil:
-    section.add "subscriptionId", valid_568240
+  if valid_564140 != nil:
+    section.add "resourceGroupName", valid_564140
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -534,11 +538,11 @@ proc validate_ScriptExecutionHistoryList_568236(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568241 = query.getOrDefault("api-version")
-  valid_568241 = validateParameter(valid_568241, JString, required = true,
+  var valid_564141 = query.getOrDefault("api-version")
+  valid_564141 = validateParameter(valid_564141, JString, required = true,
                                  default = nil)
-  if valid_568241 != nil:
-    section.add "api-version", valid_568241
+  if valid_564141 != nil:
+    section.add "api-version", valid_564141
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -547,48 +551,48 @@ proc validate_ScriptExecutionHistoryList_568236(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568242: Call_ScriptExecutionHistoryList_568235; path: JsonNode;
+proc call*(call_564142: Call_ScriptExecutionHistoryList_564135; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists all scripts' execution history for the specified cluster.
   ## 
-  let valid = call_568242.validator(path, query, header, formData, body)
-  let scheme = call_568242.pickScheme
+  let valid = call_564142.validator(path, query, header, formData, body)
+  let scheme = call_564142.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568242.url(scheme.get, call_568242.host, call_568242.base,
-                         call_568242.route, valid.getOrDefault("path"),
+  let url = call_564142.url(scheme.get, call_564142.host, call_564142.base,
+                         call_564142.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568242, url, valid)
+  result = hook(call_564142, url, valid)
 
-proc call*(call_568243: Call_ScriptExecutionHistoryList_568235;
-          clusterName: string; resourceGroupName: string; apiVersion: string;
-          subscriptionId: string): Recallable =
+proc call*(call_564143: Call_ScriptExecutionHistoryList_564135;
+          clusterName: string; apiVersion: string; subscriptionId: string;
+          resourceGroupName: string): Recallable =
   ## scriptExecutionHistoryList
   ## Lists all scripts' execution history for the specified cluster.
   ##   clusterName: string (required)
   ##              : The name of the cluster.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : The HDInsight client API Version.
   ##   subscriptionId: string (required)
   ##                 : The subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_568244 = newJObject()
-  var query_568245 = newJObject()
-  add(path_568244, "clusterName", newJString(clusterName))
-  add(path_568244, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568245, "api-version", newJString(apiVersion))
-  add(path_568244, "subscriptionId", newJString(subscriptionId))
-  result = call_568243.call(path_568244, query_568245, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564144 = newJObject()
+  var query_564145 = newJObject()
+  add(path_564144, "clusterName", newJString(clusterName))
+  add(query_564145, "api-version", newJString(apiVersion))
+  add(path_564144, "subscriptionId", newJString(subscriptionId))
+  add(path_564144, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564143.call(path_564144, query_564145, nil, nil, nil)
 
-var scriptExecutionHistoryList* = Call_ScriptExecutionHistoryList_568235(
+var scriptExecutionHistoryList* = Call_ScriptExecutionHistoryList_564135(
     name: "scriptExecutionHistoryList", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.HDInsight/clusters/{clusterName}/scriptExecutionHistory",
-    validator: validate_ScriptExecutionHistoryList_568236, base: "",
-    url: url_ScriptExecutionHistoryList_568237, schemes: {Scheme.Https})
+    validator: validate_ScriptExecutionHistoryList_564136, base: "",
+    url: url_ScriptExecutionHistoryList_564137, schemes: {Scheme.Https})
 type
-  Call_ScriptActionsGetExecutionDetail_568246 = ref object of OpenApiRestCall_567657
-proc url_ScriptActionsGetExecutionDetail_568248(protocol: Scheme; host: string;
+  Call_ScriptActionsGetExecutionDetail_564146 = ref object of OpenApiRestCall_563555
+proc url_ScriptActionsGetExecutionDetail_564148(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -614,7 +618,7 @@ proc url_ScriptActionsGetExecutionDetail_568248(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ScriptActionsGetExecutionDetail_568247(path: JsonNode;
+proc validate_ScriptActionsGetExecutionDetail_564147(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the script execution detail for the given script execution ID.
   ## 
@@ -623,35 +627,35 @@ proc validate_ScriptActionsGetExecutionDetail_568247(path: JsonNode;
   ## parameters in `path` object:
   ##   clusterName: JString (required)
   ##              : The name of the cluster.
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   subscriptionId: JString (required)
   ##                 : The subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   scriptExecutionId: JString (required)
   ##                    : The script execution Id
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `clusterName` field"
-  var valid_568249 = path.getOrDefault("clusterName")
-  valid_568249 = validateParameter(valid_568249, JString, required = true,
+  var valid_564149 = path.getOrDefault("clusterName")
+  valid_564149 = validateParameter(valid_564149, JString, required = true,
                                  default = nil)
-  if valid_568249 != nil:
-    section.add "clusterName", valid_568249
-  var valid_568250 = path.getOrDefault("resourceGroupName")
-  valid_568250 = validateParameter(valid_568250, JString, required = true,
+  if valid_564149 != nil:
+    section.add "clusterName", valid_564149
+  var valid_564150 = path.getOrDefault("subscriptionId")
+  valid_564150 = validateParameter(valid_564150, JString, required = true,
                                  default = nil)
-  if valid_568250 != nil:
-    section.add "resourceGroupName", valid_568250
-  var valid_568251 = path.getOrDefault("subscriptionId")
-  valid_568251 = validateParameter(valid_568251, JString, required = true,
+  if valid_564150 != nil:
+    section.add "subscriptionId", valid_564150
+  var valid_564151 = path.getOrDefault("scriptExecutionId")
+  valid_564151 = validateParameter(valid_564151, JString, required = true,
                                  default = nil)
-  if valid_568251 != nil:
-    section.add "subscriptionId", valid_568251
-  var valid_568252 = path.getOrDefault("scriptExecutionId")
-  valid_568252 = validateParameter(valid_568252, JString, required = true,
+  if valid_564151 != nil:
+    section.add "scriptExecutionId", valid_564151
+  var valid_564152 = path.getOrDefault("resourceGroupName")
+  valid_564152 = validateParameter(valid_564152, JString, required = true,
                                  default = nil)
-  if valid_568252 != nil:
-    section.add "scriptExecutionId", valid_568252
+  if valid_564152 != nil:
+    section.add "resourceGroupName", valid_564152
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -659,11 +663,11 @@ proc validate_ScriptActionsGetExecutionDetail_568247(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568253 = query.getOrDefault("api-version")
-  valid_568253 = validateParameter(valid_568253, JString, required = true,
+  var valid_564153 = query.getOrDefault("api-version")
+  valid_564153 = validateParameter(valid_564153, JString, required = true,
                                  default = nil)
-  if valid_568253 != nil:
-    section.add "api-version", valid_568253
+  if valid_564153 != nil:
+    section.add "api-version", valid_564153
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -672,52 +676,52 @@ proc validate_ScriptActionsGetExecutionDetail_568247(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568254: Call_ScriptActionsGetExecutionDetail_568246;
+proc call*(call_564154: Call_ScriptActionsGetExecutionDetail_564146;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Gets the script execution detail for the given script execution ID.
   ## 
-  let valid = call_568254.validator(path, query, header, formData, body)
-  let scheme = call_568254.pickScheme
+  let valid = call_564154.validator(path, query, header, formData, body)
+  let scheme = call_564154.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568254.url(scheme.get, call_568254.host, call_568254.base,
-                         call_568254.route, valid.getOrDefault("path"),
+  let url = call_564154.url(scheme.get, call_564154.host, call_564154.base,
+                         call_564154.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568254, url, valid)
+  result = hook(call_564154, url, valid)
 
-proc call*(call_568255: Call_ScriptActionsGetExecutionDetail_568246;
-          clusterName: string; resourceGroupName: string; apiVersion: string;
-          subscriptionId: string; scriptExecutionId: string): Recallable =
+proc call*(call_564155: Call_ScriptActionsGetExecutionDetail_564146;
+          clusterName: string; apiVersion: string; subscriptionId: string;
+          scriptExecutionId: string; resourceGroupName: string): Recallable =
   ## scriptActionsGetExecutionDetail
   ## Gets the script execution detail for the given script execution ID.
   ##   clusterName: string (required)
   ##              : The name of the cluster.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : The HDInsight client API Version.
   ##   subscriptionId: string (required)
   ##                 : The subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   scriptExecutionId: string (required)
   ##                    : The script execution Id
-  var path_568256 = newJObject()
-  var query_568257 = newJObject()
-  add(path_568256, "clusterName", newJString(clusterName))
-  add(path_568256, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568257, "api-version", newJString(apiVersion))
-  add(path_568256, "subscriptionId", newJString(subscriptionId))
-  add(path_568256, "scriptExecutionId", newJString(scriptExecutionId))
-  result = call_568255.call(path_568256, query_568257, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564156 = newJObject()
+  var query_564157 = newJObject()
+  add(path_564156, "clusterName", newJString(clusterName))
+  add(query_564157, "api-version", newJString(apiVersion))
+  add(path_564156, "subscriptionId", newJString(subscriptionId))
+  add(path_564156, "scriptExecutionId", newJString(scriptExecutionId))
+  add(path_564156, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564155.call(path_564156, query_564157, nil, nil, nil)
 
-var scriptActionsGetExecutionDetail* = Call_ScriptActionsGetExecutionDetail_568246(
+var scriptActionsGetExecutionDetail* = Call_ScriptActionsGetExecutionDetail_564146(
     name: "scriptActionsGetExecutionDetail", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.HDInsight/clusters/{clusterName}/scriptExecutionHistory/{scriptExecutionId}",
-    validator: validate_ScriptActionsGetExecutionDetail_568247, base: "",
-    url: url_ScriptActionsGetExecutionDetail_568248, schemes: {Scheme.Https})
+    validator: validate_ScriptActionsGetExecutionDetail_564147, base: "",
+    url: url_ScriptActionsGetExecutionDetail_564148, schemes: {Scheme.Https})
 type
-  Call_ScriptExecutionHistoryPromote_568258 = ref object of OpenApiRestCall_567657
-proc url_ScriptExecutionHistoryPromote_568260(protocol: Scheme; host: string;
+  Call_ScriptExecutionHistoryPromote_564158 = ref object of OpenApiRestCall_563555
+proc url_ScriptExecutionHistoryPromote_564160(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -744,7 +748,7 @@ proc url_ScriptExecutionHistoryPromote_568260(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ScriptExecutionHistoryPromote_568259(path: JsonNode; query: JsonNode;
+proc validate_ScriptExecutionHistoryPromote_564159(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Promotes the specified ad-hoc script execution to a persisted script.
   ## 
@@ -753,35 +757,35 @@ proc validate_ScriptExecutionHistoryPromote_568259(path: JsonNode; query: JsonNo
   ## parameters in `path` object:
   ##   clusterName: JString (required)
   ##              : The name of the cluster.
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   subscriptionId: JString (required)
   ##                 : The subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   scriptExecutionId: JString (required)
   ##                    : The script execution Id
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `clusterName` field"
-  var valid_568261 = path.getOrDefault("clusterName")
-  valid_568261 = validateParameter(valid_568261, JString, required = true,
+  var valid_564161 = path.getOrDefault("clusterName")
+  valid_564161 = validateParameter(valid_564161, JString, required = true,
                                  default = nil)
-  if valid_568261 != nil:
-    section.add "clusterName", valid_568261
-  var valid_568262 = path.getOrDefault("resourceGroupName")
-  valid_568262 = validateParameter(valid_568262, JString, required = true,
+  if valid_564161 != nil:
+    section.add "clusterName", valid_564161
+  var valid_564162 = path.getOrDefault("subscriptionId")
+  valid_564162 = validateParameter(valid_564162, JString, required = true,
                                  default = nil)
-  if valid_568262 != nil:
-    section.add "resourceGroupName", valid_568262
-  var valid_568263 = path.getOrDefault("subscriptionId")
-  valid_568263 = validateParameter(valid_568263, JString, required = true,
+  if valid_564162 != nil:
+    section.add "subscriptionId", valid_564162
+  var valid_564163 = path.getOrDefault("scriptExecutionId")
+  valid_564163 = validateParameter(valid_564163, JString, required = true,
                                  default = nil)
-  if valid_568263 != nil:
-    section.add "subscriptionId", valid_568263
-  var valid_568264 = path.getOrDefault("scriptExecutionId")
-  valid_568264 = validateParameter(valid_568264, JString, required = true,
+  if valid_564163 != nil:
+    section.add "scriptExecutionId", valid_564163
+  var valid_564164 = path.getOrDefault("resourceGroupName")
+  valid_564164 = validateParameter(valid_564164, JString, required = true,
                                  default = nil)
-  if valid_568264 != nil:
-    section.add "scriptExecutionId", valid_568264
+  if valid_564164 != nil:
+    section.add "resourceGroupName", valid_564164
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -789,11 +793,11 @@ proc validate_ScriptExecutionHistoryPromote_568259(path: JsonNode; query: JsonNo
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568265 = query.getOrDefault("api-version")
-  valid_568265 = validateParameter(valid_568265, JString, required = true,
+  var valid_564165 = query.getOrDefault("api-version")
+  valid_564165 = validateParameter(valid_564165, JString, required = true,
                                  default = nil)
-  if valid_568265 != nil:
-    section.add "api-version", valid_568265
+  if valid_564165 != nil:
+    section.add "api-version", valid_564165
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -802,48 +806,48 @@ proc validate_ScriptExecutionHistoryPromote_568259(path: JsonNode; query: JsonNo
   if body != nil:
     result.add "body", body
 
-proc call*(call_568266: Call_ScriptExecutionHistoryPromote_568258; path: JsonNode;
+proc call*(call_564166: Call_ScriptExecutionHistoryPromote_564158; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Promotes the specified ad-hoc script execution to a persisted script.
   ## 
-  let valid = call_568266.validator(path, query, header, formData, body)
-  let scheme = call_568266.pickScheme
+  let valid = call_564166.validator(path, query, header, formData, body)
+  let scheme = call_564166.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568266.url(scheme.get, call_568266.host, call_568266.base,
-                         call_568266.route, valid.getOrDefault("path"),
+  let url = call_564166.url(scheme.get, call_564166.host, call_564166.base,
+                         call_564166.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568266, url, valid)
+  result = hook(call_564166, url, valid)
 
-proc call*(call_568267: Call_ScriptExecutionHistoryPromote_568258;
-          clusterName: string; resourceGroupName: string; apiVersion: string;
-          subscriptionId: string; scriptExecutionId: string): Recallable =
+proc call*(call_564167: Call_ScriptExecutionHistoryPromote_564158;
+          clusterName: string; apiVersion: string; subscriptionId: string;
+          scriptExecutionId: string; resourceGroupName: string): Recallable =
   ## scriptExecutionHistoryPromote
   ## Promotes the specified ad-hoc script execution to a persisted script.
   ##   clusterName: string (required)
   ##              : The name of the cluster.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : The HDInsight client API Version.
   ##   subscriptionId: string (required)
   ##                 : The subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   scriptExecutionId: string (required)
   ##                    : The script execution Id
-  var path_568268 = newJObject()
-  var query_568269 = newJObject()
-  add(path_568268, "clusterName", newJString(clusterName))
-  add(path_568268, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568269, "api-version", newJString(apiVersion))
-  add(path_568268, "subscriptionId", newJString(subscriptionId))
-  add(path_568268, "scriptExecutionId", newJString(scriptExecutionId))
-  result = call_568267.call(path_568268, query_568269, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564168 = newJObject()
+  var query_564169 = newJObject()
+  add(path_564168, "clusterName", newJString(clusterName))
+  add(query_564169, "api-version", newJString(apiVersion))
+  add(path_564168, "subscriptionId", newJString(subscriptionId))
+  add(path_564168, "scriptExecutionId", newJString(scriptExecutionId))
+  add(path_564168, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564167.call(path_564168, query_564169, nil, nil, nil)
 
-var scriptExecutionHistoryPromote* = Call_ScriptExecutionHistoryPromote_568258(
+var scriptExecutionHistoryPromote* = Call_ScriptExecutionHistoryPromote_564158(
     name: "scriptExecutionHistoryPromote", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.HDInsight/clusters/{clusterName}/scriptExecutionHistory/{scriptExecutionId}/promote",
-    validator: validate_ScriptExecutionHistoryPromote_568259, base: "",
-    url: url_ScriptExecutionHistoryPromote_568260, schemes: {Scheme.Https})
+    validator: validate_ScriptExecutionHistoryPromote_564159, base: "",
+    url: url_ScriptExecutionHistoryPromote_564160, schemes: {Scheme.Https})
 export
   rest
 

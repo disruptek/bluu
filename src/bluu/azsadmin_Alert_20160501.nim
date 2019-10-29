@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, httpcore
 
 ## auto-generated via openapi macro
 ## title: InfrastructureInsightsManagementClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_582442 = ref object of OpenApiRestCall
+  OpenApiRestCall_563540 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_582442](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563540](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_582442): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563540): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,8 +107,8 @@ const
   macServiceName = "azsadmin-Alert"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_AlertsList_582664 = ref object of OpenApiRestCall_582442
-proc url_AlertsList_582666(protocol: Scheme; host: string; base: string; route: string;
+  Call_AlertsList_563762 = ref object of OpenApiRestCall_563540
+proc url_AlertsList_563764(protocol: Scheme; host: string; base: string; route: string;
                           path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -127,37 +131,37 @@ proc url_AlertsList_582666(protocol: Scheme; host: string; base: string; route: 
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AlertsList_582665(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_AlertsList_563763(path: JsonNode; query: JsonNode; header: JsonNode;
                                formData: JsonNode; body: JsonNode): JsonNode =
   ## Returns the list of all alerts in a given region.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials that uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   location: JString (required)
   ##           : Name of the region
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_582827 = path.getOrDefault("resourceGroupName")
-  valid_582827 = validateParameter(valid_582827, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_563927 = path.getOrDefault("subscriptionId")
+  valid_563927 = validateParameter(valid_563927, JString, required = true,
                                  default = nil)
-  if valid_582827 != nil:
-    section.add "resourceGroupName", valid_582827
-  var valid_582828 = path.getOrDefault("subscriptionId")
-  valid_582828 = validateParameter(valid_582828, JString, required = true,
+  if valid_563927 != nil:
+    section.add "subscriptionId", valid_563927
+  var valid_563928 = path.getOrDefault("location")
+  valid_563928 = validateParameter(valid_563928, JString, required = true,
                                  default = nil)
-  if valid_582828 != nil:
-    section.add "subscriptionId", valid_582828
-  var valid_582829 = path.getOrDefault("location")
-  valid_582829 = validateParameter(valid_582829, JString, required = true,
+  if valid_563928 != nil:
+    section.add "location", valid_563928
+  var valid_563929 = path.getOrDefault("resourceGroupName")
+  valid_563929 = validateParameter(valid_563929, JString, required = true,
                                  default = nil)
-  if valid_582829 != nil:
-    section.add "location", valid_582829
+  if valid_563929 != nil:
+    section.add "resourceGroupName", valid_563929
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -167,16 +171,16 @@ proc validate_AlertsList_582665(path: JsonNode; query: JsonNode; header: JsonNod
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_582843 = query.getOrDefault("api-version")
-  valid_582843 = validateParameter(valid_582843, JString, required = true,
+  var valid_563943 = query.getOrDefault("api-version")
+  valid_563943 = validateParameter(valid_563943, JString, required = true,
                                  default = newJString("2016-05-01"))
-  if valid_582843 != nil:
-    section.add "api-version", valid_582843
-  var valid_582844 = query.getOrDefault("$filter")
-  valid_582844 = validateParameter(valid_582844, JString, required = false,
+  if valid_563943 != nil:
+    section.add "api-version", valid_563943
+  var valid_563944 = query.getOrDefault("$filter")
+  valid_563944 = validateParameter(valid_563944, JString, required = false,
                                  default = nil)
-  if valid_582844 != nil:
-    section.add "$filter", valid_582844
+  if valid_563944 != nil:
+    section.add "$filter", valid_563944
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -185,51 +189,51 @@ proc validate_AlertsList_582665(path: JsonNode; query: JsonNode; header: JsonNod
   if body != nil:
     result.add "body", body
 
-proc call*(call_582871: Call_AlertsList_582664; path: JsonNode; query: JsonNode;
+proc call*(call_563971: Call_AlertsList_563762; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Returns the list of all alerts in a given region.
   ## 
-  let valid = call_582871.validator(path, query, header, formData, body)
-  let scheme = call_582871.pickScheme
+  let valid = call_563971.validator(path, query, header, formData, body)
+  let scheme = call_563971.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_582871.url(scheme.get, call_582871.host, call_582871.base,
-                         call_582871.route, valid.getOrDefault("path"),
+  let url = call_563971.url(scheme.get, call_563971.host, call_563971.base,
+                         call_563971.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_582871, url, valid)
+  result = hook(call_563971, url, valid)
 
-proc call*(call_582942: Call_AlertsList_582664; resourceGroupName: string;
-          subscriptionId: string; location: string;
+proc call*(call_564042: Call_AlertsList_563762; subscriptionId: string;
+          location: string; resourceGroupName: string;
           apiVersion: string = "2016-05-01"; Filter: string = ""): Recallable =
   ## alertsList
   ## Returns the list of all alerts in a given region.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client API Version.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials that uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   location: string (required)
   ##           : Name of the region
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   Filter: string
   ##         : OData filter parameter.
-  var path_582943 = newJObject()
-  var query_582945 = newJObject()
-  add(path_582943, "resourceGroupName", newJString(resourceGroupName))
-  add(query_582945, "api-version", newJString(apiVersion))
-  add(path_582943, "subscriptionId", newJString(subscriptionId))
-  add(path_582943, "location", newJString(location))
-  add(query_582945, "$filter", newJString(Filter))
-  result = call_582942.call(path_582943, query_582945, nil, nil, nil)
+  var path_564043 = newJObject()
+  var query_564045 = newJObject()
+  add(query_564045, "api-version", newJString(apiVersion))
+  add(path_564043, "subscriptionId", newJString(subscriptionId))
+  add(path_564043, "location", newJString(location))
+  add(path_564043, "resourceGroupName", newJString(resourceGroupName))
+  add(query_564045, "$filter", newJString(Filter))
+  result = call_564042.call(path_564043, query_564045, nil, nil, nil)
 
-var alertsList* = Call_AlertsList_582664(name: "alertsList",
+var alertsList* = Call_AlertsList_563762(name: "alertsList",
                                       meth: HttpMethod.HttpGet, host: "adminmanagement.local.azurestack.external", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.InfrastructureInsights.Admin/regionHealths/{location}/alerts",
-                                      validator: validate_AlertsList_582665,
-                                      base: "", url: url_AlertsList_582666,
+                                      validator: validate_AlertsList_563763,
+                                      base: "", url: url_AlertsList_563764,
                                       schemes: {Scheme.Https})
 type
-  Call_AlertsClose_583005 = ref object of OpenApiRestCall_582442
-proc url_AlertsClose_583007(protocol: Scheme; host: string; base: string;
+  Call_AlertsClose_564105 = ref object of OpenApiRestCall_563540
+proc url_AlertsClose_564107(protocol: Scheme; host: string; base: string;
                            route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -254,44 +258,43 @@ proc url_AlertsClose_583007(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AlertsClose_583006(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_AlertsClose_564106(path: JsonNode; query: JsonNode; header: JsonNode;
                                 formData: JsonNode; body: JsonNode): JsonNode =
   ## Closes the given alert.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
-  ##   subscriptionId: JString (required)
-  ##                 : Subscription credentials that uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   alertName: JString (required)
   ##            : Name of the alert.
+  ##   subscriptionId: JString (required)
+  ##                 : Subscription credentials that uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   location: JString (required)
   ##           : Name of the region
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_583008 = path.getOrDefault("resourceGroupName")
-  valid_583008 = validateParameter(valid_583008, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `alertName` field"
+  var valid_564108 = path.getOrDefault("alertName")
+  valid_564108 = validateParameter(valid_564108, JString, required = true,
                                  default = nil)
-  if valid_583008 != nil:
-    section.add "resourceGroupName", valid_583008
-  var valid_583009 = path.getOrDefault("subscriptionId")
-  valid_583009 = validateParameter(valid_583009, JString, required = true,
+  if valid_564108 != nil:
+    section.add "alertName", valid_564108
+  var valid_564109 = path.getOrDefault("subscriptionId")
+  valid_564109 = validateParameter(valid_564109, JString, required = true,
                                  default = nil)
-  if valid_583009 != nil:
-    section.add "subscriptionId", valid_583009
-  var valid_583010 = path.getOrDefault("alertName")
-  valid_583010 = validateParameter(valid_583010, JString, required = true,
+  if valid_564109 != nil:
+    section.add "subscriptionId", valid_564109
+  var valid_564110 = path.getOrDefault("location")
+  valid_564110 = validateParameter(valid_564110, JString, required = true,
                                  default = nil)
-  if valid_583010 != nil:
-    section.add "alertName", valid_583010
-  var valid_583011 = path.getOrDefault("location")
-  valid_583011 = validateParameter(valid_583011, JString, required = true,
+  if valid_564110 != nil:
+    section.add "location", valid_564110
+  var valid_564111 = path.getOrDefault("resourceGroupName")
+  valid_564111 = validateParameter(valid_564111, JString, required = true,
                                  default = nil)
-  if valid_583011 != nil:
-    section.add "location", valid_583011
+  if valid_564111 != nil:
+    section.add "resourceGroupName", valid_564111
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -301,16 +304,16 @@ proc validate_AlertsClose_583006(path: JsonNode; query: JsonNode; header: JsonNo
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_583012 = query.getOrDefault("api-version")
-  valid_583012 = validateParameter(valid_583012, JString, required = true,
+  var valid_564112 = query.getOrDefault("api-version")
+  valid_564112 = validateParameter(valid_564112, JString, required = true,
                                  default = newJString("2016-05-01"))
-  if valid_583012 != nil:
-    section.add "api-version", valid_583012
-  var valid_583013 = query.getOrDefault("user")
-  valid_583013 = validateParameter(valid_583013, JString, required = true,
+  if valid_564112 != nil:
+    section.add "api-version", valid_564112
+  var valid_564113 = query.getOrDefault("user")
+  valid_564113 = validateParameter(valid_564113, JString, required = true,
                                  default = nil)
-  if valid_583013 != nil:
-    section.add "user", valid_583013
+  if valid_564113 != nil:
+    section.add "user", valid_564113
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -324,59 +327,59 @@ proc validate_AlertsClose_583006(path: JsonNode; query: JsonNode; header: JsonNo
   if body != nil:
     result.add "body", body
 
-proc call*(call_583015: Call_AlertsClose_583005; path: JsonNode; query: JsonNode;
+proc call*(call_564115: Call_AlertsClose_564105; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Closes the given alert.
   ## 
-  let valid = call_583015.validator(path, query, header, formData, body)
-  let scheme = call_583015.pickScheme
+  let valid = call_564115.validator(path, query, header, formData, body)
+  let scheme = call_564115.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_583015.url(scheme.get, call_583015.host, call_583015.base,
-                         call_583015.route, valid.getOrDefault("path"),
+  let url = call_564115.url(scheme.get, call_564115.host, call_564115.base,
+                         call_564115.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_583015, url, valid)
+  result = hook(call_564115, url, valid)
 
-proc call*(call_583016: Call_AlertsClose_583005; resourceGroupName: string;
-          subscriptionId: string; alert: JsonNode; alertName: string; user: string;
-          location: string; apiVersion: string = "2016-05-01"): Recallable =
+proc call*(call_564116: Call_AlertsClose_564105; alertName: string; alert: JsonNode;
+          subscriptionId: string; location: string; user: string;
+          resourceGroupName: string; apiVersion: string = "2016-05-01"): Recallable =
   ## alertsClose
   ## Closes the given alert.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   alertName: string (required)
+  ##            : Name of the alert.
+  ##   alert: JObject (required)
+  ##        : Updated alert parameter.
   ##   apiVersion: string (required)
   ##             : Client API Version.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials that uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   alert: JObject (required)
-  ##        : Updated alert parameter.
-  ##   alertName: string (required)
-  ##            : Name of the alert.
-  ##   user: string (required)
-  ##       : The username used to perform the operation.
   ##   location: string (required)
   ##           : Name of the region
-  var path_583017 = newJObject()
-  var query_583018 = newJObject()
-  var body_583019 = newJObject()
-  add(path_583017, "resourceGroupName", newJString(resourceGroupName))
-  add(query_583018, "api-version", newJString(apiVersion))
-  add(path_583017, "subscriptionId", newJString(subscriptionId))
+  ##   user: string (required)
+  ##       : The username used to perform the operation.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564117 = newJObject()
+  var query_564118 = newJObject()
+  var body_564119 = newJObject()
+  add(path_564117, "alertName", newJString(alertName))
   if alert != nil:
-    body_583019 = alert
-  add(path_583017, "alertName", newJString(alertName))
-  add(query_583018, "user", newJString(user))
-  add(path_583017, "location", newJString(location))
-  result = call_583016.call(path_583017, query_583018, nil, nil, body_583019)
+    body_564119 = alert
+  add(query_564118, "api-version", newJString(apiVersion))
+  add(path_564117, "subscriptionId", newJString(subscriptionId))
+  add(path_564117, "location", newJString(location))
+  add(query_564118, "user", newJString(user))
+  add(path_564117, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564116.call(path_564117, query_564118, nil, nil, body_564119)
 
-var alertsClose* = Call_AlertsClose_583005(name: "alertsClose",
+var alertsClose* = Call_AlertsClose_564105(name: "alertsClose",
                                         meth: HttpMethod.HttpPut, host: "adminmanagement.local.azurestack.external", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.InfrastructureInsights.Admin/regionHealths/{location}/alerts/{alertName}",
-                                        validator: validate_AlertsClose_583006,
-                                        base: "", url: url_AlertsClose_583007,
+                                        validator: validate_AlertsClose_564106,
+                                        base: "", url: url_AlertsClose_564107,
                                         schemes: {Scheme.Https})
 type
-  Call_AlertsGet_582984 = ref object of OpenApiRestCall_582442
-proc url_AlertsGet_582986(protocol: Scheme; host: string; base: string; route: string;
+  Call_AlertsGet_564084 = ref object of OpenApiRestCall_563540
+proc url_AlertsGet_564086(protocol: Scheme; host: string; base: string; route: string;
                          path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -401,44 +404,43 @@ proc url_AlertsGet_582986(protocol: Scheme; host: string; base: string; route: s
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AlertsGet_582985(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_AlertsGet_564085(path: JsonNode; query: JsonNode; header: JsonNode;
                               formData: JsonNode; body: JsonNode): JsonNode =
   ## Returns the requested an alert.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
-  ##   subscriptionId: JString (required)
-  ##                 : Subscription credentials that uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   alertName: JString (required)
   ##            : Name of the alert.
+  ##   subscriptionId: JString (required)
+  ##                 : Subscription credentials that uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   location: JString (required)
   ##           : Name of the region
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_582996 = path.getOrDefault("resourceGroupName")
-  valid_582996 = validateParameter(valid_582996, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `alertName` field"
+  var valid_564096 = path.getOrDefault("alertName")
+  valid_564096 = validateParameter(valid_564096, JString, required = true,
                                  default = nil)
-  if valid_582996 != nil:
-    section.add "resourceGroupName", valid_582996
-  var valid_582997 = path.getOrDefault("subscriptionId")
-  valid_582997 = validateParameter(valid_582997, JString, required = true,
+  if valid_564096 != nil:
+    section.add "alertName", valid_564096
+  var valid_564097 = path.getOrDefault("subscriptionId")
+  valid_564097 = validateParameter(valid_564097, JString, required = true,
                                  default = nil)
-  if valid_582997 != nil:
-    section.add "subscriptionId", valid_582997
-  var valid_582998 = path.getOrDefault("alertName")
-  valid_582998 = validateParameter(valid_582998, JString, required = true,
+  if valid_564097 != nil:
+    section.add "subscriptionId", valid_564097
+  var valid_564098 = path.getOrDefault("location")
+  valid_564098 = validateParameter(valid_564098, JString, required = true,
                                  default = nil)
-  if valid_582998 != nil:
-    section.add "alertName", valid_582998
-  var valid_582999 = path.getOrDefault("location")
-  valid_582999 = validateParameter(valid_582999, JString, required = true,
+  if valid_564098 != nil:
+    section.add "location", valid_564098
+  var valid_564099 = path.getOrDefault("resourceGroupName")
+  valid_564099 = validateParameter(valid_564099, JString, required = true,
                                  default = nil)
-  if valid_582999 != nil:
-    section.add "location", valid_582999
+  if valid_564099 != nil:
+    section.add "resourceGroupName", valid_564099
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -446,11 +448,11 @@ proc validate_AlertsGet_582985(path: JsonNode; query: JsonNode; header: JsonNode
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_583000 = query.getOrDefault("api-version")
-  valid_583000 = validateParameter(valid_583000, JString, required = true,
+  var valid_564100 = query.getOrDefault("api-version")
+  valid_564100 = validateParameter(valid_564100, JString, required = true,
                                  default = newJString("2016-05-01"))
-  if valid_583000 != nil:
-    section.add "api-version", valid_583000
+  if valid_564100 != nil:
+    section.add "api-version", valid_564100
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -459,50 +461,50 @@ proc validate_AlertsGet_582985(path: JsonNode; query: JsonNode; header: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_583001: Call_AlertsGet_582984; path: JsonNode; query: JsonNode;
+proc call*(call_564101: Call_AlertsGet_564084; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Returns the requested an alert.
   ## 
-  let valid = call_583001.validator(path, query, header, formData, body)
-  let scheme = call_583001.pickScheme
+  let valid = call_564101.validator(path, query, header, formData, body)
+  let scheme = call_564101.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_583001.url(scheme.get, call_583001.host, call_583001.base,
-                         call_583001.route, valid.getOrDefault("path"),
+  let url = call_564101.url(scheme.get, call_564101.host, call_564101.base,
+                         call_564101.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_583001, url, valid)
+  result = hook(call_564101, url, valid)
 
-proc call*(call_583002: Call_AlertsGet_582984; resourceGroupName: string;
-          subscriptionId: string; alertName: string; location: string;
+proc call*(call_564102: Call_AlertsGet_564084; alertName: string;
+          subscriptionId: string; location: string; resourceGroupName: string;
           apiVersion: string = "2016-05-01"): Recallable =
   ## alertsGet
   ## Returns the requested an alert.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   alertName: string (required)
+  ##            : Name of the alert.
   ##   apiVersion: string (required)
   ##             : Client API Version.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials that uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   alertName: string (required)
-  ##            : Name of the alert.
   ##   location: string (required)
   ##           : Name of the region
-  var path_583003 = newJObject()
-  var query_583004 = newJObject()
-  add(path_583003, "resourceGroupName", newJString(resourceGroupName))
-  add(query_583004, "api-version", newJString(apiVersion))
-  add(path_583003, "subscriptionId", newJString(subscriptionId))
-  add(path_583003, "alertName", newJString(alertName))
-  add(path_583003, "location", newJString(location))
-  result = call_583002.call(path_583003, query_583004, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564103 = newJObject()
+  var query_564104 = newJObject()
+  add(path_564103, "alertName", newJString(alertName))
+  add(query_564104, "api-version", newJString(apiVersion))
+  add(path_564103, "subscriptionId", newJString(subscriptionId))
+  add(path_564103, "location", newJString(location))
+  add(path_564103, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564102.call(path_564103, query_564104, nil, nil, nil)
 
-var alertsGet* = Call_AlertsGet_582984(name: "alertsGet", meth: HttpMethod.HttpGet, host: "adminmanagement.local.azurestack.external", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.InfrastructureInsights.Admin/regionHealths/{location}/alerts/{alertName}",
-                                    validator: validate_AlertsGet_582985,
-                                    base: "", url: url_AlertsGet_582986,
+var alertsGet* = Call_AlertsGet_564084(name: "alertsGet", meth: HttpMethod.HttpGet, host: "adminmanagement.local.azurestack.external", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.InfrastructureInsights.Admin/regionHealths/{location}/alerts/{alertName}",
+                                    validator: validate_AlertsGet_564085,
+                                    base: "", url: url_AlertsGet_564086,
                                     schemes: {Scheme.Https})
 type
-  Call_AlertsRepair_583020 = ref object of OpenApiRestCall_582442
-proc url_AlertsRepair_583022(protocol: Scheme; host: string; base: string;
+  Call_AlertsRepair_564120 = ref object of OpenApiRestCall_563540
+proc url_AlertsRepair_564122(protocol: Scheme; host: string; base: string;
                             route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -528,44 +530,43 @@ proc url_AlertsRepair_583022(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AlertsRepair_583021(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_AlertsRepair_564121(path: JsonNode; query: JsonNode; header: JsonNode;
                                  formData: JsonNode; body: JsonNode): JsonNode =
   ## Repairs an alert.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
-  ##   subscriptionId: JString (required)
-  ##                 : Subscription credentials that uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   alertName: JString (required)
   ##            : Name of the alert.
+  ##   subscriptionId: JString (required)
+  ##                 : Subscription credentials that uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   location: JString (required)
   ##           : Name of the region
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_583023 = path.getOrDefault("resourceGroupName")
-  valid_583023 = validateParameter(valid_583023, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `alertName` field"
+  var valid_564123 = path.getOrDefault("alertName")
+  valid_564123 = validateParameter(valid_564123, JString, required = true,
                                  default = nil)
-  if valid_583023 != nil:
-    section.add "resourceGroupName", valid_583023
-  var valid_583024 = path.getOrDefault("subscriptionId")
-  valid_583024 = validateParameter(valid_583024, JString, required = true,
+  if valid_564123 != nil:
+    section.add "alertName", valid_564123
+  var valid_564124 = path.getOrDefault("subscriptionId")
+  valid_564124 = validateParameter(valid_564124, JString, required = true,
                                  default = nil)
-  if valid_583024 != nil:
-    section.add "subscriptionId", valid_583024
-  var valid_583025 = path.getOrDefault("alertName")
-  valid_583025 = validateParameter(valid_583025, JString, required = true,
+  if valid_564124 != nil:
+    section.add "subscriptionId", valid_564124
+  var valid_564125 = path.getOrDefault("location")
+  valid_564125 = validateParameter(valid_564125, JString, required = true,
                                  default = nil)
-  if valid_583025 != nil:
-    section.add "alertName", valid_583025
-  var valid_583026 = path.getOrDefault("location")
-  valid_583026 = validateParameter(valid_583026, JString, required = true,
+  if valid_564125 != nil:
+    section.add "location", valid_564125
+  var valid_564126 = path.getOrDefault("resourceGroupName")
+  valid_564126 = validateParameter(valid_564126, JString, required = true,
                                  default = nil)
-  if valid_583026 != nil:
-    section.add "location", valid_583026
+  if valid_564126 != nil:
+    section.add "resourceGroupName", valid_564126
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -573,11 +574,11 @@ proc validate_AlertsRepair_583021(path: JsonNode; query: JsonNode; header: JsonN
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_583027 = query.getOrDefault("api-version")
-  valid_583027 = validateParameter(valid_583027, JString, required = true,
+  var valid_564127 = query.getOrDefault("api-version")
+  valid_564127 = validateParameter(valid_564127, JString, required = true,
                                  default = newJString("2016-05-01"))
-  if valid_583027 != nil:
-    section.add "api-version", valid_583027
+  if valid_564127 != nil:
+    section.add "api-version", valid_564127
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -586,46 +587,46 @@ proc validate_AlertsRepair_583021(path: JsonNode; query: JsonNode; header: JsonN
   if body != nil:
     result.add "body", body
 
-proc call*(call_583028: Call_AlertsRepair_583020; path: JsonNode; query: JsonNode;
+proc call*(call_564128: Call_AlertsRepair_564120; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Repairs an alert.
   ## 
-  let valid = call_583028.validator(path, query, header, formData, body)
-  let scheme = call_583028.pickScheme
+  let valid = call_564128.validator(path, query, header, formData, body)
+  let scheme = call_564128.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_583028.url(scheme.get, call_583028.host, call_583028.base,
-                         call_583028.route, valid.getOrDefault("path"),
+  let url = call_564128.url(scheme.get, call_564128.host, call_564128.base,
+                         call_564128.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_583028, url, valid)
+  result = hook(call_564128, url, valid)
 
-proc call*(call_583029: Call_AlertsRepair_583020; resourceGroupName: string;
-          subscriptionId: string; alertName: string; location: string;
+proc call*(call_564129: Call_AlertsRepair_564120; alertName: string;
+          subscriptionId: string; location: string; resourceGroupName: string;
           apiVersion: string = "2016-05-01"): Recallable =
   ## alertsRepair
   ## Repairs an alert.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   alertName: string (required)
+  ##            : Name of the alert.
   ##   apiVersion: string (required)
   ##             : Client API Version.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials that uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   alertName: string (required)
-  ##            : Name of the alert.
   ##   location: string (required)
   ##           : Name of the region
-  var path_583030 = newJObject()
-  var query_583031 = newJObject()
-  add(path_583030, "resourceGroupName", newJString(resourceGroupName))
-  add(query_583031, "api-version", newJString(apiVersion))
-  add(path_583030, "subscriptionId", newJString(subscriptionId))
-  add(path_583030, "alertName", newJString(alertName))
-  add(path_583030, "location", newJString(location))
-  result = call_583029.call(path_583030, query_583031, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564130 = newJObject()
+  var query_564131 = newJObject()
+  add(path_564130, "alertName", newJString(alertName))
+  add(query_564131, "api-version", newJString(apiVersion))
+  add(path_564130, "subscriptionId", newJString(subscriptionId))
+  add(path_564130, "location", newJString(location))
+  add(path_564130, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564129.call(path_564130, query_564131, nil, nil, nil)
 
-var alertsRepair* = Call_AlertsRepair_583020(name: "alertsRepair",
+var alertsRepair* = Call_AlertsRepair_564120(name: "alertsRepair",
     meth: HttpMethod.HttpPost, host: "adminmanagement.local.azurestack.external", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.InfrastructureInsights.Admin/regionHealths/{location}/alerts/{alertName}/repair",
-    validator: validate_AlertsRepair_583021, base: "", url: url_AlertsRepair_583022,
+    validator: validate_AlertsRepair_564121, base: "", url: url_AlertsRepair_564122,
     schemes: {Scheme.Https})
 export
   rest

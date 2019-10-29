@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, httpcore
 
 ## auto-generated via openapi macro
 ## title: Azure SQL Database
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_567642 = ref object of OpenApiRestCall
+  OpenApiRestCall_563540 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_567642](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563540](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_567642): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563540): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,8 +107,8 @@ const
   macServiceName = "sql-serviceObjectives"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_ServiceObjectivesListByServer_567864 = ref object of OpenApiRestCall_567642
-proc url_ServiceObjectivesListByServer_567866(protocol: Scheme; host: string;
+  Call_ServiceObjectivesListByServer_563762 = ref object of OpenApiRestCall_563540
+proc url_ServiceObjectivesListByServer_563764(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -127,37 +131,37 @@ proc url_ServiceObjectivesListByServer_567866(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ServiceObjectivesListByServer_567865(path: JsonNode; query: JsonNode;
+proc validate_ServiceObjectivesListByServer_563763(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Returns database service objectives.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   ##   serverName: JString (required)
   ##             : The name of the server.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID that identifies an Azure subscription.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568039 = path.getOrDefault("resourceGroupName")
-  valid_568039 = validateParameter(valid_568039, JString, required = true,
+        "path argument is necessary due to required `serverName` field"
+  var valid_563939 = path.getOrDefault("serverName")
+  valid_563939 = validateParameter(valid_563939, JString, required = true,
                                  default = nil)
-  if valid_568039 != nil:
-    section.add "resourceGroupName", valid_568039
-  var valid_568040 = path.getOrDefault("serverName")
-  valid_568040 = validateParameter(valid_568040, JString, required = true,
+  if valid_563939 != nil:
+    section.add "serverName", valid_563939
+  var valid_563940 = path.getOrDefault("subscriptionId")
+  valid_563940 = validateParameter(valid_563940, JString, required = true,
                                  default = nil)
-  if valid_568040 != nil:
-    section.add "serverName", valid_568040
-  var valid_568041 = path.getOrDefault("subscriptionId")
-  valid_568041 = validateParameter(valid_568041, JString, required = true,
+  if valid_563940 != nil:
+    section.add "subscriptionId", valid_563940
+  var valid_563941 = path.getOrDefault("resourceGroupName")
+  valid_563941 = validateParameter(valid_563941, JString, required = true,
                                  default = nil)
-  if valid_568041 != nil:
-    section.add "subscriptionId", valid_568041
+  if valid_563941 != nil:
+    section.add "resourceGroupName", valid_563941
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -165,11 +169,11 @@ proc validate_ServiceObjectivesListByServer_567865(path: JsonNode; query: JsonNo
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568042 = query.getOrDefault("api-version")
-  valid_568042 = validateParameter(valid_568042, JString, required = true,
+  var valid_563942 = query.getOrDefault("api-version")
+  valid_563942 = validateParameter(valid_563942, JString, required = true,
                                  default = nil)
-  if valid_568042 != nil:
-    section.add "api-version", valid_568042
+  if valid_563942 != nil:
+    section.add "api-version", valid_563942
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -178,48 +182,48 @@ proc validate_ServiceObjectivesListByServer_567865(path: JsonNode; query: JsonNo
   if body != nil:
     result.add "body", body
 
-proc call*(call_568065: Call_ServiceObjectivesListByServer_567864; path: JsonNode;
+proc call*(call_563965: Call_ServiceObjectivesListByServer_563762; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Returns database service objectives.
   ## 
-  let valid = call_568065.validator(path, query, header, formData, body)
-  let scheme = call_568065.pickScheme
+  let valid = call_563965.validator(path, query, header, formData, body)
+  let scheme = call_563965.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568065.url(scheme.get, call_568065.host, call_568065.base,
-                         call_568065.route, valid.getOrDefault("path"),
+  let url = call_563965.url(scheme.get, call_563965.host, call_563965.base,
+                         call_563965.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568065, url, valid)
+  result = hook(call_563965, url, valid)
 
-proc call*(call_568136: Call_ServiceObjectivesListByServer_567864;
-          resourceGroupName: string; apiVersion: string; serverName: string;
-          subscriptionId: string): Recallable =
+proc call*(call_564036: Call_ServiceObjectivesListByServer_563762;
+          apiVersion: string; serverName: string; subscriptionId: string;
+          resourceGroupName: string): Recallable =
   ## serviceObjectivesListByServer
   ## Returns database service objectives.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   ##   apiVersion: string (required)
   ##             : The API version to use for the request.
   ##   serverName: string (required)
   ##             : The name of the server.
   ##   subscriptionId: string (required)
   ##                 : The subscription ID that identifies an Azure subscription.
-  var path_568137 = newJObject()
-  var query_568139 = newJObject()
-  add(path_568137, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568139, "api-version", newJString(apiVersion))
-  add(path_568137, "serverName", newJString(serverName))
-  add(path_568137, "subscriptionId", newJString(subscriptionId))
-  result = call_568136.call(path_568137, query_568139, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
+  var path_564037 = newJObject()
+  var query_564039 = newJObject()
+  add(query_564039, "api-version", newJString(apiVersion))
+  add(path_564037, "serverName", newJString(serverName))
+  add(path_564037, "subscriptionId", newJString(subscriptionId))
+  add(path_564037, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564036.call(path_564037, query_564039, nil, nil, nil)
 
-var serviceObjectivesListByServer* = Call_ServiceObjectivesListByServer_567864(
+var serviceObjectivesListByServer* = Call_ServiceObjectivesListByServer_563762(
     name: "serviceObjectivesListByServer", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/servers/{serverName}/serviceObjectives",
-    validator: validate_ServiceObjectivesListByServer_567865, base: "",
-    url: url_ServiceObjectivesListByServer_567866, schemes: {Scheme.Https})
+    validator: validate_ServiceObjectivesListByServer_563763, base: "",
+    url: url_ServiceObjectivesListByServer_563764, schemes: {Scheme.Https})
 type
-  Call_ServiceObjectivesGet_568178 = ref object of OpenApiRestCall_567642
-proc url_ServiceObjectivesGet_568180(protocol: Scheme; host: string; base: string;
+  Call_ServiceObjectivesGet_564078 = ref object of OpenApiRestCall_563540
+proc url_ServiceObjectivesGet_564080(protocol: Scheme; host: string; base: string;
                                     route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -245,44 +249,44 @@ proc url_ServiceObjectivesGet_568180(protocol: Scheme; host: string; base: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ServiceObjectivesGet_568179(path: JsonNode; query: JsonNode;
+proc validate_ServiceObjectivesGet_564079(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets a database service objective.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   ##   serverName: JString (required)
   ##             : The name of the server.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID that identifies an Azure subscription.
   ##   serviceObjectiveName: JString (required)
   ##                       : The name of the service objective to retrieve.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568181 = path.getOrDefault("resourceGroupName")
-  valid_568181 = validateParameter(valid_568181, JString, required = true,
+        "path argument is necessary due to required `serverName` field"
+  var valid_564081 = path.getOrDefault("serverName")
+  valid_564081 = validateParameter(valid_564081, JString, required = true,
                                  default = nil)
-  if valid_568181 != nil:
-    section.add "resourceGroupName", valid_568181
-  var valid_568182 = path.getOrDefault("serverName")
-  valid_568182 = validateParameter(valid_568182, JString, required = true,
+  if valid_564081 != nil:
+    section.add "serverName", valid_564081
+  var valid_564082 = path.getOrDefault("subscriptionId")
+  valid_564082 = validateParameter(valid_564082, JString, required = true,
                                  default = nil)
-  if valid_568182 != nil:
-    section.add "serverName", valid_568182
-  var valid_568183 = path.getOrDefault("subscriptionId")
-  valid_568183 = validateParameter(valid_568183, JString, required = true,
+  if valid_564082 != nil:
+    section.add "subscriptionId", valid_564082
+  var valid_564083 = path.getOrDefault("serviceObjectiveName")
+  valid_564083 = validateParameter(valid_564083, JString, required = true,
                                  default = nil)
-  if valid_568183 != nil:
-    section.add "subscriptionId", valid_568183
-  var valid_568184 = path.getOrDefault("serviceObjectiveName")
-  valid_568184 = validateParameter(valid_568184, JString, required = true,
+  if valid_564083 != nil:
+    section.add "serviceObjectiveName", valid_564083
+  var valid_564084 = path.getOrDefault("resourceGroupName")
+  valid_564084 = validateParameter(valid_564084, JString, required = true,
                                  default = nil)
-  if valid_568184 != nil:
-    section.add "serviceObjectiveName", valid_568184
+  if valid_564084 != nil:
+    section.add "resourceGroupName", valid_564084
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -290,11 +294,11 @@ proc validate_ServiceObjectivesGet_568179(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568185 = query.getOrDefault("api-version")
-  valid_568185 = validateParameter(valid_568185, JString, required = true,
+  var valid_564085 = query.getOrDefault("api-version")
+  valid_564085 = validateParameter(valid_564085, JString, required = true,
                                  default = nil)
-  if valid_568185 != nil:
-    section.add "api-version", valid_568185
+  if valid_564085 != nil:
+    section.add "api-version", valid_564085
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -303,26 +307,24 @@ proc validate_ServiceObjectivesGet_568179(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568186: Call_ServiceObjectivesGet_568178; path: JsonNode;
+proc call*(call_564086: Call_ServiceObjectivesGet_564078; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets a database service objective.
   ## 
-  let valid = call_568186.validator(path, query, header, formData, body)
-  let scheme = call_568186.pickScheme
+  let valid = call_564086.validator(path, query, header, formData, body)
+  let scheme = call_564086.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568186.url(scheme.get, call_568186.host, call_568186.base,
-                         call_568186.route, valid.getOrDefault("path"),
+  let url = call_564086.url(scheme.get, call_564086.host, call_564086.base,
+                         call_564086.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568186, url, valid)
+  result = hook(call_564086, url, valid)
 
-proc call*(call_568187: Call_ServiceObjectivesGet_568178;
-          resourceGroupName: string; apiVersion: string; serverName: string;
-          subscriptionId: string; serviceObjectiveName: string): Recallable =
+proc call*(call_564087: Call_ServiceObjectivesGet_564078; apiVersion: string;
+          serverName: string; subscriptionId: string; serviceObjectiveName: string;
+          resourceGroupName: string): Recallable =
   ## serviceObjectivesGet
   ## Gets a database service objective.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   ##   apiVersion: string (required)
   ##             : The API version to use for the request.
   ##   serverName: string (required)
@@ -331,20 +333,22 @@ proc call*(call_568187: Call_ServiceObjectivesGet_568178;
   ##                 : The subscription ID that identifies an Azure subscription.
   ##   serviceObjectiveName: string (required)
   ##                       : The name of the service objective to retrieve.
-  var path_568188 = newJObject()
-  var query_568189 = newJObject()
-  add(path_568188, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568189, "api-version", newJString(apiVersion))
-  add(path_568188, "serverName", newJString(serverName))
-  add(path_568188, "subscriptionId", newJString(subscriptionId))
-  add(path_568188, "serviceObjectiveName", newJString(serviceObjectiveName))
-  result = call_568187.call(path_568188, query_568189, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
+  var path_564088 = newJObject()
+  var query_564089 = newJObject()
+  add(query_564089, "api-version", newJString(apiVersion))
+  add(path_564088, "serverName", newJString(serverName))
+  add(path_564088, "subscriptionId", newJString(subscriptionId))
+  add(path_564088, "serviceObjectiveName", newJString(serviceObjectiveName))
+  add(path_564088, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564087.call(path_564088, query_564089, nil, nil, nil)
 
-var serviceObjectivesGet* = Call_ServiceObjectivesGet_568178(
+var serviceObjectivesGet* = Call_ServiceObjectivesGet_564078(
     name: "serviceObjectivesGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/servers/{serverName}/serviceObjectives/{serviceObjectiveName}",
-    validator: validate_ServiceObjectivesGet_568179, base: "",
-    url: url_ServiceObjectivesGet_568180, schemes: {Scheme.Https})
+    validator: validate_ServiceObjectivesGet_564079, base: "",
+    url: url_ServiceObjectivesGet_564080, schemes: {Scheme.Https})
 export
   rest
 

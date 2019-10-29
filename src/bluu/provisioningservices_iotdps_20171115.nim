@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, httpcore
 
 ## auto-generated via openapi macro
 ## title: iotDpsClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_567657 = ref object of OpenApiRestCall
+  OpenApiRestCall_563555 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_567657](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563555](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_567657): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563555): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,15 +107,15 @@ const
   macServiceName = "provisioningservices-iotdps"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_OperationsList_567879 = ref object of OpenApiRestCall_567657
-proc url_OperationsList_567881(protocol: Scheme; host: string; base: string;
+  Call_OperationsList_563777 = ref object of OpenApiRestCall_563555
+proc url_OperationsList_563779(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_OperationsList_567880(path: JsonNode; query: JsonNode;
+proc validate_OperationsList_563778(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## Lists all of the available Microsoft.Devices REST API operations.
@@ -126,11 +130,11 @@ proc validate_OperationsList_567880(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568040 = query.getOrDefault("api-version")
-  valid_568040 = validateParameter(valid_568040, JString, required = true,
+  var valid_563940 = query.getOrDefault("api-version")
+  valid_563940 = validateParameter(valid_563940, JString, required = true,
                                  default = nil)
-  if valid_568040 != nil:
-    section.add "api-version", valid_568040
+  if valid_563940 != nil:
+    section.add "api-version", valid_563940
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -139,36 +143,36 @@ proc validate_OperationsList_567880(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568063: Call_OperationsList_567879; path: JsonNode; query: JsonNode;
+proc call*(call_563963: Call_OperationsList_563777; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists all of the available Microsoft.Devices REST API operations.
   ## 
-  let valid = call_568063.validator(path, query, header, formData, body)
-  let scheme = call_568063.pickScheme
+  let valid = call_563963.validator(path, query, header, formData, body)
+  let scheme = call_563963.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568063.url(scheme.get, call_568063.host, call_568063.base,
-                         call_568063.route, valid.getOrDefault("path"),
+  let url = call_563963.url(scheme.get, call_563963.host, call_563963.base,
+                         call_563963.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568063, url, valid)
+  result = hook(call_563963, url, valid)
 
-proc call*(call_568134: Call_OperationsList_567879; apiVersion: string): Recallable =
+proc call*(call_564034: Call_OperationsList_563777; apiVersion: string): Recallable =
   ## operationsList
   ## Lists all of the available Microsoft.Devices REST API operations.
   ##   apiVersion: string (required)
   ##             : The version of the API.
-  var query_568135 = newJObject()
-  add(query_568135, "api-version", newJString(apiVersion))
-  result = call_568134.call(nil, query_568135, nil, nil, nil)
+  var query_564035 = newJObject()
+  add(query_564035, "api-version", newJString(apiVersion))
+  result = call_564034.call(nil, query_564035, nil, nil, nil)
 
-var operationsList* = Call_OperationsList_567879(name: "operationsList",
+var operationsList* = Call_OperationsList_563777(name: "operationsList",
     meth: HttpMethod.HttpGet, host: "management.azure.com",
     route: "/providers/Microsoft.Devices/operations",
-    validator: validate_OperationsList_567880, base: "", url: url_OperationsList_567881,
+    validator: validate_OperationsList_563778, base: "", url: url_OperationsList_563779,
     schemes: {Scheme.Https})
 type
-  Call_IotDpsResourceCheckProvisioningServiceNameAvailability_568175 = ref object of OpenApiRestCall_567657
-proc url_IotDpsResourceCheckProvisioningServiceNameAvailability_568177(
+  Call_IotDpsResourceCheckProvisioningServiceNameAvailability_564075 = ref object of OpenApiRestCall_563555
+proc url_IotDpsResourceCheckProvisioningServiceNameAvailability_564077(
     protocol: Scheme; host: string; base: string; route: string; path: JsonNode;
     query: JsonNode): Uri =
   result.scheme = $protocol
@@ -185,7 +189,7 @@ proc url_IotDpsResourceCheckProvisioningServiceNameAvailability_568177(
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_IotDpsResourceCheckProvisioningServiceNameAvailability_568176(
+proc validate_IotDpsResourceCheckProvisioningServiceNameAvailability_564076(
     path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
     body: JsonNode): JsonNode =
   ## Check if a provisioning service name is available. This will validate if the name is syntactically valid and if the name is usable
@@ -198,11 +202,11 @@ proc validate_IotDpsResourceCheckProvisioningServiceNameAvailability_568176(
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_568192 = path.getOrDefault("subscriptionId")
-  valid_568192 = validateParameter(valid_568192, JString, required = true,
+  var valid_564092 = path.getOrDefault("subscriptionId")
+  valid_564092 = validateParameter(valid_564092, JString, required = true,
                                  default = nil)
-  if valid_568192 != nil:
-    section.add "subscriptionId", valid_568192
+  if valid_564092 != nil:
+    section.add "subscriptionId", valid_564092
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -210,11 +214,11 @@ proc validate_IotDpsResourceCheckProvisioningServiceNameAvailability_568176(
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568193 = query.getOrDefault("api-version")
-  valid_568193 = validateParameter(valid_568193, JString, required = true,
+  var valid_564093 = query.getOrDefault("api-version")
+  valid_564093 = validateParameter(valid_564093, JString, required = true,
                                  default = nil)
-  if valid_568193 != nil:
-    section.add "api-version", valid_568193
+  if valid_564093 != nil:
+    section.add "api-version", valid_564093
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -228,21 +232,21 @@ proc validate_IotDpsResourceCheckProvisioningServiceNameAvailability_568176(
   if body != nil:
     result.add "body", body
 
-proc call*(call_568195: Call_IotDpsResourceCheckProvisioningServiceNameAvailability_568175;
+proc call*(call_564095: Call_IotDpsResourceCheckProvisioningServiceNameAvailability_564075;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Check if a provisioning service name is available. This will validate if the name is syntactically valid and if the name is usable
   ## 
-  let valid = call_568195.validator(path, query, header, formData, body)
-  let scheme = call_568195.pickScheme
+  let valid = call_564095.validator(path, query, header, formData, body)
+  let scheme = call_564095.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568195.url(scheme.get, call_568195.host, call_568195.base,
-                         call_568195.route, valid.getOrDefault("path"),
+  let url = call_564095.url(scheme.get, call_564095.host, call_564095.base,
+                         call_564095.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568195, url, valid)
+  result = hook(call_564095, url, valid)
 
-proc call*(call_568196: Call_IotDpsResourceCheckProvisioningServiceNameAvailability_568175;
+proc call*(call_564096: Call_IotDpsResourceCheckProvisioningServiceNameAvailability_564075;
           apiVersion: string; subscriptionId: string; arguments: JsonNode): Recallable =
   ## iotDpsResourceCheckProvisioningServiceNameAvailability
   ## Check if a provisioning service name is available. This will validate if the name is syntactically valid and if the name is usable
@@ -252,24 +256,24 @@ proc call*(call_568196: Call_IotDpsResourceCheckProvisioningServiceNameAvailabil
   ##                 : The subscription identifier.
   ##   arguments: JObject (required)
   ##            : Set the name parameter in the OperationInputs structure to the name of the provisioning service to check.
-  var path_568197 = newJObject()
-  var query_568198 = newJObject()
-  var body_568199 = newJObject()
-  add(query_568198, "api-version", newJString(apiVersion))
-  add(path_568197, "subscriptionId", newJString(subscriptionId))
+  var path_564097 = newJObject()
+  var query_564098 = newJObject()
+  var body_564099 = newJObject()
+  add(query_564098, "api-version", newJString(apiVersion))
+  add(path_564097, "subscriptionId", newJString(subscriptionId))
   if arguments != nil:
-    body_568199 = arguments
-  result = call_568196.call(path_568197, query_568198, nil, nil, body_568199)
+    body_564099 = arguments
+  result = call_564096.call(path_564097, query_564098, nil, nil, body_564099)
 
-var iotDpsResourceCheckProvisioningServiceNameAvailability* = Call_IotDpsResourceCheckProvisioningServiceNameAvailability_568175(
+var iotDpsResourceCheckProvisioningServiceNameAvailability* = Call_IotDpsResourceCheckProvisioningServiceNameAvailability_564075(
     name: "iotDpsResourceCheckProvisioningServiceNameAvailability",
     meth: HttpMethod.HttpPost, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Devices/checkProvisioningServiceNameAvailability",
-    validator: validate_IotDpsResourceCheckProvisioningServiceNameAvailability_568176,
-    base: "", url: url_IotDpsResourceCheckProvisioningServiceNameAvailability_568177,
+    validator: validate_IotDpsResourceCheckProvisioningServiceNameAvailability_564076,
+    base: "", url: url_IotDpsResourceCheckProvisioningServiceNameAvailability_564077,
     schemes: {Scheme.Https})
 type
-  Call_IotDpsResourceListBySubscription_568200 = ref object of OpenApiRestCall_567657
-proc url_IotDpsResourceListBySubscription_568202(protocol: Scheme; host: string;
+  Call_IotDpsResourceListBySubscription_564100 = ref object of OpenApiRestCall_563555
+proc url_IotDpsResourceListBySubscription_564102(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -286,7 +290,7 @@ proc url_IotDpsResourceListBySubscription_568202(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_IotDpsResourceListBySubscription_568201(path: JsonNode;
+proc validate_IotDpsResourceListBySubscription_564101(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## List all the provisioning services for a given subscription id.
   ## 
@@ -298,11 +302,11 @@ proc validate_IotDpsResourceListBySubscription_568201(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_568203 = path.getOrDefault("subscriptionId")
-  valid_568203 = validateParameter(valid_568203, JString, required = true,
+  var valid_564103 = path.getOrDefault("subscriptionId")
+  valid_564103 = validateParameter(valid_564103, JString, required = true,
                                  default = nil)
-  if valid_568203 != nil:
-    section.add "subscriptionId", valid_568203
+  if valid_564103 != nil:
+    section.add "subscriptionId", valid_564103
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -310,11 +314,11 @@ proc validate_IotDpsResourceListBySubscription_568201(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568204 = query.getOrDefault("api-version")
-  valid_568204 = validateParameter(valid_568204, JString, required = true,
+  var valid_564104 = query.getOrDefault("api-version")
+  valid_564104 = validateParameter(valid_564104, JString, required = true,
                                  default = nil)
-  if valid_568204 != nil:
-    section.add "api-version", valid_568204
+  if valid_564104 != nil:
+    section.add "api-version", valid_564104
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -323,21 +327,21 @@ proc validate_IotDpsResourceListBySubscription_568201(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568205: Call_IotDpsResourceListBySubscription_568200;
+proc call*(call_564105: Call_IotDpsResourceListBySubscription_564100;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## List all the provisioning services for a given subscription id.
   ## 
-  let valid = call_568205.validator(path, query, header, formData, body)
-  let scheme = call_568205.pickScheme
+  let valid = call_564105.validator(path, query, header, formData, body)
+  let scheme = call_564105.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568205.url(scheme.get, call_568205.host, call_568205.base,
-                         call_568205.route, valid.getOrDefault("path"),
+  let url = call_564105.url(scheme.get, call_564105.host, call_564105.base,
+                         call_564105.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568205, url, valid)
+  result = hook(call_564105, url, valid)
 
-proc call*(call_568206: Call_IotDpsResourceListBySubscription_568200;
+proc call*(call_564106: Call_IotDpsResourceListBySubscription_564100;
           apiVersion: string; subscriptionId: string): Recallable =
   ## iotDpsResourceListBySubscription
   ## List all the provisioning services for a given subscription id.
@@ -345,20 +349,20 @@ proc call*(call_568206: Call_IotDpsResourceListBySubscription_568200;
   ##             : The version of the API.
   ##   subscriptionId: string (required)
   ##                 : The subscription identifier.
-  var path_568207 = newJObject()
-  var query_568208 = newJObject()
-  add(query_568208, "api-version", newJString(apiVersion))
-  add(path_568207, "subscriptionId", newJString(subscriptionId))
-  result = call_568206.call(path_568207, query_568208, nil, nil, nil)
+  var path_564107 = newJObject()
+  var query_564108 = newJObject()
+  add(query_564108, "api-version", newJString(apiVersion))
+  add(path_564107, "subscriptionId", newJString(subscriptionId))
+  result = call_564106.call(path_564107, query_564108, nil, nil, nil)
 
-var iotDpsResourceListBySubscription* = Call_IotDpsResourceListBySubscription_568200(
+var iotDpsResourceListBySubscription* = Call_IotDpsResourceListBySubscription_564100(
     name: "iotDpsResourceListBySubscription", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Devices/provisioningServices",
-    validator: validate_IotDpsResourceListBySubscription_568201, base: "",
-    url: url_IotDpsResourceListBySubscription_568202, schemes: {Scheme.Https})
+    validator: validate_IotDpsResourceListBySubscription_564101, base: "",
+    url: url_IotDpsResourceListBySubscription_564102, schemes: {Scheme.Https})
 type
-  Call_IotDpsResourceListByResourceGroup_568209 = ref object of OpenApiRestCall_567657
-proc url_IotDpsResourceListByResourceGroup_568211(protocol: Scheme; host: string;
+  Call_IotDpsResourceListByResourceGroup_564109 = ref object of OpenApiRestCall_563555
+proc url_IotDpsResourceListByResourceGroup_564111(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -379,30 +383,30 @@ proc url_IotDpsResourceListByResourceGroup_568211(protocol: Scheme; host: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_IotDpsResourceListByResourceGroup_568210(path: JsonNode;
+proc validate_IotDpsResourceListByResourceGroup_564110(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Get a list of all provisioning services in the given resource group.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : Resource group identifier.
   ##   subscriptionId: JString (required)
   ##                 : The subscription identifier.
+  ##   resourceGroupName: JString (required)
+  ##                    : Resource group identifier.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568212 = path.getOrDefault("resourceGroupName")
-  valid_568212 = validateParameter(valid_568212, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564112 = path.getOrDefault("subscriptionId")
+  valid_564112 = validateParameter(valid_564112, JString, required = true,
                                  default = nil)
-  if valid_568212 != nil:
-    section.add "resourceGroupName", valid_568212
-  var valid_568213 = path.getOrDefault("subscriptionId")
-  valid_568213 = validateParameter(valid_568213, JString, required = true,
+  if valid_564112 != nil:
+    section.add "subscriptionId", valid_564112
+  var valid_564113 = path.getOrDefault("resourceGroupName")
+  valid_564113 = validateParameter(valid_564113, JString, required = true,
                                  default = nil)
-  if valid_568213 != nil:
-    section.add "subscriptionId", valid_568213
+  if valid_564113 != nil:
+    section.add "resourceGroupName", valid_564113
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -410,11 +414,11 @@ proc validate_IotDpsResourceListByResourceGroup_568210(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568214 = query.getOrDefault("api-version")
-  valid_568214 = validateParameter(valid_568214, JString, required = true,
+  var valid_564114 = query.getOrDefault("api-version")
+  valid_564114 = validateParameter(valid_564114, JString, required = true,
                                  default = nil)
-  if valid_568214 != nil:
-    section.add "api-version", valid_568214
+  if valid_564114 != nil:
+    section.add "api-version", valid_564114
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -423,45 +427,45 @@ proc validate_IotDpsResourceListByResourceGroup_568210(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568215: Call_IotDpsResourceListByResourceGroup_568209;
+proc call*(call_564115: Call_IotDpsResourceListByResourceGroup_564109;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Get a list of all provisioning services in the given resource group.
   ## 
-  let valid = call_568215.validator(path, query, header, formData, body)
-  let scheme = call_568215.pickScheme
+  let valid = call_564115.validator(path, query, header, formData, body)
+  let scheme = call_564115.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568215.url(scheme.get, call_568215.host, call_568215.base,
-                         call_568215.route, valid.getOrDefault("path"),
+  let url = call_564115.url(scheme.get, call_564115.host, call_564115.base,
+                         call_564115.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568215, url, valid)
+  result = hook(call_564115, url, valid)
 
-proc call*(call_568216: Call_IotDpsResourceListByResourceGroup_568209;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string): Recallable =
+proc call*(call_564116: Call_IotDpsResourceListByResourceGroup_564109;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string): Recallable =
   ## iotDpsResourceListByResourceGroup
   ## Get a list of all provisioning services in the given resource group.
-  ##   resourceGroupName: string (required)
-  ##                    : Resource group identifier.
   ##   apiVersion: string (required)
   ##             : The version of the API.
   ##   subscriptionId: string (required)
   ##                 : The subscription identifier.
-  var path_568217 = newJObject()
-  var query_568218 = newJObject()
-  add(path_568217, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568218, "api-version", newJString(apiVersion))
-  add(path_568217, "subscriptionId", newJString(subscriptionId))
-  result = call_568216.call(path_568217, query_568218, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : Resource group identifier.
+  var path_564117 = newJObject()
+  var query_564118 = newJObject()
+  add(query_564118, "api-version", newJString(apiVersion))
+  add(path_564117, "subscriptionId", newJString(subscriptionId))
+  add(path_564117, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564116.call(path_564117, query_564118, nil, nil, nil)
 
-var iotDpsResourceListByResourceGroup* = Call_IotDpsResourceListByResourceGroup_568209(
+var iotDpsResourceListByResourceGroup* = Call_IotDpsResourceListByResourceGroup_564109(
     name: "iotDpsResourceListByResourceGroup", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Devices/provisioningServices",
-    validator: validate_IotDpsResourceListByResourceGroup_568210, base: "",
-    url: url_IotDpsResourceListByResourceGroup_568211, schemes: {Scheme.Https})
+    validator: validate_IotDpsResourceListByResourceGroup_564110, base: "",
+    url: url_IotDpsResourceListByResourceGroup_564111, schemes: {Scheme.Https})
 type
-  Call_IotDpsResourceCreateOrUpdate_568230 = ref object of OpenApiRestCall_567657
-proc url_IotDpsResourceCreateOrUpdate_568232(protocol: Scheme; host: string;
+  Call_IotDpsResourceCreateOrUpdate_564130 = ref object of OpenApiRestCall_563555
+proc url_IotDpsResourceCreateOrUpdate_564132(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -485,37 +489,37 @@ proc url_IotDpsResourceCreateOrUpdate_568232(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_IotDpsResourceCreateOrUpdate_568231(path: JsonNode; query: JsonNode;
+proc validate_IotDpsResourceCreateOrUpdate_564131(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Create or update the metadata of the provisioning service. The usual pattern to modify a property is to retrieve the provisioning service metadata and security metadata, and then combine them with the modified values in a new body to update the provisioning service.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
+  ##   subscriptionId: JString (required)
+  ##                 : The subscription identifier.
   ##   resourceGroupName: JString (required)
   ##                    : Resource group identifier.
   ##   provisioningServiceName: JString (required)
   ##                          : Name of provisioning service to create or update.
-  ##   subscriptionId: JString (required)
-  ##                 : The subscription identifier.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568233 = path.getOrDefault("resourceGroupName")
-  valid_568233 = validateParameter(valid_568233, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564133 = path.getOrDefault("subscriptionId")
+  valid_564133 = validateParameter(valid_564133, JString, required = true,
                                  default = nil)
-  if valid_568233 != nil:
-    section.add "resourceGroupName", valid_568233
-  var valid_568234 = path.getOrDefault("provisioningServiceName")
-  valid_568234 = validateParameter(valid_568234, JString, required = true,
+  if valid_564133 != nil:
+    section.add "subscriptionId", valid_564133
+  var valid_564134 = path.getOrDefault("resourceGroupName")
+  valid_564134 = validateParameter(valid_564134, JString, required = true,
                                  default = nil)
-  if valid_568234 != nil:
-    section.add "provisioningServiceName", valid_568234
-  var valid_568235 = path.getOrDefault("subscriptionId")
-  valid_568235 = validateParameter(valid_568235, JString, required = true,
+  if valid_564134 != nil:
+    section.add "resourceGroupName", valid_564134
+  var valid_564135 = path.getOrDefault("provisioningServiceName")
+  valid_564135 = validateParameter(valid_564135, JString, required = true,
                                  default = nil)
-  if valid_568235 != nil:
-    section.add "subscriptionId", valid_568235
+  if valid_564135 != nil:
+    section.add "provisioningServiceName", valid_564135
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -523,11 +527,11 @@ proc validate_IotDpsResourceCreateOrUpdate_568231(path: JsonNode; query: JsonNod
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568236 = query.getOrDefault("api-version")
-  valid_568236 = validateParameter(valid_568236, JString, required = true,
+  var valid_564136 = query.getOrDefault("api-version")
+  valid_564136 = validateParameter(valid_564136, JString, required = true,
                                  default = nil)
-  if valid_568236 != nil:
-    section.add "api-version", valid_568236
+  if valid_564136 != nil:
+    section.add "api-version", valid_564136
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -541,54 +545,53 @@ proc validate_IotDpsResourceCreateOrUpdate_568231(path: JsonNode; query: JsonNod
   if body != nil:
     result.add "body", body
 
-proc call*(call_568238: Call_IotDpsResourceCreateOrUpdate_568230; path: JsonNode;
+proc call*(call_564138: Call_IotDpsResourceCreateOrUpdate_564130; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Create or update the metadata of the provisioning service. The usual pattern to modify a property is to retrieve the provisioning service metadata and security metadata, and then combine them with the modified values in a new body to update the provisioning service.
   ## 
-  let valid = call_568238.validator(path, query, header, formData, body)
-  let scheme = call_568238.pickScheme
+  let valid = call_564138.validator(path, query, header, formData, body)
+  let scheme = call_564138.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568238.url(scheme.get, call_568238.host, call_568238.base,
-                         call_568238.route, valid.getOrDefault("path"),
+  let url = call_564138.url(scheme.get, call_564138.host, call_564138.base,
+                         call_564138.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568238, url, valid)
+  result = hook(call_564138, url, valid)
 
-proc call*(call_568239: Call_IotDpsResourceCreateOrUpdate_568230;
-          resourceGroupName: string; apiVersion: string;
-          provisioningServiceName: string; subscriptionId: string;
-          iotDpsDescription: JsonNode): Recallable =
+proc call*(call_564139: Call_IotDpsResourceCreateOrUpdate_564130;
+          apiVersion: string; iotDpsDescription: JsonNode; subscriptionId: string;
+          resourceGroupName: string; provisioningServiceName: string): Recallable =
   ## iotDpsResourceCreateOrUpdate
   ## Create or update the metadata of the provisioning service. The usual pattern to modify a property is to retrieve the provisioning service metadata and security metadata, and then combine them with the modified values in a new body to update the provisioning service.
-  ##   resourceGroupName: string (required)
-  ##                    : Resource group identifier.
   ##   apiVersion: string (required)
   ##             : The version of the API.
-  ##   provisioningServiceName: string (required)
-  ##                          : Name of provisioning service to create or update.
-  ##   subscriptionId: string (required)
-  ##                 : The subscription identifier.
   ##   iotDpsDescription: JObject (required)
   ##                    : Description of the provisioning service to create or update.
-  var path_568240 = newJObject()
-  var query_568241 = newJObject()
-  var body_568242 = newJObject()
-  add(path_568240, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568241, "api-version", newJString(apiVersion))
-  add(path_568240, "provisioningServiceName", newJString(provisioningServiceName))
-  add(path_568240, "subscriptionId", newJString(subscriptionId))
+  ##   subscriptionId: string (required)
+  ##                 : The subscription identifier.
+  ##   resourceGroupName: string (required)
+  ##                    : Resource group identifier.
+  ##   provisioningServiceName: string (required)
+  ##                          : Name of provisioning service to create or update.
+  var path_564140 = newJObject()
+  var query_564141 = newJObject()
+  var body_564142 = newJObject()
+  add(query_564141, "api-version", newJString(apiVersion))
   if iotDpsDescription != nil:
-    body_568242 = iotDpsDescription
-  result = call_568239.call(path_568240, query_568241, nil, nil, body_568242)
+    body_564142 = iotDpsDescription
+  add(path_564140, "subscriptionId", newJString(subscriptionId))
+  add(path_564140, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564140, "provisioningServiceName", newJString(provisioningServiceName))
+  result = call_564139.call(path_564140, query_564141, nil, nil, body_564142)
 
-var iotDpsResourceCreateOrUpdate* = Call_IotDpsResourceCreateOrUpdate_568230(
+var iotDpsResourceCreateOrUpdate* = Call_IotDpsResourceCreateOrUpdate_564130(
     name: "iotDpsResourceCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Devices/provisioningServices/{provisioningServiceName}",
-    validator: validate_IotDpsResourceCreateOrUpdate_568231, base: "",
-    url: url_IotDpsResourceCreateOrUpdate_568232, schemes: {Scheme.Https})
+    validator: validate_IotDpsResourceCreateOrUpdate_564131, base: "",
+    url: url_IotDpsResourceCreateOrUpdate_564132, schemes: {Scheme.Https})
 type
-  Call_IotDpsResourceGet_568219 = ref object of OpenApiRestCall_567657
-proc url_IotDpsResourceGet_568221(protocol: Scheme; host: string; base: string;
+  Call_IotDpsResourceGet_564119 = ref object of OpenApiRestCall_563555
+proc url_IotDpsResourceGet_564121(protocol: Scheme; host: string; base: string;
                                  route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -612,7 +615,7 @@ proc url_IotDpsResourceGet_568221(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_IotDpsResourceGet_568220(path: JsonNode; query: JsonNode;
+proc validate_IotDpsResourceGet_564120(path: JsonNode; query: JsonNode;
                                       header: JsonNode; formData: JsonNode;
                                       body: JsonNode): JsonNode =
   ## Get the metadata of the provisioning service without SAS keys.
@@ -620,30 +623,30 @@ proc validate_IotDpsResourceGet_568220(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
+  ##   subscriptionId: JString (required)
+  ##                 : The subscription identifier.
   ##   resourceGroupName: JString (required)
   ##                    : Resource group name.
   ##   provisioningServiceName: JString (required)
   ##                          : Name of the provisioning service to retrieve.
-  ##   subscriptionId: JString (required)
-  ##                 : The subscription identifier.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568222 = path.getOrDefault("resourceGroupName")
-  valid_568222 = validateParameter(valid_568222, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564122 = path.getOrDefault("subscriptionId")
+  valid_564122 = validateParameter(valid_564122, JString, required = true,
                                  default = nil)
-  if valid_568222 != nil:
-    section.add "resourceGroupName", valid_568222
-  var valid_568223 = path.getOrDefault("provisioningServiceName")
-  valid_568223 = validateParameter(valid_568223, JString, required = true,
+  if valid_564122 != nil:
+    section.add "subscriptionId", valid_564122
+  var valid_564123 = path.getOrDefault("resourceGroupName")
+  valid_564123 = validateParameter(valid_564123, JString, required = true,
                                  default = nil)
-  if valid_568223 != nil:
-    section.add "provisioningServiceName", valid_568223
-  var valid_568224 = path.getOrDefault("subscriptionId")
-  valid_568224 = validateParameter(valid_568224, JString, required = true,
+  if valid_564123 != nil:
+    section.add "resourceGroupName", valid_564123
+  var valid_564124 = path.getOrDefault("provisioningServiceName")
+  valid_564124 = validateParameter(valid_564124, JString, required = true,
                                  default = nil)
-  if valid_568224 != nil:
-    section.add "subscriptionId", valid_568224
+  if valid_564124 != nil:
+    section.add "provisioningServiceName", valid_564124
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -651,11 +654,11 @@ proc validate_IotDpsResourceGet_568220(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568225 = query.getOrDefault("api-version")
-  valid_568225 = validateParameter(valid_568225, JString, required = true,
+  var valid_564125 = query.getOrDefault("api-version")
+  valid_564125 = validateParameter(valid_564125, JString, required = true,
                                  default = nil)
-  if valid_568225 != nil:
-    section.add "api-version", valid_568225
+  if valid_564125 != nil:
+    section.add "api-version", valid_564125
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -664,47 +667,47 @@ proc validate_IotDpsResourceGet_568220(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568226: Call_IotDpsResourceGet_568219; path: JsonNode;
+proc call*(call_564126: Call_IotDpsResourceGet_564119; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get the metadata of the provisioning service without SAS keys.
   ## 
-  let valid = call_568226.validator(path, query, header, formData, body)
-  let scheme = call_568226.pickScheme
+  let valid = call_564126.validator(path, query, header, formData, body)
+  let scheme = call_564126.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568226.url(scheme.get, call_568226.host, call_568226.base,
-                         call_568226.route, valid.getOrDefault("path"),
+  let url = call_564126.url(scheme.get, call_564126.host, call_564126.base,
+                         call_564126.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568226, url, valid)
+  result = hook(call_564126, url, valid)
 
-proc call*(call_568227: Call_IotDpsResourceGet_568219; resourceGroupName: string;
-          apiVersion: string; provisioningServiceName: string;
-          subscriptionId: string): Recallable =
+proc call*(call_564127: Call_IotDpsResourceGet_564119; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string;
+          provisioningServiceName: string): Recallable =
   ## iotDpsResourceGet
   ## Get the metadata of the provisioning service without SAS keys.
-  ##   resourceGroupName: string (required)
-  ##                    : Resource group name.
   ##   apiVersion: string (required)
   ##             : The version of the API.
-  ##   provisioningServiceName: string (required)
-  ##                          : Name of the provisioning service to retrieve.
   ##   subscriptionId: string (required)
   ##                 : The subscription identifier.
-  var path_568228 = newJObject()
-  var query_568229 = newJObject()
-  add(path_568228, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568229, "api-version", newJString(apiVersion))
-  add(path_568228, "provisioningServiceName", newJString(provisioningServiceName))
-  add(path_568228, "subscriptionId", newJString(subscriptionId))
-  result = call_568227.call(path_568228, query_568229, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : Resource group name.
+  ##   provisioningServiceName: string (required)
+  ##                          : Name of the provisioning service to retrieve.
+  var path_564128 = newJObject()
+  var query_564129 = newJObject()
+  add(query_564129, "api-version", newJString(apiVersion))
+  add(path_564128, "subscriptionId", newJString(subscriptionId))
+  add(path_564128, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564128, "provisioningServiceName", newJString(provisioningServiceName))
+  result = call_564127.call(path_564128, query_564129, nil, nil, nil)
 
-var iotDpsResourceGet* = Call_IotDpsResourceGet_568219(name: "iotDpsResourceGet",
+var iotDpsResourceGet* = Call_IotDpsResourceGet_564119(name: "iotDpsResourceGet",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Devices/provisioningServices/{provisioningServiceName}",
-    validator: validate_IotDpsResourceGet_568220, base: "",
-    url: url_IotDpsResourceGet_568221, schemes: {Scheme.Https})
+    validator: validate_IotDpsResourceGet_564120, base: "",
+    url: url_IotDpsResourceGet_564121, schemes: {Scheme.Https})
 type
-  Call_IotDpsResourceUpdate_568254 = ref object of OpenApiRestCall_567657
-proc url_IotDpsResourceUpdate_568256(protocol: Scheme; host: string; base: string;
+  Call_IotDpsResourceUpdate_564154 = ref object of OpenApiRestCall_563555
+proc url_IotDpsResourceUpdate_564156(protocol: Scheme; host: string; base: string;
                                     route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -728,37 +731,37 @@ proc url_IotDpsResourceUpdate_568256(protocol: Scheme; host: string; base: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_IotDpsResourceUpdate_568255(path: JsonNode; query: JsonNode;
+proc validate_IotDpsResourceUpdate_564155(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Update an existing provisioning service's tags. to update other fields use the CreateOrUpdate method
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
+  ##   subscriptionId: JString (required)
+  ##                 : The subscription identifier.
   ##   resourceGroupName: JString (required)
   ##                    : Resource group identifier.
   ##   provisioningServiceName: JString (required)
   ##                          : Name of provisioning service to create or update.
-  ##   subscriptionId: JString (required)
-  ##                 : The subscription identifier.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568274 = path.getOrDefault("resourceGroupName")
-  valid_568274 = validateParameter(valid_568274, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564174 = path.getOrDefault("subscriptionId")
+  valid_564174 = validateParameter(valid_564174, JString, required = true,
                                  default = nil)
-  if valid_568274 != nil:
-    section.add "resourceGroupName", valid_568274
-  var valid_568275 = path.getOrDefault("provisioningServiceName")
-  valid_568275 = validateParameter(valid_568275, JString, required = true,
+  if valid_564174 != nil:
+    section.add "subscriptionId", valid_564174
+  var valid_564175 = path.getOrDefault("resourceGroupName")
+  valid_564175 = validateParameter(valid_564175, JString, required = true,
                                  default = nil)
-  if valid_568275 != nil:
-    section.add "provisioningServiceName", valid_568275
-  var valid_568276 = path.getOrDefault("subscriptionId")
-  valid_568276 = validateParameter(valid_568276, JString, required = true,
+  if valid_564175 != nil:
+    section.add "resourceGroupName", valid_564175
+  var valid_564176 = path.getOrDefault("provisioningServiceName")
+  valid_564176 = validateParameter(valid_564176, JString, required = true,
                                  default = nil)
-  if valid_568276 != nil:
-    section.add "subscriptionId", valid_568276
+  if valid_564176 != nil:
+    section.add "provisioningServiceName", valid_564176
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -766,11 +769,11 @@ proc validate_IotDpsResourceUpdate_568255(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568277 = query.getOrDefault("api-version")
-  valid_568277 = validateParameter(valid_568277, JString, required = true,
+  var valid_564177 = query.getOrDefault("api-version")
+  valid_564177 = validateParameter(valid_564177, JString, required = true,
                                  default = nil)
-  if valid_568277 != nil:
-    section.add "api-version", valid_568277
+  if valid_564177 != nil:
+    section.add "api-version", valid_564177
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -784,54 +787,53 @@ proc validate_IotDpsResourceUpdate_568255(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568279: Call_IotDpsResourceUpdate_568254; path: JsonNode;
+proc call*(call_564179: Call_IotDpsResourceUpdate_564154; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Update an existing provisioning service's tags. to update other fields use the CreateOrUpdate method
   ## 
-  let valid = call_568279.validator(path, query, header, formData, body)
-  let scheme = call_568279.pickScheme
+  let valid = call_564179.validator(path, query, header, formData, body)
+  let scheme = call_564179.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568279.url(scheme.get, call_568279.host, call_568279.base,
-                         call_568279.route, valid.getOrDefault("path"),
+  let url = call_564179.url(scheme.get, call_564179.host, call_564179.base,
+                         call_564179.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568279, url, valid)
+  result = hook(call_564179, url, valid)
 
-proc call*(call_568280: Call_IotDpsResourceUpdate_568254;
-          resourceGroupName: string; apiVersion: string;
-          provisioningServiceName: string; ProvisioningServiceTags: JsonNode;
-          subscriptionId: string): Recallable =
+proc call*(call_564180: Call_IotDpsResourceUpdate_564154; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string;
+          provisioningServiceName: string; ProvisioningServiceTags: JsonNode): Recallable =
   ## iotDpsResourceUpdate
   ## Update an existing provisioning service's tags. to update other fields use the CreateOrUpdate method
-  ##   resourceGroupName: string (required)
-  ##                    : Resource group identifier.
   ##   apiVersion: string (required)
   ##             : The version of the API.
+  ##   subscriptionId: string (required)
+  ##                 : The subscription identifier.
+  ##   resourceGroupName: string (required)
+  ##                    : Resource group identifier.
   ##   provisioningServiceName: string (required)
   ##                          : Name of provisioning service to create or update.
   ##   ProvisioningServiceTags: JObject (required)
   ##                          : Updated tag information to set into the provisioning service instance.
-  ##   subscriptionId: string (required)
-  ##                 : The subscription identifier.
-  var path_568281 = newJObject()
-  var query_568282 = newJObject()
-  var body_568283 = newJObject()
-  add(path_568281, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568282, "api-version", newJString(apiVersion))
-  add(path_568281, "provisioningServiceName", newJString(provisioningServiceName))
+  var path_564181 = newJObject()
+  var query_564182 = newJObject()
+  var body_564183 = newJObject()
+  add(query_564182, "api-version", newJString(apiVersion))
+  add(path_564181, "subscriptionId", newJString(subscriptionId))
+  add(path_564181, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564181, "provisioningServiceName", newJString(provisioningServiceName))
   if ProvisioningServiceTags != nil:
-    body_568283 = ProvisioningServiceTags
-  add(path_568281, "subscriptionId", newJString(subscriptionId))
-  result = call_568280.call(path_568281, query_568282, nil, nil, body_568283)
+    body_564183 = ProvisioningServiceTags
+  result = call_564180.call(path_564181, query_564182, nil, nil, body_564183)
 
-var iotDpsResourceUpdate* = Call_IotDpsResourceUpdate_568254(
+var iotDpsResourceUpdate* = Call_IotDpsResourceUpdate_564154(
     name: "iotDpsResourceUpdate", meth: HttpMethod.HttpPatch,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Devices/provisioningServices/{provisioningServiceName}",
-    validator: validate_IotDpsResourceUpdate_568255, base: "",
-    url: url_IotDpsResourceUpdate_568256, schemes: {Scheme.Https})
+    validator: validate_IotDpsResourceUpdate_564155, base: "",
+    url: url_IotDpsResourceUpdate_564156, schemes: {Scheme.Https})
 type
-  Call_IotDpsResourceDelete_568243 = ref object of OpenApiRestCall_567657
-proc url_IotDpsResourceDelete_568245(protocol: Scheme; host: string; base: string;
+  Call_IotDpsResourceDelete_564143 = ref object of OpenApiRestCall_563555
+proc url_IotDpsResourceDelete_564145(protocol: Scheme; host: string; base: string;
                                     route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -855,37 +857,37 @@ proc url_IotDpsResourceDelete_568245(protocol: Scheme; host: string; base: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_IotDpsResourceDelete_568244(path: JsonNode; query: JsonNode;
+proc validate_IotDpsResourceDelete_564144(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Deletes the Provisioning Service.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
+  ##   subscriptionId: JString (required)
+  ##                 : The subscription identifier.
   ##   resourceGroupName: JString (required)
   ##                    : Resource group identifier.
   ##   provisioningServiceName: JString (required)
   ##                          : Name of provisioning service to delete.
-  ##   subscriptionId: JString (required)
-  ##                 : The subscription identifier.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568246 = path.getOrDefault("resourceGroupName")
-  valid_568246 = validateParameter(valid_568246, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564146 = path.getOrDefault("subscriptionId")
+  valid_564146 = validateParameter(valid_564146, JString, required = true,
                                  default = nil)
-  if valid_568246 != nil:
-    section.add "resourceGroupName", valid_568246
-  var valid_568247 = path.getOrDefault("provisioningServiceName")
-  valid_568247 = validateParameter(valid_568247, JString, required = true,
+  if valid_564146 != nil:
+    section.add "subscriptionId", valid_564146
+  var valid_564147 = path.getOrDefault("resourceGroupName")
+  valid_564147 = validateParameter(valid_564147, JString, required = true,
                                  default = nil)
-  if valid_568247 != nil:
-    section.add "provisioningServiceName", valid_568247
-  var valid_568248 = path.getOrDefault("subscriptionId")
-  valid_568248 = validateParameter(valid_568248, JString, required = true,
+  if valid_564147 != nil:
+    section.add "resourceGroupName", valid_564147
+  var valid_564148 = path.getOrDefault("provisioningServiceName")
+  valid_564148 = validateParameter(valid_564148, JString, required = true,
                                  default = nil)
-  if valid_568248 != nil:
-    section.add "subscriptionId", valid_568248
+  if valid_564148 != nil:
+    section.add "provisioningServiceName", valid_564148
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -893,11 +895,11 @@ proc validate_IotDpsResourceDelete_568244(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568249 = query.getOrDefault("api-version")
-  valid_568249 = validateParameter(valid_568249, JString, required = true,
+  var valid_564149 = query.getOrDefault("api-version")
+  valid_564149 = validateParameter(valid_564149, JString, required = true,
                                  default = nil)
-  if valid_568249 != nil:
-    section.add "api-version", valid_568249
+  if valid_564149 != nil:
+    section.add "api-version", valid_564149
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -906,48 +908,48 @@ proc validate_IotDpsResourceDelete_568244(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568250: Call_IotDpsResourceDelete_568243; path: JsonNode;
+proc call*(call_564150: Call_IotDpsResourceDelete_564143; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes the Provisioning Service.
   ## 
-  let valid = call_568250.validator(path, query, header, formData, body)
-  let scheme = call_568250.pickScheme
+  let valid = call_564150.validator(path, query, header, formData, body)
+  let scheme = call_564150.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568250.url(scheme.get, call_568250.host, call_568250.base,
-                         call_568250.route, valid.getOrDefault("path"),
+  let url = call_564150.url(scheme.get, call_564150.host, call_564150.base,
+                         call_564150.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568250, url, valid)
+  result = hook(call_564150, url, valid)
 
-proc call*(call_568251: Call_IotDpsResourceDelete_568243;
-          resourceGroupName: string; apiVersion: string;
-          provisioningServiceName: string; subscriptionId: string): Recallable =
+proc call*(call_564151: Call_IotDpsResourceDelete_564143; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string;
+          provisioningServiceName: string): Recallable =
   ## iotDpsResourceDelete
   ## Deletes the Provisioning Service.
-  ##   resourceGroupName: string (required)
-  ##                    : Resource group identifier.
   ##   apiVersion: string (required)
   ##             : The version of the API.
-  ##   provisioningServiceName: string (required)
-  ##                          : Name of provisioning service to delete.
   ##   subscriptionId: string (required)
   ##                 : The subscription identifier.
-  var path_568252 = newJObject()
-  var query_568253 = newJObject()
-  add(path_568252, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568253, "api-version", newJString(apiVersion))
-  add(path_568252, "provisioningServiceName", newJString(provisioningServiceName))
-  add(path_568252, "subscriptionId", newJString(subscriptionId))
-  result = call_568251.call(path_568252, query_568253, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : Resource group identifier.
+  ##   provisioningServiceName: string (required)
+  ##                          : Name of provisioning service to delete.
+  var path_564152 = newJObject()
+  var query_564153 = newJObject()
+  add(query_564153, "api-version", newJString(apiVersion))
+  add(path_564152, "subscriptionId", newJString(subscriptionId))
+  add(path_564152, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564152, "provisioningServiceName", newJString(provisioningServiceName))
+  result = call_564151.call(path_564152, query_564153, nil, nil, nil)
 
-var iotDpsResourceDelete* = Call_IotDpsResourceDelete_568243(
+var iotDpsResourceDelete* = Call_IotDpsResourceDelete_564143(
     name: "iotDpsResourceDelete", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Devices/provisioningServices/{provisioningServiceName}",
-    validator: validate_IotDpsResourceDelete_568244, base: "",
-    url: url_IotDpsResourceDelete_568245, schemes: {Scheme.Https})
+    validator: validate_IotDpsResourceDelete_564144, base: "",
+    url: url_IotDpsResourceDelete_564145, schemes: {Scheme.Https})
 type
-  Call_DpsCertificatesList_568284 = ref object of OpenApiRestCall_567657
-proc url_DpsCertificatesList_568286(protocol: Scheme; host: string; base: string;
+  Call_DpsCertificatesList_564184 = ref object of OpenApiRestCall_563555
+proc url_DpsCertificatesList_564186(protocol: Scheme; host: string; base: string;
                                    route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -972,7 +974,7 @@ proc url_DpsCertificatesList_568286(protocol: Scheme; host: string; base: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DpsCertificatesList_568285(path: JsonNode; query: JsonNode;
+proc validate_DpsCertificatesList_564185(path: JsonNode; query: JsonNode;
                                         header: JsonNode; formData: JsonNode;
                                         body: JsonNode): JsonNode =
   ## Get all the certificates tied to the provisioning service.
@@ -980,30 +982,30 @@ proc validate_DpsCertificatesList_568285(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
+  ##   subscriptionId: JString (required)
+  ##                 : The subscription identifier.
   ##   resourceGroupName: JString (required)
   ##                    : Name of resource group.
   ##   provisioningServiceName: JString (required)
   ##                          : Name of provisioning service to retrieve certificates for.
-  ##   subscriptionId: JString (required)
-  ##                 : The subscription identifier.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568287 = path.getOrDefault("resourceGroupName")
-  valid_568287 = validateParameter(valid_568287, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564187 = path.getOrDefault("subscriptionId")
+  valid_564187 = validateParameter(valid_564187, JString, required = true,
                                  default = nil)
-  if valid_568287 != nil:
-    section.add "resourceGroupName", valid_568287
-  var valid_568288 = path.getOrDefault("provisioningServiceName")
-  valid_568288 = validateParameter(valid_568288, JString, required = true,
+  if valid_564187 != nil:
+    section.add "subscriptionId", valid_564187
+  var valid_564188 = path.getOrDefault("resourceGroupName")
+  valid_564188 = validateParameter(valid_564188, JString, required = true,
                                  default = nil)
-  if valid_568288 != nil:
-    section.add "provisioningServiceName", valid_568288
-  var valid_568289 = path.getOrDefault("subscriptionId")
-  valid_568289 = validateParameter(valid_568289, JString, required = true,
+  if valid_564188 != nil:
+    section.add "resourceGroupName", valid_564188
+  var valid_564189 = path.getOrDefault("provisioningServiceName")
+  valid_564189 = validateParameter(valid_564189, JString, required = true,
                                  default = nil)
-  if valid_568289 != nil:
-    section.add "subscriptionId", valid_568289
+  if valid_564189 != nil:
+    section.add "provisioningServiceName", valid_564189
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1011,11 +1013,11 @@ proc validate_DpsCertificatesList_568285(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568290 = query.getOrDefault("api-version")
-  valid_568290 = validateParameter(valid_568290, JString, required = true,
+  var valid_564190 = query.getOrDefault("api-version")
+  valid_564190 = validateParameter(valid_564190, JString, required = true,
                                  default = nil)
-  if valid_568290 != nil:
-    section.add "api-version", valid_568290
+  if valid_564190 != nil:
+    section.add "api-version", valid_564190
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1024,48 +1026,48 @@ proc validate_DpsCertificatesList_568285(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568291: Call_DpsCertificatesList_568284; path: JsonNode;
+proc call*(call_564191: Call_DpsCertificatesList_564184; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get all the certificates tied to the provisioning service.
   ## 
-  let valid = call_568291.validator(path, query, header, formData, body)
-  let scheme = call_568291.pickScheme
+  let valid = call_564191.validator(path, query, header, formData, body)
+  let scheme = call_564191.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568291.url(scheme.get, call_568291.host, call_568291.base,
-                         call_568291.route, valid.getOrDefault("path"),
+  let url = call_564191.url(scheme.get, call_564191.host, call_564191.base,
+                         call_564191.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568291, url, valid)
+  result = hook(call_564191, url, valid)
 
-proc call*(call_568292: Call_DpsCertificatesList_568284; resourceGroupName: string;
-          apiVersion: string; provisioningServiceName: string;
-          subscriptionId: string): Recallable =
+proc call*(call_564192: Call_DpsCertificatesList_564184; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string;
+          provisioningServiceName: string): Recallable =
   ## dpsCertificatesList
   ## Get all the certificates tied to the provisioning service.
-  ##   resourceGroupName: string (required)
-  ##                    : Name of resource group.
   ##   apiVersion: string (required)
   ##             : The version of the API.
-  ##   provisioningServiceName: string (required)
-  ##                          : Name of provisioning service to retrieve certificates for.
   ##   subscriptionId: string (required)
   ##                 : The subscription identifier.
-  var path_568293 = newJObject()
-  var query_568294 = newJObject()
-  add(path_568293, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568294, "api-version", newJString(apiVersion))
-  add(path_568293, "provisioningServiceName", newJString(provisioningServiceName))
-  add(path_568293, "subscriptionId", newJString(subscriptionId))
-  result = call_568292.call(path_568293, query_568294, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : Name of resource group.
+  ##   provisioningServiceName: string (required)
+  ##                          : Name of provisioning service to retrieve certificates for.
+  var path_564193 = newJObject()
+  var query_564194 = newJObject()
+  add(query_564194, "api-version", newJString(apiVersion))
+  add(path_564193, "subscriptionId", newJString(subscriptionId))
+  add(path_564193, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564193, "provisioningServiceName", newJString(provisioningServiceName))
+  result = call_564192.call(path_564193, query_564194, nil, nil, nil)
 
-var dpsCertificatesList* = Call_DpsCertificatesList_568284(
+var dpsCertificatesList* = Call_DpsCertificatesList_564184(
     name: "dpsCertificatesList", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Devices/provisioningServices/{provisioningServiceName}/certificates",
-    validator: validate_DpsCertificatesList_568285, base: "",
-    url: url_DpsCertificatesList_568286, schemes: {Scheme.Https})
+    validator: validate_DpsCertificatesList_564185, base: "",
+    url: url_DpsCertificatesList_564186, schemes: {Scheme.Https})
 type
-  Call_DpsCertificateCreateOrUpdate_568308 = ref object of OpenApiRestCall_567657
-proc url_DpsCertificateCreateOrUpdate_568310(protocol: Scheme; host: string;
+  Call_DpsCertificateCreateOrUpdate_564208 = ref object of OpenApiRestCall_563555
+proc url_DpsCertificateCreateOrUpdate_564210(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1092,44 +1094,44 @@ proc url_DpsCertificateCreateOrUpdate_568310(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DpsCertificateCreateOrUpdate_568309(path: JsonNode; query: JsonNode;
+proc validate_DpsCertificateCreateOrUpdate_564209(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Add new certificate or update an existing certificate.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
+  ##   subscriptionId: JString (required)
+  ##                 : The subscription identifier.
   ##   resourceGroupName: JString (required)
   ##                    : Resource group identifier.
   ##   provisioningServiceName: JString (required)
   ##                          : The name of the provisioning service.
-  ##   subscriptionId: JString (required)
-  ##                 : The subscription identifier.
   ##   certificateName: JString (required)
   ##                  : The name of the certificate create or update.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568311 = path.getOrDefault("resourceGroupName")
-  valid_568311 = validateParameter(valid_568311, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564211 = path.getOrDefault("subscriptionId")
+  valid_564211 = validateParameter(valid_564211, JString, required = true,
                                  default = nil)
-  if valid_568311 != nil:
-    section.add "resourceGroupName", valid_568311
-  var valid_568312 = path.getOrDefault("provisioningServiceName")
-  valid_568312 = validateParameter(valid_568312, JString, required = true,
+  if valid_564211 != nil:
+    section.add "subscriptionId", valid_564211
+  var valid_564212 = path.getOrDefault("resourceGroupName")
+  valid_564212 = validateParameter(valid_564212, JString, required = true,
                                  default = nil)
-  if valid_568312 != nil:
-    section.add "provisioningServiceName", valid_568312
-  var valid_568313 = path.getOrDefault("subscriptionId")
-  valid_568313 = validateParameter(valid_568313, JString, required = true,
+  if valid_564212 != nil:
+    section.add "resourceGroupName", valid_564212
+  var valid_564213 = path.getOrDefault("provisioningServiceName")
+  valid_564213 = validateParameter(valid_564213, JString, required = true,
                                  default = nil)
-  if valid_568313 != nil:
-    section.add "subscriptionId", valid_568313
-  var valid_568314 = path.getOrDefault("certificateName")
-  valid_568314 = validateParameter(valid_568314, JString, required = true,
+  if valid_564213 != nil:
+    section.add "provisioningServiceName", valid_564213
+  var valid_564214 = path.getOrDefault("certificateName")
+  valid_564214 = validateParameter(valid_564214, JString, required = true,
                                  default = nil)
-  if valid_568314 != nil:
-    section.add "certificateName", valid_568314
+  if valid_564214 != nil:
+    section.add "certificateName", valid_564214
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1137,21 +1139,21 @@ proc validate_DpsCertificateCreateOrUpdate_568309(path: JsonNode; query: JsonNod
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568315 = query.getOrDefault("api-version")
-  valid_568315 = validateParameter(valid_568315, JString, required = true,
+  var valid_564215 = query.getOrDefault("api-version")
+  valid_564215 = validateParameter(valid_564215, JString, required = true,
                                  default = nil)
-  if valid_568315 != nil:
-    section.add "api-version", valid_568315
+  if valid_564215 != nil:
+    section.add "api-version", valid_564215
   result.add "query", section
   ## parameters in `header` object:
   ##   If-Match: JString
   ##           : ETag of the certificate. This is required to update an existing certificate, and ignored while creating a brand new certificate.
   section = newJObject()
-  var valid_568316 = header.getOrDefault("If-Match")
-  valid_568316 = validateParameter(valid_568316, JString, required = false,
+  var valid_564216 = header.getOrDefault("If-Match")
+  valid_564216 = validateParameter(valid_564216, JString, required = false,
                                  default = nil)
-  if valid_568316 != nil:
-    section.add "If-Match", valid_568316
+  if valid_564216 != nil:
+    section.add "If-Match", valid_564216
   result.add "header", section
   section = newJObject()
   result.add "formData", section
@@ -1163,57 +1165,57 @@ proc validate_DpsCertificateCreateOrUpdate_568309(path: JsonNode; query: JsonNod
   if body != nil:
     result.add "body", body
 
-proc call*(call_568318: Call_DpsCertificateCreateOrUpdate_568308; path: JsonNode;
+proc call*(call_564218: Call_DpsCertificateCreateOrUpdate_564208; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Add new certificate or update an existing certificate.
   ## 
-  let valid = call_568318.validator(path, query, header, formData, body)
-  let scheme = call_568318.pickScheme
+  let valid = call_564218.validator(path, query, header, formData, body)
+  let scheme = call_564218.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568318.url(scheme.get, call_568318.host, call_568318.base,
-                         call_568318.route, valid.getOrDefault("path"),
+  let url = call_564218.url(scheme.get, call_564218.host, call_564218.base,
+                         call_564218.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568318, url, valid)
+  result = hook(call_564218, url, valid)
 
-proc call*(call_568319: Call_DpsCertificateCreateOrUpdate_568308;
-          resourceGroupName: string; apiVersion: string;
-          provisioningServiceName: string; subscriptionId: string;
-          certificateName: string; certificateDescription: JsonNode): Recallable =
+proc call*(call_564219: Call_DpsCertificateCreateOrUpdate_564208;
+          apiVersion: string; subscriptionId: string;
+          certificateDescription: JsonNode; resourceGroupName: string;
+          provisioningServiceName: string; certificateName: string): Recallable =
   ## dpsCertificateCreateOrUpdate
   ## Add new certificate or update an existing certificate.
-  ##   resourceGroupName: string (required)
-  ##                    : Resource group identifier.
   ##   apiVersion: string (required)
   ##             : The version of the API.
-  ##   provisioningServiceName: string (required)
-  ##                          : The name of the provisioning service.
   ##   subscriptionId: string (required)
   ##                 : The subscription identifier.
-  ##   certificateName: string (required)
-  ##                  : The name of the certificate create or update.
   ##   certificateDescription: JObject (required)
   ##                         : The certificate body.
-  var path_568320 = newJObject()
-  var query_568321 = newJObject()
-  var body_568322 = newJObject()
-  add(path_568320, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568321, "api-version", newJString(apiVersion))
-  add(path_568320, "provisioningServiceName", newJString(provisioningServiceName))
-  add(path_568320, "subscriptionId", newJString(subscriptionId))
-  add(path_568320, "certificateName", newJString(certificateName))
+  ##   resourceGroupName: string (required)
+  ##                    : Resource group identifier.
+  ##   provisioningServiceName: string (required)
+  ##                          : The name of the provisioning service.
+  ##   certificateName: string (required)
+  ##                  : The name of the certificate create or update.
+  var path_564220 = newJObject()
+  var query_564221 = newJObject()
+  var body_564222 = newJObject()
+  add(query_564221, "api-version", newJString(apiVersion))
+  add(path_564220, "subscriptionId", newJString(subscriptionId))
   if certificateDescription != nil:
-    body_568322 = certificateDescription
-  result = call_568319.call(path_568320, query_568321, nil, nil, body_568322)
+    body_564222 = certificateDescription
+  add(path_564220, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564220, "provisioningServiceName", newJString(provisioningServiceName))
+  add(path_564220, "certificateName", newJString(certificateName))
+  result = call_564219.call(path_564220, query_564221, nil, nil, body_564222)
 
-var dpsCertificateCreateOrUpdate* = Call_DpsCertificateCreateOrUpdate_568308(
+var dpsCertificateCreateOrUpdate* = Call_DpsCertificateCreateOrUpdate_564208(
     name: "dpsCertificateCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Devices/provisioningServices/{provisioningServiceName}/certificates/{certificateName}",
-    validator: validate_DpsCertificateCreateOrUpdate_568309, base: "",
-    url: url_DpsCertificateCreateOrUpdate_568310, schemes: {Scheme.Https})
+    validator: validate_DpsCertificateCreateOrUpdate_564209, base: "",
+    url: url_DpsCertificateCreateOrUpdate_564210, schemes: {Scheme.Https})
 type
-  Call_DpsCertificateGet_568295 = ref object of OpenApiRestCall_567657
-proc url_DpsCertificateGet_568297(protocol: Scheme; host: string; base: string;
+  Call_DpsCertificateGet_564195 = ref object of OpenApiRestCall_563555
+proc url_DpsCertificateGet_564197(protocol: Scheme; host: string; base: string;
                                  route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1240,7 +1242,7 @@ proc url_DpsCertificateGet_568297(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DpsCertificateGet_568296(path: JsonNode; query: JsonNode;
+proc validate_DpsCertificateGet_564196(path: JsonNode; query: JsonNode;
                                       header: JsonNode; formData: JsonNode;
                                       body: JsonNode): JsonNode =
   ## Get the certificate from the provisioning service.
@@ -1248,37 +1250,37 @@ proc validate_DpsCertificateGet_568296(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
+  ##   subscriptionId: JString (required)
+  ##                 : The subscription identifier.
   ##   resourceGroupName: JString (required)
   ##                    : Resource group identifier.
   ##   provisioningServiceName: JString (required)
   ##                          : Name of the provisioning service the certificate is associated with.
-  ##   subscriptionId: JString (required)
-  ##                 : The subscription identifier.
   ##   certificateName: JString (required)
   ##                  : Name of the certificate to retrieve.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568298 = path.getOrDefault("resourceGroupName")
-  valid_568298 = validateParameter(valid_568298, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564198 = path.getOrDefault("subscriptionId")
+  valid_564198 = validateParameter(valid_564198, JString, required = true,
                                  default = nil)
-  if valid_568298 != nil:
-    section.add "resourceGroupName", valid_568298
-  var valid_568299 = path.getOrDefault("provisioningServiceName")
-  valid_568299 = validateParameter(valid_568299, JString, required = true,
+  if valid_564198 != nil:
+    section.add "subscriptionId", valid_564198
+  var valid_564199 = path.getOrDefault("resourceGroupName")
+  valid_564199 = validateParameter(valid_564199, JString, required = true,
                                  default = nil)
-  if valid_568299 != nil:
-    section.add "provisioningServiceName", valid_568299
-  var valid_568300 = path.getOrDefault("subscriptionId")
-  valid_568300 = validateParameter(valid_568300, JString, required = true,
+  if valid_564199 != nil:
+    section.add "resourceGroupName", valid_564199
+  var valid_564200 = path.getOrDefault("provisioningServiceName")
+  valid_564200 = validateParameter(valid_564200, JString, required = true,
                                  default = nil)
-  if valid_568300 != nil:
-    section.add "subscriptionId", valid_568300
-  var valid_568301 = path.getOrDefault("certificateName")
-  valid_568301 = validateParameter(valid_568301, JString, required = true,
+  if valid_564200 != nil:
+    section.add "provisioningServiceName", valid_564200
+  var valid_564201 = path.getOrDefault("certificateName")
+  valid_564201 = validateParameter(valid_564201, JString, required = true,
                                  default = nil)
-  if valid_568301 != nil:
-    section.add "certificateName", valid_568301
+  if valid_564201 != nil:
+    section.add "certificateName", valid_564201
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1286,71 +1288,71 @@ proc validate_DpsCertificateGet_568296(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568302 = query.getOrDefault("api-version")
-  valid_568302 = validateParameter(valid_568302, JString, required = true,
+  var valid_564202 = query.getOrDefault("api-version")
+  valid_564202 = validateParameter(valid_564202, JString, required = true,
                                  default = nil)
-  if valid_568302 != nil:
-    section.add "api-version", valid_568302
+  if valid_564202 != nil:
+    section.add "api-version", valid_564202
   result.add "query", section
   ## parameters in `header` object:
   ##   If-Match: JString
   ##           : ETag of the certificate.
   section = newJObject()
-  var valid_568303 = header.getOrDefault("If-Match")
-  valid_568303 = validateParameter(valid_568303, JString, required = false,
+  var valid_564203 = header.getOrDefault("If-Match")
+  valid_564203 = validateParameter(valid_564203, JString, required = false,
                                  default = nil)
-  if valid_568303 != nil:
-    section.add "If-Match", valid_568303
+  if valid_564203 != nil:
+    section.add "If-Match", valid_564203
   result.add "header", section
   section = newJObject()
   result.add "formData", section
   if body != nil:
     result.add "body", body
 
-proc call*(call_568304: Call_DpsCertificateGet_568295; path: JsonNode;
+proc call*(call_564204: Call_DpsCertificateGet_564195; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get the certificate from the provisioning service.
   ## 
-  let valid = call_568304.validator(path, query, header, formData, body)
-  let scheme = call_568304.pickScheme
+  let valid = call_564204.validator(path, query, header, formData, body)
+  let scheme = call_564204.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568304.url(scheme.get, call_568304.host, call_568304.base,
-                         call_568304.route, valid.getOrDefault("path"),
+  let url = call_564204.url(scheme.get, call_564204.host, call_564204.base,
+                         call_564204.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568304, url, valid)
+  result = hook(call_564204, url, valid)
 
-proc call*(call_568305: Call_DpsCertificateGet_568295; resourceGroupName: string;
-          apiVersion: string; provisioningServiceName: string;
-          subscriptionId: string; certificateName: string): Recallable =
+proc call*(call_564205: Call_DpsCertificateGet_564195; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string;
+          provisioningServiceName: string; certificateName: string): Recallable =
   ## dpsCertificateGet
   ## Get the certificate from the provisioning service.
-  ##   resourceGroupName: string (required)
-  ##                    : Resource group identifier.
   ##   apiVersion: string (required)
   ##             : The version of the API.
-  ##   provisioningServiceName: string (required)
-  ##                          : Name of the provisioning service the certificate is associated with.
   ##   subscriptionId: string (required)
   ##                 : The subscription identifier.
+  ##   resourceGroupName: string (required)
+  ##                    : Resource group identifier.
+  ##   provisioningServiceName: string (required)
+  ##                          : Name of the provisioning service the certificate is associated with.
   ##   certificateName: string (required)
   ##                  : Name of the certificate to retrieve.
-  var path_568306 = newJObject()
-  var query_568307 = newJObject()
-  add(path_568306, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568307, "api-version", newJString(apiVersion))
-  add(path_568306, "provisioningServiceName", newJString(provisioningServiceName))
-  add(path_568306, "subscriptionId", newJString(subscriptionId))
-  add(path_568306, "certificateName", newJString(certificateName))
-  result = call_568305.call(path_568306, query_568307, nil, nil, nil)
+  var path_564206 = newJObject()
+  var query_564207 = newJObject()
+  add(query_564207, "api-version", newJString(apiVersion))
+  add(path_564206, "subscriptionId", newJString(subscriptionId))
+  add(path_564206, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564206, "provisioningServiceName", newJString(provisioningServiceName))
+  add(path_564206, "certificateName", newJString(certificateName))
+  result = call_564205.call(path_564206, query_564207, nil, nil, nil)
 
-var dpsCertificateGet* = Call_DpsCertificateGet_568295(name: "dpsCertificateGet",
+var dpsCertificateGet* = Call_DpsCertificateGet_564195(name: "dpsCertificateGet",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Devices/provisioningServices/{provisioningServiceName}/certificates/{certificateName}",
-    validator: validate_DpsCertificateGet_568296, base: "",
-    url: url_DpsCertificateGet_568297, schemes: {Scheme.Https})
+    validator: validate_DpsCertificateGet_564196, base: "",
+    url: url_DpsCertificateGet_564197, schemes: {Scheme.Https})
 type
-  Call_DpsCertificateDelete_568323 = ref object of OpenApiRestCall_567657
-proc url_DpsCertificateDelete_568325(protocol: Scheme; host: string; base: string;
+  Call_DpsCertificateDelete_564223 = ref object of OpenApiRestCall_563555
+proc url_DpsCertificateDelete_564225(protocol: Scheme; host: string; base: string;
                                     route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1377,110 +1379,110 @@ proc url_DpsCertificateDelete_568325(protocol: Scheme; host: string; base: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DpsCertificateDelete_568324(path: JsonNode; query: JsonNode;
+proc validate_DpsCertificateDelete_564224(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Deletes the specified certificate assosciated with the Provisioning Service
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
+  ##   subscriptionId: JString (required)
+  ##                 : The subscription identifier.
   ##   resourceGroupName: JString (required)
   ##                    : Resource group identifier.
   ##   provisioningServiceName: JString (required)
   ##                          : The name of the provisioning service.
-  ##   subscriptionId: JString (required)
-  ##                 : The subscription identifier.
   ##   certificateName: JString (required)
   ##                  : This is a mandatory field, and is the logical name of the certificate that the provisioning service will access by.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568326 = path.getOrDefault("resourceGroupName")
-  valid_568326 = validateParameter(valid_568326, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564226 = path.getOrDefault("subscriptionId")
+  valid_564226 = validateParameter(valid_564226, JString, required = true,
                                  default = nil)
-  if valid_568326 != nil:
-    section.add "resourceGroupName", valid_568326
-  var valid_568327 = path.getOrDefault("provisioningServiceName")
-  valid_568327 = validateParameter(valid_568327, JString, required = true,
+  if valid_564226 != nil:
+    section.add "subscriptionId", valid_564226
+  var valid_564227 = path.getOrDefault("resourceGroupName")
+  valid_564227 = validateParameter(valid_564227, JString, required = true,
                                  default = nil)
-  if valid_568327 != nil:
-    section.add "provisioningServiceName", valid_568327
-  var valid_568328 = path.getOrDefault("subscriptionId")
-  valid_568328 = validateParameter(valid_568328, JString, required = true,
+  if valid_564227 != nil:
+    section.add "resourceGroupName", valid_564227
+  var valid_564228 = path.getOrDefault("provisioningServiceName")
+  valid_564228 = validateParameter(valid_564228, JString, required = true,
                                  default = nil)
-  if valid_568328 != nil:
-    section.add "subscriptionId", valid_568328
-  var valid_568329 = path.getOrDefault("certificateName")
-  valid_568329 = validateParameter(valid_568329, JString, required = true,
+  if valid_564228 != nil:
+    section.add "provisioningServiceName", valid_564228
+  var valid_564229 = path.getOrDefault("certificateName")
+  valid_564229 = validateParameter(valid_564229, JString, required = true,
                                  default = nil)
-  if valid_568329 != nil:
-    section.add "certificateName", valid_568329
+  if valid_564229 != nil:
+    section.add "certificateName", valid_564229
   result.add "path", section
   ## parameters in `query` object:
-  ##   certificate.hasPrivateKey: JBool
-  ##                            : Indicates if the certificate contains a private key.
-  ##   api-version: JString (required)
-  ##              : The version of the API.
-  ##   certificate.name: JString
-  ##                   : This is optional, and it is the Common Name of the certificate.
-  ##   certificate.lastUpdated: JString
-  ##                          : Time the certificate is last updated.
-  ##   certificate.created: JString
-  ##                      : Time the certificate is created.
   ##   certificate.purpose: JString
   ##                      : A description that mentions the purpose of the certificate.
+  ##   certificate.lastUpdated: JString
+  ##                          : Time the certificate is last updated.
+  ##   api-version: JString (required)
+  ##              : The version of the API.
+  ##   certificate.created: JString
+  ##                      : Time the certificate is created.
   ##   certificate.isVerified: JBool
   ##                         : Indicates if certificate has been verified by owner of the private key.
-  ##   certificate.nonce: JString
-  ##                    : Random number generated to indicate Proof of Possession.
+  ##   certificate.name: JString
+  ##                   : This is optional, and it is the Common Name of the certificate.
   ##   certificate.rawBytes: JString
   ##                       : Raw data within the certificate.
+  ##   certificate.hasPrivateKey: JBool
+  ##                            : Indicates if the certificate contains a private key.
+  ##   certificate.nonce: JString
+  ##                    : Random number generated to indicate Proof of Possession.
   section = newJObject()
-  var valid_568330 = query.getOrDefault("certificate.hasPrivateKey")
-  valid_568330 = validateParameter(valid_568330, JBool, required = false, default = nil)
-  if valid_568330 != nil:
-    section.add "certificate.hasPrivateKey", valid_568330
+  var valid_564243 = query.getOrDefault("certificate.purpose")
+  valid_564243 = validateParameter(valid_564243, JString, required = false,
+                                 default = newJString("clientAuthentication"))
+  if valid_564243 != nil:
+    section.add "certificate.purpose", valid_564243
+  var valid_564244 = query.getOrDefault("certificate.lastUpdated")
+  valid_564244 = validateParameter(valid_564244, JString, required = false,
+                                 default = nil)
+  if valid_564244 != nil:
+    section.add "certificate.lastUpdated", valid_564244
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568331 = query.getOrDefault("api-version")
-  valid_568331 = validateParameter(valid_568331, JString, required = true,
+  var valid_564245 = query.getOrDefault("api-version")
+  valid_564245 = validateParameter(valid_564245, JString, required = true,
                                  default = nil)
-  if valid_568331 != nil:
-    section.add "api-version", valid_568331
-  var valid_568332 = query.getOrDefault("certificate.name")
-  valid_568332 = validateParameter(valid_568332, JString, required = false,
+  if valid_564245 != nil:
+    section.add "api-version", valid_564245
+  var valid_564246 = query.getOrDefault("certificate.created")
+  valid_564246 = validateParameter(valid_564246, JString, required = false,
                                  default = nil)
-  if valid_568332 != nil:
-    section.add "certificate.name", valid_568332
-  var valid_568333 = query.getOrDefault("certificate.lastUpdated")
-  valid_568333 = validateParameter(valid_568333, JString, required = false,
+  if valid_564246 != nil:
+    section.add "certificate.created", valid_564246
+  var valid_564247 = query.getOrDefault("certificate.isVerified")
+  valid_564247 = validateParameter(valid_564247, JBool, required = false, default = nil)
+  if valid_564247 != nil:
+    section.add "certificate.isVerified", valid_564247
+  var valid_564248 = query.getOrDefault("certificate.name")
+  valid_564248 = validateParameter(valid_564248, JString, required = false,
                                  default = nil)
-  if valid_568333 != nil:
-    section.add "certificate.lastUpdated", valid_568333
-  var valid_568334 = query.getOrDefault("certificate.created")
-  valid_568334 = validateParameter(valid_568334, JString, required = false,
+  if valid_564248 != nil:
+    section.add "certificate.name", valid_564248
+  var valid_564249 = query.getOrDefault("certificate.rawBytes")
+  valid_564249 = validateParameter(valid_564249, JString, required = false,
                                  default = nil)
-  if valid_568334 != nil:
-    section.add "certificate.created", valid_568334
-  var valid_568348 = query.getOrDefault("certificate.purpose")
-  valid_568348 = validateParameter(valid_568348, JString, required = false,
-                                 default = newJString("clientAuthentication"))
-  if valid_568348 != nil:
-    section.add "certificate.purpose", valid_568348
-  var valid_568349 = query.getOrDefault("certificate.isVerified")
-  valid_568349 = validateParameter(valid_568349, JBool, required = false, default = nil)
-  if valid_568349 != nil:
-    section.add "certificate.isVerified", valid_568349
-  var valid_568350 = query.getOrDefault("certificate.nonce")
-  valid_568350 = validateParameter(valid_568350, JString, required = false,
+  if valid_564249 != nil:
+    section.add "certificate.rawBytes", valid_564249
+  var valid_564250 = query.getOrDefault("certificate.hasPrivateKey")
+  valid_564250 = validateParameter(valid_564250, JBool, required = false, default = nil)
+  if valid_564250 != nil:
+    section.add "certificate.hasPrivateKey", valid_564250
+  var valid_564251 = query.getOrDefault("certificate.nonce")
+  valid_564251 = validateParameter(valid_564251, JString, required = false,
                                  default = nil)
-  if valid_568350 != nil:
-    section.add "certificate.nonce", valid_568350
-  var valid_568351 = query.getOrDefault("certificate.rawBytes")
-  valid_568351 = validateParameter(valid_568351, JString, required = false,
-                                 default = nil)
-  if valid_568351 != nil:
-    section.add "certificate.rawBytes", valid_568351
+  if valid_564251 != nil:
+    section.add "certificate.nonce", valid_564251
   result.add "query", section
   ## parameters in `header` object:
   ##   If-Match: JString (required)
@@ -1488,38 +1490,38 @@ proc validate_DpsCertificateDelete_568324(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert header != nil,
         "header argument is necessary due to required `If-Match` field"
-  var valid_568352 = header.getOrDefault("If-Match")
-  valid_568352 = validateParameter(valid_568352, JString, required = true,
+  var valid_564252 = header.getOrDefault("If-Match")
+  valid_564252 = validateParameter(valid_564252, JString, required = true,
                                  default = nil)
-  if valid_568352 != nil:
-    section.add "If-Match", valid_568352
+  if valid_564252 != nil:
+    section.add "If-Match", valid_564252
   result.add "header", section
   section = newJObject()
   result.add "formData", section
   if body != nil:
     result.add "body", body
 
-proc call*(call_568353: Call_DpsCertificateDelete_568323; path: JsonNode;
+proc call*(call_564253: Call_DpsCertificateDelete_564223; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes the specified certificate assosciated with the Provisioning Service
   ## 
-  let valid = call_568353.validator(path, query, header, formData, body)
-  let scheme = call_568353.pickScheme
+  let valid = call_564253.validator(path, query, header, formData, body)
+  let scheme = call_564253.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568353.url(scheme.get, call_568353.host, call_568353.base,
-                         call_568353.route, valid.getOrDefault("path"),
+  let url = call_564253.url(scheme.get, call_564253.host, call_564253.base,
+                         call_564253.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568353, url, valid)
+  result = hook(call_564253, url, valid)
 
-var dpsCertificateDelete* = Call_DpsCertificateDelete_568323(
+var dpsCertificateDelete* = Call_DpsCertificateDelete_564223(
     name: "dpsCertificateDelete", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Devices/provisioningServices/{provisioningServiceName}/certificates/{certificateName}",
-    validator: validate_DpsCertificateDelete_568324, base: "",
-    url: url_DpsCertificateDelete_568325, schemes: {Scheme.Https})
+    validator: validate_DpsCertificateDelete_564224, base: "",
+    url: url_DpsCertificateDelete_564225, schemes: {Scheme.Https})
 type
-  Call_DpsCertificateGenerateVerificationCode_568357 = ref object of OpenApiRestCall_567657
-proc url_DpsCertificateGenerateVerificationCode_568359(protocol: Scheme;
+  Call_DpsCertificateGenerateVerificationCode_564257 = ref object of OpenApiRestCall_563555
+proc url_DpsCertificateGenerateVerificationCode_564259(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1547,110 +1549,110 @@ proc url_DpsCertificateGenerateVerificationCode_568359(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DpsCertificateGenerateVerificationCode_568358(path: JsonNode;
+proc validate_DpsCertificateGenerateVerificationCode_564258(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Generate verification code for Proof of Possession.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
+  ##   subscriptionId: JString (required)
+  ##                 : The subscription identifier.
   ##   resourceGroupName: JString (required)
   ##                    : name of resource group.
   ##   provisioningServiceName: JString (required)
   ##                          : Name of provisioning service.
-  ##   subscriptionId: JString (required)
-  ##                 : The subscription identifier.
   ##   certificateName: JString (required)
   ##                  : The mandatory logical name of the certificate, that the provisioning service uses to access.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568360 = path.getOrDefault("resourceGroupName")
-  valid_568360 = validateParameter(valid_568360, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564260 = path.getOrDefault("subscriptionId")
+  valid_564260 = validateParameter(valid_564260, JString, required = true,
                                  default = nil)
-  if valid_568360 != nil:
-    section.add "resourceGroupName", valid_568360
-  var valid_568361 = path.getOrDefault("provisioningServiceName")
-  valid_568361 = validateParameter(valid_568361, JString, required = true,
+  if valid_564260 != nil:
+    section.add "subscriptionId", valid_564260
+  var valid_564261 = path.getOrDefault("resourceGroupName")
+  valid_564261 = validateParameter(valid_564261, JString, required = true,
                                  default = nil)
-  if valid_568361 != nil:
-    section.add "provisioningServiceName", valid_568361
-  var valid_568362 = path.getOrDefault("subscriptionId")
-  valid_568362 = validateParameter(valid_568362, JString, required = true,
+  if valid_564261 != nil:
+    section.add "resourceGroupName", valid_564261
+  var valid_564262 = path.getOrDefault("provisioningServiceName")
+  valid_564262 = validateParameter(valid_564262, JString, required = true,
                                  default = nil)
-  if valid_568362 != nil:
-    section.add "subscriptionId", valid_568362
-  var valid_568363 = path.getOrDefault("certificateName")
-  valid_568363 = validateParameter(valid_568363, JString, required = true,
+  if valid_564262 != nil:
+    section.add "provisioningServiceName", valid_564262
+  var valid_564263 = path.getOrDefault("certificateName")
+  valid_564263 = validateParameter(valid_564263, JString, required = true,
                                  default = nil)
-  if valid_568363 != nil:
-    section.add "certificateName", valid_568363
+  if valid_564263 != nil:
+    section.add "certificateName", valid_564263
   result.add "path", section
   ## parameters in `query` object:
-  ##   certificate.hasPrivateKey: JBool
-  ##                            : Indicates if the certificate contains private key.
-  ##   api-version: JString (required)
-  ##              : The version of the API.
-  ##   certificate.name: JString
-  ##                   : Common Name for the certificate.
-  ##   certificate.lastUpdated: JString
-  ##                          : Certificate last updated time.
-  ##   certificate.created: JString
-  ##                      : Certificate creation time.
   ##   certificate.purpose: JString
   ##                      : Description mentioning the purpose of the certificate.
+  ##   certificate.lastUpdated: JString
+  ##                          : Certificate last updated time.
+  ##   api-version: JString (required)
+  ##              : The version of the API.
+  ##   certificate.created: JString
+  ##                      : Certificate creation time.
   ##   certificate.isVerified: JBool
   ##                         : Indicates if the certificate has been verified by owner of the private key.
-  ##   certificate.nonce: JString
-  ##                    : Random number generated to indicate Proof of Possession.
+  ##   certificate.name: JString
+  ##                   : Common Name for the certificate.
   ##   certificate.rawBytes: JString
   ##                       : Raw data of certificate.
+  ##   certificate.hasPrivateKey: JBool
+  ##                            : Indicates if the certificate contains private key.
+  ##   certificate.nonce: JString
+  ##                    : Random number generated to indicate Proof of Possession.
   section = newJObject()
-  var valid_568364 = query.getOrDefault("certificate.hasPrivateKey")
-  valid_568364 = validateParameter(valid_568364, JBool, required = false, default = nil)
-  if valid_568364 != nil:
-    section.add "certificate.hasPrivateKey", valid_568364
+  var valid_564264 = query.getOrDefault("certificate.purpose")
+  valid_564264 = validateParameter(valid_564264, JString, required = false,
+                                 default = newJString("clientAuthentication"))
+  if valid_564264 != nil:
+    section.add "certificate.purpose", valid_564264
+  var valid_564265 = query.getOrDefault("certificate.lastUpdated")
+  valid_564265 = validateParameter(valid_564265, JString, required = false,
+                                 default = nil)
+  if valid_564265 != nil:
+    section.add "certificate.lastUpdated", valid_564265
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568365 = query.getOrDefault("api-version")
-  valid_568365 = validateParameter(valid_568365, JString, required = true,
+  var valid_564266 = query.getOrDefault("api-version")
+  valid_564266 = validateParameter(valid_564266, JString, required = true,
                                  default = nil)
-  if valid_568365 != nil:
-    section.add "api-version", valid_568365
-  var valid_568366 = query.getOrDefault("certificate.name")
-  valid_568366 = validateParameter(valid_568366, JString, required = false,
+  if valid_564266 != nil:
+    section.add "api-version", valid_564266
+  var valid_564267 = query.getOrDefault("certificate.created")
+  valid_564267 = validateParameter(valid_564267, JString, required = false,
                                  default = nil)
-  if valid_568366 != nil:
-    section.add "certificate.name", valid_568366
-  var valid_568367 = query.getOrDefault("certificate.lastUpdated")
-  valid_568367 = validateParameter(valid_568367, JString, required = false,
+  if valid_564267 != nil:
+    section.add "certificate.created", valid_564267
+  var valid_564268 = query.getOrDefault("certificate.isVerified")
+  valid_564268 = validateParameter(valid_564268, JBool, required = false, default = nil)
+  if valid_564268 != nil:
+    section.add "certificate.isVerified", valid_564268
+  var valid_564269 = query.getOrDefault("certificate.name")
+  valid_564269 = validateParameter(valid_564269, JString, required = false,
                                  default = nil)
-  if valid_568367 != nil:
-    section.add "certificate.lastUpdated", valid_568367
-  var valid_568368 = query.getOrDefault("certificate.created")
-  valid_568368 = validateParameter(valid_568368, JString, required = false,
+  if valid_564269 != nil:
+    section.add "certificate.name", valid_564269
+  var valid_564270 = query.getOrDefault("certificate.rawBytes")
+  valid_564270 = validateParameter(valid_564270, JString, required = false,
                                  default = nil)
-  if valid_568368 != nil:
-    section.add "certificate.created", valid_568368
-  var valid_568369 = query.getOrDefault("certificate.purpose")
-  valid_568369 = validateParameter(valid_568369, JString, required = false,
-                                 default = newJString("clientAuthentication"))
-  if valid_568369 != nil:
-    section.add "certificate.purpose", valid_568369
-  var valid_568370 = query.getOrDefault("certificate.isVerified")
-  valid_568370 = validateParameter(valid_568370, JBool, required = false, default = nil)
-  if valid_568370 != nil:
-    section.add "certificate.isVerified", valid_568370
-  var valid_568371 = query.getOrDefault("certificate.nonce")
-  valid_568371 = validateParameter(valid_568371, JString, required = false,
+  if valid_564270 != nil:
+    section.add "certificate.rawBytes", valid_564270
+  var valid_564271 = query.getOrDefault("certificate.hasPrivateKey")
+  valid_564271 = validateParameter(valid_564271, JBool, required = false, default = nil)
+  if valid_564271 != nil:
+    section.add "certificate.hasPrivateKey", valid_564271
+  var valid_564272 = query.getOrDefault("certificate.nonce")
+  valid_564272 = validateParameter(valid_564272, JString, required = false,
                                  default = nil)
-  if valid_568371 != nil:
-    section.add "certificate.nonce", valid_568371
-  var valid_568372 = query.getOrDefault("certificate.rawBytes")
-  valid_568372 = validateParameter(valid_568372, JString, required = false,
-                                 default = nil)
-  if valid_568372 != nil:
-    section.add "certificate.rawBytes", valid_568372
+  if valid_564272 != nil:
+    section.add "certificate.nonce", valid_564272
   result.add "query", section
   ## parameters in `header` object:
   ##   If-Match: JString (required)
@@ -1658,40 +1660,40 @@ proc validate_DpsCertificateGenerateVerificationCode_568358(path: JsonNode;
   section = newJObject()
   assert header != nil,
         "header argument is necessary due to required `If-Match` field"
-  var valid_568373 = header.getOrDefault("If-Match")
-  valid_568373 = validateParameter(valid_568373, JString, required = true,
+  var valid_564273 = header.getOrDefault("If-Match")
+  valid_564273 = validateParameter(valid_564273, JString, required = true,
                                  default = nil)
-  if valid_568373 != nil:
-    section.add "If-Match", valid_568373
+  if valid_564273 != nil:
+    section.add "If-Match", valid_564273
   result.add "header", section
   section = newJObject()
   result.add "formData", section
   if body != nil:
     result.add "body", body
 
-proc call*(call_568374: Call_DpsCertificateGenerateVerificationCode_568357;
+proc call*(call_564274: Call_DpsCertificateGenerateVerificationCode_564257;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Generate verification code for Proof of Possession.
   ## 
-  let valid = call_568374.validator(path, query, header, formData, body)
-  let scheme = call_568374.pickScheme
+  let valid = call_564274.validator(path, query, header, formData, body)
+  let scheme = call_564274.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568374.url(scheme.get, call_568374.host, call_568374.base,
-                         call_568374.route, valid.getOrDefault("path"),
+  let url = call_564274.url(scheme.get, call_564274.host, call_564274.base,
+                         call_564274.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568374, url, valid)
+  result = hook(call_564274, url, valid)
 
-var dpsCertificateGenerateVerificationCode* = Call_DpsCertificateGenerateVerificationCode_568357(
+var dpsCertificateGenerateVerificationCode* = Call_DpsCertificateGenerateVerificationCode_564257(
     name: "dpsCertificateGenerateVerificationCode", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Devices/provisioningServices/{provisioningServiceName}/certificates/{certificateName}/generateVerificationCode",
-    validator: validate_DpsCertificateGenerateVerificationCode_568358, base: "",
-    url: url_DpsCertificateGenerateVerificationCode_568359,
+    validator: validate_DpsCertificateGenerateVerificationCode_564258, base: "",
+    url: url_DpsCertificateGenerateVerificationCode_564259,
     schemes: {Scheme.Https})
 type
-  Call_DpsCertificateVerifyCertificate_568378 = ref object of OpenApiRestCall_567657
-proc url_DpsCertificateVerifyCertificate_568380(protocol: Scheme; host: string;
+  Call_DpsCertificateVerifyCertificate_564278 = ref object of OpenApiRestCall_563555
+proc url_DpsCertificateVerifyCertificate_564280(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1719,110 +1721,110 @@ proc url_DpsCertificateVerifyCertificate_568380(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DpsCertificateVerifyCertificate_568379(path: JsonNode;
+proc validate_DpsCertificateVerifyCertificate_564279(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Verifies the certificate's private key possession by providing the leaf cert issued by the verifying pre uploaded certificate.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
+  ##   subscriptionId: JString (required)
+  ##                 : The subscription identifier.
   ##   resourceGroupName: JString (required)
   ##                    : Resource group name.
   ##   provisioningServiceName: JString (required)
   ##                          : Provisioning service name.
-  ##   subscriptionId: JString (required)
-  ##                 : The subscription identifier.
   ##   certificateName: JString (required)
   ##                  : The mandatory logical name of the certificate, that the provisioning service uses to access.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568381 = path.getOrDefault("resourceGroupName")
-  valid_568381 = validateParameter(valid_568381, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564281 = path.getOrDefault("subscriptionId")
+  valid_564281 = validateParameter(valid_564281, JString, required = true,
                                  default = nil)
-  if valid_568381 != nil:
-    section.add "resourceGroupName", valid_568381
-  var valid_568382 = path.getOrDefault("provisioningServiceName")
-  valid_568382 = validateParameter(valid_568382, JString, required = true,
+  if valid_564281 != nil:
+    section.add "subscriptionId", valid_564281
+  var valid_564282 = path.getOrDefault("resourceGroupName")
+  valid_564282 = validateParameter(valid_564282, JString, required = true,
                                  default = nil)
-  if valid_568382 != nil:
-    section.add "provisioningServiceName", valid_568382
-  var valid_568383 = path.getOrDefault("subscriptionId")
-  valid_568383 = validateParameter(valid_568383, JString, required = true,
+  if valid_564282 != nil:
+    section.add "resourceGroupName", valid_564282
+  var valid_564283 = path.getOrDefault("provisioningServiceName")
+  valid_564283 = validateParameter(valid_564283, JString, required = true,
                                  default = nil)
-  if valid_568383 != nil:
-    section.add "subscriptionId", valid_568383
-  var valid_568384 = path.getOrDefault("certificateName")
-  valid_568384 = validateParameter(valid_568384, JString, required = true,
+  if valid_564283 != nil:
+    section.add "provisioningServiceName", valid_564283
+  var valid_564284 = path.getOrDefault("certificateName")
+  valid_564284 = validateParameter(valid_564284, JString, required = true,
                                  default = nil)
-  if valid_568384 != nil:
-    section.add "certificateName", valid_568384
+  if valid_564284 != nil:
+    section.add "certificateName", valid_564284
   result.add "path", section
   ## parameters in `query` object:
-  ##   certificate.hasPrivateKey: JBool
-  ##                            : Indicates if the certificate contains private key.
-  ##   api-version: JString (required)
-  ##              : The version of the API.
-  ##   certificate.name: JString
-  ##                   : Common Name for the certificate.
-  ##   certificate.lastUpdated: JString
-  ##                          : Certificate last updated time.
-  ##   certificate.created: JString
-  ##                      : Certificate creation time.
   ##   certificate.purpose: JString
   ##                      : Describe the purpose of the certificate.
+  ##   certificate.lastUpdated: JString
+  ##                          : Certificate last updated time.
+  ##   api-version: JString (required)
+  ##              : The version of the API.
+  ##   certificate.created: JString
+  ##                      : Certificate creation time.
   ##   certificate.isVerified: JBool
   ##                         : Indicates if the certificate has been verified by owner of the private key.
-  ##   certificate.nonce: JString
-  ##                    : Random number generated to indicate Proof of Possession.
+  ##   certificate.name: JString
+  ##                   : Common Name for the certificate.
   ##   certificate.rawBytes: JString
   ##                       : Raw data of certificate.
+  ##   certificate.hasPrivateKey: JBool
+  ##                            : Indicates if the certificate contains private key.
+  ##   certificate.nonce: JString
+  ##                    : Random number generated to indicate Proof of Possession.
   section = newJObject()
-  var valid_568385 = query.getOrDefault("certificate.hasPrivateKey")
-  valid_568385 = validateParameter(valid_568385, JBool, required = false, default = nil)
-  if valid_568385 != nil:
-    section.add "certificate.hasPrivateKey", valid_568385
+  var valid_564285 = query.getOrDefault("certificate.purpose")
+  valid_564285 = validateParameter(valid_564285, JString, required = false,
+                                 default = newJString("clientAuthentication"))
+  if valid_564285 != nil:
+    section.add "certificate.purpose", valid_564285
+  var valid_564286 = query.getOrDefault("certificate.lastUpdated")
+  valid_564286 = validateParameter(valid_564286, JString, required = false,
+                                 default = nil)
+  if valid_564286 != nil:
+    section.add "certificate.lastUpdated", valid_564286
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568386 = query.getOrDefault("api-version")
-  valid_568386 = validateParameter(valid_568386, JString, required = true,
+  var valid_564287 = query.getOrDefault("api-version")
+  valid_564287 = validateParameter(valid_564287, JString, required = true,
                                  default = nil)
-  if valid_568386 != nil:
-    section.add "api-version", valid_568386
-  var valid_568387 = query.getOrDefault("certificate.name")
-  valid_568387 = validateParameter(valid_568387, JString, required = false,
+  if valid_564287 != nil:
+    section.add "api-version", valid_564287
+  var valid_564288 = query.getOrDefault("certificate.created")
+  valid_564288 = validateParameter(valid_564288, JString, required = false,
                                  default = nil)
-  if valid_568387 != nil:
-    section.add "certificate.name", valid_568387
-  var valid_568388 = query.getOrDefault("certificate.lastUpdated")
-  valid_568388 = validateParameter(valid_568388, JString, required = false,
+  if valid_564288 != nil:
+    section.add "certificate.created", valid_564288
+  var valid_564289 = query.getOrDefault("certificate.isVerified")
+  valid_564289 = validateParameter(valid_564289, JBool, required = false, default = nil)
+  if valid_564289 != nil:
+    section.add "certificate.isVerified", valid_564289
+  var valid_564290 = query.getOrDefault("certificate.name")
+  valid_564290 = validateParameter(valid_564290, JString, required = false,
                                  default = nil)
-  if valid_568388 != nil:
-    section.add "certificate.lastUpdated", valid_568388
-  var valid_568389 = query.getOrDefault("certificate.created")
-  valid_568389 = validateParameter(valid_568389, JString, required = false,
+  if valid_564290 != nil:
+    section.add "certificate.name", valid_564290
+  var valid_564291 = query.getOrDefault("certificate.rawBytes")
+  valid_564291 = validateParameter(valid_564291, JString, required = false,
                                  default = nil)
-  if valid_568389 != nil:
-    section.add "certificate.created", valid_568389
-  var valid_568390 = query.getOrDefault("certificate.purpose")
-  valid_568390 = validateParameter(valid_568390, JString, required = false,
-                                 default = newJString("clientAuthentication"))
-  if valid_568390 != nil:
-    section.add "certificate.purpose", valid_568390
-  var valid_568391 = query.getOrDefault("certificate.isVerified")
-  valid_568391 = validateParameter(valid_568391, JBool, required = false, default = nil)
-  if valid_568391 != nil:
-    section.add "certificate.isVerified", valid_568391
-  var valid_568392 = query.getOrDefault("certificate.nonce")
-  valid_568392 = validateParameter(valid_568392, JString, required = false,
+  if valid_564291 != nil:
+    section.add "certificate.rawBytes", valid_564291
+  var valid_564292 = query.getOrDefault("certificate.hasPrivateKey")
+  valid_564292 = validateParameter(valid_564292, JBool, required = false, default = nil)
+  if valid_564292 != nil:
+    section.add "certificate.hasPrivateKey", valid_564292
+  var valid_564293 = query.getOrDefault("certificate.nonce")
+  valid_564293 = validateParameter(valid_564293, JString, required = false,
                                  default = nil)
-  if valid_568392 != nil:
-    section.add "certificate.nonce", valid_568392
-  var valid_568393 = query.getOrDefault("certificate.rawBytes")
-  valid_568393 = validateParameter(valid_568393, JString, required = false,
-                                 default = nil)
-  if valid_568393 != nil:
-    section.add "certificate.rawBytes", valid_568393
+  if valid_564293 != nil:
+    section.add "certificate.nonce", valid_564293
   result.add "query", section
   ## parameters in `header` object:
   ##   If-Match: JString (required)
@@ -1830,11 +1832,11 @@ proc validate_DpsCertificateVerifyCertificate_568379(path: JsonNode;
   section = newJObject()
   assert header != nil,
         "header argument is necessary due to required `If-Match` field"
-  var valid_568394 = header.getOrDefault("If-Match")
-  valid_568394 = validateParameter(valid_568394, JString, required = true,
+  var valid_564294 = header.getOrDefault("If-Match")
+  valid_564294 = validateParameter(valid_564294, JString, required = true,
                                  default = nil)
-  if valid_568394 != nil:
-    section.add "If-Match", valid_568394
+  if valid_564294 != nil:
+    section.add "If-Match", valid_564294
   result.add "header", section
   section = newJObject()
   result.add "formData", section
@@ -1846,28 +1848,28 @@ proc validate_DpsCertificateVerifyCertificate_568379(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568396: Call_DpsCertificateVerifyCertificate_568378;
+proc call*(call_564296: Call_DpsCertificateVerifyCertificate_564278;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Verifies the certificate's private key possession by providing the leaf cert issued by the verifying pre uploaded certificate.
   ## 
-  let valid = call_568396.validator(path, query, header, formData, body)
-  let scheme = call_568396.pickScheme
+  let valid = call_564296.validator(path, query, header, formData, body)
+  let scheme = call_564296.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568396.url(scheme.get, call_568396.host, call_568396.base,
-                         call_568396.route, valid.getOrDefault("path"),
+  let url = call_564296.url(scheme.get, call_564296.host, call_564296.base,
+                         call_564296.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568396, url, valid)
+  result = hook(call_564296, url, valid)
 
-var dpsCertificateVerifyCertificate* = Call_DpsCertificateVerifyCertificate_568378(
+var dpsCertificateVerifyCertificate* = Call_DpsCertificateVerifyCertificate_564278(
     name: "dpsCertificateVerifyCertificate", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Devices/provisioningServices/{provisioningServiceName}/certificates/{certificateName}/verify",
-    validator: validate_DpsCertificateVerifyCertificate_568379, base: "",
-    url: url_DpsCertificateVerifyCertificate_568380, schemes: {Scheme.Https})
+    validator: validate_DpsCertificateVerifyCertificate_564279, base: "",
+    url: url_DpsCertificateVerifyCertificate_564280, schemes: {Scheme.Https})
 type
-  Call_IotDpsResourceListKeysForKeyName_568401 = ref object of OpenApiRestCall_567657
-proc url_IotDpsResourceListKeysForKeyName_568403(protocol: Scheme; host: string;
+  Call_IotDpsResourceListKeysForKeyName_564301 = ref object of OpenApiRestCall_563555
+proc url_IotDpsResourceListKeysForKeyName_564303(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1895,44 +1897,43 @@ proc url_IotDpsResourceListKeysForKeyName_568403(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_IotDpsResourceListKeysForKeyName_568402(path: JsonNode;
+proc validate_IotDpsResourceListKeysForKeyName_564302(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## List primary and secondary keys for a specific key name
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group that contains the provisioning service.
-  ##   provisioningServiceName: JString (required)
-  ##                          : Name of the provisioning service.
   ##   keyName: JString (required)
   ##          : Logical key name to get key-values for.
   ##   subscriptionId: JString (required)
   ##                 : The subscription identifier.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group that contains the provisioning service.
+  ##   provisioningServiceName: JString (required)
+  ##                          : Name of the provisioning service.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568404 = path.getOrDefault("resourceGroupName")
-  valid_568404 = validateParameter(valid_568404, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `keyName` field"
+  var valid_564304 = path.getOrDefault("keyName")
+  valid_564304 = validateParameter(valid_564304, JString, required = true,
                                  default = nil)
-  if valid_568404 != nil:
-    section.add "resourceGroupName", valid_568404
-  var valid_568405 = path.getOrDefault("provisioningServiceName")
-  valid_568405 = validateParameter(valid_568405, JString, required = true,
+  if valid_564304 != nil:
+    section.add "keyName", valid_564304
+  var valid_564305 = path.getOrDefault("subscriptionId")
+  valid_564305 = validateParameter(valid_564305, JString, required = true,
                                  default = nil)
-  if valid_568405 != nil:
-    section.add "provisioningServiceName", valid_568405
-  var valid_568406 = path.getOrDefault("keyName")
-  valid_568406 = validateParameter(valid_568406, JString, required = true,
+  if valid_564305 != nil:
+    section.add "subscriptionId", valid_564305
+  var valid_564306 = path.getOrDefault("resourceGroupName")
+  valid_564306 = validateParameter(valid_564306, JString, required = true,
                                  default = nil)
-  if valid_568406 != nil:
-    section.add "keyName", valid_568406
-  var valid_568407 = path.getOrDefault("subscriptionId")
-  valid_568407 = validateParameter(valid_568407, JString, required = true,
+  if valid_564306 != nil:
+    section.add "resourceGroupName", valid_564306
+  var valid_564307 = path.getOrDefault("provisioningServiceName")
+  valid_564307 = validateParameter(valid_564307, JString, required = true,
                                  default = nil)
-  if valid_568407 != nil:
-    section.add "subscriptionId", valid_568407
+  if valid_564307 != nil:
+    section.add "provisioningServiceName", valid_564307
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1940,11 +1941,11 @@ proc validate_IotDpsResourceListKeysForKeyName_568402(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568408 = query.getOrDefault("api-version")
-  valid_568408 = validateParameter(valid_568408, JString, required = true,
+  var valid_564308 = query.getOrDefault("api-version")
+  valid_564308 = validateParameter(valid_564308, JString, required = true,
                                  default = nil)
-  if valid_568408 != nil:
-    section.add "api-version", valid_568408
+  if valid_564308 != nil:
+    section.add "api-version", valid_564308
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1953,52 +1954,52 @@ proc validate_IotDpsResourceListKeysForKeyName_568402(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568409: Call_IotDpsResourceListKeysForKeyName_568401;
+proc call*(call_564309: Call_IotDpsResourceListKeysForKeyName_564301;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## List primary and secondary keys for a specific key name
   ## 
-  let valid = call_568409.validator(path, query, header, formData, body)
-  let scheme = call_568409.pickScheme
+  let valid = call_564309.validator(path, query, header, formData, body)
+  let scheme = call_564309.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568409.url(scheme.get, call_568409.host, call_568409.base,
-                         call_568409.route, valid.getOrDefault("path"),
+  let url = call_564309.url(scheme.get, call_564309.host, call_564309.base,
+                         call_564309.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568409, url, valid)
+  result = hook(call_564309, url, valid)
 
-proc call*(call_568410: Call_IotDpsResourceListKeysForKeyName_568401;
-          resourceGroupName: string; apiVersion: string;
-          provisioningServiceName: string; keyName: string; subscriptionId: string): Recallable =
+proc call*(call_564310: Call_IotDpsResourceListKeysForKeyName_564301;
+          apiVersion: string; keyName: string; subscriptionId: string;
+          resourceGroupName: string; provisioningServiceName: string): Recallable =
   ## iotDpsResourceListKeysForKeyName
   ## List primary and secondary keys for a specific key name
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group that contains the provisioning service.
   ##   apiVersion: string (required)
   ##             : The version of the API.
-  ##   provisioningServiceName: string (required)
-  ##                          : Name of the provisioning service.
   ##   keyName: string (required)
   ##          : Logical key name to get key-values for.
   ##   subscriptionId: string (required)
   ##                 : The subscription identifier.
-  var path_568411 = newJObject()
-  var query_568412 = newJObject()
-  add(path_568411, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568412, "api-version", newJString(apiVersion))
-  add(path_568411, "provisioningServiceName", newJString(provisioningServiceName))
-  add(path_568411, "keyName", newJString(keyName))
-  add(path_568411, "subscriptionId", newJString(subscriptionId))
-  result = call_568410.call(path_568411, query_568412, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group that contains the provisioning service.
+  ##   provisioningServiceName: string (required)
+  ##                          : Name of the provisioning service.
+  var path_564311 = newJObject()
+  var query_564312 = newJObject()
+  add(query_564312, "api-version", newJString(apiVersion))
+  add(path_564311, "keyName", newJString(keyName))
+  add(path_564311, "subscriptionId", newJString(subscriptionId))
+  add(path_564311, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564311, "provisioningServiceName", newJString(provisioningServiceName))
+  result = call_564310.call(path_564311, query_564312, nil, nil, nil)
 
-var iotDpsResourceListKeysForKeyName* = Call_IotDpsResourceListKeysForKeyName_568401(
+var iotDpsResourceListKeysForKeyName* = Call_IotDpsResourceListKeysForKeyName_564301(
     name: "iotDpsResourceListKeysForKeyName", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Devices/provisioningServices/{provisioningServiceName}/keys/{keyName}/listkeys",
-    validator: validate_IotDpsResourceListKeysForKeyName_568402, base: "",
-    url: url_IotDpsResourceListKeysForKeyName_568403, schemes: {Scheme.Https})
+    validator: validate_IotDpsResourceListKeysForKeyName_564302, base: "",
+    url: url_IotDpsResourceListKeysForKeyName_564303, schemes: {Scheme.Https})
 type
-  Call_IotDpsResourceListKeys_568413 = ref object of OpenApiRestCall_567657
-proc url_IotDpsResourceListKeys_568415(protocol: Scheme; host: string; base: string;
+  Call_IotDpsResourceListKeys_564313 = ref object of OpenApiRestCall_563555
+proc url_IotDpsResourceListKeys_564315(protocol: Scheme; host: string; base: string;
                                       route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2023,37 +2024,37 @@ proc url_IotDpsResourceListKeys_568415(protocol: Scheme; host: string; base: str
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_IotDpsResourceListKeys_568414(path: JsonNode; query: JsonNode;
+proc validate_IotDpsResourceListKeys_564314(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## List the primary and secondary keys for a provisioning service.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
+  ##   subscriptionId: JString (required)
+  ##                 : The subscription identifier.
   ##   resourceGroupName: JString (required)
   ##                    : resource group name
   ##   provisioningServiceName: JString (required)
   ##                          : The provisioning service name to get the shared access keys for.
-  ##   subscriptionId: JString (required)
-  ##                 : The subscription identifier.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568416 = path.getOrDefault("resourceGroupName")
-  valid_568416 = validateParameter(valid_568416, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564316 = path.getOrDefault("subscriptionId")
+  valid_564316 = validateParameter(valid_564316, JString, required = true,
                                  default = nil)
-  if valid_568416 != nil:
-    section.add "resourceGroupName", valid_568416
-  var valid_568417 = path.getOrDefault("provisioningServiceName")
-  valid_568417 = validateParameter(valid_568417, JString, required = true,
+  if valid_564316 != nil:
+    section.add "subscriptionId", valid_564316
+  var valid_564317 = path.getOrDefault("resourceGroupName")
+  valid_564317 = validateParameter(valid_564317, JString, required = true,
                                  default = nil)
-  if valid_568417 != nil:
-    section.add "provisioningServiceName", valid_568417
-  var valid_568418 = path.getOrDefault("subscriptionId")
-  valid_568418 = validateParameter(valid_568418, JString, required = true,
+  if valid_564317 != nil:
+    section.add "resourceGroupName", valid_564317
+  var valid_564318 = path.getOrDefault("provisioningServiceName")
+  valid_564318 = validateParameter(valid_564318, JString, required = true,
                                  default = nil)
-  if valid_568418 != nil:
-    section.add "subscriptionId", valid_568418
+  if valid_564318 != nil:
+    section.add "provisioningServiceName", valid_564318
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2061,11 +2062,11 @@ proc validate_IotDpsResourceListKeys_568414(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568419 = query.getOrDefault("api-version")
-  valid_568419 = validateParameter(valid_568419, JString, required = true,
+  var valid_564319 = query.getOrDefault("api-version")
+  valid_564319 = validateParameter(valid_564319, JString, required = true,
                                  default = nil)
-  if valid_568419 != nil:
-    section.add "api-version", valid_568419
+  if valid_564319 != nil:
+    section.add "api-version", valid_564319
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2074,48 +2075,48 @@ proc validate_IotDpsResourceListKeys_568414(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568420: Call_IotDpsResourceListKeys_568413; path: JsonNode;
+proc call*(call_564320: Call_IotDpsResourceListKeys_564313; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## List the primary and secondary keys for a provisioning service.
   ## 
-  let valid = call_568420.validator(path, query, header, formData, body)
-  let scheme = call_568420.pickScheme
+  let valid = call_564320.validator(path, query, header, formData, body)
+  let scheme = call_564320.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568420.url(scheme.get, call_568420.host, call_568420.base,
-                         call_568420.route, valid.getOrDefault("path"),
+  let url = call_564320.url(scheme.get, call_564320.host, call_564320.base,
+                         call_564320.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568420, url, valid)
+  result = hook(call_564320, url, valid)
 
-proc call*(call_568421: Call_IotDpsResourceListKeys_568413;
-          resourceGroupName: string; apiVersion: string;
-          provisioningServiceName: string; subscriptionId: string): Recallable =
+proc call*(call_564321: Call_IotDpsResourceListKeys_564313; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string;
+          provisioningServiceName: string): Recallable =
   ## iotDpsResourceListKeys
   ## List the primary and secondary keys for a provisioning service.
-  ##   resourceGroupName: string (required)
-  ##                    : resource group name
   ##   apiVersion: string (required)
   ##             : The version of the API.
-  ##   provisioningServiceName: string (required)
-  ##                          : The provisioning service name to get the shared access keys for.
   ##   subscriptionId: string (required)
   ##                 : The subscription identifier.
-  var path_568422 = newJObject()
-  var query_568423 = newJObject()
-  add(path_568422, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568423, "api-version", newJString(apiVersion))
-  add(path_568422, "provisioningServiceName", newJString(provisioningServiceName))
-  add(path_568422, "subscriptionId", newJString(subscriptionId))
-  result = call_568421.call(path_568422, query_568423, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : resource group name
+  ##   provisioningServiceName: string (required)
+  ##                          : The provisioning service name to get the shared access keys for.
+  var path_564322 = newJObject()
+  var query_564323 = newJObject()
+  add(query_564323, "api-version", newJString(apiVersion))
+  add(path_564322, "subscriptionId", newJString(subscriptionId))
+  add(path_564322, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564322, "provisioningServiceName", newJString(provisioningServiceName))
+  result = call_564321.call(path_564322, query_564323, nil, nil, nil)
 
-var iotDpsResourceListKeys* = Call_IotDpsResourceListKeys_568413(
+var iotDpsResourceListKeys* = Call_IotDpsResourceListKeys_564313(
     name: "iotDpsResourceListKeys", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Devices/provisioningServices/{provisioningServiceName}/listkeys",
-    validator: validate_IotDpsResourceListKeys_568414, base: "",
-    url: url_IotDpsResourceListKeys_568415, schemes: {Scheme.Https})
+    validator: validate_IotDpsResourceListKeys_564314, base: "",
+    url: url_IotDpsResourceListKeys_564315, schemes: {Scheme.Https})
 type
-  Call_IotDpsResourceGetOperationResult_568424 = ref object of OpenApiRestCall_567657
-proc url_IotDpsResourceGetOperationResult_568426(protocol: Scheme; host: string;
+  Call_IotDpsResourceGetOperationResult_564324 = ref object of OpenApiRestCall_563555
+proc url_IotDpsResourceGetOperationResult_564326(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2142,44 +2143,44 @@ proc url_IotDpsResourceGetOperationResult_568426(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_IotDpsResourceGetOperationResult_568425(path: JsonNode;
+proc validate_IotDpsResourceGetOperationResult_564325(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the status of a long running operation, such as create, update or delete a provisioning service.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
+  ##   operationId: JString (required)
+  ##              : Operation id corresponding to long running operation. Use this to poll for the status.
+  ##   subscriptionId: JString (required)
+  ##                 : The subscription identifier.
   ##   resourceGroupName: JString (required)
   ##                    : Resource group identifier.
   ##   provisioningServiceName: JString (required)
   ##                          : Name of provisioning service that the operation is running on.
-  ##   subscriptionId: JString (required)
-  ##                 : The subscription identifier.
-  ##   operationId: JString (required)
-  ##              : Operation id corresponding to long running operation. Use this to poll for the status.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568427 = path.getOrDefault("resourceGroupName")
-  valid_568427 = validateParameter(valid_568427, JString, required = true,
+        "path argument is necessary due to required `operationId` field"
+  var valid_564327 = path.getOrDefault("operationId")
+  valid_564327 = validateParameter(valid_564327, JString, required = true,
                                  default = nil)
-  if valid_568427 != nil:
-    section.add "resourceGroupName", valid_568427
-  var valid_568428 = path.getOrDefault("provisioningServiceName")
-  valid_568428 = validateParameter(valid_568428, JString, required = true,
+  if valid_564327 != nil:
+    section.add "operationId", valid_564327
+  var valid_564328 = path.getOrDefault("subscriptionId")
+  valid_564328 = validateParameter(valid_564328, JString, required = true,
                                  default = nil)
-  if valid_568428 != nil:
-    section.add "provisioningServiceName", valid_568428
-  var valid_568429 = path.getOrDefault("subscriptionId")
-  valid_568429 = validateParameter(valid_568429, JString, required = true,
+  if valid_564328 != nil:
+    section.add "subscriptionId", valid_564328
+  var valid_564329 = path.getOrDefault("resourceGroupName")
+  valid_564329 = validateParameter(valid_564329, JString, required = true,
                                  default = nil)
-  if valid_568429 != nil:
-    section.add "subscriptionId", valid_568429
-  var valid_568430 = path.getOrDefault("operationId")
-  valid_568430 = validateParameter(valid_568430, JString, required = true,
+  if valid_564329 != nil:
+    section.add "resourceGroupName", valid_564329
+  var valid_564330 = path.getOrDefault("provisioningServiceName")
+  valid_564330 = validateParameter(valid_564330, JString, required = true,
                                  default = nil)
-  if valid_568430 != nil:
-    section.add "operationId", valid_568430
+  if valid_564330 != nil:
+    section.add "provisioningServiceName", valid_564330
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2189,16 +2190,16 @@ proc validate_IotDpsResourceGetOperationResult_568425(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568431 = query.getOrDefault("api-version")
-  valid_568431 = validateParameter(valid_568431, JString, required = true,
+  var valid_564331 = query.getOrDefault("api-version")
+  valid_564331 = validateParameter(valid_564331, JString, required = true,
                                  default = nil)
-  if valid_568431 != nil:
-    section.add "api-version", valid_568431
-  var valid_568432 = query.getOrDefault("asyncinfo")
-  valid_568432 = validateParameter(valid_568432, JString, required = true,
+  if valid_564331 != nil:
+    section.add "api-version", valid_564331
+  var valid_564332 = query.getOrDefault("asyncinfo")
+  valid_564332 = validateParameter(valid_564332, JString, required = true,
                                  default = newJString("true"))
-  if valid_568432 != nil:
-    section.add "asyncinfo", valid_568432
+  if valid_564332 != nil:
+    section.add "asyncinfo", valid_564332
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2207,56 +2208,56 @@ proc validate_IotDpsResourceGetOperationResult_568425(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568433: Call_IotDpsResourceGetOperationResult_568424;
+proc call*(call_564333: Call_IotDpsResourceGetOperationResult_564324;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Gets the status of a long running operation, such as create, update or delete a provisioning service.
   ## 
-  let valid = call_568433.validator(path, query, header, formData, body)
-  let scheme = call_568433.pickScheme
+  let valid = call_564333.validator(path, query, header, formData, body)
+  let scheme = call_564333.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568433.url(scheme.get, call_568433.host, call_568433.base,
-                         call_568433.route, valid.getOrDefault("path"),
+  let url = call_564333.url(scheme.get, call_564333.host, call_564333.base,
+                         call_564333.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568433, url, valid)
+  result = hook(call_564333, url, valid)
 
-proc call*(call_568434: Call_IotDpsResourceGetOperationResult_568424;
-          resourceGroupName: string; apiVersion: string;
-          provisioningServiceName: string; subscriptionId: string;
-          operationId: string; asyncinfo: string = "true"): Recallable =
+proc call*(call_564334: Call_IotDpsResourceGetOperationResult_564324;
+          apiVersion: string; operationId: string; subscriptionId: string;
+          resourceGroupName: string; provisioningServiceName: string;
+          asyncinfo: string = "true"): Recallable =
   ## iotDpsResourceGetOperationResult
   ## Gets the status of a long running operation, such as create, update or delete a provisioning service.
-  ##   resourceGroupName: string (required)
-  ##                    : Resource group identifier.
   ##   apiVersion: string (required)
   ##             : The version of the API.
-  ##   provisioningServiceName: string (required)
-  ##                          : Name of provisioning service that the operation is running on.
-  ##   subscriptionId: string (required)
-  ##                 : The subscription identifier.
-  ##   asyncinfo: string (required)
-  ##            : Async header used to poll on the status of the operation, obtained while creating the long running operation.
   ##   operationId: string (required)
   ##              : Operation id corresponding to long running operation. Use this to poll for the status.
-  var path_568435 = newJObject()
-  var query_568436 = newJObject()
-  add(path_568435, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568436, "api-version", newJString(apiVersion))
-  add(path_568435, "provisioningServiceName", newJString(provisioningServiceName))
-  add(path_568435, "subscriptionId", newJString(subscriptionId))
-  add(query_568436, "asyncinfo", newJString(asyncinfo))
-  add(path_568435, "operationId", newJString(operationId))
-  result = call_568434.call(path_568435, query_568436, nil, nil, nil)
+  ##   subscriptionId: string (required)
+  ##                 : The subscription identifier.
+  ##   resourceGroupName: string (required)
+  ##                    : Resource group identifier.
+  ##   provisioningServiceName: string (required)
+  ##                          : Name of provisioning service that the operation is running on.
+  ##   asyncinfo: string (required)
+  ##            : Async header used to poll on the status of the operation, obtained while creating the long running operation.
+  var path_564335 = newJObject()
+  var query_564336 = newJObject()
+  add(query_564336, "api-version", newJString(apiVersion))
+  add(path_564335, "operationId", newJString(operationId))
+  add(path_564335, "subscriptionId", newJString(subscriptionId))
+  add(path_564335, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564335, "provisioningServiceName", newJString(provisioningServiceName))
+  add(query_564336, "asyncinfo", newJString(asyncinfo))
+  result = call_564334.call(path_564335, query_564336, nil, nil, nil)
 
-var iotDpsResourceGetOperationResult* = Call_IotDpsResourceGetOperationResult_568424(
+var iotDpsResourceGetOperationResult* = Call_IotDpsResourceGetOperationResult_564324(
     name: "iotDpsResourceGetOperationResult", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Devices/provisioningServices/{provisioningServiceName}/operationresults/{operationId}",
-    validator: validate_IotDpsResourceGetOperationResult_568425, base: "",
-    url: url_IotDpsResourceGetOperationResult_568426, schemes: {Scheme.Https})
+    validator: validate_IotDpsResourceGetOperationResult_564325, base: "",
+    url: url_IotDpsResourceGetOperationResult_564326, schemes: {Scheme.Https})
 type
-  Call_IotDpsResourceListValidSkus_568437 = ref object of OpenApiRestCall_567657
-proc url_IotDpsResourceListValidSkus_568439(protocol: Scheme; host: string;
+  Call_IotDpsResourceListValidSkus_564337 = ref object of OpenApiRestCall_563555
+proc url_IotDpsResourceListValidSkus_564339(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2281,37 +2282,37 @@ proc url_IotDpsResourceListValidSkus_568439(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_IotDpsResourceListValidSkus_568438(path: JsonNode; query: JsonNode;
+proc validate_IotDpsResourceListValidSkus_564338(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the list of valid SKUs and tiers for a provisioning service.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
+  ##   subscriptionId: JString (required)
+  ##                 : The subscription identifier.
   ##   resourceGroupName: JString (required)
   ##                    : Name of resource group.
   ##   provisioningServiceName: JString (required)
   ##                          : Name of provisioning service.
-  ##   subscriptionId: JString (required)
-  ##                 : The subscription identifier.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568440 = path.getOrDefault("resourceGroupName")
-  valid_568440 = validateParameter(valid_568440, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564340 = path.getOrDefault("subscriptionId")
+  valid_564340 = validateParameter(valid_564340, JString, required = true,
                                  default = nil)
-  if valid_568440 != nil:
-    section.add "resourceGroupName", valid_568440
-  var valid_568441 = path.getOrDefault("provisioningServiceName")
-  valid_568441 = validateParameter(valid_568441, JString, required = true,
+  if valid_564340 != nil:
+    section.add "subscriptionId", valid_564340
+  var valid_564341 = path.getOrDefault("resourceGroupName")
+  valid_564341 = validateParameter(valid_564341, JString, required = true,
                                  default = nil)
-  if valid_568441 != nil:
-    section.add "provisioningServiceName", valid_568441
-  var valid_568442 = path.getOrDefault("subscriptionId")
-  valid_568442 = validateParameter(valid_568442, JString, required = true,
+  if valid_564341 != nil:
+    section.add "resourceGroupName", valid_564341
+  var valid_564342 = path.getOrDefault("provisioningServiceName")
+  valid_564342 = validateParameter(valid_564342, JString, required = true,
                                  default = nil)
-  if valid_568442 != nil:
-    section.add "subscriptionId", valid_568442
+  if valid_564342 != nil:
+    section.add "provisioningServiceName", valid_564342
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2319,11 +2320,11 @@ proc validate_IotDpsResourceListValidSkus_568438(path: JsonNode; query: JsonNode
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568443 = query.getOrDefault("api-version")
-  valid_568443 = validateParameter(valid_568443, JString, required = true,
+  var valid_564343 = query.getOrDefault("api-version")
+  valid_564343 = validateParameter(valid_564343, JString, required = true,
                                  default = nil)
-  if valid_568443 != nil:
-    section.add "api-version", valid_568443
+  if valid_564343 != nil:
+    section.add "api-version", valid_564343
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2332,45 +2333,45 @@ proc validate_IotDpsResourceListValidSkus_568438(path: JsonNode; query: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_568444: Call_IotDpsResourceListValidSkus_568437; path: JsonNode;
+proc call*(call_564344: Call_IotDpsResourceListValidSkus_564337; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the list of valid SKUs and tiers for a provisioning service.
   ## 
-  let valid = call_568444.validator(path, query, header, formData, body)
-  let scheme = call_568444.pickScheme
+  let valid = call_564344.validator(path, query, header, formData, body)
+  let scheme = call_564344.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568444.url(scheme.get, call_568444.host, call_568444.base,
-                         call_568444.route, valid.getOrDefault("path"),
+  let url = call_564344.url(scheme.get, call_564344.host, call_564344.base,
+                         call_564344.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568444, url, valid)
+  result = hook(call_564344, url, valid)
 
-proc call*(call_568445: Call_IotDpsResourceListValidSkus_568437;
-          resourceGroupName: string; apiVersion: string;
-          provisioningServiceName: string; subscriptionId: string): Recallable =
+proc call*(call_564345: Call_IotDpsResourceListValidSkus_564337;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string;
+          provisioningServiceName: string): Recallable =
   ## iotDpsResourceListValidSkus
   ## Gets the list of valid SKUs and tiers for a provisioning service.
-  ##   resourceGroupName: string (required)
-  ##                    : Name of resource group.
   ##   apiVersion: string (required)
   ##             : The version of the API.
-  ##   provisioningServiceName: string (required)
-  ##                          : Name of provisioning service.
   ##   subscriptionId: string (required)
   ##                 : The subscription identifier.
-  var path_568446 = newJObject()
-  var query_568447 = newJObject()
-  add(path_568446, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568447, "api-version", newJString(apiVersion))
-  add(path_568446, "provisioningServiceName", newJString(provisioningServiceName))
-  add(path_568446, "subscriptionId", newJString(subscriptionId))
-  result = call_568445.call(path_568446, query_568447, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : Name of resource group.
+  ##   provisioningServiceName: string (required)
+  ##                          : Name of provisioning service.
+  var path_564346 = newJObject()
+  var query_564347 = newJObject()
+  add(query_564347, "api-version", newJString(apiVersion))
+  add(path_564346, "subscriptionId", newJString(subscriptionId))
+  add(path_564346, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564346, "provisioningServiceName", newJString(provisioningServiceName))
+  result = call_564345.call(path_564346, query_564347, nil, nil, nil)
 
-var iotDpsResourceListValidSkus* = Call_IotDpsResourceListValidSkus_568437(
+var iotDpsResourceListValidSkus* = Call_IotDpsResourceListValidSkus_564337(
     name: "iotDpsResourceListValidSkus", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Devices/provisioningServices/{provisioningServiceName}/skus",
-    validator: validate_IotDpsResourceListValidSkus_568438, base: "",
-    url: url_IotDpsResourceListValidSkus_568439, schemes: {Scheme.Https})
+    validator: validate_IotDpsResourceListValidSkus_564338, base: "",
+    url: url_IotDpsResourceListValidSkus_564339, schemes: {Scheme.Https})
 export
   rest
 

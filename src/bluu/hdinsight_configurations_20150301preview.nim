@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, httpcore
 
 ## auto-generated via openapi macro
 ## title: HDInsightManagementClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_567641 = ref object of OpenApiRestCall
+  OpenApiRestCall_563539 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_567641](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563539](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_567641): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563539): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,8 +107,8 @@ const
   macServiceName = "hdinsight-configurations"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_ConfigurationsList_567863 = ref object of OpenApiRestCall_567641
-proc url_ConfigurationsList_567865(protocol: Scheme; host: string; base: string;
+  Call_ConfigurationsList_563761 = ref object of OpenApiRestCall_563539
+proc url_ConfigurationsList_563763(protocol: Scheme; host: string; base: string;
                                   route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -127,7 +131,7 @@ proc url_ConfigurationsList_567865(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ConfigurationsList_567864(path: JsonNode; query: JsonNode;
+proc validate_ConfigurationsList_563762(path: JsonNode; query: JsonNode;
                                        header: JsonNode; formData: JsonNode;
                                        body: JsonNode): JsonNode =
   ## Gets all configuration information for an HDI cluster.
@@ -137,28 +141,28 @@ proc validate_ConfigurationsList_567864(path: JsonNode; query: JsonNode;
   ## parameters in `path` object:
   ##   clusterName: JString (required)
   ##              : The name of the cluster.
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   subscriptionId: JString (required)
   ##                 : The subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `clusterName` field"
-  var valid_568038 = path.getOrDefault("clusterName")
-  valid_568038 = validateParameter(valid_568038, JString, required = true,
+  var valid_563938 = path.getOrDefault("clusterName")
+  valid_563938 = validateParameter(valid_563938, JString, required = true,
                                  default = nil)
-  if valid_568038 != nil:
-    section.add "clusterName", valid_568038
-  var valid_568039 = path.getOrDefault("resourceGroupName")
-  valid_568039 = validateParameter(valid_568039, JString, required = true,
+  if valid_563938 != nil:
+    section.add "clusterName", valid_563938
+  var valid_563939 = path.getOrDefault("subscriptionId")
+  valid_563939 = validateParameter(valid_563939, JString, required = true,
                                  default = nil)
-  if valid_568039 != nil:
-    section.add "resourceGroupName", valid_568039
-  var valid_568040 = path.getOrDefault("subscriptionId")
-  valid_568040 = validateParameter(valid_568040, JString, required = true,
+  if valid_563939 != nil:
+    section.add "subscriptionId", valid_563939
+  var valid_563940 = path.getOrDefault("resourceGroupName")
+  valid_563940 = validateParameter(valid_563940, JString, required = true,
                                  default = nil)
-  if valid_568040 != nil:
-    section.add "subscriptionId", valid_568040
+  if valid_563940 != nil:
+    section.add "resourceGroupName", valid_563940
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -166,11 +170,11 @@ proc validate_ConfigurationsList_567864(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568041 = query.getOrDefault("api-version")
-  valid_568041 = validateParameter(valid_568041, JString, required = true,
+  var valid_563941 = query.getOrDefault("api-version")
+  valid_563941 = validateParameter(valid_563941, JString, required = true,
                                  default = nil)
-  if valid_568041 != nil:
-    section.add "api-version", valid_568041
+  if valid_563941 != nil:
+    section.add "api-version", valid_563941
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -179,47 +183,47 @@ proc validate_ConfigurationsList_567864(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568064: Call_ConfigurationsList_567863; path: JsonNode;
+proc call*(call_563964: Call_ConfigurationsList_563761; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets all configuration information for an HDI cluster.
   ## 
-  let valid = call_568064.validator(path, query, header, formData, body)
-  let scheme = call_568064.pickScheme
+  let valid = call_563964.validator(path, query, header, formData, body)
+  let scheme = call_563964.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568064.url(scheme.get, call_568064.host, call_568064.base,
-                         call_568064.route, valid.getOrDefault("path"),
+  let url = call_563964.url(scheme.get, call_563964.host, call_563964.base,
+                         call_563964.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568064, url, valid)
+  result = hook(call_563964, url, valid)
 
-proc call*(call_568135: Call_ConfigurationsList_567863; clusterName: string;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string): Recallable =
+proc call*(call_564035: Call_ConfigurationsList_563761; clusterName: string;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string): Recallable =
   ## configurationsList
   ## Gets all configuration information for an HDI cluster.
   ##   clusterName: string (required)
   ##              : The name of the cluster.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : The HDInsight client API Version.
   ##   subscriptionId: string (required)
   ##                 : The subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_568136 = newJObject()
-  var query_568138 = newJObject()
-  add(path_568136, "clusterName", newJString(clusterName))
-  add(path_568136, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568138, "api-version", newJString(apiVersion))
-  add(path_568136, "subscriptionId", newJString(subscriptionId))
-  result = call_568135.call(path_568136, query_568138, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564036 = newJObject()
+  var query_564038 = newJObject()
+  add(path_564036, "clusterName", newJString(clusterName))
+  add(query_564038, "api-version", newJString(apiVersion))
+  add(path_564036, "subscriptionId", newJString(subscriptionId))
+  add(path_564036, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564035.call(path_564036, query_564038, nil, nil, nil)
 
-var configurationsList* = Call_ConfigurationsList_567863(
+var configurationsList* = Call_ConfigurationsList_563761(
     name: "configurationsList", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.HDInsight/clusters/{clusterName}/configurations",
-    validator: validate_ConfigurationsList_567864, base: "",
-    url: url_ConfigurationsList_567865, schemes: {Scheme.Https})
+    validator: validate_ConfigurationsList_563762, base: "",
+    url: url_ConfigurationsList_563763, schemes: {Scheme.Https})
 type
-  Call_ConfigurationsUpdate_568189 = ref object of OpenApiRestCall_567641
-proc url_ConfigurationsUpdate_568191(protocol: Scheme; host: string; base: string;
+  Call_ConfigurationsUpdate_564089 = ref object of OpenApiRestCall_563539
+proc url_ConfigurationsUpdate_564091(protocol: Scheme; host: string; base: string;
                                     route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -245,7 +249,7 @@ proc url_ConfigurationsUpdate_568191(protocol: Scheme; host: string; base: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ConfigurationsUpdate_568190(path: JsonNode; query: JsonNode;
+proc validate_ConfigurationsUpdate_564090(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Configures the HTTP settings on the specified cluster. This API is deprecated, please use UpdateGatewaySettings in cluster endpoint instead.
   ## 
@@ -254,35 +258,35 @@ proc validate_ConfigurationsUpdate_568190(path: JsonNode; query: JsonNode;
   ## parameters in `path` object:
   ##   clusterName: JString (required)
   ##              : The name of the cluster.
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
-  ##   subscriptionId: JString (required)
-  ##                 : The subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   configurationName: JString (required)
   ##                    : The name of the cluster configuration.
+  ##   subscriptionId: JString (required)
+  ##                 : The subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `clusterName` field"
-  var valid_568192 = path.getOrDefault("clusterName")
-  valid_568192 = validateParameter(valid_568192, JString, required = true,
+  var valid_564092 = path.getOrDefault("clusterName")
+  valid_564092 = validateParameter(valid_564092, JString, required = true,
                                  default = nil)
-  if valid_568192 != nil:
-    section.add "clusterName", valid_568192
-  var valid_568193 = path.getOrDefault("resourceGroupName")
-  valid_568193 = validateParameter(valid_568193, JString, required = true,
+  if valid_564092 != nil:
+    section.add "clusterName", valid_564092
+  var valid_564093 = path.getOrDefault("configurationName")
+  valid_564093 = validateParameter(valid_564093, JString, required = true,
                                  default = nil)
-  if valid_568193 != nil:
-    section.add "resourceGroupName", valid_568193
-  var valid_568194 = path.getOrDefault("subscriptionId")
-  valid_568194 = validateParameter(valid_568194, JString, required = true,
+  if valid_564093 != nil:
+    section.add "configurationName", valid_564093
+  var valid_564094 = path.getOrDefault("subscriptionId")
+  valid_564094 = validateParameter(valid_564094, JString, required = true,
                                  default = nil)
-  if valid_568194 != nil:
-    section.add "subscriptionId", valid_568194
-  var valid_568195 = path.getOrDefault("configurationName")
-  valid_568195 = validateParameter(valid_568195, JString, required = true,
+  if valid_564094 != nil:
+    section.add "subscriptionId", valid_564094
+  var valid_564095 = path.getOrDefault("resourceGroupName")
+  valid_564095 = validateParameter(valid_564095, JString, required = true,
                                  default = nil)
-  if valid_568195 != nil:
-    section.add "configurationName", valid_568195
+  if valid_564095 != nil:
+    section.add "resourceGroupName", valid_564095
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -290,11 +294,11 @@ proc validate_ConfigurationsUpdate_568190(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568196 = query.getOrDefault("api-version")
-  valid_568196 = validateParameter(valid_568196, JString, required = true,
+  var valid_564096 = query.getOrDefault("api-version")
+  valid_564096 = validateParameter(valid_564096, JString, required = true,
                                  default = nil)
-  if valid_568196 != nil:
-    section.add "api-version", valid_568196
+  if valid_564096 != nil:
+    section.add "api-version", valid_564096
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -308,56 +312,56 @@ proc validate_ConfigurationsUpdate_568190(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568198: Call_ConfigurationsUpdate_568189; path: JsonNode;
+proc call*(call_564098: Call_ConfigurationsUpdate_564089; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Configures the HTTP settings on the specified cluster. This API is deprecated, please use UpdateGatewaySettings in cluster endpoint instead.
   ## 
-  let valid = call_568198.validator(path, query, header, formData, body)
-  let scheme = call_568198.pickScheme
+  let valid = call_564098.validator(path, query, header, formData, body)
+  let scheme = call_564098.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568198.url(scheme.get, call_568198.host, call_568198.base,
-                         call_568198.route, valid.getOrDefault("path"),
+  let url = call_564098.url(scheme.get, call_564098.host, call_564098.base,
+                         call_564098.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568198, url, valid)
+  result = hook(call_564098, url, valid)
 
-proc call*(call_568199: Call_ConfigurationsUpdate_568189; clusterName: string;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          configurationName: string; parameters: JsonNode): Recallable =
+proc call*(call_564099: Call_ConfigurationsUpdate_564089; clusterName: string;
+          apiVersion: string; configurationName: string; subscriptionId: string;
+          resourceGroupName: string; parameters: JsonNode): Recallable =
   ## configurationsUpdate
   ## Configures the HTTP settings on the specified cluster. This API is deprecated, please use UpdateGatewaySettings in cluster endpoint instead.
   ##   clusterName: string (required)
   ##              : The name of the cluster.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : The HDInsight client API Version.
-  ##   subscriptionId: string (required)
-  ##                 : The subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   configurationName: string (required)
   ##                    : The name of the cluster configuration.
+  ##   subscriptionId: string (required)
+  ##                 : The subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   parameters: JObject (required)
   ##             : The cluster configurations.
-  var path_568200 = newJObject()
-  var query_568201 = newJObject()
-  var body_568202 = newJObject()
-  add(path_568200, "clusterName", newJString(clusterName))
-  add(path_568200, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568201, "api-version", newJString(apiVersion))
-  add(path_568200, "subscriptionId", newJString(subscriptionId))
-  add(path_568200, "configurationName", newJString(configurationName))
+  var path_564100 = newJObject()
+  var query_564101 = newJObject()
+  var body_564102 = newJObject()
+  add(path_564100, "clusterName", newJString(clusterName))
+  add(query_564101, "api-version", newJString(apiVersion))
+  add(path_564100, "configurationName", newJString(configurationName))
+  add(path_564100, "subscriptionId", newJString(subscriptionId))
+  add(path_564100, "resourceGroupName", newJString(resourceGroupName))
   if parameters != nil:
-    body_568202 = parameters
-  result = call_568199.call(path_568200, query_568201, nil, nil, body_568202)
+    body_564102 = parameters
+  result = call_564099.call(path_564100, query_564101, nil, nil, body_564102)
 
-var configurationsUpdate* = Call_ConfigurationsUpdate_568189(
+var configurationsUpdate* = Call_ConfigurationsUpdate_564089(
     name: "configurationsUpdate", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.HDInsight/clusters/{clusterName}/configurations/{configurationName}",
-    validator: validate_ConfigurationsUpdate_568190, base: "",
-    url: url_ConfigurationsUpdate_568191, schemes: {Scheme.Https})
+    validator: validate_ConfigurationsUpdate_564090, base: "",
+    url: url_ConfigurationsUpdate_564091, schemes: {Scheme.Https})
 type
-  Call_ConfigurationsGet_568177 = ref object of OpenApiRestCall_567641
-proc url_ConfigurationsGet_568179(protocol: Scheme; host: string; base: string;
+  Call_ConfigurationsGet_564077 = ref object of OpenApiRestCall_563539
+proc url_ConfigurationsGet_564079(protocol: Scheme; host: string; base: string;
                                  route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -383,7 +387,7 @@ proc url_ConfigurationsGet_568179(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ConfigurationsGet_568178(path: JsonNode; query: JsonNode;
+proc validate_ConfigurationsGet_564078(path: JsonNode; query: JsonNode;
                                       header: JsonNode; formData: JsonNode;
                                       body: JsonNode): JsonNode =
   ## The configuration object for the specified cluster. This API is not recommended and might be removed in the future. Please consider using List configurations API instead.
@@ -393,35 +397,35 @@ proc validate_ConfigurationsGet_568178(path: JsonNode; query: JsonNode;
   ## parameters in `path` object:
   ##   clusterName: JString (required)
   ##              : The name of the cluster.
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
-  ##   subscriptionId: JString (required)
-  ##                 : The subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   configurationName: JString (required)
   ##                    : The name of the cluster configuration.
+  ##   subscriptionId: JString (required)
+  ##                 : The subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `clusterName` field"
-  var valid_568180 = path.getOrDefault("clusterName")
-  valid_568180 = validateParameter(valid_568180, JString, required = true,
+  var valid_564080 = path.getOrDefault("clusterName")
+  valid_564080 = validateParameter(valid_564080, JString, required = true,
                                  default = nil)
-  if valid_568180 != nil:
-    section.add "clusterName", valid_568180
-  var valid_568181 = path.getOrDefault("resourceGroupName")
-  valid_568181 = validateParameter(valid_568181, JString, required = true,
+  if valid_564080 != nil:
+    section.add "clusterName", valid_564080
+  var valid_564081 = path.getOrDefault("configurationName")
+  valid_564081 = validateParameter(valid_564081, JString, required = true,
                                  default = nil)
-  if valid_568181 != nil:
-    section.add "resourceGroupName", valid_568181
-  var valid_568182 = path.getOrDefault("subscriptionId")
-  valid_568182 = validateParameter(valid_568182, JString, required = true,
+  if valid_564081 != nil:
+    section.add "configurationName", valid_564081
+  var valid_564082 = path.getOrDefault("subscriptionId")
+  valid_564082 = validateParameter(valid_564082, JString, required = true,
                                  default = nil)
-  if valid_568182 != nil:
-    section.add "subscriptionId", valid_568182
-  var valid_568183 = path.getOrDefault("configurationName")
-  valid_568183 = validateParameter(valid_568183, JString, required = true,
+  if valid_564082 != nil:
+    section.add "subscriptionId", valid_564082
+  var valid_564083 = path.getOrDefault("resourceGroupName")
+  valid_564083 = validateParameter(valid_564083, JString, required = true,
                                  default = nil)
-  if valid_568183 != nil:
-    section.add "configurationName", valid_568183
+  if valid_564083 != nil:
+    section.add "resourceGroupName", valid_564083
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -429,11 +433,11 @@ proc validate_ConfigurationsGet_568178(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568184 = query.getOrDefault("api-version")
-  valid_568184 = validateParameter(valid_568184, JString, required = true,
+  var valid_564084 = query.getOrDefault("api-version")
+  valid_564084 = validateParameter(valid_564084, JString, required = true,
                                  default = nil)
-  if valid_568184 != nil:
-    section.add "api-version", valid_568184
+  if valid_564084 != nil:
+    section.add "api-version", valid_564084
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -442,47 +446,47 @@ proc validate_ConfigurationsGet_568178(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568185: Call_ConfigurationsGet_568177; path: JsonNode;
+proc call*(call_564085: Call_ConfigurationsGet_564077; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## The configuration object for the specified cluster. This API is not recommended and might be removed in the future. Please consider using List configurations API instead.
   ## 
-  let valid = call_568185.validator(path, query, header, formData, body)
-  let scheme = call_568185.pickScheme
+  let valid = call_564085.validator(path, query, header, formData, body)
+  let scheme = call_564085.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568185.url(scheme.get, call_568185.host, call_568185.base,
-                         call_568185.route, valid.getOrDefault("path"),
+  let url = call_564085.url(scheme.get, call_564085.host, call_564085.base,
+                         call_564085.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568185, url, valid)
+  result = hook(call_564085, url, valid)
 
-proc call*(call_568186: Call_ConfigurationsGet_568177; clusterName: string;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          configurationName: string): Recallable =
+proc call*(call_564086: Call_ConfigurationsGet_564077; clusterName: string;
+          apiVersion: string; configurationName: string; subscriptionId: string;
+          resourceGroupName: string): Recallable =
   ## configurationsGet
   ## The configuration object for the specified cluster. This API is not recommended and might be removed in the future. Please consider using List configurations API instead.
   ##   clusterName: string (required)
   ##              : The name of the cluster.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : The HDInsight client API Version.
-  ##   subscriptionId: string (required)
-  ##                 : The subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   configurationName: string (required)
   ##                    : The name of the cluster configuration.
-  var path_568187 = newJObject()
-  var query_568188 = newJObject()
-  add(path_568187, "clusterName", newJString(clusterName))
-  add(path_568187, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568188, "api-version", newJString(apiVersion))
-  add(path_568187, "subscriptionId", newJString(subscriptionId))
-  add(path_568187, "configurationName", newJString(configurationName))
-  result = call_568186.call(path_568187, query_568188, nil, nil, nil)
+  ##   subscriptionId: string (required)
+  ##                 : The subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564087 = newJObject()
+  var query_564088 = newJObject()
+  add(path_564087, "clusterName", newJString(clusterName))
+  add(query_564088, "api-version", newJString(apiVersion))
+  add(path_564087, "configurationName", newJString(configurationName))
+  add(path_564087, "subscriptionId", newJString(subscriptionId))
+  add(path_564087, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564086.call(path_564087, query_564088, nil, nil, nil)
 
-var configurationsGet* = Call_ConfigurationsGet_568177(name: "configurationsGet",
+var configurationsGet* = Call_ConfigurationsGet_564077(name: "configurationsGet",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.HDInsight/clusters/{clusterName}/configurations/{configurationName}",
-    validator: validate_ConfigurationsGet_568178, base: "",
-    url: url_ConfigurationsGet_568179, schemes: {Scheme.Https})
+    validator: validate_ConfigurationsGet_564078, base: "",
+    url: url_ConfigurationsGet_564079, schemes: {Scheme.Https})
 export
   rest
 

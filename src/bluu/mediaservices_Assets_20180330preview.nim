@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, httpcore
 
 ## auto-generated via openapi macro
 ## title: Azure Media Services
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_567642 = ref object of OpenApiRestCall
+  OpenApiRestCall_563540 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_567642](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563540](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_567642): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563540): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,8 +107,8 @@ const
   macServiceName = "mediaservices-Assets"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_AssetsList_567864 = ref object of OpenApiRestCall_567642
-proc url_AssetsList_567866(protocol: Scheme; host: string; base: string; route: string;
+  Call_AssetsList_563762 = ref object of OpenApiRestCall_563540
+proc url_AssetsList_563764(protocol: Scheme; host: string; base: string; route: string;
                           path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -127,69 +131,69 @@ proc url_AssetsList_567866(protocol: Scheme; host: string; base: string; route: 
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AssetsList_567865(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_AssetsList_563763(path: JsonNode; query: JsonNode; header: JsonNode;
                                formData: JsonNode; body: JsonNode): JsonNode =
   ## List Assets in the Media Services account with optional filtering and ordering
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group within the Azure subscription.
   ##   subscriptionId: JString (required)
   ##                 : The unique identifier for a Microsoft Azure subscription.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group within the Azure subscription.
   ##   accountName: JString (required)
   ##              : The Media Services account name.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568040 = path.getOrDefault("resourceGroupName")
-  valid_568040 = validateParameter(valid_568040, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_563940 = path.getOrDefault("subscriptionId")
+  valid_563940 = validateParameter(valid_563940, JString, required = true,
                                  default = nil)
-  if valid_568040 != nil:
-    section.add "resourceGroupName", valid_568040
-  var valid_568041 = path.getOrDefault("subscriptionId")
-  valid_568041 = validateParameter(valid_568041, JString, required = true,
+  if valid_563940 != nil:
+    section.add "subscriptionId", valid_563940
+  var valid_563941 = path.getOrDefault("resourceGroupName")
+  valid_563941 = validateParameter(valid_563941, JString, required = true,
                                  default = nil)
-  if valid_568041 != nil:
-    section.add "subscriptionId", valid_568041
-  var valid_568042 = path.getOrDefault("accountName")
-  valid_568042 = validateParameter(valid_568042, JString, required = true,
+  if valid_563941 != nil:
+    section.add "resourceGroupName", valid_563941
+  var valid_563942 = path.getOrDefault("accountName")
+  valid_563942 = validateParameter(valid_563942, JString, required = true,
                                  default = nil)
-  if valid_568042 != nil:
-    section.add "accountName", valid_568042
+  if valid_563942 != nil:
+    section.add "accountName", valid_563942
   result.add "path", section
   ## parameters in `query` object:
-  ##   $orderby: JString
-  ##           : Specifies the key by which the result collection should be ordered.
   ##   api-version: JString (required)
   ##              : The Version of the API to be used with the client request.
   ##   $top: JInt
   ##       : Specifies a non-negative integer n that limits the number of items returned from a collection. The service returns the number of available items up to but not greater than the specified value n.
+  ##   $orderby: JString
+  ##           : Specifies the key by which the result collection should be ordered.
   ##   $filter: JString
   ##          : Restricts the set of items returned.
   section = newJObject()
-  var valid_568043 = query.getOrDefault("$orderby")
-  valid_568043 = validateParameter(valid_568043, JString, required = false,
-                                 default = nil)
-  if valid_568043 != nil:
-    section.add "$orderby", valid_568043
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568044 = query.getOrDefault("api-version")
-  valid_568044 = validateParameter(valid_568044, JString, required = true,
+  var valid_563943 = query.getOrDefault("api-version")
+  valid_563943 = validateParameter(valid_563943, JString, required = true,
                                  default = nil)
-  if valid_568044 != nil:
-    section.add "api-version", valid_568044
-  var valid_568045 = query.getOrDefault("$top")
-  valid_568045 = validateParameter(valid_568045, JInt, required = false, default = nil)
-  if valid_568045 != nil:
-    section.add "$top", valid_568045
-  var valid_568046 = query.getOrDefault("$filter")
-  valid_568046 = validateParameter(valid_568046, JString, required = false,
+  if valid_563943 != nil:
+    section.add "api-version", valid_563943
+  var valid_563944 = query.getOrDefault("$top")
+  valid_563944 = validateParameter(valid_563944, JInt, required = false, default = nil)
+  if valid_563944 != nil:
+    section.add "$top", valid_563944
+  var valid_563945 = query.getOrDefault("$orderby")
+  valid_563945 = validateParameter(valid_563945, JString, required = false,
                                  default = nil)
-  if valid_568046 != nil:
-    section.add "$filter", valid_568046
+  if valid_563945 != nil:
+    section.add "$orderby", valid_563945
+  var valid_563946 = query.getOrDefault("$filter")
+  valid_563946 = validateParameter(valid_563946, JString, required = false,
+                                 default = nil)
+  if valid_563946 != nil:
+    section.add "$filter", valid_563946
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -198,58 +202,58 @@ proc validate_AssetsList_567865(path: JsonNode; query: JsonNode; header: JsonNod
   if body != nil:
     result.add "body", body
 
-proc call*(call_568069: Call_AssetsList_567864; path: JsonNode; query: JsonNode;
+proc call*(call_563969: Call_AssetsList_563762; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## List Assets in the Media Services account with optional filtering and ordering
   ## 
-  let valid = call_568069.validator(path, query, header, formData, body)
-  let scheme = call_568069.pickScheme
+  let valid = call_563969.validator(path, query, header, formData, body)
+  let scheme = call_563969.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568069.url(scheme.get, call_568069.host, call_568069.base,
-                         call_568069.route, valid.getOrDefault("path"),
+  let url = call_563969.url(scheme.get, call_563969.host, call_563969.base,
+                         call_563969.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568069, url, valid)
+  result = hook(call_563969, url, valid)
 
-proc call*(call_568140: Call_AssetsList_567864; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; accountName: string;
-          Orderby: string = ""; Top: int = 0; Filter: string = ""): Recallable =
+proc call*(call_564040: Call_AssetsList_563762; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string; accountName: string;
+          Top: int = 0; Orderby: string = ""; Filter: string = ""): Recallable =
   ## assetsList
   ## List Assets in the Media Services account with optional filtering and ordering
+  ##   apiVersion: string (required)
+  ##             : The Version of the API to be used with the client request.
+  ##   Top: int
+  ##      : Specifies a non-negative integer n that limits the number of items returned from a collection. The service returns the number of available items up to but not greater than the specified value n.
+  ##   subscriptionId: string (required)
+  ##                 : The unique identifier for a Microsoft Azure subscription.
   ##   Orderby: string
   ##          : Specifies the key by which the result collection should be ordered.
   ##   resourceGroupName: string (required)
   ##                    : The name of the resource group within the Azure subscription.
-  ##   apiVersion: string (required)
-  ##             : The Version of the API to be used with the client request.
-  ##   subscriptionId: string (required)
-  ##                 : The unique identifier for a Microsoft Azure subscription.
-  ##   Top: int
-  ##      : Specifies a non-negative integer n that limits the number of items returned from a collection. The service returns the number of available items up to but not greater than the specified value n.
-  ##   accountName: string (required)
-  ##              : The Media Services account name.
   ##   Filter: string
   ##         : Restricts the set of items returned.
-  var path_568141 = newJObject()
-  var query_568143 = newJObject()
-  add(query_568143, "$orderby", newJString(Orderby))
-  add(path_568141, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568143, "api-version", newJString(apiVersion))
-  add(path_568141, "subscriptionId", newJString(subscriptionId))
-  add(query_568143, "$top", newJInt(Top))
-  add(path_568141, "accountName", newJString(accountName))
-  add(query_568143, "$filter", newJString(Filter))
-  result = call_568140.call(path_568141, query_568143, nil, nil, nil)
+  ##   accountName: string (required)
+  ##              : The Media Services account name.
+  var path_564041 = newJObject()
+  var query_564043 = newJObject()
+  add(query_564043, "api-version", newJString(apiVersion))
+  add(query_564043, "$top", newJInt(Top))
+  add(path_564041, "subscriptionId", newJString(subscriptionId))
+  add(query_564043, "$orderby", newJString(Orderby))
+  add(path_564041, "resourceGroupName", newJString(resourceGroupName))
+  add(query_564043, "$filter", newJString(Filter))
+  add(path_564041, "accountName", newJString(accountName))
+  result = call_564040.call(path_564041, query_564043, nil, nil, nil)
 
-var assetsList* = Call_AssetsList_567864(name: "assetsList",
+var assetsList* = Call_AssetsList_563762(name: "assetsList",
                                       meth: HttpMethod.HttpGet,
                                       host: "azure.local", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Media/mediaServices/{accountName}/assets",
-                                      validator: validate_AssetsList_567865,
-                                      base: "", url: url_AssetsList_567866,
+                                      validator: validate_AssetsList_563763,
+                                      base: "", url: url_AssetsList_563764,
                                       schemes: {Scheme.Https})
 type
-  Call_AssetsCreateOrUpdate_568194 = ref object of OpenApiRestCall_567642
-proc url_AssetsCreateOrUpdate_568196(protocol: Scheme; host: string; base: string;
+  Call_AssetsCreateOrUpdate_564094 = ref object of OpenApiRestCall_563540
+proc url_AssetsCreateOrUpdate_564096(protocol: Scheme; host: string; base: string;
                                     route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -274,44 +278,44 @@ proc url_AssetsCreateOrUpdate_568196(protocol: Scheme; host: string; base: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AssetsCreateOrUpdate_568195(path: JsonNode; query: JsonNode;
+proc validate_AssetsCreateOrUpdate_564095(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Creates or updates an Asset in the Media Services account
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group within the Azure subscription.
   ##   subscriptionId: JString (required)
   ##                 : The unique identifier for a Microsoft Azure subscription.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group within the Azure subscription.
   ##   accountName: JString (required)
   ##              : The Media Services account name.
   ##   assetName: JString (required)
   ##            : The Asset name.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568197 = path.getOrDefault("resourceGroupName")
-  valid_568197 = validateParameter(valid_568197, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564097 = path.getOrDefault("subscriptionId")
+  valid_564097 = validateParameter(valid_564097, JString, required = true,
                                  default = nil)
-  if valid_568197 != nil:
-    section.add "resourceGroupName", valid_568197
-  var valid_568198 = path.getOrDefault("subscriptionId")
-  valid_568198 = validateParameter(valid_568198, JString, required = true,
+  if valid_564097 != nil:
+    section.add "subscriptionId", valid_564097
+  var valid_564098 = path.getOrDefault("resourceGroupName")
+  valid_564098 = validateParameter(valid_564098, JString, required = true,
                                  default = nil)
-  if valid_568198 != nil:
-    section.add "subscriptionId", valid_568198
-  var valid_568199 = path.getOrDefault("accountName")
-  valid_568199 = validateParameter(valid_568199, JString, required = true,
+  if valid_564098 != nil:
+    section.add "resourceGroupName", valid_564098
+  var valid_564099 = path.getOrDefault("accountName")
+  valid_564099 = validateParameter(valid_564099, JString, required = true,
                                  default = nil)
-  if valid_568199 != nil:
-    section.add "accountName", valid_568199
-  var valid_568200 = path.getOrDefault("assetName")
-  valid_568200 = validateParameter(valid_568200, JString, required = true,
+  if valid_564099 != nil:
+    section.add "accountName", valid_564099
+  var valid_564100 = path.getOrDefault("assetName")
+  valid_564100 = validateParameter(valid_564100, JString, required = true,
                                  default = nil)
-  if valid_568200 != nil:
-    section.add "assetName", valid_568200
+  if valid_564100 != nil:
+    section.add "assetName", valid_564100
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -319,11 +323,11 @@ proc validate_AssetsCreateOrUpdate_568195(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568201 = query.getOrDefault("api-version")
-  valid_568201 = validateParameter(valid_568201, JString, required = true,
+  var valid_564101 = query.getOrDefault("api-version")
+  valid_564101 = validateParameter(valid_564101, JString, required = true,
                                  default = nil)
-  if valid_568201 != nil:
-    section.add "api-version", valid_568201
+  if valid_564101 != nil:
+    section.add "api-version", valid_564101
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -337,55 +341,55 @@ proc validate_AssetsCreateOrUpdate_568195(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568203: Call_AssetsCreateOrUpdate_568194; path: JsonNode;
+proc call*(call_564103: Call_AssetsCreateOrUpdate_564094; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Creates or updates an Asset in the Media Services account
   ## 
-  let valid = call_568203.validator(path, query, header, formData, body)
-  let scheme = call_568203.pickScheme
+  let valid = call_564103.validator(path, query, header, formData, body)
+  let scheme = call_564103.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568203.url(scheme.get, call_568203.host, call_568203.base,
-                         call_568203.route, valid.getOrDefault("path"),
+  let url = call_564103.url(scheme.get, call_564103.host, call_564103.base,
+                         call_564103.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568203, url, valid)
+  result = hook(call_564103, url, valid)
 
-proc call*(call_568204: Call_AssetsCreateOrUpdate_568194;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          parameters: JsonNode; accountName: string; assetName: string): Recallable =
+proc call*(call_564104: Call_AssetsCreateOrUpdate_564094; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string; parameters: JsonNode;
+          accountName: string; assetName: string): Recallable =
   ## assetsCreateOrUpdate
   ## Creates or updates an Asset in the Media Services account
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group within the Azure subscription.
   ##   apiVersion: string (required)
   ##             : The Version of the API to be used with the client request.
   ##   subscriptionId: string (required)
   ##                 : The unique identifier for a Microsoft Azure subscription.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group within the Azure subscription.
   ##   parameters: JObject (required)
   ##             : The request parameters
   ##   accountName: string (required)
   ##              : The Media Services account name.
   ##   assetName: string (required)
   ##            : The Asset name.
-  var path_568205 = newJObject()
-  var query_568206 = newJObject()
-  var body_568207 = newJObject()
-  add(path_568205, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568206, "api-version", newJString(apiVersion))
-  add(path_568205, "subscriptionId", newJString(subscriptionId))
+  var path_564105 = newJObject()
+  var query_564106 = newJObject()
+  var body_564107 = newJObject()
+  add(query_564106, "api-version", newJString(apiVersion))
+  add(path_564105, "subscriptionId", newJString(subscriptionId))
+  add(path_564105, "resourceGroupName", newJString(resourceGroupName))
   if parameters != nil:
-    body_568207 = parameters
-  add(path_568205, "accountName", newJString(accountName))
-  add(path_568205, "assetName", newJString(assetName))
-  result = call_568204.call(path_568205, query_568206, nil, nil, body_568207)
+    body_564107 = parameters
+  add(path_564105, "accountName", newJString(accountName))
+  add(path_564105, "assetName", newJString(assetName))
+  result = call_564104.call(path_564105, query_564106, nil, nil, body_564107)
 
-var assetsCreateOrUpdate* = Call_AssetsCreateOrUpdate_568194(
+var assetsCreateOrUpdate* = Call_AssetsCreateOrUpdate_564094(
     name: "assetsCreateOrUpdate", meth: HttpMethod.HttpPut, host: "azure.local", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Media/mediaServices/{accountName}/assets/{assetName}",
-    validator: validate_AssetsCreateOrUpdate_568195, base: "",
-    url: url_AssetsCreateOrUpdate_568196, schemes: {Scheme.Https})
+    validator: validate_AssetsCreateOrUpdate_564095, base: "",
+    url: url_AssetsCreateOrUpdate_564096, schemes: {Scheme.Https})
 type
-  Call_AssetsGet_568182 = ref object of OpenApiRestCall_567642
-proc url_AssetsGet_568184(protocol: Scheme; host: string; base: string; route: string;
+  Call_AssetsGet_564082 = ref object of OpenApiRestCall_563540
+proc url_AssetsGet_564084(protocol: Scheme; host: string; base: string; route: string;
                          path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -410,44 +414,44 @@ proc url_AssetsGet_568184(protocol: Scheme; host: string; base: string; route: s
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AssetsGet_568183(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_AssetsGet_564083(path: JsonNode; query: JsonNode; header: JsonNode;
                               formData: JsonNode; body: JsonNode): JsonNode =
   ## Get the details of an Asset in the Media Services account
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group within the Azure subscription.
   ##   subscriptionId: JString (required)
   ##                 : The unique identifier for a Microsoft Azure subscription.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group within the Azure subscription.
   ##   accountName: JString (required)
   ##              : The Media Services account name.
   ##   assetName: JString (required)
   ##            : The Asset name.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568185 = path.getOrDefault("resourceGroupName")
-  valid_568185 = validateParameter(valid_568185, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564085 = path.getOrDefault("subscriptionId")
+  valid_564085 = validateParameter(valid_564085, JString, required = true,
                                  default = nil)
-  if valid_568185 != nil:
-    section.add "resourceGroupName", valid_568185
-  var valid_568186 = path.getOrDefault("subscriptionId")
-  valid_568186 = validateParameter(valid_568186, JString, required = true,
+  if valid_564085 != nil:
+    section.add "subscriptionId", valid_564085
+  var valid_564086 = path.getOrDefault("resourceGroupName")
+  valid_564086 = validateParameter(valid_564086, JString, required = true,
                                  default = nil)
-  if valid_568186 != nil:
-    section.add "subscriptionId", valid_568186
-  var valid_568187 = path.getOrDefault("accountName")
-  valid_568187 = validateParameter(valid_568187, JString, required = true,
+  if valid_564086 != nil:
+    section.add "resourceGroupName", valid_564086
+  var valid_564087 = path.getOrDefault("accountName")
+  valid_564087 = validateParameter(valid_564087, JString, required = true,
                                  default = nil)
-  if valid_568187 != nil:
-    section.add "accountName", valid_568187
-  var valid_568188 = path.getOrDefault("assetName")
-  valid_568188 = validateParameter(valid_568188, JString, required = true,
+  if valid_564087 != nil:
+    section.add "accountName", valid_564087
+  var valid_564088 = path.getOrDefault("assetName")
+  valid_564088 = validateParameter(valid_564088, JString, required = true,
                                  default = nil)
-  if valid_568188 != nil:
-    section.add "assetName", valid_568188
+  if valid_564088 != nil:
+    section.add "assetName", valid_564088
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -455,11 +459,11 @@ proc validate_AssetsGet_568183(path: JsonNode; query: JsonNode; header: JsonNode
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568189 = query.getOrDefault("api-version")
-  valid_568189 = validateParameter(valid_568189, JString, required = true,
+  var valid_564089 = query.getOrDefault("api-version")
+  valid_564089 = validateParameter(valid_564089, JString, required = true,
                                  default = nil)
-  if valid_568189 != nil:
-    section.add "api-version", valid_568189
+  if valid_564089 != nil:
+    section.add "api-version", valid_564089
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -468,51 +472,51 @@ proc validate_AssetsGet_568183(path: JsonNode; query: JsonNode; header: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_568190: Call_AssetsGet_568182; path: JsonNode; query: JsonNode;
+proc call*(call_564090: Call_AssetsGet_564082; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get the details of an Asset in the Media Services account
   ## 
-  let valid = call_568190.validator(path, query, header, formData, body)
-  let scheme = call_568190.pickScheme
+  let valid = call_564090.validator(path, query, header, formData, body)
+  let scheme = call_564090.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568190.url(scheme.get, call_568190.host, call_568190.base,
-                         call_568190.route, valid.getOrDefault("path"),
+  let url = call_564090.url(scheme.get, call_564090.host, call_564090.base,
+                         call_564090.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568190, url, valid)
+  result = hook(call_564090, url, valid)
 
-proc call*(call_568191: Call_AssetsGet_568182; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; accountName: string;
+proc call*(call_564091: Call_AssetsGet_564082; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string; accountName: string;
           assetName: string): Recallable =
   ## assetsGet
   ## Get the details of an Asset in the Media Services account
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group within the Azure subscription.
   ##   apiVersion: string (required)
   ##             : The Version of the API to be used with the client request.
   ##   subscriptionId: string (required)
   ##                 : The unique identifier for a Microsoft Azure subscription.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group within the Azure subscription.
   ##   accountName: string (required)
   ##              : The Media Services account name.
   ##   assetName: string (required)
   ##            : The Asset name.
-  var path_568192 = newJObject()
-  var query_568193 = newJObject()
-  add(path_568192, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568193, "api-version", newJString(apiVersion))
-  add(path_568192, "subscriptionId", newJString(subscriptionId))
-  add(path_568192, "accountName", newJString(accountName))
-  add(path_568192, "assetName", newJString(assetName))
-  result = call_568191.call(path_568192, query_568193, nil, nil, nil)
+  var path_564092 = newJObject()
+  var query_564093 = newJObject()
+  add(query_564093, "api-version", newJString(apiVersion))
+  add(path_564092, "subscriptionId", newJString(subscriptionId))
+  add(path_564092, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564092, "accountName", newJString(accountName))
+  add(path_564092, "assetName", newJString(assetName))
+  result = call_564091.call(path_564092, query_564093, nil, nil, nil)
 
-var assetsGet* = Call_AssetsGet_568182(name: "assetsGet", meth: HttpMethod.HttpGet,
+var assetsGet* = Call_AssetsGet_564082(name: "assetsGet", meth: HttpMethod.HttpGet,
                                     host: "azure.local", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Media/mediaServices/{accountName}/assets/{assetName}",
-                                    validator: validate_AssetsGet_568183,
-                                    base: "", url: url_AssetsGet_568184,
+                                    validator: validate_AssetsGet_564083,
+                                    base: "", url: url_AssetsGet_564084,
                                     schemes: {Scheme.Https})
 type
-  Call_AssetsUpdate_568220 = ref object of OpenApiRestCall_567642
-proc url_AssetsUpdate_568222(protocol: Scheme; host: string; base: string;
+  Call_AssetsUpdate_564120 = ref object of OpenApiRestCall_563540
+proc url_AssetsUpdate_564122(protocol: Scheme; host: string; base: string;
                             route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -537,44 +541,44 @@ proc url_AssetsUpdate_568222(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AssetsUpdate_568221(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_AssetsUpdate_564121(path: JsonNode; query: JsonNode; header: JsonNode;
                                  formData: JsonNode; body: JsonNode): JsonNode =
   ## Updates an existing Asset in the Media Services account
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group within the Azure subscription.
   ##   subscriptionId: JString (required)
   ##                 : The unique identifier for a Microsoft Azure subscription.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group within the Azure subscription.
   ##   accountName: JString (required)
   ##              : The Media Services account name.
   ##   assetName: JString (required)
   ##            : The Asset name.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568223 = path.getOrDefault("resourceGroupName")
-  valid_568223 = validateParameter(valid_568223, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564123 = path.getOrDefault("subscriptionId")
+  valid_564123 = validateParameter(valid_564123, JString, required = true,
                                  default = nil)
-  if valid_568223 != nil:
-    section.add "resourceGroupName", valid_568223
-  var valid_568224 = path.getOrDefault("subscriptionId")
-  valid_568224 = validateParameter(valid_568224, JString, required = true,
+  if valid_564123 != nil:
+    section.add "subscriptionId", valid_564123
+  var valid_564124 = path.getOrDefault("resourceGroupName")
+  valid_564124 = validateParameter(valid_564124, JString, required = true,
                                  default = nil)
-  if valid_568224 != nil:
-    section.add "subscriptionId", valid_568224
-  var valid_568225 = path.getOrDefault("accountName")
-  valid_568225 = validateParameter(valid_568225, JString, required = true,
+  if valid_564124 != nil:
+    section.add "resourceGroupName", valid_564124
+  var valid_564125 = path.getOrDefault("accountName")
+  valid_564125 = validateParameter(valid_564125, JString, required = true,
                                  default = nil)
-  if valid_568225 != nil:
-    section.add "accountName", valid_568225
-  var valid_568226 = path.getOrDefault("assetName")
-  valid_568226 = validateParameter(valid_568226, JString, required = true,
+  if valid_564125 != nil:
+    section.add "accountName", valid_564125
+  var valid_564126 = path.getOrDefault("assetName")
+  valid_564126 = validateParameter(valid_564126, JString, required = true,
                                  default = nil)
-  if valid_568226 != nil:
-    section.add "assetName", valid_568226
+  if valid_564126 != nil:
+    section.add "assetName", valid_564126
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -582,11 +586,11 @@ proc validate_AssetsUpdate_568221(path: JsonNode; query: JsonNode; header: JsonN
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568227 = query.getOrDefault("api-version")
-  valid_568227 = validateParameter(valid_568227, JString, required = true,
+  var valid_564127 = query.getOrDefault("api-version")
+  valid_564127 = validateParameter(valid_564127, JString, required = true,
                                  default = nil)
-  if valid_568227 != nil:
-    section.add "api-version", valid_568227
+  if valid_564127 != nil:
+    section.add "api-version", valid_564127
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -600,55 +604,55 @@ proc validate_AssetsUpdate_568221(path: JsonNode; query: JsonNode; header: JsonN
   if body != nil:
     result.add "body", body
 
-proc call*(call_568229: Call_AssetsUpdate_568220; path: JsonNode; query: JsonNode;
+proc call*(call_564129: Call_AssetsUpdate_564120; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Updates an existing Asset in the Media Services account
   ## 
-  let valid = call_568229.validator(path, query, header, formData, body)
-  let scheme = call_568229.pickScheme
+  let valid = call_564129.validator(path, query, header, formData, body)
+  let scheme = call_564129.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568229.url(scheme.get, call_568229.host, call_568229.base,
-                         call_568229.route, valid.getOrDefault("path"),
+  let url = call_564129.url(scheme.get, call_564129.host, call_564129.base,
+                         call_564129.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568229, url, valid)
+  result = hook(call_564129, url, valid)
 
-proc call*(call_568230: Call_AssetsUpdate_568220; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; parameters: JsonNode;
+proc call*(call_564130: Call_AssetsUpdate_564120; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string; parameters: JsonNode;
           accountName: string; assetName: string): Recallable =
   ## assetsUpdate
   ## Updates an existing Asset in the Media Services account
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group within the Azure subscription.
   ##   apiVersion: string (required)
   ##             : The Version of the API to be used with the client request.
   ##   subscriptionId: string (required)
   ##                 : The unique identifier for a Microsoft Azure subscription.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group within the Azure subscription.
   ##   parameters: JObject (required)
   ##             : The request parameters
   ##   accountName: string (required)
   ##              : The Media Services account name.
   ##   assetName: string (required)
   ##            : The Asset name.
-  var path_568231 = newJObject()
-  var query_568232 = newJObject()
-  var body_568233 = newJObject()
-  add(path_568231, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568232, "api-version", newJString(apiVersion))
-  add(path_568231, "subscriptionId", newJString(subscriptionId))
+  var path_564131 = newJObject()
+  var query_564132 = newJObject()
+  var body_564133 = newJObject()
+  add(query_564132, "api-version", newJString(apiVersion))
+  add(path_564131, "subscriptionId", newJString(subscriptionId))
+  add(path_564131, "resourceGroupName", newJString(resourceGroupName))
   if parameters != nil:
-    body_568233 = parameters
-  add(path_568231, "accountName", newJString(accountName))
-  add(path_568231, "assetName", newJString(assetName))
-  result = call_568230.call(path_568231, query_568232, nil, nil, body_568233)
+    body_564133 = parameters
+  add(path_564131, "accountName", newJString(accountName))
+  add(path_564131, "assetName", newJString(assetName))
+  result = call_564130.call(path_564131, query_564132, nil, nil, body_564133)
 
-var assetsUpdate* = Call_AssetsUpdate_568220(name: "assetsUpdate",
+var assetsUpdate* = Call_AssetsUpdate_564120(name: "assetsUpdate",
     meth: HttpMethod.HttpPatch, host: "azure.local", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Media/mediaServices/{accountName}/assets/{assetName}",
-    validator: validate_AssetsUpdate_568221, base: "", url: url_AssetsUpdate_568222,
+    validator: validate_AssetsUpdate_564121, base: "", url: url_AssetsUpdate_564122,
     schemes: {Scheme.Https})
 type
-  Call_AssetsDelete_568208 = ref object of OpenApiRestCall_567642
-proc url_AssetsDelete_568210(protocol: Scheme; host: string; base: string;
+  Call_AssetsDelete_564108 = ref object of OpenApiRestCall_563540
+proc url_AssetsDelete_564110(protocol: Scheme; host: string; base: string;
                             route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -673,44 +677,44 @@ proc url_AssetsDelete_568210(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AssetsDelete_568209(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_AssetsDelete_564109(path: JsonNode; query: JsonNode; header: JsonNode;
                                  formData: JsonNode; body: JsonNode): JsonNode =
   ## Deletes an Asset in the Media Services account
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group within the Azure subscription.
   ##   subscriptionId: JString (required)
   ##                 : The unique identifier for a Microsoft Azure subscription.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group within the Azure subscription.
   ##   accountName: JString (required)
   ##              : The Media Services account name.
   ##   assetName: JString (required)
   ##            : The Asset name.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568211 = path.getOrDefault("resourceGroupName")
-  valid_568211 = validateParameter(valid_568211, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564111 = path.getOrDefault("subscriptionId")
+  valid_564111 = validateParameter(valid_564111, JString, required = true,
                                  default = nil)
-  if valid_568211 != nil:
-    section.add "resourceGroupName", valid_568211
-  var valid_568212 = path.getOrDefault("subscriptionId")
-  valid_568212 = validateParameter(valid_568212, JString, required = true,
+  if valid_564111 != nil:
+    section.add "subscriptionId", valid_564111
+  var valid_564112 = path.getOrDefault("resourceGroupName")
+  valid_564112 = validateParameter(valid_564112, JString, required = true,
                                  default = nil)
-  if valid_568212 != nil:
-    section.add "subscriptionId", valid_568212
-  var valid_568213 = path.getOrDefault("accountName")
-  valid_568213 = validateParameter(valid_568213, JString, required = true,
+  if valid_564112 != nil:
+    section.add "resourceGroupName", valid_564112
+  var valid_564113 = path.getOrDefault("accountName")
+  valid_564113 = validateParameter(valid_564113, JString, required = true,
                                  default = nil)
-  if valid_568213 != nil:
-    section.add "accountName", valid_568213
-  var valid_568214 = path.getOrDefault("assetName")
-  valid_568214 = validateParameter(valid_568214, JString, required = true,
+  if valid_564113 != nil:
+    section.add "accountName", valid_564113
+  var valid_564114 = path.getOrDefault("assetName")
+  valid_564114 = validateParameter(valid_564114, JString, required = true,
                                  default = nil)
-  if valid_568214 != nil:
-    section.add "assetName", valid_568214
+  if valid_564114 != nil:
+    section.add "assetName", valid_564114
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -718,11 +722,11 @@ proc validate_AssetsDelete_568209(path: JsonNode; query: JsonNode; header: JsonN
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568215 = query.getOrDefault("api-version")
-  valid_568215 = validateParameter(valid_568215, JString, required = true,
+  var valid_564115 = query.getOrDefault("api-version")
+  valid_564115 = validateParameter(valid_564115, JString, required = true,
                                  default = nil)
-  if valid_568215 != nil:
-    section.add "api-version", valid_568215
+  if valid_564115 != nil:
+    section.add "api-version", valid_564115
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -731,50 +735,50 @@ proc validate_AssetsDelete_568209(path: JsonNode; query: JsonNode; header: JsonN
   if body != nil:
     result.add "body", body
 
-proc call*(call_568216: Call_AssetsDelete_568208; path: JsonNode; query: JsonNode;
+proc call*(call_564116: Call_AssetsDelete_564108; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes an Asset in the Media Services account
   ## 
-  let valid = call_568216.validator(path, query, header, formData, body)
-  let scheme = call_568216.pickScheme
+  let valid = call_564116.validator(path, query, header, formData, body)
+  let scheme = call_564116.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568216.url(scheme.get, call_568216.host, call_568216.base,
-                         call_568216.route, valid.getOrDefault("path"),
+  let url = call_564116.url(scheme.get, call_564116.host, call_564116.base,
+                         call_564116.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568216, url, valid)
+  result = hook(call_564116, url, valid)
 
-proc call*(call_568217: Call_AssetsDelete_568208; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; accountName: string;
+proc call*(call_564117: Call_AssetsDelete_564108; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string; accountName: string;
           assetName: string): Recallable =
   ## assetsDelete
   ## Deletes an Asset in the Media Services account
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group within the Azure subscription.
   ##   apiVersion: string (required)
   ##             : The Version of the API to be used with the client request.
   ##   subscriptionId: string (required)
   ##                 : The unique identifier for a Microsoft Azure subscription.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group within the Azure subscription.
   ##   accountName: string (required)
   ##              : The Media Services account name.
   ##   assetName: string (required)
   ##            : The Asset name.
-  var path_568218 = newJObject()
-  var query_568219 = newJObject()
-  add(path_568218, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568219, "api-version", newJString(apiVersion))
-  add(path_568218, "subscriptionId", newJString(subscriptionId))
-  add(path_568218, "accountName", newJString(accountName))
-  add(path_568218, "assetName", newJString(assetName))
-  result = call_568217.call(path_568218, query_568219, nil, nil, nil)
+  var path_564118 = newJObject()
+  var query_564119 = newJObject()
+  add(query_564119, "api-version", newJString(apiVersion))
+  add(path_564118, "subscriptionId", newJString(subscriptionId))
+  add(path_564118, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564118, "accountName", newJString(accountName))
+  add(path_564118, "assetName", newJString(assetName))
+  result = call_564117.call(path_564118, query_564119, nil, nil, nil)
 
-var assetsDelete* = Call_AssetsDelete_568208(name: "assetsDelete",
+var assetsDelete* = Call_AssetsDelete_564108(name: "assetsDelete",
     meth: HttpMethod.HttpDelete, host: "azure.local", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Media/mediaServices/{accountName}/assets/{assetName}",
-    validator: validate_AssetsDelete_568209, base: "", url: url_AssetsDelete_568210,
+    validator: validate_AssetsDelete_564109, base: "", url: url_AssetsDelete_564110,
     schemes: {Scheme.Https})
 type
-  Call_AssetsGetEncryptionKey_568234 = ref object of OpenApiRestCall_567642
-proc url_AssetsGetEncryptionKey_568236(protocol: Scheme; host: string; base: string;
+  Call_AssetsGetEncryptionKey_564134 = ref object of OpenApiRestCall_563540
+proc url_AssetsGetEncryptionKey_564136(protocol: Scheme; host: string; base: string;
                                       route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -800,44 +804,44 @@ proc url_AssetsGetEncryptionKey_568236(protocol: Scheme; host: string; base: str
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AssetsGetEncryptionKey_568235(path: JsonNode; query: JsonNode;
+proc validate_AssetsGetEncryptionKey_564135(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the Asset storage encryption keys used to decrypt content created by version 2 of the Media Services API
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group within the Azure subscription.
   ##   subscriptionId: JString (required)
   ##                 : The unique identifier for a Microsoft Azure subscription.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group within the Azure subscription.
   ##   accountName: JString (required)
   ##              : The Media Services account name.
   ##   assetName: JString (required)
   ##            : The Asset name.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568237 = path.getOrDefault("resourceGroupName")
-  valid_568237 = validateParameter(valid_568237, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564137 = path.getOrDefault("subscriptionId")
+  valid_564137 = validateParameter(valid_564137, JString, required = true,
                                  default = nil)
-  if valid_568237 != nil:
-    section.add "resourceGroupName", valid_568237
-  var valid_568238 = path.getOrDefault("subscriptionId")
-  valid_568238 = validateParameter(valid_568238, JString, required = true,
+  if valid_564137 != nil:
+    section.add "subscriptionId", valid_564137
+  var valid_564138 = path.getOrDefault("resourceGroupName")
+  valid_564138 = validateParameter(valid_564138, JString, required = true,
                                  default = nil)
-  if valid_568238 != nil:
-    section.add "subscriptionId", valid_568238
-  var valid_568239 = path.getOrDefault("accountName")
-  valid_568239 = validateParameter(valid_568239, JString, required = true,
+  if valid_564138 != nil:
+    section.add "resourceGroupName", valid_564138
+  var valid_564139 = path.getOrDefault("accountName")
+  valid_564139 = validateParameter(valid_564139, JString, required = true,
                                  default = nil)
-  if valid_568239 != nil:
-    section.add "accountName", valid_568239
-  var valid_568240 = path.getOrDefault("assetName")
-  valid_568240 = validateParameter(valid_568240, JString, required = true,
+  if valid_564139 != nil:
+    section.add "accountName", valid_564139
+  var valid_564140 = path.getOrDefault("assetName")
+  valid_564140 = validateParameter(valid_564140, JString, required = true,
                                  default = nil)
-  if valid_568240 != nil:
-    section.add "assetName", valid_568240
+  if valid_564140 != nil:
+    section.add "assetName", valid_564140
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -845,11 +849,11 @@ proc validate_AssetsGetEncryptionKey_568235(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568241 = query.getOrDefault("api-version")
-  valid_568241 = validateParameter(valid_568241, JString, required = true,
+  var valid_564141 = query.getOrDefault("api-version")
+  valid_564141 = validateParameter(valid_564141, JString, required = true,
                                  default = nil)
-  if valid_568241 != nil:
-    section.add "api-version", valid_568241
+  if valid_564141 != nil:
+    section.add "api-version", valid_564141
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -858,50 +862,50 @@ proc validate_AssetsGetEncryptionKey_568235(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568242: Call_AssetsGetEncryptionKey_568234; path: JsonNode;
+proc call*(call_564142: Call_AssetsGetEncryptionKey_564134; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the Asset storage encryption keys used to decrypt content created by version 2 of the Media Services API
   ## 
-  let valid = call_568242.validator(path, query, header, formData, body)
-  let scheme = call_568242.pickScheme
+  let valid = call_564142.validator(path, query, header, formData, body)
+  let scheme = call_564142.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568242.url(scheme.get, call_568242.host, call_568242.base,
-                         call_568242.route, valid.getOrDefault("path"),
+  let url = call_564142.url(scheme.get, call_564142.host, call_564142.base,
+                         call_564142.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568242, url, valid)
+  result = hook(call_564142, url, valid)
 
-proc call*(call_568243: Call_AssetsGetEncryptionKey_568234;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          accountName: string; assetName: string): Recallable =
+proc call*(call_564143: Call_AssetsGetEncryptionKey_564134; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string; accountName: string;
+          assetName: string): Recallable =
   ## assetsGetEncryptionKey
   ## Gets the Asset storage encryption keys used to decrypt content created by version 2 of the Media Services API
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group within the Azure subscription.
   ##   apiVersion: string (required)
   ##             : The Version of the API to be used with the client request.
   ##   subscriptionId: string (required)
   ##                 : The unique identifier for a Microsoft Azure subscription.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group within the Azure subscription.
   ##   accountName: string (required)
   ##              : The Media Services account name.
   ##   assetName: string (required)
   ##            : The Asset name.
-  var path_568244 = newJObject()
-  var query_568245 = newJObject()
-  add(path_568244, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568245, "api-version", newJString(apiVersion))
-  add(path_568244, "subscriptionId", newJString(subscriptionId))
-  add(path_568244, "accountName", newJString(accountName))
-  add(path_568244, "assetName", newJString(assetName))
-  result = call_568243.call(path_568244, query_568245, nil, nil, nil)
+  var path_564144 = newJObject()
+  var query_564145 = newJObject()
+  add(query_564145, "api-version", newJString(apiVersion))
+  add(path_564144, "subscriptionId", newJString(subscriptionId))
+  add(path_564144, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564144, "accountName", newJString(accountName))
+  add(path_564144, "assetName", newJString(assetName))
+  result = call_564143.call(path_564144, query_564145, nil, nil, nil)
 
-var assetsGetEncryptionKey* = Call_AssetsGetEncryptionKey_568234(
+var assetsGetEncryptionKey* = Call_AssetsGetEncryptionKey_564134(
     name: "assetsGetEncryptionKey", meth: HttpMethod.HttpPost, host: "azure.local", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Media/mediaServices/{accountName}/assets/{assetName}/getEncryptionKey",
-    validator: validate_AssetsGetEncryptionKey_568235, base: "",
-    url: url_AssetsGetEncryptionKey_568236, schemes: {Scheme.Https})
+    validator: validate_AssetsGetEncryptionKey_564135, base: "",
+    url: url_AssetsGetEncryptionKey_564136, schemes: {Scheme.Https})
 type
-  Call_AssetsListContainerSas_568246 = ref object of OpenApiRestCall_567642
-proc url_AssetsListContainerSas_568248(protocol: Scheme; host: string; base: string;
+  Call_AssetsListContainerSas_564146 = ref object of OpenApiRestCall_563540
+proc url_AssetsListContainerSas_564148(protocol: Scheme; host: string; base: string;
                                       route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -927,44 +931,44 @@ proc url_AssetsListContainerSas_568248(protocol: Scheme; host: string; base: str
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AssetsListContainerSas_568247(path: JsonNode; query: JsonNode;
+proc validate_AssetsListContainerSas_564147(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists storage container URLs with shared access signatures (SAS) for uploading and downloading Asset content. The signatures are derived from the storage account keys.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group within the Azure subscription.
   ##   subscriptionId: JString (required)
   ##                 : The unique identifier for a Microsoft Azure subscription.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group within the Azure subscription.
   ##   accountName: JString (required)
   ##              : The Media Services account name.
   ##   assetName: JString (required)
   ##            : The Asset name.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568249 = path.getOrDefault("resourceGroupName")
-  valid_568249 = validateParameter(valid_568249, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564149 = path.getOrDefault("subscriptionId")
+  valid_564149 = validateParameter(valid_564149, JString, required = true,
                                  default = nil)
-  if valid_568249 != nil:
-    section.add "resourceGroupName", valid_568249
-  var valid_568250 = path.getOrDefault("subscriptionId")
-  valid_568250 = validateParameter(valid_568250, JString, required = true,
+  if valid_564149 != nil:
+    section.add "subscriptionId", valid_564149
+  var valid_564150 = path.getOrDefault("resourceGroupName")
+  valid_564150 = validateParameter(valid_564150, JString, required = true,
                                  default = nil)
-  if valid_568250 != nil:
-    section.add "subscriptionId", valid_568250
-  var valid_568251 = path.getOrDefault("accountName")
-  valid_568251 = validateParameter(valid_568251, JString, required = true,
+  if valid_564150 != nil:
+    section.add "resourceGroupName", valid_564150
+  var valid_564151 = path.getOrDefault("accountName")
+  valid_564151 = validateParameter(valid_564151, JString, required = true,
                                  default = nil)
-  if valid_568251 != nil:
-    section.add "accountName", valid_568251
-  var valid_568252 = path.getOrDefault("assetName")
-  valid_568252 = validateParameter(valid_568252, JString, required = true,
+  if valid_564151 != nil:
+    section.add "accountName", valid_564151
+  var valid_564152 = path.getOrDefault("assetName")
+  valid_564152 = validateParameter(valid_564152, JString, required = true,
                                  default = nil)
-  if valid_568252 != nil:
-    section.add "assetName", valid_568252
+  if valid_564152 != nil:
+    section.add "assetName", valid_564152
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -972,11 +976,11 @@ proc validate_AssetsListContainerSas_568247(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568253 = query.getOrDefault("api-version")
-  valid_568253 = validateParameter(valid_568253, JString, required = true,
+  var valid_564153 = query.getOrDefault("api-version")
+  valid_564153 = validateParameter(valid_564153, JString, required = true,
                                  default = nil)
-  if valid_568253 != nil:
-    section.add "api-version", valid_568253
+  if valid_564153 != nil:
+    section.add "api-version", valid_564153
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -990,52 +994,52 @@ proc validate_AssetsListContainerSas_568247(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568255: Call_AssetsListContainerSas_568246; path: JsonNode;
+proc call*(call_564155: Call_AssetsListContainerSas_564146; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists storage container URLs with shared access signatures (SAS) for uploading and downloading Asset content. The signatures are derived from the storage account keys.
   ## 
-  let valid = call_568255.validator(path, query, header, formData, body)
-  let scheme = call_568255.pickScheme
+  let valid = call_564155.validator(path, query, header, formData, body)
+  let scheme = call_564155.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568255.url(scheme.get, call_568255.host, call_568255.base,
-                         call_568255.route, valid.getOrDefault("path"),
+  let url = call_564155.url(scheme.get, call_564155.host, call_564155.base,
+                         call_564155.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568255, url, valid)
+  result = hook(call_564155, url, valid)
 
-proc call*(call_568256: Call_AssetsListContainerSas_568246;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          parameters: JsonNode; accountName: string; assetName: string): Recallable =
+proc call*(call_564156: Call_AssetsListContainerSas_564146; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string; parameters: JsonNode;
+          accountName: string; assetName: string): Recallable =
   ## assetsListContainerSas
   ## Lists storage container URLs with shared access signatures (SAS) for uploading and downloading Asset content. The signatures are derived from the storage account keys.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group within the Azure subscription.
   ##   apiVersion: string (required)
   ##             : The Version of the API to be used with the client request.
   ##   subscriptionId: string (required)
   ##                 : The unique identifier for a Microsoft Azure subscription.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group within the Azure subscription.
   ##   parameters: JObject (required)
   ##             : The request parameters
   ##   accountName: string (required)
   ##              : The Media Services account name.
   ##   assetName: string (required)
   ##            : The Asset name.
-  var path_568257 = newJObject()
-  var query_568258 = newJObject()
-  var body_568259 = newJObject()
-  add(path_568257, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568258, "api-version", newJString(apiVersion))
-  add(path_568257, "subscriptionId", newJString(subscriptionId))
+  var path_564157 = newJObject()
+  var query_564158 = newJObject()
+  var body_564159 = newJObject()
+  add(query_564158, "api-version", newJString(apiVersion))
+  add(path_564157, "subscriptionId", newJString(subscriptionId))
+  add(path_564157, "resourceGroupName", newJString(resourceGroupName))
   if parameters != nil:
-    body_568259 = parameters
-  add(path_568257, "accountName", newJString(accountName))
-  add(path_568257, "assetName", newJString(assetName))
-  result = call_568256.call(path_568257, query_568258, nil, nil, body_568259)
+    body_564159 = parameters
+  add(path_564157, "accountName", newJString(accountName))
+  add(path_564157, "assetName", newJString(assetName))
+  result = call_564156.call(path_564157, query_564158, nil, nil, body_564159)
 
-var assetsListContainerSas* = Call_AssetsListContainerSas_568246(
+var assetsListContainerSas* = Call_AssetsListContainerSas_564146(
     name: "assetsListContainerSas", meth: HttpMethod.HttpPost, host: "azure.local", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Media/mediaServices/{accountName}/assets/{assetName}/listContainerSas",
-    validator: validate_AssetsListContainerSas_568247, base: "",
-    url: url_AssetsListContainerSas_568248, schemes: {Scheme.Https})
+    validator: validate_AssetsListContainerSas_564147, base: "",
+    url: url_AssetsListContainerSas_564148, schemes: {Scheme.Https})
 export
   rest
 

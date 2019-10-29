@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, httpcore
 
 ## auto-generated via openapi macro
 ## title: BackupManagementClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_582442 = ref object of OpenApiRestCall
+  OpenApiRestCall_563540 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_582442](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563540](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_582442): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563540): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,15 +107,15 @@ const
   macServiceName = "azsadmin-Backup"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_OperationsList_582664 = ref object of OpenApiRestCall_582442
-proc url_OperationsList_582666(protocol: Scheme; host: string; base: string;
+  Call_OperationsList_563762 = ref object of OpenApiRestCall_563540
+proc url_OperationsList_563764(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_OperationsList_582665(path: JsonNode; query: JsonNode;
+proc validate_OperationsList_563763(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## Returns the list of support REST operations.
@@ -126,11 +130,11 @@ proc validate_OperationsList_582665(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_582838 = query.getOrDefault("api-version")
-  valid_582838 = validateParameter(valid_582838, JString, required = true,
+  var valid_563938 = query.getOrDefault("api-version")
+  valid_563938 = validateParameter(valid_563938, JString, required = true,
                                  default = newJString("2018-09-01"))
-  if valid_582838 != nil:
-    section.add "api-version", valid_582838
+  if valid_563938 != nil:
+    section.add "api-version", valid_563938
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -139,33 +143,33 @@ proc validate_OperationsList_582665(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_582861: Call_OperationsList_582664; path: JsonNode; query: JsonNode;
+proc call*(call_563961: Call_OperationsList_563762; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Returns the list of support REST operations.
   ## 
-  let valid = call_582861.validator(path, query, header, formData, body)
-  let scheme = call_582861.pickScheme
+  let valid = call_563961.validator(path, query, header, formData, body)
+  let scheme = call_563961.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_582861.url(scheme.get, call_582861.host, call_582861.base,
-                         call_582861.route, valid.getOrDefault("path"),
+  let url = call_563961.url(scheme.get, call_563961.host, call_563961.base,
+                         call_563961.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_582861, url, valid)
+  result = hook(call_563961, url, valid)
 
-proc call*(call_582932: Call_OperationsList_582664;
+proc call*(call_564032: Call_OperationsList_563762;
           apiVersion: string = "2018-09-01"): Recallable =
   ## operationsList
   ## Returns the list of support REST operations.
   ##   apiVersion: string (required)
   ##             : Client API version.
-  var query_582933 = newJObject()
-  add(query_582933, "api-version", newJString(apiVersion))
-  result = call_582932.call(nil, query_582933, nil, nil, nil)
+  var query_564033 = newJObject()
+  add(query_564033, "api-version", newJString(apiVersion))
+  result = call_564032.call(nil, query_564033, nil, nil, nil)
 
-var operationsList* = Call_OperationsList_582664(name: "operationsList",
+var operationsList* = Call_OperationsList_563762(name: "operationsList",
     meth: HttpMethod.HttpGet, host: "adminmanagement.local.azurestack.external",
     route: "/providers/Microsoft.Backup.Admin/operations",
-    validator: validate_OperationsList_582665, base: "", url: url_OperationsList_582666,
+    validator: validate_OperationsList_563763, base: "", url: url_OperationsList_563764,
     schemes: {Scheme.Https})
 export
   rest

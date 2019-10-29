@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, httpcore
 
 ## auto-generated via openapi macro
 ## title: PeeringManagementClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_567657 = ref object of OpenApiRestCall
+  OpenApiRestCall_563555 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_567657](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563555](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_567657): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563555): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,15 +107,15 @@ const
   macServiceName = "peering"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_OperationsList_567879 = ref object of OpenApiRestCall_567657
-proc url_OperationsList_567881(protocol: Scheme; host: string; base: string;
+  Call_OperationsList_563777 = ref object of OpenApiRestCall_563555
+proc url_OperationsList_563779(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_OperationsList_567880(path: JsonNode; query: JsonNode;
+proc validate_OperationsList_563778(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## Lists all of the available API operations for peering resources.
@@ -126,11 +130,11 @@ proc validate_OperationsList_567880(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568040 = query.getOrDefault("api-version")
-  valid_568040 = validateParameter(valid_568040, JString, required = true,
+  var valid_563940 = query.getOrDefault("api-version")
+  valid_563940 = validateParameter(valid_563940, JString, required = true,
                                  default = nil)
-  if valid_568040 != nil:
-    section.add "api-version", valid_568040
+  if valid_563940 != nil:
+    section.add "api-version", valid_563940
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -139,36 +143,36 @@ proc validate_OperationsList_567880(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568063: Call_OperationsList_567879; path: JsonNode; query: JsonNode;
+proc call*(call_563963: Call_OperationsList_563777; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists all of the available API operations for peering resources.
   ## 
-  let valid = call_568063.validator(path, query, header, formData, body)
-  let scheme = call_568063.pickScheme
+  let valid = call_563963.validator(path, query, header, formData, body)
+  let scheme = call_563963.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568063.url(scheme.get, call_568063.host, call_568063.base,
-                         call_568063.route, valid.getOrDefault("path"),
+  let url = call_563963.url(scheme.get, call_563963.host, call_563963.base,
+                         call_563963.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568063, url, valid)
+  result = hook(call_563963, url, valid)
 
-proc call*(call_568134: Call_OperationsList_567879; apiVersion: string): Recallable =
+proc call*(call_564034: Call_OperationsList_563777; apiVersion: string): Recallable =
   ## operationsList
   ## Lists all of the available API operations for peering resources.
   ##   apiVersion: string (required)
   ##             : The client API version.
-  var query_568135 = newJObject()
-  add(query_568135, "api-version", newJString(apiVersion))
-  result = call_568134.call(nil, query_568135, nil, nil, nil)
+  var query_564035 = newJObject()
+  add(query_564035, "api-version", newJString(apiVersion))
+  result = call_564034.call(nil, query_564035, nil, nil, nil)
 
-var operationsList* = Call_OperationsList_567879(name: "operationsList",
+var operationsList* = Call_OperationsList_563777(name: "operationsList",
     meth: HttpMethod.HttpGet, host: "management.azure.com",
     route: "/providers/Microsoft.Peering/operations",
-    validator: validate_OperationsList_567880, base: "", url: url_OperationsList_567881,
+    validator: validate_OperationsList_563778, base: "", url: url_OperationsList_563779,
     schemes: {Scheme.Https})
 type
-  Call_CheckServiceProviderAvailability_568175 = ref object of OpenApiRestCall_567657
-proc url_CheckServiceProviderAvailability_568177(protocol: Scheme; host: string;
+  Call_CheckServiceProviderAvailability_564075 = ref object of OpenApiRestCall_563555
+proc url_CheckServiceProviderAvailability_564077(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -185,7 +189,7 @@ proc url_CheckServiceProviderAvailability_568177(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_CheckServiceProviderAvailability_568176(path: JsonNode;
+proc validate_CheckServiceProviderAvailability_564076(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Checks if the peering service provider is present within 1000 distance of customer's location
   ## 
@@ -197,11 +201,11 @@ proc validate_CheckServiceProviderAvailability_568176(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_568192 = path.getOrDefault("subscriptionId")
-  valid_568192 = validateParameter(valid_568192, JString, required = true,
+  var valid_564092 = path.getOrDefault("subscriptionId")
+  valid_564092 = validateParameter(valid_564092, JString, required = true,
                                  default = nil)
-  if valid_568192 != nil:
-    section.add "subscriptionId", valid_568192
+  if valid_564092 != nil:
+    section.add "subscriptionId", valid_564092
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -209,11 +213,11 @@ proc validate_CheckServiceProviderAvailability_568176(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568193 = query.getOrDefault("api-version")
-  valid_568193 = validateParameter(valid_568193, JString, required = true,
+  var valid_564093 = query.getOrDefault("api-version")
+  valid_564093 = validateParameter(valid_564093, JString, required = true,
                                  default = nil)
-  if valid_568193 != nil:
-    section.add "api-version", valid_568193
+  if valid_564093 != nil:
+    section.add "api-version", valid_564093
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -227,48 +231,48 @@ proc validate_CheckServiceProviderAvailability_568176(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568195: Call_CheckServiceProviderAvailability_568175;
+proc call*(call_564095: Call_CheckServiceProviderAvailability_564075;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Checks if the peering service provider is present within 1000 distance of customer's location
   ## 
-  let valid = call_568195.validator(path, query, header, formData, body)
-  let scheme = call_568195.pickScheme
+  let valid = call_564095.validator(path, query, header, formData, body)
+  let scheme = call_564095.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568195.url(scheme.get, call_568195.host, call_568195.base,
-                         call_568195.route, valid.getOrDefault("path"),
+  let url = call_564095.url(scheme.get, call_564095.host, call_564095.base,
+                         call_564095.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568195, url, valid)
+  result = hook(call_564095, url, valid)
 
-proc call*(call_568196: Call_CheckServiceProviderAvailability_568175;
-          apiVersion: string; subscriptionId: string;
-          checkServiceProviderAvailabilityInput: JsonNode): Recallable =
+proc call*(call_564096: Call_CheckServiceProviderAvailability_564075;
+          checkServiceProviderAvailabilityInput: JsonNode; apiVersion: string;
+          subscriptionId: string): Recallable =
   ## checkServiceProviderAvailability
   ## Checks if the peering service provider is present within 1000 distance of customer's location
+  ##   checkServiceProviderAvailabilityInput: JObject (required)
+  ##                                        : The CheckServiceProviderAvailabilityInput.
   ##   apiVersion: string (required)
   ##             : The client API version.
   ##   subscriptionId: string (required)
   ##                 : The Azure subscription ID.
-  ##   checkServiceProviderAvailabilityInput: JObject (required)
-  ##                                        : The CheckServiceProviderAvailabilityInput.
-  var path_568197 = newJObject()
-  var query_568198 = newJObject()
-  var body_568199 = newJObject()
-  add(query_568198, "api-version", newJString(apiVersion))
-  add(path_568197, "subscriptionId", newJString(subscriptionId))
+  var path_564097 = newJObject()
+  var query_564098 = newJObject()
+  var body_564099 = newJObject()
   if checkServiceProviderAvailabilityInput != nil:
-    body_568199 = checkServiceProviderAvailabilityInput
-  result = call_568196.call(path_568197, query_568198, nil, nil, body_568199)
+    body_564099 = checkServiceProviderAvailabilityInput
+  add(query_564098, "api-version", newJString(apiVersion))
+  add(path_564097, "subscriptionId", newJString(subscriptionId))
+  result = call_564096.call(path_564097, query_564098, nil, nil, body_564099)
 
-var checkServiceProviderAvailability* = Call_CheckServiceProviderAvailability_568175(
+var checkServiceProviderAvailability* = Call_CheckServiceProviderAvailability_564075(
     name: "checkServiceProviderAvailability", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Peering/CheckServiceProviderAvailability",
-    validator: validate_CheckServiceProviderAvailability_568176, base: "",
-    url: url_CheckServiceProviderAvailability_568177, schemes: {Scheme.Https})
+    validator: validate_CheckServiceProviderAvailability_564076, base: "",
+    url: url_CheckServiceProviderAvailability_564077, schemes: {Scheme.Https})
 type
-  Call_LegacyPeeringsList_568200 = ref object of OpenApiRestCall_567657
-proc url_LegacyPeeringsList_568202(protocol: Scheme; host: string; base: string;
+  Call_LegacyPeeringsList_564100 = ref object of OpenApiRestCall_563555
+proc url_LegacyPeeringsList_564102(protocol: Scheme; host: string; base: string;
                                   route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -285,7 +289,7 @@ proc url_LegacyPeeringsList_568202(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_LegacyPeeringsList_568201(path: JsonNode; query: JsonNode;
+proc validate_LegacyPeeringsList_564101(path: JsonNode; query: JsonNode;
                                        header: JsonNode; formData: JsonNode;
                                        body: JsonNode): JsonNode =
   ## Lists all of the legacy peerings under the given subscription matching the specified kind and location.
@@ -298,37 +302,37 @@ proc validate_LegacyPeeringsList_568201(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_568203 = path.getOrDefault("subscriptionId")
-  valid_568203 = validateParameter(valid_568203, JString, required = true,
+  var valid_564103 = path.getOrDefault("subscriptionId")
+  valid_564103 = validateParameter(valid_564103, JString, required = true,
                                  default = nil)
-  if valid_568203 != nil:
-    section.add "subscriptionId", valid_568203
+  if valid_564103 != nil:
+    section.add "subscriptionId", valid_564103
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
   ##              : The client API version.
-  ##   kind: JString (required)
-  ##       : The kind of the peering.
   ##   peeringLocation: JString (required)
   ##                  : The location of the peering.
+  ##   kind: JString (required)
+  ##       : The kind of the peering.
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568204 = query.getOrDefault("api-version")
-  valid_568204 = validateParameter(valid_568204, JString, required = true,
+  var valid_564104 = query.getOrDefault("api-version")
+  valid_564104 = validateParameter(valid_564104, JString, required = true,
                                  default = nil)
-  if valid_568204 != nil:
-    section.add "api-version", valid_568204
-  var valid_568218 = query.getOrDefault("kind")
-  valid_568218 = validateParameter(valid_568218, JString, required = true,
+  if valid_564104 != nil:
+    section.add "api-version", valid_564104
+  var valid_564105 = query.getOrDefault("peeringLocation")
+  valid_564105 = validateParameter(valid_564105, JString, required = true,
+                                 default = nil)
+  if valid_564105 != nil:
+    section.add "peeringLocation", valid_564105
+  var valid_564119 = query.getOrDefault("kind")
+  valid_564119 = validateParameter(valid_564119, JString, required = true,
                                  default = newJString("Direct"))
-  if valid_568218 != nil:
-    section.add "kind", valid_568218
-  var valid_568219 = query.getOrDefault("peeringLocation")
-  valid_568219 = validateParameter(valid_568219, JString, required = true,
-                                 default = nil)
-  if valid_568219 != nil:
-    section.add "peeringLocation", valid_568219
+  if valid_564119 != nil:
+    section.add "kind", valid_564119
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -337,20 +341,20 @@ proc validate_LegacyPeeringsList_568201(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568220: Call_LegacyPeeringsList_568200; path: JsonNode;
+proc call*(call_564120: Call_LegacyPeeringsList_564100; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists all of the legacy peerings under the given subscription matching the specified kind and location.
   ## 
-  let valid = call_568220.validator(path, query, header, formData, body)
-  let scheme = call_568220.pickScheme
+  let valid = call_564120.validator(path, query, header, formData, body)
+  let scheme = call_564120.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568220.url(scheme.get, call_568220.host, call_568220.base,
-                         call_568220.route, valid.getOrDefault("path"),
+  let url = call_564120.url(scheme.get, call_564120.host, call_564120.base,
+                         call_564120.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568220, url, valid)
+  result = hook(call_564120, url, valid)
 
-proc call*(call_568221: Call_LegacyPeeringsList_568200; apiVersion: string;
+proc call*(call_564121: Call_LegacyPeeringsList_564100; apiVersion: string;
           subscriptionId: string; peeringLocation: string; kind: string = "Direct"): Recallable =
   ## legacyPeeringsList
   ## Lists all of the legacy peerings under the given subscription matching the specified kind and location.
@@ -358,26 +362,26 @@ proc call*(call_568221: Call_LegacyPeeringsList_568200; apiVersion: string;
   ##             : The client API version.
   ##   subscriptionId: string (required)
   ##                 : The Azure subscription ID.
-  ##   kind: string (required)
-  ##       : The kind of the peering.
   ##   peeringLocation: string (required)
   ##                  : The location of the peering.
-  var path_568222 = newJObject()
-  var query_568223 = newJObject()
-  add(query_568223, "api-version", newJString(apiVersion))
-  add(path_568222, "subscriptionId", newJString(subscriptionId))
-  add(query_568223, "kind", newJString(kind))
-  add(query_568223, "peeringLocation", newJString(peeringLocation))
-  result = call_568221.call(path_568222, query_568223, nil, nil, nil)
+  ##   kind: string (required)
+  ##       : The kind of the peering.
+  var path_564122 = newJObject()
+  var query_564123 = newJObject()
+  add(query_564123, "api-version", newJString(apiVersion))
+  add(path_564122, "subscriptionId", newJString(subscriptionId))
+  add(query_564123, "peeringLocation", newJString(peeringLocation))
+  add(query_564123, "kind", newJString(kind))
+  result = call_564121.call(path_564122, query_564123, nil, nil, nil)
 
-var legacyPeeringsList* = Call_LegacyPeeringsList_568200(
+var legacyPeeringsList* = Call_LegacyPeeringsList_564100(
     name: "legacyPeeringsList", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Peering/legacyPeerings",
-    validator: validate_LegacyPeeringsList_568201, base: "",
-    url: url_LegacyPeeringsList_568202, schemes: {Scheme.Https})
+    validator: validate_LegacyPeeringsList_564101, base: "",
+    url: url_LegacyPeeringsList_564102, schemes: {Scheme.Https})
 type
-  Call_PeerAsnsListBySubscription_568224 = ref object of OpenApiRestCall_567657
-proc url_PeerAsnsListBySubscription_568226(protocol: Scheme; host: string;
+  Call_PeerAsnsListBySubscription_564124 = ref object of OpenApiRestCall_563555
+proc url_PeerAsnsListBySubscription_564126(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -393,7 +397,7 @@ proc url_PeerAsnsListBySubscription_568226(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_PeerAsnsListBySubscription_568225(path: JsonNode; query: JsonNode;
+proc validate_PeerAsnsListBySubscription_564125(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists all of the peer ASNs under the given subscription.
   ## 
@@ -405,11 +409,11 @@ proc validate_PeerAsnsListBySubscription_568225(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_568227 = path.getOrDefault("subscriptionId")
-  valid_568227 = validateParameter(valid_568227, JString, required = true,
+  var valid_564127 = path.getOrDefault("subscriptionId")
+  valid_564127 = validateParameter(valid_564127, JString, required = true,
                                  default = nil)
-  if valid_568227 != nil:
-    section.add "subscriptionId", valid_568227
+  if valid_564127 != nil:
+    section.add "subscriptionId", valid_564127
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -417,11 +421,11 @@ proc validate_PeerAsnsListBySubscription_568225(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568228 = query.getOrDefault("api-version")
-  valid_568228 = validateParameter(valid_568228, JString, required = true,
+  var valid_564128 = query.getOrDefault("api-version")
+  valid_564128 = validateParameter(valid_564128, JString, required = true,
                                  default = nil)
-  if valid_568228 != nil:
-    section.add "api-version", valid_568228
+  if valid_564128 != nil:
+    section.add "api-version", valid_564128
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -430,20 +434,20 @@ proc validate_PeerAsnsListBySubscription_568225(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568229: Call_PeerAsnsListBySubscription_568224; path: JsonNode;
+proc call*(call_564129: Call_PeerAsnsListBySubscription_564124; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists all of the peer ASNs under the given subscription.
   ## 
-  let valid = call_568229.validator(path, query, header, formData, body)
-  let scheme = call_568229.pickScheme
+  let valid = call_564129.validator(path, query, header, formData, body)
+  let scheme = call_564129.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568229.url(scheme.get, call_568229.host, call_568229.base,
-                         call_568229.route, valid.getOrDefault("path"),
+  let url = call_564129.url(scheme.get, call_564129.host, call_564129.base,
+                         call_564129.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568229, url, valid)
+  result = hook(call_564129, url, valid)
 
-proc call*(call_568230: Call_PeerAsnsListBySubscription_568224; apiVersion: string;
+proc call*(call_564130: Call_PeerAsnsListBySubscription_564124; apiVersion: string;
           subscriptionId: string): Recallable =
   ## peerAsnsListBySubscription
   ## Lists all of the peer ASNs under the given subscription.
@@ -451,20 +455,20 @@ proc call*(call_568230: Call_PeerAsnsListBySubscription_568224; apiVersion: stri
   ##             : The client API version.
   ##   subscriptionId: string (required)
   ##                 : The Azure subscription ID.
-  var path_568231 = newJObject()
-  var query_568232 = newJObject()
-  add(query_568232, "api-version", newJString(apiVersion))
-  add(path_568231, "subscriptionId", newJString(subscriptionId))
-  result = call_568230.call(path_568231, query_568232, nil, nil, nil)
+  var path_564131 = newJObject()
+  var query_564132 = newJObject()
+  add(query_564132, "api-version", newJString(apiVersion))
+  add(path_564131, "subscriptionId", newJString(subscriptionId))
+  result = call_564130.call(path_564131, query_564132, nil, nil, nil)
 
-var peerAsnsListBySubscription* = Call_PeerAsnsListBySubscription_568224(
+var peerAsnsListBySubscription* = Call_PeerAsnsListBySubscription_564124(
     name: "peerAsnsListBySubscription", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Peering/peerAsns",
-    validator: validate_PeerAsnsListBySubscription_568225, base: "",
-    url: url_PeerAsnsListBySubscription_568226, schemes: {Scheme.Https})
+    validator: validate_PeerAsnsListBySubscription_564125, base: "",
+    url: url_PeerAsnsListBySubscription_564126, schemes: {Scheme.Https})
 type
-  Call_PeerAsnsCreateOrUpdate_568243 = ref object of OpenApiRestCall_567657
-proc url_PeerAsnsCreateOrUpdate_568245(protocol: Scheme; host: string; base: string;
+  Call_PeerAsnsCreateOrUpdate_564143 = ref object of OpenApiRestCall_563555
+proc url_PeerAsnsCreateOrUpdate_564145(protocol: Scheme; host: string; base: string;
                                       route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -482,7 +486,7 @@ proc url_PeerAsnsCreateOrUpdate_568245(protocol: Scheme; host: string; base: str
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_PeerAsnsCreateOrUpdate_568244(path: JsonNode; query: JsonNode;
+proc validate_PeerAsnsCreateOrUpdate_564144(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Creates a new peer ASN or updates an existing peer ASN with the specified name under the given subscription.
   ## 
@@ -496,16 +500,16 @@ proc validate_PeerAsnsCreateOrUpdate_568244(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `peerAsnName` field"
-  var valid_568246 = path.getOrDefault("peerAsnName")
-  valid_568246 = validateParameter(valid_568246, JString, required = true,
+  var valid_564146 = path.getOrDefault("peerAsnName")
+  valid_564146 = validateParameter(valid_564146, JString, required = true,
                                  default = nil)
-  if valid_568246 != nil:
-    section.add "peerAsnName", valid_568246
-  var valid_568247 = path.getOrDefault("subscriptionId")
-  valid_568247 = validateParameter(valid_568247, JString, required = true,
+  if valid_564146 != nil:
+    section.add "peerAsnName", valid_564146
+  var valid_564147 = path.getOrDefault("subscriptionId")
+  valid_564147 = validateParameter(valid_564147, JString, required = true,
                                  default = nil)
-  if valid_568247 != nil:
-    section.add "subscriptionId", valid_568247
+  if valid_564147 != nil:
+    section.add "subscriptionId", valid_564147
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -513,11 +517,11 @@ proc validate_PeerAsnsCreateOrUpdate_568244(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568248 = query.getOrDefault("api-version")
-  valid_568248 = validateParameter(valid_568248, JString, required = true,
+  var valid_564148 = query.getOrDefault("api-version")
+  valid_564148 = validateParameter(valid_564148, JString, required = true,
                                  default = nil)
-  if valid_568248 != nil:
-    section.add "api-version", valid_568248
+  if valid_564148 != nil:
+    section.add "api-version", valid_564148
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -531,20 +535,20 @@ proc validate_PeerAsnsCreateOrUpdate_568244(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568250: Call_PeerAsnsCreateOrUpdate_568243; path: JsonNode;
+proc call*(call_564150: Call_PeerAsnsCreateOrUpdate_564143; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Creates a new peer ASN or updates an existing peer ASN with the specified name under the given subscription.
   ## 
-  let valid = call_568250.validator(path, query, header, formData, body)
-  let scheme = call_568250.pickScheme
+  let valid = call_564150.validator(path, query, header, formData, body)
+  let scheme = call_564150.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568250.url(scheme.get, call_568250.host, call_568250.base,
-                         call_568250.route, valid.getOrDefault("path"),
+  let url = call_564150.url(scheme.get, call_564150.host, call_564150.base,
+                         call_564150.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568250, url, valid)
+  result = hook(call_564150, url, valid)
 
-proc call*(call_568251: Call_PeerAsnsCreateOrUpdate_568243; peerAsnName: string;
+proc call*(call_564151: Call_PeerAsnsCreateOrUpdate_564143; peerAsnName: string;
           apiVersion: string; subscriptionId: string; peerAsn: JsonNode): Recallable =
   ## peerAsnsCreateOrUpdate
   ## Creates a new peer ASN or updates an existing peer ASN with the specified name under the given subscription.
@@ -556,24 +560,24 @@ proc call*(call_568251: Call_PeerAsnsCreateOrUpdate_568243; peerAsnName: string;
   ##                 : The Azure subscription ID.
   ##   peerAsn: JObject (required)
   ##          : The peer ASN.
-  var path_568252 = newJObject()
-  var query_568253 = newJObject()
-  var body_568254 = newJObject()
-  add(path_568252, "peerAsnName", newJString(peerAsnName))
-  add(query_568253, "api-version", newJString(apiVersion))
-  add(path_568252, "subscriptionId", newJString(subscriptionId))
+  var path_564152 = newJObject()
+  var query_564153 = newJObject()
+  var body_564154 = newJObject()
+  add(path_564152, "peerAsnName", newJString(peerAsnName))
+  add(query_564153, "api-version", newJString(apiVersion))
+  add(path_564152, "subscriptionId", newJString(subscriptionId))
   if peerAsn != nil:
-    body_568254 = peerAsn
-  result = call_568251.call(path_568252, query_568253, nil, nil, body_568254)
+    body_564154 = peerAsn
+  result = call_564151.call(path_564152, query_564153, nil, nil, body_564154)
 
-var peerAsnsCreateOrUpdate* = Call_PeerAsnsCreateOrUpdate_568243(
+var peerAsnsCreateOrUpdate* = Call_PeerAsnsCreateOrUpdate_564143(
     name: "peerAsnsCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Peering/peerAsns/{peerAsnName}",
-    validator: validate_PeerAsnsCreateOrUpdate_568244, base: "",
-    url: url_PeerAsnsCreateOrUpdate_568245, schemes: {Scheme.Https})
+    validator: validate_PeerAsnsCreateOrUpdate_564144, base: "",
+    url: url_PeerAsnsCreateOrUpdate_564145, schemes: {Scheme.Https})
 type
-  Call_PeerAsnsGet_568233 = ref object of OpenApiRestCall_567657
-proc url_PeerAsnsGet_568235(protocol: Scheme; host: string; base: string;
+  Call_PeerAsnsGet_564133 = ref object of OpenApiRestCall_563555
+proc url_PeerAsnsGet_564135(protocol: Scheme; host: string; base: string;
                            route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -591,7 +595,7 @@ proc url_PeerAsnsGet_568235(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_PeerAsnsGet_568234(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_PeerAsnsGet_564134(path: JsonNode; query: JsonNode; header: JsonNode;
                                 formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the peer ASN with the specified name under the given subscription.
   ## 
@@ -605,16 +609,16 @@ proc validate_PeerAsnsGet_568234(path: JsonNode; query: JsonNode; header: JsonNo
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `peerAsnName` field"
-  var valid_568236 = path.getOrDefault("peerAsnName")
-  valid_568236 = validateParameter(valid_568236, JString, required = true,
+  var valid_564136 = path.getOrDefault("peerAsnName")
+  valid_564136 = validateParameter(valid_564136, JString, required = true,
                                  default = nil)
-  if valid_568236 != nil:
-    section.add "peerAsnName", valid_568236
-  var valid_568237 = path.getOrDefault("subscriptionId")
-  valid_568237 = validateParameter(valid_568237, JString, required = true,
+  if valid_564136 != nil:
+    section.add "peerAsnName", valid_564136
+  var valid_564137 = path.getOrDefault("subscriptionId")
+  valid_564137 = validateParameter(valid_564137, JString, required = true,
                                  default = nil)
-  if valid_568237 != nil:
-    section.add "subscriptionId", valid_568237
+  if valid_564137 != nil:
+    section.add "subscriptionId", valid_564137
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -622,11 +626,11 @@ proc validate_PeerAsnsGet_568234(path: JsonNode; query: JsonNode; header: JsonNo
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568238 = query.getOrDefault("api-version")
-  valid_568238 = validateParameter(valid_568238, JString, required = true,
+  var valid_564138 = query.getOrDefault("api-version")
+  valid_564138 = validateParameter(valid_564138, JString, required = true,
                                  default = nil)
-  if valid_568238 != nil:
-    section.add "api-version", valid_568238
+  if valid_564138 != nil:
+    section.add "api-version", valid_564138
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -635,20 +639,20 @@ proc validate_PeerAsnsGet_568234(path: JsonNode; query: JsonNode; header: JsonNo
   if body != nil:
     result.add "body", body
 
-proc call*(call_568239: Call_PeerAsnsGet_568233; path: JsonNode; query: JsonNode;
+proc call*(call_564139: Call_PeerAsnsGet_564133; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the peer ASN with the specified name under the given subscription.
   ## 
-  let valid = call_568239.validator(path, query, header, formData, body)
-  let scheme = call_568239.pickScheme
+  let valid = call_564139.validator(path, query, header, formData, body)
+  let scheme = call_564139.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568239.url(scheme.get, call_568239.host, call_568239.base,
-                         call_568239.route, valid.getOrDefault("path"),
+  let url = call_564139.url(scheme.get, call_564139.host, call_564139.base,
+                         call_564139.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568239, url, valid)
+  result = hook(call_564139, url, valid)
 
-proc call*(call_568240: Call_PeerAsnsGet_568233; peerAsnName: string;
+proc call*(call_564140: Call_PeerAsnsGet_564133; peerAsnName: string;
           apiVersion: string; subscriptionId: string): Recallable =
   ## peerAsnsGet
   ## Gets the peer ASN with the specified name under the given subscription.
@@ -658,22 +662,22 @@ proc call*(call_568240: Call_PeerAsnsGet_568233; peerAsnName: string;
   ##             : The client API version.
   ##   subscriptionId: string (required)
   ##                 : The Azure subscription ID.
-  var path_568241 = newJObject()
-  var query_568242 = newJObject()
-  add(path_568241, "peerAsnName", newJString(peerAsnName))
-  add(query_568242, "api-version", newJString(apiVersion))
-  add(path_568241, "subscriptionId", newJString(subscriptionId))
-  result = call_568240.call(path_568241, query_568242, nil, nil, nil)
+  var path_564141 = newJObject()
+  var query_564142 = newJObject()
+  add(path_564141, "peerAsnName", newJString(peerAsnName))
+  add(query_564142, "api-version", newJString(apiVersion))
+  add(path_564141, "subscriptionId", newJString(subscriptionId))
+  result = call_564140.call(path_564141, query_564142, nil, nil, nil)
 
-var peerAsnsGet* = Call_PeerAsnsGet_568233(name: "peerAsnsGet",
+var peerAsnsGet* = Call_PeerAsnsGet_564133(name: "peerAsnsGet",
                                         meth: HttpMethod.HttpGet,
                                         host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Peering/peerAsns/{peerAsnName}",
-                                        validator: validate_PeerAsnsGet_568234,
-                                        base: "", url: url_PeerAsnsGet_568235,
+                                        validator: validate_PeerAsnsGet_564134,
+                                        base: "", url: url_PeerAsnsGet_564135,
                                         schemes: {Scheme.Https})
 type
-  Call_PeerAsnsDelete_568255 = ref object of OpenApiRestCall_567657
-proc url_PeerAsnsDelete_568257(protocol: Scheme; host: string; base: string;
+  Call_PeerAsnsDelete_564155 = ref object of OpenApiRestCall_563555
+proc url_PeerAsnsDelete_564157(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -691,7 +695,7 @@ proc url_PeerAsnsDelete_568257(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_PeerAsnsDelete_568256(path: JsonNode; query: JsonNode;
+proc validate_PeerAsnsDelete_564156(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## Deletes an existing peer ASN with the specified name under the given subscription.
@@ -706,16 +710,16 @@ proc validate_PeerAsnsDelete_568256(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `peerAsnName` field"
-  var valid_568258 = path.getOrDefault("peerAsnName")
-  valid_568258 = validateParameter(valid_568258, JString, required = true,
+  var valid_564158 = path.getOrDefault("peerAsnName")
+  valid_564158 = validateParameter(valid_564158, JString, required = true,
                                  default = nil)
-  if valid_568258 != nil:
-    section.add "peerAsnName", valid_568258
-  var valid_568259 = path.getOrDefault("subscriptionId")
-  valid_568259 = validateParameter(valid_568259, JString, required = true,
+  if valid_564158 != nil:
+    section.add "peerAsnName", valid_564158
+  var valid_564159 = path.getOrDefault("subscriptionId")
+  valid_564159 = validateParameter(valid_564159, JString, required = true,
                                  default = nil)
-  if valid_568259 != nil:
-    section.add "subscriptionId", valid_568259
+  if valid_564159 != nil:
+    section.add "subscriptionId", valid_564159
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -723,11 +727,11 @@ proc validate_PeerAsnsDelete_568256(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568260 = query.getOrDefault("api-version")
-  valid_568260 = validateParameter(valid_568260, JString, required = true,
+  var valid_564160 = query.getOrDefault("api-version")
+  valid_564160 = validateParameter(valid_564160, JString, required = true,
                                  default = nil)
-  if valid_568260 != nil:
-    section.add "api-version", valid_568260
+  if valid_564160 != nil:
+    section.add "api-version", valid_564160
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -736,20 +740,20 @@ proc validate_PeerAsnsDelete_568256(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568261: Call_PeerAsnsDelete_568255; path: JsonNode; query: JsonNode;
+proc call*(call_564161: Call_PeerAsnsDelete_564155; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes an existing peer ASN with the specified name under the given subscription.
   ## 
-  let valid = call_568261.validator(path, query, header, formData, body)
-  let scheme = call_568261.pickScheme
+  let valid = call_564161.validator(path, query, header, formData, body)
+  let scheme = call_564161.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568261.url(scheme.get, call_568261.host, call_568261.base,
-                         call_568261.route, valid.getOrDefault("path"),
+  let url = call_564161.url(scheme.get, call_564161.host, call_564161.base,
+                         call_564161.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568261, url, valid)
+  result = hook(call_564161, url, valid)
 
-proc call*(call_568262: Call_PeerAsnsDelete_568255; peerAsnName: string;
+proc call*(call_564162: Call_PeerAsnsDelete_564155; peerAsnName: string;
           apiVersion: string; subscriptionId: string): Recallable =
   ## peerAsnsDelete
   ## Deletes an existing peer ASN with the specified name under the given subscription.
@@ -759,20 +763,20 @@ proc call*(call_568262: Call_PeerAsnsDelete_568255; peerAsnName: string;
   ##             : The client API version.
   ##   subscriptionId: string (required)
   ##                 : The Azure subscription ID.
-  var path_568263 = newJObject()
-  var query_568264 = newJObject()
-  add(path_568263, "peerAsnName", newJString(peerAsnName))
-  add(query_568264, "api-version", newJString(apiVersion))
-  add(path_568263, "subscriptionId", newJString(subscriptionId))
-  result = call_568262.call(path_568263, query_568264, nil, nil, nil)
+  var path_564163 = newJObject()
+  var query_564164 = newJObject()
+  add(path_564163, "peerAsnName", newJString(peerAsnName))
+  add(query_564164, "api-version", newJString(apiVersion))
+  add(path_564163, "subscriptionId", newJString(subscriptionId))
+  result = call_564162.call(path_564163, query_564164, nil, nil, nil)
 
-var peerAsnsDelete* = Call_PeerAsnsDelete_568255(name: "peerAsnsDelete",
+var peerAsnsDelete* = Call_PeerAsnsDelete_564155(name: "peerAsnsDelete",
     meth: HttpMethod.HttpDelete, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Peering/peerAsns/{peerAsnName}",
-    validator: validate_PeerAsnsDelete_568256, base: "", url: url_PeerAsnsDelete_568257,
+    validator: validate_PeerAsnsDelete_564156, base: "", url: url_PeerAsnsDelete_564157,
     schemes: {Scheme.Https})
 type
-  Call_PeeringLocationsList_568265 = ref object of OpenApiRestCall_567657
-proc url_PeeringLocationsList_568267(protocol: Scheme; host: string; base: string;
+  Call_PeeringLocationsList_564165 = ref object of OpenApiRestCall_563555
+proc url_PeeringLocationsList_564167(protocol: Scheme; host: string; base: string;
                                     route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -789,7 +793,7 @@ proc url_PeeringLocationsList_568267(protocol: Scheme; host: string; base: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_PeeringLocationsList_568266(path: JsonNode; query: JsonNode;
+proc validate_PeeringLocationsList_564166(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists all of the available peering locations for the specified kind of peering.
   ## 
@@ -801,11 +805,11 @@ proc validate_PeeringLocationsList_568266(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_568268 = path.getOrDefault("subscriptionId")
-  valid_568268 = validateParameter(valid_568268, JString, required = true,
+  var valid_564168 = path.getOrDefault("subscriptionId")
+  valid_564168 = validateParameter(valid_564168, JString, required = true,
                                  default = nil)
-  if valid_568268 != nil:
-    section.add "subscriptionId", valid_568268
+  if valid_564168 != nil:
+    section.add "subscriptionId", valid_564168
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -815,16 +819,16 @@ proc validate_PeeringLocationsList_568266(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568269 = query.getOrDefault("api-version")
-  valid_568269 = validateParameter(valid_568269, JString, required = true,
+  var valid_564169 = query.getOrDefault("api-version")
+  valid_564169 = validateParameter(valid_564169, JString, required = true,
                                  default = nil)
-  if valid_568269 != nil:
-    section.add "api-version", valid_568269
-  var valid_568270 = query.getOrDefault("kind")
-  valid_568270 = validateParameter(valid_568270, JString, required = true,
+  if valid_564169 != nil:
+    section.add "api-version", valid_564169
+  var valid_564170 = query.getOrDefault("kind")
+  valid_564170 = validateParameter(valid_564170, JString, required = true,
                                  default = newJString("Direct"))
-  if valid_568270 != nil:
-    section.add "kind", valid_568270
+  if valid_564170 != nil:
+    section.add "kind", valid_564170
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -833,20 +837,20 @@ proc validate_PeeringLocationsList_568266(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568271: Call_PeeringLocationsList_568265; path: JsonNode;
+proc call*(call_564171: Call_PeeringLocationsList_564165; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists all of the available peering locations for the specified kind of peering.
   ## 
-  let valid = call_568271.validator(path, query, header, formData, body)
-  let scheme = call_568271.pickScheme
+  let valid = call_564171.validator(path, query, header, formData, body)
+  let scheme = call_564171.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568271.url(scheme.get, call_568271.host, call_568271.base,
-                         call_568271.route, valid.getOrDefault("path"),
+  let url = call_564171.url(scheme.get, call_564171.host, call_564171.base,
+                         call_564171.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568271, url, valid)
+  result = hook(call_564171, url, valid)
 
-proc call*(call_568272: Call_PeeringLocationsList_568265; apiVersion: string;
+proc call*(call_564172: Call_PeeringLocationsList_564165; apiVersion: string;
           subscriptionId: string; kind: string = "Direct"): Recallable =
   ## peeringLocationsList
   ## Lists all of the available peering locations for the specified kind of peering.
@@ -856,21 +860,21 @@ proc call*(call_568272: Call_PeeringLocationsList_568265; apiVersion: string;
   ##                 : The Azure subscription ID.
   ##   kind: string (required)
   ##       : The kind of the peering.
-  var path_568273 = newJObject()
-  var query_568274 = newJObject()
-  add(query_568274, "api-version", newJString(apiVersion))
-  add(path_568273, "subscriptionId", newJString(subscriptionId))
-  add(query_568274, "kind", newJString(kind))
-  result = call_568272.call(path_568273, query_568274, nil, nil, nil)
+  var path_564173 = newJObject()
+  var query_564174 = newJObject()
+  add(query_564174, "api-version", newJString(apiVersion))
+  add(path_564173, "subscriptionId", newJString(subscriptionId))
+  add(query_564174, "kind", newJString(kind))
+  result = call_564172.call(path_564173, query_564174, nil, nil, nil)
 
-var peeringLocationsList* = Call_PeeringLocationsList_568265(
+var peeringLocationsList* = Call_PeeringLocationsList_564165(
     name: "peeringLocationsList", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Peering/peeringLocations",
-    validator: validate_PeeringLocationsList_568266, base: "",
-    url: url_PeeringLocationsList_568267, schemes: {Scheme.Https})
+    validator: validate_PeeringLocationsList_564166, base: "",
+    url: url_PeeringLocationsList_564167, schemes: {Scheme.Https})
 type
-  Call_PeeringServiceLocationsList_568275 = ref object of OpenApiRestCall_567657
-proc url_PeeringServiceLocationsList_568277(protocol: Scheme; host: string;
+  Call_PeeringServiceLocationsList_564175 = ref object of OpenApiRestCall_563555
+proc url_PeeringServiceLocationsList_564177(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -887,7 +891,7 @@ proc url_PeeringServiceLocationsList_568277(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_PeeringServiceLocationsList_568276(path: JsonNode; query: JsonNode;
+proc validate_PeeringServiceLocationsList_564176(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists all of the available peering service locations for the specified kind of peering.
   ## 
@@ -899,11 +903,11 @@ proc validate_PeeringServiceLocationsList_568276(path: JsonNode; query: JsonNode
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_568278 = path.getOrDefault("subscriptionId")
-  valid_568278 = validateParameter(valid_568278, JString, required = true,
+  var valid_564178 = path.getOrDefault("subscriptionId")
+  valid_564178 = validateParameter(valid_564178, JString, required = true,
                                  default = nil)
-  if valid_568278 != nil:
-    section.add "subscriptionId", valid_568278
+  if valid_564178 != nil:
+    section.add "subscriptionId", valid_564178
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -911,11 +915,11 @@ proc validate_PeeringServiceLocationsList_568276(path: JsonNode; query: JsonNode
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568279 = query.getOrDefault("api-version")
-  valid_568279 = validateParameter(valid_568279, JString, required = true,
+  var valid_564179 = query.getOrDefault("api-version")
+  valid_564179 = validateParameter(valid_564179, JString, required = true,
                                  default = nil)
-  if valid_568279 != nil:
-    section.add "api-version", valid_568279
+  if valid_564179 != nil:
+    section.add "api-version", valid_564179
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -924,20 +928,20 @@ proc validate_PeeringServiceLocationsList_568276(path: JsonNode; query: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_568280: Call_PeeringServiceLocationsList_568275; path: JsonNode;
+proc call*(call_564180: Call_PeeringServiceLocationsList_564175; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists all of the available peering service locations for the specified kind of peering.
   ## 
-  let valid = call_568280.validator(path, query, header, formData, body)
-  let scheme = call_568280.pickScheme
+  let valid = call_564180.validator(path, query, header, formData, body)
+  let scheme = call_564180.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568280.url(scheme.get, call_568280.host, call_568280.base,
-                         call_568280.route, valid.getOrDefault("path"),
+  let url = call_564180.url(scheme.get, call_564180.host, call_564180.base,
+                         call_564180.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568280, url, valid)
+  result = hook(call_564180, url, valid)
 
-proc call*(call_568281: Call_PeeringServiceLocationsList_568275;
+proc call*(call_564181: Call_PeeringServiceLocationsList_564175;
           apiVersion: string; subscriptionId: string): Recallable =
   ## peeringServiceLocationsList
   ## Lists all of the available peering service locations for the specified kind of peering.
@@ -945,20 +949,20 @@ proc call*(call_568281: Call_PeeringServiceLocationsList_568275;
   ##             : The client API version.
   ##   subscriptionId: string (required)
   ##                 : The Azure subscription ID.
-  var path_568282 = newJObject()
-  var query_568283 = newJObject()
-  add(query_568283, "api-version", newJString(apiVersion))
-  add(path_568282, "subscriptionId", newJString(subscriptionId))
-  result = call_568281.call(path_568282, query_568283, nil, nil, nil)
+  var path_564182 = newJObject()
+  var query_564183 = newJObject()
+  add(query_564183, "api-version", newJString(apiVersion))
+  add(path_564182, "subscriptionId", newJString(subscriptionId))
+  result = call_564181.call(path_564182, query_564183, nil, nil, nil)
 
-var peeringServiceLocationsList* = Call_PeeringServiceLocationsList_568275(
+var peeringServiceLocationsList* = Call_PeeringServiceLocationsList_564175(
     name: "peeringServiceLocationsList", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Peering/peeringServiceLocations",
-    validator: validate_PeeringServiceLocationsList_568276, base: "",
-    url: url_PeeringServiceLocationsList_568277, schemes: {Scheme.Https})
+    validator: validate_PeeringServiceLocationsList_564176, base: "",
+    url: url_PeeringServiceLocationsList_564177, schemes: {Scheme.Https})
 type
-  Call_PeeringServiceProvidersList_568284 = ref object of OpenApiRestCall_567657
-proc url_PeeringServiceProvidersList_568286(protocol: Scheme; host: string;
+  Call_PeeringServiceProvidersList_564184 = ref object of OpenApiRestCall_563555
+proc url_PeeringServiceProvidersList_564186(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -975,7 +979,7 @@ proc url_PeeringServiceProvidersList_568286(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_PeeringServiceProvidersList_568285(path: JsonNode; query: JsonNode;
+proc validate_PeeringServiceProvidersList_564185(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists all of the available peering service locations for the specified kind of peering.
   ## 
@@ -987,11 +991,11 @@ proc validate_PeeringServiceProvidersList_568285(path: JsonNode; query: JsonNode
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_568287 = path.getOrDefault("subscriptionId")
-  valid_568287 = validateParameter(valid_568287, JString, required = true,
+  var valid_564187 = path.getOrDefault("subscriptionId")
+  valid_564187 = validateParameter(valid_564187, JString, required = true,
                                  default = nil)
-  if valid_568287 != nil:
-    section.add "subscriptionId", valid_568287
+  if valid_564187 != nil:
+    section.add "subscriptionId", valid_564187
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -999,11 +1003,11 @@ proc validate_PeeringServiceProvidersList_568285(path: JsonNode; query: JsonNode
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568288 = query.getOrDefault("api-version")
-  valid_568288 = validateParameter(valid_568288, JString, required = true,
+  var valid_564188 = query.getOrDefault("api-version")
+  valid_564188 = validateParameter(valid_564188, JString, required = true,
                                  default = nil)
-  if valid_568288 != nil:
-    section.add "api-version", valid_568288
+  if valid_564188 != nil:
+    section.add "api-version", valid_564188
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1012,20 +1016,20 @@ proc validate_PeeringServiceProvidersList_568285(path: JsonNode; query: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_568289: Call_PeeringServiceProvidersList_568284; path: JsonNode;
+proc call*(call_564189: Call_PeeringServiceProvidersList_564184; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists all of the available peering service locations for the specified kind of peering.
   ## 
-  let valid = call_568289.validator(path, query, header, formData, body)
-  let scheme = call_568289.pickScheme
+  let valid = call_564189.validator(path, query, header, formData, body)
+  let scheme = call_564189.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568289.url(scheme.get, call_568289.host, call_568289.base,
-                         call_568289.route, valid.getOrDefault("path"),
+  let url = call_564189.url(scheme.get, call_564189.host, call_564189.base,
+                         call_564189.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568289, url, valid)
+  result = hook(call_564189, url, valid)
 
-proc call*(call_568290: Call_PeeringServiceProvidersList_568284;
+proc call*(call_564190: Call_PeeringServiceProvidersList_564184;
           apiVersion: string; subscriptionId: string): Recallable =
   ## peeringServiceProvidersList
   ## Lists all of the available peering service locations for the specified kind of peering.
@@ -1033,20 +1037,20 @@ proc call*(call_568290: Call_PeeringServiceProvidersList_568284;
   ##             : The client API version.
   ##   subscriptionId: string (required)
   ##                 : The Azure subscription ID.
-  var path_568291 = newJObject()
-  var query_568292 = newJObject()
-  add(query_568292, "api-version", newJString(apiVersion))
-  add(path_568291, "subscriptionId", newJString(subscriptionId))
-  result = call_568290.call(path_568291, query_568292, nil, nil, nil)
+  var path_564191 = newJObject()
+  var query_564192 = newJObject()
+  add(query_564192, "api-version", newJString(apiVersion))
+  add(path_564191, "subscriptionId", newJString(subscriptionId))
+  result = call_564190.call(path_564191, query_564192, nil, nil, nil)
 
-var peeringServiceProvidersList* = Call_PeeringServiceProvidersList_568284(
+var peeringServiceProvidersList* = Call_PeeringServiceProvidersList_564184(
     name: "peeringServiceProvidersList", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Peering/peeringServiceProviders",
-    validator: validate_PeeringServiceProvidersList_568285, base: "",
-    url: url_PeeringServiceProvidersList_568286, schemes: {Scheme.Https})
+    validator: validate_PeeringServiceProvidersList_564185, base: "",
+    url: url_PeeringServiceProvidersList_564186, schemes: {Scheme.Https})
 type
-  Call_PeeringServicesListBySubscription_568293 = ref object of OpenApiRestCall_567657
-proc url_PeeringServicesListBySubscription_568295(protocol: Scheme; host: string;
+  Call_PeeringServicesListBySubscription_564193 = ref object of OpenApiRestCall_563555
+proc url_PeeringServicesListBySubscription_564195(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1063,7 +1067,7 @@ proc url_PeeringServicesListBySubscription_568295(protocol: Scheme; host: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_PeeringServicesListBySubscription_568294(path: JsonNode;
+proc validate_PeeringServicesListBySubscription_564194(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists all of the peerings under the given subscription.
   ## 
@@ -1075,11 +1079,11 @@ proc validate_PeeringServicesListBySubscription_568294(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_568296 = path.getOrDefault("subscriptionId")
-  valid_568296 = validateParameter(valid_568296, JString, required = true,
+  var valid_564196 = path.getOrDefault("subscriptionId")
+  valid_564196 = validateParameter(valid_564196, JString, required = true,
                                  default = nil)
-  if valid_568296 != nil:
-    section.add "subscriptionId", valid_568296
+  if valid_564196 != nil:
+    section.add "subscriptionId", valid_564196
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1087,11 +1091,11 @@ proc validate_PeeringServicesListBySubscription_568294(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568297 = query.getOrDefault("api-version")
-  valid_568297 = validateParameter(valid_568297, JString, required = true,
+  var valid_564197 = query.getOrDefault("api-version")
+  valid_564197 = validateParameter(valid_564197, JString, required = true,
                                  default = nil)
-  if valid_568297 != nil:
-    section.add "api-version", valid_568297
+  if valid_564197 != nil:
+    section.add "api-version", valid_564197
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1100,21 +1104,21 @@ proc validate_PeeringServicesListBySubscription_568294(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568298: Call_PeeringServicesListBySubscription_568293;
+proc call*(call_564198: Call_PeeringServicesListBySubscription_564193;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Lists all of the peerings under the given subscription.
   ## 
-  let valid = call_568298.validator(path, query, header, formData, body)
-  let scheme = call_568298.pickScheme
+  let valid = call_564198.validator(path, query, header, formData, body)
+  let scheme = call_564198.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568298.url(scheme.get, call_568298.host, call_568298.base,
-                         call_568298.route, valid.getOrDefault("path"),
+  let url = call_564198.url(scheme.get, call_564198.host, call_564198.base,
+                         call_564198.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568298, url, valid)
+  result = hook(call_564198, url, valid)
 
-proc call*(call_568299: Call_PeeringServicesListBySubscription_568293;
+proc call*(call_564199: Call_PeeringServicesListBySubscription_564193;
           apiVersion: string; subscriptionId: string): Recallable =
   ## peeringServicesListBySubscription
   ## Lists all of the peerings under the given subscription.
@@ -1122,20 +1126,20 @@ proc call*(call_568299: Call_PeeringServicesListBySubscription_568293;
   ##             : The client API version.
   ##   subscriptionId: string (required)
   ##                 : The Azure subscription ID.
-  var path_568300 = newJObject()
-  var query_568301 = newJObject()
-  add(query_568301, "api-version", newJString(apiVersion))
-  add(path_568300, "subscriptionId", newJString(subscriptionId))
-  result = call_568299.call(path_568300, query_568301, nil, nil, nil)
+  var path_564200 = newJObject()
+  var query_564201 = newJObject()
+  add(query_564201, "api-version", newJString(apiVersion))
+  add(path_564200, "subscriptionId", newJString(subscriptionId))
+  result = call_564199.call(path_564200, query_564201, nil, nil, nil)
 
-var peeringServicesListBySubscription* = Call_PeeringServicesListBySubscription_568293(
+var peeringServicesListBySubscription* = Call_PeeringServicesListBySubscription_564193(
     name: "peeringServicesListBySubscription", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Peering/peeringServices",
-    validator: validate_PeeringServicesListBySubscription_568294, base: "",
-    url: url_PeeringServicesListBySubscription_568295, schemes: {Scheme.Https})
+    validator: validate_PeeringServicesListBySubscription_564194, base: "",
+    url: url_PeeringServicesListBySubscription_564195, schemes: {Scheme.Https})
 type
-  Call_PeeringsListBySubscription_568302 = ref object of OpenApiRestCall_567657
-proc url_PeeringsListBySubscription_568304(protocol: Scheme; host: string;
+  Call_PeeringsListBySubscription_564202 = ref object of OpenApiRestCall_563555
+proc url_PeeringsListBySubscription_564204(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1151,7 +1155,7 @@ proc url_PeeringsListBySubscription_568304(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_PeeringsListBySubscription_568303(path: JsonNode; query: JsonNode;
+proc validate_PeeringsListBySubscription_564203(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists all of the peerings under the given subscription.
   ## 
@@ -1163,11 +1167,11 @@ proc validate_PeeringsListBySubscription_568303(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_568305 = path.getOrDefault("subscriptionId")
-  valid_568305 = validateParameter(valid_568305, JString, required = true,
+  var valid_564205 = path.getOrDefault("subscriptionId")
+  valid_564205 = validateParameter(valid_564205, JString, required = true,
                                  default = nil)
-  if valid_568305 != nil:
-    section.add "subscriptionId", valid_568305
+  if valid_564205 != nil:
+    section.add "subscriptionId", valid_564205
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1175,11 +1179,11 @@ proc validate_PeeringsListBySubscription_568303(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568306 = query.getOrDefault("api-version")
-  valid_568306 = validateParameter(valid_568306, JString, required = true,
+  var valid_564206 = query.getOrDefault("api-version")
+  valid_564206 = validateParameter(valid_564206, JString, required = true,
                                  default = nil)
-  if valid_568306 != nil:
-    section.add "api-version", valid_568306
+  if valid_564206 != nil:
+    section.add "api-version", valid_564206
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1188,20 +1192,20 @@ proc validate_PeeringsListBySubscription_568303(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568307: Call_PeeringsListBySubscription_568302; path: JsonNode;
+proc call*(call_564207: Call_PeeringsListBySubscription_564202; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists all of the peerings under the given subscription.
   ## 
-  let valid = call_568307.validator(path, query, header, formData, body)
-  let scheme = call_568307.pickScheme
+  let valid = call_564207.validator(path, query, header, formData, body)
+  let scheme = call_564207.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568307.url(scheme.get, call_568307.host, call_568307.base,
-                         call_568307.route, valid.getOrDefault("path"),
+  let url = call_564207.url(scheme.get, call_564207.host, call_564207.base,
+                         call_564207.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568307, url, valid)
+  result = hook(call_564207, url, valid)
 
-proc call*(call_568308: Call_PeeringsListBySubscription_568302; apiVersion: string;
+proc call*(call_564208: Call_PeeringsListBySubscription_564202; apiVersion: string;
           subscriptionId: string): Recallable =
   ## peeringsListBySubscription
   ## Lists all of the peerings under the given subscription.
@@ -1209,20 +1213,20 @@ proc call*(call_568308: Call_PeeringsListBySubscription_568302; apiVersion: stri
   ##             : The client API version.
   ##   subscriptionId: string (required)
   ##                 : The Azure subscription ID.
-  var path_568309 = newJObject()
-  var query_568310 = newJObject()
-  add(query_568310, "api-version", newJString(apiVersion))
-  add(path_568309, "subscriptionId", newJString(subscriptionId))
-  result = call_568308.call(path_568309, query_568310, nil, nil, nil)
+  var path_564209 = newJObject()
+  var query_564210 = newJObject()
+  add(query_564210, "api-version", newJString(apiVersion))
+  add(path_564209, "subscriptionId", newJString(subscriptionId))
+  result = call_564208.call(path_564209, query_564210, nil, nil, nil)
 
-var peeringsListBySubscription* = Call_PeeringsListBySubscription_568302(
+var peeringsListBySubscription* = Call_PeeringsListBySubscription_564202(
     name: "peeringsListBySubscription", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Peering/peerings",
-    validator: validate_PeeringsListBySubscription_568303, base: "",
-    url: url_PeeringsListBySubscription_568304, schemes: {Scheme.Https})
+    validator: validate_PeeringsListBySubscription_564203, base: "",
+    url: url_PeeringsListBySubscription_564204, schemes: {Scheme.Https})
 type
-  Call_PeeringServicesListByResourceGroup_568311 = ref object of OpenApiRestCall_567657
-proc url_PeeringServicesListByResourceGroup_568313(protocol: Scheme; host: string;
+  Call_PeeringServicesListByResourceGroup_564211 = ref object of OpenApiRestCall_563555
+proc url_PeeringServicesListByResourceGroup_564213(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1243,30 +1247,30 @@ proc url_PeeringServicesListByResourceGroup_568313(protocol: Scheme; host: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_PeeringServicesListByResourceGroup_568312(path: JsonNode;
+proc validate_PeeringServicesListByResourceGroup_564212(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists all of the peering services under the given subscription and resource group.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   subscriptionId: JString (required)
   ##                 : The Azure subscription ID.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568314 = path.getOrDefault("resourceGroupName")
-  valid_568314 = validateParameter(valid_568314, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564214 = path.getOrDefault("subscriptionId")
+  valid_564214 = validateParameter(valid_564214, JString, required = true,
                                  default = nil)
-  if valid_568314 != nil:
-    section.add "resourceGroupName", valid_568314
-  var valid_568315 = path.getOrDefault("subscriptionId")
-  valid_568315 = validateParameter(valid_568315, JString, required = true,
+  if valid_564214 != nil:
+    section.add "subscriptionId", valid_564214
+  var valid_564215 = path.getOrDefault("resourceGroupName")
+  valid_564215 = validateParameter(valid_564215, JString, required = true,
                                  default = nil)
-  if valid_568315 != nil:
-    section.add "subscriptionId", valid_568315
+  if valid_564215 != nil:
+    section.add "resourceGroupName", valid_564215
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1274,11 +1278,11 @@ proc validate_PeeringServicesListByResourceGroup_568312(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568316 = query.getOrDefault("api-version")
-  valid_568316 = validateParameter(valid_568316, JString, required = true,
+  var valid_564216 = query.getOrDefault("api-version")
+  valid_564216 = validateParameter(valid_564216, JString, required = true,
                                  default = nil)
-  if valid_568316 != nil:
-    section.add "api-version", valid_568316
+  if valid_564216 != nil:
+    section.add "api-version", valid_564216
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1287,45 +1291,45 @@ proc validate_PeeringServicesListByResourceGroup_568312(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568317: Call_PeeringServicesListByResourceGroup_568311;
+proc call*(call_564217: Call_PeeringServicesListByResourceGroup_564211;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Lists all of the peering services under the given subscription and resource group.
   ## 
-  let valid = call_568317.validator(path, query, header, formData, body)
-  let scheme = call_568317.pickScheme
+  let valid = call_564217.validator(path, query, header, formData, body)
+  let scheme = call_564217.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568317.url(scheme.get, call_568317.host, call_568317.base,
-                         call_568317.route, valid.getOrDefault("path"),
+  let url = call_564217.url(scheme.get, call_564217.host, call_564217.base,
+                         call_564217.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568317, url, valid)
+  result = hook(call_564217, url, valid)
 
-proc call*(call_568318: Call_PeeringServicesListByResourceGroup_568311;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string): Recallable =
+proc call*(call_564218: Call_PeeringServicesListByResourceGroup_564211;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string): Recallable =
   ## peeringServicesListByResourceGroup
   ## Lists all of the peering services under the given subscription and resource group.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : The client API version.
   ##   subscriptionId: string (required)
   ##                 : The Azure subscription ID.
-  var path_568319 = newJObject()
-  var query_568320 = newJObject()
-  add(path_568319, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568320, "api-version", newJString(apiVersion))
-  add(path_568319, "subscriptionId", newJString(subscriptionId))
-  result = call_568318.call(path_568319, query_568320, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564219 = newJObject()
+  var query_564220 = newJObject()
+  add(query_564220, "api-version", newJString(apiVersion))
+  add(path_564219, "subscriptionId", newJString(subscriptionId))
+  add(path_564219, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564218.call(path_564219, query_564220, nil, nil, nil)
 
-var peeringServicesListByResourceGroup* = Call_PeeringServicesListByResourceGroup_568311(
+var peeringServicesListByResourceGroup* = Call_PeeringServicesListByResourceGroup_564211(
     name: "peeringServicesListByResourceGroup", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Peering/peeringServices",
-    validator: validate_PeeringServicesListByResourceGroup_568312, base: "",
-    url: url_PeeringServicesListByResourceGroup_568313, schemes: {Scheme.Https})
+    validator: validate_PeeringServicesListByResourceGroup_564212, base: "",
+    url: url_PeeringServicesListByResourceGroup_564213, schemes: {Scheme.Https})
 type
-  Call_PeeringServicesCreateOrUpdate_568332 = ref object of OpenApiRestCall_567657
-proc url_PeeringServicesCreateOrUpdate_568334(protocol: Scheme; host: string;
+  Call_PeeringServicesCreateOrUpdate_564232 = ref object of OpenApiRestCall_563555
+proc url_PeeringServicesCreateOrUpdate_564234(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1349,37 +1353,37 @@ proc url_PeeringServicesCreateOrUpdate_568334(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_PeeringServicesCreateOrUpdate_568333(path: JsonNode; query: JsonNode;
+proc validate_PeeringServicesCreateOrUpdate_564233(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Creates a new peering service or updates an existing peering with the specified name under the given subscription and resource group.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   peeringServiceName: JString (required)
   ##                     : The name of the peering service.
   ##   subscriptionId: JString (required)
   ##                 : The Azure subscription ID.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568335 = path.getOrDefault("resourceGroupName")
-  valid_568335 = validateParameter(valid_568335, JString, required = true,
+        "path argument is necessary due to required `peeringServiceName` field"
+  var valid_564235 = path.getOrDefault("peeringServiceName")
+  valid_564235 = validateParameter(valid_564235, JString, required = true,
                                  default = nil)
-  if valid_568335 != nil:
-    section.add "resourceGroupName", valid_568335
-  var valid_568336 = path.getOrDefault("peeringServiceName")
-  valid_568336 = validateParameter(valid_568336, JString, required = true,
+  if valid_564235 != nil:
+    section.add "peeringServiceName", valid_564235
+  var valid_564236 = path.getOrDefault("subscriptionId")
+  valid_564236 = validateParameter(valid_564236, JString, required = true,
                                  default = nil)
-  if valid_568336 != nil:
-    section.add "peeringServiceName", valid_568336
-  var valid_568337 = path.getOrDefault("subscriptionId")
-  valid_568337 = validateParameter(valid_568337, JString, required = true,
+  if valid_564236 != nil:
+    section.add "subscriptionId", valid_564236
+  var valid_564237 = path.getOrDefault("resourceGroupName")
+  valid_564237 = validateParameter(valid_564237, JString, required = true,
                                  default = nil)
-  if valid_568337 != nil:
-    section.add "subscriptionId", valid_568337
+  if valid_564237 != nil:
+    section.add "resourceGroupName", valid_564237
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1387,11 +1391,11 @@ proc validate_PeeringServicesCreateOrUpdate_568333(path: JsonNode; query: JsonNo
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568338 = query.getOrDefault("api-version")
-  valid_568338 = validateParameter(valid_568338, JString, required = true,
+  var valid_564238 = query.getOrDefault("api-version")
+  valid_564238 = validateParameter(valid_564238, JString, required = true,
                                  default = nil)
-  if valid_568338 != nil:
-    section.add "api-version", valid_568338
+  if valid_564238 != nil:
+    section.add "api-version", valid_564238
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1405,26 +1409,24 @@ proc validate_PeeringServicesCreateOrUpdate_568333(path: JsonNode; query: JsonNo
   if body != nil:
     result.add "body", body
 
-proc call*(call_568340: Call_PeeringServicesCreateOrUpdate_568332; path: JsonNode;
+proc call*(call_564240: Call_PeeringServicesCreateOrUpdate_564232; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Creates a new peering service or updates an existing peering with the specified name under the given subscription and resource group.
   ## 
-  let valid = call_568340.validator(path, query, header, formData, body)
-  let scheme = call_568340.pickScheme
+  let valid = call_564240.validator(path, query, header, formData, body)
+  let scheme = call_564240.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568340.url(scheme.get, call_568340.host, call_568340.base,
-                         call_568340.route, valid.getOrDefault("path"),
+  let url = call_564240.url(scheme.get, call_564240.host, call_564240.base,
+                         call_564240.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568340, url, valid)
+  result = hook(call_564240, url, valid)
 
-proc call*(call_568341: Call_PeeringServicesCreateOrUpdate_568332;
-          resourceGroupName: string; apiVersion: string; peeringServiceName: string;
-          subscriptionId: string; peeringService: JsonNode): Recallable =
+proc call*(call_564241: Call_PeeringServicesCreateOrUpdate_564232;
+          apiVersion: string; peeringServiceName: string; subscriptionId: string;
+          peeringService: JsonNode; resourceGroupName: string): Recallable =
   ## peeringServicesCreateOrUpdate
   ## Creates a new peering service or updates an existing peering with the specified name under the given subscription and resource group.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : The client API version.
   ##   peeringServiceName: string (required)
@@ -1433,25 +1435,27 @@ proc call*(call_568341: Call_PeeringServicesCreateOrUpdate_568332;
   ##                 : The Azure subscription ID.
   ##   peeringService: JObject (required)
   ##                 : The properties needed to create or update a peering service.
-  var path_568342 = newJObject()
-  var query_568343 = newJObject()
-  var body_568344 = newJObject()
-  add(path_568342, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568343, "api-version", newJString(apiVersion))
-  add(path_568342, "peeringServiceName", newJString(peeringServiceName))
-  add(path_568342, "subscriptionId", newJString(subscriptionId))
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564242 = newJObject()
+  var query_564243 = newJObject()
+  var body_564244 = newJObject()
+  add(query_564243, "api-version", newJString(apiVersion))
+  add(path_564242, "peeringServiceName", newJString(peeringServiceName))
+  add(path_564242, "subscriptionId", newJString(subscriptionId))
   if peeringService != nil:
-    body_568344 = peeringService
-  result = call_568341.call(path_568342, query_568343, nil, nil, body_568344)
+    body_564244 = peeringService
+  add(path_564242, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564241.call(path_564242, query_564243, nil, nil, body_564244)
 
-var peeringServicesCreateOrUpdate* = Call_PeeringServicesCreateOrUpdate_568332(
+var peeringServicesCreateOrUpdate* = Call_PeeringServicesCreateOrUpdate_564232(
     name: "peeringServicesCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Peering/peeringServices/{peeringServiceName}",
-    validator: validate_PeeringServicesCreateOrUpdate_568333, base: "",
-    url: url_PeeringServicesCreateOrUpdate_568334, schemes: {Scheme.Https})
+    validator: validate_PeeringServicesCreateOrUpdate_564233, base: "",
+    url: url_PeeringServicesCreateOrUpdate_564234, schemes: {Scheme.Https})
 type
-  Call_PeeringServicesGet_568321 = ref object of OpenApiRestCall_567657
-proc url_PeeringServicesGet_568323(protocol: Scheme; host: string; base: string;
+  Call_PeeringServicesGet_564221 = ref object of OpenApiRestCall_563555
+proc url_PeeringServicesGet_564223(protocol: Scheme; host: string; base: string;
                                   route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1475,7 +1479,7 @@ proc url_PeeringServicesGet_568323(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_PeeringServicesGet_568322(path: JsonNode; query: JsonNode;
+proc validate_PeeringServicesGet_564222(path: JsonNode; query: JsonNode;
                                        header: JsonNode; formData: JsonNode;
                                        body: JsonNode): JsonNode =
   ## Gets an existing peering service with the specified name under the given subscription and resource group.
@@ -1483,30 +1487,30 @@ proc validate_PeeringServicesGet_568322(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   peeringServiceName: JString (required)
   ##                     : The name of the peering.
   ##   subscriptionId: JString (required)
   ##                 : The Azure subscription ID.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568324 = path.getOrDefault("resourceGroupName")
-  valid_568324 = validateParameter(valid_568324, JString, required = true,
+        "path argument is necessary due to required `peeringServiceName` field"
+  var valid_564224 = path.getOrDefault("peeringServiceName")
+  valid_564224 = validateParameter(valid_564224, JString, required = true,
                                  default = nil)
-  if valid_568324 != nil:
-    section.add "resourceGroupName", valid_568324
-  var valid_568325 = path.getOrDefault("peeringServiceName")
-  valid_568325 = validateParameter(valid_568325, JString, required = true,
+  if valid_564224 != nil:
+    section.add "peeringServiceName", valid_564224
+  var valid_564225 = path.getOrDefault("subscriptionId")
+  valid_564225 = validateParameter(valid_564225, JString, required = true,
                                  default = nil)
-  if valid_568325 != nil:
-    section.add "peeringServiceName", valid_568325
-  var valid_568326 = path.getOrDefault("subscriptionId")
-  valid_568326 = validateParameter(valid_568326, JString, required = true,
+  if valid_564225 != nil:
+    section.add "subscriptionId", valid_564225
+  var valid_564226 = path.getOrDefault("resourceGroupName")
+  valid_564226 = validateParameter(valid_564226, JString, required = true,
                                  default = nil)
-  if valid_568326 != nil:
-    section.add "subscriptionId", valid_568326
+  if valid_564226 != nil:
+    section.add "resourceGroupName", valid_564226
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1514,11 +1518,11 @@ proc validate_PeeringServicesGet_568322(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568327 = query.getOrDefault("api-version")
-  valid_568327 = validateParameter(valid_568327, JString, required = true,
+  var valid_564227 = query.getOrDefault("api-version")
+  valid_564227 = validateParameter(valid_564227, JString, required = true,
                                  default = nil)
-  if valid_568327 != nil:
-    section.add "api-version", valid_568327
+  if valid_564227 != nil:
+    section.add "api-version", valid_564227
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1527,47 +1531,48 @@ proc validate_PeeringServicesGet_568322(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568328: Call_PeeringServicesGet_568321; path: JsonNode;
+proc call*(call_564228: Call_PeeringServicesGet_564221; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets an existing peering service with the specified name under the given subscription and resource group.
   ## 
-  let valid = call_568328.validator(path, query, header, formData, body)
-  let scheme = call_568328.pickScheme
+  let valid = call_564228.validator(path, query, header, formData, body)
+  let scheme = call_564228.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568328.url(scheme.get, call_568328.host, call_568328.base,
-                         call_568328.route, valid.getOrDefault("path"),
+  let url = call_564228.url(scheme.get, call_564228.host, call_564228.base,
+                         call_564228.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568328, url, valid)
+  result = hook(call_564228, url, valid)
 
-proc call*(call_568329: Call_PeeringServicesGet_568321; resourceGroupName: string;
-          apiVersion: string; peeringServiceName: string; subscriptionId: string): Recallable =
+proc call*(call_564229: Call_PeeringServicesGet_564221; apiVersion: string;
+          peeringServiceName: string; subscriptionId: string;
+          resourceGroupName: string): Recallable =
   ## peeringServicesGet
   ## Gets an existing peering service with the specified name under the given subscription and resource group.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : The client API version.
   ##   peeringServiceName: string (required)
   ##                     : The name of the peering.
   ##   subscriptionId: string (required)
   ##                 : The Azure subscription ID.
-  var path_568330 = newJObject()
-  var query_568331 = newJObject()
-  add(path_568330, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568331, "api-version", newJString(apiVersion))
-  add(path_568330, "peeringServiceName", newJString(peeringServiceName))
-  add(path_568330, "subscriptionId", newJString(subscriptionId))
-  result = call_568329.call(path_568330, query_568331, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564230 = newJObject()
+  var query_564231 = newJObject()
+  add(query_564231, "api-version", newJString(apiVersion))
+  add(path_564230, "peeringServiceName", newJString(peeringServiceName))
+  add(path_564230, "subscriptionId", newJString(subscriptionId))
+  add(path_564230, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564229.call(path_564230, query_564231, nil, nil, nil)
 
-var peeringServicesGet* = Call_PeeringServicesGet_568321(
+var peeringServicesGet* = Call_PeeringServicesGet_564221(
     name: "peeringServicesGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Peering/peeringServices/{peeringServiceName}",
-    validator: validate_PeeringServicesGet_568322, base: "",
-    url: url_PeeringServicesGet_568323, schemes: {Scheme.Https})
+    validator: validate_PeeringServicesGet_564222, base: "",
+    url: url_PeeringServicesGet_564223, schemes: {Scheme.Https})
 type
-  Call_PeeringServicesUpdate_568356 = ref object of OpenApiRestCall_567657
-proc url_PeeringServicesUpdate_568358(protocol: Scheme; host: string; base: string;
+  Call_PeeringServicesUpdate_564256 = ref object of OpenApiRestCall_563555
+proc url_PeeringServicesUpdate_564258(protocol: Scheme; host: string; base: string;
                                      route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1591,37 +1596,37 @@ proc url_PeeringServicesUpdate_568358(protocol: Scheme; host: string; base: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_PeeringServicesUpdate_568357(path: JsonNode; query: JsonNode;
+proc validate_PeeringServicesUpdate_564257(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Updates tags for a peering service with the specified name under the given subscription and resource group.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   peeringServiceName: JString (required)
   ##                     : The name of the peering service.
   ##   subscriptionId: JString (required)
   ##                 : The Azure subscription ID.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568359 = path.getOrDefault("resourceGroupName")
-  valid_568359 = validateParameter(valid_568359, JString, required = true,
+        "path argument is necessary due to required `peeringServiceName` field"
+  var valid_564259 = path.getOrDefault("peeringServiceName")
+  valid_564259 = validateParameter(valid_564259, JString, required = true,
                                  default = nil)
-  if valid_568359 != nil:
-    section.add "resourceGroupName", valid_568359
-  var valid_568360 = path.getOrDefault("peeringServiceName")
-  valid_568360 = validateParameter(valid_568360, JString, required = true,
+  if valid_564259 != nil:
+    section.add "peeringServiceName", valid_564259
+  var valid_564260 = path.getOrDefault("subscriptionId")
+  valid_564260 = validateParameter(valid_564260, JString, required = true,
                                  default = nil)
-  if valid_568360 != nil:
-    section.add "peeringServiceName", valid_568360
-  var valid_568361 = path.getOrDefault("subscriptionId")
-  valid_568361 = validateParameter(valid_568361, JString, required = true,
+  if valid_564260 != nil:
+    section.add "subscriptionId", valid_564260
+  var valid_564261 = path.getOrDefault("resourceGroupName")
+  valid_564261 = validateParameter(valid_564261, JString, required = true,
                                  default = nil)
-  if valid_568361 != nil:
-    section.add "subscriptionId", valid_568361
+  if valid_564261 != nil:
+    section.add "resourceGroupName", valid_564261
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1629,11 +1634,11 @@ proc validate_PeeringServicesUpdate_568357(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568362 = query.getOrDefault("api-version")
-  valid_568362 = validateParameter(valid_568362, JString, required = true,
+  var valid_564262 = query.getOrDefault("api-version")
+  valid_564262 = validateParameter(valid_564262, JString, required = true,
                                  default = nil)
-  if valid_568362 != nil:
-    section.add "api-version", valid_568362
+  if valid_564262 != nil:
+    section.add "api-version", valid_564262
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1647,53 +1652,53 @@ proc validate_PeeringServicesUpdate_568357(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568364: Call_PeeringServicesUpdate_568356; path: JsonNode;
+proc call*(call_564264: Call_PeeringServicesUpdate_564256; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Updates tags for a peering service with the specified name under the given subscription and resource group.
   ## 
-  let valid = call_568364.validator(path, query, header, formData, body)
-  let scheme = call_568364.pickScheme
+  let valid = call_564264.validator(path, query, header, formData, body)
+  let scheme = call_564264.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568364.url(scheme.get, call_568364.host, call_568364.base,
-                         call_568364.route, valid.getOrDefault("path"),
+  let url = call_564264.url(scheme.get, call_564264.host, call_564264.base,
+                         call_564264.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568364, url, valid)
+  result = hook(call_564264, url, valid)
 
-proc call*(call_568365: Call_PeeringServicesUpdate_568356;
-          resourceGroupName: string; apiVersion: string; peeringServiceName: string;
-          subscriptionId: string; tags: JsonNode): Recallable =
+proc call*(call_564265: Call_PeeringServicesUpdate_564256; tags: JsonNode;
+          apiVersion: string; peeringServiceName: string; subscriptionId: string;
+          resourceGroupName: string): Recallable =
   ## peeringServicesUpdate
   ## Updates tags for a peering service with the specified name under the given subscription and resource group.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   tags: JObject (required)
+  ##       : The resource tags.
   ##   apiVersion: string (required)
   ##             : The client API version.
   ##   peeringServiceName: string (required)
   ##                     : The name of the peering service.
   ##   subscriptionId: string (required)
   ##                 : The Azure subscription ID.
-  ##   tags: JObject (required)
-  ##       : The resource tags.
-  var path_568366 = newJObject()
-  var query_568367 = newJObject()
-  var body_568368 = newJObject()
-  add(path_568366, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568367, "api-version", newJString(apiVersion))
-  add(path_568366, "peeringServiceName", newJString(peeringServiceName))
-  add(path_568366, "subscriptionId", newJString(subscriptionId))
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564266 = newJObject()
+  var query_564267 = newJObject()
+  var body_564268 = newJObject()
   if tags != nil:
-    body_568368 = tags
-  result = call_568365.call(path_568366, query_568367, nil, nil, body_568368)
+    body_564268 = tags
+  add(query_564267, "api-version", newJString(apiVersion))
+  add(path_564266, "peeringServiceName", newJString(peeringServiceName))
+  add(path_564266, "subscriptionId", newJString(subscriptionId))
+  add(path_564266, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564265.call(path_564266, query_564267, nil, nil, body_564268)
 
-var peeringServicesUpdate* = Call_PeeringServicesUpdate_568356(
+var peeringServicesUpdate* = Call_PeeringServicesUpdate_564256(
     name: "peeringServicesUpdate", meth: HttpMethod.HttpPatch,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Peering/peeringServices/{peeringServiceName}",
-    validator: validate_PeeringServicesUpdate_568357, base: "",
-    url: url_PeeringServicesUpdate_568358, schemes: {Scheme.Https})
+    validator: validate_PeeringServicesUpdate_564257, base: "",
+    url: url_PeeringServicesUpdate_564258, schemes: {Scheme.Https})
 type
-  Call_PeeringServicesDelete_568345 = ref object of OpenApiRestCall_567657
-proc url_PeeringServicesDelete_568347(protocol: Scheme; host: string; base: string;
+  Call_PeeringServicesDelete_564245 = ref object of OpenApiRestCall_563555
+proc url_PeeringServicesDelete_564247(protocol: Scheme; host: string; base: string;
                                      route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1717,37 +1722,37 @@ proc url_PeeringServicesDelete_568347(protocol: Scheme; host: string; base: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_PeeringServicesDelete_568346(path: JsonNode; query: JsonNode;
+proc validate_PeeringServicesDelete_564246(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Deletes an existing peering service with the specified name under the given subscription and resource group.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   peeringServiceName: JString (required)
   ##                     : The name of the peering service.
   ##   subscriptionId: JString (required)
   ##                 : The Azure subscription ID.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568348 = path.getOrDefault("resourceGroupName")
-  valid_568348 = validateParameter(valid_568348, JString, required = true,
+        "path argument is necessary due to required `peeringServiceName` field"
+  var valid_564248 = path.getOrDefault("peeringServiceName")
+  valid_564248 = validateParameter(valid_564248, JString, required = true,
                                  default = nil)
-  if valid_568348 != nil:
-    section.add "resourceGroupName", valid_568348
-  var valid_568349 = path.getOrDefault("peeringServiceName")
-  valid_568349 = validateParameter(valid_568349, JString, required = true,
+  if valid_564248 != nil:
+    section.add "peeringServiceName", valid_564248
+  var valid_564249 = path.getOrDefault("subscriptionId")
+  valid_564249 = validateParameter(valid_564249, JString, required = true,
                                  default = nil)
-  if valid_568349 != nil:
-    section.add "peeringServiceName", valid_568349
-  var valid_568350 = path.getOrDefault("subscriptionId")
-  valid_568350 = validateParameter(valid_568350, JString, required = true,
+  if valid_564249 != nil:
+    section.add "subscriptionId", valid_564249
+  var valid_564250 = path.getOrDefault("resourceGroupName")
+  valid_564250 = validateParameter(valid_564250, JString, required = true,
                                  default = nil)
-  if valid_568350 != nil:
-    section.add "subscriptionId", valid_568350
+  if valid_564250 != nil:
+    section.add "resourceGroupName", valid_564250
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1755,11 +1760,11 @@ proc validate_PeeringServicesDelete_568346(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568351 = query.getOrDefault("api-version")
-  valid_568351 = validateParameter(valid_568351, JString, required = true,
+  var valid_564251 = query.getOrDefault("api-version")
+  valid_564251 = validateParameter(valid_564251, JString, required = true,
                                  default = nil)
-  if valid_568351 != nil:
-    section.add "api-version", valid_568351
+  if valid_564251 != nil:
+    section.add "api-version", valid_564251
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1768,48 +1773,48 @@ proc validate_PeeringServicesDelete_568346(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568352: Call_PeeringServicesDelete_568345; path: JsonNode;
+proc call*(call_564252: Call_PeeringServicesDelete_564245; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes an existing peering service with the specified name under the given subscription and resource group.
   ## 
-  let valid = call_568352.validator(path, query, header, formData, body)
-  let scheme = call_568352.pickScheme
+  let valid = call_564252.validator(path, query, header, formData, body)
+  let scheme = call_564252.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568352.url(scheme.get, call_568352.host, call_568352.base,
-                         call_568352.route, valid.getOrDefault("path"),
+  let url = call_564252.url(scheme.get, call_564252.host, call_564252.base,
+                         call_564252.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568352, url, valid)
+  result = hook(call_564252, url, valid)
 
-proc call*(call_568353: Call_PeeringServicesDelete_568345;
-          resourceGroupName: string; apiVersion: string; peeringServiceName: string;
-          subscriptionId: string): Recallable =
+proc call*(call_564253: Call_PeeringServicesDelete_564245; apiVersion: string;
+          peeringServiceName: string; subscriptionId: string;
+          resourceGroupName: string): Recallable =
   ## peeringServicesDelete
   ## Deletes an existing peering service with the specified name under the given subscription and resource group.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : The client API version.
   ##   peeringServiceName: string (required)
   ##                     : The name of the peering service.
   ##   subscriptionId: string (required)
   ##                 : The Azure subscription ID.
-  var path_568354 = newJObject()
-  var query_568355 = newJObject()
-  add(path_568354, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568355, "api-version", newJString(apiVersion))
-  add(path_568354, "peeringServiceName", newJString(peeringServiceName))
-  add(path_568354, "subscriptionId", newJString(subscriptionId))
-  result = call_568353.call(path_568354, query_568355, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564254 = newJObject()
+  var query_564255 = newJObject()
+  add(query_564255, "api-version", newJString(apiVersion))
+  add(path_564254, "peeringServiceName", newJString(peeringServiceName))
+  add(path_564254, "subscriptionId", newJString(subscriptionId))
+  add(path_564254, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564253.call(path_564254, query_564255, nil, nil, nil)
 
-var peeringServicesDelete* = Call_PeeringServicesDelete_568345(
+var peeringServicesDelete* = Call_PeeringServicesDelete_564245(
     name: "peeringServicesDelete", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Peering/peeringServices/{peeringServiceName}",
-    validator: validate_PeeringServicesDelete_568346, base: "",
-    url: url_PeeringServicesDelete_568347, schemes: {Scheme.Https})
+    validator: validate_PeeringServicesDelete_564246, base: "",
+    url: url_PeeringServicesDelete_564247, schemes: {Scheme.Https})
 type
-  Call_PrefixesListByPeeringService_568369 = ref object of OpenApiRestCall_567657
-proc url_PrefixesListByPeeringService_568371(protocol: Scheme; host: string;
+  Call_PrefixesListByPeeringService_564269 = ref object of OpenApiRestCall_563555
+proc url_PrefixesListByPeeringService_564271(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1834,37 +1839,37 @@ proc url_PrefixesListByPeeringService_568371(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_PrefixesListByPeeringService_568370(path: JsonNode; query: JsonNode;
+proc validate_PrefixesListByPeeringService_564270(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists the peerings prefix in the resource group.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The resource group name.
   ##   peeringServiceName: JString (required)
   ##                     : The peering service name.
   ##   subscriptionId: JString (required)
   ##                 : The Azure subscription ID.
+  ##   resourceGroupName: JString (required)
+  ##                    : The resource group name.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568372 = path.getOrDefault("resourceGroupName")
-  valid_568372 = validateParameter(valid_568372, JString, required = true,
+        "path argument is necessary due to required `peeringServiceName` field"
+  var valid_564272 = path.getOrDefault("peeringServiceName")
+  valid_564272 = validateParameter(valid_564272, JString, required = true,
                                  default = nil)
-  if valid_568372 != nil:
-    section.add "resourceGroupName", valid_568372
-  var valid_568373 = path.getOrDefault("peeringServiceName")
-  valid_568373 = validateParameter(valid_568373, JString, required = true,
+  if valid_564272 != nil:
+    section.add "peeringServiceName", valid_564272
+  var valid_564273 = path.getOrDefault("subscriptionId")
+  valid_564273 = validateParameter(valid_564273, JString, required = true,
                                  default = nil)
-  if valid_568373 != nil:
-    section.add "peeringServiceName", valid_568373
-  var valid_568374 = path.getOrDefault("subscriptionId")
-  valid_568374 = validateParameter(valid_568374, JString, required = true,
+  if valid_564273 != nil:
+    section.add "subscriptionId", valid_564273
+  var valid_564274 = path.getOrDefault("resourceGroupName")
+  valid_564274 = validateParameter(valid_564274, JString, required = true,
                                  default = nil)
-  if valid_568374 != nil:
-    section.add "subscriptionId", valid_568374
+  if valid_564274 != nil:
+    section.add "resourceGroupName", valid_564274
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1872,11 +1877,11 @@ proc validate_PrefixesListByPeeringService_568370(path: JsonNode; query: JsonNod
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568375 = query.getOrDefault("api-version")
-  valid_568375 = validateParameter(valid_568375, JString, required = true,
+  var valid_564275 = query.getOrDefault("api-version")
+  valid_564275 = validateParameter(valid_564275, JString, required = true,
                                  default = nil)
-  if valid_568375 != nil:
-    section.add "api-version", valid_568375
+  if valid_564275 != nil:
+    section.add "api-version", valid_564275
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1885,48 +1890,48 @@ proc validate_PrefixesListByPeeringService_568370(path: JsonNode; query: JsonNod
   if body != nil:
     result.add "body", body
 
-proc call*(call_568376: Call_PrefixesListByPeeringService_568369; path: JsonNode;
+proc call*(call_564276: Call_PrefixesListByPeeringService_564269; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists the peerings prefix in the resource group.
   ## 
-  let valid = call_568376.validator(path, query, header, formData, body)
-  let scheme = call_568376.pickScheme
+  let valid = call_564276.validator(path, query, header, formData, body)
+  let scheme = call_564276.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568376.url(scheme.get, call_568376.host, call_568376.base,
-                         call_568376.route, valid.getOrDefault("path"),
+  let url = call_564276.url(scheme.get, call_564276.host, call_564276.base,
+                         call_564276.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568376, url, valid)
+  result = hook(call_564276, url, valid)
 
-proc call*(call_568377: Call_PrefixesListByPeeringService_568369;
-          resourceGroupName: string; apiVersion: string; peeringServiceName: string;
-          subscriptionId: string): Recallable =
+proc call*(call_564277: Call_PrefixesListByPeeringService_564269;
+          apiVersion: string; peeringServiceName: string; subscriptionId: string;
+          resourceGroupName: string): Recallable =
   ## prefixesListByPeeringService
   ## Lists the peerings prefix in the resource group.
-  ##   resourceGroupName: string (required)
-  ##                    : The resource group name.
   ##   apiVersion: string (required)
   ##             : The client API version.
   ##   peeringServiceName: string (required)
   ##                     : The peering service name.
   ##   subscriptionId: string (required)
   ##                 : The Azure subscription ID.
-  var path_568378 = newJObject()
-  var query_568379 = newJObject()
-  add(path_568378, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568379, "api-version", newJString(apiVersion))
-  add(path_568378, "peeringServiceName", newJString(peeringServiceName))
-  add(path_568378, "subscriptionId", newJString(subscriptionId))
-  result = call_568377.call(path_568378, query_568379, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The resource group name.
+  var path_564278 = newJObject()
+  var query_564279 = newJObject()
+  add(query_564279, "api-version", newJString(apiVersion))
+  add(path_564278, "peeringServiceName", newJString(peeringServiceName))
+  add(path_564278, "subscriptionId", newJString(subscriptionId))
+  add(path_564278, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564277.call(path_564278, query_564279, nil, nil, nil)
 
-var prefixesListByPeeringService* = Call_PrefixesListByPeeringService_568369(
+var prefixesListByPeeringService* = Call_PrefixesListByPeeringService_564269(
     name: "prefixesListByPeeringService", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Peering/peeringServices/{peeringServiceName}/prefixes",
-    validator: validate_PrefixesListByPeeringService_568370, base: "",
-    url: url_PrefixesListByPeeringService_568371, schemes: {Scheme.Https})
+    validator: validate_PrefixesListByPeeringService_564270, base: "",
+    url: url_PrefixesListByPeeringService_564271, schemes: {Scheme.Https})
 type
-  Call_PeeringServicePrefixesCreateOrUpdate_568392 = ref object of OpenApiRestCall_567657
-proc url_PeeringServicePrefixesCreateOrUpdate_568394(protocol: Scheme;
+  Call_PeeringServicePrefixesCreateOrUpdate_564292 = ref object of OpenApiRestCall_563555
+proc url_PeeringServicePrefixesCreateOrUpdate_564294(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1953,44 +1958,44 @@ proc url_PeeringServicePrefixesCreateOrUpdate_568394(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_PeeringServicePrefixesCreateOrUpdate_568393(path: JsonNode;
+proc validate_PeeringServicePrefixesCreateOrUpdate_564293(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Creates or updates the peering prefix.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The resource group name.
   ##   peeringServiceName: JString (required)
   ##                     : The peering service name.
   ##   subscriptionId: JString (required)
   ##                 : The Azure subscription ID.
   ##   prefixName: JString (required)
   ##             : The prefix name
+  ##   resourceGroupName: JString (required)
+  ##                    : The resource group name.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568395 = path.getOrDefault("resourceGroupName")
-  valid_568395 = validateParameter(valid_568395, JString, required = true,
+        "path argument is necessary due to required `peeringServiceName` field"
+  var valid_564295 = path.getOrDefault("peeringServiceName")
+  valid_564295 = validateParameter(valid_564295, JString, required = true,
                                  default = nil)
-  if valid_568395 != nil:
-    section.add "resourceGroupName", valid_568395
-  var valid_568396 = path.getOrDefault("peeringServiceName")
-  valid_568396 = validateParameter(valid_568396, JString, required = true,
+  if valid_564295 != nil:
+    section.add "peeringServiceName", valid_564295
+  var valid_564296 = path.getOrDefault("subscriptionId")
+  valid_564296 = validateParameter(valid_564296, JString, required = true,
                                  default = nil)
-  if valid_568396 != nil:
-    section.add "peeringServiceName", valid_568396
-  var valid_568397 = path.getOrDefault("subscriptionId")
-  valid_568397 = validateParameter(valid_568397, JString, required = true,
+  if valid_564296 != nil:
+    section.add "subscriptionId", valid_564296
+  var valid_564297 = path.getOrDefault("prefixName")
+  valid_564297 = validateParameter(valid_564297, JString, required = true,
                                  default = nil)
-  if valid_568397 != nil:
-    section.add "subscriptionId", valid_568397
-  var valid_568398 = path.getOrDefault("prefixName")
-  valid_568398 = validateParameter(valid_568398, JString, required = true,
+  if valid_564297 != nil:
+    section.add "prefixName", valid_564297
+  var valid_564298 = path.getOrDefault("resourceGroupName")
+  valid_564298 = validateParameter(valid_564298, JString, required = true,
                                  default = nil)
-  if valid_568398 != nil:
-    section.add "prefixName", valid_568398
+  if valid_564298 != nil:
+    section.add "resourceGroupName", valid_564298
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1998,11 +2003,11 @@ proc validate_PeeringServicePrefixesCreateOrUpdate_568393(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568399 = query.getOrDefault("api-version")
-  valid_568399 = validateParameter(valid_568399, JString, required = true,
+  var valid_564299 = query.getOrDefault("api-version")
+  valid_564299 = validateParameter(valid_564299, JString, required = true,
                                  default = nil)
-  if valid_568399 != nil:
-    section.add "api-version", valid_568399
+  if valid_564299 != nil:
+    section.add "api-version", valid_564299
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2016,57 +2021,58 @@ proc validate_PeeringServicePrefixesCreateOrUpdate_568393(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568401: Call_PeeringServicePrefixesCreateOrUpdate_568392;
+proc call*(call_564301: Call_PeeringServicePrefixesCreateOrUpdate_564292;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Creates or updates the peering prefix.
   ## 
-  let valid = call_568401.validator(path, query, header, formData, body)
-  let scheme = call_568401.pickScheme
+  let valid = call_564301.validator(path, query, header, formData, body)
+  let scheme = call_564301.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568401.url(scheme.get, call_568401.host, call_568401.base,
-                         call_568401.route, valid.getOrDefault("path"),
+  let url = call_564301.url(scheme.get, call_564301.host, call_564301.base,
+                         call_564301.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568401, url, valid)
+  result = hook(call_564301, url, valid)
 
-proc call*(call_568402: Call_PeeringServicePrefixesCreateOrUpdate_568392;
-          resourceGroupName: string; apiVersion: string; peeringServiceName: string;
-          subscriptionId: string; peeringServicePrefix: JsonNode; prefixName: string): Recallable =
+proc call*(call_564302: Call_PeeringServicePrefixesCreateOrUpdate_564292;
+          apiVersion: string; peeringServiceName: string; subscriptionId: string;
+          prefixName: string; resourceGroupName: string;
+          peeringServicePrefix: JsonNode): Recallable =
   ## peeringServicePrefixesCreateOrUpdate
   ## Creates or updates the peering prefix.
-  ##   resourceGroupName: string (required)
-  ##                    : The resource group name.
   ##   apiVersion: string (required)
   ##             : The client API version.
   ##   peeringServiceName: string (required)
   ##                     : The peering service name.
   ##   subscriptionId: string (required)
   ##                 : The Azure subscription ID.
+  ##   prefixName: string (required)
+  ##             : The prefix name
+  ##   resourceGroupName: string (required)
+  ##                    : The resource group name.
   ##   peeringServicePrefix: JObject (required)
   ##                       : The IP prefix for an peering
-  ##   prefixName: string (required)
-  ##             : The prefix name
-  var path_568403 = newJObject()
-  var query_568404 = newJObject()
-  var body_568405 = newJObject()
-  add(path_568403, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568404, "api-version", newJString(apiVersion))
-  add(path_568403, "peeringServiceName", newJString(peeringServiceName))
-  add(path_568403, "subscriptionId", newJString(subscriptionId))
+  var path_564303 = newJObject()
+  var query_564304 = newJObject()
+  var body_564305 = newJObject()
+  add(query_564304, "api-version", newJString(apiVersion))
+  add(path_564303, "peeringServiceName", newJString(peeringServiceName))
+  add(path_564303, "subscriptionId", newJString(subscriptionId))
+  add(path_564303, "prefixName", newJString(prefixName))
+  add(path_564303, "resourceGroupName", newJString(resourceGroupName))
   if peeringServicePrefix != nil:
-    body_568405 = peeringServicePrefix
-  add(path_568403, "prefixName", newJString(prefixName))
-  result = call_568402.call(path_568403, query_568404, nil, nil, body_568405)
+    body_564305 = peeringServicePrefix
+  result = call_564302.call(path_564303, query_564304, nil, nil, body_564305)
 
-var peeringServicePrefixesCreateOrUpdate* = Call_PeeringServicePrefixesCreateOrUpdate_568392(
+var peeringServicePrefixesCreateOrUpdate* = Call_PeeringServicePrefixesCreateOrUpdate_564292(
     name: "peeringServicePrefixesCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Peering/peeringServices/{peeringServiceName}/prefixes/{prefixName}",
-    validator: validate_PeeringServicePrefixesCreateOrUpdate_568393, base: "",
-    url: url_PeeringServicePrefixesCreateOrUpdate_568394, schemes: {Scheme.Https})
+    validator: validate_PeeringServicePrefixesCreateOrUpdate_564293, base: "",
+    url: url_PeeringServicePrefixesCreateOrUpdate_564294, schemes: {Scheme.Https})
 type
-  Call_PeeringServicePrefixesGet_568380 = ref object of OpenApiRestCall_567657
-proc url_PeeringServicePrefixesGet_568382(protocol: Scheme; host: string;
+  Call_PeeringServicePrefixesGet_564280 = ref object of OpenApiRestCall_563555
+proc url_PeeringServicePrefixesGet_564282(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2093,44 +2099,44 @@ proc url_PeeringServicePrefixesGet_568382(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_PeeringServicePrefixesGet_568381(path: JsonNode; query: JsonNode;
+proc validate_PeeringServicePrefixesGet_564281(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the peering service prefix.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The resource group name.
   ##   peeringServiceName: JString (required)
   ##                     : The peering service name.
   ##   subscriptionId: JString (required)
   ##                 : The Azure subscription ID.
   ##   prefixName: JString (required)
   ##             : The prefix name.
+  ##   resourceGroupName: JString (required)
+  ##                    : The resource group name.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568383 = path.getOrDefault("resourceGroupName")
-  valid_568383 = validateParameter(valid_568383, JString, required = true,
+        "path argument is necessary due to required `peeringServiceName` field"
+  var valid_564283 = path.getOrDefault("peeringServiceName")
+  valid_564283 = validateParameter(valid_564283, JString, required = true,
                                  default = nil)
-  if valid_568383 != nil:
-    section.add "resourceGroupName", valid_568383
-  var valid_568384 = path.getOrDefault("peeringServiceName")
-  valid_568384 = validateParameter(valid_568384, JString, required = true,
+  if valid_564283 != nil:
+    section.add "peeringServiceName", valid_564283
+  var valid_564284 = path.getOrDefault("subscriptionId")
+  valid_564284 = validateParameter(valid_564284, JString, required = true,
                                  default = nil)
-  if valid_568384 != nil:
-    section.add "peeringServiceName", valid_568384
-  var valid_568385 = path.getOrDefault("subscriptionId")
-  valid_568385 = validateParameter(valid_568385, JString, required = true,
+  if valid_564284 != nil:
+    section.add "subscriptionId", valid_564284
+  var valid_564285 = path.getOrDefault("prefixName")
+  valid_564285 = validateParameter(valid_564285, JString, required = true,
                                  default = nil)
-  if valid_568385 != nil:
-    section.add "subscriptionId", valid_568385
-  var valid_568386 = path.getOrDefault("prefixName")
-  valid_568386 = validateParameter(valid_568386, JString, required = true,
+  if valid_564285 != nil:
+    section.add "prefixName", valid_564285
+  var valid_564286 = path.getOrDefault("resourceGroupName")
+  valid_564286 = validateParameter(valid_564286, JString, required = true,
                                  default = nil)
-  if valid_568386 != nil:
-    section.add "prefixName", valid_568386
+  if valid_564286 != nil:
+    section.add "resourceGroupName", valid_564286
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2138,11 +2144,11 @@ proc validate_PeeringServicePrefixesGet_568381(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568387 = query.getOrDefault("api-version")
-  valid_568387 = validateParameter(valid_568387, JString, required = true,
+  var valid_564287 = query.getOrDefault("api-version")
+  valid_564287 = validateParameter(valid_564287, JString, required = true,
                                  default = nil)
-  if valid_568387 != nil:
-    section.add "api-version", valid_568387
+  if valid_564287 != nil:
+    section.add "api-version", valid_564287
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2151,26 +2157,24 @@ proc validate_PeeringServicePrefixesGet_568381(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568388: Call_PeeringServicePrefixesGet_568380; path: JsonNode;
+proc call*(call_564288: Call_PeeringServicePrefixesGet_564280; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the peering service prefix.
   ## 
-  let valid = call_568388.validator(path, query, header, formData, body)
-  let scheme = call_568388.pickScheme
+  let valid = call_564288.validator(path, query, header, formData, body)
+  let scheme = call_564288.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568388.url(scheme.get, call_568388.host, call_568388.base,
-                         call_568388.route, valid.getOrDefault("path"),
+  let url = call_564288.url(scheme.get, call_564288.host, call_564288.base,
+                         call_564288.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568388, url, valid)
+  result = hook(call_564288, url, valid)
 
-proc call*(call_568389: Call_PeeringServicePrefixesGet_568380;
-          resourceGroupName: string; apiVersion: string; peeringServiceName: string;
-          subscriptionId: string; prefixName: string): Recallable =
+proc call*(call_564289: Call_PeeringServicePrefixesGet_564280; apiVersion: string;
+          peeringServiceName: string; subscriptionId: string; prefixName: string;
+          resourceGroupName: string): Recallable =
   ## peeringServicePrefixesGet
   ## Gets the peering service prefix.
-  ##   resourceGroupName: string (required)
-  ##                    : The resource group name.
   ##   apiVersion: string (required)
   ##             : The client API version.
   ##   peeringServiceName: string (required)
@@ -2179,23 +2183,25 @@ proc call*(call_568389: Call_PeeringServicePrefixesGet_568380;
   ##                 : The Azure subscription ID.
   ##   prefixName: string (required)
   ##             : The prefix name.
-  var path_568390 = newJObject()
-  var query_568391 = newJObject()
-  add(path_568390, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568391, "api-version", newJString(apiVersion))
-  add(path_568390, "peeringServiceName", newJString(peeringServiceName))
-  add(path_568390, "subscriptionId", newJString(subscriptionId))
-  add(path_568390, "prefixName", newJString(prefixName))
-  result = call_568389.call(path_568390, query_568391, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The resource group name.
+  var path_564290 = newJObject()
+  var query_564291 = newJObject()
+  add(query_564291, "api-version", newJString(apiVersion))
+  add(path_564290, "peeringServiceName", newJString(peeringServiceName))
+  add(path_564290, "subscriptionId", newJString(subscriptionId))
+  add(path_564290, "prefixName", newJString(prefixName))
+  add(path_564290, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564289.call(path_564290, query_564291, nil, nil, nil)
 
-var peeringServicePrefixesGet* = Call_PeeringServicePrefixesGet_568380(
+var peeringServicePrefixesGet* = Call_PeeringServicePrefixesGet_564280(
     name: "peeringServicePrefixesGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Peering/peeringServices/{peeringServiceName}/prefixes/{prefixName}",
-    validator: validate_PeeringServicePrefixesGet_568381, base: "",
-    url: url_PeeringServicePrefixesGet_568382, schemes: {Scheme.Https})
+    validator: validate_PeeringServicePrefixesGet_564281, base: "",
+    url: url_PeeringServicePrefixesGet_564282, schemes: {Scheme.Https})
 type
-  Call_PeeringServicePrefixesDelete_568406 = ref object of OpenApiRestCall_567657
-proc url_PeeringServicePrefixesDelete_568408(protocol: Scheme; host: string;
+  Call_PeeringServicePrefixesDelete_564306 = ref object of OpenApiRestCall_563555
+proc url_PeeringServicePrefixesDelete_564308(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2222,44 +2228,44 @@ proc url_PeeringServicePrefixesDelete_568408(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_PeeringServicePrefixesDelete_568407(path: JsonNode; query: JsonNode;
+proc validate_PeeringServicePrefixesDelete_564307(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## removes the peering prefix.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The resource group name.
   ##   peeringServiceName: JString (required)
   ##                     : The peering service name.
   ##   subscriptionId: JString (required)
   ##                 : The Azure subscription ID.
   ##   prefixName: JString (required)
   ##             : The prefix name
+  ##   resourceGroupName: JString (required)
+  ##                    : The resource group name.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568409 = path.getOrDefault("resourceGroupName")
-  valid_568409 = validateParameter(valid_568409, JString, required = true,
+        "path argument is necessary due to required `peeringServiceName` field"
+  var valid_564309 = path.getOrDefault("peeringServiceName")
+  valid_564309 = validateParameter(valid_564309, JString, required = true,
                                  default = nil)
-  if valid_568409 != nil:
-    section.add "resourceGroupName", valid_568409
-  var valid_568410 = path.getOrDefault("peeringServiceName")
-  valid_568410 = validateParameter(valid_568410, JString, required = true,
+  if valid_564309 != nil:
+    section.add "peeringServiceName", valid_564309
+  var valid_564310 = path.getOrDefault("subscriptionId")
+  valid_564310 = validateParameter(valid_564310, JString, required = true,
                                  default = nil)
-  if valid_568410 != nil:
-    section.add "peeringServiceName", valid_568410
-  var valid_568411 = path.getOrDefault("subscriptionId")
-  valid_568411 = validateParameter(valid_568411, JString, required = true,
+  if valid_564310 != nil:
+    section.add "subscriptionId", valid_564310
+  var valid_564311 = path.getOrDefault("prefixName")
+  valid_564311 = validateParameter(valid_564311, JString, required = true,
                                  default = nil)
-  if valid_568411 != nil:
-    section.add "subscriptionId", valid_568411
-  var valid_568412 = path.getOrDefault("prefixName")
-  valid_568412 = validateParameter(valid_568412, JString, required = true,
+  if valid_564311 != nil:
+    section.add "prefixName", valid_564311
+  var valid_564312 = path.getOrDefault("resourceGroupName")
+  valid_564312 = validateParameter(valid_564312, JString, required = true,
                                  default = nil)
-  if valid_568412 != nil:
-    section.add "prefixName", valid_568412
+  if valid_564312 != nil:
+    section.add "resourceGroupName", valid_564312
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2267,11 +2273,11 @@ proc validate_PeeringServicePrefixesDelete_568407(path: JsonNode; query: JsonNod
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568413 = query.getOrDefault("api-version")
-  valid_568413 = validateParameter(valid_568413, JString, required = true,
+  var valid_564313 = query.getOrDefault("api-version")
+  valid_564313 = validateParameter(valid_564313, JString, required = true,
                                  default = nil)
-  if valid_568413 != nil:
-    section.add "api-version", valid_568413
+  if valid_564313 != nil:
+    section.add "api-version", valid_564313
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2280,26 +2286,24 @@ proc validate_PeeringServicePrefixesDelete_568407(path: JsonNode; query: JsonNod
   if body != nil:
     result.add "body", body
 
-proc call*(call_568414: Call_PeeringServicePrefixesDelete_568406; path: JsonNode;
+proc call*(call_564314: Call_PeeringServicePrefixesDelete_564306; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## removes the peering prefix.
   ## 
-  let valid = call_568414.validator(path, query, header, formData, body)
-  let scheme = call_568414.pickScheme
+  let valid = call_564314.validator(path, query, header, formData, body)
+  let scheme = call_564314.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568414.url(scheme.get, call_568414.host, call_568414.base,
-                         call_568414.route, valid.getOrDefault("path"),
+  let url = call_564314.url(scheme.get, call_564314.host, call_564314.base,
+                         call_564314.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568414, url, valid)
+  result = hook(call_564314, url, valid)
 
-proc call*(call_568415: Call_PeeringServicePrefixesDelete_568406;
-          resourceGroupName: string; apiVersion: string; peeringServiceName: string;
-          subscriptionId: string; prefixName: string): Recallable =
+proc call*(call_564315: Call_PeeringServicePrefixesDelete_564306;
+          apiVersion: string; peeringServiceName: string; subscriptionId: string;
+          prefixName: string; resourceGroupName: string): Recallable =
   ## peeringServicePrefixesDelete
   ## removes the peering prefix.
-  ##   resourceGroupName: string (required)
-  ##                    : The resource group name.
   ##   apiVersion: string (required)
   ##             : The client API version.
   ##   peeringServiceName: string (required)
@@ -2308,23 +2312,25 @@ proc call*(call_568415: Call_PeeringServicePrefixesDelete_568406;
   ##                 : The Azure subscription ID.
   ##   prefixName: string (required)
   ##             : The prefix name
-  var path_568416 = newJObject()
-  var query_568417 = newJObject()
-  add(path_568416, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568417, "api-version", newJString(apiVersion))
-  add(path_568416, "peeringServiceName", newJString(peeringServiceName))
-  add(path_568416, "subscriptionId", newJString(subscriptionId))
-  add(path_568416, "prefixName", newJString(prefixName))
-  result = call_568415.call(path_568416, query_568417, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The resource group name.
+  var path_564316 = newJObject()
+  var query_564317 = newJObject()
+  add(query_564317, "api-version", newJString(apiVersion))
+  add(path_564316, "peeringServiceName", newJString(peeringServiceName))
+  add(path_564316, "subscriptionId", newJString(subscriptionId))
+  add(path_564316, "prefixName", newJString(prefixName))
+  add(path_564316, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564315.call(path_564316, query_564317, nil, nil, nil)
 
-var peeringServicePrefixesDelete* = Call_PeeringServicePrefixesDelete_568406(
+var peeringServicePrefixesDelete* = Call_PeeringServicePrefixesDelete_564306(
     name: "peeringServicePrefixesDelete", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Peering/peeringServices/{peeringServiceName}/prefixes/{prefixName}",
-    validator: validate_PeeringServicePrefixesDelete_568407, base: "",
-    url: url_PeeringServicePrefixesDelete_568408, schemes: {Scheme.Https})
+    validator: validate_PeeringServicePrefixesDelete_564307, base: "",
+    url: url_PeeringServicePrefixesDelete_564308, schemes: {Scheme.Https})
 type
-  Call_PeeringsListByResourceGroup_568418 = ref object of OpenApiRestCall_567657
-proc url_PeeringsListByResourceGroup_568420(protocol: Scheme; host: string;
+  Call_PeeringsListByResourceGroup_564318 = ref object of OpenApiRestCall_563555
+proc url_PeeringsListByResourceGroup_564320(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2344,30 +2350,30 @@ proc url_PeeringsListByResourceGroup_568420(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_PeeringsListByResourceGroup_568419(path: JsonNode; query: JsonNode;
+proc validate_PeeringsListByResourceGroup_564319(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists all of the peerings under the given subscription and resource group.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   subscriptionId: JString (required)
   ##                 : The Azure subscription ID.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568421 = path.getOrDefault("resourceGroupName")
-  valid_568421 = validateParameter(valid_568421, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564321 = path.getOrDefault("subscriptionId")
+  valid_564321 = validateParameter(valid_564321, JString, required = true,
                                  default = nil)
-  if valid_568421 != nil:
-    section.add "resourceGroupName", valid_568421
-  var valid_568422 = path.getOrDefault("subscriptionId")
-  valid_568422 = validateParameter(valid_568422, JString, required = true,
+  if valid_564321 != nil:
+    section.add "subscriptionId", valid_564321
+  var valid_564322 = path.getOrDefault("resourceGroupName")
+  valid_564322 = validateParameter(valid_564322, JString, required = true,
                                  default = nil)
-  if valid_568422 != nil:
-    section.add "subscriptionId", valid_568422
+  if valid_564322 != nil:
+    section.add "resourceGroupName", valid_564322
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2375,11 +2381,11 @@ proc validate_PeeringsListByResourceGroup_568419(path: JsonNode; query: JsonNode
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568423 = query.getOrDefault("api-version")
-  valid_568423 = validateParameter(valid_568423, JString, required = true,
+  var valid_564323 = query.getOrDefault("api-version")
+  valid_564323 = validateParameter(valid_564323, JString, required = true,
                                  default = nil)
-  if valid_568423 != nil:
-    section.add "api-version", valid_568423
+  if valid_564323 != nil:
+    section.add "api-version", valid_564323
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2388,44 +2394,44 @@ proc validate_PeeringsListByResourceGroup_568419(path: JsonNode; query: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_568424: Call_PeeringsListByResourceGroup_568418; path: JsonNode;
+proc call*(call_564324: Call_PeeringsListByResourceGroup_564318; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists all of the peerings under the given subscription and resource group.
   ## 
-  let valid = call_568424.validator(path, query, header, formData, body)
-  let scheme = call_568424.pickScheme
+  let valid = call_564324.validator(path, query, header, formData, body)
+  let scheme = call_564324.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568424.url(scheme.get, call_568424.host, call_568424.base,
-                         call_568424.route, valid.getOrDefault("path"),
+  let url = call_564324.url(scheme.get, call_564324.host, call_564324.base,
+                         call_564324.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568424, url, valid)
+  result = hook(call_564324, url, valid)
 
-proc call*(call_568425: Call_PeeringsListByResourceGroup_568418;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string): Recallable =
+proc call*(call_564325: Call_PeeringsListByResourceGroup_564318;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string): Recallable =
   ## peeringsListByResourceGroup
   ## Lists all of the peerings under the given subscription and resource group.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : The client API version.
   ##   subscriptionId: string (required)
   ##                 : The Azure subscription ID.
-  var path_568426 = newJObject()
-  var query_568427 = newJObject()
-  add(path_568426, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568427, "api-version", newJString(apiVersion))
-  add(path_568426, "subscriptionId", newJString(subscriptionId))
-  result = call_568425.call(path_568426, query_568427, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564326 = newJObject()
+  var query_564327 = newJObject()
+  add(query_564327, "api-version", newJString(apiVersion))
+  add(path_564326, "subscriptionId", newJString(subscriptionId))
+  add(path_564326, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564325.call(path_564326, query_564327, nil, nil, nil)
 
-var peeringsListByResourceGroup* = Call_PeeringsListByResourceGroup_568418(
+var peeringsListByResourceGroup* = Call_PeeringsListByResourceGroup_564318(
     name: "peeringsListByResourceGroup", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Peering/peerings",
-    validator: validate_PeeringsListByResourceGroup_568419, base: "",
-    url: url_PeeringsListByResourceGroup_568420, schemes: {Scheme.Https})
+    validator: validate_PeeringsListByResourceGroup_564319, base: "",
+    url: url_PeeringsListByResourceGroup_564320, schemes: {Scheme.Https})
 type
-  Call_PeeringsCreateOrUpdate_568439 = ref object of OpenApiRestCall_567657
-proc url_PeeringsCreateOrUpdate_568441(protocol: Scheme; host: string; base: string;
+  Call_PeeringsCreateOrUpdate_564339 = ref object of OpenApiRestCall_563555
+proc url_PeeringsCreateOrUpdate_564341(protocol: Scheme; host: string; base: string;
                                       route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2447,37 +2453,37 @@ proc url_PeeringsCreateOrUpdate_568441(protocol: Scheme; host: string; base: str
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_PeeringsCreateOrUpdate_568440(path: JsonNode; query: JsonNode;
+proc validate_PeeringsCreateOrUpdate_564340(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Creates a new peering or updates an existing peering with the specified name under the given subscription and resource group.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   peeringName: JString (required)
   ##              : The name of the peering.
   ##   subscriptionId: JString (required)
   ##                 : The Azure subscription ID.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568442 = path.getOrDefault("resourceGroupName")
-  valid_568442 = validateParameter(valid_568442, JString, required = true,
+        "path argument is necessary due to required `peeringName` field"
+  var valid_564342 = path.getOrDefault("peeringName")
+  valid_564342 = validateParameter(valid_564342, JString, required = true,
                                  default = nil)
-  if valid_568442 != nil:
-    section.add "resourceGroupName", valid_568442
-  var valid_568443 = path.getOrDefault("peeringName")
-  valid_568443 = validateParameter(valid_568443, JString, required = true,
+  if valid_564342 != nil:
+    section.add "peeringName", valid_564342
+  var valid_564343 = path.getOrDefault("subscriptionId")
+  valid_564343 = validateParameter(valid_564343, JString, required = true,
                                  default = nil)
-  if valid_568443 != nil:
-    section.add "peeringName", valid_568443
-  var valid_568444 = path.getOrDefault("subscriptionId")
-  valid_568444 = validateParameter(valid_568444, JString, required = true,
+  if valid_564343 != nil:
+    section.add "subscriptionId", valid_564343
+  var valid_564344 = path.getOrDefault("resourceGroupName")
+  valid_564344 = validateParameter(valid_564344, JString, required = true,
                                  default = nil)
-  if valid_568444 != nil:
-    section.add "subscriptionId", valid_568444
+  if valid_564344 != nil:
+    section.add "resourceGroupName", valid_564344
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2485,11 +2491,11 @@ proc validate_PeeringsCreateOrUpdate_568440(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568445 = query.getOrDefault("api-version")
-  valid_568445 = validateParameter(valid_568445, JString, required = true,
+  var valid_564345 = query.getOrDefault("api-version")
+  valid_564345 = validateParameter(valid_564345, JString, required = true,
                                  default = nil)
-  if valid_568445 != nil:
-    section.add "api-version", valid_568445
+  if valid_564345 != nil:
+    section.add "api-version", valid_564345
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2503,26 +2509,24 @@ proc validate_PeeringsCreateOrUpdate_568440(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568447: Call_PeeringsCreateOrUpdate_568439; path: JsonNode;
+proc call*(call_564347: Call_PeeringsCreateOrUpdate_564339; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Creates a new peering or updates an existing peering with the specified name under the given subscription and resource group.
   ## 
-  let valid = call_568447.validator(path, query, header, formData, body)
-  let scheme = call_568447.pickScheme
+  let valid = call_564347.validator(path, query, header, formData, body)
+  let scheme = call_564347.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568447.url(scheme.get, call_568447.host, call_568447.base,
-                         call_568447.route, valid.getOrDefault("path"),
+  let url = call_564347.url(scheme.get, call_564347.host, call_564347.base,
+                         call_564347.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568447, url, valid)
+  result = hook(call_564347, url, valid)
 
-proc call*(call_568448: Call_PeeringsCreateOrUpdate_568439;
-          resourceGroupName: string; apiVersion: string; peeringName: string;
-          subscriptionId: string; peering: JsonNode): Recallable =
+proc call*(call_564348: Call_PeeringsCreateOrUpdate_564339; apiVersion: string;
+          peeringName: string; subscriptionId: string; peering: JsonNode;
+          resourceGroupName: string): Recallable =
   ## peeringsCreateOrUpdate
   ## Creates a new peering or updates an existing peering with the specified name under the given subscription and resource group.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : The client API version.
   ##   peeringName: string (required)
@@ -2531,25 +2535,27 @@ proc call*(call_568448: Call_PeeringsCreateOrUpdate_568439;
   ##                 : The Azure subscription ID.
   ##   peering: JObject (required)
   ##          : The properties needed to create or update a peering.
-  var path_568449 = newJObject()
-  var query_568450 = newJObject()
-  var body_568451 = newJObject()
-  add(path_568449, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568450, "api-version", newJString(apiVersion))
-  add(path_568449, "peeringName", newJString(peeringName))
-  add(path_568449, "subscriptionId", newJString(subscriptionId))
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564349 = newJObject()
+  var query_564350 = newJObject()
+  var body_564351 = newJObject()
+  add(query_564350, "api-version", newJString(apiVersion))
+  add(path_564349, "peeringName", newJString(peeringName))
+  add(path_564349, "subscriptionId", newJString(subscriptionId))
   if peering != nil:
-    body_568451 = peering
-  result = call_568448.call(path_568449, query_568450, nil, nil, body_568451)
+    body_564351 = peering
+  add(path_564349, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564348.call(path_564349, query_564350, nil, nil, body_564351)
 
-var peeringsCreateOrUpdate* = Call_PeeringsCreateOrUpdate_568439(
+var peeringsCreateOrUpdate* = Call_PeeringsCreateOrUpdate_564339(
     name: "peeringsCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Peering/peerings/{peeringName}",
-    validator: validate_PeeringsCreateOrUpdate_568440, base: "",
-    url: url_PeeringsCreateOrUpdate_568441, schemes: {Scheme.Https})
+    validator: validate_PeeringsCreateOrUpdate_564340, base: "",
+    url: url_PeeringsCreateOrUpdate_564341, schemes: {Scheme.Https})
 type
-  Call_PeeringsGet_568428 = ref object of OpenApiRestCall_567657
-proc url_PeeringsGet_568430(protocol: Scheme; host: string; base: string;
+  Call_PeeringsGet_564328 = ref object of OpenApiRestCall_563555
+proc url_PeeringsGet_564330(protocol: Scheme; host: string; base: string;
                            route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2571,37 +2577,37 @@ proc url_PeeringsGet_568430(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_PeeringsGet_568429(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_PeeringsGet_564329(path: JsonNode; query: JsonNode; header: JsonNode;
                                 formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets an existing peering with the specified name under the given subscription and resource group.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   peeringName: JString (required)
   ##              : The name of the peering.
   ##   subscriptionId: JString (required)
   ##                 : The Azure subscription ID.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568431 = path.getOrDefault("resourceGroupName")
-  valid_568431 = validateParameter(valid_568431, JString, required = true,
+        "path argument is necessary due to required `peeringName` field"
+  var valid_564331 = path.getOrDefault("peeringName")
+  valid_564331 = validateParameter(valid_564331, JString, required = true,
                                  default = nil)
-  if valid_568431 != nil:
-    section.add "resourceGroupName", valid_568431
-  var valid_568432 = path.getOrDefault("peeringName")
-  valid_568432 = validateParameter(valid_568432, JString, required = true,
+  if valid_564331 != nil:
+    section.add "peeringName", valid_564331
+  var valid_564332 = path.getOrDefault("subscriptionId")
+  valid_564332 = validateParameter(valid_564332, JString, required = true,
                                  default = nil)
-  if valid_568432 != nil:
-    section.add "peeringName", valid_568432
-  var valid_568433 = path.getOrDefault("subscriptionId")
-  valid_568433 = validateParameter(valid_568433, JString, required = true,
+  if valid_564332 != nil:
+    section.add "subscriptionId", valid_564332
+  var valid_564333 = path.getOrDefault("resourceGroupName")
+  valid_564333 = validateParameter(valid_564333, JString, required = true,
                                  default = nil)
-  if valid_568433 != nil:
-    section.add "subscriptionId", valid_568433
+  if valid_564333 != nil:
+    section.add "resourceGroupName", valid_564333
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2609,11 +2615,11 @@ proc validate_PeeringsGet_568429(path: JsonNode; query: JsonNode; header: JsonNo
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568434 = query.getOrDefault("api-version")
-  valid_568434 = validateParameter(valid_568434, JString, required = true,
+  var valid_564334 = query.getOrDefault("api-version")
+  valid_564334 = validateParameter(valid_564334, JString, required = true,
                                  default = nil)
-  if valid_568434 != nil:
-    section.add "api-version", valid_568434
+  if valid_564334 != nil:
+    section.add "api-version", valid_564334
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2622,48 +2628,48 @@ proc validate_PeeringsGet_568429(path: JsonNode; query: JsonNode; header: JsonNo
   if body != nil:
     result.add "body", body
 
-proc call*(call_568435: Call_PeeringsGet_568428; path: JsonNode; query: JsonNode;
+proc call*(call_564335: Call_PeeringsGet_564328; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets an existing peering with the specified name under the given subscription and resource group.
   ## 
-  let valid = call_568435.validator(path, query, header, formData, body)
-  let scheme = call_568435.pickScheme
+  let valid = call_564335.validator(path, query, header, formData, body)
+  let scheme = call_564335.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568435.url(scheme.get, call_568435.host, call_568435.base,
-                         call_568435.route, valid.getOrDefault("path"),
+  let url = call_564335.url(scheme.get, call_564335.host, call_564335.base,
+                         call_564335.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568435, url, valid)
+  result = hook(call_564335, url, valid)
 
-proc call*(call_568436: Call_PeeringsGet_568428; resourceGroupName: string;
-          apiVersion: string; peeringName: string; subscriptionId: string): Recallable =
+proc call*(call_564336: Call_PeeringsGet_564328; apiVersion: string;
+          peeringName: string; subscriptionId: string; resourceGroupName: string): Recallable =
   ## peeringsGet
   ## Gets an existing peering with the specified name under the given subscription and resource group.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : The client API version.
   ##   peeringName: string (required)
   ##              : The name of the peering.
   ##   subscriptionId: string (required)
   ##                 : The Azure subscription ID.
-  var path_568437 = newJObject()
-  var query_568438 = newJObject()
-  add(path_568437, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568438, "api-version", newJString(apiVersion))
-  add(path_568437, "peeringName", newJString(peeringName))
-  add(path_568437, "subscriptionId", newJString(subscriptionId))
-  result = call_568436.call(path_568437, query_568438, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564337 = newJObject()
+  var query_564338 = newJObject()
+  add(query_564338, "api-version", newJString(apiVersion))
+  add(path_564337, "peeringName", newJString(peeringName))
+  add(path_564337, "subscriptionId", newJString(subscriptionId))
+  add(path_564337, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564336.call(path_564337, query_564338, nil, nil, nil)
 
-var peeringsGet* = Call_PeeringsGet_568428(name: "peeringsGet",
+var peeringsGet* = Call_PeeringsGet_564328(name: "peeringsGet",
                                         meth: HttpMethod.HttpGet,
                                         host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Peering/peerings/{peeringName}",
-                                        validator: validate_PeeringsGet_568429,
-                                        base: "", url: url_PeeringsGet_568430,
+                                        validator: validate_PeeringsGet_564329,
+                                        base: "", url: url_PeeringsGet_564330,
                                         schemes: {Scheme.Https})
 type
-  Call_PeeringsUpdate_568463 = ref object of OpenApiRestCall_567657
-proc url_PeeringsUpdate_568465(protocol: Scheme; host: string; base: string;
+  Call_PeeringsUpdate_564363 = ref object of OpenApiRestCall_563555
+proc url_PeeringsUpdate_564365(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2685,7 +2691,7 @@ proc url_PeeringsUpdate_568465(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_PeeringsUpdate_568464(path: JsonNode; query: JsonNode;
+proc validate_PeeringsUpdate_564364(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## Updates tags for a peering with the specified name under the given subscription and resource group.
@@ -2693,30 +2699,30 @@ proc validate_PeeringsUpdate_568464(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   peeringName: JString (required)
   ##              : The name of the peering.
   ##   subscriptionId: JString (required)
   ##                 : The Azure subscription ID.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568466 = path.getOrDefault("resourceGroupName")
-  valid_568466 = validateParameter(valid_568466, JString, required = true,
+        "path argument is necessary due to required `peeringName` field"
+  var valid_564366 = path.getOrDefault("peeringName")
+  valid_564366 = validateParameter(valid_564366, JString, required = true,
                                  default = nil)
-  if valid_568466 != nil:
-    section.add "resourceGroupName", valid_568466
-  var valid_568467 = path.getOrDefault("peeringName")
-  valid_568467 = validateParameter(valid_568467, JString, required = true,
+  if valid_564366 != nil:
+    section.add "peeringName", valid_564366
+  var valid_564367 = path.getOrDefault("subscriptionId")
+  valid_564367 = validateParameter(valid_564367, JString, required = true,
                                  default = nil)
-  if valid_568467 != nil:
-    section.add "peeringName", valid_568467
-  var valid_568468 = path.getOrDefault("subscriptionId")
-  valid_568468 = validateParameter(valid_568468, JString, required = true,
+  if valid_564367 != nil:
+    section.add "subscriptionId", valid_564367
+  var valid_564368 = path.getOrDefault("resourceGroupName")
+  valid_564368 = validateParameter(valid_564368, JString, required = true,
                                  default = nil)
-  if valid_568468 != nil:
-    section.add "subscriptionId", valid_568468
+  if valid_564368 != nil:
+    section.add "resourceGroupName", valid_564368
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2724,11 +2730,11 @@ proc validate_PeeringsUpdate_568464(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568469 = query.getOrDefault("api-version")
-  valid_568469 = validateParameter(valid_568469, JString, required = true,
+  var valid_564369 = query.getOrDefault("api-version")
+  valid_564369 = validateParameter(valid_564369, JString, required = true,
                                  default = nil)
-  if valid_568469 != nil:
-    section.add "api-version", valid_568469
+  if valid_564369 != nil:
+    section.add "api-version", valid_564369
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2742,52 +2748,52 @@ proc validate_PeeringsUpdate_568464(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568471: Call_PeeringsUpdate_568463; path: JsonNode; query: JsonNode;
+proc call*(call_564371: Call_PeeringsUpdate_564363; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Updates tags for a peering with the specified name under the given subscription and resource group.
   ## 
-  let valid = call_568471.validator(path, query, header, formData, body)
-  let scheme = call_568471.pickScheme
+  let valid = call_564371.validator(path, query, header, formData, body)
+  let scheme = call_564371.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568471.url(scheme.get, call_568471.host, call_568471.base,
-                         call_568471.route, valid.getOrDefault("path"),
+  let url = call_564371.url(scheme.get, call_564371.host, call_564371.base,
+                         call_564371.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568471, url, valid)
+  result = hook(call_564371, url, valid)
 
-proc call*(call_568472: Call_PeeringsUpdate_568463; resourceGroupName: string;
+proc call*(call_564372: Call_PeeringsUpdate_564363; tags: JsonNode;
           apiVersion: string; peeringName: string; subscriptionId: string;
-          tags: JsonNode): Recallable =
+          resourceGroupName: string): Recallable =
   ## peeringsUpdate
   ## Updates tags for a peering with the specified name under the given subscription and resource group.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   tags: JObject (required)
+  ##       : The resource tags.
   ##   apiVersion: string (required)
   ##             : The client API version.
   ##   peeringName: string (required)
   ##              : The name of the peering.
   ##   subscriptionId: string (required)
   ##                 : The Azure subscription ID.
-  ##   tags: JObject (required)
-  ##       : The resource tags.
-  var path_568473 = newJObject()
-  var query_568474 = newJObject()
-  var body_568475 = newJObject()
-  add(path_568473, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568474, "api-version", newJString(apiVersion))
-  add(path_568473, "peeringName", newJString(peeringName))
-  add(path_568473, "subscriptionId", newJString(subscriptionId))
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564373 = newJObject()
+  var query_564374 = newJObject()
+  var body_564375 = newJObject()
   if tags != nil:
-    body_568475 = tags
-  result = call_568472.call(path_568473, query_568474, nil, nil, body_568475)
+    body_564375 = tags
+  add(query_564374, "api-version", newJString(apiVersion))
+  add(path_564373, "peeringName", newJString(peeringName))
+  add(path_564373, "subscriptionId", newJString(subscriptionId))
+  add(path_564373, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564372.call(path_564373, query_564374, nil, nil, body_564375)
 
-var peeringsUpdate* = Call_PeeringsUpdate_568463(name: "peeringsUpdate",
+var peeringsUpdate* = Call_PeeringsUpdate_564363(name: "peeringsUpdate",
     meth: HttpMethod.HttpPatch, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Peering/peerings/{peeringName}",
-    validator: validate_PeeringsUpdate_568464, base: "", url: url_PeeringsUpdate_568465,
+    validator: validate_PeeringsUpdate_564364, base: "", url: url_PeeringsUpdate_564365,
     schemes: {Scheme.Https})
 type
-  Call_PeeringsDelete_568452 = ref object of OpenApiRestCall_567657
-proc url_PeeringsDelete_568454(protocol: Scheme; host: string; base: string;
+  Call_PeeringsDelete_564352 = ref object of OpenApiRestCall_563555
+proc url_PeeringsDelete_564354(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2809,7 +2815,7 @@ proc url_PeeringsDelete_568454(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_PeeringsDelete_568453(path: JsonNode; query: JsonNode;
+proc validate_PeeringsDelete_564353(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## Deletes an existing peering with the specified name under the given subscription and resource group.
@@ -2817,30 +2823,30 @@ proc validate_PeeringsDelete_568453(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   peeringName: JString (required)
   ##              : The name of the peering.
   ##   subscriptionId: JString (required)
   ##                 : The Azure subscription ID.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568455 = path.getOrDefault("resourceGroupName")
-  valid_568455 = validateParameter(valid_568455, JString, required = true,
+        "path argument is necessary due to required `peeringName` field"
+  var valid_564355 = path.getOrDefault("peeringName")
+  valid_564355 = validateParameter(valid_564355, JString, required = true,
                                  default = nil)
-  if valid_568455 != nil:
-    section.add "resourceGroupName", valid_568455
-  var valid_568456 = path.getOrDefault("peeringName")
-  valid_568456 = validateParameter(valid_568456, JString, required = true,
+  if valid_564355 != nil:
+    section.add "peeringName", valid_564355
+  var valid_564356 = path.getOrDefault("subscriptionId")
+  valid_564356 = validateParameter(valid_564356, JString, required = true,
                                  default = nil)
-  if valid_568456 != nil:
-    section.add "peeringName", valid_568456
-  var valid_568457 = path.getOrDefault("subscriptionId")
-  valid_568457 = validateParameter(valid_568457, JString, required = true,
+  if valid_564356 != nil:
+    section.add "subscriptionId", valid_564356
+  var valid_564357 = path.getOrDefault("resourceGroupName")
+  valid_564357 = validateParameter(valid_564357, JString, required = true,
                                  default = nil)
-  if valid_568457 != nil:
-    section.add "subscriptionId", valid_568457
+  if valid_564357 != nil:
+    section.add "resourceGroupName", valid_564357
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2848,11 +2854,11 @@ proc validate_PeeringsDelete_568453(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568458 = query.getOrDefault("api-version")
-  valid_568458 = validateParameter(valid_568458, JString, required = true,
+  var valid_564358 = query.getOrDefault("api-version")
+  valid_564358 = validateParameter(valid_564358, JString, required = true,
                                  default = nil)
-  if valid_568458 != nil:
-    section.add "api-version", valid_568458
+  if valid_564358 != nil:
+    section.add "api-version", valid_564358
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2861,42 +2867,42 @@ proc validate_PeeringsDelete_568453(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568459: Call_PeeringsDelete_568452; path: JsonNode; query: JsonNode;
+proc call*(call_564359: Call_PeeringsDelete_564352; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes an existing peering with the specified name under the given subscription and resource group.
   ## 
-  let valid = call_568459.validator(path, query, header, formData, body)
-  let scheme = call_568459.pickScheme
+  let valid = call_564359.validator(path, query, header, formData, body)
+  let scheme = call_564359.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568459.url(scheme.get, call_568459.host, call_568459.base,
-                         call_568459.route, valid.getOrDefault("path"),
+  let url = call_564359.url(scheme.get, call_564359.host, call_564359.base,
+                         call_564359.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568459, url, valid)
+  result = hook(call_564359, url, valid)
 
-proc call*(call_568460: Call_PeeringsDelete_568452; resourceGroupName: string;
-          apiVersion: string; peeringName: string; subscriptionId: string): Recallable =
+proc call*(call_564360: Call_PeeringsDelete_564352; apiVersion: string;
+          peeringName: string; subscriptionId: string; resourceGroupName: string): Recallable =
   ## peeringsDelete
   ## Deletes an existing peering with the specified name under the given subscription and resource group.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : The client API version.
   ##   peeringName: string (required)
   ##              : The name of the peering.
   ##   subscriptionId: string (required)
   ##                 : The Azure subscription ID.
-  var path_568461 = newJObject()
-  var query_568462 = newJObject()
-  add(path_568461, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568462, "api-version", newJString(apiVersion))
-  add(path_568461, "peeringName", newJString(peeringName))
-  add(path_568461, "subscriptionId", newJString(subscriptionId))
-  result = call_568460.call(path_568461, query_568462, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564361 = newJObject()
+  var query_564362 = newJObject()
+  add(query_564362, "api-version", newJString(apiVersion))
+  add(path_564361, "peeringName", newJString(peeringName))
+  add(path_564361, "subscriptionId", newJString(subscriptionId))
+  add(path_564361, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564360.call(path_564361, query_564362, nil, nil, nil)
 
-var peeringsDelete* = Call_PeeringsDelete_568452(name: "peeringsDelete",
+var peeringsDelete* = Call_PeeringsDelete_564352(name: "peeringsDelete",
     meth: HttpMethod.HttpDelete, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Peering/peerings/{peeringName}",
-    validator: validate_PeeringsDelete_568453, base: "", url: url_PeeringsDelete_568454,
+    validator: validate_PeeringsDelete_564353, base: "", url: url_PeeringsDelete_564354,
     schemes: {Scheme.Https})
 export
   rest

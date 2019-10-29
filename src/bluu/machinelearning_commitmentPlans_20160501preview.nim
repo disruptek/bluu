@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, httpcore
 
 ## auto-generated via openapi macro
 ## title: Azure ML Commitment Plans Management Client
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_567642 = ref object of OpenApiRestCall
+  OpenApiRestCall_563540 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_567642](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563540](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_567642): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563540): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,15 +107,15 @@ const
   macServiceName = "machinelearning-commitmentPlans"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_OperationsList_567864 = ref object of OpenApiRestCall_567642
-proc url_OperationsList_567866(protocol: Scheme; host: string; base: string;
+  Call_OperationsList_563762 = ref object of OpenApiRestCall_563540
+proc url_OperationsList_563764(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_OperationsList_567865(path: JsonNode; query: JsonNode;
+proc validate_OperationsList_563763(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## Lists all of the available Azure Machine Learning Studio Commitment Plan RP REST API operations.
@@ -126,11 +130,11 @@ proc validate_OperationsList_567865(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568025 = query.getOrDefault("api-version")
-  valid_568025 = validateParameter(valid_568025, JString, required = true,
+  var valid_563925 = query.getOrDefault("api-version")
+  valid_563925 = validateParameter(valid_563925, JString, required = true,
                                  default = nil)
-  if valid_568025 != nil:
-    section.add "api-version", valid_568025
+  if valid_563925 != nil:
+    section.add "api-version", valid_563925
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -139,36 +143,36 @@ proc validate_OperationsList_567865(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568048: Call_OperationsList_567864; path: JsonNode; query: JsonNode;
+proc call*(call_563948: Call_OperationsList_563762; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists all of the available Azure Machine Learning Studio Commitment Plan RP REST API operations.
   ## 
-  let valid = call_568048.validator(path, query, header, formData, body)
-  let scheme = call_568048.pickScheme
+  let valid = call_563948.validator(path, query, header, formData, body)
+  let scheme = call_563948.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568048.url(scheme.get, call_568048.host, call_568048.base,
-                         call_568048.route, valid.getOrDefault("path"),
+  let url = call_563948.url(scheme.get, call_563948.host, call_563948.base,
+                         call_563948.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568048, url, valid)
+  result = hook(call_563948, url, valid)
 
-proc call*(call_568119: Call_OperationsList_567864; apiVersion: string): Recallable =
+proc call*(call_564019: Call_OperationsList_563762; apiVersion: string): Recallable =
   ## operationsList
   ## Lists all of the available Azure Machine Learning Studio Commitment Plan RP REST API operations.
   ##   apiVersion: string (required)
   ##             : The version of the Microsoft.MachineLearning resource provider API to use.
-  var query_568120 = newJObject()
-  add(query_568120, "api-version", newJString(apiVersion))
-  result = call_568119.call(nil, query_568120, nil, nil, nil)
+  var query_564020 = newJObject()
+  add(query_564020, "api-version", newJString(apiVersion))
+  result = call_564019.call(nil, query_564020, nil, nil, nil)
 
-var operationsList* = Call_OperationsList_567864(name: "operationsList",
+var operationsList* = Call_OperationsList_563762(name: "operationsList",
     meth: HttpMethod.HttpGet, host: "management.azure.com",
     route: "/providers/Microsoft.MachineLearning/operations",
-    validator: validate_OperationsList_567865, base: "", url: url_OperationsList_567866,
+    validator: validate_OperationsList_563763, base: "", url: url_OperationsList_563764,
     schemes: {Scheme.Https})
 type
-  Call_CommitmentPlansList_568160 = ref object of OpenApiRestCall_567642
-proc url_CommitmentPlansList_568162(protocol: Scheme; host: string; base: string;
+  Call_CommitmentPlansList_564060 = ref object of OpenApiRestCall_563540
+proc url_CommitmentPlansList_564062(protocol: Scheme; host: string; base: string;
                                    route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -185,7 +189,7 @@ proc url_CommitmentPlansList_568162(protocol: Scheme; host: string; base: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_CommitmentPlansList_568161(path: JsonNode; query: JsonNode;
+proc validate_CommitmentPlansList_564061(path: JsonNode; query: JsonNode;
                                         header: JsonNode; formData: JsonNode;
                                         body: JsonNode): JsonNode =
   ## Retrieve all Azure ML commitment plans in a subscription.
@@ -198,30 +202,30 @@ proc validate_CommitmentPlansList_568161(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_568178 = path.getOrDefault("subscriptionId")
-  valid_568178 = validateParameter(valid_568178, JString, required = true,
+  var valid_564078 = path.getOrDefault("subscriptionId")
+  valid_564078 = validateParameter(valid_564078, JString, required = true,
                                  default = nil)
-  if valid_568178 != nil:
-    section.add "subscriptionId", valid_568178
+  if valid_564078 != nil:
+    section.add "subscriptionId", valid_564078
   result.add "path", section
   ## parameters in `query` object:
-  ##   api-version: JString (required)
-  ##              : The version of the Microsoft.MachineLearning resource provider API to use.
   ##   $skipToken: JString
   ##             : Continuation token for pagination.
+  ##   api-version: JString (required)
+  ##              : The version of the Microsoft.MachineLearning resource provider API to use.
   section = newJObject()
+  var valid_564079 = query.getOrDefault("$skipToken")
+  valid_564079 = validateParameter(valid_564079, JString, required = false,
+                                 default = nil)
+  if valid_564079 != nil:
+    section.add "$skipToken", valid_564079
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568179 = query.getOrDefault("api-version")
-  valid_568179 = validateParameter(valid_568179, JString, required = true,
+  var valid_564080 = query.getOrDefault("api-version")
+  valid_564080 = validateParameter(valid_564080, JString, required = true,
                                  default = nil)
-  if valid_568179 != nil:
-    section.add "api-version", valid_568179
-  var valid_568180 = query.getOrDefault("$skipToken")
-  valid_568180 = validateParameter(valid_568180, JString, required = false,
-                                 default = nil)
-  if valid_568180 != nil:
-    section.add "$skipToken", valid_568180
+  if valid_564080 != nil:
+    section.add "api-version", valid_564080
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -230,44 +234,44 @@ proc validate_CommitmentPlansList_568161(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568181: Call_CommitmentPlansList_568160; path: JsonNode;
+proc call*(call_564081: Call_CommitmentPlansList_564060; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Retrieve all Azure ML commitment plans in a subscription.
   ## 
-  let valid = call_568181.validator(path, query, header, formData, body)
-  let scheme = call_568181.pickScheme
+  let valid = call_564081.validator(path, query, header, formData, body)
+  let scheme = call_564081.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568181.url(scheme.get, call_568181.host, call_568181.base,
-                         call_568181.route, valid.getOrDefault("path"),
+  let url = call_564081.url(scheme.get, call_564081.host, call_564081.base,
+                         call_564081.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568181, url, valid)
+  result = hook(call_564081, url, valid)
 
-proc call*(call_568182: Call_CommitmentPlansList_568160; apiVersion: string;
+proc call*(call_564082: Call_CommitmentPlansList_564060; apiVersion: string;
           subscriptionId: string; SkipToken: string = ""): Recallable =
   ## commitmentPlansList
   ## Retrieve all Azure ML commitment plans in a subscription.
+  ##   SkipToken: string
+  ##            : Continuation token for pagination.
   ##   apiVersion: string (required)
   ##             : The version of the Microsoft.MachineLearning resource provider API to use.
   ##   subscriptionId: string (required)
   ##                 : Azure Subscription ID.
-  ##   SkipToken: string
-  ##            : Continuation token for pagination.
-  var path_568183 = newJObject()
-  var query_568184 = newJObject()
-  add(query_568184, "api-version", newJString(apiVersion))
-  add(path_568183, "subscriptionId", newJString(subscriptionId))
-  add(query_568184, "$skipToken", newJString(SkipToken))
-  result = call_568182.call(path_568183, query_568184, nil, nil, nil)
+  var path_564083 = newJObject()
+  var query_564084 = newJObject()
+  add(query_564084, "$skipToken", newJString(SkipToken))
+  add(query_564084, "api-version", newJString(apiVersion))
+  add(path_564083, "subscriptionId", newJString(subscriptionId))
+  result = call_564082.call(path_564083, query_564084, nil, nil, nil)
 
-var commitmentPlansList* = Call_CommitmentPlansList_568160(
+var commitmentPlansList* = Call_CommitmentPlansList_564060(
     name: "commitmentPlansList", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.MachineLearning/commitmentPlans",
-    validator: validate_CommitmentPlansList_568161, base: "",
-    url: url_CommitmentPlansList_568162, schemes: {Scheme.Https})
+    validator: validate_CommitmentPlansList_564061, base: "",
+    url: url_CommitmentPlansList_564062, schemes: {Scheme.Https})
 type
-  Call_SkusList_568185 = ref object of OpenApiRestCall_567642
-proc url_SkusList_568187(protocol: Scheme; host: string; base: string; route: string;
+  Call_SkusList_564085 = ref object of OpenApiRestCall_563540
+proc url_SkusList_564087(protocol: Scheme; host: string; base: string; route: string;
                         path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -283,7 +287,7 @@ proc url_SkusList_568187(protocol: Scheme; host: string; base: string; route: st
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_SkusList_568186(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_SkusList_564086(path: JsonNode; query: JsonNode; header: JsonNode;
                              formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists the available commitment plan SKUs.
   ## 
@@ -295,11 +299,11 @@ proc validate_SkusList_568186(path: JsonNode; query: JsonNode; header: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_568188 = path.getOrDefault("subscriptionId")
-  valid_568188 = validateParameter(valid_568188, JString, required = true,
+  var valid_564088 = path.getOrDefault("subscriptionId")
+  valid_564088 = validateParameter(valid_564088, JString, required = true,
                                  default = nil)
-  if valid_568188 != nil:
-    section.add "subscriptionId", valid_568188
+  if valid_564088 != nil:
+    section.add "subscriptionId", valid_564088
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -307,11 +311,11 @@ proc validate_SkusList_568186(path: JsonNode; query: JsonNode; header: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568189 = query.getOrDefault("api-version")
-  valid_568189 = validateParameter(valid_568189, JString, required = true,
+  var valid_564089 = query.getOrDefault("api-version")
+  valid_564089 = validateParameter(valid_564089, JString, required = true,
                                  default = nil)
-  if valid_568189 != nil:
-    section.add "api-version", valid_568189
+  if valid_564089 != nil:
+    section.add "api-version", valid_564089
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -320,20 +324,20 @@ proc validate_SkusList_568186(path: JsonNode; query: JsonNode; header: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568190: Call_SkusList_568185; path: JsonNode; query: JsonNode;
+proc call*(call_564090: Call_SkusList_564085; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists the available commitment plan SKUs.
   ## 
-  let valid = call_568190.validator(path, query, header, formData, body)
-  let scheme = call_568190.pickScheme
+  let valid = call_564090.validator(path, query, header, formData, body)
+  let scheme = call_564090.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568190.url(scheme.get, call_568190.host, call_568190.base,
-                         call_568190.route, valid.getOrDefault("path"),
+  let url = call_564090.url(scheme.get, call_564090.host, call_564090.base,
+                         call_564090.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568190, url, valid)
+  result = hook(call_564090, url, valid)
 
-proc call*(call_568191: Call_SkusList_568185; apiVersion: string;
+proc call*(call_564091: Call_SkusList_564085; apiVersion: string;
           subscriptionId: string): Recallable =
   ## skusList
   ## Lists the available commitment plan SKUs.
@@ -341,20 +345,20 @@ proc call*(call_568191: Call_SkusList_568185; apiVersion: string;
   ##             : The version of the Microsoft.MachineLearning resource provider API to use.
   ##   subscriptionId: string (required)
   ##                 : Azure Subscription ID.
-  var path_568192 = newJObject()
-  var query_568193 = newJObject()
-  add(query_568193, "api-version", newJString(apiVersion))
-  add(path_568192, "subscriptionId", newJString(subscriptionId))
-  result = call_568191.call(path_568192, query_568193, nil, nil, nil)
+  var path_564092 = newJObject()
+  var query_564093 = newJObject()
+  add(query_564093, "api-version", newJString(apiVersion))
+  add(path_564092, "subscriptionId", newJString(subscriptionId))
+  result = call_564091.call(path_564092, query_564093, nil, nil, nil)
 
-var skusList* = Call_SkusList_568185(name: "skusList", meth: HttpMethod.HttpGet,
+var skusList* = Call_SkusList_564085(name: "skusList", meth: HttpMethod.HttpGet,
                                   host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.MachineLearning/skus",
-                                  validator: validate_SkusList_568186, base: "",
-                                  url: url_SkusList_568187,
+                                  validator: validate_SkusList_564086, base: "",
+                                  url: url_SkusList_564087,
                                   schemes: {Scheme.Https})
 type
-  Call_CommitmentPlansListInResourceGroup_568194 = ref object of OpenApiRestCall_567642
-proc url_CommitmentPlansListInResourceGroup_568196(protocol: Scheme; host: string;
+  Call_CommitmentPlansListInResourceGroup_564094 = ref object of OpenApiRestCall_563540
+proc url_CommitmentPlansListInResourceGroup_564096(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -375,49 +379,49 @@ proc url_CommitmentPlansListInResourceGroup_568196(protocol: Scheme; host: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_CommitmentPlansListInResourceGroup_568195(path: JsonNode;
+proc validate_CommitmentPlansListInResourceGroup_564095(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Retrieve all Azure ML commitment plans in a resource group.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The resource group name.
   ##   subscriptionId: JString (required)
   ##                 : Azure Subscription ID.
+  ##   resourceGroupName: JString (required)
+  ##                    : The resource group name.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568197 = path.getOrDefault("resourceGroupName")
-  valid_568197 = validateParameter(valid_568197, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564097 = path.getOrDefault("subscriptionId")
+  valid_564097 = validateParameter(valid_564097, JString, required = true,
                                  default = nil)
-  if valid_568197 != nil:
-    section.add "resourceGroupName", valid_568197
-  var valid_568198 = path.getOrDefault("subscriptionId")
-  valid_568198 = validateParameter(valid_568198, JString, required = true,
+  if valid_564097 != nil:
+    section.add "subscriptionId", valid_564097
+  var valid_564098 = path.getOrDefault("resourceGroupName")
+  valid_564098 = validateParameter(valid_564098, JString, required = true,
                                  default = nil)
-  if valid_568198 != nil:
-    section.add "subscriptionId", valid_568198
+  if valid_564098 != nil:
+    section.add "resourceGroupName", valid_564098
   result.add "path", section
   ## parameters in `query` object:
-  ##   api-version: JString (required)
-  ##              : The version of the Microsoft.MachineLearning resource provider API to use.
   ##   $skipToken: JString
   ##             : Continuation token for pagination.
+  ##   api-version: JString (required)
+  ##              : The version of the Microsoft.MachineLearning resource provider API to use.
   section = newJObject()
+  var valid_564099 = query.getOrDefault("$skipToken")
+  valid_564099 = validateParameter(valid_564099, JString, required = false,
+                                 default = nil)
+  if valid_564099 != nil:
+    section.add "$skipToken", valid_564099
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568199 = query.getOrDefault("api-version")
-  valid_568199 = validateParameter(valid_568199, JString, required = true,
+  var valid_564100 = query.getOrDefault("api-version")
+  valid_564100 = validateParameter(valid_564100, JString, required = true,
                                  default = nil)
-  if valid_568199 != nil:
-    section.add "api-version", valid_568199
-  var valid_568200 = query.getOrDefault("$skipToken")
-  valid_568200 = validateParameter(valid_568200, JString, required = false,
-                                 default = nil)
-  if valid_568200 != nil:
-    section.add "$skipToken", valid_568200
+  if valid_564100 != nil:
+    section.add "api-version", valid_564100
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -426,49 +430,49 @@ proc validate_CommitmentPlansListInResourceGroup_568195(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568201: Call_CommitmentPlansListInResourceGroup_568194;
+proc call*(call_564101: Call_CommitmentPlansListInResourceGroup_564094;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Retrieve all Azure ML commitment plans in a resource group.
   ## 
-  let valid = call_568201.validator(path, query, header, formData, body)
-  let scheme = call_568201.pickScheme
+  let valid = call_564101.validator(path, query, header, formData, body)
+  let scheme = call_564101.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568201.url(scheme.get, call_568201.host, call_568201.base,
-                         call_568201.route, valid.getOrDefault("path"),
+  let url = call_564101.url(scheme.get, call_564101.host, call_564101.base,
+                         call_564101.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568201, url, valid)
+  result = hook(call_564101, url, valid)
 
-proc call*(call_568202: Call_CommitmentPlansListInResourceGroup_568194;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
+proc call*(call_564102: Call_CommitmentPlansListInResourceGroup_564094;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string;
           SkipToken: string = ""): Recallable =
   ## commitmentPlansListInResourceGroup
   ## Retrieve all Azure ML commitment plans in a resource group.
-  ##   resourceGroupName: string (required)
-  ##                    : The resource group name.
+  ##   SkipToken: string
+  ##            : Continuation token for pagination.
   ##   apiVersion: string (required)
   ##             : The version of the Microsoft.MachineLearning resource provider API to use.
   ##   subscriptionId: string (required)
   ##                 : Azure Subscription ID.
-  ##   SkipToken: string
-  ##            : Continuation token for pagination.
-  var path_568203 = newJObject()
-  var query_568204 = newJObject()
-  add(path_568203, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568204, "api-version", newJString(apiVersion))
-  add(path_568203, "subscriptionId", newJString(subscriptionId))
-  add(query_568204, "$skipToken", newJString(SkipToken))
-  result = call_568202.call(path_568203, query_568204, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The resource group name.
+  var path_564103 = newJObject()
+  var query_564104 = newJObject()
+  add(query_564104, "$skipToken", newJString(SkipToken))
+  add(query_564104, "api-version", newJString(apiVersion))
+  add(path_564103, "subscriptionId", newJString(subscriptionId))
+  add(path_564103, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564102.call(path_564103, query_564104, nil, nil, nil)
 
-var commitmentPlansListInResourceGroup* = Call_CommitmentPlansListInResourceGroup_568194(
+var commitmentPlansListInResourceGroup* = Call_CommitmentPlansListInResourceGroup_564094(
     name: "commitmentPlansListInResourceGroup", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.MachineLearning/commitmentPlans",
-    validator: validate_CommitmentPlansListInResourceGroup_568195, base: "",
-    url: url_CommitmentPlansListInResourceGroup_568196, schemes: {Scheme.Https})
+    validator: validate_CommitmentPlansListInResourceGroup_564095, base: "",
+    url: url_CommitmentPlansListInResourceGroup_564096, schemes: {Scheme.Https})
 type
-  Call_CommitmentPlansCreateOrUpdate_568216 = ref object of OpenApiRestCall_567642
-proc url_CommitmentPlansCreateOrUpdate_568218(protocol: Scheme; host: string;
+  Call_CommitmentPlansCreateOrUpdate_564116 = ref object of OpenApiRestCall_563540
+proc url_CommitmentPlansCreateOrUpdate_564118(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -492,37 +496,37 @@ proc url_CommitmentPlansCreateOrUpdate_568218(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_CommitmentPlansCreateOrUpdate_568217(path: JsonNode; query: JsonNode;
+proc validate_CommitmentPlansCreateOrUpdate_564117(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Create a new Azure ML commitment plan resource or updates an existing one.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
+  ##   subscriptionId: JString (required)
+  ##                 : Azure Subscription ID.
   ##   resourceGroupName: JString (required)
   ##                    : The resource group name.
   ##   commitmentPlanName: JString (required)
   ##                     : The Azure ML commitment plan name.
-  ##   subscriptionId: JString (required)
-  ##                 : Azure Subscription ID.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568219 = path.getOrDefault("resourceGroupName")
-  valid_568219 = validateParameter(valid_568219, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564119 = path.getOrDefault("subscriptionId")
+  valid_564119 = validateParameter(valid_564119, JString, required = true,
                                  default = nil)
-  if valid_568219 != nil:
-    section.add "resourceGroupName", valid_568219
-  var valid_568220 = path.getOrDefault("commitmentPlanName")
-  valid_568220 = validateParameter(valid_568220, JString, required = true,
+  if valid_564119 != nil:
+    section.add "subscriptionId", valid_564119
+  var valid_564120 = path.getOrDefault("resourceGroupName")
+  valid_564120 = validateParameter(valid_564120, JString, required = true,
                                  default = nil)
-  if valid_568220 != nil:
-    section.add "commitmentPlanName", valid_568220
-  var valid_568221 = path.getOrDefault("subscriptionId")
-  valid_568221 = validateParameter(valid_568221, JString, required = true,
+  if valid_564120 != nil:
+    section.add "resourceGroupName", valid_564120
+  var valid_564121 = path.getOrDefault("commitmentPlanName")
+  valid_564121 = validateParameter(valid_564121, JString, required = true,
                                  default = nil)
-  if valid_568221 != nil:
-    section.add "subscriptionId", valid_568221
+  if valid_564121 != nil:
+    section.add "commitmentPlanName", valid_564121
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -530,11 +534,11 @@ proc validate_CommitmentPlansCreateOrUpdate_568217(path: JsonNode; query: JsonNo
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568222 = query.getOrDefault("api-version")
-  valid_568222 = validateParameter(valid_568222, JString, required = true,
+  var valid_564122 = query.getOrDefault("api-version")
+  valid_564122 = validateParameter(valid_564122, JString, required = true,
                                  default = nil)
-  if valid_568222 != nil:
-    section.add "api-version", valid_568222
+  if valid_564122 != nil:
+    section.add "api-version", valid_564122
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -548,53 +552,53 @@ proc validate_CommitmentPlansCreateOrUpdate_568217(path: JsonNode; query: JsonNo
   if body != nil:
     result.add "body", body
 
-proc call*(call_568224: Call_CommitmentPlansCreateOrUpdate_568216; path: JsonNode;
+proc call*(call_564124: Call_CommitmentPlansCreateOrUpdate_564116; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Create a new Azure ML commitment plan resource or updates an existing one.
   ## 
-  let valid = call_568224.validator(path, query, header, formData, body)
-  let scheme = call_568224.pickScheme
+  let valid = call_564124.validator(path, query, header, formData, body)
+  let scheme = call_564124.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568224.url(scheme.get, call_568224.host, call_568224.base,
-                         call_568224.route, valid.getOrDefault("path"),
+  let url = call_564124.url(scheme.get, call_564124.host, call_564124.base,
+                         call_564124.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568224, url, valid)
+  result = hook(call_564124, url, valid)
 
-proc call*(call_568225: Call_CommitmentPlansCreateOrUpdate_568216;
-          resourceGroupName: string; apiVersion: string; commitmentPlanName: string;
-          subscriptionId: string; createOrUpdatePayload: JsonNode): Recallable =
+proc call*(call_564125: Call_CommitmentPlansCreateOrUpdate_564116;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string;
+          createOrUpdatePayload: JsonNode; commitmentPlanName: string): Recallable =
   ## commitmentPlansCreateOrUpdate
   ## Create a new Azure ML commitment plan resource or updates an existing one.
-  ##   resourceGroupName: string (required)
-  ##                    : The resource group name.
   ##   apiVersion: string (required)
   ##             : The version of the Microsoft.MachineLearning resource provider API to use.
-  ##   commitmentPlanName: string (required)
-  ##                     : The Azure ML commitment plan name.
   ##   subscriptionId: string (required)
   ##                 : Azure Subscription ID.
+  ##   resourceGroupName: string (required)
+  ##                    : The resource group name.
   ##   createOrUpdatePayload: JObject (required)
   ##                        : The payload to create or update the Azure ML commitment plan.
-  var path_568226 = newJObject()
-  var query_568227 = newJObject()
-  var body_568228 = newJObject()
-  add(path_568226, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568227, "api-version", newJString(apiVersion))
-  add(path_568226, "commitmentPlanName", newJString(commitmentPlanName))
-  add(path_568226, "subscriptionId", newJString(subscriptionId))
+  ##   commitmentPlanName: string (required)
+  ##                     : The Azure ML commitment plan name.
+  var path_564126 = newJObject()
+  var query_564127 = newJObject()
+  var body_564128 = newJObject()
+  add(query_564127, "api-version", newJString(apiVersion))
+  add(path_564126, "subscriptionId", newJString(subscriptionId))
+  add(path_564126, "resourceGroupName", newJString(resourceGroupName))
   if createOrUpdatePayload != nil:
-    body_568228 = createOrUpdatePayload
-  result = call_568225.call(path_568226, query_568227, nil, nil, body_568228)
+    body_564128 = createOrUpdatePayload
+  add(path_564126, "commitmentPlanName", newJString(commitmentPlanName))
+  result = call_564125.call(path_564126, query_564127, nil, nil, body_564128)
 
-var commitmentPlansCreateOrUpdate* = Call_CommitmentPlansCreateOrUpdate_568216(
+var commitmentPlansCreateOrUpdate* = Call_CommitmentPlansCreateOrUpdate_564116(
     name: "commitmentPlansCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.MachineLearning/commitmentPlans/{commitmentPlanName}",
-    validator: validate_CommitmentPlansCreateOrUpdate_568217, base: "",
-    url: url_CommitmentPlansCreateOrUpdate_568218, schemes: {Scheme.Https})
+    validator: validate_CommitmentPlansCreateOrUpdate_564117, base: "",
+    url: url_CommitmentPlansCreateOrUpdate_564118, schemes: {Scheme.Https})
 type
-  Call_CommitmentPlansGet_568205 = ref object of OpenApiRestCall_567642
-proc url_CommitmentPlansGet_568207(protocol: Scheme; host: string; base: string;
+  Call_CommitmentPlansGet_564105 = ref object of OpenApiRestCall_563540
+proc url_CommitmentPlansGet_564107(protocol: Scheme; host: string; base: string;
                                   route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -618,7 +622,7 @@ proc url_CommitmentPlansGet_568207(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_CommitmentPlansGet_568206(path: JsonNode; query: JsonNode;
+proc validate_CommitmentPlansGet_564106(path: JsonNode; query: JsonNode;
                                        header: JsonNode; formData: JsonNode;
                                        body: JsonNode): JsonNode =
   ## Retrieve an Azure ML commitment plan by its subscription, resource group and name.
@@ -626,30 +630,30 @@ proc validate_CommitmentPlansGet_568206(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
+  ##   subscriptionId: JString (required)
+  ##                 : Azure Subscription ID.
   ##   resourceGroupName: JString (required)
   ##                    : The resource group name.
   ##   commitmentPlanName: JString (required)
   ##                     : The Azure ML commitment plan name.
-  ##   subscriptionId: JString (required)
-  ##                 : Azure Subscription ID.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568208 = path.getOrDefault("resourceGroupName")
-  valid_568208 = validateParameter(valid_568208, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564108 = path.getOrDefault("subscriptionId")
+  valid_564108 = validateParameter(valid_564108, JString, required = true,
                                  default = nil)
-  if valid_568208 != nil:
-    section.add "resourceGroupName", valid_568208
-  var valid_568209 = path.getOrDefault("commitmentPlanName")
-  valid_568209 = validateParameter(valid_568209, JString, required = true,
+  if valid_564108 != nil:
+    section.add "subscriptionId", valid_564108
+  var valid_564109 = path.getOrDefault("resourceGroupName")
+  valid_564109 = validateParameter(valid_564109, JString, required = true,
                                  default = nil)
-  if valid_568209 != nil:
-    section.add "commitmentPlanName", valid_568209
-  var valid_568210 = path.getOrDefault("subscriptionId")
-  valid_568210 = validateParameter(valid_568210, JString, required = true,
+  if valid_564109 != nil:
+    section.add "resourceGroupName", valid_564109
+  var valid_564110 = path.getOrDefault("commitmentPlanName")
+  valid_564110 = validateParameter(valid_564110, JString, required = true,
                                  default = nil)
-  if valid_568210 != nil:
-    section.add "subscriptionId", valid_568210
+  if valid_564110 != nil:
+    section.add "commitmentPlanName", valid_564110
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -657,11 +661,11 @@ proc validate_CommitmentPlansGet_568206(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568211 = query.getOrDefault("api-version")
-  valid_568211 = validateParameter(valid_568211, JString, required = true,
+  var valid_564111 = query.getOrDefault("api-version")
+  valid_564111 = validateParameter(valid_564111, JString, required = true,
                                  default = nil)
-  if valid_568211 != nil:
-    section.add "api-version", valid_568211
+  if valid_564111 != nil:
+    section.add "api-version", valid_564111
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -670,47 +674,48 @@ proc validate_CommitmentPlansGet_568206(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568212: Call_CommitmentPlansGet_568205; path: JsonNode;
+proc call*(call_564112: Call_CommitmentPlansGet_564105; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Retrieve an Azure ML commitment plan by its subscription, resource group and name.
   ## 
-  let valid = call_568212.validator(path, query, header, formData, body)
-  let scheme = call_568212.pickScheme
+  let valid = call_564112.validator(path, query, header, formData, body)
+  let scheme = call_564112.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568212.url(scheme.get, call_568212.host, call_568212.base,
-                         call_568212.route, valid.getOrDefault("path"),
+  let url = call_564112.url(scheme.get, call_564112.host, call_564112.base,
+                         call_564112.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568212, url, valid)
+  result = hook(call_564112, url, valid)
 
-proc call*(call_568213: Call_CommitmentPlansGet_568205; resourceGroupName: string;
-          apiVersion: string; commitmentPlanName: string; subscriptionId: string): Recallable =
+proc call*(call_564113: Call_CommitmentPlansGet_564105; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string;
+          commitmentPlanName: string): Recallable =
   ## commitmentPlansGet
   ## Retrieve an Azure ML commitment plan by its subscription, resource group and name.
-  ##   resourceGroupName: string (required)
-  ##                    : The resource group name.
   ##   apiVersion: string (required)
   ##             : The version of the Microsoft.MachineLearning resource provider API to use.
-  ##   commitmentPlanName: string (required)
-  ##                     : The Azure ML commitment plan name.
   ##   subscriptionId: string (required)
   ##                 : Azure Subscription ID.
-  var path_568214 = newJObject()
-  var query_568215 = newJObject()
-  add(path_568214, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568215, "api-version", newJString(apiVersion))
-  add(path_568214, "commitmentPlanName", newJString(commitmentPlanName))
-  add(path_568214, "subscriptionId", newJString(subscriptionId))
-  result = call_568213.call(path_568214, query_568215, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The resource group name.
+  ##   commitmentPlanName: string (required)
+  ##                     : The Azure ML commitment plan name.
+  var path_564114 = newJObject()
+  var query_564115 = newJObject()
+  add(query_564115, "api-version", newJString(apiVersion))
+  add(path_564114, "subscriptionId", newJString(subscriptionId))
+  add(path_564114, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564114, "commitmentPlanName", newJString(commitmentPlanName))
+  result = call_564113.call(path_564114, query_564115, nil, nil, nil)
 
-var commitmentPlansGet* = Call_CommitmentPlansGet_568205(
+var commitmentPlansGet* = Call_CommitmentPlansGet_564105(
     name: "commitmentPlansGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.MachineLearning/commitmentPlans/{commitmentPlanName}",
-    validator: validate_CommitmentPlansGet_568206, base: "",
-    url: url_CommitmentPlansGet_568207, schemes: {Scheme.Https})
+    validator: validate_CommitmentPlansGet_564106, base: "",
+    url: url_CommitmentPlansGet_564107, schemes: {Scheme.Https})
 type
-  Call_CommitmentPlansPatch_568240 = ref object of OpenApiRestCall_567642
-proc url_CommitmentPlansPatch_568242(protocol: Scheme; host: string; base: string;
+  Call_CommitmentPlansPatch_564140 = ref object of OpenApiRestCall_563540
+proc url_CommitmentPlansPatch_564142(protocol: Scheme; host: string; base: string;
                                     route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -734,37 +739,37 @@ proc url_CommitmentPlansPatch_568242(protocol: Scheme; host: string; base: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_CommitmentPlansPatch_568241(path: JsonNode; query: JsonNode;
+proc validate_CommitmentPlansPatch_564141(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Patch an existing Azure ML commitment plan resource.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
+  ##   subscriptionId: JString (required)
+  ##                 : Azure Subscription ID.
   ##   resourceGroupName: JString (required)
   ##                    : The resource group name.
   ##   commitmentPlanName: JString (required)
   ##                     : The Azure ML commitment plan name.
-  ##   subscriptionId: JString (required)
-  ##                 : Azure Subscription ID.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568243 = path.getOrDefault("resourceGroupName")
-  valid_568243 = validateParameter(valid_568243, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564143 = path.getOrDefault("subscriptionId")
+  valid_564143 = validateParameter(valid_564143, JString, required = true,
                                  default = nil)
-  if valid_568243 != nil:
-    section.add "resourceGroupName", valid_568243
-  var valid_568244 = path.getOrDefault("commitmentPlanName")
-  valid_568244 = validateParameter(valid_568244, JString, required = true,
+  if valid_564143 != nil:
+    section.add "subscriptionId", valid_564143
+  var valid_564144 = path.getOrDefault("resourceGroupName")
+  valid_564144 = validateParameter(valid_564144, JString, required = true,
                                  default = nil)
-  if valid_568244 != nil:
-    section.add "commitmentPlanName", valid_568244
-  var valid_568245 = path.getOrDefault("subscriptionId")
-  valid_568245 = validateParameter(valid_568245, JString, required = true,
+  if valid_564144 != nil:
+    section.add "resourceGroupName", valid_564144
+  var valid_564145 = path.getOrDefault("commitmentPlanName")
+  valid_564145 = validateParameter(valid_564145, JString, required = true,
                                  default = nil)
-  if valid_568245 != nil:
-    section.add "subscriptionId", valid_568245
+  if valid_564145 != nil:
+    section.add "commitmentPlanName", valid_564145
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -772,11 +777,11 @@ proc validate_CommitmentPlansPatch_568241(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568246 = query.getOrDefault("api-version")
-  valid_568246 = validateParameter(valid_568246, JString, required = true,
+  var valid_564146 = query.getOrDefault("api-version")
+  valid_564146 = validateParameter(valid_564146, JString, required = true,
                                  default = nil)
-  if valid_568246 != nil:
-    section.add "api-version", valid_568246
+  if valid_564146 != nil:
+    section.add "api-version", valid_564146
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -790,53 +795,53 @@ proc validate_CommitmentPlansPatch_568241(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568248: Call_CommitmentPlansPatch_568240; path: JsonNode;
+proc call*(call_564148: Call_CommitmentPlansPatch_564140; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Patch an existing Azure ML commitment plan resource.
   ## 
-  let valid = call_568248.validator(path, query, header, formData, body)
-  let scheme = call_568248.pickScheme
+  let valid = call_564148.validator(path, query, header, formData, body)
+  let scheme = call_564148.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568248.url(scheme.get, call_568248.host, call_568248.base,
-                         call_568248.route, valid.getOrDefault("path"),
+  let url = call_564148.url(scheme.get, call_564148.host, call_564148.base,
+                         call_564148.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568248, url, valid)
+  result = hook(call_564148, url, valid)
 
-proc call*(call_568249: Call_CommitmentPlansPatch_568240;
-          resourceGroupName: string; apiVersion: string; commitmentPlanName: string;
-          subscriptionId: string; patchPayload: JsonNode): Recallable =
+proc call*(call_564149: Call_CommitmentPlansPatch_564140; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string; patchPayload: JsonNode;
+          commitmentPlanName: string): Recallable =
   ## commitmentPlansPatch
   ## Patch an existing Azure ML commitment plan resource.
-  ##   resourceGroupName: string (required)
-  ##                    : The resource group name.
   ##   apiVersion: string (required)
   ##             : The version of the Microsoft.MachineLearning resource provider API to use.
-  ##   commitmentPlanName: string (required)
-  ##                     : The Azure ML commitment plan name.
   ##   subscriptionId: string (required)
   ##                 : Azure Subscription ID.
+  ##   resourceGroupName: string (required)
+  ##                    : The resource group name.
   ##   patchPayload: JObject (required)
   ##               : The payload to use to patch the Azure ML commitment plan. Only tags and SKU may be modified on an existing commitment plan.
-  var path_568250 = newJObject()
-  var query_568251 = newJObject()
-  var body_568252 = newJObject()
-  add(path_568250, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568251, "api-version", newJString(apiVersion))
-  add(path_568250, "commitmentPlanName", newJString(commitmentPlanName))
-  add(path_568250, "subscriptionId", newJString(subscriptionId))
+  ##   commitmentPlanName: string (required)
+  ##                     : The Azure ML commitment plan name.
+  var path_564150 = newJObject()
+  var query_564151 = newJObject()
+  var body_564152 = newJObject()
+  add(query_564151, "api-version", newJString(apiVersion))
+  add(path_564150, "subscriptionId", newJString(subscriptionId))
+  add(path_564150, "resourceGroupName", newJString(resourceGroupName))
   if patchPayload != nil:
-    body_568252 = patchPayload
-  result = call_568249.call(path_568250, query_568251, nil, nil, body_568252)
+    body_564152 = patchPayload
+  add(path_564150, "commitmentPlanName", newJString(commitmentPlanName))
+  result = call_564149.call(path_564150, query_564151, nil, nil, body_564152)
 
-var commitmentPlansPatch* = Call_CommitmentPlansPatch_568240(
+var commitmentPlansPatch* = Call_CommitmentPlansPatch_564140(
     name: "commitmentPlansPatch", meth: HttpMethod.HttpPatch,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.MachineLearning/commitmentPlans/{commitmentPlanName}",
-    validator: validate_CommitmentPlansPatch_568241, base: "",
-    url: url_CommitmentPlansPatch_568242, schemes: {Scheme.Https})
+    validator: validate_CommitmentPlansPatch_564141, base: "",
+    url: url_CommitmentPlansPatch_564142, schemes: {Scheme.Https})
 type
-  Call_CommitmentPlansRemove_568229 = ref object of OpenApiRestCall_567642
-proc url_CommitmentPlansRemove_568231(protocol: Scheme; host: string; base: string;
+  Call_CommitmentPlansRemove_564129 = ref object of OpenApiRestCall_563540
+proc url_CommitmentPlansRemove_564131(protocol: Scheme; host: string; base: string;
                                      route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -860,37 +865,37 @@ proc url_CommitmentPlansRemove_568231(protocol: Scheme; host: string; base: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_CommitmentPlansRemove_568230(path: JsonNode; query: JsonNode;
+proc validate_CommitmentPlansRemove_564130(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Remove an existing Azure ML commitment plan.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
+  ##   subscriptionId: JString (required)
+  ##                 : Azure Subscription ID.
   ##   resourceGroupName: JString (required)
   ##                    : The resource group name.
   ##   commitmentPlanName: JString (required)
   ##                     : The Azure ML commitment plan name.
-  ##   subscriptionId: JString (required)
-  ##                 : Azure Subscription ID.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568232 = path.getOrDefault("resourceGroupName")
-  valid_568232 = validateParameter(valid_568232, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564132 = path.getOrDefault("subscriptionId")
+  valid_564132 = validateParameter(valid_564132, JString, required = true,
                                  default = nil)
-  if valid_568232 != nil:
-    section.add "resourceGroupName", valid_568232
-  var valid_568233 = path.getOrDefault("commitmentPlanName")
-  valid_568233 = validateParameter(valid_568233, JString, required = true,
+  if valid_564132 != nil:
+    section.add "subscriptionId", valid_564132
+  var valid_564133 = path.getOrDefault("resourceGroupName")
+  valid_564133 = validateParameter(valid_564133, JString, required = true,
                                  default = nil)
-  if valid_568233 != nil:
-    section.add "commitmentPlanName", valid_568233
-  var valid_568234 = path.getOrDefault("subscriptionId")
-  valid_568234 = validateParameter(valid_568234, JString, required = true,
+  if valid_564133 != nil:
+    section.add "resourceGroupName", valid_564133
+  var valid_564134 = path.getOrDefault("commitmentPlanName")
+  valid_564134 = validateParameter(valid_564134, JString, required = true,
                                  default = nil)
-  if valid_568234 != nil:
-    section.add "subscriptionId", valid_568234
+  if valid_564134 != nil:
+    section.add "commitmentPlanName", valid_564134
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -898,11 +903,11 @@ proc validate_CommitmentPlansRemove_568230(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568235 = query.getOrDefault("api-version")
-  valid_568235 = validateParameter(valid_568235, JString, required = true,
+  var valid_564135 = query.getOrDefault("api-version")
+  valid_564135 = validateParameter(valid_564135, JString, required = true,
                                  default = nil)
-  if valid_568235 != nil:
-    section.add "api-version", valid_568235
+  if valid_564135 != nil:
+    section.add "api-version", valid_564135
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -911,48 +916,48 @@ proc validate_CommitmentPlansRemove_568230(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568236: Call_CommitmentPlansRemove_568229; path: JsonNode;
+proc call*(call_564136: Call_CommitmentPlansRemove_564129; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Remove an existing Azure ML commitment plan.
   ## 
-  let valid = call_568236.validator(path, query, header, formData, body)
-  let scheme = call_568236.pickScheme
+  let valid = call_564136.validator(path, query, header, formData, body)
+  let scheme = call_564136.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568236.url(scheme.get, call_568236.host, call_568236.base,
-                         call_568236.route, valid.getOrDefault("path"),
+  let url = call_564136.url(scheme.get, call_564136.host, call_564136.base,
+                         call_564136.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568236, url, valid)
+  result = hook(call_564136, url, valid)
 
-proc call*(call_568237: Call_CommitmentPlansRemove_568229;
-          resourceGroupName: string; apiVersion: string; commitmentPlanName: string;
-          subscriptionId: string): Recallable =
+proc call*(call_564137: Call_CommitmentPlansRemove_564129; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string;
+          commitmentPlanName: string): Recallable =
   ## commitmentPlansRemove
   ## Remove an existing Azure ML commitment plan.
-  ##   resourceGroupName: string (required)
-  ##                    : The resource group name.
   ##   apiVersion: string (required)
   ##             : The version of the Microsoft.MachineLearning resource provider API to use.
-  ##   commitmentPlanName: string (required)
-  ##                     : The Azure ML commitment plan name.
   ##   subscriptionId: string (required)
   ##                 : Azure Subscription ID.
-  var path_568238 = newJObject()
-  var query_568239 = newJObject()
-  add(path_568238, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568239, "api-version", newJString(apiVersion))
-  add(path_568238, "commitmentPlanName", newJString(commitmentPlanName))
-  add(path_568238, "subscriptionId", newJString(subscriptionId))
-  result = call_568237.call(path_568238, query_568239, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The resource group name.
+  ##   commitmentPlanName: string (required)
+  ##                     : The Azure ML commitment plan name.
+  var path_564138 = newJObject()
+  var query_564139 = newJObject()
+  add(query_564139, "api-version", newJString(apiVersion))
+  add(path_564138, "subscriptionId", newJString(subscriptionId))
+  add(path_564138, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564138, "commitmentPlanName", newJString(commitmentPlanName))
+  result = call_564137.call(path_564138, query_564139, nil, nil, nil)
 
-var commitmentPlansRemove* = Call_CommitmentPlansRemove_568229(
+var commitmentPlansRemove* = Call_CommitmentPlansRemove_564129(
     name: "commitmentPlansRemove", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.MachineLearning/commitmentPlans/{commitmentPlanName}",
-    validator: validate_CommitmentPlansRemove_568230, base: "",
-    url: url_CommitmentPlansRemove_568231, schemes: {Scheme.Https})
+    validator: validate_CommitmentPlansRemove_564130, base: "",
+    url: url_CommitmentPlansRemove_564131, schemes: {Scheme.Https})
 type
-  Call_CommitmentAssociationsList_568253 = ref object of OpenApiRestCall_567642
-proc url_CommitmentAssociationsList_568255(protocol: Scheme; host: string;
+  Call_CommitmentAssociationsList_564153 = ref object of OpenApiRestCall_563540
+proc url_CommitmentAssociationsList_564155(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -977,56 +982,56 @@ proc url_CommitmentAssociationsList_568255(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_CommitmentAssociationsList_568254(path: JsonNode; query: JsonNode;
+proc validate_CommitmentAssociationsList_564154(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Get all commitment associations for a parent commitment plan.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
+  ##   subscriptionId: JString (required)
+  ##                 : Azure Subscription ID.
   ##   resourceGroupName: JString (required)
   ##                    : The resource group name.
   ##   commitmentPlanName: JString (required)
   ##                     : The Azure ML commitment plan name.
-  ##   subscriptionId: JString (required)
-  ##                 : Azure Subscription ID.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568256 = path.getOrDefault("resourceGroupName")
-  valid_568256 = validateParameter(valid_568256, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564156 = path.getOrDefault("subscriptionId")
+  valid_564156 = validateParameter(valid_564156, JString, required = true,
                                  default = nil)
-  if valid_568256 != nil:
-    section.add "resourceGroupName", valid_568256
-  var valid_568257 = path.getOrDefault("commitmentPlanName")
-  valid_568257 = validateParameter(valid_568257, JString, required = true,
+  if valid_564156 != nil:
+    section.add "subscriptionId", valid_564156
+  var valid_564157 = path.getOrDefault("resourceGroupName")
+  valid_564157 = validateParameter(valid_564157, JString, required = true,
                                  default = nil)
-  if valid_568257 != nil:
-    section.add "commitmentPlanName", valid_568257
-  var valid_568258 = path.getOrDefault("subscriptionId")
-  valid_568258 = validateParameter(valid_568258, JString, required = true,
+  if valid_564157 != nil:
+    section.add "resourceGroupName", valid_564157
+  var valid_564158 = path.getOrDefault("commitmentPlanName")
+  valid_564158 = validateParameter(valid_564158, JString, required = true,
                                  default = nil)
-  if valid_568258 != nil:
-    section.add "subscriptionId", valid_568258
+  if valid_564158 != nil:
+    section.add "commitmentPlanName", valid_564158
   result.add "path", section
   ## parameters in `query` object:
-  ##   api-version: JString (required)
-  ##              : The version of the Microsoft.MachineLearning resource provider API to use.
   ##   $skipToken: JString
   ##             : Continuation token for pagination.
+  ##   api-version: JString (required)
+  ##              : The version of the Microsoft.MachineLearning resource provider API to use.
   section = newJObject()
+  var valid_564159 = query.getOrDefault("$skipToken")
+  valid_564159 = validateParameter(valid_564159, JString, required = false,
+                                 default = nil)
+  if valid_564159 != nil:
+    section.add "$skipToken", valid_564159
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568259 = query.getOrDefault("api-version")
-  valid_568259 = validateParameter(valid_568259, JString, required = true,
+  var valid_564160 = query.getOrDefault("api-version")
+  valid_564160 = validateParameter(valid_564160, JString, required = true,
                                  default = nil)
-  if valid_568259 != nil:
-    section.add "api-version", valid_568259
-  var valid_568260 = query.getOrDefault("$skipToken")
-  valid_568260 = validateParameter(valid_568260, JString, required = false,
-                                 default = nil)
-  if valid_568260 != nil:
-    section.add "$skipToken", valid_568260
+  if valid_564160 != nil:
+    section.add "api-version", valid_564160
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1035,51 +1040,51 @@ proc validate_CommitmentAssociationsList_568254(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568261: Call_CommitmentAssociationsList_568253; path: JsonNode;
+proc call*(call_564161: Call_CommitmentAssociationsList_564153; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get all commitment associations for a parent commitment plan.
   ## 
-  let valid = call_568261.validator(path, query, header, formData, body)
-  let scheme = call_568261.pickScheme
+  let valid = call_564161.validator(path, query, header, formData, body)
+  let scheme = call_564161.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568261.url(scheme.get, call_568261.host, call_568261.base,
-                         call_568261.route, valid.getOrDefault("path"),
+  let url = call_564161.url(scheme.get, call_564161.host, call_564161.base,
+                         call_564161.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568261, url, valid)
+  result = hook(call_564161, url, valid)
 
-proc call*(call_568262: Call_CommitmentAssociationsList_568253;
-          resourceGroupName: string; apiVersion: string; commitmentPlanName: string;
-          subscriptionId: string; SkipToken: string = ""): Recallable =
+proc call*(call_564162: Call_CommitmentAssociationsList_564153; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string;
+          commitmentPlanName: string; SkipToken: string = ""): Recallable =
   ## commitmentAssociationsList
   ## Get all commitment associations for a parent commitment plan.
-  ##   resourceGroupName: string (required)
-  ##                    : The resource group name.
-  ##   apiVersion: string (required)
-  ##             : The version of the Microsoft.MachineLearning resource provider API to use.
-  ##   commitmentPlanName: string (required)
-  ##                     : The Azure ML commitment plan name.
-  ##   subscriptionId: string (required)
-  ##                 : Azure Subscription ID.
   ##   SkipToken: string
   ##            : Continuation token for pagination.
-  var path_568263 = newJObject()
-  var query_568264 = newJObject()
-  add(path_568263, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568264, "api-version", newJString(apiVersion))
-  add(path_568263, "commitmentPlanName", newJString(commitmentPlanName))
-  add(path_568263, "subscriptionId", newJString(subscriptionId))
-  add(query_568264, "$skipToken", newJString(SkipToken))
-  result = call_568262.call(path_568263, query_568264, nil, nil, nil)
+  ##   apiVersion: string (required)
+  ##             : The version of the Microsoft.MachineLearning resource provider API to use.
+  ##   subscriptionId: string (required)
+  ##                 : Azure Subscription ID.
+  ##   resourceGroupName: string (required)
+  ##                    : The resource group name.
+  ##   commitmentPlanName: string (required)
+  ##                     : The Azure ML commitment plan name.
+  var path_564163 = newJObject()
+  var query_564164 = newJObject()
+  add(query_564164, "$skipToken", newJString(SkipToken))
+  add(query_564164, "api-version", newJString(apiVersion))
+  add(path_564163, "subscriptionId", newJString(subscriptionId))
+  add(path_564163, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564163, "commitmentPlanName", newJString(commitmentPlanName))
+  result = call_564162.call(path_564163, query_564164, nil, nil, nil)
 
-var commitmentAssociationsList* = Call_CommitmentAssociationsList_568253(
+var commitmentAssociationsList* = Call_CommitmentAssociationsList_564153(
     name: "commitmentAssociationsList", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.MachineLearning/commitmentPlans/{commitmentPlanName}/commitmentAssociations",
-    validator: validate_CommitmentAssociationsList_568254, base: "",
-    url: url_CommitmentAssociationsList_568255, schemes: {Scheme.Https})
+    validator: validate_CommitmentAssociationsList_564154, base: "",
+    url: url_CommitmentAssociationsList_564155, schemes: {Scheme.Https})
 type
-  Call_CommitmentAssociationsGet_568265 = ref object of OpenApiRestCall_567642
-proc url_CommitmentAssociationsGet_568267(protocol: Scheme; host: string;
+  Call_CommitmentAssociationsGet_564165 = ref object of OpenApiRestCall_563540
+proc url_CommitmentAssociationsGet_564167(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1107,44 +1112,43 @@ proc url_CommitmentAssociationsGet_568267(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_CommitmentAssociationsGet_568266(path: JsonNode; query: JsonNode;
+proc validate_CommitmentAssociationsGet_564166(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Get a commitment association.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The resource group name.
   ##   commitmentAssociationName: JString (required)
   ##                            : The commitment association name.
-  ##   commitmentPlanName: JString (required)
-  ##                     : The Azure ML commitment plan name.
   ##   subscriptionId: JString (required)
   ##                 : Azure Subscription ID.
+  ##   resourceGroupName: JString (required)
+  ##                    : The resource group name.
+  ##   commitmentPlanName: JString (required)
+  ##                     : The Azure ML commitment plan name.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568268 = path.getOrDefault("resourceGroupName")
-  valid_568268 = validateParameter(valid_568268, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `commitmentAssociationName` field"
+  var valid_564168 = path.getOrDefault("commitmentAssociationName")
+  valid_564168 = validateParameter(valid_564168, JString, required = true,
                                  default = nil)
-  if valid_568268 != nil:
-    section.add "resourceGroupName", valid_568268
-  var valid_568269 = path.getOrDefault("commitmentAssociationName")
-  valid_568269 = validateParameter(valid_568269, JString, required = true,
+  if valid_564168 != nil:
+    section.add "commitmentAssociationName", valid_564168
+  var valid_564169 = path.getOrDefault("subscriptionId")
+  valid_564169 = validateParameter(valid_564169, JString, required = true,
                                  default = nil)
-  if valid_568269 != nil:
-    section.add "commitmentAssociationName", valid_568269
-  var valid_568270 = path.getOrDefault("commitmentPlanName")
-  valid_568270 = validateParameter(valid_568270, JString, required = true,
+  if valid_564169 != nil:
+    section.add "subscriptionId", valid_564169
+  var valid_564170 = path.getOrDefault("resourceGroupName")
+  valid_564170 = validateParameter(valid_564170, JString, required = true,
                                  default = nil)
-  if valid_568270 != nil:
-    section.add "commitmentPlanName", valid_568270
-  var valid_568271 = path.getOrDefault("subscriptionId")
-  valid_568271 = validateParameter(valid_568271, JString, required = true,
+  if valid_564170 != nil:
+    section.add "resourceGroupName", valid_564170
+  var valid_564171 = path.getOrDefault("commitmentPlanName")
+  valid_564171 = validateParameter(valid_564171, JString, required = true,
                                  default = nil)
-  if valid_568271 != nil:
-    section.add "subscriptionId", valid_568271
+  if valid_564171 != nil:
+    section.add "commitmentPlanName", valid_564171
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1152,11 +1156,11 @@ proc validate_CommitmentAssociationsGet_568266(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568272 = query.getOrDefault("api-version")
-  valid_568272 = validateParameter(valid_568272, JString, required = true,
+  var valid_564172 = query.getOrDefault("api-version")
+  valid_564172 = validateParameter(valid_564172, JString, required = true,
                                  default = nil)
-  if valid_568272 != nil:
-    section.add "api-version", valid_568272
+  if valid_564172 != nil:
+    section.add "api-version", valid_564172
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1165,53 +1169,52 @@ proc validate_CommitmentAssociationsGet_568266(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568273: Call_CommitmentAssociationsGet_568265; path: JsonNode;
+proc call*(call_564173: Call_CommitmentAssociationsGet_564165; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get a commitment association.
   ## 
-  let valid = call_568273.validator(path, query, header, formData, body)
-  let scheme = call_568273.pickScheme
+  let valid = call_564173.validator(path, query, header, formData, body)
+  let scheme = call_564173.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568273.url(scheme.get, call_568273.host, call_568273.base,
-                         call_568273.route, valid.getOrDefault("path"),
+  let url = call_564173.url(scheme.get, call_564173.host, call_564173.base,
+                         call_564173.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568273, url, valid)
+  result = hook(call_564173, url, valid)
 
-proc call*(call_568274: Call_CommitmentAssociationsGet_568265;
-          resourceGroupName: string; apiVersion: string;
-          commitmentAssociationName: string; commitmentPlanName: string;
-          subscriptionId: string): Recallable =
+proc call*(call_564174: Call_CommitmentAssociationsGet_564165; apiVersion: string;
+          commitmentAssociationName: string; subscriptionId: string;
+          resourceGroupName: string; commitmentPlanName: string): Recallable =
   ## commitmentAssociationsGet
   ## Get a commitment association.
-  ##   resourceGroupName: string (required)
-  ##                    : The resource group name.
   ##   apiVersion: string (required)
   ##             : The version of the Microsoft.MachineLearning resource provider API to use.
   ##   commitmentAssociationName: string (required)
   ##                            : The commitment association name.
-  ##   commitmentPlanName: string (required)
-  ##                     : The Azure ML commitment plan name.
   ##   subscriptionId: string (required)
   ##                 : Azure Subscription ID.
-  var path_568275 = newJObject()
-  var query_568276 = newJObject()
-  add(path_568275, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568276, "api-version", newJString(apiVersion))
-  add(path_568275, "commitmentAssociationName",
+  ##   resourceGroupName: string (required)
+  ##                    : The resource group name.
+  ##   commitmentPlanName: string (required)
+  ##                     : The Azure ML commitment plan name.
+  var path_564175 = newJObject()
+  var query_564176 = newJObject()
+  add(query_564176, "api-version", newJString(apiVersion))
+  add(path_564175, "commitmentAssociationName",
       newJString(commitmentAssociationName))
-  add(path_568275, "commitmentPlanName", newJString(commitmentPlanName))
-  add(path_568275, "subscriptionId", newJString(subscriptionId))
-  result = call_568274.call(path_568275, query_568276, nil, nil, nil)
+  add(path_564175, "subscriptionId", newJString(subscriptionId))
+  add(path_564175, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564175, "commitmentPlanName", newJString(commitmentPlanName))
+  result = call_564174.call(path_564175, query_564176, nil, nil, nil)
 
-var commitmentAssociationsGet* = Call_CommitmentAssociationsGet_568265(
+var commitmentAssociationsGet* = Call_CommitmentAssociationsGet_564165(
     name: "commitmentAssociationsGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.MachineLearning/commitmentPlans/{commitmentPlanName}/commitmentAssociations/{commitmentAssociationName}",
-    validator: validate_CommitmentAssociationsGet_568266, base: "",
-    url: url_CommitmentAssociationsGet_568267, schemes: {Scheme.Https})
+    validator: validate_CommitmentAssociationsGet_564166, base: "",
+    url: url_CommitmentAssociationsGet_564167, schemes: {Scheme.Https})
 type
-  Call_CommitmentAssociationsMove_568277 = ref object of OpenApiRestCall_567642
-proc url_CommitmentAssociationsMove_568279(protocol: Scheme; host: string;
+  Call_CommitmentAssociationsMove_564177 = ref object of OpenApiRestCall_563540
+proc url_CommitmentAssociationsMove_564179(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1240,44 +1243,43 @@ proc url_CommitmentAssociationsMove_568279(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_CommitmentAssociationsMove_568278(path: JsonNode; query: JsonNode;
+proc validate_CommitmentAssociationsMove_564178(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Re-parent a commitment association from one commitment plan to another.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The resource group name.
   ##   commitmentAssociationName: JString (required)
   ##                            : The commitment association name.
-  ##   commitmentPlanName: JString (required)
-  ##                     : The Azure ML commitment plan name.
   ##   subscriptionId: JString (required)
   ##                 : Azure Subscription ID.
+  ##   resourceGroupName: JString (required)
+  ##                    : The resource group name.
+  ##   commitmentPlanName: JString (required)
+  ##                     : The Azure ML commitment plan name.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568280 = path.getOrDefault("resourceGroupName")
-  valid_568280 = validateParameter(valid_568280, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `commitmentAssociationName` field"
+  var valid_564180 = path.getOrDefault("commitmentAssociationName")
+  valid_564180 = validateParameter(valid_564180, JString, required = true,
                                  default = nil)
-  if valid_568280 != nil:
-    section.add "resourceGroupName", valid_568280
-  var valid_568281 = path.getOrDefault("commitmentAssociationName")
-  valid_568281 = validateParameter(valid_568281, JString, required = true,
+  if valid_564180 != nil:
+    section.add "commitmentAssociationName", valid_564180
+  var valid_564181 = path.getOrDefault("subscriptionId")
+  valid_564181 = validateParameter(valid_564181, JString, required = true,
                                  default = nil)
-  if valid_568281 != nil:
-    section.add "commitmentAssociationName", valid_568281
-  var valid_568282 = path.getOrDefault("commitmentPlanName")
-  valid_568282 = validateParameter(valid_568282, JString, required = true,
+  if valid_564181 != nil:
+    section.add "subscriptionId", valid_564181
+  var valid_564182 = path.getOrDefault("resourceGroupName")
+  valid_564182 = validateParameter(valid_564182, JString, required = true,
                                  default = nil)
-  if valid_568282 != nil:
-    section.add "commitmentPlanName", valid_568282
-  var valid_568283 = path.getOrDefault("subscriptionId")
-  valid_568283 = validateParameter(valid_568283, JString, required = true,
+  if valid_564182 != nil:
+    section.add "resourceGroupName", valid_564182
+  var valid_564183 = path.getOrDefault("commitmentPlanName")
+  valid_564183 = validateParameter(valid_564183, JString, required = true,
                                  default = nil)
-  if valid_568283 != nil:
-    section.add "subscriptionId", valid_568283
+  if valid_564183 != nil:
+    section.add "commitmentPlanName", valid_564183
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1285,11 +1287,11 @@ proc validate_CommitmentAssociationsMove_568278(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568284 = query.getOrDefault("api-version")
-  valid_568284 = validateParameter(valid_568284, JString, required = true,
+  var valid_564184 = query.getOrDefault("api-version")
+  valid_564184 = validateParameter(valid_564184, JString, required = true,
                                  default = nil)
-  if valid_568284 != nil:
-    section.add "api-version", valid_568284
+  if valid_564184 != nil:
+    section.add "api-version", valid_564184
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1303,58 +1305,58 @@ proc validate_CommitmentAssociationsMove_568278(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568286: Call_CommitmentAssociationsMove_568277; path: JsonNode;
+proc call*(call_564186: Call_CommitmentAssociationsMove_564177; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Re-parent a commitment association from one commitment plan to another.
   ## 
-  let valid = call_568286.validator(path, query, header, formData, body)
-  let scheme = call_568286.pickScheme
+  let valid = call_564186.validator(path, query, header, formData, body)
+  let scheme = call_564186.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568286.url(scheme.get, call_568286.host, call_568286.base,
-                         call_568286.route, valid.getOrDefault("path"),
+  let url = call_564186.url(scheme.get, call_564186.host, call_564186.base,
+                         call_564186.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568286, url, valid)
+  result = hook(call_564186, url, valid)
 
-proc call*(call_568287: Call_CommitmentAssociationsMove_568277;
-          resourceGroupName: string; apiVersion: string;
-          commitmentAssociationName: string; commitmentPlanName: string;
-          subscriptionId: string; movePayload: JsonNode): Recallable =
+proc call*(call_564187: Call_CommitmentAssociationsMove_564177; apiVersion: string;
+          commitmentAssociationName: string; subscriptionId: string;
+          movePayload: JsonNode; resourceGroupName: string;
+          commitmentPlanName: string): Recallable =
   ## commitmentAssociationsMove
   ## Re-parent a commitment association from one commitment plan to another.
-  ##   resourceGroupName: string (required)
-  ##                    : The resource group name.
   ##   apiVersion: string (required)
   ##             : The version of the Microsoft.MachineLearning resource provider API to use.
   ##   commitmentAssociationName: string (required)
   ##                            : The commitment association name.
-  ##   commitmentPlanName: string (required)
-  ##                     : The Azure ML commitment plan name.
   ##   subscriptionId: string (required)
   ##                 : Azure Subscription ID.
   ##   movePayload: JObject (required)
   ##              : The move request payload.
-  var path_568288 = newJObject()
-  var query_568289 = newJObject()
-  var body_568290 = newJObject()
-  add(path_568288, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568289, "api-version", newJString(apiVersion))
-  add(path_568288, "commitmentAssociationName",
+  ##   resourceGroupName: string (required)
+  ##                    : The resource group name.
+  ##   commitmentPlanName: string (required)
+  ##                     : The Azure ML commitment plan name.
+  var path_564188 = newJObject()
+  var query_564189 = newJObject()
+  var body_564190 = newJObject()
+  add(query_564189, "api-version", newJString(apiVersion))
+  add(path_564188, "commitmentAssociationName",
       newJString(commitmentAssociationName))
-  add(path_568288, "commitmentPlanName", newJString(commitmentPlanName))
-  add(path_568288, "subscriptionId", newJString(subscriptionId))
+  add(path_564188, "subscriptionId", newJString(subscriptionId))
   if movePayload != nil:
-    body_568290 = movePayload
-  result = call_568287.call(path_568288, query_568289, nil, nil, body_568290)
+    body_564190 = movePayload
+  add(path_564188, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564188, "commitmentPlanName", newJString(commitmentPlanName))
+  result = call_564187.call(path_564188, query_564189, nil, nil, body_564190)
 
-var commitmentAssociationsMove* = Call_CommitmentAssociationsMove_568277(
+var commitmentAssociationsMove* = Call_CommitmentAssociationsMove_564177(
     name: "commitmentAssociationsMove", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.MachineLearning/commitmentPlans/{commitmentPlanName}/commitmentAssociations/{commitmentAssociationName}/move",
-    validator: validate_CommitmentAssociationsMove_568278, base: "",
-    url: url_CommitmentAssociationsMove_568279, schemes: {Scheme.Https})
+    validator: validate_CommitmentAssociationsMove_564178, base: "",
+    url: url_CommitmentAssociationsMove_564179, schemes: {Scheme.Https})
 type
-  Call_UsageHistoryList_568291 = ref object of OpenApiRestCall_567642
-proc url_UsageHistoryList_568293(protocol: Scheme; host: string; base: string;
+  Call_UsageHistoryList_564191 = ref object of OpenApiRestCall_563540
+proc url_UsageHistoryList_564193(protocol: Scheme; host: string; base: string;
                                 route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1379,7 +1381,7 @@ proc url_UsageHistoryList_568293(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_UsageHistoryList_568292(path: JsonNode; query: JsonNode;
+proc validate_UsageHistoryList_564192(path: JsonNode; query: JsonNode;
                                      header: JsonNode; formData: JsonNode;
                                      body: JsonNode): JsonNode =
   ## Retrieve the usage history for an Azure ML commitment plan.
@@ -1387,49 +1389,49 @@ proc validate_UsageHistoryList_568292(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
+  ##   subscriptionId: JString (required)
+  ##                 : Azure Subscription ID.
   ##   resourceGroupName: JString (required)
   ##                    : The resource group name.
   ##   commitmentPlanName: JString (required)
   ##                     : The Azure ML commitment plan name.
-  ##   subscriptionId: JString (required)
-  ##                 : Azure Subscription ID.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568294 = path.getOrDefault("resourceGroupName")
-  valid_568294 = validateParameter(valid_568294, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564194 = path.getOrDefault("subscriptionId")
+  valid_564194 = validateParameter(valid_564194, JString, required = true,
                                  default = nil)
-  if valid_568294 != nil:
-    section.add "resourceGroupName", valid_568294
-  var valid_568295 = path.getOrDefault("commitmentPlanName")
-  valid_568295 = validateParameter(valid_568295, JString, required = true,
+  if valid_564194 != nil:
+    section.add "subscriptionId", valid_564194
+  var valid_564195 = path.getOrDefault("resourceGroupName")
+  valid_564195 = validateParameter(valid_564195, JString, required = true,
                                  default = nil)
-  if valid_568295 != nil:
-    section.add "commitmentPlanName", valid_568295
-  var valid_568296 = path.getOrDefault("subscriptionId")
-  valid_568296 = validateParameter(valid_568296, JString, required = true,
+  if valid_564195 != nil:
+    section.add "resourceGroupName", valid_564195
+  var valid_564196 = path.getOrDefault("commitmentPlanName")
+  valid_564196 = validateParameter(valid_564196, JString, required = true,
                                  default = nil)
-  if valid_568296 != nil:
-    section.add "subscriptionId", valid_568296
+  if valid_564196 != nil:
+    section.add "commitmentPlanName", valid_564196
   result.add "path", section
   ## parameters in `query` object:
-  ##   api-version: JString (required)
-  ##              : The version of the Microsoft.MachineLearning resource provider API to use.
   ##   $skipToken: JString
   ##             : Continuation token for pagination.
+  ##   api-version: JString (required)
+  ##              : The version of the Microsoft.MachineLearning resource provider API to use.
   section = newJObject()
+  var valid_564197 = query.getOrDefault("$skipToken")
+  valid_564197 = validateParameter(valid_564197, JString, required = false,
+                                 default = nil)
+  if valid_564197 != nil:
+    section.add "$skipToken", valid_564197
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568297 = query.getOrDefault("api-version")
-  valid_568297 = validateParameter(valid_568297, JString, required = true,
+  var valid_564198 = query.getOrDefault("api-version")
+  valid_564198 = validateParameter(valid_564198, JString, required = true,
                                  default = nil)
-  if valid_568297 != nil:
-    section.add "api-version", valid_568297
-  var valid_568298 = query.getOrDefault("$skipToken")
-  valid_568298 = validateParameter(valid_568298, JString, required = false,
-                                 default = nil)
-  if valid_568298 != nil:
-    section.add "$skipToken", valid_568298
+  if valid_564198 != nil:
+    section.add "api-version", valid_564198
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1438,47 +1440,47 @@ proc validate_UsageHistoryList_568292(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568299: Call_UsageHistoryList_568291; path: JsonNode;
+proc call*(call_564199: Call_UsageHistoryList_564191; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Retrieve the usage history for an Azure ML commitment plan.
   ## 
-  let valid = call_568299.validator(path, query, header, formData, body)
-  let scheme = call_568299.pickScheme
+  let valid = call_564199.validator(path, query, header, formData, body)
+  let scheme = call_564199.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568299.url(scheme.get, call_568299.host, call_568299.base,
-                         call_568299.route, valid.getOrDefault("path"),
+  let url = call_564199.url(scheme.get, call_564199.host, call_564199.base,
+                         call_564199.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568299, url, valid)
+  result = hook(call_564199, url, valid)
 
-proc call*(call_568300: Call_UsageHistoryList_568291; resourceGroupName: string;
-          apiVersion: string; commitmentPlanName: string; subscriptionId: string;
-          SkipToken: string = ""): Recallable =
+proc call*(call_564200: Call_UsageHistoryList_564191; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string;
+          commitmentPlanName: string; SkipToken: string = ""): Recallable =
   ## usageHistoryList
   ## Retrieve the usage history for an Azure ML commitment plan.
-  ##   resourceGroupName: string (required)
-  ##                    : The resource group name.
-  ##   apiVersion: string (required)
-  ##             : The version of the Microsoft.MachineLearning resource provider API to use.
-  ##   commitmentPlanName: string (required)
-  ##                     : The Azure ML commitment plan name.
-  ##   subscriptionId: string (required)
-  ##                 : Azure Subscription ID.
   ##   SkipToken: string
   ##            : Continuation token for pagination.
-  var path_568301 = newJObject()
-  var query_568302 = newJObject()
-  add(path_568301, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568302, "api-version", newJString(apiVersion))
-  add(path_568301, "commitmentPlanName", newJString(commitmentPlanName))
-  add(path_568301, "subscriptionId", newJString(subscriptionId))
-  add(query_568302, "$skipToken", newJString(SkipToken))
-  result = call_568300.call(path_568301, query_568302, nil, nil, nil)
+  ##   apiVersion: string (required)
+  ##             : The version of the Microsoft.MachineLearning resource provider API to use.
+  ##   subscriptionId: string (required)
+  ##                 : Azure Subscription ID.
+  ##   resourceGroupName: string (required)
+  ##                    : The resource group name.
+  ##   commitmentPlanName: string (required)
+  ##                     : The Azure ML commitment plan name.
+  var path_564201 = newJObject()
+  var query_564202 = newJObject()
+  add(query_564202, "$skipToken", newJString(SkipToken))
+  add(query_564202, "api-version", newJString(apiVersion))
+  add(path_564201, "subscriptionId", newJString(subscriptionId))
+  add(path_564201, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564201, "commitmentPlanName", newJString(commitmentPlanName))
+  result = call_564200.call(path_564201, query_564202, nil, nil, nil)
 
-var usageHistoryList* = Call_UsageHistoryList_568291(name: "usageHistoryList",
+var usageHistoryList* = Call_UsageHistoryList_564191(name: "usageHistoryList",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.MachineLearning/commitmentPlans/{commitmentPlanName}/usageHistory",
-    validator: validate_UsageHistoryList_568292, base: "",
-    url: url_UsageHistoryList_568293, schemes: {Scheme.Https})
+    validator: validate_UsageHistoryList_564192, base: "",
+    url: url_UsageHistoryList_564193, schemes: {Scheme.Https})
 export
   rest
 

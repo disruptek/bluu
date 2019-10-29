@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, httpcore
 
 ## auto-generated via openapi macro
 ## title: NetworkManagementClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_567641 = ref object of OpenApiRestCall
+  OpenApiRestCall_563539 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_567641](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563539](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_567641): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563539): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,8 +107,8 @@ const
   macServiceName = "network-vmssNetworkInterface"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_NetworkInterfacesListVirtualMachineScaleSetNetworkInterfaces_567863 = ref object of OpenApiRestCall_567641
-proc url_NetworkInterfacesListVirtualMachineScaleSetNetworkInterfaces_567865(
+  Call_NetworkInterfacesListVirtualMachineScaleSetNetworkInterfaces_563761 = ref object of OpenApiRestCall_563539
+proc url_NetworkInterfacesListVirtualMachineScaleSetNetworkInterfaces_563763(
     protocol: Scheme; host: string; base: string; route: string; path: JsonNode;
     query: JsonNode): Uri =
   result.scheme = $protocol
@@ -130,7 +134,7 @@ proc url_NetworkInterfacesListVirtualMachineScaleSetNetworkInterfaces_567865(
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_NetworkInterfacesListVirtualMachineScaleSetNetworkInterfaces_567864(
+proc validate_NetworkInterfacesListVirtualMachineScaleSetNetworkInterfaces_563762(
     path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
     body: JsonNode): JsonNode =
   ## Gets all network interfaces in a virtual machine scale set.
@@ -138,30 +142,30 @@ proc validate_NetworkInterfacesListVirtualMachineScaleSetNetworkInterfaces_56786
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   subscriptionId: JString (required)
   ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   virtualMachineScaleSetName: JString (required)
   ##                             : The name of the virtual machine scale set.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568038 = path.getOrDefault("resourceGroupName")
-  valid_568038 = validateParameter(valid_568038, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_563938 = path.getOrDefault("subscriptionId")
+  valid_563938 = validateParameter(valid_563938, JString, required = true,
                                  default = nil)
-  if valid_568038 != nil:
-    section.add "resourceGroupName", valid_568038
-  var valid_568039 = path.getOrDefault("subscriptionId")
-  valid_568039 = validateParameter(valid_568039, JString, required = true,
+  if valid_563938 != nil:
+    section.add "subscriptionId", valid_563938
+  var valid_563939 = path.getOrDefault("virtualMachineScaleSetName")
+  valid_563939 = validateParameter(valid_563939, JString, required = true,
                                  default = nil)
-  if valid_568039 != nil:
-    section.add "subscriptionId", valid_568039
-  var valid_568040 = path.getOrDefault("virtualMachineScaleSetName")
-  valid_568040 = validateParameter(valid_568040, JString, required = true,
+  if valid_563939 != nil:
+    section.add "virtualMachineScaleSetName", valid_563939
+  var valid_563940 = path.getOrDefault("resourceGroupName")
+  valid_563940 = validateParameter(valid_563940, JString, required = true,
                                  default = nil)
-  if valid_568040 != nil:
-    section.add "virtualMachineScaleSetName", valid_568040
+  if valid_563940 != nil:
+    section.add "resourceGroupName", valid_563940
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -169,11 +173,11 @@ proc validate_NetworkInterfacesListVirtualMachineScaleSetNetworkInterfaces_56786
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568054 = query.getOrDefault("api-version")
-  valid_568054 = validateParameter(valid_568054, JString, required = true,
+  var valid_563954 = query.getOrDefault("api-version")
+  valid_563954 = validateParameter(valid_563954, JString, required = true,
                                  default = newJString("2016-09-01"))
-  if valid_568054 != nil:
-    section.add "api-version", valid_568054
+  if valid_563954 != nil:
+    section.add "api-version", valid_563954
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -182,51 +186,51 @@ proc validate_NetworkInterfacesListVirtualMachineScaleSetNetworkInterfaces_56786
   if body != nil:
     result.add "body", body
 
-proc call*(call_568077: Call_NetworkInterfacesListVirtualMachineScaleSetNetworkInterfaces_567863;
+proc call*(call_563977: Call_NetworkInterfacesListVirtualMachineScaleSetNetworkInterfaces_563761;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Gets all network interfaces in a virtual machine scale set.
   ## 
-  let valid = call_568077.validator(path, query, header, formData, body)
-  let scheme = call_568077.pickScheme
+  let valid = call_563977.validator(path, query, header, formData, body)
+  let scheme = call_563977.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568077.url(scheme.get, call_568077.host, call_568077.base,
-                         call_568077.route, valid.getOrDefault("path"),
+  let url = call_563977.url(scheme.get, call_563977.host, call_563977.base,
+                         call_563977.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568077, url, valid)
+  result = hook(call_563977, url, valid)
 
-proc call*(call_568148: Call_NetworkInterfacesListVirtualMachineScaleSetNetworkInterfaces_567863;
-          resourceGroupName: string; subscriptionId: string;
-          virtualMachineScaleSetName: string; apiVersion: string = "2016-09-01"): Recallable =
+proc call*(call_564048: Call_NetworkInterfacesListVirtualMachineScaleSetNetworkInterfaces_563761;
+          subscriptionId: string; virtualMachineScaleSetName: string;
+          resourceGroupName: string; apiVersion: string = "2016-09-01"): Recallable =
   ## networkInterfacesListVirtualMachineScaleSetNetworkInterfaces
   ## Gets all network interfaces in a virtual machine scale set.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client API version.
   ##   subscriptionId: string (required)
   ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   virtualMachineScaleSetName: string (required)
   ##                             : The name of the virtual machine scale set.
-  var path_568149 = newJObject()
-  var query_568151 = newJObject()
-  add(path_568149, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568151, "api-version", newJString(apiVersion))
-  add(path_568149, "subscriptionId", newJString(subscriptionId))
-  add(path_568149, "virtualMachineScaleSetName",
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564049 = newJObject()
+  var query_564051 = newJObject()
+  add(query_564051, "api-version", newJString(apiVersion))
+  add(path_564049, "subscriptionId", newJString(subscriptionId))
+  add(path_564049, "virtualMachineScaleSetName",
       newJString(virtualMachineScaleSetName))
-  result = call_568148.call(path_568149, query_568151, nil, nil, nil)
+  add(path_564049, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564048.call(path_564049, query_564051, nil, nil, nil)
 
-var networkInterfacesListVirtualMachineScaleSetNetworkInterfaces* = Call_NetworkInterfacesListVirtualMachineScaleSetNetworkInterfaces_567863(
+var networkInterfacesListVirtualMachineScaleSetNetworkInterfaces* = Call_NetworkInterfacesListVirtualMachineScaleSetNetworkInterfaces_563761(
     name: "networkInterfacesListVirtualMachineScaleSetNetworkInterfaces",
-    meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/microsoft.Compute/virtualMachineScaleSets/{virtualMachineScaleSetName}/networkInterfaces", validator: validate_NetworkInterfacesListVirtualMachineScaleSetNetworkInterfaces_567864,
+    meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/microsoft.Compute/virtualMachineScaleSets/{virtualMachineScaleSetName}/networkInterfaces", validator: validate_NetworkInterfacesListVirtualMachineScaleSetNetworkInterfaces_563762,
     base: "",
-    url: url_NetworkInterfacesListVirtualMachineScaleSetNetworkInterfaces_567865,
+    url: url_NetworkInterfacesListVirtualMachineScaleSetNetworkInterfaces_563763,
     schemes: {Scheme.Https})
 type
-  Call_NetworkInterfacesListVirtualMachineScaleSetVMNetworkInterfaces_568190 = ref object of OpenApiRestCall_567641
-proc url_NetworkInterfacesListVirtualMachineScaleSetVMNetworkInterfaces_568192(
+  Call_NetworkInterfacesListVirtualMachineScaleSetVMNetworkInterfaces_564090 = ref object of OpenApiRestCall_563539
+proc url_NetworkInterfacesListVirtualMachineScaleSetVMNetworkInterfaces_564092(
     protocol: Scheme; host: string; base: string; route: string; path: JsonNode;
     query: JsonNode): Uri =
   result.scheme = $protocol
@@ -256,7 +260,7 @@ proc url_NetworkInterfacesListVirtualMachineScaleSetVMNetworkInterfaces_568192(
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_NetworkInterfacesListVirtualMachineScaleSetVMNetworkInterfaces_568191(
+proc validate_NetworkInterfacesListVirtualMachineScaleSetVMNetworkInterfaces_564091(
     path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
     body: JsonNode): JsonNode =
   ## Gets information about all network interfaces in a virtual machine in a virtual machine scale set.
@@ -264,37 +268,37 @@ proc validate_NetworkInterfacesListVirtualMachineScaleSetVMNetworkInterfaces_568
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   subscriptionId: JString (required)
   ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   virtualmachineIndex: JString (required)
-  ##                      : The virtual machine index.
   ##   virtualMachineScaleSetName: JString (required)
   ##                             : The name of the virtual machine scale set.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
+  ##   virtualmachineIndex: JString (required)
+  ##                      : The virtual machine index.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568193 = path.getOrDefault("resourceGroupName")
-  valid_568193 = validateParameter(valid_568193, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564093 = path.getOrDefault("subscriptionId")
+  valid_564093 = validateParameter(valid_564093, JString, required = true,
                                  default = nil)
-  if valid_568193 != nil:
-    section.add "resourceGroupName", valid_568193
-  var valid_568194 = path.getOrDefault("subscriptionId")
-  valid_568194 = validateParameter(valid_568194, JString, required = true,
+  if valid_564093 != nil:
+    section.add "subscriptionId", valid_564093
+  var valid_564094 = path.getOrDefault("virtualMachineScaleSetName")
+  valid_564094 = validateParameter(valid_564094, JString, required = true,
                                  default = nil)
-  if valid_568194 != nil:
-    section.add "subscriptionId", valid_568194
-  var valid_568195 = path.getOrDefault("virtualmachineIndex")
-  valid_568195 = validateParameter(valid_568195, JString, required = true,
+  if valid_564094 != nil:
+    section.add "virtualMachineScaleSetName", valid_564094
+  var valid_564095 = path.getOrDefault("resourceGroupName")
+  valid_564095 = validateParameter(valid_564095, JString, required = true,
                                  default = nil)
-  if valid_568195 != nil:
-    section.add "virtualmachineIndex", valid_568195
-  var valid_568196 = path.getOrDefault("virtualMachineScaleSetName")
-  valid_568196 = validateParameter(valid_568196, JString, required = true,
+  if valid_564095 != nil:
+    section.add "resourceGroupName", valid_564095
+  var valid_564096 = path.getOrDefault("virtualmachineIndex")
+  valid_564096 = validateParameter(valid_564096, JString, required = true,
                                  default = nil)
-  if valid_568196 != nil:
-    section.add "virtualMachineScaleSetName", valid_568196
+  if valid_564096 != nil:
+    section.add "virtualmachineIndex", valid_564096
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -302,11 +306,11 @@ proc validate_NetworkInterfacesListVirtualMachineScaleSetVMNetworkInterfaces_568
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568197 = query.getOrDefault("api-version")
-  valid_568197 = validateParameter(valid_568197, JString, required = true,
+  var valid_564097 = query.getOrDefault("api-version")
+  valid_564097 = validateParameter(valid_564097, JString, required = true,
                                  default = newJString("2016-09-01"))
-  if valid_568197 != nil:
-    section.add "api-version", valid_568197
+  if valid_564097 != nil:
+    section.add "api-version", valid_564097
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -315,55 +319,55 @@ proc validate_NetworkInterfacesListVirtualMachineScaleSetVMNetworkInterfaces_568
   if body != nil:
     result.add "body", body
 
-proc call*(call_568198: Call_NetworkInterfacesListVirtualMachineScaleSetVMNetworkInterfaces_568190;
+proc call*(call_564098: Call_NetworkInterfacesListVirtualMachineScaleSetVMNetworkInterfaces_564090;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Gets information about all network interfaces in a virtual machine in a virtual machine scale set.
   ## 
-  let valid = call_568198.validator(path, query, header, formData, body)
-  let scheme = call_568198.pickScheme
+  let valid = call_564098.validator(path, query, header, formData, body)
+  let scheme = call_564098.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568198.url(scheme.get, call_568198.host, call_568198.base,
-                         call_568198.route, valid.getOrDefault("path"),
+  let url = call_564098.url(scheme.get, call_564098.host, call_564098.base,
+                         call_564098.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568198, url, valid)
+  result = hook(call_564098, url, valid)
 
-proc call*(call_568199: Call_NetworkInterfacesListVirtualMachineScaleSetVMNetworkInterfaces_568190;
-          resourceGroupName: string; subscriptionId: string;
-          virtualmachineIndex: string; virtualMachineScaleSetName: string;
+proc call*(call_564099: Call_NetworkInterfacesListVirtualMachineScaleSetVMNetworkInterfaces_564090;
+          subscriptionId: string; virtualMachineScaleSetName: string;
+          resourceGroupName: string; virtualmachineIndex: string;
           apiVersion: string = "2016-09-01"): Recallable =
   ## networkInterfacesListVirtualMachineScaleSetVMNetworkInterfaces
   ## Gets information about all network interfaces in a virtual machine in a virtual machine scale set.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client API version.
   ##   subscriptionId: string (required)
   ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   virtualmachineIndex: string (required)
-  ##                      : The virtual machine index.
   ##   virtualMachineScaleSetName: string (required)
   ##                             : The name of the virtual machine scale set.
-  var path_568200 = newJObject()
-  var query_568201 = newJObject()
-  add(path_568200, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568201, "api-version", newJString(apiVersion))
-  add(path_568200, "subscriptionId", newJString(subscriptionId))
-  add(path_568200, "virtualmachineIndex", newJString(virtualmachineIndex))
-  add(path_568200, "virtualMachineScaleSetName",
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  ##   virtualmachineIndex: string (required)
+  ##                      : The virtual machine index.
+  var path_564100 = newJObject()
+  var query_564101 = newJObject()
+  add(query_564101, "api-version", newJString(apiVersion))
+  add(path_564100, "subscriptionId", newJString(subscriptionId))
+  add(path_564100, "virtualMachineScaleSetName",
       newJString(virtualMachineScaleSetName))
-  result = call_568199.call(path_568200, query_568201, nil, nil, nil)
+  add(path_564100, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564100, "virtualmachineIndex", newJString(virtualmachineIndex))
+  result = call_564099.call(path_564100, query_564101, nil, nil, nil)
 
-var networkInterfacesListVirtualMachineScaleSetVMNetworkInterfaces* = Call_NetworkInterfacesListVirtualMachineScaleSetVMNetworkInterfaces_568190(
+var networkInterfacesListVirtualMachineScaleSetVMNetworkInterfaces* = Call_NetworkInterfacesListVirtualMachineScaleSetVMNetworkInterfaces_564090(
     name: "networkInterfacesListVirtualMachineScaleSetVMNetworkInterfaces",
-    meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/microsoft.Compute/virtualMachineScaleSets/{virtualMachineScaleSetName}/virtualMachines/{virtualmachineIndex}/networkInterfaces", validator: validate_NetworkInterfacesListVirtualMachineScaleSetVMNetworkInterfaces_568191,
+    meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/microsoft.Compute/virtualMachineScaleSets/{virtualMachineScaleSetName}/virtualMachines/{virtualmachineIndex}/networkInterfaces", validator: validate_NetworkInterfacesListVirtualMachineScaleSetVMNetworkInterfaces_564091,
     base: "",
-    url: url_NetworkInterfacesListVirtualMachineScaleSetVMNetworkInterfaces_568192,
+    url: url_NetworkInterfacesListVirtualMachineScaleSetVMNetworkInterfaces_564092,
     schemes: {Scheme.Https})
 type
-  Call_NetworkInterfacesGetVirtualMachineScaleSetNetworkInterface_568202 = ref object of OpenApiRestCall_567641
-proc url_NetworkInterfacesGetVirtualMachineScaleSetNetworkInterface_568204(
+  Call_NetworkInterfacesGetVirtualMachineScaleSetNetworkInterface_564102 = ref object of OpenApiRestCall_563539
+proc url_NetworkInterfacesGetVirtualMachineScaleSetNetworkInterface_564104(
     protocol: Scheme; host: string; base: string; route: string; path: JsonNode;
     query: JsonNode): Uri =
   result.scheme = $protocol
@@ -396,7 +400,7 @@ proc url_NetworkInterfacesGetVirtualMachineScaleSetNetworkInterface_568204(
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_NetworkInterfacesGetVirtualMachineScaleSetNetworkInterface_568203(
+proc validate_NetworkInterfacesGetVirtualMachineScaleSetNetworkInterface_564103(
     path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
     body: JsonNode): JsonNode =
   ## Get the specified network interface in a virtual machine scale set.
@@ -404,44 +408,43 @@ proc validate_NetworkInterfacesGetVirtualMachineScaleSetNetworkInterface_568203(
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
-  ##   subscriptionId: JString (required)
-  ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   virtualmachineIndex: JString (required)
-  ##                      : The virtual machine index.
   ##   networkInterfaceName: JString (required)
   ##                       : The name of the network interface.
+  ##   subscriptionId: JString (required)
+  ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   virtualMachineScaleSetName: JString (required)
   ##                             : The name of the virtual machine scale set.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
+  ##   virtualmachineIndex: JString (required)
+  ##                      : The virtual machine index.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568206 = path.getOrDefault("resourceGroupName")
-  valid_568206 = validateParameter(valid_568206, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `networkInterfaceName` field"
+  var valid_564106 = path.getOrDefault("networkInterfaceName")
+  valid_564106 = validateParameter(valid_564106, JString, required = true,
                                  default = nil)
-  if valid_568206 != nil:
-    section.add "resourceGroupName", valid_568206
-  var valid_568207 = path.getOrDefault("subscriptionId")
-  valid_568207 = validateParameter(valid_568207, JString, required = true,
+  if valid_564106 != nil:
+    section.add "networkInterfaceName", valid_564106
+  var valid_564107 = path.getOrDefault("subscriptionId")
+  valid_564107 = validateParameter(valid_564107, JString, required = true,
                                  default = nil)
-  if valid_568207 != nil:
-    section.add "subscriptionId", valid_568207
-  var valid_568208 = path.getOrDefault("virtualmachineIndex")
-  valid_568208 = validateParameter(valid_568208, JString, required = true,
+  if valid_564107 != nil:
+    section.add "subscriptionId", valid_564107
+  var valid_564108 = path.getOrDefault("virtualMachineScaleSetName")
+  valid_564108 = validateParameter(valid_564108, JString, required = true,
                                  default = nil)
-  if valid_568208 != nil:
-    section.add "virtualmachineIndex", valid_568208
-  var valid_568209 = path.getOrDefault("networkInterfaceName")
-  valid_568209 = validateParameter(valid_568209, JString, required = true,
+  if valid_564108 != nil:
+    section.add "virtualMachineScaleSetName", valid_564108
+  var valid_564109 = path.getOrDefault("resourceGroupName")
+  valid_564109 = validateParameter(valid_564109, JString, required = true,
                                  default = nil)
-  if valid_568209 != nil:
-    section.add "networkInterfaceName", valid_568209
-  var valid_568210 = path.getOrDefault("virtualMachineScaleSetName")
-  valid_568210 = validateParameter(valid_568210, JString, required = true,
+  if valid_564109 != nil:
+    section.add "resourceGroupName", valid_564109
+  var valid_564110 = path.getOrDefault("virtualmachineIndex")
+  valid_564110 = validateParameter(valid_564110, JString, required = true,
                                  default = nil)
-  if valid_568210 != nil:
-    section.add "virtualMachineScaleSetName", valid_568210
+  if valid_564110 != nil:
+    section.add "virtualmachineIndex", valid_564110
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -451,16 +454,16 @@ proc validate_NetworkInterfacesGetVirtualMachineScaleSetNetworkInterface_568203(
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568211 = query.getOrDefault("api-version")
-  valid_568211 = validateParameter(valid_568211, JString, required = true,
+  var valid_564111 = query.getOrDefault("api-version")
+  valid_564111 = validateParameter(valid_564111, JString, required = true,
                                  default = newJString("2016-09-01"))
-  if valid_568211 != nil:
-    section.add "api-version", valid_568211
-  var valid_568212 = query.getOrDefault("$expand")
-  valid_568212 = validateParameter(valid_568212, JString, required = false,
+  if valid_564111 != nil:
+    section.add "api-version", valid_564111
+  var valid_564112 = query.getOrDefault("$expand")
+  valid_564112 = validateParameter(valid_564112, JString, required = false,
                                  default = nil)
-  if valid_568212 != nil:
-    section.add "$expand", valid_568212
+  if valid_564112 != nil:
+    section.add "$expand", valid_564112
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -469,57 +472,57 @@ proc validate_NetworkInterfacesGetVirtualMachineScaleSetNetworkInterface_568203(
   if body != nil:
     result.add "body", body
 
-proc call*(call_568213: Call_NetworkInterfacesGetVirtualMachineScaleSetNetworkInterface_568202;
+proc call*(call_564113: Call_NetworkInterfacesGetVirtualMachineScaleSetNetworkInterface_564102;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Get the specified network interface in a virtual machine scale set.
   ## 
-  let valid = call_568213.validator(path, query, header, formData, body)
-  let scheme = call_568213.pickScheme
+  let valid = call_564113.validator(path, query, header, formData, body)
+  let scheme = call_564113.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568213.url(scheme.get, call_568213.host, call_568213.base,
-                         call_568213.route, valid.getOrDefault("path"),
+  let url = call_564113.url(scheme.get, call_564113.host, call_564113.base,
+                         call_564113.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568213, url, valid)
+  result = hook(call_564113, url, valid)
 
-proc call*(call_568214: Call_NetworkInterfacesGetVirtualMachineScaleSetNetworkInterface_568202;
-          resourceGroupName: string; subscriptionId: string;
-          virtualmachineIndex: string; networkInterfaceName: string;
-          virtualMachineScaleSetName: string; apiVersion: string = "2016-09-01";
+proc call*(call_564114: Call_NetworkInterfacesGetVirtualMachineScaleSetNetworkInterface_564102;
+          networkInterfaceName: string; subscriptionId: string;
+          virtualMachineScaleSetName: string; resourceGroupName: string;
+          virtualmachineIndex: string; apiVersion: string = "2016-09-01";
           Expand: string = ""): Recallable =
   ## networkInterfacesGetVirtualMachineScaleSetNetworkInterface
   ## Get the specified network interface in a virtual machine scale set.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client API version.
+  ##   networkInterfaceName: string (required)
+  ##                       : The name of the network interface.
   ##   Expand: string
   ##         : Expands referenced resources.
   ##   subscriptionId: string (required)
   ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   virtualmachineIndex: string (required)
-  ##                      : The virtual machine index.
-  ##   networkInterfaceName: string (required)
-  ##                       : The name of the network interface.
   ##   virtualMachineScaleSetName: string (required)
   ##                             : The name of the virtual machine scale set.
-  var path_568215 = newJObject()
-  var query_568216 = newJObject()
-  add(path_568215, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568216, "api-version", newJString(apiVersion))
-  add(query_568216, "$expand", newJString(Expand))
-  add(path_568215, "subscriptionId", newJString(subscriptionId))
-  add(path_568215, "virtualmachineIndex", newJString(virtualmachineIndex))
-  add(path_568215, "networkInterfaceName", newJString(networkInterfaceName))
-  add(path_568215, "virtualMachineScaleSetName",
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  ##   virtualmachineIndex: string (required)
+  ##                      : The virtual machine index.
+  var path_564115 = newJObject()
+  var query_564116 = newJObject()
+  add(query_564116, "api-version", newJString(apiVersion))
+  add(path_564115, "networkInterfaceName", newJString(networkInterfaceName))
+  add(query_564116, "$expand", newJString(Expand))
+  add(path_564115, "subscriptionId", newJString(subscriptionId))
+  add(path_564115, "virtualMachineScaleSetName",
       newJString(virtualMachineScaleSetName))
-  result = call_568214.call(path_568215, query_568216, nil, nil, nil)
+  add(path_564115, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564115, "virtualmachineIndex", newJString(virtualmachineIndex))
+  result = call_564114.call(path_564115, query_564116, nil, nil, nil)
 
-var networkInterfacesGetVirtualMachineScaleSetNetworkInterface* = Call_NetworkInterfacesGetVirtualMachineScaleSetNetworkInterface_568202(
+var networkInterfacesGetVirtualMachineScaleSetNetworkInterface* = Call_NetworkInterfacesGetVirtualMachineScaleSetNetworkInterface_564102(
     name: "networkInterfacesGetVirtualMachineScaleSetNetworkInterface",
-    meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/microsoft.Compute/virtualMachineScaleSets/{virtualMachineScaleSetName}/virtualMachines/{virtualmachineIndex}/networkInterfaces/{networkInterfaceName}", validator: validate_NetworkInterfacesGetVirtualMachineScaleSetNetworkInterface_568203,
-    base: "", url: url_NetworkInterfacesGetVirtualMachineScaleSetNetworkInterface_568204,
+    meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/microsoft.Compute/virtualMachineScaleSets/{virtualMachineScaleSetName}/virtualMachines/{virtualmachineIndex}/networkInterfaces/{networkInterfaceName}", validator: validate_NetworkInterfacesGetVirtualMachineScaleSetNetworkInterface_564103,
+    base: "", url: url_NetworkInterfacesGetVirtualMachineScaleSetNetworkInterface_564104,
     schemes: {Scheme.Https})
 export
   rest

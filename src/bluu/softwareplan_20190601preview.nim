@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, httpcore
 
 ## auto-generated via openapi macro
 ## title: Software Plan RP
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_567657 = ref object of OpenApiRestCall
+  OpenApiRestCall_563555 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_567657](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563555](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_567657): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563555): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,8 +107,8 @@ const
   macServiceName = "softwareplan"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_SoftwarePlanRegister_567879 = ref object of OpenApiRestCall_567657
-proc url_SoftwarePlanRegister_567881(protocol: Scheme; host: string; base: string;
+  Call_SoftwarePlanRegister_563777 = ref object of OpenApiRestCall_563555
+proc url_SoftwarePlanRegister_563779(protocol: Scheme; host: string; base: string;
                                     route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -120,7 +124,7 @@ proc url_SoftwarePlanRegister_567881(protocol: Scheme; host: string; base: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_SoftwarePlanRegister_567880(path: JsonNode; query: JsonNode;
+proc validate_SoftwarePlanRegister_563778(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Register to Microsoft.SoftwarePlan resource provider.
   ## 
@@ -132,11 +136,11 @@ proc validate_SoftwarePlanRegister_567880(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_568054 = path.getOrDefault("subscriptionId")
-  valid_568054 = validateParameter(valid_568054, JString, required = true,
+  var valid_563954 = path.getOrDefault("subscriptionId")
+  valid_563954 = validateParameter(valid_563954, JString, required = true,
                                  default = nil)
-  if valid_568054 != nil:
-    section.add "subscriptionId", valid_568054
+  if valid_563954 != nil:
+    section.add "subscriptionId", valid_563954
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -144,11 +148,11 @@ proc validate_SoftwarePlanRegister_567880(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568055 = query.getOrDefault("api-version")
-  valid_568055 = validateParameter(valid_568055, JString, required = true,
+  var valid_563955 = query.getOrDefault("api-version")
+  valid_563955 = validateParameter(valid_563955, JString, required = true,
                                  default = nil)
-  if valid_568055 != nil:
-    section.add "api-version", valid_568055
+  if valid_563955 != nil:
+    section.add "api-version", valid_563955
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -157,20 +161,20 @@ proc validate_SoftwarePlanRegister_567880(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568078: Call_SoftwarePlanRegister_567879; path: JsonNode;
+proc call*(call_563978: Call_SoftwarePlanRegister_563777; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Register to Microsoft.SoftwarePlan resource provider.
   ## 
-  let valid = call_568078.validator(path, query, header, formData, body)
-  let scheme = call_568078.pickScheme
+  let valid = call_563978.validator(path, query, header, formData, body)
+  let scheme = call_563978.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568078.url(scheme.get, call_568078.host, call_568078.base,
-                         call_568078.route, valid.getOrDefault("path"),
+  let url = call_563978.url(scheme.get, call_563978.host, call_563978.base,
+                         call_563978.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568078, url, valid)
+  result = hook(call_563978, url, valid)
 
-proc call*(call_568149: Call_SoftwarePlanRegister_567879; apiVersion: string;
+proc call*(call_564049: Call_SoftwarePlanRegister_563777; apiVersion: string;
           subscriptionId: string): Recallable =
   ## softwarePlanRegister
   ## Register to Microsoft.SoftwarePlan resource provider.
@@ -178,20 +182,20 @@ proc call*(call_568149: Call_SoftwarePlanRegister_567879; apiVersion: string;
   ##             : The api-version to be used by the service
   ##   subscriptionId: string (required)
   ##                 : The ID of the target subscription.
-  var path_568150 = newJObject()
-  var query_568152 = newJObject()
-  add(query_568152, "api-version", newJString(apiVersion))
-  add(path_568150, "subscriptionId", newJString(subscriptionId))
-  result = call_568149.call(path_568150, query_568152, nil, nil, nil)
+  var path_564050 = newJObject()
+  var query_564052 = newJObject()
+  add(query_564052, "api-version", newJString(apiVersion))
+  add(path_564050, "subscriptionId", newJString(subscriptionId))
+  result = call_564049.call(path_564050, query_564052, nil, nil, nil)
 
-var softwarePlanRegister* = Call_SoftwarePlanRegister_567879(
+var softwarePlanRegister* = Call_SoftwarePlanRegister_563777(
     name: "softwarePlanRegister", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.SoftwarePlan/register",
-    validator: validate_SoftwarePlanRegister_567880, base: "",
-    url: url_SoftwarePlanRegister_567881, schemes: {Scheme.Https})
+    validator: validate_SoftwarePlanRegister_563778, base: "",
+    url: url_SoftwarePlanRegister_563779, schemes: {Scheme.Https})
 type
-  Call_HybridUseBenefitList_568191 = ref object of OpenApiRestCall_567657
-proc url_HybridUseBenefitList_568193(protocol: Scheme; host: string; base: string;
+  Call_HybridUseBenefitList_564091 = ref object of OpenApiRestCall_563555
+proc url_HybridUseBenefitList_564093(protocol: Scheme; host: string; base: string;
                                     route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -207,7 +211,7 @@ proc url_HybridUseBenefitList_568193(protocol: Scheme; host: string; base: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_HybridUseBenefitList_568192(path: JsonNode; query: JsonNode;
+proc validate_HybridUseBenefitList_564092(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Get all hybrid use benefits associated with an ARM resource.
   ## 
@@ -218,11 +222,11 @@ proc validate_HybridUseBenefitList_568192(path: JsonNode; query: JsonNode;
   ##        : The scope at which the operation is performed. This is limited to Microsoft.Compute/virtualMachines and Microsoft.Compute/hostGroups/hosts for now
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `scope` field"
-  var valid_568195 = path.getOrDefault("scope")
-  valid_568195 = validateParameter(valid_568195, JString, required = true,
+  var valid_564095 = path.getOrDefault("scope")
+  valid_564095 = validateParameter(valid_564095, JString, required = true,
                                  default = nil)
-  if valid_568195 != nil:
-    section.add "scope", valid_568195
+  if valid_564095 != nil:
+    section.add "scope", valid_564095
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -232,16 +236,16 @@ proc validate_HybridUseBenefitList_568192(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568196 = query.getOrDefault("api-version")
-  valid_568196 = validateParameter(valid_568196, JString, required = true,
+  var valid_564096 = query.getOrDefault("api-version")
+  valid_564096 = validateParameter(valid_564096, JString, required = true,
                                  default = nil)
-  if valid_568196 != nil:
-    section.add "api-version", valid_568196
-  var valid_568197 = query.getOrDefault("$filter")
-  valid_568197 = validateParameter(valid_568197, JString, required = false,
+  if valid_564096 != nil:
+    section.add "api-version", valid_564096
+  var valid_564097 = query.getOrDefault("$filter")
+  valid_564097 = validateParameter(valid_564097, JString, required = false,
                                  default = nil)
-  if valid_568197 != nil:
-    section.add "$filter", valid_568197
+  if valid_564097 != nil:
+    section.add "$filter", valid_564097
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -250,45 +254,45 @@ proc validate_HybridUseBenefitList_568192(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568198: Call_HybridUseBenefitList_568191; path: JsonNode;
+proc call*(call_564098: Call_HybridUseBenefitList_564091; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get all hybrid use benefits associated with an ARM resource.
   ## 
-  let valid = call_568198.validator(path, query, header, formData, body)
-  let scheme = call_568198.pickScheme
+  let valid = call_564098.validator(path, query, header, formData, body)
+  let scheme = call_564098.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568198.url(scheme.get, call_568198.host, call_568198.base,
-                         call_568198.route, valid.getOrDefault("path"),
+  let url = call_564098.url(scheme.get, call_564098.host, call_564098.base,
+                         call_564098.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568198, url, valid)
+  result = hook(call_564098, url, valid)
 
-proc call*(call_568199: Call_HybridUseBenefitList_568191; apiVersion: string;
+proc call*(call_564099: Call_HybridUseBenefitList_564091; apiVersion: string;
           scope: string; Filter: string = ""): Recallable =
   ## hybridUseBenefitList
   ## Get all hybrid use benefits associated with an ARM resource.
   ##   apiVersion: string (required)
   ##             : The api-version to be used by the service
-  ##   scope: string (required)
-  ##        : The scope at which the operation is performed. This is limited to Microsoft.Compute/virtualMachines and Microsoft.Compute/hostGroups/hosts for now
   ##   Filter: string
   ##         : Supports applying filter on the type of SKU
-  var path_568200 = newJObject()
-  var query_568201 = newJObject()
-  add(query_568201, "api-version", newJString(apiVersion))
-  add(path_568200, "scope", newJString(scope))
-  add(query_568201, "$filter", newJString(Filter))
-  result = call_568199.call(path_568200, query_568201, nil, nil, nil)
+  ##   scope: string (required)
+  ##        : The scope at which the operation is performed. This is limited to Microsoft.Compute/virtualMachines and Microsoft.Compute/hostGroups/hosts for now
+  var path_564100 = newJObject()
+  var query_564101 = newJObject()
+  add(query_564101, "api-version", newJString(apiVersion))
+  add(query_564101, "$filter", newJString(Filter))
+  add(path_564100, "scope", newJString(scope))
+  result = call_564099.call(path_564100, query_564101, nil, nil, nil)
 
-var hybridUseBenefitList* = Call_HybridUseBenefitList_568191(
+var hybridUseBenefitList* = Call_HybridUseBenefitList_564091(
     name: "hybridUseBenefitList", meth: HttpMethod.HttpGet,
     host: "management.azure.com",
     route: "/{scope}/providers/Microsoft.SoftwarePlan/hybridUseBenefits",
-    validator: validate_HybridUseBenefitList_568192, base: "",
-    url: url_HybridUseBenefitList_568193, schemes: {Scheme.Https})
+    validator: validate_HybridUseBenefitList_564092, base: "",
+    url: url_HybridUseBenefitList_564093, schemes: {Scheme.Https})
 type
-  Call_HybridUseBenefitCreate_568212 = ref object of OpenApiRestCall_567657
-proc url_HybridUseBenefitCreate_568214(protocol: Scheme; host: string; base: string;
+  Call_HybridUseBenefitCreate_564112 = ref object of OpenApiRestCall_563555
+proc url_HybridUseBenefitCreate_564114(protocol: Scheme; host: string; base: string;
                                       route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -306,7 +310,7 @@ proc url_HybridUseBenefitCreate_568214(protocol: Scheme; host: string; base: str
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_HybridUseBenefitCreate_568213(path: JsonNode; query: JsonNode;
+proc validate_HybridUseBenefitCreate_564113(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Create a new hybrid use benefit under a given scope
   ## 
@@ -319,16 +323,16 @@ proc validate_HybridUseBenefitCreate_568213(path: JsonNode; query: JsonNode;
   ##        : The scope at which the operation is performed. This is limited to Microsoft.Compute/virtualMachines and Microsoft.Compute/hostGroups/hosts for now
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `planId` field"
-  var valid_568232 = path.getOrDefault("planId")
-  valid_568232 = validateParameter(valid_568232, JString, required = true,
+  var valid_564132 = path.getOrDefault("planId")
+  valid_564132 = validateParameter(valid_564132, JString, required = true,
                                  default = nil)
-  if valid_568232 != nil:
-    section.add "planId", valid_568232
-  var valid_568233 = path.getOrDefault("scope")
-  valid_568233 = validateParameter(valid_568233, JString, required = true,
+  if valid_564132 != nil:
+    section.add "planId", valid_564132
+  var valid_564133 = path.getOrDefault("scope")
+  valid_564133 = validateParameter(valid_564133, JString, required = true,
                                  default = nil)
-  if valid_568233 != nil:
-    section.add "scope", valid_568233
+  if valid_564133 != nil:
+    section.add "scope", valid_564133
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -336,11 +340,11 @@ proc validate_HybridUseBenefitCreate_568213(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568234 = query.getOrDefault("api-version")
-  valid_568234 = validateParameter(valid_568234, JString, required = true,
+  var valid_564134 = query.getOrDefault("api-version")
+  valid_564134 = validateParameter(valid_564134, JString, required = true,
                                  default = nil)
-  if valid_568234 != nil:
-    section.add "api-version", valid_568234
+  if valid_564134 != nil:
+    section.add "api-version", valid_564134
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -354,49 +358,49 @@ proc validate_HybridUseBenefitCreate_568213(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568236: Call_HybridUseBenefitCreate_568212; path: JsonNode;
+proc call*(call_564136: Call_HybridUseBenefitCreate_564112; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Create a new hybrid use benefit under a given scope
   ## 
-  let valid = call_568236.validator(path, query, header, formData, body)
-  let scheme = call_568236.pickScheme
+  let valid = call_564136.validator(path, query, header, formData, body)
+  let scheme = call_564136.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568236.url(scheme.get, call_568236.host, call_568236.base,
-                         call_568236.route, valid.getOrDefault("path"),
+  let url = call_564136.url(scheme.get, call_564136.host, call_564136.base,
+                         call_564136.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568236, url, valid)
+  result = hook(call_564136, url, valid)
 
-proc call*(call_568237: Call_HybridUseBenefitCreate_568212; apiVersion: string;
-          planId: string; scope: string; body: JsonNode): Recallable =
+proc call*(call_564137: Call_HybridUseBenefitCreate_564112; apiVersion: string;
+          planId: string; body: JsonNode; scope: string): Recallable =
   ## hybridUseBenefitCreate
   ## Create a new hybrid use benefit under a given scope
   ##   apiVersion: string (required)
   ##             : The api-version to be used by the service
   ##   planId: string (required)
   ##         : This is a unique identifier for a plan. Should be a guid.
-  ##   scope: string (required)
-  ##        : The scope at which the operation is performed. This is limited to Microsoft.Compute/virtualMachines and Microsoft.Compute/hostGroups/hosts for now
   ##   body: JObject (required)
   ##       : Request body for creating a hybrid use benefit
-  var path_568238 = newJObject()
-  var query_568239 = newJObject()
-  var body_568240 = newJObject()
-  add(query_568239, "api-version", newJString(apiVersion))
-  add(path_568238, "planId", newJString(planId))
-  add(path_568238, "scope", newJString(scope))
+  ##   scope: string (required)
+  ##        : The scope at which the operation is performed. This is limited to Microsoft.Compute/virtualMachines and Microsoft.Compute/hostGroups/hosts for now
+  var path_564138 = newJObject()
+  var query_564139 = newJObject()
+  var body_564140 = newJObject()
+  add(query_564139, "api-version", newJString(apiVersion))
+  add(path_564138, "planId", newJString(planId))
   if body != nil:
-    body_568240 = body
-  result = call_568237.call(path_568238, query_568239, nil, nil, body_568240)
+    body_564140 = body
+  add(path_564138, "scope", newJString(scope))
+  result = call_564137.call(path_564138, query_564139, nil, nil, body_564140)
 
-var hybridUseBenefitCreate* = Call_HybridUseBenefitCreate_568212(
+var hybridUseBenefitCreate* = Call_HybridUseBenefitCreate_564112(
     name: "hybridUseBenefitCreate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/{scope}/providers/Microsoft.SoftwarePlan/hybridUseBenefits/{planId}",
-    validator: validate_HybridUseBenefitCreate_568213, base: "",
-    url: url_HybridUseBenefitCreate_568214, schemes: {Scheme.Https})
+    validator: validate_HybridUseBenefitCreate_564113, base: "",
+    url: url_HybridUseBenefitCreate_564114, schemes: {Scheme.Https})
 type
-  Call_HybridUseBenefitGet_568202 = ref object of OpenApiRestCall_567657
-proc url_HybridUseBenefitGet_568204(protocol: Scheme; host: string; base: string;
+  Call_HybridUseBenefitGet_564102 = ref object of OpenApiRestCall_563555
+proc url_HybridUseBenefitGet_564104(protocol: Scheme; host: string; base: string;
                                    route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -414,7 +418,7 @@ proc url_HybridUseBenefitGet_568204(protocol: Scheme; host: string; base: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_HybridUseBenefitGet_568203(path: JsonNode; query: JsonNode;
+proc validate_HybridUseBenefitGet_564103(path: JsonNode; query: JsonNode;
                                         header: JsonNode; formData: JsonNode;
                                         body: JsonNode): JsonNode =
   ## Gets a given plan ID
@@ -428,16 +432,16 @@ proc validate_HybridUseBenefitGet_568203(path: JsonNode; query: JsonNode;
   ##        : The scope at which the operation is performed. This is limited to Microsoft.Compute/virtualMachines and Microsoft.Compute/hostGroups/hosts for now
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `planId` field"
-  var valid_568205 = path.getOrDefault("planId")
-  valid_568205 = validateParameter(valid_568205, JString, required = true,
+  var valid_564105 = path.getOrDefault("planId")
+  valid_564105 = validateParameter(valid_564105, JString, required = true,
                                  default = nil)
-  if valid_568205 != nil:
-    section.add "planId", valid_568205
-  var valid_568206 = path.getOrDefault("scope")
-  valid_568206 = validateParameter(valid_568206, JString, required = true,
+  if valid_564105 != nil:
+    section.add "planId", valid_564105
+  var valid_564106 = path.getOrDefault("scope")
+  valid_564106 = validateParameter(valid_564106, JString, required = true,
                                  default = nil)
-  if valid_568206 != nil:
-    section.add "scope", valid_568206
+  if valid_564106 != nil:
+    section.add "scope", valid_564106
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -445,11 +449,11 @@ proc validate_HybridUseBenefitGet_568203(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568207 = query.getOrDefault("api-version")
-  valid_568207 = validateParameter(valid_568207, JString, required = true,
+  var valid_564107 = query.getOrDefault("api-version")
+  valid_564107 = validateParameter(valid_564107, JString, required = true,
                                  default = nil)
-  if valid_568207 != nil:
-    section.add "api-version", valid_568207
+  if valid_564107 != nil:
+    section.add "api-version", valid_564107
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -458,20 +462,20 @@ proc validate_HybridUseBenefitGet_568203(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568208: Call_HybridUseBenefitGet_568202; path: JsonNode;
+proc call*(call_564108: Call_HybridUseBenefitGet_564102; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets a given plan ID
   ## 
-  let valid = call_568208.validator(path, query, header, formData, body)
-  let scheme = call_568208.pickScheme
+  let valid = call_564108.validator(path, query, header, formData, body)
+  let scheme = call_564108.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568208.url(scheme.get, call_568208.host, call_568208.base,
-                         call_568208.route, valid.getOrDefault("path"),
+  let url = call_564108.url(scheme.get, call_564108.host, call_564108.base,
+                         call_564108.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568208, url, valid)
+  result = hook(call_564108, url, valid)
 
-proc call*(call_568209: Call_HybridUseBenefitGet_568202; apiVersion: string;
+proc call*(call_564109: Call_HybridUseBenefitGet_564102; apiVersion: string;
           planId: string; scope: string): Recallable =
   ## hybridUseBenefitGet
   ## Gets a given plan ID
@@ -481,21 +485,21 @@ proc call*(call_568209: Call_HybridUseBenefitGet_568202; apiVersion: string;
   ##         : This is a unique identifier for a plan. Should be a guid.
   ##   scope: string (required)
   ##        : The scope at which the operation is performed. This is limited to Microsoft.Compute/virtualMachines and Microsoft.Compute/hostGroups/hosts for now
-  var path_568210 = newJObject()
-  var query_568211 = newJObject()
-  add(query_568211, "api-version", newJString(apiVersion))
-  add(path_568210, "planId", newJString(planId))
-  add(path_568210, "scope", newJString(scope))
-  result = call_568209.call(path_568210, query_568211, nil, nil, nil)
+  var path_564110 = newJObject()
+  var query_564111 = newJObject()
+  add(query_564111, "api-version", newJString(apiVersion))
+  add(path_564110, "planId", newJString(planId))
+  add(path_564110, "scope", newJString(scope))
+  result = call_564109.call(path_564110, query_564111, nil, nil, nil)
 
-var hybridUseBenefitGet* = Call_HybridUseBenefitGet_568202(
+var hybridUseBenefitGet* = Call_HybridUseBenefitGet_564102(
     name: "hybridUseBenefitGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/{scope}/providers/Microsoft.SoftwarePlan/hybridUseBenefits/{planId}",
-    validator: validate_HybridUseBenefitGet_568203, base: "",
-    url: url_HybridUseBenefitGet_568204, schemes: {Scheme.Https})
+    validator: validate_HybridUseBenefitGet_564103, base: "",
+    url: url_HybridUseBenefitGet_564104, schemes: {Scheme.Https})
 type
-  Call_HybridUseBenefitUpdate_568251 = ref object of OpenApiRestCall_567657
-proc url_HybridUseBenefitUpdate_568253(protocol: Scheme; host: string; base: string;
+  Call_HybridUseBenefitUpdate_564151 = ref object of OpenApiRestCall_563555
+proc url_HybridUseBenefitUpdate_564153(protocol: Scheme; host: string; base: string;
                                       route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -513,7 +517,7 @@ proc url_HybridUseBenefitUpdate_568253(protocol: Scheme; host: string; base: str
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_HybridUseBenefitUpdate_568252(path: JsonNode; query: JsonNode;
+proc validate_HybridUseBenefitUpdate_564152(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Updates an existing hybrid use benefit
   ## 
@@ -526,16 +530,16 @@ proc validate_HybridUseBenefitUpdate_568252(path: JsonNode; query: JsonNode;
   ##        : The scope at which the operation is performed. This is limited to Microsoft.Compute/virtualMachines and Microsoft.Compute/hostGroups/hosts for now
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `planId` field"
-  var valid_568254 = path.getOrDefault("planId")
-  valid_568254 = validateParameter(valid_568254, JString, required = true,
+  var valid_564154 = path.getOrDefault("planId")
+  valid_564154 = validateParameter(valid_564154, JString, required = true,
                                  default = nil)
-  if valid_568254 != nil:
-    section.add "planId", valid_568254
-  var valid_568255 = path.getOrDefault("scope")
-  valid_568255 = validateParameter(valid_568255, JString, required = true,
+  if valid_564154 != nil:
+    section.add "planId", valid_564154
+  var valid_564155 = path.getOrDefault("scope")
+  valid_564155 = validateParameter(valid_564155, JString, required = true,
                                  default = nil)
-  if valid_568255 != nil:
-    section.add "scope", valid_568255
+  if valid_564155 != nil:
+    section.add "scope", valid_564155
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -543,11 +547,11 @@ proc validate_HybridUseBenefitUpdate_568252(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568256 = query.getOrDefault("api-version")
-  valid_568256 = validateParameter(valid_568256, JString, required = true,
+  var valid_564156 = query.getOrDefault("api-version")
+  valid_564156 = validateParameter(valid_564156, JString, required = true,
                                  default = nil)
-  if valid_568256 != nil:
-    section.add "api-version", valid_568256
+  if valid_564156 != nil:
+    section.add "api-version", valid_564156
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -561,49 +565,49 @@ proc validate_HybridUseBenefitUpdate_568252(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568258: Call_HybridUseBenefitUpdate_568251; path: JsonNode;
+proc call*(call_564158: Call_HybridUseBenefitUpdate_564151; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Updates an existing hybrid use benefit
   ## 
-  let valid = call_568258.validator(path, query, header, formData, body)
-  let scheme = call_568258.pickScheme
+  let valid = call_564158.validator(path, query, header, formData, body)
+  let scheme = call_564158.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568258.url(scheme.get, call_568258.host, call_568258.base,
-                         call_568258.route, valid.getOrDefault("path"),
+  let url = call_564158.url(scheme.get, call_564158.host, call_564158.base,
+                         call_564158.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568258, url, valid)
+  result = hook(call_564158, url, valid)
 
-proc call*(call_568259: Call_HybridUseBenefitUpdate_568251; apiVersion: string;
-          planId: string; scope: string; body: JsonNode): Recallable =
+proc call*(call_564159: Call_HybridUseBenefitUpdate_564151; apiVersion: string;
+          planId: string; body: JsonNode; scope: string): Recallable =
   ## hybridUseBenefitUpdate
   ## Updates an existing hybrid use benefit
   ##   apiVersion: string (required)
   ##             : The api-version to be used by the service
   ##   planId: string (required)
   ##         : This is a unique identifier for a plan. Should be a guid.
-  ##   scope: string (required)
-  ##        : The scope at which the operation is performed. This is limited to Microsoft.Compute/virtualMachines and Microsoft.Compute/hostGroups/hosts for now
   ##   body: JObject (required)
   ##       : Request body for creating a hybrid use benefit
-  var path_568260 = newJObject()
-  var query_568261 = newJObject()
-  var body_568262 = newJObject()
-  add(query_568261, "api-version", newJString(apiVersion))
-  add(path_568260, "planId", newJString(planId))
-  add(path_568260, "scope", newJString(scope))
+  ##   scope: string (required)
+  ##        : The scope at which the operation is performed. This is limited to Microsoft.Compute/virtualMachines and Microsoft.Compute/hostGroups/hosts for now
+  var path_564160 = newJObject()
+  var query_564161 = newJObject()
+  var body_564162 = newJObject()
+  add(query_564161, "api-version", newJString(apiVersion))
+  add(path_564160, "planId", newJString(planId))
   if body != nil:
-    body_568262 = body
-  result = call_568259.call(path_568260, query_568261, nil, nil, body_568262)
+    body_564162 = body
+  add(path_564160, "scope", newJString(scope))
+  result = call_564159.call(path_564160, query_564161, nil, nil, body_564162)
 
-var hybridUseBenefitUpdate* = Call_HybridUseBenefitUpdate_568251(
+var hybridUseBenefitUpdate* = Call_HybridUseBenefitUpdate_564151(
     name: "hybridUseBenefitUpdate", meth: HttpMethod.HttpPatch,
     host: "management.azure.com", route: "/{scope}/providers/Microsoft.SoftwarePlan/hybridUseBenefits/{planId}",
-    validator: validate_HybridUseBenefitUpdate_568252, base: "",
-    url: url_HybridUseBenefitUpdate_568253, schemes: {Scheme.Https})
+    validator: validate_HybridUseBenefitUpdate_564152, base: "",
+    url: url_HybridUseBenefitUpdate_564153, schemes: {Scheme.Https})
 type
-  Call_HybridUseBenefitDelete_568241 = ref object of OpenApiRestCall_567657
-proc url_HybridUseBenefitDelete_568243(protocol: Scheme; host: string; base: string;
+  Call_HybridUseBenefitDelete_564141 = ref object of OpenApiRestCall_563555
+proc url_HybridUseBenefitDelete_564143(protocol: Scheme; host: string; base: string;
                                       route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -621,7 +625,7 @@ proc url_HybridUseBenefitDelete_568243(protocol: Scheme; host: string; base: str
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_HybridUseBenefitDelete_568242(path: JsonNode; query: JsonNode;
+proc validate_HybridUseBenefitDelete_564142(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Deletes a given plan ID
   ## 
@@ -634,16 +638,16 @@ proc validate_HybridUseBenefitDelete_568242(path: JsonNode; query: JsonNode;
   ##        : The scope at which the operation is performed. This is limited to Microsoft.Compute/virtualMachines and Microsoft.Compute/hostGroups/hosts for now
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `planId` field"
-  var valid_568244 = path.getOrDefault("planId")
-  valid_568244 = validateParameter(valid_568244, JString, required = true,
+  var valid_564144 = path.getOrDefault("planId")
+  valid_564144 = validateParameter(valid_564144, JString, required = true,
                                  default = nil)
-  if valid_568244 != nil:
-    section.add "planId", valid_568244
-  var valid_568245 = path.getOrDefault("scope")
-  valid_568245 = validateParameter(valid_568245, JString, required = true,
+  if valid_564144 != nil:
+    section.add "planId", valid_564144
+  var valid_564145 = path.getOrDefault("scope")
+  valid_564145 = validateParameter(valid_564145, JString, required = true,
                                  default = nil)
-  if valid_568245 != nil:
-    section.add "scope", valid_568245
+  if valid_564145 != nil:
+    section.add "scope", valid_564145
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -651,11 +655,11 @@ proc validate_HybridUseBenefitDelete_568242(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568246 = query.getOrDefault("api-version")
-  valid_568246 = validateParameter(valid_568246, JString, required = true,
+  var valid_564146 = query.getOrDefault("api-version")
+  valid_564146 = validateParameter(valid_564146, JString, required = true,
                                  default = nil)
-  if valid_568246 != nil:
-    section.add "api-version", valid_568246
+  if valid_564146 != nil:
+    section.add "api-version", valid_564146
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -664,20 +668,20 @@ proc validate_HybridUseBenefitDelete_568242(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568247: Call_HybridUseBenefitDelete_568241; path: JsonNode;
+proc call*(call_564147: Call_HybridUseBenefitDelete_564141; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes a given plan ID
   ## 
-  let valid = call_568247.validator(path, query, header, formData, body)
-  let scheme = call_568247.pickScheme
+  let valid = call_564147.validator(path, query, header, formData, body)
+  let scheme = call_564147.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568247.url(scheme.get, call_568247.host, call_568247.base,
-                         call_568247.route, valid.getOrDefault("path"),
+  let url = call_564147.url(scheme.get, call_564147.host, call_564147.base,
+                         call_564147.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568247, url, valid)
+  result = hook(call_564147, url, valid)
 
-proc call*(call_568248: Call_HybridUseBenefitDelete_568241; apiVersion: string;
+proc call*(call_564148: Call_HybridUseBenefitDelete_564141; apiVersion: string;
           planId: string; scope: string): Recallable =
   ## hybridUseBenefitDelete
   ## Deletes a given plan ID
@@ -687,21 +691,21 @@ proc call*(call_568248: Call_HybridUseBenefitDelete_568241; apiVersion: string;
   ##         : This is a unique identifier for a plan. Should be a guid.
   ##   scope: string (required)
   ##        : The scope at which the operation is performed. This is limited to Microsoft.Compute/virtualMachines and Microsoft.Compute/hostGroups/hosts for now
-  var path_568249 = newJObject()
-  var query_568250 = newJObject()
-  add(query_568250, "api-version", newJString(apiVersion))
-  add(path_568249, "planId", newJString(planId))
-  add(path_568249, "scope", newJString(scope))
-  result = call_568248.call(path_568249, query_568250, nil, nil, nil)
+  var path_564149 = newJObject()
+  var query_564150 = newJObject()
+  add(query_564150, "api-version", newJString(apiVersion))
+  add(path_564149, "planId", newJString(planId))
+  add(path_564149, "scope", newJString(scope))
+  result = call_564148.call(path_564149, query_564150, nil, nil, nil)
 
-var hybridUseBenefitDelete* = Call_HybridUseBenefitDelete_568241(
+var hybridUseBenefitDelete* = Call_HybridUseBenefitDelete_564141(
     name: "hybridUseBenefitDelete", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/{scope}/providers/Microsoft.SoftwarePlan/hybridUseBenefits/{planId}",
-    validator: validate_HybridUseBenefitDelete_568242, base: "",
-    url: url_HybridUseBenefitDelete_568243, schemes: {Scheme.Https})
+    validator: validate_HybridUseBenefitDelete_564142, base: "",
+    url: url_HybridUseBenefitDelete_564143, schemes: {Scheme.Https})
 type
-  Call_HybridUseBenefitRevisionList_568263 = ref object of OpenApiRestCall_567657
-proc url_HybridUseBenefitRevisionList_568265(protocol: Scheme; host: string;
+  Call_HybridUseBenefitRevisionList_564163 = ref object of OpenApiRestCall_563555
+proc url_HybridUseBenefitRevisionList_564165(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -720,7 +724,7 @@ proc url_HybridUseBenefitRevisionList_568265(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_HybridUseBenefitRevisionList_568264(path: JsonNode; query: JsonNode;
+proc validate_HybridUseBenefitRevisionList_564164(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the version history of a hybrid use benefit
   ## 
@@ -733,16 +737,16 @@ proc validate_HybridUseBenefitRevisionList_568264(path: JsonNode; query: JsonNod
   ##        : The scope at which the operation is performed. This is limited to Microsoft.Compute/virtualMachines and Microsoft.Compute/hostGroups/hosts for now
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `planId` field"
-  var valid_568266 = path.getOrDefault("planId")
-  valid_568266 = validateParameter(valid_568266, JString, required = true,
+  var valid_564166 = path.getOrDefault("planId")
+  valid_564166 = validateParameter(valid_564166, JString, required = true,
                                  default = nil)
-  if valid_568266 != nil:
-    section.add "planId", valid_568266
-  var valid_568267 = path.getOrDefault("scope")
-  valid_568267 = validateParameter(valid_568267, JString, required = true,
+  if valid_564166 != nil:
+    section.add "planId", valid_564166
+  var valid_564167 = path.getOrDefault("scope")
+  valid_564167 = validateParameter(valid_564167, JString, required = true,
                                  default = nil)
-  if valid_568267 != nil:
-    section.add "scope", valid_568267
+  if valid_564167 != nil:
+    section.add "scope", valid_564167
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -750,11 +754,11 @@ proc validate_HybridUseBenefitRevisionList_568264(path: JsonNode; query: JsonNod
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568268 = query.getOrDefault("api-version")
-  valid_568268 = validateParameter(valid_568268, JString, required = true,
+  var valid_564168 = query.getOrDefault("api-version")
+  valid_564168 = validateParameter(valid_564168, JString, required = true,
                                  default = nil)
-  if valid_568268 != nil:
-    section.add "api-version", valid_568268
+  if valid_564168 != nil:
+    section.add "api-version", valid_564168
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -763,20 +767,20 @@ proc validate_HybridUseBenefitRevisionList_568264(path: JsonNode; query: JsonNod
   if body != nil:
     result.add "body", body
 
-proc call*(call_568269: Call_HybridUseBenefitRevisionList_568263; path: JsonNode;
+proc call*(call_564169: Call_HybridUseBenefitRevisionList_564163; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the version history of a hybrid use benefit
   ## 
-  let valid = call_568269.validator(path, query, header, formData, body)
-  let scheme = call_568269.pickScheme
+  let valid = call_564169.validator(path, query, header, formData, body)
+  let scheme = call_564169.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568269.url(scheme.get, call_568269.host, call_568269.base,
-                         call_568269.route, valid.getOrDefault("path"),
+  let url = call_564169.url(scheme.get, call_564169.host, call_564169.base,
+                         call_564169.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568269, url, valid)
+  result = hook(call_564169, url, valid)
 
-proc call*(call_568270: Call_HybridUseBenefitRevisionList_568263;
+proc call*(call_564170: Call_HybridUseBenefitRevisionList_564163;
           apiVersion: string; planId: string; scope: string): Recallable =
   ## hybridUseBenefitRevisionList
   ## Gets the version history of a hybrid use benefit
@@ -786,21 +790,21 @@ proc call*(call_568270: Call_HybridUseBenefitRevisionList_568263;
   ##         : This is a unique identifier for a plan. Should be a guid.
   ##   scope: string (required)
   ##        : The scope at which the operation is performed. This is limited to Microsoft.Compute/virtualMachines and Microsoft.Compute/hostGroups/hosts for now
-  var path_568271 = newJObject()
-  var query_568272 = newJObject()
-  add(query_568272, "api-version", newJString(apiVersion))
-  add(path_568271, "planId", newJString(planId))
-  add(path_568271, "scope", newJString(scope))
-  result = call_568270.call(path_568271, query_568272, nil, nil, nil)
+  var path_564171 = newJObject()
+  var query_564172 = newJObject()
+  add(query_564172, "api-version", newJString(apiVersion))
+  add(path_564171, "planId", newJString(planId))
+  add(path_564171, "scope", newJString(scope))
+  result = call_564170.call(path_564171, query_564172, nil, nil, nil)
 
-var hybridUseBenefitRevisionList* = Call_HybridUseBenefitRevisionList_568263(
+var hybridUseBenefitRevisionList* = Call_HybridUseBenefitRevisionList_564163(
     name: "hybridUseBenefitRevisionList", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/{scope}/providers/Microsoft.SoftwarePlan/hybridUseBenefits/{planId}/revisions",
-    validator: validate_HybridUseBenefitRevisionList_568264, base: "",
-    url: url_HybridUseBenefitRevisionList_568265, schemes: {Scheme.Https})
+    validator: validate_HybridUseBenefitRevisionList_564164, base: "",
+    url: url_HybridUseBenefitRevisionList_564165, schemes: {Scheme.Https})
 type
-  Call_OperationsList_568273 = ref object of OpenApiRestCall_567657
-proc url_OperationsList_568275(protocol: Scheme; host: string; base: string;
+  Call_OperationsList_564173 = ref object of OpenApiRestCall_563555
+proc url_OperationsList_564175(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -816,7 +820,7 @@ proc url_OperationsList_568275(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_OperationsList_568274(path: JsonNode; query: JsonNode;
+proc validate_OperationsList_564174(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## List all the operations.
@@ -828,11 +832,11 @@ proc validate_OperationsList_568274(path: JsonNode; query: JsonNode;
   ##        : The scope at which the operation is performed. This is limited to Microsoft.Compute/virtualMachines and Microsoft.Compute/hostGroups/hosts for now
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `scope` field"
-  var valid_568276 = path.getOrDefault("scope")
-  valid_568276 = validateParameter(valid_568276, JString, required = true,
+  var valid_564176 = path.getOrDefault("scope")
+  valid_564176 = validateParameter(valid_564176, JString, required = true,
                                  default = nil)
-  if valid_568276 != nil:
-    section.add "scope", valid_568276
+  if valid_564176 != nil:
+    section.add "scope", valid_564176
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -840,11 +844,11 @@ proc validate_OperationsList_568274(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568277 = query.getOrDefault("api-version")
-  valid_568277 = validateParameter(valid_568277, JString, required = true,
+  var valid_564177 = query.getOrDefault("api-version")
+  valid_564177 = validateParameter(valid_564177, JString, required = true,
                                  default = nil)
-  if valid_568277 != nil:
-    section.add "api-version", valid_568277
+  if valid_564177 != nil:
+    section.add "api-version", valid_564177
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -853,36 +857,36 @@ proc validate_OperationsList_568274(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568278: Call_OperationsList_568273; path: JsonNode; query: JsonNode;
+proc call*(call_564178: Call_OperationsList_564173; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## List all the operations.
   ## 
-  let valid = call_568278.validator(path, query, header, formData, body)
-  let scheme = call_568278.pickScheme
+  let valid = call_564178.validator(path, query, header, formData, body)
+  let scheme = call_564178.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568278.url(scheme.get, call_568278.host, call_568278.base,
-                         call_568278.route, valid.getOrDefault("path"),
+  let url = call_564178.url(scheme.get, call_564178.host, call_564178.base,
+                         call_564178.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568278, url, valid)
+  result = hook(call_564178, url, valid)
 
-proc call*(call_568279: Call_OperationsList_568273; apiVersion: string; scope: string): Recallable =
+proc call*(call_564179: Call_OperationsList_564173; apiVersion: string; scope: string): Recallable =
   ## operationsList
   ## List all the operations.
   ##   apiVersion: string (required)
   ##             : The api-version to be used by the service
   ##   scope: string (required)
   ##        : The scope at which the operation is performed. This is limited to Microsoft.Compute/virtualMachines and Microsoft.Compute/hostGroups/hosts for now
-  var path_568280 = newJObject()
-  var query_568281 = newJObject()
-  add(query_568281, "api-version", newJString(apiVersion))
-  add(path_568280, "scope", newJString(scope))
-  result = call_568279.call(path_568280, query_568281, nil, nil, nil)
+  var path_564180 = newJObject()
+  var query_564181 = newJObject()
+  add(query_564181, "api-version", newJString(apiVersion))
+  add(path_564180, "scope", newJString(scope))
+  result = call_564179.call(path_564180, query_564181, nil, nil, nil)
 
-var operationsList* = Call_OperationsList_568273(name: "operationsList",
+var operationsList* = Call_OperationsList_564173(name: "operationsList",
     meth: HttpMethod.HttpGet, host: "management.azure.com",
     route: "/{scope}/providers/Microsoft.SoftwarePlan/operations",
-    validator: validate_OperationsList_568274, base: "", url: url_OperationsList_568275,
+    validator: validate_OperationsList_564174, base: "", url: url_OperationsList_564175,
     schemes: {Scheme.Https})
 export
   rest

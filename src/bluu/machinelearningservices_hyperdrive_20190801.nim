@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_573658 = ref object of OpenApiRestCall
+  OpenApiRestCall_563556 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_573658](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563556](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_573658): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563556): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,8 +107,8 @@ const
   macServiceName = "machinelearningservices-hyperdrive"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_HyperDriveCreateExperiment_573880 = ref object of OpenApiRestCall_573658
-proc url_HyperDriveCreateExperiment_573882(protocol: Scheme; host: string;
+  Call_HyperDriveCreateExperiment_563778 = ref object of OpenApiRestCall_563556
+proc url_HyperDriveCreateExperiment_563780(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -120,7 +124,7 @@ proc url_HyperDriveCreateExperiment_573882(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_HyperDriveCreateExperiment_573881(path: JsonNode; query: JsonNode;
+proc validate_HyperDriveCreateExperiment_563779(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Create a HyperDrive Experiment.
   ## 
@@ -134,11 +138,11 @@ proc validate_HyperDriveCreateExperiment_573881(path: JsonNode; query: JsonNode;
   ## 
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `armScope` field"
-  var valid_574055 = path.getOrDefault("armScope")
-  valid_574055 = validateParameter(valid_574055, JString, required = true,
+  var valid_563955 = path.getOrDefault("armScope")
+  valid_563955 = validateParameter(valid_563955, JString, required = true,
                                  default = nil)
-  if valid_574055 != nil:
-    section.add "armScope", valid_574055
+  if valid_563955 != nil:
+    section.add "armScope", valid_563955
   result.add "path", section
   section = newJObject()
   result.add "query", section
@@ -150,53 +154,53 @@ proc validate_HyperDriveCreateExperiment_573881(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert formData != nil,
         "formData argument is necessary due to required `config` field"
-  var valid_574056 = formData.getOrDefault("config")
-  valid_574056 = validateParameter(valid_574056, JString, required = true,
+  var valid_563956 = formData.getOrDefault("config")
+  valid_563956 = validateParameter(valid_563956, JString, required = true,
                                  default = nil)
-  if valid_574056 != nil:
-    section.add "config", valid_574056
+  if valid_563956 != nil:
+    section.add "config", valid_563956
   result.add "formData", section
   if body != nil:
     result.add "body", body
 
-proc call*(call_574079: Call_HyperDriveCreateExperiment_573880; path: JsonNode;
+proc call*(call_563979: Call_HyperDriveCreateExperiment_563778; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Create a HyperDrive Experiment.
   ## 
-  let valid = call_574079.validator(path, query, header, formData, body)
-  let scheme = call_574079.pickScheme
+  let valid = call_563979.validator(path, query, header, formData, body)
+  let scheme = call_563979.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574079.url(scheme.get, call_574079.host, call_574079.base,
-                         call_574079.route, valid.getOrDefault("path"),
+  let url = call_563979.url(scheme.get, call_563979.host, call_563979.base,
+                         call_563979.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574079, url, valid)
+  result = hook(call_563979, url, valid)
 
-proc call*(call_574150: Call_HyperDriveCreateExperiment_573880; config: string;
-          armScope: string): Recallable =
+proc call*(call_564050: Call_HyperDriveCreateExperiment_563778; armScope: string;
+          config: string): Recallable =
   ## hyperDriveCreateExperiment
   ## Create a HyperDrive Experiment.
-  ##   config: string (required)
-  ##         : The configuration file with experiment JSON content. A text file that is a JSON-serialized '#/definitions/HyperDriveCreateExperiment' object.
   ##   armScope: string (required)
   ##           : The ARM scope passed in through URL with format:
   ##             
   ## subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.MachineLearningServices/workspaces/{workspaceName}/experiments/{experimentName}.
   ## 
-  var path_574151 = newJObject()
-  var formData_574153 = newJObject()
-  add(formData_574153, "config", newJString(config))
-  add(path_574151, "armScope", newJString(armScope))
-  result = call_574150.call(path_574151, nil, nil, formData_574153, nil)
+  ##   config: string (required)
+  ##         : The configuration file with experiment JSON content. A text file that is a JSON-serialized '#/definitions/HyperDriveCreateExperiment' object.
+  var path_564051 = newJObject()
+  var formData_564053 = newJObject()
+  add(path_564051, "armScope", newJString(armScope))
+  add(formData_564053, "config", newJString(config))
+  result = call_564050.call(path_564051, nil, nil, formData_564053, nil)
 
-var hyperDriveCreateExperiment* = Call_HyperDriveCreateExperiment_573880(
+var hyperDriveCreateExperiment* = Call_HyperDriveCreateExperiment_563778(
     name: "hyperDriveCreateExperiment", meth: HttpMethod.HttpPost,
     host: "azure.local", route: "/hyperdrive/v1.0/{armScope}/runs",
-    validator: validate_HyperDriveCreateExperiment_573881, base: "",
-    url: url_HyperDriveCreateExperiment_573882, schemes: {Scheme.Https})
+    validator: validate_HyperDriveCreateExperiment_563779, base: "",
+    url: url_HyperDriveCreateExperiment_563780, schemes: {Scheme.Https})
 type
-  Call_HyperDriveCancelExperiment_574192 = ref object of OpenApiRestCall_573658
-proc url_HyperDriveCancelExperiment_574194(protocol: Scheme; host: string;
+  Call_HyperDriveCancelExperiment_564092 = ref object of OpenApiRestCall_563556
+proc url_HyperDriveCancelExperiment_564094(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -215,7 +219,7 @@ proc url_HyperDriveCancelExperiment_574194(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_HyperDriveCancelExperiment_574193(path: JsonNode; query: JsonNode;
+proc validate_HyperDriveCancelExperiment_564093(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Cancel a HyperDrive Experiment.
   ## 
@@ -231,16 +235,16 @@ proc validate_HyperDriveCancelExperiment_574193(path: JsonNode; query: JsonNode;
   ## 
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `runId` field"
-  var valid_574195 = path.getOrDefault("runId")
-  valid_574195 = validateParameter(valid_574195, JString, required = true,
+  var valid_564095 = path.getOrDefault("runId")
+  valid_564095 = validateParameter(valid_564095, JString, required = true,
                                  default = nil)
-  if valid_574195 != nil:
-    section.add "runId", valid_574195
-  var valid_574196 = path.getOrDefault("armScope")
-  valid_574196 = validateParameter(valid_574196, JString, required = true,
+  if valid_564095 != nil:
+    section.add "runId", valid_564095
+  var valid_564096 = path.getOrDefault("armScope")
+  valid_564096 = validateParameter(valid_564096, JString, required = true,
                                  default = nil)
-  if valid_574196 != nil:
-    section.add "armScope", valid_574196
+  if valid_564096 != nil:
+    section.add "armScope", valid_564096
   result.add "path", section
   section = newJObject()
   result.add "query", section
@@ -248,31 +252,31 @@ proc validate_HyperDriveCancelExperiment_574193(path: JsonNode; query: JsonNode;
   ##   RunHistoryHost: JString
   ##                 : The host for run location.
   section = newJObject()
-  var valid_574197 = header.getOrDefault("RunHistoryHost")
-  valid_574197 = validateParameter(valid_574197, JString, required = false,
+  var valid_564097 = header.getOrDefault("RunHistoryHost")
+  valid_564097 = validateParameter(valid_564097, JString, required = false,
                                  default = nil)
-  if valid_574197 != nil:
-    section.add "RunHistoryHost", valid_574197
+  if valid_564097 != nil:
+    section.add "RunHistoryHost", valid_564097
   result.add "header", section
   section = newJObject()
   result.add "formData", section
   if body != nil:
     result.add "body", body
 
-proc call*(call_574198: Call_HyperDriveCancelExperiment_574192; path: JsonNode;
+proc call*(call_564098: Call_HyperDriveCancelExperiment_564092; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Cancel a HyperDrive Experiment.
   ## 
-  let valid = call_574198.validator(path, query, header, formData, body)
-  let scheme = call_574198.pickScheme
+  let valid = call_564098.validator(path, query, header, formData, body)
+  let scheme = call_564098.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574198.url(scheme.get, call_574198.host, call_574198.base,
-                         call_574198.route, valid.getOrDefault("path"),
+  let url = call_564098.url(scheme.get, call_564098.host, call_564098.base,
+                         call_564098.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574198, url, valid)
+  result = hook(call_564098, url, valid)
 
-proc call*(call_574199: Call_HyperDriveCancelExperiment_574192; runId: string;
+proc call*(call_564099: Call_HyperDriveCancelExperiment_564092; runId: string;
           armScope: string): Recallable =
   ## hyperDriveCancelExperiment
   ## Cancel a HyperDrive Experiment.
@@ -283,16 +287,16 @@ proc call*(call_574199: Call_HyperDriveCancelExperiment_574192; runId: string;
   ##             
   ## subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.MachineLearningServices/workspaces/{workspaceName}/experiments/{experimentName}.
   ## 
-  var path_574200 = newJObject()
-  add(path_574200, "runId", newJString(runId))
-  add(path_574200, "armScope", newJString(armScope))
-  result = call_574199.call(path_574200, nil, nil, nil, nil)
+  var path_564100 = newJObject()
+  add(path_564100, "runId", newJString(runId))
+  add(path_564100, "armScope", newJString(armScope))
+  result = call_564099.call(path_564100, nil, nil, nil, nil)
 
-var hyperDriveCancelExperiment* = Call_HyperDriveCancelExperiment_574192(
+var hyperDriveCancelExperiment* = Call_HyperDriveCancelExperiment_564092(
     name: "hyperDriveCancelExperiment", meth: HttpMethod.HttpPost,
     host: "azure.local", route: "/hyperdrive/v1.0/{armScope}/runs/{runId}/cancel",
-    validator: validate_HyperDriveCancelExperiment_574193, base: "",
-    url: url_HyperDriveCancelExperiment_574194, schemes: {Scheme.Https})
+    validator: validate_HyperDriveCancelExperiment_564093, base: "",
+    url: url_HyperDriveCancelExperiment_564094, schemes: {Scheme.Https})
 export
   rest
 

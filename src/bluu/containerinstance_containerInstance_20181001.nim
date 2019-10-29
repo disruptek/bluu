@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, httpcore
 
 ## auto-generated via openapi macro
 ## title: ContainerInstanceManagementClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_567658 = ref object of OpenApiRestCall
+  OpenApiRestCall_563556 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_567658](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563556](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_567658): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563556): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,15 +107,15 @@ const
   macServiceName = "containerinstance-containerInstance"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_OperationsList_567880 = ref object of OpenApiRestCall_567658
-proc url_OperationsList_567882(protocol: Scheme; host: string; base: string;
+  Call_OperationsList_563778 = ref object of OpenApiRestCall_563556
+proc url_OperationsList_563780(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_OperationsList_567881(path: JsonNode; query: JsonNode;
+proc validate_OperationsList_563779(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## List the operations for Azure Container Instance service.
@@ -126,11 +130,11 @@ proc validate_OperationsList_567881(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568041 = query.getOrDefault("api-version")
-  valid_568041 = validateParameter(valid_568041, JString, required = true,
+  var valid_563941 = query.getOrDefault("api-version")
+  valid_563941 = validateParameter(valid_563941, JString, required = true,
                                  default = nil)
-  if valid_568041 != nil:
-    section.add "api-version", valid_568041
+  if valid_563941 != nil:
+    section.add "api-version", valid_563941
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -139,36 +143,36 @@ proc validate_OperationsList_567881(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568064: Call_OperationsList_567880; path: JsonNode; query: JsonNode;
+proc call*(call_563964: Call_OperationsList_563778; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## List the operations for Azure Container Instance service.
   ## 
-  let valid = call_568064.validator(path, query, header, formData, body)
-  let scheme = call_568064.pickScheme
+  let valid = call_563964.validator(path, query, header, formData, body)
+  let scheme = call_563964.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568064.url(scheme.get, call_568064.host, call_568064.base,
-                         call_568064.route, valid.getOrDefault("path"),
+  let url = call_563964.url(scheme.get, call_563964.host, call_563964.base,
+                         call_563964.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568064, url, valid)
+  result = hook(call_563964, url, valid)
 
-proc call*(call_568135: Call_OperationsList_567880; apiVersion: string): Recallable =
+proc call*(call_564035: Call_OperationsList_563778; apiVersion: string): Recallable =
   ## operationsList
   ## List the operations for Azure Container Instance service.
   ##   apiVersion: string (required)
   ##             : Client API version
-  var query_568136 = newJObject()
-  add(query_568136, "api-version", newJString(apiVersion))
-  result = call_568135.call(nil, query_568136, nil, nil, nil)
+  var query_564036 = newJObject()
+  add(query_564036, "api-version", newJString(apiVersion))
+  result = call_564035.call(nil, query_564036, nil, nil, nil)
 
-var operationsList* = Call_OperationsList_567880(name: "operationsList",
+var operationsList* = Call_OperationsList_563778(name: "operationsList",
     meth: HttpMethod.HttpGet, host: "management.azure.com",
     route: "/providers/Microsoft.ContainerInstance/operations",
-    validator: validate_OperationsList_567881, base: "", url: url_OperationsList_567882,
+    validator: validate_OperationsList_563779, base: "", url: url_OperationsList_563780,
     schemes: {Scheme.Https})
 type
-  Call_ContainerGroupsList_568176 = ref object of OpenApiRestCall_567658
-proc url_ContainerGroupsList_568178(protocol: Scheme; host: string; base: string;
+  Call_ContainerGroupsList_564076 = ref object of OpenApiRestCall_563556
+proc url_ContainerGroupsList_564078(protocol: Scheme; host: string; base: string;
                                    route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -185,7 +189,7 @@ proc url_ContainerGroupsList_568178(protocol: Scheme; host: string; base: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ContainerGroupsList_568177(path: JsonNode; query: JsonNode;
+proc validate_ContainerGroupsList_564077(path: JsonNode; query: JsonNode;
                                         header: JsonNode; formData: JsonNode;
                                         body: JsonNode): JsonNode =
   ## Get a list of container groups in the specified subscription. This operation returns properties of each container group including containers, image registry credentials, restart policy, IP address type, OS type, state, and volumes.
@@ -198,11 +202,11 @@ proc validate_ContainerGroupsList_568177(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_568193 = path.getOrDefault("subscriptionId")
-  valid_568193 = validateParameter(valid_568193, JString, required = true,
+  var valid_564093 = path.getOrDefault("subscriptionId")
+  valid_564093 = validateParameter(valid_564093, JString, required = true,
                                  default = nil)
-  if valid_568193 != nil:
-    section.add "subscriptionId", valid_568193
+  if valid_564093 != nil:
+    section.add "subscriptionId", valid_564093
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -210,11 +214,11 @@ proc validate_ContainerGroupsList_568177(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568194 = query.getOrDefault("api-version")
-  valid_568194 = validateParameter(valid_568194, JString, required = true,
+  var valid_564094 = query.getOrDefault("api-version")
+  valid_564094 = validateParameter(valid_564094, JString, required = true,
                                  default = nil)
-  if valid_568194 != nil:
-    section.add "api-version", valid_568194
+  if valid_564094 != nil:
+    section.add "api-version", valid_564094
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -223,20 +227,20 @@ proc validate_ContainerGroupsList_568177(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568195: Call_ContainerGroupsList_568176; path: JsonNode;
+proc call*(call_564095: Call_ContainerGroupsList_564076; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get a list of container groups in the specified subscription. This operation returns properties of each container group including containers, image registry credentials, restart policy, IP address type, OS type, state, and volumes.
   ## 
-  let valid = call_568195.validator(path, query, header, formData, body)
-  let scheme = call_568195.pickScheme
+  let valid = call_564095.validator(path, query, header, formData, body)
+  let scheme = call_564095.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568195.url(scheme.get, call_568195.host, call_568195.base,
-                         call_568195.route, valid.getOrDefault("path"),
+  let url = call_564095.url(scheme.get, call_564095.host, call_564095.base,
+                         call_564095.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568195, url, valid)
+  result = hook(call_564095, url, valid)
 
-proc call*(call_568196: Call_ContainerGroupsList_568176; apiVersion: string;
+proc call*(call_564096: Call_ContainerGroupsList_564076; apiVersion: string;
           subscriptionId: string): Recallable =
   ## containerGroupsList
   ## Get a list of container groups in the specified subscription. This operation returns properties of each container group including containers, image registry credentials, restart policy, IP address type, OS type, state, and volumes.
@@ -244,20 +248,20 @@ proc call*(call_568196: Call_ContainerGroupsList_568176; apiVersion: string;
   ##             : Client API version
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_568197 = newJObject()
-  var query_568198 = newJObject()
-  add(query_568198, "api-version", newJString(apiVersion))
-  add(path_568197, "subscriptionId", newJString(subscriptionId))
-  result = call_568196.call(path_568197, query_568198, nil, nil, nil)
+  var path_564097 = newJObject()
+  var query_564098 = newJObject()
+  add(query_564098, "api-version", newJString(apiVersion))
+  add(path_564097, "subscriptionId", newJString(subscriptionId))
+  result = call_564096.call(path_564097, query_564098, nil, nil, nil)
 
-var containerGroupsList* = Call_ContainerGroupsList_568176(
+var containerGroupsList* = Call_ContainerGroupsList_564076(
     name: "containerGroupsList", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.ContainerInstance/containerGroups",
-    validator: validate_ContainerGroupsList_568177, base: "",
-    url: url_ContainerGroupsList_568178, schemes: {Scheme.Https})
+    validator: validate_ContainerGroupsList_564077, base: "",
+    url: url_ContainerGroupsList_564078, schemes: {Scheme.Https})
 type
-  Call_ListCachedImages_568199 = ref object of OpenApiRestCall_567658
-proc url_ListCachedImages_568201(protocol: Scheme; host: string; base: string;
+  Call_ListCachedImages_564099 = ref object of OpenApiRestCall_563556
+proc url_ListCachedImages_564101(protocol: Scheme; host: string; base: string;
                                 route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -277,7 +281,7 @@ proc url_ListCachedImages_568201(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ListCachedImages_568200(path: JsonNode; query: JsonNode;
+proc validate_ListCachedImages_564100(path: JsonNode; query: JsonNode;
                                      header: JsonNode; formData: JsonNode;
                                      body: JsonNode): JsonNode =
   ## Get the list of cached images on specific OS type for a subscription in a region.
@@ -292,16 +296,16 @@ proc validate_ListCachedImages_568200(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_568202 = path.getOrDefault("subscriptionId")
-  valid_568202 = validateParameter(valid_568202, JString, required = true,
+  var valid_564102 = path.getOrDefault("subscriptionId")
+  valid_564102 = validateParameter(valid_564102, JString, required = true,
                                  default = nil)
-  if valid_568202 != nil:
-    section.add "subscriptionId", valid_568202
-  var valid_568203 = path.getOrDefault("location")
-  valid_568203 = validateParameter(valid_568203, JString, required = true,
+  if valid_564102 != nil:
+    section.add "subscriptionId", valid_564102
+  var valid_564103 = path.getOrDefault("location")
+  valid_564103 = validateParameter(valid_564103, JString, required = true,
                                  default = nil)
-  if valid_568203 != nil:
-    section.add "location", valid_568203
+  if valid_564103 != nil:
+    section.add "location", valid_564103
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -309,11 +313,11 @@ proc validate_ListCachedImages_568200(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568204 = query.getOrDefault("api-version")
-  valid_568204 = validateParameter(valid_568204, JString, required = true,
+  var valid_564104 = query.getOrDefault("api-version")
+  valid_564104 = validateParameter(valid_564104, JString, required = true,
                                  default = nil)
-  if valid_568204 != nil:
-    section.add "api-version", valid_568204
+  if valid_564104 != nil:
+    section.add "api-version", valid_564104
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -322,20 +326,20 @@ proc validate_ListCachedImages_568200(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568205: Call_ListCachedImages_568199; path: JsonNode;
+proc call*(call_564105: Call_ListCachedImages_564099; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get the list of cached images on specific OS type for a subscription in a region.
   ## 
-  let valid = call_568205.validator(path, query, header, formData, body)
-  let scheme = call_568205.pickScheme
+  let valid = call_564105.validator(path, query, header, formData, body)
+  let scheme = call_564105.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568205.url(scheme.get, call_568205.host, call_568205.base,
-                         call_568205.route, valid.getOrDefault("path"),
+  let url = call_564105.url(scheme.get, call_564105.host, call_564105.base,
+                         call_564105.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568205, url, valid)
+  result = hook(call_564105, url, valid)
 
-proc call*(call_568206: Call_ListCachedImages_568199; apiVersion: string;
+proc call*(call_564106: Call_ListCachedImages_564099; apiVersion: string;
           subscriptionId: string; location: string): Recallable =
   ## listCachedImages
   ## Get the list of cached images on specific OS type for a subscription in a region.
@@ -345,20 +349,20 @@ proc call*(call_568206: Call_ListCachedImages_568199; apiVersion: string;
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   location: string (required)
   ##           : The identifier for the physical azure location.
-  var path_568207 = newJObject()
-  var query_568208 = newJObject()
-  add(query_568208, "api-version", newJString(apiVersion))
-  add(path_568207, "subscriptionId", newJString(subscriptionId))
-  add(path_568207, "location", newJString(location))
-  result = call_568206.call(path_568207, query_568208, nil, nil, nil)
+  var path_564107 = newJObject()
+  var query_564108 = newJObject()
+  add(query_564108, "api-version", newJString(apiVersion))
+  add(path_564107, "subscriptionId", newJString(subscriptionId))
+  add(path_564107, "location", newJString(location))
+  result = call_564106.call(path_564107, query_564108, nil, nil, nil)
 
-var listCachedImages* = Call_ListCachedImages_568199(name: "listCachedImages",
+var listCachedImages* = Call_ListCachedImages_564099(name: "listCachedImages",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.ContainerInstance/locations/{location}/cachedImages",
-    validator: validate_ListCachedImages_568200, base: "",
-    url: url_ListCachedImages_568201, schemes: {Scheme.Https})
+    validator: validate_ListCachedImages_564100, base: "",
+    url: url_ListCachedImages_564101, schemes: {Scheme.Https})
 type
-  Call_ListCapabilities_568209 = ref object of OpenApiRestCall_567658
-proc url_ListCapabilities_568211(protocol: Scheme; host: string; base: string;
+  Call_ListCapabilities_564109 = ref object of OpenApiRestCall_563556
+proc url_ListCapabilities_564111(protocol: Scheme; host: string; base: string;
                                 route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -378,7 +382,7 @@ proc url_ListCapabilities_568211(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ListCapabilities_568210(path: JsonNode; query: JsonNode;
+proc validate_ListCapabilities_564110(path: JsonNode; query: JsonNode;
                                      header: JsonNode; formData: JsonNode;
                                      body: JsonNode): JsonNode =
   ## Get the list of CPU/memory/GPU capabilities of a region.
@@ -393,16 +397,16 @@ proc validate_ListCapabilities_568210(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_568212 = path.getOrDefault("subscriptionId")
-  valid_568212 = validateParameter(valid_568212, JString, required = true,
+  var valid_564112 = path.getOrDefault("subscriptionId")
+  valid_564112 = validateParameter(valid_564112, JString, required = true,
                                  default = nil)
-  if valid_568212 != nil:
-    section.add "subscriptionId", valid_568212
-  var valid_568213 = path.getOrDefault("location")
-  valid_568213 = validateParameter(valid_568213, JString, required = true,
+  if valid_564112 != nil:
+    section.add "subscriptionId", valid_564112
+  var valid_564113 = path.getOrDefault("location")
+  valid_564113 = validateParameter(valid_564113, JString, required = true,
                                  default = nil)
-  if valid_568213 != nil:
-    section.add "location", valid_568213
+  if valid_564113 != nil:
+    section.add "location", valid_564113
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -410,11 +414,11 @@ proc validate_ListCapabilities_568210(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568214 = query.getOrDefault("api-version")
-  valid_568214 = validateParameter(valid_568214, JString, required = true,
+  var valid_564114 = query.getOrDefault("api-version")
+  valid_564114 = validateParameter(valid_564114, JString, required = true,
                                  default = nil)
-  if valid_568214 != nil:
-    section.add "api-version", valid_568214
+  if valid_564114 != nil:
+    section.add "api-version", valid_564114
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -423,20 +427,20 @@ proc validate_ListCapabilities_568210(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568215: Call_ListCapabilities_568209; path: JsonNode;
+proc call*(call_564115: Call_ListCapabilities_564109; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get the list of CPU/memory/GPU capabilities of a region.
   ## 
-  let valid = call_568215.validator(path, query, header, formData, body)
-  let scheme = call_568215.pickScheme
+  let valid = call_564115.validator(path, query, header, formData, body)
+  let scheme = call_564115.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568215.url(scheme.get, call_568215.host, call_568215.base,
-                         call_568215.route, valid.getOrDefault("path"),
+  let url = call_564115.url(scheme.get, call_564115.host, call_564115.base,
+                         call_564115.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568215, url, valid)
+  result = hook(call_564115, url, valid)
 
-proc call*(call_568216: Call_ListCapabilities_568209; apiVersion: string;
+proc call*(call_564116: Call_ListCapabilities_564109; apiVersion: string;
           subscriptionId: string; location: string): Recallable =
   ## listCapabilities
   ## Get the list of CPU/memory/GPU capabilities of a region.
@@ -446,20 +450,20 @@ proc call*(call_568216: Call_ListCapabilities_568209; apiVersion: string;
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   location: string (required)
   ##           : The identifier for the physical azure location.
-  var path_568217 = newJObject()
-  var query_568218 = newJObject()
-  add(query_568218, "api-version", newJString(apiVersion))
-  add(path_568217, "subscriptionId", newJString(subscriptionId))
-  add(path_568217, "location", newJString(location))
-  result = call_568216.call(path_568217, query_568218, nil, nil, nil)
+  var path_564117 = newJObject()
+  var query_564118 = newJObject()
+  add(query_564118, "api-version", newJString(apiVersion))
+  add(path_564117, "subscriptionId", newJString(subscriptionId))
+  add(path_564117, "location", newJString(location))
+  result = call_564116.call(path_564117, query_564118, nil, nil, nil)
 
-var listCapabilities* = Call_ListCapabilities_568209(name: "listCapabilities",
+var listCapabilities* = Call_ListCapabilities_564109(name: "listCapabilities",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.ContainerInstance/locations/{location}/capabilities",
-    validator: validate_ListCapabilities_568210, base: "",
-    url: url_ListCapabilities_568211, schemes: {Scheme.Https})
+    validator: validate_ListCapabilities_564110, base: "",
+    url: url_ListCapabilities_564111, schemes: {Scheme.Https})
 type
-  Call_ContainerGroupUsageList_568219 = ref object of OpenApiRestCall_567658
-proc url_ContainerGroupUsageList_568221(protocol: Scheme; host: string; base: string;
+  Call_ContainerGroupUsageList_564119 = ref object of OpenApiRestCall_563556
+proc url_ContainerGroupUsageList_564121(protocol: Scheme; host: string; base: string;
                                        route: string; path: JsonNode;
                                        query: JsonNode): Uri =
   result.scheme = $protocol
@@ -480,7 +484,7 @@ proc url_ContainerGroupUsageList_568221(protocol: Scheme; host: string; base: st
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ContainerGroupUsageList_568220(path: JsonNode; query: JsonNode;
+proc validate_ContainerGroupUsageList_564120(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Get the usage for a subscription
   ## 
@@ -494,16 +498,16 @@ proc validate_ContainerGroupUsageList_568220(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_568222 = path.getOrDefault("subscriptionId")
-  valid_568222 = validateParameter(valid_568222, JString, required = true,
+  var valid_564122 = path.getOrDefault("subscriptionId")
+  valid_564122 = validateParameter(valid_564122, JString, required = true,
                                  default = nil)
-  if valid_568222 != nil:
-    section.add "subscriptionId", valid_568222
-  var valid_568223 = path.getOrDefault("location")
-  valid_568223 = validateParameter(valid_568223, JString, required = true,
+  if valid_564122 != nil:
+    section.add "subscriptionId", valid_564122
+  var valid_564123 = path.getOrDefault("location")
+  valid_564123 = validateParameter(valid_564123, JString, required = true,
                                  default = nil)
-  if valid_568223 != nil:
-    section.add "location", valid_568223
+  if valid_564123 != nil:
+    section.add "location", valid_564123
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -511,11 +515,11 @@ proc validate_ContainerGroupUsageList_568220(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568224 = query.getOrDefault("api-version")
-  valid_568224 = validateParameter(valid_568224, JString, required = true,
+  var valid_564124 = query.getOrDefault("api-version")
+  valid_564124 = validateParameter(valid_564124, JString, required = true,
                                  default = nil)
-  if valid_568224 != nil:
-    section.add "api-version", valid_568224
+  if valid_564124 != nil:
+    section.add "api-version", valid_564124
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -524,20 +528,20 @@ proc validate_ContainerGroupUsageList_568220(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568225: Call_ContainerGroupUsageList_568219; path: JsonNode;
+proc call*(call_564125: Call_ContainerGroupUsageList_564119; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get the usage for a subscription
   ## 
-  let valid = call_568225.validator(path, query, header, formData, body)
-  let scheme = call_568225.pickScheme
+  let valid = call_564125.validator(path, query, header, formData, body)
+  let scheme = call_564125.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568225.url(scheme.get, call_568225.host, call_568225.base,
-                         call_568225.route, valid.getOrDefault("path"),
+  let url = call_564125.url(scheme.get, call_564125.host, call_564125.base,
+                         call_564125.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568225, url, valid)
+  result = hook(call_564125, url, valid)
 
-proc call*(call_568226: Call_ContainerGroupUsageList_568219; apiVersion: string;
+proc call*(call_564126: Call_ContainerGroupUsageList_564119; apiVersion: string;
           subscriptionId: string; location: string): Recallable =
   ## containerGroupUsageList
   ## Get the usage for a subscription
@@ -547,21 +551,21 @@ proc call*(call_568226: Call_ContainerGroupUsageList_568219; apiVersion: string;
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   location: string (required)
   ##           : The identifier for the physical azure location.
-  var path_568227 = newJObject()
-  var query_568228 = newJObject()
-  add(query_568228, "api-version", newJString(apiVersion))
-  add(path_568227, "subscriptionId", newJString(subscriptionId))
-  add(path_568227, "location", newJString(location))
-  result = call_568226.call(path_568227, query_568228, nil, nil, nil)
+  var path_564127 = newJObject()
+  var query_564128 = newJObject()
+  add(query_564128, "api-version", newJString(apiVersion))
+  add(path_564127, "subscriptionId", newJString(subscriptionId))
+  add(path_564127, "location", newJString(location))
+  result = call_564126.call(path_564127, query_564128, nil, nil, nil)
 
-var containerGroupUsageList* = Call_ContainerGroupUsageList_568219(
+var containerGroupUsageList* = Call_ContainerGroupUsageList_564119(
     name: "containerGroupUsageList", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.ContainerInstance/locations/{location}/usages",
-    validator: validate_ContainerGroupUsageList_568220, base: "",
-    url: url_ContainerGroupUsageList_568221, schemes: {Scheme.Https})
+    validator: validate_ContainerGroupUsageList_564120, base: "",
+    url: url_ContainerGroupUsageList_564121, schemes: {Scheme.Https})
 type
-  Call_ContainerGroupsListByResourceGroup_568229 = ref object of OpenApiRestCall_567658
-proc url_ContainerGroupsListByResourceGroup_568231(protocol: Scheme; host: string;
+  Call_ContainerGroupsListByResourceGroup_564129 = ref object of OpenApiRestCall_563556
+proc url_ContainerGroupsListByResourceGroup_564131(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -582,30 +586,30 @@ proc url_ContainerGroupsListByResourceGroup_568231(protocol: Scheme; host: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ContainerGroupsListByResourceGroup_568230(path: JsonNode;
+proc validate_ContainerGroupsListByResourceGroup_564130(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Get a list of container groups in a specified subscription and resource group. This operation returns properties of each container group including containers, image registry credentials, restart policy, IP address type, OS type, state, and volumes.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568232 = path.getOrDefault("resourceGroupName")
-  valid_568232 = validateParameter(valid_568232, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564132 = path.getOrDefault("subscriptionId")
+  valid_564132 = validateParameter(valid_564132, JString, required = true,
                                  default = nil)
-  if valid_568232 != nil:
-    section.add "resourceGroupName", valid_568232
-  var valid_568233 = path.getOrDefault("subscriptionId")
-  valid_568233 = validateParameter(valid_568233, JString, required = true,
+  if valid_564132 != nil:
+    section.add "subscriptionId", valid_564132
+  var valid_564133 = path.getOrDefault("resourceGroupName")
+  valid_564133 = validateParameter(valid_564133, JString, required = true,
                                  default = nil)
-  if valid_568233 != nil:
-    section.add "subscriptionId", valid_568233
+  if valid_564133 != nil:
+    section.add "resourceGroupName", valid_564133
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -613,11 +617,11 @@ proc validate_ContainerGroupsListByResourceGroup_568230(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568234 = query.getOrDefault("api-version")
-  valid_568234 = validateParameter(valid_568234, JString, required = true,
+  var valid_564134 = query.getOrDefault("api-version")
+  valid_564134 = validateParameter(valid_564134, JString, required = true,
                                  default = nil)
-  if valid_568234 != nil:
-    section.add "api-version", valid_568234
+  if valid_564134 != nil:
+    section.add "api-version", valid_564134
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -626,45 +630,45 @@ proc validate_ContainerGroupsListByResourceGroup_568230(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568235: Call_ContainerGroupsListByResourceGroup_568229;
+proc call*(call_564135: Call_ContainerGroupsListByResourceGroup_564129;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Get a list of container groups in a specified subscription and resource group. This operation returns properties of each container group including containers, image registry credentials, restart policy, IP address type, OS type, state, and volumes.
   ## 
-  let valid = call_568235.validator(path, query, header, formData, body)
-  let scheme = call_568235.pickScheme
+  let valid = call_564135.validator(path, query, header, formData, body)
+  let scheme = call_564135.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568235.url(scheme.get, call_568235.host, call_568235.base,
-                         call_568235.route, valid.getOrDefault("path"),
+  let url = call_564135.url(scheme.get, call_564135.host, call_564135.base,
+                         call_564135.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568235, url, valid)
+  result = hook(call_564135, url, valid)
 
-proc call*(call_568236: Call_ContainerGroupsListByResourceGroup_568229;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string): Recallable =
+proc call*(call_564136: Call_ContainerGroupsListByResourceGroup_564129;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string): Recallable =
   ## containerGroupsListByResourceGroup
   ## Get a list of container groups in a specified subscription and resource group. This operation returns properties of each container group including containers, image registry credentials, restart policy, IP address type, OS type, state, and volumes.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client API version
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_568237 = newJObject()
-  var query_568238 = newJObject()
-  add(path_568237, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568238, "api-version", newJString(apiVersion))
-  add(path_568237, "subscriptionId", newJString(subscriptionId))
-  result = call_568236.call(path_568237, query_568238, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564137 = newJObject()
+  var query_564138 = newJObject()
+  add(query_564138, "api-version", newJString(apiVersion))
+  add(path_564137, "subscriptionId", newJString(subscriptionId))
+  add(path_564137, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564136.call(path_564137, query_564138, nil, nil, nil)
 
-var containerGroupsListByResourceGroup* = Call_ContainerGroupsListByResourceGroup_568229(
+var containerGroupsListByResourceGroup* = Call_ContainerGroupsListByResourceGroup_564129(
     name: "containerGroupsListByResourceGroup", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ContainerInstance/containerGroups",
-    validator: validate_ContainerGroupsListByResourceGroup_568230, base: "",
-    url: url_ContainerGroupsListByResourceGroup_568231, schemes: {Scheme.Https})
+    validator: validate_ContainerGroupsListByResourceGroup_564130, base: "",
+    url: url_ContainerGroupsListByResourceGroup_564131, schemes: {Scheme.Https})
 type
-  Call_ContainerGroupsCreateOrUpdate_568250 = ref object of OpenApiRestCall_567658
-proc url_ContainerGroupsCreateOrUpdate_568252(protocol: Scheme; host: string;
+  Call_ContainerGroupsCreateOrUpdate_564150 = ref object of OpenApiRestCall_563556
+proc url_ContainerGroupsCreateOrUpdate_564152(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -688,37 +692,37 @@ proc url_ContainerGroupsCreateOrUpdate_568252(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ContainerGroupsCreateOrUpdate_568251(path: JsonNode; query: JsonNode;
+proc validate_ContainerGroupsCreateOrUpdate_564151(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Create or update container groups with specified configurations.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   ##   containerGroupName: JString (required)
   ##                     : The name of the container group.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568253 = path.getOrDefault("resourceGroupName")
-  valid_568253 = validateParameter(valid_568253, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564153 = path.getOrDefault("subscriptionId")
+  valid_564153 = validateParameter(valid_564153, JString, required = true,
                                  default = nil)
-  if valid_568253 != nil:
-    section.add "resourceGroupName", valid_568253
-  var valid_568254 = path.getOrDefault("subscriptionId")
-  valid_568254 = validateParameter(valid_568254, JString, required = true,
+  if valid_564153 != nil:
+    section.add "subscriptionId", valid_564153
+  var valid_564154 = path.getOrDefault("resourceGroupName")
+  valid_564154 = validateParameter(valid_564154, JString, required = true,
                                  default = nil)
-  if valid_568254 != nil:
-    section.add "subscriptionId", valid_568254
-  var valid_568255 = path.getOrDefault("containerGroupName")
-  valid_568255 = validateParameter(valid_568255, JString, required = true,
+  if valid_564154 != nil:
+    section.add "resourceGroupName", valid_564154
+  var valid_564155 = path.getOrDefault("containerGroupName")
+  valid_564155 = validateParameter(valid_564155, JString, required = true,
                                  default = nil)
-  if valid_568255 != nil:
-    section.add "containerGroupName", valid_568255
+  if valid_564155 != nil:
+    section.add "containerGroupName", valid_564155
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -726,11 +730,11 @@ proc validate_ContainerGroupsCreateOrUpdate_568251(path: JsonNode; query: JsonNo
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568256 = query.getOrDefault("api-version")
-  valid_568256 = validateParameter(valid_568256, JString, required = true,
+  var valid_564156 = query.getOrDefault("api-version")
+  valid_564156 = validateParameter(valid_564156, JString, required = true,
                                  default = nil)
-  if valid_568256 != nil:
-    section.add "api-version", valid_568256
+  if valid_564156 != nil:
+    section.add "api-version", valid_564156
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -744,53 +748,53 @@ proc validate_ContainerGroupsCreateOrUpdate_568251(path: JsonNode; query: JsonNo
   if body != nil:
     result.add "body", body
 
-proc call*(call_568258: Call_ContainerGroupsCreateOrUpdate_568250; path: JsonNode;
+proc call*(call_564158: Call_ContainerGroupsCreateOrUpdate_564150; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Create or update container groups with specified configurations.
   ## 
-  let valid = call_568258.validator(path, query, header, formData, body)
-  let scheme = call_568258.pickScheme
+  let valid = call_564158.validator(path, query, header, formData, body)
+  let scheme = call_564158.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568258.url(scheme.get, call_568258.host, call_568258.base,
-                         call_568258.route, valid.getOrDefault("path"),
+  let url = call_564158.url(scheme.get, call_564158.host, call_564158.base,
+                         call_564158.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568258, url, valid)
+  result = hook(call_564158, url, valid)
 
-proc call*(call_568259: Call_ContainerGroupsCreateOrUpdate_568250;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          containerGroup: JsonNode; containerGroupName: string): Recallable =
+proc call*(call_564159: Call_ContainerGroupsCreateOrUpdate_564150;
+          apiVersion: string; subscriptionId: string; containerGroup: JsonNode;
+          resourceGroupName: string; containerGroupName: string): Recallable =
   ## containerGroupsCreateOrUpdate
   ## Create or update container groups with specified configurations.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client API version
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   containerGroup: JObject (required)
   ##                 : The properties of the container group to be created or updated.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   containerGroupName: string (required)
   ##                     : The name of the container group.
-  var path_568260 = newJObject()
-  var query_568261 = newJObject()
-  var body_568262 = newJObject()
-  add(path_568260, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568261, "api-version", newJString(apiVersion))
-  add(path_568260, "subscriptionId", newJString(subscriptionId))
+  var path_564160 = newJObject()
+  var query_564161 = newJObject()
+  var body_564162 = newJObject()
+  add(query_564161, "api-version", newJString(apiVersion))
+  add(path_564160, "subscriptionId", newJString(subscriptionId))
   if containerGroup != nil:
-    body_568262 = containerGroup
-  add(path_568260, "containerGroupName", newJString(containerGroupName))
-  result = call_568259.call(path_568260, query_568261, nil, nil, body_568262)
+    body_564162 = containerGroup
+  add(path_564160, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564160, "containerGroupName", newJString(containerGroupName))
+  result = call_564159.call(path_564160, query_564161, nil, nil, body_564162)
 
-var containerGroupsCreateOrUpdate* = Call_ContainerGroupsCreateOrUpdate_568250(
+var containerGroupsCreateOrUpdate* = Call_ContainerGroupsCreateOrUpdate_564150(
     name: "containerGroupsCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ContainerInstance/containerGroups/{containerGroupName}",
-    validator: validate_ContainerGroupsCreateOrUpdate_568251, base: "",
-    url: url_ContainerGroupsCreateOrUpdate_568252, schemes: {Scheme.Https})
+    validator: validate_ContainerGroupsCreateOrUpdate_564151, base: "",
+    url: url_ContainerGroupsCreateOrUpdate_564152, schemes: {Scheme.Https})
 type
-  Call_ContainerGroupsGet_568239 = ref object of OpenApiRestCall_567658
-proc url_ContainerGroupsGet_568241(protocol: Scheme; host: string; base: string;
+  Call_ContainerGroupsGet_564139 = ref object of OpenApiRestCall_563556
+proc url_ContainerGroupsGet_564141(protocol: Scheme; host: string; base: string;
                                   route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -814,7 +818,7 @@ proc url_ContainerGroupsGet_568241(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ContainerGroupsGet_568240(path: JsonNode; query: JsonNode;
+proc validate_ContainerGroupsGet_564140(path: JsonNode; query: JsonNode;
                                        header: JsonNode; formData: JsonNode;
                                        body: JsonNode): JsonNode =
   ## Gets the properties of the specified container group in the specified subscription and resource group. The operation returns the properties of each container group including containers, image registry credentials, restart policy, IP address type, OS type, state, and volumes.
@@ -822,30 +826,30 @@ proc validate_ContainerGroupsGet_568240(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   ##   containerGroupName: JString (required)
   ##                     : The name of the container group.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568242 = path.getOrDefault("resourceGroupName")
-  valid_568242 = validateParameter(valid_568242, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564142 = path.getOrDefault("subscriptionId")
+  valid_564142 = validateParameter(valid_564142, JString, required = true,
                                  default = nil)
-  if valid_568242 != nil:
-    section.add "resourceGroupName", valid_568242
-  var valid_568243 = path.getOrDefault("subscriptionId")
-  valid_568243 = validateParameter(valid_568243, JString, required = true,
+  if valid_564142 != nil:
+    section.add "subscriptionId", valid_564142
+  var valid_564143 = path.getOrDefault("resourceGroupName")
+  valid_564143 = validateParameter(valid_564143, JString, required = true,
                                  default = nil)
-  if valid_568243 != nil:
-    section.add "subscriptionId", valid_568243
-  var valid_568244 = path.getOrDefault("containerGroupName")
-  valid_568244 = validateParameter(valid_568244, JString, required = true,
+  if valid_564143 != nil:
+    section.add "resourceGroupName", valid_564143
+  var valid_564144 = path.getOrDefault("containerGroupName")
+  valid_564144 = validateParameter(valid_564144, JString, required = true,
                                  default = nil)
-  if valid_568244 != nil:
-    section.add "containerGroupName", valid_568244
+  if valid_564144 != nil:
+    section.add "containerGroupName", valid_564144
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -853,11 +857,11 @@ proc validate_ContainerGroupsGet_568240(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568245 = query.getOrDefault("api-version")
-  valid_568245 = validateParameter(valid_568245, JString, required = true,
+  var valid_564145 = query.getOrDefault("api-version")
+  valid_564145 = validateParameter(valid_564145, JString, required = true,
                                  default = nil)
-  if valid_568245 != nil:
-    section.add "api-version", valid_568245
+  if valid_564145 != nil:
+    section.add "api-version", valid_564145
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -866,47 +870,48 @@ proc validate_ContainerGroupsGet_568240(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568246: Call_ContainerGroupsGet_568239; path: JsonNode;
+proc call*(call_564146: Call_ContainerGroupsGet_564139; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the properties of the specified container group in the specified subscription and resource group. The operation returns the properties of each container group including containers, image registry credentials, restart policy, IP address type, OS type, state, and volumes.
   ## 
-  let valid = call_568246.validator(path, query, header, formData, body)
-  let scheme = call_568246.pickScheme
+  let valid = call_564146.validator(path, query, header, formData, body)
+  let scheme = call_564146.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568246.url(scheme.get, call_568246.host, call_568246.base,
-                         call_568246.route, valid.getOrDefault("path"),
+  let url = call_564146.url(scheme.get, call_564146.host, call_564146.base,
+                         call_564146.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568246, url, valid)
+  result = hook(call_564146, url, valid)
 
-proc call*(call_568247: Call_ContainerGroupsGet_568239; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; containerGroupName: string): Recallable =
+proc call*(call_564147: Call_ContainerGroupsGet_564139; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string;
+          containerGroupName: string): Recallable =
   ## containerGroupsGet
   ## Gets the properties of the specified container group in the specified subscription and resource group. The operation returns the properties of each container group including containers, image registry credentials, restart policy, IP address type, OS type, state, and volumes.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client API version
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   containerGroupName: string (required)
   ##                     : The name of the container group.
-  var path_568248 = newJObject()
-  var query_568249 = newJObject()
-  add(path_568248, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568249, "api-version", newJString(apiVersion))
-  add(path_568248, "subscriptionId", newJString(subscriptionId))
-  add(path_568248, "containerGroupName", newJString(containerGroupName))
-  result = call_568247.call(path_568248, query_568249, nil, nil, nil)
+  var path_564148 = newJObject()
+  var query_564149 = newJObject()
+  add(query_564149, "api-version", newJString(apiVersion))
+  add(path_564148, "subscriptionId", newJString(subscriptionId))
+  add(path_564148, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564148, "containerGroupName", newJString(containerGroupName))
+  result = call_564147.call(path_564148, query_564149, nil, nil, nil)
 
-var containerGroupsGet* = Call_ContainerGroupsGet_568239(
+var containerGroupsGet* = Call_ContainerGroupsGet_564139(
     name: "containerGroupsGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ContainerInstance/containerGroups/{containerGroupName}",
-    validator: validate_ContainerGroupsGet_568240, base: "",
-    url: url_ContainerGroupsGet_568241, schemes: {Scheme.Https})
+    validator: validate_ContainerGroupsGet_564140, base: "",
+    url: url_ContainerGroupsGet_564141, schemes: {Scheme.Https})
 type
-  Call_ContainerGroupsUpdate_568274 = ref object of OpenApiRestCall_567658
-proc url_ContainerGroupsUpdate_568276(protocol: Scheme; host: string; base: string;
+  Call_ContainerGroupsUpdate_564174 = ref object of OpenApiRestCall_563556
+proc url_ContainerGroupsUpdate_564176(protocol: Scheme; host: string; base: string;
                                      route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -930,37 +935,37 @@ proc url_ContainerGroupsUpdate_568276(protocol: Scheme; host: string; base: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ContainerGroupsUpdate_568275(path: JsonNode; query: JsonNode;
+proc validate_ContainerGroupsUpdate_564175(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Updates container group tags with specified values.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   ##   containerGroupName: JString (required)
   ##                     : The name of the container group.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568277 = path.getOrDefault("resourceGroupName")
-  valid_568277 = validateParameter(valid_568277, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564177 = path.getOrDefault("subscriptionId")
+  valid_564177 = validateParameter(valid_564177, JString, required = true,
                                  default = nil)
-  if valid_568277 != nil:
-    section.add "resourceGroupName", valid_568277
-  var valid_568278 = path.getOrDefault("subscriptionId")
-  valid_568278 = validateParameter(valid_568278, JString, required = true,
+  if valid_564177 != nil:
+    section.add "subscriptionId", valid_564177
+  var valid_564178 = path.getOrDefault("resourceGroupName")
+  valid_564178 = validateParameter(valid_564178, JString, required = true,
                                  default = nil)
-  if valid_568278 != nil:
-    section.add "subscriptionId", valid_568278
-  var valid_568279 = path.getOrDefault("containerGroupName")
-  valid_568279 = validateParameter(valid_568279, JString, required = true,
+  if valid_564178 != nil:
+    section.add "resourceGroupName", valid_564178
+  var valid_564179 = path.getOrDefault("containerGroupName")
+  valid_564179 = validateParameter(valid_564179, JString, required = true,
                                  default = nil)
-  if valid_568279 != nil:
-    section.add "containerGroupName", valid_568279
+  if valid_564179 != nil:
+    section.add "containerGroupName", valid_564179
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -968,11 +973,11 @@ proc validate_ContainerGroupsUpdate_568275(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568280 = query.getOrDefault("api-version")
-  valid_568280 = validateParameter(valid_568280, JString, required = true,
+  var valid_564180 = query.getOrDefault("api-version")
+  valid_564180 = validateParameter(valid_564180, JString, required = true,
                                  default = nil)
-  if valid_568280 != nil:
-    section.add "api-version", valid_568280
+  if valid_564180 != nil:
+    section.add "api-version", valid_564180
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -986,53 +991,53 @@ proc validate_ContainerGroupsUpdate_568275(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568282: Call_ContainerGroupsUpdate_568274; path: JsonNode;
+proc call*(call_564182: Call_ContainerGroupsUpdate_564174; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Updates container group tags with specified values.
   ## 
-  let valid = call_568282.validator(path, query, header, formData, body)
-  let scheme = call_568282.pickScheme
+  let valid = call_564182.validator(path, query, header, formData, body)
+  let scheme = call_564182.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568282.url(scheme.get, call_568282.host, call_568282.base,
-                         call_568282.route, valid.getOrDefault("path"),
+  let url = call_564182.url(scheme.get, call_564182.host, call_564182.base,
+                         call_564182.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568282, url, valid)
+  result = hook(call_564182, url, valid)
 
-proc call*(call_568283: Call_ContainerGroupsUpdate_568274;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          containerGroupName: string; Resource: JsonNode): Recallable =
+proc call*(call_564183: Call_ContainerGroupsUpdate_564174; Resource: JsonNode;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string;
+          containerGroupName: string): Recallable =
   ## containerGroupsUpdate
   ## Updates container group tags with specified values.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   Resource: JObject (required)
+  ##           : The container group resource with just the tags to be updated.
   ##   apiVersion: string (required)
   ##             : Client API version
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   containerGroupName: string (required)
   ##                     : The name of the container group.
-  ##   Resource: JObject (required)
-  ##           : The container group resource with just the tags to be updated.
-  var path_568284 = newJObject()
-  var query_568285 = newJObject()
-  var body_568286 = newJObject()
-  add(path_568284, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568285, "api-version", newJString(apiVersion))
-  add(path_568284, "subscriptionId", newJString(subscriptionId))
-  add(path_568284, "containerGroupName", newJString(containerGroupName))
+  var path_564184 = newJObject()
+  var query_564185 = newJObject()
+  var body_564186 = newJObject()
   if Resource != nil:
-    body_568286 = Resource
-  result = call_568283.call(path_568284, query_568285, nil, nil, body_568286)
+    body_564186 = Resource
+  add(query_564185, "api-version", newJString(apiVersion))
+  add(path_564184, "subscriptionId", newJString(subscriptionId))
+  add(path_564184, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564184, "containerGroupName", newJString(containerGroupName))
+  result = call_564183.call(path_564184, query_564185, nil, nil, body_564186)
 
-var containerGroupsUpdate* = Call_ContainerGroupsUpdate_568274(
+var containerGroupsUpdate* = Call_ContainerGroupsUpdate_564174(
     name: "containerGroupsUpdate", meth: HttpMethod.HttpPatch,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ContainerInstance/containerGroups/{containerGroupName}",
-    validator: validate_ContainerGroupsUpdate_568275, base: "",
-    url: url_ContainerGroupsUpdate_568276, schemes: {Scheme.Https})
+    validator: validate_ContainerGroupsUpdate_564175, base: "",
+    url: url_ContainerGroupsUpdate_564176, schemes: {Scheme.Https})
 type
-  Call_ContainerGroupsDelete_568263 = ref object of OpenApiRestCall_567658
-proc url_ContainerGroupsDelete_568265(protocol: Scheme; host: string; base: string;
+  Call_ContainerGroupsDelete_564163 = ref object of OpenApiRestCall_563556
+proc url_ContainerGroupsDelete_564165(protocol: Scheme; host: string; base: string;
                                      route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1056,37 +1061,37 @@ proc url_ContainerGroupsDelete_568265(protocol: Scheme; host: string; base: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ContainerGroupsDelete_568264(path: JsonNode; query: JsonNode;
+proc validate_ContainerGroupsDelete_564164(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Delete the specified container group in the specified subscription and resource group. The operation does not delete other resources provided by the user, such as volumes.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   ##   containerGroupName: JString (required)
   ##                     : The name of the container group.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568266 = path.getOrDefault("resourceGroupName")
-  valid_568266 = validateParameter(valid_568266, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564166 = path.getOrDefault("subscriptionId")
+  valid_564166 = validateParameter(valid_564166, JString, required = true,
                                  default = nil)
-  if valid_568266 != nil:
-    section.add "resourceGroupName", valid_568266
-  var valid_568267 = path.getOrDefault("subscriptionId")
-  valid_568267 = validateParameter(valid_568267, JString, required = true,
+  if valid_564166 != nil:
+    section.add "subscriptionId", valid_564166
+  var valid_564167 = path.getOrDefault("resourceGroupName")
+  valid_564167 = validateParameter(valid_564167, JString, required = true,
                                  default = nil)
-  if valid_568267 != nil:
-    section.add "subscriptionId", valid_568267
-  var valid_568268 = path.getOrDefault("containerGroupName")
-  valid_568268 = validateParameter(valid_568268, JString, required = true,
+  if valid_564167 != nil:
+    section.add "resourceGroupName", valid_564167
+  var valid_564168 = path.getOrDefault("containerGroupName")
+  valid_564168 = validateParameter(valid_564168, JString, required = true,
                                  default = nil)
-  if valid_568268 != nil:
-    section.add "containerGroupName", valid_568268
+  if valid_564168 != nil:
+    section.add "containerGroupName", valid_564168
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1094,11 +1099,11 @@ proc validate_ContainerGroupsDelete_568264(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568269 = query.getOrDefault("api-version")
-  valid_568269 = validateParameter(valid_568269, JString, required = true,
+  var valid_564169 = query.getOrDefault("api-version")
+  valid_564169 = validateParameter(valid_564169, JString, required = true,
                                  default = nil)
-  if valid_568269 != nil:
-    section.add "api-version", valid_568269
+  if valid_564169 != nil:
+    section.add "api-version", valid_564169
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1107,48 +1112,48 @@ proc validate_ContainerGroupsDelete_568264(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568270: Call_ContainerGroupsDelete_568263; path: JsonNode;
+proc call*(call_564170: Call_ContainerGroupsDelete_564163; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Delete the specified container group in the specified subscription and resource group. The operation does not delete other resources provided by the user, such as volumes.
   ## 
-  let valid = call_568270.validator(path, query, header, formData, body)
-  let scheme = call_568270.pickScheme
+  let valid = call_564170.validator(path, query, header, formData, body)
+  let scheme = call_564170.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568270.url(scheme.get, call_568270.host, call_568270.base,
-                         call_568270.route, valid.getOrDefault("path"),
+  let url = call_564170.url(scheme.get, call_564170.host, call_564170.base,
+                         call_564170.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568270, url, valid)
+  result = hook(call_564170, url, valid)
 
-proc call*(call_568271: Call_ContainerGroupsDelete_568263;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
+proc call*(call_564171: Call_ContainerGroupsDelete_564163; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string;
           containerGroupName: string): Recallable =
   ## containerGroupsDelete
   ## Delete the specified container group in the specified subscription and resource group. The operation does not delete other resources provided by the user, such as volumes.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client API version
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   containerGroupName: string (required)
   ##                     : The name of the container group.
-  var path_568272 = newJObject()
-  var query_568273 = newJObject()
-  add(path_568272, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568273, "api-version", newJString(apiVersion))
-  add(path_568272, "subscriptionId", newJString(subscriptionId))
-  add(path_568272, "containerGroupName", newJString(containerGroupName))
-  result = call_568271.call(path_568272, query_568273, nil, nil, nil)
+  var path_564172 = newJObject()
+  var query_564173 = newJObject()
+  add(query_564173, "api-version", newJString(apiVersion))
+  add(path_564172, "subscriptionId", newJString(subscriptionId))
+  add(path_564172, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564172, "containerGroupName", newJString(containerGroupName))
+  result = call_564171.call(path_564172, query_564173, nil, nil, nil)
 
-var containerGroupsDelete* = Call_ContainerGroupsDelete_568263(
+var containerGroupsDelete* = Call_ContainerGroupsDelete_564163(
     name: "containerGroupsDelete", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ContainerInstance/containerGroups/{containerGroupName}",
-    validator: validate_ContainerGroupsDelete_568264, base: "",
-    url: url_ContainerGroupsDelete_568265, schemes: {Scheme.Https})
+    validator: validate_ContainerGroupsDelete_564164, base: "",
+    url: url_ContainerGroupsDelete_564165, schemes: {Scheme.Https})
 type
-  Call_ContainerExecuteCommand_568287 = ref object of OpenApiRestCall_567658
-proc url_ContainerExecuteCommand_568289(protocol: Scheme; host: string; base: string;
+  Call_ContainerExecuteCommand_564187 = ref object of OpenApiRestCall_563556
+proc url_ContainerExecuteCommand_564189(protocol: Scheme; host: string; base: string;
                                        route: string; path: JsonNode;
                                        query: JsonNode): Uri =
   result.scheme = $protocol
@@ -1177,44 +1182,44 @@ proc url_ContainerExecuteCommand_568289(protocol: Scheme; host: string; base: st
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ContainerExecuteCommand_568288(path: JsonNode; query: JsonNode;
+proc validate_ContainerExecuteCommand_564188(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Executes a command for a specific container instance in a specified resource group and container group.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
+  ##   subscriptionId: JString (required)
+  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   resourceGroupName: JString (required)
   ##                    : The name of the resource group.
   ##   containerName: JString (required)
   ##                : The name of the container instance.
-  ##   subscriptionId: JString (required)
-  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   containerGroupName: JString (required)
   ##                     : The name of the container group.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568290 = path.getOrDefault("resourceGroupName")
-  valid_568290 = validateParameter(valid_568290, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564190 = path.getOrDefault("subscriptionId")
+  valid_564190 = validateParameter(valid_564190, JString, required = true,
                                  default = nil)
-  if valid_568290 != nil:
-    section.add "resourceGroupName", valid_568290
-  var valid_568291 = path.getOrDefault("containerName")
-  valid_568291 = validateParameter(valid_568291, JString, required = true,
+  if valid_564190 != nil:
+    section.add "subscriptionId", valid_564190
+  var valid_564191 = path.getOrDefault("resourceGroupName")
+  valid_564191 = validateParameter(valid_564191, JString, required = true,
                                  default = nil)
-  if valid_568291 != nil:
-    section.add "containerName", valid_568291
-  var valid_568292 = path.getOrDefault("subscriptionId")
-  valid_568292 = validateParameter(valid_568292, JString, required = true,
+  if valid_564191 != nil:
+    section.add "resourceGroupName", valid_564191
+  var valid_564192 = path.getOrDefault("containerName")
+  valid_564192 = validateParameter(valid_564192, JString, required = true,
                                  default = nil)
-  if valid_568292 != nil:
-    section.add "subscriptionId", valid_568292
-  var valid_568293 = path.getOrDefault("containerGroupName")
-  valid_568293 = validateParameter(valid_568293, JString, required = true,
+  if valid_564192 != nil:
+    section.add "containerName", valid_564192
+  var valid_564193 = path.getOrDefault("containerGroupName")
+  valid_564193 = validateParameter(valid_564193, JString, required = true,
                                  default = nil)
-  if valid_568293 != nil:
-    section.add "containerGroupName", valid_568293
+  if valid_564193 != nil:
+    section.add "containerGroupName", valid_564193
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1222,11 +1227,11 @@ proc validate_ContainerExecuteCommand_568288(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568294 = query.getOrDefault("api-version")
-  valid_568294 = validateParameter(valid_568294, JString, required = true,
+  var valid_564194 = query.getOrDefault("api-version")
+  valid_564194 = validateParameter(valid_564194, JString, required = true,
                                  default = nil)
-  if valid_568294 != nil:
-    section.add "api-version", valid_568294
+  if valid_564194 != nil:
+    section.add "api-version", valid_564194
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1240,57 +1245,56 @@ proc validate_ContainerExecuteCommand_568288(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568296: Call_ContainerExecuteCommand_568287; path: JsonNode;
+proc call*(call_564196: Call_ContainerExecuteCommand_564187; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Executes a command for a specific container instance in a specified resource group and container group.
   ## 
-  let valid = call_568296.validator(path, query, header, formData, body)
-  let scheme = call_568296.pickScheme
+  let valid = call_564196.validator(path, query, header, formData, body)
+  let scheme = call_564196.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568296.url(scheme.get, call_568296.host, call_568296.base,
-                         call_568296.route, valid.getOrDefault("path"),
+  let url = call_564196.url(scheme.get, call_564196.host, call_564196.base,
+                         call_564196.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568296, url, valid)
+  result = hook(call_564196, url, valid)
 
-proc call*(call_568297: Call_ContainerExecuteCommand_568287;
-          resourceGroupName: string; apiVersion: string; containerName: string;
-          subscriptionId: string; containerExecRequest: JsonNode;
-          containerGroupName: string): Recallable =
+proc call*(call_564197: Call_ContainerExecuteCommand_564187; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string; containerName: string;
+          containerExecRequest: JsonNode; containerGroupName: string): Recallable =
   ## containerExecuteCommand
   ## Executes a command for a specific container instance in a specified resource group and container group.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client API version
-  ##   containerName: string (required)
-  ##                : The name of the container instance.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  ##   containerName: string (required)
+  ##                : The name of the container instance.
   ##   containerExecRequest: JObject (required)
   ##                       : The request for the exec command.
   ##   containerGroupName: string (required)
   ##                     : The name of the container group.
-  var path_568298 = newJObject()
-  var query_568299 = newJObject()
-  var body_568300 = newJObject()
-  add(path_568298, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568299, "api-version", newJString(apiVersion))
-  add(path_568298, "containerName", newJString(containerName))
-  add(path_568298, "subscriptionId", newJString(subscriptionId))
+  var path_564198 = newJObject()
+  var query_564199 = newJObject()
+  var body_564200 = newJObject()
+  add(query_564199, "api-version", newJString(apiVersion))
+  add(path_564198, "subscriptionId", newJString(subscriptionId))
+  add(path_564198, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564198, "containerName", newJString(containerName))
   if containerExecRequest != nil:
-    body_568300 = containerExecRequest
-  add(path_568298, "containerGroupName", newJString(containerGroupName))
-  result = call_568297.call(path_568298, query_568299, nil, nil, body_568300)
+    body_564200 = containerExecRequest
+  add(path_564198, "containerGroupName", newJString(containerGroupName))
+  result = call_564197.call(path_564198, query_564199, nil, nil, body_564200)
 
-var containerExecuteCommand* = Call_ContainerExecuteCommand_568287(
+var containerExecuteCommand* = Call_ContainerExecuteCommand_564187(
     name: "containerExecuteCommand", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ContainerInstance/containerGroups/{containerGroupName}/containers/{containerName}/exec",
-    validator: validate_ContainerExecuteCommand_568288, base: "",
-    url: url_ContainerExecuteCommand_568289, schemes: {Scheme.Https})
+    validator: validate_ContainerExecuteCommand_564188, base: "",
+    url: url_ContainerExecuteCommand_564189, schemes: {Scheme.Https})
 type
-  Call_ContainerListLogs_568301 = ref object of OpenApiRestCall_567658
-proc url_ContainerListLogs_568303(protocol: Scheme; host: string; base: string;
+  Call_ContainerListLogs_564201 = ref object of OpenApiRestCall_563556
+proc url_ContainerListLogs_564203(protocol: Scheme; host: string; base: string;
                                  route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1318,7 +1322,7 @@ proc url_ContainerListLogs_568303(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ContainerListLogs_568302(path: JsonNode; query: JsonNode;
+proc validate_ContainerListLogs_564202(path: JsonNode; query: JsonNode;
                                       header: JsonNode; formData: JsonNode;
                                       body: JsonNode): JsonNode =
   ## Get the logs for a specified container instance in a specified resource group and container group.
@@ -1326,55 +1330,55 @@ proc validate_ContainerListLogs_568302(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
+  ##   subscriptionId: JString (required)
+  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   resourceGroupName: JString (required)
   ##                    : The name of the resource group.
   ##   containerName: JString (required)
   ##                : The name of the container instance.
-  ##   subscriptionId: JString (required)
-  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   containerGroupName: JString (required)
   ##                     : The name of the container group.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568304 = path.getOrDefault("resourceGroupName")
-  valid_568304 = validateParameter(valid_568304, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564204 = path.getOrDefault("subscriptionId")
+  valid_564204 = validateParameter(valid_564204, JString, required = true,
                                  default = nil)
-  if valid_568304 != nil:
-    section.add "resourceGroupName", valid_568304
-  var valid_568305 = path.getOrDefault("containerName")
-  valid_568305 = validateParameter(valid_568305, JString, required = true,
+  if valid_564204 != nil:
+    section.add "subscriptionId", valid_564204
+  var valid_564205 = path.getOrDefault("resourceGroupName")
+  valid_564205 = validateParameter(valid_564205, JString, required = true,
                                  default = nil)
-  if valid_568305 != nil:
-    section.add "containerName", valid_568305
-  var valid_568306 = path.getOrDefault("subscriptionId")
-  valid_568306 = validateParameter(valid_568306, JString, required = true,
+  if valid_564205 != nil:
+    section.add "resourceGroupName", valid_564205
+  var valid_564206 = path.getOrDefault("containerName")
+  valid_564206 = validateParameter(valid_564206, JString, required = true,
                                  default = nil)
-  if valid_568306 != nil:
-    section.add "subscriptionId", valid_568306
-  var valid_568307 = path.getOrDefault("containerGroupName")
-  valid_568307 = validateParameter(valid_568307, JString, required = true,
+  if valid_564206 != nil:
+    section.add "containerName", valid_564206
+  var valid_564207 = path.getOrDefault("containerGroupName")
+  valid_564207 = validateParameter(valid_564207, JString, required = true,
                                  default = nil)
-  if valid_568307 != nil:
-    section.add "containerGroupName", valid_568307
+  if valid_564207 != nil:
+    section.add "containerGroupName", valid_564207
   result.add "path", section
   ## parameters in `query` object:
-  ##   tail: JInt
-  ##       : The number of lines to show from the tail of the container instance log. If not provided, all available logs are shown up to 4mb.
   ##   api-version: JString (required)
   ##              : Client API version
+  ##   tail: JInt
+  ##       : The number of lines to show from the tail of the container instance log. If not provided, all available logs are shown up to 4mb.
   section = newJObject()
-  var valid_568308 = query.getOrDefault("tail")
-  valid_568308 = validateParameter(valid_568308, JInt, required = false, default = nil)
-  if valid_568308 != nil:
-    section.add "tail", valid_568308
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568309 = query.getOrDefault("api-version")
-  valid_568309 = validateParameter(valid_568309, JString, required = true,
+  var valid_564208 = query.getOrDefault("api-version")
+  valid_564208 = validateParameter(valid_564208, JString, required = true,
                                  default = nil)
-  if valid_568309 != nil:
-    section.add "api-version", valid_568309
+  if valid_564208 != nil:
+    section.add "api-version", valid_564208
+  var valid_564209 = query.getOrDefault("tail")
+  valid_564209 = validateParameter(valid_564209, JInt, required = false, default = nil)
+  if valid_564209 != nil:
+    section.add "tail", valid_564209
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1383,53 +1387,53 @@ proc validate_ContainerListLogs_568302(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568310: Call_ContainerListLogs_568301; path: JsonNode;
+proc call*(call_564210: Call_ContainerListLogs_564201; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get the logs for a specified container instance in a specified resource group and container group.
   ## 
-  let valid = call_568310.validator(path, query, header, formData, body)
-  let scheme = call_568310.pickScheme
+  let valid = call_564210.validator(path, query, header, formData, body)
+  let scheme = call_564210.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568310.url(scheme.get, call_568310.host, call_568310.base,
-                         call_568310.route, valid.getOrDefault("path"),
+  let url = call_564210.url(scheme.get, call_564210.host, call_564210.base,
+                         call_564210.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568310, url, valid)
+  result = hook(call_564210, url, valid)
 
-proc call*(call_568311: Call_ContainerListLogs_568301; resourceGroupName: string;
-          apiVersion: string; containerName: string; subscriptionId: string;
+proc call*(call_564211: Call_ContainerListLogs_564201; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string; containerName: string;
           containerGroupName: string; tail: int = 0): Recallable =
   ## containerListLogs
   ## Get the logs for a specified container instance in a specified resource group and container group.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
-  ##   tail: int
-  ##       : The number of lines to show from the tail of the container instance log. If not provided, all available logs are shown up to 4mb.
   ##   apiVersion: string (required)
   ##             : Client API version
-  ##   containerName: string (required)
-  ##                : The name of the container instance.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   tail: int
+  ##       : The number of lines to show from the tail of the container instance log. If not provided, all available logs are shown up to 4mb.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  ##   containerName: string (required)
+  ##                : The name of the container instance.
   ##   containerGroupName: string (required)
   ##                     : The name of the container group.
-  var path_568312 = newJObject()
-  var query_568313 = newJObject()
-  add(path_568312, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568313, "tail", newJInt(tail))
-  add(query_568313, "api-version", newJString(apiVersion))
-  add(path_568312, "containerName", newJString(containerName))
-  add(path_568312, "subscriptionId", newJString(subscriptionId))
-  add(path_568312, "containerGroupName", newJString(containerGroupName))
-  result = call_568311.call(path_568312, query_568313, nil, nil, nil)
+  var path_564212 = newJObject()
+  var query_564213 = newJObject()
+  add(query_564213, "api-version", newJString(apiVersion))
+  add(path_564212, "subscriptionId", newJString(subscriptionId))
+  add(query_564213, "tail", newJInt(tail))
+  add(path_564212, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564212, "containerName", newJString(containerName))
+  add(path_564212, "containerGroupName", newJString(containerGroupName))
+  result = call_564211.call(path_564212, query_564213, nil, nil, nil)
 
-var containerListLogs* = Call_ContainerListLogs_568301(name: "containerListLogs",
+var containerListLogs* = Call_ContainerListLogs_564201(name: "containerListLogs",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ContainerInstance/containerGroups/{containerGroupName}/containers/{containerName}/logs",
-    validator: validate_ContainerListLogs_568302, base: "",
-    url: url_ContainerListLogs_568303, schemes: {Scheme.Https})
+    validator: validate_ContainerListLogs_564202, base: "",
+    url: url_ContainerListLogs_564203, schemes: {Scheme.Https})
 type
-  Call_ContainerGroupsRestart_568314 = ref object of OpenApiRestCall_567658
-proc url_ContainerGroupsRestart_568316(protocol: Scheme; host: string; base: string;
+  Call_ContainerGroupsRestart_564214 = ref object of OpenApiRestCall_563556
+proc url_ContainerGroupsRestart_564216(protocol: Scheme; host: string; base: string;
                                       route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1454,37 +1458,37 @@ proc url_ContainerGroupsRestart_568316(protocol: Scheme; host: string; base: str
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ContainerGroupsRestart_568315(path: JsonNode; query: JsonNode;
+proc validate_ContainerGroupsRestart_564215(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Restarts all containers in a container group in place. If container image has updates, new image will be downloaded.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   ##   containerGroupName: JString (required)
   ##                     : The name of the container group.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568317 = path.getOrDefault("resourceGroupName")
-  valid_568317 = validateParameter(valid_568317, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564217 = path.getOrDefault("subscriptionId")
+  valid_564217 = validateParameter(valid_564217, JString, required = true,
                                  default = nil)
-  if valid_568317 != nil:
-    section.add "resourceGroupName", valid_568317
-  var valid_568318 = path.getOrDefault("subscriptionId")
-  valid_568318 = validateParameter(valid_568318, JString, required = true,
+  if valid_564217 != nil:
+    section.add "subscriptionId", valid_564217
+  var valid_564218 = path.getOrDefault("resourceGroupName")
+  valid_564218 = validateParameter(valid_564218, JString, required = true,
                                  default = nil)
-  if valid_568318 != nil:
-    section.add "subscriptionId", valid_568318
-  var valid_568319 = path.getOrDefault("containerGroupName")
-  valid_568319 = validateParameter(valid_568319, JString, required = true,
+  if valid_564218 != nil:
+    section.add "resourceGroupName", valid_564218
+  var valid_564219 = path.getOrDefault("containerGroupName")
+  valid_564219 = validateParameter(valid_564219, JString, required = true,
                                  default = nil)
-  if valid_568319 != nil:
-    section.add "containerGroupName", valid_568319
+  if valid_564219 != nil:
+    section.add "containerGroupName", valid_564219
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1492,11 +1496,11 @@ proc validate_ContainerGroupsRestart_568315(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568320 = query.getOrDefault("api-version")
-  valid_568320 = validateParameter(valid_568320, JString, required = true,
+  var valid_564220 = query.getOrDefault("api-version")
+  valid_564220 = validateParameter(valid_564220, JString, required = true,
                                  default = nil)
-  if valid_568320 != nil:
-    section.add "api-version", valid_568320
+  if valid_564220 != nil:
+    section.add "api-version", valid_564220
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1505,48 +1509,48 @@ proc validate_ContainerGroupsRestart_568315(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568321: Call_ContainerGroupsRestart_568314; path: JsonNode;
+proc call*(call_564221: Call_ContainerGroupsRestart_564214; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Restarts all containers in a container group in place. If container image has updates, new image will be downloaded.
   ## 
-  let valid = call_568321.validator(path, query, header, formData, body)
-  let scheme = call_568321.pickScheme
+  let valid = call_564221.validator(path, query, header, formData, body)
+  let scheme = call_564221.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568321.url(scheme.get, call_568321.host, call_568321.base,
-                         call_568321.route, valid.getOrDefault("path"),
+  let url = call_564221.url(scheme.get, call_564221.host, call_564221.base,
+                         call_564221.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568321, url, valid)
+  result = hook(call_564221, url, valid)
 
-proc call*(call_568322: Call_ContainerGroupsRestart_568314;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
+proc call*(call_564222: Call_ContainerGroupsRestart_564214; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string;
           containerGroupName: string): Recallable =
   ## containerGroupsRestart
   ## Restarts all containers in a container group in place. If container image has updates, new image will be downloaded.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client API version
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   containerGroupName: string (required)
   ##                     : The name of the container group.
-  var path_568323 = newJObject()
-  var query_568324 = newJObject()
-  add(path_568323, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568324, "api-version", newJString(apiVersion))
-  add(path_568323, "subscriptionId", newJString(subscriptionId))
-  add(path_568323, "containerGroupName", newJString(containerGroupName))
-  result = call_568322.call(path_568323, query_568324, nil, nil, nil)
+  var path_564223 = newJObject()
+  var query_564224 = newJObject()
+  add(query_564224, "api-version", newJString(apiVersion))
+  add(path_564223, "subscriptionId", newJString(subscriptionId))
+  add(path_564223, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564223, "containerGroupName", newJString(containerGroupName))
+  result = call_564222.call(path_564223, query_564224, nil, nil, nil)
 
-var containerGroupsRestart* = Call_ContainerGroupsRestart_568314(
+var containerGroupsRestart* = Call_ContainerGroupsRestart_564214(
     name: "containerGroupsRestart", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ContainerInstance/containerGroups/{containerGroupName}/restart",
-    validator: validate_ContainerGroupsRestart_568315, base: "",
-    url: url_ContainerGroupsRestart_568316, schemes: {Scheme.Https})
+    validator: validate_ContainerGroupsRestart_564215, base: "",
+    url: url_ContainerGroupsRestart_564216, schemes: {Scheme.Https})
 type
-  Call_ContainerGroupsStart_568325 = ref object of OpenApiRestCall_567658
-proc url_ContainerGroupsStart_568327(protocol: Scheme; host: string; base: string;
+  Call_ContainerGroupsStart_564225 = ref object of OpenApiRestCall_563556
+proc url_ContainerGroupsStart_564227(protocol: Scheme; host: string; base: string;
                                     route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1571,37 +1575,37 @@ proc url_ContainerGroupsStart_568327(protocol: Scheme; host: string; base: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ContainerGroupsStart_568326(path: JsonNode; query: JsonNode;
+proc validate_ContainerGroupsStart_564226(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Starts all containers in a container group.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   ##   containerGroupName: JString (required)
   ##                     : The name of the container group.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568328 = path.getOrDefault("resourceGroupName")
-  valid_568328 = validateParameter(valid_568328, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564228 = path.getOrDefault("subscriptionId")
+  valid_564228 = validateParameter(valid_564228, JString, required = true,
                                  default = nil)
-  if valid_568328 != nil:
-    section.add "resourceGroupName", valid_568328
-  var valid_568329 = path.getOrDefault("subscriptionId")
-  valid_568329 = validateParameter(valid_568329, JString, required = true,
+  if valid_564228 != nil:
+    section.add "subscriptionId", valid_564228
+  var valid_564229 = path.getOrDefault("resourceGroupName")
+  valid_564229 = validateParameter(valid_564229, JString, required = true,
                                  default = nil)
-  if valid_568329 != nil:
-    section.add "subscriptionId", valid_568329
-  var valid_568330 = path.getOrDefault("containerGroupName")
-  valid_568330 = validateParameter(valid_568330, JString, required = true,
+  if valid_564229 != nil:
+    section.add "resourceGroupName", valid_564229
+  var valid_564230 = path.getOrDefault("containerGroupName")
+  valid_564230 = validateParameter(valid_564230, JString, required = true,
                                  default = nil)
-  if valid_568330 != nil:
-    section.add "containerGroupName", valid_568330
+  if valid_564230 != nil:
+    section.add "containerGroupName", valid_564230
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1609,11 +1613,11 @@ proc validate_ContainerGroupsStart_568326(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568331 = query.getOrDefault("api-version")
-  valid_568331 = validateParameter(valid_568331, JString, required = true,
+  var valid_564231 = query.getOrDefault("api-version")
+  valid_564231 = validateParameter(valid_564231, JString, required = true,
                                  default = nil)
-  if valid_568331 != nil:
-    section.add "api-version", valid_568331
+  if valid_564231 != nil:
+    section.add "api-version", valid_564231
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1622,48 +1626,48 @@ proc validate_ContainerGroupsStart_568326(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568332: Call_ContainerGroupsStart_568325; path: JsonNode;
+proc call*(call_564232: Call_ContainerGroupsStart_564225; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Starts all containers in a container group.
   ## 
-  let valid = call_568332.validator(path, query, header, formData, body)
-  let scheme = call_568332.pickScheme
+  let valid = call_564232.validator(path, query, header, formData, body)
+  let scheme = call_564232.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568332.url(scheme.get, call_568332.host, call_568332.base,
-                         call_568332.route, valid.getOrDefault("path"),
+  let url = call_564232.url(scheme.get, call_564232.host, call_564232.base,
+                         call_564232.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568332, url, valid)
+  result = hook(call_564232, url, valid)
 
-proc call*(call_568333: Call_ContainerGroupsStart_568325;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
+proc call*(call_564233: Call_ContainerGroupsStart_564225; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string;
           containerGroupName: string): Recallable =
   ## containerGroupsStart
   ## Starts all containers in a container group.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client API version
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   containerGroupName: string (required)
   ##                     : The name of the container group.
-  var path_568334 = newJObject()
-  var query_568335 = newJObject()
-  add(path_568334, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568335, "api-version", newJString(apiVersion))
-  add(path_568334, "subscriptionId", newJString(subscriptionId))
-  add(path_568334, "containerGroupName", newJString(containerGroupName))
-  result = call_568333.call(path_568334, query_568335, nil, nil, nil)
+  var path_564234 = newJObject()
+  var query_564235 = newJObject()
+  add(query_564235, "api-version", newJString(apiVersion))
+  add(path_564234, "subscriptionId", newJString(subscriptionId))
+  add(path_564234, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564234, "containerGroupName", newJString(containerGroupName))
+  result = call_564233.call(path_564234, query_564235, nil, nil, nil)
 
-var containerGroupsStart* = Call_ContainerGroupsStart_568325(
+var containerGroupsStart* = Call_ContainerGroupsStart_564225(
     name: "containerGroupsStart", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ContainerInstance/containerGroups/{containerGroupName}/start",
-    validator: validate_ContainerGroupsStart_568326, base: "",
-    url: url_ContainerGroupsStart_568327, schemes: {Scheme.Https})
+    validator: validate_ContainerGroupsStart_564226, base: "",
+    url: url_ContainerGroupsStart_564227, schemes: {Scheme.Https})
 type
-  Call_ContainerGroupsStop_568336 = ref object of OpenApiRestCall_567658
-proc url_ContainerGroupsStop_568338(protocol: Scheme; host: string; base: string;
+  Call_ContainerGroupsStop_564236 = ref object of OpenApiRestCall_563556
+proc url_ContainerGroupsStop_564238(protocol: Scheme; host: string; base: string;
                                    route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1688,7 +1692,7 @@ proc url_ContainerGroupsStop_568338(protocol: Scheme; host: string; base: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ContainerGroupsStop_568337(path: JsonNode; query: JsonNode;
+proc validate_ContainerGroupsStop_564237(path: JsonNode; query: JsonNode;
                                         header: JsonNode; formData: JsonNode;
                                         body: JsonNode): JsonNode =
   ## Stops all containers in a container group. Compute resources will be deallocated and billing will stop.
@@ -1696,30 +1700,30 @@ proc validate_ContainerGroupsStop_568337(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   ##   containerGroupName: JString (required)
   ##                     : The name of the container group.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568339 = path.getOrDefault("resourceGroupName")
-  valid_568339 = validateParameter(valid_568339, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564239 = path.getOrDefault("subscriptionId")
+  valid_564239 = validateParameter(valid_564239, JString, required = true,
                                  default = nil)
-  if valid_568339 != nil:
-    section.add "resourceGroupName", valid_568339
-  var valid_568340 = path.getOrDefault("subscriptionId")
-  valid_568340 = validateParameter(valid_568340, JString, required = true,
+  if valid_564239 != nil:
+    section.add "subscriptionId", valid_564239
+  var valid_564240 = path.getOrDefault("resourceGroupName")
+  valid_564240 = validateParameter(valid_564240, JString, required = true,
                                  default = nil)
-  if valid_568340 != nil:
-    section.add "subscriptionId", valid_568340
-  var valid_568341 = path.getOrDefault("containerGroupName")
-  valid_568341 = validateParameter(valid_568341, JString, required = true,
+  if valid_564240 != nil:
+    section.add "resourceGroupName", valid_564240
+  var valid_564241 = path.getOrDefault("containerGroupName")
+  valid_564241 = validateParameter(valid_564241, JString, required = true,
                                  default = nil)
-  if valid_568341 != nil:
-    section.add "containerGroupName", valid_568341
+  if valid_564241 != nil:
+    section.add "containerGroupName", valid_564241
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1727,11 +1731,11 @@ proc validate_ContainerGroupsStop_568337(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568342 = query.getOrDefault("api-version")
-  valid_568342 = validateParameter(valid_568342, JString, required = true,
+  var valid_564242 = query.getOrDefault("api-version")
+  valid_564242 = validateParameter(valid_564242, JString, required = true,
                                  default = nil)
-  if valid_568342 != nil:
-    section.add "api-version", valid_568342
+  if valid_564242 != nil:
+    section.add "api-version", valid_564242
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1740,47 +1744,48 @@ proc validate_ContainerGroupsStop_568337(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568343: Call_ContainerGroupsStop_568336; path: JsonNode;
+proc call*(call_564243: Call_ContainerGroupsStop_564236; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Stops all containers in a container group. Compute resources will be deallocated and billing will stop.
   ## 
-  let valid = call_568343.validator(path, query, header, formData, body)
-  let scheme = call_568343.pickScheme
+  let valid = call_564243.validator(path, query, header, formData, body)
+  let scheme = call_564243.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568343.url(scheme.get, call_568343.host, call_568343.base,
-                         call_568343.route, valid.getOrDefault("path"),
+  let url = call_564243.url(scheme.get, call_564243.host, call_564243.base,
+                         call_564243.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568343, url, valid)
+  result = hook(call_564243, url, valid)
 
-proc call*(call_568344: Call_ContainerGroupsStop_568336; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; containerGroupName: string): Recallable =
+proc call*(call_564244: Call_ContainerGroupsStop_564236; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string;
+          containerGroupName: string): Recallable =
   ## containerGroupsStop
   ## Stops all containers in a container group. Compute resources will be deallocated and billing will stop.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client API version
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   containerGroupName: string (required)
   ##                     : The name of the container group.
-  var path_568345 = newJObject()
-  var query_568346 = newJObject()
-  add(path_568345, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568346, "api-version", newJString(apiVersion))
-  add(path_568345, "subscriptionId", newJString(subscriptionId))
-  add(path_568345, "containerGroupName", newJString(containerGroupName))
-  result = call_568344.call(path_568345, query_568346, nil, nil, nil)
+  var path_564245 = newJObject()
+  var query_564246 = newJObject()
+  add(query_564246, "api-version", newJString(apiVersion))
+  add(path_564245, "subscriptionId", newJString(subscriptionId))
+  add(path_564245, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564245, "containerGroupName", newJString(containerGroupName))
+  result = call_564244.call(path_564245, query_564246, nil, nil, nil)
 
-var containerGroupsStop* = Call_ContainerGroupsStop_568336(
+var containerGroupsStop* = Call_ContainerGroupsStop_564236(
     name: "containerGroupsStop", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ContainerInstance/containerGroups/{containerGroupName}/stop",
-    validator: validate_ContainerGroupsStop_568337, base: "",
-    url: url_ContainerGroupsStop_568338, schemes: {Scheme.Https})
+    validator: validate_ContainerGroupsStop_564237, base: "",
+    url: url_ContainerGroupsStop_564238, schemes: {Scheme.Https})
 type
-  Call_ServiceAssociationLinkDelete_568347 = ref object of OpenApiRestCall_567658
-proc url_ServiceAssociationLinkDelete_568349(protocol: Scheme; host: string;
+  Call_ServiceAssociationLinkDelete_564247 = ref object of OpenApiRestCall_563556
+proc url_ServiceAssociationLinkDelete_564249(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1807,44 +1812,44 @@ proc url_ServiceAssociationLinkDelete_568349(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ServiceAssociationLinkDelete_568348(path: JsonNode; query: JsonNode;
+proc validate_ServiceAssociationLinkDelete_564248(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Delete the container instance service association link for the subnet. This operation unblocks user from deleting subnet.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
+  ##   subscriptionId: JString (required)
+  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   resourceGroupName: JString (required)
   ##                    : The name of the resource group.
   ##   subnetName: JString (required)
   ##             : The name of the subnet.
-  ##   subscriptionId: JString (required)
-  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   virtualNetworkName: JString (required)
   ##                     : The name of the virtual network.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568350 = path.getOrDefault("resourceGroupName")
-  valid_568350 = validateParameter(valid_568350, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564250 = path.getOrDefault("subscriptionId")
+  valid_564250 = validateParameter(valid_564250, JString, required = true,
                                  default = nil)
-  if valid_568350 != nil:
-    section.add "resourceGroupName", valid_568350
-  var valid_568351 = path.getOrDefault("subnetName")
-  valid_568351 = validateParameter(valid_568351, JString, required = true,
+  if valid_564250 != nil:
+    section.add "subscriptionId", valid_564250
+  var valid_564251 = path.getOrDefault("resourceGroupName")
+  valid_564251 = validateParameter(valid_564251, JString, required = true,
                                  default = nil)
-  if valid_568351 != nil:
-    section.add "subnetName", valid_568351
-  var valid_568352 = path.getOrDefault("subscriptionId")
-  valid_568352 = validateParameter(valid_568352, JString, required = true,
+  if valid_564251 != nil:
+    section.add "resourceGroupName", valid_564251
+  var valid_564252 = path.getOrDefault("subnetName")
+  valid_564252 = validateParameter(valid_564252, JString, required = true,
                                  default = nil)
-  if valid_568352 != nil:
-    section.add "subscriptionId", valid_568352
-  var valid_568353 = path.getOrDefault("virtualNetworkName")
-  valid_568353 = validateParameter(valid_568353, JString, required = true,
+  if valid_564252 != nil:
+    section.add "subnetName", valid_564252
+  var valid_564253 = path.getOrDefault("virtualNetworkName")
+  valid_564253 = validateParameter(valid_564253, JString, required = true,
                                  default = nil)
-  if valid_568353 != nil:
-    section.add "virtualNetworkName", valid_568353
+  if valid_564253 != nil:
+    section.add "virtualNetworkName", valid_564253
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1852,11 +1857,11 @@ proc validate_ServiceAssociationLinkDelete_568348(path: JsonNode; query: JsonNod
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568354 = query.getOrDefault("api-version")
-  valid_568354 = validateParameter(valid_568354, JString, required = true,
+  var valid_564254 = query.getOrDefault("api-version")
+  valid_564254 = validateParameter(valid_564254, JString, required = true,
                                  default = nil)
-  if valid_568354 != nil:
-    section.add "api-version", valid_568354
+  if valid_564254 != nil:
+    section.add "api-version", valid_564254
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1865,48 +1870,48 @@ proc validate_ServiceAssociationLinkDelete_568348(path: JsonNode; query: JsonNod
   if body != nil:
     result.add "body", body
 
-proc call*(call_568355: Call_ServiceAssociationLinkDelete_568347; path: JsonNode;
+proc call*(call_564255: Call_ServiceAssociationLinkDelete_564247; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Delete the container instance service association link for the subnet. This operation unblocks user from deleting subnet.
   ## 
-  let valid = call_568355.validator(path, query, header, formData, body)
-  let scheme = call_568355.pickScheme
+  let valid = call_564255.validator(path, query, header, formData, body)
+  let scheme = call_564255.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568355.url(scheme.get, call_568355.host, call_568355.base,
-                         call_568355.route, valid.getOrDefault("path"),
+  let url = call_564255.url(scheme.get, call_564255.host, call_564255.base,
+                         call_564255.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568355, url, valid)
+  result = hook(call_564255, url, valid)
 
-proc call*(call_568356: Call_ServiceAssociationLinkDelete_568347;
-          resourceGroupName: string; subnetName: string; apiVersion: string;
-          subscriptionId: string; virtualNetworkName: string): Recallable =
+proc call*(call_564256: Call_ServiceAssociationLinkDelete_564247;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string;
+          subnetName: string; virtualNetworkName: string): Recallable =
   ## serviceAssociationLinkDelete
   ## Delete the container instance service association link for the subnet. This operation unblocks user from deleting subnet.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
-  ##   subnetName: string (required)
-  ##             : The name of the subnet.
   ##   apiVersion: string (required)
   ##             : Client API version
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  ##   subnetName: string (required)
+  ##             : The name of the subnet.
   ##   virtualNetworkName: string (required)
   ##                     : The name of the virtual network.
-  var path_568357 = newJObject()
-  var query_568358 = newJObject()
-  add(path_568357, "resourceGroupName", newJString(resourceGroupName))
-  add(path_568357, "subnetName", newJString(subnetName))
-  add(query_568358, "api-version", newJString(apiVersion))
-  add(path_568357, "subscriptionId", newJString(subscriptionId))
-  add(path_568357, "virtualNetworkName", newJString(virtualNetworkName))
-  result = call_568356.call(path_568357, query_568358, nil, nil, nil)
+  var path_564257 = newJObject()
+  var query_564258 = newJObject()
+  add(query_564258, "api-version", newJString(apiVersion))
+  add(path_564257, "subscriptionId", newJString(subscriptionId))
+  add(path_564257, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564257, "subnetName", newJString(subnetName))
+  add(path_564257, "virtualNetworkName", newJString(virtualNetworkName))
+  result = call_564256.call(path_564257, query_564258, nil, nil, nil)
 
-var serviceAssociationLinkDelete* = Call_ServiceAssociationLinkDelete_568347(
+var serviceAssociationLinkDelete* = Call_ServiceAssociationLinkDelete_564247(
     name: "serviceAssociationLinkDelete", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/virtualNetworks/{virtualNetworkName}/subnets/{subnetName}/providers/Microsoft.ContainerInstance/serviceAssociationLinks/default",
-    validator: validate_ServiceAssociationLinkDelete_568348, base: "",
-    url: url_ServiceAssociationLinkDelete_568349, schemes: {Scheme.Https})
+    validator: validate_ServiceAssociationLinkDelete_564248, base: "",
+    url: url_ServiceAssociationLinkDelete_564249, schemes: {Scheme.Https})
 export
   rest
 

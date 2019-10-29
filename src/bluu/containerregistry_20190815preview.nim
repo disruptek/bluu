@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_573657 = ref object of OpenApiRestCall
+  OpenApiRestCall_563555 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_573657](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563555](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_573657): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563555): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,15 +107,15 @@ const
   macServiceName = "containerregistry"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_RepositoryGetList_573879 = ref object of OpenApiRestCall_573657
-proc url_RepositoryGetList_573881(protocol: Scheme; host: string; base: string;
+  Call_RepositoryGetList_563777 = ref object of OpenApiRestCall_563555
+proc url_RepositoryGetList_563779(protocol: Scheme; host: string; base: string;
                                  route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_RepositoryGetList_573880(path: JsonNode; query: JsonNode;
+proc validate_RepositoryGetList_563778(path: JsonNode; query: JsonNode;
                                       header: JsonNode; formData: JsonNode;
                                       body: JsonNode): JsonNode =
   ## List repositories
@@ -126,15 +130,15 @@ proc validate_RepositoryGetList_573880(path: JsonNode; query: JsonNode;
   ##   n: JInt
   ##    : query parameter for max number of items
   section = newJObject()
-  var valid_574040 = query.getOrDefault("last")
-  valid_574040 = validateParameter(valid_574040, JString, required = false,
+  var valid_563940 = query.getOrDefault("last")
+  valid_563940 = validateParameter(valid_563940, JString, required = false,
                                  default = nil)
-  if valid_574040 != nil:
-    section.add "last", valid_574040
-  var valid_574041 = query.getOrDefault("n")
-  valid_574041 = validateParameter(valid_574041, JInt, required = false, default = nil)
-  if valid_574041 != nil:
-    section.add "n", valid_574041
+  if valid_563940 != nil:
+    section.add "last", valid_563940
+  var valid_563941 = query.getOrDefault("n")
+  valid_563941 = validateParameter(valid_563941, JInt, required = false, default = nil)
+  if valid_563941 != nil:
+    section.add "n", valid_563941
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -143,38 +147,38 @@ proc validate_RepositoryGetList_573880(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574064: Call_RepositoryGetList_573879; path: JsonNode;
+proc call*(call_563964: Call_RepositoryGetList_563777; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## List repositories
   ## 
-  let valid = call_574064.validator(path, query, header, formData, body)
-  let scheme = call_574064.pickScheme
+  let valid = call_563964.validator(path, query, header, formData, body)
+  let scheme = call_563964.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574064.url(scheme.get, call_574064.host, call_574064.base,
-                         call_574064.route, valid.getOrDefault("path"),
+  let url = call_563964.url(scheme.get, call_563964.host, call_563964.base,
+                         call_563964.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574064, url, valid)
+  result = hook(call_563964, url, valid)
 
-proc call*(call_574135: Call_RepositoryGetList_573879; last: string = ""; n: int = 0): Recallable =
+proc call*(call_564035: Call_RepositoryGetList_563777; last: string = ""; n: int = 0): Recallable =
   ## repositoryGetList
   ## List repositories
   ##   last: string
   ##       : Query parameter for the last item in previous query. Result set will include values lexically after last.
   ##   n: int
   ##    : query parameter for max number of items
-  var query_574136 = newJObject()
-  add(query_574136, "last", newJString(last))
-  add(query_574136, "n", newJInt(n))
-  result = call_574135.call(nil, query_574136, nil, nil, nil)
+  var query_564036 = newJObject()
+  add(query_564036, "last", newJString(last))
+  add(query_564036, "n", newJInt(n))
+  result = call_564035.call(nil, query_564036, nil, nil, nil)
 
-var repositoryGetList* = Call_RepositoryGetList_573879(name: "repositoryGetList",
+var repositoryGetList* = Call_RepositoryGetList_563777(name: "repositoryGetList",
     meth: HttpMethod.HttpGet, host: "azure.local", route: "/acr/v1/_catalog",
-    validator: validate_RepositoryGetList_573880, base: "",
-    url: url_RepositoryGetList_573881, schemes: {Scheme.Https})
+    validator: validate_RepositoryGetList_563778, base: "",
+    url: url_RepositoryGetList_563779, schemes: {Scheme.Https})
 type
-  Call_RepositoryGetAttributes_574176 = ref object of OpenApiRestCall_573657
-proc url_RepositoryGetAttributes_574178(protocol: Scheme; host: string; base: string;
+  Call_RepositoryGetAttributes_564076 = ref object of OpenApiRestCall_563555
+proc url_RepositoryGetAttributes_564078(protocol: Scheme; host: string; base: string;
                                        route: string; path: JsonNode;
                                        query: JsonNode): Uri =
   result.scheme = $protocol
@@ -190,7 +194,7 @@ proc url_RepositoryGetAttributes_574178(protocol: Scheme; host: string; base: st
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_RepositoryGetAttributes_574177(path: JsonNode; query: JsonNode;
+proc validate_RepositoryGetAttributes_564077(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Get repository attributes
   ## 
@@ -201,11 +205,11 @@ proc validate_RepositoryGetAttributes_574177(path: JsonNode; query: JsonNode;
   ##       : Name of the image (including the namespace)
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `name` field"
-  var valid_574193 = path.getOrDefault("name")
-  valid_574193 = validateParameter(valid_574193, JString, required = true,
+  var valid_564093 = path.getOrDefault("name")
+  valid_564093 = validateParameter(valid_564093, JString, required = true,
                                  default = nil)
-  if valid_574193 != nil:
-    section.add "name", valid_574193
+  if valid_564093 != nil:
+    section.add "name", valid_564093
   result.add "path", section
   section = newJObject()
   result.add "query", section
@@ -216,35 +220,35 @@ proc validate_RepositoryGetAttributes_574177(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574194: Call_RepositoryGetAttributes_574176; path: JsonNode;
+proc call*(call_564094: Call_RepositoryGetAttributes_564076; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get repository attributes
   ## 
-  let valid = call_574194.validator(path, query, header, formData, body)
-  let scheme = call_574194.pickScheme
+  let valid = call_564094.validator(path, query, header, formData, body)
+  let scheme = call_564094.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574194.url(scheme.get, call_574194.host, call_574194.base,
-                         call_574194.route, valid.getOrDefault("path"),
+  let url = call_564094.url(scheme.get, call_564094.host, call_564094.base,
+                         call_564094.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574194, url, valid)
+  result = hook(call_564094, url, valid)
 
-proc call*(call_574195: Call_RepositoryGetAttributes_574176; name: string): Recallable =
+proc call*(call_564095: Call_RepositoryGetAttributes_564076; name: string): Recallable =
   ## repositoryGetAttributes
   ## Get repository attributes
   ##   name: string (required)
   ##       : Name of the image (including the namespace)
-  var path_574196 = newJObject()
-  add(path_574196, "name", newJString(name))
-  result = call_574195.call(path_574196, nil, nil, nil, nil)
+  var path_564096 = newJObject()
+  add(path_564096, "name", newJString(name))
+  result = call_564095.call(path_564096, nil, nil, nil, nil)
 
-var repositoryGetAttributes* = Call_RepositoryGetAttributes_574176(
+var repositoryGetAttributes* = Call_RepositoryGetAttributes_564076(
     name: "repositoryGetAttributes", meth: HttpMethod.HttpGet, host: "azure.local",
-    route: "/acr/v1/{name}", validator: validate_RepositoryGetAttributes_574177,
-    base: "", url: url_RepositoryGetAttributes_574178, schemes: {Scheme.Https})
+    route: "/acr/v1/{name}", validator: validate_RepositoryGetAttributes_564077,
+    base: "", url: url_RepositoryGetAttributes_564078, schemes: {Scheme.Https})
 type
-  Call_RepositoryUpdateAttributes_574204 = ref object of OpenApiRestCall_573657
-proc url_RepositoryUpdateAttributes_574206(protocol: Scheme; host: string;
+  Call_RepositoryUpdateAttributes_564104 = ref object of OpenApiRestCall_563555
+proc url_RepositoryUpdateAttributes_564106(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -259,7 +263,7 @@ proc url_RepositoryUpdateAttributes_574206(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_RepositoryUpdateAttributes_574205(path: JsonNode; query: JsonNode;
+proc validate_RepositoryUpdateAttributes_564105(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Update the attribute identified by `name` where `reference` is the name of the repository.
   ## 
@@ -270,11 +274,11 @@ proc validate_RepositoryUpdateAttributes_574205(path: JsonNode; query: JsonNode;
   ##       : Name of the image (including the namespace)
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `name` field"
-  var valid_574224 = path.getOrDefault("name")
-  valid_574224 = validateParameter(valid_574224, JString, required = true,
+  var valid_564124 = path.getOrDefault("name")
+  valid_564124 = validateParameter(valid_564124, JString, required = true,
                                  default = nil)
-  if valid_574224 != nil:
-    section.add "name", valid_574224
+  if valid_564124 != nil:
+    section.add "name", valid_564124
   result.add "path", section
   section = newJObject()
   result.add "query", section
@@ -289,20 +293,20 @@ proc validate_RepositoryUpdateAttributes_574205(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574226: Call_RepositoryUpdateAttributes_574204; path: JsonNode;
+proc call*(call_564126: Call_RepositoryUpdateAttributes_564104; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Update the attribute identified by `name` where `reference` is the name of the repository.
   ## 
-  let valid = call_574226.validator(path, query, header, formData, body)
-  let scheme = call_574226.pickScheme
+  let valid = call_564126.validator(path, query, header, formData, body)
+  let scheme = call_564126.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574226.url(scheme.get, call_574226.host, call_574226.base,
-                         call_574226.route, valid.getOrDefault("path"),
+  let url = call_564126.url(scheme.get, call_564126.host, call_564126.base,
+                         call_564126.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574226, url, valid)
+  result = hook(call_564126, url, valid)
 
-proc call*(call_574227: Call_RepositoryUpdateAttributes_574204; name: string;
+proc call*(call_564127: Call_RepositoryUpdateAttributes_564104; name: string;
           value: JsonNode = nil): Recallable =
   ## repositoryUpdateAttributes
   ## Update the attribute identified by `name` where `reference` is the name of the repository.
@@ -310,21 +314,21 @@ proc call*(call_574227: Call_RepositoryUpdateAttributes_574204; name: string;
   ##       : Name of the image (including the namespace)
   ##   value: JObject
   ##        : Repository attribute value
-  var path_574228 = newJObject()
-  var body_574229 = newJObject()
-  add(path_574228, "name", newJString(name))
+  var path_564128 = newJObject()
+  var body_564129 = newJObject()
+  add(path_564128, "name", newJString(name))
   if value != nil:
-    body_574229 = value
-  result = call_574227.call(path_574228, nil, nil, nil, body_574229)
+    body_564129 = value
+  result = call_564127.call(path_564128, nil, nil, nil, body_564129)
 
-var repositoryUpdateAttributes* = Call_RepositoryUpdateAttributes_574204(
+var repositoryUpdateAttributes* = Call_RepositoryUpdateAttributes_564104(
     name: "repositoryUpdateAttributes", meth: HttpMethod.HttpPatch,
     host: "azure.local", route: "/acr/v1/{name}",
-    validator: validate_RepositoryUpdateAttributes_574205, base: "",
-    url: url_RepositoryUpdateAttributes_574206, schemes: {Scheme.Https})
+    validator: validate_RepositoryUpdateAttributes_564105, base: "",
+    url: url_RepositoryUpdateAttributes_564106, schemes: {Scheme.Https})
 type
-  Call_RepositoryDelete_574197 = ref object of OpenApiRestCall_573657
-proc url_RepositoryDelete_574199(protocol: Scheme; host: string; base: string;
+  Call_RepositoryDelete_564097 = ref object of OpenApiRestCall_563555
+proc url_RepositoryDelete_564099(protocol: Scheme; host: string; base: string;
                                 route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -339,7 +343,7 @@ proc url_RepositoryDelete_574199(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_RepositoryDelete_574198(path: JsonNode; query: JsonNode;
+proc validate_RepositoryDelete_564098(path: JsonNode; query: JsonNode;
                                      header: JsonNode; formData: JsonNode;
                                      body: JsonNode): JsonNode =
   ## Delete the repository identified by `name`
@@ -351,11 +355,11 @@ proc validate_RepositoryDelete_574198(path: JsonNode; query: JsonNode;
   ##       : Name of the image (including the namespace)
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `name` field"
-  var valid_574200 = path.getOrDefault("name")
-  valid_574200 = validateParameter(valid_574200, JString, required = true,
+  var valid_564100 = path.getOrDefault("name")
+  valid_564100 = validateParameter(valid_564100, JString, required = true,
                                  default = nil)
-  if valid_574200 != nil:
-    section.add "name", valid_574200
+  if valid_564100 != nil:
+    section.add "name", valid_564100
   result.add "path", section
   section = newJObject()
   result.add "query", section
@@ -366,35 +370,35 @@ proc validate_RepositoryDelete_574198(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574201: Call_RepositoryDelete_574197; path: JsonNode;
+proc call*(call_564101: Call_RepositoryDelete_564097; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Delete the repository identified by `name`
   ## 
-  let valid = call_574201.validator(path, query, header, formData, body)
-  let scheme = call_574201.pickScheme
+  let valid = call_564101.validator(path, query, header, formData, body)
+  let scheme = call_564101.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574201.url(scheme.get, call_574201.host, call_574201.base,
-                         call_574201.route, valid.getOrDefault("path"),
+  let url = call_564101.url(scheme.get, call_564101.host, call_564101.base,
+                         call_564101.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574201, url, valid)
+  result = hook(call_564101, url, valid)
 
-proc call*(call_574202: Call_RepositoryDelete_574197; name: string): Recallable =
+proc call*(call_564102: Call_RepositoryDelete_564097; name: string): Recallable =
   ## repositoryDelete
   ## Delete the repository identified by `name`
   ##   name: string (required)
   ##       : Name of the image (including the namespace)
-  var path_574203 = newJObject()
-  add(path_574203, "name", newJString(name))
-  result = call_574202.call(path_574203, nil, nil, nil, nil)
+  var path_564103 = newJObject()
+  add(path_564103, "name", newJString(name))
+  result = call_564102.call(path_564103, nil, nil, nil, nil)
 
-var repositoryDelete* = Call_RepositoryDelete_574197(name: "repositoryDelete",
+var repositoryDelete* = Call_RepositoryDelete_564097(name: "repositoryDelete",
     meth: HttpMethod.HttpDelete, host: "azure.local", route: "/acr/v1/{name}",
-    validator: validate_RepositoryDelete_574198, base: "",
-    url: url_RepositoryDelete_574199, schemes: {Scheme.Https})
+    validator: validate_RepositoryDelete_564098, base: "",
+    url: url_RepositoryDelete_564099, schemes: {Scheme.Https})
 type
-  Call_ManifestsGetList_574230 = ref object of OpenApiRestCall_573657
-proc url_ManifestsGetList_574232(protocol: Scheme; host: string; base: string;
+  Call_ManifestsGetList_564130 = ref object of OpenApiRestCall_563555
+proc url_ManifestsGetList_564132(protocol: Scheme; host: string; base: string;
                                 route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -410,7 +414,7 @@ proc url_ManifestsGetList_574232(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ManifestsGetList_574231(path: JsonNode; query: JsonNode;
+proc validate_ManifestsGetList_564131(path: JsonNode; query: JsonNode;
                                      header: JsonNode; formData: JsonNode;
                                      body: JsonNode): JsonNode =
   ## List manifests of a repository
@@ -422,34 +426,34 @@ proc validate_ManifestsGetList_574231(path: JsonNode; query: JsonNode;
   ##       : Name of the image (including the namespace)
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `name` field"
-  var valid_574233 = path.getOrDefault("name")
-  valid_574233 = validateParameter(valid_574233, JString, required = true,
+  var valid_564133 = path.getOrDefault("name")
+  valid_564133 = validateParameter(valid_564133, JString, required = true,
                                  default = nil)
-  if valid_574233 != nil:
-    section.add "name", valid_574233
+  if valid_564133 != nil:
+    section.add "name", valid_564133
   result.add "path", section
   ## parameters in `query` object:
-  ##   orderby: JString
-  ##          : orderby query parameter
   ##   last: JString
   ##       : Query parameter for the last item in previous query. Result set will include values lexically after last.
+  ##   orderby: JString
+  ##          : orderby query parameter
   ##   n: JInt
   ##    : query parameter for max number of items
   section = newJObject()
-  var valid_574234 = query.getOrDefault("orderby")
-  valid_574234 = validateParameter(valid_574234, JString, required = false,
+  var valid_564134 = query.getOrDefault("last")
+  valid_564134 = validateParameter(valid_564134, JString, required = false,
                                  default = nil)
-  if valid_574234 != nil:
-    section.add "orderby", valid_574234
-  var valid_574235 = query.getOrDefault("last")
-  valid_574235 = validateParameter(valid_574235, JString, required = false,
+  if valid_564134 != nil:
+    section.add "last", valid_564134
+  var valid_564135 = query.getOrDefault("orderby")
+  valid_564135 = validateParameter(valid_564135, JString, required = false,
                                  default = nil)
-  if valid_574235 != nil:
-    section.add "last", valid_574235
-  var valid_574236 = query.getOrDefault("n")
-  valid_574236 = validateParameter(valid_574236, JInt, required = false, default = nil)
-  if valid_574236 != nil:
-    section.add "n", valid_574236
+  if valid_564135 != nil:
+    section.add "orderby", valid_564135
+  var valid_564136 = query.getOrDefault("n")
+  valid_564136 = validateParameter(valid_564136, JInt, required = false, default = nil)
+  if valid_564136 != nil:
+    section.add "n", valid_564136
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -458,46 +462,46 @@ proc validate_ManifestsGetList_574231(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574237: Call_ManifestsGetList_574230; path: JsonNode;
+proc call*(call_564137: Call_ManifestsGetList_564130; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## List manifests of a repository
   ## 
-  let valid = call_574237.validator(path, query, header, formData, body)
-  let scheme = call_574237.pickScheme
+  let valid = call_564137.validator(path, query, header, formData, body)
+  let scheme = call_564137.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574237.url(scheme.get, call_574237.host, call_574237.base,
-                         call_574237.route, valid.getOrDefault("path"),
+  let url = call_564137.url(scheme.get, call_564137.host, call_564137.base,
+                         call_564137.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574237, url, valid)
+  result = hook(call_564137, url, valid)
 
-proc call*(call_574238: Call_ManifestsGetList_574230; name: string;
-          orderby: string = ""; last: string = ""; n: int = 0): Recallable =
+proc call*(call_564138: Call_ManifestsGetList_564130; name: string;
+          last: string = ""; orderby: string = ""; n: int = 0): Recallable =
   ## manifestsGetList
   ## List manifests of a repository
+  ##   last: string
+  ##       : Query parameter for the last item in previous query. Result set will include values lexically after last.
   ##   name: string (required)
   ##       : Name of the image (including the namespace)
   ##   orderby: string
   ##          : orderby query parameter
-  ##   last: string
-  ##       : Query parameter for the last item in previous query. Result set will include values lexically after last.
   ##   n: int
   ##    : query parameter for max number of items
-  var path_574239 = newJObject()
-  var query_574240 = newJObject()
-  add(path_574239, "name", newJString(name))
-  add(query_574240, "orderby", newJString(orderby))
-  add(query_574240, "last", newJString(last))
-  add(query_574240, "n", newJInt(n))
-  result = call_574238.call(path_574239, query_574240, nil, nil, nil)
+  var path_564139 = newJObject()
+  var query_564140 = newJObject()
+  add(query_564140, "last", newJString(last))
+  add(path_564139, "name", newJString(name))
+  add(query_564140, "orderby", newJString(orderby))
+  add(query_564140, "n", newJInt(n))
+  result = call_564138.call(path_564139, query_564140, nil, nil, nil)
 
-var manifestsGetList* = Call_ManifestsGetList_574230(name: "manifestsGetList",
+var manifestsGetList* = Call_ManifestsGetList_564130(name: "manifestsGetList",
     meth: HttpMethod.HttpGet, host: "azure.local",
-    route: "/acr/v1/{name}/_manifests", validator: validate_ManifestsGetList_574231,
-    base: "", url: url_ManifestsGetList_574232, schemes: {Scheme.Https})
+    route: "/acr/v1/{name}/_manifests", validator: validate_ManifestsGetList_564131,
+    base: "", url: url_ManifestsGetList_564132, schemes: {Scheme.Https})
 type
-  Call_ManifestsGetAttributes_574241 = ref object of OpenApiRestCall_573657
-proc url_ManifestsGetAttributes_574243(protocol: Scheme; host: string; base: string;
+  Call_ManifestsGetAttributes_564141 = ref object of OpenApiRestCall_563555
+proc url_ManifestsGetAttributes_564143(protocol: Scheme; host: string; base: string;
                                       route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -515,7 +519,7 @@ proc url_ManifestsGetAttributes_574243(protocol: Scheme; host: string; base: str
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ManifestsGetAttributes_574242(path: JsonNode; query: JsonNode;
+proc validate_ManifestsGetAttributes_564142(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Get manifest attributes
   ## 
@@ -528,16 +532,16 @@ proc validate_ManifestsGetAttributes_574242(path: JsonNode; query: JsonNode;
   ##            : A tag or a digest, pointing to a specific image
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `name` field"
-  var valid_574244 = path.getOrDefault("name")
-  valid_574244 = validateParameter(valid_574244, JString, required = true,
+  var valid_564144 = path.getOrDefault("name")
+  valid_564144 = validateParameter(valid_564144, JString, required = true,
                                  default = nil)
-  if valid_574244 != nil:
-    section.add "name", valid_574244
-  var valid_574245 = path.getOrDefault("reference")
-  valid_574245 = validateParameter(valid_574245, JString, required = true,
+  if valid_564144 != nil:
+    section.add "name", valid_564144
+  var valid_564145 = path.getOrDefault("reference")
+  valid_564145 = validateParameter(valid_564145, JString, required = true,
                                  default = nil)
-  if valid_574245 != nil:
-    section.add "reference", valid_574245
+  if valid_564145 != nil:
+    section.add "reference", valid_564145
   result.add "path", section
   section = newJObject()
   result.add "query", section
@@ -548,20 +552,20 @@ proc validate_ManifestsGetAttributes_574242(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574246: Call_ManifestsGetAttributes_574241; path: JsonNode;
+proc call*(call_564146: Call_ManifestsGetAttributes_564141; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get manifest attributes
   ## 
-  let valid = call_574246.validator(path, query, header, formData, body)
-  let scheme = call_574246.pickScheme
+  let valid = call_564146.validator(path, query, header, formData, body)
+  let scheme = call_564146.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574246.url(scheme.get, call_574246.host, call_574246.base,
-                         call_574246.route, valid.getOrDefault("path"),
+  let url = call_564146.url(scheme.get, call_564146.host, call_564146.base,
+                         call_564146.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574246, url, valid)
+  result = hook(call_564146, url, valid)
 
-proc call*(call_574247: Call_ManifestsGetAttributes_574241; name: string;
+proc call*(call_564147: Call_ManifestsGetAttributes_564141; name: string;
           reference: string): Recallable =
   ## manifestsGetAttributes
   ## Get manifest attributes
@@ -569,19 +573,19 @@ proc call*(call_574247: Call_ManifestsGetAttributes_574241; name: string;
   ##       : Name of the image (including the namespace)
   ##   reference: string (required)
   ##            : A tag or a digest, pointing to a specific image
-  var path_574248 = newJObject()
-  add(path_574248, "name", newJString(name))
-  add(path_574248, "reference", newJString(reference))
-  result = call_574247.call(path_574248, nil, nil, nil, nil)
+  var path_564148 = newJObject()
+  add(path_564148, "name", newJString(name))
+  add(path_564148, "reference", newJString(reference))
+  result = call_564147.call(path_564148, nil, nil, nil, nil)
 
-var manifestsGetAttributes* = Call_ManifestsGetAttributes_574241(
+var manifestsGetAttributes* = Call_ManifestsGetAttributes_564141(
     name: "manifestsGetAttributes", meth: HttpMethod.HttpGet, host: "azure.local",
     route: "/acr/v1/{name}/_manifests/{reference}",
-    validator: validate_ManifestsGetAttributes_574242, base: "",
-    url: url_ManifestsGetAttributes_574243, schemes: {Scheme.Https})
+    validator: validate_ManifestsGetAttributes_564142, base: "",
+    url: url_ManifestsGetAttributes_564143, schemes: {Scheme.Https})
 type
-  Call_ManifestsUpdateAttributes_574249 = ref object of OpenApiRestCall_573657
-proc url_ManifestsUpdateAttributes_574251(protocol: Scheme; host: string;
+  Call_ManifestsUpdateAttributes_564149 = ref object of OpenApiRestCall_563555
+proc url_ManifestsUpdateAttributes_564151(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -599,7 +603,7 @@ proc url_ManifestsUpdateAttributes_574251(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ManifestsUpdateAttributes_574250(path: JsonNode; query: JsonNode;
+proc validate_ManifestsUpdateAttributes_564150(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Update attributes of a manifest
   ## 
@@ -612,16 +616,16 @@ proc validate_ManifestsUpdateAttributes_574250(path: JsonNode; query: JsonNode;
   ##            : A tag or a digest, pointing to a specific image
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `name` field"
-  var valid_574252 = path.getOrDefault("name")
-  valid_574252 = validateParameter(valid_574252, JString, required = true,
+  var valid_564152 = path.getOrDefault("name")
+  valid_564152 = validateParameter(valid_564152, JString, required = true,
                                  default = nil)
-  if valid_574252 != nil:
-    section.add "name", valid_574252
-  var valid_574253 = path.getOrDefault("reference")
-  valid_574253 = validateParameter(valid_574253, JString, required = true,
+  if valid_564152 != nil:
+    section.add "name", valid_564152
+  var valid_564153 = path.getOrDefault("reference")
+  valid_564153 = validateParameter(valid_564153, JString, required = true,
                                  default = nil)
-  if valid_574253 != nil:
-    section.add "reference", valid_574253
+  if valid_564153 != nil:
+    section.add "reference", valid_564153
   result.add "path", section
   section = newJObject()
   result.add "query", section
@@ -636,45 +640,45 @@ proc validate_ManifestsUpdateAttributes_574250(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574255: Call_ManifestsUpdateAttributes_574249; path: JsonNode;
+proc call*(call_564155: Call_ManifestsUpdateAttributes_564149; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Update attributes of a manifest
   ## 
-  let valid = call_574255.validator(path, query, header, formData, body)
-  let scheme = call_574255.pickScheme
+  let valid = call_564155.validator(path, query, header, formData, body)
+  let scheme = call_564155.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574255.url(scheme.get, call_574255.host, call_574255.base,
-                         call_574255.route, valid.getOrDefault("path"),
+  let url = call_564155.url(scheme.get, call_564155.host, call_564155.base,
+                         call_564155.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574255, url, valid)
+  result = hook(call_564155, url, valid)
 
-proc call*(call_574256: Call_ManifestsUpdateAttributes_574249; name: string;
+proc call*(call_564156: Call_ManifestsUpdateAttributes_564149; name: string;
           reference: string; value: JsonNode = nil): Recallable =
   ## manifestsUpdateAttributes
   ## Update attributes of a manifest
   ##   name: string (required)
   ##       : Name of the image (including the namespace)
-  ##   reference: string (required)
-  ##            : A tag or a digest, pointing to a specific image
   ##   value: JObject
   ##        : Repository attribute value
-  var path_574257 = newJObject()
-  var body_574258 = newJObject()
-  add(path_574257, "name", newJString(name))
-  add(path_574257, "reference", newJString(reference))
+  ##   reference: string (required)
+  ##            : A tag or a digest, pointing to a specific image
+  var path_564157 = newJObject()
+  var body_564158 = newJObject()
+  add(path_564157, "name", newJString(name))
   if value != nil:
-    body_574258 = value
-  result = call_574256.call(path_574257, nil, nil, nil, body_574258)
+    body_564158 = value
+  add(path_564157, "reference", newJString(reference))
+  result = call_564156.call(path_564157, nil, nil, nil, body_564158)
 
-var manifestsUpdateAttributes* = Call_ManifestsUpdateAttributes_574249(
+var manifestsUpdateAttributes* = Call_ManifestsUpdateAttributes_564149(
     name: "manifestsUpdateAttributes", meth: HttpMethod.HttpPatch,
     host: "azure.local", route: "/acr/v1/{name}/_manifests/{reference}",
-    validator: validate_ManifestsUpdateAttributes_574250, base: "",
-    url: url_ManifestsUpdateAttributes_574251, schemes: {Scheme.Https})
+    validator: validate_ManifestsUpdateAttributes_564150, base: "",
+    url: url_ManifestsUpdateAttributes_564151, schemes: {Scheme.Https})
 type
-  Call_TagGetList_574259 = ref object of OpenApiRestCall_573657
-proc url_TagGetList_574261(protocol: Scheme; host: string; base: string; route: string;
+  Call_TagGetList_564159 = ref object of OpenApiRestCall_563555
+proc url_TagGetList_564161(protocol: Scheme; host: string; base: string; route: string;
                           path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -690,7 +694,7 @@ proc url_TagGetList_574261(protocol: Scheme; host: string; base: string; route: 
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_TagGetList_574260(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_TagGetList_564160(path: JsonNode; query: JsonNode; header: JsonNode;
                                formData: JsonNode; body: JsonNode): JsonNode =
   ## List tags of a repository
   ## 
@@ -701,41 +705,41 @@ proc validate_TagGetList_574260(path: JsonNode; query: JsonNode; header: JsonNod
   ##       : Name of the image (including the namespace)
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `name` field"
-  var valid_574262 = path.getOrDefault("name")
-  valid_574262 = validateParameter(valid_574262, JString, required = true,
+  var valid_564162 = path.getOrDefault("name")
+  valid_564162 = validateParameter(valid_564162, JString, required = true,
                                  default = nil)
-  if valid_574262 != nil:
-    section.add "name", valid_574262
+  if valid_564162 != nil:
+    section.add "name", valid_564162
   result.add "path", section
   ## parameters in `query` object:
+  ##   last: JString
+  ##       : Query parameter for the last item in previous query. Result set will include values lexically after last.
   ##   digest: JString
   ##         : filter by digest
   ##   orderby: JString
   ##          : orderby query parameter
-  ##   last: JString
-  ##       : Query parameter for the last item in previous query. Result set will include values lexically after last.
   ##   n: JInt
   ##    : query parameter for max number of items
   section = newJObject()
-  var valid_574263 = query.getOrDefault("digest")
-  valid_574263 = validateParameter(valid_574263, JString, required = false,
+  var valid_564163 = query.getOrDefault("last")
+  valid_564163 = validateParameter(valid_564163, JString, required = false,
                                  default = nil)
-  if valid_574263 != nil:
-    section.add "digest", valid_574263
-  var valid_574264 = query.getOrDefault("orderby")
-  valid_574264 = validateParameter(valid_574264, JString, required = false,
+  if valid_564163 != nil:
+    section.add "last", valid_564163
+  var valid_564164 = query.getOrDefault("digest")
+  valid_564164 = validateParameter(valid_564164, JString, required = false,
                                  default = nil)
-  if valid_574264 != nil:
-    section.add "orderby", valid_574264
-  var valid_574265 = query.getOrDefault("last")
-  valid_574265 = validateParameter(valid_574265, JString, required = false,
+  if valid_564164 != nil:
+    section.add "digest", valid_564164
+  var valid_564165 = query.getOrDefault("orderby")
+  valid_564165 = validateParameter(valid_564165, JString, required = false,
                                  default = nil)
-  if valid_574265 != nil:
-    section.add "last", valid_574265
-  var valid_574266 = query.getOrDefault("n")
-  valid_574266 = validateParameter(valid_574266, JInt, required = false, default = nil)
-  if valid_574266 != nil:
-    section.add "n", valid_574266
+  if valid_564165 != nil:
+    section.add "orderby", valid_564165
+  var valid_564166 = query.getOrDefault("n")
+  valid_564166 = validateParameter(valid_564166, JInt, required = false, default = nil)
+  if valid_564166 != nil:
+    section.add "n", valid_564166
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -744,52 +748,52 @@ proc validate_TagGetList_574260(path: JsonNode; query: JsonNode; header: JsonNod
   if body != nil:
     result.add "body", body
 
-proc call*(call_574267: Call_TagGetList_574259; path: JsonNode; query: JsonNode;
+proc call*(call_564167: Call_TagGetList_564159; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## List tags of a repository
   ## 
-  let valid = call_574267.validator(path, query, header, formData, body)
-  let scheme = call_574267.pickScheme
+  let valid = call_564167.validator(path, query, header, formData, body)
+  let scheme = call_564167.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574267.url(scheme.get, call_574267.host, call_574267.base,
-                         call_574267.route, valid.getOrDefault("path"),
+  let url = call_564167.url(scheme.get, call_564167.host, call_564167.base,
+                         call_564167.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574267, url, valid)
+  result = hook(call_564167, url, valid)
 
-proc call*(call_574268: Call_TagGetList_574259; name: string; digest: string = "";
-          orderby: string = ""; last: string = ""; n: int = 0): Recallable =
+proc call*(call_564168: Call_TagGetList_564159; name: string; last: string = "";
+          digest: string = ""; orderby: string = ""; n: int = 0): Recallable =
   ## tagGetList
   ## List tags of a repository
-  ##   digest: string
-  ##         : filter by digest
-  ##   name: string (required)
-  ##       : Name of the image (including the namespace)
-  ##   orderby: string
-  ##          : orderby query parameter
   ##   last: string
   ##       : Query parameter for the last item in previous query. Result set will include values lexically after last.
+  ##   name: string (required)
+  ##       : Name of the image (including the namespace)
+  ##   digest: string
+  ##         : filter by digest
+  ##   orderby: string
+  ##          : orderby query parameter
   ##   n: int
   ##    : query parameter for max number of items
-  var path_574269 = newJObject()
-  var query_574270 = newJObject()
-  add(query_574270, "digest", newJString(digest))
-  add(path_574269, "name", newJString(name))
-  add(query_574270, "orderby", newJString(orderby))
-  add(query_574270, "last", newJString(last))
-  add(query_574270, "n", newJInt(n))
-  result = call_574268.call(path_574269, query_574270, nil, nil, nil)
+  var path_564169 = newJObject()
+  var query_564170 = newJObject()
+  add(query_564170, "last", newJString(last))
+  add(path_564169, "name", newJString(name))
+  add(query_564170, "digest", newJString(digest))
+  add(query_564170, "orderby", newJString(orderby))
+  add(query_564170, "n", newJInt(n))
+  result = call_564168.call(path_564169, query_564170, nil, nil, nil)
 
-var tagGetList* = Call_TagGetList_574259(name: "tagGetList",
+var tagGetList* = Call_TagGetList_564159(name: "tagGetList",
                                       meth: HttpMethod.HttpGet,
                                       host: "azure.local",
                                       route: "/acr/v1/{name}/_tags",
-                                      validator: validate_TagGetList_574260,
-                                      base: "", url: url_TagGetList_574261,
+                                      validator: validate_TagGetList_564160,
+                                      base: "", url: url_TagGetList_564161,
                                       schemes: {Scheme.Https})
 type
-  Call_TagGetAttributes_574271 = ref object of OpenApiRestCall_573657
-proc url_TagGetAttributes_574273(protocol: Scheme; host: string; base: string;
+  Call_TagGetAttributes_564171 = ref object of OpenApiRestCall_563555
+proc url_TagGetAttributes_564173(protocol: Scheme; host: string; base: string;
                                 route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -807,7 +811,7 @@ proc url_TagGetAttributes_574273(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_TagGetAttributes_574272(path: JsonNode; query: JsonNode;
+proc validate_TagGetAttributes_564172(path: JsonNode; query: JsonNode;
                                      header: JsonNode; formData: JsonNode;
                                      body: JsonNode): JsonNode =
   ## Get tag attributes by tag
@@ -821,16 +825,16 @@ proc validate_TagGetAttributes_574272(path: JsonNode; query: JsonNode;
   ##            : Tag name
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `name` field"
-  var valid_574274 = path.getOrDefault("name")
-  valid_574274 = validateParameter(valid_574274, JString, required = true,
+  var valid_564174 = path.getOrDefault("name")
+  valid_564174 = validateParameter(valid_564174, JString, required = true,
                                  default = nil)
-  if valid_574274 != nil:
-    section.add "name", valid_574274
-  var valid_574275 = path.getOrDefault("reference")
-  valid_574275 = validateParameter(valid_574275, JString, required = true,
+  if valid_564174 != nil:
+    section.add "name", valid_564174
+  var valid_564175 = path.getOrDefault("reference")
+  valid_564175 = validateParameter(valid_564175, JString, required = true,
                                  default = nil)
-  if valid_574275 != nil:
-    section.add "reference", valid_574275
+  if valid_564175 != nil:
+    section.add "reference", valid_564175
   result.add "path", section
   section = newJObject()
   result.add "query", section
@@ -841,39 +845,39 @@ proc validate_TagGetAttributes_574272(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574276: Call_TagGetAttributes_574271; path: JsonNode;
+proc call*(call_564176: Call_TagGetAttributes_564171; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get tag attributes by tag
   ## 
-  let valid = call_574276.validator(path, query, header, formData, body)
-  let scheme = call_574276.pickScheme
+  let valid = call_564176.validator(path, query, header, formData, body)
+  let scheme = call_564176.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574276.url(scheme.get, call_574276.host, call_574276.base,
-                         call_574276.route, valid.getOrDefault("path"),
+  let url = call_564176.url(scheme.get, call_564176.host, call_564176.base,
+                         call_564176.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574276, url, valid)
+  result = hook(call_564176, url, valid)
 
-proc call*(call_574277: Call_TagGetAttributes_574271; name: string; reference: string): Recallable =
+proc call*(call_564177: Call_TagGetAttributes_564171; name: string; reference: string): Recallable =
   ## tagGetAttributes
   ## Get tag attributes by tag
   ##   name: string (required)
   ##       : Name of the image (including the namespace)
   ##   reference: string (required)
   ##            : Tag name
-  var path_574278 = newJObject()
-  add(path_574278, "name", newJString(name))
-  add(path_574278, "reference", newJString(reference))
-  result = call_574277.call(path_574278, nil, nil, nil, nil)
+  var path_564178 = newJObject()
+  add(path_564178, "name", newJString(name))
+  add(path_564178, "reference", newJString(reference))
+  result = call_564177.call(path_564178, nil, nil, nil, nil)
 
-var tagGetAttributes* = Call_TagGetAttributes_574271(name: "tagGetAttributes",
+var tagGetAttributes* = Call_TagGetAttributes_564171(name: "tagGetAttributes",
     meth: HttpMethod.HttpGet, host: "azure.local",
     route: "/acr/v1/{name}/_tags/{reference}",
-    validator: validate_TagGetAttributes_574272, base: "",
-    url: url_TagGetAttributes_574273, schemes: {Scheme.Https})
+    validator: validate_TagGetAttributes_564172, base: "",
+    url: url_TagGetAttributes_564173, schemes: {Scheme.Https})
 type
-  Call_TagUpdateAttributes_574287 = ref object of OpenApiRestCall_573657
-proc url_TagUpdateAttributes_574289(protocol: Scheme; host: string; base: string;
+  Call_TagUpdateAttributes_564187 = ref object of OpenApiRestCall_563555
+proc url_TagUpdateAttributes_564189(protocol: Scheme; host: string; base: string;
                                    route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -891,7 +895,7 @@ proc url_TagUpdateAttributes_574289(protocol: Scheme; host: string; base: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_TagUpdateAttributes_574288(path: JsonNode; query: JsonNode;
+proc validate_TagUpdateAttributes_564188(path: JsonNode; query: JsonNode;
                                         header: JsonNode; formData: JsonNode;
                                         body: JsonNode): JsonNode =
   ## Update tag attributes
@@ -905,16 +909,16 @@ proc validate_TagUpdateAttributes_574288(path: JsonNode; query: JsonNode;
   ##            : Tag name
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `name` field"
-  var valid_574290 = path.getOrDefault("name")
-  valid_574290 = validateParameter(valid_574290, JString, required = true,
+  var valid_564190 = path.getOrDefault("name")
+  valid_564190 = validateParameter(valid_564190, JString, required = true,
                                  default = nil)
-  if valid_574290 != nil:
-    section.add "name", valid_574290
-  var valid_574291 = path.getOrDefault("reference")
-  valid_574291 = validateParameter(valid_574291, JString, required = true,
+  if valid_564190 != nil:
+    section.add "name", valid_564190
+  var valid_564191 = path.getOrDefault("reference")
+  valid_564191 = validateParameter(valid_564191, JString, required = true,
                                  default = nil)
-  if valid_574291 != nil:
-    section.add "reference", valid_574291
+  if valid_564191 != nil:
+    section.add "reference", valid_564191
   result.add "path", section
   section = newJObject()
   result.add "query", section
@@ -929,45 +933,45 @@ proc validate_TagUpdateAttributes_574288(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574293: Call_TagUpdateAttributes_574287; path: JsonNode;
+proc call*(call_564193: Call_TagUpdateAttributes_564187; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Update tag attributes
   ## 
-  let valid = call_574293.validator(path, query, header, formData, body)
-  let scheme = call_574293.pickScheme
+  let valid = call_564193.validator(path, query, header, formData, body)
+  let scheme = call_564193.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574293.url(scheme.get, call_574293.host, call_574293.base,
-                         call_574293.route, valid.getOrDefault("path"),
+  let url = call_564193.url(scheme.get, call_564193.host, call_564193.base,
+                         call_564193.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574293, url, valid)
+  result = hook(call_564193, url, valid)
 
-proc call*(call_574294: Call_TagUpdateAttributes_574287; name: string;
+proc call*(call_564194: Call_TagUpdateAttributes_564187; name: string;
           reference: string; value: JsonNode = nil): Recallable =
   ## tagUpdateAttributes
   ## Update tag attributes
   ##   name: string (required)
   ##       : Name of the image (including the namespace)
-  ##   reference: string (required)
-  ##            : Tag name
   ##   value: JObject
   ##        : Repository attribute value
-  var path_574295 = newJObject()
-  var body_574296 = newJObject()
-  add(path_574295, "name", newJString(name))
-  add(path_574295, "reference", newJString(reference))
+  ##   reference: string (required)
+  ##            : Tag name
+  var path_564195 = newJObject()
+  var body_564196 = newJObject()
+  add(path_564195, "name", newJString(name))
   if value != nil:
-    body_574296 = value
-  result = call_574294.call(path_574295, nil, nil, nil, body_574296)
+    body_564196 = value
+  add(path_564195, "reference", newJString(reference))
+  result = call_564194.call(path_564195, nil, nil, nil, body_564196)
 
-var tagUpdateAttributes* = Call_TagUpdateAttributes_574287(
+var tagUpdateAttributes* = Call_TagUpdateAttributes_564187(
     name: "tagUpdateAttributes", meth: HttpMethod.HttpPatch, host: "azure.local",
     route: "/acr/v1/{name}/_tags/{reference}",
-    validator: validate_TagUpdateAttributes_574288, base: "",
-    url: url_TagUpdateAttributes_574289, schemes: {Scheme.Https})
+    validator: validate_TagUpdateAttributes_564188, base: "",
+    url: url_TagUpdateAttributes_564189, schemes: {Scheme.Https})
 type
-  Call_TagDelete_574279 = ref object of OpenApiRestCall_573657
-proc url_TagDelete_574281(protocol: Scheme; host: string; base: string; route: string;
+  Call_TagDelete_564179 = ref object of OpenApiRestCall_563555
+proc url_TagDelete_564181(protocol: Scheme; host: string; base: string; route: string;
                          path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -985,7 +989,7 @@ proc url_TagDelete_574281(protocol: Scheme; host: string; base: string; route: s
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_TagDelete_574280(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_TagDelete_564180(path: JsonNode; query: JsonNode; header: JsonNode;
                               formData: JsonNode; body: JsonNode): JsonNode =
   ## Delete tag
   ## 
@@ -998,16 +1002,16 @@ proc validate_TagDelete_574280(path: JsonNode; query: JsonNode; header: JsonNode
   ##            : Tag name
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `name` field"
-  var valid_574282 = path.getOrDefault("name")
-  valid_574282 = validateParameter(valid_574282, JString, required = true,
+  var valid_564182 = path.getOrDefault("name")
+  valid_564182 = validateParameter(valid_564182, JString, required = true,
                                  default = nil)
-  if valid_574282 != nil:
-    section.add "name", valid_574282
-  var valid_574283 = path.getOrDefault("reference")
-  valid_574283 = validateParameter(valid_574283, JString, required = true,
+  if valid_564182 != nil:
+    section.add "name", valid_564182
+  var valid_564183 = path.getOrDefault("reference")
+  valid_564183 = validateParameter(valid_564183, JString, required = true,
                                  default = nil)
-  if valid_574283 != nil:
-    section.add "reference", valid_574283
+  if valid_564183 != nil:
+    section.add "reference", valid_564183
   result.add "path", section
   section = newJObject()
   result.add "query", section
@@ -1018,48 +1022,48 @@ proc validate_TagDelete_574280(path: JsonNode; query: JsonNode; header: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_574284: Call_TagDelete_574279; path: JsonNode; query: JsonNode;
+proc call*(call_564184: Call_TagDelete_564179; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Delete tag
   ## 
-  let valid = call_574284.validator(path, query, header, formData, body)
-  let scheme = call_574284.pickScheme
+  let valid = call_564184.validator(path, query, header, formData, body)
+  let scheme = call_564184.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574284.url(scheme.get, call_574284.host, call_574284.base,
-                         call_574284.route, valid.getOrDefault("path"),
+  let url = call_564184.url(scheme.get, call_564184.host, call_564184.base,
+                         call_564184.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574284, url, valid)
+  result = hook(call_564184, url, valid)
 
-proc call*(call_574285: Call_TagDelete_574279; name: string; reference: string): Recallable =
+proc call*(call_564185: Call_TagDelete_564179; name: string; reference: string): Recallable =
   ## tagDelete
   ## Delete tag
   ##   name: string (required)
   ##       : Name of the image (including the namespace)
   ##   reference: string (required)
   ##            : Tag name
-  var path_574286 = newJObject()
-  add(path_574286, "name", newJString(name))
-  add(path_574286, "reference", newJString(reference))
-  result = call_574285.call(path_574286, nil, nil, nil, nil)
+  var path_564186 = newJObject()
+  add(path_564186, "name", newJString(name))
+  add(path_564186, "reference", newJString(reference))
+  result = call_564185.call(path_564186, nil, nil, nil, nil)
 
-var tagDelete* = Call_TagDelete_574279(name: "tagDelete",
+var tagDelete* = Call_TagDelete_564179(name: "tagDelete",
                                     meth: HttpMethod.HttpDelete,
                                     host: "azure.local",
                                     route: "/acr/v1/{name}/_tags/{reference}",
-                                    validator: validate_TagDelete_574280,
-                                    base: "", url: url_TagDelete_574281,
+                                    validator: validate_TagDelete_564180,
+                                    base: "", url: url_TagDelete_564181,
                                     schemes: {Scheme.Https})
 type
-  Call_RefreshTokensGetFromExchange_574297 = ref object of OpenApiRestCall_573657
-proc url_RefreshTokensGetFromExchange_574299(protocol: Scheme; host: string;
+  Call_RefreshTokensGetFromExchange_564197 = ref object of OpenApiRestCall_563555
+proc url_RefreshTokensGetFromExchange_564199(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_RefreshTokensGetFromExchange_574298(path: JsonNode; query: JsonNode;
+proc validate_RefreshTokensGetFromExchange_564198(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Exchange AAD tokens for an ACR refresh Token
   ## 
@@ -1072,99 +1076,100 @@ proc validate_RefreshTokensGetFromExchange_574298(path: JsonNode; query: JsonNod
   section = newJObject()
   result.add "header", section
   ## parameters in `formData` object:
-  ##   refresh_token: JString
-  ##                : AAD refresh token, mandatory when grant_type is access_token_refresh_token or refresh_token
+  ##   access_token: JString
+  ##               : AAD access token, mandatory when grant_type is access_token_refresh_token or access_token.
   ##   tenant: JString
   ##         : AAD tenant associated to the AAD credentials.
   ##   grant_type: JString (required)
   ##             : Can take a value of access_token_refresh_token, or access_token, or refresh_token
-  ##   access_token: JString
-  ##               : AAD access token, mandatory when grant_type is access_token_refresh_token or access_token.
+  ##   refresh_token: JString
+  ##                : AAD refresh token, mandatory when grant_type is access_token_refresh_token or refresh_token
   ##   service: JString (required)
   ##          : Indicates the name of your Azure container registry.
   section = newJObject()
-  var valid_574300 = formData.getOrDefault("refresh_token")
-  valid_574300 = validateParameter(valid_574300, JString, required = false,
+  var valid_564200 = formData.getOrDefault("access_token")
+  valid_564200 = validateParameter(valid_564200, JString, required = false,
                                  default = nil)
-  if valid_574300 != nil:
-    section.add "refresh_token", valid_574300
-  var valid_574301 = formData.getOrDefault("tenant")
-  valid_574301 = validateParameter(valid_574301, JString, required = false,
+  if valid_564200 != nil:
+    section.add "access_token", valid_564200
+  var valid_564201 = formData.getOrDefault("tenant")
+  valid_564201 = validateParameter(valid_564201, JString, required = false,
                                  default = nil)
-  if valid_574301 != nil:
-    section.add "tenant", valid_574301
+  if valid_564201 != nil:
+    section.add "tenant", valid_564201
   assert formData != nil,
         "formData argument is necessary due to required `grant_type` field"
-  var valid_574315 = formData.getOrDefault("grant_type")
-  valid_574315 = validateParameter(valid_574315, JString, required = true, default = newJString(
+  var valid_564215 = formData.getOrDefault("grant_type")
+  valid_564215 = validateParameter(valid_564215, JString, required = true, default = newJString(
       "access_token_refresh_token"))
-  if valid_574315 != nil:
-    section.add "grant_type", valid_574315
-  var valid_574316 = formData.getOrDefault("access_token")
-  valid_574316 = validateParameter(valid_574316, JString, required = false,
+  if valid_564215 != nil:
+    section.add "grant_type", valid_564215
+  var valid_564216 = formData.getOrDefault("refresh_token")
+  valid_564216 = validateParameter(valid_564216, JString, required = false,
                                  default = nil)
-  if valid_574316 != nil:
-    section.add "access_token", valid_574316
-  var valid_574317 = formData.getOrDefault("service")
-  valid_574317 = validateParameter(valid_574317, JString, required = true,
+  if valid_564216 != nil:
+    section.add "refresh_token", valid_564216
+  var valid_564217 = formData.getOrDefault("service")
+  valid_564217 = validateParameter(valid_564217, JString, required = true,
                                  default = nil)
-  if valid_574317 != nil:
-    section.add "service", valid_574317
+  if valid_564217 != nil:
+    section.add "service", valid_564217
   result.add "formData", section
   if body != nil:
     result.add "body", body
 
-proc call*(call_574318: Call_RefreshTokensGetFromExchange_574297; path: JsonNode;
+proc call*(call_564218: Call_RefreshTokensGetFromExchange_564197; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Exchange AAD tokens for an ACR refresh Token
   ## 
-  let valid = call_574318.validator(path, query, header, formData, body)
-  let scheme = call_574318.pickScheme
+  let valid = call_564218.validator(path, query, header, formData, body)
+  let scheme = call_564218.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574318.url(scheme.get, call_574318.host, call_574318.base,
-                         call_574318.route, valid.getOrDefault("path"),
+  let url = call_564218.url(scheme.get, call_564218.host, call_564218.base,
+                         call_564218.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574318, url, valid)
+  result = hook(call_564218, url, valid)
 
-proc call*(call_574319: Call_RefreshTokensGetFromExchange_574297; service: string;
-          refreshToken: string = ""; tenant: string = "";
-          grantType: string = "access_token_refresh_token"; accessToken: string = ""): Recallable =
+proc call*(call_564219: Call_RefreshTokensGetFromExchange_564197; service: string;
+          accessToken: string = ""; tenant: string = "";
+          grantType: string = "access_token_refresh_token";
+          refreshToken: string = ""): Recallable =
   ## refreshTokensGetFromExchange
   ## Exchange AAD tokens for an ACR refresh Token
-  ##   refreshToken: string
-  ##               : AAD refresh token, mandatory when grant_type is access_token_refresh_token or refresh_token
+  ##   accessToken: string
+  ##              : AAD access token, mandatory when grant_type is access_token_refresh_token or access_token.
   ##   tenant: string
   ##         : AAD tenant associated to the AAD credentials.
   ##   grantType: string (required)
   ##            : Can take a value of access_token_refresh_token, or access_token, or refresh_token
-  ##   accessToken: string
-  ##              : AAD access token, mandatory when grant_type is access_token_refresh_token or access_token.
+  ##   refreshToken: string
+  ##               : AAD refresh token, mandatory when grant_type is access_token_refresh_token or refresh_token
   ##   service: string (required)
   ##          : Indicates the name of your Azure container registry.
-  var formData_574320 = newJObject()
-  add(formData_574320, "refresh_token", newJString(refreshToken))
-  add(formData_574320, "tenant", newJString(tenant))
-  add(formData_574320, "grant_type", newJString(grantType))
-  add(formData_574320, "access_token", newJString(accessToken))
-  add(formData_574320, "service", newJString(service))
-  result = call_574319.call(nil, nil, nil, formData_574320, nil)
+  var formData_564220 = newJObject()
+  add(formData_564220, "access_token", newJString(accessToken))
+  add(formData_564220, "tenant", newJString(tenant))
+  add(formData_564220, "grant_type", newJString(grantType))
+  add(formData_564220, "refresh_token", newJString(refreshToken))
+  add(formData_564220, "service", newJString(service))
+  result = call_564219.call(nil, nil, nil, formData_564220, nil)
 
-var refreshTokensGetFromExchange* = Call_RefreshTokensGetFromExchange_574297(
+var refreshTokensGetFromExchange* = Call_RefreshTokensGetFromExchange_564197(
     name: "refreshTokensGetFromExchange", meth: HttpMethod.HttpPost,
     host: "azure.local", route: "/oauth2/exchange",
-    validator: validate_RefreshTokensGetFromExchange_574298, base: "",
-    url: url_RefreshTokensGetFromExchange_574299, schemes: {Scheme.Https})
+    validator: validate_RefreshTokensGetFromExchange_564198, base: "",
+    url: url_RefreshTokensGetFromExchange_564199, schemes: {Scheme.Https})
 type
-  Call_AccessTokensGet_574329 = ref object of OpenApiRestCall_573657
-proc url_AccessTokensGet_574331(protocol: Scheme; host: string; base: string;
+  Call_AccessTokensGet_564229 = ref object of OpenApiRestCall_563555
+proc url_AccessTokensGet_564231(protocol: Scheme; host: string; base: string;
                                route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_AccessTokensGet_574330(path: JsonNode; query: JsonNode;
+proc validate_AccessTokensGet_564230(path: JsonNode; query: JsonNode;
                                     header: JsonNode; formData: JsonNode;
                                     body: JsonNode): JsonNode =
   ## Exchange ACR Refresh token for an ACR Access Token
@@ -1178,80 +1183,80 @@ proc validate_AccessTokensGet_574330(path: JsonNode; query: JsonNode;
   section = newJObject()
   result.add "header", section
   ## parameters in `formData` object:
-  ##   scope: JString (required)
-  ##        : Which is expected to be a valid scope, and can be specified more than once for multiple scope requests. You obtained this from the Www-Authenticate response header from the challenge.
-  ##   refresh_token: JString (required)
-  ##                : Must be a valid ACR refresh token
   ##   grant_type: JString (required)
   ##             : Grant type is expected to be refresh_token
+  ##   refresh_token: JString (required)
+  ##                : Must be a valid ACR refresh token
   ##   service: JString (required)
   ##          : Indicates the name of your Azure container registry.
+  ##   scope: JString (required)
+  ##        : Which is expected to be a valid scope, and can be specified more than once for multiple scope requests. You obtained this from the Www-Authenticate response header from the challenge.
   section = newJObject()
   assert formData != nil,
-        "formData argument is necessary due to required `scope` field"
-  var valid_574332 = formData.getOrDefault("scope")
-  valid_574332 = validateParameter(valid_574332, JString, required = true,
-                                 default = nil)
-  if valid_574332 != nil:
-    section.add "scope", valid_574332
-  var valid_574333 = formData.getOrDefault("refresh_token")
-  valid_574333 = validateParameter(valid_574333, JString, required = true,
-                                 default = nil)
-  if valid_574333 != nil:
-    section.add "refresh_token", valid_574333
-  var valid_574334 = formData.getOrDefault("grant_type")
-  valid_574334 = validateParameter(valid_574334, JString, required = true,
+        "formData argument is necessary due to required `grant_type` field"
+  var valid_564232 = formData.getOrDefault("grant_type")
+  valid_564232 = validateParameter(valid_564232, JString, required = true,
                                  default = newJString("refresh_token"))
-  if valid_574334 != nil:
-    section.add "grant_type", valid_574334
-  var valid_574335 = formData.getOrDefault("service")
-  valid_574335 = validateParameter(valid_574335, JString, required = true,
+  if valid_564232 != nil:
+    section.add "grant_type", valid_564232
+  var valid_564233 = formData.getOrDefault("refresh_token")
+  valid_564233 = validateParameter(valid_564233, JString, required = true,
                                  default = nil)
-  if valid_574335 != nil:
-    section.add "service", valid_574335
+  if valid_564233 != nil:
+    section.add "refresh_token", valid_564233
+  var valid_564234 = formData.getOrDefault("service")
+  valid_564234 = validateParameter(valid_564234, JString, required = true,
+                                 default = nil)
+  if valid_564234 != nil:
+    section.add "service", valid_564234
+  var valid_564235 = formData.getOrDefault("scope")
+  valid_564235 = validateParameter(valid_564235, JString, required = true,
+                                 default = nil)
+  if valid_564235 != nil:
+    section.add "scope", valid_564235
   result.add "formData", section
   if body != nil:
     result.add "body", body
 
-proc call*(call_574336: Call_AccessTokensGet_574329; path: JsonNode; query: JsonNode;
+proc call*(call_564236: Call_AccessTokensGet_564229; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Exchange ACR Refresh token for an ACR Access Token
   ## 
-  let valid = call_574336.validator(path, query, header, formData, body)
-  let scheme = call_574336.pickScheme
+  let valid = call_564236.validator(path, query, header, formData, body)
+  let scheme = call_564236.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574336.url(scheme.get, call_574336.host, call_574336.base,
-                         call_574336.route, valid.getOrDefault("path"),
+  let url = call_564236.url(scheme.get, call_564236.host, call_564236.base,
+                         call_564236.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574336, url, valid)
+  result = hook(call_564236, url, valid)
 
-proc call*(call_574337: Call_AccessTokensGet_574329; scope: string;
-          refreshToken: string; service: string; grantType: string = "refresh_token"): Recallable =
+proc call*(call_564237: Call_AccessTokensGet_564229; refreshToken: string;
+          service: string; scope: string; grantType: string = "refresh_token"): Recallable =
   ## accessTokensGet
   ## Exchange ACR Refresh token for an ACR Access Token
-  ##   scope: string (required)
-  ##        : Which is expected to be a valid scope, and can be specified more than once for multiple scope requests. You obtained this from the Www-Authenticate response header from the challenge.
-  ##   refreshToken: string (required)
-  ##               : Must be a valid ACR refresh token
   ##   grantType: string (required)
   ##            : Grant type is expected to be refresh_token
+  ##   refreshToken: string (required)
+  ##               : Must be a valid ACR refresh token
   ##   service: string (required)
   ##          : Indicates the name of your Azure container registry.
-  var formData_574338 = newJObject()
-  add(formData_574338, "scope", newJString(scope))
-  add(formData_574338, "refresh_token", newJString(refreshToken))
-  add(formData_574338, "grant_type", newJString(grantType))
-  add(formData_574338, "service", newJString(service))
-  result = call_574337.call(nil, nil, nil, formData_574338, nil)
+  ##   scope: string (required)
+  ##        : Which is expected to be a valid scope, and can be specified more than once for multiple scope requests. You obtained this from the Www-Authenticate response header from the challenge.
+  var formData_564238 = newJObject()
+  add(formData_564238, "grant_type", newJString(grantType))
+  add(formData_564238, "refresh_token", newJString(refreshToken))
+  add(formData_564238, "service", newJString(service))
+  add(formData_564238, "scope", newJString(scope))
+  result = call_564237.call(nil, nil, nil, formData_564238, nil)
 
-var accessTokensGet* = Call_AccessTokensGet_574329(name: "accessTokensGet",
+var accessTokensGet* = Call_AccessTokensGet_564229(name: "accessTokensGet",
     meth: HttpMethod.HttpPost, host: "azure.local", route: "/oauth2/token",
-    validator: validate_AccessTokensGet_574330, base: "", url: url_AccessTokensGet_574331,
+    validator: validate_AccessTokensGet_564230, base: "", url: url_AccessTokensGet_564231,
     schemes: {Scheme.Https})
 type
-  Call_AccessTokensGetFromLogin_574321 = ref object of OpenApiRestCall_573657
-proc url_AccessTokensGetFromLogin_574323(protocol: Scheme; host: string;
+  Call_AccessTokensGetFromLogin_564221 = ref object of OpenApiRestCall_563555
+proc url_AccessTokensGetFromLogin_564223(protocol: Scheme; host: string;
                                         base: string; route: string; path: JsonNode;
                                         query: JsonNode): Uri =
   result.scheme = $protocol
@@ -1259,7 +1264,7 @@ proc url_AccessTokensGetFromLogin_574323(protocol: Scheme; host: string;
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_AccessTokensGetFromLogin_574322(path: JsonNode; query: JsonNode;
+proc validate_AccessTokensGetFromLogin_564222(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Exchange Username, Password and Scope an ACR Access Token
   ## 
@@ -1268,22 +1273,22 @@ proc validate_AccessTokensGetFromLogin_574322(path: JsonNode; query: JsonNode;
   section = newJObject()
   result.add "path", section
   ## parameters in `query` object:
-  ##   service: JString (required)
-  ##          : Indicates the name of your Azure container registry.
   ##   scope: JString (required)
   ##        : Expected to be a valid scope, and can be specified more than once for multiple scope requests. You can obtain this from the Www-Authenticate response header from the challenge.
+  ##   service: JString (required)
+  ##          : Indicates the name of your Azure container registry.
   section = newJObject()
-  assert query != nil, "query argument is necessary due to required `service` field"
-  var valid_574324 = query.getOrDefault("service")
-  valid_574324 = validateParameter(valid_574324, JString, required = true,
+  assert query != nil, "query argument is necessary due to required `scope` field"
+  var valid_564224 = query.getOrDefault("scope")
+  valid_564224 = validateParameter(valid_564224, JString, required = true,
                                  default = nil)
-  if valid_574324 != nil:
-    section.add "service", valid_574324
-  var valid_574325 = query.getOrDefault("scope")
-  valid_574325 = validateParameter(valid_574325, JString, required = true,
+  if valid_564224 != nil:
+    section.add "scope", valid_564224
+  var valid_564225 = query.getOrDefault("service")
+  valid_564225 = validateParameter(valid_564225, JString, required = true,
                                  default = nil)
-  if valid_574325 != nil:
-    section.add "scope", valid_574325
+  if valid_564225 != nil:
+    section.add "service", valid_564225
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1292,46 +1297,46 @@ proc validate_AccessTokensGetFromLogin_574322(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574326: Call_AccessTokensGetFromLogin_574321; path: JsonNode;
+proc call*(call_564226: Call_AccessTokensGetFromLogin_564221; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Exchange Username, Password and Scope an ACR Access Token
   ## 
-  let valid = call_574326.validator(path, query, header, formData, body)
-  let scheme = call_574326.pickScheme
+  let valid = call_564226.validator(path, query, header, formData, body)
+  let scheme = call_564226.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574326.url(scheme.get, call_574326.host, call_574326.base,
-                         call_574326.route, valid.getOrDefault("path"),
+  let url = call_564226.url(scheme.get, call_564226.host, call_564226.base,
+                         call_564226.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574326, url, valid)
+  result = hook(call_564226, url, valid)
 
-proc call*(call_574327: Call_AccessTokensGetFromLogin_574321; service: string;
-          scope: string): Recallable =
+proc call*(call_564227: Call_AccessTokensGetFromLogin_564221; scope: string;
+          service: string): Recallable =
   ## accessTokensGetFromLogin
   ## Exchange Username, Password and Scope an ACR Access Token
-  ##   service: string (required)
-  ##          : Indicates the name of your Azure container registry.
   ##   scope: string (required)
   ##        : Expected to be a valid scope, and can be specified more than once for multiple scope requests. You can obtain this from the Www-Authenticate response header from the challenge.
-  var query_574328 = newJObject()
-  add(query_574328, "service", newJString(service))
-  add(query_574328, "scope", newJString(scope))
-  result = call_574327.call(nil, query_574328, nil, nil, nil)
+  ##   service: string (required)
+  ##          : Indicates the name of your Azure container registry.
+  var query_564228 = newJObject()
+  add(query_564228, "scope", newJString(scope))
+  add(query_564228, "service", newJString(service))
+  result = call_564227.call(nil, query_564228, nil, nil, nil)
 
-var accessTokensGetFromLogin* = Call_AccessTokensGetFromLogin_574321(
+var accessTokensGetFromLogin* = Call_AccessTokensGetFromLogin_564221(
     name: "accessTokensGetFromLogin", meth: HttpMethod.HttpGet, host: "azure.local",
-    route: "/oauth2/token", validator: validate_AccessTokensGetFromLogin_574322,
-    base: "", url: url_AccessTokensGetFromLogin_574323, schemes: {Scheme.Https})
+    route: "/oauth2/token", validator: validate_AccessTokensGetFromLogin_564222,
+    base: "", url: url_AccessTokensGetFromLogin_564223, schemes: {Scheme.Https})
 type
-  Call_V2SupportCheck_574339 = ref object of OpenApiRestCall_573657
-proc url_V2SupportCheck_574341(protocol: Scheme; host: string; base: string;
+  Call_V2SupportCheck_564239 = ref object of OpenApiRestCall_563555
+proc url_V2SupportCheck_564241(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_V2SupportCheck_574340(path: JsonNode; query: JsonNode;
+proc validate_V2SupportCheck_564240(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## Tells whether this Docker Registry instance supports Docker Registry HTTP API v2
@@ -1349,31 +1354,31 @@ proc validate_V2SupportCheck_574340(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574342: Call_V2SupportCheck_574339; path: JsonNode; query: JsonNode;
+proc call*(call_564242: Call_V2SupportCheck_564239; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Tells whether this Docker Registry instance supports Docker Registry HTTP API v2
   ## 
-  let valid = call_574342.validator(path, query, header, formData, body)
-  let scheme = call_574342.pickScheme
+  let valid = call_564242.validator(path, query, header, formData, body)
+  let scheme = call_564242.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574342.url(scheme.get, call_574342.host, call_574342.base,
-                         call_574342.route, valid.getOrDefault("path"),
+  let url = call_564242.url(scheme.get, call_564242.host, call_564242.base,
+                         call_564242.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574342, url, valid)
+  result = hook(call_564242, url, valid)
 
-proc call*(call_574343: Call_V2SupportCheck_574339): Recallable =
+proc call*(call_564243: Call_V2SupportCheck_564239): Recallable =
   ## v2SupportCheck
   ## Tells whether this Docker Registry instance supports Docker Registry HTTP API v2
-  result = call_574343.call(nil, nil, nil, nil, nil)
+  result = call_564243.call(nil, nil, nil, nil, nil)
 
-var v2SupportCheck* = Call_V2SupportCheck_574339(name: "v2SupportCheck",
+var v2SupportCheck* = Call_V2SupportCheck_564239(name: "v2SupportCheck",
     meth: HttpMethod.HttpGet, host: "azure.local", route: "/v2/",
-    validator: validate_V2SupportCheck_574340, base: "", url: url_V2SupportCheck_574341,
+    validator: validate_V2SupportCheck_564240, base: "", url: url_V2SupportCheck_564241,
     schemes: {Scheme.Https})
 type
-  Call_BlobMount_574344 = ref object of OpenApiRestCall_573657
-proc url_BlobMount_574346(protocol: Scheme; host: string; base: string; route: string;
+  Call_BlobMount_564244 = ref object of OpenApiRestCall_563555
+proc url_BlobMount_564246(protocol: Scheme; host: string; base: string; route: string;
                          path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1389,7 +1394,7 @@ proc url_BlobMount_574346(protocol: Scheme; host: string; base: string; route: s
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_BlobMount_574345(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_BlobMount_564245(path: JsonNode; query: JsonNode; header: JsonNode;
                               formData: JsonNode; body: JsonNode): JsonNode =
   ## Mount a blob identified by the `mount` parameter from another repository.
   ## 
@@ -1400,11 +1405,11 @@ proc validate_BlobMount_574345(path: JsonNode; query: JsonNode; header: JsonNode
   ##       : Name of the image (including the namespace)
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `name` field"
-  var valid_574347 = path.getOrDefault("name")
-  valid_574347 = validateParameter(valid_574347, JString, required = true,
+  var valid_564247 = path.getOrDefault("name")
+  valid_564247 = validateParameter(valid_564247, JString, required = true,
                                  default = nil)
-  if valid_574347 != nil:
-    section.add "name", valid_574347
+  if valid_564247 != nil:
+    section.add "name", valid_564247
   result.add "path", section
   ## parameters in `query` object:
   ##   from: JString (required)
@@ -1413,16 +1418,16 @@ proc validate_BlobMount_574345(path: JsonNode; query: JsonNode; header: JsonNode
   ##        : Digest of blob to mount from the source repository.
   section = newJObject()
   assert query != nil, "query argument is necessary due to required `from` field"
-  var valid_574348 = query.getOrDefault("from")
-  valid_574348 = validateParameter(valid_574348, JString, required = true,
+  var valid_564248 = query.getOrDefault("from")
+  valid_564248 = validateParameter(valid_564248, JString, required = true,
                                  default = nil)
-  if valid_574348 != nil:
-    section.add "from", valid_574348
-  var valid_574349 = query.getOrDefault("mount")
-  valid_574349 = validateParameter(valid_574349, JString, required = true,
+  if valid_564248 != nil:
+    section.add "from", valid_564248
+  var valid_564249 = query.getOrDefault("mount")
+  valid_564249 = validateParameter(valid_564249, JString, required = true,
                                  default = nil)
-  if valid_574349 != nil:
-    section.add "mount", valid_574349
+  if valid_564249 != nil:
+    section.add "mount", valid_564249
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1431,20 +1436,20 @@ proc validate_BlobMount_574345(path: JsonNode; query: JsonNode; header: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_574350: Call_BlobMount_574344; path: JsonNode; query: JsonNode;
+proc call*(call_564250: Call_BlobMount_564244; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Mount a blob identified by the `mount` parameter from another repository.
   ## 
-  let valid = call_574350.validator(path, query, header, formData, body)
-  let scheme = call_574350.pickScheme
+  let valid = call_564250.validator(path, query, header, formData, body)
+  let scheme = call_564250.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574350.url(scheme.get, call_574350.host, call_574350.base,
-                         call_574350.route, valid.getOrDefault("path"),
+  let url = call_564250.url(scheme.get, call_564250.host, call_564250.base,
+                         call_564250.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574350, url, valid)
+  result = hook(call_564250, url, valid)
 
-proc call*(call_574351: Call_BlobMount_574344; name: string; `from`: string;
+proc call*(call_564251: Call_BlobMount_564244; name: string; `from`: string;
           mount: string): Recallable =
   ## blobMount
   ## Mount a blob identified by the `mount` parameter from another repository.
@@ -1454,22 +1459,22 @@ proc call*(call_574351: Call_BlobMount_574344; name: string; `from`: string;
   ##       : Name of the source repository.
   ##   mount: string (required)
   ##        : Digest of blob to mount from the source repository.
-  var path_574352 = newJObject()
-  var query_574353 = newJObject()
-  add(path_574352, "name", newJString(name))
-  add(query_574353, "from", newJString(`from`))
-  add(query_574353, "mount", newJString(mount))
-  result = call_574351.call(path_574352, query_574353, nil, nil, nil)
+  var path_564252 = newJObject()
+  var query_564253 = newJObject()
+  add(path_564252, "name", newJString(name))
+  add(query_564253, "from", newJString(`from`))
+  add(query_564253, "mount", newJString(mount))
+  result = call_564251.call(path_564252, query_564253, nil, nil, nil)
 
-var blobMount* = Call_BlobMount_574344(name: "blobMount", meth: HttpMethod.HttpPost,
+var blobMount* = Call_BlobMount_564244(name: "blobMount", meth: HttpMethod.HttpPost,
                                     host: "azure.local",
                                     route: "/v2/{name}/blobs/uploads/",
-                                    validator: validate_BlobMount_574345,
-                                    base: "", url: url_BlobMount_574346,
+                                    validator: validate_BlobMount_564245,
+                                    base: "", url: url_BlobMount_564246,
                                     schemes: {Scheme.Https})
 type
-  Call_BlobCheck_574370 = ref object of OpenApiRestCall_573657
-proc url_BlobCheck_574372(protocol: Scheme; host: string; base: string; route: string;
+  Call_BlobCheck_564270 = ref object of OpenApiRestCall_563555
+proc url_BlobCheck_564272(protocol: Scheme; host: string; base: string; route: string;
                          path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1487,7 +1492,7 @@ proc url_BlobCheck_574372(protocol: Scheme; host: string; base: string; route: s
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_BlobCheck_574371(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_BlobCheck_564271(path: JsonNode; query: JsonNode; header: JsonNode;
                               formData: JsonNode; body: JsonNode): JsonNode =
   ## Same as GET, except only the headers are returned.
   ## 
@@ -1500,16 +1505,16 @@ proc validate_BlobCheck_574371(path: JsonNode; query: JsonNode; header: JsonNode
   ##         : Digest of a BLOB
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `name` field"
-  var valid_574373 = path.getOrDefault("name")
-  valid_574373 = validateParameter(valid_574373, JString, required = true,
+  var valid_564273 = path.getOrDefault("name")
+  valid_564273 = validateParameter(valid_564273, JString, required = true,
                                  default = nil)
-  if valid_574373 != nil:
-    section.add "name", valid_574373
-  var valid_574374 = path.getOrDefault("digest")
-  valid_574374 = validateParameter(valid_574374, JString, required = true,
+  if valid_564273 != nil:
+    section.add "name", valid_564273
+  var valid_564274 = path.getOrDefault("digest")
+  valid_564274 = validateParameter(valid_564274, JString, required = true,
                                  default = nil)
-  if valid_574374 != nil:
-    section.add "digest", valid_574374
+  if valid_564274 != nil:
+    section.add "digest", valid_564274
   result.add "path", section
   section = newJObject()
   result.add "query", section
@@ -1520,40 +1525,40 @@ proc validate_BlobCheck_574371(path: JsonNode; query: JsonNode; header: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_574375: Call_BlobCheck_574370; path: JsonNode; query: JsonNode;
+proc call*(call_564275: Call_BlobCheck_564270; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Same as GET, except only the headers are returned.
   ## 
-  let valid = call_574375.validator(path, query, header, formData, body)
-  let scheme = call_574375.pickScheme
+  let valid = call_564275.validator(path, query, header, formData, body)
+  let scheme = call_564275.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574375.url(scheme.get, call_574375.host, call_574375.base,
-                         call_574375.route, valid.getOrDefault("path"),
+  let url = call_564275.url(scheme.get, call_564275.host, call_564275.base,
+                         call_564275.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574375, url, valid)
+  result = hook(call_564275, url, valid)
 
-proc call*(call_574376: Call_BlobCheck_574370; name: string; digest: string): Recallable =
+proc call*(call_564276: Call_BlobCheck_564270; name: string; digest: string): Recallable =
   ## blobCheck
   ## Same as GET, except only the headers are returned.
   ##   name: string (required)
   ##       : Name of the image (including the namespace)
   ##   digest: string (required)
   ##         : Digest of a BLOB
-  var path_574377 = newJObject()
-  add(path_574377, "name", newJString(name))
-  add(path_574377, "digest", newJString(digest))
-  result = call_574376.call(path_574377, nil, nil, nil, nil)
+  var path_564277 = newJObject()
+  add(path_564277, "name", newJString(name))
+  add(path_564277, "digest", newJString(digest))
+  result = call_564276.call(path_564277, nil, nil, nil, nil)
 
-var blobCheck* = Call_BlobCheck_574370(name: "blobCheck", meth: HttpMethod.HttpHead,
+var blobCheck* = Call_BlobCheck_564270(name: "blobCheck", meth: HttpMethod.HttpHead,
                                     host: "azure.local",
                                     route: "/v2/{name}/blobs/{digest}",
-                                    validator: validate_BlobCheck_574371,
-                                    base: "", url: url_BlobCheck_574372,
+                                    validator: validate_BlobCheck_564271,
+                                    base: "", url: url_BlobCheck_564272,
                                     schemes: {Scheme.Https})
 type
-  Call_BlobGet_574354 = ref object of OpenApiRestCall_573657
-proc url_BlobGet_574356(protocol: Scheme; host: string; base: string; route: string;
+  Call_BlobGet_564254 = ref object of OpenApiRestCall_563555
+proc url_BlobGet_564256(protocol: Scheme; host: string; base: string; route: string;
                        path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1571,7 +1576,7 @@ proc url_BlobGet_574356(protocol: Scheme; host: string; base: string; route: str
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_BlobGet_574355(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_BlobGet_564255(path: JsonNode; query: JsonNode; header: JsonNode;
                             formData: JsonNode; body: JsonNode): JsonNode =
   ## Retrieve the blob from the registry identified by digest.
   ## 
@@ -1584,16 +1589,16 @@ proc validate_BlobGet_574355(path: JsonNode; query: JsonNode; header: JsonNode;
   ##         : Digest of a BLOB
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `name` field"
-  var valid_574357 = path.getOrDefault("name")
-  valid_574357 = validateParameter(valid_574357, JString, required = true,
+  var valid_564257 = path.getOrDefault("name")
+  valid_564257 = validateParameter(valid_564257, JString, required = true,
                                  default = nil)
-  if valid_574357 != nil:
-    section.add "name", valid_574357
-  var valid_574358 = path.getOrDefault("digest")
-  valid_574358 = validateParameter(valid_574358, JString, required = true,
+  if valid_564257 != nil:
+    section.add "name", valid_564257
+  var valid_564258 = path.getOrDefault("digest")
+  valid_564258 = validateParameter(valid_564258, JString, required = true,
                                  default = nil)
-  if valid_574358 != nil:
-    section.add "digest", valid_574358
+  if valid_564258 != nil:
+    section.add "digest", valid_564258
   result.add "path", section
   section = newJObject()
   result.add "query", section
@@ -1604,39 +1609,39 @@ proc validate_BlobGet_574355(path: JsonNode; query: JsonNode; header: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574359: Call_BlobGet_574354; path: JsonNode; query: JsonNode;
+proc call*(call_564259: Call_BlobGet_564254; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Retrieve the blob from the registry identified by digest.
   ## 
-  let valid = call_574359.validator(path, query, header, formData, body)
-  let scheme = call_574359.pickScheme
+  let valid = call_564259.validator(path, query, header, formData, body)
+  let scheme = call_564259.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574359.url(scheme.get, call_574359.host, call_574359.base,
-                         call_574359.route, valid.getOrDefault("path"),
+  let url = call_564259.url(scheme.get, call_564259.host, call_564259.base,
+                         call_564259.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574359, url, valid)
+  result = hook(call_564259, url, valid)
 
-proc call*(call_574360: Call_BlobGet_574354; name: string; digest: string): Recallable =
+proc call*(call_564260: Call_BlobGet_564254; name: string; digest: string): Recallable =
   ## blobGet
   ## Retrieve the blob from the registry identified by digest.
   ##   name: string (required)
   ##       : Name of the image (including the namespace)
   ##   digest: string (required)
   ##         : Digest of a BLOB
-  var path_574361 = newJObject()
-  add(path_574361, "name", newJString(name))
-  add(path_574361, "digest", newJString(digest))
-  result = call_574360.call(path_574361, nil, nil, nil, nil)
+  var path_564261 = newJObject()
+  add(path_564261, "name", newJString(name))
+  add(path_564261, "digest", newJString(digest))
+  result = call_564260.call(path_564261, nil, nil, nil, nil)
 
-var blobGet* = Call_BlobGet_574354(name: "blobGet", meth: HttpMethod.HttpGet,
+var blobGet* = Call_BlobGet_564254(name: "blobGet", meth: HttpMethod.HttpGet,
                                 host: "azure.local",
                                 route: "/v2/{name}/blobs/{digest}",
-                                validator: validate_BlobGet_574355, base: "",
-                                url: url_BlobGet_574356, schemes: {Scheme.Https})
+                                validator: validate_BlobGet_564255, base: "",
+                                url: url_BlobGet_564256, schemes: {Scheme.Https})
 type
-  Call_BlobDelete_574362 = ref object of OpenApiRestCall_573657
-proc url_BlobDelete_574364(protocol: Scheme; host: string; base: string; route: string;
+  Call_BlobDelete_564262 = ref object of OpenApiRestCall_563555
+proc url_BlobDelete_564264(protocol: Scheme; host: string; base: string; route: string;
                           path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1654,7 +1659,7 @@ proc url_BlobDelete_574364(protocol: Scheme; host: string; base: string; route: 
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_BlobDelete_574363(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_BlobDelete_564263(path: JsonNode; query: JsonNode; header: JsonNode;
                                formData: JsonNode; body: JsonNode): JsonNode =
   ## Removes an already uploaded blob.
   ## 
@@ -1667,16 +1672,16 @@ proc validate_BlobDelete_574363(path: JsonNode; query: JsonNode; header: JsonNod
   ##         : Digest of a BLOB
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `name` field"
-  var valid_574365 = path.getOrDefault("name")
-  valid_574365 = validateParameter(valid_574365, JString, required = true,
+  var valid_564265 = path.getOrDefault("name")
+  valid_564265 = validateParameter(valid_564265, JString, required = true,
                                  default = nil)
-  if valid_574365 != nil:
-    section.add "name", valid_574365
-  var valid_574366 = path.getOrDefault("digest")
-  valid_574366 = validateParameter(valid_574366, JString, required = true,
+  if valid_564265 != nil:
+    section.add "name", valid_564265
+  var valid_564266 = path.getOrDefault("digest")
+  valid_564266 = validateParameter(valid_564266, JString, required = true,
                                  default = nil)
-  if valid_574366 != nil:
-    section.add "digest", valid_574366
+  if valid_564266 != nil:
+    section.add "digest", valid_564266
   result.add "path", section
   section = newJObject()
   result.add "query", section
@@ -1687,41 +1692,41 @@ proc validate_BlobDelete_574363(path: JsonNode; query: JsonNode; header: JsonNod
   if body != nil:
     result.add "body", body
 
-proc call*(call_574367: Call_BlobDelete_574362; path: JsonNode; query: JsonNode;
+proc call*(call_564267: Call_BlobDelete_564262; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Removes an already uploaded blob.
   ## 
-  let valid = call_574367.validator(path, query, header, formData, body)
-  let scheme = call_574367.pickScheme
+  let valid = call_564267.validator(path, query, header, formData, body)
+  let scheme = call_564267.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574367.url(scheme.get, call_574367.host, call_574367.base,
-                         call_574367.route, valid.getOrDefault("path"),
+  let url = call_564267.url(scheme.get, call_564267.host, call_564267.base,
+                         call_564267.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574367, url, valid)
+  result = hook(call_564267, url, valid)
 
-proc call*(call_574368: Call_BlobDelete_574362; name: string; digest: string): Recallable =
+proc call*(call_564268: Call_BlobDelete_564262; name: string; digest: string): Recallable =
   ## blobDelete
   ## Removes an already uploaded blob.
   ##   name: string (required)
   ##       : Name of the image (including the namespace)
   ##   digest: string (required)
   ##         : Digest of a BLOB
-  var path_574369 = newJObject()
-  add(path_574369, "name", newJString(name))
-  add(path_574369, "digest", newJString(digest))
-  result = call_574368.call(path_574369, nil, nil, nil, nil)
+  var path_564269 = newJObject()
+  add(path_564269, "name", newJString(name))
+  add(path_564269, "digest", newJString(digest))
+  result = call_564268.call(path_564269, nil, nil, nil, nil)
 
-var blobDelete* = Call_BlobDelete_574362(name: "blobDelete",
+var blobDelete* = Call_BlobDelete_564262(name: "blobDelete",
                                       meth: HttpMethod.HttpDelete,
                                       host: "azure.local",
                                       route: "/v2/{name}/blobs/{digest}",
-                                      validator: validate_BlobDelete_574363,
-                                      base: "", url: url_BlobDelete_574364,
+                                      validator: validate_BlobDelete_564263,
+                                      base: "", url: url_BlobDelete_564264,
                                       schemes: {Scheme.Https})
 type
-  Call_ManifestsCreate_574387 = ref object of OpenApiRestCall_573657
-proc url_ManifestsCreate_574389(protocol: Scheme; host: string; base: string;
+  Call_ManifestsCreate_564287 = ref object of OpenApiRestCall_563555
+proc url_ManifestsCreate_564289(protocol: Scheme; host: string; base: string;
                                route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1739,7 +1744,7 @@ proc url_ManifestsCreate_574389(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ManifestsCreate_574388(path: JsonNode; query: JsonNode;
+proc validate_ManifestsCreate_564288(path: JsonNode; query: JsonNode;
                                     header: JsonNode; formData: JsonNode;
                                     body: JsonNode): JsonNode =
   ## Put the manifest identified by `name` and `reference` where `reference` can be a tag or digest.
@@ -1753,16 +1758,16 @@ proc validate_ManifestsCreate_574388(path: JsonNode; query: JsonNode;
   ##            : A tag or a digest, pointing to a specific image
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `name` field"
-  var valid_574390 = path.getOrDefault("name")
-  valid_574390 = validateParameter(valid_574390, JString, required = true,
+  var valid_564290 = path.getOrDefault("name")
+  valid_564290 = validateParameter(valid_564290, JString, required = true,
                                  default = nil)
-  if valid_574390 != nil:
-    section.add "name", valid_574390
-  var valid_574391 = path.getOrDefault("reference")
-  valid_574391 = validateParameter(valid_574391, JString, required = true,
+  if valid_564290 != nil:
+    section.add "name", valid_564290
+  var valid_564291 = path.getOrDefault("reference")
+  valid_564291 = validateParameter(valid_564291, JString, required = true,
                                  default = nil)
-  if valid_574391 != nil:
-    section.add "reference", valid_574391
+  if valid_564291 != nil:
+    section.add "reference", valid_564291
   result.add "path", section
   section = newJObject()
   result.add "query", section
@@ -1778,20 +1783,20 @@ proc validate_ManifestsCreate_574388(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574393: Call_ManifestsCreate_574387; path: JsonNode; query: JsonNode;
+proc call*(call_564293: Call_ManifestsCreate_564287; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Put the manifest identified by `name` and `reference` where `reference` can be a tag or digest.
   ## 
-  let valid = call_574393.validator(path, query, header, formData, body)
-  let scheme = call_574393.pickScheme
+  let valid = call_564293.validator(path, query, header, formData, body)
+  let scheme = call_564293.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574393.url(scheme.get, call_574393.host, call_574393.base,
-                         call_574393.route, valid.getOrDefault("path"),
+  let url = call_564293.url(scheme.get, call_564293.host, call_564293.base,
+                         call_564293.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574393, url, valid)
+  result = hook(call_564293, url, valid)
 
-proc call*(call_574394: Call_ManifestsCreate_574387; name: string; reference: string;
+proc call*(call_564294: Call_ManifestsCreate_564287; name: string; reference: string;
           payload: JsonNode): Recallable =
   ## manifestsCreate
   ## Put the manifest identified by `name` and `reference` where `reference` can be a tag or digest.
@@ -1801,22 +1806,22 @@ proc call*(call_574394: Call_ManifestsCreate_574387; name: string; reference: st
   ##            : A tag or a digest, pointing to a specific image
   ##   payload: JObject (required)
   ##          : Manifest body, can take v1 or v2 values depending on accept header
-  var path_574395 = newJObject()
-  var body_574396 = newJObject()
-  add(path_574395, "name", newJString(name))
-  add(path_574395, "reference", newJString(reference))
+  var path_564295 = newJObject()
+  var body_564296 = newJObject()
+  add(path_564295, "name", newJString(name))
+  add(path_564295, "reference", newJString(reference))
   if payload != nil:
-    body_574396 = payload
-  result = call_574394.call(path_574395, nil, nil, nil, body_574396)
+    body_564296 = payload
+  result = call_564294.call(path_564295, nil, nil, nil, body_564296)
 
-var manifestsCreate* = Call_ManifestsCreate_574387(name: "manifestsCreate",
+var manifestsCreate* = Call_ManifestsCreate_564287(name: "manifestsCreate",
     meth: HttpMethod.HttpPut, host: "azure.local",
     route: "/v2/{name}/manifests/{reference}",
-    validator: validate_ManifestsCreate_574388, base: "", url: url_ManifestsCreate_574389,
+    validator: validate_ManifestsCreate_564288, base: "", url: url_ManifestsCreate_564289,
     schemes: {Scheme.Https})
 type
-  Call_ManifestsGet_574378 = ref object of OpenApiRestCall_573657
-proc url_ManifestsGet_574380(protocol: Scheme; host: string; base: string;
+  Call_ManifestsGet_564278 = ref object of OpenApiRestCall_563555
+proc url_ManifestsGet_564280(protocol: Scheme; host: string; base: string;
                             route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1834,7 +1839,7 @@ proc url_ManifestsGet_574380(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ManifestsGet_574379(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_ManifestsGet_564279(path: JsonNode; query: JsonNode; header: JsonNode;
                                  formData: JsonNode; body: JsonNode): JsonNode =
   ## Get the manifest identified by `name` and `reference` where `reference` can be a tag or digest.
   ## 
@@ -1847,16 +1852,16 @@ proc validate_ManifestsGet_574379(path: JsonNode; query: JsonNode; header: JsonN
   ##            : A tag or a digest, pointing to a specific image
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `name` field"
-  var valid_574381 = path.getOrDefault("name")
-  valid_574381 = validateParameter(valid_574381, JString, required = true,
+  var valid_564281 = path.getOrDefault("name")
+  valid_564281 = validateParameter(valid_564281, JString, required = true,
                                  default = nil)
-  if valid_574381 != nil:
-    section.add "name", valid_574381
-  var valid_574382 = path.getOrDefault("reference")
-  valid_574382 = validateParameter(valid_574382, JString, required = true,
+  if valid_564281 != nil:
+    section.add "name", valid_564281
+  var valid_564282 = path.getOrDefault("reference")
+  valid_564282 = validateParameter(valid_564282, JString, required = true,
                                  default = nil)
-  if valid_574382 != nil:
-    section.add "reference", valid_574382
+  if valid_564282 != nil:
+    section.add "reference", valid_564282
   result.add "path", section
   section = newJObject()
   result.add "query", section
@@ -1864,49 +1869,49 @@ proc validate_ManifestsGet_574379(path: JsonNode; query: JsonNode; header: JsonN
   ##   accept: JString
   ##         : Accept header string delimited by comma. For example, application/vnd.docker.distribution.manifest.v2+json
   section = newJObject()
-  var valid_574383 = header.getOrDefault("accept")
-  valid_574383 = validateParameter(valid_574383, JString, required = false,
+  var valid_564283 = header.getOrDefault("accept")
+  valid_564283 = validateParameter(valid_564283, JString, required = false,
                                  default = nil)
-  if valid_574383 != nil:
-    section.add "accept", valid_574383
+  if valid_564283 != nil:
+    section.add "accept", valid_564283
   result.add "header", section
   section = newJObject()
   result.add "formData", section
   if body != nil:
     result.add "body", body
 
-proc call*(call_574384: Call_ManifestsGet_574378; path: JsonNode; query: JsonNode;
+proc call*(call_564284: Call_ManifestsGet_564278; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get the manifest identified by `name` and `reference` where `reference` can be a tag or digest.
   ## 
-  let valid = call_574384.validator(path, query, header, formData, body)
-  let scheme = call_574384.pickScheme
+  let valid = call_564284.validator(path, query, header, formData, body)
+  let scheme = call_564284.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574384.url(scheme.get, call_574384.host, call_574384.base,
-                         call_574384.route, valid.getOrDefault("path"),
+  let url = call_564284.url(scheme.get, call_564284.host, call_564284.base,
+                         call_564284.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574384, url, valid)
+  result = hook(call_564284, url, valid)
 
-proc call*(call_574385: Call_ManifestsGet_574378; name: string; reference: string): Recallable =
+proc call*(call_564285: Call_ManifestsGet_564278; name: string; reference: string): Recallable =
   ## manifestsGet
   ## Get the manifest identified by `name` and `reference` where `reference` can be a tag or digest.
   ##   name: string (required)
   ##       : Name of the image (including the namespace)
   ##   reference: string (required)
   ##            : A tag or a digest, pointing to a specific image
-  var path_574386 = newJObject()
-  add(path_574386, "name", newJString(name))
-  add(path_574386, "reference", newJString(reference))
-  result = call_574385.call(path_574386, nil, nil, nil, nil)
+  var path_564286 = newJObject()
+  add(path_564286, "name", newJString(name))
+  add(path_564286, "reference", newJString(reference))
+  result = call_564285.call(path_564286, nil, nil, nil, nil)
 
-var manifestsGet* = Call_ManifestsGet_574378(name: "manifestsGet",
+var manifestsGet* = Call_ManifestsGet_564278(name: "manifestsGet",
     meth: HttpMethod.HttpGet, host: "azure.local",
-    route: "/v2/{name}/manifests/{reference}", validator: validate_ManifestsGet_574379,
-    base: "", url: url_ManifestsGet_574380, schemes: {Scheme.Https})
+    route: "/v2/{name}/manifests/{reference}", validator: validate_ManifestsGet_564279,
+    base: "", url: url_ManifestsGet_564280, schemes: {Scheme.Https})
 type
-  Call_ManifestsDelete_574397 = ref object of OpenApiRestCall_573657
-proc url_ManifestsDelete_574399(protocol: Scheme; host: string; base: string;
+  Call_ManifestsDelete_564297 = ref object of OpenApiRestCall_563555
+proc url_ManifestsDelete_564299(protocol: Scheme; host: string; base: string;
                                route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1924,7 +1929,7 @@ proc url_ManifestsDelete_574399(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ManifestsDelete_574398(path: JsonNode; query: JsonNode;
+proc validate_ManifestsDelete_564298(path: JsonNode; query: JsonNode;
                                     header: JsonNode; formData: JsonNode;
                                     body: JsonNode): JsonNode =
   ## Delete the manifest identified by `name` and `reference`. Note that a manifest can _only_ be deleted by `digest`.
@@ -1938,16 +1943,16 @@ proc validate_ManifestsDelete_574398(path: JsonNode; query: JsonNode;
   ##            : A tag or a digest, pointing to a specific image
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `name` field"
-  var valid_574400 = path.getOrDefault("name")
-  valid_574400 = validateParameter(valid_574400, JString, required = true,
+  var valid_564300 = path.getOrDefault("name")
+  valid_564300 = validateParameter(valid_564300, JString, required = true,
                                  default = nil)
-  if valid_574400 != nil:
-    section.add "name", valid_574400
-  var valid_574401 = path.getOrDefault("reference")
-  valid_574401 = validateParameter(valid_574401, JString, required = true,
+  if valid_564300 != nil:
+    section.add "name", valid_564300
+  var valid_564301 = path.getOrDefault("reference")
+  valid_564301 = validateParameter(valid_564301, JString, required = true,
                                  default = nil)
-  if valid_574401 != nil:
-    section.add "reference", valid_574401
+  if valid_564301 != nil:
+    section.add "reference", valid_564301
   result.add "path", section
   section = newJObject()
   result.add "query", section
@@ -1958,39 +1963,39 @@ proc validate_ManifestsDelete_574398(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574402: Call_ManifestsDelete_574397; path: JsonNode; query: JsonNode;
+proc call*(call_564302: Call_ManifestsDelete_564297; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Delete the manifest identified by `name` and `reference`. Note that a manifest can _only_ be deleted by `digest`.
   ## 
-  let valid = call_574402.validator(path, query, header, formData, body)
-  let scheme = call_574402.pickScheme
+  let valid = call_564302.validator(path, query, header, formData, body)
+  let scheme = call_564302.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574402.url(scheme.get, call_574402.host, call_574402.base,
-                         call_574402.route, valid.getOrDefault("path"),
+  let url = call_564302.url(scheme.get, call_564302.host, call_564302.base,
+                         call_564302.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574402, url, valid)
+  result = hook(call_564302, url, valid)
 
-proc call*(call_574403: Call_ManifestsDelete_574397; name: string; reference: string): Recallable =
+proc call*(call_564303: Call_ManifestsDelete_564297; name: string; reference: string): Recallable =
   ## manifestsDelete
   ## Delete the manifest identified by `name` and `reference`. Note that a manifest can _only_ be deleted by `digest`.
   ##   name: string (required)
   ##       : Name of the image (including the namespace)
   ##   reference: string (required)
   ##            : A tag or a digest, pointing to a specific image
-  var path_574404 = newJObject()
-  add(path_574404, "name", newJString(name))
-  add(path_574404, "reference", newJString(reference))
-  result = call_574403.call(path_574404, nil, nil, nil, nil)
+  var path_564304 = newJObject()
+  add(path_564304, "name", newJString(name))
+  add(path_564304, "reference", newJString(reference))
+  result = call_564303.call(path_564304, nil, nil, nil, nil)
 
-var manifestsDelete* = Call_ManifestsDelete_574397(name: "manifestsDelete",
+var manifestsDelete* = Call_ManifestsDelete_564297(name: "manifestsDelete",
     meth: HttpMethod.HttpDelete, host: "azure.local",
     route: "/v2/{name}/manifests/{reference}",
-    validator: validate_ManifestsDelete_574398, base: "", url: url_ManifestsDelete_574399,
+    validator: validate_ManifestsDelete_564298, base: "", url: url_ManifestsDelete_564299,
     schemes: {Scheme.Https})
 type
-  Call_BlobEndUpload_574412 = ref object of OpenApiRestCall_573657
-proc url_BlobEndUpload_574414(protocol: Scheme; host: string; base: string;
+  Call_BlobEndUpload_564312 = ref object of OpenApiRestCall_563555
+proc url_BlobEndUpload_564314(protocol: Scheme; host: string; base: string;
                              route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2006,7 +2011,7 @@ proc url_BlobEndUpload_574414(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_BlobEndUpload_574413(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_BlobEndUpload_564313(path: JsonNode; query: JsonNode; header: JsonNode;
                                   formData: JsonNode; body: JsonNode): JsonNode =
   ## Complete the upload, providing all the data in the body, if necessary. A request without a body will just complete the upload with previously uploaded content.
   ## 
@@ -2018,22 +2023,22 @@ proc validate_BlobEndUpload_574413(path: JsonNode; query: JsonNode; header: Json
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `nextBlobUuidLink` field"
-  var valid_574415 = path.getOrDefault("nextBlobUuidLink")
-  valid_574415 = validateParameter(valid_574415, JString, required = true,
+  var valid_564315 = path.getOrDefault("nextBlobUuidLink")
+  valid_564315 = validateParameter(valid_564315, JString, required = true,
                                  default = nil)
-  if valid_574415 != nil:
-    section.add "nextBlobUuidLink", valid_574415
+  if valid_564315 != nil:
+    section.add "nextBlobUuidLink", valid_564315
   result.add "path", section
   ## parameters in `query` object:
   ##   digest: JString (required)
   ##         : Digest of a BLOB
   section = newJObject()
   assert query != nil, "query argument is necessary due to required `digest` field"
-  var valid_574416 = query.getOrDefault("digest")
-  valid_574416 = validateParameter(valid_574416, JString, required = true,
+  var valid_564316 = query.getOrDefault("digest")
+  valid_564316 = validateParameter(valid_564316, JString, required = true,
                                  default = nil)
-  if valid_574416 != nil:
-    section.add "digest", valid_574416
+  if valid_564316 != nil:
+    section.add "digest", valid_564316
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2046,20 +2051,20 @@ proc validate_BlobEndUpload_574413(path: JsonNode; query: JsonNode; header: Json
   if body != nil:
     result.add "body", body
 
-proc call*(call_574418: Call_BlobEndUpload_574412; path: JsonNode; query: JsonNode;
+proc call*(call_564318: Call_BlobEndUpload_564312; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Complete the upload, providing all the data in the body, if necessary. A request without a body will just complete the upload with previously uploaded content.
   ## 
-  let valid = call_574418.validator(path, query, header, formData, body)
-  let scheme = call_574418.pickScheme
+  let valid = call_564318.validator(path, query, header, formData, body)
+  let scheme = call_564318.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574418.url(scheme.get, call_574418.host, call_574418.base,
-                         call_574418.route, valid.getOrDefault("path"),
+  let url = call_564318.url(scheme.get, call_564318.host, call_564318.base,
+                         call_564318.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574418, url, valid)
+  result = hook(call_564318, url, valid)
 
-proc call*(call_574419: Call_BlobEndUpload_574412; digest: string;
+proc call*(call_564319: Call_BlobEndUpload_564312; digest: string;
           nextBlobUuidLink: string; value: JsonNode = nil): Recallable =
   ## blobEndUpload
   ## Complete the upload, providing all the data in the body, if necessary. A request without a body will just complete the upload with previously uploaded content.
@@ -2069,22 +2074,22 @@ proc call*(call_574419: Call_BlobEndUpload_574412; digest: string;
   ##        : Optional raw data of blob
   ##   nextBlobUuidLink: string (required)
   ##                   : Link acquired from upload start or previous chunk. Note, do not include initial / (must do substring(1) )
-  var path_574420 = newJObject()
-  var query_574421 = newJObject()
-  var body_574422 = newJObject()
-  add(query_574421, "digest", newJString(digest))
+  var path_564320 = newJObject()
+  var query_564321 = newJObject()
+  var body_564322 = newJObject()
+  add(query_564321, "digest", newJString(digest))
   if value != nil:
-    body_574422 = value
-  add(path_574420, "nextBlobUuidLink", newJString(nextBlobUuidLink))
-  result = call_574419.call(path_574420, query_574421, nil, nil, body_574422)
+    body_564322 = value
+  add(path_564320, "nextBlobUuidLink", newJString(nextBlobUuidLink))
+  result = call_564319.call(path_564320, query_564321, nil, nil, body_564322)
 
-var blobEndUpload* = Call_BlobEndUpload_574412(name: "blobEndUpload",
+var blobEndUpload* = Call_BlobEndUpload_564312(name: "blobEndUpload",
     meth: HttpMethod.HttpPut, host: "azure.local", route: "/{nextBlobUuidLink}",
-    validator: validate_BlobEndUpload_574413, base: "", url: url_BlobEndUpload_574414,
+    validator: validate_BlobEndUpload_564313, base: "", url: url_BlobEndUpload_564314,
     schemes: {Scheme.Https})
 type
-  Call_BlobGetStatus_574405 = ref object of OpenApiRestCall_573657
-proc url_BlobGetStatus_574407(protocol: Scheme; host: string; base: string;
+  Call_BlobGetStatus_564305 = ref object of OpenApiRestCall_563555
+proc url_BlobGetStatus_564307(protocol: Scheme; host: string; base: string;
                              route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2100,7 +2105,7 @@ proc url_BlobGetStatus_574407(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_BlobGetStatus_574406(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_BlobGetStatus_564306(path: JsonNode; query: JsonNode; header: JsonNode;
                                   formData: JsonNode; body: JsonNode): JsonNode =
   ## Retrieve status of upload identified by uuid. The primary purpose of this endpoint is to resolve the current status of a resumable upload.
   ## 
@@ -2112,11 +2117,11 @@ proc validate_BlobGetStatus_574406(path: JsonNode; query: JsonNode; header: Json
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `nextBlobUuidLink` field"
-  var valid_574408 = path.getOrDefault("nextBlobUuidLink")
-  valid_574408 = validateParameter(valid_574408, JString, required = true,
+  var valid_564308 = path.getOrDefault("nextBlobUuidLink")
+  valid_564308 = validateParameter(valid_564308, JString, required = true,
                                  default = nil)
-  if valid_574408 != nil:
-    section.add "nextBlobUuidLink", valid_574408
+  if valid_564308 != nil:
+    section.add "nextBlobUuidLink", valid_564308
   result.add "path", section
   section = newJObject()
   result.add "query", section
@@ -2127,35 +2132,35 @@ proc validate_BlobGetStatus_574406(path: JsonNode; query: JsonNode; header: Json
   if body != nil:
     result.add "body", body
 
-proc call*(call_574409: Call_BlobGetStatus_574405; path: JsonNode; query: JsonNode;
+proc call*(call_564309: Call_BlobGetStatus_564305; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Retrieve status of upload identified by uuid. The primary purpose of this endpoint is to resolve the current status of a resumable upload.
   ## 
-  let valid = call_574409.validator(path, query, header, formData, body)
-  let scheme = call_574409.pickScheme
+  let valid = call_564309.validator(path, query, header, formData, body)
+  let scheme = call_564309.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574409.url(scheme.get, call_574409.host, call_574409.base,
-                         call_574409.route, valid.getOrDefault("path"),
+  let url = call_564309.url(scheme.get, call_564309.host, call_564309.base,
+                         call_564309.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574409, url, valid)
+  result = hook(call_564309, url, valid)
 
-proc call*(call_574410: Call_BlobGetStatus_574405; nextBlobUuidLink: string): Recallable =
+proc call*(call_564310: Call_BlobGetStatus_564305; nextBlobUuidLink: string): Recallable =
   ## blobGetStatus
   ## Retrieve status of upload identified by uuid. The primary purpose of this endpoint is to resolve the current status of a resumable upload.
   ##   nextBlobUuidLink: string (required)
   ##                   : Link acquired from upload start or previous chunk. Note, do not include initial / (must do substring(1) )
-  var path_574411 = newJObject()
-  add(path_574411, "nextBlobUuidLink", newJString(nextBlobUuidLink))
-  result = call_574410.call(path_574411, nil, nil, nil, nil)
+  var path_564311 = newJObject()
+  add(path_564311, "nextBlobUuidLink", newJString(nextBlobUuidLink))
+  result = call_564310.call(path_564311, nil, nil, nil, nil)
 
-var blobGetStatus* = Call_BlobGetStatus_574405(name: "blobGetStatus",
+var blobGetStatus* = Call_BlobGetStatus_564305(name: "blobGetStatus",
     meth: HttpMethod.HttpGet, host: "azure.local", route: "/{nextBlobUuidLink}",
-    validator: validate_BlobGetStatus_574406, base: "", url: url_BlobGetStatus_574407,
+    validator: validate_BlobGetStatus_564306, base: "", url: url_BlobGetStatus_564307,
     schemes: {Scheme.Https})
 type
-  Call_BlobUpload_574430 = ref object of OpenApiRestCall_573657
-proc url_BlobUpload_574432(protocol: Scheme; host: string; base: string; route: string;
+  Call_BlobUpload_564330 = ref object of OpenApiRestCall_563555
+proc url_BlobUpload_564332(protocol: Scheme; host: string; base: string; route: string;
                           path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2171,7 +2176,7 @@ proc url_BlobUpload_574432(protocol: Scheme; host: string; base: string; route: 
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_BlobUpload_574431(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_BlobUpload_564331(path: JsonNode; query: JsonNode; header: JsonNode;
                                formData: JsonNode; body: JsonNode): JsonNode =
   ## Upload a stream of data without completing the upload.
   ## 
@@ -2183,11 +2188,11 @@ proc validate_BlobUpload_574431(path: JsonNode; query: JsonNode; header: JsonNod
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `nextBlobUuidLink` field"
-  var valid_574433 = path.getOrDefault("nextBlobUuidLink")
-  valid_574433 = validateParameter(valid_574433, JString, required = true,
+  var valid_564333 = path.getOrDefault("nextBlobUuidLink")
+  valid_564333 = validateParameter(valid_564333, JString, required = true,
                                  default = nil)
-  if valid_574433 != nil:
-    section.add "nextBlobUuidLink", valid_574433
+  if valid_564333 != nil:
+    section.add "nextBlobUuidLink", valid_564333
   result.add "path", section
   section = newJObject()
   result.add "query", section
@@ -2203,20 +2208,20 @@ proc validate_BlobUpload_574431(path: JsonNode; query: JsonNode; header: JsonNod
   if body != nil:
     result.add "body", body
 
-proc call*(call_574435: Call_BlobUpload_574430; path: JsonNode; query: JsonNode;
+proc call*(call_564335: Call_BlobUpload_564330; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Upload a stream of data without completing the upload.
   ## 
-  let valid = call_574435.validator(path, query, header, formData, body)
-  let scheme = call_574435.pickScheme
+  let valid = call_564335.validator(path, query, header, formData, body)
+  let scheme = call_564335.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574435.url(scheme.get, call_574435.host, call_574435.base,
-                         call_574435.route, valid.getOrDefault("path"),
+  let url = call_564335.url(scheme.get, call_564335.host, call_564335.base,
+                         call_564335.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574435, url, valid)
+  result = hook(call_564335, url, valid)
 
-proc call*(call_574436: Call_BlobUpload_574430; value: JsonNode;
+proc call*(call_564336: Call_BlobUpload_564330; value: JsonNode;
           nextBlobUuidLink: string): Recallable =
   ## blobUpload
   ## Upload a stream of data without completing the upload.
@@ -2224,23 +2229,23 @@ proc call*(call_574436: Call_BlobUpload_574430; value: JsonNode;
   ##        : Raw data of blob
   ##   nextBlobUuidLink: string (required)
   ##                   : Link acquired from upload start or previous chunk. Note, do not include initial / (must do substring(1) )
-  var path_574437 = newJObject()
-  var body_574438 = newJObject()
+  var path_564337 = newJObject()
+  var body_564338 = newJObject()
   if value != nil:
-    body_574438 = value
-  add(path_574437, "nextBlobUuidLink", newJString(nextBlobUuidLink))
-  result = call_574436.call(path_574437, nil, nil, nil, body_574438)
+    body_564338 = value
+  add(path_564337, "nextBlobUuidLink", newJString(nextBlobUuidLink))
+  result = call_564336.call(path_564337, nil, nil, nil, body_564338)
 
-var blobUpload* = Call_BlobUpload_574430(name: "blobUpload",
+var blobUpload* = Call_BlobUpload_564330(name: "blobUpload",
                                       meth: HttpMethod.HttpPatch,
                                       host: "azure.local",
                                       route: "/{nextBlobUuidLink}",
-                                      validator: validate_BlobUpload_574431,
-                                      base: "", url: url_BlobUpload_574432,
+                                      validator: validate_BlobUpload_564331,
+                                      base: "", url: url_BlobUpload_564332,
                                       schemes: {Scheme.Https})
 type
-  Call_BlobCancelUpload_574423 = ref object of OpenApiRestCall_573657
-proc url_BlobCancelUpload_574425(protocol: Scheme; host: string; base: string;
+  Call_BlobCancelUpload_564323 = ref object of OpenApiRestCall_563555
+proc url_BlobCancelUpload_564325(protocol: Scheme; host: string; base: string;
                                 route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2256,7 +2261,7 @@ proc url_BlobCancelUpload_574425(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_BlobCancelUpload_574424(path: JsonNode; query: JsonNode;
+proc validate_BlobCancelUpload_564324(path: JsonNode; query: JsonNode;
                                      header: JsonNode; formData: JsonNode;
                                      body: JsonNode): JsonNode =
   ## Cancel outstanding upload processes, releasing associated resources. If this is not called, the unfinished uploads will eventually timeout.
@@ -2269,11 +2274,11 @@ proc validate_BlobCancelUpload_574424(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `nextBlobUuidLink` field"
-  var valid_574426 = path.getOrDefault("nextBlobUuidLink")
-  valid_574426 = validateParameter(valid_574426, JString, required = true,
+  var valid_564326 = path.getOrDefault("nextBlobUuidLink")
+  valid_564326 = validateParameter(valid_564326, JString, required = true,
                                  default = nil)
-  if valid_574426 != nil:
-    section.add "nextBlobUuidLink", valid_574426
+  if valid_564326 != nil:
+    section.add "nextBlobUuidLink", valid_564326
   result.add "path", section
   section = newJObject()
   result.add "query", section
@@ -2284,32 +2289,32 @@ proc validate_BlobCancelUpload_574424(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574427: Call_BlobCancelUpload_574423; path: JsonNode;
+proc call*(call_564327: Call_BlobCancelUpload_564323; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Cancel outstanding upload processes, releasing associated resources. If this is not called, the unfinished uploads will eventually timeout.
   ## 
-  let valid = call_574427.validator(path, query, header, formData, body)
-  let scheme = call_574427.pickScheme
+  let valid = call_564327.validator(path, query, header, formData, body)
+  let scheme = call_564327.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574427.url(scheme.get, call_574427.host, call_574427.base,
-                         call_574427.route, valid.getOrDefault("path"),
+  let url = call_564327.url(scheme.get, call_564327.host, call_564327.base,
+                         call_564327.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574427, url, valid)
+  result = hook(call_564327, url, valid)
 
-proc call*(call_574428: Call_BlobCancelUpload_574423; nextBlobUuidLink: string): Recallable =
+proc call*(call_564328: Call_BlobCancelUpload_564323; nextBlobUuidLink: string): Recallable =
   ## blobCancelUpload
   ## Cancel outstanding upload processes, releasing associated resources. If this is not called, the unfinished uploads will eventually timeout.
   ##   nextBlobUuidLink: string (required)
   ##                   : Link acquired from upload start or previous chunk. Note, do not include initial / (must do substring(1) )
-  var path_574429 = newJObject()
-  add(path_574429, "nextBlobUuidLink", newJString(nextBlobUuidLink))
-  result = call_574428.call(path_574429, nil, nil, nil, nil)
+  var path_564329 = newJObject()
+  add(path_564329, "nextBlobUuidLink", newJString(nextBlobUuidLink))
+  result = call_564328.call(path_564329, nil, nil, nil, nil)
 
-var blobCancelUpload* = Call_BlobCancelUpload_574423(name: "blobCancelUpload",
+var blobCancelUpload* = Call_BlobCancelUpload_564323(name: "blobCancelUpload",
     meth: HttpMethod.HttpDelete, host: "azure.local", route: "/{nextBlobUuidLink}",
-    validator: validate_BlobCancelUpload_574424, base: "",
-    url: url_BlobCancelUpload_574425, schemes: {Scheme.Https})
+    validator: validate_BlobCancelUpload_564324, base: "",
+    url: url_BlobCancelUpload_564325, schemes: {Scheme.Https})
 export
   rest
 

@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, httpcore
 
 ## auto-generated via openapi macro
 ## title: Microsoft Insights
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_567658 = ref object of OpenApiRestCall
+  OpenApiRestCall_563556 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_567658](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563556](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_567658): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563556): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,8 +107,8 @@ const
   macServiceName = "monitor-scheduledQueryRule_API"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_ScheduledQueryRulesListBySubscription_567880 = ref object of OpenApiRestCall_567658
-proc url_ScheduledQueryRulesListBySubscription_567882(protocol: Scheme;
+  Call_ScheduledQueryRulesListBySubscription_563778 = ref object of OpenApiRestCall_563556
+proc url_ScheduledQueryRulesListBySubscription_563780(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -121,7 +125,7 @@ proc url_ScheduledQueryRulesListBySubscription_567882(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ScheduledQueryRulesListBySubscription_567881(path: JsonNode;
+proc validate_ScheduledQueryRulesListBySubscription_563779(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## List the Log Search rules within a subscription group.
   ## 
@@ -133,11 +137,11 @@ proc validate_ScheduledQueryRulesListBySubscription_567881(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_568056 = path.getOrDefault("subscriptionId")
-  valid_568056 = validateParameter(valid_568056, JString, required = true,
+  var valid_563956 = path.getOrDefault("subscriptionId")
+  valid_563956 = validateParameter(valid_563956, JString, required = true,
                                  default = nil)
-  if valid_568056 != nil:
-    section.add "subscriptionId", valid_568056
+  if valid_563956 != nil:
+    section.add "subscriptionId", valid_563956
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -147,16 +151,16 @@ proc validate_ScheduledQueryRulesListBySubscription_567881(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568057 = query.getOrDefault("api-version")
-  valid_568057 = validateParameter(valid_568057, JString, required = true,
+  var valid_563957 = query.getOrDefault("api-version")
+  valid_563957 = validateParameter(valid_563957, JString, required = true,
                                  default = nil)
-  if valid_568057 != nil:
-    section.add "api-version", valid_568057
-  var valid_568058 = query.getOrDefault("$filter")
-  valid_568058 = validateParameter(valid_568058, JString, required = false,
+  if valid_563957 != nil:
+    section.add "api-version", valid_563957
+  var valid_563958 = query.getOrDefault("$filter")
+  valid_563958 = validateParameter(valid_563958, JString, required = false,
                                  default = nil)
-  if valid_568058 != nil:
-    section.add "$filter", valid_568058
+  if valid_563958 != nil:
+    section.add "$filter", valid_563958
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -165,21 +169,21 @@ proc validate_ScheduledQueryRulesListBySubscription_567881(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568081: Call_ScheduledQueryRulesListBySubscription_567880;
+proc call*(call_563981: Call_ScheduledQueryRulesListBySubscription_563778;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## List the Log Search rules within a subscription group.
   ## 
-  let valid = call_568081.validator(path, query, header, formData, body)
-  let scheme = call_568081.pickScheme
+  let valid = call_563981.validator(path, query, header, formData, body)
+  let scheme = call_563981.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568081.url(scheme.get, call_568081.host, call_568081.base,
-                         call_568081.route, valid.getOrDefault("path"),
+  let url = call_563981.url(scheme.get, call_563981.host, call_563981.base,
+                         call_563981.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568081, url, valid)
+  result = hook(call_563981, url, valid)
 
-proc call*(call_568152: Call_ScheduledQueryRulesListBySubscription_567880;
+proc call*(call_564052: Call_ScheduledQueryRulesListBySubscription_563778;
           apiVersion: string; subscriptionId: string; Filter: string = ""): Recallable =
   ## scheduledQueryRulesListBySubscription
   ## List the Log Search rules within a subscription group.
@@ -189,21 +193,21 @@ proc call*(call_568152: Call_ScheduledQueryRulesListBySubscription_567880;
   ##                 : The Azure subscription Id.
   ##   Filter: string
   ##         : The filter to apply on the operation. For more information please see https://msdn.microsoft.com/en-us/library/azure/dn931934.aspx
-  var path_568153 = newJObject()
-  var query_568155 = newJObject()
-  add(query_568155, "api-version", newJString(apiVersion))
-  add(path_568153, "subscriptionId", newJString(subscriptionId))
-  add(query_568155, "$filter", newJString(Filter))
-  result = call_568152.call(path_568153, query_568155, nil, nil, nil)
+  var path_564053 = newJObject()
+  var query_564055 = newJObject()
+  add(query_564055, "api-version", newJString(apiVersion))
+  add(path_564053, "subscriptionId", newJString(subscriptionId))
+  add(query_564055, "$filter", newJString(Filter))
+  result = call_564052.call(path_564053, query_564055, nil, nil, nil)
 
-var scheduledQueryRulesListBySubscription* = Call_ScheduledQueryRulesListBySubscription_567880(
+var scheduledQueryRulesListBySubscription* = Call_ScheduledQueryRulesListBySubscription_563778(
     name: "scheduledQueryRulesListBySubscription", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/microsoft.insights/scheduledQueryRules",
-    validator: validate_ScheduledQueryRulesListBySubscription_567881, base: "",
-    url: url_ScheduledQueryRulesListBySubscription_567882, schemes: {Scheme.Https})
+    validator: validate_ScheduledQueryRulesListBySubscription_563779, base: "",
+    url: url_ScheduledQueryRulesListBySubscription_563780, schemes: {Scheme.Https})
 type
-  Call_ScheduledQueryRulesListByResourceGroup_568194 = ref object of OpenApiRestCall_567658
-proc url_ScheduledQueryRulesListByResourceGroup_568196(protocol: Scheme;
+  Call_ScheduledQueryRulesListByResourceGroup_564094 = ref object of OpenApiRestCall_563556
+proc url_ScheduledQueryRulesListByResourceGroup_564096(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -224,30 +228,30 @@ proc url_ScheduledQueryRulesListByResourceGroup_568196(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ScheduledQueryRulesListByResourceGroup_568195(path: JsonNode;
+proc validate_ScheduledQueryRulesListByResourceGroup_564095(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## List the Log Search rules within a resource group.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   subscriptionId: JString (required)
   ##                 : The Azure subscription Id.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568197 = path.getOrDefault("resourceGroupName")
-  valid_568197 = validateParameter(valid_568197, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564097 = path.getOrDefault("subscriptionId")
+  valid_564097 = validateParameter(valid_564097, JString, required = true,
                                  default = nil)
-  if valid_568197 != nil:
-    section.add "resourceGroupName", valid_568197
-  var valid_568198 = path.getOrDefault("subscriptionId")
-  valid_568198 = validateParameter(valid_568198, JString, required = true,
+  if valid_564097 != nil:
+    section.add "subscriptionId", valid_564097
+  var valid_564098 = path.getOrDefault("resourceGroupName")
+  valid_564098 = validateParameter(valid_564098, JString, required = true,
                                  default = nil)
-  if valid_568198 != nil:
-    section.add "subscriptionId", valid_568198
+  if valid_564098 != nil:
+    section.add "resourceGroupName", valid_564098
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -257,16 +261,16 @@ proc validate_ScheduledQueryRulesListByResourceGroup_568195(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568199 = query.getOrDefault("api-version")
-  valid_568199 = validateParameter(valid_568199, JString, required = true,
+  var valid_564099 = query.getOrDefault("api-version")
+  valid_564099 = validateParameter(valid_564099, JString, required = true,
                                  default = nil)
-  if valid_568199 != nil:
-    section.add "api-version", valid_568199
-  var valid_568200 = query.getOrDefault("$filter")
-  valid_568200 = validateParameter(valid_568200, JString, required = false,
+  if valid_564099 != nil:
+    section.add "api-version", valid_564099
+  var valid_564100 = query.getOrDefault("$filter")
+  valid_564100 = validateParameter(valid_564100, JString, required = false,
                                  default = nil)
-  if valid_568200 != nil:
-    section.add "$filter", valid_568200
+  if valid_564100 != nil:
+    section.add "$filter", valid_564100
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -275,50 +279,50 @@ proc validate_ScheduledQueryRulesListByResourceGroup_568195(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568201: Call_ScheduledQueryRulesListByResourceGroup_568194;
+proc call*(call_564101: Call_ScheduledQueryRulesListByResourceGroup_564094;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## List the Log Search rules within a resource group.
   ## 
-  let valid = call_568201.validator(path, query, header, formData, body)
-  let scheme = call_568201.pickScheme
+  let valid = call_564101.validator(path, query, header, formData, body)
+  let scheme = call_564101.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568201.url(scheme.get, call_568201.host, call_568201.base,
-                         call_568201.route, valid.getOrDefault("path"),
+  let url = call_564101.url(scheme.get, call_564101.host, call_564101.base,
+                         call_564101.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568201, url, valid)
+  result = hook(call_564101, url, valid)
 
-proc call*(call_568202: Call_ScheduledQueryRulesListByResourceGroup_568194;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
+proc call*(call_564102: Call_ScheduledQueryRulesListByResourceGroup_564094;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string;
           Filter: string = ""): Recallable =
   ## scheduledQueryRulesListByResourceGroup
   ## List the Log Search rules within a resource group.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
   ##   subscriptionId: string (required)
   ##                 : The Azure subscription Id.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   Filter: string
   ##         : The filter to apply on the operation. For more information please see https://msdn.microsoft.com/en-us/library/azure/dn931934.aspx
-  var path_568203 = newJObject()
-  var query_568204 = newJObject()
-  add(path_568203, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568204, "api-version", newJString(apiVersion))
-  add(path_568203, "subscriptionId", newJString(subscriptionId))
-  add(query_568204, "$filter", newJString(Filter))
-  result = call_568202.call(path_568203, query_568204, nil, nil, nil)
+  var path_564103 = newJObject()
+  var query_564104 = newJObject()
+  add(query_564104, "api-version", newJString(apiVersion))
+  add(path_564103, "subscriptionId", newJString(subscriptionId))
+  add(path_564103, "resourceGroupName", newJString(resourceGroupName))
+  add(query_564104, "$filter", newJString(Filter))
+  result = call_564102.call(path_564103, query_564104, nil, nil, nil)
 
-var scheduledQueryRulesListByResourceGroup* = Call_ScheduledQueryRulesListByResourceGroup_568194(
+var scheduledQueryRulesListByResourceGroup* = Call_ScheduledQueryRulesListByResourceGroup_564094(
     name: "scheduledQueryRulesListByResourceGroup", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/microsoft.insights/scheduledQueryRules",
-    validator: validate_ScheduledQueryRulesListByResourceGroup_568195, base: "",
-    url: url_ScheduledQueryRulesListByResourceGroup_568196,
+    validator: validate_ScheduledQueryRulesListByResourceGroup_564095, base: "",
+    url: url_ScheduledQueryRulesListByResourceGroup_564096,
     schemes: {Scheme.Https})
 type
-  Call_ScheduledQueryRulesCreateOrUpdate_568216 = ref object of OpenApiRestCall_567658
-proc url_ScheduledQueryRulesCreateOrUpdate_568218(protocol: Scheme; host: string;
+  Call_ScheduledQueryRulesCreateOrUpdate_564116 = ref object of OpenApiRestCall_563556
+proc url_ScheduledQueryRulesCreateOrUpdate_564118(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -341,37 +345,37 @@ proc url_ScheduledQueryRulesCreateOrUpdate_568218(protocol: Scheme; host: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ScheduledQueryRulesCreateOrUpdate_568217(path: JsonNode;
+proc validate_ScheduledQueryRulesCreateOrUpdate_564117(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Creates or updates an log search rule.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
-  ##   ruleName: JString (required)
-  ##           : The name of the rule.
   ##   subscriptionId: JString (required)
   ##                 : The Azure subscription Id.
+  ##   ruleName: JString (required)
+  ##           : The name of the rule.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568219 = path.getOrDefault("resourceGroupName")
-  valid_568219 = validateParameter(valid_568219, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564119 = path.getOrDefault("subscriptionId")
+  valid_564119 = validateParameter(valid_564119, JString, required = true,
                                  default = nil)
-  if valid_568219 != nil:
-    section.add "resourceGroupName", valid_568219
-  var valid_568220 = path.getOrDefault("ruleName")
-  valid_568220 = validateParameter(valid_568220, JString, required = true,
+  if valid_564119 != nil:
+    section.add "subscriptionId", valid_564119
+  var valid_564120 = path.getOrDefault("ruleName")
+  valid_564120 = validateParameter(valid_564120, JString, required = true,
                                  default = nil)
-  if valid_568220 != nil:
-    section.add "ruleName", valid_568220
-  var valid_568221 = path.getOrDefault("subscriptionId")
-  valid_568221 = validateParameter(valid_568221, JString, required = true,
+  if valid_564120 != nil:
+    section.add "ruleName", valid_564120
+  var valid_564121 = path.getOrDefault("resourceGroupName")
+  valid_564121 = validateParameter(valid_564121, JString, required = true,
                                  default = nil)
-  if valid_568221 != nil:
-    section.add "subscriptionId", valid_568221
+  if valid_564121 != nil:
+    section.add "resourceGroupName", valid_564121
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -379,11 +383,11 @@ proc validate_ScheduledQueryRulesCreateOrUpdate_568217(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568222 = query.getOrDefault("api-version")
-  valid_568222 = validateParameter(valid_568222, JString, required = true,
+  var valid_564122 = query.getOrDefault("api-version")
+  valid_564122 = validateParameter(valid_564122, JString, required = true,
                                  default = nil)
-  if valid_568222 != nil:
-    section.add "api-version", valid_568222
+  if valid_564122 != nil:
+    section.add "api-version", valid_564122
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -397,54 +401,54 @@ proc validate_ScheduledQueryRulesCreateOrUpdate_568217(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568224: Call_ScheduledQueryRulesCreateOrUpdate_568216;
+proc call*(call_564124: Call_ScheduledQueryRulesCreateOrUpdate_564116;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Creates or updates an log search rule.
   ## 
-  let valid = call_568224.validator(path, query, header, formData, body)
-  let scheme = call_568224.pickScheme
+  let valid = call_564124.validator(path, query, header, formData, body)
+  let scheme = call_564124.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568224.url(scheme.get, call_568224.host, call_568224.base,
-                         call_568224.route, valid.getOrDefault("path"),
+  let url = call_564124.url(scheme.get, call_564124.host, call_564124.base,
+                         call_564124.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568224, url, valid)
+  result = hook(call_564124, url, valid)
 
-proc call*(call_568225: Call_ScheduledQueryRulesCreateOrUpdate_568216;
-          resourceGroupName: string; apiVersion: string; ruleName: string;
-          subscriptionId: string; parameters: JsonNode): Recallable =
+proc call*(call_564125: Call_ScheduledQueryRulesCreateOrUpdate_564116;
+          apiVersion: string; subscriptionId: string; ruleName: string;
+          resourceGroupName: string; parameters: JsonNode): Recallable =
   ## scheduledQueryRulesCreateOrUpdate
   ## Creates or updates an log search rule.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
-  ##   ruleName: string (required)
-  ##           : The name of the rule.
   ##   subscriptionId: string (required)
   ##                 : The Azure subscription Id.
+  ##   ruleName: string (required)
+  ##           : The name of the rule.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   parameters: JObject (required)
   ##             : The parameters of the rule to create or update.
-  var path_568226 = newJObject()
-  var query_568227 = newJObject()
-  var body_568228 = newJObject()
-  add(path_568226, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568227, "api-version", newJString(apiVersion))
-  add(path_568226, "ruleName", newJString(ruleName))
-  add(path_568226, "subscriptionId", newJString(subscriptionId))
+  var path_564126 = newJObject()
+  var query_564127 = newJObject()
+  var body_564128 = newJObject()
+  add(query_564127, "api-version", newJString(apiVersion))
+  add(path_564126, "subscriptionId", newJString(subscriptionId))
+  add(path_564126, "ruleName", newJString(ruleName))
+  add(path_564126, "resourceGroupName", newJString(resourceGroupName))
   if parameters != nil:
-    body_568228 = parameters
-  result = call_568225.call(path_568226, query_568227, nil, nil, body_568228)
+    body_564128 = parameters
+  result = call_564125.call(path_564126, query_564127, nil, nil, body_564128)
 
-var scheduledQueryRulesCreateOrUpdate* = Call_ScheduledQueryRulesCreateOrUpdate_568216(
+var scheduledQueryRulesCreateOrUpdate* = Call_ScheduledQueryRulesCreateOrUpdate_564116(
     name: "scheduledQueryRulesCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/microsoft.insights/scheduledQueryRules/{ruleName}",
-    validator: validate_ScheduledQueryRulesCreateOrUpdate_568217, base: "",
-    url: url_ScheduledQueryRulesCreateOrUpdate_568218, schemes: {Scheme.Https})
+    validator: validate_ScheduledQueryRulesCreateOrUpdate_564117, base: "",
+    url: url_ScheduledQueryRulesCreateOrUpdate_564118, schemes: {Scheme.Https})
 type
-  Call_ScheduledQueryRulesGet_568205 = ref object of OpenApiRestCall_567658
-proc url_ScheduledQueryRulesGet_568207(protocol: Scheme; host: string; base: string;
+  Call_ScheduledQueryRulesGet_564105 = ref object of OpenApiRestCall_563556
+proc url_ScheduledQueryRulesGet_564107(protocol: Scheme; host: string; base: string;
                                       route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -467,37 +471,37 @@ proc url_ScheduledQueryRulesGet_568207(protocol: Scheme; host: string; base: str
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ScheduledQueryRulesGet_568206(path: JsonNode; query: JsonNode;
+proc validate_ScheduledQueryRulesGet_564106(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets an Log Search rule
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
-  ##   ruleName: JString (required)
-  ##           : The name of the rule.
   ##   subscriptionId: JString (required)
   ##                 : The Azure subscription Id.
+  ##   ruleName: JString (required)
+  ##           : The name of the rule.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568208 = path.getOrDefault("resourceGroupName")
-  valid_568208 = validateParameter(valid_568208, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564108 = path.getOrDefault("subscriptionId")
+  valid_564108 = validateParameter(valid_564108, JString, required = true,
                                  default = nil)
-  if valid_568208 != nil:
-    section.add "resourceGroupName", valid_568208
-  var valid_568209 = path.getOrDefault("ruleName")
-  valid_568209 = validateParameter(valid_568209, JString, required = true,
+  if valid_564108 != nil:
+    section.add "subscriptionId", valid_564108
+  var valid_564109 = path.getOrDefault("ruleName")
+  valid_564109 = validateParameter(valid_564109, JString, required = true,
                                  default = nil)
-  if valid_568209 != nil:
-    section.add "ruleName", valid_568209
-  var valid_568210 = path.getOrDefault("subscriptionId")
-  valid_568210 = validateParameter(valid_568210, JString, required = true,
+  if valid_564109 != nil:
+    section.add "ruleName", valid_564109
+  var valid_564110 = path.getOrDefault("resourceGroupName")
+  valid_564110 = validateParameter(valid_564110, JString, required = true,
                                  default = nil)
-  if valid_568210 != nil:
-    section.add "subscriptionId", valid_568210
+  if valid_564110 != nil:
+    section.add "resourceGroupName", valid_564110
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -505,11 +509,11 @@ proc validate_ScheduledQueryRulesGet_568206(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568211 = query.getOrDefault("api-version")
-  valid_568211 = validateParameter(valid_568211, JString, required = true,
+  var valid_564111 = query.getOrDefault("api-version")
+  valid_564111 = validateParameter(valid_564111, JString, required = true,
                                  default = nil)
-  if valid_568211 != nil:
-    section.add "api-version", valid_568211
+  if valid_564111 != nil:
+    section.add "api-version", valid_564111
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -518,48 +522,47 @@ proc validate_ScheduledQueryRulesGet_568206(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568212: Call_ScheduledQueryRulesGet_568205; path: JsonNode;
+proc call*(call_564112: Call_ScheduledQueryRulesGet_564105; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets an Log Search rule
   ## 
-  let valid = call_568212.validator(path, query, header, formData, body)
-  let scheme = call_568212.pickScheme
+  let valid = call_564112.validator(path, query, header, formData, body)
+  let scheme = call_564112.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568212.url(scheme.get, call_568212.host, call_568212.base,
-                         call_568212.route, valid.getOrDefault("path"),
+  let url = call_564112.url(scheme.get, call_564112.host, call_564112.base,
+                         call_564112.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568212, url, valid)
+  result = hook(call_564112, url, valid)
 
-proc call*(call_568213: Call_ScheduledQueryRulesGet_568205;
-          resourceGroupName: string; apiVersion: string; ruleName: string;
-          subscriptionId: string): Recallable =
+proc call*(call_564113: Call_ScheduledQueryRulesGet_564105; apiVersion: string;
+          subscriptionId: string; ruleName: string; resourceGroupName: string): Recallable =
   ## scheduledQueryRulesGet
   ## Gets an Log Search rule
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
-  ##   ruleName: string (required)
-  ##           : The name of the rule.
   ##   subscriptionId: string (required)
   ##                 : The Azure subscription Id.
-  var path_568214 = newJObject()
-  var query_568215 = newJObject()
-  add(path_568214, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568215, "api-version", newJString(apiVersion))
-  add(path_568214, "ruleName", newJString(ruleName))
-  add(path_568214, "subscriptionId", newJString(subscriptionId))
-  result = call_568213.call(path_568214, query_568215, nil, nil, nil)
+  ##   ruleName: string (required)
+  ##           : The name of the rule.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564114 = newJObject()
+  var query_564115 = newJObject()
+  add(query_564115, "api-version", newJString(apiVersion))
+  add(path_564114, "subscriptionId", newJString(subscriptionId))
+  add(path_564114, "ruleName", newJString(ruleName))
+  add(path_564114, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564113.call(path_564114, query_564115, nil, nil, nil)
 
-var scheduledQueryRulesGet* = Call_ScheduledQueryRulesGet_568205(
+var scheduledQueryRulesGet* = Call_ScheduledQueryRulesGet_564105(
     name: "scheduledQueryRulesGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/microsoft.insights/scheduledQueryRules/{ruleName}",
-    validator: validate_ScheduledQueryRulesGet_568206, base: "",
-    url: url_ScheduledQueryRulesGet_568207, schemes: {Scheme.Https})
+    validator: validate_ScheduledQueryRulesGet_564106, base: "",
+    url: url_ScheduledQueryRulesGet_564107, schemes: {Scheme.Https})
 type
-  Call_ScheduledQueryRulesUpdate_568240 = ref object of OpenApiRestCall_567658
-proc url_ScheduledQueryRulesUpdate_568242(protocol: Scheme; host: string;
+  Call_ScheduledQueryRulesUpdate_564140 = ref object of OpenApiRestCall_563556
+proc url_ScheduledQueryRulesUpdate_564142(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -582,37 +585,37 @@ proc url_ScheduledQueryRulesUpdate_568242(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ScheduledQueryRulesUpdate_568241(path: JsonNode; query: JsonNode;
+proc validate_ScheduledQueryRulesUpdate_564141(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Update log search Rule.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
-  ##   ruleName: JString (required)
-  ##           : The name of the rule.
   ##   subscriptionId: JString (required)
   ##                 : The Azure subscription Id.
+  ##   ruleName: JString (required)
+  ##           : The name of the rule.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568260 = path.getOrDefault("resourceGroupName")
-  valid_568260 = validateParameter(valid_568260, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564160 = path.getOrDefault("subscriptionId")
+  valid_564160 = validateParameter(valid_564160, JString, required = true,
                                  default = nil)
-  if valid_568260 != nil:
-    section.add "resourceGroupName", valid_568260
-  var valid_568261 = path.getOrDefault("ruleName")
-  valid_568261 = validateParameter(valid_568261, JString, required = true,
+  if valid_564160 != nil:
+    section.add "subscriptionId", valid_564160
+  var valid_564161 = path.getOrDefault("ruleName")
+  valid_564161 = validateParameter(valid_564161, JString, required = true,
                                  default = nil)
-  if valid_568261 != nil:
-    section.add "ruleName", valid_568261
-  var valid_568262 = path.getOrDefault("subscriptionId")
-  valid_568262 = validateParameter(valid_568262, JString, required = true,
+  if valid_564161 != nil:
+    section.add "ruleName", valid_564161
+  var valid_564162 = path.getOrDefault("resourceGroupName")
+  valid_564162 = validateParameter(valid_564162, JString, required = true,
                                  default = nil)
-  if valid_568262 != nil:
-    section.add "subscriptionId", valid_568262
+  if valid_564162 != nil:
+    section.add "resourceGroupName", valid_564162
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -620,11 +623,11 @@ proc validate_ScheduledQueryRulesUpdate_568241(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568263 = query.getOrDefault("api-version")
-  valid_568263 = validateParameter(valid_568263, JString, required = true,
+  var valid_564163 = query.getOrDefault("api-version")
+  valid_564163 = validateParameter(valid_564163, JString, required = true,
                                  default = nil)
-  if valid_568263 != nil:
-    section.add "api-version", valid_568263
+  if valid_564163 != nil:
+    section.add "api-version", valid_564163
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -638,53 +641,53 @@ proc validate_ScheduledQueryRulesUpdate_568241(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568265: Call_ScheduledQueryRulesUpdate_568240; path: JsonNode;
+proc call*(call_564165: Call_ScheduledQueryRulesUpdate_564140; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Update log search Rule.
   ## 
-  let valid = call_568265.validator(path, query, header, formData, body)
-  let scheme = call_568265.pickScheme
+  let valid = call_564165.validator(path, query, header, formData, body)
+  let scheme = call_564165.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568265.url(scheme.get, call_568265.host, call_568265.base,
-                         call_568265.route, valid.getOrDefault("path"),
+  let url = call_564165.url(scheme.get, call_564165.host, call_564165.base,
+                         call_564165.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568265, url, valid)
+  result = hook(call_564165, url, valid)
 
-proc call*(call_568266: Call_ScheduledQueryRulesUpdate_568240;
-          resourceGroupName: string; apiVersion: string; ruleName: string;
-          subscriptionId: string; parameters: JsonNode): Recallable =
+proc call*(call_564166: Call_ScheduledQueryRulesUpdate_564140; apiVersion: string;
+          subscriptionId: string; ruleName: string; resourceGroupName: string;
+          parameters: JsonNode): Recallable =
   ## scheduledQueryRulesUpdate
   ## Update log search Rule.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
-  ##   ruleName: string (required)
-  ##           : The name of the rule.
   ##   subscriptionId: string (required)
   ##                 : The Azure subscription Id.
+  ##   ruleName: string (required)
+  ##           : The name of the rule.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   parameters: JObject (required)
   ##             : The parameters of the rule to update.
-  var path_568267 = newJObject()
-  var query_568268 = newJObject()
-  var body_568269 = newJObject()
-  add(path_568267, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568268, "api-version", newJString(apiVersion))
-  add(path_568267, "ruleName", newJString(ruleName))
-  add(path_568267, "subscriptionId", newJString(subscriptionId))
+  var path_564167 = newJObject()
+  var query_564168 = newJObject()
+  var body_564169 = newJObject()
+  add(query_564168, "api-version", newJString(apiVersion))
+  add(path_564167, "subscriptionId", newJString(subscriptionId))
+  add(path_564167, "ruleName", newJString(ruleName))
+  add(path_564167, "resourceGroupName", newJString(resourceGroupName))
   if parameters != nil:
-    body_568269 = parameters
-  result = call_568266.call(path_568267, query_568268, nil, nil, body_568269)
+    body_564169 = parameters
+  result = call_564166.call(path_564167, query_564168, nil, nil, body_564169)
 
-var scheduledQueryRulesUpdate* = Call_ScheduledQueryRulesUpdate_568240(
+var scheduledQueryRulesUpdate* = Call_ScheduledQueryRulesUpdate_564140(
     name: "scheduledQueryRulesUpdate", meth: HttpMethod.HttpPatch,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/microsoft.insights/scheduledQueryRules/{ruleName}",
-    validator: validate_ScheduledQueryRulesUpdate_568241, base: "",
-    url: url_ScheduledQueryRulesUpdate_568242, schemes: {Scheme.Https})
+    validator: validate_ScheduledQueryRulesUpdate_564141, base: "",
+    url: url_ScheduledQueryRulesUpdate_564142, schemes: {Scheme.Https})
 type
-  Call_ScheduledQueryRulesDelete_568229 = ref object of OpenApiRestCall_567658
-proc url_ScheduledQueryRulesDelete_568231(protocol: Scheme; host: string;
+  Call_ScheduledQueryRulesDelete_564129 = ref object of OpenApiRestCall_563556
+proc url_ScheduledQueryRulesDelete_564131(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -707,37 +710,37 @@ proc url_ScheduledQueryRulesDelete_568231(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ScheduledQueryRulesDelete_568230(path: JsonNode; query: JsonNode;
+proc validate_ScheduledQueryRulesDelete_564130(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Deletes a Log Search rule
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
-  ##   ruleName: JString (required)
-  ##           : The name of the rule.
   ##   subscriptionId: JString (required)
   ##                 : The Azure subscription Id.
+  ##   ruleName: JString (required)
+  ##           : The name of the rule.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568232 = path.getOrDefault("resourceGroupName")
-  valid_568232 = validateParameter(valid_568232, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564132 = path.getOrDefault("subscriptionId")
+  valid_564132 = validateParameter(valid_564132, JString, required = true,
                                  default = nil)
-  if valid_568232 != nil:
-    section.add "resourceGroupName", valid_568232
-  var valid_568233 = path.getOrDefault("ruleName")
-  valid_568233 = validateParameter(valid_568233, JString, required = true,
+  if valid_564132 != nil:
+    section.add "subscriptionId", valid_564132
+  var valid_564133 = path.getOrDefault("ruleName")
+  valid_564133 = validateParameter(valid_564133, JString, required = true,
                                  default = nil)
-  if valid_568233 != nil:
-    section.add "ruleName", valid_568233
-  var valid_568234 = path.getOrDefault("subscriptionId")
-  valid_568234 = validateParameter(valid_568234, JString, required = true,
+  if valid_564133 != nil:
+    section.add "ruleName", valid_564133
+  var valid_564134 = path.getOrDefault("resourceGroupName")
+  valid_564134 = validateParameter(valid_564134, JString, required = true,
                                  default = nil)
-  if valid_568234 != nil:
-    section.add "subscriptionId", valid_568234
+  if valid_564134 != nil:
+    section.add "resourceGroupName", valid_564134
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -745,11 +748,11 @@ proc validate_ScheduledQueryRulesDelete_568230(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568235 = query.getOrDefault("api-version")
-  valid_568235 = validateParameter(valid_568235, JString, required = true,
+  var valid_564135 = query.getOrDefault("api-version")
+  valid_564135 = validateParameter(valid_564135, JString, required = true,
                                  default = nil)
-  if valid_568235 != nil:
-    section.add "api-version", valid_568235
+  if valid_564135 != nil:
+    section.add "api-version", valid_564135
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -758,45 +761,44 @@ proc validate_ScheduledQueryRulesDelete_568230(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568236: Call_ScheduledQueryRulesDelete_568229; path: JsonNode;
+proc call*(call_564136: Call_ScheduledQueryRulesDelete_564129; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes a Log Search rule
   ## 
-  let valid = call_568236.validator(path, query, header, formData, body)
-  let scheme = call_568236.pickScheme
+  let valid = call_564136.validator(path, query, header, formData, body)
+  let scheme = call_564136.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568236.url(scheme.get, call_568236.host, call_568236.base,
-                         call_568236.route, valid.getOrDefault("path"),
+  let url = call_564136.url(scheme.get, call_564136.host, call_564136.base,
+                         call_564136.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568236, url, valid)
+  result = hook(call_564136, url, valid)
 
-proc call*(call_568237: Call_ScheduledQueryRulesDelete_568229;
-          resourceGroupName: string; apiVersion: string; ruleName: string;
-          subscriptionId: string): Recallable =
+proc call*(call_564137: Call_ScheduledQueryRulesDelete_564129; apiVersion: string;
+          subscriptionId: string; ruleName: string; resourceGroupName: string): Recallable =
   ## scheduledQueryRulesDelete
   ## Deletes a Log Search rule
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
-  ##   ruleName: string (required)
-  ##           : The name of the rule.
   ##   subscriptionId: string (required)
   ##                 : The Azure subscription Id.
-  var path_568238 = newJObject()
-  var query_568239 = newJObject()
-  add(path_568238, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568239, "api-version", newJString(apiVersion))
-  add(path_568238, "ruleName", newJString(ruleName))
-  add(path_568238, "subscriptionId", newJString(subscriptionId))
-  result = call_568237.call(path_568238, query_568239, nil, nil, nil)
+  ##   ruleName: string (required)
+  ##           : The name of the rule.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564138 = newJObject()
+  var query_564139 = newJObject()
+  add(query_564139, "api-version", newJString(apiVersion))
+  add(path_564138, "subscriptionId", newJString(subscriptionId))
+  add(path_564138, "ruleName", newJString(ruleName))
+  add(path_564138, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564137.call(path_564138, query_564139, nil, nil, nil)
 
-var scheduledQueryRulesDelete* = Call_ScheduledQueryRulesDelete_568229(
+var scheduledQueryRulesDelete* = Call_ScheduledQueryRulesDelete_564129(
     name: "scheduledQueryRulesDelete", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/microsoft.insights/scheduledQueryRules/{ruleName}",
-    validator: validate_ScheduledQueryRulesDelete_568230, base: "",
-    url: url_ScheduledQueryRulesDelete_568231, schemes: {Scheme.Https})
+    validator: validate_ScheduledQueryRulesDelete_564130, base: "",
+    url: url_ScheduledQueryRulesDelete_564131, schemes: {Scheme.Https})
 export
   rest
 

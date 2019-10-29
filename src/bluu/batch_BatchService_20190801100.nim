@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_573667 = ref object of OpenApiRestCall
+  OpenApiRestCall_563565 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_573667](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563565](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_573667): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563565): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,15 +107,15 @@ const
   macServiceName = "batch-BatchService"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_ApplicationList_573889 = ref object of OpenApiRestCall_573667
-proc url_ApplicationList_573891(protocol: Scheme; host: string; base: string;
+  Call_ApplicationList_563787 = ref object of OpenApiRestCall_563565
+proc url_ApplicationList_563789(protocol: Scheme; host: string; base: string;
                                route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_ApplicationList_573890(path: JsonNode; query: JsonNode;
+proc validate_ApplicationList_563788(path: JsonNode; query: JsonNode;
                                     header: JsonNode; formData: JsonNode;
                                     body: JsonNode): JsonNode =
   ## This operation returns only Applications and versions that are available for use on Compute Nodes; that is, that can be used in an Package reference. For administrator information about applications and versions that are not yet available to Compute Nodes, use the Azure portal or the Azure Resource Manager API.
@@ -121,96 +125,96 @@ proc validate_ApplicationList_573890(path: JsonNode; query: JsonNode;
   section = newJObject()
   result.add "path", section
   ## parameters in `query` object:
-  ##   timeout: JInt
-  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   ##   api-version: JString (required)
   ##              : Client API Version.
+  ##   timeout: JInt
+  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   ##   maxresults: JInt
   ##             : The maximum number of items to return in the response. A maximum of 1000 applications can be returned.
   section = newJObject()
-  var valid_574064 = query.getOrDefault("timeout")
-  valid_574064 = validateParameter(valid_574064, JInt, required = false,
-                                 default = newJInt(30))
-  if valid_574064 != nil:
-    section.add "timeout", valid_574064
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574065 = query.getOrDefault("api-version")
-  valid_574065 = validateParameter(valid_574065, JString, required = true,
+  var valid_563950 = query.getOrDefault("api-version")
+  valid_563950 = validateParameter(valid_563950, JString, required = true,
                                  default = nil)
-  if valid_574065 != nil:
-    section.add "api-version", valid_574065
-  var valid_574066 = query.getOrDefault("maxresults")
-  valid_574066 = validateParameter(valid_574066, JInt, required = false,
+  if valid_563950 != nil:
+    section.add "api-version", valid_563950
+  var valid_563965 = query.getOrDefault("timeout")
+  valid_563965 = validateParameter(valid_563965, JInt, required = false,
+                                 default = newJInt(30))
+  if valid_563965 != nil:
+    section.add "timeout", valid_563965
+  var valid_563966 = query.getOrDefault("maxresults")
+  valid_563966 = validateParameter(valid_563966, JInt, required = false,
                                  default = newJInt(1000))
-  if valid_574066 != nil:
-    section.add "maxresults", valid_574066
+  if valid_563966 != nil:
+    section.add "maxresults", valid_563966
   result.add "query", section
   ## parameters in `header` object:
+  ##   return-client-request-id: JBool
+  ##                           : Whether the server should return the client-request-id in the response.
   ##   client-request-id: JString
   ##                    : The caller-generated request identity, in the form of a GUID with no decoration such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
   ##   ocp-date: JString
   ##           : The time the request was issued. Client libraries typically set this to the current system clock time; set it explicitly if you are calling the REST API directly.
-  ##   return-client-request-id: JBool
-  ##                           : Whether the server should return the client-request-id in the response.
   section = newJObject()
-  var valid_574067 = header.getOrDefault("client-request-id")
-  valid_574067 = validateParameter(valid_574067, JString, required = false,
-                                 default = nil)
-  if valid_574067 != nil:
-    section.add "client-request-id", valid_574067
-  var valid_574068 = header.getOrDefault("ocp-date")
-  valid_574068 = validateParameter(valid_574068, JString, required = false,
-                                 default = nil)
-  if valid_574068 != nil:
-    section.add "ocp-date", valid_574068
-  var valid_574069 = header.getOrDefault("return-client-request-id")
-  valid_574069 = validateParameter(valid_574069, JBool, required = false,
+  var valid_563967 = header.getOrDefault("return-client-request-id")
+  valid_563967 = validateParameter(valid_563967, JBool, required = false,
                                  default = newJBool(false))
-  if valid_574069 != nil:
-    section.add "return-client-request-id", valid_574069
+  if valid_563967 != nil:
+    section.add "return-client-request-id", valid_563967
+  var valid_563968 = header.getOrDefault("client-request-id")
+  valid_563968 = validateParameter(valid_563968, JString, required = false,
+                                 default = nil)
+  if valid_563968 != nil:
+    section.add "client-request-id", valid_563968
+  var valid_563969 = header.getOrDefault("ocp-date")
+  valid_563969 = validateParameter(valid_563969, JString, required = false,
+                                 default = nil)
+  if valid_563969 != nil:
+    section.add "ocp-date", valid_563969
   result.add "header", section
   section = newJObject()
   result.add "formData", section
   if body != nil:
     result.add "body", body
 
-proc call*(call_574092: Call_ApplicationList_573889; path: JsonNode; query: JsonNode;
+proc call*(call_563992: Call_ApplicationList_563787; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## This operation returns only Applications and versions that are available for use on Compute Nodes; that is, that can be used in an Package reference. For administrator information about applications and versions that are not yet available to Compute Nodes, use the Azure portal or the Azure Resource Manager API.
   ## 
-  let valid = call_574092.validator(path, query, header, formData, body)
-  let scheme = call_574092.pickScheme
+  let valid = call_563992.validator(path, query, header, formData, body)
+  let scheme = call_563992.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574092.url(scheme.get, call_574092.host, call_574092.base,
-                         call_574092.route, valid.getOrDefault("path"),
+  let url = call_563992.url(scheme.get, call_563992.host, call_563992.base,
+                         call_563992.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574092, url, valid)
+  result = hook(call_563992, url, valid)
 
-proc call*(call_574163: Call_ApplicationList_573889; apiVersion: string;
+proc call*(call_564063: Call_ApplicationList_563787; apiVersion: string;
           timeout: int = 30; maxresults: int = 1000): Recallable =
   ## applicationList
   ## This operation returns only Applications and versions that are available for use on Compute Nodes; that is, that can be used in an Package reference. For administrator information about applications and versions that are not yet available to Compute Nodes, use the Azure portal or the Azure Resource Manager API.
-  ##   timeout: int
-  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   ##   apiVersion: string (required)
   ##             : Client API Version.
+  ##   timeout: int
+  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   ##   maxresults: int
   ##             : The maximum number of items to return in the response. A maximum of 1000 applications can be returned.
-  var query_574164 = newJObject()
-  add(query_574164, "timeout", newJInt(timeout))
-  add(query_574164, "api-version", newJString(apiVersion))
-  add(query_574164, "maxresults", newJInt(maxresults))
-  result = call_574163.call(nil, query_574164, nil, nil, nil)
+  var query_564064 = newJObject()
+  add(query_564064, "api-version", newJString(apiVersion))
+  add(query_564064, "timeout", newJInt(timeout))
+  add(query_564064, "maxresults", newJInt(maxresults))
+  result = call_564063.call(nil, query_564064, nil, nil, nil)
 
-var applicationList* = Call_ApplicationList_573889(name: "applicationList",
+var applicationList* = Call_ApplicationList_563787(name: "applicationList",
     meth: HttpMethod.HttpGet, host: "azure.local", route: "/applications",
-    validator: validate_ApplicationList_573890, base: "", url: url_ApplicationList_573891,
+    validator: validate_ApplicationList_563788, base: "", url: url_ApplicationList_563789,
     schemes: {Scheme.Https})
 type
-  Call_ApplicationGet_574204 = ref object of OpenApiRestCall_573667
-proc url_ApplicationGet_574206(protocol: Scheme; host: string; base: string;
+  Call_ApplicationGet_564104 = ref object of OpenApiRestCall_563565
+proc url_ApplicationGet_564106(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -225,7 +229,7 @@ proc url_ApplicationGet_574206(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ApplicationGet_574205(path: JsonNode; query: JsonNode;
+proc validate_ApplicationGet_564105(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## This operation returns only Applications and versions that are available for use on Compute Nodes; that is, that can be used in an Package reference. For administrator information about Applications and versions that are not yet available to Compute Nodes, use the Azure portal or the Azure Resource Manager API.
@@ -238,104 +242,104 @@ proc validate_ApplicationGet_574205(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `applicationId` field"
-  var valid_574221 = path.getOrDefault("applicationId")
-  valid_574221 = validateParameter(valid_574221, JString, required = true,
+  var valid_564121 = path.getOrDefault("applicationId")
+  valid_564121 = validateParameter(valid_564121, JString, required = true,
                                  default = nil)
-  if valid_574221 != nil:
-    section.add "applicationId", valid_574221
+  if valid_564121 != nil:
+    section.add "applicationId", valid_564121
   result.add "path", section
   ## parameters in `query` object:
-  ##   timeout: JInt
-  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   ##   api-version: JString (required)
   ##              : Client API Version.
+  ##   timeout: JInt
+  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   section = newJObject()
-  var valid_574222 = query.getOrDefault("timeout")
-  valid_574222 = validateParameter(valid_574222, JInt, required = false,
-                                 default = newJInt(30))
-  if valid_574222 != nil:
-    section.add "timeout", valid_574222
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574223 = query.getOrDefault("api-version")
-  valid_574223 = validateParameter(valid_574223, JString, required = true,
+  var valid_564122 = query.getOrDefault("api-version")
+  valid_564122 = validateParameter(valid_564122, JString, required = true,
                                  default = nil)
-  if valid_574223 != nil:
-    section.add "api-version", valid_574223
+  if valid_564122 != nil:
+    section.add "api-version", valid_564122
+  var valid_564123 = query.getOrDefault("timeout")
+  valid_564123 = validateParameter(valid_564123, JInt, required = false,
+                                 default = newJInt(30))
+  if valid_564123 != nil:
+    section.add "timeout", valid_564123
   result.add "query", section
   ## parameters in `header` object:
+  ##   return-client-request-id: JBool
+  ##                           : Whether the server should return the client-request-id in the response.
   ##   client-request-id: JString
   ##                    : The caller-generated request identity, in the form of a GUID with no decoration such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
   ##   ocp-date: JString
   ##           : The time the request was issued. Client libraries typically set this to the current system clock time; set it explicitly if you are calling the REST API directly.
-  ##   return-client-request-id: JBool
-  ##                           : Whether the server should return the client-request-id in the response.
   section = newJObject()
-  var valid_574224 = header.getOrDefault("client-request-id")
-  valid_574224 = validateParameter(valid_574224, JString, required = false,
-                                 default = nil)
-  if valid_574224 != nil:
-    section.add "client-request-id", valid_574224
-  var valid_574225 = header.getOrDefault("ocp-date")
-  valid_574225 = validateParameter(valid_574225, JString, required = false,
-                                 default = nil)
-  if valid_574225 != nil:
-    section.add "ocp-date", valid_574225
-  var valid_574226 = header.getOrDefault("return-client-request-id")
-  valid_574226 = validateParameter(valid_574226, JBool, required = false,
+  var valid_564124 = header.getOrDefault("return-client-request-id")
+  valid_564124 = validateParameter(valid_564124, JBool, required = false,
                                  default = newJBool(false))
-  if valid_574226 != nil:
-    section.add "return-client-request-id", valid_574226
+  if valid_564124 != nil:
+    section.add "return-client-request-id", valid_564124
+  var valid_564125 = header.getOrDefault("client-request-id")
+  valid_564125 = validateParameter(valid_564125, JString, required = false,
+                                 default = nil)
+  if valid_564125 != nil:
+    section.add "client-request-id", valid_564125
+  var valid_564126 = header.getOrDefault("ocp-date")
+  valid_564126 = validateParameter(valid_564126, JString, required = false,
+                                 default = nil)
+  if valid_564126 != nil:
+    section.add "ocp-date", valid_564126
   result.add "header", section
   section = newJObject()
   result.add "formData", section
   if body != nil:
     result.add "body", body
 
-proc call*(call_574227: Call_ApplicationGet_574204; path: JsonNode; query: JsonNode;
+proc call*(call_564127: Call_ApplicationGet_564104; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## This operation returns only Applications and versions that are available for use on Compute Nodes; that is, that can be used in an Package reference. For administrator information about Applications and versions that are not yet available to Compute Nodes, use the Azure portal or the Azure Resource Manager API.
   ## 
-  let valid = call_574227.validator(path, query, header, formData, body)
-  let scheme = call_574227.pickScheme
+  let valid = call_564127.validator(path, query, header, formData, body)
+  let scheme = call_564127.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574227.url(scheme.get, call_574227.host, call_574227.base,
-                         call_574227.route, valid.getOrDefault("path"),
+  let url = call_564127.url(scheme.get, call_564127.host, call_564127.base,
+                         call_564127.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574227, url, valid)
+  result = hook(call_564127, url, valid)
 
-proc call*(call_574228: Call_ApplicationGet_574204; apiVersion: string;
+proc call*(call_564128: Call_ApplicationGet_564104; apiVersion: string;
           applicationId: string; timeout: int = 30): Recallable =
   ## applicationGet
   ## This operation returns only Applications and versions that are available for use on Compute Nodes; that is, that can be used in an Package reference. For administrator information about Applications and versions that are not yet available to Compute Nodes, use the Azure portal or the Azure Resource Manager API.
-  ##   timeout: int
-  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   ##   apiVersion: string (required)
   ##             : Client API Version.
+  ##   timeout: int
+  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   ##   applicationId: string (required)
   ##                : The ID of the Application.
-  var path_574229 = newJObject()
-  var query_574230 = newJObject()
-  add(query_574230, "timeout", newJInt(timeout))
-  add(query_574230, "api-version", newJString(apiVersion))
-  add(path_574229, "applicationId", newJString(applicationId))
-  result = call_574228.call(path_574229, query_574230, nil, nil, nil)
+  var path_564129 = newJObject()
+  var query_564130 = newJObject()
+  add(query_564130, "api-version", newJString(apiVersion))
+  add(query_564130, "timeout", newJInt(timeout))
+  add(path_564129, "applicationId", newJString(applicationId))
+  result = call_564128.call(path_564129, query_564130, nil, nil, nil)
 
-var applicationGet* = Call_ApplicationGet_574204(name: "applicationGet",
+var applicationGet* = Call_ApplicationGet_564104(name: "applicationGet",
     meth: HttpMethod.HttpGet, host: "azure.local",
-    route: "/applications/{applicationId}", validator: validate_ApplicationGet_574205,
-    base: "", url: url_ApplicationGet_574206, schemes: {Scheme.Https})
+    route: "/applications/{applicationId}", validator: validate_ApplicationGet_564105,
+    base: "", url: url_ApplicationGet_564106, schemes: {Scheme.Https})
 type
-  Call_CertificateAdd_574246 = ref object of OpenApiRestCall_573667
-proc url_CertificateAdd_574248(protocol: Scheme; host: string; base: string;
+  Call_CertificateAdd_564146 = ref object of OpenApiRestCall_563565
+proc url_CertificateAdd_564148(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_CertificateAdd_574247(path: JsonNode; query: JsonNode;
+proc validate_CertificateAdd_564147(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   var section: JsonNode
@@ -343,47 +347,47 @@ proc validate_CertificateAdd_574247(path: JsonNode; query: JsonNode;
   section = newJObject()
   result.add "path", section
   ## parameters in `query` object:
-  ##   timeout: JInt
-  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   ##   api-version: JString (required)
   ##              : Client API Version.
+  ##   timeout: JInt
+  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   section = newJObject()
-  var valid_574266 = query.getOrDefault("timeout")
-  valid_574266 = validateParameter(valid_574266, JInt, required = false,
-                                 default = newJInt(30))
-  if valid_574266 != nil:
-    section.add "timeout", valid_574266
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574267 = query.getOrDefault("api-version")
-  valid_574267 = validateParameter(valid_574267, JString, required = true,
+  var valid_564166 = query.getOrDefault("api-version")
+  valid_564166 = validateParameter(valid_564166, JString, required = true,
                                  default = nil)
-  if valid_574267 != nil:
-    section.add "api-version", valid_574267
+  if valid_564166 != nil:
+    section.add "api-version", valid_564166
+  var valid_564167 = query.getOrDefault("timeout")
+  valid_564167 = validateParameter(valid_564167, JInt, required = false,
+                                 default = newJInt(30))
+  if valid_564167 != nil:
+    section.add "timeout", valid_564167
   result.add "query", section
   ## parameters in `header` object:
+  ##   return-client-request-id: JBool
+  ##                           : Whether the server should return the client-request-id in the response.
   ##   client-request-id: JString
   ##                    : The caller-generated request identity, in the form of a GUID with no decoration such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
   ##   ocp-date: JString
   ##           : The time the request was issued. Client libraries typically set this to the current system clock time; set it explicitly if you are calling the REST API directly.
-  ##   return-client-request-id: JBool
-  ##                           : Whether the server should return the client-request-id in the response.
   section = newJObject()
-  var valid_574268 = header.getOrDefault("client-request-id")
-  valid_574268 = validateParameter(valid_574268, JString, required = false,
-                                 default = nil)
-  if valid_574268 != nil:
-    section.add "client-request-id", valid_574268
-  var valid_574269 = header.getOrDefault("ocp-date")
-  valid_574269 = validateParameter(valid_574269, JString, required = false,
-                                 default = nil)
-  if valid_574269 != nil:
-    section.add "ocp-date", valid_574269
-  var valid_574270 = header.getOrDefault("return-client-request-id")
-  valid_574270 = validateParameter(valid_574270, JBool, required = false,
+  var valid_564168 = header.getOrDefault("return-client-request-id")
+  valid_564168 = validateParameter(valid_564168, JBool, required = false,
                                  default = newJBool(false))
-  if valid_574270 != nil:
-    section.add "return-client-request-id", valid_574270
+  if valid_564168 != nil:
+    section.add "return-client-request-id", valid_564168
+  var valid_564169 = header.getOrDefault("client-request-id")
+  valid_564169 = validateParameter(valid_564169, JString, required = false,
+                                 default = nil)
+  if valid_564169 != nil:
+    section.add "client-request-id", valid_564169
+  var valid_564170 = header.getOrDefault("ocp-date")
+  valid_564170 = validateParameter(valid_564170, JString, required = false,
+                                 default = nil)
+  if valid_564170 != nil:
+    section.add "ocp-date", valid_564170
   result.add "header", section
   section = newJObject()
   result.add "formData", section
@@ -395,48 +399,48 @@ proc validate_CertificateAdd_574247(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574272: Call_CertificateAdd_574246; path: JsonNode; query: JsonNode;
+proc call*(call_564172: Call_CertificateAdd_564146; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
-  let valid = call_574272.validator(path, query, header, formData, body)
-  let scheme = call_574272.pickScheme
+  let valid = call_564172.validator(path, query, header, formData, body)
+  let scheme = call_564172.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574272.url(scheme.get, call_574272.host, call_574272.base,
-                         call_574272.route, valid.getOrDefault("path"),
+  let url = call_564172.url(scheme.get, call_564172.host, call_564172.base,
+                         call_564172.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574272, url, valid)
+  result = hook(call_564172, url, valid)
 
-proc call*(call_574273: Call_CertificateAdd_574246; apiVersion: string;
+proc call*(call_564173: Call_CertificateAdd_564146; apiVersion: string;
           certificate: JsonNode; timeout: int = 30): Recallable =
   ## certificateAdd
-  ##   timeout: int
-  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   ##   apiVersion: string (required)
   ##             : Client API Version.
   ##   certificate: JObject (required)
   ##              : The Certificate to be added.
-  var query_574274 = newJObject()
-  var body_574275 = newJObject()
-  add(query_574274, "timeout", newJInt(timeout))
-  add(query_574274, "api-version", newJString(apiVersion))
+  ##   timeout: int
+  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
+  var query_564174 = newJObject()
+  var body_564175 = newJObject()
+  add(query_564174, "api-version", newJString(apiVersion))
   if certificate != nil:
-    body_574275 = certificate
-  result = call_574273.call(nil, query_574274, nil, nil, body_574275)
+    body_564175 = certificate
+  add(query_564174, "timeout", newJInt(timeout))
+  result = call_564173.call(nil, query_564174, nil, nil, body_564175)
 
-var certificateAdd* = Call_CertificateAdd_574246(name: "certificateAdd",
+var certificateAdd* = Call_CertificateAdd_564146(name: "certificateAdd",
     meth: HttpMethod.HttpPost, host: "azure.local", route: "/certificates",
-    validator: validate_CertificateAdd_574247, base: "", url: url_CertificateAdd_574248,
+    validator: validate_CertificateAdd_564147, base: "", url: url_CertificateAdd_564148,
     schemes: {Scheme.Https})
 type
-  Call_CertificateList_574231 = ref object of OpenApiRestCall_573667
-proc url_CertificateList_574233(protocol: Scheme; host: string; base: string;
+  Call_CertificateList_564131 = ref object of OpenApiRestCall_563565
+proc url_CertificateList_564133(protocol: Scheme; host: string; base: string;
                                route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_CertificateList_574232(path: JsonNode; query: JsonNode;
+proc validate_CertificateList_564132(path: JsonNode; query: JsonNode;
                                     header: JsonNode; formData: JsonNode;
                                     body: JsonNode): JsonNode =
   var section: JsonNode
@@ -444,116 +448,116 @@ proc validate_CertificateList_574232(path: JsonNode; query: JsonNode;
   section = newJObject()
   result.add "path", section
   ## parameters in `query` object:
-  ##   timeout: JInt
-  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   ##   api-version: JString (required)
   ##              : Client API Version.
-  ##   maxresults: JInt
-  ##             : The maximum number of items to return in the response. A maximum of 1000 Certificates can be returned.
   ##   $select: JString
   ##          : An OData $select clause.
+  ##   timeout: JInt
+  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
+  ##   maxresults: JInt
+  ##             : The maximum number of items to return in the response. A maximum of 1000 Certificates can be returned.
   ##   $filter: JString
   ##          : An OData $filter clause. For more information on constructing this filter, see 
   ## https://docs.microsoft.com/en-us/rest/api/batchservice/odata-filters-in-batch#list-certificates.
   section = newJObject()
-  var valid_574235 = query.getOrDefault("timeout")
-  valid_574235 = validateParameter(valid_574235, JInt, required = false,
-                                 default = newJInt(30))
-  if valid_574235 != nil:
-    section.add "timeout", valid_574235
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574236 = query.getOrDefault("api-version")
-  valid_574236 = validateParameter(valid_574236, JString, required = true,
+  var valid_564135 = query.getOrDefault("api-version")
+  valid_564135 = validateParameter(valid_564135, JString, required = true,
                                  default = nil)
-  if valid_574236 != nil:
-    section.add "api-version", valid_574236
-  var valid_574237 = query.getOrDefault("maxresults")
-  valid_574237 = validateParameter(valid_574237, JInt, required = false,
+  if valid_564135 != nil:
+    section.add "api-version", valid_564135
+  var valid_564136 = query.getOrDefault("$select")
+  valid_564136 = validateParameter(valid_564136, JString, required = false,
+                                 default = nil)
+  if valid_564136 != nil:
+    section.add "$select", valid_564136
+  var valid_564137 = query.getOrDefault("timeout")
+  valid_564137 = validateParameter(valid_564137, JInt, required = false,
+                                 default = newJInt(30))
+  if valid_564137 != nil:
+    section.add "timeout", valid_564137
+  var valid_564138 = query.getOrDefault("maxresults")
+  valid_564138 = validateParameter(valid_564138, JInt, required = false,
                                  default = newJInt(1000))
-  if valid_574237 != nil:
-    section.add "maxresults", valid_574237
-  var valid_574238 = query.getOrDefault("$select")
-  valid_574238 = validateParameter(valid_574238, JString, required = false,
+  if valid_564138 != nil:
+    section.add "maxresults", valid_564138
+  var valid_564139 = query.getOrDefault("$filter")
+  valid_564139 = validateParameter(valid_564139, JString, required = false,
                                  default = nil)
-  if valid_574238 != nil:
-    section.add "$select", valid_574238
-  var valid_574239 = query.getOrDefault("$filter")
-  valid_574239 = validateParameter(valid_574239, JString, required = false,
-                                 default = nil)
-  if valid_574239 != nil:
-    section.add "$filter", valid_574239
+  if valid_564139 != nil:
+    section.add "$filter", valid_564139
   result.add "query", section
   ## parameters in `header` object:
+  ##   return-client-request-id: JBool
+  ##                           : Whether the server should return the client-request-id in the response.
   ##   client-request-id: JString
   ##                    : The caller-generated request identity, in the form of a GUID with no decoration such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
   ##   ocp-date: JString
   ##           : The time the request was issued. Client libraries typically set this to the current system clock time; set it explicitly if you are calling the REST API directly.
-  ##   return-client-request-id: JBool
-  ##                           : Whether the server should return the client-request-id in the response.
   section = newJObject()
-  var valid_574240 = header.getOrDefault("client-request-id")
-  valid_574240 = validateParameter(valid_574240, JString, required = false,
-                                 default = nil)
-  if valid_574240 != nil:
-    section.add "client-request-id", valid_574240
-  var valid_574241 = header.getOrDefault("ocp-date")
-  valid_574241 = validateParameter(valid_574241, JString, required = false,
-                                 default = nil)
-  if valid_574241 != nil:
-    section.add "ocp-date", valid_574241
-  var valid_574242 = header.getOrDefault("return-client-request-id")
-  valid_574242 = validateParameter(valid_574242, JBool, required = false,
+  var valid_564140 = header.getOrDefault("return-client-request-id")
+  valid_564140 = validateParameter(valid_564140, JBool, required = false,
                                  default = newJBool(false))
-  if valid_574242 != nil:
-    section.add "return-client-request-id", valid_574242
+  if valid_564140 != nil:
+    section.add "return-client-request-id", valid_564140
+  var valid_564141 = header.getOrDefault("client-request-id")
+  valid_564141 = validateParameter(valid_564141, JString, required = false,
+                                 default = nil)
+  if valid_564141 != nil:
+    section.add "client-request-id", valid_564141
+  var valid_564142 = header.getOrDefault("ocp-date")
+  valid_564142 = validateParameter(valid_564142, JString, required = false,
+                                 default = nil)
+  if valid_564142 != nil:
+    section.add "ocp-date", valid_564142
   result.add "header", section
   section = newJObject()
   result.add "formData", section
   if body != nil:
     result.add "body", body
 
-proc call*(call_574243: Call_CertificateList_574231; path: JsonNode; query: JsonNode;
+proc call*(call_564143: Call_CertificateList_564131; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
-  let valid = call_574243.validator(path, query, header, formData, body)
-  let scheme = call_574243.pickScheme
+  let valid = call_564143.validator(path, query, header, formData, body)
+  let scheme = call_564143.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574243.url(scheme.get, call_574243.host, call_574243.base,
-                         call_574243.route, valid.getOrDefault("path"),
+  let url = call_564143.url(scheme.get, call_564143.host, call_564143.base,
+                         call_564143.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574243, url, valid)
+  result = hook(call_564143, url, valid)
 
-proc call*(call_574244: Call_CertificateList_574231; apiVersion: string;
-          timeout: int = 30; maxresults: int = 1000; Select: string = "";
+proc call*(call_564144: Call_CertificateList_564131; apiVersion: string;
+          Select: string = ""; timeout: int = 30; maxresults: int = 1000;
           Filter: string = ""): Recallable =
   ## certificateList
-  ##   timeout: int
-  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   ##   apiVersion: string (required)
   ##             : Client API Version.
-  ##   maxresults: int
-  ##             : The maximum number of items to return in the response. A maximum of 1000 Certificates can be returned.
   ##   Select: string
   ##         : An OData $select clause.
+  ##   timeout: int
+  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
+  ##   maxresults: int
+  ##             : The maximum number of items to return in the response. A maximum of 1000 Certificates can be returned.
   ##   Filter: string
   ##         : An OData $filter clause. For more information on constructing this filter, see 
   ## https://docs.microsoft.com/en-us/rest/api/batchservice/odata-filters-in-batch#list-certificates.
-  var query_574245 = newJObject()
-  add(query_574245, "timeout", newJInt(timeout))
-  add(query_574245, "api-version", newJString(apiVersion))
-  add(query_574245, "maxresults", newJInt(maxresults))
-  add(query_574245, "$select", newJString(Select))
-  add(query_574245, "$filter", newJString(Filter))
-  result = call_574244.call(nil, query_574245, nil, nil, nil)
+  var query_564145 = newJObject()
+  add(query_564145, "api-version", newJString(apiVersion))
+  add(query_564145, "$select", newJString(Select))
+  add(query_564145, "timeout", newJInt(timeout))
+  add(query_564145, "maxresults", newJInt(maxresults))
+  add(query_564145, "$filter", newJString(Filter))
+  result = call_564144.call(nil, query_564145, nil, nil, nil)
 
-var certificateList* = Call_CertificateList_574231(name: "certificateList",
+var certificateList* = Call_CertificateList_564131(name: "certificateList",
     meth: HttpMethod.HttpGet, host: "azure.local", route: "/certificates",
-    validator: validate_CertificateList_574232, base: "", url: url_CertificateList_574233,
+    validator: validate_CertificateList_564132, base: "", url: url_CertificateList_564133,
     schemes: {Scheme.Https})
 type
-  Call_CertificateGet_574276 = ref object of OpenApiRestCall_573667
-proc url_CertificateGet_574278(protocol: Scheme; host: string; base: string;
+  Call_CertificateGet_564176 = ref object of OpenApiRestCall_563565
+proc url_CertificateGet_564178(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -573,7 +577,7 @@ proc url_CertificateGet_574278(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_CertificateGet_574277(path: JsonNode; query: JsonNode;
+proc validate_CertificateGet_564177(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## Gets information about the specified Certificate.
@@ -587,116 +591,116 @@ proc validate_CertificateGet_574277(path: JsonNode; query: JsonNode;
   ##             : The thumbprint of the Certificate to get.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `thumbprintAlgorithm` field"
-  var valid_574279 = path.getOrDefault("thumbprintAlgorithm")
-  valid_574279 = validateParameter(valid_574279, JString, required = true,
+  var valid_564179 = path.getOrDefault("thumbprintAlgorithm")
+  valid_564179 = validateParameter(valid_564179, JString, required = true,
                                  default = nil)
-  if valid_574279 != nil:
-    section.add "thumbprintAlgorithm", valid_574279
-  var valid_574280 = path.getOrDefault("thumbprint")
-  valid_574280 = validateParameter(valid_574280, JString, required = true,
+  if valid_564179 != nil:
+    section.add "thumbprintAlgorithm", valid_564179
+  var valid_564180 = path.getOrDefault("thumbprint")
+  valid_564180 = validateParameter(valid_564180, JString, required = true,
                                  default = nil)
-  if valid_574280 != nil:
-    section.add "thumbprint", valid_574280
+  if valid_564180 != nil:
+    section.add "thumbprint", valid_564180
   result.add "path", section
   ## parameters in `query` object:
-  ##   timeout: JInt
-  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   ##   api-version: JString (required)
   ##              : Client API Version.
   ##   $select: JString
   ##          : An OData $select clause.
+  ##   timeout: JInt
+  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   section = newJObject()
-  var valid_574281 = query.getOrDefault("timeout")
-  valid_574281 = validateParameter(valid_574281, JInt, required = false,
-                                 default = newJInt(30))
-  if valid_574281 != nil:
-    section.add "timeout", valid_574281
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574282 = query.getOrDefault("api-version")
-  valid_574282 = validateParameter(valid_574282, JString, required = true,
+  var valid_564181 = query.getOrDefault("api-version")
+  valid_564181 = validateParameter(valid_564181, JString, required = true,
                                  default = nil)
-  if valid_574282 != nil:
-    section.add "api-version", valid_574282
-  var valid_574283 = query.getOrDefault("$select")
-  valid_574283 = validateParameter(valid_574283, JString, required = false,
+  if valid_564181 != nil:
+    section.add "api-version", valid_564181
+  var valid_564182 = query.getOrDefault("$select")
+  valid_564182 = validateParameter(valid_564182, JString, required = false,
                                  default = nil)
-  if valid_574283 != nil:
-    section.add "$select", valid_574283
+  if valid_564182 != nil:
+    section.add "$select", valid_564182
+  var valid_564183 = query.getOrDefault("timeout")
+  valid_564183 = validateParameter(valid_564183, JInt, required = false,
+                                 default = newJInt(30))
+  if valid_564183 != nil:
+    section.add "timeout", valid_564183
   result.add "query", section
   ## parameters in `header` object:
+  ##   return-client-request-id: JBool
+  ##                           : Whether the server should return the client-request-id in the response.
   ##   client-request-id: JString
   ##                    : The caller-generated request identity, in the form of a GUID with no decoration such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
   ##   ocp-date: JString
   ##           : The time the request was issued. Client libraries typically set this to the current system clock time; set it explicitly if you are calling the REST API directly.
-  ##   return-client-request-id: JBool
-  ##                           : Whether the server should return the client-request-id in the response.
   section = newJObject()
-  var valid_574284 = header.getOrDefault("client-request-id")
-  valid_574284 = validateParameter(valid_574284, JString, required = false,
-                                 default = nil)
-  if valid_574284 != nil:
-    section.add "client-request-id", valid_574284
-  var valid_574285 = header.getOrDefault("ocp-date")
-  valid_574285 = validateParameter(valid_574285, JString, required = false,
-                                 default = nil)
-  if valid_574285 != nil:
-    section.add "ocp-date", valid_574285
-  var valid_574286 = header.getOrDefault("return-client-request-id")
-  valid_574286 = validateParameter(valid_574286, JBool, required = false,
+  var valid_564184 = header.getOrDefault("return-client-request-id")
+  valid_564184 = validateParameter(valid_564184, JBool, required = false,
                                  default = newJBool(false))
-  if valid_574286 != nil:
-    section.add "return-client-request-id", valid_574286
+  if valid_564184 != nil:
+    section.add "return-client-request-id", valid_564184
+  var valid_564185 = header.getOrDefault("client-request-id")
+  valid_564185 = validateParameter(valid_564185, JString, required = false,
+                                 default = nil)
+  if valid_564185 != nil:
+    section.add "client-request-id", valid_564185
+  var valid_564186 = header.getOrDefault("ocp-date")
+  valid_564186 = validateParameter(valid_564186, JString, required = false,
+                                 default = nil)
+  if valid_564186 != nil:
+    section.add "ocp-date", valid_564186
   result.add "header", section
   section = newJObject()
   result.add "formData", section
   if body != nil:
     result.add "body", body
 
-proc call*(call_574287: Call_CertificateGet_574276; path: JsonNode; query: JsonNode;
+proc call*(call_564187: Call_CertificateGet_564176; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets information about the specified Certificate.
   ## 
-  let valid = call_574287.validator(path, query, header, formData, body)
-  let scheme = call_574287.pickScheme
+  let valid = call_564187.validator(path, query, header, formData, body)
+  let scheme = call_564187.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574287.url(scheme.get, call_574287.host, call_574287.base,
-                         call_574287.route, valid.getOrDefault("path"),
+  let url = call_564187.url(scheme.get, call_564187.host, call_564187.base,
+                         call_564187.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574287, url, valid)
+  result = hook(call_564187, url, valid)
 
-proc call*(call_574288: Call_CertificateGet_574276; apiVersion: string;
-          thumbprintAlgorithm: string; thumbprint: string; timeout: int = 30;
-          Select: string = ""): Recallable =
+proc call*(call_564188: Call_CertificateGet_564176; apiVersion: string;
+          thumbprintAlgorithm: string; thumbprint: string; Select: string = "";
+          timeout: int = 30): Recallable =
   ## certificateGet
   ## Gets information about the specified Certificate.
-  ##   timeout: int
-  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   ##   apiVersion: string (required)
   ##             : Client API Version.
-  ##   thumbprintAlgorithm: string (required)
-  ##                      : The algorithm used to derive the thumbprint parameter. This must be sha1.
   ##   Select: string
   ##         : An OData $select clause.
+  ##   timeout: int
+  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
+  ##   thumbprintAlgorithm: string (required)
+  ##                      : The algorithm used to derive the thumbprint parameter. This must be sha1.
   ##   thumbprint: string (required)
   ##             : The thumbprint of the Certificate to get.
-  var path_574289 = newJObject()
-  var query_574290 = newJObject()
-  add(query_574290, "timeout", newJInt(timeout))
-  add(query_574290, "api-version", newJString(apiVersion))
-  add(path_574289, "thumbprintAlgorithm", newJString(thumbprintAlgorithm))
-  add(query_574290, "$select", newJString(Select))
-  add(path_574289, "thumbprint", newJString(thumbprint))
-  result = call_574288.call(path_574289, query_574290, nil, nil, nil)
+  var path_564189 = newJObject()
+  var query_564190 = newJObject()
+  add(query_564190, "api-version", newJString(apiVersion))
+  add(query_564190, "$select", newJString(Select))
+  add(query_564190, "timeout", newJInt(timeout))
+  add(path_564189, "thumbprintAlgorithm", newJString(thumbprintAlgorithm))
+  add(path_564189, "thumbprint", newJString(thumbprint))
+  result = call_564188.call(path_564189, query_564190, nil, nil, nil)
 
-var certificateGet* = Call_CertificateGet_574276(name: "certificateGet",
+var certificateGet* = Call_CertificateGet_564176(name: "certificateGet",
     meth: HttpMethod.HttpGet, host: "azure.local", route: "/certificates(thumbprintAlgorithm={thumbprintAlgorithm},thumbprint={thumbprint})",
-    validator: validate_CertificateGet_574277, base: "", url: url_CertificateGet_574278,
+    validator: validate_CertificateGet_564177, base: "", url: url_CertificateGet_564178,
     schemes: {Scheme.Https})
 type
-  Call_CertificateDelete_574291 = ref object of OpenApiRestCall_573667
-proc url_CertificateDelete_574293(protocol: Scheme; host: string; base: string;
+  Call_CertificateDelete_564191 = ref object of OpenApiRestCall_563565
+proc url_CertificateDelete_564193(protocol: Scheme; host: string; base: string;
                                  route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -716,7 +720,7 @@ proc url_CertificateDelete_574293(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_CertificateDelete_574292(path: JsonNode; query: JsonNode;
+proc validate_CertificateDelete_564192(path: JsonNode; query: JsonNode;
                                       header: JsonNode; formData: JsonNode;
                                       body: JsonNode): JsonNode =
   ## You cannot delete a Certificate if a resource (Pool or Compute Node) is using it. Before you can delete a Certificate, you must therefore make sure that the Certificate is not associated with any existing Pools, the Certificate is not installed on any Nodes (even if you remove a Certificate from a Pool, it is not removed from existing Compute Nodes in that Pool until they restart), and no running Tasks depend on the Certificate. If you try to delete a Certificate that is in use, the deletion fails. The Certificate status changes to deleteFailed. You can use Cancel Delete Certificate to set the status back to active if you decide that you want to continue using the Certificate.
@@ -730,105 +734,105 @@ proc validate_CertificateDelete_574292(path: JsonNode; query: JsonNode;
   ##             : The thumbprint of the Certificate to be deleted.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `thumbprintAlgorithm` field"
-  var valid_574294 = path.getOrDefault("thumbprintAlgorithm")
-  valid_574294 = validateParameter(valid_574294, JString, required = true,
+  var valid_564194 = path.getOrDefault("thumbprintAlgorithm")
+  valid_564194 = validateParameter(valid_564194, JString, required = true,
                                  default = nil)
-  if valid_574294 != nil:
-    section.add "thumbprintAlgorithm", valid_574294
-  var valid_574295 = path.getOrDefault("thumbprint")
-  valid_574295 = validateParameter(valid_574295, JString, required = true,
+  if valid_564194 != nil:
+    section.add "thumbprintAlgorithm", valid_564194
+  var valid_564195 = path.getOrDefault("thumbprint")
+  valid_564195 = validateParameter(valid_564195, JString, required = true,
                                  default = nil)
-  if valid_574295 != nil:
-    section.add "thumbprint", valid_574295
+  if valid_564195 != nil:
+    section.add "thumbprint", valid_564195
   result.add "path", section
   ## parameters in `query` object:
-  ##   timeout: JInt
-  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   ##   api-version: JString (required)
   ##              : Client API Version.
+  ##   timeout: JInt
+  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   section = newJObject()
-  var valid_574296 = query.getOrDefault("timeout")
-  valid_574296 = validateParameter(valid_574296, JInt, required = false,
-                                 default = newJInt(30))
-  if valid_574296 != nil:
-    section.add "timeout", valid_574296
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574297 = query.getOrDefault("api-version")
-  valid_574297 = validateParameter(valid_574297, JString, required = true,
+  var valid_564196 = query.getOrDefault("api-version")
+  valid_564196 = validateParameter(valid_564196, JString, required = true,
                                  default = nil)
-  if valid_574297 != nil:
-    section.add "api-version", valid_574297
+  if valid_564196 != nil:
+    section.add "api-version", valid_564196
+  var valid_564197 = query.getOrDefault("timeout")
+  valid_564197 = validateParameter(valid_564197, JInt, required = false,
+                                 default = newJInt(30))
+  if valid_564197 != nil:
+    section.add "timeout", valid_564197
   result.add "query", section
   ## parameters in `header` object:
+  ##   return-client-request-id: JBool
+  ##                           : Whether the server should return the client-request-id in the response.
   ##   client-request-id: JString
   ##                    : The caller-generated request identity, in the form of a GUID with no decoration such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
   ##   ocp-date: JString
   ##           : The time the request was issued. Client libraries typically set this to the current system clock time; set it explicitly if you are calling the REST API directly.
-  ##   return-client-request-id: JBool
-  ##                           : Whether the server should return the client-request-id in the response.
   section = newJObject()
-  var valid_574298 = header.getOrDefault("client-request-id")
-  valid_574298 = validateParameter(valid_574298, JString, required = false,
-                                 default = nil)
-  if valid_574298 != nil:
-    section.add "client-request-id", valid_574298
-  var valid_574299 = header.getOrDefault("ocp-date")
-  valid_574299 = validateParameter(valid_574299, JString, required = false,
-                                 default = nil)
-  if valid_574299 != nil:
-    section.add "ocp-date", valid_574299
-  var valid_574300 = header.getOrDefault("return-client-request-id")
-  valid_574300 = validateParameter(valid_574300, JBool, required = false,
+  var valid_564198 = header.getOrDefault("return-client-request-id")
+  valid_564198 = validateParameter(valid_564198, JBool, required = false,
                                  default = newJBool(false))
-  if valid_574300 != nil:
-    section.add "return-client-request-id", valid_574300
+  if valid_564198 != nil:
+    section.add "return-client-request-id", valid_564198
+  var valid_564199 = header.getOrDefault("client-request-id")
+  valid_564199 = validateParameter(valid_564199, JString, required = false,
+                                 default = nil)
+  if valid_564199 != nil:
+    section.add "client-request-id", valid_564199
+  var valid_564200 = header.getOrDefault("ocp-date")
+  valid_564200 = validateParameter(valid_564200, JString, required = false,
+                                 default = nil)
+  if valid_564200 != nil:
+    section.add "ocp-date", valid_564200
   result.add "header", section
   section = newJObject()
   result.add "formData", section
   if body != nil:
     result.add "body", body
 
-proc call*(call_574301: Call_CertificateDelete_574291; path: JsonNode;
+proc call*(call_564201: Call_CertificateDelete_564191; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## You cannot delete a Certificate if a resource (Pool or Compute Node) is using it. Before you can delete a Certificate, you must therefore make sure that the Certificate is not associated with any existing Pools, the Certificate is not installed on any Nodes (even if you remove a Certificate from a Pool, it is not removed from existing Compute Nodes in that Pool until they restart), and no running Tasks depend on the Certificate. If you try to delete a Certificate that is in use, the deletion fails. The Certificate status changes to deleteFailed. You can use Cancel Delete Certificate to set the status back to active if you decide that you want to continue using the Certificate.
   ## 
-  let valid = call_574301.validator(path, query, header, formData, body)
-  let scheme = call_574301.pickScheme
+  let valid = call_564201.validator(path, query, header, formData, body)
+  let scheme = call_564201.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574301.url(scheme.get, call_574301.host, call_574301.base,
-                         call_574301.route, valid.getOrDefault("path"),
+  let url = call_564201.url(scheme.get, call_564201.host, call_564201.base,
+                         call_564201.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574301, url, valid)
+  result = hook(call_564201, url, valid)
 
-proc call*(call_574302: Call_CertificateDelete_574291; apiVersion: string;
+proc call*(call_564202: Call_CertificateDelete_564191; apiVersion: string;
           thumbprintAlgorithm: string; thumbprint: string; timeout: int = 30): Recallable =
   ## certificateDelete
   ## You cannot delete a Certificate if a resource (Pool or Compute Node) is using it. Before you can delete a Certificate, you must therefore make sure that the Certificate is not associated with any existing Pools, the Certificate is not installed on any Nodes (even if you remove a Certificate from a Pool, it is not removed from existing Compute Nodes in that Pool until they restart), and no running Tasks depend on the Certificate. If you try to delete a Certificate that is in use, the deletion fails. The Certificate status changes to deleteFailed. You can use Cancel Delete Certificate to set the status back to active if you decide that you want to continue using the Certificate.
-  ##   timeout: int
-  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   ##   apiVersion: string (required)
   ##             : Client API Version.
+  ##   timeout: int
+  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   ##   thumbprintAlgorithm: string (required)
   ##                      : The algorithm used to derive the thumbprint parameter. This must be sha1.
   ##   thumbprint: string (required)
   ##             : The thumbprint of the Certificate to be deleted.
-  var path_574303 = newJObject()
-  var query_574304 = newJObject()
-  add(query_574304, "timeout", newJInt(timeout))
-  add(query_574304, "api-version", newJString(apiVersion))
-  add(path_574303, "thumbprintAlgorithm", newJString(thumbprintAlgorithm))
-  add(path_574303, "thumbprint", newJString(thumbprint))
-  result = call_574302.call(path_574303, query_574304, nil, nil, nil)
+  var path_564203 = newJObject()
+  var query_564204 = newJObject()
+  add(query_564204, "api-version", newJString(apiVersion))
+  add(query_564204, "timeout", newJInt(timeout))
+  add(path_564203, "thumbprintAlgorithm", newJString(thumbprintAlgorithm))
+  add(path_564203, "thumbprint", newJString(thumbprint))
+  result = call_564202.call(path_564203, query_564204, nil, nil, nil)
 
-var certificateDelete* = Call_CertificateDelete_574291(name: "certificateDelete",
+var certificateDelete* = Call_CertificateDelete_564191(name: "certificateDelete",
     meth: HttpMethod.HttpDelete, host: "azure.local", route: "/certificates(thumbprintAlgorithm={thumbprintAlgorithm},thumbprint={thumbprint})",
-    validator: validate_CertificateDelete_574292, base: "",
-    url: url_CertificateDelete_574293, schemes: {Scheme.Https})
+    validator: validate_CertificateDelete_564192, base: "",
+    url: url_CertificateDelete_564193, schemes: {Scheme.Https})
 type
-  Call_CertificateCancelDeletion_574305 = ref object of OpenApiRestCall_573667
-proc url_CertificateCancelDeletion_574307(protocol: Scheme; host: string;
+  Call_CertificateCancelDeletion_564205 = ref object of OpenApiRestCall_563565
+proc url_CertificateCancelDeletion_564207(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -848,7 +852,7 @@ proc url_CertificateCancelDeletion_574307(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_CertificateCancelDeletion_574306(path: JsonNode; query: JsonNode;
+proc validate_CertificateCancelDeletion_564206(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## If you try to delete a Certificate that is being used by a Pool or Compute Node, the status of the Certificate changes to deleteFailed. If you decide that you want to continue using the Certificate, you can use this operation to set the status of the Certificate back to active. If you intend to delete the Certificate, you do not need to run this operation after the deletion failed. You must make sure that the Certificate is not being used by any resources, and then you can try again to delete the Certificate.
   ## 
@@ -861,113 +865,113 @@ proc validate_CertificateCancelDeletion_574306(path: JsonNode; query: JsonNode;
   ##             : The thumbprint of the Certificate being deleted.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `thumbprintAlgorithm` field"
-  var valid_574308 = path.getOrDefault("thumbprintAlgorithm")
-  valid_574308 = validateParameter(valid_574308, JString, required = true,
+  var valid_564208 = path.getOrDefault("thumbprintAlgorithm")
+  valid_564208 = validateParameter(valid_564208, JString, required = true,
                                  default = nil)
-  if valid_574308 != nil:
-    section.add "thumbprintAlgorithm", valid_574308
-  var valid_574309 = path.getOrDefault("thumbprint")
-  valid_574309 = validateParameter(valid_574309, JString, required = true,
+  if valid_564208 != nil:
+    section.add "thumbprintAlgorithm", valid_564208
+  var valid_564209 = path.getOrDefault("thumbprint")
+  valid_564209 = validateParameter(valid_564209, JString, required = true,
                                  default = nil)
-  if valid_574309 != nil:
-    section.add "thumbprint", valid_574309
+  if valid_564209 != nil:
+    section.add "thumbprint", valid_564209
   result.add "path", section
   ## parameters in `query` object:
-  ##   timeout: JInt
-  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   ##   api-version: JString (required)
   ##              : Client API Version.
+  ##   timeout: JInt
+  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   section = newJObject()
-  var valid_574310 = query.getOrDefault("timeout")
-  valid_574310 = validateParameter(valid_574310, JInt, required = false,
-                                 default = newJInt(30))
-  if valid_574310 != nil:
-    section.add "timeout", valid_574310
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574311 = query.getOrDefault("api-version")
-  valid_574311 = validateParameter(valid_574311, JString, required = true,
+  var valid_564210 = query.getOrDefault("api-version")
+  valid_564210 = validateParameter(valid_564210, JString, required = true,
                                  default = nil)
-  if valid_574311 != nil:
-    section.add "api-version", valid_574311
+  if valid_564210 != nil:
+    section.add "api-version", valid_564210
+  var valid_564211 = query.getOrDefault("timeout")
+  valid_564211 = validateParameter(valid_564211, JInt, required = false,
+                                 default = newJInt(30))
+  if valid_564211 != nil:
+    section.add "timeout", valid_564211
   result.add "query", section
   ## parameters in `header` object:
+  ##   return-client-request-id: JBool
+  ##                           : Whether the server should return the client-request-id in the response.
   ##   client-request-id: JString
   ##                    : The caller-generated request identity, in the form of a GUID with no decoration such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
   ##   ocp-date: JString
   ##           : The time the request was issued. Client libraries typically set this to the current system clock time; set it explicitly if you are calling the REST API directly.
-  ##   return-client-request-id: JBool
-  ##                           : Whether the server should return the client-request-id in the response.
   section = newJObject()
-  var valid_574312 = header.getOrDefault("client-request-id")
-  valid_574312 = validateParameter(valid_574312, JString, required = false,
-                                 default = nil)
-  if valid_574312 != nil:
-    section.add "client-request-id", valid_574312
-  var valid_574313 = header.getOrDefault("ocp-date")
-  valid_574313 = validateParameter(valid_574313, JString, required = false,
-                                 default = nil)
-  if valid_574313 != nil:
-    section.add "ocp-date", valid_574313
-  var valid_574314 = header.getOrDefault("return-client-request-id")
-  valid_574314 = validateParameter(valid_574314, JBool, required = false,
+  var valid_564212 = header.getOrDefault("return-client-request-id")
+  valid_564212 = validateParameter(valid_564212, JBool, required = false,
                                  default = newJBool(false))
-  if valid_574314 != nil:
-    section.add "return-client-request-id", valid_574314
+  if valid_564212 != nil:
+    section.add "return-client-request-id", valid_564212
+  var valid_564213 = header.getOrDefault("client-request-id")
+  valid_564213 = validateParameter(valid_564213, JString, required = false,
+                                 default = nil)
+  if valid_564213 != nil:
+    section.add "client-request-id", valid_564213
+  var valid_564214 = header.getOrDefault("ocp-date")
+  valid_564214 = validateParameter(valid_564214, JString, required = false,
+                                 default = nil)
+  if valid_564214 != nil:
+    section.add "ocp-date", valid_564214
   result.add "header", section
   section = newJObject()
   result.add "formData", section
   if body != nil:
     result.add "body", body
 
-proc call*(call_574315: Call_CertificateCancelDeletion_574305; path: JsonNode;
+proc call*(call_564215: Call_CertificateCancelDeletion_564205; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## If you try to delete a Certificate that is being used by a Pool or Compute Node, the status of the Certificate changes to deleteFailed. If you decide that you want to continue using the Certificate, you can use this operation to set the status of the Certificate back to active. If you intend to delete the Certificate, you do not need to run this operation after the deletion failed. You must make sure that the Certificate is not being used by any resources, and then you can try again to delete the Certificate.
   ## 
-  let valid = call_574315.validator(path, query, header, formData, body)
-  let scheme = call_574315.pickScheme
+  let valid = call_564215.validator(path, query, header, formData, body)
+  let scheme = call_564215.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574315.url(scheme.get, call_574315.host, call_574315.base,
-                         call_574315.route, valid.getOrDefault("path"),
+  let url = call_564215.url(scheme.get, call_564215.host, call_564215.base,
+                         call_564215.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574315, url, valid)
+  result = hook(call_564215, url, valid)
 
-proc call*(call_574316: Call_CertificateCancelDeletion_574305; apiVersion: string;
+proc call*(call_564216: Call_CertificateCancelDeletion_564205; apiVersion: string;
           thumbprintAlgorithm: string; thumbprint: string; timeout: int = 30): Recallable =
   ## certificateCancelDeletion
   ## If you try to delete a Certificate that is being used by a Pool or Compute Node, the status of the Certificate changes to deleteFailed. If you decide that you want to continue using the Certificate, you can use this operation to set the status of the Certificate back to active. If you intend to delete the Certificate, you do not need to run this operation after the deletion failed. You must make sure that the Certificate is not being used by any resources, and then you can try again to delete the Certificate.
-  ##   timeout: int
-  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   ##   apiVersion: string (required)
   ##             : Client API Version.
+  ##   timeout: int
+  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   ##   thumbprintAlgorithm: string (required)
   ##                      : The algorithm used to derive the thumbprint parameter. This must be sha1.
   ##   thumbprint: string (required)
   ##             : The thumbprint of the Certificate being deleted.
-  var path_574317 = newJObject()
-  var query_574318 = newJObject()
-  add(query_574318, "timeout", newJInt(timeout))
-  add(query_574318, "api-version", newJString(apiVersion))
-  add(path_574317, "thumbprintAlgorithm", newJString(thumbprintAlgorithm))
-  add(path_574317, "thumbprint", newJString(thumbprint))
-  result = call_574316.call(path_574317, query_574318, nil, nil, nil)
+  var path_564217 = newJObject()
+  var query_564218 = newJObject()
+  add(query_564218, "api-version", newJString(apiVersion))
+  add(query_564218, "timeout", newJInt(timeout))
+  add(path_564217, "thumbprintAlgorithm", newJString(thumbprintAlgorithm))
+  add(path_564217, "thumbprint", newJString(thumbprint))
+  result = call_564216.call(path_564217, query_564218, nil, nil, nil)
 
-var certificateCancelDeletion* = Call_CertificateCancelDeletion_574305(
+var certificateCancelDeletion* = Call_CertificateCancelDeletion_564205(
     name: "certificateCancelDeletion", meth: HttpMethod.HttpPost,
     host: "azure.local", route: "/certificates(thumbprintAlgorithm={thumbprintAlgorithm},thumbprint={thumbprint})/canceldelete",
-    validator: validate_CertificateCancelDeletion_574306, base: "",
-    url: url_CertificateCancelDeletion_574307, schemes: {Scheme.Https})
+    validator: validate_CertificateCancelDeletion_564206, base: "",
+    url: url_CertificateCancelDeletion_564207, schemes: {Scheme.Https})
 type
-  Call_JobAdd_574334 = ref object of OpenApiRestCall_573667
-proc url_JobAdd_574336(protocol: Scheme; host: string; base: string; route: string;
+  Call_JobAdd_564234 = ref object of OpenApiRestCall_563565
+proc url_JobAdd_564236(protocol: Scheme; host: string; base: string; route: string;
                       path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_JobAdd_574335(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_JobAdd_564235(path: JsonNode; query: JsonNode; header: JsonNode;
                            formData: JsonNode; body: JsonNode): JsonNode =
   ## The Batch service supports two ways to control the work done as part of a Job. In the first approach, the user specifies a Job Manager Task. The Batch service launches this Task when it is ready to start the Job. The Job Manager Task controls all other Tasks that run under this Job, by using the Task APIs. In the second approach, the user directly controls the execution of Tasks under an active Job, by using the Task APIs. Also note: when naming Jobs, avoid including sensitive information such as user names or secret project names. This information may appear in telemetry logs accessible to Microsoft Support engineers.
   ## 
@@ -976,47 +980,47 @@ proc validate_JobAdd_574335(path: JsonNode; query: JsonNode; header: JsonNode;
   section = newJObject()
   result.add "path", section
   ## parameters in `query` object:
-  ##   timeout: JInt
-  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   ##   api-version: JString (required)
   ##              : Client API Version.
+  ##   timeout: JInt
+  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   section = newJObject()
-  var valid_574337 = query.getOrDefault("timeout")
-  valid_574337 = validateParameter(valid_574337, JInt, required = false,
-                                 default = newJInt(30))
-  if valid_574337 != nil:
-    section.add "timeout", valid_574337
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574338 = query.getOrDefault("api-version")
-  valid_574338 = validateParameter(valid_574338, JString, required = true,
+  var valid_564237 = query.getOrDefault("api-version")
+  valid_564237 = validateParameter(valid_564237, JString, required = true,
                                  default = nil)
-  if valid_574338 != nil:
-    section.add "api-version", valid_574338
+  if valid_564237 != nil:
+    section.add "api-version", valid_564237
+  var valid_564238 = query.getOrDefault("timeout")
+  valid_564238 = validateParameter(valid_564238, JInt, required = false,
+                                 default = newJInt(30))
+  if valid_564238 != nil:
+    section.add "timeout", valid_564238
   result.add "query", section
   ## parameters in `header` object:
+  ##   return-client-request-id: JBool
+  ##                           : Whether the server should return the client-request-id in the response.
   ##   client-request-id: JString
   ##                    : The caller-generated request identity, in the form of a GUID with no decoration such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
   ##   ocp-date: JString
   ##           : The time the request was issued. Client libraries typically set this to the current system clock time; set it explicitly if you are calling the REST API directly.
-  ##   return-client-request-id: JBool
-  ##                           : Whether the server should return the client-request-id in the response.
   section = newJObject()
-  var valid_574339 = header.getOrDefault("client-request-id")
-  valid_574339 = validateParameter(valid_574339, JString, required = false,
-                                 default = nil)
-  if valid_574339 != nil:
-    section.add "client-request-id", valid_574339
-  var valid_574340 = header.getOrDefault("ocp-date")
-  valid_574340 = validateParameter(valid_574340, JString, required = false,
-                                 default = nil)
-  if valid_574340 != nil:
-    section.add "ocp-date", valid_574340
-  var valid_574341 = header.getOrDefault("return-client-request-id")
-  valid_574341 = validateParameter(valid_574341, JBool, required = false,
+  var valid_564239 = header.getOrDefault("return-client-request-id")
+  valid_564239 = validateParameter(valid_564239, JBool, required = false,
                                  default = newJBool(false))
-  if valid_574341 != nil:
-    section.add "return-client-request-id", valid_574341
+  if valid_564239 != nil:
+    section.add "return-client-request-id", valid_564239
+  var valid_564240 = header.getOrDefault("client-request-id")
+  valid_564240 = validateParameter(valid_564240, JString, required = false,
+                                 default = nil)
+  if valid_564240 != nil:
+    section.add "client-request-id", valid_564240
+  var valid_564241 = header.getOrDefault("ocp-date")
+  valid_564241 = validateParameter(valid_564241, JString, required = false,
+                                 default = nil)
+  if valid_564241 != nil:
+    section.add "ocp-date", valid_564241
   result.add "header", section
   section = newJObject()
   result.add "formData", section
@@ -1028,177 +1032,177 @@ proc validate_JobAdd_574335(path: JsonNode; query: JsonNode; header: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574343: Call_JobAdd_574334; path: JsonNode; query: JsonNode;
+proc call*(call_564243: Call_JobAdd_564234; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## The Batch service supports two ways to control the work done as part of a Job. In the first approach, the user specifies a Job Manager Task. The Batch service launches this Task when it is ready to start the Job. The Job Manager Task controls all other Tasks that run under this Job, by using the Task APIs. In the second approach, the user directly controls the execution of Tasks under an active Job, by using the Task APIs. Also note: when naming Jobs, avoid including sensitive information such as user names or secret project names. This information may appear in telemetry logs accessible to Microsoft Support engineers.
   ## 
-  let valid = call_574343.validator(path, query, header, formData, body)
-  let scheme = call_574343.pickScheme
+  let valid = call_564243.validator(path, query, header, formData, body)
+  let scheme = call_564243.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574343.url(scheme.get, call_574343.host, call_574343.base,
-                         call_574343.route, valid.getOrDefault("path"),
+  let url = call_564243.url(scheme.get, call_564243.host, call_564243.base,
+                         call_564243.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574343, url, valid)
+  result = hook(call_564243, url, valid)
 
-proc call*(call_574344: Call_JobAdd_574334; apiVersion: string; job: JsonNode;
+proc call*(call_564244: Call_JobAdd_564234; apiVersion: string; job: JsonNode;
           timeout: int = 30): Recallable =
   ## jobAdd
   ## The Batch service supports two ways to control the work done as part of a Job. In the first approach, the user specifies a Job Manager Task. The Batch service launches this Task when it is ready to start the Job. The Job Manager Task controls all other Tasks that run under this Job, by using the Task APIs. In the second approach, the user directly controls the execution of Tasks under an active Job, by using the Task APIs. Also note: when naming Jobs, avoid including sensitive information such as user names or secret project names. This information may appear in telemetry logs accessible to Microsoft Support engineers.
-  ##   timeout: int
-  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   ##   apiVersion: string (required)
   ##             : Client API Version.
   ##   job: JObject (required)
   ##      : The Job to be added.
-  var query_574345 = newJObject()
-  var body_574346 = newJObject()
-  add(query_574345, "timeout", newJInt(timeout))
-  add(query_574345, "api-version", newJString(apiVersion))
+  ##   timeout: int
+  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
+  var query_564245 = newJObject()
+  var body_564246 = newJObject()
+  add(query_564245, "api-version", newJString(apiVersion))
   if job != nil:
-    body_574346 = job
-  result = call_574344.call(nil, query_574345, nil, nil, body_574346)
+    body_564246 = job
+  add(query_564245, "timeout", newJInt(timeout))
+  result = call_564244.call(nil, query_564245, nil, nil, body_564246)
 
-var jobAdd* = Call_JobAdd_574334(name: "jobAdd", meth: HttpMethod.HttpPost,
+var jobAdd* = Call_JobAdd_564234(name: "jobAdd", meth: HttpMethod.HttpPost,
                               host: "azure.local", route: "/jobs",
-                              validator: validate_JobAdd_574335, base: "",
-                              url: url_JobAdd_574336, schemes: {Scheme.Https})
+                              validator: validate_JobAdd_564235, base: "",
+                              url: url_JobAdd_564236, schemes: {Scheme.Https})
 type
-  Call_JobList_574319 = ref object of OpenApiRestCall_573667
-proc url_JobList_574321(protocol: Scheme; host: string; base: string; route: string;
+  Call_JobList_564219 = ref object of OpenApiRestCall_563565
+proc url_JobList_564221(protocol: Scheme; host: string; base: string; route: string;
                        path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_JobList_574320(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_JobList_564220(path: JsonNode; query: JsonNode; header: JsonNode;
                             formData: JsonNode; body: JsonNode): JsonNode =
   var section: JsonNode
   result = newJObject()
   section = newJObject()
   result.add "path", section
   ## parameters in `query` object:
-  ##   timeout: JInt
-  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
-  ##   $expand: JString
-  ##          : An OData $expand clause.
   ##   api-version: JString (required)
   ##              : Client API Version.
-  ##   maxresults: JInt
-  ##             : The maximum number of items to return in the response. A maximum of 1000 Jobs can be returned.
   ##   $select: JString
   ##          : An OData $select clause.
+  ##   $expand: JString
+  ##          : An OData $expand clause.
+  ##   timeout: JInt
+  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
+  ##   maxresults: JInt
+  ##             : The maximum number of items to return in the response. A maximum of 1000 Jobs can be returned.
   ##   $filter: JString
   ##          : An OData $filter clause. For more information on constructing this filter, see 
   ## https://docs.microsoft.com/en-us/rest/api/batchservice/odata-filters-in-batch#list-jobs.
   section = newJObject()
-  var valid_574322 = query.getOrDefault("timeout")
-  valid_574322 = validateParameter(valid_574322, JInt, required = false,
-                                 default = newJInt(30))
-  if valid_574322 != nil:
-    section.add "timeout", valid_574322
-  var valid_574323 = query.getOrDefault("$expand")
-  valid_574323 = validateParameter(valid_574323, JString, required = false,
-                                 default = nil)
-  if valid_574323 != nil:
-    section.add "$expand", valid_574323
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574324 = query.getOrDefault("api-version")
-  valid_574324 = validateParameter(valid_574324, JString, required = true,
+  var valid_564222 = query.getOrDefault("api-version")
+  valid_564222 = validateParameter(valid_564222, JString, required = true,
                                  default = nil)
-  if valid_574324 != nil:
-    section.add "api-version", valid_574324
-  var valid_574325 = query.getOrDefault("maxresults")
-  valid_574325 = validateParameter(valid_574325, JInt, required = false,
+  if valid_564222 != nil:
+    section.add "api-version", valid_564222
+  var valid_564223 = query.getOrDefault("$select")
+  valid_564223 = validateParameter(valid_564223, JString, required = false,
+                                 default = nil)
+  if valid_564223 != nil:
+    section.add "$select", valid_564223
+  var valid_564224 = query.getOrDefault("$expand")
+  valid_564224 = validateParameter(valid_564224, JString, required = false,
+                                 default = nil)
+  if valid_564224 != nil:
+    section.add "$expand", valid_564224
+  var valid_564225 = query.getOrDefault("timeout")
+  valid_564225 = validateParameter(valid_564225, JInt, required = false,
+                                 default = newJInt(30))
+  if valid_564225 != nil:
+    section.add "timeout", valid_564225
+  var valid_564226 = query.getOrDefault("maxresults")
+  valid_564226 = validateParameter(valid_564226, JInt, required = false,
                                  default = newJInt(1000))
-  if valid_574325 != nil:
-    section.add "maxresults", valid_574325
-  var valid_574326 = query.getOrDefault("$select")
-  valid_574326 = validateParameter(valid_574326, JString, required = false,
+  if valid_564226 != nil:
+    section.add "maxresults", valid_564226
+  var valid_564227 = query.getOrDefault("$filter")
+  valid_564227 = validateParameter(valid_564227, JString, required = false,
                                  default = nil)
-  if valid_574326 != nil:
-    section.add "$select", valid_574326
-  var valid_574327 = query.getOrDefault("$filter")
-  valid_574327 = validateParameter(valid_574327, JString, required = false,
-                                 default = nil)
-  if valid_574327 != nil:
-    section.add "$filter", valid_574327
+  if valid_564227 != nil:
+    section.add "$filter", valid_564227
   result.add "query", section
   ## parameters in `header` object:
+  ##   return-client-request-id: JBool
+  ##                           : Whether the server should return the client-request-id in the response.
   ##   client-request-id: JString
   ##                    : The caller-generated request identity, in the form of a GUID with no decoration such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
   ##   ocp-date: JString
   ##           : The time the request was issued. Client libraries typically set this to the current system clock time; set it explicitly if you are calling the REST API directly.
-  ##   return-client-request-id: JBool
-  ##                           : Whether the server should return the client-request-id in the response.
   section = newJObject()
-  var valid_574328 = header.getOrDefault("client-request-id")
-  valid_574328 = validateParameter(valid_574328, JString, required = false,
-                                 default = nil)
-  if valid_574328 != nil:
-    section.add "client-request-id", valid_574328
-  var valid_574329 = header.getOrDefault("ocp-date")
-  valid_574329 = validateParameter(valid_574329, JString, required = false,
-                                 default = nil)
-  if valid_574329 != nil:
-    section.add "ocp-date", valid_574329
-  var valid_574330 = header.getOrDefault("return-client-request-id")
-  valid_574330 = validateParameter(valid_574330, JBool, required = false,
+  var valid_564228 = header.getOrDefault("return-client-request-id")
+  valid_564228 = validateParameter(valid_564228, JBool, required = false,
                                  default = newJBool(false))
-  if valid_574330 != nil:
-    section.add "return-client-request-id", valid_574330
+  if valid_564228 != nil:
+    section.add "return-client-request-id", valid_564228
+  var valid_564229 = header.getOrDefault("client-request-id")
+  valid_564229 = validateParameter(valid_564229, JString, required = false,
+                                 default = nil)
+  if valid_564229 != nil:
+    section.add "client-request-id", valid_564229
+  var valid_564230 = header.getOrDefault("ocp-date")
+  valid_564230 = validateParameter(valid_564230, JString, required = false,
+                                 default = nil)
+  if valid_564230 != nil:
+    section.add "ocp-date", valid_564230
   result.add "header", section
   section = newJObject()
   result.add "formData", section
   if body != nil:
     result.add "body", body
 
-proc call*(call_574331: Call_JobList_574319; path: JsonNode; query: JsonNode;
+proc call*(call_564231: Call_JobList_564219; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
-  let valid = call_574331.validator(path, query, header, formData, body)
-  let scheme = call_574331.pickScheme
+  let valid = call_564231.validator(path, query, header, formData, body)
+  let scheme = call_564231.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574331.url(scheme.get, call_574331.host, call_574331.base,
-                         call_574331.route, valid.getOrDefault("path"),
+  let url = call_564231.url(scheme.get, call_564231.host, call_564231.base,
+                         call_564231.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574331, url, valid)
+  result = hook(call_564231, url, valid)
 
-proc call*(call_574332: Call_JobList_574319; apiVersion: string; timeout: int = 30;
-          Expand: string = ""; maxresults: int = 1000; Select: string = "";
+proc call*(call_564232: Call_JobList_564219; apiVersion: string; Select: string = "";
+          Expand: string = ""; timeout: int = 30; maxresults: int = 1000;
           Filter: string = ""): Recallable =
   ## jobList
-  ##   timeout: int
-  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
-  ##   Expand: string
-  ##         : An OData $expand clause.
   ##   apiVersion: string (required)
   ##             : Client API Version.
-  ##   maxresults: int
-  ##             : The maximum number of items to return in the response. A maximum of 1000 Jobs can be returned.
   ##   Select: string
   ##         : An OData $select clause.
+  ##   Expand: string
+  ##         : An OData $expand clause.
+  ##   timeout: int
+  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
+  ##   maxresults: int
+  ##             : The maximum number of items to return in the response. A maximum of 1000 Jobs can be returned.
   ##   Filter: string
   ##         : An OData $filter clause. For more information on constructing this filter, see 
   ## https://docs.microsoft.com/en-us/rest/api/batchservice/odata-filters-in-batch#list-jobs.
-  var query_574333 = newJObject()
-  add(query_574333, "timeout", newJInt(timeout))
-  add(query_574333, "$expand", newJString(Expand))
-  add(query_574333, "api-version", newJString(apiVersion))
-  add(query_574333, "maxresults", newJInt(maxresults))
-  add(query_574333, "$select", newJString(Select))
-  add(query_574333, "$filter", newJString(Filter))
-  result = call_574332.call(nil, query_574333, nil, nil, nil)
+  var query_564233 = newJObject()
+  add(query_564233, "api-version", newJString(apiVersion))
+  add(query_564233, "$select", newJString(Select))
+  add(query_564233, "$expand", newJString(Expand))
+  add(query_564233, "timeout", newJInt(timeout))
+  add(query_564233, "maxresults", newJInt(maxresults))
+  add(query_564233, "$filter", newJString(Filter))
+  result = call_564232.call(nil, query_564233, nil, nil, nil)
 
-var jobList* = Call_JobList_574319(name: "jobList", meth: HttpMethod.HttpGet,
+var jobList* = Call_JobList_564219(name: "jobList", meth: HttpMethod.HttpGet,
                                 host: "azure.local", route: "/jobs",
-                                validator: validate_JobList_574320, base: "",
-                                url: url_JobList_574321, schemes: {Scheme.Https})
+                                validator: validate_JobList_564220, base: "",
+                                url: url_JobList_564221, schemes: {Scheme.Https})
 type
-  Call_JobUpdate_574366 = ref object of OpenApiRestCall_573667
-proc url_JobUpdate_574368(protocol: Scheme; host: string; base: string; route: string;
+  Call_JobUpdate_564266 = ref object of OpenApiRestCall_563565
+proc url_JobUpdate_564268(protocol: Scheme; host: string; base: string; route: string;
                          path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1213,7 +1217,7 @@ proc url_JobUpdate_574368(protocol: Scheme; host: string; base: string; route: s
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_JobUpdate_574367(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_JobUpdate_564267(path: JsonNode; query: JsonNode; header: JsonNode;
                               formData: JsonNode; body: JsonNode): JsonNode =
   ## This fully replaces all the updatable properties of the Job. For example, if the Job has constraints associated with it and if constraints is not specified with this request, then the Batch service will remove the existing constraints.
   ## 
@@ -1224,82 +1228,82 @@ proc validate_JobUpdate_574367(path: JsonNode; query: JsonNode; header: JsonNode
   ##        : The ID of the Job whose properties you want to update.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `jobId` field"
-  var valid_574369 = path.getOrDefault("jobId")
-  valid_574369 = validateParameter(valid_574369, JString, required = true,
+  var valid_564269 = path.getOrDefault("jobId")
+  valid_564269 = validateParameter(valid_564269, JString, required = true,
                                  default = nil)
-  if valid_574369 != nil:
-    section.add "jobId", valid_574369
+  if valid_564269 != nil:
+    section.add "jobId", valid_564269
   result.add "path", section
   ## parameters in `query` object:
-  ##   timeout: JInt
-  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   ##   api-version: JString (required)
   ##              : Client API Version.
+  ##   timeout: JInt
+  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   section = newJObject()
-  var valid_574370 = query.getOrDefault("timeout")
-  valid_574370 = validateParameter(valid_574370, JInt, required = false,
-                                 default = newJInt(30))
-  if valid_574370 != nil:
-    section.add "timeout", valid_574370
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574371 = query.getOrDefault("api-version")
-  valid_574371 = validateParameter(valid_574371, JString, required = true,
+  var valid_564270 = query.getOrDefault("api-version")
+  valid_564270 = validateParameter(valid_564270, JString, required = true,
                                  default = nil)
-  if valid_574371 != nil:
-    section.add "api-version", valid_574371
+  if valid_564270 != nil:
+    section.add "api-version", valid_564270
+  var valid_564271 = query.getOrDefault("timeout")
+  valid_564271 = validateParameter(valid_564271, JInt, required = false,
+                                 default = newJInt(30))
+  if valid_564271 != nil:
+    section.add "timeout", valid_564271
   result.add "query", section
   ## parameters in `header` object:
-  ##   If-Match: JString
-  ##           : An ETag value associated with the version of the resource known to the client. The operation will be performed only if the resource's current ETag on the service exactly matches the value specified by the client.
-  ##   client-request-id: JString
-  ##                    : The caller-generated request identity, in the form of a GUID with no decoration such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
-  ##   ocp-date: JString
-  ##           : The time the request was issued. Client libraries typically set this to the current system clock time; set it explicitly if you are calling the REST API directly.
-  ##   If-Unmodified-Since: JString
-  ##                      : A timestamp indicating the last modified time of the resource known to the client. The operation will be performed only if the resource on the service has not been modified since the specified time.
-  ##   If-None-Match: JString
-  ##                : An ETag value associated with the version of the resource known to the client. The operation will be performed only if the resource's current ETag on the service does not match the value specified by the client.
-  ##   If-Modified-Since: JString
-  ##                    : A timestamp indicating the last modified time of the resource known to the client. The operation will be performed only if the resource on the service has been modified since the specified time.
   ##   return-client-request-id: JBool
   ##                           : Whether the server should return the client-request-id in the response.
+  ##   If-Unmodified-Since: JString
+  ##                      : A timestamp indicating the last modified time of the resource known to the client. The operation will be performed only if the resource on the service has not been modified since the specified time.
+  ##   client-request-id: JString
+  ##                    : The caller-generated request identity, in the form of a GUID with no decoration such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
+  ##   If-Modified-Since: JString
+  ##                    : A timestamp indicating the last modified time of the resource known to the client. The operation will be performed only if the resource on the service has been modified since the specified time.
+  ##   If-None-Match: JString
+  ##                : An ETag value associated with the version of the resource known to the client. The operation will be performed only if the resource's current ETag on the service does not match the value specified by the client.
+  ##   ocp-date: JString
+  ##           : The time the request was issued. Client libraries typically set this to the current system clock time; set it explicitly if you are calling the REST API directly.
+  ##   If-Match: JString
+  ##           : An ETag value associated with the version of the resource known to the client. The operation will be performed only if the resource's current ETag on the service exactly matches the value specified by the client.
   section = newJObject()
-  var valid_574372 = header.getOrDefault("If-Match")
-  valid_574372 = validateParameter(valid_574372, JString, required = false,
-                                 default = nil)
-  if valid_574372 != nil:
-    section.add "If-Match", valid_574372
-  var valid_574373 = header.getOrDefault("client-request-id")
-  valid_574373 = validateParameter(valid_574373, JString, required = false,
-                                 default = nil)
-  if valid_574373 != nil:
-    section.add "client-request-id", valid_574373
-  var valid_574374 = header.getOrDefault("ocp-date")
-  valid_574374 = validateParameter(valid_574374, JString, required = false,
-                                 default = nil)
-  if valid_574374 != nil:
-    section.add "ocp-date", valid_574374
-  var valid_574375 = header.getOrDefault("If-Unmodified-Since")
-  valid_574375 = validateParameter(valid_574375, JString, required = false,
-                                 default = nil)
-  if valid_574375 != nil:
-    section.add "If-Unmodified-Since", valid_574375
-  var valid_574376 = header.getOrDefault("If-None-Match")
-  valid_574376 = validateParameter(valid_574376, JString, required = false,
-                                 default = nil)
-  if valid_574376 != nil:
-    section.add "If-None-Match", valid_574376
-  var valid_574377 = header.getOrDefault("If-Modified-Since")
-  valid_574377 = validateParameter(valid_574377, JString, required = false,
-                                 default = nil)
-  if valid_574377 != nil:
-    section.add "If-Modified-Since", valid_574377
-  var valid_574378 = header.getOrDefault("return-client-request-id")
-  valid_574378 = validateParameter(valid_574378, JBool, required = false,
+  var valid_564272 = header.getOrDefault("return-client-request-id")
+  valid_564272 = validateParameter(valid_564272, JBool, required = false,
                                  default = newJBool(false))
-  if valid_574378 != nil:
-    section.add "return-client-request-id", valid_574378
+  if valid_564272 != nil:
+    section.add "return-client-request-id", valid_564272
+  var valid_564273 = header.getOrDefault("If-Unmodified-Since")
+  valid_564273 = validateParameter(valid_564273, JString, required = false,
+                                 default = nil)
+  if valid_564273 != nil:
+    section.add "If-Unmodified-Since", valid_564273
+  var valid_564274 = header.getOrDefault("client-request-id")
+  valid_564274 = validateParameter(valid_564274, JString, required = false,
+                                 default = nil)
+  if valid_564274 != nil:
+    section.add "client-request-id", valid_564274
+  var valid_564275 = header.getOrDefault("If-Modified-Since")
+  valid_564275 = validateParameter(valid_564275, JString, required = false,
+                                 default = nil)
+  if valid_564275 != nil:
+    section.add "If-Modified-Since", valid_564275
+  var valid_564276 = header.getOrDefault("If-None-Match")
+  valid_564276 = validateParameter(valid_564276, JString, required = false,
+                                 default = nil)
+  if valid_564276 != nil:
+    section.add "If-None-Match", valid_564276
+  var valid_564277 = header.getOrDefault("ocp-date")
+  valid_564277 = validateParameter(valid_564277, JString, required = false,
+                                 default = nil)
+  if valid_564277 != nil:
+    section.add "ocp-date", valid_564277
+  var valid_564278 = header.getOrDefault("If-Match")
+  valid_564278 = validateParameter(valid_564278, JString, required = false,
+                                 default = nil)
+  if valid_564278 != nil:
+    section.add "If-Match", valid_564278
   result.add "header", section
   section = newJObject()
   result.add "formData", section
@@ -1311,49 +1315,49 @@ proc validate_JobUpdate_574367(path: JsonNode; query: JsonNode; header: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_574380: Call_JobUpdate_574366; path: JsonNode; query: JsonNode;
+proc call*(call_564280: Call_JobUpdate_564266; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## This fully replaces all the updatable properties of the Job. For example, if the Job has constraints associated with it and if constraints is not specified with this request, then the Batch service will remove the existing constraints.
   ## 
-  let valid = call_574380.validator(path, query, header, formData, body)
-  let scheme = call_574380.pickScheme
+  let valid = call_564280.validator(path, query, header, formData, body)
+  let scheme = call_564280.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574380.url(scheme.get, call_574380.host, call_574380.base,
-                         call_574380.route, valid.getOrDefault("path"),
+  let url = call_564280.url(scheme.get, call_564280.host, call_564280.base,
+                         call_564280.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574380, url, valid)
+  result = hook(call_564280, url, valid)
 
-proc call*(call_574381: Call_JobUpdate_574366; jobUpdateParameter: JsonNode;
-          apiVersion: string; jobId: string; timeout: int = 30): Recallable =
+proc call*(call_564281: Call_JobUpdate_564266; jobId: string; apiVersion: string;
+          jobUpdateParameter: JsonNode; timeout: int = 30): Recallable =
   ## jobUpdate
   ## This fully replaces all the updatable properties of the Job. For example, if the Job has constraints associated with it and if constraints is not specified with this request, then the Batch service will remove the existing constraints.
-  ##   timeout: int
-  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
-  ##   jobUpdateParameter: JObject (required)
-  ##                     : The parameters for the request.
-  ##   apiVersion: string (required)
-  ##             : Client API Version.
   ##   jobId: string (required)
   ##        : The ID of the Job whose properties you want to update.
-  var path_574382 = newJObject()
-  var query_574383 = newJObject()
-  var body_574384 = newJObject()
-  add(query_574383, "timeout", newJInt(timeout))
+  ##   apiVersion: string (required)
+  ##             : Client API Version.
+  ##   jobUpdateParameter: JObject (required)
+  ##                     : The parameters for the request.
+  ##   timeout: int
+  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
+  var path_564282 = newJObject()
+  var query_564283 = newJObject()
+  var body_564284 = newJObject()
+  add(path_564282, "jobId", newJString(jobId))
+  add(query_564283, "api-version", newJString(apiVersion))
   if jobUpdateParameter != nil:
-    body_574384 = jobUpdateParameter
-  add(query_574383, "api-version", newJString(apiVersion))
-  add(path_574382, "jobId", newJString(jobId))
-  result = call_574381.call(path_574382, query_574383, nil, nil, body_574384)
+    body_564284 = jobUpdateParameter
+  add(query_564283, "timeout", newJInt(timeout))
+  result = call_564281.call(path_564282, query_564283, nil, nil, body_564284)
 
-var jobUpdate* = Call_JobUpdate_574366(name: "jobUpdate", meth: HttpMethod.HttpPut,
+var jobUpdate* = Call_JobUpdate_564266(name: "jobUpdate", meth: HttpMethod.HttpPut,
                                     host: "azure.local", route: "/jobs/{jobId}",
-                                    validator: validate_JobUpdate_574367,
-                                    base: "", url: url_JobUpdate_574368,
+                                    validator: validate_JobUpdate_564267,
+                                    base: "", url: url_JobUpdate_564268,
                                     schemes: {Scheme.Https})
 type
-  Call_JobGet_574347 = ref object of OpenApiRestCall_573667
-proc url_JobGet_574349(protocol: Scheme; host: string; base: string; route: string;
+  Call_JobGet_564247 = ref object of OpenApiRestCall_563565
+proc url_JobGet_564249(protocol: Scheme; host: string; base: string; route: string;
                       path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1368,7 +1372,7 @@ proc url_JobGet_574349(protocol: Scheme; host: string; base: string; route: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_JobGet_574348(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_JobGet_564248(path: JsonNode; query: JsonNode; header: JsonNode;
                            formData: JsonNode; body: JsonNode): JsonNode =
   var section: JsonNode
   result = newJObject()
@@ -1377,142 +1381,142 @@ proc validate_JobGet_574348(path: JsonNode; query: JsonNode; header: JsonNode;
   ##        : The ID of the Job.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `jobId` field"
-  var valid_574350 = path.getOrDefault("jobId")
-  valid_574350 = validateParameter(valid_574350, JString, required = true,
+  var valid_564250 = path.getOrDefault("jobId")
+  valid_564250 = validateParameter(valid_564250, JString, required = true,
                                  default = nil)
-  if valid_574350 != nil:
-    section.add "jobId", valid_574350
+  if valid_564250 != nil:
+    section.add "jobId", valid_564250
   result.add "path", section
   ## parameters in `query` object:
-  ##   timeout: JInt
-  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
-  ##   $expand: JString
-  ##          : An OData $expand clause.
   ##   api-version: JString (required)
   ##              : Client API Version.
   ##   $select: JString
   ##          : An OData $select clause.
+  ##   $expand: JString
+  ##          : An OData $expand clause.
+  ##   timeout: JInt
+  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   section = newJObject()
-  var valid_574351 = query.getOrDefault("timeout")
-  valid_574351 = validateParameter(valid_574351, JInt, required = false,
-                                 default = newJInt(30))
-  if valid_574351 != nil:
-    section.add "timeout", valid_574351
-  var valid_574352 = query.getOrDefault("$expand")
-  valid_574352 = validateParameter(valid_574352, JString, required = false,
-                                 default = nil)
-  if valid_574352 != nil:
-    section.add "$expand", valid_574352
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574353 = query.getOrDefault("api-version")
-  valid_574353 = validateParameter(valid_574353, JString, required = true,
+  var valid_564251 = query.getOrDefault("api-version")
+  valid_564251 = validateParameter(valid_564251, JString, required = true,
                                  default = nil)
-  if valid_574353 != nil:
-    section.add "api-version", valid_574353
-  var valid_574354 = query.getOrDefault("$select")
-  valid_574354 = validateParameter(valid_574354, JString, required = false,
+  if valid_564251 != nil:
+    section.add "api-version", valid_564251
+  var valid_564252 = query.getOrDefault("$select")
+  valid_564252 = validateParameter(valid_564252, JString, required = false,
                                  default = nil)
-  if valid_574354 != nil:
-    section.add "$select", valid_574354
+  if valid_564252 != nil:
+    section.add "$select", valid_564252
+  var valid_564253 = query.getOrDefault("$expand")
+  valid_564253 = validateParameter(valid_564253, JString, required = false,
+                                 default = nil)
+  if valid_564253 != nil:
+    section.add "$expand", valid_564253
+  var valid_564254 = query.getOrDefault("timeout")
+  valid_564254 = validateParameter(valid_564254, JInt, required = false,
+                                 default = newJInt(30))
+  if valid_564254 != nil:
+    section.add "timeout", valid_564254
   result.add "query", section
   ## parameters in `header` object:
-  ##   If-Match: JString
-  ##           : An ETag value associated with the version of the resource known to the client. The operation will be performed only if the resource's current ETag on the service exactly matches the value specified by the client.
-  ##   client-request-id: JString
-  ##                    : The caller-generated request identity, in the form of a GUID with no decoration such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
-  ##   ocp-date: JString
-  ##           : The time the request was issued. Client libraries typically set this to the current system clock time; set it explicitly if you are calling the REST API directly.
-  ##   If-Unmodified-Since: JString
-  ##                      : A timestamp indicating the last modified time of the resource known to the client. The operation will be performed only if the resource on the service has not been modified since the specified time.
-  ##   If-None-Match: JString
-  ##                : An ETag value associated with the version of the resource known to the client. The operation will be performed only if the resource's current ETag on the service does not match the value specified by the client.
-  ##   If-Modified-Since: JString
-  ##                    : A timestamp indicating the last modified time of the resource known to the client. The operation will be performed only if the resource on the service has been modified since the specified time.
   ##   return-client-request-id: JBool
   ##                           : Whether the server should return the client-request-id in the response.
+  ##   If-Unmodified-Since: JString
+  ##                      : A timestamp indicating the last modified time of the resource known to the client. The operation will be performed only if the resource on the service has not been modified since the specified time.
+  ##   client-request-id: JString
+  ##                    : The caller-generated request identity, in the form of a GUID with no decoration such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
+  ##   If-Modified-Since: JString
+  ##                    : A timestamp indicating the last modified time of the resource known to the client. The operation will be performed only if the resource on the service has been modified since the specified time.
+  ##   If-None-Match: JString
+  ##                : An ETag value associated with the version of the resource known to the client. The operation will be performed only if the resource's current ETag on the service does not match the value specified by the client.
+  ##   ocp-date: JString
+  ##           : The time the request was issued. Client libraries typically set this to the current system clock time; set it explicitly if you are calling the REST API directly.
+  ##   If-Match: JString
+  ##           : An ETag value associated with the version of the resource known to the client. The operation will be performed only if the resource's current ETag on the service exactly matches the value specified by the client.
   section = newJObject()
-  var valid_574355 = header.getOrDefault("If-Match")
-  valid_574355 = validateParameter(valid_574355, JString, required = false,
-                                 default = nil)
-  if valid_574355 != nil:
-    section.add "If-Match", valid_574355
-  var valid_574356 = header.getOrDefault("client-request-id")
-  valid_574356 = validateParameter(valid_574356, JString, required = false,
-                                 default = nil)
-  if valid_574356 != nil:
-    section.add "client-request-id", valid_574356
-  var valid_574357 = header.getOrDefault("ocp-date")
-  valid_574357 = validateParameter(valid_574357, JString, required = false,
-                                 default = nil)
-  if valid_574357 != nil:
-    section.add "ocp-date", valid_574357
-  var valid_574358 = header.getOrDefault("If-Unmodified-Since")
-  valid_574358 = validateParameter(valid_574358, JString, required = false,
-                                 default = nil)
-  if valid_574358 != nil:
-    section.add "If-Unmodified-Since", valid_574358
-  var valid_574359 = header.getOrDefault("If-None-Match")
-  valid_574359 = validateParameter(valid_574359, JString, required = false,
-                                 default = nil)
-  if valid_574359 != nil:
-    section.add "If-None-Match", valid_574359
-  var valid_574360 = header.getOrDefault("If-Modified-Since")
-  valid_574360 = validateParameter(valid_574360, JString, required = false,
-                                 default = nil)
-  if valid_574360 != nil:
-    section.add "If-Modified-Since", valid_574360
-  var valid_574361 = header.getOrDefault("return-client-request-id")
-  valid_574361 = validateParameter(valid_574361, JBool, required = false,
+  var valid_564255 = header.getOrDefault("return-client-request-id")
+  valid_564255 = validateParameter(valid_564255, JBool, required = false,
                                  default = newJBool(false))
-  if valid_574361 != nil:
-    section.add "return-client-request-id", valid_574361
+  if valid_564255 != nil:
+    section.add "return-client-request-id", valid_564255
+  var valid_564256 = header.getOrDefault("If-Unmodified-Since")
+  valid_564256 = validateParameter(valid_564256, JString, required = false,
+                                 default = nil)
+  if valid_564256 != nil:
+    section.add "If-Unmodified-Since", valid_564256
+  var valid_564257 = header.getOrDefault("client-request-id")
+  valid_564257 = validateParameter(valid_564257, JString, required = false,
+                                 default = nil)
+  if valid_564257 != nil:
+    section.add "client-request-id", valid_564257
+  var valid_564258 = header.getOrDefault("If-Modified-Since")
+  valid_564258 = validateParameter(valid_564258, JString, required = false,
+                                 default = nil)
+  if valid_564258 != nil:
+    section.add "If-Modified-Since", valid_564258
+  var valid_564259 = header.getOrDefault("If-None-Match")
+  valid_564259 = validateParameter(valid_564259, JString, required = false,
+                                 default = nil)
+  if valid_564259 != nil:
+    section.add "If-None-Match", valid_564259
+  var valid_564260 = header.getOrDefault("ocp-date")
+  valid_564260 = validateParameter(valid_564260, JString, required = false,
+                                 default = nil)
+  if valid_564260 != nil:
+    section.add "ocp-date", valid_564260
+  var valid_564261 = header.getOrDefault("If-Match")
+  valid_564261 = validateParameter(valid_564261, JString, required = false,
+                                 default = nil)
+  if valid_564261 != nil:
+    section.add "If-Match", valid_564261
   result.add "header", section
   section = newJObject()
   result.add "formData", section
   if body != nil:
     result.add "body", body
 
-proc call*(call_574362: Call_JobGet_574347; path: JsonNode; query: JsonNode;
+proc call*(call_564262: Call_JobGet_564247; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
-  let valid = call_574362.validator(path, query, header, formData, body)
-  let scheme = call_574362.pickScheme
+  let valid = call_564262.validator(path, query, header, formData, body)
+  let scheme = call_564262.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574362.url(scheme.get, call_574362.host, call_574362.base,
-                         call_574362.route, valid.getOrDefault("path"),
+  let url = call_564262.url(scheme.get, call_564262.host, call_564262.base,
+                         call_564262.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574362, url, valid)
+  result = hook(call_564262, url, valid)
 
-proc call*(call_574363: Call_JobGet_574347; apiVersion: string; jobId: string;
-          timeout: int = 30; Expand: string = ""; Select: string = ""): Recallable =
+proc call*(call_564263: Call_JobGet_564247; jobId: string; apiVersion: string;
+          Select: string = ""; Expand: string = ""; timeout: int = 30): Recallable =
   ## jobGet
-  ##   timeout: int
-  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
-  ##   Expand: string
-  ##         : An OData $expand clause.
-  ##   apiVersion: string (required)
-  ##             : Client API Version.
   ##   jobId: string (required)
   ##        : The ID of the Job.
+  ##   apiVersion: string (required)
+  ##             : Client API Version.
   ##   Select: string
   ##         : An OData $select clause.
-  var path_574364 = newJObject()
-  var query_574365 = newJObject()
-  add(query_574365, "timeout", newJInt(timeout))
-  add(query_574365, "$expand", newJString(Expand))
-  add(query_574365, "api-version", newJString(apiVersion))
-  add(path_574364, "jobId", newJString(jobId))
-  add(query_574365, "$select", newJString(Select))
-  result = call_574363.call(path_574364, query_574365, nil, nil, nil)
+  ##   Expand: string
+  ##         : An OData $expand clause.
+  ##   timeout: int
+  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
+  var path_564264 = newJObject()
+  var query_564265 = newJObject()
+  add(path_564264, "jobId", newJString(jobId))
+  add(query_564265, "api-version", newJString(apiVersion))
+  add(query_564265, "$select", newJString(Select))
+  add(query_564265, "$expand", newJString(Expand))
+  add(query_564265, "timeout", newJInt(timeout))
+  result = call_564263.call(path_564264, query_564265, nil, nil, nil)
 
-var jobGet* = Call_JobGet_574347(name: "jobGet", meth: HttpMethod.HttpGet,
+var jobGet* = Call_JobGet_564247(name: "jobGet", meth: HttpMethod.HttpGet,
                               host: "azure.local", route: "/jobs/{jobId}",
-                              validator: validate_JobGet_574348, base: "",
-                              url: url_JobGet_574349, schemes: {Scheme.Https})
+                              validator: validate_JobGet_564248, base: "",
+                              url: url_JobGet_564249, schemes: {Scheme.Https})
 type
-  Call_JobPatch_574402 = ref object of OpenApiRestCall_573667
-proc url_JobPatch_574404(protocol: Scheme; host: string; base: string; route: string;
+  Call_JobPatch_564302 = ref object of OpenApiRestCall_563565
+proc url_JobPatch_564304(protocol: Scheme; host: string; base: string; route: string;
                         path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1527,7 +1531,7 @@ proc url_JobPatch_574404(protocol: Scheme; host: string; base: string; route: st
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_JobPatch_574403(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_JobPatch_564303(path: JsonNode; query: JsonNode; header: JsonNode;
                              formData: JsonNode; body: JsonNode): JsonNode =
   ## This replaces only the Job properties specified in the request. For example, if the Job has constraints, and a request does not specify the constraints element, then the Job keeps the existing constraints.
   ## 
@@ -1538,82 +1542,82 @@ proc validate_JobPatch_574403(path: JsonNode; query: JsonNode; header: JsonNode;
   ##        : The ID of the Job whose properties you want to update.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `jobId` field"
-  var valid_574405 = path.getOrDefault("jobId")
-  valid_574405 = validateParameter(valid_574405, JString, required = true,
+  var valid_564305 = path.getOrDefault("jobId")
+  valid_564305 = validateParameter(valid_564305, JString, required = true,
                                  default = nil)
-  if valid_574405 != nil:
-    section.add "jobId", valid_574405
+  if valid_564305 != nil:
+    section.add "jobId", valid_564305
   result.add "path", section
   ## parameters in `query` object:
-  ##   timeout: JInt
-  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   ##   api-version: JString (required)
   ##              : Client API Version.
+  ##   timeout: JInt
+  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   section = newJObject()
-  var valid_574406 = query.getOrDefault("timeout")
-  valid_574406 = validateParameter(valid_574406, JInt, required = false,
-                                 default = newJInt(30))
-  if valid_574406 != nil:
-    section.add "timeout", valid_574406
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574407 = query.getOrDefault("api-version")
-  valid_574407 = validateParameter(valid_574407, JString, required = true,
+  var valid_564306 = query.getOrDefault("api-version")
+  valid_564306 = validateParameter(valid_564306, JString, required = true,
                                  default = nil)
-  if valid_574407 != nil:
-    section.add "api-version", valid_574407
+  if valid_564306 != nil:
+    section.add "api-version", valid_564306
+  var valid_564307 = query.getOrDefault("timeout")
+  valid_564307 = validateParameter(valid_564307, JInt, required = false,
+                                 default = newJInt(30))
+  if valid_564307 != nil:
+    section.add "timeout", valid_564307
   result.add "query", section
   ## parameters in `header` object:
-  ##   If-Match: JString
-  ##           : An ETag value associated with the version of the resource known to the client. The operation will be performed only if the resource's current ETag on the service exactly matches the value specified by the client.
-  ##   client-request-id: JString
-  ##                    : The caller-generated request identity, in the form of a GUID with no decoration such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
-  ##   ocp-date: JString
-  ##           : The time the request was issued. Client libraries typically set this to the current system clock time; set it explicitly if you are calling the REST API directly.
-  ##   If-Unmodified-Since: JString
-  ##                      : A timestamp indicating the last modified time of the resource known to the client. The operation will be performed only if the resource on the service has not been modified since the specified time.
-  ##   If-None-Match: JString
-  ##                : An ETag value associated with the version of the resource known to the client. The operation will be performed only if the resource's current ETag on the service does not match the value specified by the client.
-  ##   If-Modified-Since: JString
-  ##                    : A timestamp indicating the last modified time of the resource known to the client. The operation will be performed only if the resource on the service has been modified since the specified time.
   ##   return-client-request-id: JBool
   ##                           : Whether the server should return the client-request-id in the response.
+  ##   If-Unmodified-Since: JString
+  ##                      : A timestamp indicating the last modified time of the resource known to the client. The operation will be performed only if the resource on the service has not been modified since the specified time.
+  ##   client-request-id: JString
+  ##                    : The caller-generated request identity, in the form of a GUID with no decoration such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
+  ##   If-Modified-Since: JString
+  ##                    : A timestamp indicating the last modified time of the resource known to the client. The operation will be performed only if the resource on the service has been modified since the specified time.
+  ##   If-None-Match: JString
+  ##                : An ETag value associated with the version of the resource known to the client. The operation will be performed only if the resource's current ETag on the service does not match the value specified by the client.
+  ##   ocp-date: JString
+  ##           : The time the request was issued. Client libraries typically set this to the current system clock time; set it explicitly if you are calling the REST API directly.
+  ##   If-Match: JString
+  ##           : An ETag value associated with the version of the resource known to the client. The operation will be performed only if the resource's current ETag on the service exactly matches the value specified by the client.
   section = newJObject()
-  var valid_574408 = header.getOrDefault("If-Match")
-  valid_574408 = validateParameter(valid_574408, JString, required = false,
-                                 default = nil)
-  if valid_574408 != nil:
-    section.add "If-Match", valid_574408
-  var valid_574409 = header.getOrDefault("client-request-id")
-  valid_574409 = validateParameter(valid_574409, JString, required = false,
-                                 default = nil)
-  if valid_574409 != nil:
-    section.add "client-request-id", valid_574409
-  var valid_574410 = header.getOrDefault("ocp-date")
-  valid_574410 = validateParameter(valid_574410, JString, required = false,
-                                 default = nil)
-  if valid_574410 != nil:
-    section.add "ocp-date", valid_574410
-  var valid_574411 = header.getOrDefault("If-Unmodified-Since")
-  valid_574411 = validateParameter(valid_574411, JString, required = false,
-                                 default = nil)
-  if valid_574411 != nil:
-    section.add "If-Unmodified-Since", valid_574411
-  var valid_574412 = header.getOrDefault("If-None-Match")
-  valid_574412 = validateParameter(valid_574412, JString, required = false,
-                                 default = nil)
-  if valid_574412 != nil:
-    section.add "If-None-Match", valid_574412
-  var valid_574413 = header.getOrDefault("If-Modified-Since")
-  valid_574413 = validateParameter(valid_574413, JString, required = false,
-                                 default = nil)
-  if valid_574413 != nil:
-    section.add "If-Modified-Since", valid_574413
-  var valid_574414 = header.getOrDefault("return-client-request-id")
-  valid_574414 = validateParameter(valid_574414, JBool, required = false,
+  var valid_564308 = header.getOrDefault("return-client-request-id")
+  valid_564308 = validateParameter(valid_564308, JBool, required = false,
                                  default = newJBool(false))
-  if valid_574414 != nil:
-    section.add "return-client-request-id", valid_574414
+  if valid_564308 != nil:
+    section.add "return-client-request-id", valid_564308
+  var valid_564309 = header.getOrDefault("If-Unmodified-Since")
+  valid_564309 = validateParameter(valid_564309, JString, required = false,
+                                 default = nil)
+  if valid_564309 != nil:
+    section.add "If-Unmodified-Since", valid_564309
+  var valid_564310 = header.getOrDefault("client-request-id")
+  valid_564310 = validateParameter(valid_564310, JString, required = false,
+                                 default = nil)
+  if valid_564310 != nil:
+    section.add "client-request-id", valid_564310
+  var valid_564311 = header.getOrDefault("If-Modified-Since")
+  valid_564311 = validateParameter(valid_564311, JString, required = false,
+                                 default = nil)
+  if valid_564311 != nil:
+    section.add "If-Modified-Since", valid_564311
+  var valid_564312 = header.getOrDefault("If-None-Match")
+  valid_564312 = validateParameter(valid_564312, JString, required = false,
+                                 default = nil)
+  if valid_564312 != nil:
+    section.add "If-None-Match", valid_564312
+  var valid_564313 = header.getOrDefault("ocp-date")
+  valid_564313 = validateParameter(valid_564313, JString, required = false,
+                                 default = nil)
+  if valid_564313 != nil:
+    section.add "ocp-date", valid_564313
+  var valid_564314 = header.getOrDefault("If-Match")
+  valid_564314 = validateParameter(valid_564314, JString, required = false,
+                                 default = nil)
+  if valid_564314 != nil:
+    section.add "If-Match", valid_564314
   result.add "header", section
   section = newJObject()
   result.add "formData", section
@@ -1625,49 +1629,49 @@ proc validate_JobPatch_574403(path: JsonNode; query: JsonNode; header: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574416: Call_JobPatch_574402; path: JsonNode; query: JsonNode;
+proc call*(call_564316: Call_JobPatch_564302; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## This replaces only the Job properties specified in the request. For example, if the Job has constraints, and a request does not specify the constraints element, then the Job keeps the existing constraints.
   ## 
-  let valid = call_574416.validator(path, query, header, formData, body)
-  let scheme = call_574416.pickScheme
+  let valid = call_564316.validator(path, query, header, formData, body)
+  let scheme = call_564316.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574416.url(scheme.get, call_574416.host, call_574416.base,
-                         call_574416.route, valid.getOrDefault("path"),
+  let url = call_564316.url(scheme.get, call_564316.host, call_564316.base,
+                         call_564316.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574416, url, valid)
+  result = hook(call_564316, url, valid)
 
-proc call*(call_574417: Call_JobPatch_574402; apiVersion: string; jobId: string;
-          jobPatchParameter: JsonNode; timeout: int = 30): Recallable =
+proc call*(call_564317: Call_JobPatch_564302; jobId: string;
+          jobPatchParameter: JsonNode; apiVersion: string; timeout: int = 30): Recallable =
   ## jobPatch
   ## This replaces only the Job properties specified in the request. For example, if the Job has constraints, and a request does not specify the constraints element, then the Job keeps the existing constraints.
-  ##   timeout: int
-  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
-  ##   apiVersion: string (required)
-  ##             : Client API Version.
   ##   jobId: string (required)
   ##        : The ID of the Job whose properties you want to update.
   ##   jobPatchParameter: JObject (required)
   ##                    : The parameters for the request.
-  var path_574418 = newJObject()
-  var query_574419 = newJObject()
-  var body_574420 = newJObject()
-  add(query_574419, "timeout", newJInt(timeout))
-  add(query_574419, "api-version", newJString(apiVersion))
-  add(path_574418, "jobId", newJString(jobId))
+  ##   apiVersion: string (required)
+  ##             : Client API Version.
+  ##   timeout: int
+  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
+  var path_564318 = newJObject()
+  var query_564319 = newJObject()
+  var body_564320 = newJObject()
+  add(path_564318, "jobId", newJString(jobId))
   if jobPatchParameter != nil:
-    body_574420 = jobPatchParameter
-  result = call_574417.call(path_574418, query_574419, nil, nil, body_574420)
+    body_564320 = jobPatchParameter
+  add(query_564319, "api-version", newJString(apiVersion))
+  add(query_564319, "timeout", newJInt(timeout))
+  result = call_564317.call(path_564318, query_564319, nil, nil, body_564320)
 
-var jobPatch* = Call_JobPatch_574402(name: "jobPatch", meth: HttpMethod.HttpPatch,
+var jobPatch* = Call_JobPatch_564302(name: "jobPatch", meth: HttpMethod.HttpPatch,
                                   host: "azure.local", route: "/jobs/{jobId}",
-                                  validator: validate_JobPatch_574403, base: "",
-                                  url: url_JobPatch_574404,
+                                  validator: validate_JobPatch_564303, base: "",
+                                  url: url_JobPatch_564304,
                                   schemes: {Scheme.Https})
 type
-  Call_JobDelete_574385 = ref object of OpenApiRestCall_573667
-proc url_JobDelete_574387(protocol: Scheme; host: string; base: string; route: string;
+  Call_JobDelete_564285 = ref object of OpenApiRestCall_563565
+proc url_JobDelete_564287(protocol: Scheme; host: string; base: string; route: string;
                          path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1682,7 +1686,7 @@ proc url_JobDelete_574387(protocol: Scheme; host: string; base: string; route: s
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_JobDelete_574386(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_JobDelete_564286(path: JsonNode; query: JsonNode; header: JsonNode;
                               formData: JsonNode; body: JsonNode): JsonNode =
   ## Deleting a Job also deletes all Tasks that are part of that Job, and all Job statistics. This also overrides the retention period for Task data; that is, if the Job contains Tasks which are still retained on Compute Nodes, the Batch services deletes those Tasks' working directories and all their contents.  When a Delete Job request is received, the Batch service sets the Job to the deleting state. All update operations on a Job that is in deleting state will fail with status code 409 (Conflict), with additional information indicating that the Job is being deleted.
   ## 
@@ -1693,127 +1697,127 @@ proc validate_JobDelete_574386(path: JsonNode; query: JsonNode; header: JsonNode
   ##        : The ID of the Job to delete.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `jobId` field"
-  var valid_574388 = path.getOrDefault("jobId")
-  valid_574388 = validateParameter(valid_574388, JString, required = true,
+  var valid_564288 = path.getOrDefault("jobId")
+  valid_564288 = validateParameter(valid_564288, JString, required = true,
                                  default = nil)
-  if valid_574388 != nil:
-    section.add "jobId", valid_574388
+  if valid_564288 != nil:
+    section.add "jobId", valid_564288
   result.add "path", section
   ## parameters in `query` object:
-  ##   timeout: JInt
-  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   ##   api-version: JString (required)
   ##              : Client API Version.
+  ##   timeout: JInt
+  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   section = newJObject()
-  var valid_574389 = query.getOrDefault("timeout")
-  valid_574389 = validateParameter(valid_574389, JInt, required = false,
-                                 default = newJInt(30))
-  if valid_574389 != nil:
-    section.add "timeout", valid_574389
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574390 = query.getOrDefault("api-version")
-  valid_574390 = validateParameter(valid_574390, JString, required = true,
+  var valid_564289 = query.getOrDefault("api-version")
+  valid_564289 = validateParameter(valid_564289, JString, required = true,
                                  default = nil)
-  if valid_574390 != nil:
-    section.add "api-version", valid_574390
+  if valid_564289 != nil:
+    section.add "api-version", valid_564289
+  var valid_564290 = query.getOrDefault("timeout")
+  valid_564290 = validateParameter(valid_564290, JInt, required = false,
+                                 default = newJInt(30))
+  if valid_564290 != nil:
+    section.add "timeout", valid_564290
   result.add "query", section
   ## parameters in `header` object:
-  ##   If-Match: JString
-  ##           : An ETag value associated with the version of the resource known to the client. The operation will be performed only if the resource's current ETag on the service exactly matches the value specified by the client.
-  ##   client-request-id: JString
-  ##                    : The caller-generated request identity, in the form of a GUID with no decoration such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
-  ##   ocp-date: JString
-  ##           : The time the request was issued. Client libraries typically set this to the current system clock time; set it explicitly if you are calling the REST API directly.
-  ##   If-Unmodified-Since: JString
-  ##                      : A timestamp indicating the last modified time of the resource known to the client. The operation will be performed only if the resource on the service has not been modified since the specified time.
-  ##   If-None-Match: JString
-  ##                : An ETag value associated with the version of the resource known to the client. The operation will be performed only if the resource's current ETag on the service does not match the value specified by the client.
-  ##   If-Modified-Since: JString
-  ##                    : A timestamp indicating the last modified time of the resource known to the client. The operation will be performed only if the resource on the service has been modified since the specified time.
   ##   return-client-request-id: JBool
   ##                           : Whether the server should return the client-request-id in the response.
+  ##   If-Unmodified-Since: JString
+  ##                      : A timestamp indicating the last modified time of the resource known to the client. The operation will be performed only if the resource on the service has not been modified since the specified time.
+  ##   client-request-id: JString
+  ##                    : The caller-generated request identity, in the form of a GUID with no decoration such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
+  ##   If-Modified-Since: JString
+  ##                    : A timestamp indicating the last modified time of the resource known to the client. The operation will be performed only if the resource on the service has been modified since the specified time.
+  ##   If-None-Match: JString
+  ##                : An ETag value associated with the version of the resource known to the client. The operation will be performed only if the resource's current ETag on the service does not match the value specified by the client.
+  ##   ocp-date: JString
+  ##           : The time the request was issued. Client libraries typically set this to the current system clock time; set it explicitly if you are calling the REST API directly.
+  ##   If-Match: JString
+  ##           : An ETag value associated with the version of the resource known to the client. The operation will be performed only if the resource's current ETag on the service exactly matches the value specified by the client.
   section = newJObject()
-  var valid_574391 = header.getOrDefault("If-Match")
-  valid_574391 = validateParameter(valid_574391, JString, required = false,
-                                 default = nil)
-  if valid_574391 != nil:
-    section.add "If-Match", valid_574391
-  var valid_574392 = header.getOrDefault("client-request-id")
-  valid_574392 = validateParameter(valid_574392, JString, required = false,
-                                 default = nil)
-  if valid_574392 != nil:
-    section.add "client-request-id", valid_574392
-  var valid_574393 = header.getOrDefault("ocp-date")
-  valid_574393 = validateParameter(valid_574393, JString, required = false,
-                                 default = nil)
-  if valid_574393 != nil:
-    section.add "ocp-date", valid_574393
-  var valid_574394 = header.getOrDefault("If-Unmodified-Since")
-  valid_574394 = validateParameter(valid_574394, JString, required = false,
-                                 default = nil)
-  if valid_574394 != nil:
-    section.add "If-Unmodified-Since", valid_574394
-  var valid_574395 = header.getOrDefault("If-None-Match")
-  valid_574395 = validateParameter(valid_574395, JString, required = false,
-                                 default = nil)
-  if valid_574395 != nil:
-    section.add "If-None-Match", valid_574395
-  var valid_574396 = header.getOrDefault("If-Modified-Since")
-  valid_574396 = validateParameter(valid_574396, JString, required = false,
-                                 default = nil)
-  if valid_574396 != nil:
-    section.add "If-Modified-Since", valid_574396
-  var valid_574397 = header.getOrDefault("return-client-request-id")
-  valid_574397 = validateParameter(valid_574397, JBool, required = false,
+  var valid_564291 = header.getOrDefault("return-client-request-id")
+  valid_564291 = validateParameter(valid_564291, JBool, required = false,
                                  default = newJBool(false))
-  if valid_574397 != nil:
-    section.add "return-client-request-id", valid_574397
+  if valid_564291 != nil:
+    section.add "return-client-request-id", valid_564291
+  var valid_564292 = header.getOrDefault("If-Unmodified-Since")
+  valid_564292 = validateParameter(valid_564292, JString, required = false,
+                                 default = nil)
+  if valid_564292 != nil:
+    section.add "If-Unmodified-Since", valid_564292
+  var valid_564293 = header.getOrDefault("client-request-id")
+  valid_564293 = validateParameter(valid_564293, JString, required = false,
+                                 default = nil)
+  if valid_564293 != nil:
+    section.add "client-request-id", valid_564293
+  var valid_564294 = header.getOrDefault("If-Modified-Since")
+  valid_564294 = validateParameter(valid_564294, JString, required = false,
+                                 default = nil)
+  if valid_564294 != nil:
+    section.add "If-Modified-Since", valid_564294
+  var valid_564295 = header.getOrDefault("If-None-Match")
+  valid_564295 = validateParameter(valid_564295, JString, required = false,
+                                 default = nil)
+  if valid_564295 != nil:
+    section.add "If-None-Match", valid_564295
+  var valid_564296 = header.getOrDefault("ocp-date")
+  valid_564296 = validateParameter(valid_564296, JString, required = false,
+                                 default = nil)
+  if valid_564296 != nil:
+    section.add "ocp-date", valid_564296
+  var valid_564297 = header.getOrDefault("If-Match")
+  valid_564297 = validateParameter(valid_564297, JString, required = false,
+                                 default = nil)
+  if valid_564297 != nil:
+    section.add "If-Match", valid_564297
   result.add "header", section
   section = newJObject()
   result.add "formData", section
   if body != nil:
     result.add "body", body
 
-proc call*(call_574398: Call_JobDelete_574385; path: JsonNode; query: JsonNode;
+proc call*(call_564298: Call_JobDelete_564285; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deleting a Job also deletes all Tasks that are part of that Job, and all Job statistics. This also overrides the retention period for Task data; that is, if the Job contains Tasks which are still retained on Compute Nodes, the Batch services deletes those Tasks' working directories and all their contents.  When a Delete Job request is received, the Batch service sets the Job to the deleting state. All update operations on a Job that is in deleting state will fail with status code 409 (Conflict), with additional information indicating that the Job is being deleted.
   ## 
-  let valid = call_574398.validator(path, query, header, formData, body)
-  let scheme = call_574398.pickScheme
+  let valid = call_564298.validator(path, query, header, formData, body)
+  let scheme = call_564298.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574398.url(scheme.get, call_574398.host, call_574398.base,
-                         call_574398.route, valid.getOrDefault("path"),
+  let url = call_564298.url(scheme.get, call_564298.host, call_564298.base,
+                         call_564298.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574398, url, valid)
+  result = hook(call_564298, url, valid)
 
-proc call*(call_574399: Call_JobDelete_574385; apiVersion: string; jobId: string;
+proc call*(call_564299: Call_JobDelete_564285; jobId: string; apiVersion: string;
           timeout: int = 30): Recallable =
   ## jobDelete
   ## Deleting a Job also deletes all Tasks that are part of that Job, and all Job statistics. This also overrides the retention period for Task data; that is, if the Job contains Tasks which are still retained on Compute Nodes, the Batch services deletes those Tasks' working directories and all their contents.  When a Delete Job request is received, the Batch service sets the Job to the deleting state. All update operations on a Job that is in deleting state will fail with status code 409 (Conflict), with additional information indicating that the Job is being deleted.
-  ##   timeout: int
-  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
-  ##   apiVersion: string (required)
-  ##             : Client API Version.
   ##   jobId: string (required)
   ##        : The ID of the Job to delete.
-  var path_574400 = newJObject()
-  var query_574401 = newJObject()
-  add(query_574401, "timeout", newJInt(timeout))
-  add(query_574401, "api-version", newJString(apiVersion))
-  add(path_574400, "jobId", newJString(jobId))
-  result = call_574399.call(path_574400, query_574401, nil, nil, nil)
+  ##   apiVersion: string (required)
+  ##             : Client API Version.
+  ##   timeout: int
+  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
+  var path_564300 = newJObject()
+  var query_564301 = newJObject()
+  add(path_564300, "jobId", newJString(jobId))
+  add(query_564301, "api-version", newJString(apiVersion))
+  add(query_564301, "timeout", newJInt(timeout))
+  result = call_564299.call(path_564300, query_564301, nil, nil, nil)
 
-var jobDelete* = Call_JobDelete_574385(name: "jobDelete",
+var jobDelete* = Call_JobDelete_564285(name: "jobDelete",
                                     meth: HttpMethod.HttpDelete,
                                     host: "azure.local", route: "/jobs/{jobId}",
-                                    validator: validate_JobDelete_574386,
-                                    base: "", url: url_JobDelete_574387,
+                                    validator: validate_JobDelete_564286,
+                                    base: "", url: url_JobDelete_564287,
                                     schemes: {Scheme.Https})
 type
-  Call_TaskAddCollection_574421 = ref object of OpenApiRestCall_573667
-proc url_TaskAddCollection_574423(protocol: Scheme; host: string; base: string;
+  Call_TaskAddCollection_564321 = ref object of OpenApiRestCall_563565
+proc url_TaskAddCollection_564323(protocol: Scheme; host: string; base: string;
                                  route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1829,7 +1833,7 @@ proc url_TaskAddCollection_574423(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_TaskAddCollection_574422(path: JsonNode; query: JsonNode;
+proc validate_TaskAddCollection_564322(path: JsonNode; query: JsonNode;
                                       header: JsonNode; formData: JsonNode;
                                       body: JsonNode): JsonNode =
   ## Note that each Task must have a unique ID. The Batch service may not return the results for each Task in the same order the Tasks were submitted in this request. If the server times out or the connection is closed during the request, the request may have been partially or fully processed, or not at all. In such cases, the user should re-issue the request. Note that it is up to the user to correctly handle failures when re-issuing a request. For example, you should use the same Task IDs during a retry so that if the prior operation succeeded, the retry will not create extra Tasks unexpectedly. If the response contains any Tasks which failed to add, a client can retry the request. In a retry, it is most efficient to resubmit only Tasks that failed to add, and to omit Tasks that were successfully added on the first attempt. The maximum lifetime of a Task from addition to completion is 180 days. If a Task has not completed within 180 days of being added it will be terminated by the Batch service and left in whatever state it was in at that time.
@@ -1841,54 +1845,54 @@ proc validate_TaskAddCollection_574422(path: JsonNode; query: JsonNode;
   ##        : The ID of the Job to which the Task collection is to be added.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `jobId` field"
-  var valid_574434 = path.getOrDefault("jobId")
-  valid_574434 = validateParameter(valid_574434, JString, required = true,
+  var valid_564334 = path.getOrDefault("jobId")
+  valid_564334 = validateParameter(valid_564334, JString, required = true,
                                  default = nil)
-  if valid_574434 != nil:
-    section.add "jobId", valid_574434
+  if valid_564334 != nil:
+    section.add "jobId", valid_564334
   result.add "path", section
   ## parameters in `query` object:
-  ##   timeout: JInt
-  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   ##   api-version: JString (required)
   ##              : Client API Version.
+  ##   timeout: JInt
+  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   section = newJObject()
-  var valid_574435 = query.getOrDefault("timeout")
-  valid_574435 = validateParameter(valid_574435, JInt, required = false,
-                                 default = newJInt(30))
-  if valid_574435 != nil:
-    section.add "timeout", valid_574435
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574436 = query.getOrDefault("api-version")
-  valid_574436 = validateParameter(valid_574436, JString, required = true,
+  var valid_564335 = query.getOrDefault("api-version")
+  valid_564335 = validateParameter(valid_564335, JString, required = true,
                                  default = nil)
-  if valid_574436 != nil:
-    section.add "api-version", valid_574436
+  if valid_564335 != nil:
+    section.add "api-version", valid_564335
+  var valid_564336 = query.getOrDefault("timeout")
+  valid_564336 = validateParameter(valid_564336, JInt, required = false,
+                                 default = newJInt(30))
+  if valid_564336 != nil:
+    section.add "timeout", valid_564336
   result.add "query", section
   ## parameters in `header` object:
+  ##   return-client-request-id: JBool
+  ##                           : Whether the server should return the client-request-id in the response.
   ##   client-request-id: JString
   ##                    : The caller-generated request identity, in the form of a GUID with no decoration such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
   ##   ocp-date: JString
   ##           : The time the request was issued. Client libraries typically set this to the current system clock time; set it explicitly if you are calling the REST API directly.
-  ##   return-client-request-id: JBool
-  ##                           : Whether the server should return the client-request-id in the response.
   section = newJObject()
-  var valid_574437 = header.getOrDefault("client-request-id")
-  valid_574437 = validateParameter(valid_574437, JString, required = false,
-                                 default = nil)
-  if valid_574437 != nil:
-    section.add "client-request-id", valid_574437
-  var valid_574438 = header.getOrDefault("ocp-date")
-  valid_574438 = validateParameter(valid_574438, JString, required = false,
-                                 default = nil)
-  if valid_574438 != nil:
-    section.add "ocp-date", valid_574438
-  var valid_574439 = header.getOrDefault("return-client-request-id")
-  valid_574439 = validateParameter(valid_574439, JBool, required = false,
+  var valid_564337 = header.getOrDefault("return-client-request-id")
+  valid_564337 = validateParameter(valid_564337, JBool, required = false,
                                  default = newJBool(false))
-  if valid_574439 != nil:
-    section.add "return-client-request-id", valid_574439
+  if valid_564337 != nil:
+    section.add "return-client-request-id", valid_564337
+  var valid_564338 = header.getOrDefault("client-request-id")
+  valid_564338 = validateParameter(valid_564338, JString, required = false,
+                                 default = nil)
+  if valid_564338 != nil:
+    section.add "client-request-id", valid_564338
+  var valid_564339 = header.getOrDefault("ocp-date")
+  valid_564339 = validateParameter(valid_564339, JString, required = false,
+                                 default = nil)
+  if valid_564339 != nil:
+    section.add "ocp-date", valid_564339
   result.add "header", section
   section = newJObject()
   result.add "formData", section
@@ -1900,49 +1904,49 @@ proc validate_TaskAddCollection_574422(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574441: Call_TaskAddCollection_574421; path: JsonNode;
+proc call*(call_564341: Call_TaskAddCollection_564321; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Note that each Task must have a unique ID. The Batch service may not return the results for each Task in the same order the Tasks were submitted in this request. If the server times out or the connection is closed during the request, the request may have been partially or fully processed, or not at all. In such cases, the user should re-issue the request. Note that it is up to the user to correctly handle failures when re-issuing a request. For example, you should use the same Task IDs during a retry so that if the prior operation succeeded, the retry will not create extra Tasks unexpectedly. If the response contains any Tasks which failed to add, a client can retry the request. In a retry, it is most efficient to resubmit only Tasks that failed to add, and to omit Tasks that were successfully added on the first attempt. The maximum lifetime of a Task from addition to completion is 180 days. If a Task has not completed within 180 days of being added it will be terminated by the Batch service and left in whatever state it was in at that time.
   ## 
-  let valid = call_574441.validator(path, query, header, formData, body)
-  let scheme = call_574441.pickScheme
+  let valid = call_564341.validator(path, query, header, formData, body)
+  let scheme = call_564341.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574441.url(scheme.get, call_574441.host, call_574441.base,
-                         call_574441.route, valid.getOrDefault("path"),
+  let url = call_564341.url(scheme.get, call_564341.host, call_564341.base,
+                         call_564341.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574441, url, valid)
+  result = hook(call_564341, url, valid)
 
-proc call*(call_574442: Call_TaskAddCollection_574421; apiVersion: string;
-          jobId: string; taskCollection: JsonNode; timeout: int = 30): Recallable =
+proc call*(call_564342: Call_TaskAddCollection_564321; jobId: string;
+          apiVersion: string; taskCollection: JsonNode; timeout: int = 30): Recallable =
   ## taskAddCollection
   ## Note that each Task must have a unique ID. The Batch service may not return the results for each Task in the same order the Tasks were submitted in this request. If the server times out or the connection is closed during the request, the request may have been partially or fully processed, or not at all. In such cases, the user should re-issue the request. Note that it is up to the user to correctly handle failures when re-issuing a request. For example, you should use the same Task IDs during a retry so that if the prior operation succeeded, the retry will not create extra Tasks unexpectedly. If the response contains any Tasks which failed to add, a client can retry the request. In a retry, it is most efficient to resubmit only Tasks that failed to add, and to omit Tasks that were successfully added on the first attempt. The maximum lifetime of a Task from addition to completion is 180 days. If a Task has not completed within 180 days of being added it will be terminated by the Batch service and left in whatever state it was in at that time.
-  ##   timeout: int
-  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
-  ##   apiVersion: string (required)
-  ##             : Client API Version.
   ##   jobId: string (required)
   ##        : The ID of the Job to which the Task collection is to be added.
+  ##   apiVersion: string (required)
+  ##             : Client API Version.
   ##   taskCollection: JObject (required)
   ##                 : The Tasks to be added.
-  var path_574443 = newJObject()
-  var query_574444 = newJObject()
-  var body_574445 = newJObject()
-  add(query_574444, "timeout", newJInt(timeout))
-  add(query_574444, "api-version", newJString(apiVersion))
-  add(path_574443, "jobId", newJString(jobId))
+  ##   timeout: int
+  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
+  var path_564343 = newJObject()
+  var query_564344 = newJObject()
+  var body_564345 = newJObject()
+  add(path_564343, "jobId", newJString(jobId))
+  add(query_564344, "api-version", newJString(apiVersion))
   if taskCollection != nil:
-    body_574445 = taskCollection
-  result = call_574442.call(path_574443, query_574444, nil, nil, body_574445)
+    body_564345 = taskCollection
+  add(query_564344, "timeout", newJInt(timeout))
+  result = call_564342.call(path_564343, query_564344, nil, nil, body_564345)
 
-var taskAddCollection* = Call_TaskAddCollection_574421(name: "taskAddCollection",
+var taskAddCollection* = Call_TaskAddCollection_564321(name: "taskAddCollection",
     meth: HttpMethod.HttpPost, host: "azure.local",
     route: "/jobs/{jobId}/addtaskcollection",
-    validator: validate_TaskAddCollection_574422, base: "",
-    url: url_TaskAddCollection_574423, schemes: {Scheme.Https})
+    validator: validate_TaskAddCollection_564322, base: "",
+    url: url_TaskAddCollection_564323, schemes: {Scheme.Https})
 type
-  Call_JobDisable_574446 = ref object of OpenApiRestCall_573667
-proc url_JobDisable_574448(protocol: Scheme; host: string; base: string; route: string;
+  Call_JobDisable_564346 = ref object of OpenApiRestCall_563565
+proc url_JobDisable_564348(protocol: Scheme; host: string; base: string; route: string;
                           path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1958,7 +1962,7 @@ proc url_JobDisable_574448(protocol: Scheme; host: string; base: string; route: 
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_JobDisable_574447(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_JobDisable_564347(path: JsonNode; query: JsonNode; header: JsonNode;
                                formData: JsonNode; body: JsonNode): JsonNode =
   ## The Batch Service immediately moves the Job to the disabling state. Batch then uses the disableTasks parameter to determine what to do with the currently running Tasks of the Job. The Job remains in the disabling state until the disable operation is completed and all Tasks have been dealt with according to the disableTasks option; the Job then moves to the disabled state. No new Tasks are started under the Job until it moves back to active state. If you try to disable a Job that is in any state other than active, disabling, or disabled, the request fails with status code 409.
   ## 
@@ -1969,82 +1973,82 @@ proc validate_JobDisable_574447(path: JsonNode; query: JsonNode; header: JsonNod
   ##        : The ID of the Job to disable.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `jobId` field"
-  var valid_574449 = path.getOrDefault("jobId")
-  valid_574449 = validateParameter(valid_574449, JString, required = true,
+  var valid_564349 = path.getOrDefault("jobId")
+  valid_564349 = validateParameter(valid_564349, JString, required = true,
                                  default = nil)
-  if valid_574449 != nil:
-    section.add "jobId", valid_574449
+  if valid_564349 != nil:
+    section.add "jobId", valid_564349
   result.add "path", section
   ## parameters in `query` object:
-  ##   timeout: JInt
-  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   ##   api-version: JString (required)
   ##              : Client API Version.
+  ##   timeout: JInt
+  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   section = newJObject()
-  var valid_574450 = query.getOrDefault("timeout")
-  valid_574450 = validateParameter(valid_574450, JInt, required = false,
-                                 default = newJInt(30))
-  if valid_574450 != nil:
-    section.add "timeout", valid_574450
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574451 = query.getOrDefault("api-version")
-  valid_574451 = validateParameter(valid_574451, JString, required = true,
+  var valid_564350 = query.getOrDefault("api-version")
+  valid_564350 = validateParameter(valid_564350, JString, required = true,
                                  default = nil)
-  if valid_574451 != nil:
-    section.add "api-version", valid_574451
+  if valid_564350 != nil:
+    section.add "api-version", valid_564350
+  var valid_564351 = query.getOrDefault("timeout")
+  valid_564351 = validateParameter(valid_564351, JInt, required = false,
+                                 default = newJInt(30))
+  if valid_564351 != nil:
+    section.add "timeout", valid_564351
   result.add "query", section
   ## parameters in `header` object:
-  ##   If-Match: JString
-  ##           : An ETag value associated with the version of the resource known to the client. The operation will be performed only if the resource's current ETag on the service exactly matches the value specified by the client.
-  ##   client-request-id: JString
-  ##                    : The caller-generated request identity, in the form of a GUID with no decoration such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
-  ##   ocp-date: JString
-  ##           : The time the request was issued. Client libraries typically set this to the current system clock time; set it explicitly if you are calling the REST API directly.
-  ##   If-Unmodified-Since: JString
-  ##                      : A timestamp indicating the last modified time of the resource known to the client. The operation will be performed only if the resource on the service has not been modified since the specified time.
-  ##   If-None-Match: JString
-  ##                : An ETag value associated with the version of the resource known to the client. The operation will be performed only if the resource's current ETag on the service does not match the value specified by the client.
-  ##   If-Modified-Since: JString
-  ##                    : A timestamp indicating the last modified time of the resource known to the client. The operation will be performed only if the resource on the service has been modified since the specified time.
   ##   return-client-request-id: JBool
   ##                           : Whether the server should return the client-request-id in the response.
+  ##   If-Unmodified-Since: JString
+  ##                      : A timestamp indicating the last modified time of the resource known to the client. The operation will be performed only if the resource on the service has not been modified since the specified time.
+  ##   client-request-id: JString
+  ##                    : The caller-generated request identity, in the form of a GUID with no decoration such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
+  ##   If-Modified-Since: JString
+  ##                    : A timestamp indicating the last modified time of the resource known to the client. The operation will be performed only if the resource on the service has been modified since the specified time.
+  ##   If-None-Match: JString
+  ##                : An ETag value associated with the version of the resource known to the client. The operation will be performed only if the resource's current ETag on the service does not match the value specified by the client.
+  ##   ocp-date: JString
+  ##           : The time the request was issued. Client libraries typically set this to the current system clock time; set it explicitly if you are calling the REST API directly.
+  ##   If-Match: JString
+  ##           : An ETag value associated with the version of the resource known to the client. The operation will be performed only if the resource's current ETag on the service exactly matches the value specified by the client.
   section = newJObject()
-  var valid_574452 = header.getOrDefault("If-Match")
-  valid_574452 = validateParameter(valid_574452, JString, required = false,
-                                 default = nil)
-  if valid_574452 != nil:
-    section.add "If-Match", valid_574452
-  var valid_574453 = header.getOrDefault("client-request-id")
-  valid_574453 = validateParameter(valid_574453, JString, required = false,
-                                 default = nil)
-  if valid_574453 != nil:
-    section.add "client-request-id", valid_574453
-  var valid_574454 = header.getOrDefault("ocp-date")
-  valid_574454 = validateParameter(valid_574454, JString, required = false,
-                                 default = nil)
-  if valid_574454 != nil:
-    section.add "ocp-date", valid_574454
-  var valid_574455 = header.getOrDefault("If-Unmodified-Since")
-  valid_574455 = validateParameter(valid_574455, JString, required = false,
-                                 default = nil)
-  if valid_574455 != nil:
-    section.add "If-Unmodified-Since", valid_574455
-  var valid_574456 = header.getOrDefault("If-None-Match")
-  valid_574456 = validateParameter(valid_574456, JString, required = false,
-                                 default = nil)
-  if valid_574456 != nil:
-    section.add "If-None-Match", valid_574456
-  var valid_574457 = header.getOrDefault("If-Modified-Since")
-  valid_574457 = validateParameter(valid_574457, JString, required = false,
-                                 default = nil)
-  if valid_574457 != nil:
-    section.add "If-Modified-Since", valid_574457
-  var valid_574458 = header.getOrDefault("return-client-request-id")
-  valid_574458 = validateParameter(valid_574458, JBool, required = false,
+  var valid_564352 = header.getOrDefault("return-client-request-id")
+  valid_564352 = validateParameter(valid_564352, JBool, required = false,
                                  default = newJBool(false))
-  if valid_574458 != nil:
-    section.add "return-client-request-id", valid_574458
+  if valid_564352 != nil:
+    section.add "return-client-request-id", valid_564352
+  var valid_564353 = header.getOrDefault("If-Unmodified-Since")
+  valid_564353 = validateParameter(valid_564353, JString, required = false,
+                                 default = nil)
+  if valid_564353 != nil:
+    section.add "If-Unmodified-Since", valid_564353
+  var valid_564354 = header.getOrDefault("client-request-id")
+  valid_564354 = validateParameter(valid_564354, JString, required = false,
+                                 default = nil)
+  if valid_564354 != nil:
+    section.add "client-request-id", valid_564354
+  var valid_564355 = header.getOrDefault("If-Modified-Since")
+  valid_564355 = validateParameter(valid_564355, JString, required = false,
+                                 default = nil)
+  if valid_564355 != nil:
+    section.add "If-Modified-Since", valid_564355
+  var valid_564356 = header.getOrDefault("If-None-Match")
+  valid_564356 = validateParameter(valid_564356, JString, required = false,
+                                 default = nil)
+  if valid_564356 != nil:
+    section.add "If-None-Match", valid_564356
+  var valid_564357 = header.getOrDefault("ocp-date")
+  valid_564357 = validateParameter(valid_564357, JString, required = false,
+                                 default = nil)
+  if valid_564357 != nil:
+    section.add "ocp-date", valid_564357
+  var valid_564358 = header.getOrDefault("If-Match")
+  valid_564358 = validateParameter(valid_564358, JString, required = false,
+                                 default = nil)
+  if valid_564358 != nil:
+    section.add "If-Match", valid_564358
   result.add "header", section
   section = newJObject()
   result.add "formData", section
@@ -2056,51 +2060,51 @@ proc validate_JobDisable_574447(path: JsonNode; query: JsonNode; header: JsonNod
   if body != nil:
     result.add "body", body
 
-proc call*(call_574460: Call_JobDisable_574446; path: JsonNode; query: JsonNode;
+proc call*(call_564360: Call_JobDisable_564346; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## The Batch Service immediately moves the Job to the disabling state. Batch then uses the disableTasks parameter to determine what to do with the currently running Tasks of the Job. The Job remains in the disabling state until the disable operation is completed and all Tasks have been dealt with according to the disableTasks option; the Job then moves to the disabled state. No new Tasks are started under the Job until it moves back to active state. If you try to disable a Job that is in any state other than active, disabling, or disabled, the request fails with status code 409.
   ## 
-  let valid = call_574460.validator(path, query, header, formData, body)
-  let scheme = call_574460.pickScheme
+  let valid = call_564360.validator(path, query, header, formData, body)
+  let scheme = call_564360.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574460.url(scheme.get, call_574460.host, call_574460.base,
-                         call_574460.route, valid.getOrDefault("path"),
+  let url = call_564360.url(scheme.get, call_564360.host, call_564360.base,
+                         call_564360.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574460, url, valid)
+  result = hook(call_564360, url, valid)
 
-proc call*(call_574461: Call_JobDisable_574446; apiVersion: string; jobId: string;
+proc call*(call_564361: Call_JobDisable_564346; jobId: string; apiVersion: string;
           jobDisableParameter: JsonNode; timeout: int = 30): Recallable =
   ## jobDisable
   ## The Batch Service immediately moves the Job to the disabling state. Batch then uses the disableTasks parameter to determine what to do with the currently running Tasks of the Job. The Job remains in the disabling state until the disable operation is completed and all Tasks have been dealt with according to the disableTasks option; the Job then moves to the disabled state. No new Tasks are started under the Job until it moves back to active state. If you try to disable a Job that is in any state other than active, disabling, or disabled, the request fails with status code 409.
-  ##   timeout: int
-  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
-  ##   apiVersion: string (required)
-  ##             : Client API Version.
   ##   jobId: string (required)
   ##        : The ID of the Job to disable.
+  ##   apiVersion: string (required)
+  ##             : Client API Version.
   ##   jobDisableParameter: JObject (required)
   ##                      : The parameters for the request.
-  var path_574462 = newJObject()
-  var query_574463 = newJObject()
-  var body_574464 = newJObject()
-  add(query_574463, "timeout", newJInt(timeout))
-  add(query_574463, "api-version", newJString(apiVersion))
-  add(path_574462, "jobId", newJString(jobId))
+  ##   timeout: int
+  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
+  var path_564362 = newJObject()
+  var query_564363 = newJObject()
+  var body_564364 = newJObject()
+  add(path_564362, "jobId", newJString(jobId))
+  add(query_564363, "api-version", newJString(apiVersion))
   if jobDisableParameter != nil:
-    body_574464 = jobDisableParameter
-  result = call_574461.call(path_574462, query_574463, nil, nil, body_574464)
+    body_564364 = jobDisableParameter
+  add(query_564363, "timeout", newJInt(timeout))
+  result = call_564361.call(path_564362, query_564363, nil, nil, body_564364)
 
-var jobDisable* = Call_JobDisable_574446(name: "jobDisable",
+var jobDisable* = Call_JobDisable_564346(name: "jobDisable",
                                       meth: HttpMethod.HttpPost,
                                       host: "azure.local",
                                       route: "/jobs/{jobId}/disable",
-                                      validator: validate_JobDisable_574447,
-                                      base: "", url: url_JobDisable_574448,
+                                      validator: validate_JobDisable_564347,
+                                      base: "", url: url_JobDisable_564348,
                                       schemes: {Scheme.Https})
 type
-  Call_JobEnable_574465 = ref object of OpenApiRestCall_573667
-proc url_JobEnable_574467(protocol: Scheme; host: string; base: string; route: string;
+  Call_JobEnable_564365 = ref object of OpenApiRestCall_563565
+proc url_JobEnable_564367(protocol: Scheme; host: string; base: string; route: string;
                          path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2116,7 +2120,7 @@ proc url_JobEnable_574467(protocol: Scheme; host: string; base: string; route: s
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_JobEnable_574466(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_JobEnable_564366(path: JsonNode; query: JsonNode; header: JsonNode;
                               formData: JsonNode; body: JsonNode): JsonNode =
   ## When you call this API, the Batch service sets a disabled Job to the enabling state. After the this operation is completed, the Job moves to the active state, and scheduling of new Tasks under the Job resumes. The Batch service does not allow a Task to remain in the active state for more than 180 days. Therefore, if you enable a Job containing active Tasks which were added more than 180 days ago, those Tasks will not run.
   ## 
@@ -2127,127 +2131,127 @@ proc validate_JobEnable_574466(path: JsonNode; query: JsonNode; header: JsonNode
   ##        : The ID of the Job to enable.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `jobId` field"
-  var valid_574468 = path.getOrDefault("jobId")
-  valid_574468 = validateParameter(valid_574468, JString, required = true,
+  var valid_564368 = path.getOrDefault("jobId")
+  valid_564368 = validateParameter(valid_564368, JString, required = true,
                                  default = nil)
-  if valid_574468 != nil:
-    section.add "jobId", valid_574468
+  if valid_564368 != nil:
+    section.add "jobId", valid_564368
   result.add "path", section
   ## parameters in `query` object:
-  ##   timeout: JInt
-  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   ##   api-version: JString (required)
   ##              : Client API Version.
+  ##   timeout: JInt
+  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   section = newJObject()
-  var valid_574469 = query.getOrDefault("timeout")
-  valid_574469 = validateParameter(valid_574469, JInt, required = false,
-                                 default = newJInt(30))
-  if valid_574469 != nil:
-    section.add "timeout", valid_574469
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574470 = query.getOrDefault("api-version")
-  valid_574470 = validateParameter(valid_574470, JString, required = true,
+  var valid_564369 = query.getOrDefault("api-version")
+  valid_564369 = validateParameter(valid_564369, JString, required = true,
                                  default = nil)
-  if valid_574470 != nil:
-    section.add "api-version", valid_574470
+  if valid_564369 != nil:
+    section.add "api-version", valid_564369
+  var valid_564370 = query.getOrDefault("timeout")
+  valid_564370 = validateParameter(valid_564370, JInt, required = false,
+                                 default = newJInt(30))
+  if valid_564370 != nil:
+    section.add "timeout", valid_564370
   result.add "query", section
   ## parameters in `header` object:
-  ##   If-Match: JString
-  ##           : An ETag value associated with the version of the resource known to the client. The operation will be performed only if the resource's current ETag on the service exactly matches the value specified by the client.
-  ##   client-request-id: JString
-  ##                    : The caller-generated request identity, in the form of a GUID with no decoration such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
-  ##   ocp-date: JString
-  ##           : The time the request was issued. Client libraries typically set this to the current system clock time; set it explicitly if you are calling the REST API directly.
-  ##   If-Unmodified-Since: JString
-  ##                      : A timestamp indicating the last modified time of the resource known to the client. The operation will be performed only if the resource on the service has not been modified since the specified time.
-  ##   If-None-Match: JString
-  ##                : An ETag value associated with the version of the resource known to the client. The operation will be performed only if the resource's current ETag on the service does not match the value specified by the client.
-  ##   If-Modified-Since: JString
-  ##                    : A timestamp indicating the last modified time of the resource known to the client. The operation will be performed only if the resource on the service has been modified since the specified time.
   ##   return-client-request-id: JBool
   ##                           : Whether the server should return the client-request-id in the response.
+  ##   If-Unmodified-Since: JString
+  ##                      : A timestamp indicating the last modified time of the resource known to the client. The operation will be performed only if the resource on the service has not been modified since the specified time.
+  ##   client-request-id: JString
+  ##                    : The caller-generated request identity, in the form of a GUID with no decoration such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
+  ##   If-Modified-Since: JString
+  ##                    : A timestamp indicating the last modified time of the resource known to the client. The operation will be performed only if the resource on the service has been modified since the specified time.
+  ##   If-None-Match: JString
+  ##                : An ETag value associated with the version of the resource known to the client. The operation will be performed only if the resource's current ETag on the service does not match the value specified by the client.
+  ##   ocp-date: JString
+  ##           : The time the request was issued. Client libraries typically set this to the current system clock time; set it explicitly if you are calling the REST API directly.
+  ##   If-Match: JString
+  ##           : An ETag value associated with the version of the resource known to the client. The operation will be performed only if the resource's current ETag on the service exactly matches the value specified by the client.
   section = newJObject()
-  var valid_574471 = header.getOrDefault("If-Match")
-  valid_574471 = validateParameter(valid_574471, JString, required = false,
-                                 default = nil)
-  if valid_574471 != nil:
-    section.add "If-Match", valid_574471
-  var valid_574472 = header.getOrDefault("client-request-id")
-  valid_574472 = validateParameter(valid_574472, JString, required = false,
-                                 default = nil)
-  if valid_574472 != nil:
-    section.add "client-request-id", valid_574472
-  var valid_574473 = header.getOrDefault("ocp-date")
-  valid_574473 = validateParameter(valid_574473, JString, required = false,
-                                 default = nil)
-  if valid_574473 != nil:
-    section.add "ocp-date", valid_574473
-  var valid_574474 = header.getOrDefault("If-Unmodified-Since")
-  valid_574474 = validateParameter(valid_574474, JString, required = false,
-                                 default = nil)
-  if valid_574474 != nil:
-    section.add "If-Unmodified-Since", valid_574474
-  var valid_574475 = header.getOrDefault("If-None-Match")
-  valid_574475 = validateParameter(valid_574475, JString, required = false,
-                                 default = nil)
-  if valid_574475 != nil:
-    section.add "If-None-Match", valid_574475
-  var valid_574476 = header.getOrDefault("If-Modified-Since")
-  valid_574476 = validateParameter(valid_574476, JString, required = false,
-                                 default = nil)
-  if valid_574476 != nil:
-    section.add "If-Modified-Since", valid_574476
-  var valid_574477 = header.getOrDefault("return-client-request-id")
-  valid_574477 = validateParameter(valid_574477, JBool, required = false,
+  var valid_564371 = header.getOrDefault("return-client-request-id")
+  valid_564371 = validateParameter(valid_564371, JBool, required = false,
                                  default = newJBool(false))
-  if valid_574477 != nil:
-    section.add "return-client-request-id", valid_574477
+  if valid_564371 != nil:
+    section.add "return-client-request-id", valid_564371
+  var valid_564372 = header.getOrDefault("If-Unmodified-Since")
+  valid_564372 = validateParameter(valid_564372, JString, required = false,
+                                 default = nil)
+  if valid_564372 != nil:
+    section.add "If-Unmodified-Since", valid_564372
+  var valid_564373 = header.getOrDefault("client-request-id")
+  valid_564373 = validateParameter(valid_564373, JString, required = false,
+                                 default = nil)
+  if valid_564373 != nil:
+    section.add "client-request-id", valid_564373
+  var valid_564374 = header.getOrDefault("If-Modified-Since")
+  valid_564374 = validateParameter(valid_564374, JString, required = false,
+                                 default = nil)
+  if valid_564374 != nil:
+    section.add "If-Modified-Since", valid_564374
+  var valid_564375 = header.getOrDefault("If-None-Match")
+  valid_564375 = validateParameter(valid_564375, JString, required = false,
+                                 default = nil)
+  if valid_564375 != nil:
+    section.add "If-None-Match", valid_564375
+  var valid_564376 = header.getOrDefault("ocp-date")
+  valid_564376 = validateParameter(valid_564376, JString, required = false,
+                                 default = nil)
+  if valid_564376 != nil:
+    section.add "ocp-date", valid_564376
+  var valid_564377 = header.getOrDefault("If-Match")
+  valid_564377 = validateParameter(valid_564377, JString, required = false,
+                                 default = nil)
+  if valid_564377 != nil:
+    section.add "If-Match", valid_564377
   result.add "header", section
   section = newJObject()
   result.add "formData", section
   if body != nil:
     result.add "body", body
 
-proc call*(call_574478: Call_JobEnable_574465; path: JsonNode; query: JsonNode;
+proc call*(call_564378: Call_JobEnable_564365; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## When you call this API, the Batch service sets a disabled Job to the enabling state. After the this operation is completed, the Job moves to the active state, and scheduling of new Tasks under the Job resumes. The Batch service does not allow a Task to remain in the active state for more than 180 days. Therefore, if you enable a Job containing active Tasks which were added more than 180 days ago, those Tasks will not run.
   ## 
-  let valid = call_574478.validator(path, query, header, formData, body)
-  let scheme = call_574478.pickScheme
+  let valid = call_564378.validator(path, query, header, formData, body)
+  let scheme = call_564378.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574478.url(scheme.get, call_574478.host, call_574478.base,
-                         call_574478.route, valid.getOrDefault("path"),
+  let url = call_564378.url(scheme.get, call_564378.host, call_564378.base,
+                         call_564378.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574478, url, valid)
+  result = hook(call_564378, url, valid)
 
-proc call*(call_574479: Call_JobEnable_574465; apiVersion: string; jobId: string;
+proc call*(call_564379: Call_JobEnable_564365; jobId: string; apiVersion: string;
           timeout: int = 30): Recallable =
   ## jobEnable
   ## When you call this API, the Batch service sets a disabled Job to the enabling state. After the this operation is completed, the Job moves to the active state, and scheduling of new Tasks under the Job resumes. The Batch service does not allow a Task to remain in the active state for more than 180 days. Therefore, if you enable a Job containing active Tasks which were added more than 180 days ago, those Tasks will not run.
-  ##   timeout: int
-  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
-  ##   apiVersion: string (required)
-  ##             : Client API Version.
   ##   jobId: string (required)
   ##        : The ID of the Job to enable.
-  var path_574480 = newJObject()
-  var query_574481 = newJObject()
-  add(query_574481, "timeout", newJInt(timeout))
-  add(query_574481, "api-version", newJString(apiVersion))
-  add(path_574480, "jobId", newJString(jobId))
-  result = call_574479.call(path_574480, query_574481, nil, nil, nil)
+  ##   apiVersion: string (required)
+  ##             : Client API Version.
+  ##   timeout: int
+  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
+  var path_564380 = newJObject()
+  var query_564381 = newJObject()
+  add(path_564380, "jobId", newJString(jobId))
+  add(query_564381, "api-version", newJString(apiVersion))
+  add(query_564381, "timeout", newJInt(timeout))
+  result = call_564379.call(path_564380, query_564381, nil, nil, nil)
 
-var jobEnable* = Call_JobEnable_574465(name: "jobEnable", meth: HttpMethod.HttpPost,
+var jobEnable* = Call_JobEnable_564365(name: "jobEnable", meth: HttpMethod.HttpPost,
                                     host: "azure.local",
                                     route: "/jobs/{jobId}/enable",
-                                    validator: validate_JobEnable_574466,
-                                    base: "", url: url_JobEnable_574467,
+                                    validator: validate_JobEnable_564366,
+                                    base: "", url: url_JobEnable_564367,
                                     schemes: {Scheme.Https})
 type
-  Call_JobListPreparationAndReleaseTaskStatus_574482 = ref object of OpenApiRestCall_573667
-proc url_JobListPreparationAndReleaseTaskStatus_574484(protocol: Scheme;
+  Call_JobListPreparationAndReleaseTaskStatus_564382 = ref object of OpenApiRestCall_563565
+proc url_JobListPreparationAndReleaseTaskStatus_564384(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2263,7 +2267,7 @@ proc url_JobListPreparationAndReleaseTaskStatus_574484(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_JobListPreparationAndReleaseTaskStatus_574483(path: JsonNode;
+proc validate_JobListPreparationAndReleaseTaskStatus_564383(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## This API returns the Job Preparation and Job Release Task status on all Compute Nodes that have run the Job Preparation or Job Release Task. This includes Compute Nodes which have since been removed from the Pool. If this API is invoked on a Job which has no Job Preparation or Job Release Task, the Batch service returns HTTP status code 409 (Conflict) with an error code of JobPreparationTaskNotSpecified.
   ## 
@@ -2274,134 +2278,134 @@ proc validate_JobListPreparationAndReleaseTaskStatus_574483(path: JsonNode;
   ##        : The ID of the Job.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `jobId` field"
-  var valid_574485 = path.getOrDefault("jobId")
-  valid_574485 = validateParameter(valid_574485, JString, required = true,
+  var valid_564385 = path.getOrDefault("jobId")
+  valid_564385 = validateParameter(valid_564385, JString, required = true,
                                  default = nil)
-  if valid_574485 != nil:
-    section.add "jobId", valid_574485
+  if valid_564385 != nil:
+    section.add "jobId", valid_564385
   result.add "path", section
   ## parameters in `query` object:
-  ##   timeout: JInt
-  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   ##   api-version: JString (required)
   ##              : Client API Version.
-  ##   maxresults: JInt
-  ##             : The maximum number of items to return in the response. A maximum of 1000 Tasks can be returned.
   ##   $select: JString
   ##          : An OData $select clause.
+  ##   timeout: JInt
+  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
+  ##   maxresults: JInt
+  ##             : The maximum number of items to return in the response. A maximum of 1000 Tasks can be returned.
   ##   $filter: JString
   ##          : An OData $filter clause. For more information on constructing this filter, see 
   ## https://docs.microsoft.com/en-us/rest/api/batchservice/odata-filters-in-batch#list-job-preparation-and-release-status.
   section = newJObject()
-  var valid_574486 = query.getOrDefault("timeout")
-  valid_574486 = validateParameter(valid_574486, JInt, required = false,
-                                 default = newJInt(30))
-  if valid_574486 != nil:
-    section.add "timeout", valid_574486
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574487 = query.getOrDefault("api-version")
-  valid_574487 = validateParameter(valid_574487, JString, required = true,
+  var valid_564386 = query.getOrDefault("api-version")
+  valid_564386 = validateParameter(valid_564386, JString, required = true,
                                  default = nil)
-  if valid_574487 != nil:
-    section.add "api-version", valid_574487
-  var valid_574488 = query.getOrDefault("maxresults")
-  valid_574488 = validateParameter(valid_574488, JInt, required = false,
+  if valid_564386 != nil:
+    section.add "api-version", valid_564386
+  var valid_564387 = query.getOrDefault("$select")
+  valid_564387 = validateParameter(valid_564387, JString, required = false,
+                                 default = nil)
+  if valid_564387 != nil:
+    section.add "$select", valid_564387
+  var valid_564388 = query.getOrDefault("timeout")
+  valid_564388 = validateParameter(valid_564388, JInt, required = false,
+                                 default = newJInt(30))
+  if valid_564388 != nil:
+    section.add "timeout", valid_564388
+  var valid_564389 = query.getOrDefault("maxresults")
+  valid_564389 = validateParameter(valid_564389, JInt, required = false,
                                  default = newJInt(1000))
-  if valid_574488 != nil:
-    section.add "maxresults", valid_574488
-  var valid_574489 = query.getOrDefault("$select")
-  valid_574489 = validateParameter(valid_574489, JString, required = false,
+  if valid_564389 != nil:
+    section.add "maxresults", valid_564389
+  var valid_564390 = query.getOrDefault("$filter")
+  valid_564390 = validateParameter(valid_564390, JString, required = false,
                                  default = nil)
-  if valid_574489 != nil:
-    section.add "$select", valid_574489
-  var valid_574490 = query.getOrDefault("$filter")
-  valid_574490 = validateParameter(valid_574490, JString, required = false,
-                                 default = nil)
-  if valid_574490 != nil:
-    section.add "$filter", valid_574490
+  if valid_564390 != nil:
+    section.add "$filter", valid_564390
   result.add "query", section
   ## parameters in `header` object:
+  ##   return-client-request-id: JBool
+  ##                           : Whether the server should return the client-request-id in the response.
   ##   client-request-id: JString
   ##                    : The caller-generated request identity, in the form of a GUID with no decoration such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
   ##   ocp-date: JString
   ##           : The time the request was issued. Client libraries typically set this to the current system clock time; set it explicitly if you are calling the REST API directly.
-  ##   return-client-request-id: JBool
-  ##                           : Whether the server should return the client-request-id in the response.
   section = newJObject()
-  var valid_574491 = header.getOrDefault("client-request-id")
-  valid_574491 = validateParameter(valid_574491, JString, required = false,
-                                 default = nil)
-  if valid_574491 != nil:
-    section.add "client-request-id", valid_574491
-  var valid_574492 = header.getOrDefault("ocp-date")
-  valid_574492 = validateParameter(valid_574492, JString, required = false,
-                                 default = nil)
-  if valid_574492 != nil:
-    section.add "ocp-date", valid_574492
-  var valid_574493 = header.getOrDefault("return-client-request-id")
-  valid_574493 = validateParameter(valid_574493, JBool, required = false,
+  var valid_564391 = header.getOrDefault("return-client-request-id")
+  valid_564391 = validateParameter(valid_564391, JBool, required = false,
                                  default = newJBool(false))
-  if valid_574493 != nil:
-    section.add "return-client-request-id", valid_574493
+  if valid_564391 != nil:
+    section.add "return-client-request-id", valid_564391
+  var valid_564392 = header.getOrDefault("client-request-id")
+  valid_564392 = validateParameter(valid_564392, JString, required = false,
+                                 default = nil)
+  if valid_564392 != nil:
+    section.add "client-request-id", valid_564392
+  var valid_564393 = header.getOrDefault("ocp-date")
+  valid_564393 = validateParameter(valid_564393, JString, required = false,
+                                 default = nil)
+  if valid_564393 != nil:
+    section.add "ocp-date", valid_564393
   result.add "header", section
   section = newJObject()
   result.add "formData", section
   if body != nil:
     result.add "body", body
 
-proc call*(call_574494: Call_JobListPreparationAndReleaseTaskStatus_574482;
+proc call*(call_564394: Call_JobListPreparationAndReleaseTaskStatus_564382;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## This API returns the Job Preparation and Job Release Task status on all Compute Nodes that have run the Job Preparation or Job Release Task. This includes Compute Nodes which have since been removed from the Pool. If this API is invoked on a Job which has no Job Preparation or Job Release Task, the Batch service returns HTTP status code 409 (Conflict) with an error code of JobPreparationTaskNotSpecified.
   ## 
-  let valid = call_574494.validator(path, query, header, formData, body)
-  let scheme = call_574494.pickScheme
+  let valid = call_564394.validator(path, query, header, formData, body)
+  let scheme = call_564394.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574494.url(scheme.get, call_574494.host, call_574494.base,
-                         call_574494.route, valid.getOrDefault("path"),
+  let url = call_564394.url(scheme.get, call_564394.host, call_564394.base,
+                         call_564394.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574494, url, valid)
+  result = hook(call_564394, url, valid)
 
-proc call*(call_574495: Call_JobListPreparationAndReleaseTaskStatus_574482;
-          apiVersion: string; jobId: string; timeout: int = 30; maxresults: int = 1000;
-          Select: string = ""; Filter: string = ""): Recallable =
+proc call*(call_564395: Call_JobListPreparationAndReleaseTaskStatus_564382;
+          jobId: string; apiVersion: string; Select: string = ""; timeout: int = 30;
+          maxresults: int = 1000; Filter: string = ""): Recallable =
   ## jobListPreparationAndReleaseTaskStatus
   ## This API returns the Job Preparation and Job Release Task status on all Compute Nodes that have run the Job Preparation or Job Release Task. This includes Compute Nodes which have since been removed from the Pool. If this API is invoked on a Job which has no Job Preparation or Job Release Task, the Batch service returns HTTP status code 409 (Conflict) with an error code of JobPreparationTaskNotSpecified.
-  ##   timeout: int
-  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
-  ##   apiVersion: string (required)
-  ##             : Client API Version.
   ##   jobId: string (required)
   ##        : The ID of the Job.
-  ##   maxresults: int
-  ##             : The maximum number of items to return in the response. A maximum of 1000 Tasks can be returned.
+  ##   apiVersion: string (required)
+  ##             : Client API Version.
   ##   Select: string
   ##         : An OData $select clause.
+  ##   timeout: int
+  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
+  ##   maxresults: int
+  ##             : The maximum number of items to return in the response. A maximum of 1000 Tasks can be returned.
   ##   Filter: string
   ##         : An OData $filter clause. For more information on constructing this filter, see 
   ## https://docs.microsoft.com/en-us/rest/api/batchservice/odata-filters-in-batch#list-job-preparation-and-release-status.
-  var path_574496 = newJObject()
-  var query_574497 = newJObject()
-  add(query_574497, "timeout", newJInt(timeout))
-  add(query_574497, "api-version", newJString(apiVersion))
-  add(path_574496, "jobId", newJString(jobId))
-  add(query_574497, "maxresults", newJInt(maxresults))
-  add(query_574497, "$select", newJString(Select))
-  add(query_574497, "$filter", newJString(Filter))
-  result = call_574495.call(path_574496, query_574497, nil, nil, nil)
+  var path_564396 = newJObject()
+  var query_564397 = newJObject()
+  add(path_564396, "jobId", newJString(jobId))
+  add(query_564397, "api-version", newJString(apiVersion))
+  add(query_564397, "$select", newJString(Select))
+  add(query_564397, "timeout", newJInt(timeout))
+  add(query_564397, "maxresults", newJInt(maxresults))
+  add(query_564397, "$filter", newJString(Filter))
+  result = call_564395.call(path_564396, query_564397, nil, nil, nil)
 
-var jobListPreparationAndReleaseTaskStatus* = Call_JobListPreparationAndReleaseTaskStatus_574482(
+var jobListPreparationAndReleaseTaskStatus* = Call_JobListPreparationAndReleaseTaskStatus_564382(
     name: "jobListPreparationAndReleaseTaskStatus", meth: HttpMethod.HttpGet,
     host: "azure.local",
     route: "/jobs/{jobId}/jobpreparationandreleasetaskstatus",
-    validator: validate_JobListPreparationAndReleaseTaskStatus_574483, base: "",
-    url: url_JobListPreparationAndReleaseTaskStatus_574484,
+    validator: validate_JobListPreparationAndReleaseTaskStatus_564383, base: "",
+    url: url_JobListPreparationAndReleaseTaskStatus_564384,
     schemes: {Scheme.Https})
 type
-  Call_JobGetTaskCounts_574498 = ref object of OpenApiRestCall_573667
-proc url_JobGetTaskCounts_574500(protocol: Scheme; host: string; base: string;
+  Call_JobGetTaskCounts_564398 = ref object of OpenApiRestCall_563565
+proc url_JobGetTaskCounts_564400(protocol: Scheme; host: string; base: string;
                                 route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2417,7 +2421,7 @@ proc url_JobGetTaskCounts_574500(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_JobGetTaskCounts_574499(path: JsonNode; query: JsonNode;
+proc validate_JobGetTaskCounts_564399(path: JsonNode; query: JsonNode;
                                      header: JsonNode; formData: JsonNode;
                                      body: JsonNode): JsonNode =
   ## Task counts provide a count of the Tasks by active, running or completed Task state, and a count of Tasks which succeeded or failed. Tasks in the preparing state are counted as running.
@@ -2429,97 +2433,97 @@ proc validate_JobGetTaskCounts_574499(path: JsonNode; query: JsonNode;
   ##        : The ID of the Job.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `jobId` field"
-  var valid_574501 = path.getOrDefault("jobId")
-  valid_574501 = validateParameter(valid_574501, JString, required = true,
+  var valid_564401 = path.getOrDefault("jobId")
+  valid_564401 = validateParameter(valid_564401, JString, required = true,
                                  default = nil)
-  if valid_574501 != nil:
-    section.add "jobId", valid_574501
+  if valid_564401 != nil:
+    section.add "jobId", valid_564401
   result.add "path", section
   ## parameters in `query` object:
-  ##   timeout: JInt
-  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   ##   api-version: JString (required)
   ##              : Client API Version.
+  ##   timeout: JInt
+  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   section = newJObject()
-  var valid_574502 = query.getOrDefault("timeout")
-  valid_574502 = validateParameter(valid_574502, JInt, required = false,
-                                 default = newJInt(30))
-  if valid_574502 != nil:
-    section.add "timeout", valid_574502
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574503 = query.getOrDefault("api-version")
-  valid_574503 = validateParameter(valid_574503, JString, required = true,
+  var valid_564402 = query.getOrDefault("api-version")
+  valid_564402 = validateParameter(valid_564402, JString, required = true,
                                  default = nil)
-  if valid_574503 != nil:
-    section.add "api-version", valid_574503
+  if valid_564402 != nil:
+    section.add "api-version", valid_564402
+  var valid_564403 = query.getOrDefault("timeout")
+  valid_564403 = validateParameter(valid_564403, JInt, required = false,
+                                 default = newJInt(30))
+  if valid_564403 != nil:
+    section.add "timeout", valid_564403
   result.add "query", section
   ## parameters in `header` object:
+  ##   return-client-request-id: JBool
+  ##                           : Whether the server should return the client-request-id in the response.
   ##   client-request-id: JString
   ##                    : The caller-generated request identity, in the form of a GUID with no decoration such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
   ##   ocp-date: JString
   ##           : The time the request was issued. Client libraries typically set this to the current system clock time; set it explicitly if you are calling the REST API directly.
-  ##   return-client-request-id: JBool
-  ##                           : Whether the server should return the client-request-id in the response.
   section = newJObject()
-  var valid_574504 = header.getOrDefault("client-request-id")
-  valid_574504 = validateParameter(valid_574504, JString, required = false,
-                                 default = nil)
-  if valid_574504 != nil:
-    section.add "client-request-id", valid_574504
-  var valid_574505 = header.getOrDefault("ocp-date")
-  valid_574505 = validateParameter(valid_574505, JString, required = false,
-                                 default = nil)
-  if valid_574505 != nil:
-    section.add "ocp-date", valid_574505
-  var valid_574506 = header.getOrDefault("return-client-request-id")
-  valid_574506 = validateParameter(valid_574506, JBool, required = false,
+  var valid_564404 = header.getOrDefault("return-client-request-id")
+  valid_564404 = validateParameter(valid_564404, JBool, required = false,
                                  default = newJBool(false))
-  if valid_574506 != nil:
-    section.add "return-client-request-id", valid_574506
+  if valid_564404 != nil:
+    section.add "return-client-request-id", valid_564404
+  var valid_564405 = header.getOrDefault("client-request-id")
+  valid_564405 = validateParameter(valid_564405, JString, required = false,
+                                 default = nil)
+  if valid_564405 != nil:
+    section.add "client-request-id", valid_564405
+  var valid_564406 = header.getOrDefault("ocp-date")
+  valid_564406 = validateParameter(valid_564406, JString, required = false,
+                                 default = nil)
+  if valid_564406 != nil:
+    section.add "ocp-date", valid_564406
   result.add "header", section
   section = newJObject()
   result.add "formData", section
   if body != nil:
     result.add "body", body
 
-proc call*(call_574507: Call_JobGetTaskCounts_574498; path: JsonNode;
+proc call*(call_564407: Call_JobGetTaskCounts_564398; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Task counts provide a count of the Tasks by active, running or completed Task state, and a count of Tasks which succeeded or failed. Tasks in the preparing state are counted as running.
   ## 
-  let valid = call_574507.validator(path, query, header, formData, body)
-  let scheme = call_574507.pickScheme
+  let valid = call_564407.validator(path, query, header, formData, body)
+  let scheme = call_564407.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574507.url(scheme.get, call_574507.host, call_574507.base,
-                         call_574507.route, valid.getOrDefault("path"),
+  let url = call_564407.url(scheme.get, call_564407.host, call_564407.base,
+                         call_564407.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574507, url, valid)
+  result = hook(call_564407, url, valid)
 
-proc call*(call_574508: Call_JobGetTaskCounts_574498; apiVersion: string;
-          jobId: string; timeout: int = 30): Recallable =
+proc call*(call_564408: Call_JobGetTaskCounts_564398; jobId: string;
+          apiVersion: string; timeout: int = 30): Recallable =
   ## jobGetTaskCounts
   ## Task counts provide a count of the Tasks by active, running or completed Task state, and a count of Tasks which succeeded or failed. Tasks in the preparing state are counted as running.
-  ##   timeout: int
-  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
-  ##   apiVersion: string (required)
-  ##             : Client API Version.
   ##   jobId: string (required)
   ##        : The ID of the Job.
-  var path_574509 = newJObject()
-  var query_574510 = newJObject()
-  add(query_574510, "timeout", newJInt(timeout))
-  add(query_574510, "api-version", newJString(apiVersion))
-  add(path_574509, "jobId", newJString(jobId))
-  result = call_574508.call(path_574509, query_574510, nil, nil, nil)
+  ##   apiVersion: string (required)
+  ##             : Client API Version.
+  ##   timeout: int
+  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
+  var path_564409 = newJObject()
+  var query_564410 = newJObject()
+  add(path_564409, "jobId", newJString(jobId))
+  add(query_564410, "api-version", newJString(apiVersion))
+  add(query_564410, "timeout", newJInt(timeout))
+  result = call_564408.call(path_564409, query_564410, nil, nil, nil)
 
-var jobGetTaskCounts* = Call_JobGetTaskCounts_574498(name: "jobGetTaskCounts",
+var jobGetTaskCounts* = Call_JobGetTaskCounts_564398(name: "jobGetTaskCounts",
     meth: HttpMethod.HttpGet, host: "azure.local",
-    route: "/jobs/{jobId}/taskcounts", validator: validate_JobGetTaskCounts_574499,
-    base: "", url: url_JobGetTaskCounts_574500, schemes: {Scheme.Https})
+    route: "/jobs/{jobId}/taskcounts", validator: validate_JobGetTaskCounts_564399,
+    base: "", url: url_JobGetTaskCounts_564400, schemes: {Scheme.Https})
 type
-  Call_TaskAdd_574528 = ref object of OpenApiRestCall_573667
-proc url_TaskAdd_574530(protocol: Scheme; host: string; base: string; route: string;
+  Call_TaskAdd_564428 = ref object of OpenApiRestCall_563565
+proc url_TaskAdd_564430(protocol: Scheme; host: string; base: string; route: string;
                        path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2535,7 +2539,7 @@ proc url_TaskAdd_574530(protocol: Scheme; host: string; base: string; route: str
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_TaskAdd_574529(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_TaskAdd_564429(path: JsonNode; query: JsonNode; header: JsonNode;
                             formData: JsonNode; body: JsonNode): JsonNode =
   ## The maximum lifetime of a Task from addition to completion is 180 days. If a Task has not completed within 180 days of being added it will be terminated by the Batch service and left in whatever state it was in at that time.
   ## 
@@ -2546,54 +2550,54 @@ proc validate_TaskAdd_574529(path: JsonNode; query: JsonNode; header: JsonNode;
   ##        : The ID of the Job to which the Task is to be added.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `jobId` field"
-  var valid_574531 = path.getOrDefault("jobId")
-  valid_574531 = validateParameter(valid_574531, JString, required = true,
+  var valid_564431 = path.getOrDefault("jobId")
+  valid_564431 = validateParameter(valid_564431, JString, required = true,
                                  default = nil)
-  if valid_574531 != nil:
-    section.add "jobId", valid_574531
+  if valid_564431 != nil:
+    section.add "jobId", valid_564431
   result.add "path", section
   ## parameters in `query` object:
-  ##   timeout: JInt
-  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   ##   api-version: JString (required)
   ##              : Client API Version.
+  ##   timeout: JInt
+  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   section = newJObject()
-  var valid_574532 = query.getOrDefault("timeout")
-  valid_574532 = validateParameter(valid_574532, JInt, required = false,
-                                 default = newJInt(30))
-  if valid_574532 != nil:
-    section.add "timeout", valid_574532
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574533 = query.getOrDefault("api-version")
-  valid_574533 = validateParameter(valid_574533, JString, required = true,
+  var valid_564432 = query.getOrDefault("api-version")
+  valid_564432 = validateParameter(valid_564432, JString, required = true,
                                  default = nil)
-  if valid_574533 != nil:
-    section.add "api-version", valid_574533
+  if valid_564432 != nil:
+    section.add "api-version", valid_564432
+  var valid_564433 = query.getOrDefault("timeout")
+  valid_564433 = validateParameter(valid_564433, JInt, required = false,
+                                 default = newJInt(30))
+  if valid_564433 != nil:
+    section.add "timeout", valid_564433
   result.add "query", section
   ## parameters in `header` object:
+  ##   return-client-request-id: JBool
+  ##                           : Whether the server should return the client-request-id in the response.
   ##   client-request-id: JString
   ##                    : The caller-generated request identity, in the form of a GUID with no decoration such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
   ##   ocp-date: JString
   ##           : The time the request was issued. Client libraries typically set this to the current system clock time; set it explicitly if you are calling the REST API directly.
-  ##   return-client-request-id: JBool
-  ##                           : Whether the server should return the client-request-id in the response.
   section = newJObject()
-  var valid_574534 = header.getOrDefault("client-request-id")
-  valid_574534 = validateParameter(valid_574534, JString, required = false,
-                                 default = nil)
-  if valid_574534 != nil:
-    section.add "client-request-id", valid_574534
-  var valid_574535 = header.getOrDefault("ocp-date")
-  valid_574535 = validateParameter(valid_574535, JString, required = false,
-                                 default = nil)
-  if valid_574535 != nil:
-    section.add "ocp-date", valid_574535
-  var valid_574536 = header.getOrDefault("return-client-request-id")
-  valid_574536 = validateParameter(valid_574536, JBool, required = false,
+  var valid_564434 = header.getOrDefault("return-client-request-id")
+  valid_564434 = validateParameter(valid_564434, JBool, required = false,
                                  default = newJBool(false))
-  if valid_574536 != nil:
-    section.add "return-client-request-id", valid_574536
+  if valid_564434 != nil:
+    section.add "return-client-request-id", valid_564434
+  var valid_564435 = header.getOrDefault("client-request-id")
+  valid_564435 = validateParameter(valid_564435, JString, required = false,
+                                 default = nil)
+  if valid_564435 != nil:
+    section.add "client-request-id", valid_564435
+  var valid_564436 = header.getOrDefault("ocp-date")
+  valid_564436 = validateParameter(valid_564436, JString, required = false,
+                                 default = nil)
+  if valid_564436 != nil:
+    section.add "ocp-date", valid_564436
   result.add "header", section
   section = newJObject()
   result.add "formData", section
@@ -2605,48 +2609,48 @@ proc validate_TaskAdd_574529(path: JsonNode; query: JsonNode; header: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574538: Call_TaskAdd_574528; path: JsonNode; query: JsonNode;
+proc call*(call_564438: Call_TaskAdd_564428; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## The maximum lifetime of a Task from addition to completion is 180 days. If a Task has not completed within 180 days of being added it will be terminated by the Batch service and left in whatever state it was in at that time.
   ## 
-  let valid = call_574538.validator(path, query, header, formData, body)
-  let scheme = call_574538.pickScheme
+  let valid = call_564438.validator(path, query, header, formData, body)
+  let scheme = call_564438.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574538.url(scheme.get, call_574538.host, call_574538.base,
-                         call_574538.route, valid.getOrDefault("path"),
+  let url = call_564438.url(scheme.get, call_564438.host, call_564438.base,
+                         call_564438.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574538, url, valid)
+  result = hook(call_564438, url, valid)
 
-proc call*(call_574539: Call_TaskAdd_574528; apiVersion: string; jobId: string;
+proc call*(call_564439: Call_TaskAdd_564428; jobId: string; apiVersion: string;
           task: JsonNode; timeout: int = 30): Recallable =
   ## taskAdd
   ## The maximum lifetime of a Task from addition to completion is 180 days. If a Task has not completed within 180 days of being added it will be terminated by the Batch service and left in whatever state it was in at that time.
-  ##   timeout: int
-  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
-  ##   apiVersion: string (required)
-  ##             : Client API Version.
   ##   jobId: string (required)
   ##        : The ID of the Job to which the Task is to be added.
+  ##   apiVersion: string (required)
+  ##             : Client API Version.
+  ##   timeout: int
+  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   ##   task: JObject (required)
   ##       : The Task to be added.
-  var path_574540 = newJObject()
-  var query_574541 = newJObject()
-  var body_574542 = newJObject()
-  add(query_574541, "timeout", newJInt(timeout))
-  add(query_574541, "api-version", newJString(apiVersion))
-  add(path_574540, "jobId", newJString(jobId))
+  var path_564440 = newJObject()
+  var query_564441 = newJObject()
+  var body_564442 = newJObject()
+  add(path_564440, "jobId", newJString(jobId))
+  add(query_564441, "api-version", newJString(apiVersion))
+  add(query_564441, "timeout", newJInt(timeout))
   if task != nil:
-    body_574542 = task
-  result = call_574539.call(path_574540, query_574541, nil, nil, body_574542)
+    body_564442 = task
+  result = call_564439.call(path_564440, query_564441, nil, nil, body_564442)
 
-var taskAdd* = Call_TaskAdd_574528(name: "taskAdd", meth: HttpMethod.HttpPost,
+var taskAdd* = Call_TaskAdd_564428(name: "taskAdd", meth: HttpMethod.HttpPost,
                                 host: "azure.local", route: "/jobs/{jobId}/tasks",
-                                validator: validate_TaskAdd_574529, base: "",
-                                url: url_TaskAdd_574530, schemes: {Scheme.Https})
+                                validator: validate_TaskAdd_564429, base: "",
+                                url: url_TaskAdd_564430, schemes: {Scheme.Https})
 type
-  Call_TaskList_574511 = ref object of OpenApiRestCall_573667
-proc url_TaskList_574513(protocol: Scheme; host: string; base: string; route: string;
+  Call_TaskList_564411 = ref object of OpenApiRestCall_563565
+proc url_TaskList_564413(protocol: Scheme; host: string; base: string; route: string;
                         path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2662,7 +2666,7 @@ proc url_TaskList_574513(protocol: Scheme; host: string; base: string; route: st
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_TaskList_574512(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_TaskList_564412(path: JsonNode; query: JsonNode; header: JsonNode;
                              formData: JsonNode; body: JsonNode): JsonNode =
   ## For multi-instance Tasks, information such as affinityId, executionInfo and nodeInfo refer to the primary Task. Use the list subtasks API to retrieve information about subtasks.
   ## 
@@ -2673,142 +2677,142 @@ proc validate_TaskList_574512(path: JsonNode; query: JsonNode; header: JsonNode;
   ##        : The ID of the Job.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `jobId` field"
-  var valid_574514 = path.getOrDefault("jobId")
-  valid_574514 = validateParameter(valid_574514, JString, required = true,
+  var valid_564414 = path.getOrDefault("jobId")
+  valid_564414 = validateParameter(valid_564414, JString, required = true,
                                  default = nil)
-  if valid_574514 != nil:
-    section.add "jobId", valid_574514
+  if valid_564414 != nil:
+    section.add "jobId", valid_564414
   result.add "path", section
   ## parameters in `query` object:
-  ##   timeout: JInt
-  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
-  ##   $expand: JString
-  ##          : An OData $expand clause.
   ##   api-version: JString (required)
   ##              : Client API Version.
-  ##   maxresults: JInt
-  ##             : The maximum number of items to return in the response. A maximum of 1000 Tasks can be returned.
   ##   $select: JString
   ##          : An OData $select clause.
+  ##   $expand: JString
+  ##          : An OData $expand clause.
+  ##   timeout: JInt
+  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
+  ##   maxresults: JInt
+  ##             : The maximum number of items to return in the response. A maximum of 1000 Tasks can be returned.
   ##   $filter: JString
   ##          : An OData $filter clause. For more information on constructing this filter, see 
   ## https://docs.microsoft.com/en-us/rest/api/batchservice/odata-filters-in-batch#list-tasks.
   section = newJObject()
-  var valid_574515 = query.getOrDefault("timeout")
-  valid_574515 = validateParameter(valid_574515, JInt, required = false,
-                                 default = newJInt(30))
-  if valid_574515 != nil:
-    section.add "timeout", valid_574515
-  var valid_574516 = query.getOrDefault("$expand")
-  valid_574516 = validateParameter(valid_574516, JString, required = false,
-                                 default = nil)
-  if valid_574516 != nil:
-    section.add "$expand", valid_574516
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574517 = query.getOrDefault("api-version")
-  valid_574517 = validateParameter(valid_574517, JString, required = true,
+  var valid_564415 = query.getOrDefault("api-version")
+  valid_564415 = validateParameter(valid_564415, JString, required = true,
                                  default = nil)
-  if valid_574517 != nil:
-    section.add "api-version", valid_574517
-  var valid_574518 = query.getOrDefault("maxresults")
-  valid_574518 = validateParameter(valid_574518, JInt, required = false,
+  if valid_564415 != nil:
+    section.add "api-version", valid_564415
+  var valid_564416 = query.getOrDefault("$select")
+  valid_564416 = validateParameter(valid_564416, JString, required = false,
+                                 default = nil)
+  if valid_564416 != nil:
+    section.add "$select", valid_564416
+  var valid_564417 = query.getOrDefault("$expand")
+  valid_564417 = validateParameter(valid_564417, JString, required = false,
+                                 default = nil)
+  if valid_564417 != nil:
+    section.add "$expand", valid_564417
+  var valid_564418 = query.getOrDefault("timeout")
+  valid_564418 = validateParameter(valid_564418, JInt, required = false,
+                                 default = newJInt(30))
+  if valid_564418 != nil:
+    section.add "timeout", valid_564418
+  var valid_564419 = query.getOrDefault("maxresults")
+  valid_564419 = validateParameter(valid_564419, JInt, required = false,
                                  default = newJInt(1000))
-  if valid_574518 != nil:
-    section.add "maxresults", valid_574518
-  var valid_574519 = query.getOrDefault("$select")
-  valid_574519 = validateParameter(valid_574519, JString, required = false,
+  if valid_564419 != nil:
+    section.add "maxresults", valid_564419
+  var valid_564420 = query.getOrDefault("$filter")
+  valid_564420 = validateParameter(valid_564420, JString, required = false,
                                  default = nil)
-  if valid_574519 != nil:
-    section.add "$select", valid_574519
-  var valid_574520 = query.getOrDefault("$filter")
-  valid_574520 = validateParameter(valid_574520, JString, required = false,
-                                 default = nil)
-  if valid_574520 != nil:
-    section.add "$filter", valid_574520
+  if valid_564420 != nil:
+    section.add "$filter", valid_564420
   result.add "query", section
   ## parameters in `header` object:
+  ##   return-client-request-id: JBool
+  ##                           : Whether the server should return the client-request-id in the response.
   ##   client-request-id: JString
   ##                    : The caller-generated request identity, in the form of a GUID with no decoration such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
   ##   ocp-date: JString
   ##           : The time the request was issued. Client libraries typically set this to the current system clock time; set it explicitly if you are calling the REST API directly.
-  ##   return-client-request-id: JBool
-  ##                           : Whether the server should return the client-request-id in the response.
   section = newJObject()
-  var valid_574521 = header.getOrDefault("client-request-id")
-  valid_574521 = validateParameter(valid_574521, JString, required = false,
-                                 default = nil)
-  if valid_574521 != nil:
-    section.add "client-request-id", valid_574521
-  var valid_574522 = header.getOrDefault("ocp-date")
-  valid_574522 = validateParameter(valid_574522, JString, required = false,
-                                 default = nil)
-  if valid_574522 != nil:
-    section.add "ocp-date", valid_574522
-  var valid_574523 = header.getOrDefault("return-client-request-id")
-  valid_574523 = validateParameter(valid_574523, JBool, required = false,
+  var valid_564421 = header.getOrDefault("return-client-request-id")
+  valid_564421 = validateParameter(valid_564421, JBool, required = false,
                                  default = newJBool(false))
-  if valid_574523 != nil:
-    section.add "return-client-request-id", valid_574523
+  if valid_564421 != nil:
+    section.add "return-client-request-id", valid_564421
+  var valid_564422 = header.getOrDefault("client-request-id")
+  valid_564422 = validateParameter(valid_564422, JString, required = false,
+                                 default = nil)
+  if valid_564422 != nil:
+    section.add "client-request-id", valid_564422
+  var valid_564423 = header.getOrDefault("ocp-date")
+  valid_564423 = validateParameter(valid_564423, JString, required = false,
+                                 default = nil)
+  if valid_564423 != nil:
+    section.add "ocp-date", valid_564423
   result.add "header", section
   section = newJObject()
   result.add "formData", section
   if body != nil:
     result.add "body", body
 
-proc call*(call_574524: Call_TaskList_574511; path: JsonNode; query: JsonNode;
+proc call*(call_564424: Call_TaskList_564411; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## For multi-instance Tasks, information such as affinityId, executionInfo and nodeInfo refer to the primary Task. Use the list subtasks API to retrieve information about subtasks.
   ## 
-  let valid = call_574524.validator(path, query, header, formData, body)
-  let scheme = call_574524.pickScheme
+  let valid = call_564424.validator(path, query, header, formData, body)
+  let scheme = call_564424.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574524.url(scheme.get, call_574524.host, call_574524.base,
-                         call_574524.route, valid.getOrDefault("path"),
+  let url = call_564424.url(scheme.get, call_564424.host, call_564424.base,
+                         call_564424.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574524, url, valid)
+  result = hook(call_564424, url, valid)
 
-proc call*(call_574525: Call_TaskList_574511; apiVersion: string; jobId: string;
-          timeout: int = 30; Expand: string = ""; maxresults: int = 1000;
-          Select: string = ""; Filter: string = ""): Recallable =
+proc call*(call_564425: Call_TaskList_564411; jobId: string; apiVersion: string;
+          Select: string = ""; Expand: string = ""; timeout: int = 30;
+          maxresults: int = 1000; Filter: string = ""): Recallable =
   ## taskList
   ## For multi-instance Tasks, information such as affinityId, executionInfo and nodeInfo refer to the primary Task. Use the list subtasks API to retrieve information about subtasks.
-  ##   timeout: int
-  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
-  ##   Expand: string
-  ##         : An OData $expand clause.
-  ##   apiVersion: string (required)
-  ##             : Client API Version.
   ##   jobId: string (required)
   ##        : The ID of the Job.
-  ##   maxresults: int
-  ##             : The maximum number of items to return in the response. A maximum of 1000 Tasks can be returned.
+  ##   apiVersion: string (required)
+  ##             : Client API Version.
   ##   Select: string
   ##         : An OData $select clause.
+  ##   Expand: string
+  ##         : An OData $expand clause.
+  ##   timeout: int
+  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
+  ##   maxresults: int
+  ##             : The maximum number of items to return in the response. A maximum of 1000 Tasks can be returned.
   ##   Filter: string
   ##         : An OData $filter clause. For more information on constructing this filter, see 
   ## https://docs.microsoft.com/en-us/rest/api/batchservice/odata-filters-in-batch#list-tasks.
-  var path_574526 = newJObject()
-  var query_574527 = newJObject()
-  add(query_574527, "timeout", newJInt(timeout))
-  add(query_574527, "$expand", newJString(Expand))
-  add(query_574527, "api-version", newJString(apiVersion))
-  add(path_574526, "jobId", newJString(jobId))
-  add(query_574527, "maxresults", newJInt(maxresults))
-  add(query_574527, "$select", newJString(Select))
-  add(query_574527, "$filter", newJString(Filter))
-  result = call_574525.call(path_574526, query_574527, nil, nil, nil)
+  var path_564426 = newJObject()
+  var query_564427 = newJObject()
+  add(path_564426, "jobId", newJString(jobId))
+  add(query_564427, "api-version", newJString(apiVersion))
+  add(query_564427, "$select", newJString(Select))
+  add(query_564427, "$expand", newJString(Expand))
+  add(query_564427, "timeout", newJInt(timeout))
+  add(query_564427, "maxresults", newJInt(maxresults))
+  add(query_564427, "$filter", newJString(Filter))
+  result = call_564425.call(path_564426, query_564427, nil, nil, nil)
 
-var taskList* = Call_TaskList_574511(name: "taskList", meth: HttpMethod.HttpGet,
+var taskList* = Call_TaskList_564411(name: "taskList", meth: HttpMethod.HttpGet,
                                   host: "azure.local",
                                   route: "/jobs/{jobId}/tasks",
-                                  validator: validate_TaskList_574512, base: "",
-                                  url: url_TaskList_574513,
+                                  validator: validate_TaskList_564412, base: "",
+                                  url: url_TaskList_564413,
                                   schemes: {Scheme.Https})
 type
-  Call_TaskUpdate_574563 = ref object of OpenApiRestCall_573667
-proc url_TaskUpdate_574565(protocol: Scheme; host: string; base: string; route: string;
+  Call_TaskUpdate_564463 = ref object of OpenApiRestCall_563565
+proc url_TaskUpdate_564465(protocol: Scheme; host: string; base: string; route: string;
                           path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2826,7 +2830,7 @@ proc url_TaskUpdate_574565(protocol: Scheme; host: string; base: string; route: 
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_TaskUpdate_574564(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_TaskUpdate_564464(path: JsonNode; query: JsonNode; header: JsonNode;
                                formData: JsonNode; body: JsonNode): JsonNode =
   ## Updates the properties of the specified Task.
   ## 
@@ -2839,87 +2843,87 @@ proc validate_TaskUpdate_574564(path: JsonNode; query: JsonNode; header: JsonNod
   ##         : The ID of the Task to update.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `jobId` field"
-  var valid_574566 = path.getOrDefault("jobId")
-  valid_574566 = validateParameter(valid_574566, JString, required = true,
+  var valid_564466 = path.getOrDefault("jobId")
+  valid_564466 = validateParameter(valid_564466, JString, required = true,
                                  default = nil)
-  if valid_574566 != nil:
-    section.add "jobId", valid_574566
-  var valid_574567 = path.getOrDefault("taskId")
-  valid_574567 = validateParameter(valid_574567, JString, required = true,
+  if valid_564466 != nil:
+    section.add "jobId", valid_564466
+  var valid_564467 = path.getOrDefault("taskId")
+  valid_564467 = validateParameter(valid_564467, JString, required = true,
                                  default = nil)
-  if valid_574567 != nil:
-    section.add "taskId", valid_574567
+  if valid_564467 != nil:
+    section.add "taskId", valid_564467
   result.add "path", section
   ## parameters in `query` object:
-  ##   timeout: JInt
-  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   ##   api-version: JString (required)
   ##              : Client API Version.
+  ##   timeout: JInt
+  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   section = newJObject()
-  var valid_574568 = query.getOrDefault("timeout")
-  valid_574568 = validateParameter(valid_574568, JInt, required = false,
-                                 default = newJInt(30))
-  if valid_574568 != nil:
-    section.add "timeout", valid_574568
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574569 = query.getOrDefault("api-version")
-  valid_574569 = validateParameter(valid_574569, JString, required = true,
+  var valid_564468 = query.getOrDefault("api-version")
+  valid_564468 = validateParameter(valid_564468, JString, required = true,
                                  default = nil)
-  if valid_574569 != nil:
-    section.add "api-version", valid_574569
+  if valid_564468 != nil:
+    section.add "api-version", valid_564468
+  var valid_564469 = query.getOrDefault("timeout")
+  valid_564469 = validateParameter(valid_564469, JInt, required = false,
+                                 default = newJInt(30))
+  if valid_564469 != nil:
+    section.add "timeout", valid_564469
   result.add "query", section
   ## parameters in `header` object:
-  ##   If-Match: JString
-  ##           : An ETag value associated with the version of the resource known to the client. The operation will be performed only if the resource's current ETag on the service exactly matches the value specified by the client.
-  ##   client-request-id: JString
-  ##                    : The caller-generated request identity, in the form of a GUID with no decoration such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
-  ##   ocp-date: JString
-  ##           : The time the request was issued. Client libraries typically set this to the current system clock time; set it explicitly if you are calling the REST API directly.
-  ##   If-Unmodified-Since: JString
-  ##                      : A timestamp indicating the last modified time of the resource known to the client. The operation will be performed only if the resource on the service has not been modified since the specified time.
-  ##   If-None-Match: JString
-  ##                : An ETag value associated with the version of the resource known to the client. The operation will be performed only if the resource's current ETag on the service does not match the value specified by the client.
-  ##   If-Modified-Since: JString
-  ##                    : A timestamp indicating the last modified time of the resource known to the client. The operation will be performed only if the resource on the service has been modified since the specified time.
   ##   return-client-request-id: JBool
   ##                           : Whether the server should return the client-request-id in the response.
+  ##   If-Unmodified-Since: JString
+  ##                      : A timestamp indicating the last modified time of the resource known to the client. The operation will be performed only if the resource on the service has not been modified since the specified time.
+  ##   client-request-id: JString
+  ##                    : The caller-generated request identity, in the form of a GUID with no decoration such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
+  ##   If-Modified-Since: JString
+  ##                    : A timestamp indicating the last modified time of the resource known to the client. The operation will be performed only if the resource on the service has been modified since the specified time.
+  ##   If-None-Match: JString
+  ##                : An ETag value associated with the version of the resource known to the client. The operation will be performed only if the resource's current ETag on the service does not match the value specified by the client.
+  ##   ocp-date: JString
+  ##           : The time the request was issued. Client libraries typically set this to the current system clock time; set it explicitly if you are calling the REST API directly.
+  ##   If-Match: JString
+  ##           : An ETag value associated with the version of the resource known to the client. The operation will be performed only if the resource's current ETag on the service exactly matches the value specified by the client.
   section = newJObject()
-  var valid_574570 = header.getOrDefault("If-Match")
-  valid_574570 = validateParameter(valid_574570, JString, required = false,
-                                 default = nil)
-  if valid_574570 != nil:
-    section.add "If-Match", valid_574570
-  var valid_574571 = header.getOrDefault("client-request-id")
-  valid_574571 = validateParameter(valid_574571, JString, required = false,
-                                 default = nil)
-  if valid_574571 != nil:
-    section.add "client-request-id", valid_574571
-  var valid_574572 = header.getOrDefault("ocp-date")
-  valid_574572 = validateParameter(valid_574572, JString, required = false,
-                                 default = nil)
-  if valid_574572 != nil:
-    section.add "ocp-date", valid_574572
-  var valid_574573 = header.getOrDefault("If-Unmodified-Since")
-  valid_574573 = validateParameter(valid_574573, JString, required = false,
-                                 default = nil)
-  if valid_574573 != nil:
-    section.add "If-Unmodified-Since", valid_574573
-  var valid_574574 = header.getOrDefault("If-None-Match")
-  valid_574574 = validateParameter(valid_574574, JString, required = false,
-                                 default = nil)
-  if valid_574574 != nil:
-    section.add "If-None-Match", valid_574574
-  var valid_574575 = header.getOrDefault("If-Modified-Since")
-  valid_574575 = validateParameter(valid_574575, JString, required = false,
-                                 default = nil)
-  if valid_574575 != nil:
-    section.add "If-Modified-Since", valid_574575
-  var valid_574576 = header.getOrDefault("return-client-request-id")
-  valid_574576 = validateParameter(valid_574576, JBool, required = false,
+  var valid_564470 = header.getOrDefault("return-client-request-id")
+  valid_564470 = validateParameter(valid_564470, JBool, required = false,
                                  default = newJBool(false))
-  if valid_574576 != nil:
-    section.add "return-client-request-id", valid_574576
+  if valid_564470 != nil:
+    section.add "return-client-request-id", valid_564470
+  var valid_564471 = header.getOrDefault("If-Unmodified-Since")
+  valid_564471 = validateParameter(valid_564471, JString, required = false,
+                                 default = nil)
+  if valid_564471 != nil:
+    section.add "If-Unmodified-Since", valid_564471
+  var valid_564472 = header.getOrDefault("client-request-id")
+  valid_564472 = validateParameter(valid_564472, JString, required = false,
+                                 default = nil)
+  if valid_564472 != nil:
+    section.add "client-request-id", valid_564472
+  var valid_564473 = header.getOrDefault("If-Modified-Since")
+  valid_564473 = validateParameter(valid_564473, JString, required = false,
+                                 default = nil)
+  if valid_564473 != nil:
+    section.add "If-Modified-Since", valid_564473
+  var valid_564474 = header.getOrDefault("If-None-Match")
+  valid_564474 = validateParameter(valid_564474, JString, required = false,
+                                 default = nil)
+  if valid_564474 != nil:
+    section.add "If-None-Match", valid_564474
+  var valid_564475 = header.getOrDefault("ocp-date")
+  valid_564475 = validateParameter(valid_564475, JString, required = false,
+                                 default = nil)
+  if valid_564475 != nil:
+    section.add "ocp-date", valid_564475
+  var valid_564476 = header.getOrDefault("If-Match")
+  valid_564476 = validateParameter(valid_564476, JString, required = false,
+                                 default = nil)
+  if valid_564476 != nil:
+    section.add "If-Match", valid_564476
   result.add "header", section
   section = newJObject()
   result.add "formData", section
@@ -2931,54 +2935,55 @@ proc validate_TaskUpdate_574564(path: JsonNode; query: JsonNode; header: JsonNod
   if body != nil:
     result.add "body", body
 
-proc call*(call_574578: Call_TaskUpdate_574563; path: JsonNode; query: JsonNode;
+proc call*(call_564478: Call_TaskUpdate_564463; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Updates the properties of the specified Task.
   ## 
-  let valid = call_574578.validator(path, query, header, formData, body)
-  let scheme = call_574578.pickScheme
+  let valid = call_564478.validator(path, query, header, formData, body)
+  let scheme = call_564478.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574578.url(scheme.get, call_574578.host, call_574578.base,
-                         call_574578.route, valid.getOrDefault("path"),
+  let url = call_564478.url(scheme.get, call_564478.host, call_564478.base,
+                         call_564478.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574578, url, valid)
+  result = hook(call_564478, url, valid)
 
-proc call*(call_574579: Call_TaskUpdate_574563; apiVersion: string; jobId: string;
-          taskUpdateParameter: JsonNode; taskId: string; timeout: int = 30): Recallable =
+proc call*(call_564479: Call_TaskUpdate_564463; jobId: string;
+          taskUpdateParameter: JsonNode; apiVersion: string; taskId: string;
+          timeout: int = 30): Recallable =
   ## taskUpdate
   ## Updates the properties of the specified Task.
-  ##   timeout: int
-  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
-  ##   apiVersion: string (required)
-  ##             : Client API Version.
   ##   jobId: string (required)
   ##        : The ID of the Job containing the Task.
   ##   taskUpdateParameter: JObject (required)
   ##                      : The parameters for the request.
+  ##   apiVersion: string (required)
+  ##             : Client API Version.
+  ##   timeout: int
+  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   ##   taskId: string (required)
   ##         : The ID of the Task to update.
-  var path_574580 = newJObject()
-  var query_574581 = newJObject()
-  var body_574582 = newJObject()
-  add(query_574581, "timeout", newJInt(timeout))
-  add(query_574581, "api-version", newJString(apiVersion))
-  add(path_574580, "jobId", newJString(jobId))
+  var path_564480 = newJObject()
+  var query_564481 = newJObject()
+  var body_564482 = newJObject()
+  add(path_564480, "jobId", newJString(jobId))
   if taskUpdateParameter != nil:
-    body_574582 = taskUpdateParameter
-  add(path_574580, "taskId", newJString(taskId))
-  result = call_574579.call(path_574580, query_574581, nil, nil, body_574582)
+    body_564482 = taskUpdateParameter
+  add(query_564481, "api-version", newJString(apiVersion))
+  add(query_564481, "timeout", newJInt(timeout))
+  add(path_564480, "taskId", newJString(taskId))
+  result = call_564479.call(path_564480, query_564481, nil, nil, body_564482)
 
-var taskUpdate* = Call_TaskUpdate_574563(name: "taskUpdate",
+var taskUpdate* = Call_TaskUpdate_564463(name: "taskUpdate",
                                       meth: HttpMethod.HttpPut,
                                       host: "azure.local",
                                       route: "/jobs/{jobId}/tasks/{taskId}",
-                                      validator: validate_TaskUpdate_574564,
-                                      base: "", url: url_TaskUpdate_574565,
+                                      validator: validate_TaskUpdate_564464,
+                                      base: "", url: url_TaskUpdate_564465,
                                       schemes: {Scheme.Https})
 type
-  Call_TaskGet_574543 = ref object of OpenApiRestCall_573667
-proc url_TaskGet_574545(protocol: Scheme; host: string; base: string; route: string;
+  Call_TaskGet_564443 = ref object of OpenApiRestCall_563565
+proc url_TaskGet_564445(protocol: Scheme; host: string; base: string; route: string;
                        path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2996,7 +3001,7 @@ proc url_TaskGet_574545(protocol: Scheme; host: string; base: string; route: str
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_TaskGet_574544(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_TaskGet_564444(path: JsonNode; query: JsonNode; header: JsonNode;
                             formData: JsonNode; body: JsonNode): JsonNode =
   ## For multi-instance Tasks, information such as affinityId, executionInfo and nodeInfo refer to the primary Task. Use the list subtasks API to retrieve information about subtasks.
   ## 
@@ -3009,154 +3014,154 @@ proc validate_TaskGet_574544(path: JsonNode; query: JsonNode; header: JsonNode;
   ##         : The ID of the Task to get information about.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `jobId` field"
-  var valid_574546 = path.getOrDefault("jobId")
-  valid_574546 = validateParameter(valid_574546, JString, required = true,
+  var valid_564446 = path.getOrDefault("jobId")
+  valid_564446 = validateParameter(valid_564446, JString, required = true,
                                  default = nil)
-  if valid_574546 != nil:
-    section.add "jobId", valid_574546
-  var valid_574547 = path.getOrDefault("taskId")
-  valid_574547 = validateParameter(valid_574547, JString, required = true,
+  if valid_564446 != nil:
+    section.add "jobId", valid_564446
+  var valid_564447 = path.getOrDefault("taskId")
+  valid_564447 = validateParameter(valid_564447, JString, required = true,
                                  default = nil)
-  if valid_574547 != nil:
-    section.add "taskId", valid_574547
+  if valid_564447 != nil:
+    section.add "taskId", valid_564447
   result.add "path", section
   ## parameters in `query` object:
-  ##   timeout: JInt
-  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
-  ##   $expand: JString
-  ##          : An OData $expand clause.
   ##   api-version: JString (required)
   ##              : Client API Version.
   ##   $select: JString
   ##          : An OData $select clause.
+  ##   $expand: JString
+  ##          : An OData $expand clause.
+  ##   timeout: JInt
+  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   section = newJObject()
-  var valid_574548 = query.getOrDefault("timeout")
-  valid_574548 = validateParameter(valid_574548, JInt, required = false,
-                                 default = newJInt(30))
-  if valid_574548 != nil:
-    section.add "timeout", valid_574548
-  var valid_574549 = query.getOrDefault("$expand")
-  valid_574549 = validateParameter(valid_574549, JString, required = false,
-                                 default = nil)
-  if valid_574549 != nil:
-    section.add "$expand", valid_574549
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574550 = query.getOrDefault("api-version")
-  valid_574550 = validateParameter(valid_574550, JString, required = true,
+  var valid_564448 = query.getOrDefault("api-version")
+  valid_564448 = validateParameter(valid_564448, JString, required = true,
                                  default = nil)
-  if valid_574550 != nil:
-    section.add "api-version", valid_574550
-  var valid_574551 = query.getOrDefault("$select")
-  valid_574551 = validateParameter(valid_574551, JString, required = false,
+  if valid_564448 != nil:
+    section.add "api-version", valid_564448
+  var valid_564449 = query.getOrDefault("$select")
+  valid_564449 = validateParameter(valid_564449, JString, required = false,
                                  default = nil)
-  if valid_574551 != nil:
-    section.add "$select", valid_574551
+  if valid_564449 != nil:
+    section.add "$select", valid_564449
+  var valid_564450 = query.getOrDefault("$expand")
+  valid_564450 = validateParameter(valid_564450, JString, required = false,
+                                 default = nil)
+  if valid_564450 != nil:
+    section.add "$expand", valid_564450
+  var valid_564451 = query.getOrDefault("timeout")
+  valid_564451 = validateParameter(valid_564451, JInt, required = false,
+                                 default = newJInt(30))
+  if valid_564451 != nil:
+    section.add "timeout", valid_564451
   result.add "query", section
   ## parameters in `header` object:
-  ##   If-Match: JString
-  ##           : An ETag value associated with the version of the resource known to the client. The operation will be performed only if the resource's current ETag on the service exactly matches the value specified by the client.
-  ##   client-request-id: JString
-  ##                    : The caller-generated request identity, in the form of a GUID with no decoration such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
-  ##   ocp-date: JString
-  ##           : The time the request was issued. Client libraries typically set this to the current system clock time; set it explicitly if you are calling the REST API directly.
-  ##   If-Unmodified-Since: JString
-  ##                      : A timestamp indicating the last modified time of the resource known to the client. The operation will be performed only if the resource on the service has not been modified since the specified time.
-  ##   If-None-Match: JString
-  ##                : An ETag value associated with the version of the resource known to the client. The operation will be performed only if the resource's current ETag on the service does not match the value specified by the client.
-  ##   If-Modified-Since: JString
-  ##                    : A timestamp indicating the last modified time of the resource known to the client. The operation will be performed only if the resource on the service has been modified since the specified time.
   ##   return-client-request-id: JBool
   ##                           : Whether the server should return the client-request-id in the response.
+  ##   If-Unmodified-Since: JString
+  ##                      : A timestamp indicating the last modified time of the resource known to the client. The operation will be performed only if the resource on the service has not been modified since the specified time.
+  ##   client-request-id: JString
+  ##                    : The caller-generated request identity, in the form of a GUID with no decoration such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
+  ##   If-Modified-Since: JString
+  ##                    : A timestamp indicating the last modified time of the resource known to the client. The operation will be performed only if the resource on the service has been modified since the specified time.
+  ##   If-None-Match: JString
+  ##                : An ETag value associated with the version of the resource known to the client. The operation will be performed only if the resource's current ETag on the service does not match the value specified by the client.
+  ##   ocp-date: JString
+  ##           : The time the request was issued. Client libraries typically set this to the current system clock time; set it explicitly if you are calling the REST API directly.
+  ##   If-Match: JString
+  ##           : An ETag value associated with the version of the resource known to the client. The operation will be performed only if the resource's current ETag on the service exactly matches the value specified by the client.
   section = newJObject()
-  var valid_574552 = header.getOrDefault("If-Match")
-  valid_574552 = validateParameter(valid_574552, JString, required = false,
-                                 default = nil)
-  if valid_574552 != nil:
-    section.add "If-Match", valid_574552
-  var valid_574553 = header.getOrDefault("client-request-id")
-  valid_574553 = validateParameter(valid_574553, JString, required = false,
-                                 default = nil)
-  if valid_574553 != nil:
-    section.add "client-request-id", valid_574553
-  var valid_574554 = header.getOrDefault("ocp-date")
-  valid_574554 = validateParameter(valid_574554, JString, required = false,
-                                 default = nil)
-  if valid_574554 != nil:
-    section.add "ocp-date", valid_574554
-  var valid_574555 = header.getOrDefault("If-Unmodified-Since")
-  valid_574555 = validateParameter(valid_574555, JString, required = false,
-                                 default = nil)
-  if valid_574555 != nil:
-    section.add "If-Unmodified-Since", valid_574555
-  var valid_574556 = header.getOrDefault("If-None-Match")
-  valid_574556 = validateParameter(valid_574556, JString, required = false,
-                                 default = nil)
-  if valid_574556 != nil:
-    section.add "If-None-Match", valid_574556
-  var valid_574557 = header.getOrDefault("If-Modified-Since")
-  valid_574557 = validateParameter(valid_574557, JString, required = false,
-                                 default = nil)
-  if valid_574557 != nil:
-    section.add "If-Modified-Since", valid_574557
-  var valid_574558 = header.getOrDefault("return-client-request-id")
-  valid_574558 = validateParameter(valid_574558, JBool, required = false,
+  var valid_564452 = header.getOrDefault("return-client-request-id")
+  valid_564452 = validateParameter(valid_564452, JBool, required = false,
                                  default = newJBool(false))
-  if valid_574558 != nil:
-    section.add "return-client-request-id", valid_574558
+  if valid_564452 != nil:
+    section.add "return-client-request-id", valid_564452
+  var valid_564453 = header.getOrDefault("If-Unmodified-Since")
+  valid_564453 = validateParameter(valid_564453, JString, required = false,
+                                 default = nil)
+  if valid_564453 != nil:
+    section.add "If-Unmodified-Since", valid_564453
+  var valid_564454 = header.getOrDefault("client-request-id")
+  valid_564454 = validateParameter(valid_564454, JString, required = false,
+                                 default = nil)
+  if valid_564454 != nil:
+    section.add "client-request-id", valid_564454
+  var valid_564455 = header.getOrDefault("If-Modified-Since")
+  valid_564455 = validateParameter(valid_564455, JString, required = false,
+                                 default = nil)
+  if valid_564455 != nil:
+    section.add "If-Modified-Since", valid_564455
+  var valid_564456 = header.getOrDefault("If-None-Match")
+  valid_564456 = validateParameter(valid_564456, JString, required = false,
+                                 default = nil)
+  if valid_564456 != nil:
+    section.add "If-None-Match", valid_564456
+  var valid_564457 = header.getOrDefault("ocp-date")
+  valid_564457 = validateParameter(valid_564457, JString, required = false,
+                                 default = nil)
+  if valid_564457 != nil:
+    section.add "ocp-date", valid_564457
+  var valid_564458 = header.getOrDefault("If-Match")
+  valid_564458 = validateParameter(valid_564458, JString, required = false,
+                                 default = nil)
+  if valid_564458 != nil:
+    section.add "If-Match", valid_564458
   result.add "header", section
   section = newJObject()
   result.add "formData", section
   if body != nil:
     result.add "body", body
 
-proc call*(call_574559: Call_TaskGet_574543; path: JsonNode; query: JsonNode;
+proc call*(call_564459: Call_TaskGet_564443; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## For multi-instance Tasks, information such as affinityId, executionInfo and nodeInfo refer to the primary Task. Use the list subtasks API to retrieve information about subtasks.
   ## 
-  let valid = call_574559.validator(path, query, header, formData, body)
-  let scheme = call_574559.pickScheme
+  let valid = call_564459.validator(path, query, header, formData, body)
+  let scheme = call_564459.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574559.url(scheme.get, call_574559.host, call_574559.base,
-                         call_574559.route, valid.getOrDefault("path"),
+  let url = call_564459.url(scheme.get, call_564459.host, call_564459.base,
+                         call_564459.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574559, url, valid)
+  result = hook(call_564459, url, valid)
 
-proc call*(call_574560: Call_TaskGet_574543; apiVersion: string; jobId: string;
-          taskId: string; timeout: int = 30; Expand: string = ""; Select: string = ""): Recallable =
+proc call*(call_564460: Call_TaskGet_564443; jobId: string; apiVersion: string;
+          taskId: string; Select: string = ""; Expand: string = ""; timeout: int = 30): Recallable =
   ## taskGet
   ## For multi-instance Tasks, information such as affinityId, executionInfo and nodeInfo refer to the primary Task. Use the list subtasks API to retrieve information about subtasks.
-  ##   timeout: int
-  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
-  ##   Expand: string
-  ##         : An OData $expand clause.
-  ##   apiVersion: string (required)
-  ##             : Client API Version.
   ##   jobId: string (required)
   ##        : The ID of the Job that contains the Task.
+  ##   apiVersion: string (required)
+  ##             : Client API Version.
   ##   Select: string
   ##         : An OData $select clause.
+  ##   Expand: string
+  ##         : An OData $expand clause.
+  ##   timeout: int
+  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   ##   taskId: string (required)
   ##         : The ID of the Task to get information about.
-  var path_574561 = newJObject()
-  var query_574562 = newJObject()
-  add(query_574562, "timeout", newJInt(timeout))
-  add(query_574562, "$expand", newJString(Expand))
-  add(query_574562, "api-version", newJString(apiVersion))
-  add(path_574561, "jobId", newJString(jobId))
-  add(query_574562, "$select", newJString(Select))
-  add(path_574561, "taskId", newJString(taskId))
-  result = call_574560.call(path_574561, query_574562, nil, nil, nil)
+  var path_564461 = newJObject()
+  var query_564462 = newJObject()
+  add(path_564461, "jobId", newJString(jobId))
+  add(query_564462, "api-version", newJString(apiVersion))
+  add(query_564462, "$select", newJString(Select))
+  add(query_564462, "$expand", newJString(Expand))
+  add(query_564462, "timeout", newJInt(timeout))
+  add(path_564461, "taskId", newJString(taskId))
+  result = call_564460.call(path_564461, query_564462, nil, nil, nil)
 
-var taskGet* = Call_TaskGet_574543(name: "taskGet", meth: HttpMethod.HttpGet,
+var taskGet* = Call_TaskGet_564443(name: "taskGet", meth: HttpMethod.HttpGet,
                                 host: "azure.local",
                                 route: "/jobs/{jobId}/tasks/{taskId}",
-                                validator: validate_TaskGet_574544, base: "",
-                                url: url_TaskGet_574545, schemes: {Scheme.Https})
+                                validator: validate_TaskGet_564444, base: "",
+                                url: url_TaskGet_564445, schemes: {Scheme.Https})
 type
-  Call_TaskDelete_574583 = ref object of OpenApiRestCall_573667
-proc url_TaskDelete_574585(protocol: Scheme; host: string; base: string; route: string;
+  Call_TaskDelete_564483 = ref object of OpenApiRestCall_563565
+proc url_TaskDelete_564485(protocol: Scheme; host: string; base: string; route: string;
                           path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -3174,7 +3179,7 @@ proc url_TaskDelete_574585(protocol: Scheme; host: string; base: string; route: 
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_TaskDelete_574584(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_TaskDelete_564484(path: JsonNode; query: JsonNode; header: JsonNode;
                                formData: JsonNode; body: JsonNode): JsonNode =
   ## When a Task is deleted, all of the files in its directory on the Compute Node where it ran are also deleted (regardless of the retention time). For multi-instance Tasks, the delete Task operation applies synchronously to the primary task; subtasks and their files are then deleted asynchronously in the background.
   ## 
@@ -3187,136 +3192,136 @@ proc validate_TaskDelete_574584(path: JsonNode; query: JsonNode; header: JsonNod
   ##         : The ID of the Task to delete.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `jobId` field"
-  var valid_574586 = path.getOrDefault("jobId")
-  valid_574586 = validateParameter(valid_574586, JString, required = true,
+  var valid_564486 = path.getOrDefault("jobId")
+  valid_564486 = validateParameter(valid_564486, JString, required = true,
                                  default = nil)
-  if valid_574586 != nil:
-    section.add "jobId", valid_574586
-  var valid_574587 = path.getOrDefault("taskId")
-  valid_574587 = validateParameter(valid_574587, JString, required = true,
+  if valid_564486 != nil:
+    section.add "jobId", valid_564486
+  var valid_564487 = path.getOrDefault("taskId")
+  valid_564487 = validateParameter(valid_564487, JString, required = true,
                                  default = nil)
-  if valid_574587 != nil:
-    section.add "taskId", valid_574587
+  if valid_564487 != nil:
+    section.add "taskId", valid_564487
   result.add "path", section
   ## parameters in `query` object:
-  ##   timeout: JInt
-  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   ##   api-version: JString (required)
   ##              : Client API Version.
+  ##   timeout: JInt
+  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   section = newJObject()
-  var valid_574588 = query.getOrDefault("timeout")
-  valid_574588 = validateParameter(valid_574588, JInt, required = false,
-                                 default = newJInt(30))
-  if valid_574588 != nil:
-    section.add "timeout", valid_574588
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574589 = query.getOrDefault("api-version")
-  valid_574589 = validateParameter(valid_574589, JString, required = true,
+  var valid_564488 = query.getOrDefault("api-version")
+  valid_564488 = validateParameter(valid_564488, JString, required = true,
                                  default = nil)
-  if valid_574589 != nil:
-    section.add "api-version", valid_574589
+  if valid_564488 != nil:
+    section.add "api-version", valid_564488
+  var valid_564489 = query.getOrDefault("timeout")
+  valid_564489 = validateParameter(valid_564489, JInt, required = false,
+                                 default = newJInt(30))
+  if valid_564489 != nil:
+    section.add "timeout", valid_564489
   result.add "query", section
   ## parameters in `header` object:
-  ##   If-Match: JString
-  ##           : An ETag value associated with the version of the resource known to the client. The operation will be performed only if the resource's current ETag on the service exactly matches the value specified by the client.
-  ##   client-request-id: JString
-  ##                    : The caller-generated request identity, in the form of a GUID with no decoration such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
-  ##   ocp-date: JString
-  ##           : The time the request was issued. Client libraries typically set this to the current system clock time; set it explicitly if you are calling the REST API directly.
-  ##   If-Unmodified-Since: JString
-  ##                      : A timestamp indicating the last modified time of the resource known to the client. The operation will be performed only if the resource on the service has not been modified since the specified time.
-  ##   If-None-Match: JString
-  ##                : An ETag value associated with the version of the resource known to the client. The operation will be performed only if the resource's current ETag on the service does not match the value specified by the client.
-  ##   If-Modified-Since: JString
-  ##                    : A timestamp indicating the last modified time of the resource known to the client. The operation will be performed only if the resource on the service has been modified since the specified time.
   ##   return-client-request-id: JBool
   ##                           : Whether the server should return the client-request-id in the response.
+  ##   If-Unmodified-Since: JString
+  ##                      : A timestamp indicating the last modified time of the resource known to the client. The operation will be performed only if the resource on the service has not been modified since the specified time.
+  ##   client-request-id: JString
+  ##                    : The caller-generated request identity, in the form of a GUID with no decoration such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
+  ##   If-Modified-Since: JString
+  ##                    : A timestamp indicating the last modified time of the resource known to the client. The operation will be performed only if the resource on the service has been modified since the specified time.
+  ##   If-None-Match: JString
+  ##                : An ETag value associated with the version of the resource known to the client. The operation will be performed only if the resource's current ETag on the service does not match the value specified by the client.
+  ##   ocp-date: JString
+  ##           : The time the request was issued. Client libraries typically set this to the current system clock time; set it explicitly if you are calling the REST API directly.
+  ##   If-Match: JString
+  ##           : An ETag value associated with the version of the resource known to the client. The operation will be performed only if the resource's current ETag on the service exactly matches the value specified by the client.
   section = newJObject()
-  var valid_574590 = header.getOrDefault("If-Match")
-  valid_574590 = validateParameter(valid_574590, JString, required = false,
-                                 default = nil)
-  if valid_574590 != nil:
-    section.add "If-Match", valid_574590
-  var valid_574591 = header.getOrDefault("client-request-id")
-  valid_574591 = validateParameter(valid_574591, JString, required = false,
-                                 default = nil)
-  if valid_574591 != nil:
-    section.add "client-request-id", valid_574591
-  var valid_574592 = header.getOrDefault("ocp-date")
-  valid_574592 = validateParameter(valid_574592, JString, required = false,
-                                 default = nil)
-  if valid_574592 != nil:
-    section.add "ocp-date", valid_574592
-  var valid_574593 = header.getOrDefault("If-Unmodified-Since")
-  valid_574593 = validateParameter(valid_574593, JString, required = false,
-                                 default = nil)
-  if valid_574593 != nil:
-    section.add "If-Unmodified-Since", valid_574593
-  var valid_574594 = header.getOrDefault("If-None-Match")
-  valid_574594 = validateParameter(valid_574594, JString, required = false,
-                                 default = nil)
-  if valid_574594 != nil:
-    section.add "If-None-Match", valid_574594
-  var valid_574595 = header.getOrDefault("If-Modified-Since")
-  valid_574595 = validateParameter(valid_574595, JString, required = false,
-                                 default = nil)
-  if valid_574595 != nil:
-    section.add "If-Modified-Since", valid_574595
-  var valid_574596 = header.getOrDefault("return-client-request-id")
-  valid_574596 = validateParameter(valid_574596, JBool, required = false,
+  var valid_564490 = header.getOrDefault("return-client-request-id")
+  valid_564490 = validateParameter(valid_564490, JBool, required = false,
                                  default = newJBool(false))
-  if valid_574596 != nil:
-    section.add "return-client-request-id", valid_574596
+  if valid_564490 != nil:
+    section.add "return-client-request-id", valid_564490
+  var valid_564491 = header.getOrDefault("If-Unmodified-Since")
+  valid_564491 = validateParameter(valid_564491, JString, required = false,
+                                 default = nil)
+  if valid_564491 != nil:
+    section.add "If-Unmodified-Since", valid_564491
+  var valid_564492 = header.getOrDefault("client-request-id")
+  valid_564492 = validateParameter(valid_564492, JString, required = false,
+                                 default = nil)
+  if valid_564492 != nil:
+    section.add "client-request-id", valid_564492
+  var valid_564493 = header.getOrDefault("If-Modified-Since")
+  valid_564493 = validateParameter(valid_564493, JString, required = false,
+                                 default = nil)
+  if valid_564493 != nil:
+    section.add "If-Modified-Since", valid_564493
+  var valid_564494 = header.getOrDefault("If-None-Match")
+  valid_564494 = validateParameter(valid_564494, JString, required = false,
+                                 default = nil)
+  if valid_564494 != nil:
+    section.add "If-None-Match", valid_564494
+  var valid_564495 = header.getOrDefault("ocp-date")
+  valid_564495 = validateParameter(valid_564495, JString, required = false,
+                                 default = nil)
+  if valid_564495 != nil:
+    section.add "ocp-date", valid_564495
+  var valid_564496 = header.getOrDefault("If-Match")
+  valid_564496 = validateParameter(valid_564496, JString, required = false,
+                                 default = nil)
+  if valid_564496 != nil:
+    section.add "If-Match", valid_564496
   result.add "header", section
   section = newJObject()
   result.add "formData", section
   if body != nil:
     result.add "body", body
 
-proc call*(call_574597: Call_TaskDelete_574583; path: JsonNode; query: JsonNode;
+proc call*(call_564497: Call_TaskDelete_564483; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## When a Task is deleted, all of the files in its directory on the Compute Node where it ran are also deleted (regardless of the retention time). For multi-instance Tasks, the delete Task operation applies synchronously to the primary task; subtasks and their files are then deleted asynchronously in the background.
   ## 
-  let valid = call_574597.validator(path, query, header, formData, body)
-  let scheme = call_574597.pickScheme
+  let valid = call_564497.validator(path, query, header, formData, body)
+  let scheme = call_564497.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574597.url(scheme.get, call_574597.host, call_574597.base,
-                         call_574597.route, valid.getOrDefault("path"),
+  let url = call_564497.url(scheme.get, call_564497.host, call_564497.base,
+                         call_564497.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574597, url, valid)
+  result = hook(call_564497, url, valid)
 
-proc call*(call_574598: Call_TaskDelete_574583; apiVersion: string; jobId: string;
+proc call*(call_564498: Call_TaskDelete_564483; jobId: string; apiVersion: string;
           taskId: string; timeout: int = 30): Recallable =
   ## taskDelete
   ## When a Task is deleted, all of the files in its directory on the Compute Node where it ran are also deleted (regardless of the retention time). For multi-instance Tasks, the delete Task operation applies synchronously to the primary task; subtasks and their files are then deleted asynchronously in the background.
-  ##   timeout: int
-  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
-  ##   apiVersion: string (required)
-  ##             : Client API Version.
   ##   jobId: string (required)
   ##        : The ID of the Job from which to delete the Task.
+  ##   apiVersion: string (required)
+  ##             : Client API Version.
+  ##   timeout: int
+  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   ##   taskId: string (required)
   ##         : The ID of the Task to delete.
-  var path_574599 = newJObject()
-  var query_574600 = newJObject()
-  add(query_574600, "timeout", newJInt(timeout))
-  add(query_574600, "api-version", newJString(apiVersion))
-  add(path_574599, "jobId", newJString(jobId))
-  add(path_574599, "taskId", newJString(taskId))
-  result = call_574598.call(path_574599, query_574600, nil, nil, nil)
+  var path_564499 = newJObject()
+  var query_564500 = newJObject()
+  add(path_564499, "jobId", newJString(jobId))
+  add(query_564500, "api-version", newJString(apiVersion))
+  add(query_564500, "timeout", newJInt(timeout))
+  add(path_564499, "taskId", newJString(taskId))
+  result = call_564498.call(path_564499, query_564500, nil, nil, nil)
 
-var taskDelete* = Call_TaskDelete_574583(name: "taskDelete",
+var taskDelete* = Call_TaskDelete_564483(name: "taskDelete",
                                       meth: HttpMethod.HttpDelete,
                                       host: "azure.local",
                                       route: "/jobs/{jobId}/tasks/{taskId}",
-                                      validator: validate_TaskDelete_574584,
-                                      base: "", url: url_TaskDelete_574585,
+                                      validator: validate_TaskDelete_564484,
+                                      base: "", url: url_TaskDelete_564485,
                                       schemes: {Scheme.Https})
 type
-  Call_FileListFromTask_574601 = ref object of OpenApiRestCall_573667
-proc url_FileListFromTask_574603(protocol: Scheme; host: string; base: string;
+  Call_FileListFromTask_564501 = ref object of OpenApiRestCall_563565
+proc url_FileListFromTask_564503(protocol: Scheme; host: string; base: string;
                                 route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -3335,7 +3340,7 @@ proc url_FileListFromTask_574603(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_FileListFromTask_574602(path: JsonNode; query: JsonNode;
+proc validate_FileListFromTask_564502(path: JsonNode; query: JsonNode;
                                      header: JsonNode; formData: JsonNode;
                                      body: JsonNode): JsonNode =
   var section: JsonNode
@@ -3347,135 +3352,135 @@ proc validate_FileListFromTask_574602(path: JsonNode; query: JsonNode;
   ##         : The ID of the Task whose files you want to list.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `jobId` field"
-  var valid_574604 = path.getOrDefault("jobId")
-  valid_574604 = validateParameter(valid_574604, JString, required = true,
+  var valid_564504 = path.getOrDefault("jobId")
+  valid_564504 = validateParameter(valid_564504, JString, required = true,
                                  default = nil)
-  if valid_574604 != nil:
-    section.add "jobId", valid_574604
-  var valid_574605 = path.getOrDefault("taskId")
-  valid_574605 = validateParameter(valid_574605, JString, required = true,
+  if valid_564504 != nil:
+    section.add "jobId", valid_564504
+  var valid_564505 = path.getOrDefault("taskId")
+  valid_564505 = validateParameter(valid_564505, JString, required = true,
                                  default = nil)
-  if valid_574605 != nil:
-    section.add "taskId", valid_574605
+  if valid_564505 != nil:
+    section.add "taskId", valid_564505
   result.add "path", section
   ## parameters in `query` object:
-  ##   timeout: JInt
-  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   ##   api-version: JString (required)
   ##              : Client API Version.
+  ##   recursive: JBool
+  ##            : Whether to list children of the Task directory. This parameter can be used in combination with the filter parameter to list specific type of files.
+  ##   timeout: JInt
+  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   ##   maxresults: JInt
   ##             : The maximum number of items to return in the response. A maximum of 1000 files can be returned.
   ##   $filter: JString
   ##          : An OData $filter clause. For more information on constructing this filter, see 
   ## https://docs.microsoft.com/en-us/rest/api/batchservice/odata-filters-in-batch#list-task-files.
-  ##   recursive: JBool
-  ##            : Whether to list children of the Task directory. This parameter can be used in combination with the filter parameter to list specific type of files.
   section = newJObject()
-  var valid_574606 = query.getOrDefault("timeout")
-  valid_574606 = validateParameter(valid_574606, JInt, required = false,
-                                 default = newJInt(30))
-  if valid_574606 != nil:
-    section.add "timeout", valid_574606
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574607 = query.getOrDefault("api-version")
-  valid_574607 = validateParameter(valid_574607, JString, required = true,
+  var valid_564506 = query.getOrDefault("api-version")
+  valid_564506 = validateParameter(valid_564506, JString, required = true,
                                  default = nil)
-  if valid_574607 != nil:
-    section.add "api-version", valid_574607
-  var valid_574608 = query.getOrDefault("maxresults")
-  valid_574608 = validateParameter(valid_574608, JInt, required = false,
+  if valid_564506 != nil:
+    section.add "api-version", valid_564506
+  var valid_564507 = query.getOrDefault("recursive")
+  valid_564507 = validateParameter(valid_564507, JBool, required = false, default = nil)
+  if valid_564507 != nil:
+    section.add "recursive", valid_564507
+  var valid_564508 = query.getOrDefault("timeout")
+  valid_564508 = validateParameter(valid_564508, JInt, required = false,
+                                 default = newJInt(30))
+  if valid_564508 != nil:
+    section.add "timeout", valid_564508
+  var valid_564509 = query.getOrDefault("maxresults")
+  valid_564509 = validateParameter(valid_564509, JInt, required = false,
                                  default = newJInt(1000))
-  if valid_574608 != nil:
-    section.add "maxresults", valid_574608
-  var valid_574609 = query.getOrDefault("$filter")
-  valid_574609 = validateParameter(valid_574609, JString, required = false,
+  if valid_564509 != nil:
+    section.add "maxresults", valid_564509
+  var valid_564510 = query.getOrDefault("$filter")
+  valid_564510 = validateParameter(valid_564510, JString, required = false,
                                  default = nil)
-  if valid_574609 != nil:
-    section.add "$filter", valid_574609
-  var valid_574610 = query.getOrDefault("recursive")
-  valid_574610 = validateParameter(valid_574610, JBool, required = false, default = nil)
-  if valid_574610 != nil:
-    section.add "recursive", valid_574610
+  if valid_564510 != nil:
+    section.add "$filter", valid_564510
   result.add "query", section
   ## parameters in `header` object:
+  ##   return-client-request-id: JBool
+  ##                           : Whether the server should return the client-request-id in the response.
   ##   client-request-id: JString
   ##                    : The caller-generated request identity, in the form of a GUID with no decoration such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
   ##   ocp-date: JString
   ##           : The time the request was issued. Client libraries typically set this to the current system clock time; set it explicitly if you are calling the REST API directly.
-  ##   return-client-request-id: JBool
-  ##                           : Whether the server should return the client-request-id in the response.
   section = newJObject()
-  var valid_574611 = header.getOrDefault("client-request-id")
-  valid_574611 = validateParameter(valid_574611, JString, required = false,
-                                 default = nil)
-  if valid_574611 != nil:
-    section.add "client-request-id", valid_574611
-  var valid_574612 = header.getOrDefault("ocp-date")
-  valid_574612 = validateParameter(valid_574612, JString, required = false,
-                                 default = nil)
-  if valid_574612 != nil:
-    section.add "ocp-date", valid_574612
-  var valid_574613 = header.getOrDefault("return-client-request-id")
-  valid_574613 = validateParameter(valid_574613, JBool, required = false,
+  var valid_564511 = header.getOrDefault("return-client-request-id")
+  valid_564511 = validateParameter(valid_564511, JBool, required = false,
                                  default = newJBool(false))
-  if valid_574613 != nil:
-    section.add "return-client-request-id", valid_574613
+  if valid_564511 != nil:
+    section.add "return-client-request-id", valid_564511
+  var valid_564512 = header.getOrDefault("client-request-id")
+  valid_564512 = validateParameter(valid_564512, JString, required = false,
+                                 default = nil)
+  if valid_564512 != nil:
+    section.add "client-request-id", valid_564512
+  var valid_564513 = header.getOrDefault("ocp-date")
+  valid_564513 = validateParameter(valid_564513, JString, required = false,
+                                 default = nil)
+  if valid_564513 != nil:
+    section.add "ocp-date", valid_564513
   result.add "header", section
   section = newJObject()
   result.add "formData", section
   if body != nil:
     result.add "body", body
 
-proc call*(call_574614: Call_FileListFromTask_574601; path: JsonNode;
+proc call*(call_564514: Call_FileListFromTask_564501; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
-  let valid = call_574614.validator(path, query, header, formData, body)
-  let scheme = call_574614.pickScheme
+  let valid = call_564514.validator(path, query, header, formData, body)
+  let scheme = call_564514.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574614.url(scheme.get, call_574614.host, call_574614.base,
-                         call_574614.route, valid.getOrDefault("path"),
+  let url = call_564514.url(scheme.get, call_564514.host, call_564514.base,
+                         call_564514.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574614, url, valid)
+  result = hook(call_564514, url, valid)
 
-proc call*(call_574615: Call_FileListFromTask_574601; apiVersion: string;
-          jobId: string; taskId: string; timeout: int = 30; maxresults: int = 1000;
-          Filter: string = ""; recursive: bool = false): Recallable =
+proc call*(call_564515: Call_FileListFromTask_564501; jobId: string;
+          apiVersion: string; taskId: string; recursive: bool = false;
+          timeout: int = 30; maxresults: int = 1000; Filter: string = ""): Recallable =
   ## fileListFromTask
-  ##   timeout: int
-  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
-  ##   apiVersion: string (required)
-  ##             : Client API Version.
   ##   jobId: string (required)
   ##        : The ID of the Job that contains the Task.
+  ##   apiVersion: string (required)
+  ##             : Client API Version.
+  ##   recursive: bool
+  ##            : Whether to list children of the Task directory. This parameter can be used in combination with the filter parameter to list specific type of files.
+  ##   timeout: int
+  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   ##   maxresults: int
   ##             : The maximum number of items to return in the response. A maximum of 1000 files can be returned.
   ##   Filter: string
   ##         : An OData $filter clause. For more information on constructing this filter, see 
   ## https://docs.microsoft.com/en-us/rest/api/batchservice/odata-filters-in-batch#list-task-files.
-  ##   recursive: bool
-  ##            : Whether to list children of the Task directory. This parameter can be used in combination with the filter parameter to list specific type of files.
   ##   taskId: string (required)
   ##         : The ID of the Task whose files you want to list.
-  var path_574616 = newJObject()
-  var query_574617 = newJObject()
-  add(query_574617, "timeout", newJInt(timeout))
-  add(query_574617, "api-version", newJString(apiVersion))
-  add(path_574616, "jobId", newJString(jobId))
-  add(query_574617, "maxresults", newJInt(maxresults))
-  add(query_574617, "$filter", newJString(Filter))
-  add(query_574617, "recursive", newJBool(recursive))
-  add(path_574616, "taskId", newJString(taskId))
-  result = call_574615.call(path_574616, query_574617, nil, nil, nil)
+  var path_564516 = newJObject()
+  var query_564517 = newJObject()
+  add(path_564516, "jobId", newJString(jobId))
+  add(query_564517, "api-version", newJString(apiVersion))
+  add(query_564517, "recursive", newJBool(recursive))
+  add(query_564517, "timeout", newJInt(timeout))
+  add(query_564517, "maxresults", newJInt(maxresults))
+  add(query_564517, "$filter", newJString(Filter))
+  add(path_564516, "taskId", newJString(taskId))
+  result = call_564515.call(path_564516, query_564517, nil, nil, nil)
 
-var fileListFromTask* = Call_FileListFromTask_574601(name: "fileListFromTask",
+var fileListFromTask* = Call_FileListFromTask_564501(name: "fileListFromTask",
     meth: HttpMethod.HttpGet, host: "azure.local",
     route: "/jobs/{jobId}/tasks/{taskId}/files",
-    validator: validate_FileListFromTask_574602, base: "",
-    url: url_FileListFromTask_574603, schemes: {Scheme.Https})
+    validator: validate_FileListFromTask_564502, base: "",
+    url: url_FileListFromTask_564503, schemes: {Scheme.Https})
 type
-  Call_FileGetPropertiesFromTask_574652 = ref object of OpenApiRestCall_573667
-proc url_FileGetPropertiesFromTask_574654(protocol: Scheme; host: string;
+  Call_FileGetPropertiesFromTask_564552 = ref object of OpenApiRestCall_563565
+proc url_FileGetPropertiesFromTask_564554(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -3496,7 +3501,7 @@ proc url_FileGetPropertiesFromTask_574654(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_FileGetPropertiesFromTask_574653(path: JsonNode; query: JsonNode;
+proc validate_FileGetPropertiesFromTask_564553(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the properties of the specified Task file.
   ## 
@@ -3511,128 +3516,128 @@ proc validate_FileGetPropertiesFromTask_574653(path: JsonNode; query: JsonNode;
   ##         : The ID of the Task whose file you want to get the properties of.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `jobId` field"
-  var valid_574655 = path.getOrDefault("jobId")
-  valid_574655 = validateParameter(valid_574655, JString, required = true,
+  var valid_564555 = path.getOrDefault("jobId")
+  valid_564555 = validateParameter(valid_564555, JString, required = true,
                                  default = nil)
-  if valid_574655 != nil:
-    section.add "jobId", valid_574655
-  var valid_574656 = path.getOrDefault("filePath")
-  valid_574656 = validateParameter(valid_574656, JString, required = true,
+  if valid_564555 != nil:
+    section.add "jobId", valid_564555
+  var valid_564556 = path.getOrDefault("filePath")
+  valid_564556 = validateParameter(valid_564556, JString, required = true,
                                  default = nil)
-  if valid_574656 != nil:
-    section.add "filePath", valid_574656
-  var valid_574657 = path.getOrDefault("taskId")
-  valid_574657 = validateParameter(valid_574657, JString, required = true,
+  if valid_564556 != nil:
+    section.add "filePath", valid_564556
+  var valid_564557 = path.getOrDefault("taskId")
+  valid_564557 = validateParameter(valid_564557, JString, required = true,
                                  default = nil)
-  if valid_574657 != nil:
-    section.add "taskId", valid_574657
+  if valid_564557 != nil:
+    section.add "taskId", valid_564557
   result.add "path", section
   ## parameters in `query` object:
-  ##   timeout: JInt
-  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   ##   api-version: JString (required)
   ##              : Client API Version.
+  ##   timeout: JInt
+  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   section = newJObject()
-  var valid_574658 = query.getOrDefault("timeout")
-  valid_574658 = validateParameter(valid_574658, JInt, required = false,
-                                 default = newJInt(30))
-  if valid_574658 != nil:
-    section.add "timeout", valid_574658
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574659 = query.getOrDefault("api-version")
-  valid_574659 = validateParameter(valid_574659, JString, required = true,
+  var valid_564558 = query.getOrDefault("api-version")
+  valid_564558 = validateParameter(valid_564558, JString, required = true,
                                  default = nil)
-  if valid_574659 != nil:
-    section.add "api-version", valid_574659
+  if valid_564558 != nil:
+    section.add "api-version", valid_564558
+  var valid_564559 = query.getOrDefault("timeout")
+  valid_564559 = validateParameter(valid_564559, JInt, required = false,
+                                 default = newJInt(30))
+  if valid_564559 != nil:
+    section.add "timeout", valid_564559
   result.add "query", section
   ## parameters in `header` object:
-  ##   client-request-id: JString
-  ##                    : The caller-generated request identity, in the form of a GUID with no decoration such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
-  ##   ocp-date: JString
-  ##           : The time the request was issued. Client libraries typically set this to the current system clock time; set it explicitly if you are calling the REST API directly.
-  ##   If-Unmodified-Since: JString
-  ##                      : A timestamp indicating the last modified time of the resource known to the client. The operation will be performed only if the resource on the service has not been modified since the specified time.
-  ##   If-Modified-Since: JString
-  ##                    : A timestamp indicating the last modified time of the resource known to the client. The operation will be performed only if the resource on the service has been modified since the specified time.
   ##   return-client-request-id: JBool
   ##                           : Whether the server should return the client-request-id in the response.
+  ##   If-Unmodified-Since: JString
+  ##                      : A timestamp indicating the last modified time of the resource known to the client. The operation will be performed only if the resource on the service has not been modified since the specified time.
+  ##   client-request-id: JString
+  ##                    : The caller-generated request identity, in the form of a GUID with no decoration such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
+  ##   If-Modified-Since: JString
+  ##                    : A timestamp indicating the last modified time of the resource known to the client. The operation will be performed only if the resource on the service has been modified since the specified time.
+  ##   ocp-date: JString
+  ##           : The time the request was issued. Client libraries typically set this to the current system clock time; set it explicitly if you are calling the REST API directly.
   section = newJObject()
-  var valid_574660 = header.getOrDefault("client-request-id")
-  valid_574660 = validateParameter(valid_574660, JString, required = false,
-                                 default = nil)
-  if valid_574660 != nil:
-    section.add "client-request-id", valid_574660
-  var valid_574661 = header.getOrDefault("ocp-date")
-  valid_574661 = validateParameter(valid_574661, JString, required = false,
-                                 default = nil)
-  if valid_574661 != nil:
-    section.add "ocp-date", valid_574661
-  var valid_574662 = header.getOrDefault("If-Unmodified-Since")
-  valid_574662 = validateParameter(valid_574662, JString, required = false,
-                                 default = nil)
-  if valid_574662 != nil:
-    section.add "If-Unmodified-Since", valid_574662
-  var valid_574663 = header.getOrDefault("If-Modified-Since")
-  valid_574663 = validateParameter(valid_574663, JString, required = false,
-                                 default = nil)
-  if valid_574663 != nil:
-    section.add "If-Modified-Since", valid_574663
-  var valid_574664 = header.getOrDefault("return-client-request-id")
-  valid_574664 = validateParameter(valid_574664, JBool, required = false,
+  var valid_564560 = header.getOrDefault("return-client-request-id")
+  valid_564560 = validateParameter(valid_564560, JBool, required = false,
                                  default = newJBool(false))
-  if valid_574664 != nil:
-    section.add "return-client-request-id", valid_574664
+  if valid_564560 != nil:
+    section.add "return-client-request-id", valid_564560
+  var valid_564561 = header.getOrDefault("If-Unmodified-Since")
+  valid_564561 = validateParameter(valid_564561, JString, required = false,
+                                 default = nil)
+  if valid_564561 != nil:
+    section.add "If-Unmodified-Since", valid_564561
+  var valid_564562 = header.getOrDefault("client-request-id")
+  valid_564562 = validateParameter(valid_564562, JString, required = false,
+                                 default = nil)
+  if valid_564562 != nil:
+    section.add "client-request-id", valid_564562
+  var valid_564563 = header.getOrDefault("If-Modified-Since")
+  valid_564563 = validateParameter(valid_564563, JString, required = false,
+                                 default = nil)
+  if valid_564563 != nil:
+    section.add "If-Modified-Since", valid_564563
+  var valid_564564 = header.getOrDefault("ocp-date")
+  valid_564564 = validateParameter(valid_564564, JString, required = false,
+                                 default = nil)
+  if valid_564564 != nil:
+    section.add "ocp-date", valid_564564
   result.add "header", section
   section = newJObject()
   result.add "formData", section
   if body != nil:
     result.add "body", body
 
-proc call*(call_574665: Call_FileGetPropertiesFromTask_574652; path: JsonNode;
+proc call*(call_564565: Call_FileGetPropertiesFromTask_564552; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the properties of the specified Task file.
   ## 
-  let valid = call_574665.validator(path, query, header, formData, body)
-  let scheme = call_574665.pickScheme
+  let valid = call_564565.validator(path, query, header, formData, body)
+  let scheme = call_564565.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574665.url(scheme.get, call_574665.host, call_574665.base,
-                         call_574665.route, valid.getOrDefault("path"),
+  let url = call_564565.url(scheme.get, call_564565.host, call_564565.base,
+                         call_564565.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574665, url, valid)
+  result = hook(call_564565, url, valid)
 
-proc call*(call_574666: Call_FileGetPropertiesFromTask_574652; apiVersion: string;
-          jobId: string; filePath: string; taskId: string; timeout: int = 30): Recallable =
+proc call*(call_564566: Call_FileGetPropertiesFromTask_564552; jobId: string;
+          apiVersion: string; filePath: string; taskId: string; timeout: int = 30): Recallable =
   ## fileGetPropertiesFromTask
   ## Gets the properties of the specified Task file.
-  ##   timeout: int
-  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
-  ##   apiVersion: string (required)
-  ##             : Client API Version.
   ##   jobId: string (required)
   ##        : The ID of the Job that contains the Task.
+  ##   apiVersion: string (required)
+  ##             : Client API Version.
   ##   filePath: string (required)
   ##           : The path to the Task file that you want to get the properties of.
+  ##   timeout: int
+  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   ##   taskId: string (required)
   ##         : The ID of the Task whose file you want to get the properties of.
-  var path_574667 = newJObject()
-  var query_574668 = newJObject()
-  add(query_574668, "timeout", newJInt(timeout))
-  add(query_574668, "api-version", newJString(apiVersion))
-  add(path_574667, "jobId", newJString(jobId))
-  add(path_574667, "filePath", newJString(filePath))
-  add(path_574667, "taskId", newJString(taskId))
-  result = call_574666.call(path_574667, query_574668, nil, nil, nil)
+  var path_564567 = newJObject()
+  var query_564568 = newJObject()
+  add(path_564567, "jobId", newJString(jobId))
+  add(query_564568, "api-version", newJString(apiVersion))
+  add(path_564567, "filePath", newJString(filePath))
+  add(query_564568, "timeout", newJInt(timeout))
+  add(path_564567, "taskId", newJString(taskId))
+  result = call_564566.call(path_564567, query_564568, nil, nil, nil)
 
-var fileGetPropertiesFromTask* = Call_FileGetPropertiesFromTask_574652(
+var fileGetPropertiesFromTask* = Call_FileGetPropertiesFromTask_564552(
     name: "fileGetPropertiesFromTask", meth: HttpMethod.HttpHead,
     host: "azure.local", route: "/jobs/{jobId}/tasks/{taskId}/files/{filePath}",
-    validator: validate_FileGetPropertiesFromTask_574653, base: "",
-    url: url_FileGetPropertiesFromTask_574654, schemes: {Scheme.Https})
+    validator: validate_FileGetPropertiesFromTask_564553, base: "",
+    url: url_FileGetPropertiesFromTask_564554, schemes: {Scheme.Https})
 type
-  Call_FileGetFromTask_574618 = ref object of OpenApiRestCall_573667
-proc url_FileGetFromTask_574620(protocol: Scheme; host: string; base: string;
+  Call_FileGetFromTask_564518 = ref object of OpenApiRestCall_563565
+proc url_FileGetFromTask_564520(protocol: Scheme; host: string; base: string;
                                route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -3653,7 +3658,7 @@ proc url_FileGetFromTask_574620(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_FileGetFromTask_574619(path: JsonNode; query: JsonNode;
+proc validate_FileGetFromTask_564519(path: JsonNode; query: JsonNode;
                                     header: JsonNode; formData: JsonNode;
                                     body: JsonNode): JsonNode =
   ## Returns the content of the specified Task file.
@@ -3669,135 +3674,135 @@ proc validate_FileGetFromTask_574619(path: JsonNode; query: JsonNode;
   ##         : The ID of the Task whose file you want to retrieve.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `jobId` field"
-  var valid_574621 = path.getOrDefault("jobId")
-  valid_574621 = validateParameter(valid_574621, JString, required = true,
+  var valid_564521 = path.getOrDefault("jobId")
+  valid_564521 = validateParameter(valid_564521, JString, required = true,
                                  default = nil)
-  if valid_574621 != nil:
-    section.add "jobId", valid_574621
-  var valid_574622 = path.getOrDefault("filePath")
-  valid_574622 = validateParameter(valid_574622, JString, required = true,
+  if valid_564521 != nil:
+    section.add "jobId", valid_564521
+  var valid_564522 = path.getOrDefault("filePath")
+  valid_564522 = validateParameter(valid_564522, JString, required = true,
                                  default = nil)
-  if valid_574622 != nil:
-    section.add "filePath", valid_574622
-  var valid_574623 = path.getOrDefault("taskId")
-  valid_574623 = validateParameter(valid_574623, JString, required = true,
+  if valid_564522 != nil:
+    section.add "filePath", valid_564522
+  var valid_564523 = path.getOrDefault("taskId")
+  valid_564523 = validateParameter(valid_564523, JString, required = true,
                                  default = nil)
-  if valid_574623 != nil:
-    section.add "taskId", valid_574623
+  if valid_564523 != nil:
+    section.add "taskId", valid_564523
   result.add "path", section
   ## parameters in `query` object:
-  ##   timeout: JInt
-  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   ##   api-version: JString (required)
   ##              : Client API Version.
+  ##   timeout: JInt
+  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   section = newJObject()
-  var valid_574624 = query.getOrDefault("timeout")
-  valid_574624 = validateParameter(valid_574624, JInt, required = false,
-                                 default = newJInt(30))
-  if valid_574624 != nil:
-    section.add "timeout", valid_574624
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574625 = query.getOrDefault("api-version")
-  valid_574625 = validateParameter(valid_574625, JString, required = true,
+  var valid_564524 = query.getOrDefault("api-version")
+  valid_564524 = validateParameter(valid_564524, JString, required = true,
                                  default = nil)
-  if valid_574625 != nil:
-    section.add "api-version", valid_574625
+  if valid_564524 != nil:
+    section.add "api-version", valid_564524
+  var valid_564525 = query.getOrDefault("timeout")
+  valid_564525 = validateParameter(valid_564525, JInt, required = false,
+                                 default = newJInt(30))
+  if valid_564525 != nil:
+    section.add "timeout", valid_564525
   result.add "query", section
   ## parameters in `header` object:
-  ##   client-request-id: JString
-  ##                    : The caller-generated request identity, in the form of a GUID with no decoration such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
-  ##   ocp-date: JString
-  ##           : The time the request was issued. Client libraries typically set this to the current system clock time; set it explicitly if you are calling the REST API directly.
-  ##   If-Unmodified-Since: JString
-  ##                      : A timestamp indicating the last modified time of the resource known to the client. The operation will be performed only if the resource on the service has not been modified since the specified time.
-  ##   ocp-range: JString
-  ##            : The byte range to be retrieved. The default is to retrieve the entire file. The format is bytes=startRange-endRange.
-  ##   If-Modified-Since: JString
-  ##                    : A timestamp indicating the last modified time of the resource known to the client. The operation will be performed only if the resource on the service has been modified since the specified time.
   ##   return-client-request-id: JBool
   ##                           : Whether the server should return the client-request-id in the response.
+  ##   If-Unmodified-Since: JString
+  ##                      : A timestamp indicating the last modified time of the resource known to the client. The operation will be performed only if the resource on the service has not been modified since the specified time.
+  ##   client-request-id: JString
+  ##                    : The caller-generated request identity, in the form of a GUID with no decoration such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
+  ##   If-Modified-Since: JString
+  ##                    : A timestamp indicating the last modified time of the resource known to the client. The operation will be performed only if the resource on the service has been modified since the specified time.
+  ##   ocp-date: JString
+  ##           : The time the request was issued. Client libraries typically set this to the current system clock time; set it explicitly if you are calling the REST API directly.
+  ##   ocp-range: JString
+  ##            : The byte range to be retrieved. The default is to retrieve the entire file. The format is bytes=startRange-endRange.
   section = newJObject()
-  var valid_574626 = header.getOrDefault("client-request-id")
-  valid_574626 = validateParameter(valid_574626, JString, required = false,
-                                 default = nil)
-  if valid_574626 != nil:
-    section.add "client-request-id", valid_574626
-  var valid_574627 = header.getOrDefault("ocp-date")
-  valid_574627 = validateParameter(valid_574627, JString, required = false,
-                                 default = nil)
-  if valid_574627 != nil:
-    section.add "ocp-date", valid_574627
-  var valid_574628 = header.getOrDefault("If-Unmodified-Since")
-  valid_574628 = validateParameter(valid_574628, JString, required = false,
-                                 default = nil)
-  if valid_574628 != nil:
-    section.add "If-Unmodified-Since", valid_574628
-  var valid_574629 = header.getOrDefault("ocp-range")
-  valid_574629 = validateParameter(valid_574629, JString, required = false,
-                                 default = nil)
-  if valid_574629 != nil:
-    section.add "ocp-range", valid_574629
-  var valid_574630 = header.getOrDefault("If-Modified-Since")
-  valid_574630 = validateParameter(valid_574630, JString, required = false,
-                                 default = nil)
-  if valid_574630 != nil:
-    section.add "If-Modified-Since", valid_574630
-  var valid_574631 = header.getOrDefault("return-client-request-id")
-  valid_574631 = validateParameter(valid_574631, JBool, required = false,
+  var valid_564526 = header.getOrDefault("return-client-request-id")
+  valid_564526 = validateParameter(valid_564526, JBool, required = false,
                                  default = newJBool(false))
-  if valid_574631 != nil:
-    section.add "return-client-request-id", valid_574631
+  if valid_564526 != nil:
+    section.add "return-client-request-id", valid_564526
+  var valid_564527 = header.getOrDefault("If-Unmodified-Since")
+  valid_564527 = validateParameter(valid_564527, JString, required = false,
+                                 default = nil)
+  if valid_564527 != nil:
+    section.add "If-Unmodified-Since", valid_564527
+  var valid_564528 = header.getOrDefault("client-request-id")
+  valid_564528 = validateParameter(valid_564528, JString, required = false,
+                                 default = nil)
+  if valid_564528 != nil:
+    section.add "client-request-id", valid_564528
+  var valid_564529 = header.getOrDefault("If-Modified-Since")
+  valid_564529 = validateParameter(valid_564529, JString, required = false,
+                                 default = nil)
+  if valid_564529 != nil:
+    section.add "If-Modified-Since", valid_564529
+  var valid_564530 = header.getOrDefault("ocp-date")
+  valid_564530 = validateParameter(valid_564530, JString, required = false,
+                                 default = nil)
+  if valid_564530 != nil:
+    section.add "ocp-date", valid_564530
+  var valid_564531 = header.getOrDefault("ocp-range")
+  valid_564531 = validateParameter(valid_564531, JString, required = false,
+                                 default = nil)
+  if valid_564531 != nil:
+    section.add "ocp-range", valid_564531
   result.add "header", section
   section = newJObject()
   result.add "formData", section
   if body != nil:
     result.add "body", body
 
-proc call*(call_574632: Call_FileGetFromTask_574618; path: JsonNode; query: JsonNode;
+proc call*(call_564532: Call_FileGetFromTask_564518; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Returns the content of the specified Task file.
   ## 
-  let valid = call_574632.validator(path, query, header, formData, body)
-  let scheme = call_574632.pickScheme
+  let valid = call_564532.validator(path, query, header, formData, body)
+  let scheme = call_564532.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574632.url(scheme.get, call_574632.host, call_574632.base,
-                         call_574632.route, valid.getOrDefault("path"),
+  let url = call_564532.url(scheme.get, call_564532.host, call_564532.base,
+                         call_564532.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574632, url, valid)
+  result = hook(call_564532, url, valid)
 
-proc call*(call_574633: Call_FileGetFromTask_574618; apiVersion: string;
-          jobId: string; filePath: string; taskId: string; timeout: int = 30): Recallable =
+proc call*(call_564533: Call_FileGetFromTask_564518; jobId: string;
+          apiVersion: string; filePath: string; taskId: string; timeout: int = 30): Recallable =
   ## fileGetFromTask
   ## Returns the content of the specified Task file.
-  ##   timeout: int
-  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
-  ##   apiVersion: string (required)
-  ##             : Client API Version.
   ##   jobId: string (required)
   ##        : The ID of the Job that contains the Task.
+  ##   apiVersion: string (required)
+  ##             : Client API Version.
   ##   filePath: string (required)
   ##           : The path to the Task file that you want to get the content of.
+  ##   timeout: int
+  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   ##   taskId: string (required)
   ##         : The ID of the Task whose file you want to retrieve.
-  var path_574634 = newJObject()
-  var query_574635 = newJObject()
-  add(query_574635, "timeout", newJInt(timeout))
-  add(query_574635, "api-version", newJString(apiVersion))
-  add(path_574634, "jobId", newJString(jobId))
-  add(path_574634, "filePath", newJString(filePath))
-  add(path_574634, "taskId", newJString(taskId))
-  result = call_574633.call(path_574634, query_574635, nil, nil, nil)
+  var path_564534 = newJObject()
+  var query_564535 = newJObject()
+  add(path_564534, "jobId", newJString(jobId))
+  add(query_564535, "api-version", newJString(apiVersion))
+  add(path_564534, "filePath", newJString(filePath))
+  add(query_564535, "timeout", newJInt(timeout))
+  add(path_564534, "taskId", newJString(taskId))
+  result = call_564533.call(path_564534, query_564535, nil, nil, nil)
 
-var fileGetFromTask* = Call_FileGetFromTask_574618(name: "fileGetFromTask",
+var fileGetFromTask* = Call_FileGetFromTask_564518(name: "fileGetFromTask",
     meth: HttpMethod.HttpGet, host: "azure.local",
     route: "/jobs/{jobId}/tasks/{taskId}/files/{filePath}",
-    validator: validate_FileGetFromTask_574619, base: "", url: url_FileGetFromTask_574620,
+    validator: validate_FileGetFromTask_564519, base: "", url: url_FileGetFromTask_564520,
     schemes: {Scheme.Https})
 type
-  Call_FileDeleteFromTask_574636 = ref object of OpenApiRestCall_573667
-proc url_FileDeleteFromTask_574638(protocol: Scheme; host: string; base: string;
+  Call_FileDeleteFromTask_564536 = ref object of OpenApiRestCall_563565
+proc url_FileDeleteFromTask_564538(protocol: Scheme; host: string; base: string;
                                   route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -3818,7 +3823,7 @@ proc url_FileDeleteFromTask_574638(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_FileDeleteFromTask_574637(path: JsonNode; query: JsonNode;
+proc validate_FileDeleteFromTask_564537(path: JsonNode; query: JsonNode;
                                        header: JsonNode; formData: JsonNode;
                                        body: JsonNode): JsonNode =
   var section: JsonNode
@@ -3832,121 +3837,121 @@ proc validate_FileDeleteFromTask_574637(path: JsonNode; query: JsonNode;
   ##         : The ID of the Task whose file you want to delete.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `jobId` field"
-  var valid_574639 = path.getOrDefault("jobId")
-  valid_574639 = validateParameter(valid_574639, JString, required = true,
+  var valid_564539 = path.getOrDefault("jobId")
+  valid_564539 = validateParameter(valid_564539, JString, required = true,
                                  default = nil)
-  if valid_574639 != nil:
-    section.add "jobId", valid_574639
-  var valid_574640 = path.getOrDefault("filePath")
-  valid_574640 = validateParameter(valid_574640, JString, required = true,
+  if valid_564539 != nil:
+    section.add "jobId", valid_564539
+  var valid_564540 = path.getOrDefault("filePath")
+  valid_564540 = validateParameter(valid_564540, JString, required = true,
                                  default = nil)
-  if valid_574640 != nil:
-    section.add "filePath", valid_574640
-  var valid_574641 = path.getOrDefault("taskId")
-  valid_574641 = validateParameter(valid_574641, JString, required = true,
+  if valid_564540 != nil:
+    section.add "filePath", valid_564540
+  var valid_564541 = path.getOrDefault("taskId")
+  valid_564541 = validateParameter(valid_564541, JString, required = true,
                                  default = nil)
-  if valid_574641 != nil:
-    section.add "taskId", valid_574641
+  if valid_564541 != nil:
+    section.add "taskId", valid_564541
   result.add "path", section
   ## parameters in `query` object:
-  ##   timeout: JInt
-  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   ##   api-version: JString (required)
   ##              : Client API Version.
   ##   recursive: JBool
   ##            : Whether to delete children of a directory. If the filePath parameter represents a directory instead of a file, you can set recursive to true to delete the directory and all of the files and subdirectories in it. If recursive is false then the directory must be empty or deletion will fail.
+  ##   timeout: JInt
+  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   section = newJObject()
-  var valid_574642 = query.getOrDefault("timeout")
-  valid_574642 = validateParameter(valid_574642, JInt, required = false,
-                                 default = newJInt(30))
-  if valid_574642 != nil:
-    section.add "timeout", valid_574642
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574643 = query.getOrDefault("api-version")
-  valid_574643 = validateParameter(valid_574643, JString, required = true,
+  var valid_564542 = query.getOrDefault("api-version")
+  valid_564542 = validateParameter(valid_564542, JString, required = true,
                                  default = nil)
-  if valid_574643 != nil:
-    section.add "api-version", valid_574643
-  var valid_574644 = query.getOrDefault("recursive")
-  valid_574644 = validateParameter(valid_574644, JBool, required = false, default = nil)
-  if valid_574644 != nil:
-    section.add "recursive", valid_574644
+  if valid_564542 != nil:
+    section.add "api-version", valid_564542
+  var valid_564543 = query.getOrDefault("recursive")
+  valid_564543 = validateParameter(valid_564543, JBool, required = false, default = nil)
+  if valid_564543 != nil:
+    section.add "recursive", valid_564543
+  var valid_564544 = query.getOrDefault("timeout")
+  valid_564544 = validateParameter(valid_564544, JInt, required = false,
+                                 default = newJInt(30))
+  if valid_564544 != nil:
+    section.add "timeout", valid_564544
   result.add "query", section
   ## parameters in `header` object:
+  ##   return-client-request-id: JBool
+  ##                           : Whether the server should return the client-request-id in the response.
   ##   client-request-id: JString
   ##                    : The caller-generated request identity, in the form of a GUID with no decoration such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
   ##   ocp-date: JString
   ##           : The time the request was issued. Client libraries typically set this to the current system clock time; set it explicitly if you are calling the REST API directly.
-  ##   return-client-request-id: JBool
-  ##                           : Whether the server should return the client-request-id in the response.
   section = newJObject()
-  var valid_574645 = header.getOrDefault("client-request-id")
-  valid_574645 = validateParameter(valid_574645, JString, required = false,
-                                 default = nil)
-  if valid_574645 != nil:
-    section.add "client-request-id", valid_574645
-  var valid_574646 = header.getOrDefault("ocp-date")
-  valid_574646 = validateParameter(valid_574646, JString, required = false,
-                                 default = nil)
-  if valid_574646 != nil:
-    section.add "ocp-date", valid_574646
-  var valid_574647 = header.getOrDefault("return-client-request-id")
-  valid_574647 = validateParameter(valid_574647, JBool, required = false,
+  var valid_564545 = header.getOrDefault("return-client-request-id")
+  valid_564545 = validateParameter(valid_564545, JBool, required = false,
                                  default = newJBool(false))
-  if valid_574647 != nil:
-    section.add "return-client-request-id", valid_574647
+  if valid_564545 != nil:
+    section.add "return-client-request-id", valid_564545
+  var valid_564546 = header.getOrDefault("client-request-id")
+  valid_564546 = validateParameter(valid_564546, JString, required = false,
+                                 default = nil)
+  if valid_564546 != nil:
+    section.add "client-request-id", valid_564546
+  var valid_564547 = header.getOrDefault("ocp-date")
+  valid_564547 = validateParameter(valid_564547, JString, required = false,
+                                 default = nil)
+  if valid_564547 != nil:
+    section.add "ocp-date", valid_564547
   result.add "header", section
   section = newJObject()
   result.add "formData", section
   if body != nil:
     result.add "body", body
 
-proc call*(call_574648: Call_FileDeleteFromTask_574636; path: JsonNode;
+proc call*(call_564548: Call_FileDeleteFromTask_564536; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
-  let valid = call_574648.validator(path, query, header, formData, body)
-  let scheme = call_574648.pickScheme
+  let valid = call_564548.validator(path, query, header, formData, body)
+  let scheme = call_564548.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574648.url(scheme.get, call_574648.host, call_574648.base,
-                         call_574648.route, valid.getOrDefault("path"),
+  let url = call_564548.url(scheme.get, call_564548.host, call_564548.base,
+                         call_564548.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574648, url, valid)
+  result = hook(call_564548, url, valid)
 
-proc call*(call_574649: Call_FileDeleteFromTask_574636; apiVersion: string;
-          jobId: string; filePath: string; taskId: string; timeout: int = 30;
-          recursive: bool = false): Recallable =
+proc call*(call_564549: Call_FileDeleteFromTask_564536; jobId: string;
+          apiVersion: string; filePath: string; taskId: string;
+          recursive: bool = false; timeout: int = 30): Recallable =
   ## fileDeleteFromTask
-  ##   timeout: int
-  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
-  ##   apiVersion: string (required)
-  ##             : Client API Version.
   ##   jobId: string (required)
   ##        : The ID of the Job that contains the Task.
-  ##   filePath: string (required)
-  ##           : The path to the Task file or directory that you want to delete.
+  ##   apiVersion: string (required)
+  ##             : Client API Version.
   ##   recursive: bool
   ##            : Whether to delete children of a directory. If the filePath parameter represents a directory instead of a file, you can set recursive to true to delete the directory and all of the files and subdirectories in it. If recursive is false then the directory must be empty or deletion will fail.
+  ##   filePath: string (required)
+  ##           : The path to the Task file or directory that you want to delete.
+  ##   timeout: int
+  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   ##   taskId: string (required)
   ##         : The ID of the Task whose file you want to delete.
-  var path_574650 = newJObject()
-  var query_574651 = newJObject()
-  add(query_574651, "timeout", newJInt(timeout))
-  add(query_574651, "api-version", newJString(apiVersion))
-  add(path_574650, "jobId", newJString(jobId))
-  add(path_574650, "filePath", newJString(filePath))
-  add(query_574651, "recursive", newJBool(recursive))
-  add(path_574650, "taskId", newJString(taskId))
-  result = call_574649.call(path_574650, query_574651, nil, nil, nil)
+  var path_564550 = newJObject()
+  var query_564551 = newJObject()
+  add(path_564550, "jobId", newJString(jobId))
+  add(query_564551, "api-version", newJString(apiVersion))
+  add(query_564551, "recursive", newJBool(recursive))
+  add(path_564550, "filePath", newJString(filePath))
+  add(query_564551, "timeout", newJInt(timeout))
+  add(path_564550, "taskId", newJString(taskId))
+  result = call_564549.call(path_564550, query_564551, nil, nil, nil)
 
-var fileDeleteFromTask* = Call_FileDeleteFromTask_574636(
+var fileDeleteFromTask* = Call_FileDeleteFromTask_564536(
     name: "fileDeleteFromTask", meth: HttpMethod.HttpDelete, host: "azure.local",
     route: "/jobs/{jobId}/tasks/{taskId}/files/{filePath}",
-    validator: validate_FileDeleteFromTask_574637, base: "",
-    url: url_FileDeleteFromTask_574638, schemes: {Scheme.Https})
+    validator: validate_FileDeleteFromTask_564537, base: "",
+    url: url_FileDeleteFromTask_564538, schemes: {Scheme.Https})
 type
-  Call_TaskReactivate_574669 = ref object of OpenApiRestCall_573667
-proc url_TaskReactivate_574671(protocol: Scheme; host: string; base: string;
+  Call_TaskReactivate_564569 = ref object of OpenApiRestCall_563565
+proc url_TaskReactivate_564571(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -3965,7 +3970,7 @@ proc url_TaskReactivate_574671(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_TaskReactivate_574670(path: JsonNode; query: JsonNode;
+proc validate_TaskReactivate_564570(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## Reactivation makes a Task eligible to be retried again up to its maximum retry count. The Task's state is changed to active. As the Task is no longer in the completed state, any previous exit code or failure information is no longer available after reactivation. Each time a Task is reactivated, its retry count is reset to 0. Reactivation will fail for Tasks that are not completed or that previously completed successfully (with an exit code of 0). Additionally, it will fail if the Job has completed (or is terminating or deleting).
@@ -3979,134 +3984,134 @@ proc validate_TaskReactivate_574670(path: JsonNode; query: JsonNode;
   ##         : The ID of the Task to reactivate.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `jobId` field"
-  var valid_574672 = path.getOrDefault("jobId")
-  valid_574672 = validateParameter(valid_574672, JString, required = true,
+  var valid_564572 = path.getOrDefault("jobId")
+  valid_564572 = validateParameter(valid_564572, JString, required = true,
                                  default = nil)
-  if valid_574672 != nil:
-    section.add "jobId", valid_574672
-  var valid_574673 = path.getOrDefault("taskId")
-  valid_574673 = validateParameter(valid_574673, JString, required = true,
+  if valid_564572 != nil:
+    section.add "jobId", valid_564572
+  var valid_564573 = path.getOrDefault("taskId")
+  valid_564573 = validateParameter(valid_564573, JString, required = true,
                                  default = nil)
-  if valid_574673 != nil:
-    section.add "taskId", valid_574673
+  if valid_564573 != nil:
+    section.add "taskId", valid_564573
   result.add "path", section
   ## parameters in `query` object:
-  ##   timeout: JInt
-  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   ##   api-version: JString (required)
   ##              : Client API Version.
+  ##   timeout: JInt
+  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   section = newJObject()
-  var valid_574674 = query.getOrDefault("timeout")
-  valid_574674 = validateParameter(valid_574674, JInt, required = false,
-                                 default = newJInt(30))
-  if valid_574674 != nil:
-    section.add "timeout", valid_574674
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574675 = query.getOrDefault("api-version")
-  valid_574675 = validateParameter(valid_574675, JString, required = true,
+  var valid_564574 = query.getOrDefault("api-version")
+  valid_564574 = validateParameter(valid_564574, JString, required = true,
                                  default = nil)
-  if valid_574675 != nil:
-    section.add "api-version", valid_574675
+  if valid_564574 != nil:
+    section.add "api-version", valid_564574
+  var valid_564575 = query.getOrDefault("timeout")
+  valid_564575 = validateParameter(valid_564575, JInt, required = false,
+                                 default = newJInt(30))
+  if valid_564575 != nil:
+    section.add "timeout", valid_564575
   result.add "query", section
   ## parameters in `header` object:
-  ##   If-Match: JString
-  ##           : An ETag value associated with the version of the resource known to the client. The operation will be performed only if the resource's current ETag on the service exactly matches the value specified by the client.
-  ##   client-request-id: JString
-  ##                    : The caller-generated request identity, in the form of a GUID with no decoration such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
-  ##   ocp-date: JString
-  ##           : The time the request was issued. Client libraries typically set this to the current system clock time; set it explicitly if you are calling the REST API directly.
-  ##   If-Unmodified-Since: JString
-  ##                      : A timestamp indicating the last modified time of the resource known to the client. The operation will be performed only if the resource on the service has not been modified since the specified time.
-  ##   If-None-Match: JString
-  ##                : An ETag value associated with the version of the resource known to the client. The operation will be performed only if the resource's current ETag on the service does not match the value specified by the client.
-  ##   If-Modified-Since: JString
-  ##                    : A timestamp indicating the last modified time of the resource known to the client. The operation will be performed only if the resource on the service has been modified since the specified time.
   ##   return-client-request-id: JBool
   ##                           : Whether the server should return the client-request-id in the response.
+  ##   If-Unmodified-Since: JString
+  ##                      : A timestamp indicating the last modified time of the resource known to the client. The operation will be performed only if the resource on the service has not been modified since the specified time.
+  ##   client-request-id: JString
+  ##                    : The caller-generated request identity, in the form of a GUID with no decoration such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
+  ##   If-Modified-Since: JString
+  ##                    : A timestamp indicating the last modified time of the resource known to the client. The operation will be performed only if the resource on the service has been modified since the specified time.
+  ##   If-None-Match: JString
+  ##                : An ETag value associated with the version of the resource known to the client. The operation will be performed only if the resource's current ETag on the service does not match the value specified by the client.
+  ##   ocp-date: JString
+  ##           : The time the request was issued. Client libraries typically set this to the current system clock time; set it explicitly if you are calling the REST API directly.
+  ##   If-Match: JString
+  ##           : An ETag value associated with the version of the resource known to the client. The operation will be performed only if the resource's current ETag on the service exactly matches the value specified by the client.
   section = newJObject()
-  var valid_574676 = header.getOrDefault("If-Match")
-  valid_574676 = validateParameter(valid_574676, JString, required = false,
-                                 default = nil)
-  if valid_574676 != nil:
-    section.add "If-Match", valid_574676
-  var valid_574677 = header.getOrDefault("client-request-id")
-  valid_574677 = validateParameter(valid_574677, JString, required = false,
-                                 default = nil)
-  if valid_574677 != nil:
-    section.add "client-request-id", valid_574677
-  var valid_574678 = header.getOrDefault("ocp-date")
-  valid_574678 = validateParameter(valid_574678, JString, required = false,
-                                 default = nil)
-  if valid_574678 != nil:
-    section.add "ocp-date", valid_574678
-  var valid_574679 = header.getOrDefault("If-Unmodified-Since")
-  valid_574679 = validateParameter(valid_574679, JString, required = false,
-                                 default = nil)
-  if valid_574679 != nil:
-    section.add "If-Unmodified-Since", valid_574679
-  var valid_574680 = header.getOrDefault("If-None-Match")
-  valid_574680 = validateParameter(valid_574680, JString, required = false,
-                                 default = nil)
-  if valid_574680 != nil:
-    section.add "If-None-Match", valid_574680
-  var valid_574681 = header.getOrDefault("If-Modified-Since")
-  valid_574681 = validateParameter(valid_574681, JString, required = false,
-                                 default = nil)
-  if valid_574681 != nil:
-    section.add "If-Modified-Since", valid_574681
-  var valid_574682 = header.getOrDefault("return-client-request-id")
-  valid_574682 = validateParameter(valid_574682, JBool, required = false,
+  var valid_564576 = header.getOrDefault("return-client-request-id")
+  valid_564576 = validateParameter(valid_564576, JBool, required = false,
                                  default = newJBool(false))
-  if valid_574682 != nil:
-    section.add "return-client-request-id", valid_574682
+  if valid_564576 != nil:
+    section.add "return-client-request-id", valid_564576
+  var valid_564577 = header.getOrDefault("If-Unmodified-Since")
+  valid_564577 = validateParameter(valid_564577, JString, required = false,
+                                 default = nil)
+  if valid_564577 != nil:
+    section.add "If-Unmodified-Since", valid_564577
+  var valid_564578 = header.getOrDefault("client-request-id")
+  valid_564578 = validateParameter(valid_564578, JString, required = false,
+                                 default = nil)
+  if valid_564578 != nil:
+    section.add "client-request-id", valid_564578
+  var valid_564579 = header.getOrDefault("If-Modified-Since")
+  valid_564579 = validateParameter(valid_564579, JString, required = false,
+                                 default = nil)
+  if valid_564579 != nil:
+    section.add "If-Modified-Since", valid_564579
+  var valid_564580 = header.getOrDefault("If-None-Match")
+  valid_564580 = validateParameter(valid_564580, JString, required = false,
+                                 default = nil)
+  if valid_564580 != nil:
+    section.add "If-None-Match", valid_564580
+  var valid_564581 = header.getOrDefault("ocp-date")
+  valid_564581 = validateParameter(valid_564581, JString, required = false,
+                                 default = nil)
+  if valid_564581 != nil:
+    section.add "ocp-date", valid_564581
+  var valid_564582 = header.getOrDefault("If-Match")
+  valid_564582 = validateParameter(valid_564582, JString, required = false,
+                                 default = nil)
+  if valid_564582 != nil:
+    section.add "If-Match", valid_564582
   result.add "header", section
   section = newJObject()
   result.add "formData", section
   if body != nil:
     result.add "body", body
 
-proc call*(call_574683: Call_TaskReactivate_574669; path: JsonNode; query: JsonNode;
+proc call*(call_564583: Call_TaskReactivate_564569; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Reactivation makes a Task eligible to be retried again up to its maximum retry count. The Task's state is changed to active. As the Task is no longer in the completed state, any previous exit code or failure information is no longer available after reactivation. Each time a Task is reactivated, its retry count is reset to 0. Reactivation will fail for Tasks that are not completed or that previously completed successfully (with an exit code of 0). Additionally, it will fail if the Job has completed (or is terminating or deleting).
   ## 
-  let valid = call_574683.validator(path, query, header, formData, body)
-  let scheme = call_574683.pickScheme
+  let valid = call_564583.validator(path, query, header, formData, body)
+  let scheme = call_564583.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574683.url(scheme.get, call_574683.host, call_574683.base,
-                         call_574683.route, valid.getOrDefault("path"),
+  let url = call_564583.url(scheme.get, call_564583.host, call_564583.base,
+                         call_564583.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574683, url, valid)
+  result = hook(call_564583, url, valid)
 
-proc call*(call_574684: Call_TaskReactivate_574669; apiVersion: string;
-          jobId: string; taskId: string; timeout: int = 30): Recallable =
+proc call*(call_564584: Call_TaskReactivate_564569; jobId: string;
+          apiVersion: string; taskId: string; timeout: int = 30): Recallable =
   ## taskReactivate
   ## Reactivation makes a Task eligible to be retried again up to its maximum retry count. The Task's state is changed to active. As the Task is no longer in the completed state, any previous exit code or failure information is no longer available after reactivation. Each time a Task is reactivated, its retry count is reset to 0. Reactivation will fail for Tasks that are not completed or that previously completed successfully (with an exit code of 0). Additionally, it will fail if the Job has completed (or is terminating or deleting).
-  ##   timeout: int
-  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
-  ##   apiVersion: string (required)
-  ##             : Client API Version.
   ##   jobId: string (required)
   ##        : The ID of the Job containing the Task.
+  ##   apiVersion: string (required)
+  ##             : Client API Version.
+  ##   timeout: int
+  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   ##   taskId: string (required)
   ##         : The ID of the Task to reactivate.
-  var path_574685 = newJObject()
-  var query_574686 = newJObject()
-  add(query_574686, "timeout", newJInt(timeout))
-  add(query_574686, "api-version", newJString(apiVersion))
-  add(path_574685, "jobId", newJString(jobId))
-  add(path_574685, "taskId", newJString(taskId))
-  result = call_574684.call(path_574685, query_574686, nil, nil, nil)
+  var path_564585 = newJObject()
+  var query_564586 = newJObject()
+  add(path_564585, "jobId", newJString(jobId))
+  add(query_564586, "api-version", newJString(apiVersion))
+  add(query_564586, "timeout", newJInt(timeout))
+  add(path_564585, "taskId", newJString(taskId))
+  result = call_564584.call(path_564585, query_564586, nil, nil, nil)
 
-var taskReactivate* = Call_TaskReactivate_574669(name: "taskReactivate",
+var taskReactivate* = Call_TaskReactivate_564569(name: "taskReactivate",
     meth: HttpMethod.HttpPost, host: "azure.local",
     route: "/jobs/{jobId}/tasks/{taskId}/reactivate",
-    validator: validate_TaskReactivate_574670, base: "", url: url_TaskReactivate_574671,
+    validator: validate_TaskReactivate_564570, base: "", url: url_TaskReactivate_564571,
     schemes: {Scheme.Https})
 type
-  Call_TaskListSubtasks_574687 = ref object of OpenApiRestCall_573667
-proc url_TaskListSubtasks_574689(protocol: Scheme; host: string; base: string;
+  Call_TaskListSubtasks_564587 = ref object of OpenApiRestCall_563565
+proc url_TaskListSubtasks_564589(protocol: Scheme; host: string; base: string;
                                 route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -4125,7 +4130,7 @@ proc url_TaskListSubtasks_574689(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_TaskListSubtasks_574688(path: JsonNode; query: JsonNode;
+proc validate_TaskListSubtasks_564588(path: JsonNode; query: JsonNode;
                                      header: JsonNode; formData: JsonNode;
                                      body: JsonNode): JsonNode =
   ## If the Task is not a multi-instance Task then this returns an empty collection.
@@ -4139,116 +4144,116 @@ proc validate_TaskListSubtasks_574688(path: JsonNode; query: JsonNode;
   ##         : The ID of the Task.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `jobId` field"
-  var valid_574690 = path.getOrDefault("jobId")
-  valid_574690 = validateParameter(valid_574690, JString, required = true,
+  var valid_564590 = path.getOrDefault("jobId")
+  valid_564590 = validateParameter(valid_564590, JString, required = true,
                                  default = nil)
-  if valid_574690 != nil:
-    section.add "jobId", valid_574690
-  var valid_574691 = path.getOrDefault("taskId")
-  valid_574691 = validateParameter(valid_574691, JString, required = true,
+  if valid_564590 != nil:
+    section.add "jobId", valid_564590
+  var valid_564591 = path.getOrDefault("taskId")
+  valid_564591 = validateParameter(valid_564591, JString, required = true,
                                  default = nil)
-  if valid_574691 != nil:
-    section.add "taskId", valid_574691
+  if valid_564591 != nil:
+    section.add "taskId", valid_564591
   result.add "path", section
   ## parameters in `query` object:
-  ##   timeout: JInt
-  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   ##   api-version: JString (required)
   ##              : Client API Version.
   ##   $select: JString
   ##          : An OData $select clause.
+  ##   timeout: JInt
+  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   section = newJObject()
-  var valid_574692 = query.getOrDefault("timeout")
-  valid_574692 = validateParameter(valid_574692, JInt, required = false,
-                                 default = newJInt(30))
-  if valid_574692 != nil:
-    section.add "timeout", valid_574692
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574693 = query.getOrDefault("api-version")
-  valid_574693 = validateParameter(valid_574693, JString, required = true,
+  var valid_564592 = query.getOrDefault("api-version")
+  valid_564592 = validateParameter(valid_564592, JString, required = true,
                                  default = nil)
-  if valid_574693 != nil:
-    section.add "api-version", valid_574693
-  var valid_574694 = query.getOrDefault("$select")
-  valid_574694 = validateParameter(valid_574694, JString, required = false,
+  if valid_564592 != nil:
+    section.add "api-version", valid_564592
+  var valid_564593 = query.getOrDefault("$select")
+  valid_564593 = validateParameter(valid_564593, JString, required = false,
                                  default = nil)
-  if valid_574694 != nil:
-    section.add "$select", valid_574694
+  if valid_564593 != nil:
+    section.add "$select", valid_564593
+  var valid_564594 = query.getOrDefault("timeout")
+  valid_564594 = validateParameter(valid_564594, JInt, required = false,
+                                 default = newJInt(30))
+  if valid_564594 != nil:
+    section.add "timeout", valid_564594
   result.add "query", section
   ## parameters in `header` object:
+  ##   return-client-request-id: JBool
+  ##                           : Whether the server should return the client-request-id in the response.
   ##   client-request-id: JString
   ##                    : The caller-generated request identity, in the form of a GUID with no decoration such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
   ##   ocp-date: JString
   ##           : The time the request was issued. Client libraries typically set this to the current system clock time; set it explicitly if you are calling the REST API directly.
-  ##   return-client-request-id: JBool
-  ##                           : Whether the server should return the client-request-id in the response.
   section = newJObject()
-  var valid_574695 = header.getOrDefault("client-request-id")
-  valid_574695 = validateParameter(valid_574695, JString, required = false,
-                                 default = nil)
-  if valid_574695 != nil:
-    section.add "client-request-id", valid_574695
-  var valid_574696 = header.getOrDefault("ocp-date")
-  valid_574696 = validateParameter(valid_574696, JString, required = false,
-                                 default = nil)
-  if valid_574696 != nil:
-    section.add "ocp-date", valid_574696
-  var valid_574697 = header.getOrDefault("return-client-request-id")
-  valid_574697 = validateParameter(valid_574697, JBool, required = false,
+  var valid_564595 = header.getOrDefault("return-client-request-id")
+  valid_564595 = validateParameter(valid_564595, JBool, required = false,
                                  default = newJBool(false))
-  if valid_574697 != nil:
-    section.add "return-client-request-id", valid_574697
+  if valid_564595 != nil:
+    section.add "return-client-request-id", valid_564595
+  var valid_564596 = header.getOrDefault("client-request-id")
+  valid_564596 = validateParameter(valid_564596, JString, required = false,
+                                 default = nil)
+  if valid_564596 != nil:
+    section.add "client-request-id", valid_564596
+  var valid_564597 = header.getOrDefault("ocp-date")
+  valid_564597 = validateParameter(valid_564597, JString, required = false,
+                                 default = nil)
+  if valid_564597 != nil:
+    section.add "ocp-date", valid_564597
   result.add "header", section
   section = newJObject()
   result.add "formData", section
   if body != nil:
     result.add "body", body
 
-proc call*(call_574698: Call_TaskListSubtasks_574687; path: JsonNode;
+proc call*(call_564598: Call_TaskListSubtasks_564587; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## If the Task is not a multi-instance Task then this returns an empty collection.
   ## 
-  let valid = call_574698.validator(path, query, header, formData, body)
-  let scheme = call_574698.pickScheme
+  let valid = call_564598.validator(path, query, header, formData, body)
+  let scheme = call_564598.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574698.url(scheme.get, call_574698.host, call_574698.base,
-                         call_574698.route, valid.getOrDefault("path"),
+  let url = call_564598.url(scheme.get, call_564598.host, call_564598.base,
+                         call_564598.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574698, url, valid)
+  result = hook(call_564598, url, valid)
 
-proc call*(call_574699: Call_TaskListSubtasks_574687; apiVersion: string;
-          jobId: string; taskId: string; timeout: int = 30; Select: string = ""): Recallable =
+proc call*(call_564599: Call_TaskListSubtasks_564587; jobId: string;
+          apiVersion: string; taskId: string; Select: string = ""; timeout: int = 30): Recallable =
   ## taskListSubtasks
   ## If the Task is not a multi-instance Task then this returns an empty collection.
-  ##   timeout: int
-  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
-  ##   apiVersion: string (required)
-  ##             : Client API Version.
   ##   jobId: string (required)
   ##        : The ID of the Job.
+  ##   apiVersion: string (required)
+  ##             : Client API Version.
   ##   Select: string
   ##         : An OData $select clause.
+  ##   timeout: int
+  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   ##   taskId: string (required)
   ##         : The ID of the Task.
-  var path_574700 = newJObject()
-  var query_574701 = newJObject()
-  add(query_574701, "timeout", newJInt(timeout))
-  add(query_574701, "api-version", newJString(apiVersion))
-  add(path_574700, "jobId", newJString(jobId))
-  add(query_574701, "$select", newJString(Select))
-  add(path_574700, "taskId", newJString(taskId))
-  result = call_574699.call(path_574700, query_574701, nil, nil, nil)
+  var path_564600 = newJObject()
+  var query_564601 = newJObject()
+  add(path_564600, "jobId", newJString(jobId))
+  add(query_564601, "api-version", newJString(apiVersion))
+  add(query_564601, "$select", newJString(Select))
+  add(query_564601, "timeout", newJInt(timeout))
+  add(path_564600, "taskId", newJString(taskId))
+  result = call_564599.call(path_564600, query_564601, nil, nil, nil)
 
-var taskListSubtasks* = Call_TaskListSubtasks_574687(name: "taskListSubtasks",
+var taskListSubtasks* = Call_TaskListSubtasks_564587(name: "taskListSubtasks",
     meth: HttpMethod.HttpGet, host: "azure.local",
     route: "/jobs/{jobId}/tasks/{taskId}/subtasksinfo",
-    validator: validate_TaskListSubtasks_574688, base: "",
-    url: url_TaskListSubtasks_574689, schemes: {Scheme.Https})
+    validator: validate_TaskListSubtasks_564588, base: "",
+    url: url_TaskListSubtasks_564589, schemes: {Scheme.Https})
 type
-  Call_TaskTerminate_574702 = ref object of OpenApiRestCall_573667
-proc url_TaskTerminate_574704(protocol: Scheme; host: string; base: string;
+  Call_TaskTerminate_564602 = ref object of OpenApiRestCall_563565
+proc url_TaskTerminate_564604(protocol: Scheme; host: string; base: string;
                              route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -4267,7 +4272,7 @@ proc url_TaskTerminate_574704(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_TaskTerminate_574703(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_TaskTerminate_564603(path: JsonNode; query: JsonNode; header: JsonNode;
                                   formData: JsonNode; body: JsonNode): JsonNode =
   ## When the Task has been terminated, it moves to the completed state. For multi-instance Tasks, the terminate Task operation applies synchronously to the primary task; subtasks are then terminated asynchronously in the background.
   ## 
@@ -4280,134 +4285,134 @@ proc validate_TaskTerminate_574703(path: JsonNode; query: JsonNode; header: Json
   ##         : The ID of the Task to terminate.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `jobId` field"
-  var valid_574705 = path.getOrDefault("jobId")
-  valid_574705 = validateParameter(valid_574705, JString, required = true,
+  var valid_564605 = path.getOrDefault("jobId")
+  valid_564605 = validateParameter(valid_564605, JString, required = true,
                                  default = nil)
-  if valid_574705 != nil:
-    section.add "jobId", valid_574705
-  var valid_574706 = path.getOrDefault("taskId")
-  valid_574706 = validateParameter(valid_574706, JString, required = true,
+  if valid_564605 != nil:
+    section.add "jobId", valid_564605
+  var valid_564606 = path.getOrDefault("taskId")
+  valid_564606 = validateParameter(valid_564606, JString, required = true,
                                  default = nil)
-  if valid_574706 != nil:
-    section.add "taskId", valid_574706
+  if valid_564606 != nil:
+    section.add "taskId", valid_564606
   result.add "path", section
   ## parameters in `query` object:
-  ##   timeout: JInt
-  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   ##   api-version: JString (required)
   ##              : Client API Version.
+  ##   timeout: JInt
+  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   section = newJObject()
-  var valid_574707 = query.getOrDefault("timeout")
-  valid_574707 = validateParameter(valid_574707, JInt, required = false,
-                                 default = newJInt(30))
-  if valid_574707 != nil:
-    section.add "timeout", valid_574707
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574708 = query.getOrDefault("api-version")
-  valid_574708 = validateParameter(valid_574708, JString, required = true,
+  var valid_564607 = query.getOrDefault("api-version")
+  valid_564607 = validateParameter(valid_564607, JString, required = true,
                                  default = nil)
-  if valid_574708 != nil:
-    section.add "api-version", valid_574708
+  if valid_564607 != nil:
+    section.add "api-version", valid_564607
+  var valid_564608 = query.getOrDefault("timeout")
+  valid_564608 = validateParameter(valid_564608, JInt, required = false,
+                                 default = newJInt(30))
+  if valid_564608 != nil:
+    section.add "timeout", valid_564608
   result.add "query", section
   ## parameters in `header` object:
-  ##   If-Match: JString
-  ##           : An ETag value associated with the version of the resource known to the client. The operation will be performed only if the resource's current ETag on the service exactly matches the value specified by the client.
-  ##   client-request-id: JString
-  ##                    : The caller-generated request identity, in the form of a GUID with no decoration such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
-  ##   ocp-date: JString
-  ##           : The time the request was issued. Client libraries typically set this to the current system clock time; set it explicitly if you are calling the REST API directly.
-  ##   If-Unmodified-Since: JString
-  ##                      : A timestamp indicating the last modified time of the resource known to the client. The operation will be performed only if the resource on the service has not been modified since the specified time.
-  ##   If-None-Match: JString
-  ##                : An ETag value associated with the version of the resource known to the client. The operation will be performed only if the resource's current ETag on the service does not match the value specified by the client.
-  ##   If-Modified-Since: JString
-  ##                    : A timestamp indicating the last modified time of the resource known to the client. The operation will be performed only if the resource on the service has been modified since the specified time.
   ##   return-client-request-id: JBool
   ##                           : Whether the server should return the client-request-id in the response.
+  ##   If-Unmodified-Since: JString
+  ##                      : A timestamp indicating the last modified time of the resource known to the client. The operation will be performed only if the resource on the service has not been modified since the specified time.
+  ##   client-request-id: JString
+  ##                    : The caller-generated request identity, in the form of a GUID with no decoration such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
+  ##   If-Modified-Since: JString
+  ##                    : A timestamp indicating the last modified time of the resource known to the client. The operation will be performed only if the resource on the service has been modified since the specified time.
+  ##   If-None-Match: JString
+  ##                : An ETag value associated with the version of the resource known to the client. The operation will be performed only if the resource's current ETag on the service does not match the value specified by the client.
+  ##   ocp-date: JString
+  ##           : The time the request was issued. Client libraries typically set this to the current system clock time; set it explicitly if you are calling the REST API directly.
+  ##   If-Match: JString
+  ##           : An ETag value associated with the version of the resource known to the client. The operation will be performed only if the resource's current ETag on the service exactly matches the value specified by the client.
   section = newJObject()
-  var valid_574709 = header.getOrDefault("If-Match")
-  valid_574709 = validateParameter(valid_574709, JString, required = false,
-                                 default = nil)
-  if valid_574709 != nil:
-    section.add "If-Match", valid_574709
-  var valid_574710 = header.getOrDefault("client-request-id")
-  valid_574710 = validateParameter(valid_574710, JString, required = false,
-                                 default = nil)
-  if valid_574710 != nil:
-    section.add "client-request-id", valid_574710
-  var valid_574711 = header.getOrDefault("ocp-date")
-  valid_574711 = validateParameter(valid_574711, JString, required = false,
-                                 default = nil)
-  if valid_574711 != nil:
-    section.add "ocp-date", valid_574711
-  var valid_574712 = header.getOrDefault("If-Unmodified-Since")
-  valid_574712 = validateParameter(valid_574712, JString, required = false,
-                                 default = nil)
-  if valid_574712 != nil:
-    section.add "If-Unmodified-Since", valid_574712
-  var valid_574713 = header.getOrDefault("If-None-Match")
-  valid_574713 = validateParameter(valid_574713, JString, required = false,
-                                 default = nil)
-  if valid_574713 != nil:
-    section.add "If-None-Match", valid_574713
-  var valid_574714 = header.getOrDefault("If-Modified-Since")
-  valid_574714 = validateParameter(valid_574714, JString, required = false,
-                                 default = nil)
-  if valid_574714 != nil:
-    section.add "If-Modified-Since", valid_574714
-  var valid_574715 = header.getOrDefault("return-client-request-id")
-  valid_574715 = validateParameter(valid_574715, JBool, required = false,
+  var valid_564609 = header.getOrDefault("return-client-request-id")
+  valid_564609 = validateParameter(valid_564609, JBool, required = false,
                                  default = newJBool(false))
-  if valid_574715 != nil:
-    section.add "return-client-request-id", valid_574715
+  if valid_564609 != nil:
+    section.add "return-client-request-id", valid_564609
+  var valid_564610 = header.getOrDefault("If-Unmodified-Since")
+  valid_564610 = validateParameter(valid_564610, JString, required = false,
+                                 default = nil)
+  if valid_564610 != nil:
+    section.add "If-Unmodified-Since", valid_564610
+  var valid_564611 = header.getOrDefault("client-request-id")
+  valid_564611 = validateParameter(valid_564611, JString, required = false,
+                                 default = nil)
+  if valid_564611 != nil:
+    section.add "client-request-id", valid_564611
+  var valid_564612 = header.getOrDefault("If-Modified-Since")
+  valid_564612 = validateParameter(valid_564612, JString, required = false,
+                                 default = nil)
+  if valid_564612 != nil:
+    section.add "If-Modified-Since", valid_564612
+  var valid_564613 = header.getOrDefault("If-None-Match")
+  valid_564613 = validateParameter(valid_564613, JString, required = false,
+                                 default = nil)
+  if valid_564613 != nil:
+    section.add "If-None-Match", valid_564613
+  var valid_564614 = header.getOrDefault("ocp-date")
+  valid_564614 = validateParameter(valid_564614, JString, required = false,
+                                 default = nil)
+  if valid_564614 != nil:
+    section.add "ocp-date", valid_564614
+  var valid_564615 = header.getOrDefault("If-Match")
+  valid_564615 = validateParameter(valid_564615, JString, required = false,
+                                 default = nil)
+  if valid_564615 != nil:
+    section.add "If-Match", valid_564615
   result.add "header", section
   section = newJObject()
   result.add "formData", section
   if body != nil:
     result.add "body", body
 
-proc call*(call_574716: Call_TaskTerminate_574702; path: JsonNode; query: JsonNode;
+proc call*(call_564616: Call_TaskTerminate_564602; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## When the Task has been terminated, it moves to the completed state. For multi-instance Tasks, the terminate Task operation applies synchronously to the primary task; subtasks are then terminated asynchronously in the background.
   ## 
-  let valid = call_574716.validator(path, query, header, formData, body)
-  let scheme = call_574716.pickScheme
+  let valid = call_564616.validator(path, query, header, formData, body)
+  let scheme = call_564616.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574716.url(scheme.get, call_574716.host, call_574716.base,
-                         call_574716.route, valid.getOrDefault("path"),
+  let url = call_564616.url(scheme.get, call_564616.host, call_564616.base,
+                         call_564616.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574716, url, valid)
+  result = hook(call_564616, url, valid)
 
-proc call*(call_574717: Call_TaskTerminate_574702; apiVersion: string; jobId: string;
+proc call*(call_564617: Call_TaskTerminate_564602; jobId: string; apiVersion: string;
           taskId: string; timeout: int = 30): Recallable =
   ## taskTerminate
   ## When the Task has been terminated, it moves to the completed state. For multi-instance Tasks, the terminate Task operation applies synchronously to the primary task; subtasks are then terminated asynchronously in the background.
-  ##   timeout: int
-  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
-  ##   apiVersion: string (required)
-  ##             : Client API Version.
   ##   jobId: string (required)
   ##        : The ID of the Job containing the Task.
+  ##   apiVersion: string (required)
+  ##             : Client API Version.
+  ##   timeout: int
+  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   ##   taskId: string (required)
   ##         : The ID of the Task to terminate.
-  var path_574718 = newJObject()
-  var query_574719 = newJObject()
-  add(query_574719, "timeout", newJInt(timeout))
-  add(query_574719, "api-version", newJString(apiVersion))
-  add(path_574718, "jobId", newJString(jobId))
-  add(path_574718, "taskId", newJString(taskId))
-  result = call_574717.call(path_574718, query_574719, nil, nil, nil)
+  var path_564618 = newJObject()
+  var query_564619 = newJObject()
+  add(path_564618, "jobId", newJString(jobId))
+  add(query_564619, "api-version", newJString(apiVersion))
+  add(query_564619, "timeout", newJInt(timeout))
+  add(path_564618, "taskId", newJString(taskId))
+  result = call_564617.call(path_564618, query_564619, nil, nil, nil)
 
-var taskTerminate* = Call_TaskTerminate_574702(name: "taskTerminate",
+var taskTerminate* = Call_TaskTerminate_564602(name: "taskTerminate",
     meth: HttpMethod.HttpPost, host: "azure.local",
     route: "/jobs/{jobId}/tasks/{taskId}/terminate",
-    validator: validate_TaskTerminate_574703, base: "", url: url_TaskTerminate_574704,
+    validator: validate_TaskTerminate_564603, base: "", url: url_TaskTerminate_564604,
     schemes: {Scheme.Https})
 type
-  Call_JobTerminate_574720 = ref object of OpenApiRestCall_573667
-proc url_JobTerminate_574722(protocol: Scheme; host: string; base: string;
+  Call_JobTerminate_564620 = ref object of OpenApiRestCall_563565
+proc url_JobTerminate_564622(protocol: Scheme; host: string; base: string;
                             route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -4423,7 +4428,7 @@ proc url_JobTerminate_574722(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_JobTerminate_574721(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_JobTerminate_564621(path: JsonNode; query: JsonNode; header: JsonNode;
                                  formData: JsonNode; body: JsonNode): JsonNode =
   ## When a Terminate Job request is received, the Batch service sets the Job to the terminating state. The Batch service then terminates any running Tasks associated with the Job and runs any required Job release Tasks. Then the Job moves into the completed state. If there are any Tasks in the Job in the active state, they will remain in the active state. Once a Job is terminated, new Tasks cannot be added and any remaining active Tasks will not be scheduled.
   ## 
@@ -4434,82 +4439,82 @@ proc validate_JobTerminate_574721(path: JsonNode; query: JsonNode; header: JsonN
   ##        : The ID of the Job to terminate.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `jobId` field"
-  var valid_574723 = path.getOrDefault("jobId")
-  valid_574723 = validateParameter(valid_574723, JString, required = true,
+  var valid_564623 = path.getOrDefault("jobId")
+  valid_564623 = validateParameter(valid_564623, JString, required = true,
                                  default = nil)
-  if valid_574723 != nil:
-    section.add "jobId", valid_574723
+  if valid_564623 != nil:
+    section.add "jobId", valid_564623
   result.add "path", section
   ## parameters in `query` object:
-  ##   timeout: JInt
-  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   ##   api-version: JString (required)
   ##              : Client API Version.
+  ##   timeout: JInt
+  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   section = newJObject()
-  var valid_574724 = query.getOrDefault("timeout")
-  valid_574724 = validateParameter(valid_574724, JInt, required = false,
-                                 default = newJInt(30))
-  if valid_574724 != nil:
-    section.add "timeout", valid_574724
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574725 = query.getOrDefault("api-version")
-  valid_574725 = validateParameter(valid_574725, JString, required = true,
+  var valid_564624 = query.getOrDefault("api-version")
+  valid_564624 = validateParameter(valid_564624, JString, required = true,
                                  default = nil)
-  if valid_574725 != nil:
-    section.add "api-version", valid_574725
+  if valid_564624 != nil:
+    section.add "api-version", valid_564624
+  var valid_564625 = query.getOrDefault("timeout")
+  valid_564625 = validateParameter(valid_564625, JInt, required = false,
+                                 default = newJInt(30))
+  if valid_564625 != nil:
+    section.add "timeout", valid_564625
   result.add "query", section
   ## parameters in `header` object:
-  ##   If-Match: JString
-  ##           : An ETag value associated with the version of the resource known to the client. The operation will be performed only if the resource's current ETag on the service exactly matches the value specified by the client.
-  ##   client-request-id: JString
-  ##                    : The caller-generated request identity, in the form of a GUID with no decoration such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
-  ##   ocp-date: JString
-  ##           : The time the request was issued. Client libraries typically set this to the current system clock time; set it explicitly if you are calling the REST API directly.
-  ##   If-Unmodified-Since: JString
-  ##                      : A timestamp indicating the last modified time of the resource known to the client. The operation will be performed only if the resource on the service has not been modified since the specified time.
-  ##   If-None-Match: JString
-  ##                : An ETag value associated with the version of the resource known to the client. The operation will be performed only if the resource's current ETag on the service does not match the value specified by the client.
-  ##   If-Modified-Since: JString
-  ##                    : A timestamp indicating the last modified time of the resource known to the client. The operation will be performed only if the resource on the service has been modified since the specified time.
   ##   return-client-request-id: JBool
   ##                           : Whether the server should return the client-request-id in the response.
+  ##   If-Unmodified-Since: JString
+  ##                      : A timestamp indicating the last modified time of the resource known to the client. The operation will be performed only if the resource on the service has not been modified since the specified time.
+  ##   client-request-id: JString
+  ##                    : The caller-generated request identity, in the form of a GUID with no decoration such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
+  ##   If-Modified-Since: JString
+  ##                    : A timestamp indicating the last modified time of the resource known to the client. The operation will be performed only if the resource on the service has been modified since the specified time.
+  ##   If-None-Match: JString
+  ##                : An ETag value associated with the version of the resource known to the client. The operation will be performed only if the resource's current ETag on the service does not match the value specified by the client.
+  ##   ocp-date: JString
+  ##           : The time the request was issued. Client libraries typically set this to the current system clock time; set it explicitly if you are calling the REST API directly.
+  ##   If-Match: JString
+  ##           : An ETag value associated with the version of the resource known to the client. The operation will be performed only if the resource's current ETag on the service exactly matches the value specified by the client.
   section = newJObject()
-  var valid_574726 = header.getOrDefault("If-Match")
-  valid_574726 = validateParameter(valid_574726, JString, required = false,
-                                 default = nil)
-  if valid_574726 != nil:
-    section.add "If-Match", valid_574726
-  var valid_574727 = header.getOrDefault("client-request-id")
-  valid_574727 = validateParameter(valid_574727, JString, required = false,
-                                 default = nil)
-  if valid_574727 != nil:
-    section.add "client-request-id", valid_574727
-  var valid_574728 = header.getOrDefault("ocp-date")
-  valid_574728 = validateParameter(valid_574728, JString, required = false,
-                                 default = nil)
-  if valid_574728 != nil:
-    section.add "ocp-date", valid_574728
-  var valid_574729 = header.getOrDefault("If-Unmodified-Since")
-  valid_574729 = validateParameter(valid_574729, JString, required = false,
-                                 default = nil)
-  if valid_574729 != nil:
-    section.add "If-Unmodified-Since", valid_574729
-  var valid_574730 = header.getOrDefault("If-None-Match")
-  valid_574730 = validateParameter(valid_574730, JString, required = false,
-                                 default = nil)
-  if valid_574730 != nil:
-    section.add "If-None-Match", valid_574730
-  var valid_574731 = header.getOrDefault("If-Modified-Since")
-  valid_574731 = validateParameter(valid_574731, JString, required = false,
-                                 default = nil)
-  if valid_574731 != nil:
-    section.add "If-Modified-Since", valid_574731
-  var valid_574732 = header.getOrDefault("return-client-request-id")
-  valid_574732 = validateParameter(valid_574732, JBool, required = false,
+  var valid_564626 = header.getOrDefault("return-client-request-id")
+  valid_564626 = validateParameter(valid_564626, JBool, required = false,
                                  default = newJBool(false))
-  if valid_574732 != nil:
-    section.add "return-client-request-id", valid_574732
+  if valid_564626 != nil:
+    section.add "return-client-request-id", valid_564626
+  var valid_564627 = header.getOrDefault("If-Unmodified-Since")
+  valid_564627 = validateParameter(valid_564627, JString, required = false,
+                                 default = nil)
+  if valid_564627 != nil:
+    section.add "If-Unmodified-Since", valid_564627
+  var valid_564628 = header.getOrDefault("client-request-id")
+  valid_564628 = validateParameter(valid_564628, JString, required = false,
+                                 default = nil)
+  if valid_564628 != nil:
+    section.add "client-request-id", valid_564628
+  var valid_564629 = header.getOrDefault("If-Modified-Since")
+  valid_564629 = validateParameter(valid_564629, JString, required = false,
+                                 default = nil)
+  if valid_564629 != nil:
+    section.add "If-Modified-Since", valid_564629
+  var valid_564630 = header.getOrDefault("If-None-Match")
+  valid_564630 = validateParameter(valid_564630, JString, required = false,
+                                 default = nil)
+  if valid_564630 != nil:
+    section.add "If-None-Match", valid_564630
+  var valid_564631 = header.getOrDefault("ocp-date")
+  valid_564631 = validateParameter(valid_564631, JString, required = false,
+                                 default = nil)
+  if valid_564631 != nil:
+    section.add "ocp-date", valid_564631
+  var valid_564632 = header.getOrDefault("If-Match")
+  valid_564632 = validateParameter(valid_564632, JString, required = false,
+                                 default = nil)
+  if valid_564632 != nil:
+    section.add "If-Match", valid_564632
   result.add "header", section
   section = newJObject()
   result.add "formData", section
@@ -4520,55 +4525,55 @@ proc validate_JobTerminate_574721(path: JsonNode; query: JsonNode; header: JsonN
   if body != nil:
     result.add "body", body
 
-proc call*(call_574734: Call_JobTerminate_574720; path: JsonNode; query: JsonNode;
+proc call*(call_564634: Call_JobTerminate_564620; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## When a Terminate Job request is received, the Batch service sets the Job to the terminating state. The Batch service then terminates any running Tasks associated with the Job and runs any required Job release Tasks. Then the Job moves into the completed state. If there are any Tasks in the Job in the active state, they will remain in the active state. Once a Job is terminated, new Tasks cannot be added and any remaining active Tasks will not be scheduled.
   ## 
-  let valid = call_574734.validator(path, query, header, formData, body)
-  let scheme = call_574734.pickScheme
+  let valid = call_564634.validator(path, query, header, formData, body)
+  let scheme = call_564634.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574734.url(scheme.get, call_574734.host, call_574734.base,
-                         call_574734.route, valid.getOrDefault("path"),
+  let url = call_564634.url(scheme.get, call_564634.host, call_564634.base,
+                         call_564634.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574734, url, valid)
+  result = hook(call_564634, url, valid)
 
-proc call*(call_574735: Call_JobTerminate_574720; apiVersion: string; jobId: string;
+proc call*(call_564635: Call_JobTerminate_564620; jobId: string; apiVersion: string;
           timeout: int = 30; jobTerminateParameter: JsonNode = nil): Recallable =
   ## jobTerminate
   ## When a Terminate Job request is received, the Batch service sets the Job to the terminating state. The Batch service then terminates any running Tasks associated with the Job and runs any required Job release Tasks. Then the Job moves into the completed state. If there are any Tasks in the Job in the active state, they will remain in the active state. Once a Job is terminated, new Tasks cannot be added and any remaining active Tasks will not be scheduled.
-  ##   timeout: int
-  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
-  ##   apiVersion: string (required)
-  ##             : Client API Version.
   ##   jobId: string (required)
   ##        : The ID of the Job to terminate.
+  ##   apiVersion: string (required)
+  ##             : Client API Version.
+  ##   timeout: int
+  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   ##   jobTerminateParameter: JObject
   ##                        : The parameters for the request.
-  var path_574736 = newJObject()
-  var query_574737 = newJObject()
-  var body_574738 = newJObject()
-  add(query_574737, "timeout", newJInt(timeout))
-  add(query_574737, "api-version", newJString(apiVersion))
-  add(path_574736, "jobId", newJString(jobId))
+  var path_564636 = newJObject()
+  var query_564637 = newJObject()
+  var body_564638 = newJObject()
+  add(path_564636, "jobId", newJString(jobId))
+  add(query_564637, "api-version", newJString(apiVersion))
+  add(query_564637, "timeout", newJInt(timeout))
   if jobTerminateParameter != nil:
-    body_574738 = jobTerminateParameter
-  result = call_574735.call(path_574736, query_574737, nil, nil, body_574738)
+    body_564638 = jobTerminateParameter
+  result = call_564635.call(path_564636, query_564637, nil, nil, body_564638)
 
-var jobTerminate* = Call_JobTerminate_574720(name: "jobTerminate",
+var jobTerminate* = Call_JobTerminate_564620(name: "jobTerminate",
     meth: HttpMethod.HttpPost, host: "azure.local",
-    route: "/jobs/{jobId}/terminate", validator: validate_JobTerminate_574721,
-    base: "", url: url_JobTerminate_574722, schemes: {Scheme.Https})
+    route: "/jobs/{jobId}/terminate", validator: validate_JobTerminate_564621,
+    base: "", url: url_JobTerminate_564622, schemes: {Scheme.Https})
 type
-  Call_JobScheduleAdd_574754 = ref object of OpenApiRestCall_573667
-proc url_JobScheduleAdd_574756(protocol: Scheme; host: string; base: string;
+  Call_JobScheduleAdd_564654 = ref object of OpenApiRestCall_563565
+proc url_JobScheduleAdd_564656(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_JobScheduleAdd_574755(path: JsonNode; query: JsonNode;
+proc validate_JobScheduleAdd_564655(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   var section: JsonNode
@@ -4576,47 +4581,47 @@ proc validate_JobScheduleAdd_574755(path: JsonNode; query: JsonNode;
   section = newJObject()
   result.add "path", section
   ## parameters in `query` object:
-  ##   timeout: JInt
-  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   ##   api-version: JString (required)
   ##              : Client API Version.
+  ##   timeout: JInt
+  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   section = newJObject()
-  var valid_574757 = query.getOrDefault("timeout")
-  valid_574757 = validateParameter(valid_574757, JInt, required = false,
-                                 default = newJInt(30))
-  if valid_574757 != nil:
-    section.add "timeout", valid_574757
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574758 = query.getOrDefault("api-version")
-  valid_574758 = validateParameter(valid_574758, JString, required = true,
+  var valid_564657 = query.getOrDefault("api-version")
+  valid_564657 = validateParameter(valid_564657, JString, required = true,
                                  default = nil)
-  if valid_574758 != nil:
-    section.add "api-version", valid_574758
+  if valid_564657 != nil:
+    section.add "api-version", valid_564657
+  var valid_564658 = query.getOrDefault("timeout")
+  valid_564658 = validateParameter(valid_564658, JInt, required = false,
+                                 default = newJInt(30))
+  if valid_564658 != nil:
+    section.add "timeout", valid_564658
   result.add "query", section
   ## parameters in `header` object:
+  ##   return-client-request-id: JBool
+  ##                           : Whether the server should return the client-request-id in the response.
   ##   client-request-id: JString
   ##                    : The caller-generated request identity, in the form of a GUID with no decoration such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
   ##   ocp-date: JString
   ##           : The time the request was issued. Client libraries typically set this to the current system clock time; set it explicitly if you are calling the REST API directly.
-  ##   return-client-request-id: JBool
-  ##                           : Whether the server should return the client-request-id in the response.
   section = newJObject()
-  var valid_574759 = header.getOrDefault("client-request-id")
-  valid_574759 = validateParameter(valid_574759, JString, required = false,
-                                 default = nil)
-  if valid_574759 != nil:
-    section.add "client-request-id", valid_574759
-  var valid_574760 = header.getOrDefault("ocp-date")
-  valid_574760 = validateParameter(valid_574760, JString, required = false,
-                                 default = nil)
-  if valid_574760 != nil:
-    section.add "ocp-date", valid_574760
-  var valid_574761 = header.getOrDefault("return-client-request-id")
-  valid_574761 = validateParameter(valid_574761, JBool, required = false,
+  var valid_564659 = header.getOrDefault("return-client-request-id")
+  valid_564659 = validateParameter(valid_564659, JBool, required = false,
                                  default = newJBool(false))
-  if valid_574761 != nil:
-    section.add "return-client-request-id", valid_574761
+  if valid_564659 != nil:
+    section.add "return-client-request-id", valid_564659
+  var valid_564660 = header.getOrDefault("client-request-id")
+  valid_564660 = validateParameter(valid_564660, JString, required = false,
+                                 default = nil)
+  if valid_564660 != nil:
+    section.add "client-request-id", valid_564660
+  var valid_564661 = header.getOrDefault("ocp-date")
+  valid_564661 = validateParameter(valid_564661, JString, required = false,
+                                 default = nil)
+  if valid_564661 != nil:
+    section.add "ocp-date", valid_564661
   result.add "header", section
   section = newJObject()
   result.add "formData", section
@@ -4628,48 +4633,48 @@ proc validate_JobScheduleAdd_574755(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574763: Call_JobScheduleAdd_574754; path: JsonNode; query: JsonNode;
+proc call*(call_564663: Call_JobScheduleAdd_564654; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
-  let valid = call_574763.validator(path, query, header, formData, body)
-  let scheme = call_574763.pickScheme
+  let valid = call_564663.validator(path, query, header, formData, body)
+  let scheme = call_564663.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574763.url(scheme.get, call_574763.host, call_574763.base,
-                         call_574763.route, valid.getOrDefault("path"),
+  let url = call_564663.url(scheme.get, call_564663.host, call_564663.base,
+                         call_564663.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574763, url, valid)
+  result = hook(call_564663, url, valid)
 
-proc call*(call_574764: Call_JobScheduleAdd_574754; apiVersion: string;
+proc call*(call_564664: Call_JobScheduleAdd_564654; apiVersion: string;
           cloudJobSchedule: JsonNode; timeout: int = 30): Recallable =
   ## jobScheduleAdd
-  ##   timeout: int
-  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   ##   apiVersion: string (required)
   ##             : Client API Version.
   ##   cloudJobSchedule: JObject (required)
   ##                   : The Job Schedule to be added.
-  var query_574765 = newJObject()
-  var body_574766 = newJObject()
-  add(query_574765, "timeout", newJInt(timeout))
-  add(query_574765, "api-version", newJString(apiVersion))
+  ##   timeout: int
+  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
+  var query_564665 = newJObject()
+  var body_564666 = newJObject()
+  add(query_564665, "api-version", newJString(apiVersion))
   if cloudJobSchedule != nil:
-    body_574766 = cloudJobSchedule
-  result = call_574764.call(nil, query_574765, nil, nil, body_574766)
+    body_564666 = cloudJobSchedule
+  add(query_564665, "timeout", newJInt(timeout))
+  result = call_564664.call(nil, query_564665, nil, nil, body_564666)
 
-var jobScheduleAdd* = Call_JobScheduleAdd_574754(name: "jobScheduleAdd",
+var jobScheduleAdd* = Call_JobScheduleAdd_564654(name: "jobScheduleAdd",
     meth: HttpMethod.HttpPost, host: "azure.local", route: "/jobschedules",
-    validator: validate_JobScheduleAdd_574755, base: "", url: url_JobScheduleAdd_574756,
+    validator: validate_JobScheduleAdd_564655, base: "", url: url_JobScheduleAdd_564656,
     schemes: {Scheme.Https})
 type
-  Call_JobScheduleList_574739 = ref object of OpenApiRestCall_573667
-proc url_JobScheduleList_574741(protocol: Scheme; host: string; base: string;
+  Call_JobScheduleList_564639 = ref object of OpenApiRestCall_563565
+proc url_JobScheduleList_564641(protocol: Scheme; host: string; base: string;
                                route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_JobScheduleList_574740(path: JsonNode; query: JsonNode;
+proc validate_JobScheduleList_564640(path: JsonNode; query: JsonNode;
                                     header: JsonNode; formData: JsonNode;
                                     body: JsonNode): JsonNode =
   var section: JsonNode
@@ -4677,126 +4682,126 @@ proc validate_JobScheduleList_574740(path: JsonNode; query: JsonNode;
   section = newJObject()
   result.add "path", section
   ## parameters in `query` object:
-  ##   timeout: JInt
-  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
-  ##   $expand: JString
-  ##          : An OData $expand clause.
   ##   api-version: JString (required)
   ##              : Client API Version.
-  ##   maxresults: JInt
-  ##             : The maximum number of items to return in the response. A maximum of 1000 Job Schedules can be returned.
   ##   $select: JString
   ##          : An OData $select clause.
+  ##   $expand: JString
+  ##          : An OData $expand clause.
+  ##   timeout: JInt
+  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
+  ##   maxresults: JInt
+  ##             : The maximum number of items to return in the response. A maximum of 1000 Job Schedules can be returned.
   ##   $filter: JString
   ##          : An OData $filter clause. For more information on constructing this filter, see 
   ## https://docs.microsoft.com/en-us/rest/api/batchservice/odata-filters-in-batch#list-job-schedules.
   section = newJObject()
-  var valid_574742 = query.getOrDefault("timeout")
-  valid_574742 = validateParameter(valid_574742, JInt, required = false,
-                                 default = newJInt(30))
-  if valid_574742 != nil:
-    section.add "timeout", valid_574742
-  var valid_574743 = query.getOrDefault("$expand")
-  valid_574743 = validateParameter(valid_574743, JString, required = false,
-                                 default = nil)
-  if valid_574743 != nil:
-    section.add "$expand", valid_574743
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574744 = query.getOrDefault("api-version")
-  valid_574744 = validateParameter(valid_574744, JString, required = true,
+  var valid_564642 = query.getOrDefault("api-version")
+  valid_564642 = validateParameter(valid_564642, JString, required = true,
                                  default = nil)
-  if valid_574744 != nil:
-    section.add "api-version", valid_574744
-  var valid_574745 = query.getOrDefault("maxresults")
-  valid_574745 = validateParameter(valid_574745, JInt, required = false,
+  if valid_564642 != nil:
+    section.add "api-version", valid_564642
+  var valid_564643 = query.getOrDefault("$select")
+  valid_564643 = validateParameter(valid_564643, JString, required = false,
+                                 default = nil)
+  if valid_564643 != nil:
+    section.add "$select", valid_564643
+  var valid_564644 = query.getOrDefault("$expand")
+  valid_564644 = validateParameter(valid_564644, JString, required = false,
+                                 default = nil)
+  if valid_564644 != nil:
+    section.add "$expand", valid_564644
+  var valid_564645 = query.getOrDefault("timeout")
+  valid_564645 = validateParameter(valid_564645, JInt, required = false,
+                                 default = newJInt(30))
+  if valid_564645 != nil:
+    section.add "timeout", valid_564645
+  var valid_564646 = query.getOrDefault("maxresults")
+  valid_564646 = validateParameter(valid_564646, JInt, required = false,
                                  default = newJInt(1000))
-  if valid_574745 != nil:
-    section.add "maxresults", valid_574745
-  var valid_574746 = query.getOrDefault("$select")
-  valid_574746 = validateParameter(valid_574746, JString, required = false,
+  if valid_564646 != nil:
+    section.add "maxresults", valid_564646
+  var valid_564647 = query.getOrDefault("$filter")
+  valid_564647 = validateParameter(valid_564647, JString, required = false,
                                  default = nil)
-  if valid_574746 != nil:
-    section.add "$select", valid_574746
-  var valid_574747 = query.getOrDefault("$filter")
-  valid_574747 = validateParameter(valid_574747, JString, required = false,
-                                 default = nil)
-  if valid_574747 != nil:
-    section.add "$filter", valid_574747
+  if valid_564647 != nil:
+    section.add "$filter", valid_564647
   result.add "query", section
   ## parameters in `header` object:
+  ##   return-client-request-id: JBool
+  ##                           : Whether the server should return the client-request-id in the response.
   ##   client-request-id: JString
   ##                    : The caller-generated request identity, in the form of a GUID with no decoration such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
   ##   ocp-date: JString
   ##           : The time the request was issued. Client libraries typically set this to the current system clock time; set it explicitly if you are calling the REST API directly.
-  ##   return-client-request-id: JBool
-  ##                           : Whether the server should return the client-request-id in the response.
   section = newJObject()
-  var valid_574748 = header.getOrDefault("client-request-id")
-  valid_574748 = validateParameter(valid_574748, JString, required = false,
-                                 default = nil)
-  if valid_574748 != nil:
-    section.add "client-request-id", valid_574748
-  var valid_574749 = header.getOrDefault("ocp-date")
-  valid_574749 = validateParameter(valid_574749, JString, required = false,
-                                 default = nil)
-  if valid_574749 != nil:
-    section.add "ocp-date", valid_574749
-  var valid_574750 = header.getOrDefault("return-client-request-id")
-  valid_574750 = validateParameter(valid_574750, JBool, required = false,
+  var valid_564648 = header.getOrDefault("return-client-request-id")
+  valid_564648 = validateParameter(valid_564648, JBool, required = false,
                                  default = newJBool(false))
-  if valid_574750 != nil:
-    section.add "return-client-request-id", valid_574750
+  if valid_564648 != nil:
+    section.add "return-client-request-id", valid_564648
+  var valid_564649 = header.getOrDefault("client-request-id")
+  valid_564649 = validateParameter(valid_564649, JString, required = false,
+                                 default = nil)
+  if valid_564649 != nil:
+    section.add "client-request-id", valid_564649
+  var valid_564650 = header.getOrDefault("ocp-date")
+  valid_564650 = validateParameter(valid_564650, JString, required = false,
+                                 default = nil)
+  if valid_564650 != nil:
+    section.add "ocp-date", valid_564650
   result.add "header", section
   section = newJObject()
   result.add "formData", section
   if body != nil:
     result.add "body", body
 
-proc call*(call_574751: Call_JobScheduleList_574739; path: JsonNode; query: JsonNode;
+proc call*(call_564651: Call_JobScheduleList_564639; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
-  let valid = call_574751.validator(path, query, header, formData, body)
-  let scheme = call_574751.pickScheme
+  let valid = call_564651.validator(path, query, header, formData, body)
+  let scheme = call_564651.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574751.url(scheme.get, call_574751.host, call_574751.base,
-                         call_574751.route, valid.getOrDefault("path"),
+  let url = call_564651.url(scheme.get, call_564651.host, call_564651.base,
+                         call_564651.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574751, url, valid)
+  result = hook(call_564651, url, valid)
 
-proc call*(call_574752: Call_JobScheduleList_574739; apiVersion: string;
-          timeout: int = 30; Expand: string = ""; maxresults: int = 1000;
-          Select: string = ""; Filter: string = ""): Recallable =
+proc call*(call_564652: Call_JobScheduleList_564639; apiVersion: string;
+          Select: string = ""; Expand: string = ""; timeout: int = 30;
+          maxresults: int = 1000; Filter: string = ""): Recallable =
   ## jobScheduleList
-  ##   timeout: int
-  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
-  ##   Expand: string
-  ##         : An OData $expand clause.
   ##   apiVersion: string (required)
   ##             : Client API Version.
-  ##   maxresults: int
-  ##             : The maximum number of items to return in the response. A maximum of 1000 Job Schedules can be returned.
   ##   Select: string
   ##         : An OData $select clause.
+  ##   Expand: string
+  ##         : An OData $expand clause.
+  ##   timeout: int
+  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
+  ##   maxresults: int
+  ##             : The maximum number of items to return in the response. A maximum of 1000 Job Schedules can be returned.
   ##   Filter: string
   ##         : An OData $filter clause. For more information on constructing this filter, see 
   ## https://docs.microsoft.com/en-us/rest/api/batchservice/odata-filters-in-batch#list-job-schedules.
-  var query_574753 = newJObject()
-  add(query_574753, "timeout", newJInt(timeout))
-  add(query_574753, "$expand", newJString(Expand))
-  add(query_574753, "api-version", newJString(apiVersion))
-  add(query_574753, "maxresults", newJInt(maxresults))
-  add(query_574753, "$select", newJString(Select))
-  add(query_574753, "$filter", newJString(Filter))
-  result = call_574752.call(nil, query_574753, nil, nil, nil)
+  var query_564653 = newJObject()
+  add(query_564653, "api-version", newJString(apiVersion))
+  add(query_564653, "$select", newJString(Select))
+  add(query_564653, "$expand", newJString(Expand))
+  add(query_564653, "timeout", newJInt(timeout))
+  add(query_564653, "maxresults", newJInt(maxresults))
+  add(query_564653, "$filter", newJString(Filter))
+  result = call_564652.call(nil, query_564653, nil, nil, nil)
 
-var jobScheduleList* = Call_JobScheduleList_574739(name: "jobScheduleList",
+var jobScheduleList* = Call_JobScheduleList_564639(name: "jobScheduleList",
     meth: HttpMethod.HttpGet, host: "azure.local", route: "/jobschedules",
-    validator: validate_JobScheduleList_574740, base: "", url: url_JobScheduleList_574741,
+    validator: validate_JobScheduleList_564640, base: "", url: url_JobScheduleList_564641,
     schemes: {Scheme.Https})
 type
-  Call_JobScheduleUpdate_574786 = ref object of OpenApiRestCall_573667
-proc url_JobScheduleUpdate_574788(protocol: Scheme; host: string; base: string;
+  Call_JobScheduleUpdate_564686 = ref object of OpenApiRestCall_563565
+proc url_JobScheduleUpdate_564688(protocol: Scheme; host: string; base: string;
                                  route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -4811,7 +4816,7 @@ proc url_JobScheduleUpdate_574788(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_JobScheduleUpdate_574787(path: JsonNode; query: JsonNode;
+proc validate_JobScheduleUpdate_564687(path: JsonNode; query: JsonNode;
                                       header: JsonNode; formData: JsonNode;
                                       body: JsonNode): JsonNode =
   ## This fully replaces all the updatable properties of the Job Schedule. For example, if the schedule property is not specified with this request, then the Batch service will remove the existing schedule. Changes to a Job Schedule only impact Jobs created by the schedule after the update has taken place; currently running Jobs are unaffected.
@@ -4824,82 +4829,82 @@ proc validate_JobScheduleUpdate_574787(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `jobScheduleId` field"
-  var valid_574789 = path.getOrDefault("jobScheduleId")
-  valid_574789 = validateParameter(valid_574789, JString, required = true,
+  var valid_564689 = path.getOrDefault("jobScheduleId")
+  valid_564689 = validateParameter(valid_564689, JString, required = true,
                                  default = nil)
-  if valid_574789 != nil:
-    section.add "jobScheduleId", valid_574789
+  if valid_564689 != nil:
+    section.add "jobScheduleId", valid_564689
   result.add "path", section
   ## parameters in `query` object:
-  ##   timeout: JInt
-  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   ##   api-version: JString (required)
   ##              : Client API Version.
+  ##   timeout: JInt
+  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   section = newJObject()
-  var valid_574790 = query.getOrDefault("timeout")
-  valid_574790 = validateParameter(valid_574790, JInt, required = false,
-                                 default = newJInt(30))
-  if valid_574790 != nil:
-    section.add "timeout", valid_574790
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574791 = query.getOrDefault("api-version")
-  valid_574791 = validateParameter(valid_574791, JString, required = true,
+  var valid_564690 = query.getOrDefault("api-version")
+  valid_564690 = validateParameter(valid_564690, JString, required = true,
                                  default = nil)
-  if valid_574791 != nil:
-    section.add "api-version", valid_574791
+  if valid_564690 != nil:
+    section.add "api-version", valid_564690
+  var valid_564691 = query.getOrDefault("timeout")
+  valid_564691 = validateParameter(valid_564691, JInt, required = false,
+                                 default = newJInt(30))
+  if valid_564691 != nil:
+    section.add "timeout", valid_564691
   result.add "query", section
   ## parameters in `header` object:
-  ##   If-Match: JString
-  ##           : An ETag value associated with the version of the resource known to the client. The operation will be performed only if the resource's current ETag on the service exactly matches the value specified by the client.
-  ##   client-request-id: JString
-  ##                    : The caller-generated request identity, in the form of a GUID with no decoration such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
-  ##   ocp-date: JString
-  ##           : The time the request was issued. Client libraries typically set this to the current system clock time; set it explicitly if you are calling the REST API directly.
-  ##   If-Unmodified-Since: JString
-  ##                      : A timestamp indicating the last modified time of the resource known to the client. The operation will be performed only if the resource on the service has not been modified since the specified time.
-  ##   If-None-Match: JString
-  ##                : An ETag value associated with the version of the resource known to the client. The operation will be performed only if the resource's current ETag on the service does not match the value specified by the client.
-  ##   If-Modified-Since: JString
-  ##                    : A timestamp indicating the last modified time of the resource known to the client. The operation will be performed only if the resource on the service has been modified since the specified time.
   ##   return-client-request-id: JBool
   ##                           : Whether the server should return the client-request-id in the response.
+  ##   If-Unmodified-Since: JString
+  ##                      : A timestamp indicating the last modified time of the resource known to the client. The operation will be performed only if the resource on the service has not been modified since the specified time.
+  ##   client-request-id: JString
+  ##                    : The caller-generated request identity, in the form of a GUID with no decoration such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
+  ##   If-Modified-Since: JString
+  ##                    : A timestamp indicating the last modified time of the resource known to the client. The operation will be performed only if the resource on the service has been modified since the specified time.
+  ##   If-None-Match: JString
+  ##                : An ETag value associated with the version of the resource known to the client. The operation will be performed only if the resource's current ETag on the service does not match the value specified by the client.
+  ##   ocp-date: JString
+  ##           : The time the request was issued. Client libraries typically set this to the current system clock time; set it explicitly if you are calling the REST API directly.
+  ##   If-Match: JString
+  ##           : An ETag value associated with the version of the resource known to the client. The operation will be performed only if the resource's current ETag on the service exactly matches the value specified by the client.
   section = newJObject()
-  var valid_574792 = header.getOrDefault("If-Match")
-  valid_574792 = validateParameter(valid_574792, JString, required = false,
-                                 default = nil)
-  if valid_574792 != nil:
-    section.add "If-Match", valid_574792
-  var valid_574793 = header.getOrDefault("client-request-id")
-  valid_574793 = validateParameter(valid_574793, JString, required = false,
-                                 default = nil)
-  if valid_574793 != nil:
-    section.add "client-request-id", valid_574793
-  var valid_574794 = header.getOrDefault("ocp-date")
-  valid_574794 = validateParameter(valid_574794, JString, required = false,
-                                 default = nil)
-  if valid_574794 != nil:
-    section.add "ocp-date", valid_574794
-  var valid_574795 = header.getOrDefault("If-Unmodified-Since")
-  valid_574795 = validateParameter(valid_574795, JString, required = false,
-                                 default = nil)
-  if valid_574795 != nil:
-    section.add "If-Unmodified-Since", valid_574795
-  var valid_574796 = header.getOrDefault("If-None-Match")
-  valid_574796 = validateParameter(valid_574796, JString, required = false,
-                                 default = nil)
-  if valid_574796 != nil:
-    section.add "If-None-Match", valid_574796
-  var valid_574797 = header.getOrDefault("If-Modified-Since")
-  valid_574797 = validateParameter(valid_574797, JString, required = false,
-                                 default = nil)
-  if valid_574797 != nil:
-    section.add "If-Modified-Since", valid_574797
-  var valid_574798 = header.getOrDefault("return-client-request-id")
-  valid_574798 = validateParameter(valid_574798, JBool, required = false,
+  var valid_564692 = header.getOrDefault("return-client-request-id")
+  valid_564692 = validateParameter(valid_564692, JBool, required = false,
                                  default = newJBool(false))
-  if valid_574798 != nil:
-    section.add "return-client-request-id", valid_574798
+  if valid_564692 != nil:
+    section.add "return-client-request-id", valid_564692
+  var valid_564693 = header.getOrDefault("If-Unmodified-Since")
+  valid_564693 = validateParameter(valid_564693, JString, required = false,
+                                 default = nil)
+  if valid_564693 != nil:
+    section.add "If-Unmodified-Since", valid_564693
+  var valid_564694 = header.getOrDefault("client-request-id")
+  valid_564694 = validateParameter(valid_564694, JString, required = false,
+                                 default = nil)
+  if valid_564694 != nil:
+    section.add "client-request-id", valid_564694
+  var valid_564695 = header.getOrDefault("If-Modified-Since")
+  valid_564695 = validateParameter(valid_564695, JString, required = false,
+                                 default = nil)
+  if valid_564695 != nil:
+    section.add "If-Modified-Since", valid_564695
+  var valid_564696 = header.getOrDefault("If-None-Match")
+  valid_564696 = validateParameter(valid_564696, JString, required = false,
+                                 default = nil)
+  if valid_564696 != nil:
+    section.add "If-None-Match", valid_564696
+  var valid_564697 = header.getOrDefault("ocp-date")
+  valid_564697 = validateParameter(valid_564697, JString, required = false,
+                                 default = nil)
+  if valid_564697 != nil:
+    section.add "ocp-date", valid_564697
+  var valid_564698 = header.getOrDefault("If-Match")
+  valid_564698 = validateParameter(valid_564698, JString, required = false,
+                                 default = nil)
+  if valid_564698 != nil:
+    section.add "If-Match", valid_564698
   result.add "header", section
   section = newJObject()
   result.add "formData", section
@@ -4911,49 +4916,49 @@ proc validate_JobScheduleUpdate_574787(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574800: Call_JobScheduleUpdate_574786; path: JsonNode;
+proc call*(call_564700: Call_JobScheduleUpdate_564686; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## This fully replaces all the updatable properties of the Job Schedule. For example, if the schedule property is not specified with this request, then the Batch service will remove the existing schedule. Changes to a Job Schedule only impact Jobs created by the schedule after the update has taken place; currently running Jobs are unaffected.
   ## 
-  let valid = call_574800.validator(path, query, header, formData, body)
-  let scheme = call_574800.pickScheme
+  let valid = call_564700.validator(path, query, header, formData, body)
+  let scheme = call_564700.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574800.url(scheme.get, call_574800.host, call_574800.base,
-                         call_574800.route, valid.getOrDefault("path"),
+  let url = call_564700.url(scheme.get, call_564700.host, call_564700.base,
+                         call_564700.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574800, url, valid)
+  result = hook(call_564700, url, valid)
 
-proc call*(call_574801: Call_JobScheduleUpdate_574786; jobScheduleId: string;
-          apiVersion: string; jobScheduleUpdateParameter: JsonNode;
+proc call*(call_564701: Call_JobScheduleUpdate_564686; apiVersion: string;
+          jobScheduleId: string; jobScheduleUpdateParameter: JsonNode;
           timeout: int = 30): Recallable =
   ## jobScheduleUpdate
   ## This fully replaces all the updatable properties of the Job Schedule. For example, if the schedule property is not specified with this request, then the Batch service will remove the existing schedule. Changes to a Job Schedule only impact Jobs created by the schedule after the update has taken place; currently running Jobs are unaffected.
-  ##   timeout: int
-  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
-  ##   jobScheduleId: string (required)
-  ##                : The ID of the Job Schedule to update.
   ##   apiVersion: string (required)
   ##             : Client API Version.
+  ##   jobScheduleId: string (required)
+  ##                : The ID of the Job Schedule to update.
   ##   jobScheduleUpdateParameter: JObject (required)
   ##                             : The parameters for the request.
-  var path_574802 = newJObject()
-  var query_574803 = newJObject()
-  var body_574804 = newJObject()
-  add(query_574803, "timeout", newJInt(timeout))
-  add(path_574802, "jobScheduleId", newJString(jobScheduleId))
-  add(query_574803, "api-version", newJString(apiVersion))
+  ##   timeout: int
+  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
+  var path_564702 = newJObject()
+  var query_564703 = newJObject()
+  var body_564704 = newJObject()
+  add(query_564703, "api-version", newJString(apiVersion))
+  add(path_564702, "jobScheduleId", newJString(jobScheduleId))
   if jobScheduleUpdateParameter != nil:
-    body_574804 = jobScheduleUpdateParameter
-  result = call_574801.call(path_574802, query_574803, nil, nil, body_574804)
+    body_564704 = jobScheduleUpdateParameter
+  add(query_564703, "timeout", newJInt(timeout))
+  result = call_564701.call(path_564702, query_564703, nil, nil, body_564704)
 
-var jobScheduleUpdate* = Call_JobScheduleUpdate_574786(name: "jobScheduleUpdate",
+var jobScheduleUpdate* = Call_JobScheduleUpdate_564686(name: "jobScheduleUpdate",
     meth: HttpMethod.HttpPut, host: "azure.local",
-    route: "/jobschedules/{jobScheduleId}", validator: validate_JobScheduleUpdate_574787,
-    base: "", url: url_JobScheduleUpdate_574788, schemes: {Scheme.Https})
+    route: "/jobschedules/{jobScheduleId}", validator: validate_JobScheduleUpdate_564687,
+    base: "", url: url_JobScheduleUpdate_564688, schemes: {Scheme.Https})
 type
-  Call_JobScheduleExists_574822 = ref object of OpenApiRestCall_573667
-proc url_JobScheduleExists_574824(protocol: Scheme; host: string; base: string;
+  Call_JobScheduleExists_564722 = ref object of OpenApiRestCall_563565
+proc url_JobScheduleExists_564724(protocol: Scheme; host: string; base: string;
                                  route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -4968,7 +4973,7 @@ proc url_JobScheduleExists_574824(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_JobScheduleExists_574823(path: JsonNode; query: JsonNode;
+proc validate_JobScheduleExists_564723(path: JsonNode; query: JsonNode;
                                       header: JsonNode; formData: JsonNode;
                                       body: JsonNode): JsonNode =
   var section: JsonNode
@@ -4979,122 +4984,122 @@ proc validate_JobScheduleExists_574823(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `jobScheduleId` field"
-  var valid_574825 = path.getOrDefault("jobScheduleId")
-  valid_574825 = validateParameter(valid_574825, JString, required = true,
+  var valid_564725 = path.getOrDefault("jobScheduleId")
+  valid_564725 = validateParameter(valid_564725, JString, required = true,
                                  default = nil)
-  if valid_574825 != nil:
-    section.add "jobScheduleId", valid_574825
+  if valid_564725 != nil:
+    section.add "jobScheduleId", valid_564725
   result.add "path", section
   ## parameters in `query` object:
-  ##   timeout: JInt
-  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   ##   api-version: JString (required)
   ##              : Client API Version.
+  ##   timeout: JInt
+  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   section = newJObject()
-  var valid_574826 = query.getOrDefault("timeout")
-  valid_574826 = validateParameter(valid_574826, JInt, required = false,
-                                 default = newJInt(30))
-  if valid_574826 != nil:
-    section.add "timeout", valid_574826
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574827 = query.getOrDefault("api-version")
-  valid_574827 = validateParameter(valid_574827, JString, required = true,
+  var valid_564726 = query.getOrDefault("api-version")
+  valid_564726 = validateParameter(valid_564726, JString, required = true,
                                  default = nil)
-  if valid_574827 != nil:
-    section.add "api-version", valid_574827
+  if valid_564726 != nil:
+    section.add "api-version", valid_564726
+  var valid_564727 = query.getOrDefault("timeout")
+  valid_564727 = validateParameter(valid_564727, JInt, required = false,
+                                 default = newJInt(30))
+  if valid_564727 != nil:
+    section.add "timeout", valid_564727
   result.add "query", section
   ## parameters in `header` object:
-  ##   If-Match: JString
-  ##           : An ETag value associated with the version of the resource known to the client. The operation will be performed only if the resource's current ETag on the service exactly matches the value specified by the client.
-  ##   client-request-id: JString
-  ##                    : The caller-generated request identity, in the form of a GUID with no decoration such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
-  ##   ocp-date: JString
-  ##           : The time the request was issued. Client libraries typically set this to the current system clock time; set it explicitly if you are calling the REST API directly.
-  ##   If-Unmodified-Since: JString
-  ##                      : A timestamp indicating the last modified time of the resource known to the client. The operation will be performed only if the resource on the service has not been modified since the specified time.
-  ##   If-None-Match: JString
-  ##                : An ETag value associated with the version of the resource known to the client. The operation will be performed only if the resource's current ETag on the service does not match the value specified by the client.
-  ##   If-Modified-Since: JString
-  ##                    : A timestamp indicating the last modified time of the resource known to the client. The operation will be performed only if the resource on the service has been modified since the specified time.
   ##   return-client-request-id: JBool
   ##                           : Whether the server should return the client-request-id in the response.
+  ##   If-Unmodified-Since: JString
+  ##                      : A timestamp indicating the last modified time of the resource known to the client. The operation will be performed only if the resource on the service has not been modified since the specified time.
+  ##   client-request-id: JString
+  ##                    : The caller-generated request identity, in the form of a GUID with no decoration such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
+  ##   If-Modified-Since: JString
+  ##                    : A timestamp indicating the last modified time of the resource known to the client. The operation will be performed only if the resource on the service has been modified since the specified time.
+  ##   If-None-Match: JString
+  ##                : An ETag value associated with the version of the resource known to the client. The operation will be performed only if the resource's current ETag on the service does not match the value specified by the client.
+  ##   ocp-date: JString
+  ##           : The time the request was issued. Client libraries typically set this to the current system clock time; set it explicitly if you are calling the REST API directly.
+  ##   If-Match: JString
+  ##           : An ETag value associated with the version of the resource known to the client. The operation will be performed only if the resource's current ETag on the service exactly matches the value specified by the client.
   section = newJObject()
-  var valid_574828 = header.getOrDefault("If-Match")
-  valid_574828 = validateParameter(valid_574828, JString, required = false,
-                                 default = nil)
-  if valid_574828 != nil:
-    section.add "If-Match", valid_574828
-  var valid_574829 = header.getOrDefault("client-request-id")
-  valid_574829 = validateParameter(valid_574829, JString, required = false,
-                                 default = nil)
-  if valid_574829 != nil:
-    section.add "client-request-id", valid_574829
-  var valid_574830 = header.getOrDefault("ocp-date")
-  valid_574830 = validateParameter(valid_574830, JString, required = false,
-                                 default = nil)
-  if valid_574830 != nil:
-    section.add "ocp-date", valid_574830
-  var valid_574831 = header.getOrDefault("If-Unmodified-Since")
-  valid_574831 = validateParameter(valid_574831, JString, required = false,
-                                 default = nil)
-  if valid_574831 != nil:
-    section.add "If-Unmodified-Since", valid_574831
-  var valid_574832 = header.getOrDefault("If-None-Match")
-  valid_574832 = validateParameter(valid_574832, JString, required = false,
-                                 default = nil)
-  if valid_574832 != nil:
-    section.add "If-None-Match", valid_574832
-  var valid_574833 = header.getOrDefault("If-Modified-Since")
-  valid_574833 = validateParameter(valid_574833, JString, required = false,
-                                 default = nil)
-  if valid_574833 != nil:
-    section.add "If-Modified-Since", valid_574833
-  var valid_574834 = header.getOrDefault("return-client-request-id")
-  valid_574834 = validateParameter(valid_574834, JBool, required = false,
+  var valid_564728 = header.getOrDefault("return-client-request-id")
+  valid_564728 = validateParameter(valid_564728, JBool, required = false,
                                  default = newJBool(false))
-  if valid_574834 != nil:
-    section.add "return-client-request-id", valid_574834
+  if valid_564728 != nil:
+    section.add "return-client-request-id", valid_564728
+  var valid_564729 = header.getOrDefault("If-Unmodified-Since")
+  valid_564729 = validateParameter(valid_564729, JString, required = false,
+                                 default = nil)
+  if valid_564729 != nil:
+    section.add "If-Unmodified-Since", valid_564729
+  var valid_564730 = header.getOrDefault("client-request-id")
+  valid_564730 = validateParameter(valid_564730, JString, required = false,
+                                 default = nil)
+  if valid_564730 != nil:
+    section.add "client-request-id", valid_564730
+  var valid_564731 = header.getOrDefault("If-Modified-Since")
+  valid_564731 = validateParameter(valid_564731, JString, required = false,
+                                 default = nil)
+  if valid_564731 != nil:
+    section.add "If-Modified-Since", valid_564731
+  var valid_564732 = header.getOrDefault("If-None-Match")
+  valid_564732 = validateParameter(valid_564732, JString, required = false,
+                                 default = nil)
+  if valid_564732 != nil:
+    section.add "If-None-Match", valid_564732
+  var valid_564733 = header.getOrDefault("ocp-date")
+  valid_564733 = validateParameter(valid_564733, JString, required = false,
+                                 default = nil)
+  if valid_564733 != nil:
+    section.add "ocp-date", valid_564733
+  var valid_564734 = header.getOrDefault("If-Match")
+  valid_564734 = validateParameter(valid_564734, JString, required = false,
+                                 default = nil)
+  if valid_564734 != nil:
+    section.add "If-Match", valid_564734
   result.add "header", section
   section = newJObject()
   result.add "formData", section
   if body != nil:
     result.add "body", body
 
-proc call*(call_574835: Call_JobScheduleExists_574822; path: JsonNode;
+proc call*(call_564735: Call_JobScheduleExists_564722; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
-  let valid = call_574835.validator(path, query, header, formData, body)
-  let scheme = call_574835.pickScheme
+  let valid = call_564735.validator(path, query, header, formData, body)
+  let scheme = call_564735.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574835.url(scheme.get, call_574835.host, call_574835.base,
-                         call_574835.route, valid.getOrDefault("path"),
+  let url = call_564735.url(scheme.get, call_564735.host, call_564735.base,
+                         call_564735.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574835, url, valid)
+  result = hook(call_564735, url, valid)
 
-proc call*(call_574836: Call_JobScheduleExists_574822; jobScheduleId: string;
-          apiVersion: string; timeout: int = 30): Recallable =
+proc call*(call_564736: Call_JobScheduleExists_564722; apiVersion: string;
+          jobScheduleId: string; timeout: int = 30): Recallable =
   ## jobScheduleExists
-  ##   timeout: int
-  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
-  ##   jobScheduleId: string (required)
-  ##                : The ID of the Job Schedule which you want to check.
   ##   apiVersion: string (required)
   ##             : Client API Version.
-  var path_574837 = newJObject()
-  var query_574838 = newJObject()
-  add(query_574838, "timeout", newJInt(timeout))
-  add(path_574837, "jobScheduleId", newJString(jobScheduleId))
-  add(query_574838, "api-version", newJString(apiVersion))
-  result = call_574836.call(path_574837, query_574838, nil, nil, nil)
+  ##   jobScheduleId: string (required)
+  ##                : The ID of the Job Schedule which you want to check.
+  ##   timeout: int
+  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
+  var path_564737 = newJObject()
+  var query_564738 = newJObject()
+  add(query_564738, "api-version", newJString(apiVersion))
+  add(path_564737, "jobScheduleId", newJString(jobScheduleId))
+  add(query_564738, "timeout", newJInt(timeout))
+  result = call_564736.call(path_564737, query_564738, nil, nil, nil)
 
-var jobScheduleExists* = Call_JobScheduleExists_574822(name: "jobScheduleExists",
+var jobScheduleExists* = Call_JobScheduleExists_564722(name: "jobScheduleExists",
     meth: HttpMethod.HttpHead, host: "azure.local",
-    route: "/jobschedules/{jobScheduleId}", validator: validate_JobScheduleExists_574823,
-    base: "", url: url_JobScheduleExists_574824, schemes: {Scheme.Https})
+    route: "/jobschedules/{jobScheduleId}", validator: validate_JobScheduleExists_564723,
+    base: "", url: url_JobScheduleExists_564724, schemes: {Scheme.Https})
 type
-  Call_JobScheduleGet_574767 = ref object of OpenApiRestCall_573667
-proc url_JobScheduleGet_574769(protocol: Scheme; host: string; base: string;
+  Call_JobScheduleGet_564667 = ref object of OpenApiRestCall_563565
+proc url_JobScheduleGet_564669(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -5109,7 +5114,7 @@ proc url_JobScheduleGet_574769(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_JobScheduleGet_574768(path: JsonNode; query: JsonNode;
+proc validate_JobScheduleGet_564668(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## Gets information about the specified Job Schedule.
@@ -5122,145 +5127,146 @@ proc validate_JobScheduleGet_574768(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `jobScheduleId` field"
-  var valid_574770 = path.getOrDefault("jobScheduleId")
-  valid_574770 = validateParameter(valid_574770, JString, required = true,
+  var valid_564670 = path.getOrDefault("jobScheduleId")
+  valid_564670 = validateParameter(valid_564670, JString, required = true,
                                  default = nil)
-  if valid_574770 != nil:
-    section.add "jobScheduleId", valid_574770
+  if valid_564670 != nil:
+    section.add "jobScheduleId", valid_564670
   result.add "path", section
   ## parameters in `query` object:
-  ##   timeout: JInt
-  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
-  ##   $expand: JString
-  ##          : An OData $expand clause.
   ##   api-version: JString (required)
   ##              : Client API Version.
   ##   $select: JString
   ##          : An OData $select clause.
+  ##   $expand: JString
+  ##          : An OData $expand clause.
+  ##   timeout: JInt
+  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   section = newJObject()
-  var valid_574771 = query.getOrDefault("timeout")
-  valid_574771 = validateParameter(valid_574771, JInt, required = false,
-                                 default = newJInt(30))
-  if valid_574771 != nil:
-    section.add "timeout", valid_574771
-  var valid_574772 = query.getOrDefault("$expand")
-  valid_574772 = validateParameter(valid_574772, JString, required = false,
-                                 default = nil)
-  if valid_574772 != nil:
-    section.add "$expand", valid_574772
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574773 = query.getOrDefault("api-version")
-  valid_574773 = validateParameter(valid_574773, JString, required = true,
+  var valid_564671 = query.getOrDefault("api-version")
+  valid_564671 = validateParameter(valid_564671, JString, required = true,
                                  default = nil)
-  if valid_574773 != nil:
-    section.add "api-version", valid_574773
-  var valid_574774 = query.getOrDefault("$select")
-  valid_574774 = validateParameter(valid_574774, JString, required = false,
+  if valid_564671 != nil:
+    section.add "api-version", valid_564671
+  var valid_564672 = query.getOrDefault("$select")
+  valid_564672 = validateParameter(valid_564672, JString, required = false,
                                  default = nil)
-  if valid_574774 != nil:
-    section.add "$select", valid_574774
+  if valid_564672 != nil:
+    section.add "$select", valid_564672
+  var valid_564673 = query.getOrDefault("$expand")
+  valid_564673 = validateParameter(valid_564673, JString, required = false,
+                                 default = nil)
+  if valid_564673 != nil:
+    section.add "$expand", valid_564673
+  var valid_564674 = query.getOrDefault("timeout")
+  valid_564674 = validateParameter(valid_564674, JInt, required = false,
+                                 default = newJInt(30))
+  if valid_564674 != nil:
+    section.add "timeout", valid_564674
   result.add "query", section
   ## parameters in `header` object:
-  ##   If-Match: JString
-  ##           : An ETag value associated with the version of the resource known to the client. The operation will be performed only if the resource's current ETag on the service exactly matches the value specified by the client.
-  ##   client-request-id: JString
-  ##                    : The caller-generated request identity, in the form of a GUID with no decoration such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
-  ##   ocp-date: JString
-  ##           : The time the request was issued. Client libraries typically set this to the current system clock time; set it explicitly if you are calling the REST API directly.
-  ##   If-Unmodified-Since: JString
-  ##                      : A timestamp indicating the last modified time of the resource known to the client. The operation will be performed only if the resource on the service has not been modified since the specified time.
-  ##   If-None-Match: JString
-  ##                : An ETag value associated with the version of the resource known to the client. The operation will be performed only if the resource's current ETag on the service does not match the value specified by the client.
-  ##   If-Modified-Since: JString
-  ##                    : A timestamp indicating the last modified time of the resource known to the client. The operation will be performed only if the resource on the service has been modified since the specified time.
   ##   return-client-request-id: JBool
   ##                           : Whether the server should return the client-request-id in the response.
+  ##   If-Unmodified-Since: JString
+  ##                      : A timestamp indicating the last modified time of the resource known to the client. The operation will be performed only if the resource on the service has not been modified since the specified time.
+  ##   client-request-id: JString
+  ##                    : The caller-generated request identity, in the form of a GUID with no decoration such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
+  ##   If-Modified-Since: JString
+  ##                    : A timestamp indicating the last modified time of the resource known to the client. The operation will be performed only if the resource on the service has been modified since the specified time.
+  ##   If-None-Match: JString
+  ##                : An ETag value associated with the version of the resource known to the client. The operation will be performed only if the resource's current ETag on the service does not match the value specified by the client.
+  ##   ocp-date: JString
+  ##           : The time the request was issued. Client libraries typically set this to the current system clock time; set it explicitly if you are calling the REST API directly.
+  ##   If-Match: JString
+  ##           : An ETag value associated with the version of the resource known to the client. The operation will be performed only if the resource's current ETag on the service exactly matches the value specified by the client.
   section = newJObject()
-  var valid_574775 = header.getOrDefault("If-Match")
-  valid_574775 = validateParameter(valid_574775, JString, required = false,
-                                 default = nil)
-  if valid_574775 != nil:
-    section.add "If-Match", valid_574775
-  var valid_574776 = header.getOrDefault("client-request-id")
-  valid_574776 = validateParameter(valid_574776, JString, required = false,
-                                 default = nil)
-  if valid_574776 != nil:
-    section.add "client-request-id", valid_574776
-  var valid_574777 = header.getOrDefault("ocp-date")
-  valid_574777 = validateParameter(valid_574777, JString, required = false,
-                                 default = nil)
-  if valid_574777 != nil:
-    section.add "ocp-date", valid_574777
-  var valid_574778 = header.getOrDefault("If-Unmodified-Since")
-  valid_574778 = validateParameter(valid_574778, JString, required = false,
-                                 default = nil)
-  if valid_574778 != nil:
-    section.add "If-Unmodified-Since", valid_574778
-  var valid_574779 = header.getOrDefault("If-None-Match")
-  valid_574779 = validateParameter(valid_574779, JString, required = false,
-                                 default = nil)
-  if valid_574779 != nil:
-    section.add "If-None-Match", valid_574779
-  var valid_574780 = header.getOrDefault("If-Modified-Since")
-  valid_574780 = validateParameter(valid_574780, JString, required = false,
-                                 default = nil)
-  if valid_574780 != nil:
-    section.add "If-Modified-Since", valid_574780
-  var valid_574781 = header.getOrDefault("return-client-request-id")
-  valid_574781 = validateParameter(valid_574781, JBool, required = false,
+  var valid_564675 = header.getOrDefault("return-client-request-id")
+  valid_564675 = validateParameter(valid_564675, JBool, required = false,
                                  default = newJBool(false))
-  if valid_574781 != nil:
-    section.add "return-client-request-id", valid_574781
+  if valid_564675 != nil:
+    section.add "return-client-request-id", valid_564675
+  var valid_564676 = header.getOrDefault("If-Unmodified-Since")
+  valid_564676 = validateParameter(valid_564676, JString, required = false,
+                                 default = nil)
+  if valid_564676 != nil:
+    section.add "If-Unmodified-Since", valid_564676
+  var valid_564677 = header.getOrDefault("client-request-id")
+  valid_564677 = validateParameter(valid_564677, JString, required = false,
+                                 default = nil)
+  if valid_564677 != nil:
+    section.add "client-request-id", valid_564677
+  var valid_564678 = header.getOrDefault("If-Modified-Since")
+  valid_564678 = validateParameter(valid_564678, JString, required = false,
+                                 default = nil)
+  if valid_564678 != nil:
+    section.add "If-Modified-Since", valid_564678
+  var valid_564679 = header.getOrDefault("If-None-Match")
+  valid_564679 = validateParameter(valid_564679, JString, required = false,
+                                 default = nil)
+  if valid_564679 != nil:
+    section.add "If-None-Match", valid_564679
+  var valid_564680 = header.getOrDefault("ocp-date")
+  valid_564680 = validateParameter(valid_564680, JString, required = false,
+                                 default = nil)
+  if valid_564680 != nil:
+    section.add "ocp-date", valid_564680
+  var valid_564681 = header.getOrDefault("If-Match")
+  valid_564681 = validateParameter(valid_564681, JString, required = false,
+                                 default = nil)
+  if valid_564681 != nil:
+    section.add "If-Match", valid_564681
   result.add "header", section
   section = newJObject()
   result.add "formData", section
   if body != nil:
     result.add "body", body
 
-proc call*(call_574782: Call_JobScheduleGet_574767; path: JsonNode; query: JsonNode;
+proc call*(call_564682: Call_JobScheduleGet_564667; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets information about the specified Job Schedule.
   ## 
-  let valid = call_574782.validator(path, query, header, formData, body)
-  let scheme = call_574782.pickScheme
+  let valid = call_564682.validator(path, query, header, formData, body)
+  let scheme = call_564682.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574782.url(scheme.get, call_574782.host, call_574782.base,
-                         call_574782.route, valid.getOrDefault("path"),
+  let url = call_564682.url(scheme.get, call_564682.host, call_564682.base,
+                         call_564682.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574782, url, valid)
+  result = hook(call_564682, url, valid)
 
-proc call*(call_574783: Call_JobScheduleGet_574767; jobScheduleId: string;
-          apiVersion: string; timeout: int = 30; Expand: string = ""; Select: string = ""): Recallable =
+proc call*(call_564683: Call_JobScheduleGet_564667; apiVersion: string;
+          jobScheduleId: string; Select: string = ""; Expand: string = "";
+          timeout: int = 30): Recallable =
   ## jobScheduleGet
   ## Gets information about the specified Job Schedule.
-  ##   timeout: int
-  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
-  ##   jobScheduleId: string (required)
-  ##                : The ID of the Job Schedule to get.
-  ##   Expand: string
-  ##         : An OData $expand clause.
   ##   apiVersion: string (required)
   ##             : Client API Version.
   ##   Select: string
   ##         : An OData $select clause.
-  var path_574784 = newJObject()
-  var query_574785 = newJObject()
-  add(query_574785, "timeout", newJInt(timeout))
-  add(path_574784, "jobScheduleId", newJString(jobScheduleId))
-  add(query_574785, "$expand", newJString(Expand))
-  add(query_574785, "api-version", newJString(apiVersion))
-  add(query_574785, "$select", newJString(Select))
-  result = call_574783.call(path_574784, query_574785, nil, nil, nil)
+  ##   Expand: string
+  ##         : An OData $expand clause.
+  ##   jobScheduleId: string (required)
+  ##                : The ID of the Job Schedule to get.
+  ##   timeout: int
+  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
+  var path_564684 = newJObject()
+  var query_564685 = newJObject()
+  add(query_564685, "api-version", newJString(apiVersion))
+  add(query_564685, "$select", newJString(Select))
+  add(query_564685, "$expand", newJString(Expand))
+  add(path_564684, "jobScheduleId", newJString(jobScheduleId))
+  add(query_564685, "timeout", newJInt(timeout))
+  result = call_564683.call(path_564684, query_564685, nil, nil, nil)
 
-var jobScheduleGet* = Call_JobScheduleGet_574767(name: "jobScheduleGet",
+var jobScheduleGet* = Call_JobScheduleGet_564667(name: "jobScheduleGet",
     meth: HttpMethod.HttpGet, host: "azure.local",
-    route: "/jobschedules/{jobScheduleId}", validator: validate_JobScheduleGet_574768,
-    base: "", url: url_JobScheduleGet_574769, schemes: {Scheme.Https})
+    route: "/jobschedules/{jobScheduleId}", validator: validate_JobScheduleGet_564668,
+    base: "", url: url_JobScheduleGet_564669, schemes: {Scheme.Https})
 type
-  Call_JobSchedulePatch_574839 = ref object of OpenApiRestCall_573667
-proc url_JobSchedulePatch_574841(protocol: Scheme; host: string; base: string;
+  Call_JobSchedulePatch_564739 = ref object of OpenApiRestCall_563565
+proc url_JobSchedulePatch_564741(protocol: Scheme; host: string; base: string;
                                 route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -5275,7 +5281,7 @@ proc url_JobSchedulePatch_574841(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_JobSchedulePatch_574840(path: JsonNode; query: JsonNode;
+proc validate_JobSchedulePatch_564740(path: JsonNode; query: JsonNode;
                                      header: JsonNode; formData: JsonNode;
                                      body: JsonNode): JsonNode =
   ## This replaces only the Job Schedule properties specified in the request. For example, if the schedule property is not specified with this request, then the Batch service will keep the existing schedule. Changes to a Job Schedule only impact Jobs created by the schedule after the update has taken place; currently running Jobs are unaffected.
@@ -5288,82 +5294,82 @@ proc validate_JobSchedulePatch_574840(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `jobScheduleId` field"
-  var valid_574842 = path.getOrDefault("jobScheduleId")
-  valid_574842 = validateParameter(valid_574842, JString, required = true,
+  var valid_564742 = path.getOrDefault("jobScheduleId")
+  valid_564742 = validateParameter(valid_564742, JString, required = true,
                                  default = nil)
-  if valid_574842 != nil:
-    section.add "jobScheduleId", valid_574842
+  if valid_564742 != nil:
+    section.add "jobScheduleId", valid_564742
   result.add "path", section
   ## parameters in `query` object:
-  ##   timeout: JInt
-  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   ##   api-version: JString (required)
   ##              : Client API Version.
+  ##   timeout: JInt
+  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   section = newJObject()
-  var valid_574843 = query.getOrDefault("timeout")
-  valid_574843 = validateParameter(valid_574843, JInt, required = false,
-                                 default = newJInt(30))
-  if valid_574843 != nil:
-    section.add "timeout", valid_574843
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574844 = query.getOrDefault("api-version")
-  valid_574844 = validateParameter(valid_574844, JString, required = true,
+  var valid_564743 = query.getOrDefault("api-version")
+  valid_564743 = validateParameter(valid_564743, JString, required = true,
                                  default = nil)
-  if valid_574844 != nil:
-    section.add "api-version", valid_574844
+  if valid_564743 != nil:
+    section.add "api-version", valid_564743
+  var valid_564744 = query.getOrDefault("timeout")
+  valid_564744 = validateParameter(valid_564744, JInt, required = false,
+                                 default = newJInt(30))
+  if valid_564744 != nil:
+    section.add "timeout", valid_564744
   result.add "query", section
   ## parameters in `header` object:
-  ##   If-Match: JString
-  ##           : An ETag value associated with the version of the resource known to the client. The operation will be performed only if the resource's current ETag on the service exactly matches the value specified by the client.
-  ##   client-request-id: JString
-  ##                    : The caller-generated request identity, in the form of a GUID with no decoration such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
-  ##   ocp-date: JString
-  ##           : The time the request was issued. Client libraries typically set this to the current system clock time; set it explicitly if you are calling the REST API directly.
-  ##   If-Unmodified-Since: JString
-  ##                      : A timestamp indicating the last modified time of the resource known to the client. The operation will be performed only if the resource on the service has not been modified since the specified time.
-  ##   If-None-Match: JString
-  ##                : An ETag value associated with the version of the resource known to the client. The operation will be performed only if the resource's current ETag on the service does not match the value specified by the client.
-  ##   If-Modified-Since: JString
-  ##                    : A timestamp indicating the last modified time of the resource known to the client. The operation will be performed only if the resource on the service has been modified since the specified time.
   ##   return-client-request-id: JBool
   ##                           : Whether the server should return the client-request-id in the response.
+  ##   If-Unmodified-Since: JString
+  ##                      : A timestamp indicating the last modified time of the resource known to the client. The operation will be performed only if the resource on the service has not been modified since the specified time.
+  ##   client-request-id: JString
+  ##                    : The caller-generated request identity, in the form of a GUID with no decoration such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
+  ##   If-Modified-Since: JString
+  ##                    : A timestamp indicating the last modified time of the resource known to the client. The operation will be performed only if the resource on the service has been modified since the specified time.
+  ##   If-None-Match: JString
+  ##                : An ETag value associated with the version of the resource known to the client. The operation will be performed only if the resource's current ETag on the service does not match the value specified by the client.
+  ##   ocp-date: JString
+  ##           : The time the request was issued. Client libraries typically set this to the current system clock time; set it explicitly if you are calling the REST API directly.
+  ##   If-Match: JString
+  ##           : An ETag value associated with the version of the resource known to the client. The operation will be performed only if the resource's current ETag on the service exactly matches the value specified by the client.
   section = newJObject()
-  var valid_574845 = header.getOrDefault("If-Match")
-  valid_574845 = validateParameter(valid_574845, JString, required = false,
-                                 default = nil)
-  if valid_574845 != nil:
-    section.add "If-Match", valid_574845
-  var valid_574846 = header.getOrDefault("client-request-id")
-  valid_574846 = validateParameter(valid_574846, JString, required = false,
-                                 default = nil)
-  if valid_574846 != nil:
-    section.add "client-request-id", valid_574846
-  var valid_574847 = header.getOrDefault("ocp-date")
-  valid_574847 = validateParameter(valid_574847, JString, required = false,
-                                 default = nil)
-  if valid_574847 != nil:
-    section.add "ocp-date", valid_574847
-  var valid_574848 = header.getOrDefault("If-Unmodified-Since")
-  valid_574848 = validateParameter(valid_574848, JString, required = false,
-                                 default = nil)
-  if valid_574848 != nil:
-    section.add "If-Unmodified-Since", valid_574848
-  var valid_574849 = header.getOrDefault("If-None-Match")
-  valid_574849 = validateParameter(valid_574849, JString, required = false,
-                                 default = nil)
-  if valid_574849 != nil:
-    section.add "If-None-Match", valid_574849
-  var valid_574850 = header.getOrDefault("If-Modified-Since")
-  valid_574850 = validateParameter(valid_574850, JString, required = false,
-                                 default = nil)
-  if valid_574850 != nil:
-    section.add "If-Modified-Since", valid_574850
-  var valid_574851 = header.getOrDefault("return-client-request-id")
-  valid_574851 = validateParameter(valid_574851, JBool, required = false,
+  var valid_564745 = header.getOrDefault("return-client-request-id")
+  valid_564745 = validateParameter(valid_564745, JBool, required = false,
                                  default = newJBool(false))
-  if valid_574851 != nil:
-    section.add "return-client-request-id", valid_574851
+  if valid_564745 != nil:
+    section.add "return-client-request-id", valid_564745
+  var valid_564746 = header.getOrDefault("If-Unmodified-Since")
+  valid_564746 = validateParameter(valid_564746, JString, required = false,
+                                 default = nil)
+  if valid_564746 != nil:
+    section.add "If-Unmodified-Since", valid_564746
+  var valid_564747 = header.getOrDefault("client-request-id")
+  valid_564747 = validateParameter(valid_564747, JString, required = false,
+                                 default = nil)
+  if valid_564747 != nil:
+    section.add "client-request-id", valid_564747
+  var valid_564748 = header.getOrDefault("If-Modified-Since")
+  valid_564748 = validateParameter(valid_564748, JString, required = false,
+                                 default = nil)
+  if valid_564748 != nil:
+    section.add "If-Modified-Since", valid_564748
+  var valid_564749 = header.getOrDefault("If-None-Match")
+  valid_564749 = validateParameter(valid_564749, JString, required = false,
+                                 default = nil)
+  if valid_564749 != nil:
+    section.add "If-None-Match", valid_564749
+  var valid_564750 = header.getOrDefault("ocp-date")
+  valid_564750 = validateParameter(valid_564750, JString, required = false,
+                                 default = nil)
+  if valid_564750 != nil:
+    section.add "ocp-date", valid_564750
+  var valid_564751 = header.getOrDefault("If-Match")
+  valid_564751 = validateParameter(valid_564751, JString, required = false,
+                                 default = nil)
+  if valid_564751 != nil:
+    section.add "If-Match", valid_564751
   result.add "header", section
   section = newJObject()
   result.add "formData", section
@@ -5375,48 +5381,49 @@ proc validate_JobSchedulePatch_574840(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574853: Call_JobSchedulePatch_574839; path: JsonNode;
+proc call*(call_564753: Call_JobSchedulePatch_564739; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## This replaces only the Job Schedule properties specified in the request. For example, if the schedule property is not specified with this request, then the Batch service will keep the existing schedule. Changes to a Job Schedule only impact Jobs created by the schedule after the update has taken place; currently running Jobs are unaffected.
   ## 
-  let valid = call_574853.validator(path, query, header, formData, body)
-  let scheme = call_574853.pickScheme
+  let valid = call_564753.validator(path, query, header, formData, body)
+  let scheme = call_564753.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574853.url(scheme.get, call_574853.host, call_574853.base,
-                         call_574853.route, valid.getOrDefault("path"),
+  let url = call_564753.url(scheme.get, call_564753.host, call_564753.base,
+                         call_564753.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574853, url, valid)
+  result = hook(call_564753, url, valid)
 
-proc call*(call_574854: Call_JobSchedulePatch_574839; jobScheduleId: string;
-          apiVersion: string; jobSchedulePatchParameter: JsonNode; timeout: int = 30): Recallable =
+proc call*(call_564754: Call_JobSchedulePatch_564739; apiVersion: string;
+          jobScheduleId: string; jobSchedulePatchParameter: JsonNode;
+          timeout: int = 30): Recallable =
   ## jobSchedulePatch
   ## This replaces only the Job Schedule properties specified in the request. For example, if the schedule property is not specified with this request, then the Batch service will keep the existing schedule. Changes to a Job Schedule only impact Jobs created by the schedule after the update has taken place; currently running Jobs are unaffected.
-  ##   timeout: int
-  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
-  ##   jobScheduleId: string (required)
-  ##                : The ID of the Job Schedule to update.
   ##   apiVersion: string (required)
   ##             : Client API Version.
+  ##   jobScheduleId: string (required)
+  ##                : The ID of the Job Schedule to update.
+  ##   timeout: int
+  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   ##   jobSchedulePatchParameter: JObject (required)
   ##                            : The parameters for the request.
-  var path_574855 = newJObject()
-  var query_574856 = newJObject()
-  var body_574857 = newJObject()
-  add(query_574856, "timeout", newJInt(timeout))
-  add(path_574855, "jobScheduleId", newJString(jobScheduleId))
-  add(query_574856, "api-version", newJString(apiVersion))
+  var path_564755 = newJObject()
+  var query_564756 = newJObject()
+  var body_564757 = newJObject()
+  add(query_564756, "api-version", newJString(apiVersion))
+  add(path_564755, "jobScheduleId", newJString(jobScheduleId))
+  add(query_564756, "timeout", newJInt(timeout))
   if jobSchedulePatchParameter != nil:
-    body_574857 = jobSchedulePatchParameter
-  result = call_574854.call(path_574855, query_574856, nil, nil, body_574857)
+    body_564757 = jobSchedulePatchParameter
+  result = call_564754.call(path_564755, query_564756, nil, nil, body_564757)
 
-var jobSchedulePatch* = Call_JobSchedulePatch_574839(name: "jobSchedulePatch",
+var jobSchedulePatch* = Call_JobSchedulePatch_564739(name: "jobSchedulePatch",
     meth: HttpMethod.HttpPatch, host: "azure.local",
-    route: "/jobschedules/{jobScheduleId}", validator: validate_JobSchedulePatch_574840,
-    base: "", url: url_JobSchedulePatch_574841, schemes: {Scheme.Https})
+    route: "/jobschedules/{jobScheduleId}", validator: validate_JobSchedulePatch_564740,
+    base: "", url: url_JobSchedulePatch_564741, schemes: {Scheme.Https})
 type
-  Call_JobScheduleDelete_574805 = ref object of OpenApiRestCall_573667
-proc url_JobScheduleDelete_574807(protocol: Scheme; host: string; base: string;
+  Call_JobScheduleDelete_564705 = ref object of OpenApiRestCall_563565
+proc url_JobScheduleDelete_564707(protocol: Scheme; host: string; base: string;
                                  route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -5431,7 +5438,7 @@ proc url_JobScheduleDelete_574807(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_JobScheduleDelete_574806(path: JsonNode; query: JsonNode;
+proc validate_JobScheduleDelete_564706(path: JsonNode; query: JsonNode;
                                       header: JsonNode; formData: JsonNode;
                                       body: JsonNode): JsonNode =
   ## When you delete a Job Schedule, this also deletes all Jobs and Tasks under that schedule. When Tasks are deleted, all the files in their working directories on the Compute Nodes are also deleted (the retention period is ignored). The Job Schedule statistics are no longer accessible once the Job Schedule is deleted, though they are still counted towards Account lifetime statistics.
@@ -5444,125 +5451,125 @@ proc validate_JobScheduleDelete_574806(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `jobScheduleId` field"
-  var valid_574808 = path.getOrDefault("jobScheduleId")
-  valid_574808 = validateParameter(valid_574808, JString, required = true,
+  var valid_564708 = path.getOrDefault("jobScheduleId")
+  valid_564708 = validateParameter(valid_564708, JString, required = true,
                                  default = nil)
-  if valid_574808 != nil:
-    section.add "jobScheduleId", valid_574808
+  if valid_564708 != nil:
+    section.add "jobScheduleId", valid_564708
   result.add "path", section
   ## parameters in `query` object:
-  ##   timeout: JInt
-  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   ##   api-version: JString (required)
   ##              : Client API Version.
+  ##   timeout: JInt
+  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   section = newJObject()
-  var valid_574809 = query.getOrDefault("timeout")
-  valid_574809 = validateParameter(valid_574809, JInt, required = false,
-                                 default = newJInt(30))
-  if valid_574809 != nil:
-    section.add "timeout", valid_574809
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574810 = query.getOrDefault("api-version")
-  valid_574810 = validateParameter(valid_574810, JString, required = true,
+  var valid_564709 = query.getOrDefault("api-version")
+  valid_564709 = validateParameter(valid_564709, JString, required = true,
                                  default = nil)
-  if valid_574810 != nil:
-    section.add "api-version", valid_574810
+  if valid_564709 != nil:
+    section.add "api-version", valid_564709
+  var valid_564710 = query.getOrDefault("timeout")
+  valid_564710 = validateParameter(valid_564710, JInt, required = false,
+                                 default = newJInt(30))
+  if valid_564710 != nil:
+    section.add "timeout", valid_564710
   result.add "query", section
   ## parameters in `header` object:
-  ##   If-Match: JString
-  ##           : An ETag value associated with the version of the resource known to the client. The operation will be performed only if the resource's current ETag on the service exactly matches the value specified by the client.
-  ##   client-request-id: JString
-  ##                    : The caller-generated request identity, in the form of a GUID with no decoration such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
-  ##   ocp-date: JString
-  ##           : The time the request was issued. Client libraries typically set this to the current system clock time; set it explicitly if you are calling the REST API directly.
-  ##   If-Unmodified-Since: JString
-  ##                      : A timestamp indicating the last modified time of the resource known to the client. The operation will be performed only if the resource on the service has not been modified since the specified time.
-  ##   If-None-Match: JString
-  ##                : An ETag value associated with the version of the resource known to the client. The operation will be performed only if the resource's current ETag on the service does not match the value specified by the client.
-  ##   If-Modified-Since: JString
-  ##                    : A timestamp indicating the last modified time of the resource known to the client. The operation will be performed only if the resource on the service has been modified since the specified time.
   ##   return-client-request-id: JBool
   ##                           : Whether the server should return the client-request-id in the response.
+  ##   If-Unmodified-Since: JString
+  ##                      : A timestamp indicating the last modified time of the resource known to the client. The operation will be performed only if the resource on the service has not been modified since the specified time.
+  ##   client-request-id: JString
+  ##                    : The caller-generated request identity, in the form of a GUID with no decoration such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
+  ##   If-Modified-Since: JString
+  ##                    : A timestamp indicating the last modified time of the resource known to the client. The operation will be performed only if the resource on the service has been modified since the specified time.
+  ##   If-None-Match: JString
+  ##                : An ETag value associated with the version of the resource known to the client. The operation will be performed only if the resource's current ETag on the service does not match the value specified by the client.
+  ##   ocp-date: JString
+  ##           : The time the request was issued. Client libraries typically set this to the current system clock time; set it explicitly if you are calling the REST API directly.
+  ##   If-Match: JString
+  ##           : An ETag value associated with the version of the resource known to the client. The operation will be performed only if the resource's current ETag on the service exactly matches the value specified by the client.
   section = newJObject()
-  var valid_574811 = header.getOrDefault("If-Match")
-  valid_574811 = validateParameter(valid_574811, JString, required = false,
-                                 default = nil)
-  if valid_574811 != nil:
-    section.add "If-Match", valid_574811
-  var valid_574812 = header.getOrDefault("client-request-id")
-  valid_574812 = validateParameter(valid_574812, JString, required = false,
-                                 default = nil)
-  if valid_574812 != nil:
-    section.add "client-request-id", valid_574812
-  var valid_574813 = header.getOrDefault("ocp-date")
-  valid_574813 = validateParameter(valid_574813, JString, required = false,
-                                 default = nil)
-  if valid_574813 != nil:
-    section.add "ocp-date", valid_574813
-  var valid_574814 = header.getOrDefault("If-Unmodified-Since")
-  valid_574814 = validateParameter(valid_574814, JString, required = false,
-                                 default = nil)
-  if valid_574814 != nil:
-    section.add "If-Unmodified-Since", valid_574814
-  var valid_574815 = header.getOrDefault("If-None-Match")
-  valid_574815 = validateParameter(valid_574815, JString, required = false,
-                                 default = nil)
-  if valid_574815 != nil:
-    section.add "If-None-Match", valid_574815
-  var valid_574816 = header.getOrDefault("If-Modified-Since")
-  valid_574816 = validateParameter(valid_574816, JString, required = false,
-                                 default = nil)
-  if valid_574816 != nil:
-    section.add "If-Modified-Since", valid_574816
-  var valid_574817 = header.getOrDefault("return-client-request-id")
-  valid_574817 = validateParameter(valid_574817, JBool, required = false,
+  var valid_564711 = header.getOrDefault("return-client-request-id")
+  valid_564711 = validateParameter(valid_564711, JBool, required = false,
                                  default = newJBool(false))
-  if valid_574817 != nil:
-    section.add "return-client-request-id", valid_574817
+  if valid_564711 != nil:
+    section.add "return-client-request-id", valid_564711
+  var valid_564712 = header.getOrDefault("If-Unmodified-Since")
+  valid_564712 = validateParameter(valid_564712, JString, required = false,
+                                 default = nil)
+  if valid_564712 != nil:
+    section.add "If-Unmodified-Since", valid_564712
+  var valid_564713 = header.getOrDefault("client-request-id")
+  valid_564713 = validateParameter(valid_564713, JString, required = false,
+                                 default = nil)
+  if valid_564713 != nil:
+    section.add "client-request-id", valid_564713
+  var valid_564714 = header.getOrDefault("If-Modified-Since")
+  valid_564714 = validateParameter(valid_564714, JString, required = false,
+                                 default = nil)
+  if valid_564714 != nil:
+    section.add "If-Modified-Since", valid_564714
+  var valid_564715 = header.getOrDefault("If-None-Match")
+  valid_564715 = validateParameter(valid_564715, JString, required = false,
+                                 default = nil)
+  if valid_564715 != nil:
+    section.add "If-None-Match", valid_564715
+  var valid_564716 = header.getOrDefault("ocp-date")
+  valid_564716 = validateParameter(valid_564716, JString, required = false,
+                                 default = nil)
+  if valid_564716 != nil:
+    section.add "ocp-date", valid_564716
+  var valid_564717 = header.getOrDefault("If-Match")
+  valid_564717 = validateParameter(valid_564717, JString, required = false,
+                                 default = nil)
+  if valid_564717 != nil:
+    section.add "If-Match", valid_564717
   result.add "header", section
   section = newJObject()
   result.add "formData", section
   if body != nil:
     result.add "body", body
 
-proc call*(call_574818: Call_JobScheduleDelete_574805; path: JsonNode;
+proc call*(call_564718: Call_JobScheduleDelete_564705; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## When you delete a Job Schedule, this also deletes all Jobs and Tasks under that schedule. When Tasks are deleted, all the files in their working directories on the Compute Nodes are also deleted (the retention period is ignored). The Job Schedule statistics are no longer accessible once the Job Schedule is deleted, though they are still counted towards Account lifetime statistics.
   ## 
-  let valid = call_574818.validator(path, query, header, formData, body)
-  let scheme = call_574818.pickScheme
+  let valid = call_564718.validator(path, query, header, formData, body)
+  let scheme = call_564718.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574818.url(scheme.get, call_574818.host, call_574818.base,
-                         call_574818.route, valid.getOrDefault("path"),
+  let url = call_564718.url(scheme.get, call_564718.host, call_564718.base,
+                         call_564718.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574818, url, valid)
+  result = hook(call_564718, url, valid)
 
-proc call*(call_574819: Call_JobScheduleDelete_574805; jobScheduleId: string;
-          apiVersion: string; timeout: int = 30): Recallable =
+proc call*(call_564719: Call_JobScheduleDelete_564705; apiVersion: string;
+          jobScheduleId: string; timeout: int = 30): Recallable =
   ## jobScheduleDelete
   ## When you delete a Job Schedule, this also deletes all Jobs and Tasks under that schedule. When Tasks are deleted, all the files in their working directories on the Compute Nodes are also deleted (the retention period is ignored). The Job Schedule statistics are no longer accessible once the Job Schedule is deleted, though they are still counted towards Account lifetime statistics.
-  ##   timeout: int
-  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
-  ##   jobScheduleId: string (required)
-  ##                : The ID of the Job Schedule to delete.
   ##   apiVersion: string (required)
   ##             : Client API Version.
-  var path_574820 = newJObject()
-  var query_574821 = newJObject()
-  add(query_574821, "timeout", newJInt(timeout))
-  add(path_574820, "jobScheduleId", newJString(jobScheduleId))
-  add(query_574821, "api-version", newJString(apiVersion))
-  result = call_574819.call(path_574820, query_574821, nil, nil, nil)
+  ##   jobScheduleId: string (required)
+  ##                : The ID of the Job Schedule to delete.
+  ##   timeout: int
+  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
+  var path_564720 = newJObject()
+  var query_564721 = newJObject()
+  add(query_564721, "api-version", newJString(apiVersion))
+  add(path_564720, "jobScheduleId", newJString(jobScheduleId))
+  add(query_564721, "timeout", newJInt(timeout))
+  result = call_564719.call(path_564720, query_564721, nil, nil, nil)
 
-var jobScheduleDelete* = Call_JobScheduleDelete_574805(name: "jobScheduleDelete",
+var jobScheduleDelete* = Call_JobScheduleDelete_564705(name: "jobScheduleDelete",
     meth: HttpMethod.HttpDelete, host: "azure.local",
-    route: "/jobschedules/{jobScheduleId}", validator: validate_JobScheduleDelete_574806,
-    base: "", url: url_JobScheduleDelete_574807, schemes: {Scheme.Https})
+    route: "/jobschedules/{jobScheduleId}", validator: validate_JobScheduleDelete_564706,
+    base: "", url: url_JobScheduleDelete_564707, schemes: {Scheme.Https})
 type
-  Call_JobScheduleDisable_574858 = ref object of OpenApiRestCall_573667
-proc url_JobScheduleDisable_574860(protocol: Scheme; host: string; base: string;
+  Call_JobScheduleDisable_564758 = ref object of OpenApiRestCall_563565
+proc url_JobScheduleDisable_564760(protocol: Scheme; host: string; base: string;
                                   route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -5578,7 +5585,7 @@ proc url_JobScheduleDisable_574860(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_JobScheduleDisable_574859(path: JsonNode; query: JsonNode;
+proc validate_JobScheduleDisable_564759(path: JsonNode; query: JsonNode;
                                        header: JsonNode; formData: JsonNode;
                                        body: JsonNode): JsonNode =
   ## No new Jobs will be created until the Job Schedule is enabled again.
@@ -5591,126 +5598,126 @@ proc validate_JobScheduleDisable_574859(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `jobScheduleId` field"
-  var valid_574861 = path.getOrDefault("jobScheduleId")
-  valid_574861 = validateParameter(valid_574861, JString, required = true,
+  var valid_564761 = path.getOrDefault("jobScheduleId")
+  valid_564761 = validateParameter(valid_564761, JString, required = true,
                                  default = nil)
-  if valid_574861 != nil:
-    section.add "jobScheduleId", valid_574861
+  if valid_564761 != nil:
+    section.add "jobScheduleId", valid_564761
   result.add "path", section
   ## parameters in `query` object:
-  ##   timeout: JInt
-  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   ##   api-version: JString (required)
   ##              : Client API Version.
+  ##   timeout: JInt
+  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   section = newJObject()
-  var valid_574862 = query.getOrDefault("timeout")
-  valid_574862 = validateParameter(valid_574862, JInt, required = false,
-                                 default = newJInt(30))
-  if valid_574862 != nil:
-    section.add "timeout", valid_574862
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574863 = query.getOrDefault("api-version")
-  valid_574863 = validateParameter(valid_574863, JString, required = true,
+  var valid_564762 = query.getOrDefault("api-version")
+  valid_564762 = validateParameter(valid_564762, JString, required = true,
                                  default = nil)
-  if valid_574863 != nil:
-    section.add "api-version", valid_574863
+  if valid_564762 != nil:
+    section.add "api-version", valid_564762
+  var valid_564763 = query.getOrDefault("timeout")
+  valid_564763 = validateParameter(valid_564763, JInt, required = false,
+                                 default = newJInt(30))
+  if valid_564763 != nil:
+    section.add "timeout", valid_564763
   result.add "query", section
   ## parameters in `header` object:
-  ##   If-Match: JString
-  ##           : An ETag value associated with the version of the resource known to the client. The operation will be performed only if the resource's current ETag on the service exactly matches the value specified by the client.
-  ##   client-request-id: JString
-  ##                    : The caller-generated request identity, in the form of a GUID with no decoration such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
-  ##   ocp-date: JString
-  ##           : The time the request was issued. Client libraries typically set this to the current system clock time; set it explicitly if you are calling the REST API directly.
-  ##   If-Unmodified-Since: JString
-  ##                      : A timestamp indicating the last modified time of the resource known to the client. The operation will be performed only if the resource on the service has not been modified since the specified time.
-  ##   If-None-Match: JString
-  ##                : An ETag value associated with the version of the resource known to the client. The operation will be performed only if the resource's current ETag on the service does not match the value specified by the client.
-  ##   If-Modified-Since: JString
-  ##                    : A timestamp indicating the last modified time of the resource known to the client. The operation will be performed only if the resource on the service has been modified since the specified time.
   ##   return-client-request-id: JBool
   ##                           : Whether the server should return the client-request-id in the response.
+  ##   If-Unmodified-Since: JString
+  ##                      : A timestamp indicating the last modified time of the resource known to the client. The operation will be performed only if the resource on the service has not been modified since the specified time.
+  ##   client-request-id: JString
+  ##                    : The caller-generated request identity, in the form of a GUID with no decoration such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
+  ##   If-Modified-Since: JString
+  ##                    : A timestamp indicating the last modified time of the resource known to the client. The operation will be performed only if the resource on the service has been modified since the specified time.
+  ##   If-None-Match: JString
+  ##                : An ETag value associated with the version of the resource known to the client. The operation will be performed only if the resource's current ETag on the service does not match the value specified by the client.
+  ##   ocp-date: JString
+  ##           : The time the request was issued. Client libraries typically set this to the current system clock time; set it explicitly if you are calling the REST API directly.
+  ##   If-Match: JString
+  ##           : An ETag value associated with the version of the resource known to the client. The operation will be performed only if the resource's current ETag on the service exactly matches the value specified by the client.
   section = newJObject()
-  var valid_574864 = header.getOrDefault("If-Match")
-  valid_574864 = validateParameter(valid_574864, JString, required = false,
-                                 default = nil)
-  if valid_574864 != nil:
-    section.add "If-Match", valid_574864
-  var valid_574865 = header.getOrDefault("client-request-id")
-  valid_574865 = validateParameter(valid_574865, JString, required = false,
-                                 default = nil)
-  if valid_574865 != nil:
-    section.add "client-request-id", valid_574865
-  var valid_574866 = header.getOrDefault("ocp-date")
-  valid_574866 = validateParameter(valid_574866, JString, required = false,
-                                 default = nil)
-  if valid_574866 != nil:
-    section.add "ocp-date", valid_574866
-  var valid_574867 = header.getOrDefault("If-Unmodified-Since")
-  valid_574867 = validateParameter(valid_574867, JString, required = false,
-                                 default = nil)
-  if valid_574867 != nil:
-    section.add "If-Unmodified-Since", valid_574867
-  var valid_574868 = header.getOrDefault("If-None-Match")
-  valid_574868 = validateParameter(valid_574868, JString, required = false,
-                                 default = nil)
-  if valid_574868 != nil:
-    section.add "If-None-Match", valid_574868
-  var valid_574869 = header.getOrDefault("If-Modified-Since")
-  valid_574869 = validateParameter(valid_574869, JString, required = false,
-                                 default = nil)
-  if valid_574869 != nil:
-    section.add "If-Modified-Since", valid_574869
-  var valid_574870 = header.getOrDefault("return-client-request-id")
-  valid_574870 = validateParameter(valid_574870, JBool, required = false,
+  var valid_564764 = header.getOrDefault("return-client-request-id")
+  valid_564764 = validateParameter(valid_564764, JBool, required = false,
                                  default = newJBool(false))
-  if valid_574870 != nil:
-    section.add "return-client-request-id", valid_574870
+  if valid_564764 != nil:
+    section.add "return-client-request-id", valid_564764
+  var valid_564765 = header.getOrDefault("If-Unmodified-Since")
+  valid_564765 = validateParameter(valid_564765, JString, required = false,
+                                 default = nil)
+  if valid_564765 != nil:
+    section.add "If-Unmodified-Since", valid_564765
+  var valid_564766 = header.getOrDefault("client-request-id")
+  valid_564766 = validateParameter(valid_564766, JString, required = false,
+                                 default = nil)
+  if valid_564766 != nil:
+    section.add "client-request-id", valid_564766
+  var valid_564767 = header.getOrDefault("If-Modified-Since")
+  valid_564767 = validateParameter(valid_564767, JString, required = false,
+                                 default = nil)
+  if valid_564767 != nil:
+    section.add "If-Modified-Since", valid_564767
+  var valid_564768 = header.getOrDefault("If-None-Match")
+  valid_564768 = validateParameter(valid_564768, JString, required = false,
+                                 default = nil)
+  if valid_564768 != nil:
+    section.add "If-None-Match", valid_564768
+  var valid_564769 = header.getOrDefault("ocp-date")
+  valid_564769 = validateParameter(valid_564769, JString, required = false,
+                                 default = nil)
+  if valid_564769 != nil:
+    section.add "ocp-date", valid_564769
+  var valid_564770 = header.getOrDefault("If-Match")
+  valid_564770 = validateParameter(valid_564770, JString, required = false,
+                                 default = nil)
+  if valid_564770 != nil:
+    section.add "If-Match", valid_564770
   result.add "header", section
   section = newJObject()
   result.add "formData", section
   if body != nil:
     result.add "body", body
 
-proc call*(call_574871: Call_JobScheduleDisable_574858; path: JsonNode;
+proc call*(call_564771: Call_JobScheduleDisable_564758; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## No new Jobs will be created until the Job Schedule is enabled again.
   ## 
-  let valid = call_574871.validator(path, query, header, formData, body)
-  let scheme = call_574871.pickScheme
+  let valid = call_564771.validator(path, query, header, formData, body)
+  let scheme = call_564771.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574871.url(scheme.get, call_574871.host, call_574871.base,
-                         call_574871.route, valid.getOrDefault("path"),
+  let url = call_564771.url(scheme.get, call_564771.host, call_564771.base,
+                         call_564771.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574871, url, valid)
+  result = hook(call_564771, url, valid)
 
-proc call*(call_574872: Call_JobScheduleDisable_574858; jobScheduleId: string;
-          apiVersion: string; timeout: int = 30): Recallable =
+proc call*(call_564772: Call_JobScheduleDisable_564758; apiVersion: string;
+          jobScheduleId: string; timeout: int = 30): Recallable =
   ## jobScheduleDisable
   ## No new Jobs will be created until the Job Schedule is enabled again.
-  ##   timeout: int
-  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
-  ##   jobScheduleId: string (required)
-  ##                : The ID of the Job Schedule to disable.
   ##   apiVersion: string (required)
   ##             : Client API Version.
-  var path_574873 = newJObject()
-  var query_574874 = newJObject()
-  add(query_574874, "timeout", newJInt(timeout))
-  add(path_574873, "jobScheduleId", newJString(jobScheduleId))
-  add(query_574874, "api-version", newJString(apiVersion))
-  result = call_574872.call(path_574873, query_574874, nil, nil, nil)
+  ##   jobScheduleId: string (required)
+  ##                : The ID of the Job Schedule to disable.
+  ##   timeout: int
+  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
+  var path_564773 = newJObject()
+  var query_564774 = newJObject()
+  add(query_564774, "api-version", newJString(apiVersion))
+  add(path_564773, "jobScheduleId", newJString(jobScheduleId))
+  add(query_564774, "timeout", newJInt(timeout))
+  result = call_564772.call(path_564773, query_564774, nil, nil, nil)
 
-var jobScheduleDisable* = Call_JobScheduleDisable_574858(
+var jobScheduleDisable* = Call_JobScheduleDisable_564758(
     name: "jobScheduleDisable", meth: HttpMethod.HttpPost, host: "azure.local",
     route: "/jobschedules/{jobScheduleId}/disable",
-    validator: validate_JobScheduleDisable_574859, base: "",
-    url: url_JobScheduleDisable_574860, schemes: {Scheme.Https})
+    validator: validate_JobScheduleDisable_564759, base: "",
+    url: url_JobScheduleDisable_564760, schemes: {Scheme.Https})
 type
-  Call_JobScheduleEnable_574875 = ref object of OpenApiRestCall_573667
-proc url_JobScheduleEnable_574877(protocol: Scheme; host: string; base: string;
+  Call_JobScheduleEnable_564775 = ref object of OpenApiRestCall_563565
+proc url_JobScheduleEnable_564777(protocol: Scheme; host: string; base: string;
                                  route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -5726,7 +5733,7 @@ proc url_JobScheduleEnable_574877(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_JobScheduleEnable_574876(path: JsonNode; query: JsonNode;
+proc validate_JobScheduleEnable_564776(path: JsonNode; query: JsonNode;
                                       header: JsonNode; formData: JsonNode;
                                       body: JsonNode): JsonNode =
   var section: JsonNode
@@ -5737,123 +5744,123 @@ proc validate_JobScheduleEnable_574876(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `jobScheduleId` field"
-  var valid_574878 = path.getOrDefault("jobScheduleId")
-  valid_574878 = validateParameter(valid_574878, JString, required = true,
+  var valid_564778 = path.getOrDefault("jobScheduleId")
+  valid_564778 = validateParameter(valid_564778, JString, required = true,
                                  default = nil)
-  if valid_574878 != nil:
-    section.add "jobScheduleId", valid_574878
+  if valid_564778 != nil:
+    section.add "jobScheduleId", valid_564778
   result.add "path", section
   ## parameters in `query` object:
-  ##   timeout: JInt
-  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   ##   api-version: JString (required)
   ##              : Client API Version.
+  ##   timeout: JInt
+  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   section = newJObject()
-  var valid_574879 = query.getOrDefault("timeout")
-  valid_574879 = validateParameter(valid_574879, JInt, required = false,
-                                 default = newJInt(30))
-  if valid_574879 != nil:
-    section.add "timeout", valid_574879
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574880 = query.getOrDefault("api-version")
-  valid_574880 = validateParameter(valid_574880, JString, required = true,
+  var valid_564779 = query.getOrDefault("api-version")
+  valid_564779 = validateParameter(valid_564779, JString, required = true,
                                  default = nil)
-  if valid_574880 != nil:
-    section.add "api-version", valid_574880
+  if valid_564779 != nil:
+    section.add "api-version", valid_564779
+  var valid_564780 = query.getOrDefault("timeout")
+  valid_564780 = validateParameter(valid_564780, JInt, required = false,
+                                 default = newJInt(30))
+  if valid_564780 != nil:
+    section.add "timeout", valid_564780
   result.add "query", section
   ## parameters in `header` object:
-  ##   If-Match: JString
-  ##           : An ETag value associated with the version of the resource known to the client. The operation will be performed only if the resource's current ETag on the service exactly matches the value specified by the client.
-  ##   client-request-id: JString
-  ##                    : The caller-generated request identity, in the form of a GUID with no decoration such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
-  ##   ocp-date: JString
-  ##           : The time the request was issued. Client libraries typically set this to the current system clock time; set it explicitly if you are calling the REST API directly.
-  ##   If-Unmodified-Since: JString
-  ##                      : A timestamp indicating the last modified time of the resource known to the client. The operation will be performed only if the resource on the service has not been modified since the specified time.
-  ##   If-None-Match: JString
-  ##                : An ETag value associated with the version of the resource known to the client. The operation will be performed only if the resource's current ETag on the service does not match the value specified by the client.
-  ##   If-Modified-Since: JString
-  ##                    : A timestamp indicating the last modified time of the resource known to the client. The operation will be performed only if the resource on the service has been modified since the specified time.
   ##   return-client-request-id: JBool
   ##                           : Whether the server should return the client-request-id in the response.
+  ##   If-Unmodified-Since: JString
+  ##                      : A timestamp indicating the last modified time of the resource known to the client. The operation will be performed only if the resource on the service has not been modified since the specified time.
+  ##   client-request-id: JString
+  ##                    : The caller-generated request identity, in the form of a GUID with no decoration such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
+  ##   If-Modified-Since: JString
+  ##                    : A timestamp indicating the last modified time of the resource known to the client. The operation will be performed only if the resource on the service has been modified since the specified time.
+  ##   If-None-Match: JString
+  ##                : An ETag value associated with the version of the resource known to the client. The operation will be performed only if the resource's current ETag on the service does not match the value specified by the client.
+  ##   ocp-date: JString
+  ##           : The time the request was issued. Client libraries typically set this to the current system clock time; set it explicitly if you are calling the REST API directly.
+  ##   If-Match: JString
+  ##           : An ETag value associated with the version of the resource known to the client. The operation will be performed only if the resource's current ETag on the service exactly matches the value specified by the client.
   section = newJObject()
-  var valid_574881 = header.getOrDefault("If-Match")
-  valid_574881 = validateParameter(valid_574881, JString, required = false,
-                                 default = nil)
-  if valid_574881 != nil:
-    section.add "If-Match", valid_574881
-  var valid_574882 = header.getOrDefault("client-request-id")
-  valid_574882 = validateParameter(valid_574882, JString, required = false,
-                                 default = nil)
-  if valid_574882 != nil:
-    section.add "client-request-id", valid_574882
-  var valid_574883 = header.getOrDefault("ocp-date")
-  valid_574883 = validateParameter(valid_574883, JString, required = false,
-                                 default = nil)
-  if valid_574883 != nil:
-    section.add "ocp-date", valid_574883
-  var valid_574884 = header.getOrDefault("If-Unmodified-Since")
-  valid_574884 = validateParameter(valid_574884, JString, required = false,
-                                 default = nil)
-  if valid_574884 != nil:
-    section.add "If-Unmodified-Since", valid_574884
-  var valid_574885 = header.getOrDefault("If-None-Match")
-  valid_574885 = validateParameter(valid_574885, JString, required = false,
-                                 default = nil)
-  if valid_574885 != nil:
-    section.add "If-None-Match", valid_574885
-  var valid_574886 = header.getOrDefault("If-Modified-Since")
-  valid_574886 = validateParameter(valid_574886, JString, required = false,
-                                 default = nil)
-  if valid_574886 != nil:
-    section.add "If-Modified-Since", valid_574886
-  var valid_574887 = header.getOrDefault("return-client-request-id")
-  valid_574887 = validateParameter(valid_574887, JBool, required = false,
+  var valid_564781 = header.getOrDefault("return-client-request-id")
+  valid_564781 = validateParameter(valid_564781, JBool, required = false,
                                  default = newJBool(false))
-  if valid_574887 != nil:
-    section.add "return-client-request-id", valid_574887
+  if valid_564781 != nil:
+    section.add "return-client-request-id", valid_564781
+  var valid_564782 = header.getOrDefault("If-Unmodified-Since")
+  valid_564782 = validateParameter(valid_564782, JString, required = false,
+                                 default = nil)
+  if valid_564782 != nil:
+    section.add "If-Unmodified-Since", valid_564782
+  var valid_564783 = header.getOrDefault("client-request-id")
+  valid_564783 = validateParameter(valid_564783, JString, required = false,
+                                 default = nil)
+  if valid_564783 != nil:
+    section.add "client-request-id", valid_564783
+  var valid_564784 = header.getOrDefault("If-Modified-Since")
+  valid_564784 = validateParameter(valid_564784, JString, required = false,
+                                 default = nil)
+  if valid_564784 != nil:
+    section.add "If-Modified-Since", valid_564784
+  var valid_564785 = header.getOrDefault("If-None-Match")
+  valid_564785 = validateParameter(valid_564785, JString, required = false,
+                                 default = nil)
+  if valid_564785 != nil:
+    section.add "If-None-Match", valid_564785
+  var valid_564786 = header.getOrDefault("ocp-date")
+  valid_564786 = validateParameter(valid_564786, JString, required = false,
+                                 default = nil)
+  if valid_564786 != nil:
+    section.add "ocp-date", valid_564786
+  var valid_564787 = header.getOrDefault("If-Match")
+  valid_564787 = validateParameter(valid_564787, JString, required = false,
+                                 default = nil)
+  if valid_564787 != nil:
+    section.add "If-Match", valid_564787
   result.add "header", section
   section = newJObject()
   result.add "formData", section
   if body != nil:
     result.add "body", body
 
-proc call*(call_574888: Call_JobScheduleEnable_574875; path: JsonNode;
+proc call*(call_564788: Call_JobScheduleEnable_564775; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
-  let valid = call_574888.validator(path, query, header, formData, body)
-  let scheme = call_574888.pickScheme
+  let valid = call_564788.validator(path, query, header, formData, body)
+  let scheme = call_564788.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574888.url(scheme.get, call_574888.host, call_574888.base,
-                         call_574888.route, valid.getOrDefault("path"),
+  let url = call_564788.url(scheme.get, call_564788.host, call_564788.base,
+                         call_564788.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574888, url, valid)
+  result = hook(call_564788, url, valid)
 
-proc call*(call_574889: Call_JobScheduleEnable_574875; jobScheduleId: string;
-          apiVersion: string; timeout: int = 30): Recallable =
+proc call*(call_564789: Call_JobScheduleEnable_564775; apiVersion: string;
+          jobScheduleId: string; timeout: int = 30): Recallable =
   ## jobScheduleEnable
-  ##   timeout: int
-  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
-  ##   jobScheduleId: string (required)
-  ##                : The ID of the Job Schedule to enable.
   ##   apiVersion: string (required)
   ##             : Client API Version.
-  var path_574890 = newJObject()
-  var query_574891 = newJObject()
-  add(query_574891, "timeout", newJInt(timeout))
-  add(path_574890, "jobScheduleId", newJString(jobScheduleId))
-  add(query_574891, "api-version", newJString(apiVersion))
-  result = call_574889.call(path_574890, query_574891, nil, nil, nil)
+  ##   jobScheduleId: string (required)
+  ##                : The ID of the Job Schedule to enable.
+  ##   timeout: int
+  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
+  var path_564790 = newJObject()
+  var query_564791 = newJObject()
+  add(query_564791, "api-version", newJString(apiVersion))
+  add(path_564790, "jobScheduleId", newJString(jobScheduleId))
+  add(query_564791, "timeout", newJInt(timeout))
+  result = call_564789.call(path_564790, query_564791, nil, nil, nil)
 
-var jobScheduleEnable* = Call_JobScheduleEnable_574875(name: "jobScheduleEnable",
+var jobScheduleEnable* = Call_JobScheduleEnable_564775(name: "jobScheduleEnable",
     meth: HttpMethod.HttpPost, host: "azure.local",
     route: "/jobschedules/{jobScheduleId}/enable",
-    validator: validate_JobScheduleEnable_574876, base: "",
-    url: url_JobScheduleEnable_574877, schemes: {Scheme.Https})
+    validator: validate_JobScheduleEnable_564776, base: "",
+    url: url_JobScheduleEnable_564777, schemes: {Scheme.Https})
 type
-  Call_JobListFromJobSchedule_574892 = ref object of OpenApiRestCall_573667
-proc url_JobListFromJobSchedule_574894(protocol: Scheme; host: string; base: string;
+  Call_JobListFromJobSchedule_564792 = ref object of OpenApiRestCall_563565
+proc url_JobListFromJobSchedule_564794(protocol: Scheme; host: string; base: string;
                                       route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -5869,7 +5876,7 @@ proc url_JobListFromJobSchedule_574894(protocol: Scheme; host: string; base: str
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_JobListFromJobSchedule_574893(path: JsonNode; query: JsonNode;
+proc validate_JobListFromJobSchedule_564793(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   var section: JsonNode
   result = newJObject()
@@ -5879,138 +5886,138 @@ proc validate_JobListFromJobSchedule_574893(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `jobScheduleId` field"
-  var valid_574895 = path.getOrDefault("jobScheduleId")
-  valid_574895 = validateParameter(valid_574895, JString, required = true,
+  var valid_564795 = path.getOrDefault("jobScheduleId")
+  valid_564795 = validateParameter(valid_564795, JString, required = true,
                                  default = nil)
-  if valid_574895 != nil:
-    section.add "jobScheduleId", valid_574895
+  if valid_564795 != nil:
+    section.add "jobScheduleId", valid_564795
   result.add "path", section
   ## parameters in `query` object:
-  ##   timeout: JInt
-  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
-  ##   $expand: JString
-  ##          : An OData $expand clause.
   ##   api-version: JString (required)
   ##              : Client API Version.
-  ##   maxresults: JInt
-  ##             : The maximum number of items to return in the response. A maximum of 1000 Jobs can be returned.
   ##   $select: JString
   ##          : An OData $select clause.
+  ##   $expand: JString
+  ##          : An OData $expand clause.
+  ##   timeout: JInt
+  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
+  ##   maxresults: JInt
+  ##             : The maximum number of items to return in the response. A maximum of 1000 Jobs can be returned.
   ##   $filter: JString
   ##          : An OData $filter clause. For more information on constructing this filter, see 
   ## https://docs.microsoft.com/en-us/rest/api/batchservice/odata-filters-in-batch#list-jobs-in-a-job-schedule.
   section = newJObject()
-  var valid_574896 = query.getOrDefault("timeout")
-  valid_574896 = validateParameter(valid_574896, JInt, required = false,
-                                 default = newJInt(30))
-  if valid_574896 != nil:
-    section.add "timeout", valid_574896
-  var valid_574897 = query.getOrDefault("$expand")
-  valid_574897 = validateParameter(valid_574897, JString, required = false,
-                                 default = nil)
-  if valid_574897 != nil:
-    section.add "$expand", valid_574897
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574898 = query.getOrDefault("api-version")
-  valid_574898 = validateParameter(valid_574898, JString, required = true,
+  var valid_564796 = query.getOrDefault("api-version")
+  valid_564796 = validateParameter(valid_564796, JString, required = true,
                                  default = nil)
-  if valid_574898 != nil:
-    section.add "api-version", valid_574898
-  var valid_574899 = query.getOrDefault("maxresults")
-  valid_574899 = validateParameter(valid_574899, JInt, required = false,
+  if valid_564796 != nil:
+    section.add "api-version", valid_564796
+  var valid_564797 = query.getOrDefault("$select")
+  valid_564797 = validateParameter(valid_564797, JString, required = false,
+                                 default = nil)
+  if valid_564797 != nil:
+    section.add "$select", valid_564797
+  var valid_564798 = query.getOrDefault("$expand")
+  valid_564798 = validateParameter(valid_564798, JString, required = false,
+                                 default = nil)
+  if valid_564798 != nil:
+    section.add "$expand", valid_564798
+  var valid_564799 = query.getOrDefault("timeout")
+  valid_564799 = validateParameter(valid_564799, JInt, required = false,
+                                 default = newJInt(30))
+  if valid_564799 != nil:
+    section.add "timeout", valid_564799
+  var valid_564800 = query.getOrDefault("maxresults")
+  valid_564800 = validateParameter(valid_564800, JInt, required = false,
                                  default = newJInt(1000))
-  if valid_574899 != nil:
-    section.add "maxresults", valid_574899
-  var valid_574900 = query.getOrDefault("$select")
-  valid_574900 = validateParameter(valid_574900, JString, required = false,
+  if valid_564800 != nil:
+    section.add "maxresults", valid_564800
+  var valid_564801 = query.getOrDefault("$filter")
+  valid_564801 = validateParameter(valid_564801, JString, required = false,
                                  default = nil)
-  if valid_574900 != nil:
-    section.add "$select", valid_574900
-  var valid_574901 = query.getOrDefault("$filter")
-  valid_574901 = validateParameter(valid_574901, JString, required = false,
-                                 default = nil)
-  if valid_574901 != nil:
-    section.add "$filter", valid_574901
+  if valid_564801 != nil:
+    section.add "$filter", valid_564801
   result.add "query", section
   ## parameters in `header` object:
+  ##   return-client-request-id: JBool
+  ##                           : Whether the server should return the client-request-id in the response.
   ##   client-request-id: JString
   ##                    : The caller-generated request identity, in the form of a GUID with no decoration such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
   ##   ocp-date: JString
   ##           : The time the request was issued. Client libraries typically set this to the current system clock time; set it explicitly if you are calling the REST API directly.
-  ##   return-client-request-id: JBool
-  ##                           : Whether the server should return the client-request-id in the response.
   section = newJObject()
-  var valid_574902 = header.getOrDefault("client-request-id")
-  valid_574902 = validateParameter(valid_574902, JString, required = false,
-                                 default = nil)
-  if valid_574902 != nil:
-    section.add "client-request-id", valid_574902
-  var valid_574903 = header.getOrDefault("ocp-date")
-  valid_574903 = validateParameter(valid_574903, JString, required = false,
-                                 default = nil)
-  if valid_574903 != nil:
-    section.add "ocp-date", valid_574903
-  var valid_574904 = header.getOrDefault("return-client-request-id")
-  valid_574904 = validateParameter(valid_574904, JBool, required = false,
+  var valid_564802 = header.getOrDefault("return-client-request-id")
+  valid_564802 = validateParameter(valid_564802, JBool, required = false,
                                  default = newJBool(false))
-  if valid_574904 != nil:
-    section.add "return-client-request-id", valid_574904
+  if valid_564802 != nil:
+    section.add "return-client-request-id", valid_564802
+  var valid_564803 = header.getOrDefault("client-request-id")
+  valid_564803 = validateParameter(valid_564803, JString, required = false,
+                                 default = nil)
+  if valid_564803 != nil:
+    section.add "client-request-id", valid_564803
+  var valid_564804 = header.getOrDefault("ocp-date")
+  valid_564804 = validateParameter(valid_564804, JString, required = false,
+                                 default = nil)
+  if valid_564804 != nil:
+    section.add "ocp-date", valid_564804
   result.add "header", section
   section = newJObject()
   result.add "formData", section
   if body != nil:
     result.add "body", body
 
-proc call*(call_574905: Call_JobListFromJobSchedule_574892; path: JsonNode;
+proc call*(call_564805: Call_JobListFromJobSchedule_564792; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
-  let valid = call_574905.validator(path, query, header, formData, body)
-  let scheme = call_574905.pickScheme
+  let valid = call_564805.validator(path, query, header, formData, body)
+  let scheme = call_564805.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574905.url(scheme.get, call_574905.host, call_574905.base,
-                         call_574905.route, valid.getOrDefault("path"),
+  let url = call_564805.url(scheme.get, call_564805.host, call_564805.base,
+                         call_564805.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574905, url, valid)
+  result = hook(call_564805, url, valid)
 
-proc call*(call_574906: Call_JobListFromJobSchedule_574892; jobScheduleId: string;
-          apiVersion: string; timeout: int = 30; Expand: string = "";
-          maxresults: int = 1000; Select: string = ""; Filter: string = ""): Recallable =
+proc call*(call_564806: Call_JobListFromJobSchedule_564792; apiVersion: string;
+          jobScheduleId: string; Select: string = ""; Expand: string = "";
+          timeout: int = 30; maxresults: int = 1000; Filter: string = ""): Recallable =
   ## jobListFromJobSchedule
-  ##   timeout: int
-  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
-  ##   jobScheduleId: string (required)
-  ##                : The ID of the Job Schedule from which you want to get a list of Jobs.
-  ##   Expand: string
-  ##         : An OData $expand clause.
   ##   apiVersion: string (required)
   ##             : Client API Version.
-  ##   maxresults: int
-  ##             : The maximum number of items to return in the response. A maximum of 1000 Jobs can be returned.
   ##   Select: string
   ##         : An OData $select clause.
+  ##   Expand: string
+  ##         : An OData $expand clause.
+  ##   jobScheduleId: string (required)
+  ##                : The ID of the Job Schedule from which you want to get a list of Jobs.
+  ##   timeout: int
+  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
+  ##   maxresults: int
+  ##             : The maximum number of items to return in the response. A maximum of 1000 Jobs can be returned.
   ##   Filter: string
   ##         : An OData $filter clause. For more information on constructing this filter, see 
   ## https://docs.microsoft.com/en-us/rest/api/batchservice/odata-filters-in-batch#list-jobs-in-a-job-schedule.
-  var path_574907 = newJObject()
-  var query_574908 = newJObject()
-  add(query_574908, "timeout", newJInt(timeout))
-  add(path_574907, "jobScheduleId", newJString(jobScheduleId))
-  add(query_574908, "$expand", newJString(Expand))
-  add(query_574908, "api-version", newJString(apiVersion))
-  add(query_574908, "maxresults", newJInt(maxresults))
-  add(query_574908, "$select", newJString(Select))
-  add(query_574908, "$filter", newJString(Filter))
-  result = call_574906.call(path_574907, query_574908, nil, nil, nil)
+  var path_564807 = newJObject()
+  var query_564808 = newJObject()
+  add(query_564808, "api-version", newJString(apiVersion))
+  add(query_564808, "$select", newJString(Select))
+  add(query_564808, "$expand", newJString(Expand))
+  add(path_564807, "jobScheduleId", newJString(jobScheduleId))
+  add(query_564808, "timeout", newJInt(timeout))
+  add(query_564808, "maxresults", newJInt(maxresults))
+  add(query_564808, "$filter", newJString(Filter))
+  result = call_564806.call(path_564807, query_564808, nil, nil, nil)
 
-var jobListFromJobSchedule* = Call_JobListFromJobSchedule_574892(
+var jobListFromJobSchedule* = Call_JobListFromJobSchedule_564792(
     name: "jobListFromJobSchedule", meth: HttpMethod.HttpGet, host: "azure.local",
     route: "/jobschedules/{jobScheduleId}/jobs",
-    validator: validate_JobListFromJobSchedule_574893, base: "",
-    url: url_JobListFromJobSchedule_574894, schemes: {Scheme.Https})
+    validator: validate_JobListFromJobSchedule_564793, base: "",
+    url: url_JobListFromJobSchedule_564794, schemes: {Scheme.Https})
 type
-  Call_JobScheduleTerminate_574909 = ref object of OpenApiRestCall_573667
-proc url_JobScheduleTerminate_574911(protocol: Scheme; host: string; base: string;
+  Call_JobScheduleTerminate_564809 = ref object of OpenApiRestCall_563565
+proc url_JobScheduleTerminate_564811(protocol: Scheme; host: string; base: string;
                                     route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -6026,7 +6033,7 @@ proc url_JobScheduleTerminate_574911(protocol: Scheme; host: string; base: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_JobScheduleTerminate_574910(path: JsonNode; query: JsonNode;
+proc validate_JobScheduleTerminate_564810(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   var section: JsonNode
   result = newJObject()
@@ -6036,130 +6043,130 @@ proc validate_JobScheduleTerminate_574910(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `jobScheduleId` field"
-  var valid_574912 = path.getOrDefault("jobScheduleId")
-  valid_574912 = validateParameter(valid_574912, JString, required = true,
+  var valid_564812 = path.getOrDefault("jobScheduleId")
+  valid_564812 = validateParameter(valid_564812, JString, required = true,
                                  default = nil)
-  if valid_574912 != nil:
-    section.add "jobScheduleId", valid_574912
+  if valid_564812 != nil:
+    section.add "jobScheduleId", valid_564812
   result.add "path", section
   ## parameters in `query` object:
-  ##   timeout: JInt
-  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   ##   api-version: JString (required)
   ##              : Client API Version.
+  ##   timeout: JInt
+  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   section = newJObject()
-  var valid_574913 = query.getOrDefault("timeout")
-  valid_574913 = validateParameter(valid_574913, JInt, required = false,
-                                 default = newJInt(30))
-  if valid_574913 != nil:
-    section.add "timeout", valid_574913
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574914 = query.getOrDefault("api-version")
-  valid_574914 = validateParameter(valid_574914, JString, required = true,
+  var valid_564813 = query.getOrDefault("api-version")
+  valid_564813 = validateParameter(valid_564813, JString, required = true,
                                  default = nil)
-  if valid_574914 != nil:
-    section.add "api-version", valid_574914
+  if valid_564813 != nil:
+    section.add "api-version", valid_564813
+  var valid_564814 = query.getOrDefault("timeout")
+  valid_564814 = validateParameter(valid_564814, JInt, required = false,
+                                 default = newJInt(30))
+  if valid_564814 != nil:
+    section.add "timeout", valid_564814
   result.add "query", section
   ## parameters in `header` object:
-  ##   If-Match: JString
-  ##           : An ETag value associated with the version of the resource known to the client. The operation will be performed only if the resource's current ETag on the service exactly matches the value specified by the client.
-  ##   client-request-id: JString
-  ##                    : The caller-generated request identity, in the form of a GUID with no decoration such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
-  ##   ocp-date: JString
-  ##           : The time the request was issued. Client libraries typically set this to the current system clock time; set it explicitly if you are calling the REST API directly.
-  ##   If-Unmodified-Since: JString
-  ##                      : A timestamp indicating the last modified time of the resource known to the client. The operation will be performed only if the resource on the service has not been modified since the specified time.
-  ##   If-None-Match: JString
-  ##                : An ETag value associated with the version of the resource known to the client. The operation will be performed only if the resource's current ETag on the service does not match the value specified by the client.
-  ##   If-Modified-Since: JString
-  ##                    : A timestamp indicating the last modified time of the resource known to the client. The operation will be performed only if the resource on the service has been modified since the specified time.
   ##   return-client-request-id: JBool
   ##                           : Whether the server should return the client-request-id in the response.
+  ##   If-Unmodified-Since: JString
+  ##                      : A timestamp indicating the last modified time of the resource known to the client. The operation will be performed only if the resource on the service has not been modified since the specified time.
+  ##   client-request-id: JString
+  ##                    : The caller-generated request identity, in the form of a GUID with no decoration such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
+  ##   If-Modified-Since: JString
+  ##                    : A timestamp indicating the last modified time of the resource known to the client. The operation will be performed only if the resource on the service has been modified since the specified time.
+  ##   If-None-Match: JString
+  ##                : An ETag value associated with the version of the resource known to the client. The operation will be performed only if the resource's current ETag on the service does not match the value specified by the client.
+  ##   ocp-date: JString
+  ##           : The time the request was issued. Client libraries typically set this to the current system clock time; set it explicitly if you are calling the REST API directly.
+  ##   If-Match: JString
+  ##           : An ETag value associated with the version of the resource known to the client. The operation will be performed only if the resource's current ETag on the service exactly matches the value specified by the client.
   section = newJObject()
-  var valid_574915 = header.getOrDefault("If-Match")
-  valid_574915 = validateParameter(valid_574915, JString, required = false,
-                                 default = nil)
-  if valid_574915 != nil:
-    section.add "If-Match", valid_574915
-  var valid_574916 = header.getOrDefault("client-request-id")
-  valid_574916 = validateParameter(valid_574916, JString, required = false,
-                                 default = nil)
-  if valid_574916 != nil:
-    section.add "client-request-id", valid_574916
-  var valid_574917 = header.getOrDefault("ocp-date")
-  valid_574917 = validateParameter(valid_574917, JString, required = false,
-                                 default = nil)
-  if valid_574917 != nil:
-    section.add "ocp-date", valid_574917
-  var valid_574918 = header.getOrDefault("If-Unmodified-Since")
-  valid_574918 = validateParameter(valid_574918, JString, required = false,
-                                 default = nil)
-  if valid_574918 != nil:
-    section.add "If-Unmodified-Since", valid_574918
-  var valid_574919 = header.getOrDefault("If-None-Match")
-  valid_574919 = validateParameter(valid_574919, JString, required = false,
-                                 default = nil)
-  if valid_574919 != nil:
-    section.add "If-None-Match", valid_574919
-  var valid_574920 = header.getOrDefault("If-Modified-Since")
-  valid_574920 = validateParameter(valid_574920, JString, required = false,
-                                 default = nil)
-  if valid_574920 != nil:
-    section.add "If-Modified-Since", valid_574920
-  var valid_574921 = header.getOrDefault("return-client-request-id")
-  valid_574921 = validateParameter(valid_574921, JBool, required = false,
+  var valid_564815 = header.getOrDefault("return-client-request-id")
+  valid_564815 = validateParameter(valid_564815, JBool, required = false,
                                  default = newJBool(false))
-  if valid_574921 != nil:
-    section.add "return-client-request-id", valid_574921
+  if valid_564815 != nil:
+    section.add "return-client-request-id", valid_564815
+  var valid_564816 = header.getOrDefault("If-Unmodified-Since")
+  valid_564816 = validateParameter(valid_564816, JString, required = false,
+                                 default = nil)
+  if valid_564816 != nil:
+    section.add "If-Unmodified-Since", valid_564816
+  var valid_564817 = header.getOrDefault("client-request-id")
+  valid_564817 = validateParameter(valid_564817, JString, required = false,
+                                 default = nil)
+  if valid_564817 != nil:
+    section.add "client-request-id", valid_564817
+  var valid_564818 = header.getOrDefault("If-Modified-Since")
+  valid_564818 = validateParameter(valid_564818, JString, required = false,
+                                 default = nil)
+  if valid_564818 != nil:
+    section.add "If-Modified-Since", valid_564818
+  var valid_564819 = header.getOrDefault("If-None-Match")
+  valid_564819 = validateParameter(valid_564819, JString, required = false,
+                                 default = nil)
+  if valid_564819 != nil:
+    section.add "If-None-Match", valid_564819
+  var valid_564820 = header.getOrDefault("ocp-date")
+  valid_564820 = validateParameter(valid_564820, JString, required = false,
+                                 default = nil)
+  if valid_564820 != nil:
+    section.add "ocp-date", valid_564820
+  var valid_564821 = header.getOrDefault("If-Match")
+  valid_564821 = validateParameter(valid_564821, JString, required = false,
+                                 default = nil)
+  if valid_564821 != nil:
+    section.add "If-Match", valid_564821
   result.add "header", section
   section = newJObject()
   result.add "formData", section
   if body != nil:
     result.add "body", body
 
-proc call*(call_574922: Call_JobScheduleTerminate_574909; path: JsonNode;
+proc call*(call_564822: Call_JobScheduleTerminate_564809; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
-  let valid = call_574922.validator(path, query, header, formData, body)
-  let scheme = call_574922.pickScheme
+  let valid = call_564822.validator(path, query, header, formData, body)
+  let scheme = call_564822.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574922.url(scheme.get, call_574922.host, call_574922.base,
-                         call_574922.route, valid.getOrDefault("path"),
+  let url = call_564822.url(scheme.get, call_564822.host, call_564822.base,
+                         call_564822.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574922, url, valid)
+  result = hook(call_564822, url, valid)
 
-proc call*(call_574923: Call_JobScheduleTerminate_574909; jobScheduleId: string;
-          apiVersion: string; timeout: int = 30): Recallable =
+proc call*(call_564823: Call_JobScheduleTerminate_564809; apiVersion: string;
+          jobScheduleId: string; timeout: int = 30): Recallable =
   ## jobScheduleTerminate
-  ##   timeout: int
-  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
-  ##   jobScheduleId: string (required)
-  ##                : The ID of the Job Schedule to terminates.
   ##   apiVersion: string (required)
   ##             : Client API Version.
-  var path_574924 = newJObject()
-  var query_574925 = newJObject()
-  add(query_574925, "timeout", newJInt(timeout))
-  add(path_574924, "jobScheduleId", newJString(jobScheduleId))
-  add(query_574925, "api-version", newJString(apiVersion))
-  result = call_574923.call(path_574924, query_574925, nil, nil, nil)
+  ##   jobScheduleId: string (required)
+  ##                : The ID of the Job Schedule to terminates.
+  ##   timeout: int
+  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
+  var path_564824 = newJObject()
+  var query_564825 = newJObject()
+  add(query_564825, "api-version", newJString(apiVersion))
+  add(path_564824, "jobScheduleId", newJString(jobScheduleId))
+  add(query_564825, "timeout", newJInt(timeout))
+  result = call_564823.call(path_564824, query_564825, nil, nil, nil)
 
-var jobScheduleTerminate* = Call_JobScheduleTerminate_574909(
+var jobScheduleTerminate* = Call_JobScheduleTerminate_564809(
     name: "jobScheduleTerminate", meth: HttpMethod.HttpPost, host: "azure.local",
     route: "/jobschedules/{jobScheduleId}/terminate",
-    validator: validate_JobScheduleTerminate_574910, base: "",
-    url: url_JobScheduleTerminate_574911, schemes: {Scheme.Https})
+    validator: validate_JobScheduleTerminate_564810, base: "",
+    url: url_JobScheduleTerminate_564811, schemes: {Scheme.Https})
 type
-  Call_JobGetAllLifetimeStatistics_574926 = ref object of OpenApiRestCall_573667
-proc url_JobGetAllLifetimeStatistics_574928(protocol: Scheme; host: string;
+  Call_JobGetAllLifetimeStatistics_564826 = ref object of OpenApiRestCall_563565
+proc url_JobGetAllLifetimeStatistics_564828(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_JobGetAllLifetimeStatistics_574927(path: JsonNode; query: JsonNode;
+proc validate_JobGetAllLifetimeStatistics_564827(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Statistics are aggregated across all Jobs that have ever existed in the Account, from Account creation to the last update time of the statistics. The statistics may not be immediately available. The Batch service performs periodic roll-up of statistics. The typical delay is about 30 minutes.
   ## 
@@ -6168,94 +6175,94 @@ proc validate_JobGetAllLifetimeStatistics_574927(path: JsonNode; query: JsonNode
   section = newJObject()
   result.add "path", section
   ## parameters in `query` object:
-  ##   timeout: JInt
-  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   ##   api-version: JString (required)
   ##              : Client API Version.
+  ##   timeout: JInt
+  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   section = newJObject()
-  var valid_574929 = query.getOrDefault("timeout")
-  valid_574929 = validateParameter(valid_574929, JInt, required = false,
-                                 default = newJInt(30))
-  if valid_574929 != nil:
-    section.add "timeout", valid_574929
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574930 = query.getOrDefault("api-version")
-  valid_574930 = validateParameter(valid_574930, JString, required = true,
+  var valid_564829 = query.getOrDefault("api-version")
+  valid_564829 = validateParameter(valid_564829, JString, required = true,
                                  default = nil)
-  if valid_574930 != nil:
-    section.add "api-version", valid_574930
+  if valid_564829 != nil:
+    section.add "api-version", valid_564829
+  var valid_564830 = query.getOrDefault("timeout")
+  valid_564830 = validateParameter(valid_564830, JInt, required = false,
+                                 default = newJInt(30))
+  if valid_564830 != nil:
+    section.add "timeout", valid_564830
   result.add "query", section
   ## parameters in `header` object:
+  ##   return-client-request-id: JBool
+  ##                           : Whether the server should return the client-request-id in the response.
   ##   client-request-id: JString
   ##                    : The caller-generated request identity, in the form of a GUID with no decoration such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
   ##   ocp-date: JString
   ##           : The time the request was issued. Client libraries typically set this to the current system clock time; set it explicitly if you are calling the REST API directly.
-  ##   return-client-request-id: JBool
-  ##                           : Whether the server should return the client-request-id in the response.
   section = newJObject()
-  var valid_574931 = header.getOrDefault("client-request-id")
-  valid_574931 = validateParameter(valid_574931, JString, required = false,
-                                 default = nil)
-  if valid_574931 != nil:
-    section.add "client-request-id", valid_574931
-  var valid_574932 = header.getOrDefault("ocp-date")
-  valid_574932 = validateParameter(valid_574932, JString, required = false,
-                                 default = nil)
-  if valid_574932 != nil:
-    section.add "ocp-date", valid_574932
-  var valid_574933 = header.getOrDefault("return-client-request-id")
-  valid_574933 = validateParameter(valid_574933, JBool, required = false,
+  var valid_564831 = header.getOrDefault("return-client-request-id")
+  valid_564831 = validateParameter(valid_564831, JBool, required = false,
                                  default = newJBool(false))
-  if valid_574933 != nil:
-    section.add "return-client-request-id", valid_574933
+  if valid_564831 != nil:
+    section.add "return-client-request-id", valid_564831
+  var valid_564832 = header.getOrDefault("client-request-id")
+  valid_564832 = validateParameter(valid_564832, JString, required = false,
+                                 default = nil)
+  if valid_564832 != nil:
+    section.add "client-request-id", valid_564832
+  var valid_564833 = header.getOrDefault("ocp-date")
+  valid_564833 = validateParameter(valid_564833, JString, required = false,
+                                 default = nil)
+  if valid_564833 != nil:
+    section.add "ocp-date", valid_564833
   result.add "header", section
   section = newJObject()
   result.add "formData", section
   if body != nil:
     result.add "body", body
 
-proc call*(call_574934: Call_JobGetAllLifetimeStatistics_574926; path: JsonNode;
+proc call*(call_564834: Call_JobGetAllLifetimeStatistics_564826; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Statistics are aggregated across all Jobs that have ever existed in the Account, from Account creation to the last update time of the statistics. The statistics may not be immediately available. The Batch service performs periodic roll-up of statistics. The typical delay is about 30 minutes.
   ## 
-  let valid = call_574934.validator(path, query, header, formData, body)
-  let scheme = call_574934.pickScheme
+  let valid = call_564834.validator(path, query, header, formData, body)
+  let scheme = call_564834.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574934.url(scheme.get, call_574934.host, call_574934.base,
-                         call_574934.route, valid.getOrDefault("path"),
+  let url = call_564834.url(scheme.get, call_564834.host, call_564834.base,
+                         call_564834.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574934, url, valid)
+  result = hook(call_564834, url, valid)
 
-proc call*(call_574935: Call_JobGetAllLifetimeStatistics_574926;
+proc call*(call_564835: Call_JobGetAllLifetimeStatistics_564826;
           apiVersion: string; timeout: int = 30): Recallable =
   ## jobGetAllLifetimeStatistics
   ## Statistics are aggregated across all Jobs that have ever existed in the Account, from Account creation to the last update time of the statistics. The statistics may not be immediately available. The Batch service performs periodic roll-up of statistics. The typical delay is about 30 minutes.
-  ##   timeout: int
-  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   ##   apiVersion: string (required)
   ##             : Client API Version.
-  var query_574936 = newJObject()
-  add(query_574936, "timeout", newJInt(timeout))
-  add(query_574936, "api-version", newJString(apiVersion))
-  result = call_574935.call(nil, query_574936, nil, nil, nil)
+  ##   timeout: int
+  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
+  var query_564836 = newJObject()
+  add(query_564836, "api-version", newJString(apiVersion))
+  add(query_564836, "timeout", newJInt(timeout))
+  result = call_564835.call(nil, query_564836, nil, nil, nil)
 
-var jobGetAllLifetimeStatistics* = Call_JobGetAllLifetimeStatistics_574926(
+var jobGetAllLifetimeStatistics* = Call_JobGetAllLifetimeStatistics_564826(
     name: "jobGetAllLifetimeStatistics", meth: HttpMethod.HttpGet,
     host: "azure.local", route: "/lifetimejobstats",
-    validator: validate_JobGetAllLifetimeStatistics_574927, base: "",
-    url: url_JobGetAllLifetimeStatistics_574928, schemes: {Scheme.Https})
+    validator: validate_JobGetAllLifetimeStatistics_564827, base: "",
+    url: url_JobGetAllLifetimeStatistics_564828, schemes: {Scheme.Https})
 type
-  Call_PoolGetAllLifetimeStatistics_574937 = ref object of OpenApiRestCall_573667
-proc url_PoolGetAllLifetimeStatistics_574939(protocol: Scheme; host: string;
+  Call_PoolGetAllLifetimeStatistics_564837 = ref object of OpenApiRestCall_563565
+proc url_PoolGetAllLifetimeStatistics_564839(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_PoolGetAllLifetimeStatistics_574938(path: JsonNode; query: JsonNode;
+proc validate_PoolGetAllLifetimeStatistics_564838(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Statistics are aggregated across all Pools that have ever existed in the Account, from Account creation to the last update time of the statistics. The statistics may not be immediately available. The Batch service performs periodic roll-up of statistics. The typical delay is about 30 minutes.
   ## 
@@ -6264,94 +6271,94 @@ proc validate_PoolGetAllLifetimeStatistics_574938(path: JsonNode; query: JsonNod
   section = newJObject()
   result.add "path", section
   ## parameters in `query` object:
-  ##   timeout: JInt
-  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   ##   api-version: JString (required)
   ##              : Client API Version.
+  ##   timeout: JInt
+  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   section = newJObject()
-  var valid_574940 = query.getOrDefault("timeout")
-  valid_574940 = validateParameter(valid_574940, JInt, required = false,
-                                 default = newJInt(30))
-  if valid_574940 != nil:
-    section.add "timeout", valid_574940
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574941 = query.getOrDefault("api-version")
-  valid_574941 = validateParameter(valid_574941, JString, required = true,
+  var valid_564840 = query.getOrDefault("api-version")
+  valid_564840 = validateParameter(valid_564840, JString, required = true,
                                  default = nil)
-  if valid_574941 != nil:
-    section.add "api-version", valid_574941
+  if valid_564840 != nil:
+    section.add "api-version", valid_564840
+  var valid_564841 = query.getOrDefault("timeout")
+  valid_564841 = validateParameter(valid_564841, JInt, required = false,
+                                 default = newJInt(30))
+  if valid_564841 != nil:
+    section.add "timeout", valid_564841
   result.add "query", section
   ## parameters in `header` object:
+  ##   return-client-request-id: JBool
+  ##                           : Whether the server should return the client-request-id in the response.
   ##   client-request-id: JString
   ##                    : The caller-generated request identity, in the form of a GUID with no decoration such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
   ##   ocp-date: JString
   ##           : The time the request was issued. Client libraries typically set this to the current system clock time; set it explicitly if you are calling the REST API directly.
-  ##   return-client-request-id: JBool
-  ##                           : Whether the server should return the client-request-id in the response.
   section = newJObject()
-  var valid_574942 = header.getOrDefault("client-request-id")
-  valid_574942 = validateParameter(valid_574942, JString, required = false,
-                                 default = nil)
-  if valid_574942 != nil:
-    section.add "client-request-id", valid_574942
-  var valid_574943 = header.getOrDefault("ocp-date")
-  valid_574943 = validateParameter(valid_574943, JString, required = false,
-                                 default = nil)
-  if valid_574943 != nil:
-    section.add "ocp-date", valid_574943
-  var valid_574944 = header.getOrDefault("return-client-request-id")
-  valid_574944 = validateParameter(valid_574944, JBool, required = false,
+  var valid_564842 = header.getOrDefault("return-client-request-id")
+  valid_564842 = validateParameter(valid_564842, JBool, required = false,
                                  default = newJBool(false))
-  if valid_574944 != nil:
-    section.add "return-client-request-id", valid_574944
+  if valid_564842 != nil:
+    section.add "return-client-request-id", valid_564842
+  var valid_564843 = header.getOrDefault("client-request-id")
+  valid_564843 = validateParameter(valid_564843, JString, required = false,
+                                 default = nil)
+  if valid_564843 != nil:
+    section.add "client-request-id", valid_564843
+  var valid_564844 = header.getOrDefault("ocp-date")
+  valid_564844 = validateParameter(valid_564844, JString, required = false,
+                                 default = nil)
+  if valid_564844 != nil:
+    section.add "ocp-date", valid_564844
   result.add "header", section
   section = newJObject()
   result.add "formData", section
   if body != nil:
     result.add "body", body
 
-proc call*(call_574945: Call_PoolGetAllLifetimeStatistics_574937; path: JsonNode;
+proc call*(call_564845: Call_PoolGetAllLifetimeStatistics_564837; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Statistics are aggregated across all Pools that have ever existed in the Account, from Account creation to the last update time of the statistics. The statistics may not be immediately available. The Batch service performs periodic roll-up of statistics. The typical delay is about 30 minutes.
   ## 
-  let valid = call_574945.validator(path, query, header, formData, body)
-  let scheme = call_574945.pickScheme
+  let valid = call_564845.validator(path, query, header, formData, body)
+  let scheme = call_564845.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574945.url(scheme.get, call_574945.host, call_574945.base,
-                         call_574945.route, valid.getOrDefault("path"),
+  let url = call_564845.url(scheme.get, call_564845.host, call_564845.base,
+                         call_564845.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574945, url, valid)
+  result = hook(call_564845, url, valid)
 
-proc call*(call_574946: Call_PoolGetAllLifetimeStatistics_574937;
+proc call*(call_564846: Call_PoolGetAllLifetimeStatistics_564837;
           apiVersion: string; timeout: int = 30): Recallable =
   ## poolGetAllLifetimeStatistics
   ## Statistics are aggregated across all Pools that have ever existed in the Account, from Account creation to the last update time of the statistics. The statistics may not be immediately available. The Batch service performs periodic roll-up of statistics. The typical delay is about 30 minutes.
-  ##   timeout: int
-  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   ##   apiVersion: string (required)
   ##             : Client API Version.
-  var query_574947 = newJObject()
-  add(query_574947, "timeout", newJInt(timeout))
-  add(query_574947, "api-version", newJString(apiVersion))
-  result = call_574946.call(nil, query_574947, nil, nil, nil)
+  ##   timeout: int
+  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
+  var query_564847 = newJObject()
+  add(query_564847, "api-version", newJString(apiVersion))
+  add(query_564847, "timeout", newJInt(timeout))
+  result = call_564846.call(nil, query_564847, nil, nil, nil)
 
-var poolGetAllLifetimeStatistics* = Call_PoolGetAllLifetimeStatistics_574937(
+var poolGetAllLifetimeStatistics* = Call_PoolGetAllLifetimeStatistics_564837(
     name: "poolGetAllLifetimeStatistics", meth: HttpMethod.HttpGet,
     host: "azure.local", route: "/lifetimepoolstats",
-    validator: validate_PoolGetAllLifetimeStatistics_574938, base: "",
-    url: url_PoolGetAllLifetimeStatistics_574939, schemes: {Scheme.Https})
+    validator: validate_PoolGetAllLifetimeStatistics_564838, base: "",
+    url: url_PoolGetAllLifetimeStatistics_564839, schemes: {Scheme.Https})
 type
-  Call_AccountListPoolNodeCounts_574948 = ref object of OpenApiRestCall_573667
-proc url_AccountListPoolNodeCounts_574950(protocol: Scheme; host: string;
+  Call_AccountListPoolNodeCounts_564848 = ref object of OpenApiRestCall_563565
+proc url_AccountListPoolNodeCounts_564850(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_AccountListPoolNodeCounts_574949(path: JsonNode; query: JsonNode;
+proc validate_AccountListPoolNodeCounts_564849(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the number of Compute Nodes in each state, grouped by Pool.
   ## 
@@ -6360,114 +6367,114 @@ proc validate_AccountListPoolNodeCounts_574949(path: JsonNode; query: JsonNode;
   section = newJObject()
   result.add "path", section
   ## parameters in `query` object:
-  ##   timeout: JInt
-  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   ##   api-version: JString (required)
   ##              : Client API Version.
+  ##   timeout: JInt
+  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   ##   maxresults: JInt
   ##             : The maximum number of items to return in the response.
   ##   $filter: JString
   ##          : An OData $filter clause. For more information on constructing this filter, see https://docs.microsoft.com/en-us/rest/api/batchservice/odata-filters-in-batch.
   section = newJObject()
-  var valid_574951 = query.getOrDefault("timeout")
-  valid_574951 = validateParameter(valid_574951, JInt, required = false,
-                                 default = newJInt(30))
-  if valid_574951 != nil:
-    section.add "timeout", valid_574951
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574952 = query.getOrDefault("api-version")
-  valid_574952 = validateParameter(valid_574952, JString, required = true,
+  var valid_564851 = query.getOrDefault("api-version")
+  valid_564851 = validateParameter(valid_564851, JString, required = true,
                                  default = nil)
-  if valid_574952 != nil:
-    section.add "api-version", valid_574952
-  var valid_574953 = query.getOrDefault("maxresults")
-  valid_574953 = validateParameter(valid_574953, JInt, required = false,
+  if valid_564851 != nil:
+    section.add "api-version", valid_564851
+  var valid_564852 = query.getOrDefault("timeout")
+  valid_564852 = validateParameter(valid_564852, JInt, required = false,
+                                 default = newJInt(30))
+  if valid_564852 != nil:
+    section.add "timeout", valid_564852
+  var valid_564853 = query.getOrDefault("maxresults")
+  valid_564853 = validateParameter(valid_564853, JInt, required = false,
                                  default = newJInt(10))
-  if valid_574953 != nil:
-    section.add "maxresults", valid_574953
-  var valid_574954 = query.getOrDefault("$filter")
-  valid_574954 = validateParameter(valid_574954, JString, required = false,
+  if valid_564853 != nil:
+    section.add "maxresults", valid_564853
+  var valid_564854 = query.getOrDefault("$filter")
+  valid_564854 = validateParameter(valid_564854, JString, required = false,
                                  default = nil)
-  if valid_574954 != nil:
-    section.add "$filter", valid_574954
+  if valid_564854 != nil:
+    section.add "$filter", valid_564854
   result.add "query", section
   ## parameters in `header` object:
+  ##   return-client-request-id: JBool
+  ##                           : Whether the server should return the client-request-id in the response.
   ##   client-request-id: JString
   ##                    : The caller-generated request identity, in the form of a GUID with no decoration such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
   ##   ocp-date: JString
   ##           : The time the request was issued. Client libraries typically set this to the current system clock time; set it explicitly if you are calling the REST API directly.
-  ##   return-client-request-id: JBool
-  ##                           : Whether the server should return the client-request-id in the response.
   section = newJObject()
-  var valid_574955 = header.getOrDefault("client-request-id")
-  valid_574955 = validateParameter(valid_574955, JString, required = false,
-                                 default = nil)
-  if valid_574955 != nil:
-    section.add "client-request-id", valid_574955
-  var valid_574956 = header.getOrDefault("ocp-date")
-  valid_574956 = validateParameter(valid_574956, JString, required = false,
-                                 default = nil)
-  if valid_574956 != nil:
-    section.add "ocp-date", valid_574956
-  var valid_574957 = header.getOrDefault("return-client-request-id")
-  valid_574957 = validateParameter(valid_574957, JBool, required = false,
+  var valid_564855 = header.getOrDefault("return-client-request-id")
+  valid_564855 = validateParameter(valid_564855, JBool, required = false,
                                  default = newJBool(false))
-  if valid_574957 != nil:
-    section.add "return-client-request-id", valid_574957
+  if valid_564855 != nil:
+    section.add "return-client-request-id", valid_564855
+  var valid_564856 = header.getOrDefault("client-request-id")
+  valid_564856 = validateParameter(valid_564856, JString, required = false,
+                                 default = nil)
+  if valid_564856 != nil:
+    section.add "client-request-id", valid_564856
+  var valid_564857 = header.getOrDefault("ocp-date")
+  valid_564857 = validateParameter(valid_564857, JString, required = false,
+                                 default = nil)
+  if valid_564857 != nil:
+    section.add "ocp-date", valid_564857
   result.add "header", section
   section = newJObject()
   result.add "formData", section
   if body != nil:
     result.add "body", body
 
-proc call*(call_574958: Call_AccountListPoolNodeCounts_574948; path: JsonNode;
+proc call*(call_564858: Call_AccountListPoolNodeCounts_564848; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the number of Compute Nodes in each state, grouped by Pool.
   ## 
-  let valid = call_574958.validator(path, query, header, formData, body)
-  let scheme = call_574958.pickScheme
+  let valid = call_564858.validator(path, query, header, formData, body)
+  let scheme = call_564858.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574958.url(scheme.get, call_574958.host, call_574958.base,
-                         call_574958.route, valid.getOrDefault("path"),
+  let url = call_564858.url(scheme.get, call_564858.host, call_564858.base,
+                         call_564858.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574958, url, valid)
+  result = hook(call_564858, url, valid)
 
-proc call*(call_574959: Call_AccountListPoolNodeCounts_574948; apiVersion: string;
+proc call*(call_564859: Call_AccountListPoolNodeCounts_564848; apiVersion: string;
           timeout: int = 30; maxresults: int = 10; Filter: string = ""): Recallable =
   ## accountListPoolNodeCounts
   ## Gets the number of Compute Nodes in each state, grouped by Pool.
-  ##   timeout: int
-  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   ##   apiVersion: string (required)
   ##             : Client API Version.
+  ##   timeout: int
+  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   ##   maxresults: int
   ##             : The maximum number of items to return in the response.
   ##   Filter: string
   ##         : An OData $filter clause. For more information on constructing this filter, see https://docs.microsoft.com/en-us/rest/api/batchservice/odata-filters-in-batch.
-  var query_574960 = newJObject()
-  add(query_574960, "timeout", newJInt(timeout))
-  add(query_574960, "api-version", newJString(apiVersion))
-  add(query_574960, "maxresults", newJInt(maxresults))
-  add(query_574960, "$filter", newJString(Filter))
-  result = call_574959.call(nil, query_574960, nil, nil, nil)
+  var query_564860 = newJObject()
+  add(query_564860, "api-version", newJString(apiVersion))
+  add(query_564860, "timeout", newJInt(timeout))
+  add(query_564860, "maxresults", newJInt(maxresults))
+  add(query_564860, "$filter", newJString(Filter))
+  result = call_564859.call(nil, query_564860, nil, nil, nil)
 
-var accountListPoolNodeCounts* = Call_AccountListPoolNodeCounts_574948(
+var accountListPoolNodeCounts* = Call_AccountListPoolNodeCounts_564848(
     name: "accountListPoolNodeCounts", meth: HttpMethod.HttpGet,
     host: "azure.local", route: "/nodecounts",
-    validator: validate_AccountListPoolNodeCounts_574949, base: "",
-    url: url_AccountListPoolNodeCounts_574950, schemes: {Scheme.Https})
+    validator: validate_AccountListPoolNodeCounts_564849, base: "",
+    url: url_AccountListPoolNodeCounts_564850, schemes: {Scheme.Https})
 type
-  Call_PoolAdd_574976 = ref object of OpenApiRestCall_573667
-proc url_PoolAdd_574978(protocol: Scheme; host: string; base: string; route: string;
+  Call_PoolAdd_564876 = ref object of OpenApiRestCall_563565
+proc url_PoolAdd_564878(protocol: Scheme; host: string; base: string; route: string;
                        path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_PoolAdd_574977(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_PoolAdd_564877(path: JsonNode; query: JsonNode; header: JsonNode;
                             formData: JsonNode; body: JsonNode): JsonNode =
   ## When naming Pools, avoid including sensitive information such as user names or secret project names. This information may appear in telemetry logs accessible to Microsoft Support engineers.
   ## 
@@ -6476,47 +6483,47 @@ proc validate_PoolAdd_574977(path: JsonNode; query: JsonNode; header: JsonNode;
   section = newJObject()
   result.add "path", section
   ## parameters in `query` object:
-  ##   timeout: JInt
-  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   ##   api-version: JString (required)
   ##              : Client API Version.
+  ##   timeout: JInt
+  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   section = newJObject()
-  var valid_574979 = query.getOrDefault("timeout")
-  valid_574979 = validateParameter(valid_574979, JInt, required = false,
-                                 default = newJInt(30))
-  if valid_574979 != nil:
-    section.add "timeout", valid_574979
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574980 = query.getOrDefault("api-version")
-  valid_574980 = validateParameter(valid_574980, JString, required = true,
+  var valid_564879 = query.getOrDefault("api-version")
+  valid_564879 = validateParameter(valid_564879, JString, required = true,
                                  default = nil)
-  if valid_574980 != nil:
-    section.add "api-version", valid_574980
+  if valid_564879 != nil:
+    section.add "api-version", valid_564879
+  var valid_564880 = query.getOrDefault("timeout")
+  valid_564880 = validateParameter(valid_564880, JInt, required = false,
+                                 default = newJInt(30))
+  if valid_564880 != nil:
+    section.add "timeout", valid_564880
   result.add "query", section
   ## parameters in `header` object:
+  ##   return-client-request-id: JBool
+  ##                           : Whether the server should return the client-request-id in the response.
   ##   client-request-id: JString
   ##                    : The caller-generated request identity, in the form of a GUID with no decoration such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
   ##   ocp-date: JString
   ##           : The time the request was issued. Client libraries typically set this to the current system clock time; set it explicitly if you are calling the REST API directly.
-  ##   return-client-request-id: JBool
-  ##                           : Whether the server should return the client-request-id in the response.
   section = newJObject()
-  var valid_574981 = header.getOrDefault("client-request-id")
-  valid_574981 = validateParameter(valid_574981, JString, required = false,
-                                 default = nil)
-  if valid_574981 != nil:
-    section.add "client-request-id", valid_574981
-  var valid_574982 = header.getOrDefault("ocp-date")
-  valid_574982 = validateParameter(valid_574982, JString, required = false,
-                                 default = nil)
-  if valid_574982 != nil:
-    section.add "ocp-date", valid_574982
-  var valid_574983 = header.getOrDefault("return-client-request-id")
-  valid_574983 = validateParameter(valid_574983, JBool, required = false,
+  var valid_564881 = header.getOrDefault("return-client-request-id")
+  valid_564881 = validateParameter(valid_564881, JBool, required = false,
                                  default = newJBool(false))
-  if valid_574983 != nil:
-    section.add "return-client-request-id", valid_574983
+  if valid_564881 != nil:
+    section.add "return-client-request-id", valid_564881
+  var valid_564882 = header.getOrDefault("client-request-id")
+  valid_564882 = validateParameter(valid_564882, JString, required = false,
+                                 default = nil)
+  if valid_564882 != nil:
+    section.add "client-request-id", valid_564882
+  var valid_564883 = header.getOrDefault("ocp-date")
+  valid_564883 = validateParameter(valid_564883, JString, required = false,
+                                 default = nil)
+  if valid_564883 != nil:
+    section.add "ocp-date", valid_564883
   result.add "header", section
   section = newJObject()
   result.add "formData", section
@@ -6528,178 +6535,178 @@ proc validate_PoolAdd_574977(path: JsonNode; query: JsonNode; header: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574985: Call_PoolAdd_574976; path: JsonNode; query: JsonNode;
+proc call*(call_564885: Call_PoolAdd_564876; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## When naming Pools, avoid including sensitive information such as user names or secret project names. This information may appear in telemetry logs accessible to Microsoft Support engineers.
   ## 
-  let valid = call_574985.validator(path, query, header, formData, body)
-  let scheme = call_574985.pickScheme
+  let valid = call_564885.validator(path, query, header, formData, body)
+  let scheme = call_564885.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574985.url(scheme.get, call_574985.host, call_574985.base,
-                         call_574985.route, valid.getOrDefault("path"),
+  let url = call_564885.url(scheme.get, call_564885.host, call_564885.base,
+                         call_564885.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574985, url, valid)
+  result = hook(call_564885, url, valid)
 
-proc call*(call_574986: Call_PoolAdd_574976; pool: JsonNode; apiVersion: string;
+proc call*(call_564886: Call_PoolAdd_564876; apiVersion: string; pool: JsonNode;
           timeout: int = 30): Recallable =
   ## poolAdd
   ## When naming Pools, avoid including sensitive information such as user names or secret project names. This information may appear in telemetry logs accessible to Microsoft Support engineers.
+  ##   apiVersion: string (required)
+  ##             : Client API Version.
   ##   timeout: int
   ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   ##   pool: JObject (required)
   ##       : The Pool to be added.
-  ##   apiVersion: string (required)
-  ##             : Client API Version.
-  var query_574987 = newJObject()
-  var body_574988 = newJObject()
-  add(query_574987, "timeout", newJInt(timeout))
+  var query_564887 = newJObject()
+  var body_564888 = newJObject()
+  add(query_564887, "api-version", newJString(apiVersion))
+  add(query_564887, "timeout", newJInt(timeout))
   if pool != nil:
-    body_574988 = pool
-  add(query_574987, "api-version", newJString(apiVersion))
-  result = call_574986.call(nil, query_574987, nil, nil, body_574988)
+    body_564888 = pool
+  result = call_564886.call(nil, query_564887, nil, nil, body_564888)
 
-var poolAdd* = Call_PoolAdd_574976(name: "poolAdd", meth: HttpMethod.HttpPost,
+var poolAdd* = Call_PoolAdd_564876(name: "poolAdd", meth: HttpMethod.HttpPost,
                                 host: "azure.local", route: "/pools",
-                                validator: validate_PoolAdd_574977, base: "",
-                                url: url_PoolAdd_574978, schemes: {Scheme.Https})
+                                validator: validate_PoolAdd_564877, base: "",
+                                url: url_PoolAdd_564878, schemes: {Scheme.Https})
 type
-  Call_PoolList_574961 = ref object of OpenApiRestCall_573667
-proc url_PoolList_574963(protocol: Scheme; host: string; base: string; route: string;
+  Call_PoolList_564861 = ref object of OpenApiRestCall_563565
+proc url_PoolList_564863(protocol: Scheme; host: string; base: string; route: string;
                         path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_PoolList_574962(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_PoolList_564862(path: JsonNode; query: JsonNode; header: JsonNode;
                              formData: JsonNode; body: JsonNode): JsonNode =
   var section: JsonNode
   result = newJObject()
   section = newJObject()
   result.add "path", section
   ## parameters in `query` object:
-  ##   timeout: JInt
-  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
-  ##   $expand: JString
-  ##          : An OData $expand clause.
   ##   api-version: JString (required)
   ##              : Client API Version.
-  ##   maxresults: JInt
-  ##             : The maximum number of items to return in the response. A maximum of 1000 Pools can be returned.
   ##   $select: JString
   ##          : An OData $select clause.
+  ##   $expand: JString
+  ##          : An OData $expand clause.
+  ##   timeout: JInt
+  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
+  ##   maxresults: JInt
+  ##             : The maximum number of items to return in the response. A maximum of 1000 Pools can be returned.
   ##   $filter: JString
   ##          : An OData $filter clause. For more information on constructing this filter, see 
   ## https://docs.microsoft.com/en-us/rest/api/batchservice/odata-filters-in-batch#list-pools.
   section = newJObject()
-  var valid_574964 = query.getOrDefault("timeout")
-  valid_574964 = validateParameter(valid_574964, JInt, required = false,
-                                 default = newJInt(30))
-  if valid_574964 != nil:
-    section.add "timeout", valid_574964
-  var valid_574965 = query.getOrDefault("$expand")
-  valid_574965 = validateParameter(valid_574965, JString, required = false,
-                                 default = nil)
-  if valid_574965 != nil:
-    section.add "$expand", valid_574965
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574966 = query.getOrDefault("api-version")
-  valid_574966 = validateParameter(valid_574966, JString, required = true,
+  var valid_564864 = query.getOrDefault("api-version")
+  valid_564864 = validateParameter(valid_564864, JString, required = true,
                                  default = nil)
-  if valid_574966 != nil:
-    section.add "api-version", valid_574966
-  var valid_574967 = query.getOrDefault("maxresults")
-  valid_574967 = validateParameter(valid_574967, JInt, required = false,
+  if valid_564864 != nil:
+    section.add "api-version", valid_564864
+  var valid_564865 = query.getOrDefault("$select")
+  valid_564865 = validateParameter(valid_564865, JString, required = false,
+                                 default = nil)
+  if valid_564865 != nil:
+    section.add "$select", valid_564865
+  var valid_564866 = query.getOrDefault("$expand")
+  valid_564866 = validateParameter(valid_564866, JString, required = false,
+                                 default = nil)
+  if valid_564866 != nil:
+    section.add "$expand", valid_564866
+  var valid_564867 = query.getOrDefault("timeout")
+  valid_564867 = validateParameter(valid_564867, JInt, required = false,
+                                 default = newJInt(30))
+  if valid_564867 != nil:
+    section.add "timeout", valid_564867
+  var valid_564868 = query.getOrDefault("maxresults")
+  valid_564868 = validateParameter(valid_564868, JInt, required = false,
                                  default = newJInt(1000))
-  if valid_574967 != nil:
-    section.add "maxresults", valid_574967
-  var valid_574968 = query.getOrDefault("$select")
-  valid_574968 = validateParameter(valid_574968, JString, required = false,
+  if valid_564868 != nil:
+    section.add "maxresults", valid_564868
+  var valid_564869 = query.getOrDefault("$filter")
+  valid_564869 = validateParameter(valid_564869, JString, required = false,
                                  default = nil)
-  if valid_574968 != nil:
-    section.add "$select", valid_574968
-  var valid_574969 = query.getOrDefault("$filter")
-  valid_574969 = validateParameter(valid_574969, JString, required = false,
-                                 default = nil)
-  if valid_574969 != nil:
-    section.add "$filter", valid_574969
+  if valid_564869 != nil:
+    section.add "$filter", valid_564869
   result.add "query", section
   ## parameters in `header` object:
+  ##   return-client-request-id: JBool
+  ##                           : Whether the server should return the client-request-id in the response.
   ##   client-request-id: JString
   ##                    : The caller-generated request identity, in the form of a GUID with no decoration such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
   ##   ocp-date: JString
   ##           : The time the request was issued. Client libraries typically set this to the current system clock time; set it explicitly if you are calling the REST API directly.
-  ##   return-client-request-id: JBool
-  ##                           : Whether the server should return the client-request-id in the response.
   section = newJObject()
-  var valid_574970 = header.getOrDefault("client-request-id")
-  valid_574970 = validateParameter(valid_574970, JString, required = false,
-                                 default = nil)
-  if valid_574970 != nil:
-    section.add "client-request-id", valid_574970
-  var valid_574971 = header.getOrDefault("ocp-date")
-  valid_574971 = validateParameter(valid_574971, JString, required = false,
-                                 default = nil)
-  if valid_574971 != nil:
-    section.add "ocp-date", valid_574971
-  var valid_574972 = header.getOrDefault("return-client-request-id")
-  valid_574972 = validateParameter(valid_574972, JBool, required = false,
+  var valid_564870 = header.getOrDefault("return-client-request-id")
+  valid_564870 = validateParameter(valid_564870, JBool, required = false,
                                  default = newJBool(false))
-  if valid_574972 != nil:
-    section.add "return-client-request-id", valid_574972
+  if valid_564870 != nil:
+    section.add "return-client-request-id", valid_564870
+  var valid_564871 = header.getOrDefault("client-request-id")
+  valid_564871 = validateParameter(valid_564871, JString, required = false,
+                                 default = nil)
+  if valid_564871 != nil:
+    section.add "client-request-id", valid_564871
+  var valid_564872 = header.getOrDefault("ocp-date")
+  valid_564872 = validateParameter(valid_564872, JString, required = false,
+                                 default = nil)
+  if valid_564872 != nil:
+    section.add "ocp-date", valid_564872
   result.add "header", section
   section = newJObject()
   result.add "formData", section
   if body != nil:
     result.add "body", body
 
-proc call*(call_574973: Call_PoolList_574961; path: JsonNode; query: JsonNode;
+proc call*(call_564873: Call_PoolList_564861; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
-  let valid = call_574973.validator(path, query, header, formData, body)
-  let scheme = call_574973.pickScheme
+  let valid = call_564873.validator(path, query, header, formData, body)
+  let scheme = call_564873.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574973.url(scheme.get, call_574973.host, call_574973.base,
-                         call_574973.route, valid.getOrDefault("path"),
+  let url = call_564873.url(scheme.get, call_564873.host, call_564873.base,
+                         call_564873.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574973, url, valid)
+  result = hook(call_564873, url, valid)
 
-proc call*(call_574974: Call_PoolList_574961; apiVersion: string; timeout: int = 30;
-          Expand: string = ""; maxresults: int = 1000; Select: string = "";
-          Filter: string = ""): Recallable =
+proc call*(call_564874: Call_PoolList_564861; apiVersion: string;
+          Select: string = ""; Expand: string = ""; timeout: int = 30;
+          maxresults: int = 1000; Filter: string = ""): Recallable =
   ## poolList
-  ##   timeout: int
-  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
-  ##   Expand: string
-  ##         : An OData $expand clause.
   ##   apiVersion: string (required)
   ##             : Client API Version.
-  ##   maxresults: int
-  ##             : The maximum number of items to return in the response. A maximum of 1000 Pools can be returned.
   ##   Select: string
   ##         : An OData $select clause.
+  ##   Expand: string
+  ##         : An OData $expand clause.
+  ##   timeout: int
+  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
+  ##   maxresults: int
+  ##             : The maximum number of items to return in the response. A maximum of 1000 Pools can be returned.
   ##   Filter: string
   ##         : An OData $filter clause. For more information on constructing this filter, see 
   ## https://docs.microsoft.com/en-us/rest/api/batchservice/odata-filters-in-batch#list-pools.
-  var query_574975 = newJObject()
-  add(query_574975, "timeout", newJInt(timeout))
-  add(query_574975, "$expand", newJString(Expand))
-  add(query_574975, "api-version", newJString(apiVersion))
-  add(query_574975, "maxresults", newJInt(maxresults))
-  add(query_574975, "$select", newJString(Select))
-  add(query_574975, "$filter", newJString(Filter))
-  result = call_574974.call(nil, query_574975, nil, nil, nil)
+  var query_564875 = newJObject()
+  add(query_564875, "api-version", newJString(apiVersion))
+  add(query_564875, "$select", newJString(Select))
+  add(query_564875, "$expand", newJString(Expand))
+  add(query_564875, "timeout", newJInt(timeout))
+  add(query_564875, "maxresults", newJInt(maxresults))
+  add(query_564875, "$filter", newJString(Filter))
+  result = call_564874.call(nil, query_564875, nil, nil, nil)
 
-var poolList* = Call_PoolList_574961(name: "poolList", meth: HttpMethod.HttpGet,
+var poolList* = Call_PoolList_564861(name: "poolList", meth: HttpMethod.HttpGet,
                                   host: "azure.local", route: "/pools",
-                                  validator: validate_PoolList_574962, base: "",
-                                  url: url_PoolList_574963,
+                                  validator: validate_PoolList_564862, base: "",
+                                  url: url_PoolList_564863,
                                   schemes: {Scheme.Https})
 type
-  Call_PoolExists_575025 = ref object of OpenApiRestCall_573667
-proc url_PoolExists_575027(protocol: Scheme; host: string; base: string; route: string;
+  Call_PoolExists_564925 = ref object of OpenApiRestCall_563565
+proc url_PoolExists_564927(protocol: Scheme; host: string; base: string; route: string;
                           path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -6714,7 +6721,7 @@ proc url_PoolExists_575027(protocol: Scheme; host: string; base: string; route: 
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_PoolExists_575026(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_PoolExists_564926(path: JsonNode; query: JsonNode; header: JsonNode;
                                formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets basic properties of a Pool.
   ## 
@@ -6725,128 +6732,128 @@ proc validate_PoolExists_575026(path: JsonNode; query: JsonNode; header: JsonNod
   ##         : The ID of the Pool to get.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `poolId` field"
-  var valid_575028 = path.getOrDefault("poolId")
-  valid_575028 = validateParameter(valid_575028, JString, required = true,
+  var valid_564928 = path.getOrDefault("poolId")
+  valid_564928 = validateParameter(valid_564928, JString, required = true,
                                  default = nil)
-  if valid_575028 != nil:
-    section.add "poolId", valid_575028
+  if valid_564928 != nil:
+    section.add "poolId", valid_564928
   result.add "path", section
   ## parameters in `query` object:
-  ##   timeout: JInt
-  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   ##   api-version: JString (required)
   ##              : Client API Version.
+  ##   timeout: JInt
+  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   section = newJObject()
-  var valid_575029 = query.getOrDefault("timeout")
-  valid_575029 = validateParameter(valid_575029, JInt, required = false,
-                                 default = newJInt(30))
-  if valid_575029 != nil:
-    section.add "timeout", valid_575029
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575030 = query.getOrDefault("api-version")
-  valid_575030 = validateParameter(valid_575030, JString, required = true,
+  var valid_564929 = query.getOrDefault("api-version")
+  valid_564929 = validateParameter(valid_564929, JString, required = true,
                                  default = nil)
-  if valid_575030 != nil:
-    section.add "api-version", valid_575030
+  if valid_564929 != nil:
+    section.add "api-version", valid_564929
+  var valid_564930 = query.getOrDefault("timeout")
+  valid_564930 = validateParameter(valid_564930, JInt, required = false,
+                                 default = newJInt(30))
+  if valid_564930 != nil:
+    section.add "timeout", valid_564930
   result.add "query", section
   ## parameters in `header` object:
-  ##   If-Match: JString
-  ##           : An ETag value associated with the version of the resource known to the client. The operation will be performed only if the resource's current ETag on the service exactly matches the value specified by the client.
-  ##   client-request-id: JString
-  ##                    : The caller-generated request identity, in the form of a GUID with no decoration such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
-  ##   ocp-date: JString
-  ##           : The time the request was issued. Client libraries typically set this to the current system clock time; set it explicitly if you are calling the REST API directly.
-  ##   If-Unmodified-Since: JString
-  ##                      : A timestamp indicating the last modified time of the resource known to the client. The operation will be performed only if the resource on the service has not been modified since the specified time.
-  ##   If-None-Match: JString
-  ##                : An ETag value associated with the version of the resource known to the client. The operation will be performed only if the resource's current ETag on the service does not match the value specified by the client.
-  ##   If-Modified-Since: JString
-  ##                    : A timestamp indicating the last modified time of the resource known to the client. The operation will be performed only if the resource on the service has been modified since the specified time.
   ##   return-client-request-id: JBool
   ##                           : Whether the server should return the client-request-id in the response.
+  ##   If-Unmodified-Since: JString
+  ##                      : A timestamp indicating the last modified time of the resource known to the client. The operation will be performed only if the resource on the service has not been modified since the specified time.
+  ##   client-request-id: JString
+  ##                    : The caller-generated request identity, in the form of a GUID with no decoration such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
+  ##   If-Modified-Since: JString
+  ##                    : A timestamp indicating the last modified time of the resource known to the client. The operation will be performed only if the resource on the service has been modified since the specified time.
+  ##   If-None-Match: JString
+  ##                : An ETag value associated with the version of the resource known to the client. The operation will be performed only if the resource's current ETag on the service does not match the value specified by the client.
+  ##   ocp-date: JString
+  ##           : The time the request was issued. Client libraries typically set this to the current system clock time; set it explicitly if you are calling the REST API directly.
+  ##   If-Match: JString
+  ##           : An ETag value associated with the version of the resource known to the client. The operation will be performed only if the resource's current ETag on the service exactly matches the value specified by the client.
   section = newJObject()
-  var valid_575031 = header.getOrDefault("If-Match")
-  valid_575031 = validateParameter(valid_575031, JString, required = false,
-                                 default = nil)
-  if valid_575031 != nil:
-    section.add "If-Match", valid_575031
-  var valid_575032 = header.getOrDefault("client-request-id")
-  valid_575032 = validateParameter(valid_575032, JString, required = false,
-                                 default = nil)
-  if valid_575032 != nil:
-    section.add "client-request-id", valid_575032
-  var valid_575033 = header.getOrDefault("ocp-date")
-  valid_575033 = validateParameter(valid_575033, JString, required = false,
-                                 default = nil)
-  if valid_575033 != nil:
-    section.add "ocp-date", valid_575033
-  var valid_575034 = header.getOrDefault("If-Unmodified-Since")
-  valid_575034 = validateParameter(valid_575034, JString, required = false,
-                                 default = nil)
-  if valid_575034 != nil:
-    section.add "If-Unmodified-Since", valid_575034
-  var valid_575035 = header.getOrDefault("If-None-Match")
-  valid_575035 = validateParameter(valid_575035, JString, required = false,
-                                 default = nil)
-  if valid_575035 != nil:
-    section.add "If-None-Match", valid_575035
-  var valid_575036 = header.getOrDefault("If-Modified-Since")
-  valid_575036 = validateParameter(valid_575036, JString, required = false,
-                                 default = nil)
-  if valid_575036 != nil:
-    section.add "If-Modified-Since", valid_575036
-  var valid_575037 = header.getOrDefault("return-client-request-id")
-  valid_575037 = validateParameter(valid_575037, JBool, required = false,
+  var valid_564931 = header.getOrDefault("return-client-request-id")
+  valid_564931 = validateParameter(valid_564931, JBool, required = false,
                                  default = newJBool(false))
-  if valid_575037 != nil:
-    section.add "return-client-request-id", valid_575037
+  if valid_564931 != nil:
+    section.add "return-client-request-id", valid_564931
+  var valid_564932 = header.getOrDefault("If-Unmodified-Since")
+  valid_564932 = validateParameter(valid_564932, JString, required = false,
+                                 default = nil)
+  if valid_564932 != nil:
+    section.add "If-Unmodified-Since", valid_564932
+  var valid_564933 = header.getOrDefault("client-request-id")
+  valid_564933 = validateParameter(valid_564933, JString, required = false,
+                                 default = nil)
+  if valid_564933 != nil:
+    section.add "client-request-id", valid_564933
+  var valid_564934 = header.getOrDefault("If-Modified-Since")
+  valid_564934 = validateParameter(valid_564934, JString, required = false,
+                                 default = nil)
+  if valid_564934 != nil:
+    section.add "If-Modified-Since", valid_564934
+  var valid_564935 = header.getOrDefault("If-None-Match")
+  valid_564935 = validateParameter(valid_564935, JString, required = false,
+                                 default = nil)
+  if valid_564935 != nil:
+    section.add "If-None-Match", valid_564935
+  var valid_564936 = header.getOrDefault("ocp-date")
+  valid_564936 = validateParameter(valid_564936, JString, required = false,
+                                 default = nil)
+  if valid_564936 != nil:
+    section.add "ocp-date", valid_564936
+  var valid_564937 = header.getOrDefault("If-Match")
+  valid_564937 = validateParameter(valid_564937, JString, required = false,
+                                 default = nil)
+  if valid_564937 != nil:
+    section.add "If-Match", valid_564937
   result.add "header", section
   section = newJObject()
   result.add "formData", section
   if body != nil:
     result.add "body", body
 
-proc call*(call_575038: Call_PoolExists_575025; path: JsonNode; query: JsonNode;
+proc call*(call_564938: Call_PoolExists_564925; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets basic properties of a Pool.
   ## 
-  let valid = call_575038.validator(path, query, header, formData, body)
-  let scheme = call_575038.pickScheme
+  let valid = call_564938.validator(path, query, header, formData, body)
+  let scheme = call_564938.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575038.url(scheme.get, call_575038.host, call_575038.base,
-                         call_575038.route, valid.getOrDefault("path"),
+  let url = call_564938.url(scheme.get, call_564938.host, call_564938.base,
+                         call_564938.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575038, url, valid)
+  result = hook(call_564938, url, valid)
 
-proc call*(call_575039: Call_PoolExists_575025; apiVersion: string; poolId: string;
+proc call*(call_564939: Call_PoolExists_564925; apiVersion: string; poolId: string;
           timeout: int = 30): Recallable =
   ## poolExists
   ## Gets basic properties of a Pool.
-  ##   timeout: int
-  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   ##   apiVersion: string (required)
   ##             : Client API Version.
   ##   poolId: string (required)
   ##         : The ID of the Pool to get.
-  var path_575040 = newJObject()
-  var query_575041 = newJObject()
-  add(query_575041, "timeout", newJInt(timeout))
-  add(query_575041, "api-version", newJString(apiVersion))
-  add(path_575040, "poolId", newJString(poolId))
-  result = call_575039.call(path_575040, query_575041, nil, nil, nil)
+  ##   timeout: int
+  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
+  var path_564940 = newJObject()
+  var query_564941 = newJObject()
+  add(query_564941, "api-version", newJString(apiVersion))
+  add(path_564940, "poolId", newJString(poolId))
+  add(query_564941, "timeout", newJInt(timeout))
+  result = call_564939.call(path_564940, query_564941, nil, nil, nil)
 
-var poolExists* = Call_PoolExists_575025(name: "poolExists",
+var poolExists* = Call_PoolExists_564925(name: "poolExists",
                                       meth: HttpMethod.HttpHead,
                                       host: "azure.local",
                                       route: "/pools/{poolId}",
-                                      validator: validate_PoolExists_575026,
-                                      base: "", url: url_PoolExists_575027,
+                                      validator: validate_PoolExists_564926,
+                                      base: "", url: url_PoolExists_564927,
                                       schemes: {Scheme.Https})
 type
-  Call_PoolGet_574989 = ref object of OpenApiRestCall_573667
-proc url_PoolGet_574991(protocol: Scheme; host: string; base: string; route: string;
+  Call_PoolGet_564889 = ref object of OpenApiRestCall_563565
+proc url_PoolGet_564891(protocol: Scheme; host: string; base: string; route: string;
                        path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -6861,7 +6868,7 @@ proc url_PoolGet_574991(protocol: Scheme; host: string; base: string; route: str
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_PoolGet_574990(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_PoolGet_564890(path: JsonNode; query: JsonNode; header: JsonNode;
                             formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets information about the specified Pool.
   ## 
@@ -6872,145 +6879,145 @@ proc validate_PoolGet_574990(path: JsonNode; query: JsonNode; header: JsonNode;
   ##         : The ID of the Pool to get.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `poolId` field"
-  var valid_574992 = path.getOrDefault("poolId")
-  valid_574992 = validateParameter(valid_574992, JString, required = true,
+  var valid_564892 = path.getOrDefault("poolId")
+  valid_564892 = validateParameter(valid_564892, JString, required = true,
                                  default = nil)
-  if valid_574992 != nil:
-    section.add "poolId", valid_574992
+  if valid_564892 != nil:
+    section.add "poolId", valid_564892
   result.add "path", section
   ## parameters in `query` object:
-  ##   timeout: JInt
-  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
-  ##   $expand: JString
-  ##          : An OData $expand clause.
   ##   api-version: JString (required)
   ##              : Client API Version.
   ##   $select: JString
   ##          : An OData $select clause.
+  ##   $expand: JString
+  ##          : An OData $expand clause.
+  ##   timeout: JInt
+  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   section = newJObject()
-  var valid_574993 = query.getOrDefault("timeout")
-  valid_574993 = validateParameter(valid_574993, JInt, required = false,
-                                 default = newJInt(30))
-  if valid_574993 != nil:
-    section.add "timeout", valid_574993
-  var valid_574994 = query.getOrDefault("$expand")
-  valid_574994 = validateParameter(valid_574994, JString, required = false,
-                                 default = nil)
-  if valid_574994 != nil:
-    section.add "$expand", valid_574994
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574995 = query.getOrDefault("api-version")
-  valid_574995 = validateParameter(valid_574995, JString, required = true,
+  var valid_564893 = query.getOrDefault("api-version")
+  valid_564893 = validateParameter(valid_564893, JString, required = true,
                                  default = nil)
-  if valid_574995 != nil:
-    section.add "api-version", valid_574995
-  var valid_574996 = query.getOrDefault("$select")
-  valid_574996 = validateParameter(valid_574996, JString, required = false,
+  if valid_564893 != nil:
+    section.add "api-version", valid_564893
+  var valid_564894 = query.getOrDefault("$select")
+  valid_564894 = validateParameter(valid_564894, JString, required = false,
                                  default = nil)
-  if valid_574996 != nil:
-    section.add "$select", valid_574996
+  if valid_564894 != nil:
+    section.add "$select", valid_564894
+  var valid_564895 = query.getOrDefault("$expand")
+  valid_564895 = validateParameter(valid_564895, JString, required = false,
+                                 default = nil)
+  if valid_564895 != nil:
+    section.add "$expand", valid_564895
+  var valid_564896 = query.getOrDefault("timeout")
+  valid_564896 = validateParameter(valid_564896, JInt, required = false,
+                                 default = newJInt(30))
+  if valid_564896 != nil:
+    section.add "timeout", valid_564896
   result.add "query", section
   ## parameters in `header` object:
-  ##   If-Match: JString
-  ##           : An ETag value associated with the version of the resource known to the client. The operation will be performed only if the resource's current ETag on the service exactly matches the value specified by the client.
-  ##   client-request-id: JString
-  ##                    : The caller-generated request identity, in the form of a GUID with no decoration such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
-  ##   ocp-date: JString
-  ##           : The time the request was issued. Client libraries typically set this to the current system clock time; set it explicitly if you are calling the REST API directly.
-  ##   If-Unmodified-Since: JString
-  ##                      : A timestamp indicating the last modified time of the resource known to the client. The operation will be performed only if the resource on the service has not been modified since the specified time.
-  ##   If-None-Match: JString
-  ##                : An ETag value associated with the version of the resource known to the client. The operation will be performed only if the resource's current ETag on the service does not match the value specified by the client.
-  ##   If-Modified-Since: JString
-  ##                    : A timestamp indicating the last modified time of the resource known to the client. The operation will be performed only if the resource on the service has been modified since the specified time.
   ##   return-client-request-id: JBool
   ##                           : Whether the server should return the client-request-id in the response.
+  ##   If-Unmodified-Since: JString
+  ##                      : A timestamp indicating the last modified time of the resource known to the client. The operation will be performed only if the resource on the service has not been modified since the specified time.
+  ##   client-request-id: JString
+  ##                    : The caller-generated request identity, in the form of a GUID with no decoration such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
+  ##   If-Modified-Since: JString
+  ##                    : A timestamp indicating the last modified time of the resource known to the client. The operation will be performed only if the resource on the service has been modified since the specified time.
+  ##   If-None-Match: JString
+  ##                : An ETag value associated with the version of the resource known to the client. The operation will be performed only if the resource's current ETag on the service does not match the value specified by the client.
+  ##   ocp-date: JString
+  ##           : The time the request was issued. Client libraries typically set this to the current system clock time; set it explicitly if you are calling the REST API directly.
+  ##   If-Match: JString
+  ##           : An ETag value associated with the version of the resource known to the client. The operation will be performed only if the resource's current ETag on the service exactly matches the value specified by the client.
   section = newJObject()
-  var valid_574997 = header.getOrDefault("If-Match")
-  valid_574997 = validateParameter(valid_574997, JString, required = false,
-                                 default = nil)
-  if valid_574997 != nil:
-    section.add "If-Match", valid_574997
-  var valid_574998 = header.getOrDefault("client-request-id")
-  valid_574998 = validateParameter(valid_574998, JString, required = false,
-                                 default = nil)
-  if valid_574998 != nil:
-    section.add "client-request-id", valid_574998
-  var valid_574999 = header.getOrDefault("ocp-date")
-  valid_574999 = validateParameter(valid_574999, JString, required = false,
-                                 default = nil)
-  if valid_574999 != nil:
-    section.add "ocp-date", valid_574999
-  var valid_575000 = header.getOrDefault("If-Unmodified-Since")
-  valid_575000 = validateParameter(valid_575000, JString, required = false,
-                                 default = nil)
-  if valid_575000 != nil:
-    section.add "If-Unmodified-Since", valid_575000
-  var valid_575001 = header.getOrDefault("If-None-Match")
-  valid_575001 = validateParameter(valid_575001, JString, required = false,
-                                 default = nil)
-  if valid_575001 != nil:
-    section.add "If-None-Match", valid_575001
-  var valid_575002 = header.getOrDefault("If-Modified-Since")
-  valid_575002 = validateParameter(valid_575002, JString, required = false,
-                                 default = nil)
-  if valid_575002 != nil:
-    section.add "If-Modified-Since", valid_575002
-  var valid_575003 = header.getOrDefault("return-client-request-id")
-  valid_575003 = validateParameter(valid_575003, JBool, required = false,
+  var valid_564897 = header.getOrDefault("return-client-request-id")
+  valid_564897 = validateParameter(valid_564897, JBool, required = false,
                                  default = newJBool(false))
-  if valid_575003 != nil:
-    section.add "return-client-request-id", valid_575003
+  if valid_564897 != nil:
+    section.add "return-client-request-id", valid_564897
+  var valid_564898 = header.getOrDefault("If-Unmodified-Since")
+  valid_564898 = validateParameter(valid_564898, JString, required = false,
+                                 default = nil)
+  if valid_564898 != nil:
+    section.add "If-Unmodified-Since", valid_564898
+  var valid_564899 = header.getOrDefault("client-request-id")
+  valid_564899 = validateParameter(valid_564899, JString, required = false,
+                                 default = nil)
+  if valid_564899 != nil:
+    section.add "client-request-id", valid_564899
+  var valid_564900 = header.getOrDefault("If-Modified-Since")
+  valid_564900 = validateParameter(valid_564900, JString, required = false,
+                                 default = nil)
+  if valid_564900 != nil:
+    section.add "If-Modified-Since", valid_564900
+  var valid_564901 = header.getOrDefault("If-None-Match")
+  valid_564901 = validateParameter(valid_564901, JString, required = false,
+                                 default = nil)
+  if valid_564901 != nil:
+    section.add "If-None-Match", valid_564901
+  var valid_564902 = header.getOrDefault("ocp-date")
+  valid_564902 = validateParameter(valid_564902, JString, required = false,
+                                 default = nil)
+  if valid_564902 != nil:
+    section.add "ocp-date", valid_564902
+  var valid_564903 = header.getOrDefault("If-Match")
+  valid_564903 = validateParameter(valid_564903, JString, required = false,
+                                 default = nil)
+  if valid_564903 != nil:
+    section.add "If-Match", valid_564903
   result.add "header", section
   section = newJObject()
   result.add "formData", section
   if body != nil:
     result.add "body", body
 
-proc call*(call_575004: Call_PoolGet_574989; path: JsonNode; query: JsonNode;
+proc call*(call_564904: Call_PoolGet_564889; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets information about the specified Pool.
   ## 
-  let valid = call_575004.validator(path, query, header, formData, body)
-  let scheme = call_575004.pickScheme
+  let valid = call_564904.validator(path, query, header, formData, body)
+  let scheme = call_564904.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575004.url(scheme.get, call_575004.host, call_575004.base,
-                         call_575004.route, valid.getOrDefault("path"),
+  let url = call_564904.url(scheme.get, call_564904.host, call_564904.base,
+                         call_564904.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575004, url, valid)
+  result = hook(call_564904, url, valid)
 
-proc call*(call_575005: Call_PoolGet_574989; apiVersion: string; poolId: string;
-          timeout: int = 30; Expand: string = ""; Select: string = ""): Recallable =
+proc call*(call_564905: Call_PoolGet_564889; apiVersion: string; poolId: string;
+          Select: string = ""; Expand: string = ""; timeout: int = 30): Recallable =
   ## poolGet
   ## Gets information about the specified Pool.
-  ##   timeout: int
-  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
-  ##   Expand: string
-  ##         : An OData $expand clause.
   ##   apiVersion: string (required)
   ##             : Client API Version.
   ##   poolId: string (required)
   ##         : The ID of the Pool to get.
   ##   Select: string
   ##         : An OData $select clause.
-  var path_575006 = newJObject()
-  var query_575007 = newJObject()
-  add(query_575007, "timeout", newJInt(timeout))
-  add(query_575007, "$expand", newJString(Expand))
-  add(query_575007, "api-version", newJString(apiVersion))
-  add(path_575006, "poolId", newJString(poolId))
-  add(query_575007, "$select", newJString(Select))
-  result = call_575005.call(path_575006, query_575007, nil, nil, nil)
+  ##   Expand: string
+  ##         : An OData $expand clause.
+  ##   timeout: int
+  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
+  var path_564906 = newJObject()
+  var query_564907 = newJObject()
+  add(query_564907, "api-version", newJString(apiVersion))
+  add(path_564906, "poolId", newJString(poolId))
+  add(query_564907, "$select", newJString(Select))
+  add(query_564907, "$expand", newJString(Expand))
+  add(query_564907, "timeout", newJInt(timeout))
+  result = call_564905.call(path_564906, query_564907, nil, nil, nil)
 
-var poolGet* = Call_PoolGet_574989(name: "poolGet", meth: HttpMethod.HttpGet,
+var poolGet* = Call_PoolGet_564889(name: "poolGet", meth: HttpMethod.HttpGet,
                                 host: "azure.local", route: "/pools/{poolId}",
-                                validator: validate_PoolGet_574990, base: "",
-                                url: url_PoolGet_574991, schemes: {Scheme.Https})
+                                validator: validate_PoolGet_564890, base: "",
+                                url: url_PoolGet_564891, schemes: {Scheme.Https})
 type
-  Call_PoolPatch_575042 = ref object of OpenApiRestCall_573667
-proc url_PoolPatch_575044(protocol: Scheme; host: string; base: string; route: string;
+  Call_PoolPatch_564942 = ref object of OpenApiRestCall_563565
+proc url_PoolPatch_564944(protocol: Scheme; host: string; base: string; route: string;
                          path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -7025,7 +7032,7 @@ proc url_PoolPatch_575044(protocol: Scheme; host: string; base: string; route: s
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_PoolPatch_575043(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_PoolPatch_564943(path: JsonNode; query: JsonNode; header: JsonNode;
                               formData: JsonNode; body: JsonNode): JsonNode =
   ## This only replaces the Pool properties specified in the request. For example, if the Pool has a StartTask associated with it, and a request does not specify a StartTask element, then the Pool keeps the existing StartTask.
   ## 
@@ -7036,82 +7043,82 @@ proc validate_PoolPatch_575043(path: JsonNode; query: JsonNode; header: JsonNode
   ##         : The ID of the Pool to update.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `poolId` field"
-  var valid_575045 = path.getOrDefault("poolId")
-  valid_575045 = validateParameter(valid_575045, JString, required = true,
+  var valid_564945 = path.getOrDefault("poolId")
+  valid_564945 = validateParameter(valid_564945, JString, required = true,
                                  default = nil)
-  if valid_575045 != nil:
-    section.add "poolId", valid_575045
+  if valid_564945 != nil:
+    section.add "poolId", valid_564945
   result.add "path", section
   ## parameters in `query` object:
-  ##   timeout: JInt
-  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   ##   api-version: JString (required)
   ##              : Client API Version.
+  ##   timeout: JInt
+  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   section = newJObject()
-  var valid_575046 = query.getOrDefault("timeout")
-  valid_575046 = validateParameter(valid_575046, JInt, required = false,
-                                 default = newJInt(30))
-  if valid_575046 != nil:
-    section.add "timeout", valid_575046
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575047 = query.getOrDefault("api-version")
-  valid_575047 = validateParameter(valid_575047, JString, required = true,
+  var valid_564946 = query.getOrDefault("api-version")
+  valid_564946 = validateParameter(valid_564946, JString, required = true,
                                  default = nil)
-  if valid_575047 != nil:
-    section.add "api-version", valid_575047
+  if valid_564946 != nil:
+    section.add "api-version", valid_564946
+  var valid_564947 = query.getOrDefault("timeout")
+  valid_564947 = validateParameter(valid_564947, JInt, required = false,
+                                 default = newJInt(30))
+  if valid_564947 != nil:
+    section.add "timeout", valid_564947
   result.add "query", section
   ## parameters in `header` object:
-  ##   If-Match: JString
-  ##           : An ETag value associated with the version of the resource known to the client. The operation will be performed only if the resource's current ETag on the service exactly matches the value specified by the client.
-  ##   client-request-id: JString
-  ##                    : The caller-generated request identity, in the form of a GUID with no decoration such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
-  ##   ocp-date: JString
-  ##           : The time the request was issued. Client libraries typically set this to the current system clock time; set it explicitly if you are calling the REST API directly.
-  ##   If-Unmodified-Since: JString
-  ##                      : A timestamp indicating the last modified time of the resource known to the client. The operation will be performed only if the resource on the service has not been modified since the specified time.
-  ##   If-None-Match: JString
-  ##                : An ETag value associated with the version of the resource known to the client. The operation will be performed only if the resource's current ETag on the service does not match the value specified by the client.
-  ##   If-Modified-Since: JString
-  ##                    : A timestamp indicating the last modified time of the resource known to the client. The operation will be performed only if the resource on the service has been modified since the specified time.
   ##   return-client-request-id: JBool
   ##                           : Whether the server should return the client-request-id in the response.
+  ##   If-Unmodified-Since: JString
+  ##                      : A timestamp indicating the last modified time of the resource known to the client. The operation will be performed only if the resource on the service has not been modified since the specified time.
+  ##   client-request-id: JString
+  ##                    : The caller-generated request identity, in the form of a GUID with no decoration such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
+  ##   If-Modified-Since: JString
+  ##                    : A timestamp indicating the last modified time of the resource known to the client. The operation will be performed only if the resource on the service has been modified since the specified time.
+  ##   If-None-Match: JString
+  ##                : An ETag value associated with the version of the resource known to the client. The operation will be performed only if the resource's current ETag on the service does not match the value specified by the client.
+  ##   ocp-date: JString
+  ##           : The time the request was issued. Client libraries typically set this to the current system clock time; set it explicitly if you are calling the REST API directly.
+  ##   If-Match: JString
+  ##           : An ETag value associated with the version of the resource known to the client. The operation will be performed only if the resource's current ETag on the service exactly matches the value specified by the client.
   section = newJObject()
-  var valid_575048 = header.getOrDefault("If-Match")
-  valid_575048 = validateParameter(valid_575048, JString, required = false,
-                                 default = nil)
-  if valid_575048 != nil:
-    section.add "If-Match", valid_575048
-  var valid_575049 = header.getOrDefault("client-request-id")
-  valid_575049 = validateParameter(valid_575049, JString, required = false,
-                                 default = nil)
-  if valid_575049 != nil:
-    section.add "client-request-id", valid_575049
-  var valid_575050 = header.getOrDefault("ocp-date")
-  valid_575050 = validateParameter(valid_575050, JString, required = false,
-                                 default = nil)
-  if valid_575050 != nil:
-    section.add "ocp-date", valid_575050
-  var valid_575051 = header.getOrDefault("If-Unmodified-Since")
-  valid_575051 = validateParameter(valid_575051, JString, required = false,
-                                 default = nil)
-  if valid_575051 != nil:
-    section.add "If-Unmodified-Since", valid_575051
-  var valid_575052 = header.getOrDefault("If-None-Match")
-  valid_575052 = validateParameter(valid_575052, JString, required = false,
-                                 default = nil)
-  if valid_575052 != nil:
-    section.add "If-None-Match", valid_575052
-  var valid_575053 = header.getOrDefault("If-Modified-Since")
-  valid_575053 = validateParameter(valid_575053, JString, required = false,
-                                 default = nil)
-  if valid_575053 != nil:
-    section.add "If-Modified-Since", valid_575053
-  var valid_575054 = header.getOrDefault("return-client-request-id")
-  valid_575054 = validateParameter(valid_575054, JBool, required = false,
+  var valid_564948 = header.getOrDefault("return-client-request-id")
+  valid_564948 = validateParameter(valid_564948, JBool, required = false,
                                  default = newJBool(false))
-  if valid_575054 != nil:
-    section.add "return-client-request-id", valid_575054
+  if valid_564948 != nil:
+    section.add "return-client-request-id", valid_564948
+  var valid_564949 = header.getOrDefault("If-Unmodified-Since")
+  valid_564949 = validateParameter(valid_564949, JString, required = false,
+                                 default = nil)
+  if valid_564949 != nil:
+    section.add "If-Unmodified-Since", valid_564949
+  var valid_564950 = header.getOrDefault("client-request-id")
+  valid_564950 = validateParameter(valid_564950, JString, required = false,
+                                 default = nil)
+  if valid_564950 != nil:
+    section.add "client-request-id", valid_564950
+  var valid_564951 = header.getOrDefault("If-Modified-Since")
+  valid_564951 = validateParameter(valid_564951, JString, required = false,
+                                 default = nil)
+  if valid_564951 != nil:
+    section.add "If-Modified-Since", valid_564951
+  var valid_564952 = header.getOrDefault("If-None-Match")
+  valid_564952 = validateParameter(valid_564952, JString, required = false,
+                                 default = nil)
+  if valid_564952 != nil:
+    section.add "If-None-Match", valid_564952
+  var valid_564953 = header.getOrDefault("ocp-date")
+  valid_564953 = validateParameter(valid_564953, JString, required = false,
+                                 default = nil)
+  if valid_564953 != nil:
+    section.add "ocp-date", valid_564953
+  var valid_564954 = header.getOrDefault("If-Match")
+  valid_564954 = validateParameter(valid_564954, JString, required = false,
+                                 default = nil)
+  if valid_564954 != nil:
+    section.add "If-Match", valid_564954
   result.add "header", section
   section = newJObject()
   result.add "formData", section
@@ -7123,49 +7130,49 @@ proc validate_PoolPatch_575043(path: JsonNode; query: JsonNode; header: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_575056: Call_PoolPatch_575042; path: JsonNode; query: JsonNode;
+proc call*(call_564956: Call_PoolPatch_564942; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## This only replaces the Pool properties specified in the request. For example, if the Pool has a StartTask associated with it, and a request does not specify a StartTask element, then the Pool keeps the existing StartTask.
   ## 
-  let valid = call_575056.validator(path, query, header, formData, body)
-  let scheme = call_575056.pickScheme
+  let valid = call_564956.validator(path, query, header, formData, body)
+  let scheme = call_564956.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575056.url(scheme.get, call_575056.host, call_575056.base,
-                         call_575056.route, valid.getOrDefault("path"),
+  let url = call_564956.url(scheme.get, call_564956.host, call_564956.base,
+                         call_564956.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575056, url, valid)
+  result = hook(call_564956, url, valid)
 
-proc call*(call_575057: Call_PoolPatch_575042; apiVersion: string; poolId: string;
-          poolPatchParameter: JsonNode; timeout: int = 30): Recallable =
+proc call*(call_564957: Call_PoolPatch_564942; apiVersion: string;
+          poolPatchParameter: JsonNode; poolId: string; timeout: int = 30): Recallable =
   ## poolPatch
   ## This only replaces the Pool properties specified in the request. For example, if the Pool has a StartTask associated with it, and a request does not specify a StartTask element, then the Pool keeps the existing StartTask.
-  ##   timeout: int
-  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   ##   apiVersion: string (required)
   ##             : Client API Version.
-  ##   poolId: string (required)
-  ##         : The ID of the Pool to update.
   ##   poolPatchParameter: JObject (required)
   ##                     : The parameters for the request.
-  var path_575058 = newJObject()
-  var query_575059 = newJObject()
-  var body_575060 = newJObject()
-  add(query_575059, "timeout", newJInt(timeout))
-  add(query_575059, "api-version", newJString(apiVersion))
-  add(path_575058, "poolId", newJString(poolId))
+  ##   poolId: string (required)
+  ##         : The ID of the Pool to update.
+  ##   timeout: int
+  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
+  var path_564958 = newJObject()
+  var query_564959 = newJObject()
+  var body_564960 = newJObject()
+  add(query_564959, "api-version", newJString(apiVersion))
   if poolPatchParameter != nil:
-    body_575060 = poolPatchParameter
-  result = call_575057.call(path_575058, query_575059, nil, nil, body_575060)
+    body_564960 = poolPatchParameter
+  add(path_564958, "poolId", newJString(poolId))
+  add(query_564959, "timeout", newJInt(timeout))
+  result = call_564957.call(path_564958, query_564959, nil, nil, body_564960)
 
-var poolPatch* = Call_PoolPatch_575042(name: "poolPatch", meth: HttpMethod.HttpPatch,
+var poolPatch* = Call_PoolPatch_564942(name: "poolPatch", meth: HttpMethod.HttpPatch,
                                     host: "azure.local", route: "/pools/{poolId}",
-                                    validator: validate_PoolPatch_575043,
-                                    base: "", url: url_PoolPatch_575044,
+                                    validator: validate_PoolPatch_564943,
+                                    base: "", url: url_PoolPatch_564944,
                                     schemes: {Scheme.Https})
 type
-  Call_PoolDelete_575008 = ref object of OpenApiRestCall_573667
-proc url_PoolDelete_575010(protocol: Scheme; host: string; base: string; route: string;
+  Call_PoolDelete_564908 = ref object of OpenApiRestCall_563565
+proc url_PoolDelete_564910(protocol: Scheme; host: string; base: string; route: string;
                           path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -7180,7 +7187,7 @@ proc url_PoolDelete_575010(protocol: Scheme; host: string; base: string; route: 
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_PoolDelete_575009(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_PoolDelete_564909(path: JsonNode; query: JsonNode; header: JsonNode;
                                formData: JsonNode; body: JsonNode): JsonNode =
   ## When you request that a Pool be deleted, the following actions occur: the Pool state is set to deleting; any ongoing resize operation on the Pool are stopped; the Batch service starts resizing the Pool to zero Compute Nodes; any Tasks running on existing Compute Nodes are terminated and requeued (as if a resize Pool operation had been requested with the default requeue option); finally, the Pool is removed from the system. Because running Tasks are requeued, the user can rerun these Tasks by updating their Job to target a different Pool. The Tasks can then run on the new Pool. If you want to override the requeue behavior, then you should call resize Pool explicitly to shrink the Pool to zero size before deleting the Pool. If you call an Update, Patch or Delete API on a Pool in the deleting state, it will fail with HTTP status code 409 with error code PoolBeingDeleted.
   ## 
@@ -7191,128 +7198,128 @@ proc validate_PoolDelete_575009(path: JsonNode; query: JsonNode; header: JsonNod
   ##         : The ID of the Pool to delete.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `poolId` field"
-  var valid_575011 = path.getOrDefault("poolId")
-  valid_575011 = validateParameter(valid_575011, JString, required = true,
+  var valid_564911 = path.getOrDefault("poolId")
+  valid_564911 = validateParameter(valid_564911, JString, required = true,
                                  default = nil)
-  if valid_575011 != nil:
-    section.add "poolId", valid_575011
+  if valid_564911 != nil:
+    section.add "poolId", valid_564911
   result.add "path", section
   ## parameters in `query` object:
-  ##   timeout: JInt
-  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   ##   api-version: JString (required)
   ##              : Client API Version.
+  ##   timeout: JInt
+  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   section = newJObject()
-  var valid_575012 = query.getOrDefault("timeout")
-  valid_575012 = validateParameter(valid_575012, JInt, required = false,
-                                 default = newJInt(30))
-  if valid_575012 != nil:
-    section.add "timeout", valid_575012
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575013 = query.getOrDefault("api-version")
-  valid_575013 = validateParameter(valid_575013, JString, required = true,
+  var valid_564912 = query.getOrDefault("api-version")
+  valid_564912 = validateParameter(valid_564912, JString, required = true,
                                  default = nil)
-  if valid_575013 != nil:
-    section.add "api-version", valid_575013
+  if valid_564912 != nil:
+    section.add "api-version", valid_564912
+  var valid_564913 = query.getOrDefault("timeout")
+  valid_564913 = validateParameter(valid_564913, JInt, required = false,
+                                 default = newJInt(30))
+  if valid_564913 != nil:
+    section.add "timeout", valid_564913
   result.add "query", section
   ## parameters in `header` object:
-  ##   If-Match: JString
-  ##           : An ETag value associated with the version of the resource known to the client. The operation will be performed only if the resource's current ETag on the service exactly matches the value specified by the client.
-  ##   client-request-id: JString
-  ##                    : The caller-generated request identity, in the form of a GUID with no decoration such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
-  ##   ocp-date: JString
-  ##           : The time the request was issued. Client libraries typically set this to the current system clock time; set it explicitly if you are calling the REST API directly.
-  ##   If-Unmodified-Since: JString
-  ##                      : A timestamp indicating the last modified time of the resource known to the client. The operation will be performed only if the resource on the service has not been modified since the specified time.
-  ##   If-None-Match: JString
-  ##                : An ETag value associated with the version of the resource known to the client. The operation will be performed only if the resource's current ETag on the service does not match the value specified by the client.
-  ##   If-Modified-Since: JString
-  ##                    : A timestamp indicating the last modified time of the resource known to the client. The operation will be performed only if the resource on the service has been modified since the specified time.
   ##   return-client-request-id: JBool
   ##                           : Whether the server should return the client-request-id in the response.
+  ##   If-Unmodified-Since: JString
+  ##                      : A timestamp indicating the last modified time of the resource known to the client. The operation will be performed only if the resource on the service has not been modified since the specified time.
+  ##   client-request-id: JString
+  ##                    : The caller-generated request identity, in the form of a GUID with no decoration such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
+  ##   If-Modified-Since: JString
+  ##                    : A timestamp indicating the last modified time of the resource known to the client. The operation will be performed only if the resource on the service has been modified since the specified time.
+  ##   If-None-Match: JString
+  ##                : An ETag value associated with the version of the resource known to the client. The operation will be performed only if the resource's current ETag on the service does not match the value specified by the client.
+  ##   ocp-date: JString
+  ##           : The time the request was issued. Client libraries typically set this to the current system clock time; set it explicitly if you are calling the REST API directly.
+  ##   If-Match: JString
+  ##           : An ETag value associated with the version of the resource known to the client. The operation will be performed only if the resource's current ETag on the service exactly matches the value specified by the client.
   section = newJObject()
-  var valid_575014 = header.getOrDefault("If-Match")
-  valid_575014 = validateParameter(valid_575014, JString, required = false,
-                                 default = nil)
-  if valid_575014 != nil:
-    section.add "If-Match", valid_575014
-  var valid_575015 = header.getOrDefault("client-request-id")
-  valid_575015 = validateParameter(valid_575015, JString, required = false,
-                                 default = nil)
-  if valid_575015 != nil:
-    section.add "client-request-id", valid_575015
-  var valid_575016 = header.getOrDefault("ocp-date")
-  valid_575016 = validateParameter(valid_575016, JString, required = false,
-                                 default = nil)
-  if valid_575016 != nil:
-    section.add "ocp-date", valid_575016
-  var valid_575017 = header.getOrDefault("If-Unmodified-Since")
-  valid_575017 = validateParameter(valid_575017, JString, required = false,
-                                 default = nil)
-  if valid_575017 != nil:
-    section.add "If-Unmodified-Since", valid_575017
-  var valid_575018 = header.getOrDefault("If-None-Match")
-  valid_575018 = validateParameter(valid_575018, JString, required = false,
-                                 default = nil)
-  if valid_575018 != nil:
-    section.add "If-None-Match", valid_575018
-  var valid_575019 = header.getOrDefault("If-Modified-Since")
-  valid_575019 = validateParameter(valid_575019, JString, required = false,
-                                 default = nil)
-  if valid_575019 != nil:
-    section.add "If-Modified-Since", valid_575019
-  var valid_575020 = header.getOrDefault("return-client-request-id")
-  valid_575020 = validateParameter(valid_575020, JBool, required = false,
+  var valid_564914 = header.getOrDefault("return-client-request-id")
+  valid_564914 = validateParameter(valid_564914, JBool, required = false,
                                  default = newJBool(false))
-  if valid_575020 != nil:
-    section.add "return-client-request-id", valid_575020
+  if valid_564914 != nil:
+    section.add "return-client-request-id", valid_564914
+  var valid_564915 = header.getOrDefault("If-Unmodified-Since")
+  valid_564915 = validateParameter(valid_564915, JString, required = false,
+                                 default = nil)
+  if valid_564915 != nil:
+    section.add "If-Unmodified-Since", valid_564915
+  var valid_564916 = header.getOrDefault("client-request-id")
+  valid_564916 = validateParameter(valid_564916, JString, required = false,
+                                 default = nil)
+  if valid_564916 != nil:
+    section.add "client-request-id", valid_564916
+  var valid_564917 = header.getOrDefault("If-Modified-Since")
+  valid_564917 = validateParameter(valid_564917, JString, required = false,
+                                 default = nil)
+  if valid_564917 != nil:
+    section.add "If-Modified-Since", valid_564917
+  var valid_564918 = header.getOrDefault("If-None-Match")
+  valid_564918 = validateParameter(valid_564918, JString, required = false,
+                                 default = nil)
+  if valid_564918 != nil:
+    section.add "If-None-Match", valid_564918
+  var valid_564919 = header.getOrDefault("ocp-date")
+  valid_564919 = validateParameter(valid_564919, JString, required = false,
+                                 default = nil)
+  if valid_564919 != nil:
+    section.add "ocp-date", valid_564919
+  var valid_564920 = header.getOrDefault("If-Match")
+  valid_564920 = validateParameter(valid_564920, JString, required = false,
+                                 default = nil)
+  if valid_564920 != nil:
+    section.add "If-Match", valid_564920
   result.add "header", section
   section = newJObject()
   result.add "formData", section
   if body != nil:
     result.add "body", body
 
-proc call*(call_575021: Call_PoolDelete_575008; path: JsonNode; query: JsonNode;
+proc call*(call_564921: Call_PoolDelete_564908; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## When you request that a Pool be deleted, the following actions occur: the Pool state is set to deleting; any ongoing resize operation on the Pool are stopped; the Batch service starts resizing the Pool to zero Compute Nodes; any Tasks running on existing Compute Nodes are terminated and requeued (as if a resize Pool operation had been requested with the default requeue option); finally, the Pool is removed from the system. Because running Tasks are requeued, the user can rerun these Tasks by updating their Job to target a different Pool. The Tasks can then run on the new Pool. If you want to override the requeue behavior, then you should call resize Pool explicitly to shrink the Pool to zero size before deleting the Pool. If you call an Update, Patch or Delete API on a Pool in the deleting state, it will fail with HTTP status code 409 with error code PoolBeingDeleted.
   ## 
-  let valid = call_575021.validator(path, query, header, formData, body)
-  let scheme = call_575021.pickScheme
+  let valid = call_564921.validator(path, query, header, formData, body)
+  let scheme = call_564921.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575021.url(scheme.get, call_575021.host, call_575021.base,
-                         call_575021.route, valid.getOrDefault("path"),
+  let url = call_564921.url(scheme.get, call_564921.host, call_564921.base,
+                         call_564921.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575021, url, valid)
+  result = hook(call_564921, url, valid)
 
-proc call*(call_575022: Call_PoolDelete_575008; apiVersion: string; poolId: string;
+proc call*(call_564922: Call_PoolDelete_564908; apiVersion: string; poolId: string;
           timeout: int = 30): Recallable =
   ## poolDelete
   ## When you request that a Pool be deleted, the following actions occur: the Pool state is set to deleting; any ongoing resize operation on the Pool are stopped; the Batch service starts resizing the Pool to zero Compute Nodes; any Tasks running on existing Compute Nodes are terminated and requeued (as if a resize Pool operation had been requested with the default requeue option); finally, the Pool is removed from the system. Because running Tasks are requeued, the user can rerun these Tasks by updating their Job to target a different Pool. The Tasks can then run on the new Pool. If you want to override the requeue behavior, then you should call resize Pool explicitly to shrink the Pool to zero size before deleting the Pool. If you call an Update, Patch or Delete API on a Pool in the deleting state, it will fail with HTTP status code 409 with error code PoolBeingDeleted.
-  ##   timeout: int
-  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   ##   apiVersion: string (required)
   ##             : Client API Version.
   ##   poolId: string (required)
   ##         : The ID of the Pool to delete.
-  var path_575023 = newJObject()
-  var query_575024 = newJObject()
-  add(query_575024, "timeout", newJInt(timeout))
-  add(query_575024, "api-version", newJString(apiVersion))
-  add(path_575023, "poolId", newJString(poolId))
-  result = call_575022.call(path_575023, query_575024, nil, nil, nil)
+  ##   timeout: int
+  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
+  var path_564923 = newJObject()
+  var query_564924 = newJObject()
+  add(query_564924, "api-version", newJString(apiVersion))
+  add(path_564923, "poolId", newJString(poolId))
+  add(query_564924, "timeout", newJInt(timeout))
+  result = call_564922.call(path_564923, query_564924, nil, nil, nil)
 
-var poolDelete* = Call_PoolDelete_575008(name: "poolDelete",
+var poolDelete* = Call_PoolDelete_564908(name: "poolDelete",
                                       meth: HttpMethod.HttpDelete,
                                       host: "azure.local",
                                       route: "/pools/{poolId}",
-                                      validator: validate_PoolDelete_575009,
-                                      base: "", url: url_PoolDelete_575010,
+                                      validator: validate_PoolDelete_564909,
+                                      base: "", url: url_PoolDelete_564910,
                                       schemes: {Scheme.Https})
 type
-  Call_PoolDisableAutoScale_575061 = ref object of OpenApiRestCall_573667
-proc url_PoolDisableAutoScale_575063(protocol: Scheme; host: string; base: string;
+  Call_PoolDisableAutoScale_564961 = ref object of OpenApiRestCall_563565
+proc url_PoolDisableAutoScale_564963(protocol: Scheme; host: string; base: string;
                                     route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -7328,7 +7335,7 @@ proc url_PoolDisableAutoScale_575063(protocol: Scheme; host: string; base: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_PoolDisableAutoScale_575062(path: JsonNode; query: JsonNode;
+proc validate_PoolDisableAutoScale_564962(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   var section: JsonNode
   result = newJObject()
@@ -7337,95 +7344,95 @@ proc validate_PoolDisableAutoScale_575062(path: JsonNode; query: JsonNode;
   ##         : The ID of the Pool on which to disable automatic scaling.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `poolId` field"
-  var valid_575064 = path.getOrDefault("poolId")
-  valid_575064 = validateParameter(valid_575064, JString, required = true,
+  var valid_564964 = path.getOrDefault("poolId")
+  valid_564964 = validateParameter(valid_564964, JString, required = true,
                                  default = nil)
-  if valid_575064 != nil:
-    section.add "poolId", valid_575064
+  if valid_564964 != nil:
+    section.add "poolId", valid_564964
   result.add "path", section
   ## parameters in `query` object:
-  ##   timeout: JInt
-  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   ##   api-version: JString (required)
   ##              : Client API Version.
+  ##   timeout: JInt
+  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   section = newJObject()
-  var valid_575065 = query.getOrDefault("timeout")
-  valid_575065 = validateParameter(valid_575065, JInt, required = false,
-                                 default = newJInt(30))
-  if valid_575065 != nil:
-    section.add "timeout", valid_575065
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575066 = query.getOrDefault("api-version")
-  valid_575066 = validateParameter(valid_575066, JString, required = true,
+  var valid_564965 = query.getOrDefault("api-version")
+  valid_564965 = validateParameter(valid_564965, JString, required = true,
                                  default = nil)
-  if valid_575066 != nil:
-    section.add "api-version", valid_575066
+  if valid_564965 != nil:
+    section.add "api-version", valid_564965
+  var valid_564966 = query.getOrDefault("timeout")
+  valid_564966 = validateParameter(valid_564966, JInt, required = false,
+                                 default = newJInt(30))
+  if valid_564966 != nil:
+    section.add "timeout", valid_564966
   result.add "query", section
   ## parameters in `header` object:
+  ##   return-client-request-id: JBool
+  ##                           : Whether the server should return the client-request-id in the response.
   ##   client-request-id: JString
   ##                    : The caller-generated request identity, in the form of a GUID with no decoration such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
   ##   ocp-date: JString
   ##           : The time the request was issued. Client libraries typically set this to the current system clock time; set it explicitly if you are calling the REST API directly.
-  ##   return-client-request-id: JBool
-  ##                           : Whether the server should return the client-request-id in the response.
   section = newJObject()
-  var valid_575067 = header.getOrDefault("client-request-id")
-  valid_575067 = validateParameter(valid_575067, JString, required = false,
-                                 default = nil)
-  if valid_575067 != nil:
-    section.add "client-request-id", valid_575067
-  var valid_575068 = header.getOrDefault("ocp-date")
-  valid_575068 = validateParameter(valid_575068, JString, required = false,
-                                 default = nil)
-  if valid_575068 != nil:
-    section.add "ocp-date", valid_575068
-  var valid_575069 = header.getOrDefault("return-client-request-id")
-  valid_575069 = validateParameter(valid_575069, JBool, required = false,
+  var valid_564967 = header.getOrDefault("return-client-request-id")
+  valid_564967 = validateParameter(valid_564967, JBool, required = false,
                                  default = newJBool(false))
-  if valid_575069 != nil:
-    section.add "return-client-request-id", valid_575069
+  if valid_564967 != nil:
+    section.add "return-client-request-id", valid_564967
+  var valid_564968 = header.getOrDefault("client-request-id")
+  valid_564968 = validateParameter(valid_564968, JString, required = false,
+                                 default = nil)
+  if valid_564968 != nil:
+    section.add "client-request-id", valid_564968
+  var valid_564969 = header.getOrDefault("ocp-date")
+  valid_564969 = validateParameter(valid_564969, JString, required = false,
+                                 default = nil)
+  if valid_564969 != nil:
+    section.add "ocp-date", valid_564969
   result.add "header", section
   section = newJObject()
   result.add "formData", section
   if body != nil:
     result.add "body", body
 
-proc call*(call_575070: Call_PoolDisableAutoScale_575061; path: JsonNode;
+proc call*(call_564970: Call_PoolDisableAutoScale_564961; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
-  let valid = call_575070.validator(path, query, header, formData, body)
-  let scheme = call_575070.pickScheme
+  let valid = call_564970.validator(path, query, header, formData, body)
+  let scheme = call_564970.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575070.url(scheme.get, call_575070.host, call_575070.base,
-                         call_575070.route, valid.getOrDefault("path"),
+  let url = call_564970.url(scheme.get, call_564970.host, call_564970.base,
+                         call_564970.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575070, url, valid)
+  result = hook(call_564970, url, valid)
 
-proc call*(call_575071: Call_PoolDisableAutoScale_575061; apiVersion: string;
+proc call*(call_564971: Call_PoolDisableAutoScale_564961; apiVersion: string;
           poolId: string; timeout: int = 30): Recallable =
   ## poolDisableAutoScale
-  ##   timeout: int
-  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   ##   apiVersion: string (required)
   ##             : Client API Version.
   ##   poolId: string (required)
   ##         : The ID of the Pool on which to disable automatic scaling.
-  var path_575072 = newJObject()
-  var query_575073 = newJObject()
-  add(query_575073, "timeout", newJInt(timeout))
-  add(query_575073, "api-version", newJString(apiVersion))
-  add(path_575072, "poolId", newJString(poolId))
-  result = call_575071.call(path_575072, query_575073, nil, nil, nil)
+  ##   timeout: int
+  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
+  var path_564972 = newJObject()
+  var query_564973 = newJObject()
+  add(query_564973, "api-version", newJString(apiVersion))
+  add(path_564972, "poolId", newJString(poolId))
+  add(query_564973, "timeout", newJInt(timeout))
+  result = call_564971.call(path_564972, query_564973, nil, nil, nil)
 
-var poolDisableAutoScale* = Call_PoolDisableAutoScale_575061(
+var poolDisableAutoScale* = Call_PoolDisableAutoScale_564961(
     name: "poolDisableAutoScale", meth: HttpMethod.HttpPost, host: "azure.local",
     route: "/pools/{poolId}/disableautoscale",
-    validator: validate_PoolDisableAutoScale_575062, base: "",
-    url: url_PoolDisableAutoScale_575063, schemes: {Scheme.Https})
+    validator: validate_PoolDisableAutoScale_564962, base: "",
+    url: url_PoolDisableAutoScale_564963, schemes: {Scheme.Https})
 type
-  Call_PoolEnableAutoScale_575074 = ref object of OpenApiRestCall_573667
-proc url_PoolEnableAutoScale_575076(protocol: Scheme; host: string; base: string;
+  Call_PoolEnableAutoScale_564974 = ref object of OpenApiRestCall_563565
+proc url_PoolEnableAutoScale_564976(protocol: Scheme; host: string; base: string;
                                    route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -7441,7 +7448,7 @@ proc url_PoolEnableAutoScale_575076(protocol: Scheme; host: string; base: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_PoolEnableAutoScale_575075(path: JsonNode; query: JsonNode;
+proc validate_PoolEnableAutoScale_564975(path: JsonNode; query: JsonNode;
                                         header: JsonNode; formData: JsonNode;
                                         body: JsonNode): JsonNode =
   ## You cannot enable automatic scaling on a Pool if a resize operation is in progress on the Pool. If automatic scaling of the Pool is currently disabled, you must specify a valid autoscale formula as part of the request. If automatic scaling of the Pool is already enabled, you may specify a new autoscale formula and/or a new evaluation interval. You cannot call this API for the same Pool more than once every 30 seconds.
@@ -7453,82 +7460,82 @@ proc validate_PoolEnableAutoScale_575075(path: JsonNode; query: JsonNode;
   ##         : The ID of the Pool on which to enable automatic scaling.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `poolId` field"
-  var valid_575077 = path.getOrDefault("poolId")
-  valid_575077 = validateParameter(valid_575077, JString, required = true,
+  var valid_564977 = path.getOrDefault("poolId")
+  valid_564977 = validateParameter(valid_564977, JString, required = true,
                                  default = nil)
-  if valid_575077 != nil:
-    section.add "poolId", valid_575077
+  if valid_564977 != nil:
+    section.add "poolId", valid_564977
   result.add "path", section
   ## parameters in `query` object:
-  ##   timeout: JInt
-  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   ##   api-version: JString (required)
   ##              : Client API Version.
+  ##   timeout: JInt
+  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   section = newJObject()
-  var valid_575078 = query.getOrDefault("timeout")
-  valid_575078 = validateParameter(valid_575078, JInt, required = false,
-                                 default = newJInt(30))
-  if valid_575078 != nil:
-    section.add "timeout", valid_575078
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575079 = query.getOrDefault("api-version")
-  valid_575079 = validateParameter(valid_575079, JString, required = true,
+  var valid_564978 = query.getOrDefault("api-version")
+  valid_564978 = validateParameter(valid_564978, JString, required = true,
                                  default = nil)
-  if valid_575079 != nil:
-    section.add "api-version", valid_575079
+  if valid_564978 != nil:
+    section.add "api-version", valid_564978
+  var valid_564979 = query.getOrDefault("timeout")
+  valid_564979 = validateParameter(valid_564979, JInt, required = false,
+                                 default = newJInt(30))
+  if valid_564979 != nil:
+    section.add "timeout", valid_564979
   result.add "query", section
   ## parameters in `header` object:
-  ##   If-Match: JString
-  ##           : An ETag value associated with the version of the resource known to the client. The operation will be performed only if the resource's current ETag on the service exactly matches the value specified by the client.
-  ##   client-request-id: JString
-  ##                    : The caller-generated request identity, in the form of a GUID with no decoration such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
-  ##   ocp-date: JString
-  ##           : The time the request was issued. Client libraries typically set this to the current system clock time; set it explicitly if you are calling the REST API directly.
-  ##   If-Unmodified-Since: JString
-  ##                      : A timestamp indicating the last modified time of the resource known to the client. The operation will be performed only if the resource on the service has not been modified since the specified time.
-  ##   If-None-Match: JString
-  ##                : An ETag value associated with the version of the resource known to the client. The operation will be performed only if the resource's current ETag on the service does not match the value specified by the client.
-  ##   If-Modified-Since: JString
-  ##                    : A timestamp indicating the last modified time of the resource known to the client. The operation will be performed only if the resource on the service has been modified since the specified time.
   ##   return-client-request-id: JBool
   ##                           : Whether the server should return the client-request-id in the response.
+  ##   If-Unmodified-Since: JString
+  ##                      : A timestamp indicating the last modified time of the resource known to the client. The operation will be performed only if the resource on the service has not been modified since the specified time.
+  ##   client-request-id: JString
+  ##                    : The caller-generated request identity, in the form of a GUID with no decoration such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
+  ##   If-Modified-Since: JString
+  ##                    : A timestamp indicating the last modified time of the resource known to the client. The operation will be performed only if the resource on the service has been modified since the specified time.
+  ##   If-None-Match: JString
+  ##                : An ETag value associated with the version of the resource known to the client. The operation will be performed only if the resource's current ETag on the service does not match the value specified by the client.
+  ##   ocp-date: JString
+  ##           : The time the request was issued. Client libraries typically set this to the current system clock time; set it explicitly if you are calling the REST API directly.
+  ##   If-Match: JString
+  ##           : An ETag value associated with the version of the resource known to the client. The operation will be performed only if the resource's current ETag on the service exactly matches the value specified by the client.
   section = newJObject()
-  var valid_575080 = header.getOrDefault("If-Match")
-  valid_575080 = validateParameter(valid_575080, JString, required = false,
-                                 default = nil)
-  if valid_575080 != nil:
-    section.add "If-Match", valid_575080
-  var valid_575081 = header.getOrDefault("client-request-id")
-  valid_575081 = validateParameter(valid_575081, JString, required = false,
-                                 default = nil)
-  if valid_575081 != nil:
-    section.add "client-request-id", valid_575081
-  var valid_575082 = header.getOrDefault("ocp-date")
-  valid_575082 = validateParameter(valid_575082, JString, required = false,
-                                 default = nil)
-  if valid_575082 != nil:
-    section.add "ocp-date", valid_575082
-  var valid_575083 = header.getOrDefault("If-Unmodified-Since")
-  valid_575083 = validateParameter(valid_575083, JString, required = false,
-                                 default = nil)
-  if valid_575083 != nil:
-    section.add "If-Unmodified-Since", valid_575083
-  var valid_575084 = header.getOrDefault("If-None-Match")
-  valid_575084 = validateParameter(valid_575084, JString, required = false,
-                                 default = nil)
-  if valid_575084 != nil:
-    section.add "If-None-Match", valid_575084
-  var valid_575085 = header.getOrDefault("If-Modified-Since")
-  valid_575085 = validateParameter(valid_575085, JString, required = false,
-                                 default = nil)
-  if valid_575085 != nil:
-    section.add "If-Modified-Since", valid_575085
-  var valid_575086 = header.getOrDefault("return-client-request-id")
-  valid_575086 = validateParameter(valid_575086, JBool, required = false,
+  var valid_564980 = header.getOrDefault("return-client-request-id")
+  valid_564980 = validateParameter(valid_564980, JBool, required = false,
                                  default = newJBool(false))
-  if valid_575086 != nil:
-    section.add "return-client-request-id", valid_575086
+  if valid_564980 != nil:
+    section.add "return-client-request-id", valid_564980
+  var valid_564981 = header.getOrDefault("If-Unmodified-Since")
+  valid_564981 = validateParameter(valid_564981, JString, required = false,
+                                 default = nil)
+  if valid_564981 != nil:
+    section.add "If-Unmodified-Since", valid_564981
+  var valid_564982 = header.getOrDefault("client-request-id")
+  valid_564982 = validateParameter(valid_564982, JString, required = false,
+                                 default = nil)
+  if valid_564982 != nil:
+    section.add "client-request-id", valid_564982
+  var valid_564983 = header.getOrDefault("If-Modified-Since")
+  valid_564983 = validateParameter(valid_564983, JString, required = false,
+                                 default = nil)
+  if valid_564983 != nil:
+    section.add "If-Modified-Since", valid_564983
+  var valid_564984 = header.getOrDefault("If-None-Match")
+  valid_564984 = validateParameter(valid_564984, JString, required = false,
+                                 default = nil)
+  if valid_564984 != nil:
+    section.add "If-None-Match", valid_564984
+  var valid_564985 = header.getOrDefault("ocp-date")
+  valid_564985 = validateParameter(valid_564985, JString, required = false,
+                                 default = nil)
+  if valid_564985 != nil:
+    section.add "ocp-date", valid_564985
+  var valid_564986 = header.getOrDefault("If-Match")
+  valid_564986 = validateParameter(valid_564986, JString, required = false,
+                                 default = nil)
+  if valid_564986 != nil:
+    section.add "If-Match", valid_564986
   result.add "header", section
   section = newJObject()
   result.add "formData", section
@@ -7540,49 +7547,49 @@ proc validate_PoolEnableAutoScale_575075(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_575088: Call_PoolEnableAutoScale_575074; path: JsonNode;
+proc call*(call_564988: Call_PoolEnableAutoScale_564974; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## You cannot enable automatic scaling on a Pool if a resize operation is in progress on the Pool. If automatic scaling of the Pool is currently disabled, you must specify a valid autoscale formula as part of the request. If automatic scaling of the Pool is already enabled, you may specify a new autoscale formula and/or a new evaluation interval. You cannot call this API for the same Pool more than once every 30 seconds.
   ## 
-  let valid = call_575088.validator(path, query, header, formData, body)
-  let scheme = call_575088.pickScheme
+  let valid = call_564988.validator(path, query, header, formData, body)
+  let scheme = call_564988.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575088.url(scheme.get, call_575088.host, call_575088.base,
-                         call_575088.route, valid.getOrDefault("path"),
+  let url = call_564988.url(scheme.get, call_564988.host, call_564988.base,
+                         call_564988.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575088, url, valid)
+  result = hook(call_564988, url, valid)
 
-proc call*(call_575089: Call_PoolEnableAutoScale_575074; apiVersion: string;
+proc call*(call_564989: Call_PoolEnableAutoScale_564974; apiVersion: string;
           poolId: string; poolEnableAutoScaleParameter: JsonNode; timeout: int = 30): Recallable =
   ## poolEnableAutoScale
   ## You cannot enable automatic scaling on a Pool if a resize operation is in progress on the Pool. If automatic scaling of the Pool is currently disabled, you must specify a valid autoscale formula as part of the request. If automatic scaling of the Pool is already enabled, you may specify a new autoscale formula and/or a new evaluation interval. You cannot call this API for the same Pool more than once every 30 seconds.
-  ##   timeout: int
-  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   ##   apiVersion: string (required)
   ##             : Client API Version.
   ##   poolId: string (required)
   ##         : The ID of the Pool on which to enable automatic scaling.
+  ##   timeout: int
+  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   ##   poolEnableAutoScaleParameter: JObject (required)
   ##                               : The parameters for the request.
-  var path_575090 = newJObject()
-  var query_575091 = newJObject()
-  var body_575092 = newJObject()
-  add(query_575091, "timeout", newJInt(timeout))
-  add(query_575091, "api-version", newJString(apiVersion))
-  add(path_575090, "poolId", newJString(poolId))
+  var path_564990 = newJObject()
+  var query_564991 = newJObject()
+  var body_564992 = newJObject()
+  add(query_564991, "api-version", newJString(apiVersion))
+  add(path_564990, "poolId", newJString(poolId))
+  add(query_564991, "timeout", newJInt(timeout))
   if poolEnableAutoScaleParameter != nil:
-    body_575092 = poolEnableAutoScaleParameter
-  result = call_575089.call(path_575090, query_575091, nil, nil, body_575092)
+    body_564992 = poolEnableAutoScaleParameter
+  result = call_564989.call(path_564990, query_564991, nil, nil, body_564992)
 
-var poolEnableAutoScale* = Call_PoolEnableAutoScale_575074(
+var poolEnableAutoScale* = Call_PoolEnableAutoScale_564974(
     name: "poolEnableAutoScale", meth: HttpMethod.HttpPost, host: "azure.local",
     route: "/pools/{poolId}/enableautoscale",
-    validator: validate_PoolEnableAutoScale_575075, base: "",
-    url: url_PoolEnableAutoScale_575076, schemes: {Scheme.Https})
+    validator: validate_PoolEnableAutoScale_564975, base: "",
+    url: url_PoolEnableAutoScale_564976, schemes: {Scheme.Https})
 type
-  Call_PoolEvaluateAutoScale_575093 = ref object of OpenApiRestCall_573667
-proc url_PoolEvaluateAutoScale_575095(protocol: Scheme; host: string; base: string;
+  Call_PoolEvaluateAutoScale_564993 = ref object of OpenApiRestCall_563565
+proc url_PoolEvaluateAutoScale_564995(protocol: Scheme; host: string; base: string;
                                      route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -7598,7 +7605,7 @@ proc url_PoolEvaluateAutoScale_575095(protocol: Scheme; host: string; base: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_PoolEvaluateAutoScale_575094(path: JsonNode; query: JsonNode;
+proc validate_PoolEvaluateAutoScale_564994(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## This API is primarily for validating an autoscale formula, as it simply returns the result without applying the formula to the Pool. The Pool must have auto scaling enabled in order to evaluate a formula.
   ## 
@@ -7609,54 +7616,54 @@ proc validate_PoolEvaluateAutoScale_575094(path: JsonNode; query: JsonNode;
   ##         : The ID of the Pool on which to evaluate the automatic scaling formula.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `poolId` field"
-  var valid_575096 = path.getOrDefault("poolId")
-  valid_575096 = validateParameter(valid_575096, JString, required = true,
+  var valid_564996 = path.getOrDefault("poolId")
+  valid_564996 = validateParameter(valid_564996, JString, required = true,
                                  default = nil)
-  if valid_575096 != nil:
-    section.add "poolId", valid_575096
+  if valid_564996 != nil:
+    section.add "poolId", valid_564996
   result.add "path", section
   ## parameters in `query` object:
-  ##   timeout: JInt
-  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   ##   api-version: JString (required)
   ##              : Client API Version.
+  ##   timeout: JInt
+  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   section = newJObject()
-  var valid_575097 = query.getOrDefault("timeout")
-  valid_575097 = validateParameter(valid_575097, JInt, required = false,
-                                 default = newJInt(30))
-  if valid_575097 != nil:
-    section.add "timeout", valid_575097
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575098 = query.getOrDefault("api-version")
-  valid_575098 = validateParameter(valid_575098, JString, required = true,
+  var valid_564997 = query.getOrDefault("api-version")
+  valid_564997 = validateParameter(valid_564997, JString, required = true,
                                  default = nil)
-  if valid_575098 != nil:
-    section.add "api-version", valid_575098
+  if valid_564997 != nil:
+    section.add "api-version", valid_564997
+  var valid_564998 = query.getOrDefault("timeout")
+  valid_564998 = validateParameter(valid_564998, JInt, required = false,
+                                 default = newJInt(30))
+  if valid_564998 != nil:
+    section.add "timeout", valid_564998
   result.add "query", section
   ## parameters in `header` object:
+  ##   return-client-request-id: JBool
+  ##                           : Whether the server should return the client-request-id in the response.
   ##   client-request-id: JString
   ##                    : The caller-generated request identity, in the form of a GUID with no decoration such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
   ##   ocp-date: JString
   ##           : The time the request was issued. Client libraries typically set this to the current system clock time; set it explicitly if you are calling the REST API directly.
-  ##   return-client-request-id: JBool
-  ##                           : Whether the server should return the client-request-id in the response.
   section = newJObject()
-  var valid_575099 = header.getOrDefault("client-request-id")
-  valid_575099 = validateParameter(valid_575099, JString, required = false,
-                                 default = nil)
-  if valid_575099 != nil:
-    section.add "client-request-id", valid_575099
-  var valid_575100 = header.getOrDefault("ocp-date")
-  valid_575100 = validateParameter(valid_575100, JString, required = false,
-                                 default = nil)
-  if valid_575100 != nil:
-    section.add "ocp-date", valid_575100
-  var valid_575101 = header.getOrDefault("return-client-request-id")
-  valid_575101 = validateParameter(valid_575101, JBool, required = false,
+  var valid_564999 = header.getOrDefault("return-client-request-id")
+  valid_564999 = validateParameter(valid_564999, JBool, required = false,
                                  default = newJBool(false))
-  if valid_575101 != nil:
-    section.add "return-client-request-id", valid_575101
+  if valid_564999 != nil:
+    section.add "return-client-request-id", valid_564999
+  var valid_565000 = header.getOrDefault("client-request-id")
+  valid_565000 = validateParameter(valid_565000, JString, required = false,
+                                 default = nil)
+  if valid_565000 != nil:
+    section.add "client-request-id", valid_565000
+  var valid_565001 = header.getOrDefault("ocp-date")
+  valid_565001 = validateParameter(valid_565001, JString, required = false,
+                                 default = nil)
+  if valid_565001 != nil:
+    section.add "ocp-date", valid_565001
   result.add "header", section
   section = newJObject()
   result.add "formData", section
@@ -7668,50 +7675,50 @@ proc validate_PoolEvaluateAutoScale_575094(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_575103: Call_PoolEvaluateAutoScale_575093; path: JsonNode;
+proc call*(call_565003: Call_PoolEvaluateAutoScale_564993; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## This API is primarily for validating an autoscale formula, as it simply returns the result without applying the formula to the Pool. The Pool must have auto scaling enabled in order to evaluate a formula.
   ## 
-  let valid = call_575103.validator(path, query, header, formData, body)
-  let scheme = call_575103.pickScheme
+  let valid = call_565003.validator(path, query, header, formData, body)
+  let scheme = call_565003.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575103.url(scheme.get, call_575103.host, call_575103.base,
-                         call_575103.route, valid.getOrDefault("path"),
+  let url = call_565003.url(scheme.get, call_565003.host, call_565003.base,
+                         call_565003.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575103, url, valid)
+  result = hook(call_565003, url, valid)
 
-proc call*(call_575104: Call_PoolEvaluateAutoScale_575093; apiVersion: string;
-          poolEvaluateAutoScaleParameter: JsonNode; poolId: string;
-          timeout: int = 30): Recallable =
+proc call*(call_565004: Call_PoolEvaluateAutoScale_564993;
+          poolEvaluateAutoScaleParameter: JsonNode; apiVersion: string;
+          poolId: string; timeout: int = 30): Recallable =
   ## poolEvaluateAutoScale
   ## This API is primarily for validating an autoscale formula, as it simply returns the result without applying the formula to the Pool. The Pool must have auto scaling enabled in order to evaluate a formula.
-  ##   timeout: int
-  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
-  ##   apiVersion: string (required)
-  ##             : Client API Version.
   ##   poolEvaluateAutoScaleParameter: JObject (required)
   ##                                 : The parameters for the request.
+  ##   apiVersion: string (required)
+  ##             : Client API Version.
   ##   poolId: string (required)
   ##         : The ID of the Pool on which to evaluate the automatic scaling formula.
-  var path_575105 = newJObject()
-  var query_575106 = newJObject()
-  var body_575107 = newJObject()
-  add(query_575106, "timeout", newJInt(timeout))
-  add(query_575106, "api-version", newJString(apiVersion))
+  ##   timeout: int
+  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
+  var path_565005 = newJObject()
+  var query_565006 = newJObject()
+  var body_565007 = newJObject()
   if poolEvaluateAutoScaleParameter != nil:
-    body_575107 = poolEvaluateAutoScaleParameter
-  add(path_575105, "poolId", newJString(poolId))
-  result = call_575104.call(path_575105, query_575106, nil, nil, body_575107)
+    body_565007 = poolEvaluateAutoScaleParameter
+  add(query_565006, "api-version", newJString(apiVersion))
+  add(path_565005, "poolId", newJString(poolId))
+  add(query_565006, "timeout", newJInt(timeout))
+  result = call_565004.call(path_565005, query_565006, nil, nil, body_565007)
 
-var poolEvaluateAutoScale* = Call_PoolEvaluateAutoScale_575093(
+var poolEvaluateAutoScale* = Call_PoolEvaluateAutoScale_564993(
     name: "poolEvaluateAutoScale", meth: HttpMethod.HttpPost, host: "azure.local",
     route: "/pools/{poolId}/evaluateautoscale",
-    validator: validate_PoolEvaluateAutoScale_575094, base: "",
-    url: url_PoolEvaluateAutoScale_575095, schemes: {Scheme.Https})
+    validator: validate_PoolEvaluateAutoScale_564994, base: "",
+    url: url_PoolEvaluateAutoScale_564995, schemes: {Scheme.Https})
 type
-  Call_ComputeNodeList_575108 = ref object of OpenApiRestCall_573667
-proc url_ComputeNodeList_575110(protocol: Scheme; host: string; base: string;
+  Call_ComputeNodeList_565008 = ref object of OpenApiRestCall_563565
+proc url_ComputeNodeList_565010(protocol: Scheme; host: string; base: string;
                                route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -7727,7 +7734,7 @@ proc url_ComputeNodeList_575110(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ComputeNodeList_575109(path: JsonNode; query: JsonNode;
+proc validate_ComputeNodeList_565009(path: JsonNode; query: JsonNode;
                                     header: JsonNode; formData: JsonNode;
                                     body: JsonNode): JsonNode =
   var section: JsonNode
@@ -7737,127 +7744,127 @@ proc validate_ComputeNodeList_575109(path: JsonNode; query: JsonNode;
   ##         : The ID of the Pool from which you want to list Compute Nodes.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `poolId` field"
-  var valid_575111 = path.getOrDefault("poolId")
-  valid_575111 = validateParameter(valid_575111, JString, required = true,
+  var valid_565011 = path.getOrDefault("poolId")
+  valid_565011 = validateParameter(valid_565011, JString, required = true,
                                  default = nil)
-  if valid_575111 != nil:
-    section.add "poolId", valid_575111
+  if valid_565011 != nil:
+    section.add "poolId", valid_565011
   result.add "path", section
   ## parameters in `query` object:
-  ##   timeout: JInt
-  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   ##   api-version: JString (required)
   ##              : Client API Version.
-  ##   maxresults: JInt
-  ##             : The maximum number of items to return in the response. A maximum of 1000 Compute Nodes can be returned.
   ##   $select: JString
   ##          : An OData $select clause.
+  ##   timeout: JInt
+  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
+  ##   maxresults: JInt
+  ##             : The maximum number of items to return in the response. A maximum of 1000 Compute Nodes can be returned.
   ##   $filter: JString
   ##          : An OData $filter clause. For more information on constructing this filter, see 
   ## https://docs.microsoft.com/en-us/rest/api/batchservice/odata-filters-in-batch#list-nodes-in-a-pool.
   section = newJObject()
-  var valid_575112 = query.getOrDefault("timeout")
-  valid_575112 = validateParameter(valid_575112, JInt, required = false,
-                                 default = newJInt(30))
-  if valid_575112 != nil:
-    section.add "timeout", valid_575112
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575113 = query.getOrDefault("api-version")
-  valid_575113 = validateParameter(valid_575113, JString, required = true,
+  var valid_565012 = query.getOrDefault("api-version")
+  valid_565012 = validateParameter(valid_565012, JString, required = true,
                                  default = nil)
-  if valid_575113 != nil:
-    section.add "api-version", valid_575113
-  var valid_575114 = query.getOrDefault("maxresults")
-  valid_575114 = validateParameter(valid_575114, JInt, required = false,
+  if valid_565012 != nil:
+    section.add "api-version", valid_565012
+  var valid_565013 = query.getOrDefault("$select")
+  valid_565013 = validateParameter(valid_565013, JString, required = false,
+                                 default = nil)
+  if valid_565013 != nil:
+    section.add "$select", valid_565013
+  var valid_565014 = query.getOrDefault("timeout")
+  valid_565014 = validateParameter(valid_565014, JInt, required = false,
+                                 default = newJInt(30))
+  if valid_565014 != nil:
+    section.add "timeout", valid_565014
+  var valid_565015 = query.getOrDefault("maxresults")
+  valid_565015 = validateParameter(valid_565015, JInt, required = false,
                                  default = newJInt(1000))
-  if valid_575114 != nil:
-    section.add "maxresults", valid_575114
-  var valid_575115 = query.getOrDefault("$select")
-  valid_575115 = validateParameter(valid_575115, JString, required = false,
+  if valid_565015 != nil:
+    section.add "maxresults", valid_565015
+  var valid_565016 = query.getOrDefault("$filter")
+  valid_565016 = validateParameter(valid_565016, JString, required = false,
                                  default = nil)
-  if valid_575115 != nil:
-    section.add "$select", valid_575115
-  var valid_575116 = query.getOrDefault("$filter")
-  valid_575116 = validateParameter(valid_575116, JString, required = false,
-                                 default = nil)
-  if valid_575116 != nil:
-    section.add "$filter", valid_575116
+  if valid_565016 != nil:
+    section.add "$filter", valid_565016
   result.add "query", section
   ## parameters in `header` object:
+  ##   return-client-request-id: JBool
+  ##                           : Whether the server should return the client-request-id in the response.
   ##   client-request-id: JString
   ##                    : The caller-generated request identity, in the form of a GUID with no decoration such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
   ##   ocp-date: JString
   ##           : The time the request was issued. Client libraries typically set this to the current system clock time; set it explicitly if you are calling the REST API directly.
-  ##   return-client-request-id: JBool
-  ##                           : Whether the server should return the client-request-id in the response.
   section = newJObject()
-  var valid_575117 = header.getOrDefault("client-request-id")
-  valid_575117 = validateParameter(valid_575117, JString, required = false,
-                                 default = nil)
-  if valid_575117 != nil:
-    section.add "client-request-id", valid_575117
-  var valid_575118 = header.getOrDefault("ocp-date")
-  valid_575118 = validateParameter(valid_575118, JString, required = false,
-                                 default = nil)
-  if valid_575118 != nil:
-    section.add "ocp-date", valid_575118
-  var valid_575119 = header.getOrDefault("return-client-request-id")
-  valid_575119 = validateParameter(valid_575119, JBool, required = false,
+  var valid_565017 = header.getOrDefault("return-client-request-id")
+  valid_565017 = validateParameter(valid_565017, JBool, required = false,
                                  default = newJBool(false))
-  if valid_575119 != nil:
-    section.add "return-client-request-id", valid_575119
+  if valid_565017 != nil:
+    section.add "return-client-request-id", valid_565017
+  var valid_565018 = header.getOrDefault("client-request-id")
+  valid_565018 = validateParameter(valid_565018, JString, required = false,
+                                 default = nil)
+  if valid_565018 != nil:
+    section.add "client-request-id", valid_565018
+  var valid_565019 = header.getOrDefault("ocp-date")
+  valid_565019 = validateParameter(valid_565019, JString, required = false,
+                                 default = nil)
+  if valid_565019 != nil:
+    section.add "ocp-date", valid_565019
   result.add "header", section
   section = newJObject()
   result.add "formData", section
   if body != nil:
     result.add "body", body
 
-proc call*(call_575120: Call_ComputeNodeList_575108; path: JsonNode; query: JsonNode;
+proc call*(call_565020: Call_ComputeNodeList_565008; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
-  let valid = call_575120.validator(path, query, header, formData, body)
-  let scheme = call_575120.pickScheme
+  let valid = call_565020.validator(path, query, header, formData, body)
+  let scheme = call_565020.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575120.url(scheme.get, call_575120.host, call_575120.base,
-                         call_575120.route, valid.getOrDefault("path"),
+  let url = call_565020.url(scheme.get, call_565020.host, call_565020.base,
+                         call_565020.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575120, url, valid)
+  result = hook(call_565020, url, valid)
 
-proc call*(call_575121: Call_ComputeNodeList_575108; apiVersion: string;
-          poolId: string; timeout: int = 30; maxresults: int = 1000; Select: string = "";
+proc call*(call_565021: Call_ComputeNodeList_565008; apiVersion: string;
+          poolId: string; Select: string = ""; timeout: int = 30; maxresults: int = 1000;
           Filter: string = ""): Recallable =
   ## computeNodeList
-  ##   timeout: int
-  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   ##   apiVersion: string (required)
   ##             : Client API Version.
   ##   poolId: string (required)
   ##         : The ID of the Pool from which you want to list Compute Nodes.
-  ##   maxresults: int
-  ##             : The maximum number of items to return in the response. A maximum of 1000 Compute Nodes can be returned.
   ##   Select: string
   ##         : An OData $select clause.
+  ##   timeout: int
+  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
+  ##   maxresults: int
+  ##             : The maximum number of items to return in the response. A maximum of 1000 Compute Nodes can be returned.
   ##   Filter: string
   ##         : An OData $filter clause. For more information on constructing this filter, see 
   ## https://docs.microsoft.com/en-us/rest/api/batchservice/odata-filters-in-batch#list-nodes-in-a-pool.
-  var path_575122 = newJObject()
-  var query_575123 = newJObject()
-  add(query_575123, "timeout", newJInt(timeout))
-  add(query_575123, "api-version", newJString(apiVersion))
-  add(path_575122, "poolId", newJString(poolId))
-  add(query_575123, "maxresults", newJInt(maxresults))
-  add(query_575123, "$select", newJString(Select))
-  add(query_575123, "$filter", newJString(Filter))
-  result = call_575121.call(path_575122, query_575123, nil, nil, nil)
+  var path_565022 = newJObject()
+  var query_565023 = newJObject()
+  add(query_565023, "api-version", newJString(apiVersion))
+  add(path_565022, "poolId", newJString(poolId))
+  add(query_565023, "$select", newJString(Select))
+  add(query_565023, "timeout", newJInt(timeout))
+  add(query_565023, "maxresults", newJInt(maxresults))
+  add(query_565023, "$filter", newJString(Filter))
+  result = call_565021.call(path_565022, query_565023, nil, nil, nil)
 
-var computeNodeList* = Call_ComputeNodeList_575108(name: "computeNodeList",
+var computeNodeList* = Call_ComputeNodeList_565008(name: "computeNodeList",
     meth: HttpMethod.HttpGet, host: "azure.local", route: "/pools/{poolId}/nodes",
-    validator: validate_ComputeNodeList_575109, base: "", url: url_ComputeNodeList_575110,
+    validator: validate_ComputeNodeList_565009, base: "", url: url_ComputeNodeList_565010,
     schemes: {Scheme.Https})
 type
-  Call_ComputeNodeGet_575124 = ref object of OpenApiRestCall_573667
-proc url_ComputeNodeGet_575126(protocol: Scheme; host: string; base: string;
+  Call_ComputeNodeGet_565024 = ref object of OpenApiRestCall_563565
+proc url_ComputeNodeGet_565026(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -7875,7 +7882,7 @@ proc url_ComputeNodeGet_575126(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ComputeNodeGet_575125(path: JsonNode; query: JsonNode;
+proc validate_ComputeNodeGet_565025(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   var section: JsonNode
@@ -7887,112 +7894,112 @@ proc validate_ComputeNodeGet_575125(path: JsonNode; query: JsonNode;
   ##         : The ID of the Compute Node that you want to get information about.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `poolId` field"
-  var valid_575127 = path.getOrDefault("poolId")
-  valid_575127 = validateParameter(valid_575127, JString, required = true,
+  var valid_565027 = path.getOrDefault("poolId")
+  valid_565027 = validateParameter(valid_565027, JString, required = true,
                                  default = nil)
-  if valid_575127 != nil:
-    section.add "poolId", valid_575127
-  var valid_575128 = path.getOrDefault("nodeId")
-  valid_575128 = validateParameter(valid_575128, JString, required = true,
+  if valid_565027 != nil:
+    section.add "poolId", valid_565027
+  var valid_565028 = path.getOrDefault("nodeId")
+  valid_565028 = validateParameter(valid_565028, JString, required = true,
                                  default = nil)
-  if valid_575128 != nil:
-    section.add "nodeId", valid_575128
+  if valid_565028 != nil:
+    section.add "nodeId", valid_565028
   result.add "path", section
   ## parameters in `query` object:
-  ##   timeout: JInt
-  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   ##   api-version: JString (required)
   ##              : Client API Version.
   ##   $select: JString
   ##          : An OData $select clause.
+  ##   timeout: JInt
+  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   section = newJObject()
-  var valid_575129 = query.getOrDefault("timeout")
-  valid_575129 = validateParameter(valid_575129, JInt, required = false,
-                                 default = newJInt(30))
-  if valid_575129 != nil:
-    section.add "timeout", valid_575129
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575130 = query.getOrDefault("api-version")
-  valid_575130 = validateParameter(valid_575130, JString, required = true,
+  var valid_565029 = query.getOrDefault("api-version")
+  valid_565029 = validateParameter(valid_565029, JString, required = true,
                                  default = nil)
-  if valid_575130 != nil:
-    section.add "api-version", valid_575130
-  var valid_575131 = query.getOrDefault("$select")
-  valid_575131 = validateParameter(valid_575131, JString, required = false,
+  if valid_565029 != nil:
+    section.add "api-version", valid_565029
+  var valid_565030 = query.getOrDefault("$select")
+  valid_565030 = validateParameter(valid_565030, JString, required = false,
                                  default = nil)
-  if valid_575131 != nil:
-    section.add "$select", valid_575131
+  if valid_565030 != nil:
+    section.add "$select", valid_565030
+  var valid_565031 = query.getOrDefault("timeout")
+  valid_565031 = validateParameter(valid_565031, JInt, required = false,
+                                 default = newJInt(30))
+  if valid_565031 != nil:
+    section.add "timeout", valid_565031
   result.add "query", section
   ## parameters in `header` object:
+  ##   return-client-request-id: JBool
+  ##                           : Whether the server should return the client-request-id in the response.
   ##   client-request-id: JString
   ##                    : The caller-generated request identity, in the form of a GUID with no decoration such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
   ##   ocp-date: JString
   ##           : The time the request was issued. Client libraries typically set this to the current system clock time; set it explicitly if you are calling the REST API directly.
-  ##   return-client-request-id: JBool
-  ##                           : Whether the server should return the client-request-id in the response.
   section = newJObject()
-  var valid_575132 = header.getOrDefault("client-request-id")
-  valid_575132 = validateParameter(valid_575132, JString, required = false,
-                                 default = nil)
-  if valid_575132 != nil:
-    section.add "client-request-id", valid_575132
-  var valid_575133 = header.getOrDefault("ocp-date")
-  valid_575133 = validateParameter(valid_575133, JString, required = false,
-                                 default = nil)
-  if valid_575133 != nil:
-    section.add "ocp-date", valid_575133
-  var valid_575134 = header.getOrDefault("return-client-request-id")
-  valid_575134 = validateParameter(valid_575134, JBool, required = false,
+  var valid_565032 = header.getOrDefault("return-client-request-id")
+  valid_565032 = validateParameter(valid_565032, JBool, required = false,
                                  default = newJBool(false))
-  if valid_575134 != nil:
-    section.add "return-client-request-id", valid_575134
+  if valid_565032 != nil:
+    section.add "return-client-request-id", valid_565032
+  var valid_565033 = header.getOrDefault("client-request-id")
+  valid_565033 = validateParameter(valid_565033, JString, required = false,
+                                 default = nil)
+  if valid_565033 != nil:
+    section.add "client-request-id", valid_565033
+  var valid_565034 = header.getOrDefault("ocp-date")
+  valid_565034 = validateParameter(valid_565034, JString, required = false,
+                                 default = nil)
+  if valid_565034 != nil:
+    section.add "ocp-date", valid_565034
   result.add "header", section
   section = newJObject()
   result.add "formData", section
   if body != nil:
     result.add "body", body
 
-proc call*(call_575135: Call_ComputeNodeGet_575124; path: JsonNode; query: JsonNode;
+proc call*(call_565035: Call_ComputeNodeGet_565024; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
-  let valid = call_575135.validator(path, query, header, formData, body)
-  let scheme = call_575135.pickScheme
+  let valid = call_565035.validator(path, query, header, formData, body)
+  let scheme = call_565035.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575135.url(scheme.get, call_575135.host, call_575135.base,
-                         call_575135.route, valid.getOrDefault("path"),
+  let url = call_565035.url(scheme.get, call_565035.host, call_565035.base,
+                         call_565035.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575135, url, valid)
+  result = hook(call_565035, url, valid)
 
-proc call*(call_575136: Call_ComputeNodeGet_575124; apiVersion: string;
-          poolId: string; nodeId: string; timeout: int = 30; Select: string = ""): Recallable =
+proc call*(call_565036: Call_ComputeNodeGet_565024; apiVersion: string;
+          poolId: string; nodeId: string; Select: string = ""; timeout: int = 30): Recallable =
   ## computeNodeGet
-  ##   timeout: int
-  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   ##   apiVersion: string (required)
   ##             : Client API Version.
   ##   poolId: string (required)
   ##         : The ID of the Pool that contains the Compute Node.
-  ##   nodeId: string (required)
-  ##         : The ID of the Compute Node that you want to get information about.
   ##   Select: string
   ##         : An OData $select clause.
-  var path_575137 = newJObject()
-  var query_575138 = newJObject()
-  add(query_575138, "timeout", newJInt(timeout))
-  add(query_575138, "api-version", newJString(apiVersion))
-  add(path_575137, "poolId", newJString(poolId))
-  add(path_575137, "nodeId", newJString(nodeId))
-  add(query_575138, "$select", newJString(Select))
-  result = call_575136.call(path_575137, query_575138, nil, nil, nil)
+  ##   timeout: int
+  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
+  ##   nodeId: string (required)
+  ##         : The ID of the Compute Node that you want to get information about.
+  var path_565037 = newJObject()
+  var query_565038 = newJObject()
+  add(query_565038, "api-version", newJString(apiVersion))
+  add(path_565037, "poolId", newJString(poolId))
+  add(query_565038, "$select", newJString(Select))
+  add(query_565038, "timeout", newJInt(timeout))
+  add(path_565037, "nodeId", newJString(nodeId))
+  result = call_565036.call(path_565037, query_565038, nil, nil, nil)
 
-var computeNodeGet* = Call_ComputeNodeGet_575124(name: "computeNodeGet",
+var computeNodeGet* = Call_ComputeNodeGet_565024(name: "computeNodeGet",
     meth: HttpMethod.HttpGet, host: "azure.local",
-    route: "/pools/{poolId}/nodes/{nodeId}", validator: validate_ComputeNodeGet_575125,
-    base: "", url: url_ComputeNodeGet_575126, schemes: {Scheme.Https})
+    route: "/pools/{poolId}/nodes/{nodeId}", validator: validate_ComputeNodeGet_565025,
+    base: "", url: url_ComputeNodeGet_565026, schemes: {Scheme.Https})
 type
-  Call_ComputeNodeDisableScheduling_575139 = ref object of OpenApiRestCall_573667
-proc url_ComputeNodeDisableScheduling_575141(protocol: Scheme; host: string;
+  Call_ComputeNodeDisableScheduling_565039 = ref object of OpenApiRestCall_563565
+proc url_ComputeNodeDisableScheduling_565041(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -8011,7 +8018,7 @@ proc url_ComputeNodeDisableScheduling_575141(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ComputeNodeDisableScheduling_575140(path: JsonNode; query: JsonNode;
+proc validate_ComputeNodeDisableScheduling_565040(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## You can disable Task scheduling on a Compute Node only if its current scheduling state is enabled.
   ## 
@@ -8024,59 +8031,59 @@ proc validate_ComputeNodeDisableScheduling_575140(path: JsonNode; query: JsonNod
   ##         : The ID of the Compute Node on which you want to disable Task scheduling.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `poolId` field"
-  var valid_575142 = path.getOrDefault("poolId")
-  valid_575142 = validateParameter(valid_575142, JString, required = true,
+  var valid_565042 = path.getOrDefault("poolId")
+  valid_565042 = validateParameter(valid_565042, JString, required = true,
                                  default = nil)
-  if valid_575142 != nil:
-    section.add "poolId", valid_575142
-  var valid_575143 = path.getOrDefault("nodeId")
-  valid_575143 = validateParameter(valid_575143, JString, required = true,
+  if valid_565042 != nil:
+    section.add "poolId", valid_565042
+  var valid_565043 = path.getOrDefault("nodeId")
+  valid_565043 = validateParameter(valid_565043, JString, required = true,
                                  default = nil)
-  if valid_575143 != nil:
-    section.add "nodeId", valid_575143
+  if valid_565043 != nil:
+    section.add "nodeId", valid_565043
   result.add "path", section
   ## parameters in `query` object:
-  ##   timeout: JInt
-  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   ##   api-version: JString (required)
   ##              : Client API Version.
+  ##   timeout: JInt
+  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   section = newJObject()
-  var valid_575144 = query.getOrDefault("timeout")
-  valid_575144 = validateParameter(valid_575144, JInt, required = false,
-                                 default = newJInt(30))
-  if valid_575144 != nil:
-    section.add "timeout", valid_575144
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575145 = query.getOrDefault("api-version")
-  valid_575145 = validateParameter(valid_575145, JString, required = true,
+  var valid_565044 = query.getOrDefault("api-version")
+  valid_565044 = validateParameter(valid_565044, JString, required = true,
                                  default = nil)
-  if valid_575145 != nil:
-    section.add "api-version", valid_575145
+  if valid_565044 != nil:
+    section.add "api-version", valid_565044
+  var valid_565045 = query.getOrDefault("timeout")
+  valid_565045 = validateParameter(valid_565045, JInt, required = false,
+                                 default = newJInt(30))
+  if valid_565045 != nil:
+    section.add "timeout", valid_565045
   result.add "query", section
   ## parameters in `header` object:
+  ##   return-client-request-id: JBool
+  ##                           : Whether the server should return the client-request-id in the response.
   ##   client-request-id: JString
   ##                    : The caller-generated request identity, in the form of a GUID with no decoration such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
   ##   ocp-date: JString
   ##           : The time the request was issued. Client libraries typically set this to the current system clock time; set it explicitly if you are calling the REST API directly.
-  ##   return-client-request-id: JBool
-  ##                           : Whether the server should return the client-request-id in the response.
   section = newJObject()
-  var valid_575146 = header.getOrDefault("client-request-id")
-  valid_575146 = validateParameter(valid_575146, JString, required = false,
-                                 default = nil)
-  if valid_575146 != nil:
-    section.add "client-request-id", valid_575146
-  var valid_575147 = header.getOrDefault("ocp-date")
-  valid_575147 = validateParameter(valid_575147, JString, required = false,
-                                 default = nil)
-  if valid_575147 != nil:
-    section.add "ocp-date", valid_575147
-  var valid_575148 = header.getOrDefault("return-client-request-id")
-  valid_575148 = validateParameter(valid_575148, JBool, required = false,
+  var valid_565046 = header.getOrDefault("return-client-request-id")
+  valid_565046 = validateParameter(valid_565046, JBool, required = false,
                                  default = newJBool(false))
-  if valid_575148 != nil:
-    section.add "return-client-request-id", valid_575148
+  if valid_565046 != nil:
+    section.add "return-client-request-id", valid_565046
+  var valid_565047 = header.getOrDefault("client-request-id")
+  valid_565047 = validateParameter(valid_565047, JString, required = false,
+                                 default = nil)
+  if valid_565047 != nil:
+    section.add "client-request-id", valid_565047
+  var valid_565048 = header.getOrDefault("ocp-date")
+  valid_565048 = validateParameter(valid_565048, JString, required = false,
+                                 default = nil)
+  if valid_565048 != nil:
+    section.add "ocp-date", valid_565048
   result.add "header", section
   section = newJObject()
   result.add "formData", section
@@ -8087,54 +8094,54 @@ proc validate_ComputeNodeDisableScheduling_575140(path: JsonNode; query: JsonNod
   if body != nil:
     result.add "body", body
 
-proc call*(call_575150: Call_ComputeNodeDisableScheduling_575139; path: JsonNode;
+proc call*(call_565050: Call_ComputeNodeDisableScheduling_565039; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## You can disable Task scheduling on a Compute Node only if its current scheduling state is enabled.
   ## 
-  let valid = call_575150.validator(path, query, header, formData, body)
-  let scheme = call_575150.pickScheme
+  let valid = call_565050.validator(path, query, header, formData, body)
+  let scheme = call_565050.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575150.url(scheme.get, call_575150.host, call_575150.base,
-                         call_575150.route, valid.getOrDefault("path"),
+  let url = call_565050.url(scheme.get, call_565050.host, call_565050.base,
+                         call_565050.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575150, url, valid)
+  result = hook(call_565050, url, valid)
 
-proc call*(call_575151: Call_ComputeNodeDisableScheduling_575139;
+proc call*(call_565051: Call_ComputeNodeDisableScheduling_565039;
           apiVersion: string; poolId: string; nodeId: string; timeout: int = 30;
           nodeDisableSchedulingParameter: JsonNode = nil): Recallable =
   ## computeNodeDisableScheduling
   ## You can disable Task scheduling on a Compute Node only if its current scheduling state is enabled.
-  ##   timeout: int
-  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   ##   apiVersion: string (required)
   ##             : Client API Version.
   ##   poolId: string (required)
   ##         : The ID of the Pool that contains the Compute Node.
-  ##   nodeId: string (required)
-  ##         : The ID of the Compute Node on which you want to disable Task scheduling.
+  ##   timeout: int
+  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   ##   nodeDisableSchedulingParameter: JObject
   ##                                 : The parameters for the request.
-  var path_575152 = newJObject()
-  var query_575153 = newJObject()
-  var body_575154 = newJObject()
-  add(query_575153, "timeout", newJInt(timeout))
-  add(query_575153, "api-version", newJString(apiVersion))
-  add(path_575152, "poolId", newJString(poolId))
-  add(path_575152, "nodeId", newJString(nodeId))
+  ##   nodeId: string (required)
+  ##         : The ID of the Compute Node on which you want to disable Task scheduling.
+  var path_565052 = newJObject()
+  var query_565053 = newJObject()
+  var body_565054 = newJObject()
+  add(query_565053, "api-version", newJString(apiVersion))
+  add(path_565052, "poolId", newJString(poolId))
+  add(query_565053, "timeout", newJInt(timeout))
   if nodeDisableSchedulingParameter != nil:
-    body_575154 = nodeDisableSchedulingParameter
-  result = call_575151.call(path_575152, query_575153, nil, nil, body_575154)
+    body_565054 = nodeDisableSchedulingParameter
+  add(path_565052, "nodeId", newJString(nodeId))
+  result = call_565051.call(path_565052, query_565053, nil, nil, body_565054)
 
-var computeNodeDisableScheduling* = Call_ComputeNodeDisableScheduling_575139(
+var computeNodeDisableScheduling* = Call_ComputeNodeDisableScheduling_565039(
     name: "computeNodeDisableScheduling", meth: HttpMethod.HttpPost,
     host: "azure.local",
     route: "/pools/{poolId}/nodes/{nodeId}/disablescheduling",
-    validator: validate_ComputeNodeDisableScheduling_575140, base: "",
-    url: url_ComputeNodeDisableScheduling_575141, schemes: {Scheme.Https})
+    validator: validate_ComputeNodeDisableScheduling_565040, base: "",
+    url: url_ComputeNodeDisableScheduling_565041, schemes: {Scheme.Https})
 type
-  Call_ComputeNodeEnableScheduling_575155 = ref object of OpenApiRestCall_573667
-proc url_ComputeNodeEnableScheduling_575157(protocol: Scheme; host: string;
+  Call_ComputeNodeEnableScheduling_565055 = ref object of OpenApiRestCall_563565
+proc url_ComputeNodeEnableScheduling_565057(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -8153,7 +8160,7 @@ proc url_ComputeNodeEnableScheduling_575157(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ComputeNodeEnableScheduling_575156(path: JsonNode; query: JsonNode;
+proc validate_ComputeNodeEnableScheduling_565056(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## You can enable Task scheduling on a Compute Node only if its current scheduling state is disabled
   ## 
@@ -8166,106 +8173,106 @@ proc validate_ComputeNodeEnableScheduling_575156(path: JsonNode; query: JsonNode
   ##         : The ID of the Compute Node on which you want to enable Task scheduling.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `poolId` field"
-  var valid_575158 = path.getOrDefault("poolId")
-  valid_575158 = validateParameter(valid_575158, JString, required = true,
+  var valid_565058 = path.getOrDefault("poolId")
+  valid_565058 = validateParameter(valid_565058, JString, required = true,
                                  default = nil)
-  if valid_575158 != nil:
-    section.add "poolId", valid_575158
-  var valid_575159 = path.getOrDefault("nodeId")
-  valid_575159 = validateParameter(valid_575159, JString, required = true,
+  if valid_565058 != nil:
+    section.add "poolId", valid_565058
+  var valid_565059 = path.getOrDefault("nodeId")
+  valid_565059 = validateParameter(valid_565059, JString, required = true,
                                  default = nil)
-  if valid_575159 != nil:
-    section.add "nodeId", valid_575159
+  if valid_565059 != nil:
+    section.add "nodeId", valid_565059
   result.add "path", section
   ## parameters in `query` object:
-  ##   timeout: JInt
-  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   ##   api-version: JString (required)
   ##              : Client API Version.
+  ##   timeout: JInt
+  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   section = newJObject()
-  var valid_575160 = query.getOrDefault("timeout")
-  valid_575160 = validateParameter(valid_575160, JInt, required = false,
-                                 default = newJInt(30))
-  if valid_575160 != nil:
-    section.add "timeout", valid_575160
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575161 = query.getOrDefault("api-version")
-  valid_575161 = validateParameter(valid_575161, JString, required = true,
+  var valid_565060 = query.getOrDefault("api-version")
+  valid_565060 = validateParameter(valid_565060, JString, required = true,
                                  default = nil)
-  if valid_575161 != nil:
-    section.add "api-version", valid_575161
+  if valid_565060 != nil:
+    section.add "api-version", valid_565060
+  var valid_565061 = query.getOrDefault("timeout")
+  valid_565061 = validateParameter(valid_565061, JInt, required = false,
+                                 default = newJInt(30))
+  if valid_565061 != nil:
+    section.add "timeout", valid_565061
   result.add "query", section
   ## parameters in `header` object:
+  ##   return-client-request-id: JBool
+  ##                           : Whether the server should return the client-request-id in the response.
   ##   client-request-id: JString
   ##                    : The caller-generated request identity, in the form of a GUID with no decoration such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
   ##   ocp-date: JString
   ##           : The time the request was issued. Client libraries typically set this to the current system clock time; set it explicitly if you are calling the REST API directly.
-  ##   return-client-request-id: JBool
-  ##                           : Whether the server should return the client-request-id in the response.
   section = newJObject()
-  var valid_575162 = header.getOrDefault("client-request-id")
-  valid_575162 = validateParameter(valid_575162, JString, required = false,
-                                 default = nil)
-  if valid_575162 != nil:
-    section.add "client-request-id", valid_575162
-  var valid_575163 = header.getOrDefault("ocp-date")
-  valid_575163 = validateParameter(valid_575163, JString, required = false,
-                                 default = nil)
-  if valid_575163 != nil:
-    section.add "ocp-date", valid_575163
-  var valid_575164 = header.getOrDefault("return-client-request-id")
-  valid_575164 = validateParameter(valid_575164, JBool, required = false,
+  var valid_565062 = header.getOrDefault("return-client-request-id")
+  valid_565062 = validateParameter(valid_565062, JBool, required = false,
                                  default = newJBool(false))
-  if valid_575164 != nil:
-    section.add "return-client-request-id", valid_575164
+  if valid_565062 != nil:
+    section.add "return-client-request-id", valid_565062
+  var valid_565063 = header.getOrDefault("client-request-id")
+  valid_565063 = validateParameter(valid_565063, JString, required = false,
+                                 default = nil)
+  if valid_565063 != nil:
+    section.add "client-request-id", valid_565063
+  var valid_565064 = header.getOrDefault("ocp-date")
+  valid_565064 = validateParameter(valid_565064, JString, required = false,
+                                 default = nil)
+  if valid_565064 != nil:
+    section.add "ocp-date", valid_565064
   result.add "header", section
   section = newJObject()
   result.add "formData", section
   if body != nil:
     result.add "body", body
 
-proc call*(call_575165: Call_ComputeNodeEnableScheduling_575155; path: JsonNode;
+proc call*(call_565065: Call_ComputeNodeEnableScheduling_565055; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## You can enable Task scheduling on a Compute Node only if its current scheduling state is disabled
   ## 
-  let valid = call_575165.validator(path, query, header, formData, body)
-  let scheme = call_575165.pickScheme
+  let valid = call_565065.validator(path, query, header, formData, body)
+  let scheme = call_565065.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575165.url(scheme.get, call_575165.host, call_575165.base,
-                         call_575165.route, valid.getOrDefault("path"),
+  let url = call_565065.url(scheme.get, call_565065.host, call_565065.base,
+                         call_565065.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575165, url, valid)
+  result = hook(call_565065, url, valid)
 
-proc call*(call_575166: Call_ComputeNodeEnableScheduling_575155;
+proc call*(call_565066: Call_ComputeNodeEnableScheduling_565055;
           apiVersion: string; poolId: string; nodeId: string; timeout: int = 30): Recallable =
   ## computeNodeEnableScheduling
   ## You can enable Task scheduling on a Compute Node only if its current scheduling state is disabled
-  ##   timeout: int
-  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   ##   apiVersion: string (required)
   ##             : Client API Version.
   ##   poolId: string (required)
   ##         : The ID of the Pool that contains the Compute Node.
+  ##   timeout: int
+  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   ##   nodeId: string (required)
   ##         : The ID of the Compute Node on which you want to enable Task scheduling.
-  var path_575167 = newJObject()
-  var query_575168 = newJObject()
-  add(query_575168, "timeout", newJInt(timeout))
-  add(query_575168, "api-version", newJString(apiVersion))
-  add(path_575167, "poolId", newJString(poolId))
-  add(path_575167, "nodeId", newJString(nodeId))
-  result = call_575166.call(path_575167, query_575168, nil, nil, nil)
+  var path_565067 = newJObject()
+  var query_565068 = newJObject()
+  add(query_565068, "api-version", newJString(apiVersion))
+  add(path_565067, "poolId", newJString(poolId))
+  add(query_565068, "timeout", newJInt(timeout))
+  add(path_565067, "nodeId", newJString(nodeId))
+  result = call_565066.call(path_565067, query_565068, nil, nil, nil)
 
-var computeNodeEnableScheduling* = Call_ComputeNodeEnableScheduling_575155(
+var computeNodeEnableScheduling* = Call_ComputeNodeEnableScheduling_565055(
     name: "computeNodeEnableScheduling", meth: HttpMethod.HttpPost,
     host: "azure.local", route: "/pools/{poolId}/nodes/{nodeId}/enablescheduling",
-    validator: validate_ComputeNodeEnableScheduling_575156, base: "",
-    url: url_ComputeNodeEnableScheduling_575157, schemes: {Scheme.Https})
+    validator: validate_ComputeNodeEnableScheduling_565056, base: "",
+    url: url_ComputeNodeEnableScheduling_565057, schemes: {Scheme.Https})
 type
-  Call_FileListFromComputeNode_575169 = ref object of OpenApiRestCall_573667
-proc url_FileListFromComputeNode_575171(protocol: Scheme; host: string; base: string;
+  Call_FileListFromComputeNode_565069 = ref object of OpenApiRestCall_563565
+proc url_FileListFromComputeNode_565071(protocol: Scheme; host: string; base: string;
                                        route: string; path: JsonNode;
                                        query: JsonNode): Uri =
   result.scheme = $protocol
@@ -8285,7 +8292,7 @@ proc url_FileListFromComputeNode_575171(protocol: Scheme; host: string; base: st
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_FileListFromComputeNode_575170(path: JsonNode; query: JsonNode;
+proc validate_FileListFromComputeNode_565070(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   var section: JsonNode
   result = newJObject()
@@ -8296,135 +8303,135 @@ proc validate_FileListFromComputeNode_575170(path: JsonNode; query: JsonNode;
   ##         : The ID of the Compute Node whose files you want to list.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `poolId` field"
-  var valid_575172 = path.getOrDefault("poolId")
-  valid_575172 = validateParameter(valid_575172, JString, required = true,
+  var valid_565072 = path.getOrDefault("poolId")
+  valid_565072 = validateParameter(valid_565072, JString, required = true,
                                  default = nil)
-  if valid_575172 != nil:
-    section.add "poolId", valid_575172
-  var valid_575173 = path.getOrDefault("nodeId")
-  valid_575173 = validateParameter(valid_575173, JString, required = true,
+  if valid_565072 != nil:
+    section.add "poolId", valid_565072
+  var valid_565073 = path.getOrDefault("nodeId")
+  valid_565073 = validateParameter(valid_565073, JString, required = true,
                                  default = nil)
-  if valid_575173 != nil:
-    section.add "nodeId", valid_575173
+  if valid_565073 != nil:
+    section.add "nodeId", valid_565073
   result.add "path", section
   ## parameters in `query` object:
-  ##   timeout: JInt
-  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   ##   api-version: JString (required)
   ##              : Client API Version.
+  ##   recursive: JBool
+  ##            : Whether to list children of a directory.
+  ##   timeout: JInt
+  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   ##   maxresults: JInt
   ##             : The maximum number of items to return in the response. A maximum of 1000 files can be returned.
   ##   $filter: JString
   ##          : An OData $filter clause. For more information on constructing this filter, see 
   ## https://docs.microsoft.com/en-us/rest/api/batchservice/odata-filters-in-batch#list-compute-node-files.
-  ##   recursive: JBool
-  ##            : Whether to list children of a directory.
   section = newJObject()
-  var valid_575174 = query.getOrDefault("timeout")
-  valid_575174 = validateParameter(valid_575174, JInt, required = false,
-                                 default = newJInt(30))
-  if valid_575174 != nil:
-    section.add "timeout", valid_575174
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575175 = query.getOrDefault("api-version")
-  valid_575175 = validateParameter(valid_575175, JString, required = true,
+  var valid_565074 = query.getOrDefault("api-version")
+  valid_565074 = validateParameter(valid_565074, JString, required = true,
                                  default = nil)
-  if valid_575175 != nil:
-    section.add "api-version", valid_575175
-  var valid_575176 = query.getOrDefault("maxresults")
-  valid_575176 = validateParameter(valid_575176, JInt, required = false,
+  if valid_565074 != nil:
+    section.add "api-version", valid_565074
+  var valid_565075 = query.getOrDefault("recursive")
+  valid_565075 = validateParameter(valid_565075, JBool, required = false, default = nil)
+  if valid_565075 != nil:
+    section.add "recursive", valid_565075
+  var valid_565076 = query.getOrDefault("timeout")
+  valid_565076 = validateParameter(valid_565076, JInt, required = false,
+                                 default = newJInt(30))
+  if valid_565076 != nil:
+    section.add "timeout", valid_565076
+  var valid_565077 = query.getOrDefault("maxresults")
+  valid_565077 = validateParameter(valid_565077, JInt, required = false,
                                  default = newJInt(1000))
-  if valid_575176 != nil:
-    section.add "maxresults", valid_575176
-  var valid_575177 = query.getOrDefault("$filter")
-  valid_575177 = validateParameter(valid_575177, JString, required = false,
+  if valid_565077 != nil:
+    section.add "maxresults", valid_565077
+  var valid_565078 = query.getOrDefault("$filter")
+  valid_565078 = validateParameter(valid_565078, JString, required = false,
                                  default = nil)
-  if valid_575177 != nil:
-    section.add "$filter", valid_575177
-  var valid_575178 = query.getOrDefault("recursive")
-  valid_575178 = validateParameter(valid_575178, JBool, required = false, default = nil)
-  if valid_575178 != nil:
-    section.add "recursive", valid_575178
+  if valid_565078 != nil:
+    section.add "$filter", valid_565078
   result.add "query", section
   ## parameters in `header` object:
+  ##   return-client-request-id: JBool
+  ##                           : Whether the server should return the client-request-id in the response.
   ##   client-request-id: JString
   ##                    : The caller-generated request identity, in the form of a GUID with no decoration such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
   ##   ocp-date: JString
   ##           : The time the request was issued. Client libraries typically set this to the current system clock time; set it explicitly if you are calling the REST API directly.
-  ##   return-client-request-id: JBool
-  ##                           : Whether the server should return the client-request-id in the response.
   section = newJObject()
-  var valid_575179 = header.getOrDefault("client-request-id")
-  valid_575179 = validateParameter(valid_575179, JString, required = false,
-                                 default = nil)
-  if valid_575179 != nil:
-    section.add "client-request-id", valid_575179
-  var valid_575180 = header.getOrDefault("ocp-date")
-  valid_575180 = validateParameter(valid_575180, JString, required = false,
-                                 default = nil)
-  if valid_575180 != nil:
-    section.add "ocp-date", valid_575180
-  var valid_575181 = header.getOrDefault("return-client-request-id")
-  valid_575181 = validateParameter(valid_575181, JBool, required = false,
+  var valid_565079 = header.getOrDefault("return-client-request-id")
+  valid_565079 = validateParameter(valid_565079, JBool, required = false,
                                  default = newJBool(false))
-  if valid_575181 != nil:
-    section.add "return-client-request-id", valid_575181
+  if valid_565079 != nil:
+    section.add "return-client-request-id", valid_565079
+  var valid_565080 = header.getOrDefault("client-request-id")
+  valid_565080 = validateParameter(valid_565080, JString, required = false,
+                                 default = nil)
+  if valid_565080 != nil:
+    section.add "client-request-id", valid_565080
+  var valid_565081 = header.getOrDefault("ocp-date")
+  valid_565081 = validateParameter(valid_565081, JString, required = false,
+                                 default = nil)
+  if valid_565081 != nil:
+    section.add "ocp-date", valid_565081
   result.add "header", section
   section = newJObject()
   result.add "formData", section
   if body != nil:
     result.add "body", body
 
-proc call*(call_575182: Call_FileListFromComputeNode_575169; path: JsonNode;
+proc call*(call_565082: Call_FileListFromComputeNode_565069; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
-  let valid = call_575182.validator(path, query, header, formData, body)
-  let scheme = call_575182.pickScheme
+  let valid = call_565082.validator(path, query, header, formData, body)
+  let scheme = call_565082.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575182.url(scheme.get, call_575182.host, call_575182.base,
-                         call_575182.route, valid.getOrDefault("path"),
+  let url = call_565082.url(scheme.get, call_565082.host, call_565082.base,
+                         call_565082.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575182, url, valid)
+  result = hook(call_565082, url, valid)
 
-proc call*(call_575183: Call_FileListFromComputeNode_575169; apiVersion: string;
-          poolId: string; nodeId: string; timeout: int = 30; maxresults: int = 1000;
-          Filter: string = ""; recursive: bool = false): Recallable =
+proc call*(call_565083: Call_FileListFromComputeNode_565069; apiVersion: string;
+          poolId: string; nodeId: string; recursive: bool = false; timeout: int = 30;
+          maxresults: int = 1000; Filter: string = ""): Recallable =
   ## fileListFromComputeNode
-  ##   timeout: int
-  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   ##   apiVersion: string (required)
   ##             : Client API Version.
   ##   poolId: string (required)
   ##         : The ID of the Pool that contains the Compute Node.
-  ##   nodeId: string (required)
-  ##         : The ID of the Compute Node whose files you want to list.
+  ##   recursive: bool
+  ##            : Whether to list children of a directory.
+  ##   timeout: int
+  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   ##   maxresults: int
   ##             : The maximum number of items to return in the response. A maximum of 1000 files can be returned.
   ##   Filter: string
   ##         : An OData $filter clause. For more information on constructing this filter, see 
   ## https://docs.microsoft.com/en-us/rest/api/batchservice/odata-filters-in-batch#list-compute-node-files.
-  ##   recursive: bool
-  ##            : Whether to list children of a directory.
-  var path_575184 = newJObject()
-  var query_575185 = newJObject()
-  add(query_575185, "timeout", newJInt(timeout))
-  add(query_575185, "api-version", newJString(apiVersion))
-  add(path_575184, "poolId", newJString(poolId))
-  add(path_575184, "nodeId", newJString(nodeId))
-  add(query_575185, "maxresults", newJInt(maxresults))
-  add(query_575185, "$filter", newJString(Filter))
-  add(query_575185, "recursive", newJBool(recursive))
-  result = call_575183.call(path_575184, query_575185, nil, nil, nil)
+  ##   nodeId: string (required)
+  ##         : The ID of the Compute Node whose files you want to list.
+  var path_565084 = newJObject()
+  var query_565085 = newJObject()
+  add(query_565085, "api-version", newJString(apiVersion))
+  add(path_565084, "poolId", newJString(poolId))
+  add(query_565085, "recursive", newJBool(recursive))
+  add(query_565085, "timeout", newJInt(timeout))
+  add(query_565085, "maxresults", newJInt(maxresults))
+  add(query_565085, "$filter", newJString(Filter))
+  add(path_565084, "nodeId", newJString(nodeId))
+  result = call_565083.call(path_565084, query_565085, nil, nil, nil)
 
-var fileListFromComputeNode* = Call_FileListFromComputeNode_575169(
+var fileListFromComputeNode* = Call_FileListFromComputeNode_565069(
     name: "fileListFromComputeNode", meth: HttpMethod.HttpGet, host: "azure.local",
     route: "/pools/{poolId}/nodes/{nodeId}/files",
-    validator: validate_FileListFromComputeNode_575170, base: "",
-    url: url_FileListFromComputeNode_575171, schemes: {Scheme.Https})
+    validator: validate_FileListFromComputeNode_565070, base: "",
+    url: url_FileListFromComputeNode_565071, schemes: {Scheme.Https})
 type
-  Call_FileGetPropertiesFromComputeNode_575220 = ref object of OpenApiRestCall_573667
-proc url_FileGetPropertiesFromComputeNode_575222(protocol: Scheme; host: string;
+  Call_FileGetPropertiesFromComputeNode_565120 = ref object of OpenApiRestCall_563565
+proc url_FileGetPropertiesFromComputeNode_565122(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -8445,7 +8452,7 @@ proc url_FileGetPropertiesFromComputeNode_575222(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_FileGetPropertiesFromComputeNode_575221(path: JsonNode;
+proc validate_FileGetPropertiesFromComputeNode_565121(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the properties of the specified Compute Node file.
   ## 
@@ -8454,136 +8461,136 @@ proc validate_FileGetPropertiesFromComputeNode_575221(path: JsonNode;
   ## parameters in `path` object:
   ##   poolId: JString (required)
   ##         : The ID of the Pool that contains the Compute Node.
-  ##   nodeId: JString (required)
-  ##         : The ID of the Compute Node that contains the file.
   ##   filePath: JString (required)
   ##           : The path to the Compute Node file that you want to get the properties of.
+  ##   nodeId: JString (required)
+  ##         : The ID of the Compute Node that contains the file.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `poolId` field"
-  var valid_575223 = path.getOrDefault("poolId")
-  valid_575223 = validateParameter(valid_575223, JString, required = true,
+  var valid_565123 = path.getOrDefault("poolId")
+  valid_565123 = validateParameter(valid_565123, JString, required = true,
                                  default = nil)
-  if valid_575223 != nil:
-    section.add "poolId", valid_575223
-  var valid_575224 = path.getOrDefault("nodeId")
-  valid_575224 = validateParameter(valid_575224, JString, required = true,
+  if valid_565123 != nil:
+    section.add "poolId", valid_565123
+  var valid_565124 = path.getOrDefault("filePath")
+  valid_565124 = validateParameter(valid_565124, JString, required = true,
                                  default = nil)
-  if valid_575224 != nil:
-    section.add "nodeId", valid_575224
-  var valid_575225 = path.getOrDefault("filePath")
-  valid_575225 = validateParameter(valid_575225, JString, required = true,
+  if valid_565124 != nil:
+    section.add "filePath", valid_565124
+  var valid_565125 = path.getOrDefault("nodeId")
+  valid_565125 = validateParameter(valid_565125, JString, required = true,
                                  default = nil)
-  if valid_575225 != nil:
-    section.add "filePath", valid_575225
+  if valid_565125 != nil:
+    section.add "nodeId", valid_565125
   result.add "path", section
   ## parameters in `query` object:
-  ##   timeout: JInt
-  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   ##   api-version: JString (required)
   ##              : Client API Version.
+  ##   timeout: JInt
+  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   section = newJObject()
-  var valid_575226 = query.getOrDefault("timeout")
-  valid_575226 = validateParameter(valid_575226, JInt, required = false,
-                                 default = newJInt(30))
-  if valid_575226 != nil:
-    section.add "timeout", valid_575226
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575227 = query.getOrDefault("api-version")
-  valid_575227 = validateParameter(valid_575227, JString, required = true,
+  var valid_565126 = query.getOrDefault("api-version")
+  valid_565126 = validateParameter(valid_565126, JString, required = true,
                                  default = nil)
-  if valid_575227 != nil:
-    section.add "api-version", valid_575227
+  if valid_565126 != nil:
+    section.add "api-version", valid_565126
+  var valid_565127 = query.getOrDefault("timeout")
+  valid_565127 = validateParameter(valid_565127, JInt, required = false,
+                                 default = newJInt(30))
+  if valid_565127 != nil:
+    section.add "timeout", valid_565127
   result.add "query", section
   ## parameters in `header` object:
-  ##   client-request-id: JString
-  ##                    : The caller-generated request identity, in the form of a GUID with no decoration such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
-  ##   ocp-date: JString
-  ##           : The time the request was issued. Client libraries typically set this to the current system clock time; set it explicitly if you are calling the REST API directly.
-  ##   If-Unmodified-Since: JString
-  ##                      : A timestamp indicating the last modified time of the resource known to the client. The operation will be performed only if the resource on the service has not been modified since the specified time.
-  ##   If-Modified-Since: JString
-  ##                    : A timestamp indicating the last modified time of the resource known to the client. The operation will be performed only if the resource on the service has been modified since the specified time.
   ##   return-client-request-id: JBool
   ##                           : Whether the server should return the client-request-id in the response.
+  ##   If-Unmodified-Since: JString
+  ##                      : A timestamp indicating the last modified time of the resource known to the client. The operation will be performed only if the resource on the service has not been modified since the specified time.
+  ##   client-request-id: JString
+  ##                    : The caller-generated request identity, in the form of a GUID with no decoration such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
+  ##   If-Modified-Since: JString
+  ##                    : A timestamp indicating the last modified time of the resource known to the client. The operation will be performed only if the resource on the service has been modified since the specified time.
+  ##   ocp-date: JString
+  ##           : The time the request was issued. Client libraries typically set this to the current system clock time; set it explicitly if you are calling the REST API directly.
   section = newJObject()
-  var valid_575228 = header.getOrDefault("client-request-id")
-  valid_575228 = validateParameter(valid_575228, JString, required = false,
-                                 default = nil)
-  if valid_575228 != nil:
-    section.add "client-request-id", valid_575228
-  var valid_575229 = header.getOrDefault("ocp-date")
-  valid_575229 = validateParameter(valid_575229, JString, required = false,
-                                 default = nil)
-  if valid_575229 != nil:
-    section.add "ocp-date", valid_575229
-  var valid_575230 = header.getOrDefault("If-Unmodified-Since")
-  valid_575230 = validateParameter(valid_575230, JString, required = false,
-                                 default = nil)
-  if valid_575230 != nil:
-    section.add "If-Unmodified-Since", valid_575230
-  var valid_575231 = header.getOrDefault("If-Modified-Since")
-  valid_575231 = validateParameter(valid_575231, JString, required = false,
-                                 default = nil)
-  if valid_575231 != nil:
-    section.add "If-Modified-Since", valid_575231
-  var valid_575232 = header.getOrDefault("return-client-request-id")
-  valid_575232 = validateParameter(valid_575232, JBool, required = false,
+  var valid_565128 = header.getOrDefault("return-client-request-id")
+  valid_565128 = validateParameter(valid_565128, JBool, required = false,
                                  default = newJBool(false))
-  if valid_575232 != nil:
-    section.add "return-client-request-id", valid_575232
+  if valid_565128 != nil:
+    section.add "return-client-request-id", valid_565128
+  var valid_565129 = header.getOrDefault("If-Unmodified-Since")
+  valid_565129 = validateParameter(valid_565129, JString, required = false,
+                                 default = nil)
+  if valid_565129 != nil:
+    section.add "If-Unmodified-Since", valid_565129
+  var valid_565130 = header.getOrDefault("client-request-id")
+  valid_565130 = validateParameter(valid_565130, JString, required = false,
+                                 default = nil)
+  if valid_565130 != nil:
+    section.add "client-request-id", valid_565130
+  var valid_565131 = header.getOrDefault("If-Modified-Since")
+  valid_565131 = validateParameter(valid_565131, JString, required = false,
+                                 default = nil)
+  if valid_565131 != nil:
+    section.add "If-Modified-Since", valid_565131
+  var valid_565132 = header.getOrDefault("ocp-date")
+  valid_565132 = validateParameter(valid_565132, JString, required = false,
+                                 default = nil)
+  if valid_565132 != nil:
+    section.add "ocp-date", valid_565132
   result.add "header", section
   section = newJObject()
   result.add "formData", section
   if body != nil:
     result.add "body", body
 
-proc call*(call_575233: Call_FileGetPropertiesFromComputeNode_575220;
+proc call*(call_565133: Call_FileGetPropertiesFromComputeNode_565120;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Gets the properties of the specified Compute Node file.
   ## 
-  let valid = call_575233.validator(path, query, header, formData, body)
-  let scheme = call_575233.pickScheme
+  let valid = call_565133.validator(path, query, header, formData, body)
+  let scheme = call_565133.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575233.url(scheme.get, call_575233.host, call_575233.base,
-                         call_575233.route, valid.getOrDefault("path"),
+  let url = call_565133.url(scheme.get, call_565133.host, call_565133.base,
+                         call_565133.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575233, url, valid)
+  result = hook(call_565133, url, valid)
 
-proc call*(call_575234: Call_FileGetPropertiesFromComputeNode_575220;
-          apiVersion: string; poolId: string; nodeId: string; filePath: string;
+proc call*(call_565134: Call_FileGetPropertiesFromComputeNode_565120;
+          apiVersion: string; poolId: string; filePath: string; nodeId: string;
           timeout: int = 30): Recallable =
   ## fileGetPropertiesFromComputeNode
   ## Gets the properties of the specified Compute Node file.
-  ##   timeout: int
-  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   ##   apiVersion: string (required)
   ##             : Client API Version.
   ##   poolId: string (required)
   ##         : The ID of the Pool that contains the Compute Node.
-  ##   nodeId: string (required)
-  ##         : The ID of the Compute Node that contains the file.
   ##   filePath: string (required)
   ##           : The path to the Compute Node file that you want to get the properties of.
-  var path_575235 = newJObject()
-  var query_575236 = newJObject()
-  add(query_575236, "timeout", newJInt(timeout))
-  add(query_575236, "api-version", newJString(apiVersion))
-  add(path_575235, "poolId", newJString(poolId))
-  add(path_575235, "nodeId", newJString(nodeId))
-  add(path_575235, "filePath", newJString(filePath))
-  result = call_575234.call(path_575235, query_575236, nil, nil, nil)
+  ##   timeout: int
+  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
+  ##   nodeId: string (required)
+  ##         : The ID of the Compute Node that contains the file.
+  var path_565135 = newJObject()
+  var query_565136 = newJObject()
+  add(query_565136, "api-version", newJString(apiVersion))
+  add(path_565135, "poolId", newJString(poolId))
+  add(path_565135, "filePath", newJString(filePath))
+  add(query_565136, "timeout", newJInt(timeout))
+  add(path_565135, "nodeId", newJString(nodeId))
+  result = call_565134.call(path_565135, query_565136, nil, nil, nil)
 
-var fileGetPropertiesFromComputeNode* = Call_FileGetPropertiesFromComputeNode_575220(
+var fileGetPropertiesFromComputeNode* = Call_FileGetPropertiesFromComputeNode_565120(
     name: "fileGetPropertiesFromComputeNode", meth: HttpMethod.HttpHead,
     host: "azure.local", route: "/pools/{poolId}/nodes/{nodeId}/files/{filePath}",
-    validator: validate_FileGetPropertiesFromComputeNode_575221, base: "",
-    url: url_FileGetPropertiesFromComputeNode_575222, schemes: {Scheme.Https})
+    validator: validate_FileGetPropertiesFromComputeNode_565121, base: "",
+    url: url_FileGetPropertiesFromComputeNode_565122, schemes: {Scheme.Https})
 type
-  Call_FileGetFromComputeNode_575186 = ref object of OpenApiRestCall_573667
-proc url_FileGetFromComputeNode_575188(protocol: Scheme; host: string; base: string;
+  Call_FileGetFromComputeNode_565086 = ref object of OpenApiRestCall_563565
+proc url_FileGetFromComputeNode_565088(protocol: Scheme; host: string; base: string;
                                       route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -8604,7 +8611,7 @@ proc url_FileGetFromComputeNode_575188(protocol: Scheme; host: string; base: str
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_FileGetFromComputeNode_575187(path: JsonNode; query: JsonNode;
+proc validate_FileGetFromComputeNode_565087(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Returns the content of the specified Compute Node file.
   ## 
@@ -8613,141 +8620,141 @@ proc validate_FileGetFromComputeNode_575187(path: JsonNode; query: JsonNode;
   ## parameters in `path` object:
   ##   poolId: JString (required)
   ##         : The ID of the Pool that contains the Compute Node.
-  ##   nodeId: JString (required)
-  ##         : The ID of the Compute Node that contains the file.
   ##   filePath: JString (required)
   ##           : The path to the Compute Node file that you want to get the content of.
+  ##   nodeId: JString (required)
+  ##         : The ID of the Compute Node that contains the file.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `poolId` field"
-  var valid_575189 = path.getOrDefault("poolId")
-  valid_575189 = validateParameter(valid_575189, JString, required = true,
+  var valid_565089 = path.getOrDefault("poolId")
+  valid_565089 = validateParameter(valid_565089, JString, required = true,
                                  default = nil)
-  if valid_575189 != nil:
-    section.add "poolId", valid_575189
-  var valid_575190 = path.getOrDefault("nodeId")
-  valid_575190 = validateParameter(valid_575190, JString, required = true,
+  if valid_565089 != nil:
+    section.add "poolId", valid_565089
+  var valid_565090 = path.getOrDefault("filePath")
+  valid_565090 = validateParameter(valid_565090, JString, required = true,
                                  default = nil)
-  if valid_575190 != nil:
-    section.add "nodeId", valid_575190
-  var valid_575191 = path.getOrDefault("filePath")
-  valid_575191 = validateParameter(valid_575191, JString, required = true,
+  if valid_565090 != nil:
+    section.add "filePath", valid_565090
+  var valid_565091 = path.getOrDefault("nodeId")
+  valid_565091 = validateParameter(valid_565091, JString, required = true,
                                  default = nil)
-  if valid_575191 != nil:
-    section.add "filePath", valid_575191
+  if valid_565091 != nil:
+    section.add "nodeId", valid_565091
   result.add "path", section
   ## parameters in `query` object:
-  ##   timeout: JInt
-  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   ##   api-version: JString (required)
   ##              : Client API Version.
+  ##   timeout: JInt
+  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   section = newJObject()
-  var valid_575192 = query.getOrDefault("timeout")
-  valid_575192 = validateParameter(valid_575192, JInt, required = false,
-                                 default = newJInt(30))
-  if valid_575192 != nil:
-    section.add "timeout", valid_575192
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575193 = query.getOrDefault("api-version")
-  valid_575193 = validateParameter(valid_575193, JString, required = true,
+  var valid_565092 = query.getOrDefault("api-version")
+  valid_565092 = validateParameter(valid_565092, JString, required = true,
                                  default = nil)
-  if valid_575193 != nil:
-    section.add "api-version", valid_575193
+  if valid_565092 != nil:
+    section.add "api-version", valid_565092
+  var valid_565093 = query.getOrDefault("timeout")
+  valid_565093 = validateParameter(valid_565093, JInt, required = false,
+                                 default = newJInt(30))
+  if valid_565093 != nil:
+    section.add "timeout", valid_565093
   result.add "query", section
   ## parameters in `header` object:
-  ##   client-request-id: JString
-  ##                    : The caller-generated request identity, in the form of a GUID with no decoration such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
-  ##   ocp-date: JString
-  ##           : The time the request was issued. Client libraries typically set this to the current system clock time; set it explicitly if you are calling the REST API directly.
-  ##   If-Unmodified-Since: JString
-  ##                      : A timestamp indicating the last modified time of the resource known to the client. The operation will be performed only if the resource on the service has not been modified since the specified time.
-  ##   ocp-range: JString
-  ##            : The byte range to be retrieved. The default is to retrieve the entire file. The format is bytes=startRange-endRange.
-  ##   If-Modified-Since: JString
-  ##                    : A timestamp indicating the last modified time of the resource known to the client. The operation will be performed only if the resource on the service has been modified since the specified time.
   ##   return-client-request-id: JBool
   ##                           : Whether the server should return the client-request-id in the response.
+  ##   If-Unmodified-Since: JString
+  ##                      : A timestamp indicating the last modified time of the resource known to the client. The operation will be performed only if the resource on the service has not been modified since the specified time.
+  ##   client-request-id: JString
+  ##                    : The caller-generated request identity, in the form of a GUID with no decoration such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
+  ##   If-Modified-Since: JString
+  ##                    : A timestamp indicating the last modified time of the resource known to the client. The operation will be performed only if the resource on the service has been modified since the specified time.
+  ##   ocp-date: JString
+  ##           : The time the request was issued. Client libraries typically set this to the current system clock time; set it explicitly if you are calling the REST API directly.
+  ##   ocp-range: JString
+  ##            : The byte range to be retrieved. The default is to retrieve the entire file. The format is bytes=startRange-endRange.
   section = newJObject()
-  var valid_575194 = header.getOrDefault("client-request-id")
-  valid_575194 = validateParameter(valid_575194, JString, required = false,
-                                 default = nil)
-  if valid_575194 != nil:
-    section.add "client-request-id", valid_575194
-  var valid_575195 = header.getOrDefault("ocp-date")
-  valid_575195 = validateParameter(valid_575195, JString, required = false,
-                                 default = nil)
-  if valid_575195 != nil:
-    section.add "ocp-date", valid_575195
-  var valid_575196 = header.getOrDefault("If-Unmodified-Since")
-  valid_575196 = validateParameter(valid_575196, JString, required = false,
-                                 default = nil)
-  if valid_575196 != nil:
-    section.add "If-Unmodified-Since", valid_575196
-  var valid_575197 = header.getOrDefault("ocp-range")
-  valid_575197 = validateParameter(valid_575197, JString, required = false,
-                                 default = nil)
-  if valid_575197 != nil:
-    section.add "ocp-range", valid_575197
-  var valid_575198 = header.getOrDefault("If-Modified-Since")
-  valid_575198 = validateParameter(valid_575198, JString, required = false,
-                                 default = nil)
-  if valid_575198 != nil:
-    section.add "If-Modified-Since", valid_575198
-  var valid_575199 = header.getOrDefault("return-client-request-id")
-  valid_575199 = validateParameter(valid_575199, JBool, required = false,
+  var valid_565094 = header.getOrDefault("return-client-request-id")
+  valid_565094 = validateParameter(valid_565094, JBool, required = false,
                                  default = newJBool(false))
-  if valid_575199 != nil:
-    section.add "return-client-request-id", valid_575199
+  if valid_565094 != nil:
+    section.add "return-client-request-id", valid_565094
+  var valid_565095 = header.getOrDefault("If-Unmodified-Since")
+  valid_565095 = validateParameter(valid_565095, JString, required = false,
+                                 default = nil)
+  if valid_565095 != nil:
+    section.add "If-Unmodified-Since", valid_565095
+  var valid_565096 = header.getOrDefault("client-request-id")
+  valid_565096 = validateParameter(valid_565096, JString, required = false,
+                                 default = nil)
+  if valid_565096 != nil:
+    section.add "client-request-id", valid_565096
+  var valid_565097 = header.getOrDefault("If-Modified-Since")
+  valid_565097 = validateParameter(valid_565097, JString, required = false,
+                                 default = nil)
+  if valid_565097 != nil:
+    section.add "If-Modified-Since", valid_565097
+  var valid_565098 = header.getOrDefault("ocp-date")
+  valid_565098 = validateParameter(valid_565098, JString, required = false,
+                                 default = nil)
+  if valid_565098 != nil:
+    section.add "ocp-date", valid_565098
+  var valid_565099 = header.getOrDefault("ocp-range")
+  valid_565099 = validateParameter(valid_565099, JString, required = false,
+                                 default = nil)
+  if valid_565099 != nil:
+    section.add "ocp-range", valid_565099
   result.add "header", section
   section = newJObject()
   result.add "formData", section
   if body != nil:
     result.add "body", body
 
-proc call*(call_575200: Call_FileGetFromComputeNode_575186; path: JsonNode;
+proc call*(call_565100: Call_FileGetFromComputeNode_565086; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Returns the content of the specified Compute Node file.
   ## 
-  let valid = call_575200.validator(path, query, header, formData, body)
-  let scheme = call_575200.pickScheme
+  let valid = call_565100.validator(path, query, header, formData, body)
+  let scheme = call_565100.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575200.url(scheme.get, call_575200.host, call_575200.base,
-                         call_575200.route, valid.getOrDefault("path"),
+  let url = call_565100.url(scheme.get, call_565100.host, call_565100.base,
+                         call_565100.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575200, url, valid)
+  result = hook(call_565100, url, valid)
 
-proc call*(call_575201: Call_FileGetFromComputeNode_575186; apiVersion: string;
-          poolId: string; nodeId: string; filePath: string; timeout: int = 30): Recallable =
+proc call*(call_565101: Call_FileGetFromComputeNode_565086; apiVersion: string;
+          poolId: string; filePath: string; nodeId: string; timeout: int = 30): Recallable =
   ## fileGetFromComputeNode
   ## Returns the content of the specified Compute Node file.
-  ##   timeout: int
-  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   ##   apiVersion: string (required)
   ##             : Client API Version.
   ##   poolId: string (required)
   ##         : The ID of the Pool that contains the Compute Node.
-  ##   nodeId: string (required)
-  ##         : The ID of the Compute Node that contains the file.
   ##   filePath: string (required)
   ##           : The path to the Compute Node file that you want to get the content of.
-  var path_575202 = newJObject()
-  var query_575203 = newJObject()
-  add(query_575203, "timeout", newJInt(timeout))
-  add(query_575203, "api-version", newJString(apiVersion))
-  add(path_575202, "poolId", newJString(poolId))
-  add(path_575202, "nodeId", newJString(nodeId))
-  add(path_575202, "filePath", newJString(filePath))
-  result = call_575201.call(path_575202, query_575203, nil, nil, nil)
+  ##   timeout: int
+  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
+  ##   nodeId: string (required)
+  ##         : The ID of the Compute Node that contains the file.
+  var path_565102 = newJObject()
+  var query_565103 = newJObject()
+  add(query_565103, "api-version", newJString(apiVersion))
+  add(path_565102, "poolId", newJString(poolId))
+  add(path_565102, "filePath", newJString(filePath))
+  add(query_565103, "timeout", newJInt(timeout))
+  add(path_565102, "nodeId", newJString(nodeId))
+  result = call_565101.call(path_565102, query_565103, nil, nil, nil)
 
-var fileGetFromComputeNode* = Call_FileGetFromComputeNode_575186(
+var fileGetFromComputeNode* = Call_FileGetFromComputeNode_565086(
     name: "fileGetFromComputeNode", meth: HttpMethod.HttpGet, host: "azure.local",
     route: "/pools/{poolId}/nodes/{nodeId}/files/{filePath}",
-    validator: validate_FileGetFromComputeNode_575187, base: "",
-    url: url_FileGetFromComputeNode_575188, schemes: {Scheme.Https})
+    validator: validate_FileGetFromComputeNode_565087, base: "",
+    url: url_FileGetFromComputeNode_565088, schemes: {Scheme.Https})
 type
-  Call_FileDeleteFromComputeNode_575204 = ref object of OpenApiRestCall_573667
-proc url_FileDeleteFromComputeNode_575206(protocol: Scheme; host: string;
+  Call_FileDeleteFromComputeNode_565104 = ref object of OpenApiRestCall_563565
+proc url_FileDeleteFromComputeNode_565106(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -8768,134 +8775,134 @@ proc url_FileDeleteFromComputeNode_575206(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_FileDeleteFromComputeNode_575205(path: JsonNode; query: JsonNode;
+proc validate_FileDeleteFromComputeNode_565105(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
   ##   poolId: JString (required)
   ##         : The ID of the Pool that contains the Compute Node.
-  ##   nodeId: JString (required)
-  ##         : The ID of the Compute Node from which you want to delete the file.
   ##   filePath: JString (required)
   ##           : The path to the file or directory that you want to delete.
+  ##   nodeId: JString (required)
+  ##         : The ID of the Compute Node from which you want to delete the file.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `poolId` field"
-  var valid_575207 = path.getOrDefault("poolId")
-  valid_575207 = validateParameter(valid_575207, JString, required = true,
+  var valid_565107 = path.getOrDefault("poolId")
+  valid_565107 = validateParameter(valid_565107, JString, required = true,
                                  default = nil)
-  if valid_575207 != nil:
-    section.add "poolId", valid_575207
-  var valid_575208 = path.getOrDefault("nodeId")
-  valid_575208 = validateParameter(valid_575208, JString, required = true,
+  if valid_565107 != nil:
+    section.add "poolId", valid_565107
+  var valid_565108 = path.getOrDefault("filePath")
+  valid_565108 = validateParameter(valid_565108, JString, required = true,
                                  default = nil)
-  if valid_575208 != nil:
-    section.add "nodeId", valid_575208
-  var valid_575209 = path.getOrDefault("filePath")
-  valid_575209 = validateParameter(valid_575209, JString, required = true,
+  if valid_565108 != nil:
+    section.add "filePath", valid_565108
+  var valid_565109 = path.getOrDefault("nodeId")
+  valid_565109 = validateParameter(valid_565109, JString, required = true,
                                  default = nil)
-  if valid_575209 != nil:
-    section.add "filePath", valid_575209
+  if valid_565109 != nil:
+    section.add "nodeId", valid_565109
   result.add "path", section
   ## parameters in `query` object:
-  ##   timeout: JInt
-  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   ##   api-version: JString (required)
   ##              : Client API Version.
   ##   recursive: JBool
   ##            : Whether to delete children of a directory. If the filePath parameter represents a directory instead of a file, you can set recursive to true to delete the directory and all of the files and subdirectories in it. If recursive is false then the directory must be empty or deletion will fail.
+  ##   timeout: JInt
+  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   section = newJObject()
-  var valid_575210 = query.getOrDefault("timeout")
-  valid_575210 = validateParameter(valid_575210, JInt, required = false,
-                                 default = newJInt(30))
-  if valid_575210 != nil:
-    section.add "timeout", valid_575210
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575211 = query.getOrDefault("api-version")
-  valid_575211 = validateParameter(valid_575211, JString, required = true,
+  var valid_565110 = query.getOrDefault("api-version")
+  valid_565110 = validateParameter(valid_565110, JString, required = true,
                                  default = nil)
-  if valid_575211 != nil:
-    section.add "api-version", valid_575211
-  var valid_575212 = query.getOrDefault("recursive")
-  valid_575212 = validateParameter(valid_575212, JBool, required = false, default = nil)
-  if valid_575212 != nil:
-    section.add "recursive", valid_575212
+  if valid_565110 != nil:
+    section.add "api-version", valid_565110
+  var valid_565111 = query.getOrDefault("recursive")
+  valid_565111 = validateParameter(valid_565111, JBool, required = false, default = nil)
+  if valid_565111 != nil:
+    section.add "recursive", valid_565111
+  var valid_565112 = query.getOrDefault("timeout")
+  valid_565112 = validateParameter(valid_565112, JInt, required = false,
+                                 default = newJInt(30))
+  if valid_565112 != nil:
+    section.add "timeout", valid_565112
   result.add "query", section
   ## parameters in `header` object:
+  ##   return-client-request-id: JBool
+  ##                           : Whether the server should return the client-request-id in the response.
   ##   client-request-id: JString
   ##                    : The caller-generated request identity, in the form of a GUID with no decoration such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
   ##   ocp-date: JString
   ##           : The time the request was issued. Client libraries typically set this to the current system clock time; set it explicitly if you are calling the REST API directly.
-  ##   return-client-request-id: JBool
-  ##                           : Whether the server should return the client-request-id in the response.
   section = newJObject()
-  var valid_575213 = header.getOrDefault("client-request-id")
-  valid_575213 = validateParameter(valid_575213, JString, required = false,
-                                 default = nil)
-  if valid_575213 != nil:
-    section.add "client-request-id", valid_575213
-  var valid_575214 = header.getOrDefault("ocp-date")
-  valid_575214 = validateParameter(valid_575214, JString, required = false,
-                                 default = nil)
-  if valid_575214 != nil:
-    section.add "ocp-date", valid_575214
-  var valid_575215 = header.getOrDefault("return-client-request-id")
-  valid_575215 = validateParameter(valid_575215, JBool, required = false,
+  var valid_565113 = header.getOrDefault("return-client-request-id")
+  valid_565113 = validateParameter(valid_565113, JBool, required = false,
                                  default = newJBool(false))
-  if valid_575215 != nil:
-    section.add "return-client-request-id", valid_575215
+  if valid_565113 != nil:
+    section.add "return-client-request-id", valid_565113
+  var valid_565114 = header.getOrDefault("client-request-id")
+  valid_565114 = validateParameter(valid_565114, JString, required = false,
+                                 default = nil)
+  if valid_565114 != nil:
+    section.add "client-request-id", valid_565114
+  var valid_565115 = header.getOrDefault("ocp-date")
+  valid_565115 = validateParameter(valid_565115, JString, required = false,
+                                 default = nil)
+  if valid_565115 != nil:
+    section.add "ocp-date", valid_565115
   result.add "header", section
   section = newJObject()
   result.add "formData", section
   if body != nil:
     result.add "body", body
 
-proc call*(call_575216: Call_FileDeleteFromComputeNode_575204; path: JsonNode;
+proc call*(call_565116: Call_FileDeleteFromComputeNode_565104; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
-  let valid = call_575216.validator(path, query, header, formData, body)
-  let scheme = call_575216.pickScheme
+  let valid = call_565116.validator(path, query, header, formData, body)
+  let scheme = call_565116.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575216.url(scheme.get, call_575216.host, call_575216.base,
-                         call_575216.route, valid.getOrDefault("path"),
+  let url = call_565116.url(scheme.get, call_565116.host, call_565116.base,
+                         call_565116.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575216, url, valid)
+  result = hook(call_565116, url, valid)
 
-proc call*(call_575217: Call_FileDeleteFromComputeNode_575204; apiVersion: string;
-          poolId: string; nodeId: string; filePath: string; timeout: int = 30;
-          recursive: bool = false): Recallable =
+proc call*(call_565117: Call_FileDeleteFromComputeNode_565104; apiVersion: string;
+          poolId: string; filePath: string; nodeId: string; recursive: bool = false;
+          timeout: int = 30): Recallable =
   ## fileDeleteFromComputeNode
-  ##   timeout: int
-  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   ##   apiVersion: string (required)
   ##             : Client API Version.
   ##   poolId: string (required)
   ##         : The ID of the Pool that contains the Compute Node.
-  ##   nodeId: string (required)
-  ##         : The ID of the Compute Node from which you want to delete the file.
-  ##   filePath: string (required)
-  ##           : The path to the file or directory that you want to delete.
   ##   recursive: bool
   ##            : Whether to delete children of a directory. If the filePath parameter represents a directory instead of a file, you can set recursive to true to delete the directory and all of the files and subdirectories in it. If recursive is false then the directory must be empty or deletion will fail.
-  var path_575218 = newJObject()
-  var query_575219 = newJObject()
-  add(query_575219, "timeout", newJInt(timeout))
-  add(query_575219, "api-version", newJString(apiVersion))
-  add(path_575218, "poolId", newJString(poolId))
-  add(path_575218, "nodeId", newJString(nodeId))
-  add(path_575218, "filePath", newJString(filePath))
-  add(query_575219, "recursive", newJBool(recursive))
-  result = call_575217.call(path_575218, query_575219, nil, nil, nil)
+  ##   filePath: string (required)
+  ##           : The path to the file or directory that you want to delete.
+  ##   timeout: int
+  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
+  ##   nodeId: string (required)
+  ##         : The ID of the Compute Node from which you want to delete the file.
+  var path_565118 = newJObject()
+  var query_565119 = newJObject()
+  add(query_565119, "api-version", newJString(apiVersion))
+  add(path_565118, "poolId", newJString(poolId))
+  add(query_565119, "recursive", newJBool(recursive))
+  add(path_565118, "filePath", newJString(filePath))
+  add(query_565119, "timeout", newJInt(timeout))
+  add(path_565118, "nodeId", newJString(nodeId))
+  result = call_565117.call(path_565118, query_565119, nil, nil, nil)
 
-var fileDeleteFromComputeNode* = Call_FileDeleteFromComputeNode_575204(
+var fileDeleteFromComputeNode* = Call_FileDeleteFromComputeNode_565104(
     name: "fileDeleteFromComputeNode", meth: HttpMethod.HttpDelete,
     host: "azure.local", route: "/pools/{poolId}/nodes/{nodeId}/files/{filePath}",
-    validator: validate_FileDeleteFromComputeNode_575205, base: "",
-    url: url_FileDeleteFromComputeNode_575206, schemes: {Scheme.Https})
+    validator: validate_FileDeleteFromComputeNode_565105, base: "",
+    url: url_FileDeleteFromComputeNode_565106, schemes: {Scheme.Https})
 type
-  Call_ComputeNodeGetRemoteDesktop_575237 = ref object of OpenApiRestCall_573667
-proc url_ComputeNodeGetRemoteDesktop_575239(protocol: Scheme; host: string;
+  Call_ComputeNodeGetRemoteDesktop_565137 = ref object of OpenApiRestCall_563565
+proc url_ComputeNodeGetRemoteDesktop_565139(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -8914,7 +8921,7 @@ proc url_ComputeNodeGetRemoteDesktop_575239(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ComputeNodeGetRemoteDesktop_575238(path: JsonNode; query: JsonNode;
+proc validate_ComputeNodeGetRemoteDesktop_565138(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Before you can access a Compute Node by using the RDP file, you must create a user Account on the Compute Node. This API can only be invoked on Pools created with a cloud service configuration. For Pools created with a virtual machine configuration, see the GetRemoteLoginSettings API.
   ## 
@@ -8927,106 +8934,106 @@ proc validate_ComputeNodeGetRemoteDesktop_575238(path: JsonNode; query: JsonNode
   ##         : The ID of the Compute Node for which you want to get the Remote Desktop Protocol file.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `poolId` field"
-  var valid_575240 = path.getOrDefault("poolId")
-  valid_575240 = validateParameter(valid_575240, JString, required = true,
+  var valid_565140 = path.getOrDefault("poolId")
+  valid_565140 = validateParameter(valid_565140, JString, required = true,
                                  default = nil)
-  if valid_575240 != nil:
-    section.add "poolId", valid_575240
-  var valid_575241 = path.getOrDefault("nodeId")
-  valid_575241 = validateParameter(valid_575241, JString, required = true,
+  if valid_565140 != nil:
+    section.add "poolId", valid_565140
+  var valid_565141 = path.getOrDefault("nodeId")
+  valid_565141 = validateParameter(valid_565141, JString, required = true,
                                  default = nil)
-  if valid_575241 != nil:
-    section.add "nodeId", valid_575241
+  if valid_565141 != nil:
+    section.add "nodeId", valid_565141
   result.add "path", section
   ## parameters in `query` object:
-  ##   timeout: JInt
-  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   ##   api-version: JString (required)
   ##              : Client API Version.
+  ##   timeout: JInt
+  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   section = newJObject()
-  var valid_575242 = query.getOrDefault("timeout")
-  valid_575242 = validateParameter(valid_575242, JInt, required = false,
-                                 default = newJInt(30))
-  if valid_575242 != nil:
-    section.add "timeout", valid_575242
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575243 = query.getOrDefault("api-version")
-  valid_575243 = validateParameter(valid_575243, JString, required = true,
+  var valid_565142 = query.getOrDefault("api-version")
+  valid_565142 = validateParameter(valid_565142, JString, required = true,
                                  default = nil)
-  if valid_575243 != nil:
-    section.add "api-version", valid_575243
+  if valid_565142 != nil:
+    section.add "api-version", valid_565142
+  var valid_565143 = query.getOrDefault("timeout")
+  valid_565143 = validateParameter(valid_565143, JInt, required = false,
+                                 default = newJInt(30))
+  if valid_565143 != nil:
+    section.add "timeout", valid_565143
   result.add "query", section
   ## parameters in `header` object:
+  ##   return-client-request-id: JBool
+  ##                           : Whether the server should return the client-request-id in the response.
   ##   client-request-id: JString
   ##                    : The caller-generated request identity, in the form of a GUID with no decoration such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
   ##   ocp-date: JString
   ##           : The time the request was issued. Client libraries typically set this to the current system clock time; set it explicitly if you are calling the REST API directly.
-  ##   return-client-request-id: JBool
-  ##                           : Whether the server should return the client-request-id in the response.
   section = newJObject()
-  var valid_575244 = header.getOrDefault("client-request-id")
-  valid_575244 = validateParameter(valid_575244, JString, required = false,
-                                 default = nil)
-  if valid_575244 != nil:
-    section.add "client-request-id", valid_575244
-  var valid_575245 = header.getOrDefault("ocp-date")
-  valid_575245 = validateParameter(valid_575245, JString, required = false,
-                                 default = nil)
-  if valid_575245 != nil:
-    section.add "ocp-date", valid_575245
-  var valid_575246 = header.getOrDefault("return-client-request-id")
-  valid_575246 = validateParameter(valid_575246, JBool, required = false,
+  var valid_565144 = header.getOrDefault("return-client-request-id")
+  valid_565144 = validateParameter(valid_565144, JBool, required = false,
                                  default = newJBool(false))
-  if valid_575246 != nil:
-    section.add "return-client-request-id", valid_575246
+  if valid_565144 != nil:
+    section.add "return-client-request-id", valid_565144
+  var valid_565145 = header.getOrDefault("client-request-id")
+  valid_565145 = validateParameter(valid_565145, JString, required = false,
+                                 default = nil)
+  if valid_565145 != nil:
+    section.add "client-request-id", valid_565145
+  var valid_565146 = header.getOrDefault("ocp-date")
+  valid_565146 = validateParameter(valid_565146, JString, required = false,
+                                 default = nil)
+  if valid_565146 != nil:
+    section.add "ocp-date", valid_565146
   result.add "header", section
   section = newJObject()
   result.add "formData", section
   if body != nil:
     result.add "body", body
 
-proc call*(call_575247: Call_ComputeNodeGetRemoteDesktop_575237; path: JsonNode;
+proc call*(call_565147: Call_ComputeNodeGetRemoteDesktop_565137; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Before you can access a Compute Node by using the RDP file, you must create a user Account on the Compute Node. This API can only be invoked on Pools created with a cloud service configuration. For Pools created with a virtual machine configuration, see the GetRemoteLoginSettings API.
   ## 
-  let valid = call_575247.validator(path, query, header, formData, body)
-  let scheme = call_575247.pickScheme
+  let valid = call_565147.validator(path, query, header, formData, body)
+  let scheme = call_565147.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575247.url(scheme.get, call_575247.host, call_575247.base,
-                         call_575247.route, valid.getOrDefault("path"),
+  let url = call_565147.url(scheme.get, call_565147.host, call_565147.base,
+                         call_565147.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575247, url, valid)
+  result = hook(call_565147, url, valid)
 
-proc call*(call_575248: Call_ComputeNodeGetRemoteDesktop_575237;
+proc call*(call_565148: Call_ComputeNodeGetRemoteDesktop_565137;
           apiVersion: string; poolId: string; nodeId: string; timeout: int = 30): Recallable =
   ## computeNodeGetRemoteDesktop
   ## Before you can access a Compute Node by using the RDP file, you must create a user Account on the Compute Node. This API can only be invoked on Pools created with a cloud service configuration. For Pools created with a virtual machine configuration, see the GetRemoteLoginSettings API.
-  ##   timeout: int
-  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   ##   apiVersion: string (required)
   ##             : Client API Version.
   ##   poolId: string (required)
   ##         : The ID of the Pool that contains the Compute Node.
+  ##   timeout: int
+  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   ##   nodeId: string (required)
   ##         : The ID of the Compute Node for which you want to get the Remote Desktop Protocol file.
-  var path_575249 = newJObject()
-  var query_575250 = newJObject()
-  add(query_575250, "timeout", newJInt(timeout))
-  add(query_575250, "api-version", newJString(apiVersion))
-  add(path_575249, "poolId", newJString(poolId))
-  add(path_575249, "nodeId", newJString(nodeId))
-  result = call_575248.call(path_575249, query_575250, nil, nil, nil)
+  var path_565149 = newJObject()
+  var query_565150 = newJObject()
+  add(query_565150, "api-version", newJString(apiVersion))
+  add(path_565149, "poolId", newJString(poolId))
+  add(query_565150, "timeout", newJInt(timeout))
+  add(path_565149, "nodeId", newJString(nodeId))
+  result = call_565148.call(path_565149, query_565150, nil, nil, nil)
 
-var computeNodeGetRemoteDesktop* = Call_ComputeNodeGetRemoteDesktop_575237(
+var computeNodeGetRemoteDesktop* = Call_ComputeNodeGetRemoteDesktop_565137(
     name: "computeNodeGetRemoteDesktop", meth: HttpMethod.HttpGet,
     host: "azure.local", route: "/pools/{poolId}/nodes/{nodeId}/rdp",
-    validator: validate_ComputeNodeGetRemoteDesktop_575238, base: "",
-    url: url_ComputeNodeGetRemoteDesktop_575239, schemes: {Scheme.Https})
+    validator: validate_ComputeNodeGetRemoteDesktop_565138, base: "",
+    url: url_ComputeNodeGetRemoteDesktop_565139, schemes: {Scheme.Https})
 type
-  Call_ComputeNodeReboot_575251 = ref object of OpenApiRestCall_573667
-proc url_ComputeNodeReboot_575253(protocol: Scheme; host: string; base: string;
+  Call_ComputeNodeReboot_565151 = ref object of OpenApiRestCall_563565
+proc url_ComputeNodeReboot_565153(protocol: Scheme; host: string; base: string;
                                  route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -9045,7 +9052,7 @@ proc url_ComputeNodeReboot_575253(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ComputeNodeReboot_575252(path: JsonNode; query: JsonNode;
+proc validate_ComputeNodeReboot_565152(path: JsonNode; query: JsonNode;
                                       header: JsonNode; formData: JsonNode;
                                       body: JsonNode): JsonNode =
   ## You can restart a Compute Node only if it is in an idle or running state.
@@ -9059,59 +9066,59 @@ proc validate_ComputeNodeReboot_575252(path: JsonNode; query: JsonNode;
   ##         : The ID of the Compute Node that you want to restart.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `poolId` field"
-  var valid_575254 = path.getOrDefault("poolId")
-  valid_575254 = validateParameter(valid_575254, JString, required = true,
+  var valid_565154 = path.getOrDefault("poolId")
+  valid_565154 = validateParameter(valid_565154, JString, required = true,
                                  default = nil)
-  if valid_575254 != nil:
-    section.add "poolId", valid_575254
-  var valid_575255 = path.getOrDefault("nodeId")
-  valid_575255 = validateParameter(valid_575255, JString, required = true,
+  if valid_565154 != nil:
+    section.add "poolId", valid_565154
+  var valid_565155 = path.getOrDefault("nodeId")
+  valid_565155 = validateParameter(valid_565155, JString, required = true,
                                  default = nil)
-  if valid_575255 != nil:
-    section.add "nodeId", valid_575255
+  if valid_565155 != nil:
+    section.add "nodeId", valid_565155
   result.add "path", section
   ## parameters in `query` object:
-  ##   timeout: JInt
-  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   ##   api-version: JString (required)
   ##              : Client API Version.
+  ##   timeout: JInt
+  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   section = newJObject()
-  var valid_575256 = query.getOrDefault("timeout")
-  valid_575256 = validateParameter(valid_575256, JInt, required = false,
-                                 default = newJInt(30))
-  if valid_575256 != nil:
-    section.add "timeout", valid_575256
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575257 = query.getOrDefault("api-version")
-  valid_575257 = validateParameter(valid_575257, JString, required = true,
+  var valid_565156 = query.getOrDefault("api-version")
+  valid_565156 = validateParameter(valid_565156, JString, required = true,
                                  default = nil)
-  if valid_575257 != nil:
-    section.add "api-version", valid_575257
+  if valid_565156 != nil:
+    section.add "api-version", valid_565156
+  var valid_565157 = query.getOrDefault("timeout")
+  valid_565157 = validateParameter(valid_565157, JInt, required = false,
+                                 default = newJInt(30))
+  if valid_565157 != nil:
+    section.add "timeout", valid_565157
   result.add "query", section
   ## parameters in `header` object:
+  ##   return-client-request-id: JBool
+  ##                           : Whether the server should return the client-request-id in the response.
   ##   client-request-id: JString
   ##                    : The caller-generated request identity, in the form of a GUID with no decoration such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
   ##   ocp-date: JString
   ##           : The time the request was issued. Client libraries typically set this to the current system clock time; set it explicitly if you are calling the REST API directly.
-  ##   return-client-request-id: JBool
-  ##                           : Whether the server should return the client-request-id in the response.
   section = newJObject()
-  var valid_575258 = header.getOrDefault("client-request-id")
-  valid_575258 = validateParameter(valid_575258, JString, required = false,
-                                 default = nil)
-  if valid_575258 != nil:
-    section.add "client-request-id", valid_575258
-  var valid_575259 = header.getOrDefault("ocp-date")
-  valid_575259 = validateParameter(valid_575259, JString, required = false,
-                                 default = nil)
-  if valid_575259 != nil:
-    section.add "ocp-date", valid_575259
-  var valid_575260 = header.getOrDefault("return-client-request-id")
-  valid_575260 = validateParameter(valid_575260, JBool, required = false,
+  var valid_565158 = header.getOrDefault("return-client-request-id")
+  valid_565158 = validateParameter(valid_565158, JBool, required = false,
                                  default = newJBool(false))
-  if valid_575260 != nil:
-    section.add "return-client-request-id", valid_575260
+  if valid_565158 != nil:
+    section.add "return-client-request-id", valid_565158
+  var valid_565159 = header.getOrDefault("client-request-id")
+  valid_565159 = validateParameter(valid_565159, JString, required = false,
+                                 default = nil)
+  if valid_565159 != nil:
+    section.add "client-request-id", valid_565159
+  var valid_565160 = header.getOrDefault("ocp-date")
+  valid_565160 = validateParameter(valid_565160, JString, required = false,
+                                 default = nil)
+  if valid_565160 != nil:
+    section.add "ocp-date", valid_565160
   result.add "header", section
   section = newJObject()
   result.add "formData", section
@@ -9122,53 +9129,53 @@ proc validate_ComputeNodeReboot_575252(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_575262: Call_ComputeNodeReboot_575251; path: JsonNode;
+proc call*(call_565162: Call_ComputeNodeReboot_565151; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## You can restart a Compute Node only if it is in an idle or running state.
   ## 
-  let valid = call_575262.validator(path, query, header, formData, body)
-  let scheme = call_575262.pickScheme
+  let valid = call_565162.validator(path, query, header, formData, body)
+  let scheme = call_565162.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575262.url(scheme.get, call_575262.host, call_575262.base,
-                         call_575262.route, valid.getOrDefault("path"),
+  let url = call_565162.url(scheme.get, call_565162.host, call_565162.base,
+                         call_565162.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575262, url, valid)
+  result = hook(call_565162, url, valid)
 
-proc call*(call_575263: Call_ComputeNodeReboot_575251; apiVersion: string;
+proc call*(call_565163: Call_ComputeNodeReboot_565151; apiVersion: string;
           poolId: string; nodeId: string; timeout: int = 30;
           nodeRebootParameter: JsonNode = nil): Recallable =
   ## computeNodeReboot
   ## You can restart a Compute Node only if it is in an idle or running state.
-  ##   timeout: int
-  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   ##   apiVersion: string (required)
   ##             : Client API Version.
-  ##   nodeRebootParameter: JObject
-  ##                      : The parameters for the request.
   ##   poolId: string (required)
   ##         : The ID of the Pool that contains the Compute Node.
+  ##   timeout: int
+  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
+  ##   nodeRebootParameter: JObject
+  ##                      : The parameters for the request.
   ##   nodeId: string (required)
   ##         : The ID of the Compute Node that you want to restart.
-  var path_575264 = newJObject()
-  var query_575265 = newJObject()
-  var body_575266 = newJObject()
-  add(query_575265, "timeout", newJInt(timeout))
-  add(query_575265, "api-version", newJString(apiVersion))
+  var path_565164 = newJObject()
+  var query_565165 = newJObject()
+  var body_565166 = newJObject()
+  add(query_565165, "api-version", newJString(apiVersion))
+  add(path_565164, "poolId", newJString(poolId))
+  add(query_565165, "timeout", newJInt(timeout))
   if nodeRebootParameter != nil:
-    body_575266 = nodeRebootParameter
-  add(path_575264, "poolId", newJString(poolId))
-  add(path_575264, "nodeId", newJString(nodeId))
-  result = call_575263.call(path_575264, query_575265, nil, nil, body_575266)
+    body_565166 = nodeRebootParameter
+  add(path_565164, "nodeId", newJString(nodeId))
+  result = call_565163.call(path_565164, query_565165, nil, nil, body_565166)
 
-var computeNodeReboot* = Call_ComputeNodeReboot_575251(name: "computeNodeReboot",
+var computeNodeReboot* = Call_ComputeNodeReboot_565151(name: "computeNodeReboot",
     meth: HttpMethod.HttpPost, host: "azure.local",
     route: "/pools/{poolId}/nodes/{nodeId}/reboot",
-    validator: validate_ComputeNodeReboot_575252, base: "",
-    url: url_ComputeNodeReboot_575253, schemes: {Scheme.Https})
+    validator: validate_ComputeNodeReboot_565152, base: "",
+    url: url_ComputeNodeReboot_565153, schemes: {Scheme.Https})
 type
-  Call_ComputeNodeReimage_575267 = ref object of OpenApiRestCall_573667
-proc url_ComputeNodeReimage_575269(protocol: Scheme; host: string; base: string;
+  Call_ComputeNodeReimage_565167 = ref object of OpenApiRestCall_563565
+proc url_ComputeNodeReimage_565169(protocol: Scheme; host: string; base: string;
                                   route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -9187,7 +9194,7 @@ proc url_ComputeNodeReimage_575269(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ComputeNodeReimage_575268(path: JsonNode; query: JsonNode;
+proc validate_ComputeNodeReimage_565168(path: JsonNode; query: JsonNode;
                                        header: JsonNode; formData: JsonNode;
                                        body: JsonNode): JsonNode =
   ## You can reinstall the operating system on a Compute Node only if it is in an idle or running state. This API can be invoked only on Pools created with the cloud service configuration property.
@@ -9201,59 +9208,59 @@ proc validate_ComputeNodeReimage_575268(path: JsonNode; query: JsonNode;
   ##         : The ID of the Compute Node that you want to restart.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `poolId` field"
-  var valid_575270 = path.getOrDefault("poolId")
-  valid_575270 = validateParameter(valid_575270, JString, required = true,
+  var valid_565170 = path.getOrDefault("poolId")
+  valid_565170 = validateParameter(valid_565170, JString, required = true,
                                  default = nil)
-  if valid_575270 != nil:
-    section.add "poolId", valid_575270
-  var valid_575271 = path.getOrDefault("nodeId")
-  valid_575271 = validateParameter(valid_575271, JString, required = true,
+  if valid_565170 != nil:
+    section.add "poolId", valid_565170
+  var valid_565171 = path.getOrDefault("nodeId")
+  valid_565171 = validateParameter(valid_565171, JString, required = true,
                                  default = nil)
-  if valid_575271 != nil:
-    section.add "nodeId", valid_575271
+  if valid_565171 != nil:
+    section.add "nodeId", valid_565171
   result.add "path", section
   ## parameters in `query` object:
-  ##   timeout: JInt
-  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   ##   api-version: JString (required)
   ##              : Client API Version.
+  ##   timeout: JInt
+  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   section = newJObject()
-  var valid_575272 = query.getOrDefault("timeout")
-  valid_575272 = validateParameter(valid_575272, JInt, required = false,
-                                 default = newJInt(30))
-  if valid_575272 != nil:
-    section.add "timeout", valid_575272
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575273 = query.getOrDefault("api-version")
-  valid_575273 = validateParameter(valid_575273, JString, required = true,
+  var valid_565172 = query.getOrDefault("api-version")
+  valid_565172 = validateParameter(valid_565172, JString, required = true,
                                  default = nil)
-  if valid_575273 != nil:
-    section.add "api-version", valid_575273
+  if valid_565172 != nil:
+    section.add "api-version", valid_565172
+  var valid_565173 = query.getOrDefault("timeout")
+  valid_565173 = validateParameter(valid_565173, JInt, required = false,
+                                 default = newJInt(30))
+  if valid_565173 != nil:
+    section.add "timeout", valid_565173
   result.add "query", section
   ## parameters in `header` object:
+  ##   return-client-request-id: JBool
+  ##                           : Whether the server should return the client-request-id in the response.
   ##   client-request-id: JString
   ##                    : The caller-generated request identity, in the form of a GUID with no decoration such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
   ##   ocp-date: JString
   ##           : The time the request was issued. Client libraries typically set this to the current system clock time; set it explicitly if you are calling the REST API directly.
-  ##   return-client-request-id: JBool
-  ##                           : Whether the server should return the client-request-id in the response.
   section = newJObject()
-  var valid_575274 = header.getOrDefault("client-request-id")
-  valid_575274 = validateParameter(valid_575274, JString, required = false,
-                                 default = nil)
-  if valid_575274 != nil:
-    section.add "client-request-id", valid_575274
-  var valid_575275 = header.getOrDefault("ocp-date")
-  valid_575275 = validateParameter(valid_575275, JString, required = false,
-                                 default = nil)
-  if valid_575275 != nil:
-    section.add "ocp-date", valid_575275
-  var valid_575276 = header.getOrDefault("return-client-request-id")
-  valid_575276 = validateParameter(valid_575276, JBool, required = false,
+  var valid_565174 = header.getOrDefault("return-client-request-id")
+  valid_565174 = validateParameter(valid_565174, JBool, required = false,
                                  default = newJBool(false))
-  if valid_575276 != nil:
-    section.add "return-client-request-id", valid_575276
+  if valid_565174 != nil:
+    section.add "return-client-request-id", valid_565174
+  var valid_565175 = header.getOrDefault("client-request-id")
+  valid_565175 = validateParameter(valid_565175, JString, required = false,
+                                 default = nil)
+  if valid_565175 != nil:
+    section.add "client-request-id", valid_565175
+  var valid_565176 = header.getOrDefault("ocp-date")
+  valid_565176 = validateParameter(valid_565176, JString, required = false,
+                                 default = nil)
+  if valid_565176 != nil:
+    section.add "ocp-date", valid_565176
   result.add "header", section
   section = newJObject()
   result.add "formData", section
@@ -9264,53 +9271,53 @@ proc validate_ComputeNodeReimage_575268(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_575278: Call_ComputeNodeReimage_575267; path: JsonNode;
+proc call*(call_565178: Call_ComputeNodeReimage_565167; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## You can reinstall the operating system on a Compute Node only if it is in an idle or running state. This API can be invoked only on Pools created with the cloud service configuration property.
   ## 
-  let valid = call_575278.validator(path, query, header, formData, body)
-  let scheme = call_575278.pickScheme
+  let valid = call_565178.validator(path, query, header, formData, body)
+  let scheme = call_565178.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575278.url(scheme.get, call_575278.host, call_575278.base,
-                         call_575278.route, valid.getOrDefault("path"),
+  let url = call_565178.url(scheme.get, call_565178.host, call_565178.base,
+                         call_565178.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575278, url, valid)
+  result = hook(call_565178, url, valid)
 
-proc call*(call_575279: Call_ComputeNodeReimage_575267; apiVersion: string;
+proc call*(call_565179: Call_ComputeNodeReimage_565167; apiVersion: string;
           poolId: string; nodeId: string; timeout: int = 30;
           nodeReimageParameter: JsonNode = nil): Recallable =
   ## computeNodeReimage
   ## You can reinstall the operating system on a Compute Node only if it is in an idle or running state. This API can be invoked only on Pools created with the cloud service configuration property.
-  ##   timeout: int
-  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   ##   apiVersion: string (required)
   ##             : Client API Version.
   ##   poolId: string (required)
   ##         : The ID of the Pool that contains the Compute Node.
-  ##   nodeId: string (required)
-  ##         : The ID of the Compute Node that you want to restart.
+  ##   timeout: int
+  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   ##   nodeReimageParameter: JObject
   ##                       : The parameters for the request.
-  var path_575280 = newJObject()
-  var query_575281 = newJObject()
-  var body_575282 = newJObject()
-  add(query_575281, "timeout", newJInt(timeout))
-  add(query_575281, "api-version", newJString(apiVersion))
-  add(path_575280, "poolId", newJString(poolId))
-  add(path_575280, "nodeId", newJString(nodeId))
+  ##   nodeId: string (required)
+  ##         : The ID of the Compute Node that you want to restart.
+  var path_565180 = newJObject()
+  var query_565181 = newJObject()
+  var body_565182 = newJObject()
+  add(query_565181, "api-version", newJString(apiVersion))
+  add(path_565180, "poolId", newJString(poolId))
+  add(query_565181, "timeout", newJInt(timeout))
   if nodeReimageParameter != nil:
-    body_575282 = nodeReimageParameter
-  result = call_575279.call(path_575280, query_575281, nil, nil, body_575282)
+    body_565182 = nodeReimageParameter
+  add(path_565180, "nodeId", newJString(nodeId))
+  result = call_565179.call(path_565180, query_565181, nil, nil, body_565182)
 
-var computeNodeReimage* = Call_ComputeNodeReimage_575267(
+var computeNodeReimage* = Call_ComputeNodeReimage_565167(
     name: "computeNodeReimage", meth: HttpMethod.HttpPost, host: "azure.local",
     route: "/pools/{poolId}/nodes/{nodeId}/reimage",
-    validator: validate_ComputeNodeReimage_575268, base: "",
-    url: url_ComputeNodeReimage_575269, schemes: {Scheme.Https})
+    validator: validate_ComputeNodeReimage_565168, base: "",
+    url: url_ComputeNodeReimage_565169, schemes: {Scheme.Https})
 type
-  Call_ComputeNodeGetRemoteLoginSettings_575283 = ref object of OpenApiRestCall_573667
-proc url_ComputeNodeGetRemoteLoginSettings_575285(protocol: Scheme; host: string;
+  Call_ComputeNodeGetRemoteLoginSettings_565183 = ref object of OpenApiRestCall_563565
+proc url_ComputeNodeGetRemoteLoginSettings_565185(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -9329,7 +9336,7 @@ proc url_ComputeNodeGetRemoteLoginSettings_575285(protocol: Scheme; host: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ComputeNodeGetRemoteLoginSettings_575284(path: JsonNode;
+proc validate_ComputeNodeGetRemoteLoginSettings_565184(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Before you can remotely login to a Compute Node using the remote login settings, you must create a user Account on the Compute Node. This API can be invoked only on Pools created with the virtual machine configuration property. For Pools created with a cloud service configuration, see the GetRemoteDesktop API.
   ## 
@@ -9342,108 +9349,108 @@ proc validate_ComputeNodeGetRemoteLoginSettings_575284(path: JsonNode;
   ##         : The ID of the Compute Node for which to obtain the remote login settings.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `poolId` field"
-  var valid_575286 = path.getOrDefault("poolId")
-  valid_575286 = validateParameter(valid_575286, JString, required = true,
+  var valid_565186 = path.getOrDefault("poolId")
+  valid_565186 = validateParameter(valid_565186, JString, required = true,
                                  default = nil)
-  if valid_575286 != nil:
-    section.add "poolId", valid_575286
-  var valid_575287 = path.getOrDefault("nodeId")
-  valid_575287 = validateParameter(valid_575287, JString, required = true,
+  if valid_565186 != nil:
+    section.add "poolId", valid_565186
+  var valid_565187 = path.getOrDefault("nodeId")
+  valid_565187 = validateParameter(valid_565187, JString, required = true,
                                  default = nil)
-  if valid_575287 != nil:
-    section.add "nodeId", valid_575287
+  if valid_565187 != nil:
+    section.add "nodeId", valid_565187
   result.add "path", section
   ## parameters in `query` object:
-  ##   timeout: JInt
-  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   ##   api-version: JString (required)
   ##              : Client API Version.
+  ##   timeout: JInt
+  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   section = newJObject()
-  var valid_575288 = query.getOrDefault("timeout")
-  valid_575288 = validateParameter(valid_575288, JInt, required = false,
-                                 default = newJInt(30))
-  if valid_575288 != nil:
-    section.add "timeout", valid_575288
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575289 = query.getOrDefault("api-version")
-  valid_575289 = validateParameter(valid_575289, JString, required = true,
+  var valid_565188 = query.getOrDefault("api-version")
+  valid_565188 = validateParameter(valid_565188, JString, required = true,
                                  default = nil)
-  if valid_575289 != nil:
-    section.add "api-version", valid_575289
+  if valid_565188 != nil:
+    section.add "api-version", valid_565188
+  var valid_565189 = query.getOrDefault("timeout")
+  valid_565189 = validateParameter(valid_565189, JInt, required = false,
+                                 default = newJInt(30))
+  if valid_565189 != nil:
+    section.add "timeout", valid_565189
   result.add "query", section
   ## parameters in `header` object:
+  ##   return-client-request-id: JBool
+  ##                           : Whether the server should return the client-request-id in the response.
   ##   client-request-id: JString
   ##                    : The caller-generated request identity, in the form of a GUID with no decoration such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
   ##   ocp-date: JString
   ##           : The time the request was issued. Client libraries typically set this to the current system clock time; set it explicitly if you are calling the REST API directly.
-  ##   return-client-request-id: JBool
-  ##                           : Whether the server should return the client-request-id in the response.
   section = newJObject()
-  var valid_575290 = header.getOrDefault("client-request-id")
-  valid_575290 = validateParameter(valid_575290, JString, required = false,
-                                 default = nil)
-  if valid_575290 != nil:
-    section.add "client-request-id", valid_575290
-  var valid_575291 = header.getOrDefault("ocp-date")
-  valid_575291 = validateParameter(valid_575291, JString, required = false,
-                                 default = nil)
-  if valid_575291 != nil:
-    section.add "ocp-date", valid_575291
-  var valid_575292 = header.getOrDefault("return-client-request-id")
-  valid_575292 = validateParameter(valid_575292, JBool, required = false,
+  var valid_565190 = header.getOrDefault("return-client-request-id")
+  valid_565190 = validateParameter(valid_565190, JBool, required = false,
                                  default = newJBool(false))
-  if valid_575292 != nil:
-    section.add "return-client-request-id", valid_575292
+  if valid_565190 != nil:
+    section.add "return-client-request-id", valid_565190
+  var valid_565191 = header.getOrDefault("client-request-id")
+  valid_565191 = validateParameter(valid_565191, JString, required = false,
+                                 default = nil)
+  if valid_565191 != nil:
+    section.add "client-request-id", valid_565191
+  var valid_565192 = header.getOrDefault("ocp-date")
+  valid_565192 = validateParameter(valid_565192, JString, required = false,
+                                 default = nil)
+  if valid_565192 != nil:
+    section.add "ocp-date", valid_565192
   result.add "header", section
   section = newJObject()
   result.add "formData", section
   if body != nil:
     result.add "body", body
 
-proc call*(call_575293: Call_ComputeNodeGetRemoteLoginSettings_575283;
+proc call*(call_565193: Call_ComputeNodeGetRemoteLoginSettings_565183;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Before you can remotely login to a Compute Node using the remote login settings, you must create a user Account on the Compute Node. This API can be invoked only on Pools created with the virtual machine configuration property. For Pools created with a cloud service configuration, see the GetRemoteDesktop API.
   ## 
-  let valid = call_575293.validator(path, query, header, formData, body)
-  let scheme = call_575293.pickScheme
+  let valid = call_565193.validator(path, query, header, formData, body)
+  let scheme = call_565193.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575293.url(scheme.get, call_575293.host, call_575293.base,
-                         call_575293.route, valid.getOrDefault("path"),
+  let url = call_565193.url(scheme.get, call_565193.host, call_565193.base,
+                         call_565193.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575293, url, valid)
+  result = hook(call_565193, url, valid)
 
-proc call*(call_575294: Call_ComputeNodeGetRemoteLoginSettings_575283;
+proc call*(call_565194: Call_ComputeNodeGetRemoteLoginSettings_565183;
           apiVersion: string; poolId: string; nodeId: string; timeout: int = 30): Recallable =
   ## computeNodeGetRemoteLoginSettings
   ## Before you can remotely login to a Compute Node using the remote login settings, you must create a user Account on the Compute Node. This API can be invoked only on Pools created with the virtual machine configuration property. For Pools created with a cloud service configuration, see the GetRemoteDesktop API.
-  ##   timeout: int
-  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   ##   apiVersion: string (required)
   ##             : Client API Version.
   ##   poolId: string (required)
   ##         : The ID of the Pool that contains the Compute Node.
+  ##   timeout: int
+  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   ##   nodeId: string (required)
   ##         : The ID of the Compute Node for which to obtain the remote login settings.
-  var path_575295 = newJObject()
-  var query_575296 = newJObject()
-  add(query_575296, "timeout", newJInt(timeout))
-  add(query_575296, "api-version", newJString(apiVersion))
-  add(path_575295, "poolId", newJString(poolId))
-  add(path_575295, "nodeId", newJString(nodeId))
-  result = call_575294.call(path_575295, query_575296, nil, nil, nil)
+  var path_565195 = newJObject()
+  var query_565196 = newJObject()
+  add(query_565196, "api-version", newJString(apiVersion))
+  add(path_565195, "poolId", newJString(poolId))
+  add(query_565196, "timeout", newJInt(timeout))
+  add(path_565195, "nodeId", newJString(nodeId))
+  result = call_565194.call(path_565195, query_565196, nil, nil, nil)
 
-var computeNodeGetRemoteLoginSettings* = Call_ComputeNodeGetRemoteLoginSettings_575283(
+var computeNodeGetRemoteLoginSettings* = Call_ComputeNodeGetRemoteLoginSettings_565183(
     name: "computeNodeGetRemoteLoginSettings", meth: HttpMethod.HttpGet,
     host: "azure.local",
     route: "/pools/{poolId}/nodes/{nodeId}/remoteloginsettings",
-    validator: validate_ComputeNodeGetRemoteLoginSettings_575284, base: "",
-    url: url_ComputeNodeGetRemoteLoginSettings_575285, schemes: {Scheme.Https})
+    validator: validate_ComputeNodeGetRemoteLoginSettings_565184, base: "",
+    url: url_ComputeNodeGetRemoteLoginSettings_565185, schemes: {Scheme.Https})
 type
-  Call_ComputeNodeUploadBatchServiceLogs_575297 = ref object of OpenApiRestCall_573667
-proc url_ComputeNodeUploadBatchServiceLogs_575299(protocol: Scheme; host: string;
+  Call_ComputeNodeUploadBatchServiceLogs_565197 = ref object of OpenApiRestCall_563565
+proc url_ComputeNodeUploadBatchServiceLogs_565199(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -9462,7 +9469,7 @@ proc url_ComputeNodeUploadBatchServiceLogs_575299(protocol: Scheme; host: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ComputeNodeUploadBatchServiceLogs_575298(path: JsonNode;
+proc validate_ComputeNodeUploadBatchServiceLogs_565198(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## This is for gathering Azure Batch service log files in an automated fashion from Compute Nodes if you are experiencing an error and wish to escalate to Azure support. The Azure Batch service log files should be shared with Azure support to aid in debugging issues with the Batch service.
   ## 
@@ -9475,59 +9482,59 @@ proc validate_ComputeNodeUploadBatchServiceLogs_575298(path: JsonNode;
   ##         : The ID of the Compute Node from which you want to upload the Azure Batch service log files.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `poolId` field"
-  var valid_575300 = path.getOrDefault("poolId")
-  valid_575300 = validateParameter(valid_575300, JString, required = true,
+  var valid_565200 = path.getOrDefault("poolId")
+  valid_565200 = validateParameter(valid_565200, JString, required = true,
                                  default = nil)
-  if valid_575300 != nil:
-    section.add "poolId", valid_575300
-  var valid_575301 = path.getOrDefault("nodeId")
-  valid_575301 = validateParameter(valid_575301, JString, required = true,
+  if valid_565200 != nil:
+    section.add "poolId", valid_565200
+  var valid_565201 = path.getOrDefault("nodeId")
+  valid_565201 = validateParameter(valid_565201, JString, required = true,
                                  default = nil)
-  if valid_575301 != nil:
-    section.add "nodeId", valid_575301
+  if valid_565201 != nil:
+    section.add "nodeId", valid_565201
   result.add "path", section
   ## parameters in `query` object:
-  ##   timeout: JInt
-  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   ##   api-version: JString (required)
   ##              : Client API Version.
+  ##   timeout: JInt
+  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   section = newJObject()
-  var valid_575302 = query.getOrDefault("timeout")
-  valid_575302 = validateParameter(valid_575302, JInt, required = false,
-                                 default = newJInt(30))
-  if valid_575302 != nil:
-    section.add "timeout", valid_575302
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575303 = query.getOrDefault("api-version")
-  valid_575303 = validateParameter(valid_575303, JString, required = true,
+  var valid_565202 = query.getOrDefault("api-version")
+  valid_565202 = validateParameter(valid_565202, JString, required = true,
                                  default = nil)
-  if valid_575303 != nil:
-    section.add "api-version", valid_575303
+  if valid_565202 != nil:
+    section.add "api-version", valid_565202
+  var valid_565203 = query.getOrDefault("timeout")
+  valid_565203 = validateParameter(valid_565203, JInt, required = false,
+                                 default = newJInt(30))
+  if valid_565203 != nil:
+    section.add "timeout", valid_565203
   result.add "query", section
   ## parameters in `header` object:
+  ##   return-client-request-id: JBool
+  ##                           : Whether the server should return the client-request-id in the response.
   ##   client-request-id: JString
   ##                    : The caller-generated request identity, in the form of a GUID with no decoration such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
   ##   ocp-date: JString
   ##           : The time the request was issued. Client libraries typically set this to the current system clock time; set it explicitly if you are calling the REST API directly.
-  ##   return-client-request-id: JBool
-  ##                           : Whether the server should return the client-request-id in the response.
   section = newJObject()
-  var valid_575304 = header.getOrDefault("client-request-id")
-  valid_575304 = validateParameter(valid_575304, JString, required = false,
-                                 default = nil)
-  if valid_575304 != nil:
-    section.add "client-request-id", valid_575304
-  var valid_575305 = header.getOrDefault("ocp-date")
-  valid_575305 = validateParameter(valid_575305, JString, required = false,
-                                 default = nil)
-  if valid_575305 != nil:
-    section.add "ocp-date", valid_575305
-  var valid_575306 = header.getOrDefault("return-client-request-id")
-  valid_575306 = validateParameter(valid_575306, JBool, required = false,
+  var valid_565204 = header.getOrDefault("return-client-request-id")
+  valid_565204 = validateParameter(valid_565204, JBool, required = false,
                                  default = newJBool(false))
-  if valid_575306 != nil:
-    section.add "return-client-request-id", valid_575306
+  if valid_565204 != nil:
+    section.add "return-client-request-id", valid_565204
+  var valid_565205 = header.getOrDefault("client-request-id")
+  valid_565205 = validateParameter(valid_565205, JString, required = false,
+                                 default = nil)
+  if valid_565205 != nil:
+    section.add "client-request-id", valid_565205
+  var valid_565206 = header.getOrDefault("ocp-date")
+  valid_565206 = validateParameter(valid_565206, JString, required = false,
+                                 default = nil)
+  if valid_565206 != nil:
+    section.add "ocp-date", valid_565206
   result.add "header", section
   section = newJObject()
   result.add "formData", section
@@ -9539,55 +9546,56 @@ proc validate_ComputeNodeUploadBatchServiceLogs_575298(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_575308: Call_ComputeNodeUploadBatchServiceLogs_575297;
+proc call*(call_565208: Call_ComputeNodeUploadBatchServiceLogs_565197;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## This is for gathering Azure Batch service log files in an automated fashion from Compute Nodes if you are experiencing an error and wish to escalate to Azure support. The Azure Batch service log files should be shared with Azure support to aid in debugging issues with the Batch service.
   ## 
-  let valid = call_575308.validator(path, query, header, formData, body)
-  let scheme = call_575308.pickScheme
+  let valid = call_565208.validator(path, query, header, formData, body)
+  let scheme = call_565208.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575308.url(scheme.get, call_575308.host, call_575308.base,
-                         call_575308.route, valid.getOrDefault("path"),
+  let url = call_565208.url(scheme.get, call_565208.host, call_565208.base,
+                         call_565208.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575308, url, valid)
+  result = hook(call_565208, url, valid)
 
-proc call*(call_575309: Call_ComputeNodeUploadBatchServiceLogs_575297;
-          apiVersion: string; poolId: string; nodeId: string;
-          uploadBatchServiceLogsConfiguration: JsonNode; timeout: int = 30): Recallable =
+proc call*(call_565209: Call_ComputeNodeUploadBatchServiceLogs_565197;
+          apiVersion: string; poolId: string;
+          uploadBatchServiceLogsConfiguration: JsonNode; nodeId: string;
+          timeout: int = 30): Recallable =
   ## computeNodeUploadBatchServiceLogs
   ## This is for gathering Azure Batch service log files in an automated fashion from Compute Nodes if you are experiencing an error and wish to escalate to Azure support. The Azure Batch service log files should be shared with Azure support to aid in debugging issues with the Batch service.
-  ##   timeout: int
-  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   ##   apiVersion: string (required)
   ##             : Client API Version.
   ##   poolId: string (required)
   ##         : The ID of the Pool that contains the Compute Node.
-  ##   nodeId: string (required)
-  ##         : The ID of the Compute Node from which you want to upload the Azure Batch service log files.
+  ##   timeout: int
+  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   ##   uploadBatchServiceLogsConfiguration: JObject (required)
   ##                                      : The Azure Batch service log files upload configuration.
-  var path_575310 = newJObject()
-  var query_575311 = newJObject()
-  var body_575312 = newJObject()
-  add(query_575311, "timeout", newJInt(timeout))
-  add(query_575311, "api-version", newJString(apiVersion))
-  add(path_575310, "poolId", newJString(poolId))
-  add(path_575310, "nodeId", newJString(nodeId))
+  ##   nodeId: string (required)
+  ##         : The ID of the Compute Node from which you want to upload the Azure Batch service log files.
+  var path_565210 = newJObject()
+  var query_565211 = newJObject()
+  var body_565212 = newJObject()
+  add(query_565211, "api-version", newJString(apiVersion))
+  add(path_565210, "poolId", newJString(poolId))
+  add(query_565211, "timeout", newJInt(timeout))
   if uploadBatchServiceLogsConfiguration != nil:
-    body_575312 = uploadBatchServiceLogsConfiguration
-  result = call_575309.call(path_575310, query_575311, nil, nil, body_575312)
+    body_565212 = uploadBatchServiceLogsConfiguration
+  add(path_565210, "nodeId", newJString(nodeId))
+  result = call_565209.call(path_565210, query_565211, nil, nil, body_565212)
 
-var computeNodeUploadBatchServiceLogs* = Call_ComputeNodeUploadBatchServiceLogs_575297(
+var computeNodeUploadBatchServiceLogs* = Call_ComputeNodeUploadBatchServiceLogs_565197(
     name: "computeNodeUploadBatchServiceLogs", meth: HttpMethod.HttpPost,
     host: "azure.local",
     route: "/pools/{poolId}/nodes/{nodeId}/uploadbatchservicelogs",
-    validator: validate_ComputeNodeUploadBatchServiceLogs_575298, base: "",
-    url: url_ComputeNodeUploadBatchServiceLogs_575299, schemes: {Scheme.Https})
+    validator: validate_ComputeNodeUploadBatchServiceLogs_565198, base: "",
+    url: url_ComputeNodeUploadBatchServiceLogs_565199, schemes: {Scheme.Https})
 type
-  Call_ComputeNodeAddUser_575313 = ref object of OpenApiRestCall_573667
-proc url_ComputeNodeAddUser_575315(protocol: Scheme; host: string; base: string;
+  Call_ComputeNodeAddUser_565213 = ref object of OpenApiRestCall_563565
+proc url_ComputeNodeAddUser_565215(protocol: Scheme; host: string; base: string;
                                   route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -9606,7 +9614,7 @@ proc url_ComputeNodeAddUser_575315(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ComputeNodeAddUser_575314(path: JsonNode; query: JsonNode;
+proc validate_ComputeNodeAddUser_565214(path: JsonNode; query: JsonNode;
                                        header: JsonNode; formData: JsonNode;
                                        body: JsonNode): JsonNode =
   ## You can add a user Account to a Compute Node only when it is in the idle or running state.
@@ -9620,59 +9628,59 @@ proc validate_ComputeNodeAddUser_575314(path: JsonNode; query: JsonNode;
   ##         : The ID of the machine on which you want to create a user Account.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `poolId` field"
-  var valid_575316 = path.getOrDefault("poolId")
-  valid_575316 = validateParameter(valid_575316, JString, required = true,
+  var valid_565216 = path.getOrDefault("poolId")
+  valid_565216 = validateParameter(valid_565216, JString, required = true,
                                  default = nil)
-  if valid_575316 != nil:
-    section.add "poolId", valid_575316
-  var valid_575317 = path.getOrDefault("nodeId")
-  valid_575317 = validateParameter(valid_575317, JString, required = true,
+  if valid_565216 != nil:
+    section.add "poolId", valid_565216
+  var valid_565217 = path.getOrDefault("nodeId")
+  valid_565217 = validateParameter(valid_565217, JString, required = true,
                                  default = nil)
-  if valid_575317 != nil:
-    section.add "nodeId", valid_575317
+  if valid_565217 != nil:
+    section.add "nodeId", valid_565217
   result.add "path", section
   ## parameters in `query` object:
-  ##   timeout: JInt
-  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   ##   api-version: JString (required)
   ##              : Client API Version.
+  ##   timeout: JInt
+  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   section = newJObject()
-  var valid_575318 = query.getOrDefault("timeout")
-  valid_575318 = validateParameter(valid_575318, JInt, required = false,
-                                 default = newJInt(30))
-  if valid_575318 != nil:
-    section.add "timeout", valid_575318
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575319 = query.getOrDefault("api-version")
-  valid_575319 = validateParameter(valid_575319, JString, required = true,
+  var valid_565218 = query.getOrDefault("api-version")
+  valid_565218 = validateParameter(valid_565218, JString, required = true,
                                  default = nil)
-  if valid_575319 != nil:
-    section.add "api-version", valid_575319
+  if valid_565218 != nil:
+    section.add "api-version", valid_565218
+  var valid_565219 = query.getOrDefault("timeout")
+  valid_565219 = validateParameter(valid_565219, JInt, required = false,
+                                 default = newJInt(30))
+  if valid_565219 != nil:
+    section.add "timeout", valid_565219
   result.add "query", section
   ## parameters in `header` object:
+  ##   return-client-request-id: JBool
+  ##                           : Whether the server should return the client-request-id in the response.
   ##   client-request-id: JString
   ##                    : The caller-generated request identity, in the form of a GUID with no decoration such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
   ##   ocp-date: JString
   ##           : The time the request was issued. Client libraries typically set this to the current system clock time; set it explicitly if you are calling the REST API directly.
-  ##   return-client-request-id: JBool
-  ##                           : Whether the server should return the client-request-id in the response.
   section = newJObject()
-  var valid_575320 = header.getOrDefault("client-request-id")
-  valid_575320 = validateParameter(valid_575320, JString, required = false,
-                                 default = nil)
-  if valid_575320 != nil:
-    section.add "client-request-id", valid_575320
-  var valid_575321 = header.getOrDefault("ocp-date")
-  valid_575321 = validateParameter(valid_575321, JString, required = false,
-                                 default = nil)
-  if valid_575321 != nil:
-    section.add "ocp-date", valid_575321
-  var valid_575322 = header.getOrDefault("return-client-request-id")
-  valid_575322 = validateParameter(valid_575322, JBool, required = false,
+  var valid_565220 = header.getOrDefault("return-client-request-id")
+  valid_565220 = validateParameter(valid_565220, JBool, required = false,
                                  default = newJBool(false))
-  if valid_575322 != nil:
-    section.add "return-client-request-id", valid_575322
+  if valid_565220 != nil:
+    section.add "return-client-request-id", valid_565220
+  var valid_565221 = header.getOrDefault("client-request-id")
+  valid_565221 = validateParameter(valid_565221, JString, required = false,
+                                 default = nil)
+  if valid_565221 != nil:
+    section.add "client-request-id", valid_565221
+  var valid_565222 = header.getOrDefault("ocp-date")
+  valid_565222 = validateParameter(valid_565222, JString, required = false,
+                                 default = nil)
+  if valid_565222 != nil:
+    section.add "ocp-date", valid_565222
   result.add "header", section
   section = newJObject()
   result.add "formData", section
@@ -9684,52 +9692,52 @@ proc validate_ComputeNodeAddUser_575314(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_575324: Call_ComputeNodeAddUser_575313; path: JsonNode;
+proc call*(call_565224: Call_ComputeNodeAddUser_565213; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## You can add a user Account to a Compute Node only when it is in the idle or running state.
   ## 
-  let valid = call_575324.validator(path, query, header, formData, body)
-  let scheme = call_575324.pickScheme
+  let valid = call_565224.validator(path, query, header, formData, body)
+  let scheme = call_565224.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575324.url(scheme.get, call_575324.host, call_575324.base,
-                         call_575324.route, valid.getOrDefault("path"),
+  let url = call_565224.url(scheme.get, call_565224.host, call_565224.base,
+                         call_565224.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575324, url, valid)
+  result = hook(call_565224, url, valid)
 
-proc call*(call_575325: Call_ComputeNodeAddUser_575313; apiVersion: string;
-          user: JsonNode; poolId: string; nodeId: string; timeout: int = 30): Recallable =
+proc call*(call_565225: Call_ComputeNodeAddUser_565213; apiVersion: string;
+          poolId: string; user: JsonNode; nodeId: string; timeout: int = 30): Recallable =
   ## computeNodeAddUser
   ## You can add a user Account to a Compute Node only when it is in the idle or running state.
-  ##   timeout: int
-  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   ##   apiVersion: string (required)
   ##             : Client API Version.
-  ##   user: JObject (required)
-  ##       : The user Account to be created.
   ##   poolId: string (required)
   ##         : The ID of the Pool that contains the Compute Node.
+  ##   timeout: int
+  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
+  ##   user: JObject (required)
+  ##       : The user Account to be created.
   ##   nodeId: string (required)
   ##         : The ID of the machine on which you want to create a user Account.
-  var path_575326 = newJObject()
-  var query_575327 = newJObject()
-  var body_575328 = newJObject()
-  add(query_575327, "timeout", newJInt(timeout))
-  add(query_575327, "api-version", newJString(apiVersion))
+  var path_565226 = newJObject()
+  var query_565227 = newJObject()
+  var body_565228 = newJObject()
+  add(query_565227, "api-version", newJString(apiVersion))
+  add(path_565226, "poolId", newJString(poolId))
+  add(query_565227, "timeout", newJInt(timeout))
   if user != nil:
-    body_575328 = user
-  add(path_575326, "poolId", newJString(poolId))
-  add(path_575326, "nodeId", newJString(nodeId))
-  result = call_575325.call(path_575326, query_575327, nil, nil, body_575328)
+    body_565228 = user
+  add(path_565226, "nodeId", newJString(nodeId))
+  result = call_565225.call(path_565226, query_565227, nil, nil, body_565228)
 
-var computeNodeAddUser* = Call_ComputeNodeAddUser_575313(
+var computeNodeAddUser* = Call_ComputeNodeAddUser_565213(
     name: "computeNodeAddUser", meth: HttpMethod.HttpPost, host: "azure.local",
     route: "/pools/{poolId}/nodes/{nodeId}/users",
-    validator: validate_ComputeNodeAddUser_575314, base: "",
-    url: url_ComputeNodeAddUser_575315, schemes: {Scheme.Https})
+    validator: validate_ComputeNodeAddUser_565214, base: "",
+    url: url_ComputeNodeAddUser_565215, schemes: {Scheme.Https})
 type
-  Call_ComputeNodeUpdateUser_575329 = ref object of OpenApiRestCall_573667
-proc url_ComputeNodeUpdateUser_575331(protocol: Scheme; host: string; base: string;
+  Call_ComputeNodeUpdateUser_565229 = ref object of OpenApiRestCall_563565
+proc url_ComputeNodeUpdateUser_565231(protocol: Scheme; host: string; base: string;
                                      route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -9750,7 +9758,7 @@ proc url_ComputeNodeUpdateUser_575331(protocol: Scheme; host: string; base: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ComputeNodeUpdateUser_575330(path: JsonNode; query: JsonNode;
+proc validate_ComputeNodeUpdateUser_565230(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## This operation replaces of all the updatable properties of the Account. For example, if the expiryTime element is not specified, the current value is replaced with the default value, not left unmodified. You can update a user Account on a Compute Node only when it is in the idle or running state.
   ## 
@@ -9759,70 +9767,70 @@ proc validate_ComputeNodeUpdateUser_575330(path: JsonNode; query: JsonNode;
   ## parameters in `path` object:
   ##   poolId: JString (required)
   ##         : The ID of the Pool that contains the Compute Node.
-  ##   nodeId: JString (required)
-  ##         : The ID of the machine on which you want to update a user Account.
   ##   userName: JString (required)
   ##           : The name of the user Account to update.
+  ##   nodeId: JString (required)
+  ##         : The ID of the machine on which you want to update a user Account.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `poolId` field"
-  var valid_575332 = path.getOrDefault("poolId")
-  valid_575332 = validateParameter(valid_575332, JString, required = true,
+  var valid_565232 = path.getOrDefault("poolId")
+  valid_565232 = validateParameter(valid_565232, JString, required = true,
                                  default = nil)
-  if valid_575332 != nil:
-    section.add "poolId", valid_575332
-  var valid_575333 = path.getOrDefault("nodeId")
-  valid_575333 = validateParameter(valid_575333, JString, required = true,
+  if valid_565232 != nil:
+    section.add "poolId", valid_565232
+  var valid_565233 = path.getOrDefault("userName")
+  valid_565233 = validateParameter(valid_565233, JString, required = true,
                                  default = nil)
-  if valid_575333 != nil:
-    section.add "nodeId", valid_575333
-  var valid_575334 = path.getOrDefault("userName")
-  valid_575334 = validateParameter(valid_575334, JString, required = true,
+  if valid_565233 != nil:
+    section.add "userName", valid_565233
+  var valid_565234 = path.getOrDefault("nodeId")
+  valid_565234 = validateParameter(valid_565234, JString, required = true,
                                  default = nil)
-  if valid_575334 != nil:
-    section.add "userName", valid_575334
+  if valid_565234 != nil:
+    section.add "nodeId", valid_565234
   result.add "path", section
   ## parameters in `query` object:
-  ##   timeout: JInt
-  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   ##   api-version: JString (required)
   ##              : Client API Version.
+  ##   timeout: JInt
+  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   section = newJObject()
-  var valid_575335 = query.getOrDefault("timeout")
-  valid_575335 = validateParameter(valid_575335, JInt, required = false,
-                                 default = newJInt(30))
-  if valid_575335 != nil:
-    section.add "timeout", valid_575335
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575336 = query.getOrDefault("api-version")
-  valid_575336 = validateParameter(valid_575336, JString, required = true,
+  var valid_565235 = query.getOrDefault("api-version")
+  valid_565235 = validateParameter(valid_565235, JString, required = true,
                                  default = nil)
-  if valid_575336 != nil:
-    section.add "api-version", valid_575336
+  if valid_565235 != nil:
+    section.add "api-version", valid_565235
+  var valid_565236 = query.getOrDefault("timeout")
+  valid_565236 = validateParameter(valid_565236, JInt, required = false,
+                                 default = newJInt(30))
+  if valid_565236 != nil:
+    section.add "timeout", valid_565236
   result.add "query", section
   ## parameters in `header` object:
+  ##   return-client-request-id: JBool
+  ##                           : Whether the server should return the client-request-id in the response.
   ##   client-request-id: JString
   ##                    : The caller-generated request identity, in the form of a GUID with no decoration such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
   ##   ocp-date: JString
   ##           : The time the request was issued. Client libraries typically set this to the current system clock time; set it explicitly if you are calling the REST API directly.
-  ##   return-client-request-id: JBool
-  ##                           : Whether the server should return the client-request-id in the response.
   section = newJObject()
-  var valid_575337 = header.getOrDefault("client-request-id")
-  valid_575337 = validateParameter(valid_575337, JString, required = false,
-                                 default = nil)
-  if valid_575337 != nil:
-    section.add "client-request-id", valid_575337
-  var valid_575338 = header.getOrDefault("ocp-date")
-  valid_575338 = validateParameter(valid_575338, JString, required = false,
-                                 default = nil)
-  if valid_575338 != nil:
-    section.add "ocp-date", valid_575338
-  var valid_575339 = header.getOrDefault("return-client-request-id")
-  valid_575339 = validateParameter(valid_575339, JBool, required = false,
+  var valid_565237 = header.getOrDefault("return-client-request-id")
+  valid_565237 = validateParameter(valid_565237, JBool, required = false,
                                  default = newJBool(false))
-  if valid_575339 != nil:
-    section.add "return-client-request-id", valid_575339
+  if valid_565237 != nil:
+    section.add "return-client-request-id", valid_565237
+  var valid_565238 = header.getOrDefault("client-request-id")
+  valid_565238 = validateParameter(valid_565238, JString, required = false,
+                                 default = nil)
+  if valid_565238 != nil:
+    section.add "client-request-id", valid_565238
+  var valid_565239 = header.getOrDefault("ocp-date")
+  valid_565239 = validateParameter(valid_565239, JString, required = false,
+                                 default = nil)
+  if valid_565239 != nil:
+    section.add "ocp-date", valid_565239
   result.add "header", section
   section = newJObject()
   result.add "formData", section
@@ -9834,56 +9842,56 @@ proc validate_ComputeNodeUpdateUser_575330(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_575341: Call_ComputeNodeUpdateUser_575329; path: JsonNode;
+proc call*(call_565241: Call_ComputeNodeUpdateUser_565229; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## This operation replaces of all the updatable properties of the Account. For example, if the expiryTime element is not specified, the current value is replaced with the default value, not left unmodified. You can update a user Account on a Compute Node only when it is in the idle or running state.
   ## 
-  let valid = call_575341.validator(path, query, header, formData, body)
-  let scheme = call_575341.pickScheme
+  let valid = call_565241.validator(path, query, header, formData, body)
+  let scheme = call_565241.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575341.url(scheme.get, call_575341.host, call_575341.base,
-                         call_575341.route, valid.getOrDefault("path"),
+  let url = call_565241.url(scheme.get, call_565241.host, call_565241.base,
+                         call_565241.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575341, url, valid)
+  result = hook(call_565241, url, valid)
 
-proc call*(call_575342: Call_ComputeNodeUpdateUser_575329; apiVersion: string;
-          poolId: string; nodeId: string; nodeUpdateUserParameter: JsonNode;
-          userName: string; timeout: int = 30): Recallable =
+proc call*(call_565242: Call_ComputeNodeUpdateUser_565229; apiVersion: string;
+          poolId: string; nodeUpdateUserParameter: JsonNode; userName: string;
+          nodeId: string; timeout: int = 30): Recallable =
   ## computeNodeUpdateUser
   ## This operation replaces of all the updatable properties of the Account. For example, if the expiryTime element is not specified, the current value is replaced with the default value, not left unmodified. You can update a user Account on a Compute Node only when it is in the idle or running state.
-  ##   timeout: int
-  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   ##   apiVersion: string (required)
   ##             : Client API Version.
   ##   poolId: string (required)
   ##         : The ID of the Pool that contains the Compute Node.
-  ##   nodeId: string (required)
-  ##         : The ID of the machine on which you want to update a user Account.
   ##   nodeUpdateUserParameter: JObject (required)
   ##                          : The parameters for the request.
+  ##   timeout: int
+  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   ##   userName: string (required)
   ##           : The name of the user Account to update.
-  var path_575343 = newJObject()
-  var query_575344 = newJObject()
-  var body_575345 = newJObject()
-  add(query_575344, "timeout", newJInt(timeout))
-  add(query_575344, "api-version", newJString(apiVersion))
-  add(path_575343, "poolId", newJString(poolId))
-  add(path_575343, "nodeId", newJString(nodeId))
+  ##   nodeId: string (required)
+  ##         : The ID of the machine on which you want to update a user Account.
+  var path_565243 = newJObject()
+  var query_565244 = newJObject()
+  var body_565245 = newJObject()
+  add(query_565244, "api-version", newJString(apiVersion))
+  add(path_565243, "poolId", newJString(poolId))
   if nodeUpdateUserParameter != nil:
-    body_575345 = nodeUpdateUserParameter
-  add(path_575343, "userName", newJString(userName))
-  result = call_575342.call(path_575343, query_575344, nil, nil, body_575345)
+    body_565245 = nodeUpdateUserParameter
+  add(query_565244, "timeout", newJInt(timeout))
+  add(path_565243, "userName", newJString(userName))
+  add(path_565243, "nodeId", newJString(nodeId))
+  result = call_565242.call(path_565243, query_565244, nil, nil, body_565245)
 
-var computeNodeUpdateUser* = Call_ComputeNodeUpdateUser_575329(
+var computeNodeUpdateUser* = Call_ComputeNodeUpdateUser_565229(
     name: "computeNodeUpdateUser", meth: HttpMethod.HttpPut, host: "azure.local",
     route: "/pools/{poolId}/nodes/{nodeId}/users/{userName}",
-    validator: validate_ComputeNodeUpdateUser_575330, base: "",
-    url: url_ComputeNodeUpdateUser_575331, schemes: {Scheme.Https})
+    validator: validate_ComputeNodeUpdateUser_565230, base: "",
+    url: url_ComputeNodeUpdateUser_565231, schemes: {Scheme.Https})
 type
-  Call_ComputeNodeDeleteUser_575346 = ref object of OpenApiRestCall_573667
-proc url_ComputeNodeDeleteUser_575348(protocol: Scheme; host: string; base: string;
+  Call_ComputeNodeDeleteUser_565246 = ref object of OpenApiRestCall_563565
+proc url_ComputeNodeDeleteUser_565248(protocol: Scheme; host: string; base: string;
                                      route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -9904,7 +9912,7 @@ proc url_ComputeNodeDeleteUser_575348(protocol: Scheme; host: string; base: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ComputeNodeDeleteUser_575347(path: JsonNode; query: JsonNode;
+proc validate_ComputeNodeDeleteUser_565247(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## You can delete a user Account to a Compute Node only when it is in the idle or running state.
   ## 
@@ -9913,120 +9921,120 @@ proc validate_ComputeNodeDeleteUser_575347(path: JsonNode; query: JsonNode;
   ## parameters in `path` object:
   ##   poolId: JString (required)
   ##         : The ID of the Pool that contains the Compute Node.
-  ##   nodeId: JString (required)
-  ##         : The ID of the machine on which you want to delete a user Account.
   ##   userName: JString (required)
   ##           : The name of the user Account to delete.
+  ##   nodeId: JString (required)
+  ##         : The ID of the machine on which you want to delete a user Account.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `poolId` field"
-  var valid_575349 = path.getOrDefault("poolId")
-  valid_575349 = validateParameter(valid_575349, JString, required = true,
+  var valid_565249 = path.getOrDefault("poolId")
+  valid_565249 = validateParameter(valid_565249, JString, required = true,
                                  default = nil)
-  if valid_575349 != nil:
-    section.add "poolId", valid_575349
-  var valid_575350 = path.getOrDefault("nodeId")
-  valid_575350 = validateParameter(valid_575350, JString, required = true,
+  if valid_565249 != nil:
+    section.add "poolId", valid_565249
+  var valid_565250 = path.getOrDefault("userName")
+  valid_565250 = validateParameter(valid_565250, JString, required = true,
                                  default = nil)
-  if valid_575350 != nil:
-    section.add "nodeId", valid_575350
-  var valid_575351 = path.getOrDefault("userName")
-  valid_575351 = validateParameter(valid_575351, JString, required = true,
+  if valid_565250 != nil:
+    section.add "userName", valid_565250
+  var valid_565251 = path.getOrDefault("nodeId")
+  valid_565251 = validateParameter(valid_565251, JString, required = true,
                                  default = nil)
-  if valid_575351 != nil:
-    section.add "userName", valid_575351
+  if valid_565251 != nil:
+    section.add "nodeId", valid_565251
   result.add "path", section
   ## parameters in `query` object:
-  ##   timeout: JInt
-  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   ##   api-version: JString (required)
   ##              : Client API Version.
+  ##   timeout: JInt
+  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   section = newJObject()
-  var valid_575352 = query.getOrDefault("timeout")
-  valid_575352 = validateParameter(valid_575352, JInt, required = false,
-                                 default = newJInt(30))
-  if valid_575352 != nil:
-    section.add "timeout", valid_575352
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575353 = query.getOrDefault("api-version")
-  valid_575353 = validateParameter(valid_575353, JString, required = true,
+  var valid_565252 = query.getOrDefault("api-version")
+  valid_565252 = validateParameter(valid_565252, JString, required = true,
                                  default = nil)
-  if valid_575353 != nil:
-    section.add "api-version", valid_575353
+  if valid_565252 != nil:
+    section.add "api-version", valid_565252
+  var valid_565253 = query.getOrDefault("timeout")
+  valid_565253 = validateParameter(valid_565253, JInt, required = false,
+                                 default = newJInt(30))
+  if valid_565253 != nil:
+    section.add "timeout", valid_565253
   result.add "query", section
   ## parameters in `header` object:
+  ##   return-client-request-id: JBool
+  ##                           : Whether the server should return the client-request-id in the response.
   ##   client-request-id: JString
   ##                    : The caller-generated request identity, in the form of a GUID with no decoration such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
   ##   ocp-date: JString
   ##           : The time the request was issued. Client libraries typically set this to the current system clock time; set it explicitly if you are calling the REST API directly.
-  ##   return-client-request-id: JBool
-  ##                           : Whether the server should return the client-request-id in the response.
   section = newJObject()
-  var valid_575354 = header.getOrDefault("client-request-id")
-  valid_575354 = validateParameter(valid_575354, JString, required = false,
-                                 default = nil)
-  if valid_575354 != nil:
-    section.add "client-request-id", valid_575354
-  var valid_575355 = header.getOrDefault("ocp-date")
-  valid_575355 = validateParameter(valid_575355, JString, required = false,
-                                 default = nil)
-  if valid_575355 != nil:
-    section.add "ocp-date", valid_575355
-  var valid_575356 = header.getOrDefault("return-client-request-id")
-  valid_575356 = validateParameter(valid_575356, JBool, required = false,
+  var valid_565254 = header.getOrDefault("return-client-request-id")
+  valid_565254 = validateParameter(valid_565254, JBool, required = false,
                                  default = newJBool(false))
-  if valid_575356 != nil:
-    section.add "return-client-request-id", valid_575356
+  if valid_565254 != nil:
+    section.add "return-client-request-id", valid_565254
+  var valid_565255 = header.getOrDefault("client-request-id")
+  valid_565255 = validateParameter(valid_565255, JString, required = false,
+                                 default = nil)
+  if valid_565255 != nil:
+    section.add "client-request-id", valid_565255
+  var valid_565256 = header.getOrDefault("ocp-date")
+  valid_565256 = validateParameter(valid_565256, JString, required = false,
+                                 default = nil)
+  if valid_565256 != nil:
+    section.add "ocp-date", valid_565256
   result.add "header", section
   section = newJObject()
   result.add "formData", section
   if body != nil:
     result.add "body", body
 
-proc call*(call_575357: Call_ComputeNodeDeleteUser_575346; path: JsonNode;
+proc call*(call_565257: Call_ComputeNodeDeleteUser_565246; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## You can delete a user Account to a Compute Node only when it is in the idle or running state.
   ## 
-  let valid = call_575357.validator(path, query, header, formData, body)
-  let scheme = call_575357.pickScheme
+  let valid = call_565257.validator(path, query, header, formData, body)
+  let scheme = call_565257.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575357.url(scheme.get, call_575357.host, call_575357.base,
-                         call_575357.route, valid.getOrDefault("path"),
+  let url = call_565257.url(scheme.get, call_565257.host, call_565257.base,
+                         call_565257.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575357, url, valid)
+  result = hook(call_565257, url, valid)
 
-proc call*(call_575358: Call_ComputeNodeDeleteUser_575346; apiVersion: string;
-          poolId: string; nodeId: string; userName: string; timeout: int = 30): Recallable =
+proc call*(call_565258: Call_ComputeNodeDeleteUser_565246; apiVersion: string;
+          poolId: string; userName: string; nodeId: string; timeout: int = 30): Recallable =
   ## computeNodeDeleteUser
   ## You can delete a user Account to a Compute Node only when it is in the idle or running state.
-  ##   timeout: int
-  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   ##   apiVersion: string (required)
   ##             : Client API Version.
   ##   poolId: string (required)
   ##         : The ID of the Pool that contains the Compute Node.
-  ##   nodeId: string (required)
-  ##         : The ID of the machine on which you want to delete a user Account.
+  ##   timeout: int
+  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   ##   userName: string (required)
   ##           : The name of the user Account to delete.
-  var path_575359 = newJObject()
-  var query_575360 = newJObject()
-  add(query_575360, "timeout", newJInt(timeout))
-  add(query_575360, "api-version", newJString(apiVersion))
-  add(path_575359, "poolId", newJString(poolId))
-  add(path_575359, "nodeId", newJString(nodeId))
-  add(path_575359, "userName", newJString(userName))
-  result = call_575358.call(path_575359, query_575360, nil, nil, nil)
+  ##   nodeId: string (required)
+  ##         : The ID of the machine on which you want to delete a user Account.
+  var path_565259 = newJObject()
+  var query_565260 = newJObject()
+  add(query_565260, "api-version", newJString(apiVersion))
+  add(path_565259, "poolId", newJString(poolId))
+  add(query_565260, "timeout", newJInt(timeout))
+  add(path_565259, "userName", newJString(userName))
+  add(path_565259, "nodeId", newJString(nodeId))
+  result = call_565258.call(path_565259, query_565260, nil, nil, nil)
 
-var computeNodeDeleteUser* = Call_ComputeNodeDeleteUser_575346(
+var computeNodeDeleteUser* = Call_ComputeNodeDeleteUser_565246(
     name: "computeNodeDeleteUser", meth: HttpMethod.HttpDelete, host: "azure.local",
     route: "/pools/{poolId}/nodes/{nodeId}/users/{userName}",
-    validator: validate_ComputeNodeDeleteUser_575347, base: "",
-    url: url_ComputeNodeDeleteUser_575348, schemes: {Scheme.Https})
+    validator: validate_ComputeNodeDeleteUser_565247, base: "",
+    url: url_ComputeNodeDeleteUser_565248, schemes: {Scheme.Https})
 type
-  Call_PoolRemoveNodes_575361 = ref object of OpenApiRestCall_573667
-proc url_PoolRemoveNodes_575363(protocol: Scheme; host: string; base: string;
+  Call_PoolRemoveNodes_565261 = ref object of OpenApiRestCall_563565
+proc url_PoolRemoveNodes_565263(protocol: Scheme; host: string; base: string;
                                route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -10042,7 +10050,7 @@ proc url_PoolRemoveNodes_575363(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_PoolRemoveNodes_575362(path: JsonNode; query: JsonNode;
+proc validate_PoolRemoveNodes_565262(path: JsonNode; query: JsonNode;
                                     header: JsonNode; formData: JsonNode;
                                     body: JsonNode): JsonNode =
   ## This operation can only run when the allocation state of the Pool is steady. When this operation runs, the allocation state changes from steady to resizing.
@@ -10054,82 +10062,82 @@ proc validate_PoolRemoveNodes_575362(path: JsonNode; query: JsonNode;
   ##         : The ID of the Pool from which you want to remove Compute Nodes.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `poolId` field"
-  var valid_575364 = path.getOrDefault("poolId")
-  valid_575364 = validateParameter(valid_575364, JString, required = true,
+  var valid_565264 = path.getOrDefault("poolId")
+  valid_565264 = validateParameter(valid_565264, JString, required = true,
                                  default = nil)
-  if valid_575364 != nil:
-    section.add "poolId", valid_575364
+  if valid_565264 != nil:
+    section.add "poolId", valid_565264
   result.add "path", section
   ## parameters in `query` object:
-  ##   timeout: JInt
-  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   ##   api-version: JString (required)
   ##              : Client API Version.
+  ##   timeout: JInt
+  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   section = newJObject()
-  var valid_575365 = query.getOrDefault("timeout")
-  valid_575365 = validateParameter(valid_575365, JInt, required = false,
-                                 default = newJInt(30))
-  if valid_575365 != nil:
-    section.add "timeout", valid_575365
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575366 = query.getOrDefault("api-version")
-  valid_575366 = validateParameter(valid_575366, JString, required = true,
+  var valid_565265 = query.getOrDefault("api-version")
+  valid_565265 = validateParameter(valid_565265, JString, required = true,
                                  default = nil)
-  if valid_575366 != nil:
-    section.add "api-version", valid_575366
+  if valid_565265 != nil:
+    section.add "api-version", valid_565265
+  var valid_565266 = query.getOrDefault("timeout")
+  valid_565266 = validateParameter(valid_565266, JInt, required = false,
+                                 default = newJInt(30))
+  if valid_565266 != nil:
+    section.add "timeout", valid_565266
   result.add "query", section
   ## parameters in `header` object:
-  ##   If-Match: JString
-  ##           : An ETag value associated with the version of the resource known to the client. The operation will be performed only if the resource's current ETag on the service exactly matches the value specified by the client.
-  ##   client-request-id: JString
-  ##                    : The caller-generated request identity, in the form of a GUID with no decoration such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
-  ##   ocp-date: JString
-  ##           : The time the request was issued. Client libraries typically set this to the current system clock time; set it explicitly if you are calling the REST API directly.
-  ##   If-Unmodified-Since: JString
-  ##                      : A timestamp indicating the last modified time of the resource known to the client. The operation will be performed only if the resource on the service has not been modified since the specified time.
-  ##   If-None-Match: JString
-  ##                : An ETag value associated with the version of the resource known to the client. The operation will be performed only if the resource's current ETag on the service does not match the value specified by the client.
-  ##   If-Modified-Since: JString
-  ##                    : A timestamp indicating the last modified time of the resource known to the client. The operation will be performed only if the resource on the service has been modified since the specified time.
   ##   return-client-request-id: JBool
   ##                           : Whether the server should return the client-request-id in the response.
+  ##   If-Unmodified-Since: JString
+  ##                      : A timestamp indicating the last modified time of the resource known to the client. The operation will be performed only if the resource on the service has not been modified since the specified time.
+  ##   client-request-id: JString
+  ##                    : The caller-generated request identity, in the form of a GUID with no decoration such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
+  ##   If-Modified-Since: JString
+  ##                    : A timestamp indicating the last modified time of the resource known to the client. The operation will be performed only if the resource on the service has been modified since the specified time.
+  ##   If-None-Match: JString
+  ##                : An ETag value associated with the version of the resource known to the client. The operation will be performed only if the resource's current ETag on the service does not match the value specified by the client.
+  ##   ocp-date: JString
+  ##           : The time the request was issued. Client libraries typically set this to the current system clock time; set it explicitly if you are calling the REST API directly.
+  ##   If-Match: JString
+  ##           : An ETag value associated with the version of the resource known to the client. The operation will be performed only if the resource's current ETag on the service exactly matches the value specified by the client.
   section = newJObject()
-  var valid_575367 = header.getOrDefault("If-Match")
-  valid_575367 = validateParameter(valid_575367, JString, required = false,
-                                 default = nil)
-  if valid_575367 != nil:
-    section.add "If-Match", valid_575367
-  var valid_575368 = header.getOrDefault("client-request-id")
-  valid_575368 = validateParameter(valid_575368, JString, required = false,
-                                 default = nil)
-  if valid_575368 != nil:
-    section.add "client-request-id", valid_575368
-  var valid_575369 = header.getOrDefault("ocp-date")
-  valid_575369 = validateParameter(valid_575369, JString, required = false,
-                                 default = nil)
-  if valid_575369 != nil:
-    section.add "ocp-date", valid_575369
-  var valid_575370 = header.getOrDefault("If-Unmodified-Since")
-  valid_575370 = validateParameter(valid_575370, JString, required = false,
-                                 default = nil)
-  if valid_575370 != nil:
-    section.add "If-Unmodified-Since", valid_575370
-  var valid_575371 = header.getOrDefault("If-None-Match")
-  valid_575371 = validateParameter(valid_575371, JString, required = false,
-                                 default = nil)
-  if valid_575371 != nil:
-    section.add "If-None-Match", valid_575371
-  var valid_575372 = header.getOrDefault("If-Modified-Since")
-  valid_575372 = validateParameter(valid_575372, JString, required = false,
-                                 default = nil)
-  if valid_575372 != nil:
-    section.add "If-Modified-Since", valid_575372
-  var valid_575373 = header.getOrDefault("return-client-request-id")
-  valid_575373 = validateParameter(valid_575373, JBool, required = false,
+  var valid_565267 = header.getOrDefault("return-client-request-id")
+  valid_565267 = validateParameter(valid_565267, JBool, required = false,
                                  default = newJBool(false))
-  if valid_575373 != nil:
-    section.add "return-client-request-id", valid_575373
+  if valid_565267 != nil:
+    section.add "return-client-request-id", valid_565267
+  var valid_565268 = header.getOrDefault("If-Unmodified-Since")
+  valid_565268 = validateParameter(valid_565268, JString, required = false,
+                                 default = nil)
+  if valid_565268 != nil:
+    section.add "If-Unmodified-Since", valid_565268
+  var valid_565269 = header.getOrDefault("client-request-id")
+  valid_565269 = validateParameter(valid_565269, JString, required = false,
+                                 default = nil)
+  if valid_565269 != nil:
+    section.add "client-request-id", valid_565269
+  var valid_565270 = header.getOrDefault("If-Modified-Since")
+  valid_565270 = validateParameter(valid_565270, JString, required = false,
+                                 default = nil)
+  if valid_565270 != nil:
+    section.add "If-Modified-Since", valid_565270
+  var valid_565271 = header.getOrDefault("If-None-Match")
+  valid_565271 = validateParameter(valid_565271, JString, required = false,
+                                 default = nil)
+  if valid_565271 != nil:
+    section.add "If-None-Match", valid_565271
+  var valid_565272 = header.getOrDefault("ocp-date")
+  valid_565272 = validateParameter(valid_565272, JString, required = false,
+                                 default = nil)
+  if valid_565272 != nil:
+    section.add "ocp-date", valid_565272
+  var valid_565273 = header.getOrDefault("If-Match")
+  valid_565273 = validateParameter(valid_565273, JString, required = false,
+                                 default = nil)
+  if valid_565273 != nil:
+    section.add "If-Match", valid_565273
   result.add "header", section
   section = newJObject()
   result.add "formData", section
@@ -10141,48 +10149,48 @@ proc validate_PoolRemoveNodes_575362(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_575375: Call_PoolRemoveNodes_575361; path: JsonNode; query: JsonNode;
+proc call*(call_565275: Call_PoolRemoveNodes_565261; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## This operation can only run when the allocation state of the Pool is steady. When this operation runs, the allocation state changes from steady to resizing.
   ## 
-  let valid = call_575375.validator(path, query, header, formData, body)
-  let scheme = call_575375.pickScheme
+  let valid = call_565275.validator(path, query, header, formData, body)
+  let scheme = call_565275.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575375.url(scheme.get, call_575375.host, call_575375.base,
-                         call_575375.route, valid.getOrDefault("path"),
+  let url = call_565275.url(scheme.get, call_565275.host, call_565275.base,
+                         call_565275.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575375, url, valid)
+  result = hook(call_565275, url, valid)
 
-proc call*(call_575376: Call_PoolRemoveNodes_575361; apiVersion: string;
+proc call*(call_565276: Call_PoolRemoveNodes_565261; apiVersion: string;
           poolId: string; nodeRemoveParameter: JsonNode; timeout: int = 30): Recallable =
   ## poolRemoveNodes
   ## This operation can only run when the allocation state of the Pool is steady. When this operation runs, the allocation state changes from steady to resizing.
-  ##   timeout: int
-  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   ##   apiVersion: string (required)
   ##             : Client API Version.
   ##   poolId: string (required)
   ##         : The ID of the Pool from which you want to remove Compute Nodes.
+  ##   timeout: int
+  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   ##   nodeRemoveParameter: JObject (required)
   ##                      : The parameters for the request.
-  var path_575377 = newJObject()
-  var query_575378 = newJObject()
-  var body_575379 = newJObject()
-  add(query_575378, "timeout", newJInt(timeout))
-  add(query_575378, "api-version", newJString(apiVersion))
-  add(path_575377, "poolId", newJString(poolId))
+  var path_565277 = newJObject()
+  var query_565278 = newJObject()
+  var body_565279 = newJObject()
+  add(query_565278, "api-version", newJString(apiVersion))
+  add(path_565277, "poolId", newJString(poolId))
+  add(query_565278, "timeout", newJInt(timeout))
   if nodeRemoveParameter != nil:
-    body_575379 = nodeRemoveParameter
-  result = call_575376.call(path_575377, query_575378, nil, nil, body_575379)
+    body_565279 = nodeRemoveParameter
+  result = call_565276.call(path_565277, query_565278, nil, nil, body_565279)
 
-var poolRemoveNodes* = Call_PoolRemoveNodes_575361(name: "poolRemoveNodes",
+var poolRemoveNodes* = Call_PoolRemoveNodes_565261(name: "poolRemoveNodes",
     meth: HttpMethod.HttpPost, host: "azure.local",
-    route: "/pools/{poolId}/removenodes", validator: validate_PoolRemoveNodes_575362,
-    base: "", url: url_PoolRemoveNodes_575363, schemes: {Scheme.Https})
+    route: "/pools/{poolId}/removenodes", validator: validate_PoolRemoveNodes_565262,
+    base: "", url: url_PoolRemoveNodes_565263, schemes: {Scheme.Https})
 type
-  Call_PoolResize_575380 = ref object of OpenApiRestCall_573667
-proc url_PoolResize_575382(protocol: Scheme; host: string; base: string; route: string;
+  Call_PoolResize_565280 = ref object of OpenApiRestCall_563565
+proc url_PoolResize_565282(protocol: Scheme; host: string; base: string; route: string;
                           path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -10198,7 +10206,7 @@ proc url_PoolResize_575382(protocol: Scheme; host: string; base: string; route: 
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_PoolResize_575381(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_PoolResize_565281(path: JsonNode; query: JsonNode; header: JsonNode;
                                formData: JsonNode; body: JsonNode): JsonNode =
   ## You can only resize a Pool when its allocation state is steady. If the Pool is already resizing, the request fails with status code 409. When you resize a Pool, the Pool's allocation state changes from steady to resizing. You cannot resize Pools which are configured for automatic scaling. If you try to do this, the Batch service returns an error 409. If you resize a Pool downwards, the Batch service chooses which Compute Nodes to remove. To remove specific Compute Nodes, use the Pool remove Compute Nodes API instead.
   ## 
@@ -10209,82 +10217,82 @@ proc validate_PoolResize_575381(path: JsonNode; query: JsonNode; header: JsonNod
   ##         : The ID of the Pool to resize.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `poolId` field"
-  var valid_575383 = path.getOrDefault("poolId")
-  valid_575383 = validateParameter(valid_575383, JString, required = true,
+  var valid_565283 = path.getOrDefault("poolId")
+  valid_565283 = validateParameter(valid_565283, JString, required = true,
                                  default = nil)
-  if valid_575383 != nil:
-    section.add "poolId", valid_575383
+  if valid_565283 != nil:
+    section.add "poolId", valid_565283
   result.add "path", section
   ## parameters in `query` object:
-  ##   timeout: JInt
-  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   ##   api-version: JString (required)
   ##              : Client API Version.
+  ##   timeout: JInt
+  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   section = newJObject()
-  var valid_575384 = query.getOrDefault("timeout")
-  valid_575384 = validateParameter(valid_575384, JInt, required = false,
-                                 default = newJInt(30))
-  if valid_575384 != nil:
-    section.add "timeout", valid_575384
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575385 = query.getOrDefault("api-version")
-  valid_575385 = validateParameter(valid_575385, JString, required = true,
+  var valid_565284 = query.getOrDefault("api-version")
+  valid_565284 = validateParameter(valid_565284, JString, required = true,
                                  default = nil)
-  if valid_575385 != nil:
-    section.add "api-version", valid_575385
+  if valid_565284 != nil:
+    section.add "api-version", valid_565284
+  var valid_565285 = query.getOrDefault("timeout")
+  valid_565285 = validateParameter(valid_565285, JInt, required = false,
+                                 default = newJInt(30))
+  if valid_565285 != nil:
+    section.add "timeout", valid_565285
   result.add "query", section
   ## parameters in `header` object:
-  ##   If-Match: JString
-  ##           : An ETag value associated with the version of the resource known to the client. The operation will be performed only if the resource's current ETag on the service exactly matches the value specified by the client.
-  ##   client-request-id: JString
-  ##                    : The caller-generated request identity, in the form of a GUID with no decoration such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
-  ##   ocp-date: JString
-  ##           : The time the request was issued. Client libraries typically set this to the current system clock time; set it explicitly if you are calling the REST API directly.
-  ##   If-Unmodified-Since: JString
-  ##                      : A timestamp indicating the last modified time of the resource known to the client. The operation will be performed only if the resource on the service has not been modified since the specified time.
-  ##   If-None-Match: JString
-  ##                : An ETag value associated with the version of the resource known to the client. The operation will be performed only if the resource's current ETag on the service does not match the value specified by the client.
-  ##   If-Modified-Since: JString
-  ##                    : A timestamp indicating the last modified time of the resource known to the client. The operation will be performed only if the resource on the service has been modified since the specified time.
   ##   return-client-request-id: JBool
   ##                           : Whether the server should return the client-request-id in the response.
+  ##   If-Unmodified-Since: JString
+  ##                      : A timestamp indicating the last modified time of the resource known to the client. The operation will be performed only if the resource on the service has not been modified since the specified time.
+  ##   client-request-id: JString
+  ##                    : The caller-generated request identity, in the form of a GUID with no decoration such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
+  ##   If-Modified-Since: JString
+  ##                    : A timestamp indicating the last modified time of the resource known to the client. The operation will be performed only if the resource on the service has been modified since the specified time.
+  ##   If-None-Match: JString
+  ##                : An ETag value associated with the version of the resource known to the client. The operation will be performed only if the resource's current ETag on the service does not match the value specified by the client.
+  ##   ocp-date: JString
+  ##           : The time the request was issued. Client libraries typically set this to the current system clock time; set it explicitly if you are calling the REST API directly.
+  ##   If-Match: JString
+  ##           : An ETag value associated with the version of the resource known to the client. The operation will be performed only if the resource's current ETag on the service exactly matches the value specified by the client.
   section = newJObject()
-  var valid_575386 = header.getOrDefault("If-Match")
-  valid_575386 = validateParameter(valid_575386, JString, required = false,
-                                 default = nil)
-  if valid_575386 != nil:
-    section.add "If-Match", valid_575386
-  var valid_575387 = header.getOrDefault("client-request-id")
-  valid_575387 = validateParameter(valid_575387, JString, required = false,
-                                 default = nil)
-  if valid_575387 != nil:
-    section.add "client-request-id", valid_575387
-  var valid_575388 = header.getOrDefault("ocp-date")
-  valid_575388 = validateParameter(valid_575388, JString, required = false,
-                                 default = nil)
-  if valid_575388 != nil:
-    section.add "ocp-date", valid_575388
-  var valid_575389 = header.getOrDefault("If-Unmodified-Since")
-  valid_575389 = validateParameter(valid_575389, JString, required = false,
-                                 default = nil)
-  if valid_575389 != nil:
-    section.add "If-Unmodified-Since", valid_575389
-  var valid_575390 = header.getOrDefault("If-None-Match")
-  valid_575390 = validateParameter(valid_575390, JString, required = false,
-                                 default = nil)
-  if valid_575390 != nil:
-    section.add "If-None-Match", valid_575390
-  var valid_575391 = header.getOrDefault("If-Modified-Since")
-  valid_575391 = validateParameter(valid_575391, JString, required = false,
-                                 default = nil)
-  if valid_575391 != nil:
-    section.add "If-Modified-Since", valid_575391
-  var valid_575392 = header.getOrDefault("return-client-request-id")
-  valid_575392 = validateParameter(valid_575392, JBool, required = false,
+  var valid_565286 = header.getOrDefault("return-client-request-id")
+  valid_565286 = validateParameter(valid_565286, JBool, required = false,
                                  default = newJBool(false))
-  if valid_575392 != nil:
-    section.add "return-client-request-id", valid_575392
+  if valid_565286 != nil:
+    section.add "return-client-request-id", valid_565286
+  var valid_565287 = header.getOrDefault("If-Unmodified-Since")
+  valid_565287 = validateParameter(valid_565287, JString, required = false,
+                                 default = nil)
+  if valid_565287 != nil:
+    section.add "If-Unmodified-Since", valid_565287
+  var valid_565288 = header.getOrDefault("client-request-id")
+  valid_565288 = validateParameter(valid_565288, JString, required = false,
+                                 default = nil)
+  if valid_565288 != nil:
+    section.add "client-request-id", valid_565288
+  var valid_565289 = header.getOrDefault("If-Modified-Since")
+  valid_565289 = validateParameter(valid_565289, JString, required = false,
+                                 default = nil)
+  if valid_565289 != nil:
+    section.add "If-Modified-Since", valid_565289
+  var valid_565290 = header.getOrDefault("If-None-Match")
+  valid_565290 = validateParameter(valid_565290, JString, required = false,
+                                 default = nil)
+  if valid_565290 != nil:
+    section.add "If-None-Match", valid_565290
+  var valid_565291 = header.getOrDefault("ocp-date")
+  valid_565291 = validateParameter(valid_565291, JString, required = false,
+                                 default = nil)
+  if valid_565291 != nil:
+    section.add "ocp-date", valid_565291
+  var valid_565292 = header.getOrDefault("If-Match")
+  valid_565292 = validateParameter(valid_565292, JString, required = false,
+                                 default = nil)
+  if valid_565292 != nil:
+    section.add "If-Match", valid_565292
   result.add "header", section
   section = newJObject()
   result.add "formData", section
@@ -10296,51 +10304,51 @@ proc validate_PoolResize_575381(path: JsonNode; query: JsonNode; header: JsonNod
   if body != nil:
     result.add "body", body
 
-proc call*(call_575394: Call_PoolResize_575380; path: JsonNode; query: JsonNode;
+proc call*(call_565294: Call_PoolResize_565280; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## You can only resize a Pool when its allocation state is steady. If the Pool is already resizing, the request fails with status code 409. When you resize a Pool, the Pool's allocation state changes from steady to resizing. You cannot resize Pools which are configured for automatic scaling. If you try to do this, the Batch service returns an error 409. If you resize a Pool downwards, the Batch service chooses which Compute Nodes to remove. To remove specific Compute Nodes, use the Pool remove Compute Nodes API instead.
   ## 
-  let valid = call_575394.validator(path, query, header, formData, body)
-  let scheme = call_575394.pickScheme
+  let valid = call_565294.validator(path, query, header, formData, body)
+  let scheme = call_565294.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575394.url(scheme.get, call_575394.host, call_575394.base,
-                         call_575394.route, valid.getOrDefault("path"),
+  let url = call_565294.url(scheme.get, call_565294.host, call_565294.base,
+                         call_565294.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575394, url, valid)
+  result = hook(call_565294, url, valid)
 
-proc call*(call_575395: Call_PoolResize_575380; apiVersion: string; poolId: string;
+proc call*(call_565295: Call_PoolResize_565280; apiVersion: string; poolId: string;
           poolResizeParameter: JsonNode; timeout: int = 30): Recallable =
   ## poolResize
   ## You can only resize a Pool when its allocation state is steady. If the Pool is already resizing, the request fails with status code 409. When you resize a Pool, the Pool's allocation state changes from steady to resizing. You cannot resize Pools which are configured for automatic scaling. If you try to do this, the Batch service returns an error 409. If you resize a Pool downwards, the Batch service chooses which Compute Nodes to remove. To remove specific Compute Nodes, use the Pool remove Compute Nodes API instead.
-  ##   timeout: int
-  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   ##   apiVersion: string (required)
   ##             : Client API Version.
   ##   poolId: string (required)
   ##         : The ID of the Pool to resize.
+  ##   timeout: int
+  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   ##   poolResizeParameter: JObject (required)
   ##                      : The parameters for the request.
-  var path_575396 = newJObject()
-  var query_575397 = newJObject()
-  var body_575398 = newJObject()
-  add(query_575397, "timeout", newJInt(timeout))
-  add(query_575397, "api-version", newJString(apiVersion))
-  add(path_575396, "poolId", newJString(poolId))
+  var path_565296 = newJObject()
+  var query_565297 = newJObject()
+  var body_565298 = newJObject()
+  add(query_565297, "api-version", newJString(apiVersion))
+  add(path_565296, "poolId", newJString(poolId))
+  add(query_565297, "timeout", newJInt(timeout))
   if poolResizeParameter != nil:
-    body_575398 = poolResizeParameter
-  result = call_575395.call(path_575396, query_575397, nil, nil, body_575398)
+    body_565298 = poolResizeParameter
+  result = call_565295.call(path_565296, query_565297, nil, nil, body_565298)
 
-var poolResize* = Call_PoolResize_575380(name: "poolResize",
+var poolResize* = Call_PoolResize_565280(name: "poolResize",
                                       meth: HttpMethod.HttpPost,
                                       host: "azure.local",
                                       route: "/pools/{poolId}/resize",
-                                      validator: validate_PoolResize_575381,
-                                      base: "", url: url_PoolResize_575382,
+                                      validator: validate_PoolResize_565281,
+                                      base: "", url: url_PoolResize_565282,
                                       schemes: {Scheme.Https})
 type
-  Call_PoolStopResize_575399 = ref object of OpenApiRestCall_573667
-proc url_PoolStopResize_575401(protocol: Scheme; host: string; base: string;
+  Call_PoolStopResize_565299 = ref object of OpenApiRestCall_563565
+proc url_PoolStopResize_565301(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -10356,7 +10364,7 @@ proc url_PoolStopResize_575401(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_PoolStopResize_575400(path: JsonNode; query: JsonNode;
+proc validate_PoolStopResize_565300(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## This does not restore the Pool to its previous state before the resize operation: it only stops any further changes being made, and the Pool maintains its current state. After stopping, the Pool stabilizes at the number of Compute Nodes it was at when the stop operation was done. During the stop operation, the Pool allocation state changes first to stopping and then to steady. A resize operation need not be an explicit resize Pool request; this API can also be used to halt the initial sizing of the Pool when it is created.
@@ -10368,125 +10376,125 @@ proc validate_PoolStopResize_575400(path: JsonNode; query: JsonNode;
   ##         : The ID of the Pool whose resizing you want to stop.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `poolId` field"
-  var valid_575402 = path.getOrDefault("poolId")
-  valid_575402 = validateParameter(valid_575402, JString, required = true,
+  var valid_565302 = path.getOrDefault("poolId")
+  valid_565302 = validateParameter(valid_565302, JString, required = true,
                                  default = nil)
-  if valid_575402 != nil:
-    section.add "poolId", valid_575402
+  if valid_565302 != nil:
+    section.add "poolId", valid_565302
   result.add "path", section
   ## parameters in `query` object:
-  ##   timeout: JInt
-  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   ##   api-version: JString (required)
   ##              : Client API Version.
+  ##   timeout: JInt
+  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   section = newJObject()
-  var valid_575403 = query.getOrDefault("timeout")
-  valid_575403 = validateParameter(valid_575403, JInt, required = false,
-                                 default = newJInt(30))
-  if valid_575403 != nil:
-    section.add "timeout", valid_575403
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575404 = query.getOrDefault("api-version")
-  valid_575404 = validateParameter(valid_575404, JString, required = true,
+  var valid_565303 = query.getOrDefault("api-version")
+  valid_565303 = validateParameter(valid_565303, JString, required = true,
                                  default = nil)
-  if valid_575404 != nil:
-    section.add "api-version", valid_575404
+  if valid_565303 != nil:
+    section.add "api-version", valid_565303
+  var valid_565304 = query.getOrDefault("timeout")
+  valid_565304 = validateParameter(valid_565304, JInt, required = false,
+                                 default = newJInt(30))
+  if valid_565304 != nil:
+    section.add "timeout", valid_565304
   result.add "query", section
   ## parameters in `header` object:
-  ##   If-Match: JString
-  ##           : An ETag value associated with the version of the resource known to the client. The operation will be performed only if the resource's current ETag on the service exactly matches the value specified by the client.
-  ##   client-request-id: JString
-  ##                    : The caller-generated request identity, in the form of a GUID with no decoration such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
-  ##   ocp-date: JString
-  ##           : The time the request was issued. Client libraries typically set this to the current system clock time; set it explicitly if you are calling the REST API directly.
-  ##   If-Unmodified-Since: JString
-  ##                      : A timestamp indicating the last modified time of the resource known to the client. The operation will be performed only if the resource on the service has not been modified since the specified time.
-  ##   If-None-Match: JString
-  ##                : An ETag value associated with the version of the resource known to the client. The operation will be performed only if the resource's current ETag on the service does not match the value specified by the client.
-  ##   If-Modified-Since: JString
-  ##                    : A timestamp indicating the last modified time of the resource known to the client. The operation will be performed only if the resource on the service has been modified since the specified time.
   ##   return-client-request-id: JBool
   ##                           : Whether the server should return the client-request-id in the response.
+  ##   If-Unmodified-Since: JString
+  ##                      : A timestamp indicating the last modified time of the resource known to the client. The operation will be performed only if the resource on the service has not been modified since the specified time.
+  ##   client-request-id: JString
+  ##                    : The caller-generated request identity, in the form of a GUID with no decoration such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
+  ##   If-Modified-Since: JString
+  ##                    : A timestamp indicating the last modified time of the resource known to the client. The operation will be performed only if the resource on the service has been modified since the specified time.
+  ##   If-None-Match: JString
+  ##                : An ETag value associated with the version of the resource known to the client. The operation will be performed only if the resource's current ETag on the service does not match the value specified by the client.
+  ##   ocp-date: JString
+  ##           : The time the request was issued. Client libraries typically set this to the current system clock time; set it explicitly if you are calling the REST API directly.
+  ##   If-Match: JString
+  ##           : An ETag value associated with the version of the resource known to the client. The operation will be performed only if the resource's current ETag on the service exactly matches the value specified by the client.
   section = newJObject()
-  var valid_575405 = header.getOrDefault("If-Match")
-  valid_575405 = validateParameter(valid_575405, JString, required = false,
-                                 default = nil)
-  if valid_575405 != nil:
-    section.add "If-Match", valid_575405
-  var valid_575406 = header.getOrDefault("client-request-id")
-  valid_575406 = validateParameter(valid_575406, JString, required = false,
-                                 default = nil)
-  if valid_575406 != nil:
-    section.add "client-request-id", valid_575406
-  var valid_575407 = header.getOrDefault("ocp-date")
-  valid_575407 = validateParameter(valid_575407, JString, required = false,
-                                 default = nil)
-  if valid_575407 != nil:
-    section.add "ocp-date", valid_575407
-  var valid_575408 = header.getOrDefault("If-Unmodified-Since")
-  valid_575408 = validateParameter(valid_575408, JString, required = false,
-                                 default = nil)
-  if valid_575408 != nil:
-    section.add "If-Unmodified-Since", valid_575408
-  var valid_575409 = header.getOrDefault("If-None-Match")
-  valid_575409 = validateParameter(valid_575409, JString, required = false,
-                                 default = nil)
-  if valid_575409 != nil:
-    section.add "If-None-Match", valid_575409
-  var valid_575410 = header.getOrDefault("If-Modified-Since")
-  valid_575410 = validateParameter(valid_575410, JString, required = false,
-                                 default = nil)
-  if valid_575410 != nil:
-    section.add "If-Modified-Since", valid_575410
-  var valid_575411 = header.getOrDefault("return-client-request-id")
-  valid_575411 = validateParameter(valid_575411, JBool, required = false,
+  var valid_565305 = header.getOrDefault("return-client-request-id")
+  valid_565305 = validateParameter(valid_565305, JBool, required = false,
                                  default = newJBool(false))
-  if valid_575411 != nil:
-    section.add "return-client-request-id", valid_575411
+  if valid_565305 != nil:
+    section.add "return-client-request-id", valid_565305
+  var valid_565306 = header.getOrDefault("If-Unmodified-Since")
+  valid_565306 = validateParameter(valid_565306, JString, required = false,
+                                 default = nil)
+  if valid_565306 != nil:
+    section.add "If-Unmodified-Since", valid_565306
+  var valid_565307 = header.getOrDefault("client-request-id")
+  valid_565307 = validateParameter(valid_565307, JString, required = false,
+                                 default = nil)
+  if valid_565307 != nil:
+    section.add "client-request-id", valid_565307
+  var valid_565308 = header.getOrDefault("If-Modified-Since")
+  valid_565308 = validateParameter(valid_565308, JString, required = false,
+                                 default = nil)
+  if valid_565308 != nil:
+    section.add "If-Modified-Since", valid_565308
+  var valid_565309 = header.getOrDefault("If-None-Match")
+  valid_565309 = validateParameter(valid_565309, JString, required = false,
+                                 default = nil)
+  if valid_565309 != nil:
+    section.add "If-None-Match", valid_565309
+  var valid_565310 = header.getOrDefault("ocp-date")
+  valid_565310 = validateParameter(valid_565310, JString, required = false,
+                                 default = nil)
+  if valid_565310 != nil:
+    section.add "ocp-date", valid_565310
+  var valid_565311 = header.getOrDefault("If-Match")
+  valid_565311 = validateParameter(valid_565311, JString, required = false,
+                                 default = nil)
+  if valid_565311 != nil:
+    section.add "If-Match", valid_565311
   result.add "header", section
   section = newJObject()
   result.add "formData", section
   if body != nil:
     result.add "body", body
 
-proc call*(call_575412: Call_PoolStopResize_575399; path: JsonNode; query: JsonNode;
+proc call*(call_565312: Call_PoolStopResize_565299; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## This does not restore the Pool to its previous state before the resize operation: it only stops any further changes being made, and the Pool maintains its current state. After stopping, the Pool stabilizes at the number of Compute Nodes it was at when the stop operation was done. During the stop operation, the Pool allocation state changes first to stopping and then to steady. A resize operation need not be an explicit resize Pool request; this API can also be used to halt the initial sizing of the Pool when it is created.
   ## 
-  let valid = call_575412.validator(path, query, header, formData, body)
-  let scheme = call_575412.pickScheme
+  let valid = call_565312.validator(path, query, header, formData, body)
+  let scheme = call_565312.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575412.url(scheme.get, call_575412.host, call_575412.base,
-                         call_575412.route, valid.getOrDefault("path"),
+  let url = call_565312.url(scheme.get, call_565312.host, call_565312.base,
+                         call_565312.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575412, url, valid)
+  result = hook(call_565312, url, valid)
 
-proc call*(call_575413: Call_PoolStopResize_575399; apiVersion: string;
+proc call*(call_565313: Call_PoolStopResize_565299; apiVersion: string;
           poolId: string; timeout: int = 30): Recallable =
   ## poolStopResize
   ## This does not restore the Pool to its previous state before the resize operation: it only stops any further changes being made, and the Pool maintains its current state. After stopping, the Pool stabilizes at the number of Compute Nodes it was at when the stop operation was done. During the stop operation, the Pool allocation state changes first to stopping and then to steady. A resize operation need not be an explicit resize Pool request; this API can also be used to halt the initial sizing of the Pool when it is created.
-  ##   timeout: int
-  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   ##   apiVersion: string (required)
   ##             : Client API Version.
   ##   poolId: string (required)
   ##         : The ID of the Pool whose resizing you want to stop.
-  var path_575414 = newJObject()
-  var query_575415 = newJObject()
-  add(query_575415, "timeout", newJInt(timeout))
-  add(query_575415, "api-version", newJString(apiVersion))
-  add(path_575414, "poolId", newJString(poolId))
-  result = call_575413.call(path_575414, query_575415, nil, nil, nil)
+  ##   timeout: int
+  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
+  var path_565314 = newJObject()
+  var query_565315 = newJObject()
+  add(query_565315, "api-version", newJString(apiVersion))
+  add(path_565314, "poolId", newJString(poolId))
+  add(query_565315, "timeout", newJInt(timeout))
+  result = call_565313.call(path_565314, query_565315, nil, nil, nil)
 
-var poolStopResize* = Call_PoolStopResize_575399(name: "poolStopResize",
+var poolStopResize* = Call_PoolStopResize_565299(name: "poolStopResize",
     meth: HttpMethod.HttpPost, host: "azure.local",
-    route: "/pools/{poolId}/stopresize", validator: validate_PoolStopResize_575400,
-    base: "", url: url_PoolStopResize_575401, schemes: {Scheme.Https})
+    route: "/pools/{poolId}/stopresize", validator: validate_PoolStopResize_565300,
+    base: "", url: url_PoolStopResize_565301, schemes: {Scheme.Https})
 type
-  Call_PoolUpdateProperties_575416 = ref object of OpenApiRestCall_573667
-proc url_PoolUpdateProperties_575418(protocol: Scheme; host: string; base: string;
+  Call_PoolUpdateProperties_565316 = ref object of OpenApiRestCall_563565
+proc url_PoolUpdateProperties_565318(protocol: Scheme; host: string; base: string;
                                     route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -10502,7 +10510,7 @@ proc url_PoolUpdateProperties_575418(protocol: Scheme; host: string; base: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_PoolUpdateProperties_575417(path: JsonNode; query: JsonNode;
+proc validate_PoolUpdateProperties_565317(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## This fully replaces all the updatable properties of the Pool. For example, if the Pool has a StartTask associated with it and if StartTask is not specified with this request, then the Batch service will remove the existing StartTask.
   ## 
@@ -10513,54 +10521,54 @@ proc validate_PoolUpdateProperties_575417(path: JsonNode; query: JsonNode;
   ##         : The ID of the Pool to update.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `poolId` field"
-  var valid_575419 = path.getOrDefault("poolId")
-  valid_575419 = validateParameter(valid_575419, JString, required = true,
+  var valid_565319 = path.getOrDefault("poolId")
+  valid_565319 = validateParameter(valid_565319, JString, required = true,
                                  default = nil)
-  if valid_575419 != nil:
-    section.add "poolId", valid_575419
+  if valid_565319 != nil:
+    section.add "poolId", valid_565319
   result.add "path", section
   ## parameters in `query` object:
-  ##   timeout: JInt
-  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   ##   api-version: JString (required)
   ##              : Client API Version.
+  ##   timeout: JInt
+  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   section = newJObject()
-  var valid_575420 = query.getOrDefault("timeout")
-  valid_575420 = validateParameter(valid_575420, JInt, required = false,
-                                 default = newJInt(30))
-  if valid_575420 != nil:
-    section.add "timeout", valid_575420
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575421 = query.getOrDefault("api-version")
-  valid_575421 = validateParameter(valid_575421, JString, required = true,
+  var valid_565320 = query.getOrDefault("api-version")
+  valid_565320 = validateParameter(valid_565320, JString, required = true,
                                  default = nil)
-  if valid_575421 != nil:
-    section.add "api-version", valid_575421
+  if valid_565320 != nil:
+    section.add "api-version", valid_565320
+  var valid_565321 = query.getOrDefault("timeout")
+  valid_565321 = validateParameter(valid_565321, JInt, required = false,
+                                 default = newJInt(30))
+  if valid_565321 != nil:
+    section.add "timeout", valid_565321
   result.add "query", section
   ## parameters in `header` object:
+  ##   return-client-request-id: JBool
+  ##                           : Whether the server should return the client-request-id in the response.
   ##   client-request-id: JString
   ##                    : The caller-generated request identity, in the form of a GUID with no decoration such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
   ##   ocp-date: JString
   ##           : The time the request was issued. Client libraries typically set this to the current system clock time; set it explicitly if you are calling the REST API directly.
-  ##   return-client-request-id: JBool
-  ##                           : Whether the server should return the client-request-id in the response.
   section = newJObject()
-  var valid_575422 = header.getOrDefault("client-request-id")
-  valid_575422 = validateParameter(valid_575422, JString, required = false,
-                                 default = nil)
-  if valid_575422 != nil:
-    section.add "client-request-id", valid_575422
-  var valid_575423 = header.getOrDefault("ocp-date")
-  valid_575423 = validateParameter(valid_575423, JString, required = false,
-                                 default = nil)
-  if valid_575423 != nil:
-    section.add "ocp-date", valid_575423
-  var valid_575424 = header.getOrDefault("return-client-request-id")
-  valid_575424 = validateParameter(valid_575424, JBool, required = false,
+  var valid_565322 = header.getOrDefault("return-client-request-id")
+  valid_565322 = validateParameter(valid_565322, JBool, required = false,
                                  default = newJBool(false))
-  if valid_575424 != nil:
-    section.add "return-client-request-id", valid_575424
+  if valid_565322 != nil:
+    section.add "return-client-request-id", valid_565322
+  var valid_565323 = header.getOrDefault("client-request-id")
+  valid_565323 = validateParameter(valid_565323, JString, required = false,
+                                 default = nil)
+  if valid_565323 != nil:
+    section.add "client-request-id", valid_565323
+  var valid_565324 = header.getOrDefault("ocp-date")
+  valid_565324 = validateParameter(valid_565324, JString, required = false,
+                                 default = nil)
+  if valid_565324 != nil:
+    section.add "ocp-date", valid_565324
   result.add "header", section
   section = newJObject()
   result.add "formData", section
@@ -10572,56 +10580,56 @@ proc validate_PoolUpdateProperties_575417(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_575426: Call_PoolUpdateProperties_575416; path: JsonNode;
+proc call*(call_565326: Call_PoolUpdateProperties_565316; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## This fully replaces all the updatable properties of the Pool. For example, if the Pool has a StartTask associated with it and if StartTask is not specified with this request, then the Batch service will remove the existing StartTask.
   ## 
-  let valid = call_575426.validator(path, query, header, formData, body)
-  let scheme = call_575426.pickScheme
+  let valid = call_565326.validator(path, query, header, formData, body)
+  let scheme = call_565326.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575426.url(scheme.get, call_575426.host, call_575426.base,
-                         call_575426.route, valid.getOrDefault("path"),
+  let url = call_565326.url(scheme.get, call_565326.host, call_565326.base,
+                         call_565326.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575426, url, valid)
+  result = hook(call_565326, url, valid)
 
-proc call*(call_575427: Call_PoolUpdateProperties_575416; apiVersion: string;
+proc call*(call_565327: Call_PoolUpdateProperties_565316; apiVersion: string;
           poolId: string; poolUpdatePropertiesParameter: JsonNode; timeout: int = 30): Recallable =
   ## poolUpdateProperties
   ## This fully replaces all the updatable properties of the Pool. For example, if the Pool has a StartTask associated with it and if StartTask is not specified with this request, then the Batch service will remove the existing StartTask.
-  ##   timeout: int
-  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   ##   apiVersion: string (required)
   ##             : Client API Version.
   ##   poolId: string (required)
   ##         : The ID of the Pool to update.
   ##   poolUpdatePropertiesParameter: JObject (required)
   ##                                : The parameters for the request.
-  var path_575428 = newJObject()
-  var query_575429 = newJObject()
-  var body_575430 = newJObject()
-  add(query_575429, "timeout", newJInt(timeout))
-  add(query_575429, "api-version", newJString(apiVersion))
-  add(path_575428, "poolId", newJString(poolId))
+  ##   timeout: int
+  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
+  var path_565328 = newJObject()
+  var query_565329 = newJObject()
+  var body_565330 = newJObject()
+  add(query_565329, "api-version", newJString(apiVersion))
+  add(path_565328, "poolId", newJString(poolId))
   if poolUpdatePropertiesParameter != nil:
-    body_575430 = poolUpdatePropertiesParameter
-  result = call_575427.call(path_575428, query_575429, nil, nil, body_575430)
+    body_565330 = poolUpdatePropertiesParameter
+  add(query_565329, "timeout", newJInt(timeout))
+  result = call_565327.call(path_565328, query_565329, nil, nil, body_565330)
 
-var poolUpdateProperties* = Call_PoolUpdateProperties_575416(
+var poolUpdateProperties* = Call_PoolUpdateProperties_565316(
     name: "poolUpdateProperties", meth: HttpMethod.HttpPost, host: "azure.local",
     route: "/pools/{poolId}/updateproperties",
-    validator: validate_PoolUpdateProperties_575417, base: "",
-    url: url_PoolUpdateProperties_575418, schemes: {Scheme.Https})
+    validator: validate_PoolUpdateProperties_565317, base: "",
+    url: url_PoolUpdateProperties_565318, schemes: {Scheme.Https})
 type
-  Call_PoolListUsageMetrics_575431 = ref object of OpenApiRestCall_573667
-proc url_PoolListUsageMetrics_575433(protocol: Scheme; host: string; base: string;
+  Call_PoolListUsageMetrics_565331 = ref object of OpenApiRestCall_563565
+proc url_PoolListUsageMetrics_565333(protocol: Scheme; host: string; base: string;
                                     route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_PoolListUsageMetrics_575432(path: JsonNode; query: JsonNode;
+proc validate_PoolListUsageMetrics_565332(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## If you do not specify a $filter clause including a poolId, the response includes all Pools that existed in the Account in the time range of the returned aggregation intervals. If you do not specify a $filter clause including a startTime or endTime these filters default to the start and end times of the last aggregation interval currently available; that is, only the last aggregation interval is returned.
   ## 
@@ -10630,239 +10638,239 @@ proc validate_PoolListUsageMetrics_575432(path: JsonNode; query: JsonNode;
   section = newJObject()
   result.add "path", section
   ## parameters in `query` object:
-  ##   timeout: JInt
-  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   ##   api-version: JString (required)
   ##              : Client API Version.
-  ##   endtime: JString
-  ##          : The latest time from which to include metrics. This must be at least two hours before the current time. If not specified this defaults to the end time of the last aggregation interval currently available.
-  ##   maxresults: JInt
-  ##             : The maximum number of items to return in the response. A maximum of 1000 results will be returned.
   ##   starttime: JString
   ##            : The earliest time from which to include metrics. This must be at least two and a half hours before the current time. If not specified this defaults to the start time of the last aggregation interval currently available.
+  ##   endtime: JString
+  ##          : The latest time from which to include metrics. This must be at least two hours before the current time. If not specified this defaults to the end time of the last aggregation interval currently available.
+  ##   timeout: JInt
+  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
+  ##   maxresults: JInt
+  ##             : The maximum number of items to return in the response. A maximum of 1000 results will be returned.
   ##   $filter: JString
   ##          : An OData $filter clause. For more information on constructing this filter, see 
   ## https://docs.microsoft.com/en-us/rest/api/batchservice/odata-filters-in-batch#list-account-usage-metrics.
   section = newJObject()
-  var valid_575434 = query.getOrDefault("timeout")
-  valid_575434 = validateParameter(valid_575434, JInt, required = false,
-                                 default = newJInt(30))
-  if valid_575434 != nil:
-    section.add "timeout", valid_575434
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575435 = query.getOrDefault("api-version")
-  valid_575435 = validateParameter(valid_575435, JString, required = true,
+  var valid_565334 = query.getOrDefault("api-version")
+  valid_565334 = validateParameter(valid_565334, JString, required = true,
                                  default = nil)
-  if valid_575435 != nil:
-    section.add "api-version", valid_575435
-  var valid_575436 = query.getOrDefault("endtime")
-  valid_575436 = validateParameter(valid_575436, JString, required = false,
+  if valid_565334 != nil:
+    section.add "api-version", valid_565334
+  var valid_565335 = query.getOrDefault("starttime")
+  valid_565335 = validateParameter(valid_565335, JString, required = false,
                                  default = nil)
-  if valid_575436 != nil:
-    section.add "endtime", valid_575436
-  var valid_575437 = query.getOrDefault("maxresults")
-  valid_575437 = validateParameter(valid_575437, JInt, required = false,
+  if valid_565335 != nil:
+    section.add "starttime", valid_565335
+  var valid_565336 = query.getOrDefault("endtime")
+  valid_565336 = validateParameter(valid_565336, JString, required = false,
+                                 default = nil)
+  if valid_565336 != nil:
+    section.add "endtime", valid_565336
+  var valid_565337 = query.getOrDefault("timeout")
+  valid_565337 = validateParameter(valid_565337, JInt, required = false,
+                                 default = newJInt(30))
+  if valid_565337 != nil:
+    section.add "timeout", valid_565337
+  var valid_565338 = query.getOrDefault("maxresults")
+  valid_565338 = validateParameter(valid_565338, JInt, required = false,
                                  default = newJInt(1000))
-  if valid_575437 != nil:
-    section.add "maxresults", valid_575437
-  var valid_575438 = query.getOrDefault("starttime")
-  valid_575438 = validateParameter(valid_575438, JString, required = false,
+  if valid_565338 != nil:
+    section.add "maxresults", valid_565338
+  var valid_565339 = query.getOrDefault("$filter")
+  valid_565339 = validateParameter(valid_565339, JString, required = false,
                                  default = nil)
-  if valid_575438 != nil:
-    section.add "starttime", valid_575438
-  var valid_575439 = query.getOrDefault("$filter")
-  valid_575439 = validateParameter(valid_575439, JString, required = false,
-                                 default = nil)
-  if valid_575439 != nil:
-    section.add "$filter", valid_575439
+  if valid_565339 != nil:
+    section.add "$filter", valid_565339
   result.add "query", section
   ## parameters in `header` object:
+  ##   return-client-request-id: JBool
+  ##                           : Whether the server should return the client-request-id in the response.
   ##   client-request-id: JString
   ##                    : The caller-generated request identity, in the form of a GUID with no decoration such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
   ##   ocp-date: JString
   ##           : The time the request was issued. Client libraries typically set this to the current system clock time; set it explicitly if you are calling the REST API directly.
-  ##   return-client-request-id: JBool
-  ##                           : Whether the server should return the client-request-id in the response.
   section = newJObject()
-  var valid_575440 = header.getOrDefault("client-request-id")
-  valid_575440 = validateParameter(valid_575440, JString, required = false,
-                                 default = nil)
-  if valid_575440 != nil:
-    section.add "client-request-id", valid_575440
-  var valid_575441 = header.getOrDefault("ocp-date")
-  valid_575441 = validateParameter(valid_575441, JString, required = false,
-                                 default = nil)
-  if valid_575441 != nil:
-    section.add "ocp-date", valid_575441
-  var valid_575442 = header.getOrDefault("return-client-request-id")
-  valid_575442 = validateParameter(valid_575442, JBool, required = false,
+  var valid_565340 = header.getOrDefault("return-client-request-id")
+  valid_565340 = validateParameter(valid_565340, JBool, required = false,
                                  default = newJBool(false))
-  if valid_575442 != nil:
-    section.add "return-client-request-id", valid_575442
+  if valid_565340 != nil:
+    section.add "return-client-request-id", valid_565340
+  var valid_565341 = header.getOrDefault("client-request-id")
+  valid_565341 = validateParameter(valid_565341, JString, required = false,
+                                 default = nil)
+  if valid_565341 != nil:
+    section.add "client-request-id", valid_565341
+  var valid_565342 = header.getOrDefault("ocp-date")
+  valid_565342 = validateParameter(valid_565342, JString, required = false,
+                                 default = nil)
+  if valid_565342 != nil:
+    section.add "ocp-date", valid_565342
   result.add "header", section
   section = newJObject()
   result.add "formData", section
   if body != nil:
     result.add "body", body
 
-proc call*(call_575443: Call_PoolListUsageMetrics_575431; path: JsonNode;
+proc call*(call_565343: Call_PoolListUsageMetrics_565331; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## If you do not specify a $filter clause including a poolId, the response includes all Pools that existed in the Account in the time range of the returned aggregation intervals. If you do not specify a $filter clause including a startTime or endTime these filters default to the start and end times of the last aggregation interval currently available; that is, only the last aggregation interval is returned.
   ## 
-  let valid = call_575443.validator(path, query, header, formData, body)
-  let scheme = call_575443.pickScheme
+  let valid = call_565343.validator(path, query, header, formData, body)
+  let scheme = call_565343.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575443.url(scheme.get, call_575443.host, call_575443.base,
-                         call_575443.route, valid.getOrDefault("path"),
+  let url = call_565343.url(scheme.get, call_565343.host, call_565343.base,
+                         call_565343.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575443, url, valid)
+  result = hook(call_565343, url, valid)
 
-proc call*(call_575444: Call_PoolListUsageMetrics_575431; apiVersion: string;
-          timeout: int = 30; endtime: string = ""; maxresults: int = 1000;
-          starttime: string = ""; Filter: string = ""): Recallable =
+proc call*(call_565344: Call_PoolListUsageMetrics_565331; apiVersion: string;
+          starttime: string = ""; endtime: string = ""; timeout: int = 30;
+          maxresults: int = 1000; Filter: string = ""): Recallable =
   ## poolListUsageMetrics
   ## If you do not specify a $filter clause including a poolId, the response includes all Pools that existed in the Account in the time range of the returned aggregation intervals. If you do not specify a $filter clause including a startTime or endTime these filters default to the start and end times of the last aggregation interval currently available; that is, only the last aggregation interval is returned.
-  ##   timeout: int
-  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   ##   apiVersion: string (required)
   ##             : Client API Version.
-  ##   endtime: string
-  ##          : The latest time from which to include metrics. This must be at least two hours before the current time. If not specified this defaults to the end time of the last aggregation interval currently available.
-  ##   maxresults: int
-  ##             : The maximum number of items to return in the response. A maximum of 1000 results will be returned.
   ##   starttime: string
   ##            : The earliest time from which to include metrics. This must be at least two and a half hours before the current time. If not specified this defaults to the start time of the last aggregation interval currently available.
+  ##   endtime: string
+  ##          : The latest time from which to include metrics. This must be at least two hours before the current time. If not specified this defaults to the end time of the last aggregation interval currently available.
+  ##   timeout: int
+  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
+  ##   maxresults: int
+  ##             : The maximum number of items to return in the response. A maximum of 1000 results will be returned.
   ##   Filter: string
   ##         : An OData $filter clause. For more information on constructing this filter, see 
   ## https://docs.microsoft.com/en-us/rest/api/batchservice/odata-filters-in-batch#list-account-usage-metrics.
-  var query_575445 = newJObject()
-  add(query_575445, "timeout", newJInt(timeout))
-  add(query_575445, "api-version", newJString(apiVersion))
-  add(query_575445, "endtime", newJString(endtime))
-  add(query_575445, "maxresults", newJInt(maxresults))
-  add(query_575445, "starttime", newJString(starttime))
-  add(query_575445, "$filter", newJString(Filter))
-  result = call_575444.call(nil, query_575445, nil, nil, nil)
+  var query_565345 = newJObject()
+  add(query_565345, "api-version", newJString(apiVersion))
+  add(query_565345, "starttime", newJString(starttime))
+  add(query_565345, "endtime", newJString(endtime))
+  add(query_565345, "timeout", newJInt(timeout))
+  add(query_565345, "maxresults", newJInt(maxresults))
+  add(query_565345, "$filter", newJString(Filter))
+  result = call_565344.call(nil, query_565345, nil, nil, nil)
 
-var poolListUsageMetrics* = Call_PoolListUsageMetrics_575431(
+var poolListUsageMetrics* = Call_PoolListUsageMetrics_565331(
     name: "poolListUsageMetrics", meth: HttpMethod.HttpGet, host: "azure.local",
-    route: "/poolusagemetrics", validator: validate_PoolListUsageMetrics_575432,
-    base: "", url: url_PoolListUsageMetrics_575433, schemes: {Scheme.Https})
+    route: "/poolusagemetrics", validator: validate_PoolListUsageMetrics_565332,
+    base: "", url: url_PoolListUsageMetrics_565333, schemes: {Scheme.Https})
 type
-  Call_AccountListSupportedImages_575446 = ref object of OpenApiRestCall_573667
-proc url_AccountListSupportedImages_575448(protocol: Scheme; host: string;
+  Call_AccountListSupportedImages_565346 = ref object of OpenApiRestCall_563565
+proc url_AccountListSupportedImages_565348(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_AccountListSupportedImages_575447(path: JsonNode; query: JsonNode;
+proc validate_AccountListSupportedImages_565347(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   var section: JsonNode
   result = newJObject()
   section = newJObject()
   result.add "path", section
   ## parameters in `query` object:
-  ##   timeout: JInt
-  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   ##   api-version: JString (required)
   ##              : Client API Version.
+  ##   timeout: JInt
+  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   ##   maxresults: JInt
   ##             : The maximum number of items to return in the response. A maximum of 1000 results will be returned.
   ##   $filter: JString
   ##          : An OData $filter clause. For more information on constructing this filter, see 
   ## https://docs.microsoft.com/en-us/rest/api/batchservice/odata-filters-in-batch#list-support-images.
   section = newJObject()
-  var valid_575449 = query.getOrDefault("timeout")
-  valid_575449 = validateParameter(valid_575449, JInt, required = false,
-                                 default = newJInt(30))
-  if valid_575449 != nil:
-    section.add "timeout", valid_575449
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575450 = query.getOrDefault("api-version")
-  valid_575450 = validateParameter(valid_575450, JString, required = true,
+  var valid_565349 = query.getOrDefault("api-version")
+  valid_565349 = validateParameter(valid_565349, JString, required = true,
                                  default = nil)
-  if valid_575450 != nil:
-    section.add "api-version", valid_575450
-  var valid_575451 = query.getOrDefault("maxresults")
-  valid_575451 = validateParameter(valid_575451, JInt, required = false,
+  if valid_565349 != nil:
+    section.add "api-version", valid_565349
+  var valid_565350 = query.getOrDefault("timeout")
+  valid_565350 = validateParameter(valid_565350, JInt, required = false,
+                                 default = newJInt(30))
+  if valid_565350 != nil:
+    section.add "timeout", valid_565350
+  var valid_565351 = query.getOrDefault("maxresults")
+  valid_565351 = validateParameter(valid_565351, JInt, required = false,
                                  default = newJInt(1000))
-  if valid_575451 != nil:
-    section.add "maxresults", valid_575451
-  var valid_575452 = query.getOrDefault("$filter")
-  valid_575452 = validateParameter(valid_575452, JString, required = false,
+  if valid_565351 != nil:
+    section.add "maxresults", valid_565351
+  var valid_565352 = query.getOrDefault("$filter")
+  valid_565352 = validateParameter(valid_565352, JString, required = false,
                                  default = nil)
-  if valid_575452 != nil:
-    section.add "$filter", valid_575452
+  if valid_565352 != nil:
+    section.add "$filter", valid_565352
   result.add "query", section
   ## parameters in `header` object:
+  ##   return-client-request-id: JBool
+  ##                           : Whether the server should return the client-request-id in the response.
   ##   client-request-id: JString
   ##                    : The caller-generated request identity, in the form of a GUID with no decoration such as curly braces, e.g. 9C4D50EE-2D56-4CD3-8152-34347DC9F2B0.
   ##   ocp-date: JString
   ##           : The time the request was issued. Client libraries typically set this to the current system clock time; set it explicitly if you are calling the REST API directly.
-  ##   return-client-request-id: JBool
-  ##                           : Whether the server should return the client-request-id in the response.
   section = newJObject()
-  var valid_575453 = header.getOrDefault("client-request-id")
-  valid_575453 = validateParameter(valid_575453, JString, required = false,
-                                 default = nil)
-  if valid_575453 != nil:
-    section.add "client-request-id", valid_575453
-  var valid_575454 = header.getOrDefault("ocp-date")
-  valid_575454 = validateParameter(valid_575454, JString, required = false,
-                                 default = nil)
-  if valid_575454 != nil:
-    section.add "ocp-date", valid_575454
-  var valid_575455 = header.getOrDefault("return-client-request-id")
-  valid_575455 = validateParameter(valid_575455, JBool, required = false,
+  var valid_565353 = header.getOrDefault("return-client-request-id")
+  valid_565353 = validateParameter(valid_565353, JBool, required = false,
                                  default = newJBool(false))
-  if valid_575455 != nil:
-    section.add "return-client-request-id", valid_575455
+  if valid_565353 != nil:
+    section.add "return-client-request-id", valid_565353
+  var valid_565354 = header.getOrDefault("client-request-id")
+  valid_565354 = validateParameter(valid_565354, JString, required = false,
+                                 default = nil)
+  if valid_565354 != nil:
+    section.add "client-request-id", valid_565354
+  var valid_565355 = header.getOrDefault("ocp-date")
+  valid_565355 = validateParameter(valid_565355, JString, required = false,
+                                 default = nil)
+  if valid_565355 != nil:
+    section.add "ocp-date", valid_565355
   result.add "header", section
   section = newJObject()
   result.add "formData", section
   if body != nil:
     result.add "body", body
 
-proc call*(call_575456: Call_AccountListSupportedImages_575446; path: JsonNode;
+proc call*(call_565356: Call_AccountListSupportedImages_565346; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
-  let valid = call_575456.validator(path, query, header, formData, body)
-  let scheme = call_575456.pickScheme
+  let valid = call_565356.validator(path, query, header, formData, body)
+  let scheme = call_565356.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575456.url(scheme.get, call_575456.host, call_575456.base,
-                         call_575456.route, valid.getOrDefault("path"),
+  let url = call_565356.url(scheme.get, call_565356.host, call_565356.base,
+                         call_565356.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575456, url, valid)
+  result = hook(call_565356, url, valid)
 
-proc call*(call_575457: Call_AccountListSupportedImages_575446; apiVersion: string;
+proc call*(call_565357: Call_AccountListSupportedImages_565346; apiVersion: string;
           timeout: int = 30; maxresults: int = 1000; Filter: string = ""): Recallable =
   ## accountListSupportedImages
-  ##   timeout: int
-  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   ##   apiVersion: string (required)
   ##             : Client API Version.
+  ##   timeout: int
+  ##          : The maximum time that the server can spend processing the request, in seconds. The default is 30 seconds.
   ##   maxresults: int
   ##             : The maximum number of items to return in the response. A maximum of 1000 results will be returned.
   ##   Filter: string
   ##         : An OData $filter clause. For more information on constructing this filter, see 
   ## https://docs.microsoft.com/en-us/rest/api/batchservice/odata-filters-in-batch#list-support-images.
-  var query_575458 = newJObject()
-  add(query_575458, "timeout", newJInt(timeout))
-  add(query_575458, "api-version", newJString(apiVersion))
-  add(query_575458, "maxresults", newJInt(maxresults))
-  add(query_575458, "$filter", newJString(Filter))
-  result = call_575457.call(nil, query_575458, nil, nil, nil)
+  var query_565358 = newJObject()
+  add(query_565358, "api-version", newJString(apiVersion))
+  add(query_565358, "timeout", newJInt(timeout))
+  add(query_565358, "maxresults", newJInt(maxresults))
+  add(query_565358, "$filter", newJString(Filter))
+  result = call_565357.call(nil, query_565358, nil, nil, nil)
 
-var accountListSupportedImages* = Call_AccountListSupportedImages_575446(
+var accountListSupportedImages* = Call_AccountListSupportedImages_565346(
     name: "accountListSupportedImages", meth: HttpMethod.HttpGet,
     host: "azure.local", route: "/supportedimages",
-    validator: validate_AccountListSupportedImages_575447, base: "",
-    url: url_AccountListSupportedImages_575448, schemes: {Scheme.Https})
+    validator: validate_AccountListSupportedImages_565347, base: "",
+    url: url_AccountListSupportedImages_565348, schemes: {Scheme.Https})
 export
   rest
 

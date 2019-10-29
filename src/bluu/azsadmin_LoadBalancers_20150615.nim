@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, httpcore
 
 ## auto-generated via openapi macro
 ## title: NetworkAdminManagementClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_574441 = ref object of OpenApiRestCall
+  OpenApiRestCall_563539 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_574441](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563539](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_574441): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563539): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,8 +107,8 @@ const
   macServiceName = "azsadmin-LoadBalancers"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_LoadBalancersList_574663 = ref object of OpenApiRestCall_574441
-proc url_LoadBalancersList_574665(protocol: Scheme; host: string; base: string;
+  Call_LoadBalancersList_563761 = ref object of OpenApiRestCall_563539
+proc url_LoadBalancersList_563763(protocol: Scheme; host: string; base: string;
                                  route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -121,7 +125,7 @@ proc url_LoadBalancersList_574665(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_LoadBalancersList_574664(path: JsonNode; query: JsonNode;
+proc validate_LoadBalancersList_563762(path: JsonNode; query: JsonNode;
                                       header: JsonNode; formData: JsonNode;
                                       body: JsonNode): JsonNode =
   ## Get a list of all load balancers.
@@ -134,58 +138,58 @@ proc validate_LoadBalancersList_574664(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_574826 = path.getOrDefault("subscriptionId")
-  valid_574826 = validateParameter(valid_574826, JString, required = true,
+  var valid_563926 = path.getOrDefault("subscriptionId")
+  valid_563926 = validateParameter(valid_563926, JString, required = true,
                                  default = nil)
-  if valid_574826 != nil:
-    section.add "subscriptionId", valid_574826
+  if valid_563926 != nil:
+    section.add "subscriptionId", valid_563926
   result.add "path", section
   ## parameters in `query` object:
-  ##   api-version: JString (required)
-  ##              : Client API Version.
   ##   $inlineCount: JString
   ##               : OData inline count parameter.
+  ##   api-version: JString (required)
+  ##              : Client API Version.
   ##   $top: JString
   ##       : OData top parameter.
-  ##   $orderBy: JString
-  ##           : OData orderBy parameter.
   ##   $skip: JString
   ##        : OData skip parameter.
   ##   $filter: JString
   ##          : OData filter parameter.
+  ##   $orderBy: JString
+  ##           : OData orderBy parameter.
   section = newJObject()
+  var valid_563927 = query.getOrDefault("$inlineCount")
+  valid_563927 = validateParameter(valid_563927, JString, required = false,
+                                 default = nil)
+  if valid_563927 != nil:
+    section.add "$inlineCount", valid_563927
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574840 = query.getOrDefault("api-version")
-  valid_574840 = validateParameter(valid_574840, JString, required = true,
+  var valid_563941 = query.getOrDefault("api-version")
+  valid_563941 = validateParameter(valid_563941, JString, required = true,
                                  default = newJString("2015-06-15"))
-  if valid_574840 != nil:
-    section.add "api-version", valid_574840
-  var valid_574841 = query.getOrDefault("$inlineCount")
-  valid_574841 = validateParameter(valid_574841, JString, required = false,
+  if valid_563941 != nil:
+    section.add "api-version", valid_563941
+  var valid_563942 = query.getOrDefault("$top")
+  valid_563942 = validateParameter(valid_563942, JString, required = false,
                                  default = nil)
-  if valid_574841 != nil:
-    section.add "$inlineCount", valid_574841
-  var valid_574842 = query.getOrDefault("$top")
-  valid_574842 = validateParameter(valid_574842, JString, required = false,
+  if valid_563942 != nil:
+    section.add "$top", valid_563942
+  var valid_563943 = query.getOrDefault("$skip")
+  valid_563943 = validateParameter(valid_563943, JString, required = false,
                                  default = nil)
-  if valid_574842 != nil:
-    section.add "$top", valid_574842
-  var valid_574843 = query.getOrDefault("$orderBy")
-  valid_574843 = validateParameter(valid_574843, JString, required = false,
+  if valid_563943 != nil:
+    section.add "$skip", valid_563943
+  var valid_563944 = query.getOrDefault("$filter")
+  valid_563944 = validateParameter(valid_563944, JString, required = false,
                                  default = nil)
-  if valid_574843 != nil:
-    section.add "$orderBy", valid_574843
-  var valid_574844 = query.getOrDefault("$skip")
-  valid_574844 = validateParameter(valid_574844, JString, required = false,
+  if valid_563944 != nil:
+    section.add "$filter", valid_563944
+  var valid_563945 = query.getOrDefault("$orderBy")
+  valid_563945 = validateParameter(valid_563945, JString, required = false,
                                  default = nil)
-  if valid_574844 != nil:
-    section.add "$skip", valid_574844
-  var valid_574845 = query.getOrDefault("$filter")
-  valid_574845 = validateParameter(valid_574845, JString, required = false,
-                                 default = nil)
-  if valid_574845 != nil:
-    section.add "$filter", valid_574845
+  if valid_563945 != nil:
+    section.add "$orderBy", valid_563945
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -194,53 +198,53 @@ proc validate_LoadBalancersList_574664(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574872: Call_LoadBalancersList_574663; path: JsonNode;
+proc call*(call_563972: Call_LoadBalancersList_563761; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get a list of all load balancers.
   ## 
-  let valid = call_574872.validator(path, query, header, formData, body)
-  let scheme = call_574872.pickScheme
+  let valid = call_563972.validator(path, query, header, formData, body)
+  let scheme = call_563972.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574872.url(scheme.get, call_574872.host, call_574872.base,
-                         call_574872.route, valid.getOrDefault("path"),
+  let url = call_563972.url(scheme.get, call_563972.host, call_563972.base,
+                         call_563972.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574872, url, valid)
+  result = hook(call_563972, url, valid)
 
-proc call*(call_574943: Call_LoadBalancersList_574663; subscriptionId: string;
-          apiVersion: string = "2015-06-15"; InlineCount: string = ""; Top: string = "";
-          OrderBy: string = ""; Skip: string = ""; Filter: string = ""): Recallable =
+proc call*(call_564043: Call_LoadBalancersList_563761; subscriptionId: string;
+          InlineCount: string = ""; apiVersion: string = "2015-06-15"; Top: string = "";
+          Skip: string = ""; Filter: string = ""; OrderBy: string = ""): Recallable =
   ## loadBalancersList
   ## Get a list of all load balancers.
-  ##   apiVersion: string (required)
-  ##             : Client API Version.
   ##   InlineCount: string
   ##              : OData inline count parameter.
-  ##   subscriptionId: string (required)
-  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   apiVersion: string (required)
+  ##             : Client API Version.
   ##   Top: string
   ##      : OData top parameter.
-  ##   OrderBy: string
-  ##          : OData orderBy parameter.
+  ##   subscriptionId: string (required)
+  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   Skip: string
   ##       : OData skip parameter.
   ##   Filter: string
   ##         : OData filter parameter.
-  var path_574944 = newJObject()
-  var query_574946 = newJObject()
-  add(query_574946, "api-version", newJString(apiVersion))
-  add(query_574946, "$inlineCount", newJString(InlineCount))
-  add(path_574944, "subscriptionId", newJString(subscriptionId))
-  add(query_574946, "$top", newJString(Top))
-  add(query_574946, "$orderBy", newJString(OrderBy))
-  add(query_574946, "$skip", newJString(Skip))
-  add(query_574946, "$filter", newJString(Filter))
-  result = call_574943.call(path_574944, query_574946, nil, nil, nil)
+  ##   OrderBy: string
+  ##          : OData orderBy parameter.
+  var path_564044 = newJObject()
+  var query_564046 = newJObject()
+  add(query_564046, "$inlineCount", newJString(InlineCount))
+  add(query_564046, "api-version", newJString(apiVersion))
+  add(query_564046, "$top", newJString(Top))
+  add(path_564044, "subscriptionId", newJString(subscriptionId))
+  add(query_564046, "$skip", newJString(Skip))
+  add(query_564046, "$filter", newJString(Filter))
+  add(query_564046, "$orderBy", newJString(OrderBy))
+  result = call_564043.call(path_564044, query_564046, nil, nil, nil)
 
-var loadBalancersList* = Call_LoadBalancersList_574663(name: "loadBalancersList",
+var loadBalancersList* = Call_LoadBalancersList_563761(name: "loadBalancersList",
     meth: HttpMethod.HttpGet, host: "adminmanagement.local.azurestack.external", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Network.Admin/adminLoadBalancers",
-    validator: validate_LoadBalancersList_574664, base: "",
-    url: url_LoadBalancersList_574665, schemes: {Scheme.Https})
+    validator: validate_LoadBalancersList_563762, base: "",
+    url: url_LoadBalancersList_563763, schemes: {Scheme.Https})
 export
   rest
 

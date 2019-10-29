@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, httpcore
 
 ## auto-generated via openapi macro
 ## title: NotificationHubsManagementClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_567641 = ref object of OpenApiRestCall
+  OpenApiRestCall_563539 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_567641](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563539](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_567641): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563539): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,8 +107,8 @@ const
   macServiceName = "notificationhubs"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_NamespacesCheckAvailability_567863 = ref object of OpenApiRestCall_567641
-proc url_NamespacesCheckAvailability_567865(protocol: Scheme; host: string;
+  Call_NamespacesCheckAvailability_563761 = ref object of OpenApiRestCall_563539
+proc url_NamespacesCheckAvailability_563763(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -120,7 +124,7 @@ proc url_NamespacesCheckAvailability_567865(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_NamespacesCheckAvailability_567864(path: JsonNode; query: JsonNode;
+proc validate_NamespacesCheckAvailability_563762(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Checks the availability of the given service namespace across all Azure subscriptions. This is useful because the domain name is created based on the service namespace name.
   ## 
@@ -133,11 +137,11 @@ proc validate_NamespacesCheckAvailability_567864(path: JsonNode; query: JsonNode
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_568055 = path.getOrDefault("subscriptionId")
-  valid_568055 = validateParameter(valid_568055, JString, required = true,
+  var valid_563955 = path.getOrDefault("subscriptionId")
+  valid_563955 = validateParameter(valid_563955, JString, required = true,
                                  default = nil)
-  if valid_568055 != nil:
-    section.add "subscriptionId", valid_568055
+  if valid_563955 != nil:
+    section.add "subscriptionId", valid_563955
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -145,11 +149,11 @@ proc validate_NamespacesCheckAvailability_567864(path: JsonNode; query: JsonNode
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568056 = query.getOrDefault("api-version")
-  valid_568056 = validateParameter(valid_568056, JString, required = true,
+  var valid_563956 = query.getOrDefault("api-version")
+  valid_563956 = validateParameter(valid_563956, JString, required = true,
                                  default = nil)
-  if valid_568056 != nil:
-    section.add "api-version", valid_568056
+  if valid_563956 != nil:
+    section.add "api-version", valid_563956
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -163,21 +167,21 @@ proc validate_NamespacesCheckAvailability_567864(path: JsonNode; query: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_568080: Call_NamespacesCheckAvailability_567863; path: JsonNode;
+proc call*(call_563980: Call_NamespacesCheckAvailability_563761; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Checks the availability of the given service namespace across all Azure subscriptions. This is useful because the domain name is created based on the service namespace name.
   ## 
   ## http://msdn.microsoft.com/en-us/library/windowsazure/jj870968.aspx
-  let valid = call_568080.validator(path, query, header, formData, body)
-  let scheme = call_568080.pickScheme
+  let valid = call_563980.validator(path, query, header, formData, body)
+  let scheme = call_563980.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568080.url(scheme.get, call_568080.host, call_568080.base,
-                         call_568080.route, valid.getOrDefault("path"),
+  let url = call_563980.url(scheme.get, call_563980.host, call_563980.base,
+                         call_563980.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568080, url, valid)
+  result = hook(call_563980, url, valid)
 
-proc call*(call_568151: Call_NamespacesCheckAvailability_567863;
+proc call*(call_564051: Call_NamespacesCheckAvailability_563761;
           apiVersion: string; subscriptionId: string; parameters: JsonNode): Recallable =
   ## namespacesCheckAvailability
   ## Checks the availability of the given service namespace across all Azure subscriptions. This is useful because the domain name is created based on the service namespace name.
@@ -188,23 +192,23 @@ proc call*(call_568151: Call_NamespacesCheckAvailability_567863;
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   parameters: JObject (required)
   ##             : The namespace name.
-  var path_568152 = newJObject()
-  var query_568154 = newJObject()
-  var body_568155 = newJObject()
-  add(query_568154, "api-version", newJString(apiVersion))
-  add(path_568152, "subscriptionId", newJString(subscriptionId))
+  var path_564052 = newJObject()
+  var query_564054 = newJObject()
+  var body_564055 = newJObject()
+  add(query_564054, "api-version", newJString(apiVersion))
+  add(path_564052, "subscriptionId", newJString(subscriptionId))
   if parameters != nil:
-    body_568155 = parameters
-  result = call_568151.call(path_568152, query_568154, nil, nil, body_568155)
+    body_564055 = parameters
+  result = call_564051.call(path_564052, query_564054, nil, nil, body_564055)
 
-var namespacesCheckAvailability* = Call_NamespacesCheckAvailability_567863(
+var namespacesCheckAvailability* = Call_NamespacesCheckAvailability_563761(
     name: "namespacesCheckAvailability", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.NotificationHubs/checkNamespaceAvailability",
-    validator: validate_NamespacesCheckAvailability_567864, base: "",
-    url: url_NamespacesCheckAvailability_567865, schemes: {Scheme.Https})
+    validator: validate_NamespacesCheckAvailability_563762, base: "",
+    url: url_NamespacesCheckAvailability_563763, schemes: {Scheme.Https})
 type
-  Call_NamespacesListAll_568194 = ref object of OpenApiRestCall_567641
-proc url_NamespacesListAll_568196(protocol: Scheme; host: string; base: string;
+  Call_NamespacesListAll_564094 = ref object of OpenApiRestCall_563539
+proc url_NamespacesListAll_564096(protocol: Scheme; host: string; base: string;
                                  route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -221,7 +225,7 @@ proc url_NamespacesListAll_568196(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_NamespacesListAll_568195(path: JsonNode; query: JsonNode;
+proc validate_NamespacesListAll_564095(path: JsonNode; query: JsonNode;
                                       header: JsonNode; formData: JsonNode;
                                       body: JsonNode): JsonNode =
   ## Lists all the available namespaces within the subscription irrespective of the resourceGroups.
@@ -235,11 +239,11 @@ proc validate_NamespacesListAll_568195(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_568197 = path.getOrDefault("subscriptionId")
-  valid_568197 = validateParameter(valid_568197, JString, required = true,
+  var valid_564097 = path.getOrDefault("subscriptionId")
+  valid_564097 = validateParameter(valid_564097, JString, required = true,
                                  default = nil)
-  if valid_568197 != nil:
-    section.add "subscriptionId", valid_568197
+  if valid_564097 != nil:
+    section.add "subscriptionId", valid_564097
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -247,11 +251,11 @@ proc validate_NamespacesListAll_568195(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568198 = query.getOrDefault("api-version")
-  valid_568198 = validateParameter(valid_568198, JString, required = true,
+  var valid_564098 = query.getOrDefault("api-version")
+  valid_564098 = validateParameter(valid_564098, JString, required = true,
                                  default = nil)
-  if valid_568198 != nil:
-    section.add "api-version", valid_568198
+  if valid_564098 != nil:
+    section.add "api-version", valid_564098
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -260,21 +264,21 @@ proc validate_NamespacesListAll_568195(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568199: Call_NamespacesListAll_568194; path: JsonNode;
+proc call*(call_564099: Call_NamespacesListAll_564094; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists all the available namespaces within the subscription irrespective of the resourceGroups.
   ## 
   ## http://msdn.microsoft.com/en-us/library/azure/hh780759.aspx
-  let valid = call_568199.validator(path, query, header, formData, body)
-  let scheme = call_568199.pickScheme
+  let valid = call_564099.validator(path, query, header, formData, body)
+  let scheme = call_564099.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568199.url(scheme.get, call_568199.host, call_568199.base,
-                         call_568199.route, valid.getOrDefault("path"),
+  let url = call_564099.url(scheme.get, call_564099.host, call_564099.base,
+                         call_564099.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568199, url, valid)
+  result = hook(call_564099, url, valid)
 
-proc call*(call_568200: Call_NamespacesListAll_568194; apiVersion: string;
+proc call*(call_564100: Call_NamespacesListAll_564094; apiVersion: string;
           subscriptionId: string): Recallable =
   ## namespacesListAll
   ## Lists all the available namespaces within the subscription irrespective of the resourceGroups.
@@ -283,19 +287,19 @@ proc call*(call_568200: Call_NamespacesListAll_568194; apiVersion: string;
   ##             : Client Api Version.
   ##   subscriptionId: string (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_568201 = newJObject()
-  var query_568202 = newJObject()
-  add(query_568202, "api-version", newJString(apiVersion))
-  add(path_568201, "subscriptionId", newJString(subscriptionId))
-  result = call_568200.call(path_568201, query_568202, nil, nil, nil)
+  var path_564101 = newJObject()
+  var query_564102 = newJObject()
+  add(query_564102, "api-version", newJString(apiVersion))
+  add(path_564101, "subscriptionId", newJString(subscriptionId))
+  result = call_564100.call(path_564101, query_564102, nil, nil, nil)
 
-var namespacesListAll* = Call_NamespacesListAll_568194(name: "namespacesListAll",
+var namespacesListAll* = Call_NamespacesListAll_564094(name: "namespacesListAll",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.NotificationHubs/namespaces",
-    validator: validate_NamespacesListAll_568195, base: "",
-    url: url_NamespacesListAll_568196, schemes: {Scheme.Https})
+    validator: validate_NamespacesListAll_564095, base: "",
+    url: url_NamespacesListAll_564096, schemes: {Scheme.Https})
 type
-  Call_NamespacesList_568203 = ref object of OpenApiRestCall_567641
-proc url_NamespacesList_568205(protocol: Scheme; host: string; base: string;
+  Call_NamespacesList_564103 = ref object of OpenApiRestCall_563539
+proc url_NamespacesList_564105(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -316,7 +320,7 @@ proc url_NamespacesList_568205(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_NamespacesList_568204(path: JsonNode; query: JsonNode;
+proc validate_NamespacesList_564104(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## Lists the available namespaces within a resourceGroup.
@@ -325,23 +329,23 @@ proc validate_NamespacesList_568204(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group. If resourceGroupName value is null the method lists all the namespaces within subscription
   ##   subscriptionId: JString (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group. If resourceGroupName value is null the method lists all the namespaces within subscription
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568206 = path.getOrDefault("resourceGroupName")
-  valid_568206 = validateParameter(valid_568206, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564106 = path.getOrDefault("subscriptionId")
+  valid_564106 = validateParameter(valid_564106, JString, required = true,
                                  default = nil)
-  if valid_568206 != nil:
-    section.add "resourceGroupName", valid_568206
-  var valid_568207 = path.getOrDefault("subscriptionId")
-  valid_568207 = validateParameter(valid_568207, JString, required = true,
+  if valid_564106 != nil:
+    section.add "subscriptionId", valid_564106
+  var valid_564107 = path.getOrDefault("resourceGroupName")
+  valid_564107 = validateParameter(valid_564107, JString, required = true,
                                  default = nil)
-  if valid_568207 != nil:
-    section.add "subscriptionId", valid_568207
+  if valid_564107 != nil:
+    section.add "resourceGroupName", valid_564107
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -349,11 +353,11 @@ proc validate_NamespacesList_568204(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568208 = query.getOrDefault("api-version")
-  valid_568208 = validateParameter(valid_568208, JString, required = true,
+  var valid_564108 = query.getOrDefault("api-version")
+  valid_564108 = validateParameter(valid_564108, JString, required = true,
                                  default = nil)
-  if valid_568208 != nil:
-    section.add "api-version", valid_568208
+  if valid_564108 != nil:
+    section.add "api-version", valid_564108
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -362,45 +366,45 @@ proc validate_NamespacesList_568204(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568209: Call_NamespacesList_568203; path: JsonNode; query: JsonNode;
+proc call*(call_564109: Call_NamespacesList_564103; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists the available namespaces within a resourceGroup.
   ## 
   ## http://msdn.microsoft.com/en-us/library/azure/hh780759.aspx
-  let valid = call_568209.validator(path, query, header, formData, body)
-  let scheme = call_568209.pickScheme
+  let valid = call_564109.validator(path, query, header, formData, body)
+  let scheme = call_564109.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568209.url(scheme.get, call_568209.host, call_568209.base,
-                         call_568209.route, valid.getOrDefault("path"),
+  let url = call_564109.url(scheme.get, call_564109.host, call_564109.base,
+                         call_564109.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568209, url, valid)
+  result = hook(call_564109, url, valid)
 
-proc call*(call_568210: Call_NamespacesList_568203; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string): Recallable =
+proc call*(call_564110: Call_NamespacesList_564103; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string): Recallable =
   ## namespacesList
   ## Lists the available namespaces within a resourceGroup.
   ## http://msdn.microsoft.com/en-us/library/azure/hh780759.aspx
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group. If resourceGroupName value is null the method lists all the namespaces within subscription
   ##   apiVersion: string (required)
   ##             : Client Api Version.
   ##   subscriptionId: string (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_568211 = newJObject()
-  var query_568212 = newJObject()
-  add(path_568211, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568212, "api-version", newJString(apiVersion))
-  add(path_568211, "subscriptionId", newJString(subscriptionId))
-  result = call_568210.call(path_568211, query_568212, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group. If resourceGroupName value is null the method lists all the namespaces within subscription
+  var path_564111 = newJObject()
+  var query_564112 = newJObject()
+  add(query_564112, "api-version", newJString(apiVersion))
+  add(path_564111, "subscriptionId", newJString(subscriptionId))
+  add(path_564111, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564110.call(path_564111, query_564112, nil, nil, nil)
 
-var namespacesList* = Call_NamespacesList_568203(name: "namespacesList",
+var namespacesList* = Call_NamespacesList_564103(name: "namespacesList",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.NotificationHubs/namespaces",
-    validator: validate_NamespacesList_568204, base: "", url: url_NamespacesList_568205,
+    validator: validate_NamespacesList_564104, base: "", url: url_NamespacesList_564105,
     schemes: {Scheme.Https})
 type
-  Call_NamespacesCreateOrUpdate_568224 = ref object of OpenApiRestCall_567641
-proc url_NamespacesCreateOrUpdate_568226(protocol: Scheme; host: string;
+  Call_NamespacesCreateOrUpdate_564124 = ref object of OpenApiRestCall_563539
+proc url_NamespacesCreateOrUpdate_564126(protocol: Scheme; host: string;
                                         base: string; route: string; path: JsonNode;
                                         query: JsonNode): Uri =
   result.scheme = $protocol
@@ -424,7 +428,7 @@ proc url_NamespacesCreateOrUpdate_568226(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_NamespacesCreateOrUpdate_568225(path: JsonNode; query: JsonNode;
+proc validate_NamespacesCreateOrUpdate_564125(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Creates/Updates a service namespace. Once created, this namespace's resource manifest is immutable. This operation is idempotent.
   ## 
@@ -434,28 +438,28 @@ proc validate_NamespacesCreateOrUpdate_568225(path: JsonNode; query: JsonNode;
   ## parameters in `path` object:
   ##   namespaceName: JString (required)
   ##                : The namespace name.
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   subscriptionId: JString (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `namespaceName` field"
-  var valid_568227 = path.getOrDefault("namespaceName")
-  valid_568227 = validateParameter(valid_568227, JString, required = true,
+  var valid_564127 = path.getOrDefault("namespaceName")
+  valid_564127 = validateParameter(valid_564127, JString, required = true,
                                  default = nil)
-  if valid_568227 != nil:
-    section.add "namespaceName", valid_568227
-  var valid_568228 = path.getOrDefault("resourceGroupName")
-  valid_568228 = validateParameter(valid_568228, JString, required = true,
+  if valid_564127 != nil:
+    section.add "namespaceName", valid_564127
+  var valid_564128 = path.getOrDefault("subscriptionId")
+  valid_564128 = validateParameter(valid_564128, JString, required = true,
                                  default = nil)
-  if valid_568228 != nil:
-    section.add "resourceGroupName", valid_568228
-  var valid_568229 = path.getOrDefault("subscriptionId")
-  valid_568229 = validateParameter(valid_568229, JString, required = true,
+  if valid_564128 != nil:
+    section.add "subscriptionId", valid_564128
+  var valid_564129 = path.getOrDefault("resourceGroupName")
+  valid_564129 = validateParameter(valid_564129, JString, required = true,
                                  default = nil)
-  if valid_568229 != nil:
-    section.add "subscriptionId", valid_568229
+  if valid_564129 != nil:
+    section.add "resourceGroupName", valid_564129
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -463,11 +467,11 @@ proc validate_NamespacesCreateOrUpdate_568225(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568230 = query.getOrDefault("api-version")
-  valid_568230 = validateParameter(valid_568230, JString, required = true,
+  var valid_564130 = query.getOrDefault("api-version")
+  valid_564130 = validateParameter(valid_564130, JString, required = true,
                                  default = nil)
-  if valid_568230 != nil:
-    section.add "api-version", valid_568230
+  if valid_564130 != nil:
+    section.add "api-version", valid_564130
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -481,55 +485,55 @@ proc validate_NamespacesCreateOrUpdate_568225(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568232: Call_NamespacesCreateOrUpdate_568224; path: JsonNode;
+proc call*(call_564132: Call_NamespacesCreateOrUpdate_564124; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Creates/Updates a service namespace. Once created, this namespace's resource manifest is immutable. This operation is idempotent.
   ## 
   ## http://msdn.microsoft.com/en-us/library/windowsazure/jj856303.aspx
-  let valid = call_568232.validator(path, query, header, formData, body)
-  let scheme = call_568232.pickScheme
+  let valid = call_564132.validator(path, query, header, formData, body)
+  let scheme = call_564132.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568232.url(scheme.get, call_568232.host, call_568232.base,
-                         call_568232.route, valid.getOrDefault("path"),
+  let url = call_564132.url(scheme.get, call_564132.host, call_564132.base,
+                         call_564132.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568232, url, valid)
+  result = hook(call_564132, url, valid)
 
-proc call*(call_568233: Call_NamespacesCreateOrUpdate_568224;
-          namespaceName: string; resourceGroupName: string; apiVersion: string;
-          subscriptionId: string; parameters: JsonNode): Recallable =
+proc call*(call_564133: Call_NamespacesCreateOrUpdate_564124; apiVersion: string;
+          namespaceName: string; subscriptionId: string; resourceGroupName: string;
+          parameters: JsonNode): Recallable =
   ## namespacesCreateOrUpdate
   ## Creates/Updates a service namespace. Once created, this namespace's resource manifest is immutable. This operation is idempotent.
   ## http://msdn.microsoft.com/en-us/library/windowsazure/jj856303.aspx
-  ##   namespaceName: string (required)
-  ##                : The namespace name.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
+  ##   namespaceName: string (required)
+  ##                : The namespace name.
   ##   subscriptionId: string (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   parameters: JObject (required)
   ##             : Parameters supplied to create a Namespace Resource.
-  var path_568234 = newJObject()
-  var query_568235 = newJObject()
-  var body_568236 = newJObject()
-  add(path_568234, "namespaceName", newJString(namespaceName))
-  add(path_568234, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568235, "api-version", newJString(apiVersion))
-  add(path_568234, "subscriptionId", newJString(subscriptionId))
+  var path_564134 = newJObject()
+  var query_564135 = newJObject()
+  var body_564136 = newJObject()
+  add(query_564135, "api-version", newJString(apiVersion))
+  add(path_564134, "namespaceName", newJString(namespaceName))
+  add(path_564134, "subscriptionId", newJString(subscriptionId))
+  add(path_564134, "resourceGroupName", newJString(resourceGroupName))
   if parameters != nil:
-    body_568236 = parameters
-  result = call_568233.call(path_568234, query_568235, nil, nil, body_568236)
+    body_564136 = parameters
+  result = call_564133.call(path_564134, query_564135, nil, nil, body_564136)
 
-var namespacesCreateOrUpdate* = Call_NamespacesCreateOrUpdate_568224(
+var namespacesCreateOrUpdate* = Call_NamespacesCreateOrUpdate_564124(
     name: "namespacesCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.NotificationHubs/namespaces/{namespaceName}",
-    validator: validate_NamespacesCreateOrUpdate_568225, base: "",
-    url: url_NamespacesCreateOrUpdate_568226, schemes: {Scheme.Https})
+    validator: validate_NamespacesCreateOrUpdate_564125, base: "",
+    url: url_NamespacesCreateOrUpdate_564126, schemes: {Scheme.Https})
 type
-  Call_NamespacesGet_568213 = ref object of OpenApiRestCall_567641
-proc url_NamespacesGet_568215(protocol: Scheme; host: string; base: string;
+  Call_NamespacesGet_564113 = ref object of OpenApiRestCall_563539
+proc url_NamespacesGet_564115(protocol: Scheme; host: string; base: string;
                              route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -552,7 +556,7 @@ proc url_NamespacesGet_568215(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_NamespacesGet_568214(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_NamespacesGet_564114(path: JsonNode; query: JsonNode; header: JsonNode;
                                   formData: JsonNode; body: JsonNode): JsonNode =
   ## Returns the description for the specified namespace.
   ## 
@@ -562,28 +566,28 @@ proc validate_NamespacesGet_568214(path: JsonNode; query: JsonNode; header: Json
   ## parameters in `path` object:
   ##   namespaceName: JString (required)
   ##                : The namespace name.
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   subscriptionId: JString (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `namespaceName` field"
-  var valid_568216 = path.getOrDefault("namespaceName")
-  valid_568216 = validateParameter(valid_568216, JString, required = true,
+  var valid_564116 = path.getOrDefault("namespaceName")
+  valid_564116 = validateParameter(valid_564116, JString, required = true,
                                  default = nil)
-  if valid_568216 != nil:
-    section.add "namespaceName", valid_568216
-  var valid_568217 = path.getOrDefault("resourceGroupName")
-  valid_568217 = validateParameter(valid_568217, JString, required = true,
+  if valid_564116 != nil:
+    section.add "namespaceName", valid_564116
+  var valid_564117 = path.getOrDefault("subscriptionId")
+  valid_564117 = validateParameter(valid_564117, JString, required = true,
                                  default = nil)
-  if valid_568217 != nil:
-    section.add "resourceGroupName", valid_568217
-  var valid_568218 = path.getOrDefault("subscriptionId")
-  valid_568218 = validateParameter(valid_568218, JString, required = true,
+  if valid_564117 != nil:
+    section.add "subscriptionId", valid_564117
+  var valid_564118 = path.getOrDefault("resourceGroupName")
+  valid_564118 = validateParameter(valid_564118, JString, required = true,
                                  default = nil)
-  if valid_568218 != nil:
-    section.add "subscriptionId", valid_568218
+  if valid_564118 != nil:
+    section.add "resourceGroupName", valid_564118
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -591,11 +595,11 @@ proc validate_NamespacesGet_568214(path: JsonNode; query: JsonNode; header: Json
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568219 = query.getOrDefault("api-version")
-  valid_568219 = validateParameter(valid_568219, JString, required = true,
+  var valid_564119 = query.getOrDefault("api-version")
+  valid_564119 = validateParameter(valid_564119, JString, required = true,
                                  default = nil)
-  if valid_568219 != nil:
-    section.add "api-version", valid_568219
+  if valid_564119 != nil:
+    section.add "api-version", valid_564119
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -604,48 +608,48 @@ proc validate_NamespacesGet_568214(path: JsonNode; query: JsonNode; header: Json
   if body != nil:
     result.add "body", body
 
-proc call*(call_568220: Call_NamespacesGet_568213; path: JsonNode; query: JsonNode;
+proc call*(call_564120: Call_NamespacesGet_564113; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Returns the description for the specified namespace.
   ## 
   ## http://msdn.microsoft.com/library/azure/dn140232.aspx
-  let valid = call_568220.validator(path, query, header, formData, body)
-  let scheme = call_568220.pickScheme
+  let valid = call_564120.validator(path, query, header, formData, body)
+  let scheme = call_564120.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568220.url(scheme.get, call_568220.host, call_568220.base,
-                         call_568220.route, valid.getOrDefault("path"),
+  let url = call_564120.url(scheme.get, call_564120.host, call_564120.base,
+                         call_564120.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568220, url, valid)
+  result = hook(call_564120, url, valid)
 
-proc call*(call_568221: Call_NamespacesGet_568213; namespaceName: string;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string): Recallable =
+proc call*(call_564121: Call_NamespacesGet_564113; apiVersion: string;
+          namespaceName: string; subscriptionId: string; resourceGroupName: string): Recallable =
   ## namespacesGet
   ## Returns the description for the specified namespace.
   ## http://msdn.microsoft.com/library/azure/dn140232.aspx
-  ##   namespaceName: string (required)
-  ##                : The namespace name.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
+  ##   namespaceName: string (required)
+  ##                : The namespace name.
   ##   subscriptionId: string (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_568222 = newJObject()
-  var query_568223 = newJObject()
-  add(path_568222, "namespaceName", newJString(namespaceName))
-  add(path_568222, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568223, "api-version", newJString(apiVersion))
-  add(path_568222, "subscriptionId", newJString(subscriptionId))
-  result = call_568221.call(path_568222, query_568223, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564122 = newJObject()
+  var query_564123 = newJObject()
+  add(query_564123, "api-version", newJString(apiVersion))
+  add(path_564122, "namespaceName", newJString(namespaceName))
+  add(path_564122, "subscriptionId", newJString(subscriptionId))
+  add(path_564122, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564121.call(path_564122, query_564123, nil, nil, nil)
 
-var namespacesGet* = Call_NamespacesGet_568213(name: "namespacesGet",
+var namespacesGet* = Call_NamespacesGet_564113(name: "namespacesGet",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.NotificationHubs/namespaces/{namespaceName}",
-    validator: validate_NamespacesGet_568214, base: "", url: url_NamespacesGet_568215,
+    validator: validate_NamespacesGet_564114, base: "", url: url_NamespacesGet_564115,
     schemes: {Scheme.Https})
 type
-  Call_NamespacesPatch_568248 = ref object of OpenApiRestCall_567641
-proc url_NamespacesPatch_568250(protocol: Scheme; host: string; base: string;
+  Call_NamespacesPatch_564148 = ref object of OpenApiRestCall_563539
+proc url_NamespacesPatch_564150(protocol: Scheme; host: string; base: string;
                                route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -668,7 +672,7 @@ proc url_NamespacesPatch_568250(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_NamespacesPatch_568249(path: JsonNode; query: JsonNode;
+proc validate_NamespacesPatch_564149(path: JsonNode; query: JsonNode;
                                     header: JsonNode; formData: JsonNode;
                                     body: JsonNode): JsonNode =
   ## Patches the existing namespace
@@ -678,28 +682,28 @@ proc validate_NamespacesPatch_568249(path: JsonNode; query: JsonNode;
   ## parameters in `path` object:
   ##   namespaceName: JString (required)
   ##                : The namespace name.
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   subscriptionId: JString (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `namespaceName` field"
-  var valid_568251 = path.getOrDefault("namespaceName")
-  valid_568251 = validateParameter(valid_568251, JString, required = true,
+  var valid_564151 = path.getOrDefault("namespaceName")
+  valid_564151 = validateParameter(valid_564151, JString, required = true,
                                  default = nil)
-  if valid_568251 != nil:
-    section.add "namespaceName", valid_568251
-  var valid_568252 = path.getOrDefault("resourceGroupName")
-  valid_568252 = validateParameter(valid_568252, JString, required = true,
+  if valid_564151 != nil:
+    section.add "namespaceName", valid_564151
+  var valid_564152 = path.getOrDefault("subscriptionId")
+  valid_564152 = validateParameter(valid_564152, JString, required = true,
                                  default = nil)
-  if valid_568252 != nil:
-    section.add "resourceGroupName", valid_568252
-  var valid_568253 = path.getOrDefault("subscriptionId")
-  valid_568253 = validateParameter(valid_568253, JString, required = true,
+  if valid_564152 != nil:
+    section.add "subscriptionId", valid_564152
+  var valid_564153 = path.getOrDefault("resourceGroupName")
+  valid_564153 = validateParameter(valid_564153, JString, required = true,
                                  default = nil)
-  if valid_568253 != nil:
-    section.add "subscriptionId", valid_568253
+  if valid_564153 != nil:
+    section.add "resourceGroupName", valid_564153
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -707,11 +711,11 @@ proc validate_NamespacesPatch_568249(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568254 = query.getOrDefault("api-version")
-  valid_568254 = validateParameter(valid_568254, JString, required = true,
+  var valid_564154 = query.getOrDefault("api-version")
+  valid_564154 = validateParameter(valid_564154, JString, required = true,
                                  default = nil)
-  if valid_568254 != nil:
-    section.add "api-version", valid_568254
+  if valid_564154 != nil:
+    section.add "api-version", valid_564154
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -725,52 +729,52 @@ proc validate_NamespacesPatch_568249(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568256: Call_NamespacesPatch_568248; path: JsonNode; query: JsonNode;
+proc call*(call_564156: Call_NamespacesPatch_564148; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Patches the existing namespace
   ## 
-  let valid = call_568256.validator(path, query, header, formData, body)
-  let scheme = call_568256.pickScheme
+  let valid = call_564156.validator(path, query, header, formData, body)
+  let scheme = call_564156.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568256.url(scheme.get, call_568256.host, call_568256.base,
-                         call_568256.route, valid.getOrDefault("path"),
+  let url = call_564156.url(scheme.get, call_564156.host, call_564156.base,
+                         call_564156.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568256, url, valid)
+  result = hook(call_564156, url, valid)
 
-proc call*(call_568257: Call_NamespacesPatch_568248; namespaceName: string;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
+proc call*(call_564157: Call_NamespacesPatch_564148; apiVersion: string;
+          namespaceName: string; subscriptionId: string; resourceGroupName: string;
           parameters: JsonNode): Recallable =
   ## namespacesPatch
   ## Patches the existing namespace
-  ##   namespaceName: string (required)
-  ##                : The namespace name.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
+  ##   namespaceName: string (required)
+  ##                : The namespace name.
   ##   subscriptionId: string (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   parameters: JObject (required)
   ##             : Parameters supplied to patch a Namespace Resource.
-  var path_568258 = newJObject()
-  var query_568259 = newJObject()
-  var body_568260 = newJObject()
-  add(path_568258, "namespaceName", newJString(namespaceName))
-  add(path_568258, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568259, "api-version", newJString(apiVersion))
-  add(path_568258, "subscriptionId", newJString(subscriptionId))
+  var path_564158 = newJObject()
+  var query_564159 = newJObject()
+  var body_564160 = newJObject()
+  add(query_564159, "api-version", newJString(apiVersion))
+  add(path_564158, "namespaceName", newJString(namespaceName))
+  add(path_564158, "subscriptionId", newJString(subscriptionId))
+  add(path_564158, "resourceGroupName", newJString(resourceGroupName))
   if parameters != nil:
-    body_568260 = parameters
-  result = call_568257.call(path_568258, query_568259, nil, nil, body_568260)
+    body_564160 = parameters
+  result = call_564157.call(path_564158, query_564159, nil, nil, body_564160)
 
-var namespacesPatch* = Call_NamespacesPatch_568248(name: "namespacesPatch",
+var namespacesPatch* = Call_NamespacesPatch_564148(name: "namespacesPatch",
     meth: HttpMethod.HttpPatch, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.NotificationHubs/namespaces/{namespaceName}",
-    validator: validate_NamespacesPatch_568249, base: "", url: url_NamespacesPatch_568250,
+    validator: validate_NamespacesPatch_564149, base: "", url: url_NamespacesPatch_564150,
     schemes: {Scheme.Https})
 type
-  Call_NamespacesDelete_568237 = ref object of OpenApiRestCall_567641
-proc url_NamespacesDelete_568239(protocol: Scheme; host: string; base: string;
+  Call_NamespacesDelete_564137 = ref object of OpenApiRestCall_563539
+proc url_NamespacesDelete_564139(protocol: Scheme; host: string; base: string;
                                 route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -793,7 +797,7 @@ proc url_NamespacesDelete_568239(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_NamespacesDelete_568238(path: JsonNode; query: JsonNode;
+proc validate_NamespacesDelete_564138(path: JsonNode; query: JsonNode;
                                      header: JsonNode; formData: JsonNode;
                                      body: JsonNode): JsonNode =
   ## Deletes an existing namespace. This operation also removes all associated notificationHubs under the namespace.
@@ -804,28 +808,28 @@ proc validate_NamespacesDelete_568238(path: JsonNode; query: JsonNode;
   ## parameters in `path` object:
   ##   namespaceName: JString (required)
   ##                : The namespace name.
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   subscriptionId: JString (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `namespaceName` field"
-  var valid_568240 = path.getOrDefault("namespaceName")
-  valid_568240 = validateParameter(valid_568240, JString, required = true,
+  var valid_564140 = path.getOrDefault("namespaceName")
+  valid_564140 = validateParameter(valid_564140, JString, required = true,
                                  default = nil)
-  if valid_568240 != nil:
-    section.add "namespaceName", valid_568240
-  var valid_568241 = path.getOrDefault("resourceGroupName")
-  valid_568241 = validateParameter(valid_568241, JString, required = true,
+  if valid_564140 != nil:
+    section.add "namespaceName", valid_564140
+  var valid_564141 = path.getOrDefault("subscriptionId")
+  valid_564141 = validateParameter(valid_564141, JString, required = true,
                                  default = nil)
-  if valid_568241 != nil:
-    section.add "resourceGroupName", valid_568241
-  var valid_568242 = path.getOrDefault("subscriptionId")
-  valid_568242 = validateParameter(valid_568242, JString, required = true,
+  if valid_564141 != nil:
+    section.add "subscriptionId", valid_564141
+  var valid_564142 = path.getOrDefault("resourceGroupName")
+  valid_564142 = validateParameter(valid_564142, JString, required = true,
                                  default = nil)
-  if valid_568242 != nil:
-    section.add "subscriptionId", valid_568242
+  if valid_564142 != nil:
+    section.add "resourceGroupName", valid_564142
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -833,11 +837,11 @@ proc validate_NamespacesDelete_568238(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568243 = query.getOrDefault("api-version")
-  valid_568243 = validateParameter(valid_568243, JString, required = true,
+  var valid_564143 = query.getOrDefault("api-version")
+  valid_564143 = validateParameter(valid_564143, JString, required = true,
                                  default = nil)
-  if valid_568243 != nil:
-    section.add "api-version", valid_568243
+  if valid_564143 != nil:
+    section.add "api-version", valid_564143
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -846,48 +850,48 @@ proc validate_NamespacesDelete_568238(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568244: Call_NamespacesDelete_568237; path: JsonNode;
+proc call*(call_564144: Call_NamespacesDelete_564137; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes an existing namespace. This operation also removes all associated notificationHubs under the namespace.
   ## 
   ## http://msdn.microsoft.com/en-us/library/windowsazure/jj856296.aspx
-  let valid = call_568244.validator(path, query, header, formData, body)
-  let scheme = call_568244.pickScheme
+  let valid = call_564144.validator(path, query, header, formData, body)
+  let scheme = call_564144.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568244.url(scheme.get, call_568244.host, call_568244.base,
-                         call_568244.route, valid.getOrDefault("path"),
+  let url = call_564144.url(scheme.get, call_564144.host, call_564144.base,
+                         call_564144.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568244, url, valid)
+  result = hook(call_564144, url, valid)
 
-proc call*(call_568245: Call_NamespacesDelete_568237; namespaceName: string;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string): Recallable =
+proc call*(call_564145: Call_NamespacesDelete_564137; apiVersion: string;
+          namespaceName: string; subscriptionId: string; resourceGroupName: string): Recallable =
   ## namespacesDelete
   ## Deletes an existing namespace. This operation also removes all associated notificationHubs under the namespace.
   ## http://msdn.microsoft.com/en-us/library/windowsazure/jj856296.aspx
-  ##   namespaceName: string (required)
-  ##                : The namespace name.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
+  ##   namespaceName: string (required)
+  ##                : The namespace name.
   ##   subscriptionId: string (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_568246 = newJObject()
-  var query_568247 = newJObject()
-  add(path_568246, "namespaceName", newJString(namespaceName))
-  add(path_568246, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568247, "api-version", newJString(apiVersion))
-  add(path_568246, "subscriptionId", newJString(subscriptionId))
-  result = call_568245.call(path_568246, query_568247, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564146 = newJObject()
+  var query_564147 = newJObject()
+  add(query_564147, "api-version", newJString(apiVersion))
+  add(path_564146, "namespaceName", newJString(namespaceName))
+  add(path_564146, "subscriptionId", newJString(subscriptionId))
+  add(path_564146, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564145.call(path_564146, query_564147, nil, nil, nil)
 
-var namespacesDelete* = Call_NamespacesDelete_568237(name: "namespacesDelete",
+var namespacesDelete* = Call_NamespacesDelete_564137(name: "namespacesDelete",
     meth: HttpMethod.HttpDelete, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.NotificationHubs/namespaces/{namespaceName}",
-    validator: validate_NamespacesDelete_568238, base: "",
-    url: url_NamespacesDelete_568239, schemes: {Scheme.Https})
+    validator: validate_NamespacesDelete_564138, base: "",
+    url: url_NamespacesDelete_564139, schemes: {Scheme.Https})
 type
-  Call_NamespacesListAuthorizationRules_568261 = ref object of OpenApiRestCall_567641
-proc url_NamespacesListAuthorizationRules_568263(protocol: Scheme; host: string;
+  Call_NamespacesListAuthorizationRules_564161 = ref object of OpenApiRestCall_563539
+proc url_NamespacesListAuthorizationRules_564163(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -911,7 +915,7 @@ proc url_NamespacesListAuthorizationRules_568263(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_NamespacesListAuthorizationRules_568262(path: JsonNode;
+proc validate_NamespacesListAuthorizationRules_564162(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the authorization rules for a namespace.
   ## 
@@ -920,28 +924,28 @@ proc validate_NamespacesListAuthorizationRules_568262(path: JsonNode;
   ## parameters in `path` object:
   ##   namespaceName: JString (required)
   ##                : The namespace name
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   subscriptionId: JString (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `namespaceName` field"
-  var valid_568264 = path.getOrDefault("namespaceName")
-  valid_568264 = validateParameter(valid_568264, JString, required = true,
+  var valid_564164 = path.getOrDefault("namespaceName")
+  valid_564164 = validateParameter(valid_564164, JString, required = true,
                                  default = nil)
-  if valid_568264 != nil:
-    section.add "namespaceName", valid_568264
-  var valid_568265 = path.getOrDefault("resourceGroupName")
-  valid_568265 = validateParameter(valid_568265, JString, required = true,
+  if valid_564164 != nil:
+    section.add "namespaceName", valid_564164
+  var valid_564165 = path.getOrDefault("subscriptionId")
+  valid_564165 = validateParameter(valid_564165, JString, required = true,
                                  default = nil)
-  if valid_568265 != nil:
-    section.add "resourceGroupName", valid_568265
-  var valid_568266 = path.getOrDefault("subscriptionId")
-  valid_568266 = validateParameter(valid_568266, JString, required = true,
+  if valid_564165 != nil:
+    section.add "subscriptionId", valid_564165
+  var valid_564166 = path.getOrDefault("resourceGroupName")
+  valid_564166 = validateParameter(valid_564166, JString, required = true,
                                  default = nil)
-  if valid_568266 != nil:
-    section.add "subscriptionId", valid_568266
+  if valid_564166 != nil:
+    section.add "resourceGroupName", valid_564166
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -949,11 +953,11 @@ proc validate_NamespacesListAuthorizationRules_568262(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568267 = query.getOrDefault("api-version")
-  valid_568267 = validateParameter(valid_568267, JString, required = true,
+  var valid_564167 = query.getOrDefault("api-version")
+  valid_564167 = validateParameter(valid_564167, JString, required = true,
                                  default = nil)
-  if valid_568267 != nil:
-    section.add "api-version", valid_568267
+  if valid_564167 != nil:
+    section.add "api-version", valid_564167
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -962,49 +966,49 @@ proc validate_NamespacesListAuthorizationRules_568262(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568268: Call_NamespacesListAuthorizationRules_568261;
+proc call*(call_564168: Call_NamespacesListAuthorizationRules_564161;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Gets the authorization rules for a namespace.
   ## 
-  let valid = call_568268.validator(path, query, header, formData, body)
-  let scheme = call_568268.pickScheme
+  let valid = call_564168.validator(path, query, header, formData, body)
+  let scheme = call_564168.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568268.url(scheme.get, call_568268.host, call_568268.base,
-                         call_568268.route, valid.getOrDefault("path"),
+  let url = call_564168.url(scheme.get, call_564168.host, call_564168.base,
+                         call_564168.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568268, url, valid)
+  result = hook(call_564168, url, valid)
 
-proc call*(call_568269: Call_NamespacesListAuthorizationRules_568261;
-          namespaceName: string; resourceGroupName: string; apiVersion: string;
-          subscriptionId: string): Recallable =
+proc call*(call_564169: Call_NamespacesListAuthorizationRules_564161;
+          apiVersion: string; namespaceName: string; subscriptionId: string;
+          resourceGroupName: string): Recallable =
   ## namespacesListAuthorizationRules
   ## Gets the authorization rules for a namespace.
-  ##   namespaceName: string (required)
-  ##                : The namespace name
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
+  ##   namespaceName: string (required)
+  ##                : The namespace name
   ##   subscriptionId: string (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_568270 = newJObject()
-  var query_568271 = newJObject()
-  add(path_568270, "namespaceName", newJString(namespaceName))
-  add(path_568270, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568271, "api-version", newJString(apiVersion))
-  add(path_568270, "subscriptionId", newJString(subscriptionId))
-  result = call_568269.call(path_568270, query_568271, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564170 = newJObject()
+  var query_564171 = newJObject()
+  add(query_564171, "api-version", newJString(apiVersion))
+  add(path_564170, "namespaceName", newJString(namespaceName))
+  add(path_564170, "subscriptionId", newJString(subscriptionId))
+  add(path_564170, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564169.call(path_564170, query_564171, nil, nil, nil)
 
-var namespacesListAuthorizationRules* = Call_NamespacesListAuthorizationRules_568261(
+var namespacesListAuthorizationRules* = Call_NamespacesListAuthorizationRules_564161(
     name: "namespacesListAuthorizationRules", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.NotificationHubs/namespaces/{namespaceName}/AuthorizationRules",
-    validator: validate_NamespacesListAuthorizationRules_568262, base: "",
-    url: url_NamespacesListAuthorizationRules_568263, schemes: {Scheme.Https})
+    validator: validate_NamespacesListAuthorizationRules_564162, base: "",
+    url: url_NamespacesListAuthorizationRules_564163, schemes: {Scheme.Https})
 type
-  Call_NamespacesCreateOrUpdateAuthorizationRule_568284 = ref object of OpenApiRestCall_567641
-proc url_NamespacesCreateOrUpdateAuthorizationRule_568286(protocol: Scheme;
+  Call_NamespacesCreateOrUpdateAuthorizationRule_564184 = ref object of OpenApiRestCall_563539
+proc url_NamespacesCreateOrUpdateAuthorizationRule_564186(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1031,7 +1035,7 @@ proc url_NamespacesCreateOrUpdateAuthorizationRule_568286(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_NamespacesCreateOrUpdateAuthorizationRule_568285(path: JsonNode;
+proc validate_NamespacesCreateOrUpdateAuthorizationRule_564185(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Creates an authorization rule for a namespace
   ## 
@@ -1040,35 +1044,35 @@ proc validate_NamespacesCreateOrUpdateAuthorizationRule_568285(path: JsonNode;
   ## parameters in `path` object:
   ##   namespaceName: JString (required)
   ##                : The namespace name.
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
-  ##   authorizationRuleName: JString (required)
-  ##                        : Authorization Rule Name.
   ##   subscriptionId: JString (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   authorizationRuleName: JString (required)
+  ##                        : Authorization Rule Name.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `namespaceName` field"
-  var valid_568287 = path.getOrDefault("namespaceName")
-  valid_568287 = validateParameter(valid_568287, JString, required = true,
+  var valid_564187 = path.getOrDefault("namespaceName")
+  valid_564187 = validateParameter(valid_564187, JString, required = true,
                                  default = nil)
-  if valid_568287 != nil:
-    section.add "namespaceName", valid_568287
-  var valid_568288 = path.getOrDefault("resourceGroupName")
-  valid_568288 = validateParameter(valid_568288, JString, required = true,
+  if valid_564187 != nil:
+    section.add "namespaceName", valid_564187
+  var valid_564188 = path.getOrDefault("subscriptionId")
+  valid_564188 = validateParameter(valid_564188, JString, required = true,
                                  default = nil)
-  if valid_568288 != nil:
-    section.add "resourceGroupName", valid_568288
-  var valid_568289 = path.getOrDefault("authorizationRuleName")
-  valid_568289 = validateParameter(valid_568289, JString, required = true,
+  if valid_564188 != nil:
+    section.add "subscriptionId", valid_564188
+  var valid_564189 = path.getOrDefault("authorizationRuleName")
+  valid_564189 = validateParameter(valid_564189, JString, required = true,
                                  default = nil)
-  if valid_568289 != nil:
-    section.add "authorizationRuleName", valid_568289
-  var valid_568290 = path.getOrDefault("subscriptionId")
-  valid_568290 = validateParameter(valid_568290, JString, required = true,
+  if valid_564189 != nil:
+    section.add "authorizationRuleName", valid_564189
+  var valid_564190 = path.getOrDefault("resourceGroupName")
+  valid_564190 = validateParameter(valid_564190, JString, required = true,
                                  default = nil)
-  if valid_568290 != nil:
-    section.add "subscriptionId", valid_568290
+  if valid_564190 != nil:
+    section.add "resourceGroupName", valid_564190
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1076,11 +1080,11 @@ proc validate_NamespacesCreateOrUpdateAuthorizationRule_568285(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568291 = query.getOrDefault("api-version")
-  valid_568291 = validateParameter(valid_568291, JString, required = true,
+  var valid_564191 = query.getOrDefault("api-version")
+  valid_564191 = validateParameter(valid_564191, JString, required = true,
                                  default = nil)
-  if valid_568291 != nil:
-    section.add "api-version", valid_568291
+  if valid_564191 != nil:
+    section.add "api-version", valid_564191
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1094,59 +1098,59 @@ proc validate_NamespacesCreateOrUpdateAuthorizationRule_568285(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568293: Call_NamespacesCreateOrUpdateAuthorizationRule_568284;
+proc call*(call_564193: Call_NamespacesCreateOrUpdateAuthorizationRule_564184;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Creates an authorization rule for a namespace
   ## 
-  let valid = call_568293.validator(path, query, header, formData, body)
-  let scheme = call_568293.pickScheme
+  let valid = call_564193.validator(path, query, header, formData, body)
+  let scheme = call_564193.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568293.url(scheme.get, call_568293.host, call_568293.base,
-                         call_568293.route, valid.getOrDefault("path"),
+  let url = call_564193.url(scheme.get, call_564193.host, call_564193.base,
+                         call_564193.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568293, url, valid)
+  result = hook(call_564193, url, valid)
 
-proc call*(call_568294: Call_NamespacesCreateOrUpdateAuthorizationRule_568284;
-          namespaceName: string; resourceGroupName: string; apiVersion: string;
-          authorizationRuleName: string; subscriptionId: string;
+proc call*(call_564194: Call_NamespacesCreateOrUpdateAuthorizationRule_564184;
+          apiVersion: string; namespaceName: string; subscriptionId: string;
+          authorizationRuleName: string; resourceGroupName: string;
           parameters: JsonNode): Recallable =
   ## namespacesCreateOrUpdateAuthorizationRule
   ## Creates an authorization rule for a namespace
-  ##   namespaceName: string (required)
-  ##                : The namespace name.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
-  ##   authorizationRuleName: string (required)
-  ##                        : Authorization Rule Name.
+  ##   namespaceName: string (required)
+  ##                : The namespace name.
   ##   subscriptionId: string (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   authorizationRuleName: string (required)
+  ##                        : Authorization Rule Name.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   parameters: JObject (required)
   ##             : The shared access authorization rule.
-  var path_568295 = newJObject()
-  var query_568296 = newJObject()
-  var body_568297 = newJObject()
-  add(path_568295, "namespaceName", newJString(namespaceName))
-  add(path_568295, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568296, "api-version", newJString(apiVersion))
-  add(path_568295, "authorizationRuleName", newJString(authorizationRuleName))
-  add(path_568295, "subscriptionId", newJString(subscriptionId))
+  var path_564195 = newJObject()
+  var query_564196 = newJObject()
+  var body_564197 = newJObject()
+  add(query_564196, "api-version", newJString(apiVersion))
+  add(path_564195, "namespaceName", newJString(namespaceName))
+  add(path_564195, "subscriptionId", newJString(subscriptionId))
+  add(path_564195, "authorizationRuleName", newJString(authorizationRuleName))
+  add(path_564195, "resourceGroupName", newJString(resourceGroupName))
   if parameters != nil:
-    body_568297 = parameters
-  result = call_568294.call(path_568295, query_568296, nil, nil, body_568297)
+    body_564197 = parameters
+  result = call_564194.call(path_564195, query_564196, nil, nil, body_564197)
 
-var namespacesCreateOrUpdateAuthorizationRule* = Call_NamespacesCreateOrUpdateAuthorizationRule_568284(
+var namespacesCreateOrUpdateAuthorizationRule* = Call_NamespacesCreateOrUpdateAuthorizationRule_564184(
     name: "namespacesCreateOrUpdateAuthorizationRule", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.NotificationHubs/namespaces/{namespaceName}/AuthorizationRules/{authorizationRuleName}",
-    validator: validate_NamespacesCreateOrUpdateAuthorizationRule_568285,
-    base: "", url: url_NamespacesCreateOrUpdateAuthorizationRule_568286,
+    validator: validate_NamespacesCreateOrUpdateAuthorizationRule_564185,
+    base: "", url: url_NamespacesCreateOrUpdateAuthorizationRule_564186,
     schemes: {Scheme.Https})
 type
-  Call_NamespacesGetAuthorizationRule_568272 = ref object of OpenApiRestCall_567641
-proc url_NamespacesGetAuthorizationRule_568274(protocol: Scheme; host: string;
+  Call_NamespacesGetAuthorizationRule_564172 = ref object of OpenApiRestCall_563539
+proc url_NamespacesGetAuthorizationRule_564174(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1173,7 +1177,7 @@ proc url_NamespacesGetAuthorizationRule_568274(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_NamespacesGetAuthorizationRule_568273(path: JsonNode;
+proc validate_NamespacesGetAuthorizationRule_564173(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets an authorization rule for a namespace by name.
   ## 
@@ -1182,35 +1186,35 @@ proc validate_NamespacesGetAuthorizationRule_568273(path: JsonNode;
   ## parameters in `path` object:
   ##   namespaceName: JString (required)
   ##                : The namespace name
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
-  ##   authorizationRuleName: JString (required)
-  ##                        : Authorization rule name.
   ##   subscriptionId: JString (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   authorizationRuleName: JString (required)
+  ##                        : Authorization rule name.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `namespaceName` field"
-  var valid_568275 = path.getOrDefault("namespaceName")
-  valid_568275 = validateParameter(valid_568275, JString, required = true,
+  var valid_564175 = path.getOrDefault("namespaceName")
+  valid_564175 = validateParameter(valid_564175, JString, required = true,
                                  default = nil)
-  if valid_568275 != nil:
-    section.add "namespaceName", valid_568275
-  var valid_568276 = path.getOrDefault("resourceGroupName")
-  valid_568276 = validateParameter(valid_568276, JString, required = true,
+  if valid_564175 != nil:
+    section.add "namespaceName", valid_564175
+  var valid_564176 = path.getOrDefault("subscriptionId")
+  valid_564176 = validateParameter(valid_564176, JString, required = true,
                                  default = nil)
-  if valid_568276 != nil:
-    section.add "resourceGroupName", valid_568276
-  var valid_568277 = path.getOrDefault("authorizationRuleName")
-  valid_568277 = validateParameter(valid_568277, JString, required = true,
+  if valid_564176 != nil:
+    section.add "subscriptionId", valid_564176
+  var valid_564177 = path.getOrDefault("authorizationRuleName")
+  valid_564177 = validateParameter(valid_564177, JString, required = true,
                                  default = nil)
-  if valid_568277 != nil:
-    section.add "authorizationRuleName", valid_568277
-  var valid_568278 = path.getOrDefault("subscriptionId")
-  valid_568278 = validateParameter(valid_568278, JString, required = true,
+  if valid_564177 != nil:
+    section.add "authorizationRuleName", valid_564177
+  var valid_564178 = path.getOrDefault("resourceGroupName")
+  valid_564178 = validateParameter(valid_564178, JString, required = true,
                                  default = nil)
-  if valid_568278 != nil:
-    section.add "subscriptionId", valid_568278
+  if valid_564178 != nil:
+    section.add "resourceGroupName", valid_564178
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1218,11 +1222,11 @@ proc validate_NamespacesGetAuthorizationRule_568273(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568279 = query.getOrDefault("api-version")
-  valid_568279 = validateParameter(valid_568279, JString, required = true,
+  var valid_564179 = query.getOrDefault("api-version")
+  valid_564179 = validateParameter(valid_564179, JString, required = true,
                                  default = nil)
-  if valid_568279 != nil:
-    section.add "api-version", valid_568279
+  if valid_564179 != nil:
+    section.add "api-version", valid_564179
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1231,51 +1235,51 @@ proc validate_NamespacesGetAuthorizationRule_568273(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568280: Call_NamespacesGetAuthorizationRule_568272; path: JsonNode;
+proc call*(call_564180: Call_NamespacesGetAuthorizationRule_564172; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets an authorization rule for a namespace by name.
   ## 
-  let valid = call_568280.validator(path, query, header, formData, body)
-  let scheme = call_568280.pickScheme
+  let valid = call_564180.validator(path, query, header, formData, body)
+  let scheme = call_564180.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568280.url(scheme.get, call_568280.host, call_568280.base,
-                         call_568280.route, valid.getOrDefault("path"),
+  let url = call_564180.url(scheme.get, call_564180.host, call_564180.base,
+                         call_564180.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568280, url, valid)
+  result = hook(call_564180, url, valid)
 
-proc call*(call_568281: Call_NamespacesGetAuthorizationRule_568272;
-          namespaceName: string; resourceGroupName: string; apiVersion: string;
-          authorizationRuleName: string; subscriptionId: string): Recallable =
+proc call*(call_564181: Call_NamespacesGetAuthorizationRule_564172;
+          apiVersion: string; namespaceName: string; subscriptionId: string;
+          authorizationRuleName: string; resourceGroupName: string): Recallable =
   ## namespacesGetAuthorizationRule
   ## Gets an authorization rule for a namespace by name.
-  ##   namespaceName: string (required)
-  ##                : The namespace name
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
-  ##   authorizationRuleName: string (required)
-  ##                        : Authorization rule name.
+  ##   namespaceName: string (required)
+  ##                : The namespace name
   ##   subscriptionId: string (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_568282 = newJObject()
-  var query_568283 = newJObject()
-  add(path_568282, "namespaceName", newJString(namespaceName))
-  add(path_568282, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568283, "api-version", newJString(apiVersion))
-  add(path_568282, "authorizationRuleName", newJString(authorizationRuleName))
-  add(path_568282, "subscriptionId", newJString(subscriptionId))
-  result = call_568281.call(path_568282, query_568283, nil, nil, nil)
+  ##   authorizationRuleName: string (required)
+  ##                        : Authorization rule name.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564182 = newJObject()
+  var query_564183 = newJObject()
+  add(query_564183, "api-version", newJString(apiVersion))
+  add(path_564182, "namespaceName", newJString(namespaceName))
+  add(path_564182, "subscriptionId", newJString(subscriptionId))
+  add(path_564182, "authorizationRuleName", newJString(authorizationRuleName))
+  add(path_564182, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564181.call(path_564182, query_564183, nil, nil, nil)
 
-var namespacesGetAuthorizationRule* = Call_NamespacesGetAuthorizationRule_568272(
+var namespacesGetAuthorizationRule* = Call_NamespacesGetAuthorizationRule_564172(
     name: "namespacesGetAuthorizationRule", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.NotificationHubs/namespaces/{namespaceName}/AuthorizationRules/{authorizationRuleName}",
-    validator: validate_NamespacesGetAuthorizationRule_568273, base: "",
-    url: url_NamespacesGetAuthorizationRule_568274, schemes: {Scheme.Https})
+    validator: validate_NamespacesGetAuthorizationRule_564173, base: "",
+    url: url_NamespacesGetAuthorizationRule_564174, schemes: {Scheme.Https})
 type
-  Call_NamespacesDeleteAuthorizationRule_568298 = ref object of OpenApiRestCall_567641
-proc url_NamespacesDeleteAuthorizationRule_568300(protocol: Scheme; host: string;
+  Call_NamespacesDeleteAuthorizationRule_564198 = ref object of OpenApiRestCall_563539
+proc url_NamespacesDeleteAuthorizationRule_564200(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1302,7 +1306,7 @@ proc url_NamespacesDeleteAuthorizationRule_568300(protocol: Scheme; host: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_NamespacesDeleteAuthorizationRule_568299(path: JsonNode;
+proc validate_NamespacesDeleteAuthorizationRule_564199(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Deletes a namespace authorization rule
   ## 
@@ -1311,35 +1315,35 @@ proc validate_NamespacesDeleteAuthorizationRule_568299(path: JsonNode;
   ## parameters in `path` object:
   ##   namespaceName: JString (required)
   ##                : The namespace name.
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
-  ##   authorizationRuleName: JString (required)
-  ##                        : Authorization Rule Name.
   ##   subscriptionId: JString (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   authorizationRuleName: JString (required)
+  ##                        : Authorization Rule Name.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `namespaceName` field"
-  var valid_568301 = path.getOrDefault("namespaceName")
-  valid_568301 = validateParameter(valid_568301, JString, required = true,
+  var valid_564201 = path.getOrDefault("namespaceName")
+  valid_564201 = validateParameter(valid_564201, JString, required = true,
                                  default = nil)
-  if valid_568301 != nil:
-    section.add "namespaceName", valid_568301
-  var valid_568302 = path.getOrDefault("resourceGroupName")
-  valid_568302 = validateParameter(valid_568302, JString, required = true,
+  if valid_564201 != nil:
+    section.add "namespaceName", valid_564201
+  var valid_564202 = path.getOrDefault("subscriptionId")
+  valid_564202 = validateParameter(valid_564202, JString, required = true,
                                  default = nil)
-  if valid_568302 != nil:
-    section.add "resourceGroupName", valid_568302
-  var valid_568303 = path.getOrDefault("authorizationRuleName")
-  valid_568303 = validateParameter(valid_568303, JString, required = true,
+  if valid_564202 != nil:
+    section.add "subscriptionId", valid_564202
+  var valid_564203 = path.getOrDefault("authorizationRuleName")
+  valid_564203 = validateParameter(valid_564203, JString, required = true,
                                  default = nil)
-  if valid_568303 != nil:
-    section.add "authorizationRuleName", valid_568303
-  var valid_568304 = path.getOrDefault("subscriptionId")
-  valid_568304 = validateParameter(valid_568304, JString, required = true,
+  if valid_564203 != nil:
+    section.add "authorizationRuleName", valid_564203
+  var valid_564204 = path.getOrDefault("resourceGroupName")
+  valid_564204 = validateParameter(valid_564204, JString, required = true,
                                  default = nil)
-  if valid_568304 != nil:
-    section.add "subscriptionId", valid_568304
+  if valid_564204 != nil:
+    section.add "resourceGroupName", valid_564204
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1347,11 +1351,11 @@ proc validate_NamespacesDeleteAuthorizationRule_568299(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568305 = query.getOrDefault("api-version")
-  valid_568305 = validateParameter(valid_568305, JString, required = true,
+  var valid_564205 = query.getOrDefault("api-version")
+  valid_564205 = validateParameter(valid_564205, JString, required = true,
                                  default = nil)
-  if valid_568305 != nil:
-    section.add "api-version", valid_568305
+  if valid_564205 != nil:
+    section.add "api-version", valid_564205
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1360,52 +1364,52 @@ proc validate_NamespacesDeleteAuthorizationRule_568299(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568306: Call_NamespacesDeleteAuthorizationRule_568298;
+proc call*(call_564206: Call_NamespacesDeleteAuthorizationRule_564198;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Deletes a namespace authorization rule
   ## 
-  let valid = call_568306.validator(path, query, header, formData, body)
-  let scheme = call_568306.pickScheme
+  let valid = call_564206.validator(path, query, header, formData, body)
+  let scheme = call_564206.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568306.url(scheme.get, call_568306.host, call_568306.base,
-                         call_568306.route, valid.getOrDefault("path"),
+  let url = call_564206.url(scheme.get, call_564206.host, call_564206.base,
+                         call_564206.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568306, url, valid)
+  result = hook(call_564206, url, valid)
 
-proc call*(call_568307: Call_NamespacesDeleteAuthorizationRule_568298;
-          namespaceName: string; resourceGroupName: string; apiVersion: string;
-          authorizationRuleName: string; subscriptionId: string): Recallable =
+proc call*(call_564207: Call_NamespacesDeleteAuthorizationRule_564198;
+          apiVersion: string; namespaceName: string; subscriptionId: string;
+          authorizationRuleName: string; resourceGroupName: string): Recallable =
   ## namespacesDeleteAuthorizationRule
   ## Deletes a namespace authorization rule
-  ##   namespaceName: string (required)
-  ##                : The namespace name.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
-  ##   authorizationRuleName: string (required)
-  ##                        : Authorization Rule Name.
+  ##   namespaceName: string (required)
+  ##                : The namespace name.
   ##   subscriptionId: string (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_568308 = newJObject()
-  var query_568309 = newJObject()
-  add(path_568308, "namespaceName", newJString(namespaceName))
-  add(path_568308, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568309, "api-version", newJString(apiVersion))
-  add(path_568308, "authorizationRuleName", newJString(authorizationRuleName))
-  add(path_568308, "subscriptionId", newJString(subscriptionId))
-  result = call_568307.call(path_568308, query_568309, nil, nil, nil)
+  ##   authorizationRuleName: string (required)
+  ##                        : Authorization Rule Name.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564208 = newJObject()
+  var query_564209 = newJObject()
+  add(query_564209, "api-version", newJString(apiVersion))
+  add(path_564208, "namespaceName", newJString(namespaceName))
+  add(path_564208, "subscriptionId", newJString(subscriptionId))
+  add(path_564208, "authorizationRuleName", newJString(authorizationRuleName))
+  add(path_564208, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564207.call(path_564208, query_564209, nil, nil, nil)
 
-var namespacesDeleteAuthorizationRule* = Call_NamespacesDeleteAuthorizationRule_568298(
+var namespacesDeleteAuthorizationRule* = Call_NamespacesDeleteAuthorizationRule_564198(
     name: "namespacesDeleteAuthorizationRule", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.NotificationHubs/namespaces/{namespaceName}/AuthorizationRules/{authorizationRuleName}",
-    validator: validate_NamespacesDeleteAuthorizationRule_568299, base: "",
-    url: url_NamespacesDeleteAuthorizationRule_568300, schemes: {Scheme.Https})
+    validator: validate_NamespacesDeleteAuthorizationRule_564199, base: "",
+    url: url_NamespacesDeleteAuthorizationRule_564200, schemes: {Scheme.Https})
 type
-  Call_NamespacesListKeys_568310 = ref object of OpenApiRestCall_567641
-proc url_NamespacesListKeys_568312(protocol: Scheme; host: string; base: string;
+  Call_NamespacesListKeys_564210 = ref object of OpenApiRestCall_563539
+proc url_NamespacesListKeys_564212(protocol: Scheme; host: string; base: string;
                                   route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1433,7 +1437,7 @@ proc url_NamespacesListKeys_568312(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_NamespacesListKeys_568311(path: JsonNode; query: JsonNode;
+proc validate_NamespacesListKeys_564211(path: JsonNode; query: JsonNode;
                                        header: JsonNode; formData: JsonNode;
                                        body: JsonNode): JsonNode =
   ## Gets the Primary and Secondary ConnectionStrings to the namespace 
@@ -1444,35 +1448,35 @@ proc validate_NamespacesListKeys_568311(path: JsonNode; query: JsonNode;
   ## parameters in `path` object:
   ##   namespaceName: JString (required)
   ##                : The namespace name.
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
-  ##   authorizationRuleName: JString (required)
-  ##                        : The connection string of the namespace for the specified authorizationRule.
   ##   subscriptionId: JString (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   authorizationRuleName: JString (required)
+  ##                        : The connection string of the namespace for the specified authorizationRule.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `namespaceName` field"
-  var valid_568313 = path.getOrDefault("namespaceName")
-  valid_568313 = validateParameter(valid_568313, JString, required = true,
+  var valid_564213 = path.getOrDefault("namespaceName")
+  valid_564213 = validateParameter(valid_564213, JString, required = true,
                                  default = nil)
-  if valid_568313 != nil:
-    section.add "namespaceName", valid_568313
-  var valid_568314 = path.getOrDefault("resourceGroupName")
-  valid_568314 = validateParameter(valid_568314, JString, required = true,
+  if valid_564213 != nil:
+    section.add "namespaceName", valid_564213
+  var valid_564214 = path.getOrDefault("subscriptionId")
+  valid_564214 = validateParameter(valid_564214, JString, required = true,
                                  default = nil)
-  if valid_568314 != nil:
-    section.add "resourceGroupName", valid_568314
-  var valid_568315 = path.getOrDefault("authorizationRuleName")
-  valid_568315 = validateParameter(valid_568315, JString, required = true,
+  if valid_564214 != nil:
+    section.add "subscriptionId", valid_564214
+  var valid_564215 = path.getOrDefault("authorizationRuleName")
+  valid_564215 = validateParameter(valid_564215, JString, required = true,
                                  default = nil)
-  if valid_568315 != nil:
-    section.add "authorizationRuleName", valid_568315
-  var valid_568316 = path.getOrDefault("subscriptionId")
-  valid_568316 = validateParameter(valid_568316, JString, required = true,
+  if valid_564215 != nil:
+    section.add "authorizationRuleName", valid_564215
+  var valid_564216 = path.getOrDefault("resourceGroupName")
+  valid_564216 = validateParameter(valid_564216, JString, required = true,
                                  default = nil)
-  if valid_568316 != nil:
-    section.add "subscriptionId", valid_568316
+  if valid_564216 != nil:
+    section.add "resourceGroupName", valid_564216
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1480,11 +1484,11 @@ proc validate_NamespacesListKeys_568311(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568317 = query.getOrDefault("api-version")
-  valid_568317 = validateParameter(valid_568317, JString, required = true,
+  var valid_564217 = query.getOrDefault("api-version")
+  valid_564217 = validateParameter(valid_564217, JString, required = true,
                                  default = nil)
-  if valid_568317 != nil:
-    section.add "api-version", valid_568317
+  if valid_564217 != nil:
+    section.add "api-version", valid_564217
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1493,53 +1497,53 @@ proc validate_NamespacesListKeys_568311(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568318: Call_NamespacesListKeys_568310; path: JsonNode;
+proc call*(call_564218: Call_NamespacesListKeys_564210; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the Primary and Secondary ConnectionStrings to the namespace 
   ## 
   ## http://msdn.microsoft.com/en-us/library/windowsazure/jj873988.aspx
-  let valid = call_568318.validator(path, query, header, formData, body)
-  let scheme = call_568318.pickScheme
+  let valid = call_564218.validator(path, query, header, formData, body)
+  let scheme = call_564218.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568318.url(scheme.get, call_568318.host, call_568318.base,
-                         call_568318.route, valid.getOrDefault("path"),
+  let url = call_564218.url(scheme.get, call_564218.host, call_564218.base,
+                         call_564218.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568318, url, valid)
+  result = hook(call_564218, url, valid)
 
-proc call*(call_568319: Call_NamespacesListKeys_568310; namespaceName: string;
-          resourceGroupName: string; apiVersion: string;
-          authorizationRuleName: string; subscriptionId: string): Recallable =
+proc call*(call_564219: Call_NamespacesListKeys_564210; apiVersion: string;
+          namespaceName: string; subscriptionId: string;
+          authorizationRuleName: string; resourceGroupName: string): Recallable =
   ## namespacesListKeys
   ## Gets the Primary and Secondary ConnectionStrings to the namespace 
   ## http://msdn.microsoft.com/en-us/library/windowsazure/jj873988.aspx
-  ##   namespaceName: string (required)
-  ##                : The namespace name.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
-  ##   authorizationRuleName: string (required)
-  ##                        : The connection string of the namespace for the specified authorizationRule.
+  ##   namespaceName: string (required)
+  ##                : The namespace name.
   ##   subscriptionId: string (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_568320 = newJObject()
-  var query_568321 = newJObject()
-  add(path_568320, "namespaceName", newJString(namespaceName))
-  add(path_568320, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568321, "api-version", newJString(apiVersion))
-  add(path_568320, "authorizationRuleName", newJString(authorizationRuleName))
-  add(path_568320, "subscriptionId", newJString(subscriptionId))
-  result = call_568319.call(path_568320, query_568321, nil, nil, nil)
+  ##   authorizationRuleName: string (required)
+  ##                        : The connection string of the namespace for the specified authorizationRule.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564220 = newJObject()
+  var query_564221 = newJObject()
+  add(query_564221, "api-version", newJString(apiVersion))
+  add(path_564220, "namespaceName", newJString(namespaceName))
+  add(path_564220, "subscriptionId", newJString(subscriptionId))
+  add(path_564220, "authorizationRuleName", newJString(authorizationRuleName))
+  add(path_564220, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564219.call(path_564220, query_564221, nil, nil, nil)
 
-var namespacesListKeys* = Call_NamespacesListKeys_568310(
+var namespacesListKeys* = Call_NamespacesListKeys_564210(
     name: "namespacesListKeys", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.NotificationHubs/namespaces/{namespaceName}/AuthorizationRules/{authorizationRuleName}/listKeys",
-    validator: validate_NamespacesListKeys_568311, base: "",
-    url: url_NamespacesListKeys_568312, schemes: {Scheme.Https})
+    validator: validate_NamespacesListKeys_564211, base: "",
+    url: url_NamespacesListKeys_564212, schemes: {Scheme.Https})
 type
-  Call_NamespacesRegenerateKeys_568322 = ref object of OpenApiRestCall_567641
-proc url_NamespacesRegenerateKeys_568324(protocol: Scheme; host: string;
+  Call_NamespacesRegenerateKeys_564222 = ref object of OpenApiRestCall_563539
+proc url_NamespacesRegenerateKeys_564224(protocol: Scheme; host: string;
                                         base: string; route: string; path: JsonNode;
                                         query: JsonNode): Uri =
   result.scheme = $protocol
@@ -1568,7 +1572,7 @@ proc url_NamespacesRegenerateKeys_568324(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_NamespacesRegenerateKeys_568323(path: JsonNode; query: JsonNode;
+proc validate_NamespacesRegenerateKeys_564223(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Regenerates the Primary/Secondary Keys to the Namespace Authorization Rule
   ## 
@@ -1578,35 +1582,35 @@ proc validate_NamespacesRegenerateKeys_568323(path: JsonNode; query: JsonNode;
   ## parameters in `path` object:
   ##   namespaceName: JString (required)
   ##                : The namespace name.
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
-  ##   authorizationRuleName: JString (required)
-  ##                        : The connection string of the namespace for the specified authorizationRule.
   ##   subscriptionId: JString (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   authorizationRuleName: JString (required)
+  ##                        : The connection string of the namespace for the specified authorizationRule.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `namespaceName` field"
-  var valid_568325 = path.getOrDefault("namespaceName")
-  valid_568325 = validateParameter(valid_568325, JString, required = true,
+  var valid_564225 = path.getOrDefault("namespaceName")
+  valid_564225 = validateParameter(valid_564225, JString, required = true,
                                  default = nil)
-  if valid_568325 != nil:
-    section.add "namespaceName", valid_568325
-  var valid_568326 = path.getOrDefault("resourceGroupName")
-  valid_568326 = validateParameter(valid_568326, JString, required = true,
+  if valid_564225 != nil:
+    section.add "namespaceName", valid_564225
+  var valid_564226 = path.getOrDefault("subscriptionId")
+  valid_564226 = validateParameter(valid_564226, JString, required = true,
                                  default = nil)
-  if valid_568326 != nil:
-    section.add "resourceGroupName", valid_568326
-  var valid_568327 = path.getOrDefault("authorizationRuleName")
-  valid_568327 = validateParameter(valid_568327, JString, required = true,
+  if valid_564226 != nil:
+    section.add "subscriptionId", valid_564226
+  var valid_564227 = path.getOrDefault("authorizationRuleName")
+  valid_564227 = validateParameter(valid_564227, JString, required = true,
                                  default = nil)
-  if valid_568327 != nil:
-    section.add "authorizationRuleName", valid_568327
-  var valid_568328 = path.getOrDefault("subscriptionId")
-  valid_568328 = validateParameter(valid_568328, JString, required = true,
+  if valid_564227 != nil:
+    section.add "authorizationRuleName", valid_564227
+  var valid_564228 = path.getOrDefault("resourceGroupName")
+  valid_564228 = validateParameter(valid_564228, JString, required = true,
                                  default = nil)
-  if valid_568328 != nil:
-    section.add "subscriptionId", valid_568328
+  if valid_564228 != nil:
+    section.add "resourceGroupName", valid_564228
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1614,11 +1618,11 @@ proc validate_NamespacesRegenerateKeys_568323(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568329 = query.getOrDefault("api-version")
-  valid_568329 = validateParameter(valid_568329, JString, required = true,
+  var valid_564229 = query.getOrDefault("api-version")
+  valid_564229 = validateParameter(valid_564229, JString, required = true,
                                  default = nil)
-  if valid_568329 != nil:
-    section.add "api-version", valid_568329
+  if valid_564229 != nil:
+    section.add "api-version", valid_564229
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1632,59 +1636,59 @@ proc validate_NamespacesRegenerateKeys_568323(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568331: Call_NamespacesRegenerateKeys_568322; path: JsonNode;
+proc call*(call_564231: Call_NamespacesRegenerateKeys_564222; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Regenerates the Primary/Secondary Keys to the Namespace Authorization Rule
   ## 
   ## http://msdn.microsoft.com/en-us/library/windowsazure/jj873988.aspx
-  let valid = call_568331.validator(path, query, header, formData, body)
-  let scheme = call_568331.pickScheme
+  let valid = call_564231.validator(path, query, header, formData, body)
+  let scheme = call_564231.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568331.url(scheme.get, call_568331.host, call_568331.base,
-                         call_568331.route, valid.getOrDefault("path"),
+  let url = call_564231.url(scheme.get, call_564231.host, call_564231.base,
+                         call_564231.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568331, url, valid)
+  result = hook(call_564231, url, valid)
 
-proc call*(call_568332: Call_NamespacesRegenerateKeys_568322;
-          namespaceName: string; resourceGroupName: string; apiVersion: string;
-          authorizationRuleName: string; subscriptionId: string;
+proc call*(call_564232: Call_NamespacesRegenerateKeys_564222; apiVersion: string;
+          namespaceName: string; subscriptionId: string;
+          authorizationRuleName: string; resourceGroupName: string;
           parameters: JsonNode): Recallable =
   ## namespacesRegenerateKeys
   ## Regenerates the Primary/Secondary Keys to the Namespace Authorization Rule
   ## http://msdn.microsoft.com/en-us/library/windowsazure/jj873988.aspx
-  ##   namespaceName: string (required)
-  ##                : The namespace name.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
-  ##   authorizationRuleName: string (required)
-  ##                        : The connection string of the namespace for the specified authorizationRule.
+  ##   namespaceName: string (required)
+  ##                : The namespace name.
   ##   subscriptionId: string (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   authorizationRuleName: string (required)
+  ##                        : The connection string of the namespace for the specified authorizationRule.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   parameters: JObject (required)
   ##             : Parameters supplied to regenerate the Namespace Authorization Rule Key.
-  var path_568333 = newJObject()
-  var query_568334 = newJObject()
-  var body_568335 = newJObject()
-  add(path_568333, "namespaceName", newJString(namespaceName))
-  add(path_568333, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568334, "api-version", newJString(apiVersion))
-  add(path_568333, "authorizationRuleName", newJString(authorizationRuleName))
-  add(path_568333, "subscriptionId", newJString(subscriptionId))
+  var path_564233 = newJObject()
+  var query_564234 = newJObject()
+  var body_564235 = newJObject()
+  add(query_564234, "api-version", newJString(apiVersion))
+  add(path_564233, "namespaceName", newJString(namespaceName))
+  add(path_564233, "subscriptionId", newJString(subscriptionId))
+  add(path_564233, "authorizationRuleName", newJString(authorizationRuleName))
+  add(path_564233, "resourceGroupName", newJString(resourceGroupName))
   if parameters != nil:
-    body_568335 = parameters
-  result = call_568332.call(path_568333, query_568334, nil, nil, body_568335)
+    body_564235 = parameters
+  result = call_564232.call(path_564233, query_564234, nil, nil, body_564235)
 
-var namespacesRegenerateKeys* = Call_NamespacesRegenerateKeys_568322(
+var namespacesRegenerateKeys* = Call_NamespacesRegenerateKeys_564222(
     name: "namespacesRegenerateKeys", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.NotificationHubs/namespaces/{namespaceName}/AuthorizationRules/{authorizationRuleName}/regenerateKeys",
-    validator: validate_NamespacesRegenerateKeys_568323, base: "",
-    url: url_NamespacesRegenerateKeys_568324, schemes: {Scheme.Https})
+    validator: validate_NamespacesRegenerateKeys_564223, base: "",
+    url: url_NamespacesRegenerateKeys_564224, schemes: {Scheme.Https})
 type
-  Call_NotificationHubsCheckAvailability_568336 = ref object of OpenApiRestCall_567641
-proc url_NotificationHubsCheckAvailability_568338(protocol: Scheme; host: string;
+  Call_NotificationHubsCheckAvailability_564236 = ref object of OpenApiRestCall_563539
+proc url_NotificationHubsCheckAvailability_564238(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1708,7 +1712,7 @@ proc url_NotificationHubsCheckAvailability_568338(protocol: Scheme; host: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_NotificationHubsCheckAvailability_568337(path: JsonNode;
+proc validate_NotificationHubsCheckAvailability_564237(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Checks the availability of the given notificationHub in a namespace.
   ## 
@@ -1718,28 +1722,28 @@ proc validate_NotificationHubsCheckAvailability_568337(path: JsonNode;
   ## parameters in `path` object:
   ##   namespaceName: JString (required)
   ##                : The namespace name.
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   subscriptionId: JString (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `namespaceName` field"
-  var valid_568339 = path.getOrDefault("namespaceName")
-  valid_568339 = validateParameter(valid_568339, JString, required = true,
+  var valid_564239 = path.getOrDefault("namespaceName")
+  valid_564239 = validateParameter(valid_564239, JString, required = true,
                                  default = nil)
-  if valid_568339 != nil:
-    section.add "namespaceName", valid_568339
-  var valid_568340 = path.getOrDefault("resourceGroupName")
-  valid_568340 = validateParameter(valid_568340, JString, required = true,
+  if valid_564239 != nil:
+    section.add "namespaceName", valid_564239
+  var valid_564240 = path.getOrDefault("subscriptionId")
+  valid_564240 = validateParameter(valid_564240, JString, required = true,
                                  default = nil)
-  if valid_568340 != nil:
-    section.add "resourceGroupName", valid_568340
-  var valid_568341 = path.getOrDefault("subscriptionId")
-  valid_568341 = validateParameter(valid_568341, JString, required = true,
+  if valid_564240 != nil:
+    section.add "subscriptionId", valid_564240
+  var valid_564241 = path.getOrDefault("resourceGroupName")
+  valid_564241 = validateParameter(valid_564241, JString, required = true,
                                  default = nil)
-  if valid_568341 != nil:
-    section.add "subscriptionId", valid_568341
+  if valid_564241 != nil:
+    section.add "resourceGroupName", valid_564241
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1747,11 +1751,11 @@ proc validate_NotificationHubsCheckAvailability_568337(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568342 = query.getOrDefault("api-version")
-  valid_568342 = validateParameter(valid_568342, JString, required = true,
+  var valid_564242 = query.getOrDefault("api-version")
+  valid_564242 = validateParameter(valid_564242, JString, required = true,
                                  default = nil)
-  if valid_568342 != nil:
-    section.add "api-version", valid_568342
+  if valid_564242 != nil:
+    section.add "api-version", valid_564242
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1765,56 +1769,56 @@ proc validate_NotificationHubsCheckAvailability_568337(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568344: Call_NotificationHubsCheckAvailability_568336;
+proc call*(call_564244: Call_NotificationHubsCheckAvailability_564236;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Checks the availability of the given notificationHub in a namespace.
   ## 
   ## http://msdn.microsoft.com/en-us/library/windowsazure/jj870968.aspx
-  let valid = call_568344.validator(path, query, header, formData, body)
-  let scheme = call_568344.pickScheme
+  let valid = call_564244.validator(path, query, header, formData, body)
+  let scheme = call_564244.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568344.url(scheme.get, call_568344.host, call_568344.base,
-                         call_568344.route, valid.getOrDefault("path"),
+  let url = call_564244.url(scheme.get, call_564244.host, call_564244.base,
+                         call_564244.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568344, url, valid)
+  result = hook(call_564244, url, valid)
 
-proc call*(call_568345: Call_NotificationHubsCheckAvailability_568336;
-          namespaceName: string; resourceGroupName: string; apiVersion: string;
-          subscriptionId: string; parameters: JsonNode): Recallable =
+proc call*(call_564245: Call_NotificationHubsCheckAvailability_564236;
+          apiVersion: string; namespaceName: string; subscriptionId: string;
+          resourceGroupName: string; parameters: JsonNode): Recallable =
   ## notificationHubsCheckAvailability
   ## Checks the availability of the given notificationHub in a namespace.
   ## http://msdn.microsoft.com/en-us/library/windowsazure/jj870968.aspx
-  ##   namespaceName: string (required)
-  ##                : The namespace name.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
+  ##   namespaceName: string (required)
+  ##                : The namespace name.
   ##   subscriptionId: string (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   parameters: JObject (required)
   ##             : The notificationHub name.
-  var path_568346 = newJObject()
-  var query_568347 = newJObject()
-  var body_568348 = newJObject()
-  add(path_568346, "namespaceName", newJString(namespaceName))
-  add(path_568346, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568347, "api-version", newJString(apiVersion))
-  add(path_568346, "subscriptionId", newJString(subscriptionId))
+  var path_564246 = newJObject()
+  var query_564247 = newJObject()
+  var body_564248 = newJObject()
+  add(query_564247, "api-version", newJString(apiVersion))
+  add(path_564246, "namespaceName", newJString(namespaceName))
+  add(path_564246, "subscriptionId", newJString(subscriptionId))
+  add(path_564246, "resourceGroupName", newJString(resourceGroupName))
   if parameters != nil:
-    body_568348 = parameters
-  result = call_568345.call(path_568346, query_568347, nil, nil, body_568348)
+    body_564248 = parameters
+  result = call_564245.call(path_564246, query_564247, nil, nil, body_564248)
 
-var notificationHubsCheckAvailability* = Call_NotificationHubsCheckAvailability_568336(
+var notificationHubsCheckAvailability* = Call_NotificationHubsCheckAvailability_564236(
     name: "notificationHubsCheckAvailability", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.NotificationHubs/namespaces/{namespaceName}/checkNotificationHubAvailability",
-    validator: validate_NotificationHubsCheckAvailability_568337, base: "",
-    url: url_NotificationHubsCheckAvailability_568338, schemes: {Scheme.Https})
+    validator: validate_NotificationHubsCheckAvailability_564237, base: "",
+    url: url_NotificationHubsCheckAvailability_564238, schemes: {Scheme.Https})
 type
-  Call_NotificationHubsList_568349 = ref object of OpenApiRestCall_567641
-proc url_NotificationHubsList_568351(protocol: Scheme; host: string; base: string;
+  Call_NotificationHubsList_564249 = ref object of OpenApiRestCall_563539
+proc url_NotificationHubsList_564251(protocol: Scheme; host: string; base: string;
                                     route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1838,7 +1842,7 @@ proc url_NotificationHubsList_568351(protocol: Scheme; host: string; base: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_NotificationHubsList_568350(path: JsonNode; query: JsonNode;
+proc validate_NotificationHubsList_564250(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists the notification hubs associated with a namespace.
   ## 
@@ -1847,28 +1851,28 @@ proc validate_NotificationHubsList_568350(path: JsonNode; query: JsonNode;
   ## parameters in `path` object:
   ##   namespaceName: JString (required)
   ##                : The namespace name.
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   subscriptionId: JString (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `namespaceName` field"
-  var valid_568352 = path.getOrDefault("namespaceName")
-  valid_568352 = validateParameter(valid_568352, JString, required = true,
+  var valid_564252 = path.getOrDefault("namespaceName")
+  valid_564252 = validateParameter(valid_564252, JString, required = true,
                                  default = nil)
-  if valid_568352 != nil:
-    section.add "namespaceName", valid_568352
-  var valid_568353 = path.getOrDefault("resourceGroupName")
-  valid_568353 = validateParameter(valid_568353, JString, required = true,
+  if valid_564252 != nil:
+    section.add "namespaceName", valid_564252
+  var valid_564253 = path.getOrDefault("subscriptionId")
+  valid_564253 = validateParameter(valid_564253, JString, required = true,
                                  default = nil)
-  if valid_568353 != nil:
-    section.add "resourceGroupName", valid_568353
-  var valid_568354 = path.getOrDefault("subscriptionId")
-  valid_568354 = validateParameter(valid_568354, JString, required = true,
+  if valid_564253 != nil:
+    section.add "subscriptionId", valid_564253
+  var valid_564254 = path.getOrDefault("resourceGroupName")
+  valid_564254 = validateParameter(valid_564254, JString, required = true,
                                  default = nil)
-  if valid_568354 != nil:
-    section.add "subscriptionId", valid_568354
+  if valid_564254 != nil:
+    section.add "resourceGroupName", valid_564254
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1876,11 +1880,11 @@ proc validate_NotificationHubsList_568350(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568355 = query.getOrDefault("api-version")
-  valid_568355 = validateParameter(valid_568355, JString, required = true,
+  var valid_564255 = query.getOrDefault("api-version")
+  valid_564255 = validateParameter(valid_564255, JString, required = true,
                                  default = nil)
-  if valid_568355 != nil:
-    section.add "api-version", valid_568355
+  if valid_564255 != nil:
+    section.add "api-version", valid_564255
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1889,47 +1893,47 @@ proc validate_NotificationHubsList_568350(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568356: Call_NotificationHubsList_568349; path: JsonNode;
+proc call*(call_564256: Call_NotificationHubsList_564249; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists the notification hubs associated with a namespace.
   ## 
-  let valid = call_568356.validator(path, query, header, formData, body)
-  let scheme = call_568356.pickScheme
+  let valid = call_564256.validator(path, query, header, formData, body)
+  let scheme = call_564256.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568356.url(scheme.get, call_568356.host, call_568356.base,
-                         call_568356.route, valid.getOrDefault("path"),
+  let url = call_564256.url(scheme.get, call_564256.host, call_564256.base,
+                         call_564256.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568356, url, valid)
+  result = hook(call_564256, url, valid)
 
-proc call*(call_568357: Call_NotificationHubsList_568349; namespaceName: string;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string): Recallable =
+proc call*(call_564257: Call_NotificationHubsList_564249; apiVersion: string;
+          namespaceName: string; subscriptionId: string; resourceGroupName: string): Recallable =
   ## notificationHubsList
   ## Lists the notification hubs associated with a namespace.
-  ##   namespaceName: string (required)
-  ##                : The namespace name.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
+  ##   namespaceName: string (required)
+  ##                : The namespace name.
   ##   subscriptionId: string (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_568358 = newJObject()
-  var query_568359 = newJObject()
-  add(path_568358, "namespaceName", newJString(namespaceName))
-  add(path_568358, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568359, "api-version", newJString(apiVersion))
-  add(path_568358, "subscriptionId", newJString(subscriptionId))
-  result = call_568357.call(path_568358, query_568359, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564258 = newJObject()
+  var query_564259 = newJObject()
+  add(query_564259, "api-version", newJString(apiVersion))
+  add(path_564258, "namespaceName", newJString(namespaceName))
+  add(path_564258, "subscriptionId", newJString(subscriptionId))
+  add(path_564258, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564257.call(path_564258, query_564259, nil, nil, nil)
 
-var notificationHubsList* = Call_NotificationHubsList_568349(
+var notificationHubsList* = Call_NotificationHubsList_564249(
     name: "notificationHubsList", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.NotificationHubs/namespaces/{namespaceName}/notificationHubs",
-    validator: validate_NotificationHubsList_568350, base: "",
-    url: url_NotificationHubsList_568351, schemes: {Scheme.Https})
+    validator: validate_NotificationHubsList_564250, base: "",
+    url: url_NotificationHubsList_564251, schemes: {Scheme.Https})
 type
-  Call_NotificationHubsCreateOrUpdate_568372 = ref object of OpenApiRestCall_567641
-proc url_NotificationHubsCreateOrUpdate_568374(protocol: Scheme; host: string;
+  Call_NotificationHubsCreateOrUpdate_564272 = ref object of OpenApiRestCall_563539
+proc url_NotificationHubsCreateOrUpdate_564274(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1956,7 +1960,7 @@ proc url_NotificationHubsCreateOrUpdate_568374(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_NotificationHubsCreateOrUpdate_568373(path: JsonNode;
+proc validate_NotificationHubsCreateOrUpdate_564273(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Creates/Update a NotificationHub in a namespace.
   ## 
@@ -1966,35 +1970,35 @@ proc validate_NotificationHubsCreateOrUpdate_568373(path: JsonNode;
   ## parameters in `path` object:
   ##   namespaceName: JString (required)
   ##                : The namespace name.
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
-  ##   subscriptionId: JString (required)
-  ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   notificationHubName: JString (required)
   ##                      : The notification hub name.
+  ##   subscriptionId: JString (required)
+  ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `namespaceName` field"
-  var valid_568375 = path.getOrDefault("namespaceName")
-  valid_568375 = validateParameter(valid_568375, JString, required = true,
+  var valid_564275 = path.getOrDefault("namespaceName")
+  valid_564275 = validateParameter(valid_564275, JString, required = true,
                                  default = nil)
-  if valid_568375 != nil:
-    section.add "namespaceName", valid_568375
-  var valid_568376 = path.getOrDefault("resourceGroupName")
-  valid_568376 = validateParameter(valid_568376, JString, required = true,
+  if valid_564275 != nil:
+    section.add "namespaceName", valid_564275
+  var valid_564276 = path.getOrDefault("notificationHubName")
+  valid_564276 = validateParameter(valid_564276, JString, required = true,
                                  default = nil)
-  if valid_568376 != nil:
-    section.add "resourceGroupName", valid_568376
-  var valid_568377 = path.getOrDefault("subscriptionId")
-  valid_568377 = validateParameter(valid_568377, JString, required = true,
+  if valid_564276 != nil:
+    section.add "notificationHubName", valid_564276
+  var valid_564277 = path.getOrDefault("subscriptionId")
+  valid_564277 = validateParameter(valid_564277, JString, required = true,
                                  default = nil)
-  if valid_568377 != nil:
-    section.add "subscriptionId", valid_568377
-  var valid_568378 = path.getOrDefault("notificationHubName")
-  valid_568378 = validateParameter(valid_568378, JString, required = true,
+  if valid_564277 != nil:
+    section.add "subscriptionId", valid_564277
+  var valid_564278 = path.getOrDefault("resourceGroupName")
+  valid_564278 = validateParameter(valid_564278, JString, required = true,
                                  default = nil)
-  if valid_568378 != nil:
-    section.add "notificationHubName", valid_568378
+  if valid_564278 != nil:
+    section.add "resourceGroupName", valid_564278
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2002,11 +2006,11 @@ proc validate_NotificationHubsCreateOrUpdate_568373(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568379 = query.getOrDefault("api-version")
-  valid_568379 = validateParameter(valid_568379, JString, required = true,
+  var valid_564279 = query.getOrDefault("api-version")
+  valid_564279 = validateParameter(valid_564279, JString, required = true,
                                  default = nil)
-  if valid_568379 != nil:
-    section.add "api-version", valid_568379
+  if valid_564279 != nil:
+    section.add "api-version", valid_564279
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2020,58 +2024,58 @@ proc validate_NotificationHubsCreateOrUpdate_568373(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568381: Call_NotificationHubsCreateOrUpdate_568372; path: JsonNode;
+proc call*(call_564281: Call_NotificationHubsCreateOrUpdate_564272; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Creates/Update a NotificationHub in a namespace.
   ## 
   ## http://msdn.microsoft.com/en-us/library/windowsazure/jj856303.aspx
-  let valid = call_568381.validator(path, query, header, formData, body)
-  let scheme = call_568381.pickScheme
+  let valid = call_564281.validator(path, query, header, formData, body)
+  let scheme = call_564281.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568381.url(scheme.get, call_568381.host, call_568381.base,
-                         call_568381.route, valid.getOrDefault("path"),
+  let url = call_564281.url(scheme.get, call_564281.host, call_564281.base,
+                         call_564281.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568381, url, valid)
+  result = hook(call_564281, url, valid)
 
-proc call*(call_568382: Call_NotificationHubsCreateOrUpdate_568372;
-          namespaceName: string; resourceGroupName: string; apiVersion: string;
-          subscriptionId: string; notificationHubName: string; parameters: JsonNode): Recallable =
+proc call*(call_564282: Call_NotificationHubsCreateOrUpdate_564272;
+          apiVersion: string; namespaceName: string; notificationHubName: string;
+          subscriptionId: string; resourceGroupName: string; parameters: JsonNode): Recallable =
   ## notificationHubsCreateOrUpdate
   ## Creates/Update a NotificationHub in a namespace.
   ## http://msdn.microsoft.com/en-us/library/windowsazure/jj856303.aspx
-  ##   namespaceName: string (required)
-  ##                : The namespace name.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
-  ##   subscriptionId: string (required)
-  ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   namespaceName: string (required)
+  ##                : The namespace name.
   ##   notificationHubName: string (required)
   ##                      : The notification hub name.
+  ##   subscriptionId: string (required)
+  ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   parameters: JObject (required)
   ##             : Parameters supplied to the create/update a NotificationHub Resource.
-  var path_568383 = newJObject()
-  var query_568384 = newJObject()
-  var body_568385 = newJObject()
-  add(path_568383, "namespaceName", newJString(namespaceName))
-  add(path_568383, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568384, "api-version", newJString(apiVersion))
-  add(path_568383, "subscriptionId", newJString(subscriptionId))
-  add(path_568383, "notificationHubName", newJString(notificationHubName))
+  var path_564283 = newJObject()
+  var query_564284 = newJObject()
+  var body_564285 = newJObject()
+  add(query_564284, "api-version", newJString(apiVersion))
+  add(path_564283, "namespaceName", newJString(namespaceName))
+  add(path_564283, "notificationHubName", newJString(notificationHubName))
+  add(path_564283, "subscriptionId", newJString(subscriptionId))
+  add(path_564283, "resourceGroupName", newJString(resourceGroupName))
   if parameters != nil:
-    body_568385 = parameters
-  result = call_568382.call(path_568383, query_568384, nil, nil, body_568385)
+    body_564285 = parameters
+  result = call_564282.call(path_564283, query_564284, nil, nil, body_564285)
 
-var notificationHubsCreateOrUpdate* = Call_NotificationHubsCreateOrUpdate_568372(
+var notificationHubsCreateOrUpdate* = Call_NotificationHubsCreateOrUpdate_564272(
     name: "notificationHubsCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.NotificationHubs/namespaces/{namespaceName}/notificationHubs/{notificationHubName}",
-    validator: validate_NotificationHubsCreateOrUpdate_568373, base: "",
-    url: url_NotificationHubsCreateOrUpdate_568374, schemes: {Scheme.Https})
+    validator: validate_NotificationHubsCreateOrUpdate_564273, base: "",
+    url: url_NotificationHubsCreateOrUpdate_564274, schemes: {Scheme.Https})
 type
-  Call_NotificationHubsGet_568360 = ref object of OpenApiRestCall_567641
-proc url_NotificationHubsGet_568362(protocol: Scheme; host: string; base: string;
+  Call_NotificationHubsGet_564260 = ref object of OpenApiRestCall_563539
+proc url_NotificationHubsGet_564262(protocol: Scheme; host: string; base: string;
                                    route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2098,7 +2102,7 @@ proc url_NotificationHubsGet_568362(protocol: Scheme; host: string; base: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_NotificationHubsGet_568361(path: JsonNode; query: JsonNode;
+proc validate_NotificationHubsGet_564261(path: JsonNode; query: JsonNode;
                                         header: JsonNode; formData: JsonNode;
                                         body: JsonNode): JsonNode =
   ## Lists the notification hubs associated with a namespace.
@@ -2108,35 +2112,35 @@ proc validate_NotificationHubsGet_568361(path: JsonNode; query: JsonNode;
   ## parameters in `path` object:
   ##   namespaceName: JString (required)
   ##                : The namespace name.
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
-  ##   subscriptionId: JString (required)
-  ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   notificationHubName: JString (required)
   ##                      : The notification hub name.
+  ##   subscriptionId: JString (required)
+  ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `namespaceName` field"
-  var valid_568363 = path.getOrDefault("namespaceName")
-  valid_568363 = validateParameter(valid_568363, JString, required = true,
+  var valid_564263 = path.getOrDefault("namespaceName")
+  valid_564263 = validateParameter(valid_564263, JString, required = true,
                                  default = nil)
-  if valid_568363 != nil:
-    section.add "namespaceName", valid_568363
-  var valid_568364 = path.getOrDefault("resourceGroupName")
-  valid_568364 = validateParameter(valid_568364, JString, required = true,
+  if valid_564263 != nil:
+    section.add "namespaceName", valid_564263
+  var valid_564264 = path.getOrDefault("notificationHubName")
+  valid_564264 = validateParameter(valid_564264, JString, required = true,
                                  default = nil)
-  if valid_568364 != nil:
-    section.add "resourceGroupName", valid_568364
-  var valid_568365 = path.getOrDefault("subscriptionId")
-  valid_568365 = validateParameter(valid_568365, JString, required = true,
+  if valid_564264 != nil:
+    section.add "notificationHubName", valid_564264
+  var valid_564265 = path.getOrDefault("subscriptionId")
+  valid_564265 = validateParameter(valid_564265, JString, required = true,
                                  default = nil)
-  if valid_568365 != nil:
-    section.add "subscriptionId", valid_568365
-  var valid_568366 = path.getOrDefault("notificationHubName")
-  valid_568366 = validateParameter(valid_568366, JString, required = true,
+  if valid_564265 != nil:
+    section.add "subscriptionId", valid_564265
+  var valid_564266 = path.getOrDefault("resourceGroupName")
+  valid_564266 = validateParameter(valid_564266, JString, required = true,
                                  default = nil)
-  if valid_568366 != nil:
-    section.add "notificationHubName", valid_568366
+  if valid_564266 != nil:
+    section.add "resourceGroupName", valid_564266
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2144,11 +2148,11 @@ proc validate_NotificationHubsGet_568361(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568367 = query.getOrDefault("api-version")
-  valid_568367 = validateParameter(valid_568367, JString, required = true,
+  var valid_564267 = query.getOrDefault("api-version")
+  valid_564267 = validateParameter(valid_564267, JString, required = true,
                                  default = nil)
-  if valid_568367 != nil:
-    section.add "api-version", valid_568367
+  if valid_564267 != nil:
+    section.add "api-version", valid_564267
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2157,51 +2161,51 @@ proc validate_NotificationHubsGet_568361(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568368: Call_NotificationHubsGet_568360; path: JsonNode;
+proc call*(call_564268: Call_NotificationHubsGet_564260; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists the notification hubs associated with a namespace.
   ## 
-  let valid = call_568368.validator(path, query, header, formData, body)
-  let scheme = call_568368.pickScheme
+  let valid = call_564268.validator(path, query, header, formData, body)
+  let scheme = call_564268.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568368.url(scheme.get, call_568368.host, call_568368.base,
-                         call_568368.route, valid.getOrDefault("path"),
+  let url = call_564268.url(scheme.get, call_564268.host, call_564268.base,
+                         call_564268.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568368, url, valid)
+  result = hook(call_564268, url, valid)
 
-proc call*(call_568369: Call_NotificationHubsGet_568360; namespaceName: string;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          notificationHubName: string): Recallable =
+proc call*(call_564269: Call_NotificationHubsGet_564260; apiVersion: string;
+          namespaceName: string; notificationHubName: string;
+          subscriptionId: string; resourceGroupName: string): Recallable =
   ## notificationHubsGet
   ## Lists the notification hubs associated with a namespace.
-  ##   namespaceName: string (required)
-  ##                : The namespace name.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
-  ##   subscriptionId: string (required)
-  ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   namespaceName: string (required)
+  ##                : The namespace name.
   ##   notificationHubName: string (required)
   ##                      : The notification hub name.
-  var path_568370 = newJObject()
-  var query_568371 = newJObject()
-  add(path_568370, "namespaceName", newJString(namespaceName))
-  add(path_568370, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568371, "api-version", newJString(apiVersion))
-  add(path_568370, "subscriptionId", newJString(subscriptionId))
-  add(path_568370, "notificationHubName", newJString(notificationHubName))
-  result = call_568369.call(path_568370, query_568371, nil, nil, nil)
+  ##   subscriptionId: string (required)
+  ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564270 = newJObject()
+  var query_564271 = newJObject()
+  add(query_564271, "api-version", newJString(apiVersion))
+  add(path_564270, "namespaceName", newJString(namespaceName))
+  add(path_564270, "notificationHubName", newJString(notificationHubName))
+  add(path_564270, "subscriptionId", newJString(subscriptionId))
+  add(path_564270, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564269.call(path_564270, query_564271, nil, nil, nil)
 
-var notificationHubsGet* = Call_NotificationHubsGet_568360(
+var notificationHubsGet* = Call_NotificationHubsGet_564260(
     name: "notificationHubsGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.NotificationHubs/namespaces/{namespaceName}/notificationHubs/{notificationHubName}",
-    validator: validate_NotificationHubsGet_568361, base: "",
-    url: url_NotificationHubsGet_568362, schemes: {Scheme.Https})
+    validator: validate_NotificationHubsGet_564261, base: "",
+    url: url_NotificationHubsGet_564262, schemes: {Scheme.Https})
 type
-  Call_NotificationHubsDelete_568386 = ref object of OpenApiRestCall_567641
-proc url_NotificationHubsDelete_568388(protocol: Scheme; host: string; base: string;
+  Call_NotificationHubsDelete_564286 = ref object of OpenApiRestCall_563539
+proc url_NotificationHubsDelete_564288(protocol: Scheme; host: string; base: string;
                                       route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2228,7 +2232,7 @@ proc url_NotificationHubsDelete_568388(protocol: Scheme; host: string; base: str
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_NotificationHubsDelete_568387(path: JsonNode; query: JsonNode;
+proc validate_NotificationHubsDelete_564287(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Deletes a notification hub associated with a namespace.
   ## 
@@ -2237,35 +2241,35 @@ proc validate_NotificationHubsDelete_568387(path: JsonNode; query: JsonNode;
   ## parameters in `path` object:
   ##   namespaceName: JString (required)
   ##                : The namespace name.
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
-  ##   subscriptionId: JString (required)
-  ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   notificationHubName: JString (required)
   ##                      : The notification hub name.
+  ##   subscriptionId: JString (required)
+  ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `namespaceName` field"
-  var valid_568389 = path.getOrDefault("namespaceName")
-  valid_568389 = validateParameter(valid_568389, JString, required = true,
+  var valid_564289 = path.getOrDefault("namespaceName")
+  valid_564289 = validateParameter(valid_564289, JString, required = true,
                                  default = nil)
-  if valid_568389 != nil:
-    section.add "namespaceName", valid_568389
-  var valid_568390 = path.getOrDefault("resourceGroupName")
-  valid_568390 = validateParameter(valid_568390, JString, required = true,
+  if valid_564289 != nil:
+    section.add "namespaceName", valid_564289
+  var valid_564290 = path.getOrDefault("notificationHubName")
+  valid_564290 = validateParameter(valid_564290, JString, required = true,
                                  default = nil)
-  if valid_568390 != nil:
-    section.add "resourceGroupName", valid_568390
-  var valid_568391 = path.getOrDefault("subscriptionId")
-  valid_568391 = validateParameter(valid_568391, JString, required = true,
+  if valid_564290 != nil:
+    section.add "notificationHubName", valid_564290
+  var valid_564291 = path.getOrDefault("subscriptionId")
+  valid_564291 = validateParameter(valid_564291, JString, required = true,
                                  default = nil)
-  if valid_568391 != nil:
-    section.add "subscriptionId", valid_568391
-  var valid_568392 = path.getOrDefault("notificationHubName")
-  valid_568392 = validateParameter(valid_568392, JString, required = true,
+  if valid_564291 != nil:
+    section.add "subscriptionId", valid_564291
+  var valid_564292 = path.getOrDefault("resourceGroupName")
+  valid_564292 = validateParameter(valid_564292, JString, required = true,
                                  default = nil)
-  if valid_568392 != nil:
-    section.add "notificationHubName", valid_568392
+  if valid_564292 != nil:
+    section.add "resourceGroupName", valid_564292
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2273,11 +2277,11 @@ proc validate_NotificationHubsDelete_568387(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568393 = query.getOrDefault("api-version")
-  valid_568393 = validateParameter(valid_568393, JString, required = true,
+  var valid_564293 = query.getOrDefault("api-version")
+  valid_564293 = validateParameter(valid_564293, JString, required = true,
                                  default = nil)
-  if valid_568393 != nil:
-    section.add "api-version", valid_568393
+  if valid_564293 != nil:
+    section.add "api-version", valid_564293
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2286,51 +2290,51 @@ proc validate_NotificationHubsDelete_568387(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568394: Call_NotificationHubsDelete_568386; path: JsonNode;
+proc call*(call_564294: Call_NotificationHubsDelete_564286; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes a notification hub associated with a namespace.
   ## 
-  let valid = call_568394.validator(path, query, header, formData, body)
-  let scheme = call_568394.pickScheme
+  let valid = call_564294.validator(path, query, header, formData, body)
+  let scheme = call_564294.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568394.url(scheme.get, call_568394.host, call_568394.base,
-                         call_568394.route, valid.getOrDefault("path"),
+  let url = call_564294.url(scheme.get, call_564294.host, call_564294.base,
+                         call_564294.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568394, url, valid)
+  result = hook(call_564294, url, valid)
 
-proc call*(call_568395: Call_NotificationHubsDelete_568386; namespaceName: string;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          notificationHubName: string): Recallable =
+proc call*(call_564295: Call_NotificationHubsDelete_564286; apiVersion: string;
+          namespaceName: string; notificationHubName: string;
+          subscriptionId: string; resourceGroupName: string): Recallable =
   ## notificationHubsDelete
   ## Deletes a notification hub associated with a namespace.
-  ##   namespaceName: string (required)
-  ##                : The namespace name.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
-  ##   subscriptionId: string (required)
-  ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   namespaceName: string (required)
+  ##                : The namespace name.
   ##   notificationHubName: string (required)
   ##                      : The notification hub name.
-  var path_568396 = newJObject()
-  var query_568397 = newJObject()
-  add(path_568396, "namespaceName", newJString(namespaceName))
-  add(path_568396, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568397, "api-version", newJString(apiVersion))
-  add(path_568396, "subscriptionId", newJString(subscriptionId))
-  add(path_568396, "notificationHubName", newJString(notificationHubName))
-  result = call_568395.call(path_568396, query_568397, nil, nil, nil)
+  ##   subscriptionId: string (required)
+  ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564296 = newJObject()
+  var query_564297 = newJObject()
+  add(query_564297, "api-version", newJString(apiVersion))
+  add(path_564296, "namespaceName", newJString(namespaceName))
+  add(path_564296, "notificationHubName", newJString(notificationHubName))
+  add(path_564296, "subscriptionId", newJString(subscriptionId))
+  add(path_564296, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564295.call(path_564296, query_564297, nil, nil, nil)
 
-var notificationHubsDelete* = Call_NotificationHubsDelete_568386(
+var notificationHubsDelete* = Call_NotificationHubsDelete_564286(
     name: "notificationHubsDelete", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.NotificationHubs/namespaces/{namespaceName}/notificationHubs/{notificationHubName}",
-    validator: validate_NotificationHubsDelete_568387, base: "",
-    url: url_NotificationHubsDelete_568388, schemes: {Scheme.Https})
+    validator: validate_NotificationHubsDelete_564287, base: "",
+    url: url_NotificationHubsDelete_564288, schemes: {Scheme.Https})
 type
-  Call_NotificationHubsListAuthorizationRules_568398 = ref object of OpenApiRestCall_567641
-proc url_NotificationHubsListAuthorizationRules_568400(protocol: Scheme;
+  Call_NotificationHubsListAuthorizationRules_564298 = ref object of OpenApiRestCall_563539
+proc url_NotificationHubsListAuthorizationRules_564300(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2358,7 +2362,7 @@ proc url_NotificationHubsListAuthorizationRules_568400(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_NotificationHubsListAuthorizationRules_568399(path: JsonNode;
+proc validate_NotificationHubsListAuthorizationRules_564299(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the authorization rules for a NotificationHub.
   ## 
@@ -2367,35 +2371,35 @@ proc validate_NotificationHubsListAuthorizationRules_568399(path: JsonNode;
   ## parameters in `path` object:
   ##   namespaceName: JString (required)
   ##                : The namespace name
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
-  ##   subscriptionId: JString (required)
-  ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   notificationHubName: JString (required)
   ##                      : The notification hub name.
+  ##   subscriptionId: JString (required)
+  ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `namespaceName` field"
-  var valid_568401 = path.getOrDefault("namespaceName")
-  valid_568401 = validateParameter(valid_568401, JString, required = true,
+  var valid_564301 = path.getOrDefault("namespaceName")
+  valid_564301 = validateParameter(valid_564301, JString, required = true,
                                  default = nil)
-  if valid_568401 != nil:
-    section.add "namespaceName", valid_568401
-  var valid_568402 = path.getOrDefault("resourceGroupName")
-  valid_568402 = validateParameter(valid_568402, JString, required = true,
+  if valid_564301 != nil:
+    section.add "namespaceName", valid_564301
+  var valid_564302 = path.getOrDefault("notificationHubName")
+  valid_564302 = validateParameter(valid_564302, JString, required = true,
                                  default = nil)
-  if valid_568402 != nil:
-    section.add "resourceGroupName", valid_568402
-  var valid_568403 = path.getOrDefault("subscriptionId")
-  valid_568403 = validateParameter(valid_568403, JString, required = true,
+  if valid_564302 != nil:
+    section.add "notificationHubName", valid_564302
+  var valid_564303 = path.getOrDefault("subscriptionId")
+  valid_564303 = validateParameter(valid_564303, JString, required = true,
                                  default = nil)
-  if valid_568403 != nil:
-    section.add "subscriptionId", valid_568403
-  var valid_568404 = path.getOrDefault("notificationHubName")
-  valid_568404 = validateParameter(valid_568404, JString, required = true,
+  if valid_564303 != nil:
+    section.add "subscriptionId", valid_564303
+  var valid_564304 = path.getOrDefault("resourceGroupName")
+  valid_564304 = validateParameter(valid_564304, JString, required = true,
                                  default = nil)
-  if valid_568404 != nil:
-    section.add "notificationHubName", valid_568404
+  if valid_564304 != nil:
+    section.add "resourceGroupName", valid_564304
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2403,11 +2407,11 @@ proc validate_NotificationHubsListAuthorizationRules_568399(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568405 = query.getOrDefault("api-version")
-  valid_568405 = validateParameter(valid_568405, JString, required = true,
+  var valid_564305 = query.getOrDefault("api-version")
+  valid_564305 = validateParameter(valid_564305, JString, required = true,
                                  default = nil)
-  if valid_568405 != nil:
-    section.add "api-version", valid_568405
+  if valid_564305 != nil:
+    section.add "api-version", valid_564305
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2416,53 +2420,53 @@ proc validate_NotificationHubsListAuthorizationRules_568399(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568406: Call_NotificationHubsListAuthorizationRules_568398;
+proc call*(call_564306: Call_NotificationHubsListAuthorizationRules_564298;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Gets the authorization rules for a NotificationHub.
   ## 
-  let valid = call_568406.validator(path, query, header, formData, body)
-  let scheme = call_568406.pickScheme
+  let valid = call_564306.validator(path, query, header, formData, body)
+  let scheme = call_564306.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568406.url(scheme.get, call_568406.host, call_568406.base,
-                         call_568406.route, valid.getOrDefault("path"),
+  let url = call_564306.url(scheme.get, call_564306.host, call_564306.base,
+                         call_564306.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568406, url, valid)
+  result = hook(call_564306, url, valid)
 
-proc call*(call_568407: Call_NotificationHubsListAuthorizationRules_568398;
-          namespaceName: string; resourceGroupName: string; apiVersion: string;
-          subscriptionId: string; notificationHubName: string): Recallable =
+proc call*(call_564307: Call_NotificationHubsListAuthorizationRules_564298;
+          apiVersion: string; namespaceName: string; notificationHubName: string;
+          subscriptionId: string; resourceGroupName: string): Recallable =
   ## notificationHubsListAuthorizationRules
   ## Gets the authorization rules for a NotificationHub.
-  ##   namespaceName: string (required)
-  ##                : The namespace name
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
-  ##   subscriptionId: string (required)
-  ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   namespaceName: string (required)
+  ##                : The namespace name
   ##   notificationHubName: string (required)
   ##                      : The notification hub name.
-  var path_568408 = newJObject()
-  var query_568409 = newJObject()
-  add(path_568408, "namespaceName", newJString(namespaceName))
-  add(path_568408, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568409, "api-version", newJString(apiVersion))
-  add(path_568408, "subscriptionId", newJString(subscriptionId))
-  add(path_568408, "notificationHubName", newJString(notificationHubName))
-  result = call_568407.call(path_568408, query_568409, nil, nil, nil)
+  ##   subscriptionId: string (required)
+  ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564308 = newJObject()
+  var query_564309 = newJObject()
+  add(query_564309, "api-version", newJString(apiVersion))
+  add(path_564308, "namespaceName", newJString(namespaceName))
+  add(path_564308, "notificationHubName", newJString(notificationHubName))
+  add(path_564308, "subscriptionId", newJString(subscriptionId))
+  add(path_564308, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564307.call(path_564308, query_564309, nil, nil, nil)
 
-var notificationHubsListAuthorizationRules* = Call_NotificationHubsListAuthorizationRules_568398(
+var notificationHubsListAuthorizationRules* = Call_NotificationHubsListAuthorizationRules_564298(
     name: "notificationHubsListAuthorizationRules", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.NotificationHubs/namespaces/{namespaceName}/notificationHubs/{notificationHubName}/AuthorizationRules",
-    validator: validate_NotificationHubsListAuthorizationRules_568399, base: "",
-    url: url_NotificationHubsListAuthorizationRules_568400,
+    validator: validate_NotificationHubsListAuthorizationRules_564299, base: "",
+    url: url_NotificationHubsListAuthorizationRules_564300,
     schemes: {Scheme.Https})
 type
-  Call_NotificationHubsCreateOrUpdateAuthorizationRule_568423 = ref object of OpenApiRestCall_567641
-proc url_NotificationHubsCreateOrUpdateAuthorizationRule_568425(protocol: Scheme;
+  Call_NotificationHubsCreateOrUpdateAuthorizationRule_564323 = ref object of OpenApiRestCall_563539
+proc url_NotificationHubsCreateOrUpdateAuthorizationRule_564325(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2493,7 +2497,7 @@ proc url_NotificationHubsCreateOrUpdateAuthorizationRule_568425(protocol: Scheme
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_NotificationHubsCreateOrUpdateAuthorizationRule_568424(
+proc validate_NotificationHubsCreateOrUpdateAuthorizationRule_564324(
     path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
     body: JsonNode): JsonNode =
   ## Creates/Updates an authorization rule for a NotificationHub
@@ -2503,42 +2507,42 @@ proc validate_NotificationHubsCreateOrUpdateAuthorizationRule_568424(
   ## parameters in `path` object:
   ##   namespaceName: JString (required)
   ##                : The namespace name.
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
-  ##   authorizationRuleName: JString (required)
-  ##                        : Authorization Rule Name.
-  ##   subscriptionId: JString (required)
-  ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   notificationHubName: JString (required)
   ##                      : The notification hub name.
+  ##   subscriptionId: JString (required)
+  ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   authorizationRuleName: JString (required)
+  ##                        : Authorization Rule Name.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `namespaceName` field"
-  var valid_568426 = path.getOrDefault("namespaceName")
-  valid_568426 = validateParameter(valid_568426, JString, required = true,
+  var valid_564326 = path.getOrDefault("namespaceName")
+  valid_564326 = validateParameter(valid_564326, JString, required = true,
                                  default = nil)
-  if valid_568426 != nil:
-    section.add "namespaceName", valid_568426
-  var valid_568427 = path.getOrDefault("resourceGroupName")
-  valid_568427 = validateParameter(valid_568427, JString, required = true,
+  if valid_564326 != nil:
+    section.add "namespaceName", valid_564326
+  var valid_564327 = path.getOrDefault("notificationHubName")
+  valid_564327 = validateParameter(valid_564327, JString, required = true,
                                  default = nil)
-  if valid_568427 != nil:
-    section.add "resourceGroupName", valid_568427
-  var valid_568428 = path.getOrDefault("authorizationRuleName")
-  valid_568428 = validateParameter(valid_568428, JString, required = true,
+  if valid_564327 != nil:
+    section.add "notificationHubName", valid_564327
+  var valid_564328 = path.getOrDefault("subscriptionId")
+  valid_564328 = validateParameter(valid_564328, JString, required = true,
                                  default = nil)
-  if valid_568428 != nil:
-    section.add "authorizationRuleName", valid_568428
-  var valid_568429 = path.getOrDefault("subscriptionId")
-  valid_568429 = validateParameter(valid_568429, JString, required = true,
+  if valid_564328 != nil:
+    section.add "subscriptionId", valid_564328
+  var valid_564329 = path.getOrDefault("authorizationRuleName")
+  valid_564329 = validateParameter(valid_564329, JString, required = true,
                                  default = nil)
-  if valid_568429 != nil:
-    section.add "subscriptionId", valid_568429
-  var valid_568430 = path.getOrDefault("notificationHubName")
-  valid_568430 = validateParameter(valid_568430, JString, required = true,
+  if valid_564329 != nil:
+    section.add "authorizationRuleName", valid_564329
+  var valid_564330 = path.getOrDefault("resourceGroupName")
+  valid_564330 = validateParameter(valid_564330, JString, required = true,
                                  default = nil)
-  if valid_568430 != nil:
-    section.add "notificationHubName", valid_568430
+  if valid_564330 != nil:
+    section.add "resourceGroupName", valid_564330
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2546,11 +2550,11 @@ proc validate_NotificationHubsCreateOrUpdateAuthorizationRule_568424(
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568431 = query.getOrDefault("api-version")
-  valid_568431 = validateParameter(valid_568431, JString, required = true,
+  var valid_564331 = query.getOrDefault("api-version")
+  valid_564331 = validateParameter(valid_564331, JString, required = true,
                                  default = nil)
-  if valid_568431 != nil:
-    section.add "api-version", valid_568431
+  if valid_564331 != nil:
+    section.add "api-version", valid_564331
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2564,62 +2568,62 @@ proc validate_NotificationHubsCreateOrUpdateAuthorizationRule_568424(
   if body != nil:
     result.add "body", body
 
-proc call*(call_568433: Call_NotificationHubsCreateOrUpdateAuthorizationRule_568423;
+proc call*(call_564333: Call_NotificationHubsCreateOrUpdateAuthorizationRule_564323;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Creates/Updates an authorization rule for a NotificationHub
   ## 
-  let valid = call_568433.validator(path, query, header, formData, body)
-  let scheme = call_568433.pickScheme
+  let valid = call_564333.validator(path, query, header, formData, body)
+  let scheme = call_564333.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568433.url(scheme.get, call_568433.host, call_568433.base,
-                         call_568433.route, valid.getOrDefault("path"),
+  let url = call_564333.url(scheme.get, call_564333.host, call_564333.base,
+                         call_564333.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568433, url, valid)
+  result = hook(call_564333, url, valid)
 
-proc call*(call_568434: Call_NotificationHubsCreateOrUpdateAuthorizationRule_568423;
-          namespaceName: string; resourceGroupName: string; apiVersion: string;
-          authorizationRuleName: string; subscriptionId: string;
-          notificationHubName: string; parameters: JsonNode): Recallable =
+proc call*(call_564334: Call_NotificationHubsCreateOrUpdateAuthorizationRule_564323;
+          apiVersion: string; namespaceName: string; notificationHubName: string;
+          subscriptionId: string; authorizationRuleName: string;
+          resourceGroupName: string; parameters: JsonNode): Recallable =
   ## notificationHubsCreateOrUpdateAuthorizationRule
   ## Creates/Updates an authorization rule for a NotificationHub
-  ##   namespaceName: string (required)
-  ##                : The namespace name.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
-  ##   authorizationRuleName: string (required)
-  ##                        : Authorization Rule Name.
-  ##   subscriptionId: string (required)
-  ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   namespaceName: string (required)
+  ##                : The namespace name.
   ##   notificationHubName: string (required)
   ##                      : The notification hub name.
+  ##   subscriptionId: string (required)
+  ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   authorizationRuleName: string (required)
+  ##                        : Authorization Rule Name.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   parameters: JObject (required)
   ##             : The shared access authorization rule.
-  var path_568435 = newJObject()
-  var query_568436 = newJObject()
-  var body_568437 = newJObject()
-  add(path_568435, "namespaceName", newJString(namespaceName))
-  add(path_568435, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568436, "api-version", newJString(apiVersion))
-  add(path_568435, "authorizationRuleName", newJString(authorizationRuleName))
-  add(path_568435, "subscriptionId", newJString(subscriptionId))
-  add(path_568435, "notificationHubName", newJString(notificationHubName))
+  var path_564335 = newJObject()
+  var query_564336 = newJObject()
+  var body_564337 = newJObject()
+  add(query_564336, "api-version", newJString(apiVersion))
+  add(path_564335, "namespaceName", newJString(namespaceName))
+  add(path_564335, "notificationHubName", newJString(notificationHubName))
+  add(path_564335, "subscriptionId", newJString(subscriptionId))
+  add(path_564335, "authorizationRuleName", newJString(authorizationRuleName))
+  add(path_564335, "resourceGroupName", newJString(resourceGroupName))
   if parameters != nil:
-    body_568437 = parameters
-  result = call_568434.call(path_568435, query_568436, nil, nil, body_568437)
+    body_564337 = parameters
+  result = call_564334.call(path_564335, query_564336, nil, nil, body_564337)
 
-var notificationHubsCreateOrUpdateAuthorizationRule* = Call_NotificationHubsCreateOrUpdateAuthorizationRule_568423(
+var notificationHubsCreateOrUpdateAuthorizationRule* = Call_NotificationHubsCreateOrUpdateAuthorizationRule_564323(
     name: "notificationHubsCreateOrUpdateAuthorizationRule",
     meth: HttpMethod.HttpPut, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.NotificationHubs/namespaces/{namespaceName}/notificationHubs/{notificationHubName}/AuthorizationRules/{authorizationRuleName}",
-    validator: validate_NotificationHubsCreateOrUpdateAuthorizationRule_568424,
-    base: "", url: url_NotificationHubsCreateOrUpdateAuthorizationRule_568425,
+    validator: validate_NotificationHubsCreateOrUpdateAuthorizationRule_564324,
+    base: "", url: url_NotificationHubsCreateOrUpdateAuthorizationRule_564325,
     schemes: {Scheme.Https})
 type
-  Call_NotificationHubsGetAuthorizationRule_568410 = ref object of OpenApiRestCall_567641
-proc url_NotificationHubsGetAuthorizationRule_568412(protocol: Scheme;
+  Call_NotificationHubsGetAuthorizationRule_564310 = ref object of OpenApiRestCall_563539
+proc url_NotificationHubsGetAuthorizationRule_564312(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2650,7 +2654,7 @@ proc url_NotificationHubsGetAuthorizationRule_568412(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_NotificationHubsGetAuthorizationRule_568411(path: JsonNode;
+proc validate_NotificationHubsGetAuthorizationRule_564311(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets an authorization rule for a NotificationHub by name.
   ## 
@@ -2659,42 +2663,42 @@ proc validate_NotificationHubsGetAuthorizationRule_568411(path: JsonNode;
   ## parameters in `path` object:
   ##   namespaceName: JString (required)
   ##                : The namespace name
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
-  ##   authorizationRuleName: JString (required)
-  ##                        : authorization rule name.
-  ##   subscriptionId: JString (required)
-  ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   notificationHubName: JString (required)
   ##                      : The notification hub name.
+  ##   subscriptionId: JString (required)
+  ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   authorizationRuleName: JString (required)
+  ##                        : authorization rule name.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `namespaceName` field"
-  var valid_568413 = path.getOrDefault("namespaceName")
-  valid_568413 = validateParameter(valid_568413, JString, required = true,
+  var valid_564313 = path.getOrDefault("namespaceName")
+  valid_564313 = validateParameter(valid_564313, JString, required = true,
                                  default = nil)
-  if valid_568413 != nil:
-    section.add "namespaceName", valid_568413
-  var valid_568414 = path.getOrDefault("resourceGroupName")
-  valid_568414 = validateParameter(valid_568414, JString, required = true,
+  if valid_564313 != nil:
+    section.add "namespaceName", valid_564313
+  var valid_564314 = path.getOrDefault("notificationHubName")
+  valid_564314 = validateParameter(valid_564314, JString, required = true,
                                  default = nil)
-  if valid_568414 != nil:
-    section.add "resourceGroupName", valid_568414
-  var valid_568415 = path.getOrDefault("authorizationRuleName")
-  valid_568415 = validateParameter(valid_568415, JString, required = true,
+  if valid_564314 != nil:
+    section.add "notificationHubName", valid_564314
+  var valid_564315 = path.getOrDefault("subscriptionId")
+  valid_564315 = validateParameter(valid_564315, JString, required = true,
                                  default = nil)
-  if valid_568415 != nil:
-    section.add "authorizationRuleName", valid_568415
-  var valid_568416 = path.getOrDefault("subscriptionId")
-  valid_568416 = validateParameter(valid_568416, JString, required = true,
+  if valid_564315 != nil:
+    section.add "subscriptionId", valid_564315
+  var valid_564316 = path.getOrDefault("authorizationRuleName")
+  valid_564316 = validateParameter(valid_564316, JString, required = true,
                                  default = nil)
-  if valid_568416 != nil:
-    section.add "subscriptionId", valid_568416
-  var valid_568417 = path.getOrDefault("notificationHubName")
-  valid_568417 = validateParameter(valid_568417, JString, required = true,
+  if valid_564316 != nil:
+    section.add "authorizationRuleName", valid_564316
+  var valid_564317 = path.getOrDefault("resourceGroupName")
+  valid_564317 = validateParameter(valid_564317, JString, required = true,
                                  default = nil)
-  if valid_568417 != nil:
-    section.add "notificationHubName", valid_568417
+  if valid_564317 != nil:
+    section.add "resourceGroupName", valid_564317
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2702,11 +2706,11 @@ proc validate_NotificationHubsGetAuthorizationRule_568411(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568418 = query.getOrDefault("api-version")
-  valid_568418 = validateParameter(valid_568418, JString, required = true,
+  var valid_564318 = query.getOrDefault("api-version")
+  valid_564318 = validateParameter(valid_564318, JString, required = true,
                                  default = nil)
-  if valid_568418 != nil:
-    section.add "api-version", valid_568418
+  if valid_564318 != nil:
+    section.add "api-version", valid_564318
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2715,56 +2719,56 @@ proc validate_NotificationHubsGetAuthorizationRule_568411(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568419: Call_NotificationHubsGetAuthorizationRule_568410;
+proc call*(call_564319: Call_NotificationHubsGetAuthorizationRule_564310;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Gets an authorization rule for a NotificationHub by name.
   ## 
-  let valid = call_568419.validator(path, query, header, formData, body)
-  let scheme = call_568419.pickScheme
+  let valid = call_564319.validator(path, query, header, formData, body)
+  let scheme = call_564319.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568419.url(scheme.get, call_568419.host, call_568419.base,
-                         call_568419.route, valid.getOrDefault("path"),
+  let url = call_564319.url(scheme.get, call_564319.host, call_564319.base,
+                         call_564319.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568419, url, valid)
+  result = hook(call_564319, url, valid)
 
-proc call*(call_568420: Call_NotificationHubsGetAuthorizationRule_568410;
-          namespaceName: string; resourceGroupName: string; apiVersion: string;
-          authorizationRuleName: string; subscriptionId: string;
-          notificationHubName: string): Recallable =
+proc call*(call_564320: Call_NotificationHubsGetAuthorizationRule_564310;
+          apiVersion: string; namespaceName: string; notificationHubName: string;
+          subscriptionId: string; authorizationRuleName: string;
+          resourceGroupName: string): Recallable =
   ## notificationHubsGetAuthorizationRule
   ## Gets an authorization rule for a NotificationHub by name.
-  ##   namespaceName: string (required)
-  ##                : The namespace name
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
-  ##   authorizationRuleName: string (required)
-  ##                        : authorization rule name.
-  ##   subscriptionId: string (required)
-  ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   namespaceName: string (required)
+  ##                : The namespace name
   ##   notificationHubName: string (required)
   ##                      : The notification hub name.
-  var path_568421 = newJObject()
-  var query_568422 = newJObject()
-  add(path_568421, "namespaceName", newJString(namespaceName))
-  add(path_568421, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568422, "api-version", newJString(apiVersion))
-  add(path_568421, "authorizationRuleName", newJString(authorizationRuleName))
-  add(path_568421, "subscriptionId", newJString(subscriptionId))
-  add(path_568421, "notificationHubName", newJString(notificationHubName))
-  result = call_568420.call(path_568421, query_568422, nil, nil, nil)
+  ##   subscriptionId: string (required)
+  ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   authorizationRuleName: string (required)
+  ##                        : authorization rule name.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564321 = newJObject()
+  var query_564322 = newJObject()
+  add(query_564322, "api-version", newJString(apiVersion))
+  add(path_564321, "namespaceName", newJString(namespaceName))
+  add(path_564321, "notificationHubName", newJString(notificationHubName))
+  add(path_564321, "subscriptionId", newJString(subscriptionId))
+  add(path_564321, "authorizationRuleName", newJString(authorizationRuleName))
+  add(path_564321, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564320.call(path_564321, query_564322, nil, nil, nil)
 
-var notificationHubsGetAuthorizationRule* = Call_NotificationHubsGetAuthorizationRule_568410(
+var notificationHubsGetAuthorizationRule* = Call_NotificationHubsGetAuthorizationRule_564310(
     name: "notificationHubsGetAuthorizationRule", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.NotificationHubs/namespaces/{namespaceName}/notificationHubs/{notificationHubName}/AuthorizationRules/{authorizationRuleName}",
-    validator: validate_NotificationHubsGetAuthorizationRule_568411, base: "",
-    url: url_NotificationHubsGetAuthorizationRule_568412, schemes: {Scheme.Https})
+    validator: validate_NotificationHubsGetAuthorizationRule_564311, base: "",
+    url: url_NotificationHubsGetAuthorizationRule_564312, schemes: {Scheme.Https})
 type
-  Call_NotificationHubsDeleteAuthorizationRule_568438 = ref object of OpenApiRestCall_567641
-proc url_NotificationHubsDeleteAuthorizationRule_568440(protocol: Scheme;
+  Call_NotificationHubsDeleteAuthorizationRule_564338 = ref object of OpenApiRestCall_563539
+proc url_NotificationHubsDeleteAuthorizationRule_564340(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2795,7 +2799,7 @@ proc url_NotificationHubsDeleteAuthorizationRule_568440(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_NotificationHubsDeleteAuthorizationRule_568439(path: JsonNode;
+proc validate_NotificationHubsDeleteAuthorizationRule_564339(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Deletes a notificationHub authorization rule
   ## 
@@ -2804,42 +2808,42 @@ proc validate_NotificationHubsDeleteAuthorizationRule_568439(path: JsonNode;
   ## parameters in `path` object:
   ##   namespaceName: JString (required)
   ##                : The namespace name.
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
-  ##   authorizationRuleName: JString (required)
-  ##                        : Authorization Rule Name.
-  ##   subscriptionId: JString (required)
-  ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   notificationHubName: JString (required)
   ##                      : The notification hub name.
+  ##   subscriptionId: JString (required)
+  ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   authorizationRuleName: JString (required)
+  ##                        : Authorization Rule Name.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `namespaceName` field"
-  var valid_568441 = path.getOrDefault("namespaceName")
-  valid_568441 = validateParameter(valid_568441, JString, required = true,
+  var valid_564341 = path.getOrDefault("namespaceName")
+  valid_564341 = validateParameter(valid_564341, JString, required = true,
                                  default = nil)
-  if valid_568441 != nil:
-    section.add "namespaceName", valid_568441
-  var valid_568442 = path.getOrDefault("resourceGroupName")
-  valid_568442 = validateParameter(valid_568442, JString, required = true,
+  if valid_564341 != nil:
+    section.add "namespaceName", valid_564341
+  var valid_564342 = path.getOrDefault("notificationHubName")
+  valid_564342 = validateParameter(valid_564342, JString, required = true,
                                  default = nil)
-  if valid_568442 != nil:
-    section.add "resourceGroupName", valid_568442
-  var valid_568443 = path.getOrDefault("authorizationRuleName")
-  valid_568443 = validateParameter(valid_568443, JString, required = true,
+  if valid_564342 != nil:
+    section.add "notificationHubName", valid_564342
+  var valid_564343 = path.getOrDefault("subscriptionId")
+  valid_564343 = validateParameter(valid_564343, JString, required = true,
                                  default = nil)
-  if valid_568443 != nil:
-    section.add "authorizationRuleName", valid_568443
-  var valid_568444 = path.getOrDefault("subscriptionId")
-  valid_568444 = validateParameter(valid_568444, JString, required = true,
+  if valid_564343 != nil:
+    section.add "subscriptionId", valid_564343
+  var valid_564344 = path.getOrDefault("authorizationRuleName")
+  valid_564344 = validateParameter(valid_564344, JString, required = true,
                                  default = nil)
-  if valid_568444 != nil:
-    section.add "subscriptionId", valid_568444
-  var valid_568445 = path.getOrDefault("notificationHubName")
-  valid_568445 = validateParameter(valid_568445, JString, required = true,
+  if valid_564344 != nil:
+    section.add "authorizationRuleName", valid_564344
+  var valid_564345 = path.getOrDefault("resourceGroupName")
+  valid_564345 = validateParameter(valid_564345, JString, required = true,
                                  default = nil)
-  if valid_568445 != nil:
-    section.add "notificationHubName", valid_568445
+  if valid_564345 != nil:
+    section.add "resourceGroupName", valid_564345
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2847,11 +2851,11 @@ proc validate_NotificationHubsDeleteAuthorizationRule_568439(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568446 = query.getOrDefault("api-version")
-  valid_568446 = validateParameter(valid_568446, JString, required = true,
+  var valid_564346 = query.getOrDefault("api-version")
+  valid_564346 = validateParameter(valid_564346, JString, required = true,
                                  default = nil)
-  if valid_568446 != nil:
-    section.add "api-version", valid_568446
+  if valid_564346 != nil:
+    section.add "api-version", valid_564346
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2860,57 +2864,57 @@ proc validate_NotificationHubsDeleteAuthorizationRule_568439(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568447: Call_NotificationHubsDeleteAuthorizationRule_568438;
+proc call*(call_564347: Call_NotificationHubsDeleteAuthorizationRule_564338;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Deletes a notificationHub authorization rule
   ## 
-  let valid = call_568447.validator(path, query, header, formData, body)
-  let scheme = call_568447.pickScheme
+  let valid = call_564347.validator(path, query, header, formData, body)
+  let scheme = call_564347.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568447.url(scheme.get, call_568447.host, call_568447.base,
-                         call_568447.route, valid.getOrDefault("path"),
+  let url = call_564347.url(scheme.get, call_564347.host, call_564347.base,
+                         call_564347.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568447, url, valid)
+  result = hook(call_564347, url, valid)
 
-proc call*(call_568448: Call_NotificationHubsDeleteAuthorizationRule_568438;
-          namespaceName: string; resourceGroupName: string; apiVersion: string;
-          authorizationRuleName: string; subscriptionId: string;
-          notificationHubName: string): Recallable =
+proc call*(call_564348: Call_NotificationHubsDeleteAuthorizationRule_564338;
+          apiVersion: string; namespaceName: string; notificationHubName: string;
+          subscriptionId: string; authorizationRuleName: string;
+          resourceGroupName: string): Recallable =
   ## notificationHubsDeleteAuthorizationRule
   ## Deletes a notificationHub authorization rule
-  ##   namespaceName: string (required)
-  ##                : The namespace name.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
-  ##   authorizationRuleName: string (required)
-  ##                        : Authorization Rule Name.
-  ##   subscriptionId: string (required)
-  ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   namespaceName: string (required)
+  ##                : The namespace name.
   ##   notificationHubName: string (required)
   ##                      : The notification hub name.
-  var path_568449 = newJObject()
-  var query_568450 = newJObject()
-  add(path_568449, "namespaceName", newJString(namespaceName))
-  add(path_568449, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568450, "api-version", newJString(apiVersion))
-  add(path_568449, "authorizationRuleName", newJString(authorizationRuleName))
-  add(path_568449, "subscriptionId", newJString(subscriptionId))
-  add(path_568449, "notificationHubName", newJString(notificationHubName))
-  result = call_568448.call(path_568449, query_568450, nil, nil, nil)
+  ##   subscriptionId: string (required)
+  ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   authorizationRuleName: string (required)
+  ##                        : Authorization Rule Name.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564349 = newJObject()
+  var query_564350 = newJObject()
+  add(query_564350, "api-version", newJString(apiVersion))
+  add(path_564349, "namespaceName", newJString(namespaceName))
+  add(path_564349, "notificationHubName", newJString(notificationHubName))
+  add(path_564349, "subscriptionId", newJString(subscriptionId))
+  add(path_564349, "authorizationRuleName", newJString(authorizationRuleName))
+  add(path_564349, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564348.call(path_564349, query_564350, nil, nil, nil)
 
-var notificationHubsDeleteAuthorizationRule* = Call_NotificationHubsDeleteAuthorizationRule_568438(
+var notificationHubsDeleteAuthorizationRule* = Call_NotificationHubsDeleteAuthorizationRule_564338(
     name: "notificationHubsDeleteAuthorizationRule", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.NotificationHubs/namespaces/{namespaceName}/notificationHubs/{notificationHubName}/AuthorizationRules/{authorizationRuleName}",
-    validator: validate_NotificationHubsDeleteAuthorizationRule_568439, base: "",
-    url: url_NotificationHubsDeleteAuthorizationRule_568440,
+    validator: validate_NotificationHubsDeleteAuthorizationRule_564339, base: "",
+    url: url_NotificationHubsDeleteAuthorizationRule_564340,
     schemes: {Scheme.Https})
 type
-  Call_NotificationHubsListKeys_568451 = ref object of OpenApiRestCall_567641
-proc url_NotificationHubsListKeys_568453(protocol: Scheme; host: string;
+  Call_NotificationHubsListKeys_564351 = ref object of OpenApiRestCall_563539
+proc url_NotificationHubsListKeys_564353(protocol: Scheme; host: string;
                                         base: string; route: string; path: JsonNode;
                                         query: JsonNode): Uri =
   result.scheme = $protocol
@@ -2943,7 +2947,7 @@ proc url_NotificationHubsListKeys_568453(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_NotificationHubsListKeys_568452(path: JsonNode; query: JsonNode;
+proc validate_NotificationHubsListKeys_564352(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the Primary and Secondary ConnectionStrings to the NotificationHub 
   ## 
@@ -2953,42 +2957,42 @@ proc validate_NotificationHubsListKeys_568452(path: JsonNode; query: JsonNode;
   ## parameters in `path` object:
   ##   namespaceName: JString (required)
   ##                : The namespace name.
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
-  ##   authorizationRuleName: JString (required)
-  ##                        : The connection string of the NotificationHub for the specified authorizationRule.
-  ##   subscriptionId: JString (required)
-  ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   notificationHubName: JString (required)
   ##                      : The notification hub name.
+  ##   subscriptionId: JString (required)
+  ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   authorizationRuleName: JString (required)
+  ##                        : The connection string of the NotificationHub for the specified authorizationRule.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `namespaceName` field"
-  var valid_568454 = path.getOrDefault("namespaceName")
-  valid_568454 = validateParameter(valid_568454, JString, required = true,
+  var valid_564354 = path.getOrDefault("namespaceName")
+  valid_564354 = validateParameter(valid_564354, JString, required = true,
                                  default = nil)
-  if valid_568454 != nil:
-    section.add "namespaceName", valid_568454
-  var valid_568455 = path.getOrDefault("resourceGroupName")
-  valid_568455 = validateParameter(valid_568455, JString, required = true,
+  if valid_564354 != nil:
+    section.add "namespaceName", valid_564354
+  var valid_564355 = path.getOrDefault("notificationHubName")
+  valid_564355 = validateParameter(valid_564355, JString, required = true,
                                  default = nil)
-  if valid_568455 != nil:
-    section.add "resourceGroupName", valid_568455
-  var valid_568456 = path.getOrDefault("authorizationRuleName")
-  valid_568456 = validateParameter(valid_568456, JString, required = true,
+  if valid_564355 != nil:
+    section.add "notificationHubName", valid_564355
+  var valid_564356 = path.getOrDefault("subscriptionId")
+  valid_564356 = validateParameter(valid_564356, JString, required = true,
                                  default = nil)
-  if valid_568456 != nil:
-    section.add "authorizationRuleName", valid_568456
-  var valid_568457 = path.getOrDefault("subscriptionId")
-  valid_568457 = validateParameter(valid_568457, JString, required = true,
+  if valid_564356 != nil:
+    section.add "subscriptionId", valid_564356
+  var valid_564357 = path.getOrDefault("authorizationRuleName")
+  valid_564357 = validateParameter(valid_564357, JString, required = true,
                                  default = nil)
-  if valid_568457 != nil:
-    section.add "subscriptionId", valid_568457
-  var valid_568458 = path.getOrDefault("notificationHubName")
-  valid_568458 = validateParameter(valid_568458, JString, required = true,
+  if valid_564357 != nil:
+    section.add "authorizationRuleName", valid_564357
+  var valid_564358 = path.getOrDefault("resourceGroupName")
+  valid_564358 = validateParameter(valid_564358, JString, required = true,
                                  default = nil)
-  if valid_568458 != nil:
-    section.add "notificationHubName", valid_568458
+  if valid_564358 != nil:
+    section.add "resourceGroupName", valid_564358
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2996,11 +3000,11 @@ proc validate_NotificationHubsListKeys_568452(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568459 = query.getOrDefault("api-version")
-  valid_568459 = validateParameter(valid_568459, JString, required = true,
+  var valid_564359 = query.getOrDefault("api-version")
+  valid_564359 = validateParameter(valid_564359, JString, required = true,
                                  default = nil)
-  if valid_568459 != nil:
-    section.add "api-version", valid_568459
+  if valid_564359 != nil:
+    section.add "api-version", valid_564359
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3009,57 +3013,57 @@ proc validate_NotificationHubsListKeys_568452(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568460: Call_NotificationHubsListKeys_568451; path: JsonNode;
+proc call*(call_564360: Call_NotificationHubsListKeys_564351; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the Primary and Secondary ConnectionStrings to the NotificationHub 
   ## 
   ## http://msdn.microsoft.com/en-us/library/windowsazure/jj873988.aspx
-  let valid = call_568460.validator(path, query, header, formData, body)
-  let scheme = call_568460.pickScheme
+  let valid = call_564360.validator(path, query, header, formData, body)
+  let scheme = call_564360.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568460.url(scheme.get, call_568460.host, call_568460.base,
-                         call_568460.route, valid.getOrDefault("path"),
+  let url = call_564360.url(scheme.get, call_564360.host, call_564360.base,
+                         call_564360.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568460, url, valid)
+  result = hook(call_564360, url, valid)
 
-proc call*(call_568461: Call_NotificationHubsListKeys_568451;
-          namespaceName: string; resourceGroupName: string; apiVersion: string;
-          authorizationRuleName: string; subscriptionId: string;
-          notificationHubName: string): Recallable =
+proc call*(call_564361: Call_NotificationHubsListKeys_564351; apiVersion: string;
+          namespaceName: string; notificationHubName: string;
+          subscriptionId: string; authorizationRuleName: string;
+          resourceGroupName: string): Recallable =
   ## notificationHubsListKeys
   ## Gets the Primary and Secondary ConnectionStrings to the NotificationHub 
   ## http://msdn.microsoft.com/en-us/library/windowsazure/jj873988.aspx
-  ##   namespaceName: string (required)
-  ##                : The namespace name.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
-  ##   authorizationRuleName: string (required)
-  ##                        : The connection string of the NotificationHub for the specified authorizationRule.
-  ##   subscriptionId: string (required)
-  ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   namespaceName: string (required)
+  ##                : The namespace name.
   ##   notificationHubName: string (required)
   ##                      : The notification hub name.
-  var path_568462 = newJObject()
-  var query_568463 = newJObject()
-  add(path_568462, "namespaceName", newJString(namespaceName))
-  add(path_568462, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568463, "api-version", newJString(apiVersion))
-  add(path_568462, "authorizationRuleName", newJString(authorizationRuleName))
-  add(path_568462, "subscriptionId", newJString(subscriptionId))
-  add(path_568462, "notificationHubName", newJString(notificationHubName))
-  result = call_568461.call(path_568462, query_568463, nil, nil, nil)
+  ##   subscriptionId: string (required)
+  ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   authorizationRuleName: string (required)
+  ##                        : The connection string of the NotificationHub for the specified authorizationRule.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564362 = newJObject()
+  var query_564363 = newJObject()
+  add(query_564363, "api-version", newJString(apiVersion))
+  add(path_564362, "namespaceName", newJString(namespaceName))
+  add(path_564362, "notificationHubName", newJString(notificationHubName))
+  add(path_564362, "subscriptionId", newJString(subscriptionId))
+  add(path_564362, "authorizationRuleName", newJString(authorizationRuleName))
+  add(path_564362, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564361.call(path_564362, query_564363, nil, nil, nil)
 
-var notificationHubsListKeys* = Call_NotificationHubsListKeys_568451(
+var notificationHubsListKeys* = Call_NotificationHubsListKeys_564351(
     name: "notificationHubsListKeys", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.NotificationHubs/namespaces/{namespaceName}/notificationHubs/{notificationHubName}/AuthorizationRules/{authorizationRuleName}/listKeys",
-    validator: validate_NotificationHubsListKeys_568452, base: "",
-    url: url_NotificationHubsListKeys_568453, schemes: {Scheme.Https})
+    validator: validate_NotificationHubsListKeys_564352, base: "",
+    url: url_NotificationHubsListKeys_564353, schemes: {Scheme.Https})
 type
-  Call_NotificationHubsRegenerateKeys_568464 = ref object of OpenApiRestCall_567641
-proc url_NotificationHubsRegenerateKeys_568466(protocol: Scheme; host: string;
+  Call_NotificationHubsRegenerateKeys_564364 = ref object of OpenApiRestCall_563539
+proc url_NotificationHubsRegenerateKeys_564366(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -3091,7 +3095,7 @@ proc url_NotificationHubsRegenerateKeys_568466(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_NotificationHubsRegenerateKeys_568465(path: JsonNode;
+proc validate_NotificationHubsRegenerateKeys_564365(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Regenerates the Primary/Secondary Keys to the NotificationHub Authorization Rule
   ## 
@@ -3101,42 +3105,42 @@ proc validate_NotificationHubsRegenerateKeys_568465(path: JsonNode;
   ## parameters in `path` object:
   ##   namespaceName: JString (required)
   ##                : The namespace name.
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
-  ##   authorizationRuleName: JString (required)
-  ##                        : The connection string of the NotificationHub for the specified authorizationRule.
-  ##   subscriptionId: JString (required)
-  ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   notificationHubName: JString (required)
   ##                      : The notification hub name.
+  ##   subscriptionId: JString (required)
+  ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   authorizationRuleName: JString (required)
+  ##                        : The connection string of the NotificationHub for the specified authorizationRule.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `namespaceName` field"
-  var valid_568467 = path.getOrDefault("namespaceName")
-  valid_568467 = validateParameter(valid_568467, JString, required = true,
+  var valid_564367 = path.getOrDefault("namespaceName")
+  valid_564367 = validateParameter(valid_564367, JString, required = true,
                                  default = nil)
-  if valid_568467 != nil:
-    section.add "namespaceName", valid_568467
-  var valid_568468 = path.getOrDefault("resourceGroupName")
-  valid_568468 = validateParameter(valid_568468, JString, required = true,
+  if valid_564367 != nil:
+    section.add "namespaceName", valid_564367
+  var valid_564368 = path.getOrDefault("notificationHubName")
+  valid_564368 = validateParameter(valid_564368, JString, required = true,
                                  default = nil)
-  if valid_568468 != nil:
-    section.add "resourceGroupName", valid_568468
-  var valid_568469 = path.getOrDefault("authorizationRuleName")
-  valid_568469 = validateParameter(valid_568469, JString, required = true,
+  if valid_564368 != nil:
+    section.add "notificationHubName", valid_564368
+  var valid_564369 = path.getOrDefault("subscriptionId")
+  valid_564369 = validateParameter(valid_564369, JString, required = true,
                                  default = nil)
-  if valid_568469 != nil:
-    section.add "authorizationRuleName", valid_568469
-  var valid_568470 = path.getOrDefault("subscriptionId")
-  valid_568470 = validateParameter(valid_568470, JString, required = true,
+  if valid_564369 != nil:
+    section.add "subscriptionId", valid_564369
+  var valid_564370 = path.getOrDefault("authorizationRuleName")
+  valid_564370 = validateParameter(valid_564370, JString, required = true,
                                  default = nil)
-  if valid_568470 != nil:
-    section.add "subscriptionId", valid_568470
-  var valid_568471 = path.getOrDefault("notificationHubName")
-  valid_568471 = validateParameter(valid_568471, JString, required = true,
+  if valid_564370 != nil:
+    section.add "authorizationRuleName", valid_564370
+  var valid_564371 = path.getOrDefault("resourceGroupName")
+  valid_564371 = validateParameter(valid_564371, JString, required = true,
                                  default = nil)
-  if valid_568471 != nil:
-    section.add "notificationHubName", valid_568471
+  if valid_564371 != nil:
+    section.add "resourceGroupName", valid_564371
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -3144,11 +3148,11 @@ proc validate_NotificationHubsRegenerateKeys_568465(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568472 = query.getOrDefault("api-version")
-  valid_568472 = validateParameter(valid_568472, JString, required = true,
+  var valid_564372 = query.getOrDefault("api-version")
+  valid_564372 = validateParameter(valid_564372, JString, required = true,
                                  default = nil)
-  if valid_568472 != nil:
-    section.add "api-version", valid_568472
+  if valid_564372 != nil:
+    section.add "api-version", valid_564372
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3162,62 +3166,62 @@ proc validate_NotificationHubsRegenerateKeys_568465(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568474: Call_NotificationHubsRegenerateKeys_568464; path: JsonNode;
+proc call*(call_564374: Call_NotificationHubsRegenerateKeys_564364; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Regenerates the Primary/Secondary Keys to the NotificationHub Authorization Rule
   ## 
   ## http://msdn.microsoft.com/en-us/library/windowsazure/jj873988.aspx
-  let valid = call_568474.validator(path, query, header, formData, body)
-  let scheme = call_568474.pickScheme
+  let valid = call_564374.validator(path, query, header, formData, body)
+  let scheme = call_564374.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568474.url(scheme.get, call_568474.host, call_568474.base,
-                         call_568474.route, valid.getOrDefault("path"),
+  let url = call_564374.url(scheme.get, call_564374.host, call_564374.base,
+                         call_564374.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568474, url, valid)
+  result = hook(call_564374, url, valid)
 
-proc call*(call_568475: Call_NotificationHubsRegenerateKeys_568464;
-          namespaceName: string; resourceGroupName: string; apiVersion: string;
-          authorizationRuleName: string; subscriptionId: string;
-          notificationHubName: string; parameters: JsonNode): Recallable =
+proc call*(call_564375: Call_NotificationHubsRegenerateKeys_564364;
+          apiVersion: string; namespaceName: string; notificationHubName: string;
+          subscriptionId: string; authorizationRuleName: string;
+          resourceGroupName: string; parameters: JsonNode): Recallable =
   ## notificationHubsRegenerateKeys
   ## Regenerates the Primary/Secondary Keys to the NotificationHub Authorization Rule
   ## http://msdn.microsoft.com/en-us/library/windowsazure/jj873988.aspx
-  ##   namespaceName: string (required)
-  ##                : The namespace name.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
-  ##   authorizationRuleName: string (required)
-  ##                        : The connection string of the NotificationHub for the specified authorizationRule.
-  ##   subscriptionId: string (required)
-  ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   namespaceName: string (required)
+  ##                : The namespace name.
   ##   notificationHubName: string (required)
   ##                      : The notification hub name.
+  ##   subscriptionId: string (required)
+  ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   authorizationRuleName: string (required)
+  ##                        : The connection string of the NotificationHub for the specified authorizationRule.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   parameters: JObject (required)
   ##             : Parameters supplied to regenerate the NotificationHub Authorization Rule Key.
-  var path_568476 = newJObject()
-  var query_568477 = newJObject()
-  var body_568478 = newJObject()
-  add(path_568476, "namespaceName", newJString(namespaceName))
-  add(path_568476, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568477, "api-version", newJString(apiVersion))
-  add(path_568476, "authorizationRuleName", newJString(authorizationRuleName))
-  add(path_568476, "subscriptionId", newJString(subscriptionId))
-  add(path_568476, "notificationHubName", newJString(notificationHubName))
+  var path_564376 = newJObject()
+  var query_564377 = newJObject()
+  var body_564378 = newJObject()
+  add(query_564377, "api-version", newJString(apiVersion))
+  add(path_564376, "namespaceName", newJString(namespaceName))
+  add(path_564376, "notificationHubName", newJString(notificationHubName))
+  add(path_564376, "subscriptionId", newJString(subscriptionId))
+  add(path_564376, "authorizationRuleName", newJString(authorizationRuleName))
+  add(path_564376, "resourceGroupName", newJString(resourceGroupName))
   if parameters != nil:
-    body_568478 = parameters
-  result = call_568475.call(path_568476, query_568477, nil, nil, body_568478)
+    body_564378 = parameters
+  result = call_564375.call(path_564376, query_564377, nil, nil, body_564378)
 
-var notificationHubsRegenerateKeys* = Call_NotificationHubsRegenerateKeys_568464(
+var notificationHubsRegenerateKeys* = Call_NotificationHubsRegenerateKeys_564364(
     name: "notificationHubsRegenerateKeys", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.NotificationHubs/namespaces/{namespaceName}/notificationHubs/{notificationHubName}/AuthorizationRules/{authorizationRuleName}/regenerateKeys",
-    validator: validate_NotificationHubsRegenerateKeys_568465, base: "",
-    url: url_NotificationHubsRegenerateKeys_568466, schemes: {Scheme.Https})
+    validator: validate_NotificationHubsRegenerateKeys_564365, base: "",
+    url: url_NotificationHubsRegenerateKeys_564366, schemes: {Scheme.Https})
 type
-  Call_NotificationHubsGetPnsCredentials_568479 = ref object of OpenApiRestCall_567641
-proc url_NotificationHubsGetPnsCredentials_568481(protocol: Scheme; host: string;
+  Call_NotificationHubsGetPnsCredentials_564379 = ref object of OpenApiRestCall_563539
+proc url_NotificationHubsGetPnsCredentials_564381(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -3245,7 +3249,7 @@ proc url_NotificationHubsGetPnsCredentials_568481(protocol: Scheme; host: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_NotificationHubsGetPnsCredentials_568480(path: JsonNode;
+proc validate_NotificationHubsGetPnsCredentials_564380(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists the PNS Credentials associated with a notification hub .
   ## 
@@ -3254,35 +3258,35 @@ proc validate_NotificationHubsGetPnsCredentials_568480(path: JsonNode;
   ## parameters in `path` object:
   ##   namespaceName: JString (required)
   ##                : The namespace name.
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
-  ##   subscriptionId: JString (required)
-  ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   notificationHubName: JString (required)
   ##                      : The notification hub name.
+  ##   subscriptionId: JString (required)
+  ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `namespaceName` field"
-  var valid_568482 = path.getOrDefault("namespaceName")
-  valid_568482 = validateParameter(valid_568482, JString, required = true,
+  var valid_564382 = path.getOrDefault("namespaceName")
+  valid_564382 = validateParameter(valid_564382, JString, required = true,
                                  default = nil)
-  if valid_568482 != nil:
-    section.add "namespaceName", valid_568482
-  var valid_568483 = path.getOrDefault("resourceGroupName")
-  valid_568483 = validateParameter(valid_568483, JString, required = true,
+  if valid_564382 != nil:
+    section.add "namespaceName", valid_564382
+  var valid_564383 = path.getOrDefault("notificationHubName")
+  valid_564383 = validateParameter(valid_564383, JString, required = true,
                                  default = nil)
-  if valid_568483 != nil:
-    section.add "resourceGroupName", valid_568483
-  var valid_568484 = path.getOrDefault("subscriptionId")
-  valid_568484 = validateParameter(valid_568484, JString, required = true,
+  if valid_564383 != nil:
+    section.add "notificationHubName", valid_564383
+  var valid_564384 = path.getOrDefault("subscriptionId")
+  valid_564384 = validateParameter(valid_564384, JString, required = true,
                                  default = nil)
-  if valid_568484 != nil:
-    section.add "subscriptionId", valid_568484
-  var valid_568485 = path.getOrDefault("notificationHubName")
-  valid_568485 = validateParameter(valid_568485, JString, required = true,
+  if valid_564384 != nil:
+    section.add "subscriptionId", valid_564384
+  var valid_564385 = path.getOrDefault("resourceGroupName")
+  valid_564385 = validateParameter(valid_564385, JString, required = true,
                                  default = nil)
-  if valid_568485 != nil:
-    section.add "notificationHubName", valid_568485
+  if valid_564385 != nil:
+    section.add "resourceGroupName", valid_564385
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -3290,11 +3294,11 @@ proc validate_NotificationHubsGetPnsCredentials_568480(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568486 = query.getOrDefault("api-version")
-  valid_568486 = validateParameter(valid_568486, JString, required = true,
+  var valid_564386 = query.getOrDefault("api-version")
+  valid_564386 = validateParameter(valid_564386, JString, required = true,
                                  default = nil)
-  if valid_568486 != nil:
-    section.add "api-version", valid_568486
+  if valid_564386 != nil:
+    section.add "api-version", valid_564386
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3303,49 +3307,49 @@ proc validate_NotificationHubsGetPnsCredentials_568480(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568487: Call_NotificationHubsGetPnsCredentials_568479;
+proc call*(call_564387: Call_NotificationHubsGetPnsCredentials_564379;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Lists the PNS Credentials associated with a notification hub .
   ## 
-  let valid = call_568487.validator(path, query, header, formData, body)
-  let scheme = call_568487.pickScheme
+  let valid = call_564387.validator(path, query, header, formData, body)
+  let scheme = call_564387.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568487.url(scheme.get, call_568487.host, call_568487.base,
-                         call_568487.route, valid.getOrDefault("path"),
+  let url = call_564387.url(scheme.get, call_564387.host, call_564387.base,
+                         call_564387.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568487, url, valid)
+  result = hook(call_564387, url, valid)
 
-proc call*(call_568488: Call_NotificationHubsGetPnsCredentials_568479;
-          namespaceName: string; resourceGroupName: string; apiVersion: string;
-          subscriptionId: string; notificationHubName: string): Recallable =
+proc call*(call_564388: Call_NotificationHubsGetPnsCredentials_564379;
+          apiVersion: string; namespaceName: string; notificationHubName: string;
+          subscriptionId: string; resourceGroupName: string): Recallable =
   ## notificationHubsGetPnsCredentials
   ## Lists the PNS Credentials associated with a notification hub .
-  ##   namespaceName: string (required)
-  ##                : The namespace name.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
-  ##   subscriptionId: string (required)
-  ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   namespaceName: string (required)
+  ##                : The namespace name.
   ##   notificationHubName: string (required)
   ##                      : The notification hub name.
-  var path_568489 = newJObject()
-  var query_568490 = newJObject()
-  add(path_568489, "namespaceName", newJString(namespaceName))
-  add(path_568489, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568490, "api-version", newJString(apiVersion))
-  add(path_568489, "subscriptionId", newJString(subscriptionId))
-  add(path_568489, "notificationHubName", newJString(notificationHubName))
-  result = call_568488.call(path_568489, query_568490, nil, nil, nil)
+  ##   subscriptionId: string (required)
+  ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564389 = newJObject()
+  var query_564390 = newJObject()
+  add(query_564390, "api-version", newJString(apiVersion))
+  add(path_564389, "namespaceName", newJString(namespaceName))
+  add(path_564389, "notificationHubName", newJString(notificationHubName))
+  add(path_564389, "subscriptionId", newJString(subscriptionId))
+  add(path_564389, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564388.call(path_564389, query_564390, nil, nil, nil)
 
-var notificationHubsGetPnsCredentials* = Call_NotificationHubsGetPnsCredentials_568479(
+var notificationHubsGetPnsCredentials* = Call_NotificationHubsGetPnsCredentials_564379(
     name: "notificationHubsGetPnsCredentials", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.NotificationHubs/namespaces/{namespaceName}/notificationHubs/{notificationHubName}/pnsCredentials",
-    validator: validate_NotificationHubsGetPnsCredentials_568480, base: "",
-    url: url_NotificationHubsGetPnsCredentials_568481, schemes: {Scheme.Https})
+    validator: validate_NotificationHubsGetPnsCredentials_564380, base: "",
+    url: url_NotificationHubsGetPnsCredentials_564381, schemes: {Scheme.Https})
 export
   rest
 

@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, httpcore
 
 ## auto-generated via openapi macro
 ## title: SearchServiceClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_567641 = ref object of OpenApiRestCall
+  OpenApiRestCall_563539 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_567641](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563539](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_567641): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563539): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,15 +107,15 @@ const
   macServiceName = "search-searchservice"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_DataSourcesCreate_568160 = ref object of OpenApiRestCall_567641
-proc url_DataSourcesCreate_568162(protocol: Scheme; host: string; base: string;
+  Call_DataSourcesCreate_564060 = ref object of OpenApiRestCall_563539
+proc url_DataSourcesCreate_564062(protocol: Scheme; host: string; base: string;
                                  route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_DataSourcesCreate_568161(path: JsonNode; query: JsonNode;
+proc validate_DataSourcesCreate_564061(path: JsonNode; query: JsonNode;
                                       header: JsonNode; formData: JsonNode;
                                       body: JsonNode): JsonNode =
   ## Creates a new Azure Search datasource.
@@ -127,21 +131,21 @@ proc validate_DataSourcesCreate_568161(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568180 = query.getOrDefault("api-version")
-  valid_568180 = validateParameter(valid_568180, JString, required = true,
+  var valid_564080 = query.getOrDefault("api-version")
+  valid_564080 = validateParameter(valid_564080, JString, required = true,
                                  default = nil)
-  if valid_568180 != nil:
-    section.add "api-version", valid_568180
+  if valid_564080 != nil:
+    section.add "api-version", valid_564080
   result.add "query", section
   ## parameters in `header` object:
   ##   client-request-id: JString
   ##                    : Tracking ID sent with the request to help with debugging.
   section = newJObject()
-  var valid_568181 = header.getOrDefault("client-request-id")
-  valid_568181 = validateParameter(valid_568181, JString, required = false,
+  var valid_564081 = header.getOrDefault("client-request-id")
+  valid_564081 = validateParameter(valid_564081, JString, required = false,
                                  default = nil)
-  if valid_568181 != nil:
-    section.add "client-request-id", valid_568181
+  if valid_564081 != nil:
+    section.add "client-request-id", valid_564081
   result.add "header", section
   section = newJObject()
   result.add "formData", section
@@ -153,50 +157,50 @@ proc validate_DataSourcesCreate_568161(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568183: Call_DataSourcesCreate_568160; path: JsonNode;
+proc call*(call_564083: Call_DataSourcesCreate_564060; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Creates a new Azure Search datasource.
   ## 
   ## https://msdn.microsoft.com/library/azure/dn946876.aspx
-  let valid = call_568183.validator(path, query, header, formData, body)
-  let scheme = call_568183.pickScheme
+  let valid = call_564083.validator(path, query, header, formData, body)
+  let scheme = call_564083.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568183.url(scheme.get, call_568183.host, call_568183.base,
-                         call_568183.route, valid.getOrDefault("path"),
+  let url = call_564083.url(scheme.get, call_564083.host, call_564083.base,
+                         call_564083.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568183, url, valid)
+  result = hook(call_564083, url, valid)
 
-proc call*(call_568184: Call_DataSourcesCreate_568160; apiVersion: string;
-          dataSource: JsonNode): Recallable =
+proc call*(call_564084: Call_DataSourcesCreate_564060; dataSource: JsonNode;
+          apiVersion: string): Recallable =
   ## dataSourcesCreate
   ## Creates a new Azure Search datasource.
   ## https://msdn.microsoft.com/library/azure/dn946876.aspx
-  ##   apiVersion: string (required)
-  ##             : Client Api Version.
   ##   dataSource: JObject (required)
   ##             : The definition of the datasource to create.
-  var query_568185 = newJObject()
-  var body_568186 = newJObject()
-  add(query_568185, "api-version", newJString(apiVersion))
+  ##   apiVersion: string (required)
+  ##             : Client Api Version.
+  var query_564085 = newJObject()
+  var body_564086 = newJObject()
   if dataSource != nil:
-    body_568186 = dataSource
-  result = call_568184.call(nil, query_568185, nil, nil, body_568186)
+    body_564086 = dataSource
+  add(query_564085, "api-version", newJString(apiVersion))
+  result = call_564084.call(nil, query_564085, nil, nil, body_564086)
 
-var dataSourcesCreate* = Call_DataSourcesCreate_568160(name: "dataSourcesCreate",
+var dataSourcesCreate* = Call_DataSourcesCreate_564060(name: "dataSourcesCreate",
     meth: HttpMethod.HttpPost, host: "azure.local", route: "/datasources",
-    validator: validate_DataSourcesCreate_568161, base: "",
-    url: url_DataSourcesCreate_568162, schemes: {Scheme.Https})
+    validator: validate_DataSourcesCreate_564061, base: "",
+    url: url_DataSourcesCreate_564062, schemes: {Scheme.Https})
 type
-  Call_DataSourcesList_567863 = ref object of OpenApiRestCall_567641
-proc url_DataSourcesList_567865(protocol: Scheme; host: string; base: string;
+  Call_DataSourcesList_563761 = ref object of OpenApiRestCall_563539
+proc url_DataSourcesList_563763(protocol: Scheme; host: string; base: string;
                                route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_DataSourcesList_567864(path: JsonNode; query: JsonNode;
+proc validate_DataSourcesList_563762(path: JsonNode; query: JsonNode;
                                     header: JsonNode; formData: JsonNode;
                                     body: JsonNode): JsonNode =
   ## Lists all datasources available for an Azure Search service.
@@ -212,58 +216,58 @@ proc validate_DataSourcesList_567864(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568024 = query.getOrDefault("api-version")
-  valid_568024 = validateParameter(valid_568024, JString, required = true,
+  var valid_563924 = query.getOrDefault("api-version")
+  valid_563924 = validateParameter(valid_563924, JString, required = true,
                                  default = nil)
-  if valid_568024 != nil:
-    section.add "api-version", valid_568024
+  if valid_563924 != nil:
+    section.add "api-version", valid_563924
   result.add "query", section
   ## parameters in `header` object:
   ##   client-request-id: JString
   ##                    : Tracking ID sent with the request to help with debugging.
   section = newJObject()
-  var valid_568025 = header.getOrDefault("client-request-id")
-  valid_568025 = validateParameter(valid_568025, JString, required = false,
+  var valid_563925 = header.getOrDefault("client-request-id")
+  valid_563925 = validateParameter(valid_563925, JString, required = false,
                                  default = nil)
-  if valid_568025 != nil:
-    section.add "client-request-id", valid_568025
+  if valid_563925 != nil:
+    section.add "client-request-id", valid_563925
   result.add "header", section
   section = newJObject()
   result.add "formData", section
   if body != nil:
     result.add "body", body
 
-proc call*(call_568048: Call_DataSourcesList_567863; path: JsonNode; query: JsonNode;
+proc call*(call_563948: Call_DataSourcesList_563761; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists all datasources available for an Azure Search service.
   ## 
   ## https://msdn.microsoft.com/library/azure/dn946878.aspx
-  let valid = call_568048.validator(path, query, header, formData, body)
-  let scheme = call_568048.pickScheme
+  let valid = call_563948.validator(path, query, header, formData, body)
+  let scheme = call_563948.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568048.url(scheme.get, call_568048.host, call_568048.base,
-                         call_568048.route, valid.getOrDefault("path"),
+  let url = call_563948.url(scheme.get, call_563948.host, call_563948.base,
+                         call_563948.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568048, url, valid)
+  result = hook(call_563948, url, valid)
 
-proc call*(call_568119: Call_DataSourcesList_567863; apiVersion: string): Recallable =
+proc call*(call_564019: Call_DataSourcesList_563761; apiVersion: string): Recallable =
   ## dataSourcesList
   ## Lists all datasources available for an Azure Search service.
   ## https://msdn.microsoft.com/library/azure/dn946878.aspx
   ##   apiVersion: string (required)
   ##             : Client Api Version.
-  var query_568120 = newJObject()
-  add(query_568120, "api-version", newJString(apiVersion))
-  result = call_568119.call(nil, query_568120, nil, nil, nil)
+  var query_564020 = newJObject()
+  add(query_564020, "api-version", newJString(apiVersion))
+  result = call_564019.call(nil, query_564020, nil, nil, nil)
 
-var dataSourcesList* = Call_DataSourcesList_567863(name: "dataSourcesList",
+var dataSourcesList* = Call_DataSourcesList_563761(name: "dataSourcesList",
     meth: HttpMethod.HttpGet, host: "azure.local", route: "/datasources",
-    validator: validate_DataSourcesList_567864, base: "", url: url_DataSourcesList_567865,
+    validator: validate_DataSourcesList_563762, base: "", url: url_DataSourcesList_563763,
     schemes: {Scheme.Https})
 type
-  Call_DataSourcesCreateOrUpdate_568211 = ref object of OpenApiRestCall_567641
-proc url_DataSourcesCreateOrUpdate_568213(protocol: Scheme; host: string;
+  Call_DataSourcesCreateOrUpdate_564111 = ref object of OpenApiRestCall_563539
+proc url_DataSourcesCreateOrUpdate_564113(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -279,7 +283,7 @@ proc url_DataSourcesCreateOrUpdate_568213(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DataSourcesCreateOrUpdate_568212(path: JsonNode; query: JsonNode;
+proc validate_DataSourcesCreateOrUpdate_564112(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Creates a new Azure Search datasource or updates a datasource if it already exists.
   ## 
@@ -292,11 +296,11 @@ proc validate_DataSourcesCreateOrUpdate_568212(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `dataSourceName` field"
-  var valid_568214 = path.getOrDefault("dataSourceName")
-  valid_568214 = validateParameter(valid_568214, JString, required = true,
+  var valid_564114 = path.getOrDefault("dataSourceName")
+  valid_564114 = validateParameter(valid_564114, JString, required = true,
                                  default = nil)
-  if valid_568214 != nil:
-    section.add "dataSourceName", valid_568214
+  if valid_564114 != nil:
+    section.add "dataSourceName", valid_564114
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -304,21 +308,21 @@ proc validate_DataSourcesCreateOrUpdate_568212(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568215 = query.getOrDefault("api-version")
-  valid_568215 = validateParameter(valid_568215, JString, required = true,
+  var valid_564115 = query.getOrDefault("api-version")
+  valid_564115 = validateParameter(valid_564115, JString, required = true,
                                  default = nil)
-  if valid_568215 != nil:
-    section.add "api-version", valid_568215
+  if valid_564115 != nil:
+    section.add "api-version", valid_564115
   result.add "query", section
   ## parameters in `header` object:
   ##   client-request-id: JString
   ##                    : Tracking ID sent with the request to help with debugging.
   section = newJObject()
-  var valid_568216 = header.getOrDefault("client-request-id")
-  valid_568216 = validateParameter(valid_568216, JString, required = false,
+  var valid_564116 = header.getOrDefault("client-request-id")
+  valid_564116 = validateParameter(valid_564116, JString, required = false,
                                  default = nil)
-  if valid_568216 != nil:
-    section.add "client-request-id", valid_568216
+  if valid_564116 != nil:
+    section.add "client-request-id", valid_564116
   result.add "header", section
   section = newJObject()
   result.add "formData", section
@@ -330,48 +334,48 @@ proc validate_DataSourcesCreateOrUpdate_568212(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568218: Call_DataSourcesCreateOrUpdate_568211; path: JsonNode;
+proc call*(call_564118: Call_DataSourcesCreateOrUpdate_564111; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Creates a new Azure Search datasource or updates a datasource if it already exists.
   ## 
   ## https://msdn.microsoft.com/library/azure/dn946900.aspx
-  let valid = call_568218.validator(path, query, header, formData, body)
-  let scheme = call_568218.pickScheme
+  let valid = call_564118.validator(path, query, header, formData, body)
+  let scheme = call_564118.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568218.url(scheme.get, call_568218.host, call_568218.base,
-                         call_568218.route, valid.getOrDefault("path"),
+  let url = call_564118.url(scheme.get, call_564118.host, call_564118.base,
+                         call_564118.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568218, url, valid)
+  result = hook(call_564118, url, valid)
 
-proc call*(call_568219: Call_DataSourcesCreateOrUpdate_568211; apiVersion: string;
-          dataSourceName: string; dataSource: JsonNode): Recallable =
+proc call*(call_564119: Call_DataSourcesCreateOrUpdate_564111;
+          dataSource: JsonNode; dataSourceName: string; apiVersion: string): Recallable =
   ## dataSourcesCreateOrUpdate
   ## Creates a new Azure Search datasource or updates a datasource if it already exists.
   ## https://msdn.microsoft.com/library/azure/dn946900.aspx
-  ##   apiVersion: string (required)
-  ##             : Client Api Version.
-  ##   dataSourceName: string (required)
-  ##                 : The name of the datasource to create or update.
   ##   dataSource: JObject (required)
   ##             : The definition of the datasource to create or update.
-  var path_568220 = newJObject()
-  var query_568221 = newJObject()
-  var body_568222 = newJObject()
-  add(query_568221, "api-version", newJString(apiVersion))
-  add(path_568220, "dataSourceName", newJString(dataSourceName))
+  ##   dataSourceName: string (required)
+  ##                 : The name of the datasource to create or update.
+  ##   apiVersion: string (required)
+  ##             : Client Api Version.
+  var path_564120 = newJObject()
+  var query_564121 = newJObject()
+  var body_564122 = newJObject()
   if dataSource != nil:
-    body_568222 = dataSource
-  result = call_568219.call(path_568220, query_568221, nil, nil, body_568222)
+    body_564122 = dataSource
+  add(path_564120, "dataSourceName", newJString(dataSourceName))
+  add(query_564121, "api-version", newJString(apiVersion))
+  result = call_564119.call(path_564120, query_564121, nil, nil, body_564122)
 
-var dataSourcesCreateOrUpdate* = Call_DataSourcesCreateOrUpdate_568211(
+var dataSourcesCreateOrUpdate* = Call_DataSourcesCreateOrUpdate_564111(
     name: "dataSourcesCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "azure.local", route: "/datasources(\'{dataSourceName}\')",
-    validator: validate_DataSourcesCreateOrUpdate_568212, base: "",
-    url: url_DataSourcesCreateOrUpdate_568213, schemes: {Scheme.Https})
+    validator: validate_DataSourcesCreateOrUpdate_564112, base: "",
+    url: url_DataSourcesCreateOrUpdate_564113, schemes: {Scheme.Https})
 type
-  Call_DataSourcesGet_568187 = ref object of OpenApiRestCall_567641
-proc url_DataSourcesGet_568189(protocol: Scheme; host: string; base: string;
+  Call_DataSourcesGet_564087 = ref object of OpenApiRestCall_563539
+proc url_DataSourcesGet_564089(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -387,7 +391,7 @@ proc url_DataSourcesGet_568189(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DataSourcesGet_568188(path: JsonNode; query: JsonNode;
+proc validate_DataSourcesGet_564088(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## Retrieves a datasource definition from Azure Search.
@@ -401,11 +405,11 @@ proc validate_DataSourcesGet_568188(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `dataSourceName` field"
-  var valid_568204 = path.getOrDefault("dataSourceName")
-  valid_568204 = validateParameter(valid_568204, JString, required = true,
+  var valid_564104 = path.getOrDefault("dataSourceName")
+  valid_564104 = validateParameter(valid_564104, JString, required = true,
                                  default = nil)
-  if valid_568204 != nil:
-    section.add "dataSourceName", valid_568204
+  if valid_564104 != nil:
+    section.add "dataSourceName", valid_564104
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -413,64 +417,64 @@ proc validate_DataSourcesGet_568188(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568205 = query.getOrDefault("api-version")
-  valid_568205 = validateParameter(valid_568205, JString, required = true,
+  var valid_564105 = query.getOrDefault("api-version")
+  valid_564105 = validateParameter(valid_564105, JString, required = true,
                                  default = nil)
-  if valid_568205 != nil:
-    section.add "api-version", valid_568205
+  if valid_564105 != nil:
+    section.add "api-version", valid_564105
   result.add "query", section
   ## parameters in `header` object:
   ##   client-request-id: JString
   ##                    : Tracking ID sent with the request to help with debugging.
   section = newJObject()
-  var valid_568206 = header.getOrDefault("client-request-id")
-  valid_568206 = validateParameter(valid_568206, JString, required = false,
+  var valid_564106 = header.getOrDefault("client-request-id")
+  valid_564106 = validateParameter(valid_564106, JString, required = false,
                                  default = nil)
-  if valid_568206 != nil:
-    section.add "client-request-id", valid_568206
+  if valid_564106 != nil:
+    section.add "client-request-id", valid_564106
   result.add "header", section
   section = newJObject()
   result.add "formData", section
   if body != nil:
     result.add "body", body
 
-proc call*(call_568207: Call_DataSourcesGet_568187; path: JsonNode; query: JsonNode;
+proc call*(call_564107: Call_DataSourcesGet_564087; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Retrieves a datasource definition from Azure Search.
   ## 
   ## https://msdn.microsoft.com/library/azure/dn946893.aspx
-  let valid = call_568207.validator(path, query, header, formData, body)
-  let scheme = call_568207.pickScheme
+  let valid = call_564107.validator(path, query, header, formData, body)
+  let scheme = call_564107.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568207.url(scheme.get, call_568207.host, call_568207.base,
-                         call_568207.route, valid.getOrDefault("path"),
+  let url = call_564107.url(scheme.get, call_564107.host, call_564107.base,
+                         call_564107.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568207, url, valid)
+  result = hook(call_564107, url, valid)
 
-proc call*(call_568208: Call_DataSourcesGet_568187; apiVersion: string;
-          dataSourceName: string): Recallable =
+proc call*(call_564108: Call_DataSourcesGet_564087; dataSourceName: string;
+          apiVersion: string): Recallable =
   ## dataSourcesGet
   ## Retrieves a datasource definition from Azure Search.
   ## https://msdn.microsoft.com/library/azure/dn946893.aspx
-  ##   apiVersion: string (required)
-  ##             : Client Api Version.
   ##   dataSourceName: string (required)
   ##                 : The name of the datasource to retrieve.
-  var path_568209 = newJObject()
-  var query_568210 = newJObject()
-  add(query_568210, "api-version", newJString(apiVersion))
-  add(path_568209, "dataSourceName", newJString(dataSourceName))
-  result = call_568208.call(path_568209, query_568210, nil, nil, nil)
+  ##   apiVersion: string (required)
+  ##             : Client Api Version.
+  var path_564109 = newJObject()
+  var query_564110 = newJObject()
+  add(path_564109, "dataSourceName", newJString(dataSourceName))
+  add(query_564110, "api-version", newJString(apiVersion))
+  result = call_564108.call(path_564109, query_564110, nil, nil, nil)
 
-var dataSourcesGet* = Call_DataSourcesGet_568187(name: "dataSourcesGet",
+var dataSourcesGet* = Call_DataSourcesGet_564087(name: "dataSourcesGet",
     meth: HttpMethod.HttpGet, host: "azure.local",
     route: "/datasources(\'{dataSourceName}\')",
-    validator: validate_DataSourcesGet_568188, base: "", url: url_DataSourcesGet_568189,
+    validator: validate_DataSourcesGet_564088, base: "", url: url_DataSourcesGet_564089,
     schemes: {Scheme.Https})
 type
-  Call_DataSourcesDelete_568223 = ref object of OpenApiRestCall_567641
-proc url_DataSourcesDelete_568225(protocol: Scheme; host: string; base: string;
+  Call_DataSourcesDelete_564123 = ref object of OpenApiRestCall_563539
+proc url_DataSourcesDelete_564125(protocol: Scheme; host: string; base: string;
                                  route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -486,7 +490,7 @@ proc url_DataSourcesDelete_568225(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DataSourcesDelete_568224(path: JsonNode; query: JsonNode;
+proc validate_DataSourcesDelete_564124(path: JsonNode; query: JsonNode;
                                       header: JsonNode; formData: JsonNode;
                                       body: JsonNode): JsonNode =
   ## Deletes an Azure Search datasource.
@@ -500,11 +504,11 @@ proc validate_DataSourcesDelete_568224(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `dataSourceName` field"
-  var valid_568226 = path.getOrDefault("dataSourceName")
-  valid_568226 = validateParameter(valid_568226, JString, required = true,
+  var valid_564126 = path.getOrDefault("dataSourceName")
+  valid_564126 = validateParameter(valid_564126, JString, required = true,
                                  default = nil)
-  if valid_568226 != nil:
-    section.add "dataSourceName", valid_568226
+  if valid_564126 != nil:
+    section.add "dataSourceName", valid_564126
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -512,71 +516,71 @@ proc validate_DataSourcesDelete_568224(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568227 = query.getOrDefault("api-version")
-  valid_568227 = validateParameter(valid_568227, JString, required = true,
+  var valid_564127 = query.getOrDefault("api-version")
+  valid_564127 = validateParameter(valid_564127, JString, required = true,
                                  default = nil)
-  if valid_568227 != nil:
-    section.add "api-version", valid_568227
+  if valid_564127 != nil:
+    section.add "api-version", valid_564127
   result.add "query", section
   ## parameters in `header` object:
   ##   client-request-id: JString
   ##                    : Tracking ID sent with the request to help with debugging.
   section = newJObject()
-  var valid_568228 = header.getOrDefault("client-request-id")
-  valid_568228 = validateParameter(valid_568228, JString, required = false,
+  var valid_564128 = header.getOrDefault("client-request-id")
+  valid_564128 = validateParameter(valid_564128, JString, required = false,
                                  default = nil)
-  if valid_568228 != nil:
-    section.add "client-request-id", valid_568228
+  if valid_564128 != nil:
+    section.add "client-request-id", valid_564128
   result.add "header", section
   section = newJObject()
   result.add "formData", section
   if body != nil:
     result.add "body", body
 
-proc call*(call_568229: Call_DataSourcesDelete_568223; path: JsonNode;
+proc call*(call_564129: Call_DataSourcesDelete_564123; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes an Azure Search datasource.
   ## 
   ## https://msdn.microsoft.com/library/azure/dn946881.aspx
-  let valid = call_568229.validator(path, query, header, formData, body)
-  let scheme = call_568229.pickScheme
+  let valid = call_564129.validator(path, query, header, formData, body)
+  let scheme = call_564129.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568229.url(scheme.get, call_568229.host, call_568229.base,
-                         call_568229.route, valid.getOrDefault("path"),
+  let url = call_564129.url(scheme.get, call_564129.host, call_564129.base,
+                         call_564129.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568229, url, valid)
+  result = hook(call_564129, url, valid)
 
-proc call*(call_568230: Call_DataSourcesDelete_568223; apiVersion: string;
-          dataSourceName: string): Recallable =
+proc call*(call_564130: Call_DataSourcesDelete_564123; dataSourceName: string;
+          apiVersion: string): Recallable =
   ## dataSourcesDelete
   ## Deletes an Azure Search datasource.
   ## https://msdn.microsoft.com/library/azure/dn946881.aspx
-  ##   apiVersion: string (required)
-  ##             : Client Api Version.
   ##   dataSourceName: string (required)
   ##                 : The name of the datasource to delete.
-  var path_568231 = newJObject()
-  var query_568232 = newJObject()
-  add(query_568232, "api-version", newJString(apiVersion))
-  add(path_568231, "dataSourceName", newJString(dataSourceName))
-  result = call_568230.call(path_568231, query_568232, nil, nil, nil)
+  ##   apiVersion: string (required)
+  ##             : Client Api Version.
+  var path_564131 = newJObject()
+  var query_564132 = newJObject()
+  add(path_564131, "dataSourceName", newJString(dataSourceName))
+  add(query_564132, "api-version", newJString(apiVersion))
+  result = call_564130.call(path_564131, query_564132, nil, nil, nil)
 
-var dataSourcesDelete* = Call_DataSourcesDelete_568223(name: "dataSourcesDelete",
+var dataSourcesDelete* = Call_DataSourcesDelete_564123(name: "dataSourcesDelete",
     meth: HttpMethod.HttpDelete, host: "azure.local",
     route: "/datasources(\'{dataSourceName}\')",
-    validator: validate_DataSourcesDelete_568224, base: "",
-    url: url_DataSourcesDelete_568225, schemes: {Scheme.Https})
+    validator: validate_DataSourcesDelete_564124, base: "",
+    url: url_DataSourcesDelete_564125, schemes: {Scheme.Https})
 type
-  Call_IndexersCreate_568241 = ref object of OpenApiRestCall_567641
-proc url_IndexersCreate_568243(protocol: Scheme; host: string; base: string;
+  Call_IndexersCreate_564141 = ref object of OpenApiRestCall_563539
+proc url_IndexersCreate_564143(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_IndexersCreate_568242(path: JsonNode; query: JsonNode;
+proc validate_IndexersCreate_564142(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## Creates a new Azure Search indexer.
@@ -592,21 +596,21 @@ proc validate_IndexersCreate_568242(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568244 = query.getOrDefault("api-version")
-  valid_568244 = validateParameter(valid_568244, JString, required = true,
+  var valid_564144 = query.getOrDefault("api-version")
+  valid_564144 = validateParameter(valid_564144, JString, required = true,
                                  default = nil)
-  if valid_568244 != nil:
-    section.add "api-version", valid_568244
+  if valid_564144 != nil:
+    section.add "api-version", valid_564144
   result.add "query", section
   ## parameters in `header` object:
   ##   client-request-id: JString
   ##                    : Tracking ID sent with the request to help with debugging.
   section = newJObject()
-  var valid_568245 = header.getOrDefault("client-request-id")
-  valid_568245 = validateParameter(valid_568245, JString, required = false,
+  var valid_564145 = header.getOrDefault("client-request-id")
+  valid_564145 = validateParameter(valid_564145, JString, required = false,
                                  default = nil)
-  if valid_568245 != nil:
-    section.add "client-request-id", valid_568245
+  if valid_564145 != nil:
+    section.add "client-request-id", valid_564145
   result.add "header", section
   section = newJObject()
   result.add "formData", section
@@ -618,50 +622,50 @@ proc validate_IndexersCreate_568242(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568247: Call_IndexersCreate_568241; path: JsonNode; query: JsonNode;
+proc call*(call_564147: Call_IndexersCreate_564141; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Creates a new Azure Search indexer.
   ## 
   ## https://msdn.microsoft.com/library/azure/dn946899.aspx
-  let valid = call_568247.validator(path, query, header, formData, body)
-  let scheme = call_568247.pickScheme
+  let valid = call_564147.validator(path, query, header, formData, body)
+  let scheme = call_564147.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568247.url(scheme.get, call_568247.host, call_568247.base,
-                         call_568247.route, valid.getOrDefault("path"),
+  let url = call_564147.url(scheme.get, call_564147.host, call_564147.base,
+                         call_564147.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568247, url, valid)
+  result = hook(call_564147, url, valid)
 
-proc call*(call_568248: Call_IndexersCreate_568241; apiVersion: string;
-          indexer: JsonNode): Recallable =
+proc call*(call_564148: Call_IndexersCreate_564141; indexer: JsonNode;
+          apiVersion: string): Recallable =
   ## indexersCreate
   ## Creates a new Azure Search indexer.
   ## https://msdn.microsoft.com/library/azure/dn946899.aspx
-  ##   apiVersion: string (required)
-  ##             : Client Api Version.
   ##   indexer: JObject (required)
   ##          : The definition of the indexer to create.
-  var query_568249 = newJObject()
-  var body_568250 = newJObject()
-  add(query_568249, "api-version", newJString(apiVersion))
+  ##   apiVersion: string (required)
+  ##             : Client Api Version.
+  var query_564149 = newJObject()
+  var body_564150 = newJObject()
   if indexer != nil:
-    body_568250 = indexer
-  result = call_568248.call(nil, query_568249, nil, nil, body_568250)
+    body_564150 = indexer
+  add(query_564149, "api-version", newJString(apiVersion))
+  result = call_564148.call(nil, query_564149, nil, nil, body_564150)
 
-var indexersCreate* = Call_IndexersCreate_568241(name: "indexersCreate",
+var indexersCreate* = Call_IndexersCreate_564141(name: "indexersCreate",
     meth: HttpMethod.HttpPost, host: "azure.local", route: "/indexers",
-    validator: validate_IndexersCreate_568242, base: "", url: url_IndexersCreate_568243,
+    validator: validate_IndexersCreate_564142, base: "", url: url_IndexersCreate_564143,
     schemes: {Scheme.Https})
 type
-  Call_IndexersList_568233 = ref object of OpenApiRestCall_567641
-proc url_IndexersList_568235(protocol: Scheme; host: string; base: string;
+  Call_IndexersList_564133 = ref object of OpenApiRestCall_563539
+proc url_IndexersList_564135(protocol: Scheme; host: string; base: string;
                             route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_IndexersList_568234(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_IndexersList_564134(path: JsonNode; query: JsonNode; header: JsonNode;
                                  formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists all indexers available for an Azure Search service.
   ## 
@@ -676,58 +680,58 @@ proc validate_IndexersList_568234(path: JsonNode; query: JsonNode; header: JsonN
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568236 = query.getOrDefault("api-version")
-  valid_568236 = validateParameter(valid_568236, JString, required = true,
+  var valid_564136 = query.getOrDefault("api-version")
+  valid_564136 = validateParameter(valid_564136, JString, required = true,
                                  default = nil)
-  if valid_568236 != nil:
-    section.add "api-version", valid_568236
+  if valid_564136 != nil:
+    section.add "api-version", valid_564136
   result.add "query", section
   ## parameters in `header` object:
   ##   client-request-id: JString
   ##                    : Tracking ID sent with the request to help with debugging.
   section = newJObject()
-  var valid_568237 = header.getOrDefault("client-request-id")
-  valid_568237 = validateParameter(valid_568237, JString, required = false,
+  var valid_564137 = header.getOrDefault("client-request-id")
+  valid_564137 = validateParameter(valid_564137, JString, required = false,
                                  default = nil)
-  if valid_568237 != nil:
-    section.add "client-request-id", valid_568237
+  if valid_564137 != nil:
+    section.add "client-request-id", valid_564137
   result.add "header", section
   section = newJObject()
   result.add "formData", section
   if body != nil:
     result.add "body", body
 
-proc call*(call_568238: Call_IndexersList_568233; path: JsonNode; query: JsonNode;
+proc call*(call_564138: Call_IndexersList_564133; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists all indexers available for an Azure Search service.
   ## 
   ## https://msdn.microsoft.com/library/azure/dn946883.aspx
-  let valid = call_568238.validator(path, query, header, formData, body)
-  let scheme = call_568238.pickScheme
+  let valid = call_564138.validator(path, query, header, formData, body)
+  let scheme = call_564138.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568238.url(scheme.get, call_568238.host, call_568238.base,
-                         call_568238.route, valid.getOrDefault("path"),
+  let url = call_564138.url(scheme.get, call_564138.host, call_564138.base,
+                         call_564138.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568238, url, valid)
+  result = hook(call_564138, url, valid)
 
-proc call*(call_568239: Call_IndexersList_568233; apiVersion: string): Recallable =
+proc call*(call_564139: Call_IndexersList_564133; apiVersion: string): Recallable =
   ## indexersList
   ## Lists all indexers available for an Azure Search service.
   ## https://msdn.microsoft.com/library/azure/dn946883.aspx
   ##   apiVersion: string (required)
   ##             : Client Api Version.
-  var query_568240 = newJObject()
-  add(query_568240, "api-version", newJString(apiVersion))
-  result = call_568239.call(nil, query_568240, nil, nil, nil)
+  var query_564140 = newJObject()
+  add(query_564140, "api-version", newJString(apiVersion))
+  result = call_564139.call(nil, query_564140, nil, nil, nil)
 
-var indexersList* = Call_IndexersList_568233(name: "indexersList",
+var indexersList* = Call_IndexersList_564133(name: "indexersList",
     meth: HttpMethod.HttpGet, host: "azure.local", route: "/indexers",
-    validator: validate_IndexersList_568234, base: "", url: url_IndexersList_568235,
+    validator: validate_IndexersList_564134, base: "", url: url_IndexersList_564135,
     schemes: {Scheme.Https})
 type
-  Call_IndexersCreateOrUpdate_568261 = ref object of OpenApiRestCall_567641
-proc url_IndexersCreateOrUpdate_568263(protocol: Scheme; host: string; base: string;
+  Call_IndexersCreateOrUpdate_564161 = ref object of OpenApiRestCall_563539
+proc url_IndexersCreateOrUpdate_564163(protocol: Scheme; host: string; base: string;
                                       route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -743,7 +747,7 @@ proc url_IndexersCreateOrUpdate_568263(protocol: Scheme; host: string; base: str
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_IndexersCreateOrUpdate_568262(path: JsonNode; query: JsonNode;
+proc validate_IndexersCreateOrUpdate_564162(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Creates a new Azure Search indexer or updates an indexer if it already exists.
   ## 
@@ -756,11 +760,11 @@ proc validate_IndexersCreateOrUpdate_568262(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `indexerName` field"
-  var valid_568264 = path.getOrDefault("indexerName")
-  valid_568264 = validateParameter(valid_568264, JString, required = true,
+  var valid_564164 = path.getOrDefault("indexerName")
+  valid_564164 = validateParameter(valid_564164, JString, required = true,
                                  default = nil)
-  if valid_568264 != nil:
-    section.add "indexerName", valid_568264
+  if valid_564164 != nil:
+    section.add "indexerName", valid_564164
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -768,21 +772,21 @@ proc validate_IndexersCreateOrUpdate_568262(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568265 = query.getOrDefault("api-version")
-  valid_568265 = validateParameter(valid_568265, JString, required = true,
+  var valid_564165 = query.getOrDefault("api-version")
+  valid_564165 = validateParameter(valid_564165, JString, required = true,
                                  default = nil)
-  if valid_568265 != nil:
-    section.add "api-version", valid_568265
+  if valid_564165 != nil:
+    section.add "api-version", valid_564165
   result.add "query", section
   ## parameters in `header` object:
   ##   client-request-id: JString
   ##                    : Tracking ID sent with the request to help with debugging.
   section = newJObject()
-  var valid_568266 = header.getOrDefault("client-request-id")
-  valid_568266 = validateParameter(valid_568266, JString, required = false,
+  var valid_564166 = header.getOrDefault("client-request-id")
+  valid_564166 = validateParameter(valid_564166, JString, required = false,
                                  default = nil)
-  if valid_568266 != nil:
-    section.add "client-request-id", valid_568266
+  if valid_564166 != nil:
+    section.add "client-request-id", valid_564166
   result.add "header", section
   section = newJObject()
   result.add "formData", section
@@ -794,48 +798,48 @@ proc validate_IndexersCreateOrUpdate_568262(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568268: Call_IndexersCreateOrUpdate_568261; path: JsonNode;
+proc call*(call_564168: Call_IndexersCreateOrUpdate_564161; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Creates a new Azure Search indexer or updates an indexer if it already exists.
   ## 
   ## https://msdn.microsoft.com/library/azure/dn946899.aspx
-  let valid = call_568268.validator(path, query, header, formData, body)
-  let scheme = call_568268.pickScheme
+  let valid = call_564168.validator(path, query, header, formData, body)
+  let scheme = call_564168.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568268.url(scheme.get, call_568268.host, call_568268.base,
-                         call_568268.route, valid.getOrDefault("path"),
+  let url = call_564168.url(scheme.get, call_564168.host, call_564168.base,
+                         call_564168.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568268, url, valid)
+  result = hook(call_564168, url, valid)
 
-proc call*(call_568269: Call_IndexersCreateOrUpdate_568261; apiVersion: string;
-          indexerName: string; indexer: JsonNode): Recallable =
+proc call*(call_564169: Call_IndexersCreateOrUpdate_564161; indexer: JsonNode;
+          apiVersion: string; indexerName: string): Recallable =
   ## indexersCreateOrUpdate
   ## Creates a new Azure Search indexer or updates an indexer if it already exists.
   ## https://msdn.microsoft.com/library/azure/dn946899.aspx
+  ##   indexer: JObject (required)
+  ##          : The definition of the indexer to create or update.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
   ##   indexerName: string (required)
   ##              : The name of the indexer to create or update.
-  ##   indexer: JObject (required)
-  ##          : The definition of the indexer to create or update.
-  var path_568270 = newJObject()
-  var query_568271 = newJObject()
-  var body_568272 = newJObject()
-  add(query_568271, "api-version", newJString(apiVersion))
-  add(path_568270, "indexerName", newJString(indexerName))
+  var path_564170 = newJObject()
+  var query_564171 = newJObject()
+  var body_564172 = newJObject()
   if indexer != nil:
-    body_568272 = indexer
-  result = call_568269.call(path_568270, query_568271, nil, nil, body_568272)
+    body_564172 = indexer
+  add(query_564171, "api-version", newJString(apiVersion))
+  add(path_564170, "indexerName", newJString(indexerName))
+  result = call_564169.call(path_564170, query_564171, nil, nil, body_564172)
 
-var indexersCreateOrUpdate* = Call_IndexersCreateOrUpdate_568261(
+var indexersCreateOrUpdate* = Call_IndexersCreateOrUpdate_564161(
     name: "indexersCreateOrUpdate", meth: HttpMethod.HttpPut, host: "azure.local",
     route: "/indexers(\'{indexerName}\')",
-    validator: validate_IndexersCreateOrUpdate_568262, base: "",
-    url: url_IndexersCreateOrUpdate_568263, schemes: {Scheme.Https})
+    validator: validate_IndexersCreateOrUpdate_564162, base: "",
+    url: url_IndexersCreateOrUpdate_564163, schemes: {Scheme.Https})
 type
-  Call_IndexersGet_568251 = ref object of OpenApiRestCall_567641
-proc url_IndexersGet_568253(protocol: Scheme; host: string; base: string;
+  Call_IndexersGet_564151 = ref object of OpenApiRestCall_563539
+proc url_IndexersGet_564153(protocol: Scheme; host: string; base: string;
                            route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -851,7 +855,7 @@ proc url_IndexersGet_568253(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_IndexersGet_568252(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_IndexersGet_564152(path: JsonNode; query: JsonNode; header: JsonNode;
                                 formData: JsonNode; body: JsonNode): JsonNode =
   ## Retrieves an indexer definition from Azure Search.
   ## 
@@ -864,11 +868,11 @@ proc validate_IndexersGet_568252(path: JsonNode; query: JsonNode; header: JsonNo
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `indexerName` field"
-  var valid_568254 = path.getOrDefault("indexerName")
-  valid_568254 = validateParameter(valid_568254, JString, required = true,
+  var valid_564154 = path.getOrDefault("indexerName")
+  valid_564154 = validateParameter(valid_564154, JString, required = true,
                                  default = nil)
-  if valid_568254 != nil:
-    section.add "indexerName", valid_568254
+  if valid_564154 != nil:
+    section.add "indexerName", valid_564154
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -876,42 +880,42 @@ proc validate_IndexersGet_568252(path: JsonNode; query: JsonNode; header: JsonNo
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568255 = query.getOrDefault("api-version")
-  valid_568255 = validateParameter(valid_568255, JString, required = true,
+  var valid_564155 = query.getOrDefault("api-version")
+  valid_564155 = validateParameter(valid_564155, JString, required = true,
                                  default = nil)
-  if valid_568255 != nil:
-    section.add "api-version", valid_568255
+  if valid_564155 != nil:
+    section.add "api-version", valid_564155
   result.add "query", section
   ## parameters in `header` object:
   ##   client-request-id: JString
   ##                    : Tracking ID sent with the request to help with debugging.
   section = newJObject()
-  var valid_568256 = header.getOrDefault("client-request-id")
-  valid_568256 = validateParameter(valid_568256, JString, required = false,
+  var valid_564156 = header.getOrDefault("client-request-id")
+  valid_564156 = validateParameter(valid_564156, JString, required = false,
                                  default = nil)
-  if valid_568256 != nil:
-    section.add "client-request-id", valid_568256
+  if valid_564156 != nil:
+    section.add "client-request-id", valid_564156
   result.add "header", section
   section = newJObject()
   result.add "formData", section
   if body != nil:
     result.add "body", body
 
-proc call*(call_568257: Call_IndexersGet_568251; path: JsonNode; query: JsonNode;
+proc call*(call_564157: Call_IndexersGet_564151; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Retrieves an indexer definition from Azure Search.
   ## 
   ## https://msdn.microsoft.com/library/azure/dn946874.aspx
-  let valid = call_568257.validator(path, query, header, formData, body)
-  let scheme = call_568257.pickScheme
+  let valid = call_564157.validator(path, query, header, formData, body)
+  let scheme = call_564157.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568257.url(scheme.get, call_568257.host, call_568257.base,
-                         call_568257.route, valid.getOrDefault("path"),
+  let url = call_564157.url(scheme.get, call_564157.host, call_564157.base,
+                         call_564157.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568257, url, valid)
+  result = hook(call_564157, url, valid)
 
-proc call*(call_568258: Call_IndexersGet_568251; apiVersion: string;
+proc call*(call_564158: Call_IndexersGet_564151; apiVersion: string;
           indexerName: string): Recallable =
   ## indexersGet
   ## Retrieves an indexer definition from Azure Search.
@@ -920,22 +924,22 @@ proc call*(call_568258: Call_IndexersGet_568251; apiVersion: string;
   ##             : Client Api Version.
   ##   indexerName: string (required)
   ##              : The name of the indexer to retrieve.
-  var path_568259 = newJObject()
-  var query_568260 = newJObject()
-  add(query_568260, "api-version", newJString(apiVersion))
-  add(path_568259, "indexerName", newJString(indexerName))
-  result = call_568258.call(path_568259, query_568260, nil, nil, nil)
+  var path_564159 = newJObject()
+  var query_564160 = newJObject()
+  add(query_564160, "api-version", newJString(apiVersion))
+  add(path_564159, "indexerName", newJString(indexerName))
+  result = call_564158.call(path_564159, query_564160, nil, nil, nil)
 
-var indexersGet* = Call_IndexersGet_568251(name: "indexersGet",
+var indexersGet* = Call_IndexersGet_564151(name: "indexersGet",
                                         meth: HttpMethod.HttpGet,
                                         host: "azure.local",
                                         route: "/indexers(\'{indexerName}\')",
-                                        validator: validate_IndexersGet_568252,
-                                        base: "", url: url_IndexersGet_568253,
+                                        validator: validate_IndexersGet_564152,
+                                        base: "", url: url_IndexersGet_564153,
                                         schemes: {Scheme.Https})
 type
-  Call_IndexersDelete_568273 = ref object of OpenApiRestCall_567641
-proc url_IndexersDelete_568275(protocol: Scheme; host: string; base: string;
+  Call_IndexersDelete_564173 = ref object of OpenApiRestCall_563539
+proc url_IndexersDelete_564175(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -951,7 +955,7 @@ proc url_IndexersDelete_568275(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_IndexersDelete_568274(path: JsonNode; query: JsonNode;
+proc validate_IndexersDelete_564174(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## Deletes an Azure Search indexer.
@@ -965,11 +969,11 @@ proc validate_IndexersDelete_568274(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `indexerName` field"
-  var valid_568276 = path.getOrDefault("indexerName")
-  valid_568276 = validateParameter(valid_568276, JString, required = true,
+  var valid_564176 = path.getOrDefault("indexerName")
+  valid_564176 = validateParameter(valid_564176, JString, required = true,
                                  default = nil)
-  if valid_568276 != nil:
-    section.add "indexerName", valid_568276
+  if valid_564176 != nil:
+    section.add "indexerName", valid_564176
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -977,42 +981,42 @@ proc validate_IndexersDelete_568274(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568277 = query.getOrDefault("api-version")
-  valid_568277 = validateParameter(valid_568277, JString, required = true,
+  var valid_564177 = query.getOrDefault("api-version")
+  valid_564177 = validateParameter(valid_564177, JString, required = true,
                                  default = nil)
-  if valid_568277 != nil:
-    section.add "api-version", valid_568277
+  if valid_564177 != nil:
+    section.add "api-version", valid_564177
   result.add "query", section
   ## parameters in `header` object:
   ##   client-request-id: JString
   ##                    : Tracking ID sent with the request to help with debugging.
   section = newJObject()
-  var valid_568278 = header.getOrDefault("client-request-id")
-  valid_568278 = validateParameter(valid_568278, JString, required = false,
+  var valid_564178 = header.getOrDefault("client-request-id")
+  valid_564178 = validateParameter(valid_564178, JString, required = false,
                                  default = nil)
-  if valid_568278 != nil:
-    section.add "client-request-id", valid_568278
+  if valid_564178 != nil:
+    section.add "client-request-id", valid_564178
   result.add "header", section
   section = newJObject()
   result.add "formData", section
   if body != nil:
     result.add "body", body
 
-proc call*(call_568279: Call_IndexersDelete_568273; path: JsonNode; query: JsonNode;
+proc call*(call_564179: Call_IndexersDelete_564173; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes an Azure Search indexer.
   ## 
   ## https://msdn.microsoft.com/library/azure/dn946898.aspx
-  let valid = call_568279.validator(path, query, header, formData, body)
-  let scheme = call_568279.pickScheme
+  let valid = call_564179.validator(path, query, header, formData, body)
+  let scheme = call_564179.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568279.url(scheme.get, call_568279.host, call_568279.base,
-                         call_568279.route, valid.getOrDefault("path"),
+  let url = call_564179.url(scheme.get, call_564179.host, call_564179.base,
+                         call_564179.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568279, url, valid)
+  result = hook(call_564179, url, valid)
 
-proc call*(call_568280: Call_IndexersDelete_568273; apiVersion: string;
+proc call*(call_564180: Call_IndexersDelete_564173; apiVersion: string;
           indexerName: string): Recallable =
   ## indexersDelete
   ## Deletes an Azure Search indexer.
@@ -1021,19 +1025,19 @@ proc call*(call_568280: Call_IndexersDelete_568273; apiVersion: string;
   ##             : Client Api Version.
   ##   indexerName: string (required)
   ##              : The name of the indexer to delete.
-  var path_568281 = newJObject()
-  var query_568282 = newJObject()
-  add(query_568282, "api-version", newJString(apiVersion))
-  add(path_568281, "indexerName", newJString(indexerName))
-  result = call_568280.call(path_568281, query_568282, nil, nil, nil)
+  var path_564181 = newJObject()
+  var query_564182 = newJObject()
+  add(query_564182, "api-version", newJString(apiVersion))
+  add(path_564181, "indexerName", newJString(indexerName))
+  result = call_564180.call(path_564181, query_564182, nil, nil, nil)
 
-var indexersDelete* = Call_IndexersDelete_568273(name: "indexersDelete",
+var indexersDelete* = Call_IndexersDelete_564173(name: "indexersDelete",
     meth: HttpMethod.HttpDelete, host: "azure.local",
-    route: "/indexers(\'{indexerName}\')", validator: validate_IndexersDelete_568274,
-    base: "", url: url_IndexersDelete_568275, schemes: {Scheme.Https})
+    route: "/indexers(\'{indexerName}\')", validator: validate_IndexersDelete_564174,
+    base: "", url: url_IndexersDelete_564175, schemes: {Scheme.Https})
 type
-  Call_IndexersReset_568283 = ref object of OpenApiRestCall_567641
-proc url_IndexersReset_568285(protocol: Scheme; host: string; base: string;
+  Call_IndexersReset_564183 = ref object of OpenApiRestCall_563539
+proc url_IndexersReset_564185(protocol: Scheme; host: string; base: string;
                              route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1049,7 +1053,7 @@ proc url_IndexersReset_568285(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_IndexersReset_568284(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_IndexersReset_564184(path: JsonNode; query: JsonNode; header: JsonNode;
                                   formData: JsonNode; body: JsonNode): JsonNode =
   ## Resets the change tracking state associated with an Azure Search indexer.
   ## 
@@ -1062,11 +1066,11 @@ proc validate_IndexersReset_568284(path: JsonNode; query: JsonNode; header: Json
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `indexerName` field"
-  var valid_568286 = path.getOrDefault("indexerName")
-  valid_568286 = validateParameter(valid_568286, JString, required = true,
+  var valid_564186 = path.getOrDefault("indexerName")
+  valid_564186 = validateParameter(valid_564186, JString, required = true,
                                  default = nil)
-  if valid_568286 != nil:
-    section.add "indexerName", valid_568286
+  if valid_564186 != nil:
+    section.add "indexerName", valid_564186
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1074,42 +1078,42 @@ proc validate_IndexersReset_568284(path: JsonNode; query: JsonNode; header: Json
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568287 = query.getOrDefault("api-version")
-  valid_568287 = validateParameter(valid_568287, JString, required = true,
+  var valid_564187 = query.getOrDefault("api-version")
+  valid_564187 = validateParameter(valid_564187, JString, required = true,
                                  default = nil)
-  if valid_568287 != nil:
-    section.add "api-version", valid_568287
+  if valid_564187 != nil:
+    section.add "api-version", valid_564187
   result.add "query", section
   ## parameters in `header` object:
   ##   client-request-id: JString
   ##                    : Tracking ID sent with the request to help with debugging.
   section = newJObject()
-  var valid_568288 = header.getOrDefault("client-request-id")
-  valid_568288 = validateParameter(valid_568288, JString, required = false,
+  var valid_564188 = header.getOrDefault("client-request-id")
+  valid_564188 = validateParameter(valid_564188, JString, required = false,
                                  default = nil)
-  if valid_568288 != nil:
-    section.add "client-request-id", valid_568288
+  if valid_564188 != nil:
+    section.add "client-request-id", valid_564188
   result.add "header", section
   section = newJObject()
   result.add "formData", section
   if body != nil:
     result.add "body", body
 
-proc call*(call_568289: Call_IndexersReset_568283; path: JsonNode; query: JsonNode;
+proc call*(call_564189: Call_IndexersReset_564183; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Resets the change tracking state associated with an Azure Search indexer.
   ## 
   ## https://msdn.microsoft.com/library/azure/dn946897.aspx
-  let valid = call_568289.validator(path, query, header, formData, body)
-  let scheme = call_568289.pickScheme
+  let valid = call_564189.validator(path, query, header, formData, body)
+  let scheme = call_564189.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568289.url(scheme.get, call_568289.host, call_568289.base,
-                         call_568289.route, valid.getOrDefault("path"),
+  let url = call_564189.url(scheme.get, call_564189.host, call_564189.base,
+                         call_564189.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568289, url, valid)
+  result = hook(call_564189, url, valid)
 
-proc call*(call_568290: Call_IndexersReset_568283; apiVersion: string;
+proc call*(call_564190: Call_IndexersReset_564183; apiVersion: string;
           indexerName: string): Recallable =
   ## indexersReset
   ## Resets the change tracking state associated with an Azure Search indexer.
@@ -1118,20 +1122,20 @@ proc call*(call_568290: Call_IndexersReset_568283; apiVersion: string;
   ##             : Client Api Version.
   ##   indexerName: string (required)
   ##              : The name of the indexer to reset.
-  var path_568291 = newJObject()
-  var query_568292 = newJObject()
-  add(query_568292, "api-version", newJString(apiVersion))
-  add(path_568291, "indexerName", newJString(indexerName))
-  result = call_568290.call(path_568291, query_568292, nil, nil, nil)
+  var path_564191 = newJObject()
+  var query_564192 = newJObject()
+  add(query_564192, "api-version", newJString(apiVersion))
+  add(path_564191, "indexerName", newJString(indexerName))
+  result = call_564190.call(path_564191, query_564192, nil, nil, nil)
 
-var indexersReset* = Call_IndexersReset_568283(name: "indexersReset",
+var indexersReset* = Call_IndexersReset_564183(name: "indexersReset",
     meth: HttpMethod.HttpPost, host: "azure.local",
     route: "/indexers(\'{indexerName}\')/search.reset",
-    validator: validate_IndexersReset_568284, base: "", url: url_IndexersReset_568285,
+    validator: validate_IndexersReset_564184, base: "", url: url_IndexersReset_564185,
     schemes: {Scheme.Https})
 type
-  Call_IndexersRun_568293 = ref object of OpenApiRestCall_567641
-proc url_IndexersRun_568295(protocol: Scheme; host: string; base: string;
+  Call_IndexersRun_564193 = ref object of OpenApiRestCall_563539
+proc url_IndexersRun_564195(protocol: Scheme; host: string; base: string;
                            route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1147,7 +1151,7 @@ proc url_IndexersRun_568295(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_IndexersRun_568294(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_IndexersRun_564194(path: JsonNode; query: JsonNode; header: JsonNode;
                                 formData: JsonNode; body: JsonNode): JsonNode =
   ## Runs an Azure Search indexer on-demand.
   ## 
@@ -1160,11 +1164,11 @@ proc validate_IndexersRun_568294(path: JsonNode; query: JsonNode; header: JsonNo
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `indexerName` field"
-  var valid_568296 = path.getOrDefault("indexerName")
-  valid_568296 = validateParameter(valid_568296, JString, required = true,
+  var valid_564196 = path.getOrDefault("indexerName")
+  valid_564196 = validateParameter(valid_564196, JString, required = true,
                                  default = nil)
-  if valid_568296 != nil:
-    section.add "indexerName", valid_568296
+  if valid_564196 != nil:
+    section.add "indexerName", valid_564196
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1172,42 +1176,42 @@ proc validate_IndexersRun_568294(path: JsonNode; query: JsonNode; header: JsonNo
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568297 = query.getOrDefault("api-version")
-  valid_568297 = validateParameter(valid_568297, JString, required = true,
+  var valid_564197 = query.getOrDefault("api-version")
+  valid_564197 = validateParameter(valid_564197, JString, required = true,
                                  default = nil)
-  if valid_568297 != nil:
-    section.add "api-version", valid_568297
+  if valid_564197 != nil:
+    section.add "api-version", valid_564197
   result.add "query", section
   ## parameters in `header` object:
   ##   client-request-id: JString
   ##                    : Tracking ID sent with the request to help with debugging.
   section = newJObject()
-  var valid_568298 = header.getOrDefault("client-request-id")
-  valid_568298 = validateParameter(valid_568298, JString, required = false,
+  var valid_564198 = header.getOrDefault("client-request-id")
+  valid_564198 = validateParameter(valid_564198, JString, required = false,
                                  default = nil)
-  if valid_568298 != nil:
-    section.add "client-request-id", valid_568298
+  if valid_564198 != nil:
+    section.add "client-request-id", valid_564198
   result.add "header", section
   section = newJObject()
   result.add "formData", section
   if body != nil:
     result.add "body", body
 
-proc call*(call_568299: Call_IndexersRun_568293; path: JsonNode; query: JsonNode;
+proc call*(call_564199: Call_IndexersRun_564193; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Runs an Azure Search indexer on-demand.
   ## 
   ## https://msdn.microsoft.com/library/azure/dn946885.aspx
-  let valid = call_568299.validator(path, query, header, formData, body)
-  let scheme = call_568299.pickScheme
+  let valid = call_564199.validator(path, query, header, formData, body)
+  let scheme = call_564199.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568299.url(scheme.get, call_568299.host, call_568299.base,
-                         call_568299.route, valid.getOrDefault("path"),
+  let url = call_564199.url(scheme.get, call_564199.host, call_564199.base,
+                         call_564199.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568299, url, valid)
+  result = hook(call_564199, url, valid)
 
-proc call*(call_568300: Call_IndexersRun_568293; apiVersion: string;
+proc call*(call_564200: Call_IndexersRun_564193; apiVersion: string;
           indexerName: string): Recallable =
   ## indexersRun
   ## Runs an Azure Search indexer on-demand.
@@ -1216,21 +1220,21 @@ proc call*(call_568300: Call_IndexersRun_568293; apiVersion: string;
   ##             : Client Api Version.
   ##   indexerName: string (required)
   ##              : The name of the indexer to run.
-  var path_568301 = newJObject()
-  var query_568302 = newJObject()
-  add(query_568302, "api-version", newJString(apiVersion))
-  add(path_568301, "indexerName", newJString(indexerName))
-  result = call_568300.call(path_568301, query_568302, nil, nil, nil)
+  var path_564201 = newJObject()
+  var query_564202 = newJObject()
+  add(query_564202, "api-version", newJString(apiVersion))
+  add(path_564201, "indexerName", newJString(indexerName))
+  result = call_564200.call(path_564201, query_564202, nil, nil, nil)
 
-var indexersRun* = Call_IndexersRun_568293(name: "indexersRun",
+var indexersRun* = Call_IndexersRun_564193(name: "indexersRun",
                                         meth: HttpMethod.HttpPost,
                                         host: "azure.local", route: "/indexers(\'{indexerName}\')/search.run",
-                                        validator: validate_IndexersRun_568294,
-                                        base: "", url: url_IndexersRun_568295,
+                                        validator: validate_IndexersRun_564194,
+                                        base: "", url: url_IndexersRun_564195,
                                         schemes: {Scheme.Https})
 type
-  Call_IndexersGetStatus_568303 = ref object of OpenApiRestCall_567641
-proc url_IndexersGetStatus_568305(protocol: Scheme; host: string; base: string;
+  Call_IndexersGetStatus_564203 = ref object of OpenApiRestCall_563539
+proc url_IndexersGetStatus_564205(protocol: Scheme; host: string; base: string;
                                  route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1246,7 +1250,7 @@ proc url_IndexersGetStatus_568305(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_IndexersGetStatus_568304(path: JsonNode; query: JsonNode;
+proc validate_IndexersGetStatus_564204(path: JsonNode; query: JsonNode;
                                       header: JsonNode; formData: JsonNode;
                                       body: JsonNode): JsonNode =
   ## Returns the current status and execution history of an indexer.
@@ -1260,11 +1264,11 @@ proc validate_IndexersGetStatus_568304(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `indexerName` field"
-  var valid_568306 = path.getOrDefault("indexerName")
-  valid_568306 = validateParameter(valid_568306, JString, required = true,
+  var valid_564206 = path.getOrDefault("indexerName")
+  valid_564206 = validateParameter(valid_564206, JString, required = true,
                                  default = nil)
-  if valid_568306 != nil:
-    section.add "indexerName", valid_568306
+  if valid_564206 != nil:
+    section.add "indexerName", valid_564206
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1272,42 +1276,42 @@ proc validate_IndexersGetStatus_568304(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568307 = query.getOrDefault("api-version")
-  valid_568307 = validateParameter(valid_568307, JString, required = true,
+  var valid_564207 = query.getOrDefault("api-version")
+  valid_564207 = validateParameter(valid_564207, JString, required = true,
                                  default = nil)
-  if valid_568307 != nil:
-    section.add "api-version", valid_568307
+  if valid_564207 != nil:
+    section.add "api-version", valid_564207
   result.add "query", section
   ## parameters in `header` object:
   ##   client-request-id: JString
   ##                    : Tracking ID sent with the request to help with debugging.
   section = newJObject()
-  var valid_568308 = header.getOrDefault("client-request-id")
-  valid_568308 = validateParameter(valid_568308, JString, required = false,
+  var valid_564208 = header.getOrDefault("client-request-id")
+  valid_564208 = validateParameter(valid_564208, JString, required = false,
                                  default = nil)
-  if valid_568308 != nil:
-    section.add "client-request-id", valid_568308
+  if valid_564208 != nil:
+    section.add "client-request-id", valid_564208
   result.add "header", section
   section = newJObject()
   result.add "formData", section
   if body != nil:
     result.add "body", body
 
-proc call*(call_568309: Call_IndexersGetStatus_568303; path: JsonNode;
+proc call*(call_564209: Call_IndexersGetStatus_564203; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Returns the current status and execution history of an indexer.
   ## 
   ## https://msdn.microsoft.com/library/azure/dn946884.aspx
-  let valid = call_568309.validator(path, query, header, formData, body)
-  let scheme = call_568309.pickScheme
+  let valid = call_564209.validator(path, query, header, formData, body)
+  let scheme = call_564209.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568309.url(scheme.get, call_568309.host, call_568309.base,
-                         call_568309.route, valid.getOrDefault("path"),
+  let url = call_564209.url(scheme.get, call_564209.host, call_564209.base,
+                         call_564209.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568309, url, valid)
+  result = hook(call_564209, url, valid)
 
-proc call*(call_568310: Call_IndexersGetStatus_568303; apiVersion: string;
+proc call*(call_564210: Call_IndexersGetStatus_564203; apiVersion: string;
           indexerName: string): Recallable =
   ## indexersGetStatus
   ## Returns the current status and execution history of an indexer.
@@ -1316,27 +1320,27 @@ proc call*(call_568310: Call_IndexersGetStatus_568303; apiVersion: string;
   ##             : Client Api Version.
   ##   indexerName: string (required)
   ##              : The name of the indexer for which to retrieve status.
-  var path_568311 = newJObject()
-  var query_568312 = newJObject()
-  add(query_568312, "api-version", newJString(apiVersion))
-  add(path_568311, "indexerName", newJString(indexerName))
-  result = call_568310.call(path_568311, query_568312, nil, nil, nil)
+  var path_564211 = newJObject()
+  var query_564212 = newJObject()
+  add(query_564212, "api-version", newJString(apiVersion))
+  add(path_564211, "indexerName", newJString(indexerName))
+  result = call_564210.call(path_564211, query_564212, nil, nil, nil)
 
-var indexersGetStatus* = Call_IndexersGetStatus_568303(name: "indexersGetStatus",
+var indexersGetStatus* = Call_IndexersGetStatus_564203(name: "indexersGetStatus",
     meth: HttpMethod.HttpGet, host: "azure.local",
     route: "/indexers(\'{indexerName}\')/search.status",
-    validator: validate_IndexersGetStatus_568304, base: "",
-    url: url_IndexersGetStatus_568305, schemes: {Scheme.Https})
+    validator: validate_IndexersGetStatus_564204, base: "",
+    url: url_IndexersGetStatus_564205, schemes: {Scheme.Https})
 type
-  Call_IndexesCreate_568323 = ref object of OpenApiRestCall_567641
-proc url_IndexesCreate_568325(protocol: Scheme; host: string; base: string;
+  Call_IndexesCreate_564223 = ref object of OpenApiRestCall_563539
+proc url_IndexesCreate_564225(protocol: Scheme; host: string; base: string;
                              route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_IndexesCreate_568324(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_IndexesCreate_564224(path: JsonNode; query: JsonNode; header: JsonNode;
                                   formData: JsonNode; body: JsonNode): JsonNode =
   ## Creates a new Azure Search index.
   ## 
@@ -1351,21 +1355,21 @@ proc validate_IndexesCreate_568324(path: JsonNode; query: JsonNode; header: Json
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568326 = query.getOrDefault("api-version")
-  valid_568326 = validateParameter(valid_568326, JString, required = true,
+  var valid_564226 = query.getOrDefault("api-version")
+  valid_564226 = validateParameter(valid_564226, JString, required = true,
                                  default = nil)
-  if valid_568326 != nil:
-    section.add "api-version", valid_568326
+  if valid_564226 != nil:
+    section.add "api-version", valid_564226
   result.add "query", section
   ## parameters in `header` object:
   ##   client-request-id: JString
   ##                    : Tracking ID sent with the request to help with debugging.
   section = newJObject()
-  var valid_568327 = header.getOrDefault("client-request-id")
-  valid_568327 = validateParameter(valid_568327, JString, required = false,
+  var valid_564227 = header.getOrDefault("client-request-id")
+  valid_564227 = validateParameter(valid_564227, JString, required = false,
                                  default = nil)
-  if valid_568327 != nil:
-    section.add "client-request-id", valid_568327
+  if valid_564227 != nil:
+    section.add "client-request-id", valid_564227
   result.add "header", section
   section = newJObject()
   result.add "formData", section
@@ -1377,50 +1381,50 @@ proc validate_IndexesCreate_568324(path: JsonNode; query: JsonNode; header: Json
   if body != nil:
     result.add "body", body
 
-proc call*(call_568329: Call_IndexesCreate_568323; path: JsonNode; query: JsonNode;
+proc call*(call_564229: Call_IndexesCreate_564223; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Creates a new Azure Search index.
   ## 
   ## https://msdn.microsoft.com/library/azure/dn798941.aspx
-  let valid = call_568329.validator(path, query, header, formData, body)
-  let scheme = call_568329.pickScheme
+  let valid = call_564229.validator(path, query, header, formData, body)
+  let scheme = call_564229.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568329.url(scheme.get, call_568329.host, call_568329.base,
-                         call_568329.route, valid.getOrDefault("path"),
+  let url = call_564229.url(scheme.get, call_564229.host, call_564229.base,
+                         call_564229.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568329, url, valid)
+  result = hook(call_564229, url, valid)
 
-proc call*(call_568330: Call_IndexesCreate_568323; apiVersion: string;
-          index: JsonNode): Recallable =
+proc call*(call_564230: Call_IndexesCreate_564223; index: JsonNode;
+          apiVersion: string): Recallable =
   ## indexesCreate
   ## Creates a new Azure Search index.
   ## https://msdn.microsoft.com/library/azure/dn798941.aspx
-  ##   apiVersion: string (required)
-  ##             : Client Api Version.
   ##   index: JObject (required)
   ##        : The definition of the index to create.
-  var query_568331 = newJObject()
-  var body_568332 = newJObject()
-  add(query_568331, "api-version", newJString(apiVersion))
+  ##   apiVersion: string (required)
+  ##             : Client Api Version.
+  var query_564231 = newJObject()
+  var body_564232 = newJObject()
   if index != nil:
-    body_568332 = index
-  result = call_568330.call(nil, query_568331, nil, nil, body_568332)
+    body_564232 = index
+  add(query_564231, "api-version", newJString(apiVersion))
+  result = call_564230.call(nil, query_564231, nil, nil, body_564232)
 
-var indexesCreate* = Call_IndexesCreate_568323(name: "indexesCreate",
+var indexesCreate* = Call_IndexesCreate_564223(name: "indexesCreate",
     meth: HttpMethod.HttpPost, host: "azure.local", route: "/indexes",
-    validator: validate_IndexesCreate_568324, base: "", url: url_IndexesCreate_568325,
+    validator: validate_IndexesCreate_564224, base: "", url: url_IndexesCreate_564225,
     schemes: {Scheme.Https})
 type
-  Call_IndexesList_568313 = ref object of OpenApiRestCall_567641
-proc url_IndexesList_568315(protocol: Scheme; host: string; base: string;
+  Call_IndexesList_564213 = ref object of OpenApiRestCall_563539
+proc url_IndexesList_564215(protocol: Scheme; host: string; base: string;
                            route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_IndexesList_568314(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_IndexesList_564214(path: JsonNode; query: JsonNode; header: JsonNode;
                                 formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists all indexes available for an Azure Search service.
   ## 
@@ -1437,47 +1441,47 @@ proc validate_IndexesList_568314(path: JsonNode; query: JsonNode; header: JsonNo
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568317 = query.getOrDefault("api-version")
-  valid_568317 = validateParameter(valid_568317, JString, required = true,
+  var valid_564217 = query.getOrDefault("api-version")
+  valid_564217 = validateParameter(valid_564217, JString, required = true,
                                  default = nil)
-  if valid_568317 != nil:
-    section.add "api-version", valid_568317
-  var valid_568318 = query.getOrDefault("$select")
-  valid_568318 = validateParameter(valid_568318, JString, required = false,
+  if valid_564217 != nil:
+    section.add "api-version", valid_564217
+  var valid_564218 = query.getOrDefault("$select")
+  valid_564218 = validateParameter(valid_564218, JString, required = false,
                                  default = nil)
-  if valid_568318 != nil:
-    section.add "$select", valid_568318
+  if valid_564218 != nil:
+    section.add "$select", valid_564218
   result.add "query", section
   ## parameters in `header` object:
   ##   client-request-id: JString
   ##                    : Tracking ID sent with the request to help with debugging.
   section = newJObject()
-  var valid_568319 = header.getOrDefault("client-request-id")
-  valid_568319 = validateParameter(valid_568319, JString, required = false,
+  var valid_564219 = header.getOrDefault("client-request-id")
+  valid_564219 = validateParameter(valid_564219, JString, required = false,
                                  default = nil)
-  if valid_568319 != nil:
-    section.add "client-request-id", valid_568319
+  if valid_564219 != nil:
+    section.add "client-request-id", valid_564219
   result.add "header", section
   section = newJObject()
   result.add "formData", section
   if body != nil:
     result.add "body", body
 
-proc call*(call_568320: Call_IndexesList_568313; path: JsonNode; query: JsonNode;
+proc call*(call_564220: Call_IndexesList_564213; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists all indexes available for an Azure Search service.
   ## 
   ## https://msdn.microsoft.com/library/azure/dn798923.aspx
-  let valid = call_568320.validator(path, query, header, formData, body)
-  let scheme = call_568320.pickScheme
+  let valid = call_564220.validator(path, query, header, formData, body)
+  let scheme = call_564220.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568320.url(scheme.get, call_568320.host, call_568320.base,
-                         call_568320.route, valid.getOrDefault("path"),
+  let url = call_564220.url(scheme.get, call_564220.host, call_564220.base,
+                         call_564220.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568320, url, valid)
+  result = hook(call_564220, url, valid)
 
-proc call*(call_568321: Call_IndexesList_568313; apiVersion: string;
+proc call*(call_564221: Call_IndexesList_564213; apiVersion: string;
           Select: string = ""): Recallable =
   ## indexesList
   ## Lists all indexes available for an Azure Search service.
@@ -1486,20 +1490,20 @@ proc call*(call_568321: Call_IndexesList_568313; apiVersion: string;
   ##             : Client Api Version.
   ##   Select: string
   ##         : Selects which properties of the index definitions to retrieve. Specified as a comma-separated list of JSON property names, or '*' for all properties. The default is all properties.
-  var query_568322 = newJObject()
-  add(query_568322, "api-version", newJString(apiVersion))
-  add(query_568322, "$select", newJString(Select))
-  result = call_568321.call(nil, query_568322, nil, nil, nil)
+  var query_564222 = newJObject()
+  add(query_564222, "api-version", newJString(apiVersion))
+  add(query_564222, "$select", newJString(Select))
+  result = call_564221.call(nil, query_564222, nil, nil, nil)
 
-var indexesList* = Call_IndexesList_568313(name: "indexesList",
+var indexesList* = Call_IndexesList_564213(name: "indexesList",
                                         meth: HttpMethod.HttpGet,
                                         host: "azure.local", route: "/indexes",
-                                        validator: validate_IndexesList_568314,
-                                        base: "", url: url_IndexesList_568315,
+                                        validator: validate_IndexesList_564214,
+                                        base: "", url: url_IndexesList_564215,
                                         schemes: {Scheme.Https})
 type
-  Call_IndexesCreateOrUpdate_568343 = ref object of OpenApiRestCall_567641
-proc url_IndexesCreateOrUpdate_568345(protocol: Scheme; host: string; base: string;
+  Call_IndexesCreateOrUpdate_564243 = ref object of OpenApiRestCall_563539
+proc url_IndexesCreateOrUpdate_564245(protocol: Scheme; host: string; base: string;
                                      route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1515,7 +1519,7 @@ proc url_IndexesCreateOrUpdate_568345(protocol: Scheme; host: string; base: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_IndexesCreateOrUpdate_568344(path: JsonNode; query: JsonNode;
+proc validate_IndexesCreateOrUpdate_564244(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Creates a new Azure Search index or updates an index if it already exists.
   ## 
@@ -1527,11 +1531,11 @@ proc validate_IndexesCreateOrUpdate_568344(path: JsonNode; query: JsonNode;
   ##            : The definition of the index to create or update.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `indexName` field"
-  var valid_568346 = path.getOrDefault("indexName")
-  valid_568346 = validateParameter(valid_568346, JString, required = true,
+  var valid_564246 = path.getOrDefault("indexName")
+  valid_564246 = validateParameter(valid_564246, JString, required = true,
                                  default = nil)
-  if valid_568346 != nil:
-    section.add "indexName", valid_568346
+  if valid_564246 != nil:
+    section.add "indexName", valid_564246
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1539,21 +1543,21 @@ proc validate_IndexesCreateOrUpdate_568344(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568347 = query.getOrDefault("api-version")
-  valid_568347 = validateParameter(valid_568347, JString, required = true,
+  var valid_564247 = query.getOrDefault("api-version")
+  valid_564247 = validateParameter(valid_564247, JString, required = true,
                                  default = nil)
-  if valid_568347 != nil:
-    section.add "api-version", valid_568347
+  if valid_564247 != nil:
+    section.add "api-version", valid_564247
   result.add "query", section
   ## parameters in `header` object:
   ##   client-request-id: JString
   ##                    : Tracking ID sent with the request to help with debugging.
   section = newJObject()
-  var valid_568348 = header.getOrDefault("client-request-id")
-  valid_568348 = validateParameter(valid_568348, JString, required = false,
+  var valid_564248 = header.getOrDefault("client-request-id")
+  valid_564248 = validateParameter(valid_564248, JString, required = false,
                                  default = nil)
-  if valid_568348 != nil:
-    section.add "client-request-id", valid_568348
+  if valid_564248 != nil:
+    section.add "client-request-id", valid_564248
   result.add "header", section
   section = newJObject()
   result.add "formData", section
@@ -1565,47 +1569,47 @@ proc validate_IndexesCreateOrUpdate_568344(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568350: Call_IndexesCreateOrUpdate_568343; path: JsonNode;
+proc call*(call_564250: Call_IndexesCreateOrUpdate_564243; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Creates a new Azure Search index or updates an index if it already exists.
   ## 
   ## https://msdn.microsoft.com/library/azure/dn800964.aspx
-  let valid = call_568350.validator(path, query, header, formData, body)
-  let scheme = call_568350.pickScheme
+  let valid = call_564250.validator(path, query, header, formData, body)
+  let scheme = call_564250.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568350.url(scheme.get, call_568350.host, call_568350.base,
-                         call_568350.route, valid.getOrDefault("path"),
+  let url = call_564250.url(scheme.get, call_564250.host, call_564250.base,
+                         call_564250.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568350, url, valid)
+  result = hook(call_564250, url, valid)
 
-proc call*(call_568351: Call_IndexesCreateOrUpdate_568343; indexName: string;
-          apiVersion: string; index: JsonNode): Recallable =
+proc call*(call_564251: Call_IndexesCreateOrUpdate_564243; index: JsonNode;
+          apiVersion: string; indexName: string): Recallable =
   ## indexesCreateOrUpdate
   ## Creates a new Azure Search index or updates an index if it already exists.
   ## https://msdn.microsoft.com/library/azure/dn800964.aspx
-  ##   indexName: string (required)
-  ##            : The definition of the index to create or update.
-  ##   apiVersion: string (required)
-  ##             : Client Api Version.
   ##   index: JObject (required)
   ##        : The definition of the index to create or update.
-  var path_568352 = newJObject()
-  var query_568353 = newJObject()
-  var body_568354 = newJObject()
-  add(path_568352, "indexName", newJString(indexName))
-  add(query_568353, "api-version", newJString(apiVersion))
+  ##   apiVersion: string (required)
+  ##             : Client Api Version.
+  ##   indexName: string (required)
+  ##            : The definition of the index to create or update.
+  var path_564252 = newJObject()
+  var query_564253 = newJObject()
+  var body_564254 = newJObject()
   if index != nil:
-    body_568354 = index
-  result = call_568351.call(path_568352, query_568353, nil, nil, body_568354)
+    body_564254 = index
+  add(query_564253, "api-version", newJString(apiVersion))
+  add(path_564252, "indexName", newJString(indexName))
+  result = call_564251.call(path_564252, query_564253, nil, nil, body_564254)
 
-var indexesCreateOrUpdate* = Call_IndexesCreateOrUpdate_568343(
+var indexesCreateOrUpdate* = Call_IndexesCreateOrUpdate_564243(
     name: "indexesCreateOrUpdate", meth: HttpMethod.HttpPut, host: "azure.local",
-    route: "/indexes(\'{indexName}\')", validator: validate_IndexesCreateOrUpdate_568344,
-    base: "", url: url_IndexesCreateOrUpdate_568345, schemes: {Scheme.Https})
+    route: "/indexes(\'{indexName}\')", validator: validate_IndexesCreateOrUpdate_564244,
+    base: "", url: url_IndexesCreateOrUpdate_564245, schemes: {Scheme.Https})
 type
-  Call_IndexesGet_568333 = ref object of OpenApiRestCall_567641
-proc url_IndexesGet_568335(protocol: Scheme; host: string; base: string; route: string;
+  Call_IndexesGet_564233 = ref object of OpenApiRestCall_563539
+proc url_IndexesGet_564235(protocol: Scheme; host: string; base: string; route: string;
                           path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1621,7 +1625,7 @@ proc url_IndexesGet_568335(protocol: Scheme; host: string; base: string; route: 
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_IndexesGet_568334(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_IndexesGet_564234(path: JsonNode; query: JsonNode; header: JsonNode;
                                formData: JsonNode; body: JsonNode): JsonNode =
   ## Retrieves an index definition from Azure Search.
   ## 
@@ -1633,11 +1637,11 @@ proc validate_IndexesGet_568334(path: JsonNode; query: JsonNode; header: JsonNod
   ##            : The name of the index to retrieve.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `indexName` field"
-  var valid_568336 = path.getOrDefault("indexName")
-  valid_568336 = validateParameter(valid_568336, JString, required = true,
+  var valid_564236 = path.getOrDefault("indexName")
+  valid_564236 = validateParameter(valid_564236, JString, required = true,
                                  default = nil)
-  if valid_568336 != nil:
-    section.add "indexName", valid_568336
+  if valid_564236 != nil:
+    section.add "indexName", valid_564236
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1645,65 +1649,65 @@ proc validate_IndexesGet_568334(path: JsonNode; query: JsonNode; header: JsonNod
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568337 = query.getOrDefault("api-version")
-  valid_568337 = validateParameter(valid_568337, JString, required = true,
+  var valid_564237 = query.getOrDefault("api-version")
+  valid_564237 = validateParameter(valid_564237, JString, required = true,
                                  default = nil)
-  if valid_568337 != nil:
-    section.add "api-version", valid_568337
+  if valid_564237 != nil:
+    section.add "api-version", valid_564237
   result.add "query", section
   ## parameters in `header` object:
   ##   client-request-id: JString
   ##                    : Tracking ID sent with the request to help with debugging.
   section = newJObject()
-  var valid_568338 = header.getOrDefault("client-request-id")
-  valid_568338 = validateParameter(valid_568338, JString, required = false,
+  var valid_564238 = header.getOrDefault("client-request-id")
+  valid_564238 = validateParameter(valid_564238, JString, required = false,
                                  default = nil)
-  if valid_568338 != nil:
-    section.add "client-request-id", valid_568338
+  if valid_564238 != nil:
+    section.add "client-request-id", valid_564238
   result.add "header", section
   section = newJObject()
   result.add "formData", section
   if body != nil:
     result.add "body", body
 
-proc call*(call_568339: Call_IndexesGet_568333; path: JsonNode; query: JsonNode;
+proc call*(call_564239: Call_IndexesGet_564233; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Retrieves an index definition from Azure Search.
   ## 
   ## https://msdn.microsoft.com/library/azure/dn798939.aspx
-  let valid = call_568339.validator(path, query, header, formData, body)
-  let scheme = call_568339.pickScheme
+  let valid = call_564239.validator(path, query, header, formData, body)
+  let scheme = call_564239.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568339.url(scheme.get, call_568339.host, call_568339.base,
-                         call_568339.route, valid.getOrDefault("path"),
+  let url = call_564239.url(scheme.get, call_564239.host, call_564239.base,
+                         call_564239.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568339, url, valid)
+  result = hook(call_564239, url, valid)
 
-proc call*(call_568340: Call_IndexesGet_568333; indexName: string; apiVersion: string): Recallable =
+proc call*(call_564240: Call_IndexesGet_564233; apiVersion: string; indexName: string): Recallable =
   ## indexesGet
   ## Retrieves an index definition from Azure Search.
   ## https://msdn.microsoft.com/library/azure/dn798939.aspx
-  ##   indexName: string (required)
-  ##            : The name of the index to retrieve.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
-  var path_568341 = newJObject()
-  var query_568342 = newJObject()
-  add(path_568341, "indexName", newJString(indexName))
-  add(query_568342, "api-version", newJString(apiVersion))
-  result = call_568340.call(path_568341, query_568342, nil, nil, nil)
+  ##   indexName: string (required)
+  ##            : The name of the index to retrieve.
+  var path_564241 = newJObject()
+  var query_564242 = newJObject()
+  add(query_564242, "api-version", newJString(apiVersion))
+  add(path_564241, "indexName", newJString(indexName))
+  result = call_564240.call(path_564241, query_564242, nil, nil, nil)
 
-var indexesGet* = Call_IndexesGet_568333(name: "indexesGet",
+var indexesGet* = Call_IndexesGet_564233(name: "indexesGet",
                                       meth: HttpMethod.HttpGet,
                                       host: "azure.local",
                                       route: "/indexes(\'{indexName}\')",
-                                      validator: validate_IndexesGet_568334,
-                                      base: "", url: url_IndexesGet_568335,
+                                      validator: validate_IndexesGet_564234,
+                                      base: "", url: url_IndexesGet_564235,
                                       schemes: {Scheme.Https})
 type
-  Call_IndexesDelete_568355 = ref object of OpenApiRestCall_567641
-proc url_IndexesDelete_568357(protocol: Scheme; host: string; base: string;
+  Call_IndexesDelete_564255 = ref object of OpenApiRestCall_563539
+proc url_IndexesDelete_564257(protocol: Scheme; host: string; base: string;
                              route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1719,7 +1723,7 @@ proc url_IndexesDelete_568357(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_IndexesDelete_568356(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_IndexesDelete_564256(path: JsonNode; query: JsonNode; header: JsonNode;
                                   formData: JsonNode; body: JsonNode): JsonNode =
   ## Deletes an Azure Search index and all the documents it contains.
   ## 
@@ -1731,11 +1735,11 @@ proc validate_IndexesDelete_568356(path: JsonNode; query: JsonNode; header: Json
   ##            : The name of the index to delete.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `indexName` field"
-  var valid_568358 = path.getOrDefault("indexName")
-  valid_568358 = validateParameter(valid_568358, JString, required = true,
+  var valid_564258 = path.getOrDefault("indexName")
+  valid_564258 = validateParameter(valid_564258, JString, required = true,
                                  default = nil)
-  if valid_568358 != nil:
-    section.add "indexName", valid_568358
+  if valid_564258 != nil:
+    section.add "indexName", valid_564258
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1743,63 +1747,63 @@ proc validate_IndexesDelete_568356(path: JsonNode; query: JsonNode; header: Json
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568359 = query.getOrDefault("api-version")
-  valid_568359 = validateParameter(valid_568359, JString, required = true,
+  var valid_564259 = query.getOrDefault("api-version")
+  valid_564259 = validateParameter(valid_564259, JString, required = true,
                                  default = nil)
-  if valid_568359 != nil:
-    section.add "api-version", valid_568359
+  if valid_564259 != nil:
+    section.add "api-version", valid_564259
   result.add "query", section
   ## parameters in `header` object:
   ##   client-request-id: JString
   ##                    : Tracking ID sent with the request to help with debugging.
   section = newJObject()
-  var valid_568360 = header.getOrDefault("client-request-id")
-  valid_568360 = validateParameter(valid_568360, JString, required = false,
+  var valid_564260 = header.getOrDefault("client-request-id")
+  valid_564260 = validateParameter(valid_564260, JString, required = false,
                                  default = nil)
-  if valid_568360 != nil:
-    section.add "client-request-id", valid_568360
+  if valid_564260 != nil:
+    section.add "client-request-id", valid_564260
   result.add "header", section
   section = newJObject()
   result.add "formData", section
   if body != nil:
     result.add "body", body
 
-proc call*(call_568361: Call_IndexesDelete_568355; path: JsonNode; query: JsonNode;
+proc call*(call_564261: Call_IndexesDelete_564255; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes an Azure Search index and all the documents it contains.
   ## 
   ## https://msdn.microsoft.com/library/azure/dn798926.aspx
-  let valid = call_568361.validator(path, query, header, formData, body)
-  let scheme = call_568361.pickScheme
+  let valid = call_564261.validator(path, query, header, formData, body)
+  let scheme = call_564261.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568361.url(scheme.get, call_568361.host, call_568361.base,
-                         call_568361.route, valid.getOrDefault("path"),
+  let url = call_564261.url(scheme.get, call_564261.host, call_564261.base,
+                         call_564261.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568361, url, valid)
+  result = hook(call_564261, url, valid)
 
-proc call*(call_568362: Call_IndexesDelete_568355; indexName: string;
-          apiVersion: string): Recallable =
+proc call*(call_564262: Call_IndexesDelete_564255; apiVersion: string;
+          indexName: string): Recallable =
   ## indexesDelete
   ## Deletes an Azure Search index and all the documents it contains.
   ## https://msdn.microsoft.com/library/azure/dn798926.aspx
-  ##   indexName: string (required)
-  ##            : The name of the index to delete.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
-  var path_568363 = newJObject()
-  var query_568364 = newJObject()
-  add(path_568363, "indexName", newJString(indexName))
-  add(query_568364, "api-version", newJString(apiVersion))
-  result = call_568362.call(path_568363, query_568364, nil, nil, nil)
+  ##   indexName: string (required)
+  ##            : The name of the index to delete.
+  var path_564263 = newJObject()
+  var query_564264 = newJObject()
+  add(query_564264, "api-version", newJString(apiVersion))
+  add(path_564263, "indexName", newJString(indexName))
+  result = call_564262.call(path_564263, query_564264, nil, nil, nil)
 
-var indexesDelete* = Call_IndexesDelete_568355(name: "indexesDelete",
+var indexesDelete* = Call_IndexesDelete_564255(name: "indexesDelete",
     meth: HttpMethod.HttpDelete, host: "azure.local",
-    route: "/indexes(\'{indexName}\')", validator: validate_IndexesDelete_568356,
-    base: "", url: url_IndexesDelete_568357, schemes: {Scheme.Https})
+    route: "/indexes(\'{indexName}\')", validator: validate_IndexesDelete_564256,
+    base: "", url: url_IndexesDelete_564257, schemes: {Scheme.Https})
 type
-  Call_IndexesGetStatistics_568365 = ref object of OpenApiRestCall_567641
-proc url_IndexesGetStatistics_568367(protocol: Scheme; host: string; base: string;
+  Call_IndexesGetStatistics_564265 = ref object of OpenApiRestCall_563539
+proc url_IndexesGetStatistics_564267(protocol: Scheme; host: string; base: string;
                                     route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1815,7 +1819,7 @@ proc url_IndexesGetStatistics_568367(protocol: Scheme; host: string; base: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_IndexesGetStatistics_568366(path: JsonNode; query: JsonNode;
+proc validate_IndexesGetStatistics_564266(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Returns statistics for the given index, including a document count and storage usage.
   ## 
@@ -1827,11 +1831,11 @@ proc validate_IndexesGetStatistics_568366(path: JsonNode; query: JsonNode;
   ##            : The name of the index for which to retrieve statistics.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `indexName` field"
-  var valid_568368 = path.getOrDefault("indexName")
-  valid_568368 = validateParameter(valid_568368, JString, required = true,
+  var valid_564268 = path.getOrDefault("indexName")
+  valid_564268 = validateParameter(valid_564268, JString, required = true,
                                  default = nil)
-  if valid_568368 != nil:
-    section.add "indexName", valid_568368
+  if valid_564268 != nil:
+    section.add "indexName", valid_564268
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1839,61 +1843,61 @@ proc validate_IndexesGetStatistics_568366(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568369 = query.getOrDefault("api-version")
-  valid_568369 = validateParameter(valid_568369, JString, required = true,
+  var valid_564269 = query.getOrDefault("api-version")
+  valid_564269 = validateParameter(valid_564269, JString, required = true,
                                  default = nil)
-  if valid_568369 != nil:
-    section.add "api-version", valid_568369
+  if valid_564269 != nil:
+    section.add "api-version", valid_564269
   result.add "query", section
   ## parameters in `header` object:
   ##   client-request-id: JString
   ##                    : Tracking ID sent with the request to help with debugging.
   section = newJObject()
-  var valid_568370 = header.getOrDefault("client-request-id")
-  valid_568370 = validateParameter(valid_568370, JString, required = false,
+  var valid_564270 = header.getOrDefault("client-request-id")
+  valid_564270 = validateParameter(valid_564270, JString, required = false,
                                  default = nil)
-  if valid_568370 != nil:
-    section.add "client-request-id", valid_568370
+  if valid_564270 != nil:
+    section.add "client-request-id", valid_564270
   result.add "header", section
   section = newJObject()
   result.add "formData", section
   if body != nil:
     result.add "body", body
 
-proc call*(call_568371: Call_IndexesGetStatistics_568365; path: JsonNode;
+proc call*(call_564271: Call_IndexesGetStatistics_564265; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Returns statistics for the given index, including a document count and storage usage.
   ## 
   ## https://msdn.microsoft.com/library/azure/dn798942.aspx
-  let valid = call_568371.validator(path, query, header, formData, body)
-  let scheme = call_568371.pickScheme
+  let valid = call_564271.validator(path, query, header, formData, body)
+  let scheme = call_564271.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568371.url(scheme.get, call_568371.host, call_568371.base,
-                         call_568371.route, valid.getOrDefault("path"),
+  let url = call_564271.url(scheme.get, call_564271.host, call_564271.base,
+                         call_564271.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568371, url, valid)
+  result = hook(call_564271, url, valid)
 
-proc call*(call_568372: Call_IndexesGetStatistics_568365; indexName: string;
-          apiVersion: string): Recallable =
+proc call*(call_564272: Call_IndexesGetStatistics_564265; apiVersion: string;
+          indexName: string): Recallable =
   ## indexesGetStatistics
   ## Returns statistics for the given index, including a document count and storage usage.
   ## https://msdn.microsoft.com/library/azure/dn798942.aspx
-  ##   indexName: string (required)
-  ##            : The name of the index for which to retrieve statistics.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
-  var path_568373 = newJObject()
-  var query_568374 = newJObject()
-  add(path_568373, "indexName", newJString(indexName))
-  add(query_568374, "api-version", newJString(apiVersion))
-  result = call_568372.call(path_568373, query_568374, nil, nil, nil)
+  ##   indexName: string (required)
+  ##            : The name of the index for which to retrieve statistics.
+  var path_564273 = newJObject()
+  var query_564274 = newJObject()
+  add(query_564274, "api-version", newJString(apiVersion))
+  add(path_564273, "indexName", newJString(indexName))
+  result = call_564272.call(path_564273, query_564274, nil, nil, nil)
 
-var indexesGetStatistics* = Call_IndexesGetStatistics_568365(
+var indexesGetStatistics* = Call_IndexesGetStatistics_564265(
     name: "indexesGetStatistics", meth: HttpMethod.HttpGet, host: "azure.local",
     route: "/indexes(\'{indexName}\')/search.stats",
-    validator: validate_IndexesGetStatistics_568366, base: "",
-    url: url_IndexesGetStatistics_568367, schemes: {Scheme.Https})
+    validator: validate_IndexesGetStatistics_564266, base: "",
+    url: url_IndexesGetStatistics_564267, schemes: {Scheme.Https})
 export
   rest
 

@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, httpcore
 
 ## auto-generated via openapi macro
 ## title: Azure Reservation
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_567657 = ref object of OpenApiRestCall
+  OpenApiRestCall_563555 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_567657](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563555](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_567657): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563555): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,15 +107,15 @@ const
   macServiceName = "reservations"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_OperationList_567879 = ref object of OpenApiRestCall_567657
-proc url_OperationList_567881(protocol: Scheme; host: string; base: string;
+  Call_OperationList_563777 = ref object of OpenApiRestCall_563555
+proc url_OperationList_563779(protocol: Scheme; host: string; base: string;
                              route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_OperationList_567880(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_OperationList_563778(path: JsonNode; query: JsonNode; header: JsonNode;
                                   formData: JsonNode; body: JsonNode): JsonNode =
   ## List all the operations.
   ## 
@@ -125,11 +129,11 @@ proc validate_OperationList_567880(path: JsonNode; query: JsonNode; header: Json
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568040 = query.getOrDefault("api-version")
-  valid_568040 = validateParameter(valid_568040, JString, required = true,
+  var valid_563940 = query.getOrDefault("api-version")
+  valid_563940 = validateParameter(valid_563940, JString, required = true,
                                  default = nil)
-  if valid_568040 != nil:
-    section.add "api-version", valid_568040
+  if valid_563940 != nil:
+    section.add "api-version", valid_563940
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -138,43 +142,43 @@ proc validate_OperationList_567880(path: JsonNode; query: JsonNode; header: Json
   if body != nil:
     result.add "body", body
 
-proc call*(call_568063: Call_OperationList_567879; path: JsonNode; query: JsonNode;
+proc call*(call_563963: Call_OperationList_563777; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## List all the operations.
   ## 
-  let valid = call_568063.validator(path, query, header, formData, body)
-  let scheme = call_568063.pickScheme
+  let valid = call_563963.validator(path, query, header, formData, body)
+  let scheme = call_563963.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568063.url(scheme.get, call_568063.host, call_568063.base,
-                         call_568063.route, valid.getOrDefault("path"),
+  let url = call_563963.url(scheme.get, call_563963.host, call_563963.base,
+                         call_563963.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568063, url, valid)
+  result = hook(call_563963, url, valid)
 
-proc call*(call_568134: Call_OperationList_567879; apiVersion: string): Recallable =
+proc call*(call_564034: Call_OperationList_563777; apiVersion: string): Recallable =
   ## operationList
   ## List all the operations.
   ##   apiVersion: string (required)
   ##             : Supported version.
-  var query_568135 = newJObject()
-  add(query_568135, "api-version", newJString(apiVersion))
-  result = call_568134.call(nil, query_568135, nil, nil, nil)
+  var query_564035 = newJObject()
+  add(query_564035, "api-version", newJString(apiVersion))
+  result = call_564034.call(nil, query_564035, nil, nil, nil)
 
-var operationList* = Call_OperationList_567879(name: "operationList",
+var operationList* = Call_OperationList_563777(name: "operationList",
     meth: HttpMethod.HttpGet, host: "management.azure.com",
     route: "/providers/Microsoft.Capacity/operations",
-    validator: validate_OperationList_567880, base: "", url: url_OperationList_567881,
+    validator: validate_OperationList_563778, base: "", url: url_OperationList_563779,
     schemes: {Scheme.Https})
 type
-  Call_ReservationOrderList_568175 = ref object of OpenApiRestCall_567657
-proc url_ReservationOrderList_568177(protocol: Scheme; host: string; base: string;
+  Call_ReservationOrderList_564075 = ref object of OpenApiRestCall_563555
+proc url_ReservationOrderList_564077(protocol: Scheme; host: string; base: string;
                                     route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_ReservationOrderList_568176(path: JsonNode; query: JsonNode;
+proc validate_ReservationOrderList_564076(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## List of all the `ReservationOrder`s that the user has access to in the current tenant.
   ## 
@@ -188,11 +192,11 @@ proc validate_ReservationOrderList_568176(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568178 = query.getOrDefault("api-version")
-  valid_568178 = validateParameter(valid_568178, JString, required = true,
+  var valid_564078 = query.getOrDefault("api-version")
+  valid_564078 = validateParameter(valid_564078, JString, required = true,
                                  default = nil)
-  if valid_568178 != nil:
-    section.add "api-version", valid_568178
+  if valid_564078 != nil:
+    section.add "api-version", valid_564078
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -201,37 +205,37 @@ proc validate_ReservationOrderList_568176(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568179: Call_ReservationOrderList_568175; path: JsonNode;
+proc call*(call_564079: Call_ReservationOrderList_564075; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## List of all the `ReservationOrder`s that the user has access to in the current tenant.
   ## 
-  let valid = call_568179.validator(path, query, header, formData, body)
-  let scheme = call_568179.pickScheme
+  let valid = call_564079.validator(path, query, header, formData, body)
+  let scheme = call_564079.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568179.url(scheme.get, call_568179.host, call_568179.base,
-                         call_568179.route, valid.getOrDefault("path"),
+  let url = call_564079.url(scheme.get, call_564079.host, call_564079.base,
+                         call_564079.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568179, url, valid)
+  result = hook(call_564079, url, valid)
 
-proc call*(call_568180: Call_ReservationOrderList_568175; apiVersion: string): Recallable =
+proc call*(call_564080: Call_ReservationOrderList_564075; apiVersion: string): Recallable =
   ## reservationOrderList
   ## List of all the `ReservationOrder`s that the user has access to in the current tenant.
   ##   apiVersion: string (required)
   ##             : Supported version.
-  var query_568181 = newJObject()
-  add(query_568181, "api-version", newJString(apiVersion))
-  result = call_568180.call(nil, query_568181, nil, nil, nil)
+  var query_564081 = newJObject()
+  add(query_564081, "api-version", newJString(apiVersion))
+  result = call_564080.call(nil, query_564081, nil, nil, nil)
 
-var reservationOrderList* = Call_ReservationOrderList_568175(
+var reservationOrderList* = Call_ReservationOrderList_564075(
     name: "reservationOrderList", meth: HttpMethod.HttpGet,
     host: "management.azure.com",
     route: "/providers/Microsoft.Capacity/reservationOrders",
-    validator: validate_ReservationOrderList_568176, base: "",
-    url: url_ReservationOrderList_568177, schemes: {Scheme.Https})
+    validator: validate_ReservationOrderList_564076, base: "",
+    url: url_ReservationOrderList_564077, schemes: {Scheme.Https})
 type
-  Call_ReservationOrderGet_568182 = ref object of OpenApiRestCall_567657
-proc url_ReservationOrderGet_568184(protocol: Scheme; host: string; base: string;
+  Call_ReservationOrderGet_564082 = ref object of OpenApiRestCall_563555
+proc url_ReservationOrderGet_564084(protocol: Scheme; host: string; base: string;
                                    route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -248,7 +252,7 @@ proc url_ReservationOrderGet_568184(protocol: Scheme; host: string; base: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ReservationOrderGet_568183(path: JsonNode; query: JsonNode;
+proc validate_ReservationOrderGet_564083(path: JsonNode; query: JsonNode;
                                         header: JsonNode; formData: JsonNode;
                                         body: JsonNode): JsonNode =
   ## Get the details of the `ReservationOrder`.
@@ -262,11 +266,11 @@ proc validate_ReservationOrderGet_568183(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `reservationOrderId` field"
-  var valid_568199 = path.getOrDefault("reservationOrderId")
-  valid_568199 = validateParameter(valid_568199, JString, required = true,
+  var valid_564099 = path.getOrDefault("reservationOrderId")
+  valid_564099 = validateParameter(valid_564099, JString, required = true,
                                  default = nil)
-  if valid_568199 != nil:
-    section.add "reservationOrderId", valid_568199
+  if valid_564099 != nil:
+    section.add "reservationOrderId", valid_564099
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -274,11 +278,11 @@ proc validate_ReservationOrderGet_568183(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568200 = query.getOrDefault("api-version")
-  valid_568200 = validateParameter(valid_568200, JString, required = true,
+  var valid_564100 = query.getOrDefault("api-version")
+  valid_564100 = validateParameter(valid_564100, JString, required = true,
                                  default = nil)
-  if valid_568200 != nil:
-    section.add "api-version", valid_568200
+  if valid_564100 != nil:
+    section.add "api-version", valid_564100
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -287,20 +291,20 @@ proc validate_ReservationOrderGet_568183(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568201: Call_ReservationOrderGet_568182; path: JsonNode;
+proc call*(call_564101: Call_ReservationOrderGet_564082; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get the details of the `ReservationOrder`.
   ## 
-  let valid = call_568201.validator(path, query, header, formData, body)
-  let scheme = call_568201.pickScheme
+  let valid = call_564101.validator(path, query, header, formData, body)
+  let scheme = call_564101.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568201.url(scheme.get, call_568201.host, call_568201.base,
-                         call_568201.route, valid.getOrDefault("path"),
+  let url = call_564101.url(scheme.get, call_564101.host, call_564101.base,
+                         call_564101.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568201, url, valid)
+  result = hook(call_564101, url, valid)
 
-proc call*(call_568202: Call_ReservationOrderGet_568182; apiVersion: string;
+proc call*(call_564102: Call_ReservationOrderGet_564082; apiVersion: string;
           reservationOrderId: string): Recallable =
   ## reservationOrderGet
   ## Get the details of the `ReservationOrder`.
@@ -309,20 +313,20 @@ proc call*(call_568202: Call_ReservationOrderGet_568182; apiVersion: string;
   ##   reservationOrderId: string (required)
   ##                     : Order Id of the reservation
   ## 
-  var path_568203 = newJObject()
-  var query_568204 = newJObject()
-  add(query_568204, "api-version", newJString(apiVersion))
-  add(path_568203, "reservationOrderId", newJString(reservationOrderId))
-  result = call_568202.call(path_568203, query_568204, nil, nil, nil)
+  var path_564103 = newJObject()
+  var query_564104 = newJObject()
+  add(query_564104, "api-version", newJString(apiVersion))
+  add(path_564103, "reservationOrderId", newJString(reservationOrderId))
+  result = call_564102.call(path_564103, query_564104, nil, nil, nil)
 
-var reservationOrderGet* = Call_ReservationOrderGet_568182(
+var reservationOrderGet* = Call_ReservationOrderGet_564082(
     name: "reservationOrderGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/providers/Microsoft.Capacity/reservationOrders/{reservationOrderId}",
-    validator: validate_ReservationOrderGet_568183, base: "",
-    url: url_ReservationOrderGet_568184, schemes: {Scheme.Https})
+    validator: validate_ReservationOrderGet_564083, base: "",
+    url: url_ReservationOrderGet_564084, schemes: {Scheme.Https})
 type
-  Call_ReservationMerge_568205 = ref object of OpenApiRestCall_567657
-proc url_ReservationMerge_568207(protocol: Scheme; host: string; base: string;
+  Call_ReservationMerge_564105 = ref object of OpenApiRestCall_563555
+proc url_ReservationMerge_564107(protocol: Scheme; host: string; base: string;
                                 route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -340,7 +344,7 @@ proc url_ReservationMerge_568207(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ReservationMerge_568206(path: JsonNode; query: JsonNode;
+proc validate_ReservationMerge_564106(path: JsonNode; query: JsonNode;
                                      header: JsonNode; formData: JsonNode;
                                      body: JsonNode): JsonNode =
   ## Merge the specified `Reservation`s into a new `Reservation`. The two `Reservation`s being merged must have same properties.
@@ -354,11 +358,11 @@ proc validate_ReservationMerge_568206(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `reservationOrderId` field"
-  var valid_568208 = path.getOrDefault("reservationOrderId")
-  valid_568208 = validateParameter(valid_568208, JString, required = true,
+  var valid_564108 = path.getOrDefault("reservationOrderId")
+  valid_564108 = validateParameter(valid_564108, JString, required = true,
                                  default = nil)
-  if valid_568208 != nil:
-    section.add "reservationOrderId", valid_568208
+  if valid_564108 != nil:
+    section.add "reservationOrderId", valid_564108
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -366,11 +370,11 @@ proc validate_ReservationMerge_568206(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568209 = query.getOrDefault("api-version")
-  valid_568209 = validateParameter(valid_568209, JString, required = true,
+  var valid_564109 = query.getOrDefault("api-version")
+  valid_564109 = validateParameter(valid_564109, JString, required = true,
                                  default = nil)
-  if valid_568209 != nil:
-    section.add "api-version", valid_568209
+  if valid_564109 != nil:
+    section.add "api-version", valid_564109
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -384,20 +388,20 @@ proc validate_ReservationMerge_568206(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568211: Call_ReservationMerge_568205; path: JsonNode;
+proc call*(call_564111: Call_ReservationMerge_564105; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Merge the specified `Reservation`s into a new `Reservation`. The two `Reservation`s being merged must have same properties.
   ## 
-  let valid = call_568211.validator(path, query, header, formData, body)
-  let scheme = call_568211.pickScheme
+  let valid = call_564111.validator(path, query, header, formData, body)
+  let scheme = call_564111.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568211.url(scheme.get, call_568211.host, call_568211.base,
-                         call_568211.route, valid.getOrDefault("path"),
+  let url = call_564111.url(scheme.get, call_564111.host, call_564111.base,
+                         call_564111.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568211, url, valid)
+  result = hook(call_564111, url, valid)
 
-proc call*(call_568212: Call_ReservationMerge_568205; apiVersion: string;
+proc call*(call_564112: Call_ReservationMerge_564105; apiVersion: string;
           reservationOrderId: string; body: JsonNode): Recallable =
   ## reservationMerge
   ## Merge the specified `Reservation`s into a new `Reservation`. The two `Reservation`s being merged must have same properties.
@@ -408,22 +412,22 @@ proc call*(call_568212: Call_ReservationMerge_568205; apiVersion: string;
   ## 
   ##   body: JObject (required)
   ##       : Information needed for commercial request for a reservation
-  var path_568213 = newJObject()
-  var query_568214 = newJObject()
-  var body_568215 = newJObject()
-  add(query_568214, "api-version", newJString(apiVersion))
-  add(path_568213, "reservationOrderId", newJString(reservationOrderId))
+  var path_564113 = newJObject()
+  var query_564114 = newJObject()
+  var body_564115 = newJObject()
+  add(query_564114, "api-version", newJString(apiVersion))
+  add(path_564113, "reservationOrderId", newJString(reservationOrderId))
   if body != nil:
-    body_568215 = body
-  result = call_568212.call(path_568213, query_568214, nil, nil, body_568215)
+    body_564115 = body
+  result = call_564112.call(path_564113, query_564114, nil, nil, body_564115)
 
-var reservationMerge* = Call_ReservationMerge_568205(name: "reservationMerge",
+var reservationMerge* = Call_ReservationMerge_564105(name: "reservationMerge",
     meth: HttpMethod.HttpPost, host: "management.azure.com", route: "/providers/Microsoft.Capacity/reservationOrders/{reservationOrderId}/merge",
-    validator: validate_ReservationMerge_568206, base: "",
-    url: url_ReservationMerge_568207, schemes: {Scheme.Https})
+    validator: validate_ReservationMerge_564106, base: "",
+    url: url_ReservationMerge_564107, schemes: {Scheme.Https})
 type
-  Call_ReservationList_568216 = ref object of OpenApiRestCall_567657
-proc url_ReservationList_568218(protocol: Scheme; host: string; base: string;
+  Call_ReservationList_564116 = ref object of OpenApiRestCall_563555
+proc url_ReservationList_564118(protocol: Scheme; host: string; base: string;
                                route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -441,7 +445,7 @@ proc url_ReservationList_568218(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ReservationList_568217(path: JsonNode; query: JsonNode;
+proc validate_ReservationList_564117(path: JsonNode; query: JsonNode;
                                     header: JsonNode; formData: JsonNode;
                                     body: JsonNode): JsonNode =
   ## List `Reservation`s within a single `ReservationOrder`.
@@ -455,11 +459,11 @@ proc validate_ReservationList_568217(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `reservationOrderId` field"
-  var valid_568219 = path.getOrDefault("reservationOrderId")
-  valid_568219 = validateParameter(valid_568219, JString, required = true,
+  var valid_564119 = path.getOrDefault("reservationOrderId")
+  valid_564119 = validateParameter(valid_564119, JString, required = true,
                                  default = nil)
-  if valid_568219 != nil:
-    section.add "reservationOrderId", valid_568219
+  if valid_564119 != nil:
+    section.add "reservationOrderId", valid_564119
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -467,11 +471,11 @@ proc validate_ReservationList_568217(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568220 = query.getOrDefault("api-version")
-  valid_568220 = validateParameter(valid_568220, JString, required = true,
+  var valid_564120 = query.getOrDefault("api-version")
+  valid_564120 = validateParameter(valid_564120, JString, required = true,
                                  default = nil)
-  if valid_568220 != nil:
-    section.add "api-version", valid_568220
+  if valid_564120 != nil:
+    section.add "api-version", valid_564120
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -480,20 +484,20 @@ proc validate_ReservationList_568217(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568221: Call_ReservationList_568216; path: JsonNode; query: JsonNode;
+proc call*(call_564121: Call_ReservationList_564116; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## List `Reservation`s within a single `ReservationOrder`.
   ## 
-  let valid = call_568221.validator(path, query, header, formData, body)
-  let scheme = call_568221.pickScheme
+  let valid = call_564121.validator(path, query, header, formData, body)
+  let scheme = call_564121.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568221.url(scheme.get, call_568221.host, call_568221.base,
-                         call_568221.route, valid.getOrDefault("path"),
+  let url = call_564121.url(scheme.get, call_564121.host, call_564121.base,
+                         call_564121.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568221, url, valid)
+  result = hook(call_564121, url, valid)
 
-proc call*(call_568222: Call_ReservationList_568216; apiVersion: string;
+proc call*(call_564122: Call_ReservationList_564116; apiVersion: string;
           reservationOrderId: string): Recallable =
   ## reservationList
   ## List `Reservation`s within a single `ReservationOrder`.
@@ -502,19 +506,19 @@ proc call*(call_568222: Call_ReservationList_568216; apiVersion: string;
   ##   reservationOrderId: string (required)
   ##                     : Order Id of the reservation
   ## 
-  var path_568223 = newJObject()
-  var query_568224 = newJObject()
-  add(query_568224, "api-version", newJString(apiVersion))
-  add(path_568223, "reservationOrderId", newJString(reservationOrderId))
-  result = call_568222.call(path_568223, query_568224, nil, nil, nil)
+  var path_564123 = newJObject()
+  var query_564124 = newJObject()
+  add(query_564124, "api-version", newJString(apiVersion))
+  add(path_564123, "reservationOrderId", newJString(reservationOrderId))
+  result = call_564122.call(path_564123, query_564124, nil, nil, nil)
 
-var reservationList* = Call_ReservationList_568216(name: "reservationList",
+var reservationList* = Call_ReservationList_564116(name: "reservationList",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/providers/Microsoft.Capacity/reservationOrders/{reservationOrderId}/reservations",
-    validator: validate_ReservationList_568217, base: "", url: url_ReservationList_568218,
+    validator: validate_ReservationList_564117, base: "", url: url_ReservationList_564118,
     schemes: {Scheme.Https})
 type
-  Call_ReservationGet_568225 = ref object of OpenApiRestCall_567657
-proc url_ReservationGet_568227(protocol: Scheme; host: string; base: string;
+  Call_ReservationGet_564125 = ref object of OpenApiRestCall_563555
+proc url_ReservationGet_564127(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -534,7 +538,7 @@ proc url_ReservationGet_568227(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ReservationGet_568226(path: JsonNode; query: JsonNode;
+proc validate_ReservationGet_564126(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## Get specific `Reservation` details.
@@ -550,16 +554,16 @@ proc validate_ReservationGet_568226(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `reservationOrderId` field"
-  var valid_568228 = path.getOrDefault("reservationOrderId")
-  valid_568228 = validateParameter(valid_568228, JString, required = true,
+  var valid_564128 = path.getOrDefault("reservationOrderId")
+  valid_564128 = validateParameter(valid_564128, JString, required = true,
                                  default = nil)
-  if valid_568228 != nil:
-    section.add "reservationOrderId", valid_568228
-  var valid_568229 = path.getOrDefault("reservationId")
-  valid_568229 = validateParameter(valid_568229, JString, required = true,
+  if valid_564128 != nil:
+    section.add "reservationOrderId", valid_564128
+  var valid_564129 = path.getOrDefault("reservationId")
+  valid_564129 = validateParameter(valid_564129, JString, required = true,
                                  default = nil)
-  if valid_568229 != nil:
-    section.add "reservationId", valid_568229
+  if valid_564129 != nil:
+    section.add "reservationId", valid_564129
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -567,11 +571,11 @@ proc validate_ReservationGet_568226(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568230 = query.getOrDefault("api-version")
-  valid_568230 = validateParameter(valid_568230, JString, required = true,
+  var valid_564130 = query.getOrDefault("api-version")
+  valid_564130 = validateParameter(valid_564130, JString, required = true,
                                  default = nil)
-  if valid_568230 != nil:
-    section.add "api-version", valid_568230
+  if valid_564130 != nil:
+    section.add "api-version", valid_564130
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -580,20 +584,20 @@ proc validate_ReservationGet_568226(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568231: Call_ReservationGet_568225; path: JsonNode; query: JsonNode;
+proc call*(call_564131: Call_ReservationGet_564125; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get specific `Reservation` details.
   ## 
-  let valid = call_568231.validator(path, query, header, formData, body)
-  let scheme = call_568231.pickScheme
+  let valid = call_564131.validator(path, query, header, formData, body)
+  let scheme = call_564131.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568231.url(scheme.get, call_568231.host, call_568231.base,
-                         call_568231.route, valid.getOrDefault("path"),
+  let url = call_564131.url(scheme.get, call_564131.host, call_564131.base,
+                         call_564131.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568231, url, valid)
+  result = hook(call_564131, url, valid)
 
-proc call*(call_568232: Call_ReservationGet_568225; apiVersion: string;
+proc call*(call_564132: Call_ReservationGet_564125; apiVersion: string;
           reservationOrderId: string; reservationId: string): Recallable =
   ## reservationGet
   ## Get specific `Reservation` details.
@@ -604,20 +608,20 @@ proc call*(call_568232: Call_ReservationGet_568225; apiVersion: string;
   ## 
   ##   reservationId: string (required)
   ##                : Id of the Reservation Item
-  var path_568233 = newJObject()
-  var query_568234 = newJObject()
-  add(query_568234, "api-version", newJString(apiVersion))
-  add(path_568233, "reservationOrderId", newJString(reservationOrderId))
-  add(path_568233, "reservationId", newJString(reservationId))
-  result = call_568232.call(path_568233, query_568234, nil, nil, nil)
+  var path_564133 = newJObject()
+  var query_564134 = newJObject()
+  add(query_564134, "api-version", newJString(apiVersion))
+  add(path_564133, "reservationOrderId", newJString(reservationOrderId))
+  add(path_564133, "reservationId", newJString(reservationId))
+  result = call_564132.call(path_564133, query_564134, nil, nil, nil)
 
-var reservationGet* = Call_ReservationGet_568225(name: "reservationGet",
+var reservationGet* = Call_ReservationGet_564125(name: "reservationGet",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/providers/Microsoft.Capacity/reservationOrders/{reservationOrderId}/reservations/{reservationId}",
-    validator: validate_ReservationGet_568226, base: "", url: url_ReservationGet_568227,
+    validator: validate_ReservationGet_564126, base: "", url: url_ReservationGet_564127,
     schemes: {Scheme.Https})
 type
-  Call_ReservationUpdate_568235 = ref object of OpenApiRestCall_567657
-proc url_ReservationUpdate_568237(protocol: Scheme; host: string; base: string;
+  Call_ReservationUpdate_564135 = ref object of OpenApiRestCall_563555
+proc url_ReservationUpdate_564137(protocol: Scheme; host: string; base: string;
                                  route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -637,7 +641,7 @@ proc url_ReservationUpdate_568237(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ReservationUpdate_568236(path: JsonNode; query: JsonNode;
+proc validate_ReservationUpdate_564136(path: JsonNode; query: JsonNode;
                                       header: JsonNode; formData: JsonNode;
                                       body: JsonNode): JsonNode =
   ## Updates the applied scopes of the `Reservation`.
@@ -653,16 +657,16 @@ proc validate_ReservationUpdate_568236(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `reservationOrderId` field"
-  var valid_568238 = path.getOrDefault("reservationOrderId")
-  valid_568238 = validateParameter(valid_568238, JString, required = true,
+  var valid_564138 = path.getOrDefault("reservationOrderId")
+  valid_564138 = validateParameter(valid_564138, JString, required = true,
                                  default = nil)
-  if valid_568238 != nil:
-    section.add "reservationOrderId", valid_568238
-  var valid_568239 = path.getOrDefault("reservationId")
-  valid_568239 = validateParameter(valid_568239, JString, required = true,
+  if valid_564138 != nil:
+    section.add "reservationOrderId", valid_564138
+  var valid_564139 = path.getOrDefault("reservationId")
+  valid_564139 = validateParameter(valid_564139, JString, required = true,
                                  default = nil)
-  if valid_568239 != nil:
-    section.add "reservationId", valid_568239
+  if valid_564139 != nil:
+    section.add "reservationId", valid_564139
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -670,11 +674,11 @@ proc validate_ReservationUpdate_568236(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568240 = query.getOrDefault("api-version")
-  valid_568240 = validateParameter(valid_568240, JString, required = true,
+  var valid_564140 = query.getOrDefault("api-version")
+  valid_564140 = validateParameter(valid_564140, JString, required = true,
                                  default = nil)
-  if valid_568240 != nil:
-    section.add "api-version", valid_568240
+  if valid_564140 != nil:
+    section.add "api-version", valid_564140
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -688,21 +692,21 @@ proc validate_ReservationUpdate_568236(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568242: Call_ReservationUpdate_568235; path: JsonNode;
+proc call*(call_564142: Call_ReservationUpdate_564135; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Updates the applied scopes of the `Reservation`.
   ## 
-  let valid = call_568242.validator(path, query, header, formData, body)
-  let scheme = call_568242.pickScheme
+  let valid = call_564142.validator(path, query, header, formData, body)
+  let scheme = call_564142.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568242.url(scheme.get, call_568242.host, call_568242.base,
-                         call_568242.route, valid.getOrDefault("path"),
+  let url = call_564142.url(scheme.get, call_564142.host, call_564142.base,
+                         call_564142.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568242, url, valid)
+  result = hook(call_564142, url, valid)
 
-proc call*(call_568243: Call_ReservationUpdate_568235; apiVersion: string;
-          reservationOrderId: string; reservationId: string; parameters: JsonNode): Recallable =
+proc call*(call_564143: Call_ReservationUpdate_564135; apiVersion: string;
+          reservationOrderId: string; parameters: JsonNode; reservationId: string): Recallable =
   ## reservationUpdate
   ## Updates the applied scopes of the `Reservation`.
   ##   apiVersion: string (required)
@@ -710,27 +714,27 @@ proc call*(call_568243: Call_ReservationUpdate_568235; apiVersion: string;
   ##   reservationOrderId: string (required)
   ##                     : Order Id of the reservation
   ## 
-  ##   reservationId: string (required)
-  ##                : Id of the Reservation Item
   ##   parameters: JObject (required)
   ##             : Information needed to patch a reservation item
-  var path_568244 = newJObject()
-  var query_568245 = newJObject()
-  var body_568246 = newJObject()
-  add(query_568245, "api-version", newJString(apiVersion))
-  add(path_568244, "reservationOrderId", newJString(reservationOrderId))
-  add(path_568244, "reservationId", newJString(reservationId))
+  ##   reservationId: string (required)
+  ##                : Id of the Reservation Item
+  var path_564144 = newJObject()
+  var query_564145 = newJObject()
+  var body_564146 = newJObject()
+  add(query_564145, "api-version", newJString(apiVersion))
+  add(path_564144, "reservationOrderId", newJString(reservationOrderId))
   if parameters != nil:
-    body_568246 = parameters
-  result = call_568243.call(path_568244, query_568245, nil, nil, body_568246)
+    body_564146 = parameters
+  add(path_564144, "reservationId", newJString(reservationId))
+  result = call_564143.call(path_564144, query_564145, nil, nil, body_564146)
 
-var reservationUpdate* = Call_ReservationUpdate_568235(name: "reservationUpdate",
+var reservationUpdate* = Call_ReservationUpdate_564135(name: "reservationUpdate",
     meth: HttpMethod.HttpPatch, host: "management.azure.com", route: "/providers/Microsoft.Capacity/reservationOrders/{reservationOrderId}/reservations/{reservationId}",
-    validator: validate_ReservationUpdate_568236, base: "",
-    url: url_ReservationUpdate_568237, schemes: {Scheme.Https})
+    validator: validate_ReservationUpdate_564136, base: "",
+    url: url_ReservationUpdate_564137, schemes: {Scheme.Https})
 type
-  Call_ReservationListRevisions_568247 = ref object of OpenApiRestCall_567657
-proc url_ReservationListRevisions_568249(protocol: Scheme; host: string;
+  Call_ReservationListRevisions_564147 = ref object of OpenApiRestCall_563555
+proc url_ReservationListRevisions_564149(protocol: Scheme; host: string;
                                         base: string; route: string; path: JsonNode;
                                         query: JsonNode): Uri =
   result.scheme = $protocol
@@ -752,7 +756,7 @@ proc url_ReservationListRevisions_568249(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ReservationListRevisions_568248(path: JsonNode; query: JsonNode;
+proc validate_ReservationListRevisions_564148(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## List of all the revisions for the `Reservation`.
   ## 
@@ -768,16 +772,16 @@ proc validate_ReservationListRevisions_568248(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `reservationOrderId` field"
-  var valid_568250 = path.getOrDefault("reservationOrderId")
-  valid_568250 = validateParameter(valid_568250, JString, required = true,
+  var valid_564150 = path.getOrDefault("reservationOrderId")
+  valid_564150 = validateParameter(valid_564150, JString, required = true,
                                  default = nil)
-  if valid_568250 != nil:
-    section.add "reservationOrderId", valid_568250
-  var valid_568251 = path.getOrDefault("reservationId")
-  valid_568251 = validateParameter(valid_568251, JString, required = true,
+  if valid_564150 != nil:
+    section.add "reservationOrderId", valid_564150
+  var valid_564151 = path.getOrDefault("reservationId")
+  valid_564151 = validateParameter(valid_564151, JString, required = true,
                                  default = nil)
-  if valid_568251 != nil:
-    section.add "reservationId", valid_568251
+  if valid_564151 != nil:
+    section.add "reservationId", valid_564151
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -785,11 +789,11 @@ proc validate_ReservationListRevisions_568248(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568252 = query.getOrDefault("api-version")
-  valid_568252 = validateParameter(valid_568252, JString, required = true,
+  var valid_564152 = query.getOrDefault("api-version")
+  valid_564152 = validateParameter(valid_564152, JString, required = true,
                                  default = nil)
-  if valid_568252 != nil:
-    section.add "api-version", valid_568252
+  if valid_564152 != nil:
+    section.add "api-version", valid_564152
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -798,21 +802,21 @@ proc validate_ReservationListRevisions_568248(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568253: Call_ReservationListRevisions_568247; path: JsonNode;
+proc call*(call_564153: Call_ReservationListRevisions_564147; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## List of all the revisions for the `Reservation`.
   ## 
   ## 
-  let valid = call_568253.validator(path, query, header, formData, body)
-  let scheme = call_568253.pickScheme
+  let valid = call_564153.validator(path, query, header, formData, body)
+  let scheme = call_564153.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568253.url(scheme.get, call_568253.host, call_568253.base,
-                         call_568253.route, valid.getOrDefault("path"),
+  let url = call_564153.url(scheme.get, call_564153.host, call_564153.base,
+                         call_564153.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568253, url, valid)
+  result = hook(call_564153, url, valid)
 
-proc call*(call_568254: Call_ReservationListRevisions_568247; apiVersion: string;
+proc call*(call_564154: Call_ReservationListRevisions_564147; apiVersion: string;
           reservationOrderId: string; reservationId: string): Recallable =
   ## reservationListRevisions
   ## List of all the revisions for the `Reservation`.
@@ -824,21 +828,21 @@ proc call*(call_568254: Call_ReservationListRevisions_568247; apiVersion: string
   ## 
   ##   reservationId: string (required)
   ##                : Id of the Reservation Item
-  var path_568255 = newJObject()
-  var query_568256 = newJObject()
-  add(query_568256, "api-version", newJString(apiVersion))
-  add(path_568255, "reservationOrderId", newJString(reservationOrderId))
-  add(path_568255, "reservationId", newJString(reservationId))
-  result = call_568254.call(path_568255, query_568256, nil, nil, nil)
+  var path_564155 = newJObject()
+  var query_564156 = newJObject()
+  add(query_564156, "api-version", newJString(apiVersion))
+  add(path_564155, "reservationOrderId", newJString(reservationOrderId))
+  add(path_564155, "reservationId", newJString(reservationId))
+  result = call_564154.call(path_564155, query_564156, nil, nil, nil)
 
-var reservationListRevisions* = Call_ReservationListRevisions_568247(
+var reservationListRevisions* = Call_ReservationListRevisions_564147(
     name: "reservationListRevisions", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/providers/Microsoft.Capacity/reservationOrders/{reservationOrderId}/reservations/{reservationId}/revisions",
-    validator: validate_ReservationListRevisions_568248, base: "",
-    url: url_ReservationListRevisions_568249, schemes: {Scheme.Https})
+    validator: validate_ReservationListRevisions_564148, base: "",
+    url: url_ReservationListRevisions_564149, schemes: {Scheme.Https})
 type
-  Call_ReservationSplit_568257 = ref object of OpenApiRestCall_567657
-proc url_ReservationSplit_568259(protocol: Scheme; host: string; base: string;
+  Call_ReservationSplit_564157 = ref object of OpenApiRestCall_563555
+proc url_ReservationSplit_564159(protocol: Scheme; host: string; base: string;
                                 route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -856,7 +860,7 @@ proc url_ReservationSplit_568259(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ReservationSplit_568258(path: JsonNode; query: JsonNode;
+proc validate_ReservationSplit_564158(path: JsonNode; query: JsonNode;
                                      header: JsonNode; formData: JsonNode;
                                      body: JsonNode): JsonNode =
   ## Split a `Reservation` into two `Reservation`s with specified quantity distribution.
@@ -871,11 +875,11 @@ proc validate_ReservationSplit_568258(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `reservationOrderId` field"
-  var valid_568260 = path.getOrDefault("reservationOrderId")
-  valid_568260 = validateParameter(valid_568260, JString, required = true,
+  var valid_564160 = path.getOrDefault("reservationOrderId")
+  valid_564160 = validateParameter(valid_564160, JString, required = true,
                                  default = nil)
-  if valid_568260 != nil:
-    section.add "reservationOrderId", valid_568260
+  if valid_564160 != nil:
+    section.add "reservationOrderId", valid_564160
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -883,11 +887,11 @@ proc validate_ReservationSplit_568258(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568261 = query.getOrDefault("api-version")
-  valid_568261 = validateParameter(valid_568261, JString, required = true,
+  var valid_564161 = query.getOrDefault("api-version")
+  valid_564161 = validateParameter(valid_564161, JString, required = true,
                                  default = nil)
-  if valid_568261 != nil:
-    section.add "api-version", valid_568261
+  if valid_564161 != nil:
+    section.add "api-version", valid_564161
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -901,21 +905,21 @@ proc validate_ReservationSplit_568258(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568263: Call_ReservationSplit_568257; path: JsonNode;
+proc call*(call_564163: Call_ReservationSplit_564157; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Split a `Reservation` into two `Reservation`s with specified quantity distribution.
   ## 
   ## 
-  let valid = call_568263.validator(path, query, header, formData, body)
-  let scheme = call_568263.pickScheme
+  let valid = call_564163.validator(path, query, header, formData, body)
+  let scheme = call_564163.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568263.url(scheme.get, call_568263.host, call_568263.base,
-                         call_568263.route, valid.getOrDefault("path"),
+  let url = call_564163.url(scheme.get, call_564163.host, call_564163.base,
+                         call_564163.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568263, url, valid)
+  result = hook(call_564163, url, valid)
 
-proc call*(call_568264: Call_ReservationSplit_568257; apiVersion: string;
+proc call*(call_564164: Call_ReservationSplit_564157; apiVersion: string;
           reservationOrderId: string; body: JsonNode): Recallable =
   ## reservationSplit
   ## Split a `Reservation` into two `Reservation`s with specified quantity distribution.
@@ -927,22 +931,22 @@ proc call*(call_568264: Call_ReservationSplit_568257; apiVersion: string;
   ## 
   ##   body: JObject (required)
   ##       : Information needed to Split a reservation item
-  var path_568265 = newJObject()
-  var query_568266 = newJObject()
-  var body_568267 = newJObject()
-  add(query_568266, "api-version", newJString(apiVersion))
-  add(path_568265, "reservationOrderId", newJString(reservationOrderId))
+  var path_564165 = newJObject()
+  var query_564166 = newJObject()
+  var body_564167 = newJObject()
+  add(query_564166, "api-version", newJString(apiVersion))
+  add(path_564165, "reservationOrderId", newJString(reservationOrderId))
   if body != nil:
-    body_568267 = body
-  result = call_568264.call(path_568265, query_568266, nil, nil, body_568267)
+    body_564167 = body
+  result = call_564164.call(path_564165, query_564166, nil, nil, body_564167)
 
-var reservationSplit* = Call_ReservationSplit_568257(name: "reservationSplit",
+var reservationSplit* = Call_ReservationSplit_564157(name: "reservationSplit",
     meth: HttpMethod.HttpPost, host: "management.azure.com", route: "/providers/Microsoft.Capacity/reservationOrders/{reservationOrderId}/split",
-    validator: validate_ReservationSplit_568258, base: "",
-    url: url_ReservationSplit_568259, schemes: {Scheme.Https})
+    validator: validate_ReservationSplit_564158, base: "",
+    url: url_ReservationSplit_564159, schemes: {Scheme.Https})
 type
-  Call_GetAppliedReservationList_568268 = ref object of OpenApiRestCall_567657
-proc url_GetAppliedReservationList_568270(protocol: Scheme; host: string;
+  Call_GetAppliedReservationList_564168 = ref object of OpenApiRestCall_563555
+proc url_GetAppliedReservationList_564170(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -959,7 +963,7 @@ proc url_GetAppliedReservationList_568270(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_GetAppliedReservationList_568269(path: JsonNode; query: JsonNode;
+proc validate_GetAppliedReservationList_564169(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Get applicable `Reservation`s that are applied to this subscription.
   ## 
@@ -971,11 +975,11 @@ proc validate_GetAppliedReservationList_568269(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_568271 = path.getOrDefault("subscriptionId")
-  valid_568271 = validateParameter(valid_568271, JString, required = true,
+  var valid_564171 = path.getOrDefault("subscriptionId")
+  valid_564171 = validateParameter(valid_564171, JString, required = true,
                                  default = nil)
-  if valid_568271 != nil:
-    section.add "subscriptionId", valid_568271
+  if valid_564171 != nil:
+    section.add "subscriptionId", valid_564171
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -983,11 +987,11 @@ proc validate_GetAppliedReservationList_568269(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568272 = query.getOrDefault("api-version")
-  valid_568272 = validateParameter(valid_568272, JString, required = true,
+  var valid_564172 = query.getOrDefault("api-version")
+  valid_564172 = validateParameter(valid_564172, JString, required = true,
                                  default = nil)
-  if valid_568272 != nil:
-    section.add "api-version", valid_568272
+  if valid_564172 != nil:
+    section.add "api-version", valid_564172
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -996,20 +1000,20 @@ proc validate_GetAppliedReservationList_568269(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568273: Call_GetAppliedReservationList_568268; path: JsonNode;
+proc call*(call_564173: Call_GetAppliedReservationList_564168; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get applicable `Reservation`s that are applied to this subscription.
   ## 
-  let valid = call_568273.validator(path, query, header, formData, body)
-  let scheme = call_568273.pickScheme
+  let valid = call_564173.validator(path, query, header, formData, body)
+  let scheme = call_564173.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568273.url(scheme.get, call_568273.host, call_568273.base,
-                         call_568273.route, valid.getOrDefault("path"),
+  let url = call_564173.url(scheme.get, call_564173.host, call_564173.base,
+                         call_564173.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568273, url, valid)
+  result = hook(call_564173, url, valid)
 
-proc call*(call_568274: Call_GetAppliedReservationList_568268; apiVersion: string;
+proc call*(call_564174: Call_GetAppliedReservationList_564168; apiVersion: string;
           subscriptionId: string): Recallable =
   ## getAppliedReservationList
   ## Get applicable `Reservation`s that are applied to this subscription.
@@ -1017,20 +1021,20 @@ proc call*(call_568274: Call_GetAppliedReservationList_568268; apiVersion: strin
   ##             : Supported version.
   ##   subscriptionId: string (required)
   ##                 : Id of the subscription
-  var path_568275 = newJObject()
-  var query_568276 = newJObject()
-  add(query_568276, "api-version", newJString(apiVersion))
-  add(path_568275, "subscriptionId", newJString(subscriptionId))
-  result = call_568274.call(path_568275, query_568276, nil, nil, nil)
+  var path_564175 = newJObject()
+  var query_564176 = newJObject()
+  add(query_564176, "api-version", newJString(apiVersion))
+  add(path_564175, "subscriptionId", newJString(subscriptionId))
+  result = call_564174.call(path_564175, query_564176, nil, nil, nil)
 
-var getAppliedReservationList* = Call_GetAppliedReservationList_568268(
+var getAppliedReservationList* = Call_GetAppliedReservationList_564168(
     name: "getAppliedReservationList", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Capacity/appliedReservations",
-    validator: validate_GetAppliedReservationList_568269, base: "",
-    url: url_GetAppliedReservationList_568270, schemes: {Scheme.Https})
+    validator: validate_GetAppliedReservationList_564169, base: "",
+    url: url_GetAppliedReservationList_564170, schemes: {Scheme.Https})
 type
-  Call_GetCatalog_568277 = ref object of OpenApiRestCall_567657
-proc url_GetCatalog_568279(protocol: Scheme; host: string; base: string; route: string;
+  Call_GetCatalog_564177 = ref object of OpenApiRestCall_563555
+proc url_GetCatalog_564179(protocol: Scheme; host: string; base: string; route: string;
                           path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1046,7 +1050,7 @@ proc url_GetCatalog_568279(protocol: Scheme; host: string; base: string; route: 
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_GetCatalog_568278(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_GetCatalog_564178(path: JsonNode; query: JsonNode; header: JsonNode;
                                formData: JsonNode; body: JsonNode): JsonNode =
   var section: JsonNode
   result = newJObject()
@@ -1056,11 +1060,11 @@ proc validate_GetCatalog_568278(path: JsonNode; query: JsonNode; header: JsonNod
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_568280 = path.getOrDefault("subscriptionId")
-  valid_568280 = validateParameter(valid_568280, JString, required = true,
+  var valid_564180 = path.getOrDefault("subscriptionId")
+  valid_564180 = validateParameter(valid_564180, JString, required = true,
                                  default = nil)
-  if valid_568280 != nil:
-    section.add "subscriptionId", valid_568280
+  if valid_564180 != nil:
+    section.add "subscriptionId", valid_564180
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1068,11 +1072,11 @@ proc validate_GetCatalog_568278(path: JsonNode; query: JsonNode; header: JsonNod
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568281 = query.getOrDefault("api-version")
-  valid_568281 = validateParameter(valid_568281, JString, required = true,
+  var valid_564181 = query.getOrDefault("api-version")
+  valid_564181 = validateParameter(valid_564181, JString, required = true,
                                  default = nil)
-  if valid_568281 != nil:
-    section.add "api-version", valid_568281
+  if valid_564181 != nil:
+    section.add "api-version", valid_564181
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1081,35 +1085,35 @@ proc validate_GetCatalog_568278(path: JsonNode; query: JsonNode; header: JsonNod
   if body != nil:
     result.add "body", body
 
-proc call*(call_568282: Call_GetCatalog_568277; path: JsonNode; query: JsonNode;
+proc call*(call_564182: Call_GetCatalog_564177; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
-  let valid = call_568282.validator(path, query, header, formData, body)
-  let scheme = call_568282.pickScheme
+  let valid = call_564182.validator(path, query, header, formData, body)
+  let scheme = call_564182.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568282.url(scheme.get, call_568282.host, call_568282.base,
-                         call_568282.route, valid.getOrDefault("path"),
+  let url = call_564182.url(scheme.get, call_564182.host, call_564182.base,
+                         call_564182.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568282, url, valid)
+  result = hook(call_564182, url, valid)
 
-proc call*(call_568283: Call_GetCatalog_568277; apiVersion: string;
+proc call*(call_564183: Call_GetCatalog_564177; apiVersion: string;
           subscriptionId: string): Recallable =
   ## getCatalog
   ##   apiVersion: string (required)
   ##             : Supported version.
   ##   subscriptionId: string (required)
   ##                 : Id of the subscription
-  var path_568284 = newJObject()
-  var query_568285 = newJObject()
-  add(query_568285, "api-version", newJString(apiVersion))
-  add(path_568284, "subscriptionId", newJString(subscriptionId))
-  result = call_568283.call(path_568284, query_568285, nil, nil, nil)
+  var path_564184 = newJObject()
+  var query_564185 = newJObject()
+  add(query_564185, "api-version", newJString(apiVersion))
+  add(path_564184, "subscriptionId", newJString(subscriptionId))
+  result = call_564183.call(path_564184, query_564185, nil, nil, nil)
 
-var getCatalog* = Call_GetCatalog_568277(name: "getCatalog",
+var getCatalog* = Call_GetCatalog_564177(name: "getCatalog",
                                       meth: HttpMethod.HttpGet,
                                       host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Capacity/catalogs",
-                                      validator: validate_GetCatalog_568278,
-                                      base: "", url: url_GetCatalog_568279,
+                                      validator: validate_GetCatalog_564178,
+                                      base: "", url: url_GetCatalog_564179,
                                       schemes: {Scheme.Https})
 export
   rest

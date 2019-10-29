@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, httpcore
 
 ## auto-generated via openapi macro
 ## title: MarketplaceOrdering.Agreements
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_567641 = ref object of OpenApiRestCall
+  OpenApiRestCall_563539 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_567641](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563539](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_567641): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563539): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,15 +107,15 @@ const
   macServiceName = "marketplaceordering-Agreements"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_OperationsList_567863 = ref object of OpenApiRestCall_567641
-proc url_OperationsList_567865(protocol: Scheme; host: string; base: string;
+  Call_OperationsList_563761 = ref object of OpenApiRestCall_563539
+proc url_OperationsList_563763(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_OperationsList_567864(path: JsonNode; query: JsonNode;
+proc validate_OperationsList_563762(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## Lists all of the available Microsoft.MarketplaceOrdering REST API operations.
@@ -126,11 +130,11 @@ proc validate_OperationsList_567864(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568024 = query.getOrDefault("api-version")
-  valid_568024 = validateParameter(valid_568024, JString, required = true,
+  var valid_563924 = query.getOrDefault("api-version")
+  valid_563924 = validateParameter(valid_563924, JString, required = true,
                                  default = nil)
-  if valid_568024 != nil:
-    section.add "api-version", valid_568024
+  if valid_563924 != nil:
+    section.add "api-version", valid_563924
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -139,36 +143,36 @@ proc validate_OperationsList_567864(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568047: Call_OperationsList_567863; path: JsonNode; query: JsonNode;
+proc call*(call_563947: Call_OperationsList_563761; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists all of the available Microsoft.MarketplaceOrdering REST API operations.
   ## 
-  let valid = call_568047.validator(path, query, header, formData, body)
-  let scheme = call_568047.pickScheme
+  let valid = call_563947.validator(path, query, header, formData, body)
+  let scheme = call_563947.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568047.url(scheme.get, call_568047.host, call_568047.base,
-                         call_568047.route, valid.getOrDefault("path"),
+  let url = call_563947.url(scheme.get, call_563947.host, call_563947.base,
+                         call_563947.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568047, url, valid)
+  result = hook(call_563947, url, valid)
 
-proc call*(call_568118: Call_OperationsList_567863; apiVersion: string): Recallable =
+proc call*(call_564018: Call_OperationsList_563761; apiVersion: string): Recallable =
   ## operationsList
   ## Lists all of the available Microsoft.MarketplaceOrdering REST API operations.
   ##   apiVersion: string (required)
   ##             : The API version to use for the request.
-  var query_568119 = newJObject()
-  add(query_568119, "api-version", newJString(apiVersion))
-  result = call_568118.call(nil, query_568119, nil, nil, nil)
+  var query_564019 = newJObject()
+  add(query_564019, "api-version", newJString(apiVersion))
+  result = call_564018.call(nil, query_564019, nil, nil, nil)
 
-var operationsList* = Call_OperationsList_567863(name: "operationsList",
+var operationsList* = Call_OperationsList_563761(name: "operationsList",
     meth: HttpMethod.HttpGet, host: "management.azure.com",
     route: "/providers/Microsoft.MarketplaceOrdering/operations",
-    validator: validate_OperationsList_567864, base: "", url: url_OperationsList_567865,
+    validator: validate_OperationsList_563762, base: "", url: url_OperationsList_563763,
     schemes: {Scheme.Https})
 type
-  Call_MarketplaceAgreementsList_568159 = ref object of OpenApiRestCall_567641
-proc url_MarketplaceAgreementsList_568161(protocol: Scheme; host: string;
+  Call_MarketplaceAgreementsList_564059 = ref object of OpenApiRestCall_563539
+proc url_MarketplaceAgreementsList_564061(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -185,7 +189,7 @@ proc url_MarketplaceAgreementsList_568161(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_MarketplaceAgreementsList_568160(path: JsonNode; query: JsonNode;
+proc validate_MarketplaceAgreementsList_564060(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## List marketplace agreements in the subscription.
   ## 
@@ -197,11 +201,11 @@ proc validate_MarketplaceAgreementsList_568160(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_568176 = path.getOrDefault("subscriptionId")
-  valid_568176 = validateParameter(valid_568176, JString, required = true,
+  var valid_564076 = path.getOrDefault("subscriptionId")
+  valid_564076 = validateParameter(valid_564076, JString, required = true,
                                  default = nil)
-  if valid_568176 != nil:
-    section.add "subscriptionId", valid_568176
+  if valid_564076 != nil:
+    section.add "subscriptionId", valid_564076
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -209,11 +213,11 @@ proc validate_MarketplaceAgreementsList_568160(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568177 = query.getOrDefault("api-version")
-  valid_568177 = validateParameter(valid_568177, JString, required = true,
+  var valid_564077 = query.getOrDefault("api-version")
+  valid_564077 = validateParameter(valid_564077, JString, required = true,
                                  default = nil)
-  if valid_568177 != nil:
-    section.add "api-version", valid_568177
+  if valid_564077 != nil:
+    section.add "api-version", valid_564077
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -222,20 +226,20 @@ proc validate_MarketplaceAgreementsList_568160(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568178: Call_MarketplaceAgreementsList_568159; path: JsonNode;
+proc call*(call_564078: Call_MarketplaceAgreementsList_564059; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## List marketplace agreements in the subscription.
   ## 
-  let valid = call_568178.validator(path, query, header, formData, body)
-  let scheme = call_568178.pickScheme
+  let valid = call_564078.validator(path, query, header, formData, body)
+  let scheme = call_564078.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568178.url(scheme.get, call_568178.host, call_568178.base,
-                         call_568178.route, valid.getOrDefault("path"),
+  let url = call_564078.url(scheme.get, call_564078.host, call_564078.base,
+                         call_564078.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568178, url, valid)
+  result = hook(call_564078, url, valid)
 
-proc call*(call_568179: Call_MarketplaceAgreementsList_568159; apiVersion: string;
+proc call*(call_564079: Call_MarketplaceAgreementsList_564059; apiVersion: string;
           subscriptionId: string): Recallable =
   ## marketplaceAgreementsList
   ## List marketplace agreements in the subscription.
@@ -243,20 +247,20 @@ proc call*(call_568179: Call_MarketplaceAgreementsList_568159; apiVersion: strin
   ##             : The API version to use for the request.
   ##   subscriptionId: string (required)
   ##                 : The subscription ID that identifies an Azure subscription.
-  var path_568180 = newJObject()
-  var query_568181 = newJObject()
-  add(query_568181, "api-version", newJString(apiVersion))
-  add(path_568180, "subscriptionId", newJString(subscriptionId))
-  result = call_568179.call(path_568180, query_568181, nil, nil, nil)
+  var path_564080 = newJObject()
+  var query_564081 = newJObject()
+  add(query_564081, "api-version", newJString(apiVersion))
+  add(path_564080, "subscriptionId", newJString(subscriptionId))
+  result = call_564079.call(path_564080, query_564081, nil, nil, nil)
 
-var marketplaceAgreementsList* = Call_MarketplaceAgreementsList_568159(
+var marketplaceAgreementsList* = Call_MarketplaceAgreementsList_564059(
     name: "marketplaceAgreementsList", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.MarketplaceOrdering/agreements",
-    validator: validate_MarketplaceAgreementsList_568160, base: "",
-    url: url_MarketplaceAgreementsList_568161, schemes: {Scheme.Https})
+    validator: validate_MarketplaceAgreementsList_564060, base: "",
+    url: url_MarketplaceAgreementsList_564061, schemes: {Scheme.Https})
 type
-  Call_MarketplaceAgreementsGetAgreement_568182 = ref object of OpenApiRestCall_567641
-proc url_MarketplaceAgreementsGetAgreement_568184(protocol: Scheme; host: string;
+  Call_MarketplaceAgreementsGetAgreement_564082 = ref object of OpenApiRestCall_563539
+proc url_MarketplaceAgreementsGetAgreement_564084(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -281,43 +285,44 @@ proc url_MarketplaceAgreementsGetAgreement_568184(protocol: Scheme; host: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_MarketplaceAgreementsGetAgreement_568183(path: JsonNode;
+proc validate_MarketplaceAgreementsGetAgreement_564083(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Get marketplace agreement.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
+  ##   publisherId: JString (required)
+  ##              : Publisher identifier string of image being deployed.
   ##   offerId: JString (required)
   ##          : Offer identifier string of image being deployed.
   ##   planId: JString (required)
   ##         : Plan identifier string of image being deployed.
-  ##   publisherId: JString (required)
-  ##              : Publisher identifier string of image being deployed.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID that identifies an Azure subscription.
   section = newJObject()
-  assert path != nil, "path argument is necessary due to required `offerId` field"
-  var valid_568185 = path.getOrDefault("offerId")
-  valid_568185 = validateParameter(valid_568185, JString, required = true,
+  assert path != nil,
+        "path argument is necessary due to required `publisherId` field"
+  var valid_564085 = path.getOrDefault("publisherId")
+  valid_564085 = validateParameter(valid_564085, JString, required = true,
                                  default = nil)
-  if valid_568185 != nil:
-    section.add "offerId", valid_568185
-  var valid_568186 = path.getOrDefault("planId")
-  valid_568186 = validateParameter(valid_568186, JString, required = true,
+  if valid_564085 != nil:
+    section.add "publisherId", valid_564085
+  var valid_564086 = path.getOrDefault("offerId")
+  valid_564086 = validateParameter(valid_564086, JString, required = true,
                                  default = nil)
-  if valid_568186 != nil:
-    section.add "planId", valid_568186
-  var valid_568187 = path.getOrDefault("publisherId")
-  valid_568187 = validateParameter(valid_568187, JString, required = true,
+  if valid_564086 != nil:
+    section.add "offerId", valid_564086
+  var valid_564087 = path.getOrDefault("planId")
+  valid_564087 = validateParameter(valid_564087, JString, required = true,
                                  default = nil)
-  if valid_568187 != nil:
-    section.add "publisherId", valid_568187
-  var valid_568188 = path.getOrDefault("subscriptionId")
-  valid_568188 = validateParameter(valid_568188, JString, required = true,
+  if valid_564087 != nil:
+    section.add "planId", valid_564087
+  var valid_564088 = path.getOrDefault("subscriptionId")
+  valid_564088 = validateParameter(valid_564088, JString, required = true,
                                  default = nil)
-  if valid_568188 != nil:
-    section.add "subscriptionId", valid_568188
+  if valid_564088 != nil:
+    section.add "subscriptionId", valid_564088
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -325,11 +330,11 @@ proc validate_MarketplaceAgreementsGetAgreement_568183(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568189 = query.getOrDefault("api-version")
-  valid_568189 = validateParameter(valid_568189, JString, required = true,
+  var valid_564089 = query.getOrDefault("api-version")
+  valid_564089 = validateParameter(valid_564089, JString, required = true,
                                  default = nil)
-  if valid_568189 != nil:
-    section.add "api-version", valid_568189
+  if valid_564089 != nil:
+    section.add "api-version", valid_564089
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -338,52 +343,52 @@ proc validate_MarketplaceAgreementsGetAgreement_568183(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568190: Call_MarketplaceAgreementsGetAgreement_568182;
+proc call*(call_564090: Call_MarketplaceAgreementsGetAgreement_564082;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Get marketplace agreement.
   ## 
-  let valid = call_568190.validator(path, query, header, formData, body)
-  let scheme = call_568190.pickScheme
+  let valid = call_564090.validator(path, query, header, formData, body)
+  let scheme = call_564090.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568190.url(scheme.get, call_568190.host, call_568190.base,
-                         call_568190.route, valid.getOrDefault("path"),
+  let url = call_564090.url(scheme.get, call_564090.host, call_564090.base,
+                         call_564090.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568190, url, valid)
+  result = hook(call_564090, url, valid)
 
-proc call*(call_568191: Call_MarketplaceAgreementsGetAgreement_568182;
-          apiVersion: string; offerId: string; planId: string; publisherId: string;
+proc call*(call_564091: Call_MarketplaceAgreementsGetAgreement_564082;
+          publisherId: string; apiVersion: string; offerId: string; planId: string;
           subscriptionId: string): Recallable =
   ## marketplaceAgreementsGetAgreement
   ## Get marketplace agreement.
+  ##   publisherId: string (required)
+  ##              : Publisher identifier string of image being deployed.
   ##   apiVersion: string (required)
   ##             : The API version to use for the request.
   ##   offerId: string (required)
   ##          : Offer identifier string of image being deployed.
   ##   planId: string (required)
   ##         : Plan identifier string of image being deployed.
-  ##   publisherId: string (required)
-  ##              : Publisher identifier string of image being deployed.
   ##   subscriptionId: string (required)
   ##                 : The subscription ID that identifies an Azure subscription.
-  var path_568192 = newJObject()
-  var query_568193 = newJObject()
-  add(query_568193, "api-version", newJString(apiVersion))
-  add(path_568192, "offerId", newJString(offerId))
-  add(path_568192, "planId", newJString(planId))
-  add(path_568192, "publisherId", newJString(publisherId))
-  add(path_568192, "subscriptionId", newJString(subscriptionId))
-  result = call_568191.call(path_568192, query_568193, nil, nil, nil)
+  var path_564092 = newJObject()
+  var query_564093 = newJObject()
+  add(path_564092, "publisherId", newJString(publisherId))
+  add(query_564093, "api-version", newJString(apiVersion))
+  add(path_564092, "offerId", newJString(offerId))
+  add(path_564092, "planId", newJString(planId))
+  add(path_564092, "subscriptionId", newJString(subscriptionId))
+  result = call_564091.call(path_564092, query_564093, nil, nil, nil)
 
-var marketplaceAgreementsGetAgreement* = Call_MarketplaceAgreementsGetAgreement_568182(
+var marketplaceAgreementsGetAgreement* = Call_MarketplaceAgreementsGetAgreement_564082(
     name: "marketplaceAgreementsGetAgreement", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.MarketplaceOrdering/agreements/{publisherId}/offers/{offerId}/plans/{planId}",
-    validator: validate_MarketplaceAgreementsGetAgreement_568183, base: "",
-    url: url_MarketplaceAgreementsGetAgreement_568184, schemes: {Scheme.Https})
+    validator: validate_MarketplaceAgreementsGetAgreement_564083, base: "",
+    url: url_MarketplaceAgreementsGetAgreement_564084, schemes: {Scheme.Https})
 type
-  Call_MarketplaceAgreementsCancel_568194 = ref object of OpenApiRestCall_567641
-proc url_MarketplaceAgreementsCancel_568196(protocol: Scheme; host: string;
+  Call_MarketplaceAgreementsCancel_564094 = ref object of OpenApiRestCall_563539
+proc url_MarketplaceAgreementsCancel_564096(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -409,43 +414,44 @@ proc url_MarketplaceAgreementsCancel_568196(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_MarketplaceAgreementsCancel_568195(path: JsonNode; query: JsonNode;
+proc validate_MarketplaceAgreementsCancel_564095(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Cancel marketplace terms.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
+  ##   publisherId: JString (required)
+  ##              : Publisher identifier string of image being deployed.
   ##   offerId: JString (required)
   ##          : Offer identifier string of image being deployed.
   ##   planId: JString (required)
   ##         : Plan identifier string of image being deployed.
-  ##   publisherId: JString (required)
-  ##              : Publisher identifier string of image being deployed.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID that identifies an Azure subscription.
   section = newJObject()
-  assert path != nil, "path argument is necessary due to required `offerId` field"
-  var valid_568197 = path.getOrDefault("offerId")
-  valid_568197 = validateParameter(valid_568197, JString, required = true,
+  assert path != nil,
+        "path argument is necessary due to required `publisherId` field"
+  var valid_564097 = path.getOrDefault("publisherId")
+  valid_564097 = validateParameter(valid_564097, JString, required = true,
                                  default = nil)
-  if valid_568197 != nil:
-    section.add "offerId", valid_568197
-  var valid_568198 = path.getOrDefault("planId")
-  valid_568198 = validateParameter(valid_568198, JString, required = true,
+  if valid_564097 != nil:
+    section.add "publisherId", valid_564097
+  var valid_564098 = path.getOrDefault("offerId")
+  valid_564098 = validateParameter(valid_564098, JString, required = true,
                                  default = nil)
-  if valid_568198 != nil:
-    section.add "planId", valid_568198
-  var valid_568199 = path.getOrDefault("publisherId")
-  valid_568199 = validateParameter(valid_568199, JString, required = true,
+  if valid_564098 != nil:
+    section.add "offerId", valid_564098
+  var valid_564099 = path.getOrDefault("planId")
+  valid_564099 = validateParameter(valid_564099, JString, required = true,
                                  default = nil)
-  if valid_568199 != nil:
-    section.add "publisherId", valid_568199
-  var valid_568200 = path.getOrDefault("subscriptionId")
-  valid_568200 = validateParameter(valid_568200, JString, required = true,
+  if valid_564099 != nil:
+    section.add "planId", valid_564099
+  var valid_564100 = path.getOrDefault("subscriptionId")
+  valid_564100 = validateParameter(valid_564100, JString, required = true,
                                  default = nil)
-  if valid_568200 != nil:
-    section.add "subscriptionId", valid_568200
+  if valid_564100 != nil:
+    section.add "subscriptionId", valid_564100
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -453,11 +459,11 @@ proc validate_MarketplaceAgreementsCancel_568195(path: JsonNode; query: JsonNode
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568201 = query.getOrDefault("api-version")
-  valid_568201 = validateParameter(valid_568201, JString, required = true,
+  var valid_564101 = query.getOrDefault("api-version")
+  valid_564101 = validateParameter(valid_564101, JString, required = true,
                                  default = nil)
-  if valid_568201 != nil:
-    section.add "api-version", valid_568201
+  if valid_564101 != nil:
+    section.add "api-version", valid_564101
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -466,51 +472,51 @@ proc validate_MarketplaceAgreementsCancel_568195(path: JsonNode; query: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_568202: Call_MarketplaceAgreementsCancel_568194; path: JsonNode;
+proc call*(call_564102: Call_MarketplaceAgreementsCancel_564094; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Cancel marketplace terms.
   ## 
-  let valid = call_568202.validator(path, query, header, formData, body)
-  let scheme = call_568202.pickScheme
+  let valid = call_564102.validator(path, query, header, formData, body)
+  let scheme = call_564102.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568202.url(scheme.get, call_568202.host, call_568202.base,
-                         call_568202.route, valid.getOrDefault("path"),
+  let url = call_564102.url(scheme.get, call_564102.host, call_564102.base,
+                         call_564102.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568202, url, valid)
+  result = hook(call_564102, url, valid)
 
-proc call*(call_568203: Call_MarketplaceAgreementsCancel_568194;
-          apiVersion: string; offerId: string; planId: string; publisherId: string;
+proc call*(call_564103: Call_MarketplaceAgreementsCancel_564094;
+          publisherId: string; apiVersion: string; offerId: string; planId: string;
           subscriptionId: string): Recallable =
   ## marketplaceAgreementsCancel
   ## Cancel marketplace terms.
+  ##   publisherId: string (required)
+  ##              : Publisher identifier string of image being deployed.
   ##   apiVersion: string (required)
   ##             : The API version to use for the request.
   ##   offerId: string (required)
   ##          : Offer identifier string of image being deployed.
   ##   planId: string (required)
   ##         : Plan identifier string of image being deployed.
-  ##   publisherId: string (required)
-  ##              : Publisher identifier string of image being deployed.
   ##   subscriptionId: string (required)
   ##                 : The subscription ID that identifies an Azure subscription.
-  var path_568204 = newJObject()
-  var query_568205 = newJObject()
-  add(query_568205, "api-version", newJString(apiVersion))
-  add(path_568204, "offerId", newJString(offerId))
-  add(path_568204, "planId", newJString(planId))
-  add(path_568204, "publisherId", newJString(publisherId))
-  add(path_568204, "subscriptionId", newJString(subscriptionId))
-  result = call_568203.call(path_568204, query_568205, nil, nil, nil)
+  var path_564104 = newJObject()
+  var query_564105 = newJObject()
+  add(path_564104, "publisherId", newJString(publisherId))
+  add(query_564105, "api-version", newJString(apiVersion))
+  add(path_564104, "offerId", newJString(offerId))
+  add(path_564104, "planId", newJString(planId))
+  add(path_564104, "subscriptionId", newJString(subscriptionId))
+  result = call_564103.call(path_564104, query_564105, nil, nil, nil)
 
-var marketplaceAgreementsCancel* = Call_MarketplaceAgreementsCancel_568194(
+var marketplaceAgreementsCancel* = Call_MarketplaceAgreementsCancel_564094(
     name: "marketplaceAgreementsCancel", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.MarketplaceOrdering/agreements/{publisherId}/offers/{offerId}/plans/{planId}/cancel",
-    validator: validate_MarketplaceAgreementsCancel_568195, base: "",
-    url: url_MarketplaceAgreementsCancel_568196, schemes: {Scheme.Https})
+    validator: validate_MarketplaceAgreementsCancel_564095, base: "",
+    url: url_MarketplaceAgreementsCancel_564096, schemes: {Scheme.Https})
 type
-  Call_MarketplaceAgreementsSign_568206 = ref object of OpenApiRestCall_567641
-proc url_MarketplaceAgreementsSign_568208(protocol: Scheme; host: string;
+  Call_MarketplaceAgreementsSign_564106 = ref object of OpenApiRestCall_563539
+proc url_MarketplaceAgreementsSign_564108(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -536,43 +542,44 @@ proc url_MarketplaceAgreementsSign_568208(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_MarketplaceAgreementsSign_568207(path: JsonNode; query: JsonNode;
+proc validate_MarketplaceAgreementsSign_564107(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Sign marketplace terms.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
+  ##   publisherId: JString (required)
+  ##              : Publisher identifier string of image being deployed.
   ##   offerId: JString (required)
   ##          : Offer identifier string of image being deployed.
   ##   planId: JString (required)
   ##         : Plan identifier string of image being deployed.
-  ##   publisherId: JString (required)
-  ##              : Publisher identifier string of image being deployed.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID that identifies an Azure subscription.
   section = newJObject()
-  assert path != nil, "path argument is necessary due to required `offerId` field"
-  var valid_568209 = path.getOrDefault("offerId")
-  valid_568209 = validateParameter(valid_568209, JString, required = true,
+  assert path != nil,
+        "path argument is necessary due to required `publisherId` field"
+  var valid_564109 = path.getOrDefault("publisherId")
+  valid_564109 = validateParameter(valid_564109, JString, required = true,
                                  default = nil)
-  if valid_568209 != nil:
-    section.add "offerId", valid_568209
-  var valid_568210 = path.getOrDefault("planId")
-  valid_568210 = validateParameter(valid_568210, JString, required = true,
+  if valid_564109 != nil:
+    section.add "publisherId", valid_564109
+  var valid_564110 = path.getOrDefault("offerId")
+  valid_564110 = validateParameter(valid_564110, JString, required = true,
                                  default = nil)
-  if valid_568210 != nil:
-    section.add "planId", valid_568210
-  var valid_568211 = path.getOrDefault("publisherId")
-  valid_568211 = validateParameter(valid_568211, JString, required = true,
+  if valid_564110 != nil:
+    section.add "offerId", valid_564110
+  var valid_564111 = path.getOrDefault("planId")
+  valid_564111 = validateParameter(valid_564111, JString, required = true,
                                  default = nil)
-  if valid_568211 != nil:
-    section.add "publisherId", valid_568211
-  var valid_568212 = path.getOrDefault("subscriptionId")
-  valid_568212 = validateParameter(valid_568212, JString, required = true,
+  if valid_564111 != nil:
+    section.add "planId", valid_564111
+  var valid_564112 = path.getOrDefault("subscriptionId")
+  valid_564112 = validateParameter(valid_564112, JString, required = true,
                                  default = nil)
-  if valid_568212 != nil:
-    section.add "subscriptionId", valid_568212
+  if valid_564112 != nil:
+    section.add "subscriptionId", valid_564112
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -580,11 +587,11 @@ proc validate_MarketplaceAgreementsSign_568207(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568213 = query.getOrDefault("api-version")
-  valid_568213 = validateParameter(valid_568213, JString, required = true,
+  var valid_564113 = query.getOrDefault("api-version")
+  valid_564113 = validateParameter(valid_564113, JString, required = true,
                                  default = nil)
-  if valid_568213 != nil:
-    section.add "api-version", valid_568213
+  if valid_564113 != nil:
+    section.add "api-version", valid_564113
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -593,50 +600,50 @@ proc validate_MarketplaceAgreementsSign_568207(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568214: Call_MarketplaceAgreementsSign_568206; path: JsonNode;
+proc call*(call_564114: Call_MarketplaceAgreementsSign_564106; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Sign marketplace terms.
   ## 
-  let valid = call_568214.validator(path, query, header, formData, body)
-  let scheme = call_568214.pickScheme
+  let valid = call_564114.validator(path, query, header, formData, body)
+  let scheme = call_564114.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568214.url(scheme.get, call_568214.host, call_568214.base,
-                         call_568214.route, valid.getOrDefault("path"),
+  let url = call_564114.url(scheme.get, call_564114.host, call_564114.base,
+                         call_564114.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568214, url, valid)
+  result = hook(call_564114, url, valid)
 
-proc call*(call_568215: Call_MarketplaceAgreementsSign_568206; apiVersion: string;
-          offerId: string; planId: string; publisherId: string; subscriptionId: string): Recallable =
+proc call*(call_564115: Call_MarketplaceAgreementsSign_564106; publisherId: string;
+          apiVersion: string; offerId: string; planId: string; subscriptionId: string): Recallable =
   ## marketplaceAgreementsSign
   ## Sign marketplace terms.
+  ##   publisherId: string (required)
+  ##              : Publisher identifier string of image being deployed.
   ##   apiVersion: string (required)
   ##             : The API version to use for the request.
   ##   offerId: string (required)
   ##          : Offer identifier string of image being deployed.
   ##   planId: string (required)
   ##         : Plan identifier string of image being deployed.
-  ##   publisherId: string (required)
-  ##              : Publisher identifier string of image being deployed.
   ##   subscriptionId: string (required)
   ##                 : The subscription ID that identifies an Azure subscription.
-  var path_568216 = newJObject()
-  var query_568217 = newJObject()
-  add(query_568217, "api-version", newJString(apiVersion))
-  add(path_568216, "offerId", newJString(offerId))
-  add(path_568216, "planId", newJString(planId))
-  add(path_568216, "publisherId", newJString(publisherId))
-  add(path_568216, "subscriptionId", newJString(subscriptionId))
-  result = call_568215.call(path_568216, query_568217, nil, nil, nil)
+  var path_564116 = newJObject()
+  var query_564117 = newJObject()
+  add(path_564116, "publisherId", newJString(publisherId))
+  add(query_564117, "api-version", newJString(apiVersion))
+  add(path_564116, "offerId", newJString(offerId))
+  add(path_564116, "planId", newJString(planId))
+  add(path_564116, "subscriptionId", newJString(subscriptionId))
+  result = call_564115.call(path_564116, query_564117, nil, nil, nil)
 
-var marketplaceAgreementsSign* = Call_MarketplaceAgreementsSign_568206(
+var marketplaceAgreementsSign* = Call_MarketplaceAgreementsSign_564106(
     name: "marketplaceAgreementsSign", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.MarketplaceOrdering/agreements/{publisherId}/offers/{offerId}/plans/{planId}/sign",
-    validator: validate_MarketplaceAgreementsSign_568207, base: "",
-    url: url_MarketplaceAgreementsSign_568208, schemes: {Scheme.Https})
+    validator: validate_MarketplaceAgreementsSign_564107, base: "",
+    url: url_MarketplaceAgreementsSign_564108, schemes: {Scheme.Https})
 type
-  Call_MarketplaceAgreementsCreate_568244 = ref object of OpenApiRestCall_567641
-proc url_MarketplaceAgreementsCreate_568246(protocol: Scheme; host: string;
+  Call_MarketplaceAgreementsCreate_564144 = ref object of OpenApiRestCall_563539
+proc url_MarketplaceAgreementsCreate_564146(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -665,50 +672,51 @@ proc url_MarketplaceAgreementsCreate_568246(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_MarketplaceAgreementsCreate_568245(path: JsonNode; query: JsonNode;
+proc validate_MarketplaceAgreementsCreate_564145(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Save marketplace terms.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
+  ##   publisherId: JString (required)
+  ##              : Publisher identifier string of image being deployed.
   ##   offerId: JString (required)
   ##          : Offer identifier string of image being deployed.
   ##   planId: JString (required)
   ##         : Plan identifier string of image being deployed.
-  ##   publisherId: JString (required)
-  ##              : Publisher identifier string of image being deployed.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID that identifies an Azure subscription.
   ##   offerType: JString (required)
   ##            : Offer Type, currently only virtualmachine type is supported.
   section = newJObject()
-  assert path != nil, "path argument is necessary due to required `offerId` field"
-  var valid_568264 = path.getOrDefault("offerId")
-  valid_568264 = validateParameter(valid_568264, JString, required = true,
+  assert path != nil,
+        "path argument is necessary due to required `publisherId` field"
+  var valid_564164 = path.getOrDefault("publisherId")
+  valid_564164 = validateParameter(valid_564164, JString, required = true,
                                  default = nil)
-  if valid_568264 != nil:
-    section.add "offerId", valid_568264
-  var valid_568265 = path.getOrDefault("planId")
-  valid_568265 = validateParameter(valid_568265, JString, required = true,
+  if valid_564164 != nil:
+    section.add "publisherId", valid_564164
+  var valid_564165 = path.getOrDefault("offerId")
+  valid_564165 = validateParameter(valid_564165, JString, required = true,
                                  default = nil)
-  if valid_568265 != nil:
-    section.add "planId", valid_568265
-  var valid_568266 = path.getOrDefault("publisherId")
-  valid_568266 = validateParameter(valid_568266, JString, required = true,
+  if valid_564165 != nil:
+    section.add "offerId", valid_564165
+  var valid_564166 = path.getOrDefault("planId")
+  valid_564166 = validateParameter(valid_564166, JString, required = true,
                                  default = nil)
-  if valid_568266 != nil:
-    section.add "publisherId", valid_568266
-  var valid_568267 = path.getOrDefault("subscriptionId")
-  valid_568267 = validateParameter(valid_568267, JString, required = true,
+  if valid_564166 != nil:
+    section.add "planId", valid_564166
+  var valid_564167 = path.getOrDefault("subscriptionId")
+  valid_564167 = validateParameter(valid_564167, JString, required = true,
                                  default = nil)
-  if valid_568267 != nil:
-    section.add "subscriptionId", valid_568267
-  var valid_568268 = path.getOrDefault("offerType")
-  valid_568268 = validateParameter(valid_568268, JString, required = true,
+  if valid_564167 != nil:
+    section.add "subscriptionId", valid_564167
+  var valid_564168 = path.getOrDefault("offerType")
+  valid_564168 = validateParameter(valid_564168, JString, required = true,
                                  default = newJString("virtualmachine"))
-  if valid_568268 != nil:
-    section.add "offerType", valid_568268
+  if valid_564168 != nil:
+    section.add "offerType", valid_564168
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -716,11 +724,11 @@ proc validate_MarketplaceAgreementsCreate_568245(path: JsonNode; query: JsonNode
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568269 = query.getOrDefault("api-version")
-  valid_568269 = validateParameter(valid_568269, JString, required = true,
+  var valid_564169 = query.getOrDefault("api-version")
+  valid_564169 = validateParameter(valid_564169, JString, required = true,
                                  default = nil)
-  if valid_568269 != nil:
-    section.add "api-version", valid_568269
+  if valid_564169 != nil:
+    section.add "api-version", valid_564169
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -734,60 +742,60 @@ proc validate_MarketplaceAgreementsCreate_568245(path: JsonNode; query: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_568271: Call_MarketplaceAgreementsCreate_568244; path: JsonNode;
+proc call*(call_564171: Call_MarketplaceAgreementsCreate_564144; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Save marketplace terms.
   ## 
-  let valid = call_568271.validator(path, query, header, formData, body)
-  let scheme = call_568271.pickScheme
+  let valid = call_564171.validator(path, query, header, formData, body)
+  let scheme = call_564171.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568271.url(scheme.get, call_568271.host, call_568271.base,
-                         call_568271.route, valid.getOrDefault("path"),
+  let url = call_564171.url(scheme.get, call_564171.host, call_564171.base,
+                         call_564171.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568271, url, valid)
+  result = hook(call_564171, url, valid)
 
-proc call*(call_568272: Call_MarketplaceAgreementsCreate_568244;
-          apiVersion: string; offerId: string; planId: string; publisherId: string;
+proc call*(call_564172: Call_MarketplaceAgreementsCreate_564144;
+          publisherId: string; apiVersion: string; offerId: string; planId: string;
           subscriptionId: string; parameters: JsonNode;
           offerType: string = "virtualmachine"): Recallable =
   ## marketplaceAgreementsCreate
   ## Save marketplace terms.
+  ##   publisherId: string (required)
+  ##              : Publisher identifier string of image being deployed.
   ##   apiVersion: string (required)
   ##             : The API version to use for the request.
   ##   offerId: string (required)
   ##          : Offer identifier string of image being deployed.
   ##   planId: string (required)
   ##         : Plan identifier string of image being deployed.
-  ##   publisherId: string (required)
-  ##              : Publisher identifier string of image being deployed.
   ##   subscriptionId: string (required)
   ##                 : The subscription ID that identifies an Azure subscription.
   ##   offerType: string (required)
   ##            : Offer Type, currently only virtualmachine type is supported.
   ##   parameters: JObject (required)
   ##             : Parameters supplied to the Create Marketplace Terms operation.
-  var path_568273 = newJObject()
-  var query_568274 = newJObject()
-  var body_568275 = newJObject()
-  add(query_568274, "api-version", newJString(apiVersion))
-  add(path_568273, "offerId", newJString(offerId))
-  add(path_568273, "planId", newJString(planId))
-  add(path_568273, "publisherId", newJString(publisherId))
-  add(path_568273, "subscriptionId", newJString(subscriptionId))
-  add(path_568273, "offerType", newJString(offerType))
+  var path_564173 = newJObject()
+  var query_564174 = newJObject()
+  var body_564175 = newJObject()
+  add(path_564173, "publisherId", newJString(publisherId))
+  add(query_564174, "api-version", newJString(apiVersion))
+  add(path_564173, "offerId", newJString(offerId))
+  add(path_564173, "planId", newJString(planId))
+  add(path_564173, "subscriptionId", newJString(subscriptionId))
+  add(path_564173, "offerType", newJString(offerType))
   if parameters != nil:
-    body_568275 = parameters
-  result = call_568272.call(path_568273, query_568274, nil, nil, body_568275)
+    body_564175 = parameters
+  result = call_564172.call(path_564173, query_564174, nil, nil, body_564175)
 
-var marketplaceAgreementsCreate* = Call_MarketplaceAgreementsCreate_568244(
+var marketplaceAgreementsCreate* = Call_MarketplaceAgreementsCreate_564144(
     name: "marketplaceAgreementsCreate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.MarketplaceOrdering/offerTypes/{offerType}/publishers/{publisherId}/offers/{offerId}/plans/{planId}/agreements/current",
-    validator: validate_MarketplaceAgreementsCreate_568245, base: "",
-    url: url_MarketplaceAgreementsCreate_568246, schemes: {Scheme.Https})
+    validator: validate_MarketplaceAgreementsCreate_564145, base: "",
+    url: url_MarketplaceAgreementsCreate_564146, schemes: {Scheme.Https})
 type
-  Call_MarketplaceAgreementsGet_568218 = ref object of OpenApiRestCall_567641
-proc url_MarketplaceAgreementsGet_568220(protocol: Scheme; host: string;
+  Call_MarketplaceAgreementsGet_564118 = ref object of OpenApiRestCall_563539
+proc url_MarketplaceAgreementsGet_564120(protocol: Scheme; host: string;
                                         base: string; route: string; path: JsonNode;
                                         query: JsonNode): Uri =
   result.scheme = $protocol
@@ -817,50 +825,51 @@ proc url_MarketplaceAgreementsGet_568220(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_MarketplaceAgreementsGet_568219(path: JsonNode; query: JsonNode;
+proc validate_MarketplaceAgreementsGet_564119(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Get marketplace terms.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
+  ##   publisherId: JString (required)
+  ##              : Publisher identifier string of image being deployed.
   ##   offerId: JString (required)
   ##          : Offer identifier string of image being deployed.
   ##   planId: JString (required)
   ##         : Plan identifier string of image being deployed.
-  ##   publisherId: JString (required)
-  ##              : Publisher identifier string of image being deployed.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID that identifies an Azure subscription.
   ##   offerType: JString (required)
   ##            : Offer Type, currently only virtualmachine type is supported.
   section = newJObject()
-  assert path != nil, "path argument is necessary due to required `offerId` field"
-  var valid_568221 = path.getOrDefault("offerId")
-  valid_568221 = validateParameter(valid_568221, JString, required = true,
+  assert path != nil,
+        "path argument is necessary due to required `publisherId` field"
+  var valid_564121 = path.getOrDefault("publisherId")
+  valid_564121 = validateParameter(valid_564121, JString, required = true,
                                  default = nil)
-  if valid_568221 != nil:
-    section.add "offerId", valid_568221
-  var valid_568222 = path.getOrDefault("planId")
-  valid_568222 = validateParameter(valid_568222, JString, required = true,
+  if valid_564121 != nil:
+    section.add "publisherId", valid_564121
+  var valid_564122 = path.getOrDefault("offerId")
+  valid_564122 = validateParameter(valid_564122, JString, required = true,
                                  default = nil)
-  if valid_568222 != nil:
-    section.add "planId", valid_568222
-  var valid_568223 = path.getOrDefault("publisherId")
-  valid_568223 = validateParameter(valid_568223, JString, required = true,
+  if valid_564122 != nil:
+    section.add "offerId", valid_564122
+  var valid_564123 = path.getOrDefault("planId")
+  valid_564123 = validateParameter(valid_564123, JString, required = true,
                                  default = nil)
-  if valid_568223 != nil:
-    section.add "publisherId", valid_568223
-  var valid_568224 = path.getOrDefault("subscriptionId")
-  valid_568224 = validateParameter(valid_568224, JString, required = true,
+  if valid_564123 != nil:
+    section.add "planId", valid_564123
+  var valid_564124 = path.getOrDefault("subscriptionId")
+  valid_564124 = validateParameter(valid_564124, JString, required = true,
                                  default = nil)
-  if valid_568224 != nil:
-    section.add "subscriptionId", valid_568224
-  var valid_568238 = path.getOrDefault("offerType")
-  valid_568238 = validateParameter(valid_568238, JString, required = true,
+  if valid_564124 != nil:
+    section.add "subscriptionId", valid_564124
+  var valid_564138 = path.getOrDefault("offerType")
+  valid_564138 = validateParameter(valid_564138, JString, required = true,
                                  default = newJString("virtualmachine"))
-  if valid_568238 != nil:
-    section.add "offerType", valid_568238
+  if valid_564138 != nil:
+    section.add "offerType", valid_564138
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -868,11 +877,11 @@ proc validate_MarketplaceAgreementsGet_568219(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568239 = query.getOrDefault("api-version")
-  valid_568239 = validateParameter(valid_568239, JString, required = true,
+  var valid_564139 = query.getOrDefault("api-version")
+  valid_564139 = validateParameter(valid_564139, JString, required = true,
                                  default = nil)
-  if valid_568239 != nil:
-    section.add "api-version", valid_568239
+  if valid_564139 != nil:
+    section.add "api-version", valid_564139
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -881,51 +890,51 @@ proc validate_MarketplaceAgreementsGet_568219(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568240: Call_MarketplaceAgreementsGet_568218; path: JsonNode;
+proc call*(call_564140: Call_MarketplaceAgreementsGet_564118; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get marketplace terms.
   ## 
-  let valid = call_568240.validator(path, query, header, formData, body)
-  let scheme = call_568240.pickScheme
+  let valid = call_564140.validator(path, query, header, formData, body)
+  let scheme = call_564140.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568240.url(scheme.get, call_568240.host, call_568240.base,
-                         call_568240.route, valid.getOrDefault("path"),
+  let url = call_564140.url(scheme.get, call_564140.host, call_564140.base,
+                         call_564140.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568240, url, valid)
+  result = hook(call_564140, url, valid)
 
-proc call*(call_568241: Call_MarketplaceAgreementsGet_568218; apiVersion: string;
-          offerId: string; planId: string; publisherId: string;
-          subscriptionId: string; offerType: string = "virtualmachine"): Recallable =
+proc call*(call_564141: Call_MarketplaceAgreementsGet_564118; publisherId: string;
+          apiVersion: string; offerId: string; planId: string; subscriptionId: string;
+          offerType: string = "virtualmachine"): Recallable =
   ## marketplaceAgreementsGet
   ## Get marketplace terms.
+  ##   publisherId: string (required)
+  ##              : Publisher identifier string of image being deployed.
   ##   apiVersion: string (required)
   ##             : The API version to use for the request.
   ##   offerId: string (required)
   ##          : Offer identifier string of image being deployed.
   ##   planId: string (required)
   ##         : Plan identifier string of image being deployed.
-  ##   publisherId: string (required)
-  ##              : Publisher identifier string of image being deployed.
   ##   subscriptionId: string (required)
   ##                 : The subscription ID that identifies an Azure subscription.
   ##   offerType: string (required)
   ##            : Offer Type, currently only virtualmachine type is supported.
-  var path_568242 = newJObject()
-  var query_568243 = newJObject()
-  add(query_568243, "api-version", newJString(apiVersion))
-  add(path_568242, "offerId", newJString(offerId))
-  add(path_568242, "planId", newJString(planId))
-  add(path_568242, "publisherId", newJString(publisherId))
-  add(path_568242, "subscriptionId", newJString(subscriptionId))
-  add(path_568242, "offerType", newJString(offerType))
-  result = call_568241.call(path_568242, query_568243, nil, nil, nil)
+  var path_564142 = newJObject()
+  var query_564143 = newJObject()
+  add(path_564142, "publisherId", newJString(publisherId))
+  add(query_564143, "api-version", newJString(apiVersion))
+  add(path_564142, "offerId", newJString(offerId))
+  add(path_564142, "planId", newJString(planId))
+  add(path_564142, "subscriptionId", newJString(subscriptionId))
+  add(path_564142, "offerType", newJString(offerType))
+  result = call_564141.call(path_564142, query_564143, nil, nil, nil)
 
-var marketplaceAgreementsGet* = Call_MarketplaceAgreementsGet_568218(
+var marketplaceAgreementsGet* = Call_MarketplaceAgreementsGet_564118(
     name: "marketplaceAgreementsGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.MarketplaceOrdering/offerTypes/{offerType}/publishers/{publisherId}/offers/{offerId}/plans/{planId}/agreements/current",
-    validator: validate_MarketplaceAgreementsGet_568219, base: "",
-    url: url_MarketplaceAgreementsGet_568220, schemes: {Scheme.Https})
+    validator: validate_MarketplaceAgreementsGet_564119, base: "",
+    url: url_MarketplaceAgreementsGet_564120, schemes: {Scheme.Https})
 export
   rest
 

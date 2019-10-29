@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, httpcore
 
 ## auto-generated via openapi macro
 ## title: Azure SQL Database capabilities
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_567657 = ref object of OpenApiRestCall
+  OpenApiRestCall_563555 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_567657](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563555](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_567657): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563555): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,8 +107,8 @@ const
   macServiceName = "sql-capabilities"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_CapabilitiesListByLocation_567879 = ref object of OpenApiRestCall_567657
-proc url_CapabilitiesListByLocation_567881(protocol: Scheme; host: string;
+  Call_CapabilitiesListByLocation_563777 = ref object of OpenApiRestCall_563555
+proc url_CapabilitiesListByLocation_563779(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -123,30 +127,30 @@ proc url_CapabilitiesListByLocation_567881(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_CapabilitiesListByLocation_567880(path: JsonNode; query: JsonNode;
+proc validate_CapabilitiesListByLocation_563778(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the capabilities available for the specified location.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   locationId: JString (required)
-  ##             : The location id whose capabilities are retrieved.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID that identifies an Azure subscription.
+  ##   locationId: JString (required)
+  ##             : The location id whose capabilities are retrieved.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `locationId` field"
-  var valid_568041 = path.getOrDefault("locationId")
-  valid_568041 = validateParameter(valid_568041, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_563941 = path.getOrDefault("subscriptionId")
+  valid_563941 = validateParameter(valid_563941, JString, required = true,
                                  default = nil)
-  if valid_568041 != nil:
-    section.add "locationId", valid_568041
-  var valid_568042 = path.getOrDefault("subscriptionId")
-  valid_568042 = validateParameter(valid_568042, JString, required = true,
+  if valid_563941 != nil:
+    section.add "subscriptionId", valid_563941
+  var valid_563942 = path.getOrDefault("locationId")
+  valid_563942 = validateParameter(valid_563942, JString, required = true,
                                  default = nil)
-  if valid_568042 != nil:
-    section.add "subscriptionId", valid_568042
+  if valid_563942 != nil:
+    section.add "locationId", valid_563942
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -154,11 +158,11 @@ proc validate_CapabilitiesListByLocation_567880(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568043 = query.getOrDefault("api-version")
-  valid_568043 = validateParameter(valid_568043, JString, required = true,
+  var valid_563943 = query.getOrDefault("api-version")
+  valid_563943 = validateParameter(valid_563943, JString, required = true,
                                  default = nil)
-  if valid_568043 != nil:
-    section.add "api-version", valid_568043
+  if valid_563943 != nil:
+    section.add "api-version", valid_563943
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -167,41 +171,41 @@ proc validate_CapabilitiesListByLocation_567880(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568070: Call_CapabilitiesListByLocation_567879; path: JsonNode;
+proc call*(call_563970: Call_CapabilitiesListByLocation_563777; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the capabilities available for the specified location.
   ## 
-  let valid = call_568070.validator(path, query, header, formData, body)
-  let scheme = call_568070.pickScheme
+  let valid = call_563970.validator(path, query, header, formData, body)
+  let scheme = call_563970.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568070.url(scheme.get, call_568070.host, call_568070.base,
-                         call_568070.route, valid.getOrDefault("path"),
+  let url = call_563970.url(scheme.get, call_563970.host, call_563970.base,
+                         call_563970.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568070, url, valid)
+  result = hook(call_563970, url, valid)
 
-proc call*(call_568141: Call_CapabilitiesListByLocation_567879; apiVersion: string;
-          locationId: string; subscriptionId: string): Recallable =
+proc call*(call_564041: Call_CapabilitiesListByLocation_563777; apiVersion: string;
+          subscriptionId: string; locationId: string): Recallable =
   ## capabilitiesListByLocation
   ## Gets the capabilities available for the specified location.
   ##   apiVersion: string (required)
   ##             : The API version to use for the request.
-  ##   locationId: string (required)
-  ##             : The location id whose capabilities are retrieved.
   ##   subscriptionId: string (required)
   ##                 : The subscription ID that identifies an Azure subscription.
-  var path_568142 = newJObject()
-  var query_568144 = newJObject()
-  add(query_568144, "api-version", newJString(apiVersion))
-  add(path_568142, "locationId", newJString(locationId))
-  add(path_568142, "subscriptionId", newJString(subscriptionId))
-  result = call_568141.call(path_568142, query_568144, nil, nil, nil)
+  ##   locationId: string (required)
+  ##             : The location id whose capabilities are retrieved.
+  var path_564042 = newJObject()
+  var query_564044 = newJObject()
+  add(query_564044, "api-version", newJString(apiVersion))
+  add(path_564042, "subscriptionId", newJString(subscriptionId))
+  add(path_564042, "locationId", newJString(locationId))
+  result = call_564041.call(path_564042, query_564044, nil, nil, nil)
 
-var capabilitiesListByLocation* = Call_CapabilitiesListByLocation_567879(
+var capabilitiesListByLocation* = Call_CapabilitiesListByLocation_563777(
     name: "capabilitiesListByLocation", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Sql/locations/{locationId}/capabilities",
-    validator: validate_CapabilitiesListByLocation_567880, base: "",
-    url: url_CapabilitiesListByLocation_567881, schemes: {Scheme.Https})
+    validator: validate_CapabilitiesListByLocation_563778, base: "",
+    url: url_CapabilitiesListByLocation_563779, schemes: {Scheme.Https})
 export
   rest
 

@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, httpcore
 
 ## auto-generated via openapi macro
 ## title: Power BI Embedded Management Client
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_567642 = ref object of OpenApiRestCall
+  OpenApiRestCall_563540 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_567642](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563540](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_567642): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563540): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,15 +107,15 @@ const
   macServiceName = "powerbiembedded"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_GetAvailableOperations_567864 = ref object of OpenApiRestCall_567642
-proc url_GetAvailableOperations_567866(protocol: Scheme; host: string; base: string;
+  Call_GetAvailableOperations_563762 = ref object of OpenApiRestCall_563540
+proc url_GetAvailableOperations_563764(protocol: Scheme; host: string; base: string;
                                       route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_GetAvailableOperations_567865(path: JsonNode; query: JsonNode;
+proc validate_GetAvailableOperations_563763(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Indicates which operations can be performed by the Power BI Resource Provider.
   ## 
@@ -125,11 +129,11 @@ proc validate_GetAvailableOperations_567865(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568025 = query.getOrDefault("api-version")
-  valid_568025 = validateParameter(valid_568025, JString, required = true,
+  var valid_563925 = query.getOrDefault("api-version")
+  valid_563925 = validateParameter(valid_563925, JString, required = true,
                                  default = nil)
-  if valid_568025 != nil:
-    section.add "api-version", valid_568025
+  if valid_563925 != nil:
+    section.add "api-version", valid_563925
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -138,37 +142,37 @@ proc validate_GetAvailableOperations_567865(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568048: Call_GetAvailableOperations_567864; path: JsonNode;
+proc call*(call_563948: Call_GetAvailableOperations_563762; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Indicates which operations can be performed by the Power BI Resource Provider.
   ## 
-  let valid = call_568048.validator(path, query, header, formData, body)
-  let scheme = call_568048.pickScheme
+  let valid = call_563948.validator(path, query, header, formData, body)
+  let scheme = call_563948.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568048.url(scheme.get, call_568048.host, call_568048.base,
-                         call_568048.route, valid.getOrDefault("path"),
+  let url = call_563948.url(scheme.get, call_563948.host, call_563948.base,
+                         call_563948.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568048, url, valid)
+  result = hook(call_563948, url, valid)
 
-proc call*(call_568119: Call_GetAvailableOperations_567864; apiVersion: string): Recallable =
+proc call*(call_564019: Call_GetAvailableOperations_563762; apiVersion: string): Recallable =
   ## getAvailableOperations
   ## Indicates which operations can be performed by the Power BI Resource Provider.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
-  var query_568120 = newJObject()
-  add(query_568120, "api-version", newJString(apiVersion))
-  result = call_568119.call(nil, query_568120, nil, nil, nil)
+  var query_564020 = newJObject()
+  add(query_564020, "api-version", newJString(apiVersion))
+  result = call_564019.call(nil, query_564020, nil, nil, nil)
 
-var getAvailableOperations* = Call_GetAvailableOperations_567864(
+var getAvailableOperations* = Call_GetAvailableOperations_563762(
     name: "getAvailableOperations", meth: HttpMethod.HttpGet,
     host: "management.azure.com",
     route: "/providers/Microsoft.PowerBI/operations",
-    validator: validate_GetAvailableOperations_567865, base: "",
-    url: url_GetAvailableOperations_567866, schemes: {Scheme.Https})
+    validator: validate_GetAvailableOperations_563763, base: "",
+    url: url_GetAvailableOperations_563764, schemes: {Scheme.Https})
 type
-  Call_WorkspaceCollectionsCheckNameAvailability_568160 = ref object of OpenApiRestCall_567642
-proc url_WorkspaceCollectionsCheckNameAvailability_568162(protocol: Scheme;
+  Call_WorkspaceCollectionsCheckNameAvailability_564060 = ref object of OpenApiRestCall_563540
+proc url_WorkspaceCollectionsCheckNameAvailability_564062(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -187,7 +191,7 @@ proc url_WorkspaceCollectionsCheckNameAvailability_568162(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_WorkspaceCollectionsCheckNameAvailability_568161(path: JsonNode;
+proc validate_WorkspaceCollectionsCheckNameAvailability_564061(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Verify the specified Power BI Workspace Collection name is valid and not already in use.
   ## 
@@ -201,16 +205,16 @@ proc validate_WorkspaceCollectionsCheckNameAvailability_568161(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_568177 = path.getOrDefault("subscriptionId")
-  valid_568177 = validateParameter(valid_568177, JString, required = true,
+  var valid_564077 = path.getOrDefault("subscriptionId")
+  valid_564077 = validateParameter(valid_564077, JString, required = true,
                                  default = nil)
-  if valid_568177 != nil:
-    section.add "subscriptionId", valid_568177
-  var valid_568178 = path.getOrDefault("location")
-  valid_568178 = validateParameter(valid_568178, JString, required = true,
+  if valid_564077 != nil:
+    section.add "subscriptionId", valid_564077
+  var valid_564078 = path.getOrDefault("location")
+  valid_564078 = validateParameter(valid_564078, JString, required = true,
                                  default = nil)
-  if valid_568178 != nil:
-    section.add "location", valid_568178
+  if valid_564078 != nil:
+    section.add "location", valid_564078
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -218,11 +222,11 @@ proc validate_WorkspaceCollectionsCheckNameAvailability_568161(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568179 = query.getOrDefault("api-version")
-  valid_568179 = validateParameter(valid_568179, JString, required = true,
+  var valid_564079 = query.getOrDefault("api-version")
+  valid_564079 = validateParameter(valid_564079, JString, required = true,
                                  default = nil)
-  if valid_568179 != nil:
-    section.add "api-version", valid_568179
+  if valid_564079 != nil:
+    section.add "api-version", valid_564079
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -236,51 +240,51 @@ proc validate_WorkspaceCollectionsCheckNameAvailability_568161(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568181: Call_WorkspaceCollectionsCheckNameAvailability_568160;
+proc call*(call_564081: Call_WorkspaceCollectionsCheckNameAvailability_564060;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Verify the specified Power BI Workspace Collection name is valid and not already in use.
   ## 
-  let valid = call_568181.validator(path, query, header, formData, body)
-  let scheme = call_568181.pickScheme
+  let valid = call_564081.validator(path, query, header, formData, body)
+  let scheme = call_564081.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568181.url(scheme.get, call_568181.host, call_568181.base,
-                         call_568181.route, valid.getOrDefault("path"),
+  let url = call_564081.url(scheme.get, call_564081.host, call_564081.base,
+                         call_564081.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568181, url, valid)
+  result = hook(call_564081, url, valid)
 
-proc call*(call_568182: Call_WorkspaceCollectionsCheckNameAvailability_568160;
-          apiVersion: string; subscriptionId: string; body: JsonNode; location: string): Recallable =
+proc call*(call_564082: Call_WorkspaceCollectionsCheckNameAvailability_564060;
+          apiVersion: string; subscriptionId: string; location: string; body: JsonNode): Recallable =
   ## workspaceCollectionsCheckNameAvailability
   ## Verify the specified Power BI Workspace Collection name is valid and not already in use.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
   ##   subscriptionId: string (required)
   ##                 : Gets subscription credentials which uniquely identify a Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   body: JObject (required)
-  ##       : Check name availability request
   ##   location: string (required)
   ##           : Azure location
-  var path_568183 = newJObject()
-  var query_568184 = newJObject()
-  var body_568185 = newJObject()
-  add(query_568184, "api-version", newJString(apiVersion))
-  add(path_568183, "subscriptionId", newJString(subscriptionId))
+  ##   body: JObject (required)
+  ##       : Check name availability request
+  var path_564083 = newJObject()
+  var query_564084 = newJObject()
+  var body_564085 = newJObject()
+  add(query_564084, "api-version", newJString(apiVersion))
+  add(path_564083, "subscriptionId", newJString(subscriptionId))
+  add(path_564083, "location", newJString(location))
   if body != nil:
-    body_568185 = body
-  add(path_568183, "location", newJString(location))
-  result = call_568182.call(path_568183, query_568184, nil, nil, body_568185)
+    body_564085 = body
+  result = call_564082.call(path_564083, query_564084, nil, nil, body_564085)
 
-var workspaceCollectionsCheckNameAvailability* = Call_WorkspaceCollectionsCheckNameAvailability_568160(
+var workspaceCollectionsCheckNameAvailability* = Call_WorkspaceCollectionsCheckNameAvailability_564060(
     name: "workspaceCollectionsCheckNameAvailability", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.PowerBI/locations/{location}/checkNameAvailability",
-    validator: validate_WorkspaceCollectionsCheckNameAvailability_568161,
-    base: "", url: url_WorkspaceCollectionsCheckNameAvailability_568162,
+    validator: validate_WorkspaceCollectionsCheckNameAvailability_564061,
+    base: "", url: url_WorkspaceCollectionsCheckNameAvailability_564062,
     schemes: {Scheme.Https})
 type
-  Call_WorkspaceCollectionsListBySubscription_568186 = ref object of OpenApiRestCall_567642
-proc url_WorkspaceCollectionsListBySubscription_568188(protocol: Scheme;
+  Call_WorkspaceCollectionsListBySubscription_564086 = ref object of OpenApiRestCall_563540
+proc url_WorkspaceCollectionsListBySubscription_564088(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -297,7 +301,7 @@ proc url_WorkspaceCollectionsListBySubscription_568188(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_WorkspaceCollectionsListBySubscription_568187(path: JsonNode;
+proc validate_WorkspaceCollectionsListBySubscription_564087(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Retrieves all existing Power BI workspace collections in the specified subscription.
   ## 
@@ -309,11 +313,11 @@ proc validate_WorkspaceCollectionsListBySubscription_568187(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_568189 = path.getOrDefault("subscriptionId")
-  valid_568189 = validateParameter(valid_568189, JString, required = true,
+  var valid_564089 = path.getOrDefault("subscriptionId")
+  valid_564089 = validateParameter(valid_564089, JString, required = true,
                                  default = nil)
-  if valid_568189 != nil:
-    section.add "subscriptionId", valid_568189
+  if valid_564089 != nil:
+    section.add "subscriptionId", valid_564089
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -321,11 +325,11 @@ proc validate_WorkspaceCollectionsListBySubscription_568187(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568190 = query.getOrDefault("api-version")
-  valid_568190 = validateParameter(valid_568190, JString, required = true,
+  var valid_564090 = query.getOrDefault("api-version")
+  valid_564090 = validateParameter(valid_564090, JString, required = true,
                                  default = nil)
-  if valid_568190 != nil:
-    section.add "api-version", valid_568190
+  if valid_564090 != nil:
+    section.add "api-version", valid_564090
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -334,21 +338,21 @@ proc validate_WorkspaceCollectionsListBySubscription_568187(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568191: Call_WorkspaceCollectionsListBySubscription_568186;
+proc call*(call_564091: Call_WorkspaceCollectionsListBySubscription_564086;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Retrieves all existing Power BI workspace collections in the specified subscription.
   ## 
-  let valid = call_568191.validator(path, query, header, formData, body)
-  let scheme = call_568191.pickScheme
+  let valid = call_564091.validator(path, query, header, formData, body)
+  let scheme = call_564091.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568191.url(scheme.get, call_568191.host, call_568191.base,
-                         call_568191.route, valid.getOrDefault("path"),
+  let url = call_564091.url(scheme.get, call_564091.host, call_564091.base,
+                         call_564091.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568191, url, valid)
+  result = hook(call_564091, url, valid)
 
-proc call*(call_568192: Call_WorkspaceCollectionsListBySubscription_568186;
+proc call*(call_564092: Call_WorkspaceCollectionsListBySubscription_564086;
           apiVersion: string; subscriptionId: string): Recallable =
   ## workspaceCollectionsListBySubscription
   ## Retrieves all existing Power BI workspace collections in the specified subscription.
@@ -356,21 +360,21 @@ proc call*(call_568192: Call_WorkspaceCollectionsListBySubscription_568186;
   ##             : Client Api Version.
   ##   subscriptionId: string (required)
   ##                 : Gets subscription credentials which uniquely identify a Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_568193 = newJObject()
-  var query_568194 = newJObject()
-  add(query_568194, "api-version", newJString(apiVersion))
-  add(path_568193, "subscriptionId", newJString(subscriptionId))
-  result = call_568192.call(path_568193, query_568194, nil, nil, nil)
+  var path_564093 = newJObject()
+  var query_564094 = newJObject()
+  add(query_564094, "api-version", newJString(apiVersion))
+  add(path_564093, "subscriptionId", newJString(subscriptionId))
+  result = call_564092.call(path_564093, query_564094, nil, nil, nil)
 
-var workspaceCollectionsListBySubscription* = Call_WorkspaceCollectionsListBySubscription_568186(
+var workspaceCollectionsListBySubscription* = Call_WorkspaceCollectionsListBySubscription_564086(
     name: "workspaceCollectionsListBySubscription", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.PowerBI/workspaceCollections",
-    validator: validate_WorkspaceCollectionsListBySubscription_568187, base: "",
-    url: url_WorkspaceCollectionsListBySubscription_568188,
+    validator: validate_WorkspaceCollectionsListBySubscription_564087, base: "",
+    url: url_WorkspaceCollectionsListBySubscription_564088,
     schemes: {Scheme.Https})
 type
-  Call_WorkspaceCollectionsMigrate_568195 = ref object of OpenApiRestCall_567642
-proc url_WorkspaceCollectionsMigrate_568197(protocol: Scheme; host: string;
+  Call_WorkspaceCollectionsMigrate_564095 = ref object of OpenApiRestCall_563540
+proc url_WorkspaceCollectionsMigrate_564097(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -390,30 +394,30 @@ proc url_WorkspaceCollectionsMigrate_568197(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_WorkspaceCollectionsMigrate_568196(path: JsonNode; query: JsonNode;
+proc validate_WorkspaceCollectionsMigrate_564096(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Migrates an existing Power BI Workspace Collection to a different resource group and/or subscription.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : Azure resource group
   ##   subscriptionId: JString (required)
   ##                 : Gets subscription credentials which uniquely identify a Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : Azure resource group
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568198 = path.getOrDefault("resourceGroupName")
-  valid_568198 = validateParameter(valid_568198, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564098 = path.getOrDefault("subscriptionId")
+  valid_564098 = validateParameter(valid_564098, JString, required = true,
                                  default = nil)
-  if valid_568198 != nil:
-    section.add "resourceGroupName", valid_568198
-  var valid_568199 = path.getOrDefault("subscriptionId")
-  valid_568199 = validateParameter(valid_568199, JString, required = true,
+  if valid_564098 != nil:
+    section.add "subscriptionId", valid_564098
+  var valid_564099 = path.getOrDefault("resourceGroupName")
+  valid_564099 = validateParameter(valid_564099, JString, required = true,
                                  default = nil)
-  if valid_568199 != nil:
-    section.add "subscriptionId", valid_568199
+  if valid_564099 != nil:
+    section.add "resourceGroupName", valid_564099
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -421,11 +425,11 @@ proc validate_WorkspaceCollectionsMigrate_568196(path: JsonNode; query: JsonNode
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568200 = query.getOrDefault("api-version")
-  valid_568200 = validateParameter(valid_568200, JString, required = true,
+  var valid_564100 = query.getOrDefault("api-version")
+  valid_564100 = validateParameter(valid_564100, JString, required = true,
                                  default = nil)
-  if valid_568200 != nil:
-    section.add "api-version", valid_568200
+  if valid_564100 != nil:
+    section.add "api-version", valid_564100
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -439,50 +443,50 @@ proc validate_WorkspaceCollectionsMigrate_568196(path: JsonNode; query: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_568202: Call_WorkspaceCollectionsMigrate_568195; path: JsonNode;
+proc call*(call_564102: Call_WorkspaceCollectionsMigrate_564095; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Migrates an existing Power BI Workspace Collection to a different resource group and/or subscription.
   ## 
-  let valid = call_568202.validator(path, query, header, formData, body)
-  let scheme = call_568202.pickScheme
+  let valid = call_564102.validator(path, query, header, formData, body)
+  let scheme = call_564102.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568202.url(scheme.get, call_568202.host, call_568202.base,
-                         call_568202.route, valid.getOrDefault("path"),
+  let url = call_564102.url(scheme.get, call_564102.host, call_564102.base,
+                         call_564102.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568202, url, valid)
+  result = hook(call_564102, url, valid)
 
-proc call*(call_568203: Call_WorkspaceCollectionsMigrate_568195;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
+proc call*(call_564103: Call_WorkspaceCollectionsMigrate_564095;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string;
           body: JsonNode): Recallable =
   ## workspaceCollectionsMigrate
   ## Migrates an existing Power BI Workspace Collection to a different resource group and/or subscription.
-  ##   resourceGroupName: string (required)
-  ##                    : Azure resource group
   ##   apiVersion: string (required)
   ##             : Client Api Version.
   ##   subscriptionId: string (required)
   ##                 : Gets subscription credentials which uniquely identify a Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : Azure resource group
   ##   body: JObject (required)
   ##       : Workspace migration request
-  var path_568204 = newJObject()
-  var query_568205 = newJObject()
-  var body_568206 = newJObject()
-  add(path_568204, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568205, "api-version", newJString(apiVersion))
-  add(path_568204, "subscriptionId", newJString(subscriptionId))
+  var path_564104 = newJObject()
+  var query_564105 = newJObject()
+  var body_564106 = newJObject()
+  add(query_564105, "api-version", newJString(apiVersion))
+  add(path_564104, "subscriptionId", newJString(subscriptionId))
+  add(path_564104, "resourceGroupName", newJString(resourceGroupName))
   if body != nil:
-    body_568206 = body
-  result = call_568203.call(path_568204, query_568205, nil, nil, body_568206)
+    body_564106 = body
+  result = call_564103.call(path_564104, query_564105, nil, nil, body_564106)
 
-var workspaceCollectionsMigrate* = Call_WorkspaceCollectionsMigrate_568195(
+var workspaceCollectionsMigrate* = Call_WorkspaceCollectionsMigrate_564095(
     name: "workspaceCollectionsMigrate", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/moveResources",
-    validator: validate_WorkspaceCollectionsMigrate_568196, base: "",
-    url: url_WorkspaceCollectionsMigrate_568197, schemes: {Scheme.Https})
+    validator: validate_WorkspaceCollectionsMigrate_564096, base: "",
+    url: url_WorkspaceCollectionsMigrate_564097, schemes: {Scheme.Https})
 type
-  Call_WorkspaceCollectionsListByResourceGroup_568207 = ref object of OpenApiRestCall_567642
-proc url_WorkspaceCollectionsListByResourceGroup_568209(protocol: Scheme;
+  Call_WorkspaceCollectionsListByResourceGroup_564107 = ref object of OpenApiRestCall_563540
+proc url_WorkspaceCollectionsListByResourceGroup_564109(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -503,30 +507,30 @@ proc url_WorkspaceCollectionsListByResourceGroup_568209(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_WorkspaceCollectionsListByResourceGroup_568208(path: JsonNode;
+proc validate_WorkspaceCollectionsListByResourceGroup_564108(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Retrieves all existing Power BI workspace collections in the specified resource group.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : Azure resource group
   ##   subscriptionId: JString (required)
   ##                 : Gets subscription credentials which uniquely identify a Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : Azure resource group
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568210 = path.getOrDefault("resourceGroupName")
-  valid_568210 = validateParameter(valid_568210, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564110 = path.getOrDefault("subscriptionId")
+  valid_564110 = validateParameter(valid_564110, JString, required = true,
                                  default = nil)
-  if valid_568210 != nil:
-    section.add "resourceGroupName", valid_568210
-  var valid_568211 = path.getOrDefault("subscriptionId")
-  valid_568211 = validateParameter(valid_568211, JString, required = true,
+  if valid_564110 != nil:
+    section.add "subscriptionId", valid_564110
+  var valid_564111 = path.getOrDefault("resourceGroupName")
+  valid_564111 = validateParameter(valid_564111, JString, required = true,
                                  default = nil)
-  if valid_568211 != nil:
-    section.add "subscriptionId", valid_568211
+  if valid_564111 != nil:
+    section.add "resourceGroupName", valid_564111
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -534,11 +538,11 @@ proc validate_WorkspaceCollectionsListByResourceGroup_568208(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568212 = query.getOrDefault("api-version")
-  valid_568212 = validateParameter(valid_568212, JString, required = true,
+  var valid_564112 = query.getOrDefault("api-version")
+  valid_564112 = validateParameter(valid_564112, JString, required = true,
                                  default = nil)
-  if valid_568212 != nil:
-    section.add "api-version", valid_568212
+  if valid_564112 != nil:
+    section.add "api-version", valid_564112
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -547,46 +551,46 @@ proc validate_WorkspaceCollectionsListByResourceGroup_568208(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568213: Call_WorkspaceCollectionsListByResourceGroup_568207;
+proc call*(call_564113: Call_WorkspaceCollectionsListByResourceGroup_564107;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Retrieves all existing Power BI workspace collections in the specified resource group.
   ## 
-  let valid = call_568213.validator(path, query, header, formData, body)
-  let scheme = call_568213.pickScheme
+  let valid = call_564113.validator(path, query, header, formData, body)
+  let scheme = call_564113.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568213.url(scheme.get, call_568213.host, call_568213.base,
-                         call_568213.route, valid.getOrDefault("path"),
+  let url = call_564113.url(scheme.get, call_564113.host, call_564113.base,
+                         call_564113.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568213, url, valid)
+  result = hook(call_564113, url, valid)
 
-proc call*(call_568214: Call_WorkspaceCollectionsListByResourceGroup_568207;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string): Recallable =
+proc call*(call_564114: Call_WorkspaceCollectionsListByResourceGroup_564107;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string): Recallable =
   ## workspaceCollectionsListByResourceGroup
   ## Retrieves all existing Power BI workspace collections in the specified resource group.
-  ##   resourceGroupName: string (required)
-  ##                    : Azure resource group
   ##   apiVersion: string (required)
   ##             : Client Api Version.
   ##   subscriptionId: string (required)
   ##                 : Gets subscription credentials which uniquely identify a Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_568215 = newJObject()
-  var query_568216 = newJObject()
-  add(path_568215, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568216, "api-version", newJString(apiVersion))
-  add(path_568215, "subscriptionId", newJString(subscriptionId))
-  result = call_568214.call(path_568215, query_568216, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : Azure resource group
+  var path_564115 = newJObject()
+  var query_564116 = newJObject()
+  add(query_564116, "api-version", newJString(apiVersion))
+  add(path_564115, "subscriptionId", newJString(subscriptionId))
+  add(path_564115, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564114.call(path_564115, query_564116, nil, nil, nil)
 
-var workspaceCollectionsListByResourceGroup* = Call_WorkspaceCollectionsListByResourceGroup_568207(
+var workspaceCollectionsListByResourceGroup* = Call_WorkspaceCollectionsListByResourceGroup_564107(
     name: "workspaceCollectionsListByResourceGroup", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.PowerBI/workspaceCollections",
-    validator: validate_WorkspaceCollectionsListByResourceGroup_568208, base: "",
-    url: url_WorkspaceCollectionsListByResourceGroup_568209,
+    validator: validate_WorkspaceCollectionsListByResourceGroup_564108, base: "",
+    url: url_WorkspaceCollectionsListByResourceGroup_564109,
     schemes: {Scheme.Https})
 type
-  Call_WorkspaceCollectionsCreate_568228 = ref object of OpenApiRestCall_567642
-proc url_WorkspaceCollectionsCreate_568230(protocol: Scheme; host: string;
+  Call_WorkspaceCollectionsCreate_564128 = ref object of OpenApiRestCall_563540
+proc url_WorkspaceCollectionsCreate_564130(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -610,37 +614,37 @@ proc url_WorkspaceCollectionsCreate_568230(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_WorkspaceCollectionsCreate_568229(path: JsonNode; query: JsonNode;
+proc validate_WorkspaceCollectionsCreate_564129(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Creates a new Power BI Workspace Collection with the specified properties. A Power BI Workspace Collection contains one or more workspaces, and can be used to provision keys that provide API access to those workspaces.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : Azure resource group
   ##   subscriptionId: JString (required)
   ##                 : Gets subscription credentials which uniquely identify a Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   workspaceCollectionName: JString (required)
   ##                          : Power BI Embedded Workspace Collection name
+  ##   resourceGroupName: JString (required)
+  ##                    : Azure resource group
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568231 = path.getOrDefault("resourceGroupName")
-  valid_568231 = validateParameter(valid_568231, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564131 = path.getOrDefault("subscriptionId")
+  valid_564131 = validateParameter(valid_564131, JString, required = true,
                                  default = nil)
-  if valid_568231 != nil:
-    section.add "resourceGroupName", valid_568231
-  var valid_568232 = path.getOrDefault("subscriptionId")
-  valid_568232 = validateParameter(valid_568232, JString, required = true,
+  if valid_564131 != nil:
+    section.add "subscriptionId", valid_564131
+  var valid_564132 = path.getOrDefault("workspaceCollectionName")
+  valid_564132 = validateParameter(valid_564132, JString, required = true,
                                  default = nil)
-  if valid_568232 != nil:
-    section.add "subscriptionId", valid_568232
-  var valid_568233 = path.getOrDefault("workspaceCollectionName")
-  valid_568233 = validateParameter(valid_568233, JString, required = true,
+  if valid_564132 != nil:
+    section.add "workspaceCollectionName", valid_564132
+  var valid_564133 = path.getOrDefault("resourceGroupName")
+  valid_564133 = validateParameter(valid_564133, JString, required = true,
                                  default = nil)
-  if valid_568233 != nil:
-    section.add "workspaceCollectionName", valid_568233
+  if valid_564133 != nil:
+    section.add "resourceGroupName", valid_564133
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -648,11 +652,11 @@ proc validate_WorkspaceCollectionsCreate_568229(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568234 = query.getOrDefault("api-version")
-  valid_568234 = validateParameter(valid_568234, JString, required = true,
+  var valid_564134 = query.getOrDefault("api-version")
+  valid_564134 = validateParameter(valid_564134, JString, required = true,
                                  default = nil)
-  if valid_568234 != nil:
-    section.add "api-version", valid_568234
+  if valid_564134 != nil:
+    section.add "api-version", valid_564134
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -666,53 +670,53 @@ proc validate_WorkspaceCollectionsCreate_568229(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568236: Call_WorkspaceCollectionsCreate_568228; path: JsonNode;
+proc call*(call_564136: Call_WorkspaceCollectionsCreate_564128; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Creates a new Power BI Workspace Collection with the specified properties. A Power BI Workspace Collection contains one or more workspaces, and can be used to provision keys that provide API access to those workspaces.
   ## 
-  let valid = call_568236.validator(path, query, header, formData, body)
-  let scheme = call_568236.pickScheme
+  let valid = call_564136.validator(path, query, header, formData, body)
+  let scheme = call_564136.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568236.url(scheme.get, call_568236.host, call_568236.base,
-                         call_568236.route, valid.getOrDefault("path"),
+  let url = call_564136.url(scheme.get, call_564136.host, call_564136.base,
+                         call_564136.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568236, url, valid)
+  result = hook(call_564136, url, valid)
 
-proc call*(call_568237: Call_WorkspaceCollectionsCreate_568228;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          workspaceCollectionName: string; body: JsonNode): Recallable =
+proc call*(call_564137: Call_WorkspaceCollectionsCreate_564128; apiVersion: string;
+          subscriptionId: string; workspaceCollectionName: string;
+          resourceGroupName: string; body: JsonNode): Recallable =
   ## workspaceCollectionsCreate
   ## Creates a new Power BI Workspace Collection with the specified properties. A Power BI Workspace Collection contains one or more workspaces, and can be used to provision keys that provide API access to those workspaces.
-  ##   resourceGroupName: string (required)
-  ##                    : Azure resource group
   ##   apiVersion: string (required)
   ##             : Client Api Version.
   ##   subscriptionId: string (required)
   ##                 : Gets subscription credentials which uniquely identify a Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   workspaceCollectionName: string (required)
   ##                          : Power BI Embedded Workspace Collection name
+  ##   resourceGroupName: string (required)
+  ##                    : Azure resource group
   ##   body: JObject (required)
   ##       : Create workspace collection request
-  var path_568238 = newJObject()
-  var query_568239 = newJObject()
-  var body_568240 = newJObject()
-  add(path_568238, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568239, "api-version", newJString(apiVersion))
-  add(path_568238, "subscriptionId", newJString(subscriptionId))
-  add(path_568238, "workspaceCollectionName", newJString(workspaceCollectionName))
+  var path_564138 = newJObject()
+  var query_564139 = newJObject()
+  var body_564140 = newJObject()
+  add(query_564139, "api-version", newJString(apiVersion))
+  add(path_564138, "subscriptionId", newJString(subscriptionId))
+  add(path_564138, "workspaceCollectionName", newJString(workspaceCollectionName))
+  add(path_564138, "resourceGroupName", newJString(resourceGroupName))
   if body != nil:
-    body_568240 = body
-  result = call_568237.call(path_568238, query_568239, nil, nil, body_568240)
+    body_564140 = body
+  result = call_564137.call(path_564138, query_564139, nil, nil, body_564140)
 
-var workspaceCollectionsCreate* = Call_WorkspaceCollectionsCreate_568228(
+var workspaceCollectionsCreate* = Call_WorkspaceCollectionsCreate_564128(
     name: "workspaceCollectionsCreate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.PowerBI/workspaceCollections/{workspaceCollectionName}",
-    validator: validate_WorkspaceCollectionsCreate_568229, base: "",
-    url: url_WorkspaceCollectionsCreate_568230, schemes: {Scheme.Https})
+    validator: validate_WorkspaceCollectionsCreate_564129, base: "",
+    url: url_WorkspaceCollectionsCreate_564130, schemes: {Scheme.Https})
 type
-  Call_WorkspaceCollectionsGetByName_568217 = ref object of OpenApiRestCall_567642
-proc url_WorkspaceCollectionsGetByName_568219(protocol: Scheme; host: string;
+  Call_WorkspaceCollectionsGetByName_564117 = ref object of OpenApiRestCall_563540
+proc url_WorkspaceCollectionsGetByName_564119(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -736,37 +740,37 @@ proc url_WorkspaceCollectionsGetByName_568219(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_WorkspaceCollectionsGetByName_568218(path: JsonNode; query: JsonNode;
+proc validate_WorkspaceCollectionsGetByName_564118(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Retrieves an existing Power BI Workspace Collection.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : Azure resource group
   ##   subscriptionId: JString (required)
   ##                 : Gets subscription credentials which uniquely identify a Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   workspaceCollectionName: JString (required)
   ##                          : Power BI Embedded Workspace Collection name
+  ##   resourceGroupName: JString (required)
+  ##                    : Azure resource group
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568220 = path.getOrDefault("resourceGroupName")
-  valid_568220 = validateParameter(valid_568220, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564120 = path.getOrDefault("subscriptionId")
+  valid_564120 = validateParameter(valid_564120, JString, required = true,
                                  default = nil)
-  if valid_568220 != nil:
-    section.add "resourceGroupName", valid_568220
-  var valid_568221 = path.getOrDefault("subscriptionId")
-  valid_568221 = validateParameter(valid_568221, JString, required = true,
+  if valid_564120 != nil:
+    section.add "subscriptionId", valid_564120
+  var valid_564121 = path.getOrDefault("workspaceCollectionName")
+  valid_564121 = validateParameter(valid_564121, JString, required = true,
                                  default = nil)
-  if valid_568221 != nil:
-    section.add "subscriptionId", valid_568221
-  var valid_568222 = path.getOrDefault("workspaceCollectionName")
-  valid_568222 = validateParameter(valid_568222, JString, required = true,
+  if valid_564121 != nil:
+    section.add "workspaceCollectionName", valid_564121
+  var valid_564122 = path.getOrDefault("resourceGroupName")
+  valid_564122 = validateParameter(valid_564122, JString, required = true,
                                  default = nil)
-  if valid_568222 != nil:
-    section.add "workspaceCollectionName", valid_568222
+  if valid_564122 != nil:
+    section.add "resourceGroupName", valid_564122
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -774,11 +778,11 @@ proc validate_WorkspaceCollectionsGetByName_568218(path: JsonNode; query: JsonNo
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568223 = query.getOrDefault("api-version")
-  valid_568223 = validateParameter(valid_568223, JString, required = true,
+  var valid_564123 = query.getOrDefault("api-version")
+  valid_564123 = validateParameter(valid_564123, JString, required = true,
                                  default = nil)
-  if valid_568223 != nil:
-    section.add "api-version", valid_568223
+  if valid_564123 != nil:
+    section.add "api-version", valid_564123
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -787,48 +791,48 @@ proc validate_WorkspaceCollectionsGetByName_568218(path: JsonNode; query: JsonNo
   if body != nil:
     result.add "body", body
 
-proc call*(call_568224: Call_WorkspaceCollectionsGetByName_568217; path: JsonNode;
+proc call*(call_564124: Call_WorkspaceCollectionsGetByName_564117; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Retrieves an existing Power BI Workspace Collection.
   ## 
-  let valid = call_568224.validator(path, query, header, formData, body)
-  let scheme = call_568224.pickScheme
+  let valid = call_564124.validator(path, query, header, formData, body)
+  let scheme = call_564124.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568224.url(scheme.get, call_568224.host, call_568224.base,
-                         call_568224.route, valid.getOrDefault("path"),
+  let url = call_564124.url(scheme.get, call_564124.host, call_564124.base,
+                         call_564124.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568224, url, valid)
+  result = hook(call_564124, url, valid)
 
-proc call*(call_568225: Call_WorkspaceCollectionsGetByName_568217;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          workspaceCollectionName: string): Recallable =
+proc call*(call_564125: Call_WorkspaceCollectionsGetByName_564117;
+          apiVersion: string; subscriptionId: string;
+          workspaceCollectionName: string; resourceGroupName: string): Recallable =
   ## workspaceCollectionsGetByName
   ## Retrieves an existing Power BI Workspace Collection.
-  ##   resourceGroupName: string (required)
-  ##                    : Azure resource group
   ##   apiVersion: string (required)
   ##             : Client Api Version.
   ##   subscriptionId: string (required)
   ##                 : Gets subscription credentials which uniquely identify a Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   workspaceCollectionName: string (required)
   ##                          : Power BI Embedded Workspace Collection name
-  var path_568226 = newJObject()
-  var query_568227 = newJObject()
-  add(path_568226, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568227, "api-version", newJString(apiVersion))
-  add(path_568226, "subscriptionId", newJString(subscriptionId))
-  add(path_568226, "workspaceCollectionName", newJString(workspaceCollectionName))
-  result = call_568225.call(path_568226, query_568227, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : Azure resource group
+  var path_564126 = newJObject()
+  var query_564127 = newJObject()
+  add(query_564127, "api-version", newJString(apiVersion))
+  add(path_564126, "subscriptionId", newJString(subscriptionId))
+  add(path_564126, "workspaceCollectionName", newJString(workspaceCollectionName))
+  add(path_564126, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564125.call(path_564126, query_564127, nil, nil, nil)
 
-var workspaceCollectionsGetByName* = Call_WorkspaceCollectionsGetByName_568217(
+var workspaceCollectionsGetByName* = Call_WorkspaceCollectionsGetByName_564117(
     name: "workspaceCollectionsGetByName", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.PowerBI/workspaceCollections/{workspaceCollectionName}",
-    validator: validate_WorkspaceCollectionsGetByName_568218, base: "",
-    url: url_WorkspaceCollectionsGetByName_568219, schemes: {Scheme.Https})
+    validator: validate_WorkspaceCollectionsGetByName_564118, base: "",
+    url: url_WorkspaceCollectionsGetByName_564119, schemes: {Scheme.Https})
 type
-  Call_WorkspaceCollectionsUpdate_568252 = ref object of OpenApiRestCall_567642
-proc url_WorkspaceCollectionsUpdate_568254(protocol: Scheme; host: string;
+  Call_WorkspaceCollectionsUpdate_564152 = ref object of OpenApiRestCall_563540
+proc url_WorkspaceCollectionsUpdate_564154(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -852,37 +856,37 @@ proc url_WorkspaceCollectionsUpdate_568254(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_WorkspaceCollectionsUpdate_568253(path: JsonNode; query: JsonNode;
+proc validate_WorkspaceCollectionsUpdate_564153(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Update an existing Power BI Workspace Collection with the specified properties.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : Azure resource group
   ##   subscriptionId: JString (required)
   ##                 : Gets subscription credentials which uniquely identify a Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   workspaceCollectionName: JString (required)
   ##                          : Power BI Embedded Workspace Collection name
+  ##   resourceGroupName: JString (required)
+  ##                    : Azure resource group
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568255 = path.getOrDefault("resourceGroupName")
-  valid_568255 = validateParameter(valid_568255, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564155 = path.getOrDefault("subscriptionId")
+  valid_564155 = validateParameter(valid_564155, JString, required = true,
                                  default = nil)
-  if valid_568255 != nil:
-    section.add "resourceGroupName", valid_568255
-  var valid_568256 = path.getOrDefault("subscriptionId")
-  valid_568256 = validateParameter(valid_568256, JString, required = true,
+  if valid_564155 != nil:
+    section.add "subscriptionId", valid_564155
+  var valid_564156 = path.getOrDefault("workspaceCollectionName")
+  valid_564156 = validateParameter(valid_564156, JString, required = true,
                                  default = nil)
-  if valid_568256 != nil:
-    section.add "subscriptionId", valid_568256
-  var valid_568257 = path.getOrDefault("workspaceCollectionName")
-  valid_568257 = validateParameter(valid_568257, JString, required = true,
+  if valid_564156 != nil:
+    section.add "workspaceCollectionName", valid_564156
+  var valid_564157 = path.getOrDefault("resourceGroupName")
+  valid_564157 = validateParameter(valid_564157, JString, required = true,
                                  default = nil)
-  if valid_568257 != nil:
-    section.add "workspaceCollectionName", valid_568257
+  if valid_564157 != nil:
+    section.add "resourceGroupName", valid_564157
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -890,11 +894,11 @@ proc validate_WorkspaceCollectionsUpdate_568253(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568258 = query.getOrDefault("api-version")
-  valid_568258 = validateParameter(valid_568258, JString, required = true,
+  var valid_564158 = query.getOrDefault("api-version")
+  valid_564158 = validateParameter(valid_564158, JString, required = true,
                                  default = nil)
-  if valid_568258 != nil:
-    section.add "api-version", valid_568258
+  if valid_564158 != nil:
+    section.add "api-version", valid_564158
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -908,53 +912,53 @@ proc validate_WorkspaceCollectionsUpdate_568253(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568260: Call_WorkspaceCollectionsUpdate_568252; path: JsonNode;
+proc call*(call_564160: Call_WorkspaceCollectionsUpdate_564152; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Update an existing Power BI Workspace Collection with the specified properties.
   ## 
-  let valid = call_568260.validator(path, query, header, formData, body)
-  let scheme = call_568260.pickScheme
+  let valid = call_564160.validator(path, query, header, formData, body)
+  let scheme = call_564160.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568260.url(scheme.get, call_568260.host, call_568260.base,
-                         call_568260.route, valid.getOrDefault("path"),
+  let url = call_564160.url(scheme.get, call_564160.host, call_564160.base,
+                         call_564160.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568260, url, valid)
+  result = hook(call_564160, url, valid)
 
-proc call*(call_568261: Call_WorkspaceCollectionsUpdate_568252;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          workspaceCollectionName: string; body: JsonNode): Recallable =
+proc call*(call_564161: Call_WorkspaceCollectionsUpdate_564152; apiVersion: string;
+          subscriptionId: string; workspaceCollectionName: string;
+          resourceGroupName: string; body: JsonNode): Recallable =
   ## workspaceCollectionsUpdate
   ## Update an existing Power BI Workspace Collection with the specified properties.
-  ##   resourceGroupName: string (required)
-  ##                    : Azure resource group
   ##   apiVersion: string (required)
   ##             : Client Api Version.
   ##   subscriptionId: string (required)
   ##                 : Gets subscription credentials which uniquely identify a Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   workspaceCollectionName: string (required)
   ##                          : Power BI Embedded Workspace Collection name
+  ##   resourceGroupName: string (required)
+  ##                    : Azure resource group
   ##   body: JObject (required)
   ##       : Update workspace collection request
-  var path_568262 = newJObject()
-  var query_568263 = newJObject()
-  var body_568264 = newJObject()
-  add(path_568262, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568263, "api-version", newJString(apiVersion))
-  add(path_568262, "subscriptionId", newJString(subscriptionId))
-  add(path_568262, "workspaceCollectionName", newJString(workspaceCollectionName))
+  var path_564162 = newJObject()
+  var query_564163 = newJObject()
+  var body_564164 = newJObject()
+  add(query_564163, "api-version", newJString(apiVersion))
+  add(path_564162, "subscriptionId", newJString(subscriptionId))
+  add(path_564162, "workspaceCollectionName", newJString(workspaceCollectionName))
+  add(path_564162, "resourceGroupName", newJString(resourceGroupName))
   if body != nil:
-    body_568264 = body
-  result = call_568261.call(path_568262, query_568263, nil, nil, body_568264)
+    body_564164 = body
+  result = call_564161.call(path_564162, query_564163, nil, nil, body_564164)
 
-var workspaceCollectionsUpdate* = Call_WorkspaceCollectionsUpdate_568252(
+var workspaceCollectionsUpdate* = Call_WorkspaceCollectionsUpdate_564152(
     name: "workspaceCollectionsUpdate", meth: HttpMethod.HttpPatch,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.PowerBI/workspaceCollections/{workspaceCollectionName}",
-    validator: validate_WorkspaceCollectionsUpdate_568253, base: "",
-    url: url_WorkspaceCollectionsUpdate_568254, schemes: {Scheme.Https})
+    validator: validate_WorkspaceCollectionsUpdate_564153, base: "",
+    url: url_WorkspaceCollectionsUpdate_564154, schemes: {Scheme.Https})
 type
-  Call_WorkspaceCollectionsDelete_568241 = ref object of OpenApiRestCall_567642
-proc url_WorkspaceCollectionsDelete_568243(protocol: Scheme; host: string;
+  Call_WorkspaceCollectionsDelete_564141 = ref object of OpenApiRestCall_563540
+proc url_WorkspaceCollectionsDelete_564143(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -978,37 +982,37 @@ proc url_WorkspaceCollectionsDelete_568243(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_WorkspaceCollectionsDelete_568242(path: JsonNode; query: JsonNode;
+proc validate_WorkspaceCollectionsDelete_564142(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Delete a Power BI Workspace Collection.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : Azure resource group
   ##   subscriptionId: JString (required)
   ##                 : Gets subscription credentials which uniquely identify a Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   workspaceCollectionName: JString (required)
   ##                          : Power BI Embedded Workspace Collection name
+  ##   resourceGroupName: JString (required)
+  ##                    : Azure resource group
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568244 = path.getOrDefault("resourceGroupName")
-  valid_568244 = validateParameter(valid_568244, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564144 = path.getOrDefault("subscriptionId")
+  valid_564144 = validateParameter(valid_564144, JString, required = true,
                                  default = nil)
-  if valid_568244 != nil:
-    section.add "resourceGroupName", valid_568244
-  var valid_568245 = path.getOrDefault("subscriptionId")
-  valid_568245 = validateParameter(valid_568245, JString, required = true,
+  if valid_564144 != nil:
+    section.add "subscriptionId", valid_564144
+  var valid_564145 = path.getOrDefault("workspaceCollectionName")
+  valid_564145 = validateParameter(valid_564145, JString, required = true,
                                  default = nil)
-  if valid_568245 != nil:
-    section.add "subscriptionId", valid_568245
-  var valid_568246 = path.getOrDefault("workspaceCollectionName")
-  valid_568246 = validateParameter(valid_568246, JString, required = true,
+  if valid_564145 != nil:
+    section.add "workspaceCollectionName", valid_564145
+  var valid_564146 = path.getOrDefault("resourceGroupName")
+  valid_564146 = validateParameter(valid_564146, JString, required = true,
                                  default = nil)
-  if valid_568246 != nil:
-    section.add "workspaceCollectionName", valid_568246
+  if valid_564146 != nil:
+    section.add "resourceGroupName", valid_564146
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1016,11 +1020,11 @@ proc validate_WorkspaceCollectionsDelete_568242(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568247 = query.getOrDefault("api-version")
-  valid_568247 = validateParameter(valid_568247, JString, required = true,
+  var valid_564147 = query.getOrDefault("api-version")
+  valid_564147 = validateParameter(valid_564147, JString, required = true,
                                  default = nil)
-  if valid_568247 != nil:
-    section.add "api-version", valid_568247
+  if valid_564147 != nil:
+    section.add "api-version", valid_564147
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1029,48 +1033,48 @@ proc validate_WorkspaceCollectionsDelete_568242(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568248: Call_WorkspaceCollectionsDelete_568241; path: JsonNode;
+proc call*(call_564148: Call_WorkspaceCollectionsDelete_564141; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Delete a Power BI Workspace Collection.
   ## 
-  let valid = call_568248.validator(path, query, header, formData, body)
-  let scheme = call_568248.pickScheme
+  let valid = call_564148.validator(path, query, header, formData, body)
+  let scheme = call_564148.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568248.url(scheme.get, call_568248.host, call_568248.base,
-                         call_568248.route, valid.getOrDefault("path"),
+  let url = call_564148.url(scheme.get, call_564148.host, call_564148.base,
+                         call_564148.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568248, url, valid)
+  result = hook(call_564148, url, valid)
 
-proc call*(call_568249: Call_WorkspaceCollectionsDelete_568241;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          workspaceCollectionName: string): Recallable =
+proc call*(call_564149: Call_WorkspaceCollectionsDelete_564141; apiVersion: string;
+          subscriptionId: string; workspaceCollectionName: string;
+          resourceGroupName: string): Recallable =
   ## workspaceCollectionsDelete
   ## Delete a Power BI Workspace Collection.
-  ##   resourceGroupName: string (required)
-  ##                    : Azure resource group
   ##   apiVersion: string (required)
   ##             : Client Api Version.
   ##   subscriptionId: string (required)
   ##                 : Gets subscription credentials which uniquely identify a Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   workspaceCollectionName: string (required)
   ##                          : Power BI Embedded Workspace Collection name
-  var path_568250 = newJObject()
-  var query_568251 = newJObject()
-  add(path_568250, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568251, "api-version", newJString(apiVersion))
-  add(path_568250, "subscriptionId", newJString(subscriptionId))
-  add(path_568250, "workspaceCollectionName", newJString(workspaceCollectionName))
-  result = call_568249.call(path_568250, query_568251, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : Azure resource group
+  var path_564150 = newJObject()
+  var query_564151 = newJObject()
+  add(query_564151, "api-version", newJString(apiVersion))
+  add(path_564150, "subscriptionId", newJString(subscriptionId))
+  add(path_564150, "workspaceCollectionName", newJString(workspaceCollectionName))
+  add(path_564150, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564149.call(path_564150, query_564151, nil, nil, nil)
 
-var workspaceCollectionsDelete* = Call_WorkspaceCollectionsDelete_568241(
+var workspaceCollectionsDelete* = Call_WorkspaceCollectionsDelete_564141(
     name: "workspaceCollectionsDelete", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.PowerBI/workspaceCollections/{workspaceCollectionName}",
-    validator: validate_WorkspaceCollectionsDelete_568242, base: "",
-    url: url_WorkspaceCollectionsDelete_568243, schemes: {Scheme.Https})
+    validator: validate_WorkspaceCollectionsDelete_564142, base: "",
+    url: url_WorkspaceCollectionsDelete_564143, schemes: {Scheme.Https})
 type
-  Call_WorkspaceCollectionsGetAccessKeys_568265 = ref object of OpenApiRestCall_567642
-proc url_WorkspaceCollectionsGetAccessKeys_568267(protocol: Scheme; host: string;
+  Call_WorkspaceCollectionsGetAccessKeys_564165 = ref object of OpenApiRestCall_563540
+proc url_WorkspaceCollectionsGetAccessKeys_564167(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1095,37 +1099,37 @@ proc url_WorkspaceCollectionsGetAccessKeys_568267(protocol: Scheme; host: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_WorkspaceCollectionsGetAccessKeys_568266(path: JsonNode;
+proc validate_WorkspaceCollectionsGetAccessKeys_564166(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Retrieves the primary and secondary access keys for the specified Power BI Workspace Collection.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : Azure resource group
   ##   subscriptionId: JString (required)
   ##                 : Gets subscription credentials which uniquely identify a Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   workspaceCollectionName: JString (required)
   ##                          : Power BI Embedded Workspace Collection name
+  ##   resourceGroupName: JString (required)
+  ##                    : Azure resource group
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568268 = path.getOrDefault("resourceGroupName")
-  valid_568268 = validateParameter(valid_568268, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564168 = path.getOrDefault("subscriptionId")
+  valid_564168 = validateParameter(valid_564168, JString, required = true,
                                  default = nil)
-  if valid_568268 != nil:
-    section.add "resourceGroupName", valid_568268
-  var valid_568269 = path.getOrDefault("subscriptionId")
-  valid_568269 = validateParameter(valid_568269, JString, required = true,
+  if valid_564168 != nil:
+    section.add "subscriptionId", valid_564168
+  var valid_564169 = path.getOrDefault("workspaceCollectionName")
+  valid_564169 = validateParameter(valid_564169, JString, required = true,
                                  default = nil)
-  if valid_568269 != nil:
-    section.add "subscriptionId", valid_568269
-  var valid_568270 = path.getOrDefault("workspaceCollectionName")
-  valid_568270 = validateParameter(valid_568270, JString, required = true,
+  if valid_564169 != nil:
+    section.add "workspaceCollectionName", valid_564169
+  var valid_564170 = path.getOrDefault("resourceGroupName")
+  valid_564170 = validateParameter(valid_564170, JString, required = true,
                                  default = nil)
-  if valid_568270 != nil:
-    section.add "workspaceCollectionName", valid_568270
+  if valid_564170 != nil:
+    section.add "resourceGroupName", valid_564170
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1133,11 +1137,11 @@ proc validate_WorkspaceCollectionsGetAccessKeys_568266(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568271 = query.getOrDefault("api-version")
-  valid_568271 = validateParameter(valid_568271, JString, required = true,
+  var valid_564171 = query.getOrDefault("api-version")
+  valid_564171 = validateParameter(valid_564171, JString, required = true,
                                  default = nil)
-  if valid_568271 != nil:
-    section.add "api-version", valid_568271
+  if valid_564171 != nil:
+    section.add "api-version", valid_564171
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1146,49 +1150,49 @@ proc validate_WorkspaceCollectionsGetAccessKeys_568266(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568272: Call_WorkspaceCollectionsGetAccessKeys_568265;
+proc call*(call_564172: Call_WorkspaceCollectionsGetAccessKeys_564165;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Retrieves the primary and secondary access keys for the specified Power BI Workspace Collection.
   ## 
-  let valid = call_568272.validator(path, query, header, formData, body)
-  let scheme = call_568272.pickScheme
+  let valid = call_564172.validator(path, query, header, formData, body)
+  let scheme = call_564172.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568272.url(scheme.get, call_568272.host, call_568272.base,
-                         call_568272.route, valid.getOrDefault("path"),
+  let url = call_564172.url(scheme.get, call_564172.host, call_564172.base,
+                         call_564172.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568272, url, valid)
+  result = hook(call_564172, url, valid)
 
-proc call*(call_568273: Call_WorkspaceCollectionsGetAccessKeys_568265;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          workspaceCollectionName: string): Recallable =
+proc call*(call_564173: Call_WorkspaceCollectionsGetAccessKeys_564165;
+          apiVersion: string; subscriptionId: string;
+          workspaceCollectionName: string; resourceGroupName: string): Recallable =
   ## workspaceCollectionsGetAccessKeys
   ## Retrieves the primary and secondary access keys for the specified Power BI Workspace Collection.
-  ##   resourceGroupName: string (required)
-  ##                    : Azure resource group
   ##   apiVersion: string (required)
   ##             : Client Api Version.
   ##   subscriptionId: string (required)
   ##                 : Gets subscription credentials which uniquely identify a Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   workspaceCollectionName: string (required)
   ##                          : Power BI Embedded Workspace Collection name
-  var path_568274 = newJObject()
-  var query_568275 = newJObject()
-  add(path_568274, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568275, "api-version", newJString(apiVersion))
-  add(path_568274, "subscriptionId", newJString(subscriptionId))
-  add(path_568274, "workspaceCollectionName", newJString(workspaceCollectionName))
-  result = call_568273.call(path_568274, query_568275, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : Azure resource group
+  var path_564174 = newJObject()
+  var query_564175 = newJObject()
+  add(query_564175, "api-version", newJString(apiVersion))
+  add(path_564174, "subscriptionId", newJString(subscriptionId))
+  add(path_564174, "workspaceCollectionName", newJString(workspaceCollectionName))
+  add(path_564174, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564173.call(path_564174, query_564175, nil, nil, nil)
 
-var workspaceCollectionsGetAccessKeys* = Call_WorkspaceCollectionsGetAccessKeys_568265(
+var workspaceCollectionsGetAccessKeys* = Call_WorkspaceCollectionsGetAccessKeys_564165(
     name: "workspaceCollectionsGetAccessKeys", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.PowerBI/workspaceCollections/{workspaceCollectionName}/listKeys",
-    validator: validate_WorkspaceCollectionsGetAccessKeys_568266, base: "",
-    url: url_WorkspaceCollectionsGetAccessKeys_568267, schemes: {Scheme.Https})
+    validator: validate_WorkspaceCollectionsGetAccessKeys_564166, base: "",
+    url: url_WorkspaceCollectionsGetAccessKeys_564167, schemes: {Scheme.Https})
 type
-  Call_WorkspaceCollectionsRegenerateKey_568276 = ref object of OpenApiRestCall_567642
-proc url_WorkspaceCollectionsRegenerateKey_568278(protocol: Scheme; host: string;
+  Call_WorkspaceCollectionsRegenerateKey_564176 = ref object of OpenApiRestCall_563540
+proc url_WorkspaceCollectionsRegenerateKey_564178(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1213,37 +1217,37 @@ proc url_WorkspaceCollectionsRegenerateKey_568278(protocol: Scheme; host: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_WorkspaceCollectionsRegenerateKey_568277(path: JsonNode;
+proc validate_WorkspaceCollectionsRegenerateKey_564177(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Regenerates the primary or secondary access key for the specified Power BI Workspace Collection.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : Azure resource group
   ##   subscriptionId: JString (required)
   ##                 : Gets subscription credentials which uniquely identify a Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   workspaceCollectionName: JString (required)
   ##                          : Power BI Embedded Workspace Collection name
+  ##   resourceGroupName: JString (required)
+  ##                    : Azure resource group
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568279 = path.getOrDefault("resourceGroupName")
-  valid_568279 = validateParameter(valid_568279, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564179 = path.getOrDefault("subscriptionId")
+  valid_564179 = validateParameter(valid_564179, JString, required = true,
                                  default = nil)
-  if valid_568279 != nil:
-    section.add "resourceGroupName", valid_568279
-  var valid_568280 = path.getOrDefault("subscriptionId")
-  valid_568280 = validateParameter(valid_568280, JString, required = true,
+  if valid_564179 != nil:
+    section.add "subscriptionId", valid_564179
+  var valid_564180 = path.getOrDefault("workspaceCollectionName")
+  valid_564180 = validateParameter(valid_564180, JString, required = true,
                                  default = nil)
-  if valid_568280 != nil:
-    section.add "subscriptionId", valid_568280
-  var valid_568281 = path.getOrDefault("workspaceCollectionName")
-  valid_568281 = validateParameter(valid_568281, JString, required = true,
+  if valid_564180 != nil:
+    section.add "workspaceCollectionName", valid_564180
+  var valid_564181 = path.getOrDefault("resourceGroupName")
+  valid_564181 = validateParameter(valid_564181, JString, required = true,
                                  default = nil)
-  if valid_568281 != nil:
-    section.add "workspaceCollectionName", valid_568281
+  if valid_564181 != nil:
+    section.add "resourceGroupName", valid_564181
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1251,11 +1255,11 @@ proc validate_WorkspaceCollectionsRegenerateKey_568277(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568282 = query.getOrDefault("api-version")
-  valid_568282 = validateParameter(valid_568282, JString, required = true,
+  var valid_564182 = query.getOrDefault("api-version")
+  valid_564182 = validateParameter(valid_564182, JString, required = true,
                                  default = nil)
-  if valid_568282 != nil:
-    section.add "api-version", valid_568282
+  if valid_564182 != nil:
+    section.add "api-version", valid_564182
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1269,54 +1273,54 @@ proc validate_WorkspaceCollectionsRegenerateKey_568277(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568284: Call_WorkspaceCollectionsRegenerateKey_568276;
+proc call*(call_564184: Call_WorkspaceCollectionsRegenerateKey_564176;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Regenerates the primary or secondary access key for the specified Power BI Workspace Collection.
   ## 
-  let valid = call_568284.validator(path, query, header, formData, body)
-  let scheme = call_568284.pickScheme
+  let valid = call_564184.validator(path, query, header, formData, body)
+  let scheme = call_564184.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568284.url(scheme.get, call_568284.host, call_568284.base,
-                         call_568284.route, valid.getOrDefault("path"),
+  let url = call_564184.url(scheme.get, call_564184.host, call_564184.base,
+                         call_564184.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568284, url, valid)
+  result = hook(call_564184, url, valid)
 
-proc call*(call_568285: Call_WorkspaceCollectionsRegenerateKey_568276;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          workspaceCollectionName: string; body: JsonNode): Recallable =
+proc call*(call_564185: Call_WorkspaceCollectionsRegenerateKey_564176;
+          apiVersion: string; subscriptionId: string;
+          workspaceCollectionName: string; resourceGroupName: string; body: JsonNode): Recallable =
   ## workspaceCollectionsRegenerateKey
   ## Regenerates the primary or secondary access key for the specified Power BI Workspace Collection.
-  ##   resourceGroupName: string (required)
-  ##                    : Azure resource group
   ##   apiVersion: string (required)
   ##             : Client Api Version.
   ##   subscriptionId: string (required)
   ##                 : Gets subscription credentials which uniquely identify a Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   workspaceCollectionName: string (required)
   ##                          : Power BI Embedded Workspace Collection name
+  ##   resourceGroupName: string (required)
+  ##                    : Azure resource group
   ##   body: JObject (required)
   ##       : Access key to regenerate
-  var path_568286 = newJObject()
-  var query_568287 = newJObject()
-  var body_568288 = newJObject()
-  add(path_568286, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568287, "api-version", newJString(apiVersion))
-  add(path_568286, "subscriptionId", newJString(subscriptionId))
-  add(path_568286, "workspaceCollectionName", newJString(workspaceCollectionName))
+  var path_564186 = newJObject()
+  var query_564187 = newJObject()
+  var body_564188 = newJObject()
+  add(query_564187, "api-version", newJString(apiVersion))
+  add(path_564186, "subscriptionId", newJString(subscriptionId))
+  add(path_564186, "workspaceCollectionName", newJString(workspaceCollectionName))
+  add(path_564186, "resourceGroupName", newJString(resourceGroupName))
   if body != nil:
-    body_568288 = body
-  result = call_568285.call(path_568286, query_568287, nil, nil, body_568288)
+    body_564188 = body
+  result = call_564185.call(path_564186, query_564187, nil, nil, body_564188)
 
-var workspaceCollectionsRegenerateKey* = Call_WorkspaceCollectionsRegenerateKey_568276(
+var workspaceCollectionsRegenerateKey* = Call_WorkspaceCollectionsRegenerateKey_564176(
     name: "workspaceCollectionsRegenerateKey", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.PowerBI/workspaceCollections/{workspaceCollectionName}/regenerateKey",
-    validator: validate_WorkspaceCollectionsRegenerateKey_568277, base: "",
-    url: url_WorkspaceCollectionsRegenerateKey_568278, schemes: {Scheme.Https})
+    validator: validate_WorkspaceCollectionsRegenerateKey_564177, base: "",
+    url: url_WorkspaceCollectionsRegenerateKey_564178, schemes: {Scheme.Https})
 type
-  Call_WorkspacesList_568289 = ref object of OpenApiRestCall_567642
-proc url_WorkspacesList_568291(protocol: Scheme; host: string; base: string;
+  Call_WorkspacesList_564189 = ref object of OpenApiRestCall_563540
+proc url_WorkspacesList_564191(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1341,7 +1345,7 @@ proc url_WorkspacesList_568291(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_WorkspacesList_568290(path: JsonNode; query: JsonNode;
+proc validate_WorkspacesList_564190(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## Retrieves all existing Power BI workspaces in the specified workspace collection.
@@ -1349,30 +1353,30 @@ proc validate_WorkspacesList_568290(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : Azure resource group
   ##   subscriptionId: JString (required)
   ##                 : Gets subscription credentials which uniquely identify a Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   workspaceCollectionName: JString (required)
   ##                          : Power BI Embedded Workspace Collection name
+  ##   resourceGroupName: JString (required)
+  ##                    : Azure resource group
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568292 = path.getOrDefault("resourceGroupName")
-  valid_568292 = validateParameter(valid_568292, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564192 = path.getOrDefault("subscriptionId")
+  valid_564192 = validateParameter(valid_564192, JString, required = true,
                                  default = nil)
-  if valid_568292 != nil:
-    section.add "resourceGroupName", valid_568292
-  var valid_568293 = path.getOrDefault("subscriptionId")
-  valid_568293 = validateParameter(valid_568293, JString, required = true,
+  if valid_564192 != nil:
+    section.add "subscriptionId", valid_564192
+  var valid_564193 = path.getOrDefault("workspaceCollectionName")
+  valid_564193 = validateParameter(valid_564193, JString, required = true,
                                  default = nil)
-  if valid_568293 != nil:
-    section.add "subscriptionId", valid_568293
-  var valid_568294 = path.getOrDefault("workspaceCollectionName")
-  valid_568294 = validateParameter(valid_568294, JString, required = true,
+  if valid_564193 != nil:
+    section.add "workspaceCollectionName", valid_564193
+  var valid_564194 = path.getOrDefault("resourceGroupName")
+  valid_564194 = validateParameter(valid_564194, JString, required = true,
                                  default = nil)
-  if valid_568294 != nil:
-    section.add "workspaceCollectionName", valid_568294
+  if valid_564194 != nil:
+    section.add "resourceGroupName", valid_564194
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1380,11 +1384,11 @@ proc validate_WorkspacesList_568290(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568295 = query.getOrDefault("api-version")
-  valid_568295 = validateParameter(valid_568295, JString, required = true,
+  var valid_564195 = query.getOrDefault("api-version")
+  valid_564195 = validateParameter(valid_564195, JString, required = true,
                                  default = nil)
-  if valid_568295 != nil:
-    section.add "api-version", valid_568295
+  if valid_564195 != nil:
+    section.add "api-version", valid_564195
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1393,43 +1397,43 @@ proc validate_WorkspacesList_568290(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568296: Call_WorkspacesList_568289; path: JsonNode; query: JsonNode;
+proc call*(call_564196: Call_WorkspacesList_564189; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Retrieves all existing Power BI workspaces in the specified workspace collection.
   ## 
-  let valid = call_568296.validator(path, query, header, formData, body)
-  let scheme = call_568296.pickScheme
+  let valid = call_564196.validator(path, query, header, formData, body)
+  let scheme = call_564196.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568296.url(scheme.get, call_568296.host, call_568296.base,
-                         call_568296.route, valid.getOrDefault("path"),
+  let url = call_564196.url(scheme.get, call_564196.host, call_564196.base,
+                         call_564196.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568296, url, valid)
+  result = hook(call_564196, url, valid)
 
-proc call*(call_568297: Call_WorkspacesList_568289; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string;
-          workspaceCollectionName: string): Recallable =
+proc call*(call_564197: Call_WorkspacesList_564189; apiVersion: string;
+          subscriptionId: string; workspaceCollectionName: string;
+          resourceGroupName: string): Recallable =
   ## workspacesList
   ## Retrieves all existing Power BI workspaces in the specified workspace collection.
-  ##   resourceGroupName: string (required)
-  ##                    : Azure resource group
   ##   apiVersion: string (required)
   ##             : Client Api Version.
   ##   subscriptionId: string (required)
   ##                 : Gets subscription credentials which uniquely identify a Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   workspaceCollectionName: string (required)
   ##                          : Power BI Embedded Workspace Collection name
-  var path_568298 = newJObject()
-  var query_568299 = newJObject()
-  add(path_568298, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568299, "api-version", newJString(apiVersion))
-  add(path_568298, "subscriptionId", newJString(subscriptionId))
-  add(path_568298, "workspaceCollectionName", newJString(workspaceCollectionName))
-  result = call_568297.call(path_568298, query_568299, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : Azure resource group
+  var path_564198 = newJObject()
+  var query_564199 = newJObject()
+  add(query_564199, "api-version", newJString(apiVersion))
+  add(path_564198, "subscriptionId", newJString(subscriptionId))
+  add(path_564198, "workspaceCollectionName", newJString(workspaceCollectionName))
+  add(path_564198, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564197.call(path_564198, query_564199, nil, nil, nil)
 
-var workspacesList* = Call_WorkspacesList_568289(name: "workspacesList",
+var workspacesList* = Call_WorkspacesList_564189(name: "workspacesList",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.PowerBI/workspaceCollections/{workspaceCollectionName}/workspaces",
-    validator: validate_WorkspacesList_568290, base: "", url: url_WorkspacesList_568291,
+    validator: validate_WorkspacesList_564190, base: "", url: url_WorkspacesList_564191,
     schemes: {Scheme.Https})
 export
   rest

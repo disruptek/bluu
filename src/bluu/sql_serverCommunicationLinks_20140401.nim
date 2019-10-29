@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, httpcore
 
 ## auto-generated via openapi macro
 ## title: Azure SQL Database
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_567642 = ref object of OpenApiRestCall
+  OpenApiRestCall_563540 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_567642](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563540](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_567642): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563540): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,8 +107,8 @@ const
   macServiceName = "sql-serverCommunicationLinks"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_ServerCommunicationLinksListByServer_567864 = ref object of OpenApiRestCall_567642
-proc url_ServerCommunicationLinksListByServer_567866(protocol: Scheme;
+  Call_ServerCommunicationLinksListByServer_563762 = ref object of OpenApiRestCall_563540
+proc url_ServerCommunicationLinksListByServer_563764(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -127,37 +131,37 @@ proc url_ServerCommunicationLinksListByServer_567866(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ServerCommunicationLinksListByServer_567865(path: JsonNode;
+proc validate_ServerCommunicationLinksListByServer_563763(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets a list of server communication links.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   ##   serverName: JString (required)
   ##             : The name of the server.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID that identifies an Azure subscription.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568039 = path.getOrDefault("resourceGroupName")
-  valid_568039 = validateParameter(valid_568039, JString, required = true,
+        "path argument is necessary due to required `serverName` field"
+  var valid_563939 = path.getOrDefault("serverName")
+  valid_563939 = validateParameter(valid_563939, JString, required = true,
                                  default = nil)
-  if valid_568039 != nil:
-    section.add "resourceGroupName", valid_568039
-  var valid_568040 = path.getOrDefault("serverName")
-  valid_568040 = validateParameter(valid_568040, JString, required = true,
+  if valid_563939 != nil:
+    section.add "serverName", valid_563939
+  var valid_563940 = path.getOrDefault("subscriptionId")
+  valid_563940 = validateParameter(valid_563940, JString, required = true,
                                  default = nil)
-  if valid_568040 != nil:
-    section.add "serverName", valid_568040
-  var valid_568041 = path.getOrDefault("subscriptionId")
-  valid_568041 = validateParameter(valid_568041, JString, required = true,
+  if valid_563940 != nil:
+    section.add "subscriptionId", valid_563940
+  var valid_563941 = path.getOrDefault("resourceGroupName")
+  valid_563941 = validateParameter(valid_563941, JString, required = true,
                                  default = nil)
-  if valid_568041 != nil:
-    section.add "subscriptionId", valid_568041
+  if valid_563941 != nil:
+    section.add "resourceGroupName", valid_563941
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -165,11 +169,11 @@ proc validate_ServerCommunicationLinksListByServer_567865(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568042 = query.getOrDefault("api-version")
-  valid_568042 = validateParameter(valid_568042, JString, required = true,
+  var valid_563942 = query.getOrDefault("api-version")
+  valid_563942 = validateParameter(valid_563942, JString, required = true,
                                  default = nil)
-  if valid_568042 != nil:
-    section.add "api-version", valid_568042
+  if valid_563942 != nil:
+    section.add "api-version", valid_563942
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -178,49 +182,49 @@ proc validate_ServerCommunicationLinksListByServer_567865(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568065: Call_ServerCommunicationLinksListByServer_567864;
+proc call*(call_563965: Call_ServerCommunicationLinksListByServer_563762;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Gets a list of server communication links.
   ## 
-  let valid = call_568065.validator(path, query, header, formData, body)
-  let scheme = call_568065.pickScheme
+  let valid = call_563965.validator(path, query, header, formData, body)
+  let scheme = call_563965.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568065.url(scheme.get, call_568065.host, call_568065.base,
-                         call_568065.route, valid.getOrDefault("path"),
+  let url = call_563965.url(scheme.get, call_563965.host, call_563965.base,
+                         call_563965.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568065, url, valid)
+  result = hook(call_563965, url, valid)
 
-proc call*(call_568136: Call_ServerCommunicationLinksListByServer_567864;
-          resourceGroupName: string; apiVersion: string; serverName: string;
-          subscriptionId: string): Recallable =
+proc call*(call_564036: Call_ServerCommunicationLinksListByServer_563762;
+          apiVersion: string; serverName: string; subscriptionId: string;
+          resourceGroupName: string): Recallable =
   ## serverCommunicationLinksListByServer
   ## Gets a list of server communication links.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   ##   apiVersion: string (required)
   ##             : The API version to use for the request.
   ##   serverName: string (required)
   ##             : The name of the server.
   ##   subscriptionId: string (required)
   ##                 : The subscription ID that identifies an Azure subscription.
-  var path_568137 = newJObject()
-  var query_568139 = newJObject()
-  add(path_568137, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568139, "api-version", newJString(apiVersion))
-  add(path_568137, "serverName", newJString(serverName))
-  add(path_568137, "subscriptionId", newJString(subscriptionId))
-  result = call_568136.call(path_568137, query_568139, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
+  var path_564037 = newJObject()
+  var query_564039 = newJObject()
+  add(query_564039, "api-version", newJString(apiVersion))
+  add(path_564037, "serverName", newJString(serverName))
+  add(path_564037, "subscriptionId", newJString(subscriptionId))
+  add(path_564037, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564036.call(path_564037, query_564039, nil, nil, nil)
 
-var serverCommunicationLinksListByServer* = Call_ServerCommunicationLinksListByServer_567864(
+var serverCommunicationLinksListByServer* = Call_ServerCommunicationLinksListByServer_563762(
     name: "serverCommunicationLinksListByServer", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/servers/{serverName}/communicationLinks",
-    validator: validate_ServerCommunicationLinksListByServer_567865, base: "",
-    url: url_ServerCommunicationLinksListByServer_567866, schemes: {Scheme.Https})
+    validator: validate_ServerCommunicationLinksListByServer_563763, base: "",
+    url: url_ServerCommunicationLinksListByServer_563764, schemes: {Scheme.Https})
 type
-  Call_ServerCommunicationLinksCreateOrUpdate_568190 = ref object of OpenApiRestCall_567642
-proc url_ServerCommunicationLinksCreateOrUpdate_568192(protocol: Scheme;
+  Call_ServerCommunicationLinksCreateOrUpdate_564090 = ref object of OpenApiRestCall_563540
+proc url_ServerCommunicationLinksCreateOrUpdate_564092(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -246,44 +250,44 @@ proc url_ServerCommunicationLinksCreateOrUpdate_568192(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ServerCommunicationLinksCreateOrUpdate_568191(path: JsonNode;
+proc validate_ServerCommunicationLinksCreateOrUpdate_564091(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Creates a server communication link.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   ##   serverName: JString (required)
   ##             : The name of the server.
   ##   communicationLinkName: JString (required)
   ##                        : The name of the server communication link.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID that identifies an Azure subscription.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568210 = path.getOrDefault("resourceGroupName")
-  valid_568210 = validateParameter(valid_568210, JString, required = true,
+        "path argument is necessary due to required `serverName` field"
+  var valid_564110 = path.getOrDefault("serverName")
+  valid_564110 = validateParameter(valid_564110, JString, required = true,
                                  default = nil)
-  if valid_568210 != nil:
-    section.add "resourceGroupName", valid_568210
-  var valid_568211 = path.getOrDefault("serverName")
-  valid_568211 = validateParameter(valid_568211, JString, required = true,
+  if valid_564110 != nil:
+    section.add "serverName", valid_564110
+  var valid_564111 = path.getOrDefault("communicationLinkName")
+  valid_564111 = validateParameter(valid_564111, JString, required = true,
                                  default = nil)
-  if valid_568211 != nil:
-    section.add "serverName", valid_568211
-  var valid_568212 = path.getOrDefault("communicationLinkName")
-  valid_568212 = validateParameter(valid_568212, JString, required = true,
+  if valid_564111 != nil:
+    section.add "communicationLinkName", valid_564111
+  var valid_564112 = path.getOrDefault("subscriptionId")
+  valid_564112 = validateParameter(valid_564112, JString, required = true,
                                  default = nil)
-  if valid_568212 != nil:
-    section.add "communicationLinkName", valid_568212
-  var valid_568213 = path.getOrDefault("subscriptionId")
-  valid_568213 = validateParameter(valid_568213, JString, required = true,
+  if valid_564112 != nil:
+    section.add "subscriptionId", valid_564112
+  var valid_564113 = path.getOrDefault("resourceGroupName")
+  valid_564113 = validateParameter(valid_564113, JString, required = true,
                                  default = nil)
-  if valid_568213 != nil:
-    section.add "subscriptionId", valid_568213
+  if valid_564113 != nil:
+    section.add "resourceGroupName", valid_564113
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -291,11 +295,11 @@ proc validate_ServerCommunicationLinksCreateOrUpdate_568191(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568214 = query.getOrDefault("api-version")
-  valid_568214 = validateParameter(valid_568214, JString, required = true,
+  var valid_564114 = query.getOrDefault("api-version")
+  valid_564114 = validateParameter(valid_564114, JString, required = true,
                                  default = nil)
-  if valid_568214 != nil:
-    section.add "api-version", valid_568214
+  if valid_564114 != nil:
+    section.add "api-version", valid_564114
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -309,28 +313,25 @@ proc validate_ServerCommunicationLinksCreateOrUpdate_568191(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568216: Call_ServerCommunicationLinksCreateOrUpdate_568190;
+proc call*(call_564116: Call_ServerCommunicationLinksCreateOrUpdate_564090;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Creates a server communication link.
   ## 
-  let valid = call_568216.validator(path, query, header, formData, body)
-  let scheme = call_568216.pickScheme
+  let valid = call_564116.validator(path, query, header, formData, body)
+  let scheme = call_564116.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568216.url(scheme.get, call_568216.host, call_568216.base,
-                         call_568216.route, valid.getOrDefault("path"),
+  let url = call_564116.url(scheme.get, call_564116.host, call_564116.base,
+                         call_564116.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568216, url, valid)
+  result = hook(call_564116, url, valid)
 
-proc call*(call_568217: Call_ServerCommunicationLinksCreateOrUpdate_568190;
-          resourceGroupName: string; apiVersion: string; serverName: string;
-          communicationLinkName: string; subscriptionId: string;
-          parameters: JsonNode): Recallable =
+proc call*(call_564117: Call_ServerCommunicationLinksCreateOrUpdate_564090;
+          apiVersion: string; serverName: string; communicationLinkName: string;
+          subscriptionId: string; resourceGroupName: string; parameters: JsonNode): Recallable =
   ## serverCommunicationLinksCreateOrUpdate
   ## Creates a server communication link.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   ##   apiVersion: string (required)
   ##             : The API version to use for the request.
   ##   serverName: string (required)
@@ -339,29 +340,31 @@ proc call*(call_568217: Call_ServerCommunicationLinksCreateOrUpdate_568190;
   ##                        : The name of the server communication link.
   ##   subscriptionId: string (required)
   ##                 : The subscription ID that identifies an Azure subscription.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   ##   parameters: JObject (required)
   ##             : The required parameters for creating a server communication link.
-  var path_568218 = newJObject()
-  var query_568219 = newJObject()
-  var body_568220 = newJObject()
-  add(path_568218, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568219, "api-version", newJString(apiVersion))
-  add(path_568218, "serverName", newJString(serverName))
-  add(path_568218, "communicationLinkName", newJString(communicationLinkName))
-  add(path_568218, "subscriptionId", newJString(subscriptionId))
+  var path_564118 = newJObject()
+  var query_564119 = newJObject()
+  var body_564120 = newJObject()
+  add(query_564119, "api-version", newJString(apiVersion))
+  add(path_564118, "serverName", newJString(serverName))
+  add(path_564118, "communicationLinkName", newJString(communicationLinkName))
+  add(path_564118, "subscriptionId", newJString(subscriptionId))
+  add(path_564118, "resourceGroupName", newJString(resourceGroupName))
   if parameters != nil:
-    body_568220 = parameters
-  result = call_568217.call(path_568218, query_568219, nil, nil, body_568220)
+    body_564120 = parameters
+  result = call_564117.call(path_564118, query_564119, nil, nil, body_564120)
 
-var serverCommunicationLinksCreateOrUpdate* = Call_ServerCommunicationLinksCreateOrUpdate_568190(
+var serverCommunicationLinksCreateOrUpdate* = Call_ServerCommunicationLinksCreateOrUpdate_564090(
     name: "serverCommunicationLinksCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/servers/{serverName}/communicationLinks/{communicationLinkName}",
-    validator: validate_ServerCommunicationLinksCreateOrUpdate_568191, base: "",
-    url: url_ServerCommunicationLinksCreateOrUpdate_568192,
+    validator: validate_ServerCommunicationLinksCreateOrUpdate_564091, base: "",
+    url: url_ServerCommunicationLinksCreateOrUpdate_564092,
     schemes: {Scheme.Https})
 type
-  Call_ServerCommunicationLinksGet_568178 = ref object of OpenApiRestCall_567642
-proc url_ServerCommunicationLinksGet_568180(protocol: Scheme; host: string;
+  Call_ServerCommunicationLinksGet_564078 = ref object of OpenApiRestCall_563540
+proc url_ServerCommunicationLinksGet_564080(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -387,44 +390,44 @@ proc url_ServerCommunicationLinksGet_568180(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ServerCommunicationLinksGet_568179(path: JsonNode; query: JsonNode;
+proc validate_ServerCommunicationLinksGet_564079(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Returns a server communication link.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   ##   serverName: JString (required)
   ##             : The name of the server.
   ##   communicationLinkName: JString (required)
   ##                        : The name of the server communication link.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID that identifies an Azure subscription.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568181 = path.getOrDefault("resourceGroupName")
-  valid_568181 = validateParameter(valid_568181, JString, required = true,
+        "path argument is necessary due to required `serverName` field"
+  var valid_564081 = path.getOrDefault("serverName")
+  valid_564081 = validateParameter(valid_564081, JString, required = true,
                                  default = nil)
-  if valid_568181 != nil:
-    section.add "resourceGroupName", valid_568181
-  var valid_568182 = path.getOrDefault("serverName")
-  valid_568182 = validateParameter(valid_568182, JString, required = true,
+  if valid_564081 != nil:
+    section.add "serverName", valid_564081
+  var valid_564082 = path.getOrDefault("communicationLinkName")
+  valid_564082 = validateParameter(valid_564082, JString, required = true,
                                  default = nil)
-  if valid_568182 != nil:
-    section.add "serverName", valid_568182
-  var valid_568183 = path.getOrDefault("communicationLinkName")
-  valid_568183 = validateParameter(valid_568183, JString, required = true,
+  if valid_564082 != nil:
+    section.add "communicationLinkName", valid_564082
+  var valid_564083 = path.getOrDefault("subscriptionId")
+  valid_564083 = validateParameter(valid_564083, JString, required = true,
                                  default = nil)
-  if valid_568183 != nil:
-    section.add "communicationLinkName", valid_568183
-  var valid_568184 = path.getOrDefault("subscriptionId")
-  valid_568184 = validateParameter(valid_568184, JString, required = true,
+  if valid_564083 != nil:
+    section.add "subscriptionId", valid_564083
+  var valid_564084 = path.getOrDefault("resourceGroupName")
+  valid_564084 = validateParameter(valid_564084, JString, required = true,
                                  default = nil)
-  if valid_568184 != nil:
-    section.add "subscriptionId", valid_568184
+  if valid_564084 != nil:
+    section.add "resourceGroupName", valid_564084
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -432,11 +435,11 @@ proc validate_ServerCommunicationLinksGet_568179(path: JsonNode; query: JsonNode
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568185 = query.getOrDefault("api-version")
-  valid_568185 = validateParameter(valid_568185, JString, required = true,
+  var valid_564085 = query.getOrDefault("api-version")
+  valid_564085 = validateParameter(valid_564085, JString, required = true,
                                  default = nil)
-  if valid_568185 != nil:
-    section.add "api-version", valid_568185
+  if valid_564085 != nil:
+    section.add "api-version", valid_564085
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -445,26 +448,24 @@ proc validate_ServerCommunicationLinksGet_568179(path: JsonNode; query: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_568186: Call_ServerCommunicationLinksGet_568178; path: JsonNode;
+proc call*(call_564086: Call_ServerCommunicationLinksGet_564078; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Returns a server communication link.
   ## 
-  let valid = call_568186.validator(path, query, header, formData, body)
-  let scheme = call_568186.pickScheme
+  let valid = call_564086.validator(path, query, header, formData, body)
+  let scheme = call_564086.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568186.url(scheme.get, call_568186.host, call_568186.base,
-                         call_568186.route, valid.getOrDefault("path"),
+  let url = call_564086.url(scheme.get, call_564086.host, call_564086.base,
+                         call_564086.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568186, url, valid)
+  result = hook(call_564086, url, valid)
 
-proc call*(call_568187: Call_ServerCommunicationLinksGet_568178;
-          resourceGroupName: string; apiVersion: string; serverName: string;
-          communicationLinkName: string; subscriptionId: string): Recallable =
+proc call*(call_564087: Call_ServerCommunicationLinksGet_564078;
+          apiVersion: string; serverName: string; communicationLinkName: string;
+          subscriptionId: string; resourceGroupName: string): Recallable =
   ## serverCommunicationLinksGet
   ## Returns a server communication link.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   ##   apiVersion: string (required)
   ##             : The API version to use for the request.
   ##   serverName: string (required)
@@ -473,23 +474,25 @@ proc call*(call_568187: Call_ServerCommunicationLinksGet_568178;
   ##                        : The name of the server communication link.
   ##   subscriptionId: string (required)
   ##                 : The subscription ID that identifies an Azure subscription.
-  var path_568188 = newJObject()
-  var query_568189 = newJObject()
-  add(path_568188, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568189, "api-version", newJString(apiVersion))
-  add(path_568188, "serverName", newJString(serverName))
-  add(path_568188, "communicationLinkName", newJString(communicationLinkName))
-  add(path_568188, "subscriptionId", newJString(subscriptionId))
-  result = call_568187.call(path_568188, query_568189, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
+  var path_564088 = newJObject()
+  var query_564089 = newJObject()
+  add(query_564089, "api-version", newJString(apiVersion))
+  add(path_564088, "serverName", newJString(serverName))
+  add(path_564088, "communicationLinkName", newJString(communicationLinkName))
+  add(path_564088, "subscriptionId", newJString(subscriptionId))
+  add(path_564088, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564087.call(path_564088, query_564089, nil, nil, nil)
 
-var serverCommunicationLinksGet* = Call_ServerCommunicationLinksGet_568178(
+var serverCommunicationLinksGet* = Call_ServerCommunicationLinksGet_564078(
     name: "serverCommunicationLinksGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/servers/{serverName}/communicationLinks/{communicationLinkName}",
-    validator: validate_ServerCommunicationLinksGet_568179, base: "",
-    url: url_ServerCommunicationLinksGet_568180, schemes: {Scheme.Https})
+    validator: validate_ServerCommunicationLinksGet_564079, base: "",
+    url: url_ServerCommunicationLinksGet_564080, schemes: {Scheme.Https})
 type
-  Call_ServerCommunicationLinksDelete_568221 = ref object of OpenApiRestCall_567642
-proc url_ServerCommunicationLinksDelete_568223(protocol: Scheme; host: string;
+  Call_ServerCommunicationLinksDelete_564121 = ref object of OpenApiRestCall_563540
+proc url_ServerCommunicationLinksDelete_564123(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -515,44 +518,44 @@ proc url_ServerCommunicationLinksDelete_568223(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ServerCommunicationLinksDelete_568222(path: JsonNode;
+proc validate_ServerCommunicationLinksDelete_564122(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Deletes a server communication link.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   ##   serverName: JString (required)
   ##             : The name of the server.
   ##   communicationLinkName: JString (required)
   ##                        : The name of the server communication link.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID that identifies an Azure subscription.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568224 = path.getOrDefault("resourceGroupName")
-  valid_568224 = validateParameter(valid_568224, JString, required = true,
+        "path argument is necessary due to required `serverName` field"
+  var valid_564124 = path.getOrDefault("serverName")
+  valid_564124 = validateParameter(valid_564124, JString, required = true,
                                  default = nil)
-  if valid_568224 != nil:
-    section.add "resourceGroupName", valid_568224
-  var valid_568225 = path.getOrDefault("serverName")
-  valid_568225 = validateParameter(valid_568225, JString, required = true,
+  if valid_564124 != nil:
+    section.add "serverName", valid_564124
+  var valid_564125 = path.getOrDefault("communicationLinkName")
+  valid_564125 = validateParameter(valid_564125, JString, required = true,
                                  default = nil)
-  if valid_568225 != nil:
-    section.add "serverName", valid_568225
-  var valid_568226 = path.getOrDefault("communicationLinkName")
-  valid_568226 = validateParameter(valid_568226, JString, required = true,
+  if valid_564125 != nil:
+    section.add "communicationLinkName", valid_564125
+  var valid_564126 = path.getOrDefault("subscriptionId")
+  valid_564126 = validateParameter(valid_564126, JString, required = true,
                                  default = nil)
-  if valid_568226 != nil:
-    section.add "communicationLinkName", valid_568226
-  var valid_568227 = path.getOrDefault("subscriptionId")
-  valid_568227 = validateParameter(valid_568227, JString, required = true,
+  if valid_564126 != nil:
+    section.add "subscriptionId", valid_564126
+  var valid_564127 = path.getOrDefault("resourceGroupName")
+  valid_564127 = validateParameter(valid_564127, JString, required = true,
                                  default = nil)
-  if valid_568227 != nil:
-    section.add "subscriptionId", valid_568227
+  if valid_564127 != nil:
+    section.add "resourceGroupName", valid_564127
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -560,11 +563,11 @@ proc validate_ServerCommunicationLinksDelete_568222(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568228 = query.getOrDefault("api-version")
-  valid_568228 = validateParameter(valid_568228, JString, required = true,
+  var valid_564128 = query.getOrDefault("api-version")
+  valid_564128 = validateParameter(valid_564128, JString, required = true,
                                  default = nil)
-  if valid_568228 != nil:
-    section.add "api-version", valid_568228
+  if valid_564128 != nil:
+    section.add "api-version", valid_564128
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -573,26 +576,24 @@ proc validate_ServerCommunicationLinksDelete_568222(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568229: Call_ServerCommunicationLinksDelete_568221; path: JsonNode;
+proc call*(call_564129: Call_ServerCommunicationLinksDelete_564121; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes a server communication link.
   ## 
-  let valid = call_568229.validator(path, query, header, formData, body)
-  let scheme = call_568229.pickScheme
+  let valid = call_564129.validator(path, query, header, formData, body)
+  let scheme = call_564129.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568229.url(scheme.get, call_568229.host, call_568229.base,
-                         call_568229.route, valid.getOrDefault("path"),
+  let url = call_564129.url(scheme.get, call_564129.host, call_564129.base,
+                         call_564129.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568229, url, valid)
+  result = hook(call_564129, url, valid)
 
-proc call*(call_568230: Call_ServerCommunicationLinksDelete_568221;
-          resourceGroupName: string; apiVersion: string; serverName: string;
-          communicationLinkName: string; subscriptionId: string): Recallable =
+proc call*(call_564130: Call_ServerCommunicationLinksDelete_564121;
+          apiVersion: string; serverName: string; communicationLinkName: string;
+          subscriptionId: string; resourceGroupName: string): Recallable =
   ## serverCommunicationLinksDelete
   ## Deletes a server communication link.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   ##   apiVersion: string (required)
   ##             : The API version to use for the request.
   ##   serverName: string (required)
@@ -601,20 +602,22 @@ proc call*(call_568230: Call_ServerCommunicationLinksDelete_568221;
   ##                        : The name of the server communication link.
   ##   subscriptionId: string (required)
   ##                 : The subscription ID that identifies an Azure subscription.
-  var path_568231 = newJObject()
-  var query_568232 = newJObject()
-  add(path_568231, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568232, "api-version", newJString(apiVersion))
-  add(path_568231, "serverName", newJString(serverName))
-  add(path_568231, "communicationLinkName", newJString(communicationLinkName))
-  add(path_568231, "subscriptionId", newJString(subscriptionId))
-  result = call_568230.call(path_568231, query_568232, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
+  var path_564131 = newJObject()
+  var query_564132 = newJObject()
+  add(query_564132, "api-version", newJString(apiVersion))
+  add(path_564131, "serverName", newJString(serverName))
+  add(path_564131, "communicationLinkName", newJString(communicationLinkName))
+  add(path_564131, "subscriptionId", newJString(subscriptionId))
+  add(path_564131, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564130.call(path_564131, query_564132, nil, nil, nil)
 
-var serverCommunicationLinksDelete* = Call_ServerCommunicationLinksDelete_568221(
+var serverCommunicationLinksDelete* = Call_ServerCommunicationLinksDelete_564121(
     name: "serverCommunicationLinksDelete", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/servers/{serverName}/communicationLinks/{communicationLinkName}",
-    validator: validate_ServerCommunicationLinksDelete_568222, base: "",
-    url: url_ServerCommunicationLinksDelete_568223, schemes: {Scheme.Https})
+    validator: validate_ServerCommunicationLinksDelete_564122, base: "",
+    url: url_ServerCommunicationLinksDelete_564123, schemes: {Scheme.Https})
 export
   rest
 

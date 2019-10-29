@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_573658 = ref object of OpenApiRestCall
+  OpenApiRestCall_563556 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_573658](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563556](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_573658): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563556): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,8 +107,8 @@ const
   macServiceName = "apimanagement-apimauthorizationservers"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_AuthorizationServerList_573880 = ref object of OpenApiRestCall_573658
-proc url_AuthorizationServerList_573882(protocol: Scheme; host: string; base: string;
+  Call_AuthorizationServerList_563778 = ref object of OpenApiRestCall_563556
+proc url_AuthorizationServerList_563780(protocol: Scheme; host: string; base: string;
                                        route: string; path: JsonNode;
                                        query: JsonNode): Uri =
   result.scheme = $protocol
@@ -112,7 +116,7 @@ proc url_AuthorizationServerList_573882(protocol: Scheme; host: string; base: st
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_AuthorizationServerList_573881(path: JsonNode; query: JsonNode;
+proc validate_AuthorizationServerList_563779(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists a collection of authorization servers defined within a service instance.
   ## 
@@ -121,10 +125,10 @@ proc validate_AuthorizationServerList_573881(path: JsonNode; query: JsonNode;
   section = newJObject()
   result.add "path", section
   ## parameters in `query` object:
-  ##   api-version: JString (required)
-  ##              : Version of the API to be used with the client request.
   ##   $top: JInt
   ##       : Number of records to return.
+  ##   api-version: JString (required)
+  ##              : Version of the API to be used with the client request.
   ##   $skip: JInt
   ##        : Number of records to skip.
   ##   $filter: JString
@@ -134,26 +138,26 @@ proc validate_AuthorizationServerList_573881(path: JsonNode; query: JsonNode;
   ## | id    | ge, le, eq, ne, gt, lt | substringof, contains, startswith, endswith |
   ## | name  | ge, le, eq, ne, gt, lt | substringof, contains, startswith, endswith |
   section = newJObject()
+  var valid_563929 = query.getOrDefault("$top")
+  valid_563929 = validateParameter(valid_563929, JInt, required = false, default = nil)
+  if valid_563929 != nil:
+    section.add "$top", valid_563929
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574029 = query.getOrDefault("api-version")
-  valid_574029 = validateParameter(valid_574029, JString, required = true,
+  var valid_563930 = query.getOrDefault("api-version")
+  valid_563930 = validateParameter(valid_563930, JString, required = true,
                                  default = nil)
-  if valid_574029 != nil:
-    section.add "api-version", valid_574029
-  var valid_574030 = query.getOrDefault("$top")
-  valid_574030 = validateParameter(valid_574030, JInt, required = false, default = nil)
-  if valid_574030 != nil:
-    section.add "$top", valid_574030
-  var valid_574031 = query.getOrDefault("$skip")
-  valid_574031 = validateParameter(valid_574031, JInt, required = false, default = nil)
-  if valid_574031 != nil:
-    section.add "$skip", valid_574031
-  var valid_574032 = query.getOrDefault("$filter")
-  valid_574032 = validateParameter(valid_574032, JString, required = false,
+  if valid_563930 != nil:
+    section.add "api-version", valid_563930
+  var valid_563931 = query.getOrDefault("$skip")
+  valid_563931 = validateParameter(valid_563931, JInt, required = false, default = nil)
+  if valid_563931 != nil:
+    section.add "$skip", valid_563931
+  var valid_563932 = query.getOrDefault("$filter")
+  valid_563932 = validateParameter(valid_563932, JString, required = false,
                                  default = nil)
-  if valid_574032 != nil:
-    section.add "$filter", valid_574032
+  if valid_563932 != nil:
+    section.add "$filter", valid_563932
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -162,27 +166,27 @@ proc validate_AuthorizationServerList_573881(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574059: Call_AuthorizationServerList_573880; path: JsonNode;
+proc call*(call_563959: Call_AuthorizationServerList_563778; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists a collection of authorization servers defined within a service instance.
   ## 
-  let valid = call_574059.validator(path, query, header, formData, body)
-  let scheme = call_574059.pickScheme
+  let valid = call_563959.validator(path, query, header, formData, body)
+  let scheme = call_563959.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574059.url(scheme.get, call_574059.host, call_574059.base,
-                         call_574059.route, valid.getOrDefault("path"),
+  let url = call_563959.url(scheme.get, call_563959.host, call_563959.base,
+                         call_563959.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574059, url, valid)
+  result = hook(call_563959, url, valid)
 
-proc call*(call_574130: Call_AuthorizationServerList_573880; apiVersion: string;
+proc call*(call_564030: Call_AuthorizationServerList_563778; apiVersion: string;
           Top: int = 0; Skip: int = 0; Filter: string = ""): Recallable =
   ## authorizationServerList
   ## Lists a collection of authorization servers defined within a service instance.
-  ##   apiVersion: string (required)
-  ##             : Version of the API to be used with the client request.
   ##   Top: int
   ##      : Number of records to return.
+  ##   apiVersion: string (required)
+  ##             : Version of the API to be used with the client request.
   ##   Skip: int
   ##       : Number of records to skip.
   ##   Filter: string
@@ -191,20 +195,20 @@ proc call*(call_574130: Call_AuthorizationServerList_573880; apiVersion: string;
   ## |-------|------------------------|---------------------------------------------|
   ## | id    | ge, le, eq, ne, gt, lt | substringof, contains, startswith, endswith |
   ## | name  | ge, le, eq, ne, gt, lt | substringof, contains, startswith, endswith |
-  var query_574131 = newJObject()
-  add(query_574131, "api-version", newJString(apiVersion))
-  add(query_574131, "$top", newJInt(Top))
-  add(query_574131, "$skip", newJInt(Skip))
-  add(query_574131, "$filter", newJString(Filter))
-  result = call_574130.call(nil, query_574131, nil, nil, nil)
+  var query_564031 = newJObject()
+  add(query_564031, "$top", newJInt(Top))
+  add(query_564031, "api-version", newJString(apiVersion))
+  add(query_564031, "$skip", newJInt(Skip))
+  add(query_564031, "$filter", newJString(Filter))
+  result = call_564030.call(nil, query_564031, nil, nil, nil)
 
-var authorizationServerList* = Call_AuthorizationServerList_573880(
+var authorizationServerList* = Call_AuthorizationServerList_563778(
     name: "authorizationServerList", meth: HttpMethod.HttpGet, host: "azure.local",
-    route: "/authorizationServers", validator: validate_AuthorizationServerList_573881,
-    base: "", url: url_AuthorizationServerList_573882, schemes: {Scheme.Https})
+    route: "/authorizationServers", validator: validate_AuthorizationServerList_563779,
+    base: "", url: url_AuthorizationServerList_563780, schemes: {Scheme.Https})
 type
-  Call_AuthorizationServerCreateOrUpdate_574203 = ref object of OpenApiRestCall_573658
-proc url_AuthorizationServerCreateOrUpdate_574205(protocol: Scheme; host: string;
+  Call_AuthorizationServerCreateOrUpdate_564103 = ref object of OpenApiRestCall_563556
+proc url_AuthorizationServerCreateOrUpdate_564105(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -219,7 +223,7 @@ proc url_AuthorizationServerCreateOrUpdate_574205(protocol: Scheme; host: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AuthorizationServerCreateOrUpdate_574204(path: JsonNode;
+proc validate_AuthorizationServerCreateOrUpdate_564104(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Creates new authorization server or updates an existing authorization server.
   ## 
@@ -230,11 +234,11 @@ proc validate_AuthorizationServerCreateOrUpdate_574204(path: JsonNode;
   ##          : Identifier of the authorization server.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `authsid` field"
-  var valid_574223 = path.getOrDefault("authsid")
-  valid_574223 = validateParameter(valid_574223, JString, required = true,
+  var valid_564123 = path.getOrDefault("authsid")
+  valid_564123 = validateParameter(valid_564123, JString, required = true,
                                  default = nil)
-  if valid_574223 != nil:
-    section.add "authsid", valid_574223
+  if valid_564123 != nil:
+    section.add "authsid", valid_564123
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -242,11 +246,11 @@ proc validate_AuthorizationServerCreateOrUpdate_574204(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574224 = query.getOrDefault("api-version")
-  valid_574224 = validateParameter(valid_574224, JString, required = true,
+  var valid_564124 = query.getOrDefault("api-version")
+  valid_564124 = validateParameter(valid_564124, JString, required = true,
                                  default = nil)
-  if valid_574224 != nil:
-    section.add "api-version", valid_574224
+  if valid_564124 != nil:
+    section.add "api-version", valid_564124
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -260,21 +264,21 @@ proc validate_AuthorizationServerCreateOrUpdate_574204(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574226: Call_AuthorizationServerCreateOrUpdate_574203;
+proc call*(call_564126: Call_AuthorizationServerCreateOrUpdate_564103;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Creates new authorization server or updates an existing authorization server.
   ## 
-  let valid = call_574226.validator(path, query, header, formData, body)
-  let scheme = call_574226.pickScheme
+  let valid = call_564126.validator(path, query, header, formData, body)
+  let scheme = call_564126.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574226.url(scheme.get, call_574226.host, call_574226.base,
-                         call_574226.route, valid.getOrDefault("path"),
+  let url = call_564126.url(scheme.get, call_564126.host, call_564126.base,
+                         call_564126.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574226, url, valid)
+  result = hook(call_564126, url, valid)
 
-proc call*(call_574227: Call_AuthorizationServerCreateOrUpdate_574203;
+proc call*(call_564127: Call_AuthorizationServerCreateOrUpdate_564103;
           apiVersion: string; authsid: string; parameters: JsonNode): Recallable =
   ## authorizationServerCreateOrUpdate
   ## Creates new authorization server or updates an existing authorization server.
@@ -284,23 +288,23 @@ proc call*(call_574227: Call_AuthorizationServerCreateOrUpdate_574203;
   ##          : Identifier of the authorization server.
   ##   parameters: JObject (required)
   ##             : Create or update parameters.
-  var path_574228 = newJObject()
-  var query_574229 = newJObject()
-  var body_574230 = newJObject()
-  add(query_574229, "api-version", newJString(apiVersion))
-  add(path_574228, "authsid", newJString(authsid))
+  var path_564128 = newJObject()
+  var query_564129 = newJObject()
+  var body_564130 = newJObject()
+  add(query_564129, "api-version", newJString(apiVersion))
+  add(path_564128, "authsid", newJString(authsid))
   if parameters != nil:
-    body_574230 = parameters
-  result = call_574227.call(path_574228, query_574229, nil, nil, body_574230)
+    body_564130 = parameters
+  result = call_564127.call(path_564128, query_564129, nil, nil, body_564130)
 
-var authorizationServerCreateOrUpdate* = Call_AuthorizationServerCreateOrUpdate_574203(
+var authorizationServerCreateOrUpdate* = Call_AuthorizationServerCreateOrUpdate_564103(
     name: "authorizationServerCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "azure.local", route: "/authorizationServers/{authsid}",
-    validator: validate_AuthorizationServerCreateOrUpdate_574204, base: "",
-    url: url_AuthorizationServerCreateOrUpdate_574205, schemes: {Scheme.Https})
+    validator: validate_AuthorizationServerCreateOrUpdate_564104, base: "",
+    url: url_AuthorizationServerCreateOrUpdate_564105, schemes: {Scheme.Https})
 type
-  Call_AuthorizationServerGet_574171 = ref object of OpenApiRestCall_573658
-proc url_AuthorizationServerGet_574173(protocol: Scheme; host: string; base: string;
+  Call_AuthorizationServerGet_564071 = ref object of OpenApiRestCall_563556
+proc url_AuthorizationServerGet_564073(protocol: Scheme; host: string; base: string;
                                       route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -315,7 +319,7 @@ proc url_AuthorizationServerGet_574173(protocol: Scheme; host: string; base: str
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AuthorizationServerGet_574172(path: JsonNode; query: JsonNode;
+proc validate_AuthorizationServerGet_564072(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the details of the authorization server specified by its identifier.
   ## 
@@ -326,11 +330,11 @@ proc validate_AuthorizationServerGet_574172(path: JsonNode; query: JsonNode;
   ##          : Identifier of the authorization server.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `authsid` field"
-  var valid_574197 = path.getOrDefault("authsid")
-  valid_574197 = validateParameter(valid_574197, JString, required = true,
+  var valid_564097 = path.getOrDefault("authsid")
+  valid_564097 = validateParameter(valid_564097, JString, required = true,
                                  default = nil)
-  if valid_574197 != nil:
-    section.add "authsid", valid_574197
+  if valid_564097 != nil:
+    section.add "authsid", valid_564097
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -338,11 +342,11 @@ proc validate_AuthorizationServerGet_574172(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574198 = query.getOrDefault("api-version")
-  valid_574198 = validateParameter(valid_574198, JString, required = true,
+  var valid_564098 = query.getOrDefault("api-version")
+  valid_564098 = validateParameter(valid_564098, JString, required = true,
                                  default = nil)
-  if valid_574198 != nil:
-    section.add "api-version", valid_574198
+  if valid_564098 != nil:
+    section.add "api-version", valid_564098
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -351,20 +355,20 @@ proc validate_AuthorizationServerGet_574172(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574199: Call_AuthorizationServerGet_574171; path: JsonNode;
+proc call*(call_564099: Call_AuthorizationServerGet_564071; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the details of the authorization server specified by its identifier.
   ## 
-  let valid = call_574199.validator(path, query, header, formData, body)
-  let scheme = call_574199.pickScheme
+  let valid = call_564099.validator(path, query, header, formData, body)
+  let scheme = call_564099.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574199.url(scheme.get, call_574199.host, call_574199.base,
-                         call_574199.route, valid.getOrDefault("path"),
+  let url = call_564099.url(scheme.get, call_564099.host, call_564099.base,
+                         call_564099.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574199, url, valid)
+  result = hook(call_564099, url, valid)
 
-proc call*(call_574200: Call_AuthorizationServerGet_574171; apiVersion: string;
+proc call*(call_564100: Call_AuthorizationServerGet_564071; apiVersion: string;
           authsid: string): Recallable =
   ## authorizationServerGet
   ## Gets the details of the authorization server specified by its identifier.
@@ -372,20 +376,20 @@ proc call*(call_574200: Call_AuthorizationServerGet_574171; apiVersion: string;
   ##             : Version of the API to be used with the client request.
   ##   authsid: string (required)
   ##          : Identifier of the authorization server.
-  var path_574201 = newJObject()
-  var query_574202 = newJObject()
-  add(query_574202, "api-version", newJString(apiVersion))
-  add(path_574201, "authsid", newJString(authsid))
-  result = call_574200.call(path_574201, query_574202, nil, nil, nil)
+  var path_564101 = newJObject()
+  var query_564102 = newJObject()
+  add(query_564102, "api-version", newJString(apiVersion))
+  add(path_564101, "authsid", newJString(authsid))
+  result = call_564100.call(path_564101, query_564102, nil, nil, nil)
 
-var authorizationServerGet* = Call_AuthorizationServerGet_574171(
+var authorizationServerGet* = Call_AuthorizationServerGet_564071(
     name: "authorizationServerGet", meth: HttpMethod.HttpGet, host: "azure.local",
     route: "/authorizationServers/{authsid}",
-    validator: validate_AuthorizationServerGet_574172, base: "",
-    url: url_AuthorizationServerGet_574173, schemes: {Scheme.Https})
+    validator: validate_AuthorizationServerGet_564072, base: "",
+    url: url_AuthorizationServerGet_564073, schemes: {Scheme.Https})
 type
-  Call_AuthorizationServerUpdate_574241 = ref object of OpenApiRestCall_573658
-proc url_AuthorizationServerUpdate_574243(protocol: Scheme; host: string;
+  Call_AuthorizationServerUpdate_564141 = ref object of OpenApiRestCall_563556
+proc url_AuthorizationServerUpdate_564143(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -400,7 +404,7 @@ proc url_AuthorizationServerUpdate_574243(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AuthorizationServerUpdate_574242(path: JsonNode; query: JsonNode;
+proc validate_AuthorizationServerUpdate_564142(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Updates the details of the authorization server specified by its identifier.
   ## 
@@ -411,11 +415,11 @@ proc validate_AuthorizationServerUpdate_574242(path: JsonNode; query: JsonNode;
   ##          : Identifier of the authorization server.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `authsid` field"
-  var valid_574254 = path.getOrDefault("authsid")
-  valid_574254 = validateParameter(valid_574254, JString, required = true,
+  var valid_564154 = path.getOrDefault("authsid")
+  valid_564154 = validateParameter(valid_564154, JString, required = true,
                                  default = nil)
-  if valid_574254 != nil:
-    section.add "authsid", valid_574254
+  if valid_564154 != nil:
+    section.add "authsid", valid_564154
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -423,11 +427,11 @@ proc validate_AuthorizationServerUpdate_574242(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574255 = query.getOrDefault("api-version")
-  valid_574255 = validateParameter(valid_574255, JString, required = true,
+  var valid_564155 = query.getOrDefault("api-version")
+  valid_564155 = validateParameter(valid_564155, JString, required = true,
                                  default = nil)
-  if valid_574255 != nil:
-    section.add "api-version", valid_574255
+  if valid_564155 != nil:
+    section.add "api-version", valid_564155
   result.add "query", section
   ## parameters in `header` object:
   ##   If-Match: JString (required)
@@ -435,11 +439,11 @@ proc validate_AuthorizationServerUpdate_574242(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert header != nil,
         "header argument is necessary due to required `If-Match` field"
-  var valid_574256 = header.getOrDefault("If-Match")
-  valid_574256 = validateParameter(valid_574256, JString, required = true,
+  var valid_564156 = header.getOrDefault("If-Match")
+  valid_564156 = validateParameter(valid_564156, JString, required = true,
                                  default = nil)
-  if valid_574256 != nil:
-    section.add "If-Match", valid_574256
+  if valid_564156 != nil:
+    section.add "If-Match", valid_564156
   result.add "header", section
   section = newJObject()
   result.add "formData", section
@@ -451,20 +455,20 @@ proc validate_AuthorizationServerUpdate_574242(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574258: Call_AuthorizationServerUpdate_574241; path: JsonNode;
+proc call*(call_564158: Call_AuthorizationServerUpdate_564141; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Updates the details of the authorization server specified by its identifier.
   ## 
-  let valid = call_574258.validator(path, query, header, formData, body)
-  let scheme = call_574258.pickScheme
+  let valid = call_564158.validator(path, query, header, formData, body)
+  let scheme = call_564158.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574258.url(scheme.get, call_574258.host, call_574258.base,
-                         call_574258.route, valid.getOrDefault("path"),
+  let url = call_564158.url(scheme.get, call_564158.host, call_564158.base,
+                         call_564158.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574258, url, valid)
+  result = hook(call_564158, url, valid)
 
-proc call*(call_574259: Call_AuthorizationServerUpdate_574241; apiVersion: string;
+proc call*(call_564159: Call_AuthorizationServerUpdate_564141; apiVersion: string;
           authsid: string; parameters: JsonNode): Recallable =
   ## authorizationServerUpdate
   ## Updates the details of the authorization server specified by its identifier.
@@ -474,23 +478,23 @@ proc call*(call_574259: Call_AuthorizationServerUpdate_574241; apiVersion: strin
   ##          : Identifier of the authorization server.
   ##   parameters: JObject (required)
   ##             : OAuth2 Server settings Update parameters.
-  var path_574260 = newJObject()
-  var query_574261 = newJObject()
-  var body_574262 = newJObject()
-  add(query_574261, "api-version", newJString(apiVersion))
-  add(path_574260, "authsid", newJString(authsid))
+  var path_564160 = newJObject()
+  var query_564161 = newJObject()
+  var body_564162 = newJObject()
+  add(query_564161, "api-version", newJString(apiVersion))
+  add(path_564160, "authsid", newJString(authsid))
   if parameters != nil:
-    body_574262 = parameters
-  result = call_574259.call(path_574260, query_574261, nil, nil, body_574262)
+    body_564162 = parameters
+  result = call_564159.call(path_564160, query_564161, nil, nil, body_564162)
 
-var authorizationServerUpdate* = Call_AuthorizationServerUpdate_574241(
+var authorizationServerUpdate* = Call_AuthorizationServerUpdate_564141(
     name: "authorizationServerUpdate", meth: HttpMethod.HttpPatch,
     host: "azure.local", route: "/authorizationServers/{authsid}",
-    validator: validate_AuthorizationServerUpdate_574242, base: "",
-    url: url_AuthorizationServerUpdate_574243, schemes: {Scheme.Https})
+    validator: validate_AuthorizationServerUpdate_564142, base: "",
+    url: url_AuthorizationServerUpdate_564143, schemes: {Scheme.Https})
 type
-  Call_AuthorizationServerDelete_574231 = ref object of OpenApiRestCall_573658
-proc url_AuthorizationServerDelete_574233(protocol: Scheme; host: string;
+  Call_AuthorizationServerDelete_564131 = ref object of OpenApiRestCall_563556
+proc url_AuthorizationServerDelete_564133(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -505,7 +509,7 @@ proc url_AuthorizationServerDelete_574233(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AuthorizationServerDelete_574232(path: JsonNode; query: JsonNode;
+proc validate_AuthorizationServerDelete_564132(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Deletes specific authorization server instance.
   ## 
@@ -516,11 +520,11 @@ proc validate_AuthorizationServerDelete_574232(path: JsonNode; query: JsonNode;
   ##          : Identifier of the authorization server.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `authsid` field"
-  var valid_574234 = path.getOrDefault("authsid")
-  valid_574234 = validateParameter(valid_574234, JString, required = true,
+  var valid_564134 = path.getOrDefault("authsid")
+  valid_564134 = validateParameter(valid_564134, JString, required = true,
                                  default = nil)
-  if valid_574234 != nil:
-    section.add "authsid", valid_574234
+  if valid_564134 != nil:
+    section.add "authsid", valid_564134
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -528,11 +532,11 @@ proc validate_AuthorizationServerDelete_574232(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574235 = query.getOrDefault("api-version")
-  valid_574235 = validateParameter(valid_574235, JString, required = true,
+  var valid_564135 = query.getOrDefault("api-version")
+  valid_564135 = validateParameter(valid_564135, JString, required = true,
                                  default = nil)
-  if valid_574235 != nil:
-    section.add "api-version", valid_574235
+  if valid_564135 != nil:
+    section.add "api-version", valid_564135
   result.add "query", section
   ## parameters in `header` object:
   ##   If-Match: JString (required)
@@ -540,31 +544,31 @@ proc validate_AuthorizationServerDelete_574232(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert header != nil,
         "header argument is necessary due to required `If-Match` field"
-  var valid_574236 = header.getOrDefault("If-Match")
-  valid_574236 = validateParameter(valid_574236, JString, required = true,
+  var valid_564136 = header.getOrDefault("If-Match")
+  valid_564136 = validateParameter(valid_564136, JString, required = true,
                                  default = nil)
-  if valid_574236 != nil:
-    section.add "If-Match", valid_574236
+  if valid_564136 != nil:
+    section.add "If-Match", valid_564136
   result.add "header", section
   section = newJObject()
   result.add "formData", section
   if body != nil:
     result.add "body", body
 
-proc call*(call_574237: Call_AuthorizationServerDelete_574231; path: JsonNode;
+proc call*(call_564137: Call_AuthorizationServerDelete_564131; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes specific authorization server instance.
   ## 
-  let valid = call_574237.validator(path, query, header, formData, body)
-  let scheme = call_574237.pickScheme
+  let valid = call_564137.validator(path, query, header, formData, body)
+  let scheme = call_564137.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574237.url(scheme.get, call_574237.host, call_574237.base,
-                         call_574237.route, valid.getOrDefault("path"),
+  let url = call_564137.url(scheme.get, call_564137.host, call_564137.base,
+                         call_564137.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574237, url, valid)
+  result = hook(call_564137, url, valid)
 
-proc call*(call_574238: Call_AuthorizationServerDelete_574231; apiVersion: string;
+proc call*(call_564138: Call_AuthorizationServerDelete_564131; apiVersion: string;
           authsid: string): Recallable =
   ## authorizationServerDelete
   ## Deletes specific authorization server instance.
@@ -572,17 +576,17 @@ proc call*(call_574238: Call_AuthorizationServerDelete_574231; apiVersion: strin
   ##             : Version of the API to be used with the client request.
   ##   authsid: string (required)
   ##          : Identifier of the authorization server.
-  var path_574239 = newJObject()
-  var query_574240 = newJObject()
-  add(query_574240, "api-version", newJString(apiVersion))
-  add(path_574239, "authsid", newJString(authsid))
-  result = call_574238.call(path_574239, query_574240, nil, nil, nil)
+  var path_564139 = newJObject()
+  var query_564140 = newJObject()
+  add(query_564140, "api-version", newJString(apiVersion))
+  add(path_564139, "authsid", newJString(authsid))
+  result = call_564138.call(path_564139, query_564140, nil, nil, nil)
 
-var authorizationServerDelete* = Call_AuthorizationServerDelete_574231(
+var authorizationServerDelete* = Call_AuthorizationServerDelete_564131(
     name: "authorizationServerDelete", meth: HttpMethod.HttpDelete,
     host: "azure.local", route: "/authorizationServers/{authsid}",
-    validator: validate_AuthorizationServerDelete_574232, base: "",
-    url: url_AuthorizationServerDelete_574233, schemes: {Scheme.Https})
+    validator: validate_AuthorizationServerDelete_564132, base: "",
+    url: url_AuthorizationServerDelete_564133, schemes: {Scheme.Https})
 export
   rest
 

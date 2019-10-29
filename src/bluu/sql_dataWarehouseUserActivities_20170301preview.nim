@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, httpcore
 
 ## auto-generated via openapi macro
 ## title: SqlManagementClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_567657 = ref object of OpenApiRestCall
+  OpenApiRestCall_563555 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_567657](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563555](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_567657): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563555): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,8 +107,8 @@ const
   macServiceName = "sql-dataWarehouseUserActivities"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_DataWarehouseUserActivitiesGet_567879 = ref object of OpenApiRestCall_567657
-proc url_DataWarehouseUserActivitiesGet_567881(protocol: Scheme; host: string;
+  Call_DataWarehouseUserActivitiesGet_563777 = ref object of OpenApiRestCall_563555
+proc url_DataWarehouseUserActivitiesGet_563779(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -133,51 +137,51 @@ proc url_DataWarehouseUserActivitiesGet_567881(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DataWarehouseUserActivitiesGet_567880(path: JsonNode;
+proc validate_DataWarehouseUserActivitiesGet_563778(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the user activities of a data warehouse which includes running and suspended queries
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   ##   serverName: JString (required)
   ##             : The name of the server.
   ##   subscriptionId: JString (required)
   ##                 : The subscription ID that identifies an Azure subscription.
-  ##   databaseName: JString (required)
-  ##               : The name of the database.
   ##   dataWarehouseUserActivityName: JString (required)
   ##                                : The activity name of the data warehouse. 
+  ##   databaseName: JString (required)
+  ##               : The name of the database.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568054 = path.getOrDefault("resourceGroupName")
-  valid_568054 = validateParameter(valid_568054, JString, required = true,
+        "path argument is necessary due to required `serverName` field"
+  var valid_563954 = path.getOrDefault("serverName")
+  valid_563954 = validateParameter(valid_563954, JString, required = true,
                                  default = nil)
-  if valid_568054 != nil:
-    section.add "resourceGroupName", valid_568054
-  var valid_568055 = path.getOrDefault("serverName")
-  valid_568055 = validateParameter(valid_568055, JString, required = true,
+  if valid_563954 != nil:
+    section.add "serverName", valid_563954
+  var valid_563955 = path.getOrDefault("subscriptionId")
+  valid_563955 = validateParameter(valid_563955, JString, required = true,
                                  default = nil)
-  if valid_568055 != nil:
-    section.add "serverName", valid_568055
-  var valid_568056 = path.getOrDefault("subscriptionId")
-  valid_568056 = validateParameter(valid_568056, JString, required = true,
-                                 default = nil)
-  if valid_568056 != nil:
-    section.add "subscriptionId", valid_568056
-  var valid_568057 = path.getOrDefault("databaseName")
-  valid_568057 = validateParameter(valid_568057, JString, required = true,
-                                 default = nil)
-  if valid_568057 != nil:
-    section.add "databaseName", valid_568057
-  var valid_568071 = path.getOrDefault("dataWarehouseUserActivityName")
-  valid_568071 = validateParameter(valid_568071, JString, required = true,
+  if valid_563955 != nil:
+    section.add "subscriptionId", valid_563955
+  var valid_563969 = path.getOrDefault("dataWarehouseUserActivityName")
+  valid_563969 = validateParameter(valid_563969, JString, required = true,
                                  default = newJString("current"))
-  if valid_568071 != nil:
-    section.add "dataWarehouseUserActivityName", valid_568071
+  if valid_563969 != nil:
+    section.add "dataWarehouseUserActivityName", valid_563969
+  var valid_563970 = path.getOrDefault("databaseName")
+  valid_563970 = validateParameter(valid_563970, JString, required = true,
+                                 default = nil)
+  if valid_563970 != nil:
+    section.add "databaseName", valid_563970
+  var valid_563971 = path.getOrDefault("resourceGroupName")
+  valid_563971 = validateParameter(valid_563971, JString, required = true,
+                                 default = nil)
+  if valid_563971 != nil:
+    section.add "resourceGroupName", valid_563971
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -185,11 +189,11 @@ proc validate_DataWarehouseUserActivitiesGet_567880(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568072 = query.getOrDefault("api-version")
-  valid_568072 = validateParameter(valid_568072, JString, required = true,
+  var valid_563972 = query.getOrDefault("api-version")
+  valid_563972 = validateParameter(valid_563972, JString, required = true,
                                  default = nil)
-  if valid_568072 != nil:
-    section.add "api-version", valid_568072
+  if valid_563972 != nil:
+    section.add "api-version", valid_563972
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -198,53 +202,53 @@ proc validate_DataWarehouseUserActivitiesGet_567880(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568095: Call_DataWarehouseUserActivitiesGet_567879; path: JsonNode;
+proc call*(call_563995: Call_DataWarehouseUserActivitiesGet_563777; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the user activities of a data warehouse which includes running and suspended queries
   ## 
-  let valid = call_568095.validator(path, query, header, formData, body)
-  let scheme = call_568095.pickScheme
+  let valid = call_563995.validator(path, query, header, formData, body)
+  let scheme = call_563995.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568095.url(scheme.get, call_568095.host, call_568095.base,
-                         call_568095.route, valid.getOrDefault("path"),
+  let url = call_563995.url(scheme.get, call_563995.host, call_563995.base,
+                         call_563995.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568095, url, valid)
+  result = hook(call_563995, url, valid)
 
-proc call*(call_568166: Call_DataWarehouseUserActivitiesGet_567879;
-          resourceGroupName: string; apiVersion: string; serverName: string;
-          subscriptionId: string; databaseName: string;
+proc call*(call_564066: Call_DataWarehouseUserActivitiesGet_563777;
+          apiVersion: string; serverName: string; subscriptionId: string;
+          databaseName: string; resourceGroupName: string;
           dataWarehouseUserActivityName: string = "current"): Recallable =
   ## dataWarehouseUserActivitiesGet
   ## Gets the user activities of a data warehouse which includes running and suspended queries
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
   ##   apiVersion: string (required)
   ##             : The API version to use for the request.
   ##   serverName: string (required)
   ##             : The name of the server.
   ##   subscriptionId: string (required)
   ##                 : The subscription ID that identifies an Azure subscription.
-  ##   databaseName: string (required)
-  ##               : The name of the database.
   ##   dataWarehouseUserActivityName: string (required)
   ##                                : The activity name of the data warehouse. 
-  var path_568167 = newJObject()
-  var query_568169 = newJObject()
-  add(path_568167, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568169, "api-version", newJString(apiVersion))
-  add(path_568167, "serverName", newJString(serverName))
-  add(path_568167, "subscriptionId", newJString(subscriptionId))
-  add(path_568167, "databaseName", newJString(databaseName))
-  add(path_568167, "dataWarehouseUserActivityName",
+  ##   databaseName: string (required)
+  ##               : The name of the database.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group that contains the resource. You can obtain this value from the Azure Resource Manager API or the portal.
+  var path_564067 = newJObject()
+  var query_564069 = newJObject()
+  add(query_564069, "api-version", newJString(apiVersion))
+  add(path_564067, "serverName", newJString(serverName))
+  add(path_564067, "subscriptionId", newJString(subscriptionId))
+  add(path_564067, "dataWarehouseUserActivityName",
       newJString(dataWarehouseUserActivityName))
-  result = call_568166.call(path_568167, query_568169, nil, nil, nil)
+  add(path_564067, "databaseName", newJString(databaseName))
+  add(path_564067, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564066.call(path_564067, query_564069, nil, nil, nil)
 
-var dataWarehouseUserActivitiesGet* = Call_DataWarehouseUserActivitiesGet_567879(
+var dataWarehouseUserActivitiesGet* = Call_DataWarehouseUserActivitiesGet_563777(
     name: "dataWarehouseUserActivitiesGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/servers/{serverName}/databases/{databaseName}/dataWarehouseUserActivities/{dataWarehouseUserActivityName}",
-    validator: validate_DataWarehouseUserActivitiesGet_567880, base: "",
-    url: url_DataWarehouseUserActivitiesGet_567881, schemes: {Scheme.Https})
+    validator: validate_DataWarehouseUserActivitiesGet_563778, base: "",
+    url: url_DataWarehouseUserActivitiesGet_563779, schemes: {Scheme.Https})
 export
   rest
 

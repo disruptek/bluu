@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, httpcore
 
 ## auto-generated via openapi macro
 ## title: BatchManagement
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_574457 = ref object of OpenApiRestCall
+  OpenApiRestCall_563555 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_574457](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563555](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_574457): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563555): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,15 +107,15 @@ const
   macServiceName = "batch-BatchManagement"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_OperationsList_574679 = ref object of OpenApiRestCall_574457
-proc url_OperationsList_574681(protocol: Scheme; host: string; base: string;
+  Call_OperationsList_563777 = ref object of OpenApiRestCall_563555
+proc url_OperationsList_563779(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_OperationsList_574680(path: JsonNode; query: JsonNode;
+proc validate_OperationsList_563778(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## Lists available operations for the Microsoft.Batch provider
@@ -126,11 +130,11 @@ proc validate_OperationsList_574680(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574840 = query.getOrDefault("api-version")
-  valid_574840 = validateParameter(valid_574840, JString, required = true,
+  var valid_563940 = query.getOrDefault("api-version")
+  valid_563940 = validateParameter(valid_563940, JString, required = true,
                                  default = nil)
-  if valid_574840 != nil:
-    section.add "api-version", valid_574840
+  if valid_563940 != nil:
+    section.add "api-version", valid_563940
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -139,36 +143,36 @@ proc validate_OperationsList_574680(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574863: Call_OperationsList_574679; path: JsonNode; query: JsonNode;
+proc call*(call_563963: Call_OperationsList_563777; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists available operations for the Microsoft.Batch provider
   ## 
-  let valid = call_574863.validator(path, query, header, formData, body)
-  let scheme = call_574863.pickScheme
+  let valid = call_563963.validator(path, query, header, formData, body)
+  let scheme = call_563963.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574863.url(scheme.get, call_574863.host, call_574863.base,
-                         call_574863.route, valid.getOrDefault("path"),
+  let url = call_563963.url(scheme.get, call_563963.host, call_563963.base,
+                         call_563963.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574863, url, valid)
+  result = hook(call_563963, url, valid)
 
-proc call*(call_574934: Call_OperationsList_574679; apiVersion: string): Recallable =
+proc call*(call_564034: Call_OperationsList_563777; apiVersion: string): Recallable =
   ## operationsList
   ## Lists available operations for the Microsoft.Batch provider
   ##   apiVersion: string (required)
   ##             : The API version to be used with the HTTP request.
-  var query_574935 = newJObject()
-  add(query_574935, "api-version", newJString(apiVersion))
-  result = call_574934.call(nil, query_574935, nil, nil, nil)
+  var query_564035 = newJObject()
+  add(query_564035, "api-version", newJString(apiVersion))
+  result = call_564034.call(nil, query_564035, nil, nil, nil)
 
-var operationsList* = Call_OperationsList_574679(name: "operationsList",
+var operationsList* = Call_OperationsList_563777(name: "operationsList",
     meth: HttpMethod.HttpGet, host: "management.azure.com",
     route: "/providers/Microsoft.Batch/operations",
-    validator: validate_OperationsList_574680, base: "", url: url_OperationsList_574681,
+    validator: validate_OperationsList_563778, base: "", url: url_OperationsList_563779,
     schemes: {Scheme.Https})
 type
-  Call_BatchAccountList_574975 = ref object of OpenApiRestCall_574457
-proc url_BatchAccountList_574977(protocol: Scheme; host: string; base: string;
+  Call_BatchAccountList_564075 = ref object of OpenApiRestCall_563555
+proc url_BatchAccountList_564077(protocol: Scheme; host: string; base: string;
                                 route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -184,7 +188,7 @@ proc url_BatchAccountList_574977(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_BatchAccountList_574976(path: JsonNode; query: JsonNode;
+proc validate_BatchAccountList_564076(path: JsonNode; query: JsonNode;
                                      header: JsonNode; formData: JsonNode;
                                      body: JsonNode): JsonNode =
   ## Gets information about the Batch accounts associated with the subscription.
@@ -197,11 +201,11 @@ proc validate_BatchAccountList_574976(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_574992 = path.getOrDefault("subscriptionId")
-  valid_574992 = validateParameter(valid_574992, JString, required = true,
+  var valid_564092 = path.getOrDefault("subscriptionId")
+  valid_564092 = validateParameter(valid_564092, JString, required = true,
                                  default = nil)
-  if valid_574992 != nil:
-    section.add "subscriptionId", valid_574992
+  if valid_564092 != nil:
+    section.add "subscriptionId", valid_564092
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -209,11 +213,11 @@ proc validate_BatchAccountList_574976(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574993 = query.getOrDefault("api-version")
-  valid_574993 = validateParameter(valid_574993, JString, required = true,
+  var valid_564093 = query.getOrDefault("api-version")
+  valid_564093 = validateParameter(valid_564093, JString, required = true,
                                  default = nil)
-  if valid_574993 != nil:
-    section.add "api-version", valid_574993
+  if valid_564093 != nil:
+    section.add "api-version", valid_564093
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -222,20 +226,20 @@ proc validate_BatchAccountList_574976(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574994: Call_BatchAccountList_574975; path: JsonNode;
+proc call*(call_564094: Call_BatchAccountList_564075; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets information about the Batch accounts associated with the subscription.
   ## 
-  let valid = call_574994.validator(path, query, header, formData, body)
-  let scheme = call_574994.pickScheme
+  let valid = call_564094.validator(path, query, header, formData, body)
+  let scheme = call_564094.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574994.url(scheme.get, call_574994.host, call_574994.base,
-                         call_574994.route, valid.getOrDefault("path"),
+  let url = call_564094.url(scheme.get, call_564094.host, call_564094.base,
+                         call_564094.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574994, url, valid)
+  result = hook(call_564094, url, valid)
 
-proc call*(call_574995: Call_BatchAccountList_574975; apiVersion: string;
+proc call*(call_564095: Call_BatchAccountList_564075; apiVersion: string;
           subscriptionId: string): Recallable =
   ## batchAccountList
   ## Gets information about the Batch accounts associated with the subscription.
@@ -243,19 +247,19 @@ proc call*(call_574995: Call_BatchAccountList_574975; apiVersion: string;
   ##             : The API version to be used with the HTTP request.
   ##   subscriptionId: string (required)
   ##                 : The Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000)
-  var path_574996 = newJObject()
-  var query_574997 = newJObject()
-  add(query_574997, "api-version", newJString(apiVersion))
-  add(path_574996, "subscriptionId", newJString(subscriptionId))
-  result = call_574995.call(path_574996, query_574997, nil, nil, nil)
+  var path_564096 = newJObject()
+  var query_564097 = newJObject()
+  add(query_564097, "api-version", newJString(apiVersion))
+  add(path_564096, "subscriptionId", newJString(subscriptionId))
+  result = call_564095.call(path_564096, query_564097, nil, nil, nil)
 
-var batchAccountList* = Call_BatchAccountList_574975(name: "batchAccountList",
+var batchAccountList* = Call_BatchAccountList_564075(name: "batchAccountList",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Batch/batchAccounts",
-    validator: validate_BatchAccountList_574976, base: "",
-    url: url_BatchAccountList_574977, schemes: {Scheme.Https})
+    validator: validate_BatchAccountList_564076, base: "",
+    url: url_BatchAccountList_564077, schemes: {Scheme.Https})
 type
-  Call_LocationCheckNameAvailability_574998 = ref object of OpenApiRestCall_574457
-proc url_LocationCheckNameAvailability_575000(protocol: Scheme; host: string;
+  Call_LocationCheckNameAvailability_564098 = ref object of OpenApiRestCall_563555
+proc url_LocationCheckNameAvailability_564100(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -274,30 +278,30 @@ proc url_LocationCheckNameAvailability_575000(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_LocationCheckNameAvailability_574999(path: JsonNode; query: JsonNode;
+proc validate_LocationCheckNameAvailability_564099(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Checks whether the Batch account name is available in the specified region.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   subscriptionId: JString (required)
-  ##                 : The Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000)
   ##   locationName: JString (required)
   ##               : The desired region for the name check.
+  ##   subscriptionId: JString (required)
+  ##                 : The Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000)
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `subscriptionId` field"
-  var valid_575018 = path.getOrDefault("subscriptionId")
-  valid_575018 = validateParameter(valid_575018, JString, required = true,
+        "path argument is necessary due to required `locationName` field"
+  var valid_564118 = path.getOrDefault("locationName")
+  valid_564118 = validateParameter(valid_564118, JString, required = true,
                                  default = nil)
-  if valid_575018 != nil:
-    section.add "subscriptionId", valid_575018
-  var valid_575019 = path.getOrDefault("locationName")
-  valid_575019 = validateParameter(valid_575019, JString, required = true,
+  if valid_564118 != nil:
+    section.add "locationName", valid_564118
+  var valid_564119 = path.getOrDefault("subscriptionId")
+  valid_564119 = validateParameter(valid_564119, JString, required = true,
                                  default = nil)
-  if valid_575019 != nil:
-    section.add "locationName", valid_575019
+  if valid_564119 != nil:
+    section.add "subscriptionId", valid_564119
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -305,11 +309,11 @@ proc validate_LocationCheckNameAvailability_574999(path: JsonNode; query: JsonNo
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575020 = query.getOrDefault("api-version")
-  valid_575020 = validateParameter(valid_575020, JString, required = true,
+  var valid_564120 = query.getOrDefault("api-version")
+  valid_564120 = validateParameter(valid_564120, JString, required = true,
                                  default = nil)
-  if valid_575020 != nil:
-    section.add "api-version", valid_575020
+  if valid_564120 != nil:
+    section.add "api-version", valid_564120
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -323,50 +327,50 @@ proc validate_LocationCheckNameAvailability_574999(path: JsonNode; query: JsonNo
   if body != nil:
     result.add "body", body
 
-proc call*(call_575022: Call_LocationCheckNameAvailability_574998; path: JsonNode;
+proc call*(call_564122: Call_LocationCheckNameAvailability_564098; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Checks whether the Batch account name is available in the specified region.
   ## 
-  let valid = call_575022.validator(path, query, header, formData, body)
-  let scheme = call_575022.pickScheme
+  let valid = call_564122.validator(path, query, header, formData, body)
+  let scheme = call_564122.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575022.url(scheme.get, call_575022.host, call_575022.base,
-                         call_575022.route, valid.getOrDefault("path"),
+  let url = call_564122.url(scheme.get, call_564122.host, call_564122.base,
+                         call_564122.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575022, url, valid)
+  result = hook(call_564122, url, valid)
 
-proc call*(call_575023: Call_LocationCheckNameAvailability_574998;
-          apiVersion: string; subscriptionId: string; parameters: JsonNode;
-          locationName: string): Recallable =
+proc call*(call_564123: Call_LocationCheckNameAvailability_564098;
+          apiVersion: string; locationName: string; subscriptionId: string;
+          parameters: JsonNode): Recallable =
   ## locationCheckNameAvailability
   ## Checks whether the Batch account name is available in the specified region.
   ##   apiVersion: string (required)
   ##             : The API version to be used with the HTTP request.
+  ##   locationName: string (required)
+  ##               : The desired region for the name check.
   ##   subscriptionId: string (required)
   ##                 : The Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000)
   ##   parameters: JObject (required)
   ##             : Properties needed to check the availability of a name.
-  ##   locationName: string (required)
-  ##               : The desired region for the name check.
-  var path_575024 = newJObject()
-  var query_575025 = newJObject()
-  var body_575026 = newJObject()
-  add(query_575025, "api-version", newJString(apiVersion))
-  add(path_575024, "subscriptionId", newJString(subscriptionId))
+  var path_564124 = newJObject()
+  var query_564125 = newJObject()
+  var body_564126 = newJObject()
+  add(query_564125, "api-version", newJString(apiVersion))
+  add(path_564124, "locationName", newJString(locationName))
+  add(path_564124, "subscriptionId", newJString(subscriptionId))
   if parameters != nil:
-    body_575026 = parameters
-  add(path_575024, "locationName", newJString(locationName))
-  result = call_575023.call(path_575024, query_575025, nil, nil, body_575026)
+    body_564126 = parameters
+  result = call_564123.call(path_564124, query_564125, nil, nil, body_564126)
 
-var locationCheckNameAvailability* = Call_LocationCheckNameAvailability_574998(
+var locationCheckNameAvailability* = Call_LocationCheckNameAvailability_564098(
     name: "locationCheckNameAvailability", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Batch/locations/{locationName}/checkNameAvailability",
-    validator: validate_LocationCheckNameAvailability_574999, base: "",
-    url: url_LocationCheckNameAvailability_575000, schemes: {Scheme.Https})
+    validator: validate_LocationCheckNameAvailability_564099, base: "",
+    url: url_LocationCheckNameAvailability_564100, schemes: {Scheme.Https})
 type
-  Call_LocationGetQuotas_575027 = ref object of OpenApiRestCall_574457
-proc url_LocationGetQuotas_575029(protocol: Scheme; host: string; base: string;
+  Call_LocationGetQuotas_564127 = ref object of OpenApiRestCall_563555
+proc url_LocationGetQuotas_564129(protocol: Scheme; host: string; base: string;
                                  route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -385,7 +389,7 @@ proc url_LocationGetQuotas_575029(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_LocationGetQuotas_575028(path: JsonNode; query: JsonNode;
+proc validate_LocationGetQuotas_564128(path: JsonNode; query: JsonNode;
                                       header: JsonNode; formData: JsonNode;
                                       body: JsonNode): JsonNode =
   ## Gets the Batch service quotas for the specified subscription at the given location.
@@ -393,23 +397,23 @@ proc validate_LocationGetQuotas_575028(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   subscriptionId: JString (required)
-  ##                 : The Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000)
   ##   locationName: JString (required)
   ##               : The region for which to retrieve Batch service quotas.
+  ##   subscriptionId: JString (required)
+  ##                 : The Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000)
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `subscriptionId` field"
-  var valid_575030 = path.getOrDefault("subscriptionId")
-  valid_575030 = validateParameter(valid_575030, JString, required = true,
+        "path argument is necessary due to required `locationName` field"
+  var valid_564130 = path.getOrDefault("locationName")
+  valid_564130 = validateParameter(valid_564130, JString, required = true,
                                  default = nil)
-  if valid_575030 != nil:
-    section.add "subscriptionId", valid_575030
-  var valid_575031 = path.getOrDefault("locationName")
-  valid_575031 = validateParameter(valid_575031, JString, required = true,
+  if valid_564130 != nil:
+    section.add "locationName", valid_564130
+  var valid_564131 = path.getOrDefault("subscriptionId")
+  valid_564131 = validateParameter(valid_564131, JString, required = true,
                                  default = nil)
-  if valid_575031 != nil:
-    section.add "locationName", valid_575031
+  if valid_564131 != nil:
+    section.add "subscriptionId", valid_564131
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -417,11 +421,11 @@ proc validate_LocationGetQuotas_575028(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575032 = query.getOrDefault("api-version")
-  valid_575032 = validateParameter(valid_575032, JString, required = true,
+  var valid_564132 = query.getOrDefault("api-version")
+  valid_564132 = validateParameter(valid_564132, JString, required = true,
                                  default = nil)
-  if valid_575032 != nil:
-    section.add "api-version", valid_575032
+  if valid_564132 != nil:
+    section.add "api-version", valid_564132
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -430,43 +434,43 @@ proc validate_LocationGetQuotas_575028(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_575033: Call_LocationGetQuotas_575027; path: JsonNode;
+proc call*(call_564133: Call_LocationGetQuotas_564127; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the Batch service quotas for the specified subscription at the given location.
   ## 
-  let valid = call_575033.validator(path, query, header, formData, body)
-  let scheme = call_575033.pickScheme
+  let valid = call_564133.validator(path, query, header, formData, body)
+  let scheme = call_564133.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575033.url(scheme.get, call_575033.host, call_575033.base,
-                         call_575033.route, valid.getOrDefault("path"),
+  let url = call_564133.url(scheme.get, call_564133.host, call_564133.base,
+                         call_564133.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575033, url, valid)
+  result = hook(call_564133, url, valid)
 
-proc call*(call_575034: Call_LocationGetQuotas_575027; apiVersion: string;
-          subscriptionId: string; locationName: string): Recallable =
+proc call*(call_564134: Call_LocationGetQuotas_564127; apiVersion: string;
+          locationName: string; subscriptionId: string): Recallable =
   ## locationGetQuotas
   ## Gets the Batch service quotas for the specified subscription at the given location.
   ##   apiVersion: string (required)
   ##             : The API version to be used with the HTTP request.
-  ##   subscriptionId: string (required)
-  ##                 : The Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000)
   ##   locationName: string (required)
   ##               : The region for which to retrieve Batch service quotas.
-  var path_575035 = newJObject()
-  var query_575036 = newJObject()
-  add(query_575036, "api-version", newJString(apiVersion))
-  add(path_575035, "subscriptionId", newJString(subscriptionId))
-  add(path_575035, "locationName", newJString(locationName))
-  result = call_575034.call(path_575035, query_575036, nil, nil, nil)
+  ##   subscriptionId: string (required)
+  ##                 : The Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000)
+  var path_564135 = newJObject()
+  var query_564136 = newJObject()
+  add(query_564136, "api-version", newJString(apiVersion))
+  add(path_564135, "locationName", newJString(locationName))
+  add(path_564135, "subscriptionId", newJString(subscriptionId))
+  result = call_564134.call(path_564135, query_564136, nil, nil, nil)
 
-var locationGetQuotas* = Call_LocationGetQuotas_575027(name: "locationGetQuotas",
+var locationGetQuotas* = Call_LocationGetQuotas_564127(name: "locationGetQuotas",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Batch/locations/{locationName}/quotas",
-    validator: validate_LocationGetQuotas_575028, base: "",
-    url: url_LocationGetQuotas_575029, schemes: {Scheme.Https})
+    validator: validate_LocationGetQuotas_564128, base: "",
+    url: url_LocationGetQuotas_564129, schemes: {Scheme.Https})
 type
-  Call_BatchAccountListByResourceGroup_575037 = ref object of OpenApiRestCall_574457
-proc url_BatchAccountListByResourceGroup_575039(protocol: Scheme; host: string;
+  Call_BatchAccountListByResourceGroup_564137 = ref object of OpenApiRestCall_563555
+proc url_BatchAccountListByResourceGroup_564139(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -486,30 +490,30 @@ proc url_BatchAccountListByResourceGroup_575039(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_BatchAccountListByResourceGroup_575038(path: JsonNode;
+proc validate_BatchAccountListByResourceGroup_564138(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets information about the Batch accounts associated with the specified resource group.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group that contains the Batch account.
   ##   subscriptionId: JString (required)
   ##                 : The Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000)
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group that contains the Batch account.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_575040 = path.getOrDefault("resourceGroupName")
-  valid_575040 = validateParameter(valid_575040, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564140 = path.getOrDefault("subscriptionId")
+  valid_564140 = validateParameter(valid_564140, JString, required = true,
                                  default = nil)
-  if valid_575040 != nil:
-    section.add "resourceGroupName", valid_575040
-  var valid_575041 = path.getOrDefault("subscriptionId")
-  valid_575041 = validateParameter(valid_575041, JString, required = true,
+  if valid_564140 != nil:
+    section.add "subscriptionId", valid_564140
+  var valid_564141 = path.getOrDefault("resourceGroupName")
+  valid_564141 = validateParameter(valid_564141, JString, required = true,
                                  default = nil)
-  if valid_575041 != nil:
-    section.add "subscriptionId", valid_575041
+  if valid_564141 != nil:
+    section.add "resourceGroupName", valid_564141
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -517,11 +521,11 @@ proc validate_BatchAccountListByResourceGroup_575038(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575042 = query.getOrDefault("api-version")
-  valid_575042 = validateParameter(valid_575042, JString, required = true,
+  var valid_564142 = query.getOrDefault("api-version")
+  valid_564142 = validateParameter(valid_564142, JString, required = true,
                                  default = nil)
-  if valid_575042 != nil:
-    section.add "api-version", valid_575042
+  if valid_564142 != nil:
+    section.add "api-version", valid_564142
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -530,45 +534,45 @@ proc validate_BatchAccountListByResourceGroup_575038(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_575043: Call_BatchAccountListByResourceGroup_575037;
+proc call*(call_564143: Call_BatchAccountListByResourceGroup_564137;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Gets information about the Batch accounts associated with the specified resource group.
   ## 
-  let valid = call_575043.validator(path, query, header, formData, body)
-  let scheme = call_575043.pickScheme
+  let valid = call_564143.validator(path, query, header, formData, body)
+  let scheme = call_564143.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575043.url(scheme.get, call_575043.host, call_575043.base,
-                         call_575043.route, valid.getOrDefault("path"),
+  let url = call_564143.url(scheme.get, call_564143.host, call_564143.base,
+                         call_564143.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575043, url, valid)
+  result = hook(call_564143, url, valid)
 
-proc call*(call_575044: Call_BatchAccountListByResourceGroup_575037;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string): Recallable =
+proc call*(call_564144: Call_BatchAccountListByResourceGroup_564137;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string): Recallable =
   ## batchAccountListByResourceGroup
   ## Gets information about the Batch accounts associated with the specified resource group.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group that contains the Batch account.
   ##   apiVersion: string (required)
   ##             : The API version to be used with the HTTP request.
   ##   subscriptionId: string (required)
   ##                 : The Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000)
-  var path_575045 = newJObject()
-  var query_575046 = newJObject()
-  add(path_575045, "resourceGroupName", newJString(resourceGroupName))
-  add(query_575046, "api-version", newJString(apiVersion))
-  add(path_575045, "subscriptionId", newJString(subscriptionId))
-  result = call_575044.call(path_575045, query_575046, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group that contains the Batch account.
+  var path_564145 = newJObject()
+  var query_564146 = newJObject()
+  add(query_564146, "api-version", newJString(apiVersion))
+  add(path_564145, "subscriptionId", newJString(subscriptionId))
+  add(path_564145, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564144.call(path_564145, query_564146, nil, nil, nil)
 
-var batchAccountListByResourceGroup* = Call_BatchAccountListByResourceGroup_575037(
+var batchAccountListByResourceGroup* = Call_BatchAccountListByResourceGroup_564137(
     name: "batchAccountListByResourceGroup", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Batch/batchAccounts",
-    validator: validate_BatchAccountListByResourceGroup_575038, base: "",
-    url: url_BatchAccountListByResourceGroup_575039, schemes: {Scheme.Https})
+    validator: validate_BatchAccountListByResourceGroup_564138, base: "",
+    url: url_BatchAccountListByResourceGroup_564139, schemes: {Scheme.Https})
 type
-  Call_BatchAccountCreate_575058 = ref object of OpenApiRestCall_574457
-proc url_BatchAccountCreate_575060(protocol: Scheme; host: string; base: string;
+  Call_BatchAccountCreate_564158 = ref object of OpenApiRestCall_563555
+proc url_BatchAccountCreate_564160(protocol: Scheme; host: string; base: string;
                                   route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -590,7 +594,7 @@ proc url_BatchAccountCreate_575060(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_BatchAccountCreate_575059(path: JsonNode; query: JsonNode;
+proc validate_BatchAccountCreate_564159(path: JsonNode; query: JsonNode;
                                        header: JsonNode; formData: JsonNode;
                                        body: JsonNode): JsonNode =
   ## Creates a new Batch account with the specified parameters. Existing accounts cannot be updated with this API and should instead be updated with the Update Batch Account API.
@@ -598,30 +602,30 @@ proc validate_BatchAccountCreate_575059(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group that contains the Batch account.
   ##   subscriptionId: JString (required)
   ##                 : The Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000)
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group that contains the Batch account.
   ##   accountName: JString (required)
   ##              : A name for the Batch account which must be unique within the region. Batch account names must be between 3 and 24 characters in length and must use only numbers and lowercase letters. This name is used as part of the DNS name that is used to access the Batch service in the region in which the account is created. For example: http://accountname.region.batch.azure.com/.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_575061 = path.getOrDefault("resourceGroupName")
-  valid_575061 = validateParameter(valid_575061, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564161 = path.getOrDefault("subscriptionId")
+  valid_564161 = validateParameter(valid_564161, JString, required = true,
                                  default = nil)
-  if valid_575061 != nil:
-    section.add "resourceGroupName", valid_575061
-  var valid_575062 = path.getOrDefault("subscriptionId")
-  valid_575062 = validateParameter(valid_575062, JString, required = true,
+  if valid_564161 != nil:
+    section.add "subscriptionId", valid_564161
+  var valid_564162 = path.getOrDefault("resourceGroupName")
+  valid_564162 = validateParameter(valid_564162, JString, required = true,
                                  default = nil)
-  if valid_575062 != nil:
-    section.add "subscriptionId", valid_575062
-  var valid_575063 = path.getOrDefault("accountName")
-  valid_575063 = validateParameter(valid_575063, JString, required = true,
+  if valid_564162 != nil:
+    section.add "resourceGroupName", valid_564162
+  var valid_564163 = path.getOrDefault("accountName")
+  valid_564163 = validateParameter(valid_564163, JString, required = true,
                                  default = nil)
-  if valid_575063 != nil:
-    section.add "accountName", valid_575063
+  if valid_564163 != nil:
+    section.add "accountName", valid_564163
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -629,11 +633,11 @@ proc validate_BatchAccountCreate_575059(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575064 = query.getOrDefault("api-version")
-  valid_575064 = validateParameter(valid_575064, JString, required = true,
+  var valid_564164 = query.getOrDefault("api-version")
+  valid_564164 = validateParameter(valid_564164, JString, required = true,
                                  default = nil)
-  if valid_575064 != nil:
-    section.add "api-version", valid_575064
+  if valid_564164 != nil:
+    section.add "api-version", valid_564164
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -647,53 +651,53 @@ proc validate_BatchAccountCreate_575059(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_575066: Call_BatchAccountCreate_575058; path: JsonNode;
+proc call*(call_564166: Call_BatchAccountCreate_564158; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Creates a new Batch account with the specified parameters. Existing accounts cannot be updated with this API and should instead be updated with the Update Batch Account API.
   ## 
-  let valid = call_575066.validator(path, query, header, formData, body)
-  let scheme = call_575066.pickScheme
+  let valid = call_564166.validator(path, query, header, formData, body)
+  let scheme = call_564166.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575066.url(scheme.get, call_575066.host, call_575066.base,
-                         call_575066.route, valid.getOrDefault("path"),
+  let url = call_564166.url(scheme.get, call_564166.host, call_564166.base,
+                         call_564166.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575066, url, valid)
+  result = hook(call_564166, url, valid)
 
-proc call*(call_575067: Call_BatchAccountCreate_575058; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; parameters: JsonNode;
+proc call*(call_564167: Call_BatchAccountCreate_564158; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string; parameters: JsonNode;
           accountName: string): Recallable =
   ## batchAccountCreate
   ## Creates a new Batch account with the specified parameters. Existing accounts cannot be updated with this API and should instead be updated with the Update Batch Account API.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group that contains the Batch account.
   ##   apiVersion: string (required)
   ##             : The API version to be used with the HTTP request.
   ##   subscriptionId: string (required)
   ##                 : The Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group that contains the Batch account.
   ##   parameters: JObject (required)
   ##             : Additional parameters for account creation.
   ##   accountName: string (required)
   ##              : A name for the Batch account which must be unique within the region. Batch account names must be between 3 and 24 characters in length and must use only numbers and lowercase letters. This name is used as part of the DNS name that is used to access the Batch service in the region in which the account is created. For example: http://accountname.region.batch.azure.com/.
-  var path_575068 = newJObject()
-  var query_575069 = newJObject()
-  var body_575070 = newJObject()
-  add(path_575068, "resourceGroupName", newJString(resourceGroupName))
-  add(query_575069, "api-version", newJString(apiVersion))
-  add(path_575068, "subscriptionId", newJString(subscriptionId))
+  var path_564168 = newJObject()
+  var query_564169 = newJObject()
+  var body_564170 = newJObject()
+  add(query_564169, "api-version", newJString(apiVersion))
+  add(path_564168, "subscriptionId", newJString(subscriptionId))
+  add(path_564168, "resourceGroupName", newJString(resourceGroupName))
   if parameters != nil:
-    body_575070 = parameters
-  add(path_575068, "accountName", newJString(accountName))
-  result = call_575067.call(path_575068, query_575069, nil, nil, body_575070)
+    body_564170 = parameters
+  add(path_564168, "accountName", newJString(accountName))
+  result = call_564167.call(path_564168, query_564169, nil, nil, body_564170)
 
-var batchAccountCreate* = Call_BatchAccountCreate_575058(
+var batchAccountCreate* = Call_BatchAccountCreate_564158(
     name: "batchAccountCreate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Batch/batchAccounts/{accountName}",
-    validator: validate_BatchAccountCreate_575059, base: "",
-    url: url_BatchAccountCreate_575060, schemes: {Scheme.Https})
+    validator: validate_BatchAccountCreate_564159, base: "",
+    url: url_BatchAccountCreate_564160, schemes: {Scheme.Https})
 type
-  Call_BatchAccountGet_575047 = ref object of OpenApiRestCall_574457
-proc url_BatchAccountGet_575049(protocol: Scheme; host: string; base: string;
+  Call_BatchAccountGet_564147 = ref object of OpenApiRestCall_563555
+proc url_BatchAccountGet_564149(protocol: Scheme; host: string; base: string;
                                route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -715,7 +719,7 @@ proc url_BatchAccountGet_575049(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_BatchAccountGet_575048(path: JsonNode; query: JsonNode;
+proc validate_BatchAccountGet_564148(path: JsonNode; query: JsonNode;
                                     header: JsonNode; formData: JsonNode;
                                     body: JsonNode): JsonNode =
   ## Gets information about the specified Batch account.
@@ -723,30 +727,30 @@ proc validate_BatchAccountGet_575048(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group that contains the Batch account.
   ##   subscriptionId: JString (required)
   ##                 : The Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000)
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group that contains the Batch account.
   ##   accountName: JString (required)
   ##              : The name of the Batch account.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_575050 = path.getOrDefault("resourceGroupName")
-  valid_575050 = validateParameter(valid_575050, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564150 = path.getOrDefault("subscriptionId")
+  valid_564150 = validateParameter(valid_564150, JString, required = true,
                                  default = nil)
-  if valid_575050 != nil:
-    section.add "resourceGroupName", valid_575050
-  var valid_575051 = path.getOrDefault("subscriptionId")
-  valid_575051 = validateParameter(valid_575051, JString, required = true,
+  if valid_564150 != nil:
+    section.add "subscriptionId", valid_564150
+  var valid_564151 = path.getOrDefault("resourceGroupName")
+  valid_564151 = validateParameter(valid_564151, JString, required = true,
                                  default = nil)
-  if valid_575051 != nil:
-    section.add "subscriptionId", valid_575051
-  var valid_575052 = path.getOrDefault("accountName")
-  valid_575052 = validateParameter(valid_575052, JString, required = true,
+  if valid_564151 != nil:
+    section.add "resourceGroupName", valid_564151
+  var valid_564152 = path.getOrDefault("accountName")
+  valid_564152 = validateParameter(valid_564152, JString, required = true,
                                  default = nil)
-  if valid_575052 != nil:
-    section.add "accountName", valid_575052
+  if valid_564152 != nil:
+    section.add "accountName", valid_564152
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -754,11 +758,11 @@ proc validate_BatchAccountGet_575048(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575053 = query.getOrDefault("api-version")
-  valid_575053 = validateParameter(valid_575053, JString, required = true,
+  var valid_564153 = query.getOrDefault("api-version")
+  valid_564153 = validateParameter(valid_564153, JString, required = true,
                                  default = nil)
-  if valid_575053 != nil:
-    section.add "api-version", valid_575053
+  if valid_564153 != nil:
+    section.add "api-version", valid_564153
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -767,46 +771,46 @@ proc validate_BatchAccountGet_575048(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_575054: Call_BatchAccountGet_575047; path: JsonNode; query: JsonNode;
+proc call*(call_564154: Call_BatchAccountGet_564147; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets information about the specified Batch account.
   ## 
-  let valid = call_575054.validator(path, query, header, formData, body)
-  let scheme = call_575054.pickScheme
+  let valid = call_564154.validator(path, query, header, formData, body)
+  let scheme = call_564154.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575054.url(scheme.get, call_575054.host, call_575054.base,
-                         call_575054.route, valid.getOrDefault("path"),
+  let url = call_564154.url(scheme.get, call_564154.host, call_564154.base,
+                         call_564154.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575054, url, valid)
+  result = hook(call_564154, url, valid)
 
-proc call*(call_575055: Call_BatchAccountGet_575047; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; accountName: string): Recallable =
+proc call*(call_564155: Call_BatchAccountGet_564147; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string; accountName: string): Recallable =
   ## batchAccountGet
   ## Gets information about the specified Batch account.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group that contains the Batch account.
   ##   apiVersion: string (required)
   ##             : The API version to be used with the HTTP request.
   ##   subscriptionId: string (required)
   ##                 : The Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group that contains the Batch account.
   ##   accountName: string (required)
   ##              : The name of the Batch account.
-  var path_575056 = newJObject()
-  var query_575057 = newJObject()
-  add(path_575056, "resourceGroupName", newJString(resourceGroupName))
-  add(query_575057, "api-version", newJString(apiVersion))
-  add(path_575056, "subscriptionId", newJString(subscriptionId))
-  add(path_575056, "accountName", newJString(accountName))
-  result = call_575055.call(path_575056, query_575057, nil, nil, nil)
+  var path_564156 = newJObject()
+  var query_564157 = newJObject()
+  add(query_564157, "api-version", newJString(apiVersion))
+  add(path_564156, "subscriptionId", newJString(subscriptionId))
+  add(path_564156, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564156, "accountName", newJString(accountName))
+  result = call_564155.call(path_564156, query_564157, nil, nil, nil)
 
-var batchAccountGet* = Call_BatchAccountGet_575047(name: "batchAccountGet",
+var batchAccountGet* = Call_BatchAccountGet_564147(name: "batchAccountGet",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Batch/batchAccounts/{accountName}",
-    validator: validate_BatchAccountGet_575048, base: "", url: url_BatchAccountGet_575049,
+    validator: validate_BatchAccountGet_564148, base: "", url: url_BatchAccountGet_564149,
     schemes: {Scheme.Https})
 type
-  Call_BatchAccountUpdate_575082 = ref object of OpenApiRestCall_574457
-proc url_BatchAccountUpdate_575084(protocol: Scheme; host: string; base: string;
+  Call_BatchAccountUpdate_564182 = ref object of OpenApiRestCall_563555
+proc url_BatchAccountUpdate_564184(protocol: Scheme; host: string; base: string;
                                   route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -828,7 +832,7 @@ proc url_BatchAccountUpdate_575084(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_BatchAccountUpdate_575083(path: JsonNode; query: JsonNode;
+proc validate_BatchAccountUpdate_564183(path: JsonNode; query: JsonNode;
                                        header: JsonNode; formData: JsonNode;
                                        body: JsonNode): JsonNode =
   ## Updates the properties of an existing Batch account.
@@ -836,30 +840,30 @@ proc validate_BatchAccountUpdate_575083(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group that contains the Batch account.
   ##   subscriptionId: JString (required)
   ##                 : The Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000)
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group that contains the Batch account.
   ##   accountName: JString (required)
   ##              : The name of the Batch account.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_575085 = path.getOrDefault("resourceGroupName")
-  valid_575085 = validateParameter(valid_575085, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564185 = path.getOrDefault("subscriptionId")
+  valid_564185 = validateParameter(valid_564185, JString, required = true,
                                  default = nil)
-  if valid_575085 != nil:
-    section.add "resourceGroupName", valid_575085
-  var valid_575086 = path.getOrDefault("subscriptionId")
-  valid_575086 = validateParameter(valid_575086, JString, required = true,
+  if valid_564185 != nil:
+    section.add "subscriptionId", valid_564185
+  var valid_564186 = path.getOrDefault("resourceGroupName")
+  valid_564186 = validateParameter(valid_564186, JString, required = true,
                                  default = nil)
-  if valid_575086 != nil:
-    section.add "subscriptionId", valid_575086
-  var valid_575087 = path.getOrDefault("accountName")
-  valid_575087 = validateParameter(valid_575087, JString, required = true,
+  if valid_564186 != nil:
+    section.add "resourceGroupName", valid_564186
+  var valid_564187 = path.getOrDefault("accountName")
+  valid_564187 = validateParameter(valid_564187, JString, required = true,
                                  default = nil)
-  if valid_575087 != nil:
-    section.add "accountName", valid_575087
+  if valid_564187 != nil:
+    section.add "accountName", valid_564187
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -867,11 +871,11 @@ proc validate_BatchAccountUpdate_575083(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575088 = query.getOrDefault("api-version")
-  valid_575088 = validateParameter(valid_575088, JString, required = true,
+  var valid_564188 = query.getOrDefault("api-version")
+  valid_564188 = validateParameter(valid_564188, JString, required = true,
                                  default = nil)
-  if valid_575088 != nil:
-    section.add "api-version", valid_575088
+  if valid_564188 != nil:
+    section.add "api-version", valid_564188
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -885,53 +889,53 @@ proc validate_BatchAccountUpdate_575083(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_575090: Call_BatchAccountUpdate_575082; path: JsonNode;
+proc call*(call_564190: Call_BatchAccountUpdate_564182; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Updates the properties of an existing Batch account.
   ## 
-  let valid = call_575090.validator(path, query, header, formData, body)
-  let scheme = call_575090.pickScheme
+  let valid = call_564190.validator(path, query, header, formData, body)
+  let scheme = call_564190.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575090.url(scheme.get, call_575090.host, call_575090.base,
-                         call_575090.route, valid.getOrDefault("path"),
+  let url = call_564190.url(scheme.get, call_564190.host, call_564190.base,
+                         call_564190.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575090, url, valid)
+  result = hook(call_564190, url, valid)
 
-proc call*(call_575091: Call_BatchAccountUpdate_575082; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; parameters: JsonNode;
+proc call*(call_564191: Call_BatchAccountUpdate_564182; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string; parameters: JsonNode;
           accountName: string): Recallable =
   ## batchAccountUpdate
   ## Updates the properties of an existing Batch account.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group that contains the Batch account.
   ##   apiVersion: string (required)
   ##             : The API version to be used with the HTTP request.
   ##   subscriptionId: string (required)
   ##                 : The Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group that contains the Batch account.
   ##   parameters: JObject (required)
   ##             : Additional parameters for account update.
   ##   accountName: string (required)
   ##              : The name of the Batch account.
-  var path_575092 = newJObject()
-  var query_575093 = newJObject()
-  var body_575094 = newJObject()
-  add(path_575092, "resourceGroupName", newJString(resourceGroupName))
-  add(query_575093, "api-version", newJString(apiVersion))
-  add(path_575092, "subscriptionId", newJString(subscriptionId))
+  var path_564192 = newJObject()
+  var query_564193 = newJObject()
+  var body_564194 = newJObject()
+  add(query_564193, "api-version", newJString(apiVersion))
+  add(path_564192, "subscriptionId", newJString(subscriptionId))
+  add(path_564192, "resourceGroupName", newJString(resourceGroupName))
   if parameters != nil:
-    body_575094 = parameters
-  add(path_575092, "accountName", newJString(accountName))
-  result = call_575091.call(path_575092, query_575093, nil, nil, body_575094)
+    body_564194 = parameters
+  add(path_564192, "accountName", newJString(accountName))
+  result = call_564191.call(path_564192, query_564193, nil, nil, body_564194)
 
-var batchAccountUpdate* = Call_BatchAccountUpdate_575082(
+var batchAccountUpdate* = Call_BatchAccountUpdate_564182(
     name: "batchAccountUpdate", meth: HttpMethod.HttpPatch,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Batch/batchAccounts/{accountName}",
-    validator: validate_BatchAccountUpdate_575083, base: "",
-    url: url_BatchAccountUpdate_575084, schemes: {Scheme.Https})
+    validator: validate_BatchAccountUpdate_564183, base: "",
+    url: url_BatchAccountUpdate_564184, schemes: {Scheme.Https})
 type
-  Call_BatchAccountDelete_575071 = ref object of OpenApiRestCall_574457
-proc url_BatchAccountDelete_575073(protocol: Scheme; host: string; base: string;
+  Call_BatchAccountDelete_564171 = ref object of OpenApiRestCall_563555
+proc url_BatchAccountDelete_564173(protocol: Scheme; host: string; base: string;
                                   route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -953,7 +957,7 @@ proc url_BatchAccountDelete_575073(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_BatchAccountDelete_575072(path: JsonNode; query: JsonNode;
+proc validate_BatchAccountDelete_564172(path: JsonNode; query: JsonNode;
                                        header: JsonNode; formData: JsonNode;
                                        body: JsonNode): JsonNode =
   ## Deletes the specified Batch account.
@@ -961,30 +965,30 @@ proc validate_BatchAccountDelete_575072(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group that contains the Batch account.
   ##   subscriptionId: JString (required)
   ##                 : The Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000)
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group that contains the Batch account.
   ##   accountName: JString (required)
   ##              : The name of the Batch account.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_575074 = path.getOrDefault("resourceGroupName")
-  valid_575074 = validateParameter(valid_575074, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564174 = path.getOrDefault("subscriptionId")
+  valid_564174 = validateParameter(valid_564174, JString, required = true,
                                  default = nil)
-  if valid_575074 != nil:
-    section.add "resourceGroupName", valid_575074
-  var valid_575075 = path.getOrDefault("subscriptionId")
-  valid_575075 = validateParameter(valid_575075, JString, required = true,
+  if valid_564174 != nil:
+    section.add "subscriptionId", valid_564174
+  var valid_564175 = path.getOrDefault("resourceGroupName")
+  valid_564175 = validateParameter(valid_564175, JString, required = true,
                                  default = nil)
-  if valid_575075 != nil:
-    section.add "subscriptionId", valid_575075
-  var valid_575076 = path.getOrDefault("accountName")
-  valid_575076 = validateParameter(valid_575076, JString, required = true,
+  if valid_564175 != nil:
+    section.add "resourceGroupName", valid_564175
+  var valid_564176 = path.getOrDefault("accountName")
+  valid_564176 = validateParameter(valid_564176, JString, required = true,
                                  default = nil)
-  if valid_575076 != nil:
-    section.add "accountName", valid_575076
+  if valid_564176 != nil:
+    section.add "accountName", valid_564176
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -992,11 +996,11 @@ proc validate_BatchAccountDelete_575072(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575077 = query.getOrDefault("api-version")
-  valid_575077 = validateParameter(valid_575077, JString, required = true,
+  var valid_564177 = query.getOrDefault("api-version")
+  valid_564177 = validateParameter(valid_564177, JString, required = true,
                                  default = nil)
-  if valid_575077 != nil:
-    section.add "api-version", valid_575077
+  if valid_564177 != nil:
+    section.add "api-version", valid_564177
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1005,47 +1009,47 @@ proc validate_BatchAccountDelete_575072(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_575078: Call_BatchAccountDelete_575071; path: JsonNode;
+proc call*(call_564178: Call_BatchAccountDelete_564171; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes the specified Batch account.
   ## 
-  let valid = call_575078.validator(path, query, header, formData, body)
-  let scheme = call_575078.pickScheme
+  let valid = call_564178.validator(path, query, header, formData, body)
+  let scheme = call_564178.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575078.url(scheme.get, call_575078.host, call_575078.base,
-                         call_575078.route, valid.getOrDefault("path"),
+  let url = call_564178.url(scheme.get, call_564178.host, call_564178.base,
+                         call_564178.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575078, url, valid)
+  result = hook(call_564178, url, valid)
 
-proc call*(call_575079: Call_BatchAccountDelete_575071; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; accountName: string): Recallable =
+proc call*(call_564179: Call_BatchAccountDelete_564171; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string; accountName: string): Recallable =
   ## batchAccountDelete
   ## Deletes the specified Batch account.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group that contains the Batch account.
   ##   apiVersion: string (required)
   ##             : The API version to be used with the HTTP request.
   ##   subscriptionId: string (required)
   ##                 : The Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group that contains the Batch account.
   ##   accountName: string (required)
   ##              : The name of the Batch account.
-  var path_575080 = newJObject()
-  var query_575081 = newJObject()
-  add(path_575080, "resourceGroupName", newJString(resourceGroupName))
-  add(query_575081, "api-version", newJString(apiVersion))
-  add(path_575080, "subscriptionId", newJString(subscriptionId))
-  add(path_575080, "accountName", newJString(accountName))
-  result = call_575079.call(path_575080, query_575081, nil, nil, nil)
+  var path_564180 = newJObject()
+  var query_564181 = newJObject()
+  add(query_564181, "api-version", newJString(apiVersion))
+  add(path_564180, "subscriptionId", newJString(subscriptionId))
+  add(path_564180, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564180, "accountName", newJString(accountName))
+  result = call_564179.call(path_564180, query_564181, nil, nil, nil)
 
-var batchAccountDelete* = Call_BatchAccountDelete_575071(
+var batchAccountDelete* = Call_BatchAccountDelete_564171(
     name: "batchAccountDelete", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Batch/batchAccounts/{accountName}",
-    validator: validate_BatchAccountDelete_575072, base: "",
-    url: url_BatchAccountDelete_575073, schemes: {Scheme.Https})
+    validator: validate_BatchAccountDelete_564172, base: "",
+    url: url_BatchAccountDelete_564173, schemes: {Scheme.Https})
 type
-  Call_ApplicationList_575095 = ref object of OpenApiRestCall_574457
-proc url_ApplicationList_575097(protocol: Scheme; host: string; base: string;
+  Call_ApplicationList_564195 = ref object of OpenApiRestCall_563555
+proc url_ApplicationList_564197(protocol: Scheme; host: string; base: string;
                                route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1068,7 +1072,7 @@ proc url_ApplicationList_575097(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ApplicationList_575096(path: JsonNode; query: JsonNode;
+proc validate_ApplicationList_564196(path: JsonNode; query: JsonNode;
                                     header: JsonNode; formData: JsonNode;
                                     body: JsonNode): JsonNode =
   ## Lists all of the applications in the specified account.
@@ -1076,30 +1080,30 @@ proc validate_ApplicationList_575096(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group that contains the Batch account.
   ##   subscriptionId: JString (required)
   ##                 : The Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000)
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group that contains the Batch account.
   ##   accountName: JString (required)
   ##              : The name of the Batch account.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_575098 = path.getOrDefault("resourceGroupName")
-  valid_575098 = validateParameter(valid_575098, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564198 = path.getOrDefault("subscriptionId")
+  valid_564198 = validateParameter(valid_564198, JString, required = true,
                                  default = nil)
-  if valid_575098 != nil:
-    section.add "resourceGroupName", valid_575098
-  var valid_575099 = path.getOrDefault("subscriptionId")
-  valid_575099 = validateParameter(valid_575099, JString, required = true,
+  if valid_564198 != nil:
+    section.add "subscriptionId", valid_564198
+  var valid_564199 = path.getOrDefault("resourceGroupName")
+  valid_564199 = validateParameter(valid_564199, JString, required = true,
                                  default = nil)
-  if valid_575099 != nil:
-    section.add "subscriptionId", valid_575099
-  var valid_575100 = path.getOrDefault("accountName")
-  valid_575100 = validateParameter(valid_575100, JString, required = true,
+  if valid_564199 != nil:
+    section.add "resourceGroupName", valid_564199
+  var valid_564200 = path.getOrDefault("accountName")
+  valid_564200 = validateParameter(valid_564200, JString, required = true,
                                  default = nil)
-  if valid_575100 != nil:
-    section.add "accountName", valid_575100
+  if valid_564200 != nil:
+    section.add "accountName", valid_564200
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1109,15 +1113,15 @@ proc validate_ApplicationList_575096(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575101 = query.getOrDefault("api-version")
-  valid_575101 = validateParameter(valid_575101, JString, required = true,
+  var valid_564201 = query.getOrDefault("api-version")
+  valid_564201 = validateParameter(valid_564201, JString, required = true,
                                  default = nil)
-  if valid_575101 != nil:
-    section.add "api-version", valid_575101
-  var valid_575102 = query.getOrDefault("maxresults")
-  valid_575102 = validateParameter(valid_575102, JInt, required = false, default = nil)
-  if valid_575102 != nil:
-    section.add "maxresults", valid_575102
+  if valid_564201 != nil:
+    section.add "api-version", valid_564201
+  var valid_564202 = query.getOrDefault("maxresults")
+  valid_564202 = validateParameter(valid_564202, JInt, required = false, default = nil)
+  if valid_564202 != nil:
+    section.add "maxresults", valid_564202
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1126,50 +1130,50 @@ proc validate_ApplicationList_575096(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_575103: Call_ApplicationList_575095; path: JsonNode; query: JsonNode;
+proc call*(call_564203: Call_ApplicationList_564195; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists all of the applications in the specified account.
   ## 
-  let valid = call_575103.validator(path, query, header, formData, body)
-  let scheme = call_575103.pickScheme
+  let valid = call_564203.validator(path, query, header, formData, body)
+  let scheme = call_564203.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575103.url(scheme.get, call_575103.host, call_575103.base,
-                         call_575103.route, valid.getOrDefault("path"),
+  let url = call_564203.url(scheme.get, call_564203.host, call_564203.base,
+                         call_564203.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575103, url, valid)
+  result = hook(call_564203, url, valid)
 
-proc call*(call_575104: Call_ApplicationList_575095; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; accountName: string;
+proc call*(call_564204: Call_ApplicationList_564195; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string; accountName: string;
           maxresults: int = 0): Recallable =
   ## applicationList
   ## Lists all of the applications in the specified account.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group that contains the Batch account.
   ##   apiVersion: string (required)
   ##             : The API version to be used with the HTTP request.
   ##   subscriptionId: string (required)
   ##                 : The Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000)
   ##   maxresults: int
   ##             : The maximum number of items to return in the response.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group that contains the Batch account.
   ##   accountName: string (required)
   ##              : The name of the Batch account.
-  var path_575105 = newJObject()
-  var query_575106 = newJObject()
-  add(path_575105, "resourceGroupName", newJString(resourceGroupName))
-  add(query_575106, "api-version", newJString(apiVersion))
-  add(path_575105, "subscriptionId", newJString(subscriptionId))
-  add(query_575106, "maxresults", newJInt(maxresults))
-  add(path_575105, "accountName", newJString(accountName))
-  result = call_575104.call(path_575105, query_575106, nil, nil, nil)
+  var path_564205 = newJObject()
+  var query_564206 = newJObject()
+  add(query_564206, "api-version", newJString(apiVersion))
+  add(path_564205, "subscriptionId", newJString(subscriptionId))
+  add(query_564206, "maxresults", newJInt(maxresults))
+  add(path_564205, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564205, "accountName", newJString(accountName))
+  result = call_564204.call(path_564205, query_564206, nil, nil, nil)
 
-var applicationList* = Call_ApplicationList_575095(name: "applicationList",
+var applicationList* = Call_ApplicationList_564195(name: "applicationList",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Batch/batchAccounts/{accountName}/applications",
-    validator: validate_ApplicationList_575096, base: "", url: url_ApplicationList_575097,
+    validator: validate_ApplicationList_564196, base: "", url: url_ApplicationList_564197,
     schemes: {Scheme.Https})
 type
-  Call_ApplicationCreate_575119 = ref object of OpenApiRestCall_574457
-proc url_ApplicationCreate_575121(protocol: Scheme; host: string; base: string;
+  Call_ApplicationCreate_564219 = ref object of OpenApiRestCall_563555
+proc url_ApplicationCreate_564221(protocol: Scheme; host: string; base: string;
                                  route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1194,7 +1198,7 @@ proc url_ApplicationCreate_575121(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ApplicationCreate_575120(path: JsonNode; query: JsonNode;
+proc validate_ApplicationCreate_564220(path: JsonNode; query: JsonNode;
                                       header: JsonNode; formData: JsonNode;
                                       body: JsonNode): JsonNode =
   ## Adds an application to the specified Batch account.
@@ -1202,37 +1206,37 @@ proc validate_ApplicationCreate_575120(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group that contains the Batch account.
   ##   subscriptionId: JString (required)
   ##                 : The Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000)
-  ##   applicationId: JString (required)
-  ##                : The ID of the application.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group that contains the Batch account.
   ##   accountName: JString (required)
   ##              : The name of the Batch account.
+  ##   applicationId: JString (required)
+  ##                : The ID of the application.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_575122 = path.getOrDefault("resourceGroupName")
-  valid_575122 = validateParameter(valid_575122, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564222 = path.getOrDefault("subscriptionId")
+  valid_564222 = validateParameter(valid_564222, JString, required = true,
                                  default = nil)
-  if valid_575122 != nil:
-    section.add "resourceGroupName", valid_575122
-  var valid_575123 = path.getOrDefault("subscriptionId")
-  valid_575123 = validateParameter(valid_575123, JString, required = true,
+  if valid_564222 != nil:
+    section.add "subscriptionId", valid_564222
+  var valid_564223 = path.getOrDefault("resourceGroupName")
+  valid_564223 = validateParameter(valid_564223, JString, required = true,
                                  default = nil)
-  if valid_575123 != nil:
-    section.add "subscriptionId", valid_575123
-  var valid_575124 = path.getOrDefault("applicationId")
-  valid_575124 = validateParameter(valid_575124, JString, required = true,
+  if valid_564223 != nil:
+    section.add "resourceGroupName", valid_564223
+  var valid_564224 = path.getOrDefault("accountName")
+  valid_564224 = validateParameter(valid_564224, JString, required = true,
                                  default = nil)
-  if valid_575124 != nil:
-    section.add "applicationId", valid_575124
-  var valid_575125 = path.getOrDefault("accountName")
-  valid_575125 = validateParameter(valid_575125, JString, required = true,
+  if valid_564224 != nil:
+    section.add "accountName", valid_564224
+  var valid_564225 = path.getOrDefault("applicationId")
+  valid_564225 = validateParameter(valid_564225, JString, required = true,
                                  default = nil)
-  if valid_575125 != nil:
-    section.add "accountName", valid_575125
+  if valid_564225 != nil:
+    section.add "applicationId", valid_564225
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1240,11 +1244,11 @@ proc validate_ApplicationCreate_575120(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575126 = query.getOrDefault("api-version")
-  valid_575126 = validateParameter(valid_575126, JString, required = true,
+  var valid_564226 = query.getOrDefault("api-version")
+  valid_564226 = validateParameter(valid_564226, JString, required = true,
                                  default = nil)
-  if valid_575126 != nil:
-    section.add "api-version", valid_575126
+  if valid_564226 != nil:
+    section.add "api-version", valid_564226
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1257,55 +1261,55 @@ proc validate_ApplicationCreate_575120(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_575128: Call_ApplicationCreate_575119; path: JsonNode;
+proc call*(call_564228: Call_ApplicationCreate_564219; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Adds an application to the specified Batch account.
   ## 
-  let valid = call_575128.validator(path, query, header, formData, body)
-  let scheme = call_575128.pickScheme
+  let valid = call_564228.validator(path, query, header, formData, body)
+  let scheme = call_564228.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575128.url(scheme.get, call_575128.host, call_575128.base,
-                         call_575128.route, valid.getOrDefault("path"),
+  let url = call_564228.url(scheme.get, call_564228.host, call_564228.base,
+                         call_564228.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575128, url, valid)
+  result = hook(call_564228, url, valid)
 
-proc call*(call_575129: Call_ApplicationCreate_575119; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; applicationId: string;
-          accountName: string; parameters: JsonNode = nil): Recallable =
+proc call*(call_564229: Call_ApplicationCreate_564219; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string; accountName: string;
+          applicationId: string; parameters: JsonNode = nil): Recallable =
   ## applicationCreate
   ## Adds an application to the specified Batch account.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group that contains the Batch account.
   ##   apiVersion: string (required)
   ##             : The API version to be used with the HTTP request.
   ##   subscriptionId: string (required)
   ##                 : The Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000)
-  ##   applicationId: string (required)
-  ##                : The ID of the application.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group that contains the Batch account.
   ##   parameters: JObject
   ##             : The parameters for the request.
   ##   accountName: string (required)
   ##              : The name of the Batch account.
-  var path_575130 = newJObject()
-  var query_575131 = newJObject()
-  var body_575132 = newJObject()
-  add(path_575130, "resourceGroupName", newJString(resourceGroupName))
-  add(query_575131, "api-version", newJString(apiVersion))
-  add(path_575130, "subscriptionId", newJString(subscriptionId))
-  add(path_575130, "applicationId", newJString(applicationId))
+  ##   applicationId: string (required)
+  ##                : The ID of the application.
+  var path_564230 = newJObject()
+  var query_564231 = newJObject()
+  var body_564232 = newJObject()
+  add(query_564231, "api-version", newJString(apiVersion))
+  add(path_564230, "subscriptionId", newJString(subscriptionId))
+  add(path_564230, "resourceGroupName", newJString(resourceGroupName))
   if parameters != nil:
-    body_575132 = parameters
-  add(path_575130, "accountName", newJString(accountName))
-  result = call_575129.call(path_575130, query_575131, nil, nil, body_575132)
+    body_564232 = parameters
+  add(path_564230, "accountName", newJString(accountName))
+  add(path_564230, "applicationId", newJString(applicationId))
+  result = call_564229.call(path_564230, query_564231, nil, nil, body_564232)
 
-var applicationCreate* = Call_ApplicationCreate_575119(name: "applicationCreate",
+var applicationCreate* = Call_ApplicationCreate_564219(name: "applicationCreate",
     meth: HttpMethod.HttpPut, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Batch/batchAccounts/{accountName}/applications/{applicationId}",
-    validator: validate_ApplicationCreate_575120, base: "",
-    url: url_ApplicationCreate_575121, schemes: {Scheme.Https})
+    validator: validate_ApplicationCreate_564220, base: "",
+    url: url_ApplicationCreate_564221, schemes: {Scheme.Https})
 type
-  Call_ApplicationGet_575107 = ref object of OpenApiRestCall_574457
-proc url_ApplicationGet_575109(protocol: Scheme; host: string; base: string;
+  Call_ApplicationGet_564207 = ref object of OpenApiRestCall_563555
+proc url_ApplicationGet_564209(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1330,7 +1334,7 @@ proc url_ApplicationGet_575109(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ApplicationGet_575108(path: JsonNode; query: JsonNode;
+proc validate_ApplicationGet_564208(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## Gets information about the specified application.
@@ -1338,37 +1342,37 @@ proc validate_ApplicationGet_575108(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group that contains the Batch account.
   ##   subscriptionId: JString (required)
   ##                 : The Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000)
-  ##   applicationId: JString (required)
-  ##                : The ID of the application.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group that contains the Batch account.
   ##   accountName: JString (required)
   ##              : The name of the Batch account.
+  ##   applicationId: JString (required)
+  ##                : The ID of the application.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_575110 = path.getOrDefault("resourceGroupName")
-  valid_575110 = validateParameter(valid_575110, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564210 = path.getOrDefault("subscriptionId")
+  valid_564210 = validateParameter(valid_564210, JString, required = true,
                                  default = nil)
-  if valid_575110 != nil:
-    section.add "resourceGroupName", valid_575110
-  var valid_575111 = path.getOrDefault("subscriptionId")
-  valid_575111 = validateParameter(valid_575111, JString, required = true,
+  if valid_564210 != nil:
+    section.add "subscriptionId", valid_564210
+  var valid_564211 = path.getOrDefault("resourceGroupName")
+  valid_564211 = validateParameter(valid_564211, JString, required = true,
                                  default = nil)
-  if valid_575111 != nil:
-    section.add "subscriptionId", valid_575111
-  var valid_575112 = path.getOrDefault("applicationId")
-  valid_575112 = validateParameter(valid_575112, JString, required = true,
+  if valid_564211 != nil:
+    section.add "resourceGroupName", valid_564211
+  var valid_564212 = path.getOrDefault("accountName")
+  valid_564212 = validateParameter(valid_564212, JString, required = true,
                                  default = nil)
-  if valid_575112 != nil:
-    section.add "applicationId", valid_575112
-  var valid_575113 = path.getOrDefault("accountName")
-  valid_575113 = validateParameter(valid_575113, JString, required = true,
+  if valid_564212 != nil:
+    section.add "accountName", valid_564212
+  var valid_564213 = path.getOrDefault("applicationId")
+  valid_564213 = validateParameter(valid_564213, JString, required = true,
                                  default = nil)
-  if valid_575113 != nil:
-    section.add "accountName", valid_575113
+  if valid_564213 != nil:
+    section.add "applicationId", valid_564213
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1376,11 +1380,11 @@ proc validate_ApplicationGet_575108(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575114 = query.getOrDefault("api-version")
-  valid_575114 = validateParameter(valid_575114, JString, required = true,
+  var valid_564214 = query.getOrDefault("api-version")
+  valid_564214 = validateParameter(valid_564214, JString, required = true,
                                  default = nil)
-  if valid_575114 != nil:
-    section.add "api-version", valid_575114
+  if valid_564214 != nil:
+    section.add "api-version", valid_564214
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1389,50 +1393,50 @@ proc validate_ApplicationGet_575108(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_575115: Call_ApplicationGet_575107; path: JsonNode; query: JsonNode;
+proc call*(call_564215: Call_ApplicationGet_564207; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets information about the specified application.
   ## 
-  let valid = call_575115.validator(path, query, header, formData, body)
-  let scheme = call_575115.pickScheme
+  let valid = call_564215.validator(path, query, header, formData, body)
+  let scheme = call_564215.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575115.url(scheme.get, call_575115.host, call_575115.base,
-                         call_575115.route, valid.getOrDefault("path"),
+  let url = call_564215.url(scheme.get, call_564215.host, call_564215.base,
+                         call_564215.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575115, url, valid)
+  result = hook(call_564215, url, valid)
 
-proc call*(call_575116: Call_ApplicationGet_575107; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; applicationId: string;
-          accountName: string): Recallable =
+proc call*(call_564216: Call_ApplicationGet_564207; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string; accountName: string;
+          applicationId: string): Recallable =
   ## applicationGet
   ## Gets information about the specified application.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group that contains the Batch account.
   ##   apiVersion: string (required)
   ##             : The API version to be used with the HTTP request.
   ##   subscriptionId: string (required)
   ##                 : The Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000)
-  ##   applicationId: string (required)
-  ##                : The ID of the application.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group that contains the Batch account.
   ##   accountName: string (required)
   ##              : The name of the Batch account.
-  var path_575117 = newJObject()
-  var query_575118 = newJObject()
-  add(path_575117, "resourceGroupName", newJString(resourceGroupName))
-  add(query_575118, "api-version", newJString(apiVersion))
-  add(path_575117, "subscriptionId", newJString(subscriptionId))
-  add(path_575117, "applicationId", newJString(applicationId))
-  add(path_575117, "accountName", newJString(accountName))
-  result = call_575116.call(path_575117, query_575118, nil, nil, nil)
+  ##   applicationId: string (required)
+  ##                : The ID of the application.
+  var path_564217 = newJObject()
+  var query_564218 = newJObject()
+  add(query_564218, "api-version", newJString(apiVersion))
+  add(path_564217, "subscriptionId", newJString(subscriptionId))
+  add(path_564217, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564217, "accountName", newJString(accountName))
+  add(path_564217, "applicationId", newJString(applicationId))
+  result = call_564216.call(path_564217, query_564218, nil, nil, nil)
 
-var applicationGet* = Call_ApplicationGet_575107(name: "applicationGet",
+var applicationGet* = Call_ApplicationGet_564207(name: "applicationGet",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Batch/batchAccounts/{accountName}/applications/{applicationId}",
-    validator: validate_ApplicationGet_575108, base: "", url: url_ApplicationGet_575109,
+    validator: validate_ApplicationGet_564208, base: "", url: url_ApplicationGet_564209,
     schemes: {Scheme.Https})
 type
-  Call_ApplicationUpdate_575145 = ref object of OpenApiRestCall_574457
-proc url_ApplicationUpdate_575147(protocol: Scheme; host: string; base: string;
+  Call_ApplicationUpdate_564245 = ref object of OpenApiRestCall_563555
+proc url_ApplicationUpdate_564247(protocol: Scheme; host: string; base: string;
                                  route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1457,7 +1461,7 @@ proc url_ApplicationUpdate_575147(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ApplicationUpdate_575146(path: JsonNode; query: JsonNode;
+proc validate_ApplicationUpdate_564246(path: JsonNode; query: JsonNode;
                                       header: JsonNode; formData: JsonNode;
                                       body: JsonNode): JsonNode =
   ## Updates settings for the specified application.
@@ -1465,37 +1469,37 @@ proc validate_ApplicationUpdate_575146(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group that contains the Batch account.
   ##   subscriptionId: JString (required)
   ##                 : The Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000)
-  ##   applicationId: JString (required)
-  ##                : The ID of the application.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group that contains the Batch account.
   ##   accountName: JString (required)
   ##              : The name of the Batch account.
+  ##   applicationId: JString (required)
+  ##                : The ID of the application.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_575148 = path.getOrDefault("resourceGroupName")
-  valid_575148 = validateParameter(valid_575148, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564248 = path.getOrDefault("subscriptionId")
+  valid_564248 = validateParameter(valid_564248, JString, required = true,
                                  default = nil)
-  if valid_575148 != nil:
-    section.add "resourceGroupName", valid_575148
-  var valid_575149 = path.getOrDefault("subscriptionId")
-  valid_575149 = validateParameter(valid_575149, JString, required = true,
+  if valid_564248 != nil:
+    section.add "subscriptionId", valid_564248
+  var valid_564249 = path.getOrDefault("resourceGroupName")
+  valid_564249 = validateParameter(valid_564249, JString, required = true,
                                  default = nil)
-  if valid_575149 != nil:
-    section.add "subscriptionId", valid_575149
-  var valid_575150 = path.getOrDefault("applicationId")
-  valid_575150 = validateParameter(valid_575150, JString, required = true,
+  if valid_564249 != nil:
+    section.add "resourceGroupName", valid_564249
+  var valid_564250 = path.getOrDefault("accountName")
+  valid_564250 = validateParameter(valid_564250, JString, required = true,
                                  default = nil)
-  if valid_575150 != nil:
-    section.add "applicationId", valid_575150
-  var valid_575151 = path.getOrDefault("accountName")
-  valid_575151 = validateParameter(valid_575151, JString, required = true,
+  if valid_564250 != nil:
+    section.add "accountName", valid_564250
+  var valid_564251 = path.getOrDefault("applicationId")
+  valid_564251 = validateParameter(valid_564251, JString, required = true,
                                  default = nil)
-  if valid_575151 != nil:
-    section.add "accountName", valid_575151
+  if valid_564251 != nil:
+    section.add "applicationId", valid_564251
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1503,11 +1507,11 @@ proc validate_ApplicationUpdate_575146(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575152 = query.getOrDefault("api-version")
-  valid_575152 = validateParameter(valid_575152, JString, required = true,
+  var valid_564252 = query.getOrDefault("api-version")
+  valid_564252 = validateParameter(valid_564252, JString, required = true,
                                  default = nil)
-  if valid_575152 != nil:
-    section.add "api-version", valid_575152
+  if valid_564252 != nil:
+    section.add "api-version", valid_564252
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1521,55 +1525,55 @@ proc validate_ApplicationUpdate_575146(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_575154: Call_ApplicationUpdate_575145; path: JsonNode;
+proc call*(call_564254: Call_ApplicationUpdate_564245; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Updates settings for the specified application.
   ## 
-  let valid = call_575154.validator(path, query, header, formData, body)
-  let scheme = call_575154.pickScheme
+  let valid = call_564254.validator(path, query, header, formData, body)
+  let scheme = call_564254.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575154.url(scheme.get, call_575154.host, call_575154.base,
-                         call_575154.route, valid.getOrDefault("path"),
+  let url = call_564254.url(scheme.get, call_564254.host, call_564254.base,
+                         call_564254.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575154, url, valid)
+  result = hook(call_564254, url, valid)
 
-proc call*(call_575155: Call_ApplicationUpdate_575145; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; applicationId: string;
-          parameters: JsonNode; accountName: string): Recallable =
+proc call*(call_564255: Call_ApplicationUpdate_564245; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string; parameters: JsonNode;
+          accountName: string; applicationId: string): Recallable =
   ## applicationUpdate
   ## Updates settings for the specified application.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group that contains the Batch account.
   ##   apiVersion: string (required)
   ##             : The API version to be used with the HTTP request.
   ##   subscriptionId: string (required)
   ##                 : The Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000)
-  ##   applicationId: string (required)
-  ##                : The ID of the application.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group that contains the Batch account.
   ##   parameters: JObject (required)
   ##             : The parameters for the request.
   ##   accountName: string (required)
   ##              : The name of the Batch account.
-  var path_575156 = newJObject()
-  var query_575157 = newJObject()
-  var body_575158 = newJObject()
-  add(path_575156, "resourceGroupName", newJString(resourceGroupName))
-  add(query_575157, "api-version", newJString(apiVersion))
-  add(path_575156, "subscriptionId", newJString(subscriptionId))
-  add(path_575156, "applicationId", newJString(applicationId))
+  ##   applicationId: string (required)
+  ##                : The ID of the application.
+  var path_564256 = newJObject()
+  var query_564257 = newJObject()
+  var body_564258 = newJObject()
+  add(query_564257, "api-version", newJString(apiVersion))
+  add(path_564256, "subscriptionId", newJString(subscriptionId))
+  add(path_564256, "resourceGroupName", newJString(resourceGroupName))
   if parameters != nil:
-    body_575158 = parameters
-  add(path_575156, "accountName", newJString(accountName))
-  result = call_575155.call(path_575156, query_575157, nil, nil, body_575158)
+    body_564258 = parameters
+  add(path_564256, "accountName", newJString(accountName))
+  add(path_564256, "applicationId", newJString(applicationId))
+  result = call_564255.call(path_564256, query_564257, nil, nil, body_564258)
 
-var applicationUpdate* = Call_ApplicationUpdate_575145(name: "applicationUpdate",
+var applicationUpdate* = Call_ApplicationUpdate_564245(name: "applicationUpdate",
     meth: HttpMethod.HttpPatch, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Batch/batchAccounts/{accountName}/applications/{applicationId}",
-    validator: validate_ApplicationUpdate_575146, base: "",
-    url: url_ApplicationUpdate_575147, schemes: {Scheme.Https})
+    validator: validate_ApplicationUpdate_564246, base: "",
+    url: url_ApplicationUpdate_564247, schemes: {Scheme.Https})
 type
-  Call_ApplicationDelete_575133 = ref object of OpenApiRestCall_574457
-proc url_ApplicationDelete_575135(protocol: Scheme; host: string; base: string;
+  Call_ApplicationDelete_564233 = ref object of OpenApiRestCall_563555
+proc url_ApplicationDelete_564235(protocol: Scheme; host: string; base: string;
                                  route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1594,7 +1598,7 @@ proc url_ApplicationDelete_575135(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ApplicationDelete_575134(path: JsonNode; query: JsonNode;
+proc validate_ApplicationDelete_564234(path: JsonNode; query: JsonNode;
                                       header: JsonNode; formData: JsonNode;
                                       body: JsonNode): JsonNode =
   ## Deletes an application.
@@ -1602,37 +1606,37 @@ proc validate_ApplicationDelete_575134(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group that contains the Batch account.
   ##   subscriptionId: JString (required)
   ##                 : The Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000)
-  ##   applicationId: JString (required)
-  ##                : The ID of the application.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group that contains the Batch account.
   ##   accountName: JString (required)
   ##              : The name of the Batch account.
+  ##   applicationId: JString (required)
+  ##                : The ID of the application.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_575136 = path.getOrDefault("resourceGroupName")
-  valid_575136 = validateParameter(valid_575136, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564236 = path.getOrDefault("subscriptionId")
+  valid_564236 = validateParameter(valid_564236, JString, required = true,
                                  default = nil)
-  if valid_575136 != nil:
-    section.add "resourceGroupName", valid_575136
-  var valid_575137 = path.getOrDefault("subscriptionId")
-  valid_575137 = validateParameter(valid_575137, JString, required = true,
+  if valid_564236 != nil:
+    section.add "subscriptionId", valid_564236
+  var valid_564237 = path.getOrDefault("resourceGroupName")
+  valid_564237 = validateParameter(valid_564237, JString, required = true,
                                  default = nil)
-  if valid_575137 != nil:
-    section.add "subscriptionId", valid_575137
-  var valid_575138 = path.getOrDefault("applicationId")
-  valid_575138 = validateParameter(valid_575138, JString, required = true,
+  if valid_564237 != nil:
+    section.add "resourceGroupName", valid_564237
+  var valid_564238 = path.getOrDefault("accountName")
+  valid_564238 = validateParameter(valid_564238, JString, required = true,
                                  default = nil)
-  if valid_575138 != nil:
-    section.add "applicationId", valid_575138
-  var valid_575139 = path.getOrDefault("accountName")
-  valid_575139 = validateParameter(valid_575139, JString, required = true,
+  if valid_564238 != nil:
+    section.add "accountName", valid_564238
+  var valid_564239 = path.getOrDefault("applicationId")
+  valid_564239 = validateParameter(valid_564239, JString, required = true,
                                  default = nil)
-  if valid_575139 != nil:
-    section.add "accountName", valid_575139
+  if valid_564239 != nil:
+    section.add "applicationId", valid_564239
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1640,11 +1644,11 @@ proc validate_ApplicationDelete_575134(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575140 = query.getOrDefault("api-version")
-  valid_575140 = validateParameter(valid_575140, JString, required = true,
+  var valid_564240 = query.getOrDefault("api-version")
+  valid_564240 = validateParameter(valid_564240, JString, required = true,
                                  default = nil)
-  if valid_575140 != nil:
-    section.add "api-version", valid_575140
+  if valid_564240 != nil:
+    section.add "api-version", valid_564240
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1653,50 +1657,50 @@ proc validate_ApplicationDelete_575134(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_575141: Call_ApplicationDelete_575133; path: JsonNode;
+proc call*(call_564241: Call_ApplicationDelete_564233; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes an application.
   ## 
-  let valid = call_575141.validator(path, query, header, formData, body)
-  let scheme = call_575141.pickScheme
+  let valid = call_564241.validator(path, query, header, formData, body)
+  let scheme = call_564241.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575141.url(scheme.get, call_575141.host, call_575141.base,
-                         call_575141.route, valid.getOrDefault("path"),
+  let url = call_564241.url(scheme.get, call_564241.host, call_564241.base,
+                         call_564241.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575141, url, valid)
+  result = hook(call_564241, url, valid)
 
-proc call*(call_575142: Call_ApplicationDelete_575133; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; applicationId: string;
-          accountName: string): Recallable =
+proc call*(call_564242: Call_ApplicationDelete_564233; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string; accountName: string;
+          applicationId: string): Recallable =
   ## applicationDelete
   ## Deletes an application.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group that contains the Batch account.
   ##   apiVersion: string (required)
   ##             : The API version to be used with the HTTP request.
   ##   subscriptionId: string (required)
   ##                 : The Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000)
-  ##   applicationId: string (required)
-  ##                : The ID of the application.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group that contains the Batch account.
   ##   accountName: string (required)
   ##              : The name of the Batch account.
-  var path_575143 = newJObject()
-  var query_575144 = newJObject()
-  add(path_575143, "resourceGroupName", newJString(resourceGroupName))
-  add(query_575144, "api-version", newJString(apiVersion))
-  add(path_575143, "subscriptionId", newJString(subscriptionId))
-  add(path_575143, "applicationId", newJString(applicationId))
-  add(path_575143, "accountName", newJString(accountName))
-  result = call_575142.call(path_575143, query_575144, nil, nil, nil)
+  ##   applicationId: string (required)
+  ##                : The ID of the application.
+  var path_564243 = newJObject()
+  var query_564244 = newJObject()
+  add(query_564244, "api-version", newJString(apiVersion))
+  add(path_564243, "subscriptionId", newJString(subscriptionId))
+  add(path_564243, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564243, "accountName", newJString(accountName))
+  add(path_564243, "applicationId", newJString(applicationId))
+  result = call_564242.call(path_564243, query_564244, nil, nil, nil)
 
-var applicationDelete* = Call_ApplicationDelete_575133(name: "applicationDelete",
+var applicationDelete* = Call_ApplicationDelete_564233(name: "applicationDelete",
     meth: HttpMethod.HttpDelete, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Batch/batchAccounts/{accountName}/applications/{applicationId}",
-    validator: validate_ApplicationDelete_575134, base: "",
-    url: url_ApplicationDelete_575135, schemes: {Scheme.Https})
+    validator: validate_ApplicationDelete_564234, base: "",
+    url: url_ApplicationDelete_564235, schemes: {Scheme.Https})
 type
-  Call_ApplicationPackageCreate_575172 = ref object of OpenApiRestCall_574457
-proc url_ApplicationPackageCreate_575174(protocol: Scheme; host: string;
+  Call_ApplicationPackageCreate_564272 = ref object of OpenApiRestCall_563555
+proc url_ApplicationPackageCreate_564274(protocol: Scheme; host: string;
                                         base: string; route: string; path: JsonNode;
                                         query: JsonNode): Uri =
   result.scheme = $protocol
@@ -1725,51 +1729,50 @@ proc url_ApplicationPackageCreate_575174(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ApplicationPackageCreate_575173(path: JsonNode; query: JsonNode;
+proc validate_ApplicationPackageCreate_564273(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Creates an application package record.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group that contains the Batch account.
   ##   version: JString (required)
   ##          : The version of the application.
   ##   subscriptionId: JString (required)
   ##                 : The Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000)
-  ##   applicationId: JString (required)
-  ##                : The ID of the application.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group that contains the Batch account.
   ##   accountName: JString (required)
   ##              : The name of the Batch account.
+  ##   applicationId: JString (required)
+  ##                : The ID of the application.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_575175 = path.getOrDefault("resourceGroupName")
-  valid_575175 = validateParameter(valid_575175, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `version` field"
+  var valid_564275 = path.getOrDefault("version")
+  valid_564275 = validateParameter(valid_564275, JString, required = true,
                                  default = nil)
-  if valid_575175 != nil:
-    section.add "resourceGroupName", valid_575175
-  var valid_575176 = path.getOrDefault("version")
-  valid_575176 = validateParameter(valid_575176, JString, required = true,
+  if valid_564275 != nil:
+    section.add "version", valid_564275
+  var valid_564276 = path.getOrDefault("subscriptionId")
+  valid_564276 = validateParameter(valid_564276, JString, required = true,
                                  default = nil)
-  if valid_575176 != nil:
-    section.add "version", valid_575176
-  var valid_575177 = path.getOrDefault("subscriptionId")
-  valid_575177 = validateParameter(valid_575177, JString, required = true,
+  if valid_564276 != nil:
+    section.add "subscriptionId", valid_564276
+  var valid_564277 = path.getOrDefault("resourceGroupName")
+  valid_564277 = validateParameter(valid_564277, JString, required = true,
                                  default = nil)
-  if valid_575177 != nil:
-    section.add "subscriptionId", valid_575177
-  var valid_575178 = path.getOrDefault("applicationId")
-  valid_575178 = validateParameter(valid_575178, JString, required = true,
+  if valid_564277 != nil:
+    section.add "resourceGroupName", valid_564277
+  var valid_564278 = path.getOrDefault("accountName")
+  valid_564278 = validateParameter(valid_564278, JString, required = true,
                                  default = nil)
-  if valid_575178 != nil:
-    section.add "applicationId", valid_575178
-  var valid_575179 = path.getOrDefault("accountName")
-  valid_575179 = validateParameter(valid_575179, JString, required = true,
+  if valid_564278 != nil:
+    section.add "accountName", valid_564278
+  var valid_564279 = path.getOrDefault("applicationId")
+  valid_564279 = validateParameter(valid_564279, JString, required = true,
                                  default = nil)
-  if valid_575179 != nil:
-    section.add "accountName", valid_575179
+  if valid_564279 != nil:
+    section.add "applicationId", valid_564279
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1777,11 +1780,11 @@ proc validate_ApplicationPackageCreate_575173(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575180 = query.getOrDefault("api-version")
-  valid_575180 = validateParameter(valid_575180, JString, required = true,
+  var valid_564280 = query.getOrDefault("api-version")
+  valid_564280 = validateParameter(valid_564280, JString, required = true,
                                  default = nil)
-  if valid_575180 != nil:
-    section.add "api-version", valid_575180
+  if valid_564280 != nil:
+    section.add "api-version", valid_564280
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1790,54 +1793,54 @@ proc validate_ApplicationPackageCreate_575173(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_575181: Call_ApplicationPackageCreate_575172; path: JsonNode;
+proc call*(call_564281: Call_ApplicationPackageCreate_564272; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Creates an application package record.
   ## 
-  let valid = call_575181.validator(path, query, header, formData, body)
-  let scheme = call_575181.pickScheme
+  let valid = call_564281.validator(path, query, header, formData, body)
+  let scheme = call_564281.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575181.url(scheme.get, call_575181.host, call_575181.base,
-                         call_575181.route, valid.getOrDefault("path"),
+  let url = call_564281.url(scheme.get, call_564281.host, call_564281.base,
+                         call_564281.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575181, url, valid)
+  result = hook(call_564281, url, valid)
 
-proc call*(call_575182: Call_ApplicationPackageCreate_575172;
-          resourceGroupName: string; apiVersion: string; version: string;
-          subscriptionId: string; applicationId: string; accountName: string): Recallable =
+proc call*(call_564282: Call_ApplicationPackageCreate_564272; version: string;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string;
+          accountName: string; applicationId: string): Recallable =
   ## applicationPackageCreate
   ## Creates an application package record.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group that contains the Batch account.
-  ##   apiVersion: string (required)
-  ##             : The API version to be used with the HTTP request.
   ##   version: string (required)
   ##          : The version of the application.
+  ##   apiVersion: string (required)
+  ##             : The API version to be used with the HTTP request.
   ##   subscriptionId: string (required)
   ##                 : The Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000)
-  ##   applicationId: string (required)
-  ##                : The ID of the application.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group that contains the Batch account.
   ##   accountName: string (required)
   ##              : The name of the Batch account.
-  var path_575183 = newJObject()
-  var query_575184 = newJObject()
-  add(path_575183, "resourceGroupName", newJString(resourceGroupName))
-  add(query_575184, "api-version", newJString(apiVersion))
-  add(path_575183, "version", newJString(version))
-  add(path_575183, "subscriptionId", newJString(subscriptionId))
-  add(path_575183, "applicationId", newJString(applicationId))
-  add(path_575183, "accountName", newJString(accountName))
-  result = call_575182.call(path_575183, query_575184, nil, nil, nil)
+  ##   applicationId: string (required)
+  ##                : The ID of the application.
+  var path_564283 = newJObject()
+  var query_564284 = newJObject()
+  add(path_564283, "version", newJString(version))
+  add(query_564284, "api-version", newJString(apiVersion))
+  add(path_564283, "subscriptionId", newJString(subscriptionId))
+  add(path_564283, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564283, "accountName", newJString(accountName))
+  add(path_564283, "applicationId", newJString(applicationId))
+  result = call_564282.call(path_564283, query_564284, nil, nil, nil)
 
-var applicationPackageCreate* = Call_ApplicationPackageCreate_575172(
+var applicationPackageCreate* = Call_ApplicationPackageCreate_564272(
     name: "applicationPackageCreate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Batch/batchAccounts/{accountName}/applications/{applicationId}/versions/{version}",
-    validator: validate_ApplicationPackageCreate_575173, base: "",
-    url: url_ApplicationPackageCreate_575174, schemes: {Scheme.Https})
+    validator: validate_ApplicationPackageCreate_564273, base: "",
+    url: url_ApplicationPackageCreate_564274, schemes: {Scheme.Https})
 type
-  Call_ApplicationPackageGet_575159 = ref object of OpenApiRestCall_574457
-proc url_ApplicationPackageGet_575161(protocol: Scheme; host: string; base: string;
+  Call_ApplicationPackageGet_564259 = ref object of OpenApiRestCall_563555
+proc url_ApplicationPackageGet_564261(protocol: Scheme; host: string; base: string;
                                      route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1865,51 +1868,50 @@ proc url_ApplicationPackageGet_575161(protocol: Scheme; host: string; base: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ApplicationPackageGet_575160(path: JsonNode; query: JsonNode;
+proc validate_ApplicationPackageGet_564260(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets information about the specified application package.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group that contains the Batch account.
   ##   version: JString (required)
   ##          : The version of the application.
   ##   subscriptionId: JString (required)
   ##                 : The Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000)
-  ##   applicationId: JString (required)
-  ##                : The ID of the application.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group that contains the Batch account.
   ##   accountName: JString (required)
   ##              : The name of the Batch account.
+  ##   applicationId: JString (required)
+  ##                : The ID of the application.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_575162 = path.getOrDefault("resourceGroupName")
-  valid_575162 = validateParameter(valid_575162, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `version` field"
+  var valid_564262 = path.getOrDefault("version")
+  valid_564262 = validateParameter(valid_564262, JString, required = true,
                                  default = nil)
-  if valid_575162 != nil:
-    section.add "resourceGroupName", valid_575162
-  var valid_575163 = path.getOrDefault("version")
-  valid_575163 = validateParameter(valid_575163, JString, required = true,
+  if valid_564262 != nil:
+    section.add "version", valid_564262
+  var valid_564263 = path.getOrDefault("subscriptionId")
+  valid_564263 = validateParameter(valid_564263, JString, required = true,
                                  default = nil)
-  if valid_575163 != nil:
-    section.add "version", valid_575163
-  var valid_575164 = path.getOrDefault("subscriptionId")
-  valid_575164 = validateParameter(valid_575164, JString, required = true,
+  if valid_564263 != nil:
+    section.add "subscriptionId", valid_564263
+  var valid_564264 = path.getOrDefault("resourceGroupName")
+  valid_564264 = validateParameter(valid_564264, JString, required = true,
                                  default = nil)
-  if valid_575164 != nil:
-    section.add "subscriptionId", valid_575164
-  var valid_575165 = path.getOrDefault("applicationId")
-  valid_575165 = validateParameter(valid_575165, JString, required = true,
+  if valid_564264 != nil:
+    section.add "resourceGroupName", valid_564264
+  var valid_564265 = path.getOrDefault("accountName")
+  valid_564265 = validateParameter(valid_564265, JString, required = true,
                                  default = nil)
-  if valid_575165 != nil:
-    section.add "applicationId", valid_575165
-  var valid_575166 = path.getOrDefault("accountName")
-  valid_575166 = validateParameter(valid_575166, JString, required = true,
+  if valid_564265 != nil:
+    section.add "accountName", valid_564265
+  var valid_564266 = path.getOrDefault("applicationId")
+  valid_564266 = validateParameter(valid_564266, JString, required = true,
                                  default = nil)
-  if valid_575166 != nil:
-    section.add "accountName", valid_575166
+  if valid_564266 != nil:
+    section.add "applicationId", valid_564266
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1917,11 +1919,11 @@ proc validate_ApplicationPackageGet_575160(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575167 = query.getOrDefault("api-version")
-  valid_575167 = validateParameter(valid_575167, JString, required = true,
+  var valid_564267 = query.getOrDefault("api-version")
+  valid_564267 = validateParameter(valid_564267, JString, required = true,
                                  default = nil)
-  if valid_575167 != nil:
-    section.add "api-version", valid_575167
+  if valid_564267 != nil:
+    section.add "api-version", valid_564267
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1930,54 +1932,54 @@ proc validate_ApplicationPackageGet_575160(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_575168: Call_ApplicationPackageGet_575159; path: JsonNode;
+proc call*(call_564268: Call_ApplicationPackageGet_564259; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets information about the specified application package.
   ## 
-  let valid = call_575168.validator(path, query, header, formData, body)
-  let scheme = call_575168.pickScheme
+  let valid = call_564268.validator(path, query, header, formData, body)
+  let scheme = call_564268.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575168.url(scheme.get, call_575168.host, call_575168.base,
-                         call_575168.route, valid.getOrDefault("path"),
+  let url = call_564268.url(scheme.get, call_564268.host, call_564268.base,
+                         call_564268.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575168, url, valid)
+  result = hook(call_564268, url, valid)
 
-proc call*(call_575169: Call_ApplicationPackageGet_575159;
-          resourceGroupName: string; apiVersion: string; version: string;
-          subscriptionId: string; applicationId: string; accountName: string): Recallable =
+proc call*(call_564269: Call_ApplicationPackageGet_564259; version: string;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string;
+          accountName: string; applicationId: string): Recallable =
   ## applicationPackageGet
   ## Gets information about the specified application package.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group that contains the Batch account.
-  ##   apiVersion: string (required)
-  ##             : The API version to be used with the HTTP request.
   ##   version: string (required)
   ##          : The version of the application.
+  ##   apiVersion: string (required)
+  ##             : The API version to be used with the HTTP request.
   ##   subscriptionId: string (required)
   ##                 : The Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000)
-  ##   applicationId: string (required)
-  ##                : The ID of the application.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group that contains the Batch account.
   ##   accountName: string (required)
   ##              : The name of the Batch account.
-  var path_575170 = newJObject()
-  var query_575171 = newJObject()
-  add(path_575170, "resourceGroupName", newJString(resourceGroupName))
-  add(query_575171, "api-version", newJString(apiVersion))
-  add(path_575170, "version", newJString(version))
-  add(path_575170, "subscriptionId", newJString(subscriptionId))
-  add(path_575170, "applicationId", newJString(applicationId))
-  add(path_575170, "accountName", newJString(accountName))
-  result = call_575169.call(path_575170, query_575171, nil, nil, nil)
+  ##   applicationId: string (required)
+  ##                : The ID of the application.
+  var path_564270 = newJObject()
+  var query_564271 = newJObject()
+  add(path_564270, "version", newJString(version))
+  add(query_564271, "api-version", newJString(apiVersion))
+  add(path_564270, "subscriptionId", newJString(subscriptionId))
+  add(path_564270, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564270, "accountName", newJString(accountName))
+  add(path_564270, "applicationId", newJString(applicationId))
+  result = call_564269.call(path_564270, query_564271, nil, nil, nil)
 
-var applicationPackageGet* = Call_ApplicationPackageGet_575159(
+var applicationPackageGet* = Call_ApplicationPackageGet_564259(
     name: "applicationPackageGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Batch/batchAccounts/{accountName}/applications/{applicationId}/versions/{version}",
-    validator: validate_ApplicationPackageGet_575160, base: "",
-    url: url_ApplicationPackageGet_575161, schemes: {Scheme.Https})
+    validator: validate_ApplicationPackageGet_564260, base: "",
+    url: url_ApplicationPackageGet_564261, schemes: {Scheme.Https})
 type
-  Call_ApplicationPackageDelete_575185 = ref object of OpenApiRestCall_574457
-proc url_ApplicationPackageDelete_575187(protocol: Scheme; host: string;
+  Call_ApplicationPackageDelete_564285 = ref object of OpenApiRestCall_563555
+proc url_ApplicationPackageDelete_564287(protocol: Scheme; host: string;
                                         base: string; route: string; path: JsonNode;
                                         query: JsonNode): Uri =
   result.scheme = $protocol
@@ -2006,51 +2008,50 @@ proc url_ApplicationPackageDelete_575187(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ApplicationPackageDelete_575186(path: JsonNode; query: JsonNode;
+proc validate_ApplicationPackageDelete_564286(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Deletes an application package record and its associated binary file.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group that contains the Batch account.
   ##   version: JString (required)
   ##          : The version of the application to delete.
   ##   subscriptionId: JString (required)
   ##                 : The Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000)
-  ##   applicationId: JString (required)
-  ##                : The ID of the application.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group that contains the Batch account.
   ##   accountName: JString (required)
   ##              : The name of the Batch account.
+  ##   applicationId: JString (required)
+  ##                : The ID of the application.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_575188 = path.getOrDefault("resourceGroupName")
-  valid_575188 = validateParameter(valid_575188, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `version` field"
+  var valid_564288 = path.getOrDefault("version")
+  valid_564288 = validateParameter(valid_564288, JString, required = true,
                                  default = nil)
-  if valid_575188 != nil:
-    section.add "resourceGroupName", valid_575188
-  var valid_575189 = path.getOrDefault("version")
-  valid_575189 = validateParameter(valid_575189, JString, required = true,
+  if valid_564288 != nil:
+    section.add "version", valid_564288
+  var valid_564289 = path.getOrDefault("subscriptionId")
+  valid_564289 = validateParameter(valid_564289, JString, required = true,
                                  default = nil)
-  if valid_575189 != nil:
-    section.add "version", valid_575189
-  var valid_575190 = path.getOrDefault("subscriptionId")
-  valid_575190 = validateParameter(valid_575190, JString, required = true,
+  if valid_564289 != nil:
+    section.add "subscriptionId", valid_564289
+  var valid_564290 = path.getOrDefault("resourceGroupName")
+  valid_564290 = validateParameter(valid_564290, JString, required = true,
                                  default = nil)
-  if valid_575190 != nil:
-    section.add "subscriptionId", valid_575190
-  var valid_575191 = path.getOrDefault("applicationId")
-  valid_575191 = validateParameter(valid_575191, JString, required = true,
+  if valid_564290 != nil:
+    section.add "resourceGroupName", valid_564290
+  var valid_564291 = path.getOrDefault("accountName")
+  valid_564291 = validateParameter(valid_564291, JString, required = true,
                                  default = nil)
-  if valid_575191 != nil:
-    section.add "applicationId", valid_575191
-  var valid_575192 = path.getOrDefault("accountName")
-  valid_575192 = validateParameter(valid_575192, JString, required = true,
+  if valid_564291 != nil:
+    section.add "accountName", valid_564291
+  var valid_564292 = path.getOrDefault("applicationId")
+  valid_564292 = validateParameter(valid_564292, JString, required = true,
                                  default = nil)
-  if valid_575192 != nil:
-    section.add "accountName", valid_575192
+  if valid_564292 != nil:
+    section.add "applicationId", valid_564292
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2058,11 +2059,11 @@ proc validate_ApplicationPackageDelete_575186(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575193 = query.getOrDefault("api-version")
-  valid_575193 = validateParameter(valid_575193, JString, required = true,
+  var valid_564293 = query.getOrDefault("api-version")
+  valid_564293 = validateParameter(valid_564293, JString, required = true,
                                  default = nil)
-  if valid_575193 != nil:
-    section.add "api-version", valid_575193
+  if valid_564293 != nil:
+    section.add "api-version", valid_564293
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2071,54 +2072,54 @@ proc validate_ApplicationPackageDelete_575186(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_575194: Call_ApplicationPackageDelete_575185; path: JsonNode;
+proc call*(call_564294: Call_ApplicationPackageDelete_564285; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes an application package record and its associated binary file.
   ## 
-  let valid = call_575194.validator(path, query, header, formData, body)
-  let scheme = call_575194.pickScheme
+  let valid = call_564294.validator(path, query, header, formData, body)
+  let scheme = call_564294.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575194.url(scheme.get, call_575194.host, call_575194.base,
-                         call_575194.route, valid.getOrDefault("path"),
+  let url = call_564294.url(scheme.get, call_564294.host, call_564294.base,
+                         call_564294.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575194, url, valid)
+  result = hook(call_564294, url, valid)
 
-proc call*(call_575195: Call_ApplicationPackageDelete_575185;
-          resourceGroupName: string; apiVersion: string; version: string;
-          subscriptionId: string; applicationId: string; accountName: string): Recallable =
+proc call*(call_564295: Call_ApplicationPackageDelete_564285; version: string;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string;
+          accountName: string; applicationId: string): Recallable =
   ## applicationPackageDelete
   ## Deletes an application package record and its associated binary file.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group that contains the Batch account.
-  ##   apiVersion: string (required)
-  ##             : The API version to be used with the HTTP request.
   ##   version: string (required)
   ##          : The version of the application to delete.
+  ##   apiVersion: string (required)
+  ##             : The API version to be used with the HTTP request.
   ##   subscriptionId: string (required)
   ##                 : The Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000)
-  ##   applicationId: string (required)
-  ##                : The ID of the application.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group that contains the Batch account.
   ##   accountName: string (required)
   ##              : The name of the Batch account.
-  var path_575196 = newJObject()
-  var query_575197 = newJObject()
-  add(path_575196, "resourceGroupName", newJString(resourceGroupName))
-  add(query_575197, "api-version", newJString(apiVersion))
-  add(path_575196, "version", newJString(version))
-  add(path_575196, "subscriptionId", newJString(subscriptionId))
-  add(path_575196, "applicationId", newJString(applicationId))
-  add(path_575196, "accountName", newJString(accountName))
-  result = call_575195.call(path_575196, query_575197, nil, nil, nil)
+  ##   applicationId: string (required)
+  ##                : The ID of the application.
+  var path_564296 = newJObject()
+  var query_564297 = newJObject()
+  add(path_564296, "version", newJString(version))
+  add(query_564297, "api-version", newJString(apiVersion))
+  add(path_564296, "subscriptionId", newJString(subscriptionId))
+  add(path_564296, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564296, "accountName", newJString(accountName))
+  add(path_564296, "applicationId", newJString(applicationId))
+  result = call_564295.call(path_564296, query_564297, nil, nil, nil)
 
-var applicationPackageDelete* = Call_ApplicationPackageDelete_575185(
+var applicationPackageDelete* = Call_ApplicationPackageDelete_564285(
     name: "applicationPackageDelete", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Batch/batchAccounts/{accountName}/applications/{applicationId}/versions/{version}",
-    validator: validate_ApplicationPackageDelete_575186, base: "",
-    url: url_ApplicationPackageDelete_575187, schemes: {Scheme.Https})
+    validator: validate_ApplicationPackageDelete_564286, base: "",
+    url: url_ApplicationPackageDelete_564287, schemes: {Scheme.Https})
 type
-  Call_ApplicationPackageActivate_575198 = ref object of OpenApiRestCall_574457
-proc url_ApplicationPackageActivate_575200(protocol: Scheme; host: string;
+  Call_ApplicationPackageActivate_564298 = ref object of OpenApiRestCall_563555
+proc url_ApplicationPackageActivate_564300(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2147,51 +2148,50 @@ proc url_ApplicationPackageActivate_575200(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ApplicationPackageActivate_575199(path: JsonNode; query: JsonNode;
+proc validate_ApplicationPackageActivate_564299(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Activates the specified application package.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group that contains the Batch account.
   ##   version: JString (required)
   ##          : The version of the application to activate.
   ##   subscriptionId: JString (required)
   ##                 : The Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000)
-  ##   applicationId: JString (required)
-  ##                : The ID of the application.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group that contains the Batch account.
   ##   accountName: JString (required)
   ##              : The name of the Batch account.
+  ##   applicationId: JString (required)
+  ##                : The ID of the application.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_575201 = path.getOrDefault("resourceGroupName")
-  valid_575201 = validateParameter(valid_575201, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `version` field"
+  var valid_564301 = path.getOrDefault("version")
+  valid_564301 = validateParameter(valid_564301, JString, required = true,
                                  default = nil)
-  if valid_575201 != nil:
-    section.add "resourceGroupName", valid_575201
-  var valid_575202 = path.getOrDefault("version")
-  valid_575202 = validateParameter(valid_575202, JString, required = true,
+  if valid_564301 != nil:
+    section.add "version", valid_564301
+  var valid_564302 = path.getOrDefault("subscriptionId")
+  valid_564302 = validateParameter(valid_564302, JString, required = true,
                                  default = nil)
-  if valid_575202 != nil:
-    section.add "version", valid_575202
-  var valid_575203 = path.getOrDefault("subscriptionId")
-  valid_575203 = validateParameter(valid_575203, JString, required = true,
+  if valid_564302 != nil:
+    section.add "subscriptionId", valid_564302
+  var valid_564303 = path.getOrDefault("resourceGroupName")
+  valid_564303 = validateParameter(valid_564303, JString, required = true,
                                  default = nil)
-  if valid_575203 != nil:
-    section.add "subscriptionId", valid_575203
-  var valid_575204 = path.getOrDefault("applicationId")
-  valid_575204 = validateParameter(valid_575204, JString, required = true,
+  if valid_564303 != nil:
+    section.add "resourceGroupName", valid_564303
+  var valid_564304 = path.getOrDefault("accountName")
+  valid_564304 = validateParameter(valid_564304, JString, required = true,
                                  default = nil)
-  if valid_575204 != nil:
-    section.add "applicationId", valid_575204
-  var valid_575205 = path.getOrDefault("accountName")
-  valid_575205 = validateParameter(valid_575205, JString, required = true,
+  if valid_564304 != nil:
+    section.add "accountName", valid_564304
+  var valid_564305 = path.getOrDefault("applicationId")
+  valid_564305 = validateParameter(valid_564305, JString, required = true,
                                  default = nil)
-  if valid_575205 != nil:
-    section.add "accountName", valid_575205
+  if valid_564305 != nil:
+    section.add "applicationId", valid_564305
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2199,11 +2199,11 @@ proc validate_ApplicationPackageActivate_575199(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575206 = query.getOrDefault("api-version")
-  valid_575206 = validateParameter(valid_575206, JString, required = true,
+  var valid_564306 = query.getOrDefault("api-version")
+  valid_564306 = validateParameter(valid_564306, JString, required = true,
                                  default = nil)
-  if valid_575206 != nil:
-    section.add "api-version", valid_575206
+  if valid_564306 != nil:
+    section.add "api-version", valid_564306
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2217,60 +2217,59 @@ proc validate_ApplicationPackageActivate_575199(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_575208: Call_ApplicationPackageActivate_575198; path: JsonNode;
+proc call*(call_564308: Call_ApplicationPackageActivate_564298; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Activates the specified application package.
   ## 
-  let valid = call_575208.validator(path, query, header, formData, body)
-  let scheme = call_575208.pickScheme
+  let valid = call_564308.validator(path, query, header, formData, body)
+  let scheme = call_564308.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575208.url(scheme.get, call_575208.host, call_575208.base,
-                         call_575208.route, valid.getOrDefault("path"),
+  let url = call_564308.url(scheme.get, call_564308.host, call_564308.base,
+                         call_564308.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575208, url, valid)
+  result = hook(call_564308, url, valid)
 
-proc call*(call_575209: Call_ApplicationPackageActivate_575198;
-          resourceGroupName: string; apiVersion: string; version: string;
-          subscriptionId: string; applicationId: string; parameters: JsonNode;
-          accountName: string): Recallable =
+proc call*(call_564309: Call_ApplicationPackageActivate_564298; version: string;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string;
+          parameters: JsonNode; accountName: string; applicationId: string): Recallable =
   ## applicationPackageActivate
   ## Activates the specified application package.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group that contains the Batch account.
-  ##   apiVersion: string (required)
-  ##             : The API version to be used with the HTTP request.
   ##   version: string (required)
   ##          : The version of the application to activate.
+  ##   apiVersion: string (required)
+  ##             : The API version to be used with the HTTP request.
   ##   subscriptionId: string (required)
   ##                 : The Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000)
-  ##   applicationId: string (required)
-  ##                : The ID of the application.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group that contains the Batch account.
   ##   parameters: JObject (required)
   ##             : The parameters for the request.
   ##   accountName: string (required)
   ##              : The name of the Batch account.
-  var path_575210 = newJObject()
-  var query_575211 = newJObject()
-  var body_575212 = newJObject()
-  add(path_575210, "resourceGroupName", newJString(resourceGroupName))
-  add(query_575211, "api-version", newJString(apiVersion))
-  add(path_575210, "version", newJString(version))
-  add(path_575210, "subscriptionId", newJString(subscriptionId))
-  add(path_575210, "applicationId", newJString(applicationId))
+  ##   applicationId: string (required)
+  ##                : The ID of the application.
+  var path_564310 = newJObject()
+  var query_564311 = newJObject()
+  var body_564312 = newJObject()
+  add(path_564310, "version", newJString(version))
+  add(query_564311, "api-version", newJString(apiVersion))
+  add(path_564310, "subscriptionId", newJString(subscriptionId))
+  add(path_564310, "resourceGroupName", newJString(resourceGroupName))
   if parameters != nil:
-    body_575212 = parameters
-  add(path_575210, "accountName", newJString(accountName))
-  result = call_575209.call(path_575210, query_575211, nil, nil, body_575212)
+    body_564312 = parameters
+  add(path_564310, "accountName", newJString(accountName))
+  add(path_564310, "applicationId", newJString(applicationId))
+  result = call_564309.call(path_564310, query_564311, nil, nil, body_564312)
 
-var applicationPackageActivate* = Call_ApplicationPackageActivate_575198(
+var applicationPackageActivate* = Call_ApplicationPackageActivate_564298(
     name: "applicationPackageActivate", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Batch/batchAccounts/{accountName}/applications/{applicationId}/versions/{version}/activate",
-    validator: validate_ApplicationPackageActivate_575199, base: "",
-    url: url_ApplicationPackageActivate_575200, schemes: {Scheme.Https})
+    validator: validate_ApplicationPackageActivate_564299, base: "",
+    url: url_ApplicationPackageActivate_564300, schemes: {Scheme.Https})
 type
-  Call_BatchAccountGetKeys_575213 = ref object of OpenApiRestCall_574457
-proc url_BatchAccountGetKeys_575215(protocol: Scheme; host: string; base: string;
+  Call_BatchAccountGetKeys_564313 = ref object of OpenApiRestCall_563555
+proc url_BatchAccountGetKeys_564315(protocol: Scheme; host: string; base: string;
                                    route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2293,7 +2292,7 @@ proc url_BatchAccountGetKeys_575215(protocol: Scheme; host: string; base: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_BatchAccountGetKeys_575214(path: JsonNode; query: JsonNode;
+proc validate_BatchAccountGetKeys_564314(path: JsonNode; query: JsonNode;
                                         header: JsonNode; formData: JsonNode;
                                         body: JsonNode): JsonNode =
   ## This operation applies only to Batch accounts created with a poolAllocationMode of 'BatchService'. If the Batch account was created with a poolAllocationMode of 'UserSubscription', clients cannot use access to keys to authenticate, and must use Azure Active Directory instead. In this case, getting the keys will fail.
@@ -2301,30 +2300,30 @@ proc validate_BatchAccountGetKeys_575214(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group that contains the Batch account.
   ##   subscriptionId: JString (required)
   ##                 : The Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000)
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group that contains the Batch account.
   ##   accountName: JString (required)
   ##              : The name of the Batch account.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_575216 = path.getOrDefault("resourceGroupName")
-  valid_575216 = validateParameter(valid_575216, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564316 = path.getOrDefault("subscriptionId")
+  valid_564316 = validateParameter(valid_564316, JString, required = true,
                                  default = nil)
-  if valid_575216 != nil:
-    section.add "resourceGroupName", valid_575216
-  var valid_575217 = path.getOrDefault("subscriptionId")
-  valid_575217 = validateParameter(valid_575217, JString, required = true,
+  if valid_564316 != nil:
+    section.add "subscriptionId", valid_564316
+  var valid_564317 = path.getOrDefault("resourceGroupName")
+  valid_564317 = validateParameter(valid_564317, JString, required = true,
                                  default = nil)
-  if valid_575217 != nil:
-    section.add "subscriptionId", valid_575217
-  var valid_575218 = path.getOrDefault("accountName")
-  valid_575218 = validateParameter(valid_575218, JString, required = true,
+  if valid_564317 != nil:
+    section.add "resourceGroupName", valid_564317
+  var valid_564318 = path.getOrDefault("accountName")
+  valid_564318 = validateParameter(valid_564318, JString, required = true,
                                  default = nil)
-  if valid_575218 != nil:
-    section.add "accountName", valid_575218
+  if valid_564318 != nil:
+    section.add "accountName", valid_564318
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2332,11 +2331,11 @@ proc validate_BatchAccountGetKeys_575214(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575219 = query.getOrDefault("api-version")
-  valid_575219 = validateParameter(valid_575219, JString, required = true,
+  var valid_564319 = query.getOrDefault("api-version")
+  valid_564319 = validateParameter(valid_564319, JString, required = true,
                                  default = nil)
-  if valid_575219 != nil:
-    section.add "api-version", valid_575219
+  if valid_564319 != nil:
+    section.add "api-version", valid_564319
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2345,47 +2344,47 @@ proc validate_BatchAccountGetKeys_575214(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_575220: Call_BatchAccountGetKeys_575213; path: JsonNode;
+proc call*(call_564320: Call_BatchAccountGetKeys_564313; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## This operation applies only to Batch accounts created with a poolAllocationMode of 'BatchService'. If the Batch account was created with a poolAllocationMode of 'UserSubscription', clients cannot use access to keys to authenticate, and must use Azure Active Directory instead. In this case, getting the keys will fail.
   ## 
-  let valid = call_575220.validator(path, query, header, formData, body)
-  let scheme = call_575220.pickScheme
+  let valid = call_564320.validator(path, query, header, formData, body)
+  let scheme = call_564320.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575220.url(scheme.get, call_575220.host, call_575220.base,
-                         call_575220.route, valid.getOrDefault("path"),
+  let url = call_564320.url(scheme.get, call_564320.host, call_564320.base,
+                         call_564320.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575220, url, valid)
+  result = hook(call_564320, url, valid)
 
-proc call*(call_575221: Call_BatchAccountGetKeys_575213; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; accountName: string): Recallable =
+proc call*(call_564321: Call_BatchAccountGetKeys_564313; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string; accountName: string): Recallable =
   ## batchAccountGetKeys
   ## This operation applies only to Batch accounts created with a poolAllocationMode of 'BatchService'. If the Batch account was created with a poolAllocationMode of 'UserSubscription', clients cannot use access to keys to authenticate, and must use Azure Active Directory instead. In this case, getting the keys will fail.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group that contains the Batch account.
   ##   apiVersion: string (required)
   ##             : The API version to be used with the HTTP request.
   ##   subscriptionId: string (required)
   ##                 : The Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group that contains the Batch account.
   ##   accountName: string (required)
   ##              : The name of the Batch account.
-  var path_575222 = newJObject()
-  var query_575223 = newJObject()
-  add(path_575222, "resourceGroupName", newJString(resourceGroupName))
-  add(query_575223, "api-version", newJString(apiVersion))
-  add(path_575222, "subscriptionId", newJString(subscriptionId))
-  add(path_575222, "accountName", newJString(accountName))
-  result = call_575221.call(path_575222, query_575223, nil, nil, nil)
+  var path_564322 = newJObject()
+  var query_564323 = newJObject()
+  add(query_564323, "api-version", newJString(apiVersion))
+  add(path_564322, "subscriptionId", newJString(subscriptionId))
+  add(path_564322, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564322, "accountName", newJString(accountName))
+  result = call_564321.call(path_564322, query_564323, nil, nil, nil)
 
-var batchAccountGetKeys* = Call_BatchAccountGetKeys_575213(
+var batchAccountGetKeys* = Call_BatchAccountGetKeys_564313(
     name: "batchAccountGetKeys", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Batch/batchAccounts/{accountName}/listKeys",
-    validator: validate_BatchAccountGetKeys_575214, base: "",
-    url: url_BatchAccountGetKeys_575215, schemes: {Scheme.Https})
+    validator: validate_BatchAccountGetKeys_564314, base: "",
+    url: url_BatchAccountGetKeys_564315, schemes: {Scheme.Https})
 type
-  Call_BatchAccountRegenerateKey_575224 = ref object of OpenApiRestCall_574457
-proc url_BatchAccountRegenerateKey_575226(protocol: Scheme; host: string;
+  Call_BatchAccountRegenerateKey_564324 = ref object of OpenApiRestCall_563555
+proc url_BatchAccountRegenerateKey_564326(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2408,37 +2407,37 @@ proc url_BatchAccountRegenerateKey_575226(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_BatchAccountRegenerateKey_575225(path: JsonNode; query: JsonNode;
+proc validate_BatchAccountRegenerateKey_564325(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Regenerates the specified account key for the Batch account.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group that contains the Batch account.
   ##   subscriptionId: JString (required)
   ##                 : The Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000)
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group that contains the Batch account.
   ##   accountName: JString (required)
   ##              : The name of the Batch account.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_575227 = path.getOrDefault("resourceGroupName")
-  valid_575227 = validateParameter(valid_575227, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564327 = path.getOrDefault("subscriptionId")
+  valid_564327 = validateParameter(valid_564327, JString, required = true,
                                  default = nil)
-  if valid_575227 != nil:
-    section.add "resourceGroupName", valid_575227
-  var valid_575228 = path.getOrDefault("subscriptionId")
-  valid_575228 = validateParameter(valid_575228, JString, required = true,
+  if valid_564327 != nil:
+    section.add "subscriptionId", valid_564327
+  var valid_564328 = path.getOrDefault("resourceGroupName")
+  valid_564328 = validateParameter(valid_564328, JString, required = true,
                                  default = nil)
-  if valid_575228 != nil:
-    section.add "subscriptionId", valid_575228
-  var valid_575229 = path.getOrDefault("accountName")
-  valid_575229 = validateParameter(valid_575229, JString, required = true,
+  if valid_564328 != nil:
+    section.add "resourceGroupName", valid_564328
+  var valid_564329 = path.getOrDefault("accountName")
+  valid_564329 = validateParameter(valid_564329, JString, required = true,
                                  default = nil)
-  if valid_575229 != nil:
-    section.add "accountName", valid_575229
+  if valid_564329 != nil:
+    section.add "accountName", valid_564329
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2446,11 +2445,11 @@ proc validate_BatchAccountRegenerateKey_575225(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575230 = query.getOrDefault("api-version")
-  valid_575230 = validateParameter(valid_575230, JString, required = true,
+  var valid_564330 = query.getOrDefault("api-version")
+  valid_564330 = validateParameter(valid_564330, JString, required = true,
                                  default = nil)
-  if valid_575230 != nil:
-    section.add "api-version", valid_575230
+  if valid_564330 != nil:
+    section.add "api-version", valid_564330
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2464,53 +2463,53 @@ proc validate_BatchAccountRegenerateKey_575225(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_575232: Call_BatchAccountRegenerateKey_575224; path: JsonNode;
+proc call*(call_564332: Call_BatchAccountRegenerateKey_564324; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Regenerates the specified account key for the Batch account.
   ## 
-  let valid = call_575232.validator(path, query, header, formData, body)
-  let scheme = call_575232.pickScheme
+  let valid = call_564332.validator(path, query, header, formData, body)
+  let scheme = call_564332.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575232.url(scheme.get, call_575232.host, call_575232.base,
-                         call_575232.route, valid.getOrDefault("path"),
+  let url = call_564332.url(scheme.get, call_564332.host, call_564332.base,
+                         call_564332.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575232, url, valid)
+  result = hook(call_564332, url, valid)
 
-proc call*(call_575233: Call_BatchAccountRegenerateKey_575224;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          parameters: JsonNode; accountName: string): Recallable =
+proc call*(call_564333: Call_BatchAccountRegenerateKey_564324; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string; parameters: JsonNode;
+          accountName: string): Recallable =
   ## batchAccountRegenerateKey
   ## Regenerates the specified account key for the Batch account.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group that contains the Batch account.
   ##   apiVersion: string (required)
   ##             : The API version to be used with the HTTP request.
   ##   subscriptionId: string (required)
   ##                 : The Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group that contains the Batch account.
   ##   parameters: JObject (required)
   ##             : The type of key to regenerate.
   ##   accountName: string (required)
   ##              : The name of the Batch account.
-  var path_575234 = newJObject()
-  var query_575235 = newJObject()
-  var body_575236 = newJObject()
-  add(path_575234, "resourceGroupName", newJString(resourceGroupName))
-  add(query_575235, "api-version", newJString(apiVersion))
-  add(path_575234, "subscriptionId", newJString(subscriptionId))
+  var path_564334 = newJObject()
+  var query_564335 = newJObject()
+  var body_564336 = newJObject()
+  add(query_564335, "api-version", newJString(apiVersion))
+  add(path_564334, "subscriptionId", newJString(subscriptionId))
+  add(path_564334, "resourceGroupName", newJString(resourceGroupName))
   if parameters != nil:
-    body_575236 = parameters
-  add(path_575234, "accountName", newJString(accountName))
-  result = call_575233.call(path_575234, query_575235, nil, nil, body_575236)
+    body_564336 = parameters
+  add(path_564334, "accountName", newJString(accountName))
+  result = call_564333.call(path_564334, query_564335, nil, nil, body_564336)
 
-var batchAccountRegenerateKey* = Call_BatchAccountRegenerateKey_575224(
+var batchAccountRegenerateKey* = Call_BatchAccountRegenerateKey_564324(
     name: "batchAccountRegenerateKey", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Batch/batchAccounts/{accountName}/regenerateKeys",
-    validator: validate_BatchAccountRegenerateKey_575225, base: "",
-    url: url_BatchAccountRegenerateKey_575226, schemes: {Scheme.Https})
+    validator: validate_BatchAccountRegenerateKey_564325, base: "",
+    url: url_BatchAccountRegenerateKey_564326, schemes: {Scheme.Https})
 type
-  Call_BatchAccountSynchronizeAutoStorageKeys_575237 = ref object of OpenApiRestCall_574457
-proc url_BatchAccountSynchronizeAutoStorageKeys_575239(protocol: Scheme;
+  Call_BatchAccountSynchronizeAutoStorageKeys_564337 = ref object of OpenApiRestCall_563555
+proc url_BatchAccountSynchronizeAutoStorageKeys_564339(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2533,37 +2532,37 @@ proc url_BatchAccountSynchronizeAutoStorageKeys_575239(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_BatchAccountSynchronizeAutoStorageKeys_575238(path: JsonNode;
+proc validate_BatchAccountSynchronizeAutoStorageKeys_564338(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Synchronizes access keys for the auto-storage account configured for the specified Batch account.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group that contains the Batch account.
   ##   subscriptionId: JString (required)
   ##                 : The Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000)
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group that contains the Batch account.
   ##   accountName: JString (required)
   ##              : The name of the Batch account.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_575240 = path.getOrDefault("resourceGroupName")
-  valid_575240 = validateParameter(valid_575240, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564340 = path.getOrDefault("subscriptionId")
+  valid_564340 = validateParameter(valid_564340, JString, required = true,
                                  default = nil)
-  if valid_575240 != nil:
-    section.add "resourceGroupName", valid_575240
-  var valid_575241 = path.getOrDefault("subscriptionId")
-  valid_575241 = validateParameter(valid_575241, JString, required = true,
+  if valid_564340 != nil:
+    section.add "subscriptionId", valid_564340
+  var valid_564341 = path.getOrDefault("resourceGroupName")
+  valid_564341 = validateParameter(valid_564341, JString, required = true,
                                  default = nil)
-  if valid_575241 != nil:
-    section.add "subscriptionId", valid_575241
-  var valid_575242 = path.getOrDefault("accountName")
-  valid_575242 = validateParameter(valid_575242, JString, required = true,
+  if valid_564341 != nil:
+    section.add "resourceGroupName", valid_564341
+  var valid_564342 = path.getOrDefault("accountName")
+  valid_564342 = validateParameter(valid_564342, JString, required = true,
                                  default = nil)
-  if valid_575242 != nil:
-    section.add "accountName", valid_575242
+  if valid_564342 != nil:
+    section.add "accountName", valid_564342
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2571,11 +2570,11 @@ proc validate_BatchAccountSynchronizeAutoStorageKeys_575238(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575243 = query.getOrDefault("api-version")
-  valid_575243 = validateParameter(valid_575243, JString, required = true,
+  var valid_564343 = query.getOrDefault("api-version")
+  valid_564343 = validateParameter(valid_564343, JString, required = true,
                                  default = nil)
-  if valid_575243 != nil:
-    section.add "api-version", valid_575243
+  if valid_564343 != nil:
+    section.add "api-version", valid_564343
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2584,46 +2583,46 @@ proc validate_BatchAccountSynchronizeAutoStorageKeys_575238(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_575244: Call_BatchAccountSynchronizeAutoStorageKeys_575237;
+proc call*(call_564344: Call_BatchAccountSynchronizeAutoStorageKeys_564337;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Synchronizes access keys for the auto-storage account configured for the specified Batch account.
   ## 
-  let valid = call_575244.validator(path, query, header, formData, body)
-  let scheme = call_575244.pickScheme
+  let valid = call_564344.validator(path, query, header, formData, body)
+  let scheme = call_564344.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575244.url(scheme.get, call_575244.host, call_575244.base,
-                         call_575244.route, valid.getOrDefault("path"),
+  let url = call_564344.url(scheme.get, call_564344.host, call_564344.base,
+                         call_564344.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575244, url, valid)
+  result = hook(call_564344, url, valid)
 
-proc call*(call_575245: Call_BatchAccountSynchronizeAutoStorageKeys_575237;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
+proc call*(call_564345: Call_BatchAccountSynchronizeAutoStorageKeys_564337;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string;
           accountName: string): Recallable =
   ## batchAccountSynchronizeAutoStorageKeys
   ## Synchronizes access keys for the auto-storage account configured for the specified Batch account.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group that contains the Batch account.
   ##   apiVersion: string (required)
   ##             : The API version to be used with the HTTP request.
   ##   subscriptionId: string (required)
   ##                 : The Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group that contains the Batch account.
   ##   accountName: string (required)
   ##              : The name of the Batch account.
-  var path_575246 = newJObject()
-  var query_575247 = newJObject()
-  add(path_575246, "resourceGroupName", newJString(resourceGroupName))
-  add(query_575247, "api-version", newJString(apiVersion))
-  add(path_575246, "subscriptionId", newJString(subscriptionId))
-  add(path_575246, "accountName", newJString(accountName))
-  result = call_575245.call(path_575246, query_575247, nil, nil, nil)
+  var path_564346 = newJObject()
+  var query_564347 = newJObject()
+  add(query_564347, "api-version", newJString(apiVersion))
+  add(path_564346, "subscriptionId", newJString(subscriptionId))
+  add(path_564346, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564346, "accountName", newJString(accountName))
+  result = call_564345.call(path_564346, query_564347, nil, nil, nil)
 
-var batchAccountSynchronizeAutoStorageKeys* = Call_BatchAccountSynchronizeAutoStorageKeys_575237(
+var batchAccountSynchronizeAutoStorageKeys* = Call_BatchAccountSynchronizeAutoStorageKeys_564337(
     name: "batchAccountSynchronizeAutoStorageKeys", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Batch/batchAccounts/{accountName}/syncAutoStorageKeys",
-    validator: validate_BatchAccountSynchronizeAutoStorageKeys_575238, base: "",
-    url: url_BatchAccountSynchronizeAutoStorageKeys_575239,
+    validator: validate_BatchAccountSynchronizeAutoStorageKeys_564338, base: "",
+    url: url_BatchAccountSynchronizeAutoStorageKeys_564339,
     schemes: {Scheme.Https})
 export
   rest

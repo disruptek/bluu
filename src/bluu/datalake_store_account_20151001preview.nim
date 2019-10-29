@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, httpcore
 
 ## auto-generated via openapi macro
 ## title: DataLakeStoreAccountManagementClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_567641 = ref object of OpenApiRestCall
+  OpenApiRestCall_563539 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_567641](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563539](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_567641): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563539): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,8 +107,8 @@ const
   macServiceName = "datalake-store-account"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_AccountList_567863 = ref object of OpenApiRestCall_567641
-proc url_AccountList_567865(protocol: Scheme; host: string; base: string;
+  Call_AccountList_563761 = ref object of OpenApiRestCall_563539
+proc url_AccountList_563763(protocol: Scheme; host: string; base: string;
                            route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -121,7 +125,7 @@ proc url_AccountList_567865(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AccountList_567864(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_AccountList_563762(path: JsonNode; query: JsonNode; header: JsonNode;
                                 formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists the Data Lake Store accounts within the subscription. The response includes a link to the next page of results, if any.
   ## 
@@ -133,83 +137,83 @@ proc validate_AccountList_567864(path: JsonNode; query: JsonNode; header: JsonNo
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_568039 = path.getOrDefault("subscriptionId")
-  valid_568039 = validateParameter(valid_568039, JString, required = true,
+  var valid_563939 = path.getOrDefault("subscriptionId")
+  valid_563939 = validateParameter(valid_563939, JString, required = true,
                                  default = nil)
-  if valid_568039 != nil:
-    section.add "subscriptionId", valid_568039
+  if valid_563939 != nil:
+    section.add "subscriptionId", valid_563939
   result.add "path", section
   ## parameters in `query` object:
-  ##   $orderby: JString
-  ##           : OrderBy clause. One or more comma-separated expressions with an optional "asc" (the default) or "desc" depending on the order you'd like the values sorted, e.g. Categories?$orderby=CategoryName desc. Optional.
-  ##   $expand: JString
-  ##          : OData expansion. Expand related resources in line with the retrieved resources, e.g. Categories/$expand=Products would expand Product data in line with each Category entry. Optional.
-  ##   api-version: JString (required)
-  ##              : Client Api Version.
   ##   $top: JInt
   ##       : The number of items to return. Optional.
+  ##   api-version: JString (required)
+  ##              : Client Api Version.
   ##   $select: JString
   ##          : OData Select statement. Limits the properties on each entry to just those requested, e.g. Categories?$select=CategoryName,Description. Optional.
-  ##   $skip: JInt
-  ##        : The number of items to skip over before returning elements. Optional.
+  ##   $expand: JString
+  ##          : OData expansion. Expand related resources in line with the retrieved resources, e.g. Categories/$expand=Products would expand Product data in line with each Category entry. Optional.
   ##   $count: JBool
   ##         : The Boolean value of true or false to request a count of the matching resources included with the resources in the response, e.g. Categories?$count=true. Optional.
-  ##   $search: JString
-  ##          : A free form search. A free-text search expression to match for whether a particular entry should be included in the feed, e.g. Categories?$search=blue OR green. Optional.
   ##   $format: JString
   ##          : The desired return format. Return the response in particular format without access to request headers for standard content-type negotiation (e.g Orders?$format=json). Optional.
+  ##   $orderby: JString
+  ##           : OrderBy clause. One or more comma-separated expressions with an optional "asc" (the default) or "desc" depending on the order you'd like the values sorted, e.g. Categories?$orderby=CategoryName desc. Optional.
+  ##   $skip: JInt
+  ##        : The number of items to skip over before returning elements. Optional.
   ##   $filter: JString
   ##          : OData filter. Optional.
+  ##   $search: JString
+  ##          : A free form search. A free-text search expression to match for whether a particular entry should be included in the feed, e.g. Categories?$search=blue OR green. Optional.
   section = newJObject()
-  var valid_568040 = query.getOrDefault("$orderby")
-  valid_568040 = validateParameter(valid_568040, JString, required = false,
-                                 default = nil)
-  if valid_568040 != nil:
-    section.add "$orderby", valid_568040
-  var valid_568041 = query.getOrDefault("$expand")
-  valid_568041 = validateParameter(valid_568041, JString, required = false,
-                                 default = nil)
-  if valid_568041 != nil:
-    section.add "$expand", valid_568041
+  var valid_563940 = query.getOrDefault("$top")
+  valid_563940 = validateParameter(valid_563940, JInt, required = false, default = nil)
+  if valid_563940 != nil:
+    section.add "$top", valid_563940
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568042 = query.getOrDefault("api-version")
-  valid_568042 = validateParameter(valid_568042, JString, required = true,
+  var valid_563941 = query.getOrDefault("api-version")
+  valid_563941 = validateParameter(valid_563941, JString, required = true,
                                  default = nil)
-  if valid_568042 != nil:
-    section.add "api-version", valid_568042
-  var valid_568043 = query.getOrDefault("$top")
-  valid_568043 = validateParameter(valid_568043, JInt, required = false, default = nil)
-  if valid_568043 != nil:
-    section.add "$top", valid_568043
-  var valid_568044 = query.getOrDefault("$select")
-  valid_568044 = validateParameter(valid_568044, JString, required = false,
+  if valid_563941 != nil:
+    section.add "api-version", valid_563941
+  var valid_563942 = query.getOrDefault("$select")
+  valid_563942 = validateParameter(valid_563942, JString, required = false,
                                  default = nil)
-  if valid_568044 != nil:
-    section.add "$select", valid_568044
-  var valid_568045 = query.getOrDefault("$skip")
-  valid_568045 = validateParameter(valid_568045, JInt, required = false, default = nil)
-  if valid_568045 != nil:
-    section.add "$skip", valid_568045
-  var valid_568046 = query.getOrDefault("$count")
-  valid_568046 = validateParameter(valid_568046, JBool, required = false, default = nil)
-  if valid_568046 != nil:
-    section.add "$count", valid_568046
-  var valid_568047 = query.getOrDefault("$search")
-  valid_568047 = validateParameter(valid_568047, JString, required = false,
+  if valid_563942 != nil:
+    section.add "$select", valid_563942
+  var valid_563943 = query.getOrDefault("$expand")
+  valid_563943 = validateParameter(valid_563943, JString, required = false,
                                  default = nil)
-  if valid_568047 != nil:
-    section.add "$search", valid_568047
-  var valid_568048 = query.getOrDefault("$format")
-  valid_568048 = validateParameter(valid_568048, JString, required = false,
+  if valid_563943 != nil:
+    section.add "$expand", valid_563943
+  var valid_563944 = query.getOrDefault("$count")
+  valid_563944 = validateParameter(valid_563944, JBool, required = false, default = nil)
+  if valid_563944 != nil:
+    section.add "$count", valid_563944
+  var valid_563945 = query.getOrDefault("$format")
+  valid_563945 = validateParameter(valid_563945, JString, required = false,
                                  default = nil)
-  if valid_568048 != nil:
-    section.add "$format", valid_568048
-  var valid_568049 = query.getOrDefault("$filter")
-  valid_568049 = validateParameter(valid_568049, JString, required = false,
+  if valid_563945 != nil:
+    section.add "$format", valid_563945
+  var valid_563946 = query.getOrDefault("$orderby")
+  valid_563946 = validateParameter(valid_563946, JString, required = false,
                                  default = nil)
-  if valid_568049 != nil:
-    section.add "$filter", valid_568049
+  if valid_563946 != nil:
+    section.add "$orderby", valid_563946
+  var valid_563947 = query.getOrDefault("$skip")
+  valid_563947 = validateParameter(valid_563947, JInt, required = false, default = nil)
+  if valid_563947 != nil:
+    section.add "$skip", valid_563947
+  var valid_563948 = query.getOrDefault("$filter")
+  valid_563948 = validateParameter(valid_563948, JString, required = false,
+                                 default = nil)
+  if valid_563948 != nil:
+    section.add "$filter", valid_563948
+  var valid_563949 = query.getOrDefault("$search")
+  valid_563949 = validateParameter(valid_563949, JString, required = false,
+                                 default = nil)
+  if valid_563949 != nil:
+    section.add "$search", valid_563949
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -218,71 +222,71 @@ proc validate_AccountList_567864(path: JsonNode; query: JsonNode; header: JsonNo
   if body != nil:
     result.add "body", body
 
-proc call*(call_568072: Call_AccountList_567863; path: JsonNode; query: JsonNode;
+proc call*(call_563972: Call_AccountList_563761; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists the Data Lake Store accounts within the subscription. The response includes a link to the next page of results, if any.
   ## 
-  let valid = call_568072.validator(path, query, header, formData, body)
-  let scheme = call_568072.pickScheme
+  let valid = call_563972.validator(path, query, header, formData, body)
+  let scheme = call_563972.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568072.url(scheme.get, call_568072.host, call_568072.base,
-                         call_568072.route, valid.getOrDefault("path"),
+  let url = call_563972.url(scheme.get, call_563972.host, call_563972.base,
+                         call_563972.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568072, url, valid)
+  result = hook(call_563972, url, valid)
 
-proc call*(call_568143: Call_AccountList_567863; apiVersion: string;
-          subscriptionId: string; Orderby: string = ""; Expand: string = ""; Top: int = 0;
-          Select: string = ""; Skip: int = 0; Count: bool = false; Search: string = "";
-          Format: string = ""; Filter: string = ""): Recallable =
+proc call*(call_564043: Call_AccountList_563761; apiVersion: string;
+          subscriptionId: string; Top: int = 0; Select: string = ""; Expand: string = "";
+          Count: bool = false; Format: string = ""; Orderby: string = ""; Skip: int = 0;
+          Filter: string = ""; Search: string = ""): Recallable =
   ## accountList
   ## Lists the Data Lake Store accounts within the subscription. The response includes a link to the next page of results, if any.
-  ##   Orderby: string
-  ##          : OrderBy clause. One or more comma-separated expressions with an optional "asc" (the default) or "desc" depending on the order you'd like the values sorted, e.g. Categories?$orderby=CategoryName desc. Optional.
-  ##   Expand: string
-  ##         : OData expansion. Expand related resources in line with the retrieved resources, e.g. Categories/$expand=Products would expand Product data in line with each Category entry. Optional.
-  ##   apiVersion: string (required)
-  ##             : Client Api Version.
-  ##   subscriptionId: string (required)
-  ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   Top: int
   ##      : The number of items to return. Optional.
+  ##   apiVersion: string (required)
+  ##             : Client Api Version.
   ##   Select: string
   ##         : OData Select statement. Limits the properties on each entry to just those requested, e.g. Categories?$select=CategoryName,Description. Optional.
-  ##   Skip: int
-  ##       : The number of items to skip over before returning elements. Optional.
+  ##   Expand: string
+  ##         : OData expansion. Expand related resources in line with the retrieved resources, e.g. Categories/$expand=Products would expand Product data in line with each Category entry. Optional.
   ##   Count: bool
   ##        : The Boolean value of true or false to request a count of the matching resources included with the resources in the response, e.g. Categories?$count=true. Optional.
-  ##   Search: string
-  ##         : A free form search. A free-text search expression to match for whether a particular entry should be included in the feed, e.g. Categories?$search=blue OR green. Optional.
   ##   Format: string
   ##         : The desired return format. Return the response in particular format without access to request headers for standard content-type negotiation (e.g Orders?$format=json). Optional.
+  ##   subscriptionId: string (required)
+  ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   Orderby: string
+  ##          : OrderBy clause. One or more comma-separated expressions with an optional "asc" (the default) or "desc" depending on the order you'd like the values sorted, e.g. Categories?$orderby=CategoryName desc. Optional.
+  ##   Skip: int
+  ##       : The number of items to skip over before returning elements. Optional.
   ##   Filter: string
   ##         : OData filter. Optional.
-  var path_568144 = newJObject()
-  var query_568146 = newJObject()
-  add(query_568146, "$orderby", newJString(Orderby))
-  add(query_568146, "$expand", newJString(Expand))
-  add(query_568146, "api-version", newJString(apiVersion))
-  add(path_568144, "subscriptionId", newJString(subscriptionId))
-  add(query_568146, "$top", newJInt(Top))
-  add(query_568146, "$select", newJString(Select))
-  add(query_568146, "$skip", newJInt(Skip))
-  add(query_568146, "$count", newJBool(Count))
-  add(query_568146, "$search", newJString(Search))
-  add(query_568146, "$format", newJString(Format))
-  add(query_568146, "$filter", newJString(Filter))
-  result = call_568143.call(path_568144, query_568146, nil, nil, nil)
+  ##   Search: string
+  ##         : A free form search. A free-text search expression to match for whether a particular entry should be included in the feed, e.g. Categories?$search=blue OR green. Optional.
+  var path_564044 = newJObject()
+  var query_564046 = newJObject()
+  add(query_564046, "$top", newJInt(Top))
+  add(query_564046, "api-version", newJString(apiVersion))
+  add(query_564046, "$select", newJString(Select))
+  add(query_564046, "$expand", newJString(Expand))
+  add(query_564046, "$count", newJBool(Count))
+  add(query_564046, "$format", newJString(Format))
+  add(path_564044, "subscriptionId", newJString(subscriptionId))
+  add(query_564046, "$orderby", newJString(Orderby))
+  add(query_564046, "$skip", newJInt(Skip))
+  add(query_564046, "$filter", newJString(Filter))
+  add(query_564046, "$search", newJString(Search))
+  result = call_564043.call(path_564044, query_564046, nil, nil, nil)
 
-var accountList* = Call_AccountList_567863(name: "accountList",
+var accountList* = Call_AccountList_563761(name: "accountList",
                                         meth: HttpMethod.HttpGet,
                                         host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.DataLakeStore/accounts",
-                                        validator: validate_AccountList_567864,
-                                        base: "", url: url_AccountList_567865,
+                                        validator: validate_AccountList_563762,
+                                        base: "", url: url_AccountList_563763,
                                         schemes: {Scheme.Https})
 type
-  Call_AccountListByResourceGroup_568185 = ref object of OpenApiRestCall_567641
-proc url_AccountListByResourceGroup_568187(protocol: Scheme; host: string;
+  Call_AccountListByResourceGroup_564085 = ref object of OpenApiRestCall_563539
+proc url_AccountListByResourceGroup_564087(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -303,102 +307,102 @@ proc url_AccountListByResourceGroup_568187(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AccountListByResourceGroup_568186(path: JsonNode; query: JsonNode;
+proc validate_AccountListByResourceGroup_564086(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists the Data Lake Store accounts within a specific resource group. The response includes a link to the next page of results, if any.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the Azure resource group that contains the Data Lake Store account(s).
   ##   subscriptionId: JString (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the Azure resource group that contains the Data Lake Store account(s).
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568188 = path.getOrDefault("resourceGroupName")
-  valid_568188 = validateParameter(valid_568188, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564088 = path.getOrDefault("subscriptionId")
+  valid_564088 = validateParameter(valid_564088, JString, required = true,
                                  default = nil)
-  if valid_568188 != nil:
-    section.add "resourceGroupName", valid_568188
-  var valid_568189 = path.getOrDefault("subscriptionId")
-  valid_568189 = validateParameter(valid_568189, JString, required = true,
+  if valid_564088 != nil:
+    section.add "subscriptionId", valid_564088
+  var valid_564089 = path.getOrDefault("resourceGroupName")
+  valid_564089 = validateParameter(valid_564089, JString, required = true,
                                  default = nil)
-  if valid_568189 != nil:
-    section.add "subscriptionId", valid_568189
+  if valid_564089 != nil:
+    section.add "resourceGroupName", valid_564089
   result.add "path", section
   ## parameters in `query` object:
-  ##   $orderby: JString
-  ##           : OrderBy clause. One or more comma-separated expressions with an optional "asc" (the default) or "desc" depending on the order you'd like the values sorted, e.g. Categories?$orderby=CategoryName desc. Optional.
-  ##   $expand: JString
-  ##          : OData expansion. Expand related resources in line with the retrieved resources, e.g. Categories/$expand=Products would expand Product data in line with each Category entry. Optional.
-  ##   api-version: JString (required)
-  ##              : Client Api Version.
   ##   $top: JInt
   ##       : The number of items to return. Optional.
+  ##   api-version: JString (required)
+  ##              : Client Api Version.
   ##   $select: JString
   ##          : OData Select statement. Limits the properties on each entry to just those requested, e.g. Categories?$select=CategoryName,Description. Optional.
-  ##   $skip: JInt
-  ##        : The number of items to skip over before returning elements. Optional.
+  ##   $expand: JString
+  ##          : OData expansion. Expand related resources in line with the retrieved resources, e.g. Categories/$expand=Products would expand Product data in line with each Category entry. Optional.
   ##   $count: JBool
   ##         : A Boolean value of true or false to request a count of the matching resources included with the resources in the response, e.g. Categories?$count=true. Optional.
-  ##   $search: JString
-  ##          : A free form search. A free-text search expression to match for whether a particular entry should be included in the feed, e.g. Categories?$search=blue OR green. Optional.
   ##   $format: JString
   ##          : The desired return format. Return the response in particular format without access to request headers for standard content-type negotiation (e.g Orders?$format=json). Optional.
+  ##   $orderby: JString
+  ##           : OrderBy clause. One or more comma-separated expressions with an optional "asc" (the default) or "desc" depending on the order you'd like the values sorted, e.g. Categories?$orderby=CategoryName desc. Optional.
+  ##   $skip: JInt
+  ##        : The number of items to skip over before returning elements. Optional.
   ##   $filter: JString
   ##          : OData filter. Optional.
+  ##   $search: JString
+  ##          : A free form search. A free-text search expression to match for whether a particular entry should be included in the feed, e.g. Categories?$search=blue OR green. Optional.
   section = newJObject()
-  var valid_568190 = query.getOrDefault("$orderby")
-  valid_568190 = validateParameter(valid_568190, JString, required = false,
-                                 default = nil)
-  if valid_568190 != nil:
-    section.add "$orderby", valid_568190
-  var valid_568191 = query.getOrDefault("$expand")
-  valid_568191 = validateParameter(valid_568191, JString, required = false,
-                                 default = nil)
-  if valid_568191 != nil:
-    section.add "$expand", valid_568191
+  var valid_564090 = query.getOrDefault("$top")
+  valid_564090 = validateParameter(valid_564090, JInt, required = false, default = nil)
+  if valid_564090 != nil:
+    section.add "$top", valid_564090
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568192 = query.getOrDefault("api-version")
-  valid_568192 = validateParameter(valid_568192, JString, required = true,
+  var valid_564091 = query.getOrDefault("api-version")
+  valid_564091 = validateParameter(valid_564091, JString, required = true,
                                  default = nil)
-  if valid_568192 != nil:
-    section.add "api-version", valid_568192
-  var valid_568193 = query.getOrDefault("$top")
-  valid_568193 = validateParameter(valid_568193, JInt, required = false, default = nil)
-  if valid_568193 != nil:
-    section.add "$top", valid_568193
-  var valid_568194 = query.getOrDefault("$select")
-  valid_568194 = validateParameter(valid_568194, JString, required = false,
+  if valid_564091 != nil:
+    section.add "api-version", valid_564091
+  var valid_564092 = query.getOrDefault("$select")
+  valid_564092 = validateParameter(valid_564092, JString, required = false,
                                  default = nil)
-  if valid_568194 != nil:
-    section.add "$select", valid_568194
-  var valid_568195 = query.getOrDefault("$skip")
-  valid_568195 = validateParameter(valid_568195, JInt, required = false, default = nil)
-  if valid_568195 != nil:
-    section.add "$skip", valid_568195
-  var valid_568196 = query.getOrDefault("$count")
-  valid_568196 = validateParameter(valid_568196, JBool, required = false, default = nil)
-  if valid_568196 != nil:
-    section.add "$count", valid_568196
-  var valid_568197 = query.getOrDefault("$search")
-  valid_568197 = validateParameter(valid_568197, JString, required = false,
+  if valid_564092 != nil:
+    section.add "$select", valid_564092
+  var valid_564093 = query.getOrDefault("$expand")
+  valid_564093 = validateParameter(valid_564093, JString, required = false,
                                  default = nil)
-  if valid_568197 != nil:
-    section.add "$search", valid_568197
-  var valid_568198 = query.getOrDefault("$format")
-  valid_568198 = validateParameter(valid_568198, JString, required = false,
+  if valid_564093 != nil:
+    section.add "$expand", valid_564093
+  var valid_564094 = query.getOrDefault("$count")
+  valid_564094 = validateParameter(valid_564094, JBool, required = false, default = nil)
+  if valid_564094 != nil:
+    section.add "$count", valid_564094
+  var valid_564095 = query.getOrDefault("$format")
+  valid_564095 = validateParameter(valid_564095, JString, required = false,
                                  default = nil)
-  if valid_568198 != nil:
-    section.add "$format", valid_568198
-  var valid_568199 = query.getOrDefault("$filter")
-  valid_568199 = validateParameter(valid_568199, JString, required = false,
+  if valid_564095 != nil:
+    section.add "$format", valid_564095
+  var valid_564096 = query.getOrDefault("$orderby")
+  valid_564096 = validateParameter(valid_564096, JString, required = false,
                                  default = nil)
-  if valid_568199 != nil:
-    section.add "$filter", valid_568199
+  if valid_564096 != nil:
+    section.add "$orderby", valid_564096
+  var valid_564097 = query.getOrDefault("$skip")
+  valid_564097 = validateParameter(valid_564097, JInt, required = false, default = nil)
+  if valid_564097 != nil:
+    section.add "$skip", valid_564097
+  var valid_564098 = query.getOrDefault("$filter")
+  valid_564098 = validateParameter(valid_564098, JString, required = false,
+                                 default = nil)
+  if valid_564098 != nil:
+    section.add "$filter", valid_564098
+  var valid_564099 = query.getOrDefault("$search")
+  valid_564099 = validateParameter(valid_564099, JString, required = false,
+                                 default = nil)
+  if valid_564099 != nil:
+    section.add "$search", valid_564099
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -407,74 +411,74 @@ proc validate_AccountListByResourceGroup_568186(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568200: Call_AccountListByResourceGroup_568185; path: JsonNode;
+proc call*(call_564100: Call_AccountListByResourceGroup_564085; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists the Data Lake Store accounts within a specific resource group. The response includes a link to the next page of results, if any.
   ## 
-  let valid = call_568200.validator(path, query, header, formData, body)
-  let scheme = call_568200.pickScheme
+  let valid = call_564100.validator(path, query, header, formData, body)
+  let scheme = call_564100.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568200.url(scheme.get, call_568200.host, call_568200.base,
-                         call_568200.route, valid.getOrDefault("path"),
+  let url = call_564100.url(scheme.get, call_564100.host, call_564100.base,
+                         call_564100.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568200, url, valid)
+  result = hook(call_564100, url, valid)
 
-proc call*(call_568201: Call_AccountListByResourceGroup_568185;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          Orderby: string = ""; Expand: string = ""; Top: int = 0; Select: string = "";
-          Skip: int = 0; Count: bool = false; Search: string = ""; Format: string = "";
-          Filter: string = ""): Recallable =
+proc call*(call_564101: Call_AccountListByResourceGroup_564085; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string; Top: int = 0;
+          Select: string = ""; Expand: string = ""; Count: bool = false;
+          Format: string = ""; Orderby: string = ""; Skip: int = 0; Filter: string = "";
+          Search: string = ""): Recallable =
   ## accountListByResourceGroup
   ## Lists the Data Lake Store accounts within a specific resource group. The response includes a link to the next page of results, if any.
-  ##   Orderby: string
-  ##          : OrderBy clause. One or more comma-separated expressions with an optional "asc" (the default) or "desc" depending on the order you'd like the values sorted, e.g. Categories?$orderby=CategoryName desc. Optional.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the Azure resource group that contains the Data Lake Store account(s).
-  ##   Expand: string
-  ##         : OData expansion. Expand related resources in line with the retrieved resources, e.g. Categories/$expand=Products would expand Product data in line with each Category entry. Optional.
-  ##   apiVersion: string (required)
-  ##             : Client Api Version.
-  ##   subscriptionId: string (required)
-  ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   Top: int
   ##      : The number of items to return. Optional.
+  ##   apiVersion: string (required)
+  ##             : Client Api Version.
   ##   Select: string
   ##         : OData Select statement. Limits the properties on each entry to just those requested, e.g. Categories?$select=CategoryName,Description. Optional.
-  ##   Skip: int
-  ##       : The number of items to skip over before returning elements. Optional.
+  ##   Expand: string
+  ##         : OData expansion. Expand related resources in line with the retrieved resources, e.g. Categories/$expand=Products would expand Product data in line with each Category entry. Optional.
   ##   Count: bool
   ##        : A Boolean value of true or false to request a count of the matching resources included with the resources in the response, e.g. Categories?$count=true. Optional.
-  ##   Search: string
-  ##         : A free form search. A free-text search expression to match for whether a particular entry should be included in the feed, e.g. Categories?$search=blue OR green. Optional.
   ##   Format: string
   ##         : The desired return format. Return the response in particular format without access to request headers for standard content-type negotiation (e.g Orders?$format=json). Optional.
+  ##   subscriptionId: string (required)
+  ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   Orderby: string
+  ##          : OrderBy clause. One or more comma-separated expressions with an optional "asc" (the default) or "desc" depending on the order you'd like the values sorted, e.g. Categories?$orderby=CategoryName desc. Optional.
+  ##   Skip: int
+  ##       : The number of items to skip over before returning elements. Optional.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the Azure resource group that contains the Data Lake Store account(s).
   ##   Filter: string
   ##         : OData filter. Optional.
-  var path_568202 = newJObject()
-  var query_568203 = newJObject()
-  add(query_568203, "$orderby", newJString(Orderby))
-  add(path_568202, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568203, "$expand", newJString(Expand))
-  add(query_568203, "api-version", newJString(apiVersion))
-  add(path_568202, "subscriptionId", newJString(subscriptionId))
-  add(query_568203, "$top", newJInt(Top))
-  add(query_568203, "$select", newJString(Select))
-  add(query_568203, "$skip", newJInt(Skip))
-  add(query_568203, "$count", newJBool(Count))
-  add(query_568203, "$search", newJString(Search))
-  add(query_568203, "$format", newJString(Format))
-  add(query_568203, "$filter", newJString(Filter))
-  result = call_568201.call(path_568202, query_568203, nil, nil, nil)
+  ##   Search: string
+  ##         : A free form search. A free-text search expression to match for whether a particular entry should be included in the feed, e.g. Categories?$search=blue OR green. Optional.
+  var path_564102 = newJObject()
+  var query_564103 = newJObject()
+  add(query_564103, "$top", newJInt(Top))
+  add(query_564103, "api-version", newJString(apiVersion))
+  add(query_564103, "$select", newJString(Select))
+  add(query_564103, "$expand", newJString(Expand))
+  add(query_564103, "$count", newJBool(Count))
+  add(query_564103, "$format", newJString(Format))
+  add(path_564102, "subscriptionId", newJString(subscriptionId))
+  add(query_564103, "$orderby", newJString(Orderby))
+  add(query_564103, "$skip", newJInt(Skip))
+  add(path_564102, "resourceGroupName", newJString(resourceGroupName))
+  add(query_564103, "$filter", newJString(Filter))
+  add(query_564103, "$search", newJString(Search))
+  result = call_564101.call(path_564102, query_564103, nil, nil, nil)
 
-var accountListByResourceGroup* = Call_AccountListByResourceGroup_568185(
+var accountListByResourceGroup* = Call_AccountListByResourceGroup_564085(
     name: "accountListByResourceGroup", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DataLakeStore/accounts",
-    validator: validate_AccountListByResourceGroup_568186, base: "",
-    url: url_AccountListByResourceGroup_568187, schemes: {Scheme.Https})
+    validator: validate_AccountListByResourceGroup_564086, base: "",
+    url: url_AccountListByResourceGroup_564087, schemes: {Scheme.Https})
 type
-  Call_AccountGet_568204 = ref object of OpenApiRestCall_567641
-proc url_AccountGet_568206(protocol: Scheme; host: string; base: string; route: string;
+  Call_AccountGet_564104 = ref object of OpenApiRestCall_563539
+proc url_AccountGet_564106(protocol: Scheme; host: string; base: string; route: string;
                           path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -497,37 +501,37 @@ proc url_AccountGet_568206(protocol: Scheme; host: string; base: string; route: 
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AccountGet_568205(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_AccountGet_564105(path: JsonNode; query: JsonNode; header: JsonNode;
                                formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the specified Data Lake Store account.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the Azure resource group that contains the Data Lake Store account.
   ##   subscriptionId: JString (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the Azure resource group that contains the Data Lake Store account.
   ##   accountName: JString (required)
   ##              : The name of the Data Lake Store account to retrieve.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568207 = path.getOrDefault("resourceGroupName")
-  valid_568207 = validateParameter(valid_568207, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564107 = path.getOrDefault("subscriptionId")
+  valid_564107 = validateParameter(valid_564107, JString, required = true,
                                  default = nil)
-  if valid_568207 != nil:
-    section.add "resourceGroupName", valid_568207
-  var valid_568208 = path.getOrDefault("subscriptionId")
-  valid_568208 = validateParameter(valid_568208, JString, required = true,
+  if valid_564107 != nil:
+    section.add "subscriptionId", valid_564107
+  var valid_564108 = path.getOrDefault("resourceGroupName")
+  valid_564108 = validateParameter(valid_564108, JString, required = true,
                                  default = nil)
-  if valid_568208 != nil:
-    section.add "subscriptionId", valid_568208
-  var valid_568209 = path.getOrDefault("accountName")
-  valid_568209 = validateParameter(valid_568209, JString, required = true,
+  if valid_564108 != nil:
+    section.add "resourceGroupName", valid_564108
+  var valid_564109 = path.getOrDefault("accountName")
+  valid_564109 = validateParameter(valid_564109, JString, required = true,
                                  default = nil)
-  if valid_568209 != nil:
-    section.add "accountName", valid_568209
+  if valid_564109 != nil:
+    section.add "accountName", valid_564109
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -535,11 +539,11 @@ proc validate_AccountGet_568205(path: JsonNode; query: JsonNode; header: JsonNod
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568210 = query.getOrDefault("api-version")
-  valid_568210 = validateParameter(valid_568210, JString, required = true,
+  var valid_564110 = query.getOrDefault("api-version")
+  valid_564110 = validateParameter(valid_564110, JString, required = true,
                                  default = nil)
-  if valid_568210 != nil:
-    section.add "api-version", valid_568210
+  if valid_564110 != nil:
+    section.add "api-version", valid_564110
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -548,48 +552,48 @@ proc validate_AccountGet_568205(path: JsonNode; query: JsonNode; header: JsonNod
   if body != nil:
     result.add "body", body
 
-proc call*(call_568211: Call_AccountGet_568204; path: JsonNode; query: JsonNode;
+proc call*(call_564111: Call_AccountGet_564104; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the specified Data Lake Store account.
   ## 
-  let valid = call_568211.validator(path, query, header, formData, body)
-  let scheme = call_568211.pickScheme
+  let valid = call_564111.validator(path, query, header, formData, body)
+  let scheme = call_564111.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568211.url(scheme.get, call_568211.host, call_568211.base,
-                         call_568211.route, valid.getOrDefault("path"),
+  let url = call_564111.url(scheme.get, call_564111.host, call_564111.base,
+                         call_564111.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568211, url, valid)
+  result = hook(call_564111, url, valid)
 
-proc call*(call_568212: Call_AccountGet_568204; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; accountName: string): Recallable =
+proc call*(call_564112: Call_AccountGet_564104; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string; accountName: string): Recallable =
   ## accountGet
   ## Gets the specified Data Lake Store account.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the Azure resource group that contains the Data Lake Store account.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
   ##   subscriptionId: string (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the Azure resource group that contains the Data Lake Store account.
   ##   accountName: string (required)
   ##              : The name of the Data Lake Store account to retrieve.
-  var path_568213 = newJObject()
-  var query_568214 = newJObject()
-  add(path_568213, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568214, "api-version", newJString(apiVersion))
-  add(path_568213, "subscriptionId", newJString(subscriptionId))
-  add(path_568213, "accountName", newJString(accountName))
-  result = call_568212.call(path_568213, query_568214, nil, nil, nil)
+  var path_564113 = newJObject()
+  var query_564114 = newJObject()
+  add(query_564114, "api-version", newJString(apiVersion))
+  add(path_564113, "subscriptionId", newJString(subscriptionId))
+  add(path_564113, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564113, "accountName", newJString(accountName))
+  result = call_564112.call(path_564113, query_564114, nil, nil, nil)
 
-var accountGet* = Call_AccountGet_568204(name: "accountGet",
+var accountGet* = Call_AccountGet_564104(name: "accountGet",
                                       meth: HttpMethod.HttpGet,
                                       host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DataLakeStore/accounts/{accountName}",
-                                      validator: validate_AccountGet_568205,
-                                      base: "", url: url_AccountGet_568206,
+                                      validator: validate_AccountGet_564105,
+                                      base: "", url: url_AccountGet_564106,
                                       schemes: {Scheme.Https})
 type
-  Call_AccountDelete_568215 = ref object of OpenApiRestCall_567641
-proc url_AccountDelete_568217(protocol: Scheme; host: string; base: string;
+  Call_AccountDelete_564115 = ref object of OpenApiRestCall_563539
+proc url_AccountDelete_564117(protocol: Scheme; host: string; base: string;
                              route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -612,37 +616,37 @@ proc url_AccountDelete_568217(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AccountDelete_568216(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_AccountDelete_564116(path: JsonNode; query: JsonNode; header: JsonNode;
                                   formData: JsonNode; body: JsonNode): JsonNode =
   ## Deletes the specified Data Lake Store account.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the Azure resource group that contains the Data Lake Store account.
   ##   subscriptionId: JString (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the Azure resource group that contains the Data Lake Store account.
   ##   accountName: JString (required)
   ##              : The name of the Data Lake Store account to delete.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568218 = path.getOrDefault("resourceGroupName")
-  valid_568218 = validateParameter(valid_568218, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564118 = path.getOrDefault("subscriptionId")
+  valid_564118 = validateParameter(valid_564118, JString, required = true,
                                  default = nil)
-  if valid_568218 != nil:
-    section.add "resourceGroupName", valid_568218
-  var valid_568219 = path.getOrDefault("subscriptionId")
-  valid_568219 = validateParameter(valid_568219, JString, required = true,
+  if valid_564118 != nil:
+    section.add "subscriptionId", valid_564118
+  var valid_564119 = path.getOrDefault("resourceGroupName")
+  valid_564119 = validateParameter(valid_564119, JString, required = true,
                                  default = nil)
-  if valid_568219 != nil:
-    section.add "subscriptionId", valid_568219
-  var valid_568220 = path.getOrDefault("accountName")
-  valid_568220 = validateParameter(valid_568220, JString, required = true,
+  if valid_564119 != nil:
+    section.add "resourceGroupName", valid_564119
+  var valid_564120 = path.getOrDefault("accountName")
+  valid_564120 = validateParameter(valid_564120, JString, required = true,
                                  default = nil)
-  if valid_568220 != nil:
-    section.add "accountName", valid_568220
+  if valid_564120 != nil:
+    section.add "accountName", valid_564120
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -650,11 +654,11 @@ proc validate_AccountDelete_568216(path: JsonNode; query: JsonNode; header: Json
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568221 = query.getOrDefault("api-version")
-  valid_568221 = validateParameter(valid_568221, JString, required = true,
+  var valid_564121 = query.getOrDefault("api-version")
+  valid_564121 = validateParameter(valid_564121, JString, required = true,
                                  default = nil)
-  if valid_568221 != nil:
-    section.add "api-version", valid_568221
+  if valid_564121 != nil:
+    section.add "api-version", valid_564121
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -663,46 +667,46 @@ proc validate_AccountDelete_568216(path: JsonNode; query: JsonNode; header: Json
   if body != nil:
     result.add "body", body
 
-proc call*(call_568222: Call_AccountDelete_568215; path: JsonNode; query: JsonNode;
+proc call*(call_564122: Call_AccountDelete_564115; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes the specified Data Lake Store account.
   ## 
-  let valid = call_568222.validator(path, query, header, formData, body)
-  let scheme = call_568222.pickScheme
+  let valid = call_564122.validator(path, query, header, formData, body)
+  let scheme = call_564122.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568222.url(scheme.get, call_568222.host, call_568222.base,
-                         call_568222.route, valid.getOrDefault("path"),
+  let url = call_564122.url(scheme.get, call_564122.host, call_564122.base,
+                         call_564122.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568222, url, valid)
+  result = hook(call_564122, url, valid)
 
-proc call*(call_568223: Call_AccountDelete_568215; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; accountName: string): Recallable =
+proc call*(call_564123: Call_AccountDelete_564115; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string; accountName: string): Recallable =
   ## accountDelete
   ## Deletes the specified Data Lake Store account.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the Azure resource group that contains the Data Lake Store account.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
   ##   subscriptionId: string (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the Azure resource group that contains the Data Lake Store account.
   ##   accountName: string (required)
   ##              : The name of the Data Lake Store account to delete.
-  var path_568224 = newJObject()
-  var query_568225 = newJObject()
-  add(path_568224, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568225, "api-version", newJString(apiVersion))
-  add(path_568224, "subscriptionId", newJString(subscriptionId))
-  add(path_568224, "accountName", newJString(accountName))
-  result = call_568223.call(path_568224, query_568225, nil, nil, nil)
+  var path_564124 = newJObject()
+  var query_564125 = newJObject()
+  add(query_564125, "api-version", newJString(apiVersion))
+  add(path_564124, "subscriptionId", newJString(subscriptionId))
+  add(path_564124, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564124, "accountName", newJString(accountName))
+  result = call_564123.call(path_564124, query_564125, nil, nil, nil)
 
-var accountDelete* = Call_AccountDelete_568215(name: "accountDelete",
+var accountDelete* = Call_AccountDelete_564115(name: "accountDelete",
     meth: HttpMethod.HttpDelete, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DataLakeStore/accounts/{accountName}",
-    validator: validate_AccountDelete_568216, base: "", url: url_AccountDelete_568217,
+    validator: validate_AccountDelete_564116, base: "", url: url_AccountDelete_564117,
     schemes: {Scheme.Https})
 type
-  Call_AccountEnableKeyVault_568226 = ref object of OpenApiRestCall_567641
-proc url_AccountEnableKeyVault_568228(protocol: Scheme; host: string; base: string;
+  Call_AccountEnableKeyVault_564126 = ref object of OpenApiRestCall_563539
+proc url_AccountEnableKeyVault_564128(protocol: Scheme; host: string; base: string;
                                      route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -726,37 +730,37 @@ proc url_AccountEnableKeyVault_568228(protocol: Scheme; host: string; base: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AccountEnableKeyVault_568227(path: JsonNode; query: JsonNode;
+proc validate_AccountEnableKeyVault_564127(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Attempts to enable a user managed key vault for encryption of the specified Data Lake Store account.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the Azure resource group that contains the Data Lake Store account.
   ##   subscriptionId: JString (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the Azure resource group that contains the Data Lake Store account.
   ##   accountName: JString (required)
   ##              : The name of the Data Lake Store account to attempt to enable the Key Vault for.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568229 = path.getOrDefault("resourceGroupName")
-  valid_568229 = validateParameter(valid_568229, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564129 = path.getOrDefault("subscriptionId")
+  valid_564129 = validateParameter(valid_564129, JString, required = true,
                                  default = nil)
-  if valid_568229 != nil:
-    section.add "resourceGroupName", valid_568229
-  var valid_568230 = path.getOrDefault("subscriptionId")
-  valid_568230 = validateParameter(valid_568230, JString, required = true,
+  if valid_564129 != nil:
+    section.add "subscriptionId", valid_564129
+  var valid_564130 = path.getOrDefault("resourceGroupName")
+  valid_564130 = validateParameter(valid_564130, JString, required = true,
                                  default = nil)
-  if valid_568230 != nil:
-    section.add "subscriptionId", valid_568230
-  var valid_568231 = path.getOrDefault("accountName")
-  valid_568231 = validateParameter(valid_568231, JString, required = true,
+  if valid_564130 != nil:
+    section.add "resourceGroupName", valid_564130
+  var valid_564131 = path.getOrDefault("accountName")
+  valid_564131 = validateParameter(valid_564131, JString, required = true,
                                  default = nil)
-  if valid_568231 != nil:
-    section.add "accountName", valid_568231
+  if valid_564131 != nil:
+    section.add "accountName", valid_564131
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -764,11 +768,11 @@ proc validate_AccountEnableKeyVault_568227(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568232 = query.getOrDefault("api-version")
-  valid_568232 = validateParameter(valid_568232, JString, required = true,
+  var valid_564132 = query.getOrDefault("api-version")
+  valid_564132 = validateParameter(valid_564132, JString, required = true,
                                  default = nil)
-  if valid_568232 != nil:
-    section.add "api-version", valid_568232
+  if valid_564132 != nil:
+    section.add "api-version", valid_564132
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -777,48 +781,47 @@ proc validate_AccountEnableKeyVault_568227(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568233: Call_AccountEnableKeyVault_568226; path: JsonNode;
+proc call*(call_564133: Call_AccountEnableKeyVault_564126; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Attempts to enable a user managed key vault for encryption of the specified Data Lake Store account.
   ## 
-  let valid = call_568233.validator(path, query, header, formData, body)
-  let scheme = call_568233.pickScheme
+  let valid = call_564133.validator(path, query, header, formData, body)
+  let scheme = call_564133.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568233.url(scheme.get, call_568233.host, call_568233.base,
-                         call_568233.route, valid.getOrDefault("path"),
+  let url = call_564133.url(scheme.get, call_564133.host, call_564133.base,
+                         call_564133.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568233, url, valid)
+  result = hook(call_564133, url, valid)
 
-proc call*(call_568234: Call_AccountEnableKeyVault_568226;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          accountName: string): Recallable =
+proc call*(call_564134: Call_AccountEnableKeyVault_564126; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string; accountName: string): Recallable =
   ## accountEnableKeyVault
   ## Attempts to enable a user managed key vault for encryption of the specified Data Lake Store account.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the Azure resource group that contains the Data Lake Store account.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
   ##   subscriptionId: string (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the Azure resource group that contains the Data Lake Store account.
   ##   accountName: string (required)
   ##              : The name of the Data Lake Store account to attempt to enable the Key Vault for.
-  var path_568235 = newJObject()
-  var query_568236 = newJObject()
-  add(path_568235, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568236, "api-version", newJString(apiVersion))
-  add(path_568235, "subscriptionId", newJString(subscriptionId))
-  add(path_568235, "accountName", newJString(accountName))
-  result = call_568234.call(path_568235, query_568236, nil, nil, nil)
+  var path_564135 = newJObject()
+  var query_564136 = newJObject()
+  add(query_564136, "api-version", newJString(apiVersion))
+  add(path_564135, "subscriptionId", newJString(subscriptionId))
+  add(path_564135, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564135, "accountName", newJString(accountName))
+  result = call_564134.call(path_564135, query_564136, nil, nil, nil)
 
-var accountEnableKeyVault* = Call_AccountEnableKeyVault_568226(
+var accountEnableKeyVault* = Call_AccountEnableKeyVault_564126(
     name: "accountEnableKeyVault", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DataLakeStore/accounts/{accountName}/enableKeyVault",
-    validator: validate_AccountEnableKeyVault_568227, base: "",
-    url: url_AccountEnableKeyVault_568228, schemes: {Scheme.Https})
+    validator: validate_AccountEnableKeyVault_564127, base: "",
+    url: url_AccountEnableKeyVault_564128, schemes: {Scheme.Https})
 type
-  Call_AccountListFirewallRules_568237 = ref object of OpenApiRestCall_567641
-proc url_AccountListFirewallRules_568239(protocol: Scheme; host: string;
+  Call_AccountListFirewallRules_564137 = ref object of OpenApiRestCall_563539
+proc url_AccountListFirewallRules_564139(protocol: Scheme; host: string;
                                         base: string; route: string; path: JsonNode;
                                         query: JsonNode): Uri =
   result.scheme = $protocol
@@ -843,37 +846,37 @@ proc url_AccountListFirewallRules_568239(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AccountListFirewallRules_568238(path: JsonNode; query: JsonNode;
+proc validate_AccountListFirewallRules_564138(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists the Data Lake Store firewall rules within the specified Data Lake Store account.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the Azure resource group that contains the Data Lake Store account.
   ##   subscriptionId: JString (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the Azure resource group that contains the Data Lake Store account.
   ##   accountName: JString (required)
   ##              : The name of the Data Lake Store account from which to get the firewall rules.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568240 = path.getOrDefault("resourceGroupName")
-  valid_568240 = validateParameter(valid_568240, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564140 = path.getOrDefault("subscriptionId")
+  valid_564140 = validateParameter(valid_564140, JString, required = true,
                                  default = nil)
-  if valid_568240 != nil:
-    section.add "resourceGroupName", valid_568240
-  var valid_568241 = path.getOrDefault("subscriptionId")
-  valid_568241 = validateParameter(valid_568241, JString, required = true,
+  if valid_564140 != nil:
+    section.add "subscriptionId", valid_564140
+  var valid_564141 = path.getOrDefault("resourceGroupName")
+  valid_564141 = validateParameter(valid_564141, JString, required = true,
                                  default = nil)
-  if valid_568241 != nil:
-    section.add "subscriptionId", valid_568241
-  var valid_568242 = path.getOrDefault("accountName")
-  valid_568242 = validateParameter(valid_568242, JString, required = true,
+  if valid_564141 != nil:
+    section.add "resourceGroupName", valid_564141
+  var valid_564142 = path.getOrDefault("accountName")
+  valid_564142 = validateParameter(valid_564142, JString, required = true,
                                  default = nil)
-  if valid_568242 != nil:
-    section.add "accountName", valid_568242
+  if valid_564142 != nil:
+    section.add "accountName", valid_564142
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -881,11 +884,11 @@ proc validate_AccountListFirewallRules_568238(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568243 = query.getOrDefault("api-version")
-  valid_568243 = validateParameter(valid_568243, JString, required = true,
+  var valid_564143 = query.getOrDefault("api-version")
+  valid_564143 = validateParameter(valid_564143, JString, required = true,
                                  default = nil)
-  if valid_568243 != nil:
-    section.add "api-version", valid_568243
+  if valid_564143 != nil:
+    section.add "api-version", valid_564143
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -894,48 +897,47 @@ proc validate_AccountListFirewallRules_568238(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568244: Call_AccountListFirewallRules_568237; path: JsonNode;
+proc call*(call_564144: Call_AccountListFirewallRules_564137; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists the Data Lake Store firewall rules within the specified Data Lake Store account.
   ## 
-  let valid = call_568244.validator(path, query, header, formData, body)
-  let scheme = call_568244.pickScheme
+  let valid = call_564144.validator(path, query, header, formData, body)
+  let scheme = call_564144.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568244.url(scheme.get, call_568244.host, call_568244.base,
-                         call_568244.route, valid.getOrDefault("path"),
+  let url = call_564144.url(scheme.get, call_564144.host, call_564144.base,
+                         call_564144.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568244, url, valid)
+  result = hook(call_564144, url, valid)
 
-proc call*(call_568245: Call_AccountListFirewallRules_568237;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          accountName: string): Recallable =
+proc call*(call_564145: Call_AccountListFirewallRules_564137; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string; accountName: string): Recallable =
   ## accountListFirewallRules
   ## Lists the Data Lake Store firewall rules within the specified Data Lake Store account.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the Azure resource group that contains the Data Lake Store account.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
   ##   subscriptionId: string (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the Azure resource group that contains the Data Lake Store account.
   ##   accountName: string (required)
   ##              : The name of the Data Lake Store account from which to get the firewall rules.
-  var path_568246 = newJObject()
-  var query_568247 = newJObject()
-  add(path_568246, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568247, "api-version", newJString(apiVersion))
-  add(path_568246, "subscriptionId", newJString(subscriptionId))
-  add(path_568246, "accountName", newJString(accountName))
-  result = call_568245.call(path_568246, query_568247, nil, nil, nil)
+  var path_564146 = newJObject()
+  var query_564147 = newJObject()
+  add(query_564147, "api-version", newJString(apiVersion))
+  add(path_564146, "subscriptionId", newJString(subscriptionId))
+  add(path_564146, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564146, "accountName", newJString(accountName))
+  result = call_564145.call(path_564146, query_564147, nil, nil, nil)
 
-var accountListFirewallRules* = Call_AccountListFirewallRules_568237(
+var accountListFirewallRules* = Call_AccountListFirewallRules_564137(
     name: "accountListFirewallRules", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DataLakeStore/accounts/{accountName}/firewallRules",
-    validator: validate_AccountListFirewallRules_568238, base: "",
-    url: url_AccountListFirewallRules_568239, schemes: {Scheme.Https})
+    validator: validate_AccountListFirewallRules_564138, base: "",
+    url: url_AccountListFirewallRules_564139, schemes: {Scheme.Https})
 type
-  Call_AccountGetFirewallRule_568248 = ref object of OpenApiRestCall_567641
-proc url_AccountGetFirewallRule_568250(protocol: Scheme; host: string; base: string;
+  Call_AccountGetFirewallRule_564148 = ref object of OpenApiRestCall_563539
+proc url_AccountGetFirewallRule_564150(protocol: Scheme; host: string; base: string;
                                       route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -962,44 +964,44 @@ proc url_AccountGetFirewallRule_568250(protocol: Scheme; host: string; base: str
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AccountGetFirewallRule_568249(path: JsonNode; query: JsonNode;
+proc validate_AccountGetFirewallRule_564149(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the specified Data Lake Store firewall rule.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the Azure resource group that contains the Data Lake Store account.
-  ##   subscriptionId: JString (required)
-  ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   firewallRuleName: JString (required)
   ##                   : The name of the firewall rule to retrieve.
+  ##   subscriptionId: JString (required)
+  ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the Azure resource group that contains the Data Lake Store account.
   ##   accountName: JString (required)
   ##              : The name of the Data Lake Store account from which to get the firewall rule.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568251 = path.getOrDefault("resourceGroupName")
-  valid_568251 = validateParameter(valid_568251, JString, required = true,
+        "path argument is necessary due to required `firewallRuleName` field"
+  var valid_564151 = path.getOrDefault("firewallRuleName")
+  valid_564151 = validateParameter(valid_564151, JString, required = true,
                                  default = nil)
-  if valid_568251 != nil:
-    section.add "resourceGroupName", valid_568251
-  var valid_568252 = path.getOrDefault("subscriptionId")
-  valid_568252 = validateParameter(valid_568252, JString, required = true,
+  if valid_564151 != nil:
+    section.add "firewallRuleName", valid_564151
+  var valid_564152 = path.getOrDefault("subscriptionId")
+  valid_564152 = validateParameter(valid_564152, JString, required = true,
                                  default = nil)
-  if valid_568252 != nil:
-    section.add "subscriptionId", valid_568252
-  var valid_568253 = path.getOrDefault("firewallRuleName")
-  valid_568253 = validateParameter(valid_568253, JString, required = true,
+  if valid_564152 != nil:
+    section.add "subscriptionId", valid_564152
+  var valid_564153 = path.getOrDefault("resourceGroupName")
+  valid_564153 = validateParameter(valid_564153, JString, required = true,
                                  default = nil)
-  if valid_568253 != nil:
-    section.add "firewallRuleName", valid_568253
-  var valid_568254 = path.getOrDefault("accountName")
-  valid_568254 = validateParameter(valid_568254, JString, required = true,
+  if valid_564153 != nil:
+    section.add "resourceGroupName", valid_564153
+  var valid_564154 = path.getOrDefault("accountName")
+  valid_564154 = validateParameter(valid_564154, JString, required = true,
                                  default = nil)
-  if valid_568254 != nil:
-    section.add "accountName", valid_568254
+  if valid_564154 != nil:
+    section.add "accountName", valid_564154
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1007,11 +1009,11 @@ proc validate_AccountGetFirewallRule_568249(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568255 = query.getOrDefault("api-version")
-  valid_568255 = validateParameter(valid_568255, JString, required = true,
+  var valid_564155 = query.getOrDefault("api-version")
+  valid_564155 = validateParameter(valid_564155, JString, required = true,
                                  default = nil)
-  if valid_568255 != nil:
-    section.add "api-version", valid_568255
+  if valid_564155 != nil:
+    section.add "api-version", valid_564155
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1020,51 +1022,51 @@ proc validate_AccountGetFirewallRule_568249(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568256: Call_AccountGetFirewallRule_568248; path: JsonNode;
+proc call*(call_564156: Call_AccountGetFirewallRule_564148; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the specified Data Lake Store firewall rule.
   ## 
-  let valid = call_568256.validator(path, query, header, formData, body)
-  let scheme = call_568256.pickScheme
+  let valid = call_564156.validator(path, query, header, formData, body)
+  let scheme = call_564156.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568256.url(scheme.get, call_568256.host, call_568256.base,
-                         call_568256.route, valid.getOrDefault("path"),
+  let url = call_564156.url(scheme.get, call_564156.host, call_564156.base,
+                         call_564156.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568256, url, valid)
+  result = hook(call_564156, url, valid)
 
-proc call*(call_568257: Call_AccountGetFirewallRule_568248;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          firewallRuleName: string; accountName: string): Recallable =
+proc call*(call_564157: Call_AccountGetFirewallRule_564148; apiVersion: string;
+          firewallRuleName: string; subscriptionId: string;
+          resourceGroupName: string; accountName: string): Recallable =
   ## accountGetFirewallRule
   ## Gets the specified Data Lake Store firewall rule.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the Azure resource group that contains the Data Lake Store account.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
-  ##   subscriptionId: string (required)
-  ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   firewallRuleName: string (required)
   ##                   : The name of the firewall rule to retrieve.
+  ##   subscriptionId: string (required)
+  ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the Azure resource group that contains the Data Lake Store account.
   ##   accountName: string (required)
   ##              : The name of the Data Lake Store account from which to get the firewall rule.
-  var path_568258 = newJObject()
-  var query_568259 = newJObject()
-  add(path_568258, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568259, "api-version", newJString(apiVersion))
-  add(path_568258, "subscriptionId", newJString(subscriptionId))
-  add(path_568258, "firewallRuleName", newJString(firewallRuleName))
-  add(path_568258, "accountName", newJString(accountName))
-  result = call_568257.call(path_568258, query_568259, nil, nil, nil)
+  var path_564158 = newJObject()
+  var query_564159 = newJObject()
+  add(query_564159, "api-version", newJString(apiVersion))
+  add(path_564158, "firewallRuleName", newJString(firewallRuleName))
+  add(path_564158, "subscriptionId", newJString(subscriptionId))
+  add(path_564158, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564158, "accountName", newJString(accountName))
+  result = call_564157.call(path_564158, query_564159, nil, nil, nil)
 
-var accountGetFirewallRule* = Call_AccountGetFirewallRule_568248(
+var accountGetFirewallRule* = Call_AccountGetFirewallRule_564148(
     name: "accountGetFirewallRule", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DataLakeStore/accounts/{accountName}/firewallRules/{firewallRuleName}",
-    validator: validate_AccountGetFirewallRule_568249, base: "",
-    url: url_AccountGetFirewallRule_568250, schemes: {Scheme.Https})
+    validator: validate_AccountGetFirewallRule_564149, base: "",
+    url: url_AccountGetFirewallRule_564150, schemes: {Scheme.Https})
 type
-  Call_AccountDeleteFirewallRule_568260 = ref object of OpenApiRestCall_567641
-proc url_AccountDeleteFirewallRule_568262(protocol: Scheme; host: string;
+  Call_AccountDeleteFirewallRule_564160 = ref object of OpenApiRestCall_563539
+proc url_AccountDeleteFirewallRule_564162(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1091,44 +1093,44 @@ proc url_AccountDeleteFirewallRule_568262(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AccountDeleteFirewallRule_568261(path: JsonNode; query: JsonNode;
+proc validate_AccountDeleteFirewallRule_564161(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Deletes the specified firewall rule from the specified Data Lake Store account
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the Azure resource group that contains the Data Lake Store account.
-  ##   subscriptionId: JString (required)
-  ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   firewallRuleName: JString (required)
   ##                   : The name of the firewall rule to delete.
+  ##   subscriptionId: JString (required)
+  ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the Azure resource group that contains the Data Lake Store account.
   ##   accountName: JString (required)
   ##              : The name of the Data Lake Store account from which to delete the firewall rule.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568263 = path.getOrDefault("resourceGroupName")
-  valid_568263 = validateParameter(valid_568263, JString, required = true,
+        "path argument is necessary due to required `firewallRuleName` field"
+  var valid_564163 = path.getOrDefault("firewallRuleName")
+  valid_564163 = validateParameter(valid_564163, JString, required = true,
                                  default = nil)
-  if valid_568263 != nil:
-    section.add "resourceGroupName", valid_568263
-  var valid_568264 = path.getOrDefault("subscriptionId")
-  valid_568264 = validateParameter(valid_568264, JString, required = true,
+  if valid_564163 != nil:
+    section.add "firewallRuleName", valid_564163
+  var valid_564164 = path.getOrDefault("subscriptionId")
+  valid_564164 = validateParameter(valid_564164, JString, required = true,
                                  default = nil)
-  if valid_568264 != nil:
-    section.add "subscriptionId", valid_568264
-  var valid_568265 = path.getOrDefault("firewallRuleName")
-  valid_568265 = validateParameter(valid_568265, JString, required = true,
+  if valid_564164 != nil:
+    section.add "subscriptionId", valid_564164
+  var valid_564165 = path.getOrDefault("resourceGroupName")
+  valid_564165 = validateParameter(valid_564165, JString, required = true,
                                  default = nil)
-  if valid_568265 != nil:
-    section.add "firewallRuleName", valid_568265
-  var valid_568266 = path.getOrDefault("accountName")
-  valid_568266 = validateParameter(valid_568266, JString, required = true,
+  if valid_564165 != nil:
+    section.add "resourceGroupName", valid_564165
+  var valid_564166 = path.getOrDefault("accountName")
+  valid_564166 = validateParameter(valid_564166, JString, required = true,
                                  default = nil)
-  if valid_568266 != nil:
-    section.add "accountName", valid_568266
+  if valid_564166 != nil:
+    section.add "accountName", valid_564166
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1136,11 +1138,11 @@ proc validate_AccountDeleteFirewallRule_568261(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568267 = query.getOrDefault("api-version")
-  valid_568267 = validateParameter(valid_568267, JString, required = true,
+  var valid_564167 = query.getOrDefault("api-version")
+  valid_564167 = validateParameter(valid_564167, JString, required = true,
                                  default = nil)
-  if valid_568267 != nil:
-    section.add "api-version", valid_568267
+  if valid_564167 != nil:
+    section.add "api-version", valid_564167
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1149,51 +1151,51 @@ proc validate_AccountDeleteFirewallRule_568261(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568268: Call_AccountDeleteFirewallRule_568260; path: JsonNode;
+proc call*(call_564168: Call_AccountDeleteFirewallRule_564160; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes the specified firewall rule from the specified Data Lake Store account
   ## 
-  let valid = call_568268.validator(path, query, header, formData, body)
-  let scheme = call_568268.pickScheme
+  let valid = call_564168.validator(path, query, header, formData, body)
+  let scheme = call_564168.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568268.url(scheme.get, call_568268.host, call_568268.base,
-                         call_568268.route, valid.getOrDefault("path"),
+  let url = call_564168.url(scheme.get, call_564168.host, call_564168.base,
+                         call_564168.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568268, url, valid)
+  result = hook(call_564168, url, valid)
 
-proc call*(call_568269: Call_AccountDeleteFirewallRule_568260;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          firewallRuleName: string; accountName: string): Recallable =
+proc call*(call_564169: Call_AccountDeleteFirewallRule_564160; apiVersion: string;
+          firewallRuleName: string; subscriptionId: string;
+          resourceGroupName: string; accountName: string): Recallable =
   ## accountDeleteFirewallRule
   ## Deletes the specified firewall rule from the specified Data Lake Store account
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the Azure resource group that contains the Data Lake Store account.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
-  ##   subscriptionId: string (required)
-  ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   firewallRuleName: string (required)
   ##                   : The name of the firewall rule to delete.
+  ##   subscriptionId: string (required)
+  ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the Azure resource group that contains the Data Lake Store account.
   ##   accountName: string (required)
   ##              : The name of the Data Lake Store account from which to delete the firewall rule.
-  var path_568270 = newJObject()
-  var query_568271 = newJObject()
-  add(path_568270, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568271, "api-version", newJString(apiVersion))
-  add(path_568270, "subscriptionId", newJString(subscriptionId))
-  add(path_568270, "firewallRuleName", newJString(firewallRuleName))
-  add(path_568270, "accountName", newJString(accountName))
-  result = call_568269.call(path_568270, query_568271, nil, nil, nil)
+  var path_564170 = newJObject()
+  var query_564171 = newJObject()
+  add(query_564171, "api-version", newJString(apiVersion))
+  add(path_564170, "firewallRuleName", newJString(firewallRuleName))
+  add(path_564170, "subscriptionId", newJString(subscriptionId))
+  add(path_564170, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564170, "accountName", newJString(accountName))
+  result = call_564169.call(path_564170, query_564171, nil, nil, nil)
 
-var accountDeleteFirewallRule* = Call_AccountDeleteFirewallRule_568260(
+var accountDeleteFirewallRule* = Call_AccountDeleteFirewallRule_564160(
     name: "accountDeleteFirewallRule", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DataLakeStore/accounts/{accountName}/firewallRules/{firewallRuleName}",
-    validator: validate_AccountDeleteFirewallRule_568261, base: "",
-    url: url_AccountDeleteFirewallRule_568262, schemes: {Scheme.Https})
+    validator: validate_AccountDeleteFirewallRule_564161, base: "",
+    url: url_AccountDeleteFirewallRule_564162, schemes: {Scheme.Https})
 type
-  Call_AccountCreateOrUpdateFirewallRule_568272 = ref object of OpenApiRestCall_567641
-proc url_AccountCreateOrUpdateFirewallRule_568274(protocol: Scheme; host: string;
+  Call_AccountCreateOrUpdateFirewallRule_564172 = ref object of OpenApiRestCall_563539
+proc url_AccountCreateOrUpdateFirewallRule_564174(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1219,44 +1221,43 @@ proc url_AccountCreateOrUpdateFirewallRule_568274(protocol: Scheme; host: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AccountCreateOrUpdateFirewallRule_568273(path: JsonNode;
+proc validate_AccountCreateOrUpdateFirewallRule_564173(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Creates or updates the specified firewall rule.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the Azure resource group that contains the Data Lake Store account.
   ##   name: JString (required)
   ##       : The name of the firewall rule to create or update.
   ##   subscriptionId: JString (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the Azure resource group that contains the Data Lake Store account.
   ##   accountName: JString (required)
   ##              : The name of the Data Lake Store account to which to add the firewall rule.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568292 = path.getOrDefault("resourceGroupName")
-  valid_568292 = validateParameter(valid_568292, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `name` field"
+  var valid_564192 = path.getOrDefault("name")
+  valid_564192 = validateParameter(valid_564192, JString, required = true,
                                  default = nil)
-  if valid_568292 != nil:
-    section.add "resourceGroupName", valid_568292
-  var valid_568293 = path.getOrDefault("name")
-  valid_568293 = validateParameter(valid_568293, JString, required = true,
+  if valid_564192 != nil:
+    section.add "name", valid_564192
+  var valid_564193 = path.getOrDefault("subscriptionId")
+  valid_564193 = validateParameter(valid_564193, JString, required = true,
                                  default = nil)
-  if valid_568293 != nil:
-    section.add "name", valid_568293
-  var valid_568294 = path.getOrDefault("subscriptionId")
-  valid_568294 = validateParameter(valid_568294, JString, required = true,
+  if valid_564193 != nil:
+    section.add "subscriptionId", valid_564193
+  var valid_564194 = path.getOrDefault("resourceGroupName")
+  valid_564194 = validateParameter(valid_564194, JString, required = true,
                                  default = nil)
-  if valid_568294 != nil:
-    section.add "subscriptionId", valid_568294
-  var valid_568295 = path.getOrDefault("accountName")
-  valid_568295 = validateParameter(valid_568295, JString, required = true,
+  if valid_564194 != nil:
+    section.add "resourceGroupName", valid_564194
+  var valid_564195 = path.getOrDefault("accountName")
+  valid_564195 = validateParameter(valid_564195, JString, required = true,
                                  default = nil)
-  if valid_568295 != nil:
-    section.add "accountName", valid_568295
+  if valid_564195 != nil:
+    section.add "accountName", valid_564195
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1264,11 +1265,11 @@ proc validate_AccountCreateOrUpdateFirewallRule_568273(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568296 = query.getOrDefault("api-version")
-  valid_568296 = validateParameter(valid_568296, JString, required = true,
+  var valid_564196 = query.getOrDefault("api-version")
+  valid_564196 = validateParameter(valid_564196, JString, required = true,
                                  default = nil)
-  if valid_568296 != nil:
-    section.add "api-version", valid_568296
+  if valid_564196 != nil:
+    section.add "api-version", valid_564196
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1282,57 +1283,57 @@ proc validate_AccountCreateOrUpdateFirewallRule_568273(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568298: Call_AccountCreateOrUpdateFirewallRule_568272;
+proc call*(call_564198: Call_AccountCreateOrUpdateFirewallRule_564172;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Creates or updates the specified firewall rule.
   ## 
-  let valid = call_568298.validator(path, query, header, formData, body)
-  let scheme = call_568298.pickScheme
+  let valid = call_564198.validator(path, query, header, formData, body)
+  let scheme = call_564198.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568298.url(scheme.get, call_568298.host, call_568298.base,
-                         call_568298.route, valid.getOrDefault("path"),
+  let url = call_564198.url(scheme.get, call_564198.host, call_564198.base,
+                         call_564198.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568298, url, valid)
+  result = hook(call_564198, url, valid)
 
-proc call*(call_568299: Call_AccountCreateOrUpdateFirewallRule_568272;
-          resourceGroupName: string; apiVersion: string; name: string;
-          subscriptionId: string; parameters: JsonNode; accountName: string): Recallable =
+proc call*(call_564199: Call_AccountCreateOrUpdateFirewallRule_564172;
+          apiVersion: string; name: string; subscriptionId: string;
+          resourceGroupName: string; parameters: JsonNode; accountName: string): Recallable =
   ## accountCreateOrUpdateFirewallRule
   ## Creates or updates the specified firewall rule.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the Azure resource group that contains the Data Lake Store account.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
   ##   name: string (required)
   ##       : The name of the firewall rule to create or update.
   ##   subscriptionId: string (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the Azure resource group that contains the Data Lake Store account.
   ##   parameters: JObject (required)
   ##             : Parameters supplied to create the create firewall rule.
   ##   accountName: string (required)
   ##              : The name of the Data Lake Store account to which to add the firewall rule.
-  var path_568300 = newJObject()
-  var query_568301 = newJObject()
-  var body_568302 = newJObject()
-  add(path_568300, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568301, "api-version", newJString(apiVersion))
-  add(path_568300, "name", newJString(name))
-  add(path_568300, "subscriptionId", newJString(subscriptionId))
+  var path_564200 = newJObject()
+  var query_564201 = newJObject()
+  var body_564202 = newJObject()
+  add(query_564201, "api-version", newJString(apiVersion))
+  add(path_564200, "name", newJString(name))
+  add(path_564200, "subscriptionId", newJString(subscriptionId))
+  add(path_564200, "resourceGroupName", newJString(resourceGroupName))
   if parameters != nil:
-    body_568302 = parameters
-  add(path_568300, "accountName", newJString(accountName))
-  result = call_568299.call(path_568300, query_568301, nil, nil, body_568302)
+    body_564202 = parameters
+  add(path_564200, "accountName", newJString(accountName))
+  result = call_564199.call(path_564200, query_564201, nil, nil, body_564202)
 
-var accountCreateOrUpdateFirewallRule* = Call_AccountCreateOrUpdateFirewallRule_568272(
+var accountCreateOrUpdateFirewallRule* = Call_AccountCreateOrUpdateFirewallRule_564172(
     name: "accountCreateOrUpdateFirewallRule", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DataLakeStore/accounts/{accountName}/firewallRules/{name}",
-    validator: validate_AccountCreateOrUpdateFirewallRule_568273, base: "",
-    url: url_AccountCreateOrUpdateFirewallRule_568274, schemes: {Scheme.Https})
+    validator: validate_AccountCreateOrUpdateFirewallRule_564173, base: "",
+    url: url_AccountCreateOrUpdateFirewallRule_564174, schemes: {Scheme.Https})
 type
-  Call_AccountCreate_568303 = ref object of OpenApiRestCall_567641
-proc url_AccountCreate_568305(protocol: Scheme; host: string; base: string;
+  Call_AccountCreate_564203 = ref object of OpenApiRestCall_563539
+proc url_AccountCreate_564205(protocol: Scheme; host: string; base: string;
                              route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1355,37 +1356,36 @@ proc url_AccountCreate_568305(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AccountCreate_568304(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_AccountCreate_564204(path: JsonNode; query: JsonNode; header: JsonNode;
                                   formData: JsonNode; body: JsonNode): JsonNode =
   ## Creates the specified Data Lake Store account.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the Azure resource group that contains the Data Lake Store account.
   ##   name: JString (required)
   ##       : The name of the Data Lake Store account to create.
   ##   subscriptionId: JString (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the Azure resource group that contains the Data Lake Store account.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568306 = path.getOrDefault("resourceGroupName")
-  valid_568306 = validateParameter(valid_568306, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `name` field"
+  var valid_564206 = path.getOrDefault("name")
+  valid_564206 = validateParameter(valid_564206, JString, required = true,
                                  default = nil)
-  if valid_568306 != nil:
-    section.add "resourceGroupName", valid_568306
-  var valid_568307 = path.getOrDefault("name")
-  valid_568307 = validateParameter(valid_568307, JString, required = true,
+  if valid_564206 != nil:
+    section.add "name", valid_564206
+  var valid_564207 = path.getOrDefault("subscriptionId")
+  valid_564207 = validateParameter(valid_564207, JString, required = true,
                                  default = nil)
-  if valid_568307 != nil:
-    section.add "name", valid_568307
-  var valid_568308 = path.getOrDefault("subscriptionId")
-  valid_568308 = validateParameter(valid_568308, JString, required = true,
+  if valid_564207 != nil:
+    section.add "subscriptionId", valid_564207
+  var valid_564208 = path.getOrDefault("resourceGroupName")
+  valid_564208 = validateParameter(valid_564208, JString, required = true,
                                  default = nil)
-  if valid_568308 != nil:
-    section.add "subscriptionId", valid_568308
+  if valid_564208 != nil:
+    section.add "resourceGroupName", valid_564208
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1393,11 +1393,11 @@ proc validate_AccountCreate_568304(path: JsonNode; query: JsonNode; header: Json
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568309 = query.getOrDefault("api-version")
-  valid_568309 = validateParameter(valid_568309, JString, required = true,
+  var valid_564209 = query.getOrDefault("api-version")
+  valid_564209 = validateParameter(valid_564209, JString, required = true,
                                  default = nil)
-  if valid_568309 != nil:
-    section.add "api-version", valid_568309
+  if valid_564209 != nil:
+    section.add "api-version", valid_564209
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1411,52 +1411,51 @@ proc validate_AccountCreate_568304(path: JsonNode; query: JsonNode; header: Json
   if body != nil:
     result.add "body", body
 
-proc call*(call_568311: Call_AccountCreate_568303; path: JsonNode; query: JsonNode;
+proc call*(call_564211: Call_AccountCreate_564203; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Creates the specified Data Lake Store account.
   ## 
-  let valid = call_568311.validator(path, query, header, formData, body)
-  let scheme = call_568311.pickScheme
+  let valid = call_564211.validator(path, query, header, formData, body)
+  let scheme = call_564211.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568311.url(scheme.get, call_568311.host, call_568311.base,
-                         call_568311.route, valid.getOrDefault("path"),
+  let url = call_564211.url(scheme.get, call_564211.host, call_564211.base,
+                         call_564211.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568311, url, valid)
+  result = hook(call_564211, url, valid)
 
-proc call*(call_568312: Call_AccountCreate_568303; resourceGroupName: string;
-          apiVersion: string; name: string; subscriptionId: string;
-          parameters: JsonNode): Recallable =
+proc call*(call_564212: Call_AccountCreate_564203; apiVersion: string; name: string;
+          subscriptionId: string; resourceGroupName: string; parameters: JsonNode): Recallable =
   ## accountCreate
   ## Creates the specified Data Lake Store account.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the Azure resource group that contains the Data Lake Store account.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
   ##   name: string (required)
   ##       : The name of the Data Lake Store account to create.
   ##   subscriptionId: string (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the Azure resource group that contains the Data Lake Store account.
   ##   parameters: JObject (required)
   ##             : Parameters supplied to create the Data Lake Store account.
-  var path_568313 = newJObject()
-  var query_568314 = newJObject()
-  var body_568315 = newJObject()
-  add(path_568313, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568314, "api-version", newJString(apiVersion))
-  add(path_568313, "name", newJString(name))
-  add(path_568313, "subscriptionId", newJString(subscriptionId))
+  var path_564213 = newJObject()
+  var query_564214 = newJObject()
+  var body_564215 = newJObject()
+  add(query_564214, "api-version", newJString(apiVersion))
+  add(path_564213, "name", newJString(name))
+  add(path_564213, "subscriptionId", newJString(subscriptionId))
+  add(path_564213, "resourceGroupName", newJString(resourceGroupName))
   if parameters != nil:
-    body_568315 = parameters
-  result = call_568312.call(path_568313, query_568314, nil, nil, body_568315)
+    body_564215 = parameters
+  result = call_564212.call(path_564213, query_564214, nil, nil, body_564215)
 
-var accountCreate* = Call_AccountCreate_568303(name: "accountCreate",
+var accountCreate* = Call_AccountCreate_564203(name: "accountCreate",
     meth: HttpMethod.HttpPut, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DataLakeStore/accounts/{name}",
-    validator: validate_AccountCreate_568304, base: "", url: url_AccountCreate_568305,
+    validator: validate_AccountCreate_564204, base: "", url: url_AccountCreate_564205,
     schemes: {Scheme.Https})
 type
-  Call_AccountUpdate_568316 = ref object of OpenApiRestCall_567641
-proc url_AccountUpdate_568318(protocol: Scheme; host: string; base: string;
+  Call_AccountUpdate_564216 = ref object of OpenApiRestCall_563539
+proc url_AccountUpdate_564218(protocol: Scheme; host: string; base: string;
                              route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1479,37 +1478,36 @@ proc url_AccountUpdate_568318(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AccountUpdate_568317(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_AccountUpdate_564217(path: JsonNode; query: JsonNode; header: JsonNode;
                                   formData: JsonNode; body: JsonNode): JsonNode =
   ## Updates the specified Data Lake Store account information.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the Azure resource group that contains the Data Lake Store account.
   ##   name: JString (required)
   ##       : The name of the Data Lake Store account to update.
   ##   subscriptionId: JString (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the Azure resource group that contains the Data Lake Store account.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568319 = path.getOrDefault("resourceGroupName")
-  valid_568319 = validateParameter(valid_568319, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `name` field"
+  var valid_564219 = path.getOrDefault("name")
+  valid_564219 = validateParameter(valid_564219, JString, required = true,
                                  default = nil)
-  if valid_568319 != nil:
-    section.add "resourceGroupName", valid_568319
-  var valid_568320 = path.getOrDefault("name")
-  valid_568320 = validateParameter(valid_568320, JString, required = true,
+  if valid_564219 != nil:
+    section.add "name", valid_564219
+  var valid_564220 = path.getOrDefault("subscriptionId")
+  valid_564220 = validateParameter(valid_564220, JString, required = true,
                                  default = nil)
-  if valid_568320 != nil:
-    section.add "name", valid_568320
-  var valid_568321 = path.getOrDefault("subscriptionId")
-  valid_568321 = validateParameter(valid_568321, JString, required = true,
+  if valid_564220 != nil:
+    section.add "subscriptionId", valid_564220
+  var valid_564221 = path.getOrDefault("resourceGroupName")
+  valid_564221 = validateParameter(valid_564221, JString, required = true,
                                  default = nil)
-  if valid_568321 != nil:
-    section.add "subscriptionId", valid_568321
+  if valid_564221 != nil:
+    section.add "resourceGroupName", valid_564221
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1517,11 +1515,11 @@ proc validate_AccountUpdate_568317(path: JsonNode; query: JsonNode; header: Json
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568322 = query.getOrDefault("api-version")
-  valid_568322 = validateParameter(valid_568322, JString, required = true,
+  var valid_564222 = query.getOrDefault("api-version")
+  valid_564222 = validateParameter(valid_564222, JString, required = true,
                                  default = nil)
-  if valid_568322 != nil:
-    section.add "api-version", valid_568322
+  if valid_564222 != nil:
+    section.add "api-version", valid_564222
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1535,48 +1533,47 @@ proc validate_AccountUpdate_568317(path: JsonNode; query: JsonNode; header: Json
   if body != nil:
     result.add "body", body
 
-proc call*(call_568324: Call_AccountUpdate_568316; path: JsonNode; query: JsonNode;
+proc call*(call_564224: Call_AccountUpdate_564216; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Updates the specified Data Lake Store account information.
   ## 
-  let valid = call_568324.validator(path, query, header, formData, body)
-  let scheme = call_568324.pickScheme
+  let valid = call_564224.validator(path, query, header, formData, body)
+  let scheme = call_564224.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568324.url(scheme.get, call_568324.host, call_568324.base,
-                         call_568324.route, valid.getOrDefault("path"),
+  let url = call_564224.url(scheme.get, call_564224.host, call_564224.base,
+                         call_564224.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568324, url, valid)
+  result = hook(call_564224, url, valid)
 
-proc call*(call_568325: Call_AccountUpdate_568316; resourceGroupName: string;
-          apiVersion: string; name: string; subscriptionId: string;
-          parameters: JsonNode): Recallable =
+proc call*(call_564225: Call_AccountUpdate_564216; apiVersion: string; name: string;
+          subscriptionId: string; resourceGroupName: string; parameters: JsonNode): Recallable =
   ## accountUpdate
   ## Updates the specified Data Lake Store account information.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the Azure resource group that contains the Data Lake Store account.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
   ##   name: string (required)
   ##       : The name of the Data Lake Store account to update.
   ##   subscriptionId: string (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the Azure resource group that contains the Data Lake Store account.
   ##   parameters: JObject (required)
   ##             : Parameters supplied to update the Data Lake Store account.
-  var path_568326 = newJObject()
-  var query_568327 = newJObject()
-  var body_568328 = newJObject()
-  add(path_568326, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568327, "api-version", newJString(apiVersion))
-  add(path_568326, "name", newJString(name))
-  add(path_568326, "subscriptionId", newJString(subscriptionId))
+  var path_564226 = newJObject()
+  var query_564227 = newJObject()
+  var body_564228 = newJObject()
+  add(query_564227, "api-version", newJString(apiVersion))
+  add(path_564226, "name", newJString(name))
+  add(path_564226, "subscriptionId", newJString(subscriptionId))
+  add(path_564226, "resourceGroupName", newJString(resourceGroupName))
   if parameters != nil:
-    body_568328 = parameters
-  result = call_568325.call(path_568326, query_568327, nil, nil, body_568328)
+    body_564228 = parameters
+  result = call_564225.call(path_564226, query_564227, nil, nil, body_564228)
 
-var accountUpdate* = Call_AccountUpdate_568316(name: "accountUpdate",
+var accountUpdate* = Call_AccountUpdate_564216(name: "accountUpdate",
     meth: HttpMethod.HttpPatch, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DataLakeStore/accounts/{name}",
-    validator: validate_AccountUpdate_568317, base: "", url: url_AccountUpdate_568318,
+    validator: validate_AccountUpdate_564217, base: "", url: url_AccountUpdate_564218,
     schemes: {Scheme.Https})
 export
   rest

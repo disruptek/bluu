@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, httpcore
 
 ## auto-generated via openapi macro
 ## title: Azure DevOps
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_567642 = ref object of OpenApiRestCall
+  OpenApiRestCall_563540 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_567642](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563540](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_567642): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563540): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,15 +107,15 @@ const
   macServiceName = "devops"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_OperationsList_567864 = ref object of OpenApiRestCall_567642
-proc url_OperationsList_567866(protocol: Scheme; host: string; base: string;
+  Call_OperationsList_563762 = ref object of OpenApiRestCall_563540
+proc url_OperationsList_563764(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_OperationsList_567865(path: JsonNode; query: JsonNode;
+proc validate_OperationsList_563763(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## Lists all the operations supported by Microsoft.DevOps resource provider.
@@ -126,11 +130,11 @@ proc validate_OperationsList_567865(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568025 = query.getOrDefault("api-version")
-  valid_568025 = validateParameter(valid_568025, JString, required = true,
+  var valid_563925 = query.getOrDefault("api-version")
+  valid_563925 = validateParameter(valid_563925, JString, required = true,
                                  default = nil)
-  if valid_568025 != nil:
-    section.add "api-version", valid_568025
+  if valid_563925 != nil:
+    section.add "api-version", valid_563925
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -139,43 +143,43 @@ proc validate_OperationsList_567865(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568048: Call_OperationsList_567864; path: JsonNode; query: JsonNode;
+proc call*(call_563948: Call_OperationsList_563762; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists all the operations supported by Microsoft.DevOps resource provider.
   ## 
-  let valid = call_568048.validator(path, query, header, formData, body)
-  let scheme = call_568048.pickScheme
+  let valid = call_563948.validator(path, query, header, formData, body)
+  let scheme = call_563948.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568048.url(scheme.get, call_568048.host, call_568048.base,
-                         call_568048.route, valid.getOrDefault("path"),
+  let url = call_563948.url(scheme.get, call_563948.host, call_563948.base,
+                         call_563948.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568048, url, valid)
+  result = hook(call_563948, url, valid)
 
-proc call*(call_568119: Call_OperationsList_567864; apiVersion: string): Recallable =
+proc call*(call_564019: Call_OperationsList_563762; apiVersion: string): Recallable =
   ## operationsList
   ## Lists all the operations supported by Microsoft.DevOps resource provider.
   ##   apiVersion: string (required)
   ##             : API version to be used with the HTTP request.
-  var query_568120 = newJObject()
-  add(query_568120, "api-version", newJString(apiVersion))
-  result = call_568119.call(nil, query_568120, nil, nil, nil)
+  var query_564020 = newJObject()
+  add(query_564020, "api-version", newJString(apiVersion))
+  result = call_564019.call(nil, query_564020, nil, nil, nil)
 
-var operationsList* = Call_OperationsList_567864(name: "operationsList",
+var operationsList* = Call_OperationsList_563762(name: "operationsList",
     meth: HttpMethod.HttpGet, host: "management.azure.com",
     route: "/providers/Microsoft.DevOps/operations",
-    validator: validate_OperationsList_567865, base: "", url: url_OperationsList_567866,
+    validator: validate_OperationsList_563763, base: "", url: url_OperationsList_563764,
     schemes: {Scheme.Https})
 type
-  Call_PipelineTemplateDefinitionsList_568160 = ref object of OpenApiRestCall_567642
-proc url_PipelineTemplateDefinitionsList_568162(protocol: Scheme; host: string;
+  Call_PipelineTemplateDefinitionsList_564060 = ref object of OpenApiRestCall_563540
+proc url_PipelineTemplateDefinitionsList_564062(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_PipelineTemplateDefinitionsList_568161(path: JsonNode;
+proc validate_PipelineTemplateDefinitionsList_564061(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists all pipeline templates which can be used to configure an Azure Pipeline.
   ## 
@@ -189,11 +193,11 @@ proc validate_PipelineTemplateDefinitionsList_568161(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568163 = query.getOrDefault("api-version")
-  valid_568163 = validateParameter(valid_568163, JString, required = true,
+  var valid_564063 = query.getOrDefault("api-version")
+  valid_564063 = validateParameter(valid_564063, JString, required = true,
                                  default = nil)
-  if valid_568163 != nil:
-    section.add "api-version", valid_568163
+  if valid_564063 != nil:
+    section.add "api-version", valid_564063
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -202,39 +206,39 @@ proc validate_PipelineTemplateDefinitionsList_568161(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568164: Call_PipelineTemplateDefinitionsList_568160;
+proc call*(call_564064: Call_PipelineTemplateDefinitionsList_564060;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Lists all pipeline templates which can be used to configure an Azure Pipeline.
   ## 
-  let valid = call_568164.validator(path, query, header, formData, body)
-  let scheme = call_568164.pickScheme
+  let valid = call_564064.validator(path, query, header, formData, body)
+  let scheme = call_564064.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568164.url(scheme.get, call_568164.host, call_568164.base,
-                         call_568164.route, valid.getOrDefault("path"),
+  let url = call_564064.url(scheme.get, call_564064.host, call_564064.base,
+                         call_564064.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568164, url, valid)
+  result = hook(call_564064, url, valid)
 
-proc call*(call_568165: Call_PipelineTemplateDefinitionsList_568160;
+proc call*(call_564065: Call_PipelineTemplateDefinitionsList_564060;
           apiVersion: string): Recallable =
   ## pipelineTemplateDefinitionsList
   ## Lists all pipeline templates which can be used to configure an Azure Pipeline.
   ##   apiVersion: string (required)
   ##             : API version to be used with the HTTP request.
-  var query_568166 = newJObject()
-  add(query_568166, "api-version", newJString(apiVersion))
-  result = call_568165.call(nil, query_568166, nil, nil, nil)
+  var query_564066 = newJObject()
+  add(query_564066, "api-version", newJString(apiVersion))
+  result = call_564065.call(nil, query_564066, nil, nil, nil)
 
-var pipelineTemplateDefinitionsList* = Call_PipelineTemplateDefinitionsList_568160(
+var pipelineTemplateDefinitionsList* = Call_PipelineTemplateDefinitionsList_564060(
     name: "pipelineTemplateDefinitionsList", meth: HttpMethod.HttpGet,
     host: "management.azure.com",
     route: "/providers/Microsoft.DevOps/pipelineTemplateDefinitions",
-    validator: validate_PipelineTemplateDefinitionsList_568161, base: "",
-    url: url_PipelineTemplateDefinitionsList_568162, schemes: {Scheme.Https})
+    validator: validate_PipelineTemplateDefinitionsList_564061, base: "",
+    url: url_PipelineTemplateDefinitionsList_564062, schemes: {Scheme.Https})
 type
-  Call_PipelinesListBySubscription_568167 = ref object of OpenApiRestCall_567642
-proc url_PipelinesListBySubscription_568169(protocol: Scheme; host: string;
+  Call_PipelinesListBySubscription_564067 = ref object of OpenApiRestCall_563540
+proc url_PipelinesListBySubscription_564069(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -250,7 +254,7 @@ proc url_PipelinesListBySubscription_568169(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_PipelinesListBySubscription_568168(path: JsonNode; query: JsonNode;
+proc validate_PipelinesListBySubscription_564068(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists all Azure Pipelines under the specified subscription.
   ## 
@@ -262,11 +266,11 @@ proc validate_PipelinesListBySubscription_568168(path: JsonNode; query: JsonNode
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_568184 = path.getOrDefault("subscriptionId")
-  valid_568184 = validateParameter(valid_568184, JString, required = true,
+  var valid_564084 = path.getOrDefault("subscriptionId")
+  valid_564084 = validateParameter(valid_564084, JString, required = true,
                                  default = nil)
-  if valid_568184 != nil:
-    section.add "subscriptionId", valid_568184
+  if valid_564084 != nil:
+    section.add "subscriptionId", valid_564084
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -274,11 +278,11 @@ proc validate_PipelinesListBySubscription_568168(path: JsonNode; query: JsonNode
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568185 = query.getOrDefault("api-version")
-  valid_568185 = validateParameter(valid_568185, JString, required = true,
+  var valid_564085 = query.getOrDefault("api-version")
+  valid_564085 = validateParameter(valid_564085, JString, required = true,
                                  default = nil)
-  if valid_568185 != nil:
-    section.add "api-version", valid_568185
+  if valid_564085 != nil:
+    section.add "api-version", valid_564085
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -287,20 +291,20 @@ proc validate_PipelinesListBySubscription_568168(path: JsonNode; query: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_568186: Call_PipelinesListBySubscription_568167; path: JsonNode;
+proc call*(call_564086: Call_PipelinesListBySubscription_564067; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists all Azure Pipelines under the specified subscription.
   ## 
-  let valid = call_568186.validator(path, query, header, formData, body)
-  let scheme = call_568186.pickScheme
+  let valid = call_564086.validator(path, query, header, formData, body)
+  let scheme = call_564086.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568186.url(scheme.get, call_568186.host, call_568186.base,
-                         call_568186.route, valid.getOrDefault("path"),
+  let url = call_564086.url(scheme.get, call_564086.host, call_564086.base,
+                         call_564086.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568186, url, valid)
+  result = hook(call_564086, url, valid)
 
-proc call*(call_568187: Call_PipelinesListBySubscription_568167;
+proc call*(call_564087: Call_PipelinesListBySubscription_564067;
           apiVersion: string; subscriptionId: string): Recallable =
   ## pipelinesListBySubscription
   ## Lists all Azure Pipelines under the specified subscription.
@@ -308,20 +312,20 @@ proc call*(call_568187: Call_PipelinesListBySubscription_568167;
   ##             : API version to be used with the HTTP request.
   ##   subscriptionId: string (required)
   ##                 : Unique identifier of the Azure subscription. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
-  var path_568188 = newJObject()
-  var query_568189 = newJObject()
-  add(query_568189, "api-version", newJString(apiVersion))
-  add(path_568188, "subscriptionId", newJString(subscriptionId))
-  result = call_568187.call(path_568188, query_568189, nil, nil, nil)
+  var path_564088 = newJObject()
+  var query_564089 = newJObject()
+  add(query_564089, "api-version", newJString(apiVersion))
+  add(path_564088, "subscriptionId", newJString(subscriptionId))
+  result = call_564087.call(path_564088, query_564089, nil, nil, nil)
 
-var pipelinesListBySubscription* = Call_PipelinesListBySubscription_568167(
+var pipelinesListBySubscription* = Call_PipelinesListBySubscription_564067(
     name: "pipelinesListBySubscription", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.DevOps/pipelines",
-    validator: validate_PipelinesListBySubscription_568168, base: "",
-    url: url_PipelinesListBySubscription_568169, schemes: {Scheme.Https})
+    validator: validate_PipelinesListBySubscription_564068, base: "",
+    url: url_PipelinesListBySubscription_564069, schemes: {Scheme.Https})
 type
-  Call_PipelinesListByResourceGroup_568190 = ref object of OpenApiRestCall_567642
-proc url_PipelinesListByResourceGroup_568192(protocol: Scheme; host: string;
+  Call_PipelinesListByResourceGroup_564090 = ref object of OpenApiRestCall_563540
+proc url_PipelinesListByResourceGroup_564092(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -341,30 +345,30 @@ proc url_PipelinesListByResourceGroup_568192(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_PipelinesListByResourceGroup_568191(path: JsonNode; query: JsonNode;
+proc validate_PipelinesListByResourceGroup_564091(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists all Azure Pipelines under the specified resource group.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : Name of the resource group within the Azure subscription.
   ##   subscriptionId: JString (required)
   ##                 : Unique identifier of the Azure subscription. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
+  ##   resourceGroupName: JString (required)
+  ##                    : Name of the resource group within the Azure subscription.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568193 = path.getOrDefault("resourceGroupName")
-  valid_568193 = validateParameter(valid_568193, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564093 = path.getOrDefault("subscriptionId")
+  valid_564093 = validateParameter(valid_564093, JString, required = true,
                                  default = nil)
-  if valid_568193 != nil:
-    section.add "resourceGroupName", valid_568193
-  var valid_568194 = path.getOrDefault("subscriptionId")
-  valid_568194 = validateParameter(valid_568194, JString, required = true,
+  if valid_564093 != nil:
+    section.add "subscriptionId", valid_564093
+  var valid_564094 = path.getOrDefault("resourceGroupName")
+  valid_564094 = validateParameter(valid_564094, JString, required = true,
                                  default = nil)
-  if valid_568194 != nil:
-    section.add "subscriptionId", valid_568194
+  if valid_564094 != nil:
+    section.add "resourceGroupName", valid_564094
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -372,11 +376,11 @@ proc validate_PipelinesListByResourceGroup_568191(path: JsonNode; query: JsonNod
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568195 = query.getOrDefault("api-version")
-  valid_568195 = validateParameter(valid_568195, JString, required = true,
+  var valid_564095 = query.getOrDefault("api-version")
+  valid_564095 = validateParameter(valid_564095, JString, required = true,
                                  default = nil)
-  if valid_568195 != nil:
-    section.add "api-version", valid_568195
+  if valid_564095 != nil:
+    section.add "api-version", valid_564095
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -385,44 +389,44 @@ proc validate_PipelinesListByResourceGroup_568191(path: JsonNode; query: JsonNod
   if body != nil:
     result.add "body", body
 
-proc call*(call_568196: Call_PipelinesListByResourceGroup_568190; path: JsonNode;
+proc call*(call_564096: Call_PipelinesListByResourceGroup_564090; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists all Azure Pipelines under the specified resource group.
   ## 
-  let valid = call_568196.validator(path, query, header, formData, body)
-  let scheme = call_568196.pickScheme
+  let valid = call_564096.validator(path, query, header, formData, body)
+  let scheme = call_564096.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568196.url(scheme.get, call_568196.host, call_568196.base,
-                         call_568196.route, valid.getOrDefault("path"),
+  let url = call_564096.url(scheme.get, call_564096.host, call_564096.base,
+                         call_564096.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568196, url, valid)
+  result = hook(call_564096, url, valid)
 
-proc call*(call_568197: Call_PipelinesListByResourceGroup_568190;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string): Recallable =
+proc call*(call_564097: Call_PipelinesListByResourceGroup_564090;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string): Recallable =
   ## pipelinesListByResourceGroup
   ## Lists all Azure Pipelines under the specified resource group.
-  ##   resourceGroupName: string (required)
-  ##                    : Name of the resource group within the Azure subscription.
   ##   apiVersion: string (required)
   ##             : API version to be used with the HTTP request.
   ##   subscriptionId: string (required)
   ##                 : Unique identifier of the Azure subscription. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
-  var path_568198 = newJObject()
-  var query_568199 = newJObject()
-  add(path_568198, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568199, "api-version", newJString(apiVersion))
-  add(path_568198, "subscriptionId", newJString(subscriptionId))
-  result = call_568197.call(path_568198, query_568199, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : Name of the resource group within the Azure subscription.
+  var path_564098 = newJObject()
+  var query_564099 = newJObject()
+  add(query_564099, "api-version", newJString(apiVersion))
+  add(path_564098, "subscriptionId", newJString(subscriptionId))
+  add(path_564098, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564097.call(path_564098, query_564099, nil, nil, nil)
 
-var pipelinesListByResourceGroup* = Call_PipelinesListByResourceGroup_568190(
+var pipelinesListByResourceGroup* = Call_PipelinesListByResourceGroup_564090(
     name: "pipelinesListByResourceGroup", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DevOps/pipelines",
-    validator: validate_PipelinesListByResourceGroup_568191, base: "",
-    url: url_PipelinesListByResourceGroup_568192, schemes: {Scheme.Https})
+    validator: validate_PipelinesListByResourceGroup_564091, base: "",
+    url: url_PipelinesListByResourceGroup_564092, schemes: {Scheme.Https})
 type
-  Call_PipelinesCreateOrUpdate_568211 = ref object of OpenApiRestCall_567642
-proc url_PipelinesCreateOrUpdate_568213(protocol: Scheme; host: string; base: string;
+  Call_PipelinesCreateOrUpdate_564111 = ref object of OpenApiRestCall_563540
+proc url_PipelinesCreateOrUpdate_564113(protocol: Scheme; host: string; base: string;
                                        route: string; path: JsonNode;
                                        query: JsonNode): Uri =
   result.scheme = $protocol
@@ -445,37 +449,37 @@ proc url_PipelinesCreateOrUpdate_568213(protocol: Scheme; host: string; base: st
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_PipelinesCreateOrUpdate_568212(path: JsonNode; query: JsonNode;
+proc validate_PipelinesCreateOrUpdate_564112(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Creates or updates an Azure Pipeline.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : Name of the resource group within the Azure subscription.
   ##   subscriptionId: JString (required)
   ##                 : Unique identifier of the Azure subscription. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
   ##   pipelineName: JString (required)
   ##               : The name of the Azure Pipeline resource in ARM.
+  ##   resourceGroupName: JString (required)
+  ##                    : Name of the resource group within the Azure subscription.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568214 = path.getOrDefault("resourceGroupName")
-  valid_568214 = validateParameter(valid_568214, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564114 = path.getOrDefault("subscriptionId")
+  valid_564114 = validateParameter(valid_564114, JString, required = true,
                                  default = nil)
-  if valid_568214 != nil:
-    section.add "resourceGroupName", valid_568214
-  var valid_568215 = path.getOrDefault("subscriptionId")
-  valid_568215 = validateParameter(valid_568215, JString, required = true,
+  if valid_564114 != nil:
+    section.add "subscriptionId", valid_564114
+  var valid_564115 = path.getOrDefault("pipelineName")
+  valid_564115 = validateParameter(valid_564115, JString, required = true,
                                  default = nil)
-  if valid_568215 != nil:
-    section.add "subscriptionId", valid_568215
-  var valid_568216 = path.getOrDefault("pipelineName")
-  valid_568216 = validateParameter(valid_568216, JString, required = true,
+  if valid_564115 != nil:
+    section.add "pipelineName", valid_564115
+  var valid_564116 = path.getOrDefault("resourceGroupName")
+  valid_564116 = validateParameter(valid_564116, JString, required = true,
                                  default = nil)
-  if valid_568216 != nil:
-    section.add "pipelineName", valid_568216
+  if valid_564116 != nil:
+    section.add "resourceGroupName", valid_564116
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -483,11 +487,11 @@ proc validate_PipelinesCreateOrUpdate_568212(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568217 = query.getOrDefault("api-version")
-  valid_568217 = validateParameter(valid_568217, JString, required = true,
+  var valid_564117 = query.getOrDefault("api-version")
+  valid_564117 = validateParameter(valid_564117, JString, required = true,
                                  default = nil)
-  if valid_568217 != nil:
-    section.add "api-version", valid_568217
+  if valid_564117 != nil:
+    section.add "api-version", valid_564117
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -501,53 +505,53 @@ proc validate_PipelinesCreateOrUpdate_568212(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568219: Call_PipelinesCreateOrUpdate_568211; path: JsonNode;
+proc call*(call_564119: Call_PipelinesCreateOrUpdate_564111; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Creates or updates an Azure Pipeline.
   ## 
-  let valid = call_568219.validator(path, query, header, formData, body)
-  let scheme = call_568219.pickScheme
+  let valid = call_564119.validator(path, query, header, formData, body)
+  let scheme = call_564119.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568219.url(scheme.get, call_568219.host, call_568219.base,
-                         call_568219.route, valid.getOrDefault("path"),
+  let url = call_564119.url(scheme.get, call_564119.host, call_564119.base,
+                         call_564119.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568219, url, valid)
+  result = hook(call_564119, url, valid)
 
-proc call*(call_568220: Call_PipelinesCreateOrUpdate_568211;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          pipelineName: string; createOperationParameters: JsonNode): Recallable =
+proc call*(call_564120: Call_PipelinesCreateOrUpdate_564111;
+          createOperationParameters: JsonNode; apiVersion: string;
+          subscriptionId: string; pipelineName: string; resourceGroupName: string): Recallable =
   ## pipelinesCreateOrUpdate
   ## Creates or updates an Azure Pipeline.
-  ##   resourceGroupName: string (required)
-  ##                    : Name of the resource group within the Azure subscription.
+  ##   createOperationParameters: JObject (required)
+  ##                            : The request payload to create the Azure Pipeline.
   ##   apiVersion: string (required)
   ##             : API version to be used with the HTTP request.
   ##   subscriptionId: string (required)
   ##                 : Unique identifier of the Azure subscription. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
   ##   pipelineName: string (required)
   ##               : The name of the Azure Pipeline resource in ARM.
-  ##   createOperationParameters: JObject (required)
-  ##                            : The request payload to create the Azure Pipeline.
-  var path_568221 = newJObject()
-  var query_568222 = newJObject()
-  var body_568223 = newJObject()
-  add(path_568221, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568222, "api-version", newJString(apiVersion))
-  add(path_568221, "subscriptionId", newJString(subscriptionId))
-  add(path_568221, "pipelineName", newJString(pipelineName))
+  ##   resourceGroupName: string (required)
+  ##                    : Name of the resource group within the Azure subscription.
+  var path_564121 = newJObject()
+  var query_564122 = newJObject()
+  var body_564123 = newJObject()
   if createOperationParameters != nil:
-    body_568223 = createOperationParameters
-  result = call_568220.call(path_568221, query_568222, nil, nil, body_568223)
+    body_564123 = createOperationParameters
+  add(query_564122, "api-version", newJString(apiVersion))
+  add(path_564121, "subscriptionId", newJString(subscriptionId))
+  add(path_564121, "pipelineName", newJString(pipelineName))
+  add(path_564121, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564120.call(path_564121, query_564122, nil, nil, body_564123)
 
-var pipelinesCreateOrUpdate* = Call_PipelinesCreateOrUpdate_568211(
+var pipelinesCreateOrUpdate* = Call_PipelinesCreateOrUpdate_564111(
     name: "pipelinesCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DevOps/pipelines/{pipelineName}",
-    validator: validate_PipelinesCreateOrUpdate_568212, base: "",
-    url: url_PipelinesCreateOrUpdate_568213, schemes: {Scheme.Https})
+    validator: validate_PipelinesCreateOrUpdate_564112, base: "",
+    url: url_PipelinesCreateOrUpdate_564113, schemes: {Scheme.Https})
 type
-  Call_PipelinesGet_568200 = ref object of OpenApiRestCall_567642
-proc url_PipelinesGet_568202(protocol: Scheme; host: string; base: string;
+  Call_PipelinesGet_564100 = ref object of OpenApiRestCall_563540
+proc url_PipelinesGet_564102(protocol: Scheme; host: string; base: string;
                             route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -569,37 +573,37 @@ proc url_PipelinesGet_568202(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_PipelinesGet_568201(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_PipelinesGet_564101(path: JsonNode; query: JsonNode; header: JsonNode;
                                  formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets an existing Azure Pipeline.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : Name of the resource group within the Azure subscription.
   ##   subscriptionId: JString (required)
   ##                 : Unique identifier of the Azure subscription. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
   ##   pipelineName: JString (required)
   ##               : The name of the Azure Pipeline resource in ARM.
+  ##   resourceGroupName: JString (required)
+  ##                    : Name of the resource group within the Azure subscription.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568203 = path.getOrDefault("resourceGroupName")
-  valid_568203 = validateParameter(valid_568203, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564103 = path.getOrDefault("subscriptionId")
+  valid_564103 = validateParameter(valid_564103, JString, required = true,
                                  default = nil)
-  if valid_568203 != nil:
-    section.add "resourceGroupName", valid_568203
-  var valid_568204 = path.getOrDefault("subscriptionId")
-  valid_568204 = validateParameter(valid_568204, JString, required = true,
+  if valid_564103 != nil:
+    section.add "subscriptionId", valid_564103
+  var valid_564104 = path.getOrDefault("pipelineName")
+  valid_564104 = validateParameter(valid_564104, JString, required = true,
                                  default = nil)
-  if valid_568204 != nil:
-    section.add "subscriptionId", valid_568204
-  var valid_568205 = path.getOrDefault("pipelineName")
-  valid_568205 = validateParameter(valid_568205, JString, required = true,
+  if valid_564104 != nil:
+    section.add "pipelineName", valid_564104
+  var valid_564105 = path.getOrDefault("resourceGroupName")
+  valid_564105 = validateParameter(valid_564105, JString, required = true,
                                  default = nil)
-  if valid_568205 != nil:
-    section.add "pipelineName", valid_568205
+  if valid_564105 != nil:
+    section.add "resourceGroupName", valid_564105
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -607,11 +611,11 @@ proc validate_PipelinesGet_568201(path: JsonNode; query: JsonNode; header: JsonN
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568206 = query.getOrDefault("api-version")
-  valid_568206 = validateParameter(valid_568206, JString, required = true,
+  var valid_564106 = query.getOrDefault("api-version")
+  valid_564106 = validateParameter(valid_564106, JString, required = true,
                                  default = nil)
-  if valid_568206 != nil:
-    section.add "api-version", valid_568206
+  if valid_564106 != nil:
+    section.add "api-version", valid_564106
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -620,46 +624,46 @@ proc validate_PipelinesGet_568201(path: JsonNode; query: JsonNode; header: JsonN
   if body != nil:
     result.add "body", body
 
-proc call*(call_568207: Call_PipelinesGet_568200; path: JsonNode; query: JsonNode;
+proc call*(call_564107: Call_PipelinesGet_564100; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets an existing Azure Pipeline.
   ## 
-  let valid = call_568207.validator(path, query, header, formData, body)
-  let scheme = call_568207.pickScheme
+  let valid = call_564107.validator(path, query, header, formData, body)
+  let scheme = call_564107.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568207.url(scheme.get, call_568207.host, call_568207.base,
-                         call_568207.route, valid.getOrDefault("path"),
+  let url = call_564107.url(scheme.get, call_564107.host, call_564107.base,
+                         call_564107.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568207, url, valid)
+  result = hook(call_564107, url, valid)
 
-proc call*(call_568208: Call_PipelinesGet_568200; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; pipelineName: string): Recallable =
+proc call*(call_564108: Call_PipelinesGet_564100; apiVersion: string;
+          subscriptionId: string; pipelineName: string; resourceGroupName: string): Recallable =
   ## pipelinesGet
   ## Gets an existing Azure Pipeline.
-  ##   resourceGroupName: string (required)
-  ##                    : Name of the resource group within the Azure subscription.
   ##   apiVersion: string (required)
   ##             : API version to be used with the HTTP request.
   ##   subscriptionId: string (required)
   ##                 : Unique identifier of the Azure subscription. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
   ##   pipelineName: string (required)
   ##               : The name of the Azure Pipeline resource in ARM.
-  var path_568209 = newJObject()
-  var query_568210 = newJObject()
-  add(path_568209, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568210, "api-version", newJString(apiVersion))
-  add(path_568209, "subscriptionId", newJString(subscriptionId))
-  add(path_568209, "pipelineName", newJString(pipelineName))
-  result = call_568208.call(path_568209, query_568210, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : Name of the resource group within the Azure subscription.
+  var path_564109 = newJObject()
+  var query_564110 = newJObject()
+  add(query_564110, "api-version", newJString(apiVersion))
+  add(path_564109, "subscriptionId", newJString(subscriptionId))
+  add(path_564109, "pipelineName", newJString(pipelineName))
+  add(path_564109, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564108.call(path_564109, query_564110, nil, nil, nil)
 
-var pipelinesGet* = Call_PipelinesGet_568200(name: "pipelinesGet",
+var pipelinesGet* = Call_PipelinesGet_564100(name: "pipelinesGet",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DevOps/pipelines/{pipelineName}",
-    validator: validate_PipelinesGet_568201, base: "", url: url_PipelinesGet_568202,
+    validator: validate_PipelinesGet_564101, base: "", url: url_PipelinesGet_564102,
     schemes: {Scheme.Https})
 type
-  Call_PipelinesUpdate_568235 = ref object of OpenApiRestCall_567642
-proc url_PipelinesUpdate_568237(protocol: Scheme; host: string; base: string;
+  Call_PipelinesUpdate_564135 = ref object of OpenApiRestCall_563540
+proc url_PipelinesUpdate_564137(protocol: Scheme; host: string; base: string;
                                route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -681,7 +685,7 @@ proc url_PipelinesUpdate_568237(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_PipelinesUpdate_568236(path: JsonNode; query: JsonNode;
+proc validate_PipelinesUpdate_564136(path: JsonNode; query: JsonNode;
                                     header: JsonNode; formData: JsonNode;
                                     body: JsonNode): JsonNode =
   ## Updates the properties of an Azure Pipeline. Currently, only tags can be updated.
@@ -689,30 +693,30 @@ proc validate_PipelinesUpdate_568236(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : Name of the resource group within the Azure subscription.
   ##   subscriptionId: JString (required)
   ##                 : Unique identifier of the Azure subscription. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
   ##   pipelineName: JString (required)
   ##               : The name of the Azure Pipeline resource.
+  ##   resourceGroupName: JString (required)
+  ##                    : Name of the resource group within the Azure subscription.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568238 = path.getOrDefault("resourceGroupName")
-  valid_568238 = validateParameter(valid_568238, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564138 = path.getOrDefault("subscriptionId")
+  valid_564138 = validateParameter(valid_564138, JString, required = true,
                                  default = nil)
-  if valid_568238 != nil:
-    section.add "resourceGroupName", valid_568238
-  var valid_568239 = path.getOrDefault("subscriptionId")
-  valid_568239 = validateParameter(valid_568239, JString, required = true,
+  if valid_564138 != nil:
+    section.add "subscriptionId", valid_564138
+  var valid_564139 = path.getOrDefault("pipelineName")
+  valid_564139 = validateParameter(valid_564139, JString, required = true,
                                  default = nil)
-  if valid_568239 != nil:
-    section.add "subscriptionId", valid_568239
-  var valid_568240 = path.getOrDefault("pipelineName")
-  valid_568240 = validateParameter(valid_568240, JString, required = true,
+  if valid_564139 != nil:
+    section.add "pipelineName", valid_564139
+  var valid_564140 = path.getOrDefault("resourceGroupName")
+  valid_564140 = validateParameter(valid_564140, JString, required = true,
                                  default = nil)
-  if valid_568240 != nil:
-    section.add "pipelineName", valid_568240
+  if valid_564140 != nil:
+    section.add "resourceGroupName", valid_564140
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -720,11 +724,11 @@ proc validate_PipelinesUpdate_568236(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568241 = query.getOrDefault("api-version")
-  valid_568241 = validateParameter(valid_568241, JString, required = true,
+  var valid_564141 = query.getOrDefault("api-version")
+  valid_564141 = validateParameter(valid_564141, JString, required = true,
                                  default = nil)
-  if valid_568241 != nil:
-    section.add "api-version", valid_568241
+  if valid_564141 != nil:
+    section.add "api-version", valid_564141
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -738,52 +742,52 @@ proc validate_PipelinesUpdate_568236(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568243: Call_PipelinesUpdate_568235; path: JsonNode; query: JsonNode;
+proc call*(call_564143: Call_PipelinesUpdate_564135; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Updates the properties of an Azure Pipeline. Currently, only tags can be updated.
   ## 
-  let valid = call_568243.validator(path, query, header, formData, body)
-  let scheme = call_568243.pickScheme
+  let valid = call_564143.validator(path, query, header, formData, body)
+  let scheme = call_564143.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568243.url(scheme.get, call_568243.host, call_568243.base,
-                         call_568243.route, valid.getOrDefault("path"),
+  let url = call_564143.url(scheme.get, call_564143.host, call_564143.base,
+                         call_564143.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568243, url, valid)
+  result = hook(call_564143, url, valid)
 
-proc call*(call_568244: Call_PipelinesUpdate_568235; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; pipelineName: string;
-          updateOperationParameters: JsonNode): Recallable =
+proc call*(call_564144: Call_PipelinesUpdate_564135; apiVersion: string;
+          updateOperationParameters: JsonNode; subscriptionId: string;
+          pipelineName: string; resourceGroupName: string): Recallable =
   ## pipelinesUpdate
   ## Updates the properties of an Azure Pipeline. Currently, only tags can be updated.
-  ##   resourceGroupName: string (required)
-  ##                    : Name of the resource group within the Azure subscription.
   ##   apiVersion: string (required)
   ##             : API version to be used with the HTTP request.
+  ##   updateOperationParameters: JObject (required)
+  ##                            : The request payload containing the properties to update in the Azure Pipeline.
   ##   subscriptionId: string (required)
   ##                 : Unique identifier of the Azure subscription. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
   ##   pipelineName: string (required)
   ##               : The name of the Azure Pipeline resource.
-  ##   updateOperationParameters: JObject (required)
-  ##                            : The request payload containing the properties to update in the Azure Pipeline.
-  var path_568245 = newJObject()
-  var query_568246 = newJObject()
-  var body_568247 = newJObject()
-  add(path_568245, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568246, "api-version", newJString(apiVersion))
-  add(path_568245, "subscriptionId", newJString(subscriptionId))
-  add(path_568245, "pipelineName", newJString(pipelineName))
+  ##   resourceGroupName: string (required)
+  ##                    : Name of the resource group within the Azure subscription.
+  var path_564145 = newJObject()
+  var query_564146 = newJObject()
+  var body_564147 = newJObject()
+  add(query_564146, "api-version", newJString(apiVersion))
   if updateOperationParameters != nil:
-    body_568247 = updateOperationParameters
-  result = call_568244.call(path_568245, query_568246, nil, nil, body_568247)
+    body_564147 = updateOperationParameters
+  add(path_564145, "subscriptionId", newJString(subscriptionId))
+  add(path_564145, "pipelineName", newJString(pipelineName))
+  add(path_564145, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564144.call(path_564145, query_564146, nil, nil, body_564147)
 
-var pipelinesUpdate* = Call_PipelinesUpdate_568235(name: "pipelinesUpdate",
+var pipelinesUpdate* = Call_PipelinesUpdate_564135(name: "pipelinesUpdate",
     meth: HttpMethod.HttpPatch, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DevOps/pipelines/{pipelineName}",
-    validator: validate_PipelinesUpdate_568236, base: "", url: url_PipelinesUpdate_568237,
+    validator: validate_PipelinesUpdate_564136, base: "", url: url_PipelinesUpdate_564137,
     schemes: {Scheme.Https})
 type
-  Call_PipelinesDelete_568224 = ref object of OpenApiRestCall_567642
-proc url_PipelinesDelete_568226(protocol: Scheme; host: string; base: string;
+  Call_PipelinesDelete_564124 = ref object of OpenApiRestCall_563540
+proc url_PipelinesDelete_564126(protocol: Scheme; host: string; base: string;
                                route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -805,7 +809,7 @@ proc url_PipelinesDelete_568226(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_PipelinesDelete_568225(path: JsonNode; query: JsonNode;
+proc validate_PipelinesDelete_564125(path: JsonNode; query: JsonNode;
                                     header: JsonNode; formData: JsonNode;
                                     body: JsonNode): JsonNode =
   ## Deletes an Azure Pipeline.
@@ -813,30 +817,30 @@ proc validate_PipelinesDelete_568225(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : Name of the resource group within the Azure subscription.
   ##   subscriptionId: JString (required)
   ##                 : Unique identifier of the Azure subscription. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
   ##   pipelineName: JString (required)
   ##               : The name of the Azure Pipeline resource.
+  ##   resourceGroupName: JString (required)
+  ##                    : Name of the resource group within the Azure subscription.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568227 = path.getOrDefault("resourceGroupName")
-  valid_568227 = validateParameter(valid_568227, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564127 = path.getOrDefault("subscriptionId")
+  valid_564127 = validateParameter(valid_564127, JString, required = true,
                                  default = nil)
-  if valid_568227 != nil:
-    section.add "resourceGroupName", valid_568227
-  var valid_568228 = path.getOrDefault("subscriptionId")
-  valid_568228 = validateParameter(valid_568228, JString, required = true,
+  if valid_564127 != nil:
+    section.add "subscriptionId", valid_564127
+  var valid_564128 = path.getOrDefault("pipelineName")
+  valid_564128 = validateParameter(valid_564128, JString, required = true,
                                  default = nil)
-  if valid_568228 != nil:
-    section.add "subscriptionId", valid_568228
-  var valid_568229 = path.getOrDefault("pipelineName")
-  valid_568229 = validateParameter(valid_568229, JString, required = true,
+  if valid_564128 != nil:
+    section.add "pipelineName", valid_564128
+  var valid_564129 = path.getOrDefault("resourceGroupName")
+  valid_564129 = validateParameter(valid_564129, JString, required = true,
                                  default = nil)
-  if valid_568229 != nil:
-    section.add "pipelineName", valid_568229
+  if valid_564129 != nil:
+    section.add "resourceGroupName", valid_564129
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -844,11 +848,11 @@ proc validate_PipelinesDelete_568225(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568230 = query.getOrDefault("api-version")
-  valid_568230 = validateParameter(valid_568230, JString, required = true,
+  var valid_564130 = query.getOrDefault("api-version")
+  valid_564130 = validateParameter(valid_564130, JString, required = true,
                                  default = nil)
-  if valid_568230 != nil:
-    section.add "api-version", valid_568230
+  if valid_564130 != nil:
+    section.add "api-version", valid_564130
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -857,42 +861,42 @@ proc validate_PipelinesDelete_568225(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568231: Call_PipelinesDelete_568224; path: JsonNode; query: JsonNode;
+proc call*(call_564131: Call_PipelinesDelete_564124; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes an Azure Pipeline.
   ## 
-  let valid = call_568231.validator(path, query, header, formData, body)
-  let scheme = call_568231.pickScheme
+  let valid = call_564131.validator(path, query, header, formData, body)
+  let scheme = call_564131.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568231.url(scheme.get, call_568231.host, call_568231.base,
-                         call_568231.route, valid.getOrDefault("path"),
+  let url = call_564131.url(scheme.get, call_564131.host, call_564131.base,
+                         call_564131.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568231, url, valid)
+  result = hook(call_564131, url, valid)
 
-proc call*(call_568232: Call_PipelinesDelete_568224; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; pipelineName: string): Recallable =
+proc call*(call_564132: Call_PipelinesDelete_564124; apiVersion: string;
+          subscriptionId: string; pipelineName: string; resourceGroupName: string): Recallable =
   ## pipelinesDelete
   ## Deletes an Azure Pipeline.
-  ##   resourceGroupName: string (required)
-  ##                    : Name of the resource group within the Azure subscription.
   ##   apiVersion: string (required)
   ##             : API version to be used with the HTTP request.
   ##   subscriptionId: string (required)
   ##                 : Unique identifier of the Azure subscription. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000).
   ##   pipelineName: string (required)
   ##               : The name of the Azure Pipeline resource.
-  var path_568233 = newJObject()
-  var query_568234 = newJObject()
-  add(path_568233, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568234, "api-version", newJString(apiVersion))
-  add(path_568233, "subscriptionId", newJString(subscriptionId))
-  add(path_568233, "pipelineName", newJString(pipelineName))
-  result = call_568232.call(path_568233, query_568234, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : Name of the resource group within the Azure subscription.
+  var path_564133 = newJObject()
+  var query_564134 = newJObject()
+  add(query_564134, "api-version", newJString(apiVersion))
+  add(path_564133, "subscriptionId", newJString(subscriptionId))
+  add(path_564133, "pipelineName", newJString(pipelineName))
+  add(path_564133, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564132.call(path_564133, query_564134, nil, nil, nil)
 
-var pipelinesDelete* = Call_PipelinesDelete_568224(name: "pipelinesDelete",
+var pipelinesDelete* = Call_PipelinesDelete_564124(name: "pipelinesDelete",
     meth: HttpMethod.HttpDelete, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DevOps/pipelines/{pipelineName}",
-    validator: validate_PipelinesDelete_568225, base: "", url: url_PipelinesDelete_568226,
+    validator: validate_PipelinesDelete_564125, base: "", url: url_PipelinesDelete_564126,
     schemes: {Scheme.Https})
 export
   rest

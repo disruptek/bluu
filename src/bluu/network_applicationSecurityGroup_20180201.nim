@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, httpcore
 
 ## auto-generated via openapi macro
 ## title: NetworkManagementClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_567641 = ref object of OpenApiRestCall
+  OpenApiRestCall_563539 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_567641](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563539](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_567641): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563539): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,8 +107,8 @@ const
   macServiceName = "network-applicationSecurityGroup"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_ApplicationSecurityGroupsListAll_567863 = ref object of OpenApiRestCall_567641
-proc url_ApplicationSecurityGroupsListAll_567865(protocol: Scheme; host: string;
+  Call_ApplicationSecurityGroupsListAll_563761 = ref object of OpenApiRestCall_563539
+proc url_ApplicationSecurityGroupsListAll_563763(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -121,7 +125,7 @@ proc url_ApplicationSecurityGroupsListAll_567865(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ApplicationSecurityGroupsListAll_567864(path: JsonNode;
+proc validate_ApplicationSecurityGroupsListAll_563762(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets all application security groups in a subscription.
   ## 
@@ -133,11 +137,11 @@ proc validate_ApplicationSecurityGroupsListAll_567864(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_568038 = path.getOrDefault("subscriptionId")
-  valid_568038 = validateParameter(valid_568038, JString, required = true,
+  var valid_563938 = path.getOrDefault("subscriptionId")
+  valid_563938 = validateParameter(valid_563938, JString, required = true,
                                  default = nil)
-  if valid_568038 != nil:
-    section.add "subscriptionId", valid_568038
+  if valid_563938 != nil:
+    section.add "subscriptionId", valid_563938
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -145,11 +149,11 @@ proc validate_ApplicationSecurityGroupsListAll_567864(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568039 = query.getOrDefault("api-version")
-  valid_568039 = validateParameter(valid_568039, JString, required = true,
+  var valid_563939 = query.getOrDefault("api-version")
+  valid_563939 = validateParameter(valid_563939, JString, required = true,
                                  default = nil)
-  if valid_568039 != nil:
-    section.add "api-version", valid_568039
+  if valid_563939 != nil:
+    section.add "api-version", valid_563939
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -158,21 +162,21 @@ proc validate_ApplicationSecurityGroupsListAll_567864(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568062: Call_ApplicationSecurityGroupsListAll_567863;
+proc call*(call_563962: Call_ApplicationSecurityGroupsListAll_563761;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Gets all application security groups in a subscription.
   ## 
-  let valid = call_568062.validator(path, query, header, formData, body)
-  let scheme = call_568062.pickScheme
+  let valid = call_563962.validator(path, query, header, formData, body)
+  let scheme = call_563962.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568062.url(scheme.get, call_568062.host, call_568062.base,
-                         call_568062.route, valid.getOrDefault("path"),
+  let url = call_563962.url(scheme.get, call_563962.host, call_563962.base,
+                         call_563962.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568062, url, valid)
+  result = hook(call_563962, url, valid)
 
-proc call*(call_568133: Call_ApplicationSecurityGroupsListAll_567863;
+proc call*(call_564033: Call_ApplicationSecurityGroupsListAll_563761;
           apiVersion: string; subscriptionId: string): Recallable =
   ## applicationSecurityGroupsListAll
   ## Gets all application security groups in a subscription.
@@ -180,20 +184,20 @@ proc call*(call_568133: Call_ApplicationSecurityGroupsListAll_567863;
   ##             : Client API version.
   ##   subscriptionId: string (required)
   ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_568134 = newJObject()
-  var query_568136 = newJObject()
-  add(query_568136, "api-version", newJString(apiVersion))
-  add(path_568134, "subscriptionId", newJString(subscriptionId))
-  result = call_568133.call(path_568134, query_568136, nil, nil, nil)
+  var path_564034 = newJObject()
+  var query_564036 = newJObject()
+  add(query_564036, "api-version", newJString(apiVersion))
+  add(path_564034, "subscriptionId", newJString(subscriptionId))
+  result = call_564033.call(path_564034, query_564036, nil, nil, nil)
 
-var applicationSecurityGroupsListAll* = Call_ApplicationSecurityGroupsListAll_567863(
+var applicationSecurityGroupsListAll* = Call_ApplicationSecurityGroupsListAll_563761(
     name: "applicationSecurityGroupsListAll", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Network/applicationSecurityGroups",
-    validator: validate_ApplicationSecurityGroupsListAll_567864, base: "",
-    url: url_ApplicationSecurityGroupsListAll_567865, schemes: {Scheme.Https})
+    validator: validate_ApplicationSecurityGroupsListAll_563762, base: "",
+    url: url_ApplicationSecurityGroupsListAll_563763, schemes: {Scheme.Https})
 type
-  Call_ApplicationSecurityGroupsList_568175 = ref object of OpenApiRestCall_567641
-proc url_ApplicationSecurityGroupsList_568177(protocol: Scheme; host: string;
+  Call_ApplicationSecurityGroupsList_564075 = ref object of OpenApiRestCall_563539
+proc url_ApplicationSecurityGroupsList_564077(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -214,30 +218,30 @@ proc url_ApplicationSecurityGroupsList_568177(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ApplicationSecurityGroupsList_568176(path: JsonNode; query: JsonNode;
+proc validate_ApplicationSecurityGroupsList_564076(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets all the application security groups in a resource group.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   subscriptionId: JString (required)
   ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568178 = path.getOrDefault("resourceGroupName")
-  valid_568178 = validateParameter(valid_568178, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564078 = path.getOrDefault("subscriptionId")
+  valid_564078 = validateParameter(valid_564078, JString, required = true,
                                  default = nil)
-  if valid_568178 != nil:
-    section.add "resourceGroupName", valid_568178
-  var valid_568179 = path.getOrDefault("subscriptionId")
-  valid_568179 = validateParameter(valid_568179, JString, required = true,
+  if valid_564078 != nil:
+    section.add "subscriptionId", valid_564078
+  var valid_564079 = path.getOrDefault("resourceGroupName")
+  valid_564079 = validateParameter(valid_564079, JString, required = true,
                                  default = nil)
-  if valid_568179 != nil:
-    section.add "subscriptionId", valid_568179
+  if valid_564079 != nil:
+    section.add "resourceGroupName", valid_564079
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -245,11 +249,11 @@ proc validate_ApplicationSecurityGroupsList_568176(path: JsonNode; query: JsonNo
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568180 = query.getOrDefault("api-version")
-  valid_568180 = validateParameter(valid_568180, JString, required = true,
+  var valid_564080 = query.getOrDefault("api-version")
+  valid_564080 = validateParameter(valid_564080, JString, required = true,
                                  default = nil)
-  if valid_568180 != nil:
-    section.add "api-version", valid_568180
+  if valid_564080 != nil:
+    section.add "api-version", valid_564080
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -258,44 +262,44 @@ proc validate_ApplicationSecurityGroupsList_568176(path: JsonNode; query: JsonNo
   if body != nil:
     result.add "body", body
 
-proc call*(call_568181: Call_ApplicationSecurityGroupsList_568175; path: JsonNode;
+proc call*(call_564081: Call_ApplicationSecurityGroupsList_564075; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets all the application security groups in a resource group.
   ## 
-  let valid = call_568181.validator(path, query, header, formData, body)
-  let scheme = call_568181.pickScheme
+  let valid = call_564081.validator(path, query, header, formData, body)
+  let scheme = call_564081.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568181.url(scheme.get, call_568181.host, call_568181.base,
-                         call_568181.route, valid.getOrDefault("path"),
+  let url = call_564081.url(scheme.get, call_564081.host, call_564081.base,
+                         call_564081.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568181, url, valid)
+  result = hook(call_564081, url, valid)
 
-proc call*(call_568182: Call_ApplicationSecurityGroupsList_568175;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string): Recallable =
+proc call*(call_564082: Call_ApplicationSecurityGroupsList_564075;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string): Recallable =
   ## applicationSecurityGroupsList
   ## Gets all the application security groups in a resource group.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client API version.
   ##   subscriptionId: string (required)
   ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_568183 = newJObject()
-  var query_568184 = newJObject()
-  add(path_568183, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568184, "api-version", newJString(apiVersion))
-  add(path_568183, "subscriptionId", newJString(subscriptionId))
-  result = call_568182.call(path_568183, query_568184, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564083 = newJObject()
+  var query_564084 = newJObject()
+  add(query_564084, "api-version", newJString(apiVersion))
+  add(path_564083, "subscriptionId", newJString(subscriptionId))
+  add(path_564083, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564082.call(path_564083, query_564084, nil, nil, nil)
 
-var applicationSecurityGroupsList* = Call_ApplicationSecurityGroupsList_568175(
+var applicationSecurityGroupsList* = Call_ApplicationSecurityGroupsList_564075(
     name: "applicationSecurityGroupsList", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/applicationSecurityGroups",
-    validator: validate_ApplicationSecurityGroupsList_568176, base: "",
-    url: url_ApplicationSecurityGroupsList_568177, schemes: {Scheme.Https})
+    validator: validate_ApplicationSecurityGroupsList_564076, base: "",
+    url: url_ApplicationSecurityGroupsList_564077, schemes: {Scheme.Https})
 type
-  Call_ApplicationSecurityGroupsCreateOrUpdate_568196 = ref object of OpenApiRestCall_567641
-proc url_ApplicationSecurityGroupsCreateOrUpdate_568198(protocol: Scheme;
+  Call_ApplicationSecurityGroupsCreateOrUpdate_564096 = ref object of OpenApiRestCall_563539
+proc url_ApplicationSecurityGroupsCreateOrUpdate_564098(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -319,37 +323,36 @@ proc url_ApplicationSecurityGroupsCreateOrUpdate_568198(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ApplicationSecurityGroupsCreateOrUpdate_568197(path: JsonNode;
+proc validate_ApplicationSecurityGroupsCreateOrUpdate_564097(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Creates or updates an application security group.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
-  ##   subscriptionId: JString (required)
-  ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   applicationSecurityGroupName: JString (required)
   ##                               : The name of the application security group.
+  ##   subscriptionId: JString (required)
+  ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568216 = path.getOrDefault("resourceGroupName")
-  valid_568216 = validateParameter(valid_568216, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `applicationSecurityGroupName` field"
+  var valid_564116 = path.getOrDefault("applicationSecurityGroupName")
+  valid_564116 = validateParameter(valid_564116, JString, required = true,
                                  default = nil)
-  if valid_568216 != nil:
-    section.add "resourceGroupName", valid_568216
-  var valid_568217 = path.getOrDefault("subscriptionId")
-  valid_568217 = validateParameter(valid_568217, JString, required = true,
+  if valid_564116 != nil:
+    section.add "applicationSecurityGroupName", valid_564116
+  var valid_564117 = path.getOrDefault("subscriptionId")
+  valid_564117 = validateParameter(valid_564117, JString, required = true,
                                  default = nil)
-  if valid_568217 != nil:
-    section.add "subscriptionId", valid_568217
-  var valid_568218 = path.getOrDefault("applicationSecurityGroupName")
-  valid_568218 = validateParameter(valid_568218, JString, required = true,
+  if valid_564117 != nil:
+    section.add "subscriptionId", valid_564117
+  var valid_564118 = path.getOrDefault("resourceGroupName")
+  valid_564118 = validateParameter(valid_564118, JString, required = true,
                                  default = nil)
-  if valid_568218 != nil:
-    section.add "applicationSecurityGroupName", valid_568218
+  if valid_564118 != nil:
+    section.add "resourceGroupName", valid_564118
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -357,11 +360,11 @@ proc validate_ApplicationSecurityGroupsCreateOrUpdate_568197(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568219 = query.getOrDefault("api-version")
-  valid_568219 = validateParameter(valid_568219, JString, required = true,
+  var valid_564119 = query.getOrDefault("api-version")
+  valid_564119 = validateParameter(valid_564119, JString, required = true,
                                  default = nil)
-  if valid_568219 != nil:
-    section.add "api-version", valid_568219
+  if valid_564119 != nil:
+    section.add "api-version", valid_564119
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -375,56 +378,56 @@ proc validate_ApplicationSecurityGroupsCreateOrUpdate_568197(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568221: Call_ApplicationSecurityGroupsCreateOrUpdate_568196;
+proc call*(call_564121: Call_ApplicationSecurityGroupsCreateOrUpdate_564096;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Creates or updates an application security group.
   ## 
-  let valid = call_568221.validator(path, query, header, formData, body)
-  let scheme = call_568221.pickScheme
+  let valid = call_564121.validator(path, query, header, formData, body)
+  let scheme = call_564121.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568221.url(scheme.get, call_568221.host, call_568221.base,
-                         call_568221.route, valid.getOrDefault("path"),
+  let url = call_564121.url(scheme.get, call_564121.host, call_564121.base,
+                         call_564121.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568221, url, valid)
+  result = hook(call_564121, url, valid)
 
-proc call*(call_568222: Call_ApplicationSecurityGroupsCreateOrUpdate_568196;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          applicationSecurityGroupName: string; parameters: JsonNode): Recallable =
+proc call*(call_564122: Call_ApplicationSecurityGroupsCreateOrUpdate_564096;
+          applicationSecurityGroupName: string; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string; parameters: JsonNode): Recallable =
   ## applicationSecurityGroupsCreateOrUpdate
   ## Creates or updates an application security group.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   applicationSecurityGroupName: string (required)
+  ##                               : The name of the application security group.
   ##   apiVersion: string (required)
   ##             : Client API version.
   ##   subscriptionId: string (required)
   ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   applicationSecurityGroupName: string (required)
-  ##                               : The name of the application security group.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   parameters: JObject (required)
   ##             : Parameters supplied to the create or update ApplicationSecurityGroup operation.
-  var path_568223 = newJObject()
-  var query_568224 = newJObject()
-  var body_568225 = newJObject()
-  add(path_568223, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568224, "api-version", newJString(apiVersion))
-  add(path_568223, "subscriptionId", newJString(subscriptionId))
-  add(path_568223, "applicationSecurityGroupName",
+  var path_564123 = newJObject()
+  var query_564124 = newJObject()
+  var body_564125 = newJObject()
+  add(path_564123, "applicationSecurityGroupName",
       newJString(applicationSecurityGroupName))
+  add(query_564124, "api-version", newJString(apiVersion))
+  add(path_564123, "subscriptionId", newJString(subscriptionId))
+  add(path_564123, "resourceGroupName", newJString(resourceGroupName))
   if parameters != nil:
-    body_568225 = parameters
-  result = call_568222.call(path_568223, query_568224, nil, nil, body_568225)
+    body_564125 = parameters
+  result = call_564122.call(path_564123, query_564124, nil, nil, body_564125)
 
-var applicationSecurityGroupsCreateOrUpdate* = Call_ApplicationSecurityGroupsCreateOrUpdate_568196(
+var applicationSecurityGroupsCreateOrUpdate* = Call_ApplicationSecurityGroupsCreateOrUpdate_564096(
     name: "applicationSecurityGroupsCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/applicationSecurityGroups/{applicationSecurityGroupName}",
-    validator: validate_ApplicationSecurityGroupsCreateOrUpdate_568197, base: "",
-    url: url_ApplicationSecurityGroupsCreateOrUpdate_568198,
+    validator: validate_ApplicationSecurityGroupsCreateOrUpdate_564097, base: "",
+    url: url_ApplicationSecurityGroupsCreateOrUpdate_564098,
     schemes: {Scheme.Https})
 type
-  Call_ApplicationSecurityGroupsGet_568185 = ref object of OpenApiRestCall_567641
-proc url_ApplicationSecurityGroupsGet_568187(protocol: Scheme; host: string;
+  Call_ApplicationSecurityGroupsGet_564085 = ref object of OpenApiRestCall_563539
+proc url_ApplicationSecurityGroupsGet_564087(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -448,37 +451,36 @@ proc url_ApplicationSecurityGroupsGet_568187(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ApplicationSecurityGroupsGet_568186(path: JsonNode; query: JsonNode;
+proc validate_ApplicationSecurityGroupsGet_564086(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets information about the specified application security group.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
-  ##   subscriptionId: JString (required)
-  ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   applicationSecurityGroupName: JString (required)
   ##                               : The name of the application security group.
+  ##   subscriptionId: JString (required)
+  ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568188 = path.getOrDefault("resourceGroupName")
-  valid_568188 = validateParameter(valid_568188, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `applicationSecurityGroupName` field"
+  var valid_564088 = path.getOrDefault("applicationSecurityGroupName")
+  valid_564088 = validateParameter(valid_564088, JString, required = true,
                                  default = nil)
-  if valid_568188 != nil:
-    section.add "resourceGroupName", valid_568188
-  var valid_568189 = path.getOrDefault("subscriptionId")
-  valid_568189 = validateParameter(valid_568189, JString, required = true,
+  if valid_564088 != nil:
+    section.add "applicationSecurityGroupName", valid_564088
+  var valid_564089 = path.getOrDefault("subscriptionId")
+  valid_564089 = validateParameter(valid_564089, JString, required = true,
                                  default = nil)
-  if valid_568189 != nil:
-    section.add "subscriptionId", valid_568189
-  var valid_568190 = path.getOrDefault("applicationSecurityGroupName")
-  valid_568190 = validateParameter(valid_568190, JString, required = true,
+  if valid_564089 != nil:
+    section.add "subscriptionId", valid_564089
+  var valid_564090 = path.getOrDefault("resourceGroupName")
+  valid_564090 = validateParameter(valid_564090, JString, required = true,
                                  default = nil)
-  if valid_568190 != nil:
-    section.add "applicationSecurityGroupName", valid_568190
+  if valid_564090 != nil:
+    section.add "resourceGroupName", valid_564090
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -486,11 +488,11 @@ proc validate_ApplicationSecurityGroupsGet_568186(path: JsonNode; query: JsonNod
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568191 = query.getOrDefault("api-version")
-  valid_568191 = validateParameter(valid_568191, JString, required = true,
+  var valid_564091 = query.getOrDefault("api-version")
+  valid_564091 = validateParameter(valid_564091, JString, required = true,
                                  default = nil)
-  if valid_568191 != nil:
-    section.add "api-version", valid_568191
+  if valid_564091 != nil:
+    section.add "api-version", valid_564091
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -499,49 +501,49 @@ proc validate_ApplicationSecurityGroupsGet_568186(path: JsonNode; query: JsonNod
   if body != nil:
     result.add "body", body
 
-proc call*(call_568192: Call_ApplicationSecurityGroupsGet_568185; path: JsonNode;
+proc call*(call_564092: Call_ApplicationSecurityGroupsGet_564085; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets information about the specified application security group.
   ## 
-  let valid = call_568192.validator(path, query, header, formData, body)
-  let scheme = call_568192.pickScheme
+  let valid = call_564092.validator(path, query, header, formData, body)
+  let scheme = call_564092.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568192.url(scheme.get, call_568192.host, call_568192.base,
-                         call_568192.route, valid.getOrDefault("path"),
+  let url = call_564092.url(scheme.get, call_564092.host, call_564092.base,
+                         call_564092.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568192, url, valid)
+  result = hook(call_564092, url, valid)
 
-proc call*(call_568193: Call_ApplicationSecurityGroupsGet_568185;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          applicationSecurityGroupName: string): Recallable =
+proc call*(call_564093: Call_ApplicationSecurityGroupsGet_564085;
+          applicationSecurityGroupName: string; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string): Recallable =
   ## applicationSecurityGroupsGet
   ## Gets information about the specified application security group.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   applicationSecurityGroupName: string (required)
+  ##                               : The name of the application security group.
   ##   apiVersion: string (required)
   ##             : Client API version.
   ##   subscriptionId: string (required)
   ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   applicationSecurityGroupName: string (required)
-  ##                               : The name of the application security group.
-  var path_568194 = newJObject()
-  var query_568195 = newJObject()
-  add(path_568194, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568195, "api-version", newJString(apiVersion))
-  add(path_568194, "subscriptionId", newJString(subscriptionId))
-  add(path_568194, "applicationSecurityGroupName",
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564094 = newJObject()
+  var query_564095 = newJObject()
+  add(path_564094, "applicationSecurityGroupName",
       newJString(applicationSecurityGroupName))
-  result = call_568193.call(path_568194, query_568195, nil, nil, nil)
+  add(query_564095, "api-version", newJString(apiVersion))
+  add(path_564094, "subscriptionId", newJString(subscriptionId))
+  add(path_564094, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564093.call(path_564094, query_564095, nil, nil, nil)
 
-var applicationSecurityGroupsGet* = Call_ApplicationSecurityGroupsGet_568185(
+var applicationSecurityGroupsGet* = Call_ApplicationSecurityGroupsGet_564085(
     name: "applicationSecurityGroupsGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/applicationSecurityGroups/{applicationSecurityGroupName}",
-    validator: validate_ApplicationSecurityGroupsGet_568186, base: "",
-    url: url_ApplicationSecurityGroupsGet_568187, schemes: {Scheme.Https})
+    validator: validate_ApplicationSecurityGroupsGet_564086, base: "",
+    url: url_ApplicationSecurityGroupsGet_564087, schemes: {Scheme.Https})
 type
-  Call_ApplicationSecurityGroupsDelete_568226 = ref object of OpenApiRestCall_567641
-proc url_ApplicationSecurityGroupsDelete_568228(protocol: Scheme; host: string;
+  Call_ApplicationSecurityGroupsDelete_564126 = ref object of OpenApiRestCall_563539
+proc url_ApplicationSecurityGroupsDelete_564128(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -565,37 +567,36 @@ proc url_ApplicationSecurityGroupsDelete_568228(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ApplicationSecurityGroupsDelete_568227(path: JsonNode;
+proc validate_ApplicationSecurityGroupsDelete_564127(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Deletes the specified application security group.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
-  ##   subscriptionId: JString (required)
-  ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   applicationSecurityGroupName: JString (required)
   ##                               : The name of the application security group.
+  ##   subscriptionId: JString (required)
+  ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568229 = path.getOrDefault("resourceGroupName")
-  valid_568229 = validateParameter(valid_568229, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `applicationSecurityGroupName` field"
+  var valid_564129 = path.getOrDefault("applicationSecurityGroupName")
+  valid_564129 = validateParameter(valid_564129, JString, required = true,
                                  default = nil)
-  if valid_568229 != nil:
-    section.add "resourceGroupName", valid_568229
-  var valid_568230 = path.getOrDefault("subscriptionId")
-  valid_568230 = validateParameter(valid_568230, JString, required = true,
+  if valid_564129 != nil:
+    section.add "applicationSecurityGroupName", valid_564129
+  var valid_564130 = path.getOrDefault("subscriptionId")
+  valid_564130 = validateParameter(valid_564130, JString, required = true,
                                  default = nil)
-  if valid_568230 != nil:
-    section.add "subscriptionId", valid_568230
-  var valid_568231 = path.getOrDefault("applicationSecurityGroupName")
-  valid_568231 = validateParameter(valid_568231, JString, required = true,
+  if valid_564130 != nil:
+    section.add "subscriptionId", valid_564130
+  var valid_564131 = path.getOrDefault("resourceGroupName")
+  valid_564131 = validateParameter(valid_564131, JString, required = true,
                                  default = nil)
-  if valid_568231 != nil:
-    section.add "applicationSecurityGroupName", valid_568231
+  if valid_564131 != nil:
+    section.add "resourceGroupName", valid_564131
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -603,11 +604,11 @@ proc validate_ApplicationSecurityGroupsDelete_568227(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568232 = query.getOrDefault("api-version")
-  valid_568232 = validateParameter(valid_568232, JString, required = true,
+  var valid_564132 = query.getOrDefault("api-version")
+  valid_564132 = validateParameter(valid_564132, JString, required = true,
                                  default = nil)
-  if valid_568232 != nil:
-    section.add "api-version", valid_568232
+  if valid_564132 != nil:
+    section.add "api-version", valid_564132
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -616,47 +617,47 @@ proc validate_ApplicationSecurityGroupsDelete_568227(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568233: Call_ApplicationSecurityGroupsDelete_568226;
+proc call*(call_564133: Call_ApplicationSecurityGroupsDelete_564126;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Deletes the specified application security group.
   ## 
-  let valid = call_568233.validator(path, query, header, formData, body)
-  let scheme = call_568233.pickScheme
+  let valid = call_564133.validator(path, query, header, formData, body)
+  let scheme = call_564133.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568233.url(scheme.get, call_568233.host, call_568233.base,
-                         call_568233.route, valid.getOrDefault("path"),
+  let url = call_564133.url(scheme.get, call_564133.host, call_564133.base,
+                         call_564133.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568233, url, valid)
+  result = hook(call_564133, url, valid)
 
-proc call*(call_568234: Call_ApplicationSecurityGroupsDelete_568226;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          applicationSecurityGroupName: string): Recallable =
+proc call*(call_564134: Call_ApplicationSecurityGroupsDelete_564126;
+          applicationSecurityGroupName: string; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string): Recallable =
   ## applicationSecurityGroupsDelete
   ## Deletes the specified application security group.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   applicationSecurityGroupName: string (required)
+  ##                               : The name of the application security group.
   ##   apiVersion: string (required)
   ##             : Client API version.
   ##   subscriptionId: string (required)
   ##                 : The subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   applicationSecurityGroupName: string (required)
-  ##                               : The name of the application security group.
-  var path_568235 = newJObject()
-  var query_568236 = newJObject()
-  add(path_568235, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568236, "api-version", newJString(apiVersion))
-  add(path_568235, "subscriptionId", newJString(subscriptionId))
-  add(path_568235, "applicationSecurityGroupName",
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564135 = newJObject()
+  var query_564136 = newJObject()
+  add(path_564135, "applicationSecurityGroupName",
       newJString(applicationSecurityGroupName))
-  result = call_568234.call(path_568235, query_568236, nil, nil, nil)
+  add(query_564136, "api-version", newJString(apiVersion))
+  add(path_564135, "subscriptionId", newJString(subscriptionId))
+  add(path_564135, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564134.call(path_564135, query_564136, nil, nil, nil)
 
-var applicationSecurityGroupsDelete* = Call_ApplicationSecurityGroupsDelete_568226(
+var applicationSecurityGroupsDelete* = Call_ApplicationSecurityGroupsDelete_564126(
     name: "applicationSecurityGroupsDelete", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/applicationSecurityGroups/{applicationSecurityGroupName}",
-    validator: validate_ApplicationSecurityGroupsDelete_568227, base: "",
-    url: url_ApplicationSecurityGroupsDelete_568228, schemes: {Scheme.Https})
+    validator: validate_ApplicationSecurityGroupsDelete_564127, base: "",
+    url: url_ApplicationSecurityGroupsDelete_564128, schemes: {Scheme.Https})
 export
   rest
 

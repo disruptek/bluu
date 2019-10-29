@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_573657 = ref object of OpenApiRestCall
+  OpenApiRestCall_563555 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_573657](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563555](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_573657): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563555): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,15 +107,15 @@ const
   macServiceName = "apimanagement-apimapis"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_ApiList_573879 = ref object of OpenApiRestCall_573657
-proc url_ApiList_573881(protocol: Scheme; host: string; base: string; route: string;
+  Call_ApiList_563777 = ref object of OpenApiRestCall_563555
+proc url_ApiList_563779(protocol: Scheme; host: string; base: string; route: string;
                        path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_ApiList_573880(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_ApiList_563778(path: JsonNode; query: JsonNode; header: JsonNode;
                             formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists all APIs of the API Management service instance.
   ## 
@@ -121,10 +125,10 @@ proc validate_ApiList_573880(path: JsonNode; query: JsonNode; header: JsonNode;
   section = newJObject()
   result.add "path", section
   ## parameters in `query` object:
-  ##   api-version: JString (required)
-  ##              : Version of the API to be used with the client request.
   ##   $top: JInt
   ##       : Number of records to return.
+  ##   api-version: JString (required)
+  ##              : Version of the API to be used with the client request.
   ##   $skip: JInt
   ##        : Number of records to skip.
   ##   $filter: JString
@@ -136,26 +140,26 @@ proc validate_ApiList_573880(path: JsonNode; query: JsonNode; header: JsonNode;
   ## | serviceUrl  | ge, le, eq, ne, gt, lt | substringof, startswith, endswith |
   ## | path        | ge, le, eq, ne, gt, lt | substringof, startswith, endswith |
   section = newJObject()
+  var valid_563928 = query.getOrDefault("$top")
+  valid_563928 = validateParameter(valid_563928, JInt, required = false, default = nil)
+  if valid_563928 != nil:
+    section.add "$top", valid_563928
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574028 = query.getOrDefault("api-version")
-  valid_574028 = validateParameter(valid_574028, JString, required = true,
+  var valid_563929 = query.getOrDefault("api-version")
+  valid_563929 = validateParameter(valid_563929, JString, required = true,
                                  default = nil)
-  if valid_574028 != nil:
-    section.add "api-version", valid_574028
-  var valid_574029 = query.getOrDefault("$top")
-  valid_574029 = validateParameter(valid_574029, JInt, required = false, default = nil)
-  if valid_574029 != nil:
-    section.add "$top", valid_574029
-  var valid_574030 = query.getOrDefault("$skip")
-  valid_574030 = validateParameter(valid_574030, JInt, required = false, default = nil)
-  if valid_574030 != nil:
-    section.add "$skip", valid_574030
-  var valid_574031 = query.getOrDefault("$filter")
-  valid_574031 = validateParameter(valid_574031, JString, required = false,
+  if valid_563929 != nil:
+    section.add "api-version", valid_563929
+  var valid_563930 = query.getOrDefault("$skip")
+  valid_563930 = validateParameter(valid_563930, JInt, required = false, default = nil)
+  if valid_563930 != nil:
+    section.add "$skip", valid_563930
+  var valid_563931 = query.getOrDefault("$filter")
+  valid_563931 = validateParameter(valid_563931, JString, required = false,
                                  default = nil)
-  if valid_574031 != nil:
-    section.add "$filter", valid_574031
+  if valid_563931 != nil:
+    section.add "$filter", valid_563931
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -164,29 +168,29 @@ proc validate_ApiList_573880(path: JsonNode; query: JsonNode; header: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574058: Call_ApiList_573879; path: JsonNode; query: JsonNode;
+proc call*(call_563958: Call_ApiList_563777; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists all APIs of the API Management service instance.
   ## 
   ## https://docs.microsoft.com/en-us/azure/api-management/api-management-howto-create-apis
-  let valid = call_574058.validator(path, query, header, formData, body)
-  let scheme = call_574058.pickScheme
+  let valid = call_563958.validator(path, query, header, formData, body)
+  let scheme = call_563958.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574058.url(scheme.get, call_574058.host, call_574058.base,
-                         call_574058.route, valid.getOrDefault("path"),
+  let url = call_563958.url(scheme.get, call_563958.host, call_563958.base,
+                         call_563958.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574058, url, valid)
+  result = hook(call_563958, url, valid)
 
-proc call*(call_574129: Call_ApiList_573879; apiVersion: string; Top: int = 0;
+proc call*(call_564029: Call_ApiList_563777; apiVersion: string; Top: int = 0;
           Skip: int = 0; Filter: string = ""): Recallable =
   ## apiList
   ## Lists all APIs of the API Management service instance.
   ## https://docs.microsoft.com/en-us/azure/api-management/api-management-howto-create-apis
-  ##   apiVersion: string (required)
-  ##             : Version of the API to be used with the client request.
   ##   Top: int
   ##      : Number of records to return.
+  ##   apiVersion: string (required)
+  ##             : Version of the API to be used with the client request.
   ##   Skip: int
   ##       : Number of records to skip.
   ##   Filter: string
@@ -197,20 +201,20 @@ proc call*(call_574129: Call_ApiList_573879; apiVersion: string; Top: int = 0;
   ## | description | ge, le, eq, ne, gt, lt | substringof, startswith, endswith |
   ## | serviceUrl  | ge, le, eq, ne, gt, lt | substringof, startswith, endswith |
   ## | path        | ge, le, eq, ne, gt, lt | substringof, startswith, endswith |
-  var query_574130 = newJObject()
-  add(query_574130, "api-version", newJString(apiVersion))
-  add(query_574130, "$top", newJInt(Top))
-  add(query_574130, "$skip", newJInt(Skip))
-  add(query_574130, "$filter", newJString(Filter))
-  result = call_574129.call(nil, query_574130, nil, nil, nil)
+  var query_564030 = newJObject()
+  add(query_564030, "$top", newJInt(Top))
+  add(query_564030, "api-version", newJString(apiVersion))
+  add(query_564030, "$skip", newJInt(Skip))
+  add(query_564030, "$filter", newJString(Filter))
+  result = call_564029.call(nil, query_564030, nil, nil, nil)
 
-var apiList* = Call_ApiList_573879(name: "apiList", meth: HttpMethod.HttpGet,
+var apiList* = Call_ApiList_563777(name: "apiList", meth: HttpMethod.HttpGet,
                                 host: "azure.local", route: "/apis",
-                                validator: validate_ApiList_573880, base: "",
-                                url: url_ApiList_573881, schemes: {Scheme.Https})
+                                validator: validate_ApiList_563778, base: "",
+                                url: url_ApiList_563779, schemes: {Scheme.Https})
 type
-  Call_ApiCreateOrUpdate_574202 = ref object of OpenApiRestCall_573657
-proc url_ApiCreateOrUpdate_574204(protocol: Scheme; host: string; base: string;
+  Call_ApiCreateOrUpdate_564102 = ref object of OpenApiRestCall_563555
+proc url_ApiCreateOrUpdate_564104(protocol: Scheme; host: string; base: string;
                                  route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -225,7 +229,7 @@ proc url_ApiCreateOrUpdate_574204(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ApiCreateOrUpdate_574203(path: JsonNode; query: JsonNode;
+proc validate_ApiCreateOrUpdate_564103(path: JsonNode; query: JsonNode;
                                       header: JsonNode; formData: JsonNode;
                                       body: JsonNode): JsonNode =
   ## Creates new or updates existing specified API of the API Management service instance.
@@ -237,11 +241,11 @@ proc validate_ApiCreateOrUpdate_574203(path: JsonNode; query: JsonNode;
   ##        : API identifier. Must be unique in the current API Management service instance.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `apiId` field"
-  var valid_574222 = path.getOrDefault("apiId")
-  valid_574222 = validateParameter(valid_574222, JString, required = true,
+  var valid_564122 = path.getOrDefault("apiId")
+  valid_564122 = validateParameter(valid_564122, JString, required = true,
                                  default = nil)
-  if valid_574222 != nil:
-    section.add "apiId", valid_574222
+  if valid_564122 != nil:
+    section.add "apiId", valid_564122
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -249,21 +253,21 @@ proc validate_ApiCreateOrUpdate_574203(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574223 = query.getOrDefault("api-version")
-  valid_574223 = validateParameter(valid_574223, JString, required = true,
+  var valid_564123 = query.getOrDefault("api-version")
+  valid_564123 = validateParameter(valid_564123, JString, required = true,
                                  default = nil)
-  if valid_574223 != nil:
-    section.add "api-version", valid_574223
+  if valid_564123 != nil:
+    section.add "api-version", valid_564123
   result.add "query", section
   ## parameters in `header` object:
   ##   If-Match: JString
   ##           : ETag of the Api Entity. For Create Api Etag should not be specified. For Update Etag should match the existing Entity or it can be * for unconditional update.
   section = newJObject()
-  var valid_574224 = header.getOrDefault("If-Match")
-  valid_574224 = validateParameter(valid_574224, JString, required = false,
+  var valid_564124 = header.getOrDefault("If-Match")
+  valid_564124 = validateParameter(valid_564124, JString, required = false,
                                  default = nil)
-  if valid_574224 != nil:
-    section.add "If-Match", valid_574224
+  if valid_564124 != nil:
+    section.add "If-Match", valid_564124
   result.add "header", section
   section = newJObject()
   result.add "formData", section
@@ -275,20 +279,20 @@ proc validate_ApiCreateOrUpdate_574203(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574226: Call_ApiCreateOrUpdate_574202; path: JsonNode;
+proc call*(call_564126: Call_ApiCreateOrUpdate_564102; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Creates new or updates existing specified API of the API Management service instance.
   ## 
-  let valid = call_574226.validator(path, query, header, formData, body)
-  let scheme = call_574226.pickScheme
+  let valid = call_564126.validator(path, query, header, formData, body)
+  let scheme = call_564126.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574226.url(scheme.get, call_574226.host, call_574226.base,
-                         call_574226.route, valid.getOrDefault("path"),
+  let url = call_564126.url(scheme.get, call_564126.host, call_564126.base,
+                         call_564126.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574226, url, valid)
+  result = hook(call_564126, url, valid)
 
-proc call*(call_574227: Call_ApiCreateOrUpdate_574202; apiVersion: string;
+proc call*(call_564127: Call_ApiCreateOrUpdate_564102; apiVersion: string;
           apiId: string; parameters: JsonNode): Recallable =
   ## apiCreateOrUpdate
   ## Creates new or updates existing specified API of the API Management service instance.
@@ -298,22 +302,22 @@ proc call*(call_574227: Call_ApiCreateOrUpdate_574202; apiVersion: string;
   ##        : API identifier. Must be unique in the current API Management service instance.
   ##   parameters: JObject (required)
   ##             : Create or update parameters.
-  var path_574228 = newJObject()
-  var query_574229 = newJObject()
-  var body_574230 = newJObject()
-  add(query_574229, "api-version", newJString(apiVersion))
-  add(path_574228, "apiId", newJString(apiId))
+  var path_564128 = newJObject()
+  var query_564129 = newJObject()
+  var body_564130 = newJObject()
+  add(query_564129, "api-version", newJString(apiVersion))
+  add(path_564128, "apiId", newJString(apiId))
   if parameters != nil:
-    body_574230 = parameters
-  result = call_574227.call(path_574228, query_574229, nil, nil, body_574230)
+    body_564130 = parameters
+  result = call_564127.call(path_564128, query_564129, nil, nil, body_564130)
 
-var apiCreateOrUpdate* = Call_ApiCreateOrUpdate_574202(name: "apiCreateOrUpdate",
+var apiCreateOrUpdate* = Call_ApiCreateOrUpdate_564102(name: "apiCreateOrUpdate",
     meth: HttpMethod.HttpPut, host: "azure.local", route: "/apis/{apiId}",
-    validator: validate_ApiCreateOrUpdate_574203, base: "",
-    url: url_ApiCreateOrUpdate_574204, schemes: {Scheme.Https})
+    validator: validate_ApiCreateOrUpdate_564103, base: "",
+    url: url_ApiCreateOrUpdate_564104, schemes: {Scheme.Https})
 type
-  Call_ApiGet_574170 = ref object of OpenApiRestCall_573657
-proc url_ApiGet_574172(protocol: Scheme; host: string; base: string; route: string;
+  Call_ApiGet_564070 = ref object of OpenApiRestCall_563555
+proc url_ApiGet_564072(protocol: Scheme; host: string; base: string; route: string;
                       path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -328,7 +332,7 @@ proc url_ApiGet_574172(protocol: Scheme; host: string; base: string; route: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ApiGet_574171(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_ApiGet_564071(path: JsonNode; query: JsonNode; header: JsonNode;
                            formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the details of the API specified by its identifier.
   ## 
@@ -339,11 +343,11 @@ proc validate_ApiGet_574171(path: JsonNode; query: JsonNode; header: JsonNode;
   ##        : API identifier. Must be unique in the current API Management service instance.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `apiId` field"
-  var valid_574196 = path.getOrDefault("apiId")
-  valid_574196 = validateParameter(valid_574196, JString, required = true,
+  var valid_564096 = path.getOrDefault("apiId")
+  valid_564096 = validateParameter(valid_564096, JString, required = true,
                                  default = nil)
-  if valid_574196 != nil:
-    section.add "apiId", valid_574196
+  if valid_564096 != nil:
+    section.add "apiId", valid_564096
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -351,11 +355,11 @@ proc validate_ApiGet_574171(path: JsonNode; query: JsonNode; header: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574197 = query.getOrDefault("api-version")
-  valid_574197 = validateParameter(valid_574197, JString, required = true,
+  var valid_564097 = query.getOrDefault("api-version")
+  valid_564097 = validateParameter(valid_564097, JString, required = true,
                                  default = nil)
-  if valid_574197 != nil:
-    section.add "api-version", valid_574197
+  if valid_564097 != nil:
+    section.add "api-version", valid_564097
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -364,39 +368,39 @@ proc validate_ApiGet_574171(path: JsonNode; query: JsonNode; header: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574198: Call_ApiGet_574170; path: JsonNode; query: JsonNode;
+proc call*(call_564098: Call_ApiGet_564070; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the details of the API specified by its identifier.
   ## 
-  let valid = call_574198.validator(path, query, header, formData, body)
-  let scheme = call_574198.pickScheme
+  let valid = call_564098.validator(path, query, header, formData, body)
+  let scheme = call_564098.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574198.url(scheme.get, call_574198.host, call_574198.base,
-                         call_574198.route, valid.getOrDefault("path"),
+  let url = call_564098.url(scheme.get, call_564098.host, call_564098.base,
+                         call_564098.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574198, url, valid)
+  result = hook(call_564098, url, valid)
 
-proc call*(call_574199: Call_ApiGet_574170; apiVersion: string; apiId: string): Recallable =
+proc call*(call_564099: Call_ApiGet_564070; apiVersion: string; apiId: string): Recallable =
   ## apiGet
   ## Gets the details of the API specified by its identifier.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
   ##   apiId: string (required)
   ##        : API identifier. Must be unique in the current API Management service instance.
-  var path_574200 = newJObject()
-  var query_574201 = newJObject()
-  add(query_574201, "api-version", newJString(apiVersion))
-  add(path_574200, "apiId", newJString(apiId))
-  result = call_574199.call(path_574200, query_574201, nil, nil, nil)
+  var path_564100 = newJObject()
+  var query_564101 = newJObject()
+  add(query_564101, "api-version", newJString(apiVersion))
+  add(path_564100, "apiId", newJString(apiId))
+  result = call_564099.call(path_564100, query_564101, nil, nil, nil)
 
-var apiGet* = Call_ApiGet_574170(name: "apiGet", meth: HttpMethod.HttpGet,
+var apiGet* = Call_ApiGet_564070(name: "apiGet", meth: HttpMethod.HttpGet,
                               host: "azure.local", route: "/apis/{apiId}",
-                              validator: validate_ApiGet_574171, base: "",
-                              url: url_ApiGet_574172, schemes: {Scheme.Https})
+                              validator: validate_ApiGet_564071, base: "",
+                              url: url_ApiGet_564072, schemes: {Scheme.Https})
 type
-  Call_ApiUpdate_574241 = ref object of OpenApiRestCall_573657
-proc url_ApiUpdate_574243(protocol: Scheme; host: string; base: string; route: string;
+  Call_ApiUpdate_564141 = ref object of OpenApiRestCall_563555
+proc url_ApiUpdate_564143(protocol: Scheme; host: string; base: string; route: string;
                          path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -411,7 +415,7 @@ proc url_ApiUpdate_574243(protocol: Scheme; host: string; base: string; route: s
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ApiUpdate_574242(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_ApiUpdate_564142(path: JsonNode; query: JsonNode; header: JsonNode;
                               formData: JsonNode; body: JsonNode): JsonNode =
   ## Updates the specified API of the API Management service instance.
   ## 
@@ -422,11 +426,11 @@ proc validate_ApiUpdate_574242(path: JsonNode; query: JsonNode; header: JsonNode
   ##        : API identifier. Must be unique in the current API Management service instance.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `apiId` field"
-  var valid_574254 = path.getOrDefault("apiId")
-  valid_574254 = validateParameter(valid_574254, JString, required = true,
+  var valid_564154 = path.getOrDefault("apiId")
+  valid_564154 = validateParameter(valid_564154, JString, required = true,
                                  default = nil)
-  if valid_574254 != nil:
-    section.add "apiId", valid_574254
+  if valid_564154 != nil:
+    section.add "apiId", valid_564154
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -434,11 +438,11 @@ proc validate_ApiUpdate_574242(path: JsonNode; query: JsonNode; header: JsonNode
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574255 = query.getOrDefault("api-version")
-  valid_574255 = validateParameter(valid_574255, JString, required = true,
+  var valid_564155 = query.getOrDefault("api-version")
+  valid_564155 = validateParameter(valid_564155, JString, required = true,
                                  default = nil)
-  if valid_574255 != nil:
-    section.add "api-version", valid_574255
+  if valid_564155 != nil:
+    section.add "api-version", valid_564155
   result.add "query", section
   ## parameters in `header` object:
   ##   If-Match: JString (required)
@@ -446,11 +450,11 @@ proc validate_ApiUpdate_574242(path: JsonNode; query: JsonNode; header: JsonNode
   section = newJObject()
   assert header != nil,
         "header argument is necessary due to required `If-Match` field"
-  var valid_574256 = header.getOrDefault("If-Match")
-  valid_574256 = validateParameter(valid_574256, JString, required = true,
+  var valid_564156 = header.getOrDefault("If-Match")
+  valid_564156 = validateParameter(valid_564156, JString, required = true,
                                  default = nil)
-  if valid_574256 != nil:
-    section.add "If-Match", valid_574256
+  if valid_564156 != nil:
+    section.add "If-Match", valid_564156
   result.add "header", section
   section = newJObject()
   result.add "formData", section
@@ -462,20 +466,20 @@ proc validate_ApiUpdate_574242(path: JsonNode; query: JsonNode; header: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_574258: Call_ApiUpdate_574241; path: JsonNode; query: JsonNode;
+proc call*(call_564158: Call_ApiUpdate_564141; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Updates the specified API of the API Management service instance.
   ## 
-  let valid = call_574258.validator(path, query, header, formData, body)
-  let scheme = call_574258.pickScheme
+  let valid = call_564158.validator(path, query, header, formData, body)
+  let scheme = call_564158.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574258.url(scheme.get, call_574258.host, call_574258.base,
-                         call_574258.route, valid.getOrDefault("path"),
+  let url = call_564158.url(scheme.get, call_564158.host, call_564158.base,
+                         call_564158.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574258, url, valid)
+  result = hook(call_564158, url, valid)
 
-proc call*(call_574259: Call_ApiUpdate_574241; apiVersion: string; apiId: string;
+proc call*(call_564159: Call_ApiUpdate_564141; apiVersion: string; apiId: string;
           parameters: JsonNode): Recallable =
   ## apiUpdate
   ## Updates the specified API of the API Management service instance.
@@ -485,23 +489,23 @@ proc call*(call_574259: Call_ApiUpdate_574241; apiVersion: string; apiId: string
   ##        : API identifier. Must be unique in the current API Management service instance.
   ##   parameters: JObject (required)
   ##             : API Update Contract parameters.
-  var path_574260 = newJObject()
-  var query_574261 = newJObject()
-  var body_574262 = newJObject()
-  add(query_574261, "api-version", newJString(apiVersion))
-  add(path_574260, "apiId", newJString(apiId))
+  var path_564160 = newJObject()
+  var query_564161 = newJObject()
+  var body_564162 = newJObject()
+  add(query_564161, "api-version", newJString(apiVersion))
+  add(path_564160, "apiId", newJString(apiId))
   if parameters != nil:
-    body_574262 = parameters
-  result = call_574259.call(path_574260, query_574261, nil, nil, body_574262)
+    body_564162 = parameters
+  result = call_564159.call(path_564160, query_564161, nil, nil, body_564162)
 
-var apiUpdate* = Call_ApiUpdate_574241(name: "apiUpdate", meth: HttpMethod.HttpPatch,
+var apiUpdate* = Call_ApiUpdate_564141(name: "apiUpdate", meth: HttpMethod.HttpPatch,
                                     host: "azure.local", route: "/apis/{apiId}",
-                                    validator: validate_ApiUpdate_574242,
-                                    base: "", url: url_ApiUpdate_574243,
+                                    validator: validate_ApiUpdate_564142,
+                                    base: "", url: url_ApiUpdate_564143,
                                     schemes: {Scheme.Https})
 type
-  Call_ApiDelete_574231 = ref object of OpenApiRestCall_573657
-proc url_ApiDelete_574233(protocol: Scheme; host: string; base: string; route: string;
+  Call_ApiDelete_564131 = ref object of OpenApiRestCall_563555
+proc url_ApiDelete_564133(protocol: Scheme; host: string; base: string; route: string;
                          path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -516,7 +520,7 @@ proc url_ApiDelete_574233(protocol: Scheme; host: string; base: string; route: s
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ApiDelete_574232(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_ApiDelete_564132(path: JsonNode; query: JsonNode; header: JsonNode;
                               formData: JsonNode; body: JsonNode): JsonNode =
   ## Deletes the specified API of the API Management service instance.
   ## 
@@ -527,11 +531,11 @@ proc validate_ApiDelete_574232(path: JsonNode; query: JsonNode; header: JsonNode
   ##        : API identifier. Must be unique in the current API Management service instance.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `apiId` field"
-  var valid_574234 = path.getOrDefault("apiId")
-  valid_574234 = validateParameter(valid_574234, JString, required = true,
+  var valid_564134 = path.getOrDefault("apiId")
+  valid_564134 = validateParameter(valid_564134, JString, required = true,
                                  default = nil)
-  if valid_574234 != nil:
-    section.add "apiId", valid_574234
+  if valid_564134 != nil:
+    section.add "apiId", valid_564134
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -539,11 +543,11 @@ proc validate_ApiDelete_574232(path: JsonNode; query: JsonNode; header: JsonNode
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574235 = query.getOrDefault("api-version")
-  valid_574235 = validateParameter(valid_574235, JString, required = true,
+  var valid_564135 = query.getOrDefault("api-version")
+  valid_564135 = validateParameter(valid_564135, JString, required = true,
                                  default = nil)
-  if valid_574235 != nil:
-    section.add "api-version", valid_574235
+  if valid_564135 != nil:
+    section.add "api-version", valid_564135
   result.add "query", section
   ## parameters in `header` object:
   ##   If-Match: JString (required)
@@ -551,52 +555,52 @@ proc validate_ApiDelete_574232(path: JsonNode; query: JsonNode; header: JsonNode
   section = newJObject()
   assert header != nil,
         "header argument is necessary due to required `If-Match` field"
-  var valid_574236 = header.getOrDefault("If-Match")
-  valid_574236 = validateParameter(valid_574236, JString, required = true,
+  var valid_564136 = header.getOrDefault("If-Match")
+  valid_564136 = validateParameter(valid_564136, JString, required = true,
                                  default = nil)
-  if valid_574236 != nil:
-    section.add "If-Match", valid_574236
+  if valid_564136 != nil:
+    section.add "If-Match", valid_564136
   result.add "header", section
   section = newJObject()
   result.add "formData", section
   if body != nil:
     result.add "body", body
 
-proc call*(call_574237: Call_ApiDelete_574231; path: JsonNode; query: JsonNode;
+proc call*(call_564137: Call_ApiDelete_564131; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes the specified API of the API Management service instance.
   ## 
-  let valid = call_574237.validator(path, query, header, formData, body)
-  let scheme = call_574237.pickScheme
+  let valid = call_564137.validator(path, query, header, formData, body)
+  let scheme = call_564137.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574237.url(scheme.get, call_574237.host, call_574237.base,
-                         call_574237.route, valid.getOrDefault("path"),
+  let url = call_564137.url(scheme.get, call_564137.host, call_564137.base,
+                         call_564137.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574237, url, valid)
+  result = hook(call_564137, url, valid)
 
-proc call*(call_574238: Call_ApiDelete_574231; apiVersion: string; apiId: string): Recallable =
+proc call*(call_564138: Call_ApiDelete_564131; apiVersion: string; apiId: string): Recallable =
   ## apiDelete
   ## Deletes the specified API of the API Management service instance.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
   ##   apiId: string (required)
   ##        : API identifier. Must be unique in the current API Management service instance.
-  var path_574239 = newJObject()
-  var query_574240 = newJObject()
-  add(query_574240, "api-version", newJString(apiVersion))
-  add(path_574239, "apiId", newJString(apiId))
-  result = call_574238.call(path_574239, query_574240, nil, nil, nil)
+  var path_564139 = newJObject()
+  var query_564140 = newJObject()
+  add(query_564140, "api-version", newJString(apiVersion))
+  add(path_564139, "apiId", newJString(apiId))
+  result = call_564138.call(path_564139, query_564140, nil, nil, nil)
 
-var apiDelete* = Call_ApiDelete_574231(name: "apiDelete",
+var apiDelete* = Call_ApiDelete_564131(name: "apiDelete",
                                     meth: HttpMethod.HttpDelete,
                                     host: "azure.local", route: "/apis/{apiId}",
-                                    validator: validate_ApiDelete_574232,
-                                    base: "", url: url_ApiDelete_574233,
+                                    validator: validate_ApiDelete_564132,
+                                    base: "", url: url_ApiDelete_564133,
                                     schemes: {Scheme.Https})
 type
-  Call_ApiOperationListByApi_574263 = ref object of OpenApiRestCall_573657
-proc url_ApiOperationListByApi_574265(protocol: Scheme; host: string; base: string;
+  Call_ApiOperationListByApi_564163 = ref object of OpenApiRestCall_563555
+proc url_ApiOperationListByApi_564165(protocol: Scheme; host: string; base: string;
                                      route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -612,7 +616,7 @@ proc url_ApiOperationListByApi_574265(protocol: Scheme; host: string; base: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ApiOperationListByApi_574264(path: JsonNode; query: JsonNode;
+proc validate_ApiOperationListByApi_564164(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists a collection of the operations for the specified API.
   ## 
@@ -623,17 +627,17 @@ proc validate_ApiOperationListByApi_574264(path: JsonNode; query: JsonNode;
   ##        : API identifier. Must be unique in the current API Management service instance.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `apiId` field"
-  var valid_574266 = path.getOrDefault("apiId")
-  valid_574266 = validateParameter(valid_574266, JString, required = true,
+  var valid_564166 = path.getOrDefault("apiId")
+  valid_564166 = validateParameter(valid_564166, JString, required = true,
                                  default = nil)
-  if valid_574266 != nil:
-    section.add "apiId", valid_574266
+  if valid_564166 != nil:
+    section.add "apiId", valid_564166
   result.add "path", section
   ## parameters in `query` object:
-  ##   api-version: JString (required)
-  ##              : Version of the API to be used with the client request.
   ##   $top: JInt
   ##       : Number of records to return.
+  ##   api-version: JString (required)
+  ##              : Version of the API to be used with the client request.
   ##   $skip: JInt
   ##        : Number of records to skip.
   ##   $filter: JString
@@ -644,26 +648,26 @@ proc validate_ApiOperationListByApi_574264(path: JsonNode; query: JsonNode;
   ## | description | ge, le, eq, ne, gt, lt | substringof, startswith, endswith |
   ## | urlTemplate | ge, le, eq, ne, gt, lt | substringof, startswith, endswith |
   section = newJObject()
+  var valid_564167 = query.getOrDefault("$top")
+  valid_564167 = validateParameter(valid_564167, JInt, required = false, default = nil)
+  if valid_564167 != nil:
+    section.add "$top", valid_564167
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574267 = query.getOrDefault("api-version")
-  valid_574267 = validateParameter(valid_574267, JString, required = true,
+  var valid_564168 = query.getOrDefault("api-version")
+  valid_564168 = validateParameter(valid_564168, JString, required = true,
                                  default = nil)
-  if valid_574267 != nil:
-    section.add "api-version", valid_574267
-  var valid_574268 = query.getOrDefault("$top")
-  valid_574268 = validateParameter(valid_574268, JInt, required = false, default = nil)
-  if valid_574268 != nil:
-    section.add "$top", valid_574268
-  var valid_574269 = query.getOrDefault("$skip")
-  valid_574269 = validateParameter(valid_574269, JInt, required = false, default = nil)
-  if valid_574269 != nil:
-    section.add "$skip", valid_574269
-  var valid_574270 = query.getOrDefault("$filter")
-  valid_574270 = validateParameter(valid_574270, JString, required = false,
+  if valid_564168 != nil:
+    section.add "api-version", valid_564168
+  var valid_564169 = query.getOrDefault("$skip")
+  valid_564169 = validateParameter(valid_564169, JInt, required = false, default = nil)
+  if valid_564169 != nil:
+    section.add "$skip", valid_564169
+  var valid_564170 = query.getOrDefault("$filter")
+  valid_564170 = validateParameter(valid_564170, JString, required = false,
                                  default = nil)
-  if valid_574270 != nil:
-    section.add "$filter", valid_574270
+  if valid_564170 != nil:
+    section.add "$filter", valid_564170
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -672,29 +676,29 @@ proc validate_ApiOperationListByApi_574264(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574271: Call_ApiOperationListByApi_574263; path: JsonNode;
+proc call*(call_564171: Call_ApiOperationListByApi_564163; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists a collection of the operations for the specified API.
   ## 
-  let valid = call_574271.validator(path, query, header, formData, body)
-  let scheme = call_574271.pickScheme
+  let valid = call_564171.validator(path, query, header, formData, body)
+  let scheme = call_564171.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574271.url(scheme.get, call_574271.host, call_574271.base,
-                         call_574271.route, valid.getOrDefault("path"),
+  let url = call_564171.url(scheme.get, call_564171.host, call_564171.base,
+                         call_564171.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574271, url, valid)
+  result = hook(call_564171, url, valid)
 
-proc call*(call_574272: Call_ApiOperationListByApi_574263; apiVersion: string;
+proc call*(call_564172: Call_ApiOperationListByApi_564163; apiVersion: string;
           apiId: string; Top: int = 0; Skip: int = 0; Filter: string = ""): Recallable =
   ## apiOperationListByApi
   ## Lists a collection of the operations for the specified API.
+  ##   Top: int
+  ##      : Number of records to return.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
   ##   apiId: string (required)
   ##        : API identifier. Must be unique in the current API Management service instance.
-  ##   Top: int
-  ##      : Number of records to return.
   ##   Skip: int
   ##       : Number of records to skip.
   ##   Filter: string
@@ -704,22 +708,22 @@ proc call*(call_574272: Call_ApiOperationListByApi_574263; apiVersion: string;
   ## | method      | ge, le, eq, ne, gt, lt | substringof, startswith, endswith |
   ## | description | ge, le, eq, ne, gt, lt | substringof, startswith, endswith |
   ## | urlTemplate | ge, le, eq, ne, gt, lt | substringof, startswith, endswith |
-  var path_574273 = newJObject()
-  var query_574274 = newJObject()
-  add(query_574274, "api-version", newJString(apiVersion))
-  add(path_574273, "apiId", newJString(apiId))
-  add(query_574274, "$top", newJInt(Top))
-  add(query_574274, "$skip", newJInt(Skip))
-  add(query_574274, "$filter", newJString(Filter))
-  result = call_574272.call(path_574273, query_574274, nil, nil, nil)
+  var path_564173 = newJObject()
+  var query_564174 = newJObject()
+  add(query_564174, "$top", newJInt(Top))
+  add(query_564174, "api-version", newJString(apiVersion))
+  add(path_564173, "apiId", newJString(apiId))
+  add(query_564174, "$skip", newJInt(Skip))
+  add(query_564174, "$filter", newJString(Filter))
+  result = call_564172.call(path_564173, query_564174, nil, nil, nil)
 
-var apiOperationListByApi* = Call_ApiOperationListByApi_574263(
+var apiOperationListByApi* = Call_ApiOperationListByApi_564163(
     name: "apiOperationListByApi", meth: HttpMethod.HttpGet, host: "azure.local",
-    route: "/apis/{apiId}/operations", validator: validate_ApiOperationListByApi_574264,
-    base: "", url: url_ApiOperationListByApi_574265, schemes: {Scheme.Https})
+    route: "/apis/{apiId}/operations", validator: validate_ApiOperationListByApi_564164,
+    base: "", url: url_ApiOperationListByApi_564165, schemes: {Scheme.Https})
 type
-  Call_ApiOperationCreateOrUpdate_574285 = ref object of OpenApiRestCall_573657
-proc url_ApiOperationCreateOrUpdate_574287(protocol: Scheme; host: string;
+  Call_ApiOperationCreateOrUpdate_564185 = ref object of OpenApiRestCall_563555
+proc url_ApiOperationCreateOrUpdate_564187(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -737,29 +741,30 @@ proc url_ApiOperationCreateOrUpdate_574287(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ApiOperationCreateOrUpdate_574286(path: JsonNode; query: JsonNode;
+proc validate_ApiOperationCreateOrUpdate_564186(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Creates a new operation in the API or updates an existing one.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   apiId: JString (required)
-  ##        : API identifier. Must be unique in the current API Management service instance.
   ##   operationId: JString (required)
   ##              : Operation identifier within an API. Must be unique in the current API Management service instance.
+  ##   apiId: JString (required)
+  ##        : API identifier. Must be unique in the current API Management service instance.
   section = newJObject()
-  assert path != nil, "path argument is necessary due to required `apiId` field"
-  var valid_574288 = path.getOrDefault("apiId")
-  valid_574288 = validateParameter(valid_574288, JString, required = true,
+  assert path != nil,
+        "path argument is necessary due to required `operationId` field"
+  var valid_564188 = path.getOrDefault("operationId")
+  valid_564188 = validateParameter(valid_564188, JString, required = true,
                                  default = nil)
-  if valid_574288 != nil:
-    section.add "apiId", valid_574288
-  var valid_574289 = path.getOrDefault("operationId")
-  valid_574289 = validateParameter(valid_574289, JString, required = true,
+  if valid_564188 != nil:
+    section.add "operationId", valid_564188
+  var valid_564189 = path.getOrDefault("apiId")
+  valid_564189 = validateParameter(valid_564189, JString, required = true,
                                  default = nil)
-  if valid_574289 != nil:
-    section.add "operationId", valid_574289
+  if valid_564189 != nil:
+    section.add "apiId", valid_564189
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -767,11 +772,11 @@ proc validate_ApiOperationCreateOrUpdate_574286(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574290 = query.getOrDefault("api-version")
-  valid_574290 = validateParameter(valid_574290, JString, required = true,
+  var valid_564190 = query.getOrDefault("api-version")
+  valid_564190 = validateParameter(valid_564190, JString, required = true,
                                  default = nil)
-  if valid_574290 != nil:
-    section.add "api-version", valid_574290
+  if valid_564190 != nil:
+    section.add "api-version", valid_564190
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -785,49 +790,49 @@ proc validate_ApiOperationCreateOrUpdate_574286(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574292: Call_ApiOperationCreateOrUpdate_574285; path: JsonNode;
+proc call*(call_564192: Call_ApiOperationCreateOrUpdate_564185; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Creates a new operation in the API or updates an existing one.
   ## 
-  let valid = call_574292.validator(path, query, header, formData, body)
-  let scheme = call_574292.pickScheme
+  let valid = call_564192.validator(path, query, header, formData, body)
+  let scheme = call_564192.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574292.url(scheme.get, call_574292.host, call_574292.base,
-                         call_574292.route, valid.getOrDefault("path"),
+  let url = call_564192.url(scheme.get, call_564192.host, call_564192.base,
+                         call_564192.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574292, url, valid)
+  result = hook(call_564192, url, valid)
 
-proc call*(call_574293: Call_ApiOperationCreateOrUpdate_574285; apiVersion: string;
-          apiId: string; parameters: JsonNode; operationId: string): Recallable =
+proc call*(call_564193: Call_ApiOperationCreateOrUpdate_564185; apiVersion: string;
+          operationId: string; apiId: string; parameters: JsonNode): Recallable =
   ## apiOperationCreateOrUpdate
   ## Creates a new operation in the API or updates an existing one.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
+  ##   operationId: string (required)
+  ##              : Operation identifier within an API. Must be unique in the current API Management service instance.
   ##   apiId: string (required)
   ##        : API identifier. Must be unique in the current API Management service instance.
   ##   parameters: JObject (required)
   ##             : Create parameters.
-  ##   operationId: string (required)
-  ##              : Operation identifier within an API. Must be unique in the current API Management service instance.
-  var path_574294 = newJObject()
-  var query_574295 = newJObject()
-  var body_574296 = newJObject()
-  add(query_574295, "api-version", newJString(apiVersion))
-  add(path_574294, "apiId", newJString(apiId))
+  var path_564194 = newJObject()
+  var query_564195 = newJObject()
+  var body_564196 = newJObject()
+  add(query_564195, "api-version", newJString(apiVersion))
+  add(path_564194, "operationId", newJString(operationId))
+  add(path_564194, "apiId", newJString(apiId))
   if parameters != nil:
-    body_574296 = parameters
-  add(path_574294, "operationId", newJString(operationId))
-  result = call_574293.call(path_574294, query_574295, nil, nil, body_574296)
+    body_564196 = parameters
+  result = call_564193.call(path_564194, query_564195, nil, nil, body_564196)
 
-var apiOperationCreateOrUpdate* = Call_ApiOperationCreateOrUpdate_574285(
+var apiOperationCreateOrUpdate* = Call_ApiOperationCreateOrUpdate_564185(
     name: "apiOperationCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "azure.local", route: "/apis/{apiId}/operations/{operationId}",
-    validator: validate_ApiOperationCreateOrUpdate_574286, base: "",
-    url: url_ApiOperationCreateOrUpdate_574287, schemes: {Scheme.Https})
+    validator: validate_ApiOperationCreateOrUpdate_564186, base: "",
+    url: url_ApiOperationCreateOrUpdate_564187, schemes: {Scheme.Https})
 type
-  Call_ApiOperationGet_574275 = ref object of OpenApiRestCall_573657
-proc url_ApiOperationGet_574277(protocol: Scheme; host: string; base: string;
+  Call_ApiOperationGet_564175 = ref object of OpenApiRestCall_563555
+proc url_ApiOperationGet_564177(protocol: Scheme; host: string; base: string;
                                route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -845,7 +850,7 @@ proc url_ApiOperationGet_574277(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ApiOperationGet_574276(path: JsonNode; query: JsonNode;
+proc validate_ApiOperationGet_564176(path: JsonNode; query: JsonNode;
                                     header: JsonNode; formData: JsonNode;
                                     body: JsonNode): JsonNode =
   ## Gets the details of the API Operation specified by its identifier.
@@ -853,22 +858,23 @@ proc validate_ApiOperationGet_574276(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   apiId: JString (required)
-  ##        : API identifier. Must be unique in the current API Management service instance.
   ##   operationId: JString (required)
   ##              : Operation identifier within an API. Must be unique in the current API Management service instance.
+  ##   apiId: JString (required)
+  ##        : API identifier. Must be unique in the current API Management service instance.
   section = newJObject()
-  assert path != nil, "path argument is necessary due to required `apiId` field"
-  var valid_574278 = path.getOrDefault("apiId")
-  valid_574278 = validateParameter(valid_574278, JString, required = true,
+  assert path != nil,
+        "path argument is necessary due to required `operationId` field"
+  var valid_564178 = path.getOrDefault("operationId")
+  valid_564178 = validateParameter(valid_564178, JString, required = true,
                                  default = nil)
-  if valid_574278 != nil:
-    section.add "apiId", valid_574278
-  var valid_574279 = path.getOrDefault("operationId")
-  valid_574279 = validateParameter(valid_574279, JString, required = true,
+  if valid_564178 != nil:
+    section.add "operationId", valid_564178
+  var valid_564179 = path.getOrDefault("apiId")
+  valid_564179 = validateParameter(valid_564179, JString, required = true,
                                  default = nil)
-  if valid_574279 != nil:
-    section.add "operationId", valid_574279
+  if valid_564179 != nil:
+    section.add "apiId", valid_564179
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -876,11 +882,11 @@ proc validate_ApiOperationGet_574276(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574280 = query.getOrDefault("api-version")
-  valid_574280 = validateParameter(valid_574280, JString, required = true,
+  var valid_564180 = query.getOrDefault("api-version")
+  valid_564180 = validateParameter(valid_564180, JString, required = true,
                                  default = nil)
-  if valid_574280 != nil:
-    section.add "api-version", valid_574280
+  if valid_564180 != nil:
+    section.add "api-version", valid_564180
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -889,44 +895,44 @@ proc validate_ApiOperationGet_574276(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574281: Call_ApiOperationGet_574275; path: JsonNode; query: JsonNode;
+proc call*(call_564181: Call_ApiOperationGet_564175; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the details of the API Operation specified by its identifier.
   ## 
-  let valid = call_574281.validator(path, query, header, formData, body)
-  let scheme = call_574281.pickScheme
+  let valid = call_564181.validator(path, query, header, formData, body)
+  let scheme = call_564181.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574281.url(scheme.get, call_574281.host, call_574281.base,
-                         call_574281.route, valid.getOrDefault("path"),
+  let url = call_564181.url(scheme.get, call_564181.host, call_564181.base,
+                         call_564181.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574281, url, valid)
+  result = hook(call_564181, url, valid)
 
-proc call*(call_574282: Call_ApiOperationGet_574275; apiVersion: string;
-          apiId: string; operationId: string): Recallable =
+proc call*(call_564182: Call_ApiOperationGet_564175; apiVersion: string;
+          operationId: string; apiId: string): Recallable =
   ## apiOperationGet
   ## Gets the details of the API Operation specified by its identifier.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
-  ##   apiId: string (required)
-  ##        : API identifier. Must be unique in the current API Management service instance.
   ##   operationId: string (required)
   ##              : Operation identifier within an API. Must be unique in the current API Management service instance.
-  var path_574283 = newJObject()
-  var query_574284 = newJObject()
-  add(query_574284, "api-version", newJString(apiVersion))
-  add(path_574283, "apiId", newJString(apiId))
-  add(path_574283, "operationId", newJString(operationId))
-  result = call_574282.call(path_574283, query_574284, nil, nil, nil)
+  ##   apiId: string (required)
+  ##        : API identifier. Must be unique in the current API Management service instance.
+  var path_564183 = newJObject()
+  var query_564184 = newJObject()
+  add(query_564184, "api-version", newJString(apiVersion))
+  add(path_564183, "operationId", newJString(operationId))
+  add(path_564183, "apiId", newJString(apiId))
+  result = call_564182.call(path_564183, query_564184, nil, nil, nil)
 
-var apiOperationGet* = Call_ApiOperationGet_574275(name: "apiOperationGet",
+var apiOperationGet* = Call_ApiOperationGet_564175(name: "apiOperationGet",
     meth: HttpMethod.HttpGet, host: "azure.local",
     route: "/apis/{apiId}/operations/{operationId}",
-    validator: validate_ApiOperationGet_574276, base: "", url: url_ApiOperationGet_574277,
+    validator: validate_ApiOperationGet_564176, base: "", url: url_ApiOperationGet_564177,
     schemes: {Scheme.Https})
 type
-  Call_ApiOperationUpdate_574308 = ref object of OpenApiRestCall_573657
-proc url_ApiOperationUpdate_574310(protocol: Scheme; host: string; base: string;
+  Call_ApiOperationUpdate_564208 = ref object of OpenApiRestCall_563555
+proc url_ApiOperationUpdate_564210(protocol: Scheme; host: string; base: string;
                                   route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -944,7 +950,7 @@ proc url_ApiOperationUpdate_574310(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ApiOperationUpdate_574309(path: JsonNode; query: JsonNode;
+proc validate_ApiOperationUpdate_564209(path: JsonNode; query: JsonNode;
                                        header: JsonNode; formData: JsonNode;
                                        body: JsonNode): JsonNode =
   ## Updates the details of the operation in the API specified by its identifier.
@@ -952,22 +958,23 @@ proc validate_ApiOperationUpdate_574309(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   apiId: JString (required)
-  ##        : API identifier. Must be unique in the current API Management service instance.
   ##   operationId: JString (required)
   ##              : Operation identifier within an API. Must be unique in the current API Management service instance.
+  ##   apiId: JString (required)
+  ##        : API identifier. Must be unique in the current API Management service instance.
   section = newJObject()
-  assert path != nil, "path argument is necessary due to required `apiId` field"
-  var valid_574311 = path.getOrDefault("apiId")
-  valid_574311 = validateParameter(valid_574311, JString, required = true,
+  assert path != nil,
+        "path argument is necessary due to required `operationId` field"
+  var valid_564211 = path.getOrDefault("operationId")
+  valid_564211 = validateParameter(valid_564211, JString, required = true,
                                  default = nil)
-  if valid_574311 != nil:
-    section.add "apiId", valid_574311
-  var valid_574312 = path.getOrDefault("operationId")
-  valid_574312 = validateParameter(valid_574312, JString, required = true,
+  if valid_564211 != nil:
+    section.add "operationId", valid_564211
+  var valid_564212 = path.getOrDefault("apiId")
+  valid_564212 = validateParameter(valid_564212, JString, required = true,
                                  default = nil)
-  if valid_574312 != nil:
-    section.add "operationId", valid_574312
+  if valid_564212 != nil:
+    section.add "apiId", valid_564212
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -975,11 +982,11 @@ proc validate_ApiOperationUpdate_574309(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574313 = query.getOrDefault("api-version")
-  valid_574313 = validateParameter(valid_574313, JString, required = true,
+  var valid_564213 = query.getOrDefault("api-version")
+  valid_564213 = validateParameter(valid_564213, JString, required = true,
                                  default = nil)
-  if valid_574313 != nil:
-    section.add "api-version", valid_574313
+  if valid_564213 != nil:
+    section.add "api-version", valid_564213
   result.add "query", section
   ## parameters in `header` object:
   ##   If-Match: JString (required)
@@ -987,11 +994,11 @@ proc validate_ApiOperationUpdate_574309(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert header != nil,
         "header argument is necessary due to required `If-Match` field"
-  var valid_574314 = header.getOrDefault("If-Match")
-  valid_574314 = validateParameter(valid_574314, JString, required = true,
+  var valid_564214 = header.getOrDefault("If-Match")
+  valid_564214 = validateParameter(valid_564214, JString, required = true,
                                  default = nil)
-  if valid_574314 != nil:
-    section.add "If-Match", valid_574314
+  if valid_564214 != nil:
+    section.add "If-Match", valid_564214
   result.add "header", section
   section = newJObject()
   result.add "formData", section
@@ -1003,49 +1010,49 @@ proc validate_ApiOperationUpdate_574309(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574316: Call_ApiOperationUpdate_574308; path: JsonNode;
+proc call*(call_564216: Call_ApiOperationUpdate_564208; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Updates the details of the operation in the API specified by its identifier.
   ## 
-  let valid = call_574316.validator(path, query, header, formData, body)
-  let scheme = call_574316.pickScheme
+  let valid = call_564216.validator(path, query, header, formData, body)
+  let scheme = call_564216.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574316.url(scheme.get, call_574316.host, call_574316.base,
-                         call_574316.route, valid.getOrDefault("path"),
+  let url = call_564216.url(scheme.get, call_564216.host, call_564216.base,
+                         call_564216.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574316, url, valid)
+  result = hook(call_564216, url, valid)
 
-proc call*(call_574317: Call_ApiOperationUpdate_574308; apiVersion: string;
-          apiId: string; parameters: JsonNode; operationId: string): Recallable =
+proc call*(call_564217: Call_ApiOperationUpdate_564208; apiVersion: string;
+          operationId: string; apiId: string; parameters: JsonNode): Recallable =
   ## apiOperationUpdate
   ## Updates the details of the operation in the API specified by its identifier.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
+  ##   operationId: string (required)
+  ##              : Operation identifier within an API. Must be unique in the current API Management service instance.
   ##   apiId: string (required)
   ##        : API identifier. Must be unique in the current API Management service instance.
   ##   parameters: JObject (required)
   ##             : API Operation Update parameters.
-  ##   operationId: string (required)
-  ##              : Operation identifier within an API. Must be unique in the current API Management service instance.
-  var path_574318 = newJObject()
-  var query_574319 = newJObject()
-  var body_574320 = newJObject()
-  add(query_574319, "api-version", newJString(apiVersion))
-  add(path_574318, "apiId", newJString(apiId))
+  var path_564218 = newJObject()
+  var query_564219 = newJObject()
+  var body_564220 = newJObject()
+  add(query_564219, "api-version", newJString(apiVersion))
+  add(path_564218, "operationId", newJString(operationId))
+  add(path_564218, "apiId", newJString(apiId))
   if parameters != nil:
-    body_574320 = parameters
-  add(path_574318, "operationId", newJString(operationId))
-  result = call_574317.call(path_574318, query_574319, nil, nil, body_574320)
+    body_564220 = parameters
+  result = call_564217.call(path_564218, query_564219, nil, nil, body_564220)
 
-var apiOperationUpdate* = Call_ApiOperationUpdate_574308(
+var apiOperationUpdate* = Call_ApiOperationUpdate_564208(
     name: "apiOperationUpdate", meth: HttpMethod.HttpPatch, host: "azure.local",
     route: "/apis/{apiId}/operations/{operationId}",
-    validator: validate_ApiOperationUpdate_574309, base: "",
-    url: url_ApiOperationUpdate_574310, schemes: {Scheme.Https})
+    validator: validate_ApiOperationUpdate_564209, base: "",
+    url: url_ApiOperationUpdate_564210, schemes: {Scheme.Https})
 type
-  Call_ApiOperationDelete_574297 = ref object of OpenApiRestCall_573657
-proc url_ApiOperationDelete_574299(protocol: Scheme; host: string; base: string;
+  Call_ApiOperationDelete_564197 = ref object of OpenApiRestCall_563555
+proc url_ApiOperationDelete_564199(protocol: Scheme; host: string; base: string;
                                   route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1063,7 +1070,7 @@ proc url_ApiOperationDelete_574299(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ApiOperationDelete_574298(path: JsonNode; query: JsonNode;
+proc validate_ApiOperationDelete_564198(path: JsonNode; query: JsonNode;
                                        header: JsonNode; formData: JsonNode;
                                        body: JsonNode): JsonNode =
   ## Deletes the specified operation in the API.
@@ -1071,22 +1078,23 @@ proc validate_ApiOperationDelete_574298(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   apiId: JString (required)
-  ##        : API identifier. Must be unique in the current API Management service instance.
   ##   operationId: JString (required)
   ##              : Operation identifier within an API. Must be unique in the current API Management service instance.
+  ##   apiId: JString (required)
+  ##        : API identifier. Must be unique in the current API Management service instance.
   section = newJObject()
-  assert path != nil, "path argument is necessary due to required `apiId` field"
-  var valid_574300 = path.getOrDefault("apiId")
-  valid_574300 = validateParameter(valid_574300, JString, required = true,
+  assert path != nil,
+        "path argument is necessary due to required `operationId` field"
+  var valid_564200 = path.getOrDefault("operationId")
+  valid_564200 = validateParameter(valid_564200, JString, required = true,
                                  default = nil)
-  if valid_574300 != nil:
-    section.add "apiId", valid_574300
-  var valid_574301 = path.getOrDefault("operationId")
-  valid_574301 = validateParameter(valid_574301, JString, required = true,
+  if valid_564200 != nil:
+    section.add "operationId", valid_564200
+  var valid_564201 = path.getOrDefault("apiId")
+  valid_564201 = validateParameter(valid_564201, JString, required = true,
                                  default = nil)
-  if valid_574301 != nil:
-    section.add "operationId", valid_574301
+  if valid_564201 != nil:
+    section.add "apiId", valid_564201
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1094,11 +1102,11 @@ proc validate_ApiOperationDelete_574298(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574302 = query.getOrDefault("api-version")
-  valid_574302 = validateParameter(valid_574302, JString, required = true,
+  var valid_564202 = query.getOrDefault("api-version")
+  valid_564202 = validateParameter(valid_564202, JString, required = true,
                                  default = nil)
-  if valid_574302 != nil:
-    section.add "api-version", valid_574302
+  if valid_564202 != nil:
+    section.add "api-version", valid_564202
   result.add "query", section
   ## parameters in `header` object:
   ##   If-Match: JString (required)
@@ -1106,55 +1114,55 @@ proc validate_ApiOperationDelete_574298(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert header != nil,
         "header argument is necessary due to required `If-Match` field"
-  var valid_574303 = header.getOrDefault("If-Match")
-  valid_574303 = validateParameter(valid_574303, JString, required = true,
+  var valid_564203 = header.getOrDefault("If-Match")
+  valid_564203 = validateParameter(valid_564203, JString, required = true,
                                  default = nil)
-  if valid_574303 != nil:
-    section.add "If-Match", valid_574303
+  if valid_564203 != nil:
+    section.add "If-Match", valid_564203
   result.add "header", section
   section = newJObject()
   result.add "formData", section
   if body != nil:
     result.add "body", body
 
-proc call*(call_574304: Call_ApiOperationDelete_574297; path: JsonNode;
+proc call*(call_564204: Call_ApiOperationDelete_564197; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes the specified operation in the API.
   ## 
-  let valid = call_574304.validator(path, query, header, formData, body)
-  let scheme = call_574304.pickScheme
+  let valid = call_564204.validator(path, query, header, formData, body)
+  let scheme = call_564204.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574304.url(scheme.get, call_574304.host, call_574304.base,
-                         call_574304.route, valid.getOrDefault("path"),
+  let url = call_564204.url(scheme.get, call_564204.host, call_564204.base,
+                         call_564204.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574304, url, valid)
+  result = hook(call_564204, url, valid)
 
-proc call*(call_574305: Call_ApiOperationDelete_574297; apiVersion: string;
-          apiId: string; operationId: string): Recallable =
+proc call*(call_564205: Call_ApiOperationDelete_564197; apiVersion: string;
+          operationId: string; apiId: string): Recallable =
   ## apiOperationDelete
   ## Deletes the specified operation in the API.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
-  ##   apiId: string (required)
-  ##        : API identifier. Must be unique in the current API Management service instance.
   ##   operationId: string (required)
   ##              : Operation identifier within an API. Must be unique in the current API Management service instance.
-  var path_574306 = newJObject()
-  var query_574307 = newJObject()
-  add(query_574307, "api-version", newJString(apiVersion))
-  add(path_574306, "apiId", newJString(apiId))
-  add(path_574306, "operationId", newJString(operationId))
-  result = call_574305.call(path_574306, query_574307, nil, nil, nil)
+  ##   apiId: string (required)
+  ##        : API identifier. Must be unique in the current API Management service instance.
+  var path_564206 = newJObject()
+  var query_564207 = newJObject()
+  add(query_564207, "api-version", newJString(apiVersion))
+  add(path_564206, "operationId", newJString(operationId))
+  add(path_564206, "apiId", newJString(apiId))
+  result = call_564205.call(path_564206, query_564207, nil, nil, nil)
 
-var apiOperationDelete* = Call_ApiOperationDelete_574297(
+var apiOperationDelete* = Call_ApiOperationDelete_564197(
     name: "apiOperationDelete", meth: HttpMethod.HttpDelete, host: "azure.local",
     route: "/apis/{apiId}/operations/{operationId}",
-    validator: validate_ApiOperationDelete_574298, base: "",
-    url: url_ApiOperationDelete_574299, schemes: {Scheme.Https})
+    validator: validate_ApiOperationDelete_564198, base: "",
+    url: url_ApiOperationDelete_564199, schemes: {Scheme.Https})
 type
-  Call_ApiOperationPolicyListByOperation_574321 = ref object of OpenApiRestCall_573657
-proc url_ApiOperationPolicyListByOperation_574323(protocol: Scheme; host: string;
+  Call_ApiOperationPolicyListByOperation_564221 = ref object of OpenApiRestCall_563555
+proc url_ApiOperationPolicyListByOperation_564223(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1173,29 +1181,30 @@ proc url_ApiOperationPolicyListByOperation_574323(protocol: Scheme; host: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ApiOperationPolicyListByOperation_574322(path: JsonNode;
+proc validate_ApiOperationPolicyListByOperation_564222(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Get the list of policy configuration at the API Operation level.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   apiId: JString (required)
-  ##        : API identifier. Must be unique in the current API Management service instance.
   ##   operationId: JString (required)
   ##              : Operation identifier within an API. Must be unique in the current API Management service instance.
+  ##   apiId: JString (required)
+  ##        : API identifier. Must be unique in the current API Management service instance.
   section = newJObject()
-  assert path != nil, "path argument is necessary due to required `apiId` field"
-  var valid_574324 = path.getOrDefault("apiId")
-  valid_574324 = validateParameter(valid_574324, JString, required = true,
+  assert path != nil,
+        "path argument is necessary due to required `operationId` field"
+  var valid_564224 = path.getOrDefault("operationId")
+  valid_564224 = validateParameter(valid_564224, JString, required = true,
                                  default = nil)
-  if valid_574324 != nil:
-    section.add "apiId", valid_574324
-  var valid_574325 = path.getOrDefault("operationId")
-  valid_574325 = validateParameter(valid_574325, JString, required = true,
+  if valid_564224 != nil:
+    section.add "operationId", valid_564224
+  var valid_564225 = path.getOrDefault("apiId")
+  valid_564225 = validateParameter(valid_564225, JString, required = true,
                                  default = nil)
-  if valid_574325 != nil:
-    section.add "operationId", valid_574325
+  if valid_564225 != nil:
+    section.add "apiId", valid_564225
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1203,11 +1212,11 @@ proc validate_ApiOperationPolicyListByOperation_574322(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574326 = query.getOrDefault("api-version")
-  valid_574326 = validateParameter(valid_574326, JString, required = true,
+  var valid_564226 = query.getOrDefault("api-version")
+  valid_564226 = validateParameter(valid_564226, JString, required = true,
                                  default = nil)
-  if valid_574326 != nil:
-    section.add "api-version", valid_574326
+  if valid_564226 != nil:
+    section.add "api-version", valid_564226
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1216,45 +1225,45 @@ proc validate_ApiOperationPolicyListByOperation_574322(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574327: Call_ApiOperationPolicyListByOperation_574321;
+proc call*(call_564227: Call_ApiOperationPolicyListByOperation_564221;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Get the list of policy configuration at the API Operation level.
   ## 
-  let valid = call_574327.validator(path, query, header, formData, body)
-  let scheme = call_574327.pickScheme
+  let valid = call_564227.validator(path, query, header, formData, body)
+  let scheme = call_564227.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574327.url(scheme.get, call_574327.host, call_574327.base,
-                         call_574327.route, valid.getOrDefault("path"),
+  let url = call_564227.url(scheme.get, call_564227.host, call_564227.base,
+                         call_564227.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574327, url, valid)
+  result = hook(call_564227, url, valid)
 
-proc call*(call_574328: Call_ApiOperationPolicyListByOperation_574321;
-          apiVersion: string; apiId: string; operationId: string): Recallable =
+proc call*(call_564228: Call_ApiOperationPolicyListByOperation_564221;
+          apiVersion: string; operationId: string; apiId: string): Recallable =
   ## apiOperationPolicyListByOperation
   ## Get the list of policy configuration at the API Operation level.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
-  ##   apiId: string (required)
-  ##        : API identifier. Must be unique in the current API Management service instance.
   ##   operationId: string (required)
   ##              : Operation identifier within an API. Must be unique in the current API Management service instance.
-  var path_574329 = newJObject()
-  var query_574330 = newJObject()
-  add(query_574330, "api-version", newJString(apiVersion))
-  add(path_574329, "apiId", newJString(apiId))
-  add(path_574329, "operationId", newJString(operationId))
-  result = call_574328.call(path_574329, query_574330, nil, nil, nil)
+  ##   apiId: string (required)
+  ##        : API identifier. Must be unique in the current API Management service instance.
+  var path_564229 = newJObject()
+  var query_564230 = newJObject()
+  add(query_564230, "api-version", newJString(apiVersion))
+  add(path_564229, "operationId", newJString(operationId))
+  add(path_564229, "apiId", newJString(apiId))
+  result = call_564228.call(path_564229, query_564230, nil, nil, nil)
 
-var apiOperationPolicyListByOperation* = Call_ApiOperationPolicyListByOperation_574321(
+var apiOperationPolicyListByOperation* = Call_ApiOperationPolicyListByOperation_564221(
     name: "apiOperationPolicyListByOperation", meth: HttpMethod.HttpGet,
     host: "azure.local", route: "/apis/{apiId}/operations/{operationId}/policies",
-    validator: validate_ApiOperationPolicyListByOperation_574322, base: "",
-    url: url_ApiOperationPolicyListByOperation_574323, schemes: {Scheme.Https})
+    validator: validate_ApiOperationPolicyListByOperation_564222, base: "",
+    url: url_ApiOperationPolicyListByOperation_564223, schemes: {Scheme.Https})
 type
-  Call_ApiOperationPolicyCreateOrUpdate_574355 = ref object of OpenApiRestCall_573657
-proc url_ApiOperationPolicyCreateOrUpdate_574357(protocol: Scheme; host: string;
+  Call_ApiOperationPolicyCreateOrUpdate_564255 = ref object of OpenApiRestCall_563555
+proc url_ApiOperationPolicyCreateOrUpdate_564257(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1275,36 +1284,37 @@ proc url_ApiOperationPolicyCreateOrUpdate_574357(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ApiOperationPolicyCreateOrUpdate_574356(path: JsonNode;
+proc validate_ApiOperationPolicyCreateOrUpdate_564256(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Creates or updates policy configuration for the API Operation level.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
+  ##   operationId: JString (required)
+  ##              : Operation identifier within an API. Must be unique in the current API Management service instance.
   ##   apiId: JString (required)
   ##        : API identifier. Must be unique in the current API Management service instance.
   ##   policyId: JString (required)
   ##           : The identifier of the Policy.
-  ##   operationId: JString (required)
-  ##              : Operation identifier within an API. Must be unique in the current API Management service instance.
   section = newJObject()
-  assert path != nil, "path argument is necessary due to required `apiId` field"
-  var valid_574358 = path.getOrDefault("apiId")
-  valid_574358 = validateParameter(valid_574358, JString, required = true,
+  assert path != nil,
+        "path argument is necessary due to required `operationId` field"
+  var valid_564258 = path.getOrDefault("operationId")
+  valid_564258 = validateParameter(valid_564258, JString, required = true,
                                  default = nil)
-  if valid_574358 != nil:
-    section.add "apiId", valid_574358
-  var valid_574359 = path.getOrDefault("policyId")
-  valid_574359 = validateParameter(valid_574359, JString, required = true,
+  if valid_564258 != nil:
+    section.add "operationId", valid_564258
+  var valid_564259 = path.getOrDefault("apiId")
+  valid_564259 = validateParameter(valid_564259, JString, required = true,
+                                 default = nil)
+  if valid_564259 != nil:
+    section.add "apiId", valid_564259
+  var valid_564260 = path.getOrDefault("policyId")
+  valid_564260 = validateParameter(valid_564260, JString, required = true,
                                  default = newJString("policy"))
-  if valid_574359 != nil:
-    section.add "policyId", valid_574359
-  var valid_574360 = path.getOrDefault("operationId")
-  valid_574360 = validateParameter(valid_574360, JString, required = true,
-                                 default = nil)
-  if valid_574360 != nil:
-    section.add "operationId", valid_574360
+  if valid_564260 != nil:
+    section.add "policyId", valid_564260
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1312,11 +1322,11 @@ proc validate_ApiOperationPolicyCreateOrUpdate_574356(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574361 = query.getOrDefault("api-version")
-  valid_574361 = validateParameter(valid_574361, JString, required = true,
+  var valid_564261 = query.getOrDefault("api-version")
+  valid_564261 = validateParameter(valid_564261, JString, required = true,
                                  default = nil)
-  if valid_574361 != nil:
-    section.add "api-version", valid_574361
+  if valid_564261 != nil:
+    section.add "api-version", valid_564261
   result.add "query", section
   ## parameters in `header` object:
   ##   If-Match: JString (required)
@@ -1324,11 +1334,11 @@ proc validate_ApiOperationPolicyCreateOrUpdate_574356(path: JsonNode;
   section = newJObject()
   assert header != nil,
         "header argument is necessary due to required `If-Match` field"
-  var valid_574362 = header.getOrDefault("If-Match")
-  valid_574362 = validateParameter(valid_574362, JString, required = true,
+  var valid_564262 = header.getOrDefault("If-Match")
+  valid_564262 = validateParameter(valid_564262, JString, required = true,
                                  default = nil)
-  if valid_574362 != nil:
-    section.add "If-Match", valid_574362
+  if valid_564262 != nil:
+    section.add "If-Match", valid_564262
   result.add "header", section
   section = newJObject()
   result.add "formData", section
@@ -1340,55 +1350,55 @@ proc validate_ApiOperationPolicyCreateOrUpdate_574356(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574364: Call_ApiOperationPolicyCreateOrUpdate_574355;
+proc call*(call_564264: Call_ApiOperationPolicyCreateOrUpdate_564255;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Creates or updates policy configuration for the API Operation level.
   ## 
-  let valid = call_574364.validator(path, query, header, formData, body)
-  let scheme = call_574364.pickScheme
+  let valid = call_564264.validator(path, query, header, formData, body)
+  let scheme = call_564264.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574364.url(scheme.get, call_574364.host, call_574364.base,
-                         call_574364.route, valid.getOrDefault("path"),
+  let url = call_564264.url(scheme.get, call_564264.host, call_564264.base,
+                         call_564264.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574364, url, valid)
+  result = hook(call_564264, url, valid)
 
-proc call*(call_574365: Call_ApiOperationPolicyCreateOrUpdate_574355;
-          apiVersion: string; apiId: string; parameters: JsonNode;
-          operationId: string; policyId: string = "policy"): Recallable =
+proc call*(call_564265: Call_ApiOperationPolicyCreateOrUpdate_564255;
+          apiVersion: string; operationId: string; apiId: string;
+          parameters: JsonNode; policyId: string = "policy"): Recallable =
   ## apiOperationPolicyCreateOrUpdate
   ## Creates or updates policy configuration for the API Operation level.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
+  ##   operationId: string (required)
+  ##              : Operation identifier within an API. Must be unique in the current API Management service instance.
   ##   apiId: string (required)
   ##        : API identifier. Must be unique in the current API Management service instance.
   ##   policyId: string (required)
   ##           : The identifier of the Policy.
   ##   parameters: JObject (required)
   ##             : The policy contents to apply.
-  ##   operationId: string (required)
-  ##              : Operation identifier within an API. Must be unique in the current API Management service instance.
-  var path_574366 = newJObject()
-  var query_574367 = newJObject()
-  var body_574368 = newJObject()
-  add(query_574367, "api-version", newJString(apiVersion))
-  add(path_574366, "apiId", newJString(apiId))
-  add(path_574366, "policyId", newJString(policyId))
+  var path_564266 = newJObject()
+  var query_564267 = newJObject()
+  var body_564268 = newJObject()
+  add(query_564267, "api-version", newJString(apiVersion))
+  add(path_564266, "operationId", newJString(operationId))
+  add(path_564266, "apiId", newJString(apiId))
+  add(path_564266, "policyId", newJString(policyId))
   if parameters != nil:
-    body_574368 = parameters
-  add(path_574366, "operationId", newJString(operationId))
-  result = call_574365.call(path_574366, query_574367, nil, nil, body_574368)
+    body_564268 = parameters
+  result = call_564265.call(path_564266, query_564267, nil, nil, body_564268)
 
-var apiOperationPolicyCreateOrUpdate* = Call_ApiOperationPolicyCreateOrUpdate_574355(
+var apiOperationPolicyCreateOrUpdate* = Call_ApiOperationPolicyCreateOrUpdate_564255(
     name: "apiOperationPolicyCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "azure.local",
     route: "/apis/{apiId}/operations/{operationId}/policies/{policyId}",
-    validator: validate_ApiOperationPolicyCreateOrUpdate_574356, base: "",
-    url: url_ApiOperationPolicyCreateOrUpdate_574357, schemes: {Scheme.Https})
+    validator: validate_ApiOperationPolicyCreateOrUpdate_564256, base: "",
+    url: url_ApiOperationPolicyCreateOrUpdate_564257, schemes: {Scheme.Https})
 type
-  Call_ApiOperationPolicyGet_574331 = ref object of OpenApiRestCall_573657
-proc url_ApiOperationPolicyGet_574333(protocol: Scheme; host: string; base: string;
+  Call_ApiOperationPolicyGet_564231 = ref object of OpenApiRestCall_563555
+proc url_ApiOperationPolicyGet_564233(protocol: Scheme; host: string; base: string;
                                      route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1409,36 +1419,37 @@ proc url_ApiOperationPolicyGet_574333(protocol: Scheme; host: string; base: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ApiOperationPolicyGet_574332(path: JsonNode; query: JsonNode;
+proc validate_ApiOperationPolicyGet_564232(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Get the policy configuration at the API Operation level.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
+  ##   operationId: JString (required)
+  ##              : Operation identifier within an API. Must be unique in the current API Management service instance.
   ##   apiId: JString (required)
   ##        : API identifier. Must be unique in the current API Management service instance.
   ##   policyId: JString (required)
   ##           : The identifier of the Policy.
-  ##   operationId: JString (required)
-  ##              : Operation identifier within an API. Must be unique in the current API Management service instance.
   section = newJObject()
-  assert path != nil, "path argument is necessary due to required `apiId` field"
-  var valid_574334 = path.getOrDefault("apiId")
-  valid_574334 = validateParameter(valid_574334, JString, required = true,
+  assert path != nil,
+        "path argument is necessary due to required `operationId` field"
+  var valid_564234 = path.getOrDefault("operationId")
+  valid_564234 = validateParameter(valid_564234, JString, required = true,
                                  default = nil)
-  if valid_574334 != nil:
-    section.add "apiId", valid_574334
-  var valid_574348 = path.getOrDefault("policyId")
-  valid_574348 = validateParameter(valid_574348, JString, required = true,
+  if valid_564234 != nil:
+    section.add "operationId", valid_564234
+  var valid_564235 = path.getOrDefault("apiId")
+  valid_564235 = validateParameter(valid_564235, JString, required = true,
+                                 default = nil)
+  if valid_564235 != nil:
+    section.add "apiId", valid_564235
+  var valid_564249 = path.getOrDefault("policyId")
+  valid_564249 = validateParameter(valid_564249, JString, required = true,
                                  default = newJString("policy"))
-  if valid_574348 != nil:
-    section.add "policyId", valid_574348
-  var valid_574349 = path.getOrDefault("operationId")
-  valid_574349 = validateParameter(valid_574349, JString, required = true,
-                                 default = nil)
-  if valid_574349 != nil:
-    section.add "operationId", valid_574349
+  if valid_564249 != nil:
+    section.add "policyId", valid_564249
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1446,11 +1457,11 @@ proc validate_ApiOperationPolicyGet_574332(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574350 = query.getOrDefault("api-version")
-  valid_574350 = validateParameter(valid_574350, JString, required = true,
+  var valid_564250 = query.getOrDefault("api-version")
+  valid_564250 = validateParameter(valid_564250, JString, required = true,
                                  default = nil)
-  if valid_574350 != nil:
-    section.add "api-version", valid_574350
+  if valid_564250 != nil:
+    section.add "api-version", valid_564250
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1459,47 +1470,47 @@ proc validate_ApiOperationPolicyGet_574332(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574351: Call_ApiOperationPolicyGet_574331; path: JsonNode;
+proc call*(call_564251: Call_ApiOperationPolicyGet_564231; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get the policy configuration at the API Operation level.
   ## 
-  let valid = call_574351.validator(path, query, header, formData, body)
-  let scheme = call_574351.pickScheme
+  let valid = call_564251.validator(path, query, header, formData, body)
+  let scheme = call_564251.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574351.url(scheme.get, call_574351.host, call_574351.base,
-                         call_574351.route, valid.getOrDefault("path"),
+  let url = call_564251.url(scheme.get, call_564251.host, call_564251.base,
+                         call_564251.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574351, url, valid)
+  result = hook(call_564251, url, valid)
 
-proc call*(call_574352: Call_ApiOperationPolicyGet_574331; apiVersion: string;
-          apiId: string; operationId: string; policyId: string = "policy"): Recallable =
+proc call*(call_564252: Call_ApiOperationPolicyGet_564231; apiVersion: string;
+          operationId: string; apiId: string; policyId: string = "policy"): Recallable =
   ## apiOperationPolicyGet
   ## Get the policy configuration at the API Operation level.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
+  ##   operationId: string (required)
+  ##              : Operation identifier within an API. Must be unique in the current API Management service instance.
   ##   apiId: string (required)
   ##        : API identifier. Must be unique in the current API Management service instance.
   ##   policyId: string (required)
   ##           : The identifier of the Policy.
-  ##   operationId: string (required)
-  ##              : Operation identifier within an API. Must be unique in the current API Management service instance.
-  var path_574353 = newJObject()
-  var query_574354 = newJObject()
-  add(query_574354, "api-version", newJString(apiVersion))
-  add(path_574353, "apiId", newJString(apiId))
-  add(path_574353, "policyId", newJString(policyId))
-  add(path_574353, "operationId", newJString(operationId))
-  result = call_574352.call(path_574353, query_574354, nil, nil, nil)
+  var path_564253 = newJObject()
+  var query_564254 = newJObject()
+  add(query_564254, "api-version", newJString(apiVersion))
+  add(path_564253, "operationId", newJString(operationId))
+  add(path_564253, "apiId", newJString(apiId))
+  add(path_564253, "policyId", newJString(policyId))
+  result = call_564252.call(path_564253, query_564254, nil, nil, nil)
 
-var apiOperationPolicyGet* = Call_ApiOperationPolicyGet_574331(
+var apiOperationPolicyGet* = Call_ApiOperationPolicyGet_564231(
     name: "apiOperationPolicyGet", meth: HttpMethod.HttpGet, host: "azure.local",
     route: "/apis/{apiId}/operations/{operationId}/policies/{policyId}",
-    validator: validate_ApiOperationPolicyGet_574332, base: "",
-    url: url_ApiOperationPolicyGet_574333, schemes: {Scheme.Https})
+    validator: validate_ApiOperationPolicyGet_564232, base: "",
+    url: url_ApiOperationPolicyGet_564233, schemes: {Scheme.Https})
 type
-  Call_ApiOperationPolicyDelete_574369 = ref object of OpenApiRestCall_573657
-proc url_ApiOperationPolicyDelete_574371(protocol: Scheme; host: string;
+  Call_ApiOperationPolicyDelete_564269 = ref object of OpenApiRestCall_563555
+proc url_ApiOperationPolicyDelete_564271(protocol: Scheme; host: string;
                                         base: string; route: string; path: JsonNode;
                                         query: JsonNode): Uri =
   result.scheme = $protocol
@@ -1521,36 +1532,37 @@ proc url_ApiOperationPolicyDelete_574371(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ApiOperationPolicyDelete_574370(path: JsonNode; query: JsonNode;
+proc validate_ApiOperationPolicyDelete_564270(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Deletes the policy configuration at the Api Operation.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
+  ##   operationId: JString (required)
+  ##              : Operation identifier within an API. Must be unique in the current API Management service instance.
   ##   apiId: JString (required)
   ##        : API identifier. Must be unique in the current API Management service instance.
   ##   policyId: JString (required)
   ##           : The identifier of the Policy.
-  ##   operationId: JString (required)
-  ##              : Operation identifier within an API. Must be unique in the current API Management service instance.
   section = newJObject()
-  assert path != nil, "path argument is necessary due to required `apiId` field"
-  var valid_574372 = path.getOrDefault("apiId")
-  valid_574372 = validateParameter(valid_574372, JString, required = true,
+  assert path != nil,
+        "path argument is necessary due to required `operationId` field"
+  var valid_564272 = path.getOrDefault("operationId")
+  valid_564272 = validateParameter(valid_564272, JString, required = true,
                                  default = nil)
-  if valid_574372 != nil:
-    section.add "apiId", valid_574372
-  var valid_574373 = path.getOrDefault("policyId")
-  valid_574373 = validateParameter(valid_574373, JString, required = true,
+  if valid_564272 != nil:
+    section.add "operationId", valid_564272
+  var valid_564273 = path.getOrDefault("apiId")
+  valid_564273 = validateParameter(valid_564273, JString, required = true,
+                                 default = nil)
+  if valid_564273 != nil:
+    section.add "apiId", valid_564273
+  var valid_564274 = path.getOrDefault("policyId")
+  valid_564274 = validateParameter(valid_564274, JString, required = true,
                                  default = newJString("policy"))
-  if valid_574373 != nil:
-    section.add "policyId", valid_574373
-  var valid_574374 = path.getOrDefault("operationId")
-  valid_574374 = validateParameter(valid_574374, JString, required = true,
-                                 default = nil)
-  if valid_574374 != nil:
-    section.add "operationId", valid_574374
+  if valid_564274 != nil:
+    section.add "policyId", valid_564274
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1558,11 +1570,11 @@ proc validate_ApiOperationPolicyDelete_574370(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574375 = query.getOrDefault("api-version")
-  valid_574375 = validateParameter(valid_574375, JString, required = true,
+  var valid_564275 = query.getOrDefault("api-version")
+  valid_564275 = validateParameter(valid_564275, JString, required = true,
                                  default = nil)
-  if valid_574375 != nil:
-    section.add "api-version", valid_574375
+  if valid_564275 != nil:
+    section.add "api-version", valid_564275
   result.add "query", section
   ## parameters in `header` object:
   ##   If-Match: JString (required)
@@ -1570,59 +1582,59 @@ proc validate_ApiOperationPolicyDelete_574370(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert header != nil,
         "header argument is necessary due to required `If-Match` field"
-  var valid_574376 = header.getOrDefault("If-Match")
-  valid_574376 = validateParameter(valid_574376, JString, required = true,
+  var valid_564276 = header.getOrDefault("If-Match")
+  valid_564276 = validateParameter(valid_564276, JString, required = true,
                                  default = nil)
-  if valid_574376 != nil:
-    section.add "If-Match", valid_574376
+  if valid_564276 != nil:
+    section.add "If-Match", valid_564276
   result.add "header", section
   section = newJObject()
   result.add "formData", section
   if body != nil:
     result.add "body", body
 
-proc call*(call_574377: Call_ApiOperationPolicyDelete_574369; path: JsonNode;
+proc call*(call_564277: Call_ApiOperationPolicyDelete_564269; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes the policy configuration at the Api Operation.
   ## 
-  let valid = call_574377.validator(path, query, header, formData, body)
-  let scheme = call_574377.pickScheme
+  let valid = call_564277.validator(path, query, header, formData, body)
+  let scheme = call_564277.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574377.url(scheme.get, call_574377.host, call_574377.base,
-                         call_574377.route, valid.getOrDefault("path"),
+  let url = call_564277.url(scheme.get, call_564277.host, call_564277.base,
+                         call_564277.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574377, url, valid)
+  result = hook(call_564277, url, valid)
 
-proc call*(call_574378: Call_ApiOperationPolicyDelete_574369; apiVersion: string;
-          apiId: string; operationId: string; policyId: string = "policy"): Recallable =
+proc call*(call_564278: Call_ApiOperationPolicyDelete_564269; apiVersion: string;
+          operationId: string; apiId: string; policyId: string = "policy"): Recallable =
   ## apiOperationPolicyDelete
   ## Deletes the policy configuration at the Api Operation.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
+  ##   operationId: string (required)
+  ##              : Operation identifier within an API. Must be unique in the current API Management service instance.
   ##   apiId: string (required)
   ##        : API identifier. Must be unique in the current API Management service instance.
   ##   policyId: string (required)
   ##           : The identifier of the Policy.
-  ##   operationId: string (required)
-  ##              : Operation identifier within an API. Must be unique in the current API Management service instance.
-  var path_574379 = newJObject()
-  var query_574380 = newJObject()
-  add(query_574380, "api-version", newJString(apiVersion))
-  add(path_574379, "apiId", newJString(apiId))
-  add(path_574379, "policyId", newJString(policyId))
-  add(path_574379, "operationId", newJString(operationId))
-  result = call_574378.call(path_574379, query_574380, nil, nil, nil)
+  var path_564279 = newJObject()
+  var query_564280 = newJObject()
+  add(query_564280, "api-version", newJString(apiVersion))
+  add(path_564279, "operationId", newJString(operationId))
+  add(path_564279, "apiId", newJString(apiId))
+  add(path_564279, "policyId", newJString(policyId))
+  result = call_564278.call(path_564279, query_564280, nil, nil, nil)
 
-var apiOperationPolicyDelete* = Call_ApiOperationPolicyDelete_574369(
+var apiOperationPolicyDelete* = Call_ApiOperationPolicyDelete_564269(
     name: "apiOperationPolicyDelete", meth: HttpMethod.HttpDelete,
     host: "azure.local",
     route: "/apis/{apiId}/operations/{operationId}/policies/{policyId}",
-    validator: validate_ApiOperationPolicyDelete_574370, base: "",
-    url: url_ApiOperationPolicyDelete_574371, schemes: {Scheme.Https})
+    validator: validate_ApiOperationPolicyDelete_564270, base: "",
+    url: url_ApiOperationPolicyDelete_564271, schemes: {Scheme.Https})
 type
-  Call_ApiPolicyListByApi_574381 = ref object of OpenApiRestCall_573657
-proc url_ApiPolicyListByApi_574383(protocol: Scheme; host: string; base: string;
+  Call_ApiPolicyListByApi_564281 = ref object of OpenApiRestCall_563555
+proc url_ApiPolicyListByApi_564283(protocol: Scheme; host: string; base: string;
                                   route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1638,7 +1650,7 @@ proc url_ApiPolicyListByApi_574383(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ApiPolicyListByApi_574382(path: JsonNode; query: JsonNode;
+proc validate_ApiPolicyListByApi_564282(path: JsonNode; query: JsonNode;
                                        header: JsonNode; formData: JsonNode;
                                        body: JsonNode): JsonNode =
   ## Get the policy configuration at the API level.
@@ -1650,11 +1662,11 @@ proc validate_ApiPolicyListByApi_574382(path: JsonNode; query: JsonNode;
   ##        : API identifier. Must be unique in the current API Management service instance.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `apiId` field"
-  var valid_574384 = path.getOrDefault("apiId")
-  valid_574384 = validateParameter(valid_574384, JString, required = true,
+  var valid_564284 = path.getOrDefault("apiId")
+  valid_564284 = validateParameter(valid_564284, JString, required = true,
                                  default = nil)
-  if valid_574384 != nil:
-    section.add "apiId", valid_574384
+  if valid_564284 != nil:
+    section.add "apiId", valid_564284
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1662,11 +1674,11 @@ proc validate_ApiPolicyListByApi_574382(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574385 = query.getOrDefault("api-version")
-  valid_574385 = validateParameter(valid_574385, JString, required = true,
+  var valid_564285 = query.getOrDefault("api-version")
+  valid_564285 = validateParameter(valid_564285, JString, required = true,
                                  default = nil)
-  if valid_574385 != nil:
-    section.add "api-version", valid_574385
+  if valid_564285 != nil:
+    section.add "api-version", valid_564285
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1675,20 +1687,20 @@ proc validate_ApiPolicyListByApi_574382(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574386: Call_ApiPolicyListByApi_574381; path: JsonNode;
+proc call*(call_564286: Call_ApiPolicyListByApi_564281; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get the policy configuration at the API level.
   ## 
-  let valid = call_574386.validator(path, query, header, formData, body)
-  let scheme = call_574386.pickScheme
+  let valid = call_564286.validator(path, query, header, formData, body)
+  let scheme = call_564286.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574386.url(scheme.get, call_574386.host, call_574386.base,
-                         call_574386.route, valid.getOrDefault("path"),
+  let url = call_564286.url(scheme.get, call_564286.host, call_564286.base,
+                         call_564286.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574386, url, valid)
+  result = hook(call_564286, url, valid)
 
-proc call*(call_574387: Call_ApiPolicyListByApi_574381; apiVersion: string;
+proc call*(call_564287: Call_ApiPolicyListByApi_564281; apiVersion: string;
           apiId: string): Recallable =
   ## apiPolicyListByApi
   ## Get the policy configuration at the API level.
@@ -1696,19 +1708,19 @@ proc call*(call_574387: Call_ApiPolicyListByApi_574381; apiVersion: string;
   ##             : Version of the API to be used with the client request.
   ##   apiId: string (required)
   ##        : API identifier. Must be unique in the current API Management service instance.
-  var path_574388 = newJObject()
-  var query_574389 = newJObject()
-  add(query_574389, "api-version", newJString(apiVersion))
-  add(path_574388, "apiId", newJString(apiId))
-  result = call_574387.call(path_574388, query_574389, nil, nil, nil)
+  var path_564288 = newJObject()
+  var query_564289 = newJObject()
+  add(query_564289, "api-version", newJString(apiVersion))
+  add(path_564288, "apiId", newJString(apiId))
+  result = call_564287.call(path_564288, query_564289, nil, nil, nil)
 
-var apiPolicyListByApi* = Call_ApiPolicyListByApi_574381(
+var apiPolicyListByApi* = Call_ApiPolicyListByApi_564281(
     name: "apiPolicyListByApi", meth: HttpMethod.HttpGet, host: "azure.local",
-    route: "/apis/{apiId}/policies", validator: validate_ApiPolicyListByApi_574382,
-    base: "", url: url_ApiPolicyListByApi_574383, schemes: {Scheme.Https})
+    route: "/apis/{apiId}/policies", validator: validate_ApiPolicyListByApi_564282,
+    base: "", url: url_ApiPolicyListByApi_564283, schemes: {Scheme.Https})
 type
-  Call_ApiPolicyCreateOrUpdate_574400 = ref object of OpenApiRestCall_573657
-proc url_ApiPolicyCreateOrUpdate_574402(protocol: Scheme; host: string; base: string;
+  Call_ApiPolicyCreateOrUpdate_564300 = ref object of OpenApiRestCall_563555
+proc url_ApiPolicyCreateOrUpdate_564302(protocol: Scheme; host: string; base: string;
                                        route: string; path: JsonNode;
                                        query: JsonNode): Uri =
   result.scheme = $protocol
@@ -1727,7 +1739,7 @@ proc url_ApiPolicyCreateOrUpdate_574402(protocol: Scheme; host: string; base: st
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ApiPolicyCreateOrUpdate_574401(path: JsonNode; query: JsonNode;
+proc validate_ApiPolicyCreateOrUpdate_564301(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Creates or updates policy configuration for the API.
   ## 
@@ -1740,16 +1752,16 @@ proc validate_ApiPolicyCreateOrUpdate_574401(path: JsonNode; query: JsonNode;
   ##           : The identifier of the Policy.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `apiId` field"
-  var valid_574403 = path.getOrDefault("apiId")
-  valid_574403 = validateParameter(valid_574403, JString, required = true,
+  var valid_564303 = path.getOrDefault("apiId")
+  valid_564303 = validateParameter(valid_564303, JString, required = true,
                                  default = nil)
-  if valid_574403 != nil:
-    section.add "apiId", valid_574403
-  var valid_574404 = path.getOrDefault("policyId")
-  valid_574404 = validateParameter(valid_574404, JString, required = true,
+  if valid_564303 != nil:
+    section.add "apiId", valid_564303
+  var valid_564304 = path.getOrDefault("policyId")
+  valid_564304 = validateParameter(valid_564304, JString, required = true,
                                  default = newJString("policy"))
-  if valid_574404 != nil:
-    section.add "policyId", valid_574404
+  if valid_564304 != nil:
+    section.add "policyId", valid_564304
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1757,11 +1769,11 @@ proc validate_ApiPolicyCreateOrUpdate_574401(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574405 = query.getOrDefault("api-version")
-  valid_574405 = validateParameter(valid_574405, JString, required = true,
+  var valid_564305 = query.getOrDefault("api-version")
+  valid_564305 = validateParameter(valid_564305, JString, required = true,
                                  default = nil)
-  if valid_574405 != nil:
-    section.add "api-version", valid_574405
+  if valid_564305 != nil:
+    section.add "api-version", valid_564305
   result.add "query", section
   ## parameters in `header` object:
   ##   If-Match: JString (required)
@@ -1769,11 +1781,11 @@ proc validate_ApiPolicyCreateOrUpdate_574401(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert header != nil,
         "header argument is necessary due to required `If-Match` field"
-  var valid_574406 = header.getOrDefault("If-Match")
-  valid_574406 = validateParameter(valid_574406, JString, required = true,
+  var valid_564306 = header.getOrDefault("If-Match")
+  valid_564306 = validateParameter(valid_564306, JString, required = true,
                                  default = nil)
-  if valid_574406 != nil:
-    section.add "If-Match", valid_574406
+  if valid_564306 != nil:
+    section.add "If-Match", valid_564306
   result.add "header", section
   section = newJObject()
   result.add "formData", section
@@ -1785,20 +1797,20 @@ proc validate_ApiPolicyCreateOrUpdate_574401(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574408: Call_ApiPolicyCreateOrUpdate_574400; path: JsonNode;
+proc call*(call_564308: Call_ApiPolicyCreateOrUpdate_564300; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Creates or updates policy configuration for the API.
   ## 
-  let valid = call_574408.validator(path, query, header, formData, body)
-  let scheme = call_574408.pickScheme
+  let valid = call_564308.validator(path, query, header, formData, body)
+  let scheme = call_564308.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574408.url(scheme.get, call_574408.host, call_574408.base,
-                         call_574408.route, valid.getOrDefault("path"),
+  let url = call_564308.url(scheme.get, call_564308.host, call_564308.base,
+                         call_564308.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574408, url, valid)
+  result = hook(call_564308, url, valid)
 
-proc call*(call_574409: Call_ApiPolicyCreateOrUpdate_574400; apiVersion: string;
+proc call*(call_564309: Call_ApiPolicyCreateOrUpdate_564300; apiVersion: string;
           apiId: string; parameters: JsonNode; policyId: string = "policy"): Recallable =
   ## apiPolicyCreateOrUpdate
   ## Creates or updates policy configuration for the API.
@@ -1810,24 +1822,24 @@ proc call*(call_574409: Call_ApiPolicyCreateOrUpdate_574400; apiVersion: string;
   ##           : The identifier of the Policy.
   ##   parameters: JObject (required)
   ##             : The policy contents to apply.
-  var path_574410 = newJObject()
-  var query_574411 = newJObject()
-  var body_574412 = newJObject()
-  add(query_574411, "api-version", newJString(apiVersion))
-  add(path_574410, "apiId", newJString(apiId))
-  add(path_574410, "policyId", newJString(policyId))
+  var path_564310 = newJObject()
+  var query_564311 = newJObject()
+  var body_564312 = newJObject()
+  add(query_564311, "api-version", newJString(apiVersion))
+  add(path_564310, "apiId", newJString(apiId))
+  add(path_564310, "policyId", newJString(policyId))
   if parameters != nil:
-    body_574412 = parameters
-  result = call_574409.call(path_574410, query_574411, nil, nil, body_574412)
+    body_564312 = parameters
+  result = call_564309.call(path_564310, query_564311, nil, nil, body_564312)
 
-var apiPolicyCreateOrUpdate* = Call_ApiPolicyCreateOrUpdate_574400(
+var apiPolicyCreateOrUpdate* = Call_ApiPolicyCreateOrUpdate_564300(
     name: "apiPolicyCreateOrUpdate", meth: HttpMethod.HttpPut, host: "azure.local",
     route: "/apis/{apiId}/policies/{policyId}",
-    validator: validate_ApiPolicyCreateOrUpdate_574401, base: "",
-    url: url_ApiPolicyCreateOrUpdate_574402, schemes: {Scheme.Https})
+    validator: validate_ApiPolicyCreateOrUpdate_564301, base: "",
+    url: url_ApiPolicyCreateOrUpdate_564302, schemes: {Scheme.Https})
 type
-  Call_ApiPolicyGet_574390 = ref object of OpenApiRestCall_573657
-proc url_ApiPolicyGet_574392(protocol: Scheme; host: string; base: string;
+  Call_ApiPolicyGet_564290 = ref object of OpenApiRestCall_563555
+proc url_ApiPolicyGet_564292(protocol: Scheme; host: string; base: string;
                             route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1845,7 +1857,7 @@ proc url_ApiPolicyGet_574392(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ApiPolicyGet_574391(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_ApiPolicyGet_564291(path: JsonNode; query: JsonNode; header: JsonNode;
                                  formData: JsonNode; body: JsonNode): JsonNode =
   ## Get the policy configuration at the API level.
   ## 
@@ -1858,16 +1870,16 @@ proc validate_ApiPolicyGet_574391(path: JsonNode; query: JsonNode; header: JsonN
   ##           : The identifier of the Policy.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `apiId` field"
-  var valid_574393 = path.getOrDefault("apiId")
-  valid_574393 = validateParameter(valid_574393, JString, required = true,
+  var valid_564293 = path.getOrDefault("apiId")
+  valid_564293 = validateParameter(valid_564293, JString, required = true,
                                  default = nil)
-  if valid_574393 != nil:
-    section.add "apiId", valid_574393
-  var valid_574394 = path.getOrDefault("policyId")
-  valid_574394 = validateParameter(valid_574394, JString, required = true,
+  if valid_564293 != nil:
+    section.add "apiId", valid_564293
+  var valid_564294 = path.getOrDefault("policyId")
+  valid_564294 = validateParameter(valid_564294, JString, required = true,
                                  default = newJString("policy"))
-  if valid_574394 != nil:
-    section.add "policyId", valid_574394
+  if valid_564294 != nil:
+    section.add "policyId", valid_564294
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1875,11 +1887,11 @@ proc validate_ApiPolicyGet_574391(path: JsonNode; query: JsonNode; header: JsonN
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574395 = query.getOrDefault("api-version")
-  valid_574395 = validateParameter(valid_574395, JString, required = true,
+  var valid_564295 = query.getOrDefault("api-version")
+  valid_564295 = validateParameter(valid_564295, JString, required = true,
                                  default = nil)
-  if valid_574395 != nil:
-    section.add "api-version", valid_574395
+  if valid_564295 != nil:
+    section.add "api-version", valid_564295
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1888,20 +1900,20 @@ proc validate_ApiPolicyGet_574391(path: JsonNode; query: JsonNode; header: JsonN
   if body != nil:
     result.add "body", body
 
-proc call*(call_574396: Call_ApiPolicyGet_574390; path: JsonNode; query: JsonNode;
+proc call*(call_564296: Call_ApiPolicyGet_564290; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get the policy configuration at the API level.
   ## 
-  let valid = call_574396.validator(path, query, header, formData, body)
-  let scheme = call_574396.pickScheme
+  let valid = call_564296.validator(path, query, header, formData, body)
+  let scheme = call_564296.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574396.url(scheme.get, call_574396.host, call_574396.base,
-                         call_574396.route, valid.getOrDefault("path"),
+  let url = call_564296.url(scheme.get, call_564296.host, call_564296.base,
+                         call_564296.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574396, url, valid)
+  result = hook(call_564296, url, valid)
 
-proc call*(call_574397: Call_ApiPolicyGet_574390; apiVersion: string; apiId: string;
+proc call*(call_564297: Call_ApiPolicyGet_564290; apiVersion: string; apiId: string;
           policyId: string = "policy"): Recallable =
   ## apiPolicyGet
   ## Get the policy configuration at the API level.
@@ -1911,20 +1923,20 @@ proc call*(call_574397: Call_ApiPolicyGet_574390; apiVersion: string; apiId: str
   ##        : API identifier. Must be unique in the current API Management service instance.
   ##   policyId: string (required)
   ##           : The identifier of the Policy.
-  var path_574398 = newJObject()
-  var query_574399 = newJObject()
-  add(query_574399, "api-version", newJString(apiVersion))
-  add(path_574398, "apiId", newJString(apiId))
-  add(path_574398, "policyId", newJString(policyId))
-  result = call_574397.call(path_574398, query_574399, nil, nil, nil)
+  var path_564298 = newJObject()
+  var query_564299 = newJObject()
+  add(query_564299, "api-version", newJString(apiVersion))
+  add(path_564298, "apiId", newJString(apiId))
+  add(path_564298, "policyId", newJString(policyId))
+  result = call_564297.call(path_564298, query_564299, nil, nil, nil)
 
-var apiPolicyGet* = Call_ApiPolicyGet_574390(name: "apiPolicyGet",
+var apiPolicyGet* = Call_ApiPolicyGet_564290(name: "apiPolicyGet",
     meth: HttpMethod.HttpGet, host: "azure.local",
-    route: "/apis/{apiId}/policies/{policyId}", validator: validate_ApiPolicyGet_574391,
-    base: "", url: url_ApiPolicyGet_574392, schemes: {Scheme.Https})
+    route: "/apis/{apiId}/policies/{policyId}", validator: validate_ApiPolicyGet_564291,
+    base: "", url: url_ApiPolicyGet_564292, schemes: {Scheme.Https})
 type
-  Call_ApiPolicyDelete_574413 = ref object of OpenApiRestCall_573657
-proc url_ApiPolicyDelete_574415(protocol: Scheme; host: string; base: string;
+  Call_ApiPolicyDelete_564313 = ref object of OpenApiRestCall_563555
+proc url_ApiPolicyDelete_564315(protocol: Scheme; host: string; base: string;
                                route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1942,7 +1954,7 @@ proc url_ApiPolicyDelete_574415(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ApiPolicyDelete_574414(path: JsonNode; query: JsonNode;
+proc validate_ApiPolicyDelete_564314(path: JsonNode; query: JsonNode;
                                     header: JsonNode; formData: JsonNode;
                                     body: JsonNode): JsonNode =
   ## Deletes the policy configuration at the Api.
@@ -1956,16 +1968,16 @@ proc validate_ApiPolicyDelete_574414(path: JsonNode; query: JsonNode;
   ##           : The identifier of the Policy.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `apiId` field"
-  var valid_574416 = path.getOrDefault("apiId")
-  valid_574416 = validateParameter(valid_574416, JString, required = true,
+  var valid_564316 = path.getOrDefault("apiId")
+  valid_564316 = validateParameter(valid_564316, JString, required = true,
                                  default = nil)
-  if valid_574416 != nil:
-    section.add "apiId", valid_574416
-  var valid_574417 = path.getOrDefault("policyId")
-  valid_574417 = validateParameter(valid_574417, JString, required = true,
+  if valid_564316 != nil:
+    section.add "apiId", valid_564316
+  var valid_564317 = path.getOrDefault("policyId")
+  valid_564317 = validateParameter(valid_564317, JString, required = true,
                                  default = newJString("policy"))
-  if valid_574417 != nil:
-    section.add "policyId", valid_574417
+  if valid_564317 != nil:
+    section.add "policyId", valid_564317
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1973,11 +1985,11 @@ proc validate_ApiPolicyDelete_574414(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574418 = query.getOrDefault("api-version")
-  valid_574418 = validateParameter(valid_574418, JString, required = true,
+  var valid_564318 = query.getOrDefault("api-version")
+  valid_564318 = validateParameter(valid_564318, JString, required = true,
                                  default = nil)
-  if valid_574418 != nil:
-    section.add "api-version", valid_574418
+  if valid_564318 != nil:
+    section.add "api-version", valid_564318
   result.add "query", section
   ## parameters in `header` object:
   ##   If-Match: JString (required)
@@ -1985,31 +1997,31 @@ proc validate_ApiPolicyDelete_574414(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert header != nil,
         "header argument is necessary due to required `If-Match` field"
-  var valid_574419 = header.getOrDefault("If-Match")
-  valid_574419 = validateParameter(valid_574419, JString, required = true,
+  var valid_564319 = header.getOrDefault("If-Match")
+  valid_564319 = validateParameter(valid_564319, JString, required = true,
                                  default = nil)
-  if valid_574419 != nil:
-    section.add "If-Match", valid_574419
+  if valid_564319 != nil:
+    section.add "If-Match", valid_564319
   result.add "header", section
   section = newJObject()
   result.add "formData", section
   if body != nil:
     result.add "body", body
 
-proc call*(call_574420: Call_ApiPolicyDelete_574413; path: JsonNode; query: JsonNode;
+proc call*(call_564320: Call_ApiPolicyDelete_564313; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes the policy configuration at the Api.
   ## 
-  let valid = call_574420.validator(path, query, header, formData, body)
-  let scheme = call_574420.pickScheme
+  let valid = call_564320.validator(path, query, header, formData, body)
+  let scheme = call_564320.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574420.url(scheme.get, call_574420.host, call_574420.base,
-                         call_574420.route, valid.getOrDefault("path"),
+  let url = call_564320.url(scheme.get, call_564320.host, call_564320.base,
+                         call_564320.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574420, url, valid)
+  result = hook(call_564320, url, valid)
 
-proc call*(call_574421: Call_ApiPolicyDelete_574413; apiVersion: string;
+proc call*(call_564321: Call_ApiPolicyDelete_564313; apiVersion: string;
           apiId: string; policyId: string = "policy"): Recallable =
   ## apiPolicyDelete
   ## Deletes the policy configuration at the Api.
@@ -2019,21 +2031,21 @@ proc call*(call_574421: Call_ApiPolicyDelete_574413; apiVersion: string;
   ##        : API identifier. Must be unique in the current API Management service instance.
   ##   policyId: string (required)
   ##           : The identifier of the Policy.
-  var path_574422 = newJObject()
-  var query_574423 = newJObject()
-  add(query_574423, "api-version", newJString(apiVersion))
-  add(path_574422, "apiId", newJString(apiId))
-  add(path_574422, "policyId", newJString(policyId))
-  result = call_574421.call(path_574422, query_574423, nil, nil, nil)
+  var path_564322 = newJObject()
+  var query_564323 = newJObject()
+  add(query_564323, "api-version", newJString(apiVersion))
+  add(path_564322, "apiId", newJString(apiId))
+  add(path_564322, "policyId", newJString(policyId))
+  result = call_564321.call(path_564322, query_564323, nil, nil, nil)
 
-var apiPolicyDelete* = Call_ApiPolicyDelete_574413(name: "apiPolicyDelete",
+var apiPolicyDelete* = Call_ApiPolicyDelete_564313(name: "apiPolicyDelete",
     meth: HttpMethod.HttpDelete, host: "azure.local",
     route: "/apis/{apiId}/policies/{policyId}",
-    validator: validate_ApiPolicyDelete_574414, base: "", url: url_ApiPolicyDelete_574415,
+    validator: validate_ApiPolicyDelete_564314, base: "", url: url_ApiPolicyDelete_564315,
     schemes: {Scheme.Https})
 type
-  Call_ApiProductListByApis_574424 = ref object of OpenApiRestCall_573657
-proc url_ApiProductListByApis_574426(protocol: Scheme; host: string; base: string;
+  Call_ApiProductListByApis_564324 = ref object of OpenApiRestCall_563555
+proc url_ApiProductListByApis_564326(protocol: Scheme; host: string; base: string;
                                     route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2049,7 +2061,7 @@ proc url_ApiProductListByApis_574426(protocol: Scheme; host: string; base: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ApiProductListByApis_574425(path: JsonNode; query: JsonNode;
+proc validate_ApiProductListByApis_564325(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists all Products, which the API is part of.
   ## 
@@ -2060,17 +2072,17 @@ proc validate_ApiProductListByApis_574425(path: JsonNode; query: JsonNode;
   ##        : API identifier. Must be unique in the current API Management service instance.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `apiId` field"
-  var valid_574427 = path.getOrDefault("apiId")
-  valid_574427 = validateParameter(valid_574427, JString, required = true,
+  var valid_564327 = path.getOrDefault("apiId")
+  valid_564327 = validateParameter(valid_564327, JString, required = true,
                                  default = nil)
-  if valid_574427 != nil:
-    section.add "apiId", valid_574427
+  if valid_564327 != nil:
+    section.add "apiId", valid_564327
   result.add "path", section
   ## parameters in `query` object:
-  ##   api-version: JString (required)
-  ##              : Version of the API to be used with the client request.
   ##   $top: JInt
   ##       : Number of records to return.
+  ##   api-version: JString (required)
+  ##              : Version of the API to be used with the client request.
   ##   $skip: JInt
   ##        : Number of records to skip.
   ##   $filter: JString
@@ -2079,26 +2091,26 @@ proc validate_ApiProductListByApis_574425(path: JsonNode; query: JsonNode;
   ## |-------|------------------------|---------------------------------------------|
   ## | name  | ge, le, eq, ne, gt, lt | substringof, contains, startswith, endswith |
   section = newJObject()
+  var valid_564328 = query.getOrDefault("$top")
+  valid_564328 = validateParameter(valid_564328, JInt, required = false, default = nil)
+  if valid_564328 != nil:
+    section.add "$top", valid_564328
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574428 = query.getOrDefault("api-version")
-  valid_574428 = validateParameter(valid_574428, JString, required = true,
+  var valid_564329 = query.getOrDefault("api-version")
+  valid_564329 = validateParameter(valid_564329, JString, required = true,
                                  default = nil)
-  if valid_574428 != nil:
-    section.add "api-version", valid_574428
-  var valid_574429 = query.getOrDefault("$top")
-  valid_574429 = validateParameter(valid_574429, JInt, required = false, default = nil)
-  if valid_574429 != nil:
-    section.add "$top", valid_574429
-  var valid_574430 = query.getOrDefault("$skip")
-  valid_574430 = validateParameter(valid_574430, JInt, required = false, default = nil)
-  if valid_574430 != nil:
-    section.add "$skip", valid_574430
-  var valid_574431 = query.getOrDefault("$filter")
-  valid_574431 = validateParameter(valid_574431, JString, required = false,
+  if valid_564329 != nil:
+    section.add "api-version", valid_564329
+  var valid_564330 = query.getOrDefault("$skip")
+  valid_564330 = validateParameter(valid_564330, JInt, required = false, default = nil)
+  if valid_564330 != nil:
+    section.add "$skip", valid_564330
+  var valid_564331 = query.getOrDefault("$filter")
+  valid_564331 = validateParameter(valid_564331, JString, required = false,
                                  default = nil)
-  if valid_574431 != nil:
-    section.add "$filter", valid_574431
+  if valid_564331 != nil:
+    section.add "$filter", valid_564331
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2107,29 +2119,29 @@ proc validate_ApiProductListByApis_574425(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574432: Call_ApiProductListByApis_574424; path: JsonNode;
+proc call*(call_564332: Call_ApiProductListByApis_564324; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists all Products, which the API is part of.
   ## 
-  let valid = call_574432.validator(path, query, header, formData, body)
-  let scheme = call_574432.pickScheme
+  let valid = call_564332.validator(path, query, header, formData, body)
+  let scheme = call_564332.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574432.url(scheme.get, call_574432.host, call_574432.base,
-                         call_574432.route, valid.getOrDefault("path"),
+  let url = call_564332.url(scheme.get, call_564332.host, call_564332.base,
+                         call_564332.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574432, url, valid)
+  result = hook(call_564332, url, valid)
 
-proc call*(call_574433: Call_ApiProductListByApis_574424; apiVersion: string;
+proc call*(call_564333: Call_ApiProductListByApis_564324; apiVersion: string;
           apiId: string; Top: int = 0; Skip: int = 0; Filter: string = ""): Recallable =
   ## apiProductListByApis
   ## Lists all Products, which the API is part of.
+  ##   Top: int
+  ##      : Number of records to return.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
   ##   apiId: string (required)
   ##        : API identifier. Must be unique in the current API Management service instance.
-  ##   Top: int
-  ##      : Number of records to return.
   ##   Skip: int
   ##       : Number of records to skip.
   ##   Filter: string
@@ -2137,22 +2149,22 @@ proc call*(call_574433: Call_ApiProductListByApis_574424; apiVersion: string;
   ## 
   ## |-------|------------------------|---------------------------------------------|
   ## | name  | ge, le, eq, ne, gt, lt | substringof, contains, startswith, endswith |
-  var path_574434 = newJObject()
-  var query_574435 = newJObject()
-  add(query_574435, "api-version", newJString(apiVersion))
-  add(path_574434, "apiId", newJString(apiId))
-  add(query_574435, "$top", newJInt(Top))
-  add(query_574435, "$skip", newJInt(Skip))
-  add(query_574435, "$filter", newJString(Filter))
-  result = call_574433.call(path_574434, query_574435, nil, nil, nil)
+  var path_564334 = newJObject()
+  var query_564335 = newJObject()
+  add(query_564335, "$top", newJInt(Top))
+  add(query_564335, "api-version", newJString(apiVersion))
+  add(path_564334, "apiId", newJString(apiId))
+  add(query_564335, "$skip", newJInt(Skip))
+  add(query_564335, "$filter", newJString(Filter))
+  result = call_564333.call(path_564334, query_564335, nil, nil, nil)
 
-var apiProductListByApis* = Call_ApiProductListByApis_574424(
+var apiProductListByApis* = Call_ApiProductListByApis_564324(
     name: "apiProductListByApis", meth: HttpMethod.HttpGet, host: "azure.local",
-    route: "/apis/{apiId}/products", validator: validate_ApiProductListByApis_574425,
-    base: "", url: url_ApiProductListByApis_574426, schemes: {Scheme.Https})
+    route: "/apis/{apiId}/products", validator: validate_ApiProductListByApis_564325,
+    base: "", url: url_ApiProductListByApis_564326, schemes: {Scheme.Https})
 type
-  Call_ApiSchemaListByApi_574436 = ref object of OpenApiRestCall_573657
-proc url_ApiSchemaListByApi_574438(protocol: Scheme; host: string; base: string;
+  Call_ApiSchemaListByApi_564336 = ref object of OpenApiRestCall_563555
+proc url_ApiSchemaListByApi_564338(protocol: Scheme; host: string; base: string;
                                   route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2168,7 +2180,7 @@ proc url_ApiSchemaListByApi_574438(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ApiSchemaListByApi_574437(path: JsonNode; query: JsonNode;
+proc validate_ApiSchemaListByApi_564337(path: JsonNode; query: JsonNode;
                                        header: JsonNode; formData: JsonNode;
                                        body: JsonNode): JsonNode =
   ## Get the schema configuration at the API level.
@@ -2180,11 +2192,11 @@ proc validate_ApiSchemaListByApi_574437(path: JsonNode; query: JsonNode;
   ##        : API identifier. Must be unique in the current API Management service instance.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `apiId` field"
-  var valid_574439 = path.getOrDefault("apiId")
-  valid_574439 = validateParameter(valid_574439, JString, required = true,
+  var valid_564339 = path.getOrDefault("apiId")
+  valid_564339 = validateParameter(valid_564339, JString, required = true,
                                  default = nil)
-  if valid_574439 != nil:
-    section.add "apiId", valid_574439
+  if valid_564339 != nil:
+    section.add "apiId", valid_564339
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2192,11 +2204,11 @@ proc validate_ApiSchemaListByApi_574437(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574440 = query.getOrDefault("api-version")
-  valid_574440 = validateParameter(valid_574440, JString, required = true,
+  var valid_564340 = query.getOrDefault("api-version")
+  valid_564340 = validateParameter(valid_564340, JString, required = true,
                                  default = nil)
-  if valid_574440 != nil:
-    section.add "api-version", valid_574440
+  if valid_564340 != nil:
+    section.add "api-version", valid_564340
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2205,20 +2217,20 @@ proc validate_ApiSchemaListByApi_574437(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574441: Call_ApiSchemaListByApi_574436; path: JsonNode;
+proc call*(call_564341: Call_ApiSchemaListByApi_564336; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get the schema configuration at the API level.
   ## 
-  let valid = call_574441.validator(path, query, header, formData, body)
-  let scheme = call_574441.pickScheme
+  let valid = call_564341.validator(path, query, header, formData, body)
+  let scheme = call_564341.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574441.url(scheme.get, call_574441.host, call_574441.base,
-                         call_574441.route, valid.getOrDefault("path"),
+  let url = call_564341.url(scheme.get, call_564341.host, call_564341.base,
+                         call_564341.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574441, url, valid)
+  result = hook(call_564341, url, valid)
 
-proc call*(call_574442: Call_ApiSchemaListByApi_574436; apiVersion: string;
+proc call*(call_564342: Call_ApiSchemaListByApi_564336; apiVersion: string;
           apiId: string): Recallable =
   ## apiSchemaListByApi
   ## Get the schema configuration at the API level.
@@ -2226,19 +2238,19 @@ proc call*(call_574442: Call_ApiSchemaListByApi_574436; apiVersion: string;
   ##             : Version of the API to be used with the client request.
   ##   apiId: string (required)
   ##        : API identifier. Must be unique in the current API Management service instance.
-  var path_574443 = newJObject()
-  var query_574444 = newJObject()
-  add(query_574444, "api-version", newJString(apiVersion))
-  add(path_574443, "apiId", newJString(apiId))
-  result = call_574442.call(path_574443, query_574444, nil, nil, nil)
+  var path_564343 = newJObject()
+  var query_564344 = newJObject()
+  add(query_564344, "api-version", newJString(apiVersion))
+  add(path_564343, "apiId", newJString(apiId))
+  result = call_564342.call(path_564343, query_564344, nil, nil, nil)
 
-var apiSchemaListByApi* = Call_ApiSchemaListByApi_574436(
+var apiSchemaListByApi* = Call_ApiSchemaListByApi_564336(
     name: "apiSchemaListByApi", meth: HttpMethod.HttpGet, host: "azure.local",
-    route: "/apis/{apiId}/schemas", validator: validate_ApiSchemaListByApi_574437,
-    base: "", url: url_ApiSchemaListByApi_574438, schemes: {Scheme.Https})
+    route: "/apis/{apiId}/schemas", validator: validate_ApiSchemaListByApi_564337,
+    base: "", url: url_ApiSchemaListByApi_564338, schemes: {Scheme.Https})
 type
-  Call_ApiSchemaCreateOrUpdate_574455 = ref object of OpenApiRestCall_573657
-proc url_ApiSchemaCreateOrUpdate_574457(protocol: Scheme; host: string; base: string;
+  Call_ApiSchemaCreateOrUpdate_564355 = ref object of OpenApiRestCall_563555
+proc url_ApiSchemaCreateOrUpdate_564357(protocol: Scheme; host: string; base: string;
                                        route: string; path: JsonNode;
                                        query: JsonNode): Uri =
   result.scheme = $protocol
@@ -2257,7 +2269,7 @@ proc url_ApiSchemaCreateOrUpdate_574457(protocol: Scheme; host: string; base: st
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ApiSchemaCreateOrUpdate_574456(path: JsonNode; query: JsonNode;
+proc validate_ApiSchemaCreateOrUpdate_564356(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Creates or updates schema configuration for the API.
   ## 
@@ -2270,16 +2282,16 @@ proc validate_ApiSchemaCreateOrUpdate_574456(path: JsonNode; query: JsonNode;
   ##           : Schema identifier within an API. Must be unique in the current API Management service instance.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `apiId` field"
-  var valid_574458 = path.getOrDefault("apiId")
-  valid_574458 = validateParameter(valid_574458, JString, required = true,
+  var valid_564358 = path.getOrDefault("apiId")
+  valid_564358 = validateParameter(valid_564358, JString, required = true,
                                  default = nil)
-  if valid_574458 != nil:
-    section.add "apiId", valid_574458
-  var valid_574459 = path.getOrDefault("schemaId")
-  valid_574459 = validateParameter(valid_574459, JString, required = true,
+  if valid_564358 != nil:
+    section.add "apiId", valid_564358
+  var valid_564359 = path.getOrDefault("schemaId")
+  valid_564359 = validateParameter(valid_564359, JString, required = true,
                                  default = nil)
-  if valid_574459 != nil:
-    section.add "schemaId", valid_574459
+  if valid_564359 != nil:
+    section.add "schemaId", valid_564359
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2287,21 +2299,21 @@ proc validate_ApiSchemaCreateOrUpdate_574456(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574460 = query.getOrDefault("api-version")
-  valid_574460 = validateParameter(valid_574460, JString, required = true,
+  var valid_564360 = query.getOrDefault("api-version")
+  valid_564360 = validateParameter(valid_564360, JString, required = true,
                                  default = nil)
-  if valid_574460 != nil:
-    section.add "api-version", valid_574460
+  if valid_564360 != nil:
+    section.add "api-version", valid_564360
   result.add "query", section
   ## parameters in `header` object:
   ##   If-Match: JString
   ##           : The entity state (Etag) version of the Api Schema to update. A value of "*" can be used for If-Match to unconditionally apply the operation.
   section = newJObject()
-  var valid_574461 = header.getOrDefault("If-Match")
-  valid_574461 = validateParameter(valid_574461, JString, required = false,
+  var valid_564361 = header.getOrDefault("If-Match")
+  valid_564361 = validateParameter(valid_564361, JString, required = false,
                                  default = nil)
-  if valid_574461 != nil:
-    section.add "If-Match", valid_574461
+  if valid_564361 != nil:
+    section.add "If-Match", valid_564361
   result.add "header", section
   section = newJObject()
   result.add "formData", section
@@ -2313,20 +2325,20 @@ proc validate_ApiSchemaCreateOrUpdate_574456(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574463: Call_ApiSchemaCreateOrUpdate_574455; path: JsonNode;
+proc call*(call_564363: Call_ApiSchemaCreateOrUpdate_564355; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Creates or updates schema configuration for the API.
   ## 
-  let valid = call_574463.validator(path, query, header, formData, body)
-  let scheme = call_574463.pickScheme
+  let valid = call_564363.validator(path, query, header, formData, body)
+  let scheme = call_564363.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574463.url(scheme.get, call_574463.host, call_574463.base,
-                         call_574463.route, valid.getOrDefault("path"),
+  let url = call_564363.url(scheme.get, call_564363.host, call_564363.base,
+                         call_564363.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574463, url, valid)
+  result = hook(call_564363, url, valid)
 
-proc call*(call_574464: Call_ApiSchemaCreateOrUpdate_574455; apiVersion: string;
+proc call*(call_564364: Call_ApiSchemaCreateOrUpdate_564355; apiVersion: string;
           apiId: string; schemaId: string; parameters: JsonNode): Recallable =
   ## apiSchemaCreateOrUpdate
   ## Creates or updates schema configuration for the API.
@@ -2338,24 +2350,24 @@ proc call*(call_574464: Call_ApiSchemaCreateOrUpdate_574455; apiVersion: string;
   ##           : Schema identifier within an API. Must be unique in the current API Management service instance.
   ##   parameters: JObject (required)
   ##             : The schema contents to apply.
-  var path_574465 = newJObject()
-  var query_574466 = newJObject()
-  var body_574467 = newJObject()
-  add(query_574466, "api-version", newJString(apiVersion))
-  add(path_574465, "apiId", newJString(apiId))
-  add(path_574465, "schemaId", newJString(schemaId))
+  var path_564365 = newJObject()
+  var query_564366 = newJObject()
+  var body_564367 = newJObject()
+  add(query_564366, "api-version", newJString(apiVersion))
+  add(path_564365, "apiId", newJString(apiId))
+  add(path_564365, "schemaId", newJString(schemaId))
   if parameters != nil:
-    body_574467 = parameters
-  result = call_574464.call(path_574465, query_574466, nil, nil, body_574467)
+    body_564367 = parameters
+  result = call_564364.call(path_564365, query_564366, nil, nil, body_564367)
 
-var apiSchemaCreateOrUpdate* = Call_ApiSchemaCreateOrUpdate_574455(
+var apiSchemaCreateOrUpdate* = Call_ApiSchemaCreateOrUpdate_564355(
     name: "apiSchemaCreateOrUpdate", meth: HttpMethod.HttpPut, host: "azure.local",
     route: "/apis/{apiId}/schemas/{schemaId}",
-    validator: validate_ApiSchemaCreateOrUpdate_574456, base: "",
-    url: url_ApiSchemaCreateOrUpdate_574457, schemes: {Scheme.Https})
+    validator: validate_ApiSchemaCreateOrUpdate_564356, base: "",
+    url: url_ApiSchemaCreateOrUpdate_564357, schemes: {Scheme.Https})
 type
-  Call_ApiSchemaGet_574445 = ref object of OpenApiRestCall_573657
-proc url_ApiSchemaGet_574447(protocol: Scheme; host: string; base: string;
+  Call_ApiSchemaGet_564345 = ref object of OpenApiRestCall_563555
+proc url_ApiSchemaGet_564347(protocol: Scheme; host: string; base: string;
                             route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2373,7 +2385,7 @@ proc url_ApiSchemaGet_574447(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ApiSchemaGet_574446(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_ApiSchemaGet_564346(path: JsonNode; query: JsonNode; header: JsonNode;
                                  formData: JsonNode; body: JsonNode): JsonNode =
   ## Get the schema configuration at the API level.
   ## 
@@ -2386,16 +2398,16 @@ proc validate_ApiSchemaGet_574446(path: JsonNode; query: JsonNode; header: JsonN
   ##           : Schema identifier within an API. Must be unique in the current API Management service instance.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `apiId` field"
-  var valid_574448 = path.getOrDefault("apiId")
-  valid_574448 = validateParameter(valid_574448, JString, required = true,
+  var valid_564348 = path.getOrDefault("apiId")
+  valid_564348 = validateParameter(valid_564348, JString, required = true,
                                  default = nil)
-  if valid_574448 != nil:
-    section.add "apiId", valid_574448
-  var valid_574449 = path.getOrDefault("schemaId")
-  valid_574449 = validateParameter(valid_574449, JString, required = true,
+  if valid_564348 != nil:
+    section.add "apiId", valid_564348
+  var valid_564349 = path.getOrDefault("schemaId")
+  valid_564349 = validateParameter(valid_564349, JString, required = true,
                                  default = nil)
-  if valid_574449 != nil:
-    section.add "schemaId", valid_574449
+  if valid_564349 != nil:
+    section.add "schemaId", valid_564349
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2403,11 +2415,11 @@ proc validate_ApiSchemaGet_574446(path: JsonNode; query: JsonNode; header: JsonN
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574450 = query.getOrDefault("api-version")
-  valid_574450 = validateParameter(valid_574450, JString, required = true,
+  var valid_564350 = query.getOrDefault("api-version")
+  valid_564350 = validateParameter(valid_564350, JString, required = true,
                                  default = nil)
-  if valid_574450 != nil:
-    section.add "api-version", valid_574450
+  if valid_564350 != nil:
+    section.add "api-version", valid_564350
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2416,20 +2428,20 @@ proc validate_ApiSchemaGet_574446(path: JsonNode; query: JsonNode; header: JsonN
   if body != nil:
     result.add "body", body
 
-proc call*(call_574451: Call_ApiSchemaGet_574445; path: JsonNode; query: JsonNode;
+proc call*(call_564351: Call_ApiSchemaGet_564345; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get the schema configuration at the API level.
   ## 
-  let valid = call_574451.validator(path, query, header, formData, body)
-  let scheme = call_574451.pickScheme
+  let valid = call_564351.validator(path, query, header, formData, body)
+  let scheme = call_564351.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574451.url(scheme.get, call_574451.host, call_574451.base,
-                         call_574451.route, valid.getOrDefault("path"),
+  let url = call_564351.url(scheme.get, call_564351.host, call_564351.base,
+                         call_564351.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574451, url, valid)
+  result = hook(call_564351, url, valid)
 
-proc call*(call_574452: Call_ApiSchemaGet_574445; apiVersion: string; apiId: string;
+proc call*(call_564352: Call_ApiSchemaGet_564345; apiVersion: string; apiId: string;
           schemaId: string): Recallable =
   ## apiSchemaGet
   ## Get the schema configuration at the API level.
@@ -2439,20 +2451,20 @@ proc call*(call_574452: Call_ApiSchemaGet_574445; apiVersion: string; apiId: str
   ##        : API identifier. Must be unique in the current API Management service instance.
   ##   schemaId: string (required)
   ##           : Schema identifier within an API. Must be unique in the current API Management service instance.
-  var path_574453 = newJObject()
-  var query_574454 = newJObject()
-  add(query_574454, "api-version", newJString(apiVersion))
-  add(path_574453, "apiId", newJString(apiId))
-  add(path_574453, "schemaId", newJString(schemaId))
-  result = call_574452.call(path_574453, query_574454, nil, nil, nil)
+  var path_564353 = newJObject()
+  var query_564354 = newJObject()
+  add(query_564354, "api-version", newJString(apiVersion))
+  add(path_564353, "apiId", newJString(apiId))
+  add(path_564353, "schemaId", newJString(schemaId))
+  result = call_564352.call(path_564353, query_564354, nil, nil, nil)
 
-var apiSchemaGet* = Call_ApiSchemaGet_574445(name: "apiSchemaGet",
+var apiSchemaGet* = Call_ApiSchemaGet_564345(name: "apiSchemaGet",
     meth: HttpMethod.HttpGet, host: "azure.local",
-    route: "/apis/{apiId}/schemas/{schemaId}", validator: validate_ApiSchemaGet_574446,
-    base: "", url: url_ApiSchemaGet_574447, schemes: {Scheme.Https})
+    route: "/apis/{apiId}/schemas/{schemaId}", validator: validate_ApiSchemaGet_564346,
+    base: "", url: url_ApiSchemaGet_564347, schemes: {Scheme.Https})
 type
-  Call_ApiSchemaDelete_574468 = ref object of OpenApiRestCall_573657
-proc url_ApiSchemaDelete_574470(protocol: Scheme; host: string; base: string;
+  Call_ApiSchemaDelete_564368 = ref object of OpenApiRestCall_563555
+proc url_ApiSchemaDelete_564370(protocol: Scheme; host: string; base: string;
                                route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2470,7 +2482,7 @@ proc url_ApiSchemaDelete_574470(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ApiSchemaDelete_574469(path: JsonNode; query: JsonNode;
+proc validate_ApiSchemaDelete_564369(path: JsonNode; query: JsonNode;
                                     header: JsonNode; formData: JsonNode;
                                     body: JsonNode): JsonNode =
   ## Deletes the schema configuration at the Api.
@@ -2484,16 +2496,16 @@ proc validate_ApiSchemaDelete_574469(path: JsonNode; query: JsonNode;
   ##           : Schema identifier within an API. Must be unique in the current API Management service instance.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `apiId` field"
-  var valid_574471 = path.getOrDefault("apiId")
-  valid_574471 = validateParameter(valid_574471, JString, required = true,
+  var valid_564371 = path.getOrDefault("apiId")
+  valid_564371 = validateParameter(valid_564371, JString, required = true,
                                  default = nil)
-  if valid_574471 != nil:
-    section.add "apiId", valid_574471
-  var valid_574472 = path.getOrDefault("schemaId")
-  valid_574472 = validateParameter(valid_574472, JString, required = true,
+  if valid_564371 != nil:
+    section.add "apiId", valid_564371
+  var valid_564372 = path.getOrDefault("schemaId")
+  valid_564372 = validateParameter(valid_564372, JString, required = true,
                                  default = nil)
-  if valid_574472 != nil:
-    section.add "schemaId", valid_574472
+  if valid_564372 != nil:
+    section.add "schemaId", valid_564372
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2501,11 +2513,11 @@ proc validate_ApiSchemaDelete_574469(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574473 = query.getOrDefault("api-version")
-  valid_574473 = validateParameter(valid_574473, JString, required = true,
+  var valid_564373 = query.getOrDefault("api-version")
+  valid_564373 = validateParameter(valid_564373, JString, required = true,
                                  default = nil)
-  if valid_574473 != nil:
-    section.add "api-version", valid_574473
+  if valid_564373 != nil:
+    section.add "api-version", valid_564373
   result.add "query", section
   ## parameters in `header` object:
   ##   If-Match: JString (required)
@@ -2513,31 +2525,31 @@ proc validate_ApiSchemaDelete_574469(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert header != nil,
         "header argument is necessary due to required `If-Match` field"
-  var valid_574474 = header.getOrDefault("If-Match")
-  valid_574474 = validateParameter(valid_574474, JString, required = true,
+  var valid_564374 = header.getOrDefault("If-Match")
+  valid_564374 = validateParameter(valid_564374, JString, required = true,
                                  default = nil)
-  if valid_574474 != nil:
-    section.add "If-Match", valid_574474
+  if valid_564374 != nil:
+    section.add "If-Match", valid_564374
   result.add "header", section
   section = newJObject()
   result.add "formData", section
   if body != nil:
     result.add "body", body
 
-proc call*(call_574475: Call_ApiSchemaDelete_574468; path: JsonNode; query: JsonNode;
+proc call*(call_564375: Call_ApiSchemaDelete_564368; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes the schema configuration at the Api.
   ## 
-  let valid = call_574475.validator(path, query, header, formData, body)
-  let scheme = call_574475.pickScheme
+  let valid = call_564375.validator(path, query, header, formData, body)
+  let scheme = call_564375.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574475.url(scheme.get, call_574475.host, call_574475.base,
-                         call_574475.route, valid.getOrDefault("path"),
+  let url = call_564375.url(scheme.get, call_564375.host, call_564375.base,
+                         call_564375.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574475, url, valid)
+  result = hook(call_564375, url, valid)
 
-proc call*(call_574476: Call_ApiSchemaDelete_574468; apiVersion: string;
+proc call*(call_564376: Call_ApiSchemaDelete_564368; apiVersion: string;
           apiId: string; schemaId: string): Recallable =
   ## apiSchemaDelete
   ## Deletes the schema configuration at the Api.
@@ -2547,17 +2559,17 @@ proc call*(call_574476: Call_ApiSchemaDelete_574468; apiVersion: string;
   ##        : API identifier. Must be unique in the current API Management service instance.
   ##   schemaId: string (required)
   ##           : Schema identifier within an API. Must be unique in the current API Management service instance.
-  var path_574477 = newJObject()
-  var query_574478 = newJObject()
-  add(query_574478, "api-version", newJString(apiVersion))
-  add(path_574477, "apiId", newJString(apiId))
-  add(path_574477, "schemaId", newJString(schemaId))
-  result = call_574476.call(path_574477, query_574478, nil, nil, nil)
+  var path_564377 = newJObject()
+  var query_564378 = newJObject()
+  add(query_564378, "api-version", newJString(apiVersion))
+  add(path_564377, "apiId", newJString(apiId))
+  add(path_564377, "schemaId", newJString(schemaId))
+  result = call_564376.call(path_564377, query_564378, nil, nil, nil)
 
-var apiSchemaDelete* = Call_ApiSchemaDelete_574468(name: "apiSchemaDelete",
+var apiSchemaDelete* = Call_ApiSchemaDelete_564368(name: "apiSchemaDelete",
     meth: HttpMethod.HttpDelete, host: "azure.local",
     route: "/apis/{apiId}/schemas/{schemaId}",
-    validator: validate_ApiSchemaDelete_574469, base: "", url: url_ApiSchemaDelete_574470,
+    validator: validate_ApiSchemaDelete_564369, base: "", url: url_ApiSchemaDelete_564370,
     schemes: {Scheme.Https})
 export
   rest

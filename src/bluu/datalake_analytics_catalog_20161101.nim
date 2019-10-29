@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, httpcore
 
 ## auto-generated via openapi macro
 ## title: DataLakeAnalyticsCatalogManagementClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_567666 = ref object of OpenApiRestCall
+  OpenApiRestCall_563564 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_567666](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563564](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_567666): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563564): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,15 +107,15 @@ const
   macServiceName = "datalake-analytics-catalog"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_CatalogListAcls_567888 = ref object of OpenApiRestCall_567666
-proc url_CatalogListAcls_567890(protocol: Scheme; host: string; base: string;
+  Call_CatalogListAcls_563786 = ref object of OpenApiRestCall_563564
+proc url_CatalogListAcls_563788(protocol: Scheme; host: string; base: string;
                                route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_CatalogListAcls_567889(path: JsonNode; query: JsonNode;
+proc validate_CatalogListAcls_563787(path: JsonNode; query: JsonNode;
                                     header: JsonNode; formData: JsonNode;
                                     body: JsonNode): JsonNode =
   ## Retrieves the list of access control list (ACL) entries for the Data Lake Analytics catalog.
@@ -121,55 +125,55 @@ proc validate_CatalogListAcls_567889(path: JsonNode; query: JsonNode;
   section = newJObject()
   result.add "path", section
   ## parameters in `query` object:
-  ##   $orderby: JString
-  ##           : OrderBy clause. One or more comma-separated expressions with an optional "asc" (the default) or "desc" depending on the order you'd like the values sorted, e.g. Categories?$orderby=CategoryName desc. Optional.
-  ##   api-version: JString (required)
-  ##              : Client Api Version.
   ##   $top: JInt
   ##       : The number of items to return. Optional.
+  ##   api-version: JString (required)
+  ##              : Client Api Version.
   ##   $select: JString
   ##          : OData Select statement. Limits the properties on each entry to just those requested, e.g. Categories?$select=CategoryName,Description. Optional.
-  ##   $skip: JInt
-  ##        : The number of items to skip over before returning elements. Optional.
   ##   $count: JBool
   ##         : The Boolean value of true or false to request a count of the matching resources included with the resources in the response, e.g. Categories?$count=true. Optional.
+  ##   $orderby: JString
+  ##           : OrderBy clause. One or more comma-separated expressions with an optional "asc" (the default) or "desc" depending on the order you'd like the values sorted, e.g. Categories?$orderby=CategoryName desc. Optional.
+  ##   $skip: JInt
+  ##        : The number of items to skip over before returning elements. Optional.
   ##   $filter: JString
   ##          : OData filter. Optional.
   section = newJObject()
-  var valid_568050 = query.getOrDefault("$orderby")
-  valid_568050 = validateParameter(valid_568050, JString, required = false,
-                                 default = nil)
-  if valid_568050 != nil:
-    section.add "$orderby", valid_568050
+  var valid_563950 = query.getOrDefault("$top")
+  valid_563950 = validateParameter(valid_563950, JInt, required = false, default = nil)
+  if valid_563950 != nil:
+    section.add "$top", valid_563950
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568051 = query.getOrDefault("api-version")
-  valid_568051 = validateParameter(valid_568051, JString, required = true,
+  var valid_563951 = query.getOrDefault("api-version")
+  valid_563951 = validateParameter(valid_563951, JString, required = true,
                                  default = nil)
-  if valid_568051 != nil:
-    section.add "api-version", valid_568051
-  var valid_568052 = query.getOrDefault("$top")
-  valid_568052 = validateParameter(valid_568052, JInt, required = false, default = nil)
-  if valid_568052 != nil:
-    section.add "$top", valid_568052
-  var valid_568053 = query.getOrDefault("$select")
-  valid_568053 = validateParameter(valid_568053, JString, required = false,
+  if valid_563951 != nil:
+    section.add "api-version", valid_563951
+  var valid_563952 = query.getOrDefault("$select")
+  valid_563952 = validateParameter(valid_563952, JString, required = false,
                                  default = nil)
-  if valid_568053 != nil:
-    section.add "$select", valid_568053
-  var valid_568054 = query.getOrDefault("$skip")
-  valid_568054 = validateParameter(valid_568054, JInt, required = false, default = nil)
-  if valid_568054 != nil:
-    section.add "$skip", valid_568054
-  var valid_568055 = query.getOrDefault("$count")
-  valid_568055 = validateParameter(valid_568055, JBool, required = false, default = nil)
-  if valid_568055 != nil:
-    section.add "$count", valid_568055
-  var valid_568056 = query.getOrDefault("$filter")
-  valid_568056 = validateParameter(valid_568056, JString, required = false,
+  if valid_563952 != nil:
+    section.add "$select", valid_563952
+  var valid_563953 = query.getOrDefault("$count")
+  valid_563953 = validateParameter(valid_563953, JBool, required = false, default = nil)
+  if valid_563953 != nil:
+    section.add "$count", valid_563953
+  var valid_563954 = query.getOrDefault("$orderby")
+  valid_563954 = validateParameter(valid_563954, JString, required = false,
                                  default = nil)
-  if valid_568056 != nil:
-    section.add "$filter", valid_568056
+  if valid_563954 != nil:
+    section.add "$orderby", valid_563954
+  var valid_563955 = query.getOrDefault("$skip")
+  valid_563955 = validateParameter(valid_563955, JInt, required = false, default = nil)
+  if valid_563955 != nil:
+    section.add "$skip", valid_563955
+  var valid_563956 = query.getOrDefault("$filter")
+  valid_563956 = validateParameter(valid_563956, JString, required = false,
+                                 default = nil)
+  if valid_563956 != nil:
+    section.add "$filter", valid_563956
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -178,62 +182,62 @@ proc validate_CatalogListAcls_567889(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568079: Call_CatalogListAcls_567888; path: JsonNode; query: JsonNode;
+proc call*(call_563979: Call_CatalogListAcls_563786; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Retrieves the list of access control list (ACL) entries for the Data Lake Analytics catalog.
   ## 
-  let valid = call_568079.validator(path, query, header, formData, body)
-  let scheme = call_568079.pickScheme
+  let valid = call_563979.validator(path, query, header, formData, body)
+  let scheme = call_563979.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568079.url(scheme.get, call_568079.host, call_568079.base,
-                         call_568079.route, valid.getOrDefault("path"),
+  let url = call_563979.url(scheme.get, call_563979.host, call_563979.base,
+                         call_563979.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568079, url, valid)
+  result = hook(call_563979, url, valid)
 
-proc call*(call_568150: Call_CatalogListAcls_567888; apiVersion: string;
-          Orderby: string = ""; Top: int = 0; Select: string = ""; Skip: int = 0;
-          Count: bool = false; Filter: string = ""): Recallable =
+proc call*(call_564050: Call_CatalogListAcls_563786; apiVersion: string;
+          Top: int = 0; Select: string = ""; Count: bool = false; Orderby: string = "";
+          Skip: int = 0; Filter: string = ""): Recallable =
   ## catalogListAcls
   ## Retrieves the list of access control list (ACL) entries for the Data Lake Analytics catalog.
-  ##   Orderby: string
-  ##          : OrderBy clause. One or more comma-separated expressions with an optional "asc" (the default) or "desc" depending on the order you'd like the values sorted, e.g. Categories?$orderby=CategoryName desc. Optional.
-  ##   apiVersion: string (required)
-  ##             : Client Api Version.
   ##   Top: int
   ##      : The number of items to return. Optional.
+  ##   apiVersion: string (required)
+  ##             : Client Api Version.
   ##   Select: string
   ##         : OData Select statement. Limits the properties on each entry to just those requested, e.g. Categories?$select=CategoryName,Description. Optional.
-  ##   Skip: int
-  ##       : The number of items to skip over before returning elements. Optional.
   ##   Count: bool
   ##        : The Boolean value of true or false to request a count of the matching resources included with the resources in the response, e.g. Categories?$count=true. Optional.
+  ##   Orderby: string
+  ##          : OrderBy clause. One or more comma-separated expressions with an optional "asc" (the default) or "desc" depending on the order you'd like the values sorted, e.g. Categories?$orderby=CategoryName desc. Optional.
+  ##   Skip: int
+  ##       : The number of items to skip over before returning elements. Optional.
   ##   Filter: string
   ##         : OData filter. Optional.
-  var query_568151 = newJObject()
-  add(query_568151, "$orderby", newJString(Orderby))
-  add(query_568151, "api-version", newJString(apiVersion))
-  add(query_568151, "$top", newJInt(Top))
-  add(query_568151, "$select", newJString(Select))
-  add(query_568151, "$skip", newJInt(Skip))
-  add(query_568151, "$count", newJBool(Count))
-  add(query_568151, "$filter", newJString(Filter))
-  result = call_568150.call(nil, query_568151, nil, nil, nil)
+  var query_564051 = newJObject()
+  add(query_564051, "$top", newJInt(Top))
+  add(query_564051, "api-version", newJString(apiVersion))
+  add(query_564051, "$select", newJString(Select))
+  add(query_564051, "$count", newJBool(Count))
+  add(query_564051, "$orderby", newJString(Orderby))
+  add(query_564051, "$skip", newJInt(Skip))
+  add(query_564051, "$filter", newJString(Filter))
+  result = call_564050.call(nil, query_564051, nil, nil, nil)
 
-var catalogListAcls* = Call_CatalogListAcls_567888(name: "catalogListAcls",
+var catalogListAcls* = Call_CatalogListAcls_563786(name: "catalogListAcls",
     meth: HttpMethod.HttpGet, host: "azure.local", route: "/catalog/usql/acl",
-    validator: validate_CatalogListAcls_567889, base: "", url: url_CatalogListAcls_567890,
+    validator: validate_CatalogListAcls_563787, base: "", url: url_CatalogListAcls_563788,
     schemes: {Scheme.Https})
 type
-  Call_CatalogListDatabases_568191 = ref object of OpenApiRestCall_567666
-proc url_CatalogListDatabases_568193(protocol: Scheme; host: string; base: string;
+  Call_CatalogListDatabases_564091 = ref object of OpenApiRestCall_563564
+proc url_CatalogListDatabases_564093(protocol: Scheme; host: string; base: string;
                                     route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_CatalogListDatabases_568192(path: JsonNode; query: JsonNode;
+proc validate_CatalogListDatabases_564092(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Retrieves the list of databases from the Data Lake Analytics catalog.
   ## 
@@ -242,55 +246,55 @@ proc validate_CatalogListDatabases_568192(path: JsonNode; query: JsonNode;
   section = newJObject()
   result.add "path", section
   ## parameters in `query` object:
-  ##   $orderby: JString
-  ##           : OrderBy clause. One or more comma-separated expressions with an optional "asc" (the default) or "desc" depending on the order you'd like the values sorted, e.g. Categories?$orderby=CategoryName desc. Optional.
-  ##   api-version: JString (required)
-  ##              : Client Api Version.
   ##   $top: JInt
   ##       : The number of items to return. Optional.
+  ##   api-version: JString (required)
+  ##              : Client Api Version.
   ##   $select: JString
   ##          : OData Select statement. Limits the properties on each entry to just those requested, e.g. Categories?$select=CategoryName,Description. Optional.
-  ##   $skip: JInt
-  ##        : The number of items to skip over before returning elements. Optional.
   ##   $count: JBool
   ##         : The Boolean value of true or false to request a count of the matching resources included with the resources in the response, e.g. Categories?$count=true. Optional.
+  ##   $orderby: JString
+  ##           : OrderBy clause. One or more comma-separated expressions with an optional "asc" (the default) or "desc" depending on the order you'd like the values sorted, e.g. Categories?$orderby=CategoryName desc. Optional.
+  ##   $skip: JInt
+  ##        : The number of items to skip over before returning elements. Optional.
   ##   $filter: JString
   ##          : OData filter. Optional.
   section = newJObject()
-  var valid_568194 = query.getOrDefault("$orderby")
-  valid_568194 = validateParameter(valid_568194, JString, required = false,
-                                 default = nil)
-  if valid_568194 != nil:
-    section.add "$orderby", valid_568194
+  var valid_564094 = query.getOrDefault("$top")
+  valid_564094 = validateParameter(valid_564094, JInt, required = false, default = nil)
+  if valid_564094 != nil:
+    section.add "$top", valid_564094
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568195 = query.getOrDefault("api-version")
-  valid_568195 = validateParameter(valid_568195, JString, required = true,
+  var valid_564095 = query.getOrDefault("api-version")
+  valid_564095 = validateParameter(valid_564095, JString, required = true,
                                  default = nil)
-  if valid_568195 != nil:
-    section.add "api-version", valid_568195
-  var valid_568196 = query.getOrDefault("$top")
-  valid_568196 = validateParameter(valid_568196, JInt, required = false, default = nil)
-  if valid_568196 != nil:
-    section.add "$top", valid_568196
-  var valid_568197 = query.getOrDefault("$select")
-  valid_568197 = validateParameter(valid_568197, JString, required = false,
+  if valid_564095 != nil:
+    section.add "api-version", valid_564095
+  var valid_564096 = query.getOrDefault("$select")
+  valid_564096 = validateParameter(valid_564096, JString, required = false,
                                  default = nil)
-  if valid_568197 != nil:
-    section.add "$select", valid_568197
-  var valid_568198 = query.getOrDefault("$skip")
-  valid_568198 = validateParameter(valid_568198, JInt, required = false, default = nil)
-  if valid_568198 != nil:
-    section.add "$skip", valid_568198
-  var valid_568199 = query.getOrDefault("$count")
-  valid_568199 = validateParameter(valid_568199, JBool, required = false, default = nil)
-  if valid_568199 != nil:
-    section.add "$count", valid_568199
-  var valid_568200 = query.getOrDefault("$filter")
-  valid_568200 = validateParameter(valid_568200, JString, required = false,
+  if valid_564096 != nil:
+    section.add "$select", valid_564096
+  var valid_564097 = query.getOrDefault("$count")
+  valid_564097 = validateParameter(valid_564097, JBool, required = false, default = nil)
+  if valid_564097 != nil:
+    section.add "$count", valid_564097
+  var valid_564098 = query.getOrDefault("$orderby")
+  valid_564098 = validateParameter(valid_564098, JString, required = false,
                                  default = nil)
-  if valid_568200 != nil:
-    section.add "$filter", valid_568200
+  if valid_564098 != nil:
+    section.add "$orderby", valid_564098
+  var valid_564099 = query.getOrDefault("$skip")
+  valid_564099 = validateParameter(valid_564099, JInt, required = false, default = nil)
+  if valid_564099 != nil:
+    section.add "$skip", valid_564099
+  var valid_564100 = query.getOrDefault("$filter")
+  valid_564100 = validateParameter(valid_564100, JString, required = false,
+                                 default = nil)
+  if valid_564100 != nil:
+    section.add "$filter", valid_564100
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -299,55 +303,55 @@ proc validate_CatalogListDatabases_568192(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568201: Call_CatalogListDatabases_568191; path: JsonNode;
+proc call*(call_564101: Call_CatalogListDatabases_564091; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Retrieves the list of databases from the Data Lake Analytics catalog.
   ## 
-  let valid = call_568201.validator(path, query, header, formData, body)
-  let scheme = call_568201.pickScheme
+  let valid = call_564101.validator(path, query, header, formData, body)
+  let scheme = call_564101.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568201.url(scheme.get, call_568201.host, call_568201.base,
-                         call_568201.route, valid.getOrDefault("path"),
+  let url = call_564101.url(scheme.get, call_564101.host, call_564101.base,
+                         call_564101.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568201, url, valid)
+  result = hook(call_564101, url, valid)
 
-proc call*(call_568202: Call_CatalogListDatabases_568191; apiVersion: string;
-          Orderby: string = ""; Top: int = 0; Select: string = ""; Skip: int = 0;
-          Count: bool = false; Filter: string = ""): Recallable =
+proc call*(call_564102: Call_CatalogListDatabases_564091; apiVersion: string;
+          Top: int = 0; Select: string = ""; Count: bool = false; Orderby: string = "";
+          Skip: int = 0; Filter: string = ""): Recallable =
   ## catalogListDatabases
   ## Retrieves the list of databases from the Data Lake Analytics catalog.
-  ##   Orderby: string
-  ##          : OrderBy clause. One or more comma-separated expressions with an optional "asc" (the default) or "desc" depending on the order you'd like the values sorted, e.g. Categories?$orderby=CategoryName desc. Optional.
-  ##   apiVersion: string (required)
-  ##             : Client Api Version.
   ##   Top: int
   ##      : The number of items to return. Optional.
+  ##   apiVersion: string (required)
+  ##             : Client Api Version.
   ##   Select: string
   ##         : OData Select statement. Limits the properties on each entry to just those requested, e.g. Categories?$select=CategoryName,Description. Optional.
-  ##   Skip: int
-  ##       : The number of items to skip over before returning elements. Optional.
   ##   Count: bool
   ##        : The Boolean value of true or false to request a count of the matching resources included with the resources in the response, e.g. Categories?$count=true. Optional.
+  ##   Orderby: string
+  ##          : OrderBy clause. One or more comma-separated expressions with an optional "asc" (the default) or "desc" depending on the order you'd like the values sorted, e.g. Categories?$orderby=CategoryName desc. Optional.
+  ##   Skip: int
+  ##       : The number of items to skip over before returning elements. Optional.
   ##   Filter: string
   ##         : OData filter. Optional.
-  var query_568203 = newJObject()
-  add(query_568203, "$orderby", newJString(Orderby))
-  add(query_568203, "api-version", newJString(apiVersion))
-  add(query_568203, "$top", newJInt(Top))
-  add(query_568203, "$select", newJString(Select))
-  add(query_568203, "$skip", newJInt(Skip))
-  add(query_568203, "$count", newJBool(Count))
-  add(query_568203, "$filter", newJString(Filter))
-  result = call_568202.call(nil, query_568203, nil, nil, nil)
+  var query_564103 = newJObject()
+  add(query_564103, "$top", newJInt(Top))
+  add(query_564103, "api-version", newJString(apiVersion))
+  add(query_564103, "$select", newJString(Select))
+  add(query_564103, "$count", newJBool(Count))
+  add(query_564103, "$orderby", newJString(Orderby))
+  add(query_564103, "$skip", newJInt(Skip))
+  add(query_564103, "$filter", newJString(Filter))
+  result = call_564102.call(nil, query_564103, nil, nil, nil)
 
-var catalogListDatabases* = Call_CatalogListDatabases_568191(
+var catalogListDatabases* = Call_CatalogListDatabases_564091(
     name: "catalogListDatabases", meth: HttpMethod.HttpGet, host: "azure.local",
-    route: "/catalog/usql/databases", validator: validate_CatalogListDatabases_568192,
-    base: "", url: url_CatalogListDatabases_568193, schemes: {Scheme.Https})
+    route: "/catalog/usql/databases", validator: validate_CatalogListDatabases_564092,
+    base: "", url: url_CatalogListDatabases_564093, schemes: {Scheme.Https})
 type
-  Call_CatalogGetDatabase_568204 = ref object of OpenApiRestCall_567666
-proc url_CatalogGetDatabase_568206(protocol: Scheme; host: string; base: string;
+  Call_CatalogGetDatabase_564104 = ref object of OpenApiRestCall_563564
+proc url_CatalogGetDatabase_564106(protocol: Scheme; host: string; base: string;
                                   route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -362,7 +366,7 @@ proc url_CatalogGetDatabase_568206(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_CatalogGetDatabase_568205(path: JsonNode; query: JsonNode;
+proc validate_CatalogGetDatabase_564105(path: JsonNode; query: JsonNode;
                                        header: JsonNode; formData: JsonNode;
                                        body: JsonNode): JsonNode =
   ## Retrieves the specified database from the Data Lake Analytics catalog.
@@ -375,11 +379,11 @@ proc validate_CatalogGetDatabase_568205(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `databaseName` field"
-  var valid_568221 = path.getOrDefault("databaseName")
-  valid_568221 = validateParameter(valid_568221, JString, required = true,
+  var valid_564121 = path.getOrDefault("databaseName")
+  valid_564121 = validateParameter(valid_564121, JString, required = true,
                                  default = nil)
-  if valid_568221 != nil:
-    section.add "databaseName", valid_568221
+  if valid_564121 != nil:
+    section.add "databaseName", valid_564121
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -387,11 +391,11 @@ proc validate_CatalogGetDatabase_568205(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568222 = query.getOrDefault("api-version")
-  valid_568222 = validateParameter(valid_568222, JString, required = true,
+  var valid_564122 = query.getOrDefault("api-version")
+  valid_564122 = validateParameter(valid_564122, JString, required = true,
                                  default = nil)
-  if valid_568222 != nil:
-    section.add "api-version", valid_568222
+  if valid_564122 != nil:
+    section.add "api-version", valid_564122
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -400,20 +404,20 @@ proc validate_CatalogGetDatabase_568205(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568223: Call_CatalogGetDatabase_568204; path: JsonNode;
+proc call*(call_564123: Call_CatalogGetDatabase_564104; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Retrieves the specified database from the Data Lake Analytics catalog.
   ## 
-  let valid = call_568223.validator(path, query, header, formData, body)
-  let scheme = call_568223.pickScheme
+  let valid = call_564123.validator(path, query, header, formData, body)
+  let scheme = call_564123.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568223.url(scheme.get, call_568223.host, call_568223.base,
-                         call_568223.route, valid.getOrDefault("path"),
+  let url = call_564123.url(scheme.get, call_564123.host, call_564123.base,
+                         call_564123.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568223, url, valid)
+  result = hook(call_564123, url, valid)
 
-proc call*(call_568224: Call_CatalogGetDatabase_568204; apiVersion: string;
+proc call*(call_564124: Call_CatalogGetDatabase_564104; apiVersion: string;
           databaseName: string): Recallable =
   ## catalogGetDatabase
   ## Retrieves the specified database from the Data Lake Analytics catalog.
@@ -421,20 +425,20 @@ proc call*(call_568224: Call_CatalogGetDatabase_568204; apiVersion: string;
   ##             : Client Api Version.
   ##   databaseName: string (required)
   ##               : The name of the database.
-  var path_568225 = newJObject()
-  var query_568226 = newJObject()
-  add(query_568226, "api-version", newJString(apiVersion))
-  add(path_568225, "databaseName", newJString(databaseName))
-  result = call_568224.call(path_568225, query_568226, nil, nil, nil)
+  var path_564125 = newJObject()
+  var query_564126 = newJObject()
+  add(query_564126, "api-version", newJString(apiVersion))
+  add(path_564125, "databaseName", newJString(databaseName))
+  result = call_564124.call(path_564125, query_564126, nil, nil, nil)
 
-var catalogGetDatabase* = Call_CatalogGetDatabase_568204(
+var catalogGetDatabase* = Call_CatalogGetDatabase_564104(
     name: "catalogGetDatabase", meth: HttpMethod.HttpGet, host: "azure.local",
     route: "/catalog/usql/databases/{databaseName}",
-    validator: validate_CatalogGetDatabase_568205, base: "",
-    url: url_CatalogGetDatabase_568206, schemes: {Scheme.Https})
+    validator: validate_CatalogGetDatabase_564105, base: "",
+    url: url_CatalogGetDatabase_564106, schemes: {Scheme.Https})
 type
-  Call_CatalogListAclsByDatabase_568227 = ref object of OpenApiRestCall_567666
-proc url_CatalogListAclsByDatabase_568229(protocol: Scheme; host: string;
+  Call_CatalogListAclsByDatabase_564127 = ref object of OpenApiRestCall_563564
+proc url_CatalogListAclsByDatabase_564129(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -450,7 +454,7 @@ proc url_CatalogListAclsByDatabase_568229(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_CatalogListAclsByDatabase_568228(path: JsonNode; query: JsonNode;
+proc validate_CatalogListAclsByDatabase_564128(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Retrieves the list of access control list (ACL) entries for the database from the Data Lake Analytics catalog.
   ## 
@@ -462,62 +466,62 @@ proc validate_CatalogListAclsByDatabase_568228(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `databaseName` field"
-  var valid_568230 = path.getOrDefault("databaseName")
-  valid_568230 = validateParameter(valid_568230, JString, required = true,
+  var valid_564130 = path.getOrDefault("databaseName")
+  valid_564130 = validateParameter(valid_564130, JString, required = true,
                                  default = nil)
-  if valid_568230 != nil:
-    section.add "databaseName", valid_568230
+  if valid_564130 != nil:
+    section.add "databaseName", valid_564130
   result.add "path", section
   ## parameters in `query` object:
-  ##   $orderby: JString
-  ##           : OrderBy clause. One or more comma-separated expressions with an optional "asc" (the default) or "desc" depending on the order you'd like the values sorted, e.g. Categories?$orderby=CategoryName desc. Optional.
-  ##   api-version: JString (required)
-  ##              : Client Api Version.
   ##   $top: JInt
   ##       : The number of items to return. Optional.
+  ##   api-version: JString (required)
+  ##              : Client Api Version.
   ##   $select: JString
   ##          : OData Select statement. Limits the properties on each entry to just those requested, e.g. Categories?$select=CategoryName,Description. Optional.
-  ##   $skip: JInt
-  ##        : The number of items to skip over before returning elements. Optional.
   ##   $count: JBool
   ##         : The Boolean value of true or false to request a count of the matching resources included with the resources in the response, e.g. Categories?$count=true. Optional.
+  ##   $orderby: JString
+  ##           : OrderBy clause. One or more comma-separated expressions with an optional "asc" (the default) or "desc" depending on the order you'd like the values sorted, e.g. Categories?$orderby=CategoryName desc. Optional.
+  ##   $skip: JInt
+  ##        : The number of items to skip over before returning elements. Optional.
   ##   $filter: JString
   ##          : OData filter. Optional.
   section = newJObject()
-  var valid_568231 = query.getOrDefault("$orderby")
-  valid_568231 = validateParameter(valid_568231, JString, required = false,
-                                 default = nil)
-  if valid_568231 != nil:
-    section.add "$orderby", valid_568231
+  var valid_564131 = query.getOrDefault("$top")
+  valid_564131 = validateParameter(valid_564131, JInt, required = false, default = nil)
+  if valid_564131 != nil:
+    section.add "$top", valid_564131
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568232 = query.getOrDefault("api-version")
-  valid_568232 = validateParameter(valid_568232, JString, required = true,
+  var valid_564132 = query.getOrDefault("api-version")
+  valid_564132 = validateParameter(valid_564132, JString, required = true,
                                  default = nil)
-  if valid_568232 != nil:
-    section.add "api-version", valid_568232
-  var valid_568233 = query.getOrDefault("$top")
-  valid_568233 = validateParameter(valid_568233, JInt, required = false, default = nil)
-  if valid_568233 != nil:
-    section.add "$top", valid_568233
-  var valid_568234 = query.getOrDefault("$select")
-  valid_568234 = validateParameter(valid_568234, JString, required = false,
+  if valid_564132 != nil:
+    section.add "api-version", valid_564132
+  var valid_564133 = query.getOrDefault("$select")
+  valid_564133 = validateParameter(valid_564133, JString, required = false,
                                  default = nil)
-  if valid_568234 != nil:
-    section.add "$select", valid_568234
-  var valid_568235 = query.getOrDefault("$skip")
-  valid_568235 = validateParameter(valid_568235, JInt, required = false, default = nil)
-  if valid_568235 != nil:
-    section.add "$skip", valid_568235
-  var valid_568236 = query.getOrDefault("$count")
-  valid_568236 = validateParameter(valid_568236, JBool, required = false, default = nil)
-  if valid_568236 != nil:
-    section.add "$count", valid_568236
-  var valid_568237 = query.getOrDefault("$filter")
-  valid_568237 = validateParameter(valid_568237, JString, required = false,
+  if valid_564133 != nil:
+    section.add "$select", valid_564133
+  var valid_564134 = query.getOrDefault("$count")
+  valid_564134 = validateParameter(valid_564134, JBool, required = false, default = nil)
+  if valid_564134 != nil:
+    section.add "$count", valid_564134
+  var valid_564135 = query.getOrDefault("$orderby")
+  valid_564135 = validateParameter(valid_564135, JString, required = false,
                                  default = nil)
-  if valid_568237 != nil:
-    section.add "$filter", valid_568237
+  if valid_564135 != nil:
+    section.add "$orderby", valid_564135
+  var valid_564136 = query.getOrDefault("$skip")
+  valid_564136 = validateParameter(valid_564136, JInt, required = false, default = nil)
+  if valid_564136 != nil:
+    section.add "$skip", valid_564136
+  var valid_564137 = query.getOrDefault("$filter")
+  valid_564137 = validateParameter(valid_564137, JString, required = false,
+                                 default = nil)
+  if valid_564137 != nil:
+    section.add "$filter", valid_564137
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -526,60 +530,60 @@ proc validate_CatalogListAclsByDatabase_568228(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568238: Call_CatalogListAclsByDatabase_568227; path: JsonNode;
+proc call*(call_564138: Call_CatalogListAclsByDatabase_564127; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Retrieves the list of access control list (ACL) entries for the database from the Data Lake Analytics catalog.
   ## 
-  let valid = call_568238.validator(path, query, header, formData, body)
-  let scheme = call_568238.pickScheme
+  let valid = call_564138.validator(path, query, header, formData, body)
+  let scheme = call_564138.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568238.url(scheme.get, call_568238.host, call_568238.base,
-                         call_568238.route, valid.getOrDefault("path"),
+  let url = call_564138.url(scheme.get, call_564138.host, call_564138.base,
+                         call_564138.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568238, url, valid)
+  result = hook(call_564138, url, valid)
 
-proc call*(call_568239: Call_CatalogListAclsByDatabase_568227; apiVersion: string;
-          databaseName: string; Orderby: string = ""; Top: int = 0; Select: string = "";
-          Skip: int = 0; Count: bool = false; Filter: string = ""): Recallable =
+proc call*(call_564139: Call_CatalogListAclsByDatabase_564127; apiVersion: string;
+          databaseName: string; Top: int = 0; Select: string = ""; Count: bool = false;
+          Orderby: string = ""; Skip: int = 0; Filter: string = ""): Recallable =
   ## catalogListAclsByDatabase
   ## Retrieves the list of access control list (ACL) entries for the database from the Data Lake Analytics catalog.
-  ##   Orderby: string
-  ##          : OrderBy clause. One or more comma-separated expressions with an optional "asc" (the default) or "desc" depending on the order you'd like the values sorted, e.g. Categories?$orderby=CategoryName desc. Optional.
-  ##   apiVersion: string (required)
-  ##             : Client Api Version.
   ##   Top: int
   ##      : The number of items to return. Optional.
+  ##   apiVersion: string (required)
+  ##             : Client Api Version.
   ##   Select: string
   ##         : OData Select statement. Limits the properties on each entry to just those requested, e.g. Categories?$select=CategoryName,Description. Optional.
-  ##   databaseName: string (required)
-  ##               : The name of the database.
-  ##   Skip: int
-  ##       : The number of items to skip over before returning elements. Optional.
   ##   Count: bool
   ##        : The Boolean value of true or false to request a count of the matching resources included with the resources in the response, e.g. Categories?$count=true. Optional.
+  ##   databaseName: string (required)
+  ##               : The name of the database.
+  ##   Orderby: string
+  ##          : OrderBy clause. One or more comma-separated expressions with an optional "asc" (the default) or "desc" depending on the order you'd like the values sorted, e.g. Categories?$orderby=CategoryName desc. Optional.
+  ##   Skip: int
+  ##       : The number of items to skip over before returning elements. Optional.
   ##   Filter: string
   ##         : OData filter. Optional.
-  var path_568240 = newJObject()
-  var query_568241 = newJObject()
-  add(query_568241, "$orderby", newJString(Orderby))
-  add(query_568241, "api-version", newJString(apiVersion))
-  add(query_568241, "$top", newJInt(Top))
-  add(query_568241, "$select", newJString(Select))
-  add(path_568240, "databaseName", newJString(databaseName))
-  add(query_568241, "$skip", newJInt(Skip))
-  add(query_568241, "$count", newJBool(Count))
-  add(query_568241, "$filter", newJString(Filter))
-  result = call_568239.call(path_568240, query_568241, nil, nil, nil)
+  var path_564140 = newJObject()
+  var query_564141 = newJObject()
+  add(query_564141, "$top", newJInt(Top))
+  add(query_564141, "api-version", newJString(apiVersion))
+  add(query_564141, "$select", newJString(Select))
+  add(query_564141, "$count", newJBool(Count))
+  add(path_564140, "databaseName", newJString(databaseName))
+  add(query_564141, "$orderby", newJString(Orderby))
+  add(query_564141, "$skip", newJInt(Skip))
+  add(query_564141, "$filter", newJString(Filter))
+  result = call_564139.call(path_564140, query_564141, nil, nil, nil)
 
-var catalogListAclsByDatabase* = Call_CatalogListAclsByDatabase_568227(
+var catalogListAclsByDatabase* = Call_CatalogListAclsByDatabase_564127(
     name: "catalogListAclsByDatabase", meth: HttpMethod.HttpGet,
     host: "azure.local", route: "/catalog/usql/databases/{databaseName}/acl",
-    validator: validate_CatalogListAclsByDatabase_568228, base: "",
-    url: url_CatalogListAclsByDatabase_568229, schemes: {Scheme.Https})
+    validator: validate_CatalogListAclsByDatabase_564128, base: "",
+    url: url_CatalogListAclsByDatabase_564129, schemes: {Scheme.Https})
 type
-  Call_CatalogListAssemblies_568242 = ref object of OpenApiRestCall_567666
-proc url_CatalogListAssemblies_568244(protocol: Scheme; host: string; base: string;
+  Call_CatalogListAssemblies_564142 = ref object of OpenApiRestCall_563564
+proc url_CatalogListAssemblies_564144(protocol: Scheme; host: string; base: string;
                                      route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -595,7 +599,7 @@ proc url_CatalogListAssemblies_568244(protocol: Scheme; host: string; base: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_CatalogListAssemblies_568243(path: JsonNode; query: JsonNode;
+proc validate_CatalogListAssemblies_564143(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Retrieves the list of assemblies from the Data Lake Analytics catalog.
   ## 
@@ -607,62 +611,62 @@ proc validate_CatalogListAssemblies_568243(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `databaseName` field"
-  var valid_568245 = path.getOrDefault("databaseName")
-  valid_568245 = validateParameter(valid_568245, JString, required = true,
+  var valid_564145 = path.getOrDefault("databaseName")
+  valid_564145 = validateParameter(valid_564145, JString, required = true,
                                  default = nil)
-  if valid_568245 != nil:
-    section.add "databaseName", valid_568245
+  if valid_564145 != nil:
+    section.add "databaseName", valid_564145
   result.add "path", section
   ## parameters in `query` object:
-  ##   $orderby: JString
-  ##           : OrderBy clause. One or more comma-separated expressions with an optional "asc" (the default) or "desc" depending on the order you'd like the values sorted, e.g. Categories?$orderby=CategoryName desc. Optional.
-  ##   api-version: JString (required)
-  ##              : Client Api Version.
   ##   $top: JInt
   ##       : The number of items to return. Optional.
+  ##   api-version: JString (required)
+  ##              : Client Api Version.
   ##   $select: JString
   ##          : OData Select statement. Limits the properties on each entry to just those requested, e.g. Categories?$select=CategoryName,Description. Optional.
-  ##   $skip: JInt
-  ##        : The number of items to skip over before returning elements. Optional.
   ##   $count: JBool
   ##         : The Boolean value of true or false to request a count of the matching resources included with the resources in the response, e.g. Categories?$count=true. Optional.
+  ##   $orderby: JString
+  ##           : OrderBy clause. One or more comma-separated expressions with an optional "asc" (the default) or "desc" depending on the order you'd like the values sorted, e.g. Categories?$orderby=CategoryName desc. Optional.
+  ##   $skip: JInt
+  ##        : The number of items to skip over before returning elements. Optional.
   ##   $filter: JString
   ##          : OData filter. Optional.
   section = newJObject()
-  var valid_568246 = query.getOrDefault("$orderby")
-  valid_568246 = validateParameter(valid_568246, JString, required = false,
-                                 default = nil)
-  if valid_568246 != nil:
-    section.add "$orderby", valid_568246
+  var valid_564146 = query.getOrDefault("$top")
+  valid_564146 = validateParameter(valid_564146, JInt, required = false, default = nil)
+  if valid_564146 != nil:
+    section.add "$top", valid_564146
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568247 = query.getOrDefault("api-version")
-  valid_568247 = validateParameter(valid_568247, JString, required = true,
+  var valid_564147 = query.getOrDefault("api-version")
+  valid_564147 = validateParameter(valid_564147, JString, required = true,
                                  default = nil)
-  if valid_568247 != nil:
-    section.add "api-version", valid_568247
-  var valid_568248 = query.getOrDefault("$top")
-  valid_568248 = validateParameter(valid_568248, JInt, required = false, default = nil)
-  if valid_568248 != nil:
-    section.add "$top", valid_568248
-  var valid_568249 = query.getOrDefault("$select")
-  valid_568249 = validateParameter(valid_568249, JString, required = false,
+  if valid_564147 != nil:
+    section.add "api-version", valid_564147
+  var valid_564148 = query.getOrDefault("$select")
+  valid_564148 = validateParameter(valid_564148, JString, required = false,
                                  default = nil)
-  if valid_568249 != nil:
-    section.add "$select", valid_568249
-  var valid_568250 = query.getOrDefault("$skip")
-  valid_568250 = validateParameter(valid_568250, JInt, required = false, default = nil)
-  if valid_568250 != nil:
-    section.add "$skip", valid_568250
-  var valid_568251 = query.getOrDefault("$count")
-  valid_568251 = validateParameter(valid_568251, JBool, required = false, default = nil)
-  if valid_568251 != nil:
-    section.add "$count", valid_568251
-  var valid_568252 = query.getOrDefault("$filter")
-  valid_568252 = validateParameter(valid_568252, JString, required = false,
+  if valid_564148 != nil:
+    section.add "$select", valid_564148
+  var valid_564149 = query.getOrDefault("$count")
+  valid_564149 = validateParameter(valid_564149, JBool, required = false, default = nil)
+  if valid_564149 != nil:
+    section.add "$count", valid_564149
+  var valid_564150 = query.getOrDefault("$orderby")
+  valid_564150 = validateParameter(valid_564150, JString, required = false,
                                  default = nil)
-  if valid_568252 != nil:
-    section.add "$filter", valid_568252
+  if valid_564150 != nil:
+    section.add "$orderby", valid_564150
+  var valid_564151 = query.getOrDefault("$skip")
+  valid_564151 = validateParameter(valid_564151, JInt, required = false, default = nil)
+  if valid_564151 != nil:
+    section.add "$skip", valid_564151
+  var valid_564152 = query.getOrDefault("$filter")
+  valid_564152 = validateParameter(valid_564152, JString, required = false,
+                                 default = nil)
+  if valid_564152 != nil:
+    section.add "$filter", valid_564152
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -671,60 +675,60 @@ proc validate_CatalogListAssemblies_568243(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568253: Call_CatalogListAssemblies_568242; path: JsonNode;
+proc call*(call_564153: Call_CatalogListAssemblies_564142; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Retrieves the list of assemblies from the Data Lake Analytics catalog.
   ## 
-  let valid = call_568253.validator(path, query, header, formData, body)
-  let scheme = call_568253.pickScheme
+  let valid = call_564153.validator(path, query, header, formData, body)
+  let scheme = call_564153.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568253.url(scheme.get, call_568253.host, call_568253.base,
-                         call_568253.route, valid.getOrDefault("path"),
+  let url = call_564153.url(scheme.get, call_564153.host, call_564153.base,
+                         call_564153.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568253, url, valid)
+  result = hook(call_564153, url, valid)
 
-proc call*(call_568254: Call_CatalogListAssemblies_568242; apiVersion: string;
-          databaseName: string; Orderby: string = ""; Top: int = 0; Select: string = "";
-          Skip: int = 0; Count: bool = false; Filter: string = ""): Recallable =
+proc call*(call_564154: Call_CatalogListAssemblies_564142; apiVersion: string;
+          databaseName: string; Top: int = 0; Select: string = ""; Count: bool = false;
+          Orderby: string = ""; Skip: int = 0; Filter: string = ""): Recallable =
   ## catalogListAssemblies
   ## Retrieves the list of assemblies from the Data Lake Analytics catalog.
-  ##   Orderby: string
-  ##          : OrderBy clause. One or more comma-separated expressions with an optional "asc" (the default) or "desc" depending on the order you'd like the values sorted, e.g. Categories?$orderby=CategoryName desc. Optional.
-  ##   apiVersion: string (required)
-  ##             : Client Api Version.
   ##   Top: int
   ##      : The number of items to return. Optional.
+  ##   apiVersion: string (required)
+  ##             : Client Api Version.
   ##   Select: string
   ##         : OData Select statement. Limits the properties on each entry to just those requested, e.g. Categories?$select=CategoryName,Description. Optional.
-  ##   databaseName: string (required)
-  ##               : The name of the database containing the assembly.
-  ##   Skip: int
-  ##       : The number of items to skip over before returning elements. Optional.
   ##   Count: bool
   ##        : The Boolean value of true or false to request a count of the matching resources included with the resources in the response, e.g. Categories?$count=true. Optional.
+  ##   databaseName: string (required)
+  ##               : The name of the database containing the assembly.
+  ##   Orderby: string
+  ##          : OrderBy clause. One or more comma-separated expressions with an optional "asc" (the default) or "desc" depending on the order you'd like the values sorted, e.g. Categories?$orderby=CategoryName desc. Optional.
+  ##   Skip: int
+  ##       : The number of items to skip over before returning elements. Optional.
   ##   Filter: string
   ##         : OData filter. Optional.
-  var path_568255 = newJObject()
-  var query_568256 = newJObject()
-  add(query_568256, "$orderby", newJString(Orderby))
-  add(query_568256, "api-version", newJString(apiVersion))
-  add(query_568256, "$top", newJInt(Top))
-  add(query_568256, "$select", newJString(Select))
-  add(path_568255, "databaseName", newJString(databaseName))
-  add(query_568256, "$skip", newJInt(Skip))
-  add(query_568256, "$count", newJBool(Count))
-  add(query_568256, "$filter", newJString(Filter))
-  result = call_568254.call(path_568255, query_568256, nil, nil, nil)
+  var path_564155 = newJObject()
+  var query_564156 = newJObject()
+  add(query_564156, "$top", newJInt(Top))
+  add(query_564156, "api-version", newJString(apiVersion))
+  add(query_564156, "$select", newJString(Select))
+  add(query_564156, "$count", newJBool(Count))
+  add(path_564155, "databaseName", newJString(databaseName))
+  add(query_564156, "$orderby", newJString(Orderby))
+  add(query_564156, "$skip", newJInt(Skip))
+  add(query_564156, "$filter", newJString(Filter))
+  result = call_564154.call(path_564155, query_564156, nil, nil, nil)
 
-var catalogListAssemblies* = Call_CatalogListAssemblies_568242(
+var catalogListAssemblies* = Call_CatalogListAssemblies_564142(
     name: "catalogListAssemblies", meth: HttpMethod.HttpGet, host: "azure.local",
     route: "/catalog/usql/databases/{databaseName}/assemblies",
-    validator: validate_CatalogListAssemblies_568243, base: "",
-    url: url_CatalogListAssemblies_568244, schemes: {Scheme.Https})
+    validator: validate_CatalogListAssemblies_564143, base: "",
+    url: url_CatalogListAssemblies_564144, schemes: {Scheme.Https})
 type
-  Call_CatalogGetAssembly_568257 = ref object of OpenApiRestCall_567666
-proc url_CatalogGetAssembly_568259(protocol: Scheme; host: string; base: string;
+  Call_CatalogGetAssembly_564157 = ref object of OpenApiRestCall_563564
+proc url_CatalogGetAssembly_564159(protocol: Scheme; host: string; base: string;
                                   route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -742,7 +746,7 @@ proc url_CatalogGetAssembly_568259(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_CatalogGetAssembly_568258(path: JsonNode; query: JsonNode;
+proc validate_CatalogGetAssembly_564158(path: JsonNode; query: JsonNode;
                                        header: JsonNode; formData: JsonNode;
                                        body: JsonNode): JsonNode =
   ## Retrieves the specified assembly from the Data Lake Analytics catalog.
@@ -757,16 +761,16 @@ proc validate_CatalogGetAssembly_568258(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `databaseName` field"
-  var valid_568260 = path.getOrDefault("databaseName")
-  valid_568260 = validateParameter(valid_568260, JString, required = true,
+  var valid_564160 = path.getOrDefault("databaseName")
+  valid_564160 = validateParameter(valid_564160, JString, required = true,
                                  default = nil)
-  if valid_568260 != nil:
-    section.add "databaseName", valid_568260
-  var valid_568261 = path.getOrDefault("assemblyName")
-  valid_568261 = validateParameter(valid_568261, JString, required = true,
+  if valid_564160 != nil:
+    section.add "databaseName", valid_564160
+  var valid_564161 = path.getOrDefault("assemblyName")
+  valid_564161 = validateParameter(valid_564161, JString, required = true,
                                  default = nil)
-  if valid_568261 != nil:
-    section.add "assemblyName", valid_568261
+  if valid_564161 != nil:
+    section.add "assemblyName", valid_564161
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -774,11 +778,11 @@ proc validate_CatalogGetAssembly_568258(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568262 = query.getOrDefault("api-version")
-  valid_568262 = validateParameter(valid_568262, JString, required = true,
+  var valid_564162 = query.getOrDefault("api-version")
+  valid_564162 = validateParameter(valid_564162, JString, required = true,
                                  default = nil)
-  if valid_568262 != nil:
-    section.add "api-version", valid_568262
+  if valid_564162 != nil:
+    section.add "api-version", valid_564162
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -787,20 +791,20 @@ proc validate_CatalogGetAssembly_568258(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568263: Call_CatalogGetAssembly_568257; path: JsonNode;
+proc call*(call_564163: Call_CatalogGetAssembly_564157; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Retrieves the specified assembly from the Data Lake Analytics catalog.
   ## 
-  let valid = call_568263.validator(path, query, header, formData, body)
-  let scheme = call_568263.pickScheme
+  let valid = call_564163.validator(path, query, header, formData, body)
+  let scheme = call_564163.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568263.url(scheme.get, call_568263.host, call_568263.base,
-                         call_568263.route, valid.getOrDefault("path"),
+  let url = call_564163.url(scheme.get, call_564163.host, call_564163.base,
+                         call_564163.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568263, url, valid)
+  result = hook(call_564163, url, valid)
 
-proc call*(call_568264: Call_CatalogGetAssembly_568257; apiVersion: string;
+proc call*(call_564164: Call_CatalogGetAssembly_564157; apiVersion: string;
           databaseName: string; assemblyName: string): Recallable =
   ## catalogGetAssembly
   ## Retrieves the specified assembly from the Data Lake Analytics catalog.
@@ -810,21 +814,21 @@ proc call*(call_568264: Call_CatalogGetAssembly_568257; apiVersion: string;
   ##               : The name of the database containing the assembly.
   ##   assemblyName: string (required)
   ##               : The name of the assembly.
-  var path_568265 = newJObject()
-  var query_568266 = newJObject()
-  add(query_568266, "api-version", newJString(apiVersion))
-  add(path_568265, "databaseName", newJString(databaseName))
-  add(path_568265, "assemblyName", newJString(assemblyName))
-  result = call_568264.call(path_568265, query_568266, nil, nil, nil)
+  var path_564165 = newJObject()
+  var query_564166 = newJObject()
+  add(query_564166, "api-version", newJString(apiVersion))
+  add(path_564165, "databaseName", newJString(databaseName))
+  add(path_564165, "assemblyName", newJString(assemblyName))
+  result = call_564164.call(path_564165, query_564166, nil, nil, nil)
 
-var catalogGetAssembly* = Call_CatalogGetAssembly_568257(
+var catalogGetAssembly* = Call_CatalogGetAssembly_564157(
     name: "catalogGetAssembly", meth: HttpMethod.HttpGet, host: "azure.local",
     route: "/catalog/usql/databases/{databaseName}/assemblies/{assemblyName}",
-    validator: validate_CatalogGetAssembly_568258, base: "",
-    url: url_CatalogGetAssembly_568259, schemes: {Scheme.Https})
+    validator: validate_CatalogGetAssembly_564158, base: "",
+    url: url_CatalogGetAssembly_564159, schemes: {Scheme.Https})
 type
-  Call_CatalogListCredentials_568267 = ref object of OpenApiRestCall_567666
-proc url_CatalogListCredentials_568269(protocol: Scheme; host: string; base: string;
+  Call_CatalogListCredentials_564167 = ref object of OpenApiRestCall_563564
+proc url_CatalogListCredentials_564169(protocol: Scheme; host: string; base: string;
                                       route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -840,7 +844,7 @@ proc url_CatalogListCredentials_568269(protocol: Scheme; host: string; base: str
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_CatalogListCredentials_568268(path: JsonNode; query: JsonNode;
+proc validate_CatalogListCredentials_564168(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Retrieves the list of credentials from the Data Lake Analytics catalog.
   ## 
@@ -852,62 +856,62 @@ proc validate_CatalogListCredentials_568268(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `databaseName` field"
-  var valid_568270 = path.getOrDefault("databaseName")
-  valid_568270 = validateParameter(valid_568270, JString, required = true,
+  var valid_564170 = path.getOrDefault("databaseName")
+  valid_564170 = validateParameter(valid_564170, JString, required = true,
                                  default = nil)
-  if valid_568270 != nil:
-    section.add "databaseName", valid_568270
+  if valid_564170 != nil:
+    section.add "databaseName", valid_564170
   result.add "path", section
   ## parameters in `query` object:
-  ##   $orderby: JString
-  ##           : OrderBy clause. One or more comma-separated expressions with an optional "asc" (the default) or "desc" depending on the order you'd like the values sorted, e.g. Categories?$orderby=CategoryName desc. Optional.
-  ##   api-version: JString (required)
-  ##              : Client Api Version.
   ##   $top: JInt
   ##       : The number of items to return. Optional.
+  ##   api-version: JString (required)
+  ##              : Client Api Version.
   ##   $select: JString
   ##          : OData Select statement. Limits the properties on each entry to just those requested, e.g. Categories?$select=CategoryName,Description. Optional.
-  ##   $skip: JInt
-  ##        : The number of items to skip over before returning elements. Optional.
   ##   $count: JBool
   ##         : The Boolean value of true or false to request a count of the matching resources included with the resources in the response, e.g. Categories?$count=true. Optional.
+  ##   $orderby: JString
+  ##           : OrderBy clause. One or more comma-separated expressions with an optional "asc" (the default) or "desc" depending on the order you'd like the values sorted, e.g. Categories?$orderby=CategoryName desc. Optional.
+  ##   $skip: JInt
+  ##        : The number of items to skip over before returning elements. Optional.
   ##   $filter: JString
   ##          : OData filter. Optional.
   section = newJObject()
-  var valid_568271 = query.getOrDefault("$orderby")
-  valid_568271 = validateParameter(valid_568271, JString, required = false,
-                                 default = nil)
-  if valid_568271 != nil:
-    section.add "$orderby", valid_568271
+  var valid_564171 = query.getOrDefault("$top")
+  valid_564171 = validateParameter(valid_564171, JInt, required = false, default = nil)
+  if valid_564171 != nil:
+    section.add "$top", valid_564171
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568272 = query.getOrDefault("api-version")
-  valid_568272 = validateParameter(valid_568272, JString, required = true,
+  var valid_564172 = query.getOrDefault("api-version")
+  valid_564172 = validateParameter(valid_564172, JString, required = true,
                                  default = nil)
-  if valid_568272 != nil:
-    section.add "api-version", valid_568272
-  var valid_568273 = query.getOrDefault("$top")
-  valid_568273 = validateParameter(valid_568273, JInt, required = false, default = nil)
-  if valid_568273 != nil:
-    section.add "$top", valid_568273
-  var valid_568274 = query.getOrDefault("$select")
-  valid_568274 = validateParameter(valid_568274, JString, required = false,
+  if valid_564172 != nil:
+    section.add "api-version", valid_564172
+  var valid_564173 = query.getOrDefault("$select")
+  valid_564173 = validateParameter(valid_564173, JString, required = false,
                                  default = nil)
-  if valid_568274 != nil:
-    section.add "$select", valid_568274
-  var valid_568275 = query.getOrDefault("$skip")
-  valid_568275 = validateParameter(valid_568275, JInt, required = false, default = nil)
-  if valid_568275 != nil:
-    section.add "$skip", valid_568275
-  var valid_568276 = query.getOrDefault("$count")
-  valid_568276 = validateParameter(valid_568276, JBool, required = false, default = nil)
-  if valid_568276 != nil:
-    section.add "$count", valid_568276
-  var valid_568277 = query.getOrDefault("$filter")
-  valid_568277 = validateParameter(valid_568277, JString, required = false,
+  if valid_564173 != nil:
+    section.add "$select", valid_564173
+  var valid_564174 = query.getOrDefault("$count")
+  valid_564174 = validateParameter(valid_564174, JBool, required = false, default = nil)
+  if valid_564174 != nil:
+    section.add "$count", valid_564174
+  var valid_564175 = query.getOrDefault("$orderby")
+  valid_564175 = validateParameter(valid_564175, JString, required = false,
                                  default = nil)
-  if valid_568277 != nil:
-    section.add "$filter", valid_568277
+  if valid_564175 != nil:
+    section.add "$orderby", valid_564175
+  var valid_564176 = query.getOrDefault("$skip")
+  valid_564176 = validateParameter(valid_564176, JInt, required = false, default = nil)
+  if valid_564176 != nil:
+    section.add "$skip", valid_564176
+  var valid_564177 = query.getOrDefault("$filter")
+  valid_564177 = validateParameter(valid_564177, JString, required = false,
+                                 default = nil)
+  if valid_564177 != nil:
+    section.add "$filter", valid_564177
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -916,60 +920,60 @@ proc validate_CatalogListCredentials_568268(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568278: Call_CatalogListCredentials_568267; path: JsonNode;
+proc call*(call_564178: Call_CatalogListCredentials_564167; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Retrieves the list of credentials from the Data Lake Analytics catalog.
   ## 
-  let valid = call_568278.validator(path, query, header, formData, body)
-  let scheme = call_568278.pickScheme
+  let valid = call_564178.validator(path, query, header, formData, body)
+  let scheme = call_564178.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568278.url(scheme.get, call_568278.host, call_568278.base,
-                         call_568278.route, valid.getOrDefault("path"),
+  let url = call_564178.url(scheme.get, call_564178.host, call_564178.base,
+                         call_564178.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568278, url, valid)
+  result = hook(call_564178, url, valid)
 
-proc call*(call_568279: Call_CatalogListCredentials_568267; apiVersion: string;
-          databaseName: string; Orderby: string = ""; Top: int = 0; Select: string = "";
-          Skip: int = 0; Count: bool = false; Filter: string = ""): Recallable =
+proc call*(call_564179: Call_CatalogListCredentials_564167; apiVersion: string;
+          databaseName: string; Top: int = 0; Select: string = ""; Count: bool = false;
+          Orderby: string = ""; Skip: int = 0; Filter: string = ""): Recallable =
   ## catalogListCredentials
   ## Retrieves the list of credentials from the Data Lake Analytics catalog.
-  ##   Orderby: string
-  ##          : OrderBy clause. One or more comma-separated expressions with an optional "asc" (the default) or "desc" depending on the order you'd like the values sorted, e.g. Categories?$orderby=CategoryName desc. Optional.
-  ##   apiVersion: string (required)
-  ##             : Client Api Version.
   ##   Top: int
   ##      : The number of items to return. Optional.
+  ##   apiVersion: string (required)
+  ##             : Client Api Version.
   ##   Select: string
   ##         : OData Select statement. Limits the properties on each entry to just those requested, e.g. Categories?$select=CategoryName,Description. Optional.
-  ##   databaseName: string (required)
-  ##               : The name of the database containing the schema.
-  ##   Skip: int
-  ##       : The number of items to skip over before returning elements. Optional.
   ##   Count: bool
   ##        : The Boolean value of true or false to request a count of the matching resources included with the resources in the response, e.g. Categories?$count=true. Optional.
+  ##   databaseName: string (required)
+  ##               : The name of the database containing the schema.
+  ##   Orderby: string
+  ##          : OrderBy clause. One or more comma-separated expressions with an optional "asc" (the default) or "desc" depending on the order you'd like the values sorted, e.g. Categories?$orderby=CategoryName desc. Optional.
+  ##   Skip: int
+  ##       : The number of items to skip over before returning elements. Optional.
   ##   Filter: string
   ##         : OData filter. Optional.
-  var path_568280 = newJObject()
-  var query_568281 = newJObject()
-  add(query_568281, "$orderby", newJString(Orderby))
-  add(query_568281, "api-version", newJString(apiVersion))
-  add(query_568281, "$top", newJInt(Top))
-  add(query_568281, "$select", newJString(Select))
-  add(path_568280, "databaseName", newJString(databaseName))
-  add(query_568281, "$skip", newJInt(Skip))
-  add(query_568281, "$count", newJBool(Count))
-  add(query_568281, "$filter", newJString(Filter))
-  result = call_568279.call(path_568280, query_568281, nil, nil, nil)
+  var path_564180 = newJObject()
+  var query_564181 = newJObject()
+  add(query_564181, "$top", newJInt(Top))
+  add(query_564181, "api-version", newJString(apiVersion))
+  add(query_564181, "$select", newJString(Select))
+  add(query_564181, "$count", newJBool(Count))
+  add(path_564180, "databaseName", newJString(databaseName))
+  add(query_564181, "$orderby", newJString(Orderby))
+  add(query_564181, "$skip", newJInt(Skip))
+  add(query_564181, "$filter", newJString(Filter))
+  result = call_564179.call(path_564180, query_564181, nil, nil, nil)
 
-var catalogListCredentials* = Call_CatalogListCredentials_568267(
+var catalogListCredentials* = Call_CatalogListCredentials_564167(
     name: "catalogListCredentials", meth: HttpMethod.HttpGet, host: "azure.local",
     route: "/catalog/usql/databases/{databaseName}/credentials",
-    validator: validate_CatalogListCredentials_568268, base: "",
-    url: url_CatalogListCredentials_568269, schemes: {Scheme.Https})
+    validator: validate_CatalogListCredentials_564168, base: "",
+    url: url_CatalogListCredentials_564169, schemes: {Scheme.Https})
 type
-  Call_CatalogCreateCredential_568292 = ref object of OpenApiRestCall_567666
-proc url_CatalogCreateCredential_568294(protocol: Scheme; host: string; base: string;
+  Call_CatalogCreateCredential_564192 = ref object of OpenApiRestCall_563564
+proc url_CatalogCreateCredential_564194(protocol: Scheme; host: string; base: string;
                                        route: string; path: JsonNode;
                                        query: JsonNode): Uri =
   result.scheme = $protocol
@@ -988,7 +992,7 @@ proc url_CatalogCreateCredential_568294(protocol: Scheme; host: string; base: st
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_CatalogCreateCredential_568293(path: JsonNode; query: JsonNode;
+proc validate_CatalogCreateCredential_564193(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Creates the specified credential for use with external data sources in the specified database.
   ## 
@@ -1002,16 +1006,16 @@ proc validate_CatalogCreateCredential_568293(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `databaseName` field"
-  var valid_568312 = path.getOrDefault("databaseName")
-  valid_568312 = validateParameter(valid_568312, JString, required = true,
+  var valid_564212 = path.getOrDefault("databaseName")
+  valid_564212 = validateParameter(valid_564212, JString, required = true,
                                  default = nil)
-  if valid_568312 != nil:
-    section.add "databaseName", valid_568312
-  var valid_568313 = path.getOrDefault("credentialName")
-  valid_568313 = validateParameter(valid_568313, JString, required = true,
+  if valid_564212 != nil:
+    section.add "databaseName", valid_564212
+  var valid_564213 = path.getOrDefault("credentialName")
+  valid_564213 = validateParameter(valid_564213, JString, required = true,
                                  default = nil)
-  if valid_568313 != nil:
-    section.add "credentialName", valid_568313
+  if valid_564213 != nil:
+    section.add "credentialName", valid_564213
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1019,11 +1023,11 @@ proc validate_CatalogCreateCredential_568293(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568314 = query.getOrDefault("api-version")
-  valid_568314 = validateParameter(valid_568314, JString, required = true,
+  var valid_564214 = query.getOrDefault("api-version")
+  valid_564214 = validateParameter(valid_564214, JString, required = true,
                                  default = nil)
-  if valid_568314 != nil:
-    section.add "api-version", valid_568314
+  if valid_564214 != nil:
+    section.add "api-version", valid_564214
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1037,20 +1041,20 @@ proc validate_CatalogCreateCredential_568293(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568316: Call_CatalogCreateCredential_568292; path: JsonNode;
+proc call*(call_564216: Call_CatalogCreateCredential_564192; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Creates the specified credential for use with external data sources in the specified database.
   ## 
-  let valid = call_568316.validator(path, query, header, formData, body)
-  let scheme = call_568316.pickScheme
+  let valid = call_564216.validator(path, query, header, formData, body)
+  let scheme = call_564216.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568316.url(scheme.get, call_568316.host, call_568316.base,
-                         call_568316.route, valid.getOrDefault("path"),
+  let url = call_564216.url(scheme.get, call_564216.host, call_564216.base,
+                         call_564216.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568316, url, valid)
+  result = hook(call_564216, url, valid)
 
-proc call*(call_568317: Call_CatalogCreateCredential_568292; apiVersion: string;
+proc call*(call_564217: Call_CatalogCreateCredential_564192; apiVersion: string;
           databaseName: string; credentialName: string; parameters: JsonNode): Recallable =
   ## catalogCreateCredential
   ## Creates the specified credential for use with external data sources in the specified database.
@@ -1062,23 +1066,23 @@ proc call*(call_568317: Call_CatalogCreateCredential_568292; apiVersion: string;
   ##                 : The name of the credential.
   ##   parameters: JObject (required)
   ##             : The parameters required to create the credential (name and password)
-  var path_568318 = newJObject()
-  var query_568319 = newJObject()
-  var body_568320 = newJObject()
-  add(query_568319, "api-version", newJString(apiVersion))
-  add(path_568318, "databaseName", newJString(databaseName))
-  add(path_568318, "credentialName", newJString(credentialName))
+  var path_564218 = newJObject()
+  var query_564219 = newJObject()
+  var body_564220 = newJObject()
+  add(query_564219, "api-version", newJString(apiVersion))
+  add(path_564218, "databaseName", newJString(databaseName))
+  add(path_564218, "credentialName", newJString(credentialName))
   if parameters != nil:
-    body_568320 = parameters
-  result = call_568317.call(path_568318, query_568319, nil, nil, body_568320)
+    body_564220 = parameters
+  result = call_564217.call(path_564218, query_564219, nil, nil, body_564220)
 
-var catalogCreateCredential* = Call_CatalogCreateCredential_568292(
+var catalogCreateCredential* = Call_CatalogCreateCredential_564192(
     name: "catalogCreateCredential", meth: HttpMethod.HttpPut, host: "azure.local", route: "/catalog/usql/databases/{databaseName}/credentials/{credentialName}",
-    validator: validate_CatalogCreateCredential_568293, base: "",
-    url: url_CatalogCreateCredential_568294, schemes: {Scheme.Https})
+    validator: validate_CatalogCreateCredential_564193, base: "",
+    url: url_CatalogCreateCredential_564194, schemes: {Scheme.Https})
 type
-  Call_CatalogDeleteCredential_568321 = ref object of OpenApiRestCall_567666
-proc url_CatalogDeleteCredential_568323(protocol: Scheme; host: string; base: string;
+  Call_CatalogDeleteCredential_564221 = ref object of OpenApiRestCall_563564
+proc url_CatalogDeleteCredential_564223(protocol: Scheme; host: string; base: string;
                                        route: string; path: JsonNode;
                                        query: JsonNode): Uri =
   result.scheme = $protocol
@@ -1097,7 +1101,7 @@ proc url_CatalogDeleteCredential_568323(protocol: Scheme; host: string; base: st
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_CatalogDeleteCredential_568322(path: JsonNode; query: JsonNode;
+proc validate_CatalogDeleteCredential_564222(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Deletes the specified credential in the specified database
   ## 
@@ -1111,35 +1115,35 @@ proc validate_CatalogDeleteCredential_568322(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `databaseName` field"
-  var valid_568324 = path.getOrDefault("databaseName")
-  valid_568324 = validateParameter(valid_568324, JString, required = true,
+  var valid_564224 = path.getOrDefault("databaseName")
+  valid_564224 = validateParameter(valid_564224, JString, required = true,
                                  default = nil)
-  if valid_568324 != nil:
-    section.add "databaseName", valid_568324
-  var valid_568325 = path.getOrDefault("credentialName")
-  valid_568325 = validateParameter(valid_568325, JString, required = true,
+  if valid_564224 != nil:
+    section.add "databaseName", valid_564224
+  var valid_564225 = path.getOrDefault("credentialName")
+  valid_564225 = validateParameter(valid_564225, JString, required = true,
                                  default = nil)
-  if valid_568325 != nil:
-    section.add "credentialName", valid_568325
+  if valid_564225 != nil:
+    section.add "credentialName", valid_564225
   result.add "path", section
   ## parameters in `query` object:
-  ##   cascade: JBool
-  ##          : Indicates if the delete should be a cascading delete (which deletes all resources dependent on the credential as well as the credential) or not. If false will fail if there are any resources relying on the credential.
   ##   api-version: JString (required)
   ##              : Client Api Version.
+  ##   cascade: JBool
+  ##          : Indicates if the delete should be a cascading delete (which deletes all resources dependent on the credential as well as the credential) or not. If false will fail if there are any resources relying on the credential.
   section = newJObject()
-  var valid_568339 = query.getOrDefault("cascade")
-  valid_568339 = validateParameter(valid_568339, JBool, required = false,
-                                 default = newJBool(false))
-  if valid_568339 != nil:
-    section.add "cascade", valid_568339
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568340 = query.getOrDefault("api-version")
-  valid_568340 = validateParameter(valid_568340, JString, required = true,
+  var valid_564226 = query.getOrDefault("api-version")
+  valid_564226 = validateParameter(valid_564226, JString, required = true,
                                  default = nil)
-  if valid_568340 != nil:
-    section.add "api-version", valid_568340
+  if valid_564226 != nil:
+    section.add "api-version", valid_564226
+  var valid_564240 = query.getOrDefault("cascade")
+  valid_564240 = validateParameter(valid_564240, JBool, required = false,
+                                 default = newJBool(false))
+  if valid_564240 != nil:
+    section.add "cascade", valid_564240
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1152,52 +1156,52 @@ proc validate_CatalogDeleteCredential_568322(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568342: Call_CatalogDeleteCredential_568321; path: JsonNode;
+proc call*(call_564242: Call_CatalogDeleteCredential_564221; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes the specified credential in the specified database
   ## 
-  let valid = call_568342.validator(path, query, header, formData, body)
-  let scheme = call_568342.pickScheme
+  let valid = call_564242.validator(path, query, header, formData, body)
+  let scheme = call_564242.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568342.url(scheme.get, call_568342.host, call_568342.base,
-                         call_568342.route, valid.getOrDefault("path"),
+  let url = call_564242.url(scheme.get, call_564242.host, call_564242.base,
+                         call_564242.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568342, url, valid)
+  result = hook(call_564242, url, valid)
 
-proc call*(call_568343: Call_CatalogDeleteCredential_568321; apiVersion: string;
+proc call*(call_564243: Call_CatalogDeleteCredential_564221; apiVersion: string;
           databaseName: string; credentialName: string; cascade: bool = false;
           parameters: JsonNode = nil): Recallable =
   ## catalogDeleteCredential
   ## Deletes the specified credential in the specified database
-  ##   cascade: bool
-  ##          : Indicates if the delete should be a cascading delete (which deletes all resources dependent on the credential as well as the credential) or not. If false will fail if there are any resources relying on the credential.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
   ##   databaseName: string (required)
   ##               : The name of the database containing the credential.
   ##   credentialName: string (required)
   ##                 : The name of the credential to delete
+  ##   cascade: bool
+  ##          : Indicates if the delete should be a cascading delete (which deletes all resources dependent on the credential as well as the credential) or not. If false will fail if there are any resources relying on the credential.
   ##   parameters: JObject
   ##             : The parameters to delete a credential if the current user is not the account owner.
-  var path_568344 = newJObject()
-  var query_568345 = newJObject()
-  var body_568346 = newJObject()
-  add(query_568345, "cascade", newJBool(cascade))
-  add(query_568345, "api-version", newJString(apiVersion))
-  add(path_568344, "databaseName", newJString(databaseName))
-  add(path_568344, "credentialName", newJString(credentialName))
+  var path_564244 = newJObject()
+  var query_564245 = newJObject()
+  var body_564246 = newJObject()
+  add(query_564245, "api-version", newJString(apiVersion))
+  add(path_564244, "databaseName", newJString(databaseName))
+  add(path_564244, "credentialName", newJString(credentialName))
+  add(query_564245, "cascade", newJBool(cascade))
   if parameters != nil:
-    body_568346 = parameters
-  result = call_568343.call(path_568344, query_568345, nil, nil, body_568346)
+    body_564246 = parameters
+  result = call_564243.call(path_564244, query_564245, nil, nil, body_564246)
 
-var catalogDeleteCredential* = Call_CatalogDeleteCredential_568321(
+var catalogDeleteCredential* = Call_CatalogDeleteCredential_564221(
     name: "catalogDeleteCredential", meth: HttpMethod.HttpPost, host: "azure.local", route: "/catalog/usql/databases/{databaseName}/credentials/{credentialName}",
-    validator: validate_CatalogDeleteCredential_568322, base: "",
-    url: url_CatalogDeleteCredential_568323, schemes: {Scheme.Https})
+    validator: validate_CatalogDeleteCredential_564222, base: "",
+    url: url_CatalogDeleteCredential_564223, schemes: {Scheme.Https})
 type
-  Call_CatalogGetCredential_568282 = ref object of OpenApiRestCall_567666
-proc url_CatalogGetCredential_568284(protocol: Scheme; host: string; base: string;
+  Call_CatalogGetCredential_564182 = ref object of OpenApiRestCall_563564
+proc url_CatalogGetCredential_564184(protocol: Scheme; host: string; base: string;
                                     route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1215,7 +1219,7 @@ proc url_CatalogGetCredential_568284(protocol: Scheme; host: string; base: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_CatalogGetCredential_568283(path: JsonNode; query: JsonNode;
+proc validate_CatalogGetCredential_564183(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Retrieves the specified credential from the Data Lake Analytics catalog.
   ## 
@@ -1229,16 +1233,16 @@ proc validate_CatalogGetCredential_568283(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `databaseName` field"
-  var valid_568285 = path.getOrDefault("databaseName")
-  valid_568285 = validateParameter(valid_568285, JString, required = true,
+  var valid_564185 = path.getOrDefault("databaseName")
+  valid_564185 = validateParameter(valid_564185, JString, required = true,
                                  default = nil)
-  if valid_568285 != nil:
-    section.add "databaseName", valid_568285
-  var valid_568286 = path.getOrDefault("credentialName")
-  valid_568286 = validateParameter(valid_568286, JString, required = true,
+  if valid_564185 != nil:
+    section.add "databaseName", valid_564185
+  var valid_564186 = path.getOrDefault("credentialName")
+  valid_564186 = validateParameter(valid_564186, JString, required = true,
                                  default = nil)
-  if valid_568286 != nil:
-    section.add "credentialName", valid_568286
+  if valid_564186 != nil:
+    section.add "credentialName", valid_564186
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1246,11 +1250,11 @@ proc validate_CatalogGetCredential_568283(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568287 = query.getOrDefault("api-version")
-  valid_568287 = validateParameter(valid_568287, JString, required = true,
+  var valid_564187 = query.getOrDefault("api-version")
+  valid_564187 = validateParameter(valid_564187, JString, required = true,
                                  default = nil)
-  if valid_568287 != nil:
-    section.add "api-version", valid_568287
+  if valid_564187 != nil:
+    section.add "api-version", valid_564187
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1259,20 +1263,20 @@ proc validate_CatalogGetCredential_568283(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568288: Call_CatalogGetCredential_568282; path: JsonNode;
+proc call*(call_564188: Call_CatalogGetCredential_564182; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Retrieves the specified credential from the Data Lake Analytics catalog.
   ## 
-  let valid = call_568288.validator(path, query, header, formData, body)
-  let scheme = call_568288.pickScheme
+  let valid = call_564188.validator(path, query, header, formData, body)
+  let scheme = call_564188.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568288.url(scheme.get, call_568288.host, call_568288.base,
-                         call_568288.route, valid.getOrDefault("path"),
+  let url = call_564188.url(scheme.get, call_564188.host, call_564188.base,
+                         call_564188.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568288, url, valid)
+  result = hook(call_564188, url, valid)
 
-proc call*(call_568289: Call_CatalogGetCredential_568282; apiVersion: string;
+proc call*(call_564189: Call_CatalogGetCredential_564182; apiVersion: string;
           databaseName: string; credentialName: string): Recallable =
   ## catalogGetCredential
   ## Retrieves the specified credential from the Data Lake Analytics catalog.
@@ -1282,20 +1286,20 @@ proc call*(call_568289: Call_CatalogGetCredential_568282; apiVersion: string;
   ##               : The name of the database containing the schema.
   ##   credentialName: string (required)
   ##                 : The name of the credential.
-  var path_568290 = newJObject()
-  var query_568291 = newJObject()
-  add(query_568291, "api-version", newJString(apiVersion))
-  add(path_568290, "databaseName", newJString(databaseName))
-  add(path_568290, "credentialName", newJString(credentialName))
-  result = call_568289.call(path_568290, query_568291, nil, nil, nil)
+  var path_564190 = newJObject()
+  var query_564191 = newJObject()
+  add(query_564191, "api-version", newJString(apiVersion))
+  add(path_564190, "databaseName", newJString(databaseName))
+  add(path_564190, "credentialName", newJString(credentialName))
+  result = call_564189.call(path_564190, query_564191, nil, nil, nil)
 
-var catalogGetCredential* = Call_CatalogGetCredential_568282(
+var catalogGetCredential* = Call_CatalogGetCredential_564182(
     name: "catalogGetCredential", meth: HttpMethod.HttpGet, host: "azure.local", route: "/catalog/usql/databases/{databaseName}/credentials/{credentialName}",
-    validator: validate_CatalogGetCredential_568283, base: "",
-    url: url_CatalogGetCredential_568284, schemes: {Scheme.Https})
+    validator: validate_CatalogGetCredential_564183, base: "",
+    url: url_CatalogGetCredential_564184, schemes: {Scheme.Https})
 type
-  Call_CatalogUpdateCredential_568347 = ref object of OpenApiRestCall_567666
-proc url_CatalogUpdateCredential_568349(protocol: Scheme; host: string; base: string;
+  Call_CatalogUpdateCredential_564247 = ref object of OpenApiRestCall_563564
+proc url_CatalogUpdateCredential_564249(protocol: Scheme; host: string; base: string;
                                        route: string; path: JsonNode;
                                        query: JsonNode): Uri =
   result.scheme = $protocol
@@ -1314,7 +1318,7 @@ proc url_CatalogUpdateCredential_568349(protocol: Scheme; host: string; base: st
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_CatalogUpdateCredential_568348(path: JsonNode; query: JsonNode;
+proc validate_CatalogUpdateCredential_564248(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Modifies the specified credential for use with external data sources in the specified database
   ## 
@@ -1328,16 +1332,16 @@ proc validate_CatalogUpdateCredential_568348(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `databaseName` field"
-  var valid_568350 = path.getOrDefault("databaseName")
-  valid_568350 = validateParameter(valid_568350, JString, required = true,
+  var valid_564250 = path.getOrDefault("databaseName")
+  valid_564250 = validateParameter(valid_564250, JString, required = true,
                                  default = nil)
-  if valid_568350 != nil:
-    section.add "databaseName", valid_568350
-  var valid_568351 = path.getOrDefault("credentialName")
-  valid_568351 = validateParameter(valid_568351, JString, required = true,
+  if valid_564250 != nil:
+    section.add "databaseName", valid_564250
+  var valid_564251 = path.getOrDefault("credentialName")
+  valid_564251 = validateParameter(valid_564251, JString, required = true,
                                  default = nil)
-  if valid_568351 != nil:
-    section.add "credentialName", valid_568351
+  if valid_564251 != nil:
+    section.add "credentialName", valid_564251
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1345,11 +1349,11 @@ proc validate_CatalogUpdateCredential_568348(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568352 = query.getOrDefault("api-version")
-  valid_568352 = validateParameter(valid_568352, JString, required = true,
+  var valid_564252 = query.getOrDefault("api-version")
+  valid_564252 = validateParameter(valid_564252, JString, required = true,
                                  default = nil)
-  if valid_568352 != nil:
-    section.add "api-version", valid_568352
+  if valid_564252 != nil:
+    section.add "api-version", valid_564252
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1363,20 +1367,20 @@ proc validate_CatalogUpdateCredential_568348(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568354: Call_CatalogUpdateCredential_568347; path: JsonNode;
+proc call*(call_564254: Call_CatalogUpdateCredential_564247; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Modifies the specified credential for use with external data sources in the specified database
   ## 
-  let valid = call_568354.validator(path, query, header, formData, body)
-  let scheme = call_568354.pickScheme
+  let valid = call_564254.validator(path, query, header, formData, body)
+  let scheme = call_564254.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568354.url(scheme.get, call_568354.host, call_568354.base,
-                         call_568354.route, valid.getOrDefault("path"),
+  let url = call_564254.url(scheme.get, call_564254.host, call_564254.base,
+                         call_564254.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568354, url, valid)
+  result = hook(call_564254, url, valid)
 
-proc call*(call_568355: Call_CatalogUpdateCredential_568347; apiVersion: string;
+proc call*(call_564255: Call_CatalogUpdateCredential_564247; apiVersion: string;
           databaseName: string; credentialName: string; parameters: JsonNode): Recallable =
   ## catalogUpdateCredential
   ## Modifies the specified credential for use with external data sources in the specified database
@@ -1388,24 +1392,24 @@ proc call*(call_568355: Call_CatalogUpdateCredential_568347; apiVersion: string;
   ##                 : The name of the credential.
   ##   parameters: JObject (required)
   ##             : The parameters required to modify the credential (name and password)
-  var path_568356 = newJObject()
-  var query_568357 = newJObject()
-  var body_568358 = newJObject()
-  add(query_568357, "api-version", newJString(apiVersion))
-  add(path_568356, "databaseName", newJString(databaseName))
-  add(path_568356, "credentialName", newJString(credentialName))
+  var path_564256 = newJObject()
+  var query_564257 = newJObject()
+  var body_564258 = newJObject()
+  add(query_564257, "api-version", newJString(apiVersion))
+  add(path_564256, "databaseName", newJString(databaseName))
+  add(path_564256, "credentialName", newJString(credentialName))
   if parameters != nil:
-    body_568358 = parameters
-  result = call_568355.call(path_568356, query_568357, nil, nil, body_568358)
+    body_564258 = parameters
+  result = call_564255.call(path_564256, query_564257, nil, nil, body_564258)
 
-var catalogUpdateCredential* = Call_CatalogUpdateCredential_568347(
+var catalogUpdateCredential* = Call_CatalogUpdateCredential_564247(
     name: "catalogUpdateCredential", meth: HttpMethod.HttpPatch,
     host: "azure.local", route: "/catalog/usql/databases/{databaseName}/credentials/{credentialName}",
-    validator: validate_CatalogUpdateCredential_568348, base: "",
-    url: url_CatalogUpdateCredential_568349, schemes: {Scheme.Https})
+    validator: validate_CatalogUpdateCredential_564248, base: "",
+    url: url_CatalogUpdateCredential_564249, schemes: {Scheme.Https})
 type
-  Call_CatalogListExternalDataSources_568359 = ref object of OpenApiRestCall_567666
-proc url_CatalogListExternalDataSources_568361(protocol: Scheme; host: string;
+  Call_CatalogListExternalDataSources_564259 = ref object of OpenApiRestCall_563564
+proc url_CatalogListExternalDataSources_564261(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1421,7 +1425,7 @@ proc url_CatalogListExternalDataSources_568361(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_CatalogListExternalDataSources_568360(path: JsonNode;
+proc validate_CatalogListExternalDataSources_564260(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Retrieves the list of external data sources from the Data Lake Analytics catalog.
   ## 
@@ -1433,62 +1437,62 @@ proc validate_CatalogListExternalDataSources_568360(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `databaseName` field"
-  var valid_568362 = path.getOrDefault("databaseName")
-  valid_568362 = validateParameter(valid_568362, JString, required = true,
+  var valid_564262 = path.getOrDefault("databaseName")
+  valid_564262 = validateParameter(valid_564262, JString, required = true,
                                  default = nil)
-  if valid_568362 != nil:
-    section.add "databaseName", valid_568362
+  if valid_564262 != nil:
+    section.add "databaseName", valid_564262
   result.add "path", section
   ## parameters in `query` object:
-  ##   $orderby: JString
-  ##           : OrderBy clause. One or more comma-separated expressions with an optional "asc" (the default) or "desc" depending on the order you'd like the values sorted, e.g. Categories?$orderby=CategoryName desc. Optional.
-  ##   api-version: JString (required)
-  ##              : Client Api Version.
   ##   $top: JInt
   ##       : The number of items to return. Optional.
+  ##   api-version: JString (required)
+  ##              : Client Api Version.
   ##   $select: JString
   ##          : OData Select statement. Limits the properties on each entry to just those requested, e.g. Categories?$select=CategoryName,Description. Optional.
-  ##   $skip: JInt
-  ##        : The number of items to skip over before returning elements. Optional.
   ##   $count: JBool
   ##         : The Boolean value of true or false to request a count of the matching resources included with the resources in the response, e.g. Categories?$count=true. Optional.
+  ##   $orderby: JString
+  ##           : OrderBy clause. One or more comma-separated expressions with an optional "asc" (the default) or "desc" depending on the order you'd like the values sorted, e.g. Categories?$orderby=CategoryName desc. Optional.
+  ##   $skip: JInt
+  ##        : The number of items to skip over before returning elements. Optional.
   ##   $filter: JString
   ##          : OData filter. Optional.
   section = newJObject()
-  var valid_568363 = query.getOrDefault("$orderby")
-  valid_568363 = validateParameter(valid_568363, JString, required = false,
-                                 default = nil)
-  if valid_568363 != nil:
-    section.add "$orderby", valid_568363
+  var valid_564263 = query.getOrDefault("$top")
+  valid_564263 = validateParameter(valid_564263, JInt, required = false, default = nil)
+  if valid_564263 != nil:
+    section.add "$top", valid_564263
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568364 = query.getOrDefault("api-version")
-  valid_568364 = validateParameter(valid_568364, JString, required = true,
+  var valid_564264 = query.getOrDefault("api-version")
+  valid_564264 = validateParameter(valid_564264, JString, required = true,
                                  default = nil)
-  if valid_568364 != nil:
-    section.add "api-version", valid_568364
-  var valid_568365 = query.getOrDefault("$top")
-  valid_568365 = validateParameter(valid_568365, JInt, required = false, default = nil)
-  if valid_568365 != nil:
-    section.add "$top", valid_568365
-  var valid_568366 = query.getOrDefault("$select")
-  valid_568366 = validateParameter(valid_568366, JString, required = false,
+  if valid_564264 != nil:
+    section.add "api-version", valid_564264
+  var valid_564265 = query.getOrDefault("$select")
+  valid_564265 = validateParameter(valid_564265, JString, required = false,
                                  default = nil)
-  if valid_568366 != nil:
-    section.add "$select", valid_568366
-  var valid_568367 = query.getOrDefault("$skip")
-  valid_568367 = validateParameter(valid_568367, JInt, required = false, default = nil)
-  if valid_568367 != nil:
-    section.add "$skip", valid_568367
-  var valid_568368 = query.getOrDefault("$count")
-  valid_568368 = validateParameter(valid_568368, JBool, required = false, default = nil)
-  if valid_568368 != nil:
-    section.add "$count", valid_568368
-  var valid_568369 = query.getOrDefault("$filter")
-  valid_568369 = validateParameter(valid_568369, JString, required = false,
+  if valid_564265 != nil:
+    section.add "$select", valid_564265
+  var valid_564266 = query.getOrDefault("$count")
+  valid_564266 = validateParameter(valid_564266, JBool, required = false, default = nil)
+  if valid_564266 != nil:
+    section.add "$count", valid_564266
+  var valid_564267 = query.getOrDefault("$orderby")
+  valid_564267 = validateParameter(valid_564267, JString, required = false,
                                  default = nil)
-  if valid_568369 != nil:
-    section.add "$filter", valid_568369
+  if valid_564267 != nil:
+    section.add "$orderby", valid_564267
+  var valid_564268 = query.getOrDefault("$skip")
+  valid_564268 = validateParameter(valid_564268, JInt, required = false, default = nil)
+  if valid_564268 != nil:
+    section.add "$skip", valid_564268
+  var valid_564269 = query.getOrDefault("$filter")
+  valid_564269 = validateParameter(valid_564269, JString, required = false,
+                                 default = nil)
+  if valid_564269 != nil:
+    section.add "$filter", valid_564269
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1497,61 +1501,61 @@ proc validate_CatalogListExternalDataSources_568360(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568370: Call_CatalogListExternalDataSources_568359; path: JsonNode;
+proc call*(call_564270: Call_CatalogListExternalDataSources_564259; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Retrieves the list of external data sources from the Data Lake Analytics catalog.
   ## 
-  let valid = call_568370.validator(path, query, header, formData, body)
-  let scheme = call_568370.pickScheme
+  let valid = call_564270.validator(path, query, header, formData, body)
+  let scheme = call_564270.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568370.url(scheme.get, call_568370.host, call_568370.base,
-                         call_568370.route, valid.getOrDefault("path"),
+  let url = call_564270.url(scheme.get, call_564270.host, call_564270.base,
+                         call_564270.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568370, url, valid)
+  result = hook(call_564270, url, valid)
 
-proc call*(call_568371: Call_CatalogListExternalDataSources_568359;
-          apiVersion: string; databaseName: string; Orderby: string = ""; Top: int = 0;
-          Select: string = ""; Skip: int = 0; Count: bool = false; Filter: string = ""): Recallable =
+proc call*(call_564271: Call_CatalogListExternalDataSources_564259;
+          apiVersion: string; databaseName: string; Top: int = 0; Select: string = "";
+          Count: bool = false; Orderby: string = ""; Skip: int = 0; Filter: string = ""): Recallable =
   ## catalogListExternalDataSources
   ## Retrieves the list of external data sources from the Data Lake Analytics catalog.
-  ##   Orderby: string
-  ##          : OrderBy clause. One or more comma-separated expressions with an optional "asc" (the default) or "desc" depending on the order you'd like the values sorted, e.g. Categories?$orderby=CategoryName desc. Optional.
-  ##   apiVersion: string (required)
-  ##             : Client Api Version.
   ##   Top: int
   ##      : The number of items to return. Optional.
+  ##   apiVersion: string (required)
+  ##             : Client Api Version.
   ##   Select: string
   ##         : OData Select statement. Limits the properties on each entry to just those requested, e.g. Categories?$select=CategoryName,Description. Optional.
-  ##   databaseName: string (required)
-  ##               : The name of the database containing the external data sources.
-  ##   Skip: int
-  ##       : The number of items to skip over before returning elements. Optional.
   ##   Count: bool
   ##        : The Boolean value of true or false to request a count of the matching resources included with the resources in the response, e.g. Categories?$count=true. Optional.
+  ##   databaseName: string (required)
+  ##               : The name of the database containing the external data sources.
+  ##   Orderby: string
+  ##          : OrderBy clause. One or more comma-separated expressions with an optional "asc" (the default) or "desc" depending on the order you'd like the values sorted, e.g. Categories?$orderby=CategoryName desc. Optional.
+  ##   Skip: int
+  ##       : The number of items to skip over before returning elements. Optional.
   ##   Filter: string
   ##         : OData filter. Optional.
-  var path_568372 = newJObject()
-  var query_568373 = newJObject()
-  add(query_568373, "$orderby", newJString(Orderby))
-  add(query_568373, "api-version", newJString(apiVersion))
-  add(query_568373, "$top", newJInt(Top))
-  add(query_568373, "$select", newJString(Select))
-  add(path_568372, "databaseName", newJString(databaseName))
-  add(query_568373, "$skip", newJInt(Skip))
-  add(query_568373, "$count", newJBool(Count))
-  add(query_568373, "$filter", newJString(Filter))
-  result = call_568371.call(path_568372, query_568373, nil, nil, nil)
+  var path_564272 = newJObject()
+  var query_564273 = newJObject()
+  add(query_564273, "$top", newJInt(Top))
+  add(query_564273, "api-version", newJString(apiVersion))
+  add(query_564273, "$select", newJString(Select))
+  add(query_564273, "$count", newJBool(Count))
+  add(path_564272, "databaseName", newJString(databaseName))
+  add(query_564273, "$orderby", newJString(Orderby))
+  add(query_564273, "$skip", newJInt(Skip))
+  add(query_564273, "$filter", newJString(Filter))
+  result = call_564271.call(path_564272, query_564273, nil, nil, nil)
 
-var catalogListExternalDataSources* = Call_CatalogListExternalDataSources_568359(
+var catalogListExternalDataSources* = Call_CatalogListExternalDataSources_564259(
     name: "catalogListExternalDataSources", meth: HttpMethod.HttpGet,
     host: "azure.local",
     route: "/catalog/usql/databases/{databaseName}/externaldatasources",
-    validator: validate_CatalogListExternalDataSources_568360, base: "",
-    url: url_CatalogListExternalDataSources_568361, schemes: {Scheme.Https})
+    validator: validate_CatalogListExternalDataSources_564260, base: "",
+    url: url_CatalogListExternalDataSources_564261, schemes: {Scheme.Https})
 type
-  Call_CatalogGetExternalDataSource_568374 = ref object of OpenApiRestCall_567666
-proc url_CatalogGetExternalDataSource_568376(protocol: Scheme; host: string;
+  Call_CatalogGetExternalDataSource_564274 = ref object of OpenApiRestCall_563564
+proc url_CatalogGetExternalDataSource_564276(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1570,7 +1574,7 @@ proc url_CatalogGetExternalDataSource_568376(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_CatalogGetExternalDataSource_568375(path: JsonNode; query: JsonNode;
+proc validate_CatalogGetExternalDataSource_564275(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Retrieves the specified external data source from the Data Lake Analytics catalog.
   ## 
@@ -1583,16 +1587,16 @@ proc validate_CatalogGetExternalDataSource_568375(path: JsonNode; query: JsonNod
   ##               : The name of the database containing the external data source.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `externalDataSourceName` field"
-  var valid_568377 = path.getOrDefault("externalDataSourceName")
-  valid_568377 = validateParameter(valid_568377, JString, required = true,
+  var valid_564277 = path.getOrDefault("externalDataSourceName")
+  valid_564277 = validateParameter(valid_564277, JString, required = true,
                                  default = nil)
-  if valid_568377 != nil:
-    section.add "externalDataSourceName", valid_568377
-  var valid_568378 = path.getOrDefault("databaseName")
-  valid_568378 = validateParameter(valid_568378, JString, required = true,
+  if valid_564277 != nil:
+    section.add "externalDataSourceName", valid_564277
+  var valid_564278 = path.getOrDefault("databaseName")
+  valid_564278 = validateParameter(valid_564278, JString, required = true,
                                  default = nil)
-  if valid_568378 != nil:
-    section.add "databaseName", valid_568378
+  if valid_564278 != nil:
+    section.add "databaseName", valid_564278
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1600,11 +1604,11 @@ proc validate_CatalogGetExternalDataSource_568375(path: JsonNode; query: JsonNod
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568379 = query.getOrDefault("api-version")
-  valid_568379 = validateParameter(valid_568379, JString, required = true,
+  var valid_564279 = query.getOrDefault("api-version")
+  valid_564279 = validateParameter(valid_564279, JString, required = true,
                                  default = nil)
-  if valid_568379 != nil:
-    section.add "api-version", valid_568379
+  if valid_564279 != nil:
+    section.add "api-version", valid_564279
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1613,44 +1617,44 @@ proc validate_CatalogGetExternalDataSource_568375(path: JsonNode; query: JsonNod
   if body != nil:
     result.add "body", body
 
-proc call*(call_568380: Call_CatalogGetExternalDataSource_568374; path: JsonNode;
+proc call*(call_564280: Call_CatalogGetExternalDataSource_564274; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Retrieves the specified external data source from the Data Lake Analytics catalog.
   ## 
-  let valid = call_568380.validator(path, query, header, formData, body)
-  let scheme = call_568380.pickScheme
+  let valid = call_564280.validator(path, query, header, formData, body)
+  let scheme = call_564280.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568380.url(scheme.get, call_568380.host, call_568380.base,
-                         call_568380.route, valid.getOrDefault("path"),
+  let url = call_564280.url(scheme.get, call_564280.host, call_564280.base,
+                         call_564280.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568380, url, valid)
+  result = hook(call_564280, url, valid)
 
-proc call*(call_568381: Call_CatalogGetExternalDataSource_568374;
-          externalDataSourceName: string; apiVersion: string; databaseName: string): Recallable =
+proc call*(call_564281: Call_CatalogGetExternalDataSource_564274;
+          apiVersion: string; externalDataSourceName: string; databaseName: string): Recallable =
   ## catalogGetExternalDataSource
   ## Retrieves the specified external data source from the Data Lake Analytics catalog.
-  ##   externalDataSourceName: string (required)
-  ##                         : The name of the external data source.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
+  ##   externalDataSourceName: string (required)
+  ##                         : The name of the external data source.
   ##   databaseName: string (required)
   ##               : The name of the database containing the external data source.
-  var path_568382 = newJObject()
-  var query_568383 = newJObject()
-  add(path_568382, "externalDataSourceName", newJString(externalDataSourceName))
-  add(query_568383, "api-version", newJString(apiVersion))
-  add(path_568382, "databaseName", newJString(databaseName))
-  result = call_568381.call(path_568382, query_568383, nil, nil, nil)
+  var path_564282 = newJObject()
+  var query_564283 = newJObject()
+  add(query_564283, "api-version", newJString(apiVersion))
+  add(path_564282, "externalDataSourceName", newJString(externalDataSourceName))
+  add(path_564282, "databaseName", newJString(databaseName))
+  result = call_564281.call(path_564282, query_564283, nil, nil, nil)
 
-var catalogGetExternalDataSource* = Call_CatalogGetExternalDataSource_568374(
+var catalogGetExternalDataSource* = Call_CatalogGetExternalDataSource_564274(
     name: "catalogGetExternalDataSource", meth: HttpMethod.HttpGet,
     host: "azure.local", route: "/catalog/usql/databases/{databaseName}/externaldatasources/{externalDataSourceName}",
-    validator: validate_CatalogGetExternalDataSource_568375, base: "",
-    url: url_CatalogGetExternalDataSource_568376, schemes: {Scheme.Https})
+    validator: validate_CatalogGetExternalDataSource_564275, base: "",
+    url: url_CatalogGetExternalDataSource_564276, schemes: {Scheme.Https})
 type
-  Call_CatalogListSchemas_568384 = ref object of OpenApiRestCall_567666
-proc url_CatalogListSchemas_568386(protocol: Scheme; host: string; base: string;
+  Call_CatalogListSchemas_564284 = ref object of OpenApiRestCall_563564
+proc url_CatalogListSchemas_564286(protocol: Scheme; host: string; base: string;
                                   route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1666,7 +1670,7 @@ proc url_CatalogListSchemas_568386(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_CatalogListSchemas_568385(path: JsonNode; query: JsonNode;
+proc validate_CatalogListSchemas_564285(path: JsonNode; query: JsonNode;
                                        header: JsonNode; formData: JsonNode;
                                        body: JsonNode): JsonNode =
   ## Retrieves the list of schemas from the Data Lake Analytics catalog.
@@ -1679,62 +1683,62 @@ proc validate_CatalogListSchemas_568385(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `databaseName` field"
-  var valid_568387 = path.getOrDefault("databaseName")
-  valid_568387 = validateParameter(valid_568387, JString, required = true,
+  var valid_564287 = path.getOrDefault("databaseName")
+  valid_564287 = validateParameter(valid_564287, JString, required = true,
                                  default = nil)
-  if valid_568387 != nil:
-    section.add "databaseName", valid_568387
+  if valid_564287 != nil:
+    section.add "databaseName", valid_564287
   result.add "path", section
   ## parameters in `query` object:
-  ##   $orderby: JString
-  ##           : OrderBy clause. One or more comma-separated expressions with an optional "asc" (the default) or "desc" depending on the order you'd like the values sorted, e.g. Categories?$orderby=CategoryName desc. Optional.
-  ##   api-version: JString (required)
-  ##              : Client Api Version.
   ##   $top: JInt
   ##       : The number of items to return. Optional.
+  ##   api-version: JString (required)
+  ##              : Client Api Version.
   ##   $select: JString
   ##          : OData Select statement. Limits the properties on each entry to just those requested, e.g. Categories?$select=CategoryName,Description. Optional.
-  ##   $skip: JInt
-  ##        : The number of items to skip over before returning elements. Optional.
   ##   $count: JBool
   ##         : The Boolean value of true or false to request a count of the matching resources included with the resources in the response, e.g. Categories?$count=true. Optional.
+  ##   $orderby: JString
+  ##           : OrderBy clause. One or more comma-separated expressions with an optional "asc" (the default) or "desc" depending on the order you'd like the values sorted, e.g. Categories?$orderby=CategoryName desc. Optional.
+  ##   $skip: JInt
+  ##        : The number of items to skip over before returning elements. Optional.
   ##   $filter: JString
   ##          : OData filter. Optional.
   section = newJObject()
-  var valid_568388 = query.getOrDefault("$orderby")
-  valid_568388 = validateParameter(valid_568388, JString, required = false,
-                                 default = nil)
-  if valid_568388 != nil:
-    section.add "$orderby", valid_568388
+  var valid_564288 = query.getOrDefault("$top")
+  valid_564288 = validateParameter(valid_564288, JInt, required = false, default = nil)
+  if valid_564288 != nil:
+    section.add "$top", valid_564288
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568389 = query.getOrDefault("api-version")
-  valid_568389 = validateParameter(valid_568389, JString, required = true,
+  var valid_564289 = query.getOrDefault("api-version")
+  valid_564289 = validateParameter(valid_564289, JString, required = true,
                                  default = nil)
-  if valid_568389 != nil:
-    section.add "api-version", valid_568389
-  var valid_568390 = query.getOrDefault("$top")
-  valid_568390 = validateParameter(valid_568390, JInt, required = false, default = nil)
-  if valid_568390 != nil:
-    section.add "$top", valid_568390
-  var valid_568391 = query.getOrDefault("$select")
-  valid_568391 = validateParameter(valid_568391, JString, required = false,
+  if valid_564289 != nil:
+    section.add "api-version", valid_564289
+  var valid_564290 = query.getOrDefault("$select")
+  valid_564290 = validateParameter(valid_564290, JString, required = false,
                                  default = nil)
-  if valid_568391 != nil:
-    section.add "$select", valid_568391
-  var valid_568392 = query.getOrDefault("$skip")
-  valid_568392 = validateParameter(valid_568392, JInt, required = false, default = nil)
-  if valid_568392 != nil:
-    section.add "$skip", valid_568392
-  var valid_568393 = query.getOrDefault("$count")
-  valid_568393 = validateParameter(valid_568393, JBool, required = false, default = nil)
-  if valid_568393 != nil:
-    section.add "$count", valid_568393
-  var valid_568394 = query.getOrDefault("$filter")
-  valid_568394 = validateParameter(valid_568394, JString, required = false,
+  if valid_564290 != nil:
+    section.add "$select", valid_564290
+  var valid_564291 = query.getOrDefault("$count")
+  valid_564291 = validateParameter(valid_564291, JBool, required = false, default = nil)
+  if valid_564291 != nil:
+    section.add "$count", valid_564291
+  var valid_564292 = query.getOrDefault("$orderby")
+  valid_564292 = validateParameter(valid_564292, JString, required = false,
                                  default = nil)
-  if valid_568394 != nil:
-    section.add "$filter", valid_568394
+  if valid_564292 != nil:
+    section.add "$orderby", valid_564292
+  var valid_564293 = query.getOrDefault("$skip")
+  valid_564293 = validateParameter(valid_564293, JInt, required = false, default = nil)
+  if valid_564293 != nil:
+    section.add "$skip", valid_564293
+  var valid_564294 = query.getOrDefault("$filter")
+  valid_564294 = validateParameter(valid_564294, JString, required = false,
+                                 default = nil)
+  if valid_564294 != nil:
+    section.add "$filter", valid_564294
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1743,60 +1747,60 @@ proc validate_CatalogListSchemas_568385(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568395: Call_CatalogListSchemas_568384; path: JsonNode;
+proc call*(call_564295: Call_CatalogListSchemas_564284; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Retrieves the list of schemas from the Data Lake Analytics catalog.
   ## 
-  let valid = call_568395.validator(path, query, header, formData, body)
-  let scheme = call_568395.pickScheme
+  let valid = call_564295.validator(path, query, header, formData, body)
+  let scheme = call_564295.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568395.url(scheme.get, call_568395.host, call_568395.base,
-                         call_568395.route, valid.getOrDefault("path"),
+  let url = call_564295.url(scheme.get, call_564295.host, call_564295.base,
+                         call_564295.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568395, url, valid)
+  result = hook(call_564295, url, valid)
 
-proc call*(call_568396: Call_CatalogListSchemas_568384; apiVersion: string;
-          databaseName: string; Orderby: string = ""; Top: int = 0; Select: string = "";
-          Skip: int = 0; Count: bool = false; Filter: string = ""): Recallable =
+proc call*(call_564296: Call_CatalogListSchemas_564284; apiVersion: string;
+          databaseName: string; Top: int = 0; Select: string = ""; Count: bool = false;
+          Orderby: string = ""; Skip: int = 0; Filter: string = ""): Recallable =
   ## catalogListSchemas
   ## Retrieves the list of schemas from the Data Lake Analytics catalog.
-  ##   Orderby: string
-  ##          : OrderBy clause. One or more comma-separated expressions with an optional "asc" (the default) or "desc" depending on the order you'd like the values sorted, e.g. Categories?$orderby=CategoryName desc. Optional.
-  ##   apiVersion: string (required)
-  ##             : Client Api Version.
   ##   Top: int
   ##      : The number of items to return. Optional.
+  ##   apiVersion: string (required)
+  ##             : Client Api Version.
   ##   Select: string
   ##         : OData Select statement. Limits the properties on each entry to just those requested, e.g. Categories?$select=CategoryName,Description. Optional.
-  ##   databaseName: string (required)
-  ##               : The name of the database containing the schema.
-  ##   Skip: int
-  ##       : The number of items to skip over before returning elements. Optional.
   ##   Count: bool
   ##        : The Boolean value of true or false to request a count of the matching resources included with the resources in the response, e.g. Categories?$count=true. Optional.
+  ##   databaseName: string (required)
+  ##               : The name of the database containing the schema.
+  ##   Orderby: string
+  ##          : OrderBy clause. One or more comma-separated expressions with an optional "asc" (the default) or "desc" depending on the order you'd like the values sorted, e.g. Categories?$orderby=CategoryName desc. Optional.
+  ##   Skip: int
+  ##       : The number of items to skip over before returning elements. Optional.
   ##   Filter: string
   ##         : OData filter. Optional.
-  var path_568397 = newJObject()
-  var query_568398 = newJObject()
-  add(query_568398, "$orderby", newJString(Orderby))
-  add(query_568398, "api-version", newJString(apiVersion))
-  add(query_568398, "$top", newJInt(Top))
-  add(query_568398, "$select", newJString(Select))
-  add(path_568397, "databaseName", newJString(databaseName))
-  add(query_568398, "$skip", newJInt(Skip))
-  add(query_568398, "$count", newJBool(Count))
-  add(query_568398, "$filter", newJString(Filter))
-  result = call_568396.call(path_568397, query_568398, nil, nil, nil)
+  var path_564297 = newJObject()
+  var query_564298 = newJObject()
+  add(query_564298, "$top", newJInt(Top))
+  add(query_564298, "api-version", newJString(apiVersion))
+  add(query_564298, "$select", newJString(Select))
+  add(query_564298, "$count", newJBool(Count))
+  add(path_564297, "databaseName", newJString(databaseName))
+  add(query_564298, "$orderby", newJString(Orderby))
+  add(query_564298, "$skip", newJInt(Skip))
+  add(query_564298, "$filter", newJString(Filter))
+  result = call_564296.call(path_564297, query_564298, nil, nil, nil)
 
-var catalogListSchemas* = Call_CatalogListSchemas_568384(
+var catalogListSchemas* = Call_CatalogListSchemas_564284(
     name: "catalogListSchemas", meth: HttpMethod.HttpGet, host: "azure.local",
     route: "/catalog/usql/databases/{databaseName}/schemas",
-    validator: validate_CatalogListSchemas_568385, base: "",
-    url: url_CatalogListSchemas_568386, schemes: {Scheme.Https})
+    validator: validate_CatalogListSchemas_564285, base: "",
+    url: url_CatalogListSchemas_564286, schemes: {Scheme.Https})
 type
-  Call_CatalogGetSchema_568399 = ref object of OpenApiRestCall_567666
-proc url_CatalogGetSchema_568401(protocol: Scheme; host: string; base: string;
+  Call_CatalogGetSchema_564299 = ref object of OpenApiRestCall_563564
+proc url_CatalogGetSchema_564301(protocol: Scheme; host: string; base: string;
                                 route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1814,7 +1818,7 @@ proc url_CatalogGetSchema_568401(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_CatalogGetSchema_568400(path: JsonNode; query: JsonNode;
+proc validate_CatalogGetSchema_564300(path: JsonNode; query: JsonNode;
                                      header: JsonNode; formData: JsonNode;
                                      body: JsonNode): JsonNode =
   ## Retrieves the specified schema from the Data Lake Analytics catalog.
@@ -1822,23 +1826,23 @@ proc validate_CatalogGetSchema_568400(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   schemaName: JString (required)
-  ##             : The name of the schema.
   ##   databaseName: JString (required)
   ##               : The name of the database containing the schema.
+  ##   schemaName: JString (required)
+  ##             : The name of the schema.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `schemaName` field"
-  var valid_568402 = path.getOrDefault("schemaName")
-  valid_568402 = validateParameter(valid_568402, JString, required = true,
+        "path argument is necessary due to required `databaseName` field"
+  var valid_564302 = path.getOrDefault("databaseName")
+  valid_564302 = validateParameter(valid_564302, JString, required = true,
                                  default = nil)
-  if valid_568402 != nil:
-    section.add "schemaName", valid_568402
-  var valid_568403 = path.getOrDefault("databaseName")
-  valid_568403 = validateParameter(valid_568403, JString, required = true,
+  if valid_564302 != nil:
+    section.add "databaseName", valid_564302
+  var valid_564303 = path.getOrDefault("schemaName")
+  valid_564303 = validateParameter(valid_564303, JString, required = true,
                                  default = nil)
-  if valid_568403 != nil:
-    section.add "databaseName", valid_568403
+  if valid_564303 != nil:
+    section.add "schemaName", valid_564303
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1846,11 +1850,11 @@ proc validate_CatalogGetSchema_568400(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568404 = query.getOrDefault("api-version")
-  valid_568404 = validateParameter(valid_568404, JString, required = true,
+  var valid_564304 = query.getOrDefault("api-version")
+  valid_564304 = validateParameter(valid_564304, JString, required = true,
                                  default = nil)
-  if valid_568404 != nil:
-    section.add "api-version", valid_568404
+  if valid_564304 != nil:
+    section.add "api-version", valid_564304
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1859,44 +1863,44 @@ proc validate_CatalogGetSchema_568400(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568405: Call_CatalogGetSchema_568399; path: JsonNode;
+proc call*(call_564305: Call_CatalogGetSchema_564299; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Retrieves the specified schema from the Data Lake Analytics catalog.
   ## 
-  let valid = call_568405.validator(path, query, header, formData, body)
-  let scheme = call_568405.pickScheme
+  let valid = call_564305.validator(path, query, header, formData, body)
+  let scheme = call_564305.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568405.url(scheme.get, call_568405.host, call_568405.base,
-                         call_568405.route, valid.getOrDefault("path"),
+  let url = call_564305.url(scheme.get, call_564305.host, call_564305.base,
+                         call_564305.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568405, url, valid)
+  result = hook(call_564305, url, valid)
 
-proc call*(call_568406: Call_CatalogGetSchema_568399; apiVersion: string;
-          schemaName: string; databaseName: string): Recallable =
+proc call*(call_564306: Call_CatalogGetSchema_564299; apiVersion: string;
+          databaseName: string; schemaName: string): Recallable =
   ## catalogGetSchema
   ## Retrieves the specified schema from the Data Lake Analytics catalog.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
-  ##   schemaName: string (required)
-  ##             : The name of the schema.
   ##   databaseName: string (required)
   ##               : The name of the database containing the schema.
-  var path_568407 = newJObject()
-  var query_568408 = newJObject()
-  add(query_568408, "api-version", newJString(apiVersion))
-  add(path_568407, "schemaName", newJString(schemaName))
-  add(path_568407, "databaseName", newJString(databaseName))
-  result = call_568406.call(path_568407, query_568408, nil, nil, nil)
+  ##   schemaName: string (required)
+  ##             : The name of the schema.
+  var path_564307 = newJObject()
+  var query_564308 = newJObject()
+  add(query_564308, "api-version", newJString(apiVersion))
+  add(path_564307, "databaseName", newJString(databaseName))
+  add(path_564307, "schemaName", newJString(schemaName))
+  result = call_564306.call(path_564307, query_564308, nil, nil, nil)
 
-var catalogGetSchema* = Call_CatalogGetSchema_568399(name: "catalogGetSchema",
+var catalogGetSchema* = Call_CatalogGetSchema_564299(name: "catalogGetSchema",
     meth: HttpMethod.HttpGet, host: "azure.local",
     route: "/catalog/usql/databases/{databaseName}/schemas/{schemaName}",
-    validator: validate_CatalogGetSchema_568400, base: "",
-    url: url_CatalogGetSchema_568401, schemes: {Scheme.Https})
+    validator: validate_CatalogGetSchema_564300, base: "",
+    url: url_CatalogGetSchema_564301, schemes: {Scheme.Https})
 type
-  Call_CatalogListPackages_568409 = ref object of OpenApiRestCall_567666
-proc url_CatalogListPackages_568411(protocol: Scheme; host: string; base: string;
+  Call_CatalogListPackages_564309 = ref object of OpenApiRestCall_563564
+proc url_CatalogListPackages_564311(protocol: Scheme; host: string; base: string;
                                    route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1915,7 +1919,7 @@ proc url_CatalogListPackages_568411(protocol: Scheme; host: string; base: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_CatalogListPackages_568410(path: JsonNode; query: JsonNode;
+proc validate_CatalogListPackages_564310(path: JsonNode; query: JsonNode;
                                         header: JsonNode; formData: JsonNode;
                                         body: JsonNode): JsonNode =
   ## Retrieves the list of packages from the Data Lake Analytics catalog.
@@ -1923,74 +1927,74 @@ proc validate_CatalogListPackages_568410(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   schemaName: JString (required)
-  ##             : The name of the schema containing the packages.
   ##   databaseName: JString (required)
   ##               : The name of the database containing the packages.
+  ##   schemaName: JString (required)
+  ##             : The name of the schema containing the packages.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `schemaName` field"
-  var valid_568412 = path.getOrDefault("schemaName")
-  valid_568412 = validateParameter(valid_568412, JString, required = true,
+        "path argument is necessary due to required `databaseName` field"
+  var valid_564312 = path.getOrDefault("databaseName")
+  valid_564312 = validateParameter(valid_564312, JString, required = true,
                                  default = nil)
-  if valid_568412 != nil:
-    section.add "schemaName", valid_568412
-  var valid_568413 = path.getOrDefault("databaseName")
-  valid_568413 = validateParameter(valid_568413, JString, required = true,
+  if valid_564312 != nil:
+    section.add "databaseName", valid_564312
+  var valid_564313 = path.getOrDefault("schemaName")
+  valid_564313 = validateParameter(valid_564313, JString, required = true,
                                  default = nil)
-  if valid_568413 != nil:
-    section.add "databaseName", valid_568413
+  if valid_564313 != nil:
+    section.add "schemaName", valid_564313
   result.add "path", section
   ## parameters in `query` object:
-  ##   $orderby: JString
-  ##           : OrderBy clause. One or more comma-separated expressions with an optional "asc" (the default) or "desc" depending on the order you'd like the values sorted, e.g. Categories?$orderby=CategoryName desc. Optional.
-  ##   api-version: JString (required)
-  ##              : Client Api Version.
   ##   $top: JInt
   ##       : The number of items to return. Optional.
+  ##   api-version: JString (required)
+  ##              : Client Api Version.
   ##   $select: JString
   ##          : OData Select statement. Limits the properties on each entry to just those requested, e.g. Categories?$select=CategoryName,Description. Optional.
-  ##   $skip: JInt
-  ##        : The number of items to skip over before returning elements. Optional.
   ##   $count: JBool
   ##         : The Boolean value of true or false to request a count of the matching resources included with the resources in the response, e.g. Categories?$count=true. Optional.
+  ##   $orderby: JString
+  ##           : OrderBy clause. One or more comma-separated expressions with an optional "asc" (the default) or "desc" depending on the order you'd like the values sorted, e.g. Categories?$orderby=CategoryName desc. Optional.
+  ##   $skip: JInt
+  ##        : The number of items to skip over before returning elements. Optional.
   ##   $filter: JString
   ##          : OData filter. Optional.
   section = newJObject()
-  var valid_568414 = query.getOrDefault("$orderby")
-  valid_568414 = validateParameter(valid_568414, JString, required = false,
-                                 default = nil)
-  if valid_568414 != nil:
-    section.add "$orderby", valid_568414
+  var valid_564314 = query.getOrDefault("$top")
+  valid_564314 = validateParameter(valid_564314, JInt, required = false, default = nil)
+  if valid_564314 != nil:
+    section.add "$top", valid_564314
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568415 = query.getOrDefault("api-version")
-  valid_568415 = validateParameter(valid_568415, JString, required = true,
+  var valid_564315 = query.getOrDefault("api-version")
+  valid_564315 = validateParameter(valid_564315, JString, required = true,
                                  default = nil)
-  if valid_568415 != nil:
-    section.add "api-version", valid_568415
-  var valid_568416 = query.getOrDefault("$top")
-  valid_568416 = validateParameter(valid_568416, JInt, required = false, default = nil)
-  if valid_568416 != nil:
-    section.add "$top", valid_568416
-  var valid_568417 = query.getOrDefault("$select")
-  valid_568417 = validateParameter(valid_568417, JString, required = false,
+  if valid_564315 != nil:
+    section.add "api-version", valid_564315
+  var valid_564316 = query.getOrDefault("$select")
+  valid_564316 = validateParameter(valid_564316, JString, required = false,
                                  default = nil)
-  if valid_568417 != nil:
-    section.add "$select", valid_568417
-  var valid_568418 = query.getOrDefault("$skip")
-  valid_568418 = validateParameter(valid_568418, JInt, required = false, default = nil)
-  if valid_568418 != nil:
-    section.add "$skip", valid_568418
-  var valid_568419 = query.getOrDefault("$count")
-  valid_568419 = validateParameter(valid_568419, JBool, required = false, default = nil)
-  if valid_568419 != nil:
-    section.add "$count", valid_568419
-  var valid_568420 = query.getOrDefault("$filter")
-  valid_568420 = validateParameter(valid_568420, JString, required = false,
+  if valid_564316 != nil:
+    section.add "$select", valid_564316
+  var valid_564317 = query.getOrDefault("$count")
+  valid_564317 = validateParameter(valid_564317, JBool, required = false, default = nil)
+  if valid_564317 != nil:
+    section.add "$count", valid_564317
+  var valid_564318 = query.getOrDefault("$orderby")
+  valid_564318 = validateParameter(valid_564318, JString, required = false,
                                  default = nil)
-  if valid_568420 != nil:
-    section.add "$filter", valid_568420
+  if valid_564318 != nil:
+    section.add "$orderby", valid_564318
+  var valid_564319 = query.getOrDefault("$skip")
+  valid_564319 = validateParameter(valid_564319, JInt, required = false, default = nil)
+  if valid_564319 != nil:
+    section.add "$skip", valid_564319
+  var valid_564320 = query.getOrDefault("$filter")
+  valid_564320 = validateParameter(valid_564320, JString, required = false,
+                                 default = nil)
+  if valid_564320 != nil:
+    section.add "$filter", valid_564320
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1999,62 +2003,62 @@ proc validate_CatalogListPackages_568410(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568421: Call_CatalogListPackages_568409; path: JsonNode;
+proc call*(call_564321: Call_CatalogListPackages_564309; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Retrieves the list of packages from the Data Lake Analytics catalog.
   ## 
-  let valid = call_568421.validator(path, query, header, formData, body)
-  let scheme = call_568421.pickScheme
+  let valid = call_564321.validator(path, query, header, formData, body)
+  let scheme = call_564321.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568421.url(scheme.get, call_568421.host, call_568421.base,
-                         call_568421.route, valid.getOrDefault("path"),
+  let url = call_564321.url(scheme.get, call_564321.host, call_564321.base,
+                         call_564321.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568421, url, valid)
+  result = hook(call_564321, url, valid)
 
-proc call*(call_568422: Call_CatalogListPackages_568409; apiVersion: string;
-          schemaName: string; databaseName: string; Orderby: string = ""; Top: int = 0;
-          Select: string = ""; Skip: int = 0; Count: bool = false; Filter: string = ""): Recallable =
+proc call*(call_564322: Call_CatalogListPackages_564309; apiVersion: string;
+          databaseName: string; schemaName: string; Top: int = 0; Select: string = "";
+          Count: bool = false; Orderby: string = ""; Skip: int = 0; Filter: string = ""): Recallable =
   ## catalogListPackages
   ## Retrieves the list of packages from the Data Lake Analytics catalog.
-  ##   Orderby: string
-  ##          : OrderBy clause. One or more comma-separated expressions with an optional "asc" (the default) or "desc" depending on the order you'd like the values sorted, e.g. Categories?$orderby=CategoryName desc. Optional.
-  ##   apiVersion: string (required)
-  ##             : Client Api Version.
   ##   Top: int
   ##      : The number of items to return. Optional.
-  ##   schemaName: string (required)
-  ##             : The name of the schema containing the packages.
+  ##   apiVersion: string (required)
+  ##             : Client Api Version.
   ##   Select: string
   ##         : OData Select statement. Limits the properties on each entry to just those requested, e.g. Categories?$select=CategoryName,Description. Optional.
-  ##   databaseName: string (required)
-  ##               : The name of the database containing the packages.
-  ##   Skip: int
-  ##       : The number of items to skip over before returning elements. Optional.
   ##   Count: bool
   ##        : The Boolean value of true or false to request a count of the matching resources included with the resources in the response, e.g. Categories?$count=true. Optional.
+  ##   databaseName: string (required)
+  ##               : The name of the database containing the packages.
+  ##   Orderby: string
+  ##          : OrderBy clause. One or more comma-separated expressions with an optional "asc" (the default) or "desc" depending on the order you'd like the values sorted, e.g. Categories?$orderby=CategoryName desc. Optional.
+  ##   Skip: int
+  ##       : The number of items to skip over before returning elements. Optional.
   ##   Filter: string
   ##         : OData filter. Optional.
-  var path_568423 = newJObject()
-  var query_568424 = newJObject()
-  add(query_568424, "$orderby", newJString(Orderby))
-  add(query_568424, "api-version", newJString(apiVersion))
-  add(query_568424, "$top", newJInt(Top))
-  add(path_568423, "schemaName", newJString(schemaName))
-  add(query_568424, "$select", newJString(Select))
-  add(path_568423, "databaseName", newJString(databaseName))
-  add(query_568424, "$skip", newJInt(Skip))
-  add(query_568424, "$count", newJBool(Count))
-  add(query_568424, "$filter", newJString(Filter))
-  result = call_568422.call(path_568423, query_568424, nil, nil, nil)
+  ##   schemaName: string (required)
+  ##             : The name of the schema containing the packages.
+  var path_564323 = newJObject()
+  var query_564324 = newJObject()
+  add(query_564324, "$top", newJInt(Top))
+  add(query_564324, "api-version", newJString(apiVersion))
+  add(query_564324, "$select", newJString(Select))
+  add(query_564324, "$count", newJBool(Count))
+  add(path_564323, "databaseName", newJString(databaseName))
+  add(query_564324, "$orderby", newJString(Orderby))
+  add(query_564324, "$skip", newJInt(Skip))
+  add(query_564324, "$filter", newJString(Filter))
+  add(path_564323, "schemaName", newJString(schemaName))
+  result = call_564322.call(path_564323, query_564324, nil, nil, nil)
 
-var catalogListPackages* = Call_CatalogListPackages_568409(
+var catalogListPackages* = Call_CatalogListPackages_564309(
     name: "catalogListPackages", meth: HttpMethod.HttpGet, host: "azure.local", route: "/catalog/usql/databases/{databaseName}/schemas/{schemaName}/packages",
-    validator: validate_CatalogListPackages_568410, base: "",
-    url: url_CatalogListPackages_568411, schemes: {Scheme.Https})
+    validator: validate_CatalogListPackages_564310, base: "",
+    url: url_CatalogListPackages_564311, schemes: {Scheme.Https})
 type
-  Call_CatalogGetPackage_568425 = ref object of OpenApiRestCall_567666
-proc url_CatalogGetPackage_568427(protocol: Scheme; host: string; base: string;
+  Call_CatalogGetPackage_564325 = ref object of OpenApiRestCall_563564
+proc url_CatalogGetPackage_564327(protocol: Scheme; host: string; base: string;
                                  route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2075,7 +2079,7 @@ proc url_CatalogGetPackage_568427(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_CatalogGetPackage_568426(path: JsonNode; query: JsonNode;
+proc validate_CatalogGetPackage_564326(path: JsonNode; query: JsonNode;
                                       header: JsonNode; formData: JsonNode;
                                       body: JsonNode): JsonNode =
   ## Retrieves the specified package from the Data Lake Analytics catalog.
@@ -2085,28 +2089,28 @@ proc validate_CatalogGetPackage_568426(path: JsonNode; query: JsonNode;
   ## parameters in `path` object:
   ##   packageName: JString (required)
   ##              : The name of the package.
-  ##   schemaName: JString (required)
-  ##             : The name of the schema containing the package.
   ##   databaseName: JString (required)
   ##               : The name of the database containing the package.
+  ##   schemaName: JString (required)
+  ##             : The name of the schema containing the package.
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `packageName` field"
-  var valid_568428 = path.getOrDefault("packageName")
-  valid_568428 = validateParameter(valid_568428, JString, required = true,
+  var valid_564328 = path.getOrDefault("packageName")
+  valid_564328 = validateParameter(valid_564328, JString, required = true,
                                  default = nil)
-  if valid_568428 != nil:
-    section.add "packageName", valid_568428
-  var valid_568429 = path.getOrDefault("schemaName")
-  valid_568429 = validateParameter(valid_568429, JString, required = true,
+  if valid_564328 != nil:
+    section.add "packageName", valid_564328
+  var valid_564329 = path.getOrDefault("databaseName")
+  valid_564329 = validateParameter(valid_564329, JString, required = true,
                                  default = nil)
-  if valid_568429 != nil:
-    section.add "schemaName", valid_568429
-  var valid_568430 = path.getOrDefault("databaseName")
-  valid_568430 = validateParameter(valid_568430, JString, required = true,
+  if valid_564329 != nil:
+    section.add "databaseName", valid_564329
+  var valid_564330 = path.getOrDefault("schemaName")
+  valid_564330 = validateParameter(valid_564330, JString, required = true,
                                  default = nil)
-  if valid_568430 != nil:
-    section.add "databaseName", valid_568430
+  if valid_564330 != nil:
+    section.add "schemaName", valid_564330
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2114,11 +2118,11 @@ proc validate_CatalogGetPackage_568426(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568431 = query.getOrDefault("api-version")
-  valid_568431 = validateParameter(valid_568431, JString, required = true,
+  var valid_564331 = query.getOrDefault("api-version")
+  valid_564331 = validateParameter(valid_564331, JString, required = true,
                                  default = nil)
-  if valid_568431 != nil:
-    section.add "api-version", valid_568431
+  if valid_564331 != nil:
+    section.add "api-version", valid_564331
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2127,46 +2131,46 @@ proc validate_CatalogGetPackage_568426(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568432: Call_CatalogGetPackage_568425; path: JsonNode;
+proc call*(call_564332: Call_CatalogGetPackage_564325; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Retrieves the specified package from the Data Lake Analytics catalog.
   ## 
-  let valid = call_568432.validator(path, query, header, formData, body)
-  let scheme = call_568432.pickScheme
+  let valid = call_564332.validator(path, query, header, formData, body)
+  let scheme = call_564332.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568432.url(scheme.get, call_568432.host, call_568432.base,
-                         call_568432.route, valid.getOrDefault("path"),
+  let url = call_564332.url(scheme.get, call_564332.host, call_564332.base,
+                         call_564332.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568432, url, valid)
+  result = hook(call_564332, url, valid)
 
-proc call*(call_568433: Call_CatalogGetPackage_568425; packageName: string;
-          apiVersion: string; schemaName: string; databaseName: string): Recallable =
+proc call*(call_564333: Call_CatalogGetPackage_564325; packageName: string;
+          apiVersion: string; databaseName: string; schemaName: string): Recallable =
   ## catalogGetPackage
   ## Retrieves the specified package from the Data Lake Analytics catalog.
   ##   packageName: string (required)
   ##              : The name of the package.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
-  ##   schemaName: string (required)
-  ##             : The name of the schema containing the package.
   ##   databaseName: string (required)
   ##               : The name of the database containing the package.
-  var path_568434 = newJObject()
-  var query_568435 = newJObject()
-  add(path_568434, "packageName", newJString(packageName))
-  add(query_568435, "api-version", newJString(apiVersion))
-  add(path_568434, "schemaName", newJString(schemaName))
-  add(path_568434, "databaseName", newJString(databaseName))
-  result = call_568433.call(path_568434, query_568435, nil, nil, nil)
+  ##   schemaName: string (required)
+  ##             : The name of the schema containing the package.
+  var path_564334 = newJObject()
+  var query_564335 = newJObject()
+  add(path_564334, "packageName", newJString(packageName))
+  add(query_564335, "api-version", newJString(apiVersion))
+  add(path_564334, "databaseName", newJString(databaseName))
+  add(path_564334, "schemaName", newJString(schemaName))
+  result = call_564333.call(path_564334, query_564335, nil, nil, nil)
 
-var catalogGetPackage* = Call_CatalogGetPackage_568425(name: "catalogGetPackage",
+var catalogGetPackage* = Call_CatalogGetPackage_564325(name: "catalogGetPackage",
     meth: HttpMethod.HttpGet, host: "azure.local", route: "/catalog/usql/databases/{databaseName}/schemas/{schemaName}/packages/{packageName}",
-    validator: validate_CatalogGetPackage_568426, base: "",
-    url: url_CatalogGetPackage_568427, schemes: {Scheme.Https})
+    validator: validate_CatalogGetPackage_564326, base: "",
+    url: url_CatalogGetPackage_564327, schemes: {Scheme.Https})
 type
-  Call_CatalogListProcedures_568436 = ref object of OpenApiRestCall_567666
-proc url_CatalogListProcedures_568438(protocol: Scheme; host: string; base: string;
+  Call_CatalogListProcedures_564336 = ref object of OpenApiRestCall_563564
+proc url_CatalogListProcedures_564338(protocol: Scheme; host: string; base: string;
                                      route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2185,81 +2189,81 @@ proc url_CatalogListProcedures_568438(protocol: Scheme; host: string; base: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_CatalogListProcedures_568437(path: JsonNode; query: JsonNode;
+proc validate_CatalogListProcedures_564337(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Retrieves the list of procedures from the Data Lake Analytics catalog.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   schemaName: JString (required)
-  ##             : The name of the schema containing the procedures.
   ##   databaseName: JString (required)
   ##               : The name of the database containing the procedures.
+  ##   schemaName: JString (required)
+  ##             : The name of the schema containing the procedures.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `schemaName` field"
-  var valid_568439 = path.getOrDefault("schemaName")
-  valid_568439 = validateParameter(valid_568439, JString, required = true,
+        "path argument is necessary due to required `databaseName` field"
+  var valid_564339 = path.getOrDefault("databaseName")
+  valid_564339 = validateParameter(valid_564339, JString, required = true,
                                  default = nil)
-  if valid_568439 != nil:
-    section.add "schemaName", valid_568439
-  var valid_568440 = path.getOrDefault("databaseName")
-  valid_568440 = validateParameter(valid_568440, JString, required = true,
+  if valid_564339 != nil:
+    section.add "databaseName", valid_564339
+  var valid_564340 = path.getOrDefault("schemaName")
+  valid_564340 = validateParameter(valid_564340, JString, required = true,
                                  default = nil)
-  if valid_568440 != nil:
-    section.add "databaseName", valid_568440
+  if valid_564340 != nil:
+    section.add "schemaName", valid_564340
   result.add "path", section
   ## parameters in `query` object:
-  ##   $orderby: JString
-  ##           : OrderBy clause. One or more comma-separated expressions with an optional "asc" (the default) or "desc" depending on the order you'd like the values sorted, e.g. Categories?$orderby=CategoryName desc. Optional.
-  ##   api-version: JString (required)
-  ##              : Client Api Version.
   ##   $top: JInt
   ##       : The number of items to return. Optional.
+  ##   api-version: JString (required)
+  ##              : Client Api Version.
   ##   $select: JString
   ##          : OData Select statement. Limits the properties on each entry to just those requested, e.g. Categories?$select=CategoryName,Description. Optional.
-  ##   $skip: JInt
-  ##        : The number of items to skip over before returning elements. Optional.
   ##   $count: JBool
   ##         : The Boolean value of true or false to request a count of the matching resources included with the resources in the response, e.g. Categories?$count=true. Optional.
+  ##   $orderby: JString
+  ##           : OrderBy clause. One or more comma-separated expressions with an optional "asc" (the default) or "desc" depending on the order you'd like the values sorted, e.g. Categories?$orderby=CategoryName desc. Optional.
+  ##   $skip: JInt
+  ##        : The number of items to skip over before returning elements. Optional.
   ##   $filter: JString
   ##          : OData filter. Optional.
   section = newJObject()
-  var valid_568441 = query.getOrDefault("$orderby")
-  valid_568441 = validateParameter(valid_568441, JString, required = false,
-                                 default = nil)
-  if valid_568441 != nil:
-    section.add "$orderby", valid_568441
+  var valid_564341 = query.getOrDefault("$top")
+  valid_564341 = validateParameter(valid_564341, JInt, required = false, default = nil)
+  if valid_564341 != nil:
+    section.add "$top", valid_564341
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568442 = query.getOrDefault("api-version")
-  valid_568442 = validateParameter(valid_568442, JString, required = true,
+  var valid_564342 = query.getOrDefault("api-version")
+  valid_564342 = validateParameter(valid_564342, JString, required = true,
                                  default = nil)
-  if valid_568442 != nil:
-    section.add "api-version", valid_568442
-  var valid_568443 = query.getOrDefault("$top")
-  valid_568443 = validateParameter(valid_568443, JInt, required = false, default = nil)
-  if valid_568443 != nil:
-    section.add "$top", valid_568443
-  var valid_568444 = query.getOrDefault("$select")
-  valid_568444 = validateParameter(valid_568444, JString, required = false,
+  if valid_564342 != nil:
+    section.add "api-version", valid_564342
+  var valid_564343 = query.getOrDefault("$select")
+  valid_564343 = validateParameter(valid_564343, JString, required = false,
                                  default = nil)
-  if valid_568444 != nil:
-    section.add "$select", valid_568444
-  var valid_568445 = query.getOrDefault("$skip")
-  valid_568445 = validateParameter(valid_568445, JInt, required = false, default = nil)
-  if valid_568445 != nil:
-    section.add "$skip", valid_568445
-  var valid_568446 = query.getOrDefault("$count")
-  valid_568446 = validateParameter(valid_568446, JBool, required = false, default = nil)
-  if valid_568446 != nil:
-    section.add "$count", valid_568446
-  var valid_568447 = query.getOrDefault("$filter")
-  valid_568447 = validateParameter(valid_568447, JString, required = false,
+  if valid_564343 != nil:
+    section.add "$select", valid_564343
+  var valid_564344 = query.getOrDefault("$count")
+  valid_564344 = validateParameter(valid_564344, JBool, required = false, default = nil)
+  if valid_564344 != nil:
+    section.add "$count", valid_564344
+  var valid_564345 = query.getOrDefault("$orderby")
+  valid_564345 = validateParameter(valid_564345, JString, required = false,
                                  default = nil)
-  if valid_568447 != nil:
-    section.add "$filter", valid_568447
+  if valid_564345 != nil:
+    section.add "$orderby", valid_564345
+  var valid_564346 = query.getOrDefault("$skip")
+  valid_564346 = validateParameter(valid_564346, JInt, required = false, default = nil)
+  if valid_564346 != nil:
+    section.add "$skip", valid_564346
+  var valid_564347 = query.getOrDefault("$filter")
+  valid_564347 = validateParameter(valid_564347, JString, required = false,
+                                 default = nil)
+  if valid_564347 != nil:
+    section.add "$filter", valid_564347
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2268,62 +2272,62 @@ proc validate_CatalogListProcedures_568437(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568448: Call_CatalogListProcedures_568436; path: JsonNode;
+proc call*(call_564348: Call_CatalogListProcedures_564336; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Retrieves the list of procedures from the Data Lake Analytics catalog.
   ## 
-  let valid = call_568448.validator(path, query, header, formData, body)
-  let scheme = call_568448.pickScheme
+  let valid = call_564348.validator(path, query, header, formData, body)
+  let scheme = call_564348.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568448.url(scheme.get, call_568448.host, call_568448.base,
-                         call_568448.route, valid.getOrDefault("path"),
+  let url = call_564348.url(scheme.get, call_564348.host, call_564348.base,
+                         call_564348.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568448, url, valid)
+  result = hook(call_564348, url, valid)
 
-proc call*(call_568449: Call_CatalogListProcedures_568436; apiVersion: string;
-          schemaName: string; databaseName: string; Orderby: string = ""; Top: int = 0;
-          Select: string = ""; Skip: int = 0; Count: bool = false; Filter: string = ""): Recallable =
+proc call*(call_564349: Call_CatalogListProcedures_564336; apiVersion: string;
+          databaseName: string; schemaName: string; Top: int = 0; Select: string = "";
+          Count: bool = false; Orderby: string = ""; Skip: int = 0; Filter: string = ""): Recallable =
   ## catalogListProcedures
   ## Retrieves the list of procedures from the Data Lake Analytics catalog.
-  ##   Orderby: string
-  ##          : OrderBy clause. One or more comma-separated expressions with an optional "asc" (the default) or "desc" depending on the order you'd like the values sorted, e.g. Categories?$orderby=CategoryName desc. Optional.
-  ##   apiVersion: string (required)
-  ##             : Client Api Version.
   ##   Top: int
   ##      : The number of items to return. Optional.
-  ##   schemaName: string (required)
-  ##             : The name of the schema containing the procedures.
+  ##   apiVersion: string (required)
+  ##             : Client Api Version.
   ##   Select: string
   ##         : OData Select statement. Limits the properties on each entry to just those requested, e.g. Categories?$select=CategoryName,Description. Optional.
-  ##   databaseName: string (required)
-  ##               : The name of the database containing the procedures.
-  ##   Skip: int
-  ##       : The number of items to skip over before returning elements. Optional.
   ##   Count: bool
   ##        : The Boolean value of true or false to request a count of the matching resources included with the resources in the response, e.g. Categories?$count=true. Optional.
+  ##   databaseName: string (required)
+  ##               : The name of the database containing the procedures.
+  ##   Orderby: string
+  ##          : OrderBy clause. One or more comma-separated expressions with an optional "asc" (the default) or "desc" depending on the order you'd like the values sorted, e.g. Categories?$orderby=CategoryName desc. Optional.
+  ##   Skip: int
+  ##       : The number of items to skip over before returning elements. Optional.
   ##   Filter: string
   ##         : OData filter. Optional.
-  var path_568450 = newJObject()
-  var query_568451 = newJObject()
-  add(query_568451, "$orderby", newJString(Orderby))
-  add(query_568451, "api-version", newJString(apiVersion))
-  add(query_568451, "$top", newJInt(Top))
-  add(path_568450, "schemaName", newJString(schemaName))
-  add(query_568451, "$select", newJString(Select))
-  add(path_568450, "databaseName", newJString(databaseName))
-  add(query_568451, "$skip", newJInt(Skip))
-  add(query_568451, "$count", newJBool(Count))
-  add(query_568451, "$filter", newJString(Filter))
-  result = call_568449.call(path_568450, query_568451, nil, nil, nil)
+  ##   schemaName: string (required)
+  ##             : The name of the schema containing the procedures.
+  var path_564350 = newJObject()
+  var query_564351 = newJObject()
+  add(query_564351, "$top", newJInt(Top))
+  add(query_564351, "api-version", newJString(apiVersion))
+  add(query_564351, "$select", newJString(Select))
+  add(query_564351, "$count", newJBool(Count))
+  add(path_564350, "databaseName", newJString(databaseName))
+  add(query_564351, "$orderby", newJString(Orderby))
+  add(query_564351, "$skip", newJInt(Skip))
+  add(query_564351, "$filter", newJString(Filter))
+  add(path_564350, "schemaName", newJString(schemaName))
+  result = call_564349.call(path_564350, query_564351, nil, nil, nil)
 
-var catalogListProcedures* = Call_CatalogListProcedures_568436(
+var catalogListProcedures* = Call_CatalogListProcedures_564336(
     name: "catalogListProcedures", meth: HttpMethod.HttpGet, host: "azure.local", route: "/catalog/usql/databases/{databaseName}/schemas/{schemaName}/procedures",
-    validator: validate_CatalogListProcedures_568437, base: "",
-    url: url_CatalogListProcedures_568438, schemes: {Scheme.Https})
+    validator: validate_CatalogListProcedures_564337, base: "",
+    url: url_CatalogListProcedures_564338, schemes: {Scheme.Https})
 type
-  Call_CatalogGetProcedure_568452 = ref object of OpenApiRestCall_567666
-proc url_CatalogGetProcedure_568454(protocol: Scheme; host: string; base: string;
+  Call_CatalogGetProcedure_564352 = ref object of OpenApiRestCall_563564
+proc url_CatalogGetProcedure_564354(protocol: Scheme; host: string; base: string;
                                    route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2344,7 +2348,7 @@ proc url_CatalogGetProcedure_568454(protocol: Scheme; host: string; base: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_CatalogGetProcedure_568453(path: JsonNode; query: JsonNode;
+proc validate_CatalogGetProcedure_564353(path: JsonNode; query: JsonNode;
                                         header: JsonNode; formData: JsonNode;
                                         body: JsonNode): JsonNode =
   ## Retrieves the specified procedure from the Data Lake Analytics catalog.
@@ -2354,28 +2358,28 @@ proc validate_CatalogGetProcedure_568453(path: JsonNode; query: JsonNode;
   ## parameters in `path` object:
   ##   procedureName: JString (required)
   ##                : The name of the procedure.
-  ##   schemaName: JString (required)
-  ##             : The name of the schema containing the procedure.
   ##   databaseName: JString (required)
   ##               : The name of the database containing the procedure.
+  ##   schemaName: JString (required)
+  ##             : The name of the schema containing the procedure.
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `procedureName` field"
-  var valid_568455 = path.getOrDefault("procedureName")
-  valid_568455 = validateParameter(valid_568455, JString, required = true,
+  var valid_564355 = path.getOrDefault("procedureName")
+  valid_564355 = validateParameter(valid_564355, JString, required = true,
                                  default = nil)
-  if valid_568455 != nil:
-    section.add "procedureName", valid_568455
-  var valid_568456 = path.getOrDefault("schemaName")
-  valid_568456 = validateParameter(valid_568456, JString, required = true,
+  if valid_564355 != nil:
+    section.add "procedureName", valid_564355
+  var valid_564356 = path.getOrDefault("databaseName")
+  valid_564356 = validateParameter(valid_564356, JString, required = true,
                                  default = nil)
-  if valid_568456 != nil:
-    section.add "schemaName", valid_568456
-  var valid_568457 = path.getOrDefault("databaseName")
-  valid_568457 = validateParameter(valid_568457, JString, required = true,
+  if valid_564356 != nil:
+    section.add "databaseName", valid_564356
+  var valid_564357 = path.getOrDefault("schemaName")
+  valid_564357 = validateParameter(valid_564357, JString, required = true,
                                  default = nil)
-  if valid_568457 != nil:
-    section.add "databaseName", valid_568457
+  if valid_564357 != nil:
+    section.add "schemaName", valid_564357
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2383,11 +2387,11 @@ proc validate_CatalogGetProcedure_568453(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568458 = query.getOrDefault("api-version")
-  valid_568458 = validateParameter(valid_568458, JString, required = true,
+  var valid_564358 = query.getOrDefault("api-version")
+  valid_564358 = validateParameter(valid_564358, JString, required = true,
                                  default = nil)
-  if valid_568458 != nil:
-    section.add "api-version", valid_568458
+  if valid_564358 != nil:
+    section.add "api-version", valid_564358
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2396,46 +2400,46 @@ proc validate_CatalogGetProcedure_568453(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568459: Call_CatalogGetProcedure_568452; path: JsonNode;
+proc call*(call_564359: Call_CatalogGetProcedure_564352; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Retrieves the specified procedure from the Data Lake Analytics catalog.
   ## 
-  let valid = call_568459.validator(path, query, header, formData, body)
-  let scheme = call_568459.pickScheme
+  let valid = call_564359.validator(path, query, header, formData, body)
+  let scheme = call_564359.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568459.url(scheme.get, call_568459.host, call_568459.base,
-                         call_568459.route, valid.getOrDefault("path"),
+  let url = call_564359.url(scheme.get, call_564359.host, call_564359.base,
+                         call_564359.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568459, url, valid)
+  result = hook(call_564359, url, valid)
 
-proc call*(call_568460: Call_CatalogGetProcedure_568452; apiVersion: string;
-          procedureName: string; schemaName: string; databaseName: string): Recallable =
+proc call*(call_564360: Call_CatalogGetProcedure_564352; procedureName: string;
+          apiVersion: string; databaseName: string; schemaName: string): Recallable =
   ## catalogGetProcedure
   ## Retrieves the specified procedure from the Data Lake Analytics catalog.
-  ##   apiVersion: string (required)
-  ##             : Client Api Version.
   ##   procedureName: string (required)
   ##                : The name of the procedure.
-  ##   schemaName: string (required)
-  ##             : The name of the schema containing the procedure.
+  ##   apiVersion: string (required)
+  ##             : Client Api Version.
   ##   databaseName: string (required)
   ##               : The name of the database containing the procedure.
-  var path_568461 = newJObject()
-  var query_568462 = newJObject()
-  add(query_568462, "api-version", newJString(apiVersion))
-  add(path_568461, "procedureName", newJString(procedureName))
-  add(path_568461, "schemaName", newJString(schemaName))
-  add(path_568461, "databaseName", newJString(databaseName))
-  result = call_568460.call(path_568461, query_568462, nil, nil, nil)
+  ##   schemaName: string (required)
+  ##             : The name of the schema containing the procedure.
+  var path_564361 = newJObject()
+  var query_564362 = newJObject()
+  add(path_564361, "procedureName", newJString(procedureName))
+  add(query_564362, "api-version", newJString(apiVersion))
+  add(path_564361, "databaseName", newJString(databaseName))
+  add(path_564361, "schemaName", newJString(schemaName))
+  result = call_564360.call(path_564361, query_564362, nil, nil, nil)
 
-var catalogGetProcedure* = Call_CatalogGetProcedure_568452(
+var catalogGetProcedure* = Call_CatalogGetProcedure_564352(
     name: "catalogGetProcedure", meth: HttpMethod.HttpGet, host: "azure.local", route: "/catalog/usql/databases/{databaseName}/schemas/{schemaName}/procedures/{procedureName}",
-    validator: validate_CatalogGetProcedure_568453, base: "",
-    url: url_CatalogGetProcedure_568454, schemes: {Scheme.Https})
+    validator: validate_CatalogGetProcedure_564353, base: "",
+    url: url_CatalogGetProcedure_564354, schemes: {Scheme.Https})
 type
-  Call_CatalogListTableStatisticsByDatabaseAndSchema_568463 = ref object of OpenApiRestCall_567666
-proc url_CatalogListTableStatisticsByDatabaseAndSchema_568465(protocol: Scheme;
+  Call_CatalogListTableStatisticsByDatabaseAndSchema_564363 = ref object of OpenApiRestCall_563564
+proc url_CatalogListTableStatisticsByDatabaseAndSchema_564365(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2454,7 +2458,7 @@ proc url_CatalogListTableStatisticsByDatabaseAndSchema_568465(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_CatalogListTableStatisticsByDatabaseAndSchema_568464(
+proc validate_CatalogListTableStatisticsByDatabaseAndSchema_564364(
     path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
     body: JsonNode): JsonNode =
   ## Retrieves the list of all table statistics within the specified schema from the Data Lake Analytics catalog.
@@ -2462,74 +2466,74 @@ proc validate_CatalogListTableStatisticsByDatabaseAndSchema_568464(
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   schemaName: JString (required)
-  ##             : The name of the schema containing the statistics.
   ##   databaseName: JString (required)
   ##               : The name of the database containing the statistics.
+  ##   schemaName: JString (required)
+  ##             : The name of the schema containing the statistics.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `schemaName` field"
-  var valid_568466 = path.getOrDefault("schemaName")
-  valid_568466 = validateParameter(valid_568466, JString, required = true,
+        "path argument is necessary due to required `databaseName` field"
+  var valid_564366 = path.getOrDefault("databaseName")
+  valid_564366 = validateParameter(valid_564366, JString, required = true,
                                  default = nil)
-  if valid_568466 != nil:
-    section.add "schemaName", valid_568466
-  var valid_568467 = path.getOrDefault("databaseName")
-  valid_568467 = validateParameter(valid_568467, JString, required = true,
+  if valid_564366 != nil:
+    section.add "databaseName", valid_564366
+  var valid_564367 = path.getOrDefault("schemaName")
+  valid_564367 = validateParameter(valid_564367, JString, required = true,
                                  default = nil)
-  if valid_568467 != nil:
-    section.add "databaseName", valid_568467
+  if valid_564367 != nil:
+    section.add "schemaName", valid_564367
   result.add "path", section
   ## parameters in `query` object:
-  ##   $orderby: JString
-  ##           : OrderBy clause. One or more comma-separated expressions with an optional "asc" (the default) or "desc" depending on the order you'd like the values sorted, e.g. Categories?$orderby=CategoryName desc. Optional.
-  ##   api-version: JString (required)
-  ##              : Client Api Version.
   ##   $top: JInt
   ##       : The number of items to return. Optional.
+  ##   api-version: JString (required)
+  ##              : Client Api Version.
   ##   $select: JString
   ##          : OData Select statement. Limits the properties on each entry to just those requested, e.g. Categories?$select=CategoryName,Description. Optional.
-  ##   $skip: JInt
-  ##        : The number of items to skip over before returning elements. Optional.
   ##   $count: JBool
   ##         : The Boolean value of true or false to request a count of the matching resources included with the resources in the response, e.g. Categories?$count=true. Optional.
+  ##   $orderby: JString
+  ##           : OrderBy clause. One or more comma-separated expressions with an optional "asc" (the default) or "desc" depending on the order you'd like the values sorted, e.g. Categories?$orderby=CategoryName desc. Optional.
+  ##   $skip: JInt
+  ##        : The number of items to skip over before returning elements. Optional.
   ##   $filter: JString
   ##          : OData filter. Optional.
   section = newJObject()
-  var valid_568468 = query.getOrDefault("$orderby")
-  valid_568468 = validateParameter(valid_568468, JString, required = false,
-                                 default = nil)
-  if valid_568468 != nil:
-    section.add "$orderby", valid_568468
+  var valid_564368 = query.getOrDefault("$top")
+  valid_564368 = validateParameter(valid_564368, JInt, required = false, default = nil)
+  if valid_564368 != nil:
+    section.add "$top", valid_564368
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568469 = query.getOrDefault("api-version")
-  valid_568469 = validateParameter(valid_568469, JString, required = true,
+  var valid_564369 = query.getOrDefault("api-version")
+  valid_564369 = validateParameter(valid_564369, JString, required = true,
                                  default = nil)
-  if valid_568469 != nil:
-    section.add "api-version", valid_568469
-  var valid_568470 = query.getOrDefault("$top")
-  valid_568470 = validateParameter(valid_568470, JInt, required = false, default = nil)
-  if valid_568470 != nil:
-    section.add "$top", valid_568470
-  var valid_568471 = query.getOrDefault("$select")
-  valid_568471 = validateParameter(valid_568471, JString, required = false,
+  if valid_564369 != nil:
+    section.add "api-version", valid_564369
+  var valid_564370 = query.getOrDefault("$select")
+  valid_564370 = validateParameter(valid_564370, JString, required = false,
                                  default = nil)
-  if valid_568471 != nil:
-    section.add "$select", valid_568471
-  var valid_568472 = query.getOrDefault("$skip")
-  valid_568472 = validateParameter(valid_568472, JInt, required = false, default = nil)
-  if valid_568472 != nil:
-    section.add "$skip", valid_568472
-  var valid_568473 = query.getOrDefault("$count")
-  valid_568473 = validateParameter(valid_568473, JBool, required = false, default = nil)
-  if valid_568473 != nil:
-    section.add "$count", valid_568473
-  var valid_568474 = query.getOrDefault("$filter")
-  valid_568474 = validateParameter(valid_568474, JString, required = false,
+  if valid_564370 != nil:
+    section.add "$select", valid_564370
+  var valid_564371 = query.getOrDefault("$count")
+  valid_564371 = validateParameter(valid_564371, JBool, required = false, default = nil)
+  if valid_564371 != nil:
+    section.add "$count", valid_564371
+  var valid_564372 = query.getOrDefault("$orderby")
+  valid_564372 = validateParameter(valid_564372, JString, required = false,
                                  default = nil)
-  if valid_568474 != nil:
-    section.add "$filter", valid_568474
+  if valid_564372 != nil:
+    section.add "$orderby", valid_564372
+  var valid_564373 = query.getOrDefault("$skip")
+  valid_564373 = validateParameter(valid_564373, JInt, required = false, default = nil)
+  if valid_564373 != nil:
+    section.add "$skip", valid_564373
+  var valid_564374 = query.getOrDefault("$filter")
+  valid_564374 = validateParameter(valid_564374, JString, required = false,
+                                 default = nil)
+  if valid_564374 != nil:
+    section.add "$filter", valid_564374
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2538,66 +2542,66 @@ proc validate_CatalogListTableStatisticsByDatabaseAndSchema_568464(
   if body != nil:
     result.add "body", body
 
-proc call*(call_568475: Call_CatalogListTableStatisticsByDatabaseAndSchema_568463;
+proc call*(call_564375: Call_CatalogListTableStatisticsByDatabaseAndSchema_564363;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Retrieves the list of all table statistics within the specified schema from the Data Lake Analytics catalog.
   ## 
-  let valid = call_568475.validator(path, query, header, formData, body)
-  let scheme = call_568475.pickScheme
+  let valid = call_564375.validator(path, query, header, formData, body)
+  let scheme = call_564375.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568475.url(scheme.get, call_568475.host, call_568475.base,
-                         call_568475.route, valid.getOrDefault("path"),
+  let url = call_564375.url(scheme.get, call_564375.host, call_564375.base,
+                         call_564375.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568475, url, valid)
+  result = hook(call_564375, url, valid)
 
-proc call*(call_568476: Call_CatalogListTableStatisticsByDatabaseAndSchema_568463;
-          apiVersion: string; schemaName: string; databaseName: string;
-          Orderby: string = ""; Top: int = 0; Select: string = ""; Skip: int = 0;
-          Count: bool = false; Filter: string = ""): Recallable =
+proc call*(call_564376: Call_CatalogListTableStatisticsByDatabaseAndSchema_564363;
+          apiVersion: string; databaseName: string; schemaName: string; Top: int = 0;
+          Select: string = ""; Count: bool = false; Orderby: string = ""; Skip: int = 0;
+          Filter: string = ""): Recallable =
   ## catalogListTableStatisticsByDatabaseAndSchema
   ## Retrieves the list of all table statistics within the specified schema from the Data Lake Analytics catalog.
-  ##   Orderby: string
-  ##          : OrderBy clause. One or more comma-separated expressions with an optional "asc" (the default) or "desc" depending on the order you'd like the values sorted, e.g. Categories?$orderby=CategoryName desc. Optional.
-  ##   apiVersion: string (required)
-  ##             : Client Api Version.
   ##   Top: int
   ##      : The number of items to return. Optional.
-  ##   schemaName: string (required)
-  ##             : The name of the schema containing the statistics.
+  ##   apiVersion: string (required)
+  ##             : Client Api Version.
   ##   Select: string
   ##         : OData Select statement. Limits the properties on each entry to just those requested, e.g. Categories?$select=CategoryName,Description. Optional.
-  ##   databaseName: string (required)
-  ##               : The name of the database containing the statistics.
-  ##   Skip: int
-  ##       : The number of items to skip over before returning elements. Optional.
   ##   Count: bool
   ##        : The Boolean value of true or false to request a count of the matching resources included with the resources in the response, e.g. Categories?$count=true. Optional.
+  ##   databaseName: string (required)
+  ##               : The name of the database containing the statistics.
+  ##   Orderby: string
+  ##          : OrderBy clause. One or more comma-separated expressions with an optional "asc" (the default) or "desc" depending on the order you'd like the values sorted, e.g. Categories?$orderby=CategoryName desc. Optional.
+  ##   Skip: int
+  ##       : The number of items to skip over before returning elements. Optional.
   ##   Filter: string
   ##         : OData filter. Optional.
-  var path_568477 = newJObject()
-  var query_568478 = newJObject()
-  add(query_568478, "$orderby", newJString(Orderby))
-  add(query_568478, "api-version", newJString(apiVersion))
-  add(query_568478, "$top", newJInt(Top))
-  add(path_568477, "schemaName", newJString(schemaName))
-  add(query_568478, "$select", newJString(Select))
-  add(path_568477, "databaseName", newJString(databaseName))
-  add(query_568478, "$skip", newJInt(Skip))
-  add(query_568478, "$count", newJBool(Count))
-  add(query_568478, "$filter", newJString(Filter))
-  result = call_568476.call(path_568477, query_568478, nil, nil, nil)
+  ##   schemaName: string (required)
+  ##             : The name of the schema containing the statistics.
+  var path_564377 = newJObject()
+  var query_564378 = newJObject()
+  add(query_564378, "$top", newJInt(Top))
+  add(query_564378, "api-version", newJString(apiVersion))
+  add(query_564378, "$select", newJString(Select))
+  add(query_564378, "$count", newJBool(Count))
+  add(path_564377, "databaseName", newJString(databaseName))
+  add(query_564378, "$orderby", newJString(Orderby))
+  add(query_564378, "$skip", newJInt(Skip))
+  add(query_564378, "$filter", newJString(Filter))
+  add(path_564377, "schemaName", newJString(schemaName))
+  result = call_564376.call(path_564377, query_564378, nil, nil, nil)
 
-var catalogListTableStatisticsByDatabaseAndSchema* = Call_CatalogListTableStatisticsByDatabaseAndSchema_568463(
+var catalogListTableStatisticsByDatabaseAndSchema* = Call_CatalogListTableStatisticsByDatabaseAndSchema_564363(
     name: "catalogListTableStatisticsByDatabaseAndSchema",
     meth: HttpMethod.HttpGet, host: "azure.local", route: "/catalog/usql/databases/{databaseName}/schemas/{schemaName}/statistics",
-    validator: validate_CatalogListTableStatisticsByDatabaseAndSchema_568464,
-    base: "", url: url_CatalogListTableStatisticsByDatabaseAndSchema_568465,
+    validator: validate_CatalogListTableStatisticsByDatabaseAndSchema_564364,
+    base: "", url: url_CatalogListTableStatisticsByDatabaseAndSchema_564365,
     schemes: {Scheme.Https})
 type
-  Call_CatalogListTables_568479 = ref object of OpenApiRestCall_567666
-proc url_CatalogListTables_568481(protocol: Scheme; host: string; base: string;
+  Call_CatalogListTables_564379 = ref object of OpenApiRestCall_563564
+proc url_CatalogListTables_564381(protocol: Scheme; host: string; base: string;
                                  route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2616,7 +2620,7 @@ proc url_CatalogListTables_568481(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_CatalogListTables_568480(path: JsonNode; query: JsonNode;
+proc validate_CatalogListTables_564380(path: JsonNode; query: JsonNode;
                                       header: JsonNode; formData: JsonNode;
                                       body: JsonNode): JsonNode =
   ## Retrieves the list of tables from the Data Lake Analytics catalog.
@@ -2624,81 +2628,81 @@ proc validate_CatalogListTables_568480(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   schemaName: JString (required)
-  ##             : The name of the schema containing the tables.
   ##   databaseName: JString (required)
   ##               : The name of the database containing the tables.
+  ##   schemaName: JString (required)
+  ##             : The name of the schema containing the tables.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `schemaName` field"
-  var valid_568482 = path.getOrDefault("schemaName")
-  valid_568482 = validateParameter(valid_568482, JString, required = true,
+        "path argument is necessary due to required `databaseName` field"
+  var valid_564382 = path.getOrDefault("databaseName")
+  valid_564382 = validateParameter(valid_564382, JString, required = true,
                                  default = nil)
-  if valid_568482 != nil:
-    section.add "schemaName", valid_568482
-  var valid_568483 = path.getOrDefault("databaseName")
-  valid_568483 = validateParameter(valid_568483, JString, required = true,
+  if valid_564382 != nil:
+    section.add "databaseName", valid_564382
+  var valid_564383 = path.getOrDefault("schemaName")
+  valid_564383 = validateParameter(valid_564383, JString, required = true,
                                  default = nil)
-  if valid_568483 != nil:
-    section.add "databaseName", valid_568483
+  if valid_564383 != nil:
+    section.add "schemaName", valid_564383
   result.add "path", section
   ## parameters in `query` object:
-  ##   $orderby: JString
-  ##           : OrderBy clause. One or more comma-separated expressions with an optional "asc" (the default) or "desc" depending on the order you'd like the values sorted, e.g. Categories?$orderby=CategoryName desc. Optional.
-  ##   api-version: JString (required)
-  ##              : Client Api Version.
-  ##   $top: JInt
-  ##       : The number of items to return. Optional.
-  ##   $select: JString
-  ##          : OData Select statement. Limits the properties on each entry to just those requested, e.g. Categories?$select=CategoryName,Description. Optional.
-  ##   $skip: JInt
-  ##        : The number of items to skip over before returning elements. Optional.
-  ##   $count: JBool
-  ##         : The Boolean value of true or false to request a count of the matching resources included with the resources in the response, e.g. Categories?$count=true. Optional.
   ##   basic: JBool
   ##        : The basic switch indicates what level of information to return when listing tables. When basic is true, only database_name, schema_name, table_name and version are returned for each table, otherwise all table metadata is returned. By default, it is false. Optional.
+  ##   $top: JInt
+  ##       : The number of items to return. Optional.
+  ##   api-version: JString (required)
+  ##              : Client Api Version.
+  ##   $select: JString
+  ##          : OData Select statement. Limits the properties on each entry to just those requested, e.g. Categories?$select=CategoryName,Description. Optional.
+  ##   $count: JBool
+  ##         : The Boolean value of true or false to request a count of the matching resources included with the resources in the response, e.g. Categories?$count=true. Optional.
+  ##   $orderby: JString
+  ##           : OrderBy clause. One or more comma-separated expressions with an optional "asc" (the default) or "desc" depending on the order you'd like the values sorted, e.g. Categories?$orderby=CategoryName desc. Optional.
+  ##   $skip: JInt
+  ##        : The number of items to skip over before returning elements. Optional.
   ##   $filter: JString
   ##          : OData filter. Optional.
   section = newJObject()
-  var valid_568484 = query.getOrDefault("$orderby")
-  valid_568484 = validateParameter(valid_568484, JString, required = false,
-                                 default = nil)
-  if valid_568484 != nil:
-    section.add "$orderby", valid_568484
+  var valid_564384 = query.getOrDefault("basic")
+  valid_564384 = validateParameter(valid_564384, JBool, required = false,
+                                 default = newJBool(false))
+  if valid_564384 != nil:
+    section.add "basic", valid_564384
+  var valid_564385 = query.getOrDefault("$top")
+  valid_564385 = validateParameter(valid_564385, JInt, required = false, default = nil)
+  if valid_564385 != nil:
+    section.add "$top", valid_564385
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568485 = query.getOrDefault("api-version")
-  valid_568485 = validateParameter(valid_568485, JString, required = true,
+  var valid_564386 = query.getOrDefault("api-version")
+  valid_564386 = validateParameter(valid_564386, JString, required = true,
                                  default = nil)
-  if valid_568485 != nil:
-    section.add "api-version", valid_568485
-  var valid_568486 = query.getOrDefault("$top")
-  valid_568486 = validateParameter(valid_568486, JInt, required = false, default = nil)
-  if valid_568486 != nil:
-    section.add "$top", valid_568486
-  var valid_568487 = query.getOrDefault("$select")
-  valid_568487 = validateParameter(valid_568487, JString, required = false,
+  if valid_564386 != nil:
+    section.add "api-version", valid_564386
+  var valid_564387 = query.getOrDefault("$select")
+  valid_564387 = validateParameter(valid_564387, JString, required = false,
                                  default = nil)
-  if valid_568487 != nil:
-    section.add "$select", valid_568487
-  var valid_568488 = query.getOrDefault("$skip")
-  valid_568488 = validateParameter(valid_568488, JInt, required = false, default = nil)
-  if valid_568488 != nil:
-    section.add "$skip", valid_568488
-  var valid_568489 = query.getOrDefault("$count")
-  valid_568489 = validateParameter(valid_568489, JBool, required = false, default = nil)
-  if valid_568489 != nil:
-    section.add "$count", valid_568489
-  var valid_568490 = query.getOrDefault("basic")
-  valid_568490 = validateParameter(valid_568490, JBool, required = false,
-                                 default = newJBool(false))
-  if valid_568490 != nil:
-    section.add "basic", valid_568490
-  var valid_568491 = query.getOrDefault("$filter")
-  valid_568491 = validateParameter(valid_568491, JString, required = false,
+  if valid_564387 != nil:
+    section.add "$select", valid_564387
+  var valid_564388 = query.getOrDefault("$count")
+  valid_564388 = validateParameter(valid_564388, JBool, required = false, default = nil)
+  if valid_564388 != nil:
+    section.add "$count", valid_564388
+  var valid_564389 = query.getOrDefault("$orderby")
+  valid_564389 = validateParameter(valid_564389, JString, required = false,
                                  default = nil)
-  if valid_568491 != nil:
-    section.add "$filter", valid_568491
+  if valid_564389 != nil:
+    section.add "$orderby", valid_564389
+  var valid_564390 = query.getOrDefault("$skip")
+  valid_564390 = validateParameter(valid_564390, JInt, required = false, default = nil)
+  if valid_564390 != nil:
+    section.add "$skip", valid_564390
+  var valid_564391 = query.getOrDefault("$filter")
+  valid_564391 = validateParameter(valid_564391, JString, required = false,
+                                 default = nil)
+  if valid_564391 != nil:
+    section.add "$filter", valid_564391
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2707,66 +2711,66 @@ proc validate_CatalogListTables_568480(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568492: Call_CatalogListTables_568479; path: JsonNode;
+proc call*(call_564392: Call_CatalogListTables_564379; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Retrieves the list of tables from the Data Lake Analytics catalog.
   ## 
-  let valid = call_568492.validator(path, query, header, formData, body)
-  let scheme = call_568492.pickScheme
+  let valid = call_564392.validator(path, query, header, formData, body)
+  let scheme = call_564392.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568492.url(scheme.get, call_568492.host, call_568492.base,
-                         call_568492.route, valid.getOrDefault("path"),
+  let url = call_564392.url(scheme.get, call_564392.host, call_564392.base,
+                         call_564392.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568492, url, valid)
+  result = hook(call_564392, url, valid)
 
-proc call*(call_568493: Call_CatalogListTables_568479; apiVersion: string;
-          schemaName: string; databaseName: string; Orderby: string = ""; Top: int = 0;
-          Select: string = ""; Skip: int = 0; Count: bool = false; basic: bool = false;
+proc call*(call_564393: Call_CatalogListTables_564379; apiVersion: string;
+          databaseName: string; schemaName: string; basic: bool = false; Top: int = 0;
+          Select: string = ""; Count: bool = false; Orderby: string = ""; Skip: int = 0;
           Filter: string = ""): Recallable =
   ## catalogListTables
   ## Retrieves the list of tables from the Data Lake Analytics catalog.
-  ##   Orderby: string
-  ##          : OrderBy clause. One or more comma-separated expressions with an optional "asc" (the default) or "desc" depending on the order you'd like the values sorted, e.g. Categories?$orderby=CategoryName desc. Optional.
-  ##   apiVersion: string (required)
-  ##             : Client Api Version.
-  ##   Top: int
-  ##      : The number of items to return. Optional.
-  ##   schemaName: string (required)
-  ##             : The name of the schema containing the tables.
-  ##   Select: string
-  ##         : OData Select statement. Limits the properties on each entry to just those requested, e.g. Categories?$select=CategoryName,Description. Optional.
-  ##   databaseName: string (required)
-  ##               : The name of the database containing the tables.
-  ##   Skip: int
-  ##       : The number of items to skip over before returning elements. Optional.
-  ##   Count: bool
-  ##        : The Boolean value of true or false to request a count of the matching resources included with the resources in the response, e.g. Categories?$count=true. Optional.
   ##   basic: bool
   ##        : The basic switch indicates what level of information to return when listing tables. When basic is true, only database_name, schema_name, table_name and version are returned for each table, otherwise all table metadata is returned. By default, it is false. Optional.
+  ##   Top: int
+  ##      : The number of items to return. Optional.
+  ##   apiVersion: string (required)
+  ##             : Client Api Version.
+  ##   Select: string
+  ##         : OData Select statement. Limits the properties on each entry to just those requested, e.g. Categories?$select=CategoryName,Description. Optional.
+  ##   Count: bool
+  ##        : The Boolean value of true or false to request a count of the matching resources included with the resources in the response, e.g. Categories?$count=true. Optional.
+  ##   databaseName: string (required)
+  ##               : The name of the database containing the tables.
+  ##   Orderby: string
+  ##          : OrderBy clause. One or more comma-separated expressions with an optional "asc" (the default) or "desc" depending on the order you'd like the values sorted, e.g. Categories?$orderby=CategoryName desc. Optional.
+  ##   Skip: int
+  ##       : The number of items to skip over before returning elements. Optional.
   ##   Filter: string
   ##         : OData filter. Optional.
-  var path_568494 = newJObject()
-  var query_568495 = newJObject()
-  add(query_568495, "$orderby", newJString(Orderby))
-  add(query_568495, "api-version", newJString(apiVersion))
-  add(query_568495, "$top", newJInt(Top))
-  add(path_568494, "schemaName", newJString(schemaName))
-  add(query_568495, "$select", newJString(Select))
-  add(path_568494, "databaseName", newJString(databaseName))
-  add(query_568495, "$skip", newJInt(Skip))
-  add(query_568495, "$count", newJBool(Count))
-  add(query_568495, "basic", newJBool(basic))
-  add(query_568495, "$filter", newJString(Filter))
-  result = call_568493.call(path_568494, query_568495, nil, nil, nil)
+  ##   schemaName: string (required)
+  ##             : The name of the schema containing the tables.
+  var path_564394 = newJObject()
+  var query_564395 = newJObject()
+  add(query_564395, "basic", newJBool(basic))
+  add(query_564395, "$top", newJInt(Top))
+  add(query_564395, "api-version", newJString(apiVersion))
+  add(query_564395, "$select", newJString(Select))
+  add(query_564395, "$count", newJBool(Count))
+  add(path_564394, "databaseName", newJString(databaseName))
+  add(query_564395, "$orderby", newJString(Orderby))
+  add(query_564395, "$skip", newJInt(Skip))
+  add(query_564395, "$filter", newJString(Filter))
+  add(path_564394, "schemaName", newJString(schemaName))
+  result = call_564393.call(path_564394, query_564395, nil, nil, nil)
 
-var catalogListTables* = Call_CatalogListTables_568479(name: "catalogListTables",
+var catalogListTables* = Call_CatalogListTables_564379(name: "catalogListTables",
     meth: HttpMethod.HttpGet, host: "azure.local", route: "/catalog/usql/databases/{databaseName}/schemas/{schemaName}/tables",
-    validator: validate_CatalogListTables_568480, base: "",
-    url: url_CatalogListTables_568481, schemes: {Scheme.Https})
+    validator: validate_CatalogListTables_564380, base: "",
+    url: url_CatalogListTables_564381, schemes: {Scheme.Https})
 type
-  Call_CatalogGetTable_568496 = ref object of OpenApiRestCall_567666
-proc url_CatalogGetTable_568498(protocol: Scheme; host: string; base: string;
+  Call_CatalogGetTable_564396 = ref object of OpenApiRestCall_563564
+proc url_CatalogGetTable_564398(protocol: Scheme; host: string; base: string;
                                route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2787,7 +2791,7 @@ proc url_CatalogGetTable_568498(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_CatalogGetTable_568497(path: JsonNode; query: JsonNode;
+proc validate_CatalogGetTable_564397(path: JsonNode; query: JsonNode;
                                     header: JsonNode; formData: JsonNode;
                                     body: JsonNode): JsonNode =
   ## Retrieves the specified table from the Data Lake Analytics catalog.
@@ -2795,30 +2799,30 @@ proc validate_CatalogGetTable_568497(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
+  ##   databaseName: JString (required)
+  ##               : The name of the database containing the table.
   ##   schemaName: JString (required)
   ##             : The name of the schema containing the table.
   ##   tableName: JString (required)
   ##            : The name of the table.
-  ##   databaseName: JString (required)
-  ##               : The name of the database containing the table.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `schemaName` field"
-  var valid_568499 = path.getOrDefault("schemaName")
-  valid_568499 = validateParameter(valid_568499, JString, required = true,
+        "path argument is necessary due to required `databaseName` field"
+  var valid_564399 = path.getOrDefault("databaseName")
+  valid_564399 = validateParameter(valid_564399, JString, required = true,
                                  default = nil)
-  if valid_568499 != nil:
-    section.add "schemaName", valid_568499
-  var valid_568500 = path.getOrDefault("tableName")
-  valid_568500 = validateParameter(valid_568500, JString, required = true,
+  if valid_564399 != nil:
+    section.add "databaseName", valid_564399
+  var valid_564400 = path.getOrDefault("schemaName")
+  valid_564400 = validateParameter(valid_564400, JString, required = true,
                                  default = nil)
-  if valid_568500 != nil:
-    section.add "tableName", valid_568500
-  var valid_568501 = path.getOrDefault("databaseName")
-  valid_568501 = validateParameter(valid_568501, JString, required = true,
+  if valid_564400 != nil:
+    section.add "schemaName", valid_564400
+  var valid_564401 = path.getOrDefault("tableName")
+  valid_564401 = validateParameter(valid_564401, JString, required = true,
                                  default = nil)
-  if valid_568501 != nil:
-    section.add "databaseName", valid_568501
+  if valid_564401 != nil:
+    section.add "tableName", valid_564401
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2826,11 +2830,11 @@ proc validate_CatalogGetTable_568497(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568502 = query.getOrDefault("api-version")
-  valid_568502 = validateParameter(valid_568502, JString, required = true,
+  var valid_564402 = query.getOrDefault("api-version")
+  valid_564402 = validateParameter(valid_564402, JString, required = true,
                                  default = nil)
-  if valid_568502 != nil:
-    section.add "api-version", valid_568502
+  if valid_564402 != nil:
+    section.add "api-version", valid_564402
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2839,46 +2843,46 @@ proc validate_CatalogGetTable_568497(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568503: Call_CatalogGetTable_568496; path: JsonNode; query: JsonNode;
+proc call*(call_564403: Call_CatalogGetTable_564396; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Retrieves the specified table from the Data Lake Analytics catalog.
   ## 
-  let valid = call_568503.validator(path, query, header, formData, body)
-  let scheme = call_568503.pickScheme
+  let valid = call_564403.validator(path, query, header, formData, body)
+  let scheme = call_564403.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568503.url(scheme.get, call_568503.host, call_568503.base,
-                         call_568503.route, valid.getOrDefault("path"),
+  let url = call_564403.url(scheme.get, call_564403.host, call_564403.base,
+                         call_564403.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568503, url, valid)
+  result = hook(call_564403, url, valid)
 
-proc call*(call_568504: Call_CatalogGetTable_568496; apiVersion: string;
-          schemaName: string; tableName: string; databaseName: string): Recallable =
+proc call*(call_564404: Call_CatalogGetTable_564396; apiVersion: string;
+          databaseName: string; schemaName: string; tableName: string): Recallable =
   ## catalogGetTable
   ## Retrieves the specified table from the Data Lake Analytics catalog.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
+  ##   databaseName: string (required)
+  ##               : The name of the database containing the table.
   ##   schemaName: string (required)
   ##             : The name of the schema containing the table.
   ##   tableName: string (required)
   ##            : The name of the table.
-  ##   databaseName: string (required)
-  ##               : The name of the database containing the table.
-  var path_568505 = newJObject()
-  var query_568506 = newJObject()
-  add(query_568506, "api-version", newJString(apiVersion))
-  add(path_568505, "schemaName", newJString(schemaName))
-  add(path_568505, "tableName", newJString(tableName))
-  add(path_568505, "databaseName", newJString(databaseName))
-  result = call_568504.call(path_568505, query_568506, nil, nil, nil)
+  var path_564405 = newJObject()
+  var query_564406 = newJObject()
+  add(query_564406, "api-version", newJString(apiVersion))
+  add(path_564405, "databaseName", newJString(databaseName))
+  add(path_564405, "schemaName", newJString(schemaName))
+  add(path_564405, "tableName", newJString(tableName))
+  result = call_564404.call(path_564405, query_564406, nil, nil, nil)
 
-var catalogGetTable* = Call_CatalogGetTable_568496(name: "catalogGetTable",
+var catalogGetTable* = Call_CatalogGetTable_564396(name: "catalogGetTable",
     meth: HttpMethod.HttpGet, host: "azure.local", route: "/catalog/usql/databases/{databaseName}/schemas/{schemaName}/tables/{tableName}",
-    validator: validate_CatalogGetTable_568497, base: "", url: url_CatalogGetTable_568498,
+    validator: validate_CatalogGetTable_564397, base: "", url: url_CatalogGetTable_564398,
     schemes: {Scheme.Https})
 type
-  Call_CatalogListTablePartitions_568507 = ref object of OpenApiRestCall_567666
-proc url_CatalogListTablePartitions_568509(protocol: Scheme; host: string;
+  Call_CatalogListTablePartitions_564407 = ref object of OpenApiRestCall_563564
+proc url_CatalogListTablePartitions_564409(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2900,88 +2904,88 @@ proc url_CatalogListTablePartitions_568509(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_CatalogListTablePartitions_568508(path: JsonNode; query: JsonNode;
+proc validate_CatalogListTablePartitions_564408(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Retrieves the list of table partitions from the Data Lake Analytics catalog.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
+  ##   databaseName: JString (required)
+  ##               : The name of the database containing the partitions.
   ##   schemaName: JString (required)
   ##             : The name of the schema containing the partitions.
   ##   tableName: JString (required)
   ##            : The name of the table containing the partitions.
-  ##   databaseName: JString (required)
-  ##               : The name of the database containing the partitions.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `schemaName` field"
-  var valid_568510 = path.getOrDefault("schemaName")
-  valid_568510 = validateParameter(valid_568510, JString, required = true,
+        "path argument is necessary due to required `databaseName` field"
+  var valid_564410 = path.getOrDefault("databaseName")
+  valid_564410 = validateParameter(valid_564410, JString, required = true,
                                  default = nil)
-  if valid_568510 != nil:
-    section.add "schemaName", valid_568510
-  var valid_568511 = path.getOrDefault("tableName")
-  valid_568511 = validateParameter(valid_568511, JString, required = true,
+  if valid_564410 != nil:
+    section.add "databaseName", valid_564410
+  var valid_564411 = path.getOrDefault("schemaName")
+  valid_564411 = validateParameter(valid_564411, JString, required = true,
                                  default = nil)
-  if valid_568511 != nil:
-    section.add "tableName", valid_568511
-  var valid_568512 = path.getOrDefault("databaseName")
-  valid_568512 = validateParameter(valid_568512, JString, required = true,
+  if valid_564411 != nil:
+    section.add "schemaName", valid_564411
+  var valid_564412 = path.getOrDefault("tableName")
+  valid_564412 = validateParameter(valid_564412, JString, required = true,
                                  default = nil)
-  if valid_568512 != nil:
-    section.add "databaseName", valid_568512
+  if valid_564412 != nil:
+    section.add "tableName", valid_564412
   result.add "path", section
   ## parameters in `query` object:
-  ##   $orderby: JString
-  ##           : OrderBy clause. One or more comma-separated expressions with an optional "asc" (the default) or "desc" depending on the order you'd like the values sorted, e.g. Categories?$orderby=CategoryName desc. Optional.
-  ##   api-version: JString (required)
-  ##              : Client Api Version.
   ##   $top: JInt
   ##       : The number of items to return. Optional.
+  ##   api-version: JString (required)
+  ##              : Client Api Version.
   ##   $select: JString
   ##          : OData Select statement. Limits the properties on each entry to just those requested, e.g. Categories?$select=CategoryName,Description. Optional.
-  ##   $skip: JInt
-  ##        : The number of items to skip over before returning elements. Optional.
   ##   $count: JBool
   ##         : The Boolean value of true or false to request a count of the matching resources included with the resources in the response, e.g. Categories?$count=true. Optional.
+  ##   $orderby: JString
+  ##           : OrderBy clause. One or more comma-separated expressions with an optional "asc" (the default) or "desc" depending on the order you'd like the values sorted, e.g. Categories?$orderby=CategoryName desc. Optional.
+  ##   $skip: JInt
+  ##        : The number of items to skip over before returning elements. Optional.
   ##   $filter: JString
   ##          : OData filter. Optional.
   section = newJObject()
-  var valid_568513 = query.getOrDefault("$orderby")
-  valid_568513 = validateParameter(valid_568513, JString, required = false,
-                                 default = nil)
-  if valid_568513 != nil:
-    section.add "$orderby", valid_568513
+  var valid_564413 = query.getOrDefault("$top")
+  valid_564413 = validateParameter(valid_564413, JInt, required = false, default = nil)
+  if valid_564413 != nil:
+    section.add "$top", valid_564413
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568514 = query.getOrDefault("api-version")
-  valid_568514 = validateParameter(valid_568514, JString, required = true,
+  var valid_564414 = query.getOrDefault("api-version")
+  valid_564414 = validateParameter(valid_564414, JString, required = true,
                                  default = nil)
-  if valid_568514 != nil:
-    section.add "api-version", valid_568514
-  var valid_568515 = query.getOrDefault("$top")
-  valid_568515 = validateParameter(valid_568515, JInt, required = false, default = nil)
-  if valid_568515 != nil:
-    section.add "$top", valid_568515
-  var valid_568516 = query.getOrDefault("$select")
-  valid_568516 = validateParameter(valid_568516, JString, required = false,
+  if valid_564414 != nil:
+    section.add "api-version", valid_564414
+  var valid_564415 = query.getOrDefault("$select")
+  valid_564415 = validateParameter(valid_564415, JString, required = false,
                                  default = nil)
-  if valid_568516 != nil:
-    section.add "$select", valid_568516
-  var valid_568517 = query.getOrDefault("$skip")
-  valid_568517 = validateParameter(valid_568517, JInt, required = false, default = nil)
-  if valid_568517 != nil:
-    section.add "$skip", valid_568517
-  var valid_568518 = query.getOrDefault("$count")
-  valid_568518 = validateParameter(valid_568518, JBool, required = false, default = nil)
-  if valid_568518 != nil:
-    section.add "$count", valid_568518
-  var valid_568519 = query.getOrDefault("$filter")
-  valid_568519 = validateParameter(valid_568519, JString, required = false,
+  if valid_564415 != nil:
+    section.add "$select", valid_564415
+  var valid_564416 = query.getOrDefault("$count")
+  valid_564416 = validateParameter(valid_564416, JBool, required = false, default = nil)
+  if valid_564416 != nil:
+    section.add "$count", valid_564416
+  var valid_564417 = query.getOrDefault("$orderby")
+  valid_564417 = validateParameter(valid_564417, JString, required = false,
                                  default = nil)
-  if valid_568519 != nil:
-    section.add "$filter", valid_568519
+  if valid_564417 != nil:
+    section.add "$orderby", valid_564417
+  var valid_564418 = query.getOrDefault("$skip")
+  valid_564418 = validateParameter(valid_564418, JInt, required = false, default = nil)
+  if valid_564418 != nil:
+    section.add "$skip", valid_564418
+  var valid_564419 = query.getOrDefault("$filter")
+  valid_564419 = validateParameter(valid_564419, JString, required = false,
+                                 default = nil)
+  if valid_564419 != nil:
+    section.add "$filter", valid_564419
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2990,67 +2994,67 @@ proc validate_CatalogListTablePartitions_568508(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568520: Call_CatalogListTablePartitions_568507; path: JsonNode;
+proc call*(call_564420: Call_CatalogListTablePartitions_564407; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Retrieves the list of table partitions from the Data Lake Analytics catalog.
   ## 
-  let valid = call_568520.validator(path, query, header, formData, body)
-  let scheme = call_568520.pickScheme
+  let valid = call_564420.validator(path, query, header, formData, body)
+  let scheme = call_564420.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568520.url(scheme.get, call_568520.host, call_568520.base,
-                         call_568520.route, valid.getOrDefault("path"),
+  let url = call_564420.url(scheme.get, call_564420.host, call_564420.base,
+                         call_564420.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568520, url, valid)
+  result = hook(call_564420, url, valid)
 
-proc call*(call_568521: Call_CatalogListTablePartitions_568507; apiVersion: string;
-          schemaName: string; tableName: string; databaseName: string;
-          Orderby: string = ""; Top: int = 0; Select: string = ""; Skip: int = 0;
-          Count: bool = false; Filter: string = ""): Recallable =
+proc call*(call_564421: Call_CatalogListTablePartitions_564407; apiVersion: string;
+          databaseName: string; schemaName: string; tableName: string; Top: int = 0;
+          Select: string = ""; Count: bool = false; Orderby: string = ""; Skip: int = 0;
+          Filter: string = ""): Recallable =
   ## catalogListTablePartitions
   ## Retrieves the list of table partitions from the Data Lake Analytics catalog.
-  ##   Orderby: string
-  ##          : OrderBy clause. One or more comma-separated expressions with an optional "asc" (the default) or "desc" depending on the order you'd like the values sorted, e.g. Categories?$orderby=CategoryName desc. Optional.
-  ##   apiVersion: string (required)
-  ##             : Client Api Version.
   ##   Top: int
   ##      : The number of items to return. Optional.
+  ##   apiVersion: string (required)
+  ##             : Client Api Version.
+  ##   Select: string
+  ##         : OData Select statement. Limits the properties on each entry to just those requested, e.g. Categories?$select=CategoryName,Description. Optional.
+  ##   Count: bool
+  ##        : The Boolean value of true or false to request a count of the matching resources included with the resources in the response, e.g. Categories?$count=true. Optional.
+  ##   databaseName: string (required)
+  ##               : The name of the database containing the partitions.
+  ##   Orderby: string
+  ##          : OrderBy clause. One or more comma-separated expressions with an optional "asc" (the default) or "desc" depending on the order you'd like the values sorted, e.g. Categories?$orderby=CategoryName desc. Optional.
+  ##   Skip: int
+  ##       : The number of items to skip over before returning elements. Optional.
+  ##   Filter: string
+  ##         : OData filter. Optional.
   ##   schemaName: string (required)
   ##             : The name of the schema containing the partitions.
   ##   tableName: string (required)
   ##            : The name of the table containing the partitions.
-  ##   Select: string
-  ##         : OData Select statement. Limits the properties on each entry to just those requested, e.g. Categories?$select=CategoryName,Description. Optional.
-  ##   databaseName: string (required)
-  ##               : The name of the database containing the partitions.
-  ##   Skip: int
-  ##       : The number of items to skip over before returning elements. Optional.
-  ##   Count: bool
-  ##        : The Boolean value of true or false to request a count of the matching resources included with the resources in the response, e.g. Categories?$count=true. Optional.
-  ##   Filter: string
-  ##         : OData filter. Optional.
-  var path_568522 = newJObject()
-  var query_568523 = newJObject()
-  add(query_568523, "$orderby", newJString(Orderby))
-  add(query_568523, "api-version", newJString(apiVersion))
-  add(query_568523, "$top", newJInt(Top))
-  add(path_568522, "schemaName", newJString(schemaName))
-  add(path_568522, "tableName", newJString(tableName))
-  add(query_568523, "$select", newJString(Select))
-  add(path_568522, "databaseName", newJString(databaseName))
-  add(query_568523, "$skip", newJInt(Skip))
-  add(query_568523, "$count", newJBool(Count))
-  add(query_568523, "$filter", newJString(Filter))
-  result = call_568521.call(path_568522, query_568523, nil, nil, nil)
+  var path_564422 = newJObject()
+  var query_564423 = newJObject()
+  add(query_564423, "$top", newJInt(Top))
+  add(query_564423, "api-version", newJString(apiVersion))
+  add(query_564423, "$select", newJString(Select))
+  add(query_564423, "$count", newJBool(Count))
+  add(path_564422, "databaseName", newJString(databaseName))
+  add(query_564423, "$orderby", newJString(Orderby))
+  add(query_564423, "$skip", newJInt(Skip))
+  add(query_564423, "$filter", newJString(Filter))
+  add(path_564422, "schemaName", newJString(schemaName))
+  add(path_564422, "tableName", newJString(tableName))
+  result = call_564421.call(path_564422, query_564423, nil, nil, nil)
 
-var catalogListTablePartitions* = Call_CatalogListTablePartitions_568507(
+var catalogListTablePartitions* = Call_CatalogListTablePartitions_564407(
     name: "catalogListTablePartitions", meth: HttpMethod.HttpGet,
     host: "azure.local", route: "/catalog/usql/databases/{databaseName}/schemas/{schemaName}/tables/{tableName}/partitions",
-    validator: validate_CatalogListTablePartitions_568508, base: "",
-    url: url_CatalogListTablePartitions_568509, schemes: {Scheme.Https})
+    validator: validate_CatalogListTablePartitions_564408, base: "",
+    url: url_CatalogListTablePartitions_564409, schemes: {Scheme.Https})
 type
-  Call_CatalogGetTablePartition_568524 = ref object of OpenApiRestCall_567666
-proc url_CatalogGetTablePartition_568526(protocol: Scheme; host: string;
+  Call_CatalogGetTablePartition_564424 = ref object of OpenApiRestCall_563564
+proc url_CatalogGetTablePartition_564426(protocol: Scheme; host: string;
                                         base: string; route: string; path: JsonNode;
                                         query: JsonNode): Uri =
   result.scheme = $protocol
@@ -3075,44 +3079,44 @@ proc url_CatalogGetTablePartition_568526(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_CatalogGetTablePartition_568525(path: JsonNode; query: JsonNode;
+proc validate_CatalogGetTablePartition_564425(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Retrieves the specified table partition from the Data Lake Analytics catalog.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
+  ##   databaseName: JString (required)
+  ##               : The name of the database containing the partition.
   ##   schemaName: JString (required)
   ##             : The name of the schema containing the partition.
   ##   tableName: JString (required)
   ##            : The name of the table containing the partition.
-  ##   databaseName: JString (required)
-  ##               : The name of the database containing the partition.
   ##   partitionName: JString (required)
   ##                : The name of the table partition.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `schemaName` field"
-  var valid_568527 = path.getOrDefault("schemaName")
-  valid_568527 = validateParameter(valid_568527, JString, required = true,
+        "path argument is necessary due to required `databaseName` field"
+  var valid_564427 = path.getOrDefault("databaseName")
+  valid_564427 = validateParameter(valid_564427, JString, required = true,
                                  default = nil)
-  if valid_568527 != nil:
-    section.add "schemaName", valid_568527
-  var valid_568528 = path.getOrDefault("tableName")
-  valid_568528 = validateParameter(valid_568528, JString, required = true,
+  if valid_564427 != nil:
+    section.add "databaseName", valid_564427
+  var valid_564428 = path.getOrDefault("schemaName")
+  valid_564428 = validateParameter(valid_564428, JString, required = true,
                                  default = nil)
-  if valid_568528 != nil:
-    section.add "tableName", valid_568528
-  var valid_568529 = path.getOrDefault("databaseName")
-  valid_568529 = validateParameter(valid_568529, JString, required = true,
+  if valid_564428 != nil:
+    section.add "schemaName", valid_564428
+  var valid_564429 = path.getOrDefault("tableName")
+  valid_564429 = validateParameter(valid_564429, JString, required = true,
                                  default = nil)
-  if valid_568529 != nil:
-    section.add "databaseName", valid_568529
-  var valid_568530 = path.getOrDefault("partitionName")
-  valid_568530 = validateParameter(valid_568530, JString, required = true,
+  if valid_564429 != nil:
+    section.add "tableName", valid_564429
+  var valid_564430 = path.getOrDefault("partitionName")
+  valid_564430 = validateParameter(valid_564430, JString, required = true,
                                  default = nil)
-  if valid_568530 != nil:
-    section.add "partitionName", valid_568530
+  if valid_564430 != nil:
+    section.add "partitionName", valid_564430
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -3120,11 +3124,11 @@ proc validate_CatalogGetTablePartition_568525(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568531 = query.getOrDefault("api-version")
-  valid_568531 = validateParameter(valid_568531, JString, required = true,
+  var valid_564431 = query.getOrDefault("api-version")
+  valid_564431 = validateParameter(valid_564431, JString, required = true,
                                  default = nil)
-  if valid_568531 != nil:
-    section.add "api-version", valid_568531
+  if valid_564431 != nil:
+    section.add "api-version", valid_564431
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3133,50 +3137,50 @@ proc validate_CatalogGetTablePartition_568525(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568532: Call_CatalogGetTablePartition_568524; path: JsonNode;
+proc call*(call_564432: Call_CatalogGetTablePartition_564424; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Retrieves the specified table partition from the Data Lake Analytics catalog.
   ## 
-  let valid = call_568532.validator(path, query, header, formData, body)
-  let scheme = call_568532.pickScheme
+  let valid = call_564432.validator(path, query, header, formData, body)
+  let scheme = call_564432.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568532.url(scheme.get, call_568532.host, call_568532.base,
-                         call_568532.route, valid.getOrDefault("path"),
+  let url = call_564432.url(scheme.get, call_564432.host, call_564432.base,
+                         call_564432.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568532, url, valid)
+  result = hook(call_564432, url, valid)
 
-proc call*(call_568533: Call_CatalogGetTablePartition_568524; apiVersion: string;
-          schemaName: string; tableName: string; databaseName: string;
+proc call*(call_564433: Call_CatalogGetTablePartition_564424; apiVersion: string;
+          databaseName: string; schemaName: string; tableName: string;
           partitionName: string): Recallable =
   ## catalogGetTablePartition
   ## Retrieves the specified table partition from the Data Lake Analytics catalog.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
+  ##   databaseName: string (required)
+  ##               : The name of the database containing the partition.
   ##   schemaName: string (required)
   ##             : The name of the schema containing the partition.
   ##   tableName: string (required)
   ##            : The name of the table containing the partition.
-  ##   databaseName: string (required)
-  ##               : The name of the database containing the partition.
   ##   partitionName: string (required)
   ##                : The name of the table partition.
-  var path_568534 = newJObject()
-  var query_568535 = newJObject()
-  add(query_568535, "api-version", newJString(apiVersion))
-  add(path_568534, "schemaName", newJString(schemaName))
-  add(path_568534, "tableName", newJString(tableName))
-  add(path_568534, "databaseName", newJString(databaseName))
-  add(path_568534, "partitionName", newJString(partitionName))
-  result = call_568533.call(path_568534, query_568535, nil, nil, nil)
+  var path_564434 = newJObject()
+  var query_564435 = newJObject()
+  add(query_564435, "api-version", newJString(apiVersion))
+  add(path_564434, "databaseName", newJString(databaseName))
+  add(path_564434, "schemaName", newJString(schemaName))
+  add(path_564434, "tableName", newJString(tableName))
+  add(path_564434, "partitionName", newJString(partitionName))
+  result = call_564433.call(path_564434, query_564435, nil, nil, nil)
 
-var catalogGetTablePartition* = Call_CatalogGetTablePartition_568524(
+var catalogGetTablePartition* = Call_CatalogGetTablePartition_564424(
     name: "catalogGetTablePartition", meth: HttpMethod.HttpGet, host: "azure.local", route: "/catalog/usql/databases/{databaseName}/schemas/{schemaName}/tables/{tableName}/partitions/{partitionName}",
-    validator: validate_CatalogGetTablePartition_568525, base: "",
-    url: url_CatalogGetTablePartition_568526, schemes: {Scheme.Https})
+    validator: validate_CatalogGetTablePartition_564425, base: "",
+    url: url_CatalogGetTablePartition_564426, schemes: {Scheme.Https})
 type
-  Call_CatalogPreviewTablePartition_568536 = ref object of OpenApiRestCall_567666
-proc url_CatalogPreviewTablePartition_568538(protocol: Scheme; host: string;
+  Call_CatalogPreviewTablePartition_564436 = ref object of OpenApiRestCall_563564
+proc url_CatalogPreviewTablePartition_564438(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -3201,68 +3205,68 @@ proc url_CatalogPreviewTablePartition_568538(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_CatalogPreviewTablePartition_568537(path: JsonNode; query: JsonNode;
+proc validate_CatalogPreviewTablePartition_564437(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Retrieves a preview set of rows in given partition.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
+  ##   databaseName: JString (required)
+  ##               : The name of the database containing the partition.
   ##   schemaName: JString (required)
   ##             : The name of the schema containing the partition.
   ##   tableName: JString (required)
   ##            : The name of the table containing the partition.
-  ##   databaseName: JString (required)
-  ##               : The name of the database containing the partition.
   ##   partitionName: JString (required)
   ##                : The name of the table partition.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `schemaName` field"
-  var valid_568539 = path.getOrDefault("schemaName")
-  valid_568539 = validateParameter(valid_568539, JString, required = true,
+        "path argument is necessary due to required `databaseName` field"
+  var valid_564439 = path.getOrDefault("databaseName")
+  valid_564439 = validateParameter(valid_564439, JString, required = true,
                                  default = nil)
-  if valid_568539 != nil:
-    section.add "schemaName", valid_568539
-  var valid_568540 = path.getOrDefault("tableName")
-  valid_568540 = validateParameter(valid_568540, JString, required = true,
+  if valid_564439 != nil:
+    section.add "databaseName", valid_564439
+  var valid_564440 = path.getOrDefault("schemaName")
+  valid_564440 = validateParameter(valid_564440, JString, required = true,
                                  default = nil)
-  if valid_568540 != nil:
-    section.add "tableName", valid_568540
-  var valid_568541 = path.getOrDefault("databaseName")
-  valid_568541 = validateParameter(valid_568541, JString, required = true,
+  if valid_564440 != nil:
+    section.add "schemaName", valid_564440
+  var valid_564441 = path.getOrDefault("tableName")
+  valid_564441 = validateParameter(valid_564441, JString, required = true,
                                  default = nil)
-  if valid_568541 != nil:
-    section.add "databaseName", valid_568541
-  var valid_568542 = path.getOrDefault("partitionName")
-  valid_568542 = validateParameter(valid_568542, JString, required = true,
+  if valid_564441 != nil:
+    section.add "tableName", valid_564441
+  var valid_564442 = path.getOrDefault("partitionName")
+  valid_564442 = validateParameter(valid_564442, JString, required = true,
                                  default = nil)
-  if valid_568542 != nil:
-    section.add "partitionName", valid_568542
+  if valid_564442 != nil:
+    section.add "partitionName", valid_564442
   result.add "path", section
   ## parameters in `query` object:
-  ##   maxRows: JInt
-  ##          : The maximum number of preview rows to be retrieved.Rows returned may be less than or equal to this number depending on row sizes and number of rows in the partition.
   ##   api-version: JString (required)
   ##              : Client Api Version.
   ##   maxColumns: JInt
   ##             : The maximum number of columns to be retrieved.
+  ##   maxRows: JInt
+  ##          : The maximum number of preview rows to be retrieved.Rows returned may be less than or equal to this number depending on row sizes and number of rows in the partition.
   section = newJObject()
-  var valid_568543 = query.getOrDefault("maxRows")
-  valid_568543 = validateParameter(valid_568543, JInt, required = false, default = nil)
-  if valid_568543 != nil:
-    section.add "maxRows", valid_568543
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568544 = query.getOrDefault("api-version")
-  valid_568544 = validateParameter(valid_568544, JString, required = true,
+  var valid_564443 = query.getOrDefault("api-version")
+  valid_564443 = validateParameter(valid_564443, JString, required = true,
                                  default = nil)
-  if valid_568544 != nil:
-    section.add "api-version", valid_568544
-  var valid_568545 = query.getOrDefault("maxColumns")
-  valid_568545 = validateParameter(valid_568545, JInt, required = false, default = nil)
-  if valid_568545 != nil:
-    section.add "maxColumns", valid_568545
+  if valid_564443 != nil:
+    section.add "api-version", valid_564443
+  var valid_564444 = query.getOrDefault("maxColumns")
+  valid_564444 = validateParameter(valid_564444, JInt, required = false, default = nil)
+  if valid_564444 != nil:
+    section.add "maxColumns", valid_564444
+  var valid_564445 = query.getOrDefault("maxRows")
+  valid_564445 = validateParameter(valid_564445, JInt, required = false, default = nil)
+  if valid_564445 != nil:
+    section.add "maxRows", valid_564445
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3271,58 +3275,58 @@ proc validate_CatalogPreviewTablePartition_568537(path: JsonNode; query: JsonNod
   if body != nil:
     result.add "body", body
 
-proc call*(call_568546: Call_CatalogPreviewTablePartition_568536; path: JsonNode;
+proc call*(call_564446: Call_CatalogPreviewTablePartition_564436; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Retrieves a preview set of rows in given partition.
   ## 
-  let valid = call_568546.validator(path, query, header, formData, body)
-  let scheme = call_568546.pickScheme
+  let valid = call_564446.validator(path, query, header, formData, body)
+  let scheme = call_564446.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568546.url(scheme.get, call_568546.host, call_568546.base,
-                         call_568546.route, valid.getOrDefault("path"),
+  let url = call_564446.url(scheme.get, call_564446.host, call_564446.base,
+                         call_564446.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568546, url, valid)
+  result = hook(call_564446, url, valid)
 
-proc call*(call_568547: Call_CatalogPreviewTablePartition_568536;
-          apiVersion: string; schemaName: string; tableName: string;
-          databaseName: string; partitionName: string; maxRows: int = 0;
-          maxColumns: int = 0): Recallable =
+proc call*(call_564447: Call_CatalogPreviewTablePartition_564436;
+          apiVersion: string; databaseName: string; schemaName: string;
+          tableName: string; partitionName: string; maxColumns: int = 0;
+          maxRows: int = 0): Recallable =
   ## catalogPreviewTablePartition
   ## Retrieves a preview set of rows in given partition.
-  ##   maxRows: int
-  ##          : The maximum number of preview rows to be retrieved.Rows returned may be less than or equal to this number depending on row sizes and number of rows in the partition.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
+  ##   maxColumns: int
+  ##             : The maximum number of columns to be retrieved.
+  ##   databaseName: string (required)
+  ##               : The name of the database containing the partition.
   ##   schemaName: string (required)
   ##             : The name of the schema containing the partition.
   ##   tableName: string (required)
   ##            : The name of the table containing the partition.
-  ##   databaseName: string (required)
-  ##               : The name of the database containing the partition.
-  ##   maxColumns: int
-  ##             : The maximum number of columns to be retrieved.
+  ##   maxRows: int
+  ##          : The maximum number of preview rows to be retrieved.Rows returned may be less than or equal to this number depending on row sizes and number of rows in the partition.
   ##   partitionName: string (required)
   ##                : The name of the table partition.
-  var path_568548 = newJObject()
-  var query_568549 = newJObject()
-  add(query_568549, "maxRows", newJInt(maxRows))
-  add(query_568549, "api-version", newJString(apiVersion))
-  add(path_568548, "schemaName", newJString(schemaName))
-  add(path_568548, "tableName", newJString(tableName))
-  add(path_568548, "databaseName", newJString(databaseName))
-  add(query_568549, "maxColumns", newJInt(maxColumns))
-  add(path_568548, "partitionName", newJString(partitionName))
-  result = call_568547.call(path_568548, query_568549, nil, nil, nil)
+  var path_564448 = newJObject()
+  var query_564449 = newJObject()
+  add(query_564449, "api-version", newJString(apiVersion))
+  add(query_564449, "maxColumns", newJInt(maxColumns))
+  add(path_564448, "databaseName", newJString(databaseName))
+  add(path_564448, "schemaName", newJString(schemaName))
+  add(path_564448, "tableName", newJString(tableName))
+  add(query_564449, "maxRows", newJInt(maxRows))
+  add(path_564448, "partitionName", newJString(partitionName))
+  result = call_564447.call(path_564448, query_564449, nil, nil, nil)
 
-var catalogPreviewTablePartition* = Call_CatalogPreviewTablePartition_568536(
+var catalogPreviewTablePartition* = Call_CatalogPreviewTablePartition_564436(
     name: "catalogPreviewTablePartition", meth: HttpMethod.HttpGet,
     host: "azure.local", route: "/catalog/usql/databases/{databaseName}/schemas/{schemaName}/tables/{tableName}/partitions/{partitionName}/previewrows",
-    validator: validate_CatalogPreviewTablePartition_568537, base: "",
-    url: url_CatalogPreviewTablePartition_568538, schemes: {Scheme.Https})
+    validator: validate_CatalogPreviewTablePartition_564437, base: "",
+    url: url_CatalogPreviewTablePartition_564438, schemes: {Scheme.Https})
 type
-  Call_CatalogPreviewTable_568550 = ref object of OpenApiRestCall_567666
-proc url_CatalogPreviewTable_568552(protocol: Scheme; host: string; base: string;
+  Call_CatalogPreviewTable_564450 = ref object of OpenApiRestCall_563564
+proc url_CatalogPreviewTable_564452(protocol: Scheme; host: string; base: string;
                                    route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -3344,7 +3348,7 @@ proc url_CatalogPreviewTable_568552(protocol: Scheme; host: string; base: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_CatalogPreviewTable_568551(path: JsonNode; query: JsonNode;
+proc validate_CatalogPreviewTable_564451(path: JsonNode; query: JsonNode;
                                         header: JsonNode; formData: JsonNode;
                                         body: JsonNode): JsonNode =
   ## Retrieves a preview set of rows in given table.
@@ -3352,54 +3356,54 @@ proc validate_CatalogPreviewTable_568551(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
+  ##   databaseName: JString (required)
+  ##               : The name of the database containing the table.
   ##   schemaName: JString (required)
   ##             : The name of the schema containing the table.
   ##   tableName: JString (required)
   ##            : The name of the table.
-  ##   databaseName: JString (required)
-  ##               : The name of the database containing the table.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `schemaName` field"
-  var valid_568553 = path.getOrDefault("schemaName")
-  valid_568553 = validateParameter(valid_568553, JString, required = true,
+        "path argument is necessary due to required `databaseName` field"
+  var valid_564453 = path.getOrDefault("databaseName")
+  valid_564453 = validateParameter(valid_564453, JString, required = true,
                                  default = nil)
-  if valid_568553 != nil:
-    section.add "schemaName", valid_568553
-  var valid_568554 = path.getOrDefault("tableName")
-  valid_568554 = validateParameter(valid_568554, JString, required = true,
+  if valid_564453 != nil:
+    section.add "databaseName", valid_564453
+  var valid_564454 = path.getOrDefault("schemaName")
+  valid_564454 = validateParameter(valid_564454, JString, required = true,
                                  default = nil)
-  if valid_568554 != nil:
-    section.add "tableName", valid_568554
-  var valid_568555 = path.getOrDefault("databaseName")
-  valid_568555 = validateParameter(valid_568555, JString, required = true,
+  if valid_564454 != nil:
+    section.add "schemaName", valid_564454
+  var valid_564455 = path.getOrDefault("tableName")
+  valid_564455 = validateParameter(valid_564455, JString, required = true,
                                  default = nil)
-  if valid_568555 != nil:
-    section.add "databaseName", valid_568555
+  if valid_564455 != nil:
+    section.add "tableName", valid_564455
   result.add "path", section
   ## parameters in `query` object:
-  ##   maxRows: JInt
-  ##          : The maximum number of preview rows to be retrieved. Rows returned may be less than or equal to this number depending on row sizes and number of rows in the table.
   ##   api-version: JString (required)
   ##              : Client Api Version.
   ##   maxColumns: JInt
   ##             : The maximum number of columns to be retrieved.
+  ##   maxRows: JInt
+  ##          : The maximum number of preview rows to be retrieved. Rows returned may be less than or equal to this number depending on row sizes and number of rows in the table.
   section = newJObject()
-  var valid_568556 = query.getOrDefault("maxRows")
-  valid_568556 = validateParameter(valid_568556, JInt, required = false, default = nil)
-  if valid_568556 != nil:
-    section.add "maxRows", valid_568556
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568557 = query.getOrDefault("api-version")
-  valid_568557 = validateParameter(valid_568557, JString, required = true,
+  var valid_564456 = query.getOrDefault("api-version")
+  valid_564456 = validateParameter(valid_564456, JString, required = true,
                                  default = nil)
-  if valid_568557 != nil:
-    section.add "api-version", valid_568557
-  var valid_568558 = query.getOrDefault("maxColumns")
-  valid_568558 = validateParameter(valid_568558, JInt, required = false, default = nil)
-  if valid_568558 != nil:
-    section.add "maxColumns", valid_568558
+  if valid_564456 != nil:
+    section.add "api-version", valid_564456
+  var valid_564457 = query.getOrDefault("maxColumns")
+  valid_564457 = validateParameter(valid_564457, JInt, required = false, default = nil)
+  if valid_564457 != nil:
+    section.add "maxColumns", valid_564457
+  var valid_564458 = query.getOrDefault("maxRows")
+  valid_564458 = validateParameter(valid_564458, JInt, required = false, default = nil)
+  if valid_564458 != nil:
+    section.add "maxRows", valid_564458
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3408,53 +3412,53 @@ proc validate_CatalogPreviewTable_568551(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568559: Call_CatalogPreviewTable_568550; path: JsonNode;
+proc call*(call_564459: Call_CatalogPreviewTable_564450; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Retrieves a preview set of rows in given table.
   ## 
-  let valid = call_568559.validator(path, query, header, formData, body)
-  let scheme = call_568559.pickScheme
+  let valid = call_564459.validator(path, query, header, formData, body)
+  let scheme = call_564459.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568559.url(scheme.get, call_568559.host, call_568559.base,
-                         call_568559.route, valid.getOrDefault("path"),
+  let url = call_564459.url(scheme.get, call_564459.host, call_564459.base,
+                         call_564459.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568559, url, valid)
+  result = hook(call_564459, url, valid)
 
-proc call*(call_568560: Call_CatalogPreviewTable_568550; apiVersion: string;
-          schemaName: string; tableName: string; databaseName: string;
-          maxRows: int = 0; maxColumns: int = 0): Recallable =
+proc call*(call_564460: Call_CatalogPreviewTable_564450; apiVersion: string;
+          databaseName: string; schemaName: string; tableName: string;
+          maxColumns: int = 0; maxRows: int = 0): Recallable =
   ## catalogPreviewTable
   ## Retrieves a preview set of rows in given table.
-  ##   maxRows: int
-  ##          : The maximum number of preview rows to be retrieved. Rows returned may be less than or equal to this number depending on row sizes and number of rows in the table.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
+  ##   maxColumns: int
+  ##             : The maximum number of columns to be retrieved.
+  ##   databaseName: string (required)
+  ##               : The name of the database containing the table.
   ##   schemaName: string (required)
   ##             : The name of the schema containing the table.
   ##   tableName: string (required)
   ##            : The name of the table.
-  ##   databaseName: string (required)
-  ##               : The name of the database containing the table.
-  ##   maxColumns: int
-  ##             : The maximum number of columns to be retrieved.
-  var path_568561 = newJObject()
-  var query_568562 = newJObject()
-  add(query_568562, "maxRows", newJInt(maxRows))
-  add(query_568562, "api-version", newJString(apiVersion))
-  add(path_568561, "schemaName", newJString(schemaName))
-  add(path_568561, "tableName", newJString(tableName))
-  add(path_568561, "databaseName", newJString(databaseName))
-  add(query_568562, "maxColumns", newJInt(maxColumns))
-  result = call_568560.call(path_568561, query_568562, nil, nil, nil)
+  ##   maxRows: int
+  ##          : The maximum number of preview rows to be retrieved. Rows returned may be less than or equal to this number depending on row sizes and number of rows in the table.
+  var path_564461 = newJObject()
+  var query_564462 = newJObject()
+  add(query_564462, "api-version", newJString(apiVersion))
+  add(query_564462, "maxColumns", newJInt(maxColumns))
+  add(path_564461, "databaseName", newJString(databaseName))
+  add(path_564461, "schemaName", newJString(schemaName))
+  add(path_564461, "tableName", newJString(tableName))
+  add(query_564462, "maxRows", newJInt(maxRows))
+  result = call_564460.call(path_564461, query_564462, nil, nil, nil)
 
-var catalogPreviewTable* = Call_CatalogPreviewTable_568550(
+var catalogPreviewTable* = Call_CatalogPreviewTable_564450(
     name: "catalogPreviewTable", meth: HttpMethod.HttpGet, host: "azure.local", route: "/catalog/usql/databases/{databaseName}/schemas/{schemaName}/tables/{tableName}/previewrows",
-    validator: validate_CatalogPreviewTable_568551, base: "",
-    url: url_CatalogPreviewTable_568552, schemes: {Scheme.Https})
+    validator: validate_CatalogPreviewTable_564451, base: "",
+    url: url_CatalogPreviewTable_564452, schemes: {Scheme.Https})
 type
-  Call_CatalogListTableStatistics_568563 = ref object of OpenApiRestCall_567666
-proc url_CatalogListTableStatistics_568565(protocol: Scheme; host: string;
+  Call_CatalogListTableStatistics_564463 = ref object of OpenApiRestCall_563564
+proc url_CatalogListTableStatistics_564465(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -3476,88 +3480,88 @@ proc url_CatalogListTableStatistics_568565(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_CatalogListTableStatistics_568564(path: JsonNode; query: JsonNode;
+proc validate_CatalogListTableStatistics_564464(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Retrieves the list of table statistics from the Data Lake Analytics catalog.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
+  ##   databaseName: JString (required)
+  ##               : The name of the database containing the statistics.
   ##   schemaName: JString (required)
   ##             : The name of the schema containing the statistics.
   ##   tableName: JString (required)
   ##            : The name of the table containing the statistics.
-  ##   databaseName: JString (required)
-  ##               : The name of the database containing the statistics.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `schemaName` field"
-  var valid_568566 = path.getOrDefault("schemaName")
-  valid_568566 = validateParameter(valid_568566, JString, required = true,
+        "path argument is necessary due to required `databaseName` field"
+  var valid_564466 = path.getOrDefault("databaseName")
+  valid_564466 = validateParameter(valid_564466, JString, required = true,
                                  default = nil)
-  if valid_568566 != nil:
-    section.add "schemaName", valid_568566
-  var valid_568567 = path.getOrDefault("tableName")
-  valid_568567 = validateParameter(valid_568567, JString, required = true,
+  if valid_564466 != nil:
+    section.add "databaseName", valid_564466
+  var valid_564467 = path.getOrDefault("schemaName")
+  valid_564467 = validateParameter(valid_564467, JString, required = true,
                                  default = nil)
-  if valid_568567 != nil:
-    section.add "tableName", valid_568567
-  var valid_568568 = path.getOrDefault("databaseName")
-  valid_568568 = validateParameter(valid_568568, JString, required = true,
+  if valid_564467 != nil:
+    section.add "schemaName", valid_564467
+  var valid_564468 = path.getOrDefault("tableName")
+  valid_564468 = validateParameter(valid_564468, JString, required = true,
                                  default = nil)
-  if valid_568568 != nil:
-    section.add "databaseName", valid_568568
+  if valid_564468 != nil:
+    section.add "tableName", valid_564468
   result.add "path", section
   ## parameters in `query` object:
-  ##   $orderby: JString
-  ##           : OrderBy clause. One or more comma-separated expressions with an optional "asc" (the default) or "desc" depending on the order you'd like the values sorted, e.g. Categories?$orderby=CategoryName desc. Optional.
-  ##   api-version: JString (required)
-  ##              : Client Api Version.
   ##   $top: JInt
   ##       : The number of items to return. Optional.
+  ##   api-version: JString (required)
+  ##              : Client Api Version.
   ##   $select: JString
   ##          : OData Select statement. Limits the properties on each entry to just those requested, e.g. Categories?$select=CategoryName,Description. Optional.
-  ##   $skip: JInt
-  ##        : The number of items to skip over before returning elements. Optional.
   ##   $count: JBool
   ##         : The Boolean value of true or false to request a count of the matching resources included with the resources in the response, e.g. Categories?$count=true. Optional.
+  ##   $orderby: JString
+  ##           : OrderBy clause. One or more comma-separated expressions with an optional "asc" (the default) or "desc" depending on the order you'd like the values sorted, e.g. Categories?$orderby=CategoryName desc. Optional.
+  ##   $skip: JInt
+  ##        : The number of items to skip over before returning elements. Optional.
   ##   $filter: JString
   ##          : OData filter. Optional.
   section = newJObject()
-  var valid_568569 = query.getOrDefault("$orderby")
-  valid_568569 = validateParameter(valid_568569, JString, required = false,
-                                 default = nil)
-  if valid_568569 != nil:
-    section.add "$orderby", valid_568569
+  var valid_564469 = query.getOrDefault("$top")
+  valid_564469 = validateParameter(valid_564469, JInt, required = false, default = nil)
+  if valid_564469 != nil:
+    section.add "$top", valid_564469
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568570 = query.getOrDefault("api-version")
-  valid_568570 = validateParameter(valid_568570, JString, required = true,
+  var valid_564470 = query.getOrDefault("api-version")
+  valid_564470 = validateParameter(valid_564470, JString, required = true,
                                  default = nil)
-  if valid_568570 != nil:
-    section.add "api-version", valid_568570
-  var valid_568571 = query.getOrDefault("$top")
-  valid_568571 = validateParameter(valid_568571, JInt, required = false, default = nil)
-  if valid_568571 != nil:
-    section.add "$top", valid_568571
-  var valid_568572 = query.getOrDefault("$select")
-  valid_568572 = validateParameter(valid_568572, JString, required = false,
+  if valid_564470 != nil:
+    section.add "api-version", valid_564470
+  var valid_564471 = query.getOrDefault("$select")
+  valid_564471 = validateParameter(valid_564471, JString, required = false,
                                  default = nil)
-  if valid_568572 != nil:
-    section.add "$select", valid_568572
-  var valid_568573 = query.getOrDefault("$skip")
-  valid_568573 = validateParameter(valid_568573, JInt, required = false, default = nil)
-  if valid_568573 != nil:
-    section.add "$skip", valid_568573
-  var valid_568574 = query.getOrDefault("$count")
-  valid_568574 = validateParameter(valid_568574, JBool, required = false, default = nil)
-  if valid_568574 != nil:
-    section.add "$count", valid_568574
-  var valid_568575 = query.getOrDefault("$filter")
-  valid_568575 = validateParameter(valid_568575, JString, required = false,
+  if valid_564471 != nil:
+    section.add "$select", valid_564471
+  var valid_564472 = query.getOrDefault("$count")
+  valid_564472 = validateParameter(valid_564472, JBool, required = false, default = nil)
+  if valid_564472 != nil:
+    section.add "$count", valid_564472
+  var valid_564473 = query.getOrDefault("$orderby")
+  valid_564473 = validateParameter(valid_564473, JString, required = false,
                                  default = nil)
-  if valid_568575 != nil:
-    section.add "$filter", valid_568575
+  if valid_564473 != nil:
+    section.add "$orderby", valid_564473
+  var valid_564474 = query.getOrDefault("$skip")
+  valid_564474 = validateParameter(valid_564474, JInt, required = false, default = nil)
+  if valid_564474 != nil:
+    section.add "$skip", valid_564474
+  var valid_564475 = query.getOrDefault("$filter")
+  valid_564475 = validateParameter(valid_564475, JString, required = false,
+                                 default = nil)
+  if valid_564475 != nil:
+    section.add "$filter", valid_564475
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3566,67 +3570,67 @@ proc validate_CatalogListTableStatistics_568564(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568576: Call_CatalogListTableStatistics_568563; path: JsonNode;
+proc call*(call_564476: Call_CatalogListTableStatistics_564463; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Retrieves the list of table statistics from the Data Lake Analytics catalog.
   ## 
-  let valid = call_568576.validator(path, query, header, formData, body)
-  let scheme = call_568576.pickScheme
+  let valid = call_564476.validator(path, query, header, formData, body)
+  let scheme = call_564476.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568576.url(scheme.get, call_568576.host, call_568576.base,
-                         call_568576.route, valid.getOrDefault("path"),
+  let url = call_564476.url(scheme.get, call_564476.host, call_564476.base,
+                         call_564476.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568576, url, valid)
+  result = hook(call_564476, url, valid)
 
-proc call*(call_568577: Call_CatalogListTableStatistics_568563; apiVersion: string;
-          schemaName: string; tableName: string; databaseName: string;
-          Orderby: string = ""; Top: int = 0; Select: string = ""; Skip: int = 0;
-          Count: bool = false; Filter: string = ""): Recallable =
+proc call*(call_564477: Call_CatalogListTableStatistics_564463; apiVersion: string;
+          databaseName: string; schemaName: string; tableName: string; Top: int = 0;
+          Select: string = ""; Count: bool = false; Orderby: string = ""; Skip: int = 0;
+          Filter: string = ""): Recallable =
   ## catalogListTableStatistics
   ## Retrieves the list of table statistics from the Data Lake Analytics catalog.
-  ##   Orderby: string
-  ##          : OrderBy clause. One or more comma-separated expressions with an optional "asc" (the default) or "desc" depending on the order you'd like the values sorted, e.g. Categories?$orderby=CategoryName desc. Optional.
-  ##   apiVersion: string (required)
-  ##             : Client Api Version.
   ##   Top: int
   ##      : The number of items to return. Optional.
+  ##   apiVersion: string (required)
+  ##             : Client Api Version.
+  ##   Select: string
+  ##         : OData Select statement. Limits the properties on each entry to just those requested, e.g. Categories?$select=CategoryName,Description. Optional.
+  ##   Count: bool
+  ##        : The Boolean value of true or false to request a count of the matching resources included with the resources in the response, e.g. Categories?$count=true. Optional.
+  ##   databaseName: string (required)
+  ##               : The name of the database containing the statistics.
+  ##   Orderby: string
+  ##          : OrderBy clause. One or more comma-separated expressions with an optional "asc" (the default) or "desc" depending on the order you'd like the values sorted, e.g. Categories?$orderby=CategoryName desc. Optional.
+  ##   Skip: int
+  ##       : The number of items to skip over before returning elements. Optional.
+  ##   Filter: string
+  ##         : OData filter. Optional.
   ##   schemaName: string (required)
   ##             : The name of the schema containing the statistics.
   ##   tableName: string (required)
   ##            : The name of the table containing the statistics.
-  ##   Select: string
-  ##         : OData Select statement. Limits the properties on each entry to just those requested, e.g. Categories?$select=CategoryName,Description. Optional.
-  ##   databaseName: string (required)
-  ##               : The name of the database containing the statistics.
-  ##   Skip: int
-  ##       : The number of items to skip over before returning elements. Optional.
-  ##   Count: bool
-  ##        : The Boolean value of true or false to request a count of the matching resources included with the resources in the response, e.g. Categories?$count=true. Optional.
-  ##   Filter: string
-  ##         : OData filter. Optional.
-  var path_568578 = newJObject()
-  var query_568579 = newJObject()
-  add(query_568579, "$orderby", newJString(Orderby))
-  add(query_568579, "api-version", newJString(apiVersion))
-  add(query_568579, "$top", newJInt(Top))
-  add(path_568578, "schemaName", newJString(schemaName))
-  add(path_568578, "tableName", newJString(tableName))
-  add(query_568579, "$select", newJString(Select))
-  add(path_568578, "databaseName", newJString(databaseName))
-  add(query_568579, "$skip", newJInt(Skip))
-  add(query_568579, "$count", newJBool(Count))
-  add(query_568579, "$filter", newJString(Filter))
-  result = call_568577.call(path_568578, query_568579, nil, nil, nil)
+  var path_564478 = newJObject()
+  var query_564479 = newJObject()
+  add(query_564479, "$top", newJInt(Top))
+  add(query_564479, "api-version", newJString(apiVersion))
+  add(query_564479, "$select", newJString(Select))
+  add(query_564479, "$count", newJBool(Count))
+  add(path_564478, "databaseName", newJString(databaseName))
+  add(query_564479, "$orderby", newJString(Orderby))
+  add(query_564479, "$skip", newJInt(Skip))
+  add(query_564479, "$filter", newJString(Filter))
+  add(path_564478, "schemaName", newJString(schemaName))
+  add(path_564478, "tableName", newJString(tableName))
+  result = call_564477.call(path_564478, query_564479, nil, nil, nil)
 
-var catalogListTableStatistics* = Call_CatalogListTableStatistics_568563(
+var catalogListTableStatistics* = Call_CatalogListTableStatistics_564463(
     name: "catalogListTableStatistics", meth: HttpMethod.HttpGet,
     host: "azure.local", route: "/catalog/usql/databases/{databaseName}/schemas/{schemaName}/tables/{tableName}/statistics",
-    validator: validate_CatalogListTableStatistics_568564, base: "",
-    url: url_CatalogListTableStatistics_568565, schemes: {Scheme.Https})
+    validator: validate_CatalogListTableStatistics_564464, base: "",
+    url: url_CatalogListTableStatistics_564465, schemes: {Scheme.Https})
 type
-  Call_CatalogGetTableStatistic_568580 = ref object of OpenApiRestCall_567666
-proc url_CatalogGetTableStatistic_568582(protocol: Scheme; host: string;
+  Call_CatalogGetTableStatistic_564480 = ref object of OpenApiRestCall_563564
+proc url_CatalogGetTableStatistic_564482(protocol: Scheme; host: string;
                                         base: string; route: string; path: JsonNode;
                                         query: JsonNode): Uri =
   result.scheme = $protocol
@@ -3651,44 +3655,44 @@ proc url_CatalogGetTableStatistic_568582(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_CatalogGetTableStatistic_568581(path: JsonNode; query: JsonNode;
+proc validate_CatalogGetTableStatistic_564481(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Retrieves the specified table statistics from the Data Lake Analytics catalog.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   statisticsName: JString (required)
-  ##                 : The name of the table statistics.
+  ##   databaseName: JString (required)
+  ##               : The name of the database containing the statistics.
   ##   schemaName: JString (required)
   ##             : The name of the schema containing the statistics.
   ##   tableName: JString (required)
   ##            : The name of the table containing the statistics.
-  ##   databaseName: JString (required)
-  ##               : The name of the database containing the statistics.
+  ##   statisticsName: JString (required)
+  ##                 : The name of the table statistics.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `statisticsName` field"
-  var valid_568583 = path.getOrDefault("statisticsName")
-  valid_568583 = validateParameter(valid_568583, JString, required = true,
+        "path argument is necessary due to required `databaseName` field"
+  var valid_564483 = path.getOrDefault("databaseName")
+  valid_564483 = validateParameter(valid_564483, JString, required = true,
                                  default = nil)
-  if valid_568583 != nil:
-    section.add "statisticsName", valid_568583
-  var valid_568584 = path.getOrDefault("schemaName")
-  valid_568584 = validateParameter(valid_568584, JString, required = true,
+  if valid_564483 != nil:
+    section.add "databaseName", valid_564483
+  var valid_564484 = path.getOrDefault("schemaName")
+  valid_564484 = validateParameter(valid_564484, JString, required = true,
                                  default = nil)
-  if valid_568584 != nil:
-    section.add "schemaName", valid_568584
-  var valid_568585 = path.getOrDefault("tableName")
-  valid_568585 = validateParameter(valid_568585, JString, required = true,
+  if valid_564484 != nil:
+    section.add "schemaName", valid_564484
+  var valid_564485 = path.getOrDefault("tableName")
+  valid_564485 = validateParameter(valid_564485, JString, required = true,
                                  default = nil)
-  if valid_568585 != nil:
-    section.add "tableName", valid_568585
-  var valid_568586 = path.getOrDefault("databaseName")
-  valid_568586 = validateParameter(valid_568586, JString, required = true,
+  if valid_564485 != nil:
+    section.add "tableName", valid_564485
+  var valid_564486 = path.getOrDefault("statisticsName")
+  valid_564486 = validateParameter(valid_564486, JString, required = true,
                                  default = nil)
-  if valid_568586 != nil:
-    section.add "databaseName", valid_568586
+  if valid_564486 != nil:
+    section.add "statisticsName", valid_564486
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -3696,11 +3700,11 @@ proc validate_CatalogGetTableStatistic_568581(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568587 = query.getOrDefault("api-version")
-  valid_568587 = validateParameter(valid_568587, JString, required = true,
+  var valid_564487 = query.getOrDefault("api-version")
+  valid_564487 = validateParameter(valid_564487, JString, required = true,
                                  default = nil)
-  if valid_568587 != nil:
-    section.add "api-version", valid_568587
+  if valid_564487 != nil:
+    section.add "api-version", valid_564487
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3709,50 +3713,50 @@ proc validate_CatalogGetTableStatistic_568581(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568588: Call_CatalogGetTableStatistic_568580; path: JsonNode;
+proc call*(call_564488: Call_CatalogGetTableStatistic_564480; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Retrieves the specified table statistics from the Data Lake Analytics catalog.
   ## 
-  let valid = call_568588.validator(path, query, header, formData, body)
-  let scheme = call_568588.pickScheme
+  let valid = call_564488.validator(path, query, header, formData, body)
+  let scheme = call_564488.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568588.url(scheme.get, call_568588.host, call_568588.base,
-                         call_568588.route, valid.getOrDefault("path"),
+  let url = call_564488.url(scheme.get, call_564488.host, call_564488.base,
+                         call_564488.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568588, url, valid)
+  result = hook(call_564488, url, valid)
 
-proc call*(call_568589: Call_CatalogGetTableStatistic_568580;
-          statisticsName: string; apiVersion: string; schemaName: string;
-          tableName: string; databaseName: string): Recallable =
+proc call*(call_564489: Call_CatalogGetTableStatistic_564480; apiVersion: string;
+          databaseName: string; schemaName: string; tableName: string;
+          statisticsName: string): Recallable =
   ## catalogGetTableStatistic
   ## Retrieves the specified table statistics from the Data Lake Analytics catalog.
-  ##   statisticsName: string (required)
-  ##                 : The name of the table statistics.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
+  ##   databaseName: string (required)
+  ##               : The name of the database containing the statistics.
   ##   schemaName: string (required)
   ##             : The name of the schema containing the statistics.
   ##   tableName: string (required)
   ##            : The name of the table containing the statistics.
-  ##   databaseName: string (required)
-  ##               : The name of the database containing the statistics.
-  var path_568590 = newJObject()
-  var query_568591 = newJObject()
-  add(path_568590, "statisticsName", newJString(statisticsName))
-  add(query_568591, "api-version", newJString(apiVersion))
-  add(path_568590, "schemaName", newJString(schemaName))
-  add(path_568590, "tableName", newJString(tableName))
-  add(path_568590, "databaseName", newJString(databaseName))
-  result = call_568589.call(path_568590, query_568591, nil, nil, nil)
+  ##   statisticsName: string (required)
+  ##                 : The name of the table statistics.
+  var path_564490 = newJObject()
+  var query_564491 = newJObject()
+  add(query_564491, "api-version", newJString(apiVersion))
+  add(path_564490, "databaseName", newJString(databaseName))
+  add(path_564490, "schemaName", newJString(schemaName))
+  add(path_564490, "tableName", newJString(tableName))
+  add(path_564490, "statisticsName", newJString(statisticsName))
+  result = call_564489.call(path_564490, query_564491, nil, nil, nil)
 
-var catalogGetTableStatistic* = Call_CatalogGetTableStatistic_568580(
+var catalogGetTableStatistic* = Call_CatalogGetTableStatistic_564480(
     name: "catalogGetTableStatistic", meth: HttpMethod.HttpGet, host: "azure.local", route: "/catalog/usql/databases/{databaseName}/schemas/{schemaName}/tables/{tableName}/statistics/{statisticsName}",
-    validator: validate_CatalogGetTableStatistic_568581, base: "",
-    url: url_CatalogGetTableStatistic_568582, schemes: {Scheme.Https})
+    validator: validate_CatalogGetTableStatistic_564481, base: "",
+    url: url_CatalogGetTableStatistic_564482, schemes: {Scheme.Https})
 type
-  Call_CatalogListTableFragments_568592 = ref object of OpenApiRestCall_567666
-proc url_CatalogListTableFragments_568594(protocol: Scheme; host: string;
+  Call_CatalogListTableFragments_564492 = ref object of OpenApiRestCall_563564
+proc url_CatalogListTableFragments_564494(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -3774,88 +3778,88 @@ proc url_CatalogListTableFragments_568594(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_CatalogListTableFragments_568593(path: JsonNode; query: JsonNode;
+proc validate_CatalogListTableFragments_564493(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Retrieves the list of table fragments from the Data Lake Analytics catalog.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
+  ##   databaseName: JString (required)
+  ##               : The name of the database containing the table fragments.
   ##   schemaName: JString (required)
   ##             : The name of the schema containing the table fragments.
   ##   tableName: JString (required)
   ##            : The name of the table containing the table fragments.
-  ##   databaseName: JString (required)
-  ##               : The name of the database containing the table fragments.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `schemaName` field"
-  var valid_568595 = path.getOrDefault("schemaName")
-  valid_568595 = validateParameter(valid_568595, JString, required = true,
+        "path argument is necessary due to required `databaseName` field"
+  var valid_564495 = path.getOrDefault("databaseName")
+  valid_564495 = validateParameter(valid_564495, JString, required = true,
                                  default = nil)
-  if valid_568595 != nil:
-    section.add "schemaName", valid_568595
-  var valid_568596 = path.getOrDefault("tableName")
-  valid_568596 = validateParameter(valid_568596, JString, required = true,
+  if valid_564495 != nil:
+    section.add "databaseName", valid_564495
+  var valid_564496 = path.getOrDefault("schemaName")
+  valid_564496 = validateParameter(valid_564496, JString, required = true,
                                  default = nil)
-  if valid_568596 != nil:
-    section.add "tableName", valid_568596
-  var valid_568597 = path.getOrDefault("databaseName")
-  valid_568597 = validateParameter(valid_568597, JString, required = true,
+  if valid_564496 != nil:
+    section.add "schemaName", valid_564496
+  var valid_564497 = path.getOrDefault("tableName")
+  valid_564497 = validateParameter(valid_564497, JString, required = true,
                                  default = nil)
-  if valid_568597 != nil:
-    section.add "databaseName", valid_568597
+  if valid_564497 != nil:
+    section.add "tableName", valid_564497
   result.add "path", section
   ## parameters in `query` object:
-  ##   $orderby: JString
-  ##           : OrderBy clause. One or more comma-separated expressions with an optional "asc" (the default) or "desc" depending on the order you'd like the values sorted, e.g. Categories?$orderby=CategoryName desc. Optional.
-  ##   api-version: JString (required)
-  ##              : Client Api Version.
   ##   $top: JInt
   ##       : The number of items to return. Optional.
+  ##   api-version: JString (required)
+  ##              : Client Api Version.
   ##   $select: JString
   ##          : OData Select statement. Limits the properties on each entry to just those requested, e.g. Categories?$select=CategoryName,Description. Optional.
-  ##   $skip: JInt
-  ##        : The number of items to skip over before returning elements. Optional.
   ##   $count: JBool
   ##         : The Boolean value of true or false to request a count of the matching resources included with the resources in the response, e.g. Categories?$count=true. Optional.
+  ##   $orderby: JString
+  ##           : OrderBy clause. One or more comma-separated expressions with an optional "asc" (the default) or "desc" depending on the order you'd like the values sorted, e.g. Categories?$orderby=CategoryName desc. Optional.
+  ##   $skip: JInt
+  ##        : The number of items to skip over before returning elements. Optional.
   ##   $filter: JString
   ##          : OData filter. Optional.
   section = newJObject()
-  var valid_568598 = query.getOrDefault("$orderby")
-  valid_568598 = validateParameter(valid_568598, JString, required = false,
-                                 default = nil)
-  if valid_568598 != nil:
-    section.add "$orderby", valid_568598
+  var valid_564498 = query.getOrDefault("$top")
+  valid_564498 = validateParameter(valid_564498, JInt, required = false, default = nil)
+  if valid_564498 != nil:
+    section.add "$top", valid_564498
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568599 = query.getOrDefault("api-version")
-  valid_568599 = validateParameter(valid_568599, JString, required = true,
+  var valid_564499 = query.getOrDefault("api-version")
+  valid_564499 = validateParameter(valid_564499, JString, required = true,
                                  default = nil)
-  if valid_568599 != nil:
-    section.add "api-version", valid_568599
-  var valid_568600 = query.getOrDefault("$top")
-  valid_568600 = validateParameter(valid_568600, JInt, required = false, default = nil)
-  if valid_568600 != nil:
-    section.add "$top", valid_568600
-  var valid_568601 = query.getOrDefault("$select")
-  valid_568601 = validateParameter(valid_568601, JString, required = false,
+  if valid_564499 != nil:
+    section.add "api-version", valid_564499
+  var valid_564500 = query.getOrDefault("$select")
+  valid_564500 = validateParameter(valid_564500, JString, required = false,
                                  default = nil)
-  if valid_568601 != nil:
-    section.add "$select", valid_568601
-  var valid_568602 = query.getOrDefault("$skip")
-  valid_568602 = validateParameter(valid_568602, JInt, required = false, default = nil)
-  if valid_568602 != nil:
-    section.add "$skip", valid_568602
-  var valid_568603 = query.getOrDefault("$count")
-  valid_568603 = validateParameter(valid_568603, JBool, required = false, default = nil)
-  if valid_568603 != nil:
-    section.add "$count", valid_568603
-  var valid_568604 = query.getOrDefault("$filter")
-  valid_568604 = validateParameter(valid_568604, JString, required = false,
+  if valid_564500 != nil:
+    section.add "$select", valid_564500
+  var valid_564501 = query.getOrDefault("$count")
+  valid_564501 = validateParameter(valid_564501, JBool, required = false, default = nil)
+  if valid_564501 != nil:
+    section.add "$count", valid_564501
+  var valid_564502 = query.getOrDefault("$orderby")
+  valid_564502 = validateParameter(valid_564502, JString, required = false,
                                  default = nil)
-  if valid_568604 != nil:
-    section.add "$filter", valid_568604
+  if valid_564502 != nil:
+    section.add "$orderby", valid_564502
+  var valid_564503 = query.getOrDefault("$skip")
+  valid_564503 = validateParameter(valid_564503, JInt, required = false, default = nil)
+  if valid_564503 != nil:
+    section.add "$skip", valid_564503
+  var valid_564504 = query.getOrDefault("$filter")
+  valid_564504 = validateParameter(valid_564504, JString, required = false,
+                                 default = nil)
+  if valid_564504 != nil:
+    section.add "$filter", valid_564504
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3864,67 +3868,67 @@ proc validate_CatalogListTableFragments_568593(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568605: Call_CatalogListTableFragments_568592; path: JsonNode;
+proc call*(call_564505: Call_CatalogListTableFragments_564492; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Retrieves the list of table fragments from the Data Lake Analytics catalog.
   ## 
-  let valid = call_568605.validator(path, query, header, formData, body)
-  let scheme = call_568605.pickScheme
+  let valid = call_564505.validator(path, query, header, formData, body)
+  let scheme = call_564505.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568605.url(scheme.get, call_568605.host, call_568605.base,
-                         call_568605.route, valid.getOrDefault("path"),
+  let url = call_564505.url(scheme.get, call_564505.host, call_564505.base,
+                         call_564505.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568605, url, valid)
+  result = hook(call_564505, url, valid)
 
-proc call*(call_568606: Call_CatalogListTableFragments_568592; apiVersion: string;
-          schemaName: string; tableName: string; databaseName: string;
-          Orderby: string = ""; Top: int = 0; Select: string = ""; Skip: int = 0;
-          Count: bool = false; Filter: string = ""): Recallable =
+proc call*(call_564506: Call_CatalogListTableFragments_564492; apiVersion: string;
+          databaseName: string; schemaName: string; tableName: string; Top: int = 0;
+          Select: string = ""; Count: bool = false; Orderby: string = ""; Skip: int = 0;
+          Filter: string = ""): Recallable =
   ## catalogListTableFragments
   ## Retrieves the list of table fragments from the Data Lake Analytics catalog.
-  ##   Orderby: string
-  ##          : OrderBy clause. One or more comma-separated expressions with an optional "asc" (the default) or "desc" depending on the order you'd like the values sorted, e.g. Categories?$orderby=CategoryName desc. Optional.
-  ##   apiVersion: string (required)
-  ##             : Client Api Version.
   ##   Top: int
   ##      : The number of items to return. Optional.
+  ##   apiVersion: string (required)
+  ##             : Client Api Version.
+  ##   Select: string
+  ##         : OData Select statement. Limits the properties on each entry to just those requested, e.g. Categories?$select=CategoryName,Description. Optional.
+  ##   Count: bool
+  ##        : The Boolean value of true or false to request a count of the matching resources included with the resources in the response, e.g. Categories?$count=true. Optional.
+  ##   databaseName: string (required)
+  ##               : The name of the database containing the table fragments.
+  ##   Orderby: string
+  ##          : OrderBy clause. One or more comma-separated expressions with an optional "asc" (the default) or "desc" depending on the order you'd like the values sorted, e.g. Categories?$orderby=CategoryName desc. Optional.
+  ##   Skip: int
+  ##       : The number of items to skip over before returning elements. Optional.
+  ##   Filter: string
+  ##         : OData filter. Optional.
   ##   schemaName: string (required)
   ##             : The name of the schema containing the table fragments.
   ##   tableName: string (required)
   ##            : The name of the table containing the table fragments.
-  ##   Select: string
-  ##         : OData Select statement. Limits the properties on each entry to just those requested, e.g. Categories?$select=CategoryName,Description. Optional.
-  ##   databaseName: string (required)
-  ##               : The name of the database containing the table fragments.
-  ##   Skip: int
-  ##       : The number of items to skip over before returning elements. Optional.
-  ##   Count: bool
-  ##        : The Boolean value of true or false to request a count of the matching resources included with the resources in the response, e.g. Categories?$count=true. Optional.
-  ##   Filter: string
-  ##         : OData filter. Optional.
-  var path_568607 = newJObject()
-  var query_568608 = newJObject()
-  add(query_568608, "$orderby", newJString(Orderby))
-  add(query_568608, "api-version", newJString(apiVersion))
-  add(query_568608, "$top", newJInt(Top))
-  add(path_568607, "schemaName", newJString(schemaName))
-  add(path_568607, "tableName", newJString(tableName))
-  add(query_568608, "$select", newJString(Select))
-  add(path_568607, "databaseName", newJString(databaseName))
-  add(query_568608, "$skip", newJInt(Skip))
-  add(query_568608, "$count", newJBool(Count))
-  add(query_568608, "$filter", newJString(Filter))
-  result = call_568606.call(path_568607, query_568608, nil, nil, nil)
+  var path_564507 = newJObject()
+  var query_564508 = newJObject()
+  add(query_564508, "$top", newJInt(Top))
+  add(query_564508, "api-version", newJString(apiVersion))
+  add(query_564508, "$select", newJString(Select))
+  add(query_564508, "$count", newJBool(Count))
+  add(path_564507, "databaseName", newJString(databaseName))
+  add(query_564508, "$orderby", newJString(Orderby))
+  add(query_564508, "$skip", newJInt(Skip))
+  add(query_564508, "$filter", newJString(Filter))
+  add(path_564507, "schemaName", newJString(schemaName))
+  add(path_564507, "tableName", newJString(tableName))
+  result = call_564506.call(path_564507, query_564508, nil, nil, nil)
 
-var catalogListTableFragments* = Call_CatalogListTableFragments_568592(
+var catalogListTableFragments* = Call_CatalogListTableFragments_564492(
     name: "catalogListTableFragments", meth: HttpMethod.HttpGet,
     host: "azure.local", route: "/catalog/usql/databases/{databaseName}/schemas/{schemaName}/tables/{tableName}/tablefragments",
-    validator: validate_CatalogListTableFragments_568593, base: "",
-    url: url_CatalogListTableFragments_568594, schemes: {Scheme.Https})
+    validator: validate_CatalogListTableFragments_564493, base: "",
+    url: url_CatalogListTableFragments_564494, schemes: {Scheme.Https})
 type
-  Call_CatalogListTableTypes_568609 = ref object of OpenApiRestCall_567666
-proc url_CatalogListTableTypes_568611(protocol: Scheme; host: string; base: string;
+  Call_CatalogListTableTypes_564509 = ref object of OpenApiRestCall_563564
+proc url_CatalogListTableTypes_564511(protocol: Scheme; host: string; base: string;
                                      route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -3943,81 +3947,81 @@ proc url_CatalogListTableTypes_568611(protocol: Scheme; host: string; base: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_CatalogListTableTypes_568610(path: JsonNode; query: JsonNode;
+proc validate_CatalogListTableTypes_564510(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Retrieves the list of table types from the Data Lake Analytics catalog.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   schemaName: JString (required)
-  ##             : The name of the schema containing the table types.
   ##   databaseName: JString (required)
   ##               : The name of the database containing the table types.
+  ##   schemaName: JString (required)
+  ##             : The name of the schema containing the table types.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `schemaName` field"
-  var valid_568612 = path.getOrDefault("schemaName")
-  valid_568612 = validateParameter(valid_568612, JString, required = true,
+        "path argument is necessary due to required `databaseName` field"
+  var valid_564512 = path.getOrDefault("databaseName")
+  valid_564512 = validateParameter(valid_564512, JString, required = true,
                                  default = nil)
-  if valid_568612 != nil:
-    section.add "schemaName", valid_568612
-  var valid_568613 = path.getOrDefault("databaseName")
-  valid_568613 = validateParameter(valid_568613, JString, required = true,
+  if valid_564512 != nil:
+    section.add "databaseName", valid_564512
+  var valid_564513 = path.getOrDefault("schemaName")
+  valid_564513 = validateParameter(valid_564513, JString, required = true,
                                  default = nil)
-  if valid_568613 != nil:
-    section.add "databaseName", valid_568613
+  if valid_564513 != nil:
+    section.add "schemaName", valid_564513
   result.add "path", section
   ## parameters in `query` object:
-  ##   $orderby: JString
-  ##           : OrderBy clause. One or more comma-separated expressions with an optional "asc" (the default) or "desc" depending on the order you'd like the values sorted, e.g. Categories?$orderby=CategoryName desc. Optional.
-  ##   api-version: JString (required)
-  ##              : Client Api Version.
   ##   $top: JInt
   ##       : The number of items to return. Optional.
+  ##   api-version: JString (required)
+  ##              : Client Api Version.
   ##   $select: JString
   ##          : OData Select statement. Limits the properties on each entry to just those requested, e.g. Categories?$select=CategoryName,Description. Optional.
-  ##   $skip: JInt
-  ##        : The number of items to skip over before returning elements. Optional.
   ##   $count: JBool
   ##         : The Boolean value of true or false to request a count of the matching resources included with the resources in the response, e.g. Categories?$count=true. Optional.
+  ##   $orderby: JString
+  ##           : OrderBy clause. One or more comma-separated expressions with an optional "asc" (the default) or "desc" depending on the order you'd like the values sorted, e.g. Categories?$orderby=CategoryName desc. Optional.
+  ##   $skip: JInt
+  ##        : The number of items to skip over before returning elements. Optional.
   ##   $filter: JString
   ##          : OData filter. Optional.
   section = newJObject()
-  var valid_568614 = query.getOrDefault("$orderby")
-  valid_568614 = validateParameter(valid_568614, JString, required = false,
-                                 default = nil)
-  if valid_568614 != nil:
-    section.add "$orderby", valid_568614
+  var valid_564514 = query.getOrDefault("$top")
+  valid_564514 = validateParameter(valid_564514, JInt, required = false, default = nil)
+  if valid_564514 != nil:
+    section.add "$top", valid_564514
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568615 = query.getOrDefault("api-version")
-  valid_568615 = validateParameter(valid_568615, JString, required = true,
+  var valid_564515 = query.getOrDefault("api-version")
+  valid_564515 = validateParameter(valid_564515, JString, required = true,
                                  default = nil)
-  if valid_568615 != nil:
-    section.add "api-version", valid_568615
-  var valid_568616 = query.getOrDefault("$top")
-  valid_568616 = validateParameter(valid_568616, JInt, required = false, default = nil)
-  if valid_568616 != nil:
-    section.add "$top", valid_568616
-  var valid_568617 = query.getOrDefault("$select")
-  valid_568617 = validateParameter(valid_568617, JString, required = false,
+  if valid_564515 != nil:
+    section.add "api-version", valid_564515
+  var valid_564516 = query.getOrDefault("$select")
+  valid_564516 = validateParameter(valid_564516, JString, required = false,
                                  default = nil)
-  if valid_568617 != nil:
-    section.add "$select", valid_568617
-  var valid_568618 = query.getOrDefault("$skip")
-  valid_568618 = validateParameter(valid_568618, JInt, required = false, default = nil)
-  if valid_568618 != nil:
-    section.add "$skip", valid_568618
-  var valid_568619 = query.getOrDefault("$count")
-  valid_568619 = validateParameter(valid_568619, JBool, required = false, default = nil)
-  if valid_568619 != nil:
-    section.add "$count", valid_568619
-  var valid_568620 = query.getOrDefault("$filter")
-  valid_568620 = validateParameter(valid_568620, JString, required = false,
+  if valid_564516 != nil:
+    section.add "$select", valid_564516
+  var valid_564517 = query.getOrDefault("$count")
+  valid_564517 = validateParameter(valid_564517, JBool, required = false, default = nil)
+  if valid_564517 != nil:
+    section.add "$count", valid_564517
+  var valid_564518 = query.getOrDefault("$orderby")
+  valid_564518 = validateParameter(valid_564518, JString, required = false,
                                  default = nil)
-  if valid_568620 != nil:
-    section.add "$filter", valid_568620
+  if valid_564518 != nil:
+    section.add "$orderby", valid_564518
+  var valid_564519 = query.getOrDefault("$skip")
+  valid_564519 = validateParameter(valid_564519, JInt, required = false, default = nil)
+  if valid_564519 != nil:
+    section.add "$skip", valid_564519
+  var valid_564520 = query.getOrDefault("$filter")
+  valid_564520 = validateParameter(valid_564520, JString, required = false,
+                                 default = nil)
+  if valid_564520 != nil:
+    section.add "$filter", valid_564520
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -4026,62 +4030,62 @@ proc validate_CatalogListTableTypes_568610(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568621: Call_CatalogListTableTypes_568609; path: JsonNode;
+proc call*(call_564521: Call_CatalogListTableTypes_564509; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Retrieves the list of table types from the Data Lake Analytics catalog.
   ## 
-  let valid = call_568621.validator(path, query, header, formData, body)
-  let scheme = call_568621.pickScheme
+  let valid = call_564521.validator(path, query, header, formData, body)
+  let scheme = call_564521.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568621.url(scheme.get, call_568621.host, call_568621.base,
-                         call_568621.route, valid.getOrDefault("path"),
+  let url = call_564521.url(scheme.get, call_564521.host, call_564521.base,
+                         call_564521.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568621, url, valid)
+  result = hook(call_564521, url, valid)
 
-proc call*(call_568622: Call_CatalogListTableTypes_568609; apiVersion: string;
-          schemaName: string; databaseName: string; Orderby: string = ""; Top: int = 0;
-          Select: string = ""; Skip: int = 0; Count: bool = false; Filter: string = ""): Recallable =
+proc call*(call_564522: Call_CatalogListTableTypes_564509; apiVersion: string;
+          databaseName: string; schemaName: string; Top: int = 0; Select: string = "";
+          Count: bool = false; Orderby: string = ""; Skip: int = 0; Filter: string = ""): Recallable =
   ## catalogListTableTypes
   ## Retrieves the list of table types from the Data Lake Analytics catalog.
-  ##   Orderby: string
-  ##          : OrderBy clause. One or more comma-separated expressions with an optional "asc" (the default) or "desc" depending on the order you'd like the values sorted, e.g. Categories?$orderby=CategoryName desc. Optional.
-  ##   apiVersion: string (required)
-  ##             : Client Api Version.
   ##   Top: int
   ##      : The number of items to return. Optional.
-  ##   schemaName: string (required)
-  ##             : The name of the schema containing the table types.
+  ##   apiVersion: string (required)
+  ##             : Client Api Version.
   ##   Select: string
   ##         : OData Select statement. Limits the properties on each entry to just those requested, e.g. Categories?$select=CategoryName,Description. Optional.
-  ##   databaseName: string (required)
-  ##               : The name of the database containing the table types.
-  ##   Skip: int
-  ##       : The number of items to skip over before returning elements. Optional.
   ##   Count: bool
   ##        : The Boolean value of true or false to request a count of the matching resources included with the resources in the response, e.g. Categories?$count=true. Optional.
+  ##   databaseName: string (required)
+  ##               : The name of the database containing the table types.
+  ##   Orderby: string
+  ##          : OrderBy clause. One or more comma-separated expressions with an optional "asc" (the default) or "desc" depending on the order you'd like the values sorted, e.g. Categories?$orderby=CategoryName desc. Optional.
+  ##   Skip: int
+  ##       : The number of items to skip over before returning elements. Optional.
   ##   Filter: string
   ##         : OData filter. Optional.
-  var path_568623 = newJObject()
-  var query_568624 = newJObject()
-  add(query_568624, "$orderby", newJString(Orderby))
-  add(query_568624, "api-version", newJString(apiVersion))
-  add(query_568624, "$top", newJInt(Top))
-  add(path_568623, "schemaName", newJString(schemaName))
-  add(query_568624, "$select", newJString(Select))
-  add(path_568623, "databaseName", newJString(databaseName))
-  add(query_568624, "$skip", newJInt(Skip))
-  add(query_568624, "$count", newJBool(Count))
-  add(query_568624, "$filter", newJString(Filter))
-  result = call_568622.call(path_568623, query_568624, nil, nil, nil)
+  ##   schemaName: string (required)
+  ##             : The name of the schema containing the table types.
+  var path_564523 = newJObject()
+  var query_564524 = newJObject()
+  add(query_564524, "$top", newJInt(Top))
+  add(query_564524, "api-version", newJString(apiVersion))
+  add(query_564524, "$select", newJString(Select))
+  add(query_564524, "$count", newJBool(Count))
+  add(path_564523, "databaseName", newJString(databaseName))
+  add(query_564524, "$orderby", newJString(Orderby))
+  add(query_564524, "$skip", newJInt(Skip))
+  add(query_564524, "$filter", newJString(Filter))
+  add(path_564523, "schemaName", newJString(schemaName))
+  result = call_564522.call(path_564523, query_564524, nil, nil, nil)
 
-var catalogListTableTypes* = Call_CatalogListTableTypes_568609(
+var catalogListTableTypes* = Call_CatalogListTableTypes_564509(
     name: "catalogListTableTypes", meth: HttpMethod.HttpGet, host: "azure.local", route: "/catalog/usql/databases/{databaseName}/schemas/{schemaName}/tabletypes",
-    validator: validate_CatalogListTableTypes_568610, base: "",
-    url: url_CatalogListTableTypes_568611, schemes: {Scheme.Https})
+    validator: validate_CatalogListTableTypes_564510, base: "",
+    url: url_CatalogListTableTypes_564511, schemes: {Scheme.Https})
 type
-  Call_CatalogGetTableType_568625 = ref object of OpenApiRestCall_567666
-proc url_CatalogGetTableType_568627(protocol: Scheme; host: string; base: string;
+  Call_CatalogGetTableType_564525 = ref object of OpenApiRestCall_563564
+proc url_CatalogGetTableType_564527(protocol: Scheme; host: string; base: string;
                                    route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -4102,7 +4106,7 @@ proc url_CatalogGetTableType_568627(protocol: Scheme; host: string; base: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_CatalogGetTableType_568626(path: JsonNode; query: JsonNode;
+proc validate_CatalogGetTableType_564526(path: JsonNode; query: JsonNode;
                                         header: JsonNode; formData: JsonNode;
                                         body: JsonNode): JsonNode =
   ## Retrieves the specified table type from the Data Lake Analytics catalog.
@@ -4110,30 +4114,30 @@ proc validate_CatalogGetTableType_568626(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   schemaName: JString (required)
-  ##             : The name of the schema containing the table type.
-  ##   databaseName: JString (required)
-  ##               : The name of the database containing the table type.
   ##   tableTypeName: JString (required)
   ##                : The name of the table type to retrieve.
+  ##   databaseName: JString (required)
+  ##               : The name of the database containing the table type.
+  ##   schemaName: JString (required)
+  ##             : The name of the schema containing the table type.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `schemaName` field"
-  var valid_568628 = path.getOrDefault("schemaName")
-  valid_568628 = validateParameter(valid_568628, JString, required = true,
+        "path argument is necessary due to required `tableTypeName` field"
+  var valid_564528 = path.getOrDefault("tableTypeName")
+  valid_564528 = validateParameter(valid_564528, JString, required = true,
                                  default = nil)
-  if valid_568628 != nil:
-    section.add "schemaName", valid_568628
-  var valid_568629 = path.getOrDefault("databaseName")
-  valid_568629 = validateParameter(valid_568629, JString, required = true,
+  if valid_564528 != nil:
+    section.add "tableTypeName", valid_564528
+  var valid_564529 = path.getOrDefault("databaseName")
+  valid_564529 = validateParameter(valid_564529, JString, required = true,
                                  default = nil)
-  if valid_568629 != nil:
-    section.add "databaseName", valid_568629
-  var valid_568630 = path.getOrDefault("tableTypeName")
-  valid_568630 = validateParameter(valid_568630, JString, required = true,
+  if valid_564529 != nil:
+    section.add "databaseName", valid_564529
+  var valid_564530 = path.getOrDefault("schemaName")
+  valid_564530 = validateParameter(valid_564530, JString, required = true,
                                  default = nil)
-  if valid_568630 != nil:
-    section.add "tableTypeName", valid_568630
+  if valid_564530 != nil:
+    section.add "schemaName", valid_564530
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -4141,11 +4145,11 @@ proc validate_CatalogGetTableType_568626(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568631 = query.getOrDefault("api-version")
-  valid_568631 = validateParameter(valid_568631, JString, required = true,
+  var valid_564531 = query.getOrDefault("api-version")
+  valid_564531 = validateParameter(valid_564531, JString, required = true,
                                  default = nil)
-  if valid_568631 != nil:
-    section.add "api-version", valid_568631
+  if valid_564531 != nil:
+    section.add "api-version", valid_564531
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -4154,46 +4158,46 @@ proc validate_CatalogGetTableType_568626(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568632: Call_CatalogGetTableType_568625; path: JsonNode;
+proc call*(call_564532: Call_CatalogGetTableType_564525; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Retrieves the specified table type from the Data Lake Analytics catalog.
   ## 
-  let valid = call_568632.validator(path, query, header, formData, body)
-  let scheme = call_568632.pickScheme
+  let valid = call_564532.validator(path, query, header, formData, body)
+  let scheme = call_564532.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568632.url(scheme.get, call_568632.host, call_568632.base,
-                         call_568632.route, valid.getOrDefault("path"),
+  let url = call_564532.url(scheme.get, call_564532.host, call_564532.base,
+                         call_564532.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568632, url, valid)
+  result = hook(call_564532, url, valid)
 
-proc call*(call_568633: Call_CatalogGetTableType_568625; apiVersion: string;
-          schemaName: string; databaseName: string; tableTypeName: string): Recallable =
+proc call*(call_564533: Call_CatalogGetTableType_564525; apiVersion: string;
+          tableTypeName: string; databaseName: string; schemaName: string): Recallable =
   ## catalogGetTableType
   ## Retrieves the specified table type from the Data Lake Analytics catalog.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
-  ##   schemaName: string (required)
-  ##             : The name of the schema containing the table type.
-  ##   databaseName: string (required)
-  ##               : The name of the database containing the table type.
   ##   tableTypeName: string (required)
   ##                : The name of the table type to retrieve.
-  var path_568634 = newJObject()
-  var query_568635 = newJObject()
-  add(query_568635, "api-version", newJString(apiVersion))
-  add(path_568634, "schemaName", newJString(schemaName))
-  add(path_568634, "databaseName", newJString(databaseName))
-  add(path_568634, "tableTypeName", newJString(tableTypeName))
-  result = call_568633.call(path_568634, query_568635, nil, nil, nil)
+  ##   databaseName: string (required)
+  ##               : The name of the database containing the table type.
+  ##   schemaName: string (required)
+  ##             : The name of the schema containing the table type.
+  var path_564534 = newJObject()
+  var query_564535 = newJObject()
+  add(query_564535, "api-version", newJString(apiVersion))
+  add(path_564534, "tableTypeName", newJString(tableTypeName))
+  add(path_564534, "databaseName", newJString(databaseName))
+  add(path_564534, "schemaName", newJString(schemaName))
+  result = call_564533.call(path_564534, query_564535, nil, nil, nil)
 
-var catalogGetTableType* = Call_CatalogGetTableType_568625(
+var catalogGetTableType* = Call_CatalogGetTableType_564525(
     name: "catalogGetTableType", meth: HttpMethod.HttpGet, host: "azure.local", route: "/catalog/usql/databases/{databaseName}/schemas/{schemaName}/tabletypes/{tableTypeName}",
-    validator: validate_CatalogGetTableType_568626, base: "",
-    url: url_CatalogGetTableType_568627, schemes: {Scheme.Https})
+    validator: validate_CatalogGetTableType_564526, base: "",
+    url: url_CatalogGetTableType_564527, schemes: {Scheme.Https})
 type
-  Call_CatalogListTableValuedFunctions_568636 = ref object of OpenApiRestCall_567666
-proc url_CatalogListTableValuedFunctions_568638(protocol: Scheme; host: string;
+  Call_CatalogListTableValuedFunctions_564536 = ref object of OpenApiRestCall_563564
+proc url_CatalogListTableValuedFunctions_564538(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -4212,81 +4216,81 @@ proc url_CatalogListTableValuedFunctions_568638(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_CatalogListTableValuedFunctions_568637(path: JsonNode;
+proc validate_CatalogListTableValuedFunctions_564537(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Retrieves the list of table valued functions from the Data Lake Analytics catalog.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   schemaName: JString (required)
-  ##             : The name of the schema containing the table valued functions.
   ##   databaseName: JString (required)
   ##               : The name of the database containing the table valued functions.
+  ##   schemaName: JString (required)
+  ##             : The name of the schema containing the table valued functions.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `schemaName` field"
-  var valid_568639 = path.getOrDefault("schemaName")
-  valid_568639 = validateParameter(valid_568639, JString, required = true,
+        "path argument is necessary due to required `databaseName` field"
+  var valid_564539 = path.getOrDefault("databaseName")
+  valid_564539 = validateParameter(valid_564539, JString, required = true,
                                  default = nil)
-  if valid_568639 != nil:
-    section.add "schemaName", valid_568639
-  var valid_568640 = path.getOrDefault("databaseName")
-  valid_568640 = validateParameter(valid_568640, JString, required = true,
+  if valid_564539 != nil:
+    section.add "databaseName", valid_564539
+  var valid_564540 = path.getOrDefault("schemaName")
+  valid_564540 = validateParameter(valid_564540, JString, required = true,
                                  default = nil)
-  if valid_568640 != nil:
-    section.add "databaseName", valid_568640
+  if valid_564540 != nil:
+    section.add "schemaName", valid_564540
   result.add "path", section
   ## parameters in `query` object:
-  ##   $orderby: JString
-  ##           : OrderBy clause. One or more comma-separated expressions with an optional "asc" (the default) or "desc" depending on the order you'd like the values sorted, e.g. Categories?$orderby=CategoryName desc. Optional.
-  ##   api-version: JString (required)
-  ##              : Client Api Version.
   ##   $top: JInt
   ##       : The number of items to return. Optional.
+  ##   api-version: JString (required)
+  ##              : Client Api Version.
   ##   $select: JString
   ##          : OData Select statement. Limits the properties on each entry to just those requested, e.g. Categories?$select=CategoryName,Description. Optional.
-  ##   $skip: JInt
-  ##        : The number of items to skip over before returning elements. Optional.
   ##   $count: JBool
   ##         : The Boolean value of true or false to request a count of the matching resources included with the resources in the response, e.g. Categories?$count=true. Optional.
+  ##   $orderby: JString
+  ##           : OrderBy clause. One or more comma-separated expressions with an optional "asc" (the default) or "desc" depending on the order you'd like the values sorted, e.g. Categories?$orderby=CategoryName desc. Optional.
+  ##   $skip: JInt
+  ##        : The number of items to skip over before returning elements. Optional.
   ##   $filter: JString
   ##          : OData filter. Optional.
   section = newJObject()
-  var valid_568641 = query.getOrDefault("$orderby")
-  valid_568641 = validateParameter(valid_568641, JString, required = false,
-                                 default = nil)
-  if valid_568641 != nil:
-    section.add "$orderby", valid_568641
+  var valid_564541 = query.getOrDefault("$top")
+  valid_564541 = validateParameter(valid_564541, JInt, required = false, default = nil)
+  if valid_564541 != nil:
+    section.add "$top", valid_564541
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568642 = query.getOrDefault("api-version")
-  valid_568642 = validateParameter(valid_568642, JString, required = true,
+  var valid_564542 = query.getOrDefault("api-version")
+  valid_564542 = validateParameter(valid_564542, JString, required = true,
                                  default = nil)
-  if valid_568642 != nil:
-    section.add "api-version", valid_568642
-  var valid_568643 = query.getOrDefault("$top")
-  valid_568643 = validateParameter(valid_568643, JInt, required = false, default = nil)
-  if valid_568643 != nil:
-    section.add "$top", valid_568643
-  var valid_568644 = query.getOrDefault("$select")
-  valid_568644 = validateParameter(valid_568644, JString, required = false,
+  if valid_564542 != nil:
+    section.add "api-version", valid_564542
+  var valid_564543 = query.getOrDefault("$select")
+  valid_564543 = validateParameter(valid_564543, JString, required = false,
                                  default = nil)
-  if valid_568644 != nil:
-    section.add "$select", valid_568644
-  var valid_568645 = query.getOrDefault("$skip")
-  valid_568645 = validateParameter(valid_568645, JInt, required = false, default = nil)
-  if valid_568645 != nil:
-    section.add "$skip", valid_568645
-  var valid_568646 = query.getOrDefault("$count")
-  valid_568646 = validateParameter(valid_568646, JBool, required = false, default = nil)
-  if valid_568646 != nil:
-    section.add "$count", valid_568646
-  var valid_568647 = query.getOrDefault("$filter")
-  valid_568647 = validateParameter(valid_568647, JString, required = false,
+  if valid_564543 != nil:
+    section.add "$select", valid_564543
+  var valid_564544 = query.getOrDefault("$count")
+  valid_564544 = validateParameter(valid_564544, JBool, required = false, default = nil)
+  if valid_564544 != nil:
+    section.add "$count", valid_564544
+  var valid_564545 = query.getOrDefault("$orderby")
+  valid_564545 = validateParameter(valid_564545, JString, required = false,
                                  default = nil)
-  if valid_568647 != nil:
-    section.add "$filter", valid_568647
+  if valid_564545 != nil:
+    section.add "$orderby", valid_564545
+  var valid_564546 = query.getOrDefault("$skip")
+  valid_564546 = validateParameter(valid_564546, JInt, required = false, default = nil)
+  if valid_564546 != nil:
+    section.add "$skip", valid_564546
+  var valid_564547 = query.getOrDefault("$filter")
+  valid_564547 = validateParameter(valid_564547, JString, required = false,
+                                 default = nil)
+  if valid_564547 != nil:
+    section.add "$filter", valid_564547
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -4295,65 +4299,65 @@ proc validate_CatalogListTableValuedFunctions_568637(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568648: Call_CatalogListTableValuedFunctions_568636;
+proc call*(call_564548: Call_CatalogListTableValuedFunctions_564536;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Retrieves the list of table valued functions from the Data Lake Analytics catalog.
   ## 
-  let valid = call_568648.validator(path, query, header, formData, body)
-  let scheme = call_568648.pickScheme
+  let valid = call_564548.validator(path, query, header, formData, body)
+  let scheme = call_564548.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568648.url(scheme.get, call_568648.host, call_568648.base,
-                         call_568648.route, valid.getOrDefault("path"),
+  let url = call_564548.url(scheme.get, call_564548.host, call_564548.base,
+                         call_564548.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568648, url, valid)
+  result = hook(call_564548, url, valid)
 
-proc call*(call_568649: Call_CatalogListTableValuedFunctions_568636;
-          apiVersion: string; schemaName: string; databaseName: string;
-          Orderby: string = ""; Top: int = 0; Select: string = ""; Skip: int = 0;
-          Count: bool = false; Filter: string = ""): Recallable =
+proc call*(call_564549: Call_CatalogListTableValuedFunctions_564536;
+          apiVersion: string; databaseName: string; schemaName: string; Top: int = 0;
+          Select: string = ""; Count: bool = false; Orderby: string = ""; Skip: int = 0;
+          Filter: string = ""): Recallable =
   ## catalogListTableValuedFunctions
   ## Retrieves the list of table valued functions from the Data Lake Analytics catalog.
-  ##   Orderby: string
-  ##          : OrderBy clause. One or more comma-separated expressions with an optional "asc" (the default) or "desc" depending on the order you'd like the values sorted, e.g. Categories?$orderby=CategoryName desc. Optional.
-  ##   apiVersion: string (required)
-  ##             : Client Api Version.
   ##   Top: int
   ##      : The number of items to return. Optional.
-  ##   schemaName: string (required)
-  ##             : The name of the schema containing the table valued functions.
+  ##   apiVersion: string (required)
+  ##             : Client Api Version.
   ##   Select: string
   ##         : OData Select statement. Limits the properties on each entry to just those requested, e.g. Categories?$select=CategoryName,Description. Optional.
-  ##   databaseName: string (required)
-  ##               : The name of the database containing the table valued functions.
-  ##   Skip: int
-  ##       : The number of items to skip over before returning elements. Optional.
   ##   Count: bool
   ##        : The Boolean value of true or false to request a count of the matching resources included with the resources in the response, e.g. Categories?$count=true. Optional.
+  ##   databaseName: string (required)
+  ##               : The name of the database containing the table valued functions.
+  ##   Orderby: string
+  ##          : OrderBy clause. One or more comma-separated expressions with an optional "asc" (the default) or "desc" depending on the order you'd like the values sorted, e.g. Categories?$orderby=CategoryName desc. Optional.
+  ##   Skip: int
+  ##       : The number of items to skip over before returning elements. Optional.
   ##   Filter: string
   ##         : OData filter. Optional.
-  var path_568650 = newJObject()
-  var query_568651 = newJObject()
-  add(query_568651, "$orderby", newJString(Orderby))
-  add(query_568651, "api-version", newJString(apiVersion))
-  add(query_568651, "$top", newJInt(Top))
-  add(path_568650, "schemaName", newJString(schemaName))
-  add(query_568651, "$select", newJString(Select))
-  add(path_568650, "databaseName", newJString(databaseName))
-  add(query_568651, "$skip", newJInt(Skip))
-  add(query_568651, "$count", newJBool(Count))
-  add(query_568651, "$filter", newJString(Filter))
-  result = call_568649.call(path_568650, query_568651, nil, nil, nil)
+  ##   schemaName: string (required)
+  ##             : The name of the schema containing the table valued functions.
+  var path_564550 = newJObject()
+  var query_564551 = newJObject()
+  add(query_564551, "$top", newJInt(Top))
+  add(query_564551, "api-version", newJString(apiVersion))
+  add(query_564551, "$select", newJString(Select))
+  add(query_564551, "$count", newJBool(Count))
+  add(path_564550, "databaseName", newJString(databaseName))
+  add(query_564551, "$orderby", newJString(Orderby))
+  add(query_564551, "$skip", newJInt(Skip))
+  add(query_564551, "$filter", newJString(Filter))
+  add(path_564550, "schemaName", newJString(schemaName))
+  result = call_564549.call(path_564550, query_564551, nil, nil, nil)
 
-var catalogListTableValuedFunctions* = Call_CatalogListTableValuedFunctions_568636(
+var catalogListTableValuedFunctions* = Call_CatalogListTableValuedFunctions_564536(
     name: "catalogListTableValuedFunctions", meth: HttpMethod.HttpGet,
     host: "azure.local", route: "/catalog/usql/databases/{databaseName}/schemas/{schemaName}/tablevaluedfunctions",
-    validator: validate_CatalogListTableValuedFunctions_568637, base: "",
-    url: url_CatalogListTableValuedFunctions_568638, schemes: {Scheme.Https})
+    validator: validate_CatalogListTableValuedFunctions_564537, base: "",
+    url: url_CatalogListTableValuedFunctions_564538, schemes: {Scheme.Https})
 type
-  Call_CatalogGetTableValuedFunction_568652 = ref object of OpenApiRestCall_567666
-proc url_CatalogGetTableValuedFunction_568654(protocol: Scheme; host: string;
+  Call_CatalogGetTableValuedFunction_564552 = ref object of OpenApiRestCall_563564
+proc url_CatalogGetTableValuedFunction_564554(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -4375,36 +4379,37 @@ proc url_CatalogGetTableValuedFunction_568654(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_CatalogGetTableValuedFunction_568653(path: JsonNode; query: JsonNode;
+proc validate_CatalogGetTableValuedFunction_564553(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Retrieves the specified table valued function from the Data Lake Analytics catalog.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
+  ##   databaseName: JString (required)
+  ##               : The name of the database containing the table valued function.
   ##   tableValuedFunctionName: JString (required)
   ##                          : The name of the tableValuedFunction.
   ##   schemaName: JString (required)
   ##             : The name of the schema containing the table valued function.
-  ##   databaseName: JString (required)
-  ##               : The name of the database containing the table valued function.
   section = newJObject()
-  assert path != nil, "path argument is necessary due to required `tableValuedFunctionName` field"
-  var valid_568655 = path.getOrDefault("tableValuedFunctionName")
-  valid_568655 = validateParameter(valid_568655, JString, required = true,
+  assert path != nil,
+        "path argument is necessary due to required `databaseName` field"
+  var valid_564555 = path.getOrDefault("databaseName")
+  valid_564555 = validateParameter(valid_564555, JString, required = true,
                                  default = nil)
-  if valid_568655 != nil:
-    section.add "tableValuedFunctionName", valid_568655
-  var valid_568656 = path.getOrDefault("schemaName")
-  valid_568656 = validateParameter(valid_568656, JString, required = true,
+  if valid_564555 != nil:
+    section.add "databaseName", valid_564555
+  var valid_564556 = path.getOrDefault("tableValuedFunctionName")
+  valid_564556 = validateParameter(valid_564556, JString, required = true,
                                  default = nil)
-  if valid_568656 != nil:
-    section.add "schemaName", valid_568656
-  var valid_568657 = path.getOrDefault("databaseName")
-  valid_568657 = validateParameter(valid_568657, JString, required = true,
+  if valid_564556 != nil:
+    section.add "tableValuedFunctionName", valid_564556
+  var valid_564557 = path.getOrDefault("schemaName")
+  valid_564557 = validateParameter(valid_564557, JString, required = true,
                                  default = nil)
-  if valid_568657 != nil:
-    section.add "databaseName", valid_568657
+  if valid_564557 != nil:
+    section.add "schemaName", valid_564557
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -4412,11 +4417,11 @@ proc validate_CatalogGetTableValuedFunction_568653(path: JsonNode; query: JsonNo
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568658 = query.getOrDefault("api-version")
-  valid_568658 = validateParameter(valid_568658, JString, required = true,
+  var valid_564558 = query.getOrDefault("api-version")
+  valid_564558 = validateParameter(valid_564558, JString, required = true,
                                  default = nil)
-  if valid_568658 != nil:
-    section.add "api-version", valid_568658
+  if valid_564558 != nil:
+    section.add "api-version", valid_564558
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -4425,48 +4430,48 @@ proc validate_CatalogGetTableValuedFunction_568653(path: JsonNode; query: JsonNo
   if body != nil:
     result.add "body", body
 
-proc call*(call_568659: Call_CatalogGetTableValuedFunction_568652; path: JsonNode;
+proc call*(call_564559: Call_CatalogGetTableValuedFunction_564552; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Retrieves the specified table valued function from the Data Lake Analytics catalog.
   ## 
-  let valid = call_568659.validator(path, query, header, formData, body)
-  let scheme = call_568659.pickScheme
+  let valid = call_564559.validator(path, query, header, formData, body)
+  let scheme = call_564559.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568659.url(scheme.get, call_568659.host, call_568659.base,
-                         call_568659.route, valid.getOrDefault("path"),
+  let url = call_564559.url(scheme.get, call_564559.host, call_564559.base,
+                         call_564559.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568659, url, valid)
+  result = hook(call_564559, url, valid)
 
-proc call*(call_568660: Call_CatalogGetTableValuedFunction_568652;
-          apiVersion: string; tableValuedFunctionName: string; schemaName: string;
-          databaseName: string): Recallable =
+proc call*(call_564560: Call_CatalogGetTableValuedFunction_564552;
+          apiVersion: string; databaseName: string; tableValuedFunctionName: string;
+          schemaName: string): Recallable =
   ## catalogGetTableValuedFunction
   ## Retrieves the specified table valued function from the Data Lake Analytics catalog.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
+  ##   databaseName: string (required)
+  ##               : The name of the database containing the table valued function.
   ##   tableValuedFunctionName: string (required)
   ##                          : The name of the tableValuedFunction.
   ##   schemaName: string (required)
   ##             : The name of the schema containing the table valued function.
-  ##   databaseName: string (required)
-  ##               : The name of the database containing the table valued function.
-  var path_568661 = newJObject()
-  var query_568662 = newJObject()
-  add(query_568662, "api-version", newJString(apiVersion))
-  add(path_568661, "tableValuedFunctionName", newJString(tableValuedFunctionName))
-  add(path_568661, "schemaName", newJString(schemaName))
-  add(path_568661, "databaseName", newJString(databaseName))
-  result = call_568660.call(path_568661, query_568662, nil, nil, nil)
+  var path_564561 = newJObject()
+  var query_564562 = newJObject()
+  add(query_564562, "api-version", newJString(apiVersion))
+  add(path_564561, "databaseName", newJString(databaseName))
+  add(path_564561, "tableValuedFunctionName", newJString(tableValuedFunctionName))
+  add(path_564561, "schemaName", newJString(schemaName))
+  result = call_564560.call(path_564561, query_564562, nil, nil, nil)
 
-var catalogGetTableValuedFunction* = Call_CatalogGetTableValuedFunction_568652(
+var catalogGetTableValuedFunction* = Call_CatalogGetTableValuedFunction_564552(
     name: "catalogGetTableValuedFunction", meth: HttpMethod.HttpGet,
     host: "azure.local", route: "/catalog/usql/databases/{databaseName}/schemas/{schemaName}/tablevaluedfunctions/{tableValuedFunctionName}",
-    validator: validate_CatalogGetTableValuedFunction_568653, base: "",
-    url: url_CatalogGetTableValuedFunction_568654, schemes: {Scheme.Https})
+    validator: validate_CatalogGetTableValuedFunction_564553, base: "",
+    url: url_CatalogGetTableValuedFunction_564554, schemes: {Scheme.Https})
 type
-  Call_CatalogListTypes_568663 = ref object of OpenApiRestCall_567666
-proc url_CatalogListTypes_568665(protocol: Scheme; host: string; base: string;
+  Call_CatalogListTypes_564563 = ref object of OpenApiRestCall_563564
+proc url_CatalogListTypes_564565(protocol: Scheme; host: string; base: string;
                                 route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -4485,7 +4490,7 @@ proc url_CatalogListTypes_568665(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_CatalogListTypes_568664(path: JsonNode; query: JsonNode;
+proc validate_CatalogListTypes_564564(path: JsonNode; query: JsonNode;
                                      header: JsonNode; formData: JsonNode;
                                      body: JsonNode): JsonNode =
   ## Retrieves the list of types within the specified database and schema from the Data Lake Analytics catalog.
@@ -4493,74 +4498,74 @@ proc validate_CatalogListTypes_568664(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   schemaName: JString (required)
-  ##             : The name of the schema containing the types.
   ##   databaseName: JString (required)
   ##               : The name of the database containing the types.
+  ##   schemaName: JString (required)
+  ##             : The name of the schema containing the types.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `schemaName` field"
-  var valid_568666 = path.getOrDefault("schemaName")
-  valid_568666 = validateParameter(valid_568666, JString, required = true,
+        "path argument is necessary due to required `databaseName` field"
+  var valid_564566 = path.getOrDefault("databaseName")
+  valid_564566 = validateParameter(valid_564566, JString, required = true,
                                  default = nil)
-  if valid_568666 != nil:
-    section.add "schemaName", valid_568666
-  var valid_568667 = path.getOrDefault("databaseName")
-  valid_568667 = validateParameter(valid_568667, JString, required = true,
+  if valid_564566 != nil:
+    section.add "databaseName", valid_564566
+  var valid_564567 = path.getOrDefault("schemaName")
+  valid_564567 = validateParameter(valid_564567, JString, required = true,
                                  default = nil)
-  if valid_568667 != nil:
-    section.add "databaseName", valid_568667
+  if valid_564567 != nil:
+    section.add "schemaName", valid_564567
   result.add "path", section
   ## parameters in `query` object:
-  ##   $orderby: JString
-  ##           : OrderBy clause. One or more comma-separated expressions with an optional "asc" (the default) or "desc" depending on the order you'd like the values sorted, e.g. Categories?$orderby=CategoryName desc. Optional.
-  ##   api-version: JString (required)
-  ##              : Client Api Version.
   ##   $top: JInt
   ##       : The number of items to return. Optional.
+  ##   api-version: JString (required)
+  ##              : Client Api Version.
   ##   $select: JString
   ##          : OData Select statement. Limits the properties on each entry to just those requested, e.g. Categories?$select=CategoryName,Description. Optional.
-  ##   $skip: JInt
-  ##        : The number of items to skip over before returning elements. Optional.
   ##   $count: JBool
   ##         : The Boolean value of true or false to request a count of the matching resources included with the resources in the response, e.g. Categories?$count=true. Optional.
+  ##   $orderby: JString
+  ##           : OrderBy clause. One or more comma-separated expressions with an optional "asc" (the default) or "desc" depending on the order you'd like the values sorted, e.g. Categories?$orderby=CategoryName desc. Optional.
+  ##   $skip: JInt
+  ##        : The number of items to skip over before returning elements. Optional.
   ##   $filter: JString
   ##          : OData filter. Optional.
   section = newJObject()
-  var valid_568668 = query.getOrDefault("$orderby")
-  valid_568668 = validateParameter(valid_568668, JString, required = false,
-                                 default = nil)
-  if valid_568668 != nil:
-    section.add "$orderby", valid_568668
+  var valid_564568 = query.getOrDefault("$top")
+  valid_564568 = validateParameter(valid_564568, JInt, required = false, default = nil)
+  if valid_564568 != nil:
+    section.add "$top", valid_564568
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568669 = query.getOrDefault("api-version")
-  valid_568669 = validateParameter(valid_568669, JString, required = true,
+  var valid_564569 = query.getOrDefault("api-version")
+  valid_564569 = validateParameter(valid_564569, JString, required = true,
                                  default = nil)
-  if valid_568669 != nil:
-    section.add "api-version", valid_568669
-  var valid_568670 = query.getOrDefault("$top")
-  valid_568670 = validateParameter(valid_568670, JInt, required = false, default = nil)
-  if valid_568670 != nil:
-    section.add "$top", valid_568670
-  var valid_568671 = query.getOrDefault("$select")
-  valid_568671 = validateParameter(valid_568671, JString, required = false,
+  if valid_564569 != nil:
+    section.add "api-version", valid_564569
+  var valid_564570 = query.getOrDefault("$select")
+  valid_564570 = validateParameter(valid_564570, JString, required = false,
                                  default = nil)
-  if valid_568671 != nil:
-    section.add "$select", valid_568671
-  var valid_568672 = query.getOrDefault("$skip")
-  valid_568672 = validateParameter(valid_568672, JInt, required = false, default = nil)
-  if valid_568672 != nil:
-    section.add "$skip", valid_568672
-  var valid_568673 = query.getOrDefault("$count")
-  valid_568673 = validateParameter(valid_568673, JBool, required = false, default = nil)
-  if valid_568673 != nil:
-    section.add "$count", valid_568673
-  var valid_568674 = query.getOrDefault("$filter")
-  valid_568674 = validateParameter(valid_568674, JString, required = false,
+  if valid_564570 != nil:
+    section.add "$select", valid_564570
+  var valid_564571 = query.getOrDefault("$count")
+  valid_564571 = validateParameter(valid_564571, JBool, required = false, default = nil)
+  if valid_564571 != nil:
+    section.add "$count", valid_564571
+  var valid_564572 = query.getOrDefault("$orderby")
+  valid_564572 = validateParameter(valid_564572, JString, required = false,
                                  default = nil)
-  if valid_568674 != nil:
-    section.add "$filter", valid_568674
+  if valid_564572 != nil:
+    section.add "$orderby", valid_564572
+  var valid_564573 = query.getOrDefault("$skip")
+  valid_564573 = validateParameter(valid_564573, JInt, required = false, default = nil)
+  if valid_564573 != nil:
+    section.add "$skip", valid_564573
+  var valid_564574 = query.getOrDefault("$filter")
+  valid_564574 = validateParameter(valid_564574, JString, required = false,
+                                 default = nil)
+  if valid_564574 != nil:
+    section.add "$filter", valid_564574
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -4569,63 +4574,63 @@ proc validate_CatalogListTypes_568664(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568675: Call_CatalogListTypes_568663; path: JsonNode;
+proc call*(call_564575: Call_CatalogListTypes_564563; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Retrieves the list of types within the specified database and schema from the Data Lake Analytics catalog.
   ## 
-  let valid = call_568675.validator(path, query, header, formData, body)
-  let scheme = call_568675.pickScheme
+  let valid = call_564575.validator(path, query, header, formData, body)
+  let scheme = call_564575.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568675.url(scheme.get, call_568675.host, call_568675.base,
-                         call_568675.route, valid.getOrDefault("path"),
+  let url = call_564575.url(scheme.get, call_564575.host, call_564575.base,
+                         call_564575.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568675, url, valid)
+  result = hook(call_564575, url, valid)
 
-proc call*(call_568676: Call_CatalogListTypes_568663; apiVersion: string;
-          schemaName: string; databaseName: string; Orderby: string = ""; Top: int = 0;
-          Select: string = ""; Skip: int = 0; Count: bool = false; Filter: string = ""): Recallable =
+proc call*(call_564576: Call_CatalogListTypes_564563; apiVersion: string;
+          databaseName: string; schemaName: string; Top: int = 0; Select: string = "";
+          Count: bool = false; Orderby: string = ""; Skip: int = 0; Filter: string = ""): Recallable =
   ## catalogListTypes
   ## Retrieves the list of types within the specified database and schema from the Data Lake Analytics catalog.
-  ##   Orderby: string
-  ##          : OrderBy clause. One or more comma-separated expressions with an optional "asc" (the default) or "desc" depending on the order you'd like the values sorted, e.g. Categories?$orderby=CategoryName desc. Optional.
-  ##   apiVersion: string (required)
-  ##             : Client Api Version.
   ##   Top: int
   ##      : The number of items to return. Optional.
-  ##   schemaName: string (required)
-  ##             : The name of the schema containing the types.
+  ##   apiVersion: string (required)
+  ##             : Client Api Version.
   ##   Select: string
   ##         : OData Select statement. Limits the properties on each entry to just those requested, e.g. Categories?$select=CategoryName,Description. Optional.
-  ##   databaseName: string (required)
-  ##               : The name of the database containing the types.
-  ##   Skip: int
-  ##       : The number of items to skip over before returning elements. Optional.
   ##   Count: bool
   ##        : The Boolean value of true or false to request a count of the matching resources included with the resources in the response, e.g. Categories?$count=true. Optional.
+  ##   databaseName: string (required)
+  ##               : The name of the database containing the types.
+  ##   Orderby: string
+  ##          : OrderBy clause. One or more comma-separated expressions with an optional "asc" (the default) or "desc" depending on the order you'd like the values sorted, e.g. Categories?$orderby=CategoryName desc. Optional.
+  ##   Skip: int
+  ##       : The number of items to skip over before returning elements. Optional.
   ##   Filter: string
   ##         : OData filter. Optional.
-  var path_568677 = newJObject()
-  var query_568678 = newJObject()
-  add(query_568678, "$orderby", newJString(Orderby))
-  add(query_568678, "api-version", newJString(apiVersion))
-  add(query_568678, "$top", newJInt(Top))
-  add(path_568677, "schemaName", newJString(schemaName))
-  add(query_568678, "$select", newJString(Select))
-  add(path_568677, "databaseName", newJString(databaseName))
-  add(query_568678, "$skip", newJInt(Skip))
-  add(query_568678, "$count", newJBool(Count))
-  add(query_568678, "$filter", newJString(Filter))
-  result = call_568676.call(path_568677, query_568678, nil, nil, nil)
+  ##   schemaName: string (required)
+  ##             : The name of the schema containing the types.
+  var path_564577 = newJObject()
+  var query_564578 = newJObject()
+  add(query_564578, "$top", newJInt(Top))
+  add(query_564578, "api-version", newJString(apiVersion))
+  add(query_564578, "$select", newJString(Select))
+  add(query_564578, "$count", newJBool(Count))
+  add(path_564577, "databaseName", newJString(databaseName))
+  add(query_564578, "$orderby", newJString(Orderby))
+  add(query_564578, "$skip", newJInt(Skip))
+  add(query_564578, "$filter", newJString(Filter))
+  add(path_564577, "schemaName", newJString(schemaName))
+  result = call_564576.call(path_564577, query_564578, nil, nil, nil)
 
-var catalogListTypes* = Call_CatalogListTypes_568663(name: "catalogListTypes",
+var catalogListTypes* = Call_CatalogListTypes_564563(name: "catalogListTypes",
     meth: HttpMethod.HttpGet, host: "azure.local",
     route: "/catalog/usql/databases/{databaseName}/schemas/{schemaName}/types",
-    validator: validate_CatalogListTypes_568664, base: "",
-    url: url_CatalogListTypes_568665, schemes: {Scheme.Https})
+    validator: validate_CatalogListTypes_564564, base: "",
+    url: url_CatalogListTypes_564565, schemes: {Scheme.Https})
 type
-  Call_CatalogListViews_568679 = ref object of OpenApiRestCall_567666
-proc url_CatalogListViews_568681(protocol: Scheme; host: string; base: string;
+  Call_CatalogListViews_564579 = ref object of OpenApiRestCall_563564
+proc url_CatalogListViews_564581(protocol: Scheme; host: string; base: string;
                                 route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -4644,7 +4649,7 @@ proc url_CatalogListViews_568681(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_CatalogListViews_568680(path: JsonNode; query: JsonNode;
+proc validate_CatalogListViews_564580(path: JsonNode; query: JsonNode;
                                      header: JsonNode; formData: JsonNode;
                                      body: JsonNode): JsonNode =
   ## Retrieves the list of views from the Data Lake Analytics catalog.
@@ -4652,74 +4657,74 @@ proc validate_CatalogListViews_568680(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   schemaName: JString (required)
-  ##             : The name of the schema containing the views.
   ##   databaseName: JString (required)
   ##               : The name of the database containing the views.
+  ##   schemaName: JString (required)
+  ##             : The name of the schema containing the views.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `schemaName` field"
-  var valid_568682 = path.getOrDefault("schemaName")
-  valid_568682 = validateParameter(valid_568682, JString, required = true,
+        "path argument is necessary due to required `databaseName` field"
+  var valid_564582 = path.getOrDefault("databaseName")
+  valid_564582 = validateParameter(valid_564582, JString, required = true,
                                  default = nil)
-  if valid_568682 != nil:
-    section.add "schemaName", valid_568682
-  var valid_568683 = path.getOrDefault("databaseName")
-  valid_568683 = validateParameter(valid_568683, JString, required = true,
+  if valid_564582 != nil:
+    section.add "databaseName", valid_564582
+  var valid_564583 = path.getOrDefault("schemaName")
+  valid_564583 = validateParameter(valid_564583, JString, required = true,
                                  default = nil)
-  if valid_568683 != nil:
-    section.add "databaseName", valid_568683
+  if valid_564583 != nil:
+    section.add "schemaName", valid_564583
   result.add "path", section
   ## parameters in `query` object:
-  ##   $orderby: JString
-  ##           : OrderBy clause. One or more comma-separated expressions with an optional "asc" (the default) or "desc" depending on the order you'd like the values sorted, e.g. Categories?$orderby=CategoryName desc. Optional.
-  ##   api-version: JString (required)
-  ##              : Client Api Version.
   ##   $top: JInt
   ##       : The number of items to return. Optional.
+  ##   api-version: JString (required)
+  ##              : Client Api Version.
   ##   $select: JString
   ##          : OData Select statement. Limits the properties on each entry to just those requested, e.g. Categories?$select=CategoryName,Description. Optional.
-  ##   $skip: JInt
-  ##        : The number of items to skip over before returning elements. Optional.
   ##   $count: JBool
   ##         : The Boolean value of true or false to request a count of the matching resources included with the resources in the response, e.g. Categories?$count=true. Optional.
+  ##   $orderby: JString
+  ##           : OrderBy clause. One or more comma-separated expressions with an optional "asc" (the default) or "desc" depending on the order you'd like the values sorted, e.g. Categories?$orderby=CategoryName desc. Optional.
+  ##   $skip: JInt
+  ##        : The number of items to skip over before returning elements. Optional.
   ##   $filter: JString
   ##          : OData filter. Optional.
   section = newJObject()
-  var valid_568684 = query.getOrDefault("$orderby")
-  valid_568684 = validateParameter(valid_568684, JString, required = false,
-                                 default = nil)
-  if valid_568684 != nil:
-    section.add "$orderby", valid_568684
+  var valid_564584 = query.getOrDefault("$top")
+  valid_564584 = validateParameter(valid_564584, JInt, required = false, default = nil)
+  if valid_564584 != nil:
+    section.add "$top", valid_564584
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568685 = query.getOrDefault("api-version")
-  valid_568685 = validateParameter(valid_568685, JString, required = true,
+  var valid_564585 = query.getOrDefault("api-version")
+  valid_564585 = validateParameter(valid_564585, JString, required = true,
                                  default = nil)
-  if valid_568685 != nil:
-    section.add "api-version", valid_568685
-  var valid_568686 = query.getOrDefault("$top")
-  valid_568686 = validateParameter(valid_568686, JInt, required = false, default = nil)
-  if valid_568686 != nil:
-    section.add "$top", valid_568686
-  var valid_568687 = query.getOrDefault("$select")
-  valid_568687 = validateParameter(valid_568687, JString, required = false,
+  if valid_564585 != nil:
+    section.add "api-version", valid_564585
+  var valid_564586 = query.getOrDefault("$select")
+  valid_564586 = validateParameter(valid_564586, JString, required = false,
                                  default = nil)
-  if valid_568687 != nil:
-    section.add "$select", valid_568687
-  var valid_568688 = query.getOrDefault("$skip")
-  valid_568688 = validateParameter(valid_568688, JInt, required = false, default = nil)
-  if valid_568688 != nil:
-    section.add "$skip", valid_568688
-  var valid_568689 = query.getOrDefault("$count")
-  valid_568689 = validateParameter(valid_568689, JBool, required = false, default = nil)
-  if valid_568689 != nil:
-    section.add "$count", valid_568689
-  var valid_568690 = query.getOrDefault("$filter")
-  valid_568690 = validateParameter(valid_568690, JString, required = false,
+  if valid_564586 != nil:
+    section.add "$select", valid_564586
+  var valid_564587 = query.getOrDefault("$count")
+  valid_564587 = validateParameter(valid_564587, JBool, required = false, default = nil)
+  if valid_564587 != nil:
+    section.add "$count", valid_564587
+  var valid_564588 = query.getOrDefault("$orderby")
+  valid_564588 = validateParameter(valid_564588, JString, required = false,
                                  default = nil)
-  if valid_568690 != nil:
-    section.add "$filter", valid_568690
+  if valid_564588 != nil:
+    section.add "$orderby", valid_564588
+  var valid_564589 = query.getOrDefault("$skip")
+  valid_564589 = validateParameter(valid_564589, JInt, required = false, default = nil)
+  if valid_564589 != nil:
+    section.add "$skip", valid_564589
+  var valid_564590 = query.getOrDefault("$filter")
+  valid_564590 = validateParameter(valid_564590, JString, required = false,
+                                 default = nil)
+  if valid_564590 != nil:
+    section.add "$filter", valid_564590
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -4728,63 +4733,63 @@ proc validate_CatalogListViews_568680(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568691: Call_CatalogListViews_568679; path: JsonNode;
+proc call*(call_564591: Call_CatalogListViews_564579; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Retrieves the list of views from the Data Lake Analytics catalog.
   ## 
-  let valid = call_568691.validator(path, query, header, formData, body)
-  let scheme = call_568691.pickScheme
+  let valid = call_564591.validator(path, query, header, formData, body)
+  let scheme = call_564591.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568691.url(scheme.get, call_568691.host, call_568691.base,
-                         call_568691.route, valid.getOrDefault("path"),
+  let url = call_564591.url(scheme.get, call_564591.host, call_564591.base,
+                         call_564591.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568691, url, valid)
+  result = hook(call_564591, url, valid)
 
-proc call*(call_568692: Call_CatalogListViews_568679; apiVersion: string;
-          schemaName: string; databaseName: string; Orderby: string = ""; Top: int = 0;
-          Select: string = ""; Skip: int = 0; Count: bool = false; Filter: string = ""): Recallable =
+proc call*(call_564592: Call_CatalogListViews_564579; apiVersion: string;
+          databaseName: string; schemaName: string; Top: int = 0; Select: string = "";
+          Count: bool = false; Orderby: string = ""; Skip: int = 0; Filter: string = ""): Recallable =
   ## catalogListViews
   ## Retrieves the list of views from the Data Lake Analytics catalog.
-  ##   Orderby: string
-  ##          : OrderBy clause. One or more comma-separated expressions with an optional "asc" (the default) or "desc" depending on the order you'd like the values sorted, e.g. Categories?$orderby=CategoryName desc. Optional.
-  ##   apiVersion: string (required)
-  ##             : Client Api Version.
   ##   Top: int
   ##      : The number of items to return. Optional.
-  ##   schemaName: string (required)
-  ##             : The name of the schema containing the views.
+  ##   apiVersion: string (required)
+  ##             : Client Api Version.
   ##   Select: string
   ##         : OData Select statement. Limits the properties on each entry to just those requested, e.g. Categories?$select=CategoryName,Description. Optional.
-  ##   databaseName: string (required)
-  ##               : The name of the database containing the views.
-  ##   Skip: int
-  ##       : The number of items to skip over before returning elements. Optional.
   ##   Count: bool
   ##        : The Boolean value of true or false to request a count of the matching resources included with the resources in the response, e.g. Categories?$count=true. Optional.
+  ##   databaseName: string (required)
+  ##               : The name of the database containing the views.
+  ##   Orderby: string
+  ##          : OrderBy clause. One or more comma-separated expressions with an optional "asc" (the default) or "desc" depending on the order you'd like the values sorted, e.g. Categories?$orderby=CategoryName desc. Optional.
+  ##   Skip: int
+  ##       : The number of items to skip over before returning elements. Optional.
   ##   Filter: string
   ##         : OData filter. Optional.
-  var path_568693 = newJObject()
-  var query_568694 = newJObject()
-  add(query_568694, "$orderby", newJString(Orderby))
-  add(query_568694, "api-version", newJString(apiVersion))
-  add(query_568694, "$top", newJInt(Top))
-  add(path_568693, "schemaName", newJString(schemaName))
-  add(query_568694, "$select", newJString(Select))
-  add(path_568693, "databaseName", newJString(databaseName))
-  add(query_568694, "$skip", newJInt(Skip))
-  add(query_568694, "$count", newJBool(Count))
-  add(query_568694, "$filter", newJString(Filter))
-  result = call_568692.call(path_568693, query_568694, nil, nil, nil)
+  ##   schemaName: string (required)
+  ##             : The name of the schema containing the views.
+  var path_564593 = newJObject()
+  var query_564594 = newJObject()
+  add(query_564594, "$top", newJInt(Top))
+  add(query_564594, "api-version", newJString(apiVersion))
+  add(query_564594, "$select", newJString(Select))
+  add(query_564594, "$count", newJBool(Count))
+  add(path_564593, "databaseName", newJString(databaseName))
+  add(query_564594, "$orderby", newJString(Orderby))
+  add(query_564594, "$skip", newJInt(Skip))
+  add(query_564594, "$filter", newJString(Filter))
+  add(path_564593, "schemaName", newJString(schemaName))
+  result = call_564592.call(path_564593, query_564594, nil, nil, nil)
 
-var catalogListViews* = Call_CatalogListViews_568679(name: "catalogListViews",
+var catalogListViews* = Call_CatalogListViews_564579(name: "catalogListViews",
     meth: HttpMethod.HttpGet, host: "azure.local",
     route: "/catalog/usql/databases/{databaseName}/schemas/{schemaName}/views",
-    validator: validate_CatalogListViews_568680, base: "",
-    url: url_CatalogListViews_568681, schemes: {Scheme.Https})
+    validator: validate_CatalogListViews_564580, base: "",
+    url: url_CatalogListViews_564581, schemes: {Scheme.Https})
 type
-  Call_CatalogGetView_568695 = ref object of OpenApiRestCall_567666
-proc url_CatalogGetView_568697(protocol: Scheme; host: string; base: string;
+  Call_CatalogGetView_564595 = ref object of OpenApiRestCall_563564
+proc url_CatalogGetView_564597(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -4805,7 +4810,7 @@ proc url_CatalogGetView_568697(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_CatalogGetView_568696(path: JsonNode; query: JsonNode;
+proc validate_CatalogGetView_564596(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## Retrieves the specified view from the Data Lake Analytics catalog.
@@ -4813,29 +4818,30 @@ proc validate_CatalogGetView_568696(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
+  ##   databaseName: JString (required)
+  ##               : The name of the database containing the view.
   ##   viewName: JString (required)
   ##           : The name of the view.
   ##   schemaName: JString (required)
   ##             : The name of the schema containing the view.
-  ##   databaseName: JString (required)
-  ##               : The name of the database containing the view.
   section = newJObject()
-  assert path != nil, "path argument is necessary due to required `viewName` field"
-  var valid_568698 = path.getOrDefault("viewName")
-  valid_568698 = validateParameter(valid_568698, JString, required = true,
+  assert path != nil,
+        "path argument is necessary due to required `databaseName` field"
+  var valid_564598 = path.getOrDefault("databaseName")
+  valid_564598 = validateParameter(valid_564598, JString, required = true,
                                  default = nil)
-  if valid_568698 != nil:
-    section.add "viewName", valid_568698
-  var valid_568699 = path.getOrDefault("schemaName")
-  valid_568699 = validateParameter(valid_568699, JString, required = true,
+  if valid_564598 != nil:
+    section.add "databaseName", valid_564598
+  var valid_564599 = path.getOrDefault("viewName")
+  valid_564599 = validateParameter(valid_564599, JString, required = true,
                                  default = nil)
-  if valid_568699 != nil:
-    section.add "schemaName", valid_568699
-  var valid_568700 = path.getOrDefault("databaseName")
-  valid_568700 = validateParameter(valid_568700, JString, required = true,
+  if valid_564599 != nil:
+    section.add "viewName", valid_564599
+  var valid_564600 = path.getOrDefault("schemaName")
+  valid_564600 = validateParameter(valid_564600, JString, required = true,
                                  default = nil)
-  if valid_568700 != nil:
-    section.add "databaseName", valid_568700
+  if valid_564600 != nil:
+    section.add "schemaName", valid_564600
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -4843,11 +4849,11 @@ proc validate_CatalogGetView_568696(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568701 = query.getOrDefault("api-version")
-  valid_568701 = validateParameter(valid_568701, JString, required = true,
+  var valid_564601 = query.getOrDefault("api-version")
+  valid_564601 = validateParameter(valid_564601, JString, required = true,
                                  default = nil)
-  if valid_568701 != nil:
-    section.add "api-version", valid_568701
+  if valid_564601 != nil:
+    section.add "api-version", valid_564601
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -4856,46 +4862,46 @@ proc validate_CatalogGetView_568696(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568702: Call_CatalogGetView_568695; path: JsonNode; query: JsonNode;
+proc call*(call_564602: Call_CatalogGetView_564595; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Retrieves the specified view from the Data Lake Analytics catalog.
   ## 
-  let valid = call_568702.validator(path, query, header, formData, body)
-  let scheme = call_568702.pickScheme
+  let valid = call_564602.validator(path, query, header, formData, body)
+  let scheme = call_564602.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568702.url(scheme.get, call_568702.host, call_568702.base,
-                         call_568702.route, valid.getOrDefault("path"),
+  let url = call_564602.url(scheme.get, call_564602.host, call_564602.base,
+                         call_564602.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568702, url, valid)
+  result = hook(call_564602, url, valid)
 
-proc call*(call_568703: Call_CatalogGetView_568695; apiVersion: string;
-          viewName: string; schemaName: string; databaseName: string): Recallable =
+proc call*(call_564603: Call_CatalogGetView_564595; apiVersion: string;
+          databaseName: string; viewName: string; schemaName: string): Recallable =
   ## catalogGetView
   ## Retrieves the specified view from the Data Lake Analytics catalog.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
+  ##   databaseName: string (required)
+  ##               : The name of the database containing the view.
   ##   viewName: string (required)
   ##           : The name of the view.
   ##   schemaName: string (required)
   ##             : The name of the schema containing the view.
-  ##   databaseName: string (required)
-  ##               : The name of the database containing the view.
-  var path_568704 = newJObject()
-  var query_568705 = newJObject()
-  add(query_568705, "api-version", newJString(apiVersion))
-  add(path_568704, "viewName", newJString(viewName))
-  add(path_568704, "schemaName", newJString(schemaName))
-  add(path_568704, "databaseName", newJString(databaseName))
-  result = call_568703.call(path_568704, query_568705, nil, nil, nil)
+  var path_564604 = newJObject()
+  var query_564605 = newJObject()
+  add(query_564605, "api-version", newJString(apiVersion))
+  add(path_564604, "databaseName", newJString(databaseName))
+  add(path_564604, "viewName", newJString(viewName))
+  add(path_564604, "schemaName", newJString(schemaName))
+  result = call_564603.call(path_564604, query_564605, nil, nil, nil)
 
-var catalogGetView* = Call_CatalogGetView_568695(name: "catalogGetView",
+var catalogGetView* = Call_CatalogGetView_564595(name: "catalogGetView",
     meth: HttpMethod.HttpGet, host: "azure.local", route: "/catalog/usql/databases/{databaseName}/schemas/{schemaName}/views/{viewName}",
-    validator: validate_CatalogGetView_568696, base: "", url: url_CatalogGetView_568697,
+    validator: validate_CatalogGetView_564596, base: "", url: url_CatalogGetView_564597,
     schemes: {Scheme.Https})
 type
-  Call_CatalogDeleteAllSecrets_568706 = ref object of OpenApiRestCall_567666
-proc url_CatalogDeleteAllSecrets_568708(protocol: Scheme; host: string; base: string;
+  Call_CatalogDeleteAllSecrets_564606 = ref object of OpenApiRestCall_563564
+proc url_CatalogDeleteAllSecrets_564608(protocol: Scheme; host: string; base: string;
                                        route: string; path: JsonNode;
                                        query: JsonNode): Uri =
   result.scheme = $protocol
@@ -4912,7 +4918,7 @@ proc url_CatalogDeleteAllSecrets_568708(protocol: Scheme; host: string; base: st
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_CatalogDeleteAllSecrets_568707(path: JsonNode; query: JsonNode;
+proc validate_CatalogDeleteAllSecrets_564607(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Deletes all secrets in the specified database. This is deprecated and will be removed in the next release. In the future, please only drop individual credentials using DeleteCredential
   ## 
@@ -4924,11 +4930,11 @@ proc validate_CatalogDeleteAllSecrets_568707(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `databaseName` field"
-  var valid_568709 = path.getOrDefault("databaseName")
-  valid_568709 = validateParameter(valid_568709, JString, required = true,
+  var valid_564609 = path.getOrDefault("databaseName")
+  valid_564609 = validateParameter(valid_564609, JString, required = true,
                                  default = nil)
-  if valid_568709 != nil:
-    section.add "databaseName", valid_568709
+  if valid_564609 != nil:
+    section.add "databaseName", valid_564609
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -4936,11 +4942,11 @@ proc validate_CatalogDeleteAllSecrets_568707(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568710 = query.getOrDefault("api-version")
-  valid_568710 = validateParameter(valid_568710, JString, required = true,
+  var valid_564610 = query.getOrDefault("api-version")
+  valid_564610 = validateParameter(valid_564610, JString, required = true,
                                  default = nil)
-  if valid_568710 != nil:
-    section.add "api-version", valid_568710
+  if valid_564610 != nil:
+    section.add "api-version", valid_564610
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -4949,20 +4955,20 @@ proc validate_CatalogDeleteAllSecrets_568707(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568711: Call_CatalogDeleteAllSecrets_568706; path: JsonNode;
+proc call*(call_564611: Call_CatalogDeleteAllSecrets_564606; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes all secrets in the specified database. This is deprecated and will be removed in the next release. In the future, please only drop individual credentials using DeleteCredential
   ## 
-  let valid = call_568711.validator(path, query, header, formData, body)
-  let scheme = call_568711.pickScheme
+  let valid = call_564611.validator(path, query, header, formData, body)
+  let scheme = call_564611.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568711.url(scheme.get, call_568711.host, call_568711.base,
-                         call_568711.route, valid.getOrDefault("path"),
+  let url = call_564611.url(scheme.get, call_564611.host, call_564611.base,
+                         call_564611.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568711, url, valid)
+  result = hook(call_564611, url, valid)
 
-proc call*(call_568712: Call_CatalogDeleteAllSecrets_568706; apiVersion: string;
+proc call*(call_564612: Call_CatalogDeleteAllSecrets_564606; apiVersion: string;
           databaseName: string): Recallable =
   ## catalogDeleteAllSecrets
   ## Deletes all secrets in the specified database. This is deprecated and will be removed in the next release. In the future, please only drop individual credentials using DeleteCredential
@@ -4970,20 +4976,20 @@ proc call*(call_568712: Call_CatalogDeleteAllSecrets_568706; apiVersion: string;
   ##             : Client Api Version.
   ##   databaseName: string (required)
   ##               : The name of the database containing the secret.
-  var path_568713 = newJObject()
-  var query_568714 = newJObject()
-  add(query_568714, "api-version", newJString(apiVersion))
-  add(path_568713, "databaseName", newJString(databaseName))
-  result = call_568712.call(path_568713, query_568714, nil, nil, nil)
+  var path_564613 = newJObject()
+  var query_564614 = newJObject()
+  add(query_564614, "api-version", newJString(apiVersion))
+  add(path_564613, "databaseName", newJString(databaseName))
+  result = call_564612.call(path_564613, query_564614, nil, nil, nil)
 
-var catalogDeleteAllSecrets* = Call_CatalogDeleteAllSecrets_568706(
+var catalogDeleteAllSecrets* = Call_CatalogDeleteAllSecrets_564606(
     name: "catalogDeleteAllSecrets", meth: HttpMethod.HttpDelete,
     host: "azure.local", route: "/catalog/usql/databases/{databaseName}/secrets",
-    validator: validate_CatalogDeleteAllSecrets_568707, base: "",
-    url: url_CatalogDeleteAllSecrets_568708, schemes: {Scheme.Https})
+    validator: validate_CatalogDeleteAllSecrets_564607, base: "",
+    url: url_CatalogDeleteAllSecrets_564608, schemes: {Scheme.Https})
 type
-  Call_CatalogCreateSecret_568725 = ref object of OpenApiRestCall_567666
-proc url_CatalogCreateSecret_568727(protocol: Scheme; host: string; base: string;
+  Call_CatalogCreateSecret_564625 = ref object of OpenApiRestCall_563564
+proc url_CatalogCreateSecret_564627(protocol: Scheme; host: string; base: string;
                                    route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -5001,7 +5007,7 @@ proc url_CatalogCreateSecret_568727(protocol: Scheme; host: string; base: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_CatalogCreateSecret_568726(path: JsonNode; query: JsonNode;
+proc validate_CatalogCreateSecret_564626(path: JsonNode; query: JsonNode;
                                         header: JsonNode; formData: JsonNode;
                                         body: JsonNode): JsonNode =
   ## Creates the specified secret for use with external data sources in the specified database. This is deprecated and will be removed in the next release. Please use CreateCredential instead.
@@ -5009,23 +5015,23 @@ proc validate_CatalogCreateSecret_568726(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   databaseName: JString (required)
-  ##               : The name of the database in which to create the secret.
   ##   secretName: JString (required)
   ##             : The name of the secret.
+  ##   databaseName: JString (required)
+  ##               : The name of the database in which to create the secret.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `databaseName` field"
-  var valid_568728 = path.getOrDefault("databaseName")
-  valid_568728 = validateParameter(valid_568728, JString, required = true,
+        "path argument is necessary due to required `secretName` field"
+  var valid_564628 = path.getOrDefault("secretName")
+  valid_564628 = validateParameter(valid_564628, JString, required = true,
                                  default = nil)
-  if valid_568728 != nil:
-    section.add "databaseName", valid_568728
-  var valid_568729 = path.getOrDefault("secretName")
-  valid_568729 = validateParameter(valid_568729, JString, required = true,
+  if valid_564628 != nil:
+    section.add "secretName", valid_564628
+  var valid_564629 = path.getOrDefault("databaseName")
+  valid_564629 = validateParameter(valid_564629, JString, required = true,
                                  default = nil)
-  if valid_568729 != nil:
-    section.add "secretName", valid_568729
+  if valid_564629 != nil:
+    section.add "databaseName", valid_564629
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -5033,11 +5039,11 @@ proc validate_CatalogCreateSecret_568726(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568730 = query.getOrDefault("api-version")
-  valid_568730 = validateParameter(valid_568730, JString, required = true,
+  var valid_564630 = query.getOrDefault("api-version")
+  valid_564630 = validateParameter(valid_564630, JString, required = true,
                                  default = nil)
-  if valid_568730 != nil:
-    section.add "api-version", valid_568730
+  if valid_564630 != nil:
+    section.add "api-version", valid_564630
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -5051,49 +5057,49 @@ proc validate_CatalogCreateSecret_568726(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568732: Call_CatalogCreateSecret_568725; path: JsonNode;
+proc call*(call_564632: Call_CatalogCreateSecret_564625; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Creates the specified secret for use with external data sources in the specified database. This is deprecated and will be removed in the next release. Please use CreateCredential instead.
   ## 
-  let valid = call_568732.validator(path, query, header, formData, body)
-  let scheme = call_568732.pickScheme
+  let valid = call_564632.validator(path, query, header, formData, body)
+  let scheme = call_564632.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568732.url(scheme.get, call_568732.host, call_568732.base,
-                         call_568732.route, valid.getOrDefault("path"),
+  let url = call_564632.url(scheme.get, call_564632.host, call_564632.base,
+                         call_564632.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568732, url, valid)
+  result = hook(call_564632, url, valid)
 
-proc call*(call_568733: Call_CatalogCreateSecret_568725; apiVersion: string;
-          databaseName: string; parameters: JsonNode; secretName: string): Recallable =
+proc call*(call_564633: Call_CatalogCreateSecret_564625; apiVersion: string;
+          secretName: string; databaseName: string; parameters: JsonNode): Recallable =
   ## catalogCreateSecret
   ## Creates the specified secret for use with external data sources in the specified database. This is deprecated and will be removed in the next release. Please use CreateCredential instead.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
+  ##   secretName: string (required)
+  ##             : The name of the secret.
   ##   databaseName: string (required)
   ##               : The name of the database in which to create the secret.
   ##   parameters: JObject (required)
   ##             : The parameters required to create the secret (name and password)
-  ##   secretName: string (required)
-  ##             : The name of the secret.
-  var path_568734 = newJObject()
-  var query_568735 = newJObject()
-  var body_568736 = newJObject()
-  add(query_568735, "api-version", newJString(apiVersion))
-  add(path_568734, "databaseName", newJString(databaseName))
+  var path_564634 = newJObject()
+  var query_564635 = newJObject()
+  var body_564636 = newJObject()
+  add(query_564635, "api-version", newJString(apiVersion))
+  add(path_564634, "secretName", newJString(secretName))
+  add(path_564634, "databaseName", newJString(databaseName))
   if parameters != nil:
-    body_568736 = parameters
-  add(path_568734, "secretName", newJString(secretName))
-  result = call_568733.call(path_568734, query_568735, nil, nil, body_568736)
+    body_564636 = parameters
+  result = call_564633.call(path_564634, query_564635, nil, nil, body_564636)
 
-var catalogCreateSecret* = Call_CatalogCreateSecret_568725(
+var catalogCreateSecret* = Call_CatalogCreateSecret_564625(
     name: "catalogCreateSecret", meth: HttpMethod.HttpPut, host: "azure.local",
     route: "/catalog/usql/databases/{databaseName}/secrets/{secretName}",
-    validator: validate_CatalogCreateSecret_568726, base: "",
-    url: url_CatalogCreateSecret_568727, schemes: {Scheme.Https})
+    validator: validate_CatalogCreateSecret_564626, base: "",
+    url: url_CatalogCreateSecret_564627, schemes: {Scheme.Https})
 type
-  Call_CatalogGetSecret_568715 = ref object of OpenApiRestCall_567666
-proc url_CatalogGetSecret_568717(protocol: Scheme; host: string; base: string;
+  Call_CatalogGetSecret_564615 = ref object of OpenApiRestCall_563564
+proc url_CatalogGetSecret_564617(protocol: Scheme; host: string; base: string;
                                 route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -5111,7 +5117,7 @@ proc url_CatalogGetSecret_568717(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_CatalogGetSecret_568716(path: JsonNode; query: JsonNode;
+proc validate_CatalogGetSecret_564616(path: JsonNode; query: JsonNode;
                                      header: JsonNode; formData: JsonNode;
                                      body: JsonNode): JsonNode =
   ## Gets the specified secret in the specified database. This is deprecated and will be removed in the next release. Please use GetCredential instead.
@@ -5119,23 +5125,23 @@ proc validate_CatalogGetSecret_568716(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   databaseName: JString (required)
-  ##               : The name of the database containing the secret.
   ##   secretName: JString (required)
   ##             : The name of the secret to get
+  ##   databaseName: JString (required)
+  ##               : The name of the database containing the secret.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `databaseName` field"
-  var valid_568718 = path.getOrDefault("databaseName")
-  valid_568718 = validateParameter(valid_568718, JString, required = true,
+        "path argument is necessary due to required `secretName` field"
+  var valid_564618 = path.getOrDefault("secretName")
+  valid_564618 = validateParameter(valid_564618, JString, required = true,
                                  default = nil)
-  if valid_568718 != nil:
-    section.add "databaseName", valid_568718
-  var valid_568719 = path.getOrDefault("secretName")
-  valid_568719 = validateParameter(valid_568719, JString, required = true,
+  if valid_564618 != nil:
+    section.add "secretName", valid_564618
+  var valid_564619 = path.getOrDefault("databaseName")
+  valid_564619 = validateParameter(valid_564619, JString, required = true,
                                  default = nil)
-  if valid_568719 != nil:
-    section.add "secretName", valid_568719
+  if valid_564619 != nil:
+    section.add "databaseName", valid_564619
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -5143,11 +5149,11 @@ proc validate_CatalogGetSecret_568716(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568720 = query.getOrDefault("api-version")
-  valid_568720 = validateParameter(valid_568720, JString, required = true,
+  var valid_564620 = query.getOrDefault("api-version")
+  valid_564620 = validateParameter(valid_564620, JString, required = true,
                                  default = nil)
-  if valid_568720 != nil:
-    section.add "api-version", valid_568720
+  if valid_564620 != nil:
+    section.add "api-version", valid_564620
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -5156,44 +5162,44 @@ proc validate_CatalogGetSecret_568716(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568721: Call_CatalogGetSecret_568715; path: JsonNode;
+proc call*(call_564621: Call_CatalogGetSecret_564615; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the specified secret in the specified database. This is deprecated and will be removed in the next release. Please use GetCredential instead.
   ## 
-  let valid = call_568721.validator(path, query, header, formData, body)
-  let scheme = call_568721.pickScheme
+  let valid = call_564621.validator(path, query, header, formData, body)
+  let scheme = call_564621.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568721.url(scheme.get, call_568721.host, call_568721.base,
-                         call_568721.route, valid.getOrDefault("path"),
+  let url = call_564621.url(scheme.get, call_564621.host, call_564621.base,
+                         call_564621.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568721, url, valid)
+  result = hook(call_564621, url, valid)
 
-proc call*(call_568722: Call_CatalogGetSecret_568715; apiVersion: string;
-          databaseName: string; secretName: string): Recallable =
+proc call*(call_564622: Call_CatalogGetSecret_564615; apiVersion: string;
+          secretName: string; databaseName: string): Recallable =
   ## catalogGetSecret
   ## Gets the specified secret in the specified database. This is deprecated and will be removed in the next release. Please use GetCredential instead.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
-  ##   databaseName: string (required)
-  ##               : The name of the database containing the secret.
   ##   secretName: string (required)
   ##             : The name of the secret to get
-  var path_568723 = newJObject()
-  var query_568724 = newJObject()
-  add(query_568724, "api-version", newJString(apiVersion))
-  add(path_568723, "databaseName", newJString(databaseName))
-  add(path_568723, "secretName", newJString(secretName))
-  result = call_568722.call(path_568723, query_568724, nil, nil, nil)
+  ##   databaseName: string (required)
+  ##               : The name of the database containing the secret.
+  var path_564623 = newJObject()
+  var query_564624 = newJObject()
+  add(query_564624, "api-version", newJString(apiVersion))
+  add(path_564623, "secretName", newJString(secretName))
+  add(path_564623, "databaseName", newJString(databaseName))
+  result = call_564622.call(path_564623, query_564624, nil, nil, nil)
 
-var catalogGetSecret* = Call_CatalogGetSecret_568715(name: "catalogGetSecret",
+var catalogGetSecret* = Call_CatalogGetSecret_564615(name: "catalogGetSecret",
     meth: HttpMethod.HttpGet, host: "azure.local",
     route: "/catalog/usql/databases/{databaseName}/secrets/{secretName}",
-    validator: validate_CatalogGetSecret_568716, base: "",
-    url: url_CatalogGetSecret_568717, schemes: {Scheme.Https})
+    validator: validate_CatalogGetSecret_564616, base: "",
+    url: url_CatalogGetSecret_564617, schemes: {Scheme.Https})
 type
-  Call_CatalogUpdateSecret_568747 = ref object of OpenApiRestCall_567666
-proc url_CatalogUpdateSecret_568749(protocol: Scheme; host: string; base: string;
+  Call_CatalogUpdateSecret_564647 = ref object of OpenApiRestCall_563564
+proc url_CatalogUpdateSecret_564649(protocol: Scheme; host: string; base: string;
                                    route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -5211,7 +5217,7 @@ proc url_CatalogUpdateSecret_568749(protocol: Scheme; host: string; base: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_CatalogUpdateSecret_568748(path: JsonNode; query: JsonNode;
+proc validate_CatalogUpdateSecret_564648(path: JsonNode; query: JsonNode;
                                         header: JsonNode; formData: JsonNode;
                                         body: JsonNode): JsonNode =
   ## Modifies the specified secret for use with external data sources in the specified database. This is deprecated and will be removed in the next release. Please use UpdateCredential instead.
@@ -5219,23 +5225,23 @@ proc validate_CatalogUpdateSecret_568748(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   databaseName: JString (required)
-  ##               : The name of the database containing the secret.
   ##   secretName: JString (required)
   ##             : The name of the secret.
+  ##   databaseName: JString (required)
+  ##               : The name of the database containing the secret.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `databaseName` field"
-  var valid_568750 = path.getOrDefault("databaseName")
-  valid_568750 = validateParameter(valid_568750, JString, required = true,
+        "path argument is necessary due to required `secretName` field"
+  var valid_564650 = path.getOrDefault("secretName")
+  valid_564650 = validateParameter(valid_564650, JString, required = true,
                                  default = nil)
-  if valid_568750 != nil:
-    section.add "databaseName", valid_568750
-  var valid_568751 = path.getOrDefault("secretName")
-  valid_568751 = validateParameter(valid_568751, JString, required = true,
+  if valid_564650 != nil:
+    section.add "secretName", valid_564650
+  var valid_564651 = path.getOrDefault("databaseName")
+  valid_564651 = validateParameter(valid_564651, JString, required = true,
                                  default = nil)
-  if valid_568751 != nil:
-    section.add "secretName", valid_568751
+  if valid_564651 != nil:
+    section.add "databaseName", valid_564651
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -5243,11 +5249,11 @@ proc validate_CatalogUpdateSecret_568748(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568752 = query.getOrDefault("api-version")
-  valid_568752 = validateParameter(valid_568752, JString, required = true,
+  var valid_564652 = query.getOrDefault("api-version")
+  valid_564652 = validateParameter(valid_564652, JString, required = true,
                                  default = nil)
-  if valid_568752 != nil:
-    section.add "api-version", valid_568752
+  if valid_564652 != nil:
+    section.add "api-version", valid_564652
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -5261,49 +5267,49 @@ proc validate_CatalogUpdateSecret_568748(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568754: Call_CatalogUpdateSecret_568747; path: JsonNode;
+proc call*(call_564654: Call_CatalogUpdateSecret_564647; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Modifies the specified secret for use with external data sources in the specified database. This is deprecated and will be removed in the next release. Please use UpdateCredential instead.
   ## 
-  let valid = call_568754.validator(path, query, header, formData, body)
-  let scheme = call_568754.pickScheme
+  let valid = call_564654.validator(path, query, header, formData, body)
+  let scheme = call_564654.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568754.url(scheme.get, call_568754.host, call_568754.base,
-                         call_568754.route, valid.getOrDefault("path"),
+  let url = call_564654.url(scheme.get, call_564654.host, call_564654.base,
+                         call_564654.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568754, url, valid)
+  result = hook(call_564654, url, valid)
 
-proc call*(call_568755: Call_CatalogUpdateSecret_568747; apiVersion: string;
-          databaseName: string; parameters: JsonNode; secretName: string): Recallable =
+proc call*(call_564655: Call_CatalogUpdateSecret_564647; apiVersion: string;
+          secretName: string; databaseName: string; parameters: JsonNode): Recallable =
   ## catalogUpdateSecret
   ## Modifies the specified secret for use with external data sources in the specified database. This is deprecated and will be removed in the next release. Please use UpdateCredential instead.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
+  ##   secretName: string (required)
+  ##             : The name of the secret.
   ##   databaseName: string (required)
   ##               : The name of the database containing the secret.
   ##   parameters: JObject (required)
   ##             : The parameters required to modify the secret (name and password)
-  ##   secretName: string (required)
-  ##             : The name of the secret.
-  var path_568756 = newJObject()
-  var query_568757 = newJObject()
-  var body_568758 = newJObject()
-  add(query_568757, "api-version", newJString(apiVersion))
-  add(path_568756, "databaseName", newJString(databaseName))
+  var path_564656 = newJObject()
+  var query_564657 = newJObject()
+  var body_564658 = newJObject()
+  add(query_564657, "api-version", newJString(apiVersion))
+  add(path_564656, "secretName", newJString(secretName))
+  add(path_564656, "databaseName", newJString(databaseName))
   if parameters != nil:
-    body_568758 = parameters
-  add(path_568756, "secretName", newJString(secretName))
-  result = call_568755.call(path_568756, query_568757, nil, nil, body_568758)
+    body_564658 = parameters
+  result = call_564655.call(path_564656, query_564657, nil, nil, body_564658)
 
-var catalogUpdateSecret* = Call_CatalogUpdateSecret_568747(
+var catalogUpdateSecret* = Call_CatalogUpdateSecret_564647(
     name: "catalogUpdateSecret", meth: HttpMethod.HttpPatch, host: "azure.local",
     route: "/catalog/usql/databases/{databaseName}/secrets/{secretName}",
-    validator: validate_CatalogUpdateSecret_568748, base: "",
-    url: url_CatalogUpdateSecret_568749, schemes: {Scheme.Https})
+    validator: validate_CatalogUpdateSecret_564648, base: "",
+    url: url_CatalogUpdateSecret_564649, schemes: {Scheme.Https})
 type
-  Call_CatalogDeleteSecret_568737 = ref object of OpenApiRestCall_567666
-proc url_CatalogDeleteSecret_568739(protocol: Scheme; host: string; base: string;
+  Call_CatalogDeleteSecret_564637 = ref object of OpenApiRestCall_563564
+proc url_CatalogDeleteSecret_564639(protocol: Scheme; host: string; base: string;
                                    route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -5321,7 +5327,7 @@ proc url_CatalogDeleteSecret_568739(protocol: Scheme; host: string; base: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_CatalogDeleteSecret_568738(path: JsonNode; query: JsonNode;
+proc validate_CatalogDeleteSecret_564638(path: JsonNode; query: JsonNode;
                                         header: JsonNode; formData: JsonNode;
                                         body: JsonNode): JsonNode =
   ## Deletes the specified secret in the specified database. This is deprecated and will be removed in the next release. Please use DeleteCredential instead.
@@ -5329,23 +5335,23 @@ proc validate_CatalogDeleteSecret_568738(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   databaseName: JString (required)
-  ##               : The name of the database containing the secret.
   ##   secretName: JString (required)
   ##             : The name of the secret to delete
+  ##   databaseName: JString (required)
+  ##               : The name of the database containing the secret.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `databaseName` field"
-  var valid_568740 = path.getOrDefault("databaseName")
-  valid_568740 = validateParameter(valid_568740, JString, required = true,
+        "path argument is necessary due to required `secretName` field"
+  var valid_564640 = path.getOrDefault("secretName")
+  valid_564640 = validateParameter(valid_564640, JString, required = true,
                                  default = nil)
-  if valid_568740 != nil:
-    section.add "databaseName", valid_568740
-  var valid_568741 = path.getOrDefault("secretName")
-  valid_568741 = validateParameter(valid_568741, JString, required = true,
+  if valid_564640 != nil:
+    section.add "secretName", valid_564640
+  var valid_564641 = path.getOrDefault("databaseName")
+  valid_564641 = validateParameter(valid_564641, JString, required = true,
                                  default = nil)
-  if valid_568741 != nil:
-    section.add "secretName", valid_568741
+  if valid_564641 != nil:
+    section.add "databaseName", valid_564641
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -5353,11 +5359,11 @@ proc validate_CatalogDeleteSecret_568738(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568742 = query.getOrDefault("api-version")
-  valid_568742 = validateParameter(valid_568742, JString, required = true,
+  var valid_564642 = query.getOrDefault("api-version")
+  valid_564642 = validateParameter(valid_564642, JString, required = true,
                                  default = nil)
-  if valid_568742 != nil:
-    section.add "api-version", valid_568742
+  if valid_564642 != nil:
+    section.add "api-version", valid_564642
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -5366,44 +5372,44 @@ proc validate_CatalogDeleteSecret_568738(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568743: Call_CatalogDeleteSecret_568737; path: JsonNode;
+proc call*(call_564643: Call_CatalogDeleteSecret_564637; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes the specified secret in the specified database. This is deprecated and will be removed in the next release. Please use DeleteCredential instead.
   ## 
-  let valid = call_568743.validator(path, query, header, formData, body)
-  let scheme = call_568743.pickScheme
+  let valid = call_564643.validator(path, query, header, formData, body)
+  let scheme = call_564643.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568743.url(scheme.get, call_568743.host, call_568743.base,
-                         call_568743.route, valid.getOrDefault("path"),
+  let url = call_564643.url(scheme.get, call_564643.host, call_564643.base,
+                         call_564643.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568743, url, valid)
+  result = hook(call_564643, url, valid)
 
-proc call*(call_568744: Call_CatalogDeleteSecret_568737; apiVersion: string;
-          databaseName: string; secretName: string): Recallable =
+proc call*(call_564644: Call_CatalogDeleteSecret_564637; apiVersion: string;
+          secretName: string; databaseName: string): Recallable =
   ## catalogDeleteSecret
   ## Deletes the specified secret in the specified database. This is deprecated and will be removed in the next release. Please use DeleteCredential instead.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
-  ##   databaseName: string (required)
-  ##               : The name of the database containing the secret.
   ##   secretName: string (required)
   ##             : The name of the secret to delete
-  var path_568745 = newJObject()
-  var query_568746 = newJObject()
-  add(query_568746, "api-version", newJString(apiVersion))
-  add(path_568745, "databaseName", newJString(databaseName))
-  add(path_568745, "secretName", newJString(secretName))
-  result = call_568744.call(path_568745, query_568746, nil, nil, nil)
+  ##   databaseName: string (required)
+  ##               : The name of the database containing the secret.
+  var path_564645 = newJObject()
+  var query_564646 = newJObject()
+  add(query_564646, "api-version", newJString(apiVersion))
+  add(path_564645, "secretName", newJString(secretName))
+  add(path_564645, "databaseName", newJString(databaseName))
+  result = call_564644.call(path_564645, query_564646, nil, nil, nil)
 
-var catalogDeleteSecret* = Call_CatalogDeleteSecret_568737(
+var catalogDeleteSecret* = Call_CatalogDeleteSecret_564637(
     name: "catalogDeleteSecret", meth: HttpMethod.HttpDelete, host: "azure.local",
     route: "/catalog/usql/databases/{databaseName}/secrets/{secretName}",
-    validator: validate_CatalogDeleteSecret_568738, base: "",
-    url: url_CatalogDeleteSecret_568739, schemes: {Scheme.Https})
+    validator: validate_CatalogDeleteSecret_564638, base: "",
+    url: url_CatalogDeleteSecret_564639, schemes: {Scheme.Https})
 type
-  Call_CatalogListTableStatisticsByDatabase_568759 = ref object of OpenApiRestCall_567666
-proc url_CatalogListTableStatisticsByDatabase_568761(protocol: Scheme;
+  Call_CatalogListTableStatisticsByDatabase_564659 = ref object of OpenApiRestCall_563564
+proc url_CatalogListTableStatisticsByDatabase_564661(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -5419,7 +5425,7 @@ proc url_CatalogListTableStatisticsByDatabase_568761(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_CatalogListTableStatisticsByDatabase_568760(path: JsonNode;
+proc validate_CatalogListTableStatisticsByDatabase_564660(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Retrieves the list of all statistics in a database from the Data Lake Analytics catalog.
   ## 
@@ -5431,62 +5437,62 @@ proc validate_CatalogListTableStatisticsByDatabase_568760(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `databaseName` field"
-  var valid_568762 = path.getOrDefault("databaseName")
-  valid_568762 = validateParameter(valid_568762, JString, required = true,
+  var valid_564662 = path.getOrDefault("databaseName")
+  valid_564662 = validateParameter(valid_564662, JString, required = true,
                                  default = nil)
-  if valid_568762 != nil:
-    section.add "databaseName", valid_568762
+  if valid_564662 != nil:
+    section.add "databaseName", valid_564662
   result.add "path", section
   ## parameters in `query` object:
-  ##   $orderby: JString
-  ##           : OrderBy clause. One or more comma-separated expressions with an optional "asc" (the default) or "desc" depending on the order you'd like the values sorted, e.g. Categories?$orderby=CategoryName desc. Optional.
-  ##   api-version: JString (required)
-  ##              : Client Api Version.
   ##   $top: JInt
   ##       : The number of items to return. Optional.
+  ##   api-version: JString (required)
+  ##              : Client Api Version.
   ##   $select: JString
   ##          : OData Select statement. Limits the properties on each entry to just those requested, e.g. Categories?$select=CategoryName,Description. Optional.
-  ##   $skip: JInt
-  ##        : The number of items to skip over before returning elements. Optional.
   ##   $count: JBool
   ##         : The Boolean value of true or false to request a count of the matching resources included with the resources in the response, e.g. Categories?$count=true. Optional.
+  ##   $orderby: JString
+  ##           : OrderBy clause. One or more comma-separated expressions with an optional "asc" (the default) or "desc" depending on the order you'd like the values sorted, e.g. Categories?$orderby=CategoryName desc. Optional.
+  ##   $skip: JInt
+  ##        : The number of items to skip over before returning elements. Optional.
   ##   $filter: JString
   ##          : OData filter. Optional.
   section = newJObject()
-  var valid_568763 = query.getOrDefault("$orderby")
-  valid_568763 = validateParameter(valid_568763, JString, required = false,
-                                 default = nil)
-  if valid_568763 != nil:
-    section.add "$orderby", valid_568763
+  var valid_564663 = query.getOrDefault("$top")
+  valid_564663 = validateParameter(valid_564663, JInt, required = false, default = nil)
+  if valid_564663 != nil:
+    section.add "$top", valid_564663
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568764 = query.getOrDefault("api-version")
-  valid_568764 = validateParameter(valid_568764, JString, required = true,
+  var valid_564664 = query.getOrDefault("api-version")
+  valid_564664 = validateParameter(valid_564664, JString, required = true,
                                  default = nil)
-  if valid_568764 != nil:
-    section.add "api-version", valid_568764
-  var valid_568765 = query.getOrDefault("$top")
-  valid_568765 = validateParameter(valid_568765, JInt, required = false, default = nil)
-  if valid_568765 != nil:
-    section.add "$top", valid_568765
-  var valid_568766 = query.getOrDefault("$select")
-  valid_568766 = validateParameter(valid_568766, JString, required = false,
+  if valid_564664 != nil:
+    section.add "api-version", valid_564664
+  var valid_564665 = query.getOrDefault("$select")
+  valid_564665 = validateParameter(valid_564665, JString, required = false,
                                  default = nil)
-  if valid_568766 != nil:
-    section.add "$select", valid_568766
-  var valid_568767 = query.getOrDefault("$skip")
-  valid_568767 = validateParameter(valid_568767, JInt, required = false, default = nil)
-  if valid_568767 != nil:
-    section.add "$skip", valid_568767
-  var valid_568768 = query.getOrDefault("$count")
-  valid_568768 = validateParameter(valid_568768, JBool, required = false, default = nil)
-  if valid_568768 != nil:
-    section.add "$count", valid_568768
-  var valid_568769 = query.getOrDefault("$filter")
-  valid_568769 = validateParameter(valid_568769, JString, required = false,
+  if valid_564665 != nil:
+    section.add "$select", valid_564665
+  var valid_564666 = query.getOrDefault("$count")
+  valid_564666 = validateParameter(valid_564666, JBool, required = false, default = nil)
+  if valid_564666 != nil:
+    section.add "$count", valid_564666
+  var valid_564667 = query.getOrDefault("$orderby")
+  valid_564667 = validateParameter(valid_564667, JString, required = false,
                                  default = nil)
-  if valid_568769 != nil:
-    section.add "$filter", valid_568769
+  if valid_564667 != nil:
+    section.add "$orderby", valid_564667
+  var valid_564668 = query.getOrDefault("$skip")
+  valid_564668 = validateParameter(valid_564668, JInt, required = false, default = nil)
+  if valid_564668 != nil:
+    section.add "$skip", valid_564668
+  var valid_564669 = query.getOrDefault("$filter")
+  valid_564669 = validateParameter(valid_564669, JString, required = false,
+                                 default = nil)
+  if valid_564669 != nil:
+    section.add "$filter", valid_564669
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -5495,62 +5501,62 @@ proc validate_CatalogListTableStatisticsByDatabase_568760(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568770: Call_CatalogListTableStatisticsByDatabase_568759;
+proc call*(call_564670: Call_CatalogListTableStatisticsByDatabase_564659;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Retrieves the list of all statistics in a database from the Data Lake Analytics catalog.
   ## 
-  let valid = call_568770.validator(path, query, header, formData, body)
-  let scheme = call_568770.pickScheme
+  let valid = call_564670.validator(path, query, header, formData, body)
+  let scheme = call_564670.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568770.url(scheme.get, call_568770.host, call_568770.base,
-                         call_568770.route, valid.getOrDefault("path"),
+  let url = call_564670.url(scheme.get, call_564670.host, call_564670.base,
+                         call_564670.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568770, url, valid)
+  result = hook(call_564670, url, valid)
 
-proc call*(call_568771: Call_CatalogListTableStatisticsByDatabase_568759;
-          apiVersion: string; databaseName: string; Orderby: string = ""; Top: int = 0;
-          Select: string = ""; Skip: int = 0; Count: bool = false; Filter: string = ""): Recallable =
+proc call*(call_564671: Call_CatalogListTableStatisticsByDatabase_564659;
+          apiVersion: string; databaseName: string; Top: int = 0; Select: string = "";
+          Count: bool = false; Orderby: string = ""; Skip: int = 0; Filter: string = ""): Recallable =
   ## catalogListTableStatisticsByDatabase
   ## Retrieves the list of all statistics in a database from the Data Lake Analytics catalog.
-  ##   Orderby: string
-  ##          : OrderBy clause. One or more comma-separated expressions with an optional "asc" (the default) or "desc" depending on the order you'd like the values sorted, e.g. Categories?$orderby=CategoryName desc. Optional.
-  ##   apiVersion: string (required)
-  ##             : Client Api Version.
   ##   Top: int
   ##      : The number of items to return. Optional.
+  ##   apiVersion: string (required)
+  ##             : Client Api Version.
   ##   Select: string
   ##         : OData Select statement. Limits the properties on each entry to just those requested, e.g. Categories?$select=CategoryName,Description. Optional.
-  ##   databaseName: string (required)
-  ##               : The name of the database containing the table statistics.
-  ##   Skip: int
-  ##       : The number of items to skip over before returning elements. Optional.
   ##   Count: bool
   ##        : The Boolean value of true or false to request a count of the matching resources included with the resources in the response, e.g. Categories?$count=true. Optional.
+  ##   databaseName: string (required)
+  ##               : The name of the database containing the table statistics.
+  ##   Orderby: string
+  ##          : OrderBy clause. One or more comma-separated expressions with an optional "asc" (the default) or "desc" depending on the order you'd like the values sorted, e.g. Categories?$orderby=CategoryName desc. Optional.
+  ##   Skip: int
+  ##       : The number of items to skip over before returning elements. Optional.
   ##   Filter: string
   ##         : OData filter. Optional.
-  var path_568772 = newJObject()
-  var query_568773 = newJObject()
-  add(query_568773, "$orderby", newJString(Orderby))
-  add(query_568773, "api-version", newJString(apiVersion))
-  add(query_568773, "$top", newJInt(Top))
-  add(query_568773, "$select", newJString(Select))
-  add(path_568772, "databaseName", newJString(databaseName))
-  add(query_568773, "$skip", newJInt(Skip))
-  add(query_568773, "$count", newJBool(Count))
-  add(query_568773, "$filter", newJString(Filter))
-  result = call_568771.call(path_568772, query_568773, nil, nil, nil)
+  var path_564672 = newJObject()
+  var query_564673 = newJObject()
+  add(query_564673, "$top", newJInt(Top))
+  add(query_564673, "api-version", newJString(apiVersion))
+  add(query_564673, "$select", newJString(Select))
+  add(query_564673, "$count", newJBool(Count))
+  add(path_564672, "databaseName", newJString(databaseName))
+  add(query_564673, "$orderby", newJString(Orderby))
+  add(query_564673, "$skip", newJInt(Skip))
+  add(query_564673, "$filter", newJString(Filter))
+  result = call_564671.call(path_564672, query_564673, nil, nil, nil)
 
-var catalogListTableStatisticsByDatabase* = Call_CatalogListTableStatisticsByDatabase_568759(
+var catalogListTableStatisticsByDatabase* = Call_CatalogListTableStatisticsByDatabase_564659(
     name: "catalogListTableStatisticsByDatabase", meth: HttpMethod.HttpGet,
     host: "azure.local",
     route: "/catalog/usql/databases/{databaseName}/statistics",
-    validator: validate_CatalogListTableStatisticsByDatabase_568760, base: "",
-    url: url_CatalogListTableStatisticsByDatabase_568761, schemes: {Scheme.Https})
+    validator: validate_CatalogListTableStatisticsByDatabase_564660, base: "",
+    url: url_CatalogListTableStatisticsByDatabase_564661, schemes: {Scheme.Https})
 type
-  Call_CatalogListTablesByDatabase_568774 = ref object of OpenApiRestCall_567666
-proc url_CatalogListTablesByDatabase_568776(protocol: Scheme; host: string;
+  Call_CatalogListTablesByDatabase_564674 = ref object of OpenApiRestCall_563564
+proc url_CatalogListTablesByDatabase_564676(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -5566,7 +5572,7 @@ proc url_CatalogListTablesByDatabase_568776(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_CatalogListTablesByDatabase_568775(path: JsonNode; query: JsonNode;
+proc validate_CatalogListTablesByDatabase_564675(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Retrieves the list of all tables in a database from the Data Lake Analytics catalog.
   ## 
@@ -5578,69 +5584,69 @@ proc validate_CatalogListTablesByDatabase_568775(path: JsonNode; query: JsonNode
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `databaseName` field"
-  var valid_568777 = path.getOrDefault("databaseName")
-  valid_568777 = validateParameter(valid_568777, JString, required = true,
+  var valid_564677 = path.getOrDefault("databaseName")
+  valid_564677 = validateParameter(valid_564677, JString, required = true,
                                  default = nil)
-  if valid_568777 != nil:
-    section.add "databaseName", valid_568777
+  if valid_564677 != nil:
+    section.add "databaseName", valid_564677
   result.add "path", section
   ## parameters in `query` object:
-  ##   $orderby: JString
-  ##           : OrderBy clause. One or more comma-separated expressions with an optional "asc" (the default) or "desc" depending on the order you'd like the values sorted, e.g. Categories?$orderby=CategoryName desc. Optional.
-  ##   api-version: JString (required)
-  ##              : Client Api Version.
-  ##   $top: JInt
-  ##       : The number of items to return. Optional.
-  ##   $select: JString
-  ##          : OData Select statement. Limits the properties on each entry to just those requested, e.g. Categories?$select=CategoryName,Description. Optional.
-  ##   $skip: JInt
-  ##        : The number of items to skip over before returning elements. Optional.
-  ##   $count: JBool
-  ##         : The Boolean value of true or false to request a count of the matching resources included with the resources in the response, e.g. Categories?$count=true. Optional.
   ##   basic: JBool
   ##        : The basic switch indicates what level of information to return when listing tables. When basic is true, only database_name, schema_name, table_name and version are returned for each table, otherwise all table metadata is returned. By default, it is false
+  ##   $top: JInt
+  ##       : The number of items to return. Optional.
+  ##   api-version: JString (required)
+  ##              : Client Api Version.
+  ##   $select: JString
+  ##          : OData Select statement. Limits the properties on each entry to just those requested, e.g. Categories?$select=CategoryName,Description. Optional.
+  ##   $count: JBool
+  ##         : The Boolean value of true or false to request a count of the matching resources included with the resources in the response, e.g. Categories?$count=true. Optional.
+  ##   $orderby: JString
+  ##           : OrderBy clause. One or more comma-separated expressions with an optional "asc" (the default) or "desc" depending on the order you'd like the values sorted, e.g. Categories?$orderby=CategoryName desc. Optional.
+  ##   $skip: JInt
+  ##        : The number of items to skip over before returning elements. Optional.
   ##   $filter: JString
   ##          : OData filter. Optional.
   section = newJObject()
-  var valid_568778 = query.getOrDefault("$orderby")
-  valid_568778 = validateParameter(valid_568778, JString, required = false,
-                                 default = nil)
-  if valid_568778 != nil:
-    section.add "$orderby", valid_568778
+  var valid_564678 = query.getOrDefault("basic")
+  valid_564678 = validateParameter(valid_564678, JBool, required = false,
+                                 default = newJBool(false))
+  if valid_564678 != nil:
+    section.add "basic", valid_564678
+  var valid_564679 = query.getOrDefault("$top")
+  valid_564679 = validateParameter(valid_564679, JInt, required = false, default = nil)
+  if valid_564679 != nil:
+    section.add "$top", valid_564679
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568779 = query.getOrDefault("api-version")
-  valid_568779 = validateParameter(valid_568779, JString, required = true,
+  var valid_564680 = query.getOrDefault("api-version")
+  valid_564680 = validateParameter(valid_564680, JString, required = true,
                                  default = nil)
-  if valid_568779 != nil:
-    section.add "api-version", valid_568779
-  var valid_568780 = query.getOrDefault("$top")
-  valid_568780 = validateParameter(valid_568780, JInt, required = false, default = nil)
-  if valid_568780 != nil:
-    section.add "$top", valid_568780
-  var valid_568781 = query.getOrDefault("$select")
-  valid_568781 = validateParameter(valid_568781, JString, required = false,
+  if valid_564680 != nil:
+    section.add "api-version", valid_564680
+  var valid_564681 = query.getOrDefault("$select")
+  valid_564681 = validateParameter(valid_564681, JString, required = false,
                                  default = nil)
-  if valid_568781 != nil:
-    section.add "$select", valid_568781
-  var valid_568782 = query.getOrDefault("$skip")
-  valid_568782 = validateParameter(valid_568782, JInt, required = false, default = nil)
-  if valid_568782 != nil:
-    section.add "$skip", valid_568782
-  var valid_568783 = query.getOrDefault("$count")
-  valid_568783 = validateParameter(valid_568783, JBool, required = false, default = nil)
-  if valid_568783 != nil:
-    section.add "$count", valid_568783
-  var valid_568784 = query.getOrDefault("basic")
-  valid_568784 = validateParameter(valid_568784, JBool, required = false,
-                                 default = newJBool(false))
-  if valid_568784 != nil:
-    section.add "basic", valid_568784
-  var valid_568785 = query.getOrDefault("$filter")
-  valid_568785 = validateParameter(valid_568785, JString, required = false,
+  if valid_564681 != nil:
+    section.add "$select", valid_564681
+  var valid_564682 = query.getOrDefault("$count")
+  valid_564682 = validateParameter(valid_564682, JBool, required = false, default = nil)
+  if valid_564682 != nil:
+    section.add "$count", valid_564682
+  var valid_564683 = query.getOrDefault("$orderby")
+  valid_564683 = validateParameter(valid_564683, JString, required = false,
                                  default = nil)
-  if valid_568785 != nil:
-    section.add "$filter", valid_568785
+  if valid_564683 != nil:
+    section.add "$orderby", valid_564683
+  var valid_564684 = query.getOrDefault("$skip")
+  valid_564684 = validateParameter(valid_564684, JInt, required = false, default = nil)
+  if valid_564684 != nil:
+    section.add "$skip", valid_564684
+  var valid_564685 = query.getOrDefault("$filter")
+  valid_564685 = validateParameter(valid_564685, JString, required = false,
+                                 default = nil)
+  if valid_564685 != nil:
+    section.add "$filter", valid_564685
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -5649,64 +5655,64 @@ proc validate_CatalogListTablesByDatabase_568775(path: JsonNode; query: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_568786: Call_CatalogListTablesByDatabase_568774; path: JsonNode;
+proc call*(call_564686: Call_CatalogListTablesByDatabase_564674; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Retrieves the list of all tables in a database from the Data Lake Analytics catalog.
   ## 
-  let valid = call_568786.validator(path, query, header, formData, body)
-  let scheme = call_568786.pickScheme
+  let valid = call_564686.validator(path, query, header, formData, body)
+  let scheme = call_564686.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568786.url(scheme.get, call_568786.host, call_568786.base,
-                         call_568786.route, valid.getOrDefault("path"),
+  let url = call_564686.url(scheme.get, call_564686.host, call_564686.base,
+                         call_564686.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568786, url, valid)
+  result = hook(call_564686, url, valid)
 
-proc call*(call_568787: Call_CatalogListTablesByDatabase_568774;
-          apiVersion: string; databaseName: string; Orderby: string = ""; Top: int = 0;
-          Select: string = ""; Skip: int = 0; Count: bool = false; basic: bool = false;
+proc call*(call_564687: Call_CatalogListTablesByDatabase_564674;
+          apiVersion: string; databaseName: string; basic: bool = false; Top: int = 0;
+          Select: string = ""; Count: bool = false; Orderby: string = ""; Skip: int = 0;
           Filter: string = ""): Recallable =
   ## catalogListTablesByDatabase
   ## Retrieves the list of all tables in a database from the Data Lake Analytics catalog.
-  ##   Orderby: string
-  ##          : OrderBy clause. One or more comma-separated expressions with an optional "asc" (the default) or "desc" depending on the order you'd like the values sorted, e.g. Categories?$orderby=CategoryName desc. Optional.
-  ##   apiVersion: string (required)
-  ##             : Client Api Version.
-  ##   Top: int
-  ##      : The number of items to return. Optional.
-  ##   Select: string
-  ##         : OData Select statement. Limits the properties on each entry to just those requested, e.g. Categories?$select=CategoryName,Description. Optional.
-  ##   databaseName: string (required)
-  ##               : The name of the database containing the tables.
-  ##   Skip: int
-  ##       : The number of items to skip over before returning elements. Optional.
-  ##   Count: bool
-  ##        : The Boolean value of true or false to request a count of the matching resources included with the resources in the response, e.g. Categories?$count=true. Optional.
   ##   basic: bool
   ##        : The basic switch indicates what level of information to return when listing tables. When basic is true, only database_name, schema_name, table_name and version are returned for each table, otherwise all table metadata is returned. By default, it is false
+  ##   Top: int
+  ##      : The number of items to return. Optional.
+  ##   apiVersion: string (required)
+  ##             : Client Api Version.
+  ##   Select: string
+  ##         : OData Select statement. Limits the properties on each entry to just those requested, e.g. Categories?$select=CategoryName,Description. Optional.
+  ##   Count: bool
+  ##        : The Boolean value of true or false to request a count of the matching resources included with the resources in the response, e.g. Categories?$count=true. Optional.
+  ##   databaseName: string (required)
+  ##               : The name of the database containing the tables.
+  ##   Orderby: string
+  ##          : OrderBy clause. One or more comma-separated expressions with an optional "asc" (the default) or "desc" depending on the order you'd like the values sorted, e.g. Categories?$orderby=CategoryName desc. Optional.
+  ##   Skip: int
+  ##       : The number of items to skip over before returning elements. Optional.
   ##   Filter: string
   ##         : OData filter. Optional.
-  var path_568788 = newJObject()
-  var query_568789 = newJObject()
-  add(query_568789, "$orderby", newJString(Orderby))
-  add(query_568789, "api-version", newJString(apiVersion))
-  add(query_568789, "$top", newJInt(Top))
-  add(query_568789, "$select", newJString(Select))
-  add(path_568788, "databaseName", newJString(databaseName))
-  add(query_568789, "$skip", newJInt(Skip))
-  add(query_568789, "$count", newJBool(Count))
-  add(query_568789, "basic", newJBool(basic))
-  add(query_568789, "$filter", newJString(Filter))
-  result = call_568787.call(path_568788, query_568789, nil, nil, nil)
+  var path_564688 = newJObject()
+  var query_564689 = newJObject()
+  add(query_564689, "basic", newJBool(basic))
+  add(query_564689, "$top", newJInt(Top))
+  add(query_564689, "api-version", newJString(apiVersion))
+  add(query_564689, "$select", newJString(Select))
+  add(query_564689, "$count", newJBool(Count))
+  add(path_564688, "databaseName", newJString(databaseName))
+  add(query_564689, "$orderby", newJString(Orderby))
+  add(query_564689, "$skip", newJInt(Skip))
+  add(query_564689, "$filter", newJString(Filter))
+  result = call_564687.call(path_564688, query_564689, nil, nil, nil)
 
-var catalogListTablesByDatabase* = Call_CatalogListTablesByDatabase_568774(
+var catalogListTablesByDatabase* = Call_CatalogListTablesByDatabase_564674(
     name: "catalogListTablesByDatabase", meth: HttpMethod.HttpGet,
     host: "azure.local", route: "/catalog/usql/databases/{databaseName}/tables",
-    validator: validate_CatalogListTablesByDatabase_568775, base: "",
-    url: url_CatalogListTablesByDatabase_568776, schemes: {Scheme.Https})
+    validator: validate_CatalogListTablesByDatabase_564675, base: "",
+    url: url_CatalogListTablesByDatabase_564676, schemes: {Scheme.Https})
 type
-  Call_CatalogListTableValuedFunctionsByDatabase_568790 = ref object of OpenApiRestCall_567666
-proc url_CatalogListTableValuedFunctionsByDatabase_568792(protocol: Scheme;
+  Call_CatalogListTableValuedFunctionsByDatabase_564690 = ref object of OpenApiRestCall_563564
+proc url_CatalogListTableValuedFunctionsByDatabase_564692(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -5722,7 +5728,7 @@ proc url_CatalogListTableValuedFunctionsByDatabase_568792(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_CatalogListTableValuedFunctionsByDatabase_568791(path: JsonNode;
+proc validate_CatalogListTableValuedFunctionsByDatabase_564691(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Retrieves the list of all table valued functions in a database from the Data Lake Analytics catalog.
   ## 
@@ -5734,62 +5740,62 @@ proc validate_CatalogListTableValuedFunctionsByDatabase_568791(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `databaseName` field"
-  var valid_568793 = path.getOrDefault("databaseName")
-  valid_568793 = validateParameter(valid_568793, JString, required = true,
+  var valid_564693 = path.getOrDefault("databaseName")
+  valid_564693 = validateParameter(valid_564693, JString, required = true,
                                  default = nil)
-  if valid_568793 != nil:
-    section.add "databaseName", valid_568793
+  if valid_564693 != nil:
+    section.add "databaseName", valid_564693
   result.add "path", section
   ## parameters in `query` object:
-  ##   $orderby: JString
-  ##           : OrderBy clause. One or more comma-separated expressions with an optional "asc" (the default) or "desc" depending on the order you'd like the values sorted, e.g. Categories?$orderby=CategoryName desc. Optional.
-  ##   api-version: JString (required)
-  ##              : Client Api Version.
   ##   $top: JInt
   ##       : The number of items to return. Optional.
+  ##   api-version: JString (required)
+  ##              : Client Api Version.
   ##   $select: JString
   ##          : OData Select statement. Limits the properties on each entry to just those requested, e.g. Categories?$select=CategoryName,Description. Optional.
-  ##   $skip: JInt
-  ##        : The number of items to skip over before returning elements. Optional.
   ##   $count: JBool
   ##         : The Boolean value of true or false to request a count of the matching resources included with the resources in the response, e.g. Categories?$count=true. Optional.
+  ##   $orderby: JString
+  ##           : OrderBy clause. One or more comma-separated expressions with an optional "asc" (the default) or "desc" depending on the order you'd like the values sorted, e.g. Categories?$orderby=CategoryName desc. Optional.
+  ##   $skip: JInt
+  ##        : The number of items to skip over before returning elements. Optional.
   ##   $filter: JString
   ##          : OData filter. Optional.
   section = newJObject()
-  var valid_568794 = query.getOrDefault("$orderby")
-  valid_568794 = validateParameter(valid_568794, JString, required = false,
-                                 default = nil)
-  if valid_568794 != nil:
-    section.add "$orderby", valid_568794
+  var valid_564694 = query.getOrDefault("$top")
+  valid_564694 = validateParameter(valid_564694, JInt, required = false, default = nil)
+  if valid_564694 != nil:
+    section.add "$top", valid_564694
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568795 = query.getOrDefault("api-version")
-  valid_568795 = validateParameter(valid_568795, JString, required = true,
+  var valid_564695 = query.getOrDefault("api-version")
+  valid_564695 = validateParameter(valid_564695, JString, required = true,
                                  default = nil)
-  if valid_568795 != nil:
-    section.add "api-version", valid_568795
-  var valid_568796 = query.getOrDefault("$top")
-  valid_568796 = validateParameter(valid_568796, JInt, required = false, default = nil)
-  if valid_568796 != nil:
-    section.add "$top", valid_568796
-  var valid_568797 = query.getOrDefault("$select")
-  valid_568797 = validateParameter(valid_568797, JString, required = false,
+  if valid_564695 != nil:
+    section.add "api-version", valid_564695
+  var valid_564696 = query.getOrDefault("$select")
+  valid_564696 = validateParameter(valid_564696, JString, required = false,
                                  default = nil)
-  if valid_568797 != nil:
-    section.add "$select", valid_568797
-  var valid_568798 = query.getOrDefault("$skip")
-  valid_568798 = validateParameter(valid_568798, JInt, required = false, default = nil)
-  if valid_568798 != nil:
-    section.add "$skip", valid_568798
-  var valid_568799 = query.getOrDefault("$count")
-  valid_568799 = validateParameter(valid_568799, JBool, required = false, default = nil)
-  if valid_568799 != nil:
-    section.add "$count", valid_568799
-  var valid_568800 = query.getOrDefault("$filter")
-  valid_568800 = validateParameter(valid_568800, JString, required = false,
+  if valid_564696 != nil:
+    section.add "$select", valid_564696
+  var valid_564697 = query.getOrDefault("$count")
+  valid_564697 = validateParameter(valid_564697, JBool, required = false, default = nil)
+  if valid_564697 != nil:
+    section.add "$count", valid_564697
+  var valid_564698 = query.getOrDefault("$orderby")
+  valid_564698 = validateParameter(valid_564698, JString, required = false,
                                  default = nil)
-  if valid_568800 != nil:
-    section.add "$filter", valid_568800
+  if valid_564698 != nil:
+    section.add "$orderby", valid_564698
+  var valid_564699 = query.getOrDefault("$skip")
+  valid_564699 = validateParameter(valid_564699, JInt, required = false, default = nil)
+  if valid_564699 != nil:
+    section.add "$skip", valid_564699
+  var valid_564700 = query.getOrDefault("$filter")
+  valid_564700 = validateParameter(valid_564700, JString, required = false,
+                                 default = nil)
+  if valid_564700 != nil:
+    section.add "$filter", valid_564700
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -5798,63 +5804,63 @@ proc validate_CatalogListTableValuedFunctionsByDatabase_568791(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568801: Call_CatalogListTableValuedFunctionsByDatabase_568790;
+proc call*(call_564701: Call_CatalogListTableValuedFunctionsByDatabase_564690;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Retrieves the list of all table valued functions in a database from the Data Lake Analytics catalog.
   ## 
-  let valid = call_568801.validator(path, query, header, formData, body)
-  let scheme = call_568801.pickScheme
+  let valid = call_564701.validator(path, query, header, formData, body)
+  let scheme = call_564701.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568801.url(scheme.get, call_568801.host, call_568801.base,
-                         call_568801.route, valid.getOrDefault("path"),
+  let url = call_564701.url(scheme.get, call_564701.host, call_564701.base,
+                         call_564701.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568801, url, valid)
+  result = hook(call_564701, url, valid)
 
-proc call*(call_568802: Call_CatalogListTableValuedFunctionsByDatabase_568790;
-          apiVersion: string; databaseName: string; Orderby: string = ""; Top: int = 0;
-          Select: string = ""; Skip: int = 0; Count: bool = false; Filter: string = ""): Recallable =
+proc call*(call_564702: Call_CatalogListTableValuedFunctionsByDatabase_564690;
+          apiVersion: string; databaseName: string; Top: int = 0; Select: string = "";
+          Count: bool = false; Orderby: string = ""; Skip: int = 0; Filter: string = ""): Recallable =
   ## catalogListTableValuedFunctionsByDatabase
   ## Retrieves the list of all table valued functions in a database from the Data Lake Analytics catalog.
-  ##   Orderby: string
-  ##          : OrderBy clause. One or more comma-separated expressions with an optional "asc" (the default) or "desc" depending on the order you'd like the values sorted, e.g. Categories?$orderby=CategoryName desc. Optional.
-  ##   apiVersion: string (required)
-  ##             : Client Api Version.
   ##   Top: int
   ##      : The number of items to return. Optional.
+  ##   apiVersion: string (required)
+  ##             : Client Api Version.
   ##   Select: string
   ##         : OData Select statement. Limits the properties on each entry to just those requested, e.g. Categories?$select=CategoryName,Description. Optional.
-  ##   databaseName: string (required)
-  ##               : The name of the database containing the table valued functions.
-  ##   Skip: int
-  ##       : The number of items to skip over before returning elements. Optional.
   ##   Count: bool
   ##        : The Boolean value of true or false to request a count of the matching resources included with the resources in the response, e.g. Categories?$count=true. Optional.
+  ##   databaseName: string (required)
+  ##               : The name of the database containing the table valued functions.
+  ##   Orderby: string
+  ##          : OrderBy clause. One or more comma-separated expressions with an optional "asc" (the default) or "desc" depending on the order you'd like the values sorted, e.g. Categories?$orderby=CategoryName desc. Optional.
+  ##   Skip: int
+  ##       : The number of items to skip over before returning elements. Optional.
   ##   Filter: string
   ##         : OData filter. Optional.
-  var path_568803 = newJObject()
-  var query_568804 = newJObject()
-  add(query_568804, "$orderby", newJString(Orderby))
-  add(query_568804, "api-version", newJString(apiVersion))
-  add(query_568804, "$top", newJInt(Top))
-  add(query_568804, "$select", newJString(Select))
-  add(path_568803, "databaseName", newJString(databaseName))
-  add(query_568804, "$skip", newJInt(Skip))
-  add(query_568804, "$count", newJBool(Count))
-  add(query_568804, "$filter", newJString(Filter))
-  result = call_568802.call(path_568803, query_568804, nil, nil, nil)
+  var path_564703 = newJObject()
+  var query_564704 = newJObject()
+  add(query_564704, "$top", newJInt(Top))
+  add(query_564704, "api-version", newJString(apiVersion))
+  add(query_564704, "$select", newJString(Select))
+  add(query_564704, "$count", newJBool(Count))
+  add(path_564703, "databaseName", newJString(databaseName))
+  add(query_564704, "$orderby", newJString(Orderby))
+  add(query_564704, "$skip", newJInt(Skip))
+  add(query_564704, "$filter", newJString(Filter))
+  result = call_564702.call(path_564703, query_564704, nil, nil, nil)
 
-var catalogListTableValuedFunctionsByDatabase* = Call_CatalogListTableValuedFunctionsByDatabase_568790(
+var catalogListTableValuedFunctionsByDatabase* = Call_CatalogListTableValuedFunctionsByDatabase_564690(
     name: "catalogListTableValuedFunctionsByDatabase", meth: HttpMethod.HttpGet,
     host: "azure.local",
     route: "/catalog/usql/databases/{databaseName}/tablevaluedfunctions",
-    validator: validate_CatalogListTableValuedFunctionsByDatabase_568791,
-    base: "", url: url_CatalogListTableValuedFunctionsByDatabase_568792,
+    validator: validate_CatalogListTableValuedFunctionsByDatabase_564691,
+    base: "", url: url_CatalogListTableValuedFunctionsByDatabase_564692,
     schemes: {Scheme.Https})
 type
-  Call_CatalogListViewsByDatabase_568805 = ref object of OpenApiRestCall_567666
-proc url_CatalogListViewsByDatabase_568807(protocol: Scheme; host: string;
+  Call_CatalogListViewsByDatabase_564705 = ref object of OpenApiRestCall_563564
+proc url_CatalogListViewsByDatabase_564707(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -5870,7 +5876,7 @@ proc url_CatalogListViewsByDatabase_568807(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_CatalogListViewsByDatabase_568806(path: JsonNode; query: JsonNode;
+proc validate_CatalogListViewsByDatabase_564706(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Retrieves the list of all views in a database from the Data Lake Analytics catalog.
   ## 
@@ -5882,62 +5888,62 @@ proc validate_CatalogListViewsByDatabase_568806(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `databaseName` field"
-  var valid_568808 = path.getOrDefault("databaseName")
-  valid_568808 = validateParameter(valid_568808, JString, required = true,
+  var valid_564708 = path.getOrDefault("databaseName")
+  valid_564708 = validateParameter(valid_564708, JString, required = true,
                                  default = nil)
-  if valid_568808 != nil:
-    section.add "databaseName", valid_568808
+  if valid_564708 != nil:
+    section.add "databaseName", valid_564708
   result.add "path", section
   ## parameters in `query` object:
-  ##   $orderby: JString
-  ##           : OrderBy clause. One or more comma-separated expressions with an optional "asc" (the default) or "desc" depending on the order you'd like the values sorted, e.g. Categories?$orderby=CategoryName desc. Optional.
-  ##   api-version: JString (required)
-  ##              : Client Api Version.
   ##   $top: JInt
   ##       : The number of items to return. Optional.
+  ##   api-version: JString (required)
+  ##              : Client Api Version.
   ##   $select: JString
   ##          : OData Select statement. Limits the properties on each entry to just those requested, e.g. Categories?$select=CategoryName,Description. Optional.
-  ##   $skip: JInt
-  ##        : The number of items to skip over before returning elements. Optional.
   ##   $count: JBool
   ##         : The Boolean value of true or false to request a count of the matching resources included with the resources in the response, e.g. Categories?$count=true. Optional.
+  ##   $orderby: JString
+  ##           : OrderBy clause. One or more comma-separated expressions with an optional "asc" (the default) or "desc" depending on the order you'd like the values sorted, e.g. Categories?$orderby=CategoryName desc. Optional.
+  ##   $skip: JInt
+  ##        : The number of items to skip over before returning elements. Optional.
   ##   $filter: JString
   ##          : OData filter. Optional.
   section = newJObject()
-  var valid_568809 = query.getOrDefault("$orderby")
-  valid_568809 = validateParameter(valid_568809, JString, required = false,
-                                 default = nil)
-  if valid_568809 != nil:
-    section.add "$orderby", valid_568809
+  var valid_564709 = query.getOrDefault("$top")
+  valid_564709 = validateParameter(valid_564709, JInt, required = false, default = nil)
+  if valid_564709 != nil:
+    section.add "$top", valid_564709
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568810 = query.getOrDefault("api-version")
-  valid_568810 = validateParameter(valid_568810, JString, required = true,
+  var valid_564710 = query.getOrDefault("api-version")
+  valid_564710 = validateParameter(valid_564710, JString, required = true,
                                  default = nil)
-  if valid_568810 != nil:
-    section.add "api-version", valid_568810
-  var valid_568811 = query.getOrDefault("$top")
-  valid_568811 = validateParameter(valid_568811, JInt, required = false, default = nil)
-  if valid_568811 != nil:
-    section.add "$top", valid_568811
-  var valid_568812 = query.getOrDefault("$select")
-  valid_568812 = validateParameter(valid_568812, JString, required = false,
+  if valid_564710 != nil:
+    section.add "api-version", valid_564710
+  var valid_564711 = query.getOrDefault("$select")
+  valid_564711 = validateParameter(valid_564711, JString, required = false,
                                  default = nil)
-  if valid_568812 != nil:
-    section.add "$select", valid_568812
-  var valid_568813 = query.getOrDefault("$skip")
-  valid_568813 = validateParameter(valid_568813, JInt, required = false, default = nil)
-  if valid_568813 != nil:
-    section.add "$skip", valid_568813
-  var valid_568814 = query.getOrDefault("$count")
-  valid_568814 = validateParameter(valid_568814, JBool, required = false, default = nil)
-  if valid_568814 != nil:
-    section.add "$count", valid_568814
-  var valid_568815 = query.getOrDefault("$filter")
-  valid_568815 = validateParameter(valid_568815, JString, required = false,
+  if valid_564711 != nil:
+    section.add "$select", valid_564711
+  var valid_564712 = query.getOrDefault("$count")
+  valid_564712 = validateParameter(valid_564712, JBool, required = false, default = nil)
+  if valid_564712 != nil:
+    section.add "$count", valid_564712
+  var valid_564713 = query.getOrDefault("$orderby")
+  valid_564713 = validateParameter(valid_564713, JString, required = false,
                                  default = nil)
-  if valid_568815 != nil:
-    section.add "$filter", valid_568815
+  if valid_564713 != nil:
+    section.add "$orderby", valid_564713
+  var valid_564714 = query.getOrDefault("$skip")
+  valid_564714 = validateParameter(valid_564714, JInt, required = false, default = nil)
+  if valid_564714 != nil:
+    section.add "$skip", valid_564714
+  var valid_564715 = query.getOrDefault("$filter")
+  valid_564715 = validateParameter(valid_564715, JString, required = false,
+                                 default = nil)
+  if valid_564715 != nil:
+    section.add "$filter", valid_564715
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -5946,57 +5952,57 @@ proc validate_CatalogListViewsByDatabase_568806(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568816: Call_CatalogListViewsByDatabase_568805; path: JsonNode;
+proc call*(call_564716: Call_CatalogListViewsByDatabase_564705; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Retrieves the list of all views in a database from the Data Lake Analytics catalog.
   ## 
-  let valid = call_568816.validator(path, query, header, formData, body)
-  let scheme = call_568816.pickScheme
+  let valid = call_564716.validator(path, query, header, formData, body)
+  let scheme = call_564716.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568816.url(scheme.get, call_568816.host, call_568816.base,
-                         call_568816.route, valid.getOrDefault("path"),
+  let url = call_564716.url(scheme.get, call_564716.host, call_564716.base,
+                         call_564716.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568816, url, valid)
+  result = hook(call_564716, url, valid)
 
-proc call*(call_568817: Call_CatalogListViewsByDatabase_568805; apiVersion: string;
-          databaseName: string; Orderby: string = ""; Top: int = 0; Select: string = "";
-          Skip: int = 0; Count: bool = false; Filter: string = ""): Recallable =
+proc call*(call_564717: Call_CatalogListViewsByDatabase_564705; apiVersion: string;
+          databaseName: string; Top: int = 0; Select: string = ""; Count: bool = false;
+          Orderby: string = ""; Skip: int = 0; Filter: string = ""): Recallable =
   ## catalogListViewsByDatabase
   ## Retrieves the list of all views in a database from the Data Lake Analytics catalog.
-  ##   Orderby: string
-  ##          : OrderBy clause. One or more comma-separated expressions with an optional "asc" (the default) or "desc" depending on the order you'd like the values sorted, e.g. Categories?$orderby=CategoryName desc. Optional.
-  ##   apiVersion: string (required)
-  ##             : Client Api Version.
   ##   Top: int
   ##      : The number of items to return. Optional.
+  ##   apiVersion: string (required)
+  ##             : Client Api Version.
   ##   Select: string
   ##         : OData Select statement. Limits the properties on each entry to just those requested, e.g. Categories?$select=CategoryName,Description. Optional.
-  ##   databaseName: string (required)
-  ##               : The name of the database containing the views.
-  ##   Skip: int
-  ##       : The number of items to skip over before returning elements. Optional.
   ##   Count: bool
   ##        : The Boolean value of true or false to request a count of the matching resources included with the resources in the response, e.g. Categories?$count=true. Optional.
+  ##   databaseName: string (required)
+  ##               : The name of the database containing the views.
+  ##   Orderby: string
+  ##          : OrderBy clause. One or more comma-separated expressions with an optional "asc" (the default) or "desc" depending on the order you'd like the values sorted, e.g. Categories?$orderby=CategoryName desc. Optional.
+  ##   Skip: int
+  ##       : The number of items to skip over before returning elements. Optional.
   ##   Filter: string
   ##         : OData filter. Optional.
-  var path_568818 = newJObject()
-  var query_568819 = newJObject()
-  add(query_568819, "$orderby", newJString(Orderby))
-  add(query_568819, "api-version", newJString(apiVersion))
-  add(query_568819, "$top", newJInt(Top))
-  add(query_568819, "$select", newJString(Select))
-  add(path_568818, "databaseName", newJString(databaseName))
-  add(query_568819, "$skip", newJInt(Skip))
-  add(query_568819, "$count", newJBool(Count))
-  add(query_568819, "$filter", newJString(Filter))
-  result = call_568817.call(path_568818, query_568819, nil, nil, nil)
+  var path_564718 = newJObject()
+  var query_564719 = newJObject()
+  add(query_564719, "$top", newJInt(Top))
+  add(query_564719, "api-version", newJString(apiVersion))
+  add(query_564719, "$select", newJString(Select))
+  add(query_564719, "$count", newJBool(Count))
+  add(path_564718, "databaseName", newJString(databaseName))
+  add(query_564719, "$orderby", newJString(Orderby))
+  add(query_564719, "$skip", newJInt(Skip))
+  add(query_564719, "$filter", newJString(Filter))
+  result = call_564717.call(path_564718, query_564719, nil, nil, nil)
 
-var catalogListViewsByDatabase* = Call_CatalogListViewsByDatabase_568805(
+var catalogListViewsByDatabase* = Call_CatalogListViewsByDatabase_564705(
     name: "catalogListViewsByDatabase", meth: HttpMethod.HttpGet,
     host: "azure.local", route: "/catalog/usql/databases/{databaseName}/views",
-    validator: validate_CatalogListViewsByDatabase_568806, base: "",
-    url: url_CatalogListViewsByDatabase_568807, schemes: {Scheme.Https})
+    validator: validate_CatalogListViewsByDatabase_564706, base: "",
+    url: url_CatalogListViewsByDatabase_564707, schemes: {Scheme.Https})
 export
   rest
 

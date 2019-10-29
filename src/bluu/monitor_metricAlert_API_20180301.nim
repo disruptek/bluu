@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, httpcore
 
 ## auto-generated via openapi macro
 ## title: MonitorManagementClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_567659 = ref object of OpenApiRestCall
+  OpenApiRestCall_563557 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_567659](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563557](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_567659): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563557): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,8 +107,8 @@ const
   macServiceName = "monitor-metricAlert_API"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_MetricAlertsListBySubscription_567881 = ref object of OpenApiRestCall_567659
-proc url_MetricAlertsListBySubscription_567883(protocol: Scheme; host: string;
+  Call_MetricAlertsListBySubscription_563779 = ref object of OpenApiRestCall_563557
+proc url_MetricAlertsListBySubscription_563781(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -120,7 +124,7 @@ proc url_MetricAlertsListBySubscription_567883(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_MetricAlertsListBySubscription_567882(path: JsonNode;
+proc validate_MetricAlertsListBySubscription_563780(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Retrieve alert rule definitions in a subscription.
   ## 
@@ -132,11 +136,11 @@ proc validate_MetricAlertsListBySubscription_567882(path: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_568056 = path.getOrDefault("subscriptionId")
-  valid_568056 = validateParameter(valid_568056, JString, required = true,
+  var valid_563956 = path.getOrDefault("subscriptionId")
+  valid_563956 = validateParameter(valid_563956, JString, required = true,
                                  default = nil)
-  if valid_568056 != nil:
-    section.add "subscriptionId", valid_568056
+  if valid_563956 != nil:
+    section.add "subscriptionId", valid_563956
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -144,11 +148,11 @@ proc validate_MetricAlertsListBySubscription_567882(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568057 = query.getOrDefault("api-version")
-  valid_568057 = validateParameter(valid_568057, JString, required = true,
+  var valid_563957 = query.getOrDefault("api-version")
+  valid_563957 = validateParameter(valid_563957, JString, required = true,
                                  default = nil)
-  if valid_568057 != nil:
-    section.add "api-version", valid_568057
+  if valid_563957 != nil:
+    section.add "api-version", valid_563957
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -157,20 +161,20 @@ proc validate_MetricAlertsListBySubscription_567882(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568080: Call_MetricAlertsListBySubscription_567881; path: JsonNode;
+proc call*(call_563980: Call_MetricAlertsListBySubscription_563779; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Retrieve alert rule definitions in a subscription.
   ## 
-  let valid = call_568080.validator(path, query, header, formData, body)
-  let scheme = call_568080.pickScheme
+  let valid = call_563980.validator(path, query, header, formData, body)
+  let scheme = call_563980.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568080.url(scheme.get, call_568080.host, call_568080.base,
-                         call_568080.route, valid.getOrDefault("path"),
+  let url = call_563980.url(scheme.get, call_563980.host, call_563980.base,
+                         call_563980.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568080, url, valid)
+  result = hook(call_563980, url, valid)
 
-proc call*(call_568151: Call_MetricAlertsListBySubscription_567881;
+proc call*(call_564051: Call_MetricAlertsListBySubscription_563779;
           apiVersion: string; subscriptionId: string): Recallable =
   ## metricAlertsListBySubscription
   ## Retrieve alert rule definitions in a subscription.
@@ -178,20 +182,20 @@ proc call*(call_568151: Call_MetricAlertsListBySubscription_567881;
   ##             : Client Api Version.
   ##   subscriptionId: string (required)
   ##                 : The Azure subscription Id.
-  var path_568152 = newJObject()
-  var query_568154 = newJObject()
-  add(query_568154, "api-version", newJString(apiVersion))
-  add(path_568152, "subscriptionId", newJString(subscriptionId))
-  result = call_568151.call(path_568152, query_568154, nil, nil, nil)
+  var path_564052 = newJObject()
+  var query_564054 = newJObject()
+  add(query_564054, "api-version", newJString(apiVersion))
+  add(path_564052, "subscriptionId", newJString(subscriptionId))
+  result = call_564051.call(path_564052, query_564054, nil, nil, nil)
 
-var metricAlertsListBySubscription* = Call_MetricAlertsListBySubscription_567881(
+var metricAlertsListBySubscription* = Call_MetricAlertsListBySubscription_563779(
     name: "metricAlertsListBySubscription", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Insights/metricAlerts",
-    validator: validate_MetricAlertsListBySubscription_567882, base: "",
-    url: url_MetricAlertsListBySubscription_567883, schemes: {Scheme.Https})
+    validator: validate_MetricAlertsListBySubscription_563780, base: "",
+    url: url_MetricAlertsListBySubscription_563781, schemes: {Scheme.Https})
 type
-  Call_MetricAlertsListByResourceGroup_568193 = ref object of OpenApiRestCall_567659
-proc url_MetricAlertsListByResourceGroup_568195(protocol: Scheme; host: string;
+  Call_MetricAlertsListByResourceGroup_564093 = ref object of OpenApiRestCall_563557
+proc url_MetricAlertsListByResourceGroup_564095(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -211,30 +215,30 @@ proc url_MetricAlertsListByResourceGroup_568195(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_MetricAlertsListByResourceGroup_568194(path: JsonNode;
+proc validate_MetricAlertsListByResourceGroup_564094(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Retrieve alert rule definitions in a resource group.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   subscriptionId: JString (required)
   ##                 : The Azure subscription Id.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568196 = path.getOrDefault("resourceGroupName")
-  valid_568196 = validateParameter(valid_568196, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564096 = path.getOrDefault("subscriptionId")
+  valid_564096 = validateParameter(valid_564096, JString, required = true,
                                  default = nil)
-  if valid_568196 != nil:
-    section.add "resourceGroupName", valid_568196
-  var valid_568197 = path.getOrDefault("subscriptionId")
-  valid_568197 = validateParameter(valid_568197, JString, required = true,
+  if valid_564096 != nil:
+    section.add "subscriptionId", valid_564096
+  var valid_564097 = path.getOrDefault("resourceGroupName")
+  valid_564097 = validateParameter(valid_564097, JString, required = true,
                                  default = nil)
-  if valid_568197 != nil:
-    section.add "subscriptionId", valid_568197
+  if valid_564097 != nil:
+    section.add "resourceGroupName", valid_564097
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -242,11 +246,11 @@ proc validate_MetricAlertsListByResourceGroup_568194(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568198 = query.getOrDefault("api-version")
-  valid_568198 = validateParameter(valid_568198, JString, required = true,
+  var valid_564098 = query.getOrDefault("api-version")
+  valid_564098 = validateParameter(valid_564098, JString, required = true,
                                  default = nil)
-  if valid_568198 != nil:
-    section.add "api-version", valid_568198
+  if valid_564098 != nil:
+    section.add "api-version", valid_564098
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -255,45 +259,45 @@ proc validate_MetricAlertsListByResourceGroup_568194(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568199: Call_MetricAlertsListByResourceGroup_568193;
+proc call*(call_564099: Call_MetricAlertsListByResourceGroup_564093;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Retrieve alert rule definitions in a resource group.
   ## 
-  let valid = call_568199.validator(path, query, header, formData, body)
-  let scheme = call_568199.pickScheme
+  let valid = call_564099.validator(path, query, header, formData, body)
+  let scheme = call_564099.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568199.url(scheme.get, call_568199.host, call_568199.base,
-                         call_568199.route, valid.getOrDefault("path"),
+  let url = call_564099.url(scheme.get, call_564099.host, call_564099.base,
+                         call_564099.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568199, url, valid)
+  result = hook(call_564099, url, valid)
 
-proc call*(call_568200: Call_MetricAlertsListByResourceGroup_568193;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string): Recallable =
+proc call*(call_564100: Call_MetricAlertsListByResourceGroup_564093;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string): Recallable =
   ## metricAlertsListByResourceGroup
   ## Retrieve alert rule definitions in a resource group.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
   ##   subscriptionId: string (required)
   ##                 : The Azure subscription Id.
-  var path_568201 = newJObject()
-  var query_568202 = newJObject()
-  add(path_568201, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568202, "api-version", newJString(apiVersion))
-  add(path_568201, "subscriptionId", newJString(subscriptionId))
-  result = call_568200.call(path_568201, query_568202, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564101 = newJObject()
+  var query_564102 = newJObject()
+  add(query_564102, "api-version", newJString(apiVersion))
+  add(path_564101, "subscriptionId", newJString(subscriptionId))
+  add(path_564101, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564100.call(path_564101, query_564102, nil, nil, nil)
 
-var metricAlertsListByResourceGroup* = Call_MetricAlertsListByResourceGroup_568193(
+var metricAlertsListByResourceGroup* = Call_MetricAlertsListByResourceGroup_564093(
     name: "metricAlertsListByResourceGroup", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Insights/metricAlerts",
-    validator: validate_MetricAlertsListByResourceGroup_568194, base: "",
-    url: url_MetricAlertsListByResourceGroup_568195, schemes: {Scheme.Https})
+    validator: validate_MetricAlertsListByResourceGroup_564094, base: "",
+    url: url_MetricAlertsListByResourceGroup_564095, schemes: {Scheme.Https})
 type
-  Call_MetricAlertsCreateOrUpdate_568214 = ref object of OpenApiRestCall_567659
-proc url_MetricAlertsCreateOrUpdate_568216(protocol: Scheme; host: string;
+  Call_MetricAlertsCreateOrUpdate_564114 = ref object of OpenApiRestCall_563557
+proc url_MetricAlertsCreateOrUpdate_564116(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -316,37 +320,37 @@ proc url_MetricAlertsCreateOrUpdate_568216(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_MetricAlertsCreateOrUpdate_568215(path: JsonNode; query: JsonNode;
+proc validate_MetricAlertsCreateOrUpdate_564115(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Create or update an metric alert definition.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
-  ##   ruleName: JString (required)
-  ##           : The name of the rule.
   ##   subscriptionId: JString (required)
   ##                 : The Azure subscription Id.
+  ##   ruleName: JString (required)
+  ##           : The name of the rule.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568217 = path.getOrDefault("resourceGroupName")
-  valid_568217 = validateParameter(valid_568217, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564117 = path.getOrDefault("subscriptionId")
+  valid_564117 = validateParameter(valid_564117, JString, required = true,
                                  default = nil)
-  if valid_568217 != nil:
-    section.add "resourceGroupName", valid_568217
-  var valid_568218 = path.getOrDefault("ruleName")
-  valid_568218 = validateParameter(valid_568218, JString, required = true,
+  if valid_564117 != nil:
+    section.add "subscriptionId", valid_564117
+  var valid_564118 = path.getOrDefault("ruleName")
+  valid_564118 = validateParameter(valid_564118, JString, required = true,
                                  default = nil)
-  if valid_568218 != nil:
-    section.add "ruleName", valid_568218
-  var valid_568219 = path.getOrDefault("subscriptionId")
-  valid_568219 = validateParameter(valid_568219, JString, required = true,
+  if valid_564118 != nil:
+    section.add "ruleName", valid_564118
+  var valid_564119 = path.getOrDefault("resourceGroupName")
+  valid_564119 = validateParameter(valid_564119, JString, required = true,
                                  default = nil)
-  if valid_568219 != nil:
-    section.add "subscriptionId", valid_568219
+  if valid_564119 != nil:
+    section.add "resourceGroupName", valid_564119
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -354,11 +358,11 @@ proc validate_MetricAlertsCreateOrUpdate_568215(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568220 = query.getOrDefault("api-version")
-  valid_568220 = validateParameter(valid_568220, JString, required = true,
+  var valid_564120 = query.getOrDefault("api-version")
+  valid_564120 = validateParameter(valid_564120, JString, required = true,
                                  default = nil)
-  if valid_568220 != nil:
-    section.add "api-version", valid_568220
+  if valid_564120 != nil:
+    section.add "api-version", valid_564120
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -372,53 +376,53 @@ proc validate_MetricAlertsCreateOrUpdate_568215(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568222: Call_MetricAlertsCreateOrUpdate_568214; path: JsonNode;
+proc call*(call_564122: Call_MetricAlertsCreateOrUpdate_564114; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Create or update an metric alert definition.
   ## 
-  let valid = call_568222.validator(path, query, header, formData, body)
-  let scheme = call_568222.pickScheme
+  let valid = call_564122.validator(path, query, header, formData, body)
+  let scheme = call_564122.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568222.url(scheme.get, call_568222.host, call_568222.base,
-                         call_568222.route, valid.getOrDefault("path"),
+  let url = call_564122.url(scheme.get, call_564122.host, call_564122.base,
+                         call_564122.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568222, url, valid)
+  result = hook(call_564122, url, valid)
 
-proc call*(call_568223: Call_MetricAlertsCreateOrUpdate_568214;
-          resourceGroupName: string; apiVersion: string; ruleName: string;
-          subscriptionId: string; parameters: JsonNode): Recallable =
+proc call*(call_564123: Call_MetricAlertsCreateOrUpdate_564114; apiVersion: string;
+          subscriptionId: string; ruleName: string; resourceGroupName: string;
+          parameters: JsonNode): Recallable =
   ## metricAlertsCreateOrUpdate
   ## Create or update an metric alert definition.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
-  ##   ruleName: string (required)
-  ##           : The name of the rule.
   ##   subscriptionId: string (required)
   ##                 : The Azure subscription Id.
+  ##   ruleName: string (required)
+  ##           : The name of the rule.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   parameters: JObject (required)
   ##             : The parameters of the rule to create or update.
-  var path_568224 = newJObject()
-  var query_568225 = newJObject()
-  var body_568226 = newJObject()
-  add(path_568224, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568225, "api-version", newJString(apiVersion))
-  add(path_568224, "ruleName", newJString(ruleName))
-  add(path_568224, "subscriptionId", newJString(subscriptionId))
+  var path_564124 = newJObject()
+  var query_564125 = newJObject()
+  var body_564126 = newJObject()
+  add(query_564125, "api-version", newJString(apiVersion))
+  add(path_564124, "subscriptionId", newJString(subscriptionId))
+  add(path_564124, "ruleName", newJString(ruleName))
+  add(path_564124, "resourceGroupName", newJString(resourceGroupName))
   if parameters != nil:
-    body_568226 = parameters
-  result = call_568223.call(path_568224, query_568225, nil, nil, body_568226)
+    body_564126 = parameters
+  result = call_564123.call(path_564124, query_564125, nil, nil, body_564126)
 
-var metricAlertsCreateOrUpdate* = Call_MetricAlertsCreateOrUpdate_568214(
+var metricAlertsCreateOrUpdate* = Call_MetricAlertsCreateOrUpdate_564114(
     name: "metricAlertsCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Insights/metricAlerts/{ruleName}",
-    validator: validate_MetricAlertsCreateOrUpdate_568215, base: "",
-    url: url_MetricAlertsCreateOrUpdate_568216, schemes: {Scheme.Https})
+    validator: validate_MetricAlertsCreateOrUpdate_564115, base: "",
+    url: url_MetricAlertsCreateOrUpdate_564116, schemes: {Scheme.Https})
 type
-  Call_MetricAlertsGet_568203 = ref object of OpenApiRestCall_567659
-proc url_MetricAlertsGet_568205(protocol: Scheme; host: string; base: string;
+  Call_MetricAlertsGet_564103 = ref object of OpenApiRestCall_563557
+proc url_MetricAlertsGet_564105(protocol: Scheme; host: string; base: string;
                                route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -441,7 +445,7 @@ proc url_MetricAlertsGet_568205(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_MetricAlertsGet_568204(path: JsonNode; query: JsonNode;
+proc validate_MetricAlertsGet_564104(path: JsonNode; query: JsonNode;
                                     header: JsonNode; formData: JsonNode;
                                     body: JsonNode): JsonNode =
   ## Retrieve an alert rule definition.
@@ -449,30 +453,30 @@ proc validate_MetricAlertsGet_568204(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
-  ##   ruleName: JString (required)
-  ##           : The name of the rule.
   ##   subscriptionId: JString (required)
   ##                 : The Azure subscription Id.
+  ##   ruleName: JString (required)
+  ##           : The name of the rule.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568206 = path.getOrDefault("resourceGroupName")
-  valid_568206 = validateParameter(valid_568206, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564106 = path.getOrDefault("subscriptionId")
+  valid_564106 = validateParameter(valid_564106, JString, required = true,
                                  default = nil)
-  if valid_568206 != nil:
-    section.add "resourceGroupName", valid_568206
-  var valid_568207 = path.getOrDefault("ruleName")
-  valid_568207 = validateParameter(valid_568207, JString, required = true,
+  if valid_564106 != nil:
+    section.add "subscriptionId", valid_564106
+  var valid_564107 = path.getOrDefault("ruleName")
+  valid_564107 = validateParameter(valid_564107, JString, required = true,
                                  default = nil)
-  if valid_568207 != nil:
-    section.add "ruleName", valid_568207
-  var valid_568208 = path.getOrDefault("subscriptionId")
-  valid_568208 = validateParameter(valid_568208, JString, required = true,
+  if valid_564107 != nil:
+    section.add "ruleName", valid_564107
+  var valid_564108 = path.getOrDefault("resourceGroupName")
+  valid_564108 = validateParameter(valid_564108, JString, required = true,
                                  default = nil)
-  if valid_568208 != nil:
-    section.add "subscriptionId", valid_568208
+  if valid_564108 != nil:
+    section.add "resourceGroupName", valid_564108
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -480,11 +484,11 @@ proc validate_MetricAlertsGet_568204(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568209 = query.getOrDefault("api-version")
-  valid_568209 = validateParameter(valid_568209, JString, required = true,
+  var valid_564109 = query.getOrDefault("api-version")
+  valid_564109 = validateParameter(valid_564109, JString, required = true,
                                  default = nil)
-  if valid_568209 != nil:
-    section.add "api-version", valid_568209
+  if valid_564109 != nil:
+    section.add "api-version", valid_564109
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -493,46 +497,46 @@ proc validate_MetricAlertsGet_568204(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568210: Call_MetricAlertsGet_568203; path: JsonNode; query: JsonNode;
+proc call*(call_564110: Call_MetricAlertsGet_564103; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Retrieve an alert rule definition.
   ## 
-  let valid = call_568210.validator(path, query, header, formData, body)
-  let scheme = call_568210.pickScheme
+  let valid = call_564110.validator(path, query, header, formData, body)
+  let scheme = call_564110.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568210.url(scheme.get, call_568210.host, call_568210.base,
-                         call_568210.route, valid.getOrDefault("path"),
+  let url = call_564110.url(scheme.get, call_564110.host, call_564110.base,
+                         call_564110.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568210, url, valid)
+  result = hook(call_564110, url, valid)
 
-proc call*(call_568211: Call_MetricAlertsGet_568203; resourceGroupName: string;
-          apiVersion: string; ruleName: string; subscriptionId: string): Recallable =
+proc call*(call_564111: Call_MetricAlertsGet_564103; apiVersion: string;
+          subscriptionId: string; ruleName: string; resourceGroupName: string): Recallable =
   ## metricAlertsGet
   ## Retrieve an alert rule definition.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
-  ##   ruleName: string (required)
-  ##           : The name of the rule.
   ##   subscriptionId: string (required)
   ##                 : The Azure subscription Id.
-  var path_568212 = newJObject()
-  var query_568213 = newJObject()
-  add(path_568212, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568213, "api-version", newJString(apiVersion))
-  add(path_568212, "ruleName", newJString(ruleName))
-  add(path_568212, "subscriptionId", newJString(subscriptionId))
-  result = call_568211.call(path_568212, query_568213, nil, nil, nil)
+  ##   ruleName: string (required)
+  ##           : The name of the rule.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564112 = newJObject()
+  var query_564113 = newJObject()
+  add(query_564113, "api-version", newJString(apiVersion))
+  add(path_564112, "subscriptionId", newJString(subscriptionId))
+  add(path_564112, "ruleName", newJString(ruleName))
+  add(path_564112, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564111.call(path_564112, query_564113, nil, nil, nil)
 
-var metricAlertsGet* = Call_MetricAlertsGet_568203(name: "metricAlertsGet",
+var metricAlertsGet* = Call_MetricAlertsGet_564103(name: "metricAlertsGet",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Insights/metricAlerts/{ruleName}",
-    validator: validate_MetricAlertsGet_568204, base: "", url: url_MetricAlertsGet_568205,
+    validator: validate_MetricAlertsGet_564104, base: "", url: url_MetricAlertsGet_564105,
     schemes: {Scheme.Https})
 type
-  Call_MetricAlertsUpdate_568238 = ref object of OpenApiRestCall_567659
-proc url_MetricAlertsUpdate_568240(protocol: Scheme; host: string; base: string;
+  Call_MetricAlertsUpdate_564138 = ref object of OpenApiRestCall_563557
+proc url_MetricAlertsUpdate_564140(protocol: Scheme; host: string; base: string;
                                   route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -555,7 +559,7 @@ proc url_MetricAlertsUpdate_568240(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_MetricAlertsUpdate_568239(path: JsonNode; query: JsonNode;
+proc validate_MetricAlertsUpdate_564139(path: JsonNode; query: JsonNode;
                                        header: JsonNode; formData: JsonNode;
                                        body: JsonNode): JsonNode =
   ## Update an metric alert definition.
@@ -563,30 +567,30 @@ proc validate_MetricAlertsUpdate_568239(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
-  ##   ruleName: JString (required)
-  ##           : The name of the rule.
   ##   subscriptionId: JString (required)
   ##                 : The Azure subscription Id.
+  ##   ruleName: JString (required)
+  ##           : The name of the rule.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568258 = path.getOrDefault("resourceGroupName")
-  valid_568258 = validateParameter(valid_568258, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564158 = path.getOrDefault("subscriptionId")
+  valid_564158 = validateParameter(valid_564158, JString, required = true,
                                  default = nil)
-  if valid_568258 != nil:
-    section.add "resourceGroupName", valid_568258
-  var valid_568259 = path.getOrDefault("ruleName")
-  valid_568259 = validateParameter(valid_568259, JString, required = true,
+  if valid_564158 != nil:
+    section.add "subscriptionId", valid_564158
+  var valid_564159 = path.getOrDefault("ruleName")
+  valid_564159 = validateParameter(valid_564159, JString, required = true,
                                  default = nil)
-  if valid_568259 != nil:
-    section.add "ruleName", valid_568259
-  var valid_568260 = path.getOrDefault("subscriptionId")
-  valid_568260 = validateParameter(valid_568260, JString, required = true,
+  if valid_564159 != nil:
+    section.add "ruleName", valid_564159
+  var valid_564160 = path.getOrDefault("resourceGroupName")
+  valid_564160 = validateParameter(valid_564160, JString, required = true,
                                  default = nil)
-  if valid_568260 != nil:
-    section.add "subscriptionId", valid_568260
+  if valid_564160 != nil:
+    section.add "resourceGroupName", valid_564160
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -594,11 +598,11 @@ proc validate_MetricAlertsUpdate_568239(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568261 = query.getOrDefault("api-version")
-  valid_568261 = validateParameter(valid_568261, JString, required = true,
+  var valid_564161 = query.getOrDefault("api-version")
+  valid_564161 = validateParameter(valid_564161, JString, required = true,
                                  default = nil)
-  if valid_568261 != nil:
-    section.add "api-version", valid_568261
+  if valid_564161 != nil:
+    section.add "api-version", valid_564161
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -612,53 +616,53 @@ proc validate_MetricAlertsUpdate_568239(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568263: Call_MetricAlertsUpdate_568238; path: JsonNode;
+proc call*(call_564163: Call_MetricAlertsUpdate_564138; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Update an metric alert definition.
   ## 
-  let valid = call_568263.validator(path, query, header, formData, body)
-  let scheme = call_568263.pickScheme
+  let valid = call_564163.validator(path, query, header, formData, body)
+  let scheme = call_564163.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568263.url(scheme.get, call_568263.host, call_568263.base,
-                         call_568263.route, valid.getOrDefault("path"),
+  let url = call_564163.url(scheme.get, call_564163.host, call_564163.base,
+                         call_564163.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568263, url, valid)
+  result = hook(call_564163, url, valid)
 
-proc call*(call_568264: Call_MetricAlertsUpdate_568238; resourceGroupName: string;
-          apiVersion: string; ruleName: string; subscriptionId: string;
+proc call*(call_564164: Call_MetricAlertsUpdate_564138; apiVersion: string;
+          subscriptionId: string; ruleName: string; resourceGroupName: string;
           parameters: JsonNode): Recallable =
   ## metricAlertsUpdate
   ## Update an metric alert definition.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
-  ##   ruleName: string (required)
-  ##           : The name of the rule.
   ##   subscriptionId: string (required)
   ##                 : The Azure subscription Id.
+  ##   ruleName: string (required)
+  ##           : The name of the rule.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   parameters: JObject (required)
   ##             : The parameters of the rule to update.
-  var path_568265 = newJObject()
-  var query_568266 = newJObject()
-  var body_568267 = newJObject()
-  add(path_568265, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568266, "api-version", newJString(apiVersion))
-  add(path_568265, "ruleName", newJString(ruleName))
-  add(path_568265, "subscriptionId", newJString(subscriptionId))
+  var path_564165 = newJObject()
+  var query_564166 = newJObject()
+  var body_564167 = newJObject()
+  add(query_564166, "api-version", newJString(apiVersion))
+  add(path_564165, "subscriptionId", newJString(subscriptionId))
+  add(path_564165, "ruleName", newJString(ruleName))
+  add(path_564165, "resourceGroupName", newJString(resourceGroupName))
   if parameters != nil:
-    body_568267 = parameters
-  result = call_568264.call(path_568265, query_568266, nil, nil, body_568267)
+    body_564167 = parameters
+  result = call_564164.call(path_564165, query_564166, nil, nil, body_564167)
 
-var metricAlertsUpdate* = Call_MetricAlertsUpdate_568238(
+var metricAlertsUpdate* = Call_MetricAlertsUpdate_564138(
     name: "metricAlertsUpdate", meth: HttpMethod.HttpPatch,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Insights/metricAlerts/{ruleName}",
-    validator: validate_MetricAlertsUpdate_568239, base: "",
-    url: url_MetricAlertsUpdate_568240, schemes: {Scheme.Https})
+    validator: validate_MetricAlertsUpdate_564139, base: "",
+    url: url_MetricAlertsUpdate_564140, schemes: {Scheme.Https})
 type
-  Call_MetricAlertsDelete_568227 = ref object of OpenApiRestCall_567659
-proc url_MetricAlertsDelete_568229(protocol: Scheme; host: string; base: string;
+  Call_MetricAlertsDelete_564127 = ref object of OpenApiRestCall_563557
+proc url_MetricAlertsDelete_564129(protocol: Scheme; host: string; base: string;
                                   route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -681,7 +685,7 @@ proc url_MetricAlertsDelete_568229(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_MetricAlertsDelete_568228(path: JsonNode; query: JsonNode;
+proc validate_MetricAlertsDelete_564128(path: JsonNode; query: JsonNode;
                                        header: JsonNode; formData: JsonNode;
                                        body: JsonNode): JsonNode =
   ## Delete an alert rule definition.
@@ -689,30 +693,30 @@ proc validate_MetricAlertsDelete_568228(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
-  ##   ruleName: JString (required)
-  ##           : The name of the rule.
   ##   subscriptionId: JString (required)
   ##                 : The Azure subscription Id.
+  ##   ruleName: JString (required)
+  ##           : The name of the rule.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568230 = path.getOrDefault("resourceGroupName")
-  valid_568230 = validateParameter(valid_568230, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564130 = path.getOrDefault("subscriptionId")
+  valid_564130 = validateParameter(valid_564130, JString, required = true,
                                  default = nil)
-  if valid_568230 != nil:
-    section.add "resourceGroupName", valid_568230
-  var valid_568231 = path.getOrDefault("ruleName")
-  valid_568231 = validateParameter(valid_568231, JString, required = true,
+  if valid_564130 != nil:
+    section.add "subscriptionId", valid_564130
+  var valid_564131 = path.getOrDefault("ruleName")
+  valid_564131 = validateParameter(valid_564131, JString, required = true,
                                  default = nil)
-  if valid_568231 != nil:
-    section.add "ruleName", valid_568231
-  var valid_568232 = path.getOrDefault("subscriptionId")
-  valid_568232 = validateParameter(valid_568232, JString, required = true,
+  if valid_564131 != nil:
+    section.add "ruleName", valid_564131
+  var valid_564132 = path.getOrDefault("resourceGroupName")
+  valid_564132 = validateParameter(valid_564132, JString, required = true,
                                  default = nil)
-  if valid_568232 != nil:
-    section.add "subscriptionId", valid_568232
+  if valid_564132 != nil:
+    section.add "resourceGroupName", valid_564132
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -720,11 +724,11 @@ proc validate_MetricAlertsDelete_568228(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568233 = query.getOrDefault("api-version")
-  valid_568233 = validateParameter(valid_568233, JString, required = true,
+  var valid_564133 = query.getOrDefault("api-version")
+  valid_564133 = validateParameter(valid_564133, JString, required = true,
                                  default = nil)
-  if valid_568233 != nil:
-    section.add "api-version", valid_568233
+  if valid_564133 != nil:
+    section.add "api-version", valid_564133
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -733,47 +737,47 @@ proc validate_MetricAlertsDelete_568228(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568234: Call_MetricAlertsDelete_568227; path: JsonNode;
+proc call*(call_564134: Call_MetricAlertsDelete_564127; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Delete an alert rule definition.
   ## 
-  let valid = call_568234.validator(path, query, header, formData, body)
-  let scheme = call_568234.pickScheme
+  let valid = call_564134.validator(path, query, header, formData, body)
+  let scheme = call_564134.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568234.url(scheme.get, call_568234.host, call_568234.base,
-                         call_568234.route, valid.getOrDefault("path"),
+  let url = call_564134.url(scheme.get, call_564134.host, call_564134.base,
+                         call_564134.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568234, url, valid)
+  result = hook(call_564134, url, valid)
 
-proc call*(call_568235: Call_MetricAlertsDelete_568227; resourceGroupName: string;
-          apiVersion: string; ruleName: string; subscriptionId: string): Recallable =
+proc call*(call_564135: Call_MetricAlertsDelete_564127; apiVersion: string;
+          subscriptionId: string; ruleName: string; resourceGroupName: string): Recallable =
   ## metricAlertsDelete
   ## Delete an alert rule definition.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
-  ##   ruleName: string (required)
-  ##           : The name of the rule.
   ##   subscriptionId: string (required)
   ##                 : The Azure subscription Id.
-  var path_568236 = newJObject()
-  var query_568237 = newJObject()
-  add(path_568236, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568237, "api-version", newJString(apiVersion))
-  add(path_568236, "ruleName", newJString(ruleName))
-  add(path_568236, "subscriptionId", newJString(subscriptionId))
-  result = call_568235.call(path_568236, query_568237, nil, nil, nil)
+  ##   ruleName: string (required)
+  ##           : The name of the rule.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564136 = newJObject()
+  var query_564137 = newJObject()
+  add(query_564137, "api-version", newJString(apiVersion))
+  add(path_564136, "subscriptionId", newJString(subscriptionId))
+  add(path_564136, "ruleName", newJString(ruleName))
+  add(path_564136, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564135.call(path_564136, query_564137, nil, nil, nil)
 
-var metricAlertsDelete* = Call_MetricAlertsDelete_568227(
+var metricAlertsDelete* = Call_MetricAlertsDelete_564127(
     name: "metricAlertsDelete", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Insights/metricAlerts/{ruleName}",
-    validator: validate_MetricAlertsDelete_568228, base: "",
-    url: url_MetricAlertsDelete_568229, schemes: {Scheme.Https})
+    validator: validate_MetricAlertsDelete_564128, base: "",
+    url: url_MetricAlertsDelete_564129, schemes: {Scheme.Https})
 type
-  Call_MetricAlertsStatusList_568268 = ref object of OpenApiRestCall_567659
-proc url_MetricAlertsStatusList_568270(protocol: Scheme; host: string; base: string;
+  Call_MetricAlertsStatusList_564168 = ref object of OpenApiRestCall_563557
+proc url_MetricAlertsStatusList_564170(protocol: Scheme; host: string; base: string;
                                       route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -797,37 +801,37 @@ proc url_MetricAlertsStatusList_568270(protocol: Scheme; host: string; base: str
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_MetricAlertsStatusList_568269(path: JsonNode; query: JsonNode;
+proc validate_MetricAlertsStatusList_564169(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Retrieve an alert rule status.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
-  ##   ruleName: JString (required)
-  ##           : The name of the rule.
   ##   subscriptionId: JString (required)
   ##                 : The Azure subscription Id.
+  ##   ruleName: JString (required)
+  ##           : The name of the rule.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568271 = path.getOrDefault("resourceGroupName")
-  valid_568271 = validateParameter(valid_568271, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564171 = path.getOrDefault("subscriptionId")
+  valid_564171 = validateParameter(valid_564171, JString, required = true,
                                  default = nil)
-  if valid_568271 != nil:
-    section.add "resourceGroupName", valid_568271
-  var valid_568272 = path.getOrDefault("ruleName")
-  valid_568272 = validateParameter(valid_568272, JString, required = true,
+  if valid_564171 != nil:
+    section.add "subscriptionId", valid_564171
+  var valid_564172 = path.getOrDefault("ruleName")
+  valid_564172 = validateParameter(valid_564172, JString, required = true,
                                  default = nil)
-  if valid_568272 != nil:
-    section.add "ruleName", valid_568272
-  var valid_568273 = path.getOrDefault("subscriptionId")
-  valid_568273 = validateParameter(valid_568273, JString, required = true,
+  if valid_564172 != nil:
+    section.add "ruleName", valid_564172
+  var valid_564173 = path.getOrDefault("resourceGroupName")
+  valid_564173 = validateParameter(valid_564173, JString, required = true,
                                  default = nil)
-  if valid_568273 != nil:
-    section.add "subscriptionId", valid_568273
+  if valid_564173 != nil:
+    section.add "resourceGroupName", valid_564173
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -835,11 +839,11 @@ proc validate_MetricAlertsStatusList_568269(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568274 = query.getOrDefault("api-version")
-  valid_568274 = validateParameter(valid_568274, JString, required = true,
+  var valid_564174 = query.getOrDefault("api-version")
+  valid_564174 = validateParameter(valid_564174, JString, required = true,
                                  default = nil)
-  if valid_568274 != nil:
-    section.add "api-version", valid_568274
+  if valid_564174 != nil:
+    section.add "api-version", valid_564174
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -848,48 +852,47 @@ proc validate_MetricAlertsStatusList_568269(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568275: Call_MetricAlertsStatusList_568268; path: JsonNode;
+proc call*(call_564175: Call_MetricAlertsStatusList_564168; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Retrieve an alert rule status.
   ## 
-  let valid = call_568275.validator(path, query, header, formData, body)
-  let scheme = call_568275.pickScheme
+  let valid = call_564175.validator(path, query, header, formData, body)
+  let scheme = call_564175.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568275.url(scheme.get, call_568275.host, call_568275.base,
-                         call_568275.route, valid.getOrDefault("path"),
+  let url = call_564175.url(scheme.get, call_564175.host, call_564175.base,
+                         call_564175.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568275, url, valid)
+  result = hook(call_564175, url, valid)
 
-proc call*(call_568276: Call_MetricAlertsStatusList_568268;
-          resourceGroupName: string; apiVersion: string; ruleName: string;
-          subscriptionId: string): Recallable =
+proc call*(call_564176: Call_MetricAlertsStatusList_564168; apiVersion: string;
+          subscriptionId: string; ruleName: string; resourceGroupName: string): Recallable =
   ## metricAlertsStatusList
   ## Retrieve an alert rule status.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
-  ##   ruleName: string (required)
-  ##           : The name of the rule.
   ##   subscriptionId: string (required)
   ##                 : The Azure subscription Id.
-  var path_568277 = newJObject()
-  var query_568278 = newJObject()
-  add(path_568277, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568278, "api-version", newJString(apiVersion))
-  add(path_568277, "ruleName", newJString(ruleName))
-  add(path_568277, "subscriptionId", newJString(subscriptionId))
-  result = call_568276.call(path_568277, query_568278, nil, nil, nil)
+  ##   ruleName: string (required)
+  ##           : The name of the rule.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564177 = newJObject()
+  var query_564178 = newJObject()
+  add(query_564178, "api-version", newJString(apiVersion))
+  add(path_564177, "subscriptionId", newJString(subscriptionId))
+  add(path_564177, "ruleName", newJString(ruleName))
+  add(path_564177, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564176.call(path_564177, query_564178, nil, nil, nil)
 
-var metricAlertsStatusList* = Call_MetricAlertsStatusList_568268(
+var metricAlertsStatusList* = Call_MetricAlertsStatusList_564168(
     name: "metricAlertsStatusList", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Insights/metricAlerts/{ruleName}/status",
-    validator: validate_MetricAlertsStatusList_568269, base: "",
-    url: url_MetricAlertsStatusList_568270, schemes: {Scheme.Https})
+    validator: validate_MetricAlertsStatusList_564169, base: "",
+    url: url_MetricAlertsStatusList_564170, schemes: {Scheme.Https})
 type
-  Call_MetricAlertsStatusListByName_568279 = ref object of OpenApiRestCall_567659
-proc url_MetricAlertsStatusListByName_568281(protocol: Scheme; host: string;
+  Call_MetricAlertsStatusListByName_564179 = ref object of OpenApiRestCall_563557
+proc url_MetricAlertsStatusListByName_564181(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -915,44 +918,44 @@ proc url_MetricAlertsStatusListByName_568281(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_MetricAlertsStatusListByName_568280(path: JsonNode; query: JsonNode;
+proc validate_MetricAlertsStatusListByName_564180(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Retrieve an alert rule status.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   statusName: JString (required)
   ##             : The name of the status.
-  ##   ruleName: JString (required)
-  ##           : The name of the rule.
   ##   subscriptionId: JString (required)
   ##                 : The Azure subscription Id.
+  ##   ruleName: JString (required)
+  ##           : The name of the rule.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568282 = path.getOrDefault("resourceGroupName")
-  valid_568282 = validateParameter(valid_568282, JString, required = true,
+        "path argument is necessary due to required `statusName` field"
+  var valid_564182 = path.getOrDefault("statusName")
+  valid_564182 = validateParameter(valid_564182, JString, required = true,
                                  default = nil)
-  if valid_568282 != nil:
-    section.add "resourceGroupName", valid_568282
-  var valid_568283 = path.getOrDefault("statusName")
-  valid_568283 = validateParameter(valid_568283, JString, required = true,
+  if valid_564182 != nil:
+    section.add "statusName", valid_564182
+  var valid_564183 = path.getOrDefault("subscriptionId")
+  valid_564183 = validateParameter(valid_564183, JString, required = true,
                                  default = nil)
-  if valid_568283 != nil:
-    section.add "statusName", valid_568283
-  var valid_568284 = path.getOrDefault("ruleName")
-  valid_568284 = validateParameter(valid_568284, JString, required = true,
+  if valid_564183 != nil:
+    section.add "subscriptionId", valid_564183
+  var valid_564184 = path.getOrDefault("ruleName")
+  valid_564184 = validateParameter(valid_564184, JString, required = true,
                                  default = nil)
-  if valid_568284 != nil:
-    section.add "ruleName", valid_568284
-  var valid_568285 = path.getOrDefault("subscriptionId")
-  valid_568285 = validateParameter(valid_568285, JString, required = true,
+  if valid_564184 != nil:
+    section.add "ruleName", valid_564184
+  var valid_564185 = path.getOrDefault("resourceGroupName")
+  valid_564185 = validateParameter(valid_564185, JString, required = true,
                                  default = nil)
-  if valid_568285 != nil:
-    section.add "subscriptionId", valid_568285
+  if valid_564185 != nil:
+    section.add "resourceGroupName", valid_564185
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -960,11 +963,11 @@ proc validate_MetricAlertsStatusListByName_568280(path: JsonNode; query: JsonNod
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568286 = query.getOrDefault("api-version")
-  valid_568286 = validateParameter(valid_568286, JString, required = true,
+  var valid_564186 = query.getOrDefault("api-version")
+  valid_564186 = validateParameter(valid_564186, JString, required = true,
                                  default = nil)
-  if valid_568286 != nil:
-    section.add "api-version", valid_568286
+  if valid_564186 != nil:
+    section.add "api-version", valid_564186
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -973,48 +976,48 @@ proc validate_MetricAlertsStatusListByName_568280(path: JsonNode; query: JsonNod
   if body != nil:
     result.add "body", body
 
-proc call*(call_568287: Call_MetricAlertsStatusListByName_568279; path: JsonNode;
+proc call*(call_564187: Call_MetricAlertsStatusListByName_564179; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Retrieve an alert rule status.
   ## 
-  let valid = call_568287.validator(path, query, header, formData, body)
-  let scheme = call_568287.pickScheme
+  let valid = call_564187.validator(path, query, header, formData, body)
+  let scheme = call_564187.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568287.url(scheme.get, call_568287.host, call_568287.base,
-                         call_568287.route, valid.getOrDefault("path"),
+  let url = call_564187.url(scheme.get, call_564187.host, call_564187.base,
+                         call_564187.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568287, url, valid)
+  result = hook(call_564187, url, valid)
 
-proc call*(call_568288: Call_MetricAlertsStatusListByName_568279;
-          resourceGroupName: string; apiVersion: string; statusName: string;
-          ruleName: string; subscriptionId: string): Recallable =
+proc call*(call_564188: Call_MetricAlertsStatusListByName_564179;
+          apiVersion: string; statusName: string; subscriptionId: string;
+          ruleName: string; resourceGroupName: string): Recallable =
   ## metricAlertsStatusListByName
   ## Retrieve an alert rule status.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
   ##   statusName: string (required)
   ##             : The name of the status.
-  ##   ruleName: string (required)
-  ##           : The name of the rule.
   ##   subscriptionId: string (required)
   ##                 : The Azure subscription Id.
-  var path_568289 = newJObject()
-  var query_568290 = newJObject()
-  add(path_568289, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568290, "api-version", newJString(apiVersion))
-  add(path_568289, "statusName", newJString(statusName))
-  add(path_568289, "ruleName", newJString(ruleName))
-  add(path_568289, "subscriptionId", newJString(subscriptionId))
-  result = call_568288.call(path_568289, query_568290, nil, nil, nil)
+  ##   ruleName: string (required)
+  ##           : The name of the rule.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564189 = newJObject()
+  var query_564190 = newJObject()
+  add(query_564190, "api-version", newJString(apiVersion))
+  add(path_564189, "statusName", newJString(statusName))
+  add(path_564189, "subscriptionId", newJString(subscriptionId))
+  add(path_564189, "ruleName", newJString(ruleName))
+  add(path_564189, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564188.call(path_564189, query_564190, nil, nil, nil)
 
-var metricAlertsStatusListByName* = Call_MetricAlertsStatusListByName_568279(
+var metricAlertsStatusListByName* = Call_MetricAlertsStatusListByName_564179(
     name: "metricAlertsStatusListByName", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Insights/metricAlerts/{ruleName}/status/{statusName}",
-    validator: validate_MetricAlertsStatusListByName_568280, base: "",
-    url: url_MetricAlertsStatusListByName_568281, schemes: {Scheme.Https})
+    validator: validate_MetricAlertsStatusListByName_564180, base: "",
+    url: url_MetricAlertsStatusListByName_564181, schemes: {Scheme.Https})
 export
   rest
 

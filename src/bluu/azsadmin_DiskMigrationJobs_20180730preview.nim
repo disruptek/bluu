@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, httpcore
 
 ## auto-generated via openapi macro
 ## title: ComputeDiskAdminManagementClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_574442 = ref object of OpenApiRestCall
+  OpenApiRestCall_563540 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_574442](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563540](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_574442): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563540): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,8 +107,8 @@ const
   macServiceName = "azsadmin-DiskMigrationJobs"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_DiskMigrationJobsList_574664 = ref object of OpenApiRestCall_574442
-proc url_DiskMigrationJobsList_574666(protocol: Scheme; host: string; base: string;
+  Call_DiskMigrationJobsList_563762 = ref object of OpenApiRestCall_563540
+proc url_DiskMigrationJobsList_563764(protocol: Scheme; host: string; base: string;
                                      route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -124,7 +128,7 @@ proc url_DiskMigrationJobsList_574666(protocol: Scheme; host: string; base: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DiskMigrationJobsList_574665(path: JsonNode; query: JsonNode;
+proc validate_DiskMigrationJobsList_563763(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Returns a list of disk migration jobs.
   ## 
@@ -138,16 +142,16 @@ proc validate_DiskMigrationJobsList_574665(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_574826 = path.getOrDefault("subscriptionId")
-  valid_574826 = validateParameter(valid_574826, JString, required = true,
+  var valid_563926 = path.getOrDefault("subscriptionId")
+  valid_563926 = validateParameter(valid_563926, JString, required = true,
                                  default = nil)
-  if valid_574826 != nil:
-    section.add "subscriptionId", valid_574826
-  var valid_574827 = path.getOrDefault("location")
-  valid_574827 = validateParameter(valid_574827, JString, required = true,
+  if valid_563926 != nil:
+    section.add "subscriptionId", valid_563926
+  var valid_563927 = path.getOrDefault("location")
+  valid_563927 = validateParameter(valid_563927, JString, required = true,
                                  default = nil)
-  if valid_574827 != nil:
-    section.add "location", valid_574827
+  if valid_563927 != nil:
+    section.add "location", valid_563927
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -157,16 +161,16 @@ proc validate_DiskMigrationJobsList_574665(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574841 = query.getOrDefault("api-version")
-  valid_574841 = validateParameter(valid_574841, JString, required = true,
+  var valid_563941 = query.getOrDefault("api-version")
+  valid_563941 = validateParameter(valid_563941, JString, required = true,
                                  default = newJString("2018-07-30-preview"))
-  if valid_574841 != nil:
-    section.add "api-version", valid_574841
-  var valid_574842 = query.getOrDefault("status")
-  valid_574842 = validateParameter(valid_574842, JString, required = false,
+  if valid_563941 != nil:
+    section.add "api-version", valid_563941
+  var valid_563942 = query.getOrDefault("status")
+  valid_563942 = validateParameter(valid_563942, JString, required = false,
                                  default = nil)
-  if valid_574842 != nil:
-    section.add "status", valid_574842
+  if valid_563942 != nil:
+    section.add "status", valid_563942
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -175,20 +179,20 @@ proc validate_DiskMigrationJobsList_574665(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574869: Call_DiskMigrationJobsList_574664; path: JsonNode;
+proc call*(call_563969: Call_DiskMigrationJobsList_563762; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Returns a list of disk migration jobs.
   ## 
-  let valid = call_574869.validator(path, query, header, formData, body)
-  let scheme = call_574869.pickScheme
+  let valid = call_563969.validator(path, query, header, formData, body)
+  let scheme = call_563969.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574869.url(scheme.get, call_574869.host, call_574869.base,
-                         call_574869.route, valid.getOrDefault("path"),
+  let url = call_563969.url(scheme.get, call_563969.host, call_563969.base,
+                         call_563969.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574869, url, valid)
+  result = hook(call_563969, url, valid)
 
-proc call*(call_574940: Call_DiskMigrationJobsList_574664; subscriptionId: string;
+proc call*(call_564040: Call_DiskMigrationJobsList_563762; subscriptionId: string;
           location: string; apiVersion: string = "2018-07-30-preview";
           status: string = ""): Recallable =
   ## diskMigrationJobsList
@@ -197,26 +201,26 @@ proc call*(call_574940: Call_DiskMigrationJobsList_574664; subscriptionId: strin
   ##             : Client API Version.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials that uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   status: string
-  ##         : The parameters of disk migration job status.
   ##   location: string (required)
   ##           : Location of the resource.
-  var path_574941 = newJObject()
-  var query_574943 = newJObject()
-  add(query_574943, "api-version", newJString(apiVersion))
-  add(path_574941, "subscriptionId", newJString(subscriptionId))
-  add(query_574943, "status", newJString(status))
-  add(path_574941, "location", newJString(location))
-  result = call_574940.call(path_574941, query_574943, nil, nil, nil)
+  ##   status: string
+  ##         : The parameters of disk migration job status.
+  var path_564041 = newJObject()
+  var query_564043 = newJObject()
+  add(query_564043, "api-version", newJString(apiVersion))
+  add(path_564041, "subscriptionId", newJString(subscriptionId))
+  add(path_564041, "location", newJString(location))
+  add(query_564043, "status", newJString(status))
+  result = call_564040.call(path_564041, query_564043, nil, nil, nil)
 
-var diskMigrationJobsList* = Call_DiskMigrationJobsList_574664(
+var diskMigrationJobsList* = Call_DiskMigrationJobsList_563762(
     name: "diskMigrationJobsList", meth: HttpMethod.HttpGet,
     host: "adminmanagement.local.azurestack.external", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Compute.Admin/locations/{location}/diskmigrationjobs",
-    validator: validate_DiskMigrationJobsList_574665, base: "",
-    url: url_DiskMigrationJobsList_574666, schemes: {Scheme.Https})
+    validator: validate_DiskMigrationJobsList_563763, base: "",
+    url: url_DiskMigrationJobsList_563764, schemes: {Scheme.Https})
 type
-  Call_DiskMigrationJobsCreate_574993 = ref object of OpenApiRestCall_574442
-proc url_DiskMigrationJobsCreate_574995(protocol: Scheme; host: string; base: string;
+  Call_DiskMigrationJobsCreate_564093 = ref object of OpenApiRestCall_563540
+proc url_DiskMigrationJobsCreate_564095(protocol: Scheme; host: string; base: string;
                                        route: string; path: JsonNode;
                                        query: JsonNode): Uri =
   result.scheme = $protocol
@@ -239,37 +243,37 @@ proc url_DiskMigrationJobsCreate_574995(protocol: Scheme; host: string; base: st
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DiskMigrationJobsCreate_574994(path: JsonNode; query: JsonNode;
+proc validate_DiskMigrationJobsCreate_564094(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Create a disk migration job.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
+  ##   migrationId: JString (required)
+  ##              : The migration job guid name.
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials that uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   location: JString (required)
   ##           : Location of the resource.
-  ##   migrationId: JString (required)
-  ##              : The migration job guid name.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `subscriptionId` field"
-  var valid_574996 = path.getOrDefault("subscriptionId")
-  valid_574996 = validateParameter(valid_574996, JString, required = true,
+        "path argument is necessary due to required `migrationId` field"
+  var valid_564096 = path.getOrDefault("migrationId")
+  valid_564096 = validateParameter(valid_564096, JString, required = true,
                                  default = nil)
-  if valid_574996 != nil:
-    section.add "subscriptionId", valid_574996
-  var valid_574997 = path.getOrDefault("location")
-  valid_574997 = validateParameter(valid_574997, JString, required = true,
+  if valid_564096 != nil:
+    section.add "migrationId", valid_564096
+  var valid_564097 = path.getOrDefault("subscriptionId")
+  valid_564097 = validateParameter(valid_564097, JString, required = true,
                                  default = nil)
-  if valid_574997 != nil:
-    section.add "location", valid_574997
-  var valid_574998 = path.getOrDefault("migrationId")
-  valid_574998 = validateParameter(valid_574998, JString, required = true,
+  if valid_564097 != nil:
+    section.add "subscriptionId", valid_564097
+  var valid_564098 = path.getOrDefault("location")
+  valid_564098 = validateParameter(valid_564098, JString, required = true,
                                  default = nil)
-  if valid_574998 != nil:
-    section.add "migrationId", valid_574998
+  if valid_564098 != nil:
+    section.add "location", valid_564098
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -279,16 +283,16 @@ proc validate_DiskMigrationJobsCreate_574994(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574999 = query.getOrDefault("api-version")
-  valid_574999 = validateParameter(valid_574999, JString, required = true,
+  var valid_564099 = query.getOrDefault("api-version")
+  valid_564099 = validateParameter(valid_564099, JString, required = true,
                                  default = newJString("2018-07-30-preview"))
-  if valid_574999 != nil:
-    section.add "api-version", valid_574999
-  var valid_575000 = query.getOrDefault("targetShare")
-  valid_575000 = validateParameter(valid_575000, JString, required = true,
+  if valid_564099 != nil:
+    section.add "api-version", valid_564099
+  var valid_564100 = query.getOrDefault("targetShare")
+  valid_564100 = validateParameter(valid_564100, JString, required = true,
                                  default = nil)
-  if valid_575000 != nil:
-    section.add "targetShare", valid_575000
+  if valid_564100 != nil:
+    section.add "targetShare", valid_564100
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -302,57 +306,56 @@ proc validate_DiskMigrationJobsCreate_574994(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_575002: Call_DiskMigrationJobsCreate_574993; path: JsonNode;
+proc call*(call_564102: Call_DiskMigrationJobsCreate_564093; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Create a disk migration job.
   ## 
-  let valid = call_575002.validator(path, query, header, formData, body)
-  let scheme = call_575002.pickScheme
+  let valid = call_564102.validator(path, query, header, formData, body)
+  let scheme = call_564102.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575002.url(scheme.get, call_575002.host, call_575002.base,
-                         call_575002.route, valid.getOrDefault("path"),
+  let url = call_564102.url(scheme.get, call_564102.host, call_564102.base,
+                         call_564102.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575002, url, valid)
+  result = hook(call_564102, url, valid)
 
-proc call*(call_575003: Call_DiskMigrationJobsCreate_574993;
-          subscriptionId: string; disks: JsonNode; targetShare: string;
-          location: string; migrationId: string;
-          apiVersion: string = "2018-07-30-preview"): Recallable =
+proc call*(call_564103: Call_DiskMigrationJobsCreate_564093; migrationId: string;
+          subscriptionId: string; targetShare: string; location: string;
+          disks: JsonNode; apiVersion: string = "2018-07-30-preview"): Recallable =
   ## diskMigrationJobsCreate
   ## Create a disk migration job.
   ##   apiVersion: string (required)
   ##             : Client API Version.
+  ##   migrationId: string (required)
+  ##              : The migration job guid name.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials that uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   disks: JArray (required)
-  ##        : The parameters of disk list.
   ##   targetShare: string (required)
   ##              : The target share name.
   ##   location: string (required)
   ##           : Location of the resource.
-  ##   migrationId: string (required)
-  ##              : The migration job guid name.
-  var path_575004 = newJObject()
-  var query_575005 = newJObject()
-  var body_575006 = newJObject()
-  add(query_575005, "api-version", newJString(apiVersion))
-  add(path_575004, "subscriptionId", newJString(subscriptionId))
+  ##   disks: JArray (required)
+  ##        : The parameters of disk list.
+  var path_564104 = newJObject()
+  var query_564105 = newJObject()
+  var body_564106 = newJObject()
+  add(query_564105, "api-version", newJString(apiVersion))
+  add(path_564104, "migrationId", newJString(migrationId))
+  add(path_564104, "subscriptionId", newJString(subscriptionId))
+  add(query_564105, "targetShare", newJString(targetShare))
+  add(path_564104, "location", newJString(location))
   if disks != nil:
-    body_575006 = disks
-  add(query_575005, "targetShare", newJString(targetShare))
-  add(path_575004, "location", newJString(location))
-  add(path_575004, "migrationId", newJString(migrationId))
-  result = call_575003.call(path_575004, query_575005, nil, nil, body_575006)
+    body_564106 = disks
+  result = call_564103.call(path_564104, query_564105, nil, nil, body_564106)
 
-var diskMigrationJobsCreate* = Call_DiskMigrationJobsCreate_574993(
+var diskMigrationJobsCreate* = Call_DiskMigrationJobsCreate_564093(
     name: "diskMigrationJobsCreate", meth: HttpMethod.HttpPut,
     host: "adminmanagement.local.azurestack.external", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Compute.Admin/locations/{location}/diskmigrationjobs/{migrationId}",
-    validator: validate_DiskMigrationJobsCreate_574994, base: "",
-    url: url_DiskMigrationJobsCreate_574995, schemes: {Scheme.Https})
+    validator: validate_DiskMigrationJobsCreate_564094, base: "",
+    url: url_DiskMigrationJobsCreate_564095, schemes: {Scheme.Https})
 type
-  Call_DiskMigrationJobsGet_574982 = ref object of OpenApiRestCall_574442
-proc url_DiskMigrationJobsGet_574984(protocol: Scheme; host: string; base: string;
+  Call_DiskMigrationJobsGet_564082 = ref object of OpenApiRestCall_563540
+proc url_DiskMigrationJobsGet_564084(protocol: Scheme; host: string; base: string;
                                     route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -374,37 +377,37 @@ proc url_DiskMigrationJobsGet_574984(protocol: Scheme; host: string; base: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DiskMigrationJobsGet_574983(path: JsonNode; query: JsonNode;
+proc validate_DiskMigrationJobsGet_564083(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Returns the requested disk migration job.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
+  ##   migrationId: JString (required)
+  ##              : The migration job guid name.
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials that uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   location: JString (required)
   ##           : Location of the resource.
-  ##   migrationId: JString (required)
-  ##              : The migration job guid name.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `subscriptionId` field"
-  var valid_574985 = path.getOrDefault("subscriptionId")
-  valid_574985 = validateParameter(valid_574985, JString, required = true,
+        "path argument is necessary due to required `migrationId` field"
+  var valid_564085 = path.getOrDefault("migrationId")
+  valid_564085 = validateParameter(valid_564085, JString, required = true,
                                  default = nil)
-  if valid_574985 != nil:
-    section.add "subscriptionId", valid_574985
-  var valid_574986 = path.getOrDefault("location")
-  valid_574986 = validateParameter(valid_574986, JString, required = true,
+  if valid_564085 != nil:
+    section.add "migrationId", valid_564085
+  var valid_564086 = path.getOrDefault("subscriptionId")
+  valid_564086 = validateParameter(valid_564086, JString, required = true,
                                  default = nil)
-  if valid_574986 != nil:
-    section.add "location", valid_574986
-  var valid_574987 = path.getOrDefault("migrationId")
-  valid_574987 = validateParameter(valid_574987, JString, required = true,
+  if valid_564086 != nil:
+    section.add "subscriptionId", valid_564086
+  var valid_564087 = path.getOrDefault("location")
+  valid_564087 = validateParameter(valid_564087, JString, required = true,
                                  default = nil)
-  if valid_574987 != nil:
-    section.add "migrationId", valid_574987
+  if valid_564087 != nil:
+    section.add "location", valid_564087
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -412,11 +415,11 @@ proc validate_DiskMigrationJobsGet_574983(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574988 = query.getOrDefault("api-version")
-  valid_574988 = validateParameter(valid_574988, JString, required = true,
+  var valid_564088 = query.getOrDefault("api-version")
+  valid_564088 = validateParameter(valid_564088, JString, required = true,
                                  default = newJString("2018-07-30-preview"))
-  if valid_574988 != nil:
-    section.add "api-version", valid_574988
+  if valid_564088 != nil:
+    section.add "api-version", valid_564088
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -425,48 +428,48 @@ proc validate_DiskMigrationJobsGet_574983(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574989: Call_DiskMigrationJobsGet_574982; path: JsonNode;
+proc call*(call_564089: Call_DiskMigrationJobsGet_564082; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Returns the requested disk migration job.
   ## 
-  let valid = call_574989.validator(path, query, header, formData, body)
-  let scheme = call_574989.pickScheme
+  let valid = call_564089.validator(path, query, header, formData, body)
+  let scheme = call_564089.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574989.url(scheme.get, call_574989.host, call_574989.base,
-                         call_574989.route, valid.getOrDefault("path"),
+  let url = call_564089.url(scheme.get, call_564089.host, call_564089.base,
+                         call_564089.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574989, url, valid)
+  result = hook(call_564089, url, valid)
 
-proc call*(call_574990: Call_DiskMigrationJobsGet_574982; subscriptionId: string;
-          location: string; migrationId: string;
+proc call*(call_564090: Call_DiskMigrationJobsGet_564082; migrationId: string;
+          subscriptionId: string; location: string;
           apiVersion: string = "2018-07-30-preview"): Recallable =
   ## diskMigrationJobsGet
   ## Returns the requested disk migration job.
   ##   apiVersion: string (required)
   ##             : Client API Version.
+  ##   migrationId: string (required)
+  ##              : The migration job guid name.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials that uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   location: string (required)
   ##           : Location of the resource.
-  ##   migrationId: string (required)
-  ##              : The migration job guid name.
-  var path_574991 = newJObject()
-  var query_574992 = newJObject()
-  add(query_574992, "api-version", newJString(apiVersion))
-  add(path_574991, "subscriptionId", newJString(subscriptionId))
-  add(path_574991, "location", newJString(location))
-  add(path_574991, "migrationId", newJString(migrationId))
-  result = call_574990.call(path_574991, query_574992, nil, nil, nil)
+  var path_564091 = newJObject()
+  var query_564092 = newJObject()
+  add(query_564092, "api-version", newJString(apiVersion))
+  add(path_564091, "migrationId", newJString(migrationId))
+  add(path_564091, "subscriptionId", newJString(subscriptionId))
+  add(path_564091, "location", newJString(location))
+  result = call_564090.call(path_564091, query_564092, nil, nil, nil)
 
-var diskMigrationJobsGet* = Call_DiskMigrationJobsGet_574982(
+var diskMigrationJobsGet* = Call_DiskMigrationJobsGet_564082(
     name: "diskMigrationJobsGet", meth: HttpMethod.HttpGet,
     host: "adminmanagement.local.azurestack.external", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Compute.Admin/locations/{location}/diskmigrationjobs/{migrationId}",
-    validator: validate_DiskMigrationJobsGet_574983, base: "",
-    url: url_DiskMigrationJobsGet_574984, schemes: {Scheme.Https})
+    validator: validate_DiskMigrationJobsGet_564083, base: "",
+    url: url_DiskMigrationJobsGet_564084, schemes: {Scheme.Https})
 type
-  Call_DiskMigrationJobsCancel_575007 = ref object of OpenApiRestCall_574442
-proc url_DiskMigrationJobsCancel_575009(protocol: Scheme; host: string; base: string;
+  Call_DiskMigrationJobsCancel_564107 = ref object of OpenApiRestCall_563540
+proc url_DiskMigrationJobsCancel_564109(protocol: Scheme; host: string; base: string;
                                        route: string; path: JsonNode;
                                        query: JsonNode): Uri =
   result.scheme = $protocol
@@ -490,37 +493,37 @@ proc url_DiskMigrationJobsCancel_575009(protocol: Scheme; host: string; base: st
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DiskMigrationJobsCancel_575008(path: JsonNode; query: JsonNode;
+proc validate_DiskMigrationJobsCancel_564108(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Cancel a disk migration job.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
+  ##   migrationId: JString (required)
+  ##              : The migration job guid name.
   ##   subscriptionId: JString (required)
   ##                 : Subscription credentials that uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   location: JString (required)
   ##           : Location of the resource.
-  ##   migrationId: JString (required)
-  ##              : The migration job guid name.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `subscriptionId` field"
-  var valid_575010 = path.getOrDefault("subscriptionId")
-  valid_575010 = validateParameter(valid_575010, JString, required = true,
+        "path argument is necessary due to required `migrationId` field"
+  var valid_564110 = path.getOrDefault("migrationId")
+  valid_564110 = validateParameter(valid_564110, JString, required = true,
                                  default = nil)
-  if valid_575010 != nil:
-    section.add "subscriptionId", valid_575010
-  var valid_575011 = path.getOrDefault("location")
-  valid_575011 = validateParameter(valid_575011, JString, required = true,
+  if valid_564110 != nil:
+    section.add "migrationId", valid_564110
+  var valid_564111 = path.getOrDefault("subscriptionId")
+  valid_564111 = validateParameter(valid_564111, JString, required = true,
                                  default = nil)
-  if valid_575011 != nil:
-    section.add "location", valid_575011
-  var valid_575012 = path.getOrDefault("migrationId")
-  valid_575012 = validateParameter(valid_575012, JString, required = true,
+  if valid_564111 != nil:
+    section.add "subscriptionId", valid_564111
+  var valid_564112 = path.getOrDefault("location")
+  valid_564112 = validateParameter(valid_564112, JString, required = true,
                                  default = nil)
-  if valid_575012 != nil:
-    section.add "migrationId", valid_575012
+  if valid_564112 != nil:
+    section.add "location", valid_564112
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -528,11 +531,11 @@ proc validate_DiskMigrationJobsCancel_575008(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_575013 = query.getOrDefault("api-version")
-  valid_575013 = validateParameter(valid_575013, JString, required = true,
+  var valid_564113 = query.getOrDefault("api-version")
+  valid_564113 = validateParameter(valid_564113, JString, required = true,
                                  default = newJString("2018-07-30-preview"))
-  if valid_575013 != nil:
-    section.add "api-version", valid_575013
+  if valid_564113 != nil:
+    section.add "api-version", valid_564113
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -541,45 +544,45 @@ proc validate_DiskMigrationJobsCancel_575008(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_575014: Call_DiskMigrationJobsCancel_575007; path: JsonNode;
+proc call*(call_564114: Call_DiskMigrationJobsCancel_564107; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Cancel a disk migration job.
   ## 
-  let valid = call_575014.validator(path, query, header, formData, body)
-  let scheme = call_575014.pickScheme
+  let valid = call_564114.validator(path, query, header, formData, body)
+  let scheme = call_564114.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_575014.url(scheme.get, call_575014.host, call_575014.base,
-                         call_575014.route, valid.getOrDefault("path"),
+  let url = call_564114.url(scheme.get, call_564114.host, call_564114.base,
+                         call_564114.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_575014, url, valid)
+  result = hook(call_564114, url, valid)
 
-proc call*(call_575015: Call_DiskMigrationJobsCancel_575007;
-          subscriptionId: string; location: string; migrationId: string;
+proc call*(call_564115: Call_DiskMigrationJobsCancel_564107; migrationId: string;
+          subscriptionId: string; location: string;
           apiVersion: string = "2018-07-30-preview"): Recallable =
   ## diskMigrationJobsCancel
   ## Cancel a disk migration job.
   ##   apiVersion: string (required)
   ##             : Client API Version.
+  ##   migrationId: string (required)
+  ##              : The migration job guid name.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials that uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   location: string (required)
   ##           : Location of the resource.
-  ##   migrationId: string (required)
-  ##              : The migration job guid name.
-  var path_575016 = newJObject()
-  var query_575017 = newJObject()
-  add(query_575017, "api-version", newJString(apiVersion))
-  add(path_575016, "subscriptionId", newJString(subscriptionId))
-  add(path_575016, "location", newJString(location))
-  add(path_575016, "migrationId", newJString(migrationId))
-  result = call_575015.call(path_575016, query_575017, nil, nil, nil)
+  var path_564116 = newJObject()
+  var query_564117 = newJObject()
+  add(query_564117, "api-version", newJString(apiVersion))
+  add(path_564116, "migrationId", newJString(migrationId))
+  add(path_564116, "subscriptionId", newJString(subscriptionId))
+  add(path_564116, "location", newJString(location))
+  result = call_564115.call(path_564116, query_564117, nil, nil, nil)
 
-var diskMigrationJobsCancel* = Call_DiskMigrationJobsCancel_575007(
+var diskMigrationJobsCancel* = Call_DiskMigrationJobsCancel_564107(
     name: "diskMigrationJobsCancel", meth: HttpMethod.HttpPost,
     host: "adminmanagement.local.azurestack.external", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Compute.Admin/locations/{location}/diskmigrationjobs/{migrationId}/Cancel",
-    validator: validate_DiskMigrationJobsCancel_575008, base: "",
-    url: url_DiskMigrationJobsCancel_575009, schemes: {Scheme.Https})
+    validator: validate_DiskMigrationJobsCancel_564108, base: "",
+    url: url_DiskMigrationJobsCancel_564109, schemes: {Scheme.Https})
 export
   rest
 

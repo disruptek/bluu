@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_573667 = ref object of OpenApiRestCall
+  OpenApiRestCall_563565 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_573667](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563565](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_573667): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563565): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,15 +107,15 @@ const
   macServiceName = "azure-kusto"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_OperationsList_573889 = ref object of OpenApiRestCall_573667
-proc url_OperationsList_573891(protocol: Scheme; host: string; base: string;
+  Call_OperationsList_563787 = ref object of OpenApiRestCall_563565
+proc url_OperationsList_563789(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_OperationsList_573890(path: JsonNode; query: JsonNode;
+proc validate_OperationsList_563788(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## Lists available operations for the Microsoft.Kusto provider.
@@ -126,11 +130,11 @@ proc validate_OperationsList_573890(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574050 = query.getOrDefault("api-version")
-  valid_574050 = validateParameter(valid_574050, JString, required = true,
+  var valid_563950 = query.getOrDefault("api-version")
+  valid_563950 = validateParameter(valid_563950, JString, required = true,
                                  default = nil)
-  if valid_574050 != nil:
-    section.add "api-version", valid_574050
+  if valid_563950 != nil:
+    section.add "api-version", valid_563950
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -139,36 +143,36 @@ proc validate_OperationsList_573890(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574073: Call_OperationsList_573889; path: JsonNode; query: JsonNode;
+proc call*(call_563973: Call_OperationsList_563787; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists available operations for the Microsoft.Kusto provider.
   ## 
-  let valid = call_574073.validator(path, query, header, formData, body)
-  let scheme = call_574073.pickScheme
+  let valid = call_563973.validator(path, query, header, formData, body)
+  let scheme = call_563973.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574073.url(scheme.get, call_574073.host, call_574073.base,
-                         call_574073.route, valid.getOrDefault("path"),
+  let url = call_563973.url(scheme.get, call_563973.host, call_563973.base,
+                         call_563973.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574073, url, valid)
+  result = hook(call_563973, url, valid)
 
-proc call*(call_574144: Call_OperationsList_573889; apiVersion: string): Recallable =
+proc call*(call_564044: Call_OperationsList_563787; apiVersion: string): Recallable =
   ## operationsList
   ## Lists available operations for the Microsoft.Kusto provider.
   ##   apiVersion: string (required)
   ##             : Client API Version.
-  var query_574145 = newJObject()
-  add(query_574145, "api-version", newJString(apiVersion))
-  result = call_574144.call(nil, query_574145, nil, nil, nil)
+  var query_564045 = newJObject()
+  add(query_564045, "api-version", newJString(apiVersion))
+  result = call_564044.call(nil, query_564045, nil, nil, nil)
 
-var operationsList* = Call_OperationsList_573889(name: "operationsList",
+var operationsList* = Call_OperationsList_563787(name: "operationsList",
     meth: HttpMethod.HttpGet, host: "management.azure.com",
     route: "/providers/Microsoft.Kusto/operations",
-    validator: validate_OperationsList_573890, base: "", url: url_OperationsList_573891,
+    validator: validate_OperationsList_563788, base: "", url: url_OperationsList_563789,
     schemes: {Scheme.Https})
 type
-  Call_ClustersList_574185 = ref object of OpenApiRestCall_573667
-proc url_ClustersList_574187(protocol: Scheme; host: string; base: string;
+  Call_ClustersList_564085 = ref object of OpenApiRestCall_563565
+proc url_ClustersList_564087(protocol: Scheme; host: string; base: string;
                             route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -184,7 +188,7 @@ proc url_ClustersList_574187(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ClustersList_574186(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_ClustersList_564086(path: JsonNode; query: JsonNode; header: JsonNode;
                                  formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists all Kusto clusters within a subscription.
   ## 
@@ -196,11 +200,11 @@ proc validate_ClustersList_574186(path: JsonNode; query: JsonNode; header: JsonN
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_574202 = path.getOrDefault("subscriptionId")
-  valid_574202 = validateParameter(valid_574202, JString, required = true,
+  var valid_564102 = path.getOrDefault("subscriptionId")
+  valid_564102 = validateParameter(valid_564102, JString, required = true,
                                  default = nil)
-  if valid_574202 != nil:
-    section.add "subscriptionId", valid_574202
+  if valid_564102 != nil:
+    section.add "subscriptionId", valid_564102
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -208,11 +212,11 @@ proc validate_ClustersList_574186(path: JsonNode; query: JsonNode; header: JsonN
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574203 = query.getOrDefault("api-version")
-  valid_574203 = validateParameter(valid_574203, JString, required = true,
+  var valid_564103 = query.getOrDefault("api-version")
+  valid_564103 = validateParameter(valid_564103, JString, required = true,
                                  default = nil)
-  if valid_574203 != nil:
-    section.add "api-version", valid_574203
+  if valid_564103 != nil:
+    section.add "api-version", valid_564103
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -221,20 +225,20 @@ proc validate_ClustersList_574186(path: JsonNode; query: JsonNode; header: JsonN
   if body != nil:
     result.add "body", body
 
-proc call*(call_574204: Call_ClustersList_574185; path: JsonNode; query: JsonNode;
+proc call*(call_564104: Call_ClustersList_564085; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists all Kusto clusters within a subscription.
   ## 
-  let valid = call_574204.validator(path, query, header, formData, body)
-  let scheme = call_574204.pickScheme
+  let valid = call_564104.validator(path, query, header, formData, body)
+  let scheme = call_564104.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574204.url(scheme.get, call_574204.host, call_574204.base,
-                         call_574204.route, valid.getOrDefault("path"),
+  let url = call_564104.url(scheme.get, call_564104.host, call_564104.base,
+                         call_564104.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574204, url, valid)
+  result = hook(call_564104, url, valid)
 
-proc call*(call_574205: Call_ClustersList_574185; apiVersion: string;
+proc call*(call_564105: Call_ClustersList_564085; apiVersion: string;
           subscriptionId: string): Recallable =
   ## clustersList
   ## Lists all Kusto clusters within a subscription.
@@ -242,19 +246,19 @@ proc call*(call_574205: Call_ClustersList_574185; apiVersion: string;
   ##             : Client API Version.
   ##   subscriptionId: string (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_574206 = newJObject()
-  var query_574207 = newJObject()
-  add(query_574207, "api-version", newJString(apiVersion))
-  add(path_574206, "subscriptionId", newJString(subscriptionId))
-  result = call_574205.call(path_574206, query_574207, nil, nil, nil)
+  var path_564106 = newJObject()
+  var query_564107 = newJObject()
+  add(query_564107, "api-version", newJString(apiVersion))
+  add(path_564106, "subscriptionId", newJString(subscriptionId))
+  result = call_564105.call(path_564106, query_564107, nil, nil, nil)
 
-var clustersList* = Call_ClustersList_574185(name: "clustersList",
+var clustersList* = Call_ClustersList_564085(name: "clustersList",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Kusto/clusters",
-    validator: validate_ClustersList_574186, base: "", url: url_ClustersList_574187,
+    validator: validate_ClustersList_564086, base: "", url: url_ClustersList_564087,
     schemes: {Scheme.Https})
 type
-  Call_ClustersCheckNameAvailability_574208 = ref object of OpenApiRestCall_573667
-proc url_ClustersCheckNameAvailability_574210(protocol: Scheme; host: string;
+  Call_ClustersCheckNameAvailability_564108 = ref object of OpenApiRestCall_563565
+proc url_ClustersCheckNameAvailability_564110(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -273,7 +277,7 @@ proc url_ClustersCheckNameAvailability_574210(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ClustersCheckNameAvailability_574209(path: JsonNode; query: JsonNode;
+proc validate_ClustersCheckNameAvailability_564109(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Checks that the cluster name is valid and is not already in use.
   ## 
@@ -287,16 +291,16 @@ proc validate_ClustersCheckNameAvailability_574209(path: JsonNode; query: JsonNo
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_574211 = path.getOrDefault("subscriptionId")
-  valid_574211 = validateParameter(valid_574211, JString, required = true,
+  var valid_564111 = path.getOrDefault("subscriptionId")
+  valid_564111 = validateParameter(valid_564111, JString, required = true,
                                  default = nil)
-  if valid_574211 != nil:
-    section.add "subscriptionId", valid_574211
-  var valid_574212 = path.getOrDefault("location")
-  valid_574212 = validateParameter(valid_574212, JString, required = true,
+  if valid_564111 != nil:
+    section.add "subscriptionId", valid_564111
+  var valid_564112 = path.getOrDefault("location")
+  valid_564112 = validateParameter(valid_564112, JString, required = true,
                                  default = nil)
-  if valid_574212 != nil:
-    section.add "location", valid_574212
+  if valid_564112 != nil:
+    section.add "location", valid_564112
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -304,11 +308,11 @@ proc validate_ClustersCheckNameAvailability_574209(path: JsonNode; query: JsonNo
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574213 = query.getOrDefault("api-version")
-  valid_574213 = validateParameter(valid_574213, JString, required = true,
+  var valid_564113 = query.getOrDefault("api-version")
+  valid_564113 = validateParameter(valid_564113, JString, required = true,
                                  default = nil)
-  if valid_574213 != nil:
-    section.add "api-version", valid_574213
+  if valid_564113 != nil:
+    section.add "api-version", valid_564113
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -322,20 +326,20 @@ proc validate_ClustersCheckNameAvailability_574209(path: JsonNode; query: JsonNo
   if body != nil:
     result.add "body", body
 
-proc call*(call_574215: Call_ClustersCheckNameAvailability_574208; path: JsonNode;
+proc call*(call_564115: Call_ClustersCheckNameAvailability_564108; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Checks that the cluster name is valid and is not already in use.
   ## 
-  let valid = call_574215.validator(path, query, header, formData, body)
-  let scheme = call_574215.pickScheme
+  let valid = call_564115.validator(path, query, header, formData, body)
+  let scheme = call_564115.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574215.url(scheme.get, call_574215.host, call_574215.base,
-                         call_574215.route, valid.getOrDefault("path"),
+  let url = call_564115.url(scheme.get, call_564115.host, call_564115.base,
+                         call_564115.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574215, url, valid)
+  result = hook(call_564115, url, valid)
 
-proc call*(call_574216: Call_ClustersCheckNameAvailability_574208;
+proc call*(call_564116: Call_ClustersCheckNameAvailability_564108;
           apiVersion: string; subscriptionId: string; clusterName: JsonNode;
           location: string): Recallable =
   ## clustersCheckNameAvailability
@@ -348,24 +352,24 @@ proc call*(call_574216: Call_ClustersCheckNameAvailability_574208;
   ##              : The name of the cluster.
   ##   location: string (required)
   ##           : Azure location.
-  var path_574217 = newJObject()
-  var query_574218 = newJObject()
-  var body_574219 = newJObject()
-  add(query_574218, "api-version", newJString(apiVersion))
-  add(path_574217, "subscriptionId", newJString(subscriptionId))
+  var path_564117 = newJObject()
+  var query_564118 = newJObject()
+  var body_564119 = newJObject()
+  add(query_564118, "api-version", newJString(apiVersion))
+  add(path_564117, "subscriptionId", newJString(subscriptionId))
   if clusterName != nil:
-    body_574219 = clusterName
-  add(path_574217, "location", newJString(location))
-  result = call_574216.call(path_574217, query_574218, nil, nil, body_574219)
+    body_564119 = clusterName
+  add(path_564117, "location", newJString(location))
+  result = call_564116.call(path_564117, query_564118, nil, nil, body_564119)
 
-var clustersCheckNameAvailability* = Call_ClustersCheckNameAvailability_574208(
+var clustersCheckNameAvailability* = Call_ClustersCheckNameAvailability_564108(
     name: "clustersCheckNameAvailability", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Kusto/locations/{location}/checkNameAvailability",
-    validator: validate_ClustersCheckNameAvailability_574209, base: "",
-    url: url_ClustersCheckNameAvailability_574210, schemes: {Scheme.Https})
+    validator: validate_ClustersCheckNameAvailability_564109, base: "",
+    url: url_ClustersCheckNameAvailability_564110, schemes: {Scheme.Https})
 type
-  Call_ClustersListSkus_574220 = ref object of OpenApiRestCall_573667
-proc url_ClustersListSkus_574222(protocol: Scheme; host: string; base: string;
+  Call_ClustersListSkus_564120 = ref object of OpenApiRestCall_563565
+proc url_ClustersListSkus_564122(protocol: Scheme; host: string; base: string;
                                 route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -381,7 +385,7 @@ proc url_ClustersListSkus_574222(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ClustersListSkus_574221(path: JsonNode; query: JsonNode;
+proc validate_ClustersListSkus_564121(path: JsonNode; query: JsonNode;
                                      header: JsonNode; formData: JsonNode;
                                      body: JsonNode): JsonNode =
   ## Lists eligible SKUs for Kusto resource provider.
@@ -394,11 +398,11 @@ proc validate_ClustersListSkus_574221(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_574223 = path.getOrDefault("subscriptionId")
-  valid_574223 = validateParameter(valid_574223, JString, required = true,
+  var valid_564123 = path.getOrDefault("subscriptionId")
+  valid_564123 = validateParameter(valid_564123, JString, required = true,
                                  default = nil)
-  if valid_574223 != nil:
-    section.add "subscriptionId", valid_574223
+  if valid_564123 != nil:
+    section.add "subscriptionId", valid_564123
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -406,11 +410,11 @@ proc validate_ClustersListSkus_574221(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574224 = query.getOrDefault("api-version")
-  valid_574224 = validateParameter(valid_574224, JString, required = true,
+  var valid_564124 = query.getOrDefault("api-version")
+  valid_564124 = validateParameter(valid_564124, JString, required = true,
                                  default = nil)
-  if valid_574224 != nil:
-    section.add "api-version", valid_574224
+  if valid_564124 != nil:
+    section.add "api-version", valid_564124
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -419,20 +423,20 @@ proc validate_ClustersListSkus_574221(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574225: Call_ClustersListSkus_574220; path: JsonNode;
+proc call*(call_564125: Call_ClustersListSkus_564120; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists eligible SKUs for Kusto resource provider.
   ## 
-  let valid = call_574225.validator(path, query, header, formData, body)
-  let scheme = call_574225.pickScheme
+  let valid = call_564125.validator(path, query, header, formData, body)
+  let scheme = call_564125.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574225.url(scheme.get, call_574225.host, call_574225.base,
-                         call_574225.route, valid.getOrDefault("path"),
+  let url = call_564125.url(scheme.get, call_564125.host, call_564125.base,
+                         call_564125.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574225, url, valid)
+  result = hook(call_564125, url, valid)
 
-proc call*(call_574226: Call_ClustersListSkus_574220; apiVersion: string;
+proc call*(call_564126: Call_ClustersListSkus_564120; apiVersion: string;
           subscriptionId: string): Recallable =
   ## clustersListSkus
   ## Lists eligible SKUs for Kusto resource provider.
@@ -440,20 +444,20 @@ proc call*(call_574226: Call_ClustersListSkus_574220; apiVersion: string;
   ##             : Client API Version.
   ##   subscriptionId: string (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_574227 = newJObject()
-  var query_574228 = newJObject()
-  add(query_574228, "api-version", newJString(apiVersion))
-  add(path_574227, "subscriptionId", newJString(subscriptionId))
-  result = call_574226.call(path_574227, query_574228, nil, nil, nil)
+  var path_564127 = newJObject()
+  var query_564128 = newJObject()
+  add(query_564128, "api-version", newJString(apiVersion))
+  add(path_564127, "subscriptionId", newJString(subscriptionId))
+  result = call_564126.call(path_564127, query_564128, nil, nil, nil)
 
-var clustersListSkus* = Call_ClustersListSkus_574220(name: "clustersListSkus",
+var clustersListSkus* = Call_ClustersListSkus_564120(name: "clustersListSkus",
     meth: HttpMethod.HttpGet, host: "management.azure.com",
     route: "/subscriptions/{subscriptionId}/providers/Microsoft.Kusto/skus",
-    validator: validate_ClustersListSkus_574221, base: "",
-    url: url_ClustersListSkus_574222, schemes: {Scheme.Https})
+    validator: validate_ClustersListSkus_564121, base: "",
+    url: url_ClustersListSkus_564122, schemes: {Scheme.Https})
 type
-  Call_ClustersListByResourceGroup_574229 = ref object of OpenApiRestCall_573667
-proc url_ClustersListByResourceGroup_574231(protocol: Scheme; host: string;
+  Call_ClustersListByResourceGroup_564129 = ref object of OpenApiRestCall_563565
+proc url_ClustersListByResourceGroup_564131(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -473,30 +477,30 @@ proc url_ClustersListByResourceGroup_574231(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ClustersListByResourceGroup_574230(path: JsonNode; query: JsonNode;
+proc validate_ClustersListByResourceGroup_564130(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists all Kusto clusters within a resource group.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group containing the Kusto cluster.
   ##   subscriptionId: JString (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group containing the Kusto cluster.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_574232 = path.getOrDefault("resourceGroupName")
-  valid_574232 = validateParameter(valid_574232, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564132 = path.getOrDefault("subscriptionId")
+  valid_564132 = validateParameter(valid_564132, JString, required = true,
                                  default = nil)
-  if valid_574232 != nil:
-    section.add "resourceGroupName", valid_574232
-  var valid_574233 = path.getOrDefault("subscriptionId")
-  valid_574233 = validateParameter(valid_574233, JString, required = true,
+  if valid_564132 != nil:
+    section.add "subscriptionId", valid_564132
+  var valid_564133 = path.getOrDefault("resourceGroupName")
+  valid_564133 = validateParameter(valid_564133, JString, required = true,
                                  default = nil)
-  if valid_574233 != nil:
-    section.add "subscriptionId", valid_574233
+  if valid_564133 != nil:
+    section.add "resourceGroupName", valid_564133
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -504,11 +508,11 @@ proc validate_ClustersListByResourceGroup_574230(path: JsonNode; query: JsonNode
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574234 = query.getOrDefault("api-version")
-  valid_574234 = validateParameter(valid_574234, JString, required = true,
+  var valid_564134 = query.getOrDefault("api-version")
+  valid_564134 = validateParameter(valid_564134, JString, required = true,
                                  default = nil)
-  if valid_574234 != nil:
-    section.add "api-version", valid_574234
+  if valid_564134 != nil:
+    section.add "api-version", valid_564134
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -517,44 +521,44 @@ proc validate_ClustersListByResourceGroup_574230(path: JsonNode; query: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_574235: Call_ClustersListByResourceGroup_574229; path: JsonNode;
+proc call*(call_564135: Call_ClustersListByResourceGroup_564129; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists all Kusto clusters within a resource group.
   ## 
-  let valid = call_574235.validator(path, query, header, formData, body)
-  let scheme = call_574235.pickScheme
+  let valid = call_564135.validator(path, query, header, formData, body)
+  let scheme = call_564135.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574235.url(scheme.get, call_574235.host, call_574235.base,
-                         call_574235.route, valid.getOrDefault("path"),
+  let url = call_564135.url(scheme.get, call_564135.host, call_564135.base,
+                         call_564135.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574235, url, valid)
+  result = hook(call_564135, url, valid)
 
-proc call*(call_574236: Call_ClustersListByResourceGroup_574229;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string): Recallable =
+proc call*(call_564136: Call_ClustersListByResourceGroup_564129;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string): Recallable =
   ## clustersListByResourceGroup
   ## Lists all Kusto clusters within a resource group.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group containing the Kusto cluster.
   ##   apiVersion: string (required)
   ##             : Client API Version.
   ##   subscriptionId: string (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_574237 = newJObject()
-  var query_574238 = newJObject()
-  add(path_574237, "resourceGroupName", newJString(resourceGroupName))
-  add(query_574238, "api-version", newJString(apiVersion))
-  add(path_574237, "subscriptionId", newJString(subscriptionId))
-  result = call_574236.call(path_574237, query_574238, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group containing the Kusto cluster.
+  var path_564137 = newJObject()
+  var query_564138 = newJObject()
+  add(query_564138, "api-version", newJString(apiVersion))
+  add(path_564137, "subscriptionId", newJString(subscriptionId))
+  add(path_564137, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564136.call(path_564137, query_564138, nil, nil, nil)
 
-var clustersListByResourceGroup* = Call_ClustersListByResourceGroup_574229(
+var clustersListByResourceGroup* = Call_ClustersListByResourceGroup_564129(
     name: "clustersListByResourceGroup", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Kusto/clusters",
-    validator: validate_ClustersListByResourceGroup_574230, base: "",
-    url: url_ClustersListByResourceGroup_574231, schemes: {Scheme.Https})
+    validator: validate_ClustersListByResourceGroup_564130, base: "",
+    url: url_ClustersListByResourceGroup_564131, schemes: {Scheme.Https})
 type
-  Call_ClustersCreateOrUpdate_574250 = ref object of OpenApiRestCall_573667
-proc url_ClustersCreateOrUpdate_574252(protocol: Scheme; host: string; base: string;
+  Call_ClustersCreateOrUpdate_564150 = ref object of OpenApiRestCall_563565
+proc url_ClustersCreateOrUpdate_564152(protocol: Scheme; host: string; base: string;
                                       route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -576,7 +580,7 @@ proc url_ClustersCreateOrUpdate_574252(protocol: Scheme; host: string; base: str
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ClustersCreateOrUpdate_574251(path: JsonNode; query: JsonNode;
+proc validate_ClustersCreateOrUpdate_564151(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Create or update a Kusto cluster.
   ## 
@@ -585,28 +589,28 @@ proc validate_ClustersCreateOrUpdate_574251(path: JsonNode; query: JsonNode;
   ## parameters in `path` object:
   ##   clusterName: JString (required)
   ##              : The name of the Kusto cluster.
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group containing the Kusto cluster.
   ##   subscriptionId: JString (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group containing the Kusto cluster.
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `clusterName` field"
-  var valid_574270 = path.getOrDefault("clusterName")
-  valid_574270 = validateParameter(valid_574270, JString, required = true,
+  var valid_564170 = path.getOrDefault("clusterName")
+  valid_564170 = validateParameter(valid_564170, JString, required = true,
                                  default = nil)
-  if valid_574270 != nil:
-    section.add "clusterName", valid_574270
-  var valid_574271 = path.getOrDefault("resourceGroupName")
-  valid_574271 = validateParameter(valid_574271, JString, required = true,
+  if valid_564170 != nil:
+    section.add "clusterName", valid_564170
+  var valid_564171 = path.getOrDefault("subscriptionId")
+  valid_564171 = validateParameter(valid_564171, JString, required = true,
                                  default = nil)
-  if valid_574271 != nil:
-    section.add "resourceGroupName", valid_574271
-  var valid_574272 = path.getOrDefault("subscriptionId")
-  valid_574272 = validateParameter(valid_574272, JString, required = true,
+  if valid_564171 != nil:
+    section.add "subscriptionId", valid_564171
+  var valid_564172 = path.getOrDefault("resourceGroupName")
+  valid_564172 = validateParameter(valid_564172, JString, required = true,
                                  default = nil)
-  if valid_574272 != nil:
-    section.add "subscriptionId", valid_574272
+  if valid_564172 != nil:
+    section.add "resourceGroupName", valid_564172
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -614,11 +618,11 @@ proc validate_ClustersCreateOrUpdate_574251(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574273 = query.getOrDefault("api-version")
-  valid_574273 = validateParameter(valid_574273, JString, required = true,
+  var valid_564173 = query.getOrDefault("api-version")
+  valid_564173 = validateParameter(valid_564173, JString, required = true,
                                  default = nil)
-  if valid_574273 != nil:
-    section.add "api-version", valid_574273
+  if valid_564173 != nil:
+    section.add "api-version", valid_564173
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -632,53 +636,53 @@ proc validate_ClustersCreateOrUpdate_574251(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574275: Call_ClustersCreateOrUpdate_574250; path: JsonNode;
+proc call*(call_564175: Call_ClustersCreateOrUpdate_564150; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Create or update a Kusto cluster.
   ## 
-  let valid = call_574275.validator(path, query, header, formData, body)
-  let scheme = call_574275.pickScheme
+  let valid = call_564175.validator(path, query, header, formData, body)
+  let scheme = call_564175.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574275.url(scheme.get, call_574275.host, call_574275.base,
-                         call_574275.route, valid.getOrDefault("path"),
+  let url = call_564175.url(scheme.get, call_564175.host, call_564175.base,
+                         call_564175.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574275, url, valid)
+  result = hook(call_564175, url, valid)
 
-proc call*(call_574276: Call_ClustersCreateOrUpdate_574250; clusterName: string;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
+proc call*(call_564176: Call_ClustersCreateOrUpdate_564150; clusterName: string;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string;
           parameters: JsonNode): Recallable =
   ## clustersCreateOrUpdate
   ## Create or update a Kusto cluster.
   ##   clusterName: string (required)
   ##              : The name of the Kusto cluster.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group containing the Kusto cluster.
   ##   apiVersion: string (required)
   ##             : Client API Version.
   ##   subscriptionId: string (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group containing the Kusto cluster.
   ##   parameters: JObject (required)
   ##             : The Kusto cluster parameters supplied to the CreateOrUpdate operation.
-  var path_574277 = newJObject()
-  var query_574278 = newJObject()
-  var body_574279 = newJObject()
-  add(path_574277, "clusterName", newJString(clusterName))
-  add(path_574277, "resourceGroupName", newJString(resourceGroupName))
-  add(query_574278, "api-version", newJString(apiVersion))
-  add(path_574277, "subscriptionId", newJString(subscriptionId))
+  var path_564177 = newJObject()
+  var query_564178 = newJObject()
+  var body_564179 = newJObject()
+  add(path_564177, "clusterName", newJString(clusterName))
+  add(query_564178, "api-version", newJString(apiVersion))
+  add(path_564177, "subscriptionId", newJString(subscriptionId))
+  add(path_564177, "resourceGroupName", newJString(resourceGroupName))
   if parameters != nil:
-    body_574279 = parameters
-  result = call_574276.call(path_574277, query_574278, nil, nil, body_574279)
+    body_564179 = parameters
+  result = call_564176.call(path_564177, query_564178, nil, nil, body_564179)
 
-var clustersCreateOrUpdate* = Call_ClustersCreateOrUpdate_574250(
+var clustersCreateOrUpdate* = Call_ClustersCreateOrUpdate_564150(
     name: "clustersCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Kusto/clusters/{clusterName}",
-    validator: validate_ClustersCreateOrUpdate_574251, base: "",
-    url: url_ClustersCreateOrUpdate_574252, schemes: {Scheme.Https})
+    validator: validate_ClustersCreateOrUpdate_564151, base: "",
+    url: url_ClustersCreateOrUpdate_564152, schemes: {Scheme.Https})
 type
-  Call_ClustersGet_574239 = ref object of OpenApiRestCall_573667
-proc url_ClustersGet_574241(protocol: Scheme; host: string; base: string;
+  Call_ClustersGet_564139 = ref object of OpenApiRestCall_563565
+proc url_ClustersGet_564141(protocol: Scheme; host: string; base: string;
                            route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -700,7 +704,7 @@ proc url_ClustersGet_574241(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ClustersGet_574240(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_ClustersGet_564140(path: JsonNode; query: JsonNode; header: JsonNode;
                                 formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets a Kusto cluster.
   ## 
@@ -709,28 +713,28 @@ proc validate_ClustersGet_574240(path: JsonNode; query: JsonNode; header: JsonNo
   ## parameters in `path` object:
   ##   clusterName: JString (required)
   ##              : The name of the Kusto cluster.
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group containing the Kusto cluster.
   ##   subscriptionId: JString (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group containing the Kusto cluster.
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `clusterName` field"
-  var valid_574242 = path.getOrDefault("clusterName")
-  valid_574242 = validateParameter(valid_574242, JString, required = true,
+  var valid_564142 = path.getOrDefault("clusterName")
+  valid_564142 = validateParameter(valid_564142, JString, required = true,
                                  default = nil)
-  if valid_574242 != nil:
-    section.add "clusterName", valid_574242
-  var valid_574243 = path.getOrDefault("resourceGroupName")
-  valid_574243 = validateParameter(valid_574243, JString, required = true,
+  if valid_564142 != nil:
+    section.add "clusterName", valid_564142
+  var valid_564143 = path.getOrDefault("subscriptionId")
+  valid_564143 = validateParameter(valid_564143, JString, required = true,
                                  default = nil)
-  if valid_574243 != nil:
-    section.add "resourceGroupName", valid_574243
-  var valid_574244 = path.getOrDefault("subscriptionId")
-  valid_574244 = validateParameter(valid_574244, JString, required = true,
+  if valid_564143 != nil:
+    section.add "subscriptionId", valid_564143
+  var valid_564144 = path.getOrDefault("resourceGroupName")
+  valid_564144 = validateParameter(valid_564144, JString, required = true,
                                  default = nil)
-  if valid_574244 != nil:
-    section.add "subscriptionId", valid_574244
+  if valid_564144 != nil:
+    section.add "resourceGroupName", valid_564144
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -738,11 +742,11 @@ proc validate_ClustersGet_574240(path: JsonNode; query: JsonNode; header: JsonNo
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574245 = query.getOrDefault("api-version")
-  valid_574245 = validateParameter(valid_574245, JString, required = true,
+  var valid_564145 = query.getOrDefault("api-version")
+  valid_564145 = validateParameter(valid_564145, JString, required = true,
                                  default = nil)
-  if valid_574245 != nil:
-    section.add "api-version", valid_574245
+  if valid_564145 != nil:
+    section.add "api-version", valid_564145
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -751,48 +755,48 @@ proc validate_ClustersGet_574240(path: JsonNode; query: JsonNode; header: JsonNo
   if body != nil:
     result.add "body", body
 
-proc call*(call_574246: Call_ClustersGet_574239; path: JsonNode; query: JsonNode;
+proc call*(call_564146: Call_ClustersGet_564139; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets a Kusto cluster.
   ## 
-  let valid = call_574246.validator(path, query, header, formData, body)
-  let scheme = call_574246.pickScheme
+  let valid = call_564146.validator(path, query, header, formData, body)
+  let scheme = call_564146.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574246.url(scheme.get, call_574246.host, call_574246.base,
-                         call_574246.route, valid.getOrDefault("path"),
+  let url = call_564146.url(scheme.get, call_564146.host, call_564146.base,
+                         call_564146.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574246, url, valid)
+  result = hook(call_564146, url, valid)
 
-proc call*(call_574247: Call_ClustersGet_574239; clusterName: string;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string): Recallable =
+proc call*(call_564147: Call_ClustersGet_564139; clusterName: string;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string): Recallable =
   ## clustersGet
   ## Gets a Kusto cluster.
   ##   clusterName: string (required)
   ##              : The name of the Kusto cluster.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group containing the Kusto cluster.
   ##   apiVersion: string (required)
   ##             : Client API Version.
   ##   subscriptionId: string (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_574248 = newJObject()
-  var query_574249 = newJObject()
-  add(path_574248, "clusterName", newJString(clusterName))
-  add(path_574248, "resourceGroupName", newJString(resourceGroupName))
-  add(query_574249, "api-version", newJString(apiVersion))
-  add(path_574248, "subscriptionId", newJString(subscriptionId))
-  result = call_574247.call(path_574248, query_574249, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group containing the Kusto cluster.
+  var path_564148 = newJObject()
+  var query_564149 = newJObject()
+  add(path_564148, "clusterName", newJString(clusterName))
+  add(query_564149, "api-version", newJString(apiVersion))
+  add(path_564148, "subscriptionId", newJString(subscriptionId))
+  add(path_564148, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564147.call(path_564148, query_564149, nil, nil, nil)
 
-var clustersGet* = Call_ClustersGet_574239(name: "clustersGet",
+var clustersGet* = Call_ClustersGet_564139(name: "clustersGet",
                                         meth: HttpMethod.HttpGet,
                                         host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Kusto/clusters/{clusterName}",
-                                        validator: validate_ClustersGet_574240,
-                                        base: "", url: url_ClustersGet_574241,
+                                        validator: validate_ClustersGet_564140,
+                                        base: "", url: url_ClustersGet_564141,
                                         schemes: {Scheme.Https})
 type
-  Call_ClustersUpdate_574291 = ref object of OpenApiRestCall_573667
-proc url_ClustersUpdate_574293(protocol: Scheme; host: string; base: string;
+  Call_ClustersUpdate_564191 = ref object of OpenApiRestCall_563565
+proc url_ClustersUpdate_564193(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -814,7 +818,7 @@ proc url_ClustersUpdate_574293(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ClustersUpdate_574292(path: JsonNode; query: JsonNode;
+proc validate_ClustersUpdate_564192(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## Update a Kusto cluster.
@@ -824,28 +828,28 @@ proc validate_ClustersUpdate_574292(path: JsonNode; query: JsonNode;
   ## parameters in `path` object:
   ##   clusterName: JString (required)
   ##              : The name of the Kusto cluster.
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group containing the Kusto cluster.
   ##   subscriptionId: JString (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group containing the Kusto cluster.
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `clusterName` field"
-  var valid_574294 = path.getOrDefault("clusterName")
-  valid_574294 = validateParameter(valid_574294, JString, required = true,
+  var valid_564194 = path.getOrDefault("clusterName")
+  valid_564194 = validateParameter(valid_564194, JString, required = true,
                                  default = nil)
-  if valid_574294 != nil:
-    section.add "clusterName", valid_574294
-  var valid_574295 = path.getOrDefault("resourceGroupName")
-  valid_574295 = validateParameter(valid_574295, JString, required = true,
+  if valid_564194 != nil:
+    section.add "clusterName", valid_564194
+  var valid_564195 = path.getOrDefault("subscriptionId")
+  valid_564195 = validateParameter(valid_564195, JString, required = true,
                                  default = nil)
-  if valid_574295 != nil:
-    section.add "resourceGroupName", valid_574295
-  var valid_574296 = path.getOrDefault("subscriptionId")
-  valid_574296 = validateParameter(valid_574296, JString, required = true,
+  if valid_564195 != nil:
+    section.add "subscriptionId", valid_564195
+  var valid_564196 = path.getOrDefault("resourceGroupName")
+  valid_564196 = validateParameter(valid_564196, JString, required = true,
                                  default = nil)
-  if valid_574296 != nil:
-    section.add "subscriptionId", valid_574296
+  if valid_564196 != nil:
+    section.add "resourceGroupName", valid_564196
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -853,11 +857,11 @@ proc validate_ClustersUpdate_574292(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574297 = query.getOrDefault("api-version")
-  valid_574297 = validateParameter(valid_574297, JString, required = true,
+  var valid_564197 = query.getOrDefault("api-version")
+  valid_564197 = validateParameter(valid_564197, JString, required = true,
                                  default = nil)
-  if valid_574297 != nil:
-    section.add "api-version", valid_574297
+  if valid_564197 != nil:
+    section.add "api-version", valid_564197
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -871,52 +875,52 @@ proc validate_ClustersUpdate_574292(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574299: Call_ClustersUpdate_574291; path: JsonNode; query: JsonNode;
+proc call*(call_564199: Call_ClustersUpdate_564191; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Update a Kusto cluster.
   ## 
-  let valid = call_574299.validator(path, query, header, formData, body)
-  let scheme = call_574299.pickScheme
+  let valid = call_564199.validator(path, query, header, formData, body)
+  let scheme = call_564199.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574299.url(scheme.get, call_574299.host, call_574299.base,
-                         call_574299.route, valid.getOrDefault("path"),
+  let url = call_564199.url(scheme.get, call_564199.host, call_564199.base,
+                         call_564199.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574299, url, valid)
+  result = hook(call_564199, url, valid)
 
-proc call*(call_574300: Call_ClustersUpdate_574291; clusterName: string;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
+proc call*(call_564200: Call_ClustersUpdate_564191; clusterName: string;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string;
           parameters: JsonNode): Recallable =
   ## clustersUpdate
   ## Update a Kusto cluster.
   ##   clusterName: string (required)
   ##              : The name of the Kusto cluster.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group containing the Kusto cluster.
   ##   apiVersion: string (required)
   ##             : Client API Version.
   ##   subscriptionId: string (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group containing the Kusto cluster.
   ##   parameters: JObject (required)
   ##             : The Kusto cluster parameters supplied to the Update operation.
-  var path_574301 = newJObject()
-  var query_574302 = newJObject()
-  var body_574303 = newJObject()
-  add(path_574301, "clusterName", newJString(clusterName))
-  add(path_574301, "resourceGroupName", newJString(resourceGroupName))
-  add(query_574302, "api-version", newJString(apiVersion))
-  add(path_574301, "subscriptionId", newJString(subscriptionId))
+  var path_564201 = newJObject()
+  var query_564202 = newJObject()
+  var body_564203 = newJObject()
+  add(path_564201, "clusterName", newJString(clusterName))
+  add(query_564202, "api-version", newJString(apiVersion))
+  add(path_564201, "subscriptionId", newJString(subscriptionId))
+  add(path_564201, "resourceGroupName", newJString(resourceGroupName))
   if parameters != nil:
-    body_574303 = parameters
-  result = call_574300.call(path_574301, query_574302, nil, nil, body_574303)
+    body_564203 = parameters
+  result = call_564200.call(path_564201, query_564202, nil, nil, body_564203)
 
-var clustersUpdate* = Call_ClustersUpdate_574291(name: "clustersUpdate",
+var clustersUpdate* = Call_ClustersUpdate_564191(name: "clustersUpdate",
     meth: HttpMethod.HttpPatch, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Kusto/clusters/{clusterName}",
-    validator: validate_ClustersUpdate_574292, base: "", url: url_ClustersUpdate_574293,
+    validator: validate_ClustersUpdate_564192, base: "", url: url_ClustersUpdate_564193,
     schemes: {Scheme.Https})
 type
-  Call_ClustersDelete_574280 = ref object of OpenApiRestCall_573667
-proc url_ClustersDelete_574282(protocol: Scheme; host: string; base: string;
+  Call_ClustersDelete_564180 = ref object of OpenApiRestCall_563565
+proc url_ClustersDelete_564182(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -938,7 +942,7 @@ proc url_ClustersDelete_574282(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ClustersDelete_574281(path: JsonNode; query: JsonNode;
+proc validate_ClustersDelete_564181(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## Deletes a Kusto cluster.
@@ -948,28 +952,28 @@ proc validate_ClustersDelete_574281(path: JsonNode; query: JsonNode;
   ## parameters in `path` object:
   ##   clusterName: JString (required)
   ##              : The name of the Kusto cluster.
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group containing the Kusto cluster.
   ##   subscriptionId: JString (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group containing the Kusto cluster.
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `clusterName` field"
-  var valid_574283 = path.getOrDefault("clusterName")
-  valid_574283 = validateParameter(valid_574283, JString, required = true,
+  var valid_564183 = path.getOrDefault("clusterName")
+  valid_564183 = validateParameter(valid_564183, JString, required = true,
                                  default = nil)
-  if valid_574283 != nil:
-    section.add "clusterName", valid_574283
-  var valid_574284 = path.getOrDefault("resourceGroupName")
-  valid_574284 = validateParameter(valid_574284, JString, required = true,
+  if valid_564183 != nil:
+    section.add "clusterName", valid_564183
+  var valid_564184 = path.getOrDefault("subscriptionId")
+  valid_564184 = validateParameter(valid_564184, JString, required = true,
                                  default = nil)
-  if valid_574284 != nil:
-    section.add "resourceGroupName", valid_574284
-  var valid_574285 = path.getOrDefault("subscriptionId")
-  valid_574285 = validateParameter(valid_574285, JString, required = true,
+  if valid_564184 != nil:
+    section.add "subscriptionId", valid_564184
+  var valid_564185 = path.getOrDefault("resourceGroupName")
+  valid_564185 = validateParameter(valid_564185, JString, required = true,
                                  default = nil)
-  if valid_574285 != nil:
-    section.add "subscriptionId", valid_574285
+  if valid_564185 != nil:
+    section.add "resourceGroupName", valid_564185
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -977,11 +981,11 @@ proc validate_ClustersDelete_574281(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574286 = query.getOrDefault("api-version")
-  valid_574286 = validateParameter(valid_574286, JString, required = true,
+  var valid_564186 = query.getOrDefault("api-version")
+  valid_564186 = validateParameter(valid_564186, JString, required = true,
                                  default = nil)
-  if valid_574286 != nil:
-    section.add "api-version", valid_574286
+  if valid_564186 != nil:
+    section.add "api-version", valid_564186
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -990,46 +994,46 @@ proc validate_ClustersDelete_574281(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574287: Call_ClustersDelete_574280; path: JsonNode; query: JsonNode;
+proc call*(call_564187: Call_ClustersDelete_564180; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes a Kusto cluster.
   ## 
-  let valid = call_574287.validator(path, query, header, formData, body)
-  let scheme = call_574287.pickScheme
+  let valid = call_564187.validator(path, query, header, formData, body)
+  let scheme = call_564187.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574287.url(scheme.get, call_574287.host, call_574287.base,
-                         call_574287.route, valid.getOrDefault("path"),
+  let url = call_564187.url(scheme.get, call_564187.host, call_564187.base,
+                         call_564187.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574287, url, valid)
+  result = hook(call_564187, url, valid)
 
-proc call*(call_574288: Call_ClustersDelete_574280; clusterName: string;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string): Recallable =
+proc call*(call_564188: Call_ClustersDelete_564180; clusterName: string;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string): Recallable =
   ## clustersDelete
   ## Deletes a Kusto cluster.
   ##   clusterName: string (required)
   ##              : The name of the Kusto cluster.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group containing the Kusto cluster.
   ##   apiVersion: string (required)
   ##             : Client API Version.
   ##   subscriptionId: string (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_574289 = newJObject()
-  var query_574290 = newJObject()
-  add(path_574289, "clusterName", newJString(clusterName))
-  add(path_574289, "resourceGroupName", newJString(resourceGroupName))
-  add(query_574290, "api-version", newJString(apiVersion))
-  add(path_574289, "subscriptionId", newJString(subscriptionId))
-  result = call_574288.call(path_574289, query_574290, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group containing the Kusto cluster.
+  var path_564189 = newJObject()
+  var query_564190 = newJObject()
+  add(path_564189, "clusterName", newJString(clusterName))
+  add(query_564190, "api-version", newJString(apiVersion))
+  add(path_564189, "subscriptionId", newJString(subscriptionId))
+  add(path_564189, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564188.call(path_564189, query_564190, nil, nil, nil)
 
-var clustersDelete* = Call_ClustersDelete_574280(name: "clustersDelete",
+var clustersDelete* = Call_ClustersDelete_564180(name: "clustersDelete",
     meth: HttpMethod.HttpDelete, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Kusto/clusters/{clusterName}",
-    validator: validate_ClustersDelete_574281, base: "", url: url_ClustersDelete_574282,
+    validator: validate_ClustersDelete_564181, base: "", url: url_ClustersDelete_564182,
     schemes: {Scheme.Https})
 type
-  Call_AttachedDatabaseConfigurationsListByCluster_574304 = ref object of OpenApiRestCall_573667
-proc url_AttachedDatabaseConfigurationsListByCluster_574306(protocol: Scheme;
+  Call_AttachedDatabaseConfigurationsListByCluster_564204 = ref object of OpenApiRestCall_563565
+proc url_AttachedDatabaseConfigurationsListByCluster_564206(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1052,7 +1056,7 @@ proc url_AttachedDatabaseConfigurationsListByCluster_574306(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AttachedDatabaseConfigurationsListByCluster_574305(path: JsonNode;
+proc validate_AttachedDatabaseConfigurationsListByCluster_564205(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Returns the list of attached database configurations of the given Kusto cluster.
   ## 
@@ -1061,28 +1065,28 @@ proc validate_AttachedDatabaseConfigurationsListByCluster_574305(path: JsonNode;
   ## parameters in `path` object:
   ##   clusterName: JString (required)
   ##              : The name of the Kusto cluster.
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group containing the Kusto cluster.
   ##   subscriptionId: JString (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group containing the Kusto cluster.
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `clusterName` field"
-  var valid_574307 = path.getOrDefault("clusterName")
-  valid_574307 = validateParameter(valid_574307, JString, required = true,
+  var valid_564207 = path.getOrDefault("clusterName")
+  valid_564207 = validateParameter(valid_564207, JString, required = true,
                                  default = nil)
-  if valid_574307 != nil:
-    section.add "clusterName", valid_574307
-  var valid_574308 = path.getOrDefault("resourceGroupName")
-  valid_574308 = validateParameter(valid_574308, JString, required = true,
+  if valid_564207 != nil:
+    section.add "clusterName", valid_564207
+  var valid_564208 = path.getOrDefault("subscriptionId")
+  valid_564208 = validateParameter(valid_564208, JString, required = true,
                                  default = nil)
-  if valid_574308 != nil:
-    section.add "resourceGroupName", valid_574308
-  var valid_574309 = path.getOrDefault("subscriptionId")
-  valid_574309 = validateParameter(valid_574309, JString, required = true,
+  if valid_564208 != nil:
+    section.add "subscriptionId", valid_564208
+  var valid_564209 = path.getOrDefault("resourceGroupName")
+  valid_564209 = validateParameter(valid_564209, JString, required = true,
                                  default = nil)
-  if valid_574309 != nil:
-    section.add "subscriptionId", valid_574309
+  if valid_564209 != nil:
+    section.add "resourceGroupName", valid_564209
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1090,11 +1094,11 @@ proc validate_AttachedDatabaseConfigurationsListByCluster_574305(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574310 = query.getOrDefault("api-version")
-  valid_574310 = validateParameter(valid_574310, JString, required = true,
+  var valid_564210 = query.getOrDefault("api-version")
+  valid_564210 = validateParameter(valid_564210, JString, required = true,
                                  default = nil)
-  if valid_574310 != nil:
-    section.add "api-version", valid_574310
+  if valid_564210 != nil:
+    section.add "api-version", valid_564210
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1103,50 +1107,50 @@ proc validate_AttachedDatabaseConfigurationsListByCluster_574305(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574311: Call_AttachedDatabaseConfigurationsListByCluster_574304;
+proc call*(call_564211: Call_AttachedDatabaseConfigurationsListByCluster_564204;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Returns the list of attached database configurations of the given Kusto cluster.
   ## 
-  let valid = call_574311.validator(path, query, header, formData, body)
-  let scheme = call_574311.pickScheme
+  let valid = call_564211.validator(path, query, header, formData, body)
+  let scheme = call_564211.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574311.url(scheme.get, call_574311.host, call_574311.base,
-                         call_574311.route, valid.getOrDefault("path"),
+  let url = call_564211.url(scheme.get, call_564211.host, call_564211.base,
+                         call_564211.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574311, url, valid)
+  result = hook(call_564211, url, valid)
 
-proc call*(call_574312: Call_AttachedDatabaseConfigurationsListByCluster_574304;
-          clusterName: string; resourceGroupName: string; apiVersion: string;
-          subscriptionId: string): Recallable =
+proc call*(call_564212: Call_AttachedDatabaseConfigurationsListByCluster_564204;
+          clusterName: string; apiVersion: string; subscriptionId: string;
+          resourceGroupName: string): Recallable =
   ## attachedDatabaseConfigurationsListByCluster
   ## Returns the list of attached database configurations of the given Kusto cluster.
   ##   clusterName: string (required)
   ##              : The name of the Kusto cluster.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group containing the Kusto cluster.
   ##   apiVersion: string (required)
   ##             : Client API Version.
   ##   subscriptionId: string (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_574313 = newJObject()
-  var query_574314 = newJObject()
-  add(path_574313, "clusterName", newJString(clusterName))
-  add(path_574313, "resourceGroupName", newJString(resourceGroupName))
-  add(query_574314, "api-version", newJString(apiVersion))
-  add(path_574313, "subscriptionId", newJString(subscriptionId))
-  result = call_574312.call(path_574313, query_574314, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group containing the Kusto cluster.
+  var path_564213 = newJObject()
+  var query_564214 = newJObject()
+  add(path_564213, "clusterName", newJString(clusterName))
+  add(query_564214, "api-version", newJString(apiVersion))
+  add(path_564213, "subscriptionId", newJString(subscriptionId))
+  add(path_564213, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564212.call(path_564213, query_564214, nil, nil, nil)
 
-var attachedDatabaseConfigurationsListByCluster* = Call_AttachedDatabaseConfigurationsListByCluster_574304(
+var attachedDatabaseConfigurationsListByCluster* = Call_AttachedDatabaseConfigurationsListByCluster_564204(
     name: "attachedDatabaseConfigurationsListByCluster", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Kusto/clusters/{clusterName}/attachedDatabaseConfigurations",
-    validator: validate_AttachedDatabaseConfigurationsListByCluster_574305,
-    base: "", url: url_AttachedDatabaseConfigurationsListByCluster_574306,
+    validator: validate_AttachedDatabaseConfigurationsListByCluster_564205,
+    base: "", url: url_AttachedDatabaseConfigurationsListByCluster_564206,
     schemes: {Scheme.Https})
 type
-  Call_AttachedDatabaseConfigurationsCreateOrUpdate_574327 = ref object of OpenApiRestCall_573667
-proc url_AttachedDatabaseConfigurationsCreateOrUpdate_574329(protocol: Scheme;
+  Call_AttachedDatabaseConfigurationsCreateOrUpdate_564227 = ref object of OpenApiRestCall_563565
+proc url_AttachedDatabaseConfigurationsCreateOrUpdate_564229(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1172,7 +1176,7 @@ proc url_AttachedDatabaseConfigurationsCreateOrUpdate_574329(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AttachedDatabaseConfigurationsCreateOrUpdate_574328(path: JsonNode;
+proc validate_AttachedDatabaseConfigurationsCreateOrUpdate_564228(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Creates or updates an attached database configuration.
   ## 
@@ -1181,35 +1185,35 @@ proc validate_AttachedDatabaseConfigurationsCreateOrUpdate_574328(path: JsonNode
   ## parameters in `path` object:
   ##   clusterName: JString (required)
   ##              : The name of the Kusto cluster.
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group containing the Kusto cluster.
-  ##   subscriptionId: JString (required)
-  ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   attachedDatabaseConfigurationName: JString (required)
   ##                                    : The name of the attached database configuration.
+  ##   subscriptionId: JString (required)
+  ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group containing the Kusto cluster.
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `clusterName` field"
-  var valid_574330 = path.getOrDefault("clusterName")
-  valid_574330 = validateParameter(valid_574330, JString, required = true,
+  var valid_564230 = path.getOrDefault("clusterName")
+  valid_564230 = validateParameter(valid_564230, JString, required = true,
                                  default = nil)
-  if valid_574330 != nil:
-    section.add "clusterName", valid_574330
-  var valid_574331 = path.getOrDefault("resourceGroupName")
-  valid_574331 = validateParameter(valid_574331, JString, required = true,
+  if valid_564230 != nil:
+    section.add "clusterName", valid_564230
+  var valid_564231 = path.getOrDefault("attachedDatabaseConfigurationName")
+  valid_564231 = validateParameter(valid_564231, JString, required = true,
                                  default = nil)
-  if valid_574331 != nil:
-    section.add "resourceGroupName", valid_574331
-  var valid_574332 = path.getOrDefault("subscriptionId")
-  valid_574332 = validateParameter(valid_574332, JString, required = true,
+  if valid_564231 != nil:
+    section.add "attachedDatabaseConfigurationName", valid_564231
+  var valid_564232 = path.getOrDefault("subscriptionId")
+  valid_564232 = validateParameter(valid_564232, JString, required = true,
                                  default = nil)
-  if valid_574332 != nil:
-    section.add "subscriptionId", valid_574332
-  var valid_574333 = path.getOrDefault("attachedDatabaseConfigurationName")
-  valid_574333 = validateParameter(valid_574333, JString, required = true,
+  if valid_564232 != nil:
+    section.add "subscriptionId", valid_564232
+  var valid_564233 = path.getOrDefault("resourceGroupName")
+  valid_564233 = validateParameter(valid_564233, JString, required = true,
                                  default = nil)
-  if valid_574333 != nil:
-    section.add "attachedDatabaseConfigurationName", valid_574333
+  if valid_564233 != nil:
+    section.add "resourceGroupName", valid_564233
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1217,11 +1221,11 @@ proc validate_AttachedDatabaseConfigurationsCreateOrUpdate_574328(path: JsonNode
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574334 = query.getOrDefault("api-version")
-  valid_574334 = validateParameter(valid_574334, JString, required = true,
+  var valid_564234 = query.getOrDefault("api-version")
+  valid_564234 = validateParameter(valid_564234, JString, required = true,
                                  default = nil)
-  if valid_574334 != nil:
-    section.add "api-version", valid_574334
+  if valid_564234 != nil:
+    section.add "api-version", valid_564234
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1235,60 +1239,60 @@ proc validate_AttachedDatabaseConfigurationsCreateOrUpdate_574328(path: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_574336: Call_AttachedDatabaseConfigurationsCreateOrUpdate_574327;
+proc call*(call_564236: Call_AttachedDatabaseConfigurationsCreateOrUpdate_564227;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Creates or updates an attached database configuration.
   ## 
-  let valid = call_574336.validator(path, query, header, formData, body)
-  let scheme = call_574336.pickScheme
+  let valid = call_564236.validator(path, query, header, formData, body)
+  let scheme = call_564236.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574336.url(scheme.get, call_574336.host, call_574336.base,
-                         call_574336.route, valid.getOrDefault("path"),
+  let url = call_564236.url(scheme.get, call_564236.host, call_564236.base,
+                         call_564236.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574336, url, valid)
+  result = hook(call_564236, url, valid)
 
-proc call*(call_574337: Call_AttachedDatabaseConfigurationsCreateOrUpdate_574327;
-          clusterName: string; resourceGroupName: string; apiVersion: string;
-          subscriptionId: string; attachedDatabaseConfigurationName: string;
-          parameters: JsonNode): Recallable =
+proc call*(call_564237: Call_AttachedDatabaseConfigurationsCreateOrUpdate_564227;
+          clusterName: string; apiVersion: string;
+          attachedDatabaseConfigurationName: string; subscriptionId: string;
+          resourceGroupName: string; parameters: JsonNode): Recallable =
   ## attachedDatabaseConfigurationsCreateOrUpdate
   ## Creates or updates an attached database configuration.
   ##   clusterName: string (required)
   ##              : The name of the Kusto cluster.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group containing the Kusto cluster.
   ##   apiVersion: string (required)
   ##             : Client API Version.
-  ##   subscriptionId: string (required)
-  ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   attachedDatabaseConfigurationName: string (required)
   ##                                    : The name of the attached database configuration.
+  ##   subscriptionId: string (required)
+  ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group containing the Kusto cluster.
   ##   parameters: JObject (required)
   ##             : The database parameters supplied to the CreateOrUpdate operation.
-  var path_574338 = newJObject()
-  var query_574339 = newJObject()
-  var body_574340 = newJObject()
-  add(path_574338, "clusterName", newJString(clusterName))
-  add(path_574338, "resourceGroupName", newJString(resourceGroupName))
-  add(query_574339, "api-version", newJString(apiVersion))
-  add(path_574338, "subscriptionId", newJString(subscriptionId))
-  add(path_574338, "attachedDatabaseConfigurationName",
+  var path_564238 = newJObject()
+  var query_564239 = newJObject()
+  var body_564240 = newJObject()
+  add(path_564238, "clusterName", newJString(clusterName))
+  add(query_564239, "api-version", newJString(apiVersion))
+  add(path_564238, "attachedDatabaseConfigurationName",
       newJString(attachedDatabaseConfigurationName))
+  add(path_564238, "subscriptionId", newJString(subscriptionId))
+  add(path_564238, "resourceGroupName", newJString(resourceGroupName))
   if parameters != nil:
-    body_574340 = parameters
-  result = call_574337.call(path_574338, query_574339, nil, nil, body_574340)
+    body_564240 = parameters
+  result = call_564237.call(path_564238, query_564239, nil, nil, body_564240)
 
-var attachedDatabaseConfigurationsCreateOrUpdate* = Call_AttachedDatabaseConfigurationsCreateOrUpdate_574327(
+var attachedDatabaseConfigurationsCreateOrUpdate* = Call_AttachedDatabaseConfigurationsCreateOrUpdate_564227(
     name: "attachedDatabaseConfigurationsCreateOrUpdate",
     meth: HttpMethod.HttpPut, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Kusto/clusters/{clusterName}/attachedDatabaseConfigurations/{attachedDatabaseConfigurationName}",
-    validator: validate_AttachedDatabaseConfigurationsCreateOrUpdate_574328,
-    base: "", url: url_AttachedDatabaseConfigurationsCreateOrUpdate_574329,
+    validator: validate_AttachedDatabaseConfigurationsCreateOrUpdate_564228,
+    base: "", url: url_AttachedDatabaseConfigurationsCreateOrUpdate_564229,
     schemes: {Scheme.Https})
 type
-  Call_AttachedDatabaseConfigurationsGet_574315 = ref object of OpenApiRestCall_573667
-proc url_AttachedDatabaseConfigurationsGet_574317(protocol: Scheme; host: string;
+  Call_AttachedDatabaseConfigurationsGet_564215 = ref object of OpenApiRestCall_563565
+proc url_AttachedDatabaseConfigurationsGet_564217(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1314,7 +1318,7 @@ proc url_AttachedDatabaseConfigurationsGet_574317(protocol: Scheme; host: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AttachedDatabaseConfigurationsGet_574316(path: JsonNode;
+proc validate_AttachedDatabaseConfigurationsGet_564216(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Returns an attached database configuration.
   ## 
@@ -1323,35 +1327,35 @@ proc validate_AttachedDatabaseConfigurationsGet_574316(path: JsonNode;
   ## parameters in `path` object:
   ##   clusterName: JString (required)
   ##              : The name of the Kusto cluster.
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group containing the Kusto cluster.
-  ##   subscriptionId: JString (required)
-  ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   attachedDatabaseConfigurationName: JString (required)
   ##                                    : The name of the attached database configuration.
+  ##   subscriptionId: JString (required)
+  ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group containing the Kusto cluster.
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `clusterName` field"
-  var valid_574318 = path.getOrDefault("clusterName")
-  valid_574318 = validateParameter(valid_574318, JString, required = true,
+  var valid_564218 = path.getOrDefault("clusterName")
+  valid_564218 = validateParameter(valid_564218, JString, required = true,
                                  default = nil)
-  if valid_574318 != nil:
-    section.add "clusterName", valid_574318
-  var valid_574319 = path.getOrDefault("resourceGroupName")
-  valid_574319 = validateParameter(valid_574319, JString, required = true,
+  if valid_564218 != nil:
+    section.add "clusterName", valid_564218
+  var valid_564219 = path.getOrDefault("attachedDatabaseConfigurationName")
+  valid_564219 = validateParameter(valid_564219, JString, required = true,
                                  default = nil)
-  if valid_574319 != nil:
-    section.add "resourceGroupName", valid_574319
-  var valid_574320 = path.getOrDefault("subscriptionId")
-  valid_574320 = validateParameter(valid_574320, JString, required = true,
+  if valid_564219 != nil:
+    section.add "attachedDatabaseConfigurationName", valid_564219
+  var valid_564220 = path.getOrDefault("subscriptionId")
+  valid_564220 = validateParameter(valid_564220, JString, required = true,
                                  default = nil)
-  if valid_574320 != nil:
-    section.add "subscriptionId", valid_574320
-  var valid_574321 = path.getOrDefault("attachedDatabaseConfigurationName")
-  valid_574321 = validateParameter(valid_574321, JString, required = true,
+  if valid_564220 != nil:
+    section.add "subscriptionId", valid_564220
+  var valid_564221 = path.getOrDefault("resourceGroupName")
+  valid_564221 = validateParameter(valid_564221, JString, required = true,
                                  default = nil)
-  if valid_574321 != nil:
-    section.add "attachedDatabaseConfigurationName", valid_574321
+  if valid_564221 != nil:
+    section.add "resourceGroupName", valid_564221
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1359,11 +1363,11 @@ proc validate_AttachedDatabaseConfigurationsGet_574316(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574322 = query.getOrDefault("api-version")
-  valid_574322 = validateParameter(valid_574322, JString, required = true,
+  var valid_564222 = query.getOrDefault("api-version")
+  valid_564222 = validateParameter(valid_564222, JString, required = true,
                                  default = nil)
-  if valid_574322 != nil:
-    section.add "api-version", valid_574322
+  if valid_564222 != nil:
+    section.add "api-version", valid_564222
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1372,53 +1376,54 @@ proc validate_AttachedDatabaseConfigurationsGet_574316(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574323: Call_AttachedDatabaseConfigurationsGet_574315;
+proc call*(call_564223: Call_AttachedDatabaseConfigurationsGet_564215;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Returns an attached database configuration.
   ## 
-  let valid = call_574323.validator(path, query, header, formData, body)
-  let scheme = call_574323.pickScheme
+  let valid = call_564223.validator(path, query, header, formData, body)
+  let scheme = call_564223.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574323.url(scheme.get, call_574323.host, call_574323.base,
-                         call_574323.route, valid.getOrDefault("path"),
+  let url = call_564223.url(scheme.get, call_564223.host, call_564223.base,
+                         call_564223.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574323, url, valid)
+  result = hook(call_564223, url, valid)
 
-proc call*(call_574324: Call_AttachedDatabaseConfigurationsGet_574315;
-          clusterName: string; resourceGroupName: string; apiVersion: string;
-          subscriptionId: string; attachedDatabaseConfigurationName: string): Recallable =
+proc call*(call_564224: Call_AttachedDatabaseConfigurationsGet_564215;
+          clusterName: string; apiVersion: string;
+          attachedDatabaseConfigurationName: string; subscriptionId: string;
+          resourceGroupName: string): Recallable =
   ## attachedDatabaseConfigurationsGet
   ## Returns an attached database configuration.
   ##   clusterName: string (required)
   ##              : The name of the Kusto cluster.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group containing the Kusto cluster.
   ##   apiVersion: string (required)
   ##             : Client API Version.
-  ##   subscriptionId: string (required)
-  ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   attachedDatabaseConfigurationName: string (required)
   ##                                    : The name of the attached database configuration.
-  var path_574325 = newJObject()
-  var query_574326 = newJObject()
-  add(path_574325, "clusterName", newJString(clusterName))
-  add(path_574325, "resourceGroupName", newJString(resourceGroupName))
-  add(query_574326, "api-version", newJString(apiVersion))
-  add(path_574325, "subscriptionId", newJString(subscriptionId))
-  add(path_574325, "attachedDatabaseConfigurationName",
+  ##   subscriptionId: string (required)
+  ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group containing the Kusto cluster.
+  var path_564225 = newJObject()
+  var query_564226 = newJObject()
+  add(path_564225, "clusterName", newJString(clusterName))
+  add(query_564226, "api-version", newJString(apiVersion))
+  add(path_564225, "attachedDatabaseConfigurationName",
       newJString(attachedDatabaseConfigurationName))
-  result = call_574324.call(path_574325, query_574326, nil, nil, nil)
+  add(path_564225, "subscriptionId", newJString(subscriptionId))
+  add(path_564225, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564224.call(path_564225, query_564226, nil, nil, nil)
 
-var attachedDatabaseConfigurationsGet* = Call_AttachedDatabaseConfigurationsGet_574315(
+var attachedDatabaseConfigurationsGet* = Call_AttachedDatabaseConfigurationsGet_564215(
     name: "attachedDatabaseConfigurationsGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Kusto/clusters/{clusterName}/attachedDatabaseConfigurations/{attachedDatabaseConfigurationName}",
-    validator: validate_AttachedDatabaseConfigurationsGet_574316, base: "",
-    url: url_AttachedDatabaseConfigurationsGet_574317, schemes: {Scheme.Https})
+    validator: validate_AttachedDatabaseConfigurationsGet_564216, base: "",
+    url: url_AttachedDatabaseConfigurationsGet_564217, schemes: {Scheme.Https})
 type
-  Call_AttachedDatabaseConfigurationsDelete_574341 = ref object of OpenApiRestCall_573667
-proc url_AttachedDatabaseConfigurationsDelete_574343(protocol: Scheme;
+  Call_AttachedDatabaseConfigurationsDelete_564241 = ref object of OpenApiRestCall_563565
+proc url_AttachedDatabaseConfigurationsDelete_564243(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1444,7 +1449,7 @@ proc url_AttachedDatabaseConfigurationsDelete_574343(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AttachedDatabaseConfigurationsDelete_574342(path: JsonNode;
+proc validate_AttachedDatabaseConfigurationsDelete_564242(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Deletes the attached database configuration with the given name.
   ## 
@@ -1453,35 +1458,35 @@ proc validate_AttachedDatabaseConfigurationsDelete_574342(path: JsonNode;
   ## parameters in `path` object:
   ##   clusterName: JString (required)
   ##              : The name of the Kusto cluster.
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group containing the Kusto cluster.
-  ##   subscriptionId: JString (required)
-  ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   attachedDatabaseConfigurationName: JString (required)
   ##                                    : The name of the attached database configuration.
+  ##   subscriptionId: JString (required)
+  ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group containing the Kusto cluster.
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `clusterName` field"
-  var valid_574344 = path.getOrDefault("clusterName")
-  valid_574344 = validateParameter(valid_574344, JString, required = true,
+  var valid_564244 = path.getOrDefault("clusterName")
+  valid_564244 = validateParameter(valid_564244, JString, required = true,
                                  default = nil)
-  if valid_574344 != nil:
-    section.add "clusterName", valid_574344
-  var valid_574345 = path.getOrDefault("resourceGroupName")
-  valid_574345 = validateParameter(valid_574345, JString, required = true,
+  if valid_564244 != nil:
+    section.add "clusterName", valid_564244
+  var valid_564245 = path.getOrDefault("attachedDatabaseConfigurationName")
+  valid_564245 = validateParameter(valid_564245, JString, required = true,
                                  default = nil)
-  if valid_574345 != nil:
-    section.add "resourceGroupName", valid_574345
-  var valid_574346 = path.getOrDefault("subscriptionId")
-  valid_574346 = validateParameter(valid_574346, JString, required = true,
+  if valid_564245 != nil:
+    section.add "attachedDatabaseConfigurationName", valid_564245
+  var valid_564246 = path.getOrDefault("subscriptionId")
+  valid_564246 = validateParameter(valid_564246, JString, required = true,
                                  default = nil)
-  if valid_574346 != nil:
-    section.add "subscriptionId", valid_574346
-  var valid_574347 = path.getOrDefault("attachedDatabaseConfigurationName")
-  valid_574347 = validateParameter(valid_574347, JString, required = true,
+  if valid_564246 != nil:
+    section.add "subscriptionId", valid_564246
+  var valid_564247 = path.getOrDefault("resourceGroupName")
+  valid_564247 = validateParameter(valid_564247, JString, required = true,
                                  default = nil)
-  if valid_574347 != nil:
-    section.add "attachedDatabaseConfigurationName", valid_574347
+  if valid_564247 != nil:
+    section.add "resourceGroupName", valid_564247
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1489,11 +1494,11 @@ proc validate_AttachedDatabaseConfigurationsDelete_574342(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574348 = query.getOrDefault("api-version")
-  valid_574348 = validateParameter(valid_574348, JString, required = true,
+  var valid_564248 = query.getOrDefault("api-version")
+  valid_564248 = validateParameter(valid_564248, JString, required = true,
                                  default = nil)
-  if valid_574348 != nil:
-    section.add "api-version", valid_574348
+  if valid_564248 != nil:
+    section.add "api-version", valid_564248
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1502,53 +1507,54 @@ proc validate_AttachedDatabaseConfigurationsDelete_574342(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574349: Call_AttachedDatabaseConfigurationsDelete_574341;
+proc call*(call_564249: Call_AttachedDatabaseConfigurationsDelete_564241;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Deletes the attached database configuration with the given name.
   ## 
-  let valid = call_574349.validator(path, query, header, formData, body)
-  let scheme = call_574349.pickScheme
+  let valid = call_564249.validator(path, query, header, formData, body)
+  let scheme = call_564249.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574349.url(scheme.get, call_574349.host, call_574349.base,
-                         call_574349.route, valid.getOrDefault("path"),
+  let url = call_564249.url(scheme.get, call_564249.host, call_564249.base,
+                         call_564249.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574349, url, valid)
+  result = hook(call_564249, url, valid)
 
-proc call*(call_574350: Call_AttachedDatabaseConfigurationsDelete_574341;
-          clusterName: string; resourceGroupName: string; apiVersion: string;
-          subscriptionId: string; attachedDatabaseConfigurationName: string): Recallable =
+proc call*(call_564250: Call_AttachedDatabaseConfigurationsDelete_564241;
+          clusterName: string; apiVersion: string;
+          attachedDatabaseConfigurationName: string; subscriptionId: string;
+          resourceGroupName: string): Recallable =
   ## attachedDatabaseConfigurationsDelete
   ## Deletes the attached database configuration with the given name.
   ##   clusterName: string (required)
   ##              : The name of the Kusto cluster.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group containing the Kusto cluster.
   ##   apiVersion: string (required)
   ##             : Client API Version.
-  ##   subscriptionId: string (required)
-  ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   attachedDatabaseConfigurationName: string (required)
   ##                                    : The name of the attached database configuration.
-  var path_574351 = newJObject()
-  var query_574352 = newJObject()
-  add(path_574351, "clusterName", newJString(clusterName))
-  add(path_574351, "resourceGroupName", newJString(resourceGroupName))
-  add(query_574352, "api-version", newJString(apiVersion))
-  add(path_574351, "subscriptionId", newJString(subscriptionId))
-  add(path_574351, "attachedDatabaseConfigurationName",
+  ##   subscriptionId: string (required)
+  ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group containing the Kusto cluster.
+  var path_564251 = newJObject()
+  var query_564252 = newJObject()
+  add(path_564251, "clusterName", newJString(clusterName))
+  add(query_564252, "api-version", newJString(apiVersion))
+  add(path_564251, "attachedDatabaseConfigurationName",
       newJString(attachedDatabaseConfigurationName))
-  result = call_574350.call(path_574351, query_574352, nil, nil, nil)
+  add(path_564251, "subscriptionId", newJString(subscriptionId))
+  add(path_564251, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564250.call(path_564251, query_564252, nil, nil, nil)
 
-var attachedDatabaseConfigurationsDelete* = Call_AttachedDatabaseConfigurationsDelete_574341(
+var attachedDatabaseConfigurationsDelete* = Call_AttachedDatabaseConfigurationsDelete_564241(
     name: "attachedDatabaseConfigurationsDelete", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Kusto/clusters/{clusterName}/attachedDatabaseConfigurations/{attachedDatabaseConfigurationName}",
-    validator: validate_AttachedDatabaseConfigurationsDelete_574342, base: "",
-    url: url_AttachedDatabaseConfigurationsDelete_574343, schemes: {Scheme.Https})
+    validator: validate_AttachedDatabaseConfigurationsDelete_564242, base: "",
+    url: url_AttachedDatabaseConfigurationsDelete_564243, schemes: {Scheme.Https})
 type
-  Call_DatabasesCheckNameAvailability_574353 = ref object of OpenApiRestCall_573667
-proc url_DatabasesCheckNameAvailability_574355(protocol: Scheme; host: string;
+  Call_DatabasesCheckNameAvailability_564253 = ref object of OpenApiRestCall_563565
+proc url_DatabasesCheckNameAvailability_564255(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1571,7 +1577,7 @@ proc url_DatabasesCheckNameAvailability_574355(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DatabasesCheckNameAvailability_574354(path: JsonNode;
+proc validate_DatabasesCheckNameAvailability_564254(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Checks that the database name is valid and is not already in use.
   ## 
@@ -1580,28 +1586,28 @@ proc validate_DatabasesCheckNameAvailability_574354(path: JsonNode;
   ## parameters in `path` object:
   ##   clusterName: JString (required)
   ##              : The name of the Kusto cluster.
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group containing the Kusto cluster.
   ##   subscriptionId: JString (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group containing the Kusto cluster.
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `clusterName` field"
-  var valid_574356 = path.getOrDefault("clusterName")
-  valid_574356 = validateParameter(valid_574356, JString, required = true,
+  var valid_564256 = path.getOrDefault("clusterName")
+  valid_564256 = validateParameter(valid_564256, JString, required = true,
                                  default = nil)
-  if valid_574356 != nil:
-    section.add "clusterName", valid_574356
-  var valid_574357 = path.getOrDefault("resourceGroupName")
-  valid_574357 = validateParameter(valid_574357, JString, required = true,
+  if valid_564256 != nil:
+    section.add "clusterName", valid_564256
+  var valid_564257 = path.getOrDefault("subscriptionId")
+  valid_564257 = validateParameter(valid_564257, JString, required = true,
                                  default = nil)
-  if valid_574357 != nil:
-    section.add "resourceGroupName", valid_574357
-  var valid_574358 = path.getOrDefault("subscriptionId")
-  valid_574358 = validateParameter(valid_574358, JString, required = true,
+  if valid_564257 != nil:
+    section.add "subscriptionId", valid_564257
+  var valid_564258 = path.getOrDefault("resourceGroupName")
+  valid_564258 = validateParameter(valid_564258, JString, required = true,
                                  default = nil)
-  if valid_574358 != nil:
-    section.add "subscriptionId", valid_574358
+  if valid_564258 != nil:
+    section.add "resourceGroupName", valid_564258
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1609,11 +1615,11 @@ proc validate_DatabasesCheckNameAvailability_574354(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574359 = query.getOrDefault("api-version")
-  valid_574359 = validateParameter(valid_574359, JString, required = true,
+  var valid_564259 = query.getOrDefault("api-version")
+  valid_564259 = validateParameter(valid_564259, JString, required = true,
                                  default = nil)
-  if valid_574359 != nil:
-    section.add "api-version", valid_574359
+  if valid_564259 != nil:
+    section.add "api-version", valid_564259
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1627,53 +1633,53 @@ proc validate_DatabasesCheckNameAvailability_574354(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574361: Call_DatabasesCheckNameAvailability_574353; path: JsonNode;
+proc call*(call_564261: Call_DatabasesCheckNameAvailability_564253; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Checks that the database name is valid and is not already in use.
   ## 
-  let valid = call_574361.validator(path, query, header, formData, body)
-  let scheme = call_574361.pickScheme
+  let valid = call_564261.validator(path, query, header, formData, body)
+  let scheme = call_564261.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574361.url(scheme.get, call_574361.host, call_574361.base,
-                         call_574361.route, valid.getOrDefault("path"),
+  let url = call_564261.url(scheme.get, call_564261.host, call_564261.base,
+                         call_564261.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574361, url, valid)
+  result = hook(call_564261, url, valid)
 
-proc call*(call_574362: Call_DatabasesCheckNameAvailability_574353;
-          clusterName: string; resourceGroupName: string; apiVersion: string;
-          subscriptionId: string; resourceName: JsonNode): Recallable =
+proc call*(call_564262: Call_DatabasesCheckNameAvailability_564253;
+          clusterName: string; apiVersion: string; resourceName: JsonNode;
+          subscriptionId: string; resourceGroupName: string): Recallable =
   ## databasesCheckNameAvailability
   ## Checks that the database name is valid and is not already in use.
   ##   clusterName: string (required)
   ##              : The name of the Kusto cluster.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group containing the Kusto cluster.
   ##   apiVersion: string (required)
   ##             : Client API Version.
-  ##   subscriptionId: string (required)
-  ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   resourceName: JObject (required)
   ##               : The name of the resource.
-  var path_574363 = newJObject()
-  var query_574364 = newJObject()
-  var body_574365 = newJObject()
-  add(path_574363, "clusterName", newJString(clusterName))
-  add(path_574363, "resourceGroupName", newJString(resourceGroupName))
-  add(query_574364, "api-version", newJString(apiVersion))
-  add(path_574363, "subscriptionId", newJString(subscriptionId))
+  ##   subscriptionId: string (required)
+  ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group containing the Kusto cluster.
+  var path_564263 = newJObject()
+  var query_564264 = newJObject()
+  var body_564265 = newJObject()
+  add(path_564263, "clusterName", newJString(clusterName))
+  add(query_564264, "api-version", newJString(apiVersion))
   if resourceName != nil:
-    body_574365 = resourceName
-  result = call_574362.call(path_574363, query_574364, nil, nil, body_574365)
+    body_564265 = resourceName
+  add(path_564263, "subscriptionId", newJString(subscriptionId))
+  add(path_564263, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564262.call(path_564263, query_564264, nil, nil, body_564265)
 
-var databasesCheckNameAvailability* = Call_DatabasesCheckNameAvailability_574353(
+var databasesCheckNameAvailability* = Call_DatabasesCheckNameAvailability_564253(
     name: "databasesCheckNameAvailability", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Kusto/clusters/{clusterName}/checkNameAvailability",
-    validator: validate_DatabasesCheckNameAvailability_574354, base: "",
-    url: url_DatabasesCheckNameAvailability_574355, schemes: {Scheme.Https})
+    validator: validate_DatabasesCheckNameAvailability_564254, base: "",
+    url: url_DatabasesCheckNameAvailability_564255, schemes: {Scheme.Https})
 type
-  Call_DatabasesListByCluster_574366 = ref object of OpenApiRestCall_573667
-proc url_DatabasesListByCluster_574368(protocol: Scheme; host: string; base: string;
+  Call_DatabasesListByCluster_564266 = ref object of OpenApiRestCall_563565
+proc url_DatabasesListByCluster_564268(protocol: Scheme; host: string; base: string;
                                       route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1696,7 +1702,7 @@ proc url_DatabasesListByCluster_574368(protocol: Scheme; host: string; base: str
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DatabasesListByCluster_574367(path: JsonNode; query: JsonNode;
+proc validate_DatabasesListByCluster_564267(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Returns the list of databases of the given Kusto cluster.
   ## 
@@ -1705,28 +1711,28 @@ proc validate_DatabasesListByCluster_574367(path: JsonNode; query: JsonNode;
   ## parameters in `path` object:
   ##   clusterName: JString (required)
   ##              : The name of the Kusto cluster.
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group containing the Kusto cluster.
   ##   subscriptionId: JString (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group containing the Kusto cluster.
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `clusterName` field"
-  var valid_574369 = path.getOrDefault("clusterName")
-  valid_574369 = validateParameter(valid_574369, JString, required = true,
+  var valid_564269 = path.getOrDefault("clusterName")
+  valid_564269 = validateParameter(valid_564269, JString, required = true,
                                  default = nil)
-  if valid_574369 != nil:
-    section.add "clusterName", valid_574369
-  var valid_574370 = path.getOrDefault("resourceGroupName")
-  valid_574370 = validateParameter(valid_574370, JString, required = true,
+  if valid_564269 != nil:
+    section.add "clusterName", valid_564269
+  var valid_564270 = path.getOrDefault("subscriptionId")
+  valid_564270 = validateParameter(valid_564270, JString, required = true,
                                  default = nil)
-  if valid_574370 != nil:
-    section.add "resourceGroupName", valid_574370
-  var valid_574371 = path.getOrDefault("subscriptionId")
-  valid_574371 = validateParameter(valid_574371, JString, required = true,
+  if valid_564270 != nil:
+    section.add "subscriptionId", valid_564270
+  var valid_564271 = path.getOrDefault("resourceGroupName")
+  valid_564271 = validateParameter(valid_564271, JString, required = true,
                                  default = nil)
-  if valid_574371 != nil:
-    section.add "subscriptionId", valid_574371
+  if valid_564271 != nil:
+    section.add "resourceGroupName", valid_564271
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1734,11 +1740,11 @@ proc validate_DatabasesListByCluster_574367(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574372 = query.getOrDefault("api-version")
-  valid_574372 = validateParameter(valid_574372, JString, required = true,
+  var valid_564272 = query.getOrDefault("api-version")
+  valid_564272 = validateParameter(valid_564272, JString, required = true,
                                  default = nil)
-  if valid_574372 != nil:
-    section.add "api-version", valid_574372
+  if valid_564272 != nil:
+    section.add "api-version", valid_564272
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1747,47 +1753,47 @@ proc validate_DatabasesListByCluster_574367(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574373: Call_DatabasesListByCluster_574366; path: JsonNode;
+proc call*(call_564273: Call_DatabasesListByCluster_564266; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Returns the list of databases of the given Kusto cluster.
   ## 
-  let valid = call_574373.validator(path, query, header, formData, body)
-  let scheme = call_574373.pickScheme
+  let valid = call_564273.validator(path, query, header, formData, body)
+  let scheme = call_564273.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574373.url(scheme.get, call_574373.host, call_574373.base,
-                         call_574373.route, valid.getOrDefault("path"),
+  let url = call_564273.url(scheme.get, call_564273.host, call_564273.base,
+                         call_564273.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574373, url, valid)
+  result = hook(call_564273, url, valid)
 
-proc call*(call_574374: Call_DatabasesListByCluster_574366; clusterName: string;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string): Recallable =
+proc call*(call_564274: Call_DatabasesListByCluster_564266; clusterName: string;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string): Recallable =
   ## databasesListByCluster
   ## Returns the list of databases of the given Kusto cluster.
   ##   clusterName: string (required)
   ##              : The name of the Kusto cluster.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group containing the Kusto cluster.
   ##   apiVersion: string (required)
   ##             : Client API Version.
   ##   subscriptionId: string (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_574375 = newJObject()
-  var query_574376 = newJObject()
-  add(path_574375, "clusterName", newJString(clusterName))
-  add(path_574375, "resourceGroupName", newJString(resourceGroupName))
-  add(query_574376, "api-version", newJString(apiVersion))
-  add(path_574375, "subscriptionId", newJString(subscriptionId))
-  result = call_574374.call(path_574375, query_574376, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group containing the Kusto cluster.
+  var path_564275 = newJObject()
+  var query_564276 = newJObject()
+  add(path_564275, "clusterName", newJString(clusterName))
+  add(query_564276, "api-version", newJString(apiVersion))
+  add(path_564275, "subscriptionId", newJString(subscriptionId))
+  add(path_564275, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564274.call(path_564275, query_564276, nil, nil, nil)
 
-var databasesListByCluster* = Call_DatabasesListByCluster_574366(
+var databasesListByCluster* = Call_DatabasesListByCluster_564266(
     name: "databasesListByCluster", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Kusto/clusters/{clusterName}/databases",
-    validator: validate_DatabasesListByCluster_574367, base: "",
-    url: url_DatabasesListByCluster_574368, schemes: {Scheme.Https})
+    validator: validate_DatabasesListByCluster_564267, base: "",
+    url: url_DatabasesListByCluster_564268, schemes: {Scheme.Https})
 type
-  Call_DatabasesCreateOrUpdate_574389 = ref object of OpenApiRestCall_573667
-proc url_DatabasesCreateOrUpdate_574391(protocol: Scheme; host: string; base: string;
+  Call_DatabasesCreateOrUpdate_564289 = ref object of OpenApiRestCall_563565
+proc url_DatabasesCreateOrUpdate_564291(protocol: Scheme; host: string; base: string;
                                        route: string; path: JsonNode;
                                        query: JsonNode): Uri =
   result.scheme = $protocol
@@ -1813,7 +1819,7 @@ proc url_DatabasesCreateOrUpdate_574391(protocol: Scheme; host: string; base: st
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DatabasesCreateOrUpdate_574390(path: JsonNode; query: JsonNode;
+proc validate_DatabasesCreateOrUpdate_564290(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Creates or updates a database.
   ## 
@@ -1822,35 +1828,35 @@ proc validate_DatabasesCreateOrUpdate_574390(path: JsonNode; query: JsonNode;
   ## parameters in `path` object:
   ##   clusterName: JString (required)
   ##              : The name of the Kusto cluster.
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group containing the Kusto cluster.
   ##   subscriptionId: JString (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   databaseName: JString (required)
   ##               : The name of the database in the Kusto cluster.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group containing the Kusto cluster.
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `clusterName` field"
-  var valid_574392 = path.getOrDefault("clusterName")
-  valid_574392 = validateParameter(valid_574392, JString, required = true,
+  var valid_564292 = path.getOrDefault("clusterName")
+  valid_564292 = validateParameter(valid_564292, JString, required = true,
                                  default = nil)
-  if valid_574392 != nil:
-    section.add "clusterName", valid_574392
-  var valid_574393 = path.getOrDefault("resourceGroupName")
-  valid_574393 = validateParameter(valid_574393, JString, required = true,
+  if valid_564292 != nil:
+    section.add "clusterName", valid_564292
+  var valid_564293 = path.getOrDefault("subscriptionId")
+  valid_564293 = validateParameter(valid_564293, JString, required = true,
                                  default = nil)
-  if valid_574393 != nil:
-    section.add "resourceGroupName", valid_574393
-  var valid_574394 = path.getOrDefault("subscriptionId")
-  valid_574394 = validateParameter(valid_574394, JString, required = true,
+  if valid_564293 != nil:
+    section.add "subscriptionId", valid_564293
+  var valid_564294 = path.getOrDefault("databaseName")
+  valid_564294 = validateParameter(valid_564294, JString, required = true,
                                  default = nil)
-  if valid_574394 != nil:
-    section.add "subscriptionId", valid_574394
-  var valid_574395 = path.getOrDefault("databaseName")
-  valid_574395 = validateParameter(valid_574395, JString, required = true,
+  if valid_564294 != nil:
+    section.add "databaseName", valid_564294
+  var valid_564295 = path.getOrDefault("resourceGroupName")
+  valid_564295 = validateParameter(valid_564295, JString, required = true,
                                  default = nil)
-  if valid_574395 != nil:
-    section.add "databaseName", valid_574395
+  if valid_564295 != nil:
+    section.add "resourceGroupName", valid_564295
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1858,11 +1864,11 @@ proc validate_DatabasesCreateOrUpdate_574390(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574396 = query.getOrDefault("api-version")
-  valid_574396 = validateParameter(valid_574396, JString, required = true,
+  var valid_564296 = query.getOrDefault("api-version")
+  valid_564296 = validateParameter(valid_564296, JString, required = true,
                                  default = nil)
-  if valid_574396 != nil:
-    section.add "api-version", valid_574396
+  if valid_564296 != nil:
+    section.add "api-version", valid_564296
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1876,56 +1882,56 @@ proc validate_DatabasesCreateOrUpdate_574390(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574398: Call_DatabasesCreateOrUpdate_574389; path: JsonNode;
+proc call*(call_564298: Call_DatabasesCreateOrUpdate_564289; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Creates or updates a database.
   ## 
-  let valid = call_574398.validator(path, query, header, formData, body)
-  let scheme = call_574398.pickScheme
+  let valid = call_564298.validator(path, query, header, formData, body)
+  let scheme = call_564298.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574398.url(scheme.get, call_574398.host, call_574398.base,
-                         call_574398.route, valid.getOrDefault("path"),
+  let url = call_564298.url(scheme.get, call_564298.host, call_564298.base,
+                         call_564298.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574398, url, valid)
+  result = hook(call_564298, url, valid)
 
-proc call*(call_574399: Call_DatabasesCreateOrUpdate_574389; clusterName: string;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          databaseName: string; parameters: JsonNode): Recallable =
+proc call*(call_564299: Call_DatabasesCreateOrUpdate_564289; clusterName: string;
+          apiVersion: string; subscriptionId: string; databaseName: string;
+          resourceGroupName: string; parameters: JsonNode): Recallable =
   ## databasesCreateOrUpdate
   ## Creates or updates a database.
   ##   clusterName: string (required)
   ##              : The name of the Kusto cluster.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group containing the Kusto cluster.
   ##   apiVersion: string (required)
   ##             : Client API Version.
   ##   subscriptionId: string (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   databaseName: string (required)
   ##               : The name of the database in the Kusto cluster.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group containing the Kusto cluster.
   ##   parameters: JObject (required)
   ##             : The database parameters supplied to the CreateOrUpdate operation.
-  var path_574400 = newJObject()
-  var query_574401 = newJObject()
-  var body_574402 = newJObject()
-  add(path_574400, "clusterName", newJString(clusterName))
-  add(path_574400, "resourceGroupName", newJString(resourceGroupName))
-  add(query_574401, "api-version", newJString(apiVersion))
-  add(path_574400, "subscriptionId", newJString(subscriptionId))
-  add(path_574400, "databaseName", newJString(databaseName))
+  var path_564300 = newJObject()
+  var query_564301 = newJObject()
+  var body_564302 = newJObject()
+  add(path_564300, "clusterName", newJString(clusterName))
+  add(query_564301, "api-version", newJString(apiVersion))
+  add(path_564300, "subscriptionId", newJString(subscriptionId))
+  add(path_564300, "databaseName", newJString(databaseName))
+  add(path_564300, "resourceGroupName", newJString(resourceGroupName))
   if parameters != nil:
-    body_574402 = parameters
-  result = call_574399.call(path_574400, query_574401, nil, nil, body_574402)
+    body_564302 = parameters
+  result = call_564299.call(path_564300, query_564301, nil, nil, body_564302)
 
-var databasesCreateOrUpdate* = Call_DatabasesCreateOrUpdate_574389(
+var databasesCreateOrUpdate* = Call_DatabasesCreateOrUpdate_564289(
     name: "databasesCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Kusto/clusters/{clusterName}/databases/{databaseName}",
-    validator: validate_DatabasesCreateOrUpdate_574390, base: "",
-    url: url_DatabasesCreateOrUpdate_574391, schemes: {Scheme.Https})
+    validator: validate_DatabasesCreateOrUpdate_564290, base: "",
+    url: url_DatabasesCreateOrUpdate_564291, schemes: {Scheme.Https})
 type
-  Call_DatabasesGet_574377 = ref object of OpenApiRestCall_573667
-proc url_DatabasesGet_574379(protocol: Scheme; host: string; base: string;
+  Call_DatabasesGet_564277 = ref object of OpenApiRestCall_563565
+proc url_DatabasesGet_564279(protocol: Scheme; host: string; base: string;
                             route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1950,7 +1956,7 @@ proc url_DatabasesGet_574379(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DatabasesGet_574378(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_DatabasesGet_564278(path: JsonNode; query: JsonNode; header: JsonNode;
                                  formData: JsonNode; body: JsonNode): JsonNode =
   ## Returns a database.
   ## 
@@ -1959,35 +1965,35 @@ proc validate_DatabasesGet_574378(path: JsonNode; query: JsonNode; header: JsonN
   ## parameters in `path` object:
   ##   clusterName: JString (required)
   ##              : The name of the Kusto cluster.
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group containing the Kusto cluster.
   ##   subscriptionId: JString (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   databaseName: JString (required)
   ##               : The name of the database in the Kusto cluster.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group containing the Kusto cluster.
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `clusterName` field"
-  var valid_574380 = path.getOrDefault("clusterName")
-  valid_574380 = validateParameter(valid_574380, JString, required = true,
+  var valid_564280 = path.getOrDefault("clusterName")
+  valid_564280 = validateParameter(valid_564280, JString, required = true,
                                  default = nil)
-  if valid_574380 != nil:
-    section.add "clusterName", valid_574380
-  var valid_574381 = path.getOrDefault("resourceGroupName")
-  valid_574381 = validateParameter(valid_574381, JString, required = true,
+  if valid_564280 != nil:
+    section.add "clusterName", valid_564280
+  var valid_564281 = path.getOrDefault("subscriptionId")
+  valid_564281 = validateParameter(valid_564281, JString, required = true,
                                  default = nil)
-  if valid_574381 != nil:
-    section.add "resourceGroupName", valid_574381
-  var valid_574382 = path.getOrDefault("subscriptionId")
-  valid_574382 = validateParameter(valid_574382, JString, required = true,
+  if valid_564281 != nil:
+    section.add "subscriptionId", valid_564281
+  var valid_564282 = path.getOrDefault("databaseName")
+  valid_564282 = validateParameter(valid_564282, JString, required = true,
                                  default = nil)
-  if valid_574382 != nil:
-    section.add "subscriptionId", valid_574382
-  var valid_574383 = path.getOrDefault("databaseName")
-  valid_574383 = validateParameter(valid_574383, JString, required = true,
+  if valid_564282 != nil:
+    section.add "databaseName", valid_564282
+  var valid_564283 = path.getOrDefault("resourceGroupName")
+  valid_564283 = validateParameter(valid_564283, JString, required = true,
                                  default = nil)
-  if valid_574383 != nil:
-    section.add "databaseName", valid_574383
+  if valid_564283 != nil:
+    section.add "resourceGroupName", valid_564283
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1995,11 +2001,11 @@ proc validate_DatabasesGet_574378(path: JsonNode; query: JsonNode; header: JsonN
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574384 = query.getOrDefault("api-version")
-  valid_574384 = validateParameter(valid_574384, JString, required = true,
+  var valid_564284 = query.getOrDefault("api-version")
+  valid_564284 = validateParameter(valid_564284, JString, required = true,
                                  default = nil)
-  if valid_574384 != nil:
-    section.add "api-version", valid_574384
+  if valid_564284 != nil:
+    section.add "api-version", valid_564284
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2008,50 +2014,50 @@ proc validate_DatabasesGet_574378(path: JsonNode; query: JsonNode; header: JsonN
   if body != nil:
     result.add "body", body
 
-proc call*(call_574385: Call_DatabasesGet_574377; path: JsonNode; query: JsonNode;
+proc call*(call_564285: Call_DatabasesGet_564277; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Returns a database.
   ## 
-  let valid = call_574385.validator(path, query, header, formData, body)
-  let scheme = call_574385.pickScheme
+  let valid = call_564285.validator(path, query, header, formData, body)
+  let scheme = call_564285.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574385.url(scheme.get, call_574385.host, call_574385.base,
-                         call_574385.route, valid.getOrDefault("path"),
+  let url = call_564285.url(scheme.get, call_564285.host, call_564285.base,
+                         call_564285.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574385, url, valid)
+  result = hook(call_564285, url, valid)
 
-proc call*(call_574386: Call_DatabasesGet_574377; clusterName: string;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          databaseName: string): Recallable =
+proc call*(call_564286: Call_DatabasesGet_564277; clusterName: string;
+          apiVersion: string; subscriptionId: string; databaseName: string;
+          resourceGroupName: string): Recallable =
   ## databasesGet
   ## Returns a database.
   ##   clusterName: string (required)
   ##              : The name of the Kusto cluster.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group containing the Kusto cluster.
   ##   apiVersion: string (required)
   ##             : Client API Version.
   ##   subscriptionId: string (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   databaseName: string (required)
   ##               : The name of the database in the Kusto cluster.
-  var path_574387 = newJObject()
-  var query_574388 = newJObject()
-  add(path_574387, "clusterName", newJString(clusterName))
-  add(path_574387, "resourceGroupName", newJString(resourceGroupName))
-  add(query_574388, "api-version", newJString(apiVersion))
-  add(path_574387, "subscriptionId", newJString(subscriptionId))
-  add(path_574387, "databaseName", newJString(databaseName))
-  result = call_574386.call(path_574387, query_574388, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group containing the Kusto cluster.
+  var path_564287 = newJObject()
+  var query_564288 = newJObject()
+  add(path_564287, "clusterName", newJString(clusterName))
+  add(query_564288, "api-version", newJString(apiVersion))
+  add(path_564287, "subscriptionId", newJString(subscriptionId))
+  add(path_564287, "databaseName", newJString(databaseName))
+  add(path_564287, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564286.call(path_564287, query_564288, nil, nil, nil)
 
-var databasesGet* = Call_DatabasesGet_574377(name: "databasesGet",
+var databasesGet* = Call_DatabasesGet_564277(name: "databasesGet",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Kusto/clusters/{clusterName}/databases/{databaseName}",
-    validator: validate_DatabasesGet_574378, base: "", url: url_DatabasesGet_574379,
+    validator: validate_DatabasesGet_564278, base: "", url: url_DatabasesGet_564279,
     schemes: {Scheme.Https})
 type
-  Call_DatabasesUpdate_574415 = ref object of OpenApiRestCall_573667
-proc url_DatabasesUpdate_574417(protocol: Scheme; host: string; base: string;
+  Call_DatabasesUpdate_564315 = ref object of OpenApiRestCall_563565
+proc url_DatabasesUpdate_564317(protocol: Scheme; host: string; base: string;
                                route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2076,7 +2082,7 @@ proc url_DatabasesUpdate_574417(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DatabasesUpdate_574416(path: JsonNode; query: JsonNode;
+proc validate_DatabasesUpdate_564316(path: JsonNode; query: JsonNode;
                                     header: JsonNode; formData: JsonNode;
                                     body: JsonNode): JsonNode =
   ## Updates a database.
@@ -2086,35 +2092,35 @@ proc validate_DatabasesUpdate_574416(path: JsonNode; query: JsonNode;
   ## parameters in `path` object:
   ##   clusterName: JString (required)
   ##              : The name of the Kusto cluster.
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group containing the Kusto cluster.
   ##   subscriptionId: JString (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   databaseName: JString (required)
   ##               : The name of the database in the Kusto cluster.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group containing the Kusto cluster.
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `clusterName` field"
-  var valid_574418 = path.getOrDefault("clusterName")
-  valid_574418 = validateParameter(valid_574418, JString, required = true,
+  var valid_564318 = path.getOrDefault("clusterName")
+  valid_564318 = validateParameter(valid_564318, JString, required = true,
                                  default = nil)
-  if valid_574418 != nil:
-    section.add "clusterName", valid_574418
-  var valid_574419 = path.getOrDefault("resourceGroupName")
-  valid_574419 = validateParameter(valid_574419, JString, required = true,
+  if valid_564318 != nil:
+    section.add "clusterName", valid_564318
+  var valid_564319 = path.getOrDefault("subscriptionId")
+  valid_564319 = validateParameter(valid_564319, JString, required = true,
                                  default = nil)
-  if valid_574419 != nil:
-    section.add "resourceGroupName", valid_574419
-  var valid_574420 = path.getOrDefault("subscriptionId")
-  valid_574420 = validateParameter(valid_574420, JString, required = true,
+  if valid_564319 != nil:
+    section.add "subscriptionId", valid_564319
+  var valid_564320 = path.getOrDefault("databaseName")
+  valid_564320 = validateParameter(valid_564320, JString, required = true,
                                  default = nil)
-  if valid_574420 != nil:
-    section.add "subscriptionId", valid_574420
-  var valid_574421 = path.getOrDefault("databaseName")
-  valid_574421 = validateParameter(valid_574421, JString, required = true,
+  if valid_564320 != nil:
+    section.add "databaseName", valid_564320
+  var valid_564321 = path.getOrDefault("resourceGroupName")
+  valid_564321 = validateParameter(valid_564321, JString, required = true,
                                  default = nil)
-  if valid_574421 != nil:
-    section.add "databaseName", valid_574421
+  if valid_564321 != nil:
+    section.add "resourceGroupName", valid_564321
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2122,11 +2128,11 @@ proc validate_DatabasesUpdate_574416(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574422 = query.getOrDefault("api-version")
-  valid_574422 = validateParameter(valid_574422, JString, required = true,
+  var valid_564322 = query.getOrDefault("api-version")
+  valid_564322 = validateParameter(valid_564322, JString, required = true,
                                  default = nil)
-  if valid_574422 != nil:
-    section.add "api-version", valid_574422
+  if valid_564322 != nil:
+    section.add "api-version", valid_564322
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2140,55 +2146,55 @@ proc validate_DatabasesUpdate_574416(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574424: Call_DatabasesUpdate_574415; path: JsonNode; query: JsonNode;
+proc call*(call_564324: Call_DatabasesUpdate_564315; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Updates a database.
   ## 
-  let valid = call_574424.validator(path, query, header, formData, body)
-  let scheme = call_574424.pickScheme
+  let valid = call_564324.validator(path, query, header, formData, body)
+  let scheme = call_564324.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574424.url(scheme.get, call_574424.host, call_574424.base,
-                         call_574424.route, valid.getOrDefault("path"),
+  let url = call_564324.url(scheme.get, call_564324.host, call_564324.base,
+                         call_564324.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574424, url, valid)
+  result = hook(call_564324, url, valid)
 
-proc call*(call_574425: Call_DatabasesUpdate_574415; clusterName: string;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          databaseName: string; parameters: JsonNode): Recallable =
+proc call*(call_564325: Call_DatabasesUpdate_564315; clusterName: string;
+          apiVersion: string; subscriptionId: string; databaseName: string;
+          resourceGroupName: string; parameters: JsonNode): Recallable =
   ## databasesUpdate
   ## Updates a database.
   ##   clusterName: string (required)
   ##              : The name of the Kusto cluster.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group containing the Kusto cluster.
   ##   apiVersion: string (required)
   ##             : Client API Version.
   ##   subscriptionId: string (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   databaseName: string (required)
   ##               : The name of the database in the Kusto cluster.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group containing the Kusto cluster.
   ##   parameters: JObject (required)
   ##             : The database parameters supplied to the Update operation.
-  var path_574426 = newJObject()
-  var query_574427 = newJObject()
-  var body_574428 = newJObject()
-  add(path_574426, "clusterName", newJString(clusterName))
-  add(path_574426, "resourceGroupName", newJString(resourceGroupName))
-  add(query_574427, "api-version", newJString(apiVersion))
-  add(path_574426, "subscriptionId", newJString(subscriptionId))
-  add(path_574426, "databaseName", newJString(databaseName))
+  var path_564326 = newJObject()
+  var query_564327 = newJObject()
+  var body_564328 = newJObject()
+  add(path_564326, "clusterName", newJString(clusterName))
+  add(query_564327, "api-version", newJString(apiVersion))
+  add(path_564326, "subscriptionId", newJString(subscriptionId))
+  add(path_564326, "databaseName", newJString(databaseName))
+  add(path_564326, "resourceGroupName", newJString(resourceGroupName))
   if parameters != nil:
-    body_574428 = parameters
-  result = call_574425.call(path_574426, query_574427, nil, nil, body_574428)
+    body_564328 = parameters
+  result = call_564325.call(path_564326, query_564327, nil, nil, body_564328)
 
-var databasesUpdate* = Call_DatabasesUpdate_574415(name: "databasesUpdate",
+var databasesUpdate* = Call_DatabasesUpdate_564315(name: "databasesUpdate",
     meth: HttpMethod.HttpPatch, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Kusto/clusters/{clusterName}/databases/{databaseName}",
-    validator: validate_DatabasesUpdate_574416, base: "", url: url_DatabasesUpdate_574417,
+    validator: validate_DatabasesUpdate_564316, base: "", url: url_DatabasesUpdate_564317,
     schemes: {Scheme.Https})
 type
-  Call_DatabasesDelete_574403 = ref object of OpenApiRestCall_573667
-proc url_DatabasesDelete_574405(protocol: Scheme; host: string; base: string;
+  Call_DatabasesDelete_564303 = ref object of OpenApiRestCall_563565
+proc url_DatabasesDelete_564305(protocol: Scheme; host: string; base: string;
                                route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2213,7 +2219,7 @@ proc url_DatabasesDelete_574405(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DatabasesDelete_574404(path: JsonNode; query: JsonNode;
+proc validate_DatabasesDelete_564304(path: JsonNode; query: JsonNode;
                                     header: JsonNode; formData: JsonNode;
                                     body: JsonNode): JsonNode =
   ## Deletes the database with the given name.
@@ -2223,35 +2229,35 @@ proc validate_DatabasesDelete_574404(path: JsonNode; query: JsonNode;
   ## parameters in `path` object:
   ##   clusterName: JString (required)
   ##              : The name of the Kusto cluster.
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group containing the Kusto cluster.
   ##   subscriptionId: JString (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   databaseName: JString (required)
   ##               : The name of the database in the Kusto cluster.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group containing the Kusto cluster.
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `clusterName` field"
-  var valid_574406 = path.getOrDefault("clusterName")
-  valid_574406 = validateParameter(valid_574406, JString, required = true,
+  var valid_564306 = path.getOrDefault("clusterName")
+  valid_564306 = validateParameter(valid_564306, JString, required = true,
                                  default = nil)
-  if valid_574406 != nil:
-    section.add "clusterName", valid_574406
-  var valid_574407 = path.getOrDefault("resourceGroupName")
-  valid_574407 = validateParameter(valid_574407, JString, required = true,
+  if valid_564306 != nil:
+    section.add "clusterName", valid_564306
+  var valid_564307 = path.getOrDefault("subscriptionId")
+  valid_564307 = validateParameter(valid_564307, JString, required = true,
                                  default = nil)
-  if valid_574407 != nil:
-    section.add "resourceGroupName", valid_574407
-  var valid_574408 = path.getOrDefault("subscriptionId")
-  valid_574408 = validateParameter(valid_574408, JString, required = true,
+  if valid_564307 != nil:
+    section.add "subscriptionId", valid_564307
+  var valid_564308 = path.getOrDefault("databaseName")
+  valid_564308 = validateParameter(valid_564308, JString, required = true,
                                  default = nil)
-  if valid_574408 != nil:
-    section.add "subscriptionId", valid_574408
-  var valid_574409 = path.getOrDefault("databaseName")
-  valid_574409 = validateParameter(valid_574409, JString, required = true,
+  if valid_564308 != nil:
+    section.add "databaseName", valid_564308
+  var valid_564309 = path.getOrDefault("resourceGroupName")
+  valid_564309 = validateParameter(valid_564309, JString, required = true,
                                  default = nil)
-  if valid_574409 != nil:
-    section.add "databaseName", valid_574409
+  if valid_564309 != nil:
+    section.add "resourceGroupName", valid_564309
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2259,11 +2265,11 @@ proc validate_DatabasesDelete_574404(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574410 = query.getOrDefault("api-version")
-  valid_574410 = validateParameter(valid_574410, JString, required = true,
+  var valid_564310 = query.getOrDefault("api-version")
+  valid_564310 = validateParameter(valid_564310, JString, required = true,
                                  default = nil)
-  if valid_574410 != nil:
-    section.add "api-version", valid_574410
+  if valid_564310 != nil:
+    section.add "api-version", valid_564310
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2272,50 +2278,50 @@ proc validate_DatabasesDelete_574404(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574411: Call_DatabasesDelete_574403; path: JsonNode; query: JsonNode;
+proc call*(call_564311: Call_DatabasesDelete_564303; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes the database with the given name.
   ## 
-  let valid = call_574411.validator(path, query, header, formData, body)
-  let scheme = call_574411.pickScheme
+  let valid = call_564311.validator(path, query, header, formData, body)
+  let scheme = call_564311.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574411.url(scheme.get, call_574411.host, call_574411.base,
-                         call_574411.route, valid.getOrDefault("path"),
+  let url = call_564311.url(scheme.get, call_564311.host, call_564311.base,
+                         call_564311.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574411, url, valid)
+  result = hook(call_564311, url, valid)
 
-proc call*(call_574412: Call_DatabasesDelete_574403; clusterName: string;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          databaseName: string): Recallable =
+proc call*(call_564312: Call_DatabasesDelete_564303; clusterName: string;
+          apiVersion: string; subscriptionId: string; databaseName: string;
+          resourceGroupName: string): Recallable =
   ## databasesDelete
   ## Deletes the database with the given name.
   ##   clusterName: string (required)
   ##              : The name of the Kusto cluster.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group containing the Kusto cluster.
   ##   apiVersion: string (required)
   ##             : Client API Version.
   ##   subscriptionId: string (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   databaseName: string (required)
   ##               : The name of the database in the Kusto cluster.
-  var path_574413 = newJObject()
-  var query_574414 = newJObject()
-  add(path_574413, "clusterName", newJString(clusterName))
-  add(path_574413, "resourceGroupName", newJString(resourceGroupName))
-  add(query_574414, "api-version", newJString(apiVersion))
-  add(path_574413, "subscriptionId", newJString(subscriptionId))
-  add(path_574413, "databaseName", newJString(databaseName))
-  result = call_574412.call(path_574413, query_574414, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group containing the Kusto cluster.
+  var path_564313 = newJObject()
+  var query_564314 = newJObject()
+  add(path_564313, "clusterName", newJString(clusterName))
+  add(query_564314, "api-version", newJString(apiVersion))
+  add(path_564313, "subscriptionId", newJString(subscriptionId))
+  add(path_564313, "databaseName", newJString(databaseName))
+  add(path_564313, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564312.call(path_564313, query_564314, nil, nil, nil)
 
-var databasesDelete* = Call_DatabasesDelete_574403(name: "databasesDelete",
+var databasesDelete* = Call_DatabasesDelete_564303(name: "databasesDelete",
     meth: HttpMethod.HttpDelete, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Kusto/clusters/{clusterName}/databases/{databaseName}",
-    validator: validate_DatabasesDelete_574404, base: "", url: url_DatabasesDelete_574405,
+    validator: validate_DatabasesDelete_564304, base: "", url: url_DatabasesDelete_564305,
     schemes: {Scheme.Https})
 type
-  Call_DatabasesAddPrincipals_574429 = ref object of OpenApiRestCall_573667
-proc url_DatabasesAddPrincipals_574431(protocol: Scheme; host: string; base: string;
+  Call_DatabasesAddPrincipals_564329 = ref object of OpenApiRestCall_563565
+proc url_DatabasesAddPrincipals_564331(protocol: Scheme; host: string; base: string;
                                       route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2341,7 +2347,7 @@ proc url_DatabasesAddPrincipals_574431(protocol: Scheme; host: string; base: str
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DatabasesAddPrincipals_574430(path: JsonNode; query: JsonNode;
+proc validate_DatabasesAddPrincipals_564330(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Add Database principals permissions.
   ## 
@@ -2350,35 +2356,35 @@ proc validate_DatabasesAddPrincipals_574430(path: JsonNode; query: JsonNode;
   ## parameters in `path` object:
   ##   clusterName: JString (required)
   ##              : The name of the Kusto cluster.
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group containing the Kusto cluster.
   ##   subscriptionId: JString (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   databaseName: JString (required)
   ##               : The name of the database in the Kusto cluster.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group containing the Kusto cluster.
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `clusterName` field"
-  var valid_574432 = path.getOrDefault("clusterName")
-  valid_574432 = validateParameter(valid_574432, JString, required = true,
+  var valid_564332 = path.getOrDefault("clusterName")
+  valid_564332 = validateParameter(valid_564332, JString, required = true,
                                  default = nil)
-  if valid_574432 != nil:
-    section.add "clusterName", valid_574432
-  var valid_574433 = path.getOrDefault("resourceGroupName")
-  valid_574433 = validateParameter(valid_574433, JString, required = true,
+  if valid_564332 != nil:
+    section.add "clusterName", valid_564332
+  var valid_564333 = path.getOrDefault("subscriptionId")
+  valid_564333 = validateParameter(valid_564333, JString, required = true,
                                  default = nil)
-  if valid_574433 != nil:
-    section.add "resourceGroupName", valid_574433
-  var valid_574434 = path.getOrDefault("subscriptionId")
-  valid_574434 = validateParameter(valid_574434, JString, required = true,
+  if valid_564333 != nil:
+    section.add "subscriptionId", valid_564333
+  var valid_564334 = path.getOrDefault("databaseName")
+  valid_564334 = validateParameter(valid_564334, JString, required = true,
                                  default = nil)
-  if valid_574434 != nil:
-    section.add "subscriptionId", valid_574434
-  var valid_574435 = path.getOrDefault("databaseName")
-  valid_574435 = validateParameter(valid_574435, JString, required = true,
+  if valid_564334 != nil:
+    section.add "databaseName", valid_564334
+  var valid_564335 = path.getOrDefault("resourceGroupName")
+  valid_564335 = validateParameter(valid_564335, JString, required = true,
                                  default = nil)
-  if valid_574435 != nil:
-    section.add "databaseName", valid_574435
+  if valid_564335 != nil:
+    section.add "resourceGroupName", valid_564335
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2386,11 +2392,11 @@ proc validate_DatabasesAddPrincipals_574430(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574436 = query.getOrDefault("api-version")
-  valid_574436 = validateParameter(valid_574436, JString, required = true,
+  var valid_564336 = query.getOrDefault("api-version")
+  valid_564336 = validateParameter(valid_564336, JString, required = true,
                                  default = nil)
-  if valid_574436 != nil:
-    section.add "api-version", valid_574436
+  if valid_564336 != nil:
+    section.add "api-version", valid_564336
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2404,28 +2410,26 @@ proc validate_DatabasesAddPrincipals_574430(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574438: Call_DatabasesAddPrincipals_574429; path: JsonNode;
+proc call*(call_564338: Call_DatabasesAddPrincipals_564329; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Add Database principals permissions.
   ## 
-  let valid = call_574438.validator(path, query, header, formData, body)
-  let scheme = call_574438.pickScheme
+  let valid = call_564338.validator(path, query, header, formData, body)
+  let scheme = call_564338.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574438.url(scheme.get, call_574438.host, call_574438.base,
-                         call_574438.route, valid.getOrDefault("path"),
+  let url = call_564338.url(scheme.get, call_564338.host, call_564338.base,
+                         call_564338.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574438, url, valid)
+  result = hook(call_564338, url, valid)
 
-proc call*(call_574439: Call_DatabasesAddPrincipals_574429; clusterName: string;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          databaseName: string; databasePrincipalsToAdd: JsonNode): Recallable =
+proc call*(call_564339: Call_DatabasesAddPrincipals_564329; clusterName: string;
+          apiVersion: string; subscriptionId: string; databaseName: string;
+          databasePrincipalsToAdd: JsonNode; resourceGroupName: string): Recallable =
   ## databasesAddPrincipals
   ## Add Database principals permissions.
   ##   clusterName: string (required)
   ##              : The name of the Kusto cluster.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group containing the Kusto cluster.
   ##   apiVersion: string (required)
   ##             : Client API Version.
   ##   subscriptionId: string (required)
@@ -2434,26 +2438,28 @@ proc call*(call_574439: Call_DatabasesAddPrincipals_574429; clusterName: string;
   ##               : The name of the database in the Kusto cluster.
   ##   databasePrincipalsToAdd: JObject (required)
   ##                          : List of database principals to add.
-  var path_574440 = newJObject()
-  var query_574441 = newJObject()
-  var body_574442 = newJObject()
-  add(path_574440, "clusterName", newJString(clusterName))
-  add(path_574440, "resourceGroupName", newJString(resourceGroupName))
-  add(query_574441, "api-version", newJString(apiVersion))
-  add(path_574440, "subscriptionId", newJString(subscriptionId))
-  add(path_574440, "databaseName", newJString(databaseName))
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group containing the Kusto cluster.
+  var path_564340 = newJObject()
+  var query_564341 = newJObject()
+  var body_564342 = newJObject()
+  add(path_564340, "clusterName", newJString(clusterName))
+  add(query_564341, "api-version", newJString(apiVersion))
+  add(path_564340, "subscriptionId", newJString(subscriptionId))
+  add(path_564340, "databaseName", newJString(databaseName))
   if databasePrincipalsToAdd != nil:
-    body_574442 = databasePrincipalsToAdd
-  result = call_574439.call(path_574440, query_574441, nil, nil, body_574442)
+    body_564342 = databasePrincipalsToAdd
+  add(path_564340, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564339.call(path_564340, query_564341, nil, nil, body_564342)
 
-var databasesAddPrincipals* = Call_DatabasesAddPrincipals_574429(
+var databasesAddPrincipals* = Call_DatabasesAddPrincipals_564329(
     name: "databasesAddPrincipals", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Kusto/clusters/{clusterName}/databases/{databaseName}/addPrincipals",
-    validator: validate_DatabasesAddPrincipals_574430, base: "",
-    url: url_DatabasesAddPrincipals_574431, schemes: {Scheme.Https})
+    validator: validate_DatabasesAddPrincipals_564330, base: "",
+    url: url_DatabasesAddPrincipals_564331, schemes: {Scheme.Https})
 type
-  Call_DataConnectionsCheckNameAvailability_574443 = ref object of OpenApiRestCall_573667
-proc url_DataConnectionsCheckNameAvailability_574445(protocol: Scheme;
+  Call_DataConnectionsCheckNameAvailability_564343 = ref object of OpenApiRestCall_563565
+proc url_DataConnectionsCheckNameAvailability_564345(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2479,7 +2485,7 @@ proc url_DataConnectionsCheckNameAvailability_574445(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DataConnectionsCheckNameAvailability_574444(path: JsonNode;
+proc validate_DataConnectionsCheckNameAvailability_564344(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Checks that the data connection name is valid and is not already in use.
   ## 
@@ -2488,35 +2494,35 @@ proc validate_DataConnectionsCheckNameAvailability_574444(path: JsonNode;
   ## parameters in `path` object:
   ##   clusterName: JString (required)
   ##              : The name of the Kusto cluster.
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group containing the Kusto cluster.
   ##   subscriptionId: JString (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   databaseName: JString (required)
   ##               : The name of the database in the Kusto cluster.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group containing the Kusto cluster.
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `clusterName` field"
-  var valid_574446 = path.getOrDefault("clusterName")
-  valid_574446 = validateParameter(valid_574446, JString, required = true,
+  var valid_564346 = path.getOrDefault("clusterName")
+  valid_564346 = validateParameter(valid_564346, JString, required = true,
                                  default = nil)
-  if valid_574446 != nil:
-    section.add "clusterName", valid_574446
-  var valid_574447 = path.getOrDefault("resourceGroupName")
-  valid_574447 = validateParameter(valid_574447, JString, required = true,
+  if valid_564346 != nil:
+    section.add "clusterName", valid_564346
+  var valid_564347 = path.getOrDefault("subscriptionId")
+  valid_564347 = validateParameter(valid_564347, JString, required = true,
                                  default = nil)
-  if valid_574447 != nil:
-    section.add "resourceGroupName", valid_574447
-  var valid_574448 = path.getOrDefault("subscriptionId")
-  valid_574448 = validateParameter(valid_574448, JString, required = true,
+  if valid_564347 != nil:
+    section.add "subscriptionId", valid_564347
+  var valid_564348 = path.getOrDefault("databaseName")
+  valid_564348 = validateParameter(valid_564348, JString, required = true,
                                  default = nil)
-  if valid_574448 != nil:
-    section.add "subscriptionId", valid_574448
-  var valid_574449 = path.getOrDefault("databaseName")
-  valid_574449 = validateParameter(valid_574449, JString, required = true,
+  if valid_564348 != nil:
+    section.add "databaseName", valid_564348
+  var valid_564349 = path.getOrDefault("resourceGroupName")
+  valid_564349 = validateParameter(valid_564349, JString, required = true,
                                  default = nil)
-  if valid_574449 != nil:
-    section.add "databaseName", valid_574449
+  if valid_564349 != nil:
+    section.add "resourceGroupName", valid_564349
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2524,11 +2530,11 @@ proc validate_DataConnectionsCheckNameAvailability_574444(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574450 = query.getOrDefault("api-version")
-  valid_574450 = validateParameter(valid_574450, JString, required = true,
+  var valid_564350 = query.getOrDefault("api-version")
+  valid_564350 = validateParameter(valid_564350, JString, required = true,
                                  default = nil)
-  if valid_574450 != nil:
-    section.add "api-version", valid_574450
+  if valid_564350 != nil:
+    section.add "api-version", valid_564350
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2542,57 +2548,57 @@ proc validate_DataConnectionsCheckNameAvailability_574444(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574452: Call_DataConnectionsCheckNameAvailability_574443;
+proc call*(call_564352: Call_DataConnectionsCheckNameAvailability_564343;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Checks that the data connection name is valid and is not already in use.
   ## 
-  let valid = call_574452.validator(path, query, header, formData, body)
-  let scheme = call_574452.pickScheme
+  let valid = call_564352.validator(path, query, header, formData, body)
+  let scheme = call_564352.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574452.url(scheme.get, call_574452.host, call_574452.base,
-                         call_574452.route, valid.getOrDefault("path"),
+  let url = call_564352.url(scheme.get, call_564352.host, call_564352.base,
+                         call_564352.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574452, url, valid)
+  result = hook(call_564352, url, valid)
 
-proc call*(call_574453: Call_DataConnectionsCheckNameAvailability_574443;
-          clusterName: string; resourceGroupName: string; apiVersion: string;
-          subscriptionId: string; dataConnectionName: JsonNode; databaseName: string): Recallable =
+proc call*(call_564353: Call_DataConnectionsCheckNameAvailability_564343;
+          clusterName: string; dataConnectionName: JsonNode; apiVersion: string;
+          subscriptionId: string; databaseName: string; resourceGroupName: string): Recallable =
   ## dataConnectionsCheckNameAvailability
   ## Checks that the data connection name is valid and is not already in use.
   ##   clusterName: string (required)
   ##              : The name of the Kusto cluster.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group containing the Kusto cluster.
+  ##   dataConnectionName: JObject (required)
+  ##                     : The name of the data connection.
   ##   apiVersion: string (required)
   ##             : Client API Version.
   ##   subscriptionId: string (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   dataConnectionName: JObject (required)
-  ##                     : The name of the data connection.
   ##   databaseName: string (required)
   ##               : The name of the database in the Kusto cluster.
-  var path_574454 = newJObject()
-  var query_574455 = newJObject()
-  var body_574456 = newJObject()
-  add(path_574454, "clusterName", newJString(clusterName))
-  add(path_574454, "resourceGroupName", newJString(resourceGroupName))
-  add(query_574455, "api-version", newJString(apiVersion))
-  add(path_574454, "subscriptionId", newJString(subscriptionId))
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group containing the Kusto cluster.
+  var path_564354 = newJObject()
+  var query_564355 = newJObject()
+  var body_564356 = newJObject()
+  add(path_564354, "clusterName", newJString(clusterName))
   if dataConnectionName != nil:
-    body_574456 = dataConnectionName
-  add(path_574454, "databaseName", newJString(databaseName))
-  result = call_574453.call(path_574454, query_574455, nil, nil, body_574456)
+    body_564356 = dataConnectionName
+  add(query_564355, "api-version", newJString(apiVersion))
+  add(path_564354, "subscriptionId", newJString(subscriptionId))
+  add(path_564354, "databaseName", newJString(databaseName))
+  add(path_564354, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564353.call(path_564354, query_564355, nil, nil, body_564356)
 
-var dataConnectionsCheckNameAvailability* = Call_DataConnectionsCheckNameAvailability_574443(
+var dataConnectionsCheckNameAvailability* = Call_DataConnectionsCheckNameAvailability_564343(
     name: "dataConnectionsCheckNameAvailability", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Kusto/clusters/{clusterName}/databases/{databaseName}/checkNameAvailability",
-    validator: validate_DataConnectionsCheckNameAvailability_574444, base: "",
-    url: url_DataConnectionsCheckNameAvailability_574445, schemes: {Scheme.Https})
+    validator: validate_DataConnectionsCheckNameAvailability_564344, base: "",
+    url: url_DataConnectionsCheckNameAvailability_564345, schemes: {Scheme.Https})
 type
-  Call_DataConnectionsDataConnectionValidation_574457 = ref object of OpenApiRestCall_573667
-proc url_DataConnectionsDataConnectionValidation_574459(protocol: Scheme;
+  Call_DataConnectionsDataConnectionValidation_564357 = ref object of OpenApiRestCall_563565
+proc url_DataConnectionsDataConnectionValidation_564359(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2618,7 +2624,7 @@ proc url_DataConnectionsDataConnectionValidation_574459(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DataConnectionsDataConnectionValidation_574458(path: JsonNode;
+proc validate_DataConnectionsDataConnectionValidation_564358(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Checks that the data connection parameters are valid.
   ## 
@@ -2627,35 +2633,35 @@ proc validate_DataConnectionsDataConnectionValidation_574458(path: JsonNode;
   ## parameters in `path` object:
   ##   clusterName: JString (required)
   ##              : The name of the Kusto cluster.
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group containing the Kusto cluster.
   ##   subscriptionId: JString (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   databaseName: JString (required)
   ##               : The name of the database in the Kusto cluster.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group containing the Kusto cluster.
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `clusterName` field"
-  var valid_574460 = path.getOrDefault("clusterName")
-  valid_574460 = validateParameter(valid_574460, JString, required = true,
+  var valid_564360 = path.getOrDefault("clusterName")
+  valid_564360 = validateParameter(valid_564360, JString, required = true,
                                  default = nil)
-  if valid_574460 != nil:
-    section.add "clusterName", valid_574460
-  var valid_574461 = path.getOrDefault("resourceGroupName")
-  valid_574461 = validateParameter(valid_574461, JString, required = true,
+  if valid_564360 != nil:
+    section.add "clusterName", valid_564360
+  var valid_564361 = path.getOrDefault("subscriptionId")
+  valid_564361 = validateParameter(valid_564361, JString, required = true,
                                  default = nil)
-  if valid_574461 != nil:
-    section.add "resourceGroupName", valid_574461
-  var valid_574462 = path.getOrDefault("subscriptionId")
-  valid_574462 = validateParameter(valid_574462, JString, required = true,
+  if valid_564361 != nil:
+    section.add "subscriptionId", valid_564361
+  var valid_564362 = path.getOrDefault("databaseName")
+  valid_564362 = validateParameter(valid_564362, JString, required = true,
                                  default = nil)
-  if valid_574462 != nil:
-    section.add "subscriptionId", valid_574462
-  var valid_574463 = path.getOrDefault("databaseName")
-  valid_574463 = validateParameter(valid_574463, JString, required = true,
+  if valid_564362 != nil:
+    section.add "databaseName", valid_564362
+  var valid_564363 = path.getOrDefault("resourceGroupName")
+  valid_564363 = validateParameter(valid_564363, JString, required = true,
                                  default = nil)
-  if valid_574463 != nil:
-    section.add "databaseName", valid_574463
+  if valid_564363 != nil:
+    section.add "resourceGroupName", valid_564363
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2663,11 +2669,11 @@ proc validate_DataConnectionsDataConnectionValidation_574458(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574464 = query.getOrDefault("api-version")
-  valid_574464 = validateParameter(valid_574464, JString, required = true,
+  var valid_564364 = query.getOrDefault("api-version")
+  valid_564364 = validateParameter(valid_564364, JString, required = true,
                                  default = nil)
-  if valid_574464 != nil:
-    section.add "api-version", valid_574464
+  if valid_564364 != nil:
+    section.add "api-version", valid_564364
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2681,58 +2687,58 @@ proc validate_DataConnectionsDataConnectionValidation_574458(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574466: Call_DataConnectionsDataConnectionValidation_574457;
+proc call*(call_564366: Call_DataConnectionsDataConnectionValidation_564357;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Checks that the data connection parameters are valid.
   ## 
-  let valid = call_574466.validator(path, query, header, formData, body)
-  let scheme = call_574466.pickScheme
+  let valid = call_564366.validator(path, query, header, formData, body)
+  let scheme = call_564366.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574466.url(scheme.get, call_574466.host, call_574466.base,
-                         call_574466.route, valid.getOrDefault("path"),
+  let url = call_564366.url(scheme.get, call_564366.host, call_564366.base,
+                         call_564366.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574466, url, valid)
+  result = hook(call_564366, url, valid)
 
-proc call*(call_574467: Call_DataConnectionsDataConnectionValidation_574457;
-          clusterName: string; resourceGroupName: string; apiVersion: string;
-          subscriptionId: string; databaseName: string; parameters: JsonNode): Recallable =
+proc call*(call_564367: Call_DataConnectionsDataConnectionValidation_564357;
+          clusterName: string; apiVersion: string; subscriptionId: string;
+          databaseName: string; resourceGroupName: string; parameters: JsonNode): Recallable =
   ## dataConnectionsDataConnectionValidation
   ## Checks that the data connection parameters are valid.
   ##   clusterName: string (required)
   ##              : The name of the Kusto cluster.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group containing the Kusto cluster.
   ##   apiVersion: string (required)
   ##             : Client API Version.
   ##   subscriptionId: string (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   databaseName: string (required)
   ##               : The name of the database in the Kusto cluster.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group containing the Kusto cluster.
   ##   parameters: JObject (required)
   ##             : The data connection parameters supplied to the CreateOrUpdate operation.
-  var path_574468 = newJObject()
-  var query_574469 = newJObject()
-  var body_574470 = newJObject()
-  add(path_574468, "clusterName", newJString(clusterName))
-  add(path_574468, "resourceGroupName", newJString(resourceGroupName))
-  add(query_574469, "api-version", newJString(apiVersion))
-  add(path_574468, "subscriptionId", newJString(subscriptionId))
-  add(path_574468, "databaseName", newJString(databaseName))
+  var path_564368 = newJObject()
+  var query_564369 = newJObject()
+  var body_564370 = newJObject()
+  add(path_564368, "clusterName", newJString(clusterName))
+  add(query_564369, "api-version", newJString(apiVersion))
+  add(path_564368, "subscriptionId", newJString(subscriptionId))
+  add(path_564368, "databaseName", newJString(databaseName))
+  add(path_564368, "resourceGroupName", newJString(resourceGroupName))
   if parameters != nil:
-    body_574470 = parameters
-  result = call_574467.call(path_574468, query_574469, nil, nil, body_574470)
+    body_564370 = parameters
+  result = call_564367.call(path_564368, query_564369, nil, nil, body_564370)
 
-var dataConnectionsDataConnectionValidation* = Call_DataConnectionsDataConnectionValidation_574457(
+var dataConnectionsDataConnectionValidation* = Call_DataConnectionsDataConnectionValidation_564357(
     name: "dataConnectionsDataConnectionValidation", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Kusto/clusters/{clusterName}/databases/{databaseName}/dataConnectionValidation",
-    validator: validate_DataConnectionsDataConnectionValidation_574458, base: "",
-    url: url_DataConnectionsDataConnectionValidation_574459,
+    validator: validate_DataConnectionsDataConnectionValidation_564358, base: "",
+    url: url_DataConnectionsDataConnectionValidation_564359,
     schemes: {Scheme.Https})
 type
-  Call_DataConnectionsListByDatabase_574471 = ref object of OpenApiRestCall_573667
-proc url_DataConnectionsListByDatabase_574473(protocol: Scheme; host: string;
+  Call_DataConnectionsListByDatabase_564371 = ref object of OpenApiRestCall_563565
+proc url_DataConnectionsListByDatabase_564373(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2758,7 +2764,7 @@ proc url_DataConnectionsListByDatabase_574473(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DataConnectionsListByDatabase_574472(path: JsonNode; query: JsonNode;
+proc validate_DataConnectionsListByDatabase_564372(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Returns the list of data connections of the given Kusto database.
   ## 
@@ -2767,35 +2773,35 @@ proc validate_DataConnectionsListByDatabase_574472(path: JsonNode; query: JsonNo
   ## parameters in `path` object:
   ##   clusterName: JString (required)
   ##              : The name of the Kusto cluster.
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group containing the Kusto cluster.
   ##   subscriptionId: JString (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   databaseName: JString (required)
   ##               : The name of the database in the Kusto cluster.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group containing the Kusto cluster.
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `clusterName` field"
-  var valid_574474 = path.getOrDefault("clusterName")
-  valid_574474 = validateParameter(valid_574474, JString, required = true,
+  var valid_564374 = path.getOrDefault("clusterName")
+  valid_564374 = validateParameter(valid_564374, JString, required = true,
                                  default = nil)
-  if valid_574474 != nil:
-    section.add "clusterName", valid_574474
-  var valid_574475 = path.getOrDefault("resourceGroupName")
-  valid_574475 = validateParameter(valid_574475, JString, required = true,
+  if valid_564374 != nil:
+    section.add "clusterName", valid_564374
+  var valid_564375 = path.getOrDefault("subscriptionId")
+  valid_564375 = validateParameter(valid_564375, JString, required = true,
                                  default = nil)
-  if valid_574475 != nil:
-    section.add "resourceGroupName", valid_574475
-  var valid_574476 = path.getOrDefault("subscriptionId")
-  valid_574476 = validateParameter(valid_574476, JString, required = true,
+  if valid_564375 != nil:
+    section.add "subscriptionId", valid_564375
+  var valid_564376 = path.getOrDefault("databaseName")
+  valid_564376 = validateParameter(valid_564376, JString, required = true,
                                  default = nil)
-  if valid_574476 != nil:
-    section.add "subscriptionId", valid_574476
-  var valid_574477 = path.getOrDefault("databaseName")
-  valid_574477 = validateParameter(valid_574477, JString, required = true,
+  if valid_564376 != nil:
+    section.add "databaseName", valid_564376
+  var valid_564377 = path.getOrDefault("resourceGroupName")
+  valid_564377 = validateParameter(valid_564377, JString, required = true,
                                  default = nil)
-  if valid_574477 != nil:
-    section.add "databaseName", valid_574477
+  if valid_564377 != nil:
+    section.add "resourceGroupName", valid_564377
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2803,11 +2809,11 @@ proc validate_DataConnectionsListByDatabase_574472(path: JsonNode; query: JsonNo
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574478 = query.getOrDefault("api-version")
-  valid_574478 = validateParameter(valid_574478, JString, required = true,
+  var valid_564378 = query.getOrDefault("api-version")
+  valid_564378 = validateParameter(valid_564378, JString, required = true,
                                  default = nil)
-  if valid_574478 != nil:
-    section.add "api-version", valid_574478
+  if valid_564378 != nil:
+    section.add "api-version", valid_564378
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2816,51 +2822,51 @@ proc validate_DataConnectionsListByDatabase_574472(path: JsonNode; query: JsonNo
   if body != nil:
     result.add "body", body
 
-proc call*(call_574479: Call_DataConnectionsListByDatabase_574471; path: JsonNode;
+proc call*(call_564379: Call_DataConnectionsListByDatabase_564371; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Returns the list of data connections of the given Kusto database.
   ## 
-  let valid = call_574479.validator(path, query, header, formData, body)
-  let scheme = call_574479.pickScheme
+  let valid = call_564379.validator(path, query, header, formData, body)
+  let scheme = call_564379.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574479.url(scheme.get, call_574479.host, call_574479.base,
-                         call_574479.route, valid.getOrDefault("path"),
+  let url = call_564379.url(scheme.get, call_564379.host, call_564379.base,
+                         call_564379.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574479, url, valid)
+  result = hook(call_564379, url, valid)
 
-proc call*(call_574480: Call_DataConnectionsListByDatabase_574471;
-          clusterName: string; resourceGroupName: string; apiVersion: string;
-          subscriptionId: string; databaseName: string): Recallable =
+proc call*(call_564380: Call_DataConnectionsListByDatabase_564371;
+          clusterName: string; apiVersion: string; subscriptionId: string;
+          databaseName: string; resourceGroupName: string): Recallable =
   ## dataConnectionsListByDatabase
   ## Returns the list of data connections of the given Kusto database.
   ##   clusterName: string (required)
   ##              : The name of the Kusto cluster.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group containing the Kusto cluster.
   ##   apiVersion: string (required)
   ##             : Client API Version.
   ##   subscriptionId: string (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   databaseName: string (required)
   ##               : The name of the database in the Kusto cluster.
-  var path_574481 = newJObject()
-  var query_574482 = newJObject()
-  add(path_574481, "clusterName", newJString(clusterName))
-  add(path_574481, "resourceGroupName", newJString(resourceGroupName))
-  add(query_574482, "api-version", newJString(apiVersion))
-  add(path_574481, "subscriptionId", newJString(subscriptionId))
-  add(path_574481, "databaseName", newJString(databaseName))
-  result = call_574480.call(path_574481, query_574482, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group containing the Kusto cluster.
+  var path_564381 = newJObject()
+  var query_564382 = newJObject()
+  add(path_564381, "clusterName", newJString(clusterName))
+  add(query_564382, "api-version", newJString(apiVersion))
+  add(path_564381, "subscriptionId", newJString(subscriptionId))
+  add(path_564381, "databaseName", newJString(databaseName))
+  add(path_564381, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564380.call(path_564381, query_564382, nil, nil, nil)
 
-var dataConnectionsListByDatabase* = Call_DataConnectionsListByDatabase_574471(
+var dataConnectionsListByDatabase* = Call_DataConnectionsListByDatabase_564371(
     name: "dataConnectionsListByDatabase", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Kusto/clusters/{clusterName}/databases/{databaseName}/dataConnections",
-    validator: validate_DataConnectionsListByDatabase_574472, base: "",
-    url: url_DataConnectionsListByDatabase_574473, schemes: {Scheme.Https})
+    validator: validate_DataConnectionsListByDatabase_564372, base: "",
+    url: url_DataConnectionsListByDatabase_564373, schemes: {Scheme.Https})
 type
-  Call_DataConnectionsCreateOrUpdate_574496 = ref object of OpenApiRestCall_573667
-proc url_DataConnectionsCreateOrUpdate_574498(protocol: Scheme; host: string;
+  Call_DataConnectionsCreateOrUpdate_564396 = ref object of OpenApiRestCall_563565
+proc url_DataConnectionsCreateOrUpdate_564398(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2889,7 +2895,7 @@ proc url_DataConnectionsCreateOrUpdate_574498(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DataConnectionsCreateOrUpdate_574497(path: JsonNode; query: JsonNode;
+proc validate_DataConnectionsCreateOrUpdate_564397(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Creates or updates a data connection.
   ## 
@@ -2898,42 +2904,42 @@ proc validate_DataConnectionsCreateOrUpdate_574497(path: JsonNode; query: JsonNo
   ## parameters in `path` object:
   ##   clusterName: JString (required)
   ##              : The name of the Kusto cluster.
-  ##   dataConnectionName: JString (required)
-  ##                     : The name of the data connection.
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group containing the Kusto cluster.
   ##   subscriptionId: JString (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   databaseName: JString (required)
   ##               : The name of the database in the Kusto cluster.
+  ##   dataConnectionName: JString (required)
+  ##                     : The name of the data connection.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group containing the Kusto cluster.
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `clusterName` field"
-  var valid_574499 = path.getOrDefault("clusterName")
-  valid_574499 = validateParameter(valid_574499, JString, required = true,
+  var valid_564399 = path.getOrDefault("clusterName")
+  valid_564399 = validateParameter(valid_564399, JString, required = true,
                                  default = nil)
-  if valid_574499 != nil:
-    section.add "clusterName", valid_574499
-  var valid_574500 = path.getOrDefault("dataConnectionName")
-  valid_574500 = validateParameter(valid_574500, JString, required = true,
+  if valid_564399 != nil:
+    section.add "clusterName", valid_564399
+  var valid_564400 = path.getOrDefault("subscriptionId")
+  valid_564400 = validateParameter(valid_564400, JString, required = true,
                                  default = nil)
-  if valid_574500 != nil:
-    section.add "dataConnectionName", valid_574500
-  var valid_574501 = path.getOrDefault("resourceGroupName")
-  valid_574501 = validateParameter(valid_574501, JString, required = true,
+  if valid_564400 != nil:
+    section.add "subscriptionId", valid_564400
+  var valid_564401 = path.getOrDefault("databaseName")
+  valid_564401 = validateParameter(valid_564401, JString, required = true,
                                  default = nil)
-  if valid_574501 != nil:
-    section.add "resourceGroupName", valid_574501
-  var valid_574502 = path.getOrDefault("subscriptionId")
-  valid_574502 = validateParameter(valid_574502, JString, required = true,
+  if valid_564401 != nil:
+    section.add "databaseName", valid_564401
+  var valid_564402 = path.getOrDefault("dataConnectionName")
+  valid_564402 = validateParameter(valid_564402, JString, required = true,
                                  default = nil)
-  if valid_574502 != nil:
-    section.add "subscriptionId", valid_574502
-  var valid_574503 = path.getOrDefault("databaseName")
-  valid_574503 = validateParameter(valid_574503, JString, required = true,
+  if valid_564402 != nil:
+    section.add "dataConnectionName", valid_564402
+  var valid_564403 = path.getOrDefault("resourceGroupName")
+  valid_564403 = validateParameter(valid_564403, JString, required = true,
                                  default = nil)
-  if valid_574503 != nil:
-    section.add "databaseName", valid_574503
+  if valid_564403 != nil:
+    section.add "resourceGroupName", valid_564403
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2941,11 +2947,11 @@ proc validate_DataConnectionsCreateOrUpdate_574497(path: JsonNode; query: JsonNo
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574504 = query.getOrDefault("api-version")
-  valid_574504 = validateParameter(valid_574504, JString, required = true,
+  var valid_564404 = query.getOrDefault("api-version")
+  valid_564404 = validateParameter(valid_564404, JString, required = true,
                                  default = nil)
-  if valid_574504 != nil:
-    section.add "api-version", valid_574504
+  if valid_564404 != nil:
+    section.add "api-version", valid_564404
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2959,60 +2965,60 @@ proc validate_DataConnectionsCreateOrUpdate_574497(path: JsonNode; query: JsonNo
   if body != nil:
     result.add "body", body
 
-proc call*(call_574506: Call_DataConnectionsCreateOrUpdate_574496; path: JsonNode;
+proc call*(call_564406: Call_DataConnectionsCreateOrUpdate_564396; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Creates or updates a data connection.
   ## 
-  let valid = call_574506.validator(path, query, header, formData, body)
-  let scheme = call_574506.pickScheme
+  let valid = call_564406.validator(path, query, header, formData, body)
+  let scheme = call_564406.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574506.url(scheme.get, call_574506.host, call_574506.base,
-                         call_574506.route, valid.getOrDefault("path"),
+  let url = call_564406.url(scheme.get, call_564406.host, call_564406.base,
+                         call_564406.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574506, url, valid)
+  result = hook(call_564406, url, valid)
 
-proc call*(call_574507: Call_DataConnectionsCreateOrUpdate_574496;
-          clusterName: string; dataConnectionName: string;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          databaseName: string; parameters: JsonNode): Recallable =
+proc call*(call_564407: Call_DataConnectionsCreateOrUpdate_564396;
+          clusterName: string; apiVersion: string; subscriptionId: string;
+          databaseName: string; dataConnectionName: string;
+          resourceGroupName: string; parameters: JsonNode): Recallable =
   ## dataConnectionsCreateOrUpdate
   ## Creates or updates a data connection.
   ##   clusterName: string (required)
   ##              : The name of the Kusto cluster.
-  ##   dataConnectionName: string (required)
-  ##                     : The name of the data connection.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group containing the Kusto cluster.
   ##   apiVersion: string (required)
   ##             : Client API Version.
   ##   subscriptionId: string (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   databaseName: string (required)
   ##               : The name of the database in the Kusto cluster.
+  ##   dataConnectionName: string (required)
+  ##                     : The name of the data connection.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group containing the Kusto cluster.
   ##   parameters: JObject (required)
   ##             : The data connection parameters supplied to the CreateOrUpdate operation.
-  var path_574508 = newJObject()
-  var query_574509 = newJObject()
-  var body_574510 = newJObject()
-  add(path_574508, "clusterName", newJString(clusterName))
-  add(path_574508, "dataConnectionName", newJString(dataConnectionName))
-  add(path_574508, "resourceGroupName", newJString(resourceGroupName))
-  add(query_574509, "api-version", newJString(apiVersion))
-  add(path_574508, "subscriptionId", newJString(subscriptionId))
-  add(path_574508, "databaseName", newJString(databaseName))
+  var path_564408 = newJObject()
+  var query_564409 = newJObject()
+  var body_564410 = newJObject()
+  add(path_564408, "clusterName", newJString(clusterName))
+  add(query_564409, "api-version", newJString(apiVersion))
+  add(path_564408, "subscriptionId", newJString(subscriptionId))
+  add(path_564408, "databaseName", newJString(databaseName))
+  add(path_564408, "dataConnectionName", newJString(dataConnectionName))
+  add(path_564408, "resourceGroupName", newJString(resourceGroupName))
   if parameters != nil:
-    body_574510 = parameters
-  result = call_574507.call(path_574508, query_574509, nil, nil, body_574510)
+    body_564410 = parameters
+  result = call_564407.call(path_564408, query_564409, nil, nil, body_564410)
 
-var dataConnectionsCreateOrUpdate* = Call_DataConnectionsCreateOrUpdate_574496(
+var dataConnectionsCreateOrUpdate* = Call_DataConnectionsCreateOrUpdate_564396(
     name: "dataConnectionsCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Kusto/clusters/{clusterName}/databases/{databaseName}/dataConnections/{dataConnectionName}",
-    validator: validate_DataConnectionsCreateOrUpdate_574497, base: "",
-    url: url_DataConnectionsCreateOrUpdate_574498, schemes: {Scheme.Https})
+    validator: validate_DataConnectionsCreateOrUpdate_564397, base: "",
+    url: url_DataConnectionsCreateOrUpdate_564398, schemes: {Scheme.Https})
 type
-  Call_DataConnectionsGet_574483 = ref object of OpenApiRestCall_573667
-proc url_DataConnectionsGet_574485(protocol: Scheme; host: string; base: string;
+  Call_DataConnectionsGet_564383 = ref object of OpenApiRestCall_563565
+proc url_DataConnectionsGet_564385(protocol: Scheme; host: string; base: string;
                                   route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -3041,7 +3047,7 @@ proc url_DataConnectionsGet_574485(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DataConnectionsGet_574484(path: JsonNode; query: JsonNode;
+proc validate_DataConnectionsGet_564384(path: JsonNode; query: JsonNode;
                                        header: JsonNode; formData: JsonNode;
                                        body: JsonNode): JsonNode =
   ## Returns a data connection.
@@ -3051,42 +3057,42 @@ proc validate_DataConnectionsGet_574484(path: JsonNode; query: JsonNode;
   ## parameters in `path` object:
   ##   clusterName: JString (required)
   ##              : The name of the Kusto cluster.
-  ##   dataConnectionName: JString (required)
-  ##                     : The name of the data connection.
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group containing the Kusto cluster.
   ##   subscriptionId: JString (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   databaseName: JString (required)
   ##               : The name of the database in the Kusto cluster.
+  ##   dataConnectionName: JString (required)
+  ##                     : The name of the data connection.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group containing the Kusto cluster.
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `clusterName` field"
-  var valid_574486 = path.getOrDefault("clusterName")
-  valid_574486 = validateParameter(valid_574486, JString, required = true,
+  var valid_564386 = path.getOrDefault("clusterName")
+  valid_564386 = validateParameter(valid_564386, JString, required = true,
                                  default = nil)
-  if valid_574486 != nil:
-    section.add "clusterName", valid_574486
-  var valid_574487 = path.getOrDefault("dataConnectionName")
-  valid_574487 = validateParameter(valid_574487, JString, required = true,
+  if valid_564386 != nil:
+    section.add "clusterName", valid_564386
+  var valid_564387 = path.getOrDefault("subscriptionId")
+  valid_564387 = validateParameter(valid_564387, JString, required = true,
                                  default = nil)
-  if valid_574487 != nil:
-    section.add "dataConnectionName", valid_574487
-  var valid_574488 = path.getOrDefault("resourceGroupName")
-  valid_574488 = validateParameter(valid_574488, JString, required = true,
+  if valid_564387 != nil:
+    section.add "subscriptionId", valid_564387
+  var valid_564388 = path.getOrDefault("databaseName")
+  valid_564388 = validateParameter(valid_564388, JString, required = true,
                                  default = nil)
-  if valid_574488 != nil:
-    section.add "resourceGroupName", valid_574488
-  var valid_574489 = path.getOrDefault("subscriptionId")
-  valid_574489 = validateParameter(valid_574489, JString, required = true,
+  if valid_564388 != nil:
+    section.add "databaseName", valid_564388
+  var valid_564389 = path.getOrDefault("dataConnectionName")
+  valid_564389 = validateParameter(valid_564389, JString, required = true,
                                  default = nil)
-  if valid_574489 != nil:
-    section.add "subscriptionId", valid_574489
-  var valid_574490 = path.getOrDefault("databaseName")
-  valid_574490 = validateParameter(valid_574490, JString, required = true,
+  if valid_564389 != nil:
+    section.add "dataConnectionName", valid_564389
+  var valid_564390 = path.getOrDefault("resourceGroupName")
+  valid_564390 = validateParameter(valid_564390, JString, required = true,
                                  default = nil)
-  if valid_574490 != nil:
-    section.add "databaseName", valid_574490
+  if valid_564390 != nil:
+    section.add "resourceGroupName", valid_564390
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -3094,11 +3100,11 @@ proc validate_DataConnectionsGet_574484(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574491 = query.getOrDefault("api-version")
-  valid_574491 = validateParameter(valid_574491, JString, required = true,
+  var valid_564391 = query.getOrDefault("api-version")
+  valid_564391 = validateParameter(valid_564391, JString, required = true,
                                  default = nil)
-  if valid_574491 != nil:
-    section.add "api-version", valid_574491
+  if valid_564391 != nil:
+    section.add "api-version", valid_564391
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3107,54 +3113,54 @@ proc validate_DataConnectionsGet_574484(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574492: Call_DataConnectionsGet_574483; path: JsonNode;
+proc call*(call_564392: Call_DataConnectionsGet_564383; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Returns a data connection.
   ## 
-  let valid = call_574492.validator(path, query, header, formData, body)
-  let scheme = call_574492.pickScheme
+  let valid = call_564392.validator(path, query, header, formData, body)
+  let scheme = call_564392.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574492.url(scheme.get, call_574492.host, call_574492.base,
-                         call_574492.route, valid.getOrDefault("path"),
+  let url = call_564392.url(scheme.get, call_564392.host, call_564392.base,
+                         call_564392.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574492, url, valid)
+  result = hook(call_564392, url, valid)
 
-proc call*(call_574493: Call_DataConnectionsGet_574483; clusterName: string;
-          dataConnectionName: string; resourceGroupName: string; apiVersion: string;
-          subscriptionId: string; databaseName: string): Recallable =
+proc call*(call_564393: Call_DataConnectionsGet_564383; clusterName: string;
+          apiVersion: string; subscriptionId: string; databaseName: string;
+          dataConnectionName: string; resourceGroupName: string): Recallable =
   ## dataConnectionsGet
   ## Returns a data connection.
   ##   clusterName: string (required)
   ##              : The name of the Kusto cluster.
-  ##   dataConnectionName: string (required)
-  ##                     : The name of the data connection.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group containing the Kusto cluster.
   ##   apiVersion: string (required)
   ##             : Client API Version.
   ##   subscriptionId: string (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   databaseName: string (required)
   ##               : The name of the database in the Kusto cluster.
-  var path_574494 = newJObject()
-  var query_574495 = newJObject()
-  add(path_574494, "clusterName", newJString(clusterName))
-  add(path_574494, "dataConnectionName", newJString(dataConnectionName))
-  add(path_574494, "resourceGroupName", newJString(resourceGroupName))
-  add(query_574495, "api-version", newJString(apiVersion))
-  add(path_574494, "subscriptionId", newJString(subscriptionId))
-  add(path_574494, "databaseName", newJString(databaseName))
-  result = call_574493.call(path_574494, query_574495, nil, nil, nil)
+  ##   dataConnectionName: string (required)
+  ##                     : The name of the data connection.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group containing the Kusto cluster.
+  var path_564394 = newJObject()
+  var query_564395 = newJObject()
+  add(path_564394, "clusterName", newJString(clusterName))
+  add(query_564395, "api-version", newJString(apiVersion))
+  add(path_564394, "subscriptionId", newJString(subscriptionId))
+  add(path_564394, "databaseName", newJString(databaseName))
+  add(path_564394, "dataConnectionName", newJString(dataConnectionName))
+  add(path_564394, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564393.call(path_564394, query_564395, nil, nil, nil)
 
-var dataConnectionsGet* = Call_DataConnectionsGet_574483(
+var dataConnectionsGet* = Call_DataConnectionsGet_564383(
     name: "dataConnectionsGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Kusto/clusters/{clusterName}/databases/{databaseName}/dataConnections/{dataConnectionName}",
-    validator: validate_DataConnectionsGet_574484, base: "",
-    url: url_DataConnectionsGet_574485, schemes: {Scheme.Https})
+    validator: validate_DataConnectionsGet_564384, base: "",
+    url: url_DataConnectionsGet_564385, schemes: {Scheme.Https})
 type
-  Call_DataConnectionsUpdate_574524 = ref object of OpenApiRestCall_573667
-proc url_DataConnectionsUpdate_574526(protocol: Scheme; host: string; base: string;
+  Call_DataConnectionsUpdate_564424 = ref object of OpenApiRestCall_563565
+proc url_DataConnectionsUpdate_564426(protocol: Scheme; host: string; base: string;
                                      route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -3183,7 +3189,7 @@ proc url_DataConnectionsUpdate_574526(protocol: Scheme; host: string; base: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DataConnectionsUpdate_574525(path: JsonNode; query: JsonNode;
+proc validate_DataConnectionsUpdate_564425(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Updates a data connection.
   ## 
@@ -3192,42 +3198,42 @@ proc validate_DataConnectionsUpdate_574525(path: JsonNode; query: JsonNode;
   ## parameters in `path` object:
   ##   clusterName: JString (required)
   ##              : The name of the Kusto cluster.
-  ##   dataConnectionName: JString (required)
-  ##                     : The name of the data connection.
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group containing the Kusto cluster.
   ##   subscriptionId: JString (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   databaseName: JString (required)
   ##               : The name of the database in the Kusto cluster.
+  ##   dataConnectionName: JString (required)
+  ##                     : The name of the data connection.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group containing the Kusto cluster.
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `clusterName` field"
-  var valid_574527 = path.getOrDefault("clusterName")
-  valid_574527 = validateParameter(valid_574527, JString, required = true,
+  var valid_564427 = path.getOrDefault("clusterName")
+  valid_564427 = validateParameter(valid_564427, JString, required = true,
                                  default = nil)
-  if valid_574527 != nil:
-    section.add "clusterName", valid_574527
-  var valid_574528 = path.getOrDefault("dataConnectionName")
-  valid_574528 = validateParameter(valid_574528, JString, required = true,
+  if valid_564427 != nil:
+    section.add "clusterName", valid_564427
+  var valid_564428 = path.getOrDefault("subscriptionId")
+  valid_564428 = validateParameter(valid_564428, JString, required = true,
                                  default = nil)
-  if valid_574528 != nil:
-    section.add "dataConnectionName", valid_574528
-  var valid_574529 = path.getOrDefault("resourceGroupName")
-  valid_574529 = validateParameter(valid_574529, JString, required = true,
+  if valid_564428 != nil:
+    section.add "subscriptionId", valid_564428
+  var valid_564429 = path.getOrDefault("databaseName")
+  valid_564429 = validateParameter(valid_564429, JString, required = true,
                                  default = nil)
-  if valid_574529 != nil:
-    section.add "resourceGroupName", valid_574529
-  var valid_574530 = path.getOrDefault("subscriptionId")
-  valid_574530 = validateParameter(valid_574530, JString, required = true,
+  if valid_564429 != nil:
+    section.add "databaseName", valid_564429
+  var valid_564430 = path.getOrDefault("dataConnectionName")
+  valid_564430 = validateParameter(valid_564430, JString, required = true,
                                  default = nil)
-  if valid_574530 != nil:
-    section.add "subscriptionId", valid_574530
-  var valid_574531 = path.getOrDefault("databaseName")
-  valid_574531 = validateParameter(valid_574531, JString, required = true,
+  if valid_564430 != nil:
+    section.add "dataConnectionName", valid_564430
+  var valid_564431 = path.getOrDefault("resourceGroupName")
+  valid_564431 = validateParameter(valid_564431, JString, required = true,
                                  default = nil)
-  if valid_574531 != nil:
-    section.add "databaseName", valid_574531
+  if valid_564431 != nil:
+    section.add "resourceGroupName", valid_564431
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -3235,11 +3241,11 @@ proc validate_DataConnectionsUpdate_574525(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574532 = query.getOrDefault("api-version")
-  valid_574532 = validateParameter(valid_574532, JString, required = true,
+  var valid_564432 = query.getOrDefault("api-version")
+  valid_564432 = validateParameter(valid_564432, JString, required = true,
                                  default = nil)
-  if valid_574532 != nil:
-    section.add "api-version", valid_574532
+  if valid_564432 != nil:
+    section.add "api-version", valid_564432
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3253,59 +3259,60 @@ proc validate_DataConnectionsUpdate_574525(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574534: Call_DataConnectionsUpdate_574524; path: JsonNode;
+proc call*(call_564434: Call_DataConnectionsUpdate_564424; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Updates a data connection.
   ## 
-  let valid = call_574534.validator(path, query, header, formData, body)
-  let scheme = call_574534.pickScheme
+  let valid = call_564434.validator(path, query, header, formData, body)
+  let scheme = call_564434.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574534.url(scheme.get, call_574534.host, call_574534.base,
-                         call_574534.route, valid.getOrDefault("path"),
+  let url = call_564434.url(scheme.get, call_564434.host, call_564434.base,
+                         call_564434.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574534, url, valid)
+  result = hook(call_564434, url, valid)
 
-proc call*(call_574535: Call_DataConnectionsUpdate_574524; clusterName: string;
-          dataConnectionName: string; resourceGroupName: string; apiVersion: string;
-          subscriptionId: string; databaseName: string; parameters: JsonNode): Recallable =
+proc call*(call_564435: Call_DataConnectionsUpdate_564424; clusterName: string;
+          apiVersion: string; subscriptionId: string; databaseName: string;
+          dataConnectionName: string; resourceGroupName: string;
+          parameters: JsonNode): Recallable =
   ## dataConnectionsUpdate
   ## Updates a data connection.
   ##   clusterName: string (required)
   ##              : The name of the Kusto cluster.
-  ##   dataConnectionName: string (required)
-  ##                     : The name of the data connection.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group containing the Kusto cluster.
   ##   apiVersion: string (required)
   ##             : Client API Version.
   ##   subscriptionId: string (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   databaseName: string (required)
   ##               : The name of the database in the Kusto cluster.
+  ##   dataConnectionName: string (required)
+  ##                     : The name of the data connection.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group containing the Kusto cluster.
   ##   parameters: JObject (required)
   ##             : The data connection parameters supplied to the Update operation.
-  var path_574536 = newJObject()
-  var query_574537 = newJObject()
-  var body_574538 = newJObject()
-  add(path_574536, "clusterName", newJString(clusterName))
-  add(path_574536, "dataConnectionName", newJString(dataConnectionName))
-  add(path_574536, "resourceGroupName", newJString(resourceGroupName))
-  add(query_574537, "api-version", newJString(apiVersion))
-  add(path_574536, "subscriptionId", newJString(subscriptionId))
-  add(path_574536, "databaseName", newJString(databaseName))
+  var path_564436 = newJObject()
+  var query_564437 = newJObject()
+  var body_564438 = newJObject()
+  add(path_564436, "clusterName", newJString(clusterName))
+  add(query_564437, "api-version", newJString(apiVersion))
+  add(path_564436, "subscriptionId", newJString(subscriptionId))
+  add(path_564436, "databaseName", newJString(databaseName))
+  add(path_564436, "dataConnectionName", newJString(dataConnectionName))
+  add(path_564436, "resourceGroupName", newJString(resourceGroupName))
   if parameters != nil:
-    body_574538 = parameters
-  result = call_574535.call(path_574536, query_574537, nil, nil, body_574538)
+    body_564438 = parameters
+  result = call_564435.call(path_564436, query_564437, nil, nil, body_564438)
 
-var dataConnectionsUpdate* = Call_DataConnectionsUpdate_574524(
+var dataConnectionsUpdate* = Call_DataConnectionsUpdate_564424(
     name: "dataConnectionsUpdate", meth: HttpMethod.HttpPatch,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Kusto/clusters/{clusterName}/databases/{databaseName}/dataConnections/{dataConnectionName}",
-    validator: validate_DataConnectionsUpdate_574525, base: "",
-    url: url_DataConnectionsUpdate_574526, schemes: {Scheme.Https})
+    validator: validate_DataConnectionsUpdate_564425, base: "",
+    url: url_DataConnectionsUpdate_564426, schemes: {Scheme.Https})
 type
-  Call_DataConnectionsDelete_574511 = ref object of OpenApiRestCall_573667
-proc url_DataConnectionsDelete_574513(protocol: Scheme; host: string; base: string;
+  Call_DataConnectionsDelete_564411 = ref object of OpenApiRestCall_563565
+proc url_DataConnectionsDelete_564413(protocol: Scheme; host: string; base: string;
                                      route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -3334,7 +3341,7 @@ proc url_DataConnectionsDelete_574513(protocol: Scheme; host: string; base: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DataConnectionsDelete_574512(path: JsonNode; query: JsonNode;
+proc validate_DataConnectionsDelete_564412(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Deletes the data connection with the given name.
   ## 
@@ -3343,42 +3350,42 @@ proc validate_DataConnectionsDelete_574512(path: JsonNode; query: JsonNode;
   ## parameters in `path` object:
   ##   clusterName: JString (required)
   ##              : The name of the Kusto cluster.
-  ##   dataConnectionName: JString (required)
-  ##                     : The name of the data connection.
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group containing the Kusto cluster.
   ##   subscriptionId: JString (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   databaseName: JString (required)
   ##               : The name of the database in the Kusto cluster.
+  ##   dataConnectionName: JString (required)
+  ##                     : The name of the data connection.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group containing the Kusto cluster.
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `clusterName` field"
-  var valid_574514 = path.getOrDefault("clusterName")
-  valid_574514 = validateParameter(valid_574514, JString, required = true,
+  var valid_564414 = path.getOrDefault("clusterName")
+  valid_564414 = validateParameter(valid_564414, JString, required = true,
                                  default = nil)
-  if valid_574514 != nil:
-    section.add "clusterName", valid_574514
-  var valid_574515 = path.getOrDefault("dataConnectionName")
-  valid_574515 = validateParameter(valid_574515, JString, required = true,
+  if valid_564414 != nil:
+    section.add "clusterName", valid_564414
+  var valid_564415 = path.getOrDefault("subscriptionId")
+  valid_564415 = validateParameter(valid_564415, JString, required = true,
                                  default = nil)
-  if valid_574515 != nil:
-    section.add "dataConnectionName", valid_574515
-  var valid_574516 = path.getOrDefault("resourceGroupName")
-  valid_574516 = validateParameter(valid_574516, JString, required = true,
+  if valid_564415 != nil:
+    section.add "subscriptionId", valid_564415
+  var valid_564416 = path.getOrDefault("databaseName")
+  valid_564416 = validateParameter(valid_564416, JString, required = true,
                                  default = nil)
-  if valid_574516 != nil:
-    section.add "resourceGroupName", valid_574516
-  var valid_574517 = path.getOrDefault("subscriptionId")
-  valid_574517 = validateParameter(valid_574517, JString, required = true,
+  if valid_564416 != nil:
+    section.add "databaseName", valid_564416
+  var valid_564417 = path.getOrDefault("dataConnectionName")
+  valid_564417 = validateParameter(valid_564417, JString, required = true,
                                  default = nil)
-  if valid_574517 != nil:
-    section.add "subscriptionId", valid_574517
-  var valid_574518 = path.getOrDefault("databaseName")
-  valid_574518 = validateParameter(valid_574518, JString, required = true,
+  if valid_564417 != nil:
+    section.add "dataConnectionName", valid_564417
+  var valid_564418 = path.getOrDefault("resourceGroupName")
+  valid_564418 = validateParameter(valid_564418, JString, required = true,
                                  default = nil)
-  if valid_574518 != nil:
-    section.add "databaseName", valid_574518
+  if valid_564418 != nil:
+    section.add "resourceGroupName", valid_564418
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -3386,11 +3393,11 @@ proc validate_DataConnectionsDelete_574512(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574519 = query.getOrDefault("api-version")
-  valid_574519 = validateParameter(valid_574519, JString, required = true,
+  var valid_564419 = query.getOrDefault("api-version")
+  valid_564419 = validateParameter(valid_564419, JString, required = true,
                                  default = nil)
-  if valid_574519 != nil:
-    section.add "api-version", valid_574519
+  if valid_564419 != nil:
+    section.add "api-version", valid_564419
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3399,54 +3406,54 @@ proc validate_DataConnectionsDelete_574512(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574520: Call_DataConnectionsDelete_574511; path: JsonNode;
+proc call*(call_564420: Call_DataConnectionsDelete_564411; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes the data connection with the given name.
   ## 
-  let valid = call_574520.validator(path, query, header, formData, body)
-  let scheme = call_574520.pickScheme
+  let valid = call_564420.validator(path, query, header, formData, body)
+  let scheme = call_564420.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574520.url(scheme.get, call_574520.host, call_574520.base,
-                         call_574520.route, valid.getOrDefault("path"),
+  let url = call_564420.url(scheme.get, call_564420.host, call_564420.base,
+                         call_564420.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574520, url, valid)
+  result = hook(call_564420, url, valid)
 
-proc call*(call_574521: Call_DataConnectionsDelete_574511; clusterName: string;
-          dataConnectionName: string; resourceGroupName: string; apiVersion: string;
-          subscriptionId: string; databaseName: string): Recallable =
+proc call*(call_564421: Call_DataConnectionsDelete_564411; clusterName: string;
+          apiVersion: string; subscriptionId: string; databaseName: string;
+          dataConnectionName: string; resourceGroupName: string): Recallable =
   ## dataConnectionsDelete
   ## Deletes the data connection with the given name.
   ##   clusterName: string (required)
   ##              : The name of the Kusto cluster.
-  ##   dataConnectionName: string (required)
-  ##                     : The name of the data connection.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group containing the Kusto cluster.
   ##   apiVersion: string (required)
   ##             : Client API Version.
   ##   subscriptionId: string (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   databaseName: string (required)
   ##               : The name of the database in the Kusto cluster.
-  var path_574522 = newJObject()
-  var query_574523 = newJObject()
-  add(path_574522, "clusterName", newJString(clusterName))
-  add(path_574522, "dataConnectionName", newJString(dataConnectionName))
-  add(path_574522, "resourceGroupName", newJString(resourceGroupName))
-  add(query_574523, "api-version", newJString(apiVersion))
-  add(path_574522, "subscriptionId", newJString(subscriptionId))
-  add(path_574522, "databaseName", newJString(databaseName))
-  result = call_574521.call(path_574522, query_574523, nil, nil, nil)
+  ##   dataConnectionName: string (required)
+  ##                     : The name of the data connection.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group containing the Kusto cluster.
+  var path_564422 = newJObject()
+  var query_564423 = newJObject()
+  add(path_564422, "clusterName", newJString(clusterName))
+  add(query_564423, "api-version", newJString(apiVersion))
+  add(path_564422, "subscriptionId", newJString(subscriptionId))
+  add(path_564422, "databaseName", newJString(databaseName))
+  add(path_564422, "dataConnectionName", newJString(dataConnectionName))
+  add(path_564422, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564421.call(path_564422, query_564423, nil, nil, nil)
 
-var dataConnectionsDelete* = Call_DataConnectionsDelete_574511(
+var dataConnectionsDelete* = Call_DataConnectionsDelete_564411(
     name: "dataConnectionsDelete", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Kusto/clusters/{clusterName}/databases/{databaseName}/dataConnections/{dataConnectionName}",
-    validator: validate_DataConnectionsDelete_574512, base: "",
-    url: url_DataConnectionsDelete_574513, schemes: {Scheme.Https})
+    validator: validate_DataConnectionsDelete_564412, base: "",
+    url: url_DataConnectionsDelete_564413, schemes: {Scheme.Https})
 type
-  Call_DatabasesListPrincipals_574539 = ref object of OpenApiRestCall_573667
-proc url_DatabasesListPrincipals_574541(protocol: Scheme; host: string; base: string;
+  Call_DatabasesListPrincipals_564439 = ref object of OpenApiRestCall_563565
+proc url_DatabasesListPrincipals_564441(protocol: Scheme; host: string; base: string;
                                        route: string; path: JsonNode;
                                        query: JsonNode): Uri =
   result.scheme = $protocol
@@ -3473,7 +3480,7 @@ proc url_DatabasesListPrincipals_574541(protocol: Scheme; host: string; base: st
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DatabasesListPrincipals_574540(path: JsonNode; query: JsonNode;
+proc validate_DatabasesListPrincipals_564440(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Returns a list of database principals of the given Kusto cluster and database.
   ## 
@@ -3482,35 +3489,35 @@ proc validate_DatabasesListPrincipals_574540(path: JsonNode; query: JsonNode;
   ## parameters in `path` object:
   ##   clusterName: JString (required)
   ##              : The name of the Kusto cluster.
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group containing the Kusto cluster.
   ##   subscriptionId: JString (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   databaseName: JString (required)
   ##               : The name of the database in the Kusto cluster.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group containing the Kusto cluster.
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `clusterName` field"
-  var valid_574542 = path.getOrDefault("clusterName")
-  valid_574542 = validateParameter(valid_574542, JString, required = true,
+  var valid_564442 = path.getOrDefault("clusterName")
+  valid_564442 = validateParameter(valid_564442, JString, required = true,
                                  default = nil)
-  if valid_574542 != nil:
-    section.add "clusterName", valid_574542
-  var valid_574543 = path.getOrDefault("resourceGroupName")
-  valid_574543 = validateParameter(valid_574543, JString, required = true,
+  if valid_564442 != nil:
+    section.add "clusterName", valid_564442
+  var valid_564443 = path.getOrDefault("subscriptionId")
+  valid_564443 = validateParameter(valid_564443, JString, required = true,
                                  default = nil)
-  if valid_574543 != nil:
-    section.add "resourceGroupName", valid_574543
-  var valid_574544 = path.getOrDefault("subscriptionId")
-  valid_574544 = validateParameter(valid_574544, JString, required = true,
+  if valid_564443 != nil:
+    section.add "subscriptionId", valid_564443
+  var valid_564444 = path.getOrDefault("databaseName")
+  valid_564444 = validateParameter(valid_564444, JString, required = true,
                                  default = nil)
-  if valid_574544 != nil:
-    section.add "subscriptionId", valid_574544
-  var valid_574545 = path.getOrDefault("databaseName")
-  valid_574545 = validateParameter(valid_574545, JString, required = true,
+  if valid_564444 != nil:
+    section.add "databaseName", valid_564444
+  var valid_564445 = path.getOrDefault("resourceGroupName")
+  valid_564445 = validateParameter(valid_564445, JString, required = true,
                                  default = nil)
-  if valid_574545 != nil:
-    section.add "databaseName", valid_574545
+  if valid_564445 != nil:
+    section.add "resourceGroupName", valid_564445
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -3518,11 +3525,11 @@ proc validate_DatabasesListPrincipals_574540(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574546 = query.getOrDefault("api-version")
-  valid_574546 = validateParameter(valid_574546, JString, required = true,
+  var valid_564446 = query.getOrDefault("api-version")
+  valid_564446 = validateParameter(valid_564446, JString, required = true,
                                  default = nil)
-  if valid_574546 != nil:
-    section.add "api-version", valid_574546
+  if valid_564446 != nil:
+    section.add "api-version", valid_564446
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3531,51 +3538,51 @@ proc validate_DatabasesListPrincipals_574540(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574547: Call_DatabasesListPrincipals_574539; path: JsonNode;
+proc call*(call_564447: Call_DatabasesListPrincipals_564439; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Returns a list of database principals of the given Kusto cluster and database.
   ## 
-  let valid = call_574547.validator(path, query, header, formData, body)
-  let scheme = call_574547.pickScheme
+  let valid = call_564447.validator(path, query, header, formData, body)
+  let scheme = call_564447.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574547.url(scheme.get, call_574547.host, call_574547.base,
-                         call_574547.route, valid.getOrDefault("path"),
+  let url = call_564447.url(scheme.get, call_564447.host, call_564447.base,
+                         call_564447.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574547, url, valid)
+  result = hook(call_564447, url, valid)
 
-proc call*(call_574548: Call_DatabasesListPrincipals_574539; clusterName: string;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          databaseName: string): Recallable =
+proc call*(call_564448: Call_DatabasesListPrincipals_564439; clusterName: string;
+          apiVersion: string; subscriptionId: string; databaseName: string;
+          resourceGroupName: string): Recallable =
   ## databasesListPrincipals
   ## Returns a list of database principals of the given Kusto cluster and database.
   ##   clusterName: string (required)
   ##              : The name of the Kusto cluster.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group containing the Kusto cluster.
   ##   apiVersion: string (required)
   ##             : Client API Version.
   ##   subscriptionId: string (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   databaseName: string (required)
   ##               : The name of the database in the Kusto cluster.
-  var path_574549 = newJObject()
-  var query_574550 = newJObject()
-  add(path_574549, "clusterName", newJString(clusterName))
-  add(path_574549, "resourceGroupName", newJString(resourceGroupName))
-  add(query_574550, "api-version", newJString(apiVersion))
-  add(path_574549, "subscriptionId", newJString(subscriptionId))
-  add(path_574549, "databaseName", newJString(databaseName))
-  result = call_574548.call(path_574549, query_574550, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group containing the Kusto cluster.
+  var path_564449 = newJObject()
+  var query_564450 = newJObject()
+  add(path_564449, "clusterName", newJString(clusterName))
+  add(query_564450, "api-version", newJString(apiVersion))
+  add(path_564449, "subscriptionId", newJString(subscriptionId))
+  add(path_564449, "databaseName", newJString(databaseName))
+  add(path_564449, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564448.call(path_564449, query_564450, nil, nil, nil)
 
-var databasesListPrincipals* = Call_DatabasesListPrincipals_574539(
+var databasesListPrincipals* = Call_DatabasesListPrincipals_564439(
     name: "databasesListPrincipals", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Kusto/clusters/{clusterName}/databases/{databaseName}/listPrincipals",
-    validator: validate_DatabasesListPrincipals_574540, base: "",
-    url: url_DatabasesListPrincipals_574541, schemes: {Scheme.Https})
+    validator: validate_DatabasesListPrincipals_564440, base: "",
+    url: url_DatabasesListPrincipals_564441, schemes: {Scheme.Https})
 type
-  Call_DatabasesRemovePrincipals_574551 = ref object of OpenApiRestCall_573667
-proc url_DatabasesRemovePrincipals_574553(protocol: Scheme; host: string;
+  Call_DatabasesRemovePrincipals_564451 = ref object of OpenApiRestCall_563565
+proc url_DatabasesRemovePrincipals_564453(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -3601,7 +3608,7 @@ proc url_DatabasesRemovePrincipals_574553(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DatabasesRemovePrincipals_574552(path: JsonNode; query: JsonNode;
+proc validate_DatabasesRemovePrincipals_564452(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Remove Database principals permissions.
   ## 
@@ -3610,35 +3617,35 @@ proc validate_DatabasesRemovePrincipals_574552(path: JsonNode; query: JsonNode;
   ## parameters in `path` object:
   ##   clusterName: JString (required)
   ##              : The name of the Kusto cluster.
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group containing the Kusto cluster.
   ##   subscriptionId: JString (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   databaseName: JString (required)
   ##               : The name of the database in the Kusto cluster.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group containing the Kusto cluster.
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `clusterName` field"
-  var valid_574554 = path.getOrDefault("clusterName")
-  valid_574554 = validateParameter(valid_574554, JString, required = true,
+  var valid_564454 = path.getOrDefault("clusterName")
+  valid_564454 = validateParameter(valid_564454, JString, required = true,
                                  default = nil)
-  if valid_574554 != nil:
-    section.add "clusterName", valid_574554
-  var valid_574555 = path.getOrDefault("resourceGroupName")
-  valid_574555 = validateParameter(valid_574555, JString, required = true,
+  if valid_564454 != nil:
+    section.add "clusterName", valid_564454
+  var valid_564455 = path.getOrDefault("subscriptionId")
+  valid_564455 = validateParameter(valid_564455, JString, required = true,
                                  default = nil)
-  if valid_574555 != nil:
-    section.add "resourceGroupName", valid_574555
-  var valid_574556 = path.getOrDefault("subscriptionId")
-  valid_574556 = validateParameter(valid_574556, JString, required = true,
+  if valid_564455 != nil:
+    section.add "subscriptionId", valid_564455
+  var valid_564456 = path.getOrDefault("databaseName")
+  valid_564456 = validateParameter(valid_564456, JString, required = true,
                                  default = nil)
-  if valid_574556 != nil:
-    section.add "subscriptionId", valid_574556
-  var valid_574557 = path.getOrDefault("databaseName")
-  valid_574557 = validateParameter(valid_574557, JString, required = true,
+  if valid_564456 != nil:
+    section.add "databaseName", valid_564456
+  var valid_564457 = path.getOrDefault("resourceGroupName")
+  valid_564457 = validateParameter(valid_564457, JString, required = true,
                                  default = nil)
-  if valid_574557 != nil:
-    section.add "databaseName", valid_574557
+  if valid_564457 != nil:
+    section.add "resourceGroupName", valid_564457
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -3646,11 +3653,11 @@ proc validate_DatabasesRemovePrincipals_574552(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574558 = query.getOrDefault("api-version")
-  valid_574558 = validateParameter(valid_574558, JString, required = true,
+  var valid_564458 = query.getOrDefault("api-version")
+  valid_564458 = validateParameter(valid_564458, JString, required = true,
                                  default = nil)
-  if valid_574558 != nil:
-    section.add "api-version", valid_574558
+  if valid_564458 != nil:
+    section.add "api-version", valid_564458
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3664,28 +3671,26 @@ proc validate_DatabasesRemovePrincipals_574552(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574560: Call_DatabasesRemovePrincipals_574551; path: JsonNode;
+proc call*(call_564460: Call_DatabasesRemovePrincipals_564451; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Remove Database principals permissions.
   ## 
-  let valid = call_574560.validator(path, query, header, formData, body)
-  let scheme = call_574560.pickScheme
+  let valid = call_564460.validator(path, query, header, formData, body)
+  let scheme = call_564460.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574560.url(scheme.get, call_574560.host, call_574560.base,
-                         call_574560.route, valid.getOrDefault("path"),
+  let url = call_564460.url(scheme.get, call_564460.host, call_564460.base,
+                         call_564460.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574560, url, valid)
+  result = hook(call_564460, url, valid)
 
-proc call*(call_574561: Call_DatabasesRemovePrincipals_574551; clusterName: string;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          databaseName: string; databasePrincipalsToRemove: JsonNode): Recallable =
+proc call*(call_564461: Call_DatabasesRemovePrincipals_564451; clusterName: string;
+          apiVersion: string; subscriptionId: string; databaseName: string;
+          databasePrincipalsToRemove: JsonNode; resourceGroupName: string): Recallable =
   ## databasesRemovePrincipals
   ## Remove Database principals permissions.
   ##   clusterName: string (required)
   ##              : The name of the Kusto cluster.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group containing the Kusto cluster.
   ##   apiVersion: string (required)
   ##             : Client API Version.
   ##   subscriptionId: string (required)
@@ -3694,26 +3699,28 @@ proc call*(call_574561: Call_DatabasesRemovePrincipals_574551; clusterName: stri
   ##               : The name of the database in the Kusto cluster.
   ##   databasePrincipalsToRemove: JObject (required)
   ##                             : List of database principals to remove.
-  var path_574562 = newJObject()
-  var query_574563 = newJObject()
-  var body_574564 = newJObject()
-  add(path_574562, "clusterName", newJString(clusterName))
-  add(path_574562, "resourceGroupName", newJString(resourceGroupName))
-  add(query_574563, "api-version", newJString(apiVersion))
-  add(path_574562, "subscriptionId", newJString(subscriptionId))
-  add(path_574562, "databaseName", newJString(databaseName))
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group containing the Kusto cluster.
+  var path_564462 = newJObject()
+  var query_564463 = newJObject()
+  var body_564464 = newJObject()
+  add(path_564462, "clusterName", newJString(clusterName))
+  add(query_564463, "api-version", newJString(apiVersion))
+  add(path_564462, "subscriptionId", newJString(subscriptionId))
+  add(path_564462, "databaseName", newJString(databaseName))
   if databasePrincipalsToRemove != nil:
-    body_574564 = databasePrincipalsToRemove
-  result = call_574561.call(path_574562, query_574563, nil, nil, body_574564)
+    body_564464 = databasePrincipalsToRemove
+  add(path_564462, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564461.call(path_564462, query_564463, nil, nil, body_564464)
 
-var databasesRemovePrincipals* = Call_DatabasesRemovePrincipals_574551(
+var databasesRemovePrincipals* = Call_DatabasesRemovePrincipals_564451(
     name: "databasesRemovePrincipals", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Kusto/clusters/{clusterName}/databases/{databaseName}/removePrincipals",
-    validator: validate_DatabasesRemovePrincipals_574552, base: "",
-    url: url_DatabasesRemovePrincipals_574553, schemes: {Scheme.Https})
+    validator: validate_DatabasesRemovePrincipals_564452, base: "",
+    url: url_DatabasesRemovePrincipals_564453, schemes: {Scheme.Https})
 type
-  Call_ClustersDetachFollowerDatabases_574565 = ref object of OpenApiRestCall_573667
-proc url_ClustersDetachFollowerDatabases_574567(protocol: Scheme; host: string;
+  Call_ClustersDetachFollowerDatabases_564465 = ref object of OpenApiRestCall_563565
+proc url_ClustersDetachFollowerDatabases_564467(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -3736,7 +3743,7 @@ proc url_ClustersDetachFollowerDatabases_574567(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ClustersDetachFollowerDatabases_574566(path: JsonNode;
+proc validate_ClustersDetachFollowerDatabases_564466(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Detaches all followers of a database owned by this cluster.
   ## 
@@ -3745,28 +3752,28 @@ proc validate_ClustersDetachFollowerDatabases_574566(path: JsonNode;
   ## parameters in `path` object:
   ##   clusterName: JString (required)
   ##              : The name of the Kusto cluster.
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group containing the Kusto cluster.
   ##   subscriptionId: JString (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group containing the Kusto cluster.
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `clusterName` field"
-  var valid_574568 = path.getOrDefault("clusterName")
-  valid_574568 = validateParameter(valid_574568, JString, required = true,
+  var valid_564468 = path.getOrDefault("clusterName")
+  valid_564468 = validateParameter(valid_564468, JString, required = true,
                                  default = nil)
-  if valid_574568 != nil:
-    section.add "clusterName", valid_574568
-  var valid_574569 = path.getOrDefault("resourceGroupName")
-  valid_574569 = validateParameter(valid_574569, JString, required = true,
+  if valid_564468 != nil:
+    section.add "clusterName", valid_564468
+  var valid_564469 = path.getOrDefault("subscriptionId")
+  valid_564469 = validateParameter(valid_564469, JString, required = true,
                                  default = nil)
-  if valid_574569 != nil:
-    section.add "resourceGroupName", valid_574569
-  var valid_574570 = path.getOrDefault("subscriptionId")
-  valid_574570 = validateParameter(valid_574570, JString, required = true,
+  if valid_564469 != nil:
+    section.add "subscriptionId", valid_564469
+  var valid_564470 = path.getOrDefault("resourceGroupName")
+  valid_564470 = validateParameter(valid_564470, JString, required = true,
                                  default = nil)
-  if valid_574570 != nil:
-    section.add "subscriptionId", valid_574570
+  if valid_564470 != nil:
+    section.add "resourceGroupName", valid_564470
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -3774,11 +3781,11 @@ proc validate_ClustersDetachFollowerDatabases_574566(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574571 = query.getOrDefault("api-version")
-  valid_574571 = validateParameter(valid_574571, JString, required = true,
+  var valid_564471 = query.getOrDefault("api-version")
+  valid_564471 = validateParameter(valid_564471, JString, required = true,
                                  default = nil)
-  if valid_574571 != nil:
-    section.add "api-version", valid_574571
+  if valid_564471 != nil:
+    section.add "api-version", valid_564471
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3792,54 +3799,55 @@ proc validate_ClustersDetachFollowerDatabases_574566(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574573: Call_ClustersDetachFollowerDatabases_574565;
+proc call*(call_564473: Call_ClustersDetachFollowerDatabases_564465;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Detaches all followers of a database owned by this cluster.
   ## 
-  let valid = call_574573.validator(path, query, header, formData, body)
-  let scheme = call_574573.pickScheme
+  let valid = call_564473.validator(path, query, header, formData, body)
+  let scheme = call_564473.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574573.url(scheme.get, call_574573.host, call_574573.base,
-                         call_574573.route, valid.getOrDefault("path"),
+  let url = call_564473.url(scheme.get, call_564473.host, call_564473.base,
+                         call_564473.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574573, url, valid)
+  result = hook(call_564473, url, valid)
 
-proc call*(call_574574: Call_ClustersDetachFollowerDatabases_574565;
-          clusterName: string; resourceGroupName: string; apiVersion: string;
-          subscriptionId: string; followerDatabaseToRemove: JsonNode): Recallable =
+proc call*(call_564474: Call_ClustersDetachFollowerDatabases_564465;
+          clusterName: string; apiVersion: string;
+          followerDatabaseToRemove: JsonNode; subscriptionId: string;
+          resourceGroupName: string): Recallable =
   ## clustersDetachFollowerDatabases
   ## Detaches all followers of a database owned by this cluster.
   ##   clusterName: string (required)
   ##              : The name of the Kusto cluster.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group containing the Kusto cluster.
   ##   apiVersion: string (required)
   ##             : Client API Version.
-  ##   subscriptionId: string (required)
-  ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   followerDatabaseToRemove: JObject (required)
   ##                           : The follower databases properties to remove.
-  var path_574575 = newJObject()
-  var query_574576 = newJObject()
-  var body_574577 = newJObject()
-  add(path_574575, "clusterName", newJString(clusterName))
-  add(path_574575, "resourceGroupName", newJString(resourceGroupName))
-  add(query_574576, "api-version", newJString(apiVersion))
-  add(path_574575, "subscriptionId", newJString(subscriptionId))
+  ##   subscriptionId: string (required)
+  ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group containing the Kusto cluster.
+  var path_564475 = newJObject()
+  var query_564476 = newJObject()
+  var body_564477 = newJObject()
+  add(path_564475, "clusterName", newJString(clusterName))
+  add(query_564476, "api-version", newJString(apiVersion))
   if followerDatabaseToRemove != nil:
-    body_574577 = followerDatabaseToRemove
-  result = call_574574.call(path_574575, query_574576, nil, nil, body_574577)
+    body_564477 = followerDatabaseToRemove
+  add(path_564475, "subscriptionId", newJString(subscriptionId))
+  add(path_564475, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564474.call(path_564475, query_564476, nil, nil, body_564477)
 
-var clustersDetachFollowerDatabases* = Call_ClustersDetachFollowerDatabases_574565(
+var clustersDetachFollowerDatabases* = Call_ClustersDetachFollowerDatabases_564465(
     name: "clustersDetachFollowerDatabases", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Kusto/clusters/{clusterName}/detachFollowerDatabases",
-    validator: validate_ClustersDetachFollowerDatabases_574566, base: "",
-    url: url_ClustersDetachFollowerDatabases_574567, schemes: {Scheme.Https})
+    validator: validate_ClustersDetachFollowerDatabases_564466, base: "",
+    url: url_ClustersDetachFollowerDatabases_564467, schemes: {Scheme.Https})
 type
-  Call_ClustersListFollowerDatabases_574578 = ref object of OpenApiRestCall_573667
-proc url_ClustersListFollowerDatabases_574580(protocol: Scheme; host: string;
+  Call_ClustersListFollowerDatabases_564478 = ref object of OpenApiRestCall_563565
+proc url_ClustersListFollowerDatabases_564480(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -3862,7 +3870,7 @@ proc url_ClustersListFollowerDatabases_574580(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ClustersListFollowerDatabases_574579(path: JsonNode; query: JsonNode;
+proc validate_ClustersListFollowerDatabases_564479(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Returns a list of databases that are owned by this cluster and were followed by another cluster.
   ## 
@@ -3871,28 +3879,28 @@ proc validate_ClustersListFollowerDatabases_574579(path: JsonNode; query: JsonNo
   ## parameters in `path` object:
   ##   clusterName: JString (required)
   ##              : The name of the Kusto cluster.
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group containing the Kusto cluster.
   ##   subscriptionId: JString (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group containing the Kusto cluster.
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `clusterName` field"
-  var valid_574581 = path.getOrDefault("clusterName")
-  valid_574581 = validateParameter(valid_574581, JString, required = true,
+  var valid_564481 = path.getOrDefault("clusterName")
+  valid_564481 = validateParameter(valid_564481, JString, required = true,
                                  default = nil)
-  if valid_574581 != nil:
-    section.add "clusterName", valid_574581
-  var valid_574582 = path.getOrDefault("resourceGroupName")
-  valid_574582 = validateParameter(valid_574582, JString, required = true,
+  if valid_564481 != nil:
+    section.add "clusterName", valid_564481
+  var valid_564482 = path.getOrDefault("subscriptionId")
+  valid_564482 = validateParameter(valid_564482, JString, required = true,
                                  default = nil)
-  if valid_574582 != nil:
-    section.add "resourceGroupName", valid_574582
-  var valid_574583 = path.getOrDefault("subscriptionId")
-  valid_574583 = validateParameter(valid_574583, JString, required = true,
+  if valid_564482 != nil:
+    section.add "subscriptionId", valid_564482
+  var valid_564483 = path.getOrDefault("resourceGroupName")
+  valid_564483 = validateParameter(valid_564483, JString, required = true,
                                  default = nil)
-  if valid_574583 != nil:
-    section.add "subscriptionId", valid_574583
+  if valid_564483 != nil:
+    section.add "resourceGroupName", valid_564483
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -3900,11 +3908,11 @@ proc validate_ClustersListFollowerDatabases_574579(path: JsonNode; query: JsonNo
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574584 = query.getOrDefault("api-version")
-  valid_574584 = validateParameter(valid_574584, JString, required = true,
+  var valid_564484 = query.getOrDefault("api-version")
+  valid_564484 = validateParameter(valid_564484, JString, required = true,
                                  default = nil)
-  if valid_574584 != nil:
-    section.add "api-version", valid_574584
+  if valid_564484 != nil:
+    section.add "api-version", valid_564484
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3913,48 +3921,48 @@ proc validate_ClustersListFollowerDatabases_574579(path: JsonNode; query: JsonNo
   if body != nil:
     result.add "body", body
 
-proc call*(call_574585: Call_ClustersListFollowerDatabases_574578; path: JsonNode;
+proc call*(call_564485: Call_ClustersListFollowerDatabases_564478; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Returns a list of databases that are owned by this cluster and were followed by another cluster.
   ## 
-  let valid = call_574585.validator(path, query, header, formData, body)
-  let scheme = call_574585.pickScheme
+  let valid = call_564485.validator(path, query, header, formData, body)
+  let scheme = call_564485.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574585.url(scheme.get, call_574585.host, call_574585.base,
-                         call_574585.route, valid.getOrDefault("path"),
+  let url = call_564485.url(scheme.get, call_564485.host, call_564485.base,
+                         call_564485.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574585, url, valid)
+  result = hook(call_564485, url, valid)
 
-proc call*(call_574586: Call_ClustersListFollowerDatabases_574578;
-          clusterName: string; resourceGroupName: string; apiVersion: string;
-          subscriptionId: string): Recallable =
+proc call*(call_564486: Call_ClustersListFollowerDatabases_564478;
+          clusterName: string; apiVersion: string; subscriptionId: string;
+          resourceGroupName: string): Recallable =
   ## clustersListFollowerDatabases
   ## Returns a list of databases that are owned by this cluster and were followed by another cluster.
   ##   clusterName: string (required)
   ##              : The name of the Kusto cluster.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group containing the Kusto cluster.
   ##   apiVersion: string (required)
   ##             : Client API Version.
   ##   subscriptionId: string (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_574587 = newJObject()
-  var query_574588 = newJObject()
-  add(path_574587, "clusterName", newJString(clusterName))
-  add(path_574587, "resourceGroupName", newJString(resourceGroupName))
-  add(query_574588, "api-version", newJString(apiVersion))
-  add(path_574587, "subscriptionId", newJString(subscriptionId))
-  result = call_574586.call(path_574587, query_574588, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group containing the Kusto cluster.
+  var path_564487 = newJObject()
+  var query_564488 = newJObject()
+  add(path_564487, "clusterName", newJString(clusterName))
+  add(query_564488, "api-version", newJString(apiVersion))
+  add(path_564487, "subscriptionId", newJString(subscriptionId))
+  add(path_564487, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564486.call(path_564487, query_564488, nil, nil, nil)
 
-var clustersListFollowerDatabases* = Call_ClustersListFollowerDatabases_574578(
+var clustersListFollowerDatabases* = Call_ClustersListFollowerDatabases_564478(
     name: "clustersListFollowerDatabases", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Kusto/clusters/{clusterName}/listFollowerDatabases",
-    validator: validate_ClustersListFollowerDatabases_574579, base: "",
-    url: url_ClustersListFollowerDatabases_574580, schemes: {Scheme.Https})
+    validator: validate_ClustersListFollowerDatabases_564479, base: "",
+    url: url_ClustersListFollowerDatabases_564480, schemes: {Scheme.Https})
 type
-  Call_ClustersListSkusByResource_574589 = ref object of OpenApiRestCall_573667
-proc url_ClustersListSkusByResource_574591(protocol: Scheme; host: string;
+  Call_ClustersListSkusByResource_564489 = ref object of OpenApiRestCall_563565
+proc url_ClustersListSkusByResource_564491(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -3977,7 +3985,7 @@ proc url_ClustersListSkusByResource_574591(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ClustersListSkusByResource_574590(path: JsonNode; query: JsonNode;
+proc validate_ClustersListSkusByResource_564490(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Returns the SKUs available for the provided resource.
   ## 
@@ -3986,28 +3994,28 @@ proc validate_ClustersListSkusByResource_574590(path: JsonNode; query: JsonNode;
   ## parameters in `path` object:
   ##   clusterName: JString (required)
   ##              : The name of the Kusto cluster.
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group containing the Kusto cluster.
   ##   subscriptionId: JString (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group containing the Kusto cluster.
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `clusterName` field"
-  var valid_574592 = path.getOrDefault("clusterName")
-  valid_574592 = validateParameter(valid_574592, JString, required = true,
+  var valid_564492 = path.getOrDefault("clusterName")
+  valid_564492 = validateParameter(valid_564492, JString, required = true,
                                  default = nil)
-  if valid_574592 != nil:
-    section.add "clusterName", valid_574592
-  var valid_574593 = path.getOrDefault("resourceGroupName")
-  valid_574593 = validateParameter(valid_574593, JString, required = true,
+  if valid_564492 != nil:
+    section.add "clusterName", valid_564492
+  var valid_564493 = path.getOrDefault("subscriptionId")
+  valid_564493 = validateParameter(valid_564493, JString, required = true,
                                  default = nil)
-  if valid_574593 != nil:
-    section.add "resourceGroupName", valid_574593
-  var valid_574594 = path.getOrDefault("subscriptionId")
-  valid_574594 = validateParameter(valid_574594, JString, required = true,
+  if valid_564493 != nil:
+    section.add "subscriptionId", valid_564493
+  var valid_564494 = path.getOrDefault("resourceGroupName")
+  valid_564494 = validateParameter(valid_564494, JString, required = true,
                                  default = nil)
-  if valid_574594 != nil:
-    section.add "subscriptionId", valid_574594
+  if valid_564494 != nil:
+    section.add "resourceGroupName", valid_564494
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -4015,11 +4023,11 @@ proc validate_ClustersListSkusByResource_574590(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574595 = query.getOrDefault("api-version")
-  valid_574595 = validateParameter(valid_574595, JString, required = true,
+  var valid_564495 = query.getOrDefault("api-version")
+  valid_564495 = validateParameter(valid_564495, JString, required = true,
                                  default = nil)
-  if valid_574595 != nil:
-    section.add "api-version", valid_574595
+  if valid_564495 != nil:
+    section.add "api-version", valid_564495
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -4028,48 +4036,48 @@ proc validate_ClustersListSkusByResource_574590(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574596: Call_ClustersListSkusByResource_574589; path: JsonNode;
+proc call*(call_564496: Call_ClustersListSkusByResource_564489; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Returns the SKUs available for the provided resource.
   ## 
-  let valid = call_574596.validator(path, query, header, formData, body)
-  let scheme = call_574596.pickScheme
+  let valid = call_564496.validator(path, query, header, formData, body)
+  let scheme = call_564496.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574596.url(scheme.get, call_574596.host, call_574596.base,
-                         call_574596.route, valid.getOrDefault("path"),
+  let url = call_564496.url(scheme.get, call_564496.host, call_564496.base,
+                         call_564496.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574596, url, valid)
+  result = hook(call_564496, url, valid)
 
-proc call*(call_574597: Call_ClustersListSkusByResource_574589;
-          clusterName: string; resourceGroupName: string; apiVersion: string;
-          subscriptionId: string): Recallable =
+proc call*(call_564497: Call_ClustersListSkusByResource_564489;
+          clusterName: string; apiVersion: string; subscriptionId: string;
+          resourceGroupName: string): Recallable =
   ## clustersListSkusByResource
   ## Returns the SKUs available for the provided resource.
   ##   clusterName: string (required)
   ##              : The name of the Kusto cluster.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group containing the Kusto cluster.
   ##   apiVersion: string (required)
   ##             : Client API Version.
   ##   subscriptionId: string (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_574598 = newJObject()
-  var query_574599 = newJObject()
-  add(path_574598, "clusterName", newJString(clusterName))
-  add(path_574598, "resourceGroupName", newJString(resourceGroupName))
-  add(query_574599, "api-version", newJString(apiVersion))
-  add(path_574598, "subscriptionId", newJString(subscriptionId))
-  result = call_574597.call(path_574598, query_574599, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group containing the Kusto cluster.
+  var path_564498 = newJObject()
+  var query_564499 = newJObject()
+  add(path_564498, "clusterName", newJString(clusterName))
+  add(query_564499, "api-version", newJString(apiVersion))
+  add(path_564498, "subscriptionId", newJString(subscriptionId))
+  add(path_564498, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564497.call(path_564498, query_564499, nil, nil, nil)
 
-var clustersListSkusByResource* = Call_ClustersListSkusByResource_574589(
+var clustersListSkusByResource* = Call_ClustersListSkusByResource_564489(
     name: "clustersListSkusByResource", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Kusto/clusters/{clusterName}/skus",
-    validator: validate_ClustersListSkusByResource_574590, base: "",
-    url: url_ClustersListSkusByResource_574591, schemes: {Scheme.Https})
+    validator: validate_ClustersListSkusByResource_564490, base: "",
+    url: url_ClustersListSkusByResource_564491, schemes: {Scheme.Https})
 type
-  Call_ClustersStart_574600 = ref object of OpenApiRestCall_573667
-proc url_ClustersStart_574602(protocol: Scheme; host: string; base: string;
+  Call_ClustersStart_564500 = ref object of OpenApiRestCall_563565
+proc url_ClustersStart_564502(protocol: Scheme; host: string; base: string;
                              route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -4092,7 +4100,7 @@ proc url_ClustersStart_574602(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ClustersStart_574601(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_ClustersStart_564501(path: JsonNode; query: JsonNode; header: JsonNode;
                                   formData: JsonNode; body: JsonNode): JsonNode =
   ## Starts a Kusto cluster.
   ## 
@@ -4101,28 +4109,28 @@ proc validate_ClustersStart_574601(path: JsonNode; query: JsonNode; header: Json
   ## parameters in `path` object:
   ##   clusterName: JString (required)
   ##              : The name of the Kusto cluster.
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group containing the Kusto cluster.
   ##   subscriptionId: JString (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group containing the Kusto cluster.
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `clusterName` field"
-  var valid_574603 = path.getOrDefault("clusterName")
-  valid_574603 = validateParameter(valid_574603, JString, required = true,
+  var valid_564503 = path.getOrDefault("clusterName")
+  valid_564503 = validateParameter(valid_564503, JString, required = true,
                                  default = nil)
-  if valid_574603 != nil:
-    section.add "clusterName", valid_574603
-  var valid_574604 = path.getOrDefault("resourceGroupName")
-  valid_574604 = validateParameter(valid_574604, JString, required = true,
+  if valid_564503 != nil:
+    section.add "clusterName", valid_564503
+  var valid_564504 = path.getOrDefault("subscriptionId")
+  valid_564504 = validateParameter(valid_564504, JString, required = true,
                                  default = nil)
-  if valid_574604 != nil:
-    section.add "resourceGroupName", valid_574604
-  var valid_574605 = path.getOrDefault("subscriptionId")
-  valid_574605 = validateParameter(valid_574605, JString, required = true,
+  if valid_564504 != nil:
+    section.add "subscriptionId", valid_564504
+  var valid_564505 = path.getOrDefault("resourceGroupName")
+  valid_564505 = validateParameter(valid_564505, JString, required = true,
                                  default = nil)
-  if valid_574605 != nil:
-    section.add "subscriptionId", valid_574605
+  if valid_564505 != nil:
+    section.add "resourceGroupName", valid_564505
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -4130,11 +4138,11 @@ proc validate_ClustersStart_574601(path: JsonNode; query: JsonNode; header: Json
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574606 = query.getOrDefault("api-version")
-  valid_574606 = validateParameter(valid_574606, JString, required = true,
+  var valid_564506 = query.getOrDefault("api-version")
+  valid_564506 = validateParameter(valid_564506, JString, required = true,
                                  default = nil)
-  if valid_574606 != nil:
-    section.add "api-version", valid_574606
+  if valid_564506 != nil:
+    section.add "api-version", valid_564506
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -4143,46 +4151,46 @@ proc validate_ClustersStart_574601(path: JsonNode; query: JsonNode; header: Json
   if body != nil:
     result.add "body", body
 
-proc call*(call_574607: Call_ClustersStart_574600; path: JsonNode; query: JsonNode;
+proc call*(call_564507: Call_ClustersStart_564500; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Starts a Kusto cluster.
   ## 
-  let valid = call_574607.validator(path, query, header, formData, body)
-  let scheme = call_574607.pickScheme
+  let valid = call_564507.validator(path, query, header, formData, body)
+  let scheme = call_564507.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574607.url(scheme.get, call_574607.host, call_574607.base,
-                         call_574607.route, valid.getOrDefault("path"),
+  let url = call_564507.url(scheme.get, call_564507.host, call_564507.base,
+                         call_564507.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574607, url, valid)
+  result = hook(call_564507, url, valid)
 
-proc call*(call_574608: Call_ClustersStart_574600; clusterName: string;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string): Recallable =
+proc call*(call_564508: Call_ClustersStart_564500; clusterName: string;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string): Recallable =
   ## clustersStart
   ## Starts a Kusto cluster.
   ##   clusterName: string (required)
   ##              : The name of the Kusto cluster.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group containing the Kusto cluster.
   ##   apiVersion: string (required)
   ##             : Client API Version.
   ##   subscriptionId: string (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_574609 = newJObject()
-  var query_574610 = newJObject()
-  add(path_574609, "clusterName", newJString(clusterName))
-  add(path_574609, "resourceGroupName", newJString(resourceGroupName))
-  add(query_574610, "api-version", newJString(apiVersion))
-  add(path_574609, "subscriptionId", newJString(subscriptionId))
-  result = call_574608.call(path_574609, query_574610, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group containing the Kusto cluster.
+  var path_564509 = newJObject()
+  var query_564510 = newJObject()
+  add(path_564509, "clusterName", newJString(clusterName))
+  add(query_564510, "api-version", newJString(apiVersion))
+  add(path_564509, "subscriptionId", newJString(subscriptionId))
+  add(path_564509, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564508.call(path_564509, query_564510, nil, nil, nil)
 
-var clustersStart* = Call_ClustersStart_574600(name: "clustersStart",
+var clustersStart* = Call_ClustersStart_564500(name: "clustersStart",
     meth: HttpMethod.HttpPost, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Kusto/clusters/{clusterName}/start",
-    validator: validate_ClustersStart_574601, base: "", url: url_ClustersStart_574602,
+    validator: validate_ClustersStart_564501, base: "", url: url_ClustersStart_564502,
     schemes: {Scheme.Https})
 type
-  Call_ClustersStop_574611 = ref object of OpenApiRestCall_573667
-proc url_ClustersStop_574613(protocol: Scheme; host: string; base: string;
+  Call_ClustersStop_564511 = ref object of OpenApiRestCall_563565
+proc url_ClustersStop_564513(protocol: Scheme; host: string; base: string;
                             route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -4205,7 +4213,7 @@ proc url_ClustersStop_574613(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ClustersStop_574612(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_ClustersStop_564512(path: JsonNode; query: JsonNode; header: JsonNode;
                                  formData: JsonNode; body: JsonNode): JsonNode =
   ## Stops a Kusto cluster.
   ## 
@@ -4214,28 +4222,28 @@ proc validate_ClustersStop_574612(path: JsonNode; query: JsonNode; header: JsonN
   ## parameters in `path` object:
   ##   clusterName: JString (required)
   ##              : The name of the Kusto cluster.
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group containing the Kusto cluster.
   ##   subscriptionId: JString (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group containing the Kusto cluster.
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `clusterName` field"
-  var valid_574614 = path.getOrDefault("clusterName")
-  valid_574614 = validateParameter(valid_574614, JString, required = true,
+  var valid_564514 = path.getOrDefault("clusterName")
+  valid_564514 = validateParameter(valid_564514, JString, required = true,
                                  default = nil)
-  if valid_574614 != nil:
-    section.add "clusterName", valid_574614
-  var valid_574615 = path.getOrDefault("resourceGroupName")
-  valid_574615 = validateParameter(valid_574615, JString, required = true,
+  if valid_564514 != nil:
+    section.add "clusterName", valid_564514
+  var valid_564515 = path.getOrDefault("subscriptionId")
+  valid_564515 = validateParameter(valid_564515, JString, required = true,
                                  default = nil)
-  if valid_574615 != nil:
-    section.add "resourceGroupName", valid_574615
-  var valid_574616 = path.getOrDefault("subscriptionId")
-  valid_574616 = validateParameter(valid_574616, JString, required = true,
+  if valid_564515 != nil:
+    section.add "subscriptionId", valid_564515
+  var valid_564516 = path.getOrDefault("resourceGroupName")
+  valid_564516 = validateParameter(valid_564516, JString, required = true,
                                  default = nil)
-  if valid_574616 != nil:
-    section.add "subscriptionId", valid_574616
+  if valid_564516 != nil:
+    section.add "resourceGroupName", valid_564516
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -4243,11 +4251,11 @@ proc validate_ClustersStop_574612(path: JsonNode; query: JsonNode; header: JsonN
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574617 = query.getOrDefault("api-version")
-  valid_574617 = validateParameter(valid_574617, JString, required = true,
+  var valid_564517 = query.getOrDefault("api-version")
+  valid_564517 = validateParameter(valid_564517, JString, required = true,
                                  default = nil)
-  if valid_574617 != nil:
-    section.add "api-version", valid_574617
+  if valid_564517 != nil:
+    section.add "api-version", valid_564517
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -4256,42 +4264,42 @@ proc validate_ClustersStop_574612(path: JsonNode; query: JsonNode; header: JsonN
   if body != nil:
     result.add "body", body
 
-proc call*(call_574618: Call_ClustersStop_574611; path: JsonNode; query: JsonNode;
+proc call*(call_564518: Call_ClustersStop_564511; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Stops a Kusto cluster.
   ## 
-  let valid = call_574618.validator(path, query, header, formData, body)
-  let scheme = call_574618.pickScheme
+  let valid = call_564518.validator(path, query, header, formData, body)
+  let scheme = call_564518.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574618.url(scheme.get, call_574618.host, call_574618.base,
-                         call_574618.route, valid.getOrDefault("path"),
+  let url = call_564518.url(scheme.get, call_564518.host, call_564518.base,
+                         call_564518.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574618, url, valid)
+  result = hook(call_564518, url, valid)
 
-proc call*(call_574619: Call_ClustersStop_574611; clusterName: string;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string): Recallable =
+proc call*(call_564519: Call_ClustersStop_564511; clusterName: string;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string): Recallable =
   ## clustersStop
   ## Stops a Kusto cluster.
   ##   clusterName: string (required)
   ##              : The name of the Kusto cluster.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group containing the Kusto cluster.
   ##   apiVersion: string (required)
   ##             : Client API Version.
   ##   subscriptionId: string (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_574620 = newJObject()
-  var query_574621 = newJObject()
-  add(path_574620, "clusterName", newJString(clusterName))
-  add(path_574620, "resourceGroupName", newJString(resourceGroupName))
-  add(query_574621, "api-version", newJString(apiVersion))
-  add(path_574620, "subscriptionId", newJString(subscriptionId))
-  result = call_574619.call(path_574620, query_574621, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group containing the Kusto cluster.
+  var path_564520 = newJObject()
+  var query_564521 = newJObject()
+  add(path_564520, "clusterName", newJString(clusterName))
+  add(query_564521, "api-version", newJString(apiVersion))
+  add(path_564520, "subscriptionId", newJString(subscriptionId))
+  add(path_564520, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564519.call(path_564520, query_564521, nil, nil, nil)
 
-var clustersStop* = Call_ClustersStop_574611(name: "clustersStop",
+var clustersStop* = Call_ClustersStop_564511(name: "clustersStop",
     meth: HttpMethod.HttpPost, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Kusto/clusters/{clusterName}/stop",
-    validator: validate_ClustersStop_574612, base: "", url: url_ClustersStop_574613,
+    validator: validate_ClustersStop_564512, base: "", url: url_ClustersStop_564513,
     schemes: {Scheme.Https})
 export
   rest

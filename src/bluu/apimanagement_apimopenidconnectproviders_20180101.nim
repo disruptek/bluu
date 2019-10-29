@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, httpcore
 
 ## auto-generated via openapi macro
 ## title: ApiManagementClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_593424 = ref object of OpenApiRestCall
+  OpenApiRestCall_563555 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_593424](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563555](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_593424): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563555): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,8 +107,8 @@ const
   macServiceName = "apimanagement-apimopenidconnectproviders"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_OpenIdConnectProviderListByService_593646 = ref object of OpenApiRestCall_593424
-proc url_OpenIdConnectProviderListByService_593648(protocol: Scheme; host: string;
+  Call_OpenIdConnectProviderListByService_563777 = ref object of OpenApiRestCall_563555
+proc url_OpenIdConnectProviderListByService_563779(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -128,43 +132,43 @@ proc url_OpenIdConnectProviderListByService_593648(protocol: Scheme; host: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_OpenIdConnectProviderListByService_593647(path: JsonNode;
+proc validate_OpenIdConnectProviderListByService_563778(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists all OpenID Connect Providers.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
-  ##   subscriptionId: JString (required)
-  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   serviceName: JString (required)
   ##              : The name of the API Management service.
+  ##   subscriptionId: JString (required)
+  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593809 = path.getOrDefault("resourceGroupName")
-  valid_593809 = validateParameter(valid_593809, JString, required = true,
+        "path argument is necessary due to required `serviceName` field"
+  var valid_563942 = path.getOrDefault("serviceName")
+  valid_563942 = validateParameter(valid_563942, JString, required = true,
                                  default = nil)
-  if valid_593809 != nil:
-    section.add "resourceGroupName", valid_593809
-  var valid_593810 = path.getOrDefault("subscriptionId")
-  valid_593810 = validateParameter(valid_593810, JString, required = true,
+  if valid_563942 != nil:
+    section.add "serviceName", valid_563942
+  var valid_563943 = path.getOrDefault("subscriptionId")
+  valid_563943 = validateParameter(valid_563943, JString, required = true,
                                  default = nil)
-  if valid_593810 != nil:
-    section.add "subscriptionId", valid_593810
-  var valid_593811 = path.getOrDefault("serviceName")
-  valid_593811 = validateParameter(valid_593811, JString, required = true,
+  if valid_563943 != nil:
+    section.add "subscriptionId", valid_563943
+  var valid_563944 = path.getOrDefault("resourceGroupName")
+  valid_563944 = validateParameter(valid_563944, JString, required = true,
                                  default = nil)
-  if valid_593811 != nil:
-    section.add "serviceName", valid_593811
+  if valid_563944 != nil:
+    section.add "resourceGroupName", valid_563944
   result.add "path", section
   ## parameters in `query` object:
-  ##   api-version: JString (required)
-  ##              : Version of the API to be used with the client request.
   ##   $top: JInt
   ##       : Number of records to return.
+  ##   api-version: JString (required)
+  ##              : Version of the API to be used with the client request.
   ##   $skip: JInt
   ##        : Number of records to skip.
   ##   $filter: JString
@@ -174,26 +178,26 @@ proc validate_OpenIdConnectProviderListByService_593647(path: JsonNode;
   ## | id    | ge, le, eq, ne, gt, lt | substringof, contains, startswith, endswith |
   ## | name  | ge, le, eq, ne, gt, lt | substringof, contains, startswith, endswith |
   section = newJObject()
+  var valid_563945 = query.getOrDefault("$top")
+  valid_563945 = validateParameter(valid_563945, JInt, required = false, default = nil)
+  if valid_563945 != nil:
+    section.add "$top", valid_563945
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593812 = query.getOrDefault("api-version")
-  valid_593812 = validateParameter(valid_593812, JString, required = true,
+  var valid_563946 = query.getOrDefault("api-version")
+  valid_563946 = validateParameter(valid_563946, JString, required = true,
                                  default = nil)
-  if valid_593812 != nil:
-    section.add "api-version", valid_593812
-  var valid_593813 = query.getOrDefault("$top")
-  valid_593813 = validateParameter(valid_593813, JInt, required = false, default = nil)
-  if valid_593813 != nil:
-    section.add "$top", valid_593813
-  var valid_593814 = query.getOrDefault("$skip")
-  valid_593814 = validateParameter(valid_593814, JInt, required = false, default = nil)
-  if valid_593814 != nil:
-    section.add "$skip", valid_593814
-  var valid_593815 = query.getOrDefault("$filter")
-  valid_593815 = validateParameter(valid_593815, JString, required = false,
+  if valid_563946 != nil:
+    section.add "api-version", valid_563946
+  var valid_563947 = query.getOrDefault("$skip")
+  valid_563947 = validateParameter(valid_563947, JInt, required = false, default = nil)
+  if valid_563947 != nil:
+    section.add "$skip", valid_563947
+  var valid_563948 = query.getOrDefault("$filter")
+  valid_563948 = validateParameter(valid_563948, JString, required = false,
                                  default = nil)
-  if valid_593815 != nil:
-    section.add "$filter", valid_593815
+  if valid_563948 != nil:
+    section.add "$filter", valid_563948
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -202,62 +206,62 @@ proc validate_OpenIdConnectProviderListByService_593647(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593842: Call_OpenIdConnectProviderListByService_593646;
+proc call*(call_563975: Call_OpenIdConnectProviderListByService_563777;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Lists all OpenID Connect Providers.
   ## 
-  let valid = call_593842.validator(path, query, header, formData, body)
-  let scheme = call_593842.pickScheme
+  let valid = call_563975.validator(path, query, header, formData, body)
+  let scheme = call_563975.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593842.url(scheme.get, call_593842.host, call_593842.base,
-                         call_593842.route, valid.getOrDefault("path"),
+  let url = call_563975.url(scheme.get, call_563975.host, call_563975.base,
+                         call_563975.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593842, url, valid)
+  result = hook(call_563975, url, valid)
 
-proc call*(call_593913: Call_OpenIdConnectProviderListByService_593646;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          serviceName: string; Top: int = 0; Skip: int = 0; Filter: string = ""): Recallable =
+proc call*(call_564046: Call_OpenIdConnectProviderListByService_563777;
+          serviceName: string; apiVersion: string; subscriptionId: string;
+          resourceGroupName: string; Top: int = 0; Skip: int = 0; Filter: string = ""): Recallable =
   ## openIdConnectProviderListByService
   ## Lists all OpenID Connect Providers.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
+  ##   serviceName: string (required)
+  ##              : The name of the API Management service.
+  ##   Top: int
+  ##      : Number of records to return.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request.
   ##   subscriptionId: string (required)
   ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   Top: int
-  ##      : Number of records to return.
   ##   Skip: int
   ##       : Number of records to skip.
-  ##   serviceName: string (required)
-  ##              : The name of the API Management service.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   Filter: string
   ##         : | Field | Supported operators    | Supported functions                         |
   ## 
   ## |-------|------------------------|---------------------------------------------|
   ## | id    | ge, le, eq, ne, gt, lt | substringof, contains, startswith, endswith |
   ## | name  | ge, le, eq, ne, gt, lt | substringof, contains, startswith, endswith |
-  var path_593914 = newJObject()
-  var query_593916 = newJObject()
-  add(path_593914, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593916, "api-version", newJString(apiVersion))
-  add(path_593914, "subscriptionId", newJString(subscriptionId))
-  add(query_593916, "$top", newJInt(Top))
-  add(query_593916, "$skip", newJInt(Skip))
-  add(path_593914, "serviceName", newJString(serviceName))
-  add(query_593916, "$filter", newJString(Filter))
-  result = call_593913.call(path_593914, query_593916, nil, nil, nil)
+  var path_564047 = newJObject()
+  var query_564049 = newJObject()
+  add(path_564047, "serviceName", newJString(serviceName))
+  add(query_564049, "$top", newJInt(Top))
+  add(query_564049, "api-version", newJString(apiVersion))
+  add(path_564047, "subscriptionId", newJString(subscriptionId))
+  add(query_564049, "$skip", newJInt(Skip))
+  add(path_564047, "resourceGroupName", newJString(resourceGroupName))
+  add(query_564049, "$filter", newJString(Filter))
+  result = call_564046.call(path_564047, query_564049, nil, nil, nil)
 
-var openIdConnectProviderListByService* = Call_OpenIdConnectProviderListByService_593646(
+var openIdConnectProviderListByService* = Call_OpenIdConnectProviderListByService_563777(
     name: "openIdConnectProviderListByService", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ApiManagement/service/{serviceName}/openidConnectProviders",
-    validator: validate_OpenIdConnectProviderListByService_593647, base: "",
-    url: url_OpenIdConnectProviderListByService_593648, schemes: {Scheme.Https})
+    validator: validate_OpenIdConnectProviderListByService_563778, base: "",
+    url: url_OpenIdConnectProviderListByService_563779, schemes: {Scheme.Https})
 type
-  Call_OpenIdConnectProviderCreateOrUpdate_593976 = ref object of OpenApiRestCall_593424
-proc url_OpenIdConnectProviderCreateOrUpdate_593978(protocol: Scheme; host: string;
+  Call_OpenIdConnectProviderCreateOrUpdate_564109 = ref object of OpenApiRestCall_563555
+proc url_OpenIdConnectProviderCreateOrUpdate_564111(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -283,44 +287,44 @@ proc url_OpenIdConnectProviderCreateOrUpdate_593978(protocol: Scheme; host: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_OpenIdConnectProviderCreateOrUpdate_593977(path: JsonNode;
+proc validate_OpenIdConnectProviderCreateOrUpdate_564110(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Creates or updates the OpenID Connect Provider.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
-  ##   subscriptionId: JString (required)
-  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   opid: JString (required)
-  ##       : Identifier of the OpenID Connect Provider.
   ##   serviceName: JString (required)
   ##              : The name of the API Management service.
+  ##   opid: JString (required)
+  ##       : Identifier of the OpenID Connect Provider.
+  ##   subscriptionId: JString (required)
+  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593996 = path.getOrDefault("resourceGroupName")
-  valid_593996 = validateParameter(valid_593996, JString, required = true,
+        "path argument is necessary due to required `serviceName` field"
+  var valid_564129 = path.getOrDefault("serviceName")
+  valid_564129 = validateParameter(valid_564129, JString, required = true,
                                  default = nil)
-  if valid_593996 != nil:
-    section.add "resourceGroupName", valid_593996
-  var valid_593997 = path.getOrDefault("subscriptionId")
-  valid_593997 = validateParameter(valid_593997, JString, required = true,
+  if valid_564129 != nil:
+    section.add "serviceName", valid_564129
+  var valid_564130 = path.getOrDefault("opid")
+  valid_564130 = validateParameter(valid_564130, JString, required = true,
                                  default = nil)
-  if valid_593997 != nil:
-    section.add "subscriptionId", valid_593997
-  var valid_593998 = path.getOrDefault("opid")
-  valid_593998 = validateParameter(valid_593998, JString, required = true,
+  if valid_564130 != nil:
+    section.add "opid", valid_564130
+  var valid_564131 = path.getOrDefault("subscriptionId")
+  valid_564131 = validateParameter(valid_564131, JString, required = true,
                                  default = nil)
-  if valid_593998 != nil:
-    section.add "opid", valid_593998
-  var valid_593999 = path.getOrDefault("serviceName")
-  valid_593999 = validateParameter(valid_593999, JString, required = true,
+  if valid_564131 != nil:
+    section.add "subscriptionId", valid_564131
+  var valid_564132 = path.getOrDefault("resourceGroupName")
+  valid_564132 = validateParameter(valid_564132, JString, required = true,
                                  default = nil)
-  if valid_593999 != nil:
-    section.add "serviceName", valid_593999
+  if valid_564132 != nil:
+    section.add "resourceGroupName", valid_564132
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -328,21 +332,21 @@ proc validate_OpenIdConnectProviderCreateOrUpdate_593977(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594000 = query.getOrDefault("api-version")
-  valid_594000 = validateParameter(valid_594000, JString, required = true,
+  var valid_564133 = query.getOrDefault("api-version")
+  valid_564133 = validateParameter(valid_564133, JString, required = true,
                                  default = nil)
-  if valid_594000 != nil:
-    section.add "api-version", valid_594000
+  if valid_564133 != nil:
+    section.add "api-version", valid_564133
   result.add "query", section
   ## parameters in `header` object:
   ##   If-Match: JString
   ##           : ETag of the Entity. Not required when creating an entity, but required when updating an entity.
   section = newJObject()
-  var valid_594001 = header.getOrDefault("If-Match")
-  valid_594001 = validateParameter(valid_594001, JString, required = false,
+  var valid_564134 = header.getOrDefault("If-Match")
+  valid_564134 = validateParameter(valid_564134, JString, required = false,
                                  default = nil)
-  if valid_594001 != nil:
-    section.add "If-Match", valid_594001
+  if valid_564134 != nil:
+    section.add "If-Match", valid_564134
   result.add "header", section
   section = newJObject()
   result.add "formData", section
@@ -354,57 +358,57 @@ proc validate_OpenIdConnectProviderCreateOrUpdate_593977(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594003: Call_OpenIdConnectProviderCreateOrUpdate_593976;
+proc call*(call_564136: Call_OpenIdConnectProviderCreateOrUpdate_564109;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Creates or updates the OpenID Connect Provider.
   ## 
-  let valid = call_594003.validator(path, query, header, formData, body)
-  let scheme = call_594003.pickScheme
+  let valid = call_564136.validator(path, query, header, formData, body)
+  let scheme = call_564136.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594003.url(scheme.get, call_594003.host, call_594003.base,
-                         call_594003.route, valid.getOrDefault("path"),
+  let url = call_564136.url(scheme.get, call_564136.host, call_564136.base,
+                         call_564136.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594003, url, valid)
+  result = hook(call_564136, url, valid)
 
-proc call*(call_594004: Call_OpenIdConnectProviderCreateOrUpdate_593976;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          opid: string; parameters: JsonNode; serviceName: string): Recallable =
+proc call*(call_564137: Call_OpenIdConnectProviderCreateOrUpdate_564109;
+          serviceName: string; apiVersion: string; opid: string;
+          subscriptionId: string; resourceGroupName: string; parameters: JsonNode): Recallable =
   ## openIdConnectProviderCreateOrUpdate
   ## Creates or updates the OpenID Connect Provider.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
-  ##   apiVersion: string (required)
-  ##             : Version of the API to be used with the client request.
-  ##   subscriptionId: string (required)
-  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   opid: string (required)
-  ##       : Identifier of the OpenID Connect Provider.
-  ##   parameters: JObject (required)
-  ##             : Create parameters.
   ##   serviceName: string (required)
   ##              : The name of the API Management service.
-  var path_594005 = newJObject()
-  var query_594006 = newJObject()
-  var body_594007 = newJObject()
-  add(path_594005, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594006, "api-version", newJString(apiVersion))
-  add(path_594005, "subscriptionId", newJString(subscriptionId))
-  add(path_594005, "opid", newJString(opid))
+  ##   apiVersion: string (required)
+  ##             : Version of the API to be used with the client request.
+  ##   opid: string (required)
+  ##       : Identifier of the OpenID Connect Provider.
+  ##   subscriptionId: string (required)
+  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  ##   parameters: JObject (required)
+  ##             : Create parameters.
+  var path_564138 = newJObject()
+  var query_564139 = newJObject()
+  var body_564140 = newJObject()
+  add(path_564138, "serviceName", newJString(serviceName))
+  add(query_564139, "api-version", newJString(apiVersion))
+  add(path_564138, "opid", newJString(opid))
+  add(path_564138, "subscriptionId", newJString(subscriptionId))
+  add(path_564138, "resourceGroupName", newJString(resourceGroupName))
   if parameters != nil:
-    body_594007 = parameters
-  add(path_594005, "serviceName", newJString(serviceName))
-  result = call_594004.call(path_594005, query_594006, nil, nil, body_594007)
+    body_564140 = parameters
+  result = call_564137.call(path_564138, query_564139, nil, nil, body_564140)
 
-var openIdConnectProviderCreateOrUpdate* = Call_OpenIdConnectProviderCreateOrUpdate_593976(
+var openIdConnectProviderCreateOrUpdate* = Call_OpenIdConnectProviderCreateOrUpdate_564109(
     name: "openIdConnectProviderCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ApiManagement/service/{serviceName}/openidConnectProviders/{opid}",
-    validator: validate_OpenIdConnectProviderCreateOrUpdate_593977, base: "",
-    url: url_OpenIdConnectProviderCreateOrUpdate_593978, schemes: {Scheme.Https})
+    validator: validate_OpenIdConnectProviderCreateOrUpdate_564110, base: "",
+    url: url_OpenIdConnectProviderCreateOrUpdate_564111, schemes: {Scheme.Https})
 type
-  Call_OpenIdConnectProviderGetEntityTag_594021 = ref object of OpenApiRestCall_593424
-proc url_OpenIdConnectProviderGetEntityTag_594023(protocol: Scheme; host: string;
+  Call_OpenIdConnectProviderGetEntityTag_564154 = ref object of OpenApiRestCall_563555
+proc url_OpenIdConnectProviderGetEntityTag_564156(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -430,44 +434,44 @@ proc url_OpenIdConnectProviderGetEntityTag_594023(protocol: Scheme; host: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_OpenIdConnectProviderGetEntityTag_594022(path: JsonNode;
+proc validate_OpenIdConnectProviderGetEntityTag_564155(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the entity state (Etag) version of the openIdConnectProvider specified by its identifier.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
-  ##   subscriptionId: JString (required)
-  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   opid: JString (required)
-  ##       : Identifier of the OpenID Connect Provider.
   ##   serviceName: JString (required)
   ##              : The name of the API Management service.
+  ##   opid: JString (required)
+  ##       : Identifier of the OpenID Connect Provider.
+  ##   subscriptionId: JString (required)
+  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594024 = path.getOrDefault("resourceGroupName")
-  valid_594024 = validateParameter(valid_594024, JString, required = true,
+        "path argument is necessary due to required `serviceName` field"
+  var valid_564157 = path.getOrDefault("serviceName")
+  valid_564157 = validateParameter(valid_564157, JString, required = true,
                                  default = nil)
-  if valid_594024 != nil:
-    section.add "resourceGroupName", valid_594024
-  var valid_594025 = path.getOrDefault("subscriptionId")
-  valid_594025 = validateParameter(valid_594025, JString, required = true,
+  if valid_564157 != nil:
+    section.add "serviceName", valid_564157
+  var valid_564158 = path.getOrDefault("opid")
+  valid_564158 = validateParameter(valid_564158, JString, required = true,
                                  default = nil)
-  if valid_594025 != nil:
-    section.add "subscriptionId", valid_594025
-  var valid_594026 = path.getOrDefault("opid")
-  valid_594026 = validateParameter(valid_594026, JString, required = true,
+  if valid_564158 != nil:
+    section.add "opid", valid_564158
+  var valid_564159 = path.getOrDefault("subscriptionId")
+  valid_564159 = validateParameter(valid_564159, JString, required = true,
                                  default = nil)
-  if valid_594026 != nil:
-    section.add "opid", valid_594026
-  var valid_594027 = path.getOrDefault("serviceName")
-  valid_594027 = validateParameter(valid_594027, JString, required = true,
+  if valid_564159 != nil:
+    section.add "subscriptionId", valid_564159
+  var valid_564160 = path.getOrDefault("resourceGroupName")
+  valid_564160 = validateParameter(valid_564160, JString, required = true,
                                  default = nil)
-  if valid_594027 != nil:
-    section.add "serviceName", valid_594027
+  if valid_564160 != nil:
+    section.add "resourceGroupName", valid_564160
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -475,11 +479,11 @@ proc validate_OpenIdConnectProviderGetEntityTag_594022(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594028 = query.getOrDefault("api-version")
-  valid_594028 = validateParameter(valid_594028, JString, required = true,
+  var valid_564161 = query.getOrDefault("api-version")
+  valid_564161 = validateParameter(valid_564161, JString, required = true,
                                  default = nil)
-  if valid_594028 != nil:
-    section.add "api-version", valid_594028
+  if valid_564161 != nil:
+    section.add "api-version", valid_564161
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -488,52 +492,52 @@ proc validate_OpenIdConnectProviderGetEntityTag_594022(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_594029: Call_OpenIdConnectProviderGetEntityTag_594021;
+proc call*(call_564162: Call_OpenIdConnectProviderGetEntityTag_564154;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Gets the entity state (Etag) version of the openIdConnectProvider specified by its identifier.
   ## 
-  let valid = call_594029.validator(path, query, header, formData, body)
-  let scheme = call_594029.pickScheme
+  let valid = call_564162.validator(path, query, header, formData, body)
+  let scheme = call_564162.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594029.url(scheme.get, call_594029.host, call_594029.base,
-                         call_594029.route, valid.getOrDefault("path"),
+  let url = call_564162.url(scheme.get, call_564162.host, call_564162.base,
+                         call_564162.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594029, url, valid)
+  result = hook(call_564162, url, valid)
 
-proc call*(call_594030: Call_OpenIdConnectProviderGetEntityTag_594021;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          opid: string; serviceName: string): Recallable =
+proc call*(call_564163: Call_OpenIdConnectProviderGetEntityTag_564154;
+          serviceName: string; apiVersion: string; opid: string;
+          subscriptionId: string; resourceGroupName: string): Recallable =
   ## openIdConnectProviderGetEntityTag
   ## Gets the entity state (Etag) version of the openIdConnectProvider specified by its identifier.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
-  ##   apiVersion: string (required)
-  ##             : Version of the API to be used with the client request.
-  ##   subscriptionId: string (required)
-  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   opid: string (required)
-  ##       : Identifier of the OpenID Connect Provider.
   ##   serviceName: string (required)
   ##              : The name of the API Management service.
-  var path_594031 = newJObject()
-  var query_594032 = newJObject()
-  add(path_594031, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594032, "api-version", newJString(apiVersion))
-  add(path_594031, "subscriptionId", newJString(subscriptionId))
-  add(path_594031, "opid", newJString(opid))
-  add(path_594031, "serviceName", newJString(serviceName))
-  result = call_594030.call(path_594031, query_594032, nil, nil, nil)
+  ##   apiVersion: string (required)
+  ##             : Version of the API to be used with the client request.
+  ##   opid: string (required)
+  ##       : Identifier of the OpenID Connect Provider.
+  ##   subscriptionId: string (required)
+  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564164 = newJObject()
+  var query_564165 = newJObject()
+  add(path_564164, "serviceName", newJString(serviceName))
+  add(query_564165, "api-version", newJString(apiVersion))
+  add(path_564164, "opid", newJString(opid))
+  add(path_564164, "subscriptionId", newJString(subscriptionId))
+  add(path_564164, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564163.call(path_564164, query_564165, nil, nil, nil)
 
-var openIdConnectProviderGetEntityTag* = Call_OpenIdConnectProviderGetEntityTag_594021(
+var openIdConnectProviderGetEntityTag* = Call_OpenIdConnectProviderGetEntityTag_564154(
     name: "openIdConnectProviderGetEntityTag", meth: HttpMethod.HttpHead,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ApiManagement/service/{serviceName}/openidConnectProviders/{opid}",
-    validator: validate_OpenIdConnectProviderGetEntityTag_594022, base: "",
-    url: url_OpenIdConnectProviderGetEntityTag_594023, schemes: {Scheme.Https})
+    validator: validate_OpenIdConnectProviderGetEntityTag_564155, base: "",
+    url: url_OpenIdConnectProviderGetEntityTag_564156, schemes: {Scheme.Https})
 type
-  Call_OpenIdConnectProviderGet_593955 = ref object of OpenApiRestCall_593424
-proc url_OpenIdConnectProviderGet_593957(protocol: Scheme; host: string;
+  Call_OpenIdConnectProviderGet_564088 = ref object of OpenApiRestCall_563555
+proc url_OpenIdConnectProviderGet_564090(protocol: Scheme; host: string;
                                         base: string; route: string; path: JsonNode;
                                         query: JsonNode): Uri =
   result.scheme = $protocol
@@ -560,44 +564,44 @@ proc url_OpenIdConnectProviderGet_593957(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_OpenIdConnectProviderGet_593956(path: JsonNode; query: JsonNode;
+proc validate_OpenIdConnectProviderGet_564089(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets specific OpenID Connect Provider.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
-  ##   subscriptionId: JString (required)
-  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   opid: JString (required)
-  ##       : Identifier of the OpenID Connect Provider.
   ##   serviceName: JString (required)
   ##              : The name of the API Management service.
+  ##   opid: JString (required)
+  ##       : Identifier of the OpenID Connect Provider.
+  ##   subscriptionId: JString (required)
+  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_593967 = path.getOrDefault("resourceGroupName")
-  valid_593967 = validateParameter(valid_593967, JString, required = true,
+        "path argument is necessary due to required `serviceName` field"
+  var valid_564100 = path.getOrDefault("serviceName")
+  valid_564100 = validateParameter(valid_564100, JString, required = true,
                                  default = nil)
-  if valid_593967 != nil:
-    section.add "resourceGroupName", valid_593967
-  var valid_593968 = path.getOrDefault("subscriptionId")
-  valid_593968 = validateParameter(valid_593968, JString, required = true,
+  if valid_564100 != nil:
+    section.add "serviceName", valid_564100
+  var valid_564101 = path.getOrDefault("opid")
+  valid_564101 = validateParameter(valid_564101, JString, required = true,
                                  default = nil)
-  if valid_593968 != nil:
-    section.add "subscriptionId", valid_593968
-  var valid_593969 = path.getOrDefault("opid")
-  valid_593969 = validateParameter(valid_593969, JString, required = true,
+  if valid_564101 != nil:
+    section.add "opid", valid_564101
+  var valid_564102 = path.getOrDefault("subscriptionId")
+  valid_564102 = validateParameter(valid_564102, JString, required = true,
                                  default = nil)
-  if valid_593969 != nil:
-    section.add "opid", valid_593969
-  var valid_593970 = path.getOrDefault("serviceName")
-  valid_593970 = validateParameter(valid_593970, JString, required = true,
+  if valid_564102 != nil:
+    section.add "subscriptionId", valid_564102
+  var valid_564103 = path.getOrDefault("resourceGroupName")
+  valid_564103 = validateParameter(valid_564103, JString, required = true,
                                  default = nil)
-  if valid_593970 != nil:
-    section.add "serviceName", valid_593970
+  if valid_564103 != nil:
+    section.add "resourceGroupName", valid_564103
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -605,11 +609,11 @@ proc validate_OpenIdConnectProviderGet_593956(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_593971 = query.getOrDefault("api-version")
-  valid_593971 = validateParameter(valid_593971, JString, required = true,
+  var valid_564104 = query.getOrDefault("api-version")
+  valid_564104 = validateParameter(valid_564104, JString, required = true,
                                  default = nil)
-  if valid_593971 != nil:
-    section.add "api-version", valid_593971
+  if valid_564104 != nil:
+    section.add "api-version", valid_564104
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -618,51 +622,51 @@ proc validate_OpenIdConnectProviderGet_593956(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_593972: Call_OpenIdConnectProviderGet_593955; path: JsonNode;
+proc call*(call_564105: Call_OpenIdConnectProviderGet_564088; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets specific OpenID Connect Provider.
   ## 
-  let valid = call_593972.validator(path, query, header, formData, body)
-  let scheme = call_593972.pickScheme
+  let valid = call_564105.validator(path, query, header, formData, body)
+  let scheme = call_564105.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_593972.url(scheme.get, call_593972.host, call_593972.base,
-                         call_593972.route, valid.getOrDefault("path"),
+  let url = call_564105.url(scheme.get, call_564105.host, call_564105.base,
+                         call_564105.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_593972, url, valid)
+  result = hook(call_564105, url, valid)
 
-proc call*(call_593973: Call_OpenIdConnectProviderGet_593955;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          opid: string; serviceName: string): Recallable =
+proc call*(call_564106: Call_OpenIdConnectProviderGet_564088; serviceName: string;
+          apiVersion: string; opid: string; subscriptionId: string;
+          resourceGroupName: string): Recallable =
   ## openIdConnectProviderGet
   ## Gets specific OpenID Connect Provider.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
-  ##   apiVersion: string (required)
-  ##             : Version of the API to be used with the client request.
-  ##   subscriptionId: string (required)
-  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   opid: string (required)
-  ##       : Identifier of the OpenID Connect Provider.
   ##   serviceName: string (required)
   ##              : The name of the API Management service.
-  var path_593974 = newJObject()
-  var query_593975 = newJObject()
-  add(path_593974, "resourceGroupName", newJString(resourceGroupName))
-  add(query_593975, "api-version", newJString(apiVersion))
-  add(path_593974, "subscriptionId", newJString(subscriptionId))
-  add(path_593974, "opid", newJString(opid))
-  add(path_593974, "serviceName", newJString(serviceName))
-  result = call_593973.call(path_593974, query_593975, nil, nil, nil)
+  ##   apiVersion: string (required)
+  ##             : Version of the API to be used with the client request.
+  ##   opid: string (required)
+  ##       : Identifier of the OpenID Connect Provider.
+  ##   subscriptionId: string (required)
+  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564107 = newJObject()
+  var query_564108 = newJObject()
+  add(path_564107, "serviceName", newJString(serviceName))
+  add(query_564108, "api-version", newJString(apiVersion))
+  add(path_564107, "opid", newJString(opid))
+  add(path_564107, "subscriptionId", newJString(subscriptionId))
+  add(path_564107, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564106.call(path_564107, query_564108, nil, nil, nil)
 
-var openIdConnectProviderGet* = Call_OpenIdConnectProviderGet_593955(
+var openIdConnectProviderGet* = Call_OpenIdConnectProviderGet_564088(
     name: "openIdConnectProviderGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ApiManagement/service/{serviceName}/openidConnectProviders/{opid}",
-    validator: validate_OpenIdConnectProviderGet_593956, base: "",
-    url: url_OpenIdConnectProviderGet_593957, schemes: {Scheme.Https})
+    validator: validate_OpenIdConnectProviderGet_564089, base: "",
+    url: url_OpenIdConnectProviderGet_564090, schemes: {Scheme.Https})
 type
-  Call_OpenIdConnectProviderUpdate_594033 = ref object of OpenApiRestCall_593424
-proc url_OpenIdConnectProviderUpdate_594035(protocol: Scheme; host: string;
+  Call_OpenIdConnectProviderUpdate_564166 = ref object of OpenApiRestCall_563555
+proc url_OpenIdConnectProviderUpdate_564168(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -688,44 +692,44 @@ proc url_OpenIdConnectProviderUpdate_594035(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_OpenIdConnectProviderUpdate_594034(path: JsonNode; query: JsonNode;
+proc validate_OpenIdConnectProviderUpdate_564167(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Updates the specific OpenID Connect Provider.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
-  ##   subscriptionId: JString (required)
-  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   opid: JString (required)
-  ##       : Identifier of the OpenID Connect Provider.
   ##   serviceName: JString (required)
   ##              : The name of the API Management service.
+  ##   opid: JString (required)
+  ##       : Identifier of the OpenID Connect Provider.
+  ##   subscriptionId: JString (required)
+  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594036 = path.getOrDefault("resourceGroupName")
-  valid_594036 = validateParameter(valid_594036, JString, required = true,
+        "path argument is necessary due to required `serviceName` field"
+  var valid_564169 = path.getOrDefault("serviceName")
+  valid_564169 = validateParameter(valid_564169, JString, required = true,
                                  default = nil)
-  if valid_594036 != nil:
-    section.add "resourceGroupName", valid_594036
-  var valid_594037 = path.getOrDefault("subscriptionId")
-  valid_594037 = validateParameter(valid_594037, JString, required = true,
+  if valid_564169 != nil:
+    section.add "serviceName", valid_564169
+  var valid_564170 = path.getOrDefault("opid")
+  valid_564170 = validateParameter(valid_564170, JString, required = true,
                                  default = nil)
-  if valid_594037 != nil:
-    section.add "subscriptionId", valid_594037
-  var valid_594038 = path.getOrDefault("opid")
-  valid_594038 = validateParameter(valid_594038, JString, required = true,
+  if valid_564170 != nil:
+    section.add "opid", valid_564170
+  var valid_564171 = path.getOrDefault("subscriptionId")
+  valid_564171 = validateParameter(valid_564171, JString, required = true,
                                  default = nil)
-  if valid_594038 != nil:
-    section.add "opid", valid_594038
-  var valid_594039 = path.getOrDefault("serviceName")
-  valid_594039 = validateParameter(valid_594039, JString, required = true,
+  if valid_564171 != nil:
+    section.add "subscriptionId", valid_564171
+  var valid_564172 = path.getOrDefault("resourceGroupName")
+  valid_564172 = validateParameter(valid_564172, JString, required = true,
                                  default = nil)
-  if valid_594039 != nil:
-    section.add "serviceName", valid_594039
+  if valid_564172 != nil:
+    section.add "resourceGroupName", valid_564172
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -733,11 +737,11 @@ proc validate_OpenIdConnectProviderUpdate_594034(path: JsonNode; query: JsonNode
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594040 = query.getOrDefault("api-version")
-  valid_594040 = validateParameter(valid_594040, JString, required = true,
+  var valid_564173 = query.getOrDefault("api-version")
+  valid_564173 = validateParameter(valid_564173, JString, required = true,
                                  default = nil)
-  if valid_594040 != nil:
-    section.add "api-version", valid_594040
+  if valid_564173 != nil:
+    section.add "api-version", valid_564173
   result.add "query", section
   ## parameters in `header` object:
   ##   If-Match: JString (required)
@@ -745,11 +749,11 @@ proc validate_OpenIdConnectProviderUpdate_594034(path: JsonNode; query: JsonNode
   section = newJObject()
   assert header != nil,
         "header argument is necessary due to required `If-Match` field"
-  var valid_594041 = header.getOrDefault("If-Match")
-  valid_594041 = validateParameter(valid_594041, JString, required = true,
+  var valid_564174 = header.getOrDefault("If-Match")
+  valid_564174 = validateParameter(valid_564174, JString, required = true,
                                  default = nil)
-  if valid_594041 != nil:
-    section.add "If-Match", valid_594041
+  if valid_564174 != nil:
+    section.add "If-Match", valid_564174
   result.add "header", section
   section = newJObject()
   result.add "formData", section
@@ -761,56 +765,56 @@ proc validate_OpenIdConnectProviderUpdate_594034(path: JsonNode; query: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_594043: Call_OpenIdConnectProviderUpdate_594033; path: JsonNode;
+proc call*(call_564176: Call_OpenIdConnectProviderUpdate_564166; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Updates the specific OpenID Connect Provider.
   ## 
-  let valid = call_594043.validator(path, query, header, formData, body)
-  let scheme = call_594043.pickScheme
+  let valid = call_564176.validator(path, query, header, formData, body)
+  let scheme = call_564176.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594043.url(scheme.get, call_594043.host, call_594043.base,
-                         call_594043.route, valid.getOrDefault("path"),
+  let url = call_564176.url(scheme.get, call_564176.host, call_564176.base,
+                         call_564176.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594043, url, valid)
+  result = hook(call_564176, url, valid)
 
-proc call*(call_594044: Call_OpenIdConnectProviderUpdate_594033;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          opid: string; parameters: JsonNode; serviceName: string): Recallable =
+proc call*(call_564177: Call_OpenIdConnectProviderUpdate_564166;
+          serviceName: string; apiVersion: string; opid: string;
+          subscriptionId: string; resourceGroupName: string; parameters: JsonNode): Recallable =
   ## openIdConnectProviderUpdate
   ## Updates the specific OpenID Connect Provider.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
-  ##   apiVersion: string (required)
-  ##             : Version of the API to be used with the client request.
-  ##   subscriptionId: string (required)
-  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   opid: string (required)
-  ##       : Identifier of the OpenID Connect Provider.
-  ##   parameters: JObject (required)
-  ##             : Update parameters.
   ##   serviceName: string (required)
   ##              : The name of the API Management service.
-  var path_594045 = newJObject()
-  var query_594046 = newJObject()
-  var body_594047 = newJObject()
-  add(path_594045, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594046, "api-version", newJString(apiVersion))
-  add(path_594045, "subscriptionId", newJString(subscriptionId))
-  add(path_594045, "opid", newJString(opid))
+  ##   apiVersion: string (required)
+  ##             : Version of the API to be used with the client request.
+  ##   opid: string (required)
+  ##       : Identifier of the OpenID Connect Provider.
+  ##   subscriptionId: string (required)
+  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  ##   parameters: JObject (required)
+  ##             : Update parameters.
+  var path_564178 = newJObject()
+  var query_564179 = newJObject()
+  var body_564180 = newJObject()
+  add(path_564178, "serviceName", newJString(serviceName))
+  add(query_564179, "api-version", newJString(apiVersion))
+  add(path_564178, "opid", newJString(opid))
+  add(path_564178, "subscriptionId", newJString(subscriptionId))
+  add(path_564178, "resourceGroupName", newJString(resourceGroupName))
   if parameters != nil:
-    body_594047 = parameters
-  add(path_594045, "serviceName", newJString(serviceName))
-  result = call_594044.call(path_594045, query_594046, nil, nil, body_594047)
+    body_564180 = parameters
+  result = call_564177.call(path_564178, query_564179, nil, nil, body_564180)
 
-var openIdConnectProviderUpdate* = Call_OpenIdConnectProviderUpdate_594033(
+var openIdConnectProviderUpdate* = Call_OpenIdConnectProviderUpdate_564166(
     name: "openIdConnectProviderUpdate", meth: HttpMethod.HttpPatch,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ApiManagement/service/{serviceName}/openidConnectProviders/{opid}",
-    validator: validate_OpenIdConnectProviderUpdate_594034, base: "",
-    url: url_OpenIdConnectProviderUpdate_594035, schemes: {Scheme.Https})
+    validator: validate_OpenIdConnectProviderUpdate_564167, base: "",
+    url: url_OpenIdConnectProviderUpdate_564168, schemes: {Scheme.Https})
 type
-  Call_OpenIdConnectProviderDelete_594008 = ref object of OpenApiRestCall_593424
-proc url_OpenIdConnectProviderDelete_594010(protocol: Scheme; host: string;
+  Call_OpenIdConnectProviderDelete_564141 = ref object of OpenApiRestCall_563555
+proc url_OpenIdConnectProviderDelete_564143(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -836,44 +840,44 @@ proc url_OpenIdConnectProviderDelete_594010(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_OpenIdConnectProviderDelete_594009(path: JsonNode; query: JsonNode;
+proc validate_OpenIdConnectProviderDelete_564142(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Deletes specific OpenID Connect Provider of the API Management service instance.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
-  ##   subscriptionId: JString (required)
-  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   opid: JString (required)
-  ##       : Identifier of the OpenID Connect Provider.
   ##   serviceName: JString (required)
   ##              : The name of the API Management service.
+  ##   opid: JString (required)
+  ##       : Identifier of the OpenID Connect Provider.
+  ##   subscriptionId: JString (required)
+  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_594011 = path.getOrDefault("resourceGroupName")
-  valid_594011 = validateParameter(valid_594011, JString, required = true,
+        "path argument is necessary due to required `serviceName` field"
+  var valid_564144 = path.getOrDefault("serviceName")
+  valid_564144 = validateParameter(valid_564144, JString, required = true,
                                  default = nil)
-  if valid_594011 != nil:
-    section.add "resourceGroupName", valid_594011
-  var valid_594012 = path.getOrDefault("subscriptionId")
-  valid_594012 = validateParameter(valid_594012, JString, required = true,
+  if valid_564144 != nil:
+    section.add "serviceName", valid_564144
+  var valid_564145 = path.getOrDefault("opid")
+  valid_564145 = validateParameter(valid_564145, JString, required = true,
                                  default = nil)
-  if valid_594012 != nil:
-    section.add "subscriptionId", valid_594012
-  var valid_594013 = path.getOrDefault("opid")
-  valid_594013 = validateParameter(valid_594013, JString, required = true,
+  if valid_564145 != nil:
+    section.add "opid", valid_564145
+  var valid_564146 = path.getOrDefault("subscriptionId")
+  valid_564146 = validateParameter(valid_564146, JString, required = true,
                                  default = nil)
-  if valid_594013 != nil:
-    section.add "opid", valid_594013
-  var valid_594014 = path.getOrDefault("serviceName")
-  valid_594014 = validateParameter(valid_594014, JString, required = true,
+  if valid_564146 != nil:
+    section.add "subscriptionId", valid_564146
+  var valid_564147 = path.getOrDefault("resourceGroupName")
+  valid_564147 = validateParameter(valid_564147, JString, required = true,
                                  default = nil)
-  if valid_594014 != nil:
-    section.add "serviceName", valid_594014
+  if valid_564147 != nil:
+    section.add "resourceGroupName", valid_564147
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -881,11 +885,11 @@ proc validate_OpenIdConnectProviderDelete_594009(path: JsonNode; query: JsonNode
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_594015 = query.getOrDefault("api-version")
-  valid_594015 = validateParameter(valid_594015, JString, required = true,
+  var valid_564148 = query.getOrDefault("api-version")
+  valid_564148 = validateParameter(valid_564148, JString, required = true,
                                  default = nil)
-  if valid_594015 != nil:
-    section.add "api-version", valid_594015
+  if valid_564148 != nil:
+    section.add "api-version", valid_564148
   result.add "query", section
   ## parameters in `header` object:
   ##   If-Match: JString (required)
@@ -893,59 +897,59 @@ proc validate_OpenIdConnectProviderDelete_594009(path: JsonNode; query: JsonNode
   section = newJObject()
   assert header != nil,
         "header argument is necessary due to required `If-Match` field"
-  var valid_594016 = header.getOrDefault("If-Match")
-  valid_594016 = validateParameter(valid_594016, JString, required = true,
+  var valid_564149 = header.getOrDefault("If-Match")
+  valid_564149 = validateParameter(valid_564149, JString, required = true,
                                  default = nil)
-  if valid_594016 != nil:
-    section.add "If-Match", valid_594016
+  if valid_564149 != nil:
+    section.add "If-Match", valid_564149
   result.add "header", section
   section = newJObject()
   result.add "formData", section
   if body != nil:
     result.add "body", body
 
-proc call*(call_594017: Call_OpenIdConnectProviderDelete_594008; path: JsonNode;
+proc call*(call_564150: Call_OpenIdConnectProviderDelete_564141; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes specific OpenID Connect Provider of the API Management service instance.
   ## 
-  let valid = call_594017.validator(path, query, header, formData, body)
-  let scheme = call_594017.pickScheme
+  let valid = call_564150.validator(path, query, header, formData, body)
+  let scheme = call_564150.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_594017.url(scheme.get, call_594017.host, call_594017.base,
-                         call_594017.route, valid.getOrDefault("path"),
+  let url = call_564150.url(scheme.get, call_564150.host, call_564150.base,
+                         call_564150.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_594017, url, valid)
+  result = hook(call_564150, url, valid)
 
-proc call*(call_594018: Call_OpenIdConnectProviderDelete_594008;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          opid: string; serviceName: string): Recallable =
+proc call*(call_564151: Call_OpenIdConnectProviderDelete_564141;
+          serviceName: string; apiVersion: string; opid: string;
+          subscriptionId: string; resourceGroupName: string): Recallable =
   ## openIdConnectProviderDelete
   ## Deletes specific OpenID Connect Provider of the API Management service instance.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
-  ##   apiVersion: string (required)
-  ##             : Version of the API to be used with the client request.
-  ##   subscriptionId: string (required)
-  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   opid: string (required)
-  ##       : Identifier of the OpenID Connect Provider.
   ##   serviceName: string (required)
   ##              : The name of the API Management service.
-  var path_594019 = newJObject()
-  var query_594020 = newJObject()
-  add(path_594019, "resourceGroupName", newJString(resourceGroupName))
-  add(query_594020, "api-version", newJString(apiVersion))
-  add(path_594019, "subscriptionId", newJString(subscriptionId))
-  add(path_594019, "opid", newJString(opid))
-  add(path_594019, "serviceName", newJString(serviceName))
-  result = call_594018.call(path_594019, query_594020, nil, nil, nil)
+  ##   apiVersion: string (required)
+  ##             : Version of the API to be used with the client request.
+  ##   opid: string (required)
+  ##       : Identifier of the OpenID Connect Provider.
+  ##   subscriptionId: string (required)
+  ##                 : Subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564152 = newJObject()
+  var query_564153 = newJObject()
+  add(path_564152, "serviceName", newJString(serviceName))
+  add(query_564153, "api-version", newJString(apiVersion))
+  add(path_564152, "opid", newJString(opid))
+  add(path_564152, "subscriptionId", newJString(subscriptionId))
+  add(path_564152, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564151.call(path_564152, query_564153, nil, nil, nil)
 
-var openIdConnectProviderDelete* = Call_OpenIdConnectProviderDelete_594008(
+var openIdConnectProviderDelete* = Call_OpenIdConnectProviderDelete_564141(
     name: "openIdConnectProviderDelete", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ApiManagement/service/{serviceName}/openidConnectProviders/{opid}",
-    validator: validate_OpenIdConnectProviderDelete_594009, base: "",
-    url: url_OpenIdConnectProviderDelete_594010, schemes: {Scheme.Https})
+    validator: validate_OpenIdConnectProviderDelete_564142, base: "",
+    url: url_OpenIdConnectProviderDelete_564143, schemes: {Scheme.Https})
 export
   rest
 

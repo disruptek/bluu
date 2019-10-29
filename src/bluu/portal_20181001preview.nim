@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_573657 = ref object of OpenApiRestCall
+  OpenApiRestCall_563555 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_573657](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563555](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_573657): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563555): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,15 +107,15 @@ const
   macServiceName = "portal"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_OperationsList_573879 = ref object of OpenApiRestCall_573657
-proc url_OperationsList_573881(protocol: Scheme; host: string; base: string;
+  Call_OperationsList_563777 = ref object of OpenApiRestCall_563555
+proc url_OperationsList_563779(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_OperationsList_573880(path: JsonNode; query: JsonNode;
+proc validate_OperationsList_563778(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## The Microsoft Portal operations API.
@@ -126,11 +130,11 @@ proc validate_OperationsList_573880(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574040 = query.getOrDefault("api-version")
-  valid_574040 = validateParameter(valid_574040, JString, required = true,
+  var valid_563940 = query.getOrDefault("api-version")
+  valid_563940 = validateParameter(valid_563940, JString, required = true,
                                  default = nil)
-  if valid_574040 != nil:
-    section.add "api-version", valid_574040
+  if valid_563940 != nil:
+    section.add "api-version", valid_563940
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -139,36 +143,36 @@ proc validate_OperationsList_573880(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574063: Call_OperationsList_573879; path: JsonNode; query: JsonNode;
+proc call*(call_563963: Call_OperationsList_563777; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## The Microsoft Portal operations API.
   ## 
-  let valid = call_574063.validator(path, query, header, formData, body)
-  let scheme = call_574063.pickScheme
+  let valid = call_563963.validator(path, query, header, formData, body)
+  let scheme = call_563963.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574063.url(scheme.get, call_574063.host, call_574063.base,
-                         call_574063.route, valid.getOrDefault("path"),
+  let url = call_563963.url(scheme.get, call_563963.host, call_563963.base,
+                         call_563963.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574063, url, valid)
+  result = hook(call_563963, url, valid)
 
-proc call*(call_574134: Call_OperationsList_573879; apiVersion: string): Recallable =
+proc call*(call_564034: Call_OperationsList_563777; apiVersion: string): Recallable =
   ## operationsList
   ## The Microsoft Portal operations API.
   ##   apiVersion: string (required)
   ##             : The API version to be used with the HTTP request.
-  var query_574135 = newJObject()
-  add(query_574135, "api-version", newJString(apiVersion))
-  result = call_574134.call(nil, query_574135, nil, nil, nil)
+  var query_564035 = newJObject()
+  add(query_564035, "api-version", newJString(apiVersion))
+  result = call_564034.call(nil, query_564035, nil, nil, nil)
 
-var operationsList* = Call_OperationsList_573879(name: "operationsList",
+var operationsList* = Call_OperationsList_563777(name: "operationsList",
     meth: HttpMethod.HttpGet, host: "management.azure.com",
     route: "/providers/Microsoft.Portal/operations",
-    validator: validate_OperationsList_573880, base: "", url: url_OperationsList_573881,
+    validator: validate_OperationsList_563778, base: "", url: url_OperationsList_563779,
     schemes: {Scheme.Https})
 type
-  Call_DashboardsListBySubscription_574175 = ref object of OpenApiRestCall_573657
-proc url_DashboardsListBySubscription_574177(protocol: Scheme; host: string;
+  Call_DashboardsListBySubscription_564075 = ref object of OpenApiRestCall_563555
+proc url_DashboardsListBySubscription_564077(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -184,7 +188,7 @@ proc url_DashboardsListBySubscription_574177(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DashboardsListBySubscription_574176(path: JsonNode; query: JsonNode;
+proc validate_DashboardsListBySubscription_564076(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets all the dashboards within a subscription.
   ## 
@@ -196,11 +200,11 @@ proc validate_DashboardsListBySubscription_574176(path: JsonNode; query: JsonNod
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_574192 = path.getOrDefault("subscriptionId")
-  valid_574192 = validateParameter(valid_574192, JString, required = true,
+  var valid_564092 = path.getOrDefault("subscriptionId")
+  valid_564092 = validateParameter(valid_564092, JString, required = true,
                                  default = nil)
-  if valid_574192 != nil:
-    section.add "subscriptionId", valid_574192
+  if valid_564092 != nil:
+    section.add "subscriptionId", valid_564092
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -208,11 +212,11 @@ proc validate_DashboardsListBySubscription_574176(path: JsonNode; query: JsonNod
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574193 = query.getOrDefault("api-version")
-  valid_574193 = validateParameter(valid_574193, JString, required = true,
+  var valid_564093 = query.getOrDefault("api-version")
+  valid_564093 = validateParameter(valid_564093, JString, required = true,
                                  default = nil)
-  if valid_574193 != nil:
-    section.add "api-version", valid_574193
+  if valid_564093 != nil:
+    section.add "api-version", valid_564093
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -221,20 +225,20 @@ proc validate_DashboardsListBySubscription_574176(path: JsonNode; query: JsonNod
   if body != nil:
     result.add "body", body
 
-proc call*(call_574194: Call_DashboardsListBySubscription_574175; path: JsonNode;
+proc call*(call_564094: Call_DashboardsListBySubscription_564075; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets all the dashboards within a subscription.
   ## 
-  let valid = call_574194.validator(path, query, header, formData, body)
-  let scheme = call_574194.pickScheme
+  let valid = call_564094.validator(path, query, header, formData, body)
+  let scheme = call_564094.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574194.url(scheme.get, call_574194.host, call_574194.base,
-                         call_574194.route, valid.getOrDefault("path"),
+  let url = call_564094.url(scheme.get, call_564094.host, call_564094.base,
+                         call_564094.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574194, url, valid)
+  result = hook(call_564094, url, valid)
 
-proc call*(call_574195: Call_DashboardsListBySubscription_574175;
+proc call*(call_564095: Call_DashboardsListBySubscription_564075;
           apiVersion: string; subscriptionId: string): Recallable =
   ## dashboardsListBySubscription
   ## Gets all the dashboards within a subscription.
@@ -242,20 +246,20 @@ proc call*(call_574195: Call_DashboardsListBySubscription_574175;
   ##             : The API version to be used with the HTTP request.
   ##   subscriptionId: string (required)
   ##                 : The Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000)
-  var path_574196 = newJObject()
-  var query_574197 = newJObject()
-  add(query_574197, "api-version", newJString(apiVersion))
-  add(path_574196, "subscriptionId", newJString(subscriptionId))
-  result = call_574195.call(path_574196, query_574197, nil, nil, nil)
+  var path_564096 = newJObject()
+  var query_564097 = newJObject()
+  add(query_564097, "api-version", newJString(apiVersion))
+  add(path_564096, "subscriptionId", newJString(subscriptionId))
+  result = call_564095.call(path_564096, query_564097, nil, nil, nil)
 
-var dashboardsListBySubscription* = Call_DashboardsListBySubscription_574175(
+var dashboardsListBySubscription* = Call_DashboardsListBySubscription_564075(
     name: "dashboardsListBySubscription", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Portal/dashboards",
-    validator: validate_DashboardsListBySubscription_574176, base: "",
-    url: url_DashboardsListBySubscription_574177, schemes: {Scheme.Https})
+    validator: validate_DashboardsListBySubscription_564076, base: "",
+    url: url_DashboardsListBySubscription_564077, schemes: {Scheme.Https})
 type
-  Call_DashboardsListByResourceGroup_574198 = ref object of OpenApiRestCall_573657
-proc url_DashboardsListByResourceGroup_574200(protocol: Scheme; host: string;
+  Call_DashboardsListByResourceGroup_564098 = ref object of OpenApiRestCall_563555
+proc url_DashboardsListByResourceGroup_564100(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -275,30 +279,30 @@ proc url_DashboardsListByResourceGroup_574200(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DashboardsListByResourceGroup_574199(path: JsonNode; query: JsonNode;
+proc validate_DashboardsListByResourceGroup_564099(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets all the Dashboards within a resource group.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   subscriptionId: JString (required)
   ##                 : The Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000)
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_574201 = path.getOrDefault("resourceGroupName")
-  valid_574201 = validateParameter(valid_574201, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564101 = path.getOrDefault("subscriptionId")
+  valid_564101 = validateParameter(valid_564101, JString, required = true,
                                  default = nil)
-  if valid_574201 != nil:
-    section.add "resourceGroupName", valid_574201
-  var valid_574202 = path.getOrDefault("subscriptionId")
-  valid_574202 = validateParameter(valid_574202, JString, required = true,
+  if valid_564101 != nil:
+    section.add "subscriptionId", valid_564101
+  var valid_564102 = path.getOrDefault("resourceGroupName")
+  valid_564102 = validateParameter(valid_564102, JString, required = true,
                                  default = nil)
-  if valid_574202 != nil:
-    section.add "subscriptionId", valid_574202
+  if valid_564102 != nil:
+    section.add "resourceGroupName", valid_564102
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -306,11 +310,11 @@ proc validate_DashboardsListByResourceGroup_574199(path: JsonNode; query: JsonNo
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574203 = query.getOrDefault("api-version")
-  valid_574203 = validateParameter(valid_574203, JString, required = true,
+  var valid_564103 = query.getOrDefault("api-version")
+  valid_564103 = validateParameter(valid_564103, JString, required = true,
                                  default = nil)
-  if valid_574203 != nil:
-    section.add "api-version", valid_574203
+  if valid_564103 != nil:
+    section.add "api-version", valid_564103
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -319,44 +323,44 @@ proc validate_DashboardsListByResourceGroup_574199(path: JsonNode; query: JsonNo
   if body != nil:
     result.add "body", body
 
-proc call*(call_574204: Call_DashboardsListByResourceGroup_574198; path: JsonNode;
+proc call*(call_564104: Call_DashboardsListByResourceGroup_564098; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets all the Dashboards within a resource group.
   ## 
-  let valid = call_574204.validator(path, query, header, formData, body)
-  let scheme = call_574204.pickScheme
+  let valid = call_564104.validator(path, query, header, formData, body)
+  let scheme = call_564104.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574204.url(scheme.get, call_574204.host, call_574204.base,
-                         call_574204.route, valid.getOrDefault("path"),
+  let url = call_564104.url(scheme.get, call_564104.host, call_564104.base,
+                         call_564104.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574204, url, valid)
+  result = hook(call_564104, url, valid)
 
-proc call*(call_574205: Call_DashboardsListByResourceGroup_574198;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string): Recallable =
+proc call*(call_564105: Call_DashboardsListByResourceGroup_564098;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string): Recallable =
   ## dashboardsListByResourceGroup
   ## Gets all the Dashboards within a resource group.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : The API version to be used with the HTTP request.
   ##   subscriptionId: string (required)
   ##                 : The Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000)
-  var path_574206 = newJObject()
-  var query_574207 = newJObject()
-  add(path_574206, "resourceGroupName", newJString(resourceGroupName))
-  add(query_574207, "api-version", newJString(apiVersion))
-  add(path_574206, "subscriptionId", newJString(subscriptionId))
-  result = call_574205.call(path_574206, query_574207, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564106 = newJObject()
+  var query_564107 = newJObject()
+  add(query_564107, "api-version", newJString(apiVersion))
+  add(path_564106, "subscriptionId", newJString(subscriptionId))
+  add(path_564106, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564105.call(path_564106, query_564107, nil, nil, nil)
 
-var dashboardsListByResourceGroup* = Call_DashboardsListByResourceGroup_574198(
+var dashboardsListByResourceGroup* = Call_DashboardsListByResourceGroup_564098(
     name: "dashboardsListByResourceGroup", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Portal/dashboards",
-    validator: validate_DashboardsListByResourceGroup_574199, base: "",
-    url: url_DashboardsListByResourceGroup_574200, schemes: {Scheme.Https})
+    validator: validate_DashboardsListByResourceGroup_564099, base: "",
+    url: url_DashboardsListByResourceGroup_564100, schemes: {Scheme.Https})
 type
-  Call_DashboardsCreateOrUpdate_574219 = ref object of OpenApiRestCall_573657
-proc url_DashboardsCreateOrUpdate_574221(protocol: Scheme; host: string;
+  Call_DashboardsCreateOrUpdate_564119 = ref object of OpenApiRestCall_563555
+proc url_DashboardsCreateOrUpdate_564121(protocol: Scheme; host: string;
                                         base: string; route: string; path: JsonNode;
                                         query: JsonNode): Uri =
   result.scheme = $protocol
@@ -379,37 +383,37 @@ proc url_DashboardsCreateOrUpdate_574221(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DashboardsCreateOrUpdate_574220(path: JsonNode; query: JsonNode;
+proc validate_DashboardsCreateOrUpdate_564120(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Creates or updates a Dashboard.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   subscriptionId: JString (required)
   ##                 : The Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000)
   ##   dashboardName: JString (required)
   ##                : The name of the dashboard.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_574222 = path.getOrDefault("resourceGroupName")
-  valid_574222 = validateParameter(valid_574222, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564122 = path.getOrDefault("subscriptionId")
+  valid_564122 = validateParameter(valid_564122, JString, required = true,
                                  default = nil)
-  if valid_574222 != nil:
-    section.add "resourceGroupName", valid_574222
-  var valid_574223 = path.getOrDefault("subscriptionId")
-  valid_574223 = validateParameter(valid_574223, JString, required = true,
+  if valid_564122 != nil:
+    section.add "subscriptionId", valid_564122
+  var valid_564123 = path.getOrDefault("dashboardName")
+  valid_564123 = validateParameter(valid_564123, JString, required = true,
                                  default = nil)
-  if valid_574223 != nil:
-    section.add "subscriptionId", valid_574223
-  var valid_574224 = path.getOrDefault("dashboardName")
-  valid_574224 = validateParameter(valid_574224, JString, required = true,
+  if valid_564123 != nil:
+    section.add "dashboardName", valid_564123
+  var valid_564124 = path.getOrDefault("resourceGroupName")
+  valid_564124 = validateParameter(valid_564124, JString, required = true,
                                  default = nil)
-  if valid_574224 != nil:
-    section.add "dashboardName", valid_574224
+  if valid_564124 != nil:
+    section.add "resourceGroupName", valid_564124
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -417,11 +421,11 @@ proc validate_DashboardsCreateOrUpdate_574220(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574225 = query.getOrDefault("api-version")
-  valid_574225 = validateParameter(valid_574225, JString, required = true,
+  var valid_564125 = query.getOrDefault("api-version")
+  valid_564125 = validateParameter(valid_564125, JString, required = true,
                                  default = nil)
-  if valid_574225 != nil:
-    section.add "api-version", valid_574225
+  if valid_564125 != nil:
+    section.add "api-version", valid_564125
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -435,53 +439,53 @@ proc validate_DashboardsCreateOrUpdate_574220(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574227: Call_DashboardsCreateOrUpdate_574219; path: JsonNode;
+proc call*(call_564127: Call_DashboardsCreateOrUpdate_564119; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Creates or updates a Dashboard.
   ## 
-  let valid = call_574227.validator(path, query, header, formData, body)
-  let scheme = call_574227.pickScheme
+  let valid = call_564127.validator(path, query, header, formData, body)
+  let scheme = call_564127.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574227.url(scheme.get, call_574227.host, call_574227.base,
-                         call_574227.route, valid.getOrDefault("path"),
+  let url = call_564127.url(scheme.get, call_564127.host, call_564127.base,
+                         call_564127.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574227, url, valid)
+  result = hook(call_564127, url, valid)
 
-proc call*(call_574228: Call_DashboardsCreateOrUpdate_574219;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          dashboard: JsonNode; dashboardName: string): Recallable =
+proc call*(call_564128: Call_DashboardsCreateOrUpdate_564119; apiVersion: string;
+          subscriptionId: string; dashboardName: string; resourceGroupName: string;
+          dashboard: JsonNode): Recallable =
   ## dashboardsCreateOrUpdate
   ## Creates or updates a Dashboard.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : The API version to be used with the HTTP request.
   ##   subscriptionId: string (required)
   ##                 : The Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000)
-  ##   dashboard: JObject (required)
-  ##            : The parameters required to create or update a dashboard.
   ##   dashboardName: string (required)
   ##                : The name of the dashboard.
-  var path_574229 = newJObject()
-  var query_574230 = newJObject()
-  var body_574231 = newJObject()
-  add(path_574229, "resourceGroupName", newJString(resourceGroupName))
-  add(query_574230, "api-version", newJString(apiVersion))
-  add(path_574229, "subscriptionId", newJString(subscriptionId))
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  ##   dashboard: JObject (required)
+  ##            : The parameters required to create or update a dashboard.
+  var path_564129 = newJObject()
+  var query_564130 = newJObject()
+  var body_564131 = newJObject()
+  add(query_564130, "api-version", newJString(apiVersion))
+  add(path_564129, "subscriptionId", newJString(subscriptionId))
+  add(path_564129, "dashboardName", newJString(dashboardName))
+  add(path_564129, "resourceGroupName", newJString(resourceGroupName))
   if dashboard != nil:
-    body_574231 = dashboard
-  add(path_574229, "dashboardName", newJString(dashboardName))
-  result = call_574228.call(path_574229, query_574230, nil, nil, body_574231)
+    body_564131 = dashboard
+  result = call_564128.call(path_564129, query_564130, nil, nil, body_564131)
 
-var dashboardsCreateOrUpdate* = Call_DashboardsCreateOrUpdate_574219(
+var dashboardsCreateOrUpdate* = Call_DashboardsCreateOrUpdate_564119(
     name: "dashboardsCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Portal/dashboards/{dashboardName}",
-    validator: validate_DashboardsCreateOrUpdate_574220, base: "",
-    url: url_DashboardsCreateOrUpdate_574221, schemes: {Scheme.Https})
+    validator: validate_DashboardsCreateOrUpdate_564120, base: "",
+    url: url_DashboardsCreateOrUpdate_564121, schemes: {Scheme.Https})
 type
-  Call_DashboardsGet_574208 = ref object of OpenApiRestCall_573657
-proc url_DashboardsGet_574210(protocol: Scheme; host: string; base: string;
+  Call_DashboardsGet_564108 = ref object of OpenApiRestCall_563555
+proc url_DashboardsGet_564110(protocol: Scheme; host: string; base: string;
                              route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -503,37 +507,37 @@ proc url_DashboardsGet_574210(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DashboardsGet_574209(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_DashboardsGet_564109(path: JsonNode; query: JsonNode; header: JsonNode;
                                   formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the Dashboard.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   subscriptionId: JString (required)
   ##                 : The Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000)
   ##   dashboardName: JString (required)
   ##                : The name of the dashboard.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_574211 = path.getOrDefault("resourceGroupName")
-  valid_574211 = validateParameter(valid_574211, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564111 = path.getOrDefault("subscriptionId")
+  valid_564111 = validateParameter(valid_564111, JString, required = true,
                                  default = nil)
-  if valid_574211 != nil:
-    section.add "resourceGroupName", valid_574211
-  var valid_574212 = path.getOrDefault("subscriptionId")
-  valid_574212 = validateParameter(valid_574212, JString, required = true,
+  if valid_564111 != nil:
+    section.add "subscriptionId", valid_564111
+  var valid_564112 = path.getOrDefault("dashboardName")
+  valid_564112 = validateParameter(valid_564112, JString, required = true,
                                  default = nil)
-  if valid_574212 != nil:
-    section.add "subscriptionId", valid_574212
-  var valid_574213 = path.getOrDefault("dashboardName")
-  valid_574213 = validateParameter(valid_574213, JString, required = true,
+  if valid_564112 != nil:
+    section.add "dashboardName", valid_564112
+  var valid_564113 = path.getOrDefault("resourceGroupName")
+  valid_564113 = validateParameter(valid_564113, JString, required = true,
                                  default = nil)
-  if valid_574213 != nil:
-    section.add "dashboardName", valid_574213
+  if valid_564113 != nil:
+    section.add "resourceGroupName", valid_564113
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -541,11 +545,11 @@ proc validate_DashboardsGet_574209(path: JsonNode; query: JsonNode; header: Json
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574214 = query.getOrDefault("api-version")
-  valid_574214 = validateParameter(valid_574214, JString, required = true,
+  var valid_564114 = query.getOrDefault("api-version")
+  valid_564114 = validateParameter(valid_564114, JString, required = true,
                                  default = nil)
-  if valid_574214 != nil:
-    section.add "api-version", valid_574214
+  if valid_564114 != nil:
+    section.add "api-version", valid_564114
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -554,46 +558,46 @@ proc validate_DashboardsGet_574209(path: JsonNode; query: JsonNode; header: Json
   if body != nil:
     result.add "body", body
 
-proc call*(call_574215: Call_DashboardsGet_574208; path: JsonNode; query: JsonNode;
+proc call*(call_564115: Call_DashboardsGet_564108; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the Dashboard.
   ## 
-  let valid = call_574215.validator(path, query, header, formData, body)
-  let scheme = call_574215.pickScheme
+  let valid = call_564115.validator(path, query, header, formData, body)
+  let scheme = call_564115.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574215.url(scheme.get, call_574215.host, call_574215.base,
-                         call_574215.route, valid.getOrDefault("path"),
+  let url = call_564115.url(scheme.get, call_564115.host, call_564115.base,
+                         call_564115.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574215, url, valid)
+  result = hook(call_564115, url, valid)
 
-proc call*(call_574216: Call_DashboardsGet_574208; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; dashboardName: string): Recallable =
+proc call*(call_564116: Call_DashboardsGet_564108; apiVersion: string;
+          subscriptionId: string; dashboardName: string; resourceGroupName: string): Recallable =
   ## dashboardsGet
   ## Gets the Dashboard.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : The API version to be used with the HTTP request.
   ##   subscriptionId: string (required)
   ##                 : The Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000)
   ##   dashboardName: string (required)
   ##                : The name of the dashboard.
-  var path_574217 = newJObject()
-  var query_574218 = newJObject()
-  add(path_574217, "resourceGroupName", newJString(resourceGroupName))
-  add(query_574218, "api-version", newJString(apiVersion))
-  add(path_574217, "subscriptionId", newJString(subscriptionId))
-  add(path_574217, "dashboardName", newJString(dashboardName))
-  result = call_574216.call(path_574217, query_574218, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564117 = newJObject()
+  var query_564118 = newJObject()
+  add(query_564118, "api-version", newJString(apiVersion))
+  add(path_564117, "subscriptionId", newJString(subscriptionId))
+  add(path_564117, "dashboardName", newJString(dashboardName))
+  add(path_564117, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564116.call(path_564117, query_564118, nil, nil, nil)
 
-var dashboardsGet* = Call_DashboardsGet_574208(name: "dashboardsGet",
+var dashboardsGet* = Call_DashboardsGet_564108(name: "dashboardsGet",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Portal/dashboards/{dashboardName}",
-    validator: validate_DashboardsGet_574209, base: "", url: url_DashboardsGet_574210,
+    validator: validate_DashboardsGet_564109, base: "", url: url_DashboardsGet_564110,
     schemes: {Scheme.Https})
 type
-  Call_DashboardsUpdate_574243 = ref object of OpenApiRestCall_573657
-proc url_DashboardsUpdate_574245(protocol: Scheme; host: string; base: string;
+  Call_DashboardsUpdate_564143 = ref object of OpenApiRestCall_563555
+proc url_DashboardsUpdate_564145(protocol: Scheme; host: string; base: string;
                                 route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -615,7 +619,7 @@ proc url_DashboardsUpdate_574245(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DashboardsUpdate_574244(path: JsonNode; query: JsonNode;
+proc validate_DashboardsUpdate_564144(path: JsonNode; query: JsonNode;
                                      header: JsonNode; formData: JsonNode;
                                      body: JsonNode): JsonNode =
   ## Updates an existing Dashboard.
@@ -623,30 +627,30 @@ proc validate_DashboardsUpdate_574244(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   subscriptionId: JString (required)
   ##                 : The Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000)
   ##   dashboardName: JString (required)
   ##                : The name of the dashboard.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_574246 = path.getOrDefault("resourceGroupName")
-  valid_574246 = validateParameter(valid_574246, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564146 = path.getOrDefault("subscriptionId")
+  valid_564146 = validateParameter(valid_564146, JString, required = true,
                                  default = nil)
-  if valid_574246 != nil:
-    section.add "resourceGroupName", valid_574246
-  var valid_574247 = path.getOrDefault("subscriptionId")
-  valid_574247 = validateParameter(valid_574247, JString, required = true,
+  if valid_564146 != nil:
+    section.add "subscriptionId", valid_564146
+  var valid_564147 = path.getOrDefault("dashboardName")
+  valid_564147 = validateParameter(valid_564147, JString, required = true,
                                  default = nil)
-  if valid_574247 != nil:
-    section.add "subscriptionId", valid_574247
-  var valid_574248 = path.getOrDefault("dashboardName")
-  valid_574248 = validateParameter(valid_574248, JString, required = true,
+  if valid_564147 != nil:
+    section.add "dashboardName", valid_564147
+  var valid_564148 = path.getOrDefault("resourceGroupName")
+  valid_564148 = validateParameter(valid_564148, JString, required = true,
                                  default = nil)
-  if valid_574248 != nil:
-    section.add "dashboardName", valid_574248
+  if valid_564148 != nil:
+    section.add "resourceGroupName", valid_564148
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -654,11 +658,11 @@ proc validate_DashboardsUpdate_574244(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574249 = query.getOrDefault("api-version")
-  valid_574249 = validateParameter(valid_574249, JString, required = true,
+  var valid_564149 = query.getOrDefault("api-version")
+  valid_564149 = validateParameter(valid_564149, JString, required = true,
                                  default = nil)
-  if valid_574249 != nil:
-    section.add "api-version", valid_574249
+  if valid_564149 != nil:
+    section.add "api-version", valid_564149
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -672,52 +676,52 @@ proc validate_DashboardsUpdate_574244(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574251: Call_DashboardsUpdate_574243; path: JsonNode;
+proc call*(call_564151: Call_DashboardsUpdate_564143; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Updates an existing Dashboard.
   ## 
-  let valid = call_574251.validator(path, query, header, formData, body)
-  let scheme = call_574251.pickScheme
+  let valid = call_564151.validator(path, query, header, formData, body)
+  let scheme = call_564151.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574251.url(scheme.get, call_574251.host, call_574251.base,
-                         call_574251.route, valid.getOrDefault("path"),
+  let url = call_564151.url(scheme.get, call_564151.host, call_564151.base,
+                         call_564151.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574251, url, valid)
+  result = hook(call_564151, url, valid)
 
-proc call*(call_574252: Call_DashboardsUpdate_574243; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; dashboard: JsonNode;
-          dashboardName: string): Recallable =
+proc call*(call_564152: Call_DashboardsUpdate_564143; apiVersion: string;
+          subscriptionId: string; dashboardName: string; resourceGroupName: string;
+          dashboard: JsonNode): Recallable =
   ## dashboardsUpdate
   ## Updates an existing Dashboard.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : The API version to be used with the HTTP request.
   ##   subscriptionId: string (required)
   ##                 : The Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000)
-  ##   dashboard: JObject (required)
-  ##            : The updatable fields of a Dashboard.
   ##   dashboardName: string (required)
   ##                : The name of the dashboard.
-  var path_574253 = newJObject()
-  var query_574254 = newJObject()
-  var body_574255 = newJObject()
-  add(path_574253, "resourceGroupName", newJString(resourceGroupName))
-  add(query_574254, "api-version", newJString(apiVersion))
-  add(path_574253, "subscriptionId", newJString(subscriptionId))
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  ##   dashboard: JObject (required)
+  ##            : The updatable fields of a Dashboard.
+  var path_564153 = newJObject()
+  var query_564154 = newJObject()
+  var body_564155 = newJObject()
+  add(query_564154, "api-version", newJString(apiVersion))
+  add(path_564153, "subscriptionId", newJString(subscriptionId))
+  add(path_564153, "dashboardName", newJString(dashboardName))
+  add(path_564153, "resourceGroupName", newJString(resourceGroupName))
   if dashboard != nil:
-    body_574255 = dashboard
-  add(path_574253, "dashboardName", newJString(dashboardName))
-  result = call_574252.call(path_574253, query_574254, nil, nil, body_574255)
+    body_564155 = dashboard
+  result = call_564152.call(path_564153, query_564154, nil, nil, body_564155)
 
-var dashboardsUpdate* = Call_DashboardsUpdate_574243(name: "dashboardsUpdate",
+var dashboardsUpdate* = Call_DashboardsUpdate_564143(name: "dashboardsUpdate",
     meth: HttpMethod.HttpPatch, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Portal/dashboards/{dashboardName}",
-    validator: validate_DashboardsUpdate_574244, base: "",
-    url: url_DashboardsUpdate_574245, schemes: {Scheme.Https})
+    validator: validate_DashboardsUpdate_564144, base: "",
+    url: url_DashboardsUpdate_564145, schemes: {Scheme.Https})
 type
-  Call_DashboardsDelete_574232 = ref object of OpenApiRestCall_573657
-proc url_DashboardsDelete_574234(protocol: Scheme; host: string; base: string;
+  Call_DashboardsDelete_564132 = ref object of OpenApiRestCall_563555
+proc url_DashboardsDelete_564134(protocol: Scheme; host: string; base: string;
                                 route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -739,7 +743,7 @@ proc url_DashboardsDelete_574234(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DashboardsDelete_574233(path: JsonNode; query: JsonNode;
+proc validate_DashboardsDelete_564133(path: JsonNode; query: JsonNode;
                                      header: JsonNode; formData: JsonNode;
                                      body: JsonNode): JsonNode =
   ## Deletes the Dashboard.
@@ -747,30 +751,30 @@ proc validate_DashboardsDelete_574233(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   subscriptionId: JString (required)
   ##                 : The Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000)
   ##   dashboardName: JString (required)
   ##                : The name of the dashboard.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_574235 = path.getOrDefault("resourceGroupName")
-  valid_574235 = validateParameter(valid_574235, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564135 = path.getOrDefault("subscriptionId")
+  valid_564135 = validateParameter(valid_564135, JString, required = true,
                                  default = nil)
-  if valid_574235 != nil:
-    section.add "resourceGroupName", valid_574235
-  var valid_574236 = path.getOrDefault("subscriptionId")
-  valid_574236 = validateParameter(valid_574236, JString, required = true,
+  if valid_564135 != nil:
+    section.add "subscriptionId", valid_564135
+  var valid_564136 = path.getOrDefault("dashboardName")
+  valid_564136 = validateParameter(valid_564136, JString, required = true,
                                  default = nil)
-  if valid_574236 != nil:
-    section.add "subscriptionId", valid_574236
-  var valid_574237 = path.getOrDefault("dashboardName")
-  valid_574237 = validateParameter(valid_574237, JString, required = true,
+  if valid_564136 != nil:
+    section.add "dashboardName", valid_564136
+  var valid_564137 = path.getOrDefault("resourceGroupName")
+  valid_564137 = validateParameter(valid_564137, JString, required = true,
                                  default = nil)
-  if valid_574237 != nil:
-    section.add "dashboardName", valid_574237
+  if valid_564137 != nil:
+    section.add "resourceGroupName", valid_564137
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -778,11 +782,11 @@ proc validate_DashboardsDelete_574233(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574238 = query.getOrDefault("api-version")
-  valid_574238 = validateParameter(valid_574238, JString, required = true,
+  var valid_564138 = query.getOrDefault("api-version")
+  valid_564138 = validateParameter(valid_564138, JString, required = true,
                                  default = nil)
-  if valid_574238 != nil:
-    section.add "api-version", valid_574238
+  if valid_564138 != nil:
+    section.add "api-version", valid_564138
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -791,43 +795,43 @@ proc validate_DashboardsDelete_574233(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574239: Call_DashboardsDelete_574232; path: JsonNode;
+proc call*(call_564139: Call_DashboardsDelete_564132; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes the Dashboard.
   ## 
-  let valid = call_574239.validator(path, query, header, formData, body)
-  let scheme = call_574239.pickScheme
+  let valid = call_564139.validator(path, query, header, formData, body)
+  let scheme = call_564139.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574239.url(scheme.get, call_574239.host, call_574239.base,
-                         call_574239.route, valid.getOrDefault("path"),
+  let url = call_564139.url(scheme.get, call_564139.host, call_564139.base,
+                         call_564139.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574239, url, valid)
+  result = hook(call_564139, url, valid)
 
-proc call*(call_574240: Call_DashboardsDelete_574232; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; dashboardName: string): Recallable =
+proc call*(call_564140: Call_DashboardsDelete_564132; apiVersion: string;
+          subscriptionId: string; dashboardName: string; resourceGroupName: string): Recallable =
   ## dashboardsDelete
   ## Deletes the Dashboard.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : The API version to be used with the HTTP request.
   ##   subscriptionId: string (required)
   ##                 : The Azure subscription ID. This is a GUID-formatted string (e.g. 00000000-0000-0000-0000-000000000000)
   ##   dashboardName: string (required)
   ##                : The name of the dashboard.
-  var path_574241 = newJObject()
-  var query_574242 = newJObject()
-  add(path_574241, "resourceGroupName", newJString(resourceGroupName))
-  add(query_574242, "api-version", newJString(apiVersion))
-  add(path_574241, "subscriptionId", newJString(subscriptionId))
-  add(path_574241, "dashboardName", newJString(dashboardName))
-  result = call_574240.call(path_574241, query_574242, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564141 = newJObject()
+  var query_564142 = newJObject()
+  add(query_564142, "api-version", newJString(apiVersion))
+  add(path_564141, "subscriptionId", newJString(subscriptionId))
+  add(path_564141, "dashboardName", newJString(dashboardName))
+  add(path_564141, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564140.call(path_564141, query_564142, nil, nil, nil)
 
-var dashboardsDelete* = Call_DashboardsDelete_574232(name: "dashboardsDelete",
+var dashboardsDelete* = Call_DashboardsDelete_564132(name: "dashboardsDelete",
     meth: HttpMethod.HttpDelete, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Portal/dashboards/{dashboardName}",
-    validator: validate_DashboardsDelete_574233, base: "",
-    url: url_DashboardsDelete_574234, schemes: {Scheme.Https})
+    validator: validate_DashboardsDelete_564133, base: "",
+    url: url_DashboardsDelete_564134, schemes: {Scheme.Https})
 export
   rest
 

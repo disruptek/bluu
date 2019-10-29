@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, httpcore
 
 ## auto-generated via openapi macro
 ## title: Security Insights
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_567667 = ref object of OpenApiRestCall
+  OpenApiRestCall_563565 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_567667](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563565](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_567667): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563565): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,15 +107,15 @@ const
   macServiceName = "securityinsights-SecurityInsights"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_OperationsList_567889 = ref object of OpenApiRestCall_567667
-proc url_OperationsList_567891(protocol: Scheme; host: string; base: string;
+  Call_OperationsList_563787 = ref object of OpenApiRestCall_563565
+proc url_OperationsList_563789(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_OperationsList_567890(path: JsonNode; query: JsonNode;
+proc validate_OperationsList_563788(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## Lists all operations available Azure Security Insights Resource Provider.
@@ -126,11 +130,11 @@ proc validate_OperationsList_567890(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568063 = query.getOrDefault("api-version")
-  valid_568063 = validateParameter(valid_568063, JString, required = true,
+  var valid_563963 = query.getOrDefault("api-version")
+  valid_563963 = validateParameter(valid_563963, JString, required = true,
                                  default = newJString("2019-01-01-preview"))
-  if valid_568063 != nil:
-    section.add "api-version", valid_568063
+  if valid_563963 != nil:
+    section.add "api-version", valid_563963
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -139,37 +143,37 @@ proc validate_OperationsList_567890(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568086: Call_OperationsList_567889; path: JsonNode; query: JsonNode;
+proc call*(call_563986: Call_OperationsList_563787; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists all operations available Azure Security Insights Resource Provider.
   ## 
-  let valid = call_568086.validator(path, query, header, formData, body)
-  let scheme = call_568086.pickScheme
+  let valid = call_563986.validator(path, query, header, formData, body)
+  let scheme = call_563986.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568086.url(scheme.get, call_568086.host, call_568086.base,
-                         call_568086.route, valid.getOrDefault("path"),
+  let url = call_563986.url(scheme.get, call_563986.host, call_563986.base,
+                         call_563986.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568086, url, valid)
+  result = hook(call_563986, url, valid)
 
-proc call*(call_568157: Call_OperationsList_567889;
+proc call*(call_564057: Call_OperationsList_563787;
           apiVersion: string = "2019-01-01-preview"): Recallable =
   ## operationsList
   ## Lists all operations available Azure Security Insights Resource Provider.
   ##   apiVersion: string (required)
   ##             : API version for the operation
-  var query_568158 = newJObject()
-  add(query_568158, "api-version", newJString(apiVersion))
-  result = call_568157.call(nil, query_568158, nil, nil, nil)
+  var query_564058 = newJObject()
+  add(query_564058, "api-version", newJString(apiVersion))
+  result = call_564057.call(nil, query_564058, nil, nil, nil)
 
-var operationsList* = Call_OperationsList_567889(name: "operationsList",
+var operationsList* = Call_OperationsList_563787(name: "operationsList",
     meth: HttpMethod.HttpGet, host: "management.azure.com",
     route: "/providers/Microsoft.SecurityInsights/operations",
-    validator: validate_OperationsList_567890, base: "", url: url_OperationsList_567891,
+    validator: validate_OperationsList_563788, base: "", url: url_OperationsList_563789,
     schemes: {Scheme.Https})
 type
-  Call_CasesAggregationsGet_568198 = ref object of OpenApiRestCall_567667
-proc url_CasesAggregationsGet_568200(protocol: Scheme; host: string; base: string;
+  Call_CasesAggregationsGet_564098 = ref object of OpenApiRestCall_563565
+proc url_CasesAggregationsGet_564100(protocol: Scheme; host: string; base: string;
                                     route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -200,51 +204,51 @@ proc url_CasesAggregationsGet_568200(protocol: Scheme; host: string; base: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_CasesAggregationsGet_568199(path: JsonNode; query: JsonNode;
+proc validate_CasesAggregationsGet_564099(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Get aggregative result for the given resources under the defined workspace
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
   ##   subscriptionId: JString (required)
   ##                 : Azure subscription ID
   ##   aggregationsName: JString (required)
   ##                   : The aggregation name. Supports - Cases
-  ##   workspaceName: JString (required)
-  ##                : The name of the workspace.
   ##   operationalInsightsResourceProvider: JString (required)
   ##                                      : The namespace of workspaces resource provider- Microsoft.OperationalInsights.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
+  ##   workspaceName: JString (required)
+  ##                : The name of the workspace.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568215 = path.getOrDefault("resourceGroupName")
-  valid_568215 = validateParameter(valid_568215, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564115 = path.getOrDefault("subscriptionId")
+  valid_564115 = validateParameter(valid_564115, JString, required = true,
                                  default = nil)
-  if valid_568215 != nil:
-    section.add "resourceGroupName", valid_568215
-  var valid_568216 = path.getOrDefault("subscriptionId")
-  valid_568216 = validateParameter(valid_568216, JString, required = true,
+  if valid_564115 != nil:
+    section.add "subscriptionId", valid_564115
+  var valid_564116 = path.getOrDefault("aggregationsName")
+  valid_564116 = validateParameter(valid_564116, JString, required = true,
                                  default = nil)
-  if valid_568216 != nil:
-    section.add "subscriptionId", valid_568216
-  var valid_568217 = path.getOrDefault("aggregationsName")
-  valid_568217 = validateParameter(valid_568217, JString, required = true,
+  if valid_564116 != nil:
+    section.add "aggregationsName", valid_564116
+  var valid_564117 = path.getOrDefault("operationalInsightsResourceProvider")
+  valid_564117 = validateParameter(valid_564117, JString, required = true,
                                  default = nil)
-  if valid_568217 != nil:
-    section.add "aggregationsName", valid_568217
-  var valid_568218 = path.getOrDefault("workspaceName")
-  valid_568218 = validateParameter(valid_568218, JString, required = true,
+  if valid_564117 != nil:
+    section.add "operationalInsightsResourceProvider", valid_564117
+  var valid_564118 = path.getOrDefault("resourceGroupName")
+  valid_564118 = validateParameter(valid_564118, JString, required = true,
                                  default = nil)
-  if valid_568218 != nil:
-    section.add "workspaceName", valid_568218
-  var valid_568219 = path.getOrDefault("operationalInsightsResourceProvider")
-  valid_568219 = validateParameter(valid_568219, JString, required = true,
+  if valid_564118 != nil:
+    section.add "resourceGroupName", valid_564118
+  var valid_564119 = path.getOrDefault("workspaceName")
+  valid_564119 = validateParameter(valid_564119, JString, required = true,
                                  default = nil)
-  if valid_568219 != nil:
-    section.add "operationalInsightsResourceProvider", valid_568219
+  if valid_564119 != nil:
+    section.add "workspaceName", valid_564119
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -252,11 +256,11 @@ proc validate_CasesAggregationsGet_568199(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568220 = query.getOrDefault("api-version")
-  valid_568220 = validateParameter(valid_568220, JString, required = true,
+  var valid_564120 = query.getOrDefault("api-version")
+  valid_564120 = validateParameter(valid_564120, JString, required = true,
                                  default = newJString("2019-01-01-preview"))
-  if valid_568220 != nil:
-    section.add "api-version", valid_568220
+  if valid_564120 != nil:
+    section.add "api-version", valid_564120
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -265,57 +269,56 @@ proc validate_CasesAggregationsGet_568199(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568221: Call_CasesAggregationsGet_568198; path: JsonNode;
+proc call*(call_564121: Call_CasesAggregationsGet_564098; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Get aggregative result for the given resources under the defined workspace
   ## 
-  let valid = call_568221.validator(path, query, header, formData, body)
-  let scheme = call_568221.pickScheme
+  let valid = call_564121.validator(path, query, header, formData, body)
+  let scheme = call_564121.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568221.url(scheme.get, call_568221.host, call_568221.base,
-                         call_568221.route, valid.getOrDefault("path"),
+  let url = call_564121.url(scheme.get, call_564121.host, call_564121.base,
+                         call_564121.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568221, url, valid)
+  result = hook(call_564121, url, valid)
 
-proc call*(call_568222: Call_CasesAggregationsGet_568198;
-          resourceGroupName: string; subscriptionId: string;
-          aggregationsName: string; workspaceName: string;
-          operationalInsightsResourceProvider: string;
+proc call*(call_564122: Call_CasesAggregationsGet_564098; subscriptionId: string;
+          aggregationsName: string; operationalInsightsResourceProvider: string;
+          resourceGroupName: string; workspaceName: string;
           apiVersion: string = "2019-01-01-preview"): Recallable =
   ## casesAggregationsGet
   ## Get aggregative result for the given resources under the defined workspace
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
   ##   apiVersion: string (required)
   ##             : API version for the operation
   ##   subscriptionId: string (required)
   ##                 : Azure subscription ID
   ##   aggregationsName: string (required)
   ##                   : The aggregation name. Supports - Cases
-  ##   workspaceName: string (required)
-  ##                : The name of the workspace.
   ##   operationalInsightsResourceProvider: string (required)
   ##                                      : The namespace of workspaces resource provider- Microsoft.OperationalInsights.
-  var path_568223 = newJObject()
-  var query_568224 = newJObject()
-  add(path_568223, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568224, "api-version", newJString(apiVersion))
-  add(path_568223, "subscriptionId", newJString(subscriptionId))
-  add(path_568223, "aggregationsName", newJString(aggregationsName))
-  add(path_568223, "workspaceName", newJString(workspaceName))
-  add(path_568223, "operationalInsightsResourceProvider",
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
+  ##   workspaceName: string (required)
+  ##                : The name of the workspace.
+  var path_564123 = newJObject()
+  var query_564124 = newJObject()
+  add(query_564124, "api-version", newJString(apiVersion))
+  add(path_564123, "subscriptionId", newJString(subscriptionId))
+  add(path_564123, "aggregationsName", newJString(aggregationsName))
+  add(path_564123, "operationalInsightsResourceProvider",
       newJString(operationalInsightsResourceProvider))
-  result = call_568222.call(path_568223, query_568224, nil, nil, nil)
+  add(path_564123, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564123, "workspaceName", newJString(workspaceName))
+  result = call_564122.call(path_564123, query_564124, nil, nil, nil)
 
-var casesAggregationsGet* = Call_CasesAggregationsGet_568198(
+var casesAggregationsGet* = Call_CasesAggregationsGet_564098(
     name: "casesAggregationsGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/{operationalInsightsResourceProvider}/workspaces/{workspaceName}/providers/Microsoft.SecurityInsights/aggregations/{aggregationsName}",
-    validator: validate_CasesAggregationsGet_568199, base: "",
-    url: url_CasesAggregationsGet_568200, schemes: {Scheme.Https})
+    validator: validate_CasesAggregationsGet_564099, base: "",
+    url: url_CasesAggregationsGet_564100, schemes: {Scheme.Https})
 type
-  Call_AlertRuleTemplatesList_568225 = ref object of OpenApiRestCall_567667
-proc url_AlertRuleTemplatesList_568227(protocol: Scheme; host: string; base: string;
+  Call_AlertRuleTemplatesList_564125 = ref object of OpenApiRestCall_563565
+proc url_AlertRuleTemplatesList_564127(protocol: Scheme; host: string; base: string;
                                       route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -343,44 +346,44 @@ proc url_AlertRuleTemplatesList_568227(protocol: Scheme; host: string; base: str
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AlertRuleTemplatesList_568226(path: JsonNode; query: JsonNode;
+proc validate_AlertRuleTemplatesList_564126(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets all alert rule templates.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
   ##   subscriptionId: JString (required)
   ##                 : Azure subscription ID
-  ##   workspaceName: JString (required)
-  ##                : The name of the workspace.
   ##   operationalInsightsResourceProvider: JString (required)
   ##                                      : The namespace of workspaces resource provider- Microsoft.OperationalInsights.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
+  ##   workspaceName: JString (required)
+  ##                : The name of the workspace.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568228 = path.getOrDefault("resourceGroupName")
-  valid_568228 = validateParameter(valid_568228, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564128 = path.getOrDefault("subscriptionId")
+  valid_564128 = validateParameter(valid_564128, JString, required = true,
                                  default = nil)
-  if valid_568228 != nil:
-    section.add "resourceGroupName", valid_568228
-  var valid_568229 = path.getOrDefault("subscriptionId")
-  valid_568229 = validateParameter(valid_568229, JString, required = true,
+  if valid_564128 != nil:
+    section.add "subscriptionId", valid_564128
+  var valid_564129 = path.getOrDefault("operationalInsightsResourceProvider")
+  valid_564129 = validateParameter(valid_564129, JString, required = true,
                                  default = nil)
-  if valid_568229 != nil:
-    section.add "subscriptionId", valid_568229
-  var valid_568230 = path.getOrDefault("workspaceName")
-  valid_568230 = validateParameter(valid_568230, JString, required = true,
+  if valid_564129 != nil:
+    section.add "operationalInsightsResourceProvider", valid_564129
+  var valid_564130 = path.getOrDefault("resourceGroupName")
+  valid_564130 = validateParameter(valid_564130, JString, required = true,
                                  default = nil)
-  if valid_568230 != nil:
-    section.add "workspaceName", valid_568230
-  var valid_568231 = path.getOrDefault("operationalInsightsResourceProvider")
-  valid_568231 = validateParameter(valid_568231, JString, required = true,
+  if valid_564130 != nil:
+    section.add "resourceGroupName", valid_564130
+  var valid_564131 = path.getOrDefault("workspaceName")
+  valid_564131 = validateParameter(valid_564131, JString, required = true,
                                  default = nil)
-  if valid_568231 != nil:
-    section.add "operationalInsightsResourceProvider", valid_568231
+  if valid_564131 != nil:
+    section.add "workspaceName", valid_564131
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -388,11 +391,11 @@ proc validate_AlertRuleTemplatesList_568226(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568232 = query.getOrDefault("api-version")
-  valid_568232 = validateParameter(valid_568232, JString, required = true,
+  var valid_564132 = query.getOrDefault("api-version")
+  valid_564132 = validateParameter(valid_564132, JString, required = true,
                                  default = newJString("2019-01-01-preview"))
-  if valid_568232 != nil:
-    section.add "api-version", valid_568232
+  if valid_564132 != nil:
+    section.add "api-version", valid_564132
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -401,53 +404,52 @@ proc validate_AlertRuleTemplatesList_568226(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568233: Call_AlertRuleTemplatesList_568225; path: JsonNode;
+proc call*(call_564133: Call_AlertRuleTemplatesList_564125; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets all alert rule templates.
   ## 
-  let valid = call_568233.validator(path, query, header, formData, body)
-  let scheme = call_568233.pickScheme
+  let valid = call_564133.validator(path, query, header, formData, body)
+  let scheme = call_564133.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568233.url(scheme.get, call_568233.host, call_568233.base,
-                         call_568233.route, valid.getOrDefault("path"),
+  let url = call_564133.url(scheme.get, call_564133.host, call_564133.base,
+                         call_564133.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568233, url, valid)
+  result = hook(call_564133, url, valid)
 
-proc call*(call_568234: Call_AlertRuleTemplatesList_568225;
-          resourceGroupName: string; subscriptionId: string; workspaceName: string;
-          operationalInsightsResourceProvider: string;
-          apiVersion: string = "2019-01-01-preview"): Recallable =
+proc call*(call_564134: Call_AlertRuleTemplatesList_564125; subscriptionId: string;
+          operationalInsightsResourceProvider: string; resourceGroupName: string;
+          workspaceName: string; apiVersion: string = "2019-01-01-preview"): Recallable =
   ## alertRuleTemplatesList
   ## Gets all alert rule templates.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
   ##   apiVersion: string (required)
   ##             : API version for the operation
   ##   subscriptionId: string (required)
   ##                 : Azure subscription ID
-  ##   workspaceName: string (required)
-  ##                : The name of the workspace.
   ##   operationalInsightsResourceProvider: string (required)
   ##                                      : The namespace of workspaces resource provider- Microsoft.OperationalInsights.
-  var path_568235 = newJObject()
-  var query_568236 = newJObject()
-  add(path_568235, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568236, "api-version", newJString(apiVersion))
-  add(path_568235, "subscriptionId", newJString(subscriptionId))
-  add(path_568235, "workspaceName", newJString(workspaceName))
-  add(path_568235, "operationalInsightsResourceProvider",
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
+  ##   workspaceName: string (required)
+  ##                : The name of the workspace.
+  var path_564135 = newJObject()
+  var query_564136 = newJObject()
+  add(query_564136, "api-version", newJString(apiVersion))
+  add(path_564135, "subscriptionId", newJString(subscriptionId))
+  add(path_564135, "operationalInsightsResourceProvider",
       newJString(operationalInsightsResourceProvider))
-  result = call_568234.call(path_568235, query_568236, nil, nil, nil)
+  add(path_564135, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564135, "workspaceName", newJString(workspaceName))
+  result = call_564134.call(path_564135, query_564136, nil, nil, nil)
 
-var alertRuleTemplatesList* = Call_AlertRuleTemplatesList_568225(
+var alertRuleTemplatesList* = Call_AlertRuleTemplatesList_564125(
     name: "alertRuleTemplatesList", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/{operationalInsightsResourceProvider}/workspaces/{workspaceName}/providers/Microsoft.SecurityInsights/alertRuleTemplates",
-    validator: validate_AlertRuleTemplatesList_568226, base: "",
-    url: url_AlertRuleTemplatesList_568227, schemes: {Scheme.Https})
+    validator: validate_AlertRuleTemplatesList_564126, base: "",
+    url: url_AlertRuleTemplatesList_564127, schemes: {Scheme.Https})
 type
-  Call_AlertRuleTemplatesGet_568237 = ref object of OpenApiRestCall_567667
-proc url_AlertRuleTemplatesGet_568239(protocol: Scheme; host: string; base: string;
+  Call_AlertRuleTemplatesGet_564137 = ref object of OpenApiRestCall_563565
+proc url_AlertRuleTemplatesGet_564139(protocol: Scheme; host: string; base: string;
                                      route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -478,51 +480,51 @@ proc url_AlertRuleTemplatesGet_568239(protocol: Scheme; host: string; base: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AlertRuleTemplatesGet_568238(path: JsonNode; query: JsonNode;
+proc validate_AlertRuleTemplatesGet_564138(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the alert rule template.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
   ##   subscriptionId: JString (required)
   ##                 : Azure subscription ID
   ##   alertRuleTemplateId: JString (required)
   ##                      : Alert rule template ID
-  ##   workspaceName: JString (required)
-  ##                : The name of the workspace.
   ##   operationalInsightsResourceProvider: JString (required)
   ##                                      : The namespace of workspaces resource provider- Microsoft.OperationalInsights.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
+  ##   workspaceName: JString (required)
+  ##                : The name of the workspace.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568240 = path.getOrDefault("resourceGroupName")
-  valid_568240 = validateParameter(valid_568240, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564140 = path.getOrDefault("subscriptionId")
+  valid_564140 = validateParameter(valid_564140, JString, required = true,
                                  default = nil)
-  if valid_568240 != nil:
-    section.add "resourceGroupName", valid_568240
-  var valid_568241 = path.getOrDefault("subscriptionId")
-  valid_568241 = validateParameter(valid_568241, JString, required = true,
+  if valid_564140 != nil:
+    section.add "subscriptionId", valid_564140
+  var valid_564141 = path.getOrDefault("alertRuleTemplateId")
+  valid_564141 = validateParameter(valid_564141, JString, required = true,
                                  default = nil)
-  if valid_568241 != nil:
-    section.add "subscriptionId", valid_568241
-  var valid_568242 = path.getOrDefault("alertRuleTemplateId")
-  valid_568242 = validateParameter(valid_568242, JString, required = true,
+  if valid_564141 != nil:
+    section.add "alertRuleTemplateId", valid_564141
+  var valid_564142 = path.getOrDefault("operationalInsightsResourceProvider")
+  valid_564142 = validateParameter(valid_564142, JString, required = true,
                                  default = nil)
-  if valid_568242 != nil:
-    section.add "alertRuleTemplateId", valid_568242
-  var valid_568243 = path.getOrDefault("workspaceName")
-  valid_568243 = validateParameter(valid_568243, JString, required = true,
+  if valid_564142 != nil:
+    section.add "operationalInsightsResourceProvider", valid_564142
+  var valid_564143 = path.getOrDefault("resourceGroupName")
+  valid_564143 = validateParameter(valid_564143, JString, required = true,
                                  default = nil)
-  if valid_568243 != nil:
-    section.add "workspaceName", valid_568243
-  var valid_568244 = path.getOrDefault("operationalInsightsResourceProvider")
-  valid_568244 = validateParameter(valid_568244, JString, required = true,
+  if valid_564143 != nil:
+    section.add "resourceGroupName", valid_564143
+  var valid_564144 = path.getOrDefault("workspaceName")
+  valid_564144 = validateParameter(valid_564144, JString, required = true,
                                  default = nil)
-  if valid_568244 != nil:
-    section.add "operationalInsightsResourceProvider", valid_568244
+  if valid_564144 != nil:
+    section.add "workspaceName", valid_564144
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -530,11 +532,11 @@ proc validate_AlertRuleTemplatesGet_568238(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568245 = query.getOrDefault("api-version")
-  valid_568245 = validateParameter(valid_568245, JString, required = true,
+  var valid_564145 = query.getOrDefault("api-version")
+  valid_564145 = validateParameter(valid_564145, JString, required = true,
                                  default = newJString("2019-01-01-preview"))
-  if valid_568245 != nil:
-    section.add "api-version", valid_568245
+  if valid_564145 != nil:
+    section.add "api-version", valid_564145
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -543,57 +545,56 @@ proc validate_AlertRuleTemplatesGet_568238(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568246: Call_AlertRuleTemplatesGet_568237; path: JsonNode;
+proc call*(call_564146: Call_AlertRuleTemplatesGet_564137; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the alert rule template.
   ## 
-  let valid = call_568246.validator(path, query, header, formData, body)
-  let scheme = call_568246.pickScheme
+  let valid = call_564146.validator(path, query, header, formData, body)
+  let scheme = call_564146.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568246.url(scheme.get, call_568246.host, call_568246.base,
-                         call_568246.route, valid.getOrDefault("path"),
+  let url = call_564146.url(scheme.get, call_564146.host, call_564146.base,
+                         call_564146.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568246, url, valid)
+  result = hook(call_564146, url, valid)
 
-proc call*(call_568247: Call_AlertRuleTemplatesGet_568237;
-          resourceGroupName: string; subscriptionId: string;
-          alertRuleTemplateId: string; workspaceName: string;
-          operationalInsightsResourceProvider: string;
-          apiVersion: string = "2019-01-01-preview"): Recallable =
+proc call*(call_564147: Call_AlertRuleTemplatesGet_564137; subscriptionId: string;
+          alertRuleTemplateId: string;
+          operationalInsightsResourceProvider: string; resourceGroupName: string;
+          workspaceName: string; apiVersion: string = "2019-01-01-preview"): Recallable =
   ## alertRuleTemplatesGet
   ## Gets the alert rule template.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
   ##   apiVersion: string (required)
   ##             : API version for the operation
   ##   subscriptionId: string (required)
   ##                 : Azure subscription ID
   ##   alertRuleTemplateId: string (required)
   ##                      : Alert rule template ID
-  ##   workspaceName: string (required)
-  ##                : The name of the workspace.
   ##   operationalInsightsResourceProvider: string (required)
   ##                                      : The namespace of workspaces resource provider- Microsoft.OperationalInsights.
-  var path_568248 = newJObject()
-  var query_568249 = newJObject()
-  add(path_568248, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568249, "api-version", newJString(apiVersion))
-  add(path_568248, "subscriptionId", newJString(subscriptionId))
-  add(path_568248, "alertRuleTemplateId", newJString(alertRuleTemplateId))
-  add(path_568248, "workspaceName", newJString(workspaceName))
-  add(path_568248, "operationalInsightsResourceProvider",
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
+  ##   workspaceName: string (required)
+  ##                : The name of the workspace.
+  var path_564148 = newJObject()
+  var query_564149 = newJObject()
+  add(query_564149, "api-version", newJString(apiVersion))
+  add(path_564148, "subscriptionId", newJString(subscriptionId))
+  add(path_564148, "alertRuleTemplateId", newJString(alertRuleTemplateId))
+  add(path_564148, "operationalInsightsResourceProvider",
       newJString(operationalInsightsResourceProvider))
-  result = call_568247.call(path_568248, query_568249, nil, nil, nil)
+  add(path_564148, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564148, "workspaceName", newJString(workspaceName))
+  result = call_564147.call(path_564148, query_564149, nil, nil, nil)
 
-var alertRuleTemplatesGet* = Call_AlertRuleTemplatesGet_568237(
+var alertRuleTemplatesGet* = Call_AlertRuleTemplatesGet_564137(
     name: "alertRuleTemplatesGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/{operationalInsightsResourceProvider}/workspaces/{workspaceName}/providers/Microsoft.SecurityInsights/alertRuleTemplates/{alertRuleTemplateId}",
-    validator: validate_AlertRuleTemplatesGet_568238, base: "",
-    url: url_AlertRuleTemplatesGet_568239, schemes: {Scheme.Https})
+    validator: validate_AlertRuleTemplatesGet_564138, base: "",
+    url: url_AlertRuleTemplatesGet_564139, schemes: {Scheme.Https})
 type
-  Call_AlertRulesList_568250 = ref object of OpenApiRestCall_567667
-proc url_AlertRulesList_568252(protocol: Scheme; host: string; base: string;
+  Call_AlertRulesList_564150 = ref object of OpenApiRestCall_563565
+proc url_AlertRulesList_564152(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -621,7 +622,7 @@ proc url_AlertRulesList_568252(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AlertRulesList_568251(path: JsonNode; query: JsonNode;
+proc validate_AlertRulesList_564151(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## Gets all alert rules.
@@ -629,37 +630,37 @@ proc validate_AlertRulesList_568251(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
   ##   subscriptionId: JString (required)
   ##                 : Azure subscription ID
-  ##   workspaceName: JString (required)
-  ##                : The name of the workspace.
   ##   operationalInsightsResourceProvider: JString (required)
   ##                                      : The namespace of workspaces resource provider- Microsoft.OperationalInsights.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
+  ##   workspaceName: JString (required)
+  ##                : The name of the workspace.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568253 = path.getOrDefault("resourceGroupName")
-  valid_568253 = validateParameter(valid_568253, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564153 = path.getOrDefault("subscriptionId")
+  valid_564153 = validateParameter(valid_564153, JString, required = true,
                                  default = nil)
-  if valid_568253 != nil:
-    section.add "resourceGroupName", valid_568253
-  var valid_568254 = path.getOrDefault("subscriptionId")
-  valid_568254 = validateParameter(valid_568254, JString, required = true,
+  if valid_564153 != nil:
+    section.add "subscriptionId", valid_564153
+  var valid_564154 = path.getOrDefault("operationalInsightsResourceProvider")
+  valid_564154 = validateParameter(valid_564154, JString, required = true,
                                  default = nil)
-  if valid_568254 != nil:
-    section.add "subscriptionId", valid_568254
-  var valid_568255 = path.getOrDefault("workspaceName")
-  valid_568255 = validateParameter(valid_568255, JString, required = true,
+  if valid_564154 != nil:
+    section.add "operationalInsightsResourceProvider", valid_564154
+  var valid_564155 = path.getOrDefault("resourceGroupName")
+  valid_564155 = validateParameter(valid_564155, JString, required = true,
                                  default = nil)
-  if valid_568255 != nil:
-    section.add "workspaceName", valid_568255
-  var valid_568256 = path.getOrDefault("operationalInsightsResourceProvider")
-  valid_568256 = validateParameter(valid_568256, JString, required = true,
+  if valid_564155 != nil:
+    section.add "resourceGroupName", valid_564155
+  var valid_564156 = path.getOrDefault("workspaceName")
+  valid_564156 = validateParameter(valid_564156, JString, required = true,
                                  default = nil)
-  if valid_568256 != nil:
-    section.add "operationalInsightsResourceProvider", valid_568256
+  if valid_564156 != nil:
+    section.add "workspaceName", valid_564156
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -667,11 +668,11 @@ proc validate_AlertRulesList_568251(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568257 = query.getOrDefault("api-version")
-  valid_568257 = validateParameter(valid_568257, JString, required = true,
+  var valid_564157 = query.getOrDefault("api-version")
+  valid_564157 = validateParameter(valid_564157, JString, required = true,
                                  default = newJString("2019-01-01-preview"))
-  if valid_568257 != nil:
-    section.add "api-version", valid_568257
+  if valid_564157 != nil:
+    section.add "api-version", valid_564157
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -680,52 +681,51 @@ proc validate_AlertRulesList_568251(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568258: Call_AlertRulesList_568250; path: JsonNode; query: JsonNode;
+proc call*(call_564158: Call_AlertRulesList_564150; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets all alert rules.
   ## 
-  let valid = call_568258.validator(path, query, header, formData, body)
-  let scheme = call_568258.pickScheme
+  let valid = call_564158.validator(path, query, header, formData, body)
+  let scheme = call_564158.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568258.url(scheme.get, call_568258.host, call_568258.base,
-                         call_568258.route, valid.getOrDefault("path"),
+  let url = call_564158.url(scheme.get, call_564158.host, call_564158.base,
+                         call_564158.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568258, url, valid)
+  result = hook(call_564158, url, valid)
 
-proc call*(call_568259: Call_AlertRulesList_568250; resourceGroupName: string;
-          subscriptionId: string; workspaceName: string;
-          operationalInsightsResourceProvider: string;
-          apiVersion: string = "2019-01-01-preview"): Recallable =
+proc call*(call_564159: Call_AlertRulesList_564150; subscriptionId: string;
+          operationalInsightsResourceProvider: string; resourceGroupName: string;
+          workspaceName: string; apiVersion: string = "2019-01-01-preview"): Recallable =
   ## alertRulesList
   ## Gets all alert rules.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
   ##   apiVersion: string (required)
   ##             : API version for the operation
   ##   subscriptionId: string (required)
   ##                 : Azure subscription ID
-  ##   workspaceName: string (required)
-  ##                : The name of the workspace.
   ##   operationalInsightsResourceProvider: string (required)
   ##                                      : The namespace of workspaces resource provider- Microsoft.OperationalInsights.
-  var path_568260 = newJObject()
-  var query_568261 = newJObject()
-  add(path_568260, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568261, "api-version", newJString(apiVersion))
-  add(path_568260, "subscriptionId", newJString(subscriptionId))
-  add(path_568260, "workspaceName", newJString(workspaceName))
-  add(path_568260, "operationalInsightsResourceProvider",
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
+  ##   workspaceName: string (required)
+  ##                : The name of the workspace.
+  var path_564160 = newJObject()
+  var query_564161 = newJObject()
+  add(query_564161, "api-version", newJString(apiVersion))
+  add(path_564160, "subscriptionId", newJString(subscriptionId))
+  add(path_564160, "operationalInsightsResourceProvider",
       newJString(operationalInsightsResourceProvider))
-  result = call_568259.call(path_568260, query_568261, nil, nil, nil)
+  add(path_564160, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564160, "workspaceName", newJString(workspaceName))
+  result = call_564159.call(path_564160, query_564161, nil, nil, nil)
 
-var alertRulesList* = Call_AlertRulesList_568250(name: "alertRulesList",
+var alertRulesList* = Call_AlertRulesList_564150(name: "alertRulesList",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/{operationalInsightsResourceProvider}/workspaces/{workspaceName}/providers/Microsoft.SecurityInsights/alertRules",
-    validator: validate_AlertRulesList_568251, base: "", url: url_AlertRulesList_568252,
+    validator: validate_AlertRulesList_564151, base: "", url: url_AlertRulesList_564152,
     schemes: {Scheme.Https})
 type
-  Call_AlertRulesCreateOrUpdate_568275 = ref object of OpenApiRestCall_567667
-proc url_AlertRulesCreateOrUpdate_568277(protocol: Scheme; host: string;
+  Call_AlertRulesCreateOrUpdate_564175 = ref object of OpenApiRestCall_563565
+proc url_AlertRulesCreateOrUpdate_564177(protocol: Scheme; host: string;
                                         base: string; route: string; path: JsonNode;
                                         query: JsonNode): Uri =
   result.scheme = $protocol
@@ -756,51 +756,50 @@ proc url_AlertRulesCreateOrUpdate_568277(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AlertRulesCreateOrUpdate_568276(path: JsonNode; query: JsonNode;
+proc validate_AlertRulesCreateOrUpdate_564176(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Creates or updates the alert rule.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
-  ##   subscriptionId: JString (required)
-  ##                 : Azure subscription ID
   ##   ruleId: JString (required)
   ##         : Alert rule ID
-  ##   workspaceName: JString (required)
-  ##                : The name of the workspace.
+  ##   subscriptionId: JString (required)
+  ##                 : Azure subscription ID
   ##   operationalInsightsResourceProvider: JString (required)
   ##                                      : The namespace of workspaces resource provider- Microsoft.OperationalInsights.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
+  ##   workspaceName: JString (required)
+  ##                : The name of the workspace.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568278 = path.getOrDefault("resourceGroupName")
-  valid_568278 = validateParameter(valid_568278, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `ruleId` field"
+  var valid_564178 = path.getOrDefault("ruleId")
+  valid_564178 = validateParameter(valid_564178, JString, required = true,
                                  default = nil)
-  if valid_568278 != nil:
-    section.add "resourceGroupName", valid_568278
-  var valid_568279 = path.getOrDefault("subscriptionId")
-  valid_568279 = validateParameter(valid_568279, JString, required = true,
+  if valid_564178 != nil:
+    section.add "ruleId", valid_564178
+  var valid_564179 = path.getOrDefault("subscriptionId")
+  valid_564179 = validateParameter(valid_564179, JString, required = true,
                                  default = nil)
-  if valid_568279 != nil:
-    section.add "subscriptionId", valid_568279
-  var valid_568280 = path.getOrDefault("ruleId")
-  valid_568280 = validateParameter(valid_568280, JString, required = true,
+  if valid_564179 != nil:
+    section.add "subscriptionId", valid_564179
+  var valid_564180 = path.getOrDefault("operationalInsightsResourceProvider")
+  valid_564180 = validateParameter(valid_564180, JString, required = true,
                                  default = nil)
-  if valid_568280 != nil:
-    section.add "ruleId", valid_568280
-  var valid_568281 = path.getOrDefault("workspaceName")
-  valid_568281 = validateParameter(valid_568281, JString, required = true,
+  if valid_564180 != nil:
+    section.add "operationalInsightsResourceProvider", valid_564180
+  var valid_564181 = path.getOrDefault("resourceGroupName")
+  valid_564181 = validateParameter(valid_564181, JString, required = true,
                                  default = nil)
-  if valid_568281 != nil:
-    section.add "workspaceName", valid_568281
-  var valid_568282 = path.getOrDefault("operationalInsightsResourceProvider")
-  valid_568282 = validateParameter(valid_568282, JString, required = true,
+  if valid_564181 != nil:
+    section.add "resourceGroupName", valid_564181
+  var valid_564182 = path.getOrDefault("workspaceName")
+  valid_564182 = validateParameter(valid_564182, JString, required = true,
                                  default = nil)
-  if valid_568282 != nil:
-    section.add "operationalInsightsResourceProvider", valid_568282
+  if valid_564182 != nil:
+    section.add "workspaceName", valid_564182
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -808,11 +807,11 @@ proc validate_AlertRulesCreateOrUpdate_568276(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568283 = query.getOrDefault("api-version")
-  valid_568283 = validateParameter(valid_568283, JString, required = true,
+  var valid_564183 = query.getOrDefault("api-version")
+  valid_564183 = validateParameter(valid_564183, JString, required = true,
                                  default = newJString("2019-01-01-preview"))
-  if valid_568283 != nil:
-    section.add "api-version", valid_568283
+  if valid_564183 != nil:
+    section.add "api-version", valid_564183
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -826,62 +825,61 @@ proc validate_AlertRulesCreateOrUpdate_568276(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568285: Call_AlertRulesCreateOrUpdate_568275; path: JsonNode;
+proc call*(call_564185: Call_AlertRulesCreateOrUpdate_564175; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Creates or updates the alert rule.
   ## 
-  let valid = call_568285.validator(path, query, header, formData, body)
-  let scheme = call_568285.pickScheme
+  let valid = call_564185.validator(path, query, header, formData, body)
+  let scheme = call_564185.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568285.url(scheme.get, call_568285.host, call_568285.base,
-                         call_568285.route, valid.getOrDefault("path"),
+  let url = call_564185.url(scheme.get, call_564185.host, call_564185.base,
+                         call_564185.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568285, url, valid)
+  result = hook(call_564185, url, valid)
 
-proc call*(call_568286: Call_AlertRulesCreateOrUpdate_568275;
-          resourceGroupName: string; alertRule: JsonNode; subscriptionId: string;
-          ruleId: string; workspaceName: string;
-          operationalInsightsResourceProvider: string;
+proc call*(call_564186: Call_AlertRulesCreateOrUpdate_564175; ruleId: string;
+          subscriptionId: string; operationalInsightsResourceProvider: string;
+          resourceGroupName: string; workspaceName: string; alertRule: JsonNode;
           apiVersion: string = "2019-01-01-preview"): Recallable =
   ## alertRulesCreateOrUpdate
   ## Creates or updates the alert rule.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
-  ##   apiVersion: string (required)
-  ##             : API version for the operation
-  ##   alertRule: JObject (required)
-  ##            : The alert rule
-  ##   subscriptionId: string (required)
-  ##                 : Azure subscription ID
   ##   ruleId: string (required)
   ##         : Alert rule ID
-  ##   workspaceName: string (required)
-  ##                : The name of the workspace.
+  ##   apiVersion: string (required)
+  ##             : API version for the operation
+  ##   subscriptionId: string (required)
+  ##                 : Azure subscription ID
   ##   operationalInsightsResourceProvider: string (required)
   ##                                      : The namespace of workspaces resource provider- Microsoft.OperationalInsights.
-  var path_568287 = newJObject()
-  var query_568288 = newJObject()
-  var body_568289 = newJObject()
-  add(path_568287, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568288, "api-version", newJString(apiVersion))
-  if alertRule != nil:
-    body_568289 = alertRule
-  add(path_568287, "subscriptionId", newJString(subscriptionId))
-  add(path_568287, "ruleId", newJString(ruleId))
-  add(path_568287, "workspaceName", newJString(workspaceName))
-  add(path_568287, "operationalInsightsResourceProvider",
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
+  ##   workspaceName: string (required)
+  ##                : The name of the workspace.
+  ##   alertRule: JObject (required)
+  ##            : The alert rule
+  var path_564187 = newJObject()
+  var query_564188 = newJObject()
+  var body_564189 = newJObject()
+  add(path_564187, "ruleId", newJString(ruleId))
+  add(query_564188, "api-version", newJString(apiVersion))
+  add(path_564187, "subscriptionId", newJString(subscriptionId))
+  add(path_564187, "operationalInsightsResourceProvider",
       newJString(operationalInsightsResourceProvider))
-  result = call_568286.call(path_568287, query_568288, nil, nil, body_568289)
+  add(path_564187, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564187, "workspaceName", newJString(workspaceName))
+  if alertRule != nil:
+    body_564189 = alertRule
+  result = call_564186.call(path_564187, query_564188, nil, nil, body_564189)
 
-var alertRulesCreateOrUpdate* = Call_AlertRulesCreateOrUpdate_568275(
+var alertRulesCreateOrUpdate* = Call_AlertRulesCreateOrUpdate_564175(
     name: "alertRulesCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/{operationalInsightsResourceProvider}/workspaces/{workspaceName}/providers/Microsoft.SecurityInsights/alertRules/{ruleId}",
-    validator: validate_AlertRulesCreateOrUpdate_568276, base: "",
-    url: url_AlertRulesCreateOrUpdate_568277, schemes: {Scheme.Https})
+    validator: validate_AlertRulesCreateOrUpdate_564176, base: "",
+    url: url_AlertRulesCreateOrUpdate_564177, schemes: {Scheme.Https})
 type
-  Call_AlertRulesGet_568262 = ref object of OpenApiRestCall_567667
-proc url_AlertRulesGet_568264(protocol: Scheme; host: string; base: string;
+  Call_AlertRulesGet_564162 = ref object of OpenApiRestCall_563565
+proc url_AlertRulesGet_564164(protocol: Scheme; host: string; base: string;
                              route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -911,51 +909,50 @@ proc url_AlertRulesGet_568264(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AlertRulesGet_568263(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_AlertRulesGet_564163(path: JsonNode; query: JsonNode; header: JsonNode;
                                   formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the alert rule.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
-  ##   subscriptionId: JString (required)
-  ##                 : Azure subscription ID
   ##   ruleId: JString (required)
   ##         : Alert rule ID
-  ##   workspaceName: JString (required)
-  ##                : The name of the workspace.
+  ##   subscriptionId: JString (required)
+  ##                 : Azure subscription ID
   ##   operationalInsightsResourceProvider: JString (required)
   ##                                      : The namespace of workspaces resource provider- Microsoft.OperationalInsights.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
+  ##   workspaceName: JString (required)
+  ##                : The name of the workspace.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568265 = path.getOrDefault("resourceGroupName")
-  valid_568265 = validateParameter(valid_568265, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `ruleId` field"
+  var valid_564165 = path.getOrDefault("ruleId")
+  valid_564165 = validateParameter(valid_564165, JString, required = true,
                                  default = nil)
-  if valid_568265 != nil:
-    section.add "resourceGroupName", valid_568265
-  var valid_568266 = path.getOrDefault("subscriptionId")
-  valid_568266 = validateParameter(valid_568266, JString, required = true,
+  if valid_564165 != nil:
+    section.add "ruleId", valid_564165
+  var valid_564166 = path.getOrDefault("subscriptionId")
+  valid_564166 = validateParameter(valid_564166, JString, required = true,
                                  default = nil)
-  if valid_568266 != nil:
-    section.add "subscriptionId", valid_568266
-  var valid_568267 = path.getOrDefault("ruleId")
-  valid_568267 = validateParameter(valid_568267, JString, required = true,
+  if valid_564166 != nil:
+    section.add "subscriptionId", valid_564166
+  var valid_564167 = path.getOrDefault("operationalInsightsResourceProvider")
+  valid_564167 = validateParameter(valid_564167, JString, required = true,
                                  default = nil)
-  if valid_568267 != nil:
-    section.add "ruleId", valid_568267
-  var valid_568268 = path.getOrDefault("workspaceName")
-  valid_568268 = validateParameter(valid_568268, JString, required = true,
+  if valid_564167 != nil:
+    section.add "operationalInsightsResourceProvider", valid_564167
+  var valid_564168 = path.getOrDefault("resourceGroupName")
+  valid_564168 = validateParameter(valid_564168, JString, required = true,
                                  default = nil)
-  if valid_568268 != nil:
-    section.add "workspaceName", valid_568268
-  var valid_568269 = path.getOrDefault("operationalInsightsResourceProvider")
-  valid_568269 = validateParameter(valid_568269, JString, required = true,
+  if valid_564168 != nil:
+    section.add "resourceGroupName", valid_564168
+  var valid_564169 = path.getOrDefault("workspaceName")
+  valid_564169 = validateParameter(valid_564169, JString, required = true,
                                  default = nil)
-  if valid_568269 != nil:
-    section.add "operationalInsightsResourceProvider", valid_568269
+  if valid_564169 != nil:
+    section.add "workspaceName", valid_564169
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -963,11 +960,11 @@ proc validate_AlertRulesGet_568263(path: JsonNode; query: JsonNode; header: Json
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568270 = query.getOrDefault("api-version")
-  valid_568270 = validateParameter(valid_568270, JString, required = true,
+  var valid_564170 = query.getOrDefault("api-version")
+  valid_564170 = validateParameter(valid_564170, JString, required = true,
                                  default = newJString("2019-01-01-preview"))
-  if valid_568270 != nil:
-    section.add "api-version", valid_568270
+  if valid_564170 != nil:
+    section.add "api-version", valid_564170
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -976,55 +973,55 @@ proc validate_AlertRulesGet_568263(path: JsonNode; query: JsonNode; header: Json
   if body != nil:
     result.add "body", body
 
-proc call*(call_568271: Call_AlertRulesGet_568262; path: JsonNode; query: JsonNode;
+proc call*(call_564171: Call_AlertRulesGet_564162; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the alert rule.
   ## 
-  let valid = call_568271.validator(path, query, header, formData, body)
-  let scheme = call_568271.pickScheme
+  let valid = call_564171.validator(path, query, header, formData, body)
+  let scheme = call_564171.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568271.url(scheme.get, call_568271.host, call_568271.base,
-                         call_568271.route, valid.getOrDefault("path"),
+  let url = call_564171.url(scheme.get, call_564171.host, call_564171.base,
+                         call_564171.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568271, url, valid)
+  result = hook(call_564171, url, valid)
 
-proc call*(call_568272: Call_AlertRulesGet_568262; resourceGroupName: string;
-          subscriptionId: string; ruleId: string; workspaceName: string;
-          operationalInsightsResourceProvider: string;
+proc call*(call_564172: Call_AlertRulesGet_564162; ruleId: string;
+          subscriptionId: string; operationalInsightsResourceProvider: string;
+          resourceGroupName: string; workspaceName: string;
           apiVersion: string = "2019-01-01-preview"): Recallable =
   ## alertRulesGet
   ## Gets the alert rule.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
+  ##   ruleId: string (required)
+  ##         : Alert rule ID
   ##   apiVersion: string (required)
   ##             : API version for the operation
   ##   subscriptionId: string (required)
   ##                 : Azure subscription ID
-  ##   ruleId: string (required)
-  ##         : Alert rule ID
-  ##   workspaceName: string (required)
-  ##                : The name of the workspace.
   ##   operationalInsightsResourceProvider: string (required)
   ##                                      : The namespace of workspaces resource provider- Microsoft.OperationalInsights.
-  var path_568273 = newJObject()
-  var query_568274 = newJObject()
-  add(path_568273, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568274, "api-version", newJString(apiVersion))
-  add(path_568273, "subscriptionId", newJString(subscriptionId))
-  add(path_568273, "ruleId", newJString(ruleId))
-  add(path_568273, "workspaceName", newJString(workspaceName))
-  add(path_568273, "operationalInsightsResourceProvider",
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
+  ##   workspaceName: string (required)
+  ##                : The name of the workspace.
+  var path_564173 = newJObject()
+  var query_564174 = newJObject()
+  add(path_564173, "ruleId", newJString(ruleId))
+  add(query_564174, "api-version", newJString(apiVersion))
+  add(path_564173, "subscriptionId", newJString(subscriptionId))
+  add(path_564173, "operationalInsightsResourceProvider",
       newJString(operationalInsightsResourceProvider))
-  result = call_568272.call(path_568273, query_568274, nil, nil, nil)
+  add(path_564173, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564173, "workspaceName", newJString(workspaceName))
+  result = call_564172.call(path_564173, query_564174, nil, nil, nil)
 
-var alertRulesGet* = Call_AlertRulesGet_568262(name: "alertRulesGet",
+var alertRulesGet* = Call_AlertRulesGet_564162(name: "alertRulesGet",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/{operationalInsightsResourceProvider}/workspaces/{workspaceName}/providers/Microsoft.SecurityInsights/alertRules/{ruleId}",
-    validator: validate_AlertRulesGet_568263, base: "", url: url_AlertRulesGet_568264,
+    validator: validate_AlertRulesGet_564163, base: "", url: url_AlertRulesGet_564164,
     schemes: {Scheme.Https})
 type
-  Call_AlertRulesDelete_568290 = ref object of OpenApiRestCall_567667
-proc url_AlertRulesDelete_568292(protocol: Scheme; host: string; base: string;
+  Call_AlertRulesDelete_564190 = ref object of OpenApiRestCall_563565
+proc url_AlertRulesDelete_564192(protocol: Scheme; host: string; base: string;
                                 route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1054,7 +1051,7 @@ proc url_AlertRulesDelete_568292(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AlertRulesDelete_568291(path: JsonNode; query: JsonNode;
+proc validate_AlertRulesDelete_564191(path: JsonNode; query: JsonNode;
                                      header: JsonNode; formData: JsonNode;
                                      body: JsonNode): JsonNode =
   ## Delete the alert rule.
@@ -1062,44 +1059,43 @@ proc validate_AlertRulesDelete_568291(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
-  ##   subscriptionId: JString (required)
-  ##                 : Azure subscription ID
   ##   ruleId: JString (required)
   ##         : Alert rule ID
-  ##   workspaceName: JString (required)
-  ##                : The name of the workspace.
+  ##   subscriptionId: JString (required)
+  ##                 : Azure subscription ID
   ##   operationalInsightsResourceProvider: JString (required)
   ##                                      : The namespace of workspaces resource provider- Microsoft.OperationalInsights.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
+  ##   workspaceName: JString (required)
+  ##                : The name of the workspace.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568293 = path.getOrDefault("resourceGroupName")
-  valid_568293 = validateParameter(valid_568293, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `ruleId` field"
+  var valid_564193 = path.getOrDefault("ruleId")
+  valid_564193 = validateParameter(valid_564193, JString, required = true,
                                  default = nil)
-  if valid_568293 != nil:
-    section.add "resourceGroupName", valid_568293
-  var valid_568294 = path.getOrDefault("subscriptionId")
-  valid_568294 = validateParameter(valid_568294, JString, required = true,
+  if valid_564193 != nil:
+    section.add "ruleId", valid_564193
+  var valid_564194 = path.getOrDefault("subscriptionId")
+  valid_564194 = validateParameter(valid_564194, JString, required = true,
                                  default = nil)
-  if valid_568294 != nil:
-    section.add "subscriptionId", valid_568294
-  var valid_568295 = path.getOrDefault("ruleId")
-  valid_568295 = validateParameter(valid_568295, JString, required = true,
+  if valid_564194 != nil:
+    section.add "subscriptionId", valid_564194
+  var valid_564195 = path.getOrDefault("operationalInsightsResourceProvider")
+  valid_564195 = validateParameter(valid_564195, JString, required = true,
                                  default = nil)
-  if valid_568295 != nil:
-    section.add "ruleId", valid_568295
-  var valid_568296 = path.getOrDefault("workspaceName")
-  valid_568296 = validateParameter(valid_568296, JString, required = true,
+  if valid_564195 != nil:
+    section.add "operationalInsightsResourceProvider", valid_564195
+  var valid_564196 = path.getOrDefault("resourceGroupName")
+  valid_564196 = validateParameter(valid_564196, JString, required = true,
                                  default = nil)
-  if valid_568296 != nil:
-    section.add "workspaceName", valid_568296
-  var valid_568297 = path.getOrDefault("operationalInsightsResourceProvider")
-  valid_568297 = validateParameter(valid_568297, JString, required = true,
+  if valid_564196 != nil:
+    section.add "resourceGroupName", valid_564196
+  var valid_564197 = path.getOrDefault("workspaceName")
+  valid_564197 = validateParameter(valid_564197, JString, required = true,
                                  default = nil)
-  if valid_568297 != nil:
-    section.add "operationalInsightsResourceProvider", valid_568297
+  if valid_564197 != nil:
+    section.add "workspaceName", valid_564197
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1107,11 +1103,11 @@ proc validate_AlertRulesDelete_568291(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568298 = query.getOrDefault("api-version")
-  valid_568298 = validateParameter(valid_568298, JString, required = true,
+  var valid_564198 = query.getOrDefault("api-version")
+  valid_564198 = validateParameter(valid_564198, JString, required = true,
                                  default = newJString("2019-01-01-preview"))
-  if valid_568298 != nil:
-    section.add "api-version", valid_568298
+  if valid_564198 != nil:
+    section.add "api-version", valid_564198
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1120,55 +1116,55 @@ proc validate_AlertRulesDelete_568291(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568299: Call_AlertRulesDelete_568290; path: JsonNode;
+proc call*(call_564199: Call_AlertRulesDelete_564190; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Delete the alert rule.
   ## 
-  let valid = call_568299.validator(path, query, header, formData, body)
-  let scheme = call_568299.pickScheme
+  let valid = call_564199.validator(path, query, header, formData, body)
+  let scheme = call_564199.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568299.url(scheme.get, call_568299.host, call_568299.base,
-                         call_568299.route, valid.getOrDefault("path"),
+  let url = call_564199.url(scheme.get, call_564199.host, call_564199.base,
+                         call_564199.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568299, url, valid)
+  result = hook(call_564199, url, valid)
 
-proc call*(call_568300: Call_AlertRulesDelete_568290; resourceGroupName: string;
-          subscriptionId: string; ruleId: string; workspaceName: string;
-          operationalInsightsResourceProvider: string;
+proc call*(call_564200: Call_AlertRulesDelete_564190; ruleId: string;
+          subscriptionId: string; operationalInsightsResourceProvider: string;
+          resourceGroupName: string; workspaceName: string;
           apiVersion: string = "2019-01-01-preview"): Recallable =
   ## alertRulesDelete
   ## Delete the alert rule.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
+  ##   ruleId: string (required)
+  ##         : Alert rule ID
   ##   apiVersion: string (required)
   ##             : API version for the operation
   ##   subscriptionId: string (required)
   ##                 : Azure subscription ID
-  ##   ruleId: string (required)
-  ##         : Alert rule ID
-  ##   workspaceName: string (required)
-  ##                : The name of the workspace.
   ##   operationalInsightsResourceProvider: string (required)
   ##                                      : The namespace of workspaces resource provider- Microsoft.OperationalInsights.
-  var path_568301 = newJObject()
-  var query_568302 = newJObject()
-  add(path_568301, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568302, "api-version", newJString(apiVersion))
-  add(path_568301, "subscriptionId", newJString(subscriptionId))
-  add(path_568301, "ruleId", newJString(ruleId))
-  add(path_568301, "workspaceName", newJString(workspaceName))
-  add(path_568301, "operationalInsightsResourceProvider",
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
+  ##   workspaceName: string (required)
+  ##                : The name of the workspace.
+  var path_564201 = newJObject()
+  var query_564202 = newJObject()
+  add(path_564201, "ruleId", newJString(ruleId))
+  add(query_564202, "api-version", newJString(apiVersion))
+  add(path_564201, "subscriptionId", newJString(subscriptionId))
+  add(path_564201, "operationalInsightsResourceProvider",
       newJString(operationalInsightsResourceProvider))
-  result = call_568300.call(path_568301, query_568302, nil, nil, nil)
+  add(path_564201, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564201, "workspaceName", newJString(workspaceName))
+  result = call_564200.call(path_564201, query_564202, nil, nil, nil)
 
-var alertRulesDelete* = Call_AlertRulesDelete_568290(name: "alertRulesDelete",
+var alertRulesDelete* = Call_AlertRulesDelete_564190(name: "alertRulesDelete",
     meth: HttpMethod.HttpDelete, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/{operationalInsightsResourceProvider}/workspaces/{workspaceName}/providers/Microsoft.SecurityInsights/alertRules/{ruleId}",
-    validator: validate_AlertRulesDelete_568291, base: "",
-    url: url_AlertRulesDelete_568292, schemes: {Scheme.Https})
+    validator: validate_AlertRulesDelete_564191, base: "",
+    url: url_AlertRulesDelete_564192, schemes: {Scheme.Https})
 type
-  Call_ActionsListByAlertRule_568303 = ref object of OpenApiRestCall_567667
-proc url_ActionsListByAlertRule_568305(protocol: Scheme; host: string; base: string;
+  Call_ActionsListByAlertRule_564203 = ref object of OpenApiRestCall_563565
+proc url_ActionsListByAlertRule_564205(protocol: Scheme; host: string; base: string;
                                       route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1199,51 +1195,50 @@ proc url_ActionsListByAlertRule_568305(protocol: Scheme; host: string; base: str
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ActionsListByAlertRule_568304(path: JsonNode; query: JsonNode;
+proc validate_ActionsListByAlertRule_564204(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets all actions of alert rule.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
-  ##   subscriptionId: JString (required)
-  ##                 : Azure subscription ID
   ##   ruleId: JString (required)
   ##         : Alert rule ID
-  ##   workspaceName: JString (required)
-  ##                : The name of the workspace.
+  ##   subscriptionId: JString (required)
+  ##                 : Azure subscription ID
   ##   operationalInsightsResourceProvider: JString (required)
   ##                                      : The namespace of workspaces resource provider- Microsoft.OperationalInsights.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
+  ##   workspaceName: JString (required)
+  ##                : The name of the workspace.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568306 = path.getOrDefault("resourceGroupName")
-  valid_568306 = validateParameter(valid_568306, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `ruleId` field"
+  var valid_564206 = path.getOrDefault("ruleId")
+  valid_564206 = validateParameter(valid_564206, JString, required = true,
                                  default = nil)
-  if valid_568306 != nil:
-    section.add "resourceGroupName", valid_568306
-  var valid_568307 = path.getOrDefault("subscriptionId")
-  valid_568307 = validateParameter(valid_568307, JString, required = true,
+  if valid_564206 != nil:
+    section.add "ruleId", valid_564206
+  var valid_564207 = path.getOrDefault("subscriptionId")
+  valid_564207 = validateParameter(valid_564207, JString, required = true,
                                  default = nil)
-  if valid_568307 != nil:
-    section.add "subscriptionId", valid_568307
-  var valid_568308 = path.getOrDefault("ruleId")
-  valid_568308 = validateParameter(valid_568308, JString, required = true,
+  if valid_564207 != nil:
+    section.add "subscriptionId", valid_564207
+  var valid_564208 = path.getOrDefault("operationalInsightsResourceProvider")
+  valid_564208 = validateParameter(valid_564208, JString, required = true,
                                  default = nil)
-  if valid_568308 != nil:
-    section.add "ruleId", valid_568308
-  var valid_568309 = path.getOrDefault("workspaceName")
-  valid_568309 = validateParameter(valid_568309, JString, required = true,
+  if valid_564208 != nil:
+    section.add "operationalInsightsResourceProvider", valid_564208
+  var valid_564209 = path.getOrDefault("resourceGroupName")
+  valid_564209 = validateParameter(valid_564209, JString, required = true,
                                  default = nil)
-  if valid_568309 != nil:
-    section.add "workspaceName", valid_568309
-  var valid_568310 = path.getOrDefault("operationalInsightsResourceProvider")
-  valid_568310 = validateParameter(valid_568310, JString, required = true,
+  if valid_564209 != nil:
+    section.add "resourceGroupName", valid_564209
+  var valid_564210 = path.getOrDefault("workspaceName")
+  valid_564210 = validateParameter(valid_564210, JString, required = true,
                                  default = nil)
-  if valid_568310 != nil:
-    section.add "operationalInsightsResourceProvider", valid_568310
+  if valid_564210 != nil:
+    section.add "workspaceName", valid_564210
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1251,11 +1246,11 @@ proc validate_ActionsListByAlertRule_568304(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568311 = query.getOrDefault("api-version")
-  valid_568311 = validateParameter(valid_568311, JString, required = true,
+  var valid_564211 = query.getOrDefault("api-version")
+  valid_564211 = validateParameter(valid_564211, JString, required = true,
                                  default = newJString("2019-01-01-preview"))
-  if valid_568311 != nil:
-    section.add "api-version", valid_568311
+  if valid_564211 != nil:
+    section.add "api-version", valid_564211
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1264,56 +1259,56 @@ proc validate_ActionsListByAlertRule_568304(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568312: Call_ActionsListByAlertRule_568303; path: JsonNode;
+proc call*(call_564212: Call_ActionsListByAlertRule_564203; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets all actions of alert rule.
   ## 
-  let valid = call_568312.validator(path, query, header, formData, body)
-  let scheme = call_568312.pickScheme
+  let valid = call_564212.validator(path, query, header, formData, body)
+  let scheme = call_564212.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568312.url(scheme.get, call_568312.host, call_568312.base,
-                         call_568312.route, valid.getOrDefault("path"),
+  let url = call_564212.url(scheme.get, call_564212.host, call_564212.base,
+                         call_564212.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568312, url, valid)
+  result = hook(call_564212, url, valid)
 
-proc call*(call_568313: Call_ActionsListByAlertRule_568303;
-          resourceGroupName: string; subscriptionId: string; ruleId: string;
-          workspaceName: string; operationalInsightsResourceProvider: string;
+proc call*(call_564213: Call_ActionsListByAlertRule_564203; ruleId: string;
+          subscriptionId: string; operationalInsightsResourceProvider: string;
+          resourceGroupName: string; workspaceName: string;
           apiVersion: string = "2019-01-01-preview"): Recallable =
   ## actionsListByAlertRule
   ## Gets all actions of alert rule.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
+  ##   ruleId: string (required)
+  ##         : Alert rule ID
   ##   apiVersion: string (required)
   ##             : API version for the operation
   ##   subscriptionId: string (required)
   ##                 : Azure subscription ID
-  ##   ruleId: string (required)
-  ##         : Alert rule ID
-  ##   workspaceName: string (required)
-  ##                : The name of the workspace.
   ##   operationalInsightsResourceProvider: string (required)
   ##                                      : The namespace of workspaces resource provider- Microsoft.OperationalInsights.
-  var path_568314 = newJObject()
-  var query_568315 = newJObject()
-  add(path_568314, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568315, "api-version", newJString(apiVersion))
-  add(path_568314, "subscriptionId", newJString(subscriptionId))
-  add(path_568314, "ruleId", newJString(ruleId))
-  add(path_568314, "workspaceName", newJString(workspaceName))
-  add(path_568314, "operationalInsightsResourceProvider",
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
+  ##   workspaceName: string (required)
+  ##                : The name of the workspace.
+  var path_564214 = newJObject()
+  var query_564215 = newJObject()
+  add(path_564214, "ruleId", newJString(ruleId))
+  add(query_564215, "api-version", newJString(apiVersion))
+  add(path_564214, "subscriptionId", newJString(subscriptionId))
+  add(path_564214, "operationalInsightsResourceProvider",
       newJString(operationalInsightsResourceProvider))
-  result = call_568313.call(path_568314, query_568315, nil, nil, nil)
+  add(path_564214, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564214, "workspaceName", newJString(workspaceName))
+  result = call_564213.call(path_564214, query_564215, nil, nil, nil)
 
-var actionsListByAlertRule* = Call_ActionsListByAlertRule_568303(
+var actionsListByAlertRule* = Call_ActionsListByAlertRule_564203(
     name: "actionsListByAlertRule", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/{operationalInsightsResourceProvider}/workspaces/{workspaceName}/providers/Microsoft.SecurityInsights/alertRules/{ruleId}/actions",
-    validator: validate_ActionsListByAlertRule_568304, base: "",
-    url: url_ActionsListByAlertRule_568305, schemes: {Scheme.Https})
+    validator: validate_ActionsListByAlertRule_564204, base: "",
+    url: url_ActionsListByAlertRule_564205, schemes: {Scheme.Https})
 type
-  Call_AlertRulesCreateOrUpdateAction_568330 = ref object of OpenApiRestCall_567667
-proc url_AlertRulesCreateOrUpdateAction_568332(protocol: Scheme; host: string;
+  Call_AlertRulesCreateOrUpdateAction_564230 = ref object of OpenApiRestCall_563565
+proc url_AlertRulesCreateOrUpdateAction_564232(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1346,58 +1341,57 @@ proc url_AlertRulesCreateOrUpdateAction_568332(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AlertRulesCreateOrUpdateAction_568331(path: JsonNode;
+proc validate_AlertRulesCreateOrUpdateAction_564231(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Creates or updates the action of alert rule.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
-  ##   subscriptionId: JString (required)
-  ##                 : Azure subscription ID
   ##   ruleId: JString (required)
   ##         : Alert rule ID
   ##   actionId: JString (required)
   ##           : Action ID
-  ##   workspaceName: JString (required)
-  ##                : The name of the workspace.
+  ##   subscriptionId: JString (required)
+  ##                 : Azure subscription ID
   ##   operationalInsightsResourceProvider: JString (required)
   ##                                      : The namespace of workspaces resource provider- Microsoft.OperationalInsights.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
+  ##   workspaceName: JString (required)
+  ##                : The name of the workspace.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568333 = path.getOrDefault("resourceGroupName")
-  valid_568333 = validateParameter(valid_568333, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `ruleId` field"
+  var valid_564233 = path.getOrDefault("ruleId")
+  valid_564233 = validateParameter(valid_564233, JString, required = true,
                                  default = nil)
-  if valid_568333 != nil:
-    section.add "resourceGroupName", valid_568333
-  var valid_568334 = path.getOrDefault("subscriptionId")
-  valid_568334 = validateParameter(valid_568334, JString, required = true,
+  if valid_564233 != nil:
+    section.add "ruleId", valid_564233
+  var valid_564234 = path.getOrDefault("actionId")
+  valid_564234 = validateParameter(valid_564234, JString, required = true,
                                  default = nil)
-  if valid_568334 != nil:
-    section.add "subscriptionId", valid_568334
-  var valid_568335 = path.getOrDefault("ruleId")
-  valid_568335 = validateParameter(valid_568335, JString, required = true,
+  if valid_564234 != nil:
+    section.add "actionId", valid_564234
+  var valid_564235 = path.getOrDefault("subscriptionId")
+  valid_564235 = validateParameter(valid_564235, JString, required = true,
                                  default = nil)
-  if valid_568335 != nil:
-    section.add "ruleId", valid_568335
-  var valid_568336 = path.getOrDefault("actionId")
-  valid_568336 = validateParameter(valid_568336, JString, required = true,
+  if valid_564235 != nil:
+    section.add "subscriptionId", valid_564235
+  var valid_564236 = path.getOrDefault("operationalInsightsResourceProvider")
+  valid_564236 = validateParameter(valid_564236, JString, required = true,
                                  default = nil)
-  if valid_568336 != nil:
-    section.add "actionId", valid_568336
-  var valid_568337 = path.getOrDefault("workspaceName")
-  valid_568337 = validateParameter(valid_568337, JString, required = true,
+  if valid_564236 != nil:
+    section.add "operationalInsightsResourceProvider", valid_564236
+  var valid_564237 = path.getOrDefault("resourceGroupName")
+  valid_564237 = validateParameter(valid_564237, JString, required = true,
                                  default = nil)
-  if valid_568337 != nil:
-    section.add "workspaceName", valid_568337
-  var valid_568338 = path.getOrDefault("operationalInsightsResourceProvider")
-  valid_568338 = validateParameter(valid_568338, JString, required = true,
+  if valid_564237 != nil:
+    section.add "resourceGroupName", valid_564237
+  var valid_564238 = path.getOrDefault("workspaceName")
+  valid_564238 = validateParameter(valid_564238, JString, required = true,
                                  default = nil)
-  if valid_568338 != nil:
-    section.add "operationalInsightsResourceProvider", valid_568338
+  if valid_564238 != nil:
+    section.add "workspaceName", valid_564238
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1405,11 +1399,11 @@ proc validate_AlertRulesCreateOrUpdateAction_568331(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568339 = query.getOrDefault("api-version")
-  valid_568339 = validateParameter(valid_568339, JString, required = true,
+  var valid_564239 = query.getOrDefault("api-version")
+  valid_564239 = validateParameter(valid_564239, JString, required = true,
                                  default = newJString("2019-01-01-preview"))
-  if valid_568339 != nil:
-    section.add "api-version", valid_568339
+  if valid_564239 != nil:
+    section.add "api-version", valid_564239
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1423,65 +1417,64 @@ proc validate_AlertRulesCreateOrUpdateAction_568331(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568341: Call_AlertRulesCreateOrUpdateAction_568330; path: JsonNode;
+proc call*(call_564241: Call_AlertRulesCreateOrUpdateAction_564230; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Creates or updates the action of alert rule.
   ## 
-  let valid = call_568341.validator(path, query, header, formData, body)
-  let scheme = call_568341.pickScheme
+  let valid = call_564241.validator(path, query, header, formData, body)
+  let scheme = call_564241.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568341.url(scheme.get, call_568341.host, call_568341.base,
-                         call_568341.route, valid.getOrDefault("path"),
+  let url = call_564241.url(scheme.get, call_564241.host, call_564241.base,
+                         call_564241.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568341, url, valid)
+  result = hook(call_564241, url, valid)
 
-proc call*(call_568342: Call_AlertRulesCreateOrUpdateAction_568330;
-          resourceGroupName: string; action: JsonNode; subscriptionId: string;
-          ruleId: string; actionId: string; workspaceName: string;
-          operationalInsightsResourceProvider: string;
-          apiVersion: string = "2019-01-01-preview"): Recallable =
+proc call*(call_564242: Call_AlertRulesCreateOrUpdateAction_564230;
+          action: JsonNode; ruleId: string; actionId: string; subscriptionId: string;
+          operationalInsightsResourceProvider: string; resourceGroupName: string;
+          workspaceName: string; apiVersion: string = "2019-01-01-preview"): Recallable =
   ## alertRulesCreateOrUpdateAction
   ## Creates or updates the action of alert rule.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
   ##   action: JObject (required)
   ##         : The action
-  ##   apiVersion: string (required)
-  ##             : API version for the operation
-  ##   subscriptionId: string (required)
-  ##                 : Azure subscription ID
   ##   ruleId: string (required)
   ##         : Alert rule ID
+  ##   apiVersion: string (required)
+  ##             : API version for the operation
   ##   actionId: string (required)
   ##           : Action ID
-  ##   workspaceName: string (required)
-  ##                : The name of the workspace.
+  ##   subscriptionId: string (required)
+  ##                 : Azure subscription ID
   ##   operationalInsightsResourceProvider: string (required)
   ##                                      : The namespace of workspaces resource provider- Microsoft.OperationalInsights.
-  var path_568343 = newJObject()
-  var query_568344 = newJObject()
-  var body_568345 = newJObject()
-  add(path_568343, "resourceGroupName", newJString(resourceGroupName))
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
+  ##   workspaceName: string (required)
+  ##                : The name of the workspace.
+  var path_564243 = newJObject()
+  var query_564244 = newJObject()
+  var body_564245 = newJObject()
   if action != nil:
-    body_568345 = action
-  add(query_568344, "api-version", newJString(apiVersion))
-  add(path_568343, "subscriptionId", newJString(subscriptionId))
-  add(path_568343, "ruleId", newJString(ruleId))
-  add(path_568343, "actionId", newJString(actionId))
-  add(path_568343, "workspaceName", newJString(workspaceName))
-  add(path_568343, "operationalInsightsResourceProvider",
+    body_564245 = action
+  add(path_564243, "ruleId", newJString(ruleId))
+  add(query_564244, "api-version", newJString(apiVersion))
+  add(path_564243, "actionId", newJString(actionId))
+  add(path_564243, "subscriptionId", newJString(subscriptionId))
+  add(path_564243, "operationalInsightsResourceProvider",
       newJString(operationalInsightsResourceProvider))
-  result = call_568342.call(path_568343, query_568344, nil, nil, body_568345)
+  add(path_564243, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564243, "workspaceName", newJString(workspaceName))
+  result = call_564242.call(path_564243, query_564244, nil, nil, body_564245)
 
-var alertRulesCreateOrUpdateAction* = Call_AlertRulesCreateOrUpdateAction_568330(
+var alertRulesCreateOrUpdateAction* = Call_AlertRulesCreateOrUpdateAction_564230(
     name: "alertRulesCreateOrUpdateAction", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/{operationalInsightsResourceProvider}/workspaces/{workspaceName}/providers/Microsoft.SecurityInsights/alertRules/{ruleId}/actions/{actionId}",
-    validator: validate_AlertRulesCreateOrUpdateAction_568331, base: "",
-    url: url_AlertRulesCreateOrUpdateAction_568332, schemes: {Scheme.Https})
+    validator: validate_AlertRulesCreateOrUpdateAction_564231, base: "",
+    url: url_AlertRulesCreateOrUpdateAction_564232, schemes: {Scheme.Https})
 type
-  Call_AlertRulesGetAction_568316 = ref object of OpenApiRestCall_567667
-proc url_AlertRulesGetAction_568318(protocol: Scheme; host: string; base: string;
+  Call_AlertRulesGetAction_564216 = ref object of OpenApiRestCall_563565
+proc url_AlertRulesGetAction_564218(protocol: Scheme; host: string; base: string;
                                    route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1514,7 +1507,7 @@ proc url_AlertRulesGetAction_568318(protocol: Scheme; host: string; base: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AlertRulesGetAction_568317(path: JsonNode; query: JsonNode;
+proc validate_AlertRulesGetAction_564217(path: JsonNode; query: JsonNode;
                                         header: JsonNode; formData: JsonNode;
                                         body: JsonNode): JsonNode =
   ## Gets the action of alert rule.
@@ -1522,51 +1515,50 @@ proc validate_AlertRulesGetAction_568317(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
-  ##   subscriptionId: JString (required)
-  ##                 : Azure subscription ID
   ##   ruleId: JString (required)
   ##         : Alert rule ID
   ##   actionId: JString (required)
   ##           : Action ID
-  ##   workspaceName: JString (required)
-  ##                : The name of the workspace.
+  ##   subscriptionId: JString (required)
+  ##                 : Azure subscription ID
   ##   operationalInsightsResourceProvider: JString (required)
   ##                                      : The namespace of workspaces resource provider- Microsoft.OperationalInsights.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
+  ##   workspaceName: JString (required)
+  ##                : The name of the workspace.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568319 = path.getOrDefault("resourceGroupName")
-  valid_568319 = validateParameter(valid_568319, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `ruleId` field"
+  var valid_564219 = path.getOrDefault("ruleId")
+  valid_564219 = validateParameter(valid_564219, JString, required = true,
                                  default = nil)
-  if valid_568319 != nil:
-    section.add "resourceGroupName", valid_568319
-  var valid_568320 = path.getOrDefault("subscriptionId")
-  valid_568320 = validateParameter(valid_568320, JString, required = true,
+  if valid_564219 != nil:
+    section.add "ruleId", valid_564219
+  var valid_564220 = path.getOrDefault("actionId")
+  valid_564220 = validateParameter(valid_564220, JString, required = true,
                                  default = nil)
-  if valid_568320 != nil:
-    section.add "subscriptionId", valid_568320
-  var valid_568321 = path.getOrDefault("ruleId")
-  valid_568321 = validateParameter(valid_568321, JString, required = true,
+  if valid_564220 != nil:
+    section.add "actionId", valid_564220
+  var valid_564221 = path.getOrDefault("subscriptionId")
+  valid_564221 = validateParameter(valid_564221, JString, required = true,
                                  default = nil)
-  if valid_568321 != nil:
-    section.add "ruleId", valid_568321
-  var valid_568322 = path.getOrDefault("actionId")
-  valid_568322 = validateParameter(valid_568322, JString, required = true,
+  if valid_564221 != nil:
+    section.add "subscriptionId", valid_564221
+  var valid_564222 = path.getOrDefault("operationalInsightsResourceProvider")
+  valid_564222 = validateParameter(valid_564222, JString, required = true,
                                  default = nil)
-  if valid_568322 != nil:
-    section.add "actionId", valid_568322
-  var valid_568323 = path.getOrDefault("workspaceName")
-  valid_568323 = validateParameter(valid_568323, JString, required = true,
+  if valid_564222 != nil:
+    section.add "operationalInsightsResourceProvider", valid_564222
+  var valid_564223 = path.getOrDefault("resourceGroupName")
+  valid_564223 = validateParameter(valid_564223, JString, required = true,
                                  default = nil)
-  if valid_568323 != nil:
-    section.add "workspaceName", valid_568323
-  var valid_568324 = path.getOrDefault("operationalInsightsResourceProvider")
-  valid_568324 = validateParameter(valid_568324, JString, required = true,
+  if valid_564223 != nil:
+    section.add "resourceGroupName", valid_564223
+  var valid_564224 = path.getOrDefault("workspaceName")
+  valid_564224 = validateParameter(valid_564224, JString, required = true,
                                  default = nil)
-  if valid_568324 != nil:
-    section.add "operationalInsightsResourceProvider", valid_568324
+  if valid_564224 != nil:
+    section.add "workspaceName", valid_564224
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1574,11 +1566,11 @@ proc validate_AlertRulesGetAction_568317(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568325 = query.getOrDefault("api-version")
-  valid_568325 = validateParameter(valid_568325, JString, required = true,
+  var valid_564225 = query.getOrDefault("api-version")
+  valid_564225 = validateParameter(valid_564225, JString, required = true,
                                  default = newJString("2019-01-01-preview"))
-  if valid_568325 != nil:
-    section.add "api-version", valid_568325
+  if valid_564225 != nil:
+    section.add "api-version", valid_564225
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1587,59 +1579,59 @@ proc validate_AlertRulesGetAction_568317(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568326: Call_AlertRulesGetAction_568316; path: JsonNode;
+proc call*(call_564226: Call_AlertRulesGetAction_564216; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the action of alert rule.
   ## 
-  let valid = call_568326.validator(path, query, header, formData, body)
-  let scheme = call_568326.pickScheme
+  let valid = call_564226.validator(path, query, header, formData, body)
+  let scheme = call_564226.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568326.url(scheme.get, call_568326.host, call_568326.base,
-                         call_568326.route, valid.getOrDefault("path"),
+  let url = call_564226.url(scheme.get, call_564226.host, call_564226.base,
+                         call_564226.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568326, url, valid)
+  result = hook(call_564226, url, valid)
 
-proc call*(call_568327: Call_AlertRulesGetAction_568316; resourceGroupName: string;
-          subscriptionId: string; ruleId: string; actionId: string;
-          workspaceName: string; operationalInsightsResourceProvider: string;
-          apiVersion: string = "2019-01-01-preview"): Recallable =
+proc call*(call_564227: Call_AlertRulesGetAction_564216; ruleId: string;
+          actionId: string; subscriptionId: string;
+          operationalInsightsResourceProvider: string; resourceGroupName: string;
+          workspaceName: string; apiVersion: string = "2019-01-01-preview"): Recallable =
   ## alertRulesGetAction
   ## Gets the action of alert rule.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
-  ##   apiVersion: string (required)
-  ##             : API version for the operation
-  ##   subscriptionId: string (required)
-  ##                 : Azure subscription ID
   ##   ruleId: string (required)
   ##         : Alert rule ID
+  ##   apiVersion: string (required)
+  ##             : API version for the operation
   ##   actionId: string (required)
   ##           : Action ID
-  ##   workspaceName: string (required)
-  ##                : The name of the workspace.
+  ##   subscriptionId: string (required)
+  ##                 : Azure subscription ID
   ##   operationalInsightsResourceProvider: string (required)
   ##                                      : The namespace of workspaces resource provider- Microsoft.OperationalInsights.
-  var path_568328 = newJObject()
-  var query_568329 = newJObject()
-  add(path_568328, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568329, "api-version", newJString(apiVersion))
-  add(path_568328, "subscriptionId", newJString(subscriptionId))
-  add(path_568328, "ruleId", newJString(ruleId))
-  add(path_568328, "actionId", newJString(actionId))
-  add(path_568328, "workspaceName", newJString(workspaceName))
-  add(path_568328, "operationalInsightsResourceProvider",
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
+  ##   workspaceName: string (required)
+  ##                : The name of the workspace.
+  var path_564228 = newJObject()
+  var query_564229 = newJObject()
+  add(path_564228, "ruleId", newJString(ruleId))
+  add(query_564229, "api-version", newJString(apiVersion))
+  add(path_564228, "actionId", newJString(actionId))
+  add(path_564228, "subscriptionId", newJString(subscriptionId))
+  add(path_564228, "operationalInsightsResourceProvider",
       newJString(operationalInsightsResourceProvider))
-  result = call_568327.call(path_568328, query_568329, nil, nil, nil)
+  add(path_564228, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564228, "workspaceName", newJString(workspaceName))
+  result = call_564227.call(path_564228, query_564229, nil, nil, nil)
 
-var alertRulesGetAction* = Call_AlertRulesGetAction_568316(
+var alertRulesGetAction* = Call_AlertRulesGetAction_564216(
     name: "alertRulesGetAction", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/{operationalInsightsResourceProvider}/workspaces/{workspaceName}/providers/Microsoft.SecurityInsights/alertRules/{ruleId}/actions/{actionId}",
-    validator: validate_AlertRulesGetAction_568317, base: "",
-    url: url_AlertRulesGetAction_568318, schemes: {Scheme.Https})
+    validator: validate_AlertRulesGetAction_564217, base: "",
+    url: url_AlertRulesGetAction_564218, schemes: {Scheme.Https})
 type
-  Call_AlertRulesDeleteAction_568346 = ref object of OpenApiRestCall_567667
-proc url_AlertRulesDeleteAction_568348(protocol: Scheme; host: string; base: string;
+  Call_AlertRulesDeleteAction_564246 = ref object of OpenApiRestCall_563565
+proc url_AlertRulesDeleteAction_564248(protocol: Scheme; host: string; base: string;
                                       route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1672,58 +1664,57 @@ proc url_AlertRulesDeleteAction_568348(protocol: Scheme; host: string; base: str
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_AlertRulesDeleteAction_568347(path: JsonNode; query: JsonNode;
+proc validate_AlertRulesDeleteAction_564247(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Delete the action of alert rule.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
-  ##   subscriptionId: JString (required)
-  ##                 : Azure subscription ID
   ##   ruleId: JString (required)
   ##         : Alert rule ID
   ##   actionId: JString (required)
   ##           : Action ID
-  ##   workspaceName: JString (required)
-  ##                : The name of the workspace.
+  ##   subscriptionId: JString (required)
+  ##                 : Azure subscription ID
   ##   operationalInsightsResourceProvider: JString (required)
   ##                                      : The namespace of workspaces resource provider- Microsoft.OperationalInsights.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
+  ##   workspaceName: JString (required)
+  ##                : The name of the workspace.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568349 = path.getOrDefault("resourceGroupName")
-  valid_568349 = validateParameter(valid_568349, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `ruleId` field"
+  var valid_564249 = path.getOrDefault("ruleId")
+  valid_564249 = validateParameter(valid_564249, JString, required = true,
                                  default = nil)
-  if valid_568349 != nil:
-    section.add "resourceGroupName", valid_568349
-  var valid_568350 = path.getOrDefault("subscriptionId")
-  valid_568350 = validateParameter(valid_568350, JString, required = true,
+  if valid_564249 != nil:
+    section.add "ruleId", valid_564249
+  var valid_564250 = path.getOrDefault("actionId")
+  valid_564250 = validateParameter(valid_564250, JString, required = true,
                                  default = nil)
-  if valid_568350 != nil:
-    section.add "subscriptionId", valid_568350
-  var valid_568351 = path.getOrDefault("ruleId")
-  valid_568351 = validateParameter(valid_568351, JString, required = true,
+  if valid_564250 != nil:
+    section.add "actionId", valid_564250
+  var valid_564251 = path.getOrDefault("subscriptionId")
+  valid_564251 = validateParameter(valid_564251, JString, required = true,
                                  default = nil)
-  if valid_568351 != nil:
-    section.add "ruleId", valid_568351
-  var valid_568352 = path.getOrDefault("actionId")
-  valid_568352 = validateParameter(valid_568352, JString, required = true,
+  if valid_564251 != nil:
+    section.add "subscriptionId", valid_564251
+  var valid_564252 = path.getOrDefault("operationalInsightsResourceProvider")
+  valid_564252 = validateParameter(valid_564252, JString, required = true,
                                  default = nil)
-  if valid_568352 != nil:
-    section.add "actionId", valid_568352
-  var valid_568353 = path.getOrDefault("workspaceName")
-  valid_568353 = validateParameter(valid_568353, JString, required = true,
+  if valid_564252 != nil:
+    section.add "operationalInsightsResourceProvider", valid_564252
+  var valid_564253 = path.getOrDefault("resourceGroupName")
+  valid_564253 = validateParameter(valid_564253, JString, required = true,
                                  default = nil)
-  if valid_568353 != nil:
-    section.add "workspaceName", valid_568353
-  var valid_568354 = path.getOrDefault("operationalInsightsResourceProvider")
-  valid_568354 = validateParameter(valid_568354, JString, required = true,
+  if valid_564253 != nil:
+    section.add "resourceGroupName", valid_564253
+  var valid_564254 = path.getOrDefault("workspaceName")
+  valid_564254 = validateParameter(valid_564254, JString, required = true,
                                  default = nil)
-  if valid_568354 != nil:
-    section.add "operationalInsightsResourceProvider", valid_568354
+  if valid_564254 != nil:
+    section.add "workspaceName", valid_564254
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1731,11 +1722,11 @@ proc validate_AlertRulesDeleteAction_568347(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568355 = query.getOrDefault("api-version")
-  valid_568355 = validateParameter(valid_568355, JString, required = true,
+  var valid_564255 = query.getOrDefault("api-version")
+  valid_564255 = validateParameter(valid_564255, JString, required = true,
                                  default = newJString("2019-01-01-preview"))
-  if valid_568355 != nil:
-    section.add "api-version", valid_568355
+  if valid_564255 != nil:
+    section.add "api-version", valid_564255
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1744,60 +1735,59 @@ proc validate_AlertRulesDeleteAction_568347(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568356: Call_AlertRulesDeleteAction_568346; path: JsonNode;
+proc call*(call_564256: Call_AlertRulesDeleteAction_564246; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Delete the action of alert rule.
   ## 
-  let valid = call_568356.validator(path, query, header, formData, body)
-  let scheme = call_568356.pickScheme
+  let valid = call_564256.validator(path, query, header, formData, body)
+  let scheme = call_564256.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568356.url(scheme.get, call_568356.host, call_568356.base,
-                         call_568356.route, valid.getOrDefault("path"),
+  let url = call_564256.url(scheme.get, call_564256.host, call_564256.base,
+                         call_564256.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568356, url, valid)
+  result = hook(call_564256, url, valid)
 
-proc call*(call_568357: Call_AlertRulesDeleteAction_568346;
-          resourceGroupName: string; subscriptionId: string; ruleId: string;
-          actionId: string; workspaceName: string;
-          operationalInsightsResourceProvider: string;
-          apiVersion: string = "2019-01-01-preview"): Recallable =
+proc call*(call_564257: Call_AlertRulesDeleteAction_564246; ruleId: string;
+          actionId: string; subscriptionId: string;
+          operationalInsightsResourceProvider: string; resourceGroupName: string;
+          workspaceName: string; apiVersion: string = "2019-01-01-preview"): Recallable =
   ## alertRulesDeleteAction
   ## Delete the action of alert rule.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
-  ##   apiVersion: string (required)
-  ##             : API version for the operation
-  ##   subscriptionId: string (required)
-  ##                 : Azure subscription ID
   ##   ruleId: string (required)
   ##         : Alert rule ID
+  ##   apiVersion: string (required)
+  ##             : API version for the operation
   ##   actionId: string (required)
   ##           : Action ID
-  ##   workspaceName: string (required)
-  ##                : The name of the workspace.
+  ##   subscriptionId: string (required)
+  ##                 : Azure subscription ID
   ##   operationalInsightsResourceProvider: string (required)
   ##                                      : The namespace of workspaces resource provider- Microsoft.OperationalInsights.
-  var path_568358 = newJObject()
-  var query_568359 = newJObject()
-  add(path_568358, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568359, "api-version", newJString(apiVersion))
-  add(path_568358, "subscriptionId", newJString(subscriptionId))
-  add(path_568358, "ruleId", newJString(ruleId))
-  add(path_568358, "actionId", newJString(actionId))
-  add(path_568358, "workspaceName", newJString(workspaceName))
-  add(path_568358, "operationalInsightsResourceProvider",
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
+  ##   workspaceName: string (required)
+  ##                : The name of the workspace.
+  var path_564258 = newJObject()
+  var query_564259 = newJObject()
+  add(path_564258, "ruleId", newJString(ruleId))
+  add(query_564259, "api-version", newJString(apiVersion))
+  add(path_564258, "actionId", newJString(actionId))
+  add(path_564258, "subscriptionId", newJString(subscriptionId))
+  add(path_564258, "operationalInsightsResourceProvider",
       newJString(operationalInsightsResourceProvider))
-  result = call_568357.call(path_568358, query_568359, nil, nil, nil)
+  add(path_564258, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564258, "workspaceName", newJString(workspaceName))
+  result = call_564257.call(path_564258, query_564259, nil, nil, nil)
 
-var alertRulesDeleteAction* = Call_AlertRulesDeleteAction_568346(
+var alertRulesDeleteAction* = Call_AlertRulesDeleteAction_564246(
     name: "alertRulesDeleteAction", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/{operationalInsightsResourceProvider}/workspaces/{workspaceName}/providers/Microsoft.SecurityInsights/alertRules/{ruleId}/actions/{actionId}",
-    validator: validate_AlertRulesDeleteAction_568347, base: "",
-    url: url_AlertRulesDeleteAction_568348, schemes: {Scheme.Https})
+    validator: validate_AlertRulesDeleteAction_564247, base: "",
+    url: url_AlertRulesDeleteAction_564248, schemes: {Scheme.Https})
 type
-  Call_BookmarksList_568360 = ref object of OpenApiRestCall_567667
-proc url_BookmarksList_568362(protocol: Scheme; host: string; base: string;
+  Call_BookmarksList_564260 = ref object of OpenApiRestCall_563565
+proc url_BookmarksList_564262(protocol: Scheme; host: string; base: string;
                              route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1825,44 +1815,44 @@ proc url_BookmarksList_568362(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_BookmarksList_568361(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_BookmarksList_564261(path: JsonNode; query: JsonNode; header: JsonNode;
                                   formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets all bookmarks.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
   ##   subscriptionId: JString (required)
   ##                 : Azure subscription ID
-  ##   workspaceName: JString (required)
-  ##                : The name of the workspace.
   ##   operationalInsightsResourceProvider: JString (required)
   ##                                      : The namespace of workspaces resource provider- Microsoft.OperationalInsights.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
+  ##   workspaceName: JString (required)
+  ##                : The name of the workspace.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568363 = path.getOrDefault("resourceGroupName")
-  valid_568363 = validateParameter(valid_568363, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564263 = path.getOrDefault("subscriptionId")
+  valid_564263 = validateParameter(valid_564263, JString, required = true,
                                  default = nil)
-  if valid_568363 != nil:
-    section.add "resourceGroupName", valid_568363
-  var valid_568364 = path.getOrDefault("subscriptionId")
-  valid_568364 = validateParameter(valid_568364, JString, required = true,
+  if valid_564263 != nil:
+    section.add "subscriptionId", valid_564263
+  var valid_564264 = path.getOrDefault("operationalInsightsResourceProvider")
+  valid_564264 = validateParameter(valid_564264, JString, required = true,
                                  default = nil)
-  if valid_568364 != nil:
-    section.add "subscriptionId", valid_568364
-  var valid_568365 = path.getOrDefault("workspaceName")
-  valid_568365 = validateParameter(valid_568365, JString, required = true,
+  if valid_564264 != nil:
+    section.add "operationalInsightsResourceProvider", valid_564264
+  var valid_564265 = path.getOrDefault("resourceGroupName")
+  valid_564265 = validateParameter(valid_564265, JString, required = true,
                                  default = nil)
-  if valid_568365 != nil:
-    section.add "workspaceName", valid_568365
-  var valid_568366 = path.getOrDefault("operationalInsightsResourceProvider")
-  valid_568366 = validateParameter(valid_568366, JString, required = true,
+  if valid_564265 != nil:
+    section.add "resourceGroupName", valid_564265
+  var valid_564266 = path.getOrDefault("workspaceName")
+  valid_564266 = validateParameter(valid_564266, JString, required = true,
                                  default = nil)
-  if valid_568366 != nil:
-    section.add "operationalInsightsResourceProvider", valid_568366
+  if valid_564266 != nil:
+    section.add "workspaceName", valid_564266
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1870,11 +1860,11 @@ proc validate_BookmarksList_568361(path: JsonNode; query: JsonNode; header: Json
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568367 = query.getOrDefault("api-version")
-  valid_568367 = validateParameter(valid_568367, JString, required = true,
+  var valid_564267 = query.getOrDefault("api-version")
+  valid_564267 = validateParameter(valid_564267, JString, required = true,
                                  default = newJString("2019-01-01-preview"))
-  if valid_568367 != nil:
-    section.add "api-version", valid_568367
+  if valid_564267 != nil:
+    section.add "api-version", valid_564267
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1883,52 +1873,51 @@ proc validate_BookmarksList_568361(path: JsonNode; query: JsonNode; header: Json
   if body != nil:
     result.add "body", body
 
-proc call*(call_568368: Call_BookmarksList_568360; path: JsonNode; query: JsonNode;
+proc call*(call_564268: Call_BookmarksList_564260; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets all bookmarks.
   ## 
-  let valid = call_568368.validator(path, query, header, formData, body)
-  let scheme = call_568368.pickScheme
+  let valid = call_564268.validator(path, query, header, formData, body)
+  let scheme = call_564268.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568368.url(scheme.get, call_568368.host, call_568368.base,
-                         call_568368.route, valid.getOrDefault("path"),
+  let url = call_564268.url(scheme.get, call_564268.host, call_564268.base,
+                         call_564268.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568368, url, valid)
+  result = hook(call_564268, url, valid)
 
-proc call*(call_568369: Call_BookmarksList_568360; resourceGroupName: string;
-          subscriptionId: string; workspaceName: string;
-          operationalInsightsResourceProvider: string;
-          apiVersion: string = "2019-01-01-preview"): Recallable =
+proc call*(call_564269: Call_BookmarksList_564260; subscriptionId: string;
+          operationalInsightsResourceProvider: string; resourceGroupName: string;
+          workspaceName: string; apiVersion: string = "2019-01-01-preview"): Recallable =
   ## bookmarksList
   ## Gets all bookmarks.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
   ##   apiVersion: string (required)
   ##             : API version for the operation
   ##   subscriptionId: string (required)
   ##                 : Azure subscription ID
-  ##   workspaceName: string (required)
-  ##                : The name of the workspace.
   ##   operationalInsightsResourceProvider: string (required)
   ##                                      : The namespace of workspaces resource provider- Microsoft.OperationalInsights.
-  var path_568370 = newJObject()
-  var query_568371 = newJObject()
-  add(path_568370, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568371, "api-version", newJString(apiVersion))
-  add(path_568370, "subscriptionId", newJString(subscriptionId))
-  add(path_568370, "workspaceName", newJString(workspaceName))
-  add(path_568370, "operationalInsightsResourceProvider",
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
+  ##   workspaceName: string (required)
+  ##                : The name of the workspace.
+  var path_564270 = newJObject()
+  var query_564271 = newJObject()
+  add(query_564271, "api-version", newJString(apiVersion))
+  add(path_564270, "subscriptionId", newJString(subscriptionId))
+  add(path_564270, "operationalInsightsResourceProvider",
       newJString(operationalInsightsResourceProvider))
-  result = call_568369.call(path_568370, query_568371, nil, nil, nil)
+  add(path_564270, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564270, "workspaceName", newJString(workspaceName))
+  result = call_564269.call(path_564270, query_564271, nil, nil, nil)
 
-var bookmarksList* = Call_BookmarksList_568360(name: "bookmarksList",
+var bookmarksList* = Call_BookmarksList_564260(name: "bookmarksList",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/{operationalInsightsResourceProvider}/workspaces/{workspaceName}/providers/Microsoft.SecurityInsights/bookmarks",
-    validator: validate_BookmarksList_568361, base: "", url: url_BookmarksList_568362,
+    validator: validate_BookmarksList_564261, base: "", url: url_BookmarksList_564262,
     schemes: {Scheme.Https})
 type
-  Call_BookmarksCreateOrUpdate_568385 = ref object of OpenApiRestCall_567667
-proc url_BookmarksCreateOrUpdate_568387(protocol: Scheme; host: string; base: string;
+  Call_BookmarksCreateOrUpdate_564285 = ref object of OpenApiRestCall_563565
+proc url_BookmarksCreateOrUpdate_564287(protocol: Scheme; host: string; base: string;
                                        route: string; path: JsonNode;
                                        query: JsonNode): Uri =
   result.scheme = $protocol
@@ -1959,51 +1948,51 @@ proc url_BookmarksCreateOrUpdate_568387(protocol: Scheme; host: string; base: st
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_BookmarksCreateOrUpdate_568386(path: JsonNode; query: JsonNode;
+proc validate_BookmarksCreateOrUpdate_564286(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Creates or updates the bookmark.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
   ##   bookmarkId: JString (required)
   ##             : Bookmark ID
   ##   subscriptionId: JString (required)
   ##                 : Azure subscription ID
-  ##   workspaceName: JString (required)
-  ##                : The name of the workspace.
   ##   operationalInsightsResourceProvider: JString (required)
   ##                                      : The namespace of workspaces resource provider- Microsoft.OperationalInsights.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
+  ##   workspaceName: JString (required)
+  ##                : The name of the workspace.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568388 = path.getOrDefault("resourceGroupName")
-  valid_568388 = validateParameter(valid_568388, JString, required = true,
+        "path argument is necessary due to required `bookmarkId` field"
+  var valid_564288 = path.getOrDefault("bookmarkId")
+  valid_564288 = validateParameter(valid_564288, JString, required = true,
                                  default = nil)
-  if valid_568388 != nil:
-    section.add "resourceGroupName", valid_568388
-  var valid_568389 = path.getOrDefault("bookmarkId")
-  valid_568389 = validateParameter(valid_568389, JString, required = true,
+  if valid_564288 != nil:
+    section.add "bookmarkId", valid_564288
+  var valid_564289 = path.getOrDefault("subscriptionId")
+  valid_564289 = validateParameter(valid_564289, JString, required = true,
                                  default = nil)
-  if valid_568389 != nil:
-    section.add "bookmarkId", valid_568389
-  var valid_568390 = path.getOrDefault("subscriptionId")
-  valid_568390 = validateParameter(valid_568390, JString, required = true,
+  if valid_564289 != nil:
+    section.add "subscriptionId", valid_564289
+  var valid_564290 = path.getOrDefault("operationalInsightsResourceProvider")
+  valid_564290 = validateParameter(valid_564290, JString, required = true,
                                  default = nil)
-  if valid_568390 != nil:
-    section.add "subscriptionId", valid_568390
-  var valid_568391 = path.getOrDefault("workspaceName")
-  valid_568391 = validateParameter(valid_568391, JString, required = true,
+  if valid_564290 != nil:
+    section.add "operationalInsightsResourceProvider", valid_564290
+  var valid_564291 = path.getOrDefault("resourceGroupName")
+  valid_564291 = validateParameter(valid_564291, JString, required = true,
                                  default = nil)
-  if valid_568391 != nil:
-    section.add "workspaceName", valid_568391
-  var valid_568392 = path.getOrDefault("operationalInsightsResourceProvider")
-  valid_568392 = validateParameter(valid_568392, JString, required = true,
+  if valid_564291 != nil:
+    section.add "resourceGroupName", valid_564291
+  var valid_564292 = path.getOrDefault("workspaceName")
+  valid_564292 = validateParameter(valid_564292, JString, required = true,
                                  default = nil)
-  if valid_568392 != nil:
-    section.add "operationalInsightsResourceProvider", valid_568392
+  if valid_564292 != nil:
+    section.add "workspaceName", valid_564292
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2011,11 +2000,11 @@ proc validate_BookmarksCreateOrUpdate_568386(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568393 = query.getOrDefault("api-version")
-  valid_568393 = validateParameter(valid_568393, JString, required = true,
+  var valid_564293 = query.getOrDefault("api-version")
+  valid_564293 = validateParameter(valid_564293, JString, required = true,
                                  default = newJString("2019-01-01-preview"))
-  if valid_568393 != nil:
-    section.add "api-version", valid_568393
+  if valid_564293 != nil:
+    section.add "api-version", valid_564293
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2029,62 +2018,61 @@ proc validate_BookmarksCreateOrUpdate_568386(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568395: Call_BookmarksCreateOrUpdate_568385; path: JsonNode;
+proc call*(call_564295: Call_BookmarksCreateOrUpdate_564285; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Creates or updates the bookmark.
   ## 
-  let valid = call_568395.validator(path, query, header, formData, body)
-  let scheme = call_568395.pickScheme
+  let valid = call_564295.validator(path, query, header, formData, body)
+  let scheme = call_564295.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568395.url(scheme.get, call_568395.host, call_568395.base,
-                         call_568395.route, valid.getOrDefault("path"),
+  let url = call_564295.url(scheme.get, call_564295.host, call_564295.base,
+                         call_564295.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568395, url, valid)
+  result = hook(call_564295, url, valid)
 
-proc call*(call_568396: Call_BookmarksCreateOrUpdate_568385;
-          resourceGroupName: string; bookmarkId: string; subscriptionId: string;
-          bookmark: JsonNode; workspaceName: string;
-          operationalInsightsResourceProvider: string;
+proc call*(call_564296: Call_BookmarksCreateOrUpdate_564285; bookmarkId: string;
+          subscriptionId: string; operationalInsightsResourceProvider: string;
+          resourceGroupName: string; bookmark: JsonNode; workspaceName: string;
           apiVersion: string = "2019-01-01-preview"): Recallable =
   ## bookmarksCreateOrUpdate
   ## Creates or updates the bookmark.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
   ##   apiVersion: string (required)
   ##             : API version for the operation
   ##   bookmarkId: string (required)
   ##             : Bookmark ID
   ##   subscriptionId: string (required)
   ##                 : Azure subscription ID
+  ##   operationalInsightsResourceProvider: string (required)
+  ##                                      : The namespace of workspaces resource provider- Microsoft.OperationalInsights.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
   ##   bookmark: JObject (required)
   ##           : The bookmark
   ##   workspaceName: string (required)
   ##                : The name of the workspace.
-  ##   operationalInsightsResourceProvider: string (required)
-  ##                                      : The namespace of workspaces resource provider- Microsoft.OperationalInsights.
-  var path_568397 = newJObject()
-  var query_568398 = newJObject()
-  var body_568399 = newJObject()
-  add(path_568397, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568398, "api-version", newJString(apiVersion))
-  add(path_568397, "bookmarkId", newJString(bookmarkId))
-  add(path_568397, "subscriptionId", newJString(subscriptionId))
-  if bookmark != nil:
-    body_568399 = bookmark
-  add(path_568397, "workspaceName", newJString(workspaceName))
-  add(path_568397, "operationalInsightsResourceProvider",
+  var path_564297 = newJObject()
+  var query_564298 = newJObject()
+  var body_564299 = newJObject()
+  add(query_564298, "api-version", newJString(apiVersion))
+  add(path_564297, "bookmarkId", newJString(bookmarkId))
+  add(path_564297, "subscriptionId", newJString(subscriptionId))
+  add(path_564297, "operationalInsightsResourceProvider",
       newJString(operationalInsightsResourceProvider))
-  result = call_568396.call(path_568397, query_568398, nil, nil, body_568399)
+  add(path_564297, "resourceGroupName", newJString(resourceGroupName))
+  if bookmark != nil:
+    body_564299 = bookmark
+  add(path_564297, "workspaceName", newJString(workspaceName))
+  result = call_564296.call(path_564297, query_564298, nil, nil, body_564299)
 
-var bookmarksCreateOrUpdate* = Call_BookmarksCreateOrUpdate_568385(
+var bookmarksCreateOrUpdate* = Call_BookmarksCreateOrUpdate_564285(
     name: "bookmarksCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/{operationalInsightsResourceProvider}/workspaces/{workspaceName}/providers/Microsoft.SecurityInsights/bookmarks/{bookmarkId}",
-    validator: validate_BookmarksCreateOrUpdate_568386, base: "",
-    url: url_BookmarksCreateOrUpdate_568387, schemes: {Scheme.Https})
+    validator: validate_BookmarksCreateOrUpdate_564286, base: "",
+    url: url_BookmarksCreateOrUpdate_564287, schemes: {Scheme.Https})
 type
-  Call_BookmarksGet_568372 = ref object of OpenApiRestCall_567667
-proc url_BookmarksGet_568374(protocol: Scheme; host: string; base: string;
+  Call_BookmarksGet_564272 = ref object of OpenApiRestCall_563565
+proc url_BookmarksGet_564274(protocol: Scheme; host: string; base: string;
                             route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2114,51 +2102,51 @@ proc url_BookmarksGet_568374(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_BookmarksGet_568373(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_BookmarksGet_564273(path: JsonNode; query: JsonNode; header: JsonNode;
                                  formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets a bookmark.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
   ##   bookmarkId: JString (required)
   ##             : Bookmark ID
   ##   subscriptionId: JString (required)
   ##                 : Azure subscription ID
-  ##   workspaceName: JString (required)
-  ##                : The name of the workspace.
   ##   operationalInsightsResourceProvider: JString (required)
   ##                                      : The namespace of workspaces resource provider- Microsoft.OperationalInsights.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
+  ##   workspaceName: JString (required)
+  ##                : The name of the workspace.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568375 = path.getOrDefault("resourceGroupName")
-  valid_568375 = validateParameter(valid_568375, JString, required = true,
+        "path argument is necessary due to required `bookmarkId` field"
+  var valid_564275 = path.getOrDefault("bookmarkId")
+  valid_564275 = validateParameter(valid_564275, JString, required = true,
                                  default = nil)
-  if valid_568375 != nil:
-    section.add "resourceGroupName", valid_568375
-  var valid_568376 = path.getOrDefault("bookmarkId")
-  valid_568376 = validateParameter(valid_568376, JString, required = true,
+  if valid_564275 != nil:
+    section.add "bookmarkId", valid_564275
+  var valid_564276 = path.getOrDefault("subscriptionId")
+  valid_564276 = validateParameter(valid_564276, JString, required = true,
                                  default = nil)
-  if valid_568376 != nil:
-    section.add "bookmarkId", valid_568376
-  var valid_568377 = path.getOrDefault("subscriptionId")
-  valid_568377 = validateParameter(valid_568377, JString, required = true,
+  if valid_564276 != nil:
+    section.add "subscriptionId", valid_564276
+  var valid_564277 = path.getOrDefault("operationalInsightsResourceProvider")
+  valid_564277 = validateParameter(valid_564277, JString, required = true,
                                  default = nil)
-  if valid_568377 != nil:
-    section.add "subscriptionId", valid_568377
-  var valid_568378 = path.getOrDefault("workspaceName")
-  valid_568378 = validateParameter(valid_568378, JString, required = true,
+  if valid_564277 != nil:
+    section.add "operationalInsightsResourceProvider", valid_564277
+  var valid_564278 = path.getOrDefault("resourceGroupName")
+  valid_564278 = validateParameter(valid_564278, JString, required = true,
                                  default = nil)
-  if valid_568378 != nil:
-    section.add "workspaceName", valid_568378
-  var valid_568379 = path.getOrDefault("operationalInsightsResourceProvider")
-  valid_568379 = validateParameter(valid_568379, JString, required = true,
+  if valid_564278 != nil:
+    section.add "resourceGroupName", valid_564278
+  var valid_564279 = path.getOrDefault("workspaceName")
+  valid_564279 = validateParameter(valid_564279, JString, required = true,
                                  default = nil)
-  if valid_568379 != nil:
-    section.add "operationalInsightsResourceProvider", valid_568379
+  if valid_564279 != nil:
+    section.add "workspaceName", valid_564279
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2166,11 +2154,11 @@ proc validate_BookmarksGet_568373(path: JsonNode; query: JsonNode; header: JsonN
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568380 = query.getOrDefault("api-version")
-  valid_568380 = validateParameter(valid_568380, JString, required = true,
+  var valid_564280 = query.getOrDefault("api-version")
+  valid_564280 = validateParameter(valid_564280, JString, required = true,
                                  default = newJString("2019-01-01-preview"))
-  if valid_568380 != nil:
-    section.add "api-version", valid_568380
+  if valid_564280 != nil:
+    section.add "api-version", valid_564280
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2179,55 +2167,55 @@ proc validate_BookmarksGet_568373(path: JsonNode; query: JsonNode; header: JsonN
   if body != nil:
     result.add "body", body
 
-proc call*(call_568381: Call_BookmarksGet_568372; path: JsonNode; query: JsonNode;
+proc call*(call_564281: Call_BookmarksGet_564272; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets a bookmark.
   ## 
-  let valid = call_568381.validator(path, query, header, formData, body)
-  let scheme = call_568381.pickScheme
+  let valid = call_564281.validator(path, query, header, formData, body)
+  let scheme = call_564281.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568381.url(scheme.get, call_568381.host, call_568381.base,
-                         call_568381.route, valid.getOrDefault("path"),
+  let url = call_564281.url(scheme.get, call_564281.host, call_564281.base,
+                         call_564281.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568381, url, valid)
+  result = hook(call_564281, url, valid)
 
-proc call*(call_568382: Call_BookmarksGet_568372; resourceGroupName: string;
-          bookmarkId: string; subscriptionId: string; workspaceName: string;
-          operationalInsightsResourceProvider: string;
+proc call*(call_564282: Call_BookmarksGet_564272; bookmarkId: string;
+          subscriptionId: string; operationalInsightsResourceProvider: string;
+          resourceGroupName: string; workspaceName: string;
           apiVersion: string = "2019-01-01-preview"): Recallable =
   ## bookmarksGet
   ## Gets a bookmark.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
   ##   apiVersion: string (required)
   ##             : API version for the operation
   ##   bookmarkId: string (required)
   ##             : Bookmark ID
   ##   subscriptionId: string (required)
   ##                 : Azure subscription ID
-  ##   workspaceName: string (required)
-  ##                : The name of the workspace.
   ##   operationalInsightsResourceProvider: string (required)
   ##                                      : The namespace of workspaces resource provider- Microsoft.OperationalInsights.
-  var path_568383 = newJObject()
-  var query_568384 = newJObject()
-  add(path_568383, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568384, "api-version", newJString(apiVersion))
-  add(path_568383, "bookmarkId", newJString(bookmarkId))
-  add(path_568383, "subscriptionId", newJString(subscriptionId))
-  add(path_568383, "workspaceName", newJString(workspaceName))
-  add(path_568383, "operationalInsightsResourceProvider",
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
+  ##   workspaceName: string (required)
+  ##                : The name of the workspace.
+  var path_564283 = newJObject()
+  var query_564284 = newJObject()
+  add(query_564284, "api-version", newJString(apiVersion))
+  add(path_564283, "bookmarkId", newJString(bookmarkId))
+  add(path_564283, "subscriptionId", newJString(subscriptionId))
+  add(path_564283, "operationalInsightsResourceProvider",
       newJString(operationalInsightsResourceProvider))
-  result = call_568382.call(path_568383, query_568384, nil, nil, nil)
+  add(path_564283, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564283, "workspaceName", newJString(workspaceName))
+  result = call_564282.call(path_564283, query_564284, nil, nil, nil)
 
-var bookmarksGet* = Call_BookmarksGet_568372(name: "bookmarksGet",
+var bookmarksGet* = Call_BookmarksGet_564272(name: "bookmarksGet",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/{operationalInsightsResourceProvider}/workspaces/{workspaceName}/providers/Microsoft.SecurityInsights/bookmarks/{bookmarkId}",
-    validator: validate_BookmarksGet_568373, base: "", url: url_BookmarksGet_568374,
+    validator: validate_BookmarksGet_564273, base: "", url: url_BookmarksGet_564274,
     schemes: {Scheme.Https})
 type
-  Call_BookmarksDelete_568400 = ref object of OpenApiRestCall_567667
-proc url_BookmarksDelete_568402(protocol: Scheme; host: string; base: string;
+  Call_BookmarksDelete_564300 = ref object of OpenApiRestCall_563565
+proc url_BookmarksDelete_564302(protocol: Scheme; host: string; base: string;
                                route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2257,7 +2245,7 @@ proc url_BookmarksDelete_568402(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_BookmarksDelete_568401(path: JsonNode; query: JsonNode;
+proc validate_BookmarksDelete_564301(path: JsonNode; query: JsonNode;
                                     header: JsonNode; formData: JsonNode;
                                     body: JsonNode): JsonNode =
   ## Delete the bookmark.
@@ -2265,44 +2253,44 @@ proc validate_BookmarksDelete_568401(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
   ##   bookmarkId: JString (required)
   ##             : Bookmark ID
   ##   subscriptionId: JString (required)
   ##                 : Azure subscription ID
-  ##   workspaceName: JString (required)
-  ##                : The name of the workspace.
   ##   operationalInsightsResourceProvider: JString (required)
   ##                                      : The namespace of workspaces resource provider- Microsoft.OperationalInsights.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
+  ##   workspaceName: JString (required)
+  ##                : The name of the workspace.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568403 = path.getOrDefault("resourceGroupName")
-  valid_568403 = validateParameter(valid_568403, JString, required = true,
+        "path argument is necessary due to required `bookmarkId` field"
+  var valid_564303 = path.getOrDefault("bookmarkId")
+  valid_564303 = validateParameter(valid_564303, JString, required = true,
                                  default = nil)
-  if valid_568403 != nil:
-    section.add "resourceGroupName", valid_568403
-  var valid_568404 = path.getOrDefault("bookmarkId")
-  valid_568404 = validateParameter(valid_568404, JString, required = true,
+  if valid_564303 != nil:
+    section.add "bookmarkId", valid_564303
+  var valid_564304 = path.getOrDefault("subscriptionId")
+  valid_564304 = validateParameter(valid_564304, JString, required = true,
                                  default = nil)
-  if valid_568404 != nil:
-    section.add "bookmarkId", valid_568404
-  var valid_568405 = path.getOrDefault("subscriptionId")
-  valid_568405 = validateParameter(valid_568405, JString, required = true,
+  if valid_564304 != nil:
+    section.add "subscriptionId", valid_564304
+  var valid_564305 = path.getOrDefault("operationalInsightsResourceProvider")
+  valid_564305 = validateParameter(valid_564305, JString, required = true,
                                  default = nil)
-  if valid_568405 != nil:
-    section.add "subscriptionId", valid_568405
-  var valid_568406 = path.getOrDefault("workspaceName")
-  valid_568406 = validateParameter(valid_568406, JString, required = true,
+  if valid_564305 != nil:
+    section.add "operationalInsightsResourceProvider", valid_564305
+  var valid_564306 = path.getOrDefault("resourceGroupName")
+  valid_564306 = validateParameter(valid_564306, JString, required = true,
                                  default = nil)
-  if valid_568406 != nil:
-    section.add "workspaceName", valid_568406
-  var valid_568407 = path.getOrDefault("operationalInsightsResourceProvider")
-  valid_568407 = validateParameter(valid_568407, JString, required = true,
+  if valid_564306 != nil:
+    section.add "resourceGroupName", valid_564306
+  var valid_564307 = path.getOrDefault("workspaceName")
+  valid_564307 = validateParameter(valid_564307, JString, required = true,
                                  default = nil)
-  if valid_568407 != nil:
-    section.add "operationalInsightsResourceProvider", valid_568407
+  if valid_564307 != nil:
+    section.add "workspaceName", valid_564307
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2310,11 +2298,11 @@ proc validate_BookmarksDelete_568401(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568408 = query.getOrDefault("api-version")
-  valid_568408 = validateParameter(valid_568408, JString, required = true,
+  var valid_564308 = query.getOrDefault("api-version")
+  valid_564308 = validateParameter(valid_564308, JString, required = true,
                                  default = newJString("2019-01-01-preview"))
-  if valid_568408 != nil:
-    section.add "api-version", valid_568408
+  if valid_564308 != nil:
+    section.add "api-version", valid_564308
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2323,55 +2311,55 @@ proc validate_BookmarksDelete_568401(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568409: Call_BookmarksDelete_568400; path: JsonNode; query: JsonNode;
+proc call*(call_564309: Call_BookmarksDelete_564300; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Delete the bookmark.
   ## 
-  let valid = call_568409.validator(path, query, header, formData, body)
-  let scheme = call_568409.pickScheme
+  let valid = call_564309.validator(path, query, header, formData, body)
+  let scheme = call_564309.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568409.url(scheme.get, call_568409.host, call_568409.base,
-                         call_568409.route, valid.getOrDefault("path"),
+  let url = call_564309.url(scheme.get, call_564309.host, call_564309.base,
+                         call_564309.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568409, url, valid)
+  result = hook(call_564309, url, valid)
 
-proc call*(call_568410: Call_BookmarksDelete_568400; resourceGroupName: string;
-          bookmarkId: string; subscriptionId: string; workspaceName: string;
-          operationalInsightsResourceProvider: string;
+proc call*(call_564310: Call_BookmarksDelete_564300; bookmarkId: string;
+          subscriptionId: string; operationalInsightsResourceProvider: string;
+          resourceGroupName: string; workspaceName: string;
           apiVersion: string = "2019-01-01-preview"): Recallable =
   ## bookmarksDelete
   ## Delete the bookmark.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
   ##   apiVersion: string (required)
   ##             : API version for the operation
   ##   bookmarkId: string (required)
   ##             : Bookmark ID
   ##   subscriptionId: string (required)
   ##                 : Azure subscription ID
-  ##   workspaceName: string (required)
-  ##                : The name of the workspace.
   ##   operationalInsightsResourceProvider: string (required)
   ##                                      : The namespace of workspaces resource provider- Microsoft.OperationalInsights.
-  var path_568411 = newJObject()
-  var query_568412 = newJObject()
-  add(path_568411, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568412, "api-version", newJString(apiVersion))
-  add(path_568411, "bookmarkId", newJString(bookmarkId))
-  add(path_568411, "subscriptionId", newJString(subscriptionId))
-  add(path_568411, "workspaceName", newJString(workspaceName))
-  add(path_568411, "operationalInsightsResourceProvider",
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
+  ##   workspaceName: string (required)
+  ##                : The name of the workspace.
+  var path_564311 = newJObject()
+  var query_564312 = newJObject()
+  add(query_564312, "api-version", newJString(apiVersion))
+  add(path_564311, "bookmarkId", newJString(bookmarkId))
+  add(path_564311, "subscriptionId", newJString(subscriptionId))
+  add(path_564311, "operationalInsightsResourceProvider",
       newJString(operationalInsightsResourceProvider))
-  result = call_568410.call(path_568411, query_568412, nil, nil, nil)
+  add(path_564311, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564311, "workspaceName", newJString(workspaceName))
+  result = call_564310.call(path_564311, query_564312, nil, nil, nil)
 
-var bookmarksDelete* = Call_BookmarksDelete_568400(name: "bookmarksDelete",
+var bookmarksDelete* = Call_BookmarksDelete_564300(name: "bookmarksDelete",
     meth: HttpMethod.HttpDelete, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/{operationalInsightsResourceProvider}/workspaces/{workspaceName}/providers/Microsoft.SecurityInsights/bookmarks/{bookmarkId}",
-    validator: validate_BookmarksDelete_568401, base: "", url: url_BookmarksDelete_568402,
+    validator: validate_BookmarksDelete_564301, base: "", url: url_BookmarksDelete_564302,
     schemes: {Scheme.Https})
 type
-  Call_BookmarkRelationsList_568413 = ref object of OpenApiRestCall_567667
-proc url_BookmarkRelationsList_568415(protocol: Scheme; host: string; base: string;
+  Call_BookmarkRelationsList_564313 = ref object of OpenApiRestCall_563565
+proc url_BookmarkRelationsList_564315(protocol: Scheme; host: string; base: string;
                                      route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2402,90 +2390,90 @@ proc url_BookmarkRelationsList_568415(protocol: Scheme; host: string; base: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_BookmarkRelationsList_568414(path: JsonNode; query: JsonNode;
+proc validate_BookmarkRelationsList_564314(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets all bookmark relations.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
   ##   bookmarkId: JString (required)
   ##             : Bookmark ID
   ##   subscriptionId: JString (required)
   ##                 : Azure subscription ID
-  ##   workspaceName: JString (required)
-  ##                : The name of the workspace.
   ##   operationalInsightsResourceProvider: JString (required)
   ##                                      : The namespace of workspaces resource provider- Microsoft.OperationalInsights.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
+  ##   workspaceName: JString (required)
+  ##                : The name of the workspace.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568417 = path.getOrDefault("resourceGroupName")
-  valid_568417 = validateParameter(valid_568417, JString, required = true,
+        "path argument is necessary due to required `bookmarkId` field"
+  var valid_564317 = path.getOrDefault("bookmarkId")
+  valid_564317 = validateParameter(valid_564317, JString, required = true,
                                  default = nil)
-  if valid_568417 != nil:
-    section.add "resourceGroupName", valid_568417
-  var valid_568418 = path.getOrDefault("bookmarkId")
-  valid_568418 = validateParameter(valid_568418, JString, required = true,
+  if valid_564317 != nil:
+    section.add "bookmarkId", valid_564317
+  var valid_564318 = path.getOrDefault("subscriptionId")
+  valid_564318 = validateParameter(valid_564318, JString, required = true,
                                  default = nil)
-  if valid_568418 != nil:
-    section.add "bookmarkId", valid_568418
-  var valid_568419 = path.getOrDefault("subscriptionId")
-  valid_568419 = validateParameter(valid_568419, JString, required = true,
+  if valid_564318 != nil:
+    section.add "subscriptionId", valid_564318
+  var valid_564319 = path.getOrDefault("operationalInsightsResourceProvider")
+  valid_564319 = validateParameter(valid_564319, JString, required = true,
                                  default = nil)
-  if valid_568419 != nil:
-    section.add "subscriptionId", valid_568419
-  var valid_568420 = path.getOrDefault("workspaceName")
-  valid_568420 = validateParameter(valid_568420, JString, required = true,
+  if valid_564319 != nil:
+    section.add "operationalInsightsResourceProvider", valid_564319
+  var valid_564320 = path.getOrDefault("resourceGroupName")
+  valid_564320 = validateParameter(valid_564320, JString, required = true,
                                  default = nil)
-  if valid_568420 != nil:
-    section.add "workspaceName", valid_568420
-  var valid_568421 = path.getOrDefault("operationalInsightsResourceProvider")
-  valid_568421 = validateParameter(valid_568421, JString, required = true,
+  if valid_564320 != nil:
+    section.add "resourceGroupName", valid_564320
+  var valid_564321 = path.getOrDefault("workspaceName")
+  valid_564321 = validateParameter(valid_564321, JString, required = true,
                                  default = nil)
-  if valid_568421 != nil:
-    section.add "operationalInsightsResourceProvider", valid_568421
+  if valid_564321 != nil:
+    section.add "workspaceName", valid_564321
   result.add "path", section
   ## parameters in `query` object:
-  ##   $orderby: JString
-  ##           : Sorts the results. Optional.
+  ##   $skipToken: JString
+  ##             : Skiptoken is only used if a previous operation returned a partial result. If a previous response contains a nextLink element, the value of the nextLink element will include a skiptoken parameter that specifies a starting point to use for subsequent calls. Optional.
   ##   api-version: JString (required)
   ##              : API version for the operation
   ##   $top: JInt
   ##       : Returns only the first n results. Optional.
-  ##   $skipToken: JString
-  ##             : Skiptoken is only used if a previous operation returned a partial result. If a previous response contains a nextLink element, the value of the nextLink element will include a skiptoken parameter that specifies a starting point to use for subsequent calls. Optional.
+  ##   $orderby: JString
+  ##           : Sorts the results. Optional.
   ##   $filter: JString
   ##          : Filters the results, based on a Boolean condition. Optional.
   section = newJObject()
-  var valid_568422 = query.getOrDefault("$orderby")
-  valid_568422 = validateParameter(valid_568422, JString, required = false,
+  var valid_564322 = query.getOrDefault("$skipToken")
+  valid_564322 = validateParameter(valid_564322, JString, required = false,
                                  default = nil)
-  if valid_568422 != nil:
-    section.add "$orderby", valid_568422
+  if valid_564322 != nil:
+    section.add "$skipToken", valid_564322
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568423 = query.getOrDefault("api-version")
-  valid_568423 = validateParameter(valid_568423, JString, required = true,
+  var valid_564323 = query.getOrDefault("api-version")
+  valid_564323 = validateParameter(valid_564323, JString, required = true,
                                  default = newJString("2019-01-01-preview"))
-  if valid_568423 != nil:
-    section.add "api-version", valid_568423
-  var valid_568424 = query.getOrDefault("$top")
-  valid_568424 = validateParameter(valid_568424, JInt, required = false, default = nil)
-  if valid_568424 != nil:
-    section.add "$top", valid_568424
-  var valid_568425 = query.getOrDefault("$skipToken")
-  valid_568425 = validateParameter(valid_568425, JString, required = false,
+  if valid_564323 != nil:
+    section.add "api-version", valid_564323
+  var valid_564324 = query.getOrDefault("$top")
+  valid_564324 = validateParameter(valid_564324, JInt, required = false, default = nil)
+  if valid_564324 != nil:
+    section.add "$top", valid_564324
+  var valid_564325 = query.getOrDefault("$orderby")
+  valid_564325 = validateParameter(valid_564325, JString, required = false,
                                  default = nil)
-  if valid_568425 != nil:
-    section.add "$skipToken", valid_568425
-  var valid_568426 = query.getOrDefault("$filter")
-  valid_568426 = validateParameter(valid_568426, JString, required = false,
+  if valid_564325 != nil:
+    section.add "$orderby", valid_564325
+  var valid_564326 = query.getOrDefault("$filter")
+  valid_564326 = validateParameter(valid_564326, JString, required = false,
                                  default = nil)
-  if valid_568426 != nil:
-    section.add "$filter", valid_568426
+  if valid_564326 != nil:
+    section.add "$filter", valid_564326
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2494,69 +2482,69 @@ proc validate_BookmarkRelationsList_568414(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568427: Call_BookmarkRelationsList_568413; path: JsonNode;
+proc call*(call_564327: Call_BookmarkRelationsList_564313; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets all bookmark relations.
   ## 
-  let valid = call_568427.validator(path, query, header, formData, body)
-  let scheme = call_568427.pickScheme
+  let valid = call_564327.validator(path, query, header, formData, body)
+  let scheme = call_564327.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568427.url(scheme.get, call_568427.host, call_568427.base,
-                         call_568427.route, valid.getOrDefault("path"),
+  let url = call_564327.url(scheme.get, call_564327.host, call_564327.base,
+                         call_564327.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568427, url, valid)
+  result = hook(call_564327, url, valid)
 
-proc call*(call_568428: Call_BookmarkRelationsList_568413;
-          resourceGroupName: string; bookmarkId: string; subscriptionId: string;
-          workspaceName: string; operationalInsightsResourceProvider: string;
-          Orderby: string = ""; apiVersion: string = "2019-01-01-preview"; Top: int = 0;
-          SkipToken: string = ""; Filter: string = ""): Recallable =
+proc call*(call_564328: Call_BookmarkRelationsList_564313; bookmarkId: string;
+          subscriptionId: string; operationalInsightsResourceProvider: string;
+          resourceGroupName: string; workspaceName: string; SkipToken: string = "";
+          apiVersion: string = "2019-01-01-preview"; Top: int = 0; Orderby: string = "";
+          Filter: string = ""): Recallable =
   ## bookmarkRelationsList
   ## Gets all bookmark relations.
-  ##   Orderby: string
-  ##          : Sorts the results. Optional.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
+  ##   SkipToken: string
+  ##            : Skiptoken is only used if a previous operation returned a partial result. If a previous response contains a nextLink element, the value of the nextLink element will include a skiptoken parameter that specifies a starting point to use for subsequent calls. Optional.
   ##   apiVersion: string (required)
   ##             : API version for the operation
+  ##   Top: int
+  ##      : Returns only the first n results. Optional.
   ##   bookmarkId: string (required)
   ##             : Bookmark ID
   ##   subscriptionId: string (required)
   ##                 : Azure subscription ID
-  ##   Top: int
-  ##      : Returns only the first n results. Optional.
-  ##   SkipToken: string
-  ##            : Skiptoken is only used if a previous operation returned a partial result. If a previous response contains a nextLink element, the value of the nextLink element will include a skiptoken parameter that specifies a starting point to use for subsequent calls. Optional.
-  ##   workspaceName: string (required)
-  ##                : The name of the workspace.
-  ##   Filter: string
-  ##         : Filters the results, based on a Boolean condition. Optional.
+  ##   Orderby: string
+  ##          : Sorts the results. Optional.
   ##   operationalInsightsResourceProvider: string (required)
   ##                                      : The namespace of workspaces resource provider- Microsoft.OperationalInsights.
-  var path_568429 = newJObject()
-  var query_568430 = newJObject()
-  add(query_568430, "$orderby", newJString(Orderby))
-  add(path_568429, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568430, "api-version", newJString(apiVersion))
-  add(path_568429, "bookmarkId", newJString(bookmarkId))
-  add(path_568429, "subscriptionId", newJString(subscriptionId))
-  add(query_568430, "$top", newJInt(Top))
-  add(query_568430, "$skipToken", newJString(SkipToken))
-  add(path_568429, "workspaceName", newJString(workspaceName))
-  add(query_568430, "$filter", newJString(Filter))
-  add(path_568429, "operationalInsightsResourceProvider",
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
+  ##   Filter: string
+  ##         : Filters the results, based on a Boolean condition. Optional.
+  ##   workspaceName: string (required)
+  ##                : The name of the workspace.
+  var path_564329 = newJObject()
+  var query_564330 = newJObject()
+  add(query_564330, "$skipToken", newJString(SkipToken))
+  add(query_564330, "api-version", newJString(apiVersion))
+  add(query_564330, "$top", newJInt(Top))
+  add(path_564329, "bookmarkId", newJString(bookmarkId))
+  add(path_564329, "subscriptionId", newJString(subscriptionId))
+  add(query_564330, "$orderby", newJString(Orderby))
+  add(path_564329, "operationalInsightsResourceProvider",
       newJString(operationalInsightsResourceProvider))
-  result = call_568428.call(path_568429, query_568430, nil, nil, nil)
+  add(path_564329, "resourceGroupName", newJString(resourceGroupName))
+  add(query_564330, "$filter", newJString(Filter))
+  add(path_564329, "workspaceName", newJString(workspaceName))
+  result = call_564328.call(path_564329, query_564330, nil, nil, nil)
 
-var bookmarkRelationsList* = Call_BookmarkRelationsList_568413(
+var bookmarkRelationsList* = Call_BookmarkRelationsList_564313(
     name: "bookmarkRelationsList", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/{operationalInsightsResourceProvider}/workspaces/{workspaceName}/providers/Microsoft.SecurityInsights/bookmarks/{bookmarkId}/relations",
-    validator: validate_BookmarkRelationsList_568414, base: "",
-    url: url_BookmarkRelationsList_568415, schemes: {Scheme.Https})
+    validator: validate_BookmarkRelationsList_564314, base: "",
+    url: url_BookmarkRelationsList_564315, schemes: {Scheme.Https})
 type
-  Call_BookmarkRelationsCreateOrUpdateRelation_568445 = ref object of OpenApiRestCall_567667
-proc url_BookmarkRelationsCreateOrUpdateRelation_568447(protocol: Scheme;
+  Call_BookmarkRelationsCreateOrUpdateRelation_564345 = ref object of OpenApiRestCall_563565
+proc url_BookmarkRelationsCreateOrUpdateRelation_564347(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2589,58 +2577,58 @@ proc url_BookmarkRelationsCreateOrUpdateRelation_568447(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_BookmarkRelationsCreateOrUpdateRelation_568446(path: JsonNode;
+proc validate_BookmarkRelationsCreateOrUpdateRelation_564346(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Creates the bookmark relation.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
   ##   bookmarkId: JString (required)
   ##             : Bookmark ID
   ##   subscriptionId: JString (required)
   ##                 : Azure subscription ID
   ##   relationName: JString (required)
   ##               : Relation Name
-  ##   workspaceName: JString (required)
-  ##                : The name of the workspace.
   ##   operationalInsightsResourceProvider: JString (required)
   ##                                      : The namespace of workspaces resource provider- Microsoft.OperationalInsights.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
+  ##   workspaceName: JString (required)
+  ##                : The name of the workspace.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568448 = path.getOrDefault("resourceGroupName")
-  valid_568448 = validateParameter(valid_568448, JString, required = true,
+        "path argument is necessary due to required `bookmarkId` field"
+  var valid_564348 = path.getOrDefault("bookmarkId")
+  valid_564348 = validateParameter(valid_564348, JString, required = true,
                                  default = nil)
-  if valid_568448 != nil:
-    section.add "resourceGroupName", valid_568448
-  var valid_568449 = path.getOrDefault("bookmarkId")
-  valid_568449 = validateParameter(valid_568449, JString, required = true,
+  if valid_564348 != nil:
+    section.add "bookmarkId", valid_564348
+  var valid_564349 = path.getOrDefault("subscriptionId")
+  valid_564349 = validateParameter(valid_564349, JString, required = true,
                                  default = nil)
-  if valid_568449 != nil:
-    section.add "bookmarkId", valid_568449
-  var valid_568450 = path.getOrDefault("subscriptionId")
-  valid_568450 = validateParameter(valid_568450, JString, required = true,
+  if valid_564349 != nil:
+    section.add "subscriptionId", valid_564349
+  var valid_564350 = path.getOrDefault("relationName")
+  valid_564350 = validateParameter(valid_564350, JString, required = true,
                                  default = nil)
-  if valid_568450 != nil:
-    section.add "subscriptionId", valid_568450
-  var valid_568451 = path.getOrDefault("relationName")
-  valid_568451 = validateParameter(valid_568451, JString, required = true,
+  if valid_564350 != nil:
+    section.add "relationName", valid_564350
+  var valid_564351 = path.getOrDefault("operationalInsightsResourceProvider")
+  valid_564351 = validateParameter(valid_564351, JString, required = true,
                                  default = nil)
-  if valid_568451 != nil:
-    section.add "relationName", valid_568451
-  var valid_568452 = path.getOrDefault("workspaceName")
-  valid_568452 = validateParameter(valid_568452, JString, required = true,
+  if valid_564351 != nil:
+    section.add "operationalInsightsResourceProvider", valid_564351
+  var valid_564352 = path.getOrDefault("resourceGroupName")
+  valid_564352 = validateParameter(valid_564352, JString, required = true,
                                  default = nil)
-  if valid_568452 != nil:
-    section.add "workspaceName", valid_568452
-  var valid_568453 = path.getOrDefault("operationalInsightsResourceProvider")
-  valid_568453 = validateParameter(valid_568453, JString, required = true,
+  if valid_564352 != nil:
+    section.add "resourceGroupName", valid_564352
+  var valid_564353 = path.getOrDefault("workspaceName")
+  valid_564353 = validateParameter(valid_564353, JString, required = true,
                                  default = nil)
-  if valid_568453 != nil:
-    section.add "operationalInsightsResourceProvider", valid_568453
+  if valid_564353 != nil:
+    section.add "workspaceName", valid_564353
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2648,11 +2636,11 @@ proc validate_BookmarkRelationsCreateOrUpdateRelation_568446(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568454 = query.getOrDefault("api-version")
-  valid_568454 = validateParameter(valid_568454, JString, required = true,
+  var valid_564354 = query.getOrDefault("api-version")
+  valid_564354 = validateParameter(valid_564354, JString, required = true,
                                  default = newJString("2019-01-01-preview"))
-  if valid_568454 != nil:
-    section.add "api-version", valid_568454
+  if valid_564354 != nil:
+    section.add "api-version", valid_564354
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2666,68 +2654,67 @@ proc validate_BookmarkRelationsCreateOrUpdateRelation_568446(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568456: Call_BookmarkRelationsCreateOrUpdateRelation_568445;
+proc call*(call_564356: Call_BookmarkRelationsCreateOrUpdateRelation_564345;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Creates the bookmark relation.
   ## 
-  let valid = call_568456.validator(path, query, header, formData, body)
-  let scheme = call_568456.pickScheme
+  let valid = call_564356.validator(path, query, header, formData, body)
+  let scheme = call_564356.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568456.url(scheme.get, call_568456.host, call_568456.base,
-                         call_568456.route, valid.getOrDefault("path"),
+  let url = call_564356.url(scheme.get, call_564356.host, call_564356.base,
+                         call_564356.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568456, url, valid)
+  result = hook(call_564356, url, valid)
 
-proc call*(call_568457: Call_BookmarkRelationsCreateOrUpdateRelation_568445;
-          resourceGroupName: string; bookmarkId: string;
-          relationInputModel: JsonNode; subscriptionId: string;
-          relationName: string; workspaceName: string;
-          operationalInsightsResourceProvider: string;
-          apiVersion: string = "2019-01-01-preview"): Recallable =
+proc call*(call_564357: Call_BookmarkRelationsCreateOrUpdateRelation_564345;
+          bookmarkId: string; subscriptionId: string; relationName: string;
+          relationInputModel: JsonNode;
+          operationalInsightsResourceProvider: string; resourceGroupName: string;
+          workspaceName: string; apiVersion: string = "2019-01-01-preview"): Recallable =
   ## bookmarkRelationsCreateOrUpdateRelation
   ## Creates the bookmark relation.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
   ##   apiVersion: string (required)
   ##             : API version for the operation
   ##   bookmarkId: string (required)
   ##             : Bookmark ID
-  ##   relationInputModel: JObject (required)
-  ##                     : The relation input model
   ##   subscriptionId: string (required)
   ##                 : Azure subscription ID
   ##   relationName: string (required)
   ##               : Relation Name
-  ##   workspaceName: string (required)
-  ##                : The name of the workspace.
+  ##   relationInputModel: JObject (required)
+  ##                     : The relation input model
   ##   operationalInsightsResourceProvider: string (required)
   ##                                      : The namespace of workspaces resource provider- Microsoft.OperationalInsights.
-  var path_568458 = newJObject()
-  var query_568459 = newJObject()
-  var body_568460 = newJObject()
-  add(path_568458, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568459, "api-version", newJString(apiVersion))
-  add(path_568458, "bookmarkId", newJString(bookmarkId))
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
+  ##   workspaceName: string (required)
+  ##                : The name of the workspace.
+  var path_564358 = newJObject()
+  var query_564359 = newJObject()
+  var body_564360 = newJObject()
+  add(query_564359, "api-version", newJString(apiVersion))
+  add(path_564358, "bookmarkId", newJString(bookmarkId))
+  add(path_564358, "subscriptionId", newJString(subscriptionId))
+  add(path_564358, "relationName", newJString(relationName))
   if relationInputModel != nil:
-    body_568460 = relationInputModel
-  add(path_568458, "subscriptionId", newJString(subscriptionId))
-  add(path_568458, "relationName", newJString(relationName))
-  add(path_568458, "workspaceName", newJString(workspaceName))
-  add(path_568458, "operationalInsightsResourceProvider",
+    body_564360 = relationInputModel
+  add(path_564358, "operationalInsightsResourceProvider",
       newJString(operationalInsightsResourceProvider))
-  result = call_568457.call(path_568458, query_568459, nil, nil, body_568460)
+  add(path_564358, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564358, "workspaceName", newJString(workspaceName))
+  result = call_564357.call(path_564358, query_564359, nil, nil, body_564360)
 
-var bookmarkRelationsCreateOrUpdateRelation* = Call_BookmarkRelationsCreateOrUpdateRelation_568445(
+var bookmarkRelationsCreateOrUpdateRelation* = Call_BookmarkRelationsCreateOrUpdateRelation_564345(
     name: "bookmarkRelationsCreateOrUpdateRelation", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/{operationalInsightsResourceProvider}/workspaces/{workspaceName}/providers/Microsoft.SecurityInsights/bookmarks/{bookmarkId}/relations/{relationName}",
-    validator: validate_BookmarkRelationsCreateOrUpdateRelation_568446, base: "",
-    url: url_BookmarkRelationsCreateOrUpdateRelation_568447,
+    validator: validate_BookmarkRelationsCreateOrUpdateRelation_564346, base: "",
+    url: url_BookmarkRelationsCreateOrUpdateRelation_564347,
     schemes: {Scheme.Https})
 type
-  Call_BookmarkRelationsGetRelation_568431 = ref object of OpenApiRestCall_567667
-proc url_BookmarkRelationsGetRelation_568433(protocol: Scheme; host: string;
+  Call_BookmarkRelationsGetRelation_564331 = ref object of OpenApiRestCall_563565
+proc url_BookmarkRelationsGetRelation_564333(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2760,58 +2747,58 @@ proc url_BookmarkRelationsGetRelation_568433(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_BookmarkRelationsGetRelation_568432(path: JsonNode; query: JsonNode;
+proc validate_BookmarkRelationsGetRelation_564332(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets a bookmark relation.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
   ##   bookmarkId: JString (required)
   ##             : Bookmark ID
   ##   subscriptionId: JString (required)
   ##                 : Azure subscription ID
   ##   relationName: JString (required)
   ##               : Relation Name
-  ##   workspaceName: JString (required)
-  ##                : The name of the workspace.
   ##   operationalInsightsResourceProvider: JString (required)
   ##                                      : The namespace of workspaces resource provider- Microsoft.OperationalInsights.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
+  ##   workspaceName: JString (required)
+  ##                : The name of the workspace.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568434 = path.getOrDefault("resourceGroupName")
-  valid_568434 = validateParameter(valid_568434, JString, required = true,
+        "path argument is necessary due to required `bookmarkId` field"
+  var valid_564334 = path.getOrDefault("bookmarkId")
+  valid_564334 = validateParameter(valid_564334, JString, required = true,
                                  default = nil)
-  if valid_568434 != nil:
-    section.add "resourceGroupName", valid_568434
-  var valid_568435 = path.getOrDefault("bookmarkId")
-  valid_568435 = validateParameter(valid_568435, JString, required = true,
+  if valid_564334 != nil:
+    section.add "bookmarkId", valid_564334
+  var valid_564335 = path.getOrDefault("subscriptionId")
+  valid_564335 = validateParameter(valid_564335, JString, required = true,
                                  default = nil)
-  if valid_568435 != nil:
-    section.add "bookmarkId", valid_568435
-  var valid_568436 = path.getOrDefault("subscriptionId")
-  valid_568436 = validateParameter(valid_568436, JString, required = true,
+  if valid_564335 != nil:
+    section.add "subscriptionId", valid_564335
+  var valid_564336 = path.getOrDefault("relationName")
+  valid_564336 = validateParameter(valid_564336, JString, required = true,
                                  default = nil)
-  if valid_568436 != nil:
-    section.add "subscriptionId", valid_568436
-  var valid_568437 = path.getOrDefault("relationName")
-  valid_568437 = validateParameter(valid_568437, JString, required = true,
+  if valid_564336 != nil:
+    section.add "relationName", valid_564336
+  var valid_564337 = path.getOrDefault("operationalInsightsResourceProvider")
+  valid_564337 = validateParameter(valid_564337, JString, required = true,
                                  default = nil)
-  if valid_568437 != nil:
-    section.add "relationName", valid_568437
-  var valid_568438 = path.getOrDefault("workspaceName")
-  valid_568438 = validateParameter(valid_568438, JString, required = true,
+  if valid_564337 != nil:
+    section.add "operationalInsightsResourceProvider", valid_564337
+  var valid_564338 = path.getOrDefault("resourceGroupName")
+  valid_564338 = validateParameter(valid_564338, JString, required = true,
                                  default = nil)
-  if valid_568438 != nil:
-    section.add "workspaceName", valid_568438
-  var valid_568439 = path.getOrDefault("operationalInsightsResourceProvider")
-  valid_568439 = validateParameter(valid_568439, JString, required = true,
+  if valid_564338 != nil:
+    section.add "resourceGroupName", valid_564338
+  var valid_564339 = path.getOrDefault("workspaceName")
+  valid_564339 = validateParameter(valid_564339, JString, required = true,
                                  default = nil)
-  if valid_568439 != nil:
-    section.add "operationalInsightsResourceProvider", valid_568439
+  if valid_564339 != nil:
+    section.add "workspaceName", valid_564339
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2819,11 +2806,11 @@ proc validate_BookmarkRelationsGetRelation_568432(path: JsonNode; query: JsonNod
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568440 = query.getOrDefault("api-version")
-  valid_568440 = validateParameter(valid_568440, JString, required = true,
+  var valid_564340 = query.getOrDefault("api-version")
+  valid_564340 = validateParameter(valid_564340, JString, required = true,
                                  default = newJString("2019-01-01-preview"))
-  if valid_568440 != nil:
-    section.add "api-version", valid_568440
+  if valid_564340 != nil:
+    section.add "api-version", valid_564340
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2832,28 +2819,25 @@ proc validate_BookmarkRelationsGetRelation_568432(path: JsonNode; query: JsonNod
   if body != nil:
     result.add "body", body
 
-proc call*(call_568441: Call_BookmarkRelationsGetRelation_568431; path: JsonNode;
+proc call*(call_564341: Call_BookmarkRelationsGetRelation_564331; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets a bookmark relation.
   ## 
-  let valid = call_568441.validator(path, query, header, formData, body)
-  let scheme = call_568441.pickScheme
+  let valid = call_564341.validator(path, query, header, formData, body)
+  let scheme = call_564341.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568441.url(scheme.get, call_568441.host, call_568441.base,
-                         call_568441.route, valid.getOrDefault("path"),
+  let url = call_564341.url(scheme.get, call_564341.host, call_564341.base,
+                         call_564341.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568441, url, valid)
+  result = hook(call_564341, url, valid)
 
-proc call*(call_568442: Call_BookmarkRelationsGetRelation_568431;
-          resourceGroupName: string; bookmarkId: string; subscriptionId: string;
-          relationName: string; workspaceName: string;
-          operationalInsightsResourceProvider: string;
-          apiVersion: string = "2019-01-01-preview"): Recallable =
+proc call*(call_564342: Call_BookmarkRelationsGetRelation_564331;
+          bookmarkId: string; subscriptionId: string; relationName: string;
+          operationalInsightsResourceProvider: string; resourceGroupName: string;
+          workspaceName: string; apiVersion: string = "2019-01-01-preview"): Recallable =
   ## bookmarkRelationsGetRelation
   ## Gets a bookmark relation.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
   ##   apiVersion: string (required)
   ##             : API version for the operation
   ##   bookmarkId: string (required)
@@ -2862,30 +2846,32 @@ proc call*(call_568442: Call_BookmarkRelationsGetRelation_568431;
   ##                 : Azure subscription ID
   ##   relationName: string (required)
   ##               : Relation Name
-  ##   workspaceName: string (required)
-  ##                : The name of the workspace.
   ##   operationalInsightsResourceProvider: string (required)
   ##                                      : The namespace of workspaces resource provider- Microsoft.OperationalInsights.
-  var path_568443 = newJObject()
-  var query_568444 = newJObject()
-  add(path_568443, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568444, "api-version", newJString(apiVersion))
-  add(path_568443, "bookmarkId", newJString(bookmarkId))
-  add(path_568443, "subscriptionId", newJString(subscriptionId))
-  add(path_568443, "relationName", newJString(relationName))
-  add(path_568443, "workspaceName", newJString(workspaceName))
-  add(path_568443, "operationalInsightsResourceProvider",
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
+  ##   workspaceName: string (required)
+  ##                : The name of the workspace.
+  var path_564343 = newJObject()
+  var query_564344 = newJObject()
+  add(query_564344, "api-version", newJString(apiVersion))
+  add(path_564343, "bookmarkId", newJString(bookmarkId))
+  add(path_564343, "subscriptionId", newJString(subscriptionId))
+  add(path_564343, "relationName", newJString(relationName))
+  add(path_564343, "operationalInsightsResourceProvider",
       newJString(operationalInsightsResourceProvider))
-  result = call_568442.call(path_568443, query_568444, nil, nil, nil)
+  add(path_564343, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564343, "workspaceName", newJString(workspaceName))
+  result = call_564342.call(path_564343, query_564344, nil, nil, nil)
 
-var bookmarkRelationsGetRelation* = Call_BookmarkRelationsGetRelation_568431(
+var bookmarkRelationsGetRelation* = Call_BookmarkRelationsGetRelation_564331(
     name: "bookmarkRelationsGetRelation", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/{operationalInsightsResourceProvider}/workspaces/{workspaceName}/providers/Microsoft.SecurityInsights/bookmarks/{bookmarkId}/relations/{relationName}",
-    validator: validate_BookmarkRelationsGetRelation_568432, base: "",
-    url: url_BookmarkRelationsGetRelation_568433, schemes: {Scheme.Https})
+    validator: validate_BookmarkRelationsGetRelation_564332, base: "",
+    url: url_BookmarkRelationsGetRelation_564333, schemes: {Scheme.Https})
 type
-  Call_BookmarkRelationsDeleteRelation_568461 = ref object of OpenApiRestCall_567667
-proc url_BookmarkRelationsDeleteRelation_568463(protocol: Scheme; host: string;
+  Call_BookmarkRelationsDeleteRelation_564361 = ref object of OpenApiRestCall_563565
+proc url_BookmarkRelationsDeleteRelation_564363(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2918,58 +2904,58 @@ proc url_BookmarkRelationsDeleteRelation_568463(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_BookmarkRelationsDeleteRelation_568462(path: JsonNode;
+proc validate_BookmarkRelationsDeleteRelation_564362(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Delete the bookmark relation.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
   ##   bookmarkId: JString (required)
   ##             : Bookmark ID
   ##   subscriptionId: JString (required)
   ##                 : Azure subscription ID
   ##   relationName: JString (required)
   ##               : Relation Name
-  ##   workspaceName: JString (required)
-  ##                : The name of the workspace.
   ##   operationalInsightsResourceProvider: JString (required)
   ##                                      : The namespace of workspaces resource provider- Microsoft.OperationalInsights.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
+  ##   workspaceName: JString (required)
+  ##                : The name of the workspace.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568464 = path.getOrDefault("resourceGroupName")
-  valid_568464 = validateParameter(valid_568464, JString, required = true,
+        "path argument is necessary due to required `bookmarkId` field"
+  var valid_564364 = path.getOrDefault("bookmarkId")
+  valid_564364 = validateParameter(valid_564364, JString, required = true,
                                  default = nil)
-  if valid_568464 != nil:
-    section.add "resourceGroupName", valid_568464
-  var valid_568465 = path.getOrDefault("bookmarkId")
-  valid_568465 = validateParameter(valid_568465, JString, required = true,
+  if valid_564364 != nil:
+    section.add "bookmarkId", valid_564364
+  var valid_564365 = path.getOrDefault("subscriptionId")
+  valid_564365 = validateParameter(valid_564365, JString, required = true,
                                  default = nil)
-  if valid_568465 != nil:
-    section.add "bookmarkId", valid_568465
-  var valid_568466 = path.getOrDefault("subscriptionId")
-  valid_568466 = validateParameter(valid_568466, JString, required = true,
+  if valid_564365 != nil:
+    section.add "subscriptionId", valid_564365
+  var valid_564366 = path.getOrDefault("relationName")
+  valid_564366 = validateParameter(valid_564366, JString, required = true,
                                  default = nil)
-  if valid_568466 != nil:
-    section.add "subscriptionId", valid_568466
-  var valid_568467 = path.getOrDefault("relationName")
-  valid_568467 = validateParameter(valid_568467, JString, required = true,
+  if valid_564366 != nil:
+    section.add "relationName", valid_564366
+  var valid_564367 = path.getOrDefault("operationalInsightsResourceProvider")
+  valid_564367 = validateParameter(valid_564367, JString, required = true,
                                  default = nil)
-  if valid_568467 != nil:
-    section.add "relationName", valid_568467
-  var valid_568468 = path.getOrDefault("workspaceName")
-  valid_568468 = validateParameter(valid_568468, JString, required = true,
+  if valid_564367 != nil:
+    section.add "operationalInsightsResourceProvider", valid_564367
+  var valid_564368 = path.getOrDefault("resourceGroupName")
+  valid_564368 = validateParameter(valid_564368, JString, required = true,
                                  default = nil)
-  if valid_568468 != nil:
-    section.add "workspaceName", valid_568468
-  var valid_568469 = path.getOrDefault("operationalInsightsResourceProvider")
-  valid_568469 = validateParameter(valid_568469, JString, required = true,
+  if valid_564368 != nil:
+    section.add "resourceGroupName", valid_564368
+  var valid_564369 = path.getOrDefault("workspaceName")
+  valid_564369 = validateParameter(valid_564369, JString, required = true,
                                  default = nil)
-  if valid_568469 != nil:
-    section.add "operationalInsightsResourceProvider", valid_568469
+  if valid_564369 != nil:
+    section.add "workspaceName", valid_564369
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2977,11 +2963,11 @@ proc validate_BookmarkRelationsDeleteRelation_568462(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568470 = query.getOrDefault("api-version")
-  valid_568470 = validateParameter(valid_568470, JString, required = true,
+  var valid_564370 = query.getOrDefault("api-version")
+  valid_564370 = validateParameter(valid_564370, JString, required = true,
                                  default = newJString("2019-01-01-preview"))
-  if valid_568470 != nil:
-    section.add "api-version", valid_568470
+  if valid_564370 != nil:
+    section.add "api-version", valid_564370
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2990,29 +2976,26 @@ proc validate_BookmarkRelationsDeleteRelation_568462(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568471: Call_BookmarkRelationsDeleteRelation_568461;
+proc call*(call_564371: Call_BookmarkRelationsDeleteRelation_564361;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Delete the bookmark relation.
   ## 
-  let valid = call_568471.validator(path, query, header, formData, body)
-  let scheme = call_568471.pickScheme
+  let valid = call_564371.validator(path, query, header, formData, body)
+  let scheme = call_564371.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568471.url(scheme.get, call_568471.host, call_568471.base,
-                         call_568471.route, valid.getOrDefault("path"),
+  let url = call_564371.url(scheme.get, call_564371.host, call_564371.base,
+                         call_564371.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568471, url, valid)
+  result = hook(call_564371, url, valid)
 
-proc call*(call_568472: Call_BookmarkRelationsDeleteRelation_568461;
-          resourceGroupName: string; bookmarkId: string; subscriptionId: string;
-          relationName: string; workspaceName: string;
-          operationalInsightsResourceProvider: string;
-          apiVersion: string = "2019-01-01-preview"): Recallable =
+proc call*(call_564372: Call_BookmarkRelationsDeleteRelation_564361;
+          bookmarkId: string; subscriptionId: string; relationName: string;
+          operationalInsightsResourceProvider: string; resourceGroupName: string;
+          workspaceName: string; apiVersion: string = "2019-01-01-preview"): Recallable =
   ## bookmarkRelationsDeleteRelation
   ## Delete the bookmark relation.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
   ##   apiVersion: string (required)
   ##             : API version for the operation
   ##   bookmarkId: string (required)
@@ -3021,30 +3004,32 @@ proc call*(call_568472: Call_BookmarkRelationsDeleteRelation_568461;
   ##                 : Azure subscription ID
   ##   relationName: string (required)
   ##               : Relation Name
-  ##   workspaceName: string (required)
-  ##                : The name of the workspace.
   ##   operationalInsightsResourceProvider: string (required)
   ##                                      : The namespace of workspaces resource provider- Microsoft.OperationalInsights.
-  var path_568473 = newJObject()
-  var query_568474 = newJObject()
-  add(path_568473, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568474, "api-version", newJString(apiVersion))
-  add(path_568473, "bookmarkId", newJString(bookmarkId))
-  add(path_568473, "subscriptionId", newJString(subscriptionId))
-  add(path_568473, "relationName", newJString(relationName))
-  add(path_568473, "workspaceName", newJString(workspaceName))
-  add(path_568473, "operationalInsightsResourceProvider",
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
+  ##   workspaceName: string (required)
+  ##                : The name of the workspace.
+  var path_564373 = newJObject()
+  var query_564374 = newJObject()
+  add(query_564374, "api-version", newJString(apiVersion))
+  add(path_564373, "bookmarkId", newJString(bookmarkId))
+  add(path_564373, "subscriptionId", newJString(subscriptionId))
+  add(path_564373, "relationName", newJString(relationName))
+  add(path_564373, "operationalInsightsResourceProvider",
       newJString(operationalInsightsResourceProvider))
-  result = call_568472.call(path_568473, query_568474, nil, nil, nil)
+  add(path_564373, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564373, "workspaceName", newJString(workspaceName))
+  result = call_564372.call(path_564373, query_564374, nil, nil, nil)
 
-var bookmarkRelationsDeleteRelation* = Call_BookmarkRelationsDeleteRelation_568461(
+var bookmarkRelationsDeleteRelation* = Call_BookmarkRelationsDeleteRelation_564361(
     name: "bookmarkRelationsDeleteRelation", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/{operationalInsightsResourceProvider}/workspaces/{workspaceName}/providers/Microsoft.SecurityInsights/bookmarks/{bookmarkId}/relations/{relationName}",
-    validator: validate_BookmarkRelationsDeleteRelation_568462, base: "",
-    url: url_BookmarkRelationsDeleteRelation_568463, schemes: {Scheme.Https})
+    validator: validate_BookmarkRelationsDeleteRelation_564362, base: "",
+    url: url_BookmarkRelationsDeleteRelation_564363, schemes: {Scheme.Https})
 type
-  Call_CasesList_568475 = ref object of OpenApiRestCall_567667
-proc url_CasesList_568477(protocol: Scheme; host: string; base: string; route: string;
+  Call_CasesList_564375 = ref object of OpenApiRestCall_563565
+proc url_CasesList_564377(protocol: Scheme; host: string; base: string; route: string;
                          path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -3072,83 +3057,83 @@ proc url_CasesList_568477(protocol: Scheme; host: string; base: string; route: s
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_CasesList_568476(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_CasesList_564376(path: JsonNode; query: JsonNode; header: JsonNode;
                               formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets all cases.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
   ##   subscriptionId: JString (required)
   ##                 : Azure subscription ID
-  ##   workspaceName: JString (required)
-  ##                : The name of the workspace.
   ##   operationalInsightsResourceProvider: JString (required)
   ##                                      : The namespace of workspaces resource provider- Microsoft.OperationalInsights.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
+  ##   workspaceName: JString (required)
+  ##                : The name of the workspace.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568478 = path.getOrDefault("resourceGroupName")
-  valid_568478 = validateParameter(valid_568478, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564378 = path.getOrDefault("subscriptionId")
+  valid_564378 = validateParameter(valid_564378, JString, required = true,
                                  default = nil)
-  if valid_568478 != nil:
-    section.add "resourceGroupName", valid_568478
-  var valid_568479 = path.getOrDefault("subscriptionId")
-  valid_568479 = validateParameter(valid_568479, JString, required = true,
+  if valid_564378 != nil:
+    section.add "subscriptionId", valid_564378
+  var valid_564379 = path.getOrDefault("operationalInsightsResourceProvider")
+  valid_564379 = validateParameter(valid_564379, JString, required = true,
                                  default = nil)
-  if valid_568479 != nil:
-    section.add "subscriptionId", valid_568479
-  var valid_568480 = path.getOrDefault("workspaceName")
-  valid_568480 = validateParameter(valid_568480, JString, required = true,
+  if valid_564379 != nil:
+    section.add "operationalInsightsResourceProvider", valid_564379
+  var valid_564380 = path.getOrDefault("resourceGroupName")
+  valid_564380 = validateParameter(valid_564380, JString, required = true,
                                  default = nil)
-  if valid_568480 != nil:
-    section.add "workspaceName", valid_568480
-  var valid_568481 = path.getOrDefault("operationalInsightsResourceProvider")
-  valid_568481 = validateParameter(valid_568481, JString, required = true,
+  if valid_564380 != nil:
+    section.add "resourceGroupName", valid_564380
+  var valid_564381 = path.getOrDefault("workspaceName")
+  valid_564381 = validateParameter(valid_564381, JString, required = true,
                                  default = nil)
-  if valid_568481 != nil:
-    section.add "operationalInsightsResourceProvider", valid_568481
+  if valid_564381 != nil:
+    section.add "workspaceName", valid_564381
   result.add "path", section
   ## parameters in `query` object:
-  ##   $orderby: JString
-  ##           : Sorts the results. Optional.
+  ##   $skipToken: JString
+  ##             : Skiptoken is only used if a previous operation returned a partial result. If a previous response contains a nextLink element, the value of the nextLink element will include a skiptoken parameter that specifies a starting point to use for subsequent calls. Optional.
   ##   api-version: JString (required)
   ##              : API version for the operation
   ##   $top: JInt
   ##       : Returns only the first n results. Optional.
-  ##   $skipToken: JString
-  ##             : Skiptoken is only used if a previous operation returned a partial result. If a previous response contains a nextLink element, the value of the nextLink element will include a skiptoken parameter that specifies a starting point to use for subsequent calls. Optional.
+  ##   $orderby: JString
+  ##           : Sorts the results. Optional.
   ##   $filter: JString
   ##          : Filters the results, based on a Boolean condition. Optional.
   section = newJObject()
-  var valid_568482 = query.getOrDefault("$orderby")
-  valid_568482 = validateParameter(valid_568482, JString, required = false,
+  var valid_564382 = query.getOrDefault("$skipToken")
+  valid_564382 = validateParameter(valid_564382, JString, required = false,
                                  default = nil)
-  if valid_568482 != nil:
-    section.add "$orderby", valid_568482
+  if valid_564382 != nil:
+    section.add "$skipToken", valid_564382
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568483 = query.getOrDefault("api-version")
-  valid_568483 = validateParameter(valid_568483, JString, required = true,
+  var valid_564383 = query.getOrDefault("api-version")
+  valid_564383 = validateParameter(valid_564383, JString, required = true,
                                  default = newJString("2019-01-01-preview"))
-  if valid_568483 != nil:
-    section.add "api-version", valid_568483
-  var valid_568484 = query.getOrDefault("$top")
-  valid_568484 = validateParameter(valid_568484, JInt, required = false, default = nil)
-  if valid_568484 != nil:
-    section.add "$top", valid_568484
-  var valid_568485 = query.getOrDefault("$skipToken")
-  valid_568485 = validateParameter(valid_568485, JString, required = false,
+  if valid_564383 != nil:
+    section.add "api-version", valid_564383
+  var valid_564384 = query.getOrDefault("$top")
+  valid_564384 = validateParameter(valid_564384, JInt, required = false, default = nil)
+  if valid_564384 != nil:
+    section.add "$top", valid_564384
+  var valid_564385 = query.getOrDefault("$orderby")
+  valid_564385 = validateParameter(valid_564385, JString, required = false,
                                  default = nil)
-  if valid_568485 != nil:
-    section.add "$skipToken", valid_568485
-  var valid_568486 = query.getOrDefault("$filter")
-  valid_568486 = validateParameter(valid_568486, JString, required = false,
+  if valid_564385 != nil:
+    section.add "$orderby", valid_564385
+  var valid_564386 = query.getOrDefault("$filter")
+  valid_564386 = validateParameter(valid_564386, JString, required = false,
                                  default = nil)
-  if valid_568486 != nil:
-    section.add "$filter", valid_568486
+  if valid_564386 != nil:
+    section.add "$filter", valid_564386
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3157,66 +3142,66 @@ proc validate_CasesList_568476(path: JsonNode; query: JsonNode; header: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_568487: Call_CasesList_568475; path: JsonNode; query: JsonNode;
+proc call*(call_564387: Call_CasesList_564375; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets all cases.
   ## 
-  let valid = call_568487.validator(path, query, header, formData, body)
-  let scheme = call_568487.pickScheme
+  let valid = call_564387.validator(path, query, header, formData, body)
+  let scheme = call_564387.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568487.url(scheme.get, call_568487.host, call_568487.base,
-                         call_568487.route, valid.getOrDefault("path"),
+  let url = call_564387.url(scheme.get, call_564387.host, call_564387.base,
+                         call_564387.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568487, url, valid)
+  result = hook(call_564387, url, valid)
 
-proc call*(call_568488: Call_CasesList_568475; resourceGroupName: string;
-          subscriptionId: string; workspaceName: string;
-          operationalInsightsResourceProvider: string; Orderby: string = "";
-          apiVersion: string = "2019-01-01-preview"; Top: int = 0;
-          SkipToken: string = ""; Filter: string = ""): Recallable =
+proc call*(call_564388: Call_CasesList_564375; subscriptionId: string;
+          operationalInsightsResourceProvider: string; resourceGroupName: string;
+          workspaceName: string; SkipToken: string = "";
+          apiVersion: string = "2019-01-01-preview"; Top: int = 0; Orderby: string = "";
+          Filter: string = ""): Recallable =
   ## casesList
   ## Gets all cases.
-  ##   Orderby: string
-  ##          : Sorts the results. Optional.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
-  ##   apiVersion: string (required)
-  ##             : API version for the operation
-  ##   subscriptionId: string (required)
-  ##                 : Azure subscription ID
-  ##   Top: int
-  ##      : Returns only the first n results. Optional.
   ##   SkipToken: string
   ##            : Skiptoken is only used if a previous operation returned a partial result. If a previous response contains a nextLink element, the value of the nextLink element will include a skiptoken parameter that specifies a starting point to use for subsequent calls. Optional.
-  ##   workspaceName: string (required)
-  ##                : The name of the workspace.
-  ##   Filter: string
-  ##         : Filters the results, based on a Boolean condition. Optional.
+  ##   apiVersion: string (required)
+  ##             : API version for the operation
+  ##   Top: int
+  ##      : Returns only the first n results. Optional.
+  ##   subscriptionId: string (required)
+  ##                 : Azure subscription ID
+  ##   Orderby: string
+  ##          : Sorts the results. Optional.
   ##   operationalInsightsResourceProvider: string (required)
   ##                                      : The namespace of workspaces resource provider- Microsoft.OperationalInsights.
-  var path_568489 = newJObject()
-  var query_568490 = newJObject()
-  add(query_568490, "$orderby", newJString(Orderby))
-  add(path_568489, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568490, "api-version", newJString(apiVersion))
-  add(path_568489, "subscriptionId", newJString(subscriptionId))
-  add(query_568490, "$top", newJInt(Top))
-  add(query_568490, "$skipToken", newJString(SkipToken))
-  add(path_568489, "workspaceName", newJString(workspaceName))
-  add(query_568490, "$filter", newJString(Filter))
-  add(path_568489, "operationalInsightsResourceProvider",
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
+  ##   Filter: string
+  ##         : Filters the results, based on a Boolean condition. Optional.
+  ##   workspaceName: string (required)
+  ##                : The name of the workspace.
+  var path_564389 = newJObject()
+  var query_564390 = newJObject()
+  add(query_564390, "$skipToken", newJString(SkipToken))
+  add(query_564390, "api-version", newJString(apiVersion))
+  add(query_564390, "$top", newJInt(Top))
+  add(path_564389, "subscriptionId", newJString(subscriptionId))
+  add(query_564390, "$orderby", newJString(Orderby))
+  add(path_564389, "operationalInsightsResourceProvider",
       newJString(operationalInsightsResourceProvider))
-  result = call_568488.call(path_568489, query_568490, nil, nil, nil)
+  add(path_564389, "resourceGroupName", newJString(resourceGroupName))
+  add(query_564390, "$filter", newJString(Filter))
+  add(path_564389, "workspaceName", newJString(workspaceName))
+  result = call_564388.call(path_564389, query_564390, nil, nil, nil)
 
-var casesList* = Call_CasesList_568475(name: "casesList", meth: HttpMethod.HttpGet,
+var casesList* = Call_CasesList_564375(name: "casesList", meth: HttpMethod.HttpGet,
                                     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/{operationalInsightsResourceProvider}/workspaces/{workspaceName}/providers/Microsoft.SecurityInsights/cases",
-                                    validator: validate_CasesList_568476,
-                                    base: "", url: url_CasesList_568477,
+                                    validator: validate_CasesList_564376,
+                                    base: "", url: url_CasesList_564377,
                                     schemes: {Scheme.Https})
 type
-  Call_CasesCreateOrUpdate_568504 = ref object of OpenApiRestCall_567667
-proc url_CasesCreateOrUpdate_568506(protocol: Scheme; host: string; base: string;
+  Call_CasesCreateOrUpdate_564404 = ref object of OpenApiRestCall_563565
+proc url_CasesCreateOrUpdate_564406(protocol: Scheme; host: string; base: string;
                                    route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -3246,7 +3231,7 @@ proc url_CasesCreateOrUpdate_568506(protocol: Scheme; host: string; base: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_CasesCreateOrUpdate_568505(path: JsonNode; query: JsonNode;
+proc validate_CasesCreateOrUpdate_564405(path: JsonNode; query: JsonNode;
                                         header: JsonNode; formData: JsonNode;
                                         body: JsonNode): JsonNode =
   ## Creates or updates the case.
@@ -3254,44 +3239,44 @@ proc validate_CasesCreateOrUpdate_568505(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
+  ##   subscriptionId: JString (required)
+  ##                 : Azure subscription ID
+  ##   operationalInsightsResourceProvider: JString (required)
+  ##                                      : The namespace of workspaces resource provider- Microsoft.OperationalInsights.
   ##   resourceGroupName: JString (required)
   ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
   ##   caseId: JString (required)
   ##         : Case ID
-  ##   subscriptionId: JString (required)
-  ##                 : Azure subscription ID
   ##   workspaceName: JString (required)
   ##                : The name of the workspace.
-  ##   operationalInsightsResourceProvider: JString (required)
-  ##                                      : The namespace of workspaces resource provider- Microsoft.OperationalInsights.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568507 = path.getOrDefault("resourceGroupName")
-  valid_568507 = validateParameter(valid_568507, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564407 = path.getOrDefault("subscriptionId")
+  valid_564407 = validateParameter(valid_564407, JString, required = true,
                                  default = nil)
-  if valid_568507 != nil:
-    section.add "resourceGroupName", valid_568507
-  var valid_568508 = path.getOrDefault("caseId")
-  valid_568508 = validateParameter(valid_568508, JString, required = true,
+  if valid_564407 != nil:
+    section.add "subscriptionId", valid_564407
+  var valid_564408 = path.getOrDefault("operationalInsightsResourceProvider")
+  valid_564408 = validateParameter(valid_564408, JString, required = true,
                                  default = nil)
-  if valid_568508 != nil:
-    section.add "caseId", valid_568508
-  var valid_568509 = path.getOrDefault("subscriptionId")
-  valid_568509 = validateParameter(valid_568509, JString, required = true,
+  if valid_564408 != nil:
+    section.add "operationalInsightsResourceProvider", valid_564408
+  var valid_564409 = path.getOrDefault("resourceGroupName")
+  valid_564409 = validateParameter(valid_564409, JString, required = true,
                                  default = nil)
-  if valid_568509 != nil:
-    section.add "subscriptionId", valid_568509
-  var valid_568510 = path.getOrDefault("workspaceName")
-  valid_568510 = validateParameter(valid_568510, JString, required = true,
+  if valid_564409 != nil:
+    section.add "resourceGroupName", valid_564409
+  var valid_564410 = path.getOrDefault("caseId")
+  valid_564410 = validateParameter(valid_564410, JString, required = true,
                                  default = nil)
-  if valid_568510 != nil:
-    section.add "workspaceName", valid_568510
-  var valid_568511 = path.getOrDefault("operationalInsightsResourceProvider")
-  valid_568511 = validateParameter(valid_568511, JString, required = true,
+  if valid_564410 != nil:
+    section.add "caseId", valid_564410
+  var valid_564411 = path.getOrDefault("workspaceName")
+  valid_564411 = validateParameter(valid_564411, JString, required = true,
                                  default = nil)
-  if valid_568511 != nil:
-    section.add "operationalInsightsResourceProvider", valid_568511
+  if valid_564411 != nil:
+    section.add "workspaceName", valid_564411
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -3299,11 +3284,11 @@ proc validate_CasesCreateOrUpdate_568505(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568512 = query.getOrDefault("api-version")
-  valid_568512 = validateParameter(valid_568512, JString, required = true,
+  var valid_564412 = query.getOrDefault("api-version")
+  valid_564412 = validateParameter(valid_564412, JString, required = true,
                                  default = newJString("2019-01-01-preview"))
-  if valid_568512 != nil:
-    section.add "api-version", valid_568512
+  if valid_564412 != nil:
+    section.add "api-version", valid_564412
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3317,61 +3302,61 @@ proc validate_CasesCreateOrUpdate_568505(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568514: Call_CasesCreateOrUpdate_568504; path: JsonNode;
+proc call*(call_564414: Call_CasesCreateOrUpdate_564404; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Creates or updates the case.
   ## 
-  let valid = call_568514.validator(path, query, header, formData, body)
-  let scheme = call_568514.pickScheme
+  let valid = call_564414.validator(path, query, header, formData, body)
+  let scheme = call_564414.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568514.url(scheme.get, call_568514.host, call_568514.base,
-                         call_568514.route, valid.getOrDefault("path"),
+  let url = call_564414.url(scheme.get, call_564414.host, call_564414.base,
+                         call_564414.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568514, url, valid)
+  result = hook(call_564414, url, valid)
 
-proc call*(call_568515: Call_CasesCreateOrUpdate_568504; resourceGroupName: string;
-          `case`: JsonNode; caseId: string; subscriptionId: string;
-          workspaceName: string; operationalInsightsResourceProvider: string;
+proc call*(call_564415: Call_CasesCreateOrUpdate_564404; subscriptionId: string;
+          operationalInsightsResourceProvider: string; resourceGroupName: string;
+          caseId: string; `case`: JsonNode; workspaceName: string;
           apiVersion: string = "2019-01-01-preview"): Recallable =
   ## casesCreateOrUpdate
   ## Creates or updates the case.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
   ##   apiVersion: string (required)
   ##             : API version for the operation
-  ##   case: JObject (required)
-  ##       : The case
-  ##   caseId: string (required)
-  ##         : Case ID
   ##   subscriptionId: string (required)
   ##                 : Azure subscription ID
-  ##   workspaceName: string (required)
-  ##                : The name of the workspace.
   ##   operationalInsightsResourceProvider: string (required)
   ##                                      : The namespace of workspaces resource provider- Microsoft.OperationalInsights.
-  var path_568516 = newJObject()
-  var query_568517 = newJObject()
-  var body_568518 = newJObject()
-  add(path_568516, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568517, "api-version", newJString(apiVersion))
-  if `case` != nil:
-    body_568518 = `case`
-  add(path_568516, "caseId", newJString(caseId))
-  add(path_568516, "subscriptionId", newJString(subscriptionId))
-  add(path_568516, "workspaceName", newJString(workspaceName))
-  add(path_568516, "operationalInsightsResourceProvider",
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
+  ##   caseId: string (required)
+  ##         : Case ID
+  ##   case: JObject (required)
+  ##       : The case
+  ##   workspaceName: string (required)
+  ##                : The name of the workspace.
+  var path_564416 = newJObject()
+  var query_564417 = newJObject()
+  var body_564418 = newJObject()
+  add(query_564417, "api-version", newJString(apiVersion))
+  add(path_564416, "subscriptionId", newJString(subscriptionId))
+  add(path_564416, "operationalInsightsResourceProvider",
       newJString(operationalInsightsResourceProvider))
-  result = call_568515.call(path_568516, query_568517, nil, nil, body_568518)
+  add(path_564416, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564416, "caseId", newJString(caseId))
+  if `case` != nil:
+    body_564418 = `case`
+  add(path_564416, "workspaceName", newJString(workspaceName))
+  result = call_564415.call(path_564416, query_564417, nil, nil, body_564418)
 
-var casesCreateOrUpdate* = Call_CasesCreateOrUpdate_568504(
+var casesCreateOrUpdate* = Call_CasesCreateOrUpdate_564404(
     name: "casesCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/{operationalInsightsResourceProvider}/workspaces/{workspaceName}/providers/Microsoft.SecurityInsights/cases/{caseId}",
-    validator: validate_CasesCreateOrUpdate_568505, base: "",
-    url: url_CasesCreateOrUpdate_568506, schemes: {Scheme.Https})
+    validator: validate_CasesCreateOrUpdate_564405, base: "",
+    url: url_CasesCreateOrUpdate_564406, schemes: {Scheme.Https})
 type
-  Call_CasesGet_568491 = ref object of OpenApiRestCall_567667
-proc url_CasesGet_568493(protocol: Scheme; host: string; base: string; route: string;
+  Call_CasesGet_564391 = ref object of OpenApiRestCall_563565
+proc url_CasesGet_564393(protocol: Scheme; host: string; base: string; route: string;
                         path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -3401,51 +3386,51 @@ proc url_CasesGet_568493(protocol: Scheme; host: string; base: string; route: st
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_CasesGet_568492(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_CasesGet_564392(path: JsonNode; query: JsonNode; header: JsonNode;
                              formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets a case.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
+  ##   subscriptionId: JString (required)
+  ##                 : Azure subscription ID
+  ##   operationalInsightsResourceProvider: JString (required)
+  ##                                      : The namespace of workspaces resource provider- Microsoft.OperationalInsights.
   ##   resourceGroupName: JString (required)
   ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
   ##   caseId: JString (required)
   ##         : Case ID
-  ##   subscriptionId: JString (required)
-  ##                 : Azure subscription ID
   ##   workspaceName: JString (required)
   ##                : The name of the workspace.
-  ##   operationalInsightsResourceProvider: JString (required)
-  ##                                      : The namespace of workspaces resource provider- Microsoft.OperationalInsights.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568494 = path.getOrDefault("resourceGroupName")
-  valid_568494 = validateParameter(valid_568494, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564394 = path.getOrDefault("subscriptionId")
+  valid_564394 = validateParameter(valid_564394, JString, required = true,
                                  default = nil)
-  if valid_568494 != nil:
-    section.add "resourceGroupName", valid_568494
-  var valid_568495 = path.getOrDefault("caseId")
-  valid_568495 = validateParameter(valid_568495, JString, required = true,
+  if valid_564394 != nil:
+    section.add "subscriptionId", valid_564394
+  var valid_564395 = path.getOrDefault("operationalInsightsResourceProvider")
+  valid_564395 = validateParameter(valid_564395, JString, required = true,
                                  default = nil)
-  if valid_568495 != nil:
-    section.add "caseId", valid_568495
-  var valid_568496 = path.getOrDefault("subscriptionId")
-  valid_568496 = validateParameter(valid_568496, JString, required = true,
+  if valid_564395 != nil:
+    section.add "operationalInsightsResourceProvider", valid_564395
+  var valid_564396 = path.getOrDefault("resourceGroupName")
+  valid_564396 = validateParameter(valid_564396, JString, required = true,
                                  default = nil)
-  if valid_568496 != nil:
-    section.add "subscriptionId", valid_568496
-  var valid_568497 = path.getOrDefault("workspaceName")
-  valid_568497 = validateParameter(valid_568497, JString, required = true,
+  if valid_564396 != nil:
+    section.add "resourceGroupName", valid_564396
+  var valid_564397 = path.getOrDefault("caseId")
+  valid_564397 = validateParameter(valid_564397, JString, required = true,
                                  default = nil)
-  if valid_568497 != nil:
-    section.add "workspaceName", valid_568497
-  var valid_568498 = path.getOrDefault("operationalInsightsResourceProvider")
-  valid_568498 = validateParameter(valid_568498, JString, required = true,
+  if valid_564397 != nil:
+    section.add "caseId", valid_564397
+  var valid_564398 = path.getOrDefault("workspaceName")
+  valid_564398 = validateParameter(valid_564398, JString, required = true,
                                  default = nil)
-  if valid_568498 != nil:
-    section.add "operationalInsightsResourceProvider", valid_568498
+  if valid_564398 != nil:
+    section.add "workspaceName", valid_564398
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -3453,11 +3438,11 @@ proc validate_CasesGet_568492(path: JsonNode; query: JsonNode; header: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568499 = query.getOrDefault("api-version")
-  valid_568499 = validateParameter(valid_568499, JString, required = true,
+  var valid_564399 = query.getOrDefault("api-version")
+  valid_564399 = validateParameter(valid_564399, JString, required = true,
                                  default = newJString("2019-01-01-preview"))
-  if valid_568499 != nil:
-    section.add "api-version", valid_568499
+  if valid_564399 != nil:
+    section.add "api-version", valid_564399
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3466,56 +3451,56 @@ proc validate_CasesGet_568492(path: JsonNode; query: JsonNode; header: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568500: Call_CasesGet_568491; path: JsonNode; query: JsonNode;
+proc call*(call_564400: Call_CasesGet_564391; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets a case.
   ## 
-  let valid = call_568500.validator(path, query, header, formData, body)
-  let scheme = call_568500.pickScheme
+  let valid = call_564400.validator(path, query, header, formData, body)
+  let scheme = call_564400.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568500.url(scheme.get, call_568500.host, call_568500.base,
-                         call_568500.route, valid.getOrDefault("path"),
+  let url = call_564400.url(scheme.get, call_564400.host, call_564400.base,
+                         call_564400.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568500, url, valid)
+  result = hook(call_564400, url, valid)
 
-proc call*(call_568501: Call_CasesGet_568491; resourceGroupName: string;
-          caseId: string; subscriptionId: string; workspaceName: string;
-          operationalInsightsResourceProvider: string;
+proc call*(call_564401: Call_CasesGet_564391; subscriptionId: string;
+          operationalInsightsResourceProvider: string; resourceGroupName: string;
+          caseId: string; workspaceName: string;
           apiVersion: string = "2019-01-01-preview"): Recallable =
   ## casesGet
   ## Gets a case.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
   ##   apiVersion: string (required)
   ##             : API version for the operation
-  ##   caseId: string (required)
-  ##         : Case ID
   ##   subscriptionId: string (required)
   ##                 : Azure subscription ID
-  ##   workspaceName: string (required)
-  ##                : The name of the workspace.
   ##   operationalInsightsResourceProvider: string (required)
   ##                                      : The namespace of workspaces resource provider- Microsoft.OperationalInsights.
-  var path_568502 = newJObject()
-  var query_568503 = newJObject()
-  add(path_568502, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568503, "api-version", newJString(apiVersion))
-  add(path_568502, "caseId", newJString(caseId))
-  add(path_568502, "subscriptionId", newJString(subscriptionId))
-  add(path_568502, "workspaceName", newJString(workspaceName))
-  add(path_568502, "operationalInsightsResourceProvider",
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
+  ##   caseId: string (required)
+  ##         : Case ID
+  ##   workspaceName: string (required)
+  ##                : The name of the workspace.
+  var path_564402 = newJObject()
+  var query_564403 = newJObject()
+  add(query_564403, "api-version", newJString(apiVersion))
+  add(path_564402, "subscriptionId", newJString(subscriptionId))
+  add(path_564402, "operationalInsightsResourceProvider",
       newJString(operationalInsightsResourceProvider))
-  result = call_568501.call(path_568502, query_568503, nil, nil, nil)
+  add(path_564402, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564402, "caseId", newJString(caseId))
+  add(path_564402, "workspaceName", newJString(workspaceName))
+  result = call_564401.call(path_564402, query_564403, nil, nil, nil)
 
-var casesGet* = Call_CasesGet_568491(name: "casesGet", meth: HttpMethod.HttpGet,
+var casesGet* = Call_CasesGet_564391(name: "casesGet", meth: HttpMethod.HttpGet,
                                   host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/{operationalInsightsResourceProvider}/workspaces/{workspaceName}/providers/Microsoft.SecurityInsights/cases/{caseId}",
-                                  validator: validate_CasesGet_568492, base: "",
-                                  url: url_CasesGet_568493,
+                                  validator: validate_CasesGet_564392, base: "",
+                                  url: url_CasesGet_564393,
                                   schemes: {Scheme.Https})
 type
-  Call_CasesDelete_568519 = ref object of OpenApiRestCall_567667
-proc url_CasesDelete_568521(protocol: Scheme; host: string; base: string;
+  Call_CasesDelete_564419 = ref object of OpenApiRestCall_563565
+proc url_CasesDelete_564421(protocol: Scheme; host: string; base: string;
                            route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -3545,51 +3530,51 @@ proc url_CasesDelete_568521(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_CasesDelete_568520(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_CasesDelete_564420(path: JsonNode; query: JsonNode; header: JsonNode;
                                 formData: JsonNode; body: JsonNode): JsonNode =
   ## Delete the case.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
+  ##   subscriptionId: JString (required)
+  ##                 : Azure subscription ID
+  ##   operationalInsightsResourceProvider: JString (required)
+  ##                                      : The namespace of workspaces resource provider- Microsoft.OperationalInsights.
   ##   resourceGroupName: JString (required)
   ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
   ##   caseId: JString (required)
   ##         : Case ID
-  ##   subscriptionId: JString (required)
-  ##                 : Azure subscription ID
   ##   workspaceName: JString (required)
   ##                : The name of the workspace.
-  ##   operationalInsightsResourceProvider: JString (required)
-  ##                                      : The namespace of workspaces resource provider- Microsoft.OperationalInsights.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568522 = path.getOrDefault("resourceGroupName")
-  valid_568522 = validateParameter(valid_568522, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564422 = path.getOrDefault("subscriptionId")
+  valid_564422 = validateParameter(valid_564422, JString, required = true,
                                  default = nil)
-  if valid_568522 != nil:
-    section.add "resourceGroupName", valid_568522
-  var valid_568523 = path.getOrDefault("caseId")
-  valid_568523 = validateParameter(valid_568523, JString, required = true,
+  if valid_564422 != nil:
+    section.add "subscriptionId", valid_564422
+  var valid_564423 = path.getOrDefault("operationalInsightsResourceProvider")
+  valid_564423 = validateParameter(valid_564423, JString, required = true,
                                  default = nil)
-  if valid_568523 != nil:
-    section.add "caseId", valid_568523
-  var valid_568524 = path.getOrDefault("subscriptionId")
-  valid_568524 = validateParameter(valid_568524, JString, required = true,
+  if valid_564423 != nil:
+    section.add "operationalInsightsResourceProvider", valid_564423
+  var valid_564424 = path.getOrDefault("resourceGroupName")
+  valid_564424 = validateParameter(valid_564424, JString, required = true,
                                  default = nil)
-  if valid_568524 != nil:
-    section.add "subscriptionId", valid_568524
-  var valid_568525 = path.getOrDefault("workspaceName")
-  valid_568525 = validateParameter(valid_568525, JString, required = true,
+  if valid_564424 != nil:
+    section.add "resourceGroupName", valid_564424
+  var valid_564425 = path.getOrDefault("caseId")
+  valid_564425 = validateParameter(valid_564425, JString, required = true,
                                  default = nil)
-  if valid_568525 != nil:
-    section.add "workspaceName", valid_568525
-  var valid_568526 = path.getOrDefault("operationalInsightsResourceProvider")
-  valid_568526 = validateParameter(valid_568526, JString, required = true,
+  if valid_564425 != nil:
+    section.add "caseId", valid_564425
+  var valid_564426 = path.getOrDefault("workspaceName")
+  valid_564426 = validateParameter(valid_564426, JString, required = true,
                                  default = nil)
-  if valid_568526 != nil:
-    section.add "operationalInsightsResourceProvider", valid_568526
+  if valid_564426 != nil:
+    section.add "workspaceName", valid_564426
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -3597,11 +3582,11 @@ proc validate_CasesDelete_568520(path: JsonNode; query: JsonNode; header: JsonNo
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568527 = query.getOrDefault("api-version")
-  valid_568527 = validateParameter(valid_568527, JString, required = true,
+  var valid_564427 = query.getOrDefault("api-version")
+  valid_564427 = validateParameter(valid_564427, JString, required = true,
                                  default = newJString("2019-01-01-preview"))
-  if valid_568527 != nil:
-    section.add "api-version", valid_568527
+  if valid_564427 != nil:
+    section.add "api-version", valid_564427
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3610,57 +3595,57 @@ proc validate_CasesDelete_568520(path: JsonNode; query: JsonNode; header: JsonNo
   if body != nil:
     result.add "body", body
 
-proc call*(call_568528: Call_CasesDelete_568519; path: JsonNode; query: JsonNode;
+proc call*(call_564428: Call_CasesDelete_564419; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Delete the case.
   ## 
-  let valid = call_568528.validator(path, query, header, formData, body)
-  let scheme = call_568528.pickScheme
+  let valid = call_564428.validator(path, query, header, formData, body)
+  let scheme = call_564428.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568528.url(scheme.get, call_568528.host, call_568528.base,
-                         call_568528.route, valid.getOrDefault("path"),
+  let url = call_564428.url(scheme.get, call_564428.host, call_564428.base,
+                         call_564428.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568528, url, valid)
+  result = hook(call_564428, url, valid)
 
-proc call*(call_568529: Call_CasesDelete_568519; resourceGroupName: string;
-          caseId: string; subscriptionId: string; workspaceName: string;
-          operationalInsightsResourceProvider: string;
+proc call*(call_564429: Call_CasesDelete_564419; subscriptionId: string;
+          operationalInsightsResourceProvider: string; resourceGroupName: string;
+          caseId: string; workspaceName: string;
           apiVersion: string = "2019-01-01-preview"): Recallable =
   ## casesDelete
   ## Delete the case.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
   ##   apiVersion: string (required)
   ##             : API version for the operation
-  ##   caseId: string (required)
-  ##         : Case ID
   ##   subscriptionId: string (required)
   ##                 : Azure subscription ID
-  ##   workspaceName: string (required)
-  ##                : The name of the workspace.
   ##   operationalInsightsResourceProvider: string (required)
   ##                                      : The namespace of workspaces resource provider- Microsoft.OperationalInsights.
-  var path_568530 = newJObject()
-  var query_568531 = newJObject()
-  add(path_568530, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568531, "api-version", newJString(apiVersion))
-  add(path_568530, "caseId", newJString(caseId))
-  add(path_568530, "subscriptionId", newJString(subscriptionId))
-  add(path_568530, "workspaceName", newJString(workspaceName))
-  add(path_568530, "operationalInsightsResourceProvider",
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
+  ##   caseId: string (required)
+  ##         : Case ID
+  ##   workspaceName: string (required)
+  ##                : The name of the workspace.
+  var path_564430 = newJObject()
+  var query_564431 = newJObject()
+  add(query_564431, "api-version", newJString(apiVersion))
+  add(path_564430, "subscriptionId", newJString(subscriptionId))
+  add(path_564430, "operationalInsightsResourceProvider",
       newJString(operationalInsightsResourceProvider))
-  result = call_568529.call(path_568530, query_568531, nil, nil, nil)
+  add(path_564430, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564430, "caseId", newJString(caseId))
+  add(path_564430, "workspaceName", newJString(workspaceName))
+  result = call_564429.call(path_564430, query_564431, nil, nil, nil)
 
-var casesDelete* = Call_CasesDelete_568519(name: "casesDelete",
+var casesDelete* = Call_CasesDelete_564419(name: "casesDelete",
                                         meth: HttpMethod.HttpDelete,
                                         host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/{operationalInsightsResourceProvider}/workspaces/{workspaceName}/providers/Microsoft.SecurityInsights/cases/{caseId}",
-                                        validator: validate_CasesDelete_568520,
-                                        base: "", url: url_CasesDelete_568521,
+                                        validator: validate_CasesDelete_564420,
+                                        base: "", url: url_CasesDelete_564421,
                                         schemes: {Scheme.Https})
 type
-  Call_CommentsListByCase_568532 = ref object of OpenApiRestCall_567667
-proc url_CommentsListByCase_568534(protocol: Scheme; host: string; base: string;
+  Call_CommentsListByCase_564432 = ref object of OpenApiRestCall_563565
+proc url_CommentsListByCase_564434(protocol: Scheme; host: string; base: string;
                                   route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -3691,7 +3676,7 @@ proc url_CommentsListByCase_568534(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_CommentsListByCase_568533(path: JsonNode; query: JsonNode;
+proc validate_CommentsListByCase_564433(path: JsonNode; query: JsonNode;
                                        header: JsonNode; formData: JsonNode;
                                        body: JsonNode): JsonNode =
   ## Gets all case comments.
@@ -3699,83 +3684,83 @@ proc validate_CommentsListByCase_568533(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
+  ##   subscriptionId: JString (required)
+  ##                 : Azure subscription ID
+  ##   operationalInsightsResourceProvider: JString (required)
+  ##                                      : The namespace of workspaces resource provider- Microsoft.OperationalInsights.
   ##   resourceGroupName: JString (required)
   ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
   ##   caseId: JString (required)
   ##         : Case ID
-  ##   subscriptionId: JString (required)
-  ##                 : Azure subscription ID
   ##   workspaceName: JString (required)
   ##                : The name of the workspace.
-  ##   operationalInsightsResourceProvider: JString (required)
-  ##                                      : The namespace of workspaces resource provider- Microsoft.OperationalInsights.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568535 = path.getOrDefault("resourceGroupName")
-  valid_568535 = validateParameter(valid_568535, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564435 = path.getOrDefault("subscriptionId")
+  valid_564435 = validateParameter(valid_564435, JString, required = true,
                                  default = nil)
-  if valid_568535 != nil:
-    section.add "resourceGroupName", valid_568535
-  var valid_568536 = path.getOrDefault("caseId")
-  valid_568536 = validateParameter(valid_568536, JString, required = true,
+  if valid_564435 != nil:
+    section.add "subscriptionId", valid_564435
+  var valid_564436 = path.getOrDefault("operationalInsightsResourceProvider")
+  valid_564436 = validateParameter(valid_564436, JString, required = true,
                                  default = nil)
-  if valid_568536 != nil:
-    section.add "caseId", valid_568536
-  var valid_568537 = path.getOrDefault("subscriptionId")
-  valid_568537 = validateParameter(valid_568537, JString, required = true,
+  if valid_564436 != nil:
+    section.add "operationalInsightsResourceProvider", valid_564436
+  var valid_564437 = path.getOrDefault("resourceGroupName")
+  valid_564437 = validateParameter(valid_564437, JString, required = true,
                                  default = nil)
-  if valid_568537 != nil:
-    section.add "subscriptionId", valid_568537
-  var valid_568538 = path.getOrDefault("workspaceName")
-  valid_568538 = validateParameter(valid_568538, JString, required = true,
+  if valid_564437 != nil:
+    section.add "resourceGroupName", valid_564437
+  var valid_564438 = path.getOrDefault("caseId")
+  valid_564438 = validateParameter(valid_564438, JString, required = true,
                                  default = nil)
-  if valid_568538 != nil:
-    section.add "workspaceName", valid_568538
-  var valid_568539 = path.getOrDefault("operationalInsightsResourceProvider")
-  valid_568539 = validateParameter(valid_568539, JString, required = true,
+  if valid_564438 != nil:
+    section.add "caseId", valid_564438
+  var valid_564439 = path.getOrDefault("workspaceName")
+  valid_564439 = validateParameter(valid_564439, JString, required = true,
                                  default = nil)
-  if valid_568539 != nil:
-    section.add "operationalInsightsResourceProvider", valid_568539
+  if valid_564439 != nil:
+    section.add "workspaceName", valid_564439
   result.add "path", section
   ## parameters in `query` object:
-  ##   $orderby: JString
-  ##           : Sorts the results. Optional.
+  ##   $skipToken: JString
+  ##             : Skiptoken is only used if a previous operation returned a partial result. If a previous response contains a nextLink element, the value of the nextLink element will include a skiptoken parameter that specifies a starting point to use for subsequent calls. Optional.
   ##   api-version: JString (required)
   ##              : API version for the operation
   ##   $top: JInt
   ##       : Returns only the first n results. Optional.
-  ##   $skipToken: JString
-  ##             : Skiptoken is only used if a previous operation returned a partial result. If a previous response contains a nextLink element, the value of the nextLink element will include a skiptoken parameter that specifies a starting point to use for subsequent calls. Optional.
+  ##   $orderby: JString
+  ##           : Sorts the results. Optional.
   ##   $filter: JString
   ##          : Filters the results, based on a Boolean condition. Optional.
   section = newJObject()
-  var valid_568540 = query.getOrDefault("$orderby")
-  valid_568540 = validateParameter(valid_568540, JString, required = false,
+  var valid_564440 = query.getOrDefault("$skipToken")
+  valid_564440 = validateParameter(valid_564440, JString, required = false,
                                  default = nil)
-  if valid_568540 != nil:
-    section.add "$orderby", valid_568540
+  if valid_564440 != nil:
+    section.add "$skipToken", valid_564440
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568541 = query.getOrDefault("api-version")
-  valid_568541 = validateParameter(valid_568541, JString, required = true,
+  var valid_564441 = query.getOrDefault("api-version")
+  valid_564441 = validateParameter(valid_564441, JString, required = true,
                                  default = newJString("2019-01-01-preview"))
-  if valid_568541 != nil:
-    section.add "api-version", valid_568541
-  var valid_568542 = query.getOrDefault("$top")
-  valid_568542 = validateParameter(valid_568542, JInt, required = false, default = nil)
-  if valid_568542 != nil:
-    section.add "$top", valid_568542
-  var valid_568543 = query.getOrDefault("$skipToken")
-  valid_568543 = validateParameter(valid_568543, JString, required = false,
+  if valid_564441 != nil:
+    section.add "api-version", valid_564441
+  var valid_564442 = query.getOrDefault("$top")
+  valid_564442 = validateParameter(valid_564442, JInt, required = false, default = nil)
+  if valid_564442 != nil:
+    section.add "$top", valid_564442
+  var valid_564443 = query.getOrDefault("$orderby")
+  valid_564443 = validateParameter(valid_564443, JString, required = false,
                                  default = nil)
-  if valid_568543 != nil:
-    section.add "$skipToken", valid_568543
-  var valid_568544 = query.getOrDefault("$filter")
-  valid_568544 = validateParameter(valid_568544, JString, required = false,
+  if valid_564443 != nil:
+    section.add "$orderby", valid_564443
+  var valid_564444 = query.getOrDefault("$filter")
+  valid_564444 = validateParameter(valid_564444, JString, required = false,
                                  default = nil)
-  if valid_568544 != nil:
-    section.add "$filter", valid_568544
+  if valid_564444 != nil:
+    section.add "$filter", valid_564444
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3784,69 +3769,69 @@ proc validate_CommentsListByCase_568533(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568545: Call_CommentsListByCase_568532; path: JsonNode;
+proc call*(call_564445: Call_CommentsListByCase_564432; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets all case comments.
   ## 
-  let valid = call_568545.validator(path, query, header, formData, body)
-  let scheme = call_568545.pickScheme
+  let valid = call_564445.validator(path, query, header, formData, body)
+  let scheme = call_564445.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568545.url(scheme.get, call_568545.host, call_568545.base,
-                         call_568545.route, valid.getOrDefault("path"),
+  let url = call_564445.url(scheme.get, call_564445.host, call_564445.base,
+                         call_564445.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568545, url, valid)
+  result = hook(call_564445, url, valid)
 
-proc call*(call_568546: Call_CommentsListByCase_568532; resourceGroupName: string;
-          caseId: string; subscriptionId: string; workspaceName: string;
-          operationalInsightsResourceProvider: string; Orderby: string = "";
-          apiVersion: string = "2019-01-01-preview"; Top: int = 0;
-          SkipToken: string = ""; Filter: string = ""): Recallable =
+proc call*(call_564446: Call_CommentsListByCase_564432; subscriptionId: string;
+          operationalInsightsResourceProvider: string; resourceGroupName: string;
+          caseId: string; workspaceName: string; SkipToken: string = "";
+          apiVersion: string = "2019-01-01-preview"; Top: int = 0; Orderby: string = "";
+          Filter: string = ""): Recallable =
   ## commentsListByCase
   ## Gets all case comments.
-  ##   Orderby: string
-  ##          : Sorts the results. Optional.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
-  ##   apiVersion: string (required)
-  ##             : API version for the operation
-  ##   caseId: string (required)
-  ##         : Case ID
-  ##   subscriptionId: string (required)
-  ##                 : Azure subscription ID
-  ##   Top: int
-  ##      : Returns only the first n results. Optional.
   ##   SkipToken: string
   ##            : Skiptoken is only used if a previous operation returned a partial result. If a previous response contains a nextLink element, the value of the nextLink element will include a skiptoken parameter that specifies a starting point to use for subsequent calls. Optional.
-  ##   workspaceName: string (required)
-  ##                : The name of the workspace.
-  ##   Filter: string
-  ##         : Filters the results, based on a Boolean condition. Optional.
+  ##   apiVersion: string (required)
+  ##             : API version for the operation
+  ##   Top: int
+  ##      : Returns only the first n results. Optional.
+  ##   subscriptionId: string (required)
+  ##                 : Azure subscription ID
+  ##   Orderby: string
+  ##          : Sorts the results. Optional.
   ##   operationalInsightsResourceProvider: string (required)
   ##                                      : The namespace of workspaces resource provider- Microsoft.OperationalInsights.
-  var path_568547 = newJObject()
-  var query_568548 = newJObject()
-  add(query_568548, "$orderby", newJString(Orderby))
-  add(path_568547, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568548, "api-version", newJString(apiVersion))
-  add(path_568547, "caseId", newJString(caseId))
-  add(path_568547, "subscriptionId", newJString(subscriptionId))
-  add(query_568548, "$top", newJInt(Top))
-  add(query_568548, "$skipToken", newJString(SkipToken))
-  add(path_568547, "workspaceName", newJString(workspaceName))
-  add(query_568548, "$filter", newJString(Filter))
-  add(path_568547, "operationalInsightsResourceProvider",
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
+  ##   Filter: string
+  ##         : Filters the results, based on a Boolean condition. Optional.
+  ##   caseId: string (required)
+  ##         : Case ID
+  ##   workspaceName: string (required)
+  ##                : The name of the workspace.
+  var path_564447 = newJObject()
+  var query_564448 = newJObject()
+  add(query_564448, "$skipToken", newJString(SkipToken))
+  add(query_564448, "api-version", newJString(apiVersion))
+  add(query_564448, "$top", newJInt(Top))
+  add(path_564447, "subscriptionId", newJString(subscriptionId))
+  add(query_564448, "$orderby", newJString(Orderby))
+  add(path_564447, "operationalInsightsResourceProvider",
       newJString(operationalInsightsResourceProvider))
-  result = call_568546.call(path_568547, query_568548, nil, nil, nil)
+  add(path_564447, "resourceGroupName", newJString(resourceGroupName))
+  add(query_564448, "$filter", newJString(Filter))
+  add(path_564447, "caseId", newJString(caseId))
+  add(path_564447, "workspaceName", newJString(workspaceName))
+  result = call_564446.call(path_564447, query_564448, nil, nil, nil)
 
-var commentsListByCase* = Call_CommentsListByCase_568532(
+var commentsListByCase* = Call_CommentsListByCase_564432(
     name: "commentsListByCase", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/{operationalInsightsResourceProvider}/workspaces/{workspaceName}/providers/Microsoft.SecurityInsights/cases/{caseId}/comments",
-    validator: validate_CommentsListByCase_568533, base: "",
-    url: url_CommentsListByCase_568534, schemes: {Scheme.Https})
+    validator: validate_CommentsListByCase_564433, base: "",
+    url: url_CommentsListByCase_564434, schemes: {Scheme.Https})
 type
-  Call_CaseCommentsCreateComment_568563 = ref object of OpenApiRestCall_567667
-proc url_CaseCommentsCreateComment_568565(protocol: Scheme; host: string;
+  Call_CaseCommentsCreateComment_564463 = ref object of OpenApiRestCall_563565
+proc url_CaseCommentsCreateComment_564465(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -3879,58 +3864,58 @@ proc url_CaseCommentsCreateComment_568565(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_CaseCommentsCreateComment_568564(path: JsonNode; query: JsonNode;
+proc validate_CaseCommentsCreateComment_564464(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Creates the case comment.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
   ##   caseCommentId: JString (required)
   ##                : Case comment ID
-  ##   caseId: JString (required)
-  ##         : Case ID
   ##   subscriptionId: JString (required)
   ##                 : Azure subscription ID
-  ##   workspaceName: JString (required)
-  ##                : The name of the workspace.
   ##   operationalInsightsResourceProvider: JString (required)
   ##                                      : The namespace of workspaces resource provider- Microsoft.OperationalInsights.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
+  ##   caseId: JString (required)
+  ##         : Case ID
+  ##   workspaceName: JString (required)
+  ##                : The name of the workspace.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568566 = path.getOrDefault("resourceGroupName")
-  valid_568566 = validateParameter(valid_568566, JString, required = true,
+        "path argument is necessary due to required `caseCommentId` field"
+  var valid_564466 = path.getOrDefault("caseCommentId")
+  valid_564466 = validateParameter(valid_564466, JString, required = true,
                                  default = nil)
-  if valid_568566 != nil:
-    section.add "resourceGroupName", valid_568566
-  var valid_568567 = path.getOrDefault("caseCommentId")
-  valid_568567 = validateParameter(valid_568567, JString, required = true,
+  if valid_564466 != nil:
+    section.add "caseCommentId", valid_564466
+  var valid_564467 = path.getOrDefault("subscriptionId")
+  valid_564467 = validateParameter(valid_564467, JString, required = true,
                                  default = nil)
-  if valid_568567 != nil:
-    section.add "caseCommentId", valid_568567
-  var valid_568568 = path.getOrDefault("caseId")
-  valid_568568 = validateParameter(valid_568568, JString, required = true,
+  if valid_564467 != nil:
+    section.add "subscriptionId", valid_564467
+  var valid_564468 = path.getOrDefault("operationalInsightsResourceProvider")
+  valid_564468 = validateParameter(valid_564468, JString, required = true,
                                  default = nil)
-  if valid_568568 != nil:
-    section.add "caseId", valid_568568
-  var valid_568569 = path.getOrDefault("subscriptionId")
-  valid_568569 = validateParameter(valid_568569, JString, required = true,
+  if valid_564468 != nil:
+    section.add "operationalInsightsResourceProvider", valid_564468
+  var valid_564469 = path.getOrDefault("resourceGroupName")
+  valid_564469 = validateParameter(valid_564469, JString, required = true,
                                  default = nil)
-  if valid_568569 != nil:
-    section.add "subscriptionId", valid_568569
-  var valid_568570 = path.getOrDefault("workspaceName")
-  valid_568570 = validateParameter(valid_568570, JString, required = true,
+  if valid_564469 != nil:
+    section.add "resourceGroupName", valid_564469
+  var valid_564470 = path.getOrDefault("caseId")
+  valid_564470 = validateParameter(valid_564470, JString, required = true,
                                  default = nil)
-  if valid_568570 != nil:
-    section.add "workspaceName", valid_568570
-  var valid_568571 = path.getOrDefault("operationalInsightsResourceProvider")
-  valid_568571 = validateParameter(valid_568571, JString, required = true,
+  if valid_564470 != nil:
+    section.add "caseId", valid_564470
+  var valid_564471 = path.getOrDefault("workspaceName")
+  valid_564471 = validateParameter(valid_564471, JString, required = true,
                                  default = nil)
-  if valid_568571 != nil:
-    section.add "operationalInsightsResourceProvider", valid_568571
+  if valid_564471 != nil:
+    section.add "workspaceName", valid_564471
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -3938,11 +3923,11 @@ proc validate_CaseCommentsCreateComment_568564(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568572 = query.getOrDefault("api-version")
-  valid_568572 = validateParameter(valid_568572, JString, required = true,
+  var valid_564472 = query.getOrDefault("api-version")
+  valid_564472 = validateParameter(valid_564472, JString, required = true,
                                  default = newJString("2019-01-01-preview"))
-  if valid_568572 != nil:
-    section.add "api-version", valid_568572
+  if valid_564472 != nil:
+    section.add "api-version", valid_564472
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -3956,65 +3941,65 @@ proc validate_CaseCommentsCreateComment_568564(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568574: Call_CaseCommentsCreateComment_568563; path: JsonNode;
+proc call*(call_564474: Call_CaseCommentsCreateComment_564463; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Creates the case comment.
   ## 
-  let valid = call_568574.validator(path, query, header, formData, body)
-  let scheme = call_568574.pickScheme
+  let valid = call_564474.validator(path, query, header, formData, body)
+  let scheme = call_564474.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568574.url(scheme.get, call_568574.host, call_568574.base,
-                         call_568574.route, valid.getOrDefault("path"),
+  let url = call_564474.url(scheme.get, call_564474.host, call_564474.base,
+                         call_564474.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568574, url, valid)
+  result = hook(call_564474, url, valid)
 
-proc call*(call_568575: Call_CaseCommentsCreateComment_568563;
-          resourceGroupName: string; caseCommentId: string; caseId: string;
-          subscriptionId: string; caseComment: JsonNode; workspaceName: string;
-          operationalInsightsResourceProvider: string;
+proc call*(call_564475: Call_CaseCommentsCreateComment_564463;
+          caseCommentId: string; subscriptionId: string; caseComment: JsonNode;
+          operationalInsightsResourceProvider: string; resourceGroupName: string;
+          caseId: string; workspaceName: string;
           apiVersion: string = "2019-01-01-preview"): Recallable =
   ## caseCommentsCreateComment
   ## Creates the case comment.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
-  ##   apiVersion: string (required)
-  ##             : API version for the operation
   ##   caseCommentId: string (required)
   ##                : Case comment ID
-  ##   caseId: string (required)
-  ##         : Case ID
+  ##   apiVersion: string (required)
+  ##             : API version for the operation
   ##   subscriptionId: string (required)
   ##                 : Azure subscription ID
   ##   caseComment: JObject (required)
   ##              : The case comment
-  ##   workspaceName: string (required)
-  ##                : The name of the workspace.
   ##   operationalInsightsResourceProvider: string (required)
   ##                                      : The namespace of workspaces resource provider- Microsoft.OperationalInsights.
-  var path_568576 = newJObject()
-  var query_568577 = newJObject()
-  var body_568578 = newJObject()
-  add(path_568576, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568577, "api-version", newJString(apiVersion))
-  add(path_568576, "caseCommentId", newJString(caseCommentId))
-  add(path_568576, "caseId", newJString(caseId))
-  add(path_568576, "subscriptionId", newJString(subscriptionId))
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
+  ##   caseId: string (required)
+  ##         : Case ID
+  ##   workspaceName: string (required)
+  ##                : The name of the workspace.
+  var path_564476 = newJObject()
+  var query_564477 = newJObject()
+  var body_564478 = newJObject()
+  add(path_564476, "caseCommentId", newJString(caseCommentId))
+  add(query_564477, "api-version", newJString(apiVersion))
+  add(path_564476, "subscriptionId", newJString(subscriptionId))
   if caseComment != nil:
-    body_568578 = caseComment
-  add(path_568576, "workspaceName", newJString(workspaceName))
-  add(path_568576, "operationalInsightsResourceProvider",
+    body_564478 = caseComment
+  add(path_564476, "operationalInsightsResourceProvider",
       newJString(operationalInsightsResourceProvider))
-  result = call_568575.call(path_568576, query_568577, nil, nil, body_568578)
+  add(path_564476, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564476, "caseId", newJString(caseId))
+  add(path_564476, "workspaceName", newJString(workspaceName))
+  result = call_564475.call(path_564476, query_564477, nil, nil, body_564478)
 
-var caseCommentsCreateComment* = Call_CaseCommentsCreateComment_568563(
+var caseCommentsCreateComment* = Call_CaseCommentsCreateComment_564463(
     name: "caseCommentsCreateComment", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/{operationalInsightsResourceProvider}/workspaces/{workspaceName}/providers/Microsoft.SecurityInsights/cases/{caseId}/comments/{caseCommentId}",
-    validator: validate_CaseCommentsCreateComment_568564, base: "",
-    url: url_CaseCommentsCreateComment_568565, schemes: {Scheme.Https})
+    validator: validate_CaseCommentsCreateComment_564464, base: "",
+    url: url_CaseCommentsCreateComment_564465, schemes: {Scheme.Https})
 type
-  Call_CasesGetComment_568549 = ref object of OpenApiRestCall_567667
-proc url_CasesGetComment_568551(protocol: Scheme; host: string; base: string;
+  Call_CasesGetComment_564449 = ref object of OpenApiRestCall_563565
+proc url_CasesGetComment_564451(protocol: Scheme; host: string; base: string;
                                route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -4047,7 +4032,7 @@ proc url_CasesGetComment_568551(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_CasesGetComment_568550(path: JsonNode; query: JsonNode;
+proc validate_CasesGetComment_564450(path: JsonNode; query: JsonNode;
                                     header: JsonNode; formData: JsonNode;
                                     body: JsonNode): JsonNode =
   ## Gets a case comment.
@@ -4055,51 +4040,51 @@ proc validate_CasesGetComment_568550(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
   ##   caseCommentId: JString (required)
   ##                : Case comment ID
-  ##   caseId: JString (required)
-  ##         : Case ID
   ##   subscriptionId: JString (required)
   ##                 : Azure subscription ID
-  ##   workspaceName: JString (required)
-  ##                : The name of the workspace.
   ##   operationalInsightsResourceProvider: JString (required)
   ##                                      : The namespace of workspaces resource provider- Microsoft.OperationalInsights.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
+  ##   caseId: JString (required)
+  ##         : Case ID
+  ##   workspaceName: JString (required)
+  ##                : The name of the workspace.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568552 = path.getOrDefault("resourceGroupName")
-  valid_568552 = validateParameter(valid_568552, JString, required = true,
+        "path argument is necessary due to required `caseCommentId` field"
+  var valid_564452 = path.getOrDefault("caseCommentId")
+  valid_564452 = validateParameter(valid_564452, JString, required = true,
                                  default = nil)
-  if valid_568552 != nil:
-    section.add "resourceGroupName", valid_568552
-  var valid_568553 = path.getOrDefault("caseCommentId")
-  valid_568553 = validateParameter(valid_568553, JString, required = true,
+  if valid_564452 != nil:
+    section.add "caseCommentId", valid_564452
+  var valid_564453 = path.getOrDefault("subscriptionId")
+  valid_564453 = validateParameter(valid_564453, JString, required = true,
                                  default = nil)
-  if valid_568553 != nil:
-    section.add "caseCommentId", valid_568553
-  var valid_568554 = path.getOrDefault("caseId")
-  valid_568554 = validateParameter(valid_568554, JString, required = true,
+  if valid_564453 != nil:
+    section.add "subscriptionId", valid_564453
+  var valid_564454 = path.getOrDefault("operationalInsightsResourceProvider")
+  valid_564454 = validateParameter(valid_564454, JString, required = true,
                                  default = nil)
-  if valid_568554 != nil:
-    section.add "caseId", valid_568554
-  var valid_568555 = path.getOrDefault("subscriptionId")
-  valid_568555 = validateParameter(valid_568555, JString, required = true,
+  if valid_564454 != nil:
+    section.add "operationalInsightsResourceProvider", valid_564454
+  var valid_564455 = path.getOrDefault("resourceGroupName")
+  valid_564455 = validateParameter(valid_564455, JString, required = true,
                                  default = nil)
-  if valid_568555 != nil:
-    section.add "subscriptionId", valid_568555
-  var valid_568556 = path.getOrDefault("workspaceName")
-  valid_568556 = validateParameter(valid_568556, JString, required = true,
+  if valid_564455 != nil:
+    section.add "resourceGroupName", valid_564455
+  var valid_564456 = path.getOrDefault("caseId")
+  valid_564456 = validateParameter(valid_564456, JString, required = true,
                                  default = nil)
-  if valid_568556 != nil:
-    section.add "workspaceName", valid_568556
-  var valid_568557 = path.getOrDefault("operationalInsightsResourceProvider")
-  valid_568557 = validateParameter(valid_568557, JString, required = true,
+  if valid_564456 != nil:
+    section.add "caseId", valid_564456
+  var valid_564457 = path.getOrDefault("workspaceName")
+  valid_564457 = validateParameter(valid_564457, JString, required = true,
                                  default = nil)
-  if valid_568557 != nil:
-    section.add "operationalInsightsResourceProvider", valid_568557
+  if valid_564457 != nil:
+    section.add "workspaceName", valid_564457
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -4107,11 +4092,11 @@ proc validate_CasesGetComment_568550(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568558 = query.getOrDefault("api-version")
-  valid_568558 = validateParameter(valid_568558, JString, required = true,
+  var valid_564458 = query.getOrDefault("api-version")
+  valid_564458 = validateParameter(valid_564458, JString, required = true,
                                  default = newJString("2019-01-01-preview"))
-  if valid_568558 != nil:
-    section.add "api-version", valid_568558
+  if valid_564458 != nil:
+    section.add "api-version", valid_564458
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -4120,58 +4105,58 @@ proc validate_CasesGetComment_568550(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568559: Call_CasesGetComment_568549; path: JsonNode; query: JsonNode;
+proc call*(call_564459: Call_CasesGetComment_564449; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets a case comment.
   ## 
-  let valid = call_568559.validator(path, query, header, formData, body)
-  let scheme = call_568559.pickScheme
+  let valid = call_564459.validator(path, query, header, formData, body)
+  let scheme = call_564459.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568559.url(scheme.get, call_568559.host, call_568559.base,
-                         call_568559.route, valid.getOrDefault("path"),
+  let url = call_564459.url(scheme.get, call_564459.host, call_564459.base,
+                         call_564459.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568559, url, valid)
+  result = hook(call_564459, url, valid)
 
-proc call*(call_568560: Call_CasesGetComment_568549; resourceGroupName: string;
-          caseCommentId: string; caseId: string; subscriptionId: string;
-          workspaceName: string; operationalInsightsResourceProvider: string;
+proc call*(call_564460: Call_CasesGetComment_564449; caseCommentId: string;
+          subscriptionId: string; operationalInsightsResourceProvider: string;
+          resourceGroupName: string; caseId: string; workspaceName: string;
           apiVersion: string = "2019-01-01-preview"): Recallable =
   ## casesGetComment
   ## Gets a case comment.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
-  ##   apiVersion: string (required)
-  ##             : API version for the operation
   ##   caseCommentId: string (required)
   ##                : Case comment ID
-  ##   caseId: string (required)
-  ##         : Case ID
+  ##   apiVersion: string (required)
+  ##             : API version for the operation
   ##   subscriptionId: string (required)
   ##                 : Azure subscription ID
-  ##   workspaceName: string (required)
-  ##                : The name of the workspace.
   ##   operationalInsightsResourceProvider: string (required)
   ##                                      : The namespace of workspaces resource provider- Microsoft.OperationalInsights.
-  var path_568561 = newJObject()
-  var query_568562 = newJObject()
-  add(path_568561, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568562, "api-version", newJString(apiVersion))
-  add(path_568561, "caseCommentId", newJString(caseCommentId))
-  add(path_568561, "caseId", newJString(caseId))
-  add(path_568561, "subscriptionId", newJString(subscriptionId))
-  add(path_568561, "workspaceName", newJString(workspaceName))
-  add(path_568561, "operationalInsightsResourceProvider",
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
+  ##   caseId: string (required)
+  ##         : Case ID
+  ##   workspaceName: string (required)
+  ##                : The name of the workspace.
+  var path_564461 = newJObject()
+  var query_564462 = newJObject()
+  add(path_564461, "caseCommentId", newJString(caseCommentId))
+  add(query_564462, "api-version", newJString(apiVersion))
+  add(path_564461, "subscriptionId", newJString(subscriptionId))
+  add(path_564461, "operationalInsightsResourceProvider",
       newJString(operationalInsightsResourceProvider))
-  result = call_568560.call(path_568561, query_568562, nil, nil, nil)
+  add(path_564461, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564461, "caseId", newJString(caseId))
+  add(path_564461, "workspaceName", newJString(workspaceName))
+  result = call_564460.call(path_564461, query_564462, nil, nil, nil)
 
-var casesGetComment* = Call_CasesGetComment_568549(name: "casesGetComment",
+var casesGetComment* = Call_CasesGetComment_564449(name: "casesGetComment",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/{operationalInsightsResourceProvider}/workspaces/{workspaceName}/providers/Microsoft.SecurityInsights/cases/{caseId}/comments/{caseCommentId}",
-    validator: validate_CasesGetComment_568550, base: "", url: url_CasesGetComment_568551,
+    validator: validate_CasesGetComment_564450, base: "", url: url_CasesGetComment_564451,
     schemes: {Scheme.Https})
 type
-  Call_CaseRelationsList_568579 = ref object of OpenApiRestCall_567667
-proc url_CaseRelationsList_568581(protocol: Scheme; host: string; base: string;
+  Call_CaseRelationsList_564479 = ref object of OpenApiRestCall_563565
+proc url_CaseRelationsList_564481(protocol: Scheme; host: string; base: string;
                                  route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -4202,7 +4187,7 @@ proc url_CaseRelationsList_568581(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_CaseRelationsList_568580(path: JsonNode; query: JsonNode;
+proc validate_CaseRelationsList_564480(path: JsonNode; query: JsonNode;
                                       header: JsonNode; formData: JsonNode;
                                       body: JsonNode): JsonNode =
   ## Gets all case relations.
@@ -4210,83 +4195,83 @@ proc validate_CaseRelationsList_568580(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
+  ##   subscriptionId: JString (required)
+  ##                 : Azure subscription ID
+  ##   operationalInsightsResourceProvider: JString (required)
+  ##                                      : The namespace of workspaces resource provider- Microsoft.OperationalInsights.
   ##   resourceGroupName: JString (required)
   ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
   ##   caseId: JString (required)
   ##         : Case ID
-  ##   subscriptionId: JString (required)
-  ##                 : Azure subscription ID
   ##   workspaceName: JString (required)
   ##                : The name of the workspace.
-  ##   operationalInsightsResourceProvider: JString (required)
-  ##                                      : The namespace of workspaces resource provider- Microsoft.OperationalInsights.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568582 = path.getOrDefault("resourceGroupName")
-  valid_568582 = validateParameter(valid_568582, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564482 = path.getOrDefault("subscriptionId")
+  valid_564482 = validateParameter(valid_564482, JString, required = true,
                                  default = nil)
-  if valid_568582 != nil:
-    section.add "resourceGroupName", valid_568582
-  var valid_568583 = path.getOrDefault("caseId")
-  valid_568583 = validateParameter(valid_568583, JString, required = true,
+  if valid_564482 != nil:
+    section.add "subscriptionId", valid_564482
+  var valid_564483 = path.getOrDefault("operationalInsightsResourceProvider")
+  valid_564483 = validateParameter(valid_564483, JString, required = true,
                                  default = nil)
-  if valid_568583 != nil:
-    section.add "caseId", valid_568583
-  var valid_568584 = path.getOrDefault("subscriptionId")
-  valid_568584 = validateParameter(valid_568584, JString, required = true,
+  if valid_564483 != nil:
+    section.add "operationalInsightsResourceProvider", valid_564483
+  var valid_564484 = path.getOrDefault("resourceGroupName")
+  valid_564484 = validateParameter(valid_564484, JString, required = true,
                                  default = nil)
-  if valid_568584 != nil:
-    section.add "subscriptionId", valid_568584
-  var valid_568585 = path.getOrDefault("workspaceName")
-  valid_568585 = validateParameter(valid_568585, JString, required = true,
+  if valid_564484 != nil:
+    section.add "resourceGroupName", valid_564484
+  var valid_564485 = path.getOrDefault("caseId")
+  valid_564485 = validateParameter(valid_564485, JString, required = true,
                                  default = nil)
-  if valid_568585 != nil:
-    section.add "workspaceName", valid_568585
-  var valid_568586 = path.getOrDefault("operationalInsightsResourceProvider")
-  valid_568586 = validateParameter(valid_568586, JString, required = true,
+  if valid_564485 != nil:
+    section.add "caseId", valid_564485
+  var valid_564486 = path.getOrDefault("workspaceName")
+  valid_564486 = validateParameter(valid_564486, JString, required = true,
                                  default = nil)
-  if valid_568586 != nil:
-    section.add "operationalInsightsResourceProvider", valid_568586
+  if valid_564486 != nil:
+    section.add "workspaceName", valid_564486
   result.add "path", section
   ## parameters in `query` object:
-  ##   $orderby: JString
-  ##           : Sorts the results. Optional.
+  ##   $skipToken: JString
+  ##             : Skiptoken is only used if a previous operation returned a partial result. If a previous response contains a nextLink element, the value of the nextLink element will include a skiptoken parameter that specifies a starting point to use for subsequent calls. Optional.
   ##   api-version: JString (required)
   ##              : API version for the operation
   ##   $top: JInt
   ##       : Returns only the first n results. Optional.
-  ##   $skipToken: JString
-  ##             : Skiptoken is only used if a previous operation returned a partial result. If a previous response contains a nextLink element, the value of the nextLink element will include a skiptoken parameter that specifies a starting point to use for subsequent calls. Optional.
+  ##   $orderby: JString
+  ##           : Sorts the results. Optional.
   ##   $filter: JString
   ##          : Filters the results, based on a Boolean condition. Optional.
   section = newJObject()
-  var valid_568587 = query.getOrDefault("$orderby")
-  valid_568587 = validateParameter(valid_568587, JString, required = false,
+  var valid_564487 = query.getOrDefault("$skipToken")
+  valid_564487 = validateParameter(valid_564487, JString, required = false,
                                  default = nil)
-  if valid_568587 != nil:
-    section.add "$orderby", valid_568587
+  if valid_564487 != nil:
+    section.add "$skipToken", valid_564487
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568588 = query.getOrDefault("api-version")
-  valid_568588 = validateParameter(valid_568588, JString, required = true,
+  var valid_564488 = query.getOrDefault("api-version")
+  valid_564488 = validateParameter(valid_564488, JString, required = true,
                                  default = newJString("2019-01-01-preview"))
-  if valid_568588 != nil:
-    section.add "api-version", valid_568588
-  var valid_568589 = query.getOrDefault("$top")
-  valid_568589 = validateParameter(valid_568589, JInt, required = false, default = nil)
-  if valid_568589 != nil:
-    section.add "$top", valid_568589
-  var valid_568590 = query.getOrDefault("$skipToken")
-  valid_568590 = validateParameter(valid_568590, JString, required = false,
+  if valid_564488 != nil:
+    section.add "api-version", valid_564488
+  var valid_564489 = query.getOrDefault("$top")
+  valid_564489 = validateParameter(valid_564489, JInt, required = false, default = nil)
+  if valid_564489 != nil:
+    section.add "$top", valid_564489
+  var valid_564490 = query.getOrDefault("$orderby")
+  valid_564490 = validateParameter(valid_564490, JString, required = false,
                                  default = nil)
-  if valid_568590 != nil:
-    section.add "$skipToken", valid_568590
-  var valid_568591 = query.getOrDefault("$filter")
-  valid_568591 = validateParameter(valid_568591, JString, required = false,
+  if valid_564490 != nil:
+    section.add "$orderby", valid_564490
+  var valid_564491 = query.getOrDefault("$filter")
+  valid_564491 = validateParameter(valid_564491, JString, required = false,
                                  default = nil)
-  if valid_568591 != nil:
-    section.add "$filter", valid_568591
+  if valid_564491 != nil:
+    section.add "$filter", valid_564491
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -4295,68 +4280,68 @@ proc validate_CaseRelationsList_568580(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568592: Call_CaseRelationsList_568579; path: JsonNode;
+proc call*(call_564492: Call_CaseRelationsList_564479; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets all case relations.
   ## 
-  let valid = call_568592.validator(path, query, header, formData, body)
-  let scheme = call_568592.pickScheme
+  let valid = call_564492.validator(path, query, header, formData, body)
+  let scheme = call_564492.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568592.url(scheme.get, call_568592.host, call_568592.base,
-                         call_568592.route, valid.getOrDefault("path"),
+  let url = call_564492.url(scheme.get, call_564492.host, call_564492.base,
+                         call_564492.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568592, url, valid)
+  result = hook(call_564492, url, valid)
 
-proc call*(call_568593: Call_CaseRelationsList_568579; resourceGroupName: string;
-          caseId: string; subscriptionId: string; workspaceName: string;
-          operationalInsightsResourceProvider: string; Orderby: string = "";
-          apiVersion: string = "2019-01-01-preview"; Top: int = 0;
-          SkipToken: string = ""; Filter: string = ""): Recallable =
+proc call*(call_564493: Call_CaseRelationsList_564479; subscriptionId: string;
+          operationalInsightsResourceProvider: string; resourceGroupName: string;
+          caseId: string; workspaceName: string; SkipToken: string = "";
+          apiVersion: string = "2019-01-01-preview"; Top: int = 0; Orderby: string = "";
+          Filter: string = ""): Recallable =
   ## caseRelationsList
   ## Gets all case relations.
-  ##   Orderby: string
-  ##          : Sorts the results. Optional.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
-  ##   apiVersion: string (required)
-  ##             : API version for the operation
-  ##   caseId: string (required)
-  ##         : Case ID
-  ##   subscriptionId: string (required)
-  ##                 : Azure subscription ID
-  ##   Top: int
-  ##      : Returns only the first n results. Optional.
   ##   SkipToken: string
   ##            : Skiptoken is only used if a previous operation returned a partial result. If a previous response contains a nextLink element, the value of the nextLink element will include a skiptoken parameter that specifies a starting point to use for subsequent calls. Optional.
-  ##   workspaceName: string (required)
-  ##                : The name of the workspace.
-  ##   Filter: string
-  ##         : Filters the results, based on a Boolean condition. Optional.
+  ##   apiVersion: string (required)
+  ##             : API version for the operation
+  ##   Top: int
+  ##      : Returns only the first n results. Optional.
+  ##   subscriptionId: string (required)
+  ##                 : Azure subscription ID
+  ##   Orderby: string
+  ##          : Sorts the results. Optional.
   ##   operationalInsightsResourceProvider: string (required)
   ##                                      : The namespace of workspaces resource provider- Microsoft.OperationalInsights.
-  var path_568594 = newJObject()
-  var query_568595 = newJObject()
-  add(query_568595, "$orderby", newJString(Orderby))
-  add(path_568594, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568595, "api-version", newJString(apiVersion))
-  add(path_568594, "caseId", newJString(caseId))
-  add(path_568594, "subscriptionId", newJString(subscriptionId))
-  add(query_568595, "$top", newJInt(Top))
-  add(query_568595, "$skipToken", newJString(SkipToken))
-  add(path_568594, "workspaceName", newJString(workspaceName))
-  add(query_568595, "$filter", newJString(Filter))
-  add(path_568594, "operationalInsightsResourceProvider",
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
+  ##   Filter: string
+  ##         : Filters the results, based on a Boolean condition. Optional.
+  ##   caseId: string (required)
+  ##         : Case ID
+  ##   workspaceName: string (required)
+  ##                : The name of the workspace.
+  var path_564494 = newJObject()
+  var query_564495 = newJObject()
+  add(query_564495, "$skipToken", newJString(SkipToken))
+  add(query_564495, "api-version", newJString(apiVersion))
+  add(query_564495, "$top", newJInt(Top))
+  add(path_564494, "subscriptionId", newJString(subscriptionId))
+  add(query_564495, "$orderby", newJString(Orderby))
+  add(path_564494, "operationalInsightsResourceProvider",
       newJString(operationalInsightsResourceProvider))
-  result = call_568593.call(path_568594, query_568595, nil, nil, nil)
+  add(path_564494, "resourceGroupName", newJString(resourceGroupName))
+  add(query_564495, "$filter", newJString(Filter))
+  add(path_564494, "caseId", newJString(caseId))
+  add(path_564494, "workspaceName", newJString(workspaceName))
+  result = call_564493.call(path_564494, query_564495, nil, nil, nil)
 
-var caseRelationsList* = Call_CaseRelationsList_568579(name: "caseRelationsList",
+var caseRelationsList* = Call_CaseRelationsList_564479(name: "caseRelationsList",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/{operationalInsightsResourceProvider}/workspaces/{workspaceName}/providers/Microsoft.SecurityInsights/cases/{caseId}/relations",
-    validator: validate_CaseRelationsList_568580, base: "",
-    url: url_CaseRelationsList_568581, schemes: {Scheme.Https})
+    validator: validate_CaseRelationsList_564480, base: "",
+    url: url_CaseRelationsList_564481, schemes: {Scheme.Https})
 type
-  Call_CaseRelationsCreateOrUpdateRelation_568610 = ref object of OpenApiRestCall_567667
-proc url_CaseRelationsCreateOrUpdateRelation_568612(protocol: Scheme; host: string;
+  Call_CaseRelationsCreateOrUpdateRelation_564510 = ref object of OpenApiRestCall_563565
+proc url_CaseRelationsCreateOrUpdateRelation_564512(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -4389,58 +4374,58 @@ proc url_CaseRelationsCreateOrUpdateRelation_568612(protocol: Scheme; host: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_CaseRelationsCreateOrUpdateRelation_568611(path: JsonNode;
+proc validate_CaseRelationsCreateOrUpdateRelation_564511(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Creates or updates the case relation.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
-  ##   caseId: JString (required)
-  ##         : Case ID
   ##   subscriptionId: JString (required)
   ##                 : Azure subscription ID
   ##   relationName: JString (required)
   ##               : Relation Name
-  ##   workspaceName: JString (required)
-  ##                : The name of the workspace.
   ##   operationalInsightsResourceProvider: JString (required)
   ##                                      : The namespace of workspaces resource provider- Microsoft.OperationalInsights.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
+  ##   caseId: JString (required)
+  ##         : Case ID
+  ##   workspaceName: JString (required)
+  ##                : The name of the workspace.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568613 = path.getOrDefault("resourceGroupName")
-  valid_568613 = validateParameter(valid_568613, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564513 = path.getOrDefault("subscriptionId")
+  valid_564513 = validateParameter(valid_564513, JString, required = true,
                                  default = nil)
-  if valid_568613 != nil:
-    section.add "resourceGroupName", valid_568613
-  var valid_568614 = path.getOrDefault("caseId")
-  valid_568614 = validateParameter(valid_568614, JString, required = true,
+  if valid_564513 != nil:
+    section.add "subscriptionId", valid_564513
+  var valid_564514 = path.getOrDefault("relationName")
+  valid_564514 = validateParameter(valid_564514, JString, required = true,
                                  default = nil)
-  if valid_568614 != nil:
-    section.add "caseId", valid_568614
-  var valid_568615 = path.getOrDefault("subscriptionId")
-  valid_568615 = validateParameter(valid_568615, JString, required = true,
+  if valid_564514 != nil:
+    section.add "relationName", valid_564514
+  var valid_564515 = path.getOrDefault("operationalInsightsResourceProvider")
+  valid_564515 = validateParameter(valid_564515, JString, required = true,
                                  default = nil)
-  if valid_568615 != nil:
-    section.add "subscriptionId", valid_568615
-  var valid_568616 = path.getOrDefault("relationName")
-  valid_568616 = validateParameter(valid_568616, JString, required = true,
+  if valid_564515 != nil:
+    section.add "operationalInsightsResourceProvider", valid_564515
+  var valid_564516 = path.getOrDefault("resourceGroupName")
+  valid_564516 = validateParameter(valid_564516, JString, required = true,
                                  default = nil)
-  if valid_568616 != nil:
-    section.add "relationName", valid_568616
-  var valid_568617 = path.getOrDefault("workspaceName")
-  valid_568617 = validateParameter(valid_568617, JString, required = true,
+  if valid_564516 != nil:
+    section.add "resourceGroupName", valid_564516
+  var valid_564517 = path.getOrDefault("caseId")
+  valid_564517 = validateParameter(valid_564517, JString, required = true,
                                  default = nil)
-  if valid_568617 != nil:
-    section.add "workspaceName", valid_568617
-  var valid_568618 = path.getOrDefault("operationalInsightsResourceProvider")
-  valid_568618 = validateParameter(valid_568618, JString, required = true,
+  if valid_564517 != nil:
+    section.add "caseId", valid_564517
+  var valid_564518 = path.getOrDefault("workspaceName")
+  valid_564518 = validateParameter(valid_564518, JString, required = true,
                                  default = nil)
-  if valid_568618 != nil:
-    section.add "operationalInsightsResourceProvider", valid_568618
+  if valid_564518 != nil:
+    section.add "workspaceName", valid_564518
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -4448,11 +4433,11 @@ proc validate_CaseRelationsCreateOrUpdateRelation_568611(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568619 = query.getOrDefault("api-version")
-  valid_568619 = validateParameter(valid_568619, JString, required = true,
+  var valid_564519 = query.getOrDefault("api-version")
+  valid_564519 = validateParameter(valid_564519, JString, required = true,
                                  default = newJString("2019-01-01-preview"))
-  if valid_568619 != nil:
-    section.add "api-version", valid_568619
+  if valid_564519 != nil:
+    section.add "api-version", valid_564519
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -4466,66 +4451,67 @@ proc validate_CaseRelationsCreateOrUpdateRelation_568611(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568621: Call_CaseRelationsCreateOrUpdateRelation_568610;
+proc call*(call_564521: Call_CaseRelationsCreateOrUpdateRelation_564510;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Creates or updates the case relation.
   ## 
-  let valid = call_568621.validator(path, query, header, formData, body)
-  let scheme = call_568621.pickScheme
+  let valid = call_564521.validator(path, query, header, formData, body)
+  let scheme = call_564521.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568621.url(scheme.get, call_568621.host, call_568621.base,
-                         call_568621.route, valid.getOrDefault("path"),
+  let url = call_564521.url(scheme.get, call_564521.host, call_564521.base,
+                         call_564521.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568621, url, valid)
+  result = hook(call_564521, url, valid)
 
-proc call*(call_568622: Call_CaseRelationsCreateOrUpdateRelation_568610;
-          resourceGroupName: string; caseId: string; relationInputModel: JsonNode;
-          subscriptionId: string; relationName: string; workspaceName: string;
-          operationalInsightsResourceProvider: string;
+proc call*(call_564522: Call_CaseRelationsCreateOrUpdateRelation_564510;
+          subscriptionId: string; relationName: string;
+          relationInputModel: JsonNode;
+          operationalInsightsResourceProvider: string; resourceGroupName: string;
+          caseId: string; workspaceName: string;
           apiVersion: string = "2019-01-01-preview"): Recallable =
   ## caseRelationsCreateOrUpdateRelation
   ## Creates or updates the case relation.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
   ##   apiVersion: string (required)
   ##             : API version for the operation
-  ##   caseId: string (required)
-  ##         : Case ID
-  ##   relationInputModel: JObject (required)
-  ##                     : The relation input model
   ##   subscriptionId: string (required)
   ##                 : Azure subscription ID
   ##   relationName: string (required)
   ##               : Relation Name
-  ##   workspaceName: string (required)
-  ##                : The name of the workspace.
+  ##   relationInputModel: JObject (required)
+  ##                     : The relation input model
   ##   operationalInsightsResourceProvider: string (required)
   ##                                      : The namespace of workspaces resource provider- Microsoft.OperationalInsights.
-  var path_568623 = newJObject()
-  var query_568624 = newJObject()
-  var body_568625 = newJObject()
-  add(path_568623, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568624, "api-version", newJString(apiVersion))
-  add(path_568623, "caseId", newJString(caseId))
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
+  ##   caseId: string (required)
+  ##         : Case ID
+  ##   workspaceName: string (required)
+  ##                : The name of the workspace.
+  var path_564523 = newJObject()
+  var query_564524 = newJObject()
+  var body_564525 = newJObject()
+  add(query_564524, "api-version", newJString(apiVersion))
+  add(path_564523, "subscriptionId", newJString(subscriptionId))
+  add(path_564523, "relationName", newJString(relationName))
   if relationInputModel != nil:
-    body_568625 = relationInputModel
-  add(path_568623, "subscriptionId", newJString(subscriptionId))
-  add(path_568623, "relationName", newJString(relationName))
-  add(path_568623, "workspaceName", newJString(workspaceName))
-  add(path_568623, "operationalInsightsResourceProvider",
+    body_564525 = relationInputModel
+  add(path_564523, "operationalInsightsResourceProvider",
       newJString(operationalInsightsResourceProvider))
-  result = call_568622.call(path_568623, query_568624, nil, nil, body_568625)
+  add(path_564523, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564523, "caseId", newJString(caseId))
+  add(path_564523, "workspaceName", newJString(workspaceName))
+  result = call_564522.call(path_564523, query_564524, nil, nil, body_564525)
 
-var caseRelationsCreateOrUpdateRelation* = Call_CaseRelationsCreateOrUpdateRelation_568610(
+var caseRelationsCreateOrUpdateRelation* = Call_CaseRelationsCreateOrUpdateRelation_564510(
     name: "caseRelationsCreateOrUpdateRelation", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/{operationalInsightsResourceProvider}/workspaces/{workspaceName}/providers/Microsoft.SecurityInsights/cases/{caseId}/relations/{relationName}",
-    validator: validate_CaseRelationsCreateOrUpdateRelation_568611, base: "",
-    url: url_CaseRelationsCreateOrUpdateRelation_568612, schemes: {Scheme.Https})
+    validator: validate_CaseRelationsCreateOrUpdateRelation_564511, base: "",
+    url: url_CaseRelationsCreateOrUpdateRelation_564512, schemes: {Scheme.Https})
 type
-  Call_CaseRelationsGetRelation_568596 = ref object of OpenApiRestCall_567667
-proc url_CaseRelationsGetRelation_568598(protocol: Scheme; host: string;
+  Call_CaseRelationsGetRelation_564496 = ref object of OpenApiRestCall_563565
+proc url_CaseRelationsGetRelation_564498(protocol: Scheme; host: string;
                                         base: string; route: string; path: JsonNode;
                                         query: JsonNode): Uri =
   result.scheme = $protocol
@@ -4559,58 +4545,58 @@ proc url_CaseRelationsGetRelation_568598(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_CaseRelationsGetRelation_568597(path: JsonNode; query: JsonNode;
+proc validate_CaseRelationsGetRelation_564497(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets a case relation.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
-  ##   caseId: JString (required)
-  ##         : Case ID
   ##   subscriptionId: JString (required)
   ##                 : Azure subscription ID
   ##   relationName: JString (required)
   ##               : Relation Name
-  ##   workspaceName: JString (required)
-  ##                : The name of the workspace.
   ##   operationalInsightsResourceProvider: JString (required)
   ##                                      : The namespace of workspaces resource provider- Microsoft.OperationalInsights.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
+  ##   caseId: JString (required)
+  ##         : Case ID
+  ##   workspaceName: JString (required)
+  ##                : The name of the workspace.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568599 = path.getOrDefault("resourceGroupName")
-  valid_568599 = validateParameter(valid_568599, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564499 = path.getOrDefault("subscriptionId")
+  valid_564499 = validateParameter(valid_564499, JString, required = true,
                                  default = nil)
-  if valid_568599 != nil:
-    section.add "resourceGroupName", valid_568599
-  var valid_568600 = path.getOrDefault("caseId")
-  valid_568600 = validateParameter(valid_568600, JString, required = true,
+  if valid_564499 != nil:
+    section.add "subscriptionId", valid_564499
+  var valid_564500 = path.getOrDefault("relationName")
+  valid_564500 = validateParameter(valid_564500, JString, required = true,
                                  default = nil)
-  if valid_568600 != nil:
-    section.add "caseId", valid_568600
-  var valid_568601 = path.getOrDefault("subscriptionId")
-  valid_568601 = validateParameter(valid_568601, JString, required = true,
+  if valid_564500 != nil:
+    section.add "relationName", valid_564500
+  var valid_564501 = path.getOrDefault("operationalInsightsResourceProvider")
+  valid_564501 = validateParameter(valid_564501, JString, required = true,
                                  default = nil)
-  if valid_568601 != nil:
-    section.add "subscriptionId", valid_568601
-  var valid_568602 = path.getOrDefault("relationName")
-  valid_568602 = validateParameter(valid_568602, JString, required = true,
+  if valid_564501 != nil:
+    section.add "operationalInsightsResourceProvider", valid_564501
+  var valid_564502 = path.getOrDefault("resourceGroupName")
+  valid_564502 = validateParameter(valid_564502, JString, required = true,
                                  default = nil)
-  if valid_568602 != nil:
-    section.add "relationName", valid_568602
-  var valid_568603 = path.getOrDefault("workspaceName")
-  valid_568603 = validateParameter(valid_568603, JString, required = true,
+  if valid_564502 != nil:
+    section.add "resourceGroupName", valid_564502
+  var valid_564503 = path.getOrDefault("caseId")
+  valid_564503 = validateParameter(valid_564503, JString, required = true,
                                  default = nil)
-  if valid_568603 != nil:
-    section.add "workspaceName", valid_568603
-  var valid_568604 = path.getOrDefault("operationalInsightsResourceProvider")
-  valid_568604 = validateParameter(valid_568604, JString, required = true,
+  if valid_564503 != nil:
+    section.add "caseId", valid_564503
+  var valid_564504 = path.getOrDefault("workspaceName")
+  valid_564504 = validateParameter(valid_564504, JString, required = true,
                                  default = nil)
-  if valid_568604 != nil:
-    section.add "operationalInsightsResourceProvider", valid_568604
+  if valid_564504 != nil:
+    section.add "workspaceName", valid_564504
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -4618,11 +4604,11 @@ proc validate_CaseRelationsGetRelation_568597(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568605 = query.getOrDefault("api-version")
-  valid_568605 = validateParameter(valid_568605, JString, required = true,
+  var valid_564505 = query.getOrDefault("api-version")
+  valid_564505 = validateParameter(valid_564505, JString, required = true,
                                  default = newJString("2019-01-01-preview"))
-  if valid_568605 != nil:
-    section.add "api-version", valid_568605
+  if valid_564505 != nil:
+    section.add "api-version", valid_564505
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -4631,60 +4617,60 @@ proc validate_CaseRelationsGetRelation_568597(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568606: Call_CaseRelationsGetRelation_568596; path: JsonNode;
+proc call*(call_564506: Call_CaseRelationsGetRelation_564496; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets a case relation.
   ## 
-  let valid = call_568606.validator(path, query, header, formData, body)
-  let scheme = call_568606.pickScheme
+  let valid = call_564506.validator(path, query, header, formData, body)
+  let scheme = call_564506.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568606.url(scheme.get, call_568606.host, call_568606.base,
-                         call_568606.route, valid.getOrDefault("path"),
+  let url = call_564506.url(scheme.get, call_564506.host, call_564506.base,
+                         call_564506.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568606, url, valid)
+  result = hook(call_564506, url, valid)
 
-proc call*(call_568607: Call_CaseRelationsGetRelation_568596;
-          resourceGroupName: string; caseId: string; subscriptionId: string;
-          relationName: string; workspaceName: string;
-          operationalInsightsResourceProvider: string;
+proc call*(call_564507: Call_CaseRelationsGetRelation_564496;
+          subscriptionId: string; relationName: string;
+          operationalInsightsResourceProvider: string; resourceGroupName: string;
+          caseId: string; workspaceName: string;
           apiVersion: string = "2019-01-01-preview"): Recallable =
   ## caseRelationsGetRelation
   ## Gets a case relation.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
   ##   apiVersion: string (required)
   ##             : API version for the operation
-  ##   caseId: string (required)
-  ##         : Case ID
   ##   subscriptionId: string (required)
   ##                 : Azure subscription ID
   ##   relationName: string (required)
   ##               : Relation Name
-  ##   workspaceName: string (required)
-  ##                : The name of the workspace.
   ##   operationalInsightsResourceProvider: string (required)
   ##                                      : The namespace of workspaces resource provider- Microsoft.OperationalInsights.
-  var path_568608 = newJObject()
-  var query_568609 = newJObject()
-  add(path_568608, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568609, "api-version", newJString(apiVersion))
-  add(path_568608, "caseId", newJString(caseId))
-  add(path_568608, "subscriptionId", newJString(subscriptionId))
-  add(path_568608, "relationName", newJString(relationName))
-  add(path_568608, "workspaceName", newJString(workspaceName))
-  add(path_568608, "operationalInsightsResourceProvider",
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
+  ##   caseId: string (required)
+  ##         : Case ID
+  ##   workspaceName: string (required)
+  ##                : The name of the workspace.
+  var path_564508 = newJObject()
+  var query_564509 = newJObject()
+  add(query_564509, "api-version", newJString(apiVersion))
+  add(path_564508, "subscriptionId", newJString(subscriptionId))
+  add(path_564508, "relationName", newJString(relationName))
+  add(path_564508, "operationalInsightsResourceProvider",
       newJString(operationalInsightsResourceProvider))
-  result = call_568607.call(path_568608, query_568609, nil, nil, nil)
+  add(path_564508, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564508, "caseId", newJString(caseId))
+  add(path_564508, "workspaceName", newJString(workspaceName))
+  result = call_564507.call(path_564508, query_564509, nil, nil, nil)
 
-var caseRelationsGetRelation* = Call_CaseRelationsGetRelation_568596(
+var caseRelationsGetRelation* = Call_CaseRelationsGetRelation_564496(
     name: "caseRelationsGetRelation", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/{operationalInsightsResourceProvider}/workspaces/{workspaceName}/providers/Microsoft.SecurityInsights/cases/{caseId}/relations/{relationName}",
-    validator: validate_CaseRelationsGetRelation_568597, base: "",
-    url: url_CaseRelationsGetRelation_568598, schemes: {Scheme.Https})
+    validator: validate_CaseRelationsGetRelation_564497, base: "",
+    url: url_CaseRelationsGetRelation_564498, schemes: {Scheme.Https})
 type
-  Call_CaseRelationsDeleteRelation_568626 = ref object of OpenApiRestCall_567667
-proc url_CaseRelationsDeleteRelation_568628(protocol: Scheme; host: string;
+  Call_CaseRelationsDeleteRelation_564526 = ref object of OpenApiRestCall_563565
+proc url_CaseRelationsDeleteRelation_564528(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -4717,58 +4703,58 @@ proc url_CaseRelationsDeleteRelation_568628(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_CaseRelationsDeleteRelation_568627(path: JsonNode; query: JsonNode;
+proc validate_CaseRelationsDeleteRelation_564527(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Delete the case relation.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
-  ##   caseId: JString (required)
-  ##         : Case ID
   ##   subscriptionId: JString (required)
   ##                 : Azure subscription ID
   ##   relationName: JString (required)
   ##               : Relation Name
-  ##   workspaceName: JString (required)
-  ##                : The name of the workspace.
   ##   operationalInsightsResourceProvider: JString (required)
   ##                                      : The namespace of workspaces resource provider- Microsoft.OperationalInsights.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
+  ##   caseId: JString (required)
+  ##         : Case ID
+  ##   workspaceName: JString (required)
+  ##                : The name of the workspace.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568629 = path.getOrDefault("resourceGroupName")
-  valid_568629 = validateParameter(valid_568629, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564529 = path.getOrDefault("subscriptionId")
+  valid_564529 = validateParameter(valid_564529, JString, required = true,
                                  default = nil)
-  if valid_568629 != nil:
-    section.add "resourceGroupName", valid_568629
-  var valid_568630 = path.getOrDefault("caseId")
-  valid_568630 = validateParameter(valid_568630, JString, required = true,
+  if valid_564529 != nil:
+    section.add "subscriptionId", valid_564529
+  var valid_564530 = path.getOrDefault("relationName")
+  valid_564530 = validateParameter(valid_564530, JString, required = true,
                                  default = nil)
-  if valid_568630 != nil:
-    section.add "caseId", valid_568630
-  var valid_568631 = path.getOrDefault("subscriptionId")
-  valid_568631 = validateParameter(valid_568631, JString, required = true,
+  if valid_564530 != nil:
+    section.add "relationName", valid_564530
+  var valid_564531 = path.getOrDefault("operationalInsightsResourceProvider")
+  valid_564531 = validateParameter(valid_564531, JString, required = true,
                                  default = nil)
-  if valid_568631 != nil:
-    section.add "subscriptionId", valid_568631
-  var valid_568632 = path.getOrDefault("relationName")
-  valid_568632 = validateParameter(valid_568632, JString, required = true,
+  if valid_564531 != nil:
+    section.add "operationalInsightsResourceProvider", valid_564531
+  var valid_564532 = path.getOrDefault("resourceGroupName")
+  valid_564532 = validateParameter(valid_564532, JString, required = true,
                                  default = nil)
-  if valid_568632 != nil:
-    section.add "relationName", valid_568632
-  var valid_568633 = path.getOrDefault("workspaceName")
-  valid_568633 = validateParameter(valid_568633, JString, required = true,
+  if valid_564532 != nil:
+    section.add "resourceGroupName", valid_564532
+  var valid_564533 = path.getOrDefault("caseId")
+  valid_564533 = validateParameter(valid_564533, JString, required = true,
                                  default = nil)
-  if valid_568633 != nil:
-    section.add "workspaceName", valid_568633
-  var valid_568634 = path.getOrDefault("operationalInsightsResourceProvider")
-  valid_568634 = validateParameter(valid_568634, JString, required = true,
+  if valid_564533 != nil:
+    section.add "caseId", valid_564533
+  var valid_564534 = path.getOrDefault("workspaceName")
+  valid_564534 = validateParameter(valid_564534, JString, required = true,
                                  default = nil)
-  if valid_568634 != nil:
-    section.add "operationalInsightsResourceProvider", valid_568634
+  if valid_564534 != nil:
+    section.add "workspaceName", valid_564534
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -4776,11 +4762,11 @@ proc validate_CaseRelationsDeleteRelation_568627(path: JsonNode; query: JsonNode
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568635 = query.getOrDefault("api-version")
-  valid_568635 = validateParameter(valid_568635, JString, required = true,
+  var valid_564535 = query.getOrDefault("api-version")
+  valid_564535 = validateParameter(valid_564535, JString, required = true,
                                  default = newJString("2019-01-01-preview"))
-  if valid_568635 != nil:
-    section.add "api-version", valid_568635
+  if valid_564535 != nil:
+    section.add "api-version", valid_564535
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -4789,60 +4775,60 @@ proc validate_CaseRelationsDeleteRelation_568627(path: JsonNode; query: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_568636: Call_CaseRelationsDeleteRelation_568626; path: JsonNode;
+proc call*(call_564536: Call_CaseRelationsDeleteRelation_564526; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Delete the case relation.
   ## 
-  let valid = call_568636.validator(path, query, header, formData, body)
-  let scheme = call_568636.pickScheme
+  let valid = call_564536.validator(path, query, header, formData, body)
+  let scheme = call_564536.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568636.url(scheme.get, call_568636.host, call_568636.base,
-                         call_568636.route, valid.getOrDefault("path"),
+  let url = call_564536.url(scheme.get, call_564536.host, call_564536.base,
+                         call_564536.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568636, url, valid)
+  result = hook(call_564536, url, valid)
 
-proc call*(call_568637: Call_CaseRelationsDeleteRelation_568626;
-          resourceGroupName: string; caseId: string; subscriptionId: string;
-          relationName: string; workspaceName: string;
-          operationalInsightsResourceProvider: string;
+proc call*(call_564537: Call_CaseRelationsDeleteRelation_564526;
+          subscriptionId: string; relationName: string;
+          operationalInsightsResourceProvider: string; resourceGroupName: string;
+          caseId: string; workspaceName: string;
           apiVersion: string = "2019-01-01-preview"): Recallable =
   ## caseRelationsDeleteRelation
   ## Delete the case relation.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
   ##   apiVersion: string (required)
   ##             : API version for the operation
-  ##   caseId: string (required)
-  ##         : Case ID
   ##   subscriptionId: string (required)
   ##                 : Azure subscription ID
   ##   relationName: string (required)
   ##               : Relation Name
-  ##   workspaceName: string (required)
-  ##                : The name of the workspace.
   ##   operationalInsightsResourceProvider: string (required)
   ##                                      : The namespace of workspaces resource provider- Microsoft.OperationalInsights.
-  var path_568638 = newJObject()
-  var query_568639 = newJObject()
-  add(path_568638, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568639, "api-version", newJString(apiVersion))
-  add(path_568638, "caseId", newJString(caseId))
-  add(path_568638, "subscriptionId", newJString(subscriptionId))
-  add(path_568638, "relationName", newJString(relationName))
-  add(path_568638, "workspaceName", newJString(workspaceName))
-  add(path_568638, "operationalInsightsResourceProvider",
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
+  ##   caseId: string (required)
+  ##         : Case ID
+  ##   workspaceName: string (required)
+  ##                : The name of the workspace.
+  var path_564538 = newJObject()
+  var query_564539 = newJObject()
+  add(query_564539, "api-version", newJString(apiVersion))
+  add(path_564538, "subscriptionId", newJString(subscriptionId))
+  add(path_564538, "relationName", newJString(relationName))
+  add(path_564538, "operationalInsightsResourceProvider",
       newJString(operationalInsightsResourceProvider))
-  result = call_568637.call(path_568638, query_568639, nil, nil, nil)
+  add(path_564538, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564538, "caseId", newJString(caseId))
+  add(path_564538, "workspaceName", newJString(workspaceName))
+  result = call_564537.call(path_564538, query_564539, nil, nil, nil)
 
-var caseRelationsDeleteRelation* = Call_CaseRelationsDeleteRelation_568626(
+var caseRelationsDeleteRelation* = Call_CaseRelationsDeleteRelation_564526(
     name: "caseRelationsDeleteRelation", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/{operationalInsightsResourceProvider}/workspaces/{workspaceName}/providers/Microsoft.SecurityInsights/cases/{caseId}/relations/{relationName}",
-    validator: validate_CaseRelationsDeleteRelation_568627, base: "",
-    url: url_CaseRelationsDeleteRelation_568628, schemes: {Scheme.Https})
+    validator: validate_CaseRelationsDeleteRelation_564527, base: "",
+    url: url_CaseRelationsDeleteRelation_564528, schemes: {Scheme.Https})
 type
-  Call_DataConnectorsList_568640 = ref object of OpenApiRestCall_567667
-proc url_DataConnectorsList_568642(protocol: Scheme; host: string; base: string;
+  Call_DataConnectorsList_564540 = ref object of OpenApiRestCall_563565
+proc url_DataConnectorsList_564542(protocol: Scheme; host: string; base: string;
                                   route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -4870,7 +4856,7 @@ proc url_DataConnectorsList_568642(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DataConnectorsList_568641(path: JsonNode; query: JsonNode;
+proc validate_DataConnectorsList_564541(path: JsonNode; query: JsonNode;
                                        header: JsonNode; formData: JsonNode;
                                        body: JsonNode): JsonNode =
   ## Gets all data connectors.
@@ -4878,37 +4864,37 @@ proc validate_DataConnectorsList_568641(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
   ##   subscriptionId: JString (required)
   ##                 : Azure subscription ID
-  ##   workspaceName: JString (required)
-  ##                : The name of the workspace.
   ##   operationalInsightsResourceProvider: JString (required)
   ##                                      : The namespace of workspaces resource provider- Microsoft.OperationalInsights.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
+  ##   workspaceName: JString (required)
+  ##                : The name of the workspace.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568643 = path.getOrDefault("resourceGroupName")
-  valid_568643 = validateParameter(valid_568643, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564543 = path.getOrDefault("subscriptionId")
+  valid_564543 = validateParameter(valid_564543, JString, required = true,
                                  default = nil)
-  if valid_568643 != nil:
-    section.add "resourceGroupName", valid_568643
-  var valid_568644 = path.getOrDefault("subscriptionId")
-  valid_568644 = validateParameter(valid_568644, JString, required = true,
+  if valid_564543 != nil:
+    section.add "subscriptionId", valid_564543
+  var valid_564544 = path.getOrDefault("operationalInsightsResourceProvider")
+  valid_564544 = validateParameter(valid_564544, JString, required = true,
                                  default = nil)
-  if valid_568644 != nil:
-    section.add "subscriptionId", valid_568644
-  var valid_568645 = path.getOrDefault("workspaceName")
-  valid_568645 = validateParameter(valid_568645, JString, required = true,
+  if valid_564544 != nil:
+    section.add "operationalInsightsResourceProvider", valid_564544
+  var valid_564545 = path.getOrDefault("resourceGroupName")
+  valid_564545 = validateParameter(valid_564545, JString, required = true,
                                  default = nil)
-  if valid_568645 != nil:
-    section.add "workspaceName", valid_568645
-  var valid_568646 = path.getOrDefault("operationalInsightsResourceProvider")
-  valid_568646 = validateParameter(valid_568646, JString, required = true,
+  if valid_564545 != nil:
+    section.add "resourceGroupName", valid_564545
+  var valid_564546 = path.getOrDefault("workspaceName")
+  valid_564546 = validateParameter(valid_564546, JString, required = true,
                                  default = nil)
-  if valid_568646 != nil:
-    section.add "operationalInsightsResourceProvider", valid_568646
+  if valid_564546 != nil:
+    section.add "workspaceName", valid_564546
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -4916,11 +4902,11 @@ proc validate_DataConnectorsList_568641(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568647 = query.getOrDefault("api-version")
-  valid_568647 = validateParameter(valid_568647, JString, required = true,
+  var valid_564547 = query.getOrDefault("api-version")
+  valid_564547 = validateParameter(valid_564547, JString, required = true,
                                  default = newJString("2019-01-01-preview"))
-  if valid_568647 != nil:
-    section.add "api-version", valid_568647
+  if valid_564547 != nil:
+    section.add "api-version", valid_564547
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -4929,53 +4915,52 @@ proc validate_DataConnectorsList_568641(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568648: Call_DataConnectorsList_568640; path: JsonNode;
+proc call*(call_564548: Call_DataConnectorsList_564540; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets all data connectors.
   ## 
-  let valid = call_568648.validator(path, query, header, formData, body)
-  let scheme = call_568648.pickScheme
+  let valid = call_564548.validator(path, query, header, formData, body)
+  let scheme = call_564548.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568648.url(scheme.get, call_568648.host, call_568648.base,
-                         call_568648.route, valid.getOrDefault("path"),
+  let url = call_564548.url(scheme.get, call_564548.host, call_564548.base,
+                         call_564548.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568648, url, valid)
+  result = hook(call_564548, url, valid)
 
-proc call*(call_568649: Call_DataConnectorsList_568640; resourceGroupName: string;
-          subscriptionId: string; workspaceName: string;
-          operationalInsightsResourceProvider: string;
-          apiVersion: string = "2019-01-01-preview"): Recallable =
+proc call*(call_564549: Call_DataConnectorsList_564540; subscriptionId: string;
+          operationalInsightsResourceProvider: string; resourceGroupName: string;
+          workspaceName: string; apiVersion: string = "2019-01-01-preview"): Recallable =
   ## dataConnectorsList
   ## Gets all data connectors.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
   ##   apiVersion: string (required)
   ##             : API version for the operation
   ##   subscriptionId: string (required)
   ##                 : Azure subscription ID
-  ##   workspaceName: string (required)
-  ##                : The name of the workspace.
   ##   operationalInsightsResourceProvider: string (required)
   ##                                      : The namespace of workspaces resource provider- Microsoft.OperationalInsights.
-  var path_568650 = newJObject()
-  var query_568651 = newJObject()
-  add(path_568650, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568651, "api-version", newJString(apiVersion))
-  add(path_568650, "subscriptionId", newJString(subscriptionId))
-  add(path_568650, "workspaceName", newJString(workspaceName))
-  add(path_568650, "operationalInsightsResourceProvider",
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
+  ##   workspaceName: string (required)
+  ##                : The name of the workspace.
+  var path_564550 = newJObject()
+  var query_564551 = newJObject()
+  add(query_564551, "api-version", newJString(apiVersion))
+  add(path_564550, "subscriptionId", newJString(subscriptionId))
+  add(path_564550, "operationalInsightsResourceProvider",
       newJString(operationalInsightsResourceProvider))
-  result = call_568649.call(path_568650, query_568651, nil, nil, nil)
+  add(path_564550, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564550, "workspaceName", newJString(workspaceName))
+  result = call_564549.call(path_564550, query_564551, nil, nil, nil)
 
-var dataConnectorsList* = Call_DataConnectorsList_568640(
+var dataConnectorsList* = Call_DataConnectorsList_564540(
     name: "dataConnectorsList", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/{operationalInsightsResourceProvider}/workspaces/{workspaceName}/providers/Microsoft.SecurityInsights/dataConnectors",
-    validator: validate_DataConnectorsList_568641, base: "",
-    url: url_DataConnectorsList_568642, schemes: {Scheme.Https})
+    validator: validate_DataConnectorsList_564541, base: "",
+    url: url_DataConnectorsList_564542, schemes: {Scheme.Https})
 type
-  Call_DataConnectorsCreateOrUpdate_568665 = ref object of OpenApiRestCall_567667
-proc url_DataConnectorsCreateOrUpdate_568667(protocol: Scheme; host: string;
+  Call_DataConnectorsCreateOrUpdate_564565 = ref object of OpenApiRestCall_563565
+proc url_DataConnectorsCreateOrUpdate_564567(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -5005,51 +4990,51 @@ proc url_DataConnectorsCreateOrUpdate_568667(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DataConnectorsCreateOrUpdate_568666(path: JsonNode; query: JsonNode;
+proc validate_DataConnectorsCreateOrUpdate_564566(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Creates or updates the data connector.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
-  ##   subscriptionId: JString (required)
-  ##                 : Azure subscription ID
-  ##   workspaceName: JString (required)
-  ##                : The name of the workspace.
   ##   dataConnectorId: JString (required)
   ##                  : Connector ID
+  ##   subscriptionId: JString (required)
+  ##                 : Azure subscription ID
   ##   operationalInsightsResourceProvider: JString (required)
   ##                                      : The namespace of workspaces resource provider- Microsoft.OperationalInsights.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
+  ##   workspaceName: JString (required)
+  ##                : The name of the workspace.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568668 = path.getOrDefault("resourceGroupName")
-  valid_568668 = validateParameter(valid_568668, JString, required = true,
+        "path argument is necessary due to required `dataConnectorId` field"
+  var valid_564568 = path.getOrDefault("dataConnectorId")
+  valid_564568 = validateParameter(valid_564568, JString, required = true,
                                  default = nil)
-  if valid_568668 != nil:
-    section.add "resourceGroupName", valid_568668
-  var valid_568669 = path.getOrDefault("subscriptionId")
-  valid_568669 = validateParameter(valid_568669, JString, required = true,
+  if valid_564568 != nil:
+    section.add "dataConnectorId", valid_564568
+  var valid_564569 = path.getOrDefault("subscriptionId")
+  valid_564569 = validateParameter(valid_564569, JString, required = true,
                                  default = nil)
-  if valid_568669 != nil:
-    section.add "subscriptionId", valid_568669
-  var valid_568670 = path.getOrDefault("workspaceName")
-  valid_568670 = validateParameter(valid_568670, JString, required = true,
+  if valid_564569 != nil:
+    section.add "subscriptionId", valid_564569
+  var valid_564570 = path.getOrDefault("operationalInsightsResourceProvider")
+  valid_564570 = validateParameter(valid_564570, JString, required = true,
                                  default = nil)
-  if valid_568670 != nil:
-    section.add "workspaceName", valid_568670
-  var valid_568671 = path.getOrDefault("dataConnectorId")
-  valid_568671 = validateParameter(valid_568671, JString, required = true,
+  if valid_564570 != nil:
+    section.add "operationalInsightsResourceProvider", valid_564570
+  var valid_564571 = path.getOrDefault("resourceGroupName")
+  valid_564571 = validateParameter(valid_564571, JString, required = true,
                                  default = nil)
-  if valid_568671 != nil:
-    section.add "dataConnectorId", valid_568671
-  var valid_568672 = path.getOrDefault("operationalInsightsResourceProvider")
-  valid_568672 = validateParameter(valid_568672, JString, required = true,
+  if valid_564571 != nil:
+    section.add "resourceGroupName", valid_564571
+  var valid_564572 = path.getOrDefault("workspaceName")
+  valid_564572 = validateParameter(valid_564572, JString, required = true,
                                  default = nil)
-  if valid_568672 != nil:
-    section.add "operationalInsightsResourceProvider", valid_568672
+  if valid_564572 != nil:
+    section.add "workspaceName", valid_564572
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -5057,11 +5042,11 @@ proc validate_DataConnectorsCreateOrUpdate_568666(path: JsonNode; query: JsonNod
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568673 = query.getOrDefault("api-version")
-  valid_568673 = validateParameter(valid_568673, JString, required = true,
+  var valid_564573 = query.getOrDefault("api-version")
+  valid_564573 = validateParameter(valid_564573, JString, required = true,
                                  default = newJString("2019-01-01-preview"))
-  if valid_568673 != nil:
-    section.add "api-version", valid_568673
+  if valid_564573 != nil:
+    section.add "api-version", valid_564573
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -5075,62 +5060,61 @@ proc validate_DataConnectorsCreateOrUpdate_568666(path: JsonNode; query: JsonNod
   if body != nil:
     result.add "body", body
 
-proc call*(call_568675: Call_DataConnectorsCreateOrUpdate_568665; path: JsonNode;
+proc call*(call_564575: Call_DataConnectorsCreateOrUpdate_564565; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Creates or updates the data connector.
   ## 
-  let valid = call_568675.validator(path, query, header, formData, body)
-  let scheme = call_568675.pickScheme
+  let valid = call_564575.validator(path, query, header, formData, body)
+  let scheme = call_564575.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568675.url(scheme.get, call_568675.host, call_568675.base,
-                         call_568675.route, valid.getOrDefault("path"),
+  let url = call_564575.url(scheme.get, call_564575.host, call_564575.base,
+                         call_564575.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568675, url, valid)
+  result = hook(call_564575, url, valid)
 
-proc call*(call_568676: Call_DataConnectorsCreateOrUpdate_568665;
-          resourceGroupName: string; subscriptionId: string;
-          dataConnector: JsonNode; workspaceName: string; dataConnectorId: string;
-          operationalInsightsResourceProvider: string;
-          apiVersion: string = "2019-01-01-preview"): Recallable =
+proc call*(call_564576: Call_DataConnectorsCreateOrUpdate_564565;
+          dataConnectorId: string; dataConnector: JsonNode; subscriptionId: string;
+          operationalInsightsResourceProvider: string; resourceGroupName: string;
+          workspaceName: string; apiVersion: string = "2019-01-01-preview"): Recallable =
   ## dataConnectorsCreateOrUpdate
   ## Creates or updates the data connector.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
-  ##   apiVersion: string (required)
-  ##             : API version for the operation
-  ##   subscriptionId: string (required)
-  ##                 : Azure subscription ID
-  ##   dataConnector: JObject (required)
-  ##                : The data connector
-  ##   workspaceName: string (required)
-  ##                : The name of the workspace.
   ##   dataConnectorId: string (required)
   ##                  : Connector ID
+  ##   apiVersion: string (required)
+  ##             : API version for the operation
+  ##   dataConnector: JObject (required)
+  ##                : The data connector
+  ##   subscriptionId: string (required)
+  ##                 : Azure subscription ID
   ##   operationalInsightsResourceProvider: string (required)
   ##                                      : The namespace of workspaces resource provider- Microsoft.OperationalInsights.
-  var path_568677 = newJObject()
-  var query_568678 = newJObject()
-  var body_568679 = newJObject()
-  add(path_568677, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568678, "api-version", newJString(apiVersion))
-  add(path_568677, "subscriptionId", newJString(subscriptionId))
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
+  ##   workspaceName: string (required)
+  ##                : The name of the workspace.
+  var path_564577 = newJObject()
+  var query_564578 = newJObject()
+  var body_564579 = newJObject()
+  add(path_564577, "dataConnectorId", newJString(dataConnectorId))
+  add(query_564578, "api-version", newJString(apiVersion))
   if dataConnector != nil:
-    body_568679 = dataConnector
-  add(path_568677, "workspaceName", newJString(workspaceName))
-  add(path_568677, "dataConnectorId", newJString(dataConnectorId))
-  add(path_568677, "operationalInsightsResourceProvider",
+    body_564579 = dataConnector
+  add(path_564577, "subscriptionId", newJString(subscriptionId))
+  add(path_564577, "operationalInsightsResourceProvider",
       newJString(operationalInsightsResourceProvider))
-  result = call_568676.call(path_568677, query_568678, nil, nil, body_568679)
+  add(path_564577, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564577, "workspaceName", newJString(workspaceName))
+  result = call_564576.call(path_564577, query_564578, nil, nil, body_564579)
 
-var dataConnectorsCreateOrUpdate* = Call_DataConnectorsCreateOrUpdate_568665(
+var dataConnectorsCreateOrUpdate* = Call_DataConnectorsCreateOrUpdate_564565(
     name: "dataConnectorsCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/{operationalInsightsResourceProvider}/workspaces/{workspaceName}/providers/Microsoft.SecurityInsights/dataConnectors/{dataConnectorId}",
-    validator: validate_DataConnectorsCreateOrUpdate_568666, base: "",
-    url: url_DataConnectorsCreateOrUpdate_568667, schemes: {Scheme.Https})
+    validator: validate_DataConnectorsCreateOrUpdate_564566, base: "",
+    url: url_DataConnectorsCreateOrUpdate_564567, schemes: {Scheme.Https})
 type
-  Call_DataConnectorsGet_568652 = ref object of OpenApiRestCall_567667
-proc url_DataConnectorsGet_568654(protocol: Scheme; host: string; base: string;
+  Call_DataConnectorsGet_564552 = ref object of OpenApiRestCall_563565
+proc url_DataConnectorsGet_564554(protocol: Scheme; host: string; base: string;
                                  route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -5160,7 +5144,7 @@ proc url_DataConnectorsGet_568654(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DataConnectorsGet_568653(path: JsonNode; query: JsonNode;
+proc validate_DataConnectorsGet_564553(path: JsonNode; query: JsonNode;
                                       header: JsonNode; formData: JsonNode;
                                       body: JsonNode): JsonNode =
   ## Gets a data connector.
@@ -5168,44 +5152,44 @@ proc validate_DataConnectorsGet_568653(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
-  ##   subscriptionId: JString (required)
-  ##                 : Azure subscription ID
-  ##   workspaceName: JString (required)
-  ##                : The name of the workspace.
   ##   dataConnectorId: JString (required)
   ##                  : Connector ID
+  ##   subscriptionId: JString (required)
+  ##                 : Azure subscription ID
   ##   operationalInsightsResourceProvider: JString (required)
   ##                                      : The namespace of workspaces resource provider- Microsoft.OperationalInsights.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
+  ##   workspaceName: JString (required)
+  ##                : The name of the workspace.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568655 = path.getOrDefault("resourceGroupName")
-  valid_568655 = validateParameter(valid_568655, JString, required = true,
+        "path argument is necessary due to required `dataConnectorId` field"
+  var valid_564555 = path.getOrDefault("dataConnectorId")
+  valid_564555 = validateParameter(valid_564555, JString, required = true,
                                  default = nil)
-  if valid_568655 != nil:
-    section.add "resourceGroupName", valid_568655
-  var valid_568656 = path.getOrDefault("subscriptionId")
-  valid_568656 = validateParameter(valid_568656, JString, required = true,
+  if valid_564555 != nil:
+    section.add "dataConnectorId", valid_564555
+  var valid_564556 = path.getOrDefault("subscriptionId")
+  valid_564556 = validateParameter(valid_564556, JString, required = true,
                                  default = nil)
-  if valid_568656 != nil:
-    section.add "subscriptionId", valid_568656
-  var valid_568657 = path.getOrDefault("workspaceName")
-  valid_568657 = validateParameter(valid_568657, JString, required = true,
+  if valid_564556 != nil:
+    section.add "subscriptionId", valid_564556
+  var valid_564557 = path.getOrDefault("operationalInsightsResourceProvider")
+  valid_564557 = validateParameter(valid_564557, JString, required = true,
                                  default = nil)
-  if valid_568657 != nil:
-    section.add "workspaceName", valid_568657
-  var valid_568658 = path.getOrDefault("dataConnectorId")
-  valid_568658 = validateParameter(valid_568658, JString, required = true,
+  if valid_564557 != nil:
+    section.add "operationalInsightsResourceProvider", valid_564557
+  var valid_564558 = path.getOrDefault("resourceGroupName")
+  valid_564558 = validateParameter(valid_564558, JString, required = true,
                                  default = nil)
-  if valid_568658 != nil:
-    section.add "dataConnectorId", valid_568658
-  var valid_568659 = path.getOrDefault("operationalInsightsResourceProvider")
-  valid_568659 = validateParameter(valid_568659, JString, required = true,
+  if valid_564558 != nil:
+    section.add "resourceGroupName", valid_564558
+  var valid_564559 = path.getOrDefault("workspaceName")
+  valid_564559 = validateParameter(valid_564559, JString, required = true,
                                  default = nil)
-  if valid_568659 != nil:
-    section.add "operationalInsightsResourceProvider", valid_568659
+  if valid_564559 != nil:
+    section.add "workspaceName", valid_564559
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -5213,11 +5197,11 @@ proc validate_DataConnectorsGet_568653(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568660 = query.getOrDefault("api-version")
-  valid_568660 = validateParameter(valid_568660, JString, required = true,
+  var valid_564560 = query.getOrDefault("api-version")
+  valid_564560 = validateParameter(valid_564560, JString, required = true,
                                  default = newJString("2019-01-01-preview"))
-  if valid_568660 != nil:
-    section.add "api-version", valid_568660
+  if valid_564560 != nil:
+    section.add "api-version", valid_564560
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -5226,55 +5210,55 @@ proc validate_DataConnectorsGet_568653(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568661: Call_DataConnectorsGet_568652; path: JsonNode;
+proc call*(call_564561: Call_DataConnectorsGet_564552; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets a data connector.
   ## 
-  let valid = call_568661.validator(path, query, header, formData, body)
-  let scheme = call_568661.pickScheme
+  let valid = call_564561.validator(path, query, header, formData, body)
+  let scheme = call_564561.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568661.url(scheme.get, call_568661.host, call_568661.base,
-                         call_568661.route, valid.getOrDefault("path"),
+  let url = call_564561.url(scheme.get, call_564561.host, call_564561.base,
+                         call_564561.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568661, url, valid)
+  result = hook(call_564561, url, valid)
 
-proc call*(call_568662: Call_DataConnectorsGet_568652; resourceGroupName: string;
-          subscriptionId: string; workspaceName: string; dataConnectorId: string;
-          operationalInsightsResourceProvider: string;
+proc call*(call_564562: Call_DataConnectorsGet_564552; dataConnectorId: string;
+          subscriptionId: string; operationalInsightsResourceProvider: string;
+          resourceGroupName: string; workspaceName: string;
           apiVersion: string = "2019-01-01-preview"): Recallable =
   ## dataConnectorsGet
   ## Gets a data connector.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
+  ##   dataConnectorId: string (required)
+  ##                  : Connector ID
   ##   apiVersion: string (required)
   ##             : API version for the operation
   ##   subscriptionId: string (required)
   ##                 : Azure subscription ID
-  ##   workspaceName: string (required)
-  ##                : The name of the workspace.
-  ##   dataConnectorId: string (required)
-  ##                  : Connector ID
   ##   operationalInsightsResourceProvider: string (required)
   ##                                      : The namespace of workspaces resource provider- Microsoft.OperationalInsights.
-  var path_568663 = newJObject()
-  var query_568664 = newJObject()
-  add(path_568663, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568664, "api-version", newJString(apiVersion))
-  add(path_568663, "subscriptionId", newJString(subscriptionId))
-  add(path_568663, "workspaceName", newJString(workspaceName))
-  add(path_568663, "dataConnectorId", newJString(dataConnectorId))
-  add(path_568663, "operationalInsightsResourceProvider",
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
+  ##   workspaceName: string (required)
+  ##                : The name of the workspace.
+  var path_564563 = newJObject()
+  var query_564564 = newJObject()
+  add(path_564563, "dataConnectorId", newJString(dataConnectorId))
+  add(query_564564, "api-version", newJString(apiVersion))
+  add(path_564563, "subscriptionId", newJString(subscriptionId))
+  add(path_564563, "operationalInsightsResourceProvider",
       newJString(operationalInsightsResourceProvider))
-  result = call_568662.call(path_568663, query_568664, nil, nil, nil)
+  add(path_564563, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564563, "workspaceName", newJString(workspaceName))
+  result = call_564562.call(path_564563, query_564564, nil, nil, nil)
 
-var dataConnectorsGet* = Call_DataConnectorsGet_568652(name: "dataConnectorsGet",
+var dataConnectorsGet* = Call_DataConnectorsGet_564552(name: "dataConnectorsGet",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/{operationalInsightsResourceProvider}/workspaces/{workspaceName}/providers/Microsoft.SecurityInsights/dataConnectors/{dataConnectorId}",
-    validator: validate_DataConnectorsGet_568653, base: "",
-    url: url_DataConnectorsGet_568654, schemes: {Scheme.Https})
+    validator: validate_DataConnectorsGet_564553, base: "",
+    url: url_DataConnectorsGet_564554, schemes: {Scheme.Https})
 type
-  Call_DataConnectorsDelete_568680 = ref object of OpenApiRestCall_567667
-proc url_DataConnectorsDelete_568682(protocol: Scheme; host: string; base: string;
+  Call_DataConnectorsDelete_564580 = ref object of OpenApiRestCall_563565
+proc url_DataConnectorsDelete_564582(protocol: Scheme; host: string; base: string;
                                     route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -5304,51 +5288,51 @@ proc url_DataConnectorsDelete_568682(protocol: Scheme; host: string; base: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_DataConnectorsDelete_568681(path: JsonNode; query: JsonNode;
+proc validate_DataConnectorsDelete_564581(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Delete the data connector.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
-  ##   subscriptionId: JString (required)
-  ##                 : Azure subscription ID
-  ##   workspaceName: JString (required)
-  ##                : The name of the workspace.
   ##   dataConnectorId: JString (required)
   ##                  : Connector ID
+  ##   subscriptionId: JString (required)
+  ##                 : Azure subscription ID
   ##   operationalInsightsResourceProvider: JString (required)
   ##                                      : The namespace of workspaces resource provider- Microsoft.OperationalInsights.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
+  ##   workspaceName: JString (required)
+  ##                : The name of the workspace.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568683 = path.getOrDefault("resourceGroupName")
-  valid_568683 = validateParameter(valid_568683, JString, required = true,
+        "path argument is necessary due to required `dataConnectorId` field"
+  var valid_564583 = path.getOrDefault("dataConnectorId")
+  valid_564583 = validateParameter(valid_564583, JString, required = true,
                                  default = nil)
-  if valid_568683 != nil:
-    section.add "resourceGroupName", valid_568683
-  var valid_568684 = path.getOrDefault("subscriptionId")
-  valid_568684 = validateParameter(valid_568684, JString, required = true,
+  if valid_564583 != nil:
+    section.add "dataConnectorId", valid_564583
+  var valid_564584 = path.getOrDefault("subscriptionId")
+  valid_564584 = validateParameter(valid_564584, JString, required = true,
                                  default = nil)
-  if valid_568684 != nil:
-    section.add "subscriptionId", valid_568684
-  var valid_568685 = path.getOrDefault("workspaceName")
-  valid_568685 = validateParameter(valid_568685, JString, required = true,
+  if valid_564584 != nil:
+    section.add "subscriptionId", valid_564584
+  var valid_564585 = path.getOrDefault("operationalInsightsResourceProvider")
+  valid_564585 = validateParameter(valid_564585, JString, required = true,
                                  default = nil)
-  if valid_568685 != nil:
-    section.add "workspaceName", valid_568685
-  var valid_568686 = path.getOrDefault("dataConnectorId")
-  valid_568686 = validateParameter(valid_568686, JString, required = true,
+  if valid_564585 != nil:
+    section.add "operationalInsightsResourceProvider", valid_564585
+  var valid_564586 = path.getOrDefault("resourceGroupName")
+  valid_564586 = validateParameter(valid_564586, JString, required = true,
                                  default = nil)
-  if valid_568686 != nil:
-    section.add "dataConnectorId", valid_568686
-  var valid_568687 = path.getOrDefault("operationalInsightsResourceProvider")
-  valid_568687 = validateParameter(valid_568687, JString, required = true,
+  if valid_564586 != nil:
+    section.add "resourceGroupName", valid_564586
+  var valid_564587 = path.getOrDefault("workspaceName")
+  valid_564587 = validateParameter(valid_564587, JString, required = true,
                                  default = nil)
-  if valid_568687 != nil:
-    section.add "operationalInsightsResourceProvider", valid_568687
+  if valid_564587 != nil:
+    section.add "workspaceName", valid_564587
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -5356,11 +5340,11 @@ proc validate_DataConnectorsDelete_568681(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568688 = query.getOrDefault("api-version")
-  valid_568688 = validateParameter(valid_568688, JString, required = true,
+  var valid_564588 = query.getOrDefault("api-version")
+  valid_564588 = validateParameter(valid_564588, JString, required = true,
                                  default = newJString("2019-01-01-preview"))
-  if valid_568688 != nil:
-    section.add "api-version", valid_568688
+  if valid_564588 != nil:
+    section.add "api-version", valid_564588
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -5369,56 +5353,56 @@ proc validate_DataConnectorsDelete_568681(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568689: Call_DataConnectorsDelete_568680; path: JsonNode;
+proc call*(call_564589: Call_DataConnectorsDelete_564580; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Delete the data connector.
   ## 
-  let valid = call_568689.validator(path, query, header, formData, body)
-  let scheme = call_568689.pickScheme
+  let valid = call_564589.validator(path, query, header, formData, body)
+  let scheme = call_564589.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568689.url(scheme.get, call_568689.host, call_568689.base,
-                         call_568689.route, valid.getOrDefault("path"),
+  let url = call_564589.url(scheme.get, call_564589.host, call_564589.base,
+                         call_564589.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568689, url, valid)
+  result = hook(call_564589, url, valid)
 
-proc call*(call_568690: Call_DataConnectorsDelete_568680;
-          resourceGroupName: string; subscriptionId: string; workspaceName: string;
-          dataConnectorId: string; operationalInsightsResourceProvider: string;
+proc call*(call_564590: Call_DataConnectorsDelete_564580; dataConnectorId: string;
+          subscriptionId: string; operationalInsightsResourceProvider: string;
+          resourceGroupName: string; workspaceName: string;
           apiVersion: string = "2019-01-01-preview"): Recallable =
   ## dataConnectorsDelete
   ## Delete the data connector.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
+  ##   dataConnectorId: string (required)
+  ##                  : Connector ID
   ##   apiVersion: string (required)
   ##             : API version for the operation
   ##   subscriptionId: string (required)
   ##                 : Azure subscription ID
-  ##   workspaceName: string (required)
-  ##                : The name of the workspace.
-  ##   dataConnectorId: string (required)
-  ##                  : Connector ID
   ##   operationalInsightsResourceProvider: string (required)
   ##                                      : The namespace of workspaces resource provider- Microsoft.OperationalInsights.
-  var path_568691 = newJObject()
-  var query_568692 = newJObject()
-  add(path_568691, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568692, "api-version", newJString(apiVersion))
-  add(path_568691, "subscriptionId", newJString(subscriptionId))
-  add(path_568691, "workspaceName", newJString(workspaceName))
-  add(path_568691, "dataConnectorId", newJString(dataConnectorId))
-  add(path_568691, "operationalInsightsResourceProvider",
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
+  ##   workspaceName: string (required)
+  ##                : The name of the workspace.
+  var path_564591 = newJObject()
+  var query_564592 = newJObject()
+  add(path_564591, "dataConnectorId", newJString(dataConnectorId))
+  add(query_564592, "api-version", newJString(apiVersion))
+  add(path_564591, "subscriptionId", newJString(subscriptionId))
+  add(path_564591, "operationalInsightsResourceProvider",
       newJString(operationalInsightsResourceProvider))
-  result = call_568690.call(path_568691, query_568692, nil, nil, nil)
+  add(path_564591, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564591, "workspaceName", newJString(workspaceName))
+  result = call_564590.call(path_564591, query_564592, nil, nil, nil)
 
-var dataConnectorsDelete* = Call_DataConnectorsDelete_568680(
+var dataConnectorsDelete* = Call_DataConnectorsDelete_564580(
     name: "dataConnectorsDelete", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/{operationalInsightsResourceProvider}/workspaces/{workspaceName}/providers/Microsoft.SecurityInsights/dataConnectors/{dataConnectorId}",
-    validator: validate_DataConnectorsDelete_568681, base: "",
-    url: url_DataConnectorsDelete_568682, schemes: {Scheme.Https})
+    validator: validate_DataConnectorsDelete_564581, base: "",
+    url: url_DataConnectorsDelete_564582, schemes: {Scheme.Https})
 type
-  Call_EntitiesList_568693 = ref object of OpenApiRestCall_567667
-proc url_EntitiesList_568695(protocol: Scheme; host: string; base: string;
+  Call_EntitiesList_564593 = ref object of OpenApiRestCall_563565
+proc url_EntitiesList_564595(protocol: Scheme; host: string; base: string;
                             route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -5446,44 +5430,44 @@ proc url_EntitiesList_568695(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_EntitiesList_568694(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_EntitiesList_564594(path: JsonNode; query: JsonNode; header: JsonNode;
                                  formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets all entities.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
   ##   subscriptionId: JString (required)
   ##                 : Azure subscription ID
-  ##   workspaceName: JString (required)
-  ##                : The name of the workspace.
   ##   operationalInsightsResourceProvider: JString (required)
   ##                                      : The namespace of workspaces resource provider- Microsoft.OperationalInsights.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
+  ##   workspaceName: JString (required)
+  ##                : The name of the workspace.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568696 = path.getOrDefault("resourceGroupName")
-  valid_568696 = validateParameter(valid_568696, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564596 = path.getOrDefault("subscriptionId")
+  valid_564596 = validateParameter(valid_564596, JString, required = true,
                                  default = nil)
-  if valid_568696 != nil:
-    section.add "resourceGroupName", valid_568696
-  var valid_568697 = path.getOrDefault("subscriptionId")
-  valid_568697 = validateParameter(valid_568697, JString, required = true,
+  if valid_564596 != nil:
+    section.add "subscriptionId", valid_564596
+  var valid_564597 = path.getOrDefault("operationalInsightsResourceProvider")
+  valid_564597 = validateParameter(valid_564597, JString, required = true,
                                  default = nil)
-  if valid_568697 != nil:
-    section.add "subscriptionId", valid_568697
-  var valid_568698 = path.getOrDefault("workspaceName")
-  valid_568698 = validateParameter(valid_568698, JString, required = true,
+  if valid_564597 != nil:
+    section.add "operationalInsightsResourceProvider", valid_564597
+  var valid_564598 = path.getOrDefault("resourceGroupName")
+  valid_564598 = validateParameter(valid_564598, JString, required = true,
                                  default = nil)
-  if valid_568698 != nil:
-    section.add "workspaceName", valid_568698
-  var valid_568699 = path.getOrDefault("operationalInsightsResourceProvider")
-  valid_568699 = validateParameter(valid_568699, JString, required = true,
+  if valid_564598 != nil:
+    section.add "resourceGroupName", valid_564598
+  var valid_564599 = path.getOrDefault("workspaceName")
+  valid_564599 = validateParameter(valid_564599, JString, required = true,
                                  default = nil)
-  if valid_568699 != nil:
-    section.add "operationalInsightsResourceProvider", valid_568699
+  if valid_564599 != nil:
+    section.add "workspaceName", valid_564599
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -5491,11 +5475,11 @@ proc validate_EntitiesList_568694(path: JsonNode; query: JsonNode; header: JsonN
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568700 = query.getOrDefault("api-version")
-  valid_568700 = validateParameter(valid_568700, JString, required = true,
+  var valid_564600 = query.getOrDefault("api-version")
+  valid_564600 = validateParameter(valid_564600, JString, required = true,
                                  default = newJString("2019-01-01-preview"))
-  if valid_568700 != nil:
-    section.add "api-version", valid_568700
+  if valid_564600 != nil:
+    section.add "api-version", valid_564600
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -5504,52 +5488,51 @@ proc validate_EntitiesList_568694(path: JsonNode; query: JsonNode; header: JsonN
   if body != nil:
     result.add "body", body
 
-proc call*(call_568701: Call_EntitiesList_568693; path: JsonNode; query: JsonNode;
+proc call*(call_564601: Call_EntitiesList_564593; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets all entities.
   ## 
-  let valid = call_568701.validator(path, query, header, formData, body)
-  let scheme = call_568701.pickScheme
+  let valid = call_564601.validator(path, query, header, formData, body)
+  let scheme = call_564601.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568701.url(scheme.get, call_568701.host, call_568701.base,
-                         call_568701.route, valid.getOrDefault("path"),
+  let url = call_564601.url(scheme.get, call_564601.host, call_564601.base,
+                         call_564601.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568701, url, valid)
+  result = hook(call_564601, url, valid)
 
-proc call*(call_568702: Call_EntitiesList_568693; resourceGroupName: string;
-          subscriptionId: string; workspaceName: string;
-          operationalInsightsResourceProvider: string;
-          apiVersion: string = "2019-01-01-preview"): Recallable =
+proc call*(call_564602: Call_EntitiesList_564593; subscriptionId: string;
+          operationalInsightsResourceProvider: string; resourceGroupName: string;
+          workspaceName: string; apiVersion: string = "2019-01-01-preview"): Recallable =
   ## entitiesList
   ## Gets all entities.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
   ##   apiVersion: string (required)
   ##             : API version for the operation
   ##   subscriptionId: string (required)
   ##                 : Azure subscription ID
-  ##   workspaceName: string (required)
-  ##                : The name of the workspace.
   ##   operationalInsightsResourceProvider: string (required)
   ##                                      : The namespace of workspaces resource provider- Microsoft.OperationalInsights.
-  var path_568703 = newJObject()
-  var query_568704 = newJObject()
-  add(path_568703, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568704, "api-version", newJString(apiVersion))
-  add(path_568703, "subscriptionId", newJString(subscriptionId))
-  add(path_568703, "workspaceName", newJString(workspaceName))
-  add(path_568703, "operationalInsightsResourceProvider",
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
+  ##   workspaceName: string (required)
+  ##                : The name of the workspace.
+  var path_564603 = newJObject()
+  var query_564604 = newJObject()
+  add(query_564604, "api-version", newJString(apiVersion))
+  add(path_564603, "subscriptionId", newJString(subscriptionId))
+  add(path_564603, "operationalInsightsResourceProvider",
       newJString(operationalInsightsResourceProvider))
-  result = call_568702.call(path_568703, query_568704, nil, nil, nil)
+  add(path_564603, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564603, "workspaceName", newJString(workspaceName))
+  result = call_564602.call(path_564603, query_564604, nil, nil, nil)
 
-var entitiesList* = Call_EntitiesList_568693(name: "entitiesList",
+var entitiesList* = Call_EntitiesList_564593(name: "entitiesList",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/{operationalInsightsResourceProvider}/workspaces/{workspaceName}/providers/Microsoft.SecurityInsights/entities",
-    validator: validate_EntitiesList_568694, base: "", url: url_EntitiesList_568695,
+    validator: validate_EntitiesList_564594, base: "", url: url_EntitiesList_564595,
     schemes: {Scheme.Https})
 type
-  Call_EntitiesGet_568705 = ref object of OpenApiRestCall_567667
-proc url_EntitiesGet_568707(protocol: Scheme; host: string; base: string;
+  Call_EntitiesGet_564605 = ref object of OpenApiRestCall_563565
+proc url_EntitiesGet_564607(protocol: Scheme; host: string; base: string;
                            route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -5579,51 +5562,50 @@ proc url_EntitiesGet_568707(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_EntitiesGet_568706(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_EntitiesGet_564606(path: JsonNode; query: JsonNode; header: JsonNode;
                                 formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets an entity.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
   ##   entityId: JString (required)
   ##           : entity ID
   ##   subscriptionId: JString (required)
   ##                 : Azure subscription ID
-  ##   workspaceName: JString (required)
-  ##                : The name of the workspace.
   ##   operationalInsightsResourceProvider: JString (required)
   ##                                      : The namespace of workspaces resource provider- Microsoft.OperationalInsights.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
+  ##   workspaceName: JString (required)
+  ##                : The name of the workspace.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568708 = path.getOrDefault("resourceGroupName")
-  valid_568708 = validateParameter(valid_568708, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `entityId` field"
+  var valid_564608 = path.getOrDefault("entityId")
+  valid_564608 = validateParameter(valid_564608, JString, required = true,
                                  default = nil)
-  if valid_568708 != nil:
-    section.add "resourceGroupName", valid_568708
-  var valid_568709 = path.getOrDefault("entityId")
-  valid_568709 = validateParameter(valid_568709, JString, required = true,
+  if valid_564608 != nil:
+    section.add "entityId", valid_564608
+  var valid_564609 = path.getOrDefault("subscriptionId")
+  valid_564609 = validateParameter(valid_564609, JString, required = true,
                                  default = nil)
-  if valid_568709 != nil:
-    section.add "entityId", valid_568709
-  var valid_568710 = path.getOrDefault("subscriptionId")
-  valid_568710 = validateParameter(valid_568710, JString, required = true,
+  if valid_564609 != nil:
+    section.add "subscriptionId", valid_564609
+  var valid_564610 = path.getOrDefault("operationalInsightsResourceProvider")
+  valid_564610 = validateParameter(valid_564610, JString, required = true,
                                  default = nil)
-  if valid_568710 != nil:
-    section.add "subscriptionId", valid_568710
-  var valid_568711 = path.getOrDefault("workspaceName")
-  valid_568711 = validateParameter(valid_568711, JString, required = true,
+  if valid_564610 != nil:
+    section.add "operationalInsightsResourceProvider", valid_564610
+  var valid_564611 = path.getOrDefault("resourceGroupName")
+  valid_564611 = validateParameter(valid_564611, JString, required = true,
                                  default = nil)
-  if valid_568711 != nil:
-    section.add "workspaceName", valid_568711
-  var valid_568712 = path.getOrDefault("operationalInsightsResourceProvider")
-  valid_568712 = validateParameter(valid_568712, JString, required = true,
+  if valid_564611 != nil:
+    section.add "resourceGroupName", valid_564611
+  var valid_564612 = path.getOrDefault("workspaceName")
+  valid_564612 = validateParameter(valid_564612, JString, required = true,
                                  default = nil)
-  if valid_568712 != nil:
-    section.add "operationalInsightsResourceProvider", valid_568712
+  if valid_564612 != nil:
+    section.add "workspaceName", valid_564612
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -5631,11 +5613,11 @@ proc validate_EntitiesGet_568706(path: JsonNode; query: JsonNode; header: JsonNo
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568713 = query.getOrDefault("api-version")
-  valid_568713 = validateParameter(valid_568713, JString, required = true,
+  var valid_564613 = query.getOrDefault("api-version")
+  valid_564613 = validateParameter(valid_564613, JString, required = true,
                                  default = newJString("2019-01-01-preview"))
-  if valid_568713 != nil:
-    section.add "api-version", valid_568713
+  if valid_564613 != nil:
+    section.add "api-version", valid_564613
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -5644,57 +5626,57 @@ proc validate_EntitiesGet_568706(path: JsonNode; query: JsonNode; header: JsonNo
   if body != nil:
     result.add "body", body
 
-proc call*(call_568714: Call_EntitiesGet_568705; path: JsonNode; query: JsonNode;
+proc call*(call_564614: Call_EntitiesGet_564605; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets an entity.
   ## 
-  let valid = call_568714.validator(path, query, header, formData, body)
-  let scheme = call_568714.pickScheme
+  let valid = call_564614.validator(path, query, header, formData, body)
+  let scheme = call_564614.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568714.url(scheme.get, call_568714.host, call_568714.base,
-                         call_568714.route, valid.getOrDefault("path"),
+  let url = call_564614.url(scheme.get, call_564614.host, call_564614.base,
+                         call_564614.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568714, url, valid)
+  result = hook(call_564614, url, valid)
 
-proc call*(call_568715: Call_EntitiesGet_568705; resourceGroupName: string;
-          entityId: string; subscriptionId: string; workspaceName: string;
-          operationalInsightsResourceProvider: string;
+proc call*(call_564615: Call_EntitiesGet_564605; entityId: string;
+          subscriptionId: string; operationalInsightsResourceProvider: string;
+          resourceGroupName: string; workspaceName: string;
           apiVersion: string = "2019-01-01-preview"): Recallable =
   ## entitiesGet
   ## Gets an entity.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
   ##   apiVersion: string (required)
   ##             : API version for the operation
   ##   entityId: string (required)
   ##           : entity ID
   ##   subscriptionId: string (required)
   ##                 : Azure subscription ID
-  ##   workspaceName: string (required)
-  ##                : The name of the workspace.
   ##   operationalInsightsResourceProvider: string (required)
   ##                                      : The namespace of workspaces resource provider- Microsoft.OperationalInsights.
-  var path_568716 = newJObject()
-  var query_568717 = newJObject()
-  add(path_568716, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568717, "api-version", newJString(apiVersion))
-  add(path_568716, "entityId", newJString(entityId))
-  add(path_568716, "subscriptionId", newJString(subscriptionId))
-  add(path_568716, "workspaceName", newJString(workspaceName))
-  add(path_568716, "operationalInsightsResourceProvider",
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
+  ##   workspaceName: string (required)
+  ##                : The name of the workspace.
+  var path_564616 = newJObject()
+  var query_564617 = newJObject()
+  add(query_564617, "api-version", newJString(apiVersion))
+  add(path_564616, "entityId", newJString(entityId))
+  add(path_564616, "subscriptionId", newJString(subscriptionId))
+  add(path_564616, "operationalInsightsResourceProvider",
       newJString(operationalInsightsResourceProvider))
-  result = call_568715.call(path_568716, query_568717, nil, nil, nil)
+  add(path_564616, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564616, "workspaceName", newJString(workspaceName))
+  result = call_564615.call(path_564616, query_564617, nil, nil, nil)
 
-var entitiesGet* = Call_EntitiesGet_568705(name: "entitiesGet",
+var entitiesGet* = Call_EntitiesGet_564605(name: "entitiesGet",
                                         meth: HttpMethod.HttpGet,
                                         host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/{operationalInsightsResourceProvider}/workspaces/{workspaceName}/providers/Microsoft.SecurityInsights/entities/{entityId}",
-                                        validator: validate_EntitiesGet_568706,
-                                        base: "", url: url_EntitiesGet_568707,
+                                        validator: validate_EntitiesGet_564606,
+                                        base: "", url: url_EntitiesGet_564607,
                                         schemes: {Scheme.Https})
 type
-  Call_EntitiesExpand_568718 = ref object of OpenApiRestCall_567667
-proc url_EntitiesExpand_568720(protocol: Scheme; host: string; base: string;
+  Call_EntitiesExpand_564618 = ref object of OpenApiRestCall_563565
+proc url_EntitiesExpand_564620(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -5725,7 +5707,7 @@ proc url_EntitiesExpand_568720(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_EntitiesExpand_568719(path: JsonNode; query: JsonNode;
+proc validate_EntitiesExpand_564619(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## Expands an entity.
@@ -5733,44 +5715,43 @@ proc validate_EntitiesExpand_568719(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
   ##   entityId: JString (required)
   ##           : entity ID
   ##   subscriptionId: JString (required)
   ##                 : Azure subscription ID
-  ##   workspaceName: JString (required)
-  ##                : The name of the workspace.
   ##   operationalInsightsResourceProvider: JString (required)
   ##                                      : The namespace of workspaces resource provider- Microsoft.OperationalInsights.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
+  ##   workspaceName: JString (required)
+  ##                : The name of the workspace.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568738 = path.getOrDefault("resourceGroupName")
-  valid_568738 = validateParameter(valid_568738, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `entityId` field"
+  var valid_564638 = path.getOrDefault("entityId")
+  valid_564638 = validateParameter(valid_564638, JString, required = true,
                                  default = nil)
-  if valid_568738 != nil:
-    section.add "resourceGroupName", valid_568738
-  var valid_568739 = path.getOrDefault("entityId")
-  valid_568739 = validateParameter(valid_568739, JString, required = true,
+  if valid_564638 != nil:
+    section.add "entityId", valid_564638
+  var valid_564639 = path.getOrDefault("subscriptionId")
+  valid_564639 = validateParameter(valid_564639, JString, required = true,
                                  default = nil)
-  if valid_568739 != nil:
-    section.add "entityId", valid_568739
-  var valid_568740 = path.getOrDefault("subscriptionId")
-  valid_568740 = validateParameter(valid_568740, JString, required = true,
+  if valid_564639 != nil:
+    section.add "subscriptionId", valid_564639
+  var valid_564640 = path.getOrDefault("operationalInsightsResourceProvider")
+  valid_564640 = validateParameter(valid_564640, JString, required = true,
                                  default = nil)
-  if valid_568740 != nil:
-    section.add "subscriptionId", valid_568740
-  var valid_568741 = path.getOrDefault("workspaceName")
-  valid_568741 = validateParameter(valid_568741, JString, required = true,
+  if valid_564640 != nil:
+    section.add "operationalInsightsResourceProvider", valid_564640
+  var valid_564641 = path.getOrDefault("resourceGroupName")
+  valid_564641 = validateParameter(valid_564641, JString, required = true,
                                  default = nil)
-  if valid_568741 != nil:
-    section.add "workspaceName", valid_568741
-  var valid_568742 = path.getOrDefault("operationalInsightsResourceProvider")
-  valid_568742 = validateParameter(valid_568742, JString, required = true,
+  if valid_564641 != nil:
+    section.add "resourceGroupName", valid_564641
+  var valid_564642 = path.getOrDefault("workspaceName")
+  valid_564642 = validateParameter(valid_564642, JString, required = true,
                                  default = nil)
-  if valid_568742 != nil:
-    section.add "operationalInsightsResourceProvider", valid_568742
+  if valid_564642 != nil:
+    section.add "workspaceName", valid_564642
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -5778,11 +5759,11 @@ proc validate_EntitiesExpand_568719(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568743 = query.getOrDefault("api-version")
-  valid_568743 = validateParameter(valid_568743, JString, required = true,
+  var valid_564643 = query.getOrDefault("api-version")
+  valid_564643 = validateParameter(valid_564643, JString, required = true,
                                  default = newJString("2019-01-01-preview"))
-  if valid_568743 != nil:
-    section.add "api-version", valid_568743
+  if valid_564643 != nil:
+    section.add "api-version", valid_564643
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -5796,60 +5777,60 @@ proc validate_EntitiesExpand_568719(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568745: Call_EntitiesExpand_568718; path: JsonNode; query: JsonNode;
+proc call*(call_564645: Call_EntitiesExpand_564618; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Expands an entity.
   ## 
-  let valid = call_568745.validator(path, query, header, formData, body)
-  let scheme = call_568745.pickScheme
+  let valid = call_564645.validator(path, query, header, formData, body)
+  let scheme = call_564645.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568745.url(scheme.get, call_568745.host, call_568745.base,
-                         call_568745.route, valid.getOrDefault("path"),
+  let url = call_564645.url(scheme.get, call_564645.host, call_564645.base,
+                         call_564645.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568745, url, valid)
+  result = hook(call_564645, url, valid)
 
-proc call*(call_568746: Call_EntitiesExpand_568718; resourceGroupName: string;
-          entityId: string; subscriptionId: string; parameters: JsonNode;
-          workspaceName: string; operationalInsightsResourceProvider: string;
+proc call*(call_564646: Call_EntitiesExpand_564618; entityId: string;
+          subscriptionId: string; operationalInsightsResourceProvider: string;
+          resourceGroupName: string; workspaceName: string; parameters: JsonNode;
           apiVersion: string = "2019-01-01-preview"): Recallable =
   ## entitiesExpand
   ## Expands an entity.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
   ##   apiVersion: string (required)
   ##             : API version for the operation
   ##   entityId: string (required)
   ##           : entity ID
   ##   subscriptionId: string (required)
   ##                 : Azure subscription ID
-  ##   parameters: JObject (required)
-  ##             : The parameters required to execute an expand operation on the given entity.
-  ##   workspaceName: string (required)
-  ##                : The name of the workspace.
   ##   operationalInsightsResourceProvider: string (required)
   ##                                      : The namespace of workspaces resource provider- Microsoft.OperationalInsights.
-  var path_568747 = newJObject()
-  var query_568748 = newJObject()
-  var body_568749 = newJObject()
-  add(path_568747, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568748, "api-version", newJString(apiVersion))
-  add(path_568747, "entityId", newJString(entityId))
-  add(path_568747, "subscriptionId", newJString(subscriptionId))
-  if parameters != nil:
-    body_568749 = parameters
-  add(path_568747, "workspaceName", newJString(workspaceName))
-  add(path_568747, "operationalInsightsResourceProvider",
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
+  ##   workspaceName: string (required)
+  ##                : The name of the workspace.
+  ##   parameters: JObject (required)
+  ##             : The parameters required to execute an expand operation on the given entity.
+  var path_564647 = newJObject()
+  var query_564648 = newJObject()
+  var body_564649 = newJObject()
+  add(query_564648, "api-version", newJString(apiVersion))
+  add(path_564647, "entityId", newJString(entityId))
+  add(path_564647, "subscriptionId", newJString(subscriptionId))
+  add(path_564647, "operationalInsightsResourceProvider",
       newJString(operationalInsightsResourceProvider))
-  result = call_568746.call(path_568747, query_568748, nil, nil, body_568749)
+  add(path_564647, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564647, "workspaceName", newJString(workspaceName))
+  if parameters != nil:
+    body_564649 = parameters
+  result = call_564646.call(path_564647, query_564648, nil, nil, body_564649)
 
-var entitiesExpand* = Call_EntitiesExpand_568718(name: "entitiesExpand",
+var entitiesExpand* = Call_EntitiesExpand_564618(name: "entitiesExpand",
     meth: HttpMethod.HttpPost, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/{operationalInsightsResourceProvider}/workspaces/{workspaceName}/providers/Microsoft.SecurityInsights/entities/{entityId}/expand",
-    validator: validate_EntitiesExpand_568719, base: "", url: url_EntitiesExpand_568720,
+    validator: validate_EntitiesExpand_564619, base: "", url: url_EntitiesExpand_564620,
     schemes: {Scheme.Https})
 type
-  Call_EntityQueriesList_568750 = ref object of OpenApiRestCall_567667
-proc url_EntityQueriesList_568752(protocol: Scheme; host: string; base: string;
+  Call_EntityQueriesList_564650 = ref object of OpenApiRestCall_563565
+proc url_EntityQueriesList_564652(protocol: Scheme; host: string; base: string;
                                  route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -5877,7 +5858,7 @@ proc url_EntityQueriesList_568752(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_EntityQueriesList_568751(path: JsonNode; query: JsonNode;
+proc validate_EntityQueriesList_564651(path: JsonNode; query: JsonNode;
                                       header: JsonNode; formData: JsonNode;
                                       body: JsonNode): JsonNode =
   ## Gets all entity queries.
@@ -5885,37 +5866,37 @@ proc validate_EntityQueriesList_568751(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
   ##   subscriptionId: JString (required)
   ##                 : Azure subscription ID
-  ##   workspaceName: JString (required)
-  ##                : The name of the workspace.
   ##   operationalInsightsResourceProvider: JString (required)
   ##                                      : The namespace of workspaces resource provider- Microsoft.OperationalInsights.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
+  ##   workspaceName: JString (required)
+  ##                : The name of the workspace.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568753 = path.getOrDefault("resourceGroupName")
-  valid_568753 = validateParameter(valid_568753, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564653 = path.getOrDefault("subscriptionId")
+  valid_564653 = validateParameter(valid_564653, JString, required = true,
                                  default = nil)
-  if valid_568753 != nil:
-    section.add "resourceGroupName", valid_568753
-  var valid_568754 = path.getOrDefault("subscriptionId")
-  valid_568754 = validateParameter(valid_568754, JString, required = true,
+  if valid_564653 != nil:
+    section.add "subscriptionId", valid_564653
+  var valid_564654 = path.getOrDefault("operationalInsightsResourceProvider")
+  valid_564654 = validateParameter(valid_564654, JString, required = true,
                                  default = nil)
-  if valid_568754 != nil:
-    section.add "subscriptionId", valid_568754
-  var valid_568755 = path.getOrDefault("workspaceName")
-  valid_568755 = validateParameter(valid_568755, JString, required = true,
+  if valid_564654 != nil:
+    section.add "operationalInsightsResourceProvider", valid_564654
+  var valid_564655 = path.getOrDefault("resourceGroupName")
+  valid_564655 = validateParameter(valid_564655, JString, required = true,
                                  default = nil)
-  if valid_568755 != nil:
-    section.add "workspaceName", valid_568755
-  var valid_568756 = path.getOrDefault("operationalInsightsResourceProvider")
-  valid_568756 = validateParameter(valid_568756, JString, required = true,
+  if valid_564655 != nil:
+    section.add "resourceGroupName", valid_564655
+  var valid_564656 = path.getOrDefault("workspaceName")
+  valid_564656 = validateParameter(valid_564656, JString, required = true,
                                  default = nil)
-  if valid_568756 != nil:
-    section.add "operationalInsightsResourceProvider", valid_568756
+  if valid_564656 != nil:
+    section.add "workspaceName", valid_564656
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -5923,11 +5904,11 @@ proc validate_EntityQueriesList_568751(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568757 = query.getOrDefault("api-version")
-  valid_568757 = validateParameter(valid_568757, JString, required = true,
+  var valid_564657 = query.getOrDefault("api-version")
+  valid_564657 = validateParameter(valid_564657, JString, required = true,
                                  default = newJString("2019-01-01-preview"))
-  if valid_568757 != nil:
-    section.add "api-version", valid_568757
+  if valid_564657 != nil:
+    section.add "api-version", valid_564657
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -5936,52 +5917,51 @@ proc validate_EntityQueriesList_568751(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568758: Call_EntityQueriesList_568750; path: JsonNode;
+proc call*(call_564658: Call_EntityQueriesList_564650; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets all entity queries.
   ## 
-  let valid = call_568758.validator(path, query, header, formData, body)
-  let scheme = call_568758.pickScheme
+  let valid = call_564658.validator(path, query, header, formData, body)
+  let scheme = call_564658.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568758.url(scheme.get, call_568758.host, call_568758.base,
-                         call_568758.route, valid.getOrDefault("path"),
+  let url = call_564658.url(scheme.get, call_564658.host, call_564658.base,
+                         call_564658.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568758, url, valid)
+  result = hook(call_564658, url, valid)
 
-proc call*(call_568759: Call_EntityQueriesList_568750; resourceGroupName: string;
-          subscriptionId: string; workspaceName: string;
-          operationalInsightsResourceProvider: string;
-          apiVersion: string = "2019-01-01-preview"): Recallable =
+proc call*(call_564659: Call_EntityQueriesList_564650; subscriptionId: string;
+          operationalInsightsResourceProvider: string; resourceGroupName: string;
+          workspaceName: string; apiVersion: string = "2019-01-01-preview"): Recallable =
   ## entityQueriesList
   ## Gets all entity queries.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
   ##   apiVersion: string (required)
   ##             : API version for the operation
   ##   subscriptionId: string (required)
   ##                 : Azure subscription ID
-  ##   workspaceName: string (required)
-  ##                : The name of the workspace.
   ##   operationalInsightsResourceProvider: string (required)
   ##                                      : The namespace of workspaces resource provider- Microsoft.OperationalInsights.
-  var path_568760 = newJObject()
-  var query_568761 = newJObject()
-  add(path_568760, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568761, "api-version", newJString(apiVersion))
-  add(path_568760, "subscriptionId", newJString(subscriptionId))
-  add(path_568760, "workspaceName", newJString(workspaceName))
-  add(path_568760, "operationalInsightsResourceProvider",
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
+  ##   workspaceName: string (required)
+  ##                : The name of the workspace.
+  var path_564660 = newJObject()
+  var query_564661 = newJObject()
+  add(query_564661, "api-version", newJString(apiVersion))
+  add(path_564660, "subscriptionId", newJString(subscriptionId))
+  add(path_564660, "operationalInsightsResourceProvider",
       newJString(operationalInsightsResourceProvider))
-  result = call_568759.call(path_568760, query_568761, nil, nil, nil)
+  add(path_564660, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564660, "workspaceName", newJString(workspaceName))
+  result = call_564659.call(path_564660, query_564661, nil, nil, nil)
 
-var entityQueriesList* = Call_EntityQueriesList_568750(name: "entityQueriesList",
+var entityQueriesList* = Call_EntityQueriesList_564650(name: "entityQueriesList",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/{operationalInsightsResourceProvider}/workspaces/{workspaceName}/providers/Microsoft.SecurityInsights/entityQueries",
-    validator: validate_EntityQueriesList_568751, base: "",
-    url: url_EntityQueriesList_568752, schemes: {Scheme.Https})
+    validator: validate_EntityQueriesList_564651, base: "",
+    url: url_EntityQueriesList_564652, schemes: {Scheme.Https})
 type
-  Call_EntityQueriesGet_568762 = ref object of OpenApiRestCall_567667
-proc url_EntityQueriesGet_568764(protocol: Scheme; host: string; base: string;
+  Call_EntityQueriesGet_564662 = ref object of OpenApiRestCall_563565
+proc url_EntityQueriesGet_564664(protocol: Scheme; host: string; base: string;
                                 route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -6011,7 +5991,7 @@ proc url_EntityQueriesGet_568764(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_EntityQueriesGet_568763(path: JsonNode; query: JsonNode;
+proc validate_EntityQueriesGet_564663(path: JsonNode; query: JsonNode;
                                      header: JsonNode; formData: JsonNode;
                                      body: JsonNode): JsonNode =
   ## Gets an entity query.
@@ -6019,44 +5999,44 @@ proc validate_EntityQueriesGet_568763(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
   ##   entityQueryId: JString (required)
   ##                : entity query ID
   ##   subscriptionId: JString (required)
   ##                 : Azure subscription ID
-  ##   workspaceName: JString (required)
-  ##                : The name of the workspace.
   ##   operationalInsightsResourceProvider: JString (required)
   ##                                      : The namespace of workspaces resource provider- Microsoft.OperationalInsights.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
+  ##   workspaceName: JString (required)
+  ##                : The name of the workspace.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568765 = path.getOrDefault("resourceGroupName")
-  valid_568765 = validateParameter(valid_568765, JString, required = true,
+        "path argument is necessary due to required `entityQueryId` field"
+  var valid_564665 = path.getOrDefault("entityQueryId")
+  valid_564665 = validateParameter(valid_564665, JString, required = true,
                                  default = nil)
-  if valid_568765 != nil:
-    section.add "resourceGroupName", valid_568765
-  var valid_568766 = path.getOrDefault("entityQueryId")
-  valid_568766 = validateParameter(valid_568766, JString, required = true,
+  if valid_564665 != nil:
+    section.add "entityQueryId", valid_564665
+  var valid_564666 = path.getOrDefault("subscriptionId")
+  valid_564666 = validateParameter(valid_564666, JString, required = true,
                                  default = nil)
-  if valid_568766 != nil:
-    section.add "entityQueryId", valid_568766
-  var valid_568767 = path.getOrDefault("subscriptionId")
-  valid_568767 = validateParameter(valid_568767, JString, required = true,
+  if valid_564666 != nil:
+    section.add "subscriptionId", valid_564666
+  var valid_564667 = path.getOrDefault("operationalInsightsResourceProvider")
+  valid_564667 = validateParameter(valid_564667, JString, required = true,
                                  default = nil)
-  if valid_568767 != nil:
-    section.add "subscriptionId", valid_568767
-  var valid_568768 = path.getOrDefault("workspaceName")
-  valid_568768 = validateParameter(valid_568768, JString, required = true,
+  if valid_564667 != nil:
+    section.add "operationalInsightsResourceProvider", valid_564667
+  var valid_564668 = path.getOrDefault("resourceGroupName")
+  valid_564668 = validateParameter(valid_564668, JString, required = true,
                                  default = nil)
-  if valid_568768 != nil:
-    section.add "workspaceName", valid_568768
-  var valid_568769 = path.getOrDefault("operationalInsightsResourceProvider")
-  valid_568769 = validateParameter(valid_568769, JString, required = true,
+  if valid_564668 != nil:
+    section.add "resourceGroupName", valid_564668
+  var valid_564669 = path.getOrDefault("workspaceName")
+  valid_564669 = validateParameter(valid_564669, JString, required = true,
                                  default = nil)
-  if valid_568769 != nil:
-    section.add "operationalInsightsResourceProvider", valid_568769
+  if valid_564669 != nil:
+    section.add "workspaceName", valid_564669
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -6064,11 +6044,11 @@ proc validate_EntityQueriesGet_568763(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568770 = query.getOrDefault("api-version")
-  valid_568770 = validateParameter(valid_568770, JString, required = true,
+  var valid_564670 = query.getOrDefault("api-version")
+  valid_564670 = validateParameter(valid_564670, JString, required = true,
                                  default = newJString("2019-01-01-preview"))
-  if valid_568770 != nil:
-    section.add "api-version", valid_568770
+  if valid_564670 != nil:
+    section.add "api-version", valid_564670
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -6077,55 +6057,55 @@ proc validate_EntityQueriesGet_568763(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568771: Call_EntityQueriesGet_568762; path: JsonNode;
+proc call*(call_564671: Call_EntityQueriesGet_564662; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets an entity query.
   ## 
-  let valid = call_568771.validator(path, query, header, formData, body)
-  let scheme = call_568771.pickScheme
+  let valid = call_564671.validator(path, query, header, formData, body)
+  let scheme = call_564671.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568771.url(scheme.get, call_568771.host, call_568771.base,
-                         call_568771.route, valid.getOrDefault("path"),
+  let url = call_564671.url(scheme.get, call_564671.host, call_564671.base,
+                         call_564671.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568771, url, valid)
+  result = hook(call_564671, url, valid)
 
-proc call*(call_568772: Call_EntityQueriesGet_568762; resourceGroupName: string;
-          entityQueryId: string; subscriptionId: string; workspaceName: string;
-          operationalInsightsResourceProvider: string;
+proc call*(call_564672: Call_EntityQueriesGet_564662; entityQueryId: string;
+          subscriptionId: string; operationalInsightsResourceProvider: string;
+          resourceGroupName: string; workspaceName: string;
           apiVersion: string = "2019-01-01-preview"): Recallable =
   ## entityQueriesGet
   ## Gets an entity query.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
-  ##   apiVersion: string (required)
-  ##             : API version for the operation
   ##   entityQueryId: string (required)
   ##                : entity query ID
+  ##   apiVersion: string (required)
+  ##             : API version for the operation
   ##   subscriptionId: string (required)
   ##                 : Azure subscription ID
-  ##   workspaceName: string (required)
-  ##                : The name of the workspace.
   ##   operationalInsightsResourceProvider: string (required)
   ##                                      : The namespace of workspaces resource provider- Microsoft.OperationalInsights.
-  var path_568773 = newJObject()
-  var query_568774 = newJObject()
-  add(path_568773, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568774, "api-version", newJString(apiVersion))
-  add(path_568773, "entityQueryId", newJString(entityQueryId))
-  add(path_568773, "subscriptionId", newJString(subscriptionId))
-  add(path_568773, "workspaceName", newJString(workspaceName))
-  add(path_568773, "operationalInsightsResourceProvider",
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
+  ##   workspaceName: string (required)
+  ##                : The name of the workspace.
+  var path_564673 = newJObject()
+  var query_564674 = newJObject()
+  add(path_564673, "entityQueryId", newJString(entityQueryId))
+  add(query_564674, "api-version", newJString(apiVersion))
+  add(path_564673, "subscriptionId", newJString(subscriptionId))
+  add(path_564673, "operationalInsightsResourceProvider",
       newJString(operationalInsightsResourceProvider))
-  result = call_568772.call(path_568773, query_568774, nil, nil, nil)
+  add(path_564673, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564673, "workspaceName", newJString(workspaceName))
+  result = call_564672.call(path_564673, query_564674, nil, nil, nil)
 
-var entityQueriesGet* = Call_EntityQueriesGet_568762(name: "entityQueriesGet",
+var entityQueriesGet* = Call_EntityQueriesGet_564662(name: "entityQueriesGet",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/{operationalInsightsResourceProvider}/workspaces/{workspaceName}/providers/Microsoft.SecurityInsights/entityQueries/{entityQueryId}",
-    validator: validate_EntityQueriesGet_568763, base: "",
-    url: url_EntityQueriesGet_568764, schemes: {Scheme.Https})
+    validator: validate_EntityQueriesGet_564663, base: "",
+    url: url_EntityQueriesGet_564664, schemes: {Scheme.Https})
 type
-  Call_OfficeConsentsList_568775 = ref object of OpenApiRestCall_567667
-proc url_OfficeConsentsList_568777(protocol: Scheme; host: string; base: string;
+  Call_OfficeConsentsList_564675 = ref object of OpenApiRestCall_563565
+proc url_OfficeConsentsList_564677(protocol: Scheme; host: string; base: string;
                                   route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -6153,7 +6133,7 @@ proc url_OfficeConsentsList_568777(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_OfficeConsentsList_568776(path: JsonNode; query: JsonNode;
+proc validate_OfficeConsentsList_564676(path: JsonNode; query: JsonNode;
                                        header: JsonNode; formData: JsonNode;
                                        body: JsonNode): JsonNode =
   ## Gets all office365 consents.
@@ -6161,37 +6141,37 @@ proc validate_OfficeConsentsList_568776(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
   ##   subscriptionId: JString (required)
   ##                 : Azure subscription ID
-  ##   workspaceName: JString (required)
-  ##                : The name of the workspace.
   ##   operationalInsightsResourceProvider: JString (required)
   ##                                      : The namespace of workspaces resource provider- Microsoft.OperationalInsights.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
+  ##   workspaceName: JString (required)
+  ##                : The name of the workspace.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568778 = path.getOrDefault("resourceGroupName")
-  valid_568778 = validateParameter(valid_568778, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564678 = path.getOrDefault("subscriptionId")
+  valid_564678 = validateParameter(valid_564678, JString, required = true,
                                  default = nil)
-  if valid_568778 != nil:
-    section.add "resourceGroupName", valid_568778
-  var valid_568779 = path.getOrDefault("subscriptionId")
-  valid_568779 = validateParameter(valid_568779, JString, required = true,
+  if valid_564678 != nil:
+    section.add "subscriptionId", valid_564678
+  var valid_564679 = path.getOrDefault("operationalInsightsResourceProvider")
+  valid_564679 = validateParameter(valid_564679, JString, required = true,
                                  default = nil)
-  if valid_568779 != nil:
-    section.add "subscriptionId", valid_568779
-  var valid_568780 = path.getOrDefault("workspaceName")
-  valid_568780 = validateParameter(valid_568780, JString, required = true,
+  if valid_564679 != nil:
+    section.add "operationalInsightsResourceProvider", valid_564679
+  var valid_564680 = path.getOrDefault("resourceGroupName")
+  valid_564680 = validateParameter(valid_564680, JString, required = true,
                                  default = nil)
-  if valid_568780 != nil:
-    section.add "workspaceName", valid_568780
-  var valid_568781 = path.getOrDefault("operationalInsightsResourceProvider")
-  valid_568781 = validateParameter(valid_568781, JString, required = true,
+  if valid_564680 != nil:
+    section.add "resourceGroupName", valid_564680
+  var valid_564681 = path.getOrDefault("workspaceName")
+  valid_564681 = validateParameter(valid_564681, JString, required = true,
                                  default = nil)
-  if valid_568781 != nil:
-    section.add "operationalInsightsResourceProvider", valid_568781
+  if valid_564681 != nil:
+    section.add "workspaceName", valid_564681
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -6199,11 +6179,11 @@ proc validate_OfficeConsentsList_568776(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568782 = query.getOrDefault("api-version")
-  valid_568782 = validateParameter(valid_568782, JString, required = true,
+  var valid_564682 = query.getOrDefault("api-version")
+  valid_564682 = validateParameter(valid_564682, JString, required = true,
                                  default = newJString("2019-01-01-preview"))
-  if valid_568782 != nil:
-    section.add "api-version", valid_568782
+  if valid_564682 != nil:
+    section.add "api-version", valid_564682
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -6212,53 +6192,52 @@ proc validate_OfficeConsentsList_568776(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568783: Call_OfficeConsentsList_568775; path: JsonNode;
+proc call*(call_564683: Call_OfficeConsentsList_564675; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets all office365 consents.
   ## 
-  let valid = call_568783.validator(path, query, header, formData, body)
-  let scheme = call_568783.pickScheme
+  let valid = call_564683.validator(path, query, header, formData, body)
+  let scheme = call_564683.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568783.url(scheme.get, call_568783.host, call_568783.base,
-                         call_568783.route, valid.getOrDefault("path"),
+  let url = call_564683.url(scheme.get, call_564683.host, call_564683.base,
+                         call_564683.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568783, url, valid)
+  result = hook(call_564683, url, valid)
 
-proc call*(call_568784: Call_OfficeConsentsList_568775; resourceGroupName: string;
-          subscriptionId: string; workspaceName: string;
-          operationalInsightsResourceProvider: string;
-          apiVersion: string = "2019-01-01-preview"): Recallable =
+proc call*(call_564684: Call_OfficeConsentsList_564675; subscriptionId: string;
+          operationalInsightsResourceProvider: string; resourceGroupName: string;
+          workspaceName: string; apiVersion: string = "2019-01-01-preview"): Recallable =
   ## officeConsentsList
   ## Gets all office365 consents.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
   ##   apiVersion: string (required)
   ##             : API version for the operation
   ##   subscriptionId: string (required)
   ##                 : Azure subscription ID
-  ##   workspaceName: string (required)
-  ##                : The name of the workspace.
   ##   operationalInsightsResourceProvider: string (required)
   ##                                      : The namespace of workspaces resource provider- Microsoft.OperationalInsights.
-  var path_568785 = newJObject()
-  var query_568786 = newJObject()
-  add(path_568785, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568786, "api-version", newJString(apiVersion))
-  add(path_568785, "subscriptionId", newJString(subscriptionId))
-  add(path_568785, "workspaceName", newJString(workspaceName))
-  add(path_568785, "operationalInsightsResourceProvider",
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
+  ##   workspaceName: string (required)
+  ##                : The name of the workspace.
+  var path_564685 = newJObject()
+  var query_564686 = newJObject()
+  add(query_564686, "api-version", newJString(apiVersion))
+  add(path_564685, "subscriptionId", newJString(subscriptionId))
+  add(path_564685, "operationalInsightsResourceProvider",
       newJString(operationalInsightsResourceProvider))
-  result = call_568784.call(path_568785, query_568786, nil, nil, nil)
+  add(path_564685, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564685, "workspaceName", newJString(workspaceName))
+  result = call_564684.call(path_564685, query_564686, nil, nil, nil)
 
-var officeConsentsList* = Call_OfficeConsentsList_568775(
+var officeConsentsList* = Call_OfficeConsentsList_564675(
     name: "officeConsentsList", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/{operationalInsightsResourceProvider}/workspaces/{workspaceName}/providers/Microsoft.SecurityInsights/officeConsents",
-    validator: validate_OfficeConsentsList_568776, base: "",
-    url: url_OfficeConsentsList_568777, schemes: {Scheme.Https})
+    validator: validate_OfficeConsentsList_564676, base: "",
+    url: url_OfficeConsentsList_564677, schemes: {Scheme.Https})
 type
-  Call_OfficeConsentsGet_568787 = ref object of OpenApiRestCall_567667
-proc url_OfficeConsentsGet_568789(protocol: Scheme; host: string; base: string;
+  Call_OfficeConsentsGet_564687 = ref object of OpenApiRestCall_563565
+proc url_OfficeConsentsGet_564689(protocol: Scheme; host: string; base: string;
                                  route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -6288,7 +6267,7 @@ proc url_OfficeConsentsGet_568789(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_OfficeConsentsGet_568788(path: JsonNode; query: JsonNode;
+proc validate_OfficeConsentsGet_564688(path: JsonNode; query: JsonNode;
                                       header: JsonNode; formData: JsonNode;
                                       body: JsonNode): JsonNode =
   ## Gets an office365 consent.
@@ -6296,44 +6275,44 @@ proc validate_OfficeConsentsGet_568788(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
   ##   subscriptionId: JString (required)
   ##                 : Azure subscription ID
-  ##   workspaceName: JString (required)
-  ##                : The name of the workspace.
   ##   operationalInsightsResourceProvider: JString (required)
   ##                                      : The namespace of workspaces resource provider- Microsoft.OperationalInsights.
   ##   consentId: JString (required)
   ##            : consent ID
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
+  ##   workspaceName: JString (required)
+  ##                : The name of the workspace.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568790 = path.getOrDefault("resourceGroupName")
-  valid_568790 = validateParameter(valid_568790, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564690 = path.getOrDefault("subscriptionId")
+  valid_564690 = validateParameter(valid_564690, JString, required = true,
                                  default = nil)
-  if valid_568790 != nil:
-    section.add "resourceGroupName", valid_568790
-  var valid_568791 = path.getOrDefault("subscriptionId")
-  valid_568791 = validateParameter(valid_568791, JString, required = true,
+  if valid_564690 != nil:
+    section.add "subscriptionId", valid_564690
+  var valid_564691 = path.getOrDefault("operationalInsightsResourceProvider")
+  valid_564691 = validateParameter(valid_564691, JString, required = true,
                                  default = nil)
-  if valid_568791 != nil:
-    section.add "subscriptionId", valid_568791
-  var valid_568792 = path.getOrDefault("workspaceName")
-  valid_568792 = validateParameter(valid_568792, JString, required = true,
+  if valid_564691 != nil:
+    section.add "operationalInsightsResourceProvider", valid_564691
+  var valid_564692 = path.getOrDefault("consentId")
+  valid_564692 = validateParameter(valid_564692, JString, required = true,
                                  default = nil)
-  if valid_568792 != nil:
-    section.add "workspaceName", valid_568792
-  var valid_568793 = path.getOrDefault("operationalInsightsResourceProvider")
-  valid_568793 = validateParameter(valid_568793, JString, required = true,
+  if valid_564692 != nil:
+    section.add "consentId", valid_564692
+  var valid_564693 = path.getOrDefault("resourceGroupName")
+  valid_564693 = validateParameter(valid_564693, JString, required = true,
                                  default = nil)
-  if valid_568793 != nil:
-    section.add "operationalInsightsResourceProvider", valid_568793
-  var valid_568794 = path.getOrDefault("consentId")
-  valid_568794 = validateParameter(valid_568794, JString, required = true,
+  if valid_564693 != nil:
+    section.add "resourceGroupName", valid_564693
+  var valid_564694 = path.getOrDefault("workspaceName")
+  valid_564694 = validateParameter(valid_564694, JString, required = true,
                                  default = nil)
-  if valid_568794 != nil:
-    section.add "consentId", valid_568794
+  if valid_564694 != nil:
+    section.add "workspaceName", valid_564694
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -6341,11 +6320,11 @@ proc validate_OfficeConsentsGet_568788(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568795 = query.getOrDefault("api-version")
-  valid_568795 = validateParameter(valid_568795, JString, required = true,
+  var valid_564695 = query.getOrDefault("api-version")
+  valid_564695 = validateParameter(valid_564695, JString, required = true,
                                  default = newJString("2019-01-01-preview"))
-  if valid_568795 != nil:
-    section.add "api-version", valid_568795
+  if valid_564695 != nil:
+    section.add "api-version", valid_564695
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -6354,55 +6333,55 @@ proc validate_OfficeConsentsGet_568788(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568796: Call_OfficeConsentsGet_568787; path: JsonNode;
+proc call*(call_564696: Call_OfficeConsentsGet_564687; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets an office365 consent.
   ## 
-  let valid = call_568796.validator(path, query, header, formData, body)
-  let scheme = call_568796.pickScheme
+  let valid = call_564696.validator(path, query, header, formData, body)
+  let scheme = call_564696.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568796.url(scheme.get, call_568796.host, call_568796.base,
-                         call_568796.route, valid.getOrDefault("path"),
+  let url = call_564696.url(scheme.get, call_564696.host, call_564696.base,
+                         call_564696.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568796, url, valid)
+  result = hook(call_564696, url, valid)
 
-proc call*(call_568797: Call_OfficeConsentsGet_568787; resourceGroupName: string;
-          subscriptionId: string; workspaceName: string;
+proc call*(call_564697: Call_OfficeConsentsGet_564687; subscriptionId: string;
           operationalInsightsResourceProvider: string; consentId: string;
+          resourceGroupName: string; workspaceName: string;
           apiVersion: string = "2019-01-01-preview"): Recallable =
   ## officeConsentsGet
   ## Gets an office365 consent.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
   ##   apiVersion: string (required)
   ##             : API version for the operation
   ##   subscriptionId: string (required)
   ##                 : Azure subscription ID
-  ##   workspaceName: string (required)
-  ##                : The name of the workspace.
   ##   operationalInsightsResourceProvider: string (required)
   ##                                      : The namespace of workspaces resource provider- Microsoft.OperationalInsights.
   ##   consentId: string (required)
   ##            : consent ID
-  var path_568798 = newJObject()
-  var query_568799 = newJObject()
-  add(path_568798, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568799, "api-version", newJString(apiVersion))
-  add(path_568798, "subscriptionId", newJString(subscriptionId))
-  add(path_568798, "workspaceName", newJString(workspaceName))
-  add(path_568798, "operationalInsightsResourceProvider",
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
+  ##   workspaceName: string (required)
+  ##                : The name of the workspace.
+  var path_564698 = newJObject()
+  var query_564699 = newJObject()
+  add(query_564699, "api-version", newJString(apiVersion))
+  add(path_564698, "subscriptionId", newJString(subscriptionId))
+  add(path_564698, "operationalInsightsResourceProvider",
       newJString(operationalInsightsResourceProvider))
-  add(path_568798, "consentId", newJString(consentId))
-  result = call_568797.call(path_568798, query_568799, nil, nil, nil)
+  add(path_564698, "consentId", newJString(consentId))
+  add(path_564698, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564698, "workspaceName", newJString(workspaceName))
+  result = call_564697.call(path_564698, query_564699, nil, nil, nil)
 
-var officeConsentsGet* = Call_OfficeConsentsGet_568787(name: "officeConsentsGet",
+var officeConsentsGet* = Call_OfficeConsentsGet_564687(name: "officeConsentsGet",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/{operationalInsightsResourceProvider}/workspaces/{workspaceName}/providers/Microsoft.SecurityInsights/officeConsents/{consentId}",
-    validator: validate_OfficeConsentsGet_568788, base: "",
-    url: url_OfficeConsentsGet_568789, schemes: {Scheme.Https})
+    validator: validate_OfficeConsentsGet_564688, base: "",
+    url: url_OfficeConsentsGet_564689, schemes: {Scheme.Https})
 type
-  Call_OfficeConsentsDelete_568800 = ref object of OpenApiRestCall_567667
-proc url_OfficeConsentsDelete_568802(protocol: Scheme; host: string; base: string;
+  Call_OfficeConsentsDelete_564700 = ref object of OpenApiRestCall_563565
+proc url_OfficeConsentsDelete_564702(protocol: Scheme; host: string; base: string;
                                     route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -6432,51 +6411,51 @@ proc url_OfficeConsentsDelete_568802(protocol: Scheme; host: string; base: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_OfficeConsentsDelete_568801(path: JsonNode; query: JsonNode;
+proc validate_OfficeConsentsDelete_564701(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Delete the office365 consent.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
   ##   subscriptionId: JString (required)
   ##                 : Azure subscription ID
-  ##   workspaceName: JString (required)
-  ##                : The name of the workspace.
   ##   operationalInsightsResourceProvider: JString (required)
   ##                                      : The namespace of workspaces resource provider- Microsoft.OperationalInsights.
   ##   consentId: JString (required)
   ##            : consent ID
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
+  ##   workspaceName: JString (required)
+  ##                : The name of the workspace.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568803 = path.getOrDefault("resourceGroupName")
-  valid_568803 = validateParameter(valid_568803, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564703 = path.getOrDefault("subscriptionId")
+  valid_564703 = validateParameter(valid_564703, JString, required = true,
                                  default = nil)
-  if valid_568803 != nil:
-    section.add "resourceGroupName", valid_568803
-  var valid_568804 = path.getOrDefault("subscriptionId")
-  valid_568804 = validateParameter(valid_568804, JString, required = true,
+  if valid_564703 != nil:
+    section.add "subscriptionId", valid_564703
+  var valid_564704 = path.getOrDefault("operationalInsightsResourceProvider")
+  valid_564704 = validateParameter(valid_564704, JString, required = true,
                                  default = nil)
-  if valid_568804 != nil:
-    section.add "subscriptionId", valid_568804
-  var valid_568805 = path.getOrDefault("workspaceName")
-  valid_568805 = validateParameter(valid_568805, JString, required = true,
+  if valid_564704 != nil:
+    section.add "operationalInsightsResourceProvider", valid_564704
+  var valid_564705 = path.getOrDefault("consentId")
+  valid_564705 = validateParameter(valid_564705, JString, required = true,
                                  default = nil)
-  if valid_568805 != nil:
-    section.add "workspaceName", valid_568805
-  var valid_568806 = path.getOrDefault("operationalInsightsResourceProvider")
-  valid_568806 = validateParameter(valid_568806, JString, required = true,
+  if valid_564705 != nil:
+    section.add "consentId", valid_564705
+  var valid_564706 = path.getOrDefault("resourceGroupName")
+  valid_564706 = validateParameter(valid_564706, JString, required = true,
                                  default = nil)
-  if valid_568806 != nil:
-    section.add "operationalInsightsResourceProvider", valid_568806
-  var valid_568807 = path.getOrDefault("consentId")
-  valid_568807 = validateParameter(valid_568807, JString, required = true,
+  if valid_564706 != nil:
+    section.add "resourceGroupName", valid_564706
+  var valid_564707 = path.getOrDefault("workspaceName")
+  valid_564707 = validateParameter(valid_564707, JString, required = true,
                                  default = nil)
-  if valid_568807 != nil:
-    section.add "consentId", valid_568807
+  if valid_564707 != nil:
+    section.add "workspaceName", valid_564707
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -6484,11 +6463,11 @@ proc validate_OfficeConsentsDelete_568801(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568808 = query.getOrDefault("api-version")
-  valid_568808 = validateParameter(valid_568808, JString, required = true,
+  var valid_564708 = query.getOrDefault("api-version")
+  valid_564708 = validateParameter(valid_564708, JString, required = true,
                                  default = newJString("2019-01-01-preview"))
-  if valid_568808 != nil:
-    section.add "api-version", valid_568808
+  if valid_564708 != nil:
+    section.add "api-version", valid_564708
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -6497,56 +6476,56 @@ proc validate_OfficeConsentsDelete_568801(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568809: Call_OfficeConsentsDelete_568800; path: JsonNode;
+proc call*(call_564709: Call_OfficeConsentsDelete_564700; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Delete the office365 consent.
   ## 
-  let valid = call_568809.validator(path, query, header, formData, body)
-  let scheme = call_568809.pickScheme
+  let valid = call_564709.validator(path, query, header, formData, body)
+  let scheme = call_564709.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568809.url(scheme.get, call_568809.host, call_568809.base,
-                         call_568809.route, valid.getOrDefault("path"),
+  let url = call_564709.url(scheme.get, call_564709.host, call_564709.base,
+                         call_564709.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568809, url, valid)
+  result = hook(call_564709, url, valid)
 
-proc call*(call_568810: Call_OfficeConsentsDelete_568800;
-          resourceGroupName: string; subscriptionId: string; workspaceName: string;
+proc call*(call_564710: Call_OfficeConsentsDelete_564700; subscriptionId: string;
           operationalInsightsResourceProvider: string; consentId: string;
+          resourceGroupName: string; workspaceName: string;
           apiVersion: string = "2019-01-01-preview"): Recallable =
   ## officeConsentsDelete
   ## Delete the office365 consent.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
   ##   apiVersion: string (required)
   ##             : API version for the operation
   ##   subscriptionId: string (required)
   ##                 : Azure subscription ID
-  ##   workspaceName: string (required)
-  ##                : The name of the workspace.
   ##   operationalInsightsResourceProvider: string (required)
   ##                                      : The namespace of workspaces resource provider- Microsoft.OperationalInsights.
   ##   consentId: string (required)
   ##            : consent ID
-  var path_568811 = newJObject()
-  var query_568812 = newJObject()
-  add(path_568811, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568812, "api-version", newJString(apiVersion))
-  add(path_568811, "subscriptionId", newJString(subscriptionId))
-  add(path_568811, "workspaceName", newJString(workspaceName))
-  add(path_568811, "operationalInsightsResourceProvider",
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
+  ##   workspaceName: string (required)
+  ##                : The name of the workspace.
+  var path_564711 = newJObject()
+  var query_564712 = newJObject()
+  add(query_564712, "api-version", newJString(apiVersion))
+  add(path_564711, "subscriptionId", newJString(subscriptionId))
+  add(path_564711, "operationalInsightsResourceProvider",
       newJString(operationalInsightsResourceProvider))
-  add(path_568811, "consentId", newJString(consentId))
-  result = call_568810.call(path_568811, query_568812, nil, nil, nil)
+  add(path_564711, "consentId", newJString(consentId))
+  add(path_564711, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564711, "workspaceName", newJString(workspaceName))
+  result = call_564710.call(path_564711, query_564712, nil, nil, nil)
 
-var officeConsentsDelete* = Call_OfficeConsentsDelete_568800(
+var officeConsentsDelete* = Call_OfficeConsentsDelete_564700(
     name: "officeConsentsDelete", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/{operationalInsightsResourceProvider}/workspaces/{workspaceName}/providers/Microsoft.SecurityInsights/officeConsents/{consentId}",
-    validator: validate_OfficeConsentsDelete_568801, base: "",
-    url: url_OfficeConsentsDelete_568802, schemes: {Scheme.Https})
+    validator: validate_OfficeConsentsDelete_564701, base: "",
+    url: url_OfficeConsentsDelete_564702, schemes: {Scheme.Https})
 type
-  Call_ProductSettingsUpdate_568826 = ref object of OpenApiRestCall_567667
-proc url_ProductSettingsUpdate_568828(protocol: Scheme; host: string; base: string;
+  Call_ProductSettingsUpdate_564726 = ref object of OpenApiRestCall_563565
+proc url_ProductSettingsUpdate_564728(protocol: Scheme; host: string; base: string;
                                      route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -6576,51 +6555,51 @@ proc url_ProductSettingsUpdate_568828(protocol: Scheme; host: string; base: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ProductSettingsUpdate_568827(path: JsonNode; query: JsonNode;
+proc validate_ProductSettingsUpdate_564727(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Updates the setting.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
-  ##   subscriptionId: JString (required)
-  ##                 : Azure subscription ID
   ##   settingsName: JString (required)
   ##               : The setting name. Supports- Fusion, UEBA
-  ##   workspaceName: JString (required)
-  ##                : The name of the workspace.
+  ##   subscriptionId: JString (required)
+  ##                 : Azure subscription ID
   ##   operationalInsightsResourceProvider: JString (required)
   ##                                      : The namespace of workspaces resource provider- Microsoft.OperationalInsights.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
+  ##   workspaceName: JString (required)
+  ##                : The name of the workspace.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568829 = path.getOrDefault("resourceGroupName")
-  valid_568829 = validateParameter(valid_568829, JString, required = true,
+        "path argument is necessary due to required `settingsName` field"
+  var valid_564729 = path.getOrDefault("settingsName")
+  valid_564729 = validateParameter(valid_564729, JString, required = true,
                                  default = nil)
-  if valid_568829 != nil:
-    section.add "resourceGroupName", valid_568829
-  var valid_568830 = path.getOrDefault("subscriptionId")
-  valid_568830 = validateParameter(valid_568830, JString, required = true,
+  if valid_564729 != nil:
+    section.add "settingsName", valid_564729
+  var valid_564730 = path.getOrDefault("subscriptionId")
+  valid_564730 = validateParameter(valid_564730, JString, required = true,
                                  default = nil)
-  if valid_568830 != nil:
-    section.add "subscriptionId", valid_568830
-  var valid_568831 = path.getOrDefault("settingsName")
-  valid_568831 = validateParameter(valid_568831, JString, required = true,
+  if valid_564730 != nil:
+    section.add "subscriptionId", valid_564730
+  var valid_564731 = path.getOrDefault("operationalInsightsResourceProvider")
+  valid_564731 = validateParameter(valid_564731, JString, required = true,
                                  default = nil)
-  if valid_568831 != nil:
-    section.add "settingsName", valid_568831
-  var valid_568832 = path.getOrDefault("workspaceName")
-  valid_568832 = validateParameter(valid_568832, JString, required = true,
+  if valid_564731 != nil:
+    section.add "operationalInsightsResourceProvider", valid_564731
+  var valid_564732 = path.getOrDefault("resourceGroupName")
+  valid_564732 = validateParameter(valid_564732, JString, required = true,
                                  default = nil)
-  if valid_568832 != nil:
-    section.add "workspaceName", valid_568832
-  var valid_568833 = path.getOrDefault("operationalInsightsResourceProvider")
-  valid_568833 = validateParameter(valid_568833, JString, required = true,
+  if valid_564732 != nil:
+    section.add "resourceGroupName", valid_564732
+  var valid_564733 = path.getOrDefault("workspaceName")
+  valid_564733 = validateParameter(valid_564733, JString, required = true,
                                  default = nil)
-  if valid_568833 != nil:
-    section.add "operationalInsightsResourceProvider", valid_568833
+  if valid_564733 != nil:
+    section.add "workspaceName", valid_564733
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -6628,11 +6607,11 @@ proc validate_ProductSettingsUpdate_568827(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568834 = query.getOrDefault("api-version")
-  valid_568834 = validateParameter(valid_568834, JString, required = true,
+  var valid_564734 = query.getOrDefault("api-version")
+  valid_564734 = validateParameter(valid_564734, JString, required = true,
                                  default = newJString("2019-01-01-preview"))
-  if valid_568834 != nil:
-    section.add "api-version", valid_568834
+  if valid_564734 != nil:
+    section.add "api-version", valid_564734
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -6646,61 +6625,61 @@ proc validate_ProductSettingsUpdate_568827(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568836: Call_ProductSettingsUpdate_568826; path: JsonNode;
+proc call*(call_564736: Call_ProductSettingsUpdate_564726; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Updates the setting.
   ## 
-  let valid = call_568836.validator(path, query, header, formData, body)
-  let scheme = call_568836.pickScheme
+  let valid = call_564736.validator(path, query, header, formData, body)
+  let scheme = call_564736.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568836.url(scheme.get, call_568836.host, call_568836.base,
-                         call_568836.route, valid.getOrDefault("path"),
+  let url = call_564736.url(scheme.get, call_564736.host, call_564736.base,
+                         call_564736.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568836, url, valid)
+  result = hook(call_564736, url, valid)
 
-proc call*(call_568837: Call_ProductSettingsUpdate_568826; settings: JsonNode;
-          resourceGroupName: string; subscriptionId: string; settingsName: string;
-          workspaceName: string; operationalInsightsResourceProvider: string;
+proc call*(call_564737: Call_ProductSettingsUpdate_564726; settingsName: string;
+          subscriptionId: string; operationalInsightsResourceProvider: string;
+          resourceGroupName: string; workspaceName: string; settings: JsonNode;
           apiVersion: string = "2019-01-01-preview"): Recallable =
   ## productSettingsUpdate
   ## Updates the setting.
-  ##   settings: JObject (required)
-  ##           : The setting
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
   ##   apiVersion: string (required)
   ##             : API version for the operation
-  ##   subscriptionId: string (required)
-  ##                 : Azure subscription ID
   ##   settingsName: string (required)
   ##               : The setting name. Supports- Fusion, UEBA
-  ##   workspaceName: string (required)
-  ##                : The name of the workspace.
+  ##   subscriptionId: string (required)
+  ##                 : Azure subscription ID
   ##   operationalInsightsResourceProvider: string (required)
   ##                                      : The namespace of workspaces resource provider- Microsoft.OperationalInsights.
-  var path_568838 = newJObject()
-  var query_568839 = newJObject()
-  var body_568840 = newJObject()
-  if settings != nil:
-    body_568840 = settings
-  add(path_568838, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568839, "api-version", newJString(apiVersion))
-  add(path_568838, "subscriptionId", newJString(subscriptionId))
-  add(path_568838, "settingsName", newJString(settingsName))
-  add(path_568838, "workspaceName", newJString(workspaceName))
-  add(path_568838, "operationalInsightsResourceProvider",
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
+  ##   workspaceName: string (required)
+  ##                : The name of the workspace.
+  ##   settings: JObject (required)
+  ##           : The setting
+  var path_564738 = newJObject()
+  var query_564739 = newJObject()
+  var body_564740 = newJObject()
+  add(query_564739, "api-version", newJString(apiVersion))
+  add(path_564738, "settingsName", newJString(settingsName))
+  add(path_564738, "subscriptionId", newJString(subscriptionId))
+  add(path_564738, "operationalInsightsResourceProvider",
       newJString(operationalInsightsResourceProvider))
-  result = call_568837.call(path_568838, query_568839, nil, nil, body_568840)
+  add(path_564738, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564738, "workspaceName", newJString(workspaceName))
+  if settings != nil:
+    body_564740 = settings
+  result = call_564737.call(path_564738, query_564739, nil, nil, body_564740)
 
-var productSettingsUpdate* = Call_ProductSettingsUpdate_568826(
+var productSettingsUpdate* = Call_ProductSettingsUpdate_564726(
     name: "productSettingsUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/{operationalInsightsResourceProvider}/workspaces/{workspaceName}/providers/Microsoft.SecurityInsights/settings/{settingsName}",
-    validator: validate_ProductSettingsUpdate_568827, base: "",
-    url: url_ProductSettingsUpdate_568828, schemes: {Scheme.Https})
+    validator: validate_ProductSettingsUpdate_564727, base: "",
+    url: url_ProductSettingsUpdate_564728, schemes: {Scheme.Https})
 type
-  Call_ProductSettingsGet_568813 = ref object of OpenApiRestCall_567667
-proc url_ProductSettingsGet_568815(protocol: Scheme; host: string; base: string;
+  Call_ProductSettingsGet_564713 = ref object of OpenApiRestCall_563565
+proc url_ProductSettingsGet_564715(protocol: Scheme; host: string; base: string;
                                   route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -6730,7 +6709,7 @@ proc url_ProductSettingsGet_568815(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ProductSettingsGet_568814(path: JsonNode; query: JsonNode;
+proc validate_ProductSettingsGet_564714(path: JsonNode; query: JsonNode;
                                        header: JsonNode; formData: JsonNode;
                                        body: JsonNode): JsonNode =
   ## Gets a setting.
@@ -6738,44 +6717,44 @@ proc validate_ProductSettingsGet_568814(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
-  ##   subscriptionId: JString (required)
-  ##                 : Azure subscription ID
   ##   settingsName: JString (required)
   ##               : The setting name. Supports- Fusion, UEBA
-  ##   workspaceName: JString (required)
-  ##                : The name of the workspace.
+  ##   subscriptionId: JString (required)
+  ##                 : Azure subscription ID
   ##   operationalInsightsResourceProvider: JString (required)
   ##                                      : The namespace of workspaces resource provider- Microsoft.OperationalInsights.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
+  ##   workspaceName: JString (required)
+  ##                : The name of the workspace.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568816 = path.getOrDefault("resourceGroupName")
-  valid_568816 = validateParameter(valid_568816, JString, required = true,
+        "path argument is necessary due to required `settingsName` field"
+  var valid_564716 = path.getOrDefault("settingsName")
+  valid_564716 = validateParameter(valid_564716, JString, required = true,
                                  default = nil)
-  if valid_568816 != nil:
-    section.add "resourceGroupName", valid_568816
-  var valid_568817 = path.getOrDefault("subscriptionId")
-  valid_568817 = validateParameter(valid_568817, JString, required = true,
+  if valid_564716 != nil:
+    section.add "settingsName", valid_564716
+  var valid_564717 = path.getOrDefault("subscriptionId")
+  valid_564717 = validateParameter(valid_564717, JString, required = true,
                                  default = nil)
-  if valid_568817 != nil:
-    section.add "subscriptionId", valid_568817
-  var valid_568818 = path.getOrDefault("settingsName")
-  valid_568818 = validateParameter(valid_568818, JString, required = true,
+  if valid_564717 != nil:
+    section.add "subscriptionId", valid_564717
+  var valid_564718 = path.getOrDefault("operationalInsightsResourceProvider")
+  valid_564718 = validateParameter(valid_564718, JString, required = true,
                                  default = nil)
-  if valid_568818 != nil:
-    section.add "settingsName", valid_568818
-  var valid_568819 = path.getOrDefault("workspaceName")
-  valid_568819 = validateParameter(valid_568819, JString, required = true,
+  if valid_564718 != nil:
+    section.add "operationalInsightsResourceProvider", valid_564718
+  var valid_564719 = path.getOrDefault("resourceGroupName")
+  valid_564719 = validateParameter(valid_564719, JString, required = true,
                                  default = nil)
-  if valid_568819 != nil:
-    section.add "workspaceName", valid_568819
-  var valid_568820 = path.getOrDefault("operationalInsightsResourceProvider")
-  valid_568820 = validateParameter(valid_568820, JString, required = true,
+  if valid_564719 != nil:
+    section.add "resourceGroupName", valid_564719
+  var valid_564720 = path.getOrDefault("workspaceName")
+  valid_564720 = validateParameter(valid_564720, JString, required = true,
                                  default = nil)
-  if valid_568820 != nil:
-    section.add "operationalInsightsResourceProvider", valid_568820
+  if valid_564720 != nil:
+    section.add "workspaceName", valid_564720
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -6783,11 +6762,11 @@ proc validate_ProductSettingsGet_568814(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568821 = query.getOrDefault("api-version")
-  valid_568821 = validateParameter(valid_568821, JString, required = true,
+  var valid_564721 = query.getOrDefault("api-version")
+  valid_564721 = validateParameter(valid_564721, JString, required = true,
                                  default = newJString("2019-01-01-preview"))
-  if valid_568821 != nil:
-    section.add "api-version", valid_568821
+  if valid_564721 != nil:
+    section.add "api-version", valid_564721
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -6796,53 +6775,53 @@ proc validate_ProductSettingsGet_568814(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568822: Call_ProductSettingsGet_568813; path: JsonNode;
+proc call*(call_564722: Call_ProductSettingsGet_564713; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets a setting.
   ## 
-  let valid = call_568822.validator(path, query, header, formData, body)
-  let scheme = call_568822.pickScheme
+  let valid = call_564722.validator(path, query, header, formData, body)
+  let scheme = call_564722.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568822.url(scheme.get, call_568822.host, call_568822.base,
-                         call_568822.route, valid.getOrDefault("path"),
+  let url = call_564722.url(scheme.get, call_564722.host, call_564722.base,
+                         call_564722.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568822, url, valid)
+  result = hook(call_564722, url, valid)
 
-proc call*(call_568823: Call_ProductSettingsGet_568813; resourceGroupName: string;
-          subscriptionId: string; settingsName: string; workspaceName: string;
-          operationalInsightsResourceProvider: string;
+proc call*(call_564723: Call_ProductSettingsGet_564713; settingsName: string;
+          subscriptionId: string; operationalInsightsResourceProvider: string;
+          resourceGroupName: string; workspaceName: string;
           apiVersion: string = "2019-01-01-preview"): Recallable =
   ## productSettingsGet
   ## Gets a setting.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
   ##   apiVersion: string (required)
   ##             : API version for the operation
-  ##   subscriptionId: string (required)
-  ##                 : Azure subscription ID
   ##   settingsName: string (required)
   ##               : The setting name. Supports- Fusion, UEBA
-  ##   workspaceName: string (required)
-  ##                : The name of the workspace.
+  ##   subscriptionId: string (required)
+  ##                 : Azure subscription ID
   ##   operationalInsightsResourceProvider: string (required)
   ##                                      : The namespace of workspaces resource provider- Microsoft.OperationalInsights.
-  var path_568824 = newJObject()
-  var query_568825 = newJObject()
-  add(path_568824, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568825, "api-version", newJString(apiVersion))
-  add(path_568824, "subscriptionId", newJString(subscriptionId))
-  add(path_568824, "settingsName", newJString(settingsName))
-  add(path_568824, "workspaceName", newJString(workspaceName))
-  add(path_568824, "operationalInsightsResourceProvider",
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group within the user's subscription. The name is case insensitive.
+  ##   workspaceName: string (required)
+  ##                : The name of the workspace.
+  var path_564724 = newJObject()
+  var query_564725 = newJObject()
+  add(query_564725, "api-version", newJString(apiVersion))
+  add(path_564724, "settingsName", newJString(settingsName))
+  add(path_564724, "subscriptionId", newJString(subscriptionId))
+  add(path_564724, "operationalInsightsResourceProvider",
       newJString(operationalInsightsResourceProvider))
-  result = call_568823.call(path_568824, query_568825, nil, nil, nil)
+  add(path_564724, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564724, "workspaceName", newJString(workspaceName))
+  result = call_564723.call(path_564724, query_564725, nil, nil, nil)
 
-var productSettingsGet* = Call_ProductSettingsGet_568813(
+var productSettingsGet* = Call_ProductSettingsGet_564713(
     name: "productSettingsGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/{operationalInsightsResourceProvider}/workspaces/{workspaceName}/providers/Microsoft.SecurityInsights/settings/{settingsName}",
-    validator: validate_ProductSettingsGet_568814, base: "",
-    url: url_ProductSettingsGet_568815, schemes: {Scheme.Https})
+    validator: validate_ProductSettingsGet_564714, base: "",
+    url: url_ProductSettingsGet_564715, schemes: {Scheme.Https})
 export
   rest
 

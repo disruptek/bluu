@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, httpcore
 
 ## auto-generated via openapi macro
 ## title: RedisManagementClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_567657 = ref object of OpenApiRestCall
+  OpenApiRestCall_563555 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_567657](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563555](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_567657): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563555): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,15 +107,15 @@ const
   macServiceName = "redis"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_OperationsList_567879 = ref object of OpenApiRestCall_567657
-proc url_OperationsList_567881(protocol: Scheme; host: string; base: string;
+  Call_OperationsList_563777 = ref object of OpenApiRestCall_563555
+proc url_OperationsList_563779(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_OperationsList_567880(path: JsonNode; query: JsonNode;
+proc validate_OperationsList_563778(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## Lists all of the available REST API operations of the Microsoft.Cache provider.
@@ -126,11 +130,11 @@ proc validate_OperationsList_567880(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568040 = query.getOrDefault("api-version")
-  valid_568040 = validateParameter(valid_568040, JString, required = true,
+  var valid_563940 = query.getOrDefault("api-version")
+  valid_563940 = validateParameter(valid_563940, JString, required = true,
                                  default = nil)
-  if valid_568040 != nil:
-    section.add "api-version", valid_568040
+  if valid_563940 != nil:
+    section.add "api-version", valid_563940
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -139,36 +143,36 @@ proc validate_OperationsList_567880(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568063: Call_OperationsList_567879; path: JsonNode; query: JsonNode;
+proc call*(call_563963: Call_OperationsList_563777; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists all of the available REST API operations of the Microsoft.Cache provider.
   ## 
-  let valid = call_568063.validator(path, query, header, formData, body)
-  let scheme = call_568063.pickScheme
+  let valid = call_563963.validator(path, query, header, formData, body)
+  let scheme = call_563963.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568063.url(scheme.get, call_568063.host, call_568063.base,
-                         call_568063.route, valid.getOrDefault("path"),
+  let url = call_563963.url(scheme.get, call_563963.host, call_563963.base,
+                         call_563963.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568063, url, valid)
+  result = hook(call_563963, url, valid)
 
-proc call*(call_568134: Call_OperationsList_567879; apiVersion: string): Recallable =
+proc call*(call_564034: Call_OperationsList_563777; apiVersion: string): Recallable =
   ## operationsList
   ## Lists all of the available REST API operations of the Microsoft.Cache provider.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
-  var query_568135 = newJObject()
-  add(query_568135, "api-version", newJString(apiVersion))
-  result = call_568134.call(nil, query_568135, nil, nil, nil)
+  var query_564035 = newJObject()
+  add(query_564035, "api-version", newJString(apiVersion))
+  result = call_564034.call(nil, query_564035, nil, nil, nil)
 
-var operationsList* = Call_OperationsList_567879(name: "operationsList",
+var operationsList* = Call_OperationsList_563777(name: "operationsList",
     meth: HttpMethod.HttpGet, host: "management.azure.com",
     route: "/providers/Microsoft.Cache/operations",
-    validator: validate_OperationsList_567880, base: "", url: url_OperationsList_567881,
+    validator: validate_OperationsList_563778, base: "", url: url_OperationsList_563779,
     schemes: {Scheme.Https})
 type
-  Call_RedisList_568175 = ref object of OpenApiRestCall_567657
-proc url_RedisList_568177(protocol: Scheme; host: string; base: string; route: string;
+  Call_RedisList_564075 = ref object of OpenApiRestCall_563555
+proc url_RedisList_564077(protocol: Scheme; host: string; base: string; route: string;
                          path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -184,7 +188,7 @@ proc url_RedisList_568177(protocol: Scheme; host: string; base: string; route: s
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_RedisList_568176(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_RedisList_564076(path: JsonNode; query: JsonNode; header: JsonNode;
                               formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets all Redis caches in the specified subscription.
   ## 
@@ -196,11 +200,11 @@ proc validate_RedisList_568176(path: JsonNode; query: JsonNode; header: JsonNode
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_568192 = path.getOrDefault("subscriptionId")
-  valid_568192 = validateParameter(valid_568192, JString, required = true,
+  var valid_564092 = path.getOrDefault("subscriptionId")
+  valid_564092 = validateParameter(valid_564092, JString, required = true,
                                  default = nil)
-  if valid_568192 != nil:
-    section.add "subscriptionId", valid_568192
+  if valid_564092 != nil:
+    section.add "subscriptionId", valid_564092
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -208,11 +212,11 @@ proc validate_RedisList_568176(path: JsonNode; query: JsonNode; header: JsonNode
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568193 = query.getOrDefault("api-version")
-  valid_568193 = validateParameter(valid_568193, JString, required = true,
+  var valid_564093 = query.getOrDefault("api-version")
+  valid_564093 = validateParameter(valid_564093, JString, required = true,
                                  default = nil)
-  if valid_568193 != nil:
-    section.add "api-version", valid_568193
+  if valid_564093 != nil:
+    section.add "api-version", valid_564093
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -221,20 +225,20 @@ proc validate_RedisList_568176(path: JsonNode; query: JsonNode; header: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_568194: Call_RedisList_568175; path: JsonNode; query: JsonNode;
+proc call*(call_564094: Call_RedisList_564075; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets all Redis caches in the specified subscription.
   ## 
-  let valid = call_568194.validator(path, query, header, formData, body)
-  let scheme = call_568194.pickScheme
+  let valid = call_564094.validator(path, query, header, formData, body)
+  let scheme = call_564094.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568194.url(scheme.get, call_568194.host, call_568194.base,
-                         call_568194.route, valid.getOrDefault("path"),
+  let url = call_564094.url(scheme.get, call_564094.host, call_564094.base,
+                         call_564094.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568194, url, valid)
+  result = hook(call_564094, url, valid)
 
-proc call*(call_568195: Call_RedisList_568175; apiVersion: string;
+proc call*(call_564095: Call_RedisList_564075; apiVersion: string;
           subscriptionId: string): Recallable =
   ## redisList
   ## Gets all Redis caches in the specified subscription.
@@ -242,20 +246,20 @@ proc call*(call_568195: Call_RedisList_568175; apiVersion: string;
   ##             : Client Api Version.
   ##   subscriptionId: string (required)
   ##                 : Gets subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_568196 = newJObject()
-  var query_568197 = newJObject()
-  add(query_568197, "api-version", newJString(apiVersion))
-  add(path_568196, "subscriptionId", newJString(subscriptionId))
-  result = call_568195.call(path_568196, query_568197, nil, nil, nil)
+  var path_564096 = newJObject()
+  var query_564097 = newJObject()
+  add(query_564097, "api-version", newJString(apiVersion))
+  add(path_564096, "subscriptionId", newJString(subscriptionId))
+  result = call_564095.call(path_564096, query_564097, nil, nil, nil)
 
-var redisList* = Call_RedisList_568175(name: "redisList", meth: HttpMethod.HttpGet,
+var redisList* = Call_RedisList_564075(name: "redisList", meth: HttpMethod.HttpGet,
                                     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.Cache/Redis/",
-                                    validator: validate_RedisList_568176,
-                                    base: "", url: url_RedisList_568177,
+                                    validator: validate_RedisList_564076,
+                                    base: "", url: url_RedisList_564077,
                                     schemes: {Scheme.Https})
 type
-  Call_RedisListByResourceGroup_568198 = ref object of OpenApiRestCall_567657
-proc url_RedisListByResourceGroup_568200(protocol: Scheme; host: string;
+  Call_RedisListByResourceGroup_564098 = ref object of OpenApiRestCall_563555
+proc url_RedisListByResourceGroup_564100(protocol: Scheme; host: string;
                                         base: string; route: string; path: JsonNode;
                                         query: JsonNode): Uri =
   result.scheme = $protocol
@@ -276,30 +280,30 @@ proc url_RedisListByResourceGroup_568200(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_RedisListByResourceGroup_568199(path: JsonNode; query: JsonNode;
+proc validate_RedisListByResourceGroup_564099(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists all Redis caches in a resource group.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   subscriptionId: JString (required)
   ##                 : Gets subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568201 = path.getOrDefault("resourceGroupName")
-  valid_568201 = validateParameter(valid_568201, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564101 = path.getOrDefault("subscriptionId")
+  valid_564101 = validateParameter(valid_564101, JString, required = true,
                                  default = nil)
-  if valid_568201 != nil:
-    section.add "resourceGroupName", valid_568201
-  var valid_568202 = path.getOrDefault("subscriptionId")
-  valid_568202 = validateParameter(valid_568202, JString, required = true,
+  if valid_564101 != nil:
+    section.add "subscriptionId", valid_564101
+  var valid_564102 = path.getOrDefault("resourceGroupName")
+  valid_564102 = validateParameter(valid_564102, JString, required = true,
                                  default = nil)
-  if valid_568202 != nil:
-    section.add "subscriptionId", valid_568202
+  if valid_564102 != nil:
+    section.add "resourceGroupName", valid_564102
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -307,11 +311,11 @@ proc validate_RedisListByResourceGroup_568199(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568203 = query.getOrDefault("api-version")
-  valid_568203 = validateParameter(valid_568203, JString, required = true,
+  var valid_564103 = query.getOrDefault("api-version")
+  valid_564103 = validateParameter(valid_564103, JString, required = true,
                                  default = nil)
-  if valid_568203 != nil:
-    section.add "api-version", valid_568203
+  if valid_564103 != nil:
+    section.add "api-version", valid_564103
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -320,44 +324,44 @@ proc validate_RedisListByResourceGroup_568199(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568204: Call_RedisListByResourceGroup_568198; path: JsonNode;
+proc call*(call_564104: Call_RedisListByResourceGroup_564098; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Lists all Redis caches in a resource group.
   ## 
-  let valid = call_568204.validator(path, query, header, formData, body)
-  let scheme = call_568204.pickScheme
+  let valid = call_564104.validator(path, query, header, formData, body)
+  let scheme = call_564104.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568204.url(scheme.get, call_568204.host, call_568204.base,
-                         call_568204.route, valid.getOrDefault("path"),
+  let url = call_564104.url(scheme.get, call_564104.host, call_564104.base,
+                         call_564104.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568204, url, valid)
+  result = hook(call_564104, url, valid)
 
-proc call*(call_568205: Call_RedisListByResourceGroup_568198;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string): Recallable =
+proc call*(call_564105: Call_RedisListByResourceGroup_564098; apiVersion: string;
+          subscriptionId: string; resourceGroupName: string): Recallable =
   ## redisListByResourceGroup
   ## Lists all Redis caches in a resource group.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
   ##   subscriptionId: string (required)
   ##                 : Gets subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_568206 = newJObject()
-  var query_568207 = newJObject()
-  add(path_568206, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568207, "api-version", newJString(apiVersion))
-  add(path_568206, "subscriptionId", newJString(subscriptionId))
-  result = call_568205.call(path_568206, query_568207, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564106 = newJObject()
+  var query_564107 = newJObject()
+  add(query_564107, "api-version", newJString(apiVersion))
+  add(path_564106, "subscriptionId", newJString(subscriptionId))
+  add(path_564106, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564105.call(path_564106, query_564107, nil, nil, nil)
 
-var redisListByResourceGroup* = Call_RedisListByResourceGroup_568198(
+var redisListByResourceGroup* = Call_RedisListByResourceGroup_564098(
     name: "redisListByResourceGroup", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Cache/Redis/",
-    validator: validate_RedisListByResourceGroup_568199, base: "",
-    url: url_RedisListByResourceGroup_568200, schemes: {Scheme.Https})
+    validator: validate_RedisListByResourceGroup_564099, base: "",
+    url: url_RedisListByResourceGroup_564100, schemes: {Scheme.Https})
 type
-  Call_FirewallRulesListByRedisResource_568208 = ref object of OpenApiRestCall_567657
-proc url_FirewallRulesListByRedisResource_568210(protocol: Scheme; host: string;
+  Call_FirewallRulesListByRedisResource_564108 = ref object of OpenApiRestCall_563555
+proc url_FirewallRulesListByRedisResource_564110(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -380,37 +384,37 @@ proc url_FirewallRulesListByRedisResource_568210(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_FirewallRulesListByRedisResource_568209(path: JsonNode;
+proc validate_FirewallRulesListByRedisResource_564109(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets all firewall rules in the specified redis cache.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   subscriptionId: JString (required)
   ##                 : Gets subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   cacheName: JString (required)
   ##            : The name of the Redis cache.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568211 = path.getOrDefault("resourceGroupName")
-  valid_568211 = validateParameter(valid_568211, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564111 = path.getOrDefault("subscriptionId")
+  valid_564111 = validateParameter(valid_564111, JString, required = true,
                                  default = nil)
-  if valid_568211 != nil:
-    section.add "resourceGroupName", valid_568211
-  var valid_568212 = path.getOrDefault("subscriptionId")
-  valid_568212 = validateParameter(valid_568212, JString, required = true,
+  if valid_564111 != nil:
+    section.add "subscriptionId", valid_564111
+  var valid_564112 = path.getOrDefault("cacheName")
+  valid_564112 = validateParameter(valid_564112, JString, required = true,
                                  default = nil)
-  if valid_568212 != nil:
-    section.add "subscriptionId", valid_568212
-  var valid_568213 = path.getOrDefault("cacheName")
-  valid_568213 = validateParameter(valid_568213, JString, required = true,
+  if valid_564112 != nil:
+    section.add "cacheName", valid_564112
+  var valid_564113 = path.getOrDefault("resourceGroupName")
+  valid_564113 = validateParameter(valid_564113, JString, required = true,
                                  default = nil)
-  if valid_568213 != nil:
-    section.add "cacheName", valid_568213
+  if valid_564113 != nil:
+    section.add "resourceGroupName", valid_564113
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -418,11 +422,11 @@ proc validate_FirewallRulesListByRedisResource_568209(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568214 = query.getOrDefault("api-version")
-  valid_568214 = validateParameter(valid_568214, JString, required = true,
+  var valid_564114 = query.getOrDefault("api-version")
+  valid_564114 = validateParameter(valid_564114, JString, required = true,
                                  default = nil)
-  if valid_568214 != nil:
-    section.add "api-version", valid_568214
+  if valid_564114 != nil:
+    section.add "api-version", valid_564114
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -431,49 +435,49 @@ proc validate_FirewallRulesListByRedisResource_568209(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568215: Call_FirewallRulesListByRedisResource_568208;
+proc call*(call_564115: Call_FirewallRulesListByRedisResource_564108;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Gets all firewall rules in the specified redis cache.
   ## 
-  let valid = call_568215.validator(path, query, header, formData, body)
-  let scheme = call_568215.pickScheme
+  let valid = call_564115.validator(path, query, header, formData, body)
+  let scheme = call_564115.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568215.url(scheme.get, call_568215.host, call_568215.base,
-                         call_568215.route, valid.getOrDefault("path"),
+  let url = call_564115.url(scheme.get, call_564115.host, call_564115.base,
+                         call_564115.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568215, url, valid)
+  result = hook(call_564115, url, valid)
 
-proc call*(call_568216: Call_FirewallRulesListByRedisResource_568208;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          cacheName: string): Recallable =
+proc call*(call_564116: Call_FirewallRulesListByRedisResource_564108;
+          apiVersion: string; subscriptionId: string; cacheName: string;
+          resourceGroupName: string): Recallable =
   ## firewallRulesListByRedisResource
   ## Gets all firewall rules in the specified redis cache.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
   ##   subscriptionId: string (required)
   ##                 : Gets subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   cacheName: string (required)
   ##            : The name of the Redis cache.
-  var path_568217 = newJObject()
-  var query_568218 = newJObject()
-  add(path_568217, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568218, "api-version", newJString(apiVersion))
-  add(path_568217, "subscriptionId", newJString(subscriptionId))
-  add(path_568217, "cacheName", newJString(cacheName))
-  result = call_568216.call(path_568217, query_568218, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564117 = newJObject()
+  var query_564118 = newJObject()
+  add(query_564118, "api-version", newJString(apiVersion))
+  add(path_564117, "subscriptionId", newJString(subscriptionId))
+  add(path_564117, "cacheName", newJString(cacheName))
+  add(path_564117, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564116.call(path_564117, query_564118, nil, nil, nil)
 
-var firewallRulesListByRedisResource* = Call_FirewallRulesListByRedisResource_568208(
+var firewallRulesListByRedisResource* = Call_FirewallRulesListByRedisResource_564108(
     name: "firewallRulesListByRedisResource", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Cache/Redis/{cacheName}/firewallRules",
-    validator: validate_FirewallRulesListByRedisResource_568209, base: "",
-    url: url_FirewallRulesListByRedisResource_568210, schemes: {Scheme.Https})
+    validator: validate_FirewallRulesListByRedisResource_564109, base: "",
+    url: url_FirewallRulesListByRedisResource_564110, schemes: {Scheme.Https})
 type
-  Call_FirewallRulesCreateOrUpdate_568231 = ref object of OpenApiRestCall_567657
-proc url_FirewallRulesCreateOrUpdate_568233(protocol: Scheme; host: string;
+  Call_FirewallRulesCreateOrUpdate_564131 = ref object of OpenApiRestCall_563555
+proc url_FirewallRulesCreateOrUpdate_564133(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -498,44 +502,44 @@ proc url_FirewallRulesCreateOrUpdate_568233(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_FirewallRulesCreateOrUpdate_568232(path: JsonNode; query: JsonNode;
+proc validate_FirewallRulesCreateOrUpdate_564132(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Create or update a redis cache firewall rule
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
-  ##   ruleName: JString (required)
-  ##           : The name of the firewall rule.
   ##   subscriptionId: JString (required)
   ##                 : Gets subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   cacheName: JString (required)
   ##            : The name of the Redis cache.
+  ##   ruleName: JString (required)
+  ##           : The name of the firewall rule.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568251 = path.getOrDefault("resourceGroupName")
-  valid_568251 = validateParameter(valid_568251, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564151 = path.getOrDefault("subscriptionId")
+  valid_564151 = validateParameter(valid_564151, JString, required = true,
                                  default = nil)
-  if valid_568251 != nil:
-    section.add "resourceGroupName", valid_568251
-  var valid_568252 = path.getOrDefault("ruleName")
-  valid_568252 = validateParameter(valid_568252, JString, required = true,
+  if valid_564151 != nil:
+    section.add "subscriptionId", valid_564151
+  var valid_564152 = path.getOrDefault("cacheName")
+  valid_564152 = validateParameter(valid_564152, JString, required = true,
                                  default = nil)
-  if valid_568252 != nil:
-    section.add "ruleName", valid_568252
-  var valid_568253 = path.getOrDefault("subscriptionId")
-  valid_568253 = validateParameter(valid_568253, JString, required = true,
+  if valid_564152 != nil:
+    section.add "cacheName", valid_564152
+  var valid_564153 = path.getOrDefault("ruleName")
+  valid_564153 = validateParameter(valid_564153, JString, required = true,
                                  default = nil)
-  if valid_568253 != nil:
-    section.add "subscriptionId", valid_568253
-  var valid_568254 = path.getOrDefault("cacheName")
-  valid_568254 = validateParameter(valid_568254, JString, required = true,
+  if valid_564153 != nil:
+    section.add "ruleName", valid_564153
+  var valid_564154 = path.getOrDefault("resourceGroupName")
+  valid_564154 = validateParameter(valid_564154, JString, required = true,
                                  default = nil)
-  if valid_568254 != nil:
-    section.add "cacheName", valid_568254
+  if valid_564154 != nil:
+    section.add "resourceGroupName", valid_564154
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -543,11 +547,11 @@ proc validate_FirewallRulesCreateOrUpdate_568232(path: JsonNode; query: JsonNode
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568255 = query.getOrDefault("api-version")
-  valid_568255 = validateParameter(valid_568255, JString, required = true,
+  var valid_564155 = query.getOrDefault("api-version")
+  valid_564155 = validateParameter(valid_564155, JString, required = true,
                                  default = nil)
-  if valid_568255 != nil:
-    section.add "api-version", valid_568255
+  if valid_564155 != nil:
+    section.add "api-version", valid_564155
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -561,56 +565,56 @@ proc validate_FirewallRulesCreateOrUpdate_568232(path: JsonNode; query: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_568257: Call_FirewallRulesCreateOrUpdate_568231; path: JsonNode;
+proc call*(call_564157: Call_FirewallRulesCreateOrUpdate_564131; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Create or update a redis cache firewall rule
   ## 
-  let valid = call_568257.validator(path, query, header, formData, body)
-  let scheme = call_568257.pickScheme
+  let valid = call_564157.validator(path, query, header, formData, body)
+  let scheme = call_564157.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568257.url(scheme.get, call_568257.host, call_568257.base,
-                         call_568257.route, valid.getOrDefault("path"),
+  let url = call_564157.url(scheme.get, call_564157.host, call_564157.base,
+                         call_564157.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568257, url, valid)
+  result = hook(call_564157, url, valid)
 
-proc call*(call_568258: Call_FirewallRulesCreateOrUpdate_568231;
-          resourceGroupName: string; apiVersion: string; ruleName: string;
-          subscriptionId: string; parameters: JsonNode; cacheName: string): Recallable =
+proc call*(call_564158: Call_FirewallRulesCreateOrUpdate_564131;
+          apiVersion: string; subscriptionId: string; cacheName: string;
+          ruleName: string; resourceGroupName: string; parameters: JsonNode): Recallable =
   ## firewallRulesCreateOrUpdate
   ## Create or update a redis cache firewall rule
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
-  ##   ruleName: string (required)
-  ##           : The name of the firewall rule.
   ##   subscriptionId: string (required)
   ##                 : Gets subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   parameters: JObject (required)
-  ##             : Parameters supplied to the create or update redis firewall rule operation.
   ##   cacheName: string (required)
   ##            : The name of the Redis cache.
-  var path_568259 = newJObject()
-  var query_568260 = newJObject()
-  var body_568261 = newJObject()
-  add(path_568259, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568260, "api-version", newJString(apiVersion))
-  add(path_568259, "ruleName", newJString(ruleName))
-  add(path_568259, "subscriptionId", newJString(subscriptionId))
+  ##   ruleName: string (required)
+  ##           : The name of the firewall rule.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  ##   parameters: JObject (required)
+  ##             : Parameters supplied to the create or update redis firewall rule operation.
+  var path_564159 = newJObject()
+  var query_564160 = newJObject()
+  var body_564161 = newJObject()
+  add(query_564160, "api-version", newJString(apiVersion))
+  add(path_564159, "subscriptionId", newJString(subscriptionId))
+  add(path_564159, "cacheName", newJString(cacheName))
+  add(path_564159, "ruleName", newJString(ruleName))
+  add(path_564159, "resourceGroupName", newJString(resourceGroupName))
   if parameters != nil:
-    body_568261 = parameters
-  add(path_568259, "cacheName", newJString(cacheName))
-  result = call_568258.call(path_568259, query_568260, nil, nil, body_568261)
+    body_564161 = parameters
+  result = call_564158.call(path_564159, query_564160, nil, nil, body_564161)
 
-var firewallRulesCreateOrUpdate* = Call_FirewallRulesCreateOrUpdate_568231(
+var firewallRulesCreateOrUpdate* = Call_FirewallRulesCreateOrUpdate_564131(
     name: "firewallRulesCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Cache/Redis/{cacheName}/firewallRules/{ruleName}",
-    validator: validate_FirewallRulesCreateOrUpdate_568232, base: "",
-    url: url_FirewallRulesCreateOrUpdate_568233, schemes: {Scheme.Https})
+    validator: validate_FirewallRulesCreateOrUpdate_564132, base: "",
+    url: url_FirewallRulesCreateOrUpdate_564133, schemes: {Scheme.Https})
 type
-  Call_FirewallRulesGet_568219 = ref object of OpenApiRestCall_567657
-proc url_FirewallRulesGet_568221(protocol: Scheme; host: string; base: string;
+  Call_FirewallRulesGet_564119 = ref object of OpenApiRestCall_563555
+proc url_FirewallRulesGet_564121(protocol: Scheme; host: string; base: string;
                                 route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -635,7 +639,7 @@ proc url_FirewallRulesGet_568221(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_FirewallRulesGet_568220(path: JsonNode; query: JsonNode;
+proc validate_FirewallRulesGet_564120(path: JsonNode; query: JsonNode;
                                      header: JsonNode; formData: JsonNode;
                                      body: JsonNode): JsonNode =
   ## Gets a single firewall rule in a specified redis cache.
@@ -643,37 +647,37 @@ proc validate_FirewallRulesGet_568220(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
-  ##   ruleName: JString (required)
-  ##           : The name of the firewall rule.
   ##   subscriptionId: JString (required)
   ##                 : Gets subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   cacheName: JString (required)
   ##            : The name of the Redis cache.
+  ##   ruleName: JString (required)
+  ##           : The name of the firewall rule.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568222 = path.getOrDefault("resourceGroupName")
-  valid_568222 = validateParameter(valid_568222, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564122 = path.getOrDefault("subscriptionId")
+  valid_564122 = validateParameter(valid_564122, JString, required = true,
                                  default = nil)
-  if valid_568222 != nil:
-    section.add "resourceGroupName", valid_568222
-  var valid_568223 = path.getOrDefault("ruleName")
-  valid_568223 = validateParameter(valid_568223, JString, required = true,
+  if valid_564122 != nil:
+    section.add "subscriptionId", valid_564122
+  var valid_564123 = path.getOrDefault("cacheName")
+  valid_564123 = validateParameter(valid_564123, JString, required = true,
                                  default = nil)
-  if valid_568223 != nil:
-    section.add "ruleName", valid_568223
-  var valid_568224 = path.getOrDefault("subscriptionId")
-  valid_568224 = validateParameter(valid_568224, JString, required = true,
+  if valid_564123 != nil:
+    section.add "cacheName", valid_564123
+  var valid_564124 = path.getOrDefault("ruleName")
+  valid_564124 = validateParameter(valid_564124, JString, required = true,
                                  default = nil)
-  if valid_568224 != nil:
-    section.add "subscriptionId", valid_568224
-  var valid_568225 = path.getOrDefault("cacheName")
-  valid_568225 = validateParameter(valid_568225, JString, required = true,
+  if valid_564124 != nil:
+    section.add "ruleName", valid_564124
+  var valid_564125 = path.getOrDefault("resourceGroupName")
+  valid_564125 = validateParameter(valid_564125, JString, required = true,
                                  default = nil)
-  if valid_568225 != nil:
-    section.add "cacheName", valid_568225
+  if valid_564125 != nil:
+    section.add "resourceGroupName", valid_564125
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -681,11 +685,11 @@ proc validate_FirewallRulesGet_568220(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568226 = query.getOrDefault("api-version")
-  valid_568226 = validateParameter(valid_568226, JString, required = true,
+  var valid_564126 = query.getOrDefault("api-version")
+  valid_564126 = validateParameter(valid_564126, JString, required = true,
                                  default = nil)
-  if valid_568226 != nil:
-    section.add "api-version", valid_568226
+  if valid_564126 != nil:
+    section.add "api-version", valid_564126
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -694,50 +698,50 @@ proc validate_FirewallRulesGet_568220(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568227: Call_FirewallRulesGet_568219; path: JsonNode;
+proc call*(call_564127: Call_FirewallRulesGet_564119; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets a single firewall rule in a specified redis cache.
   ## 
-  let valid = call_568227.validator(path, query, header, formData, body)
-  let scheme = call_568227.pickScheme
+  let valid = call_564127.validator(path, query, header, formData, body)
+  let scheme = call_564127.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568227.url(scheme.get, call_568227.host, call_568227.base,
-                         call_568227.route, valid.getOrDefault("path"),
+  let url = call_564127.url(scheme.get, call_564127.host, call_564127.base,
+                         call_564127.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568227, url, valid)
+  result = hook(call_564127, url, valid)
 
-proc call*(call_568228: Call_FirewallRulesGet_568219; resourceGroupName: string;
-          apiVersion: string; ruleName: string; subscriptionId: string;
-          cacheName: string): Recallable =
+proc call*(call_564128: Call_FirewallRulesGet_564119; apiVersion: string;
+          subscriptionId: string; cacheName: string; ruleName: string;
+          resourceGroupName: string): Recallable =
   ## firewallRulesGet
   ## Gets a single firewall rule in a specified redis cache.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
-  ##   ruleName: string (required)
-  ##           : The name of the firewall rule.
   ##   subscriptionId: string (required)
   ##                 : Gets subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   cacheName: string (required)
   ##            : The name of the Redis cache.
-  var path_568229 = newJObject()
-  var query_568230 = newJObject()
-  add(path_568229, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568230, "api-version", newJString(apiVersion))
-  add(path_568229, "ruleName", newJString(ruleName))
-  add(path_568229, "subscriptionId", newJString(subscriptionId))
-  add(path_568229, "cacheName", newJString(cacheName))
-  result = call_568228.call(path_568229, query_568230, nil, nil, nil)
+  ##   ruleName: string (required)
+  ##           : The name of the firewall rule.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564129 = newJObject()
+  var query_564130 = newJObject()
+  add(query_564130, "api-version", newJString(apiVersion))
+  add(path_564129, "subscriptionId", newJString(subscriptionId))
+  add(path_564129, "cacheName", newJString(cacheName))
+  add(path_564129, "ruleName", newJString(ruleName))
+  add(path_564129, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564128.call(path_564129, query_564130, nil, nil, nil)
 
-var firewallRulesGet* = Call_FirewallRulesGet_568219(name: "firewallRulesGet",
+var firewallRulesGet* = Call_FirewallRulesGet_564119(name: "firewallRulesGet",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Cache/Redis/{cacheName}/firewallRules/{ruleName}",
-    validator: validate_FirewallRulesGet_568220, base: "",
-    url: url_FirewallRulesGet_568221, schemes: {Scheme.Https})
+    validator: validate_FirewallRulesGet_564120, base: "",
+    url: url_FirewallRulesGet_564121, schemes: {Scheme.Https})
 type
-  Call_FirewallRulesDelete_568262 = ref object of OpenApiRestCall_567657
-proc url_FirewallRulesDelete_568264(protocol: Scheme; host: string; base: string;
+  Call_FirewallRulesDelete_564162 = ref object of OpenApiRestCall_563555
+proc url_FirewallRulesDelete_564164(protocol: Scheme; host: string; base: string;
                                    route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -762,7 +766,7 @@ proc url_FirewallRulesDelete_568264(protocol: Scheme; host: string; base: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_FirewallRulesDelete_568263(path: JsonNode; query: JsonNode;
+proc validate_FirewallRulesDelete_564163(path: JsonNode; query: JsonNode;
                                         header: JsonNode; formData: JsonNode;
                                         body: JsonNode): JsonNode =
   ## Deletes a single firewall rule in a specified redis cache.
@@ -770,37 +774,37 @@ proc validate_FirewallRulesDelete_568263(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
-  ##   ruleName: JString (required)
-  ##           : The name of the firewall rule.
   ##   subscriptionId: JString (required)
   ##                 : Gets subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   cacheName: JString (required)
   ##            : The name of the Redis cache.
+  ##   ruleName: JString (required)
+  ##           : The name of the firewall rule.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568265 = path.getOrDefault("resourceGroupName")
-  valid_568265 = validateParameter(valid_568265, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564165 = path.getOrDefault("subscriptionId")
+  valid_564165 = validateParameter(valid_564165, JString, required = true,
                                  default = nil)
-  if valid_568265 != nil:
-    section.add "resourceGroupName", valid_568265
-  var valid_568266 = path.getOrDefault("ruleName")
-  valid_568266 = validateParameter(valid_568266, JString, required = true,
+  if valid_564165 != nil:
+    section.add "subscriptionId", valid_564165
+  var valid_564166 = path.getOrDefault("cacheName")
+  valid_564166 = validateParameter(valid_564166, JString, required = true,
                                  default = nil)
-  if valid_568266 != nil:
-    section.add "ruleName", valid_568266
-  var valid_568267 = path.getOrDefault("subscriptionId")
-  valid_568267 = validateParameter(valid_568267, JString, required = true,
+  if valid_564166 != nil:
+    section.add "cacheName", valid_564166
+  var valid_564167 = path.getOrDefault("ruleName")
+  valid_564167 = validateParameter(valid_564167, JString, required = true,
                                  default = nil)
-  if valid_568267 != nil:
-    section.add "subscriptionId", valid_568267
-  var valid_568268 = path.getOrDefault("cacheName")
-  valid_568268 = validateParameter(valid_568268, JString, required = true,
+  if valid_564167 != nil:
+    section.add "ruleName", valid_564167
+  var valid_564168 = path.getOrDefault("resourceGroupName")
+  valid_564168 = validateParameter(valid_564168, JString, required = true,
                                  default = nil)
-  if valid_568268 != nil:
-    section.add "cacheName", valid_568268
+  if valid_564168 != nil:
+    section.add "resourceGroupName", valid_564168
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -808,11 +812,11 @@ proc validate_FirewallRulesDelete_568263(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568269 = query.getOrDefault("api-version")
-  valid_568269 = validateParameter(valid_568269, JString, required = true,
+  var valid_564169 = query.getOrDefault("api-version")
+  valid_564169 = validateParameter(valid_564169, JString, required = true,
                                  default = nil)
-  if valid_568269 != nil:
-    section.add "api-version", valid_568269
+  if valid_564169 != nil:
+    section.add "api-version", valid_564169
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -821,51 +825,51 @@ proc validate_FirewallRulesDelete_568263(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568270: Call_FirewallRulesDelete_568262; path: JsonNode;
+proc call*(call_564170: Call_FirewallRulesDelete_564162; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes a single firewall rule in a specified redis cache.
   ## 
-  let valid = call_568270.validator(path, query, header, formData, body)
-  let scheme = call_568270.pickScheme
+  let valid = call_564170.validator(path, query, header, formData, body)
+  let scheme = call_564170.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568270.url(scheme.get, call_568270.host, call_568270.base,
-                         call_568270.route, valid.getOrDefault("path"),
+  let url = call_564170.url(scheme.get, call_564170.host, call_564170.base,
+                         call_564170.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568270, url, valid)
+  result = hook(call_564170, url, valid)
 
-proc call*(call_568271: Call_FirewallRulesDelete_568262; resourceGroupName: string;
-          apiVersion: string; ruleName: string; subscriptionId: string;
-          cacheName: string): Recallable =
+proc call*(call_564171: Call_FirewallRulesDelete_564162; apiVersion: string;
+          subscriptionId: string; cacheName: string; ruleName: string;
+          resourceGroupName: string): Recallable =
   ## firewallRulesDelete
   ## Deletes a single firewall rule in a specified redis cache.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
-  ##   ruleName: string (required)
-  ##           : The name of the firewall rule.
   ##   subscriptionId: string (required)
   ##                 : Gets subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   cacheName: string (required)
   ##            : The name of the Redis cache.
-  var path_568272 = newJObject()
-  var query_568273 = newJObject()
-  add(path_568272, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568273, "api-version", newJString(apiVersion))
-  add(path_568272, "ruleName", newJString(ruleName))
-  add(path_568272, "subscriptionId", newJString(subscriptionId))
-  add(path_568272, "cacheName", newJString(cacheName))
-  result = call_568271.call(path_568272, query_568273, nil, nil, nil)
+  ##   ruleName: string (required)
+  ##           : The name of the firewall rule.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564172 = newJObject()
+  var query_564173 = newJObject()
+  add(query_564173, "api-version", newJString(apiVersion))
+  add(path_564172, "subscriptionId", newJString(subscriptionId))
+  add(path_564172, "cacheName", newJString(cacheName))
+  add(path_564172, "ruleName", newJString(ruleName))
+  add(path_564172, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564171.call(path_564172, query_564173, nil, nil, nil)
 
-var firewallRulesDelete* = Call_FirewallRulesDelete_568262(
+var firewallRulesDelete* = Call_FirewallRulesDelete_564162(
     name: "firewallRulesDelete", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Cache/Redis/{cacheName}/firewallRules/{ruleName}",
-    validator: validate_FirewallRulesDelete_568263, base: "",
-    url: url_FirewallRulesDelete_568264, schemes: {Scheme.Https})
+    validator: validate_FirewallRulesDelete_564163, base: "",
+    url: url_FirewallRulesDelete_564164, schemes: {Scheme.Https})
 type
-  Call_RedisCreate_568285 = ref object of OpenApiRestCall_567657
-proc url_RedisCreate_568287(protocol: Scheme; host: string; base: string;
+  Call_RedisCreate_564185 = ref object of OpenApiRestCall_563555
+proc url_RedisCreate_564187(protocol: Scheme; host: string; base: string;
                            route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -887,37 +891,36 @@ proc url_RedisCreate_568287(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_RedisCreate_568286(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_RedisCreate_564186(path: JsonNode; query: JsonNode; header: JsonNode;
                                 formData: JsonNode; body: JsonNode): JsonNode =
   ## Create or replace (overwrite/recreate, with potential downtime) an existing Redis cache.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   name: JString (required)
   ##       : The name of the Redis cache.
   ##   subscriptionId: JString (required)
   ##                 : Gets subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568288 = path.getOrDefault("resourceGroupName")
-  valid_568288 = validateParameter(valid_568288, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `name` field"
+  var valid_564188 = path.getOrDefault("name")
+  valid_564188 = validateParameter(valid_564188, JString, required = true,
                                  default = nil)
-  if valid_568288 != nil:
-    section.add "resourceGroupName", valid_568288
-  var valid_568289 = path.getOrDefault("name")
-  valid_568289 = validateParameter(valid_568289, JString, required = true,
+  if valid_564188 != nil:
+    section.add "name", valid_564188
+  var valid_564189 = path.getOrDefault("subscriptionId")
+  valid_564189 = validateParameter(valid_564189, JString, required = true,
                                  default = nil)
-  if valid_568289 != nil:
-    section.add "name", valid_568289
-  var valid_568290 = path.getOrDefault("subscriptionId")
-  valid_568290 = validateParameter(valid_568290, JString, required = true,
+  if valid_564189 != nil:
+    section.add "subscriptionId", valid_564189
+  var valid_564190 = path.getOrDefault("resourceGroupName")
+  valid_564190 = validateParameter(valid_564190, JString, required = true,
                                  default = nil)
-  if valid_568290 != nil:
-    section.add "subscriptionId", valid_568290
+  if valid_564190 != nil:
+    section.add "resourceGroupName", valid_564190
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -925,11 +928,11 @@ proc validate_RedisCreate_568286(path: JsonNode; query: JsonNode; header: JsonNo
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568291 = query.getOrDefault("api-version")
-  valid_568291 = validateParameter(valid_568291, JString, required = true,
+  var valid_564191 = query.getOrDefault("api-version")
+  valid_564191 = validateParameter(valid_564191, JString, required = true,
                                  default = nil)
-  if valid_568291 != nil:
-    section.add "api-version", valid_568291
+  if valid_564191 != nil:
+    section.add "api-version", valid_564191
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -943,54 +946,53 @@ proc validate_RedisCreate_568286(path: JsonNode; query: JsonNode; header: JsonNo
   if body != nil:
     result.add "body", body
 
-proc call*(call_568293: Call_RedisCreate_568285; path: JsonNode; query: JsonNode;
+proc call*(call_564193: Call_RedisCreate_564185; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Create or replace (overwrite/recreate, with potential downtime) an existing Redis cache.
   ## 
-  let valid = call_568293.validator(path, query, header, formData, body)
-  let scheme = call_568293.pickScheme
+  let valid = call_564193.validator(path, query, header, formData, body)
+  let scheme = call_564193.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568293.url(scheme.get, call_568293.host, call_568293.base,
-                         call_568293.route, valid.getOrDefault("path"),
+  let url = call_564193.url(scheme.get, call_564193.host, call_564193.base,
+                         call_564193.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568293, url, valid)
+  result = hook(call_564193, url, valid)
 
-proc call*(call_568294: Call_RedisCreate_568285; resourceGroupName: string;
-          apiVersion: string; name: string; subscriptionId: string;
-          parameters: JsonNode): Recallable =
+proc call*(call_564194: Call_RedisCreate_564185; apiVersion: string; name: string;
+          subscriptionId: string; resourceGroupName: string; parameters: JsonNode): Recallable =
   ## redisCreate
   ## Create or replace (overwrite/recreate, with potential downtime) an existing Redis cache.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
   ##   name: string (required)
   ##       : The name of the Redis cache.
   ##   subscriptionId: string (required)
   ##                 : Gets subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   parameters: JObject (required)
   ##             : Parameters supplied to the Create Redis operation.
-  var path_568295 = newJObject()
-  var query_568296 = newJObject()
-  var body_568297 = newJObject()
-  add(path_568295, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568296, "api-version", newJString(apiVersion))
-  add(path_568295, "name", newJString(name))
-  add(path_568295, "subscriptionId", newJString(subscriptionId))
+  var path_564195 = newJObject()
+  var query_564196 = newJObject()
+  var body_564197 = newJObject()
+  add(query_564196, "api-version", newJString(apiVersion))
+  add(path_564195, "name", newJString(name))
+  add(path_564195, "subscriptionId", newJString(subscriptionId))
+  add(path_564195, "resourceGroupName", newJString(resourceGroupName))
   if parameters != nil:
-    body_568297 = parameters
-  result = call_568294.call(path_568295, query_568296, nil, nil, body_568297)
+    body_564197 = parameters
+  result = call_564194.call(path_564195, query_564196, nil, nil, body_564197)
 
-var redisCreate* = Call_RedisCreate_568285(name: "redisCreate",
+var redisCreate* = Call_RedisCreate_564185(name: "redisCreate",
                                         meth: HttpMethod.HttpPut,
                                         host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Cache/Redis/{name}",
-                                        validator: validate_RedisCreate_568286,
-                                        base: "", url: url_RedisCreate_568287,
+                                        validator: validate_RedisCreate_564186,
+                                        base: "", url: url_RedisCreate_564187,
                                         schemes: {Scheme.Https})
 type
-  Call_RedisGet_568274 = ref object of OpenApiRestCall_567657
-proc url_RedisGet_568276(protocol: Scheme; host: string; base: string; route: string;
+  Call_RedisGet_564174 = ref object of OpenApiRestCall_563555
+proc url_RedisGet_564176(protocol: Scheme; host: string; base: string; route: string;
                         path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1012,37 +1014,36 @@ proc url_RedisGet_568276(protocol: Scheme; host: string; base: string; route: st
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_RedisGet_568275(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_RedisGet_564175(path: JsonNode; query: JsonNode; header: JsonNode;
                              formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets a Redis cache (resource description).
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   name: JString (required)
   ##       : The name of the Redis cache.
   ##   subscriptionId: JString (required)
   ##                 : Gets subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568277 = path.getOrDefault("resourceGroupName")
-  valid_568277 = validateParameter(valid_568277, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `name` field"
+  var valid_564177 = path.getOrDefault("name")
+  valid_564177 = validateParameter(valid_564177, JString, required = true,
                                  default = nil)
-  if valid_568277 != nil:
-    section.add "resourceGroupName", valid_568277
-  var valid_568278 = path.getOrDefault("name")
-  valid_568278 = validateParameter(valid_568278, JString, required = true,
+  if valid_564177 != nil:
+    section.add "name", valid_564177
+  var valid_564178 = path.getOrDefault("subscriptionId")
+  valid_564178 = validateParameter(valid_564178, JString, required = true,
                                  default = nil)
-  if valid_568278 != nil:
-    section.add "name", valid_568278
-  var valid_568279 = path.getOrDefault("subscriptionId")
-  valid_568279 = validateParameter(valid_568279, JString, required = true,
+  if valid_564178 != nil:
+    section.add "subscriptionId", valid_564178
+  var valid_564179 = path.getOrDefault("resourceGroupName")
+  valid_564179 = validateParameter(valid_564179, JString, required = true,
                                  default = nil)
-  if valid_568279 != nil:
-    section.add "subscriptionId", valid_568279
+  if valid_564179 != nil:
+    section.add "resourceGroupName", valid_564179
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1050,11 +1051,11 @@ proc validate_RedisGet_568275(path: JsonNode; query: JsonNode; header: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568280 = query.getOrDefault("api-version")
-  valid_568280 = validateParameter(valid_568280, JString, required = true,
+  var valid_564180 = query.getOrDefault("api-version")
+  valid_564180 = validateParameter(valid_564180, JString, required = true,
                                  default = nil)
-  if valid_568280 != nil:
-    section.add "api-version", valid_568280
+  if valid_564180 != nil:
+    section.add "api-version", valid_564180
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1063,47 +1064,47 @@ proc validate_RedisGet_568275(path: JsonNode; query: JsonNode; header: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568281: Call_RedisGet_568274; path: JsonNode; query: JsonNode;
+proc call*(call_564181: Call_RedisGet_564174; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets a Redis cache (resource description).
   ## 
-  let valid = call_568281.validator(path, query, header, formData, body)
-  let scheme = call_568281.pickScheme
+  let valid = call_564181.validator(path, query, header, formData, body)
+  let scheme = call_564181.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568281.url(scheme.get, call_568281.host, call_568281.base,
-                         call_568281.route, valid.getOrDefault("path"),
+  let url = call_564181.url(scheme.get, call_564181.host, call_564181.base,
+                         call_564181.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568281, url, valid)
+  result = hook(call_564181, url, valid)
 
-proc call*(call_568282: Call_RedisGet_568274; resourceGroupName: string;
-          apiVersion: string; name: string; subscriptionId: string): Recallable =
+proc call*(call_564182: Call_RedisGet_564174; apiVersion: string; name: string;
+          subscriptionId: string; resourceGroupName: string): Recallable =
   ## redisGet
   ## Gets a Redis cache (resource description).
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
   ##   name: string (required)
   ##       : The name of the Redis cache.
   ##   subscriptionId: string (required)
   ##                 : Gets subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_568283 = newJObject()
-  var query_568284 = newJObject()
-  add(path_568283, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568284, "api-version", newJString(apiVersion))
-  add(path_568283, "name", newJString(name))
-  add(path_568283, "subscriptionId", newJString(subscriptionId))
-  result = call_568282.call(path_568283, query_568284, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564183 = newJObject()
+  var query_564184 = newJObject()
+  add(query_564184, "api-version", newJString(apiVersion))
+  add(path_564183, "name", newJString(name))
+  add(path_564183, "subscriptionId", newJString(subscriptionId))
+  add(path_564183, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564182.call(path_564183, query_564184, nil, nil, nil)
 
-var redisGet* = Call_RedisGet_568274(name: "redisGet", meth: HttpMethod.HttpGet,
+var redisGet* = Call_RedisGet_564174(name: "redisGet", meth: HttpMethod.HttpGet,
                                   host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Cache/Redis/{name}",
-                                  validator: validate_RedisGet_568275, base: "",
-                                  url: url_RedisGet_568276,
+                                  validator: validate_RedisGet_564175, base: "",
+                                  url: url_RedisGet_564176,
                                   schemes: {Scheme.Https})
 type
-  Call_RedisUpdate_568309 = ref object of OpenApiRestCall_567657
-proc url_RedisUpdate_568311(protocol: Scheme; host: string; base: string;
+  Call_RedisUpdate_564209 = ref object of OpenApiRestCall_563555
+proc url_RedisUpdate_564211(protocol: Scheme; host: string; base: string;
                            route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1125,37 +1126,36 @@ proc url_RedisUpdate_568311(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_RedisUpdate_568310(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_RedisUpdate_564210(path: JsonNode; query: JsonNode; header: JsonNode;
                                 formData: JsonNode; body: JsonNode): JsonNode =
   ## Update an existing Redis cache.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   name: JString (required)
   ##       : The name of the Redis cache.
   ##   subscriptionId: JString (required)
   ##                 : Gets subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568312 = path.getOrDefault("resourceGroupName")
-  valid_568312 = validateParameter(valid_568312, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `name` field"
+  var valid_564212 = path.getOrDefault("name")
+  valid_564212 = validateParameter(valid_564212, JString, required = true,
                                  default = nil)
-  if valid_568312 != nil:
-    section.add "resourceGroupName", valid_568312
-  var valid_568313 = path.getOrDefault("name")
-  valid_568313 = validateParameter(valid_568313, JString, required = true,
+  if valid_564212 != nil:
+    section.add "name", valid_564212
+  var valid_564213 = path.getOrDefault("subscriptionId")
+  valid_564213 = validateParameter(valid_564213, JString, required = true,
                                  default = nil)
-  if valid_568313 != nil:
-    section.add "name", valid_568313
-  var valid_568314 = path.getOrDefault("subscriptionId")
-  valid_568314 = validateParameter(valid_568314, JString, required = true,
+  if valid_564213 != nil:
+    section.add "subscriptionId", valid_564213
+  var valid_564214 = path.getOrDefault("resourceGroupName")
+  valid_564214 = validateParameter(valid_564214, JString, required = true,
                                  default = nil)
-  if valid_568314 != nil:
-    section.add "subscriptionId", valid_568314
+  if valid_564214 != nil:
+    section.add "resourceGroupName", valid_564214
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1163,11 +1163,11 @@ proc validate_RedisUpdate_568310(path: JsonNode; query: JsonNode; header: JsonNo
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568315 = query.getOrDefault("api-version")
-  valid_568315 = validateParameter(valid_568315, JString, required = true,
+  var valid_564215 = query.getOrDefault("api-version")
+  valid_564215 = validateParameter(valid_564215, JString, required = true,
                                  default = nil)
-  if valid_568315 != nil:
-    section.add "api-version", valid_568315
+  if valid_564215 != nil:
+    section.add "api-version", valid_564215
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1181,54 +1181,53 @@ proc validate_RedisUpdate_568310(path: JsonNode; query: JsonNode; header: JsonNo
   if body != nil:
     result.add "body", body
 
-proc call*(call_568317: Call_RedisUpdate_568309; path: JsonNode; query: JsonNode;
+proc call*(call_564217: Call_RedisUpdate_564209; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Update an existing Redis cache.
   ## 
-  let valid = call_568317.validator(path, query, header, formData, body)
-  let scheme = call_568317.pickScheme
+  let valid = call_564217.validator(path, query, header, formData, body)
+  let scheme = call_564217.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568317.url(scheme.get, call_568317.host, call_568317.base,
-                         call_568317.route, valid.getOrDefault("path"),
+  let url = call_564217.url(scheme.get, call_564217.host, call_564217.base,
+                         call_564217.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568317, url, valid)
+  result = hook(call_564217, url, valid)
 
-proc call*(call_568318: Call_RedisUpdate_568309; resourceGroupName: string;
-          apiVersion: string; name: string; subscriptionId: string;
-          parameters: JsonNode): Recallable =
+proc call*(call_564218: Call_RedisUpdate_564209; apiVersion: string; name: string;
+          subscriptionId: string; resourceGroupName: string; parameters: JsonNode): Recallable =
   ## redisUpdate
   ## Update an existing Redis cache.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
   ##   name: string (required)
   ##       : The name of the Redis cache.
   ##   subscriptionId: string (required)
   ##                 : Gets subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   parameters: JObject (required)
   ##             : Parameters supplied to the Update Redis operation.
-  var path_568319 = newJObject()
-  var query_568320 = newJObject()
-  var body_568321 = newJObject()
-  add(path_568319, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568320, "api-version", newJString(apiVersion))
-  add(path_568319, "name", newJString(name))
-  add(path_568319, "subscriptionId", newJString(subscriptionId))
+  var path_564219 = newJObject()
+  var query_564220 = newJObject()
+  var body_564221 = newJObject()
+  add(query_564220, "api-version", newJString(apiVersion))
+  add(path_564219, "name", newJString(name))
+  add(path_564219, "subscriptionId", newJString(subscriptionId))
+  add(path_564219, "resourceGroupName", newJString(resourceGroupName))
   if parameters != nil:
-    body_568321 = parameters
-  result = call_568318.call(path_568319, query_568320, nil, nil, body_568321)
+    body_564221 = parameters
+  result = call_564218.call(path_564219, query_564220, nil, nil, body_564221)
 
-var redisUpdate* = Call_RedisUpdate_568309(name: "redisUpdate",
+var redisUpdate* = Call_RedisUpdate_564209(name: "redisUpdate",
                                         meth: HttpMethod.HttpPatch,
                                         host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Cache/Redis/{name}",
-                                        validator: validate_RedisUpdate_568310,
-                                        base: "", url: url_RedisUpdate_568311,
+                                        validator: validate_RedisUpdate_564210,
+                                        base: "", url: url_RedisUpdate_564211,
                                         schemes: {Scheme.Https})
 type
-  Call_RedisDelete_568298 = ref object of OpenApiRestCall_567657
-proc url_RedisDelete_568300(protocol: Scheme; host: string; base: string;
+  Call_RedisDelete_564198 = ref object of OpenApiRestCall_563555
+proc url_RedisDelete_564200(protocol: Scheme; host: string; base: string;
                            route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1250,37 +1249,36 @@ proc url_RedisDelete_568300(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_RedisDelete_568299(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_RedisDelete_564199(path: JsonNode; query: JsonNode; header: JsonNode;
                                 formData: JsonNode; body: JsonNode): JsonNode =
   ## Deletes a Redis cache.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   name: JString (required)
   ##       : The name of the Redis cache.
   ##   subscriptionId: JString (required)
   ##                 : Gets subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568301 = path.getOrDefault("resourceGroupName")
-  valid_568301 = validateParameter(valid_568301, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `name` field"
+  var valid_564201 = path.getOrDefault("name")
+  valid_564201 = validateParameter(valid_564201, JString, required = true,
                                  default = nil)
-  if valid_568301 != nil:
-    section.add "resourceGroupName", valid_568301
-  var valid_568302 = path.getOrDefault("name")
-  valid_568302 = validateParameter(valid_568302, JString, required = true,
+  if valid_564201 != nil:
+    section.add "name", valid_564201
+  var valid_564202 = path.getOrDefault("subscriptionId")
+  valid_564202 = validateParameter(valid_564202, JString, required = true,
                                  default = nil)
-  if valid_568302 != nil:
-    section.add "name", valid_568302
-  var valid_568303 = path.getOrDefault("subscriptionId")
-  valid_568303 = validateParameter(valid_568303, JString, required = true,
+  if valid_564202 != nil:
+    section.add "subscriptionId", valid_564202
+  var valid_564203 = path.getOrDefault("resourceGroupName")
+  valid_564203 = validateParameter(valid_564203, JString, required = true,
                                  default = nil)
-  if valid_568303 != nil:
-    section.add "subscriptionId", valid_568303
+  if valid_564203 != nil:
+    section.add "resourceGroupName", valid_564203
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1288,11 +1286,11 @@ proc validate_RedisDelete_568299(path: JsonNode; query: JsonNode; header: JsonNo
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568304 = query.getOrDefault("api-version")
-  valid_568304 = validateParameter(valid_568304, JString, required = true,
+  var valid_564204 = query.getOrDefault("api-version")
+  valid_564204 = validateParameter(valid_564204, JString, required = true,
                                  default = nil)
-  if valid_568304 != nil:
-    section.add "api-version", valid_568304
+  if valid_564204 != nil:
+    section.add "api-version", valid_564204
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1301,48 +1299,48 @@ proc validate_RedisDelete_568299(path: JsonNode; query: JsonNode; header: JsonNo
   if body != nil:
     result.add "body", body
 
-proc call*(call_568305: Call_RedisDelete_568298; path: JsonNode; query: JsonNode;
+proc call*(call_564205: Call_RedisDelete_564198; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes a Redis cache.
   ## 
-  let valid = call_568305.validator(path, query, header, formData, body)
-  let scheme = call_568305.pickScheme
+  let valid = call_564205.validator(path, query, header, formData, body)
+  let scheme = call_564205.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568305.url(scheme.get, call_568305.host, call_568305.base,
-                         call_568305.route, valid.getOrDefault("path"),
+  let url = call_564205.url(scheme.get, call_564205.host, call_564205.base,
+                         call_564205.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568305, url, valid)
+  result = hook(call_564205, url, valid)
 
-proc call*(call_568306: Call_RedisDelete_568298; resourceGroupName: string;
-          apiVersion: string; name: string; subscriptionId: string): Recallable =
+proc call*(call_564206: Call_RedisDelete_564198; apiVersion: string; name: string;
+          subscriptionId: string; resourceGroupName: string): Recallable =
   ## redisDelete
   ## Deletes a Redis cache.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
   ##   name: string (required)
   ##       : The name of the Redis cache.
   ##   subscriptionId: string (required)
   ##                 : Gets subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_568307 = newJObject()
-  var query_568308 = newJObject()
-  add(path_568307, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568308, "api-version", newJString(apiVersion))
-  add(path_568307, "name", newJString(name))
-  add(path_568307, "subscriptionId", newJString(subscriptionId))
-  result = call_568306.call(path_568307, query_568308, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564207 = newJObject()
+  var query_564208 = newJObject()
+  add(query_564208, "api-version", newJString(apiVersion))
+  add(path_564207, "name", newJString(name))
+  add(path_564207, "subscriptionId", newJString(subscriptionId))
+  add(path_564207, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564206.call(path_564207, query_564208, nil, nil, nil)
 
-var redisDelete* = Call_RedisDelete_568298(name: "redisDelete",
+var redisDelete* = Call_RedisDelete_564198(name: "redisDelete",
                                         meth: HttpMethod.HttpDelete,
                                         host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Cache/Redis/{name}",
-                                        validator: validate_RedisDelete_568299,
-                                        base: "", url: url_RedisDelete_568300,
+                                        validator: validate_RedisDelete_564199,
+                                        base: "", url: url_RedisDelete_564200,
                                         schemes: {Scheme.Https})
 type
-  Call_RedisExportData_568322 = ref object of OpenApiRestCall_567657
-proc url_RedisExportData_568324(protocol: Scheme; host: string; base: string;
+  Call_RedisExportData_564222 = ref object of OpenApiRestCall_563555
+proc url_RedisExportData_564224(protocol: Scheme; host: string; base: string;
                                route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1365,7 +1363,7 @@ proc url_RedisExportData_568324(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_RedisExportData_568323(path: JsonNode; query: JsonNode;
+proc validate_RedisExportData_564223(path: JsonNode; query: JsonNode;
                                     header: JsonNode; formData: JsonNode;
                                     body: JsonNode): JsonNode =
   ## Export data from the redis cache to blobs in a container.
@@ -1373,30 +1371,29 @@ proc validate_RedisExportData_568323(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   name: JString (required)
   ##       : The name of the Redis cache.
   ##   subscriptionId: JString (required)
   ##                 : Gets subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568325 = path.getOrDefault("resourceGroupName")
-  valid_568325 = validateParameter(valid_568325, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `name` field"
+  var valid_564225 = path.getOrDefault("name")
+  valid_564225 = validateParameter(valid_564225, JString, required = true,
                                  default = nil)
-  if valid_568325 != nil:
-    section.add "resourceGroupName", valid_568325
-  var valid_568326 = path.getOrDefault("name")
-  valid_568326 = validateParameter(valid_568326, JString, required = true,
+  if valid_564225 != nil:
+    section.add "name", valid_564225
+  var valid_564226 = path.getOrDefault("subscriptionId")
+  valid_564226 = validateParameter(valid_564226, JString, required = true,
                                  default = nil)
-  if valid_568326 != nil:
-    section.add "name", valid_568326
-  var valid_568327 = path.getOrDefault("subscriptionId")
-  valid_568327 = validateParameter(valid_568327, JString, required = true,
+  if valid_564226 != nil:
+    section.add "subscriptionId", valid_564226
+  var valid_564227 = path.getOrDefault("resourceGroupName")
+  valid_564227 = validateParameter(valid_564227, JString, required = true,
                                  default = nil)
-  if valid_568327 != nil:
-    section.add "subscriptionId", valid_568327
+  if valid_564227 != nil:
+    section.add "resourceGroupName", valid_564227
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1404,11 +1401,11 @@ proc validate_RedisExportData_568323(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568328 = query.getOrDefault("api-version")
-  valid_568328 = validateParameter(valid_568328, JString, required = true,
+  var valid_564228 = query.getOrDefault("api-version")
+  valid_564228 = validateParameter(valid_564228, JString, required = true,
                                  default = nil)
-  if valid_568328 != nil:
-    section.add "api-version", valid_568328
+  if valid_564228 != nil:
+    section.add "api-version", valid_564228
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1422,52 +1419,52 @@ proc validate_RedisExportData_568323(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568330: Call_RedisExportData_568322; path: JsonNode; query: JsonNode;
+proc call*(call_564230: Call_RedisExportData_564222; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Export data from the redis cache to blobs in a container.
   ## 
-  let valid = call_568330.validator(path, query, header, formData, body)
-  let scheme = call_568330.pickScheme
+  let valid = call_564230.validator(path, query, header, formData, body)
+  let scheme = call_564230.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568330.url(scheme.get, call_568330.host, call_568330.base,
-                         call_568330.route, valid.getOrDefault("path"),
+  let url = call_564230.url(scheme.get, call_564230.host, call_564230.base,
+                         call_564230.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568330, url, valid)
+  result = hook(call_564230, url, valid)
 
-proc call*(call_568331: Call_RedisExportData_568322; resourceGroupName: string;
-          apiVersion: string; name: string; subscriptionId: string;
+proc call*(call_564231: Call_RedisExportData_564222; apiVersion: string;
+          name: string; subscriptionId: string; resourceGroupName: string;
           parameters: JsonNode): Recallable =
   ## redisExportData
   ## Export data from the redis cache to blobs in a container.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
   ##   name: string (required)
   ##       : The name of the Redis cache.
   ##   subscriptionId: string (required)
   ##                 : Gets subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   parameters: JObject (required)
   ##             : Parameters for Redis export operation.
-  var path_568332 = newJObject()
-  var query_568333 = newJObject()
-  var body_568334 = newJObject()
-  add(path_568332, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568333, "api-version", newJString(apiVersion))
-  add(path_568332, "name", newJString(name))
-  add(path_568332, "subscriptionId", newJString(subscriptionId))
+  var path_564232 = newJObject()
+  var query_564233 = newJObject()
+  var body_564234 = newJObject()
+  add(query_564233, "api-version", newJString(apiVersion))
+  add(path_564232, "name", newJString(name))
+  add(path_564232, "subscriptionId", newJString(subscriptionId))
+  add(path_564232, "resourceGroupName", newJString(resourceGroupName))
   if parameters != nil:
-    body_568334 = parameters
-  result = call_568331.call(path_568332, query_568333, nil, nil, body_568334)
+    body_564234 = parameters
+  result = call_564231.call(path_564232, query_564233, nil, nil, body_564234)
 
-var redisExportData* = Call_RedisExportData_568322(name: "redisExportData",
+var redisExportData* = Call_RedisExportData_564222(name: "redisExportData",
     meth: HttpMethod.HttpPost, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Cache/Redis/{name}/export",
-    validator: validate_RedisExportData_568323, base: "", url: url_RedisExportData_568324,
+    validator: validate_RedisExportData_564223, base: "", url: url_RedisExportData_564224,
     schemes: {Scheme.Https})
 type
-  Call_RedisForceReboot_568335 = ref object of OpenApiRestCall_567657
-proc url_RedisForceReboot_568337(protocol: Scheme; host: string; base: string;
+  Call_RedisForceReboot_564235 = ref object of OpenApiRestCall_563555
+proc url_RedisForceReboot_564237(protocol: Scheme; host: string; base: string;
                                 route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1490,7 +1487,7 @@ proc url_RedisForceReboot_568337(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_RedisForceReboot_568336(path: JsonNode; query: JsonNode;
+proc validate_RedisForceReboot_564236(path: JsonNode; query: JsonNode;
                                      header: JsonNode; formData: JsonNode;
                                      body: JsonNode): JsonNode =
   ## Reboot specified Redis node(s). This operation requires write permission to the cache resource. There can be potential data loss.
@@ -1498,30 +1495,29 @@ proc validate_RedisForceReboot_568336(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   name: JString (required)
   ##       : The name of the Redis cache.
   ##   subscriptionId: JString (required)
   ##                 : Gets subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568338 = path.getOrDefault("resourceGroupName")
-  valid_568338 = validateParameter(valid_568338, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `name` field"
+  var valid_564238 = path.getOrDefault("name")
+  valid_564238 = validateParameter(valid_564238, JString, required = true,
                                  default = nil)
-  if valid_568338 != nil:
-    section.add "resourceGroupName", valid_568338
-  var valid_568339 = path.getOrDefault("name")
-  valid_568339 = validateParameter(valid_568339, JString, required = true,
+  if valid_564238 != nil:
+    section.add "name", valid_564238
+  var valid_564239 = path.getOrDefault("subscriptionId")
+  valid_564239 = validateParameter(valid_564239, JString, required = true,
                                  default = nil)
-  if valid_568339 != nil:
-    section.add "name", valid_568339
-  var valid_568340 = path.getOrDefault("subscriptionId")
-  valid_568340 = validateParameter(valid_568340, JString, required = true,
+  if valid_564239 != nil:
+    section.add "subscriptionId", valid_564239
+  var valid_564240 = path.getOrDefault("resourceGroupName")
+  valid_564240 = validateParameter(valid_564240, JString, required = true,
                                  default = nil)
-  if valid_568340 != nil:
-    section.add "subscriptionId", valid_568340
+  if valid_564240 != nil:
+    section.add "resourceGroupName", valid_564240
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1529,11 +1525,11 @@ proc validate_RedisForceReboot_568336(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568341 = query.getOrDefault("api-version")
-  valid_568341 = validateParameter(valid_568341, JString, required = true,
+  var valid_564241 = query.getOrDefault("api-version")
+  valid_564241 = validateParameter(valid_564241, JString, required = true,
                                  default = nil)
-  if valid_568341 != nil:
-    section.add "api-version", valid_568341
+  if valid_564241 != nil:
+    section.add "api-version", valid_564241
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1547,52 +1543,52 @@ proc validate_RedisForceReboot_568336(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568343: Call_RedisForceReboot_568335; path: JsonNode;
+proc call*(call_564243: Call_RedisForceReboot_564235; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Reboot specified Redis node(s). This operation requires write permission to the cache resource. There can be potential data loss.
   ## 
-  let valid = call_568343.validator(path, query, header, formData, body)
-  let scheme = call_568343.pickScheme
+  let valid = call_564243.validator(path, query, header, formData, body)
+  let scheme = call_564243.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568343.url(scheme.get, call_568343.host, call_568343.base,
-                         call_568343.route, valid.getOrDefault("path"),
+  let url = call_564243.url(scheme.get, call_564243.host, call_564243.base,
+                         call_564243.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568343, url, valid)
+  result = hook(call_564243, url, valid)
 
-proc call*(call_568344: Call_RedisForceReboot_568335; resourceGroupName: string;
-          apiVersion: string; name: string; subscriptionId: string;
+proc call*(call_564244: Call_RedisForceReboot_564235; apiVersion: string;
+          name: string; subscriptionId: string; resourceGroupName: string;
           parameters: JsonNode): Recallable =
   ## redisForceReboot
   ## Reboot specified Redis node(s). This operation requires write permission to the cache resource. There can be potential data loss.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
   ##   name: string (required)
   ##       : The name of the Redis cache.
   ##   subscriptionId: string (required)
   ##                 : Gets subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   parameters: JObject (required)
   ##             : Specifies which Redis node(s) to reboot.
-  var path_568345 = newJObject()
-  var query_568346 = newJObject()
-  var body_568347 = newJObject()
-  add(path_568345, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568346, "api-version", newJString(apiVersion))
-  add(path_568345, "name", newJString(name))
-  add(path_568345, "subscriptionId", newJString(subscriptionId))
+  var path_564245 = newJObject()
+  var query_564246 = newJObject()
+  var body_564247 = newJObject()
+  add(query_564246, "api-version", newJString(apiVersion))
+  add(path_564245, "name", newJString(name))
+  add(path_564245, "subscriptionId", newJString(subscriptionId))
+  add(path_564245, "resourceGroupName", newJString(resourceGroupName))
   if parameters != nil:
-    body_568347 = parameters
-  result = call_568344.call(path_568345, query_568346, nil, nil, body_568347)
+    body_564247 = parameters
+  result = call_564244.call(path_564245, query_564246, nil, nil, body_564247)
 
-var redisForceReboot* = Call_RedisForceReboot_568335(name: "redisForceReboot",
+var redisForceReboot* = Call_RedisForceReboot_564235(name: "redisForceReboot",
     meth: HttpMethod.HttpPost, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Cache/Redis/{name}/forceReboot",
-    validator: validate_RedisForceReboot_568336, base: "",
-    url: url_RedisForceReboot_568337, schemes: {Scheme.Https})
+    validator: validate_RedisForceReboot_564236, base: "",
+    url: url_RedisForceReboot_564237, schemes: {Scheme.Https})
 type
-  Call_RedisImportData_568348 = ref object of OpenApiRestCall_567657
-proc url_RedisImportData_568350(protocol: Scheme; host: string; base: string;
+  Call_RedisImportData_564248 = ref object of OpenApiRestCall_563555
+proc url_RedisImportData_564250(protocol: Scheme; host: string; base: string;
                                route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1615,7 +1611,7 @@ proc url_RedisImportData_568350(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_RedisImportData_568349(path: JsonNode; query: JsonNode;
+proc validate_RedisImportData_564249(path: JsonNode; query: JsonNode;
                                     header: JsonNode; formData: JsonNode;
                                     body: JsonNode): JsonNode =
   ## Import data into Redis cache.
@@ -1623,30 +1619,29 @@ proc validate_RedisImportData_568349(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   name: JString (required)
   ##       : The name of the Redis cache.
   ##   subscriptionId: JString (required)
   ##                 : Gets subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568351 = path.getOrDefault("resourceGroupName")
-  valid_568351 = validateParameter(valid_568351, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `name` field"
+  var valid_564251 = path.getOrDefault("name")
+  valid_564251 = validateParameter(valid_564251, JString, required = true,
                                  default = nil)
-  if valid_568351 != nil:
-    section.add "resourceGroupName", valid_568351
-  var valid_568352 = path.getOrDefault("name")
-  valid_568352 = validateParameter(valid_568352, JString, required = true,
+  if valid_564251 != nil:
+    section.add "name", valid_564251
+  var valid_564252 = path.getOrDefault("subscriptionId")
+  valid_564252 = validateParameter(valid_564252, JString, required = true,
                                  default = nil)
-  if valid_568352 != nil:
-    section.add "name", valid_568352
-  var valid_568353 = path.getOrDefault("subscriptionId")
-  valid_568353 = validateParameter(valid_568353, JString, required = true,
+  if valid_564252 != nil:
+    section.add "subscriptionId", valid_564252
+  var valid_564253 = path.getOrDefault("resourceGroupName")
+  valid_564253 = validateParameter(valid_564253, JString, required = true,
                                  default = nil)
-  if valid_568353 != nil:
-    section.add "subscriptionId", valid_568353
+  if valid_564253 != nil:
+    section.add "resourceGroupName", valid_564253
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1654,11 +1649,11 @@ proc validate_RedisImportData_568349(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568354 = query.getOrDefault("api-version")
-  valid_568354 = validateParameter(valid_568354, JString, required = true,
+  var valid_564254 = query.getOrDefault("api-version")
+  valid_564254 = validateParameter(valid_564254, JString, required = true,
                                  default = nil)
-  if valid_568354 != nil:
-    section.add "api-version", valid_568354
+  if valid_564254 != nil:
+    section.add "api-version", valid_564254
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1672,52 +1667,52 @@ proc validate_RedisImportData_568349(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568356: Call_RedisImportData_568348; path: JsonNode; query: JsonNode;
+proc call*(call_564256: Call_RedisImportData_564248; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Import data into Redis cache.
   ## 
-  let valid = call_568356.validator(path, query, header, formData, body)
-  let scheme = call_568356.pickScheme
+  let valid = call_564256.validator(path, query, header, formData, body)
+  let scheme = call_564256.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568356.url(scheme.get, call_568356.host, call_568356.base,
-                         call_568356.route, valid.getOrDefault("path"),
+  let url = call_564256.url(scheme.get, call_564256.host, call_564256.base,
+                         call_564256.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568356, url, valid)
+  result = hook(call_564256, url, valid)
 
-proc call*(call_568357: Call_RedisImportData_568348; resourceGroupName: string;
-          apiVersion: string; name: string; subscriptionId: string;
+proc call*(call_564257: Call_RedisImportData_564248; apiVersion: string;
+          name: string; subscriptionId: string; resourceGroupName: string;
           parameters: JsonNode): Recallable =
   ## redisImportData
   ## Import data into Redis cache.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
   ##   name: string (required)
   ##       : The name of the Redis cache.
   ##   subscriptionId: string (required)
   ##                 : Gets subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   parameters: JObject (required)
   ##             : Parameters for Redis import operation.
-  var path_568358 = newJObject()
-  var query_568359 = newJObject()
-  var body_568360 = newJObject()
-  add(path_568358, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568359, "api-version", newJString(apiVersion))
-  add(path_568358, "name", newJString(name))
-  add(path_568358, "subscriptionId", newJString(subscriptionId))
+  var path_564258 = newJObject()
+  var query_564259 = newJObject()
+  var body_564260 = newJObject()
+  add(query_564259, "api-version", newJString(apiVersion))
+  add(path_564258, "name", newJString(name))
+  add(path_564258, "subscriptionId", newJString(subscriptionId))
+  add(path_564258, "resourceGroupName", newJString(resourceGroupName))
   if parameters != nil:
-    body_568360 = parameters
-  result = call_568357.call(path_568358, query_568359, nil, nil, body_568360)
+    body_564260 = parameters
+  result = call_564257.call(path_564258, query_564259, nil, nil, body_564260)
 
-var redisImportData* = Call_RedisImportData_568348(name: "redisImportData",
+var redisImportData* = Call_RedisImportData_564248(name: "redisImportData",
     meth: HttpMethod.HttpPost, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Cache/Redis/{name}/import",
-    validator: validate_RedisImportData_568349, base: "", url: url_RedisImportData_568350,
+    validator: validate_RedisImportData_564249, base: "", url: url_RedisImportData_564250,
     schemes: {Scheme.Https})
 type
-  Call_RedisLinkedServerList_568361 = ref object of OpenApiRestCall_567657
-proc url_RedisLinkedServerList_568363(protocol: Scheme; host: string; base: string;
+  Call_RedisLinkedServerList_564261 = ref object of OpenApiRestCall_563555
+proc url_RedisLinkedServerList_564263(protocol: Scheme; host: string; base: string;
                                      route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1740,37 +1735,36 @@ proc url_RedisLinkedServerList_568363(protocol: Scheme; host: string; base: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_RedisLinkedServerList_568362(path: JsonNode; query: JsonNode;
+proc validate_RedisLinkedServerList_564262(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the list of linked servers associated with this redis cache (requires Premium SKU).
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   name: JString (required)
   ##       : The name of the redis cache.
   ##   subscriptionId: JString (required)
   ##                 : Gets subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568364 = path.getOrDefault("resourceGroupName")
-  valid_568364 = validateParameter(valid_568364, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `name` field"
+  var valid_564264 = path.getOrDefault("name")
+  valid_564264 = validateParameter(valid_564264, JString, required = true,
                                  default = nil)
-  if valid_568364 != nil:
-    section.add "resourceGroupName", valid_568364
-  var valid_568365 = path.getOrDefault("name")
-  valid_568365 = validateParameter(valid_568365, JString, required = true,
+  if valid_564264 != nil:
+    section.add "name", valid_564264
+  var valid_564265 = path.getOrDefault("subscriptionId")
+  valid_564265 = validateParameter(valid_564265, JString, required = true,
                                  default = nil)
-  if valid_568365 != nil:
-    section.add "name", valid_568365
-  var valid_568366 = path.getOrDefault("subscriptionId")
-  valid_568366 = validateParameter(valid_568366, JString, required = true,
+  if valid_564265 != nil:
+    section.add "subscriptionId", valid_564265
+  var valid_564266 = path.getOrDefault("resourceGroupName")
+  valid_564266 = validateParameter(valid_564266, JString, required = true,
                                  default = nil)
-  if valid_568366 != nil:
-    section.add "subscriptionId", valid_568366
+  if valid_564266 != nil:
+    section.add "resourceGroupName", valid_564266
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1778,11 +1772,11 @@ proc validate_RedisLinkedServerList_568362(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568367 = query.getOrDefault("api-version")
-  valid_568367 = validateParameter(valid_568367, JString, required = true,
+  var valid_564267 = query.getOrDefault("api-version")
+  valid_564267 = validateParameter(valid_564267, JString, required = true,
                                  default = nil)
-  if valid_568367 != nil:
-    section.add "api-version", valid_568367
+  if valid_564267 != nil:
+    section.add "api-version", valid_564267
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1791,48 +1785,47 @@ proc validate_RedisLinkedServerList_568362(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568368: Call_RedisLinkedServerList_568361; path: JsonNode;
+proc call*(call_564268: Call_RedisLinkedServerList_564261; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the list of linked servers associated with this redis cache (requires Premium SKU).
   ## 
-  let valid = call_568368.validator(path, query, header, formData, body)
-  let scheme = call_568368.pickScheme
+  let valid = call_564268.validator(path, query, header, formData, body)
+  let scheme = call_564268.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568368.url(scheme.get, call_568368.host, call_568368.base,
-                         call_568368.route, valid.getOrDefault("path"),
+  let url = call_564268.url(scheme.get, call_564268.host, call_564268.base,
+                         call_564268.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568368, url, valid)
+  result = hook(call_564268, url, valid)
 
-proc call*(call_568369: Call_RedisLinkedServerList_568361;
-          resourceGroupName: string; apiVersion: string; name: string;
-          subscriptionId: string): Recallable =
+proc call*(call_564269: Call_RedisLinkedServerList_564261; apiVersion: string;
+          name: string; subscriptionId: string; resourceGroupName: string): Recallable =
   ## redisLinkedServerList
   ## Gets the list of linked servers associated with this redis cache (requires Premium SKU).
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
   ##   name: string (required)
   ##       : The name of the redis cache.
   ##   subscriptionId: string (required)
   ##                 : Gets subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_568370 = newJObject()
-  var query_568371 = newJObject()
-  add(path_568370, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568371, "api-version", newJString(apiVersion))
-  add(path_568370, "name", newJString(name))
-  add(path_568370, "subscriptionId", newJString(subscriptionId))
-  result = call_568369.call(path_568370, query_568371, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564270 = newJObject()
+  var query_564271 = newJObject()
+  add(query_564271, "api-version", newJString(apiVersion))
+  add(path_564270, "name", newJString(name))
+  add(path_564270, "subscriptionId", newJString(subscriptionId))
+  add(path_564270, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564269.call(path_564270, query_564271, nil, nil, nil)
 
-var redisLinkedServerList* = Call_RedisLinkedServerList_568361(
+var redisLinkedServerList* = Call_RedisLinkedServerList_564261(
     name: "redisLinkedServerList", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Cache/Redis/{name}/linkedServers",
-    validator: validate_RedisLinkedServerList_568362, base: "",
-    url: url_RedisLinkedServerList_568363, schemes: {Scheme.Https})
+    validator: validate_RedisLinkedServerList_564262, base: "",
+    url: url_RedisLinkedServerList_564263, schemes: {Scheme.Https})
 type
-  Call_RedisLinkedServerCreate_568384 = ref object of OpenApiRestCall_567657
-proc url_RedisLinkedServerCreate_568386(protocol: Scheme; host: string; base: string;
+  Call_RedisLinkedServerCreate_564284 = ref object of OpenApiRestCall_563555
+proc url_RedisLinkedServerCreate_564286(protocol: Scheme; host: string; base: string;
                                        route: string; path: JsonNode;
                                        query: JsonNode): Uri =
   result.scheme = $protocol
@@ -1859,44 +1852,43 @@ proc url_RedisLinkedServerCreate_568386(protocol: Scheme; host: string; base: st
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_RedisLinkedServerCreate_568385(path: JsonNode; query: JsonNode;
+proc validate_RedisLinkedServerCreate_564285(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Adds a linked server to the Redis cache (requires Premium SKU).
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   name: JString (required)
   ##       : The name of the Redis cache.
   ##   subscriptionId: JString (required)
   ##                 : Gets subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   linkedServerName: JString (required)
   ##                   : The name of the linked server that is being added to the Redis cache.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568387 = path.getOrDefault("resourceGroupName")
-  valid_568387 = validateParameter(valid_568387, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `name` field"
+  var valid_564287 = path.getOrDefault("name")
+  valid_564287 = validateParameter(valid_564287, JString, required = true,
                                  default = nil)
-  if valid_568387 != nil:
-    section.add "resourceGroupName", valid_568387
-  var valid_568388 = path.getOrDefault("name")
-  valid_568388 = validateParameter(valid_568388, JString, required = true,
+  if valid_564287 != nil:
+    section.add "name", valid_564287
+  var valid_564288 = path.getOrDefault("subscriptionId")
+  valid_564288 = validateParameter(valid_564288, JString, required = true,
                                  default = nil)
-  if valid_568388 != nil:
-    section.add "name", valid_568388
-  var valid_568389 = path.getOrDefault("subscriptionId")
-  valid_568389 = validateParameter(valid_568389, JString, required = true,
+  if valid_564288 != nil:
+    section.add "subscriptionId", valid_564288
+  var valid_564289 = path.getOrDefault("linkedServerName")
+  valid_564289 = validateParameter(valid_564289, JString, required = true,
                                  default = nil)
-  if valid_568389 != nil:
-    section.add "subscriptionId", valid_568389
-  var valid_568390 = path.getOrDefault("linkedServerName")
-  valid_568390 = validateParameter(valid_568390, JString, required = true,
+  if valid_564289 != nil:
+    section.add "linkedServerName", valid_564289
+  var valid_564290 = path.getOrDefault("resourceGroupName")
+  valid_564290 = validateParameter(valid_564290, JString, required = true,
                                  default = nil)
-  if valid_568390 != nil:
-    section.add "linkedServerName", valid_568390
+  if valid_564290 != nil:
+    section.add "resourceGroupName", valid_564290
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1904,11 +1896,11 @@ proc validate_RedisLinkedServerCreate_568385(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568391 = query.getOrDefault("api-version")
-  valid_568391 = validateParameter(valid_568391, JString, required = true,
+  var valid_564291 = query.getOrDefault("api-version")
+  valid_564291 = validateParameter(valid_564291, JString, required = true,
                                  default = nil)
-  if valid_568391 != nil:
-    section.add "api-version", valid_568391
+  if valid_564291 != nil:
+    section.add "api-version", valid_564291
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1922,56 +1914,56 @@ proc validate_RedisLinkedServerCreate_568385(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568393: Call_RedisLinkedServerCreate_568384; path: JsonNode;
+proc call*(call_564293: Call_RedisLinkedServerCreate_564284; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Adds a linked server to the Redis cache (requires Premium SKU).
   ## 
-  let valid = call_568393.validator(path, query, header, formData, body)
-  let scheme = call_568393.pickScheme
+  let valid = call_564293.validator(path, query, header, formData, body)
+  let scheme = call_564293.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568393.url(scheme.get, call_568393.host, call_568393.base,
-                         call_568393.route, valid.getOrDefault("path"),
+  let url = call_564293.url(scheme.get, call_564293.host, call_564293.base,
+                         call_564293.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568393, url, valid)
+  result = hook(call_564293, url, valid)
 
-proc call*(call_568394: Call_RedisLinkedServerCreate_568384;
-          resourceGroupName: string; apiVersion: string; name: string;
-          subscriptionId: string; parameters: JsonNode; linkedServerName: string): Recallable =
+proc call*(call_564294: Call_RedisLinkedServerCreate_564284; apiVersion: string;
+          name: string; subscriptionId: string; linkedServerName: string;
+          resourceGroupName: string; parameters: JsonNode): Recallable =
   ## redisLinkedServerCreate
   ## Adds a linked server to the Redis cache (requires Premium SKU).
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
   ##   name: string (required)
   ##       : The name of the Redis cache.
   ##   subscriptionId: string (required)
   ##                 : Gets subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   parameters: JObject (required)
-  ##             : Parameters supplied to the Create Linked server operation.
   ##   linkedServerName: string (required)
   ##                   : The name of the linked server that is being added to the Redis cache.
-  var path_568395 = newJObject()
-  var query_568396 = newJObject()
-  var body_568397 = newJObject()
-  add(path_568395, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568396, "api-version", newJString(apiVersion))
-  add(path_568395, "name", newJString(name))
-  add(path_568395, "subscriptionId", newJString(subscriptionId))
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  ##   parameters: JObject (required)
+  ##             : Parameters supplied to the Create Linked server operation.
+  var path_564295 = newJObject()
+  var query_564296 = newJObject()
+  var body_564297 = newJObject()
+  add(query_564296, "api-version", newJString(apiVersion))
+  add(path_564295, "name", newJString(name))
+  add(path_564295, "subscriptionId", newJString(subscriptionId))
+  add(path_564295, "linkedServerName", newJString(linkedServerName))
+  add(path_564295, "resourceGroupName", newJString(resourceGroupName))
   if parameters != nil:
-    body_568397 = parameters
-  add(path_568395, "linkedServerName", newJString(linkedServerName))
-  result = call_568394.call(path_568395, query_568396, nil, nil, body_568397)
+    body_564297 = parameters
+  result = call_564294.call(path_564295, query_564296, nil, nil, body_564297)
 
-var redisLinkedServerCreate* = Call_RedisLinkedServerCreate_568384(
+var redisLinkedServerCreate* = Call_RedisLinkedServerCreate_564284(
     name: "redisLinkedServerCreate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Cache/Redis/{name}/linkedServers/{linkedServerName}",
-    validator: validate_RedisLinkedServerCreate_568385, base: "",
-    url: url_RedisLinkedServerCreate_568386, schemes: {Scheme.Https})
+    validator: validate_RedisLinkedServerCreate_564285, base: "",
+    url: url_RedisLinkedServerCreate_564286, schemes: {Scheme.Https})
 type
-  Call_RedisLinkedServerGet_568372 = ref object of OpenApiRestCall_567657
-proc url_RedisLinkedServerGet_568374(protocol: Scheme; host: string; base: string;
+  Call_RedisLinkedServerGet_564272 = ref object of OpenApiRestCall_563555
+proc url_RedisLinkedServerGet_564274(protocol: Scheme; host: string; base: string;
                                     route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1997,44 +1989,43 @@ proc url_RedisLinkedServerGet_568374(protocol: Scheme; host: string; base: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_RedisLinkedServerGet_568373(path: JsonNode; query: JsonNode;
+proc validate_RedisLinkedServerGet_564273(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets the detailed information about a linked server of a redis cache (requires Premium SKU).
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   name: JString (required)
   ##       : The name of the redis cache.
   ##   subscriptionId: JString (required)
   ##                 : Gets subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   linkedServerName: JString (required)
   ##                   : The name of the linked server.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568375 = path.getOrDefault("resourceGroupName")
-  valid_568375 = validateParameter(valid_568375, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `name` field"
+  var valid_564275 = path.getOrDefault("name")
+  valid_564275 = validateParameter(valid_564275, JString, required = true,
                                  default = nil)
-  if valid_568375 != nil:
-    section.add "resourceGroupName", valid_568375
-  var valid_568376 = path.getOrDefault("name")
-  valid_568376 = validateParameter(valid_568376, JString, required = true,
+  if valid_564275 != nil:
+    section.add "name", valid_564275
+  var valid_564276 = path.getOrDefault("subscriptionId")
+  valid_564276 = validateParameter(valid_564276, JString, required = true,
                                  default = nil)
-  if valid_568376 != nil:
-    section.add "name", valid_568376
-  var valid_568377 = path.getOrDefault("subscriptionId")
-  valid_568377 = validateParameter(valid_568377, JString, required = true,
+  if valid_564276 != nil:
+    section.add "subscriptionId", valid_564276
+  var valid_564277 = path.getOrDefault("linkedServerName")
+  valid_564277 = validateParameter(valid_564277, JString, required = true,
                                  default = nil)
-  if valid_568377 != nil:
-    section.add "subscriptionId", valid_568377
-  var valid_568378 = path.getOrDefault("linkedServerName")
-  valid_568378 = validateParameter(valid_568378, JString, required = true,
+  if valid_564277 != nil:
+    section.add "linkedServerName", valid_564277
+  var valid_564278 = path.getOrDefault("resourceGroupName")
+  valid_564278 = validateParameter(valid_564278, JString, required = true,
                                  default = nil)
-  if valid_568378 != nil:
-    section.add "linkedServerName", valid_568378
+  if valid_564278 != nil:
+    section.add "resourceGroupName", valid_564278
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2042,11 +2033,11 @@ proc validate_RedisLinkedServerGet_568373(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568379 = query.getOrDefault("api-version")
-  valid_568379 = validateParameter(valid_568379, JString, required = true,
+  var valid_564279 = query.getOrDefault("api-version")
+  valid_564279 = validateParameter(valid_564279, JString, required = true,
                                  default = nil)
-  if valid_568379 != nil:
-    section.add "api-version", valid_568379
+  if valid_564279 != nil:
+    section.add "api-version", valid_564279
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2055,26 +2046,24 @@ proc validate_RedisLinkedServerGet_568373(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568380: Call_RedisLinkedServerGet_568372; path: JsonNode;
+proc call*(call_564280: Call_RedisLinkedServerGet_564272; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the detailed information about a linked server of a redis cache (requires Premium SKU).
   ## 
-  let valid = call_568380.validator(path, query, header, formData, body)
-  let scheme = call_568380.pickScheme
+  let valid = call_564280.validator(path, query, header, formData, body)
+  let scheme = call_564280.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568380.url(scheme.get, call_568380.host, call_568380.base,
-                         call_568380.route, valid.getOrDefault("path"),
+  let url = call_564280.url(scheme.get, call_564280.host, call_564280.base,
+                         call_564280.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568380, url, valid)
+  result = hook(call_564280, url, valid)
 
-proc call*(call_568381: Call_RedisLinkedServerGet_568372;
-          resourceGroupName: string; apiVersion: string; name: string;
-          subscriptionId: string; linkedServerName: string): Recallable =
+proc call*(call_564281: Call_RedisLinkedServerGet_564272; apiVersion: string;
+          name: string; subscriptionId: string; linkedServerName: string;
+          resourceGroupName: string): Recallable =
   ## redisLinkedServerGet
   ## Gets the detailed information about a linked server of a redis cache (requires Premium SKU).
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
   ##   name: string (required)
@@ -2083,23 +2072,25 @@ proc call*(call_568381: Call_RedisLinkedServerGet_568372;
   ##                 : Gets subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   linkedServerName: string (required)
   ##                   : The name of the linked server.
-  var path_568382 = newJObject()
-  var query_568383 = newJObject()
-  add(path_568382, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568383, "api-version", newJString(apiVersion))
-  add(path_568382, "name", newJString(name))
-  add(path_568382, "subscriptionId", newJString(subscriptionId))
-  add(path_568382, "linkedServerName", newJString(linkedServerName))
-  result = call_568381.call(path_568382, query_568383, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564282 = newJObject()
+  var query_564283 = newJObject()
+  add(query_564283, "api-version", newJString(apiVersion))
+  add(path_564282, "name", newJString(name))
+  add(path_564282, "subscriptionId", newJString(subscriptionId))
+  add(path_564282, "linkedServerName", newJString(linkedServerName))
+  add(path_564282, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564281.call(path_564282, query_564283, nil, nil, nil)
 
-var redisLinkedServerGet* = Call_RedisLinkedServerGet_568372(
+var redisLinkedServerGet* = Call_RedisLinkedServerGet_564272(
     name: "redisLinkedServerGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Cache/Redis/{name}/linkedServers/{linkedServerName}",
-    validator: validate_RedisLinkedServerGet_568373, base: "",
-    url: url_RedisLinkedServerGet_568374, schemes: {Scheme.Https})
+    validator: validate_RedisLinkedServerGet_564273, base: "",
+    url: url_RedisLinkedServerGet_564274, schemes: {Scheme.Https})
 type
-  Call_RedisLinkedServerDelete_568398 = ref object of OpenApiRestCall_567657
-proc url_RedisLinkedServerDelete_568400(protocol: Scheme; host: string; base: string;
+  Call_RedisLinkedServerDelete_564298 = ref object of OpenApiRestCall_563555
+proc url_RedisLinkedServerDelete_564300(protocol: Scheme; host: string; base: string;
                                        route: string; path: JsonNode;
                                        query: JsonNode): Uri =
   result.scheme = $protocol
@@ -2126,44 +2117,43 @@ proc url_RedisLinkedServerDelete_568400(protocol: Scheme; host: string; base: st
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_RedisLinkedServerDelete_568399(path: JsonNode; query: JsonNode;
+proc validate_RedisLinkedServerDelete_564299(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Deletes the linked server from a redis cache (requires Premium SKU).
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   name: JString (required)
   ##       : The name of the redis cache.
   ##   subscriptionId: JString (required)
   ##                 : Gets subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   linkedServerName: JString (required)
   ##                   : The name of the linked server that is being added to the Redis cache.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568401 = path.getOrDefault("resourceGroupName")
-  valid_568401 = validateParameter(valid_568401, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `name` field"
+  var valid_564301 = path.getOrDefault("name")
+  valid_564301 = validateParameter(valid_564301, JString, required = true,
                                  default = nil)
-  if valid_568401 != nil:
-    section.add "resourceGroupName", valid_568401
-  var valid_568402 = path.getOrDefault("name")
-  valid_568402 = validateParameter(valid_568402, JString, required = true,
+  if valid_564301 != nil:
+    section.add "name", valid_564301
+  var valid_564302 = path.getOrDefault("subscriptionId")
+  valid_564302 = validateParameter(valid_564302, JString, required = true,
                                  default = nil)
-  if valid_568402 != nil:
-    section.add "name", valid_568402
-  var valid_568403 = path.getOrDefault("subscriptionId")
-  valid_568403 = validateParameter(valid_568403, JString, required = true,
+  if valid_564302 != nil:
+    section.add "subscriptionId", valid_564302
+  var valid_564303 = path.getOrDefault("linkedServerName")
+  valid_564303 = validateParameter(valid_564303, JString, required = true,
                                  default = nil)
-  if valid_568403 != nil:
-    section.add "subscriptionId", valid_568403
-  var valid_568404 = path.getOrDefault("linkedServerName")
-  valid_568404 = validateParameter(valid_568404, JString, required = true,
+  if valid_564303 != nil:
+    section.add "linkedServerName", valid_564303
+  var valid_564304 = path.getOrDefault("resourceGroupName")
+  valid_564304 = validateParameter(valid_564304, JString, required = true,
                                  default = nil)
-  if valid_568404 != nil:
-    section.add "linkedServerName", valid_568404
+  if valid_564304 != nil:
+    section.add "resourceGroupName", valid_564304
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2171,11 +2161,11 @@ proc validate_RedisLinkedServerDelete_568399(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568405 = query.getOrDefault("api-version")
-  valid_568405 = validateParameter(valid_568405, JString, required = true,
+  var valid_564305 = query.getOrDefault("api-version")
+  valid_564305 = validateParameter(valid_564305, JString, required = true,
                                  default = nil)
-  if valid_568405 != nil:
-    section.add "api-version", valid_568405
+  if valid_564305 != nil:
+    section.add "api-version", valid_564305
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2184,26 +2174,24 @@ proc validate_RedisLinkedServerDelete_568399(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568406: Call_RedisLinkedServerDelete_568398; path: JsonNode;
+proc call*(call_564306: Call_RedisLinkedServerDelete_564298; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes the linked server from a redis cache (requires Premium SKU).
   ## 
-  let valid = call_568406.validator(path, query, header, formData, body)
-  let scheme = call_568406.pickScheme
+  let valid = call_564306.validator(path, query, header, formData, body)
+  let scheme = call_564306.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568406.url(scheme.get, call_568406.host, call_568406.base,
-                         call_568406.route, valid.getOrDefault("path"),
+  let url = call_564306.url(scheme.get, call_564306.host, call_564306.base,
+                         call_564306.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568406, url, valid)
+  result = hook(call_564306, url, valid)
 
-proc call*(call_568407: Call_RedisLinkedServerDelete_568398;
-          resourceGroupName: string; apiVersion: string; name: string;
-          subscriptionId: string; linkedServerName: string): Recallable =
+proc call*(call_564307: Call_RedisLinkedServerDelete_564298; apiVersion: string;
+          name: string; subscriptionId: string; linkedServerName: string;
+          resourceGroupName: string): Recallable =
   ## redisLinkedServerDelete
   ## Deletes the linked server from a redis cache (requires Premium SKU).
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
   ##   name: string (required)
@@ -2212,23 +2200,25 @@ proc call*(call_568407: Call_RedisLinkedServerDelete_568398;
   ##                 : Gets subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
   ##   linkedServerName: string (required)
   ##                   : The name of the linked server that is being added to the Redis cache.
-  var path_568408 = newJObject()
-  var query_568409 = newJObject()
-  add(path_568408, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568409, "api-version", newJString(apiVersion))
-  add(path_568408, "name", newJString(name))
-  add(path_568408, "subscriptionId", newJString(subscriptionId))
-  add(path_568408, "linkedServerName", newJString(linkedServerName))
-  result = call_568407.call(path_568408, query_568409, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564308 = newJObject()
+  var query_564309 = newJObject()
+  add(query_564309, "api-version", newJString(apiVersion))
+  add(path_564308, "name", newJString(name))
+  add(path_564308, "subscriptionId", newJString(subscriptionId))
+  add(path_564308, "linkedServerName", newJString(linkedServerName))
+  add(path_564308, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564307.call(path_564308, query_564309, nil, nil, nil)
 
-var redisLinkedServerDelete* = Call_RedisLinkedServerDelete_568398(
+var redisLinkedServerDelete* = Call_RedisLinkedServerDelete_564298(
     name: "redisLinkedServerDelete", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Cache/Redis/{name}/linkedServers/{linkedServerName}",
-    validator: validate_RedisLinkedServerDelete_568399, base: "",
-    url: url_RedisLinkedServerDelete_568400, schemes: {Scheme.Https})
+    validator: validate_RedisLinkedServerDelete_564299, base: "",
+    url: url_RedisLinkedServerDelete_564300, schemes: {Scheme.Https})
 type
-  Call_RedisListKeys_568410 = ref object of OpenApiRestCall_567657
-proc url_RedisListKeys_568412(protocol: Scheme; host: string; base: string;
+  Call_RedisListKeys_564310 = ref object of OpenApiRestCall_563555
+proc url_RedisListKeys_564312(protocol: Scheme; host: string; base: string;
                              route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2251,37 +2241,36 @@ proc url_RedisListKeys_568412(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_RedisListKeys_568411(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_RedisListKeys_564311(path: JsonNode; query: JsonNode; header: JsonNode;
                                   formData: JsonNode; body: JsonNode): JsonNode =
   ## Retrieve a Redis cache's access keys. This operation requires write permission to the cache resource.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   name: JString (required)
   ##       : The name of the Redis cache.
   ##   subscriptionId: JString (required)
   ##                 : Gets subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568413 = path.getOrDefault("resourceGroupName")
-  valid_568413 = validateParameter(valid_568413, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `name` field"
+  var valid_564313 = path.getOrDefault("name")
+  valid_564313 = validateParameter(valid_564313, JString, required = true,
                                  default = nil)
-  if valid_568413 != nil:
-    section.add "resourceGroupName", valid_568413
-  var valid_568414 = path.getOrDefault("name")
-  valid_568414 = validateParameter(valid_568414, JString, required = true,
+  if valid_564313 != nil:
+    section.add "name", valid_564313
+  var valid_564314 = path.getOrDefault("subscriptionId")
+  valid_564314 = validateParameter(valid_564314, JString, required = true,
                                  default = nil)
-  if valid_568414 != nil:
-    section.add "name", valid_568414
-  var valid_568415 = path.getOrDefault("subscriptionId")
-  valid_568415 = validateParameter(valid_568415, JString, required = true,
+  if valid_564314 != nil:
+    section.add "subscriptionId", valid_564314
+  var valid_564315 = path.getOrDefault("resourceGroupName")
+  valid_564315 = validateParameter(valid_564315, JString, required = true,
                                  default = nil)
-  if valid_568415 != nil:
-    section.add "subscriptionId", valid_568415
+  if valid_564315 != nil:
+    section.add "resourceGroupName", valid_564315
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2289,11 +2278,11 @@ proc validate_RedisListKeys_568411(path: JsonNode; query: JsonNode; header: Json
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568416 = query.getOrDefault("api-version")
-  valid_568416 = validateParameter(valid_568416, JString, required = true,
+  var valid_564316 = query.getOrDefault("api-version")
+  valid_564316 = validateParameter(valid_564316, JString, required = true,
                                  default = nil)
-  if valid_568416 != nil:
-    section.add "api-version", valid_568416
+  if valid_564316 != nil:
+    section.add "api-version", valid_564316
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2302,46 +2291,46 @@ proc validate_RedisListKeys_568411(path: JsonNode; query: JsonNode; header: Json
   if body != nil:
     result.add "body", body
 
-proc call*(call_568417: Call_RedisListKeys_568410; path: JsonNode; query: JsonNode;
+proc call*(call_564317: Call_RedisListKeys_564310; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Retrieve a Redis cache's access keys. This operation requires write permission to the cache resource.
   ## 
-  let valid = call_568417.validator(path, query, header, formData, body)
-  let scheme = call_568417.pickScheme
+  let valid = call_564317.validator(path, query, header, formData, body)
+  let scheme = call_564317.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568417.url(scheme.get, call_568417.host, call_568417.base,
-                         call_568417.route, valid.getOrDefault("path"),
+  let url = call_564317.url(scheme.get, call_564317.host, call_564317.base,
+                         call_564317.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568417, url, valid)
+  result = hook(call_564317, url, valid)
 
-proc call*(call_568418: Call_RedisListKeys_568410; resourceGroupName: string;
-          apiVersion: string; name: string; subscriptionId: string): Recallable =
+proc call*(call_564318: Call_RedisListKeys_564310; apiVersion: string; name: string;
+          subscriptionId: string; resourceGroupName: string): Recallable =
   ## redisListKeys
   ## Retrieve a Redis cache's access keys. This operation requires write permission to the cache resource.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
   ##   name: string (required)
   ##       : The name of the Redis cache.
   ##   subscriptionId: string (required)
   ##                 : Gets subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_568419 = newJObject()
-  var query_568420 = newJObject()
-  add(path_568419, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568420, "api-version", newJString(apiVersion))
-  add(path_568419, "name", newJString(name))
-  add(path_568419, "subscriptionId", newJString(subscriptionId))
-  result = call_568418.call(path_568419, query_568420, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564319 = newJObject()
+  var query_564320 = newJObject()
+  add(query_564320, "api-version", newJString(apiVersion))
+  add(path_564319, "name", newJString(name))
+  add(path_564319, "subscriptionId", newJString(subscriptionId))
+  add(path_564319, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564318.call(path_564319, query_564320, nil, nil, nil)
 
-var redisListKeys* = Call_RedisListKeys_568410(name: "redisListKeys",
+var redisListKeys* = Call_RedisListKeys_564310(name: "redisListKeys",
     meth: HttpMethod.HttpPost, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Cache/Redis/{name}/listKeys",
-    validator: validate_RedisListKeys_568411, base: "", url: url_RedisListKeys_568412,
+    validator: validate_RedisListKeys_564311, base: "", url: url_RedisListKeys_564312,
     schemes: {Scheme.Https})
 type
-  Call_PatchSchedulesCreateOrUpdate_568432 = ref object of OpenApiRestCall_567657
-proc url_PatchSchedulesCreateOrUpdate_568434(protocol: Scheme; host: string;
+  Call_PatchSchedulesCreateOrUpdate_564332 = ref object of OpenApiRestCall_563555
+proc url_PatchSchedulesCreateOrUpdate_564334(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2364,37 +2353,36 @@ proc url_PatchSchedulesCreateOrUpdate_568434(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_PatchSchedulesCreateOrUpdate_568433(path: JsonNode; query: JsonNode;
+proc validate_PatchSchedulesCreateOrUpdate_564333(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Create or replace the patching schedule for Redis cache (requires Premium SKU).
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   name: JString (required)
   ##       : The name of the Redis cache.
   ##   subscriptionId: JString (required)
   ##                 : Gets subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568435 = path.getOrDefault("resourceGroupName")
-  valid_568435 = validateParameter(valid_568435, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `name` field"
+  var valid_564335 = path.getOrDefault("name")
+  valid_564335 = validateParameter(valid_564335, JString, required = true,
                                  default = nil)
-  if valid_568435 != nil:
-    section.add "resourceGroupName", valid_568435
-  var valid_568436 = path.getOrDefault("name")
-  valid_568436 = validateParameter(valid_568436, JString, required = true,
+  if valid_564335 != nil:
+    section.add "name", valid_564335
+  var valid_564336 = path.getOrDefault("subscriptionId")
+  valid_564336 = validateParameter(valid_564336, JString, required = true,
                                  default = nil)
-  if valid_568436 != nil:
-    section.add "name", valid_568436
-  var valid_568437 = path.getOrDefault("subscriptionId")
-  valid_568437 = validateParameter(valid_568437, JString, required = true,
+  if valid_564336 != nil:
+    section.add "subscriptionId", valid_564336
+  var valid_564337 = path.getOrDefault("resourceGroupName")
+  valid_564337 = validateParameter(valid_564337, JString, required = true,
                                  default = nil)
-  if valid_568437 != nil:
-    section.add "subscriptionId", valid_568437
+  if valid_564337 != nil:
+    section.add "resourceGroupName", valid_564337
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2402,11 +2390,11 @@ proc validate_PatchSchedulesCreateOrUpdate_568433(path: JsonNode; query: JsonNod
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568438 = query.getOrDefault("api-version")
-  valid_568438 = validateParameter(valid_568438, JString, required = true,
+  var valid_564338 = query.getOrDefault("api-version")
+  valid_564338 = validateParameter(valid_564338, JString, required = true,
                                  default = nil)
-  if valid_568438 != nil:
-    section.add "api-version", valid_568438
+  if valid_564338 != nil:
+    section.add "api-version", valid_564338
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2420,53 +2408,53 @@ proc validate_PatchSchedulesCreateOrUpdate_568433(path: JsonNode; query: JsonNod
   if body != nil:
     result.add "body", body
 
-proc call*(call_568440: Call_PatchSchedulesCreateOrUpdate_568432; path: JsonNode;
+proc call*(call_564340: Call_PatchSchedulesCreateOrUpdate_564332; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Create or replace the patching schedule for Redis cache (requires Premium SKU).
   ## 
-  let valid = call_568440.validator(path, query, header, formData, body)
-  let scheme = call_568440.pickScheme
+  let valid = call_564340.validator(path, query, header, formData, body)
+  let scheme = call_564340.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568440.url(scheme.get, call_568440.host, call_568440.base,
-                         call_568440.route, valid.getOrDefault("path"),
+  let url = call_564340.url(scheme.get, call_564340.host, call_564340.base,
+                         call_564340.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568440, url, valid)
+  result = hook(call_564340, url, valid)
 
-proc call*(call_568441: Call_PatchSchedulesCreateOrUpdate_568432;
-          resourceGroupName: string; apiVersion: string; name: string;
-          subscriptionId: string; parameters: JsonNode): Recallable =
+proc call*(call_564341: Call_PatchSchedulesCreateOrUpdate_564332;
+          apiVersion: string; name: string; subscriptionId: string;
+          resourceGroupName: string; parameters: JsonNode): Recallable =
   ## patchSchedulesCreateOrUpdate
   ## Create or replace the patching schedule for Redis cache (requires Premium SKU).
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
   ##   name: string (required)
   ##       : The name of the Redis cache.
   ##   subscriptionId: string (required)
   ##                 : Gets subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   parameters: JObject (required)
   ##             : Parameters to set the patching schedule for Redis cache.
-  var path_568442 = newJObject()
-  var query_568443 = newJObject()
-  var body_568444 = newJObject()
-  add(path_568442, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568443, "api-version", newJString(apiVersion))
-  add(path_568442, "name", newJString(name))
-  add(path_568442, "subscriptionId", newJString(subscriptionId))
+  var path_564342 = newJObject()
+  var query_564343 = newJObject()
+  var body_564344 = newJObject()
+  add(query_564343, "api-version", newJString(apiVersion))
+  add(path_564342, "name", newJString(name))
+  add(path_564342, "subscriptionId", newJString(subscriptionId))
+  add(path_564342, "resourceGroupName", newJString(resourceGroupName))
   if parameters != nil:
-    body_568444 = parameters
-  result = call_568441.call(path_568442, query_568443, nil, nil, body_568444)
+    body_564344 = parameters
+  result = call_564341.call(path_564342, query_564343, nil, nil, body_564344)
 
-var patchSchedulesCreateOrUpdate* = Call_PatchSchedulesCreateOrUpdate_568432(
+var patchSchedulesCreateOrUpdate* = Call_PatchSchedulesCreateOrUpdate_564332(
     name: "patchSchedulesCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Cache/Redis/{name}/patchSchedules/default",
-    validator: validate_PatchSchedulesCreateOrUpdate_568433, base: "",
-    url: url_PatchSchedulesCreateOrUpdate_568434, schemes: {Scheme.Https})
+    validator: validate_PatchSchedulesCreateOrUpdate_564333, base: "",
+    url: url_PatchSchedulesCreateOrUpdate_564334, schemes: {Scheme.Https})
 type
-  Call_PatchSchedulesGet_568421 = ref object of OpenApiRestCall_567657
-proc url_PatchSchedulesGet_568423(protocol: Scheme; host: string; base: string;
+  Call_PatchSchedulesGet_564321 = ref object of OpenApiRestCall_563555
+proc url_PatchSchedulesGet_564323(protocol: Scheme; host: string; base: string;
                                  route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2489,7 +2477,7 @@ proc url_PatchSchedulesGet_568423(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_PatchSchedulesGet_568422(path: JsonNode; query: JsonNode;
+proc validate_PatchSchedulesGet_564322(path: JsonNode; query: JsonNode;
                                       header: JsonNode; formData: JsonNode;
                                       body: JsonNode): JsonNode =
   ## Gets the patching schedule of a redis cache (requires Premium SKU).
@@ -2497,30 +2485,29 @@ proc validate_PatchSchedulesGet_568422(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   name: JString (required)
   ##       : The name of the redis cache.
   ##   subscriptionId: JString (required)
   ##                 : Gets subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568424 = path.getOrDefault("resourceGroupName")
-  valid_568424 = validateParameter(valid_568424, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `name` field"
+  var valid_564324 = path.getOrDefault("name")
+  valid_564324 = validateParameter(valid_564324, JString, required = true,
                                  default = nil)
-  if valid_568424 != nil:
-    section.add "resourceGroupName", valid_568424
-  var valid_568425 = path.getOrDefault("name")
-  valid_568425 = validateParameter(valid_568425, JString, required = true,
+  if valid_564324 != nil:
+    section.add "name", valid_564324
+  var valid_564325 = path.getOrDefault("subscriptionId")
+  valid_564325 = validateParameter(valid_564325, JString, required = true,
                                  default = nil)
-  if valid_568425 != nil:
-    section.add "name", valid_568425
-  var valid_568426 = path.getOrDefault("subscriptionId")
-  valid_568426 = validateParameter(valid_568426, JString, required = true,
+  if valid_564325 != nil:
+    section.add "subscriptionId", valid_564325
+  var valid_564326 = path.getOrDefault("resourceGroupName")
+  valid_564326 = validateParameter(valid_564326, JString, required = true,
                                  default = nil)
-  if valid_568426 != nil:
-    section.add "subscriptionId", valid_568426
+  if valid_564326 != nil:
+    section.add "resourceGroupName", valid_564326
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2528,11 +2515,11 @@ proc validate_PatchSchedulesGet_568422(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568427 = query.getOrDefault("api-version")
-  valid_568427 = validateParameter(valid_568427, JString, required = true,
+  var valid_564327 = query.getOrDefault("api-version")
+  valid_564327 = validateParameter(valid_564327, JString, required = true,
                                  default = nil)
-  if valid_568427 != nil:
-    section.add "api-version", valid_568427
+  if valid_564327 != nil:
+    section.add "api-version", valid_564327
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2541,46 +2528,46 @@ proc validate_PatchSchedulesGet_568422(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568428: Call_PatchSchedulesGet_568421; path: JsonNode;
+proc call*(call_564328: Call_PatchSchedulesGet_564321; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets the patching schedule of a redis cache (requires Premium SKU).
   ## 
-  let valid = call_568428.validator(path, query, header, formData, body)
-  let scheme = call_568428.pickScheme
+  let valid = call_564328.validator(path, query, header, formData, body)
+  let scheme = call_564328.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568428.url(scheme.get, call_568428.host, call_568428.base,
-                         call_568428.route, valid.getOrDefault("path"),
+  let url = call_564328.url(scheme.get, call_564328.host, call_564328.base,
+                         call_564328.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568428, url, valid)
+  result = hook(call_564328, url, valid)
 
-proc call*(call_568429: Call_PatchSchedulesGet_568421; resourceGroupName: string;
-          apiVersion: string; name: string; subscriptionId: string): Recallable =
+proc call*(call_564329: Call_PatchSchedulesGet_564321; apiVersion: string;
+          name: string; subscriptionId: string; resourceGroupName: string): Recallable =
   ## patchSchedulesGet
   ## Gets the patching schedule of a redis cache (requires Premium SKU).
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
   ##   name: string (required)
   ##       : The name of the redis cache.
   ##   subscriptionId: string (required)
   ##                 : Gets subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_568430 = newJObject()
-  var query_568431 = newJObject()
-  add(path_568430, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568431, "api-version", newJString(apiVersion))
-  add(path_568430, "name", newJString(name))
-  add(path_568430, "subscriptionId", newJString(subscriptionId))
-  result = call_568429.call(path_568430, query_568431, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564330 = newJObject()
+  var query_564331 = newJObject()
+  add(query_564331, "api-version", newJString(apiVersion))
+  add(path_564330, "name", newJString(name))
+  add(path_564330, "subscriptionId", newJString(subscriptionId))
+  add(path_564330, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564329.call(path_564330, query_564331, nil, nil, nil)
 
-var patchSchedulesGet* = Call_PatchSchedulesGet_568421(name: "patchSchedulesGet",
+var patchSchedulesGet* = Call_PatchSchedulesGet_564321(name: "patchSchedulesGet",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Cache/Redis/{name}/patchSchedules/default",
-    validator: validate_PatchSchedulesGet_568422, base: "",
-    url: url_PatchSchedulesGet_568423, schemes: {Scheme.Https})
+    validator: validate_PatchSchedulesGet_564322, base: "",
+    url: url_PatchSchedulesGet_564323, schemes: {Scheme.Https})
 type
-  Call_PatchSchedulesDelete_568445 = ref object of OpenApiRestCall_567657
-proc url_PatchSchedulesDelete_568447(protocol: Scheme; host: string; base: string;
+  Call_PatchSchedulesDelete_564345 = ref object of OpenApiRestCall_563555
+proc url_PatchSchedulesDelete_564347(protocol: Scheme; host: string; base: string;
                                     route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2603,37 +2590,36 @@ proc url_PatchSchedulesDelete_568447(protocol: Scheme; host: string; base: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_PatchSchedulesDelete_568446(path: JsonNode; query: JsonNode;
+proc validate_PatchSchedulesDelete_564346(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Deletes the patching schedule of a redis cache (requires Premium SKU).
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   name: JString (required)
   ##       : The name of the redis cache.
   ##   subscriptionId: JString (required)
   ##                 : Gets subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568448 = path.getOrDefault("resourceGroupName")
-  valid_568448 = validateParameter(valid_568448, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `name` field"
+  var valid_564348 = path.getOrDefault("name")
+  valid_564348 = validateParameter(valid_564348, JString, required = true,
                                  default = nil)
-  if valid_568448 != nil:
-    section.add "resourceGroupName", valid_568448
-  var valid_568449 = path.getOrDefault("name")
-  valid_568449 = validateParameter(valid_568449, JString, required = true,
+  if valid_564348 != nil:
+    section.add "name", valid_564348
+  var valid_564349 = path.getOrDefault("subscriptionId")
+  valid_564349 = validateParameter(valid_564349, JString, required = true,
                                  default = nil)
-  if valid_568449 != nil:
-    section.add "name", valid_568449
-  var valid_568450 = path.getOrDefault("subscriptionId")
-  valid_568450 = validateParameter(valid_568450, JString, required = true,
+  if valid_564349 != nil:
+    section.add "subscriptionId", valid_564349
+  var valid_564350 = path.getOrDefault("resourceGroupName")
+  valid_564350 = validateParameter(valid_564350, JString, required = true,
                                  default = nil)
-  if valid_568450 != nil:
-    section.add "subscriptionId", valid_568450
+  if valid_564350 != nil:
+    section.add "resourceGroupName", valid_564350
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2641,11 +2627,11 @@ proc validate_PatchSchedulesDelete_568446(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568451 = query.getOrDefault("api-version")
-  valid_568451 = validateParameter(valid_568451, JString, required = true,
+  var valid_564351 = query.getOrDefault("api-version")
+  valid_564351 = validateParameter(valid_564351, JString, required = true,
                                  default = nil)
-  if valid_568451 != nil:
-    section.add "api-version", valid_568451
+  if valid_564351 != nil:
+    section.add "api-version", valid_564351
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2654,48 +2640,47 @@ proc validate_PatchSchedulesDelete_568446(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568452: Call_PatchSchedulesDelete_568445; path: JsonNode;
+proc call*(call_564352: Call_PatchSchedulesDelete_564345; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes the patching schedule of a redis cache (requires Premium SKU).
   ## 
-  let valid = call_568452.validator(path, query, header, formData, body)
-  let scheme = call_568452.pickScheme
+  let valid = call_564352.validator(path, query, header, formData, body)
+  let scheme = call_564352.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568452.url(scheme.get, call_568452.host, call_568452.base,
-                         call_568452.route, valid.getOrDefault("path"),
+  let url = call_564352.url(scheme.get, call_564352.host, call_564352.base,
+                         call_564352.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568452, url, valid)
+  result = hook(call_564352, url, valid)
 
-proc call*(call_568453: Call_PatchSchedulesDelete_568445;
-          resourceGroupName: string; apiVersion: string; name: string;
-          subscriptionId: string): Recallable =
+proc call*(call_564353: Call_PatchSchedulesDelete_564345; apiVersion: string;
+          name: string; subscriptionId: string; resourceGroupName: string): Recallable =
   ## patchSchedulesDelete
   ## Deletes the patching schedule of a redis cache (requires Premium SKU).
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
   ##   name: string (required)
   ##       : The name of the redis cache.
   ##   subscriptionId: string (required)
   ##                 : Gets subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  var path_568454 = newJObject()
-  var query_568455 = newJObject()
-  add(path_568454, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568455, "api-version", newJString(apiVersion))
-  add(path_568454, "name", newJString(name))
-  add(path_568454, "subscriptionId", newJString(subscriptionId))
-  result = call_568453.call(path_568454, query_568455, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
+  var path_564354 = newJObject()
+  var query_564355 = newJObject()
+  add(query_564355, "api-version", newJString(apiVersion))
+  add(path_564354, "name", newJString(name))
+  add(path_564354, "subscriptionId", newJString(subscriptionId))
+  add(path_564354, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564353.call(path_564354, query_564355, nil, nil, nil)
 
-var patchSchedulesDelete* = Call_PatchSchedulesDelete_568445(
+var patchSchedulesDelete* = Call_PatchSchedulesDelete_564345(
     name: "patchSchedulesDelete", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Cache/Redis/{name}/patchSchedules/default",
-    validator: validate_PatchSchedulesDelete_568446, base: "",
-    url: url_PatchSchedulesDelete_568447, schemes: {Scheme.Https})
+    validator: validate_PatchSchedulesDelete_564346, base: "",
+    url: url_PatchSchedulesDelete_564347, schemes: {Scheme.Https})
 type
-  Call_RedisRegenerateKey_568456 = ref object of OpenApiRestCall_567657
-proc url_RedisRegenerateKey_568458(protocol: Scheme; host: string; base: string;
+  Call_RedisRegenerateKey_564356 = ref object of OpenApiRestCall_563555
+proc url_RedisRegenerateKey_564358(protocol: Scheme; host: string; base: string;
                                   route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -2718,7 +2703,7 @@ proc url_RedisRegenerateKey_568458(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_RedisRegenerateKey_568457(path: JsonNode; query: JsonNode;
+proc validate_RedisRegenerateKey_564357(path: JsonNode; query: JsonNode;
                                        header: JsonNode; formData: JsonNode;
                                        body: JsonNode): JsonNode =
   ## Regenerate Redis cache's access keys. This operation requires write permission to the cache resource.
@@ -2726,30 +2711,29 @@ proc validate_RedisRegenerateKey_568457(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group.
   ##   name: JString (required)
   ##       : The name of the Redis cache.
   ##   subscriptionId: JString (required)
   ##                 : Gets subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group.
   section = newJObject()
-  assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_568459 = path.getOrDefault("resourceGroupName")
-  valid_568459 = validateParameter(valid_568459, JString, required = true,
+  assert path != nil, "path argument is necessary due to required `name` field"
+  var valid_564359 = path.getOrDefault("name")
+  valid_564359 = validateParameter(valid_564359, JString, required = true,
                                  default = nil)
-  if valid_568459 != nil:
-    section.add "resourceGroupName", valid_568459
-  var valid_568460 = path.getOrDefault("name")
-  valid_568460 = validateParameter(valid_568460, JString, required = true,
+  if valid_564359 != nil:
+    section.add "name", valid_564359
+  var valid_564360 = path.getOrDefault("subscriptionId")
+  valid_564360 = validateParameter(valid_564360, JString, required = true,
                                  default = nil)
-  if valid_568460 != nil:
-    section.add "name", valid_568460
-  var valid_568461 = path.getOrDefault("subscriptionId")
-  valid_568461 = validateParameter(valid_568461, JString, required = true,
+  if valid_564360 != nil:
+    section.add "subscriptionId", valid_564360
+  var valid_564361 = path.getOrDefault("resourceGroupName")
+  valid_564361 = validateParameter(valid_564361, JString, required = true,
                                  default = nil)
-  if valid_568461 != nil:
-    section.add "subscriptionId", valid_568461
+  if valid_564361 != nil:
+    section.add "resourceGroupName", valid_564361
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -2757,11 +2741,11 @@ proc validate_RedisRegenerateKey_568457(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_568462 = query.getOrDefault("api-version")
-  valid_568462 = validateParameter(valid_568462, JString, required = true,
+  var valid_564362 = query.getOrDefault("api-version")
+  valid_564362 = validateParameter(valid_564362, JString, required = true,
                                  default = nil)
-  if valid_568462 != nil:
-    section.add "api-version", valid_568462
+  if valid_564362 != nil:
+    section.add "api-version", valid_564362
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -2775,50 +2759,50 @@ proc validate_RedisRegenerateKey_568457(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_568464: Call_RedisRegenerateKey_568456; path: JsonNode;
+proc call*(call_564364: Call_RedisRegenerateKey_564356; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Regenerate Redis cache's access keys. This operation requires write permission to the cache resource.
   ## 
-  let valid = call_568464.validator(path, query, header, formData, body)
-  let scheme = call_568464.pickScheme
+  let valid = call_564364.validator(path, query, header, formData, body)
+  let scheme = call_564364.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_568464.url(scheme.get, call_568464.host, call_568464.base,
-                         call_568464.route, valid.getOrDefault("path"),
+  let url = call_564364.url(scheme.get, call_564364.host, call_564364.base,
+                         call_564364.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_568464, url, valid)
+  result = hook(call_564364, url, valid)
 
-proc call*(call_568465: Call_RedisRegenerateKey_568456; resourceGroupName: string;
-          apiVersion: string; name: string; subscriptionId: string;
+proc call*(call_564365: Call_RedisRegenerateKey_564356; apiVersion: string;
+          name: string; subscriptionId: string; resourceGroupName: string;
           parameters: JsonNode): Recallable =
   ## redisRegenerateKey
   ## Regenerate Redis cache's access keys. This operation requires write permission to the cache resource.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
   ##   name: string (required)
   ##       : The name of the Redis cache.
   ##   subscriptionId: string (required)
   ##                 : Gets subscription credentials which uniquely identify the Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group.
   ##   parameters: JObject (required)
   ##             : Specifies which key to regenerate.
-  var path_568466 = newJObject()
-  var query_568467 = newJObject()
-  var body_568468 = newJObject()
-  add(path_568466, "resourceGroupName", newJString(resourceGroupName))
-  add(query_568467, "api-version", newJString(apiVersion))
-  add(path_568466, "name", newJString(name))
-  add(path_568466, "subscriptionId", newJString(subscriptionId))
+  var path_564366 = newJObject()
+  var query_564367 = newJObject()
+  var body_564368 = newJObject()
+  add(query_564367, "api-version", newJString(apiVersion))
+  add(path_564366, "name", newJString(name))
+  add(path_564366, "subscriptionId", newJString(subscriptionId))
+  add(path_564366, "resourceGroupName", newJString(resourceGroupName))
   if parameters != nil:
-    body_568468 = parameters
-  result = call_568465.call(path_568466, query_568467, nil, nil, body_568468)
+    body_564368 = parameters
+  result = call_564365.call(path_564366, query_564367, nil, nil, body_564368)
 
-var redisRegenerateKey* = Call_RedisRegenerateKey_568456(
+var redisRegenerateKey* = Call_RedisRegenerateKey_564356(
     name: "redisRegenerateKey", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Cache/Redis/{name}/regenerateKey",
-    validator: validate_RedisRegenerateKey_568457, base: "",
-    url: url_RedisRegenerateKey_568458, schemes: {Scheme.Https})
+    validator: validate_RedisRegenerateKey_564357, base: "",
+    url: url_RedisRegenerateKey_564358, schemes: {Scheme.Https})
 export
   rest
 

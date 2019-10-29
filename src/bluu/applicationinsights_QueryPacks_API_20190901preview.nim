@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_573658 = ref object of OpenApiRestCall
+  OpenApiRestCall_563556 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_573658](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563556](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_573658): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563556): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,8 +107,8 @@ const
   macServiceName = "applicationinsights-QueryPacks_API"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_QueryPacksList_573880 = ref object of OpenApiRestCall_573658
-proc url_QueryPacksList_573882(protocol: Scheme; host: string; base: string;
+  Call_QueryPacksList_563778 = ref object of OpenApiRestCall_563556
+proc url_QueryPacksList_563780(protocol: Scheme; host: string; base: string;
                               route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -120,7 +124,7 @@ proc url_QueryPacksList_573882(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_QueryPacksList_573881(path: JsonNode; query: JsonNode;
+proc validate_QueryPacksList_563779(path: JsonNode; query: JsonNode;
                                    header: JsonNode; formData: JsonNode;
                                    body: JsonNode): JsonNode =
   ## Gets a list of all Log Analytics QueryPacks within a subscription.
@@ -133,11 +137,11 @@ proc validate_QueryPacksList_573881(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_574042 = path.getOrDefault("subscriptionId")
-  valid_574042 = validateParameter(valid_574042, JString, required = true,
+  var valid_563942 = path.getOrDefault("subscriptionId")
+  valid_563942 = validateParameter(valid_563942, JString, required = true,
                                  default = nil)
-  if valid_574042 != nil:
-    section.add "subscriptionId", valid_574042
+  if valid_563942 != nil:
+    section.add "subscriptionId", valid_563942
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -145,11 +149,11 @@ proc validate_QueryPacksList_573881(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574043 = query.getOrDefault("api-version")
-  valid_574043 = validateParameter(valid_574043, JString, required = true,
+  var valid_563943 = query.getOrDefault("api-version")
+  valid_563943 = validateParameter(valid_563943, JString, required = true,
                                  default = nil)
-  if valid_574043 != nil:
-    section.add "api-version", valid_574043
+  if valid_563943 != nil:
+    section.add "api-version", valid_563943
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -158,20 +162,20 @@ proc validate_QueryPacksList_573881(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574070: Call_QueryPacksList_573880; path: JsonNode; query: JsonNode;
+proc call*(call_563970: Call_QueryPacksList_563778; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets a list of all Log Analytics QueryPacks within a subscription.
   ## 
-  let valid = call_574070.validator(path, query, header, formData, body)
-  let scheme = call_574070.pickScheme
+  let valid = call_563970.validator(path, query, header, formData, body)
+  let scheme = call_563970.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574070.url(scheme.get, call_574070.host, call_574070.base,
-                         call_574070.route, valid.getOrDefault("path"),
+  let url = call_563970.url(scheme.get, call_563970.host, call_563970.base,
+                         call_563970.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574070, url, valid)
+  result = hook(call_563970, url, valid)
 
-proc call*(call_574141: Call_QueryPacksList_573880; apiVersion: string;
+proc call*(call_564041: Call_QueryPacksList_563778; apiVersion: string;
           subscriptionId: string): Recallable =
   ## queryPacksList
   ## Gets a list of all Log Analytics QueryPacks within a subscription.
@@ -179,19 +183,19 @@ proc call*(call_574141: Call_QueryPacksList_573880; apiVersion: string;
   ##             : The API version to use for this operation.
   ##   subscriptionId: string (required)
   ##                 : The ID of the target subscription.
-  var path_574142 = newJObject()
-  var query_574144 = newJObject()
-  add(query_574144, "api-version", newJString(apiVersion))
-  add(path_574142, "subscriptionId", newJString(subscriptionId))
-  result = call_574141.call(path_574142, query_574144, nil, nil, nil)
+  var path_564042 = newJObject()
+  var query_564044 = newJObject()
+  add(query_564044, "api-version", newJString(apiVersion))
+  add(path_564042, "subscriptionId", newJString(subscriptionId))
+  result = call_564041.call(path_564042, query_564044, nil, nil, nil)
 
-var queryPacksList* = Call_QueryPacksList_573880(name: "queryPacksList",
+var queryPacksList* = Call_QueryPacksList_563778(name: "queryPacksList",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/microsoft.insights/queryPacks",
-    validator: validate_QueryPacksList_573881, base: "", url: url_QueryPacksList_573882,
+    validator: validate_QueryPacksList_563779, base: "", url: url_QueryPacksList_563780,
     schemes: {Scheme.Https})
 type
-  Call_QueryPacksListByResourceGroup_574183 = ref object of OpenApiRestCall_573658
-proc url_QueryPacksListByResourceGroup_574185(protocol: Scheme; host: string;
+  Call_QueryPacksListByResourceGroup_564083 = ref object of OpenApiRestCall_563556
+proc url_QueryPacksListByResourceGroup_564085(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -211,30 +215,30 @@ proc url_QueryPacksListByResourceGroup_574185(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_QueryPacksListByResourceGroup_574184(path: JsonNode; query: JsonNode;
+proc validate_QueryPacksListByResourceGroup_564084(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets a list of Log Analytics QueryPacks within a resource group.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group. The name is case insensitive.
   ##   subscriptionId: JString (required)
   ##                 : The ID of the target subscription.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group. The name is case insensitive.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_574186 = path.getOrDefault("resourceGroupName")
-  valid_574186 = validateParameter(valid_574186, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564086 = path.getOrDefault("subscriptionId")
+  valid_564086 = validateParameter(valid_564086, JString, required = true,
                                  default = nil)
-  if valid_574186 != nil:
-    section.add "resourceGroupName", valid_574186
-  var valid_574187 = path.getOrDefault("subscriptionId")
-  valid_574187 = validateParameter(valid_574187, JString, required = true,
+  if valid_564086 != nil:
+    section.add "subscriptionId", valid_564086
+  var valid_564087 = path.getOrDefault("resourceGroupName")
+  valid_564087 = validateParameter(valid_564087, JString, required = true,
                                  default = nil)
-  if valid_574187 != nil:
-    section.add "subscriptionId", valid_574187
+  if valid_564087 != nil:
+    section.add "resourceGroupName", valid_564087
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -242,11 +246,11 @@ proc validate_QueryPacksListByResourceGroup_574184(path: JsonNode; query: JsonNo
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574188 = query.getOrDefault("api-version")
-  valid_574188 = validateParameter(valid_574188, JString, required = true,
+  var valid_564088 = query.getOrDefault("api-version")
+  valid_564088 = validateParameter(valid_564088, JString, required = true,
                                  default = nil)
-  if valid_574188 != nil:
-    section.add "api-version", valid_574188
+  if valid_564088 != nil:
+    section.add "api-version", valid_564088
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -255,44 +259,44 @@ proc validate_QueryPacksListByResourceGroup_574184(path: JsonNode; query: JsonNo
   if body != nil:
     result.add "body", body
 
-proc call*(call_574189: Call_QueryPacksListByResourceGroup_574183; path: JsonNode;
+proc call*(call_564089: Call_QueryPacksListByResourceGroup_564083; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets a list of Log Analytics QueryPacks within a resource group.
   ## 
-  let valid = call_574189.validator(path, query, header, formData, body)
-  let scheme = call_574189.pickScheme
+  let valid = call_564089.validator(path, query, header, formData, body)
+  let scheme = call_564089.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574189.url(scheme.get, call_574189.host, call_574189.base,
-                         call_574189.route, valid.getOrDefault("path"),
+  let url = call_564089.url(scheme.get, call_564089.host, call_564089.base,
+                         call_564089.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574189, url, valid)
+  result = hook(call_564089, url, valid)
 
-proc call*(call_574190: Call_QueryPacksListByResourceGroup_574183;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string): Recallable =
+proc call*(call_564090: Call_QueryPacksListByResourceGroup_564083;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string): Recallable =
   ## queryPacksListByResourceGroup
   ## Gets a list of Log Analytics QueryPacks within a resource group.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group. The name is case insensitive.
   ##   apiVersion: string (required)
   ##             : The API version to use for this operation.
   ##   subscriptionId: string (required)
   ##                 : The ID of the target subscription.
-  var path_574191 = newJObject()
-  var query_574192 = newJObject()
-  add(path_574191, "resourceGroupName", newJString(resourceGroupName))
-  add(query_574192, "api-version", newJString(apiVersion))
-  add(path_574191, "subscriptionId", newJString(subscriptionId))
-  result = call_574190.call(path_574191, query_574192, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group. The name is case insensitive.
+  var path_564091 = newJObject()
+  var query_564092 = newJObject()
+  add(query_564092, "api-version", newJString(apiVersion))
+  add(path_564091, "subscriptionId", newJString(subscriptionId))
+  add(path_564091, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564090.call(path_564091, query_564092, nil, nil, nil)
 
-var queryPacksListByResourceGroup* = Call_QueryPacksListByResourceGroup_574183(
+var queryPacksListByResourceGroup* = Call_QueryPacksListByResourceGroup_564083(
     name: "queryPacksListByResourceGroup", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/microsoft.insights/queryPacks",
-    validator: validate_QueryPacksListByResourceGroup_574184, base: "",
-    url: url_QueryPacksListByResourceGroup_574185, schemes: {Scheme.Https})
+    validator: validate_QueryPacksListByResourceGroup_564084, base: "",
+    url: url_QueryPacksListByResourceGroup_564085, schemes: {Scheme.Https})
 type
-  Call_QueryPacksCreateOrUpdate_574213 = ref object of OpenApiRestCall_573658
-proc url_QueryPacksCreateOrUpdate_574215(protocol: Scheme; host: string;
+  Call_QueryPacksCreateOrUpdate_564113 = ref object of OpenApiRestCall_563556
+proc url_QueryPacksCreateOrUpdate_564115(protocol: Scheme; host: string;
                                         base: string; route: string; path: JsonNode;
                                         query: JsonNode): Uri =
   result.scheme = $protocol
@@ -315,37 +319,37 @@ proc url_QueryPacksCreateOrUpdate_574215(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_QueryPacksCreateOrUpdate_574214(path: JsonNode; query: JsonNode;
+proc validate_QueryPacksCreateOrUpdate_564114(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Creates (or updates) a Log Analytics QueryPack. Note: You cannot specify a different value for InstrumentationKey nor AppId in the Put operation.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group. The name is case insensitive.
   ##   queryPackName: JString (required)
   ##                : The name of the Log Analytics QueryPack resource.
   ##   subscriptionId: JString (required)
   ##                 : The ID of the target subscription.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group. The name is case insensitive.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_574233 = path.getOrDefault("resourceGroupName")
-  valid_574233 = validateParameter(valid_574233, JString, required = true,
+        "path argument is necessary due to required `queryPackName` field"
+  var valid_564133 = path.getOrDefault("queryPackName")
+  valid_564133 = validateParameter(valid_564133, JString, required = true,
                                  default = nil)
-  if valid_574233 != nil:
-    section.add "resourceGroupName", valid_574233
-  var valid_574234 = path.getOrDefault("queryPackName")
-  valid_574234 = validateParameter(valid_574234, JString, required = true,
+  if valid_564133 != nil:
+    section.add "queryPackName", valid_564133
+  var valid_564134 = path.getOrDefault("subscriptionId")
+  valid_564134 = validateParameter(valid_564134, JString, required = true,
                                  default = nil)
-  if valid_574234 != nil:
-    section.add "queryPackName", valid_574234
-  var valid_574235 = path.getOrDefault("subscriptionId")
-  valid_574235 = validateParameter(valid_574235, JString, required = true,
+  if valid_564134 != nil:
+    section.add "subscriptionId", valid_564134
+  var valid_564135 = path.getOrDefault("resourceGroupName")
+  valid_564135 = validateParameter(valid_564135, JString, required = true,
                                  default = nil)
-  if valid_574235 != nil:
-    section.add "subscriptionId", valid_574235
+  if valid_564135 != nil:
+    section.add "resourceGroupName", valid_564135
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -353,11 +357,11 @@ proc validate_QueryPacksCreateOrUpdate_574214(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574236 = query.getOrDefault("api-version")
-  valid_574236 = validateParameter(valid_574236, JString, required = true,
+  var valid_564136 = query.getOrDefault("api-version")
+  valid_564136 = validateParameter(valid_564136, JString, required = true,
                                  default = nil)
-  if valid_574236 != nil:
-    section.add "api-version", valid_574236
+  if valid_564136 != nil:
+    section.add "api-version", valid_564136
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -371,53 +375,53 @@ proc validate_QueryPacksCreateOrUpdate_574214(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574238: Call_QueryPacksCreateOrUpdate_574213; path: JsonNode;
+proc call*(call_564138: Call_QueryPacksCreateOrUpdate_564113; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Creates (or updates) a Log Analytics QueryPack. Note: You cannot specify a different value for InstrumentationKey nor AppId in the Put operation.
   ## 
-  let valid = call_574238.validator(path, query, header, formData, body)
-  let scheme = call_574238.pickScheme
+  let valid = call_564138.validator(path, query, header, formData, body)
+  let scheme = call_564138.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574238.url(scheme.get, call_574238.host, call_574238.base,
-                         call_574238.route, valid.getOrDefault("path"),
+  let url = call_564138.url(scheme.get, call_564138.host, call_564138.base,
+                         call_564138.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574238, url, valid)
+  result = hook(call_564138, url, valid)
 
-proc call*(call_574239: Call_QueryPacksCreateOrUpdate_574213;
-          resourceGroupName: string; apiVersion: string; queryPackName: string;
-          subscriptionId: string; LogAnalyticsQueryPackPayload: JsonNode): Recallable =
+proc call*(call_564139: Call_QueryPacksCreateOrUpdate_564113;
+          queryPackName: string; apiVersion: string; subscriptionId: string;
+          resourceGroupName: string; LogAnalyticsQueryPackPayload: JsonNode): Recallable =
   ## queryPacksCreateOrUpdate
   ## Creates (or updates) a Log Analytics QueryPack. Note: You cannot specify a different value for InstrumentationKey nor AppId in the Put operation.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group. The name is case insensitive.
-  ##   apiVersion: string (required)
-  ##             : The API version to use for this operation.
   ##   queryPackName: string (required)
   ##                : The name of the Log Analytics QueryPack resource.
+  ##   apiVersion: string (required)
+  ##             : The API version to use for this operation.
   ##   subscriptionId: string (required)
   ##                 : The ID of the target subscription.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group. The name is case insensitive.
   ##   LogAnalyticsQueryPackPayload: JObject (required)
   ##                               : Properties that need to be specified to create or update a Log Analytics QueryPack.
-  var path_574240 = newJObject()
-  var query_574241 = newJObject()
-  var body_574242 = newJObject()
-  add(path_574240, "resourceGroupName", newJString(resourceGroupName))
-  add(query_574241, "api-version", newJString(apiVersion))
-  add(path_574240, "queryPackName", newJString(queryPackName))
-  add(path_574240, "subscriptionId", newJString(subscriptionId))
+  var path_564140 = newJObject()
+  var query_564141 = newJObject()
+  var body_564142 = newJObject()
+  add(path_564140, "queryPackName", newJString(queryPackName))
+  add(query_564141, "api-version", newJString(apiVersion))
+  add(path_564140, "subscriptionId", newJString(subscriptionId))
+  add(path_564140, "resourceGroupName", newJString(resourceGroupName))
   if LogAnalyticsQueryPackPayload != nil:
-    body_574242 = LogAnalyticsQueryPackPayload
-  result = call_574239.call(path_574240, query_574241, nil, nil, body_574242)
+    body_564142 = LogAnalyticsQueryPackPayload
+  result = call_564139.call(path_564140, query_564141, nil, nil, body_564142)
 
-var queryPacksCreateOrUpdate* = Call_QueryPacksCreateOrUpdate_574213(
+var queryPacksCreateOrUpdate* = Call_QueryPacksCreateOrUpdate_564113(
     name: "queryPacksCreateOrUpdate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/microsoft.insights/queryPacks/{queryPackName}",
-    validator: validate_QueryPacksCreateOrUpdate_574214, base: "",
-    url: url_QueryPacksCreateOrUpdate_574215, schemes: {Scheme.Https})
+    validator: validate_QueryPacksCreateOrUpdate_564114, base: "",
+    url: url_QueryPacksCreateOrUpdate_564115, schemes: {Scheme.Https})
 type
-  Call_QueryPacksGet_574193 = ref object of OpenApiRestCall_573658
-proc url_QueryPacksGet_574195(protocol: Scheme; host: string; base: string;
+  Call_QueryPacksGet_564093 = ref object of OpenApiRestCall_563556
+proc url_QueryPacksGet_564095(protocol: Scheme; host: string; base: string;
                              route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -439,37 +443,37 @@ proc url_QueryPacksGet_574195(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_QueryPacksGet_574194(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_QueryPacksGet_564094(path: JsonNode; query: JsonNode; header: JsonNode;
                                   formData: JsonNode; body: JsonNode): JsonNode =
   ## Returns a Log Analytics QueryPack.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group. The name is case insensitive.
   ##   queryPackName: JString (required)
   ##                : The name of the Log Analytics QueryPack resource.
   ##   subscriptionId: JString (required)
   ##                 : The ID of the target subscription.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group. The name is case insensitive.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_574205 = path.getOrDefault("resourceGroupName")
-  valid_574205 = validateParameter(valid_574205, JString, required = true,
+        "path argument is necessary due to required `queryPackName` field"
+  var valid_564105 = path.getOrDefault("queryPackName")
+  valid_564105 = validateParameter(valid_564105, JString, required = true,
                                  default = nil)
-  if valid_574205 != nil:
-    section.add "resourceGroupName", valid_574205
-  var valid_574206 = path.getOrDefault("queryPackName")
-  valid_574206 = validateParameter(valid_574206, JString, required = true,
+  if valid_564105 != nil:
+    section.add "queryPackName", valid_564105
+  var valid_564106 = path.getOrDefault("subscriptionId")
+  valid_564106 = validateParameter(valid_564106, JString, required = true,
                                  default = nil)
-  if valid_574206 != nil:
-    section.add "queryPackName", valid_574206
-  var valid_574207 = path.getOrDefault("subscriptionId")
-  valid_574207 = validateParameter(valid_574207, JString, required = true,
+  if valid_564106 != nil:
+    section.add "subscriptionId", valid_564106
+  var valid_564107 = path.getOrDefault("resourceGroupName")
+  valid_564107 = validateParameter(valid_564107, JString, required = true,
                                  default = nil)
-  if valid_574207 != nil:
-    section.add "subscriptionId", valid_574207
+  if valid_564107 != nil:
+    section.add "resourceGroupName", valid_564107
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -477,11 +481,11 @@ proc validate_QueryPacksGet_574194(path: JsonNode; query: JsonNode; header: Json
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574208 = query.getOrDefault("api-version")
-  valid_574208 = validateParameter(valid_574208, JString, required = true,
+  var valid_564108 = query.getOrDefault("api-version")
+  valid_564108 = validateParameter(valid_564108, JString, required = true,
                                  default = nil)
-  if valid_574208 != nil:
-    section.add "api-version", valid_574208
+  if valid_564108 != nil:
+    section.add "api-version", valid_564108
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -490,46 +494,46 @@ proc validate_QueryPacksGet_574194(path: JsonNode; query: JsonNode; header: Json
   if body != nil:
     result.add "body", body
 
-proc call*(call_574209: Call_QueryPacksGet_574193; path: JsonNode; query: JsonNode;
+proc call*(call_564109: Call_QueryPacksGet_564093; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Returns a Log Analytics QueryPack.
   ## 
-  let valid = call_574209.validator(path, query, header, formData, body)
-  let scheme = call_574209.pickScheme
+  let valid = call_564109.validator(path, query, header, formData, body)
+  let scheme = call_564109.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574209.url(scheme.get, call_574209.host, call_574209.base,
-                         call_574209.route, valid.getOrDefault("path"),
+  let url = call_564109.url(scheme.get, call_564109.host, call_564109.base,
+                         call_564109.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574209, url, valid)
+  result = hook(call_564109, url, valid)
 
-proc call*(call_574210: Call_QueryPacksGet_574193; resourceGroupName: string;
-          apiVersion: string; queryPackName: string; subscriptionId: string): Recallable =
+proc call*(call_564110: Call_QueryPacksGet_564093; queryPackName: string;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string): Recallable =
   ## queryPacksGet
   ## Returns a Log Analytics QueryPack.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group. The name is case insensitive.
-  ##   apiVersion: string (required)
-  ##             : The API version to use for this operation.
   ##   queryPackName: string (required)
   ##                : The name of the Log Analytics QueryPack resource.
+  ##   apiVersion: string (required)
+  ##             : The API version to use for this operation.
   ##   subscriptionId: string (required)
   ##                 : The ID of the target subscription.
-  var path_574211 = newJObject()
-  var query_574212 = newJObject()
-  add(path_574211, "resourceGroupName", newJString(resourceGroupName))
-  add(query_574212, "api-version", newJString(apiVersion))
-  add(path_574211, "queryPackName", newJString(queryPackName))
-  add(path_574211, "subscriptionId", newJString(subscriptionId))
-  result = call_574210.call(path_574211, query_574212, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group. The name is case insensitive.
+  var path_564111 = newJObject()
+  var query_564112 = newJObject()
+  add(path_564111, "queryPackName", newJString(queryPackName))
+  add(query_564112, "api-version", newJString(apiVersion))
+  add(path_564111, "subscriptionId", newJString(subscriptionId))
+  add(path_564111, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564110.call(path_564111, query_564112, nil, nil, nil)
 
-var queryPacksGet* = Call_QueryPacksGet_574193(name: "queryPacksGet",
+var queryPacksGet* = Call_QueryPacksGet_564093(name: "queryPacksGet",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/microsoft.insights/queryPacks/{queryPackName}",
-    validator: validate_QueryPacksGet_574194, base: "", url: url_QueryPacksGet_574195,
+    validator: validate_QueryPacksGet_564094, base: "", url: url_QueryPacksGet_564095,
     schemes: {Scheme.Https})
 type
-  Call_QueryPacksUpdateTags_574254 = ref object of OpenApiRestCall_573658
-proc url_QueryPacksUpdateTags_574256(protocol: Scheme; host: string; base: string;
+  Call_QueryPacksUpdateTags_564154 = ref object of OpenApiRestCall_563556
+proc url_QueryPacksUpdateTags_564156(protocol: Scheme; host: string; base: string;
                                     route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -551,37 +555,37 @@ proc url_QueryPacksUpdateTags_574256(protocol: Scheme; host: string; base: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_QueryPacksUpdateTags_574255(path: JsonNode; query: JsonNode;
+proc validate_QueryPacksUpdateTags_564155(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Updates an existing QueryPack's tags. To update other fields use the CreateOrUpdate method.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group. The name is case insensitive.
   ##   queryPackName: JString (required)
   ##                : The name of the Log Analytics QueryPack resource.
   ##   subscriptionId: JString (required)
   ##                 : The ID of the target subscription.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group. The name is case insensitive.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_574257 = path.getOrDefault("resourceGroupName")
-  valid_574257 = validateParameter(valid_574257, JString, required = true,
+        "path argument is necessary due to required `queryPackName` field"
+  var valid_564157 = path.getOrDefault("queryPackName")
+  valid_564157 = validateParameter(valid_564157, JString, required = true,
                                  default = nil)
-  if valid_574257 != nil:
-    section.add "resourceGroupName", valid_574257
-  var valid_574258 = path.getOrDefault("queryPackName")
-  valid_574258 = validateParameter(valid_574258, JString, required = true,
+  if valid_564157 != nil:
+    section.add "queryPackName", valid_564157
+  var valid_564158 = path.getOrDefault("subscriptionId")
+  valid_564158 = validateParameter(valid_564158, JString, required = true,
                                  default = nil)
-  if valid_574258 != nil:
-    section.add "queryPackName", valid_574258
-  var valid_574259 = path.getOrDefault("subscriptionId")
-  valid_574259 = validateParameter(valid_574259, JString, required = true,
+  if valid_564158 != nil:
+    section.add "subscriptionId", valid_564158
+  var valid_564159 = path.getOrDefault("resourceGroupName")
+  valid_564159 = validateParameter(valid_564159, JString, required = true,
                                  default = nil)
-  if valid_574259 != nil:
-    section.add "subscriptionId", valid_574259
+  if valid_564159 != nil:
+    section.add "resourceGroupName", valid_564159
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -589,11 +593,11 @@ proc validate_QueryPacksUpdateTags_574255(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574260 = query.getOrDefault("api-version")
-  valid_574260 = validateParameter(valid_574260, JString, required = true,
+  var valid_564160 = query.getOrDefault("api-version")
+  valid_564160 = validateParameter(valid_564160, JString, required = true,
                                  default = nil)
-  if valid_574260 != nil:
-    section.add "api-version", valid_574260
+  if valid_564160 != nil:
+    section.add "api-version", valid_564160
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -607,53 +611,53 @@ proc validate_QueryPacksUpdateTags_574255(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574262: Call_QueryPacksUpdateTags_574254; path: JsonNode;
+proc call*(call_564162: Call_QueryPacksUpdateTags_564154; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Updates an existing QueryPack's tags. To update other fields use the CreateOrUpdate method.
   ## 
-  let valid = call_574262.validator(path, query, header, formData, body)
-  let scheme = call_574262.pickScheme
+  let valid = call_564162.validator(path, query, header, formData, body)
+  let scheme = call_564162.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574262.url(scheme.get, call_574262.host, call_574262.base,
-                         call_574262.route, valid.getOrDefault("path"),
+  let url = call_564162.url(scheme.get, call_564162.host, call_564162.base,
+                         call_564162.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574262, url, valid)
+  result = hook(call_564162, url, valid)
 
-proc call*(call_574263: Call_QueryPacksUpdateTags_574254;
-          resourceGroupName: string; apiVersion: string; QueryPackTags: JsonNode;
-          queryPackName: string; subscriptionId: string): Recallable =
+proc call*(call_564163: Call_QueryPacksUpdateTags_564154; queryPackName: string;
+          QueryPackTags: JsonNode; apiVersion: string; subscriptionId: string;
+          resourceGroupName: string): Recallable =
   ## queryPacksUpdateTags
   ## Updates an existing QueryPack's tags. To update other fields use the CreateOrUpdate method.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group. The name is case insensitive.
-  ##   apiVersion: string (required)
-  ##             : The API version to use for this operation.
-  ##   QueryPackTags: JObject (required)
-  ##                : Updated tag information to set into the QueryPack instance.
   ##   queryPackName: string (required)
   ##                : The name of the Log Analytics QueryPack resource.
+  ##   QueryPackTags: JObject (required)
+  ##                : Updated tag information to set into the QueryPack instance.
+  ##   apiVersion: string (required)
+  ##             : The API version to use for this operation.
   ##   subscriptionId: string (required)
   ##                 : The ID of the target subscription.
-  var path_574264 = newJObject()
-  var query_574265 = newJObject()
-  var body_574266 = newJObject()
-  add(path_574264, "resourceGroupName", newJString(resourceGroupName))
-  add(query_574265, "api-version", newJString(apiVersion))
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group. The name is case insensitive.
+  var path_564164 = newJObject()
+  var query_564165 = newJObject()
+  var body_564166 = newJObject()
+  add(path_564164, "queryPackName", newJString(queryPackName))
   if QueryPackTags != nil:
-    body_574266 = QueryPackTags
-  add(path_574264, "queryPackName", newJString(queryPackName))
-  add(path_574264, "subscriptionId", newJString(subscriptionId))
-  result = call_574263.call(path_574264, query_574265, nil, nil, body_574266)
+    body_564166 = QueryPackTags
+  add(query_564165, "api-version", newJString(apiVersion))
+  add(path_564164, "subscriptionId", newJString(subscriptionId))
+  add(path_564164, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564163.call(path_564164, query_564165, nil, nil, body_564166)
 
-var queryPacksUpdateTags* = Call_QueryPacksUpdateTags_574254(
+var queryPacksUpdateTags* = Call_QueryPacksUpdateTags_564154(
     name: "queryPacksUpdateTags", meth: HttpMethod.HttpPatch,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/microsoft.insights/queryPacks/{queryPackName}",
-    validator: validate_QueryPacksUpdateTags_574255, base: "",
-    url: url_QueryPacksUpdateTags_574256, schemes: {Scheme.Https})
+    validator: validate_QueryPacksUpdateTags_564155, base: "",
+    url: url_QueryPacksUpdateTags_564156, schemes: {Scheme.Https})
 type
-  Call_QueryPacksDelete_574243 = ref object of OpenApiRestCall_573658
-proc url_QueryPacksDelete_574245(protocol: Scheme; host: string; base: string;
+  Call_QueryPacksDelete_564143 = ref object of OpenApiRestCall_563556
+proc url_QueryPacksDelete_564145(protocol: Scheme; host: string; base: string;
                                 route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -675,7 +679,7 @@ proc url_QueryPacksDelete_574245(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_QueryPacksDelete_574244(path: JsonNode; query: JsonNode;
+proc validate_QueryPacksDelete_564144(path: JsonNode; query: JsonNode;
                                      header: JsonNode; formData: JsonNode;
                                      body: JsonNode): JsonNode =
   ## Deletes a Log Analytics QueryPack.
@@ -683,30 +687,30 @@ proc validate_QueryPacksDelete_574244(path: JsonNode; query: JsonNode;
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group. The name is case insensitive.
   ##   queryPackName: JString (required)
   ##                : The name of the Log Analytics QueryPack resource.
   ##   subscriptionId: JString (required)
   ##                 : The ID of the target subscription.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group. The name is case insensitive.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_574246 = path.getOrDefault("resourceGroupName")
-  valid_574246 = validateParameter(valid_574246, JString, required = true,
+        "path argument is necessary due to required `queryPackName` field"
+  var valid_564146 = path.getOrDefault("queryPackName")
+  valid_564146 = validateParameter(valid_564146, JString, required = true,
                                  default = nil)
-  if valid_574246 != nil:
-    section.add "resourceGroupName", valid_574246
-  var valid_574247 = path.getOrDefault("queryPackName")
-  valid_574247 = validateParameter(valid_574247, JString, required = true,
+  if valid_564146 != nil:
+    section.add "queryPackName", valid_564146
+  var valid_564147 = path.getOrDefault("subscriptionId")
+  valid_564147 = validateParameter(valid_564147, JString, required = true,
                                  default = nil)
-  if valid_574247 != nil:
-    section.add "queryPackName", valid_574247
-  var valid_574248 = path.getOrDefault("subscriptionId")
-  valid_574248 = validateParameter(valid_574248, JString, required = true,
+  if valid_564147 != nil:
+    section.add "subscriptionId", valid_564147
+  var valid_564148 = path.getOrDefault("resourceGroupName")
+  valid_564148 = validateParameter(valid_564148, JString, required = true,
                                  default = nil)
-  if valid_574248 != nil:
-    section.add "subscriptionId", valid_574248
+  if valid_564148 != nil:
+    section.add "resourceGroupName", valid_564148
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -714,11 +718,11 @@ proc validate_QueryPacksDelete_574244(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_574249 = query.getOrDefault("api-version")
-  valid_574249 = validateParameter(valid_574249, JString, required = true,
+  var valid_564149 = query.getOrDefault("api-version")
+  valid_564149 = validateParameter(valid_564149, JString, required = true,
                                  default = nil)
-  if valid_574249 != nil:
-    section.add "api-version", valid_574249
+  if valid_564149 != nil:
+    section.add "api-version", valid_564149
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -727,43 +731,43 @@ proc validate_QueryPacksDelete_574244(path: JsonNode; query: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_574250: Call_QueryPacksDelete_574243; path: JsonNode;
+proc call*(call_564150: Call_QueryPacksDelete_564143; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Deletes a Log Analytics QueryPack.
   ## 
-  let valid = call_574250.validator(path, query, header, formData, body)
-  let scheme = call_574250.pickScheme
+  let valid = call_564150.validator(path, query, header, formData, body)
+  let scheme = call_564150.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_574250.url(scheme.get, call_574250.host, call_574250.base,
-                         call_574250.route, valid.getOrDefault("path"),
+  let url = call_564150.url(scheme.get, call_564150.host, call_564150.base,
+                         call_564150.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_574250, url, valid)
+  result = hook(call_564150, url, valid)
 
-proc call*(call_574251: Call_QueryPacksDelete_574243; resourceGroupName: string;
-          apiVersion: string; queryPackName: string; subscriptionId: string): Recallable =
+proc call*(call_564151: Call_QueryPacksDelete_564143; queryPackName: string;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string): Recallable =
   ## queryPacksDelete
   ## Deletes a Log Analytics QueryPack.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group. The name is case insensitive.
-  ##   apiVersion: string (required)
-  ##             : The API version to use for this operation.
   ##   queryPackName: string (required)
   ##                : The name of the Log Analytics QueryPack resource.
+  ##   apiVersion: string (required)
+  ##             : The API version to use for this operation.
   ##   subscriptionId: string (required)
   ##                 : The ID of the target subscription.
-  var path_574252 = newJObject()
-  var query_574253 = newJObject()
-  add(path_574252, "resourceGroupName", newJString(resourceGroupName))
-  add(query_574253, "api-version", newJString(apiVersion))
-  add(path_574252, "queryPackName", newJString(queryPackName))
-  add(path_574252, "subscriptionId", newJString(subscriptionId))
-  result = call_574251.call(path_574252, query_574253, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group. The name is case insensitive.
+  var path_564152 = newJObject()
+  var query_564153 = newJObject()
+  add(path_564152, "queryPackName", newJString(queryPackName))
+  add(query_564153, "api-version", newJString(apiVersion))
+  add(path_564152, "subscriptionId", newJString(subscriptionId))
+  add(path_564152, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564151.call(path_564152, query_564153, nil, nil, nil)
 
-var queryPacksDelete* = Call_QueryPacksDelete_574243(name: "queryPacksDelete",
+var queryPacksDelete* = Call_QueryPacksDelete_564143(name: "queryPacksDelete",
     meth: HttpMethod.HttpDelete, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/microsoft.insights/queryPacks/{queryPackName}",
-    validator: validate_QueryPacksDelete_574244, base: "",
-    url: url_QueryPacksDelete_574245, schemes: {Scheme.Https})
+    validator: validate_QueryPacksDelete_564144, base: "",
+    url: url_QueryPacksDelete_564145, schemes: {Scheme.Https})
 export
   rest
 

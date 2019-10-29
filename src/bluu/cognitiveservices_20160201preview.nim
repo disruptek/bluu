@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, httpcore
 
 ## auto-generated via openapi macro
 ## title: CognitiveServicesManagementClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_569458 = ref object of OpenApiRestCall
+  OpenApiRestCall_563556 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_569458](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563556](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_569458): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563556): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,8 +107,8 @@ const
   macServiceName = "cognitiveservices"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_CognitiveServicesAccountsList_569680 = ref object of OpenApiRestCall_569458
-proc url_CognitiveServicesAccountsList_569682(protocol: Scheme; host: string;
+  Call_CognitiveServicesAccountsList_563778 = ref object of OpenApiRestCall_563556
+proc url_CognitiveServicesAccountsList_563780(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -121,7 +125,7 @@ proc url_CognitiveServicesAccountsList_569682(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_CognitiveServicesAccountsList_569681(path: JsonNode; query: JsonNode;
+proc validate_CognitiveServicesAccountsList_563779(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Returns all the resources of a particular type belonging to a subscription.
   ## 
@@ -133,11 +137,11 @@ proc validate_CognitiveServicesAccountsList_569681(path: JsonNode; query: JsonNo
   section = newJObject()
   assert path != nil,
         "path argument is necessary due to required `subscriptionId` field"
-  var valid_569855 = path.getOrDefault("subscriptionId")
-  valid_569855 = validateParameter(valid_569855, JString, required = true,
+  var valid_563955 = path.getOrDefault("subscriptionId")
+  valid_563955 = validateParameter(valid_563955, JString, required = true,
                                  default = nil)
-  if valid_569855 != nil:
-    section.add "subscriptionId", valid_569855
+  if valid_563955 != nil:
+    section.add "subscriptionId", valid_563955
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -145,11 +149,11 @@ proc validate_CognitiveServicesAccountsList_569681(path: JsonNode; query: JsonNo
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_569856 = query.getOrDefault("api-version")
-  valid_569856 = validateParameter(valid_569856, JString, required = true,
+  var valid_563956 = query.getOrDefault("api-version")
+  valid_563956 = validateParameter(valid_563956, JString, required = true,
                                  default = nil)
-  if valid_569856 != nil:
-    section.add "api-version", valid_569856
+  if valid_563956 != nil:
+    section.add "api-version", valid_563956
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -158,20 +162,20 @@ proc validate_CognitiveServicesAccountsList_569681(path: JsonNode; query: JsonNo
   if body != nil:
     result.add "body", body
 
-proc call*(call_569879: Call_CognitiveServicesAccountsList_569680; path: JsonNode;
+proc call*(call_563979: Call_CognitiveServicesAccountsList_563778; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Returns all the resources of a particular type belonging to a subscription.
   ## 
-  let valid = call_569879.validator(path, query, header, formData, body)
-  let scheme = call_569879.pickScheme
+  let valid = call_563979.validator(path, query, header, formData, body)
+  let scheme = call_563979.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_569879.url(scheme.get, call_569879.host, call_569879.base,
-                         call_569879.route, valid.getOrDefault("path"),
+  let url = call_563979.url(scheme.get, call_563979.host, call_563979.base,
+                         call_563979.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_569879, url, valid)
+  result = hook(call_563979, url, valid)
 
-proc call*(call_569950: Call_CognitiveServicesAccountsList_569680;
+proc call*(call_564050: Call_CognitiveServicesAccountsList_563778;
           apiVersion: string; subscriptionId: string): Recallable =
   ## cognitiveServicesAccountsList
   ## Returns all the resources of a particular type belonging to a subscription.
@@ -179,20 +183,20 @@ proc call*(call_569950: Call_CognitiveServicesAccountsList_569680;
   ##             : Version of the API to be used with the client request. Current version is 2016-02-01-preview
   ##   subscriptionId: string (required)
   ##                 : Azure Subscription ID.
-  var path_569951 = newJObject()
-  var query_569953 = newJObject()
-  add(query_569953, "api-version", newJString(apiVersion))
-  add(path_569951, "subscriptionId", newJString(subscriptionId))
-  result = call_569950.call(path_569951, query_569953, nil, nil, nil)
+  var path_564051 = newJObject()
+  var query_564053 = newJObject()
+  add(query_564053, "api-version", newJString(apiVersion))
+  add(path_564051, "subscriptionId", newJString(subscriptionId))
+  result = call_564050.call(path_564051, query_564053, nil, nil, nil)
 
-var cognitiveServicesAccountsList* = Call_CognitiveServicesAccountsList_569680(
+var cognitiveServicesAccountsList* = Call_CognitiveServicesAccountsList_563778(
     name: "cognitiveServicesAccountsList", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/providers/Microsoft.CognitiveServices/accounts",
-    validator: validate_CognitiveServicesAccountsList_569681, base: "",
-    url: url_CognitiveServicesAccountsList_569682, schemes: {Scheme.Https})
+    validator: validate_CognitiveServicesAccountsList_563779, base: "",
+    url: url_CognitiveServicesAccountsList_563780, schemes: {Scheme.Https})
 type
-  Call_CognitiveServicesAccountsListByResourceGroup_569992 = ref object of OpenApiRestCall_569458
-proc url_CognitiveServicesAccountsListByResourceGroup_569994(protocol: Scheme;
+  Call_CognitiveServicesAccountsListByResourceGroup_564092 = ref object of OpenApiRestCall_563556
+proc url_CognitiveServicesAccountsListByResourceGroup_564094(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -213,30 +217,30 @@ proc url_CognitiveServicesAccountsListByResourceGroup_569994(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_CognitiveServicesAccountsListByResourceGroup_569993(path: JsonNode;
+proc validate_CognitiveServicesAccountsListByResourceGroup_564093(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Returns all the resources of a particular type belonging to a resource group
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group within the user's subscription.
   ##   subscriptionId: JString (required)
   ##                 : Azure Subscription ID.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group within the user's subscription.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_569995 = path.getOrDefault("resourceGroupName")
-  valid_569995 = validateParameter(valid_569995, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564095 = path.getOrDefault("subscriptionId")
+  valid_564095 = validateParameter(valid_564095, JString, required = true,
                                  default = nil)
-  if valid_569995 != nil:
-    section.add "resourceGroupName", valid_569995
-  var valid_569996 = path.getOrDefault("subscriptionId")
-  valid_569996 = validateParameter(valid_569996, JString, required = true,
+  if valid_564095 != nil:
+    section.add "subscriptionId", valid_564095
+  var valid_564096 = path.getOrDefault("resourceGroupName")
+  valid_564096 = validateParameter(valid_564096, JString, required = true,
                                  default = nil)
-  if valid_569996 != nil:
-    section.add "subscriptionId", valid_569996
+  if valid_564096 != nil:
+    section.add "resourceGroupName", valid_564096
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -244,11 +248,11 @@ proc validate_CognitiveServicesAccountsListByResourceGroup_569993(path: JsonNode
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_569997 = query.getOrDefault("api-version")
-  valid_569997 = validateParameter(valid_569997, JString, required = true,
+  var valid_564097 = query.getOrDefault("api-version")
+  valid_564097 = validateParameter(valid_564097, JString, required = true,
                                  default = nil)
-  if valid_569997 != nil:
-    section.add "api-version", valid_569997
+  if valid_564097 != nil:
+    section.add "api-version", valid_564097
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -257,46 +261,46 @@ proc validate_CognitiveServicesAccountsListByResourceGroup_569993(path: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_569998: Call_CognitiveServicesAccountsListByResourceGroup_569992;
+proc call*(call_564098: Call_CognitiveServicesAccountsListByResourceGroup_564092;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Returns all the resources of a particular type belonging to a resource group
   ## 
-  let valid = call_569998.validator(path, query, header, formData, body)
-  let scheme = call_569998.pickScheme
+  let valid = call_564098.validator(path, query, header, formData, body)
+  let scheme = call_564098.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_569998.url(scheme.get, call_569998.host, call_569998.base,
-                         call_569998.route, valid.getOrDefault("path"),
+  let url = call_564098.url(scheme.get, call_564098.host, call_564098.base,
+                         call_564098.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_569998, url, valid)
+  result = hook(call_564098, url, valid)
 
-proc call*(call_569999: Call_CognitiveServicesAccountsListByResourceGroup_569992;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string): Recallable =
+proc call*(call_564099: Call_CognitiveServicesAccountsListByResourceGroup_564092;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string): Recallable =
   ## cognitiveServicesAccountsListByResourceGroup
   ## Returns all the resources of a particular type belonging to a resource group
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group within the user's subscription.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request. Current version is 2016-02-01-preview
   ##   subscriptionId: string (required)
   ##                 : Azure Subscription ID.
-  var path_570000 = newJObject()
-  var query_570001 = newJObject()
-  add(path_570000, "resourceGroupName", newJString(resourceGroupName))
-  add(query_570001, "api-version", newJString(apiVersion))
-  add(path_570000, "subscriptionId", newJString(subscriptionId))
-  result = call_569999.call(path_570000, query_570001, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group within the user's subscription.
+  var path_564100 = newJObject()
+  var query_564101 = newJObject()
+  add(query_564101, "api-version", newJString(apiVersion))
+  add(path_564100, "subscriptionId", newJString(subscriptionId))
+  add(path_564100, "resourceGroupName", newJString(resourceGroupName))
+  result = call_564099.call(path_564100, query_564101, nil, nil, nil)
 
-var cognitiveServicesAccountsListByResourceGroup* = Call_CognitiveServicesAccountsListByResourceGroup_569992(
+var cognitiveServicesAccountsListByResourceGroup* = Call_CognitiveServicesAccountsListByResourceGroup_564092(
     name: "cognitiveServicesAccountsListByResourceGroup",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.CognitiveServices/accounts",
-    validator: validate_CognitiveServicesAccountsListByResourceGroup_569993,
-    base: "", url: url_CognitiveServicesAccountsListByResourceGroup_569994,
+    validator: validate_CognitiveServicesAccountsListByResourceGroup_564093,
+    base: "", url: url_CognitiveServicesAccountsListByResourceGroup_564094,
     schemes: {Scheme.Https})
 type
-  Call_CognitiveServicesAccountsCreate_570013 = ref object of OpenApiRestCall_569458
-proc url_CognitiveServicesAccountsCreate_570015(protocol: Scheme; host: string;
+  Call_CognitiveServicesAccountsCreate_564113 = ref object of OpenApiRestCall_563556
+proc url_CognitiveServicesAccountsCreate_564115(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -319,37 +323,37 @@ proc url_CognitiveServicesAccountsCreate_570015(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_CognitiveServicesAccountsCreate_570014(path: JsonNode;
+proc validate_CognitiveServicesAccountsCreate_564114(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Create Cognitive Services Account. Accounts is a resource group wide resource type. It holds the keys for developer to access intelligent APIs. It's also the resource type for billing.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group within the user's subscription.
   ##   subscriptionId: JString (required)
   ##                 : Azure Subscription ID.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group within the user's subscription.
   ##   accountName: JString (required)
   ##              : The name of the cognitive services account within the specified resource group. Cognitive Services account names must be between 3 and 24 characters in length and use numbers and lower-case letters only.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_570033 = path.getOrDefault("resourceGroupName")
-  valid_570033 = validateParameter(valid_570033, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564133 = path.getOrDefault("subscriptionId")
+  valid_564133 = validateParameter(valid_564133, JString, required = true,
                                  default = nil)
-  if valid_570033 != nil:
-    section.add "resourceGroupName", valid_570033
-  var valid_570034 = path.getOrDefault("subscriptionId")
-  valid_570034 = validateParameter(valid_570034, JString, required = true,
+  if valid_564133 != nil:
+    section.add "subscriptionId", valid_564133
+  var valid_564134 = path.getOrDefault("resourceGroupName")
+  valid_564134 = validateParameter(valid_564134, JString, required = true,
                                  default = nil)
-  if valid_570034 != nil:
-    section.add "subscriptionId", valid_570034
-  var valid_570035 = path.getOrDefault("accountName")
-  valid_570035 = validateParameter(valid_570035, JString, required = true,
+  if valid_564134 != nil:
+    section.add "resourceGroupName", valid_564134
+  var valid_564135 = path.getOrDefault("accountName")
+  valid_564135 = validateParameter(valid_564135, JString, required = true,
                                  default = nil)
-  if valid_570035 != nil:
-    section.add "accountName", valid_570035
+  if valid_564135 != nil:
+    section.add "accountName", valid_564135
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -357,11 +361,11 @@ proc validate_CognitiveServicesAccountsCreate_570014(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_570036 = query.getOrDefault("api-version")
-  valid_570036 = validateParameter(valid_570036, JString, required = true,
+  var valid_564136 = query.getOrDefault("api-version")
+  valid_564136 = validateParameter(valid_564136, JString, required = true,
                                  default = nil)
-  if valid_570036 != nil:
-    section.add "api-version", valid_570036
+  if valid_564136 != nil:
+    section.add "api-version", valid_564136
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -375,54 +379,54 @@ proc validate_CognitiveServicesAccountsCreate_570014(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_570038: Call_CognitiveServicesAccountsCreate_570013;
+proc call*(call_564138: Call_CognitiveServicesAccountsCreate_564113;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Create Cognitive Services Account. Accounts is a resource group wide resource type. It holds the keys for developer to access intelligent APIs. It's also the resource type for billing.
   ## 
-  let valid = call_570038.validator(path, query, header, formData, body)
-  let scheme = call_570038.pickScheme
+  let valid = call_564138.validator(path, query, header, formData, body)
+  let scheme = call_564138.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_570038.url(scheme.get, call_570038.host, call_570038.base,
-                         call_570038.route, valid.getOrDefault("path"),
+  let url = call_564138.url(scheme.get, call_564138.host, call_564138.base,
+                         call_564138.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_570038, url, valid)
+  result = hook(call_564138, url, valid)
 
-proc call*(call_570039: Call_CognitiveServicesAccountsCreate_570013;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
+proc call*(call_564139: Call_CognitiveServicesAccountsCreate_564113;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string;
           parameters: JsonNode; accountName: string): Recallable =
   ## cognitiveServicesAccountsCreate
   ## Create Cognitive Services Account. Accounts is a resource group wide resource type. It holds the keys for developer to access intelligent APIs. It's also the resource type for billing.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group within the user's subscription.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request. Current version is 2016-02-01-preview
   ##   subscriptionId: string (required)
   ##                 : Azure Subscription ID.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group within the user's subscription.
   ##   parameters: JObject (required)
   ##             : The parameters to provide for the created account.
   ##   accountName: string (required)
   ##              : The name of the cognitive services account within the specified resource group. Cognitive Services account names must be between 3 and 24 characters in length and use numbers and lower-case letters only.
-  var path_570040 = newJObject()
-  var query_570041 = newJObject()
-  var body_570042 = newJObject()
-  add(path_570040, "resourceGroupName", newJString(resourceGroupName))
-  add(query_570041, "api-version", newJString(apiVersion))
-  add(path_570040, "subscriptionId", newJString(subscriptionId))
+  var path_564140 = newJObject()
+  var query_564141 = newJObject()
+  var body_564142 = newJObject()
+  add(query_564141, "api-version", newJString(apiVersion))
+  add(path_564140, "subscriptionId", newJString(subscriptionId))
+  add(path_564140, "resourceGroupName", newJString(resourceGroupName))
   if parameters != nil:
-    body_570042 = parameters
-  add(path_570040, "accountName", newJString(accountName))
-  result = call_570039.call(path_570040, query_570041, nil, nil, body_570042)
+    body_564142 = parameters
+  add(path_564140, "accountName", newJString(accountName))
+  result = call_564139.call(path_564140, query_564141, nil, nil, body_564142)
 
-var cognitiveServicesAccountsCreate* = Call_CognitiveServicesAccountsCreate_570013(
+var cognitiveServicesAccountsCreate* = Call_CognitiveServicesAccountsCreate_564113(
     name: "cognitiveServicesAccountsCreate", meth: HttpMethod.HttpPut,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.CognitiveServices/accounts/{accountName}",
-    validator: validate_CognitiveServicesAccountsCreate_570014, base: "",
-    url: url_CognitiveServicesAccountsCreate_570015, schemes: {Scheme.Https})
+    validator: validate_CognitiveServicesAccountsCreate_564114, base: "",
+    url: url_CognitiveServicesAccountsCreate_564115, schemes: {Scheme.Https})
 type
-  Call_CognitiveServicesAccountsGetProperties_570002 = ref object of OpenApiRestCall_569458
-proc url_CognitiveServicesAccountsGetProperties_570004(protocol: Scheme;
+  Call_CognitiveServicesAccountsGetProperties_564102 = ref object of OpenApiRestCall_563556
+proc url_CognitiveServicesAccountsGetProperties_564104(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -445,37 +449,37 @@ proc url_CognitiveServicesAccountsGetProperties_570004(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_CognitiveServicesAccountsGetProperties_570003(path: JsonNode;
+proc validate_CognitiveServicesAccountsGetProperties_564103(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Returns a Cognitive Services account specified by the parameters.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group within the user's subscription.
   ##   subscriptionId: JString (required)
   ##                 : Azure Subscription ID.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group within the user's subscription.
   ##   accountName: JString (required)
   ##              : The name of the cognitive services account within the specified resource group. Cognitive Services account names must be between 3 and 24 characters in length and use numbers and lower-case letters only.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_570005 = path.getOrDefault("resourceGroupName")
-  valid_570005 = validateParameter(valid_570005, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564105 = path.getOrDefault("subscriptionId")
+  valid_564105 = validateParameter(valid_564105, JString, required = true,
                                  default = nil)
-  if valid_570005 != nil:
-    section.add "resourceGroupName", valid_570005
-  var valid_570006 = path.getOrDefault("subscriptionId")
-  valid_570006 = validateParameter(valid_570006, JString, required = true,
+  if valid_564105 != nil:
+    section.add "subscriptionId", valid_564105
+  var valid_564106 = path.getOrDefault("resourceGroupName")
+  valid_564106 = validateParameter(valid_564106, JString, required = true,
                                  default = nil)
-  if valid_570006 != nil:
-    section.add "subscriptionId", valid_570006
-  var valid_570007 = path.getOrDefault("accountName")
-  valid_570007 = validateParameter(valid_570007, JString, required = true,
+  if valid_564106 != nil:
+    section.add "resourceGroupName", valid_564106
+  var valid_564107 = path.getOrDefault("accountName")
+  valid_564107 = validateParameter(valid_564107, JString, required = true,
                                  default = nil)
-  if valid_570007 != nil:
-    section.add "accountName", valid_570007
+  if valid_564107 != nil:
+    section.add "accountName", valid_564107
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -483,11 +487,11 @@ proc validate_CognitiveServicesAccountsGetProperties_570003(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_570008 = query.getOrDefault("api-version")
-  valid_570008 = validateParameter(valid_570008, JString, required = true,
+  var valid_564108 = query.getOrDefault("api-version")
+  valid_564108 = validateParameter(valid_564108, JString, required = true,
                                  default = nil)
-  if valid_570008 != nil:
-    section.add "api-version", valid_570008
+  if valid_564108 != nil:
+    section.add "api-version", valid_564108
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -496,50 +500,50 @@ proc validate_CognitiveServicesAccountsGetProperties_570003(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_570009: Call_CognitiveServicesAccountsGetProperties_570002;
+proc call*(call_564109: Call_CognitiveServicesAccountsGetProperties_564102;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Returns a Cognitive Services account specified by the parameters.
   ## 
-  let valid = call_570009.validator(path, query, header, formData, body)
-  let scheme = call_570009.pickScheme
+  let valid = call_564109.validator(path, query, header, formData, body)
+  let scheme = call_564109.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_570009.url(scheme.get, call_570009.host, call_570009.base,
-                         call_570009.route, valid.getOrDefault("path"),
+  let url = call_564109.url(scheme.get, call_564109.host, call_564109.base,
+                         call_564109.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_570009, url, valid)
+  result = hook(call_564109, url, valid)
 
-proc call*(call_570010: Call_CognitiveServicesAccountsGetProperties_570002;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
+proc call*(call_564110: Call_CognitiveServicesAccountsGetProperties_564102;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string;
           accountName: string): Recallable =
   ## cognitiveServicesAccountsGetProperties
   ## Returns a Cognitive Services account specified by the parameters.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group within the user's subscription.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request. Current version is 2016-02-01-preview
   ##   subscriptionId: string (required)
   ##                 : Azure Subscription ID.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group within the user's subscription.
   ##   accountName: string (required)
   ##              : The name of the cognitive services account within the specified resource group. Cognitive Services account names must be between 3 and 24 characters in length and use numbers and lower-case letters only.
-  var path_570011 = newJObject()
-  var query_570012 = newJObject()
-  add(path_570011, "resourceGroupName", newJString(resourceGroupName))
-  add(query_570012, "api-version", newJString(apiVersion))
-  add(path_570011, "subscriptionId", newJString(subscriptionId))
-  add(path_570011, "accountName", newJString(accountName))
-  result = call_570010.call(path_570011, query_570012, nil, nil, nil)
+  var path_564111 = newJObject()
+  var query_564112 = newJObject()
+  add(query_564112, "api-version", newJString(apiVersion))
+  add(path_564111, "subscriptionId", newJString(subscriptionId))
+  add(path_564111, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564111, "accountName", newJString(accountName))
+  result = call_564110.call(path_564111, query_564112, nil, nil, nil)
 
-var cognitiveServicesAccountsGetProperties* = Call_CognitiveServicesAccountsGetProperties_570002(
+var cognitiveServicesAccountsGetProperties* = Call_CognitiveServicesAccountsGetProperties_564102(
     name: "cognitiveServicesAccountsGetProperties", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.CognitiveServices/accounts/{accountName}",
-    validator: validate_CognitiveServicesAccountsGetProperties_570003, base: "",
-    url: url_CognitiveServicesAccountsGetProperties_570004,
+    validator: validate_CognitiveServicesAccountsGetProperties_564103, base: "",
+    url: url_CognitiveServicesAccountsGetProperties_564104,
     schemes: {Scheme.Https})
 type
-  Call_CognitiveServicesAccountsUpdate_570054 = ref object of OpenApiRestCall_569458
-proc url_CognitiveServicesAccountsUpdate_570056(protocol: Scheme; host: string;
+  Call_CognitiveServicesAccountsUpdate_564154 = ref object of OpenApiRestCall_563556
+proc url_CognitiveServicesAccountsUpdate_564156(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -562,37 +566,37 @@ proc url_CognitiveServicesAccountsUpdate_570056(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_CognitiveServicesAccountsUpdate_570055(path: JsonNode;
+proc validate_CognitiveServicesAccountsUpdate_564155(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Updates a Cognitive Services account
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group within the user's subscription.
   ##   subscriptionId: JString (required)
   ##                 : Azure Subscription ID.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group within the user's subscription.
   ##   accountName: JString (required)
   ##              : The name of the cognitive services account within the specified resource group. Cognitive Services account names must be between 3 and 24 characters in length and use numbers and lower-case letters only.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_570057 = path.getOrDefault("resourceGroupName")
-  valid_570057 = validateParameter(valid_570057, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564157 = path.getOrDefault("subscriptionId")
+  valid_564157 = validateParameter(valid_564157, JString, required = true,
                                  default = nil)
-  if valid_570057 != nil:
-    section.add "resourceGroupName", valid_570057
-  var valid_570058 = path.getOrDefault("subscriptionId")
-  valid_570058 = validateParameter(valid_570058, JString, required = true,
+  if valid_564157 != nil:
+    section.add "subscriptionId", valid_564157
+  var valid_564158 = path.getOrDefault("resourceGroupName")
+  valid_564158 = validateParameter(valid_564158, JString, required = true,
                                  default = nil)
-  if valid_570058 != nil:
-    section.add "subscriptionId", valid_570058
-  var valid_570059 = path.getOrDefault("accountName")
-  valid_570059 = validateParameter(valid_570059, JString, required = true,
+  if valid_564158 != nil:
+    section.add "resourceGroupName", valid_564158
+  var valid_564159 = path.getOrDefault("accountName")
+  valid_564159 = validateParameter(valid_564159, JString, required = true,
                                  default = nil)
-  if valid_570059 != nil:
-    section.add "accountName", valid_570059
+  if valid_564159 != nil:
+    section.add "accountName", valid_564159
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -600,11 +604,11 @@ proc validate_CognitiveServicesAccountsUpdate_570055(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_570060 = query.getOrDefault("api-version")
-  valid_570060 = validateParameter(valid_570060, JString, required = true,
+  var valid_564160 = query.getOrDefault("api-version")
+  valid_564160 = validateParameter(valid_564160, JString, required = true,
                                  default = nil)
-  if valid_570060 != nil:
-    section.add "api-version", valid_570060
+  if valid_564160 != nil:
+    section.add "api-version", valid_564160
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -618,54 +622,54 @@ proc validate_CognitiveServicesAccountsUpdate_570055(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_570062: Call_CognitiveServicesAccountsUpdate_570054;
+proc call*(call_564162: Call_CognitiveServicesAccountsUpdate_564154;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Updates a Cognitive Services account
   ## 
-  let valid = call_570062.validator(path, query, header, formData, body)
-  let scheme = call_570062.pickScheme
+  let valid = call_564162.validator(path, query, header, formData, body)
+  let scheme = call_564162.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_570062.url(scheme.get, call_570062.host, call_570062.base,
-                         call_570062.route, valid.getOrDefault("path"),
+  let url = call_564162.url(scheme.get, call_564162.host, call_564162.base,
+                         call_564162.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_570062, url, valid)
+  result = hook(call_564162, url, valid)
 
-proc call*(call_570063: Call_CognitiveServicesAccountsUpdate_570054;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
+proc call*(call_564163: Call_CognitiveServicesAccountsUpdate_564154;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string;
           body: JsonNode; accountName: string): Recallable =
   ## cognitiveServicesAccountsUpdate
   ## Updates a Cognitive Services account
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group within the user's subscription.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request. Current version is 2016-02-01-preview
   ##   subscriptionId: string (required)
   ##                 : Azure Subscription ID.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group within the user's subscription.
   ##   body: JObject (required)
   ##       : The parameters to provide for the created account.
   ##   accountName: string (required)
   ##              : The name of the cognitive services account within the specified resource group. Cognitive Services account names must be between 3 and 24 characters in length and use numbers and lower-case letters only.
-  var path_570064 = newJObject()
-  var query_570065 = newJObject()
-  var body_570066 = newJObject()
-  add(path_570064, "resourceGroupName", newJString(resourceGroupName))
-  add(query_570065, "api-version", newJString(apiVersion))
-  add(path_570064, "subscriptionId", newJString(subscriptionId))
+  var path_564164 = newJObject()
+  var query_564165 = newJObject()
+  var body_564166 = newJObject()
+  add(query_564165, "api-version", newJString(apiVersion))
+  add(path_564164, "subscriptionId", newJString(subscriptionId))
+  add(path_564164, "resourceGroupName", newJString(resourceGroupName))
   if body != nil:
-    body_570066 = body
-  add(path_570064, "accountName", newJString(accountName))
-  result = call_570063.call(path_570064, query_570065, nil, nil, body_570066)
+    body_564166 = body
+  add(path_564164, "accountName", newJString(accountName))
+  result = call_564163.call(path_564164, query_564165, nil, nil, body_564166)
 
-var cognitiveServicesAccountsUpdate* = Call_CognitiveServicesAccountsUpdate_570054(
+var cognitiveServicesAccountsUpdate* = Call_CognitiveServicesAccountsUpdate_564154(
     name: "cognitiveServicesAccountsUpdate", meth: HttpMethod.HttpPatch,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.CognitiveServices/accounts/{accountName}",
-    validator: validate_CognitiveServicesAccountsUpdate_570055, base: "",
-    url: url_CognitiveServicesAccountsUpdate_570056, schemes: {Scheme.Https})
+    validator: validate_CognitiveServicesAccountsUpdate_564155, base: "",
+    url: url_CognitiveServicesAccountsUpdate_564156, schemes: {Scheme.Https})
 type
-  Call_CognitiveServicesAccountsDelete_570043 = ref object of OpenApiRestCall_569458
-proc url_CognitiveServicesAccountsDelete_570045(protocol: Scheme; host: string;
+  Call_CognitiveServicesAccountsDelete_564143 = ref object of OpenApiRestCall_563556
+proc url_CognitiveServicesAccountsDelete_564145(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -688,37 +692,37 @@ proc url_CognitiveServicesAccountsDelete_570045(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_CognitiveServicesAccountsDelete_570044(path: JsonNode;
+proc validate_CognitiveServicesAccountsDelete_564144(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Deletes a Cognitive Services account from the resource group. 
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group within the user's subscription.
   ##   subscriptionId: JString (required)
   ##                 : Azure Subscription ID.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group within the user's subscription.
   ##   accountName: JString (required)
   ##              : The name of the cognitive services account within the specified resource group. Cognitive Services account names must be between 3 and 24 characters in length and use numbers and lower-case letters only.
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_570046 = path.getOrDefault("resourceGroupName")
-  valid_570046 = validateParameter(valid_570046, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564146 = path.getOrDefault("subscriptionId")
+  valid_564146 = validateParameter(valid_564146, JString, required = true,
                                  default = nil)
-  if valid_570046 != nil:
-    section.add "resourceGroupName", valid_570046
-  var valid_570047 = path.getOrDefault("subscriptionId")
-  valid_570047 = validateParameter(valid_570047, JString, required = true,
+  if valid_564146 != nil:
+    section.add "subscriptionId", valid_564146
+  var valid_564147 = path.getOrDefault("resourceGroupName")
+  valid_564147 = validateParameter(valid_564147, JString, required = true,
                                  default = nil)
-  if valid_570047 != nil:
-    section.add "subscriptionId", valid_570047
-  var valid_570048 = path.getOrDefault("accountName")
-  valid_570048 = validateParameter(valid_570048, JString, required = true,
+  if valid_564147 != nil:
+    section.add "resourceGroupName", valid_564147
+  var valid_564148 = path.getOrDefault("accountName")
+  valid_564148 = validateParameter(valid_564148, JString, required = true,
                                  default = nil)
-  if valid_570048 != nil:
-    section.add "accountName", valid_570048
+  if valid_564148 != nil:
+    section.add "accountName", valid_564148
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -726,11 +730,11 @@ proc validate_CognitiveServicesAccountsDelete_570044(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_570049 = query.getOrDefault("api-version")
-  valid_570049 = validateParameter(valid_570049, JString, required = true,
+  var valid_564149 = query.getOrDefault("api-version")
+  valid_564149 = validateParameter(valid_564149, JString, required = true,
                                  default = nil)
-  if valid_570049 != nil:
-    section.add "api-version", valid_570049
+  if valid_564149 != nil:
+    section.add "api-version", valid_564149
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -739,49 +743,49 @@ proc validate_CognitiveServicesAccountsDelete_570044(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_570050: Call_CognitiveServicesAccountsDelete_570043;
+proc call*(call_564150: Call_CognitiveServicesAccountsDelete_564143;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Deletes a Cognitive Services account from the resource group. 
   ## 
-  let valid = call_570050.validator(path, query, header, formData, body)
-  let scheme = call_570050.pickScheme
+  let valid = call_564150.validator(path, query, header, formData, body)
+  let scheme = call_564150.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_570050.url(scheme.get, call_570050.host, call_570050.base,
-                         call_570050.route, valid.getOrDefault("path"),
+  let url = call_564150.url(scheme.get, call_564150.host, call_564150.base,
+                         call_564150.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_570050, url, valid)
+  result = hook(call_564150, url, valid)
 
-proc call*(call_570051: Call_CognitiveServicesAccountsDelete_570043;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
+proc call*(call_564151: Call_CognitiveServicesAccountsDelete_564143;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string;
           accountName: string): Recallable =
   ## cognitiveServicesAccountsDelete
   ## Deletes a Cognitive Services account from the resource group. 
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group within the user's subscription.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request. Current version is 2016-02-01-preview
   ##   subscriptionId: string (required)
   ##                 : Azure Subscription ID.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group within the user's subscription.
   ##   accountName: string (required)
   ##              : The name of the cognitive services account within the specified resource group. Cognitive Services account names must be between 3 and 24 characters in length and use numbers and lower-case letters only.
-  var path_570052 = newJObject()
-  var query_570053 = newJObject()
-  add(path_570052, "resourceGroupName", newJString(resourceGroupName))
-  add(query_570053, "api-version", newJString(apiVersion))
-  add(path_570052, "subscriptionId", newJString(subscriptionId))
-  add(path_570052, "accountName", newJString(accountName))
-  result = call_570051.call(path_570052, query_570053, nil, nil, nil)
+  var path_564152 = newJObject()
+  var query_564153 = newJObject()
+  add(query_564153, "api-version", newJString(apiVersion))
+  add(path_564152, "subscriptionId", newJString(subscriptionId))
+  add(path_564152, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564152, "accountName", newJString(accountName))
+  result = call_564151.call(path_564152, query_564153, nil, nil, nil)
 
-var cognitiveServicesAccountsDelete* = Call_CognitiveServicesAccountsDelete_570043(
+var cognitiveServicesAccountsDelete* = Call_CognitiveServicesAccountsDelete_564143(
     name: "cognitiveServicesAccountsDelete", meth: HttpMethod.HttpDelete,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.CognitiveServices/accounts/{accountName}",
-    validator: validate_CognitiveServicesAccountsDelete_570044, base: "",
-    url: url_CognitiveServicesAccountsDelete_570045, schemes: {Scheme.Https})
+    validator: validate_CognitiveServicesAccountsDelete_564144, base: "",
+    url: url_CognitiveServicesAccountsDelete_564145, schemes: {Scheme.Https})
 type
-  Call_CognitiveServicesAccountsListKeys_570067 = ref object of OpenApiRestCall_569458
-proc url_CognitiveServicesAccountsListKeys_570069(protocol: Scheme; host: string;
+  Call_CognitiveServicesAccountsListKeys_564167 = ref object of OpenApiRestCall_563556
+proc url_CognitiveServicesAccountsListKeys_564169(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -805,37 +809,37 @@ proc url_CognitiveServicesAccountsListKeys_570069(protocol: Scheme; host: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_CognitiveServicesAccountsListKeys_570068(path: JsonNode;
+proc validate_CognitiveServicesAccountsListKeys_564168(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Lists the account keys for the specified Cognitive Services account.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group within the user's subscription.
   ##   subscriptionId: JString (required)
   ##                 : Azure Subscription ID.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group within the user's subscription.
   ##   accountName: JString (required)
   ##              : The name of the cognitive services account within the specified resource group. Cognitive Services account names must be between 3 and 24 characters in length and use numbers and lower-case letters only.  
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_570070 = path.getOrDefault("resourceGroupName")
-  valid_570070 = validateParameter(valid_570070, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564170 = path.getOrDefault("subscriptionId")
+  valid_564170 = validateParameter(valid_564170, JString, required = true,
                                  default = nil)
-  if valid_570070 != nil:
-    section.add "resourceGroupName", valid_570070
-  var valid_570071 = path.getOrDefault("subscriptionId")
-  valid_570071 = validateParameter(valid_570071, JString, required = true,
+  if valid_564170 != nil:
+    section.add "subscriptionId", valid_564170
+  var valid_564171 = path.getOrDefault("resourceGroupName")
+  valid_564171 = validateParameter(valid_564171, JString, required = true,
                                  default = nil)
-  if valid_570071 != nil:
-    section.add "subscriptionId", valid_570071
-  var valid_570072 = path.getOrDefault("accountName")
-  valid_570072 = validateParameter(valid_570072, JString, required = true,
+  if valid_564171 != nil:
+    section.add "resourceGroupName", valid_564171
+  var valid_564172 = path.getOrDefault("accountName")
+  valid_564172 = validateParameter(valid_564172, JString, required = true,
                                  default = nil)
-  if valid_570072 != nil:
-    section.add "accountName", valid_570072
+  if valid_564172 != nil:
+    section.add "accountName", valid_564172
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -843,11 +847,11 @@ proc validate_CognitiveServicesAccountsListKeys_570068(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_570073 = query.getOrDefault("api-version")
-  valid_570073 = validateParameter(valid_570073, JString, required = true,
+  var valid_564173 = query.getOrDefault("api-version")
+  valid_564173 = validateParameter(valid_564173, JString, required = true,
                                  default = nil)
-  if valid_570073 != nil:
-    section.add "api-version", valid_570073
+  if valid_564173 != nil:
+    section.add "api-version", valid_564173
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -856,49 +860,49 @@ proc validate_CognitiveServicesAccountsListKeys_570068(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_570074: Call_CognitiveServicesAccountsListKeys_570067;
+proc call*(call_564174: Call_CognitiveServicesAccountsListKeys_564167;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Lists the account keys for the specified Cognitive Services account.
   ## 
-  let valid = call_570074.validator(path, query, header, formData, body)
-  let scheme = call_570074.pickScheme
+  let valid = call_564174.validator(path, query, header, formData, body)
+  let scheme = call_564174.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_570074.url(scheme.get, call_570074.host, call_570074.base,
-                         call_570074.route, valid.getOrDefault("path"),
+  let url = call_564174.url(scheme.get, call_564174.host, call_564174.base,
+                         call_564174.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_570074, url, valid)
+  result = hook(call_564174, url, valid)
 
-proc call*(call_570075: Call_CognitiveServicesAccountsListKeys_570067;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
+proc call*(call_564175: Call_CognitiveServicesAccountsListKeys_564167;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string;
           accountName: string): Recallable =
   ## cognitiveServicesAccountsListKeys
   ## Lists the account keys for the specified Cognitive Services account.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group within the user's subscription.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request. Current version is 2016-02-01-preview
   ##   subscriptionId: string (required)
   ##                 : Azure Subscription ID.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group within the user's subscription.
   ##   accountName: string (required)
   ##              : The name of the cognitive services account within the specified resource group. Cognitive Services account names must be between 3 and 24 characters in length and use numbers and lower-case letters only.  
-  var path_570076 = newJObject()
-  var query_570077 = newJObject()
-  add(path_570076, "resourceGroupName", newJString(resourceGroupName))
-  add(query_570077, "api-version", newJString(apiVersion))
-  add(path_570076, "subscriptionId", newJString(subscriptionId))
-  add(path_570076, "accountName", newJString(accountName))
-  result = call_570075.call(path_570076, query_570077, nil, nil, nil)
+  var path_564176 = newJObject()
+  var query_564177 = newJObject()
+  add(query_564177, "api-version", newJString(apiVersion))
+  add(path_564176, "subscriptionId", newJString(subscriptionId))
+  add(path_564176, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564176, "accountName", newJString(accountName))
+  result = call_564175.call(path_564176, query_564177, nil, nil, nil)
 
-var cognitiveServicesAccountsListKeys* = Call_CognitiveServicesAccountsListKeys_570067(
+var cognitiveServicesAccountsListKeys* = Call_CognitiveServicesAccountsListKeys_564167(
     name: "cognitiveServicesAccountsListKeys", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.CognitiveServices/accounts/{accountName}/listKeys",
-    validator: validate_CognitiveServicesAccountsListKeys_570068, base: "",
-    url: url_CognitiveServicesAccountsListKeys_570069, schemes: {Scheme.Https})
+    validator: validate_CognitiveServicesAccountsListKeys_564168, base: "",
+    url: url_CognitiveServicesAccountsListKeys_564169, schemes: {Scheme.Https})
 type
-  Call_CognitiveServicesAccountsRegenerateKey_570078 = ref object of OpenApiRestCall_569458
-proc url_CognitiveServicesAccountsRegenerateKey_570080(protocol: Scheme;
+  Call_CognitiveServicesAccountsRegenerateKey_564178 = ref object of OpenApiRestCall_563556
+proc url_CognitiveServicesAccountsRegenerateKey_564180(protocol: Scheme;
     host: string; base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -922,37 +926,37 @@ proc url_CognitiveServicesAccountsRegenerateKey_570080(protocol: Scheme;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_CognitiveServicesAccountsRegenerateKey_570079(path: JsonNode;
+proc validate_CognitiveServicesAccountsRegenerateKey_564179(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Regenerates the specified account key for the specified Cognitive Services account.
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group within the user's subscription.
   ##   subscriptionId: JString (required)
   ##                 : Azure Subscription ID.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group within the user's subscription.
   ##   accountName: JString (required)
   ##              : The name of the cognitive services account within the specified resource group. Cognitive Services account names must be between 3 and 24 characters in length and use numbers and lower-case letters only.  
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_570081 = path.getOrDefault("resourceGroupName")
-  valid_570081 = validateParameter(valid_570081, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564181 = path.getOrDefault("subscriptionId")
+  valid_564181 = validateParameter(valid_564181, JString, required = true,
                                  default = nil)
-  if valid_570081 != nil:
-    section.add "resourceGroupName", valid_570081
-  var valid_570082 = path.getOrDefault("subscriptionId")
-  valid_570082 = validateParameter(valid_570082, JString, required = true,
+  if valid_564181 != nil:
+    section.add "subscriptionId", valid_564181
+  var valid_564182 = path.getOrDefault("resourceGroupName")
+  valid_564182 = validateParameter(valid_564182, JString, required = true,
                                  default = nil)
-  if valid_570082 != nil:
-    section.add "subscriptionId", valid_570082
-  var valid_570083 = path.getOrDefault("accountName")
-  valid_570083 = validateParameter(valid_570083, JString, required = true,
+  if valid_564182 != nil:
+    section.add "resourceGroupName", valid_564182
+  var valid_564183 = path.getOrDefault("accountName")
+  valid_564183 = validateParameter(valid_564183, JString, required = true,
                                  default = nil)
-  if valid_570083 != nil:
-    section.add "accountName", valid_570083
+  if valid_564183 != nil:
+    section.add "accountName", valid_564183
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -960,11 +964,11 @@ proc validate_CognitiveServicesAccountsRegenerateKey_570079(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_570084 = query.getOrDefault("api-version")
-  valid_570084 = validateParameter(valid_570084, JString, required = true,
+  var valid_564184 = query.getOrDefault("api-version")
+  valid_564184 = validateParameter(valid_564184, JString, required = true,
                                  default = nil)
-  if valid_570084 != nil:
-    section.add "api-version", valid_570084
+  if valid_564184 != nil:
+    section.add "api-version", valid_564184
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -978,55 +982,55 @@ proc validate_CognitiveServicesAccountsRegenerateKey_570079(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_570086: Call_CognitiveServicesAccountsRegenerateKey_570078;
+proc call*(call_564186: Call_CognitiveServicesAccountsRegenerateKey_564178;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## Regenerates the specified account key for the specified Cognitive Services account.
   ## 
-  let valid = call_570086.validator(path, query, header, formData, body)
-  let scheme = call_570086.pickScheme
+  let valid = call_564186.validator(path, query, header, formData, body)
+  let scheme = call_564186.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_570086.url(scheme.get, call_570086.host, call_570086.base,
-                         call_570086.route, valid.getOrDefault("path"),
+  let url = call_564186.url(scheme.get, call_564186.host, call_564186.base,
+                         call_564186.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_570086, url, valid)
+  result = hook(call_564186, url, valid)
 
-proc call*(call_570087: Call_CognitiveServicesAccountsRegenerateKey_570078;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
+proc call*(call_564187: Call_CognitiveServicesAccountsRegenerateKey_564178;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string;
           body: JsonNode; accountName: string): Recallable =
   ## cognitiveServicesAccountsRegenerateKey
   ## Regenerates the specified account key for the specified Cognitive Services account.
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group within the user's subscription.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request. Current version is 2016-02-01-preview
   ##   subscriptionId: string (required)
   ##                 : Azure Subscription ID.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group within the user's subscription.
   ##   body: JObject (required)
   ##       : regenerate key parameters.
   ##   accountName: string (required)
   ##              : The name of the cognitive services account within the specified resource group. Cognitive Services account names must be between 3 and 24 characters in length and use numbers and lower-case letters only.  
-  var path_570088 = newJObject()
-  var query_570089 = newJObject()
-  var body_570090 = newJObject()
-  add(path_570088, "resourceGroupName", newJString(resourceGroupName))
-  add(query_570089, "api-version", newJString(apiVersion))
-  add(path_570088, "subscriptionId", newJString(subscriptionId))
+  var path_564188 = newJObject()
+  var query_564189 = newJObject()
+  var body_564190 = newJObject()
+  add(query_564189, "api-version", newJString(apiVersion))
+  add(path_564188, "subscriptionId", newJString(subscriptionId))
+  add(path_564188, "resourceGroupName", newJString(resourceGroupName))
   if body != nil:
-    body_570090 = body
-  add(path_570088, "accountName", newJString(accountName))
-  result = call_570087.call(path_570088, query_570089, nil, nil, body_570090)
+    body_564190 = body
+  add(path_564188, "accountName", newJString(accountName))
+  result = call_564187.call(path_564188, query_564189, nil, nil, body_564190)
 
-var cognitiveServicesAccountsRegenerateKey* = Call_CognitiveServicesAccountsRegenerateKey_570078(
+var cognitiveServicesAccountsRegenerateKey* = Call_CognitiveServicesAccountsRegenerateKey_564178(
     name: "cognitiveServicesAccountsRegenerateKey", meth: HttpMethod.HttpPost,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.CognitiveServices/accounts/{accountName}/regenerateKey",
-    validator: validate_CognitiveServicesAccountsRegenerateKey_570079, base: "",
-    url: url_CognitiveServicesAccountsRegenerateKey_570080,
+    validator: validate_CognitiveServicesAccountsRegenerateKey_564179, base: "",
+    url: url_CognitiveServicesAccountsRegenerateKey_564180,
     schemes: {Scheme.Https})
 type
-  Call_CognitiveServicesAccountsListSkus_570091 = ref object of OpenApiRestCall_569458
-proc url_CognitiveServicesAccountsListSkus_570093(protocol: Scheme; host: string;
+  Call_CognitiveServicesAccountsListSkus_564191 = ref object of OpenApiRestCall_563556
+proc url_CognitiveServicesAccountsListSkus_564193(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1050,37 +1054,37 @@ proc url_CognitiveServicesAccountsListSkus_570093(protocol: Scheme; host: string
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_CognitiveServicesAccountsListSkus_570092(path: JsonNode;
+proc validate_CognitiveServicesAccountsListSkus_564192(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## List available SKUs for the requested Cognitive Services account
   ## 
   var section: JsonNode
   result = newJObject()
   ## parameters in `path` object:
-  ##   resourceGroupName: JString (required)
-  ##                    : The name of the resource group within the user's subscription.
   ##   subscriptionId: JString (required)
   ##                 : Azure Subscription ID.
+  ##   resourceGroupName: JString (required)
+  ##                    : The name of the resource group within the user's subscription.
   ##   accountName: JString (required)
   ##              : The name of the cognitive services account within the specified resource group. Cognitive Services account names must be between 3 and 24 characters in length and use numbers and lower-case letters only.  
   section = newJObject()
   assert path != nil,
-        "path argument is necessary due to required `resourceGroupName` field"
-  var valid_570094 = path.getOrDefault("resourceGroupName")
-  valid_570094 = validateParameter(valid_570094, JString, required = true,
+        "path argument is necessary due to required `subscriptionId` field"
+  var valid_564194 = path.getOrDefault("subscriptionId")
+  valid_564194 = validateParameter(valid_564194, JString, required = true,
                                  default = nil)
-  if valid_570094 != nil:
-    section.add "resourceGroupName", valid_570094
-  var valid_570095 = path.getOrDefault("subscriptionId")
-  valid_570095 = validateParameter(valid_570095, JString, required = true,
+  if valid_564194 != nil:
+    section.add "subscriptionId", valid_564194
+  var valid_564195 = path.getOrDefault("resourceGroupName")
+  valid_564195 = validateParameter(valid_564195, JString, required = true,
                                  default = nil)
-  if valid_570095 != nil:
-    section.add "subscriptionId", valid_570095
-  var valid_570096 = path.getOrDefault("accountName")
-  valid_570096 = validateParameter(valid_570096, JString, required = true,
+  if valid_564195 != nil:
+    section.add "resourceGroupName", valid_564195
+  var valid_564196 = path.getOrDefault("accountName")
+  valid_564196 = validateParameter(valid_564196, JString, required = true,
                                  default = nil)
-  if valid_570096 != nil:
-    section.add "accountName", valid_570096
+  if valid_564196 != nil:
+    section.add "accountName", valid_564196
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1088,11 +1092,11 @@ proc validate_CognitiveServicesAccountsListSkus_570092(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_570097 = query.getOrDefault("api-version")
-  valid_570097 = validateParameter(valid_570097, JString, required = true,
+  var valid_564197 = query.getOrDefault("api-version")
+  valid_564197 = validateParameter(valid_564197, JString, required = true,
                                  default = nil)
-  if valid_570097 != nil:
-    section.add "api-version", valid_570097
+  if valid_564197 != nil:
+    section.add "api-version", valid_564197
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -1101,46 +1105,46 @@ proc validate_CognitiveServicesAccountsListSkus_570092(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_570098: Call_CognitiveServicesAccountsListSkus_570091;
+proc call*(call_564198: Call_CognitiveServicesAccountsListSkus_564191;
           path: JsonNode; query: JsonNode; header: JsonNode; formData: JsonNode;
           body: JsonNode): Recallable =
   ## List available SKUs for the requested Cognitive Services account
   ## 
-  let valid = call_570098.validator(path, query, header, formData, body)
-  let scheme = call_570098.pickScheme
+  let valid = call_564198.validator(path, query, header, formData, body)
+  let scheme = call_564198.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_570098.url(scheme.get, call_570098.host, call_570098.base,
-                         call_570098.route, valid.getOrDefault("path"),
+  let url = call_564198.url(scheme.get, call_564198.host, call_564198.base,
+                         call_564198.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_570098, url, valid)
+  result = hook(call_564198, url, valid)
 
-proc call*(call_570099: Call_CognitiveServicesAccountsListSkus_570091;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
+proc call*(call_564199: Call_CognitiveServicesAccountsListSkus_564191;
+          apiVersion: string; subscriptionId: string; resourceGroupName: string;
           accountName: string): Recallable =
   ## cognitiveServicesAccountsListSkus
   ## List available SKUs for the requested Cognitive Services account
-  ##   resourceGroupName: string (required)
-  ##                    : The name of the resource group within the user's subscription.
   ##   apiVersion: string (required)
   ##             : Version of the API to be used with the client request. Current version is 2016-02-01-preview
   ##   subscriptionId: string (required)
   ##                 : Azure Subscription ID.
+  ##   resourceGroupName: string (required)
+  ##                    : The name of the resource group within the user's subscription.
   ##   accountName: string (required)
   ##              : The name of the cognitive services account within the specified resource group. Cognitive Services account names must be between 3 and 24 characters in length and use numbers and lower-case letters only.  
-  var path_570100 = newJObject()
-  var query_570101 = newJObject()
-  add(path_570100, "resourceGroupName", newJString(resourceGroupName))
-  add(query_570101, "api-version", newJString(apiVersion))
-  add(path_570100, "subscriptionId", newJString(subscriptionId))
-  add(path_570100, "accountName", newJString(accountName))
-  result = call_570099.call(path_570100, query_570101, nil, nil, nil)
+  var path_564200 = newJObject()
+  var query_564201 = newJObject()
+  add(query_564201, "api-version", newJString(apiVersion))
+  add(path_564200, "subscriptionId", newJString(subscriptionId))
+  add(path_564200, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564200, "accountName", newJString(accountName))
+  result = call_564199.call(path_564200, query_564201, nil, nil, nil)
 
-var cognitiveServicesAccountsListSkus* = Call_CognitiveServicesAccountsListSkus_570091(
+var cognitiveServicesAccountsListSkus* = Call_CognitiveServicesAccountsListSkus_564191(
     name: "cognitiveServicesAccountsListSkus", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.CognitiveServices/accounts/{accountName}/skus",
-    validator: validate_CognitiveServicesAccountsListSkus_570092, base: "",
-    url: url_CognitiveServicesAccountsListSkus_570093, schemes: {Scheme.Https})
+    validator: validate_CognitiveServicesAccountsListSkus_564192, base: "",
+    url: url_CognitiveServicesAccountsListSkus_564193, schemes: {Scheme.Https})
 export
   rest
 

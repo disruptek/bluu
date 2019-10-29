@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, httpcore
 
 ## auto-generated via openapi macro
 ## title: AutomationManagement
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_596458 = ref object of OpenApiRestCall
+  OpenApiRestCall_563556 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_596458](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563556](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_596458): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563556): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,8 +107,8 @@ const
   macServiceName = "automation-job"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_JobListByAutomationAccount_596680 = ref object of OpenApiRestCall_596458
-proc url_JobListByAutomationAccount_596682(protocol: Scheme; host: string;
+  Call_JobListByAutomationAccount_563778 = ref object of OpenApiRestCall_563556
+proc url_JobListByAutomationAccount_563780(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -129,7 +133,7 @@ proc url_JobListByAutomationAccount_596682(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_JobListByAutomationAccount_596681(path: JsonNode; query: JsonNode;
+proc validate_JobListByAutomationAccount_563779(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Retrieve a list of jobs.
   ## 
@@ -139,27 +143,27 @@ proc validate_JobListByAutomationAccount_596681(path: JsonNode; query: JsonNode;
   ## parameters in `path` object:
   ##   automationAccountName: JString (required)
   ##                        : The name of the automation account.
-  ##   resourceGroupName: JString (required)
-  ##                    : Name of an Azure Resource group.
   ##   subscriptionId: JString (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : Name of an Azure Resource group.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `automationAccountName` field"
-  var valid_596843 = path.getOrDefault("automationAccountName")
-  valid_596843 = validateParameter(valid_596843, JString, required = true,
+  var valid_563943 = path.getOrDefault("automationAccountName")
+  valid_563943 = validateParameter(valid_563943, JString, required = true,
                                  default = nil)
-  if valid_596843 != nil:
-    section.add "automationAccountName", valid_596843
-  var valid_596844 = path.getOrDefault("resourceGroupName")
-  valid_596844 = validateParameter(valid_596844, JString, required = true,
+  if valid_563943 != nil:
+    section.add "automationAccountName", valid_563943
+  var valid_563944 = path.getOrDefault("subscriptionId")
+  valid_563944 = validateParameter(valid_563944, JString, required = true,
                                  default = nil)
-  if valid_596844 != nil:
-    section.add "resourceGroupName", valid_596844
-  var valid_596845 = path.getOrDefault("subscriptionId")
-  valid_596845 = validateParameter(valid_596845, JString, required = true,
+  if valid_563944 != nil:
+    section.add "subscriptionId", valid_563944
+  var valid_563945 = path.getOrDefault("resourceGroupName")
+  valid_563945 = validateParameter(valid_563945, JString, required = true,
                                  default = nil)
-  if valid_596845 != nil:
-    section.add "subscriptionId", valid_596845
+  if valid_563945 != nil:
+    section.add "resourceGroupName", valid_563945
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -169,79 +173,79 @@ proc validate_JobListByAutomationAccount_596681(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_596846 = query.getOrDefault("api-version")
-  valid_596846 = validateParameter(valid_596846, JString, required = true,
+  var valid_563946 = query.getOrDefault("api-version")
+  valid_563946 = validateParameter(valid_563946, JString, required = true,
                                  default = nil)
-  if valid_596846 != nil:
-    section.add "api-version", valid_596846
-  var valid_596847 = query.getOrDefault("$filter")
-  valid_596847 = validateParameter(valid_596847, JString, required = false,
+  if valid_563946 != nil:
+    section.add "api-version", valid_563946
+  var valid_563947 = query.getOrDefault("$filter")
+  valid_563947 = validateParameter(valid_563947, JString, required = false,
                                  default = nil)
-  if valid_596847 != nil:
-    section.add "$filter", valid_596847
+  if valid_563947 != nil:
+    section.add "$filter", valid_563947
   result.add "query", section
   ## parameters in `header` object:
   ##   clientRequestId: JString
   ##                  : Identifies this specific client request.
   section = newJObject()
-  var valid_596848 = header.getOrDefault("clientRequestId")
-  valid_596848 = validateParameter(valid_596848, JString, required = false,
+  var valid_563948 = header.getOrDefault("clientRequestId")
+  valid_563948 = validateParameter(valid_563948, JString, required = false,
                                  default = nil)
-  if valid_596848 != nil:
-    section.add "clientRequestId", valid_596848
+  if valid_563948 != nil:
+    section.add "clientRequestId", valid_563948
   result.add "header", section
   section = newJObject()
   result.add "formData", section
   if body != nil:
     result.add "body", body
 
-proc call*(call_596875: Call_JobListByAutomationAccount_596680; path: JsonNode;
+proc call*(call_563975: Call_JobListByAutomationAccount_563778; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Retrieve a list of jobs.
   ## 
   ## http://aka.ms/azureautomationsdk/joboperations
-  let valid = call_596875.validator(path, query, header, formData, body)
-  let scheme = call_596875.pickScheme
+  let valid = call_563975.validator(path, query, header, formData, body)
+  let scheme = call_563975.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_596875.url(scheme.get, call_596875.host, call_596875.base,
-                         call_596875.route, valid.getOrDefault("path"),
+  let url = call_563975.url(scheme.get, call_563975.host, call_563975.base,
+                         call_563975.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_596875, url, valid)
+  result = hook(call_563975, url, valid)
 
-proc call*(call_596946: Call_JobListByAutomationAccount_596680;
-          automationAccountName: string; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; Filter: string = ""): Recallable =
+proc call*(call_564046: Call_JobListByAutomationAccount_563778; apiVersion: string;
+          automationAccountName: string; subscriptionId: string;
+          resourceGroupName: string; Filter: string = ""): Recallable =
   ## jobListByAutomationAccount
   ## Retrieve a list of jobs.
   ## http://aka.ms/azureautomationsdk/joboperations
-  ##   automationAccountName: string (required)
-  ##                        : The name of the automation account.
-  ##   resourceGroupName: string (required)
-  ##                    : Name of an Azure Resource group.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
+  ##   automationAccountName: string (required)
+  ##                        : The name of the automation account.
   ##   subscriptionId: string (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : Name of an Azure Resource group.
   ##   Filter: string
   ##         : The filter to apply on the operation.
-  var path_596947 = newJObject()
-  var query_596949 = newJObject()
-  add(path_596947, "automationAccountName", newJString(automationAccountName))
-  add(path_596947, "resourceGroupName", newJString(resourceGroupName))
-  add(query_596949, "api-version", newJString(apiVersion))
-  add(path_596947, "subscriptionId", newJString(subscriptionId))
-  add(query_596949, "$filter", newJString(Filter))
-  result = call_596946.call(path_596947, query_596949, nil, nil, nil)
+  var path_564047 = newJObject()
+  var query_564049 = newJObject()
+  add(query_564049, "api-version", newJString(apiVersion))
+  add(path_564047, "automationAccountName", newJString(automationAccountName))
+  add(path_564047, "subscriptionId", newJString(subscriptionId))
+  add(path_564047, "resourceGroupName", newJString(resourceGroupName))
+  add(query_564049, "$filter", newJString(Filter))
+  result = call_564046.call(path_564047, query_564049, nil, nil, nil)
 
-var jobListByAutomationAccount* = Call_JobListByAutomationAccount_596680(
+var jobListByAutomationAccount* = Call_JobListByAutomationAccount_563778(
     name: "jobListByAutomationAccount", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Automation/automationAccounts/{automationAccountName}/jobs",
-    validator: validate_JobListByAutomationAccount_596681, base: "",
-    url: url_JobListByAutomationAccount_596682, schemes: {Scheme.Https})
+    validator: validate_JobListByAutomationAccount_563779, base: "",
+    url: url_JobListByAutomationAccount_563780, schemes: {Scheme.Https})
 type
-  Call_JobCreate_597001 = ref object of OpenApiRestCall_596458
-proc url_JobCreate_597003(protocol: Scheme; host: string; base: string; route: string;
+  Call_JobCreate_564101 = ref object of OpenApiRestCall_563556
+proc url_JobCreate_564103(protocol: Scheme; host: string; base: string; route: string;
                          path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -268,7 +272,7 @@ proc url_JobCreate_597003(protocol: Scheme; host: string; base: string; route: s
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_JobCreate_597002(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_JobCreate_564102(path: JsonNode; query: JsonNode; header: JsonNode;
                               formData: JsonNode; body: JsonNode): JsonNode =
   ## Create a job of the runbook.
   ## 
@@ -278,34 +282,34 @@ proc validate_JobCreate_597002(path: JsonNode; query: JsonNode; header: JsonNode
   ## parameters in `path` object:
   ##   automationAccountName: JString (required)
   ##                        : The name of the automation account.
-  ##   resourceGroupName: JString (required)
-  ##                    : Name of an Azure Resource group.
   ##   subscriptionId: JString (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : Name of an Azure Resource group.
   ##   jobName: JString (required)
   ##          : The job name.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `automationAccountName` field"
-  var valid_597030 = path.getOrDefault("automationAccountName")
-  valid_597030 = validateParameter(valid_597030, JString, required = true,
+  var valid_564130 = path.getOrDefault("automationAccountName")
+  valid_564130 = validateParameter(valid_564130, JString, required = true,
                                  default = nil)
-  if valid_597030 != nil:
-    section.add "automationAccountName", valid_597030
-  var valid_597031 = path.getOrDefault("resourceGroupName")
-  valid_597031 = validateParameter(valid_597031, JString, required = true,
+  if valid_564130 != nil:
+    section.add "automationAccountName", valid_564130
+  var valid_564131 = path.getOrDefault("subscriptionId")
+  valid_564131 = validateParameter(valid_564131, JString, required = true,
                                  default = nil)
-  if valid_597031 != nil:
-    section.add "resourceGroupName", valid_597031
-  var valid_597032 = path.getOrDefault("subscriptionId")
-  valid_597032 = validateParameter(valid_597032, JString, required = true,
+  if valid_564131 != nil:
+    section.add "subscriptionId", valid_564131
+  var valid_564132 = path.getOrDefault("resourceGroupName")
+  valid_564132 = validateParameter(valid_564132, JString, required = true,
                                  default = nil)
-  if valid_597032 != nil:
-    section.add "subscriptionId", valid_597032
-  var valid_597033 = path.getOrDefault("jobName")
-  valid_597033 = validateParameter(valid_597033, JString, required = true,
+  if valid_564132 != nil:
+    section.add "resourceGroupName", valid_564132
+  var valid_564133 = path.getOrDefault("jobName")
+  valid_564133 = validateParameter(valid_564133, JString, required = true,
                                  default = nil)
-  if valid_597033 != nil:
-    section.add "jobName", valid_597033
+  if valid_564133 != nil:
+    section.add "jobName", valid_564133
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -313,21 +317,21 @@ proc validate_JobCreate_597002(path: JsonNode; query: JsonNode; header: JsonNode
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_597034 = query.getOrDefault("api-version")
-  valid_597034 = validateParameter(valid_597034, JString, required = true,
+  var valid_564134 = query.getOrDefault("api-version")
+  valid_564134 = validateParameter(valid_564134, JString, required = true,
                                  default = nil)
-  if valid_597034 != nil:
-    section.add "api-version", valid_597034
+  if valid_564134 != nil:
+    section.add "api-version", valid_564134
   result.add "query", section
   ## parameters in `header` object:
   ##   clientRequestId: JString
   ##                  : Identifies this specific client request.
   section = newJObject()
-  var valid_597035 = header.getOrDefault("clientRequestId")
-  valid_597035 = validateParameter(valid_597035, JString, required = false,
+  var valid_564135 = header.getOrDefault("clientRequestId")
+  valid_564135 = validateParameter(valid_564135, JString, required = false,
                                  default = nil)
-  if valid_597035 != nil:
-    section.add "clientRequestId", valid_597035
+  if valid_564135 != nil:
+    section.add "clientRequestId", valid_564135
   result.add "header", section
   section = newJObject()
   result.add "formData", section
@@ -339,58 +343,58 @@ proc validate_JobCreate_597002(path: JsonNode; query: JsonNode; header: JsonNode
   if body != nil:
     result.add "body", body
 
-proc call*(call_597037: Call_JobCreate_597001; path: JsonNode; query: JsonNode;
+proc call*(call_564137: Call_JobCreate_564101; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Create a job of the runbook.
   ## 
   ## http://aka.ms/azureautomationsdk/joboperations
-  let valid = call_597037.validator(path, query, header, formData, body)
-  let scheme = call_597037.pickScheme
+  let valid = call_564137.validator(path, query, header, formData, body)
+  let scheme = call_564137.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_597037.url(scheme.get, call_597037.host, call_597037.base,
-                         call_597037.route, valid.getOrDefault("path"),
+  let url = call_564137.url(scheme.get, call_564137.host, call_564137.base,
+                         call_564137.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_597037, url, valid)
+  result = hook(call_564137, url, valid)
 
-proc call*(call_597038: Call_JobCreate_597001; automationAccountName: string;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          jobName: string; parameters: JsonNode): Recallable =
+proc call*(call_564138: Call_JobCreate_564101; apiVersion: string;
+          automationAccountName: string; subscriptionId: string;
+          resourceGroupName: string; parameters: JsonNode; jobName: string): Recallable =
   ## jobCreate
   ## Create a job of the runbook.
   ## http://aka.ms/azureautomationsdk/joboperations
-  ##   automationAccountName: string (required)
-  ##                        : The name of the automation account.
-  ##   resourceGroupName: string (required)
-  ##                    : Name of an Azure Resource group.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
+  ##   automationAccountName: string (required)
+  ##                        : The name of the automation account.
   ##   subscriptionId: string (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   jobName: string (required)
-  ##          : The job name.
+  ##   resourceGroupName: string (required)
+  ##                    : Name of an Azure Resource group.
   ##   parameters: JObject (required)
   ##             : The parameters supplied to the create job operation.
-  var path_597039 = newJObject()
-  var query_597040 = newJObject()
-  var body_597041 = newJObject()
-  add(path_597039, "automationAccountName", newJString(automationAccountName))
-  add(path_597039, "resourceGroupName", newJString(resourceGroupName))
-  add(query_597040, "api-version", newJString(apiVersion))
-  add(path_597039, "subscriptionId", newJString(subscriptionId))
-  add(path_597039, "jobName", newJString(jobName))
+  ##   jobName: string (required)
+  ##          : The job name.
+  var path_564139 = newJObject()
+  var query_564140 = newJObject()
+  var body_564141 = newJObject()
+  add(query_564140, "api-version", newJString(apiVersion))
+  add(path_564139, "automationAccountName", newJString(automationAccountName))
+  add(path_564139, "subscriptionId", newJString(subscriptionId))
+  add(path_564139, "resourceGroupName", newJString(resourceGroupName))
   if parameters != nil:
-    body_597041 = parameters
-  result = call_597038.call(path_597039, query_597040, nil, nil, body_597041)
+    body_564141 = parameters
+  add(path_564139, "jobName", newJString(jobName))
+  result = call_564138.call(path_564139, query_564140, nil, nil, body_564141)
 
-var jobCreate* = Call_JobCreate_597001(name: "jobCreate", meth: HttpMethod.HttpPut,
+var jobCreate* = Call_JobCreate_564101(name: "jobCreate", meth: HttpMethod.HttpPut,
                                     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Automation/automationAccounts/{automationAccountName}/jobs/{jobName}",
-                                    validator: validate_JobCreate_597002,
-                                    base: "", url: url_JobCreate_597003,
+                                    validator: validate_JobCreate_564102,
+                                    base: "", url: url_JobCreate_564103,
                                     schemes: {Scheme.Https})
 type
-  Call_JobGet_596988 = ref object of OpenApiRestCall_596458
-proc url_JobGet_596990(protocol: Scheme; host: string; base: string; route: string;
+  Call_JobGet_564088 = ref object of OpenApiRestCall_563556
+proc url_JobGet_564090(protocol: Scheme; host: string; base: string; route: string;
                       path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -417,7 +421,7 @@ proc url_JobGet_596990(protocol: Scheme; host: string; base: string; route: stri
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_JobGet_596989(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_JobGet_564089(path: JsonNode; query: JsonNode; header: JsonNode;
                            formData: JsonNode; body: JsonNode): JsonNode =
   ## Retrieve the job identified by job name.
   ## 
@@ -427,34 +431,34 @@ proc validate_JobGet_596989(path: JsonNode; query: JsonNode; header: JsonNode;
   ## parameters in `path` object:
   ##   automationAccountName: JString (required)
   ##                        : The name of the automation account.
-  ##   resourceGroupName: JString (required)
-  ##                    : Name of an Azure Resource group.
   ##   subscriptionId: JString (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : Name of an Azure Resource group.
   ##   jobName: JString (required)
   ##          : The job name.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `automationAccountName` field"
-  var valid_596991 = path.getOrDefault("automationAccountName")
-  valid_596991 = validateParameter(valid_596991, JString, required = true,
+  var valid_564091 = path.getOrDefault("automationAccountName")
+  valid_564091 = validateParameter(valid_564091, JString, required = true,
                                  default = nil)
-  if valid_596991 != nil:
-    section.add "automationAccountName", valid_596991
-  var valid_596992 = path.getOrDefault("resourceGroupName")
-  valid_596992 = validateParameter(valid_596992, JString, required = true,
+  if valid_564091 != nil:
+    section.add "automationAccountName", valid_564091
+  var valid_564092 = path.getOrDefault("subscriptionId")
+  valid_564092 = validateParameter(valid_564092, JString, required = true,
                                  default = nil)
-  if valid_596992 != nil:
-    section.add "resourceGroupName", valid_596992
-  var valid_596993 = path.getOrDefault("subscriptionId")
-  valid_596993 = validateParameter(valid_596993, JString, required = true,
+  if valid_564092 != nil:
+    section.add "subscriptionId", valid_564092
+  var valid_564093 = path.getOrDefault("resourceGroupName")
+  valid_564093 = validateParameter(valid_564093, JString, required = true,
                                  default = nil)
-  if valid_596993 != nil:
-    section.add "subscriptionId", valid_596993
-  var valid_596994 = path.getOrDefault("jobName")
-  valid_596994 = validateParameter(valid_596994, JString, required = true,
+  if valid_564093 != nil:
+    section.add "resourceGroupName", valid_564093
+  var valid_564094 = path.getOrDefault("jobName")
+  valid_564094 = validateParameter(valid_564094, JString, required = true,
                                  default = nil)
-  if valid_596994 != nil:
-    section.add "jobName", valid_596994
+  if valid_564094 != nil:
+    section.add "jobName", valid_564094
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -462,73 +466,73 @@ proc validate_JobGet_596989(path: JsonNode; query: JsonNode; header: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_596995 = query.getOrDefault("api-version")
-  valid_596995 = validateParameter(valid_596995, JString, required = true,
+  var valid_564095 = query.getOrDefault("api-version")
+  valid_564095 = validateParameter(valid_564095, JString, required = true,
                                  default = nil)
-  if valid_596995 != nil:
-    section.add "api-version", valid_596995
+  if valid_564095 != nil:
+    section.add "api-version", valid_564095
   result.add "query", section
   ## parameters in `header` object:
   ##   clientRequestId: JString
   ##                  : Identifies this specific client request.
   section = newJObject()
-  var valid_596996 = header.getOrDefault("clientRequestId")
-  valid_596996 = validateParameter(valid_596996, JString, required = false,
+  var valid_564096 = header.getOrDefault("clientRequestId")
+  valid_564096 = validateParameter(valid_564096, JString, required = false,
                                  default = nil)
-  if valid_596996 != nil:
-    section.add "clientRequestId", valid_596996
+  if valid_564096 != nil:
+    section.add "clientRequestId", valid_564096
   result.add "header", section
   section = newJObject()
   result.add "formData", section
   if body != nil:
     result.add "body", body
 
-proc call*(call_596997: Call_JobGet_596988; path: JsonNode; query: JsonNode;
+proc call*(call_564097: Call_JobGet_564088; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Retrieve the job identified by job name.
   ## 
   ## http://aka.ms/azureautomationsdk/joboperations
-  let valid = call_596997.validator(path, query, header, formData, body)
-  let scheme = call_596997.pickScheme
+  let valid = call_564097.validator(path, query, header, formData, body)
+  let scheme = call_564097.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_596997.url(scheme.get, call_596997.host, call_596997.base,
-                         call_596997.route, valid.getOrDefault("path"),
+  let url = call_564097.url(scheme.get, call_564097.host, call_564097.base,
+                         call_564097.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_596997, url, valid)
+  result = hook(call_564097, url, valid)
 
-proc call*(call_596998: Call_JobGet_596988; automationAccountName: string;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          jobName: string): Recallable =
+proc call*(call_564098: Call_JobGet_564088; apiVersion: string;
+          automationAccountName: string; subscriptionId: string;
+          resourceGroupName: string; jobName: string): Recallable =
   ## jobGet
   ## Retrieve the job identified by job name.
   ## http://aka.ms/azureautomationsdk/joboperations
-  ##   automationAccountName: string (required)
-  ##                        : The name of the automation account.
-  ##   resourceGroupName: string (required)
-  ##                    : Name of an Azure Resource group.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
+  ##   automationAccountName: string (required)
+  ##                        : The name of the automation account.
   ##   subscriptionId: string (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : Name of an Azure Resource group.
   ##   jobName: string (required)
   ##          : The job name.
-  var path_596999 = newJObject()
-  var query_597000 = newJObject()
-  add(path_596999, "automationAccountName", newJString(automationAccountName))
-  add(path_596999, "resourceGroupName", newJString(resourceGroupName))
-  add(query_597000, "api-version", newJString(apiVersion))
-  add(path_596999, "subscriptionId", newJString(subscriptionId))
-  add(path_596999, "jobName", newJString(jobName))
-  result = call_596998.call(path_596999, query_597000, nil, nil, nil)
+  var path_564099 = newJObject()
+  var query_564100 = newJObject()
+  add(query_564100, "api-version", newJString(apiVersion))
+  add(path_564099, "automationAccountName", newJString(automationAccountName))
+  add(path_564099, "subscriptionId", newJString(subscriptionId))
+  add(path_564099, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564099, "jobName", newJString(jobName))
+  result = call_564098.call(path_564099, query_564100, nil, nil, nil)
 
-var jobGet* = Call_JobGet_596988(name: "jobGet", meth: HttpMethod.HttpGet,
+var jobGet* = Call_JobGet_564088(name: "jobGet", meth: HttpMethod.HttpGet,
                               host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Automation/automationAccounts/{automationAccountName}/jobs/{jobName}",
-                              validator: validate_JobGet_596989, base: "",
-                              url: url_JobGet_596990, schemes: {Scheme.Https})
+                              validator: validate_JobGet_564089, base: "",
+                              url: url_JobGet_564090, schemes: {Scheme.Https})
 type
-  Call_JobGetOutput_597042 = ref object of OpenApiRestCall_596458
-proc url_JobGetOutput_597044(protocol: Scheme; host: string; base: string;
+  Call_JobGetOutput_564142 = ref object of OpenApiRestCall_563556
+proc url_JobGetOutput_564144(protocol: Scheme; host: string; base: string;
                             route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -556,7 +560,7 @@ proc url_JobGetOutput_597044(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_JobGetOutput_597043(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_JobGetOutput_564143(path: JsonNode; query: JsonNode; header: JsonNode;
                                  formData: JsonNode; body: JsonNode): JsonNode =
   ## Retrieve the job output identified by job name.
   ## 
@@ -566,34 +570,34 @@ proc validate_JobGetOutput_597043(path: JsonNode; query: JsonNode; header: JsonN
   ## parameters in `path` object:
   ##   automationAccountName: JString (required)
   ##                        : The name of the automation account.
-  ##   resourceGroupName: JString (required)
-  ##                    : Name of an Azure Resource group.
   ##   subscriptionId: JString (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : Name of an Azure Resource group.
   ##   jobName: JString (required)
   ##          : The name of the job to be created.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `automationAccountName` field"
-  var valid_597045 = path.getOrDefault("automationAccountName")
-  valid_597045 = validateParameter(valid_597045, JString, required = true,
+  var valid_564145 = path.getOrDefault("automationAccountName")
+  valid_564145 = validateParameter(valid_564145, JString, required = true,
                                  default = nil)
-  if valid_597045 != nil:
-    section.add "automationAccountName", valid_597045
-  var valid_597046 = path.getOrDefault("resourceGroupName")
-  valid_597046 = validateParameter(valid_597046, JString, required = true,
+  if valid_564145 != nil:
+    section.add "automationAccountName", valid_564145
+  var valid_564146 = path.getOrDefault("subscriptionId")
+  valid_564146 = validateParameter(valid_564146, JString, required = true,
                                  default = nil)
-  if valid_597046 != nil:
-    section.add "resourceGroupName", valid_597046
-  var valid_597047 = path.getOrDefault("subscriptionId")
-  valid_597047 = validateParameter(valid_597047, JString, required = true,
+  if valid_564146 != nil:
+    section.add "subscriptionId", valid_564146
+  var valid_564147 = path.getOrDefault("resourceGroupName")
+  valid_564147 = validateParameter(valid_564147, JString, required = true,
                                  default = nil)
-  if valid_597047 != nil:
-    section.add "subscriptionId", valid_597047
-  var valid_597048 = path.getOrDefault("jobName")
-  valid_597048 = validateParameter(valid_597048, JString, required = true,
+  if valid_564147 != nil:
+    section.add "resourceGroupName", valid_564147
+  var valid_564148 = path.getOrDefault("jobName")
+  valid_564148 = validateParameter(valid_564148, JString, required = true,
                                  default = nil)
-  if valid_597048 != nil:
-    section.add "jobName", valid_597048
+  if valid_564148 != nil:
+    section.add "jobName", valid_564148
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -601,73 +605,73 @@ proc validate_JobGetOutput_597043(path: JsonNode; query: JsonNode; header: JsonN
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_597049 = query.getOrDefault("api-version")
-  valid_597049 = validateParameter(valid_597049, JString, required = true,
+  var valid_564149 = query.getOrDefault("api-version")
+  valid_564149 = validateParameter(valid_564149, JString, required = true,
                                  default = nil)
-  if valid_597049 != nil:
-    section.add "api-version", valid_597049
+  if valid_564149 != nil:
+    section.add "api-version", valid_564149
   result.add "query", section
   ## parameters in `header` object:
   ##   clientRequestId: JString
   ##                  : Identifies this specific client request.
   section = newJObject()
-  var valid_597050 = header.getOrDefault("clientRequestId")
-  valid_597050 = validateParameter(valid_597050, JString, required = false,
+  var valid_564150 = header.getOrDefault("clientRequestId")
+  valid_564150 = validateParameter(valid_564150, JString, required = false,
                                  default = nil)
-  if valid_597050 != nil:
-    section.add "clientRequestId", valid_597050
+  if valid_564150 != nil:
+    section.add "clientRequestId", valid_564150
   result.add "header", section
   section = newJObject()
   result.add "formData", section
   if body != nil:
     result.add "body", body
 
-proc call*(call_597051: Call_JobGetOutput_597042; path: JsonNode; query: JsonNode;
+proc call*(call_564151: Call_JobGetOutput_564142; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Retrieve the job output identified by job name.
   ## 
   ## http://aka.ms/azureautomationsdk/joboperations
-  let valid = call_597051.validator(path, query, header, formData, body)
-  let scheme = call_597051.pickScheme
+  let valid = call_564151.validator(path, query, header, formData, body)
+  let scheme = call_564151.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_597051.url(scheme.get, call_597051.host, call_597051.base,
-                         call_597051.route, valid.getOrDefault("path"),
+  let url = call_564151.url(scheme.get, call_564151.host, call_564151.base,
+                         call_564151.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_597051, url, valid)
+  result = hook(call_564151, url, valid)
 
-proc call*(call_597052: Call_JobGetOutput_597042; automationAccountName: string;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          jobName: string): Recallable =
+proc call*(call_564152: Call_JobGetOutput_564142; apiVersion: string;
+          automationAccountName: string; subscriptionId: string;
+          resourceGroupName: string; jobName: string): Recallable =
   ## jobGetOutput
   ## Retrieve the job output identified by job name.
   ## http://aka.ms/azureautomationsdk/joboperations
-  ##   automationAccountName: string (required)
-  ##                        : The name of the automation account.
-  ##   resourceGroupName: string (required)
-  ##                    : Name of an Azure Resource group.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
+  ##   automationAccountName: string (required)
+  ##                        : The name of the automation account.
   ##   subscriptionId: string (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : Name of an Azure Resource group.
   ##   jobName: string (required)
   ##          : The name of the job to be created.
-  var path_597053 = newJObject()
-  var query_597054 = newJObject()
-  add(path_597053, "automationAccountName", newJString(automationAccountName))
-  add(path_597053, "resourceGroupName", newJString(resourceGroupName))
-  add(query_597054, "api-version", newJString(apiVersion))
-  add(path_597053, "subscriptionId", newJString(subscriptionId))
-  add(path_597053, "jobName", newJString(jobName))
-  result = call_597052.call(path_597053, query_597054, nil, nil, nil)
+  var path_564153 = newJObject()
+  var query_564154 = newJObject()
+  add(query_564154, "api-version", newJString(apiVersion))
+  add(path_564153, "automationAccountName", newJString(automationAccountName))
+  add(path_564153, "subscriptionId", newJString(subscriptionId))
+  add(path_564153, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564153, "jobName", newJString(jobName))
+  result = call_564152.call(path_564153, query_564154, nil, nil, nil)
 
-var jobGetOutput* = Call_JobGetOutput_597042(name: "jobGetOutput",
+var jobGetOutput* = Call_JobGetOutput_564142(name: "jobGetOutput",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Automation/automationAccounts/{automationAccountName}/jobs/{jobName}/output",
-    validator: validate_JobGetOutput_597043, base: "", url: url_JobGetOutput_597044,
+    validator: validate_JobGetOutput_564143, base: "", url: url_JobGetOutput_564144,
     schemes: {Scheme.Https})
 type
-  Call_JobResume_597055 = ref object of OpenApiRestCall_596458
-proc url_JobResume_597057(protocol: Scheme; host: string; base: string; route: string;
+  Call_JobResume_564155 = ref object of OpenApiRestCall_563556
+proc url_JobResume_564157(protocol: Scheme; host: string; base: string; route: string;
                          path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -695,7 +699,7 @@ proc url_JobResume_597057(protocol: Scheme; host: string; base: string; route: s
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_JobResume_597056(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_JobResume_564156(path: JsonNode; query: JsonNode; header: JsonNode;
                               formData: JsonNode; body: JsonNode): JsonNode =
   ## Resume the job identified by jobName.
   ## 
@@ -705,34 +709,34 @@ proc validate_JobResume_597056(path: JsonNode; query: JsonNode; header: JsonNode
   ## parameters in `path` object:
   ##   automationAccountName: JString (required)
   ##                        : The name of the automation account.
-  ##   resourceGroupName: JString (required)
-  ##                    : Name of an Azure Resource group.
   ##   subscriptionId: JString (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : Name of an Azure Resource group.
   ##   jobName: JString (required)
   ##          : The job name.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `automationAccountName` field"
-  var valid_597058 = path.getOrDefault("automationAccountName")
-  valid_597058 = validateParameter(valid_597058, JString, required = true,
+  var valid_564158 = path.getOrDefault("automationAccountName")
+  valid_564158 = validateParameter(valid_564158, JString, required = true,
                                  default = nil)
-  if valid_597058 != nil:
-    section.add "automationAccountName", valid_597058
-  var valid_597059 = path.getOrDefault("resourceGroupName")
-  valid_597059 = validateParameter(valid_597059, JString, required = true,
+  if valid_564158 != nil:
+    section.add "automationAccountName", valid_564158
+  var valid_564159 = path.getOrDefault("subscriptionId")
+  valid_564159 = validateParameter(valid_564159, JString, required = true,
                                  default = nil)
-  if valid_597059 != nil:
-    section.add "resourceGroupName", valid_597059
-  var valid_597060 = path.getOrDefault("subscriptionId")
-  valid_597060 = validateParameter(valid_597060, JString, required = true,
+  if valid_564159 != nil:
+    section.add "subscriptionId", valid_564159
+  var valid_564160 = path.getOrDefault("resourceGroupName")
+  valid_564160 = validateParameter(valid_564160, JString, required = true,
                                  default = nil)
-  if valid_597060 != nil:
-    section.add "subscriptionId", valid_597060
-  var valid_597061 = path.getOrDefault("jobName")
-  valid_597061 = validateParameter(valid_597061, JString, required = true,
+  if valid_564160 != nil:
+    section.add "resourceGroupName", valid_564160
+  var valid_564161 = path.getOrDefault("jobName")
+  valid_564161 = validateParameter(valid_564161, JString, required = true,
                                  default = nil)
-  if valid_597061 != nil:
-    section.add "jobName", valid_597061
+  if valid_564161 != nil:
+    section.add "jobName", valid_564161
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -740,74 +744,74 @@ proc validate_JobResume_597056(path: JsonNode; query: JsonNode; header: JsonNode
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_597062 = query.getOrDefault("api-version")
-  valid_597062 = validateParameter(valid_597062, JString, required = true,
+  var valid_564162 = query.getOrDefault("api-version")
+  valid_564162 = validateParameter(valid_564162, JString, required = true,
                                  default = nil)
-  if valid_597062 != nil:
-    section.add "api-version", valid_597062
+  if valid_564162 != nil:
+    section.add "api-version", valid_564162
   result.add "query", section
   ## parameters in `header` object:
   ##   clientRequestId: JString
   ##                  : Identifies this specific client request.
   section = newJObject()
-  var valid_597063 = header.getOrDefault("clientRequestId")
-  valid_597063 = validateParameter(valid_597063, JString, required = false,
+  var valid_564163 = header.getOrDefault("clientRequestId")
+  valid_564163 = validateParameter(valid_564163, JString, required = false,
                                  default = nil)
-  if valid_597063 != nil:
-    section.add "clientRequestId", valid_597063
+  if valid_564163 != nil:
+    section.add "clientRequestId", valid_564163
   result.add "header", section
   section = newJObject()
   result.add "formData", section
   if body != nil:
     result.add "body", body
 
-proc call*(call_597064: Call_JobResume_597055; path: JsonNode; query: JsonNode;
+proc call*(call_564164: Call_JobResume_564155; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Resume the job identified by jobName.
   ## 
   ## http://aka.ms/azureautomationsdk/joboperations
-  let valid = call_597064.validator(path, query, header, formData, body)
-  let scheme = call_597064.pickScheme
+  let valid = call_564164.validator(path, query, header, formData, body)
+  let scheme = call_564164.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_597064.url(scheme.get, call_597064.host, call_597064.base,
-                         call_597064.route, valid.getOrDefault("path"),
+  let url = call_564164.url(scheme.get, call_564164.host, call_564164.base,
+                         call_564164.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_597064, url, valid)
+  result = hook(call_564164, url, valid)
 
-proc call*(call_597065: Call_JobResume_597055; automationAccountName: string;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          jobName: string): Recallable =
+proc call*(call_564165: Call_JobResume_564155; apiVersion: string;
+          automationAccountName: string; subscriptionId: string;
+          resourceGroupName: string; jobName: string): Recallable =
   ## jobResume
   ## Resume the job identified by jobName.
   ## http://aka.ms/azureautomationsdk/joboperations
-  ##   automationAccountName: string (required)
-  ##                        : The name of the automation account.
-  ##   resourceGroupName: string (required)
-  ##                    : Name of an Azure Resource group.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
+  ##   automationAccountName: string (required)
+  ##                        : The name of the automation account.
   ##   subscriptionId: string (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : Name of an Azure Resource group.
   ##   jobName: string (required)
   ##          : The job name.
-  var path_597066 = newJObject()
-  var query_597067 = newJObject()
-  add(path_597066, "automationAccountName", newJString(automationAccountName))
-  add(path_597066, "resourceGroupName", newJString(resourceGroupName))
-  add(query_597067, "api-version", newJString(apiVersion))
-  add(path_597066, "subscriptionId", newJString(subscriptionId))
-  add(path_597066, "jobName", newJString(jobName))
-  result = call_597065.call(path_597066, query_597067, nil, nil, nil)
+  var path_564166 = newJObject()
+  var query_564167 = newJObject()
+  add(query_564167, "api-version", newJString(apiVersion))
+  add(path_564166, "automationAccountName", newJString(automationAccountName))
+  add(path_564166, "subscriptionId", newJString(subscriptionId))
+  add(path_564166, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564166, "jobName", newJString(jobName))
+  result = call_564165.call(path_564166, query_564167, nil, nil, nil)
 
-var jobResume* = Call_JobResume_597055(name: "jobResume", meth: HttpMethod.HttpPost,
+var jobResume* = Call_JobResume_564155(name: "jobResume", meth: HttpMethod.HttpPost,
                                     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Automation/automationAccounts/{automationAccountName}/jobs/{jobName}/resume",
-                                    validator: validate_JobResume_597056,
-                                    base: "", url: url_JobResume_597057,
+                                    validator: validate_JobResume_564156,
+                                    base: "", url: url_JobResume_564157,
                                     schemes: {Scheme.Https})
 type
-  Call_JobGetRunbookContent_597068 = ref object of OpenApiRestCall_596458
-proc url_JobGetRunbookContent_597070(protocol: Scheme; host: string; base: string;
+  Call_JobGetRunbookContent_564168 = ref object of OpenApiRestCall_563556
+proc url_JobGetRunbookContent_564170(protocol: Scheme; host: string; base: string;
                                     route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -835,7 +839,7 @@ proc url_JobGetRunbookContent_597070(protocol: Scheme; host: string; base: strin
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_JobGetRunbookContent_597069(path: JsonNode; query: JsonNode;
+proc validate_JobGetRunbookContent_564169(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Retrieve the runbook content of the job identified by job name.
   ## 
@@ -845,34 +849,34 @@ proc validate_JobGetRunbookContent_597069(path: JsonNode; query: JsonNode;
   ## parameters in `path` object:
   ##   automationAccountName: JString (required)
   ##                        : The name of the automation account.
-  ##   resourceGroupName: JString (required)
-  ##                    : Name of an Azure Resource group.
   ##   subscriptionId: JString (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : Name of an Azure Resource group.
   ##   jobName: JString (required)
   ##          : The job name.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `automationAccountName` field"
-  var valid_597071 = path.getOrDefault("automationAccountName")
-  valid_597071 = validateParameter(valid_597071, JString, required = true,
+  var valid_564171 = path.getOrDefault("automationAccountName")
+  valid_564171 = validateParameter(valid_564171, JString, required = true,
                                  default = nil)
-  if valid_597071 != nil:
-    section.add "automationAccountName", valid_597071
-  var valid_597072 = path.getOrDefault("resourceGroupName")
-  valid_597072 = validateParameter(valid_597072, JString, required = true,
+  if valid_564171 != nil:
+    section.add "automationAccountName", valid_564171
+  var valid_564172 = path.getOrDefault("subscriptionId")
+  valid_564172 = validateParameter(valid_564172, JString, required = true,
                                  default = nil)
-  if valid_597072 != nil:
-    section.add "resourceGroupName", valid_597072
-  var valid_597073 = path.getOrDefault("subscriptionId")
-  valid_597073 = validateParameter(valid_597073, JString, required = true,
+  if valid_564172 != nil:
+    section.add "subscriptionId", valid_564172
+  var valid_564173 = path.getOrDefault("resourceGroupName")
+  valid_564173 = validateParameter(valid_564173, JString, required = true,
                                  default = nil)
-  if valid_597073 != nil:
-    section.add "subscriptionId", valid_597073
-  var valid_597074 = path.getOrDefault("jobName")
-  valid_597074 = validateParameter(valid_597074, JString, required = true,
+  if valid_564173 != nil:
+    section.add "resourceGroupName", valid_564173
+  var valid_564174 = path.getOrDefault("jobName")
+  valid_564174 = validateParameter(valid_564174, JString, required = true,
                                  default = nil)
-  if valid_597074 != nil:
-    section.add "jobName", valid_597074
+  if valid_564174 != nil:
+    section.add "jobName", valid_564174
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -880,74 +884,74 @@ proc validate_JobGetRunbookContent_597069(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_597075 = query.getOrDefault("api-version")
-  valid_597075 = validateParameter(valid_597075, JString, required = true,
+  var valid_564175 = query.getOrDefault("api-version")
+  valid_564175 = validateParameter(valid_564175, JString, required = true,
                                  default = nil)
-  if valid_597075 != nil:
-    section.add "api-version", valid_597075
+  if valid_564175 != nil:
+    section.add "api-version", valid_564175
   result.add "query", section
   ## parameters in `header` object:
   ##   clientRequestId: JString
   ##                  : Identifies this specific client request.
   section = newJObject()
-  var valid_597076 = header.getOrDefault("clientRequestId")
-  valid_597076 = validateParameter(valid_597076, JString, required = false,
+  var valid_564176 = header.getOrDefault("clientRequestId")
+  valid_564176 = validateParameter(valid_564176, JString, required = false,
                                  default = nil)
-  if valid_597076 != nil:
-    section.add "clientRequestId", valid_597076
+  if valid_564176 != nil:
+    section.add "clientRequestId", valid_564176
   result.add "header", section
   section = newJObject()
   result.add "formData", section
   if body != nil:
     result.add "body", body
 
-proc call*(call_597077: Call_JobGetRunbookContent_597068; path: JsonNode;
+proc call*(call_564177: Call_JobGetRunbookContent_564168; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Retrieve the runbook content of the job identified by job name.
   ## 
   ## http://aka.ms/azureautomationsdk/joboperations
-  let valid = call_597077.validator(path, query, header, formData, body)
-  let scheme = call_597077.pickScheme
+  let valid = call_564177.validator(path, query, header, formData, body)
+  let scheme = call_564177.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_597077.url(scheme.get, call_597077.host, call_597077.base,
-                         call_597077.route, valid.getOrDefault("path"),
+  let url = call_564177.url(scheme.get, call_564177.host, call_564177.base,
+                         call_564177.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_597077, url, valid)
+  result = hook(call_564177, url, valid)
 
-proc call*(call_597078: Call_JobGetRunbookContent_597068;
-          automationAccountName: string; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; jobName: string): Recallable =
+proc call*(call_564178: Call_JobGetRunbookContent_564168; apiVersion: string;
+          automationAccountName: string; subscriptionId: string;
+          resourceGroupName: string; jobName: string): Recallable =
   ## jobGetRunbookContent
   ## Retrieve the runbook content of the job identified by job name.
   ## http://aka.ms/azureautomationsdk/joboperations
-  ##   automationAccountName: string (required)
-  ##                        : The name of the automation account.
-  ##   resourceGroupName: string (required)
-  ##                    : Name of an Azure Resource group.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
+  ##   automationAccountName: string (required)
+  ##                        : The name of the automation account.
   ##   subscriptionId: string (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : Name of an Azure Resource group.
   ##   jobName: string (required)
   ##          : The job name.
-  var path_597079 = newJObject()
-  var query_597080 = newJObject()
-  add(path_597079, "automationAccountName", newJString(automationAccountName))
-  add(path_597079, "resourceGroupName", newJString(resourceGroupName))
-  add(query_597080, "api-version", newJString(apiVersion))
-  add(path_597079, "subscriptionId", newJString(subscriptionId))
-  add(path_597079, "jobName", newJString(jobName))
-  result = call_597078.call(path_597079, query_597080, nil, nil, nil)
+  var path_564179 = newJObject()
+  var query_564180 = newJObject()
+  add(query_564180, "api-version", newJString(apiVersion))
+  add(path_564179, "automationAccountName", newJString(automationAccountName))
+  add(path_564179, "subscriptionId", newJString(subscriptionId))
+  add(path_564179, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564179, "jobName", newJString(jobName))
+  result = call_564178.call(path_564179, query_564180, nil, nil, nil)
 
-var jobGetRunbookContent* = Call_JobGetRunbookContent_597068(
+var jobGetRunbookContent* = Call_JobGetRunbookContent_564168(
     name: "jobGetRunbookContent", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Automation/automationAccounts/{automationAccountName}/jobs/{jobName}/runbookContent",
-    validator: validate_JobGetRunbookContent_597069, base: "",
-    url: url_JobGetRunbookContent_597070, schemes: {Scheme.Https})
+    validator: validate_JobGetRunbookContent_564169, base: "",
+    url: url_JobGetRunbookContent_564170, schemes: {Scheme.Https})
 type
-  Call_JobStop_597081 = ref object of OpenApiRestCall_596458
-proc url_JobStop_597083(protocol: Scheme; host: string; base: string; route: string;
+  Call_JobStop_564181 = ref object of OpenApiRestCall_563556
+proc url_JobStop_564183(protocol: Scheme; host: string; base: string; route: string;
                        path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -975,7 +979,7 @@ proc url_JobStop_597083(protocol: Scheme; host: string; base: string; route: str
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_JobStop_597082(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_JobStop_564182(path: JsonNode; query: JsonNode; header: JsonNode;
                             formData: JsonNode; body: JsonNode): JsonNode =
   ## Stop the job identified by jobName.
   ## 
@@ -985,34 +989,34 @@ proc validate_JobStop_597082(path: JsonNode; query: JsonNode; header: JsonNode;
   ## parameters in `path` object:
   ##   automationAccountName: JString (required)
   ##                        : The name of the automation account.
-  ##   resourceGroupName: JString (required)
-  ##                    : Name of an Azure Resource group.
   ##   subscriptionId: JString (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : Name of an Azure Resource group.
   ##   jobName: JString (required)
   ##          : The job name.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `automationAccountName` field"
-  var valid_597084 = path.getOrDefault("automationAccountName")
-  valid_597084 = validateParameter(valid_597084, JString, required = true,
+  var valid_564184 = path.getOrDefault("automationAccountName")
+  valid_564184 = validateParameter(valid_564184, JString, required = true,
                                  default = nil)
-  if valid_597084 != nil:
-    section.add "automationAccountName", valid_597084
-  var valid_597085 = path.getOrDefault("resourceGroupName")
-  valid_597085 = validateParameter(valid_597085, JString, required = true,
+  if valid_564184 != nil:
+    section.add "automationAccountName", valid_564184
+  var valid_564185 = path.getOrDefault("subscriptionId")
+  valid_564185 = validateParameter(valid_564185, JString, required = true,
                                  default = nil)
-  if valid_597085 != nil:
-    section.add "resourceGroupName", valid_597085
-  var valid_597086 = path.getOrDefault("subscriptionId")
-  valid_597086 = validateParameter(valid_597086, JString, required = true,
+  if valid_564185 != nil:
+    section.add "subscriptionId", valid_564185
+  var valid_564186 = path.getOrDefault("resourceGroupName")
+  valid_564186 = validateParameter(valid_564186, JString, required = true,
                                  default = nil)
-  if valid_597086 != nil:
-    section.add "subscriptionId", valid_597086
-  var valid_597087 = path.getOrDefault("jobName")
-  valid_597087 = validateParameter(valid_597087, JString, required = true,
+  if valid_564186 != nil:
+    section.add "resourceGroupName", valid_564186
+  var valid_564187 = path.getOrDefault("jobName")
+  valid_564187 = validateParameter(valid_564187, JString, required = true,
                                  default = nil)
-  if valid_597087 != nil:
-    section.add "jobName", valid_597087
+  if valid_564187 != nil:
+    section.add "jobName", valid_564187
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1020,73 +1024,73 @@ proc validate_JobStop_597082(path: JsonNode; query: JsonNode; header: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_597088 = query.getOrDefault("api-version")
-  valid_597088 = validateParameter(valid_597088, JString, required = true,
+  var valid_564188 = query.getOrDefault("api-version")
+  valid_564188 = validateParameter(valid_564188, JString, required = true,
                                  default = nil)
-  if valid_597088 != nil:
-    section.add "api-version", valid_597088
+  if valid_564188 != nil:
+    section.add "api-version", valid_564188
   result.add "query", section
   ## parameters in `header` object:
   ##   clientRequestId: JString
   ##                  : Identifies this specific client request.
   section = newJObject()
-  var valid_597089 = header.getOrDefault("clientRequestId")
-  valid_597089 = validateParameter(valid_597089, JString, required = false,
+  var valid_564189 = header.getOrDefault("clientRequestId")
+  valid_564189 = validateParameter(valid_564189, JString, required = false,
                                  default = nil)
-  if valid_597089 != nil:
-    section.add "clientRequestId", valid_597089
+  if valid_564189 != nil:
+    section.add "clientRequestId", valid_564189
   result.add "header", section
   section = newJObject()
   result.add "formData", section
   if body != nil:
     result.add "body", body
 
-proc call*(call_597090: Call_JobStop_597081; path: JsonNode; query: JsonNode;
+proc call*(call_564190: Call_JobStop_564181; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Stop the job identified by jobName.
   ## 
   ## http://aka.ms/azureautomationsdk/joboperations
-  let valid = call_597090.validator(path, query, header, formData, body)
-  let scheme = call_597090.pickScheme
+  let valid = call_564190.validator(path, query, header, formData, body)
+  let scheme = call_564190.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_597090.url(scheme.get, call_597090.host, call_597090.base,
-                         call_597090.route, valid.getOrDefault("path"),
+  let url = call_564190.url(scheme.get, call_564190.host, call_564190.base,
+                         call_564190.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_597090, url, valid)
+  result = hook(call_564190, url, valid)
 
-proc call*(call_597091: Call_JobStop_597081; automationAccountName: string;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          jobName: string): Recallable =
+proc call*(call_564191: Call_JobStop_564181; apiVersion: string;
+          automationAccountName: string; subscriptionId: string;
+          resourceGroupName: string; jobName: string): Recallable =
   ## jobStop
   ## Stop the job identified by jobName.
   ## http://aka.ms/azureautomationsdk/joboperations
-  ##   automationAccountName: string (required)
-  ##                        : The name of the automation account.
-  ##   resourceGroupName: string (required)
-  ##                    : Name of an Azure Resource group.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
+  ##   automationAccountName: string (required)
+  ##                        : The name of the automation account.
   ##   subscriptionId: string (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : Name of an Azure Resource group.
   ##   jobName: string (required)
   ##          : The job name.
-  var path_597092 = newJObject()
-  var query_597093 = newJObject()
-  add(path_597092, "automationAccountName", newJString(automationAccountName))
-  add(path_597092, "resourceGroupName", newJString(resourceGroupName))
-  add(query_597093, "api-version", newJString(apiVersion))
-  add(path_597092, "subscriptionId", newJString(subscriptionId))
-  add(path_597092, "jobName", newJString(jobName))
-  result = call_597091.call(path_597092, query_597093, nil, nil, nil)
+  var path_564192 = newJObject()
+  var query_564193 = newJObject()
+  add(query_564193, "api-version", newJString(apiVersion))
+  add(path_564192, "automationAccountName", newJString(automationAccountName))
+  add(path_564192, "subscriptionId", newJString(subscriptionId))
+  add(path_564192, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564192, "jobName", newJString(jobName))
+  result = call_564191.call(path_564192, query_564193, nil, nil, nil)
 
-var jobStop* = Call_JobStop_597081(name: "jobStop", meth: HttpMethod.HttpPost,
+var jobStop* = Call_JobStop_564181(name: "jobStop", meth: HttpMethod.HttpPost,
                                 host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Automation/automationAccounts/{automationAccountName}/jobs/{jobName}/stop",
-                                validator: validate_JobStop_597082, base: "",
-                                url: url_JobStop_597083, schemes: {Scheme.Https})
+                                validator: validate_JobStop_564182, base: "",
+                                url: url_JobStop_564183, schemes: {Scheme.Https})
 type
-  Call_JobStreamListByJob_597094 = ref object of OpenApiRestCall_596458
-proc url_JobStreamListByJob_597096(protocol: Scheme; host: string; base: string;
+  Call_JobStreamListByJob_564194 = ref object of OpenApiRestCall_563556
+proc url_JobStreamListByJob_564196(protocol: Scheme; host: string; base: string;
                                   route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1114,7 +1118,7 @@ proc url_JobStreamListByJob_597096(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_JobStreamListByJob_597095(path: JsonNode; query: JsonNode;
+proc validate_JobStreamListByJob_564195(path: JsonNode; query: JsonNode;
                                        header: JsonNode; formData: JsonNode;
                                        body: JsonNode): JsonNode =
   ## Retrieve a list of jobs streams identified by job name.
@@ -1125,34 +1129,34 @@ proc validate_JobStreamListByJob_597095(path: JsonNode; query: JsonNode;
   ## parameters in `path` object:
   ##   automationAccountName: JString (required)
   ##                        : The name of the automation account.
-  ##   resourceGroupName: JString (required)
-  ##                    : Name of an Azure Resource group.
   ##   subscriptionId: JString (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : Name of an Azure Resource group.
   ##   jobName: JString (required)
   ##          : The job name.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `automationAccountName` field"
-  var valid_597097 = path.getOrDefault("automationAccountName")
-  valid_597097 = validateParameter(valid_597097, JString, required = true,
+  var valid_564197 = path.getOrDefault("automationAccountName")
+  valid_564197 = validateParameter(valid_564197, JString, required = true,
                                  default = nil)
-  if valid_597097 != nil:
-    section.add "automationAccountName", valid_597097
-  var valid_597098 = path.getOrDefault("resourceGroupName")
-  valid_597098 = validateParameter(valid_597098, JString, required = true,
+  if valid_564197 != nil:
+    section.add "automationAccountName", valid_564197
+  var valid_564198 = path.getOrDefault("subscriptionId")
+  valid_564198 = validateParameter(valid_564198, JString, required = true,
                                  default = nil)
-  if valid_597098 != nil:
-    section.add "resourceGroupName", valid_597098
-  var valid_597099 = path.getOrDefault("subscriptionId")
-  valid_597099 = validateParameter(valid_597099, JString, required = true,
+  if valid_564198 != nil:
+    section.add "subscriptionId", valid_564198
+  var valid_564199 = path.getOrDefault("resourceGroupName")
+  valid_564199 = validateParameter(valid_564199, JString, required = true,
                                  default = nil)
-  if valid_597099 != nil:
-    section.add "subscriptionId", valid_597099
-  var valid_597100 = path.getOrDefault("jobName")
-  valid_597100 = validateParameter(valid_597100, JString, required = true,
+  if valid_564199 != nil:
+    section.add "resourceGroupName", valid_564199
+  var valid_564200 = path.getOrDefault("jobName")
+  valid_564200 = validateParameter(valid_564200, JString, required = true,
                                  default = nil)
-  if valid_597100 != nil:
-    section.add "jobName", valid_597100
+  if valid_564200 != nil:
+    section.add "jobName", valid_564200
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1162,83 +1166,82 @@ proc validate_JobStreamListByJob_597095(path: JsonNode; query: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_597101 = query.getOrDefault("api-version")
-  valid_597101 = validateParameter(valid_597101, JString, required = true,
+  var valid_564201 = query.getOrDefault("api-version")
+  valid_564201 = validateParameter(valid_564201, JString, required = true,
                                  default = nil)
-  if valid_597101 != nil:
-    section.add "api-version", valid_597101
-  var valid_597102 = query.getOrDefault("$filter")
-  valid_597102 = validateParameter(valid_597102, JString, required = false,
+  if valid_564201 != nil:
+    section.add "api-version", valid_564201
+  var valid_564202 = query.getOrDefault("$filter")
+  valid_564202 = validateParameter(valid_564202, JString, required = false,
                                  default = nil)
-  if valid_597102 != nil:
-    section.add "$filter", valid_597102
+  if valid_564202 != nil:
+    section.add "$filter", valid_564202
   result.add "query", section
   ## parameters in `header` object:
   ##   clientRequestId: JString
   ##                  : Identifies this specific client request.
   section = newJObject()
-  var valid_597103 = header.getOrDefault("clientRequestId")
-  valid_597103 = validateParameter(valid_597103, JString, required = false,
+  var valid_564203 = header.getOrDefault("clientRequestId")
+  valid_564203 = validateParameter(valid_564203, JString, required = false,
                                  default = nil)
-  if valid_597103 != nil:
-    section.add "clientRequestId", valid_597103
+  if valid_564203 != nil:
+    section.add "clientRequestId", valid_564203
   result.add "header", section
   section = newJObject()
   result.add "formData", section
   if body != nil:
     result.add "body", body
 
-proc call*(call_597104: Call_JobStreamListByJob_597094; path: JsonNode;
+proc call*(call_564204: Call_JobStreamListByJob_564194; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Retrieve a list of jobs streams identified by job name.
   ## 
   ## http://aka.ms/azureautomationsdk/jobstreamoperations
-  let valid = call_597104.validator(path, query, header, formData, body)
-  let scheme = call_597104.pickScheme
+  let valid = call_564204.validator(path, query, header, formData, body)
+  let scheme = call_564204.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_597104.url(scheme.get, call_597104.host, call_597104.base,
-                         call_597104.route, valid.getOrDefault("path"),
+  let url = call_564204.url(scheme.get, call_564204.host, call_564204.base,
+                         call_564204.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_597104, url, valid)
+  result = hook(call_564204, url, valid)
 
-proc call*(call_597105: Call_JobStreamListByJob_597094;
-          automationAccountName: string; resourceGroupName: string;
-          apiVersion: string; subscriptionId: string; jobName: string;
-          Filter: string = ""): Recallable =
+proc call*(call_564205: Call_JobStreamListByJob_564194; apiVersion: string;
+          automationAccountName: string; subscriptionId: string;
+          resourceGroupName: string; jobName: string; Filter: string = ""): Recallable =
   ## jobStreamListByJob
   ## Retrieve a list of jobs streams identified by job name.
   ## http://aka.ms/azureautomationsdk/jobstreamoperations
-  ##   automationAccountName: string (required)
-  ##                        : The name of the automation account.
-  ##   resourceGroupName: string (required)
-  ##                    : Name of an Azure Resource group.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
+  ##   automationAccountName: string (required)
+  ##                        : The name of the automation account.
   ##   subscriptionId: string (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   jobName: string (required)
-  ##          : The job name.
+  ##   resourceGroupName: string (required)
+  ##                    : Name of an Azure Resource group.
   ##   Filter: string
   ##         : The filter to apply on the operation.
-  var path_597106 = newJObject()
-  var query_597107 = newJObject()
-  add(path_597106, "automationAccountName", newJString(automationAccountName))
-  add(path_597106, "resourceGroupName", newJString(resourceGroupName))
-  add(query_597107, "api-version", newJString(apiVersion))
-  add(path_597106, "subscriptionId", newJString(subscriptionId))
-  add(path_597106, "jobName", newJString(jobName))
-  add(query_597107, "$filter", newJString(Filter))
-  result = call_597105.call(path_597106, query_597107, nil, nil, nil)
+  ##   jobName: string (required)
+  ##          : The job name.
+  var path_564206 = newJObject()
+  var query_564207 = newJObject()
+  add(query_564207, "api-version", newJString(apiVersion))
+  add(path_564206, "automationAccountName", newJString(automationAccountName))
+  add(path_564206, "subscriptionId", newJString(subscriptionId))
+  add(path_564206, "resourceGroupName", newJString(resourceGroupName))
+  add(query_564207, "$filter", newJString(Filter))
+  add(path_564206, "jobName", newJString(jobName))
+  result = call_564205.call(path_564206, query_564207, nil, nil, nil)
 
-var jobStreamListByJob* = Call_JobStreamListByJob_597094(
+var jobStreamListByJob* = Call_JobStreamListByJob_564194(
     name: "jobStreamListByJob", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Automation/automationAccounts/{automationAccountName}/jobs/{jobName}/streams",
-    validator: validate_JobStreamListByJob_597095, base: "",
-    url: url_JobStreamListByJob_597096, schemes: {Scheme.Https})
+    validator: validate_JobStreamListByJob_564195, base: "",
+    url: url_JobStreamListByJob_564196, schemes: {Scheme.Https})
 type
-  Call_JobStreamGet_597108 = ref object of OpenApiRestCall_596458
-proc url_JobStreamGet_597110(protocol: Scheme; host: string; base: string;
+  Call_JobStreamGet_564208 = ref object of OpenApiRestCall_563556
+proc url_JobStreamGet_564210(protocol: Scheme; host: string; base: string;
                             route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1268,7 +1271,7 @@ proc url_JobStreamGet_597110(protocol: Scheme; host: string; base: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_JobStreamGet_597109(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_JobStreamGet_564209(path: JsonNode; query: JsonNode; header: JsonNode;
                                  formData: JsonNode; body: JsonNode): JsonNode =
   ## Retrieve the job stream identified by job stream id.
   ## 
@@ -1278,41 +1281,41 @@ proc validate_JobStreamGet_597109(path: JsonNode; query: JsonNode; header: JsonN
   ## parameters in `path` object:
   ##   automationAccountName: JString (required)
   ##                        : The name of the automation account.
-  ##   resourceGroupName: JString (required)
-  ##                    : Name of an Azure Resource group.
   ##   subscriptionId: JString (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   jobName: JString (required)
-  ##          : The job name.
   ##   jobStreamId: JString (required)
   ##              : The job stream id.
+  ##   resourceGroupName: JString (required)
+  ##                    : Name of an Azure Resource group.
+  ##   jobName: JString (required)
+  ##          : The job name.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `automationAccountName` field"
-  var valid_597111 = path.getOrDefault("automationAccountName")
-  valid_597111 = validateParameter(valid_597111, JString, required = true,
+  var valid_564211 = path.getOrDefault("automationAccountName")
+  valid_564211 = validateParameter(valid_564211, JString, required = true,
                                  default = nil)
-  if valid_597111 != nil:
-    section.add "automationAccountName", valid_597111
-  var valid_597112 = path.getOrDefault("resourceGroupName")
-  valid_597112 = validateParameter(valid_597112, JString, required = true,
+  if valid_564211 != nil:
+    section.add "automationAccountName", valid_564211
+  var valid_564212 = path.getOrDefault("subscriptionId")
+  valid_564212 = validateParameter(valid_564212, JString, required = true,
                                  default = nil)
-  if valid_597112 != nil:
-    section.add "resourceGroupName", valid_597112
-  var valid_597113 = path.getOrDefault("subscriptionId")
-  valid_597113 = validateParameter(valid_597113, JString, required = true,
+  if valid_564212 != nil:
+    section.add "subscriptionId", valid_564212
+  var valid_564213 = path.getOrDefault("jobStreamId")
+  valid_564213 = validateParameter(valid_564213, JString, required = true,
                                  default = nil)
-  if valid_597113 != nil:
-    section.add "subscriptionId", valid_597113
-  var valid_597114 = path.getOrDefault("jobName")
-  valid_597114 = validateParameter(valid_597114, JString, required = true,
+  if valid_564213 != nil:
+    section.add "jobStreamId", valid_564213
+  var valid_564214 = path.getOrDefault("resourceGroupName")
+  valid_564214 = validateParameter(valid_564214, JString, required = true,
                                  default = nil)
-  if valid_597114 != nil:
-    section.add "jobName", valid_597114
-  var valid_597115 = path.getOrDefault("jobStreamId")
-  valid_597115 = validateParameter(valid_597115, JString, required = true,
+  if valid_564214 != nil:
+    section.add "resourceGroupName", valid_564214
+  var valid_564215 = path.getOrDefault("jobName")
+  valid_564215 = validateParameter(valid_564215, JString, required = true,
                                  default = nil)
-  if valid_597115 != nil:
-    section.add "jobStreamId", valid_597115
+  if valid_564215 != nil:
+    section.add "jobName", valid_564215
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1320,76 +1323,76 @@ proc validate_JobStreamGet_597109(path: JsonNode; query: JsonNode; header: JsonN
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_597116 = query.getOrDefault("api-version")
-  valid_597116 = validateParameter(valid_597116, JString, required = true,
+  var valid_564216 = query.getOrDefault("api-version")
+  valid_564216 = validateParameter(valid_564216, JString, required = true,
                                  default = nil)
-  if valid_597116 != nil:
-    section.add "api-version", valid_597116
+  if valid_564216 != nil:
+    section.add "api-version", valid_564216
   result.add "query", section
   ## parameters in `header` object:
   ##   clientRequestId: JString
   ##                  : Identifies this specific client request.
   section = newJObject()
-  var valid_597117 = header.getOrDefault("clientRequestId")
-  valid_597117 = validateParameter(valid_597117, JString, required = false,
+  var valid_564217 = header.getOrDefault("clientRequestId")
+  valid_564217 = validateParameter(valid_564217, JString, required = false,
                                  default = nil)
-  if valid_597117 != nil:
-    section.add "clientRequestId", valid_597117
+  if valid_564217 != nil:
+    section.add "clientRequestId", valid_564217
   result.add "header", section
   section = newJObject()
   result.add "formData", section
   if body != nil:
     result.add "body", body
 
-proc call*(call_597118: Call_JobStreamGet_597108; path: JsonNode; query: JsonNode;
+proc call*(call_564218: Call_JobStreamGet_564208; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Retrieve the job stream identified by job stream id.
   ## 
   ## http://aka.ms/azureautomationsdk/jobstreamoperations
-  let valid = call_597118.validator(path, query, header, formData, body)
-  let scheme = call_597118.pickScheme
+  let valid = call_564218.validator(path, query, header, formData, body)
+  let scheme = call_564218.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_597118.url(scheme.get, call_597118.host, call_597118.base,
-                         call_597118.route, valid.getOrDefault("path"),
+  let url = call_564218.url(scheme.get, call_564218.host, call_564218.base,
+                         call_564218.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_597118, url, valid)
+  result = hook(call_564218, url, valid)
 
-proc call*(call_597119: Call_JobStreamGet_597108; automationAccountName: string;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          jobName: string; jobStreamId: string): Recallable =
+proc call*(call_564219: Call_JobStreamGet_564208; apiVersion: string;
+          automationAccountName: string; subscriptionId: string;
+          jobStreamId: string; resourceGroupName: string; jobName: string): Recallable =
   ## jobStreamGet
   ## Retrieve the job stream identified by job stream id.
   ## http://aka.ms/azureautomationsdk/jobstreamoperations
-  ##   automationAccountName: string (required)
-  ##                        : The name of the automation account.
-  ##   resourceGroupName: string (required)
-  ##                    : Name of an Azure Resource group.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
+  ##   automationAccountName: string (required)
+  ##                        : The name of the automation account.
   ##   subscriptionId: string (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
-  ##   jobName: string (required)
-  ##          : The job name.
   ##   jobStreamId: string (required)
   ##              : The job stream id.
-  var path_597120 = newJObject()
-  var query_597121 = newJObject()
-  add(path_597120, "automationAccountName", newJString(automationAccountName))
-  add(path_597120, "resourceGroupName", newJString(resourceGroupName))
-  add(query_597121, "api-version", newJString(apiVersion))
-  add(path_597120, "subscriptionId", newJString(subscriptionId))
-  add(path_597120, "jobName", newJString(jobName))
-  add(path_597120, "jobStreamId", newJString(jobStreamId))
-  result = call_597119.call(path_597120, query_597121, nil, nil, nil)
+  ##   resourceGroupName: string (required)
+  ##                    : Name of an Azure Resource group.
+  ##   jobName: string (required)
+  ##          : The job name.
+  var path_564220 = newJObject()
+  var query_564221 = newJObject()
+  add(query_564221, "api-version", newJString(apiVersion))
+  add(path_564220, "automationAccountName", newJString(automationAccountName))
+  add(path_564220, "subscriptionId", newJString(subscriptionId))
+  add(path_564220, "jobStreamId", newJString(jobStreamId))
+  add(path_564220, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564220, "jobName", newJString(jobName))
+  result = call_564219.call(path_564220, query_564221, nil, nil, nil)
 
-var jobStreamGet* = Call_JobStreamGet_597108(name: "jobStreamGet",
+var jobStreamGet* = Call_JobStreamGet_564208(name: "jobStreamGet",
     meth: HttpMethod.HttpGet, host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Automation/automationAccounts/{automationAccountName}/jobs/{jobName}/streams/{jobStreamId}",
-    validator: validate_JobStreamGet_597109, base: "", url: url_JobStreamGet_597110,
+    validator: validate_JobStreamGet_564209, base: "", url: url_JobStreamGet_564210,
     schemes: {Scheme.Https})
 type
-  Call_JobSuspend_597122 = ref object of OpenApiRestCall_596458
-proc url_JobSuspend_597124(protocol: Scheme; host: string; base: string; route: string;
+  Call_JobSuspend_564222 = ref object of OpenApiRestCall_563556
+proc url_JobSuspend_564224(protocol: Scheme; host: string; base: string; route: string;
                           path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -1417,7 +1420,7 @@ proc url_JobSuspend_597124(protocol: Scheme; host: string; base: string; route: 
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_JobSuspend_597123(path: JsonNode; query: JsonNode; header: JsonNode;
+proc validate_JobSuspend_564223(path: JsonNode; query: JsonNode; header: JsonNode;
                                formData: JsonNode; body: JsonNode): JsonNode =
   ## Suspend the job identified by job name.
   ## 
@@ -1427,34 +1430,34 @@ proc validate_JobSuspend_597123(path: JsonNode; query: JsonNode; header: JsonNod
   ## parameters in `path` object:
   ##   automationAccountName: JString (required)
   ##                        : The name of the automation account.
-  ##   resourceGroupName: JString (required)
-  ##                    : Name of an Azure Resource group.
   ##   subscriptionId: JString (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: JString (required)
+  ##                    : Name of an Azure Resource group.
   ##   jobName: JString (required)
   ##          : The job name.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `automationAccountName` field"
-  var valid_597125 = path.getOrDefault("automationAccountName")
-  valid_597125 = validateParameter(valid_597125, JString, required = true,
+  var valid_564225 = path.getOrDefault("automationAccountName")
+  valid_564225 = validateParameter(valid_564225, JString, required = true,
                                  default = nil)
-  if valid_597125 != nil:
-    section.add "automationAccountName", valid_597125
-  var valid_597126 = path.getOrDefault("resourceGroupName")
-  valid_597126 = validateParameter(valid_597126, JString, required = true,
+  if valid_564225 != nil:
+    section.add "automationAccountName", valid_564225
+  var valid_564226 = path.getOrDefault("subscriptionId")
+  valid_564226 = validateParameter(valid_564226, JString, required = true,
                                  default = nil)
-  if valid_597126 != nil:
-    section.add "resourceGroupName", valid_597126
-  var valid_597127 = path.getOrDefault("subscriptionId")
-  valid_597127 = validateParameter(valid_597127, JString, required = true,
+  if valid_564226 != nil:
+    section.add "subscriptionId", valid_564226
+  var valid_564227 = path.getOrDefault("resourceGroupName")
+  valid_564227 = validateParameter(valid_564227, JString, required = true,
                                  default = nil)
-  if valid_597127 != nil:
-    section.add "subscriptionId", valid_597127
-  var valid_597128 = path.getOrDefault("jobName")
-  valid_597128 = validateParameter(valid_597128, JString, required = true,
+  if valid_564227 != nil:
+    section.add "resourceGroupName", valid_564227
+  var valid_564228 = path.getOrDefault("jobName")
+  valid_564228 = validateParameter(valid_564228, JString, required = true,
                                  default = nil)
-  if valid_597128 != nil:
-    section.add "jobName", valid_597128
+  if valid_564228 != nil:
+    section.add "jobName", valid_564228
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -1462,71 +1465,71 @@ proc validate_JobSuspend_597123(path: JsonNode; query: JsonNode; header: JsonNod
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_597129 = query.getOrDefault("api-version")
-  valid_597129 = validateParameter(valid_597129, JString, required = true,
+  var valid_564229 = query.getOrDefault("api-version")
+  valid_564229 = validateParameter(valid_564229, JString, required = true,
                                  default = nil)
-  if valid_597129 != nil:
-    section.add "api-version", valid_597129
+  if valid_564229 != nil:
+    section.add "api-version", valid_564229
   result.add "query", section
   ## parameters in `header` object:
   ##   clientRequestId: JString
   ##                  : Identifies this specific client request.
   section = newJObject()
-  var valid_597130 = header.getOrDefault("clientRequestId")
-  valid_597130 = validateParameter(valid_597130, JString, required = false,
+  var valid_564230 = header.getOrDefault("clientRequestId")
+  valid_564230 = validateParameter(valid_564230, JString, required = false,
                                  default = nil)
-  if valid_597130 != nil:
-    section.add "clientRequestId", valid_597130
+  if valid_564230 != nil:
+    section.add "clientRequestId", valid_564230
   result.add "header", section
   section = newJObject()
   result.add "formData", section
   if body != nil:
     result.add "body", body
 
-proc call*(call_597131: Call_JobSuspend_597122; path: JsonNode; query: JsonNode;
+proc call*(call_564231: Call_JobSuspend_564222; path: JsonNode; query: JsonNode;
           header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Suspend the job identified by job name.
   ## 
   ## http://aka.ms/azureautomationsdk/joboperations
-  let valid = call_597131.validator(path, query, header, formData, body)
-  let scheme = call_597131.pickScheme
+  let valid = call_564231.validator(path, query, header, formData, body)
+  let scheme = call_564231.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_597131.url(scheme.get, call_597131.host, call_597131.base,
-                         call_597131.route, valid.getOrDefault("path"),
+  let url = call_564231.url(scheme.get, call_564231.host, call_564231.base,
+                         call_564231.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_597131, url, valid)
+  result = hook(call_564231, url, valid)
 
-proc call*(call_597132: Call_JobSuspend_597122; automationAccountName: string;
-          resourceGroupName: string; apiVersion: string; subscriptionId: string;
-          jobName: string): Recallable =
+proc call*(call_564232: Call_JobSuspend_564222; apiVersion: string;
+          automationAccountName: string; subscriptionId: string;
+          resourceGroupName: string; jobName: string): Recallable =
   ## jobSuspend
   ## Suspend the job identified by job name.
   ## http://aka.ms/azureautomationsdk/joboperations
-  ##   automationAccountName: string (required)
-  ##                        : The name of the automation account.
-  ##   resourceGroupName: string (required)
-  ##                    : Name of an Azure Resource group.
   ##   apiVersion: string (required)
   ##             : Client Api Version.
+  ##   automationAccountName: string (required)
+  ##                        : The name of the automation account.
   ##   subscriptionId: string (required)
   ##                 : Gets subscription credentials which uniquely identify Microsoft Azure subscription. The subscription ID forms part of the URI for every service call.
+  ##   resourceGroupName: string (required)
+  ##                    : Name of an Azure Resource group.
   ##   jobName: string (required)
   ##          : The job name.
-  var path_597133 = newJObject()
-  var query_597134 = newJObject()
-  add(path_597133, "automationAccountName", newJString(automationAccountName))
-  add(path_597133, "resourceGroupName", newJString(resourceGroupName))
-  add(query_597134, "api-version", newJString(apiVersion))
-  add(path_597133, "subscriptionId", newJString(subscriptionId))
-  add(path_597133, "jobName", newJString(jobName))
-  result = call_597132.call(path_597133, query_597134, nil, nil, nil)
+  var path_564233 = newJObject()
+  var query_564234 = newJObject()
+  add(query_564234, "api-version", newJString(apiVersion))
+  add(path_564233, "automationAccountName", newJString(automationAccountName))
+  add(path_564233, "subscriptionId", newJString(subscriptionId))
+  add(path_564233, "resourceGroupName", newJString(resourceGroupName))
+  add(path_564233, "jobName", newJString(jobName))
+  result = call_564232.call(path_564233, query_564234, nil, nil, nil)
 
-var jobSuspend* = Call_JobSuspend_597122(name: "jobSuspend",
+var jobSuspend* = Call_JobSuspend_564222(name: "jobSuspend",
                                       meth: HttpMethod.HttpPost,
                                       host: "management.azure.com", route: "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Automation/automationAccounts/{automationAccountName}/jobs/{jobName}/suspend",
-                                      validator: validate_JobSuspend_597123,
-                                      base: "", url: url_JobSuspend_597124,
+                                      validator: validate_JobSuspend_564223,
+                                      base: "", url: url_JobSuspend_564224,
                                       schemes: {Scheme.Https})
 export
   rest

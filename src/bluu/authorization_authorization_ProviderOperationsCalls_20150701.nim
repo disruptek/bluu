@@ -1,6 +1,6 @@
 
 import
-  json, options, hashes, uri, rest, os, uri, strutils, httpcore
+  json, options, hashes, uri, rest, os, uri, httpcore
 
 ## auto-generated via openapi macro
 ## title: AuthorizationManagementClient
@@ -25,15 +25,15 @@ type
     url*: proc (protocol: Scheme; host: string; base: string; route: string;
               path: JsonNode; query: JsonNode): Uri
 
-  OpenApiRestCall_596441 = ref object of OpenApiRestCall
+  OpenApiRestCall_563539 = ref object of OpenApiRestCall
 proc hash(scheme: Scheme): Hash {.used.} =
   result = hash(ord(scheme))
 
-proc clone[T: OpenApiRestCall_596441](t: T): T {.used.} =
+proc clone[T: OpenApiRestCall_563539](t: T): T {.used.} =
   result = T(name: t.name, meth: t.meth, host: t.host, base: t.base, route: t.route,
            schemes: t.schemes, validator: t.validator, url: t.url)
 
-proc pickScheme(t: OpenApiRestCall_596441): Option[Scheme] {.used.} =
+proc pickScheme(t: OpenApiRestCall_563539): Option[Scheme] {.used.} =
   ## select a supported scheme from a set of candidates
   for scheme in Scheme.low ..
       Scheme.high:
@@ -91,9 +91,13 @@ proc hydratePath(input: JsonNode; segments: seq[PathToken]): Option[string] {.us
     if head notin input:
       return
     let js = input[head]
-    if js.kind notin {JString, JInt, JFloat, JNull, JBool}:
+    case js.kind
+    of JInt, JFloat, JNull, JBool:
+      head = $js
+    of JString:
+      head = js.getStr
+    else:
       return
-    head = $js
   var remainder = input.hydratePath(segments[1 ..^ 1])
   if remainder.isNone:
     return
@@ -103,15 +107,15 @@ const
   macServiceName = "authorization-authorization-ProviderOperationsCalls"
 method hook(call: OpenApiRestCall; url: Uri; input: JsonNode): Recallable {.base.}
 type
-  Call_ProviderOperationsMetadataList_596663 = ref object of OpenApiRestCall_596441
-proc url_ProviderOperationsMetadataList_596665(protocol: Scheme; host: string;
+  Call_ProviderOperationsMetadataList_563761 = ref object of OpenApiRestCall_563539
+proc url_ProviderOperationsMetadataList_563763(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
   result.query = $queryString(query)
   result.path = base & route
 
-proc validate_ProviderOperationsMetadataList_596664(path: JsonNode;
+proc validate_ProviderOperationsMetadataList_563762(path: JsonNode;
     query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets provider operations metadata for all resource providers.
   ## 
@@ -127,16 +131,16 @@ proc validate_ProviderOperationsMetadataList_596664(path: JsonNode;
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_596812 = query.getOrDefault("api-version")
-  valid_596812 = validateParameter(valid_596812, JString, required = true,
+  var valid_563912 = query.getOrDefault("api-version")
+  valid_563912 = validateParameter(valid_563912, JString, required = true,
                                  default = nil)
-  if valid_596812 != nil:
-    section.add "api-version", valid_596812
-  var valid_596826 = query.getOrDefault("$expand")
-  valid_596826 = validateParameter(valid_596826, JString, required = false,
+  if valid_563912 != nil:
+    section.add "api-version", valid_563912
+  var valid_563926 = query.getOrDefault("$expand")
+  valid_563926 = validateParameter(valid_563926, JString, required = false,
                                  default = newJString("resourceTypes"))
-  if valid_596826 != nil:
-    section.add "$expand", valid_596826
+  if valid_563926 != nil:
+    section.add "$expand", valid_563926
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -145,20 +149,20 @@ proc validate_ProviderOperationsMetadataList_596664(path: JsonNode;
   if body != nil:
     result.add "body", body
 
-proc call*(call_596853: Call_ProviderOperationsMetadataList_596663; path: JsonNode;
+proc call*(call_563953: Call_ProviderOperationsMetadataList_563761; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets provider operations metadata for all resource providers.
   ## 
-  let valid = call_596853.validator(path, query, header, formData, body)
-  let scheme = call_596853.pickScheme
+  let valid = call_563953.validator(path, query, header, formData, body)
+  let scheme = call_563953.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_596853.url(scheme.get, call_596853.host, call_596853.base,
-                         call_596853.route, valid.getOrDefault("path"),
+  let url = call_563953.url(scheme.get, call_563953.host, call_563953.base,
+                         call_563953.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_596853, url, valid)
+  result = hook(call_563953, url, valid)
 
-proc call*(call_596924: Call_ProviderOperationsMetadataList_596663;
+proc call*(call_564024: Call_ProviderOperationsMetadataList_563761;
           apiVersion: string; Expand: string = "resourceTypes"): Recallable =
   ## providerOperationsMetadataList
   ## Gets provider operations metadata for all resource providers.
@@ -166,20 +170,20 @@ proc call*(call_596924: Call_ProviderOperationsMetadataList_596663;
   ##             : The API version to use for this operation.
   ##   Expand: string
   ##         : Specifies whether to expand the values.
-  var query_596925 = newJObject()
-  add(query_596925, "api-version", newJString(apiVersion))
-  add(query_596925, "$expand", newJString(Expand))
-  result = call_596924.call(nil, query_596925, nil, nil, nil)
+  var query_564025 = newJObject()
+  add(query_564025, "api-version", newJString(apiVersion))
+  add(query_564025, "$expand", newJString(Expand))
+  result = call_564024.call(nil, query_564025, nil, nil, nil)
 
-var providerOperationsMetadataList* = Call_ProviderOperationsMetadataList_596663(
+var providerOperationsMetadataList* = Call_ProviderOperationsMetadataList_563761(
     name: "providerOperationsMetadataList", meth: HttpMethod.HttpGet,
     host: "management.azure.com",
     route: "/providers/Microsoft.Authorization/providerOperations",
-    validator: validate_ProviderOperationsMetadataList_596664, base: "",
-    url: url_ProviderOperationsMetadataList_596665, schemes: {Scheme.Https})
+    validator: validate_ProviderOperationsMetadataList_563762, base: "",
+    url: url_ProviderOperationsMetadataList_563763, schemes: {Scheme.Https})
 type
-  Call_ProviderOperationsMetadataGet_596965 = ref object of OpenApiRestCall_596441
-proc url_ProviderOperationsMetadataGet_596967(protocol: Scheme; host: string;
+  Call_ProviderOperationsMetadataGet_564065 = ref object of OpenApiRestCall_563539
+proc url_ProviderOperationsMetadataGet_564067(protocol: Scheme; host: string;
     base: string; route: string; path: JsonNode; query: JsonNode): Uri =
   result.scheme = $protocol
   result.hostname = host
@@ -196,7 +200,7 @@ proc url_ProviderOperationsMetadataGet_596967(protocol: Scheme; host: string;
     raise newException(ValueError, "unable to fully hydrate path")
   result.path = base & hydrated.get
 
-proc validate_ProviderOperationsMetadataGet_596966(path: JsonNode; query: JsonNode;
+proc validate_ProviderOperationsMetadataGet_564066(path: JsonNode; query: JsonNode;
     header: JsonNode; formData: JsonNode; body: JsonNode): JsonNode =
   ## Gets provider operations metadata for the specified resource provider.
   ## 
@@ -207,11 +211,11 @@ proc validate_ProviderOperationsMetadataGet_596966(path: JsonNode; query: JsonNo
   ##                            : The namespace of the resource provider.
   section = newJObject()
   assert path != nil, "path argument is necessary due to required `resourceProviderNamespace` field"
-  var valid_596982 = path.getOrDefault("resourceProviderNamespace")
-  valid_596982 = validateParameter(valid_596982, JString, required = true,
+  var valid_564082 = path.getOrDefault("resourceProviderNamespace")
+  valid_564082 = validateParameter(valid_564082, JString, required = true,
                                  default = nil)
-  if valid_596982 != nil:
-    section.add "resourceProviderNamespace", valid_596982
+  if valid_564082 != nil:
+    section.add "resourceProviderNamespace", valid_564082
   result.add "path", section
   ## parameters in `query` object:
   ##   api-version: JString (required)
@@ -221,16 +225,16 @@ proc validate_ProviderOperationsMetadataGet_596966(path: JsonNode; query: JsonNo
   section = newJObject()
   assert query != nil,
         "query argument is necessary due to required `api-version` field"
-  var valid_596983 = query.getOrDefault("api-version")
-  valid_596983 = validateParameter(valid_596983, JString, required = true,
+  var valid_564083 = query.getOrDefault("api-version")
+  valid_564083 = validateParameter(valid_564083, JString, required = true,
                                  default = nil)
-  if valid_596983 != nil:
-    section.add "api-version", valid_596983
-  var valid_596984 = query.getOrDefault("$expand")
-  valid_596984 = validateParameter(valid_596984, JString, required = false,
+  if valid_564083 != nil:
+    section.add "api-version", valid_564083
+  var valid_564084 = query.getOrDefault("$expand")
+  valid_564084 = validateParameter(valid_564084, JString, required = false,
                                  default = newJString("resourceTypes"))
-  if valid_596984 != nil:
-    section.add "$expand", valid_596984
+  if valid_564084 != nil:
+    section.add "$expand", valid_564084
   result.add "query", section
   section = newJObject()
   result.add "header", section
@@ -239,20 +243,20 @@ proc validate_ProviderOperationsMetadataGet_596966(path: JsonNode; query: JsonNo
   if body != nil:
     result.add "body", body
 
-proc call*(call_596985: Call_ProviderOperationsMetadataGet_596965; path: JsonNode;
+proc call*(call_564085: Call_ProviderOperationsMetadataGet_564065; path: JsonNode;
           query: JsonNode; header: JsonNode; formData: JsonNode; body: JsonNode): Recallable =
   ## Gets provider operations metadata for the specified resource provider.
   ## 
-  let valid = call_596985.validator(path, query, header, formData, body)
-  let scheme = call_596985.pickScheme
+  let valid = call_564085.validator(path, query, header, formData, body)
+  let scheme = call_564085.pickScheme
   if scheme.isNone:
     raise newException(IOError, "unable to find a supported scheme")
-  let url = call_596985.url(scheme.get, call_596985.host, call_596985.base,
-                         call_596985.route, valid.getOrDefault("path"),
+  let url = call_564085.url(scheme.get, call_564085.host, call_564085.base,
+                         call_564085.route, valid.getOrDefault("path"),
                          valid.getOrDefault("query"))
-  result = hook(call_596985, url, valid)
+  result = hook(call_564085, url, valid)
 
-proc call*(call_596986: Call_ProviderOperationsMetadataGet_596965;
+proc call*(call_564086: Call_ProviderOperationsMetadataGet_564065;
           apiVersion: string; resourceProviderNamespace: string;
           Expand: string = "resourceTypes"): Recallable =
   ## providerOperationsMetadataGet
@@ -263,19 +267,19 @@ proc call*(call_596986: Call_ProviderOperationsMetadataGet_596965;
   ##         : Specifies whether to expand the values.
   ##   resourceProviderNamespace: string (required)
   ##                            : The namespace of the resource provider.
-  var path_596987 = newJObject()
-  var query_596988 = newJObject()
-  add(query_596988, "api-version", newJString(apiVersion))
-  add(query_596988, "$expand", newJString(Expand))
-  add(path_596987, "resourceProviderNamespace",
+  var path_564087 = newJObject()
+  var query_564088 = newJObject()
+  add(query_564088, "api-version", newJString(apiVersion))
+  add(query_564088, "$expand", newJString(Expand))
+  add(path_564087, "resourceProviderNamespace",
       newJString(resourceProviderNamespace))
-  result = call_596986.call(path_596987, query_596988, nil, nil, nil)
+  result = call_564086.call(path_564087, query_564088, nil, nil, nil)
 
-var providerOperationsMetadataGet* = Call_ProviderOperationsMetadataGet_596965(
+var providerOperationsMetadataGet* = Call_ProviderOperationsMetadataGet_564065(
     name: "providerOperationsMetadataGet", meth: HttpMethod.HttpGet,
     host: "management.azure.com", route: "/providers/Microsoft.Authorization/providerOperations/{resourceProviderNamespace}",
-    validator: validate_ProviderOperationsMetadataGet_596966, base: "",
-    url: url_ProviderOperationsMetadataGet_596967, schemes: {Scheme.Https})
+    validator: validate_ProviderOperationsMetadataGet_564066, base: "",
+    url: url_ProviderOperationsMetadataGet_564067, schemes: {Scheme.Https})
 export
   rest
 
